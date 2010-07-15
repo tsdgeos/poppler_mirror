@@ -20,6 +20,26 @@ if (ENABLE_SPLASH)
   install(FILES pdftoppm.1 DESTINATION share/man/man1)
 endif (ENABLE_SPLASH)
 
+if (HAVE_CAIRO)
+  # pdftocairo
+  set(pdftocairo_SOURCES ${common_srcs}
+    pdftocairo.cc
+    ${CMAKE_SOURCE_DIR}/poppler/CairoFontEngine.cc
+    ${CMAKE_SOURCE_DIR}/poppler/CairoOutputDev.cc
+    ${CMAKE_SOURCE_DIR}/poppler/CairoRescaleBox.cc
+  )
+  include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CAIRO_INCLUDE_DIRS}
+  )
+  add_definitions(${CAIRO_CFLAGS})
+  add_executable(pdftocairo ${pdftocairo_SOURCES})
+  target_link_libraries(pdftocairo ${CAIRO_LIBRARIES} ${common_libs})
+  install(TARGETS pdftocairo DESTINATION bin)
+  install(FILES pdftocairo.1 DESTINATION share/man/man1)
+endif (HAVE_CAIRO)
+
 # pdffonts
 set(pdffonts_SOURCES ${common_srcs}
   pdffonts.cc
