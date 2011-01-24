@@ -102,6 +102,7 @@ pgd_text_get_text (GtkWidget   *button,
 		g_free (str);
 	} else {
 		gtk_label_set_markup (GTK_LABEL (demo->timer_label), "<i>No text found</i>");
+		n_recs = 0;
 	}
 
 	g_timer_destroy (timer);
