@@ -15,6 +15,7 @@
 //
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2011 William Bader <williambader@hotmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -132,6 +133,10 @@ public:
   // clearStats() are all rasterizable by GDI calls in GDIOutputDev.
   GBool isAllGDI() { return gdi; }
 
+  // Returns true if the operations performed since the last call to
+  // clearStats() processed a feature that PSOutputDev does not implement.
+  GBool hasLevel1PSBug() { return level1PSBug; }
+
   // Clear the stats used by the above functions.
   void clearStats();
 
@@ -144,6 +149,8 @@ private:
   GBool gray;
   GBool transparency;
   GBool gdi;
+  PSLevel level;		// PostScript level (1, 2, separation)
+  GBool level1PSBug;		// gTrue if it uses a feature not supported in PSOutputDev
 };
 
 #endif

@@ -2977,7 +2977,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     page->displaySlice(scan, 72, 72, rotateA, useMediaBox, crop,
                      sliceX, sliceY, sliceW, sliceH,
                      printing, catalog, abortCheckCbk, abortCheckCbkData);
-    rasterize = scan->usesTransparency();
+    rasterize = scan->usesTransparency() || scan->hasLevel1PSBug();
     delete scan;
   } else {
     rasterize = gTrue;
