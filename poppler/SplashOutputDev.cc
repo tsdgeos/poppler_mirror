@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -3014,14 +3014,14 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
   tx = (int)floor(xMin);
   if (tx < 0) {
     tx = 0;
-  } else if (tx > bitmap->getWidth()) {
-    tx = bitmap->getWidth();
+  } else if (tx >= bitmap->getWidth()) {
+    tx = bitmap->getWidth() - 1;
   }
   ty = (int)floor(yMin);
   if (ty < 0) {
     ty = 0;
-  } else if (ty > bitmap->getHeight()) {
-    ty = bitmap->getHeight();
+  } else if (ty >= bitmap->getHeight()) {
+    ty = bitmap->getHeight() - 1;
   }
   w = (int)ceil(xMax) - tx + 1;
   if (tx + w > bitmap->getWidth()) {
