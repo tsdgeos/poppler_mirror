@@ -692,6 +692,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   printCommands = gFalse;
   profileCommands = gFalse;
   errQuiet = gFalse;
+  splashResolution = 0.0;
 
   cidToUnicodeCache = new CharCodeToUnicodeCache(cidToUnicodeCacheSize);
   unicodeToUnicodeCache =
@@ -1583,6 +1584,14 @@ GBool GlobalParams::getErrQuiet() {
   return errQuiet;
 }
 
+double GlobalParams::getSplashResolution() {
+  double r;
+  lockGlobalParams;
+  r = splashResolution;
+  unlockGlobalParams;
+  return r;
+}
+
 CharCodeToUnicode *GlobalParams::getCIDToUnicode(GooString *collection) {
   GooString *fileName;
   CharCodeToUnicode *ctu;
@@ -1892,6 +1901,12 @@ void GlobalParams::setProfileCommands(GBool profileCommandsA) {
 void GlobalParams::setErrQuiet(GBool errQuietA) {
   lockGlobalParams;
   errQuiet = errQuietA;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setSplashResolution(double SplashResolutionA) {
+  lockGlobalParams;
+  splashResolution = SplashResolutionA;
   unlockGlobalParams;
 }
 

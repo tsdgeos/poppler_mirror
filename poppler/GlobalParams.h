@@ -220,6 +220,7 @@ public:
   GBool getPrintCommands();
   GBool getProfileCommands();
   GBool getErrQuiet();
+  double getSplashResolution();
 
   CharCodeToUnicode *getCIDToUnicode(GooString *collection);
   CharCodeToUnicode *getUnicodeToUnicode(GooString *fontName);
@@ -265,6 +266,7 @@ public:
   void setPrintCommands(GBool printCommandsA);
   void setProfileCommands(GBool profileCommandsA);
   void setErrQuiet(GBool errQuietA);
+  void setSplashResolution(double splashResolutionA);
 
   //----- security handlers
 
@@ -350,6 +352,7 @@ private:
   GBool printCommands;		// print the drawing commands
   GBool profileCommands;	// profile the drawing commands
   GBool errQuiet;		// suppress error messages?
+  double splashResolution;	// resolution when rasterizing images
 
   CharCodeToUnicodeCache *cidToUnicodeCache;
   CharCodeToUnicodeCache *unicodeToUnicodeCache;

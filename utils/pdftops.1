@@ -102,6 +102,12 @@ in Level 1 PostScript but reduces the file size and can be useful
 when Level 1 PostScript is required only for its restricted use
 of PostScript operators.
 .TP
+.BI \-r " number"
+Set the resolution in DPI when pdftops rasterizes images with
+transparencies or, for Level 1 PostScript, when pdftops
+rasterizes images with color masks.
+By default, pdftops rasterizes images to 300 DPI.
+.TP
 .B \-noembt1
 By default, any Type 1 fonts which are embedded in the PDF file are
 copied into the PostScript file.  This option causes pdftops to

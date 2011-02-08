@@ -85,7 +85,7 @@
 //------------------------------------------------------------------------
 
 // Resolution at which pages with transparency will be rasterized.
-#define splashDPI 300
+#define defaultSplashDPI 300
 
 //------------------------------------------------------------------------
 // PostScript prolog and setup
@@ -2991,6 +2991,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   Guchar col[4];
   double m0, m1, m2, m3, m4, m5;
   int c, w, h, x, y, comp, i;
+  double splashDPI;
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   Guchar digit;
   GBool useBinary;
@@ -3030,6 +3031,10 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 				    paperColor, gTrue, gFalse);
   }
   splashOut->startDoc(xref);
+  splashDPI = globalParams->getSplashResolution();
+  if (splashDPI < 1.0) {
+    splashDPI = defaultSplashDPI;
+  }
   page->displaySlice(splashOut, splashDPI, splashDPI, rotateA,
 		     useMediaBox, crop,
 		     sliceX, sliceY, sliceW, sliceH,
