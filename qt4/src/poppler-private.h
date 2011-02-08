@@ -1,7 +1,7 @@
 /* poppler-private.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2006-2009 by Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2009, 2011 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2009 by Pino Toscano <pino@kde.org>
  * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
  * Inspired on code by
@@ -90,37 +90,9 @@ namespace Poppler {
 		init(ownerPassword, userPassword);
 	    }
 	
-	void init(GooString *ownerPassword, GooString *userPassword)
-	    {
-		m_fontInfoIterator = 0;
-		m_backend = Document::SplashBackend;
-		m_outputDev = 0;
-		paperColor = Qt::white;
-		m_hints = 0;
-		m_optContentModel = 0;
-		// It might be more appropriate to delete these in PDFDoc
-		delete ownerPassword;
-		delete userPassword;
-		
-		if ( count == 0 )
-		{
-			globalParams = new GlobalParams();
-			setErrorFunction(qt4ErrorFunction);
-		}
-		count ++;
-	    }
+	void init(GooString *ownerPassword, GooString *userPassword);
 	
-	~DocumentData()
-	{
-		qDeleteAll(m_embeddedFiles);
-		delete (OptContentModel *)m_optContentModel;
-		delete doc;
-		delete m_outputDev;
-		delete m_fontInfoIterator;
-		
-		count --;
-		if ( count == 0 ) delete globalParams;
-	}
+	~DocumentData();
 	
 	OutputDev *getOutputDev()
 	{

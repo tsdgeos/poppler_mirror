@@ -45,6 +45,8 @@ namespace Debug {
 
 }
 
+    static UnicodeMap *utf8Map = 0;
+
     void setDebugErrorFunction(PopplerDebugFunc function, const QVariant &closure)
     {
         Debug::debugFunction = function ? function : Debug::qDebugDebugFunction;
@@ -70,14 +72,11 @@ namespace Debug {
     }
 
     QString unicodeToQString(Unicode* u, int len) {
-        static UnicodeMap *uMap = 0;
-        static GlobalParams *gParams = globalParams;
-        if (!uMap || gParams != globalParams)
+        if (!utf8Map)
         {
                 GooString enc("UTF-8");
-                uMap = globalParams->getUnicodeMap(&enc);
-                uMap->incRefCnt();
-                gParams = globalParams;
+                utf8Map = globalParams->getUnicodeMap(&enc);
+                utf8Map->incRefCnt();
         }
 
         // ignore the last character if it is 0x0
@@ -90,7 +89,7 @@ namespace Debug {
         for (int i = 0; i < len; ++i)
         {
             char buf[8];
-            const int n = uMap->mapUnicode(u[i], buf, sizeof(buf));
+            const int n = utf8Map->mapUnicode(u[i], buf, sizeof(buf));
             convertedStr.append(buf, n);
         }
 
@@ -223,6 +222,44 @@ namespace Debug {
             default: ;
         }
     }
+    
+    DocumentData::~DocumentData()
+    {
+        qDeleteAll(m_embeddedFiles);
+        delete (OptContentModel *)m_optContentModel;
+        delete doc;
+        delete m_outputDev;
+        delete m_fontInfoIterator;
+    
+        count --;
+        if ( count == 0 )
+        {
+            utf8Map = 0;
+            delete globalParams;
+        }
+      }
+    
+    void DocumentData::init(GooString *ownerPassword, GooString *userPassword)
+    {
+        m_fontInfoIterator = 0;
+        m_backend = Document::SplashBackend;
+        m_outputDev = 0;
+        paperColor = Qt::white;
+        m_hints = 0;
+        m_optContentModel = 0;
+        // It might be more appropriate to delete these in PDFDoc
+        delete ownerPassword;
+        delete userPassword;
+      
+        if ( count == 0 )
+        {
+            utf8Map = 0;
+            globalParams = new GlobalParams();
+            setErrorFunction(qt4ErrorFunction);
+        }
+        count ++;
+    }
+
 
     void DocumentData::addTocChildren( QDomDocument * docSyn, QDomNode * parent, GooList * items )
     {
