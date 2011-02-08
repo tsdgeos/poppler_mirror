@@ -511,6 +511,10 @@ static char *prolog[] = {
   "  /pdfImBuf1 4 index string def",
   "  { currentfile pdfImBuf1 readhexstring pop } image",
   "} def",
+  "/pdfIm1Bin {",
+  "  /pdfImBuf1 4 index string def",
+  "  { currentfile pdfImBuf1 readstring pop } image",
+  "} def",
   "~1s",
   "/pdfIm1Sep {",
   "  /pdfImBuf1 4 index string def",
@@ -523,10 +527,25 @@ static char *prolog[] = {
   "  { currentfile pdfImBuf4 readhexstring pop }",
   "  true 4 colorimage",
   "} def",
+  "/pdfIm1SepBin {",
+  "  /pdfImBuf1 4 index string def",
+  "  /pdfImBuf2 4 index string def",
+  "  /pdfImBuf3 4 index string def",
+  "  /pdfImBuf4 4 index string def",
+  "  { currentfile pdfImBuf1 readstring pop }",
+  "  { currentfile pdfImBuf2 readstring pop }",
+  "  { currentfile pdfImBuf3 readstring pop }",
+  "  { currentfile pdfImBuf4 readstring pop }",
+  "  true 4 colorimage",
+  "} def",
   "~1ns",
   "/pdfImM1 {",
   "  fCol /pdfImBuf1 4 index 7 add 8 idiv string def",
   "  { currentfile pdfImBuf1 readhexstring pop } imagemask",
+  "} def",
+  "/pdfImM1Bin {",
+  "  fCol /pdfImBuf1 4 index 7 add 8 idiv string def",
+  "  { currentfile pdfImBuf1 readstring pop } imagemask",
   "} def",
   "/pdfImM1a {",
   "  { 2 copy get exch 1 add exch } imagemask",
@@ -1315,6 +1334,9 @@ void PSOutputDev::writeHeader(int firstPage, int lastPage,
     writePS("%%DocumentCustomColors: (atend)\n");
   }
   writePS("%%DocumentSuppliedResources: (atend)\n");
+  if ((level == psLevel1 || level == psLevel1Sep) && globalParams->getPSBinary()) {
+    writePS("%%DocumentData: Binary\n");
+  }
 
   switch (mode) {
   case psModePSOrigPageSizes:
@@ -2971,6 +2993,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   int c, w, h, x, y, comp, i;
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   Guchar digit;
+  GBool useBinary;
 
   if (!forceRasterize) {
     scan = new PreScanOutputDev();
@@ -3071,47 +3094,76 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 	     m0, m1, m2, m3, m4, m5);
   switch (level) {
   case psLevel1:
-    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1\n",
-	       w, h, w, -h, h);
+    useBinary = globalParams->getPSBinary();
+    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1{5:s}\n",
+	       w, h, w, -h, h,
+	       useBinary ? "Bin" : "");
     p = bitmap->getDataPtr();
     i = 0;
-    for (y = 0; y < h; ++y) {
-      for (x = 0; x < w; ++x) {
-	digit = *p / 16;
-	hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	digit = *p++ % 16;
-	hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	if (i >= 64) {
-	  hexBuf[i++] = '\n';
-	  writePSBuf(hexBuf, i);
-	  i = 0;
+    if (useBinary) {
+      for (y = 0; y < h; ++y) {
+        for (x = 0; x < w; ++x) {
+	  hexBuf[i++] = *p++;
+	  if (i >= 64) {
+	    writePSBuf(hexBuf, i);
+	    i = 0;
+	  }
+	}
+      }
+    } else {
+      for (y = 0; y < h; ++y) {
+        for (x = 0; x < w; ++x) {
+	  digit = *p / 16;
+	  hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	  digit = *p++ % 16;
+	  hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	  if (i >= 64) {
+	    hexBuf[i++] = '\n';
+	    writePSBuf(hexBuf, i);
+	    i = 0;
+	  }
 	}
       }
     }
     if (i != 0) {
-      hexBuf[i++] = '\n';
+      if (!useBinary) {
+	hexBuf[i++] = '\n';
+      }
       writePSBuf(hexBuf, i);
     }
     break;
   case psLevel1Sep:
-    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1Sep\n",
-	       w, h, w, -h, h);
+    useBinary = globalParams->getPSBinary();
+    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1Sep{5:s}\n",
+	       w, h, w, -h, h,
+	       useBinary ? "Bin" : "");
     p = bitmap->getDataPtr();
     i = 0;
     col[0] = col[1] = col[2] = col[3] = 0;
     if (((psProcessCyan | psProcessMagenta | psProcessYellow | psProcessBlack) & ~processColors) != 0) {
       for (y = 0; y < h; ++y) {
         for (comp = 0; comp < 4; ++comp) {
-	  for (x = 0; x < w; ++x) {
-	    col[comp] |= p[4*x + comp];
-	    digit = p[4*x + comp] / 16;
-	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	    digit = p[4*x + comp] % 16;
-	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	    if (i >= 64) {
-	      hexBuf[i++] = '\n';
-	      writePSBuf(hexBuf, i);
-	      i = 0;
+	  if (useBinary) {
+	    for (x = 0; x < w; ++x) {
+	      col[comp] |= p[4*x + comp];
+	      hexBuf[i++] = p[4*x + comp];
+	      if (i >= 64) {
+	        writePSBuf(hexBuf, i);
+	        i = 0;
+	      }
+	    }
+	  } else {
+	    for (x = 0; x < w; ++x) {
+	      col[comp] |= p[4*x + comp];
+	      digit = p[4*x + comp] / 16;
+	      hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	      digit = p[4*x + comp] % 16;
+	      hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	      if (i >= 64) {
+	        hexBuf[i++] = '\n';
+	        writePSBuf(hexBuf, i);
+	        i = 0;
+	      }
 	    }
 	  }
         }
@@ -3120,15 +3172,25 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     } else {
       for (y = 0; y < h; ++y) {
         for (comp = 0; comp < 4; ++comp) {
-	  for (x = 0; x < w; ++x) {
-	    digit = p[4*x + comp] / 16;
-	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	    digit = p[4*x + comp] % 16;
-	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	    if (i >= 64) {
-	      hexBuf[i++] = '\n';
-	      writePSBuf(hexBuf, i);
-	      i = 0;
+	  if (useBinary) {
+	    for (x = 0; x < w; ++x) {
+	      hexBuf[i++] = p[4*x + comp];
+	      if (i >= 64) {
+	        writePSBuf(hexBuf, i);
+	        i = 0;
+	      }
+	    }
+	  } else {
+	    for (x = 0; x < w; ++x) {
+	      digit = p[4*x + comp] / 16;
+	      hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	      digit = p[4*x + comp] % 16;
+	      hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	      if (i >= 64) {
+	        hexBuf[i++] = '\n';
+	        writePSBuf(hexBuf, i);
+	        i = 0;
+	      }
 	    }
 	  }
         }
@@ -3136,7 +3198,9 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
       }
     }
     if (i != 0) {
-      hexBuf[i++] = '\n';
+      if (!useBinary) {
+        hexBuf[i++] = '\n';
+      }
       writePSBuf(hexBuf, i);
     }
     if (col[0]) {
@@ -4543,6 +4607,7 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
   int col, x, y, c, i;
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   Guchar digit, grayValue;
+  const GBool useBinary = globalParams->getPSBinary();
 
   // explicit masking
   if (maskStr && !(maskColors && colorMap)) {
@@ -4593,13 +4658,15 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
 	       width, height, invert ? "true" : "false",
 	       width, -height, height);
   } else if (colorMap) {
-    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1\n",
+    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1{5:s}\n",
 	       width, height,
-	       width, -height, height);
+	       width, -height, height,
+	       useBinary ? "Bin" : "");
   } else {
-    writePSFmt("{0:d} {1:d} {2:s} [{3:d} 0 0 {4:d} 0 {5:d}] pdfImM1\n",
+    writePSFmt("{0:d} {1:d} {2:s} [{3:d} 0 0 {4:d} 0 {5:d}] pdfImM1{6:s}\n",
 	       width, height, invert ? "true" : "false",
-	       width, -height, height);
+	       width, -height, height,
+	       useBinary ? "Bin" : "");
   }
 
   // image data
@@ -4621,19 +4688,27 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
 	  imgStr->getPixel(pixBuf);
 	  colorMap->getGray(pixBuf, &gray);
 	  grayValue = colToByte(gray);
-	  digit = grayValue / 16;
-	  hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	  digit = grayValue % 16;
-	  hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	  if (useBinary) {
+	    hexBuf[i++] = grayValue;
+	  } else {
+	    digit = grayValue / 16;
+	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	    digit = grayValue % 16;
+	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	  }
 	  if (i >= 64) {
-	    hexBuf[i++] = '\n';
+	    if (!useBinary) {
+	      hexBuf[i++] = '\n';
+	    }
 	    writePSBuf(hexBuf, i);
 	    i = 0;
 	  }
 	}
       }
       if (i != 0) {
-	hexBuf[i++] = '\n';
+	if (!useBinary) {
+	  hexBuf[i++] = '\n';
+	}
 	writePSBuf(hexBuf, i);
       }
       str->close();
@@ -4646,19 +4721,27 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
       for (y = 0; y < height; ++y) {
 	for (x = 0; x < width; x += 8) {
 	  grayValue = str->getChar();
-	  digit = grayValue / 16;
-	  hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
-	  digit = grayValue % 16;
-	  hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	  if (useBinary) {
+	    hexBuf[i++] = grayValue;
+	  } else {
+	    digit = grayValue / 16;
+	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	    digit = grayValue % 16;
+	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	  }
 	  if (i >= 64) {
-	    hexBuf[i++] = '\n';
+	    if (!useBinary) {
+	      hexBuf[i++] = '\n';
+	    }
 	    writePSBuf(hexBuf, i);
 	    i = 0;
 	  }
 	}
       }
       if (i != 0) {
-	hexBuf[i++] = '\n';
+	if (!useBinary) {
+	  hexBuf[i++] = '\n';
+	}
 	writePSBuf(hexBuf, i);
       }
       str->close();
@@ -4683,6 +4766,7 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
   GBool checkProcessColor;
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   Guchar digit;
+  const GBool useBinary = globalParams->getPSBinary();
 
   // explicit masking
   if (maskStr && !(maskColors && colorMap)) {
@@ -4690,9 +4774,10 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
   }
 
   // width, height, matrix, bits per component
-  writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1Sep\n",
+  writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1Sep{5:s}\n",
 	     width, height,
-	     width, -height, height);
+	     width, -height, height,
+	     useBinary ? "Bin" : "");
 
   // allocate a line buffer
   lineBuf = (Guchar *)gmallocn(width, 4);
@@ -4734,23 +4819,37 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
     }
 
     // write one line of each color component
-    for (comp = 0; comp < 4; ++comp) {
-      for (x = 0; x < width; ++x) {
-	digit = lineBuf[4*x + comp] / 16;
-	hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
-	digit = lineBuf[4*x + comp] % 16;
-	hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
-	if (i >= 64) {
-	  hexBuf[i++] = '\n';
-	  writePSBuf(hexBuf, i);
-	  i = 0;
+    if (useBinary) {
+      for (comp = 0; comp < 4; ++comp) {
+        for (x = 0; x < width; ++x) {
+	  hexBuf[i++] = lineBuf[4*x + comp];
+	  if (i >= 64) {
+	    writePSBuf(hexBuf, i);
+	    i = 0;
+	  }
+	}
+      }
+    } else {
+      for (comp = 0; comp < 4; ++comp) {
+        for (x = 0; x < width; ++x) {
+	  digit = lineBuf[4*x + comp] / 16;
+	  hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
+	  digit = lineBuf[4*x + comp] % 16;
+	  hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
+	  if (i >= 64) {
+	    hexBuf[i++] = '\n';
+	    writePSBuf(hexBuf, i);
+	    i = 0;
+	  }
 	}
       }
     }
   }
 
   if (i != 0) {
-    hexBuf[i++] = '\n';
+    if (!useBinary) {
+      hexBuf[i++] = '\n';
+    }
     writePSBuf(hexBuf, i);
   }
 

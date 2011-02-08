@@ -19,7 +19,7 @@
 // Copyright (C) 2007-2008, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Sanjoy Mahajan <sanjoy@mit.edu>
-// Copyright (C) 2009 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 //
 // To see a description of the changes please see the Changelog file that
@@ -85,6 +85,7 @@ static GBool doForm = gFalse;
 #if OPI_SUPPORT
 static GBool doOPI = gFalse;
 #endif
+static GBool psBinary = gFalse;
 static GBool noEmbedT1Fonts = gFalse;
 static GBool noEmbedTTFonts = gFalse;
 static GBool noEmbedCIDPSFonts = gFalse;
@@ -132,6 +133,8 @@ static const ArgDesc argDesc[] = {
   {"-opi",        argFlag,     &doOPI,          0,
    "generate OPI comments"},
 #endif
+  {"-binary",     argFlag,     &psBinary,       0,
+   "write binary data in Level 1 PostScript"},
   {"-noembt1",    argFlag,     &noEmbedT1Fonts, 0,
    "don't embed Type 1 fonts"},
   {"-noembtt",    argFlag,     &noEmbedTTFonts, 0,
@@ -289,6 +292,9 @@ int main(int argc, char *argv[]) {
     globalParams->setPSOPI(doOPI);
   }
 #endif
+  if (psBinary) {
+    globalParams->setPSBinary(psBinary);
+  }
   if (quiet) {
     globalParams->setErrQuiet(quiet);
   }

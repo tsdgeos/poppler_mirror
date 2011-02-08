@@ -20,7 +20,7 @@
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007, 2009 Jonathan Kew <jonathan_kew@sil.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
-// Copyright (C) 2009 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Patrick Spendrin <ps_ml@gmx.de>
@@ -665,6 +665,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   psPreload = gFalse;
   psOPI = gFalse;
   psASCIIHex = gFalse;
+  psBinary = gFalse;
   textEncoding = new GooString("UTF-8");
 #if defined(_WIN32)
   textEOL = eolDOS;
@@ -1380,6 +1381,15 @@ GBool GlobalParams::getPSASCIIHex() {
   return ah;
 }
 
+GBool GlobalParams::getPSBinary() {
+  GBool binary;
+
+  lockGlobalParams;
+  binary = psBinary;
+  unlockGlobalParams;
+  return binary;
+}
+
 GooString *GlobalParams::getTextEncodingName() {
   GooString *s;
 
@@ -1734,6 +1744,12 @@ void GlobalParams::setPSOPI(GBool opi) {
 void GlobalParams::setPSASCIIHex(GBool hex) {
   lockGlobalParams;
   psASCIIHex = hex;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setPSBinary(GBool binary) {
+  lockGlobalParams;
+  psBinary = binary;
   unlockGlobalParams;
 }
 
