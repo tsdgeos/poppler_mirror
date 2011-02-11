@@ -17,6 +17,7 @@
 // Copyright (C) 2006 Paul Walmsley <paul@booyaka.com>
 // Copyright (C) 2006-2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
+// Copyright (C) 2011 Edward Jiang <ejiang@google.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2288,7 +2289,7 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(GBool huff, GBool refine,
     s = sFirst;
 
     // read the instances
-    while (1) {
+    while (inst < numInstances) {
 
       // T value
       if (strips == 1) {
