@@ -78,20 +78,6 @@ libpoppler_glib_la_LIBADD =				\
 
 libpoppler_glib_la_LDFLAGS = -version-info 6:0:0 @create_shared_lib@ @auto_import_flags@
 
-if BUILD_WITH_GDK
-noinst_PROGRAMS = test-poppler-glib
-
-test_poppler_glib_SOURCES =			\
-       test-poppler-glib.cc
-
-test_poppler_glib_LDADD =			\
-	$(top_builddir)/poppler/libpoppler.la	\
-	libpoppler-glib.la			\
-	$(POPPLER_GLIB_LIBS)			\
-	$(GDK_LIBS)				\
-	$(FREETYPE_LIBS)
-endif
-
 BUILT_SOURCES =					\
 	poppler-enums.c				\
 	poppler-enums.h
