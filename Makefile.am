@@ -52,7 +52,6 @@ pkgconfig_DATA =				\
 	$(cairo_pc_file)			\
 	$(splash_pc_file)			\
 	$(glib_pc_file)				\
-	$(qt_pc_file)                           \
 	$(qt4_pc_file)				\
 	$(cpp_pc_file)
 
@@ -63,7 +62,6 @@ EXTRA_DIST +=							\
 	glib/demo/CMakeLists.txt				\
 	glib/CMakeLists.txt					\
 	glib/poppler-features.h.cmake				\
-	qt/CMakeLists.txt					\
 	qt4/src/CMakeLists.txt					\
 	qt4/tests/CMakeLists.txt				\
 	qt4/CMakeLists.txt					\
@@ -94,7 +92,6 @@ EXTRA_DIST +=							\
 	poppler/poppler-config.h.cmake				\
 	poppler-cpp.pc.cmake					\
 	poppler-glib.pc.cmake					\
-	poppler-qt.pc.cmake					\
 	poppler-qt4.pc.cmake					\
 	poppler-splash.pc.cmake					\
 	poppler.pc.cmake
