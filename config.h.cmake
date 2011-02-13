@@ -165,9 +165,6 @@
 /* Support for curl based doc builder is compiled in. */
 #cmakedefine POPPLER_HAS_CURL_SUPPORT 1
 
-/* Have GDK */
-#cmakedefine POPPLER_WITH_GDK 1
-
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 

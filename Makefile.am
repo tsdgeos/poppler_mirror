@@ -75,7 +75,6 @@ EXTRA_DIST +=							\
 	cmake/modules/COPYING-CMAKE-SCRIPTS			\
 	cmake/modules/FindCairo.cmake				\
 	cmake/modules/FindFontconfig.cmake			\
-	cmake/modules/FindGDK.cmake				\
 	cmake/modules/FindGLIB.cmake				\
 	cmake/modules/FindGObjectIntrospection.cmake		\
 	cmake/modules/FindGTK.cmake				\
