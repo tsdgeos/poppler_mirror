@@ -24,23 +24,13 @@ if (GTK_FOUND)
     ${CMAKE_BINARY_DIR}/glib
   )
 
-  if (ENABLE_SPLASH)
-
-    set (gtk_splash_test_SRCS
-      gtk-splash-test.cc
-    )
-    poppler_add_test(gtk-splash-test BUILD_GTK_TESTS ${gtk_splash_test_SRCS})
-    target_link_libraries(gtk-splash-test poppler ${GTK2_LIBRARIES})
-
-  endif (ENABLE_SPLASH)
+  set (gtk_splash_test_SRCS
+    gtk-test.cc
+  )
+  poppler_add_test(gtk-test BUILD_GTK_TESTS ${gtk_splash_test_SRCS})
+  target_link_libraries(gtk-test poppler-glib ${GTK2_LIBRARIES})
 
   if (HAVE_CAIRO)
-
-    set (gtk_cairo_test_SRCS
-      gtk-cairo-test.cc
-    )
-    poppler_add_test(gtk-cairo-test BUILD_GTK_TESTS ${gtk_cairo_test_SRCS})
-    target_link_libraries(gtk-cairo-test poppler-glib ${GTK2_LIBRARIES})
 
     set (pdf_inspector_SRCS
       pdf-inspector.cc
