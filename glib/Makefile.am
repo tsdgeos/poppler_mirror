@@ -6,7 +6,6 @@ INCLUDES =					\
 	-I$(top_srcdir)				\
 	-I$(top_srcdir)/poppler			\
 	$(POPPLER_GLIB_CFLAGS)			\
-	$(GDK_CFLAGS)				\
 	$(FREETYPE_CFLAGS)			\
 	$(FONTCONFIG_CFLAGS)                    \
 	$(POPPLER_GLIB_DISABLE_DEPRECATED)	\
@@ -72,11 +71,10 @@ libpoppler_glib_la_LIBADD =				\
 	$(top_builddir)/poppler/libpoppler.la		\
 	$(top_builddir)/poppler/libpoppler-cairo.la	\
 	$(POPPLER_GLIB_LIBS)				\
-	$(GDK_LIBS)					\
 	$(FREETYPE_LIBS)				\
 	$(FONTCONFIG_LIBS)
 
-libpoppler_glib_la_LDFLAGS = -version-info 6:0:0 @create_shared_lib@ @auto_import_flags@
+libpoppler_glib_la_LDFLAGS = -version-info 7:0:0 @create_shared_lib@ @auto_import_flags@
 
 BUILT_SOURCES =					\
 	poppler-enums.c				\
@@ -99,10 +97,6 @@ Poppler_0_16_gir_INCLUDES = GObject-2.0 cairo-1.0
 Poppler_0_16_gir_CFLAGS = $(INCLUDES) -I$(top_builddir)
 Poppler_0_16_gir_LIBS = libpoppler-glib.la
 Poppler_0_16_gir_FILES = $(addprefix $(srcdir)/, $(introspection_files))
-
-if BUILD_WITH_GDK
-Poppler_0_16_gir_INCLUDES += Gdk-2.0
-endif
 
 INTROSPECTION_GIRS += Poppler-0.16.gir
 

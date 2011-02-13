@@ -12,11 +12,6 @@ add_definitions(
   ${POPPLER_GLIB_DISABLE_SINGLE_INCLUDES}
 )
 
-if (GDK_FOUND)
-  include_directories(${GDK2_INCLUDE_DIRS})
-  add_definitions(${GDK2_CFLAGS_OTHER})
-endif (GDK_FOUND)
-
 configure_file(poppler-features.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/poppler-features.h @ONLY)
 
 if (GTK_FOUND AND BUILD_GTK_TESTS)
@@ -82,11 +77,8 @@ set(poppler_glib_generated_SRCS
   ${CMAKE_SOURCE_DIR}/poppler/CairoRescaleBox.cc
 )
 add_library(poppler-glib SHARED ${poppler_glib_SRCS} ${poppler_glib_generated_SRCS})
-set_target_properties(poppler-glib PROPERTIES VERSION 6.0.0 SOVERSION 6)
+set_target_properties(poppler-glib PROPERTIES VERSION 7.0.0 SOVERSION 7)
 target_link_libraries(poppler-glib poppler ${GLIB2_LIBRARIES} ${CAIRO_LIBRARIES} ${FREETYPE_LIBRARIES})
-if (GDK_FOUND)
-  target_link_libraries(poppler-glib ${GDK2_LIBRARIES})
-endif (GDK_FOUND)
 install(TARGETS poppler-glib RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
 
 install(FILES
@@ -127,10 +119,6 @@ if (HAVE_INTROSPECTION)
     ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h
   )
   set(Poppler_0_16_gir_FILES ${_abs_introspection_files})
-
-  if (GDK_FOUND)
-    list(APPEND Poppler_0_16_gir_INCLUDES Gdk-2.0)
-  endif ()
 
   list(APPEND INTROSPECTION_GIRS Poppler-0.16.gir)
 

@@ -23,10 +23,6 @@
 
 #include "poppler.h"
 
-#ifdef POPPLER_WITH_GDK
-#include <gdk/gdk.h>
-#include <gdk-pixbuf/gdk-pixbuf.h>
-#endif
 #include <cairo.h>
 
 G_BEGIN_DECLS
@@ -37,36 +33,6 @@ G_BEGIN_DECLS
 
 
 GType      	       poppler_page_get_type             (void) G_GNUC_CONST;
-
-#ifdef POPPLER_WITH_GDK
-void                   poppler_page_render_to_pixbuf     (PopplerPage        *page,
-							  int                 src_x,
-							  int                 src_y,
-							  int                 src_width,
-							  int                 src_height,
-							  double              scale,
-							  int                 rotation,
-							  GdkPixbuf          *pixbuf);
-void          poppler_page_render_to_pixbuf_for_printing (PopplerPage        *page,
-							  int                 src_x,
-							  int                 src_y,
-							  int                 src_width,
-							  int                 src_height,
-							  double              scale,
-							  int                 rotation,
-							  GdkPixbuf          *pixbuf);
-GdkPixbuf             *poppler_page_get_thumbnail_pixbuf (PopplerPage        *page);
-void                poppler_page_render_selection_to_pixbuf (
-							  PopplerPage        *page,
-							  gdouble             scale,
-							  int		      rotation,
-							  GdkPixbuf          *pixbuf,
-							  PopplerRectangle   *selection,
-							  PopplerRectangle   *old_selection,
-							  PopplerSelectionStyle style,
-							  GdkColor           *glyph_color,
-							  GdkColor           *background_color);
-#endif /* POPPLER_WITH_GDK */
 
 void                   poppler_page_render               (PopplerPage        *page,
 							  cairo_t            *cairo);
