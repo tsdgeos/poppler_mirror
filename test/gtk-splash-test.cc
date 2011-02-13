@@ -63,7 +63,7 @@ public:
   // Copy the rectangle (srcX, srcY, width, height) to (destX, destY)
   // in destDC.
   void redraw(int srcX, int srcY,
-              GdkDrawable *drawable,
+              GdkWindow *drawable,
 	      int destX, int destY,
 	      int width, int height);
 
@@ -120,23 +120,25 @@ void GDKSplashOutputDev::updateFont(GfxState *state) {
 }
 
 void GDKSplashOutputDev::redraw(int srcX, int srcY,
-                                GdkDrawable *drawable,
+                                GdkWindow *drawable,
                                 int destX, int destY,
                                 int width, int height) {
-  GdkGC *gc;
+  cairo_t *cr;
+  GdkPixbuf *pixbuf;
   int gdk_rowstride;
 
   gdk_rowstride = getBitmap()->getRowSize();
-  gc = gdk_gc_new (drawable);
-  
-  gdk_draw_rgb_image (drawable, gc,
-                      destX, destY,
-                      width, height,
-                      GDK_RGB_DITHER_NORMAL,
-                      getBitmap()->getDataPtr() + srcY * gdk_rowstride + srcX * 3,
-                      gdk_rowstride);
+  pixbuf = gdk_pixbuf_new_from_data (getBitmap()->getDataPtr() + srcY * gdk_rowstride + srcX * 3,
+                                     GDK_COLORSPACE_RGB, FALSE, 8,
+                                     width, height, gdk_rowstride,
+                                     NULL, NULL);
 
-  g_object_unref (gc);
+  cr = gdk_cairo_create (drawable);
+  gdk_cairo_set_source_pixbuf (cr, pixbuf, 0, 0);
+  cairo_paint (cr);
+  cairo_destroy (cr);
+
+  g_object_unref (pixbuf);
 }
 
 
