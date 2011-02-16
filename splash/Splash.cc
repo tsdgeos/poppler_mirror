@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2005-2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2010 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2010, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -253,30 +253,8 @@ inline void Splash::pipeRun(SplashPipe *pipe) {
   // dynamic pattern
   if (pipe->pattern) {
     if (!pipe->pattern->getColor(pipe->x, pipe->y, pipe->cSrcVal)) {
-      switch (bitmap->mode) {
-        case splashModeMono1:
-          if (!(pipe->destColorMask >>= 1)) 
-            ++pipe->destColorPtr;
-        break;
-        case splashModeMono8:
-          ++pipe->destColorPtr;
-        break;
-        case splashModeBGR8:
-        case splashModeRGB8:
-          pipe->destColorPtr += 3;
-        break;
-        case splashModeXBGR8:
-#if SPLASH_CMYK
-        case splashModeCMYK8:
-#endif
-          pipe->destColorPtr += 4;
-        break;
-      }
-      if (pipe->destAlphaPtr) {
-        ++pipe->destAlphaPtr;
-      }
-      ++pipe->x;
-      return;
+		pipeIncX(pipe);
+		return;
     }
   }
 
@@ -2395,7 +2373,7 @@ SplashError Splash::drawImage(SplashImageSource src, void *srcData,
 
       // loop-invariant constants
       k1 = splashRound(xShear * ySign * y);
-  
+
       // clipping test
       if (clipRes != splashClipAllInside &&
 	  !rot &&
@@ -3097,7 +3075,7 @@ void Splash::compositeBackground(SplashColorPtr color) {
   Guchar color3;
 #endif
   int x, y, mask;
-  
+
   if (unlikely(bitmap->alpha == NULL)) {
     error(-1, "bitmap->alpha is NULL in Splash::compositeBackground");
     return;
@@ -3282,7 +3260,7 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
   pipeInit(&pipe, 0, 0, NULL, cSrcVal, state->strokeAlpha, gFalse, gFalse);
 
   if (vectorAntialias) {
-    if (aaBuf == NULL) 
+    if (aaBuf == NULL)
       return gFalse; // fall back to old behaviour
     drawAAPixelInit();
   }
@@ -3950,19 +3928,25 @@ SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
   int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
   SplashClipResult clipRes;
 
-  if (aaBuf == NULL) { // should not happen, but to be secure
+  if (vectorAntialias && aaBuf == NULL) { // should not happen, but to be secure
     return splashErrGeneric;
   }
   if (path->length == 0) {
     return splashErrEmptyPath;
   }
   xPath = new SplashXPath(path, state->matrix, state->flatness, gTrue);
-  xPath->aaScale();
+  if (vectorAntialias) {
+    xPath->aaScale();
+  }
   xPath->sort();
   scanner = new SplashXPathScanner(xPath, gFalse);
 
   // get the min and max x and y values
-  scanner->getBBoxAA(&xMinI, &yMinI, &xMaxI, &yMaxI);
+  if (vectorAntialias) {
+    scanner->getBBoxAA(&xMinI, &yMinI, &xMaxI, &yMaxI);
+  } else {
+    scanner->getBBox(&xMinI, &yMinI, &xMaxI, &yMaxI);
+  }
 
   // check clipping
   if ((clipRes = state->clip->testRect(xMinI, yMinI, xMaxI, yMaxI)) != splashClipAllOutside) {
@@ -3977,12 +3961,82 @@ SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
     pipeInit(&pipe, 0, yMinI, pattern, NULL, state->fillAlpha, vectorAntialias && !hasBBox, gFalse);
 
     // draw the spans
-    for (y = yMinI; y <= yMaxI; ++y) {
-      scanner->renderAALine(aaBuf, &x0, &x1, y);
-      if (clipRes != splashClipAllInside) {
-        state->clip->clipAALine(aaBuf, &x0, &x1, y);
+    if (vectorAntialias) {
+      for (y = yMinI; y <= yMaxI; ++y) {
+        scanner->renderAALine(aaBuf, &x0, &x1, y);
+        if (clipRes != splashClipAllInside) {
+          state->clip->clipAALine(aaBuf, &x0, &x1, y);
+        }
+#if splashAASize == 4
+        if (!hasBBox && y > yMinI && y < yMaxI) {
+          // correct shape on left side if clip is
+          // vertical through the middle of shading:
+          Guchar *p0, *p1, *p2, *p3;
+          Guchar c1, c2, c3, c4;
+          p0 = aaBuf->getDataPtr() + (x0 >> 1);
+          p1 = p0 + aaBuf->getRowSize();
+          p2 = p1 + aaBuf->getRowSize();
+          p3 = p2 + aaBuf->getRowSize();
+          if (x0 & 1) {
+           c1 = (*p0 & 0x0f); c2 =(*p1 & 0x0f); c3 = (*p2 & 0x0f) ; c4 = (*p3 & 0x0f);
+          } else {
+            c1 = (*p0 >> 4); c2 = (*p1 >> 4); c3 = (*p2 >> 4); c4 = (*p3 >> 4);
+          }
+          if ( (c1 & 0x03) == 0x03 && (c2 & 0x03) == 0x03 && (c3 & 0x03) == 0x03 && (c4 & 0x03) == 0x03
+            && c1 == c2 && c2 == c3 && c3 == c4 &&
+            pattern->testPosition(x0 - 1, y) )
+          {
+            Guchar shapeCorrection = (x0 & 1) ? 0x0f : 0xf0;
+            *p0 |= shapeCorrection;
+            *p1 |= shapeCorrection;
+            *p2 |= shapeCorrection;
+            *p3 |= shapeCorrection;
+          }
+          // correct shape on right side if clip is
+          // through the middle of shading:
+          p0 = aaBuf->getDataPtr() + (x1 >> 1);
+          p1 = p0 + aaBuf->getRowSize();
+          p2 = p1 + aaBuf->getRowSize();
+          p3 = p2 + aaBuf->getRowSize();
+          if (x1 & 1) {
+            c1 = (*p0 & 0x0f); c2 =(*p1 & 0x0f); c3 = (*p2 & 0x0f) ; c4 = (*p3 & 0x0f);
+          } else {
+            c1 = (*p0 >> 4); c2 = (*p1 >> 4); c3 = (*p2 >> 4); c4 = (*p3 >> 4);
+          }
+
+          if ( (c1 & 0xc) == 0x0c && (c2 & 0x0c) == 0x0c && (c3 & 0x0c) == 0x0c && (c4 & 0x0c) == 0x0c
+            && c1 == c2 && c2 == c3 && c3 == c4 &&
+            pattern->testPosition(x1 + 1, y) )
+          {
+            Guchar shapeCorrection = (x1 & 1) ? 0x0f : 0xf0;
+            *p0 |= shapeCorrection;
+            *p1 |= shapeCorrection;
+            *p2 |= shapeCorrection;
+            *p3 |= shapeCorrection;
+          }
+        }
+#endif
+        drawAALine(&pipe, x0, x1, y);
       }
-      drawAALine(&pipe, x0, x1, y);
+    } else {
+      SplashClipResult clipRes2;
+      for (y = yMinI; y <= yMaxI; ++y) {
+        while (scanner->getNextSpan(y, &x0, &x1)) {
+          if (clipRes == splashClipAllInside) {
+            drawSpan(&pipe, x0, x1, y, gTrue);
+          } else {
+            // limit the x range
+            if (x0 < state->clip->getXMinI()) {
+              x0 = state->clip->getXMinI();
+            }
+            if (x1 > state->clip->getXMaxI()) {
+              x1 = state->clip->getXMaxI();
+            }
+            clipRes2 = state->clip->testSpan(x0, x1, y);
+            drawSpan(&pipe, x0, x1, y, clipRes2 == splashClipAllInside);
+          }
+        }
+      }
     }
   }
   opClipRes = clipRes;

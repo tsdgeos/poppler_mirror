@@ -28,6 +28,7 @@
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
+// Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -154,50 +155,193 @@ void SplashGouraudPattern::getParameterizedColor(double colorinterp, SplashColor
 }
 
 //------------------------------------------------------------------------
-// SplashAxialPattern
+// SplashUnivariatePattern
 //------------------------------------------------------------------------
 
-SplashAxialPattern::SplashAxialPattern(SplashColorMode colorModeA, GfxState *stateA, GfxAxialShading *shadingA) {
+SplashUnivariatePattern::SplashUnivariatePattern(SplashColorMode colorModeA, GfxState *stateA, GfxUnivariateShading *shadingA) {
   Matrix ctm;
+  double xMin, yMin, xMax, yMax;
 
   shading = shadingA;
   state = stateA;
   colorMode = colorModeA;
+
   state->getCTM(&ctm);
   ctm.invertTo(&ictm);
-
-  shading->getCoords(&x0, &y0, &x1, &y1);
-  dx = x1 - x0;
-  dy = y1 - y0;
-  mul = 1 / (dx * dx + dy * dy);
 
   // get the function domain
   t0 = shading->getDomain0();
   t1 = shading->getDomain1();
+  dt = t1 - t0;
+
+  stateA->getUserClipBBox(&xMin, &yMin, &xMax, &yMax);
+  shadingA->setupCache(&ctm, xMin, yMin, xMax, yMax);
+}
+
+SplashUnivariatePattern::~SplashUnivariatePattern() {
+}
+
+GBool SplashUnivariatePattern::getColor(int x, int y, SplashColorPtr c) {
+  GfxColor gfxColor;
+  double xc, yc, t;
+
+  ictm.transform(x, y, &xc, &yc);
+  if (! getParameter (xc, yc, &t))
+      return gFalse;
+
+  shading->getColor(t, &gfxColor);
+  convertGfxColor(c, colorMode, shading->getColorSpace(), &gfxColor);
+  return gTrue;
+}
+
+GBool SplashUnivariatePattern::testPosition(int x, int y) {
+  double xc, yc, t;
+
+  ictm.transform(x, y, &xc, &yc);
+  if (! getParameter (xc, yc, &t))
+      return gFalse;
+  return (t0 < t1) ? (t > t0 && t < t1) : (t > t1 && t < t0);
+}
+
+
+//------------------------------------------------------------------------
+// SplashRadialPattern
+//------------------------------------------------------------------------
+#define RADIAL_EPSILON (1. / 1024 / 1024)
+
+SplashRadialPattern::SplashRadialPattern(SplashColorMode colorModeA, GfxState *stateA, GfxRadialShading *shadingA):
+  SplashUnivariatePattern(colorModeA, stateA, shadingA)
+{
+  shadingA->getCoords(&x0, &y0, &r0, &dx, &dy, &dr);
+  dx -= x0;
+  dy -= y0;
+  dr -= r0;
+  a = dx*dx + dy*dy - dr*dr;
+  if (fabs(a) > RADIAL_EPSILON)
+    inva = 1.0 / a;
+}
+
+SplashRadialPattern::~SplashRadialPattern() {
+}
+
+GBool SplashRadialPattern::getParameter(double xs, double ys, SplashCoord *t) {
+  double b, c, s0, s1;
+
+  // We want to solve this system of equations:
+  //
+  // 1. (x - xc(s))^2 + (y -yc(s))^2 = rc(s)^2
+  // 2. xc(s) = x0 + s * (x1 - xo)
+  // 3. yc(s) = y0 + s * (y1 - yo)
+  // 4. rc(s) = r0 + s * (r1 - ro)
+  //
+  // To simplify the system a little, we translate
+  // our coordinates to have the origin in (x0,y0)
+
+  xs -= x0;
+  ys -= y0;
+
+  // Then we have to solve the equation:
+  //   A*s^2 - 2*B*s + C = 0
+  // where
+  //   A = dx^2  + dy^2  - dr^2
+  //   B = xs*dx + ys*dy + r0*dr
+  //   C = xs^2  + ys^2  - r0^2
+
+  b = xs*dx + ys*dy + r0*dr;
+  c = xs*xs + ys*ys - r0*r0;
+
+  if (fabs(a) <= RADIAL_EPSILON) {
+    // A is 0, thus the equation simplifies to:
+    //   -2*B*s + C = 0
+    // If B is 0, we can either have no solution or an indeterminate
+    // equation, thus we behave as if we had an invalid solution
+    if (fabs(b) <= RADIAL_EPSILON)
+      return gFalse;
+
+    s0 = s1 = 0.5 * c / b;
+  } else {
+    double d;
+
+    d = b*b - a*c;
+    if (d < 0)
+      return gFalse;
+
+    d = sqrt (d);
+    s0 = b + d;
+    s1 = b - d;
+
+    // If A < 0, one of the two solutions will have negative radius,
+    // thus it will be ignored. Otherwise we know that s1 <= s0
+    // (because d >=0 implies b - d <= b + d), so if both are valid it
+    // will be the true solution.
+    s0 *= inva;
+    s1 *= inva;
+  }
+
+  if (r0 + s0 * dr >= 0) {
+    if (0 <= s0 && s0 <= 1) {
+      *t = t0 + dt * s0;
+      return gTrue;
+    } else if (s0 < 0 && shading->getExtend0()) {
+      *t = t0;
+      return gTrue;
+    } else if (s0 > 1 && shading->getExtend1()) {
+      *t = t1;
+      return gTrue;
+    }
+  }
+
+  if (r0 + s1 * dr >= 0) {
+    if (0 <= s1 && s1 <= 1) {
+      *t = t0 + dt * s1;
+      return gTrue;
+    } else if (s1 < 0 && shading->getExtend0()) {
+      *t = t0;
+      return gTrue;
+    } else if (s1 > 1 && shading->getExtend1()) {
+      *t = t1;
+      return gTrue;
+    }
+  }
+
+  return gFalse;
+}
+
+#undef RADIAL_EPSILON
+
+//------------------------------------------------------------------------
+// SplashAxialPattern
+//------------------------------------------------------------------------
+
+SplashAxialPattern::SplashAxialPattern(SplashColorMode colorModeA, GfxState *stateA, GfxAxialShading *shadingA):
+    SplashUnivariatePattern(colorModeA, stateA, shadingA)
+{
+  shadingA->getCoords(&x0, &y0, &x1, &y1);
+  dx = x1 - x0;
+  dy = y1 - y0;
+  mul = 1 / (dx * dx + dy * dy);
 }
 
 SplashAxialPattern::~SplashAxialPattern() {
 }
 
-GBool SplashAxialPattern::getColor(int x, int y, SplashColorPtr c) {
-  GfxColor gfxColor;
-  double tt;
-  double xc, yc, xaxis;
+GBool SplashAxialPattern::getParameter(double xc, double yc, double *t) {
+  double s;
 
-  ictm.transform(x, y, &xc, &yc);
-  xaxis = ((xc - x0) * dx + (yc - y0) * dy) * mul;
-  if (xaxis < 0 && shading->getExtend0()) {
-    tt = t0;
-  } else if (xaxis > 1 && shading->getExtend1()) {
-    tt = t1;
-  } else if (xaxis >= 0 && xaxis <= 1) {
-    tt = t0 + (t1 -t0) * xaxis;
-  } else 
+  xc -= x0;
+  yc -= y0;
+
+  s = (xc * dx + yc * dy) * mul;
+  if (0 <= s && s <= 1) {
+    *t = t0 + dt * s;
+  } else if (s < 0 && shading->getExtend0()) {
+    *t = t0;
+  } else if (s > 1 && shading->getExtend1()) {
+    *t = t1;
+  } else {
     return gFalse;
+  }
 
-  shading->getColor(tt, &gfxColor);
-  state->setFillColor(&gfxColor);
-  convertGfxColor(c, colorMode, state->getFillColorSpace(), state->getFillColor());
   return gTrue;
 }
 
@@ -3317,6 +3461,7 @@ GBool SplashOutputDev::getVectorAntialias() {
 }
 
 void SplashOutputDev::setVectorAntialias(GBool vaa) {
+  vectorAntialias = vaa;
   splash->setVectorAntialias(vaa);
 }
 #endif
@@ -3356,16 +3501,48 @@ GBool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTria
   return gFalse;
 }
 
-GBool SplashOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax) {
+GBool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePattern *pattern, double tMin, double tMax) {
   double xMin, yMin, xMax, yMax;
   SplashPath *path;
-
   GBool vaa = getVectorAntialias();
-  GBool retVal = gFalse;
   // restore vector antialias because we support it here
   setVectorAntialias(gTrue);
+
+  GBool retVal = gFalse;
   // get the clip region bbox
-  state->getUserClipBBox(&xMin, &yMin, &xMax, &yMax);
+  if (pattern->getShading()->getHasBBox()) {
+    pattern->getShading()->getBBox(&xMin, &yMin, &xMax, &yMax);
+  } else {
+    state->getClipBBox(&xMin, &yMin, &xMax, &yMax);
+
+    xMin = floor (xMin);
+    yMin = floor (yMin);
+    xMax = ceil (xMax);
+    yMax = ceil (yMax);
+
+    {
+      Matrix ctm, ictm;
+      double x[4], y[4];
+      int i;
+
+      state->getCTM(&ctm);
+      ctm.invertTo(&ictm);
+
+      ictm.transform(xMin, yMin, &x[0], &y[0]);
+      ictm.transform(xMax, yMin, &x[1], &y[1]);
+      ictm.transform(xMin, yMax, &x[2], &y[2]);
+      ictm.transform(xMax, yMax, &x[3], &y[3]);
+
+      xMin = xMax = x[0];
+      yMin = yMax = y[0];
+      for (i = 1; i < 4; i++) {
+        xMin = std::min<double>(xMin, x[i]);
+        yMin = std::min<double>(yMin, y[i]);
+        xMax = std::max<double>(xMax, x[i]);
+        yMax = std::max<double>(yMax, y[i]);
+      }
+    }
+  }
 
   // fill the region
   state->moveTo(xMin, yMin);
@@ -3375,12 +3552,28 @@ GBool SplashOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading
   state->closePath();
   path = convertPath(state, state->getPath());
 
-  SplashPattern *pattern = new SplashAxialPattern(colorMode, state, shading);
-  retVal = (splash->shadedFill(path, shading->getHasBBox(), pattern) == splashOk);
-  setVectorAntialias(vaa);
+  retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern) == splashOk);
   state->clearPath();
-  delete pattern;
+  setVectorAntialias(vaa);
   delete path;
+
+  return retVal;
+}
+
+GBool SplashOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax) {
+  SplashAxialPattern *pattern = new SplashAxialPattern(colorMode, state, shading);
+  GBool retVal = univariateShadedFill(state, pattern, tMin, tMax);
+
+  delete pattern;
+
+  return retVal;
+}
+
+GBool SplashOutputDev::radialShadedFill(GfxState *state, GfxRadialShading *shading, double tMin, double tMax) {
+  SplashRadialPattern *pattern = new SplashRadialPattern(colorMode, state, shading);
+  GBool retVal = univariateShadedFill(state, pattern, tMin, tMax);
+
+  delete pattern;
 
   return retVal;
 }

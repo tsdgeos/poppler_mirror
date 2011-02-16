@@ -15,6 +15,7 @@
 //
 // Copyright (C) 2009, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
+// Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -239,10 +240,8 @@ private:
 
   GooString *codeString;
   PSObject *code;
-  PSStack *stack;
   int codeSize;
   GBool ok;
-  PopplerCache *cache;
 };
 
 #endif
