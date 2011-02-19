@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dominic Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jan Jockusch <jan@jockusch.de>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Kenneth Berland <ken@hero.com>
@@ -362,7 +362,6 @@ int main(int argc, char *argv[]) {
       fprintf(f, "</doc>\n");
     }
     fclose(f);
-    delete textOut;
   } else {
     textOut = new TextOutputDev(textFileName->getCString(),
 				physLayout, rawOrder, htmlMeta);
