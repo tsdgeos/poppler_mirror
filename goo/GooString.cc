@@ -18,7 +18,7 @@
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2008-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2011 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -238,7 +238,7 @@ GooString *GooString::formatv(char *fmt, va_list argList) {
 
 GooString::~GooString() {
   if (s != sStatic)
-    free(s);
+    gfree(s);
 }
 
 GooString *GooString::clear() {
