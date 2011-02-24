@@ -23,6 +23,7 @@
 // Copyright (C) 2009 Peter Kerzum <kerzum@yandex-team.ru>
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
+// Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1215,7 +1216,7 @@ Gushort *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff) {
   cmap = 0;
   useMacRoman = gFalse;
   useUnicode = gFalse;
-  if (hasEncoding) {
+  if (hasEncoding || type == fontType1) {
     if (usesMacRomanEnc && macRomanCmap >= 0) {
       cmap = macRomanCmap;
       useMacRoman = gTrue;
