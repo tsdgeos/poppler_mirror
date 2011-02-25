@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Kristian Høgsberg <krh@bitplanet.net>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -71,6 +71,9 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   }
   face->size = sizeObj;
   size = splashSqrt(mat[2]*mat[2] + mat[3]*mat[3]);
+  if ((int)size < 1) {
+    size = 1;
+  }
   if (FT_Set_Pixel_Sizes(face, 0, (int)size)) {
     return;
   }
