@@ -715,8 +715,8 @@ poppler_document_get_pdf_version_string (PopplerDocument *document)
 /**
  * poppler_document_get_pdf_version:
  * @document: A #PopplerDocument
- * @major_version: (allow-none): return location for the PDF major version number
- * @minor_version: (allow-none): return location for the PDF minor version number
+ * @major_version: (out) (allow-none): return location for the PDF major version number
+ * @minor_version: (out) (allow-none): return location for the PDF minor version number
  *
  * Returns the major and minor PDF version numbers.
  *
