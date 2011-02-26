@@ -2422,7 +2422,7 @@ GBool CairoOutputDev::getStreamData (Stream *str, char **buffer, int *length)
   return gTrue;
 }
 
-void CairoOutputDev::setMimeData(Stream *str, Ref ref, cairo_surface_t *image)
+void CairoOutputDev::setMimeData(Stream *str, Object *ref, cairo_surface_t *image)
 {
   char *strBuffer;
   int len;
@@ -2444,16 +2444,20 @@ void CairoOutputDev::setMimeData(Stream *str, Ref ref, cairo_surface_t *image)
     cairo_status_t st;
 
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 11, 2)
-    GooString *surfaceId = new GooString("poppler-surface-");
-    char *idBuffer = copyString(surfaceId->getCString());
-    surfaceId->appendf("{0:d}-{1:d}", ref.gen, ref.num);
-    st = cairo_surface_set_mime_data (image, CAIRO_MIME_TYPE_UNIQUE_ID,
-                                      (const unsigned char *)idBuffer,
-                                      surfaceId->getLength(),
-                                      gfree, idBuffer);
-    if (st)
-      gfree(idBuffer);
-    delete surfaceId;
+    if (ref && ref->isRef()) {
+      Ref imgRef = ref->getRef();
+      GooString *surfaceId = new GooString("poppler-surface-");
+      char *idBuffer = copyString(surfaceId->getCString());
+
+      surfaceId->appendf("{0:d}-{1:d}", imgRef.gen, imgRef.num);
+      st = cairo_surface_set_mime_data (image, CAIRO_MIME_TYPE_UNIQUE_ID,
+                                        (const unsigned char *)idBuffer,
+                                        surfaceId->getLength(),
+                                        gfree, idBuffer);
+      if (st)
+        gfree(idBuffer);
+      delete surfaceId;
+    }
 #endif
 
     st = cairo_surface_set_mime_data (image,
@@ -2579,7 +2583,7 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 
   cairo_surface_mark_dirty (image);
 
-  setMimeData(str, ref->getRef(), image);
+  setMimeData(str, ref, image);
 
   pattern = cairo_pattern_create_for_surface (image);
   cairo_surface_destroy (image);
