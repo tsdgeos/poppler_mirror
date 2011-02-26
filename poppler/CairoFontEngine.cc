@@ -467,8 +467,8 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
       }
     }
     break;
-    
   case fontCIDType2:
+  case fontCIDType2OT:
     codeToGID = NULL;
     n = 0;
     if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
