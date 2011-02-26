@@ -816,7 +816,7 @@ GBool CairoOutputDev::radialShadedSupportExtend(GfxState *state, GfxRadialShadin
   return (shading->getExtend0() == shading->getExtend1());
 }
 
-#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 11, 2)
+#if CAIRO_VERSION == CAIRO_VERSION_ENCODE(1, 11, 2)
 GBool CairoOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading)
 {
   double x0, y0, x1, y1, x2, y2;
@@ -953,7 +953,7 @@ GBool CairoOutputDev::patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *
 
   return gTrue;
 }
-#endif /* CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 11, 2) */
+#endif /* CAIRO_VERSION == CAIRO_VERSION_ENCODE(1, 11, 2) */
 
 void CairoOutputDev::clip(GfxState *state) {
   doPath (cairo, state, state->getPath());
