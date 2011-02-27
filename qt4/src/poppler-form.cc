@@ -32,6 +32,35 @@
 
 #include <math.h>
 
+namespace {
+
+Qt::Alignment formTextAlignment(Object *obj)
+{
+  Object tmp;
+  int align = 0;
+  if (obj->dictLookup("Q", &tmp)->isInt())
+  {
+    align = tmp.getInt();
+  }
+  tmp.free();
+  Qt::Alignment qtalign;
+  switch (align)
+  {
+    case 1:
+      qtalign = Qt::AlignHCenter;
+      break;
+    case 2:
+      qtalign = Qt::AlignRight;
+      break;
+    case 0:
+    default:
+      qtalign = Qt::AlignLeft;
+  }
+  return qtalign;
+}
+
+}
+
 namespace Poppler {
 
 FormField::FormField(FormFieldData &dd)
@@ -264,7 +293,7 @@ int FormFieldText::maximumLength() const
 
 Qt::Alignment FormFieldText::textAlignment() const
 {
-  return m_formData->textAlignment(m_formData->fm->getObj());
+  return formTextAlignment(m_formData->fm->getObj());
 }
 
 bool FormFieldText::canBeSpellChecked() const
@@ -342,7 +371,7 @@ void FormFieldChoice::setCurrentChoices( const QList<int> &choice )
 
 Qt::Alignment FormFieldChoice::textAlignment() const
 {
-  return m_formData->textAlignment(m_formData->fm->getObj());
+  return formTextAlignment(m_formData->fm->getObj());
 }
 
 bool FormFieldChoice::canBeSpellChecked() const

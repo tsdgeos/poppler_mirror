@@ -260,31 +260,6 @@ namespace Poppler {
 		{
 		}
 
-		Qt::Alignment textAlignment(Object *obj) const
-		{
-			Object tmp;
-			int align = 0;
-			if (obj->dictLookup("Q", &tmp)->isInt())
-			{
-				align = tmp.getInt();
-			}
-			tmp.free();
-			Qt::Alignment qtalign;
-			switch ( align )
-			{
-				case 1:
-					qtalign = Qt::AlignHCenter;
-					break;
-				case 2:
-					qtalign = Qt::AlignRight;
-					break;
-				case 0:
-				default:
-					qtalign = Qt::AlignLeft;
-			}
-			return qtalign;
-		}
-
 		DocumentData *doc;
 		::Page *page;
 		::FormWidget *fm;
