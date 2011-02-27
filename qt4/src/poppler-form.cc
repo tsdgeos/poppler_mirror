@@ -106,16 +106,11 @@ QString FormField::name() const
 
 QString FormField::uiName() const
 {
-  Object tmp;
-  Object *obj = m_formData->fm->getObj();
   QString name;
-  if (obj->dictLookup("TU", &tmp)->isString())
+  if (GooString *goo = m_formData->fm->getAlternateUiName())
   {
-    GooString *goo = tmp.getString();
-    if (goo)
-      name = goo->getCString();
+    name = QString::fromLatin1(goo->getCString());
   }
-  tmp.free();
   return name;
 }
 
