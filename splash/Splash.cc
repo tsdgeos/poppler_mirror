@@ -15,6 +15,7 @@
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2010, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
+// Copyright (C) 2011 William Bader <williambader@hotmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -3511,7 +3512,6 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
 
 SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
 				    int xDest, int yDest, int w, int h) {
-  SplashColor pixel;
   SplashColorPtr p, sp;
   Guchar *q;
   int x, y, mask;
@@ -3524,10 +3524,10 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
   case splashModeMono1:
     for (y = 0; y < h; ++y) {
       p = &bitmap->data[(yDest + y) * bitmap->rowSize + (xDest >> 3)];
+      sp = &src->data[(ySrc + y) * bitmap->rowSize + (xSrc >> 3)];
       mask = 0x80 >> (xDest & 7);
       for (x = 0; x < w; ++x) {
-	src->getPixel(xSrc + x, ySrc + y, pixel);
-	if (pixel[0]) {
+	if (sp[0] & (0x80 >> (x & 7))) {
 	  *p |= mask;
 	} else {
 	  *p &= ~mask;
@@ -3535,6 +3535,7 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
 	if (!(mask >>= 1)) {
 	  mask = 0x80;
 	  ++p;
+	  ++sp;
 	}
       }
     }
@@ -3542,9 +3543,9 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
   case splashModeMono8:
     for (y = 0; y < h; ++y) {
       p = &bitmap->data[(yDest + y) * bitmap->rowSize + xDest];
+      sp = &src->data[(ySrc + y) * bitmap->rowSize + xSrc];
       for (x = 0; x < w; ++x) {
-	src->getPixel(xSrc + x, ySrc + y, pixel);
-	*p++ = pixel[0];
+	*p++ = *sp++;
       }
     }
     break;
@@ -3577,12 +3578,12 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
   case splashModeCMYK8:
     for (y = 0; y < h; ++y) {
       p = &bitmap->data[(yDest + y) * bitmap->rowSize + 4 * xDest];
+      sp = &src->data[(ySrc + y) * bitmap->rowSize + 4 * xSrc];
       for (x = 0; x < w; ++x) {
-	src->getPixel(xSrc + x, ySrc + y, pixel);
-	*p++ = pixel[0];
-	*p++ = pixel[1];
-	*p++ = pixel[2];
-	*p++ = pixel[3];
+	*p++ = *sp++;
+	*p++ = *sp++;
+	*p++ = *sp++;
+	*p++ = *sp++;
       }
     }
     break;
