@@ -84,6 +84,13 @@ FormWidget::FormWidget(XRef *xrefA, Object *aobj, unsigned num, Ref aref, FormFi
   }
   obj1.free();
 
+  if (dict->lookup("TU", &obj1)->isString()) {
+    alternateUiName = obj1.getString()->copy();
+  } else {
+    alternateUiName = NULL;
+  }
+  obj1.free();
+
   if(dict->lookup("TM", &obj1)->isString()) {
     mappingName = obj1.getString()->copy();
   } else {
@@ -141,6 +148,7 @@ FormWidget::FormWidget(XRef *xrefA, Object *aobj, unsigned num, Ref aref, FormFi
 FormWidget::~FormWidget()
 {
   delete partialName;
+  delete alternateUiName;
   delete mappingName;
   delete fullyQualifiedName;
   obj.free ();

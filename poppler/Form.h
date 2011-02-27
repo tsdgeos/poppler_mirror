@@ -87,6 +87,7 @@ public:
   double getFontSize () { return fontSize; }
 
   GooString *getPartialName() const { return partialName; }
+  GooString *getAlternateUiName() const { return alternateUiName; }
   GooString *getMappingName() const { return mappingName; }
   GooString *getFullyQualifiedName();
 
@@ -114,6 +115,7 @@ protected:
   GBool defaultsLoaded;
   GBool modified;
   GooString *partialName; // T field
+  GooString *alternateUiName; // TU field
   GooString *mappingName; // TM field
   GooString *fullyQualifiedName;
 
