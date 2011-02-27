@@ -200,11 +200,8 @@ FormFieldButton::ButtonType FormFieldButton::buttonType() const
 QString FormFieldButton::caption() const
 {
   FormWidgetButton* fwb = static_cast<FormWidgetButton*>(m_formData->fm);
-  // HACK push buttons seems to have a null GooString for the caption
-  if (fwb->getButtonType() == formButtonPush)
-    return QString();
-
-  return fwb->getOnStr() ? QString::fromUtf8(fwb->getOnStr()) : QString();
+  GooString *goo = fwb->getOnStr();
+  return goo ? QString::fromUtf8(goo->getCString()) : QString();
 }
 
 bool FormFieldButton::state() const

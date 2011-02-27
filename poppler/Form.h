@@ -152,7 +152,7 @@ public:
   void setState (GBool state, GBool calledByParent=gFalse);
   GBool getState ();
 
-  char* getOnStr () { return onStr->getCString(); }
+  GooString* getOnStr() { return onStr; }
 
   void loadDefaults();
 

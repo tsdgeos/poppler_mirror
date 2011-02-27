@@ -289,10 +289,10 @@ void FormWidgetButton::setState (GBool astate, GBool calledByParent)
   //update appearance
   char *offStr = "Off";
   Object obj1;
-  obj1.initName(state?getOnStr():offStr);
+  obj1.initName(state ? onStr->getCString() : offStr);
   updateField ("V", &obj1);
 
-  obj1.initName(state?getOnStr():offStr);
+  obj1.initName(state ? onStr->getCString() : offStr);
   //modify the Appearance State entry as well
   obj.getDict()->set("AS", &obj1);
   //notify the xref about the update
@@ -1028,7 +1028,7 @@ GBool FormFieldButton::setState (int num, GBool s)
         FormWidgetButton* actChild = static_cast<FormWidgetButton*>(widgets[active_child]);
         if (actChild->getOnStr()) {
           Object obj1;
-          obj1.initName(actChild->getOnStr());
+          obj1.initName(actChild->getOnStr()->getCString());
 	  obj.getDict()->set("V", &obj1);
 	  xref->setModifiedObject(&obj, ref);
         }
