@@ -96,16 +96,11 @@ int FormField::id() const
 
 QString FormField::name() const
 {
-  Object tmp;
-  Object *obj = m_formData->fm->getObj();
   QString name;
-  if (obj->dictLookup("T", &tmp)->isString())
+  if (GooString *goo = m_formData->fm->getPartialName())
   {
-    GooString *goo = tmp.getString();
-    if (goo)
-      name = goo->getCString();
+    name = QString::fromLatin1(goo->getCString());
   }
-  tmp.free();
   return name;
 }
 
