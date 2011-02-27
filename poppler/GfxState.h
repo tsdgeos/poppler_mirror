@@ -17,7 +17,7 @@
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 //
@@ -94,6 +94,14 @@ static inline GfxColorComp dblToCol(double x) {
 
 static inline double colToDbl(GfxColorComp x) {
   return (double)x / (double)gfxColorComp1;
+}
+
+static inline Guchar dblToByte(double x) {
+  return (x * 255.0);
+}
+
+static inline double byteToDbl(Guchar x) {
+  return (double)x / (double)255.0;
 }
 
 static inline GfxColorComp byteToCol(Guchar x) {
@@ -385,6 +393,8 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
+  virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
+  virtual GBool useGetRGBLine() { return gTrue; }
 
   virtual int getNComps() { return 4; }
   virtual void getDefaultColor(GfxColor *color);

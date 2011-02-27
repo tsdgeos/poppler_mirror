@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2006-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Christian Persch <chpe@gnome.org>
@@ -1084,6 +1084,26 @@ void GfxDeviceCMYKColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
   rgb->r = clip01(dblToCol(r));
   rgb->g = clip01(dblToCol(g));
   rgb->b = clip01(dblToCol(b));
+}
+
+void GfxDeviceCMYKColorSpace::getRGBLine(Guchar *in, unsigned int *out, int length)
+{
+  double c, m, y, k, c1, m1, y1, k1, r, g, b;
+  
+  Guchar *inp = in;
+  for (int i = 0; i < length; i++) {
+    c = byteToDbl(*inp++);
+    m = byteToDbl(*inp++);
+    y = byteToDbl(*inp++);
+    k = byteToDbl(*inp++);
+    c1 = 1 - c;
+    m1 = 1 - m;
+    y1 = 1 - y;
+    k1 = 1 - k;
+    cmykToRGBMatrixMultiplication(c, m, y, k, c1, m1, y1, k1, r, g, b);
+  
+    *out++ = (dblToByte(clip01(r)) << 16) | (dblToByte(clip01(g)) << 8) | dblToByte(clip01(b));
+  }
 }
 
 void GfxDeviceCMYKColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
