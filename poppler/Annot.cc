@@ -790,22 +790,22 @@ AnnotAppearanceCharacs::AnnotAppearanceCharacs(Dict *dict) {
   }
   obj1.free();
 
-  if (dict->lookup("CA", &obj1)->isName()) {
-    normalCaption = new GooString(obj1.getName());
+  if (dict->lookup("CA", &obj1)->isString()) {
+    normalCaption = new GooString(obj1.getString());
   } else {
     normalCaption = NULL;
   }
   obj1.free();
 
-  if (dict->lookup("RC", &obj1)->isName()) {
-    rolloverCaption = new GooString(obj1.getName());
+  if (dict->lookup("RC", &obj1)->isString()) {
+    rolloverCaption = new GooString(obj1.getString());
   } else {
     rolloverCaption = NULL;
   }
   obj1.free();
 
-  if (dict->lookup("AC", &obj1)->isName()) {
-    alternateCaption = new GooString(obj1.getName());
+  if (dict->lookup("AC", &obj1)->isString()) {
+    alternateCaption = new GooString(obj1.getString());
   } else {
     alternateCaption = NULL;
   }
