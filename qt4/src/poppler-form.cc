@@ -90,17 +90,17 @@ FormField::FormField(FormFieldData &dd)
   XPDFReader::transform( MTX, qMax( left, right ), qMin( top, bottom ), bottomRight );
   m_formData->box = QRectF(topLeft, QSizeF(bottomRight.x() - topLeft.x(), bottomRight.y() - topLeft.y()));
 
-  Object *obj = m_formData->fm->getObj();
+  Dict *dict = m_formData->fm->getObj()->getDict();
   Object tmp;
 
   // reading the flags
-  if (obj->isDict() && obj->dictLookup("Ff", &tmp)->isInt())
+  if (dict->lookup("Ff", &tmp)->isInt())
   {
     m_formData->flags = tmp.getInt();
   }
   tmp.free();
   // reading the widget annotation flags
-  if (obj->isDict() && obj->dictLookup("F", &tmp)->isInt())
+  if (dict->lookup("F", &tmp)->isInt())
   {
     m_formData->annoflags = tmp.getInt();
   }
