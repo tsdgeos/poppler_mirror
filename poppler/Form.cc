@@ -37,6 +37,7 @@
 #include "PDFDocEncoding.h"
 #include "Annot.h"
 #include "Catalog.h"
+#include "Link.h"
 
 //return a newly allocated char* containing an UTF16BE string of size length
 char* pdfDocEncodingToUTF16 (GooString* orig, int* length)
@@ -227,6 +228,17 @@ GooString* FormWidget::getFullyQualifiedName() {
 
   fullyQualifiedName = full_name;
   return fullyQualifiedName;
+}
+
+LinkAction *FormWidget::createActivationAction(Catalog *catalog)
+{
+  Object tmp;
+  LinkAction *act = NULL;
+  if (obj.dictLookup("A", &tmp)->isDict()) {
+    act = LinkAction::parseAction(&tmp, catalog ? catalog->getBaseURI() : NULL);
+  }
+  tmp.free();
+  return act;
 }
 
 FormWidgetButton::FormWidgetButton (XRef *xrefA, Object *aobj, unsigned num, Ref ref, FormField *p) :

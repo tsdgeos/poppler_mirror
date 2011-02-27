@@ -27,6 +27,7 @@ class Array;
 class Dict;
 class Annot;
 class Catalog;
+class LinkAction;
 
 enum FormFieldType {
   formButton,
@@ -92,6 +93,8 @@ public:
   GBool isModified () { return modified; }
 
   bool isReadOnly() const;
+
+  LinkAction *createActivationAction(Catalog *catalog);
 
   // return the unique ID corresponding to pageNum/fieldNum
   static int encodeID (unsigned pageNum, unsigned fieldNum);
