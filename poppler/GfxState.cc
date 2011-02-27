@@ -1636,7 +1636,7 @@ void GfxICCBasedColorSpace::getRGBLine(Guchar *in, unsigned int *out,
 				       int length) {
 #ifdef USE_CMS
   if (lineTransform != 0) {
-    Guchar* tmp = (Guchar *)gmallocn(nComps * length, sizeof(Guchar));
+    Guchar* tmp = (Guchar *)gmallocn(3 * length, sizeof(Guchar));
     lineTransform->doTransform(in, tmp, length);
     for (int i = 0; i < length; ++i) {
         Guchar *current = tmp + (i * 3);
