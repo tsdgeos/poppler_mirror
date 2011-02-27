@@ -136,19 +136,12 @@ bool FormField::isVisible() const
 
 Link* FormField::activationAction() const
 {
-  Object tmp;
-  Object *obj = m_formData->fm->getObj();
   Link* action = 0;
-  if (obj->dictLookup("A", &tmp)->isDict())
+  if (::LinkAction *act = m_formData->fm->createActivationAction(m_formData->doc->doc->getCatalog()))
   {
-    ::LinkAction *act = ::LinkAction::parseAction(&tmp, m_formData->doc->doc->getCatalog()->getBaseURI());
-    if (act)
-    {
-      action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
-      delete act;
-    }
+    action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
+    delete act;
   }
-  tmp.free();
   return action;
 }
 
