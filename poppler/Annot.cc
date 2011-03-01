@@ -127,14 +127,13 @@ static AnnotExternalDataType parseAnnotExternalData(Dict* dict) {
   AnnotExternalDataType type;
 
   if (dict->lookup("Subtype", &obj1)->isName()) {
-    GooString *typeName = new GooString(obj1.getName());
+    const char *typeName = obj1.getName();
 
-    if (!typeName->cmp("Markup3D")) {
+    if (!strcmp(typeName, "Markup3D")) {
       type = annotExternalDataMarkup3D;
     } else {
       type = annotExternalDataMarkupUnknown;
     }
-    delete typeName;
   } else {
     type = annotExternalDataMarkupUnknown;
   }
@@ -180,13 +179,12 @@ AnnotBorderEffect::AnnotBorderEffect(Dict *dict) {
   Object obj1;
 
   if (dict->lookup("S", &obj1)->isName()) {
-    GooString *effectName = new GooString(obj1.getName());
+    const char *effectName = obj1.getName();
 
-    if (!effectName->cmp("C"))
+    if (!strcmp(effectName, "C"))
       effectType = borderEffectCloudy;
     else
       effectType = borderEffectNoEffect;
-    delete effectName;
   } else {
     effectType = borderEffectNoEffect;
   }
@@ -544,24 +542,23 @@ AnnotBorderBS::AnnotBorderBS(Dict *dict) {
   dict->lookup("W", &obj1);
   dict->lookup("S", &obj2);
   if (obj1.isNum() && obj2.isName()) {
-    GooString *styleName = new GooString(obj2.getName());
+    const char *styleName = obj2.getName();
 
     width = obj1.getNum();
 
-    if (!styleName->cmp("S")) {
+    if (!strcmp(styleName, "S")) {
       style = borderSolid;
-    } else if (!styleName->cmp("D")) {
+    } else if (!strcmp(styleName, "D")) {
       style = borderDashed;
-    } else if (!styleName->cmp("B")) {
+    } else if (!strcmp(styleName, "B")) {
       style = borderBeveled;
-    } else if (!styleName->cmp("I")) {
+    } else if (!strcmp(styleName, "I")) {
       style = borderInset;
-    } else if (!styleName->cmp("U")) {
+    } else if (!strcmp(styleName, "U")) {
       style = borderUnderlined;
     } else {
       style = borderSolid;
     }
-    delete styleName;
   } else {
     width = 0;
   }
@@ -705,32 +702,30 @@ AnnotIconFit::AnnotIconFit(Dict* dict) {
   Object obj1;
 
   if (dict->lookup("SW", &obj1)->isName()) {
-    GooString *scaleName = new GooString(obj1.getName());
+    const char *scaleName = obj1.getName();
 
-    if(!scaleName->cmp("B")) {
+    if(!strcmp(scaleName, "B")) {
       scaleWhen = scaleBigger;
-    } else if(!scaleName->cmp("S")) {
+    } else if(!strcmp(scaleName, "S")) {
       scaleWhen = scaleSmaller;
-    } else if(!scaleName->cmp("N")) {
+    } else if(!strcmp(scaleName, "N")) {
       scaleWhen = scaleNever;
     } else {
       scaleWhen = scaleAlways;
     }
-    delete scaleName;
   } else {
     scaleWhen = scaleAlways;
   }
   obj1.free();
 
   if (dict->lookup("S", &obj1)->isName()) {
-    GooString *scaleName = new GooString(obj1.getName());
+    const char *scaleName = obj1.getName();
 
-    if(!scaleName->cmp("A")) {
+    if(!strcmp(scaleName, "A")) {
       scale = scaleAnamorphic;
     } else {
       scale = scaleProportional;
     }
-    delete scaleName;
   } else {
     scale = scaleProportional;
   }
@@ -1491,16 +1486,15 @@ void AnnotMarkup::initialize(XRef *xrefA, Dict *dict, Catalog *catalog, Object *
   obj1.free();
 
   if (dict->lookup("RT", &obj1)->isName()) {
-    GooString *replyName = new GooString(obj1.getName());
+    const char *replyName = obj1.getName();
 
-    if (!replyName->cmp("R")) {
+    if (!strcmp(replyName, "R")) {
       replyTo = replyTypeR;
-    } else if (!replyName->cmp("Group")) {
+    } else if (!strcmp(replyName, "Group")) {
       replyTo = replyTypeGroup;
     } else {
       replyTo = replyTypeR;
     }
-    delete replyName;
   } else {
     replyTo = replyTypeR;
   }
@@ -2049,20 +2043,19 @@ void AnnotLink::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
   obj1.free();
 
   if (dict->lookup("H", &obj1)->isName()) {
-    GooString *effect = new GooString(obj1.getName());
+    const char *effect = obj1.getName();
 
-    if (!effect->cmp("N")) {
+    if (!strcmp(effect, "N")) {
       linkEffect = effectNone;
-    } else if (!effect->cmp("I")) {
+    } else if (!strcmp(effect, "I")) {
       linkEffect = effectInvert;
-    } else if (!effect->cmp("O")) {
+    } else if (!strcmp(effect, "O")) {
       linkEffect = effectOutline;
-    } else if (!effect->cmp("P")) {
+    } else if (!strcmp(effect, "P")) {
       linkEffect = effectPush;
     } else {
       linkEffect = effectInvert;
     }
-    delete effect;
   } else {
     linkEffect = effectInvert;
   }
@@ -2191,18 +2184,17 @@ void AnnotFreeText::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
   obj1.free();
 
   if (dict->lookup("IT", &obj1)->isName()) {
-    GooString *intentName = new GooString(obj1.getName());
+    const char *intentName = obj1.getName();
 
-    if (!intentName->cmp("FreeText")) {
+    if (!strcmp(intentName, "FreeText")) {
       intent = intentFreeText;
-    } else if (!intentName->cmp("FreeTextCallout")) {
+    } else if (!strcmp(intentName, "FreeTextCallout")) {
       intent = intentFreeTextCallout;
-    } else if (!intentName->cmp("FreeTextTypeWriter")) {
+    } else if (!strcmp(intentName, "FreeTextTypeWriter")) {
       intent = intentFreeTextTypeWriter;
     } else {
       intent = intentFreeText;
     }
-    delete intentName;
   } else {
     intent = intentFreeText;
   }
@@ -2347,16 +2339,15 @@ void AnnotLine::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
   obj1.free();
 
   if (dict->lookup("IT", &obj1)->isName()) {
-    GooString *intentName = new GooString(obj1.getName());
+    const char *intentName = obj1.getName();
 
-    if(!intentName->cmp("LineArrow")) {
+    if(!strcmp(intentName, "LineArrow")) {
       intent = intentLineArrow;
-    } else if(!intentName->cmp("LineDimension")) {
+    } else if(!strcmp(intentName, "LineDimension")) {
       intent = intentLineDimension;
     } else {
       intent = intentLineArrow;
     }
-    delete intentName;
   } else {
     intent = intentLineArrow;
   }
@@ -2373,16 +2364,15 @@ void AnnotLine::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
   obj1.free();
 
   if (dict->lookup("CP", &obj1)->isName()) {
-    GooString *captionName = new GooString(obj1.getName());
+    const char *captionName = obj1.getName();
 
-    if(!captionName->cmp("Inline")) {
+    if(!strcmp(captionName, "Inline")) {
       captionPos = captionPosInline;
-    } else if(!captionName->cmp("Top")) {
+    } else if(!strcmp(captionName, "Top")) {
       captionPos = captionPosTop;
     } else {
       captionPos = captionPosInline;
     }
-    delete captionName;
   } else {
     captionPos = captionPosInline;
   }
@@ -2751,18 +2741,17 @@ void AnnotWidget::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
     regen = gTrue;
 
   if(dict->lookup("H", &obj1)->isName()) {
-    GooString *modeName = new GooString(obj1.getName());
+    const char *modeName = obj1.getName();
 
-    if(!modeName->cmp("N")) {
+    if(!strcmp(modeName, "N")) {
       mode = highlightModeNone;
-    } else if(!modeName->cmp("O")) {
+    } else if(!strcmp(modeName, "O")) {
       mode = highlightModeOutline;
-    } else if(!modeName->cmp("P") || !modeName->cmp("T")) {
+    } else if(!strcmp(modeName, "P") || !strcmp(modeName, "T")) {
       mode = highlightModePush;
     } else {
       mode = highlightModeInvert;
     }
-    delete modeName;
   } else {
     mode = highlightModeInvert;
   }
@@ -4619,16 +4608,15 @@ void AnnotPolygon::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
   obj1.free();
 
   if (dict->lookup("IT", &obj1)->isName()) {
-    GooString *intentName = new GooString(obj1.getName());
+    const char *intentName = obj1.getName();
 
-    if(!intentName->cmp("PolygonCloud")) {
+    if(!strcmp(intentName, "PolygonCloud")) {
       intent = polygonCloud;
-    } else if(!intentName->cmp("PolyLineDimension")) {
+    } else if(!strcmp(intentName, "PolyLineDimension")) {
       intent = polylineDimension;
     } else {
       intent = polygonDimension;
     }
-    delete intentName;
   } else {
     intent = polygonCloud;
   }
@@ -5168,70 +5156,66 @@ Annot3D::Activation::Activation(Dict *dict) {
   Object obj1;
 
   if (dict->lookup("A", &obj1)->isName()) {
-    GooString *name = new GooString(obj1.getName());
+    const char *name = obj1.getName();
 
-    if(!name->cmp("PO")) {
+    if(!strcmp(name, "PO")) {
       aTrigger = aTriggerPageOpened;
-    } else if(!name->cmp("PV")) {
+    } else if(!strcmp(name, "PV")) {
       aTrigger = aTriggerPageVisible;
-    } else if(!name->cmp("XA")) {
+    } else if(!strcmp(name, "XA")) {
       aTrigger = aTriggerUserAction;
     } else {
       aTrigger = aTriggerUnknown;
     }
-    delete name;
   } else {
     aTrigger = aTriggerUnknown;
   }
   obj1.free();
 
   if(dict->lookup("AIS", &obj1)->isName()) {
-    GooString *name = new GooString(obj1.getName());
+    const char *name = obj1.getName();
 
-    if(!name->cmp("I")) {
+    if(!strcmp(name, "I")) {
       aState = aStateEnabled;
-    } else if(!name->cmp("L")) {
+    } else if(!strcmp(name, "L")) {
       aState = aStateDisabled;
     } else {
       aState = aStateUnknown;
     }
-    delete name;
   } else {
     aState = aStateUnknown;
   }
   obj1.free();
 
   if(dict->lookup("D", &obj1)->isName()) {
-    GooString *name = new GooString(obj1.getName());
+    const char *name = obj1.getName();
 
-    if(!name->cmp("PC")) {
+    if(!strcmp(name, "PC")) {
       dTrigger = dTriggerPageClosed;
-    } else if(!name->cmp("PI")) {
+    } else if(!strcmp(name, "PI")) {
       dTrigger = dTriggerPageInvisible;
-    } else if(!name->cmp("XD")) {
+    } else if(!strcmp(name, "XD")) {
       dTrigger = dTriggerUserAction;
     } else {
       dTrigger = dTriggerUnknown;
     }
-    delete name;
   } else {
     dTrigger = dTriggerUnknown;
   }
   obj1.free();
 
   if(dict->lookup("DIS", &obj1)->isName()) {
-    GooString *name = new GooString(obj1.getName());
+    const char *name = obj1.getName();
 
-    if(!name->cmp("U")) {
+    if(!strcmp(name, "U")) {
       dState = dStateUninstantiaded;
-    } else if(!name->cmp("I")) {
+    } else if(!strcmp(name, "I")) {
       dState = dStateInstantiated;
-    } else if(!name->cmp("L")) {
+    } else if(!strcmp(name, "L")) {
       dState = dStateLive;
     } else {
       dState = dStateUnknown;
     }
-    delete name;
   } else {
     dState = dStateUnknown;
   }
