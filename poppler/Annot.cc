@@ -5274,8 +5274,12 @@ Annots::Annots(XRef *xref, Catalog *catalog, Object *annotsObj) {
       if (annotsObj->arrayGet(i, &obj1)->isDict()) {
         annotsObj->arrayGetNF(i, &obj2);
         annot = createAnnot (xref, obj1.getDict(), catalog, &obj2);
-        appendAnnot(annot);
-        annot->decRefCnt();
+        if (annot) {
+          if (annot->isOk()) {
+            appendAnnot(annot);
+          }
+          annot->decRefCnt();
+        }
       }
       obj2.free();
       obj1.free();
