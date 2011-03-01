@@ -5303,57 +5303,57 @@ Annot *Annots::createAnnot(XRef *xref, Dict* dict, Catalog *catalog, Object *obj
   Object obj1;
 
   if (dict->lookup("Subtype", &obj1)->isName()) {
-    GooString *typeName = new GooString(obj1.getName());
+    const char *typeName = obj1.getName();
 
-    if (!typeName->cmp("Text")) {
+    if (!strcmp(typeName, "Text")) {
       annot = new AnnotText(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Link")) {
+    } else if (!strcmp(typeName, "Link")) {
       annot = new AnnotLink(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("FreeText")) {
+    } else if (!strcmp(typeName, "FreeText")) {
       annot = new AnnotFreeText(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Line")) {
+    } else if (!strcmp(typeName, "Line")) {
       annot = new AnnotLine(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Square")) {
+    } else if (!strcmp(typeName, "Square")) {
       annot = new AnnotGeometry(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Circle")) {
+    } else if (!strcmp(typeName, "Circle")) {
       annot = new AnnotGeometry(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Polygon")) {
+    } else if (!strcmp(typeName, "Polygon")) {
       annot = new AnnotPolygon(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("PolyLine")) {
+    } else if (!strcmp(typeName, "PolyLine")) {
       annot = new AnnotPolygon(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Highlight")) {
+    } else if (!strcmp(typeName, "Highlight")) {
       annot = new AnnotTextMarkup(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Underline")) {
+    } else if (!strcmp(typeName, "Underline")) {
       annot = new AnnotTextMarkup(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Squiggly")) {
+    } else if (!strcmp(typeName, "Squiggly")) {
       annot = new AnnotTextMarkup(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("StrikeOut")) {
+    } else if (!strcmp(typeName, "StrikeOut")) {
       annot = new AnnotTextMarkup(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Stamp")) {
+    } else if (!strcmp(typeName, "Stamp")) {
       annot = new AnnotStamp(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Caret")) {
+    } else if (!strcmp(typeName, "Caret")) {
       annot = new AnnotCaret(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Ink")) {
+    } else if (!strcmp(typeName, "Ink")) {
       annot = new AnnotInk(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("FileAttachment")) {
+    } else if (!strcmp(typeName, "FileAttachment")) {
       annot = new AnnotFileAttachment(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Sound")) {
+    } else if (!strcmp(typeName, "Sound")) {
       annot = new AnnotSound(xref, dict, catalog, obj);
-    } else if(!typeName->cmp("Movie")) {
+    } else if(!strcmp(typeName, "Movie")) {
       annot = new AnnotMovie(xref, dict, catalog, obj);
-    } else if(!typeName->cmp("Widget")) {
+    } else if(!strcmp(typeName, "Widget")) {
       annot = new AnnotWidget(xref, dict, catalog, obj);
-    } else if(!typeName->cmp("Screen")) {
+    } else if(!strcmp(typeName, "Screen")) {
       annot = new AnnotScreen(xref, dict, catalog, obj);
-    } else if(!typeName->cmp("PrinterMark")) {
+    } else if(!strcmp(typeName, "PrinterMark")) {
       annot = new Annot(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("TrapNet")) {
+    } else if (!strcmp(typeName, "TrapNet")) {
       annot = new Annot(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Watermark")) {
+    } else if (!strcmp(typeName, "Watermark")) {
       annot = new Annot(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("3D")) {
+    } else if (!strcmp(typeName, "3D")) {
       annot = new Annot3D(xref, dict, catalog, obj);
-    } else if (!typeName->cmp("Popup")) {
+    } else if (!strcmp(typeName, "Popup")) {
       /* Popup annots are already handled by markup annots
        * Here we only care about popup annots without a
        * markup annotation associated
@@ -5369,8 +5369,6 @@ Annot *Annots::createAnnot(XRef *xref, Dict* dict, Catalog *catalog, Object *obj
     } else {
       annot = new Annot(xref, dict, catalog, obj);
     }
-
-    delete typeName;
   } else {
     annot = NULL;
   }
