@@ -44,6 +44,7 @@
 #include "Sound.h"
 #include "FileSpec.h"
 #include "Rendition.h"
+#include "Annot.h"
 
 //------------------------------------------------------------------------
 // LinkAction
@@ -860,96 +861,10 @@ LinkUnknown::~LinkUnknown() {
 }
 
 //------------------------------------------------------------------------
-// Link
-//------------------------------------------------------------------------
-
-Link::Link(Dict *dict, GooString *baseURI) {
-  Object obj1, obj2;
-  double t;
-
-  action = NULL;
-  ok = gFalse;
-
-  // get rectangle
-  if (!dict->lookup("Rect", &obj1)->isArray()) {
-    error(-1, "Annotation rectangle is wrong type");
-    goto err2;
-  }
-  if (!obj1.arrayGet(0, &obj2)->isNum()) {
-    error(-1, "Bad annotation rectangle");
-    goto err1;
-  }
-  x1 = obj2.getNum();
-  obj2.free();
-  if (!obj1.arrayGet(1, &obj2)->isNum()) {
-    error(-1, "Bad annotation rectangle");
-    goto err1;
-  }
-  y1 = obj2.getNum();
-  obj2.free();
-  if (!obj1.arrayGet(2, &obj2)->isNum()) {
-    error(-1, "Bad annotation rectangle");
-    goto err1;
-  }
-  x2 = obj2.getNum();
-  obj2.free();
-  if (!obj1.arrayGet(3, &obj2)->isNum()) {
-    error(-1, "Bad annotation rectangle");
-    goto err1;
-  }
-  y2 = obj2.getNum();
-  obj2.free();
-  obj1.free();
-  if (x1 > x2) {
-    t = x1;
-    x1 = x2;
-    x2 = t;
-  }
-  if (y1 > y2) {
-    t = y1;
-    y1 = y2;
-    y2 = t;
-  }
-
-  // look for destination
-  if (!dict->lookup("Dest", &obj1)->isNull()) {
-    action = LinkAction::parseDest(&obj1);
-
-  // look for action
-  } else {
-    obj1.free();
-    if (dict->lookup("A", &obj1)->isDict()) {
-      action = LinkAction::parseAction(&obj1, baseURI);
-    }
-  }
-  obj1.free();
-
-  // check for bad action
-  if (action) {
-    ok = gTrue;
-  }
-
-  return;
-
- err1:
-  obj2.free();
- err2:
-  obj1.free();
-}
-
-Link::~Link() {
-  if (action) {
-    delete action;
-  }
-}
-
-//------------------------------------------------------------------------
 // Links
 //------------------------------------------------------------------------
 
-Links::Links(Object *annots, GooString *baseURI) {
-  Link *link;
-  Object obj1, obj2;
+Links::Links(Annots *annots) {
   int size;
   int i;
 
@@ -957,25 +872,21 @@ Links::Links(Object *annots, GooString *baseURI) {
   size = 0;
   numLinks = 0;
 
-  if (annots->isArray()) {
-    for (i = 0; i < annots->arrayGetLength(); ++i) {
-      if (annots->arrayGet(i, &obj1)->isDict()) {
-	if (obj1.dictLookup("Subtype", &obj2)->isName("Link")) {
-	  link = new Link(obj1.getDict(), baseURI);
-	  if (link->isOk()) {
-	    if (numLinks >= size) {
-	      size += 16;
-	      links = (Link **)greallocn(links, size, sizeof(Link *));
-	    }
-	    links[numLinks++] = link;
-	  } else {
-	    delete link;
-	  }
-	}
-	obj2.free();
-      }
-      obj1.free();
+  if (!annots)
+    return;
+
+  for (i = 0; i < annots->getNumAnnots(); ++i) {
+    Annot *annot = annots->getAnnot(i);
+
+    if (annot->getType() != Annot::typeLink)
+      continue;
+
+    if (numLinks >= size) {
+      size += 16;
+      links = (AnnotLink **)greallocn(links, size, sizeof(AnnotLink *));
     }
+    annot->incRefCnt();
+    links[numLinks++] = static_cast<AnnotLink *>(annot);
   }
 }
 
@@ -983,7 +894,8 @@ Links::~Links() {
   int i;
 
   for (i = 0; i < numLinks; ++i)
-    delete links[i];
+    links[i]->decRefCnt();
+
   gfree(links);
 }
 

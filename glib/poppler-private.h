@@ -60,7 +60,6 @@ struct _PopplerPage
   Page *page;
   int index;
   TextPage *text;
-  Annots *annots;
 };
 
 struct _PopplerFormField

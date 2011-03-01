@@ -76,8 +76,6 @@ poppler_page_finalize (GObject *object)
   g_object_unref (page->document);
   page->document = NULL;
 
-  if (page->annots != NULL)
-    delete page->annots;
   if (page->text != NULL) 
     page->text->decRefCnt();
   /* page->page is owned by the document */
@@ -1139,15 +1137,12 @@ poppler_page_get_link_mapping (PopplerPage *page)
   GList *map_list = NULL;
   gint i;
   Links *links;
-  Object obj;
   double width, height;
   
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
   
-  links = new Links (page->page->getAnnots (&obj),
-		     page->document->doc->getCatalog ()->getBaseURI ());
-  obj.free ();
-  
+  links = new Links (page->page->getAnnots (page->document->doc->getCatalog ()));
+
   if (links == NULL)
     return NULL;
   
@@ -1158,7 +1153,7 @@ poppler_page_get_link_mapping (PopplerPage *page)
       PopplerLinkMapping *mapping;
       PopplerRectangle rect;
       LinkAction *link_action;
-      Link *link;
+      AnnotLink *link;
       
       link = links->getLink (i);
       link_action = link->getAction ();
@@ -1250,7 +1245,8 @@ poppler_page_get_form_field_mapping (PopplerPage *page)
   
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
 
-  forms = page->page->getPageWidgets ();
+  forms = page->page->getFormWidgets (page->document->doc->getCatalog ());
+
   if (forms == NULL)
     return NULL;
   
@@ -1273,6 +1269,8 @@ poppler_page_get_form_field_mapping (PopplerPage *page)
     
     map_list = g_list_prepend (map_list, mapping);
   }
+
+  delete forms;
   
   return map_list;
 }
@@ -1310,25 +1308,24 @@ poppler_page_get_annot_mapping (PopplerPage *page)
   GList *map_list = NULL;
   double width, height;
   gint i;
+  Annots *annots;
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
 
-  if (!page->annots)
-    page->annots = page->page->getAnnots (page->document->doc->getCatalog ());
-  
-  if (!page->annots)
+  annots = page->page->getAnnots (page->document->doc->getCatalog ());
+  if (!annots)
     return NULL;
 
   poppler_page_get_size (page, &width, &height);
 
-  for (i = 0; i < page->annots->getNumAnnots (); i++) {
+  for (i = 0; i < annots->getNumAnnots (); i++) {
     PopplerAnnotMapping *mapping;
     PopplerRectangle rect;
     Annot *annot;
     PDFRectangle *annot_rect;
     gint rotation = 0;
 
-    annot = page->annots->getAnnot (i);
+    annot = annots->getAnnot (i);
 
     /* Create the mapping */
     mapping = poppler_annot_mapping_new ();
@@ -1432,7 +1429,7 @@ poppler_page_add_annot (PopplerPage  *page,
   g_return_if_fail (POPPLER_IS_PAGE (page));
   g_return_if_fail (POPPLER_IS_ANNOT (annot));
 
-  page->page->addAnnot (annot->annot);
+  page->page->addAnnot (annot->annot, page->document->doc->getCatalog ());
 }
 
 /* PopplerRectangle type */

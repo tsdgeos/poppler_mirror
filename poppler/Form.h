@@ -26,6 +26,7 @@ class GooString;
 class Array;
 class Dict;
 class Annot;
+class Annots;
 class Catalog;
 class LinkAction;
 
@@ -477,7 +478,7 @@ private:
 
 class FormPageWidgets {
 public:
-  FormPageWidgets (XRef *xrefA, Object* annots, unsigned int page, Form *form);
+  FormPageWidgets (Annots* annots, unsigned int page, Form *form);
   ~FormPageWidgets();
   
   int getNumWidgets() const { return numWidgets; }
@@ -487,8 +488,6 @@ private:
   FormWidget** widgets;
   int numWidgets;
   int size;
-  unsigned pageNum;
-  XRef* xref;
 };
 
 #endif

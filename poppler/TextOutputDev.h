@@ -42,7 +42,7 @@ class Gfx;
 class GfxFont;
 class GfxState;
 class UnicodeMap;
-class Link;
+class AnnotLink;
 
 class TextWord;
 class TextPool;
@@ -160,7 +160,7 @@ public:
   GBool getSpaceAfter() { return spaceAfter; }
 #endif
   GBool isUnderlined() { return underlined; }
-  Link *getLink() { return link; }
+  AnnotLink *getLink() { return link; }
   double getEdge(int i) { return edge[i]; }
   double getBaseline () { return base; }
   GBool hasSpaceAfter  () { return spaceAfter; }
@@ -194,7 +194,7 @@ private:
 #endif
 
   GBool underlined;
-  Link *link;
+  AnnotLink *link;
 
   friend class TextPool;
   friend class TextLine;
@@ -510,7 +510,7 @@ public:
   void addUnderline(double x0, double y0, double x1, double y1);
 
   // Add a hyperlink.
-  void addLink(int xMin, int yMin, int xMax, int yMax, Link *link);
+  void addLink(int xMin, int yMin, int xMax, int yMax, AnnotLink *link);
 
   // Coalesce strings that look like parts of the same line.
   void coalesce(GBool physLayout, GBool doHTML);
@@ -727,7 +727,7 @@ public:
   virtual void eoFill(GfxState *state);
 
   //----- link borders
-  virtual void processLink(Link *link, Catalog *catalog);
+  virtual void processLink(AnnotLink *link, Catalog *catalog);
 
   //----- special access
 

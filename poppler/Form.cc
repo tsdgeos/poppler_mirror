@@ -1360,50 +1360,40 @@ FormWidget* Form::findWidgetByRef (Ref aref)
 // FormPageWidgets
 //------------------------------------------------------------------------
 
-FormPageWidgets::FormPageWidgets (XRef *xrefA, Object* annots, unsigned int page, Form *form)
+FormPageWidgets::FormPageWidgets (Annots *annots, unsigned int page, Form *form)
 {
-  Object obj1;
   numWidgets = 0;
   widgets = NULL;
-  xref = xrefA;
-  if (annots->isArray() && form) {
-    size = annots->arrayGetLength();
+
+  if (annots && annots->getNumAnnots() > 0 && form) {
+    size = annots->getNumAnnots();
     widgets = (FormWidget**)greallocn(widgets, size, sizeof(FormWidget*));
 
     /* For each entry in the page 'Annots' dict, try to find
        a matching form field */
     for (int i = 0; i < size; ++i) {
-      if (!annots->arrayGetNF(i, &obj1)->isRef())  {
+      Annot *annot = annots->getAnnot(i);
+
+      if (!annot->getHasRef()) {
         /* Since all entry in a form field's kid dict needs to be
            indirect references, if this annot isn't indirect, it isn't 
            related to a form field */
-        obj1.free();
         continue;
       }
-      Ref r = obj1.getRef();
+
+      Ref r = annot->getRef();
 
       /* Try to find a form field which either has this Annot in its Kids entry
           or  is merged with this Annot */
       FormWidget* tmp = form->findWidgetByRef(r);
-      if(tmp) {
+      if (tmp) {
         // We've found a corresponding form field, link it
         tmp->setID(FormWidget::encodeID(page, numWidgets));
+        tmp->setFontSize(annot->getFontSize());
         widgets[numWidgets++] = tmp;
-        //create a temporary Annot to get the font size
-        Object obj2;
-        if (annots->arrayGet(i, &obj2)->isDict()) {
-          Annot *ann;
-	  
-          ann = new Annot(xref, obj2.getDict(), NULL);
-          tmp->setFontSize(ann->getFontSize());
-          delete ann;
-        }
-        obj2.free();
-      } 
-      
-      obj1.free();
+      }
     }
-  } 
+  }
 }
 
 FormPageWidgets::~FormPageWidgets()

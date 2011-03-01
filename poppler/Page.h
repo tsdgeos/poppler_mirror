@@ -55,6 +55,7 @@ public:
   PDFRectangle(double x1A, double y1A, double x2A, double y2A)
     { x1 = x1A; y1 = y1A; x2 = x2A; y2 = y2A; }
   GBool isValid() { return x1 != 0 || y1 != 0 || x2 != 0 || y2 != 0; }
+  GBool contains(double x, double y) { return x1 <= x && x <= x2 && y1 <= y && y <= y2; }
   void clipTo(PDFRectangle *rect);
 };
 
@@ -162,9 +163,9 @@ public:
   Dict *getResourceDict() { return attrs->getResourceDict(); }
 
   // Get annotations array.
-  Object *getAnnots(Object *obj) { return annots.fetch(xref, obj); }
+  Object *getAnnots(Object *obj) { return annotsObj.fetch(xref, obj); }
   // Add a new annotation to the page
-  void addAnnot(Annot *annot);
+  void addAnnot(Annot *annot, Catalog *catalog);
 
   // Return a list of links.
   Links *getLinks(Catalog *catalog);
@@ -183,7 +184,7 @@ public:
   Object *getTrans(Object *obj) { return trans.fetch(xref, obj); }
 
   // Get form.
-  FormPageWidgets *getPageWidgets() { return pageWidgets; }
+  FormPageWidgets *getFormWidgets(Catalog *catalog);
 
   // Get duration, the maximum length of time, in seconds,
   // that the page is displayed before the presentation automatically
@@ -241,9 +242,9 @@ private:
   Ref pageRef;                  // page reference
   int num;			// page number
   PageAttrs *attrs;		// page attributes
-  Object annots;		// annotations array
+  Annots *annots;               // annotations
+  Object annotsObj;		// annotations array
   Object contents;		// page contents
-  FormPageWidgets *pageWidgets; 			// the form for that page
   Object thumb;			// page thumbnail
   Object trans;			// page transition
   Object actions;		// page addiction actions

@@ -473,9 +473,7 @@ void PDFDoc::displayPageSlice(OutputDev *out, int page,
 Links *PDFDoc::getLinks(int page) {
   Page *p = getPage(page);
   if (!p) {
-    Object obj;
-    obj.initNull();
-    return new Links (&obj, NULL);
+    return new Links (NULL);
   }
   return p->getLinks(catalog);
 }

@@ -140,10 +140,6 @@ void ArthurOutputDev::startPage(int pageNum, GfxState *state)
 void ArthurOutputDev::endPage() {
 }
 
-void ArthurOutputDev::drawLink(Link *link, Catalog *catalog)
-{
-}
-
 void ArthurOutputDev::saveState(GfxState *state)
 {
   m_painter->save();

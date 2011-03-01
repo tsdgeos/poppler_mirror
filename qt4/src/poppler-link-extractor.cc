@@ -23,6 +23,7 @@
 #include <Link.h>
 #include <Object.h>
 #include <Page.h>
+#include <Annot.h>
 
 #include "poppler-qt4.h"
 #include "poppler-page-private.h"
@@ -48,7 +49,7 @@ LinkExtractorOutputDev::~LinkExtractorOutputDev()
   qDeleteAll(m_links);
 }
 
-void LinkExtractorOutputDev::processLink(::Link *link, Catalog *catalog)
+void LinkExtractorOutputDev::processLink(::AnnotLink *link, Catalog *catalog)
 {
   if (!link->isOk())
     return;

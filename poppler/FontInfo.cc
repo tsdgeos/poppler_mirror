@@ -73,8 +73,7 @@ GooList *FontInfoScanner::scan(int nPages) {
     if ((resDict = page->getResourceDict())) {
       scanFonts(resDict, result);
     }
-    annots = new Annots(doc->getXRef(), doc->getCatalog(), page->getAnnots(&obj1));
-    obj1.free();
+    annots = page->getAnnots(doc->getCatalog());
     for (int i = 0; i < annots->getNumAnnots(); ++i) {
       if (annots->getAnnot(i)->getAppearance(&obj1)->isStream()) {
 	obj1.streamGetDict()->lookup("Resources", &obj2);
@@ -85,7 +84,6 @@ GooList *FontInfoScanner::scan(int nPages) {
       }
       obj1.free();
     }
-    delete annots;
   }
 
   currentPage = lastPage;

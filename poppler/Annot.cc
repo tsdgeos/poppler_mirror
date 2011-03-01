@@ -46,13 +46,13 @@
 #include "Catalog.h"
 #include "Gfx.h"
 #include "Lexer.h"
+#include "Page.h"
 #include "Annot.h"
 #include "GfxFont.h"
 #include "CharCodeToUnicode.h"
 #include "PDFDocEncoding.h"
 #include "Form.h"
 #include "Error.h"
-#include "Page.h"
 #include "XRef.h"
 #include "Movie.h"
 #include "OptionalContent.h"
@@ -853,6 +853,7 @@ AnnotAppearanceCharacs::~AnnotAppearanceCharacs() {
 Annot::Annot(XRef *xrefA, PDFRectangle *rectA, Catalog *catalog) {
   Object obj1;
 
+  refCnt = 1;
   flags = flagUnknown;
   type = typeUnknown;
 
@@ -875,6 +876,7 @@ Annot::Annot(XRef *xrefA, PDFRectangle *rectA, Catalog *catalog) {
 }
 
 Annot::Annot(XRef *xrefA, Dict *dict, Catalog* catalog) {
+  refCnt = 1;
   hasRef = false;
   flags = flagUnknown;
   type = typeUnknown;
@@ -883,6 +885,7 @@ Annot::Annot(XRef *xrefA, Dict *dict, Catalog* catalog) {
 }
 
 Annot::Annot(XRef *xrefA, Dict *dict, Catalog* catalog, Object *obj) {
+  refCnt = 1;
   if (obj->isRef()) {
     hasRef = gTrue;
     ref = obj->getRef();
@@ -1048,6 +1051,17 @@ void Annot::initialize(XRef *xrefA, Dict *dict, Catalog *catalog) {
   }
 }
 
+void Annot::getRect(double *x1, double *y1, double *x2, double *y2) const {
+  *x1 = rect->x1;
+  *y1 = rect->y1;
+  *x2 = rect->x2;
+  *y2 = rect->y2;
+}
+
+GBool Annot::inRect(double x, double y) const {
+  return rect->contains(x, y);
+}
+
 void Annot::update(const char *key, Object *value) {
   /* Set M to current time */
   delete modified;
@@ -1126,6 +1140,15 @@ void Annot::readArrayNum(Object *pdfArray, int key, double *value) {
     ok = gFalse;
   }
   valueObject.free();
+}
+
+void Annot::incRefCnt() {
+  refCnt++;
+}
+
+void Annot::decRefCnt() {
+  if (--refCnt == 0)
+    delete this;
 }
 
 Annot::~Annot() {
@@ -1999,11 +2022,7 @@ AnnotLink::AnnotLink(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
 }
 
 AnnotLink::~AnnotLink() {
-  /*
-  if (actionDict)
-    delete actionDict;
-  */
-  dest.free();
+  delete action;
   /*
   if (uriAction)
     delete uriAction;
@@ -2014,15 +2033,21 @@ AnnotLink::~AnnotLink() {
 
 void AnnotLink::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
   Object obj1;
-  /*
-  if (dict->lookup("A", &obj1)->isDict()) {
-    actionDict = NULL;
+
+  action = NULL;
+
+  // look for destination
+  if (!dict->lookup("Dest", &obj1)->isNull()) {
+    action = LinkAction::parseDest(&obj1);
+  // look for action
   } else {
-    actionDict = NULL;
+    obj1.free();
+    if (dict->lookup("A", &obj1)->isDict()) {
+      action = LinkAction::parseAction(&obj1, catalog->getBaseURI());
+    }
   }
   obj1.free();
-  */
-  dict->lookup("Dest", &dest);
+
   if (dict->lookup("H", &obj1)->isName()) {
     GooString *effect = new GooString(obj1.getName());
 
@@ -2750,10 +2775,9 @@ void AnnotWidget::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
   }
   obj1.free();
 
+  action = NULL;
   if(dict->lookup("A", &obj1)->isDict()) {
-    action = NULL;
-  } else {
-    action = NULL;
+    action = LinkAction::parseAction(&obj1, catalog->getBaseURI());
   }
   obj1.free();
 
@@ -5235,7 +5259,6 @@ Annot3D::Activation::Activation(Dict *dict) {
 Annots::Annots(XRef *xref, Catalog *catalog, Object *annotsObj) {
   Annot *annot;
   Object obj1;
-  int size;
   int i;
 
   annots = NULL;
@@ -5251,19 +5274,23 @@ Annots::Annots(XRef *xref, Catalog *catalog, Object *annotsObj) {
       if (annotsObj->arrayGet(i, &obj1)->isDict()) {
         annotsObj->arrayGetNF(i, &obj2);
         annot = createAnnot (xref, obj1.getDict(), catalog, &obj2);
-        if (annot && annot->isOk()) {
-          if (nAnnots >= size) {
-            size += 16;
-            annots = (Annot **)greallocn(annots, size, sizeof(Annot *));
-          }
-          annots[nAnnots++] = annot;
-        } else {
-          delete annot;
-        }
+        appendAnnot(annot);
+        annot->decRefCnt();
       }
       obj2.free();
       obj1.free();
     }
+  }
+}
+
+void Annots::appendAnnot(Annot *annot) {
+  if (annot && annot->isOk()) {
+    if (nAnnots >= size) {
+      size += 16;
+      annots = (Annot **)greallocn(annots, size, sizeof(Annot *));
+    }
+    annots[nAnnots++] = annot;
+    annot->incRefCnt();
   }
 }
 
@@ -5364,7 +5391,7 @@ Annots::~Annots() {
   int i;
 
   for (i = 0; i < nAnnots; ++i) {
-    delete annots[i];
+    annots[i]->decRefCnt();
   }
   gfree(annots);
 }

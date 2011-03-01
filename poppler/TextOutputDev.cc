@@ -58,6 +58,7 @@
 #include "Link.h"
 #include "TextOutputDev.h"
 #include "Page.h"
+#include "Annot.h"
 #include "PDFDocEncoding.h"
 
 #ifdef MACOS
@@ -184,12 +185,12 @@ public:
 class TextLink {
 public:
 
-  TextLink(int xMinA, int yMinA, int xMaxA, int yMaxA, Link *linkA)
+  TextLink(int xMinA, int yMinA, int xMaxA, int yMaxA, AnnotLink *linkA)
     { xMin = xMinA; yMin = yMinA; xMax = xMaxA; yMax = yMaxA; link = linkA; }
   ~TextLink() {}
 
   int xMin, yMin, xMax, yMax;
-  Link *link;
+  AnnotLink *link;
 };
 
 //------------------------------------------------------------------------
@@ -2337,7 +2338,7 @@ void TextPage::addUnderline(double x0, double y0, double x1, double y1) {
   underlines->append(new TextUnderline(x0, y0, x1, y1));
 }
 
-void TextPage::addLink(int xMin, int yMin, int xMax, int yMax, Link *link) {
+void TextPage::addLink(int xMin, int yMin, int xMax, int yMax, AnnotLink *link) {
   links->append(new TextLink(xMin, yMin, xMax, yMax, link));
 }
 
@@ -5347,7 +5348,7 @@ void TextOutputDev::eoFill(GfxState *state) {
   fill(state);
 }
 
-void TextOutputDev::processLink(Link *link, Catalog * /*catalog*/) {
+void TextOutputDev::processLink(AnnotLink *link, Catalog * /*catalog*/) {
   double x1, y1, x2, y2;
   int xMin, yMin, xMax, yMax, x, y;
 

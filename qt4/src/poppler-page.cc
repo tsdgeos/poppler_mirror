@@ -558,7 +558,6 @@ QList<Annotation*> Page::annotations() const
     const uint numAnnotations = annots->getNumAnnots();
     if ( numAnnotations == 0 )
     {
-        delete annots;
         return QList<Annotation*>();
     }
 
@@ -907,11 +906,9 @@ QList<Annotation*> Page::annotations() const
                 // TODO
 
                 // reading link action
-                if ( !linkann->getDest()->isNull() )
+                if ( linkann->getAction() )
                 {
-                    ::LinkAction *act = ::LinkAction::parseDest( linkann->getDest() );
-                    Link * popplerLink = m_page->convertLinkActionToLink( act, QRectF() );
-                    delete act;
+                    Link * popplerLink = m_page->convertLinkActionToLink( linkann->getAction(), QRectF() );
                     if ( popplerLink )
                     {
                         l->setLinkDestination( popplerLink );
@@ -1301,7 +1298,6 @@ QList<Annotation*> Page::annotations() const
         }
     }
 
-    delete annots;
     /** 5 - finally RETURN ANNOTATIONS */
     return annotationsMap.values();
 }
@@ -1310,7 +1306,7 @@ QList<FormField*> Page::formFields() const
 {
   QList<FormField*> fields;
   ::Page *p = m_page->page;
-  ::FormPageWidgets * form = p->getPageWidgets();
+  ::FormPageWidgets * form = p->getFormWidgets(m_page->parentDoc->doc->getCatalog());
   int formcount = form->getNumWidgets();
   for (int i = 0; i < formcount; ++i)
   {
@@ -1342,6 +1338,8 @@ QList<FormField*> Page::formFields() const
     if (ff)
       fields.append(ff);
   }
+
+  delete form;
 
   return fields;
 }

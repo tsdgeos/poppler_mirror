@@ -52,6 +52,7 @@
 #include "Error.h"
 #include "GfxState.h"
 #include "Page.h"
+#include "Annot.h"
 #include "PNGWriter.h"
 #ifdef ENABLE_LIBJPEG
 #include "DCTStream.h"
@@ -1395,10 +1396,10 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 
 
 
-void HtmlOutputDev::doProcessLink(Link* link){
+void HtmlOutputDev::doProcessLink(AnnotLink* link){
   double _x1,_y1,_x2,_y2;
   int x1,y1,x2,y2;
-  
+
   link->getRect(&_x1,&_y1,&_x2,&_y2);
   cvtUserToDev(_x1,_y1,&x1,&y1);
   
@@ -1411,7 +1412,7 @@ void HtmlOutputDev::doProcessLink(Link* link){
   delete _dest;
 }
 
-GooString* HtmlOutputDev::getLinkDest(Link *link,Catalog* catalog){
+GooString* HtmlOutputDev::getLinkDest(AnnotLink *link,Catalog* catalog){
   char *p;
   switch(link->getAction()->getKind()) 
   {

@@ -55,7 +55,7 @@ class GfxGouraudTriangleShading;
 class GfxPatchMeshShading;
 class Stream;
 class Links;
-class Link;
+class AnnotLink;
 class Catalog;
 class Page;
 class Function;
@@ -304,7 +304,7 @@ public:
   virtual void clearSoftMask(GfxState * /*state*/) {}
 
   //----- links
-  virtual void processLink(Link * /*link*/, Catalog * /*catalog*/) {}
+  virtual void processLink(AnnotLink * /*link*/, Catalog * /*catalog*/) {}
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
   virtual GBool getVectorAntialias() { return gFalse; }

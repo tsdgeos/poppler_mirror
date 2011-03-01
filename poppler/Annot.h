@@ -486,8 +486,10 @@ public:
   Annot(XRef *xrefA, PDFRectangle *rectA, Catalog *catalog);
   Annot(XRef *xrefA, Dict *dict, Catalog *catalog);
   Annot(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
-  virtual ~Annot();
   GBool isOk() { return ok; }
+
+  void incRefCnt();
+  void decRefCnt();
 
   virtual void draw(Gfx *gfx, GBool printing);
   // Get appearance object.
@@ -513,9 +515,11 @@ public:
 
   // getters
   XRef *getXRef() const { return xref; }
+  GBool getHasRef() const { return hasRef; }
   Ref getRef() const { return ref; }
   AnnotSubtype getType() const { return type; }
   PDFRectangle *getRect() const { return rect; }
+  void getRect(double *x1, double *y1, double *x2, double *y2) const;
   GooString *getContents() const { return contents; }
   int getPageNum() const { return page; }
   GooString *getName() const { return name; }
@@ -529,6 +533,9 @@ public:
 
   int getId() { return ref.num; }
 
+  // Check if point is inside the annot rectangle.
+  GBool inRect(double x, double y) const;
+
 private:
   void readArrayNum(Object *pdfArray, int key, double *value);
   // write vStr[i:j[ in appearBuf
@@ -537,6 +544,7 @@ private:
 
 
 protected:
+  virtual ~Annot();
   void setColor(AnnotColor *color, GBool fill);
   void drawCircle(double cx, double cy, double r, GBool fill);
   void drawCircleTopLeft(double cx, double cy, double r);
@@ -549,6 +557,8 @@ protected:
   // Updates the field key of the annotation dictionary
   // and sets M to the current time
   void update(const char *key, Object *value);
+
+  int refCnt;
 
   Object annotObj;
   
@@ -774,8 +784,7 @@ public:
   virtual void draw(Gfx *gfx, GBool printing);
 
   // getters
-  Dict *getActionDict() const { return actionDict; }
-  Object *getDest() { return &dest; }
+  LinkAction *getAction() const { return action; }
   AnnotLinkEffect getLinkEffect() const { return linkEffect; }
   Dict *getUriAction() const { return uriAction; }
   AnnotQuadrilaterals *getQuadrilaterals() const { return quadrilaterals; }
@@ -784,8 +793,7 @@ protected:
 
   void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
 
-  Dict *actionDict;                    // A
-  Object dest;                         // Dest
+  LinkAction *action;                  // A, Dest
   AnnotLinkEffect linkEffect;          // H          (Default I)
   Dict *uriAction;                     // PA
 
@@ -1161,7 +1169,7 @@ public:
 
   AnnotWidgetHighlightMode getMode() { return mode; }
   AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs; }
-  Dict *getAction() { return action; }
+  LinkAction *getAction() { return action; }
   Dict *getAdditionActions() { return additionActions; }
   Dict *getParent() { return parent; }
 
@@ -1185,7 +1193,7 @@ private:
   FormWidget *widget;                     // FormWidget object for this annotation
   AnnotWidgetHighlightMode mode;          // H  (Default I)
   AnnotAppearanceCharacs *appearCharacs;  // MK
-  Dict *action;                           // A
+  LinkAction *action;                     // A
   Dict *additionActions;                  // AA
   // inherited  from Annot
   // AnnotBorderBS border;                // BS
@@ -1268,6 +1276,7 @@ public:
   // Iterate through list of annotations.
   int getNumAnnots() { return nAnnots; }
   Annot *getAnnot(int i) { return annots[i]; }
+  void appendAnnot(Annot *annot);
 
 private:
   Annot* createAnnot(XRef *xref, Dict* dict, Catalog *catalog, Object *obj);
@@ -1275,6 +1284,7 @@ private:
 
   Annot **annots;
   int nAnnots;
+  int size;
 };
 
 #endif

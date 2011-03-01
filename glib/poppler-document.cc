@@ -2493,7 +2493,7 @@ poppler_document_get_form_field (PopplerDocument *document,
   if (!page)
     return NULL;
 
-  widgets = page->getPageWidgets ();
+  widgets = page->getFormWidgets (document->doc->getCatalog ());
   if (!widgets)
     return NULL;
 

@@ -242,9 +242,6 @@ void CairoOutputDev::endPage() {
   }
 }
 
-void CairoOutputDev::drawLink(Link *link, Catalog *catalog) {
-}
-
 void CairoOutputDev::saveState(GfxState *state) {
   LOG(printf ("save\n"));
   cairo_save (cairo);
