@@ -2215,9 +2215,8 @@ void AnnotFreeText::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
   obj1.free();
 
   if (dict->lookup("LE", &obj1)->isName()) {
-    GooString *styleName = new GooString(obj1.getName());
-    endStyle = parseAnnotLineEndingStyle(styleName);
-    delete styleName;
+    GooString styleName(obj1.getName());
+    endStyle = parseAnnotLineEndingStyle(&styleName);
   } else {
     endStyle = annotLineEndingNone;
   }

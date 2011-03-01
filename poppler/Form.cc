@@ -411,9 +411,8 @@ void FormWidgetText::loadDefaults ()
         //non-unicode string -- assume pdfDocEncoding and try to convert to UTF16BE
         int tmp_length;
         char* tmp_str = pdfDocEncodingToUTF16(obj1.getString(), &tmp_length);
-        GooString* str1 = new GooString(tmp_str, tmp_length);
-        parent->setContentCopy(str1);
-        delete str1;
+        GooString str1(tmp_str, tmp_length);
+        parent->setContentCopy(&str1);
 	delete []tmp_str;
       }
     }
