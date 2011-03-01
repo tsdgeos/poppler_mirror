@@ -977,6 +977,9 @@ QList<Annotation*> Page::annotations() const
             // special case for ignoring unknwon annotations
             case Annot::typeUnknown:
                 continue;
+            // handled as forms or some other way
+            case Annot::typeWidget:
+                continue;
             default:
             {
 #define CASE_FOR_TYPE( thetype ) \
@@ -986,7 +989,6 @@ QList<Annotation*> Page::annotations() const
                 QByteArray type;
                 switch ( subType )
                 {
-                    CASE_FOR_TYPE( Widget )
                     CASE_FOR_TYPE( Screen )
                     CASE_FOR_TYPE( PrinterMark )
                     CASE_FOR_TYPE( TrapNet )
