@@ -38,9 +38,6 @@
 #include <assert.h>
 #include "poppler-config.h"
 #include <stdio.h>
-#if WITH_FONTCONFIGURATION_FONTCONFIG
-#include <fontconfig/fontconfig.h>
-#endif
 #include "goo/gtypes.h"
 #include "CharTypes.h"
 

@@ -67,6 +67,10 @@
 #include "GlobalParams.h"
 #include "GfxFont.h"
 
+#if WITH_FONTCONFIGURATION_FONTCONFIG
+#include <fontconfig/fontconfig.h>
+#endif
+
 #ifdef _WIN32
 #  define strcasecmp stricmp
 #else
