@@ -18,7 +18,7 @@
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2011 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2009, 2010 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 //

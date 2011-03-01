@@ -6,10 +6,10 @@
 //
 // Copyright 2006-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright 2007-2010 Albert Astals Cid <aacid@kde.org>
-// Copyright 2007-2008 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright 2007-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2007 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2007 Iñigo Martínez <inigomartinez@gmail.com>
-// Copyright 2008 Pino Toscano <pino@kde.org>
+// Copyright 2008, 2011 Pino Toscano <pino@kde.org>
 // Copyright 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright 2009 Matthias Drochner <M.Drochner@fz-juelich.de>
 // Copyright 2009 KDAB via Guillermo Amaral <gamaral@amaral.com.mx>

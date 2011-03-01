@@ -15,8 +15,8 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006, 2007, 2009 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2008-2009 Warren Toomey <wkt@tuhs.org>
-// Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2008, 2009 Warren Toomey <wkt@tuhs.org>
+// Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 //
