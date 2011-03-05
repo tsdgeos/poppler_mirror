@@ -231,8 +231,11 @@ public:
   virtual AnnotBorderStyle getStyle() const { return style; }
 
 protected:
+  void parseDashArray(Object *dashObj);
+
   AnnotBorderType type;
   double width;
+  static const int DASH_LIMIT = 10; // implementation note 82 in Appendix H.
   int dashLength;
   double *dash;
   AnnotBorderStyle style;
@@ -251,7 +254,6 @@ public:
   double getVerticalCorner() const { return verticalCorner; }
 
 protected:
-  static const int DASH_LIMIT = 10; // implementation note 82 in Appendix H.
   double horizontalCorner;          // (Default 0)
   double verticalCorner;            // (Default 0)
   // double width;                  // (Default 1)  (inherited from AnnotBorder)

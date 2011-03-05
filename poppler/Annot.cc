@@ -439,6 +439,32 @@ AnnotBorder::AnnotBorder() {
   style = borderSolid;
 }
 
+void AnnotBorder::parseDashArray(Object *dashObj) {
+  GBool correct = gTrue;
+  int tempLength = dashObj->arrayGetLength();
+  double *tempDash = (double *) gmallocn (tempLength, sizeof (double));
+
+  // TODO: check not all zero (Line Dash Pattern Page 217 PDF 8.1)
+  for (int i = 0; i < tempLength && i < DASH_LIMIT && correct; i++) {
+    Object obj1;
+
+    if (dashObj->arrayGet(i, &obj1)->isNum()) {
+      tempDash[i] = obj1.getNum();
+
+      correct = tempDash[i] >= 0;
+      obj1.free();
+    }
+  }
+
+  if (correct) {
+    dashLength = tempLength;
+    dash = tempDash;
+    style = borderDashed;
+  } else {
+    gfree (tempDash);
+  }
+}
+
 AnnotBorder::~AnnotBorder() {
   if (dash)
     gfree (dash); 
@@ -480,37 +506,9 @@ AnnotBorderArray::AnnotBorderArray(Array *array) {
       correct = gFalse;
     obj1.free();
 
-    // TODO: check not all zero ? (Line Dash Pattern Page 217 PDF 8.1)
     if (arrayLength == 4) {
-      if (array->get(3, &obj1)->isArray()) {
-        Array *dashPattern = obj1.getArray();
-        int tempLength = dashPattern->getLength();
-        double *tempDash = (double *) gmallocn (tempLength, sizeof (double));
-
-        for(int i = 0; i < tempLength && i < DASH_LIMIT && correct; i++) {
-
-          if (dashPattern->get(i, &obj1)->isNum()) {
-            tempDash[i] = obj1.getNum();
-
-            if (tempDash[i] < 0)
-              correct = gFalse;
-
-          } else {
-            correct = gFalse;
-          }
-          obj1.free();
-        }
-
-        if (correct) {
-          dashLength = tempLength;
-          dash = tempDash;
-          style = borderDashed;
-        } else {
-          gfree (tempDash);
-        }
-      } else {
-        correct = gFalse;
-      }
+      if (array->get(3, &obj1)->isArray())
+        parseDashArray(&obj1);
       obj1.free();
     }
   } else {
@@ -565,42 +563,15 @@ AnnotBorderBS::AnnotBorderBS(Dict *dict) {
   obj2.free();
   obj1.free();
 
-  // TODO: check not all zero (Line Dash Pattern Page 217 PDF 8.1)
-  if (dict->lookup("D", &obj1)->isArray()) {
-    GBool correct = gTrue;
-    int tempLength = obj1.arrayGetLength();
-    double *tempDash = (double *) gmallocn (tempLength, sizeof (double));
-
-    for(int i = 0; i < tempLength && correct; i++) {
-      Object obj2;
-
-      if (obj1.arrayGet(i, &obj2)->isNum()) {
-        tempDash[i] = obj2.getNum();
-
-        if (tempDash[i] < 0)
-          correct = gFalse;
-      } else {
-        correct = gFalse;
-      }
-      obj2.free();
-    }
-
-    if (correct) {
-      dashLength = tempLength;
-      dash = tempDash;
-      style = borderDashed;
-    } else {
-      gfree (tempDash);
-    }
-
-  }
+  if (dict->lookup("D", &obj1)->isArray())
+    parseDashArray(&obj1);
+  obj1.free();
 
   if (!dash) {
     dashLength = 1;
     dash = (double *) gmallocn (dashLength, sizeof (double));
     dash[0] = 3;
   }
-  obj1.free();
 }
 
 //------------------------------------------------------------------------
