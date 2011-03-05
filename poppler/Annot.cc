@@ -644,28 +644,6 @@ AnnotColor::AnnotColor(Array *array, int adjust) {
 }
 
 //------------------------------------------------------------------------
-// AnnotBorderStyle
-//------------------------------------------------------------------------
-
-AnnotBorderStyle::AnnotBorderStyle(AnnotBorderType typeA, double widthA,
-				   double *dashA, int dashLengthA,
-				   double rA, double gA, double bA) {
-  type = typeA;
-  width = widthA;
-  dash = dashA;
-  dashLength = dashLengthA;
-  r = rA;
-  g = gA;
-  b = bA;
-}
-
-AnnotBorderStyle::~AnnotBorderStyle() {
-  if (dash) {
-    gfree(dash);
-  }
-}
-
-//------------------------------------------------------------------------
 // AnnotIconFit
 //------------------------------------------------------------------------
 

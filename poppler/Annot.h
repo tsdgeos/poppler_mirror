@@ -305,42 +305,6 @@ private:
 };
 
 //------------------------------------------------------------------------
-// AnnotBorderStyle
-//------------------------------------------------------------------------
-
-enum AnnotBorderType {
-  annotBorderSolid,
-  annotBorderDashed,
-  annotBorderBeveled,
-  annotBorderInset,
-  annotBorderUnderlined
-};
-
-class AnnotBorderStyle {
-public:
-
-  AnnotBorderStyle(AnnotBorderType typeA, double widthA,
-		   double *dashA, int dashLengthA,
-		   double rA, double gA, double bA);
-  ~AnnotBorderStyle();
-
-  AnnotBorderType getType() { return type; }
-  double getWidth() { return width; }
-  void getDash(double **dashA, int *dashLengthA)
-    { *dashA = dash; *dashLengthA = dashLength; }
-  void getColor(double *rA, double *gA, double *bA)
-    { *rA = r; *gA = g; *bA = b; }
-
-private:
-
-  AnnotBorderType type;
-  double width;
-  double *dash;
-  int dashLength;
-  double r, g, b;
-};
-
-//------------------------------------------------------------------------
 // AnnotIconFit
 //------------------------------------------------------------------------
 
