@@ -629,6 +629,13 @@ AnnotColor::AnnotColor(Array *array, int adjust) {
     obj1.free();
   }
 
+  if (adjust != 0)
+    adjustColor(adjust);
+}
+
+void AnnotColor::adjustColor(int adjust) {
+  int i;
+
   if (length == 4) {
     adjust = -adjust;
   }

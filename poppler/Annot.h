@@ -295,6 +295,8 @@ public:
   AnnotColor(double c, double m, double y, double k);
   AnnotColor(Array *array, int adjust = 0);
 
+  void adjustColor(int adjust);
+
   AnnotColorSpace getSpace() const { return (AnnotColorSpace) length; }
   const double *getValues() const { return values; }
 
