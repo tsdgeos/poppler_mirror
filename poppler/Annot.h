@@ -1156,7 +1156,6 @@ private:
 		GBool txField, GBool forceZapfDingbats,
 		GBool password=false);
   void drawListBox(FormFieldChoice *fieldChoice,
-		   int topIdx,
 		   GooString *da, GfxFontDict *fontDict, int quadding);
   void layoutText(GooString *text, GooString *outBuf, int *i, GfxFont *font,
 		  double *width, double widthLimit, int *charCount,

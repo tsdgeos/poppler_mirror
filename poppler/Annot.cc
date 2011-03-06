@@ -3367,7 +3367,6 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxFontDict *fontDict
 
 // Draw the variable text or caption for a field.
 void AnnotWidget::drawListBox(FormFieldChoice *fieldChoice,
-			      int topIdx,
 			      GooString *da, GfxFontDict *fontDict, int quadding) {
   GooList *daToks;
   GooString *tok, *convertedText;
@@ -3460,7 +3459,7 @@ void AnnotWidget::drawListBox(FormFieldChoice *fieldChoice,
   }
   // draw the text
   y = rect->y2 - rect->y1 - 1.1 * fontSize;
-  for (i = topIdx; i < fieldChoice->getNumChoices(); ++i) {
+  for (i = fieldChoice->getTopIndex(); i < fieldChoice->getNumChoices(); ++i) {
     // setup
     appearBuf->append("q\n");
 
@@ -3740,16 +3739,7 @@ void AnnotWidget::drawFormFieldChoice(GfxFontDict *fontDict, GooString *da) {
     obj1.free();
   // list box
   } else {
-    // get the top index
-    int topIdx;
-    if (fieldDict->lookup("TI", &obj1)->isInt()) {
-      topIdx = obj1.getInt();
-    } else {
-      topIdx = 0;
-    }
-    obj1.free();
-
-    drawListBox(fieldChoice, topIdx, da, fontDict, quadding);
+    drawListBox(fieldChoice, da, fontDict, quadding);
   }
 }
 
