@@ -3540,9 +3540,113 @@ void AnnotWidget::drawListBox(GooString **text, GBool *selection,
   delete convertedText;
 }
 
+void AnnotWidget::drawBorder() {
+  int dashLength;
+  double *dash;
+  AnnotColor adjustedColor;
+  double w = border->getWidth();
+
+  AnnotColor *aColor = appearCharacs->getBorderColor();
+  if (!aColor)
+    aColor = appearCharacs->getBackColor();
+  if (!aColor)
+    return;
+
+  double dx = rect->x2 - rect->x1;
+  double dy = rect->y2 - rect->y1;
+
+  // radio buttons with no caption have a round border
+  GBool hasCaption = appearCharacs->getNormalCaption() != NULL;
+  if (field->getType() == formButton &&
+      static_cast<FormFieldButton*>(field)->getButtonType() == formButtonRadio && !hasCaption) {
+    double r = 0.5 * (dx < dy ? dx : dy);
+    switch (border->getStyle()) {
+    case AnnotBorder::borderDashed:
+      appearBuf->append("[");
+      dashLength = border->getDashLength();
+      dash = border->getDash();
+      for (int i = 0; i < dashLength; ++i) {
+        appearBuf->appendf(" {0:.2f}", dash[i]);
+      }
+      appearBuf->append("] 0 d\n");
+      // fall through to the solid case
+    case AnnotBorder::borderSolid:
+    case AnnotBorder::borderUnderlined:
+      appearBuf->appendf("{0:.2f} w\n", w);
+      setColor(aColor, gFalse);
+      drawCircle(0.5 * dx, 0.5 * dy, r - 0.5 * w, gFalse);
+      break;
+    case AnnotBorder::borderBeveled:
+    case AnnotBorder::borderInset:
+      appearBuf->appendf("{0:.2f} w\n", 0.5 * w);
+      setColor(aColor, gFalse);
+      drawCircle(0.5 * dx, 0.5 * dy, r - 0.25 * w, gFalse);
+      adjustedColor = AnnotColor(*aColor);
+      adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
+      setColor(&adjustedColor, gFalse);
+      drawCircleTopLeft(0.5 * dx, 0.5 * dy, r - 0.75 * w);
+      adjustedColor = AnnotColor(*aColor);
+      adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
+      setColor(&adjustedColor, gFalse);
+      drawCircleBottomRight(0.5 * dx, 0.5 * dy, r - 0.75 * w);
+      break;
+    }
+  } else {
+    switch (border->getStyle()) {
+    case AnnotBorder::borderDashed:
+      appearBuf->append("[");
+      dashLength = border->getDashLength();
+      dash = border->getDash();
+      for (int i = 0; i < dashLength; ++i) {
+        appearBuf->appendf(" {0:.2f}", dash[i]);
+      }
+      appearBuf->append("] 0 d\n");
+      // fall through to the solid case
+    case AnnotBorder::borderSolid:
+      appearBuf->appendf("{0:.2f} w\n", w);
+      setColor(aColor, gFalse);
+      appearBuf->appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re s\n",
+                         0.5 * w, dx - w, dy - w);
+      break;
+    case AnnotBorder::borderBeveled:
+    case AnnotBorder::borderInset:
+      adjustedColor = AnnotColor(*aColor);
+      adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
+      setColor(&adjustedColor, gTrue);
+      appearBuf->append("0 0 m\n");
+      appearBuf->appendf("0 {0:.2f} l\n", dy);
+      appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx, dy);
+      appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx - w, dy - w);
+      appearBuf->appendf("{0:.2f} {1:.2f} l\n", w, dy - w);
+      appearBuf->appendf("{0:.2f} {0:.2f} l\n", w);
+      appearBuf->append("f\n");
+      adjustedColor = AnnotColor(*aColor);
+      adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
+      setColor(&adjustedColor, gTrue);
+      appearBuf->append("0 0 m\n");
+      appearBuf->appendf("{0:.2f} 0 l\n", dx);
+      appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx, dy);
+      appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx - w, dy - w);
+      appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx - w, w);
+      appearBuf->appendf("{0:.2f} {0:.2f} l\n", w);
+      appearBuf->append("f\n");
+      break;
+    case AnnotBorder::borderUnderlined:
+      appearBuf->appendf("{0:.2f} w\n", w);
+      setColor(aColor, gFalse);
+      appearBuf->appendf("0 0 m {0:.2f} 0 l s\n", dx);
+      break;
+    }
+
+    // clip to the inside of the border
+    appearBuf->appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re W n\n",
+                       w, dx - 2 * w, dy - 2 * w);
+  }
+}
+
 void AnnotWidget::generateFieldAppearance() {
   Object mkObj, ftObj, appearDict, drObj, obj1, obj2, obj3;
-  Dict *field;
+  Dict *fieldDict;
   Dict *annot;
   Dict *acroForm;
   Dict *mkDict;
@@ -3561,7 +3665,8 @@ void AnnotWidget::generateFieldAppearance() {
   if (widget == NULL || !widget->getField () || !widget->getField ()->getObj ()->isDict ())
     return;
 
-  field = widget->getField ()->getObj ()->getDict ();
+  field = widget->getField();
+  fieldDict = field->getObj()->getDict();
   annot = widget->getObj ()->getDict ();
   acroForm = form->getObj ()->getDict ();
   
@@ -3594,10 +3699,10 @@ void AnnotWidget::generateFieldAppearance() {
   }
 
   // get the field type
-  Form::fieldLookup(field, "FT", &ftObj);
+  Form::fieldLookup(fieldDict, "FT", &ftObj);
 
   // get the field flags (Ff) value
-  if (Form::fieldLookup(field, "Ff", &obj1)->isInt()) {
+  if (Form::fieldLookup(fieldDict, "Ff", &obj1)->isInt()) {
     ff = obj1.getInt();
   } else {
     ff = 0;
@@ -3605,113 +3710,8 @@ void AnnotWidget::generateFieldAppearance() {
   obj1.free();
 
   // draw the border
-  if (mkDict && border) {
-    w = border->getWidth();
-    if (w > 0) {
-      mkDict->lookup("BC", &obj1);
-      if (!(obj1.isArray() && obj1.arrayGetLength() > 0)) {
-        mkDict->lookup("BG", &obj1);
-      }
-      if (obj1.isArray() && obj1.arrayGetLength() > 0) {
-        dx = rect->x2 - rect->x1;
-        dy = rect->y2 - rect->y1;
-
-        // radio buttons with no caption have a round border
-        hasCaption = mkDict->lookup("CA", &obj2)->isString();
-        obj2.free();
-        if (ftObj.isName("Btn") && (ff & fieldFlagRadio) && !hasCaption) {
-          r = 0.5 * (dx < dy ? dx : dy);
-          switch (border->getStyle()) {
-            case AnnotBorder::borderDashed:
-              appearBuf->append("[");
-              dashLength = border->getDashLength();
-              dash = border->getDash();
-              for (i = 0; i < dashLength; ++i) {
-                appearBuf->appendf(" {0:.2f}", dash[i]);
-              }
-              appearBuf->append("] 0 d\n");
-              // fall through to the solid case
-            case AnnotBorder::borderSolid:
-            case AnnotBorder::borderUnderlined:
-              appearBuf->appendf("{0:.2f} w\n", w);
-	      aColor = AnnotColor (obj1.getArray());
-              setColor(&aColor, gFalse);
-              drawCircle(0.5 * dx, 0.5 * dy, r - 0.5 * w, gFalse);
-              break;
-            case AnnotBorder::borderBeveled:
-            case AnnotBorder::borderInset:
-              appearBuf->appendf("{0:.2f} w\n", 0.5 * w);
-	      aColor = AnnotColor (obj1.getArray());
-              setColor(&aColor, gFalse);
-              drawCircle(0.5 * dx, 0.5 * dy, r - 0.25 * w, gFalse);
-	      aColor = AnnotColor (obj1.getArray(),
-				   border->getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
-              setColor(&aColor, gFalse);
-              drawCircleTopLeft(0.5 * dx, 0.5 * dy, r - 0.75 * w);
-	      aColor = AnnotColor (obj1.getArray(),
-				   border->getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
-              setColor(&aColor, gFalse);
-              drawCircleBottomRight(0.5 * dx, 0.5 * dy, r - 0.75 * w);
-              break;
-          }
-
-        } else {
-          switch (border->getStyle()) {
-            case AnnotBorder::borderDashed:
-              appearBuf->append("[");
-              dashLength = border->getDashLength();
-              dash = border->getDash();
-              for (i = 0; i < dashLength; ++i) {
-                appearBuf->appendf(" {0:.2f}", dash[i]);
-              }
-              appearBuf->append("] 0 d\n");
-              // fall through to the solid case
-            case AnnotBorder::borderSolid:
-              appearBuf->appendf("{0:.2f} w\n", w);
-	      aColor = AnnotColor (obj1.getArray());
-              setColor(&aColor, gFalse);
-              appearBuf->appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re s\n",
-                  0.5 * w, dx - w, dy - w);
-              break;
-            case AnnotBorder::borderBeveled:
-            case AnnotBorder::borderInset:
-	      aColor = AnnotColor (obj1.getArray(),
-				   border->getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
-	      setColor(&aColor, gTrue);
-              appearBuf->append("0 0 m\n");
-              appearBuf->appendf("0 {0:.2f} l\n", dy);
-              appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx, dy);
-              appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx - w, dy - w);
-              appearBuf->appendf("{0:.2f} {1:.2f} l\n", w, dy - w);
-              appearBuf->appendf("{0:.2f} {0:.2f} l\n", w);
-              appearBuf->append("f\n");
-	      aColor = AnnotColor (obj1.getArray(),
-				   border->getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
-              setColor(&aColor, gTrue);
-              appearBuf->append("0 0 m\n");
-              appearBuf->appendf("{0:.2f} 0 l\n", dx);
-              appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx, dy);
-              appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx - w, dy - w);
-              appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx - w, w);
-              appearBuf->appendf("{0:.2f} {0:.2f} l\n", w);
-              appearBuf->append("f\n");
-              break;
-            case AnnotBorder::borderUnderlined:
-              appearBuf->appendf("{0:.2f} w\n", w);
-	      aColor = AnnotColor (obj1.getArray());
-              setColor(&aColor, gFalse);
-              appearBuf->appendf("0 0 m {0:.2f} 0 l s\n", dx);
-              break;
-          }
-
-          // clip to the inside of the border
-          appearBuf->appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re W n\n",
-              w, dx - 2 * w, dy - 2 * w);
-        }
-      }
-      obj1.free();
-    }
-  }
+  if (appearCharacs && border && border->getWidth() > 0)
+    drawBorder();
 
   // get the resource dictionary
   acroForm->lookup("DR", &drObj);
@@ -3725,7 +3725,7 @@ void AnnotWidget::generateFieldAppearance() {
   obj1.free();
 
   // get the default appearance string
-  if (Form::fieldLookup(field, "DA", &obj1)->isNull()) {
+  if (Form::fieldLookup(fieldDict, "DA", &obj1)->isNull()) {
     obj1.free();
     acroForm->lookup("DA", &obj1);
   }
@@ -3750,7 +3750,7 @@ void AnnotWidget::generateFieldAppearance() {
     // radio button
     if (ff & fieldFlagRadio) {
       //~ Acrobat doesn't draw a caption if there is no AP dict (?)
-      if (Form::fieldLookup(field, "V", &obj1)->isName()) {
+      if (Form::fieldLookup(fieldDict, "V", &obj1)->isName()) {
         if (annot->lookup("AS", &obj2)->isName(obj1.getName()) &&
 	    strcmp (obj1.getName(), "Off") != 0) {
           if (caption) {
@@ -3796,8 +3796,8 @@ void AnnotWidget::generateFieldAppearance() {
       delete caption;
     }
   } else if (ftObj.isName("Tx")) {
-    if (Form::fieldLookup(field, "V", &obj1)->isString()) {
-      if (Form::fieldLookup(field, "Q", &obj2)->isInt()) {
+    if (Form::fieldLookup(fieldDict, "V", &obj1)->isString()) {
+      if (Form::fieldLookup(fieldDict, "Q", &obj2)->isInt()) {
         quadding = obj2.getInt();
       } else {
         quadding = fieldQuadLeft;
@@ -3805,7 +3805,7 @@ void AnnotWidget::generateFieldAppearance() {
       obj2.free();
       comb = 0;
       if (ff & fieldFlagComb) {
-        if (Form::fieldLookup(field, "MaxLen", &obj2)->isInt()) {
+        if (Form::fieldLookup(fieldDict, "MaxLen", &obj2)->isInt()) {
           comb = obj2.getInt();
         }
         obj2.free();
@@ -3815,7 +3815,7 @@ void AnnotWidget::generateFieldAppearance() {
     }
     obj1.free();
   } else if (ftObj.isName("Ch")) {
-    if (Form::fieldLookup(field, "Q", &obj1)->isInt()) {
+    if (Form::fieldLookup(fieldDict, "Q", &obj1)->isInt()) {
       quadding = obj1.getInt();
     } else {
       quadding = fieldQuadLeft;
@@ -3823,7 +3823,7 @@ void AnnotWidget::generateFieldAppearance() {
     obj1.free();
     // combo box
     if (ff & fieldFlagCombo) {
-      if (Form::fieldLookup(field, "V", &obj1)->isString()) {
+      if (Form::fieldLookup(fieldDict, "V", &obj1)->isString()) {
         drawText(obj1.getString(), da, fontDict,
             gFalse, 0, quadding, gTrue, gFalse);
         //~ Acrobat draws a popup icon on the right side
@@ -3831,7 +3831,7 @@ void AnnotWidget::generateFieldAppearance() {
       obj1.free();
       // list box
     } else {
-      if (field->lookup("Opt", &obj1)->isArray()) {
+      if (fieldDict->lookup("Opt", &obj1)->isArray()) {
         nOptions = obj1.arrayGetLength();
         // get the option text
         text = (GooString **)gmallocn(nOptions, sizeof(GooString *));
@@ -3854,7 +3854,7 @@ void AnnotWidget::generateFieldAppearance() {
         // get the selected option(s)
         selection = (GBool *)gmallocn(nOptions, sizeof(GBool));
         //~ need to use the I field in addition to the V field
-	Form::fieldLookup(field, "V", &obj2);
+	Form::fieldLookup(fieldDict, "V", &obj2);
         for (i = 0; i < nOptions; ++i) {
           selection[i] = gFalse;
           if (obj2.isString()) {
@@ -3873,7 +3873,7 @@ void AnnotWidget::generateFieldAppearance() {
         }
         obj2.free();
         // get the top index
-        if (field->lookup("TI", &obj2)->isInt()) {
+        if (fieldDict->lookup("TI", &obj2)->isInt()) {
           topIdx = obj2.getInt();
         } else {
           topIdx = 0;

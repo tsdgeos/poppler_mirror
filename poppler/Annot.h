@@ -43,6 +43,7 @@ class GfxFont;
 class GfxFontDict;
 class Form;
 class FormWidget;
+class FormField;
 class PDFRectangle;
 class Movie;
 class LinkAction;
@@ -1133,6 +1134,7 @@ public:
 
   virtual void draw(Gfx *gfx, GBool printing);
 
+  void drawBorder();
   void generateFieldAppearance ();
 
   AnnotWidgetHighlightMode getMode() { return mode; }
@@ -1159,6 +1161,7 @@ private:
 
   Form *form;
   FormWidget *widget;                     // FormWidget object for this annotation
+  FormField *field;                       // FormField object for this annotation
   AnnotWidgetHighlightMode mode;          // H  (Default I)
   AnnotAppearanceCharacs *appearCharacs;  // MK
   LinkAction *action;                     // A
