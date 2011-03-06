@@ -3754,11 +3754,10 @@ void AnnotWidget::drawFormFieldChoice(GfxFontDict *fontDict, GooString *da) {
 }
 
 void AnnotWidget::generateFieldAppearance() {
-  Object mkObj, ftObj, appearDict, drObj, obj1, obj2, obj3;
+  Object appearDict, drObj, obj1, obj2;
   Dict *fieldDict;
   Dict *annot;
   Dict *acroForm;
-  Dict *mkDict;
   MemStream *appearStream;
   GfxFontDict *fontDict;
   GooString *da;
@@ -3782,22 +3781,15 @@ void AnnotWidget::generateFieldAppearance() {
   }
 
   appearBuf = new GooString ();
-  // get the appearance characteristics (MK) dictionary
-  if (annot->lookup("MK", &mkObj)->isDict()) {
-    mkDict = mkObj.getDict();
-  } else {
-    mkDict = NULL;
-  }
+
   // draw the background
-  if (mkDict) {
-    if (mkDict->lookup("BG", &obj1)->isArray() &&
-        obj1.arrayGetLength() > 0) {
-      AnnotColor aColor = AnnotColor (obj1.getArray());
-      setColor(&aColor, gTrue);
+  if (appearCharacs) {
+    AnnotColor *aColor = appearCharacs->getBackColor();
+    if (aColor) {
+      setColor(aColor, gTrue);
       appearBuf->appendf("0 0 {0:.2f} {1:.2f} re f\n",
-          rect->x2 - rect->x1, rect->y2 - rect->y1);
+                         rect->x2 - rect->x1, rect->y2 - rect->y1);
     }
-    obj1.free();
   }
 
   // draw the border
@@ -3918,7 +3910,6 @@ void AnnotWidget::generateFieldAppearance() {
   if (fontDict) {
     delete fontDict;
   }
-  mkObj.free();
 }
 
 
