@@ -1113,6 +1113,7 @@ FormFieldChoice::FormFieldChoice(XRef *xrefA, Object *aobj, const Ref& ref, std:
   numChoices = 0;
   choices = NULL;
   editedChoice = NULL;
+  topIdx = 0;
 
   Dict* dict = obj.getDict();
   Object obj1;
@@ -1132,6 +1133,10 @@ FormFieldChoice::FormFieldChoice(XRef *xrefA, Object *aobj, const Ref& ref, std:
     if (flags & 0x4000000) // 27 -> CommitOnSelChange
       doCommitOnSelChange = true;
   }
+  obj1.free();
+
+  if (dict->lookup("TI", &obj1)->isInt())
+    topIdx = obj1.getInt();
   obj1.free();
 
 }

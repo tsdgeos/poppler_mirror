@@ -402,6 +402,8 @@ public:
   bool commitOnSelChange () const { return doCommitOnSelChange; }
   bool isListBox () const { return !combo; }
 
+  int getTopIndex() const { return topIdx; }
+
   /* these functions _must_ only be used by FormWidgetChoice */
   void _setNumChoices (int i) { numChoices = i; }
   void _createChoicesTab ();
@@ -423,7 +425,8 @@ protected:
 
   int numChoices;
   ChoiceOpt* choices;
-  GooString* editedChoice; 
+  GooString* editedChoice;
+  int topIdx; // TI
 };
 
 //------------------------------------------------------------------------
