@@ -3366,8 +3366,8 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxFontDict *fontDict
 }
 
 // Draw the variable text or caption for a field.
-void AnnotWidget::drawListBox(GooString **text, GBool *selection,
-			      int nOptions, int topIdx,
+void AnnotWidget::drawListBox(FormFieldChoice *fieldChoice,
+			      int topIdx,
 			      GooString *da, GfxFontDict *fontDict, int quadding) {
   GooList *daToks;
   GooString *tok, *convertedText;
@@ -3439,9 +3439,9 @@ void AnnotWidget::drawListBox(GooString **text, GBool *selection,
   // compute font autosize
   if (fontSize == 0) {
     wMax = 0;
-    for (i = 0; i < nOptions; ++i) {
+    for (i = 0; i < fieldChoice->getNumChoices(); ++i) {
       j = 0;
-      layoutText(text[i], convertedText, &j, font, &w, 0.0, NULL, gFalse);
+      layoutText(fieldChoice->getChoice(i), convertedText, &j, font, &w, 0.0, NULL, gFalse);
       if (w > wMax) {
         wMax = w;
       }
@@ -3460,12 +3460,12 @@ void AnnotWidget::drawListBox(GooString **text, GBool *selection,
   }
   // draw the text
   y = rect->y2 - rect->y1 - 1.1 * fontSize;
-  for (i = topIdx; i < nOptions; ++i) {
+  for (i = topIdx; i < fieldChoice->getNumChoices(); ++i) {
     // setup
     appearBuf->append("q\n");
 
     // draw the background if selected
-    if (selection[i]) {
+    if (fieldChoice->isSelected(i)) {
       appearBuf->append("0 g f\n");
       appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re f\n",
           borderWidth,
@@ -3479,7 +3479,7 @@ void AnnotWidget::drawListBox(GooString **text, GBool *selection,
 
     // compute text width and start position
     j = 0;
-    layoutText(text[i], convertedText, &j, font, &w, 0.0, NULL, gFalse);
+    layoutText(fieldChoice->getChoice(i), convertedText, &j, font, &w, 0.0, NULL, gFalse);
     w *= fontSize;
     switch (quadding) {
       case fieldQuadLeft:
@@ -3517,7 +3517,7 @@ void AnnotWidget::drawListBox(GooString **text, GBool *selection,
     }
 
     // change the text color if selected
-    if (selection[i]) {
+    if (fieldChoice->isSelected(i)) {
       appearBuf->append("1 g\n");
     }
 
@@ -3644,6 +3644,115 @@ void AnnotWidget::drawBorder() {
   }
 }
 
+void AnnotWidget::drawFormFieldButton(GfxFontDict *fontDict, GooString *da) {
+  Object obj1, obj2;
+  Dict *annot = widget->getObj()->getDict();
+  Dict *fieldDict = field->getObj()->getDict();
+  GooString *caption = NULL;
+  if (appearCharacs)
+    caption = appearCharacs->getNormalCaption();
+
+  switch (static_cast<FormFieldButton *>(field)->getButtonType()) {
+  case formButtonRadio:
+    //~ Acrobat doesn't draw a caption if there is no AP dict (?)
+    if (Form::fieldLookup(fieldDict, "V", &obj1)->isName()) {
+      if (annot->lookup("AS", &obj2)->isName(obj1.getName()) &&
+          strcmp (obj1.getName(), "Off") != 0) {
+        if (caption) {
+          drawText(caption, da, fontDict, gFalse, 0, fieldQuadCenter,
+                   gFalse, gTrue);
+        } else if (appearCharacs) {
+          AnnotColor *aColor = appearCharacs->getBorderColor();
+          if (aColor) {
+            double dx = rect->x2 - rect->x1;
+            double dy = rect->y2 - rect->y1;
+            setColor(aColor, gTrue);
+            drawCircle(0.5 * dx, 0.5 * dy, 0.2 * (dx < dy ? dx : dy), gTrue);
+          }
+        }
+      }
+      obj2.free();
+    }
+    obj1.free();
+    break;
+  case formButtonPush:
+    if (caption)
+      drawText(caption, da, fontDict, gFalse, 0, fieldQuadCenter, gFalse, gFalse);
+    break;
+  case formButtonCheck:
+    if (annot->lookup("AS", &obj1)->isName() &&
+        strcmp(obj1.getName(), "Off") != 0) {
+      if (!caption) {
+        GooString checkMark("3");
+        drawText(&checkMark, da, fontDict, gFalse, 0, fieldQuadCenter, gFalse, gTrue);
+      } else {
+        drawText(caption, da, fontDict, gFalse, 0, fieldQuadCenter, gFalse, gTrue);
+      }
+    }
+    obj1.free();
+    break;
+  }
+}
+
+void AnnotWidget::drawFormFieldText(GfxFontDict *fontDict, GooString *da) {
+  Object obj1, obj2;
+  int quadding;
+  Dict *fieldDict = field->getObj()->getDict();
+  FormFieldText *fieldText = static_cast<FormFieldText *>(field);
+
+  if (Form::fieldLookup(fieldDict, "V", &obj1)->isString()) {
+    if (Form::fieldLookup(fieldDict, "Q", &obj2)->isInt())
+      quadding = obj2.getInt();
+    else
+      quadding = fieldQuadLeft;
+    obj2.free();
+
+    int comb = 0;
+    if (fieldText->isComb()) {
+      if (Form::fieldLookup(fieldDict, "MaxLen", &obj2)->isInt())
+        comb = obj2.getInt();
+      obj2.free();
+    }
+    drawText(obj1.getString(), da, fontDict,
+             fieldText->isMultiline(), comb, quadding, gTrue, gFalse, fieldText->isPassword());
+  }
+  obj1.free();
+}
+
+void AnnotWidget::drawFormFieldChoice(GfxFontDict *fontDict, GooString *da) {
+  Object obj1;
+  Dict *fieldDict = field->getObj()->getDict();
+  int quadding;
+  FormFieldChoice *fieldChoice = static_cast<FormFieldChoice *>(field);
+
+  if (Form::fieldLookup(fieldDict, "Q", &obj1)->isInt()) {
+    quadding = obj1.getInt();
+  } else {
+    quadding = fieldQuadLeft;
+  }
+  obj1.free();
+
+  if (fieldChoice->isCombo()) {
+    if (Form::fieldLookup(fieldDict, "V", &obj1)->isString()) {
+      drawText(obj1.getString(), da, fontDict, gFalse, 0, quadding, gTrue, gFalse);
+      //~ Acrobat draws a popup icon on the right side
+    }
+    obj1.free();
+  // list box
+  } else {
+    // get the top index
+    int topIdx;
+    if (fieldDict->lookup("TI", &obj1)->isInt()) {
+      topIdx = obj1.getInt();
+    } else {
+      topIdx = 0;
+    }
+    obj1.free();
+
+    drawListBox(fieldChoice, topIdx, da, fontDict, quadding);
+  }
+}
+
 void AnnotWidget::generateFieldAppearance() {
   Object mkObj, ftObj, appearDict, drObj, obj1, obj2, obj3;
   Dict *fieldDict;
@@ -3652,15 +3761,8 @@ void AnnotWidget::generateFieldAppearance() {
   Dict *mkDict;
   MemStream *appearStream;
   GfxFontDict *fontDict;
-  GBool hasCaption;
-  double w, dx, dy, r;
-  double *dash;
-  GooString *caption, *da;
-  GooString **text;
-  GBool *selection;
-  int dashLength, ff, quadding, comb, nOptions, topIdx, i, j;
+  GooString *da;
   GBool modified;
-  AnnotColor aColor;
 
   if (widget == NULL || !widget->getField () || !widget->getField ()->getObj ()->isDict ())
     return;
@@ -3698,17 +3800,6 @@ void AnnotWidget::generateFieldAppearance() {
     obj1.free();
   }
 
-  // get the field type
-  Form::fieldLookup(fieldDict, "FT", &ftObj);
-
-  // get the field flags (Ff) value
-  if (Form::fieldLookup(fieldDict, "Ff", &obj1)->isInt()) {
-    ff = obj1.getInt();
-  } else {
-    ff = 0;
-  }
-  obj1.free();
-
   // draw the border
   if (appearCharacs && border && border->getWidth() > 0)
     drawBorder();
@@ -3739,159 +3830,21 @@ void AnnotWidget::generateFieldAppearance() {
   obj1.free();
 
   // draw the field contents
-  if (ftObj.isName("Btn")) {
-    caption = NULL;
-    if (mkDict) {
-      if (mkDict->lookup("CA", &obj1)->isString()) {
-        caption = obj1.getString()->copy();
-      }
-      obj1.free();
-    }
-    // radio button
-    if (ff & fieldFlagRadio) {
-      //~ Acrobat doesn't draw a caption if there is no AP dict (?)
-      if (Form::fieldLookup(fieldDict, "V", &obj1)->isName()) {
-        if (annot->lookup("AS", &obj2)->isName(obj1.getName()) &&
-	    strcmp (obj1.getName(), "Off") != 0) {
-          if (caption) {
-            drawText(caption, da, fontDict, gFalse, 0, fieldQuadCenter,
-                gFalse, gTrue);
-          } else {
-            if (mkDict) {
-              if (mkDict->lookup("BC", &obj3)->isArray() &&
-                  obj3.arrayGetLength() > 0) {
-                dx = rect->x2 - rect->x1;
-                dy = rect->y2 - rect->y1;
-		aColor = AnnotColor (obj3.getArray());
-                setColor(&aColor, gTrue);
-                drawCircle(0.5 * dx, 0.5 * dy, 0.2 * (dx < dy ? dx : dy),
-                    gTrue);
-              }
-              obj3.free();
-            }
-          }
-        }
-        obj2.free();
-      }
-      obj1.free();
-      // pushbutton
-    } else if (ff & fieldFlagPushbutton) {
-      if (caption) {
-        drawText(caption, da, fontDict, gFalse, 0, fieldQuadCenter,
-            gFalse, gFalse);
-      }
-      // checkbox
-    } else {
-      if (annot->lookup("AS", &obj1)->isName() &&
-          strcmp(obj1.getName(), "Off") != 0) {
-        if (!caption) {
-          caption = new GooString("3"); // ZapfDingbats checkmark
-        }
-        drawText(caption, da, fontDict, gFalse, 0, fieldQuadCenter,
-            gFalse, gTrue);
-      }
-      obj1.free();
-    }
-    if (caption) {
-      delete caption;
-    }
-  } else if (ftObj.isName("Tx")) {
-    if (Form::fieldLookup(fieldDict, "V", &obj1)->isString()) {
-      if (Form::fieldLookup(fieldDict, "Q", &obj2)->isInt()) {
-        quadding = obj2.getInt();
-      } else {
-        quadding = fieldQuadLeft;
-      }
-      obj2.free();
-      comb = 0;
-      if (ff & fieldFlagComb) {
-        if (Form::fieldLookup(fieldDict, "MaxLen", &obj2)->isInt()) {
-          comb = obj2.getInt();
-        }
-        obj2.free();
-      }
-      drawText(obj1.getString(), da, fontDict,
-          ff & fieldFlagMultiline, comb, quadding, gTrue, gFalse, ff & fieldFlagPassword);
-    }
-    obj1.free();
-  } else if (ftObj.isName("Ch")) {
-    if (Form::fieldLookup(fieldDict, "Q", &obj1)->isInt()) {
-      quadding = obj1.getInt();
-    } else {
-      quadding = fieldQuadLeft;
-    }
-    obj1.free();
-    // combo box
-    if (ff & fieldFlagCombo) {
-      if (Form::fieldLookup(fieldDict, "V", &obj1)->isString()) {
-        drawText(obj1.getString(), da, fontDict,
-            gFalse, 0, quadding, gTrue, gFalse);
-        //~ Acrobat draws a popup icon on the right side
-      }
-      obj1.free();
-      // list box
-    } else {
-      if (fieldDict->lookup("Opt", &obj1)->isArray()) {
-        nOptions = obj1.arrayGetLength();
-        // get the option text
-        text = (GooString **)gmallocn(nOptions, sizeof(GooString *));
-        for (i = 0; i < nOptions; ++i) {
-          text[i] = NULL;
-          obj1.arrayGet(i, &obj2);
-          if (obj2.isString()) {
-            text[i] = obj2.getString()->copy();
-          } else if (obj2.isArray() && obj2.arrayGetLength() == 2) {
-            if (obj2.arrayGet(1, &obj3)->isString()) {
-              text[i] = obj3.getString()->copy();
-            }
-            obj3.free();
-          }
-          obj2.free();
-          if (!text[i]) {
-            text[i] = new GooString();
-          }
-        }
-        // get the selected option(s)
-        selection = (GBool *)gmallocn(nOptions, sizeof(GBool));
-        //~ need to use the I field in addition to the V field
-	Form::fieldLookup(fieldDict, "V", &obj2);
-        for (i = 0; i < nOptions; ++i) {
-          selection[i] = gFalse;
-          if (obj2.isString()) {
-            if (!obj2.getString()->cmp(text[i])) {
-              selection[i] = gTrue;
-            }
-          } else if (obj2.isArray()) {
-            for (j = 0; j < obj2.arrayGetLength(); ++j) {
-              if (obj2.arrayGet(j, &obj3)->isString() &&
-                  !obj3.getString()->cmp(text[i])) {
-                selection[i] = gTrue;
-              }
-              obj3.free();
-            }
-          }
-        }
-        obj2.free();
-        // get the top index
-        if (fieldDict->lookup("TI", &obj2)->isInt()) {
-          topIdx = obj2.getInt();
-        } else {
-          topIdx = 0;
-        }
-        obj2.free();
-        // draw the text
-        drawListBox(text, selection, nOptions, topIdx, da, fontDict, quadding);
-        for (i = 0; i < nOptions; ++i) {
-          delete text[i];
-        }
-        gfree(text);
-        gfree(selection);
-      }
-      obj1.free();
-    }
-  } else if (ftObj.isName("Sig")) {
+  switch (field->getType()) {
+  case formButton:
+    drawFormFieldButton(fontDict, da);
+    break;
+  case formText:
+    drawFormFieldText(fontDict, da);
+    break;
+  case formChoice:
+    drawFormFieldChoice(fontDict, da);
+    break;
+  case formSignature:
     //~unimp
-  } else {
+    break;
+  case formUndef:
+  default:
     error(-1, "Unknown field type");
   }
 
@@ -3965,7 +3918,6 @@ void AnnotWidget::generateFieldAppearance() {
   if (fontDict) {
     delete fontDict;
   }
-  ftObj.free();
   mkObj.free();
 }
 

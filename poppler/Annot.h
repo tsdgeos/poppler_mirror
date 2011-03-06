@@ -44,6 +44,7 @@ class GfxFontDict;
 class Form;
 class FormWidget;
 class FormField;
+class FormFieldChoice;
 class PDFRectangle;
 class Movie;
 class LinkAction;
@@ -1135,6 +1136,9 @@ public:
   virtual void draw(Gfx *gfx, GBool printing);
 
   void drawBorder();
+  void drawFormFieldButton(GfxFontDict *fontDict, GooString *da);
+  void drawFormFieldText(GfxFontDict *fontDict, GooString *da);
+  void drawFormFieldChoice(GfxFontDict *fontDict, GooString *da);
   void generateFieldAppearance ();
 
   AnnotWidgetHighlightMode getMode() { return mode; }
@@ -1151,8 +1155,8 @@ private:
 		GBool multiline, int comb, int quadding,
 		GBool txField, GBool forceZapfDingbats,
 		GBool password=false);
-  void drawListBox(GooString **text, GBool *selection,
-		   int nOptions, int topIdx,
+  void drawListBox(FormFieldChoice *fieldChoice,
+		   int topIdx,
 		   GooString *da, GfxFontDict *fontDict, int quadding);
   void layoutText(GooString *text, GooString *outBuf, int *i, GfxFont *font,
 		  double *width, double widthLimit, int *charCount,
