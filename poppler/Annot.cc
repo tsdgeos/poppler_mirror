@@ -3702,11 +3702,7 @@ void AnnotWidget::drawFormFieldText(GfxFontDict *fontDict, GooString *da) {
   FormFieldText *fieldText = static_cast<FormFieldText *>(field);
 
   if (Form::fieldLookup(fieldDict, "V", &obj1)->isString()) {
-    if (Form::fieldLookup(fieldDict, "Q", &obj2)->isInt())
-      quadding = static_cast<VariableTextQuadding>(obj2.getInt());
-    else
-      quadding = form->getTextQuadding();
-    obj2.free();
+    quadding = field->hasTextQuadding() ? field->getTextQuadding() : form->getTextQuadding();
 
     int comb = 0;
     if (fieldText->isComb()) {
@@ -3726,12 +3722,7 @@ void AnnotWidget::drawFormFieldChoice(GfxFontDict *fontDict, GooString *da) {
   VariableTextQuadding quadding;
   FormFieldChoice *fieldChoice = static_cast<FormFieldChoice *>(field);
 
-  if (Form::fieldLookup(fieldDict, "Q", &obj1)->isInt()) {
-    quadding = static_cast<VariableTextQuadding>(obj1.getInt());
-  } else {
-    quadding = form->getTextQuadding();
-  }
-  obj1.free();
+  quadding = field->hasTextQuadding() ? field->getTextQuadding() : form->getTextQuadding();
 
   if (fieldChoice->isCombo()) {
     if (Form::fieldLookup(fieldDict, "V", &obj1)->isString()) {
@@ -3799,14 +3790,9 @@ void AnnotWidget::generateFieldAppearance() {
   }
   obj1.free();
 
-  if (Form::fieldLookup(fieldDict, "DA", &obj1)->isString()) {
-    da = obj1.getString()->copy();
-    //TODO: look for a font size / name HERE
-    // => create a function
-  } else {
-    da = form->getDefaultAppearance()->copy();
-  }
-  obj1.free();
+  da = field->getDefaultAppearance();
+  if (!da)
+    da = form->getDefaultAppearance();
 
   // draw the field contents
   switch (field->getType()) {
@@ -3825,10 +3811,6 @@ void AnnotWidget::generateFieldAppearance() {
   case formUndef:
   default:
     error(-1, "Unknown field type");
-  }
-
-  if (da) {
-    delete da;
   }
 
   // build the appearance stream dictionary

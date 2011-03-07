@@ -283,6 +283,10 @@ public:
   void setReadOnly (bool b) { readOnly = b; }
   bool isReadOnly () const { return readOnly; }
 
+  GooString* getDefaultAppearance() const { return defaultAppearance; }
+  GBool hasTextQuadding() const { return hasQuadding; }
+  VariableTextQuadding getTextQuadding() const { return quadding; }
+
   FormWidget* findWidgetByRef (Ref aref);
   // Since while loading their defaults, children may call parents methods, it's better
   // to do that when parents are completly constructed
@@ -304,6 +308,11 @@ public:
   int numChildren;
   FormWidget **widgets;
   bool readOnly;
+
+  // Variable Text
+  GooString *defaultAppearance;
+  GBool hasQuadding;
+  VariableTextQuadding quadding;
 
 private:
   FormField() {}

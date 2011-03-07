@@ -790,6 +790,10 @@ FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, std::set<int> *
   terminal = false;
   widgets = NULL;
   readOnly = false;
+  defaultAppearance = NULL;
+  quadding = quaddingLeftJustified;
+  hasQuadding = gFalse;
+
   ref = aref;
 
   Object obj1;
@@ -869,6 +873,17 @@ FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, std::set<int> *
     }
   }
   obj1.free();
+
+  // Variable Text
+  if (Form::fieldLookup(dict, "DA", &obj1)->isString())
+    defaultAppearance = obj1.getString()->copy();
+  obj1.free();
+
+  if (Form::fieldLookup(dict, "Q", &obj1)->isInt()) {
+    quadding = static_cast<VariableTextQuadding>(obj1.getInt());
+    hasQuadding = gTrue;
+  }
+  obj1.free();
 }
 
 FormField::~FormField()
@@ -885,6 +900,8 @@ FormField::~FormField()
     gfree (widgets);
   }
   obj.free();
+
+  delete defaultAppearance;
 }
 
 void FormField::loadChildrenDefaults ()
