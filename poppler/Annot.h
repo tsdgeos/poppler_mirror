@@ -40,7 +40,7 @@ class Gfx;
 class Catalog;
 class CharCodeToUnicode;
 class GfxFont;
-class GfxFontDict;
+class GfxResources;
 class Form;
 class FormWidget;
 class FormField;
@@ -1136,9 +1136,9 @@ public:
   virtual void draw(Gfx *gfx, GBool printing);
 
   void drawBorder();
-  void drawFormFieldButton(GfxFontDict *fontDict, GooString *da);
-  void drawFormFieldText(GfxFontDict *fontDict, GooString *da);
-  void drawFormFieldChoice(GfxFontDict *fontDict, GooString *da);
+  void drawFormFieldButton(GfxResources *resources, GooString *da);
+  void drawFormFieldText(GfxResources *resources, GooString *da);
+  void drawFormFieldChoice(GfxResources *resources, GooString *da);
   void generateFieldAppearance ();
 
   AnnotWidgetHighlightMode getMode() { return mode; }
@@ -1151,12 +1151,12 @@ private:
 
   void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
 
-  void drawText(GooString *text, GooString *da, GfxFontDict *fontDict,
+  void drawText(GooString *text, GooString *da, GfxResources *resources,
 		GBool multiline, int comb, int quadding,
 		GBool txField, GBool forceZapfDingbats,
 		GBool password=false);
   void drawListBox(FormFieldChoice *fieldChoice,
-		   GooString *da, GfxFontDict *fontDict, int quadding);
+		   GooString *da, GfxResources *resources, int quadding);
   void layoutText(GooString *text, GooString *outBuf, int *i, GfxFont *font,
 		  double *width, double widthLimit, int *charCount,
 		  GBool noReencode);

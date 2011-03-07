@@ -2983,7 +2983,7 @@ void AnnotWidget::writeString(GooString *str, GooString *appearBuf)
 }
 
 // Draw the variable text or caption for a field.
-void AnnotWidget::drawText(GooString *text, GooString *da, GfxFontDict *fontDict,
+void AnnotWidget::drawText(GooString *text, GooString *da, GfxResources *resources,
     GBool multiline, int comb, int quadding,
     GBool txField, GBool forceZapfDingbats,
     GBool password) {
@@ -3043,7 +3043,7 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxFontDict *fontDict
   if (tfPos >= 0) {
     tok = (GooString *)daToks->get(tfPos);
     if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
-      if (!fontDict || !(font = fontDict->lookup(tok->getCString() + 1))) {
+      if (!resources || !(font = resources->lookupFont(tok->getCString() + 1))) {
         if (forceZapfDingbats) {
           // We are forcing ZaDb but the font does not exist
           // so create a fake one
@@ -3369,7 +3369,7 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxFontDict *fontDict
 
 // Draw the variable text or caption for a field.
 void AnnotWidget::drawListBox(FormFieldChoice *fieldChoice,
-			      GooString *da, GfxFontDict *fontDict, int quadding) {
+			      GooString *da, GfxResources *resources, int quadding) {
   GooList *daToks;
   GooString *tok, *convertedText;
   GfxFont *font;
@@ -3414,7 +3414,7 @@ void AnnotWidget::drawListBox(FormFieldChoice *fieldChoice,
   if (tfPos >= 0) {
     tok = (GooString *)daToks->get(tfPos);
     if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
-      if (!fontDict || !(font = fontDict->lookup(tok->getCString() + 1))) {
+      if (!resources || !(font = resources->lookupFont(tok->getCString() + 1))) {
         error(-1, "Unknown font in field's DA string");
       }
     } else {
@@ -3645,7 +3645,7 @@ void AnnotWidget::drawBorder() {
   }
 }
 
-void AnnotWidget::drawFormFieldButton(GfxFontDict *fontDict, GooString *da) {
+void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
   Object obj1, obj2;
   Dict *annot = widget->getObj()->getDict();
   Dict *fieldDict = field->getObj()->getDict();
@@ -3660,7 +3660,7 @@ void AnnotWidget::drawFormFieldButton(GfxFontDict *fontDict, GooString *da) {
       if (annot->lookup("AS", &obj2)->isName(obj1.getName()) &&
           strcmp (obj1.getName(), "Off") != 0) {
         if (caption) {
-          drawText(caption, da, fontDict, gFalse, 0, fieldQuadCenter,
+          drawText(caption, da, resources, gFalse, 0, fieldQuadCenter,
                    gFalse, gTrue);
         } else if (appearCharacs) {
           AnnotColor *aColor = appearCharacs->getBorderColor();
@@ -3678,16 +3678,16 @@ void AnnotWidget::drawFormFieldButton(GfxFontDict *fontDict, GooString *da) {
     break;
   case formButtonPush:
     if (caption)
-      drawText(caption, da, fontDict, gFalse, 0, fieldQuadCenter, gFalse, gFalse);
+      drawText(caption, da, resources, gFalse, 0, fieldQuadCenter, gFalse, gFalse);
     break;
   case formButtonCheck:
     if (annot->lookup("AS", &obj1)->isName() &&
         strcmp(obj1.getName(), "Off") != 0) {
       if (!caption) {
         GooString checkMark("3");
-        drawText(&checkMark, da, fontDict, gFalse, 0, fieldQuadCenter, gFalse, gTrue);
+        drawText(&checkMark, da, resources, gFalse, 0, fieldQuadCenter, gFalse, gTrue);
       } else {
-        drawText(caption, da, fontDict, gFalse, 0, fieldQuadCenter, gFalse, gTrue);
+        drawText(caption, da, resources, gFalse, 0, fieldQuadCenter, gFalse, gTrue);
       }
     }
     obj1.free();
@@ -3695,7 +3695,7 @@ void AnnotWidget::drawFormFieldButton(GfxFontDict *fontDict, GooString *da) {
   }
 }
 
-void AnnotWidget::drawFormFieldText(GfxFontDict *fontDict, GooString *da) {
+void AnnotWidget::drawFormFieldText(GfxResources *resources, GooString *da) {
   Object obj1, obj2;
   VariableTextQuadding quadding;
   Dict *fieldDict = field->getObj()->getDict();
@@ -3710,13 +3710,13 @@ void AnnotWidget::drawFormFieldText(GfxFontDict *fontDict, GooString *da) {
         comb = obj2.getInt();
       obj2.free();
     }
-    drawText(obj1.getString(), da, fontDict,
+    drawText(obj1.getString(), da, resources,
              fieldText->isMultiline(), comb, quadding, gTrue, gFalse, fieldText->isPassword());
   }
   obj1.free();
 }
 
-void AnnotWidget::drawFormFieldChoice(GfxFontDict *fontDict, GooString *da) {
+void AnnotWidget::drawFormFieldChoice(GfxResources *resources, GooString *da) {
   Object obj1;
   Dict *fieldDict = field->getObj()->getDict();
   VariableTextQuadding quadding;
@@ -3726,23 +3726,22 @@ void AnnotWidget::drawFormFieldChoice(GfxFontDict *fontDict, GooString *da) {
 
   if (fieldChoice->isCombo()) {
     if (Form::fieldLookup(fieldDict, "V", &obj1)->isString()) {
-      drawText(obj1.getString(), da, fontDict, gFalse, 0, quadding, gTrue, gFalse);
+      drawText(obj1.getString(), da, resources, gFalse, 0, quadding, gTrue, gFalse);
       //~ Acrobat draws a popup icon on the right side
     }
     obj1.free();
   // list box
   } else {
-    drawListBox(fieldChoice, da, fontDict, quadding);
+    drawListBox(fieldChoice, da, resources, quadding);
   }
 }
 
 void AnnotWidget::generateFieldAppearance() {
-  Object appearDict, drObj, obj1, obj2;
+  Object appearDict, obj1, obj2;
   Dict *fieldDict;
   Dict *annot;
-  Dict *acroForm;
+  GfxResources *resources;
   MemStream *appearStream;
-  GfxFontDict *fontDict;
   GooString *da;
   GBool modified;
 
@@ -3752,8 +3751,7 @@ void AnnotWidget::generateFieldAppearance() {
   field = widget->getField();
   fieldDict = field->getObj()->getDict();
   annot = widget->getObj ()->getDict ();
-  acroForm = form->getObj ()->getDict ();
-  
+
   // do not regenerate appearence if widget has not changed
   modified = widget->isModified ();
 
@@ -3779,31 +3777,22 @@ void AnnotWidget::generateFieldAppearance() {
   if (appearCharacs && border && border->getWidth() > 0)
     drawBorder();
 
-  // get the resource dictionary
-  acroForm->lookup("DR", &drObj);
-
-  // build the font dictionary
-  if (drObj.isDict() && drObj.dictLookup("Font", &obj1)->isDict()) {
-    fontDict = new GfxFontDict(xref, NULL, obj1.getDict());
-  } else {
-    fontDict = NULL;
-  }
-  obj1.free();
-
   da = field->getDefaultAppearance();
   if (!da)
     da = form->getDefaultAppearance();
 
+  resources = form->getDefaultResources();
+
   // draw the field contents
   switch (field->getType()) {
   case formButton:
-    drawFormFieldButton(fontDict, da);
+    drawFormFieldButton(resources, da);
     break;
   case formText:
-    drawFormFieldText(fontDict, da);
+    drawFormFieldText(resources, da);
     break;
   case formChoice:
-    drawFormFieldChoice(fontDict, da);
+    drawFormFieldChoice(resources, da);
     break;
   case formSignature:
     //~unimp
@@ -3826,10 +3815,10 @@ void AnnotWidget::generateFieldAppearance() {
   appearDict.dictAdd(copyString("BBox"), &obj1);
 
   // set the resource dictionary
-  if (drObj.isDict()) {
-    appearDict.dictAdd(copyString("Resources"), drObj.copy(&obj1));
+  Object *resDict = form->getDefaultResourcesObj();
+  if (resDict->isDict()) {
+    appearDict.dictAdd(copyString("Resources"), resDict->copy(&obj1));
   }
-  drObj.free();
 
   // build the appearance stream
   appearStream = new MemStream(strdup(appearBuf->getCString()), 0,
@@ -3874,10 +3863,6 @@ void AnnotWidget::generateFieldAppearance() {
 
     xref->setModifiedObject(&dictObj, ref);
     dictObj.free();
-  }
-
-  if (fontDict) {
-    delete fontDict;
   }
 }
 

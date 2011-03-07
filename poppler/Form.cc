@@ -32,6 +32,7 @@
 #include "Object.h"
 #include "Array.h"
 #include "Dict.h"
+#include "Gfx.h"
 #include "Form.h"
 #include "XRef.h"
 #include "PDFDocEncoding.h"
@@ -1249,6 +1250,7 @@ Form::Form(XRef *xrefA, Object* acroFormA)
   rootFields = NULL;
   quadding = quaddingLeftJustified;
   defaultAppearance = NULL;
+  defaultResources = NULL;
 
   acroForm->dictLookup("NeedAppearances", &obj1);
   needAppearances = (obj1.isBool() && obj1.getBool());
@@ -1261,6 +1263,18 @@ Form::Form(XRef *xrefA, Object* acroFormA)
   if (acroForm->dictLookup("Q", &obj1)->isInt())
     quadding = static_cast<VariableTextQuadding>(obj1.getInt());
   obj1.free();
+
+  acroForm->dictLookup("DR", &resDict);
+  if (resDict.isDict()) {
+    // At a minimum, this dictionary shall contain a Font entry
+    if (resDict.dictLookup("Font", &obj1)->isDict())
+      defaultResources = new GfxResources(xref, resDict.getDict(), NULL);
+    obj1.free();
+  }
+  if (!defaultResources) {
+    resDict.free();
+    resDict.initNull();
+  }
 
   acroForm->dictLookup("Fields", &obj1);
   if (obj1.isArray()) {
@@ -1308,6 +1322,8 @@ Form::~Form() {
     delete rootFields[i];
   gfree (rootFields);
   delete defaultAppearance;
+  delete defaultResources;
+  resDict.free();
 }
 
 // Look up an inheritable field dictionary entry.

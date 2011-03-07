@@ -30,6 +30,7 @@ class Annot;
 class Annots;
 class Catalog;
 class LinkAction;
+class GfxResources;
 
 enum FormFieldType {
   formButton,
@@ -480,6 +481,8 @@ public:
   FormField* getRootField(int i) const { return rootFields[i]; }
   GooString* getDefaultAppearance() const { return defaultAppearance; }
   VariableTextQuadding getTextQuadding() const { return quadding; }
+  GfxResources* getDefaultResources() const { return defaultResources; }
+  Object* getDefaultResourcesObj() { return &resDict; }
 
   FormWidget* findWidgetByRef (Ref aref);
 
@@ -491,6 +494,8 @@ private:
   XRef* xref;
   Object *acroForm;
   GBool needAppearances;
+  GfxResources *defaultResources;
+  Object resDict;
 
   // Variable Text
   GooString *defaultAppearance;
