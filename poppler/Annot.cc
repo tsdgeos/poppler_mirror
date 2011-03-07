@@ -3696,7 +3696,7 @@ void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
 }
 
 void AnnotWidget::drawFormFieldText(GfxResources *resources, GooString *da) {
-  Object obj1, obj2;
+  Object obj1;
   VariableTextQuadding quadding;
   Dict *fieldDict = field->getObj()->getDict();
   FormFieldText *fieldText = static_cast<FormFieldText *>(field);
@@ -3705,11 +3705,9 @@ void AnnotWidget::drawFormFieldText(GfxResources *resources, GooString *da) {
     quadding = field->hasTextQuadding() ? field->getTextQuadding() : form->getTextQuadding();
 
     int comb = 0;
-    if (fieldText->isComb()) {
-      if (Form::fieldLookup(fieldDict, "MaxLen", &obj2)->isInt())
-        comb = obj2.getInt();
-      obj2.free();
-    }
+    if (fieldText->isComb())
+      comb = fieldText->getMaxLen();
+
     drawText(obj1.getString(), da, resources,
              fieldText->isMultiline(), comb, quadding, gTrue, gFalse, fieldText->isPassword());
   }
