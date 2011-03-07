@@ -563,14 +563,16 @@ AnnotBorderBS::AnnotBorderBS(Dict *dict) {
   obj2.free();
   obj1.free();
 
-  if (dict->lookup("D", &obj1)->isArray())
-    parseDashArray(&obj1);
-  obj1.free();
+  if (style == borderDashed) {
+    if (dict->lookup("D", &obj1)->isArray())
+      parseDashArray(&obj1);
+    obj1.free();
 
-  if (!dash) {
-    dashLength = 1;
-    dash = (double *) gmallocn (dashLength, sizeof (double));
-    dash[0] = 3;
+    if (!dash) {
+      dashLength = 1;
+      dash = (double *) gmallocn (dashLength, sizeof (double));
+      dash[0] = 3;
+    }
   }
 }
 
