@@ -3164,16 +3164,16 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxFontDict *fontDict
 
       // compute text start position
       switch (quadding) {
-        case fieldQuadLeft:
-        default:
-          x = borderWidth + 2;
-          break;
-        case fieldQuadCenter:
-          x = (rect->x2 - rect->x1 - w) / 2;
-          break;
-        case fieldQuadRight:
-          x = rect->x2 - rect->x1 - borderWidth - 2 - w;
-          break;
+      case quaddingLeftJustified:
+      default:
+        x = borderWidth + 2;
+        break;
+      case quaddingCentered:
+        x = (rect->x2 - rect->x1 - w) / 2;
+        break;
+      case quaddingRightJustified:
+        x = rect->x2 - rect->x1 - borderWidth - 2 - w;
+        break;
       }
 
       // draw the line
@@ -3218,16 +3218,16 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxFontDict *fontDict
 
       // compute starting text cell
       switch (quadding) {
-        case fieldQuadLeft:
-        default:
+      case quaddingLeftJustified:
+      default:
           x = borderWidth;
-          break;
-        case fieldQuadCenter:
-          x = borderWidth + (comb - charCount) / 2 * w;
-          break;
-        case fieldQuadRight:
-          x = borderWidth + (comb - charCount) * w;
-          break;
+        break;
+      case quaddingCentered:
+        x = borderWidth + (comb - charCount) / 2 * w;
+        break;
+      case quaddingRightJustified:
+        x = borderWidth + (comb - charCount) * w;
+        break;
       }
       y = 0.5 * (rect->y2 - rect->y1) - 0.4 * fontSize;
 
@@ -3309,16 +3309,16 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxFontDict *fontDict
       // compute text start position
       w *= fontSize;
       switch (quadding) {
-        case fieldQuadLeft:
-        default:
-          x = borderWidth + 2;
-          break;
-        case fieldQuadCenter:
-          x = (rect->x2 - rect->x1 - w) / 2;
-          break;
-        case fieldQuadRight:
-          x = rect->x2 - rect->x1 - borderWidth - 2 - w;
-          break;
+      case quaddingLeftJustified:
+      default:
+        x = borderWidth + 2;
+        break;
+      case quaddingCentered:
+        x = (rect->x2 - rect->x1 - w) / 2;
+        break;
+      case quaddingRightJustified:
+        x = rect->x2 - rect->x1 - borderWidth - 2 - w;
+        break;
       }
       y = 0.5 * (rect->y2 - rect->y1) - 0.4 * fontSize;
 
@@ -3483,16 +3483,16 @@ void AnnotWidget::drawListBox(FormFieldChoice *fieldChoice,
     layoutText(fieldChoice->getChoice(i), convertedText, &j, font, &w, 0.0, NULL, gFalse);
     w *= fontSize;
     switch (quadding) {
-      case fieldQuadLeft:
-      default:
-        x = borderWidth + 2;
-        break;
-      case fieldQuadCenter:
-        x = (rect->x2 - rect->x1 - w) / 2;
-        break;
-      case fieldQuadRight:
-        x = rect->x2 - rect->x1 - borderWidth - 2 - w;
-        break;
+    case quaddingLeftJustified:
+    default:
+      x = borderWidth + 2;
+      break;
+    case quaddingCentered:
+      x = (rect->x2 - rect->x1 - w) / 2;
+      break;
+    case quaddingRightJustified:
+      x = rect->x2 - rect->x1 - borderWidth - 2 - w;
+      break;
     }
 
     // set the font matrix
@@ -3697,15 +3697,15 @@ void AnnotWidget::drawFormFieldButton(GfxFontDict *fontDict, GooString *da) {
 
 void AnnotWidget::drawFormFieldText(GfxFontDict *fontDict, GooString *da) {
   Object obj1, obj2;
-  int quadding;
+  VariableTextQuadding quadding;
   Dict *fieldDict = field->getObj()->getDict();
   FormFieldText *fieldText = static_cast<FormFieldText *>(field);
 
   if (Form::fieldLookup(fieldDict, "V", &obj1)->isString()) {
     if (Form::fieldLookup(fieldDict, "Q", &obj2)->isInt())
-      quadding = obj2.getInt();
+      quadding = static_cast<VariableTextQuadding>(obj2.getInt());
     else
-      quadding = fieldQuadLeft;
+      quadding = form->getTextQuadding();
     obj2.free();
 
     int comb = 0;
@@ -3723,13 +3723,13 @@ void AnnotWidget::drawFormFieldText(GfxFontDict *fontDict, GooString *da) {
 void AnnotWidget::drawFormFieldChoice(GfxFontDict *fontDict, GooString *da) {
   Object obj1;
   Dict *fieldDict = field->getObj()->getDict();
-  int quadding;
+  VariableTextQuadding quadding;
   FormFieldChoice *fieldChoice = static_cast<FormFieldChoice *>(field);
 
   if (Form::fieldLookup(fieldDict, "Q", &obj1)->isInt()) {
-    quadding = obj1.getInt();
+    quadding = static_cast<VariableTextQuadding>(obj1.getInt());
   } else {
-    quadding = fieldQuadLeft;
+    quadding = form->getTextQuadding();
   }
   obj1.free();
 
@@ -3799,17 +3799,12 @@ void AnnotWidget::generateFieldAppearance() {
   }
   obj1.free();
 
-  // get the default appearance string
-  if (Form::fieldLookup(fieldDict, "DA", &obj1)->isNull()) {
-    obj1.free();
-    acroForm->lookup("DA", &obj1);
-  }
-  if (obj1.isString()) {
+  if (Form::fieldLookup(fieldDict, "DA", &obj1)->isString()) {
     da = obj1.getString()->copy();
     //TODO: look for a font size / name HERE
     // => create a function
   } else {
-    da = NULL;
+    da = form->getDefaultAppearance()->copy();
   }
   obj1.free();
 

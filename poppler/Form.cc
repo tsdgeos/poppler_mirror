@@ -1230,9 +1230,19 @@ Form::Form(XRef *xrefA, Object* acroFormA)
   size = 0;
   numFields = 0;
   rootFields = NULL;
+  quadding = quaddingLeftJustified;
+  defaultAppearance = NULL;
 
   acroForm->dictLookup("NeedAppearances", &obj1);
   needAppearances = (obj1.isBool() && obj1.getBool());
+  obj1.free();
+
+  if (acroForm->dictLookup("DA", &obj1)->isString())
+    defaultAppearance = obj1.getString()->copy();
+  obj1.free();
+
+  if (acroForm->dictLookup("Q", &obj1)->isInt())
+    quadding = static_cast<VariableTextQuadding>(obj1.getInt());
   obj1.free();
 
   acroForm->dictLookup("Fields", &obj1);
@@ -1280,6 +1290,7 @@ Form::~Form() {
   for(i = 0; i< numFields; ++i)
     delete rootFields[i];
   gfree (rootFields);
+  delete defaultAppearance;
 }
 
 // Look up an inheritable field dictionary entry.

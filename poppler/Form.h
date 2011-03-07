@@ -45,6 +45,12 @@ enum FormButtonType {
   formButtonRadio
 };
 
+enum VariableTextQuadding {
+  quaddingLeftJustified,
+  quaddingCentered,
+  quaddingRightJustified
+};
+
 class Form;
 class FormField;
 class FormFieldButton;
@@ -463,6 +469,8 @@ public:
   GBool getNeedAppearances () const { return needAppearances; }
   int getNumFields() const { return numFields; }
   FormField* getRootField(int i) const { return rootFields[i]; }
+  GooString* getDefaultAppearance() const { return defaultAppearance; }
+  VariableTextQuadding getTextQuadding() const { return quadding; }
 
   FormWidget* findWidgetByRef (Ref aref);
 
@@ -474,6 +482,10 @@ private:
   XRef* xref;
   Object *acroForm;
   GBool needAppearances;
+
+  // Variable Text
+  GooString *defaultAppearance;
+  VariableTextQuadding quadding;
 };
 
 //------------------------------------------------------------------------
