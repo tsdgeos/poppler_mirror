@@ -67,7 +67,6 @@ FormWidget::FormWidget(XRef *xrefA, Object *aobj, unsigned num, Ref aref, FormFi
   ref = aref;
   double t;
   ID = 0;
-  defaultsLoaded = gFalse;
   fontSize = 0.0;
   modified = gFalse;
   childNum = num;
@@ -256,9 +255,36 @@ FormWidgetButton::FormWidgetButton (XRef *xrefA, Object *aobj, unsigned num, Ref
   type = formButton;
   parent = static_cast<FormFieldButton*>(field);
   onStr = NULL;
-  state = gFalse;
   siblingsID = NULL;
   numSiblingsID = 0;
+
+  Object obj1, obj2;
+
+  // Find the name of the ON state in the AP dictionnary
+  // The reference say the Off state, if it existe, _must_ be stored in the AP dict under the name /Off
+  // The "on" state may be stored under any other name
+  if (obj.dictLookup("AP", &obj1)->isDict()) {
+    if (obj1.dictLookup("N", &obj2)->isDict()) {
+      for (int i = 0; i < obj2.dictGetLength(); i++) {
+        char *key = obj2.dictGetKey(i);
+        if (strcmp (key, "Off") != 0) {
+          onStr = new GooString (key);
+          break;
+        }
+      }
+    }
+    obj2.free();
+  }
+  obj1.free();
+}
+
+char *FormWidgetButton::getOnStr() {
+  if (onStr)
+    return onStr->getCString();
+
+  // 12.7.4.2.3 Check Boxes
+  //  Yes should be used as the name for the on state
+  return parent->getButtonType() == formButtonCheck ? (char *)"Yes" : NULL;
 }
 
 FormWidgetButton::~FormWidgetButton ()
@@ -273,108 +299,32 @@ FormButtonType FormWidgetButton::getButtonType () const
   return parent->getButtonType ();
 }
 
+void FormWidgetButton::setAppearanceState(char *state) {
+  modified = gTrue;
+
+  Object obj1;
+  obj1.initName(state);
+  obj.getDict()->set("AS", &obj1);
+  xref->setModifiedObject(&obj, ref);
+}
+
 void FormWidgetButton::setState (GBool astate, GBool calledByParent)
 {
   //pushButtons don't have state
   if (parent->getButtonType() == formButtonPush)
     return;
-  //the state modification may be denied by the parent. e.g we don't want to let the user put all combo boxes to false
-  if (!calledByParent) { //avoid infinite recursion
-    modified = gTrue;
-    if (!parent->setState(childNum, astate)) {
-      return;
-    }
-  }
-  state = astate;
-  
-  //update appearance
-  char *offStr = "Off";
-  Object obj1;
-  obj1.initName(state ? onStr->getCString() : offStr);
-  updateField ("V", &obj1);
 
-  obj1.initName(state ? onStr->getCString() : offStr);
-  //modify the Appearance State entry as well
-  obj.getDict()->set("AS", &obj1);
-  //notify the xref about the update
-  xref->setModifiedObject(&obj, ref);
-}
-
-void FormWidgetButton::loadDefaults ()
-{
-  if (defaultsLoaded)
+  // Silently return if can't set ON state
+  if (astate && !onStr)
     return;
 
-  defaultsLoaded = gTrue;
-
-  Dict *dict = obj.getDict();
-  Object obj1;
-
-  //pushButtons don't have state
-  if (parent->getButtonType() != formButtonPush ){
-    //find the name of the state in the AP dictionnary (/Yes, /Off)
-    //The reference say the Off state, if it existe, _must_ be stored in the AP dict under the name /Off
-    //The "on" state may be stored under any other name
-    if (dict->lookup("AP", &obj1)->isDict()) {
-      Dict *tmpDict = obj1.getDict();
-      int length = tmpDict->getLength();
-      for(int i=0; i<length; i++) {
-        Object obj2;
-        tmpDict->getVal(i, &obj2);
-        if (obj2.isDict()) {
-          Dict *tmpDict2 = obj2.getDict();
-          int length2 = tmpDict2->getLength();
-          for(int j=0; j<length2; j++) {
-            Object obj3;
-            tmpDict2->getVal(j, &obj3);
-            char *key = tmpDict2->getKey(j);
-            if(strcmp(key, "Off")) { //if we don't have Off, we have the name of the "on" state
-	      onStr = new GooString (key);
-            }
-            obj3.free();
-	    if (onStr)
-	      break;
-          }
-        } else if (obj2.isStream()) {
-          // TODO do something with str and obj3
-          Stream *str = obj2.getStream();
-          Dict *tmpDict2 = str->getDict();
-          Object obj3;
-          tmpDict2->lookup("Length", &obj3);
-          onStr = new GooString ("D");
-          obj3.free();
-        }
-        obj2.free();
-	if (onStr)
-	  break;
-      }
-    }
-    obj1.free();
-
-    //We didn't found the "on" state for the button
-    if (!onStr) {
-      error(-1, "FormWidgetButton:: unable to find the on state for the button\n");
-      onStr = new GooString(""); // TODO is this the best solution?
-    }
-  }
-
-  if (Form::fieldLookup(dict, "V", &obj1)->isName()) {
-    Object obj2;
-    if (dict->lookup("AS", &obj2)->isName(obj1.getName())) {
-      if (strcmp (obj1.getName(), "Off") != 0) {
-        setState(gTrue);
-      }
-    }
-    obj2.free();
-  } else if (obj1.isArray()) { //handle the case where we have multiple choices
-    error(-1, "FormWidgetButton:: multiple choice isn't supported yet\n");
-  }
-  obj1.free();
+  parent->setState(astate ? onStr->getCString() : (char *)"Off");
+  // Parent will call setAppearanceState()
 }
 
 GBool FormWidgetButton::getState ()
 {
-  return state;
+  return (onStr && parent->getAppearanceState() && strcmp(parent->getAppearanceState(), onStr->getCString()) == 0);
 }
 
 void FormWidgetButton::setNumSiblingsID (int i)
@@ -389,14 +339,6 @@ FormWidgetText::FormWidgetText (XRef *xrefA, Object *aobj, unsigned num, Ref ref
 {
   type = formText;
   parent = static_cast<FormFieldText*>(field);
-}
-
-void FormWidgetText::loadDefaults ()
-{
-  if (defaultsLoaded)
-    return;
-
-  defaultsLoaded = gTrue;
 }
 
 GooString* FormWidgetText::getContent ()
@@ -465,14 +407,6 @@ FormWidgetChoice::FormWidgetChoice(XRef *xrefA, Object *aobj, unsigned num, Ref 
 {
   type = formChoice;
   parent = static_cast<FormFieldChoice*>(field);
-}
-
-void FormWidgetChoice::loadDefaults ()
-{
-  if (defaultsLoaded)
-    return;
-
-  defaultsLoaded = gTrue;
 }
 
 FormWidgetChoice::~FormWidgetChoice()
@@ -658,7 +592,7 @@ FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, std::set<int> *
             children = (FormField**)greallocn(children, numChildren, sizeof(FormField*));
 
             obj3.free();
-            children[numChildren-1] = Form::createFieldFromDict (&obj2, xrefA, childRef.getRef(), &usedParentsAux);
+            children[numChildren-1] = Form::createFieldFromDict (&obj2, xref, childRef.getRef(), &usedParentsAux);
           }
           // 1 - we will handle 'collapsed' fields (field + annot in the same dict)
           // as if the annot was in the Kids array of the field
@@ -679,10 +613,10 @@ FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, std::set<int> *
   // As said in 1, if this is a 'collapsed' field, behave like if we had a
   // child annot
   if (dict->lookup("Subtype", &obj1)->isName()) {
-    _createWidget(aobj, ref);
+    _createWidget(&obj, ref);
   }
   obj1.free();
- 
+
   //flags
   if (Form::fieldLookup(dict, "Ff", &obj1)->isInt()) {
     int flags = obj1.getInt();
@@ -726,19 +660,6 @@ FormField::~FormField()
   obj.free();
 
   delete defaultAppearance;
-}
-
-void FormField::loadChildrenDefaults ()
-{
-  if(!terminal) {
-    for(int i=0; i<numChildren; i++) {
-      children[i]->loadChildrenDefaults();
-    }
-  } else {
-    for (int i=0; i<numChildren; i++) {
-      widgets[i]->loadDefaults();
-    }
-  }
 }
 
 void FormField::fillChildrenSiblingsID()
@@ -845,7 +766,7 @@ void FormFieldButton::fillChildrenSiblingsID()
   }
 }
 
-GBool FormFieldButton::setState (int num, GBool s) 
+GBool FormFieldButton::setState(char *state)
 {
   if (readOnly) {
     error(-1, "FormFieldButton::setState called on a readOnly field\n");
@@ -855,28 +776,54 @@ GBool FormFieldButton::setState (int num, GBool s)
   // A check button could behave as a radio button
   // when it's in a set of more than 1 buttons
   if (btype == formButtonRadio || btype == formButtonCheck) {
-    if (!s && noAllOff)
+    GBool isOn = strcmp(state, "Off") != 0;
+
+    if (!isOn && noAllOff)
       return gFalse; //don't allow to set all radio to off
 
-    if (s == gTrue) {
-      active_child = num;
-      for(int i=0; i<numChildren; i++) {
-        if (i==active_child) continue;
-        static_cast<FormWidgetButton*>(widgets[i])->setState(gFalse, gTrue);
-      }
+    char *current = getAppearanceState();
 
-      //The parent field's V entry holds a name object corresponding to the ap-
-      //pearance state of whichever child field is currently in the on state
-      if (active_child >= 0) {
-        FormWidgetButton* actChild = static_cast<FormWidgetButton*>(widgets[active_child]);
-        if (actChild->getOnStr())
-          updateState(actChild->getOnStr()->getCString());
+    if (isOn) {
+      char *current = getAppearanceState();
+      GBool currentFound = gFalse, newFound = gFalse;
+
+      for (int i = 0; i < numChildren; i++) {
+        FormWidgetButton *widget = static_cast<FormWidgetButton*>(widgets[i]);
+
+        if (!widget->getOnStr())
+          continue;
+
+        char *onStr = widget->getOnStr();
+        if (current && strcmp(current, onStr) == 0) {
+          widget->setAppearanceState("Off");
+          currentFound = gTrue;
+        }
+
+        if (strcmp(state, onStr) == 0) {
+          widget->setAppearanceState(state);
+          newFound = gTrue;
+        }
+
+        if (currentFound && newFound)
+          break;
       }
     } else {
-      active_child = -1;
-      updateState("Off");
+      for (int i = 0; i < numChildren; i++) {
+        FormWidgetButton *widget = static_cast<FormWidgetButton*>(widgets[i]);
+
+        if (!widget->getOnStr())
+          continue;
+
+        char *onStr = widget->getOnStr();
+        if (current && strcmp(current, onStr) == 0) {
+          widget->setAppearanceState("Off");
+          break;
+        }
+      }
     }
+    updateState(state);
   }
+
   return gTrue;
 }
 
@@ -1370,8 +1317,6 @@ FormField *Form::createFieldFromDict (Object* obj, XRef *xrefA, const Ref& pref,
       field = new FormField(xrefA, obj, pref, usedParents);
     }
     obj2.free();
-    
-    field->loadChildrenDefaults();
 
     return field;
 }

@@ -69,9 +69,6 @@ class FormWidget {
 public:
   virtual ~FormWidget();
 
-  // see the description of FormField::LoadChildrenDefaults
-  virtual void loadDefaults () {}
-  
   // Check if point is inside the field bounding rect
   GBool inRect(double x, double y)
     { return x1 <= x && x <= x2 && y1 <= y && y <= y2; }
@@ -121,7 +118,6 @@ protected:
   Object obj;
   Ref ref;
   XRef *xref;
-  GBool defaultsLoaded;
   GBool modified;
   GooString *partialName; // T field
   GooString *alternateUiName; // TU field
@@ -161,9 +157,8 @@ public:
   void setState (GBool state, GBool calledByParent=gFalse);
   GBool getState ();
 
-  GooString* getOnStr() { return onStr; }
-
-  void loadDefaults();
+  char* getOnStr();
+  void setAppearanceState(char *state);
 
   void setNumSiblingsID (int i);
   void setSiblingsID (int i, unsigned id) { siblingsID[i] = id; }
@@ -178,7 +173,6 @@ protected:
   int numSiblingsID;
   GooString *onStr;
   FormFieldButton *parent;
-  GBool state;
 };
 
 //------------------------------------------------------------------------
@@ -195,8 +189,6 @@ public:
 
   //except a UTF16BE string
   void setContent(GooString* new_content);
-
-  void loadDefaults ();
 
   bool isMultiline () const; 
   bool isPassword () const; 
@@ -219,7 +211,6 @@ public:
   FormWidgetChoice(XRef *xrefA, Object *dict, unsigned num, Ref ref, FormField *p);
   ~FormWidgetChoice();
 
-  void loadDefaults ();
   int getNumChoices();
   //return the display name of the i-th choice (UTF16BE)
   GooString* getChoice(int i);
@@ -288,9 +279,6 @@ public:
   VariableTextQuadding getTextQuadding() const { return quadding; }
 
   FormWidget* findWidgetByRef (Ref aref);
-  // Since while loading their defaults, children may call parents methods, it's better
-  // to do that when parents are completly constructed
-  void loadChildrenDefaults();
 
   // only implemented in FormFieldButton
   virtual void fillChildrenSiblingsID ();
@@ -298,6 +286,7 @@ public:
 
  protected:
   void _createWidget (Object *obj, Ref aref);
+  void createChildren(std::set<int> *usedParents);
 
   FormFieldType type;           // field type
   Ref ref;
@@ -332,10 +321,10 @@ public:
   bool noToggleToOff () const { return noAllOff; }
 
   // returns gTrue if the state modification is accepted
-  GBool setState (int num, GBool s);
+  GBool setState (char *state);
 
   char *getAppearanceState() { return appearanceState.isName() ? appearanceState.getName() : NULL; }
-  
+
   void fillChildrenSiblingsID ();
 
   virtual ~FormFieldButton();
