@@ -233,7 +233,7 @@ public:
   virtual AnnotBorderStyle getStyle() const { return style; }
 
 protected:
-  void parseDashArray(Object *dashObj);
+  GBool parseDashArray(Object *dashObj);
 
   AnnotBorderType type;
   double width;

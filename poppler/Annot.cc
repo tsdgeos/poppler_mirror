@@ -439,7 +439,7 @@ AnnotBorder::AnnotBorder() {
   style = borderSolid;
 }
 
-void AnnotBorder::parseDashArray(Object *dashObj) {
+GBool AnnotBorder::parseDashArray(Object *dashObj) {
   GBool correct = gTrue;
   int tempLength = dashObj->arrayGetLength();
   double *tempDash = (double *) gmallocn (tempLength, sizeof (double));
@@ -463,6 +463,8 @@ void AnnotBorder::parseDashArray(Object *dashObj) {
   } else {
     gfree (tempDash);
   }
+
+  return correct;
 }
 
 AnnotBorder::~AnnotBorder() {
@@ -508,7 +510,9 @@ AnnotBorderArray::AnnotBorderArray(Array *array) {
 
     if (arrayLength == 4) {
       if (array->get(3, &obj1)->isArray())
-        parseDashArray(&obj1);
+        correct = parseDashArray(&obj1);
+      else
+        correct = gFalse;
       obj1.free();
     }
   } else {
