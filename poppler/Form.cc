@@ -397,29 +397,6 @@ void FormWidgetText::loadDefaults ()
     return;
 
   defaultsLoaded = gTrue;
-
-  Dict *dict = obj.getDict();
-  Object obj1;
-
-  if (Form::fieldLookup(dict, "V", &obj1)->isString()) {
-    if (obj1.getString()->hasUnicodeMarker()) {
-      if (obj1.getString()->getLength() <= 2) {
-      } else {
-        parent->setContentCopy(obj1.getString());
-      }
-    } else {
-      if (obj1.getString()->getLength() > 0) {
-        //non-unicode string -- assume pdfDocEncoding and try to convert to UTF16BE
-        int tmp_length;
-        char* tmp_str = pdfDocEncodingToUTF16(obj1.getString(), &tmp_length);
-        GooString str1(tmp_str, tmp_length);
-        parent->setContentCopy(&str1);
-	delete []tmp_str;
-      }
-    }
-  }
-  obj1.free();
-
 }
 
 GooString* FormWidgetText::getContent ()
@@ -480,22 +457,7 @@ void FormWidgetText::setContent(GooString* new_content)
   }
 
   modified = gTrue;
-  if (new_content == NULL) {
-    parent->setContentCopy(NULL);
-  } else {
-    //append the unicode marker <FE FF> if needed
-    if (!new_content->hasUnicodeMarker()) {
-      new_content->insert(0, 0xff);
-      new_content->insert(0, 0xfe);
-    }
-    
-    GooString *cont = new GooString(new_content);
-    parent->setContentCopy(cont);
-    
-    Object obj1;
-    obj1.initString(cont);
-    updateField ("V", &obj1);
-  }
+  parent->setContentCopy(new_content);
 }
 
 FormWidgetChoice::FormWidgetChoice(XRef *xrefA, Object *aobj, unsigned num, Ref ref, FormField *p) :
@@ -511,136 +473,10 @@ void FormWidgetChoice::loadDefaults ()
     return;
 
   defaultsLoaded = gTrue;
-
-  Dict *dict = obj.getDict();
-  Object obj1;
-  if (dict->lookup("Opt", &obj1)->isArray()) {
-    Object obj2;
-    parent->_setNumChoices(obj1.arrayGetLength());
-    parent->_createChoicesTab();
-    for(int i=0; i<parent->getNumChoices(); i++) {
-      obj1.arrayGet(i, &obj2);
-      if(obj2.isString()) {
-        parent->_setChoiceExportVal(i, obj2.getString()->copy());
-        parent->_setChoiceOptionName(i, obj2.getString()->copy());
-      } else if (obj2.isArray()) { // [Export_value, Displayed_text]
-        Object obj3,obj4;
-        if (obj2.arrayGetLength() < 2) {
-          error(-1, "FormWidgetChoice:: invalid Opt entry -- array's length < 2\n");
-          parent->_setChoiceExportVal(i, new GooString(""));
-          parent->_setChoiceOptionName(i, new GooString(""));
-          continue;
-        }
-        obj2.arrayGet(0, &obj3);
-        obj2.arrayGet(1, &obj4);
-        parent->_setChoiceExportVal(i, obj3.getString()->copy());
-        parent->_setChoiceOptionName(i, obj4.getString()->copy());
-        obj3.free();
-        obj4.free();
-      } else {
-        error(-1, "FormWidgetChoice:: invalid %d Opt entry\n", i);
-        parent->_setChoiceExportVal(i, new GooString(""));
-        parent->_setChoiceOptionName(i, new GooString(""));
-      }
-      obj2.free();
-    }
-  } else {
-    //empty choice
-  }
-  obj1.free();
-
-  bool* tmpCurrentChoice = new bool[parent->getNumChoices()];
-  memset(tmpCurrentChoice, 0, sizeof(bool)*parent->getNumChoices());
-
-  //find default choice
-  if (Form::fieldLookup(dict, "V", &obj1)->isString()) {
-    for(int i=0; i<parent->getNumChoices(); i++) {
-      if (parent->getChoice(i)->cmp(obj1.getString()) == 0) {
-        tmpCurrentChoice[i] = true;
-        break;
-      }
-    }
-  } else if (obj1.isArray()) {
-    for(int i=0; i<obj1.arrayGetLength(); i++) {
-      Object obj2;
-      obj1.arrayGet(i, &obj2);
-      for(int j=0; j<parent->getNumChoices(); j++) {
-        if (parent->getChoice(j)->cmp(obj2.getString()) == 0) {
-          tmpCurrentChoice[i] = true;
-        }
-      }
-
-      obj2.free();
-    }
-  }
-  obj1.free();
-
-  //convert choice's human readable strings to UTF16
-  //and update the /Opt dict entry to reflect this change
-#ifdef UPDATE_OPT
-  Object *objOpt = new Object();
-  objOpt->initArray(xref);
-#endif
-  for(int i=0; i<parent->getNumChoices(); i++) {
-        if (parent->getChoice(i)->hasUnicodeMarker()) { //string already in UTF16, do nothing
-
-        } else { //string in pdfdocencoding, convert to UTF16
-          int len;
-          char* buffer = pdfDocEncodingToUTF16(parent->getChoice(i), &len);
-          parent->getChoice(i)->Set(buffer, len);
-          delete [] buffer;
-        }
-        #ifdef UPDATE_OPT
-        Object *obj2 = new Object();
-        obj2->initString(choices[i]);
-        objOpt->getArray()->add(obj2);  
-        #endif
-  }
-  //set default choice now that we have UTF16 strings
-  for (int i=0; i<parent->getNumChoices(); i++) {
-    if (tmpCurrentChoice[i])
-      parent->select(i);
-  }
-#ifdef UPDATE_OPT
-  updateField ("Opt", objOpt);
-#endif
-  delete [] tmpCurrentChoice;
 }
 
 FormWidgetChoice::~FormWidgetChoice()
 {
-}
-
-void FormWidgetChoice::_updateV ()
-{
-  Object obj1;
-  //this is an editable combo-box with user-entered text
-  if (hasEdit() && parent->getEditChoice()) { 
-    obj1.initString(new GooString(parent->getEditChoice()));
-  } else {
-    int numSelected = parent->getNumSelected();
-    if (numSelected == 0) {
-      obj1.initString(new GooString(""));
-    } else if (numSelected == 1) {
-      for(int i=0; i<parent->getNumChoices(); i++) {
-        if (parent->isSelected(i)) {
-          obj1.initString(new GooString(parent->getChoice(i)));
-          break;
-        }
-      }
-    } else {
-      obj1.initArray(xref);
-      for(int i=0; i<parent->getNumChoices(); i++) {
-        if (parent->isSelected(i)) {
-          Object obj2;
-          obj2.initString(new GooString(parent->getChoice(i)));
-          obj1.arrayAdd(&obj2);
-        }
-      }
-    }
-  }
-  updateField ("V", &obj1);
-  modified = gTrue;
 }
 
 bool FormWidgetChoice::_checkRange (int i)
@@ -661,7 +497,6 @@ void FormWidgetChoice::select (int i)
   if (!_checkRange(i)) return;
   modified = gTrue;
   parent->select(i);
-  _updateV();
 }
 
 void FormWidgetChoice::toggle (int i)
@@ -673,7 +508,6 @@ void FormWidgetChoice::toggle (int i)
   if (!_checkRange(i)) return;
   modified = gTrue;
   parent->toggle(i);
-  _updateV();
 }
 
 void FormWidgetChoice::deselectAll ()
@@ -684,7 +518,6 @@ void FormWidgetChoice::deselectAll ()
   }
   modified = gTrue;
   parent->deselectAll();
-  _updateV();
 }
 
 GooString* FormWidgetChoice::getEditChoice ()
@@ -714,17 +547,7 @@ void FormWidgetChoice::setEditChoice (GooString* new_content)
   }
 
   modified = gTrue;
-  if (new_content == NULL) {
-    parent->setEditChoice(NULL);
-  } else {
-    //append the unicode marker <FE FF> if needed
-    if (!new_content->hasUnicodeMarker()) {
-      new_content->insert(0, 0xff);
-      new_content->insert(0, 0xfe);
-    }
-    parent->setEditChoice(new_content);
-  }
-  _updateV();
+  parent->setEditChoice(new_content);
 }
 
 int FormWidgetChoice::getNumChoices() 
@@ -998,6 +821,9 @@ FormFieldButton::FormFieldButton(XRef *xrefA, Object *aobj, const Ref& ref, std:
       error(-1, "FormFieldButton:: radiosInUnison flag unimplemented, please report a bug with a testcase\n");
     } 
   }
+
+  if (btype != formButtonPush)
+    Form::fieldLookup(dict, "V", &appearanceState);
 }
 
 void FormFieldButton::fillChildrenSiblingsID()
@@ -1043,26 +869,31 @@ GBool FormFieldButton::setState (int num, GBool s)
       //pearance state of whichever child field is currently in the on state
       if (active_child >= 0) {
         FormWidgetButton* actChild = static_cast<FormWidgetButton*>(widgets[active_child]);
-        if (actChild->getOnStr()) {
-          Object obj1;
-          obj1.initName(actChild->getOnStr()->getCString());
-	  obj.getDict()->set("V", &obj1);
-	  xref->setModifiedObject(&obj, ref);
-        }
+        if (actChild->getOnStr())
+          updateState(actChild->getOnStr()->getCString());
       }
     } else {
       active_child = -1;
-      Object obj1;
-      obj1.initName("Off");
-      obj.getDict()->set("V", &obj1);
-      xref->setModifiedObject(&obj, ref);
+      updateState("Off");
     }
   }
   return gTrue;
 }
 
+void FormFieldButton::updateState(char *state) {
+  Object obj1;
+
+  appearanceState.free();
+  appearanceState.initName(state);
+
+  appearanceState.copy(&obj1);
+  obj.getDict()->set("V", &obj1);
+  xref->setModifiedObject(&obj, ref);
+}
+
 FormFieldButton::~FormFieldButton()
 {
+  appearanceState.free();
 }
 
 //------------------------------------------------------------------------
@@ -1100,6 +931,19 @@ FormFieldText::FormFieldText(XRef *xrefA, Object *aobj, const Ref& ref, std::set
     maxLen = obj1.getInt();
   }
   obj1.free();
+
+  if (Form::fieldLookup(dict, "V", &obj1)->isString()) {
+    if (obj1.getString()->hasUnicodeMarker()) {
+      if (obj1.getString()->getLength() > 2)
+        content = obj1.getString()->copy();
+    } else if (obj1.getString()->getLength() > 0) {
+      //non-unicode string -- assume pdfDocEncoding and try to convert to UTF16BE
+      int tmp_length;
+      char* tmp_str = pdfDocEncodingToUTF16(obj1.getString(), &tmp_length);
+      content = new GooString(tmp_str, tmp_length);
+    }
+  }
+  obj1.free();
 }
 
 GooString* FormFieldText::getContentCopy ()
@@ -1110,10 +954,23 @@ GooString* FormFieldText::getContentCopy ()
 
 void FormFieldText::setContentCopy (GooString* new_content)
 {
-  if(content) {
-    delete content; 
+  delete content;
+  content = NULL;
+
+  if (new_content) {
+    content = new_content->copy();
+
+    //append the unicode marker <FE FF> if needed
+    if (!content->hasUnicodeMarker()) {
+      content->insert(0, 0xff);
+      content->insert(0, 0xfe);
+    }
   }
-  content = new_content->copy();
+
+  Object obj1;
+  obj1.initString(content ? content->copy() : new GooString(""));
+  obj.getDict()->set("V", &obj1);
+  xref->setModifiedObject(&obj, ref);
 }
 
 FormFieldText::~FormFieldText()
@@ -1157,11 +1014,89 @@ FormFieldChoice::FormFieldChoice(XRef *xrefA, Object *aobj, const Ref& ref, std:
     topIdx = obj1.getInt();
   obj1.free();
 
+  if (dict->lookup("Opt", &obj1)->isArray()) {
+    Object obj2;
+
+    numChoices = obj1.arrayGetLength();
+    choices = new ChoiceOpt[numChoices];
+    memset(choices, 0, sizeof(ChoiceOpt) * numChoices);
+
+    for (int i = 0; i < numChoices; i++) {
+      if (obj1.arrayGet(i, &obj2)->isString()) {
+        choices[i].optionName = obj2.getString()->copy();
+      } else if (obj2.isArray()) { // [Export_value, Displayed_text]
+        Object obj3;
+
+        if (obj2.arrayGetLength() < 2) {
+          error(-1, "FormWidgetChoice:: invalid Opt entry -- array's length < 2\n");
+          continue;
+        }
+        if (obj2.arrayGet(0, &obj3)->isString())
+          choices[i].exportVal = obj3.getString()->copy();
+        else
+          error(-1, "FormWidgetChoice:: invalid Opt entry -- exported value not a string\n");
+        obj3.free();
+
+        if (obj2.arrayGet(1, &obj3)->isString())
+          choices[i].optionName = obj3.getString()->copy();
+        else
+          error(-1, "FormWidgetChoice:: invalid Opt entry -- choice name not a string\n");
+        obj3.free();
+      } else {
+        error(-1, "FormWidgetChoice:: invalid %d Opt entry\n", i);
+      }
+      obj2.free();
+    }
+  } else {
+    //empty choice
+  }
+  obj1.free();
+
+  // find selected items and convert choice's human readable strings to UTF16
+  if (Form::fieldLookup(dict, "V", &obj1)->isString()) {
+    for (int i = 0; i < numChoices; i++) {
+      if (!choices[i].optionName)
+        continue;
+
+      if (choices[i].optionName->cmp(obj1.getString()) == 0)
+        choices[i].selected = true;
+
+      if (!choices[i].optionName->hasUnicodeMarker()) {
+        int len;
+        char* buffer = pdfDocEncodingToUTF16(choices[i].optionName, &len);
+        choices[i].optionName->Set(buffer, len);
+      }
+    }
+  } else if (obj1.isArray()) {
+    for (int i = 0; i < numChoices; i++) {
+      if (!choices[i].optionName)
+        continue;
+
+      for (int j = 0; j < obj1.arrayGetLength(); j++) {
+        Object obj2;
+
+        obj1.arrayGet(i, &obj2);
+        if (choices[i].optionName->cmp(obj2.getString()) == 0) {
+          choices[i].selected = true;
+          obj2.free();
+          break;
+        }
+        obj2.free();
+      }
+
+      if (!choices[i].optionName->hasUnicodeMarker()) {
+        int len;
+        char* buffer = pdfDocEncodingToUTF16(choices[i].optionName, &len);
+        choices[i].optionName->Set(buffer, len);
+      }
+    }
+  }
+  obj1.free();
 }
 
 FormFieldChoice::~FormFieldChoice()
 {
-  for (int i=0; i<numChoices; i++) {
+  for (int i = 0; i < numChoices; i++) {
     delete choices[i].exportVal;
     delete choices[i].optionName;
   }
@@ -1169,33 +1104,82 @@ FormFieldChoice::~FormFieldChoice()
   delete editedChoice;
 }
 
-void FormFieldChoice::deselectAll ()
+void FormFieldChoice::updateSelection() {
+  Object obj1;
+
+  //this is an editable combo-box with user-entered text
+  if (edit && editedChoice) {
+    obj1.initString(editedChoice->copy());
+  } else {
+    int numSelected = getNumSelected();
+    if (numSelected == 0) {
+      obj1.initString(new GooString(""));
+    } else if (numSelected == 1) {
+      for (int i = 0; numChoices; i++) {
+        if (choices[i].optionName && choices[i].selected) {
+          obj1.initString(choices[i].optionName->copy());
+          break;
+        }
+      }
+    } else {
+      obj1.initArray(xref);
+      for (int i = 0; i < numChoices; i++) {
+        if (choices[i].optionName && choices[i].selected) {
+          Object obj2;
+          obj2.initString(choices[i].optionName->copy());
+          obj1.arrayAdd(&obj2);
+        }
+      }
+    }
+  }
+
+  obj.getDict()->set("V", &obj1);
+  xref->setModifiedObject(&obj, ref);
+}
+
+void FormFieldChoice::unselectAll ()
 {
-  for(int i=0; i<numChoices; i++) {
+  for (int i = 0; i < numChoices; i++) {
     choices[i].selected = false;
   }
+}
+
+void FormFieldChoice::deselectAll () {
+  unselectAll();
+  updateSelection();
 }
 
 void FormFieldChoice::toggle (int i)
 {
   choices[i].selected = !choices[i].selected;
+  updateSelection();
 }
 
 void FormFieldChoice::select (int i)
 {
-  if (!multiselect) 
-    deselectAll();
+  if (!multiselect)
+    unselectAll();
   choices[i].selected = true;
+  updateSelection();
 }
 
 void FormFieldChoice::setEditChoice (GooString* new_content)
 {
-  if (editedChoice)
-    delete editedChoice;
+  delete editedChoice;
+  editedChoice = NULL;
 
-  deselectAll();
+  unselectAll();
 
-  editedChoice = new_content->copy();
+  if (new_content) {
+    editedChoice = new_content->copy();
+
+    //append the unicode marker <FE FF> if needed
+    if (!editedChoice->hasUnicodeMarker()) {
+      editedChoice->insert(0, 0xff);
+      editedChoice->insert(0, 0xfe);
+    }
+  }
+  updateSelection();
 }
 
 GooString* FormFieldChoice::getEditChoice ()
@@ -1213,12 +1197,16 @@ int FormFieldChoice::getNumSelected ()
   return cnt;
 }
 
-void FormFieldChoice::_createChoicesTab ()
-{
-  choices = new ChoiceOpt[numChoices]; 
-  for(int i=0; i<numChoices; i++) {
-    choices[i].selected = false;
+GooString *FormFieldChoice::getSelectedChoice() {
+  if (edit && editedChoice)
+    return editedChoice;
+
+  for (int i = 0; numChoices; i++) {
+    if (choices[i].optionName && choices[i].selected)
+      return choices[i].optionName;
   }
+
+  return NULL;
 }
 
 //------------------------------------------------------------------------

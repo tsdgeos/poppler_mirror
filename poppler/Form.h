@@ -247,7 +247,6 @@ public:
   bool commitOnSelChange () const; 
   bool isListBox () const;
 protected:
-  void _updateV ();
   bool _checkRange (int i);
   FormFieldChoice *parent;
 };
@@ -334,15 +333,20 @@ public:
 
   // returns gTrue if the state modification is accepted
   GBool setState (int num, GBool s);
+
+  char *getAppearanceState() { return appearanceState.isName() ? appearanceState.getName() : NULL; }
   
   void fillChildrenSiblingsID ();
 
   virtual ~FormFieldButton();
 protected:
+  void updateState(char *state);
+
   FormButtonType btype;
   int size;
   int active_child; //only used for combo box
   bool noAllOff;
+  Object appearanceState; // V
 };
 
 //------------------------------------------------------------------------
@@ -390,8 +394,10 @@ public:
   virtual ~FormFieldChoice();
 
   int getNumChoices() { return numChoices; }
-  GooString* getChoice(int i) { return choices[i].optionName; }
-  GooString* getExportVal (int i) { return choices[i].exportVal; }
+  GooString* getChoice(int i) { return choices ? choices[i].optionName : NULL; }
+  GooString* getExportVal (int i) { return choices ? choices[i].exportVal : NULL; }
+  // For multi-select choices it returns the first one
+  GooString* getSelectedChoice();
 
   //select the i-th choice
   void select (int i); 
@@ -420,13 +426,10 @@ public:
 
   int getTopIndex() const { return topIdx; }
 
-  /* these functions _must_ only be used by FormWidgetChoice */
-  void _setNumChoices (int i) { numChoices = i; }
-  void _createChoicesTab ();
-  void _setChoiceExportVal (int i, GooString* str) { choices[i].exportVal = str; }
-  void _setChoiceOptionName (int i, GooString* str) { choices[i].optionName = str; }
-
 protected:
+  void unselectAll();
+  void updateSelection();
+
   bool combo;
   bool edit;
   bool multiselect;

@@ -3646,35 +3646,33 @@ void AnnotWidget::drawBorder() {
 }
 
 void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
-  Object obj1, obj2;
+  Object obj1;
   Dict *annot = widget->getObj()->getDict();
-  Dict *fieldDict = field->getObj()->getDict();
   GooString *caption = NULL;
   if (appearCharacs)
     caption = appearCharacs->getNormalCaption();
 
   switch (static_cast<FormFieldButton *>(field)->getButtonType()) {
-  case formButtonRadio:
+  case formButtonRadio: {
     //~ Acrobat doesn't draw a caption if there is no AP dict (?)
-    if (Form::fieldLookup(fieldDict, "V", &obj1)->isName()) {
-      if (annot->lookup("AS", &obj2)->isName(obj1.getName()) &&
-          strcmp (obj1.getName(), "Off") != 0) {
-        if (caption) {
-          drawText(caption, da, resources, gFalse, 0, fieldQuadCenter,
-                   gFalse, gTrue);
-        } else if (appearCharacs) {
-          AnnotColor *aColor = appearCharacs->getBorderColor();
-          if (aColor) {
-            double dx = rect->x2 - rect->x1;
-            double dy = rect->y2 - rect->y1;
-            setColor(aColor, gTrue);
-            drawCircle(0.5 * dx, 0.5 * dy, 0.2 * (dx < dy ? dx : dy), gTrue);
-          }
+    char *buttonState = static_cast<FormFieldButton *>(field)->getAppearanceState();
+    if (buttonState && annot->lookup("AS", &obj1)->isName(buttonState) &&
+        strcmp (buttonState, "Off") != 0) {
+      if (caption) {
+        drawText(caption, da, resources, gFalse, 0, fieldQuadCenter,
+                 gFalse, gTrue);
+      } else if (appearCharacs) {
+        AnnotColor *aColor = appearCharacs->getBorderColor();
+        if (aColor) {
+          double dx = rect->x2 - rect->x1;
+          double dy = rect->y2 - rect->y1;
+          setColor(aColor, gTrue);
+          drawCircle(0.5 * dx, 0.5 * dy, 0.2 * (dx < dy ? dx : dy), gTrue);
         }
       }
-      obj2.free();
     }
     obj1.free();
+  }
     break;
   case formButtonPush:
     if (caption)
@@ -3696,38 +3694,36 @@ void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
 }
 
 void AnnotWidget::drawFormFieldText(GfxResources *resources, GooString *da) {
-  Object obj1;
   VariableTextQuadding quadding;
-  Dict *fieldDict = field->getObj()->getDict();
+  GooString *contents;
   FormFieldText *fieldText = static_cast<FormFieldText *>(field);
 
-  if (Form::fieldLookup(fieldDict, "V", &obj1)->isString()) {
+  contents = fieldText->getContent();
+  if (contents) {
     quadding = field->hasTextQuadding() ? field->getTextQuadding() : form->getTextQuadding();
 
     int comb = 0;
     if (fieldText->isComb())
       comb = fieldText->getMaxLen();
 
-    drawText(obj1.getString(), da, resources,
+    drawText(contents, da, resources,
              fieldText->isMultiline(), comb, quadding, gTrue, gFalse, fieldText->isPassword());
   }
-  obj1.free();
 }
 
 void AnnotWidget::drawFormFieldChoice(GfxResources *resources, GooString *da) {
-  Object obj1;
-  Dict *fieldDict = field->getObj()->getDict();
+  GooString *selected;
   VariableTextQuadding quadding;
   FormFieldChoice *fieldChoice = static_cast<FormFieldChoice *>(field);
 
   quadding = field->hasTextQuadding() ? field->getTextQuadding() : form->getTextQuadding();
 
   if (fieldChoice->isCombo()) {
-    if (Form::fieldLookup(fieldDict, "V", &obj1)->isString()) {
-      drawText(obj1.getString(), da, resources, gFalse, 0, quadding, gTrue, gFalse);
+    selected = fieldChoice->getSelectedChoice();
+    if (selected) {
+      drawText(selected, da, resources, gFalse, 0, quadding, gTrue, gFalse);
       //~ Acrobat draws a popup icon on the right side
     }
-    obj1.free();
   // list box
   } else {
     drawListBox(fieldChoice, da, resources, quadding);
