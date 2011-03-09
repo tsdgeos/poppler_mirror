@@ -2664,7 +2664,14 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
 AnnotWidget::AnnotWidget(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
     Annot(xrefA, dict, catalog, obj) {
   type = typeWidget;
-  widget = NULL;
+  field = NULL;
+  initialize(xrefA, catalog, dict);
+}
+
+AnnotWidget::AnnotWidget(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj, FormField *fieldA) :
+    Annot(xrefA, dict, catalog, obj) {
+  type = typeWidget;
+  field = fieldA;
   initialize(xrefA, catalog, dict);
 }
 
@@ -2686,13 +2693,11 @@ void AnnotWidget::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
   Object obj1;
 
   if ((form = catalog->getForm ())) {
-    widget = form->findWidgetByRef (ref);
-
     // check if field apperances need to be regenerated
     // Only text or choice fields needs to have appearance regenerated
     // see section 8.6.2 "Variable Text" of PDFReference
     regen = gFalse;
-    if (widget != NULL && (widget->getType () == formText || widget->getType () == formChoice)) {
+    if (field != NULL && (field->getType () == formText || field->getType () == formChoice)) {
       regen = form->getNeedAppearances ();
     }
   }
@@ -3651,7 +3656,7 @@ void AnnotWidget::drawBorder() {
 
 void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
   Object obj1;
-  Dict *annot = widget->getObj()->getDict();
+  Dict *annot = annotObj.getDict();
   GooString *caption = NULL;
   if (appearCharacs)
     caption = appearCharacs->getNormalCaption();
@@ -3736,22 +3741,19 @@ void AnnotWidget::drawFormFieldChoice(GfxResources *resources, GooString *da) {
 
 void AnnotWidget::generateFieldAppearance() {
   Object appearDict, obj1, obj2;
-  Dict *fieldDict;
   Dict *annot;
   GfxResources *resources;
   MemStream *appearStream;
   GooString *da;
   GBool modified;
 
-  if (widget == NULL || !widget->getField () || !widget->getField ()->getObj ()->isDict ())
+  if (field == NULL)
     return;
 
-  field = widget->getField();
-  fieldDict = field->getObj()->getDict();
-  annot = widget->getObj ()->getDict ();
+  annot = annotObj.getDict ();
 
   // do not regenerate appearence if widget has not changed
-  modified = widget->isModified ();
+  modified = field->isModified ();
 
   // only regenerate when it doesn't have an AP or
   // it already has an AP but widget has been modified
@@ -3827,7 +3829,7 @@ void AnnotWidget::generateFieldAppearance() {
 
   appearStream->setNeedFree(gTrue);
 
-  if (widget->isModified()) {
+  if (field->isModified()) {
     //create a new object that will contains the new appearance
     
     //if we already have a N entry in our AP dict, reuse it
@@ -5133,7 +5135,7 @@ void Annots::appendAnnot(Annot *annot) {
 }
 
 Annot *Annots::createAnnot(XRef *xref, Dict* dict, Catalog *catalog, Object *obj) {
-  Annot *annot;
+  Annot *annot = NULL;
   Object obj1;
 
   if (dict->lookup("Subtype", &obj1)->isName()) {
@@ -5176,7 +5178,17 @@ Annot *Annots::createAnnot(XRef *xref, Dict* dict, Catalog *catalog, Object *obj
     } else if(!strcmp(typeName, "Movie")) {
       annot = new AnnotMovie(xref, dict, catalog, obj);
     } else if(!strcmp(typeName, "Widget")) {
-      annot = new AnnotWidget(xref, dict, catalog, obj);
+      // Find the annot in forms
+      if (obj->isRef()) {
+        Form *form = catalog->getForm();
+        FormWidget *widget = form->findWidgetByRef(obj->getRef());
+        if (widget) {
+          annot = widget->getWidgetAnnotation();
+          annot->incRefCnt();
+        }
+      }
+      if (!annot)
+        annot = new AnnotWidget(xref, dict, catalog, obj);
     } else if(!strcmp(typeName, "Screen")) {
       annot = new AnnotScreen(xref, dict, catalog, obj);
     } else if(!strcmp(typeName, "PrinterMark")) {
@@ -5203,8 +5215,6 @@ Annot *Annots::createAnnot(XRef *xref, Dict* dict, Catalog *catalog, Object *obj
     } else {
       annot = new Annot(xref, dict, catalog, obj);
     }
-  } else {
-    annot = NULL;
   }
   obj1.free();
 

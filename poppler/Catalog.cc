@@ -111,7 +111,7 @@ Catalog::Catalog(XRef *xrefA) {
 
   // perform form-related loading after all widgets have been loaded
   if (getForm())
-    getForm()->postWidgetsLoad();
+    getForm()->postWidgetsLoad(this);
 
   catDict.free();
   return;

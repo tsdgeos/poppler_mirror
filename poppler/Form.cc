@@ -63,68 +63,44 @@ char* pdfDocEncodingToUTF16 (GooString* orig, int* length)
 
 FormWidget::FormWidget(XRef *xrefA, Object *aobj, unsigned num, Ref aref, FormField *fieldA) 
 {
-  Object obj1, obj2;
   ref = aref;
-  double t;
   ID = 0;
-  fontSize = 0.0;
   childNum = num;
   xref = xrefA;
   aobj->copy(&obj);
   type = formUndef;
   field = fieldA;
-  Dict *dict = obj.getDict();
-
-  if (!dict->lookup("Rect", &obj1)->isArray()) {
-    error(-1, "Annotation rectangle is wrong type");
-    goto err2;
-  }
-  if (!obj1.arrayGet(0, &obj2)->isNum()) {
-    error(-1, "Bad annotation rectangle");
-    goto err1;
-  }
-  x1 = obj2.getNum();
-  obj2.free();
-  if (!obj1.arrayGet(1, &obj2)->isNum()) {
-    error(-1, "Bad annotation rectangle");
-    goto err1;
-  }
-  y1 = obj2.getNum();
-  obj2.free();
-  if (!obj1.arrayGet(2, &obj2)->isNum()) {
-    error(-1, "Bad annotation rectangle");
-    goto err1;
-  }
-  x2 = obj2.getNum();
-  obj2.free();
-  if (!obj1.arrayGet(3, &obj2)->isNum()) {
-    error(-1, "Bad annotation rectangle");
-    goto err1;
-  }
-  y2 = obj2.getNum();
-  obj2.free();
-  obj1.free();
-  //swap coords if needed
-  if (x1 > x2) {
-    t = x1;
-    x1 = x2;
-    x2 = t;
-  }
-  if (y1 > y2) {
-    t = y1;
-    y1 = y2;
-    y2 = t;
-  }
-  
-  err1:
-    obj2.free();  
-  err2:
-    obj1.free();
+  widget = NULL;
 }
 
 FormWidget::~FormWidget()
 {
+  if (widget)
+    widget->decRefCnt();
   obj.free ();
+}
+
+void FormWidget::createWidgetAnnotation(Catalog *catalog) {
+  if (widget)
+    return;
+
+  Object obj1;
+  obj1.initRef(ref.num, ref.gen);
+  widget = new AnnotWidget(xref, obj.getDict(), catalog, &obj1, field);
+  obj1.free();
+}
+
+GBool FormWidget::inRect(double x, double y) const {
+  return widget ? widget->inRect(x, y) : gFalse;
+}
+
+void FormWidget::getRect(double *x1, double *y1, double *x2, double *y2) const {
+  if (widget)
+    widget->getRect(x1, y1, x2, y2);
+}
+
+double FormWidget::getFontSize() const {
+  return widget ? widget->getFontSize() : 0.;
 }
 
 bool FormWidget::isReadOnly() const
@@ -631,12 +607,22 @@ FormField::~FormField()
 
 void FormField::fillChildrenSiblingsID()
 {
-  if(terminal) return;
-  for (int i=0; i<numChildren; i++) {
+  if (terminal)
+    return;
+  for (int i = 0; i < numChildren; i++) {
     children[i]->fillChildrenSiblingsID();
   }
 }
 
+void FormField::createWidgetAnnotations(Catalog *catalog) {
+  if (terminal) {
+    for (int i = 0; i < numChildren; i++)
+      widgets[i]->createWidgetAnnotation(catalog);
+  } else {
+    for (int i = 0; i < numChildren; i++)
+      children[i]->createWidgetAnnotations(catalog);
+  }
+}
 
 void FormField::_createWidget (Object *obj, Ref aref)
 {
@@ -1336,11 +1322,16 @@ FormField *Form::createFieldFromDict (Object* obj, XRef *xrefA, const Ref& pref,
     return field;
 }
 
-void Form::postWidgetsLoad ()
+void Form::postWidgetsLoad (Catalog *catalog)
 {
- for(int i=0; i<numFields; i++) {
-   rootFields[i]->fillChildrenSiblingsID(); 
- }
+  // We create the widget annotations associated to
+  // every form widget here, because the AnnotWidget constructor
+  // needs the form object that gets from the catalog. When constructing
+  // a FormWidget the Catalog is still creating the form object
+  for (int i = 0; i < numFields; i++) {
+    rootFields[i]->fillChildrenSiblingsID();
+    rootFields[i]->createWidgetAnnotations(catalog);
+  }
 }
 
 FormWidget* Form::findWidgetByRef (Ref aref)
@@ -1370,6 +1361,9 @@ FormPageWidgets::FormPageWidgets (Annots *annots, unsigned int page, Form *form)
     for (int i = 0; i < size; ++i) {
       Annot *annot = annots->getAnnot(i);
 
+      if (annot->getType() != Annot::typeWidget)
+        continue;
+
       if (!annot->getHasRef()) {
         /* Since all entry in a form field's kid dict needs to be
            indirect references, if this annot isn't indirect, it isn't 
@@ -1385,7 +1379,6 @@ FormPageWidgets::FormPageWidgets (Annots *annots, unsigned int page, Form *form)
       if (tmp) {
         // We've found a corresponding form field, link it
         tmp->setID(FormWidget::encodeID(page, numWidgets));
-        tmp->setFontSize(annot->getFontSize());
         widgets[numWidgets++] = tmp;
       }
     }

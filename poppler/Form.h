@@ -27,6 +27,7 @@ class GooString;
 class Array;
 class Dict;
 class Annot;
+class AnnotWidget;
 class Annots;
 class Catalog;
 class LinkAction;
@@ -70,12 +71,10 @@ public:
   virtual ~FormWidget();
 
   // Check if point is inside the field bounding rect
-  GBool inRect(double x, double y)
-    { return x1 <= x && x <= x2 && y1 <= y && y <= y2; }
+  GBool inRect(double x, double y) const;
 
   // Get the field bounding rect
-  void getRect(double *xa1, double *ya1, double *xa2, double *ya2)
-    { *xa1 = x1; *ya1 = y1; *xa2 = x2; *ya2 = y2; }
+  void getRect(double *x1, double *y1, double *x2, double *y2) const;
 
   unsigned getID () { return ID; }
   void setID (unsigned int i) { ID=i; }
@@ -89,8 +88,7 @@ public:
   void setChildNum (unsigned i) { childNum = i; }
   unsigned getChildNum () { return childNum; }
 
-  void setFontSize(double f) { fontSize = f; }
-  double getFontSize () { return fontSize; }
+  double getFontSize() const;
 
   GooString *getPartialName() const;
   GooString *getAlternateUiName() const;
@@ -108,11 +106,15 @@ public:
   // decode id and retrieve pageNum and fieldNum
   static void decodeID (unsigned id, unsigned* pageNum, unsigned* fieldNum);
 
+  void createWidgetAnnotation(Catalog *catalog);
+  AnnotWidget *getWidgetAnnotation() const { return widget; }
+
 protected:
   FormWidget(XRef *xrefA, Object *aobj, unsigned num, Ref aref, FormField *fieldA);
 
   void updateField (const char *key, Object *value);
 
+  AnnotWidget *widget;
   FormField* field;
   FormFieldType type;
   Object obj;
@@ -131,11 +133,6 @@ protected:
   (decoding) pageNum = id >> 4*sizeof(unsigned); fieldNum = (id << 4*sizeof(unsigned)) >> 4*sizeof(unsigned);
   */
   unsigned ID; 
-
-  double x1, y1;                // lower left corner
-  double x2, y2;                // upper right corner
-  double fontSize; //font size if this widget has text
-
 };
 
 //------------------------------------------------------------------------
@@ -284,6 +281,8 @@ public:
 
   // only implemented in FormFieldButton
   virtual void fillChildrenSiblingsID ();
+
+  void createWidgetAnnotations(Catalog *catalog);
 
 
  protected:
@@ -486,7 +485,7 @@ public:
 
   FormWidget* findWidgetByRef (Ref aref);
 
-  void postWidgetsLoad();
+  void postWidgetsLoad(Catalog *catalog);
 private:
   FormField** rootFields;
   int numFields;

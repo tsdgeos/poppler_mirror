@@ -1131,6 +1131,7 @@ public:
   };
 
   AnnotWidget(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotWidget(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj, FormField *fieldA);
   virtual ~AnnotWidget();
 
   virtual void draw(Gfx *gfx, GBool printing);
@@ -1163,7 +1164,6 @@ private:
   void writeString(GooString *str, GooString *appearBuf);
 
   Form *form;
-  FormWidget *widget;                     // FormWidget object for this annotation
   FormField *field;                       // FormField object for this annotation
   AnnotWidgetHighlightMode mode;          // H  (Default I)
   AnnotAppearanceCharacs *appearCharacs;  // MK
