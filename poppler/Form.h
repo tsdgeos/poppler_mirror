@@ -112,8 +112,6 @@ public:
 protected:
   FormWidget(XRef *xrefA, Object *aobj, unsigned num, Ref aref, FormField *fieldA);
 
-  void updateField (const char *key, Object *value);
-
   AnnotWidget *widget;
   FormField* field;
   FormFieldType type;

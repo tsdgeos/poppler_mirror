@@ -123,28 +123,6 @@ void FormWidget::decodeID (unsigned id, unsigned* pageNum, unsigned* fieldNum)
   *fieldNum = (id << 4*sizeof(unsigned)) >> 4*sizeof(unsigned);
 }
 
-void FormWidget::updateField (const char *key, Object *value)
-{
-  Object *obj1;
-  Ref ref1;
-  Object obj2;
-
-  if (obj.getDict()->lookup ("FT", &obj2)->isName ()) {
-    // It's a composed (annot + field) dict
-    obj1 = &obj;
-    ref1 = ref;
-  } else {
-    // It's an annot dict, we have to modify the Field (parent) dict
-    obj1 = field->getObj ();
-    ref1 = field->getRef ();
-  }
-  obj2.free ();
-
-  obj1->getDict ()->set (const_cast<char*>(key), value);
-  //notify the xref about the update
-  xref->setModifiedObject(obj1, ref1);
-}
-
 GooString *FormWidget::getPartialName() const {
   return field->getPartialName();
 }
