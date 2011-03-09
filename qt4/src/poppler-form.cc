@@ -156,10 +156,9 @@ bool FormField::isVisible() const
 Link* FormField::activationAction() const
 {
   Link* action = 0;
-  if (::LinkAction *act = m_formData->fm->createActivationAction(m_formData->doc->doc->getCatalog()))
+  if (::LinkAction *act = m_formData->fm->getActivationAction())
   {
     action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
-    delete act;
   }
   return action;
 }

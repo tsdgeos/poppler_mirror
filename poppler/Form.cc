@@ -161,15 +161,8 @@ GooString *FormWidget::getFullyQualifiedName() {
   return field->getFullyQualifiedName();
 }
 
-LinkAction *FormWidget::createActivationAction(Catalog *catalog)
-{
-  Object tmp;
-  LinkAction *act = NULL;
-  if (obj.dictLookup("A", &tmp)->isDict()) {
-    act = LinkAction::parseAction(&tmp, catalog ? catalog->getBaseURI() : NULL);
-  }
-  tmp.free();
-  return act;
+LinkAction *FormWidget::getActivationAction() {
+  return widget ? widget->getAction() : NULL;
 }
 
 FormWidgetButton::FormWidgetButton (XRef *xrefA, Object *aobj, unsigned num, Ref ref, FormField *p) :

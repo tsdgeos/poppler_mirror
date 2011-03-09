@@ -99,7 +99,7 @@ public:
 
   bool isReadOnly() const;
 
-  LinkAction *createActivationAction(Catalog *catalog);
+  LinkAction *getActivationAction();
 
   // return the unique ID corresponding to pageNum/fieldNum
   static int encodeID (unsigned pageNum, unsigned fieldNum);
