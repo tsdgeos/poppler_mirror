@@ -483,6 +483,8 @@ public:
 
   void setPage(Ref *pageRef, int pageIndex);
 
+  void setAppearanceState(char *state);
+
   // getters
   XRef *getXRef() const { return xref; }
   GBool getHasRef() const { return hasRef; }

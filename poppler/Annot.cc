@@ -1078,6 +1078,40 @@ void Annot::setPage(Ref *pageRef, int pageIndex)
   page = pageIndex;
 }
 
+void Annot::setAppearanceState(char *state) {
+  if (!state)
+    return;
+
+  if (appearState && appearState->cmp(state) == 0)
+    return;
+
+  delete appearState;
+  appearState = new GooString(state);
+
+  Object obj1;
+  obj1.initName(state);
+  update ("AS", &obj1);
+
+  // The appearance state determines the current appearance stream
+  Object obj2;
+  if (annotObj.dictLookup("AP", &obj2)->isDict()) {
+    Object obj3;
+
+    if (obj2.dictLookup("N", &obj3)->isDict()) {
+      Object obj4;
+
+      appearance.free();
+      if (obj3.dictLookupNF(state, &obj4)->isRef())
+        obj4.copy(&appearance);
+      else
+        appearance.initNull();
+      obj4.free();
+    }
+    obj3.free();
+  }
+  obj2.free();
+}
+
 double Annot::getXMin() {
   return rect->x1;
 }
@@ -3655,8 +3689,6 @@ void AnnotWidget::drawBorder() {
 }
 
 void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
-  Object obj1;
-  Dict *annot = annotObj.getDict();
   GooString *caption = NULL;
   if (appearCharacs)
     caption = appearCharacs->getNormalCaption();
@@ -3665,7 +3697,7 @@ void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
   case formButtonRadio: {
     //~ Acrobat doesn't draw a caption if there is no AP dict (?)
     char *buttonState = static_cast<FormFieldButton *>(field)->getAppearanceState();
-    if (buttonState && annot->lookup("AS", &obj1)->isName(buttonState) &&
+    if (buttonState && appearState && appearState->cmp(buttonState) == 0 &&
         strcmp (buttonState, "Off") != 0) {
       if (caption) {
         drawText(caption, da, resources, gFalse, 0, fieldQuadCenter,
@@ -3680,7 +3712,6 @@ void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
         }
       }
     }
-    obj1.free();
   }
     break;
   case formButtonPush:
@@ -3688,8 +3719,7 @@ void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
       drawText(caption, da, resources, gFalse, 0, fieldQuadCenter, gFalse, gFalse);
     break;
   case formButtonCheck:
-    if (annot->lookup("AS", &obj1)->isName() &&
-        strcmp(obj1.getName(), "Off") != 0) {
+    if (appearState && appearState->cmp("Off") != 0) {
       if (!caption) {
         GooString checkMark("3");
         drawText(&checkMark, da, resources, gFalse, 0, fieldQuadCenter, gFalse, gTrue);
@@ -3697,7 +3727,6 @@ void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
         drawText(caption, da, resources, gFalse, 0, fieldQuadCenter, gFalse, gTrue);
       }
     }
-    obj1.free();
     break;
   }
 }

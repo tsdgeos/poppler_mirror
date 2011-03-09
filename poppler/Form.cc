@@ -223,10 +223,9 @@ FormButtonType FormWidgetButton::getButtonType () const
 }
 
 void FormWidgetButton::setAppearanceState(char *state) {
-  Object obj1;
-  obj1.initName(state);
-  obj.getDict()->set("AS", &obj1);
-  xref->setModifiedObject(&obj, ref);
+  if (!widget)
+    return;
+  widget->setAppearanceState(state);
 }
 
 void FormWidgetButton::setState (GBool astate, GBool calledByParent)
