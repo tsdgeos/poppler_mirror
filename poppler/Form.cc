@@ -75,28 +75,6 @@ FormWidget::FormWidget(XRef *xrefA, Object *aobj, unsigned num, Ref aref, FormFi
   type = formUndef;
   field = fieldA;
   Dict *dict = obj.getDict();
-  fullyQualifiedName = NULL;
-
-  if (dict->lookup("T", &obj1)->isString()) {
-    partialName = obj1.getString()->copy();
-  } else {
-    partialName = NULL;
-  }
-  obj1.free();
-
-  if (dict->lookup("TU", &obj1)->isString()) {
-    alternateUiName = obj1.getString()->copy();
-  } else {
-    alternateUiName = NULL;
-  }
-  obj1.free();
-
-  if(dict->lookup("TM", &obj1)->isString()) {
-    mappingName = obj1.getString()->copy();
-  } else {
-    mappingName = NULL;
-  }
-  obj1.free();
 
   if (!dict->lookup("Rect", &obj1)->isArray()) {
     error(-1, "Annotation rectangle is wrong type");
@@ -147,10 +125,6 @@ FormWidget::FormWidget(XRef *xrefA, Object *aobj, unsigned num, Ref aref, FormFi
 
 FormWidget::~FormWidget()
 {
-  delete partialName;
-  delete alternateUiName;
-  delete mappingName;
-  delete fullyQualifiedName;
   obj.free ();
 }
 
@@ -192,50 +166,20 @@ void FormWidget::updateField (const char *key, Object *value)
   xref->setModifiedObject(obj1, ref1);
 }
 
-GooString* FormWidget::getFullyQualifiedName() {
-  Object obj1, obj2;
-  Object parent;
-  GooString *parent_name;
-  GooString *full_name;
+GooString *FormWidget::getPartialName() const {
+  return field->getPartialName();
+}
 
-  if (fullyQualifiedName)
-    return fullyQualifiedName;
+GooString *FormWidget::getAlternateUiName() const {
+  return field->getAlternateUiName();
+}
 
-  full_name = new GooString();
+GooString *FormWidget::getMappingName() const {
+  return field->getMappingName();
+}
 
-  obj.copy(&obj1);
-  while (obj1.dictLookup("Parent", &parent)->isDict()) {
-    if (parent.dictLookup("T", &obj2)->isString()) {
-      parent_name = obj2.getString();
-
-      if (parent_name->hasUnicodeMarker()) {
-        parent_name->del(0, 2); // Remove the unicode BOM
-	full_name->insert(0, "\0.", 2); // 2-byte unicode period
-      } else {
-        full_name->insert(0, '.'); // 1-byte ascii period
-      }
-
-      full_name->insert(0, parent_name);
-      obj2.free();
-    }
-    obj1.free();
-    parent.copy(&obj1);
-    parent.free();
-  }
-  obj1.free();
-  parent.free();
-
-  if (partialName) {
-    full_name->append(partialName);
-  } else {
-    int len = full_name->getLength();
-    // Remove the last period
-    if (len > 0)
-      full_name->del(len - 1, 1);
-  }
-
-  fullyQualifiedName = full_name;
-  return fullyQualifiedName;
+GooString *FormWidget::getFullyQualifiedName() {
+  return field->getFullyQualifiedName();
 }
 
 LinkAction *FormWidget::createActivationAction(Catalog *catalog)
@@ -549,6 +493,7 @@ FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, std::set<int> *
   widgets = NULL;
   readOnly = false;
   defaultAppearance = NULL;
+  fullyQualifiedName = NULL;
   quadding = quaddingLeftJustified;
   hasQuadding = gFalse;
 
@@ -642,6 +587,27 @@ FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, std::set<int> *
     hasQuadding = gTrue;
   }
   obj1.free();
+
+  if (dict->lookup("T", &obj1)->isString()) {
+    partialName = obj1.getString()->copy();
+  } else {
+    partialName = NULL;
+  }
+  obj1.free();
+
+  if (dict->lookup("TU", &obj1)->isString()) {
+    alternateUiName = obj1.getString()->copy();
+  } else {
+    alternateUiName = NULL;
+  }
+  obj1.free();
+
+  if(dict->lookup("TM", &obj1)->isString()) {
+    mappingName = obj1.getString()->copy();
+  } else {
+    mappingName = NULL;
+  }
+  obj1.free();
 }
 
 FormField::~FormField()
@@ -660,6 +626,10 @@ FormField::~FormField()
   obj.free();
 
   delete defaultAppearance;
+  delete partialName;
+  delete alternateUiName;
+  delete mappingName;
+  delete fullyQualifiedName;
 }
 
 void FormField::fillChildrenSiblingsID()
@@ -714,6 +684,51 @@ FormWidget* FormField::findWidgetByRef (Ref aref)
   return NULL;
 }
 
+GooString* FormField::getFullyQualifiedName() {
+  Object obj1, obj2;
+  Object parent;
+  GooString *parent_name;
+  GooString *full_name;
+
+  if (fullyQualifiedName)
+    return fullyQualifiedName;
+
+  full_name = new GooString();
+
+  obj.copy(&obj1);
+  while (obj1.dictLookup("Parent", &parent)->isDict()) {
+    if (parent.dictLookup("T", &obj2)->isString()) {
+      parent_name = obj2.getString();
+
+      if (parent_name->hasUnicodeMarker()) {
+        parent_name->del(0, 2); // Remove the unicode BOM
+	full_name->insert(0, "\0.", 2); // 2-byte unicode period
+      } else {
+        full_name->insert(0, '.'); // 1-byte ascii period
+      }
+
+      full_name->insert(0, parent_name);
+      obj2.free();
+    }
+    obj1.free();
+    parent.copy(&obj1);
+    parent.free();
+  }
+  obj1.free();
+  parent.free();
+
+  if (partialName) {
+    full_name->append(partialName);
+  } else {
+    int len = full_name->getLength();
+    // Remove the last period
+    if (len > 0)
+      full_name->del(len - 1, 1);
+  }
+
+  fullyQualifiedName = full_name;
+  return fullyQualifiedName;
+}
 
 //------------------------------------------------------------------------
 // FormFieldButton

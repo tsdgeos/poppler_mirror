@@ -92,9 +92,9 @@ public:
   void setFontSize(double f) { fontSize = f; }
   double getFontSize () { return fontSize; }
 
-  GooString *getPartialName() const { return partialName; }
-  GooString *getAlternateUiName() const { return alternateUiName; }
-  GooString *getMappingName() const { return mappingName; }
+  GooString *getPartialName() const;
+  GooString *getAlternateUiName() const;
+  GooString *getMappingName() const;
   GooString *getFullyQualifiedName();
 
   GBool isModified () { return modified; }
@@ -119,10 +119,6 @@ protected:
   Ref ref;
   XRef *xref;
   GBool modified;
-  GooString *partialName; // T field
-  GooString *alternateUiName; // TU field
-  GooString *mappingName; // TM field
-  GooString *fullyQualifiedName;
 
   //index of this field in the parent's child list
   unsigned childNum;
@@ -278,6 +274,11 @@ public:
   GBool hasTextQuadding() const { return hasQuadding; }
   VariableTextQuadding getTextQuadding() const { return quadding; }
 
+  GooString *getPartialName() const { return partialName; }
+  GooString *getAlternateUiName() const { return alternateUiName; }
+  GooString *getMappingName() const { return mappingName; }
+  GooString *getFullyQualifiedName();
+
   FormWidget* findWidgetByRef (Ref aref);
 
   // only implemented in FormFieldButton
@@ -297,6 +298,11 @@ public:
   int numChildren;
   FormWidget **widgets;
   bool readOnly;
+
+  GooString *partialName; // T field
+  GooString *alternateUiName; // TU field
+  GooString *mappingName; // TM field
+  GooString *fullyQualifiedName;
 
   // Variable Text
   GooString *defaultAppearance;
