@@ -68,7 +68,6 @@ FormWidget::FormWidget(XRef *xrefA, Object *aobj, unsigned num, Ref aref, FormFi
   double t;
   ID = 0;
   fontSize = 0.0;
-  modified = gFalse;
   childNum = num;
   xref = xrefA;
   aobj->copy(&obj);
@@ -131,6 +130,10 @@ FormWidget::~FormWidget()
 bool FormWidget::isReadOnly() const
 {
   return field->isReadOnly();
+}
+
+GBool FormWidget::isModified() const {
+  return field->isModified();
 }
 
 int FormWidget::encodeID (unsigned pageNum, unsigned fieldNum)
@@ -244,8 +247,6 @@ FormButtonType FormWidgetButton::getButtonType () const
 }
 
 void FormWidgetButton::setAppearanceState(char *state) {
-  modified = gTrue;
-
   Object obj1;
   obj1.initName(state);
   obj.getDict()->set("AS", &obj1);
@@ -342,7 +343,6 @@ void FormWidgetText::setContent(GooString* new_content)
     return;
   }
 
-  modified = gTrue;
   parent->setContentCopy(new_content);
 }
 
@@ -373,7 +373,6 @@ void FormWidgetChoice::select (int i)
     return;
   }
   if (!_checkRange(i)) return;
-  modified = gTrue;
   parent->select(i);
 }
 
@@ -384,7 +383,6 @@ void FormWidgetChoice::toggle (int i)
     return;
   }
   if (!_checkRange(i)) return;
-  modified = gTrue;
   parent->toggle(i);
 }
 
@@ -394,7 +392,6 @@ void FormWidgetChoice::deselectAll ()
     error(-1, "FormWidgetChoice::deselectAll called on a read only field\n");
     return;
   }
-  modified = gTrue;
   parent->deselectAll();
 }
 
@@ -424,7 +421,6 @@ void FormWidgetChoice::setEditChoice (GooString* new_content)
     return;
   }
 
-  modified = gTrue;
   parent->setEditChoice(new_content);
 }
 
@@ -496,6 +492,7 @@ FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, std::set<int> *
   fullyQualifiedName = NULL;
   quadding = quaddingLeftJustified;
   hasQuadding = gFalse;
+  modified = gFalse;
 
   ref = aref;
 
@@ -837,6 +834,7 @@ GBool FormFieldButton::setState(char *state)
       }
     }
     updateState(state);
+    modified = gTrue;
   }
 
   return gTrue;
@@ -933,6 +931,7 @@ void FormFieldText::setContentCopy (GooString* new_content)
   obj1.initString(content ? content->copy() : new GooString(""));
   obj.getDict()->set("V", &obj1);
   xref->setModifiedObject(&obj, ref);
+  modified = gTrue;
 }
 
 FormFieldText::~FormFieldText()
@@ -1097,6 +1096,7 @@ void FormFieldChoice::updateSelection() {
 
   obj.getDict()->set("V", &obj1);
   xref->setModifiedObject(&obj, ref);
+  modified = gTrue;
 }
 
 void FormFieldChoice::unselectAll ()

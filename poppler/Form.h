@@ -97,7 +97,7 @@ public:
   GooString *getMappingName() const;
   GooString *getFullyQualifiedName();
 
-  GBool isModified () { return modified; }
+  GBool isModified () const;
 
   bool isReadOnly() const;
 
@@ -118,7 +118,6 @@ protected:
   Object obj;
   Ref ref;
   XRef *xref;
-  GBool modified;
 
   //index of this field in the parent's child list
   unsigned childNum;
@@ -270,6 +269,8 @@ public:
   void setReadOnly (bool b) { readOnly = b; }
   bool isReadOnly () const { return readOnly; }
 
+  GBool isModified () const { return modified; }
+
   GooString* getDefaultAppearance() const { return defaultAppearance; }
   GBool hasTextQuadding() const { return hasQuadding; }
   VariableTextQuadding getTextQuadding() const { return quadding; }
@@ -298,6 +299,7 @@ public:
   int numChildren;
   FormWidget **widgets;
   bool readOnly;
+  GBool modified;
 
   GooString *partialName; // T field
   GooString *alternateUiName; // TU field
