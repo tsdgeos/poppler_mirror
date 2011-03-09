@@ -2726,19 +2726,7 @@ AnnotWidget::~AnnotWidget() {
 void AnnotWidget::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
   Object obj1;
 
-  if ((form = catalog->getForm ())) {
-    // check if field apperances need to be regenerated
-    // Only text or choice fields needs to have appearance regenerated
-    // see section 8.6.2 "Variable Text" of PDFReference
-    regen = gFalse;
-    if (field != NULL && (field->getType () == formText || field->getType () == formChoice)) {
-      regen = form->getNeedAppearances ();
-    }
-  }
-
-  // If field doesn't have an AP we'll have to generate it
-  if (appearance.isNone () || appearance.isNull ())
-    regen = gTrue;
+  form = catalog->getForm();
 
   if(dict->lookup("H", &obj1)->isName()) {
     const char *modeName = obj1.getName();
@@ -3770,25 +3758,9 @@ void AnnotWidget::drawFormFieldChoice(GfxResources *resources, GooString *da) {
 
 void AnnotWidget::generateFieldAppearance() {
   Object appearDict, obj1, obj2;
-  Dict *annot;
   GfxResources *resources;
   MemStream *appearStream;
   GooString *da;
-  GBool modified;
-
-  if (field == NULL)
-    return;
-
-  annot = annotObj.getDict ();
-
-  // do not regenerate appearence if widget has not changed
-  modified = field->isModified ();
-
-  // only regenerate when it doesn't have an AP or
-  // it already has an AP but widget has been modified
-  if (!regen && !modified) {
-    return;
-  }
 
   appearBuf = new GooString ();
 
@@ -3857,42 +3829,6 @@ void AnnotWidget::generateFieldAppearance() {
   delete appearBuf;
 
   appearStream->setNeedFree(gTrue);
-
-  if (field->isModified()) {
-    //create a new object that will contains the new appearance
-    
-    //if we already have a N entry in our AP dict, reuse it
-    if (annot->lookup("AP", &obj1)->isDict() &&
-        obj1.dictLookupNF("N", &obj2)->isRef()) {
-      appRef = obj2.getRef();
-    }
-
-    obj2.free();
-    obj1.free();
-
-    // this annot doesn't have an AP yet, create one
-    if (appRef.num == 0)
-      appRef = xref->addIndirectObject(&appearance);
-    else // since we reuse the already existing AP, we have to notify the xref about this update
-      xref->setModifiedObject(&appearance, appRef);
-
-    // update object's AP and AS
-    Object apObj;
-    apObj.initDict(xref);
-
-    Object oaRef;
-    oaRef.initRef(appRef.num, appRef.gen);
-
-    apObj.dictSet("N", &oaRef);
-    annot->set("AP", &apObj);
-    Dict* d = new Dict(annot);
-    d->decRef();
-    Object dictObj;
-    dictObj.initDict(d);
-
-    xref->setModifiedObject(&dictObj, ref);
-    dictObj.free();
-  }
 }
 
 
@@ -3903,7 +3839,18 @@ void AnnotWidget::draw(Gfx *gfx, GBool printing) {
     return;
 
   addDingbatsResource = gFalse;
-  generateFieldAppearance ();
+
+  // Only construct the appearance stream when
+  // - annot doesn't have an AP or
+  // - it's a field containing text (text and choices) and
+  // - NeedAppearances is true or
+  // - widget has been modified or
+  if (field) {
+    if (appearance.isNull() ||
+        (((field->getType() == formText || field->getType() == formChoice)) &&
+         ((form && form->getNeedAppearances()) || field->isModified())))
+      generateFieldAppearance();
+  }
 
   // draw the appearance stream
   appearance.fetch(xref, &obj);

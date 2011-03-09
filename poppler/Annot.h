@@ -1174,7 +1174,6 @@ private:
   // inherited  from Annot
   // AnnotBorderBS border;                // BS
   Dict *parent;                           // Parent
-  GBool regen;
   GBool addDingbatsResource;
 };
 
