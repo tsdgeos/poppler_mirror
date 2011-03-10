@@ -239,7 +239,7 @@ namespace Debug {
         }
       }
     
-    void DocumentData::init(GooString *ownerPassword, GooString *userPassword)
+    void DocumentData::init()
     {
         m_fontInfoIterator = 0;
         m_backend = Document::SplashBackend;
@@ -247,9 +247,6 @@ namespace Debug {
         paperColor = Qt::white;
         m_hints = 0;
         m_optContentModel = 0;
-        // It might be more appropriate to delete these in PDFDoc
-        delete ownerPassword;
-        delete userPassword;
       
         if ( count == 0 )
         {

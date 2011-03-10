@@ -76,8 +76,10 @@ namespace Poppler {
     public:
 	DocumentData(GooString *filePath, GooString *ownerPassword, GooString *userPassword)
 	    {
+		init();
 		doc = new PDFDoc(filePath, ownerPassword, userPassword);
-		init(ownerPassword, userPassword);
+		delete ownerPassword;
+		delete userPassword;
 	    }
 	
 	DocumentData(const QByteArray &data, GooString *ownerPassword, GooString *userPassword)
@@ -86,11 +88,13 @@ namespace Poppler {
 		fileContents = data;
 		obj.initNull();
 		MemStream *str = new MemStream((char*)fileContents.data(), 0, fileContents.length(), &obj);
-	        doc = new PDFDoc(str, ownerPassword, userPassword);
-		init(ownerPassword, userPassword);
+		init();
+		doc = new PDFDoc(str, ownerPassword, userPassword);
+		delete ownerPassword;
+		delete userPassword;
 	    }
 	
-	void init(GooString *ownerPassword, GooString *userPassword);
+	void init();
 	
 	~DocumentData();
 	
