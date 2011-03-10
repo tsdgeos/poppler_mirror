@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2006-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright 2007-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright 2007-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2007 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2007 Iñigo Martínez <inigomartinez@gmail.com>
@@ -1119,7 +1119,7 @@ GooString *FormFieldChoice::getSelectedChoice() {
   if (edit && editedChoice)
     return editedChoice;
 
-  for (int i = 0; numChoices; i++) {
+  for (int i = 0; i < numChoices; i++) {
     if (choices[i].optionName && choices[i].selected)
       return choices[i].optionName;
   }
