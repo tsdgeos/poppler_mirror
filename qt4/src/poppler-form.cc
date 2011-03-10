@@ -216,9 +216,9 @@ QString FormFieldButton::caption() const
   }
   else
   {
-    if (GooString *goo = fwb->getOnStr())
+    if (const char *goo = fwb->getOnStr())
     {
-      ret = QString::fromUtf8(goo->getCString());
+      ret = QString::fromUtf8(goo);
     }
   }
   return ret;
