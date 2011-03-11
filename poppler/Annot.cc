@@ -5157,10 +5157,12 @@ Annot *Annots::createAnnot(XRef *xref, Dict* dict, Catalog *catalog, Object *obj
       // Find the annot in forms
       if (obj->isRef()) {
         Form *form = catalog->getForm();
-        FormWidget *widget = form->findWidgetByRef(obj->getRef());
-        if (widget) {
-          annot = widget->getWidgetAnnotation();
-          annot->incRefCnt();
+        if (form) {
+          FormWidget *widget = form->findWidgetByRef(obj->getRef());
+          if (widget) {
+            annot = widget->getWidgetAnnotation();
+            annot->incRefCnt();
+          }
         }
       }
       if (!annot)
