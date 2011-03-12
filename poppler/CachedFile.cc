@@ -29,7 +29,13 @@ CachedFile::CachedFile(CachedFileLoader *cachedFileLoaderA, GooString *uriA)
   length = loader->init(uri, this);
   refCnt = 1;
 
-  chunks->resize(length/CachedFileChunkSize + 1);
+  if (length != ((size_t) -1)) {
+    chunks->resize(length/CachedFileChunkSize + 1);
+  }
+  else {
+    error(-1, "Failed to initialize file cache for '%s'.", uri->getCString());
+    chunks->resize(0);
+  }
 }
 
 CachedFile::~CachedFile()

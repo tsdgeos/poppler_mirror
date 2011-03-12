@@ -39,6 +39,7 @@ size_t
 CurlCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
 {
   double contentLength = -1;
+  long code = 0;
   size_t size;
 
   url = urlA;
@@ -50,10 +51,15 @@ CurlCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
   curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &noop_cb);
   curl_easy_perform(curl);
-  curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &contentLength);
+  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+  if (code) {
+     curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &contentLength);
+     size = contentLength;
+  } else {
+     error(-1, "Failed to get size of '%s'.", url->getCString());
+     size = -1;
+  }
   curl_easy_reset(curl);
-
-  size = contentLength;
 
   return size;
 }
