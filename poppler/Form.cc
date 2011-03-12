@@ -857,6 +857,7 @@ FormFieldText::FormFieldText(XRef *xrefA, Object *aobj, const Ref& ref, std::set
       int tmp_length;
       char* tmp_str = pdfDocEncodingToUTF16(obj1.getString(), &tmp_length);
       content = new GooString(tmp_str, tmp_length);
+      delete [] tmp_str;
     }
   }
   obj1.free();
