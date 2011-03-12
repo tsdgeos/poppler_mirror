@@ -33,7 +33,17 @@ namespace poppler
 class document;
 class embedded_file;
 
-class document_private
+class initer
+{
+public:
+    initer();
+    ~initer();
+
+private:
+    static unsigned int count;
+};
+
+class document_private : private initer
 {
 public:
     document_private(GooString *file_path, const std::string &owner_password,
@@ -53,11 +63,6 @@ public:
     int raw_doc_data_length;
     bool is_locked;
     std::vector<embedded_file *> embedded_files;
-
-private:
-    void init();
-
-    static unsigned int count;
 };
 
 }

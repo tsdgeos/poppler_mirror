@@ -37,11 +37,33 @@
 
 using namespace poppler;
 
-unsigned int poppler::document_private::count = 0U;
+unsigned int poppler::initer::count = 0U;
+
+initer::initer()
+{
+    if (!count) {
+        globalParams = new GlobalParams();
+        setErrorFunction(detail::error_function);
+    }
+    count++;
+}
+
+initer::~initer()
+{
+    if (count > 0) {
+        --count;
+        if (!count) {
+            delete globalParams;
+            globalParams = 0;
+        }
+    }
+}
+
 
 document_private::document_private(GooString *file_path, const std::string &owner_password,
                                    const std::string &user_password)
-    : doc(0)
+    : initer()
+    , doc(0)
     , raw_doc_data(0)
     , raw_doc_data_length(0)
     , is_locked(false)
@@ -49,13 +71,13 @@ document_private::document_private(GooString *file_path, const std::string &owne
     GooString goo_owner_password(owner_password.c_str());
     GooString goo_user_password(user_password.c_str());
     doc = new PDFDoc(file_path, &goo_owner_password, &goo_user_password);
-    init();
 }
 
 document_private::document_private(byte_array *file_data,
                                    const std::string &owner_password,
                                    const std::string &user_password)
-    : doc(0)
+    : initer()
+    , doc(0)
     , raw_doc_data(0)
     , raw_doc_data_length(0)
     , is_locked(false)
@@ -67,13 +89,13 @@ document_private::document_private(byte_array *file_data,
     GooString goo_owner_password(owner_password.c_str());
     GooString goo_user_password(user_password.c_str());
     doc = new PDFDoc(memstr, &goo_owner_password, &goo_user_password);
-    init();
 }
 
 document_private::document_private(const char *file_data, int file_data_length,
                                    const std::string &owner_password,
                                    const std::string &user_password)
-    : doc(0)
+    : initer()
+    , doc(0)
     , raw_doc_data(file_data)
     , raw_doc_data_length(file_data_length)
     , is_locked(false)
@@ -84,7 +106,6 @@ document_private::document_private(const char *file_data, int file_data_length,
     GooString goo_owner_password(owner_password.c_str());
     GooString goo_user_password(user_password.c_str());
     doc = new PDFDoc(memstr, &goo_owner_password, &goo_user_password);
-    init();
 }
 
 document_private::~document_private()
@@ -92,23 +113,6 @@ document_private::~document_private()
     delete_all(embedded_files);
 
     delete doc;
-
-    if (count > 0) {
-        --count;
-        if (!count) {
-            delete globalParams;
-            globalParams = 0;
-        }
-    }
-}
-
-void document_private::init()
-{
-    if (!count) {
-        globalParams = new GlobalParams();
-        setErrorFunction(detail::error_function);
-    }
-    count++;
 }
 
 document* document_private::check_document(document_private *doc, byte_array *file_data)
