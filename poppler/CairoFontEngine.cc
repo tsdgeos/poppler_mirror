@@ -707,7 +707,7 @@ CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, XRef *xref,
 
 CairoType3Font::CairoType3Font(Ref ref,
 			       XRef *xref,
-			       Catalog *cat,
+			       Catalog *catalog,
 			       cairo_font_face_t *cairo_font_face,
 			       Gushort *codeToGID,
 			       Guint codeToGIDLen,
