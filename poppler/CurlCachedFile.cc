@@ -38,7 +38,6 @@ noop_cb(char *ptr, size_t size, size_t nmemb, void *ptr2)
 size_t
 CurlCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
 {
-  long code = NULL;
   double contentLength = -1;
   size_t size;
 
@@ -51,7 +50,6 @@ CurlCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
   curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &noop_cb);
   curl_easy_perform(curl);
-  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
   curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &contentLength);
   curl_easy_reset(curl);
 
