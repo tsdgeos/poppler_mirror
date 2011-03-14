@@ -18,6 +18,9 @@ cairo_includes =				\
 
 endif
 
+gtk_test = \
+	gtk-test
+
 endif
 
 if BUILD_SPLASH_OUTPUT
@@ -29,9 +32,6 @@ endif
 
 pdf_fullrewrite = \
 	pdf-fullrewrite
-
-gtk_test = \
-	gtk-test
 
 INCLUDES =					\
 	-I$(top_srcdir)				\
