@@ -25,6 +25,7 @@
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
 // Copyright (C) 2008 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
+// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -690,8 +691,8 @@ void CairoOutputDev::eoFill(GfxState *state) {
 
 }
 
-GBool CairoOutputDev::tilingPatternFill(GfxState *state, Object *str,
-					int paintType, Dict *resDict,
+GBool CairoOutputDev::tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
+					double *pmat, int paintType, Dict *resDict,
 					double *mat, double *bbox,
 					int x0, int y0, int x1, int y1,
 					double xStep, double yStep)

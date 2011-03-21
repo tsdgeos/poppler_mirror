@@ -20,7 +20,7 @@
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008, 2010 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2009, 2010 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2011 William Bader <williambader@hotmail.com>
@@ -2997,7 +2997,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   GBool useBinary;
 
   if (!forceRasterize) {
-    scan = new PreScanOutputDev();
+    scan = new PreScanOutputDev(xref);
     page->displaySlice(scan, 72, 72, rotateA, useMediaBox, crop,
                      sliceX, sliceY, sliceW, sliceH,
                      printing, catalog, abortCheckCbk, abortCheckCbkData);
@@ -3876,8 +3876,8 @@ void PSOutputDev::eoFill(GfxState *state) {
   writePS("f*\n");
 }
 
-GBool PSOutputDev::tilingPatternFill(GfxState *state, Object *str,
-				     int paintType, Dict *resDict,
+GBool PSOutputDev::tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
+				     double *pmat, int paintType, Dict *resDict,
 				     double *mat, double *bbox,
 				     int x0, int y0, int x1, int y1,
 				     double xStep, double yStep) {

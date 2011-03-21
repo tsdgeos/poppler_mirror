@@ -47,7 +47,9 @@
 #include "GlobalParams.h"
 #include "Error.h"
 #include "Object.h"
+#include "Gfx.h"
 #include "GfxFont.h"
+#include "Page.h"
 #include "Link.h"
 #include "CharCodeToUnicode.h"
 #include "FontEncodingTables.h"
@@ -2582,6 +2584,98 @@ GBool SplashOutputDev::alphaImageSrc(void *data, SplashColorPtr colorLine,
   return gTrue;
 }
 
+struct TilingSplashOutBitmap {
+  SplashBitmap *bitmap;
+  SplashPattern *pattern;
+  SplashColorMode colorMode;
+  int paintType;
+  int repeatX;
+  int repeatY;
+  int y;
+};
+
+GBool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine,
+                                       Guchar *alphaLine) {
+  TilingSplashOutBitmap *imgData = (TilingSplashOutBitmap *)data;
+
+  if (imgData->y == imgData->bitmap->getHeight()) {
+    imgData->repeatY--;
+    if (imgData->repeatY == 0)
+      return gFalse;
+    imgData->y = 0;
+  }
+
+  if (imgData->paintType == 1) {
+    const SplashColorMode cMode = imgData->bitmap->getMode();
+    SplashColorPtr q = colorLine;
+    // For splashModeBGR8 and splashModeXBGR8 we need to use getPixel
+    // for the others we can use raw access
+    if (cMode == splashModeBGR8 || cMode == splashModeXBGR8) {
+      for (int m = 0; m < imgData->repeatX; m++) {
+        for (int x = 0; x < imgData->bitmap->getWidth(); x++) {
+          imgData->bitmap->getPixel(x, imgData->y, q);
+          q += splashColorModeNComps[cMode]; 
+        }
+      }
+    } else {
+      const int n = imgData->bitmap->getRowSize();
+      SplashColorPtr p;
+      for (int m = 0; m < imgData->repeatX; m++) {   
+        p = imgData->bitmap->getDataPtr() + imgData->y * imgData->bitmap->getRowSize();
+        for (int x = 0; x < n; ++x) { // TODO memcopy?
+          *q++ = *p++;
+        }
+      }
+    }
+    if (alphaLine != NULL) {
+      SplashColorPtr aq = alphaLine;
+      SplashColorPtr p;
+      const int n = imgData->bitmap->getWidth() - 1;
+      for (int m = 0; m < imgData->repeatX; m++) {
+        p = imgData->bitmap->getAlphaPtr() + imgData->y * imgData->bitmap->getWidth();
+        for (int x = 0; x < n; ++x) { // TODO memcopy?
+          *aq++ = *p++;
+        }
+        // This is a hack, because of how Splash antialias works if we overwrite the
+        // last alpha pixel of the tile most/all of the files look much better
+        *aq++ = (n == 0) ? *p : *(p - 1);
+      }
+    }
+  } else {
+    SplashColor col, pat;
+    SplashColorPtr dest = colorLine;
+    for (int m = 0; m < imgData->repeatX; m++) {
+      for (int x = 0; x < imgData->bitmap->getWidth(); x++) {
+        imgData->bitmap->getPixel(x, imgData->y, col);
+        imgData->pattern->getColor(x, imgData->y, pat); 
+        for (int i = 0; i < splashColorModeNComps[imgData->colorMode]; ++i) {
+#if SPLASH_CMYK
+          if (imgData->colorMode == splashModeCMYK8)
+            dest[i] = div255(pat[i] * (255 - col[0]));
+          else
+#endif
+            dest[i] = 255 - div255((255 - pat[i]) * (255 - col[0]));
+        }
+        dest += splashColorModeNComps[imgData->colorMode]; 
+      }
+    }
+    if (alphaLine != NULL) {
+      const int y = (imgData->y == imgData->bitmap->getHeight() - 1 && imgData->y > 50) ? imgData->y - 1 : imgData->y; 
+      SplashColorPtr aq = alphaLine;
+      SplashColorPtr p;
+      const int n = imgData->bitmap->getWidth();
+      for (int m = 0; m < imgData->repeatX; m++) {
+        p = imgData->bitmap->getAlphaPtr() + y * imgData->bitmap->getWidth();
+        for (int x = 0; x < n; ++x) { // TODO memcopy?
+          *aq++ = *p++;
+        }
+      }
+    }
+  }
+  ++imgData->y;
+  return gTrue;
+}
+
 void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 				int width, int height,
 				GfxImageColorMap *colorMap,
@@ -3470,6 +3564,177 @@ void SplashOutputDev::setFreeTypeHinting(GBool enable, GBool enableSlightHinting
 {
   enableFreeTypeHinting = enable;
   enableSlightHinting = enableSlightHintingA;
+}
+
+GBool SplashOutputDev::tilingPatternFill(GfxState *state, Catalog *catalog, Object *str,
+					double *ptm, int paintType, Dict *resDict,
+					double *mat, double *bbox,
+					int x0, int y0, int x1, int y1,
+					double xStep, double yStep) 
+{
+  PDFRectangle box;
+  Gfx *gfx;
+  Splash *formerSplash = splash;
+  SplashBitmap *formerBitmap = bitmap;
+  double width, height;
+  int surface_width, surface_height, result_width, result_height, i;
+  int xMin, xMax, yMin, yMax;
+  int repeatX, repeatY;
+  SplashCoord matc[6];
+  Matrix m1;
+  double *ctm, savedCTM[6];
+  double kx, ky, sx, sy;
+
+  width = bbox[2] - bbox[0];
+  height = bbox[3] - bbox[1];
+
+  if (xStep != width || yStep != height)
+    return gFalse;
+
+  // calculate offsets
+  ctm = state->getCTM();
+  for (i = 0; i < 6; ++i) {
+    savedCTM[i] = ctm[i];
+  }
+  state->concatCTM(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
+  state->concatCTM(1, 0, 0, 1, bbox[0], bbox[1]);
+  ctm = state->getCTM();
+  for (i = 0; i < 6; ++i) {
+    if (!isfinite(ctm[i]))
+      return gFalse;
+  }
+  matc[4] = x0 * xStep * ctm[0] + y0 * yStep * ctm[2] + ctm[4];
+  matc[5] = x0 * xStep * ctm[1] + y0 * yStep * ctm[3] + ctm[5];
+  xMin = (int) ceil (matc[4]);
+  yMin = (int) ceil (matc[5]);
+  xMax = xMin;
+  yMax = yMin;
+  if (splashAbs(ctm[1]) > splashAbs(ctm[0])) {
+    kx = -ctm[1];
+    ky = ctm[2] - (ctm[0] * ctm[3]) / ctm[1];
+  } else {
+    kx = ctm[0];
+    ky = ctm[3] - (ctm[1] * ctm[2]) / ctm[0];
+  }
+  result_width = (int) ceil(fabs(kx * width * (x1 - x0)));
+  result_height = (int) ceil(fabs(ky * height * (y1 - y0)));
+  kx = state->getHDPI() / 72.0;
+  ky = state->getVDPI() / 72.0;
+  m1.m[0] = (ptm[0] == 0) ? fabs(ptm[2]) * kx : fabs(ptm[0]) * kx;
+  m1.m[1] = 0;
+  m1.m[2] = 0;
+  m1.m[3] = (ptm[3] == 0) ? fabs(ptm[1]) * ky : fabs(ptm[3]) * ky;
+  m1.m[4] = 0;
+  m1.m[5] = 0;
+  m1.transform(width, height, &kx, &ky);
+  surface_width = (int) ceil (fabs(kx));
+  surface_height = (int) ceil (fabs(ky));
+
+  sx = (double) result_width / (surface_width * (x1 - x0));
+  sy = (double) result_height / (surface_height * (y1 - y0));
+  m1.m[0] *= sx;
+  m1.m[3] *= sy;
+  m1.transform(width, height, &kx, &ky);
+
+  if(fabs(kx) < 1 && fabs(ky) < 1) {
+    kx = std::min<double>(kx, ky);
+    ky = 2 / kx;
+    m1.m[0] *= ky;
+    m1.m[3] *= ky;
+    m1.transform(width, height, &kx, &ky);
+    surface_width = (int) ceil (fabs(kx));
+    surface_height = (int) ceil (fabs(ky));
+    repeatX = x1 - x0;
+    repeatY = y1 - y0;
+  } else {
+    while(fabs(kx) > 16384 || fabs(ky) > 16384) {
+      // limit pattern bitmap size
+      m1.m[0] /= 2;
+      m1.m[3] /= 2;
+      m1.transform(width, height, &kx, &ky);
+    }
+    surface_width = (int) ceil (fabs(kx));
+    surface_height = (int) ceil (fabs(ky));
+    // adjust repeat values to completely fill region
+    repeatX = result_width / surface_width;
+    repeatY = result_height / surface_height;
+    if (surface_width * repeatX < result_width)
+      repeatX++;
+    if (surface_height * repeatY < result_height)
+      repeatY++;
+    if (x1 - x0 > repeatX)
+      repeatX = x1 - x0;
+    if (y1 - y0 > repeatY)
+      repeatY = y1 - y0;
+  }
+  // restore CTM and calculate rotate and scale with rounded matric
+  state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
+  state->concatCTM(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
+  state->concatCTM(width * repeatX, 0, 0, height * repeatY, bbox[0], bbox[1]);
+  ctm = state->getCTM();
+  matc[0] = ctm[0];
+  matc[1] = ctm[1];
+  matc[2] = ctm[2];
+  matc[3] = ctm[3];
+
+  if (surface_width == 0 || surface_height == 0)
+    return gFalse;
+  m1.transform(bbox[0], bbox[1], &kx, &ky);
+  m1.m[4] = -kx;
+  m1.m[5] = -ky;
+
+  bitmap = new SplashBitmap(surface_width, surface_height, colorMode != splashModeMono1, 
+                            (paintType == 1) ? colorMode : splashModeMono8, gTrue);
+  memset(bitmap->getAlphaPtr(), 0, bitmap->getWidth() * bitmap->getHeight());
+  if (paintType == 2) {
+#ifdef SPLASH_CMYK
+    memset(bitmap->getDataPtr(), (colorMode == splashModeCMYK8) ? 0x00 : 0xFF, bitmap->getRowSize() * bitmap->getHeight());
+#else
+    memset(bitmap->getDataPtr(), 0xFF, bitmap->getRowSize() * bitmap->getHeight());
+#endif
+  }
+  splash = new Splash(bitmap, gTrue);
+
+  box.x1 = bbox[0]; box.y1 = bbox[1];
+  box.x2 = bbox[2]; box.y2 = bbox[3];
+  gfx = new Gfx(xref, this, resDict, catalog, &box, NULL);
+  // set pattern transformation matrix
+  gfx->getState()->setCTM(m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
+  updateCTM(gfx->getState(), m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
+  gfx->display(str);
+  splash = formerSplash;
+  TilingSplashOutBitmap imgData;
+  imgData.bitmap = bitmap;
+  imgData.paintType = paintType;
+  imgData.pattern = splash->getFillPattern();
+  imgData.colorMode = colorMode;
+  imgData.y = 0;
+  imgData.repeatX = repeatX;
+  imgData.repeatY = repeatY;
+  SplashBitmap *tBitmap = bitmap;
+  bitmap = formerBitmap;
+  result_width = tBitmap->getWidth() * imgData.repeatX;
+  result_height = tBitmap->getHeight() * imgData.repeatY;
+
+  if (splashAbs(matc[1]) > splashAbs(matc[0])) {
+    kx = -matc[1];
+    ky = matc[2] - (matc[0] * matc[3]) / matc[1];
+  } else {
+    kx = matc[0];
+    ky = matc[3] - (matc[1] * matc[2]) / matc[0];
+  }
+  kx = result_width / (fabs(kx) + 1);
+  ky = result_height / (fabs(ky) + 1);
+  state->concatCTM(kx, 0, 0, ky, 0, 0);
+  ctm = state->getCTM();
+  matc[0] = ctm[0];
+  matc[1] = ctm[1];
+  matc[2] = ctm[2];
+  matc[3] = ctm[3];
+  splash->drawImage(&tilingBitmapSrc, &imgData, colorMode, gTrue, result_width, result_height, matc);
+  delete tBitmap;
+  delete gfx;
+  return gTrue;
 }
 
 GBool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading)

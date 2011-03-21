@@ -16,6 +16,7 @@
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 William Bader <williambader@hotmail.com>
+// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -28,16 +29,20 @@
 
 #include <math.h>
 #include "GlobalParams.h"
+#include "Gfx.h"
 #include "GfxFont.h"
 #include "Link.h"
+#include "Catalog.h"
+#include "Page.h"
 #include "PreScanOutputDev.h"
 
 //------------------------------------------------------------------------
 // PreScanOutputDev
 //------------------------------------------------------------------------
 
-PreScanOutputDev::PreScanOutputDev() {
+PreScanOutputDev::PreScanOutputDev(XRef *xrefA) {
   level = globalParams->getPSLevel();
+  xref = xrefA;
   clearStats();
 }
 
@@ -71,6 +76,21 @@ void PreScanOutputDev::fill(GfxState *state) {
 void PreScanOutputDev::eoFill(GfxState *state) {
   check(state->getFillColorSpace(), state->getFillColor(),
 	state->getFillOpacity(), state->getBlendMode());
+}
+
+GBool PreScanOutputDev::tilingPatternFill(GfxState *state, Catalog *catalog, Object *str,
+					double *pmat, int paintType, Dict *resDict,
+					double *mat, double *bbox,
+					int x0, int y0, int x1, int y1,
+					double xStep, double yStep) {
+  PDFRectangle box;
+  Gfx *gfx;
+  box.x1 = bbox[0]; box.y1 = bbox[1];
+  box.x2 = bbox[2]; box.y2 = bbox[3];
+  gfx = new Gfx(xref, this, resDict, catalog, &box, NULL);
+  gfx->display(str);
+  delete gfx;
+  return gTrue;
 }
 
 void PreScanOutputDev::clip(GfxState * /*state*/) {
