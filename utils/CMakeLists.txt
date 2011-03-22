@@ -79,13 +79,3 @@ target_link_libraries(pdftohtml ${common_libs})
 install(TARGETS pdftohtml DESTINATION bin)
 install(FILES pdftohtml.1 DESTINATION share/man/man1)
 
-if (ENABLE_ABIWORD)
-  # pdftoabw
-  set(pdftoabw_SOURCES ${common_srcs}
-    pdftoabw.cc
-  )
-  add_executable(pdftoabw ${pdftoabw_SOURCES})
-  target_link_libraries(pdftoabw ${common_libs} ${LIBXML2_LIBRARIES})
-  install(TARGETS pdftoabw DESTINATION bin)
-endif (ENABLE_ABIWORD)
-

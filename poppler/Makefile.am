@@ -129,20 +129,6 @@ curl_sources =					\
 
 endif
 
-if BUILD_ABIWORD_OUTPUT
-
-abiword_sources =				\
-	ABWOutputDev.h				\
-	ABWOutputDev.cc
-
-abiword_includes =				\
-	$(ABIWORD_CFLAGS)
-
-abiword_libs =					\
-	$(ABIWORD_LIBS)
-
-endif
-
 if USE_CMS
 cms_includes = $(LCMS_CFLAGS)
 cms_libs = $(LCMS_LIBS)
@@ -155,7 +141,6 @@ INCLUDES =					\
 	$(splash_includes)			\
 	$(cairo_includes)			\
 	$(arthur_includes)			\
-	$(abiword_includes)			\
 	$(libtiff_includes)			\
 	$(libpng_includes)			\
 	$(libcurl_includes)			\
@@ -181,7 +166,6 @@ libpoppler_la_LIBADD =				\
 	$(zlib_libs)				\
 	$(libcurl_libs)				\
 	$(libjpeg2000_libs)			\
-	$(abiword_libs)				\
 	$(FREETYPE_LIBS)			\
 	$(FONTCONFIG_LIBS)			\
 	$(PTHREAD_LIBS)				\
@@ -274,7 +258,6 @@ libpoppler_la_SOURCES =		\
 	$(libjpeg_sources)	\
 	$(zlib_sources)		\
 	$(libjpeg2000_sources)	\
-	$(abiword_sources)	\
 	$(curl_sources)		\
 	Annot.cc		\
 	Array.cc 		\

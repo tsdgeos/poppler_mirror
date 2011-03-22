@@ -530,21 +530,6 @@ elif test x$enable_gtk_test = xtry; then
 fi
 AM_CONDITIONAL(BUILD_GTK_TEST, test x$enable_gtk_test = xyes -a x$enable_poppler_glib = xyes)
 
-AC_ARG_ENABLE(abiword-output,
-              AC_HELP_STRING([--disable-abiword-output],
-                             [Don't build the abiword backend.]),
-              enable_abiword_output=$enableval,
-              enable_abiword_output="try")
-if test x$enable_abiword_output = xyes; then
-  PKG_CHECK_MODULES(ABIWORD, libxml-2.0)
-elif test x$enable_abiword_output = xtry; then
-  PKG_CHECK_MODULES(ABIWORD, libxml-2.0,
-                    [enable_abiword_output="yes"],
-                    [enable_abiword_output="no"])
-fi
-
-AM_CONDITIONAL(BUILD_ABIWORD_OUTPUT, test x$enable_abiword_output = xyes)
-
 AC_ARG_ENABLE(utils,
               AC_HELP_STRING([--disable-utils],
 	                     [Don't compile poppler command line utils.]),
@@ -647,7 +632,6 @@ echo "Building poppler with support for:"
 echo "  font configuration: $with_font_configuration"
 echo "  splash output:      $enable_splash_output"
 echo "  cairo output:       $enable_cairo_output"
-echo "  abiword output:     $enable_abiword_output"
 echo "  qt4 wrapper:        $enable_poppler_qt4"
 echo "  glib wrapper:       $enable_poppler_glib"
 echo "    introspection:    $found_introspection"

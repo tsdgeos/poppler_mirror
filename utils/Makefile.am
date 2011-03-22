@@ -16,25 +16,12 @@ INCLUDES =					\
 	-I$(top_srcdir)/utils			\
 	-I$(top_srcdir)/poppler			\
 	$(UTILS_CFLAGS)				\
-	$(FONTCONFIG_CFLAGS)			\
-	$(ABIWORD_CFLAGS)
+	$(FONTCONFIG_CFLAGS)
 
 LDADD =						\
 	$(top_builddir)/poppler/libpoppler.la	\
 	$(UTILS_LIBS)				\
 	$(FONTCONFIG_LIBS)
-
-if BUILD_ABIWORD_OUTPUT
-
-pdftoabw_SOURCES =				\
-	pdftoabw.cc				\
-	$(common)
-
-pdftoabw_LDADD = $(LDADD) $(ABIWORD_LIBS)
-
-pdftoabw_binary = pdftoabw
-
-endif
 
 AM_LDFLAGS = @auto_import_flags@
 
@@ -45,8 +32,7 @@ bin_PROGRAMS =					\
 	pdftops					\
 	pdftotext				\
 	pdftohtml				\
-	$(pdftoppm_binary)			\
-	$(pdftoabw_binary)
+	$(pdftoppm_binary)
 
 dist_man1_MANS =				\
 	pdffonts.1				\
