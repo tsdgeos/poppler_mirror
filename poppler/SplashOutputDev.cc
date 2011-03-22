@@ -2622,7 +2622,7 @@ GBool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine,
       SplashColorPtr p;
       for (int m = 0; m < imgData->repeatX; m++) {   
         p = imgData->bitmap->getDataPtr() + imgData->y * imgData->bitmap->getRowSize();
-        for (int x = 0; x < n; ++x) { // TODO memcopy?
+        for (int x = 0; x < n; ++x) {
           *q++ = *p++;
         }
       }
@@ -2633,7 +2633,7 @@ GBool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine,
       const int n = imgData->bitmap->getWidth() - 1;
       for (int m = 0; m < imgData->repeatX; m++) {
         p = imgData->bitmap->getAlphaPtr() + imgData->y * imgData->bitmap->getWidth();
-        for (int x = 0; x < n; ++x) { // TODO memcopy?
+        for (int x = 0; x < n; ++x) {
           *aq++ = *p++;
         }
         // This is a hack, because of how Splash antialias works if we overwrite the
@@ -2666,7 +2666,7 @@ GBool SplashOutputDev::tilingBitmapSrc(void *data, SplashColorPtr colorLine,
       const int n = imgData->bitmap->getWidth();
       for (int m = 0; m < imgData->repeatX; m++) {
         p = imgData->bitmap->getAlphaPtr() + y * imgData->bitmap->getWidth();
-        for (int x = 0; x < n; ++x) { // TODO memcopy?
+        for (int x = 0; x < n; ++x) {
           *aq++ = *p++;
         }
       }
