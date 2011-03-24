@@ -2429,40 +2429,19 @@ GBool SplashOutputDev::imageSrc(void *data, SplashColorPtr colorLine,
 	imgData->colorMap->getGray(p, &gray);
 	*q++ = colToByte(gray);
       }
-	break;
-	case splashModeXBGR8:
+      break;
     case splashModeRGB8:
     case splashModeBGR8:
-      if (!imgData->colorMap->useRGBLine())
-      {
-        GfxRGB rgb;
-        for (x = 0, p = imgData->imgStr->getLine(), q = colorLine;
-           x < imgData->width;
-           ++x, p += nComps) {
-          imgData->colorMap->getRGB(p, &rgb);
-          *q++ = colToByte(rgb.r);
-          *q++ = colToByte(rgb.g);
-          *q++ = colToByte(rgb.b);
-          if (imgData->colorMode == splashModeXBGR8) *q++ = 255;
-        }
-      }
-      else
-      {
-        p = imgData->imgStr->getLine();
-        q = colorLine;
-        unsigned int* line = (unsigned int *)gmallocn(imgData->width, sizeof(unsigned int));
+      p = imgData->imgStr->getLine();
+      q = colorLine;
 
-        imgData->colorMap->getRGBLine(p, line, imgData->width);
-        for (x = 0; x < imgData->width; ++x) {
-            *q++ = (line[x] >> 16) & 255;
-            *q++ = (line[x] >> 8) & 255;
-            *q++ = (line[x]) & 255;
-            if (imgData->colorMode == splashModeXBGR8) {
-                *q++ = 255;
-            }
-        }
-        gfree(line);
-      }
+      imgData->colorMap->getRGBLine(p, colorLine, imgData->width);
+      break;
+    case splashModeXBGR8:
+      p = imgData->imgStr->getLine();
+      q = colorLine;
+
+      imgData->colorMap->getRGBXLine(p, colorLine, imgData->width);
       break;
 #if SPLASH_CMYK
     case splashModeCMYK8:

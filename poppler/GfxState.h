@@ -199,12 +199,14 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray) = 0;
   virtual void getRGB(GfxColor *color, GfxRGB *rgb) = 0;
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk) = 0;
-  virtual void getGrayLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) {}
-  virtual void getRGBLine(Guchar * /*in*/, unsigned int * /*out*/, int /*length*/) {}
+  virtual void getGrayLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) { error(-1, "GfxColorSpace::getGrayLine this should not happen"); }
+  virtual void getRGBLine(Guchar * /*in*/, unsigned int * /*out*/, int /*length*/) { error(-1, "GfxColorSpace::getRGBLine (first variant) this should not happen"); }
+  virtual void getRGBLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) {  error(-1, "GfxColorSpace::getRGBLine (second variant) this should not happen"); }
+  virtual void getRGBXLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) {  error(-1, "GfxColorSpace::getRGBXLine this should not happen"); }
 
-  // Does this ColorSpace use getRGBLine?
+  // Does this ColorSpace support getRGBLine?
   virtual GBool useGetRGBLine() { return gFalse; }
-  // Does this ColorSpace use getGrayLine?
+  // Does this ColorSpace support getGrayLine?
   virtual GBool useGetGrayLine() { return gFalse; }
 
   // Return the number of color components.
@@ -257,6 +259,8 @@ public:
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
   virtual void getGrayLine(Guchar *in, Guchar *out, int length);
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
+  virtual void getRGBLine(Guchar *in, Guchar *out, int length);
+  virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
 
   virtual GBool useGetRGBLine() { return gTrue; }
   virtual GBool useGetGrayLine() { return gTrue; }
@@ -324,6 +328,8 @@ public:
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
   virtual void getGrayLine(Guchar *in, Guchar *out, int length);
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
+  virtual void getRGBLine(Guchar *in, Guchar *out, int length);
+  virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
 
   virtual GBool useGetRGBLine() { return gTrue; }
   virtual GBool useGetGrayLine() { return gTrue; }
@@ -394,6 +400,8 @@ public:
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
+  virtual void getRGBLine(Guchar *, Guchar *out, int length);
+  virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
   virtual GBool useGetRGBLine() { return gTrue; }
 
   virtual int getNComps() { return 4; }
@@ -468,6 +476,8 @@ public:
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
+  virtual void getRGBLine(Guchar *in, Guchar *out, int length);
+  virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
 
   virtual GBool useGetRGBLine();
 
@@ -511,6 +521,8 @@ public:
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
+  virtual void getRGBLine(Guchar *in, Guchar *out, int length);
+  virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
 
   virtual GBool useGetRGBLine() { return gTrue; }
 
@@ -1073,6 +1085,8 @@ public:
   void getGray(Guchar *x, GfxGray *gray);
   void getRGB(Guchar *x, GfxRGB *rgb);
   void getRGBLine(Guchar *in, unsigned int *out, int length);
+  void getRGBLine(Guchar *in, Guchar *out, int length);
+  void getRGBXLine(Guchar *in, Guchar *out, int length);
   void getGrayLine(Guchar *in, Guchar *out, int length);
   void getCMYK(Guchar *x, GfxCMYK *cmyk);
   void getColor(Guchar *x, GfxColor *color);
