@@ -202,7 +202,7 @@ pgd_form_field_view_set_field (GtkWidget        *field_view,
 		break;
 	case POPPLER_FORM_FIELD_CHOICE: {
 		gchar *item;
-		gint   selected;
+		gint   selected = -1;
 		
 		enum_value = g_enum_get_value ((GEnumClass *) g_type_class_ref (POPPLER_TYPE_FORM_CHOICE_TYPE),
 					       poppler_form_field_choice_get_choice_type (field));
@@ -222,7 +222,7 @@ pgd_form_field_view_set_field (GtkWidget        *field_view,
 
 		pgd_form_field_view_add_choice_items (GTK_TABLE (table), field, &selected, &row);
 
-		if (poppler_form_field_choice_get_n_items (field) > selected) {
+		if (selected >= 0 && poppler_form_field_choice_get_n_items (field) > selected) {
 			item = poppler_form_field_choice_get_item (field, selected);
 			text = g_strdup_printf ("%d (%s)", selected, item);
 			g_free (item);
