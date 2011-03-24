@@ -540,6 +540,7 @@ poppler_form_field_choice_get_item (PopplerFormField *field,
   GooString *tmp;
   
   g_return_val_if_fail (field->widget->getType () == formChoice, NULL);
+  g_return_val_if_fail (index >= 0 && index < poppler_form_field_choice_get_n_items (field), NULL);
 
   tmp = static_cast<FormWidgetChoice*>(field->widget)->getChoice (index);
   return tmp ? _poppler_goo_string_to_utf8 (tmp) : NULL;
@@ -559,6 +560,7 @@ poppler_form_field_choice_is_item_selected (PopplerFormField *field,
 					    gint              index)
 {
   g_return_val_if_fail (field->widget->getType () == formChoice, FALSE);
+  g_return_val_if_fail (index >= 0 && index < poppler_form_field_choice_get_n_items (field), FALSE);
 
   return static_cast<FormWidgetChoice*>(field->widget)->isSelected (index);
 }
@@ -575,6 +577,7 @@ poppler_form_field_choice_select_item (PopplerFormField *field,
 				       gint              index)
 {
   g_return_if_fail (field->widget->getType () == formChoice);
+  g_return_if_fail (index >= 0 && index < poppler_form_field_choice_get_n_items (field));
 
   static_cast<FormWidgetChoice*>(field->widget)->select (index);
 }
@@ -605,6 +608,7 @@ poppler_form_field_choice_toggle_item (PopplerFormField *field,
 				       gint              index)
 {
   g_return_if_fail (field->widget->getType () == formChoice);
+  g_return_if_fail (index >= 0 && index < poppler_form_field_choice_get_n_items (field));
 
   static_cast<FormWidgetChoice*>(field->widget)->toggle (index);
 }
