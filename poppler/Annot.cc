@@ -3855,9 +3855,9 @@ void AnnotWidget::draw(Gfx *gfx, GBool printing) {
   // - NeedAppearances is true or
   // - widget has been modified or
   if (field) {
-    if (appearance.isNull() ||
-        (((field->getType() == formText || field->getType() == formChoice)) &&
-         ((form && form->getNeedAppearances()) || field->isModified())))
+    if (appearance.isNull() || (form && form->getNeedAppearances()) ||
+        ((field->getType() == formText || field->getType() == formChoice) &&
+         field->isModified()))
       generateFieldAppearance();
   }
 
