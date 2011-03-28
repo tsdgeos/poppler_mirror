@@ -983,6 +983,7 @@ FormFieldChoice::FormFieldChoice(XRef *xrefA, Object *aobj, const Ref& ref, std:
         int len;
         char* buffer = pdfDocEncodingToUTF16(choices[i].optionName, &len);
         choices[i].optionName->Set(buffer, len);
+        delete [] buffer;
       }
     }
   } else if (obj1.isArray()) {
@@ -1006,6 +1007,7 @@ FormFieldChoice::FormFieldChoice(XRef *xrefA, Object *aobj, const Ref& ref, std:
         int len;
         char* buffer = pdfDocEncodingToUTF16(choices[i].optionName, &len);
         choices[i].optionName->Set(buffer, len);
+        delete [] buffer;
       }
     }
   }
