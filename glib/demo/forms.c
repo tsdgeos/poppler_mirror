@@ -131,11 +131,12 @@ static void
 pgd_form_field_view_set_field (GtkWidget        *field_view,
 			       PopplerFormField *field)
 {
-	GtkWidget  *alignment;
-	GtkWidget  *table;
-	GEnumValue *enum_value;
-	gchar      *text;
-	gint        row = 0;
+	GtkWidget     *alignment;
+	GtkWidget     *table;
+        PopplerAction *action;
+	GEnumValue    *enum_value;
+	gchar         *text;
+	gint           row = 0;
 
 	alignment = gtk_bin_get_child (GTK_BIN (field_view));
 	if (alignment) {
@@ -169,6 +170,16 @@ pgd_form_field_view_set_field (GtkWidget        *field_view,
 		pgd_table_add_property (GTK_TABLE (table), "<b>Mapping Name:</b>", text, &row);
 		g_free (text);
 	}
+
+        action = poppler_form_field_get_action (field);
+        if (action) {
+                GtkWidget *action_view;
+
+                action_view = pgd_action_view_new (NULL);
+                pgd_action_view_set_action (action_view, action);
+                pgd_table_add_property_with_custom_widget (GTK_TABLE (table), "<b>Action:</b>", action_view, &row);
+                gtk_widget_show (action_view);
+        }
 
 	switch (poppler_form_field_get_field_type (field)) {
 	case POPPLER_FORM_FIELD_BUTTON:
