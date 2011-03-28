@@ -22,6 +22,17 @@ class Dict;
 class ViewerPreferences {
 public:
 
+  enum NonFullScreenPageMode {
+    nfpmUseNone,
+    nfpmUseOutlines,
+    nfpmUseThumbs,
+    nfpmUseOC
+  };
+  enum Direction {
+    directionL2R,
+    directionR2L
+  };
+
   ViewerPreferences(Dict *prefDict);
   ~ViewerPreferences();
 
@@ -31,6 +42,8 @@ public:
   GBool getFitWindow() const { return fitWindow; }
   GBool getCenterWindow() const { return centerWindow; }
   GBool getDisplayDocTitle() const { return displayDocTitle; }
+  NonFullScreenPageMode getNonFullScreenPageMode() const { return nonFullScreenPageMode; }
+  Direction getDirection() const { return direction; }
 
 private:
 
@@ -42,6 +55,8 @@ private:
   GBool fitWindow;
   GBool centerWindow;
   GBool displayDocTitle;
+  NonFullScreenPageMode nonFullScreenPageMode;
+  Direction direction;
 };
 
 #endif

@@ -54,6 +54,30 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
     centerWindow = obj.getBool();
   }
   obj.free();
+
+  if (prefDict->lookup("NonFullScreenPageMode", &obj)->isName()) {
+    const char *mode = obj.getName();
+    if (!strcmp(mode, "UseNone")) {
+      nonFullScreenPageMode = nfpmUseNone;
+    } else if (!strcmp(mode, "UseOutlines")) {
+      nonFullScreenPageMode = nfpmUseOutlines;
+    } else if (!strcmp(mode, "UseThumbs")) {
+      nonFullScreenPageMode = nfpmUseThumbs;
+    } else if (!strcmp(mode, "UseOC")) {
+      nonFullScreenPageMode = nfpmUseOC;
+    }
+  }
+  obj.free();
+
+  if (prefDict->lookup("Direction", &obj)->isName()) {
+    const char *dir = obj.getName();
+    if (!strcmp(dir, "L2R")) {
+      direction = directionL2R;
+    } else if (!strcmp(dir, "R2L")) {
+      direction = directionR2L;
+    }
+  }
+  obj.free();
 }
 
 ViewerPreferences::~ViewerPreferences()
@@ -68,4 +92,6 @@ void ViewerPreferences::init()
   fitWindow = gFalse;
   centerWindow = gFalse;
   displayDocTitle = gFalse;
+  nonFullScreenPageMode = nfpmUseNone;
+  direction = directionL2R;
 }
