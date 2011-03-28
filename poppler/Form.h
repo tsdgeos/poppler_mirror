@@ -109,6 +109,10 @@ public:
   void createWidgetAnnotation(Catalog *catalog);
   AnnotWidget *getWidgetAnnotation() const { return widget; }
 
+#ifdef DEBUG_FORMS
+  void print(int indent = 0);
+#endif
+
 protected:
   FormWidget(XRef *xrefA, Object *aobj, unsigned num, Ref aref, FormField *fieldA);
 
@@ -282,6 +286,11 @@ public:
 
   void createWidgetAnnotations(Catalog *catalog);
 
+#ifdef DEBUG_FORMS
+  void printTree(int indent = 0);
+  virtual void print(int indent = 0);
+#endif
+
 
  protected:
   void _createWidget (Object *obj, Ref aref);
@@ -332,6 +341,10 @@ public:
 
   void fillChildrenSiblingsID ();
 
+#ifdef DEBUG_FORMS
+  void print(int indent = 0);
+#endif
+
   virtual ~FormFieldButton();
 protected:
   void updateState(char *state);
@@ -365,6 +378,10 @@ public:
   bool isRichText () const { return richText; }
 
   int getMaxLen () const { return maxLen; }
+
+#ifdef DEBUG_FORMS
+  void print(int indent = 0);
+#endif
 protected:
   GooString* content;
   bool multiline;
@@ -420,6 +437,10 @@ public:
 
   int getTopIndex() const { return topIdx; }
 
+#ifdef DEBUG_FORMS
+  void print(int indent = 0);
+#endif
+
 protected:
   void unselectAll();
   void updateSelection();
@@ -451,6 +472,10 @@ public:
   FormFieldSignature(XRef *xrefA, Object *dict, const Ref& ref, std::set<int> *usedParents);
 
   virtual ~FormFieldSignature();
+
+#ifdef DEBUG_FORMS
+  void print(int indent = 0);
+#endif
 };
 
 //------------------------------------------------------------------------

@@ -80,6 +80,12 @@ FormWidget::~FormWidget()
   obj.free ();
 }
 
+#ifdef DEBUG_FORMS
+void FormWidget::print(int indent) {
+  printf ("%*s+ (%d %d): [widget]\n", indent, "", ref.num, ref.gen);
+}
+#endif
+
 void FormWidget::createWidgetAnnotation(Catalog *catalog) {
   if (widget)
     return;
@@ -575,6 +581,26 @@ FormField::~FormField()
   delete fullyQualifiedName;
 }
 
+#ifdef DEBUG_FORMS
+void FormField::print(int indent)
+{
+  printf ("%*s- (%d %d): [container] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
+          terminal ? "Yes" : "No", numChildren);
+}
+
+void FormField::printTree(int indent)
+{
+  print(indent);
+  if (terminal) {
+    for (int i = 0; i < numChildren; i++)
+      widgets[i]->print(indent + 4);
+  } else {
+    for (int i = 0; i < numChildren; i++)
+      children[i]->printTree(indent + 4);
+  }
+}
+#endif
+
 void FormField::fillChildrenSiblingsID()
 {
   if (terminal)
@@ -714,6 +740,29 @@ FormFieldButton::FormFieldButton(XRef *xrefA, Object *aobj, const Ref& ref, std:
   if (btype != formButtonPush)
     Form::fieldLookup(dict, "V", &appearanceState);
 }
+
+#ifdef DEBUG_FORMS
+static char *_getButtonType(FormButtonType type)
+{
+  switch (type) {
+  case formButtonPush:
+    return "push";
+  case formButtonCheck:
+    return "check";
+  case formButtonRadio:
+    return "radio";
+  default:
+    break;
+  }
+  return "unknown";
+}
+
+void FormFieldButton::print(int indent)
+{
+  printf ("%*s- (%d %d): [%s] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
+          _getButtonType(btype), terminal ? "Yes" : "No", numChildren);
+}
+#endif
 
 void FormFieldButton::fillChildrenSiblingsID()
 {
@@ -862,6 +911,14 @@ FormFieldText::FormFieldText(XRef *xrefA, Object *aobj, const Ref& ref, std::set
   }
   obj1.free();
 }
+
+#ifdef DEBUG_FORMS
+void FormFieldText::print(int indent)
+{
+  printf ("%*s- (%d %d): [text] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
+          terminal ? "Yes" : "No", numChildren);
+}
+#endif
 
 GooString* FormFieldText::getContentCopy ()
 {
@@ -1024,6 +1081,14 @@ FormFieldChoice::~FormFieldChoice()
   delete editedChoice;
 }
 
+#ifdef DEBUG_FORMS
+void FormFieldChoice::print(int indent)
+{
+  printf ("%*s- (%d %d): [choice] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
+          terminal ? "Yes" : "No", numChildren);
+}
+#endif
+
 void FormFieldChoice::updateSelection() {
   Object obj1;
 
@@ -1143,6 +1208,14 @@ FormFieldSignature::~FormFieldSignature()
 
 }
 
+#ifdef DEBUG_FORMS
+void FormFieldSignature::print(int indent)
+{
+  printf ("%*s- (%d %d): [signature] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
+          terminal ? "Yes" : "No", numChildren);
+}
+#endif
+
 //------------------------------------------------------------------------
 // Form
 //------------------------------------------------------------------------
@@ -1223,6 +1296,11 @@ Form::Form(XRef *xrefA, Object* acroFormA)
     error(-1, "Can't get Fields array\n");
   }
   obj1.free ();
+
+#ifdef DEBUG_FORMS
+  for (int i = 0; i < numFields; i++)
+    rootFields[i]->printTree();
+#endif
 }
 
 Form::~Form() {
