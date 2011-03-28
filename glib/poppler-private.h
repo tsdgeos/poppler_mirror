@@ -68,6 +68,7 @@ struct _PopplerFormField
   GObject parent_instance;
   PopplerDocument *document;
   FormWidget *widget;
+  PopplerAction *action;
 };
 
 struct _PopplerAnnot

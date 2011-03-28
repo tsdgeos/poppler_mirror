@@ -45,6 +45,11 @@ poppler_form_field_finalize (GObject *object)
       g_object_unref (field->document);
       field->document = NULL;
     }
+  if (field->action)
+    {
+      poppler_action_free (field->action);
+      field->action = NULL;
+    }
   field->widget = NULL;
 
   G_OBJECT_CLASS (poppler_form_field_parent_class)->finalize (object);
@@ -157,6 +162,35 @@ poppler_form_field_is_read_only (PopplerFormField *field)
   g_return_val_if_fail (POPPLER_IS_FORM_FIELD (field), FALSE);
 
   return field->widget->isReadOnly ();
+}
+
+/**
+ * poppler_form_field_get_action:
+ * @field: a #PopplerFormField
+ *
+ * Retrieves the action (#PopplerAction) that shall be
+ * performed when @field is activated, or %NULL
+ *
+ * Return value: (transfer none): the action to perform. The returned
+ *               object is owned by @field and should not be freed
+ *
+ * Since: 0.18
+ */
+PopplerAction *
+poppler_form_field_get_action (PopplerFormField *field)
+{
+  LinkAction *action;
+
+  if (field->action)
+    return field->action;
+
+  action = field->widget->getActivationAction();
+  if (!action)
+    return NULL;
+
+  field->action = _poppler_action_new (NULL, action, NULL);
+
+  return field->action;
 }
 
 /* Button Field */
