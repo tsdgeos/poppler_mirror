@@ -269,6 +269,7 @@ set(poppler_SRCS
   poppler/StdinCachedFile.cc
   poppler/StdinPDFDocBuilder.cc
   poppler/Sound.cc
+  poppler/ViewerPreferences.cc
   poppler/XpdfPluginAPI.cc
   poppler/Movie.cc
   poppler/Rendition.cc
@@ -413,6 +414,7 @@ if(ENABLE_XPDF_HEADERS)
     poppler/UnicodeCClassTables.h
     poppler/UnicodeCompTables.h
     poppler/UnicodeDecompTables.h
+    poppler/ViewerPreferences.h
     poppler/XRef.h
     poppler/CharTypes.h
     poppler/CompactFontTables.h

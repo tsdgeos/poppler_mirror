@@ -50,6 +50,7 @@
 #include "Catalog.h"
 #include "Form.h"
 #include "OptionalContent.h"
+#include "ViewerPreferences.h"
 
 //------------------------------------------------------------------------
 // Catalog
@@ -75,6 +76,7 @@ Catalog::Catalog(XRef *xrefA) {
   destNameTree = NULL;
   embeddedFileNameTree = NULL;
   jsNameTree = NULL;
+  viewerPreferences = NULL;
 
   pagesList = NULL;
   pagesRefList = NULL;
@@ -160,6 +162,7 @@ Catalog::~Catalog() {
   delete pageLabelInfo;
   delete form;
   delete optContent;
+  delete viewerPreferences;
   metadata.free();
   structTreeRoot.free();
   outline.free();
@@ -959,6 +962,26 @@ Form *Catalog::getForm()
   }
 
   return form;
+}
+
+ViewerPreferences *Catalog::getViewerPreferences()
+{
+  if (!viewerPreferences) {
+    Object catDict;
+    Dict *d = NULL;
+
+    xref->getCatalog(&catDict);
+    if (catDict.isDict()) {
+      d = catDict.getDict();
+    } else {
+      error(-1, "Catalog object is wrong type (%s)", catDict.getTypeName());
+    }
+    viewerPreferences = new ViewerPreferences(d);
+
+    catDict.free();
+  }
+
+  return viewerPreferences;
 }
 
 Object *Catalog::getNames()

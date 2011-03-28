@@ -236,6 +236,7 @@ poppler_include_HEADERS =	\
 	UnicodeCClassTables.h	\
 	UnicodeCompTables.h	\
 	UnicodeDecompTables.h	\
+	ViewerPreferences.h	\
 	XRef.h			\
 	CharTypes.h		\
 	CompactFontTables.h	\
@@ -310,6 +311,7 @@ libpoppler_la_SOURCES =		\
 	strtok_r.cpp		\
 	UnicodeMap.cc		\
 	UnicodeTypeTable.cc	\
+	ViewerPreferences.cc	\
 	XRef.cc			\
 	PSOutputDev.cc		\
 	TextOutputDev.cc	\

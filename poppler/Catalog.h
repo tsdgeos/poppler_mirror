@@ -44,6 +44,7 @@ class LinkDest;
 class PageLabelInfo;
 class Form;
 class OCGs;
+class ViewerPreferences;
 
 //------------------------------------------------------------------------
 // NameTree
@@ -202,6 +203,8 @@ public:
 
   Form* getForm();
 
+  ViewerPreferences *getViewerPreferences();
+
   enum PageMode {
     pageModeNone,
     pageModeOutlines,
@@ -240,6 +243,7 @@ private:
   std::vector<PageAttrs *> *attrsList;
   std::vector<int> *kidsIdxList;
   Form *form;
+  ViewerPreferences *viewerPreferences;
   int numPages;			// number of pages
   int pagesSize;		// size of pages array
   Object dests;			// named destination dictionary
