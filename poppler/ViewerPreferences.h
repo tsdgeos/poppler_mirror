@@ -25,10 +25,23 @@ public:
   ViewerPreferences(Dict *prefDict);
   ~ViewerPreferences();
 
+  GBool getHideToolbar() const { return hideToolbar; }
+  GBool getHideMenubar() const { return hideMenubar; }
+  GBool getHideWindowUI() const { return hideWindowUI; }
+  GBool getFitWindow() const { return fitWindow; }
+  GBool getCenterWindow() const { return centerWindow; }
+  GBool getDisplayDocTitle() const { return displayDocTitle; }
+
 private:
 
   void init();
 
+  GBool hideToolbar;
+  GBool hideMenubar;
+  GBool hideWindowUI;
+  GBool fitWindow;
+  GBool centerWindow;
+  GBool displayDocTitle;
 };
 
 #endif
