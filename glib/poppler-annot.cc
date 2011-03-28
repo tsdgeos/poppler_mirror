@@ -332,39 +332,6 @@ _poppler_annot_screen_new (Annot *annot)
   return poppler_annot;
 }
 
-/**
- * poppler_annot_screen_new:
- * @doc: a #PopplerDocument
- * @rect: a #PopplerRectangle
- * @video_file: pass the path of the video to be embed
- * @mimetype: pass the mimetype of the video to put in the Media Clip Dictionary
- * @img_file: pass png/jpeg image file for poster
- *
- * Creates a new Screen annotation that will be
- * located on @rect when added to a page. See
- * poppler_page_add_annot()
- *
- * Return value: A newly created #PopplerAnnotScreen annotation
- *
- * Since: 0.18
- */
-PopplerAnnot *
-poppler_annot_screen_new (PopplerDocument  *doc,
-			  PopplerRectangle *rect, 
-			  const char* video_file,
-			  const char* mimetype,
-			  const char* img_file)
-{
-  AnnotScreen *annot;
-  PDFRectangle pdf_rect(rect->x1, rect->y1,
-			rect->x2, rect->y2);
-
-  annot = new AnnotScreen (doc->doc->getXRef(), &pdf_rect, doc->doc->getCatalog());
-  if (annot->setAction(video_file, mimetype, img_file))
-    return _poppler_annot_screen_new ((Annot*)annot);
-  else 
-    return NULL;
-}
 
 /* Public methods */
 /**

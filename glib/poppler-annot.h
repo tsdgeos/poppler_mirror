@@ -218,11 +218,6 @@ PopplerMovie                 *poppler_annot_movie_get_movie                    (
 /* PopplerAnnotScreen */
 GType                         poppler_annot_screen_get_type                    (void) G_GNUC_CONST;
 PopplerAction                *poppler_annot_screen_get_action                  (PopplerAnnotScreen *poppler_annot);
-PopplerAnnot		     *poppler_annot_screen_new			       (PopplerDocument  *doc,
-										PopplerRectangle *rect,
-										const char* video_file,
-										const char* mimetype,
-										const char* img_file);
 
 /* PopplerCalloutLine */
 GType                         poppler_annot_callout_line_get_type              (void) G_GNUC_CONST;

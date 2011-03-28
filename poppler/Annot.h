@@ -22,7 +22,6 @@
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2009, 2010 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2011 Srinivas Adicherla <srinivas.adicherla@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -723,7 +722,6 @@ class AnnotScreen: public Annot {
   AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs; }
   LinkAction* getAction() { return action; }
   Object* getAdditionActions() { return &additionAction; }
-  GBool setAction(const char *video_file, const char *mimetype, const char *img_file);
 
  private:
   void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
