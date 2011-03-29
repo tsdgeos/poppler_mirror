@@ -140,6 +140,10 @@ poppler_action_free (PopplerAction *action)
 			g_list_free (action->ocg_state.state_list);
 		}
 		break;
+	case POPPLER_ACTION_JAVASCRIPT:
+		if (action->javascript.script)
+			g_free (action->javascript.script);
+		break;
 	default:
 		break;
 	}
@@ -213,6 +217,10 @@ poppler_action_copy (PopplerAction *action)
 			new_action->ocg_state.state_list = g_list_reverse (new_list);
 		}
 
+		break;
+	case POPPLER_ACTION_JAVASCRIPT:
+		if (action->javascript.script)
+			new_action->javascript.script = g_strdup (action->javascript.script);
 		break;
 	default:
 		break;
@@ -514,6 +522,18 @@ build_movie (PopplerDocument *document,
 }
 
 static void
+build_javascript (PopplerAction *action,
+		  LinkJavaScript *link)
+{
+	GooString *script;
+
+	script = link->getScript();
+	if (script)
+		action->javascript.script = _poppler_goo_string_to_utf8 (script);
+
+}
+
+static void
 build_rendition (PopplerAction *action,
 		 LinkRendition *link)
 {
@@ -649,6 +669,10 @@ _poppler_action_new (PopplerDocument *document,
 	case actionOCGState:
 		action->type = POPPLER_ACTION_OCG_STATE;
 		build_ocg_state (document, action, dynamic_cast<LinkOCGState*> (link));
+		break;
+	case actionJavaScript:
+		action->type = POPPLER_ACTION_JAVASCRIPT;
+		build_javascript (action, dynamic_cast<LinkJavaScript*> (link));
 		break;
 	case actionUnknown:
 	default:
