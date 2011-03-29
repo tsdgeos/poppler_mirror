@@ -51,7 +51,7 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
   obj.free();
 
   if (prefDict->lookup("DisplayDocTitle", &obj)->isBool()) {
-    centerWindow = obj.getBool();
+    displayDocTitle = obj.getBool();
   }
   obj.free();
 
