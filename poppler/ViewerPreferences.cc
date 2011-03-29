@@ -19,10 +19,6 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
 {
   init();
 
-  if (!prefDict) {
-    return;
-  }
-
   Object obj;
 
   if (prefDict->lookup("HideToolbar", &obj)->isBool()) {
