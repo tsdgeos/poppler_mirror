@@ -39,8 +39,6 @@ EXTRA_DIST =					\
 	poppler-cairo-uninstalled.pc.in		\
 	poppler-splash.pc.in			\
 	poppler-splash-uninstalled.pc.in	\
-	poppler-qt.pc.in			\
-	poppler-qt-uninstalled.pc.in		\
 	poppler-qt4.pc.in			\
 	poppler-qt4-uninstalled.pc.in		\
 	poppler-cpp.pc.in			\
