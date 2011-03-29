@@ -170,6 +170,7 @@ Catalog::~Catalog() {
   structTreeRoot.free();
   outline.free();
   acroForm.free();
+  viewerPreferences.free();
 }
 
 GooString *Catalog::readMetadata() {
