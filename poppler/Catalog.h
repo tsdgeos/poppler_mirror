@@ -18,7 +18,7 @@
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2008 Pino Toscano <pino@kde.org>
+// Copyright (C) 2008, 2011 Pino Toscano <pino@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 //
 // To see a description of the changes please see the Changelog file that
