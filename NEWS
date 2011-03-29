@@ -1,4 +1,4 @@
-Release 0.17.0
+Release 0.17.0 (0.18 Alpha)
         core:
          * Splash: Implement tiling patterns
          * Splash: Support slight hinting
@@ -38,7 +38,7 @@ Release 0.17.0
          * Form support improvements
         
         qt3:
-         * The Qt3 frontend has been removed
+         * The Qt3 has been removed
         
         tests:
          * Merge splash and cairo tests into a single gtk-test tool
