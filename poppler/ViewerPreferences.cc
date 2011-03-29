@@ -74,6 +74,28 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
     }
   }
   obj.free();
+
+  if (prefDict->lookup("PrintScaling", &obj)->isName()) {
+    const char *ps = obj.getName();
+    if (!strcmp(ps, "None")) {
+      printScaling = printScalingNone;
+    } else if (!strcmp(ps, "AppDefault")) {
+      printScaling = printScalingAppDefault;
+    }
+  }
+  obj.free();
+
+  if (prefDict->lookup("Duplex", &obj)->isName()) {
+    const char *d = obj.getName();
+    if (!strcmp(d, "Simplex")) {
+      duplex = duplexSimplex;
+    } else if (!strcmp(d, "DuplexFlipShortEdge")) {
+      duplex = duplexDuplexFlipShortEdge;
+    } else if (!strcmp(d, "DuplexFlipLongEdge")) {
+      duplex = duplexDuplexFlipLongEdge;
+    }
+  }
+  obj.free();
 }
 
 ViewerPreferences::~ViewerPreferences()
@@ -90,4 +112,6 @@ void ViewerPreferences::init()
   displayDocTitle = gFalse;
   nonFullScreenPageMode = nfpmUseNone;
   direction = directionL2R;
+  printScaling = printScalingAppDefault;
+  duplex = duplexNone;
 }

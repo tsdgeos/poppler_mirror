@@ -32,6 +32,16 @@ public:
     directionL2R,
     directionR2L
   };
+  enum PrintScaling {
+    printScalingNone,
+    printScalingAppDefault
+  };
+  enum Duplex {
+    duplexNone,
+    duplexSimplex,
+    duplexDuplexFlipShortEdge,
+    duplexDuplexFlipLongEdge
+  };
 
   ViewerPreferences(Dict *prefDict);
   ~ViewerPreferences();
@@ -44,6 +54,8 @@ public:
   GBool getDisplayDocTitle() const { return displayDocTitle; }
   NonFullScreenPageMode getNonFullScreenPageMode() const { return nonFullScreenPageMode; }
   Direction getDirection() const { return direction; }
+  PrintScaling getPrintScaling() const { return printScaling; }
+  Duplex getDuplex() const { return duplex; }
 
 private:
 
@@ -57,6 +69,8 @@ private:
   GBool displayDocTitle;
   NonFullScreenPageMode nonFullScreenPageMode;
   Direction direction;
+  PrintScaling printScaling;
+  Duplex duplex;
 };
 
 #endif
