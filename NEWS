@@ -17,7 +17,7 @@ Release 0.17.0 (0.18 Alpha)
 
         utils:
          * pdftoppm: Add -singlefile option (Bug #32025)
-         * pdftoppm: Add tif output format support (Bug #32027)
+         * pdftoppm: Add TIFF output format support (Bug #32027)
          * pdftops: Add PS level1 non standard binary output option
          * pdftops: Allow setting the rasterization resolution
          * pdftoabw has been removed
@@ -30,7 +30,7 @@ Release 0.17.0 (0.18 Alpha)
          * demo: show the activation action of form fields if there's one
 
         cpp:
-         * Add TIF output possibility
+         * Add TIFF output possibility
          * Add PNM output possibility
 
         qt4:
@@ -38,7 +38,7 @@ Release 0.17.0 (0.18 Alpha)
          * Form support improvements
         
         qt3:
-         * The Qt3 has been removed
+         * The Qt3 frontend has been removed
         
         tests:
          * Merge splash and cairo tests into a single gtk-test tool
