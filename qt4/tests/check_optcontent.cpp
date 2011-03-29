@@ -1,6 +1,7 @@
 #include <QtTest/QtTest>
 
 #include "PDFDoc.h"
+#include "GlobalParams.h"
 
 #include <poppler-qt4.h>
 
@@ -85,6 +86,7 @@ void TestOptionalContent::checkNoOptionalContent()
 void TestOptionalContent::checkIsVisible()
 {
     GooString *fileName = new GooString("../../../test/unittestcases/vis_policy_test.pdf"); 
+    globalParams = new GlobalParams();
     PDFDoc *doc = new PDFDoc( fileName );
     QVERIFY( doc );
 
@@ -161,10 +163,12 @@ void TestOptionalContent::checkIsVisible()
     obj.free();
 
     delete doc;
+    delete globalParams;
 }
 
 void TestOptionalContent::checkVisibilitySetting()
 {
+    globalParams = new GlobalParams();
     GooString *fileName = new GooString("../../../test/unittestcases/vis_policy_test.pdf"); 
     PDFDoc *doc = new PDFDoc( fileName );
     QVERIFY( doc );
@@ -394,6 +398,7 @@ void TestOptionalContent::checkVisibilitySetting()
     obj.free();
 
     delete doc;
+    delete globalParams;
 }
 
 void TestOptionalContent::checkRadioButtons()
