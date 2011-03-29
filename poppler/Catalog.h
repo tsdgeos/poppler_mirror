@@ -243,7 +243,7 @@ private:
   std::vector<PageAttrs *> *attrsList;
   std::vector<int> *kidsIdxList;
   Form *form;
-  ViewerPreferences *viewerPreferences;
+  ViewerPreferences *viewerPrefs;
   int numPages;			// number of pages
   int pagesSize;		// size of pages array
   Object dests;			// named destination dictionary
@@ -256,6 +256,7 @@ private:
   Object structTreeRoot;	// structure tree root dictionary
   Object outline;		// outline dictionary
   Object acroForm;		// AcroForm dictionary
+  Object viewerPreferences;     // ViewerPreference dictionary
   OCGs *optContent;		// Optional Content groups
   GBool ok;			// true if catalog is valid
   PageLabelInfo *pageLabelInfo; // info about page labels

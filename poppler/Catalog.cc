@@ -76,7 +76,7 @@ Catalog::Catalog(XRef *xrefA) {
   destNameTree = NULL;
   embeddedFileNameTree = NULL;
   jsNameTree = NULL;
-  viewerPreferences = NULL;
+  viewerPrefs = NULL;
 
   pagesList = NULL;
   pagesRefList = NULL;
@@ -110,6 +110,9 @@ Catalog::Catalog(XRef *xrefA) {
     }
   }
   optContentProps.free();
+
+  // get the ViewerPreferences dictionary
+  catDict.dictLookup("ViewerPreferences", &viewerPreferences);
 
   // perform form-related loading after all widgets have been loaded
   if (getForm())
@@ -162,7 +165,7 @@ Catalog::~Catalog() {
   delete pageLabelInfo;
   delete form;
   delete optContent;
-  delete viewerPreferences;
+  delete viewerPrefs;
   metadata.free();
   structTreeRoot.free();
   outline.free();
@@ -966,22 +969,13 @@ Form *Catalog::getForm()
 
 ViewerPreferences *Catalog::getViewerPreferences()
 {
-  if (!viewerPreferences) {
-    Object catDict;
-    Dict *d = NULL;
-
-    xref->getCatalog(&catDict);
-    if (catDict.isDict()) {
-      d = catDict.getDict();
-    } else {
-      error(-1, "Catalog object is wrong type (%s)", catDict.getTypeName());
+  if (!viewerPrefs) {
+    if (viewerPreferences.isDict()) {
+      viewerPrefs = new ViewerPreferences(viewerPreferences.getDict());
     }
-    viewerPreferences = new ViewerPreferences(d);
-
-    catDict.free();
   }
 
-  return viewerPreferences;
+  return viewerPrefs;
 }
 
 Object *Catalog::getNames()
