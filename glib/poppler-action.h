@@ -147,7 +147,7 @@ typedef struct _PopplerActionNamed      PopplerActionNamed;
 typedef struct _PopplerActionMovie      PopplerActionMovie;
 typedef struct _PopplerActionRendition  PopplerActionRendition;
 typedef struct _PopplerActionOCGState   PopplerActionOCGState;
-typedef struct _PopplerActionJavaScript PopplerActionJavaScript;
+typedef struct _PopplerActionJavascript PopplerActionJavascript;
 
 /**
  * PopplerDest:
@@ -268,7 +268,7 @@ struct _PopplerActionOCGState
 	GList            *state_list;
 };
 
-struct _PopplerActionJavaScript
+struct _PopplerActionJavascript
 {
 	PopplerActionType  type;
 	gchar 		  *title;
@@ -293,7 +293,7 @@ union _PopplerAction
 	PopplerActionMovie movie;
 	PopplerActionRendition rendition;
 	PopplerActionOCGState ocg_state;
-	PopplerActionJavaScript javascript;
+	PopplerActionJavascript javascript;
 };
 
 #define POPPLER_TYPE_ACTION             (poppler_action_get_type ())
