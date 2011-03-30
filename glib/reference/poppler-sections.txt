@@ -216,6 +216,7 @@ PopplerActionNamed
 PopplerActionMovie
 PopplerActionRendition
 PopplerActionOCGState
+PopplerActionJavascript
 PopplerActionType
 PopplerDestType
 PopplerActionMovieOperation
