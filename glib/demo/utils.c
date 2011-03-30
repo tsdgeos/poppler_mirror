@@ -438,6 +438,31 @@ pgd_action_view_set_action (GtkWidget     *action_view,
 		gtk_widget_show (button);
 	}
 		break;
+        case POPPLER_ACTION_JAVASCRIPT: {
+                GtkTextBuffer *buffer;
+                GtkWidget     *textview;
+                GtkWidget     *swindow;
+
+                pgd_table_add_property (GTK_TABLE (table), "<b>Type:</b>", "JavaScript", &row);
+
+                buffer = gtk_text_buffer_new (NULL);
+                if (action->javascript.script)
+                        gtk_text_buffer_set_text (buffer, action->javascript.script, -1);
+
+                textview = gtk_text_view_new_with_buffer (buffer);
+                gtk_text_view_set_editable (GTK_TEXT_VIEW (textview), FALSE);
+                g_object_unref (buffer);
+
+                swindow = gtk_scrolled_window_new (NULL, NULL);
+                gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (swindow),
+                                                GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+                gtk_container_add (GTK_CONTAINER (swindow), textview);
+                gtk_widget_show (textview);
+
+                pgd_table_add_property_with_custom_widget (GTK_TABLE (table), NULL, swindow, &row);
+                gtk_widget_show (swindow);
+        }
+                break;
 	default:
 		g_assert_not_reached ();
 	}
