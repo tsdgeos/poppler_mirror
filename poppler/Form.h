@@ -256,7 +256,7 @@ protected:
 
 class FormField {
 public:
-  FormField(XRef* xrefa, Object *aobj, const Ref& aref, std::set<int> *usedParents, FormFieldType t=formUndef);
+  FormField(XRef* xrefa, Object *aobj, const Ref& aref, FormField *parent, std::set<int> *usedParents, FormFieldType t=formUndef);
 
   virtual ~FormField();
 
@@ -268,7 +268,7 @@ public:
   void setReadOnly (bool b) { readOnly = b; }
   bool isReadOnly () const { return readOnly; }
 
-  GBool isModified () const { return modified; }
+  GBool isModified () const;
 
   GooString* getDefaultAppearance() const { return defaultAppearance; }
   GBool hasTextQuadding() const { return hasQuadding; }
@@ -280,6 +280,7 @@ public:
   GooString *getFullyQualifiedName();
 
   FormWidget* findWidgetByRef (Ref aref);
+  FormWidget *getWidget(int i) { return terminal ? widgets[i] : NULL; }
 
   // only implemented in FormFieldButton
   virtual void fillChildrenSiblingsID ();
@@ -302,6 +303,7 @@ public:
   Object obj;
   XRef *xref;
   FormField **children;
+  FormField *parent;
   int numChildren;
   FormWidget **widgets;
   bool readOnly;
@@ -328,7 +330,7 @@ private:
 
 class FormFieldButton: public FormField {
 public:
-  FormFieldButton(XRef *xrefA, Object *dict, const Ref& ref, std::set<int> *usedParents);
+  FormFieldButton(XRef *xrefA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
 
   FormButtonType getButtonType () { return btype; }
 
@@ -336,6 +338,7 @@ public:
 
   // returns gTrue if the state modification is accepted
   GBool setState (char *state);
+  GBool getState(char *state);
 
   char *getAppearanceState() { return appearanceState.isName() ? appearanceState.getName() : NULL; }
 
@@ -362,7 +365,7 @@ protected:
 
 class FormFieldText: public FormField {
 public:
-  FormFieldText(XRef *xrefA, Object *dict, const Ref& ref, std::set<int> *usedParents);
+  FormFieldText(XRef *xrefA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
   
   GooString* getContent () { return content; }
   GooString* getContentCopy ();
@@ -400,7 +403,7 @@ protected:
 
 class FormFieldChoice: public FormField {
 public:
-  FormFieldChoice(XRef *xrefA, Object *aobj, const Ref& ref, std::set<int> *usedParents);
+  FormFieldChoice(XRef *xrefA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents);
 
   virtual ~FormFieldChoice();
 
@@ -469,7 +472,7 @@ protected:
 
 class FormFieldSignature: public FormField {
 public:
-  FormFieldSignature(XRef *xrefA, Object *dict, const Ref& ref, std::set<int> *usedParents);
+  FormFieldSignature(XRef *xrefA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
 
   virtual ~FormFieldSignature();
 
@@ -495,7 +498,7 @@ public:
   
   /* Creates a new Field of the type specified in obj's dict.
      used in Form::Form and FormField::FormField */
-  static FormField *createFieldFromDict (Object* obj, XRef *xref, const Ref& aref, std::set<int> *usedParents);
+  static FormField *createFieldFromDict (Object* obj, XRef *xref, const Ref& aref, FormField *parent, std::set<int> *usedParents);
 
   Object *getObj () const { return acroForm; }
   GBool getNeedAppearances () const { return needAppearances; }

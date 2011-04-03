@@ -221,7 +221,7 @@ void FormWidgetButton::setState (GBool astate, GBool calledByParent)
 
 GBool FormWidgetButton::getState ()
 {
-  return (onStr && parent->getAppearanceState() && strcmp(parent->getAppearanceState(), onStr->getCString()) == 0);
+  return onStr ? parent->getState(onStr->getCString()) : gFalse;
 }
 
 void FormWidgetButton::setNumSiblingsID (int i)
@@ -428,13 +428,14 @@ FormWidgetSignature::FormWidgetSignature(XRef *xrefA, Object *aobj, unsigned num
 // FormField
 //========================================================================
 
-FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, std::set<int> *usedParents, FormFieldType ty)
+FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, FormField *parentA, std::set<int> *usedParents, FormFieldType ty)
 {
   xref = xrefA;
   aobj->copy(&obj);
   Dict* dict = obj.getDict();
   ref.num = ref.gen = 0;
   type = ty;
+  parent = parentA;
   numChildren = 0;
   children = NULL;
   terminal = false;
@@ -451,65 +452,60 @@ FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, std::set<int> *
   Object obj1;
   //childs
   if (dict->lookup("Kids", &obj1)->isArray()) {
-    Array *array = obj1.getArray();
-    int length = array->getLength();
     // Load children
-    for(int i=0; i<length; i++) { 
-      Object obj2,obj3;
-      array->get(i, &obj2);
-      if (!obj2.isDict ()) {
-	      error (-1, "Reference to an invalid or non existant object");
-	      obj2.free();
-	      continue;
+    for (int i = 0 ; i < obj1.arrayGetLength(); i++) {
+      Object childRef, childObj;
+
+      if (!obj1.arrayGetNF(i, &childRef)->isRef()) {
+        error (-1, "Invalid form field renference");
+        childRef.free();
+        continue;
       }
-      Object childRef;
-      array->getNF(i, &childRef);
-      if (childRef.isRef()) {
-        const Ref ref = childRef.getRef();
-        if (usedParents->find(ref.num) == usedParents->end()) {
-          //field child
-          if (dict->lookup ("FT", &obj3)->isName()) {
-            // If I'm not a generic container field and my children
-            // are widgets, create widgets for them
-            Object obj4;
+      if (!obj1.arrayGet(i, &childObj)->isDict()) {
+        error (-1, "Form field child is not a dictionary");
+        childObj.free();
+        childRef.free();
+        continue;
+      }
 
-            if (obj2.dictLookup("Subtype",&obj4)->isName()) {
-              _createWidget(&obj2, childRef.getRef());
-            }
-            obj4.free();
-          } else if(obj2.dictLookup("FT", &obj3)->isName() || obj2.dictLookup("Kids", &obj3)->isArray()) {
-            std::set<int> usedParentsAux = *usedParents;
-            usedParentsAux.insert(ref.num);
-            if(terminal) error(-1, "Field can't have both Widget AND Field as kids\n");
-
-            numChildren++;
-            children = (FormField**)greallocn(children, numChildren, sizeof(FormField*));
-
-            obj3.free();
-            children[numChildren-1] = Form::createFieldFromDict (&obj2, xref, childRef.getRef(), &usedParentsAux);
-          }
-          // 1 - we will handle 'collapsed' fields (field + annot in the same dict)
-          // as if the annot was in the Kids array of the field
-          else if (obj2.dictLookup("Subtype",&obj3)->isName()) {
-            _createWidget(&obj2, childRef.getRef());
-          }
+      const Ref ref = childRef.getRef();
+      if (usedParents->find(ref.num) == usedParents->end()) {
+        Object obj2, obj3;
+        // Field child: it could be a form field or a widget or composed dict
+        if (childObj.dictLookupNF("Parent", &obj2)->isRef() || childObj.dictLookup("Parent", &obj3)->isDict()) {
+          // Child is a form field or composed dict
+          // We create the field, if it's composed
+          // it will create the widget as a child
+          std::set<int> usedParentsAux = *usedParents;
+          usedParentsAux.insert(ref.num);
+          obj2.free();
           obj3.free();
-        } else {
-          error(-1, "Found loop in FormField creation");
+
+          if (terminal) {
+            error(-1, "Field can't have both Widget AND Field as kids\n");
+            continue;
+          }
+
+          numChildren++;
+          children = (FormField**)greallocn(children, numChildren, sizeof(FormField*));
+          children[numChildren - 1] = Form::createFieldFromDict(&childObj, xref, ref, this, &usedParentsAux);
+        } else if (childObj.dictLookup("Subtype", &obj2)->isName("Widget")) {
+          // Child is a widget annotation
+          _createWidget(&childObj, ref);
         }
-      } else {
-        error(-1, "FormField child is not a Ref as expected");
+        obj2.free();
+        obj3.free();
       }
-      obj2.free();
+      childObj.free();
+      childRef.free();
     }
+  } else {
+    // No children, if it's a composed dict, create the child widget
+    obj1.free();
+    if (dict->lookup("Subtype", &obj1)->isName("Widget"))
+      _createWidget(&obj, ref);
+    obj1.free();
   }
-  obj1.free();
-  // As said in 1, if this is a 'collapsed' field, behave like if we had a
-  // child annot
-  if (dict->lookup("Subtype", &obj1)->isName()) {
-    _createWidget(&obj, ref);
-  }
-  obj1.free();
 
   //flags
   if (Form::fieldLookup(dict, "Ff", &obj1)->isInt()) {
@@ -620,6 +616,10 @@ void FormField::createWidgetAnnotations(Catalog *catalog) {
   }
 }
 
+GBool FormField::isModified() const {
+  return modified ? gTrue : parent ? parent->isModified() : gFalse;
+}
+
 void FormField::_createWidget (Object *obj, Ref aref)
 {
   terminal = true;
@@ -712,12 +712,13 @@ GooString* FormField::getFullyQualifiedName() {
 //------------------------------------------------------------------------
 // FormFieldButton
 //------------------------------------------------------------------------
-FormFieldButton::FormFieldButton(XRef *xrefA, Object *aobj, const Ref& ref, std::set<int> *usedParents)
-	: FormField(xrefA, aobj, ref, usedParents, formButton)
+FormFieldButton::FormFieldButton(XRef *xrefA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(xrefA, aobj, ref, parent, usedParents, formButton)
 {
   Dict* dict = obj.getDict();
   active_child = -1;
   noAllOff = false;
+  appearanceState.initNull();
 
   Object obj1;
   btype = formButtonCheck; 
@@ -737,8 +738,11 @@ FormFieldButton::FormFieldButton(XRef *xrefA, Object *aobj, const Ref& ref, std:
     } 
   }
 
-  if (btype != formButtonPush)
-    Form::fieldLookup(dict, "V", &appearanceState);
+  if (btype != formButtonPush) {
+    // Even though V is inheritable we are interested in the value of this
+    // field, if not present it's probably because it's a button in a set.
+    dict->lookup("V", &appearanceState);
+  }
 }
 
 #ifdef DEBUG_FORMS
@@ -792,57 +796,68 @@ GBool FormFieldButton::setState(char *state)
 
   // A check button could behave as a radio button
   // when it's in a set of more than 1 buttons
-  if (btype == formButtonRadio || btype == formButtonCheck) {
-    GBool isOn = strcmp(state, "Off") != 0;
+  if (btype != formButtonRadio && btype != formButtonCheck)
+    return gFalse;
 
-    if (!isOn && noAllOff)
-      return gFalse; //don't allow to set all radio to off
-
-    char *current = getAppearanceState();
-
-    if (isOn) {
-      char *current = getAppearanceState();
-      GBool currentFound = gFalse, newFound = gFalse;
-
-      for (int i = 0; i < numChildren; i++) {
-        FormWidgetButton *widget = static_cast<FormWidgetButton*>(widgets[i]);
-
-        if (!widget->getOnStr())
-          continue;
-
-        char *onStr = widget->getOnStr();
-        if (current && strcmp(current, onStr) == 0) {
-          widget->setAppearanceState("Off");
-          currentFound = gTrue;
-        }
-
-        if (strcmp(state, onStr) == 0) {
-          widget->setAppearanceState(state);
-          newFound = gTrue;
-        }
-
-        if (currentFound && newFound)
-          break;
-      }
-    } else {
-      for (int i = 0; i < numChildren; i++) {
-        FormWidgetButton *widget = static_cast<FormWidgetButton*>(widgets[i]);
-
-        if (!widget->getOnStr())
-          continue;
-
-        char *onStr = widget->getOnStr();
-        if (current && strcmp(current, onStr) == 0) {
-          widget->setAppearanceState("Off");
-          break;
-        }
-      }
+  if (terminal && parent && parent->getType() == formButton && appearanceState.isNull()) {
+    // It's button in a set, set state on parent
+    if (static_cast<FormFieldButton*>(parent)->setState(state)) {
+      modified = gTrue;
+      return gTrue;
     }
-    updateState(state);
-    modified = gTrue;
+    return gFalse;
   }
 
+  GBool isOn = strcmp(state, "Off") != 0;
+
+  if (!isOn && noAllOff)
+    return gFalse; // Don't allow to set all radio to off
+
+  char *current = getAppearanceState();
+  GBool currentFound = gFalse, newFound = gFalse;
+
+  for (int i = 0; i < numChildren; i++) {
+    FormWidgetButton *widget;
+
+    // If radio button is a terminal field we want the widget at i, but
+    // if it's not terminal, the child widget is a composed dict, so
+    // we want the ony child widget of the children at i
+    if (terminal)
+      widget = static_cast<FormWidgetButton*>(widgets[i]);
+    else
+      widget = static_cast<FormWidgetButton*>(children[i]->getWidget(0));
+
+    if (!widget->getOnStr())
+      continue;
+
+    char *onStr = widget->getOnStr();
+    if (current && strcmp(current, onStr) == 0) {
+      widget->setAppearanceState("Off");
+      if (!isOn)
+        break;
+      currentFound = gTrue;
+    }
+
+    if (isOn && strcmp(state, onStr) == 0) {
+      widget->setAppearanceState(state);
+      newFound = gTrue;
+    }
+
+    if (currentFound && newFound)
+      break;
+  }
+
+  updateState(state);
+  modified = gTrue;
+
   return gTrue;
+}
+
+GBool FormFieldButton::getState(char *state) {
+  if (appearanceState.isName(state))
+    return gTrue;
+
+  return (parent && parent->getType() == formButton) ? static_cast<FormFieldButton*>(parent)->getState(state) : gFalse;
 }
 
 void FormFieldButton::updateState(char *state) {
@@ -864,8 +879,8 @@ FormFieldButton::~FormFieldButton()
 //------------------------------------------------------------------------
 // FormFieldText
 //------------------------------------------------------------------------
-FormFieldText::FormFieldText(XRef *xrefA, Object *aobj, const Ref& ref, std::set<int> *usedParents)
-	: FormField(xrefA, aobj, ref, usedParents, formText)
+FormFieldText::FormFieldText(XRef *xrefA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(xrefA, aobj, ref, parent, usedParents, formText)
 {
   Dict* dict = obj.getDict();
   Object obj1;
@@ -957,8 +972,8 @@ FormFieldText::~FormFieldText()
 //------------------------------------------------------------------------
 // FormFieldChoice
 //------------------------------------------------------------------------
-FormFieldChoice::FormFieldChoice(XRef *xrefA, Object *aobj, const Ref& ref, std::set<int> *usedParents)
-	: FormField(xrefA, aobj, ref, usedParents, formChoice)
+FormFieldChoice::FormFieldChoice(XRef *xrefA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(xrefA, aobj, ref, parent, usedParents, formChoice)
 {
   numChoices = 0;
   choices = NULL;
@@ -1198,8 +1213,8 @@ GooString *FormFieldChoice::getSelectedChoice() {
 //------------------------------------------------------------------------
 // FormFieldSignature
 //------------------------------------------------------------------------
-FormFieldSignature::FormFieldSignature(XRef *xrefA, Object *dict, const Ref& ref, std::set<int> *usedParents)
-	: FormField(xrefA, dict, ref, usedParents, formSignature)
+FormFieldSignature::FormFieldSignature(XRef *xrefA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(xrefA, dict, ref, parent, usedParents, formSignature)
 {
 }
 
@@ -1287,7 +1302,7 @@ Form::Form(XRef *xrefA, Object* acroFormA)
       }
 
       std::set<int> usedParents;
-      rootFields[numFields++] = createFieldFromDict (&obj2, xrefA, oref.getRef(), &usedParents);
+      rootFields[numFields++] = createFieldFromDict (&obj2, xrefA, oref.getRef(), NULL, &usedParents);
 
       obj2.free();
       oref.free();
@@ -1352,21 +1367,21 @@ Object *Form::fieldLookup(Dict *field, char *key, Object *obj) {
   return ::fieldLookup(field, key, obj, &usedParents);
 }
 
-FormField *Form::createFieldFromDict (Object* obj, XRef *xrefA, const Ref& pref, std::set<int> *usedParents)
+FormField *Form::createFieldFromDict (Object* obj, XRef *xrefA, const Ref& pref, FormField *parent, std::set<int> *usedParents)
 {
     Object obj2;
     FormField *field;
 
     if (Form::fieldLookup(obj->getDict (), "FT", &obj2)->isName("Btn")) {
-      field = new FormFieldButton(xrefA, obj, pref, usedParents);
+      field = new FormFieldButton(xrefA, obj, pref, parent, usedParents);
     } else if (obj2.isName("Tx")) {
-      field = new FormFieldText(xrefA, obj, pref, usedParents);
+      field = new FormFieldText(xrefA, obj, pref, parent, usedParents);
     } else if (obj2.isName("Ch")) {
-      field = new FormFieldChoice(xrefA, obj, pref, usedParents);
+      field = new FormFieldChoice(xrefA, obj, pref, parent, usedParents);
     } else if (obj2.isName("Sig")) {
-      field = new FormFieldSignature(xrefA, obj, pref, usedParents);
+      field = new FormFieldSignature(xrefA, obj, pref, parent, usedParents);
     } else { //we don't have an FT entry => non-terminal field
-      field = new FormField(xrefA, obj, pref, usedParents);
+      field = new FormField(xrefA, obj, pref, parent, usedParents);
     }
     obj2.free();
 

@@ -3684,9 +3684,7 @@ void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
   switch (static_cast<FormFieldButton *>(field)->getButtonType()) {
   case formButtonRadio: {
     //~ Acrobat doesn't draw a caption if there is no AP dict (?)
-    char *buttonState = static_cast<FormFieldButton *>(field)->getAppearanceState();
-    if (buttonState && appearState && appearState->cmp(buttonState) == 0 &&
-        strcmp (buttonState, "Off") != 0) {
+    if (appearState && appearState->cmp("Off") != 0) {
       if (caption) {
         drawText(caption, da, resources, gFalse, 0, fieldQuadCenter,
                  gFalse, gTrue);
