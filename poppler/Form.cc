@@ -491,6 +491,10 @@ FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, FormField *pare
           children[numChildren - 1] = Form::createFieldFromDict(&childObj, xref, ref, this, &usedParentsAux);
         } else if (childObj.dictLookup("Subtype", &obj2)->isName("Widget")) {
           // Child is a widget annotation
+          if (!terminal && numChildren > 0) {
+            error(-1, "Field can't have both Widget AND Field as kids\n");
+            continue;
+          }
           _createWidget(&childObj, ref);
         }
         obj2.free();
