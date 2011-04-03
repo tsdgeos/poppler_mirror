@@ -148,7 +148,7 @@ public:
 
   FormButtonType getButtonType() const;
   
-  void setState (GBool state, GBool calledByParent=gFalse);
+  void setState (GBool state);
   GBool getState ();
 
   char* getOnStr();

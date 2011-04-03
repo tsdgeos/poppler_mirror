@@ -205,7 +205,7 @@ void FormWidgetButton::setAppearanceState(char *state) {
   widget->setAppearanceState(state);
 }
 
-void FormWidgetButton::setState (GBool astate, GBool calledByParent)
+void FormWidgetButton::setState (GBool astate)
 {
   //pushButtons don't have state
   if (parent->getButtonType() == formButtonPush)
