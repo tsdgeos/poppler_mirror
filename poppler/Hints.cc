@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Pino Toscano <pino@kde.org>
 //
 //========================================================================
@@ -61,6 +61,7 @@ Hints::Hints(BaseStream *str, Linearization *linearization, XRef *xref, Security
   }
 
   memset(numSharedObject, 0, nPages * sizeof(Guint));
+  memset(pageObjectNum, 0, nPages * sizeof(int));
 
   nSharedGroups = 0;
   groupLength = NULL;
