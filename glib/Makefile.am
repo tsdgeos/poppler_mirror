@@ -107,10 +107,10 @@ Poppler_0_18_gir_EXPORT_PACKAGES = poppler-glib
 INTROSPECTION_GIRS += Poppler-0.18.gir
 
 girdir = $(datadir)/gir-1.0
-dist_gir_DATA = $(INTROSPECTION_GIRS)
+gir_DATA = $(INTROSPECTION_GIRS)
 
 typelibsdir = $(libdir)/girepository-1.0
 typelibs_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 
-CLEANFILES += $(dist_gir_DATA) $(typelibs_DATA)
+CLEANFILES += $(gir_DATA) $(typelibs_DATA)
 endif #HAVE_INTROSPECTION
