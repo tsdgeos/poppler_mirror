@@ -341,7 +341,7 @@ int main(int argc, char *argv[]) {
     if (textOut->isOk()) {
       fprintf(f, "<doc>\n");
       for (int page = firstPage; page <= lastPage; ++page) {
-        fprintf(f, "  <page width=\"%f\" height=\"%f\">\n",doc->getPageCropWidth(page), doc->getPageCropHeight(page));
+        fprintf(f, "  <page width=\"%f\" height=\"%f\">\n",doc->getPageMediaWidth(page), doc->getPageMediaHeight(page));
         doc->displayPage(textOut, page, resolution, resolution, 0, gTrue, gFalse, gFalse);
         TextWordList *wordlist = textOut->makeWordList();
         const int word_length = wordlist != NULL ? wordlist->getLength() : 0;
