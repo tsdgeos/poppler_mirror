@@ -17,7 +17,7 @@
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009 Ross Moore <ross@maths.mq.edu.au>
@@ -3593,7 +3593,6 @@ GooString *TextPage::getText(double xMin, double yMin,
 			   double xMax, double yMax) {
   GooString *s;
   UnicodeMap *uMap;
-  GBool isUnicode;
   TextBlock *blk;
   TextLine *line;
   TextLineFrag *frags;
@@ -3632,7 +3631,6 @@ GooString *TextPage::getText(double xMin, double yMin,
     return s;
   }
 
-  isUnicode = uMap->isUnicode();
   spaceLen = uMap->mapUnicode(0x20, space, sizeof(space));
   eolLen = 0; // make gcc happy
   switch (globalParams->getTextEOL()) {
@@ -3918,7 +3916,6 @@ GooString *TextSelectionDumper::getText (void)
   GooString *s;
   TextLineFrag *frag;
   int i, j;
-  GBool multiLine;
   UnicodeMap *uMap;
   char space[8], eol[16];
   int spaceLen, eolLen;
@@ -3939,7 +3936,6 @@ GooString *TextSelectionDumper::getText (void)
   eolLen = uMap->mapUnicode(0x0a, eol, sizeof(eol));
 
   if (nFrags > 0) {
-    multiLine = gFalse;
     for (i = 0; i < nFrags; ++i) {
       frag = &frags[i];
 
