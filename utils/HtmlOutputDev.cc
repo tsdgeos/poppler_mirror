@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Kjartan Maraas <kmaraas@gnome.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Haruyuki Kawabe <Haruyuki.Kawabe@unisys.co.jp>
@@ -1164,42 +1164,6 @@ void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
   FILE *f1;
   int c;
   
-  int x0, y0;			// top left corner of image
-  int w0, h0, w1, h1;		// size of image
-  double xt, yt, wt, ht;
-  GBool rotate, xFlip, yFlip;
- 
-  // get image position and size
-  state->transform(0, 0, &xt, &yt);
-  state->transformDelta(1, 1, &wt, &ht);
-  if (wt > 0) {
-    x0 = xoutRound(xt);
-    w0 = xoutRound(wt);
-  } else {
-    x0 = xoutRound(xt + wt);
-    w0 = xoutRound(-wt);
-  }
-  if (ht > 0) {
-    y0 = xoutRound(yt);
-    h0 = xoutRound(ht);
-  } else {
-    y0 = xoutRound(yt + ht);
-    h0 = xoutRound(-ht);
-  }
-  state->transformDelta(1, 0, &xt, &yt);
-  rotate = fabs(xt) < fabs(yt);
-  if (rotate) {
-    w1 = h0;
-    h1 = w0;
-    xFlip = ht < 0;
-    yFlip = wt > 0;
-  } else {
-    w1 = w0;
-    h1 = h0;
-    xFlip = wt < 0;
-    yFlip = ht > 0;
-  }
-
   // dump JPEG file
   if (dumpJPEG  && str->getKind() == strDCT) {
     GooString *fName=new GooString(Docname);
@@ -1248,43 +1212,6 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   FILE *f1;
   int c;
   
-  int x0, y0;			// top left corner of image
-  int w0, h0, w1, h1;		// size of image
-  double xt, yt, wt, ht;
-  GBool rotate, xFlip, yFlip;
- 
-  // get image position and size
-  state->transform(0, 0, &xt, &yt);
-  state->transformDelta(1, 1, &wt, &ht);
-  if (wt > 0) {
-    x0 = xoutRound(xt);
-    w0 = xoutRound(wt);
-  } else {
-    x0 = xoutRound(xt + wt);
-    w0 = xoutRound(-wt);
-  }
-  if (ht > 0) {
-    y0 = xoutRound(yt);
-    h0 = xoutRound(ht);
-  } else {
-    y0 = xoutRound(yt + ht);
-    h0 = xoutRound(-ht);
-  }
-  state->transformDelta(1, 0, &xt, &yt);
-  rotate = fabs(xt) < fabs(yt);
-  if (rotate) {
-    w1 = h0;
-    h1 = w0;
-    xFlip = ht < 0;
-    yFlip = wt > 0;
-  } else {
-    w1 = w0;
-    h1 = h0;
-    xFlip = wt < 0;
-    yFlip = ht > 0;
-  }
-
-   
   /*if( !globalParams->getErrQuiet() )
     printf("image stream of kind %d\n", str->getKind());*/
   // dump JPEG file

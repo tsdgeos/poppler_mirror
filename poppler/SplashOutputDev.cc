@@ -1512,7 +1512,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
   double *textMat;
   double m11, m12, m21, m22, fontSize;
   SplashCoord mat[4];
-  int substIdx, n;
+  int n;
   int faceIndex = 0;
   GBool recreateFont = gFalse;
   GBool doAdjustFontMatrix = gFalse;
@@ -1521,7 +1521,6 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
   font = NULL;
   fileName = NULL;
   tmpBuf = NULL;
-  substIdx = -1;
   dfp = NULL;
 
   if (!(gfxFont = state->getFont())) {
@@ -3307,13 +3306,10 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
 }
 
 void SplashOutputDev::endTransparencyGroup(GfxState *state) {
-  double *ctm;
-
   // restore state
   delete splash;
   bitmap = transpGroupStack->origBitmap;
   splash = transpGroupStack->origSplash;
-  ctm = state->getCTM();
   state->shiftCTM(transpGroupStack->tx, transpGroupStack->ty);
   updateCTM(state, 0, 0, 0, 0, 0, 0);
 }
@@ -3557,7 +3553,6 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Catalog *catalog, Obje
   SplashBitmap *formerBitmap = bitmap;
   double width, height;
   int surface_width, surface_height, result_width, result_height, i;
-  int xMin, xMax, yMin, yMax;
   int repeatX, repeatY;
   SplashCoord matc[6];
   Matrix m1;
@@ -3584,10 +3579,6 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Catalog *catalog, Obje
   }
   matc[4] = x0 * xStep * ctm[0] + y0 * yStep * ctm[2] + ctm[4];
   matc[5] = x0 * xStep * ctm[1] + y0 * yStep * ctm[3] + ctm[5];
-  xMin = (int) ceil (matc[4]);
-  yMin = (int) ceil (matc[5]);
-  xMax = xMin;
-  yMax = yMin;
   if (splashAbs(ctm[1]) > splashAbs(ctm[0])) {
     kx = -ctm[1];
     ky = ctm[2] - (ctm[0] * ctm[3]) / ctm[1];
