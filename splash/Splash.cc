@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2010, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -3220,7 +3220,7 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
 
   int scanLineOff = 0;
   int bitmapOff = 0;
-  int scanLimitR = 0, scanLimitL = 0, Yt = 0;
+  int scanLimitR = 0, scanLimitL = 0;
 
   int bitmapWidth = bitmap->getWidth();
   SplashClip* clip = getClip();
@@ -3400,7 +3400,6 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
       scanColorMapR[0] = (color[scanEdgeR[1]] - color[scanEdgeR[0]]) / (y[scanEdgeR[1]] - y[scanEdgeR[0]]);
       scanColorMapR[1] = color[scanEdgeR[0]] - y[scanEdgeR[0]] * scanColorMapR[0];
 
-      Yt = y[2];
       hasFurtherSegment = (y[1] < y[2]);
       scanLineOff = y[0] * rowSize;
 

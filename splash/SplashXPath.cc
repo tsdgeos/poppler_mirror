@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
-// Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2011 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -78,7 +78,7 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
   SplashCoord x0, y0, x1, y1, x2, y2, x3, y3, xsp, ysp;
   SplashCoord adj0, adj1, w;
   int ww;
-  int curSubpath, curSubpathX, i, j;
+  int curSubpath, i, j;
 
   // transform the points
   pts = (SplashXPathPoint *)gmallocn(path->length, sizeof(SplashXPathPoint));
@@ -157,7 +157,6 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
   x0 = y0 = xsp = ysp = 0; // make gcc happy
   adj0 = adj1 = 0; // make gcc happy
   curSubpath = 0;
-  curSubpathX = 0;
   i = 0;
   while (i < path->length) {
 
@@ -168,7 +167,6 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
       xsp = x0;
       ysp = y0;
       curSubpath = i;
-      curSubpathX = length;
       ++i;
 
     } else {

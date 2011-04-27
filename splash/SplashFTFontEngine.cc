@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 //
@@ -141,14 +141,12 @@ SplashFontFile *SplashFTFontEngine::loadCIDFont(SplashFontFileID *idA,
 SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA,
 							SplashFontSrc *src) {
   FoFiTrueType *ff;
-  GBool isCID;
   Gushort *cidToGIDMap;
   int nCIDs;
   SplashFontFile *ret;
 
   cidToGIDMap = NULL;
   nCIDs = 0;
-  isCID = gFalse;
   if (!useCIDs) {
     if (src->isFile) {
       ff = FoFiTrueType::load(src->fileName->getCString());
