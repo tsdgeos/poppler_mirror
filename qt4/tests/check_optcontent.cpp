@@ -430,7 +430,7 @@ void TestOptionalContent::checkRadioButtons()
     QCOMPARE( static_cast<Qt::CheckState>( optContent->data( subindex, Qt::CheckStateRole ).toInt() ), Qt::Unchecked );
 
     // RBGroup of languages, so turning on Japanese should turn off English
-    bool result = optContent->setData( subindex, QVariant( true ), Qt::CheckStateRole );
+    QVERIFY( optContent->setData( subindex, QVariant( true ), Qt::CheckStateRole ) );
 
     subindex = optContent->index( 0, 0, index );
     QCOMPARE( optContent->data( subindex, Qt::DisplayRole ).toString(), QString( "English" ) );
@@ -445,7 +445,7 @@ void TestOptionalContent::checkRadioButtons()
     QCOMPARE( static_cast<Qt::CheckState>( optContent->data( subindex, Qt::CheckStateRole ).toInt() ), Qt::Unchecked );
 
     // and turning on French should turn off Japanese
-    result = optContent->setData( subindex, QVariant( true ), Qt::CheckStateRole );
+    QVERIFY( optContent->setData( subindex, QVariant( true ), Qt::CheckStateRole ) );
 
     subindex = optContent->index( 0, 0, index );
     QCOMPARE( optContent->data( subindex, Qt::DisplayRole ).toString(), QString( "English" ) );
@@ -461,7 +461,7 @@ void TestOptionalContent::checkRadioButtons()
 
 
     // and turning off French should leave them all off
-    result = optContent->setData( subindex, QVariant( false ), Qt::CheckStateRole );
+    QVERIFY( optContent->setData( subindex, QVariant( false ), Qt::CheckStateRole ) );
 
     subindex = optContent->index( 0, 0, index );
     QCOMPARE( optContent->data( subindex, Qt::DisplayRole ).toString(), QString( "English" ) );
