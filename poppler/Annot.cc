@@ -2582,14 +2582,11 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
       }
 
       for (i = 0; i < quadrilaterals->getQuadrilateralsLength(); ++i) {
-        double x1, y1, x2, y2, x3, y3;
+        double x1, x2, y3;
 	double x, y;
 
 	x1 = quadrilaterals->getX1(i);
-	y1 = quadrilaterals->getY1(i);
 	x2 = quadrilaterals->getX2(i);
-	y2 = quadrilaterals->getY2(i);
-	x3 = quadrilaterals->getX3(i);
 	y3 = quadrilaterals->getY3(i);
 
 	x = x1 - rect->x1;
@@ -2607,15 +2604,13 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
       }
 
       for (i = 0; i < quadrilaterals->getQuadrilateralsLength(); ++i) {
-        double x1, y1, x2, y2, x3, y3;
+        double x1, y1, x2, y3;
 	double x, y;
 	double h2;
 
 	x1 = quadrilaterals->getX1(i);
 	y1 = quadrilaterals->getY1(i);
 	x2 = quadrilaterals->getX2(i);
-	y2 = quadrilaterals->getY2(i);
-	x3 = quadrilaterals->getX3(i);
 	y3 = quadrilaterals->getY3(i);
 	h2 = (y1 - y3) / 2.0;
 
