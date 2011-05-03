@@ -1,3 +1,15 @@
+Release 0.17.1 (0.18 Beta 1)
+        core:
+         * Rework the way form fields tree is built
+         * Cleanup unused parameters/variables
+
+        glib:
+         * Add JavaScript actions
+         * demo: Show javascript actions in actions view
+        
+        qt4:
+         * tests: Turn some assignments to bool into QVERIFY checks
+
 Release 0.17.0 (0.18 Alpha)
         core:
          * Splash: Implement tiling patterns
