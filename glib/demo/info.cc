@@ -27,7 +27,7 @@ pgd_info_add_permissions (GtkTable           *table,
 			  PopplerPermissions  permissions,
 			  gint               *row)
 {
-	GtkWidget *label, *hbox;
+	GtkWidget *label, *hbox, *vbox;
 	GtkWidget *checkbox;
 
 	label = gtk_label_new (NULL);
@@ -37,6 +37,7 @@ pgd_info_add_permissions (GtkTable           *table,
 			  GTK_FILL, GTK_FILL, 0, 0);
 	gtk_widget_show (label);
 
+        vbox = gtk_vbox_new (FALSE, 0);
 	hbox = gtk_hbox_new (FALSE, 6);
 
 	checkbox = gtk_check_button_new_with_label ("Print");
@@ -63,9 +64,41 @@ pgd_info_add_permissions (GtkTable           *table,
 	gtk_box_pack_start (GTK_BOX (hbox), checkbox, FALSE, TRUE, 0);
 	gtk_widget_show (checkbox);
 
-	gtk_table_attach (GTK_TABLE (table), hbox, 1, 2, *row, *row + 1,
+        checkbox = gtk_check_button_new_with_label ("Fill forms");
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbox),
+                                      (permissions & POPPLER_PERMISSIONS_OK_TO_FILL_FORM));
+        gtk_box_pack_start (GTK_BOX (hbox), checkbox, FALSE, TRUE, 0);
+        gtk_widget_show (checkbox);
+
+        gtk_box_pack_start (GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
+        gtk_widget_show (hbox);
+
+        hbox = gtk_hbox_new (FALSE, 6);
+
+        checkbox = gtk_check_button_new_with_label ("Extract contents");
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbox),
+                                      (permissions & POPPLER_PERMISSIONS_OK_TO_EXTRACT_CONTENTS));
+        gtk_box_pack_start (GTK_BOX (hbox), checkbox, FALSE, TRUE, 0);
+        gtk_widget_show (checkbox);
+
+        checkbox = gtk_check_button_new_with_label ("Assemble");
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbox),
+                                      (permissions & POPPLER_PERMISSIONS_OK_TO_ASSEMBLE));
+        gtk_box_pack_start (GTK_BOX (hbox), checkbox, FALSE, TRUE, 0);
+        gtk_widget_show (checkbox);
+
+        checkbox = gtk_check_button_new_with_label ("Print at high resolution");
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbox),
+                                      (permissions & POPPLER_PERMISSIONS_OK_TO_PRINT_HIGH_RESOLUTION));
+        gtk_box_pack_start (GTK_BOX (hbox), checkbox, FALSE, TRUE, 0);
+        gtk_widget_show (checkbox);
+
+        gtk_box_pack_start (GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
+        gtk_widget_show (hbox);
+
+	gtk_table_attach (GTK_TABLE (table), vbox, 1, 2, *row, *row + 1,
 			  GTK_FILL, GTK_FILL, 0, 0);
-	gtk_widget_show (hbox);
+	gtk_widget_show (vbox);
 	
 	*row += 1;
 }
