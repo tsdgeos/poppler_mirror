@@ -476,6 +476,29 @@ poppler_document_get_page_by_label (PopplerDocument  *document,
 }
 
 /**
+ * poppler_document_get_n_attachments:
+ * @document: A #PopplerDocument
+ *
+ * Returns the number of attachments in a loaded document.
+ * See also poppler_document_get_attachments()
+ *
+ * Return value: Number of attachments
+ *
+ * Since: 0.18
+ */
+guint
+poppler_document_get_n_attachments (PopplerDocument *document)
+{
+  Catalog *catalog;
+
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), 0);
+
+  catalog = document->doc->getCatalog ();
+
+  return catalog && catalog->isOk () ? catalog->numEmbeddedFiles () : 0;
+}
+
+/**
  * poppler_document_has_attachments:
  * @document: A #PopplerDocument
  * 
@@ -486,18 +509,9 @@ poppler_document_get_page_by_label (PopplerDocument  *document,
 gboolean
 poppler_document_has_attachments (PopplerDocument *document)
 {
-  Catalog *catalog;
-  int n_files = 0;
-
   g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), FALSE);
 
-  catalog = document->doc->getCatalog ();
-  if (catalog && catalog->isOk ())
-    {
-      n_files = catalog->numEmbeddedFiles ();
-    }
-
-  return (n_files != 0);
+  return (poppler_document_get_n_attachments (document) != 0);
 }
 
 /**

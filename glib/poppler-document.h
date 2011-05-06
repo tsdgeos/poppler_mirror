@@ -205,6 +205,7 @@ PopplerPermissions poppler_document_get_permissions        (PopplerDocument *doc
 gchar             *poppler_document_get_metadata           (PopplerDocument *document);
 
 /* Attachments */
+guint              poppler_document_get_n_attachments      (PopplerDocument  *document);
 gboolean           poppler_document_has_attachments        (PopplerDocument  *document);
 GList             *poppler_document_get_attachments        (PopplerDocument  *document);
 
