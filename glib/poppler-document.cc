@@ -1048,6 +1048,12 @@ poppler_document_get_permissions (PopplerDocument *document)
     flag |= POPPLER_PERMISSIONS_OK_TO_ADD_NOTES;
   if (document->doc->okToFillForm ())
     flag |= POPPLER_PERMISSIONS_OK_TO_FILL_FORM;
+  if (document->doc->okToAccessibility())
+    flag |= POPPLER_PERMISSIONS_OK_TO_EXTRACT_CONTENTS;
+  if (document->doc->okToAssemble())
+    flag |= POPPLER_PERMISSIONS_OK_TO_ASSEMBLE;
+  if (document->doc->okToPrintHighRes())
+    flag |= POPPLER_PERMISSIONS_OK_TO_PRINT_HIGH_RESOLUTION;
 
   return (PopplerPermissions)flag;
 }
