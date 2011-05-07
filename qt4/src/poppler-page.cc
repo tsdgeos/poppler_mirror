@@ -42,6 +42,7 @@
 #include <TextOutputDev.h>
 #include <Annot.h>
 #include <Link.h>
+#include <FileSpec.h>
 #include <ArthurOutputDev.h>
 #if defined(HAVE_SPLASH)
 #include <SplashOutputDev.h>
@@ -939,8 +940,8 @@ QList<Annotation*> Page::annotations() const
                 // -> fileIcon
                 f->setFileIconName( QString::fromLatin1( attachann->getName()->getCString() ) );
                 // -> embeddedFile
-                EmbFile *embfile = new EmbFile( attachann->getFile(), attachann->getContents() );
-                f->setEmbeddedFile( new EmbeddedFile( *new EmbeddedFileData( embfile ) ) );
+                FileSpec *filespec = new FileSpec( attachann->getFile() );
+                f->setEmbeddedFile( new EmbeddedFile( *new EmbeddedFileData( filespec ) ) );
                 break;
             }
             case Annot::typeSound:

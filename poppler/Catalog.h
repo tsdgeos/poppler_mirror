@@ -45,6 +45,7 @@ class PageLabelInfo;
 class Form;
 class OCGs;
 class ViewerPreferences;
+class FileSpec;
 
 //------------------------------------------------------------------------
 // NameTree
@@ -80,58 +81,6 @@ private:
   int size, length; // size is the number of entries in
                     // the array of Entry*
                     // length is the number of real Entry
-};
-
-class EmbFile {
-public:
-  EmbFile(GooString *name, GooString *description, 
-	  int size,
-	  GooString *createDate,
-	  GooString *modDate, GooString *checksum,
-	  GooString *mimetype,
-	  Object objStr) :
-    m_name(name),
-    m_description(description),
-    m_size(size),
-    m_createDate(createDate),
-    m_modDate(modDate),
-    m_checksum(checksum),
-    m_mimetype(mimetype)
-  {
-    objStr.copy(&m_objStr);
-  }
-  EmbFile(Object *efDict, GooString *description = 0);
-
-  ~EmbFile()
-  {
-    delete m_name;
-    delete m_description;
-    delete m_modDate;
-    delete m_createDate;
-    delete m_checksum;
-    delete m_mimetype;
-    m_objStr.free();
-  }
-
-  GooString *name() { return m_name; }
-  GooString *description() { return m_description; }
-  int size() { return m_size; }
-  GooString *modDate() { return m_modDate; }
-  GooString *createDate() { return m_createDate; }
-  GooString *checksum() { return m_checksum; }
-  GooString *mimeType() { return m_mimetype; }
-  Object &streamObject() { return m_objStr; }
-  bool isOk() { return m_objStr.isStream(); }
-
-private:
-  GooString *m_name;
-  GooString *m_description;
-  int m_size;
-  GooString *m_createDate;
-  GooString *m_modDate;
-  GooString *m_checksum;
-  GooString *m_mimetype;
-  Object m_objStr;
 };
 
 //------------------------------------------------------------------------
@@ -183,7 +132,7 @@ public:
   int numEmbeddedFiles() { return getEmbeddedFileNameTree()->numEntries(); }
 
   // Get the i'th file embedded (at the Document level) in the document
-  EmbFile *embeddedFile(int i);
+  FileSpec *embeddedFile(int i);
 
   // Get the number of javascript scripts
   int numJS() { return getJSNameTree()->numEntries(); }

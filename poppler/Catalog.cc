@@ -51,6 +51,7 @@
 #include "Form.h"
 #include "OptionalContent.h"
 #include "ViewerPreferences.h"
+#include "FileSpec.h"
 
 //------------------------------------------------------------------------
 // Catalog
@@ -447,19 +448,19 @@ LinkDest *Catalog::findDest(GooString *name) {
   return dest;
 }
 
-EmbFile *Catalog::embeddedFile(int i)
+FileSpec *Catalog::embeddedFile(int i)
 {
     Object efDict;
     Object obj;
     obj = getEmbeddedFileNameTree()->getValue(i);
-    EmbFile *embeddedFile = 0;
+    FileSpec *embeddedFile = 0;
     if (obj.isRef()) {
-        GooString desc(getEmbeddedFileNameTree()->getName(i));
-        embeddedFile = new EmbFile(obj.fetch(xref, &efDict), &desc);
-        efDict.free();
+      Object fsDict;
+      embeddedFile = new FileSpec(obj.fetch(xref, &fsDict));
+      fsDict.free();
     } else {
-        Object null;
-        embeddedFile = new EmbFile(&null);
+      Object null;
+      embeddedFile = new FileSpec(&null);
     }
     return embeddedFile;
 }
@@ -734,109 +735,6 @@ GBool Catalog::indexToLabel(int index, GooString *label)
     label->append(buffer);	      
     return gTrue;
   }
-}
-
-EmbFile::EmbFile(Object *efDict, GooString *description)
-{
-  m_name = 0;
-  m_description = 0;
-  if (description)
-    m_description = description->copy();
-  m_size = -1;
-  m_createDate = 0;
-  m_modDate = 0;
-  m_checksum = 0;
-  m_mimetype = 0;
-  if (efDict->isDict()) {
-    Object fileSpec;
-    Object fileDesc;
-    Object paramDict;
-    Object paramObj;
-    Object obj2;
-    Stream *efStream = NULL;
-    // efDict matches Table 3.40 in the PDF1.6 spec
-    efDict->dictLookup("F", &fileSpec);
-    if (fileSpec.isString()) {
-      m_name = new GooString(fileSpec.getString());
-    }
-    fileSpec.free();
-
-    // the logic here is that the description from the name
-    // dictionary is used if we don't have a more specific
-    // description - see the Note: on page 157 of the PDF1.6 spec
-    efDict->dictLookup("Desc", &fileDesc);
-    if (fileDesc.isString()) {
-      delete m_description;
-      m_description = new GooString(fileDesc.getString());
-    } else {
-      efDict->dictLookup("Description", &fileDesc);
-      if (fileDesc.isString()) {
-        delete m_description;
-        m_description = new GooString(fileDesc.getString());
-      }
-    }
-    fileDesc.free();
-
-    efDict->dictLookup("EF", &obj2);
-    if (obj2.isDict()) {
-      // This gives us the raw data stream bytes
-
-      obj2.dictLookup("F", &m_objStr);
-      if (m_objStr.isStream()) {
-        efStream = m_objStr.getStream();
-
-        // dataDict corresponds to Table 3.41 in the PDF1.6 spec.
-        Dict *dataDict = efStream->getDict();
-
-        // subtype is normally the mimetype
-        Object subtypeName;
-        if (dataDict->lookup("Subtype", &subtypeName)->isName()) {
-          m_mimetype = new GooString(subtypeName.getName());
-        }
-        subtypeName.free();
-
-        // paramDict corresponds to Table 3.42 in the PDF1.6 spec
-        Object paramDict;
-        dataDict->lookup( "Params", &paramDict );
-        if (paramDict.isDict()) {
-          paramDict.dictLookup("ModDate", &paramObj);
-          if (paramObj.isString()) {
-            m_modDate = new GooString(paramObj.getString());
-          }
-          paramObj.free();
-          paramDict.dictLookup("CreationDate", &paramObj);
-          if (paramObj.isString()) {
-            m_createDate = new GooString(paramObj.getString());
-          }
-          paramObj.free();
-          paramDict.dictLookup("Size", &paramObj);
-          if (paramObj.isInt()) {
-            m_size = paramObj.getInt();
-          }
-          paramObj.free();
-          paramDict.dictLookup("CheckSum", &paramObj);
-          if (paramObj.isString()) {
-            m_checksum = new GooString(paramObj.getString());
-          }
-          paramObj.free();
-        }
-        paramDict.free();
-      }
-    }
-    obj2.free();
-  }
-  if (!m_name)
-    m_name = new GooString();
-  if (!m_description)
-    m_description = new GooString();
-  if (!m_createDate)
-    m_createDate = new GooString();
-  if (!m_modDate)
-    m_modDate = new GooString();
-  if (!m_checksum)
-    m_checksum = new GooString();
-  if (!m_mimetype)
-    m_mimetype = new GooString();
 }
 
 int Catalog::getNumPages()

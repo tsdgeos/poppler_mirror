@@ -21,7 +21,7 @@
 #ifndef POPPLER_EMBEDDEDFILE_PRIVATE_H
 #define POPPLER_EMBEDDEDFILE_PRIVATE_H
 
-class EmbFile;
+class FileSpec;
 
 namespace Poppler
 {
@@ -29,10 +29,10 @@ namespace Poppler
 class EmbeddedFileData
 {
 public:
-	EmbeddedFileData(EmbFile *ef);
+	EmbeddedFileData(FileSpec *fs);
 	~EmbeddedFileData();
 
-	EmbFile *embfile;
+	FileSpec *filespec;
 };
 
 }

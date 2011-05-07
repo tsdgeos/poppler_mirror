@@ -541,13 +541,14 @@ poppler_document_get_attachments (PopplerDocument *document)
   for (i = 0; i < n_files; i++)
     {
       PopplerAttachment *attachment;
-      EmbFile *emb_file;
+      FileSpec *emb_file;
 
       emb_file = catalog->embeddedFile (i);
-      if (!emb_file->isOk ()) {
+      if (!emb_file->isOk () || !emb_file->getEmbeddedFile()->isOk()) {
         delete emb_file;
 	continue;
       }
+
       attachment = _poppler_attachment_new (emb_file);
       delete emb_file;
 

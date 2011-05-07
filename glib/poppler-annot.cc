@@ -1225,9 +1225,9 @@ poppler_annot_file_attachment_get_attachment (PopplerAnnotFileAttachment *popple
 
   annot = static_cast<AnnotFileAttachment *>(POPPLER_ANNOT (poppler_annot)->annot);
 
-  EmbFile *emb_file = new EmbFile (annot->getFile(), annot->getContents());
-  attachment = _poppler_attachment_new (emb_file);
-  delete emb_file;
+  FileSpec *file = new FileSpec (annot->getFile());
+  attachment = _poppler_attachment_new (file);
+  delete file;
 
   return attachment;
 }

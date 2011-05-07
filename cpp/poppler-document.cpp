@@ -587,8 +587,8 @@ std::vector<embedded_file *> document::embedded_files() const
         const int num = d->doc->getCatalog()->numEmbeddedFiles();
         d->embedded_files.resize(num);
         for (int i = 0; i < num; ++i) {
-            EmbFile *ef = d->doc->getCatalog()->embeddedFile(i);
-            d->embedded_files[i] = embedded_file_private::create(ef);
+            FileSpec *fs = d->doc->getCatalog()->embeddedFile(i);
+            d->embedded_files[i] = embedded_file_private::create(fs);
         }
     }
     return d->embedded_files;

@@ -164,8 +164,8 @@ namespace Poppler {
 		if (!(0 == numEmb)) {
 			// we have some embedded documents, build the list
 			for (int yalv = 0; yalv < numEmb; ++yalv) {
-				EmbFile *ef = doc->getCatalog()->embeddedFile(yalv);
-				m_embeddedFiles.append(new EmbeddedFile(*new EmbeddedFileData(ef)));
+				FileSpec *fs = doc->getCatalog()->embeddedFile(yalv);
+				m_embeddedFiles.append(new EmbeddedFile(*new EmbeddedFileData(fs)));
 			}
 		}
 	}

@@ -16,6 +16,7 @@
 #include <Catalog.h>
 #include <OptionalContent.h>
 #include <CairoOutputDev.h>
+#include <FileSpec.h>
 #endif
 
 struct _PopplerDocument
@@ -110,7 +111,7 @@ PopplerDest   *_poppler_dest_new_goto (PopplerDocument *document,
 				       LinkDest        *link_dest);
 PopplerFormField *_poppler_form_field_new (PopplerDocument *document,
 					   FormWidget      *field);
-PopplerAttachment *_poppler_attachment_new (EmbFile *file);
+PopplerAttachment *_poppler_attachment_new (FileSpec *file);
 PopplerMovie      *_poppler_movie_new (Movie *movie);
 PopplerMedia      *_poppler_media_new (MediaRendition *media);
 PopplerAnnot      *_poppler_annot_new           (Annot *annot);
