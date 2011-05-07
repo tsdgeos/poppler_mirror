@@ -58,7 +58,7 @@ public:
   void parse(Object *tree);
   GBool lookup(GooString *name, Object *obj);
   int numEntries() { return length; };
-  // iterator accessor
+  // iterator accessor, note it returns a shallow copy, do not free the object
   Object getValue(int i);
   GooString *getName(int i);
 

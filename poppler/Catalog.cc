@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
@@ -466,12 +466,10 @@ EmbFile *Catalog::embeddedFile(int i)
 
 GooString *Catalog::getJS(int i)
 {
-  Object obj = getJSNameTree()->getValue(i);
-  if (obj.isRef()) {
-    Ref r = obj.getRef();
-    obj.free();
-    xref->fetch(r.num, r.gen, &obj);
-  }
+  Object obj;
+  // getJSNameTree()->getValue(i) returns a shallow copy of the object so we
+  // do not need to free it
+  getJSNameTree()->getValue(i).fetch(xref, &obj);
 
   if (!obj.isDict()) {
     obj.free();
