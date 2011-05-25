@@ -940,7 +940,7 @@ QList<Annotation*> Page::annotations() const
                 f->setFileIconName( QString::fromLatin1( attachann->getName()->getCString() ) );
                 // -> embeddedFile
                 EmbFile *embfile = new EmbFile( attachann->getFile(), attachann->getContents() );
-                f->setEmbeddedFile( new EmbeddedFile( embfile ) );
+                f->setEmbeddedFile( new EmbeddedFile( *new EmbeddedFileData( embfile ) ) );
                 break;
             }
             case Annot::typeSound:
