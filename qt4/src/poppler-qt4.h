@@ -3,7 +3,7 @@
  * Copyright (C) 2005, 2007, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2005-2010, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
- * Copyright (C) 2006-2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2009 Shawn Rutledge <shawn.t.rutledge@gmail.com>
  * Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2010 Matthias Fauconneau <matthias.fauconneau@gmail.com>
