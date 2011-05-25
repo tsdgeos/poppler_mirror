@@ -28,15 +28,10 @@
 #include "Catalog.h"
 
 #include "poppler-private.h"
+#include "poppler-embeddedfile-private.h"
 
 namespace Poppler
 {
-
-class EmbeddedFileData
-{
-public:
-	EmbFile *embfile;
-};
 
 EmbeddedFile::EmbeddedFile(EmbFile *embfile)
 {
