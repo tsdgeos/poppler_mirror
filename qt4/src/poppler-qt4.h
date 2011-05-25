@@ -305,6 +305,7 @@ delete it;
        Container class for an embedded file with a PDF document
     */
     class POPPLER_QT4_EXPORT EmbeddedFile {
+	friend class DocumentData;
     public:
 	/// \cond PRIVATE
 	EmbeddedFile(EmbFile *embfile);
@@ -377,6 +378,7 @@ delete it;
 
     private:
 	Q_DISABLE_COPY(EmbeddedFile)
+	EmbeddedFile(EmbeddedFileData &dd);
 
 	EmbeddedFileData *m_embeddedFile;
     };

@@ -29,6 +29,9 @@ namespace Poppler
 class EmbeddedFileData
 {
 public:
+	EmbeddedFileData(EmbFile *ef);
+	~EmbeddedFileData();
+
 	EmbFile *embfile;
 };
 

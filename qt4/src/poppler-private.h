@@ -41,6 +41,7 @@
 #endif
 
 #include "poppler-qt4.h"
+#include "poppler-embeddedfile-private.h"
 
 class LinkDest;
 class FormWidget;
@@ -164,7 +165,7 @@ namespace Poppler {
 			// we have some embedded documents, build the list
 			for (int yalv = 0; yalv < numEmb; ++yalv) {
 				EmbFile *ef = doc->getCatalog()->embeddedFile(yalv);
-				m_embeddedFiles.append(new EmbeddedFile(ef));
+				m_embeddedFiles.append(new EmbeddedFile(*new EmbeddedFileData(ef)));
 			}
 		}
 	}

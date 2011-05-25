@@ -33,15 +33,30 @@
 namespace Poppler
 {
 
-EmbeddedFile::EmbeddedFile(EmbFile *embfile)
+EmbeddedFileData::EmbeddedFileData(EmbFile *ef)
+	: embfile(ef)
 {
-	m_embeddedFile = new EmbeddedFileData();
-	m_embeddedFile->embfile = embfile;
+}
+
+EmbeddedFileData::~EmbeddedFileData()
+{
+	delete embfile;
+}
+
+
+EmbeddedFile::EmbeddedFile(EmbFile *embfile)
+	: m_embeddedFile(0)
+{
+	assert(!"You must not use this private constructor!");
+}
+
+EmbeddedFile::EmbeddedFile(EmbeddedFileData &dd)
+	: m_embeddedFile(&dd)
+{
 }
 
 EmbeddedFile::~EmbeddedFile()
 {
-	delete m_embeddedFile->embfile;
 	delete m_embeddedFile;
 }
 
