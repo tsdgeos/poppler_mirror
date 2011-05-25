@@ -306,6 +306,7 @@ delete it;
     */
     class POPPLER_QT4_EXPORT EmbeddedFile {
 	friend class DocumentData;
+	friend class Page;
     public:
 	/// \cond PRIVATE
 	EmbeddedFile(EmbFile *embfile);
