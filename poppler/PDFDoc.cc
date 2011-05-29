@@ -20,7 +20,7 @@
 // Copyright (C) 2008, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Eric Toombs <ewtoombs@uwaterloo.ca>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
-// Copyright (C) 2009 Axel Struebing <axel.struebing@freenet.de>
+// Copyright (C) 2009, 2011 Axel Struebing <axel.struebing@freenet.de>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jakub Wilk <ubanus@users.sf.net>
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -984,10 +984,11 @@ void PDFDoc::writeTrailer (Guint uxrefOffset, int uxrefSize, OutStream* outStr, 
   obj1.initString(new GooString((const char*)digest, 16));
 
   //create ID array
-  Object obj2,obj3,obj4,obj5;
+  Object obj2,obj3,obj5;
   obj2.initArray(xref);
 
   if (incrUpdate) {
+    Object obj4;
     //only update the second part of the array
     xref->getTrailerDict()->getDict()->lookup("ID", &obj4);
     if (!obj4.isArray()) {
@@ -1000,6 +1001,7 @@ void PDFDoc::writeTrailer (Guint uxrefOffset, int uxrefSize, OutStream* outStr, 
       obj2.arrayAdd(&obj1);
       trailerDict->set("ID", &obj2);
     }
+    obj4.free();
   } else {
     //new file => same values for the two identifiers
     obj2.arrayAdd(&obj1);
