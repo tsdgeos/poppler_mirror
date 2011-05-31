@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007, 2009, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2009-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -56,7 +56,6 @@ public:
   NameTree();
   ~NameTree();
   void init(XRef *xref, Object *tree);
-  void parse(Object *tree);
   GBool lookup(GooString *name, Object *obj);
   int numEntries() { return length; };
   // iterator accessor, note it returns a shallow copy, do not free the object
@@ -73,6 +72,7 @@ private:
     static int cmp(const void *key, const void *entry);
   };
 
+  void parse(Object *tree);
   void addEntry(Entry *entry);
 
   XRef *xref;
