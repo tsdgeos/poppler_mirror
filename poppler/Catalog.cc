@@ -247,6 +247,7 @@ GBool Catalog::cachePageTree(int page)
     } else {
        error(-1, "Catalog dictionary does not contain a valid \"Pages\" entry");
        pagesDictRef.free();
+       catDict.free();
        return gFalse;
     }
 
