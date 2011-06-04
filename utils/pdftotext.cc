@@ -50,6 +50,7 @@
 #include "TextOutputDev.h"
 #include "CharTypes.h"
 #include "UnicodeMap.h"
+#include "PDFDocEncoding.h"
 #include "Error.h"
 #include <string>
 
@@ -452,7 +453,7 @@ static void printInfoString(FILE *f, Dict *infoDict, char *key,
 	    (s1->getChar(i+1) & 0xff);
 	i += 2;
       } else {
-	u = s1->getChar(i) & 0xff;
+	u = pdfDocEncoding[s1->getChar(i) & 0xff];
 	++i;
       }
       n = uMap->mapUnicode(u, buf, sizeof(buf));
