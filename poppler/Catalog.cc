@@ -238,17 +238,23 @@ GBool Catalog::cachePageTree(int page)
 
     xref->getCatalog(&catDict);
 
-    Object pagesDictRef;
-    if (catDict.dictLookupNF("Pages", &pagesDictRef)->isRef() &&
-        pagesDictRef.getRefNum() >= 0 &&
-        pagesDictRef.getRefNum() < xref->getNumObjects()) {
-      pagesRef = pagesDictRef.getRef();
-      pagesDictRef.free();
+    if (catDict.isDict()) {
+      Object pagesDictRef;
+      if (catDict.dictLookupNF("Pages", &pagesDictRef)->isRef() &&
+          pagesDictRef.getRefNum() >= 0 &&
+          pagesDictRef.getRefNum() < xref->getNumObjects()) {
+        pagesRef = pagesDictRef.getRef();
+        pagesDictRef.free();
+      } else {
+        error(-1, "Catalog dictionary does not contain a valid \"Pages\" entry");
+        pagesDictRef.free();
+        catDict.free();
+        return gFalse;
+      }
     } else {
-       error(-1, "Catalog dictionary does not contain a valid \"Pages\" entry");
-       pagesDictRef.free();
-       catDict.free();
-       return gFalse;
+      error(-1, "Could not find catalog dictionary");
+      catDict.free();
+      return gFalse;
     }
 
     Object obj;
