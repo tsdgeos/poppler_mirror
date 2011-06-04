@@ -751,6 +751,11 @@ int Catalog::getNumPages()
     Object catDict, pagesDict, obj;
 
     xref->getCatalog(&catDict);
+    if (!catDict.isDict()) {
+      error(-1, "Catalog object is wrong type (%s)", catDict.getTypeName());
+      catDict.free();
+      return 0;
+    }
     catDict.dictLookup("Pages", &pagesDict);
     catDict.free();
 
