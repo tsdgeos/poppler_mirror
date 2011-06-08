@@ -1341,6 +1341,8 @@ void HtmlOutputDev::doProcessLink(AnnotLink* link){
 
 GooString* HtmlOutputDev::getLinkDest(AnnotLink *link,Catalog* catalog){
   char *p;
+  if (!link->getAction())
+    return new GooString();
   switch(link->getAction()->getKind()) 
   {
       case actionGoTo:
