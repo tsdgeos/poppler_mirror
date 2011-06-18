@@ -21,6 +21,7 @@
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
+// Copyright (C) 2011 Joshua Richardson <joshuarbox-junk1@yahoo.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -331,7 +332,7 @@ GooString* HtmlFontAccu::CSStyle(int i, int j){
      tmp->append(iStr);
      tmp->append("{font-size:");
      tmp->append(Size);
-     if( font.getLineSize() != -1 )
+     if( font.getLineSize() != -1 && font.getLineSize() != 0 )
      {
 	 lSize = GooString::fromInt(font.getLineSize());
 	 tmp->append("px;line-height:");

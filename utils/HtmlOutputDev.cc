@@ -28,6 +28,7 @@
 // Copyright (C) 2010 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
+// Copyright (C) 2011 Joshua Richardson <joshuarbox-junk1@yahoo.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -60,6 +61,9 @@
 #include "GlobalParams.h"
 #include "HtmlOutputDev.h"
 #include "HtmlFonts.h"
+
+// returns true if x is closer to y than x is to z
+static inline bool IS_CLOSER(float x, float y, float z) { return fabs((x)-(y)) < fabs((x)-(z)); }
 
 int HtmlPage::pgNum=0;
 int HtmlOutputDev::imgNum=1;
@@ -400,6 +404,9 @@ static void CloseTags( GooString *htext, GBool &finish_a, GBool &finish_italic, 
     htext->append("</a>");
 }
 
+// Strings are lines of text;
+// This function aims to combine strings into lines and paragraphs if !noMerge
+// It may also strip out duplicate strings (if they are on top of each other); sometimes they are to create a font effect
 void HtmlPage::coalesce() {
   HtmlString *str1, *str2;
   HtmlFont *hfont1, *hfont2;
@@ -478,9 +485,10 @@ void HtmlPage::coalesce() {
 
   while (str1 && (str2 = str1->yxNext)) {
     hfont2 = getFont(str2);
-    space = str1->yMax - str1->yMin;
+    space = str1->yMax - str1->yMin; // the height of the font's bounding box
     horSpace = str2->xMin - str1->xMax;
-    addLineBreak = !noMerge && (fabs(str1->xMin - str2->xMin) < 0.4);
+    // if strings line up on left-hand side AND they are on subsequent lines, we need a line break
+    addLineBreak = !noMerge && (fabs(str1->xMin - str2->xMin) < 0.4) && IS_CLOSER(str2->yMax, str1->yMax + space, str1->yMax);
     vertSpace = str2->yMin - str1->yMax;
 
 //printf("coalesce %d %d %f? ", str1->dir, str2->dir, d);
@@ -497,6 +505,15 @@ void HtmlPage::coalesce() {
     	vertOverlap = 0;
     } 
     
+    // Combine strings if:
+    //  They appear to be the same font (complex mode only) && going in the same direction AND at least one of the following:
+    //  1.  They appear to be part of the same line of text
+    //  2.  They appear to be subsequent lines of a paragraph
+    //  We assume (1) or (2) above, respectively, based on:
+    //  (1)  strings overlap vertically AND
+    //       horizontal space between end of str1 and start of str2 is consistent with a single space or less;
+    //       when rawOrder, the strings have to overlap vertically by at least 50%
+    //  (2)  Strings flow down the page, but the space between them is not too great, and they are lined up on the left
     if (
 	(
 	 (
