@@ -62,6 +62,11 @@ char *FoFiBase::readFile(char *fileName, int *fileLen) {
     return NULL;
   }
   n = (int)ftell(f);
+  if (n < 0) {
+    error(-1, "Cannot determine length of '%s'", fileName);
+    fclose(f);
+    return NULL;
+  }
   if (fseek(f, 0, SEEK_SET) != 0) {
     error(-1, "Cannot seek to start of '%s'", fileName);
     fclose(f);
