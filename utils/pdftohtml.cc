@@ -18,6 +18,7 @@
 // Copyright (C) 2010 Mike Slegeir <tehpola@yahoo.com>
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
+// Copyright (C) 2011 Steven Murdoch <Steven.Murdoch@cl.cam.ac.uk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -53,6 +54,7 @@
 #endif
 #include "PSOutputDev.h"
 #include "GlobalParams.h"
+#include "PDFDocEncoding.h"
 #include "Error.h"
 #include "DateInfo.h"
 #include "goo/gfile.h"
@@ -511,13 +513,46 @@ int main(int argc, char *argv[]) {
 
 static GooString* getInfoString(Dict *infoDict, char *key) {
   Object obj;
-  GooString *s1 = NULL;
+  // Raw value as read from PDF (may be in pdfDocEncoding or UCS2)
+  GooString *rawString;
+  // Value converted to unicode
+  Unicode *unicodeString;
+  int unicodeLength;
+  // Value HTML escaped and converted to desired encoding
+  GooString *encodedString = NULL;
+  // Is rawString UCS2 (as opposed to pdfDocEncoding)
+  GBool isUnicode;
 
   if (infoDict->lookup(key, &obj)->isString()) {
-    s1 = new GooString(obj.getString());
+    rawString = obj.getString();
+
+    // Convert rawString to unicode
+    encodedString = new GooString();
+    if (rawString->hasUnicodeMarker()) {
+      isUnicode = gTrue;
+      unicodeLength = (obj.getString()->getLength() - 2) / 2;
+    } else {
+      isUnicode = gFalse;
+      unicodeLength = obj.getString()->getLength();
+    }
+    unicodeString = new Unicode[unicodeLength];
+
+    for (int i=0; i<unicodeLength; i++) {
+      if (isUnicode) {
+        unicodeString[i] = ((rawString->getChar((i+1)*2) & 0xff) << 8) |
+          (rawString->getChar(((i+1)*2)+1) & 0xff);
+      } else {
+        unicodeString[i] = pdfDocEncoding[rawString->getChar(i) & 0xff];
+      }
+    }
+
+    // HTML escape and encode unicode
+    encodedString = HtmlFont::HtmlFilter(unicodeString, unicodeLength);
+    delete[] unicodeString;
   }
+
   obj.free();
-  return s1;
+  return encodedString;
 }
 
 static GooString* getInfoDate(Dict *infoDict, char *key) {

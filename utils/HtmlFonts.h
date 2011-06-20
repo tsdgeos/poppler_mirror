@@ -19,6 +19,7 @@
 //
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
 // Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2011 Steven Murdoch <Steven.Murdoch@cl.cam.ac.uk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -65,7 +66,6 @@ class HtmlFont{
    static GooString *DefaultFont;
    GooString *FontName;
    HtmlFontColor color;
-   static GooString* HtmlFilter(Unicode* u, int uLen); //char* s);
 public:  
 
    HtmlFont(){FontName=NULL;};
@@ -84,6 +84,7 @@ public:
    GooString* getFontName();
    static GooString* getDefaultFont();
    static void setDefaultFont(GooString* defaultFont);
+   static GooString* HtmlFilter(Unicode* u, int uLen); //char* s);
    GBool isEqual(const HtmlFont& x) const;
    GBool isEqualIgnoreBold(const HtmlFont& x) const;
    static GooString* simple(HtmlFont *font, Unicode *content, int uLen);
