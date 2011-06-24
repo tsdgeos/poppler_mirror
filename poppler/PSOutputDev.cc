@@ -3016,13 +3016,13 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     splashOut = new SplashOutputDev(splashModeMono8, 1, gFalse,
 				    paperColor, gTrue, gFalse);
 #if SPLASH_CMYK
-  } else if (level == psLevel1Sep) {
+  } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep) {
     paperColor[0] = paperColor[1] = paperColor[2] = paperColor[3] = 0;
     splashOut = new SplashOutputDev(splashModeCMYK8, 1, gFalse,
 				    paperColor, gTrue, gFalse);
 #else
-  } else if (level == psLevel1Sep) {
-    error(-1, "pdftops was built without CMYK support, level1sep needs it to work in this file");
+  } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep) {
+    error(-1, "pdftops was built without CMYK support, levelnsep needs it to work in this file");
     return gFalse;
 #endif
   } else {
@@ -3221,10 +3221,59 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
       processColors |= psProcessBlack;
     }
     break;
-  case psLevel2:
   case psLevel2Sep:
-  case psLevel3:
   case psLevel3Sep:
+    obj.initNull();
+    str0 = new MemStream((char *)bitmap->getDataPtr(), 0, w * h * 4, &obj);
+    processColors |= psProcessCMYK;
+    writePS("/DeviceCMYK setcolorspace\n");
+    str = new RunLengthEncoder(str0);
+    writePS("<<\n  /ImageType 1\n");
+    writePSFmt("  /Width {0:d}\n", bitmap->getWidth());
+    writePSFmt("  /Height {0:d}\n", bitmap->getHeight());
+    writePSFmt("  /ImageMatrix [{0:d} 0 0 {1:d} 0 {2:d}]\n", w, -h, h);
+    writePS("  /BitsPerComponent 8\n");
+    writePS("  /Decode [0 1 0 1 0 1 0 1]\n");
+    writePS("  /DataSource currentfile\n");
+    useBinary = globalParams->getPSBinary();
+    if (useBinary) {
+      /* nothing to do */;
+    } else if (globalParams->getPSASCIIHex()) {
+      writePS("    /ASCIIHexDecode filter\n");
+    } else {
+      writePS("    /ASCII85Decode filter\n");
+    }
+    writePS("    /RunLengthDecode filter\n");
+    writePS(">>\n");
+    if (useBinary) {
+      /* nothing to do */;
+    } else if (globalParams->getPSASCIIHex()) {
+      str = new ASCIIHexEncoder(str);
+    } else {
+      str = new ASCII85Encoder(str);
+    }
+    str->reset();
+    if (useBinary) {
+      int len = 0;
+      while (str->getChar() != EOF) {
+	len++;
+      }
+      str->reset();
+      writePSFmt("%%BeginData: {0:d} Binary Bytes\n", len+6+1);
+    }
+    writePS("image\n");
+    while ((c = str->getChar()) != EOF) {
+      writePSChar(c);
+    }
+    if (useBinary) {
+      writePS("\n%%EndData\n");
+    }
+    str->close();
+    delete str;
+    delete str0;
+    break;
+  case psLevel2:
+  case psLevel3:
     writePS("/DeviceRGB setcolorspace\n");
     writePS("<<\n  /ImageType 1\n");
     writePSFmt("  /Width {0:d}\n", bitmap->getWidth());
