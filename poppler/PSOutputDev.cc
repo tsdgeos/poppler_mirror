@@ -2986,6 +2986,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   GfxState *state;
   SplashBitmap *bitmap;
   Stream *str0, *str;
+  Stream *str1 = NULL;
   Object obj;
   Guchar *p;
   Guchar col[4];
@@ -2995,6 +2996,8 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   Guchar digit;
   GBool useBinary;
+  GBool isGray;
+  int compCyan;
 
   if (!forceRasterize) {
     scan = new PreScanOutputDev(xref);
@@ -3225,15 +3228,35 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   case psLevel3Sep:
     obj.initNull();
     str0 = new MemStream((char *)bitmap->getDataPtr(), 0, w * h * 4, &obj);
-    processColors |= psProcessCMYK;
-    writePS("/DeviceCMYK setcolorspace\n");
-    str = new RunLengthEncoder(str0);
+    isGray = gTrue;
+    while ((compCyan = str0->getChar()) != EOF) {
+      if (str0->getChar() != compCyan ||
+          str0->getChar() != compCyan) {
+	isGray = gFalse;
+	break;
+      }
+      str0->getChar();
+    }
+    str0->reset();
+    if (isGray) {
+      writePS("/DeviceGray setcolorspace\n");
+      str1 = new CMKYGrayEncoder(str0);
+      str = new RunLengthEncoder(str1);
+    } else {
+      processColors |= psProcessCMYK;
+      writePS("/DeviceCMYK setcolorspace\n");
+      str = new RunLengthEncoder(str0);
+    }
     writePS("<<\n  /ImageType 1\n");
     writePSFmt("  /Width {0:d}\n", bitmap->getWidth());
     writePSFmt("  /Height {0:d}\n", bitmap->getHeight());
     writePSFmt("  /ImageMatrix [{0:d} 0 0 {1:d} 0 {2:d}]\n", w, -h, h);
     writePS("  /BitsPerComponent 8\n");
-    writePS("  /Decode [0 1 0 1 0 1 0 1]\n");
+    if (isGray) {
+      writePS("  /Decode [1 0]\n");
+    } else {
+      writePS("  /Decode [0 1 0 1 0 1 0 1]\n");
+    }
     writePS("  /DataSource currentfile\n");
     useBinary = globalParams->getPSBinary();
     if (useBinary) {
@@ -3267,9 +3290,12 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     }
     if (useBinary) {
       writePS("\n%%EndData\n");
+    } else if (isGray) {
+      writePSChar('\n');
     }
     str->close();
     delete str;
+    // delete str1; // deleted by str0
     delete str0;
     break;
   case psLevel2:

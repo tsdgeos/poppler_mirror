@@ -1141,4 +1141,33 @@ private:
   GBool fillBuf();
 };
 
+//------------------------------------------------------------------------
+// CMKYGrayEncoder
+//------------------------------------------------------------------------
+
+class CMKYGrayEncoder: public FilterStream {
+public:
+
+  CMKYGrayEncoder(Stream *strA);
+  virtual ~CMKYGrayEncoder();
+  virtual StreamKind getKind() { return strWeird; }
+  virtual void reset();
+  virtual int getChar()
+    { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
+  virtual int lookChar()
+    { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
+  virtual GooString *getPSFilter(int /*psLevel*/, char * /*indent*/) { return NULL; }
+  virtual GBool isBinary(GBool /*last = gTrue*/) { return gFalse; }
+  virtual GBool isEncoder() { return gTrue; }
+
+private:
+
+  char buf[2];
+  char *bufPtr;
+  char *bufEnd;
+  GBool eof;
+
+  GBool fillBuf();
+};
+
 #endif
