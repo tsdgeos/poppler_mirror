@@ -2986,7 +2986,6 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   GfxState *state;
   SplashBitmap *bitmap;
   Stream *str0, *str;
-  Stream *str1 = NULL;
   Object obj;
   Guchar *p;
   Guchar col[4];
@@ -3240,8 +3239,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     str0->reset();
     if (isGray) {
       writePS("/DeviceGray setcolorspace\n");
-      str1 = new CMKYGrayEncoder(str0);
-      str = new RunLengthEncoder(str1);
+      str = new RunLengthEncoder(new CMKYGrayEncoder(str0));
     } else {
       processColors |= psProcessCMYK;
       writePS("/DeviceCMYK setcolorspace\n");
@@ -3295,7 +3293,6 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     }
     str->close();
     delete str;
-    // delete str1; // deleted by str0
     delete str0;
     break;
   case psLevel2:
