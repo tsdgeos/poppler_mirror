@@ -11,6 +11,7 @@ test-poppler-qt4
 test-password-qt4
 poppler-attachments
 poppler-fonts
+poppler-texts
 check_attachments
 check_dateConversion
 check_fonts
