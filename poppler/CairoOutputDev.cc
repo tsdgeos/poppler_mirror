@@ -408,6 +408,11 @@ void CairoOutputDev::updateLineWidth(GfxState *state) {
     /* find out how big pixels (device unit) are in the x and y directions
      * choose the smaller of the two as our line width */
     double x = 1.0, y = 1.0;
+    if (printing) {
+      // assume printer pixel size is 1/600 inch
+      x = 72.0/600;
+      y = 72.0/600;
+    }
     cairo_device_to_user_distance(cairo, &x, &y);
     cairo_set_line_width (cairo, MIN(fabs(x),fabs(y)));
   } else {
