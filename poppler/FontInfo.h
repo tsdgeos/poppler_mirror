@@ -3,7 +3,7 @@
 // FontInfo.h
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2008, 2010, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2009 Pino Toscano <pino@kde.org>
 //
@@ -23,8 +23,12 @@
 #ifndef FONT_INFO_H
 #define FONT_INFO_H
 
+#include "Object.h"
 #include "goo/gtypes.h"
 #include "goo/GooList.h"
+
+class GfxFont;
+class PDFDoc;
 
 class FontInfo {
 public:

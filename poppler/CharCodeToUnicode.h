@@ -17,7 +17,7 @@
 //
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2011 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -33,12 +33,14 @@
 
 #include "poppler-config.h"
 #include "CharTypes.h"
+#include "goo/gtypes.h"
 
 #if MULTITHREADED
 #include "goo/GooMutex.h"
 #endif
 
 struct CharCodeToUnicodeString;
+class GooString;
 
 //------------------------------------------------------------------------
 

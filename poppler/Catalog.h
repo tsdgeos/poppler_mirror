@@ -33,6 +33,8 @@
 #pragma interface
 #endif
 
+#include "Object.h"
+
 #include <vector>
 
 class XRef;
