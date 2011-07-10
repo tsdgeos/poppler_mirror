@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2007 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 //
@@ -28,6 +28,7 @@
 #pragma interface
 #endif
 
+#include <stddef.h>
 #include "SplashTypes.h"
 #include "SplashClip.h"
 #include "SplashPattern.h"
