@@ -6,7 +6,7 @@
 //
 // Copyright 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright 2005 Martin Kretzschmar <martink@gnome.org>
-// Copyright 2005-2007, 2009, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright 2005-2007, 2009-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2011 Daiki Ueno <ueno@unixuser.org>
 //
@@ -14,7 +14,6 @@
 
 #ifndef DCTSTREAM_H
 #define DCTSTREAM_H
-#include <config.h>
 
 #ifdef USE_GCC_PRAGMAS
 #pragma interface
@@ -25,6 +24,7 @@
 #pragma implementation
 #endif
 
+#include "poppler-config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -36,7 +36,6 @@
 #include <ctype.h>
 #include "goo/gmem.h"
 #include "goo/gfile.h"
-#include "poppler-config.h"
 #include "Error.h"
 #include "Object.h"
 #include "Decrypt.h"

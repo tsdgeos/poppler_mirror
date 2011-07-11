@@ -5,13 +5,14 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
+// Copyright (C) 2011 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
 #ifndef TIFFWRITER_H
 #define TIFFWRITER_H
 
-#include <config.h>
+#include "poppler/poppler-config.h"
 
 #ifdef ENABLE_LIBTIFF
 

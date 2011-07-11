@@ -9,13 +9,14 @@
 // Copyright (C) 2010 Jürg Billeter <j@bitron.ch>
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
 // Copyright (C) 2010 Brian Cameron <brian.cameron@oracle.com>
+// Copyright (C) 2011 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
 #ifndef JPEGWRITER_H
 #define JPEGWRITER_H
 
-#include <config.h>
+#include "poppler/poppler-config.h"
 
 #ifdef ENABLE_LIBJPEG
 

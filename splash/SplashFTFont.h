@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2009, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 //
@@ -22,6 +22,8 @@
 
 #ifndef SPLASHFTFONT_H
 #define SPLASHFTFONT_H
+
+#include "poppler/poppler-config.h"
 
 #if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
 

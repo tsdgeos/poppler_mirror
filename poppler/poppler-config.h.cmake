@@ -24,6 +24,11 @@
 #cmakedefine USE_FIXEDPOINT 1
 #endif
 
+/* Use single precision arithmetic in the Splash backend */
+#ifndef USE_FLOAT
+#cmakedefine USE_FLOAT 1
+#endif
+
 /* Include support for OPI comments. */
 #ifndef OPI_SUPPORT
 #cmakedefine OPI_SUPPORT 1
@@ -47,6 +52,64 @@
 /* Support for curl is compiled in. */
 #ifndef POPPLER_HAS_CURL_SUPPORT
 #cmakedefine POPPLER_HAS_CURL_SUPPORT 1
+#endif
+
+/* Use libjpeg instead of builtin jpeg decoder. */
+#ifndef ENABLE_LIBJPEG
+#cmakedefine ENABLE_LIBJPEG 1
+#endif
+
+/* Build against libtiff. */
+#ifndef ENABLE_LIBTIFF
+#cmakedefine ENABLE_LIBTIFF 1
+#endif
+
+/* Build against libpng. */
+#ifndef ENABLE_LIBPNG
+#cmakedefine ENABLE_LIBPNG 1
+#endif
+
+/* Use zlib instead of builtin zlib decoder. */
+#ifndef ENABLE_ZLIB
+#cmakedefine ENABLE_ZLIB 1
+#endif
+
+/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
+   */
+#ifndef HAVE_DIRENT_H
+#cmakedefine HAVE_DIRENT_H 1
+#endif
+
+/* Defines if gettimeofday is available on your system */
+#ifndef HAVE_GETTIMEOFDAY
+#cmakedefine HAVE_GETTIMEOFDAY 1
+#endif
+
+/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
+#ifndef HAVE_NDIR_H
+#cmakedefine HAVE_NDIR_H 1
+#endif
+
+/* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
+   */
+#ifndef HAVE_SYS_DIR_H
+#cmakedefine HAVE_SYS_DIR_H 1
+#endif
+
+/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
+   */
+#ifndef HAVE_SYS_NDIR_H
+#cmakedefine HAVE_SYS_NDIR_H 1
+#endif
+
+/* Have FreeType2 include files */
+#ifndef HAVE_FREETYPE_H
+#cmakedefine HAVE_FREETYPE_H 1
+#endif
+
+/* Defines if use cms */
+#ifndef USE_CMS
+#cmakedefine USE_CMS 1
 #endif
 
 // Also, there's a couple of preprocessor symbols in the header files

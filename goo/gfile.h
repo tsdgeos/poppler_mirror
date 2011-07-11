@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 //
 // To see a description of the changes please see the Changelog file that
@@ -27,6 +27,7 @@
 #ifndef GFILE_H
 #define GFILE_H
 
+#include "poppler/poppler-config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>

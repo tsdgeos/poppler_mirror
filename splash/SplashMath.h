@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -20,6 +20,8 @@
 
 #ifndef SPLASHMATH_H
 #define SPLASHMATH_H
+
+#include "poppler/poppler-config.h"
 
 #if USE_FIXEDPOINT
 #include "goo/FixedPoint.h"

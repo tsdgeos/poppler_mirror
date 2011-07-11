@@ -6,7 +6,7 @@
 //
 // Copyright (C) 2009 Warren Toomey <wkt@tuhs.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
-// Copyright (C) 2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Adrian Johnson <ajohnson@redneon.com>
 //
@@ -15,7 +15,7 @@
 #ifndef PNGWRITER_H
 #define PNGWRITER_H
 
-#include <config.h>
+#include "poppler/poppler-config.h"
 
 #ifdef ENABLE_LIBPNG
 

@@ -33,6 +33,8 @@
 #pragma interface
 #endif
 
+#include "poppler-config.h"
+
 #include "goo/gtypes.h"
 #include "Object.h"
 #include "Function.h"
