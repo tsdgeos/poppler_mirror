@@ -410,7 +410,7 @@ static void splashOutBlendMultiply(SplashColorPtr src, SplashColorPtr dest,
 				   SplashColorPtr blend, SplashColorMode cm) {
   int i;
 
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
   if (cm == splashModeCMYK8) {
     SplashColor rgbSrc;
     SplashColor rgbDest;
@@ -434,7 +434,7 @@ static void splashOutBlendScreen(SplashColorPtr src, SplashColorPtr dest,
 				 SplashColorPtr blend, SplashColorMode cm) {
   int i;
 
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
   if (cm == splashModeCMYK8) {
     SplashColor rgbSrc;
     SplashColor rgbDest;
@@ -458,7 +458,7 @@ static void splashOutBlendOverlay(SplashColorPtr src, SplashColorPtr dest,
 				  SplashColorPtr blend, SplashColorMode cm) {
   int i;
 
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
   if (cm == splashModeCMYK8) {
     SplashColor rgbSrc;
     SplashColor rgbDest;
@@ -486,7 +486,7 @@ static void splashOutBlendDarken(SplashColorPtr src, SplashColorPtr dest,
 				 SplashColorPtr blend, SplashColorMode cm) {
   int i;
 
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
   if (cm == splashModeCMYK8) {
     SplashColor rgbSrc;
     SplashColor rgbDest;
@@ -510,7 +510,7 @@ static void splashOutBlendLighten(SplashColorPtr src, SplashColorPtr dest,
 				  SplashColorPtr blend, SplashColorMode cm) {
   int i;
 
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
   if (cm == splashModeCMYK8) {
     SplashColor rgbSrc;
     SplashColor rgbDest;
@@ -535,7 +535,7 @@ static void splashOutBlendColorDodge(SplashColorPtr src, SplashColorPtr dest,
 				     SplashColorMode cm) {
   int i, x;
 
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
   if (cm == splashModeCMYK8) {
     SplashColor rgbSrc;
     SplashColor rgbDest;
@@ -569,7 +569,7 @@ static void splashOutBlendColorBurn(SplashColorPtr src, SplashColorPtr dest,
 				    SplashColorPtr blend, SplashColorMode cm) {
   int i, x;
 
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
   if (cm == splashModeCMYK8) {
     SplashColor rgbSrc;
     SplashColor rgbDest;
@@ -603,7 +603,7 @@ static void splashOutBlendHardLight(SplashColorPtr src, SplashColorPtr dest,
 				    SplashColorPtr blend, SplashColorMode cm) {
   int i;
 
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
   if (cm == splashModeCMYK8) {
     SplashColor rgbSrc;
     SplashColor rgbDest;
@@ -631,7 +631,7 @@ static void splashOutBlendSoftLight(SplashColorPtr src, SplashColorPtr dest,
 				    SplashColorPtr blend, SplashColorMode cm) {
   int i, x;
 
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
   if (cm == splashModeCMYK8) {
     SplashColor rgbSrc;
     SplashColor rgbDest;
@@ -675,7 +675,7 @@ static void splashOutBlendDifference(SplashColorPtr src, SplashColorPtr dest,
   int i;
 
   for (i = 0; i < splashColorModeNComps[cm]; ++i) {
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
     if (cm == splashModeCMYK8)
     {
       blend[i] = dest[i] < src[i] ? 255 - (src[i] - dest[i]) : 255 - (dest[i] - src[i]);
@@ -692,7 +692,7 @@ static void splashOutBlendExclusion(SplashColorPtr src, SplashColorPtr dest,
 				    SplashColorPtr blend, SplashColorMode cm) {
   int i;
 
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
   if (cm == splashModeCMYK8) {
     SplashColor rgbSrc;
     SplashColor rgbDest;
@@ -3657,7 +3657,7 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Catalog *catalog, Obje
                             (paintType == 1) ? colorMode : splashModeMono8, gTrue);
   memset(bitmap->getAlphaPtr(), 0, bitmap->getWidth() * bitmap->getHeight());
   if (paintType == 2) {
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
     memset(bitmap->getDataPtr(), (colorMode == splashModeCMYK8) ? 0x00 : 0xFF, bitmap->getRowSize() * bitmap->getHeight());
 #else
     memset(bitmap->getDataPtr(), 0xFF, bitmap->getRowSize() * bitmap->getHeight());
