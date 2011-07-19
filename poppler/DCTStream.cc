@@ -9,6 +9,7 @@
 // Copyright 2009 Ryszard Trojnacki <rysiek@menel.com>
 // Copyright 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2011 Daiki Ueno <ueno@unixuser.org>
+// Copyright 2011 Tomas Hoger <thoger@redhat.com>
 //
 //========================================================================
 
@@ -141,9 +142,8 @@ void DCTStream::reset() {
     }
   }
 
-  if (!setjmp(err.setjmp_buffer)) {
-    jpeg_read_header(&cinfo, TRUE);
-
+  if (!setjmp(err.setjmp_buffer) && jpeg_read_header(&cinfo, TRUE) != JPEG_SUSPENDED)
+  {
     // figure out color transform
     if (colorXform == -1 && !cinfo.saw_Adobe_marker) {
       if (cinfo.num_components == 3) {
