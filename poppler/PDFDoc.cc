@@ -1169,7 +1169,7 @@ Page *PDFDoc::parsePage(int page)
 
   pageRef.gen = xref->getEntry(pageRef.num)->gen;
   xref->fetch(pageRef.num, pageRef.gen, &obj);
-  if (!obj.isDict()) {
+  if (!obj.isDict("Page")) {
     obj.free();
     error(-1, "Object (%d %d) is not a pageDict", pageRef.num, pageRef.gen);
     return NULL;
