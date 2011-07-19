@@ -1552,6 +1552,19 @@ SplashPath *Splash::makeDashedPath(SplashPath *path) {
     }
     i = j + 1;
   }
+  
+  if (dPath->length == 0) {
+    GBool allSame = gTrue;
+    for (int i = 0; allSame && i < path->length - 1; ++i) {
+      allSame = path->pts[i].x == path->pts[i + 1].x && path->pts[i].y == path->pts[i + 1].y;
+    }
+    if (allSame) {
+      x0 = path->pts[0].x;
+      y0 = path->pts[0].y;
+      dPath->moveTo(x0, y0);
+      dPath->lineTo(x0, y0);
+    }
+  }
 
   return dPath;
 }
