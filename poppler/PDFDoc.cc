@@ -1084,12 +1084,15 @@ Guint PDFDoc::getStartXRef()
       }
       buf[n] = '\0';
 
-      // find end of first obj
+      // find end of first obj (linearization dictionary)
       startXRefPos = 0;
       for (i = 0; i < n; i++) {
         if (!strncmp("endobj", &buf[i], 6)) {
-           startXRefPos = i+6;
-           break;
+	  i += 6;
+	  //skip whitespace 
+	  while (buf[i] && Lexer::isSpace(buf[i])) ++i;
+	  startXRefPos = i;
+	  break;
         }
       }
     } else {
