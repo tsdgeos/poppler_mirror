@@ -1118,9 +1118,10 @@ Guint PDFDoc::getStartXRef()
       }
       if (i < 0) {
         startXRefPos = 0;
+      } else {
+        for (p = &buf[i+9]; isspace(*p); ++p) ;
+        startXRefPos =  strToUnsigned(p);
       }
-      for (p = &buf[i+9]; isspace(*p); ++p) ;
-      startXRefPos =  strToUnsigned(p);
     }
 
   }
