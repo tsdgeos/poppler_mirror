@@ -506,7 +506,6 @@ static char *prolog[] = {
   "         /pdfTextClipPath [] def } def",
   "~1ns",
   "% Level 1 image operators",
-  "~1n",
   "/pdfIm1 {",
   "  /pdfImBuf1 4 index string def",
   "  { currentfile pdfImBuf1 readhexstring pop } image",
@@ -3141,13 +3140,71 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     break;
   case psLevel1Sep:
     useBinary = globalParams->getPSBinary();
-    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1Sep{5:s}\n",
+    p = bitmap->getDataPtr();
+    isGray = gTrue;
+    for (y = 0; y < h; ++y) {
+      for (x = 0; x < w; ++x) {
+	if (p[4*x] != p[4*x + 1] || p[4*x] != p[4*x + 2]) {
+	  isGray = gFalse;
+	  y = h;
+	  break;
+	}
+      }
+      p += bitmap->getRowSize();
+    }
+    writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1{5:s}{6:s}\n",
 	       w, h, w, -h, h,
+	       isGray ? "" : "Sep",
 	       useBinary ? "Bin" : "");
     p = bitmap->getDataPtr();
     i = 0;
     col[0] = col[1] = col[2] = col[3] = 0;
-    if (((psProcessCyan | psProcessMagenta | psProcessYellow | psProcessBlack) & ~processColors) != 0) {
+    if (isGray) {
+      int g;
+      if ((psProcessBlack & processColors) == 0) {
+	for (y = 0; y < h; ++y) {
+	  for (x = 0; x < w; ++x) {
+	    if (p[4*x] > 0 || p[4*x + 3] > 0) {
+	      col[3] = 1;
+	      y = h;
+	      break;
+	    }
+	  }
+          p += bitmap->getRowSize();
+	}
+        p = bitmap->getDataPtr();
+      }
+      for (y = 0; y < h; ++y) {
+	if (useBinary) {
+	  for (x = 0; x < w; ++x) {
+	    g = p[4*x] + p[4*x + 3];
+	    g = 255 - g;
+	    if (g < 0) g = 0;
+	    hexBuf[i++] = (Guchar) g;
+	    if (i >= 64) {
+	      writePSBuf(hexBuf, i);
+	      i = 0;
+	    }
+	  }
+	} else {
+	  for (x = 0; x < w; ++x) {
+	    g = p[4*x] + p[4*x + 3];
+	    g = 255 - g;
+	    if (g < 0) g = 0;
+	    digit = g / 16;
+	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	    digit = g % 16;
+	    hexBuf[i++] = digit + ((digit >= 10)? 'a' - 10: '0');
+	    if (i >= 64) {
+	      hexBuf[i++] = '\n';
+	      writePSBuf(hexBuf, i);
+	      i = 0;
+	    }
+	  }
+        }
+        p += bitmap->getRowSize();
+      }
+    } else if (((psProcessCyan | psProcessMagenta | psProcessYellow | psProcessBlack) & ~processColors) != 0) {
       for (y = 0; y < h; ++y) {
         for (comp = 0; comp < 4; ++comp) {
 	  if (useBinary) {
