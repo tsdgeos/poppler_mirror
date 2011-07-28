@@ -8,6 +8,7 @@
 // Copyright (C) 2009, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Brian Cameron <brian.cameron@oracle.com>
+// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 //========================================================================
 
@@ -26,6 +27,7 @@ class ImgWriter
 		virtual bool writeRow(unsigned char **row) = 0;
 		
 		virtual bool close() = 0;
+		virtual bool supportCMYK() { return false; }
 };
 
 #endif

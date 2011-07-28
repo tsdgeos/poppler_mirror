@@ -7,6 +7,7 @@
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
+// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 //========================================================================
 
@@ -27,13 +28,13 @@ void outputMessage(j_common_ptr cinfo)
 	error(-1, "%s", buffer);
 }
 
-JpegWriter::JpegWriter(int q, bool p)
-: progressive(p), quality(q)
+JpegWriter::JpegWriter(int q, bool p, J_COLOR_SPACE cm)
+: progressive(p), quality(q), colorMode(cm)
 {
 }
 
-JpegWriter::JpegWriter()
-: progressive(false), quality(-1)
+JpegWriter::JpegWriter(J_COLOR_SPACE cm)
+: progressive(false), quality(-1), colorMode(cm)
 {
 }
 
@@ -61,9 +62,26 @@ bool JpegWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 	cinfo.density_unit = 1; // dots per inch
 	cinfo.X_density = hDPI;
 	cinfo.Y_density = vDPI;
-	cinfo.input_components = 3;     /* # of color components per pixel */
-	cinfo.in_color_space = JCS_RGB; /* colorspace of input image */
+	cinfo.in_color_space = colorMode; /* colorspace of input image */
+	/* # of color components per pixel */
+	switch (colorMode) {
+		case JCS_GRAYSCALE:
+			cinfo.input_components = 1;     
+			break;
+		case JCS_RGB:
+			cinfo.input_components = 3;     
+			break;
+		case JCS_CMYK:
+			cinfo.input_components = 4;     
+			break;
+		default:
+			return false;
+	}
 	jpeg_set_defaults(&cinfo);
+	if (cinfo.in_color_space == JCS_CMYK) {
+		jpeg_set_colorspace(&cinfo, JCS_YCCK);
+		cinfo.write_JFIF_header = TRUE;
+	}
 	
 	// Set quality
 	if( quality >= 0 && quality <= 100 ) { 
@@ -83,16 +101,36 @@ bool JpegWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 
 bool JpegWriter::writePointers(unsigned char **rowPointers, int rowCount)
 {
+	if (colorMode == JCS_CMYK) {
+		for (int y = 0; y < rowCount; y++) {
+			unsigned char *row = rowPointers[y];
+			for (unsigned int x = 0; x < cinfo.image_width; x++) {
+				for (int n = 0; n < 4; n++) {
+					*row = 0xff - *row;
+					row++;
+				}
+			}
+		}
+	}
 	// Write all rows to the file
 	jpeg_write_scanlines(&cinfo, rowPointers, rowCount);
 	
 	return true;
 }
 
-bool JpegWriter::writeRow(unsigned char **row)
+bool JpegWriter::writeRow(unsigned char **rowPointer)
 {
+	if (colorMode == JCS_CMYK) {
+		unsigned char *row = rowPointer[0];
+		for (unsigned int x = 0; x < cinfo.image_width; x++) {
+			for (int n = 0; n < 4; n++) {
+				*row = 0xff - *row;
+				row++;
+			}
+		}
+	}
 	// Write the row to the file
-	jpeg_write_scanlines(&cinfo, row, 1);
+	jpeg_write_scanlines(&cinfo, rowPointer, 1);
 	
 	return true;
 }

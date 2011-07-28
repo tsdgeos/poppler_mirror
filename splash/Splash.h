@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2007, 2011 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2010 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2010, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -121,6 +121,9 @@ public:
   void setBlendFunc(SplashBlendFunc func);
   void setStrokeAlpha(SplashCoord alpha);
   void setFillAlpha(SplashCoord alpha);
+  void setFillOverprint(GBool fop);
+  void setStrokeOverprint(GBool sop);
+  void setOverprintMode(int opm);
   void setLineWidth(SplashCoord lineWidth);
   void setLineCap(int lineCap);
   void setLineJoin(int lineJoin);
@@ -203,7 +206,7 @@ public:
   // The matrix behaves as for fillImageMask.
   SplashError drawImage(SplashImageSource src, void *srcData,
 			SplashColorMode srcMode, GBool srcAlpha,
-			int w, int h, SplashCoord *mat);
+			int w, int h, SplashCoord *mat, SplashPattern *overprintPattern = NULL);
 
   // Composite a rectangular region from <src> onto this Splash
   // object.
@@ -262,7 +265,7 @@ private:
   void pipeInit(SplashPipe *pipe, int x, int y,
 		SplashPattern *pattern, SplashColorPtr cSrc,
 		SplashCoord aInput, GBool usesShape,
-		GBool nonIsolatedGroup);
+		GBool nonIsolatedGroup, SplashPattern *overprintPattern = NULL, GBool stroke = gFalse);
   void pipeRun(SplashPipe *pipe);
   void pipeSetXY(SplashPipe *pipe, int x, int y);
   void pipeIncX(SplashPipe *pipe);

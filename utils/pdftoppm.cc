@@ -23,6 +23,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
+// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -71,7 +72,9 @@ static GBool mono = gFalse;
 static GBool gray = gFalse;
 static GBool png = gFalse;
 static GBool jpeg = gFalse;
+static GBool jpegcmyk = gFalse;
 static GBool tiff = gFalse;
+static GBool overprint = gFalse;
 static char enableFreeTypeStr[16] = "";
 static char antialiasStr[16] = "";
 static char vectorAntialiasStr[16] = "";
@@ -129,8 +132,16 @@ static const ArgDesc argDesc[] = {
    "generate a PNG file"},
 #endif
 #if ENABLE_LIBJPEG
-  {"-jpeg",    argFlag,     &jpeg,           0,
+  {"-jpeg",   argFlag,     &jpeg,           0,
    "generate a JPEG file"},
+#if SPLASH_CMYK
+  {"-jpegcmyk",argFlag,    &jpegcmyk,       0,
+   "generate a CMYK JPEG file"},
+#endif
+#endif
+#if SPLASH_CMYK
+  {"-overprint",argFlag,   &overprint,      0,
+   "enable overprint"},
 #endif
 #if ENABLE_LIBTIFF
   {"-tiff",    argFlag,     &tiff,           0,
@@ -191,6 +202,8 @@ static void savePageSlice(PDFDoc *doc,
       bitmap->writeImgFile(splashFormatPng, ppmFile, x_resolution, y_resolution);
     } else if (jpeg) {
       bitmap->writeImgFile(splashFormatJpeg, ppmFile, x_resolution, y_resolution);
+    } else if (jpegcmyk) {
+      bitmap->writeImgFile(splashFormatJpegCMYK, ppmFile, x_resolution, y_resolution);
     } else if (tiff) {
       bitmap->writeImgFile(splashFormatTiff, ppmFile, x_resolution, y_resolution, TiffCompressionStr);
     } else {
@@ -337,11 +350,24 @@ int main(int argc, char *argv[]) {
   }
 
   // write PPM files
-  paperColor[0] = 255;
-  paperColor[1] = 255;
-  paperColor[2] = 255;
+#if SPLASH_CMYK
+  if (jpegcmyk || overprint) {
+    paperColor[0] = 0;
+    paperColor[1] = 0;
+    paperColor[2] = 0;
+    paperColor[3] = 0;
+  } else 
+#endif
+  {
+    paperColor[0] = 255;
+    paperColor[1] = 255;
+    paperColor[2] = 255;
+  }
   splashOut = new SplashOutputDev(mono ? splashModeMono1 :
 				    gray ? splashModeMono8 :
+#if SPLASH_CMYK
+				    (jpegcmyk || overprint) ? splashModeCMYK8 :
+#endif
 				             splashModeRGB8, 4,
 				  gFalse, paperColor);
   splashOut->startDoc(doc->getXRef());
@@ -377,7 +403,7 @@ int main(int argc, char *argv[]) {
       pg_h = tmp;
     }
     if (ppmRoot != NULL) {
-      const char *ext = png ? "png" : jpeg ? "jpg" : tiff ? "tif" : mono ? "pbm" : gray ? "pgm" : "ppm";
+      const char *ext = png ? "png" : (jpeg || jpegcmyk) ? "jpg" : tiff ? "tif" : mono ? "pbm" : gray ? "pgm" : "ppm";
       if (singleFile) {
         snprintf(ppmFile, PPM_FILE_SZ, "%.*s.%s",
               PPM_FILE_SZ - 32, ppmRoot, ext);

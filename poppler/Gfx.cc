@@ -1021,6 +1021,11 @@ void Gfx::opSetExtGState(Object args[], int numArgs) {
     }
   }
   obj2.free();
+  if (obj1.dictLookup("OPM", &obj2)->isInt()) {
+    state->setOverprintMode(obj2.getInt());
+    out->updateOverprintMode(state);
+  }
+  obj2.free();
 
   // stroke adjust
   if (obj1.dictLookup("SA", &obj2)->isBool()) {
@@ -1314,6 +1319,8 @@ void Gfx::opSetRenderingIntent(Object args[], int numArgs) {
 
 void Gfx::opSetFillGray(Object args[], int numArgs) {
   GfxColor color;
+  GfxColorSpace *colorSpace;
+  Object obj;
 
   if (textHaveCSPattern && drawText) {
     GBool needFill = out->deviceHasTextClip(state);
@@ -1324,7 +1331,14 @@ void Gfx::opSetFillGray(Object args[], int numArgs) {
     out->restoreState(state);
   }
   state->setFillPattern(NULL);
-  state->setFillColorSpace(new GfxDeviceGrayColorSpace());
+  res->lookupColorSpace("DefaultGray", &obj);
+  if (obj.isNull()) {
+    colorSpace = new GfxDeviceGrayColorSpace();
+  } else {
+    colorSpace = GfxColorSpace::parse(&obj, this);
+  }
+  obj.free();
+  state->setFillColorSpace(colorSpace);
   out->updateFillColorSpace(state);
   color.c[0] = dblToCol(args[0].getNum());
   state->setFillColor(&color);
@@ -1340,9 +1354,18 @@ void Gfx::opSetFillGray(Object args[], int numArgs) {
 
 void Gfx::opSetStrokeGray(Object args[], int numArgs) {
   GfxColor color;
+  GfxColorSpace *colorSpace;
+  Object obj;
 
   state->setStrokePattern(NULL);
-  state->setStrokeColorSpace(new GfxDeviceGrayColorSpace());
+  res->lookupColorSpace("DefaultGray", &obj);
+  if (obj.isNull()) {
+    colorSpace = new GfxDeviceGrayColorSpace();
+  } else {
+    colorSpace = GfxColorSpace::parse(&obj, this);
+  }
+  obj.free();
+  state->setStrokeColorSpace(colorSpace);
   out->updateStrokeColorSpace(state);
   color.c[0] = dblToCol(args[0].getNum());
   state->setStrokeColor(&color);
@@ -1351,6 +1374,8 @@ void Gfx::opSetStrokeGray(Object args[], int numArgs) {
 
 void Gfx::opSetFillCMYKColor(Object args[], int numArgs) {
   GfxColor color;
+  GfxColorSpace *colorSpace;
+  Object obj;
   int i;
 
   if (textHaveCSPattern && drawText) {
@@ -1361,8 +1386,15 @@ void Gfx::opSetFillCMYKColor(Object args[], int numArgs) {
     }
     out->restoreState(state);
   }
+  res->lookupColorSpace("DefaultCMYK", &obj);
+  if (obj.isNull()) {
+    colorSpace = new GfxDeviceCMYKColorSpace();
+  } else {
+    colorSpace = GfxColorSpace::parse(&obj, this);
+  }
+  obj.free();
   state->setFillPattern(NULL);
-  state->setFillColorSpace(new GfxDeviceCMYKColorSpace());
+  state->setFillColorSpace(colorSpace);
   out->updateFillColorSpace(state);
   for (i = 0; i < 4; ++i) {
     color.c[i] = dblToCol(args[i].getNum());
@@ -1380,10 +1412,19 @@ void Gfx::opSetFillCMYKColor(Object args[], int numArgs) {
 
 void Gfx::opSetStrokeCMYKColor(Object args[], int numArgs) {
   GfxColor color;
+  GfxColorSpace *colorSpace;
+  Object obj;
   int i;
 
   state->setStrokePattern(NULL);
-  state->setStrokeColorSpace(new GfxDeviceCMYKColorSpace());
+  res->lookupColorSpace("DefaultCMYK", &obj);
+  if (obj.isNull()) {
+    colorSpace = new GfxDeviceCMYKColorSpace();
+  } else {
+    colorSpace = GfxColorSpace::parse(&obj, this);
+  }
+  obj.free();
+  state->setStrokeColorSpace(colorSpace);
   out->updateStrokeColorSpace(state);
   for (i = 0; i < 4; ++i) {
     color.c[i] = dblToCol(args[i].getNum());
@@ -1393,6 +1434,8 @@ void Gfx::opSetStrokeCMYKColor(Object args[], int numArgs) {
 }
 
 void Gfx::opSetFillRGBColor(Object args[], int numArgs) {
+  Object obj;
+  GfxColorSpace *colorSpace;
   GfxColor color;
   int i;
 
@@ -1405,7 +1448,14 @@ void Gfx::opSetFillRGBColor(Object args[], int numArgs) {
     out->restoreState(state);
   }
   state->setFillPattern(NULL);
-  state->setFillColorSpace(new GfxDeviceRGBColorSpace());
+  res->lookupColorSpace("DefaultRGB", &obj);
+  if (obj.isNull()) {
+    colorSpace = new GfxDeviceRGBColorSpace();
+  } else {
+    colorSpace = GfxColorSpace::parse(&obj, this);
+  }
+  obj.free();
+  state->setFillColorSpace(colorSpace);
   out->updateFillColorSpace(state);
   for (i = 0; i < 3; ++i) {
     color.c[i] = dblToCol(args[i].getNum());
@@ -1422,11 +1472,20 @@ void Gfx::opSetFillRGBColor(Object args[], int numArgs) {
 }
 
 void Gfx::opSetStrokeRGBColor(Object args[], int numArgs) {
+  Object obj;
+  GfxColorSpace *colorSpace;
   GfxColor color;
   int i;
 
   state->setStrokePattern(NULL);
-  state->setStrokeColorSpace(new GfxDeviceRGBColorSpace());
+  res->lookupColorSpace("DefaultRGB", &obj);
+  if (obj.isNull()) {
+    colorSpace = new GfxDeviceRGBColorSpace();
+  } else {
+    colorSpace = GfxColorSpace::parse(&obj, this);
+  }
+  obj.free();
+  state->setStrokeColorSpace(colorSpace);
   out->updateStrokeColorSpace(state);
   for (i = 0; i < 3; ++i) {
     color.c[i] = dblToCol(args[i].getNum());
@@ -4132,11 +4191,32 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
     if (!obj1.isNull()) {
       colorSpace = GfxColorSpace::parse(&obj1, this);
     } else if (csMode == streamCSDeviceGray) {
-      colorSpace = new GfxDeviceGrayColorSpace();
+      Object objCS;
+      res->lookupColorSpace("DefaultGray", &objCS);
+      if (objCS.isNull()) {
+        colorSpace = new GfxDeviceGrayColorSpace();
+      } else {
+        colorSpace = GfxColorSpace::parse(&objCS, this);
+      }
+      objCS.free();
     } else if (csMode == streamCSDeviceRGB) {
-      colorSpace = new GfxDeviceRGBColorSpace();
+      Object objCS;
+      res->lookupColorSpace("DefaultRGB", &objCS);
+      if (objCS.isNull()) {
+        colorSpace = new GfxDeviceRGBColorSpace();
+      } else {
+        colorSpace = GfxColorSpace::parse(&objCS, this);
+      }
+      objCS.free();
     } else if (csMode == streamCSDeviceCMYK) {
-      colorSpace = new GfxDeviceCMYKColorSpace();
+      Object objCS;
+      res->lookupColorSpace("DefaultCMYK", &objCS);
+      if (objCS.isNull()) {
+        colorSpace = new GfxDeviceCMYKColorSpace();
+      } else {
+        colorSpace = GfxColorSpace::parse(&objCS, this);
+      }
+      objCS.free();
     } else {
       colorSpace = NULL;
     }

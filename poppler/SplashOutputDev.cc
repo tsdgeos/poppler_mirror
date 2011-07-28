@@ -95,6 +95,11 @@ static inline void convertGfxColor(SplashColorPtr dest,
   GfxCMYK cmyk;
 #endif
 
+  // make gcc happy
+  color[0] = color[1] = color[2] = 0;
+#if SPLASH_CMYK
+  color[3] = 0;
+#endif
   switch (colorMode) {
     case splashModeMono1:
     case splashModeMono8:
@@ -123,18 +128,200 @@ static inline void convertGfxColor(SplashColorPtr dest,
   splashColorCopy(dest, color);
 }
 
+static inline SplashPattern *createOverprintPattern(GfxColorSpace *colorSpace, SplashColorPtr color, GBool image, Guchar tolerance = 0x01) {
+  switch (colorSpace->getMode()) {
+    case csDeviceCMYK:
+      if (image) {
+        return new SplashSolidColor(color);
+      }
+    case csSeparation:
+    case csDeviceN:
+      if (image && colorSpace->getMode() == csDeviceN) {
+        GfxDeviceNColorSpace *deviceNSpace = (GfxDeviceNColorSpace *) colorSpace;
+        GBool hasSpot = gFalse;
+        GBool hasProcess = gFalse;
+        for (int i = 0; i < deviceNSpace->getNComps(); i++) {
+          GooString *name = deviceNSpace->getColorantName(i)->upperCase();
+          if (name->cmp("CYAN") != 0 && 
+              name->cmp("MAGENTA") != 0 && 
+              name->cmp("YELLOW") != 0 && 
+              name->cmp("BLACK") != 0 && 
+              name->cmp("NONE") != 0) {
+            hasSpot = gTrue;
+          } else {
+            hasProcess = gTrue;
+          }
+        }
+        if (hasSpot && hasProcess)
+          return new SplashSolidColor(color);
+      }
+      return new SplashOverprintColor(colorSpace, color, tolerance);
+    case csIndexed:
+      return createOverprintPattern(((GfxIndexedColorSpace *) colorSpace)->getBase(), color, image);          
+    case csICCBased:
+      if (image) {
+        return createOverprintPattern(((GfxICCBasedColorSpace *) colorSpace)->getAlt(), color, gFalse, 0x05);          
+      }
+    case csDeviceGray:
+      if (image) {
+        return new SplashOverprintColor(colorSpace, color, tolerance);
+      }
+    default: // knockout
+      return new SplashSolidColor(color);
+  }
+}
+
+
+//------------------------------------------------------------------------
+// SplashOverprintColor
+//------------------------------------------------------------------------
+
+SplashOverprintColor::SplashOverprintColor(GfxColorSpace *colorSpaceA, SplashColorPtr colorA, Guchar toleranceA) {
+  splashColorCopy(color, colorA);
+  colorSpace = colorSpaceA;
+  tolerance = toleranceA;
+}
+
+SplashOverprintColor::~SplashOverprintColor() {
+}
+
+GBool SplashOverprintColor::getColor(int x, int y, SplashColorPtr c) {
+  splashColorCopy(c, color);
+  return gTrue;
+}
+
+void SplashOverprintColor::overprint(GBool op, Guchar aSrc, SplashColorPtr cSrc,
+                                     Guchar aDest, SplashColorPtr cDest,
+                                     SplashColorPtr colorResult) {
+  switch(colorSpace->getMode()) {
+    case csDeviceGray: // only in case of grayscale images
+      colorResult[0] = cDest[0];
+      colorResult[1] = cDest[1];
+      colorResult[2] = cDest[2];
+      colorResult[3] = (Guchar)(((aDest - aSrc) * cDest[3] +
+                       aSrc * cSrc[3]) / aDest);
+    break;
+    case csDeviceCMYK:
+      colorResult[0] = (cSrc[0] < tolerance && op) ?
+                       cDest[0] :
+                       (Guchar)(((aDest - aSrc) * cDest[0] + aSrc * cSrc[0]) / aDest);
+      colorResult[1] = (cSrc[1] < tolerance && op) ?
+                       cDest[1] :
+                       (Guchar)(((aDest - aSrc) * cDest[1] + aSrc * cSrc[1]) / aDest);
+      colorResult[2] = (cSrc[2] < tolerance && op) ?
+                       cDest[2] :
+                       (Guchar)(((aDest - aSrc) * cDest[2] + aSrc * cSrc[2]) / aDest);
+      colorResult[3] = (cSrc[3] < tolerance && op) ?
+                       cDest[3] :
+                       (Guchar)(((aDest - aSrc) * cDest[3] + aSrc * cSrc[3]) / aDest);
+    break;
+
+    case csSeparation:
+    {
+      GfxSeparationColorSpace *sepSpace = (GfxSeparationColorSpace *) colorSpace;
+      GooString *name = sepSpace->getName()->upperCase();
+      if (name->cmp("CYAN") == 0) {
+        colorResult[0] = (Guchar)(((aDest - aSrc) * cDest[0] +
+                         aSrc * cSrc[0]) / aDest);
+                         colorResult[1] = cDest[1];
+                         colorResult[2] = cDest[2];
+                         colorResult[3] = cDest[3];
+      } else if (name->cmp("MAGENTA") == 0) {
+        colorResult[0] = cDest[0];
+        colorResult[1] = (Guchar)(((aDest - aSrc) * cDest[1] +
+                         aSrc * cSrc[1]) / aDest);
+                         colorResult[2] = cDest[2];
+                         colorResult[3] = cDest[3];
+      } else if (name->cmp("YELLOW") == 0) {
+        colorResult[0] = cDest[0];
+        colorResult[1] = cDest[1];
+        colorResult[2] = (Guchar)(((aDest - aSrc) * cDest[2] +
+                         aSrc * cSrc[2]) / aDest);
+        colorResult[3] = cDest[3];
+      } else if (name->cmp("BLACK") == 0) {
+        colorResult[0] = cDest[0];
+        colorResult[1] = cDest[1];
+        colorResult[2] = cDest[2];
+        colorResult[3] = (Guchar)(((aDest - aSrc) * cDest[3] +
+                         aSrc * cSrc[3]) / aDest);
+      } else {
+        colorResult[0] = ((int) cDest[0] + cSrc[0]) > 0xff ? 0xff : cDest[0] + cSrc[0];
+        colorResult[1] = ((int) cDest[1] + cSrc[1]) > 0xff ? 0xff : cDest[1] + cSrc[1];
+        colorResult[2] = ((int) cDest[2] + cSrc[2]) > 0xff ? 0xff : cDest[2] + cSrc[2];
+        colorResult[3] = ((int) cDest[3] + cSrc[3]) > 0xff ? 0xff : cDest[3] + cSrc[3];
+      }
+    }
+    break;
+    case csDeviceN:
+    {
+      GfxDeviceNColorSpace *deviceNSpace = (GfxDeviceNColorSpace *) colorSpace;
+      colorResult[0] = cDest[0];
+      colorResult[1] = cDest[1];
+      colorResult[2] = cDest[2];
+      colorResult[3] = cDest[3];
+      for (int i = 0; i < deviceNSpace->getNComps(); i++) {
+        GooString *name = deviceNSpace->getColorantName(i)->upperCase();
+        if (name->cmp("CYAN") == 0) {
+          colorResult[0] = (Guchar)(((aDest - aSrc) * cDest[0] +
+                           aSrc * cSrc[0]) / aDest);
+        } else if (name->cmp("MAGENTA") == 0) {
+          colorResult[1] = (Guchar)(((aDest - aSrc) * cDest[1] +
+                           aSrc * cSrc[1]) / aDest);
+        } else if (name->cmp("YELLOW") == 0) {
+          colorResult[2] = (Guchar)(((aDest - aSrc) * cDest[2] +
+                           aSrc * cSrc[2]) / aDest);
+        } else if (name->cmp("BLACK") == 0) {
+          colorResult[3] = (Guchar)(((aDest - aSrc) * cDest[3] +
+                           aSrc * cSrc[3]) / aDest);
+        } else if (name->cmp("NONE") != 0) { 
+          colorResult[0] = (cSrc[0] < tolerance && op) ?
+                           cDest[0] :
+                           (Guchar)(((aDest - aSrc) * cDest[0] + aSrc * cSrc[0]) / aDest);
+          colorResult[1] = (cSrc[1] < tolerance && op) ?
+                           cDest[1] :
+                           (Guchar)(((aDest - aSrc) * cDest[1] + aSrc * cSrc[1]) / aDest);
+          colorResult[2] = (cSrc[2] < tolerance && op) ?
+                           cDest[2] :
+                           (Guchar)(((aDest - aSrc) * cDest[2] + aSrc * cSrc[2]) / aDest);
+          colorResult[3] = (cSrc[3] < tolerance && op) ?
+                           cDest[3] :
+                           (Guchar)(((aDest - aSrc) * cDest[3] + aSrc * cSrc[3]) / aDest);
+          break;
+        }
+      }
+    }
+    break;
+    default:
+        // default for overprint is knockout:
+        colorResult[0] = (Guchar)(((aDest - aSrc) * cDest[0] +
+                         aSrc * cSrc[0]) / aDest);
+        colorResult[1] = (Guchar)(((aDest - aSrc) * cDest[1] +
+                         aSrc * cSrc[1]) / aDest);
+        colorResult[2] = (Guchar)(((aDest - aSrc) * cDest[2] +
+                         aSrc * cSrc[2]) / aDest);
+        colorResult[3] = (Guchar)(((aDest - aSrc) * cDest[3] +
+                         aSrc * cSrc[3]) / aDest);
+  }
+}
 
 //------------------------------------------------------------------------
 // SplashGouraudPattern
 //------------------------------------------------------------------------
 SplashGouraudPattern::SplashGouraudPattern(GBool bDirectColorTranslationA,
-                                           GfxState *stateA, GfxGouraudTriangleShading *shadingA) {
+                                           GfxState *stateA, GfxGouraudTriangleShading *shadingA, SplashColorMode modeA) {
+  SplashColor defaultColor;
+  GfxColor srcColor;
   state = stateA;
   shading = shadingA;
+  mode = modeA;
   bDirectColorTranslation = bDirectColorTranslationA;
+  shadingA->getColorSpace()->getDefaultColor(&srcColor);
+  convertGfxColor(defaultColor, mode, shadingA->getColorSpace(), &srcColor);
+  opPattern = new SplashOverprintColor(shadingA->getColorSpace(), defaultColor, 0x01);
 }
 
 SplashGouraudPattern::~SplashGouraudPattern() {
+  delete opPattern;
 }
 
 void SplashGouraudPattern::getParameterizedColor(double colorinterp, SplashColorMode mode, SplashColorPtr dest) {
@@ -156,6 +343,11 @@ void SplashGouraudPattern::getParameterizedColor(double colorinterp, SplashColor
   }
 }
 
+void SplashGouraudPattern::overprint(GBool op, Guchar aSrc, SplashColorPtr cSrc,
+                                     Guchar aDest, SplashColorPtr cDest,
+                                     SplashColorPtr colorResult) {
+  opPattern->overprint(op, aSrc, cSrc, aDest, cDest, colorResult);
+}
 //------------------------------------------------------------------------
 // SplashUnivariatePattern
 //------------------------------------------------------------------------
@@ -214,6 +406,9 @@ GBool SplashUnivariatePattern::testPosition(int x, int y) {
 SplashRadialPattern::SplashRadialPattern(SplashColorMode colorModeA, GfxState *stateA, GfxRadialShading *shadingA):
   SplashUnivariatePattern(colorModeA, stateA, shadingA)
 {
+  SplashColor defaultColor;
+  GfxColor srcColor;
+
   shadingA->getCoords(&x0, &y0, &r0, &dx, &dy, &dr);
   dx -= x0;
   dy -= y0;
@@ -221,9 +416,13 @@ SplashRadialPattern::SplashRadialPattern(SplashColorMode colorModeA, GfxState *s
   a = dx*dx + dy*dy - dr*dr;
   if (fabs(a) > RADIAL_EPSILON)
     inva = 1.0 / a;
+  shadingA->getColorSpace()->getDefaultColor(&srcColor);
+  convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), &srcColor);
+  opPattern = new SplashOverprintColor(shadingA->getColorSpace(), defaultColor, 0x01);
 }
 
 SplashRadialPattern::~SplashRadialPattern() {
+  delete opPattern;
 }
 
 GBool SplashRadialPattern::getParameter(double xs, double ys, SplashCoord *t) {
@@ -309,6 +508,12 @@ GBool SplashRadialPattern::getParameter(double xs, double ys, SplashCoord *t) {
   return gFalse;
 }
 
+void SplashRadialPattern::overprint(GBool op, Guchar aSrc, SplashColorPtr cSrc,
+                                    Guchar aDest, SplashColorPtr cDest,
+                                    SplashColorPtr colorResult) {
+  opPattern->overprint(op, aSrc, cSrc, aDest, cDest, colorResult);
+}
+
 #undef RADIAL_EPSILON
 
 //------------------------------------------------------------------------
@@ -318,13 +523,20 @@ GBool SplashRadialPattern::getParameter(double xs, double ys, SplashCoord *t) {
 SplashAxialPattern::SplashAxialPattern(SplashColorMode colorModeA, GfxState *stateA, GfxAxialShading *shadingA):
     SplashUnivariatePattern(colorModeA, stateA, shadingA)
 {
+  SplashColor defaultColor;
+  GfxColor srcColor;
+
   shadingA->getCoords(&x0, &y0, &x1, &y1);
   dx = x1 - x0;
   dy = y1 - y0;
   mul = 1 / (dx * dx + dy * dy);
+  shadingA->getColorSpace()->getDefaultColor(&srcColor);
+  convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), &srcColor);
+  opPattern = new SplashOverprintColor(shadingA->getColorSpace(), defaultColor, 0x01);
 }
 
 SplashAxialPattern::~SplashAxialPattern() {
+  delete opPattern;
 }
 
 GBool SplashAxialPattern::getParameter(double xc, double yc, double *t) {
@@ -345,6 +557,12 @@ GBool SplashAxialPattern::getParameter(double xc, double yc, double *t) {
   }
 
   return gTrue;
+}
+
+void SplashAxialPattern::overprint(GBool op, Guchar aSrc, SplashColorPtr cSrc,
+                                   Guchar aDest, SplashColorPtr cDest,
+                                   SplashColorPtr colorResult) {
+  opPattern->overprint(op, aSrc, cSrc, aDest, cDest, colorResult);
 }
 
 //------------------------------------------------------------------------
@@ -1405,7 +1623,7 @@ void SplashOutputDev::updateFillColor(GfxState *state) {
   state->getFillRGB(&rgb);
 #if SPLASH_CMYK
   state->getFillCMYK(&cmyk);
-  splash->setFillPattern(getColor(gray, &rgb, &cmyk));
+  splash->setFillPattern(getColor(state->getFillColorSpace(), gray, &rgb, &cmyk));
 #else
   splash->setFillPattern(getColor(gray, &rgb));
 #endif
@@ -1422,14 +1640,14 @@ void SplashOutputDev::updateStrokeColor(GfxState *state) {
   state->getStrokeRGB(&rgb);
 #if SPLASH_CMYK
   state->getStrokeCMYK(&cmyk);
-  splash->setStrokePattern(getColor(gray, &rgb, &cmyk));
+  splash->setStrokePattern(getColor(state->getStrokeColorSpace(), gray, &rgb, &cmyk));
 #else
   splash->setStrokePattern(getColor(gray, &rgb));
 #endif
 }
 
 #if SPLASH_CMYK
-SplashPattern *SplashOutputDev::getColor(GfxGray gray, GfxRGB *rgb,
+SplashPattern *SplashOutputDev::getColor(GfxColorSpace *colorSpace, GfxGray gray, GfxRGB *rgb,
 					 GfxCMYK *cmyk) {
 #else
 SplashPattern *SplashOutputDev::getColor(GfxGray gray, GfxRGB *rgb) {
@@ -1471,7 +1689,7 @@ SplashPattern *SplashOutputDev::getColor(GfxGray gray, GfxRGB *rgb) {
     color[1] = colToByte(cmyk->m);
     color[2] = colToByte(cmyk->y);
     color[3] = colToByte(cmyk->k);
-    pattern = new SplashSolidColor(color);
+    pattern = createOverprintPattern(colorSpace, color, gFalse);
     break;
 #endif
   }
@@ -1489,6 +1707,18 @@ void SplashOutputDev::updateFillOpacity(GfxState *state) {
 
 void SplashOutputDev::updateStrokeOpacity(GfxState *state) {
   splash->setStrokeAlpha((SplashCoord)state->getStrokeOpacity());
+}
+
+void SplashOutputDev::updateFillOverprint(GfxState *state) {
+  splash->setFillOverprint(state->getFillOverprint());
+}
+
+void SplashOutputDev::updateStrokeOverprint(GfxState *state) {
+  splash->setStrokeOverprint(state->getStrokeOverprint());
+}
+
+void SplashOutputDev::updateOverprintMode(GfxState *state) {
+  splash->setOverprintMode(state->getOverprintMode());
 }
 
 void SplashOutputDev::updateFont(GfxState * /*state*/) {
@@ -2663,12 +2893,15 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   SplashCoord mat[6];
   SplashOutImageData imgData;
   SplashColorMode srcMode;
+  SplashColor defaultColor;
+  GfxColor srcColor;
   SplashImageSource src;
   GfxGray gray;
   GfxRGB rgb;
 #if SPLASH_CMYK
   GfxCMYK cmyk;
 #endif
+  GBool grayIndexed = gFalse;
   Guchar pix;
   int n, i;
 
@@ -2733,15 +2966,25 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
       break;
 #if SPLASH_CMYK
     case splashModeCMYK8:
+      grayIndexed = colorMap->getColorSpace()->getMode() != csDeviceGray;
       imgData.lookup = (SplashColorPtr)gmallocn(n, 4);
       for (i = 0; i < n; ++i) {
 	pix = (Guchar)i;
 	colorMap->getCMYK(&pix, &cmyk);
+	if (cmyk.c != 0 || cmyk.m != 0 || cmyk.y != 0) {
+	  grayIndexed = gFalse;
+	}
 	imgData.lookup[4*i] = colToByte(cmyk.c);
 	imgData.lookup[4*i+1] = colToByte(cmyk.m);
 	imgData.lookup[4*i+2] = colToByte(cmyk.y);
 	imgData.lookup[4*i+3] = colToByte(cmyk.k);
       }
+#ifndef USE_CMS
+	  if (colorMap->getColorSpace()->getMode() == csIndexed) {
+		  if (((GfxIndexedColorSpace *) colorMap->getColorSpace())->getBase()->getMode() == csICCBased)
+			  grayIndexed = gFalse;
+	  }
+#endif
       break;
 #endif
       break;
@@ -2754,8 +2997,12 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     srcMode = colorMode;
   }
   src = maskColors ? &alphaImageSrc : &imageSrc;
+  colorMap->getColorSpace()->getDefaultColor(&srcColor);
+  convertGfxColor(defaultColor, srcMode, colorMap->getColorSpace(), &srcColor);
+  SplashPattern *pattern = createOverprintPattern(colorMap->getColorSpace(), defaultColor, !grayIndexed);
   splash->drawImage(src, &imgData, srcMode, maskColors ? gTrue : gFalse,
-		    width, height, mat);
+	  width, height, mat, pattern);
+  delete pattern;
   if (inlineImg) {
     while (imgData.y < height) {
       imgData.imgStr->getLine();
@@ -2913,6 +3160,8 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
     delete maskColorMap;
 
   } else {
+    SplashColor defaultColor;
+    GfxColor srcColor;
 
     //----- scale the mask image to the same size as the source image
 
@@ -3025,9 +3274,12 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
     } else {
       srcMode = colorMode;
     }
+    colorMap->getColorSpace()->getDefaultColor(&srcColor);
+    convertGfxColor(defaultColor, srcMode, colorMap->getColorSpace(), &srcColor);
+    SplashPattern *pattern = createOverprintPattern(colorMap->getColorSpace(), defaultColor, gTrue);
     splash->drawImage(&maskedImageSrc, &imgData, srcMode, gTrue,
-		      width, height, mat);
-
+		      width, height, mat, pattern);
+    delete pattern;
     delete maskBitmap;
     gfree(imgData.lookup);
     delete imgData.imgStr;
@@ -3051,6 +3303,8 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
   SplashBitmap *maskBitmap;
   Splash *maskSplash;
   SplashColor maskColor;
+  SplashColor defaultColor;
+  GfxColor srcColor;
   GfxGray gray;
   GfxRGB rgb;
 #if SPLASH_CMYK
@@ -3173,8 +3427,12 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
   } else {
     srcMode = colorMode;
   }
-  splash->drawImage(&imageSrc, &imgData, srcMode, gFalse, width, height, mat);
 
+  colorMap->getColorSpace()->getDefaultColor(&srcColor);
+  convertGfxColor(defaultColor, srcMode, colorMap->getColorSpace(), &srcColor);
+  SplashPattern *pattern = createOverprintPattern(colorMap->getColorSpace(), defaultColor, gTrue);
+  splash->drawImage(&imageSrc, &imgData, srcMode, gFalse, width, height, mat, pattern);
+  delete pattern;
   splash->setSoftMask(NULL);
   gfree(imgData.lookup);
   delete imgData.imgStr;
@@ -3499,31 +3757,6 @@ void SplashOutputDev::clearModRegion() {
   splash->clearModRegion();
 }
 
-void SplashOutputDev::setFillColor(int r, int g, int b) {
-  GfxRGB rgb;
-  GfxGray gray;
-#if SPLASH_CMYK
-  GfxCMYK cmyk;
-#endif
-
-  rgb.r = byteToCol(r);
-  rgb.g = byteToCol(g);
-  rgb.b = byteToCol(b);
-  gray = (GfxColorComp)(0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b + 0.5);
-  if (gray > gfxColorComp1) {
-    gray = gfxColorComp1;
-  }
-#if SPLASH_CMYK
-  cmyk.c = gfxColorComp1 - rgb.r;
-  cmyk.m = gfxColorComp1 - rgb.g;
-  cmyk.y = gfxColorComp1 - rgb.b;
-  cmyk.k = 0;
-  splash->setFillPattern(getColor(gray, &rgb, &cmyk));
-#else
-  splash->setFillPattern(getColor(gray, &rgb));
-#endif
-}
-
 #if 1 //~tmp: turn off anti-aliasing temporarily
 GBool SplashOutputDev::getVectorAntialias() {
   return splash->getVectorAntialias();
@@ -3545,7 +3778,7 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Catalog *catalog, Obje
 					double *ptm, int paintType, Dict *resDict,
 					double *mat, double *bbox,
 					int x0, int y0, int x1, int y1,
-					double xStep, double yStep) 
+					double xStep, double yStep)
 {
   PDFRectangle box;
   Gfx *gfx;
@@ -3653,7 +3886,7 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Catalog *catalog, Obje
   m1.m[4] = -kx;
   m1.m[5] = -ky;
 
-  bitmap = new SplashBitmap(surface_width, surface_height, colorMode != splashModeMono1, 
+  bitmap = new SplashBitmap(surface_width, surface_height, colorMode != splashModeMono1,
                             (paintType == 1) ? colorMode : splashModeMono8, gTrue);
   memset(bitmap->getAlphaPtr(), 0, bitmap->getWidth() * bitmap->getHeight());
   if (paintType == 2) {
@@ -3723,7 +3956,7 @@ GBool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTria
     default:
     break;
   }
-  SplashGouraudColor *splashShading = new SplashGouraudPattern(bDirectColorTranslation, state, shading);
+  SplashGouraudColor *splashShading = new SplashGouraudPattern(bDirectColorTranslation, state, shading, colorMode);
   // restore vector antialias because we support it here
   if (shading->isParameterized()) {
     GBool vaa = getVectorAntialias();

@@ -177,6 +177,7 @@ public:
   virtual void updateStrokeOpacity(GfxState * /*state*/) {}
   virtual void updateFillOverprint(GfxState * /*state*/) {}
   virtual void updateStrokeOverprint(GfxState * /*state*/) {}
+  virtual void updateOverprintMode(GfxState * /*state*/) {}
   virtual void updateTransfer(GfxState * /*state*/) {}
   virtual void updateFillColorStop(GfxState * /*state*/, double /*offset*/) {}
 

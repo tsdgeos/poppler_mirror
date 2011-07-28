@@ -52,6 +52,10 @@ public:
   // value for all pixels.
   virtual GBool isStatic() = 0;
 
+  // calculate destination color if overprint is enables
+  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
+                         Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult) = 0;
+
 private:
 };
 
@@ -73,6 +77,9 @@ public:
   virtual GBool testPosition(int x, int y) { return gFalse; }
 
   virtual GBool isStatic() { return gTrue; }
+
+  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
+	  Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult);
 
 private:
 

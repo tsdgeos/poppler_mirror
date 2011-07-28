@@ -103,6 +103,10 @@ struct SplashPipe {
 
   // non-isolated group correction
   int nonIsolatedGroup;
+
+  // stroke / fill operation and pattern for calculate overprint
+  GBool stroke;
+  SplashPattern *overprintPattern;
 };
 
 SplashPipeResultColorCtrl Splash::pipeResultColorNoAlphaBlend[] = {
@@ -188,7 +192,7 @@ inline void Splash::updateModY(int y) {
 inline void Splash::pipeInit(SplashPipe *pipe, int x, int y,
 			     SplashPattern *pattern, SplashColorPtr cSrc,
 			     SplashCoord aInput, GBool usesShape,
-			     GBool nonIsolatedGroup) {
+			     GBool nonIsolatedGroup, SplashPattern *opPattern, GBool strokeA) {
   pipeSetXY(pipe, x, y);
   pipe->pattern = NULL;
 
@@ -239,6 +243,8 @@ inline void Splash::pipeInit(SplashPipe *pipe, int x, int y,
   } else {
     pipe->nonIsolatedGroup = 0;
   }
+  pipe->stroke = strokeA;
+  pipe->overprintPattern = opPattern;
 }
 
 inline void Splash::pipeRun(SplashPipe *pipe) {
@@ -297,10 +303,25 @@ inline void Splash::pipeRun(SplashPipe *pipe) {
       break;
 #if SPLASH_CMYK
     case splashModeCMYK8:
-      *pipe->destColorPtr++ = pipe->cSrc[0];
-      *pipe->destColorPtr++ = pipe->cSrc[1];
-      *pipe->destColorPtr++ = pipe->cSrc[2];
-      *pipe->destColorPtr++ = pipe->cSrc[3];
+      if (pipe->overprintPattern != NULL && 
+          ((pipe->stroke && state->strokeOverprint) ||
+          (!pipe->stroke && state->fillOverprint))) {
+        SplashColor cResult;
+        cDest[0] = pipe->destColorPtr[0];
+        cDest[1] = pipe->destColorPtr[1];
+        cDest[2] = pipe->destColorPtr[2];
+        cDest[3] = pipe->destColorPtr[3];
+        pipe->overprintPattern->overprint(state->overprintMode == 1, pipe->aSrc, pipe->cSrc, 255, cDest, cResult);
+        *pipe->destColorPtr++ = cResult[0];
+        *pipe->destColorPtr++ = cResult[1];
+        *pipe->destColorPtr++ = cResult[2];
+        *pipe->destColorPtr++ = cResult[3];
+      } else {
+        *pipe->destColorPtr++ = pipe->cSrc[0];
+        *pipe->destColorPtr++ = pipe->cSrc[1];
+        *pipe->destColorPtr++ = pipe->cSrc[2];
+        *pipe->destColorPtr++ = pipe->cSrc[3];
+      }
       break;
 #endif
     }
@@ -435,14 +456,25 @@ inline void Splash::pipeRun(SplashPipe *pipe) {
 	cResult2 = 0;
 	cResult3 = 0;
       } else {
-	cResult0 = (Guchar)(((alpha2 - aSrc) * cDest[0] +
+	if (pipe->overprintPattern != NULL &&
+	   ((pipe->stroke && state->strokeOverprint) ||
+	   (!pipe->stroke && state->fillOverprint))) {
+	  SplashColor cResult;
+	  pipe->overprintPattern->overprint(state->overprintMode == 1, aSrc, pipe->cSrc, alpha2, cDest, cResult);
+	  cResult0 = cResult[0];
+	  cResult1 = cResult[1];
+	  cResult2 = cResult[2];
+	  cResult3 = cResult[3];
+	} else {
+	  cResult0 = (Guchar)(((alpha2 - aSrc) * cDest[0] +
 			     aSrc * pipe->cSrc[0]) / alpha2);
-	cResult1 = (Guchar)(((alpha2 - aSrc) * cDest[1] +
+	  cResult1 = (Guchar)(((alpha2 - aSrc) * cDest[1] +
 			     aSrc * pipe->cSrc[1]) / alpha2);
-	cResult2 = (Guchar)(((alpha2 - aSrc) * cDest[2] +
+	  cResult2 = (Guchar)(((alpha2 - aSrc) * cDest[2] +
 			     aSrc * pipe->cSrc[2]) / alpha2);
-	cResult3 = (Guchar)(((alpha2 - aSrc) * cDest[3] +
+	  cResult3 = (Guchar)(((alpha2 - aSrc) * cDest[3] +
 			     aSrc * pipe->cSrc[3]) / alpha2);
+	}
       }
       break;
 #endif
@@ -990,6 +1022,18 @@ void Splash::setFillAlpha(SplashCoord alpha) {
   state->fillAlpha = alpha;
 }
 
+void Splash::setFillOverprint(GBool fop) {
+  state->fillOverprint = fop;
+}
+
+void Splash::setStrokeOverprint(GBool gop) {
+  state->strokeOverprint = gop;
+}
+
+void Splash::setOverprintMode(int opm) {
+  state->overprintMode = opm;
+}
+
 void Splash::setLineWidth(SplashCoord lineWidth) {
   state->lineWidth = lineWidth;
 }
@@ -1242,7 +1286,7 @@ void Splash::strokeNarrow(SplashPath *path) {
   xPath = new SplashXPath(path, state->matrix, state->flatness, gFalse);
 
   pipeInit(&pipe, 0, 0, state->strokePattern, NULL, state->strokeAlpha,
-	   gFalse, gFalse);
+	   gFalse, gFalse, state->strokePattern, gTrue);
 
   for (i = 0, seg = xPath->segs; i < xPath->length; ++i, ++seg) {
 
@@ -1615,7 +1659,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
       yMaxI = state->clip->getYMaxI();
     }
 
-    pipeInit(&pipe, 0, yMinI, pattern, NULL, alpha, vectorAntialias, gFalse);
+    pipeInit(&pipe, 0, yMinI, pattern, NULL, alpha, vectorAntialias, gFalse, pattern);
 
     // draw the spans
     if (vectorAntialias) {
@@ -1685,7 +1729,7 @@ SplashError Splash::xorFill(SplashPath *path, GBool eo) {
 
     origBlendFunc = state->blendFunc;
     state->blendFunc = &blendXor;
-    pipeInit(&pipe, 0, yMinI, state->fillPattern, NULL, 1, gFalse, gFalse);
+    pipeInit(&pipe, 0, yMinI, state->fillPattern, NULL, 1, gFalse, gFalse, state->fillPattern);
 
     // draw the spans
     for (y = yMinI; y <= yMaxI; ++y) {
@@ -1799,7 +1843,7 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
   if (noClip) {
     if (glyph->aa) {
       pipeInit(&pipe, xStart, yStart,
-               state->fillPattern, NULL, state->fillAlpha, gTrue, gFalse);
+               state->fillPattern, NULL, state->fillAlpha, gTrue, gFalse, state->fillPattern);
       for (yy = 0, y1 = yStart; yy < yyLimit; ++yy, ++y1) {
         pipeSetXY(&pipe, xStart, y1);
         for (xx = 0, x1 = xStart; xx < xxLimit; ++xx, ++x1) {
@@ -1819,7 +1863,7 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
       const int widthEight = splashCeil(glyph->w / 8.0);
 
       pipeInit(&pipe, xStart, yStart,
-               state->fillPattern, NULL, state->fillAlpha, gFalse, gFalse);
+               state->fillPattern, NULL, state->fillAlpha, gFalse, gFalse, state->fillPattern);
       for (yy = 0, y1 = yStart; yy < yyLimit; ++yy, ++y1) {
         pipeSetXY(&pipe, xStart, y1);
         for (xx = 0, x1 = xStart; xx < xxLimit; xx += 8) {
@@ -1841,7 +1885,7 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
   } else {
     if (glyph->aa) {
       pipeInit(&pipe, xStart, yStart,
-               state->fillPattern, NULL, state->fillAlpha, gTrue, gFalse);
+               state->fillPattern, NULL, state->fillAlpha, gTrue, gFalse, state->fillPattern);
       for (yy = 0, y1 = yStart; yy < yyLimit; ++yy, ++y1) {
         pipeSetXY(&pipe, xStart, y1);
         for (xx = 0, x1 = xStart; xx < xxLimit; ++xx, ++x1) {
@@ -1865,7 +1909,7 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
       const int widthEight = splashCeil(glyph->w / 8.0);
 
       pipeInit(&pipe, xStart, yStart,
-               state->fillPattern, NULL, state->fillAlpha, gFalse, gFalse);
+               state->fillPattern, NULL, state->fillAlpha, gFalse, gFalse, state->fillPattern);
       for (yy = 0, y1 = yStart; yy < yyLimit; ++yy, ++y1) {
         pipeSetXY(&pipe, xStart, y1);
         for (xx = 0, x1 = xStart; xx < xxLimit; xx += 8) {
@@ -2043,7 +2087,7 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData,
 
   // initialize the pixel pipe
   pipeInit(&pipe, 0, 0, state->fillPattern, NULL, state->fillAlpha,
-	   gTrue, gFalse);
+	   gTrue, gFalse, state->fillPattern);
   if (vectorAntialias) {
     drawAAPixelInit();
   }
@@ -2178,7 +2222,7 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData,
 
 SplashError Splash::drawImage(SplashImageSource src, void *srcData,
 			      SplashColorMode srcMode, GBool srcAlpha,
-			      int w, int h, SplashCoord *mat) {
+			      int w, int h, SplashCoord *mat, SplashPattern *opImagePattern) {
   SplashPipe pipe;
   GBool ok, rot;
   SplashCoord xScale, yScale, xShear, yShear, yShear1;
@@ -2357,7 +2401,7 @@ SplashError Splash::drawImage(SplashImageSource src, void *srcData,
   // initialize the pixel pipe
   pipeInit(&pipe, 0, 0, NULL, pix, state->fillAlpha,
 	   srcAlpha || (vectorAntialias && clipRes != splashClipAllInside),
-	   gFalse);
+	   gFalse, opImagePattern);
   if (vectorAntialias) {
     drawAAPixelInit();
   }
@@ -3277,7 +3321,7 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
   SplashPipe pipe;
   SplashColor cSrcVal;
 
-  pipeInit(&pipe, 0, 0, NULL, cSrcVal, state->strokeAlpha, gFalse, gFalse);
+  pipeInit(&pipe, 0, 0, NULL, cSrcVal, state->strokeAlpha, gFalse, gFalse, NULL, gTrue);
 
   if (vectorAntialias) {
     if (aaBuf == NULL)
@@ -3977,7 +4021,7 @@ SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
       yMaxI = state->clip->getYMaxI();
     }
 
-    pipeInit(&pipe, 0, yMinI, pattern, NULL, state->fillAlpha, vectorAntialias && !hasBBox, gFalse);
+    pipeInit(&pipe, 0, yMinI, pattern, NULL, state->fillAlpha, vectorAntialias && !hasBBox, gFalse, pattern);
 
     // draw the spans
     if (vectorAntialias) {

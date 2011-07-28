@@ -51,6 +51,33 @@ struct T3GlyphStack;
 struct SplashTransparencyGroup;
 
 //------------------------------------------------------------------------
+// SplashOverprintColor
+//------------------------------------------------------------------------
+
+class SplashOverprintColor: public SplashPattern {
+public:
+  SplashOverprintColor(GfxColorSpace *colorSpace, SplashColorPtr colorA, Guchar tolerance);
+
+  virtual SplashPattern *copy() { return new SplashOverprintColor(colorSpace, color, tolerance); }
+
+  virtual ~SplashOverprintColor();
+
+  virtual GBool getColor(int x, int y, SplashColorPtr c);
+
+  virtual GBool testPosition(int x, int y) { return gFalse; }
+
+  virtual GBool isStatic() { return gTrue; }
+
+  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
+                         Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult);
+
+private:
+  GfxColorSpace *colorSpace;
+  SplashColor color;
+  Guchar tolerance;
+};
+
+//------------------------------------------------------------------------
 // Splash dynamic pattern
 //------------------------------------------------------------------------
 
@@ -90,18 +117,22 @@ public:
 
   virtual GBool getParameter(double xs, double ys, double *t);
 
+  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
+                         Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult);
+
 private:
   double x0, y0, x1, y1;
   double dx, dy, mul;
+  SplashOverprintColor *opPattern;
 };
 
 // see GfxState.h, GfxGouraudTriangleShading
 class SplashGouraudPattern: public SplashGouraudColor {
 public:
 
-  SplashGouraudPattern(GBool bDirectColorTranslation, GfxState *state, GfxGouraudTriangleShading *shading);
+  SplashGouraudPattern(GBool bDirectColorTranslation, GfxState *state, GfxGouraudTriangleShading *shading, SplashColorMode mode);
 
-  virtual SplashPattern *copy() { return new SplashGouraudPattern(bDirectColorTranslation, state, shading); }
+  virtual SplashPattern *copy() { return new SplashGouraudPattern(bDirectColorTranslation, state, shading, mode); }
 
   virtual ~SplashGouraudPattern();
 
@@ -120,10 +151,14 @@ public:
 
   virtual void getParameterizedColor(double t, SplashColorMode mode, SplashColorPtr c);
 
+  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
+                         Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult);
 private:
   GfxGouraudTriangleShading *shading;
   GfxState *state;
   GBool bDirectColorTranslation;
+  SplashOverprintColor *opPattern;
+  SplashColorMode mode;
 };
 
 // see GfxState.h, GfxRadialShading
@@ -138,9 +173,13 @@ public:
 
   virtual GBool getParameter(double xs, double ys, double *t);
 
+  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
+                         Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult);
+
 private:
   double x0, y0, r0, dx, dy, dr;
   double a, inva;
+  SplashOverprintColor *opPattern;
 };
 
 //------------------------------------------------------------------------
@@ -220,6 +259,9 @@ public:
   virtual void updateBlendMode(GfxState *state);
   virtual void updateFillOpacity(GfxState *state);
   virtual void updateStrokeOpacity(GfxState *state);
+  virtual void updateFillOverprint(GfxState *state);
+  virtual void updateStrokeOverprint(GfxState *state);
+  virtual void updateOverprintMode(GfxState *state);
 
   //----- update text state
   virtual void updateFont(GfxState *state);
@@ -327,9 +369,6 @@ public:
   // Clear the modified region.
   void clearModRegion();
 
-  // Set the Splash fill color.
-  void setFillColor(int r, int g, int b);
-
   SplashFont *getCurrentFont() { return font; }
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
@@ -344,7 +383,7 @@ private:
 
   void setupScreenParams(double hDPI, double vDPI);
 #if SPLASH_CMYK
-  SplashPattern *getColor(GfxGray gray, GfxRGB *rgb, GfxCMYK *cmyk);
+  SplashPattern *getColor(GfxColorSpace *colorSpace, GfxGray gray, GfxRGB *rgb, GfxCMYK *cmyk);
 #else
   SplashPattern *getColor(GfxGray gray, GfxRGB *rgb);
 #endif

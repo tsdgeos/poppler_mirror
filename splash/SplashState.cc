@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -71,6 +71,9 @@ SplashState::SplashState(int width, int height, GBool vectorAntialias,
   softMask = NULL;
   deleteSoftMask = gFalse;
   inNonIsolatedGroup = gFalse;
+  fillOverprint = gFalse;
+  strokeOverprint = gFalse;
+  overprintMode = 0;	  
   next = NULL;
 }
 
@@ -101,6 +104,9 @@ SplashState::SplashState(int width, int height, GBool vectorAntialias,
   softMask = NULL;
   deleteSoftMask = gFalse;
   inNonIsolatedGroup = gFalse;
+  fillOverprint = gFalse;
+  strokeOverprint = gFalse;
+  overprintMode = 0;	  
   next = NULL;
 }
 
@@ -131,6 +137,9 @@ SplashState::SplashState(SplashState *state) {
   softMask = state->softMask;
   deleteSoftMask = gFalse;
   inNonIsolatedGroup = state->inNonIsolatedGroup;
+  fillOverprint = state->fillOverprint;
+  strokeOverprint = state->strokeOverprint;
+  overprintMode = state->overprintMode;	  
   next = NULL;
 }
 

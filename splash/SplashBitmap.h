@@ -71,6 +71,7 @@ public:
   SplashError writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int vDPI);
 
   void getPixel(int x, int y, SplashColorPtr pixel);
+  void getRGBLine(int y, SplashColorPtr line);
   Guchar getAlpha(int x, int y);
 
 private:
