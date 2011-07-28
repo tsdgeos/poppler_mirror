@@ -1104,6 +1104,8 @@ static FcPattern *buildFcPattern(GfxFont *font)
     weight = FC_WEIGHT_BOLD;
   if (findModifier(modifiers, "Light", &start))
     weight = FC_WEIGHT_LIGHT;
+  if (findModifier(modifiers, "Medium", &start))
+    weight = FC_WEIGHT_MEDIUM;
   if (findModifier(modifiers, "Condensed", &start))
     width = FC_WIDTH_CONDENSED;
   
