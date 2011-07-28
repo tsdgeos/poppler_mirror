@@ -29,6 +29,7 @@
 // Copyright (C) 2010 Patrick Spendrin <ps_ml@gmx.de>
 // Copyright (C) 2010 Jakub Wilk <ubanus@users.sf.net>
 // Copyright (C) 2011 Pino Toscano <pino@kde.org>
+// Copyright (C) 2011 Koji Otani <sho@bbr.jp>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1031,6 +1032,42 @@ static GBool findModifier(const char *name, const char *modifier, const char **s
   }
 }
 
+static char *getFontLang(GfxFont *font)
+{
+  char *lang;
+
+  // find the language we want the font to support
+  if (font->isCIDFont())
+  {
+    GooString *collection = ((GfxCIDFont *)font)->getCollection();
+    if (collection)
+    {
+      if (strcmp(collection->getCString(), "Adobe-GB1") == 0)
+        lang = "zh-cn"; // Simplified Chinese
+      else if (strcmp(collection->getCString(), "Adobe-CNS1") == 0)
+        lang = "zh-tw"; // Traditional Chinese
+      else if (strcmp(collection->getCString(), "Adobe-Japan1") == 0)
+        lang = "ja"; // Japanese
+      else if (strcmp(collection->getCString(), "Adobe-Japan2") == 0)
+        lang = "ja"; // Japanese
+      else if (strcmp(collection->getCString(), "Adobe-Korea1") == 0)
+        lang = "ko"; // Korean
+      else if (strcmp(collection->getCString(), "Adobe-UCS") == 0)
+        lang = "xx";
+      else if (strcmp(collection->getCString(), "Adobe-Identity") == 0)
+        lang = "xx";
+      else
+      {
+        error(-1, "Unknown CID font collection, please report to poppler bugzilla.");
+        lang = "xx";
+      }
+    }
+    else lang = "xx";
+  }
+  else lang = "xx";
+  return lang;
+}
+
 static FcPattern *buildFcPattern(GfxFont *font)
 {
   int weight = -1,
@@ -1130,35 +1167,7 @@ static FcPattern *buildFcPattern(GfxFont *font)
     default: break; 
   }
   
-  // find the language we want the font to support
-  if (font->isCIDFont())
-  {
-    GooString *collection = ((GfxCIDFont *)font)->getCollection();
-    if (collection)
-    {
-      if (strcmp(collection->getCString(), "Adobe-GB1") == 0)
-        lang = "zh-cn"; // Simplified Chinese
-      else if (strcmp(collection->getCString(), "Adobe-CNS1") == 0)
-        lang = "zh-tw"; // Traditional Chinese
-      else if (strcmp(collection->getCString(), "Adobe-Japan1") == 0)
-        lang = "ja"; // Japanese
-      else if (strcmp(collection->getCString(), "Adobe-Japan2") == 0)
-        lang = "ja"; // Japanese
-      else if (strcmp(collection->getCString(), "Adobe-Korea1") == 0)
-        lang = "ko"; // Korean
-      else if (strcmp(collection->getCString(), "Adobe-UCS") == 0)
-        lang = "xx";
-      else if (strcmp(collection->getCString(), "Adobe-Identity") == 0)
-        lang = "xx";
-      else
-      {
-        error(-1, "Unknown CID font collection, please report to poppler bugzilla.");
-        lang = "xx";
-      }
-    }
-    else lang = "xx";
-  }
-  else lang = "xx";
+  lang = getFontLang(font);
   
   p = FcPatternBuild(NULL,
                     FC_FAMILY, FcTypeString, family,
@@ -1195,6 +1204,8 @@ DisplayFontParam *GlobalParams::getDisplayFont(GfxFont *font) {
     FcResult res;
     FcFontSet *set;
     int i;
+    FcLangSet *lb = NULL;
+    char *lang;
     p = buildFcPattern(font);
 
     if (!p)
@@ -1204,29 +1215,59 @@ DisplayFontParam *GlobalParams::getDisplayFont(GfxFont *font) {
     set = FcFontSort(NULL, p, FcFalse, NULL, &res);
     if (!set)
       goto fin;
-    for (i = 0; i < set->nfont; ++i)
+
+    // find the language we want the font to support
+    lang = getFontLang(font);
+    if (strcmp(lang,"xx") != 0) {
+      lb = FcLangSetCreate();
+      FcLangSetAdd(lb,(FcChar8 *)lang);
+    }
+
+    /*
+      scan twice.
+      first: fonts support the language
+      second: all fonts (fall back)
+    */
+    while (dfp == NULL)
     {
-      res = FcPatternGetString(set->fonts[i], FC_FILE, 0, &s);
-      if (res != FcResultMatch || !s)
-        continue;
-      ext = strrchr((char*)s,'.');
-      if (!ext)
-        continue;
-      if (!strncasecmp(ext,".ttf",4) || !strncasecmp(ext, ".ttc", 4))
+      for (i = 0; i < set->nfont; ++i)
       {
-        dfp = new DisplayFontParam(fontName->copy(), displayFontTT);  
-        dfp->tt.fileName = new GooString((char*)s);
-        FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, &(dfp->tt.faceIndex));
+        res = FcPatternGetString(set->fonts[i], FC_FILE, 0, &s);
+        if (res != FcResultMatch || !s)
+          continue;
+        if (lb != NULL) {
+          FcLangSet *l;
+          res = FcPatternGetLangSet(set->fonts[i], FC_LANG, 0, &l);
+          if (res != FcResultMatch || !FcLangSetContains(l,lb)) {
+            continue;
+          }
+        }
+        ext = strrchr((char*)s,'.');
+        if (!ext)
+          continue;
+        if (!strncasecmp(ext,".ttf",4) || !strncasecmp(ext, ".ttc", 4))
+        {
+          dfp = new DisplayFontParam(fontName->copy(), displayFontTT);  
+          dfp->tt.fileName = new GooString((char*)s);
+          FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, &(dfp->tt.faceIndex));
+        }
+        else if (!strncasecmp(ext,".pfa",4) || !strncasecmp(ext,".pfb",4)) 
+        {
+          dfp = new DisplayFontParam(fontName->copy(), displayFontT1);  
+          dfp->t1.fileName = new GooString((char*)s);
+        }
+        else
+          continue;
+        font->dfp = dfp;
+        break;
       }
-      else if (!strncasecmp(ext,".pfa",4) || !strncasecmp(ext,".pfb",4)) 
-      {
-        dfp = new DisplayFontParam(fontName->copy(), displayFontT1);  
-        dfp->t1.fileName = new GooString((char*)s);
+      if (lb != NULL) {
+        FcLangSetDestroy(lb);
+        lb = NULL;
+      } else {
+        /* scan all fonts of the list */
+        break;
       }
-      else
-        continue;
-      font->dfp = dfp;
-      break;
     }
     FcFontSetDestroy(set);
   }
