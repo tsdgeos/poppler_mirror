@@ -304,6 +304,11 @@ protected:
   cairo_surface_t *surface;
   cairo_glyph_t *glyphs;
   int glyphCount;
+  cairo_text_cluster_t *clusters;
+  int clusterCount;
+  char *utf8;
+  int utf8Count;
+  int utf8Max;
   cairo_path_t *textClipPath;
   GBool inType3Char;		// inside a Type 3 CharProc
   double t3_glyph_wx, t3_glyph_wy;

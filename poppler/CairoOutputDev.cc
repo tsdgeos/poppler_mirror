@@ -60,6 +60,7 @@
 #include "CairoOutputDev.h"
 #include "CairoFontEngine.h"
 #include "CairoRescaleBox.h"
+#include "UTF8.h"
 //------------------------------------------------------------------------
 
 // #define LOG_CAIRO
@@ -999,6 +1000,13 @@ void CairoOutputDev::beginString(GfxState *state, GooString *s)
 
   glyphs = (cairo_glyph_t *) gmallocn (len, sizeof (cairo_glyph_t));
   glyphCount = 0;
+  if (printing) {
+    clusters = (cairo_text_cluster_t *) gmallocn (len, sizeof (cairo_text_cluster_t));
+    clusterCount = 0;
+    utf8Max = len*2; // start with twice the number of glyphs. we will realloc if we need more.
+    utf8 = (char *) gmalloc (utf8Max);
+    utf8Count = 0;
+  }
 }
 
 void CairoOutputDev::drawChar(GfxState *state, double x, double y,
@@ -1011,6 +1019,24 @@ void CairoOutputDev::drawChar(GfxState *state, double x, double y,
     glyphs[glyphCount].x = x - originX;
     glyphs[glyphCount].y = y - originY;
     glyphCount++;
+    if (printing) {
+      if (utf8Max - utf8Count < uLen*6) {
+        // utf8 encoded characters can be up to 6 bytes
+	if (utf8Max > uLen*6)
+	  utf8Max *= 2;
+	else
+	  utf8Max += 2*uLen*6;
+	utf8 = (char *) grealloc (utf8, utf8Max);
+      }
+      clusters[clusterCount].num_bytes = 0;
+      for (int i = 0; i < uLen; i++) {
+	int size = mapUTF8 (u[i], utf8 + utf8Count, utf8Max - utf8Count);
+	utf8Count += size;
+	clusters[clusterCount].num_bytes += size;
+      }
+      clusters[clusterCount].num_glyphs = 1;
+      clusterCount++;
+    }
   }
 
   if (!text)
@@ -1039,15 +1065,18 @@ void CairoOutputDev::endString(GfxState *state)
     glyphs = NULL;
     return;
   }
-  
+
   if (!(render & 1) && !haveCSPattern) {
     LOG (printf ("fill string\n"));
     cairo_set_source (cairo, fill_pattern);
-    cairo_show_glyphs (cairo, glyphs, glyphCount);
+    if (printing)
+      cairo_show_text_glyphs (cairo, utf8, utf8Count, glyphs, glyphCount, clusters, clusterCount, (cairo_text_cluster_flags_t)0);
+    else
+        cairo_show_glyphs (cairo, glyphs, glyphCount);
     if (cairo_shape)
       cairo_show_glyphs (cairo_shape, glyphs, glyphCount);
   }
-  
+
   // stroke
   if ((render & 3) == 1 || (render & 3) == 2) {
     LOG (printf ("stroke string\n"));
@@ -1088,6 +1117,12 @@ void CairoOutputDev::endString(GfxState *state)
 
   gfree (glyphs);
   glyphs = NULL;
+  if (printing) {
+    gfree (clusters);
+    clusters = NULL;
+    gfree (utf8);
+    utf8 = NULL;
+  }
 }
 
 
