@@ -114,6 +114,7 @@ AC_DEFINE_DIR(POPPLER_DATADIR, "{datarootdir}/poppler", [Poppler data dir])
 dnl ##### Checks for header files.
 AC_PATH_XTRA
 AC_HEADER_DIRENT
+AC_CHECK_HEADERS([stdint.h])
 
 dnl ##### Switch over to C++.  This will make the checks below a little
 dnl ##### bit stricter (requiring function prototypes in include files).

@@ -37,8 +37,6 @@
 #include "goo/gmem.h"
 #include "CairoRescaleBox.h"
 
-typedef unsigned short int      uint16_t;
-typedef unsigned int            uint32_t;
 
 /* we work in fixed point where 1. == 1 << 24 */
 #define FIXED_SHIFT 24

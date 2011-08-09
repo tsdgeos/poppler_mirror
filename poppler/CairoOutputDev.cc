@@ -1348,8 +1348,6 @@ void CairoOutputDev::paintTransparencyGroup(GfxState * /*state*/, double * /*bbo
   popTransparencyGroup();
 }
 
-typedef unsigned int uint32_t;
-
 static uint32_t luminocity(uint32_t x)
 {
   int r = (x >> 16) & 0xff;
