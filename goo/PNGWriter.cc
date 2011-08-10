@@ -67,8 +67,7 @@ bool PNGWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 
 	png_set_IHDR(png_ptr, info_ptr, width, height, bit_depth, color_type, interlace_type, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
-	// PNG_RESOLUTION_UNKNOWN means dots per inch
-	png_set_pHYs(png_ptr, info_ptr, hDPI, vDPI, PNG_RESOLUTION_UNKNOWN);
+	png_set_pHYs(png_ptr, info_ptr, hDPI/0.0254, vDPI/0.0254, PNG_RESOLUTION_METER);
 
 	png_write_info(png_ptr, info_ptr);
 	if (setjmp(png_jmpbuf(png_ptr))) {
