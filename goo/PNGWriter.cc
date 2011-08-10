@@ -21,7 +21,7 @@
 
 #include "poppler/Error.h"
 
-PNGWriter::PNGWriter()
+PNGWriter::PNGWriter(Format formatA) : format(formatA)
 {
 }
 
@@ -61,8 +61,26 @@ bool PNGWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 	// Set up the type of PNG image and the compression level
 	png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
 
-	png_byte bit_depth = 8;
-	png_byte color_type = PNG_COLOR_TYPE_RGB;
+	png_byte bit_depth;
+	png_byte color_type;
+	switch (format) {
+		case RGB:
+			bit_depth = 8;
+			color_type = PNG_COLOR_TYPE_RGB;
+			break;
+		case RGBA:
+			bit_depth = 8;
+			color_type = PNG_COLOR_TYPE_RGB_ALPHA;
+			break;
+		case GRAY:
+			bit_depth = 8;
+			color_type = PNG_COLOR_TYPE_GRAY;
+			break;
+		case MONOCHROME:
+			bit_depth = 1;
+			color_type = PNG_COLOR_TYPE_GRAY;
+			break;
+	}
 	png_byte interlace_type = PNG_INTERLACE_NONE;
 
 	png_set_IHDR(png_ptr, info_ptr, width, height, bit_depth, color_type, interlace_type, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
@@ -74,7 +92,11 @@ bool PNGWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 		error(-1, "error during writing png info bytes");
 		return false;
 	}
-	
+
+	// pack 1 pixel/byte rows into 8 pixels/byte
+	if (format == MONOCHROME)
+		png_set_packing(png_ptr);
+
 	return true;
 }
 
