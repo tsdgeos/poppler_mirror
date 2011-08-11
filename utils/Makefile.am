@@ -16,12 +16,27 @@ INCLUDES =					\
 	-I$(top_srcdir)/utils			\
 	-I$(top_srcdir)/poppler			\
 	$(UTILS_CFLAGS)				\
-	$(FONTCONFIG_CFLAGS)
+	$(FONTCONFIG_CFLAGS)			\
+	$(CAIRO_CFLAGS)
 
 LDADD =						\
 	$(top_builddir)/poppler/libpoppler.la	\
 	$(UTILS_LIBS)				\
 	$(FONTCONFIG_LIBS)
+
+if BUILD_CAIRO_OUTPUT
+
+pdftocairo_SOURCES =				\
+	pdftocairo.cc				\
+	$(common)
+
+pdftocairo_LDADD = $(LDADD) $(CAIRO_LIBS) \
+	$(top_builddir)/poppler/libpoppler-cairo.la
+
+
+pdftocairo_binary = pdftocairo
+
+endif
 
 AM_LDFLAGS = @auto_import_flags@
 
@@ -32,7 +47,8 @@ bin_PROGRAMS =					\
 	pdftops					\
 	pdftotext				\
 	pdftohtml				\
-	$(pdftoppm_binary)
+	$(pdftoppm_binary)			\
+	$(pdftocairo_binary)
 
 dist_man1_MANS =				\
 	pdffonts.1				\

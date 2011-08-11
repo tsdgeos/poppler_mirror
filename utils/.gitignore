@@ -9,4 +9,4 @@ pdftohtml
 pdftoppm
 pdftops
 pdftotext
-pdftoabw
+pdftocairo
