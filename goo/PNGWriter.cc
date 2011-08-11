@@ -18,17 +18,40 @@
 #ifdef ENABLE_LIBPNG
 
 #include <zlib.h>
+#include <stdlib.h>
 
 #include "poppler/Error.h"
+#include "goo/gmem.h"
 
 PNGWriter::PNGWriter(Format formatA) : format(formatA)
 {
+	icc_data = NULL;
+	icc_data_size = 0;
+	icc_name = NULL;
+	sRGB_profile = false;
 }
 
 PNGWriter::~PNGWriter()
 {
 	/* cleanup heap allocation */
 	png_destroy_write_struct(&png_ptr, &info_ptr);
+	if (icc_data) {
+		gfree(icc_data);
+		free(icc_name);
+	}
+}
+
+void PNGWriter::setICCProfile(const char *name, unsigned char *data, int size)
+{
+	icc_data = (unsigned char *)gmalloc(size);
+	memcpy(icc_data, data, size);
+	icc_data_size = size;
+	icc_name = strdup(name);
+}
+
+void PNGWriter::setSRGBProfile()
+{
+	sRGB_profile = true;
 }
 
 bool PNGWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
@@ -86,6 +109,11 @@ bool PNGWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 	png_set_IHDR(png_ptr, info_ptr, width, height, bit_depth, color_type, interlace_type, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
 	png_set_pHYs(png_ptr, info_ptr, hDPI/0.0254, vDPI/0.0254, PNG_RESOLUTION_METER);
+
+	if (icc_data)
+		png_set_iCCP(png_ptr, info_ptr, icc_name, PNG_COMPRESSION_TYPE_BASE, (char*)icc_data, icc_data_size);
+	else if (sRGB_profile)
+		png_set_sRGB(png_ptr, info_ptr, PNG_sRGB_INTENT_RELATIVE);
 
 	png_write_info(png_ptr, info_ptr);
 	if (setjmp(png_jmpbuf(png_ptr))) {

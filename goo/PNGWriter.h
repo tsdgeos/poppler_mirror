@@ -36,6 +36,10 @@ class PNGWriter : public ImgWriter
 
 		PNGWriter(Format format = RGB);
 		~PNGWriter();
+
+		void setICCProfile(const char *name, unsigned char *data, int size);
+		void setSRGBProfile();
+
 		
 		bool init(FILE *f, int width, int height, int hDPI, int vDPI);
 		
@@ -48,6 +52,10 @@ class PNGWriter : public ImgWriter
 		Format format;
 		png_structp png_ptr;
 		png_infop info_ptr;
+		unsigned char *icc_data;
+		int icc_data_size;
+		char *icc_name;
+		bool sRGB_profile;
 };
 
 #endif
