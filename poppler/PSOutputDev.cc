@@ -1315,6 +1315,7 @@ void PSOutputDev::writeHeader(int firstPage, int lastPage,
     writePS("%!PS-Adobe-3.0 Resource-Form\n");
     break;
   }
+  writePSFmt("% Produced by poppler pdftops version: {0:s} (http://poppler.freedesktop.org)\n", PACKAGE_VERSION);
   xref->getDocInfo(&info);
   if (info.isDict() && info.dictLookup("Creator", &obj1)->isString()) {
     writePS("%%Creator: ");
