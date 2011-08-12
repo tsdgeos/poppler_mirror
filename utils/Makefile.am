@@ -36,6 +36,8 @@ pdftocairo_LDADD = $(LDADD) $(CAIRO_LIBS) \
 
 pdftocairo_binary = pdftocairo
 
+pdftocairo_manpage = pdftocairo.1
+
 endif
 
 AM_LDFLAGS = @auto_import_flags@
@@ -57,7 +59,8 @@ dist_man1_MANS =				\
 	pdftops.1				\
 	pdftotext.1				\
 	pdftohtml.1				\
-	$(pdftoppm_manpage)
+	$(pdftoppm_manpage)			\
+	$(pdftocairo_manpage)
 
 common = parseargs.cc parseargs.h
 
