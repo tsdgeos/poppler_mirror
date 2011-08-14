@@ -4005,11 +4005,11 @@ void PSOutputDev::eoFill(GfxState *state) {
   writePS("f*\n");
 }
 
-GBool PSOutputDev::tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
-				     double *pmat, int paintType, Dict *resDict,
-				     double *mat, double *bbox,
-				     int x0, int y0, int x1, int y1,
-				     double xStep, double yStep) {
+GBool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str,
+				       double *pmat, int paintType, int tilingType, Dict *resDict,
+				       double *mat, double *bbox,
+				       int x0, int y0, int x1, int y1,
+				       double xStep, double yStep) {
   PDFRectangle box;
   Gfx *gfx;
 
@@ -4070,6 +4070,55 @@ GBool PSOutputDev::tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
   writePS("grestore\n");
 
   return gTrue;
+}
+
+GBool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str,
+				       double *pmat, int paintType, int tilingType, Dict *resDict,
+				       double *mat, double *bbox,
+				       int x0, int y0, int x1, int y1,
+				       double xStep, double yStep) {
+  PDFRectangle box;
+  Gfx *gfx;
+  double cxMin, cyMin, cxMax, cyMax;
+
+  writePS("<<\n  /PatternType 1\n");
+  writePSFmt("  /PaintType {0:d}\n", paintType);
+  writePSFmt("  /TilingType {0:d}\n", tilingType);
+  writePSFmt("  /BBox [{0:.6g} {1:.6g} {2:.6g} {3:.6g}]\n", bbox[0], bbox[1], bbox[2], bbox[3]);
+  writePSFmt("  /XStep {0:.6g}\n", xStep);
+  writePSFmt("  /YStep {0:.6g}\n", yStep);
+  writePS("  /PaintProc { \n");
+  box.x1 = bbox[0];
+  box.y1 = bbox[1];
+  box.x2 = bbox[2];
+  box.y2 = bbox[3];
+  gfx = new Gfx(xref, this, resDict, m_catalog, &box, NULL);
+  inType3Char = gTrue;
+  gfx->display(str);
+  inType3Char = gFalse;
+  delete gfx;
+  writePS("  }\n");
+  writePS(">>\n");
+  writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}]\n", pmat[0], pmat[1], pmat[2], pmat[3], pmat[4], pmat[5]);
+  writePS("makepattern setpattern\n");
+  state->getClipBBox(&cxMin, &cyMin, &cxMax, &cyMax);
+  writePSFmt("{0:.6g} {1:.6g} {2:.6g} {3:.6g} rectfill\n", cxMin, cyMin, cxMax - cxMin, cyMax - cyMin);
+
+  return gTrue;
+}
+
+GBool PSOutputDev::tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
+				     double *pmat, int paintType, int tilingType, Dict *resDict,
+				     double *mat, double *bbox,
+				     int x0, int y0, int x1, int y1,
+				     double xStep, double yStep) {
+  if (level == psLevel1 || level == psLevel1Sep) {
+    return tilingPatternFillL1(state, cat, str, pmat, paintType, tilingType, resDict,
+			       mat, bbox, x0, y0, x1, y1, xStep, yStep);
+  } else {
+    return tilingPatternFillL2(state, cat, str, pmat, paintType, tilingType, resDict,
+			       mat, bbox, x0, y0, x1, y1, xStep, yStep);
+  }
 }
 
 GBool PSOutputDev::functionShadedFill(GfxState *state,

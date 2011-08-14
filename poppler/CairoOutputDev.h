@@ -159,7 +159,7 @@ public:
   virtual void eoFill(GfxState *state);
   virtual void clipToStrokePath(GfxState *state);
   virtual GBool tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
-				  double *pmat, int paintType, Dict *resDict,
+				  double *pmat, int paintType, int tilingType, Dict *resDict,
 				  double *mat, double *bbox,
 				  int x0, int y0, int x1, int y1,
 				  double xStep, double yStep);
@@ -412,7 +412,7 @@ public:
   virtual void fill(GfxState *state) { }
   virtual void eoFill(GfxState *state) { }
   virtual GBool tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
-				  double *pmat, int paintType, Dict *resDict,
+				  double *pmat, int paintType, int tilingType, Dict *resDict,
 				  double *mat, double *bbox,
 				  int x0, int y0, int x1, int y1,
 				  double xStep, double yStep) { return gTrue; }
