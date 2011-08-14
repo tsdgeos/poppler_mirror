@@ -4112,6 +4112,9 @@ GBool PSOutputDev::tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
 				     double *mat, double *bbox,
 				     int x0, int y0, int x1, int y1,
 				     double xStep, double yStep) {
+  if (x1 - x0 == 1 && y1 - y0 == 1)
+    return gFalse; // Don't need to use patterns if only one instance of the pattern is used
+
   if (level == psLevel1 || level == psLevel1Sep) {
     return tilingPatternFillL1(state, cat, str, pmat, paintType, tilingType, resDict,
 			       mat, bbox, x0, y0, x1, y1, xStep, yStep);
