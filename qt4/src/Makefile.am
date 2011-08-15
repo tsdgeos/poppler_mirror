@@ -49,7 +49,8 @@ libpoppler_qt4_la_SOURCES =			\
 	poppler-optcontent-private.h		\
 	poppler-export.h			\
 	poppler-private.h			\
-	poppler-page-transition-private.h
+	poppler-page-transition-private.h	\
+	poppler-embeddedfile-private.h
 
 libpoppler_qt4_la_CXXFLAGS = 			\
 	-Dpoppler_qt4_EXPORTS
@@ -60,7 +61,7 @@ libpoppler_qt4_la_LIBADD = 			\
 	$(FONTCONFIG_LIBS)				\
 	$(POPPLER_QT4_LIBS)
 
-libpoppler_qt4_la_LDFLAGS = -version-info 8:0:5 @create_shared_lib@ @auto_import_flags@
+libpoppler_qt4_la_LDFLAGS = -version-info 9:0:6 @create_shared_lib@ @auto_import_flags@
 
 # This rule lets GNU make create any *.moc from the equivalent *.h
 .h.moc:

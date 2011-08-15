@@ -1,3 +1,40 @@
+Release 0.17.2 (0.18 Beta 2)
+        core:
+         * EmbeddedFile improvements
+         * don't gmalloc(-1) upon ftell failure
+         * Fix missing content in some pages (Bug #39637)
+         * Improve selection of CJK fonts (Bug #36474)
+         * SplashOutputDev: Implement overprint
+         * SplashOutputDev: Render dots for 0 length dashed lines (Bug #34150)
+         * SplashOutputDev: Fix bad memory access when not using antialias (Bug #37189)
+         * PSOutputDev: Make level2sep and level3sep write cmyk instead of rgb
+         * PSOutputDev: Make level1sep, level2sep and level3sep write gray instead of rgb for gray images
+         * Fix numerical overflow in libopenjpeg JPXStream (Bug #39361)
+         * Fix crash on truncated JPEG/DCT stream (Bug #36693)
+         * Make sure the dict is a page dict (Bugs #35925 #39072)
+         * Fix calculation of startXRefPos
+         * Handle missing startxref properly (Bug #38209)
+         * Parse the "Medium" modifier when asking fontconfig for a font
+         * Header cleanup
+         * Include cleanup
+         * Define cleanup
+
+        glib:
+         * Add missing permissions flags to PopplerPermissions
+         * Add missing permission flags to info demo
+         * Update gtk-doc.make
+         * Add poppler_document_get_n_attachments()
+        
+        utils:
+         * pdftohtml: Fix encoding of PDF document metadata (Bug #37900)
+         * pdftohtml: Fix vertical spacing issues  (Bug #38019)
+         * pdftotext: Fix -htmlmeta to correctly output U+2019 in PDF metadata (Bug #37900)
+         * pdftoppm: Implement overprint
+
+        qt4:
+         * Rework EmbeddedFile internals
+         * Fix possible crash in test
+        
 Release 0.17.1 (0.18 Beta 1)
         core:
          * Rework the way form fields tree is built
