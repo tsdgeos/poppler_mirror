@@ -21,7 +21,8 @@
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
-// Copyright (C) 2011 Joshua Richardson <joshuarbox-junk1@yahoo.com>
+// Copyright (C) 2011 Joshua Richardson <jric@chegg.com>
+// Copyright (C) 2011 Stephen Reichling <sreichling@chegg.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -29,6 +30,7 @@
 //========================================================================
 
 #include "HtmlFonts.h"
+#include "HtmlUtils.h"
 #include "GlobalParams.h"
 #include "UnicodeMap.h"
 #include <stdio.h>
@@ -120,6 +122,7 @@ HtmlFont::HtmlFont(GooString* ftname,int _size, GfxRGB rgb){
   size=(_size-1);
   italic = gFalse;
   bold = gFalse;
+  rotOrSkewed = gFalse;
 
   if (fontname){
     if (strstr(fontname->lowerCase()->getCString(),"bold"))  bold=gTrue;
@@ -148,6 +151,8 @@ HtmlFont::HtmlFont(const HtmlFont& x){
    pos=x.pos;
    color=x.color;
    if (x.FontName) FontName=new GooString(x.FontName);
+   rotOrSkewed = x.rotOrSkewed;
+   memcpy(rotSkewMat, x.rotSkewMat, sizeof(rotSkewMat));
  }
 
 
@@ -176,14 +181,15 @@ void HtmlFont::clear(){
 
 
 /*
-  This function is used to compare font uniquily for insertion into
+  This function is used to compare font uniquely for insertion into
   the list of all encountered fonts
 */
 GBool HtmlFont::isEqual(const HtmlFont& x) const{
-  return ((size==x.size) &&
+  return (size==x.size) &&
 	  (lineSize==x.lineSize) &&
 	  (pos==x.pos) && (bold==x.bold) && (italic==x.italic) &&
-	  (color.isEqual(x.getColor())));
+	  (color.isEqual(x.getColor())) && isRotOrSkewed() == x.isRotOrSkewed() &&
+	  (!isRotOrSkewed() || rot_matrices_equal(getRotMat(), x.getRotMat()));
 }
 
 /*
@@ -232,11 +238,11 @@ GooString* HtmlFont::HtmlFilter(Unicode* u, int uLen) {
   for (int i = 0; i < uLen; ++i) {
     switch (u[i])
       { 
-	case '"': tmp->append("&quot;");  break;
+	case '"': tmp->append("&#34;");  break;
 	case '&': tmp->append("&amp;");  break;
 	case '<': tmp->append("&lt;");  break;
 	case '>': tmp->append("&gt;");  break;
-	case ' ': tmp->append( !xml && ( i+1 >= uLen || !tmp->getLength() || tmp->getChar( tmp->getLength()-1 ) == ' ' ) ? "&nbsp;" : " " );
+	case ' ': tmp->append( !xml && ( i+1 >= uLen || !tmp->getLength() || tmp->getChar( tmp->getLength()-1 ) == ' ' ) ? "&#160;" : " " );
 	          break;
 	default:  
 	  {
@@ -289,29 +295,6 @@ int HtmlFontAccu::AddFont(const HtmlFont& font){
  return (accu->size()-1);
 }
 
-// get CSS font name for font #i 
-GooString* HtmlFontAccu::getCSStyle(int i, GooString* content, int j){
-  GooString *tmp;
-  GooString *iStr=GooString::fromInt(i);
-  GooString *jStr=GooString::fromInt(j);
-  
-  if (!xml) {
-    tmp = new GooString("<span class=\"ft");
-    tmp->append(jStr);
-    tmp->append(iStr);
-    tmp->append("\">");
-    tmp->append(content);
-    tmp->append("</span>");
-  } else {
-    tmp = new GooString("");
-    tmp->append(content);
-  }
-
-  delete jStr;
-  delete iStr;
-  return tmp;
-}
-
 // get CSS font definition for font #i 
 GooString* HtmlFontAccu::CSStyle(int i, int j){
    GooString *tmp=new GooString();
@@ -343,6 +326,29 @@ GooString* HtmlFontAccu::CSStyle(int i, int j){
      tmp->append(fontName); //font.getFontName());
      tmp->append(";color:");
      tmp->append(colorStr);
+     // if there is rotation or skew, include the matrix
+     if (font.isRotOrSkewed()) {
+    	 const double * const text_mat = font.getRotMat();
+    	 GooString matrix_str(" matrix(");
+    	 matrix_str.appendf("{0:10.10g}, {1:10.10g}, {2:10.10g}, {3:10.10g}, 0, 0)",
+    			 text_mat[0], text_mat[1], text_mat[2], text_mat[3]);
+    	 tmp->append(";-moz-transform:");
+    	 tmp->append(&matrix_str);
+    	 tmp->append(";-webkit-transform:");
+    	 tmp->append(&matrix_str);
+    	 tmp->append(";-o-transform:");
+    	 tmp->append(&matrix_str);
+    	 tmp->append(";-ms-transform:");
+    	 tmp->append(&matrix_str);
+    	 // Todo: 75% is a wild guess that seems to work pretty well;
+    	 // We probably need to calculate the real percentage
+    	 // Based on the characteristic baseline and bounding box of current font
+    	 // PDF origin is at baseline
+    	 tmp->append(";-moz-transform-origin: left 75%");
+    	 tmp->append(";-webkit-transform-origin: left 75%");
+    	 tmp->append(";-o-transform-origin: left 75%");
+    	 tmp->append(";-ms-transform-origin: left 75%");
+     }
      tmp->append(";}");
    }
    if (xml) {

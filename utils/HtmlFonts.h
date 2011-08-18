@@ -20,6 +20,7 @@
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
 // Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Steven Murdoch <Steven.Murdoch@cl.cam.ac.uk>
+// Copyright (C) 2011 Joshua Richardson <jric@chegg.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -62,13 +63,15 @@ class HtmlFont{
    int lineSize;
    GBool italic;
    GBool bold;
+   GBool rotOrSkewed;
    int pos; // position of the font name in the fonts array
    static GooString *DefaultFont;
    GooString *FontName;
    HtmlFontColor color;
+   double rotSkewMat[4]; // only four values needed for rotation and skew
 public:  
 
-   HtmlFont(){FontName=NULL;};
+   HtmlFont(){FontName=NULL; rotOrSkewed = gFalse;}
    HtmlFont(GooString* fontname,int _size, GfxRGB rgb);
    HtmlFont(const HtmlFont& x);
    HtmlFont& operator=(const HtmlFont& x);
@@ -78,9 +81,13 @@ public:
    GooString* getFullName();
    GBool isItalic() const {return italic;}
    GBool isBold() const {return bold;}
+   GBool isRotOrSkewed() const { return rotOrSkewed; }
    unsigned int getSize() const {return size;}
    int getLineSize() const {return lineSize;}
    void setLineSize(int _lineSize) { lineSize = _lineSize; }
+   void setRotMat(const double * const mat)
+   { rotOrSkewed = gTrue; memcpy(rotSkewMat, mat, sizeof(rotSkewMat)); }
+   const double *getRotMat() const { return rotSkewMat; }
    GooString* getFontName();
    static GooString* getDefaultFont();
    static void setDefaultFont(GooString* defaultFont);
@@ -102,7 +109,6 @@ public:
   HtmlFont *Get(int i){
     return &(*accu)[i];
   } 
-  GooString* getCSStyle (int i,GooString* content, int j = 0);
   GooString* CSStyle(int i, int j = 0);
   int size() const {return accu->size();}
   
