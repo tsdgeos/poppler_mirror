@@ -18,7 +18,7 @@
 // Copyright (C) 2009 Michael K. Johnson <a1237@danlj.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
-// Copyright (C) 2009, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
@@ -74,7 +74,9 @@ static GBool png = gFalse;
 static GBool jpeg = gFalse;
 static GBool jpegcmyk = gFalse;
 static GBool tiff = gFalse;
+#if SPLASH_CMYK
 static GBool overprint = gFalse;
+#endif
 static char enableFreeTypeStr[16] = "";
 static char antialiasStr[16] = "";
 static char vectorAntialiasStr[16] = "";
