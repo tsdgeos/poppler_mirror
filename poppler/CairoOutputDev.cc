@@ -2313,6 +2313,9 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
   filter = getFilterForSurface (image, interpolate);
 
   cairo_surface_mark_dirty (image);
+
+  setMimeData(str, ref, image);
+
   pattern = cairo_pattern_create_for_surface (image);
   cairo_surface_destroy (image);
   if (cairo_pattern_status (pattern))
