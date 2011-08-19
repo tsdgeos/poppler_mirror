@@ -281,13 +281,26 @@ protected:
 				     GBool interpolate);
   GBool getStreamData (Stream *str, char **buffer, int *length);
   void setMimeData(Stream *str, Object *ref, cairo_surface_t *image);
-  
+  void fillToStrokePathClip();
+
   GfxRGB fill_color, stroke_color;
   cairo_pattern_t *fill_pattern, *stroke_pattern;
   double fill_opacity;
   double stroke_opacity;
   CairoFont *currentFont;
-  
+
+  struct StrokePathClip {
+    cairo_path_t *path;
+    cairo_matrix_t ctm;
+    double line_width;
+    double *dashes;
+    int dash_count;
+    double dash_offset;
+    cairo_line_cap_t cap;
+    cairo_line_join_t join;
+    double miter;
+  } *strokePathClip;
+
   XRef *xref;			// xref table for current document
   Catalog *catalog;
 
