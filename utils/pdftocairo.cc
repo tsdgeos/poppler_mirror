@@ -228,6 +228,7 @@ static const ArgDesc argDesc[] = {
 
 static  cairo_surface_t *surface;
 static  GBool printing;
+static  FILE *output_file;
 
 #if USE_CMS
 static unsigned char *icc_data;
@@ -405,12 +406,27 @@ static void getFitToPageTransform(double page_w, double page_h,
     }
 }
 
+static cairo_status_t writeStream(void *closure, const unsigned char *data, unsigned int length)
+{
+  FILE *file = (FILE *)closure;
+
+  if (fwrite(data, length, 1, file) == 1)
+    return CAIRO_STATUS_SUCCESS;
+  else
+    return CAIRO_STATUS_WRITE_ERROR;
+}
+
 static void beginDocument(GooString *outputFileName, double w, double h)
 {
   if (printing) {
+    if (outputFileName->cmp("fd://0") == 0)
+      output_file = stdout;
+    else
+      output_file = fopen(outputFileName->getCString(), "wb");
+
     if (ps || eps) {
 #if CAIRO_HAS_PS_SURFACE
-      surface = cairo_ps_surface_create(outputFileName->getCString(), w, h);
+      surface = cairo_ps_surface_create_for_stream(writeStream, output_file, w, h);
       if (level2)
 	cairo_ps_surface_restrict_to_level (surface, CAIRO_PS_LEVEL_2);
       if (eps)
@@ -424,11 +440,11 @@ static void beginDocument(GooString *outputFileName, double w, double h)
 #endif
     } else if (pdf) {
 #if CAIRO_HAS_PDF_SURFACE
-      surface = cairo_pdf_surface_create(outputFileName->getCString(), w, h);
+      surface = cairo_pdf_surface_create_for_stream(writeStream, output_file, w, h);
 #endif
     } else if (svg) {
 #if CAIRO_HAS_SVG_SURFACE
-      surface = cairo_svg_surface_create(outputFileName->getCString(), w, h);
+      surface = cairo_svg_surface_create_for_stream(writeStream, output_file, w, h);
       cairo_svg_surface_restrict_to_version (surface, CAIRO_SVG_VERSION_1_2);
 #endif
     }
@@ -545,6 +561,7 @@ static void endDocument()
     if (status)
       error(-1, "cairo error: %s\n", cairo_status_to_string(status));
     cairo_surface_destroy(surface);
+    fclose(output_file);
   }
 }
 
