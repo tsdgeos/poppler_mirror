@@ -98,6 +98,7 @@ pdftohtml_SOURCES =				\
 	HtmlLinks.h				\
 	HtmlOutputDev.cc			\
 	HtmlOutputDev.h				\
+	HtmlUtils.h				\
 	$(common)
 
 # Yay, automake!  It should be able to figure out that it has to dist
