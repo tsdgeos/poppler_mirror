@@ -3,7 +3,7 @@
  *
  * Some useful simple types.
  *
- * Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
  */
 
 #ifndef GTYPES_P_H
