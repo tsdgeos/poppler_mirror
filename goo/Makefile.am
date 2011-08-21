@@ -43,4 +43,5 @@ libgoo_la_SOURCES =				\
 	JpegWriter.cc				\
 	TiffWriter.cc				\
 	ImgWriter.cc				\
+	gtypes_p.h				\
 	gstrtod.cc

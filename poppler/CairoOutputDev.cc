@@ -44,6 +44,7 @@
 #include <cairo.h>
 
 #include "goo/gfile.h"
+#include "goo/gtypes_p.h"
 #include "GlobalParams.h"
 #include "Error.h"
 #include "Object.h"
