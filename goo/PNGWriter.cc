@@ -84,8 +84,9 @@ bool PNGWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 	// Set up the type of PNG image and the compression level
 	png_set_compression_level(png_ptr, Z_BEST_COMPRESSION);
 
-	png_byte bit_depth;
-	png_byte color_type;
+	// Silence silly gcc
+	png_byte bit_depth = -1;
+	png_byte color_type = -1;
 	switch (format) {
 		case RGB:
 			bit_depth = 8;
