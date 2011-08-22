@@ -583,3 +583,30 @@ pgd_movie_view_set_movie (GtkWidget    *movie_view,
 	gtk_container_add (GTK_CONTAINER (alignment), table);
 	gtk_widget_show (table);
 }
+
+GdkPixbuf *
+pgd_pixbuf_new_for_color (PopplerColor *poppler_color)
+{
+        GdkPixbuf *pixbuf;
+	gint num, x;
+	guchar *pixels;
+
+        if (!poppler_color)
+                return NULL;
+
+        pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB,
+                                 FALSE, 8,
+                                 64, 16);
+
+	pixels = gdk_pixbuf_get_pixels (pixbuf);
+	num = gdk_pixbuf_get_width (pixbuf) * gdk_pixbuf_get_height (pixbuf);
+
+	for (x = 0; x < num; x++) {
+                pixels[0] = poppler_color->red;
+                pixels[1] = poppler_color->green;
+                pixels[2] = poppler_color->blue;
+                pixels += 3;
+	}
+
+        return pixbuf;
+}

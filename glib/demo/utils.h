@@ -44,6 +44,7 @@ gchar     *pgd_format_date                           (time_t           utime);
 GtkWidget *pgd_movie_view_new                        (void);
 void       pgd_movie_view_set_movie                  (GtkWidget       *movie_view,
 						      PopplerMovie    *movie);
+GdkPixbuf *pgd_pixbuf_new_for_color                  (PopplerColor    *poppler_color);
 
 G_END_DECLS
 
