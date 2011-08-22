@@ -139,6 +139,7 @@ CairoOutputDev::CairoOutputDev() {
   currentFont = NULL;
   prescaleImages = gTrue;
   printing = gTrue;
+  use_show_text_glyphs = gFalse;
   inType3Char = gFalse;
   t3_glyph_has_bbox = gFalse;
 
@@ -579,6 +580,9 @@ void CairoOutputDev::updateFont(GfxState *state) {
 
   font_face = currentFont->getFontFace();
   cairo_set_font_face (cairo, font_face);
+
+  use_show_text_glyphs = state->getFont()->hasToUnicodeCMap() &&
+    cairo_surface_has_show_text_glyphs (cairo_get_target (cairo));
  
   double fontSize = state->getFontSize();
   double *m = state->getTextMat();
@@ -1051,7 +1055,7 @@ void CairoOutputDev::beginString(GfxState *state, GooString *s)
 
   glyphs = (cairo_glyph_t *) gmallocn (len, sizeof (cairo_glyph_t));
   glyphCount = 0;
-  if (printing) {
+  if (use_show_text_glyphs) {
     clusters = (cairo_text_cluster_t *) gmallocn (len, sizeof (cairo_text_cluster_t));
     clusterCount = 0;
     utf8Max = len*2; // start with twice the number of glyphs. we will realloc if we need more.
@@ -1070,7 +1074,7 @@ void CairoOutputDev::drawChar(GfxState *state, double x, double y,
     glyphs[glyphCount].x = x - originX;
     glyphs[glyphCount].y = y - originY;
     glyphCount++;
-    if (printing) {
+    if (use_show_text_glyphs) {
       if (utf8Max - utf8Count < uLen*6) {
         // utf8 encoded characters can be up to 6 bytes
 	if (utf8Max > uLen*6)
@@ -1120,7 +1124,7 @@ void CairoOutputDev::endString(GfxState *state)
   if (!(render & 1) && !haveCSPattern) {
     LOG (printf ("fill string\n"));
     cairo_set_source (cairo, fill_pattern);
-    if (printing)
+    if (use_show_text_glyphs)
       cairo_show_text_glyphs (cairo, utf8, utf8Count, glyphs, glyphCount, clusters, clusterCount, (cairo_text_cluster_flags_t)0);
     else
         cairo_show_glyphs (cairo, glyphs, glyphCount);
@@ -1168,7 +1172,7 @@ void CairoOutputDev::endString(GfxState *state)
 
   gfree (glyphs);
   glyphs = NULL;
-  if (printing) {
+  if (use_show_text_glyphs) {
     gfree (clusters);
     clusters = NULL;
     gfree (utf8);

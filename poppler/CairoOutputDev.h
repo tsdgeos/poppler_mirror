@@ -314,6 +314,7 @@ protected:
   cairo_matrix_t orig_matrix;
   GBool needFontUpdate;                // set when the font needs to be updated
   GBool printing;
+  GBool use_show_text_glyphs;
   cairo_surface_t *surface;
   cairo_glyph_t *glyphs;
   int glyphCount;

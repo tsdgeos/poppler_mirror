@@ -221,6 +221,9 @@ public:
 			  Unicode **u, int *uLen,
 			  double *dx, double *dy, double *ox, double *oy) = 0;
 
+  // Does this font have a toUnicode map?
+  GBool hasToUnicodeCMap() { return hasToUnicode; }
+
   /* XXX: dfp shouldn't be public, however the font finding code is currently in
    * GlobalParams. Instead it should be inside the GfxFont class. However,
    * getDisplayFont currently uses FCcfg so moving it is not as simple. */
