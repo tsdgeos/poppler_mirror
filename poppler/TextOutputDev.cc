@@ -226,6 +226,10 @@ GBool TextFontInfo::matches(GfxState *state) {
   return state->getFont() == gfxFont;
 }
 
+GBool TextFontInfo::matches(TextFontInfo *fontInfo) {
+  return gfxFont == fontInfo->gfxFont;
+}
+
 //------------------------------------------------------------------------
 // TextWord
 //------------------------------------------------------------------------

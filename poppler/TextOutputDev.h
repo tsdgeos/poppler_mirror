@@ -78,6 +78,7 @@ public:
   ~TextFontInfo();
 
   GBool matches(GfxState *state);
+  GBool matches(TextFontInfo *fontInfo);
 
 #if TEXTOUT_WORD_LIST
   // Get the font name (which may be NULL).
