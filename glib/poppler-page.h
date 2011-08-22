@@ -94,6 +94,8 @@ void 		      poppler_page_get_crop_box 	 (PopplerPage        *page,
 gboolean               poppler_page_get_text_layout      (PopplerPage        *page,
                                                           PopplerRectangle  **rectangles,
                                                           guint              *n_rectangles);
+GList                 *poppler_page_get_text_attributes  (PopplerPage        *page);
+void                   poppler_page_free_text_attributes (GList              *list);
 
 /* A rectangle on a page, with coordinates in PDF points. */
 #define POPPLER_TYPE_RECTANGLE             (poppler_rectangle_get_type ())
@@ -143,6 +145,37 @@ GType             poppler_color_get_type      (void) G_GNUC_CONST;
 PopplerColor     *poppler_color_new           (void);
 PopplerColor     *poppler_color_copy          (PopplerColor *color);
 void              poppler_color_free          (PopplerColor *color);
+
+/* Text attributes. */
+#define POPPLER_TYPE_TEXT_ATTRIBUTES             (poppler_text_attributes_get_type ())
+/**
+ * PopplerTextAttributes:
+ * @font_name: font name
+ * @font_size: font size
+ * @is_underlined: if text is underlined
+ * @color: a #PopplerColor, the foreground color
+ * @start_index: start position this text attributes apply
+ * @end_index: end position this text text attributes apply
+ *
+ * A #PopplerTextInfo is used to describe text attriutes of a reange of text
+ *
+ * Since: 0.18
+ */
+struct _PopplerTextAttributes
+{
+  gchar *font_name;
+  gdouble font_size;
+  gboolean is_underlined;
+  PopplerColor color;
+
+  gint start_index;
+  gint end_index;
+};
+
+GType                  poppler_text_attributes_get_type (void) G_GNUC_CONST;
+PopplerTextAttributes *poppler_text_attributes_new      (void);
+PopplerTextAttributes *poppler_text_attributes_copy     (PopplerTextAttributes *text_attrs);
+void                   poppler_text_attributes_free     (PopplerTextAttributes *text_attrs);
 
 /* Mapping between areas on the current page and PopplerActions */
 #define POPPLER_TYPE_LINK_MAPPING             (poppler_link_mapping_get_type ())

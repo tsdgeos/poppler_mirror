@@ -14,6 +14,7 @@ PopplerPageTransitionType
 PopplerPageTransitionAlignment
 PopplerPageTransitionDirection
 PopplerSelectionStyle
+PopplerTextAttributes
 poppler_page_get_index
 poppler_page_get_label
 poppler_page_get_size
@@ -38,6 +39,8 @@ poppler_page_get_selected_text
 poppler_page_find_text
 poppler_page_get_text
 poppler_page_get_text_layout
+poppler_page_get_text_attributes
+poppler_page_free_text_attributes
 poppler_page_get_link_mapping
 poppler_page_free_link_mapping
 poppler_page_get_image_mapping
@@ -66,6 +69,9 @@ poppler_form_field_mapping_free
 poppler_annot_mapping_new
 poppler_annot_mapping_copy
 poppler_annot_mapping_free
+poppler_text_attributes_new
+poppler_text_attributes_copy
+poppler_text_attributes_free
 
 <SUBSECTION Standard>
 POPPLER_PAGE
@@ -93,6 +99,7 @@ poppler_page_transition_alignment_get_type
 poppler_page_transition_direction_get_type
 poppler_page_transition_type_get_type
 poppler_selection_style_get_type
+poppler_text_attributes_get_type
 </SECTION>
 
 <SECTION>

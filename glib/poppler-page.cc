@@ -1479,6 +1479,107 @@ poppler_rectangle_free (PopplerRectangle *rectangle)
   g_slice_free (PopplerRectangle, rectangle);
 }
 
+/* PopplerTextAttributes type */
+
+POPPLER_DEFINE_BOXED_TYPE (PopplerTextAttributes, poppler_text_attributes,
+			   poppler_text_attributes_copy,
+			   poppler_text_attributes_free)
+
+/**
+ * poppler_text_attributes_new:
+ *
+ * Creates a new #PopplerTextAttributes
+ *
+ * Returns: a new #PopplerTextAttributes, use poppler_text_attributes_free() to free it
+ *
+ * Since: 0.18
+ */
+PopplerTextAttributes *
+poppler_text_attributes_new (void)
+{
+  return (PopplerTextAttributes *) g_slice_new0 (PopplerTextAttributes);
+}
+
+static gchar *
+get_font_name_from_word (TextWord *word)
+{
+  GooString *font_name = word->getFontName();
+  const gchar *name;
+  gboolean subset;
+  gint i;
+
+  if (!font_name || font_name->getLength () == 0)
+    return g_strdup ("Default");
+
+  // check for a font subset name: capital letters followed by a '+' sign
+  for (i = 0; i < font_name->getLength (); ++i) {
+    if (font_name->getChar (i) < 'A' || font_name->getChar (i) > 'Z') {
+      break;
+    }
+  }
+  subset = i > 0 && i < font_name->getLength () && font_name->getChar (i) == '+';
+  name = font_name->getCString ();
+  if (subset)
+    name += i + 1;
+
+  return g_strdup (name);
+}
+
+/*
+ * Allocates a new PopplerTextAttributes with word attributes
+ */
+static PopplerTextAttributes *
+poppler_text_attributes_new_from_word (TextWord *word)
+{
+  PopplerTextAttributes *attrs = poppler_text_attributes_new ();
+  gdouble r, g, b;
+
+  attrs->font_name = get_font_name_from_word (word);
+  attrs->font_size = word->getFontSize();
+  attrs->is_underlined = word->isUnderlined();
+  word->getColor (&r, &g, &b);
+  attrs->color.red = (int) (r * 65535. + 0.5);
+  attrs->color.green = (int)(g * 65535. + 0.5);
+  attrs->color.blue = (int)(b * 65535. + 0.5);
+
+  return attrs;
+}
+
+/**
+ * poppler_text_attributes_copy:
+ * @text_attrs: a #PopplerTextAttributes to copy
+ *
+ * Creates a copy of @text_attrs
+ *
+ * Returns: a new allocated copy of @text_attrs
+ *
+ * Since: 0.18
+ */
+PopplerTextAttributes *
+poppler_text_attributes_copy (PopplerTextAttributes *text_attrs)
+{
+  PopplerTextAttributes *attrs;
+
+  attrs = g_slice_dup (PopplerTextAttributes, text_attrs);
+  attrs->font_name = g_strdup (text_attrs->font_name);
+  return attrs;
+}
+
+/**
+ * poppler_text_attributes_free:
+ * @text_attrs: a #PopplerTextAttributes
+ *
+ * Frees the given #PopplerTextAttributes
+ *
+ * Since: 0.18
+ */
+void
+poppler_text_attributes_free (PopplerTextAttributes *text_attrs)
+{
+  g_free (text_attrs->font_name);
+  g_slice_free (PopplerTextAttributes, text_attrs);
+}
+
 /* PopplerColor type */
 POPPLER_DEFINE_BOXED_TYPE (PopplerColor, poppler_color, poppler_color_copy, poppler_color_free)
 
@@ -1903,4 +2004,105 @@ poppler_page_get_text_layout (PopplerPage       *page,
   delete wordlist;
 
   return TRUE;
+}
+
+/**
+ * poppler_page_free_text_attributes;
+ * @list: A list of #PopplerTextAttributes<!-- -->s
+ *
+ * Frees a list of #PopplerTextAttributes<!-- -->s allocated by
+ * poppler_page_get_text_attributes().
+ *
+ * Since: 0.18
+ **/
+void
+poppler_page_free_text_attributes (GList *list)
+{
+  if (G_UNLIKELY (list == NULL))
+    return;
+
+  g_list_foreach (list, (GFunc)poppler_text_attributes_free, NULL);
+  g_list_free (list);
+}
+
+static gboolean
+word_text_attributes_equal (TextWord *a, TextWord *b)
+{
+  double ar, ag, ab, br, bg, bb;
+
+  if (!a->getFontInfo()->matches (b->getFontInfo()))
+    return FALSE;
+
+  if (a->getFontSize() != b->getFontSize())
+    return FALSE;
+
+  if (a->isUnderlined() != b->isUnderlined())
+    return FALSE;
+
+  a->getColor(&ar, &ag, &ab);
+  b->getColor(&br, &bg, &bb);
+  return (ar == br && ag == bg && ab == bb);
+}
+
+/**
+ * poppler_page_get_text_attributes:
+ * @page: A #PopplerPage
+ *
+ * Obtains the attributes of the text as a GList of #PopplerTextAttributes.
+ * This list must be freed with poppler_page_free_text_attributes() when done.
+ *
+ * Each list element is a #PopplerTextAttributes struct where start_index and
+ * end_index indicates the range of text (as returned by poppler_page_get_text())
+ * to which text attributes apply.
+ *
+ * Return value: (element-type PopplerTextAttributes) (transfer full): A #GList of #PopplerTextAttributes
+ *
+ * Since: 0.18
+ **/
+GList *
+poppler_page_get_text_attributes (PopplerPage *page)
+{
+  TextPage *text;
+  TextWordList *wordlist;
+  PopplerTextAttributes *attrs = NULL;
+  PopplerTextAttributes *previous = NULL;
+  gint i, offset = 0;
+  GList *attributes = NULL;
+
+  g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
+
+  text = poppler_page_get_text_page (page);
+  wordlist = text->makeWordList (gFalse);
+
+  if (wordlist->getLength () <= 0)
+    {
+      delete wordlist;
+      return NULL;
+    }
+
+  // Calculating each word attributes
+  for (i = 0; i < wordlist->getLength (); i++)
+    {
+      TextWord *word = wordlist->get (i);
+
+      // each char of the word has the same attributes
+      if (i > 0 && word_text_attributes_equal (word, wordlist->get (i - 1))) {
+        attrs = previous;
+      } else {
+        attrs = poppler_text_attributes_new_from_word (word);
+        attrs->start_index = offset;
+        if (previous)
+          previous->end_index--;
+        previous = attrs;
+        attributes = g_list_prepend (attributes, attrs);
+      }
+      offset += word->getLength () + 1;
+      attrs->end_index = offset;
+    }
+  if (attrs)
+    attrs->end_index--;
+
+  delete wordlist;
+
+  return g_list_reverse(attributes);
 }
