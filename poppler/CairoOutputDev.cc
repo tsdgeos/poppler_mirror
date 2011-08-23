@@ -157,6 +157,8 @@ CairoOutputDev::CairoOutputDev() {
   // the SA parameter supposedly defaults to false, but Acrobat
   // apparently hardwires it to true
   stroke_adjust = globalParams->getStrokeAdjust();
+  align_stroke_coords = gFalse;
+  adjusted_stroke_width = gFalse;
 }
 
 CairoOutputDev::~CairoOutputDev() {
@@ -412,6 +414,7 @@ void CairoOutputDev::updateMiterLimit(GfxState *state) {
 
 void CairoOutputDev::updateLineWidth(GfxState *state) {
   LOG(printf ("line width: %f\n", state->getLineWidth()));
+  adjusted_stroke_width = gFalse;
   if (state->getLineWidth() == 0.0) {
     /* find out how big pixels (device unit) are in the x and y directions
      * choose the smaller of the two as our line width */
@@ -431,11 +434,12 @@ void CairoOutputDev::updateLineWidth(GfxState *state) {
 
       /* find out line width in device units */
       cairo_user_to_device_distance(cairo, &x, &y);
-      if (x < 0.5 && y < 0.5) {
+      if (x <= 1.0 && y <= 1.0) {
 	/* adjust width to at least one device pixel */
-	x = y = 0.5;
+	x = y = 1.0;
 	cairo_device_to_user_distance(cairo, &x, &y);
 	width = MIN(fabs(x),fabs(y));
+	adjusted_stroke_width = gTrue;
       }
     }
     cairo_set_line_width (cairo, width);
@@ -632,6 +636,15 @@ void CairoOutputDev::updateFont(GfxState *state) {
   cairo_set_font_matrix (cairo, &matrix);
 }
 
+void CairoOutputDev::alignStrokeCoords(double *x, double *y)
+{
+  /* see http://www.cairographics.org/FAQ/#sharp_lines */
+  cairo_user_to_device (cairo, x, y);
+  *x = floor(*x) + 0.5;
+  *y = floor(*y) + 0.5;
+  cairo_device_to_user (cairo, x, y);
+}
+
 void CairoOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path) {
   GfxSubpath *subpath;
   int i, j;
@@ -639,8 +652,15 @@ void CairoOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path) {
   for (i = 0; i < path->getNumSubpaths(); ++i) {
     subpath = path->getSubpath(i);
     if (subpath->getNumPoints() > 0) {
-      cairo_move_to (cairo, subpath->getX(0), subpath->getY(0));
-         j = 1;
+      if (align_stroke_coords) {
+	double x = subpath->getX(0);
+	double y = subpath->getY(0);
+	alignStrokeCoords(&x, &y);
+	cairo_move_to (cairo, x, y);
+      } else {
+	cairo_move_to (cairo, subpath->getX(0), subpath->getY(0));
+      }
+      j = 1;
       while (j < subpath->getNumPoints()) {
 	if (subpath->getCurve(j)) {
 	  cairo_curve_to( cairo,
@@ -650,7 +670,14 @@ void CairoOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path) {
 
 	  j += 3;
 	} else {
-	  cairo_line_to (cairo, subpath->getX(j), subpath->getY(j));
+	  if (align_stroke_coords) {
+	    double x = subpath->getX(j);
+	    double y = subpath->getY(j);
+	    alignStrokeCoords(&x, &y);
+	    cairo_line_to (cairo, x, y);
+	  } else {
+	    cairo_line_to (cairo, subpath->getX(j), subpath->getY(j));
+	  }
 	  ++j;
 	}
       }
@@ -670,7 +697,10 @@ void CairoOutputDev::stroke(GfxState *state) {
 	  return;
   }
 
+  if (adjusted_stroke_width)
+    align_stroke_coords = gTrue;
   doPath (cairo, state, state->getPath());
+  align_stroke_coords = gFalse;
   cairo_set_source (cairo, stroke_pattern);
   LOG(printf ("stroke\n"));
   cairo_stroke (cairo);

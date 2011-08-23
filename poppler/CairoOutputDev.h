@@ -282,12 +282,15 @@ protected:
   GBool getStreamData (Stream *str, char **buffer, int *length);
   void setMimeData(Stream *str, Object *ref, cairo_surface_t *image);
   void fillToStrokePathClip();
+  void alignStrokeCoords(double *x, double *y);
 
   GfxRGB fill_color, stroke_color;
   cairo_pattern_t *fill_pattern, *stroke_pattern;
   double fill_opacity;
   double stroke_opacity;
   GBool stroke_adjust;
+  GBool adjusted_stroke_width;
+  GBool align_stroke_coords;
   CairoFont *currentFont;
 
   struct StrokePathClip {
