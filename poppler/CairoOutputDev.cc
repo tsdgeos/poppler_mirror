@@ -153,6 +153,10 @@ CairoOutputDev::CairoOutputDev() {
 
   text = NULL;
   actualText = NULL;
+
+  // the SA parameter supposedly defaults to false, but Acrobat
+  // apparently hardwires it to true
+  stroke_adjust = globalParams->getStrokeAdjust();
 }
 
 CairoOutputDev::~CairoOutputDev() {
@@ -420,7 +424,21 @@ void CairoOutputDev::updateLineWidth(GfxState *state) {
     cairo_device_to_user_distance(cairo, &x, &y);
     cairo_set_line_width (cairo, MIN(fabs(x),fabs(y)));
   } else {
-    cairo_set_line_width (cairo, state->getLineWidth());
+    double width = state->getLineWidth();
+    if (stroke_adjust && !printing) {
+      double x, y;
+      x = y = width;
+
+      /* find out line width in device units */
+      cairo_user_to_device_distance(cairo, &x, &y);
+      if (x < 0.5 && y < 0.5) {
+	/* adjust width to at least one device pixel */
+	x = y = 0.5;
+	cairo_device_to_user_distance(cairo, &x, &y);
+	width = MIN(fabs(x),fabs(y));
+      }
+    }
+    cairo_set_line_width (cairo, width);
   }
   if (cairo_shape)
     cairo_set_line_width (cairo_shape, cairo_get_line_width (cairo));

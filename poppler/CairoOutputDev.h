@@ -287,6 +287,7 @@ protected:
   cairo_pattern_t *fill_pattern, *stroke_pattern;
   double fill_opacity;
   double stroke_opacity;
+  GBool stroke_adjust;
   CairoFont *currentFont;
 
   struct StrokePathClip {
