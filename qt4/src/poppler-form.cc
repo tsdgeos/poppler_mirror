@@ -1,6 +1,6 @@
 /* poppler-form.h: qt4 interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -128,6 +128,16 @@ QString FormField::name() const
 {
   QString name;
   if (GooString *goo = m_formData->fm->getPartialName())
+  {
+    name = QString::fromLatin1(goo->getCString());
+  }
+  return name;
+}
+
+QString FormField::fullyQualifiedName() const
+{
+  QString name;
+  if (GooString *goo = m_formData->fm->getFullyQualifiedName())
   {
     name = QString::fromLatin1(goo->getCString());
   }
