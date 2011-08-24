@@ -2541,9 +2541,8 @@ void CairoOutputDev::setMimeData(Stream *str, Object *ref, cairo_surface_t *imag
     if (ref && ref->isRef()) {
       Ref imgRef = ref->getRef();
       GooString *surfaceId = new GooString("poppler-surface-");
-      char *idBuffer = copyString(surfaceId->getCString());
-
       surfaceId->appendf("{0:d}-{1:d}", imgRef.gen, imgRef.num);
+      char *idBuffer = copyString(surfaceId->getCString());
       st = cairo_surface_set_mime_data (image, CAIRO_MIME_TYPE_UNIQUE_ID,
                                         (const unsigned char *)idBuffer,
                                         surfaceId->getLength(),
