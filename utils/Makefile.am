@@ -30,8 +30,9 @@ pdftocairo_SOURCES =				\
 	pdftocairo.cc				\
 	$(common)
 
-pdftocairo_LDADD = $(LDADD) $(CAIRO_LIBS) \
-	$(top_builddir)/poppler/libpoppler-cairo.la
+pdftocairo_LDADD =				\
+	$(top_builddir)/poppler/libpoppler-cairo.la \
+	$(LDADD) $(CAIRO_LIBS)
 
 
 pdftocairo_binary = pdftocairo
