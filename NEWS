@@ -1,3 +1,35 @@
+Release 0.17.3 (0.18 Beta 3)
+        core:
+         * PSOutputDev: Use Patterns for tiling fill when PS level >= 2
+         * PSOutputDev: Avoid using /PatternType if only one instance of the pattern is used
+         * PSOutputDev: Add poppler version as comment in the file
+         * CairoOutputDev: Set mime data for soft masked images (Bug #40192)
+         * CairoOutputDev: Assume printer pixel size is 1/600" when stroking 0 width lines (Bug #39067)
+         * CairoOutputDev: Use cairo_show_text_glyphs() when printing
+         * CairoOutputDev: Fix stroke patterns (Bug #11719)
+         * CairoOutputDev: Fix unique id mime data
+         * CairoOutputDev: fix stroking of very thin lines
+         * CairoOutputDev: align strokes when Stroke Adjust is true and line width <= 1 (Bug #4536)
+         * TextOutputDev: Add TextFontInfo::matches()
+         * Improve PNGWriter
+         * Rework writing of PDF files
+
+        utils:
+         * Introduce pdftocairo - utility for creating png/jpeg/ps/eps/pdf/svg using CairoOutputDev
+         * Introduce pdfextract - utility to extract PDF pages
+         * Introduce pdfmerge - utility to merge PDF files
+         * Fix compilation warning
+         * pdftohtml: Support text rotation (Bug #38586)
+         * Update SEE ALSO section of man pages
+
+        glib:
+         * Add poppler_page_get_text_attributes()
+         * Add text attributes information to text demo
+
+        qt4:
+         * Add a way to get the fully qualified name of a FormField
+         * Minor documentation improvements
+        
 Release 0.17.2 (0.18 Beta 2)
         core:
          * EmbeddedFile improvements
