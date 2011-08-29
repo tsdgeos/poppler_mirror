@@ -50,6 +50,8 @@ bin_PROGRAMS =					\
 	pdftops					\
 	pdftotext				\
 	pdftohtml				\
+	pdfextract				\
+	pdfmerge				\
 	$(pdftoppm_binary)			\
 	$(pdftocairo_binary)
 
@@ -100,6 +102,14 @@ pdftohtml_SOURCES =				\
 	HtmlOutputDev.cc			\
 	HtmlOutputDev.h				\
 	HtmlUtils.h				\
+	$(common)
+
+pdfextract_SOURCES =				\
+	pdfextract.cc				\
+	$(common)
+
+pdfmerge_SOURCES =				\
+	pdfmerge.cc				\
 	$(common)
 
 # Yay, automake!  It should be able to figure out that it has to dist

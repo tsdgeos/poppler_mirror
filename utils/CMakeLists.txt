@@ -102,3 +102,18 @@ target_link_libraries(pdftohtml ${common_libs})
 install(TARGETS pdftohtml DESTINATION bin)
 install(FILES pdftohtml.1 DESTINATION share/man/man1)
 
+# pdfextract
+set(pdfextract_SOURCES ${common_srcs}
+  pdfextract.cc
+)
+add_executable(pdfextract ${pdfextract_SOURCES})
+target_link_libraries(pdfextract ${common_libs})
+install(TARGETS pdfextract DESTINATION bin)
+
+# pdfmerge
+set(pdfmerge_SOURCES ${common_srcs}
+  pdfmerge.cc
+)
+add_executable(pdfmerge ${pdfmerge_SOURCES})
+target_link_libraries(pdfmerge ${common_libs})
+install(TARGETS pdfmerge DESTINATION bin)
