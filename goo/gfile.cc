@@ -511,6 +511,7 @@ GBool openTempFile(GooString **name, FILE **f, const char *mode) {
   *name = new GooString(s);
   if (!(*f = fopen((*name)->getCString(), mode))) {
     delete (*name);
+    *name = NULL;
     return gFalse;
   }
   return gTrue;
@@ -536,6 +537,7 @@ GBool openTempFile(GooString **name, FILE **f, const char *mode) {
 #endif // HAVE_MKSTEMP
   if (fd < 0 || !(*f = fdopen(fd, mode))) {
     delete *name;
+    *name = NULL;
     return gFalse;
   }
   return gTrue;
