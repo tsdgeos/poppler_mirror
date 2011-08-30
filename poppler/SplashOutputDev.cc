@@ -426,7 +426,7 @@ SplashRadialPattern::~SplashRadialPattern() {
   delete opPattern;
 }
 
-GBool SplashRadialPattern::getParameter(double xs, double ys, SplashCoord *t) {
+GBool SplashRadialPattern::getParameter(double xs, double ys, double *t) {
   double b, c, s0, s1;
 
   // We want to solve this system of equations:
