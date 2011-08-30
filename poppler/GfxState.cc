@@ -4169,7 +4169,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(int typeA, Dict *dict,
   double x[16], y[16];
   Guint xi, yi;
   double c[4][gfxColorMaxComps];
-  Guint ci[4];
+  Guint ci;
   GfxShadingBitBuf *bitBuf;
   Object obj1, obj2;
   int i, j;
@@ -4287,10 +4287,10 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(int typeA, Dict *dict,
     }
     for (i = 0; i < nColors; ++i) {
       for (j = 0; j < nComps; ++j) {
-	if (!bitBuf->getBits(compBits, &ci[j])) {
+	if (!bitBuf->getBits(compBits, &ci)) {
 	  break;
 	}
-	c[i][j] = cMin[j] + cMul[j] * (double)ci[j];
+	c[i][j] = cMin[j] + cMul[j] * (double)ci;
 	if( nFuncsA == 0 ) {
 	  // ... and colorspace values can also be stored into doubles.
 	  // They will be casted later.
