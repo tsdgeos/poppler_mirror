@@ -1002,6 +1002,10 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
     }
     locaTable[nGlyphs].len = 0;
     std::sort(locaTable, locaTable + nGlyphs + 1, cmpTrueTypeLocaIdxFunctor());
+    // if the last entry in the loca is not the max offset (size of
+    // the glyf table), something is wrong -- work around the problem
+    // by forcing the last sorted entry to have a zero length
+    locaTable[nGlyphs].len = 0;
     pos = 0;
     for (i = 0; i <= nGlyphs; ++i) {
       locaTable[i].newOffset = pos;
