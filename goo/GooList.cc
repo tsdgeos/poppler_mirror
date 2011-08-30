@@ -29,7 +29,7 @@ GooList::GooList() {
 }
 
 GooList::GooList(int sizeA) {
-  size = sizeA;
+  size = sizeA ? sizeA : 8;
   data = (void **)gmallocn(size, sizeof(void*));
   length = 0;
   inc = 0;
