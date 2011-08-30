@@ -78,7 +78,7 @@ extern void gMemReport(FILE *f);
 /*
  * Allocate memory and copy a string into it.
  */
-extern char *copyString(char *s);
+extern char *copyString(const char *s);
 
 /*
  * Allocate memory and copy a limited-length string to it.

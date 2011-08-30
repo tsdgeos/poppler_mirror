@@ -205,7 +205,7 @@ GBool getFileSpecNameForPlatform (Object *fileSpec, Object *fileName)
 #ifdef _WIN32
 	char *platform = "DOS";
 #else
-	char *platform = "Unix";
+	const char *platform = "Unix";
 #endif
 	if (!fileSpec->dictLookup(platform, fileName)->isString ()) {
 	  fileName->free();

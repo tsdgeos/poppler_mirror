@@ -133,7 +133,7 @@ SplashFontFile *SplashFontEngine::getFontFile(SplashFontFileID *id) {
 
 SplashFontFile *SplashFontEngine::loadType1Font(SplashFontFileID *idA,
 						SplashFontSrc *src,
-						char **enc) {
+						const char **enc) {
   SplashFontFile *fontFile;
 
   fontFile = NULL;
@@ -162,7 +162,7 @@ SplashFontFile *SplashFontEngine::loadType1Font(SplashFontFileID *idA,
 
 SplashFontFile *SplashFontEngine::loadType1CFont(SplashFontFileID *idA,
 						 SplashFontSrc *src,
-						 char **enc) {
+						 const char **enc) {
   SplashFontFile *fontFile;
 
   fontFile = NULL;
@@ -191,7 +191,7 @@ SplashFontFile *SplashFontEngine::loadType1CFont(SplashFontFileID *idA,
 
 SplashFontFile *SplashFontEngine::loadOpenTypeT1CFont(SplashFontFileID *idA,
 						      SplashFontSrc *src,
-						      char **enc) {
+						      const char **enc) {
   SplashFontFile *fontFile;
 
   fontFile = NULL;

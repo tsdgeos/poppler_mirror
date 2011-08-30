@@ -55,9 +55,9 @@
 #include "Error.h"
 #include <string>
 
-static void printInfoString(FILE *f, Dict *infoDict, char *key,
-			    char *text1, char *text2, UnicodeMap *uMap);
-static void printInfoDate(FILE *f, Dict *infoDict, char *key, char *fmt);
+static void printInfoString(FILE *f, Dict *infoDict, const char *key,
+			    const char *text1, const char *text2, UnicodeMap *uMap);
+static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *fmt);
 
 static int firstPage = 1;
 static int lastPage = 0;
@@ -428,8 +428,8 @@ int main(int argc, char *argv[]) {
   return exitCode;
 }
 
-static void printInfoString(FILE *f, Dict *infoDict, char *key,
-			    char *text1, char *text2, UnicodeMap *uMap) {
+static void printInfoString(FILE *f, Dict *infoDict, const char *key,
+			    const char *text1, const char *text2, UnicodeMap *uMap) {
   Object obj;
   GooString *s1;
   GBool isUnicode;
@@ -465,7 +465,7 @@ static void printInfoString(FILE *f, Dict *infoDict, char *key,
   obj.free();
 }
 
-static void printInfoDate(FILE *f, Dict *infoDict, char *key, char *fmt) {
+static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *fmt) {
   Object obj;
   char *s;
 

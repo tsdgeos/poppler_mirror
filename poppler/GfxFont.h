@@ -133,9 +133,9 @@ public:
 	W900 };
 
   // Build a GfxFont object.
-  static GfxFont *makeFont(XRef *xref, char *tagA, Ref idA, Dict *fontDict);
+  static GfxFont *makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict);
 
-  GfxFont(char *tagA, Ref idA, GooString *nameA);
+  GfxFont(const char *tagA, Ref idA, GooString *nameA);
 
   GBool isOk() { return ok; }
 
@@ -268,7 +268,7 @@ protected:
 class Gfx8BitFont: public GfxFont {
 public:
 
-  Gfx8BitFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
+  Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
 	      GfxFontType typeA, Dict *fontDict);
 
   virtual int getNextChar(char *s, int len, CharCode *code,
@@ -327,7 +327,7 @@ private:
 class GfxCIDFont: public GfxFont {
 public:
 
-  GfxCIDFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
+  GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
 	     Dict *fontDict);
 
   virtual GBool isCIDFont() { return gTrue; }

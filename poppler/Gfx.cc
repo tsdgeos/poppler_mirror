@@ -438,7 +438,7 @@ GBool GfxResources::lookupMarkedContentNF(char *name, Object *obj) {
   return gFalse;
 }
 
-void GfxResources::lookupColorSpace(char *name, Object *obj) {
+void GfxResources::lookupColorSpace(const char *name, Object *obj) {
   GfxResources *resPtr;
 
   for (resPtr = this; resPtr; resPtr = resPtr->next) {

@@ -152,7 +152,7 @@ public:
   GBool getState ();
 
   char* getOnStr();
-  void setAppearanceState(char *state);
+  void setAppearanceState(const char *state);
 
   void setNumSiblingsID (int i);
   void setSiblingsID (int i, unsigned id) { siblingsID[i] = id; }
@@ -494,7 +494,7 @@ public:
   ~Form();
 
   // Look up an inheritable field dictionary entry.
-  static Object *fieldLookup(Dict *field, char *key, Object *obj);
+  static Object *fieldLookup(Dict *field, const char *key, Object *obj);
   
   /* Creates a new Field of the type specified in obj's dict.
      used in Form::Form and FormField::FormField */

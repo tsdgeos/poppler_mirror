@@ -1079,7 +1079,7 @@ void Annot::setPage(Ref *pageRef, int pageIndex)
   page = pageIndex;
 }
 
-void Annot::setAppearanceState(char *state) {
+void Annot::setAppearanceState(const char *state) {
   if (!state)
     return;
 
@@ -1298,9 +1298,9 @@ void Annot::createForm(double *bbox, GBool transparencyGroup, Object *resDict, O
   aStream->initStream(mStream);
 }
 
-void Annot::createResourcesDict(char *formName, Object *formStream,
-				char *stateName,
-				double opacity,	char *blendMode,
+void Annot::createResourcesDict(const char *formName, Object *formStream,
+				const char *stateName,
+				double opacity, const char *blendMode,
 				Object *resDict) {
   Object gsDict, stateDict, formDict, obj1;
 

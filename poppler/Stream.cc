@@ -131,7 +131,7 @@ char *Stream::getLine(char *buf, int size) {
   return buf;
 }
 
-GooString *Stream::getPSFilter(int psLevel, char *indent) {
+GooString *Stream::getPSFilter(int psLevel, const char *indent) {
   return new GooString();
 }
 
@@ -1100,7 +1100,7 @@ int ASCIIHexStream::lookChar() {
   return buf;
 }
 
-GooString *ASCIIHexStream::getPSFilter(int psLevel, char *indent) {
+GooString *ASCIIHexStream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 2) {
@@ -1181,7 +1181,7 @@ int ASCII85Stream::lookChar() {
   return b[index];
 }
 
-GooString *ASCII85Stream::getPSFilter(int psLevel, char *indent) {
+GooString *ASCII85Stream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 2) {
@@ -1364,7 +1364,7 @@ int LZWStream::getCode() {
   return code;
 }
 
-GooString *LZWStream::getPSFilter(int psLevel, char *indent) {
+GooString *LZWStream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 2 || pred) {
@@ -1405,7 +1405,7 @@ void RunLengthStream::reset() {
   eof = gFalse;
 }
 
-GooString *RunLengthStream::getPSFilter(int psLevel, char *indent) {
+GooString *RunLengthStream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 2) {
@@ -2067,7 +2067,7 @@ short CCITTFaxStream::lookBits(int n) {
   return (inputBuf >> (inputBits - n)) & (0xffff >> (16 - n));
 }
 
-GooString *CCITTFaxStream::getPSFilter(int psLevel, char *indent) {
+GooString *CCITTFaxStream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
   char s1[50];
 
@@ -3526,7 +3526,7 @@ int DCTStream::read16() {
   return (c1 << 8) + c2;
 }
 
-GooString *DCTStream::getPSFilter(int psLevel, char *indent) {
+GooString *DCTStream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 2) {
@@ -4290,7 +4290,7 @@ int FlateStream::getRawChar() {
   return doGetRawChar();
 }
 
-GooString *FlateStream::getPSFilter(int psLevel, char *indent) {
+GooString *FlateStream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 3 || pred) {

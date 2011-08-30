@@ -60,9 +60,9 @@ description for all fonts available in Windows. That's how MuPDF works.
 #define DEFAULT_SUBSTITUTE_FONT "Helvetica"
 
 static struct {
-    char *name;
-    char *t1FileName;
-    char *ttFileName;
+    const char *name;
+    const char *t1FileName;
+    const char *ttFileName;
 } displayFontTab[] = {
     {"Courier",               "n022003l.pfb", "cour.ttf"},
     {"Courier-Bold",          "n022004l.pfb", "courbd.ttf"},

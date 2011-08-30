@@ -166,7 +166,7 @@ public:
 
   ~GlobalParams();
 
-  void setBaseDir(char *dir);
+  void setBaseDir(const char *dir);
 
 #if WITH_FONTCONFIGURATION_WIN32
   void setupBaseFonts(char *dir);
@@ -177,7 +177,7 @@ public:
   CharCode getMacRomanCharCode(char *charName);
 
   GooString *getBaseDir();
-  Unicode mapNameToUnicode(char *charName);
+  Unicode mapNameToUnicode(const char *charName);
   UnicodeMap *getResidentUnicodeMap(GooString *encodingName);
   FILE *getUnicodeMapFile(GooString *encodingName);
   FILE *findCMapFile(GooString *collection, GooString *cMapName);
@@ -202,7 +202,7 @@ public:
   EndOfLineKind getTextEOL();
   GBool getTextPageBreaks();
   GBool getTextKeepTinyChars();
-  GooString *findFontFile(GooString *fontName, char **exts);
+  GooString *findFontFile(GooString *fontName, const char **exts);
   GBool getEnableFreeType();
   GBool getAntialias();
   GBool getVectorAntialias();
@@ -274,7 +274,7 @@ public:
 private:
 
   void parseNameToUnicode(GooString *name);
-  GBool parseYesNo2(char *token, GBool *flag);
+  GBool parseYesNo2(const char *token, GBool *flag);
   UnicodeMap *getUnicodeMap2(GooString *encodingName);
 
   void scanEncodingDirs();

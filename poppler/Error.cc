@@ -34,7 +34,7 @@
 #include "GlobalParams.h"
 #include "Error.h"
 
-static void defaultErrorFunction(int pos, char *msg, va_list args)
+static void defaultErrorFunction(int pos, const char *msg, va_list args)
 {
   if (pos >= 0) {
     fprintf(stderr, "Error (%d): ", pos);
@@ -46,14 +46,14 @@ static void defaultErrorFunction(int pos, char *msg, va_list args)
   fflush(stderr);
 }
 
-static void (*errorFunction)(int, char *, va_list args) = defaultErrorFunction;
+static void (*errorFunction)(int, const char *, va_list args) = defaultErrorFunction;
 
-void setErrorFunction(void (* f)(int, char *, va_list args))
+void setErrorFunction(void (* f)(int, const char *, va_list args))
 {
     errorFunction = f;
 }
 
-void CDECL error(int pos, char *msg, ...) {
+void CDECL error(int pos, const char *msg, ...) {
   va_list args;
   // NB: this can be called before the globalParams object is created
   if (globalParams && globalParams->getErrQuiet()) {
@@ -64,7 +64,7 @@ void CDECL error(int pos, char *msg, ...) {
   va_end(args);
 }
 
-void warning(char *msg, ...) {
+void warning(const char *msg, ...) {
   va_list args;
   va_start(args, msg);
   vprintf(msg, args);

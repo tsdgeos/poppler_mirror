@@ -50,10 +50,10 @@
 #include "Error.h"
 #include "DateInfo.h"
 
-static void printInfoString(Dict *infoDict, char *key, char *text,
+static void printInfoString(Dict *infoDict, const char *key, const char *text,
 			    UnicodeMap *uMap);
-static void printInfoDate(Dict *infoDict, char *key, char *text);
-static void printBox(char *text, PDFRectangle *box);
+static void printInfoDate(Dict *infoDict, const char *key, const char *text);
+static void printBox(const char *text, PDFRectangle *box);
 
 static int firstPage = 1;
 static int lastPage = 0;
@@ -342,7 +342,7 @@ int main(int argc, char *argv[]) {
   return exitCode;
 }
 
-static void printInfoString(Dict *infoDict, char *key, char *text,
+static void printInfoString(Dict *infoDict, const char *key, const char *text,
 			    UnicodeMap *uMap) {
   Object obj;
   GooString *s1;
@@ -379,7 +379,7 @@ static void printInfoString(Dict *infoDict, char *key, char *text,
   obj.free();
 }
 
-static void printInfoDate(Dict *infoDict, char *key, char *text) {
+static void printInfoDate(Dict *infoDict, const char *key, const char *text) {
   Object obj;
   char *s;
   int year, mon, day, hour, min, sec, tz_hour, tz_minute;
@@ -416,7 +416,7 @@ static void printInfoDate(Dict *infoDict, char *key, char *text) {
   obj.free();
 }
 
-static void printBox(char *text, PDFRectangle *box) {
+static void printBox(const char *text, PDFRectangle *box) {
   printf("%s%8.2f %8.2f %8.2f %8.2f\n",
 	 text, box->x1, box->y1, box->x2, box->y2);
 }

@@ -114,7 +114,7 @@ public:
   // otherwise it will be left as binary data.  If <psName> is
   // non-NULL, it will be used as the PostScript font name.  (Only
   // useful for OpenType CFF fonts.)
-  void convertToType1(char *psName, char **newEncoding, GBool ascii,
+  void convertToType1(char *psName, const char **newEncoding, GBool ascii,
 		      FoFiOutputFunc outputFunc, void *outputStream);
 
   // Convert to a Type 2 CIDFont, suitable for embedding in a
@@ -176,7 +176,7 @@ private:
   Guint computeTableChecksum(Guchar *data, int length);
   void parse();
   void readPostTable();
-  int seekTable(char *tag);
+  int seekTable(const char *tag);
   Guint charToTag(const char *tagName);
   Guint doMapToVertGID(Guint orgGID);
   Guint scanLookupList(Guint listIndex, Guint orgGID);

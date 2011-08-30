@@ -173,7 +173,7 @@ int JPXStream::lookChar() {
   return doLookChar();
 }
 
-GooString *JPXStream::getPSFilter(int psLevel, char *indent) {
+GooString *JPXStream::getPSFilter(int psLevel, const char *indent) {
   return NULL;
 }
 

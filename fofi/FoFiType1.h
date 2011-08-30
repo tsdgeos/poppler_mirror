@@ -39,7 +39,7 @@ public:
   char **getEncoding();
 
   // Write a version of the Type 1 font file with a new encoding.
-  void writeEncoded(char **newEncoding,
+  void writeEncoded(const char **newEncoding,
 		    FoFiOutputFunc outputFunc, void *outputStream);
 
 private:

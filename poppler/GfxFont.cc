@@ -61,8 +61,8 @@
 //------------------------------------------------------------------------
 
 struct StdFontMapEntry {
-  char *altName;
-  char *properName;
+  const char *altName;
+  const char *properName;
 };
 
 // Acrobat 4.0 and earlier substituted Base14-compatible fonts without
@@ -132,7 +132,7 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen,
 // GfxFont
 //------------------------------------------------------------------------
 
-GfxFont *GfxFont::makeFont(XRef *xref, char *tagA, Ref idA, Dict *fontDict) {
+GfxFont *GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict) {
   GooString *nameA;
   GfxFont *font;
   Object obj1;
@@ -168,7 +168,7 @@ GfxFont *GfxFont::makeFont(XRef *xref, char *tagA, Ref idA, Dict *fontDict) {
   return font;
 }
 
-GfxFont::GfxFont(char *tagA, Ref idA, GooString *nameA) {
+GfxFont::GfxFont(const char *tagA, Ref idA, GooString *nameA) {
   ok = gFalse;
   tag = new GooString(tagA);
   id = idA;
@@ -448,8 +448,8 @@ CharCodeToUnicode *GfxFont::readToUnicodeCMap(Dict *fontDict, int nBits,
 }
 
 void GfxFont::findExtFontFile() {
-  static char *type1Exts[] = { ".pfa", ".pfb", ".ps", "", NULL };
-  static char *ttExts[] = { ".ttf", ".ttc", NULL };
+  static const char *type1Exts[] = { ".pfa", ".pfb", ".ps", "", NULL };
+  static const char *ttExts[] = { ".ttf", ".ttc", NULL };
 
   if (name) {
     if (type == fontType1) {
@@ -518,13 +518,13 @@ char *GfxFont::readEmbFontFile(XRef *xref, int *len) {
 // Gfx8BitFont
 //------------------------------------------------------------------------
 
-Gfx8BitFont::Gfx8BitFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
+Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
 			 GfxFontType typeA, Dict *fontDict):
   GfxFont(tagA, idA, nameA)
 {
   GooString *name2;
   BuiltinFont *builtinFont;
-  char **baseEnc;
+  const char **baseEnc;
   GBool baseEncFromFontFile;
   char *buf;
   int len;
@@ -717,7 +717,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
 	embFontName = new GooString(ffT1->getName());
       }
       if (!baseEnc) {
-	baseEnc = ffT1->getEncoding();
+	baseEnc = (const char **)ffT1->getEncoding();
 	baseEncFromFontFile = gTrue;
       }
     }
@@ -736,7 +736,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
 	embFontName = new GooString(ffT1C->getName());
       }
       if (!baseEnc) {
-	baseEnc = ffT1C->getEncoding();
+	baseEnc = (const char **)ffT1C->getEncoding();
 	baseEncFromFontFile = gTrue;
       }
     }
@@ -759,7 +759,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
 
   // copy the base encoding
   for (i = 0; i < 256; ++i) {
-    enc[i] = baseEnc[i];
+    enc[i] = (char *)baseEnc[i];
     if ((encFree[i] = baseEncFromFontFile) && enc[i]) {
       enc[i] = copyString(baseEnc[i]);
     }
@@ -773,7 +773,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
       baseEncFromFontFile) {
     for (i = 0; i < 256; ++i) {
       if (!enc[i] && standardEncoding[i]) {
-	enc[i] = standardEncoding[i];
+	enc[i] = (char *)standardEncoding[i];
 	encFree[i] = gFalse;
       }
     }
@@ -1315,7 +1315,7 @@ static bool cmpWidthExcepV(const GfxFontCIDWidthExcepV &w1, const GfxFontCIDWidt
   return w1.first < w2.first;
 }
 
-GfxCIDFont::GfxCIDFont(XRef *xref, char *tagA, Ref idA, GooString *nameA,
+GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
 		       Dict *fontDict):
   GfxFont(tagA, idA, nameA)
 {
@@ -1806,35 +1806,35 @@ Gushort *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
     0x2008,0x2009,0x200A,0x00A0,0x200B,0x2060,0x3000,0xFEFF,
     0
   };
-  static char *adobe_cns1_cmaps[] = {
+  static const char *adobe_cns1_cmaps[] = {
     "UniCNS-UTF32-V",
     "UniCNS-UCS2-V",
     "UniCNS-UTF32-H",
     "UniCNS-UCS2-H",
     0
   };
-  static char *adobe_gb1_cmaps[] = {
+  static const char *adobe_gb1_cmaps[] = {
     "UniGB-UTF32-V",
     "UniGB-UCS2-V",
     "UniGB-UTF32-H",
     "UniGB-UCS2-H",
     0
   };
-  static char *adobe_japan1_cmaps[] = {
+  static const char *adobe_japan1_cmaps[] = {
     "UniJIS-UTF32-V",
     "UniJIS-UCS2-V",
     "UniJIS-UTF32-H",
     "UniJIS-UCS2-H",
     0
   };
-  static char *adobe_japan2_cmaps[] = {
+  static const char *adobe_japan2_cmaps[] = {
     "UniHojo-UTF32-V",
     "UniHojo-UCS2-V",
     "UniHojo-UTF32-H",
     "UniHojo-UCS2-H",
     0
   };
-  static char *adobe_korea1_cmaps[] = {
+  static const char *adobe_korea1_cmaps[] = {
     "UniKS-UTF32-V",
     "UniKS-UCS2-V",
     "UniKS-UTF32-H",
@@ -1842,10 +1842,10 @@ Gushort *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
     0
   };
   static struct CMapListEntry {
-    char *collection;
-    char *scriptTag;
-    char *toUnicodeMap;
-    char **CMaps;
+    const char *collection;
+    const char *scriptTag;
+    const char *toUnicodeMap;
+    const char **CMaps;
   } CMapList[] = {
     {
       "Adobe-CNS1",
@@ -1887,7 +1887,7 @@ Gushort *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
   int i;
   unsigned long code;
   int wmode;
-  char **cmapName;
+  const char **cmapName;
   CMap *cMap;
   CMapListEntry *lp;
   int cmap;

@@ -53,11 +53,11 @@ typedef enum {
  * Argument descriptor.
  */
 typedef struct {
-  char *arg;			/* the command line switch */
+  const char *arg;		/* the command line switch */
   ArgKind kind;			/* kind of arg */
   void *val;			/* place to store value */
   int size;			/* for argString: size of string */
-  char *usage;			/* usage string */
+  const char *usage;		/* usage string */
 } ArgDesc;
 
 /*
@@ -70,7 +70,7 @@ extern GBool parseArgs(const ArgDesc *args, int *argc, char *argv[]);
 /*
  * Print usage message, based on arg descriptor list.
  */
-extern void printUsage(char *program, char *otherArgs, const ArgDesc *args);
+extern void printUsage(const char *program, const char *otherArgs, const ArgDesc *args);
 
 /*
  * Check if a string is a valid integer or floating point number.

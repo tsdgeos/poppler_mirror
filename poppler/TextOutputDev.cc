@@ -5147,7 +5147,7 @@ void ActualText::endMC(GfxState *state) {
 // TextOutputDev
 //------------------------------------------------------------------------
 
-static void TextOutputDev_outputToFile(void *stream, char *text, int len) {
+static void TextOutputDev_outputToFile(void *stream, const char *text, int len) {
   fwrite(text, 1, len, (FILE *)stream);
 }
 

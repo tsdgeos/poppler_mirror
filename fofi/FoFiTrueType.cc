@@ -164,7 +164,7 @@ static int cmpTrueTypeTableTag(const void *p1, const void *p2) {
 //------------------------------------------------------------------------
 
 struct T42Table {
-  char *tag;			// 4-byte tag
+  const char *tag;		// 4-byte tag
   GBool required;		// required by the TrueType spec?
 };
 
@@ -194,7 +194,7 @@ static T42Table t42Tables[nT42Tables] = {
 
 // Glyph names in some arbitrary standard order that Apple uses for
 // their TrueType fonts.
-static char *macGlyphNames[258] = {
+static const char *macGlyphNames[258] = {
   ".notdef",        "null",           "CR",             "space",
   "exclam",         "quotedbl",       "numbersign",     "dollar",
   "percent",        "ampersand",      "quotesingle",    "parenleft",
@@ -530,7 +530,7 @@ void FoFiTrueType::convertToType42(char *psName, char **encoding,
   (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
 }
 
-void FoFiTrueType::convertToType1(char *psName, char **newEncoding,
+void FoFiTrueType::convertToType1(char *psName, const char **newEncoding,
 				  GBool ascii, FoFiOutputFunc outputFunc,
 				  void *outputStream) {
   FoFiType1C *ff;
@@ -1424,7 +1424,7 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
 void FoFiTrueType::cvtEncoding(char **encoding,
 			       FoFiOutputFunc outputFunc,
 			       void *outputStream) {
-  char *name;
+  const char *name;
   GooString *buf;
   int i;
 
@@ -2085,7 +2085,7 @@ void FoFiTrueType::readPostTable() {
   }
 }
 
-int FoFiTrueType::seekTable(char *tag) {
+int FoFiTrueType::seekTable(const char *tag) {
   Guint tagI;
   int i;
 

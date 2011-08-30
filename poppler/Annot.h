@@ -485,7 +485,7 @@ public:
 
   void setPage(Ref *pageRef, int pageIndex);
 
-  void setAppearanceState(char *state);
+  void setAppearanceState(const char *state);
 
   // getters
   XRef *getXRef() const { return xref; }
@@ -524,8 +524,8 @@ protected:
   void drawCircleTopLeft(double cx, double cy, double r);
   void drawCircleBottomRight(double cx, double cy, double r);
   void createForm(double *bbox, GBool transparencyGroup, Object *resDict, Object *aStream);
-  void createResourcesDict(char *formName, Object *formStream, char *stateName,
-			   double opacity, char *blendMode, Object *resDict);
+  void createResourcesDict(const char *formName, Object *formStream, const char *stateName,
+			   double opacity, const char *blendMode, Object *resDict);
   GBool isVisible(GBool printing);
 
   // Updates the field key of the annotation dictionary

@@ -742,7 +742,7 @@ void HtmlPage::dumpAsXML(FILE* f,int page){
 
 int HtmlPage::dumpComplexHeaders(FILE * const file, FILE *& pageFile, int page) {
   GooString* tmp;
-  char* htmlEncoding;
+  const char* htmlEncoding;
 
   if( !noframes )
   {
@@ -928,7 +928,7 @@ void HtmlPage::setDocName(char *fname){
 // HtmlMetaVar
 //------------------------------------------------------------------------
 
-HtmlMetaVar::HtmlMetaVar(char *_name, char *_content)
+HtmlMetaVar::HtmlMetaVar(const char *_name, const char *_content)
 {
     name = new GooString(_name);
     content = new GooString(_content);
@@ -954,13 +954,13 @@ GooString* HtmlMetaVar::toString()
 // HtmlOutputDev
 //------------------------------------------------------------------------
 
-static char* HtmlEncodings[][2] = {
+static const char* HtmlEncodings[][2] = {
     {"Latin1", "ISO-8859-1"},
     {NULL, NULL}
 };
 
 
-char* HtmlOutputDev::mapEncodingToHtml(GooString* encoding)
+const char* HtmlOutputDev::mapEncodingToHtml(GooString* encoding)
 {
     char* enc = encoding->getCString();
     for(int i = 0; HtmlEncodings[i][0] != NULL; i++)
@@ -975,7 +975,7 @@ char* HtmlOutputDev::mapEncodingToHtml(GooString* encoding)
 
 void HtmlOutputDev::doFrame(int firstPage){
   GooString* fName=new GooString(Docname);
-  char* htmlEncoding;
+  const char* htmlEncoding;
   fName->append(".html");
 
   if (!(fContentsFrame = fopen(fName->getCString(), "w"))){
@@ -1014,7 +1014,7 @@ HtmlOutputDev::HtmlOutputDev(char *fileName, char *title,
 	char *extension,
 	GBool rawOrder, int firstPage, GBool outline) 
 {
-  char *htmlEncoding;
+  const char *htmlEncoding;
   
   fContentsFrame = NULL;
   docTitle = new GooString(title);

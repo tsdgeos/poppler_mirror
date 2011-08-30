@@ -72,7 +72,7 @@ enum PSFileType {
   psGeneric			// write to a generic stream
 };
 
-typedef void (*PSOutputFunc)(void *stream, char *data, int len);
+typedef void (*PSOutputFunc)(void *stream, const char *data, int len);
 
 class PSOutputDev: public OutputDev {
 public:
@@ -362,11 +362,11 @@ private:
   void writeDocSetup(PDFDoc *doc, Catalog *catalog, int firstPage, int lastPage, GBool duplexA);
 
   void writePSChar(char c);
-  void writePS(char *s);
-  void writePSBuf(char *s, int len);
+  void writePS(const char *s);
+  void writePSBuf(const char *s, int len);
   void writePSFmt(const char *fmt, ...);
   void writePSString(GooString *s);
-  void writePSName(char *s);
+  void writePSName(const char *s);
   GooString *filterPSLabel(GooString *label, GBool *needParens=0);
   void writePSTextLine(GooString *s);
 

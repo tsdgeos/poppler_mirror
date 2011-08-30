@@ -199,7 +199,7 @@ FormButtonType FormWidgetButton::getButtonType () const
   return parent->getButtonType ();
 }
 
-void FormWidgetButton::setAppearanceState(char *state) {
+void FormWidgetButton::setAppearanceState(const char *state) {
   if (!widget)
     return;
   widget->setAppearanceState(state);
@@ -1335,7 +1335,7 @@ Form::~Form() {
 }
 
 // Look up an inheritable field dictionary entry.
-static Object *fieldLookup(Dict *field, char *key, Object *obj, std::set<int> *usedParents) {
+static Object *fieldLookup(Dict *field, const char *key, Object *obj, std::set<int> *usedParents) {
   Dict *dict;
   Object parent;
 
@@ -1368,7 +1368,7 @@ static Object *fieldLookup(Dict *field, char *key, Object *obj, std::set<int> *u
   return obj;
 }
 
-Object *Form::fieldLookup(Dict *field, char *key, Object *obj) {
+Object *Form::fieldLookup(Dict *field, const char *key, Object *obj) {
   std::set<int> usedParents;
   return ::fieldLookup(field, key, obj, &usedParents);
 }

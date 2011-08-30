@@ -28,8 +28,8 @@
 #include "goo/gmem.h"
 
 struct UnicodeMapTableEntry {
-  char *vector;
-  char type;
+  const char *vector;
+  const char type;
 };
 
 struct UnicodeCaseTableVector {

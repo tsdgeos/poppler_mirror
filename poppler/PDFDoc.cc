@@ -1151,7 +1151,7 @@ void PDFDoc::writeTrailer(Guint uxrefOffset, int uxrefSize,
 
 void PDFDoc::writeTrailer(Guint uxrefOffset, int uxrefSize, OutStream* outStr, GBool incrUpdate)
 {
-  char *fileNameA;
+  const char *fileNameA;
   if (fileName)
     fileNameA = fileName->getCString();
   else

@@ -114,7 +114,7 @@ public:
   GBool lookupXObject(char *name, Object *obj);
   GBool lookupXObjectNF(char *name, Object *obj);
   GBool lookupMarkedContentNF(char *name, Object *obj);
-  void lookupColorSpace(char *name, Object *obj);
+  void lookupColorSpace(const char *name, Object *obj);
   GfxPattern *lookupPattern(char *name, Gfx *gfx);
   GfxShading *lookupShading(char *name, Gfx *gfx);
   GBool lookupGState(char *name, Object *obj);

@@ -79,7 +79,7 @@ extern GooString *getCurrentDir();
 
 // Append a file name to a path string.  <path> may be an empty
 // string, denoting the current directory).  Returns <path>.
-extern GooString *appendToPath(GooString *path, char *fileName);
+extern GooString *appendToPath(GooString *path, const char *fileName);
 
 // Grab the path from the front of the file name.  If there is no
 // directory component in <fileName>, returns an empty string.
@@ -102,7 +102,7 @@ extern time_t getModTime(char *fileName);
 // should be done to the returned file pointer; the file may be
 // reopened later for reading, but not for writing.  The <mode> string
 // should be "w" or "wb".  Returns true on success.
-extern GBool openTempFile(GooString **name, FILE **f, char *mode);
+extern GBool openTempFile(GooString **name, FILE **f, const char *mode);
 
 // Execute <command>.  Returns true on success.
 extern GBool executeCommand(char *cmd);

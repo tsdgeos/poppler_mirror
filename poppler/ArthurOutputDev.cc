@@ -352,7 +352,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
       if (!(fontFile = m_fontEngine->loadType1Font(
 			   id,
 			   fontsrc,
-			   ((Gfx8BitFont *)gfxFont)->getEncoding()))) {
+			   (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
 	error(-1, "Couldn't create a font for '%s'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
@@ -363,7 +363,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
       if (!(fontFile = m_fontEngine->loadType1CFont(
 			   id,
 			   fontsrc,
-			   ((Gfx8BitFont *)gfxFont)->getEncoding()))) {
+			   (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
 	error(-1, "Couldn't create a font for '%s'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
@@ -374,7 +374,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
       if (!(fontFile = m_fontEngine->loadOpenTypeT1CFont(
 			   id,
 			   fontsrc,
-			   ((Gfx8BitFont *)gfxFont)->getEncoding()))) {
+			   (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
 	error(-1, "Couldn't create a font for '%s'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");

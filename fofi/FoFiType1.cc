@@ -90,7 +90,7 @@ char **FoFiType1::getEncoding() {
   return encoding;
 }
 
-void FoFiType1::writeEncoded(char **newEncoding,
+void FoFiType1::writeEncoded(const char **newEncoding,
 			     FoFiOutputFunc outputFunc, void *outputStream) {
   char buf[512];
   char *line, *line2, *p;
@@ -213,7 +213,7 @@ void FoFiType1::parse() {
     // get encoding
     } else if (!encoding &&
 	       !strncmp(line, "/Encoding StandardEncoding def", 30)) {
-      encoding = fofiType1StandardEncoding;
+      encoding = (char **)fofiType1StandardEncoding;
     } else if (!encoding &&
 	       !strncmp(line, "/Encoding 256 array", 19)) {
       encoding = (char **)gmallocn(256, sizeof(char *));

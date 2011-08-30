@@ -43,7 +43,7 @@ public:
 
   static SplashFontFile *loadType1Font(SplashFTFontEngine *engineA,
 				       SplashFontFileID *idA,
-				       SplashFontSrc *src, char **encA);
+				       SplashFontSrc *src, const char **encA);
   static SplashFontFile *loadCIDFont(SplashFTFontEngine *engineA,
 					 SplashFontFileID *idA,
 					 SplashFontSrc *src,

@@ -88,8 +88,8 @@ public:
   //     t -- GooString *
   //     w -- blank space; arg determines width
   // To get literal curly braces, use {{ or }}.
-  static GooString *format(char *fmt, ...);
-  static GooString *formatv(char *fmt, va_list argList);
+  static GooString *format(const char *fmt, ...);
+  static GooString *formatv(const char *fmt, va_list argList);
 
   // Destructor.
   ~GooString();
@@ -115,8 +115,8 @@ public:
   GooString *append(const char *str, int lengthA=CALC_STRING_LEN);
 
   // Append a formatted string.
-  GooString *appendf(char *fmt, ...);
-  GooString *appendfv(char *fmt, va_list argList);
+  GooString *appendf(const char *fmt, ...);
+  GooString *appendfv(const char *fmt, va_list argList);
 
   // Insert a character or string.
   GooString *insert(int i, char c);
@@ -166,14 +166,14 @@ private:
   void resize(int newLength);
   static void formatInt(long x, char *buf, int bufSize,
 			GBool zeroFill, int width, int base,
-			char **p, int *len);
+			const char **p, int *len);
   static void formatUInt(Gulong x, char *buf, int bufSize,
 			 GBool zeroFill, int width, int base,
-			 char **p, int *len);
+			 const char **p, int *len);
   static void formatDouble(double x, char *buf, int bufSize, int prec,
-			   GBool trim, char **p, int *len);
+			   GBool trim, const char **p, int *len);
   static void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec,
-				     GBool trim, char **p, int *len);
+				     GBool trim, const char **p, int *len);
 };
 
 #endif

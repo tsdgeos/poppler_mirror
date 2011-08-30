@@ -851,7 +851,7 @@ void GlobalParams::addCMapDir(GooString *collection, GooString *dir) {
   list->append(dir->copy());
 }
 
-GBool GlobalParams::parseYesNo2(char *token, GBool *flag) {
+GBool GlobalParams::parseYesNo2(const char *token, GBool *flag) {
   if (!strcmp(token, "yes")) {
     *flag = gTrue;
   } else if (!strcmp(token, "no")) {
@@ -913,7 +913,7 @@ GlobalParams::~GlobalParams() {
 
 //------------------------------------------------------------------------
 
-void GlobalParams::setBaseDir(char *dir) {
+void GlobalParams::setBaseDir(const char *dir) {
   delete baseDir;
   baseDir = new GooString(dir);
 }
@@ -936,7 +936,7 @@ GooString *GlobalParams::getBaseDir() {
   return s;
 }
 
-Unicode GlobalParams::mapNameToUnicode(char *charName) {
+Unicode GlobalParams::mapNameToUnicode(const char *charName) {
   // no need to lock - nameToUnicode is constant
   return nameToUnicode->lookup(charName);
 }
@@ -1032,9 +1032,9 @@ static GBool findModifier(const char *name, const char *modifier, const char **s
   }
 }
 
-static char *getFontLang(GfxFont *font)
+static const char *getFontLang(GfxFont *font)
 {
-  char *lang;
+  const char *lang;
 
   // find the language we want the font to support
   if (font->isCIDFont())
@@ -1075,7 +1075,7 @@ static FcPattern *buildFcPattern(GfxFont *font)
       width = -1,
       spacing = -1;
   bool deleteFamily = false;
-  char *family, *name, *lang, *modifiers;
+  char *family, *name, *modifiers;
   const char *start;
   FcPattern *p;
 
@@ -1169,7 +1169,7 @@ static FcPattern *buildFcPattern(GfxFont *font)
     default: break; 
   }
   
-  lang = getFontLang(font);
+  const char *lang = getFontLang(font);
   
   p = FcPatternBuild(NULL,
                     FC_FAMILY, FcTypeString, family,
@@ -1207,7 +1207,6 @@ DisplayFontParam *GlobalParams::getDisplayFont(GfxFont *font) {
     FcFontSet *set;
     int i;
     FcLangSet *lb = NULL;
-    char *lang;
     p = buildFcPattern(font);
 
     if (!p)
@@ -1219,7 +1218,7 @@ DisplayFontParam *GlobalParams::getDisplayFont(GfxFont *font) {
       goto fin;
 
     // find the language we want the font to support
-    lang = getFontLang(font);
+    const char *lang = getFontLang(font);
     if (strcmp(lang,"xx") != 0) {
       lb = FcLangSetCreate();
       FcLangSetAdd(lb,(FcChar8 *)lang);
@@ -1478,9 +1477,9 @@ GBool GlobalParams::getTextKeepTinyChars() {
   return tiny;
 }
 
-GooString *GlobalParams::findFontFile(GooString *fontName, char **exts) {
+GooString *GlobalParams::findFontFile(GooString *fontName, const char **exts) {
   GooString *dir, *fileName;
-  char **ext;
+  const char **ext;
   FILE *f;
   int i;
 

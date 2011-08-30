@@ -81,7 +81,7 @@ enum GooStringFormatType {
   fmtSpace
 };
 
-static char *formatStrings[] = {
+static const char *formatStrings[] = {
   "d", "x", "o", "b", "ud", "ux", "uo", "ub",
   "ld", "lx", "lo", "lb", "uld", "ulx", "ulo", "ulb",
   "f", "gs", "g",
@@ -211,13 +211,13 @@ GooString::GooString(GooString *str1, GooString *str2) {
 
 GooString *GooString::fromInt(int x) {
   char buf[24]; // enough space for 64-bit ints plus a little extra
-  char *p;
+  const char *p;
   int len;
   formatInt(x, buf, sizeof(buf), gFalse, 0, 10, &p, &len);
   return new GooString(p, len);
 }
 
-GooString *GooString::format(char *fmt, ...) {
+GooString *GooString::format(const char *fmt, ...) {
   va_list argList;
   GooString *s;
 
@@ -228,7 +228,7 @@ GooString *GooString::format(char *fmt, ...) {
   return s;
 }
 
-GooString *GooString::formatv(char *fmt, va_list argList) {
+GooString *GooString::formatv(const char *fmt, va_list argList) {
   GooString *s;
 
   s = new GooString();
@@ -263,7 +263,7 @@ GooString *GooString::append(const char *str, int lengthA) {
   return this;
 }
 
-GooString *GooString::appendf(char *fmt, ...) {
+GooString *GooString::appendf(const char *fmt, ...) {
   va_list argList;
 
   va_start(argList, fmt);
@@ -272,7 +272,7 @@ GooString *GooString::appendf(char *fmt, ...) {
   return this;
 }
 
-GooString *GooString::appendfv(char *fmt, va_list argList) {
+GooString *GooString::appendfv(const char *fmt, va_list argList) {
   GooStringFormatArg *args;
   int argsLen, argsSize;
   GooStringFormatArg arg;
@@ -281,7 +281,7 @@ GooString *GooString::appendfv(char *fmt, va_list argList) {
   GooStringFormatType ft;
   char buf[65];
   int len, i;
-  char *p0, *p1, *str;
+  const char *p0, *p1, *str;
 
   argsLen = 0;
   argsSize = 8;
@@ -519,7 +519,7 @@ GooString *GooString::appendfv(char *fmt, va_list argList) {
 
 void GooString::formatInt(long x, char *buf, int bufSize,
 			GBool zeroFill, int width, int base,
-			char **p, int *len) {
+			const char **p, int *len) {
   static char vals[17] = "0123456789abcdef";
   GBool neg;
   int start, i, j;
@@ -551,7 +551,7 @@ void GooString::formatInt(long x, char *buf, int bufSize,
 
 void GooString::formatUInt(Gulong x, char *buf, int bufSize,
 			 GBool zeroFill, int width, int base,
-			 char **p, int *len) {
+			 const char **p, int *len) {
   static char vals[17] = "0123456789abcdef";
   int i, j;
 
@@ -574,7 +574,7 @@ void GooString::formatUInt(Gulong x, char *buf, int bufSize,
 }
 
 void GooString::formatDouble(double x, char *buf, int bufSize, int prec,
-			   GBool trim, char **p, int *len) {
+			   GBool trim, const char **p, int *len) {
   GBool neg, started;
   double x2;
   int d, i, j;
@@ -613,7 +613,7 @@ void GooString::formatDouble(double x, char *buf, int bufSize, int prec,
 }
 
 void GooString::formatDoubleSmallAware(double x, char *buf, int bufSize, int prec,
-				      GBool trim, char **p, int *len)
+				      GBool trim, const char **p, int *len)
 {
   double absX = fabs(x);
   if (absX >= 0.1) {

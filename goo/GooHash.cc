@@ -145,7 +145,7 @@ int GooHash::lookupInt(GooString *key) {
   return p->val.i;
 }
 
-void *GooHash::lookup(char *key) {
+void *GooHash::lookup(const char *key) {
   GooHashBucket *p;
   int h;
 
@@ -155,7 +155,7 @@ void *GooHash::lookup(char *key) {
   return p->val.p;
 }
 
-int GooHash::lookupInt(char *key) {
+int GooHash::lookupInt(const char *key) {
   GooHashBucket *p;
   int h;
 
@@ -211,7 +211,7 @@ int GooHash::removeInt(GooString *key) {
   return val;
 }
 
-void *GooHash::remove(char *key) {
+void *GooHash::remove(const char *key) {
   GooHashBucket *p;
   GooHashBucket **q;
   void *val;
@@ -234,7 +234,7 @@ void *GooHash::remove(char *key) {
   return val;
 }
 
-int GooHash::removeInt(char *key) {
+int GooHash::removeInt(const char *key) {
   GooHashBucket *p;
   GooHashBucket **q;
   int val;
@@ -344,7 +344,7 @@ GooHashBucket *GooHash::find(GooString *key, int *h) {
   return NULL;
 }
 
-GooHashBucket *GooHash::find(char *key, int *h) {
+GooHashBucket *GooHash::find(const char *key, int *h) {
   GooHashBucket *p;
 
   *h = hash(key);
@@ -357,7 +357,7 @@ GooHashBucket *GooHash::find(char *key, int *h) {
 }
 
 int GooHash::hash(GooString *key) {
-  char *p;
+  const char *p;
   unsigned int h;
   int i;
 
@@ -368,8 +368,8 @@ int GooHash::hash(GooString *key) {
   return (int)(h % size);
 }
 
-int GooHash::hash(char *key) {
-  char *p;
+int GooHash::hash(const char *key) {
+  const char *p;
   unsigned int h;
 
   h = 0;

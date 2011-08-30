@@ -53,7 +53,7 @@ namespace Debug {
         Debug::debugClosure = closure;
     }
 
-    void qt4ErrorFunction(int pos, char *msg, va_list args)
+    void qt4ErrorFunction(int pos, const char *msg, va_list args)
     {
         QString emsg;
         char buffer[1024]; // should be big enough

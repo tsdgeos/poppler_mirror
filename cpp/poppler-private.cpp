@@ -28,7 +28,7 @@
 
 using namespace poppler;
 
-void detail::error_function(int pos, char *msg, va_list args)
+void detail::error_function(int pos, const char *msg, va_list args)
 {
     std::ostringstream oss;
     if (pos >= 0) {

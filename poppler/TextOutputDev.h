@@ -59,7 +59,7 @@ class TextSelectionVisitor;
 
 //------------------------------------------------------------------------
 
-typedef void (*TextOutputFunc)(void *stream, char *text, int len);
+typedef void (*TextOutputFunc)(void *stream, const char *text, int len);
 
 enum SelectionStyle {
   selectionStyleGlyph,

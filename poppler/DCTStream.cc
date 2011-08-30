@@ -225,7 +225,7 @@ int DCTStream::lookChar() {
   return *current;
 }
 
-GooString *DCTStream::getPSFilter(int psLevel, char *indent) {
+GooString *DCTStream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 2) {

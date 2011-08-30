@@ -196,7 +196,7 @@ private:
 //------------------------------------------------------------------------
 class HtmlMetaVar {
 public:
-    HtmlMetaVar(char *_name, char *_content);
+    HtmlMetaVar(const char *_name, const char *_content);
     ~HtmlMetaVar();    
     
     GooString* toString();	
@@ -303,7 +303,7 @@ public:
 private:
   // convert encoding into a HTML standard, or encoding->getCString if not
   // recognized
-  static char* mapEncodingToHtml(GooString* encoding);
+  static const char* mapEncodingToHtml(GooString* encoding);
   void doProcessLink(AnnotLink *link);
   GooString* getLinkDest(AnnotLink *link,Catalog *catalog);
   void dumpMetaVars(FILE *);

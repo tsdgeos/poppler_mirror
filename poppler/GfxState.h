@@ -231,7 +231,7 @@ public:
   static int getNumColorSpaceModes();
 
   // Return the name of the <idx>th color space mode.
-  static char *getColorSpaceModeName(int idx);
+  static const char *getColorSpaceModeName(int idx);
 
 #ifdef USE_CMS
   static int setupColorProfiles();

@@ -144,7 +144,7 @@ Gushort *FoFiType1C::getCIDToGIDMap(int *nCIDs) {
   return map;
 }
 
-void FoFiType1C::convertToType1(char *psName, char **newEncoding, GBool ascii,
+void FoFiType1C::convertToType1(char *psName, const char **newEncoding, GBool ascii,
 				FoFiOutputFunc outputFunc,
 				void *outputStream) {
   int psNameLen;
@@ -153,7 +153,7 @@ void FoFiType1C::convertToType1(char *psName, char **newEncoding, GBool ascii,
   Type1CIndexVal val;
   GooString *buf;
   char buf2[256];
-  char **enc;
+  const char **enc;
   GBool ok;
   int i;
 
@@ -265,7 +265,7 @@ void FoFiType1C::convertToType1(char *psName, char **newEncoding, GBool ascii,
     (*outputFunc)(outputStream, "256 array\n", 10);
     (*outputFunc)(outputStream,
 		  "0 1 255 {1 index exch /.notdef put} for\n", 40);
-    enc = newEncoding ? newEncoding : encoding;
+    enc = newEncoding ? newEncoding : (const char **)encoding;
     for (i = 0; i < 256; ++i) {
       if (enc[i]) {
 	buf = GooString::format("dup {0:d} /{1:s} put\n", i, enc[i]);
@@ -1083,7 +1083,7 @@ void FoFiType1C::convertToType0(char *psName,
   gfree(cidMap);
 }
 
-void FoFiType1C::eexecCvtGlyph(Type1CEexecBuf *eb, char *glyphName,
+void FoFiType1C::eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName,
 			       int offset, int nBytes,
 			       Type1CIndex *subrIdx,
 			       Type1CPrivateDict *pDict) {
@@ -1809,7 +1809,7 @@ void FoFiType1C::cvtNum(double x, GBool isFP, GooString *charBuf) {
   charBuf->append((char *)buf, n);
 }
 
-void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, char *s) {
+void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s) {
   Guchar *p;
   Guchar x;
 
@@ -2278,10 +2278,10 @@ void FoFiType1C::buildEncoding() {
   int pos, c, sid, nLeft, nSups, i, j;
 
   if (topDict.encodingOffset == 0) {
-    encoding = fofiType1StandardEncoding;
+    encoding = (char **)fofiType1StandardEncoding;
 
   } else if (topDict.encodingOffset == 1) {
-    encoding = fofiType1ExpertEncoding;
+    encoding = (char **)fofiType1ExpertEncoding;
 
   } else {
     encoding = (char **)gmallocn(256, sizeof(char *));

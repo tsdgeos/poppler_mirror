@@ -123,7 +123,7 @@ GooString *getCurrentDir() {
   return new GooString();
 }
 
-GooString *appendToPath(GooString *path, char *fileName) {
+GooString *appendToPath(GooString *path, const char *fileName) {
 #if defined(VMS)
   //---------- VMS ----------
   //~ this should handle everything necessary for file
@@ -458,7 +458,7 @@ time_t getModTime(char *fileName) {
 #endif
 }
 
-GBool openTempFile(GooString **name, FILE **f, char *mode) {
+GBool openTempFile(GooString **name, FILE **f, const char *mode) {
 #if defined(_WIN32)
   //---------- Win32 ----------
   char *tempDir;

@@ -171,7 +171,7 @@ public:
   // font.  If <ascii> is true the eexec section will be hex-encoded,
   // otherwise it will be left as binary data.  If <psName> is non-NULL,
   // it will be used as the PostScript font name.
-  void convertToType1(char *psName, char **newEncoding, GBool ascii,
+  void convertToType1(char *psName, const char **newEncoding, GBool ascii,
 		      FoFiOutputFunc outputFunc, void *outputStream);
 
   // Convert to a Type 0 CIDFont, suitable for embedding in a
@@ -189,7 +189,7 @@ public:
 private:
 
   FoFiType1C(char *fileA, int lenA, GBool freeFileDataA);
-  void eexecCvtGlyph(Type1CEexecBuf *eb, char *glyphName,
+  void eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName,
 		     int offset, int nBytes,
 		     Type1CIndex *subrIdx,
 		     Type1CPrivateDict *pDict);
@@ -199,7 +199,7 @@ private:
   void cvtGlyphWidth(GBool useOp, GooString *charBuf,
 		     Type1CPrivateDict *pDict);
   void cvtNum(double x, GBool isFP, GooString *charBuf);
-  void eexecWrite(Type1CEexecBuf *eb, char *s);
+  void eexecWrite(Type1CEexecBuf *eb, const char *s);
   void eexecWriteCharstring(Type1CEexecBuf *eb, Guchar *s, int n);
   GBool parse();
   void readTopDict();

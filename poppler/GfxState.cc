@@ -97,7 +97,7 @@ double Matrix::norm() const
 //------------------------------------------------------------------------
 
 struct GfxBlendModeInfo {
-  char *name;
+  const char *name;
   GfxBlendMode mode;
 };
 
@@ -128,7 +128,7 @@ static const GfxBlendModeInfo gfxBlendModeNames[] = {
 // 
 // NB: This must match the GfxColorSpaceMode enum defined in
 // GfxState.h
-static char *gfxColorSpaceModeNames[] = {
+static const char *gfxColorSpaceModeNames[] = {
   "DeviceGray",
   "CalGray",
   "DeviceRGB",
@@ -277,7 +277,7 @@ int GfxColorSpace::getNumColorSpaceModes() {
   return nGfxColorSpaceModes;
 }
 
-char *GfxColorSpace::getColorSpaceModeName(int idx) {
+const char *GfxColorSpace::getColorSpaceModeName(int idx) {
   return gfxColorSpaceModeNames[idx];
 }
 

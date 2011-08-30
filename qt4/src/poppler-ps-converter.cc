@@ -25,7 +25,7 @@
 
 #include "PSOutputDev.h"
 
-static void outputToQIODevice(void *stream, char *data, int len)
+static void outputToQIODevice(void *stream, const char *data, int len)
 {
 	static_cast<QIODevice*>(stream)->write(data, len);
 }

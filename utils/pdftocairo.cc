@@ -680,7 +680,7 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
   return name;
 }
 
-static void checkInvalidPrintOption(GBool option, char *option_name)
+static void checkInvalidPrintOption(GBool option, const char *option_name)
 {
   if (option) {
     fprintf(stderr, "Error: %s may only be used with the -png or -jpeg output options.\n", option_name);
@@ -688,7 +688,7 @@ static void checkInvalidPrintOption(GBool option, char *option_name)
   }
 }
 
-static void checkInvalidImageOption(GBool option, char *option_name)
+static void checkInvalidImageOption(GBool option, const char *option_name)
 {
   if (option) {
     fprintf(stderr, "Error: %s may only be used with the -ps, -eps, -pdf, or -svg output options.\n", option_name);

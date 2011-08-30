@@ -196,7 +196,7 @@ PageAttrs::~PageAttrs() {
   resources.free();
 }
 
-GBool PageAttrs::readBox(Dict *dict, char *key, PDFRectangle *box) {
+GBool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box) {
   PDFRectangle tmp;
   double t;
   Object obj1, obj2;

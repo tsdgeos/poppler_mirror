@@ -1266,7 +1266,7 @@ int JBIG2Stream::getPos() {
   return dataPtr - pageBitmap->getDataPtr();
 }
 
-GooString *JBIG2Stream::getPSFilter(int psLevel, char *indent) {
+GooString *JBIG2Stream::getPSFilter(int psLevel, const char *indent) {
   return NULL;
 }
 

@@ -39,10 +39,10 @@
 SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA,
 						SplashFontFileID *idA,
 						SplashFontSrc *src,
-						char **encA) {
+						const char **encA) {
   FT_Face faceA;
   Gushort *codeToGIDA;
-  char *name;
+  const char *name;
   int i;
 
   if (src->isFile) {
@@ -56,7 +56,7 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA,
   for (i = 0; i < 256; ++i) {
     codeToGIDA[i] = 0;
     if ((name = encA[i])) {
-      codeToGIDA[i] = (Gushort)FT_Get_Name_Index(faceA, name);
+      codeToGIDA[i] = (Gushort)FT_Get_Name_Index(faceA, (char *)name);
     }
   }
 

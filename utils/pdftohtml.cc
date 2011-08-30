@@ -88,8 +88,8 @@ static char userPassword[33] = "";
 static char gsDevice[33] = "none";
 static GBool printVersion = gFalse;
 
-static GooString* getInfoString(Dict *infoDict, char *key);
-static GooString* getInfoDate(Dict *infoDict, char *key);
+static GooString* getInfoString(Dict *infoDict, const char *key);
+static GooString* getInfoDate(Dict *infoDict, const char *key);
 
 static char textEncName[128] = "";
 
@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
   char *p;
   GooString *ownerPW, *userPW;
   Object info;
-  char * extsList[] = {"png", "jpeg", "bmp", "pcx", "tiff", "pbm", NULL};
+  const char * extsList[] = {"png", "jpeg", "bmp", "pcx", "tiff", "pbm", NULL};
 
   // parse args
   ok = parseArgs(argDesc, &argc, argv);
@@ -511,7 +511,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-static GooString* getInfoString(Dict *infoDict, char *key) {
+static GooString* getInfoString(Dict *infoDict, const char *key) {
   Object obj;
   // Raw value as read from PDF (may be in pdfDocEncoding or UCS2)
   GooString *rawString;
@@ -555,7 +555,7 @@ static GooString* getInfoString(Dict *infoDict, char *key) {
   return encodedString;
 }
 
-static GooString* getInfoDate(Dict *infoDict, char *key) {
+static GooString* getInfoDate(Dict *infoDict, const char *key) {
   Object obj;
   char *s;
   int year, mon, day, hour, min, sec, tz_hour, tz_minute;

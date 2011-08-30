@@ -50,7 +50,7 @@ extern "C" int unlink(char *filename);
 //------------------------------------------------------------------------
 
 #if 0
-static void fileWrite(void *stream, char *data, int len) {
+static void fileWrite(void *stream, const char *data, int len) {
   fwrite(data, 1, len, (FILE *)stream);
 }
 #endif
@@ -90,19 +90,19 @@ SplashFTFontEngine::~SplashFTFontEngine() {
 
 SplashFontFile *SplashFTFontEngine::loadType1Font(SplashFontFileID *idA,
 						  SplashFontSrc *src,
-						  char **enc) {
+						  const char **enc) {
   return SplashFTFontFile::loadType1Font(this, idA, src, enc);
 }
 
 SplashFontFile *SplashFTFontEngine::loadType1CFont(SplashFontFileID *idA,
 						   SplashFontSrc *src,
-						   char **enc) {
+						   const char **enc) {
   return SplashFTFontFile::loadType1Font(this, idA, src, enc);
 }
 
 SplashFontFile *SplashFTFontEngine::loadOpenTypeT1CFont(SplashFontFileID *idA,
 							SplashFontSrc *src,
-							char **enc) {
+							const char **enc) {
   return SplashFTFontFile::loadType1Font(this, idA, src, enc);
 }
 

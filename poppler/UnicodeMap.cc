@@ -136,7 +136,7 @@ UnicodeMap::UnicodeMap(GooString *encodingNameA) {
 #endif
 }
 
-UnicodeMap::UnicodeMap(char *encodingNameA, GBool unicodeOutA,
+UnicodeMap::UnicodeMap(const char *encodingNameA, GBool unicodeOutA,
 		       UnicodeMapRange *rangesA, int lenA) {
   encodingName = new GooString(encodingNameA);
   unicodeOut = unicodeOutA;
@@ -151,7 +151,7 @@ UnicodeMap::UnicodeMap(char *encodingNameA, GBool unicodeOutA,
 #endif
 }
 
-UnicodeMap::UnicodeMap(char *encodingNameA, GBool unicodeOutA,
+UnicodeMap::UnicodeMap(const char *encodingNameA, GBool unicodeOutA,
 		       UnicodeMapFunc funcA) {
   encodingName = new GooString(encodingNameA);
   unicodeOut = unicodeOutA;

@@ -742,7 +742,7 @@ void OutputDebugString(const char *txt)
 #define _vsnprintf vsnprintf
 #endif
 
-void my_error(int pos, char *msg, va_list args) {
+void my_error(int pos, const char *msg, va_list args) {
 #if 0
     char        buf[4096], *p = buf;
 
@@ -796,7 +796,7 @@ void my_error(int pos, char *msg, va_list args) {
 #endif
 }
 
-void LogInfo(char *fmt, ...)
+void LogInfo(const char *fmt, ...)
 {
     va_list args;
     char        buf[4096], *p = buf;

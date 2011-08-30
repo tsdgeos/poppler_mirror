@@ -98,7 +98,7 @@
 //      ^   ^----- s=psLevel*Sep, n=psLevel*
 //      +----- 1=psLevel1*, 2=psLevel2*, 3=psLevel3*
 
-static char *prolog[] = {
+static const char *prolog[] = {
   "/xpdf 75 dict def xpdf begin",
   "% PDF special state",
   "/pdfDictSize 15 def",
@@ -751,7 +751,7 @@ static char *prolog[] = {
   NULL
 };
 
-static char *cmapProlog[] = {
+static const char *cmapProlog[] = {
   "/CIDInit /ProcSet findresource begin",
   "10 dict begin",
   "  begincmap",
@@ -801,7 +801,7 @@ static char *cmapProlog[] = {
 //------------------------------------------------------------------------
 
 struct PSSubstFont {
-  char *psName;			// PostScript name
+  const char *psName;			// PostScript name
   double mWidth;		// width of 'm' character
 };
 
@@ -912,7 +912,7 @@ public:
     { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx++]; }
   virtual int lookChar()
     { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx]; }
-  virtual GooString *getPSFilter(int psLevel, char *indent) { return NULL; }
+  virtual GooString *getPSFilter(int psLevel, const char *indent) { return NULL; }
   virtual GBool isBinary(GBool last = gTrue) { return gTrue; }
   virtual GBool isEncoder() { return gTrue; }
 
@@ -990,7 +990,7 @@ extern "C" {
 typedef void (*SignalFunc)(int);
 }
 
-static void outputToFile(void *stream, char *data, int len) {
+static void outputToFile(void *stream, const char *data, int len) {
   fwrite(data, 1, len, (FILE *)stream);
 }
 
@@ -1392,8 +1392,8 @@ void PSOutputDev::writeHeader(int firstPage, int lastPage,
 
 void PSOutputDev::writeXpdfProcset() {
   GBool lev1, lev2, lev3, sep, nonSep;
-  char **p;
-  char *q;
+  const char **p;
+  const char *q;
 
   writePSFmt("%%BeginResource: procset xpdf {0:s} 0\n", "3.00");
   writePSFmt("%%Copyright: {0:s}\n", xpdfCopyright);
@@ -1661,7 +1661,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
   char buf[16];
   GBool subst;
   UnicodeMap *uMap;
-  char *charName;
+  const char *charName;
   double xs, ys;
   int code;
   double w1, w2;
@@ -6823,7 +6823,7 @@ void PSOutputDev::writePSChar(char c) {
   }
 }
 
-void PSOutputDev::writePS(char *s) {
+void PSOutputDev::writePS(const char *s) {
   if (t3String) {
     t3String->append(s);
   } else {
@@ -6831,7 +6831,7 @@ void PSOutputDev::writePS(char *s) {
   }
 }
 
-void PSOutputDev::writePSBuf(char *s, int len) {
+void PSOutputDev::writePSBuf(const char *s, int len) {
   if (t3String) {
     for (int i = 0; i < len; i++) {
       t3String->append(s[i]);
@@ -6885,8 +6885,8 @@ void PSOutputDev::writePSString(GooString *s) {
   writePSChar(')');
 }
 
-void PSOutputDev::writePSName(char *s) {
-  char *p;
+void PSOutputDev::writePSName(const char *s) {
+  const char *p;
   char c;
 
   p = s;
