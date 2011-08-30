@@ -881,7 +881,7 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
     0, 0, 0, 0			// ulCodePageRange2
   };
   GBool missingCmap, missingName, missingPost, missingOS2;
-  GBool unsortedLoca, badCmapLen, abbrevHMTX;
+  GBool unsortedLoca, emptyCmap, badCmapLen, abbrevHMTX;
   int nZeroLengthTables, nBogusTables;
   int nHMetrics, advWidth, lsb;
   TrueTypeLoca *locaTable;
@@ -973,21 +973,23 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
     }
   }
 
-  // check for an incorrect cmap table length
-  badCmapLen = gFalse;
+  // check for an empty cmap table or an incorrect cmap table length
+  emptyCmap = badCmapLen = gFalse;
   cmapLen = 0; // make gcc happy
   if (!missingCmap) {
-    if (nCmaps > 0) {
+    if (nCmaps == 0) {
+      emptyCmap = gTrue;
+    } else {
       cmapLen = cmaps[0].offset + cmaps[0].len;
       for (i = 1; i < nCmaps; ++i) {
-        if (cmaps[i].offset + cmaps[i].len > cmapLen) {
+	if (cmaps[i].offset + cmaps[i].len > cmapLen) {
 	  cmapLen = cmaps[i].offset + cmaps[i].len;
-        }
+	}
       }
-    }
-    cmapLen -= tables[cmapIdx].offset;
-    if (cmapLen > tables[cmapIdx].len) {
-      badCmapLen = gTrue;
+      cmapLen -= tables[cmapIdx].offset;
+      if (cmapLen > tables[cmapIdx].len) {
+	badCmapLen = gTrue;
+      }
     }
   }
 
@@ -1000,7 +1002,7 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
 
   // if nothing is broken, just write the TTF file as is
   if (!missingCmap && !missingName && !missingPost && !missingOS2 &&
-      !unsortedLoca && !badCmapLen && !abbrevHMTX &&
+      !unsortedLoca && !emptyCmap && !badCmapLen && !abbrevHMTX &&
       nZeroLengthTables == 0 && nBogusTables == 0 &&
       !name && !codeToGID) {
     (*outputFunc)(outputStream, (char *)file, len);
@@ -1229,6 +1231,10 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
 	newTables[j].len = newCmapLen;
 	newTables[j].checksum = computeTableChecksum((Guchar *)newCmapTab,
 						     newCmapLen);
+      } else if (newTables[j].tag == cmapTag && emptyCmap) {
+	newTables[j].checksum = computeTableChecksum((Guchar *)cmapTab,
+						     sizeof(cmapTab));
+	newTables[j].len = sizeof(cmapTab);
       } else if (newTables[j].tag == cmapTag && badCmapLen) {
 	newTables[j].len = cmapLen;
       } else if (newTables[j].tag == locaTag && unsortedLoca) {
