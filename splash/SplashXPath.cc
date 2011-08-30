@@ -412,31 +412,27 @@ void SplashXPath::addSegment(SplashCoord x0, SplashCoord y0,
   ++length;
 }
 
-static bool cmpXPathSegs(const SplashXPathSeg &seg0, const SplashXPathSeg &seg1) {
-  SplashCoord x0, y0, x1, y1;
+struct cmpXPathSegsFunctor {
+  bool operator()(const SplashXPathSeg &seg0, const SplashXPathSeg &seg1) {
+    SplashCoord x0, y0, x1, y1;
 
-  if (seg0.flags & splashXPathFlip) {
-    x0 = seg0.x1;
-    y0 = seg0.y1;
-  } else {
-    x0 = seg0.x0;
-    y0 = seg0.y0;
+    if (seg0.flags & splashXPathFlip) {
+      x0 = seg0.x1;
+      y0 = seg0.y1;
+    } else {
+      x0 = seg0.x0;
+      y0 = seg0.y0;
+    }
+    if (seg1.flags & splashXPathFlip) {
+      x1 = seg1.x1;
+      y1 = seg1.y1;
+    } else {
+      x1 = seg1.x0;
+      y1 = seg1.y0;
+    }
+    return (y0 != y1) ? (y0 < y1) : (x0 < x1);
   }
-  if (seg1.flags & splashXPathFlip) {
-    x1 = seg1.x1;
-    y1 = seg1.y1;
-  } else {
-    x1 = seg1.x0;
-    y1 = seg1.y0;
-  }
-  if (y0 != y1) {
-    return (y0 < y1) ? true : false;
-  }
-  if (x0 != x1) {
-    return (x0 < x1) ? true : false;
-  }
-  return false;
-}
+};
 
 void SplashXPath::aaScale() {
   SplashXPathSeg *seg;
@@ -451,5 +447,5 @@ void SplashXPath::aaScale() {
 }
 
 void SplashXPath::sort() {
-  std::sort(segs, segs + length, &cmpXPathSegs);
+  std::sort(segs, segs + length, cmpXPathSegsFunctor());
 }

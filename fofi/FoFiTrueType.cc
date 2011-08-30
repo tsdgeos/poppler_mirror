@@ -32,6 +32,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <algorithm>
 #include "goo/gtypes.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
@@ -137,29 +138,26 @@ struct TrueTypeLoca {
 #define vrt2Tag 0x76727432
 #define vertTag 0x76657274
 
-static int cmpTrueTypeLocaOffset(const void *p1, const void *p2) {
-  TrueTypeLoca *loca1 = (TrueTypeLoca *)p1;
-  TrueTypeLoca *loca2 = (TrueTypeLoca *)p2;
-
-  if (loca1->origOffset == loca2->origOffset) {
-    return loca1->idx - loca2->idx;
+struct cmpTrueTypeLocaOffsetFunctor {
+  bool operator()(const TrueTypeLoca &loca1, const TrueTypeLoca &loca2) {
+    if (loca1.origOffset == loca2.origOffset) {
+      return loca1.idx < loca2.idx;
+    }
+    return loca1.origOffset < loca2.origOffset;
   }
-  return loca1->origOffset - loca2->origOffset;
-}
+};
 
-static int cmpTrueTypeLocaIdx(const void *p1, const void *p2) {
-  TrueTypeLoca *loca1 = (TrueTypeLoca *)p1;
-  TrueTypeLoca *loca2 = (TrueTypeLoca *)p2;
+struct cmpTrueTypeLocaIdxFunctor {
+  bool operator()(const TrueTypeLoca &loca1, const TrueTypeLoca &loca2) {
+    return loca1.idx < loca2.idx;
+  }
+};
 
-  return loca1->idx - loca2->idx;
-}
-
-static int cmpTrueTypeTableTag(const void *p1, const void *p2) {
-  TrueTypeTable *tab1 = (TrueTypeTable *)p1;
-  TrueTypeTable *tab2 = (TrueTypeTable *)p2;
-
-  return (int)tab1->tag - (int)tab2->tag;
-}
+struct cmpTrueTypeTableTagFunctor {
+  bool operator()(const TrueTypeTable &tab1, const TrueTypeTable &tab2) {
+    return tab1.tag < tab2.tag;
+  }
+};
 
 //------------------------------------------------------------------------
 
@@ -997,14 +995,13 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
   // the same pos value remain in the same order)
   glyfLen = 0; // make gcc happy
   if (unsortedLoca) {
-    qsort(locaTable, nGlyphs + 1, sizeof(TrueTypeLoca),
-	  &cmpTrueTypeLocaOffset);
+    std::sort(locaTable, locaTable + nGlyphs + 1,
+	      cmpTrueTypeLocaOffsetFunctor());
     for (i = 0; i < nGlyphs; ++i) {
       locaTable[i].len = locaTable[i+1].origOffset - locaTable[i].origOffset;
     }
     locaTable[nGlyphs].len = 0;
-    qsort(locaTable, nGlyphs + 1, sizeof(TrueTypeLoca),
-	  &cmpTrueTypeLocaIdx);
+    std::sort(locaTable, locaTable + nGlyphs + 1, cmpTrueTypeLocaIdxFunctor());
     pos = 0;
     for (i = 0; i <= nGlyphs; ++i) {
       locaTable[i].newOffset = pos;
@@ -1272,8 +1269,7 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
     newTables[j].len = sizeof(os2Tab);
     ++j;
   }
-  qsort(newTables, nNewTables, sizeof(TrueTypeTable),
-	&cmpTrueTypeTableTag);
+  std::sort(newTables, newTables + nNewTables, cmpTrueTypeTableTagFunctor());
   pos = 12 + nNewTables * 16;
   for (i = 0; i < nNewTables; ++i) {
     newTables[i].offset = pos;
@@ -1568,14 +1564,13 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
       locaTable[i].origOffset = 2 * getU16BE(pos + i*2, &ok);
     }
   }
-  qsort(locaTable, nGlyphs + 1, sizeof(TrueTypeLoca),
-	&cmpTrueTypeLocaOffset);
+  std::sort(locaTable, locaTable + nGlyphs + 1,
+	    cmpTrueTypeLocaOffsetFunctor());
   for (i = 0; i < nGlyphs; ++i) {
     locaTable[i].len = locaTable[i+1].origOffset - locaTable[i].origOffset;
   }
   locaTable[nGlyphs].len = 0;
-  qsort(locaTable, nGlyphs + 1, sizeof(TrueTypeLoca),
-	&cmpTrueTypeLocaIdx);
+  std::sort(locaTable, locaTable + nGlyphs + 1, cmpTrueTypeLocaIdxFunctor());
   pos = 0;
   for (i = 0; i <= nGlyphs; ++i) {
     locaTable[i].newOffset = pos;

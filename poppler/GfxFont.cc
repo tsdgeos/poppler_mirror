@@ -1307,13 +1307,19 @@ Dict *Gfx8BitFont::getResources() {
 // GfxCIDFont
 //------------------------------------------------------------------------
 
-static bool cmpWidthExcep(const GfxFontCIDWidthExcep &w1, const GfxFontCIDWidthExcep &w2) {
-  return w1.first < w2.first;
-}
+struct cmpWidthExcepFunctor {
+  bool operator()(const GfxFontCIDWidthExcep &w1,
+		  const GfxFontCIDWidthExcep &w2) {
+    return w1.first < w2.first;
+  }
+};
 
-static bool cmpWidthExcepV(const GfxFontCIDWidthExcepV &w1, const GfxFontCIDWidthExcepV &w2) {
-  return w1.first < w2.first;
-}
+struct cmpWidthExcepVFunctor {
+  bool operator()(const GfxFontCIDWidthExcepV &w1,
+		  const GfxFontCIDWidthExcepV &w2) {
+    return w1.first < w2.first;
+  }
+};
 
 GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
 		       Dict *fontDict):
@@ -1573,7 +1579,8 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
       obj3.free();
       obj2.free();
     }
-    std::sort(widths.exceps, widths.exceps + widths.nExceps, &cmpWidthExcep);
+    std::sort(widths.exceps, widths.exceps + widths.nExceps,
+	      cmpWidthExcepFunctor());
   }
   obj1.free();
 
@@ -1656,7 +1663,8 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
       obj3.free();
       obj2.free();
     }
-    std::sort(widths.excepsV, widths.excepsV + widths.nExcepsV, &cmpWidthExcepV);
+    std::sort(widths.excepsV, widths.excepsV + widths.nExcepsV,
+	      cmpWidthExcepVFunctor());
   }
   obj1.free();
 

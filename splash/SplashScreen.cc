@@ -26,6 +26,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <algorithm>
 #include "goo/gmem.h"
 #include "SplashMath.h"
 #include "SplashScreen.h"
@@ -46,9 +47,12 @@ struct SplashScreenPoint {
   int dist;
 };
 
-static int cmpDistances(const void *p0, const void *p1) {
-  return ((SplashScreenPoint *)p0)->dist - ((SplashScreenPoint *)p1)->dist;
-}
+
+struct cmpDistancesFunctor {
+  bool operator()(const SplashScreenPoint &p0, const SplashScreenPoint &p1) {
+    return p0.dist < p1.dist;
+  }
+};
 
 //------------------------------------------------------------------------
 // SplashScreen
@@ -360,7 +364,7 @@ void SplashScreen::buildSCDMatrix(int r) {
 	}
       }
     }
-    qsort(pts, n, sizeof(SplashScreenPoint), &cmpDistances);
+    std::sort(pts, pts + n, cmpDistancesFunctor());
     for (j = 0; j < n; ++j) {
       // map values in [0 .. n-1] --> [255 .. 1]
       mat[pts[j].y * size + pts[j].x] = 255 - (254 * j) / (n - 1);
