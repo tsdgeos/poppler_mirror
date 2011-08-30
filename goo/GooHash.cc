@@ -107,7 +107,9 @@ void GooHash::replace(GooString *key, void *val) {
 
   if ((p = find(key, &h))) {
     p->val.p = val;
-    delete key;
+    if (deleteKeys) {
+      delete key;
+    }
   } else {
     add(key, val);
   }
@@ -119,7 +121,9 @@ void GooHash::replace(GooString *key, int val) {
 
   if ((p = find(key, &h))) {
     p->val.i = val;
-    delete key;
+    if (deleteKeys) {
+      delete key;
+    }
   } else {
     add(key, val);
   }
