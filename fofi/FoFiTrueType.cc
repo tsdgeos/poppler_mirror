@@ -882,7 +882,7 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
   };
   GBool missingCmap, missingName, missingPost, missingOS2;
   GBool unsortedLoca, badCmapLen, abbrevHMTX;
-  int nZeroLengthTables;
+  int nZeroLengthTables, nBogusTables;
   int nHMetrics, advWidth, lsb;
   TrueTypeLoca *locaTable;
   TrueTypeTable *newTables;
@@ -946,11 +946,30 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
     locaTable[i].idx = i;
   }
 
-  // check for zero-length tables
-  nZeroLengthTables = 0;
+  // check for zero-length tables and bogus tags
+  nZeroLengthTables = nBogusTables = 0;
   for (i = 0; i < nTables; ++i) {
     if (tables[i].len == 0) {
       ++nZeroLengthTables;
+      if (tables[i].tag == cmapTag) {
+	missingCmap = gTrue;
+      } else if (tables[i].tag == nameTag) {
+	missingName = gTrue;
+      } else if (tables[i].tag == postTag) {
+	missingPost = gTrue;
+      } else if (tables[i].tag == os2Tag) {
+	missingOS2 = gTrue;
+      }
+    } else if (!(tables[i].tag & 0xe0000000) ||
+	       !(tables[i].tag & 0x00e00000) ||
+	       !(tables[i].tag & 0x0000e000) ||
+	       !(tables[i].tag & 0x000000e0)) {
+      // tags where any of the bytes are < 0x20 are probably bogus
+      // (the TrueType spec uses ASCII sequences for tags) -- this
+      // catches problems where the number of tables given in the
+      // header is too large, and so gibberish data is read at the end
+      // of the table directory
+      ++nBogusTables;
     }
   }
 
@@ -981,7 +1000,8 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
 
   // if nothing is broken, just write the TTF file as is
   if (!missingCmap && !missingName && !missingPost && !missingOS2 &&
-      !unsortedLoca && !badCmapLen && !abbrevHMTX && nZeroLengthTables == 0 &&
+      !unsortedLoca && !badCmapLen && !abbrevHMTX &&
+      nZeroLengthTables == 0 && nBogusTables == 0 &&
       !name && !codeToGID) {
     (*outputFunc)(outputStream, (char *)file, len);
     goto done1;
@@ -1188,7 +1208,7 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
   // - sort the table by tag
   // - compute new table positions, including 4-byte alignment
   // - (re)compute table checksums
-  nNewTables = nTables - nZeroLengthTables +
+  nNewTables = nTables - nZeroLengthTables - nBogusTables +
                (missingCmap ? 1 : 0) + (missingName ? 1 : 0) +
                (missingPost ? 1 : 0) + (missingOS2 ? 1 : 0);
   newTables = (TrueTypeTable *)gmallocn(nNewTables, sizeof(TrueTypeTable));
