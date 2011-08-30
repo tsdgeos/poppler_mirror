@@ -32,6 +32,7 @@
 #include <string.h>
 #include <limits.h>
 #include <assert.h>
+#include <math.h>
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"
 #include "poppler/Error.h"
@@ -3370,8 +3371,8 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
                            xdbl + 1, ydbl + 1, color + 1,
                            xdbl + 2, ydbl + 2, color + 2);
       for (int m = 0; m < 3; ++m) {
-        xt = xdbl[m] * userToCanvasMatrix[0] + ydbl[m] * userToCanvasMatrix[2] + userToCanvasMatrix[4];
-        yt = xdbl[m] * userToCanvasMatrix[1] + ydbl[m] * userToCanvasMatrix[3] + userToCanvasMatrix[5];
+        xt = xdbl[m] * (double)userToCanvasMatrix[0] + ydbl[m] * (double)userToCanvasMatrix[2] + (double)userToCanvasMatrix[4];
+        yt = xdbl[m] * (double)userToCanvasMatrix[1] + ydbl[m] * (double)userToCanvasMatrix[3] + (double)userToCanvasMatrix[5];
         xdbl[m] = xt;
         ydbl[m] = yt;
         // we operate on scanlines which are integer offsets into the
