@@ -908,10 +908,10 @@ void XRef::setEncryption(int permFlagsA, GBool ownerPasswordOkA,
   encrypted = gTrue;
   permFlags = permFlagsA;
   ownerPasswordOk = ownerPasswordOkA;
-  if (keyLengthA <= 16) {
+  if (keyLengthA <= 32) {
     keyLength = keyLengthA;
   } else {
-    keyLength = 16;
+    keyLength = 32;
   }
   for (i = 0; i < keyLength; ++i) {
     fileKey[i] = fileKeyA[i];
