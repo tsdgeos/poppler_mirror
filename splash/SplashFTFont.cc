@@ -146,14 +146,14 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
 
   // compute the transform matrix
 #if USE_FIXEDPOINT
-  matrix.xx = (FT_Fixed)((mat[0] / size).getRaw());
-  matrix.yx = (FT_Fixed)((mat[1] / size).getRaw());
-  matrix.xy = (FT_Fixed)((mat[2] / size).getRaw());
-  matrix.yy = (FT_Fixed)((mat[3] / size).getRaw());
-  textMatrix.xx = (FT_Fixed)((textMat[0] / (textScale * size)).getRaw());
-  textMatrix.yx = (FT_Fixed)((textMat[1] / (textScale * size)).getRaw());
-  textMatrix.xy = (FT_Fixed)((textMat[2] / (textScale * size)).getRaw());
-  textMatrix.yy = (FT_Fixed)((textMat[3] / (textScale * size)).getRaw());
+  matrix.xx = (FT_Fixed)((mat[0] / size).get16Dot16());
+  matrix.yx = (FT_Fixed)((mat[1] / size).get16Dot16());
+  matrix.xy = (FT_Fixed)((mat[2] / size).get16Dot16());
+  matrix.yy = (FT_Fixed)((mat[3] / size).get16Dot16());
+  textMatrix.xx = (FT_Fixed)((textMat[0] / (textScale * size)).get16Dot16());
+  textMatrix.yx = (FT_Fixed)((textMat[1] / (textScale * size)).get16Dot16());
+  textMatrix.xy = (FT_Fixed)((textMat[2] / (textScale * size)).get16Dot16());
+  textMatrix.yy = (FT_Fixed)((textMat[3] / (textScale * size)).get16Dot16());
 #else
   matrix.xx = (FT_Fixed)((mat[0] / size) * 65536);
   matrix.yx = (FT_Fixed)((mat[1] / size) * 65536);

@@ -1397,7 +1397,11 @@ SplashPath *Splash::flattenPath(SplashPath *path, SplashCoord *matrix,
   int i;
 
   fPath = new SplashPath();
+#if USE_FIXEDPOINT
+  flatness2 = flatness;
+#else
   flatness2 = flatness * flatness;
+#endif
   i = 0;
   while (i < path->length) {
     flag = path->flags[i];
@@ -1462,13 +1466,21 @@ void Splash::flattenCurve(SplashCoord x0, SplashCoord y0,
     // line)
     transform(matrix, (xl0 + xr3) * 0.5, (yl0 + yr3) * 0.5, &mx, &my);
     transform(matrix, xx1, yy1, &tx, &ty);
+#if USE_FIXEDPOINT
+    d1 = splashDist(tx, ty, mx, my);
+#else
     dx = tx - mx;
     dy = ty - my;
     d1 = dx*dx + dy*dy;
+#endif
     transform(matrix, xx2, yy2, &tx, &ty);
+#if USE_FIXEDPOINT
+    d2 = splashDist(tx, ty, mx, my);
+#else
     dx = tx - mx;
     dy = ty - my;
     d2 = dx*dx + dy*dy;
+#endif
 
     // if the curve is flat enough, or no more subdivisions are
     // allowed, add the straight line segment

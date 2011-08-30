@@ -97,15 +97,17 @@ static inline SplashCoord splashDist(SplashCoord x0, SplashCoord y0,
 #if USE_FIXEDPOINT
   // this handles the situation where dx*dx or dy*dy is too large to
   // fit in the 16.16 fixed point format
-  SplashCoord dxa, dya;
+  SplashCoord dxa, dya, d;
   dxa = splashAbs(dx);
   dya = splashAbs(dy);
   if (dxa == 0 && dya == 0) {
     return 0;
   } else if (dxa > dya) {
-    return dxa * FixedPoint::sqrt(dya / dxa + 1);
+    d = dya / dxa;
+    return dxa * FixedPoint::sqrt(d*d + 1);
   } else {
-    return dya * FixedPoint::sqrt(dxa / dya + 1);
+    d = dxa / dya;
+    return dya * FixedPoint::sqrt(d*d + 1);
   }
 #else
   return splashSqrt(dx * dx + dy * dy);
