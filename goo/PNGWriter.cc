@@ -56,6 +56,13 @@ void PNGWriter::setSRGBProfile()
 
 bool PNGWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 {
+  /* libpng changed the png_set_iCCP() prototype in 1.5.0 */
+#if PNG_LIBPNG_VER < 10500
+        png_charp icc_data_ptr = (png_charp)icc_data;
+#else
+        png_const_bytep icc_data_ptr = (png_const_bytep)icc_data;
+#endif
+
 	/* initialize stuff */
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (!png_ptr) {
@@ -112,7 +119,7 @@ bool PNGWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 	png_set_pHYs(png_ptr, info_ptr, hDPI/0.0254, vDPI/0.0254, PNG_RESOLUTION_METER);
 
 	if (icc_data)
-		png_set_iCCP(png_ptr, info_ptr, icc_name, PNG_COMPRESSION_TYPE_BASE, (char*)icc_data, icc_data_size);
+		png_set_iCCP(png_ptr, info_ptr, icc_name, PNG_COMPRESSION_TYPE_BASE, icc_data_ptr, icc_data_size);
 	else if (sRGB_profile)
 		png_set_sRGB(png_ptr, info_ptr, PNG_sRGB_INTENT_RELATIVE);
 
