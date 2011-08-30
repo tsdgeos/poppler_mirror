@@ -61,6 +61,9 @@ void GooList::insert(int i, void *p) {
   if (length >= size) {
     expand();
   }
+  if (i < 0) {
+    i = 0;
+  }
   if (i < length) {
     memmove(data+i+1, data+i, (length - i) * sizeof(void *));
   }
