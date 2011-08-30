@@ -28,6 +28,7 @@
 #endif
 
 #include <stdio.h>
+#include <limits.h>
 #include "goo/gmem.h"
 #include "poppler/Error.h"
 #include "FoFiBase.h"
@@ -161,6 +162,20 @@ Guint FoFiBase::getU32BE(int pos, GBool *ok) {
   x = (x << 8) + file[pos+1];
   x = (x << 8) + file[pos+2];
   x = (x << 8) + file[pos+3];
+  return x;
+}
+
+Guint FoFiBase::getU32LE(int pos, GBool *ok) {
+  Guint x;
+
+  if (pos < 0 || pos+3 >= len || pos > INT_MAX - 3) {
+    *ok = gFalse;
+    return 0;
+  }
+  x = file[pos+3];
+  x = (x << 8) + file[pos+2];
+  x = (x << 8) + file[pos+1];
+  x = (x << 8) + file[pos];
   return x;
 }
 

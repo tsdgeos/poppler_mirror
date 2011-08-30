@@ -42,6 +42,7 @@ protected:
   int getU16BE(int pos, GBool *ok);
   int getS32BE(int pos, GBool *ok);
   Guint getU32BE(int pos, GBool *ok);
+  Guint getU32LE(int pos, GBool *ok);
   Guint getUVarBE(int pos, int size, GBool *ok);
 
   GBool checkRegion(int pos, int size);
