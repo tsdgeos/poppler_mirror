@@ -1539,7 +1539,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
   GBool ok;
   Guint checksum;
   int nNewTables;
-  int length, pos, glyfPos, i, j, k;
+  int glyfTableLen, length, pos, glyfPos, i, j, k;
   Guchar vheaTab[36] = {
     0, 1, 0, 0,			// table version number
     0, 0,			// ascent
@@ -1579,12 +1579,14 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
   // sort it into proper order -- some (non-compliant) fonts have
   // out-of-order loca tables; in order to correctly handle the case
   // where (compliant) fonts have empty entries in the middle of the
-  // table, cmpTrueTypeLocaPos uses offset as its primary sort key,
+  // table, cmpTrueTypeLocaOffset uses offset as its primary sort key,
   // and idx as its secondary key (ensuring that adjacent entries with
   // the same pos value remain in the same order)
   locaTable = (TrueTypeLoca *)gmallocn(nGlyphs + 1, sizeof(TrueTypeLoca));
   i = seekTable("loca");
   pos = tables[i].offset;
+  i = seekTable("glyf");
+  glyfTableLen = tables[i].len;
   ok = gTrue;
   for (i = 0; i <= nGlyphs; ++i) {
     locaTable[i].idx = i;
@@ -1592,6 +1594,9 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
       locaTable[i].origOffset = (int)getU32BE(pos + i*4, &ok);
     } else {
       locaTable[i].origOffset = 2 * getU16BE(pos + i*2, &ok);
+    }
+    if (locaTable[i].origOffset > glyfTableLen) {
+      locaTable[i].origOffset = glyfTableLen;
     }
   }
   std::sort(locaTable, locaTable + nGlyphs + 1,
