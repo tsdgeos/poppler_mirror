@@ -214,6 +214,7 @@ set(poppler_SRCS
   fofi/FoFiTrueType.cc
   fofi/FoFiType1.cc
   fofi/FoFiType1C.cc
+  fofi/FoFiIdentifier.cc
   poppler/Annot.cc
   poppler/Array.cc
   poppler/BuiltinFont.cc
@@ -460,6 +461,7 @@ if(ENABLE_XPDF_HEADERS)
     fofi/FoFiTrueType.h
     fofi/FoFiType1.h
     fofi/FoFiType1C.h
+    fofi/FoFiIdentifier.h
     DESTINATION include/poppler/fofi)
   if(ENABLE_LIBCURL)
     install(FILES
