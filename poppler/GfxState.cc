@@ -5175,7 +5175,7 @@ GfxSubpath::GfxSubpath(GfxSubpath *subpath) {
 
 void GfxSubpath::lineTo(double x1, double y1) {
   if (n >= size) {
-    size += 16;
+    size *= 2;
     x = (double *)greallocn(x, size, sizeof(double));
     y = (double *)greallocn(y, size, sizeof(double));
     curve = (GBool *)greallocn(curve, size, sizeof(GBool));
@@ -5189,7 +5189,7 @@ void GfxSubpath::lineTo(double x1, double y1) {
 void GfxSubpath::curveTo(double x1, double y1, double x2, double y2,
 			 double x3, double y3) {
   if (n+3 > size) {
-    size += 16;
+    size *= 2;
     x = (double *)greallocn(x, size, sizeof(double));
     y = (double *)greallocn(y, size, sizeof(double));
     curve = (GBool *)greallocn(curve, size, sizeof(GBool));
@@ -5261,7 +5261,7 @@ void GfxPath::moveTo(double x, double y) {
 void GfxPath::lineTo(double x, double y) {
   if (justMoved) {
     if (n >= size) {
-      size += 16;
+      size *= 2;
       subpaths = (GfxSubpath **)
 	           greallocn(subpaths, size, sizeof(GfxSubpath *));
     }
@@ -5276,7 +5276,7 @@ void GfxPath::curveTo(double x1, double y1, double x2, double y2,
 	     double x3, double y3) {
   if (justMoved) {
     if (n >= size) {
-      size += 16;
+      size *= 2;
       subpaths = (GfxSubpath **) 
  	         greallocn(subpaths, size, sizeof(GfxSubpath *));
     }
@@ -5292,7 +5292,7 @@ void GfxPath::close() {
   // moveto/closepath/clip, which defines an empty clipping region
   if (justMoved) {
     if (n >= size) {
-      size += 16;
+      size *= 2;
       subpaths = (GfxSubpath **)
 	greallocn(subpaths, size, sizeof(GfxSubpath *));
     }
