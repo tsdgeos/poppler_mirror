@@ -1095,7 +1095,7 @@ void PDFDoc::writeTrailer(Guint uxrefOffset, int uxrefSize,
 
   //calculate md5 digest
   Guchar digest[16];
-  Decrypt::md5((Guchar*)message.getCString(), message.getLength(), digest);
+  md5((Guchar*)message.getCString(), message.getLength(), digest);
   obj1.initString(new GooString((const char*)digest, 16));
 
   //create ID array
