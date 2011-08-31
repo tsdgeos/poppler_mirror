@@ -447,7 +447,7 @@ void JPXStream::fillReadBuf() {
   } while (readBufLen < 8);
 }
 
-GooString *JPXStream::getPSFilter(int psLevel, char *indent) {
+GooString *JPXStream::getPSFilter(int psLevel, const char *indent) {
   return NULL;
 }
 
