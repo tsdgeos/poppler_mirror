@@ -43,7 +43,7 @@ initer::initer()
 {
     if (!count) {
         globalParams = new GlobalParams();
-        setErrorFunction(detail::error_function);
+        setErrorCallback(detail::error_function, NULL);
     }
     count++;
 }
