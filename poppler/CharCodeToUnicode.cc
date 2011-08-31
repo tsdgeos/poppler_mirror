@@ -411,7 +411,10 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n,
   }
   if (code >= mapLen) {
     oldLen = mapLen;
-    mapLen = (code + 256) & ~255;
+    mapLen = mapLen ? 2 * mapLen : 256;
+    if (code >= mapLen) {
+      mapLen = (code + 256) & ~255;
+    }
     if (unlikely(code >= mapLen)) {
       error(errSyntaxWarning, -1, "Illegal code value in CharCodeToUnicode::addMapping");
       return;
