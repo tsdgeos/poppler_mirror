@@ -1575,6 +1575,13 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
   memcpy(headData, file + pos, 54);
   headData[8] = headData[9] = headData[10] = headData[11] = (Guchar)0;
 
+  // check for a bogus loca format field in the 'head' table
+  // (I've encountered fonts with loca format set to 0x0100 instead of 0x0001)
+  if (locaFmt != 0 && locaFmt != 1) {
+    headData[50] = 0;
+    headData[51] = 1;
+  }
+
   // read the original 'loca' table, pad entries out to 4 bytes, and
   // sort it into proper order -- some (non-compliant) fonts have
   // out-of-order loca tables; in order to correctly handle the case
