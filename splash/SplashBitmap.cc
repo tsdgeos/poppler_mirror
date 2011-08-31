@@ -217,6 +217,20 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
   return splashOk;
 }
 
+SplashError SplashBitmap::writeAlphaPGMFile(char *fileName) {
+  FILE *f;
+
+  if (!alpha) {
+    return splashErrModeMismatch;
+  }
+  if (!(f = fopen(fileName, "wb"))) {
+    return splashErrOpenFile;
+  }
+  fprintf(f, "P5\n%d %d\n255\n", width, height);
+  fwrite(alpha, 1, width * height, f);
+  fclose(f);
+  return splashOk;
+}
 
 void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel) {
   SplashColorPtr p;
@@ -266,6 +280,14 @@ void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel) {
 
 Guchar SplashBitmap::getAlpha(int x, int y) {
   return alpha[y * width + x];
+}
+
+SplashColorPtr SplashBitmap::takeData() {
+  SplashColorPtr data2;
+
+  data2 = data;
+  data = NULL;
+  return data2;
 }
 
 SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, char *fileName, int hDPI, int vDPI, const char *compressionString) {
