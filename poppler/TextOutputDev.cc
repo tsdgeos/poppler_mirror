@@ -5171,7 +5171,7 @@ TextOutputDev::TextOutputDev(char *fileName, GBool physLayoutA,
     } else if ((outputStream = fopen(fileName, append ? "ab" : "wb"))) {
       needClose = gTrue;
     } else {
-      error(-1, "Couldn't open text file '%s'", fileName);
+      error(errIO, -1, "Couldn't open text file '{0:s}'", fileName);
       ok = gFalse;
       actualText = NULL;
       return;

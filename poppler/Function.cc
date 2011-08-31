@@ -73,12 +73,12 @@ Function *Function::parse(Object *funcObj, std::set<int> *usedParents) {
   } else if (funcObj->isName("Identity")) {
     return new IdentityFunction();
   } else {
-    error(-1, "Expected function dictionary or stream");
+    error(errSyntaxError, -1, "Expected function dictionary or stream");
     return NULL;
   }
 
   if (!dict->lookup("FunctionType", &obj1)->isInt()) {
-    error(-1, "Function type is missing or wrong type");
+    error(errSyntaxError, -1, "Function type is missing or wrong type");
     obj1.free();
     return NULL;
   }
@@ -94,7 +94,7 @@ Function *Function::parse(Object *funcObj, std::set<int> *usedParents) {
   } else if (funcType == 4) {
     func = new PostScriptFunction(funcObj, dict);
   } else {
-    error(-1, "Unimplemented function type (%d)", funcType);
+    error(errSyntaxError, -1, "Unimplemented function type ({0:d})", funcType);
     return NULL;
   }
   if (!func->isOk()) {
@@ -111,26 +111,26 @@ GBool Function::init(Dict *dict) {
 
   //----- Domain
   if (!dict->lookup("Domain", &obj1)->isArray()) {
-    error(-1, "Function is missing domain");
+    error(errSyntaxError, -1, "Function is missing domain");
     goto err2;
   }
   m = obj1.arrayGetLength() / 2;
   if (m > funcMaxInputs) {
-    error(-1, "Functions with more than %d inputs are unsupported",
+    error(errSyntaxError, -1, "Functions with more than {0:d} inputs are unsupported",
 	  funcMaxInputs);
     goto err2;
   }
   for (i = 0; i < m; ++i) {
     obj1.arrayGet(2*i, &obj2);
     if (!obj2.isNum()) {
-      error(-1, "Illegal value in function domain array");
+      error(errSyntaxError, -1, "Illegal value in function domain array");
       goto err1;
     }
     domain[i][0] = obj2.getNum();
     obj2.free();
     obj1.arrayGet(2*i+1, &obj2);
     if (!obj2.isNum()) {
-      error(-1, "Illegal value in function domain array");
+      error(errSyntaxError, -1, "Illegal value in function domain array");
       goto err1;
     }
     domain[i][1] = obj2.getNum();
@@ -145,21 +145,21 @@ GBool Function::init(Dict *dict) {
     hasRange = gTrue;
     n = obj1.arrayGetLength() / 2;
     if (n > funcMaxOutputs) {
-      error(-1, "Functions with more than %d outputs are unsupported",
+      error(errSyntaxError, -1, "Functions with more than {0:d} outputs are unsupported",
 	    funcMaxOutputs);
       goto err2;
     }
     for (i = 0; i < n; ++i) {
       obj1.arrayGet(2*i, &obj2);
       if (!obj2.isNum()) {
-	error(-1, "Illegal value in function range array");
+	error(errSyntaxError, -1, "Illegal value in function range array");
 	goto err1;
       }
       range[i][0] = obj2.getNum();
       obj2.free();
       obj1.arrayGet(2*i+1, &obj2);
       if (!obj2.isNum()) {
-	error(-1, "Illegal value in function range array");
+	error(errSyntaxError, -1, "Illegal value in function range array");
 	goto err1;
       }
       range[i][1] = obj2.getNum();
@@ -229,11 +229,11 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
     goto err1;
   }
   if (!hasRange) {
-    error(-1, "Type 0 function is missing range");
+    error(errSyntaxError, -1, "Type 0 function is missing range");
     goto err1;
   }
   if (m > sampledFuncMaxInputs) {
-    error(-1, "Sampled functions with more than %d inputs are unsupported",
+    error(errSyntaxError, -1, "Sampled functions with more than {0:d} inputs are unsupported",
 	  sampledFuncMaxInputs);
     goto err1;
   }
@@ -243,7 +243,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
 
   //----- get the stream
   if (!funcObj->isStream()) {
-    error(-1, "Type 0 function isn't a stream");
+    error(errSyntaxError, -1, "Type 0 function isn't a stream");
     goto err1;
   }
   str = funcObj->getStream();
@@ -251,13 +251,13 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
   //----- Size
   if (!dict->lookup("Size", &obj1)->isArray() ||
       obj1.arrayGetLength() != m) {
-    error(-1, "Function has missing or invalid size array");
+    error(errSyntaxError, -1, "Function has missing or invalid size array");
     goto err2;
   }
   for (i = 0; i < m; ++i) {
     obj1.arrayGet(i, &obj2);
     if (!obj2.isInt()) {
-      error(-1, "Illegal value in function size array");
+      error(errSyntaxError, -1, "Illegal value in function size array");
       goto err3;
     }
     sampleSize[i] = obj2.getInt();
@@ -271,7 +271,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
 
   //----- BitsPerSample
   if (!dict->lookup("BitsPerSample", &obj1)->isInt()) {
-    error(-1, "Function has missing or invalid BitsPerSample");
+    error(errSyntaxError, -1, "Function has missing or invalid BitsPerSample");
     goto err2;
   }
   sampleBits = obj1.getInt();
@@ -284,14 +284,14 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
     for (i = 0; i < m; ++i) {
       obj1.arrayGet(2*i, &obj2);
       if (!obj2.isNum()) {
-	error(-1, "Illegal value in function encode array");
+	error(errSyntaxError, -1, "Illegal value in function encode array");
 	goto err3;
       }
       encode[i][0] = obj2.getNum();
       obj2.free();
       obj1.arrayGet(2*i+1, &obj2);
       if (!obj2.isNum()) {
-	error(-1, "Illegal value in function encode array");
+	error(errSyntaxError, -1, "Illegal value in function encode array");
 	goto err3;
       }
       encode[i][1] = obj2.getNum();
@@ -315,14 +315,14 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
     for (i = 0; i < n; ++i) {
       obj1.arrayGet(2*i, &obj2);
       if (!obj2.isNum()) {
-	error(-1, "Illegal value in function decode array");
+	error(errSyntaxError, -1, "Illegal value in function decode array");
 	goto err3;
       }
       decode[i][0] = obj2.getNum();
       obj2.free();
       obj1.arrayGet(2*i+1, &obj2);
       if (!obj2.isNum()) {
-	error(-1, "Illegal value in function decode array");
+	error(errSyntaxError, -1, "Illegal value in function decode array");
 	goto err3;
       }
       decode[i][1] = obj2.getNum();
@@ -467,21 +467,21 @@ ExponentialFunction::ExponentialFunction(Object *funcObj, Dict *dict) {
     goto err1;
   }
   if (m != 1) {
-    error(-1, "Exponential function with more than one input");
+    error(errSyntaxError, -1, "Exponential function with more than one input");
     goto err1;
   }
 
   //----- C0
   if (dict->lookup("C0", &obj1)->isArray()) {
     if (hasRange && obj1.arrayGetLength() != n) {
-      error(-1, "Function's C0 array is wrong length");
+      error(errSyntaxError, -1, "Function's C0 array is wrong length");
       goto err2;
     }
     n = obj1.arrayGetLength();
     for (i = 0; i < n; ++i) {
       obj1.arrayGet(i, &obj2);
       if (!obj2.isNum()) {
-	error(-1, "Illegal value in function C0 array");
+	error(errSyntaxError, -1, "Illegal value in function C0 array");
 	goto err3;
       }
       c0[i] = obj2.getNum();
@@ -489,7 +489,7 @@ ExponentialFunction::ExponentialFunction(Object *funcObj, Dict *dict) {
     }
   } else {
     if (hasRange && n != 1) {
-      error(-1, "Function's C0 array is wrong length");
+      error(errSyntaxError, -1, "Function's C0 array is wrong length");
       goto err2;
     }
     n = 1;
@@ -500,13 +500,13 @@ ExponentialFunction::ExponentialFunction(Object *funcObj, Dict *dict) {
   //----- C1
   if (dict->lookup("C1", &obj1)->isArray()) {
     if (obj1.arrayGetLength() != n) {
-      error(-1, "Function's C1 array is wrong length");
+      error(errSyntaxError, -1, "Function's C1 array is wrong length");
       goto err2;
     }
     for (i = 0; i < n; ++i) {
       obj1.arrayGet(i, &obj2);
       if (!obj2.isNum()) {
-	error(-1, "Illegal value in function C1 array");
+	error(errSyntaxError, -1, "Illegal value in function C1 array");
 	goto err3;
       }
       c1[i] = obj2.getNum();
@@ -514,7 +514,7 @@ ExponentialFunction::ExponentialFunction(Object *funcObj, Dict *dict) {
     }
   } else {
     if (n != 1) {
-      error(-1, "Function's C1 array is wrong length");
+      error(errSyntaxError, -1, "Function's C1 array is wrong length");
       goto err2;
     }
     c1[0] = 1;
@@ -523,7 +523,7 @@ ExponentialFunction::ExponentialFunction(Object *funcObj, Dict *dict) {
 
   //----- N (exponent)
   if (!dict->lookup("N", &obj1)->isNum()) {
-    error(-1, "Function has missing or invalid N");
+    error(errSyntaxError, -1, "Function has missing or invalid N");
     goto err2;
   }
   e = obj1.getNum();
@@ -591,13 +591,13 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
     goto err1;
   }
   if (m != 1) {
-    error(-1, "Stitching function with more than one input");
+    error(errSyntaxError, -1, "Stitching function with more than one input");
     goto err1;
   }
 
   //----- Functions
   if (!dict->lookup("Functions", &obj1)->isArray()) {
-    error(-1, "Missing 'Functions' entry in stitching function");
+    error(errSyntaxError, -1, "Missing 'Functions' entry in stitching function");
     goto err1;
   }
   k = obj1.arrayGetLength();
@@ -626,7 +626,8 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
     }
     if (i > 0 && (funcs[i]->getInputSize() != 1 ||
 		  funcs[i]->getOutputSize() != funcs[0]->getOutputSize())) {
-      error(-1, "Incompatible subfunctions in stitching function");
+      error(errSyntaxError, -1,
+	    "Incompatible subfunctions in stitching function");
       goto err2;
     }
     obj2.free();
@@ -636,13 +637,13 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
   //----- Bounds
   if (!dict->lookup("Bounds", &obj1)->isArray() ||
       obj1.arrayGetLength() != k - 1) {
-    error(-1, "Missing or invalid 'Bounds' entry in stitching function");
+    error(errSyntaxError, -1, "Missing or invalid 'Bounds' entry in stitching function");
     goto err1;
   }
   bounds[0] = domain[0][0];
   for (i = 1; i < k; ++i) {
     if (!obj1.arrayGet(i - 1, &obj2)->isNum()) {
-      error(-1, "Invalid type in 'Bounds' array in stitching function");
+      error(errSyntaxError, -1, "Invalid type in 'Bounds' array in stitching function");
       goto err2;
     }
     bounds[i] = obj2.getNum();
@@ -654,12 +655,12 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
   //----- Encode
   if (!dict->lookup("Encode", &obj1)->isArray() ||
       obj1.arrayGetLength() != 2 * k) {
-    error(-1, "Missing or invalid 'Encode' entry in stitching function");
+    error(errSyntaxError, -1, "Missing or invalid 'Encode' entry in stitching function");
     goto err1;
   }
   for (i = 0; i < 2 * k; ++i) {
     if (!obj1.arrayGet(i, &obj2)->isNum()) {
-      error(-1, "Invalid type in 'Encode' array in stitching function");
+      error(errSyntaxError, -1, "Invalid type in 'Encode' array in stitching function");
       goto err2;
     }
     encode[i] = obj2.getNum();
@@ -969,7 +970,7 @@ private:
   GBool checkOverflow(int n = 1)
   {
     if (sp - n < 0) {
-      error(-1, "Stack overflow in PostScript function");
+      error(errSyntaxError, -1, "Stack overflow in PostScript function");
       return gFalse;
     }
     return gTrue;
@@ -977,7 +978,7 @@ private:
   GBool checkUnderflow()
   {
     if (sp == psStackSize) {
-      error(-1, "Stack underflow in PostScript function");
+      error(errSyntaxError, -1, "Stack underflow in PostScript function");
       return gFalse;
     }
     return gTrue;
@@ -985,7 +986,7 @@ private:
   GBool checkType(PSObjectType t1, PSObjectType t2)
   {
     if (stack[sp].type != t1 && stack[sp].type != t2) {
-      error(-1, "Type mismatch in PostScript function");
+      error(errSyntaxError, -1, "Type mismatch in PostScript function");
       return gFalse;
     }
     return gTrue;
@@ -999,7 +1000,7 @@ void PSStack::copy(int n) {
   int i;
 
   if (sp + n > psStackSize) {
-    error(-1, "Stack underflow in PostScript function");
+    error(errSyntaxError, -1, "Stack underflow in PostScript function");
     return;
   }
   if (!checkOverflow(n)) {
@@ -1064,13 +1065,13 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict) {
     goto err1;
   }
   if (!hasRange) {
-    error(-1, "Type 4 function is missing range");
+    error(errSyntaxError, -1, "Type 4 function is missing range");
     goto err1;
   }
 
   //----- get the stream
   if (!funcObj->isStream()) {
-    error(-1, "Type 4 function isn't a stream");
+    error(errSyntaxError, -1, "Type 4 function isn't a stream");
     goto err1;
   }
   str = funcObj->getStream();
@@ -1079,7 +1080,7 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict) {
   codeString = new GooString();
   str->reset();
   if (!(tok = getToken(str)) || tok->cmp("{")) {
-    error(-1, "Expected '{' at start of PostScript function");
+    error(errSyntaxError, -1, "Expected '{' at start of PostScript function");
     if (tok) {
       delete tok;
     }
@@ -1145,7 +1146,7 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
 
   while (1) {
     if (!(tok = getToken(str))) {
-      error(-1, "Unexpected end of PostScript function stream");
+      error(errSyntaxError, -1, "Unexpected end of PostScript function stream");
       return gFalse;
     }
     p = tok->getCString();
@@ -1176,7 +1177,7 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
 	return gFalse;
       }
       if (!(tok = getToken(str))) {
-	error(-1, "Unexpected end of PostScript function stream");
+	error(errSyntaxError, -1, "Unexpected end of PostScript function stream");
 	return gFalse;
       }
       if (!tok->cmp("{")) {
@@ -1186,7 +1187,7 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
 	}
 	delete tok;
 	if (!(tok = getToken(str))) {
-	  error(-1, "Unexpected end of PostScript function stream");
+	  error(errSyntaxError, -1, "Unexpected end of PostScript function stream");
 	  return gFalse;
 	}
       } else {
@@ -1194,7 +1195,8 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
       }
       if (!tok->cmp("if")) {
 	if (elsePtr >= 0) {
-	  error(-1, "Got 'if' operator with two blocks in PostScript function");
+	  error(errSyntaxError, -1,
+		"Got 'if' operator with two blocks in PostScript function");
 	  return gFalse;
 	}
 	code[opPtr].type = psOperator;
@@ -1203,7 +1205,8 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
 	code[opPtr+2].blk = *codePtr;
       } else if (!tok->cmp("ifelse")) {
 	if (elsePtr < 0) {
-	  error(-1, "Got 'ifelse' operator with one blocks in PostScript function");
+	  error(errSyntaxError, -1,
+		"Got 'ifelse' operator with one block in PostScript function");
 	  return gFalse;
 	}
 	code[opPtr].type = psOperator;
@@ -1213,7 +1216,8 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
 	code[opPtr+2].type = psBlock;
 	code[opPtr+2].blk = *codePtr;
       } else {
-	error(-1, "Expected if/ifelse operator in PostScript function");
+	error(errSyntaxError, -1,
+	      "Expected if/ifelse operator in PostScript function");
 	delete tok;
 	return gFalse;
       }
@@ -1241,8 +1245,9 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
 	}
       }
       if (cmp != 0) {
-	error(-1, "Unknown operator '%s' in PostScript function",
-	      tok->getCString());
+	error(errSyntaxError, -1,
+	      "Unknown operator '{0:t}' in PostScript function",
+	      tok);
 	delete tok;
 	return gFalse;
       }
@@ -1620,7 +1625,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) {
       }
       break;
     default:
-      error(-1, "Internal: bad object in PostScript function code");
+      error(errSyntaxError, -1, "Internal: bad object in PostScript function code");
       break;
     }
   }

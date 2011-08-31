@@ -844,7 +844,7 @@ static void aes256DecryptBlock(DecryptAES256State *s, Guchar *in, GBool last) {
     s->bufIdx = n;
     if (n > 16)
     {
-      error(-1, "Reducing bufIdx from %d to 16 to not crash", n);
+      error(errSyntaxError, -1, "Reducing bufIdx from {0:d} to 16 to not crash", n);
       s->bufIdx = 16;
     }
   }

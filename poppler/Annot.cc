@@ -251,7 +251,7 @@ void AnnotPath::parsePathArray(Array *array) {
   GBool correct = gTrue;
 
   if (array->getLength() % 2) {
-    error(-1, "Bad Annot Path");
+    error(errSyntaxError, -1, "Bad Annot Path");
     return;
   }
 
@@ -341,7 +341,7 @@ AnnotQuadrilaterals::AnnotQuadrilaterals(Array *array, PDFRectangle *rect) {
         } else {
             correct = gFalse;
 	    obj.free();
-	    error (-1, "Invalid QuadPoint in annot");
+	    error (errSyntaxError, -1, "Invalid QuadPoint in annot");
 	    break;
         }
         obj.free();
@@ -895,7 +895,7 @@ void Annot::initialize(XRef *xrefA, Dict *dict, Catalog *catalog) {
   } else {
     rect->x1 = rect->y1 = 0;
     rect->x2 = rect->y2 = 1;
-    error(-1, "Bad bounding box for annotation");
+    error(errSyntaxError, -1, "Bad bounding box for annotation");
     ok = gFalse;
   }
   obj1.free();
@@ -1005,7 +1005,7 @@ void Annot::initialize(XRef *xrefA, Dict *dict, Catalog *catalog) {
   optContentConfig = catalog ? catalog->getOptContentConfig() : NULL;
   dict->lookupNF("OC", &oc);
   if (!oc.isRef() && !oc.isNull()) {
-    error (-1, "Annotation OC value not null or dict: %i", oc.getType());
+    error (errSyntaxError, -1, "Annotation OC value not null or dict: {0:d}", oc.getType());
   }
 }
 
@@ -2133,7 +2133,7 @@ void AnnotFreeText::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
     appearanceString = obj1.getString()->copy();
   } else {
     appearanceString = new GooString();
-    error(-1, "Bad appearance for annotation");
+    error(errSyntaxError, -1, "Bad appearance for annotation");
     ok = gFalse;
   }
   obj1.free();
@@ -2545,7 +2545,7 @@ void AnnotTextMarkup::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
   if(dict->lookup("QuadPoints", &obj1)->isArray()) {
     quadrilaterals = new AnnotQuadrilaterals(obj1.getArray(), rect);
   } else {
-    error(-1, "Bad Annot Text Markup QuadPoints");
+    error(errSyntaxError, -1, "Bad Annot Text Markup QuadPoints");
     quadrilaterals = NULL;
     ok = gFalse;
   }
@@ -2815,7 +2815,7 @@ void AnnotWidget::layoutText(GooString *text, GooString *outBuf, int *i,
   int last_i1, last_i2, last_o1, last_o2;
 
   if (unicode && text->getLength() % 2 != 0) {
-    error(-1, "AnnotWidget::layoutText, bad unicode string");
+    error(errSyntaxError, -1, "AnnotWidget::layoutText, bad unicode string");
     return;
   }
 
@@ -3083,16 +3083,16 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxResources *resourc
           freeFont = gTrue;
           addDingbatsResource = gTrue;
         } else {
-          error(-1, "Unknown font in field's DA string");
+          error(errSyntaxError, -1, "Unknown font in field's DA string");
         }
       }
     } else {
-      error(-1, "Invalid font name in 'Tf' operator in field's DA string");
+      error(errSyntaxError, -1, "Invalid font name in 'Tf' operator in field's DA string");
     }
     tok = (GooString *)daToks->get(tfPos + 1);
     fontSize = gatof(tok->getCString());
   } else {
-    error(-1, "Missing 'Tf' operator in field's DA string");
+    error(errSyntaxError, -1, "Missing 'Tf' operator in field's DA string");
   }
   if (!font) {
     if (daToks) {
@@ -3442,15 +3442,15 @@ void AnnotWidget::drawListBox(FormFieldChoice *fieldChoice,
     tok = (GooString *)daToks->get(tfPos);
     if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
       if (!resources || !(font = resources->lookupFont(tok->getCString() + 1))) {
-        error(-1, "Unknown font in field's DA string");
+        error(errSyntaxError, -1, "Unknown font in field's DA string");
       }
     } else {
-      error(-1, "Invalid font name in 'Tf' operator in field's DA string");
+      error(errSyntaxError, -1, "Invalid font name in 'Tf' operator in field's DA string");
     }
     tok = (GooString *)daToks->get(tfPos + 1);
     fontSize = gatof(tok->getCString());
   } else {
-    error(-1, "Missing 'Tf' operator in field's DA string");
+    error(errSyntaxError, -1, "Missing 'Tf' operator in field's DA string");
   }
   if (!font) {
     if (daToks) {
@@ -3794,7 +3794,7 @@ void AnnotWidget::generateFieldAppearance() {
     break;
   case formUndef:
   default:
-    error(-1, "Unknown field type");
+    error(errSyntaxError, -1, "Unknown field type");
   }
 
   // build the appearance stream dictionary
@@ -3935,7 +3935,7 @@ void AnnotMovie::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
     }
     obj2.free();
   } else {
-    error(-1, "Bad Annot Movie");
+    error(errSyntaxError, -1, "Bad Annot Movie");
     movie = NULL;
     ok = gFalse;
   }
@@ -4076,7 +4076,7 @@ void AnnotScreen::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
   if (dict->lookup("A", &obj1)->isDict()) {
     action = LinkAction::parseAction(&obj1, catalog->getBaseURI());
     if (action->getKind() == actionRendition && page == 0) {
-      error (-1, "Invalid Rendition action: associated screen annotation without P");
+      error (errSyntaxError, -1, "Invalid Rendition action: associated screen annotation without P");
       delete action;
       action = NULL;
       ok = gFalse;
@@ -4391,7 +4391,7 @@ void AnnotPolygon::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
     vertices = new AnnotPath(obj1.getArray());
   } else {
     vertices = new AnnotPath();
-    error(-1, "Bad Annot Polygon Vertices");
+    error(errSyntaxError, -1, "Bad Annot Polygon Vertices");
     ok = gFalse;
   }
   obj1.free();
@@ -4557,7 +4557,7 @@ void AnnotInk::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
   } else {
     inkListLength = 0;
     inkList = NULL;
-    error(-1, "Bad Annot Ink List");
+    error(errSyntaxError, -1, "Bad Annot Ink List");
     ok = gFalse;
   }
   obj1.free();
@@ -4600,7 +4600,7 @@ void AnnotFileAttachment::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) 
   if (dict->lookup("FS", &obj1)->isDict() || dict->lookup("FS", &obj1)->isString()) {
     obj1.copy(&file);
   } else {
-    error(-1, "Bad Annot File Attachment");
+    error(errSyntaxError, -1, "Bad Annot File Attachment");
     ok = gFalse;
   }
   obj1.free();
@@ -4815,7 +4815,7 @@ void AnnotSound::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
 
   sound = Sound::parseSound(dict->lookup("Sound", &obj1));
   if (!sound) {
-    error(-1, "Bad Annot Sound");
+    error(errSyntaxError, -1, "Bad Annot Sound");
     ok = gFalse;
   }
   obj1.free();

@@ -273,7 +273,7 @@ Page::Page(XRef *xrefA, int numA, Dict *pageDict, Ref pageRefA, PageAttrs *attrs
   // transtion
   pageDict->lookupNF("Trans", &trans);
   if (!(trans.isRef() || trans.isDict() || trans.isNull())) {
-    error(-1, "Page transition object (page %d) is wrong type (%s)",
+    error(errSyntaxError, -1, "Page transition object (page {0:d}) is wrong type ({1:s})",
 	  num, trans.getTypeName());
     trans.free();
   }
@@ -281,7 +281,7 @@ Page::Page(XRef *xrefA, int numA, Dict *pageDict, Ref pageRefA, PageAttrs *attrs
   // duration
   pageDict->lookupNF("Dur", &tmp);
   if (!(tmp.isNum() || tmp.isNull())) {
-    error(-1, "Page duration object (page %d) is wrong type (%s)",
+    error(errSyntaxError, -1, "Page duration object (page {0:d}) is wrong type ({1:s})",
 	  num, tmp.getTypeName());
   } else if (tmp.isNum()) {
     duration = tmp.getNum();
@@ -291,7 +291,7 @@ Page::Page(XRef *xrefA, int numA, Dict *pageDict, Ref pageRefA, PageAttrs *attrs
   // annotations
   pageDict->lookupNF("Annots", &annotsObj);
   if (!(annotsObj.isRef() || annotsObj.isArray() || annotsObj.isNull())) {
-    error(-1, "Page annotations object (page %d) is wrong type (%s)",
+    error(errSyntaxError, -1, "Page annotations object (page {0:d}) is wrong type ({1:s})",
 	  num, annotsObj.getTypeName());
     annotsObj.free();
     goto err2;
@@ -301,7 +301,7 @@ Page::Page(XRef *xrefA, int numA, Dict *pageDict, Ref pageRefA, PageAttrs *attrs
   pageDict->lookupNF("Contents", &contents);
   if (!(contents.isRef() || contents.isArray() ||
 	contents.isNull())) {
-    error(-1, "Page contents object (page %d) is wrong type (%s)",
+    error(errSyntaxError, -1, "Page contents object (page {0:d}) is wrong type ({1:s})",
 	  num, contents.getTypeName());
     contents.free();
     goto err1;
@@ -310,7 +310,7 @@ Page::Page(XRef *xrefA, int numA, Dict *pageDict, Ref pageRefA, PageAttrs *attrs
   // thumb
   pageDict->lookupNF("Thumb", &thumb);
   if (!(thumb.isStream() || thumb.isNull() || thumb.isRef())) {
-      error(-1, "Page thumb object (page %d) is wrong type (%s)",
+      error(errSyntaxError, -1, "Page thumb object (page {0:d}) is wrong type ({1:s})",
             num, thumb.getTypeName());
       thumb.initNull(); 
   }
@@ -318,7 +318,7 @@ Page::Page(XRef *xrefA, int numA, Dict *pageDict, Ref pageRefA, PageAttrs *attrs
   // actions
   pageDict->lookupNF("AA", &actions);
   if (!(actions.isDict() || actions.isNull())) {
-      error(-1, "Page additional action object (page %d) is wrong type (%s)",
+      error(errSyntaxError, -1, "Page additional action object (page {0:d}) is wrong type ({1:s})",
             num, actions.getTypeName());
       actions.initNull();
   }

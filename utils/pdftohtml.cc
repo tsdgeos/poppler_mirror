@@ -252,7 +252,7 @@ int main(int argc, char *argv[]) {
   // check for copy permission
   if (!doc->okToCopy()) {
     if (!noDrm) {
-      error(-1, "Copying of text from this document is not allowed.");
+      error(errNotAllowed, -1, "Copying of text from this document is not allowed.");
       goto error;
     }
     fprintf(stderr, "Document has copy-protection bit set.\n");
@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
     }
     delete tmp;
   } else if (fileName->cmp("fd://0") == 0) {
-      error(-1, "You have to provide an output filename when reading form stdin.");
+      error(errCommandLine, -1, "You have to provide an output filename when reading form stdin.");
       goto error;
   } else {
     p = fileName->getCString() + fileName->getLength() - 4;
@@ -482,7 +482,7 @@ int main(int argc, char *argv[]) {
       gsCmd->append("\"");
       //    printf("running: %s\n", gsCmd->getCString());
       if( !executeCommand(gsCmd->getCString()) && !errQuiet) {
-        error(-1, "Failed to launch Ghostscript!\n");
+        error(errIO, -1, "Failed to launch Ghostscript!\n");
       }
       unlink(psFileName->getCString());
       delete tw;

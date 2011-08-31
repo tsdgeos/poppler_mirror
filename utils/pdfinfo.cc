@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
 
   // get mapping to output encoding
   if (!(uMap = globalParams->getTextEncoding())) {
-    error(-1, "Couldn't get text encoding");
+    error(errCommandLine, -1, "Couldn't get text encoding");
     delete fileName;
     goto err1;
   }
@@ -262,7 +262,7 @@ int main(int argc, char *argv[]) {
       for (pg = firstPage; pg <= lastPage; ++pg) {
 	page = doc->getPage(pg);
 	if (!page) {
-          error(-1, "Failed to print boxes for page %d", pg);
+          error(errSyntaxError, -1, "Failed to print boxes for page {0:d}", pg);
 	  continue;
 	}
 	sprintf(buf, "Page %4d MediaBox: ", pg);
@@ -279,7 +279,7 @@ int main(int argc, char *argv[]) {
     } else {
       page = doc->getPage(firstPage);
       if (!page) {
-        error(-1, "Failed to print boxes for page %d", firstPage);
+        error(errSyntaxError, -1, "Failed to print boxes for page {0:d}", firstPage);
       } else {
         printBox("MediaBox:       ", page->getMediaBox());
         printBox("CropBox:        ", page->getCropBox());

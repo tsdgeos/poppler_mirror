@@ -291,7 +291,7 @@ int FormWidgetText::getMaxLen () const
 void FormWidgetText::setContent(GooString* new_content)
 {
   if (isReadOnly()) {
-    error(-1, "FormWidgetText::setContentCopy called on a read only field\n");
+    error(errInternal, -1, "FormWidgetText::setContentCopy called on a read only field\n");
     return;
   }
 
@@ -312,7 +312,7 @@ FormWidgetChoice::~FormWidgetChoice()
 bool FormWidgetChoice::_checkRange (int i)
 {
   if (i < 0 || i >= parent->getNumChoices()) {
-    error(-1, "FormWidgetChoice::_checkRange i out of range : %i", i);
+    error(errInternal, -1, "FormWidgetChoice::_checkRange i out of range : {0:d}", i);
     return false;
   } 
   return true;
@@ -321,7 +321,7 @@ bool FormWidgetChoice::_checkRange (int i)
 void FormWidgetChoice::select (int i)
 {
   if (isReadOnly()) {
-    error(-1, "FormWidgetChoice::select called on a read only field\n");
+    error(errInternal, -1, "FormWidgetChoice::select called on a read only field\n");
     return;
   }
   if (!_checkRange(i)) return;
@@ -331,7 +331,7 @@ void FormWidgetChoice::select (int i)
 void FormWidgetChoice::toggle (int i)
 {
   if (isReadOnly()) {
-    error(-1, "FormWidgetChoice::toggle called on a read only field\n");
+    error(errInternal, -1, "FormWidgetChoice::toggle called on a read only field\n");
     return;
   }
   if (!_checkRange(i)) return;
@@ -341,7 +341,7 @@ void FormWidgetChoice::toggle (int i)
 void FormWidgetChoice::deselectAll ()
 {
   if (isReadOnly()) {
-    error(-1, "FormWidgetChoice::deselectAll called on a read only field\n");
+    error(errInternal, -1, "FormWidgetChoice::deselectAll called on a read only field\n");
     return;
   }
   parent->deselectAll();
@@ -350,7 +350,7 @@ void FormWidgetChoice::deselectAll ()
 GooString* FormWidgetChoice::getEditChoice ()
 {
   if (!hasEdit()) {
-    error(-1, "FormFieldChoice::getEditChoice called on a non-editable choice\n");
+    error(errInternal, -1, "FormFieldChoice::getEditChoice called on a non-editable choice\n");
     return NULL;
   }
   return parent->getEditChoice();
@@ -365,11 +365,11 @@ bool FormWidgetChoice::isSelected (int i)
 void FormWidgetChoice::setEditChoice (GooString* new_content)
 {
   if (isReadOnly()) {
-    error(-1, "FormWidgetText::setEditChoice called on a read only field\n");
+    error(errInternal, -1, "FormWidgetText::setEditChoice called on a read only field\n");
     return;
   }
   if (!hasEdit()) {
-    error(-1, "FormFieldChoice::setEditChoice : trying to edit an non-editable choice\n");
+    error(errInternal, -1, "FormFieldChoice::setEditChoice : trying to edit an non-editable choice\n");
     return;
   }
 
@@ -457,12 +457,12 @@ FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, FormField *pare
       Object childRef, childObj;
 
       if (!obj1.arrayGetNF(i, &childRef)->isRef()) {
-        error (-1, "Invalid form field renference");
+        error (errSyntaxError, -1, "Invalid form field renference");
         childRef.free();
         continue;
       }
       if (!obj1.arrayGet(i, &childObj)->isDict()) {
-        error (-1, "Form field child is not a dictionary");
+        error (errSyntaxError, -1, "Form field child is not a dictionary");
         childObj.free();
         childRef.free();
         continue;
@@ -482,7 +482,7 @@ FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, FormField *pare
           obj3.free();
 
           if (terminal) {
-            error(-1, "Field can't have both Widget AND Field as kids\n");
+            error(errSyntaxWarning, -1, "Field can't have both Widget AND Field as kids\n");
             continue;
           }
 
@@ -492,7 +492,7 @@ FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, FormField *pare
         } else if (childObj.dictLookup("Subtype", &obj2)->isName("Widget")) {
           // Child is a widget annotation
           if (!terminal && numChildren > 0) {
-            error(-1, "Field can't have both Widget AND Field as kids\n");
+            error(errSyntaxWarning, -1, "Field can't have both Widget AND Field as kids\n");
             obj2.free();
             obj3.free();
             continue;
@@ -646,7 +646,7 @@ void FormField::_createWidget (Object *obj, Ref aref)
     widgets[numChildren-1] = new FormWidgetSignature(xref, obj, numChildren-1, aref, this);
     break;
   default:
-    error(-1, "SubType on non-terminal field, invalid document?");
+    error(errSyntaxWarning, -1, "SubType on non-terminal field, invalid document?");
     numChildren--;
     terminal = false;
   }
@@ -740,7 +740,7 @@ FormFieldButton::FormFieldButton(XRef *xrefA, Object *aobj, const Ref& ref, Form
       }
     } 
     if (flags & 0x1000000) { // 26 -> radiosInUnison
-      error(-1, "FormFieldButton:: radiosInUnison flag unimplemented, please report a bug with a testcase\n");
+      error(errUnimplemented, -1, "FormFieldButton:: radiosInUnison flag unimplemented, please report a bug with a testcase\n");
     } 
   }
 
@@ -796,7 +796,7 @@ void FormFieldButton::fillChildrenSiblingsID()
 GBool FormFieldButton::setState(char *state)
 {
   if (readOnly) {
-    error(-1, "FormFieldButton::setState called on a readOnly field\n");
+    error(errInternal, -1, "FormFieldButton::setState called on a readOnly field\n");
     return gFalse;
   }
 
@@ -1024,22 +1024,22 @@ FormFieldChoice::FormFieldChoice(XRef *xrefA, Object *aobj, const Ref& ref, Form
         Object obj3;
 
         if (obj2.arrayGetLength() < 2) {
-          error(-1, "FormWidgetChoice:: invalid Opt entry -- array's length < 2\n");
+          error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- array's length < 2\n");
           continue;
         }
         if (obj2.arrayGet(0, &obj3)->isString())
           choices[i].exportVal = obj3.getString()->copy();
         else
-          error(-1, "FormWidgetChoice:: invalid Opt entry -- exported value not a string\n");
+          error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- exported value not a string\n");
         obj3.free();
 
         if (obj2.arrayGet(1, &obj3)->isString())
           choices[i].optionName = obj3.getString()->copy();
         else
-          error(-1, "FormWidgetChoice:: invalid Opt entry -- choice name not a string\n");
+          error(errSyntaxError, -1, "FormWidgetChoice:: invalid Opt entry -- choice name not a string\n");
         obj3.free();
       } else {
-        error(-1, "FormWidgetChoice:: invalid %d Opt entry\n", i);
+        error(errSyntaxError, -1, "FormWidgetChoice:: invalid {0:d} Opt entry\n", i);
       }
       obj2.free();
     }
@@ -1289,14 +1289,14 @@ Form::Form(XRef *xrefA, Object* acroFormA)
       array->get(i, &obj2);
       array->getNF(i, &oref);
       if (!oref.isRef()) {
-        error(-1, "Direct object in rootFields");
+        error(errSyntaxWarning, -1, "Direct object in rootFields");
 	obj2.free();
 	oref.free();
         continue;
       }
 
       if (!obj2.isDict()) {
-        error(-1, "Reference in Fields array to an invalid or non existant object");
+        error(errSyntaxWarning, -1, "Reference in Fields array to an invalid or non existant object");
 	obj2.free();
 	oref.free();
 	continue;
@@ -1314,7 +1314,7 @@ Form::Form(XRef *xrefA, Object* acroFormA)
       oref.free();
     }
   } else {
-    error(-1, "Can't get Fields array\n");
+    error(errSyntaxError, -1, "Can't get Fields array\n");
   }
   obj1.free ();
 

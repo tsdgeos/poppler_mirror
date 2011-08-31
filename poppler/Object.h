@@ -41,15 +41,15 @@
 
 #define OBJECT_TYPE_CHECK(wanted_type) \
     if (unlikely(type != wanted_type)) { \
-        error(0, (char *) "Call to Object where the object was type %d, " \
-                 "not the expected type %d", type, wanted_type); \
+        error(errInternal, 0, (char *) "Call to Object where the object was type {0:d}, " \
+                 "not the expected type {1:d}", type, wanted_type); \
         abort(); \
     }
 
 #define OBJECT_2TYPES_CHECK(wanted_type1, wanted_type2) \
     if (unlikely(type != wanted_type1) && unlikely(type != wanted_type2)) { \
-        error(0, (char *) "Call to Object where the object was type %d, " \
-                 "not the expected type %d or %d", type, wanted_type1, wanted_type2); \
+        error(errInternal, 0, (char *) "Call to Object where the object was type {0:d}, " \
+                 "not the expected type {1:d} or {2:d}", type, wanted_type1, wanted_type2); \
         abort(); \
     }
 

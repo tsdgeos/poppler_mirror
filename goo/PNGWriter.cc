@@ -59,25 +59,25 @@ bool PNGWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 	/* initialize stuff */
 	png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (!png_ptr) {
-		error(-1, "png_create_write_struct failed");
+		error(errInternal, -1, "png_create_write_struct failed");
 		return false;
 	}
 
 	info_ptr = png_create_info_struct(png_ptr);
 	if (!info_ptr) {
-		error(-1, "png_create_info_struct failed");
+		error(errInternal, -1, "png_create_info_struct failed");
 		return false;
 	}
 
 	if (setjmp(png_jmpbuf(png_ptr))) {
-		error(-1, "png_jmpbuf failed");
+		error(errInternal, -1, "png_jmpbuf failed");
 		return false;
 	}
 
 	/* write header */
 	png_init_io(png_ptr, f);
 	if (setjmp(png_jmpbuf(png_ptr))) {
-		error(-1, "Error during writing header");
+		error(errInternal, -1, "Error during writing header");
 		return false;
 	}
 	
@@ -118,7 +118,7 @@ bool PNGWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 
 	png_write_info(png_ptr, info_ptr);
 	if (setjmp(png_jmpbuf(png_ptr))) {
-		error(-1, "error during writing png info bytes");
+		error(errInternal, -1, "error during writing png info bytes");
 		return false;
 	}
 
@@ -134,7 +134,7 @@ bool PNGWriter::writePointers(unsigned char **rowPointers, int rowCount)
 	png_write_image(png_ptr, rowPointers);
 	/* write bytes */
 	if (setjmp(png_jmpbuf(png_ptr))) {
-		error(-1, "Error during writing bytes");
+		error(errInternal, -1, "Error during writing bytes");
 		return false;
 	}
 	
@@ -146,7 +146,7 @@ bool PNGWriter::writeRow(unsigned char **row)
 	// Write the row to the file
 	png_write_rows(png_ptr, row, 1);
 	if (setjmp(png_jmpbuf(png_ptr))) {
-		error(-1, "error during png row write");
+		error(errInternal, -1, "error during png row write");
 		return false;
 	}
 	
@@ -158,7 +158,7 @@ bool PNGWriter::close()
 	/* end write */
 	png_write_end(png_ptr, info_ptr);
 	if (setjmp(png_jmpbuf(png_ptr))) {
-		error(-1, "Error during end of write");
+		error(errInternal, -1, "Error during end of write");
 		return false;
 	}
 	

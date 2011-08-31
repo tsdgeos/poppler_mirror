@@ -84,7 +84,7 @@ void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
     setFilename("jpg");
     ++imgNum;
     if (!(f = fopen(fileName, "wb"))) {
-      error(-1, "Couldn't open image file '%s'", fileName);
+      error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
       return;
     }
 
@@ -106,7 +106,7 @@ void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
     setFilename("pbm");
     ++imgNum;
     if (!(f = fopen(fileName, "wb"))) {
-      error(-1, "Couldn't open image file '%s'", fileName);
+      error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
       return;
     }
     fprintf(f, "P4\n");
@@ -151,7 +151,7 @@ void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     setFilename("jpg");
     ++imgNum;
     if (!(f = fopen(fileName, "wb"))) {
-      error(-1, "Couldn't open image file '%s'", fileName);
+      error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
       return;
     }
 
@@ -174,7 +174,7 @@ void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     setFilename("pbm");
     ++imgNum;
     if (!(f = fopen(fileName, "wb"))) {
-      error(-1, "Couldn't open image file '%s'", fileName);
+      error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
       return;
     }
     fprintf(f, "P4\n");
@@ -205,7 +205,7 @@ void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     setFilename("ppm");
     ++imgNum;
     if (!(f = fopen(fileName, "wb"))) {
-      error(-1, "Couldn't open image file '%s'", fileName);
+      error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
       return;
     }
     fprintf(f, "P6\n");

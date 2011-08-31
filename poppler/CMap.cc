@@ -85,8 +85,8 @@ CMap *CMap::parse(CMapCache *cache, GooString *collectionA,
         return new CMap(collectionA->copy(), cMapNameA->copy(), 1);
       }
 
-      error(-1, "Couldn't find '%s' CMap file for '%s' collection",
-	    cMapNameA->getCString(), collectionA->getCString());
+      error(errSyntaxError, -1, "Couldn't find '{0:t}' CMap file for '{1:t}' collection",
+	    cMapNameA, collectionA);
       return NULL;
     }
     pst = new PSTokenizer(&getCharFromFile, f);
@@ -111,7 +111,7 @@ CMap *CMap::parse(CMapCache *cache, GooString *collectionA,
 	}
 	if (!pst->getToken(tok2, sizeof(tok2), &n2) ||
 	    !strcmp(tok2, "endcodespacerange")) {
-	  error(-1, "Illegal entry in codespacerange block in CMap");
+	  error(errSyntaxError, -1, "Illegal entry in codespacerange block in CMap");
 	  break;
 	}
 	if (tok1[0] == '<' && tok2[0] == '<' &&
@@ -131,17 +131,17 @@ CMap *CMap::parse(CMapCache *cache, GooString *collectionA,
 	}
 	if (!pst->getToken(tok2, sizeof(tok2), &n2) ||
 	    !strcmp(tok2, "endcidchar")) {
-	  error(-1, "Illegal entry in cidchar block in CMap");
+	  error(errSyntaxError, -1, "Illegal entry in cidchar block in CMap");
 	  break;
 	}
 	if (!(tok1[0] == '<' && tok1[n1 - 1] == '>' &&
 	      n1 >= 4 && (n1 & 1) == 0)) {
-	  error(-1, "Illegal entry in cidchar block in CMap");
+	  error(errSyntaxError, -1, "Illegal entry in cidchar block in CMap");
 	  continue;
 	}
 	tok1[n1 - 1] = '\0';
 	if (sscanf(tok1 + 1, "%x", &code) != 1) {
-	  error(-1, "Illegal entry in cidchar block in CMap");
+	  error(errSyntaxError, -1, "Illegal entry in cidchar block in CMap");
 	  continue;
 	}
 	n1 = (n1 - 2) / 2;
@@ -157,7 +157,7 @@ CMap *CMap::parse(CMapCache *cache, GooString *collectionA,
 	    !strcmp(tok2, "endcidrange") ||
 	    !pst->getToken(tok3, sizeof(tok3), &n3) ||
 	    !strcmp(tok3, "endcidrange")) {
-	  error(-1, "Illegal entry in cidrange block in CMap");
+	  error(errSyntaxError, -1, "Illegal entry in cidrange block in CMap");
 	  break;
 	}
 	if (tok1[0] == '<' && tok2[0] == '<' &&
@@ -242,7 +242,7 @@ void CMap::copyVector(CMapVectorEntry *dest, CMapVectorEntry *src) {
       copyVector(dest[i].vector, src[i].vector);
     } else {
       if (dest[i].isVector) {
-	error(-1, "Collision in usecmap");
+	error(errSyntaxError, -1, "Collision in usecmap");
       } else {
 	dest[i].cid = src[i].cid;
       }
@@ -285,8 +285,9 @@ void CMap::addCIDs(Guint start, Guint end, Guint nBytes, CID firstCID) {
   for (i = nBytes - 1; i >= 1; --i) {
     byte = (start >> (8 * i)) & 0xff;
     if (!vec[byte].isVector) {
-      error(-1, "Invalid CID (%0*x - %0*x) in CMap",
-	    2*nBytes, start, 2*nBytes, end);
+      error(errSyntaxError, -1,
+	    "Invalid CID ({0:x} - {1:x} [{2:d} bytes]) in CMap",
+	    start, end, nBytes);
       return;
     }
     vec = vec[byte].vector;
@@ -294,8 +295,9 @@ void CMap::addCIDs(Guint start, Guint end, Guint nBytes, CID firstCID) {
   cid = firstCID;
   for (byte = (int)(start & 0xff); byte <= (int)(end & 0xff); ++byte) {
     if (vec[byte].isVector) {
-      error(-1, "Invalid CID (%0*x - %0*x) in CMap",
-	    2*nBytes, start, 2*nBytes, end);
+      error(errSyntaxError, -1,
+	    "Invalid CID ({0:x} - {1:x} [{2:d} bytes]) in CMap",
+	    start, end, nBytes);
     } else {
       vec[byte].cid = cid;
     }

@@ -55,22 +55,22 @@ char *FoFiBase::readFile(char *fileName, int *fileLen) {
   int n;
 
   if (!(f = fopen(fileName, "rb"))) {
-    error(-1, "Cannot open '%s'", fileName);
+    error(errIO, -1, "Cannot open '{0:s}'", fileName);
     return NULL;
   }
   if (fseek(f, 0, SEEK_END) != 0) {
-    error(-1, "Cannot seek to end of '%s'", fileName);
+    error(errIO, -1, "Cannot seek to end of '{0:s}'", fileName);
     fclose(f);
     return NULL;
   }
   n = (int)ftell(f);
   if (n < 0) {
-    error(-1, "Cannot determine length of '%s'", fileName);
+    error(errIO, -1, "Cannot determine length of '{0:s}'", fileName);
     fclose(f);
     return NULL;
   }
   if (fseek(f, 0, SEEK_SET) != 0) {
-    error(-1, "Cannot seek to start of '%s'", fileName);
+    error(errIO, -1, "Cannot seek to start of '{0:s}'", fileName);
     fclose(f);
     return NULL;
   }

@@ -92,7 +92,7 @@ Object *Parser::getObj(Object *obj, Guchar *fileKey,
       obj->arrayAdd(getObj(&obj2, fileKey, encAlgorithm, keyLength,
 			   objNum, objGen, fetchOriginatorNums));
     if (buf1.isEOF())
-      error(getPos(), "End of file inside array");
+      error(errSyntaxError, getPos(), "End of file inside array");
     shift();
 
   // dictionary or stream
@@ -101,7 +101,7 @@ Object *Parser::getObj(Object *obj, Guchar *fileKey,
     obj->initDict(xref);
     while (!buf1.isCmd(">>") && !buf1.isEOF()) {
       if (!buf1.isName()) {
-	error(getPos(), "Dictionary key must be a name object");
+	error(errSyntaxError, getPos(), "Dictionary key must be a name object");
 	shift();
       } else {
 	// buf1 might go away in shift(), so construct the key
@@ -115,7 +115,7 @@ Object *Parser::getObj(Object *obj, Guchar *fileKey,
       }
     }
     if (buf1.isEOF())
-      error(getPos(), "End of file inside dictionary");
+      error(errSyntaxError, getPos(), "End of file inside dictionary");
     // stream objects are not allowed inside content streams or
     // object streams
     if (allowStreams && buf2.isCmd("stream")) {
@@ -190,7 +190,7 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
     length = (Guint)obj.getInt();
     obj.free();
   } else {
-    error(getPos(), "Bad 'Length' attribute in stream");
+    error(errSyntaxError, getPos(), "Bad 'Length' attribute in stream");
     obj.free();
     length = 0;
   }
@@ -221,7 +221,7 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
   if (buf1.isCmd("endstream")) {
     shift();
   } else {
-    error(getPos(), "Missing 'endstream'");
+    error(errSyntaxError, getPos(), "Missing 'endstream'");
     if (xref) {
       // shift until we find the proper endstream or we change to another object or reach eof
       while (!buf1.isCmd("endstream") && xref->getNumEntry(lexer->getPos()) == objNum && !buf1.isEOF()) {

@@ -218,7 +218,7 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
 #if SPLASH_CMYK
   case splashModeCMYK8:
     // PNM doesn't support CMYK
-    error(-1, "unsupported SplashBitmap mode");
+    error(errInternal, -1, "unsupported SplashBitmap mode");
     return splashErrGeneric;
     break;
 #endif
@@ -326,7 +326,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
     default:
       // Not the greatest error message, but users of this function should
       // have already checked whether their desired format is compiled in.
-      error(-1, "Support for this image type not compiled in");
+      error(errInternal, -1, "Support for this image type not compiled in");
       return splashErrGeneric;
   }
 
@@ -364,7 +364,7 @@ SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int
       && mode != splashModeCMYK8
 #endif
      ) {
-    error(-1, "unsupported SplashBitmap mode");
+    error(errInternal, -1, "unsupported SplashBitmap mode");
     return splashErrGeneric;
   }
 

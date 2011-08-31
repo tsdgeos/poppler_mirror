@@ -25,7 +25,7 @@ void outputMessage(j_common_ptr cinfo)
 	(*cinfo->err->format_message) (cinfo, buffer);
 
 	// Send it to poppler's error handler
-	error(-1, "%s", buffer);
+	error(errInternal, -1, "{0:s}", buffer);
 }
 
 JpegWriter::JpegWriter(int q, bool p, J_COLOR_SPACE cm)

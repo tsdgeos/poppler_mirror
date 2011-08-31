@@ -81,16 +81,16 @@ int main (int argc, char *argv[])
         }
       }
     } else if (doc->isOk()) {
-      error(-1, "Could not merge encrypted files ('%s')", argv[i]);
+      error(errUnimplemented, -1, "Could not merge encrypted files ('{0:s}')", argv[i]);
       return -1;
     } else {
-      error(-1, "Could not merge damaged documents ('%s')", argv[i]);
+      error(errSyntaxError, -1, "Could not merge damaged documents ('{0:s}')", argv[i]);
       return -1;
     }
   }
 
   if (!(f = fopen(fileName, "wb"))) {
-    error(-1, "Could not open file '%s'", fileName);
+    error(errIO, -1, "Could not open file '{0:s}'", fileName);
     return -1;
   }
   outStr = new FileOutStream(f, 0);

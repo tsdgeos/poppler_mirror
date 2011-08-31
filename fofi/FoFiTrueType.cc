@@ -1976,7 +1976,7 @@ void FoFiTrueType::parse() {
 	tables[i].offset + tables[i].len > len) {
       i--;
       wrongTables++;
-      error(-1, "Found a bad table definition on true type definition, trying to continue...");
+      error(errSyntaxWarning, -1, "Found a bad table definition on true type definition, trying to continue...");
     }
     pos += 16;
   }

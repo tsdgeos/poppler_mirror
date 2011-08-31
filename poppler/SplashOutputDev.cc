@@ -1254,7 +1254,7 @@ T3FontCache::T3FontCache(Ref *fontIDA, double m11A, double m12A,
   if (glyphSize < 10485760 / cacheAssoc / cacheSets) {
     cacheData = (Guchar *)gmallocn_checkoverflow(cacheSets * cacheAssoc, glyphSize);
   } else {
-    error(-1, "Not creating cacheData for T3FontCache, it asked for too much memory.\n"
+    error(errSyntaxWarning, -1, "Not creating cacheData for T3FontCache, it asked for too much memory.\n"
               "       This could teoretically result in wrong rendering,\n"
               "       but most probably the document is bogus.\n"
               "       Please report a bug if you think the rendering may be wrong because of this.");
@@ -1784,7 +1784,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
         dfp = globalParams->getDisplayFont(gfxFont);
       }
       if (!dfp) {
-	error(-1, "Couldn't find a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -1816,7 +1816,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 			   id,
 			   fontsrc,
 			   (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -1827,7 +1827,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 			   id,
 			   fontsrc,
 			   (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -1838,7 +1838,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 			   id,
 			   fontsrc,
 			   (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -1862,7 +1862,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 			   id,
 			   fontsrc,
 			   codeToGID, n))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -1873,7 +1873,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
       if (!(fontFile = fontEngine->loadCIDFont(
 			   id,
 			   fontsrc))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -1883,7 +1883,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
       if (!(fontFile = fontEngine->loadOpenTypeCFFFont(
 			   id,
 			   fontsrc))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -1907,7 +1907,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 	  ff = FoFiTrueType::make(tmpBuf, tmpBufLen);
 	if (! ff)
 	{
-	  error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	  goto err2;
@@ -1919,7 +1919,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 			   id,
 			   fontsrc,
 			   codeToGID, n, faceIndex))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -2305,17 +2305,17 @@ void SplashOutputDev::type3D1(GfxState *state, double wx, double wy,
   int i, j;
 
   if (unlikely(t3GlyphStack == NULL)) {
-    error(-1, "t3GlyphStack was null in SplashOutputDev::type3D1");
+    error(errSyntaxWarning, -1, "t3GlyphStack was null in SplashOutputDev::type3D1");
     return;
   }
 
   if (unlikely(t3GlyphStack->origBitmap != NULL)) {
-    error(-1, "t3GlyphStack origBitmap was not null in SplashOutputDev::type3D1");
+    error(errSyntaxWarning, -1, "t3GlyphStack origBitmap was not null in SplashOutputDev::type3D1");
     return;
   }
 
   if (unlikely(t3GlyphStack->origSplash != NULL)) {
-    error(-1, "t3GlyphStack origSplash was not null in SplashOutputDev::type3D1");
+    error(errSyntaxWarning, -1, "t3GlyphStack origSplash was not null in SplashOutputDev::type3D1");
     return;
   }
 
@@ -2364,7 +2364,7 @@ void SplashOutputDev::type3D1(GfxState *state, double wx, double wy,
       xMax - xt > t3Font->glyphX + t3Font->glyphW ||
       yMax - yt > t3Font->glyphY + t3Font->glyphH) {
     if (t3Font->validBBox) {
-      error(-1, "Bad bounding box in Type 3 glyph");
+      error(errSyntaxWarning, -1, "Bad bounding box in Type 3 glyph");
     }
     return;
   }

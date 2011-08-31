@@ -337,7 +337,7 @@ int main(int argc, char *argv[]) {
 #ifdef ENFORCE_PERMISSIONS
   // check for print permission
   if (!doc->okToPrint()) {
-    error(-1, "Printing this document is not allowed.");
+    error(errNotAllowed, -1, "Printing this document is not allowed.");
     exitCode = 3;
     goto err1;
   }
@@ -347,7 +347,7 @@ int main(int argc, char *argv[]) {
   if (argc == 3) {
     psFileName = new GooString(argv[2]);
   } else if (fileName->cmp("fd://0") == 0) {
-    error(-1, "You have to provide an output filename when reading form stdin.");
+    error(errCommandLine, -1, "You have to provide an output filename when reading form stdin.");
     goto err1;
   } else {
     p = fileName->getCString() + fileName->getLength() - 4;
@@ -370,7 +370,7 @@ int main(int argc, char *argv[]) {
 
   // check for multi-page EPS or form
   if ((doEPS || doForm) && firstPage != lastPage) {
-    error(-1, "EPS and form files can only contain one page.");
+    error(errCommandLine, -1, "EPS and form files can only contain one page.");
     goto err2;
   }
 

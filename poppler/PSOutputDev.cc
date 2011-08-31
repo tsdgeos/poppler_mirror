@@ -1036,19 +1036,19 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc, XRef *xrefA, Catalog
     signal(SIGPIPE, (SignalFunc)SIG_IGN);
 #endif
     if (!(f = popen(fileName + 1, "w"))) {
-      error(-1, "Couldn't run print command '%s'", fileName);
+      error(errIO, -1, "Couldn't run print command '{0:s}'", fileName);
       ok = gFalse;
       return;
     }
 #else
-    error(-1, "Print commands are not supported ('%s')", fileName);
+    error(errIO, -1, "Print commands are not supported ('{0:s}')", fileName);
     ok = gFalse;
     return;
 #endif
   } else {
     fileTypeA = psFile;
     if (!(f = fopen(fileName, "w"))) {
-      error(-1, "Couldn't open PostScript file '%s'", fileName);
+      error(errIO, -1, "Couldn't open PostScript file '{0:s}'", fileName);
       ok = gFalse;
       return;
     }
@@ -1126,7 +1126,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
       paperWidth = (int)ceil(page->getMediaWidth());
       paperHeight = (int)ceil(page->getMediaHeight());
     } else {
-      error(-1, "Invalid page %d", firstPage);
+      error(errSyntaxError, -1, "Invalid page {0:d}", firstPage);
       paperWidth = 1;
       paperHeight = 1;
     }
@@ -1201,7 +1201,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
 		  page->getRotate(),
 		  pstitle);
     } else {
-      error(-1, "Invalid page %d", firstPage);
+      error(errSyntaxError, -1, "Invalid page {0:d}", firstPage);
       box = new PDFRectangle(0, 0, 1, 1);
       writeHeader(firstPage, lastPage, box, box, 0, pstitle);
       delete box;
@@ -1446,7 +1446,7 @@ void PSOutputDev::writeDocSetup(PDFDoc *doc, Catalog *catalog,
   for (pg = firstPage; pg <= lastPage; ++pg) {
     page = doc->getPage(pg);
     if (!page) {
-      error(-1, "Failed writing resources for page %d", pg);
+      error(errSyntaxError, -1, "Failed writing resources for page {0:d}", pg);
       continue;
     }
     if ((resDict = page->getResourceDict())) {
@@ -1863,8 +1863,8 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
       uMap->decRefCnt();
       ++font16EncLen;
     } else {
-      error(-1, "Couldn't find Unicode map for 16-bit font encoding '%s'",
-	    font16Enc[font16EncLen].enc->getCString());
+      error(errSyntaxError, -1, "Couldn't find Unicode map for 16-bit font encoding '{0:t}'",
+	    font16Enc[font16EncLen].enc);
     }
 
     // try the display font for embedding
@@ -1877,7 +1877,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
 
   // give up - can't do anything with this font
   } else {
-    error(-1, "Couldn't find a font to substitute for '%s' ('%s' character collection)",
+    error(errSyntaxError, -1, "Couldn't find a font to substitute for '{0:s}' ('{1:s}' character collection)",
 	  font->getName() ? font->getName()->getCString() : "(unnamed)",
 	  ((GfxCIDFont *)font)->getCollection()
 	    ? ((GfxCIDFont *)font)->getCollection()->getCString()
@@ -1962,18 +1962,20 @@ void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName) {
   refObj.fetch(xref, &strObj);
   refObj.free();
   if (!strObj.isStream()) {
-    error(-1, "Embedded font file object is not a stream");
+    error(errSyntaxError, -1, "Embedded font file object is not a stream");
     goto err1;
   }
   if (!(dict = strObj.streamGetDict())) {
-    error(-1, "Embedded font stream is missing its dictionary");
+    error(errSyntaxError, -1,
+	  "Embedded font stream is missing its dictionary");
     goto err1;
   }
   dict->lookup("Length1", &obj1);
   dict->lookup("Length2", &obj2);
   dict->lookup("Length3", &obj3);
   if (!obj1.isInt() || !obj2.isInt() || !obj3.isInt()) {
-    error(-1, "Missing length fields in embedded font stream dictionary");
+    error(errSyntaxError, -1,
+	  "Missing length fields in embedded font stream dictionary");
     obj1.free();
     obj2.free();
     obj3.free();
@@ -2003,7 +2005,8 @@ void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName) {
   for (i = 0; i < 4; ++i) {
     start[i] = strObj.streamGetChar();
     if (start[i] == EOF) {
-      error(-1, "Unexpected end of file in embedded font stream");
+      error(errSyntaxError, -1,
+	    "Unexpected end of file in embedded font stream");
       goto err1;
     }
     if (!((start[i] >= '0' && start[i] <= '9') ||
@@ -2017,7 +2020,7 @@ void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName) {
     // length2 == 0 is an error
     // trying to solve it by just piping all
     // the stream data
-    error(-1, "Font has length2 as 0, trying to overcome the problem reading the stream until the end");
+    error(errSyntaxWarning, -1, "Font has length2 as 0, trying to overcome the problem reading the stream until the end");
     length2 = INT_MAX;
     writePadding = gFalse;
   }
@@ -2120,7 +2123,7 @@ void PSOutputDev::setupExternalType1Font(GooString *fileName, GooString *psName)
 
   // copy the font file
   if (!(fontFile = fopen(fileName->getCString(), "rb"))) {
-    error(-1, "Couldn't open external font file");
+    error(errIO, -1, "Couldn't open external font file");
     return;
   }
   while ((c = fgetc(fontFile)) != EOF) {
@@ -2678,7 +2681,8 @@ void PSOutputDev::setupImages(Dict *resDict) {
 	  if (xObjRef.isRef()) {
 	    setupImage(xObjRef.getRef(), xObj.getStream());
 	  } else {
-	    error(-1, "Image in resource dict is not an indirect reference");
+	    error(errSyntaxError, -1,
+		  "Image in resource dict is not an indirect reference");
 	  }
 	}
 	subtypeObj.free();
@@ -2878,7 +2882,8 @@ void PSOutputDev::setupForms(Dict *resDict) {
 	  if (xObjRef.isRef()) {
 	    setupForm(xObjRef.getRef(), &xObj);
 	  } else {
-	    error(-1, "Form in resource dict is not an indirect reference");
+	    error(errSyntaxError, -1,
+		  "Form in resource dict is not an indirect reference");
 	  }
 	}
 	subtypeObj.free();
@@ -2922,7 +2927,7 @@ void PSOutputDev::setupForm(Ref id, Object *strObj) {
   dict->lookup("BBox", &bboxObj);
   if (!bboxObj.isArray()) {
     bboxObj.free();
-    error(-1, "Bad form bounding box");
+    error(errSyntaxError, -1, "Bad form bounding box");
     return;
   }
   for (i = 0; i < 4; ++i) {
@@ -3024,7 +3029,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 				    paperColor, gTrue, gFalse);
 #else
   } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep) {
-    error(-1, "pdftops was built without CMYK support, levelnsep needs it to work in this file");
+    error(errInternal, -1, "pdftops was built without CMYK support, levelnsep needs it to work in this file");
     return gFalse;
 #endif
   } else {
@@ -5552,7 +5557,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
     if (opi13Nest) {
       if (inlineImg) {
 	// this can't happen -- OPI dictionaries are in XObjects
-	error(-1, "Internal: OPI in inline image");
+	error(errSyntaxError, -1, "OPI in inline image");
 	n = 0;
       } else {
 	// need to read the stream to count characters -- the length

@@ -166,7 +166,7 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA) {
   // in the 'new Object[nObjects]' call (Acrobat apparently limits
   // object streams to 100-200 objects)
   if (nObjects > 1000000) {
-    error(-1, "Too many objects in an object stream");
+    error(errSyntaxError, -1, "Too many objects in an object stream");
     goto err1;
   }
   objs = new Object[nObjects];
@@ -319,7 +319,7 @@ XRef::XRef(BaseStream *strA, Guint pos, Guint mainXRefEntriesOffsetA, GBool *was
     // set size to (at least) the size specified in trailer dict
     trailerDict.dictLookupNF("Size", &obj);
     if (!obj.isInt()) {
-        error(-1, "No valid XRef size in trailer");
+        error(errSyntaxWarning, -1, "No valid XRef size in trailer");
     } else {
       if (obj.getInt() > size) {
          if (resize(obj.getInt()) != obj.getInt()) {
@@ -499,7 +499,7 @@ GBool XRef::readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *follow
     }
     if (first + n > size) {
       if (resize(first + n) != first + n) {
-        error(-1, "Invalid 'obj' parameters'");
+        error(errSyntaxError, -1, "Invalid 'obj' parameters'");
         goto err0;
       }
     }
@@ -614,7 +614,7 @@ GBool XRef::readXRefStream(Stream *xrefStr, Guint *pos) {
   }
   if (newSize > size) {
     if (resize(newSize) != newSize) {
-      error(-1, "Invalid 'size' parameter");
+      error(errSyntaxError, -1, "Invalid 'size' parameter");
       goto err0;
     }
   }
@@ -696,7 +696,7 @@ GBool XRef::readXRefStreamSection(Stream *xrefStr, int *w, int first, int n) {
   }
   if (first + n > size) {
     if (resize(first + n) != size) {
-      error(-1, "Invalid 'size' inside xref table");
+      error(errSyntaxError, -1, "Invalid 'size' inside xref table");
       return gFalse;
     }
   }
@@ -769,7 +769,7 @@ GBool XRef::constructXRef(GBool *wasReconstructed) {
   size = 0;
   entries = NULL;
 
-  error(-1, "PDF file is damaged - attempting to reconstruct xref table...");
+  error(errSyntaxWarning, -1, "PDF file is damaged - attempting to reconstruct xref table...");
   gotRoot = gFalse;
   streamEndsLen = streamEndsSize = 0;
 
@@ -849,11 +849,11 @@ GBool XRef::constructXRef(GBool *wasReconstructed) {
 		  if (num >= size) {
 		    newSize = (num + 1 + 255) & ~255;
 		    if (newSize < 0) {
-		      error(-1, "Bad object number");
+		      error(errSyntaxError, -1, "Bad object number");
 		      return gFalse;
 		    }
 		    if (resize(newSize) != newSize) {
-		      error(-1, "Invalid 'obj' parameters");
+		      error(errSyntaxError, -1, "Invalid 'obj' parameters");
 		      return gFalse;
 		    }
 		  }
@@ -873,7 +873,7 @@ GBool XRef::constructXRef(GBool *wasReconstructed) {
         if (streamEndsLen == streamEndsSize) {
 	  streamEndsSize += 64;
           if (streamEndsSize >= INT_MAX / (int)sizeof(int)) {
-            error(-1, "Invalid 'endstream' parameter.");
+            error(errSyntaxError, -1, "Invalid 'endstream' parameter.");
             return gFalse;
           }
 	  streamEnds = (Guint *)greallocn(streamEnds,
@@ -895,7 +895,7 @@ GBool XRef::constructXRef(GBool *wasReconstructed) {
   if (gotRoot)
     return gTrue;
 
-  error(-1, "Couldn't find trailer dictionary");
+  error(errSyntaxError, -1, "Couldn't find trailer dictionary");
   return gFalse;
 }
 
@@ -1022,7 +1022,7 @@ Object *XRef::fetch(int num, int gen, Object *obj, std::set<int> *fetchOriginato
 	  long longNumber = strtol(cmd + 3, &end_ptr, 0);
 	  if (longNumber <= INT_MAX && longNumber >= INT_MIN && *end_ptr == '\0') {
 	    int number = longNumber;
-	    error(-1, "Cmd was not obj but %s, assuming the creator meant obj %d", cmd, number);
+	    error(errSyntaxWarning, -1, "Cmd was not obj but {0:s}, assuming the creator meant obj {1:d}", cmd, number);
 	    obj->initInt(number);
 	    obj1.free();
 	    obj2.free();
@@ -1180,7 +1180,7 @@ void XRef::add(int num, int gen, Guint offs, GBool used) {
 
 void XRef::setModifiedObject (Object* o, Ref r) {
   if (r.num < 0 || r.num >= size) {
-    error(-1,"XRef::setModifiedObject on unknown ref: %i, %i\n", r.num, r.gen);
+    error(errInternal, -1,"XRef::setModifiedObject on unknown ref: {0:d}, {1:d}\n", r.num, r.gen);
     return;
   }
   XRefEntry *e = getEntry(r.num);
@@ -1219,7 +1219,7 @@ Ref XRef::addIndirectObject (Object* o) {
 void XRef::writeToFile(OutStream* outStr, GBool writeAllEntries) {
   //create free entries linked-list
   if (getEntry(0)->gen != 65535) {
-    error(-1, "XRef::writeToFile, entry 0 of the XRef is invalid (gen != 65535)\n");
+    error(errInternal, -1, "XRef::writeToFile, entry 0 of the XRef is invalid (gen != 65535)\n");
   }
   int lastFreeEntry = 0;
   for (int i=0; i<size; i++) {
@@ -1299,7 +1299,7 @@ XRefEntry *XRef::getEntry(int i)
 
     if ((!xRefStream) && mainXRefEntriesOffset) {
       if (!parseEntry(mainXRefEntriesOffset + 20*i, &entries[i])) {
-        error(-1, "Failed to parse XRef entry [%d].", i);
+        error(errSyntaxError, -1, "Failed to parse XRef entry [{0:d}].", i);
       }
     } else {
       std::vector<Guint> followedPrev;
@@ -1312,7 +1312,7 @@ XRefEntry *XRef::getEntry(int i)
           }
         }
         if (followed) {
-          error(-1, "Circular XRef");
+          error(errSyntaxError, -1, "Circular XRef");
           if (!(ok = constructXRef(NULL))) {
             errCode = errDamaged;
           }
@@ -1339,7 +1339,7 @@ XRefEntry *XRef::getEntry(int i)
       }
 
       if (entries[i].type == xrefEntryNone) {
-         error(-1, "Invalid XRef entry");
+         error(errSyntaxError, -1, "Invalid XRef entry");
          entries[i].type = xrefEntryFree;
       }
     }

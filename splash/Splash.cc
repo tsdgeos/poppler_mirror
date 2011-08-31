@@ -3154,7 +3154,7 @@ void Splash::compositeBackground(SplashColorPtr color) {
   int x, y, mask;
 
   if (unlikely(bitmap->alpha == NULL)) {
-    error(-1, "bitmap->alpha is NULL in Splash::compositeBackground");
+    error(errInternal, -1, "bitmap->alpha is NULL in Splash::compositeBackground");
     return;
   }
 

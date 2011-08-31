@@ -92,7 +92,7 @@ FileSpec::FileSpec(Object *fileSpecA)
   if (!getFileSpecName(fileSpecA, &obj1)) {
     ok = gFalse;
     obj1.free();
-    error(-1, "Invalid FileSpec");
+    error(errSyntaxError, -1, "Invalid FileSpec");
     return;
   }
 
@@ -104,7 +104,7 @@ FileSpec::FileSpec(Object *fileSpecA)
       if (!obj1.dictLookupNF("F", &fileStream)->isRef()) {
         ok = gFalse;
         fileStream.free();
-        error(-1, "Invalid FileSpec: Embedded file stream is not an indirect reference");
+        error(errSyntaxError, -1, "Invalid FileSpec: Embedded file stream is not an indirect reference");
         obj1.free();
         return;
       }
@@ -209,13 +209,13 @@ GBool getFileSpecNameForPlatform (Object *fileSpec, Object *fileName)
 #endif
 	if (!fileSpec->dictLookup(platform, fileName)->isString ()) {
 	  fileName->free();
-	  error(-1, "Illegal file spec");
+	  error(errSyntaxError, -1, "Illegal file spec");
 	  return gFalse;
 	}
       }
     }
   } else {
-    error(-1, "Illegal file spec");
+    error(errSyntaxError, -1, "Illegal file spec");
     return gFalse;
   }
 

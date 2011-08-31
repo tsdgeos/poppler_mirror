@@ -517,33 +517,32 @@ Plugin *Plugin::load(char *type, char *name) {
 #ifdef _WIN32
   path->append(".dll");
   if (!(libA = LoadLibrary(path->getCString()))) {
-    error(-1, "Failed to load plugin '%s'",
-	  path->getCString());
+    error(errIO, -1, "Failed to load plugin '{0:t}'", path);
     goto err1;
   }
   if (!(vt = (XpdfPluginVecTable *)
 	         GetProcAddress(libA, "xpdfPluginVecTable"))) {
-    error(-1, "Failed to find xpdfPluginVecTable in plugin '%s'",
-	  path->getCString());
+    error(errIO, -1, "Failed to find xpdfPluginVecTable in plugin '{0:t}'",
+	  path);
     goto err2;
   }
 #else
   //~ need to deal with other extensions here
   path->append(".so");
   if (!(dlA = dlopen(path->getCString(), RTLD_NOW))) {
-    error(-1, "Failed to load plugin '%s': %s",
-	  path->getCString(), dlerror());
+    error(errIO, -1, "Failed to load plugin '{0:t}': {1:s}",
+	  path, dlerror());
     goto err1;
   }
   if (!(vt = (XpdfPluginVecTable *)dlsym(dlA, "xpdfPluginVecTable"))) {
-    error(-1, "Failed to find xpdfPluginVecTable in plugin '%s'",
-	  path->getCString());
+    error(errIO, -1, "Failed to find xpdfPluginVecTable in plugin '{0:t}'",
+	  path);
     goto err2;
   }
 #endif
 
   if (vt->version != xpdfPluginVecTable.version) {
-    error(-1, "Plugin '%s' is wrong version", path->getCString());
+    error(errIO, -1, "Plugin '{0:t}' is wrong version", path);
     goto err2;
   }
   memcpy(vt, &xpdfPluginVecTable, sizeof(xpdfPluginVecTable));
@@ -551,21 +550,20 @@ Plugin *Plugin::load(char *type, char *name) {
 #ifdef _WIN32
   if (!(xpdfInitPlugin = (XpdfBool (*)(void))
 	                     GetProcAddress(libA, "xpdfInitPlugin"))) {
-    error(-1, "Failed to find xpdfInitPlugin in plugin '%s'",
-	  path->getCString());
+    error(errIO, -1, "Failed to find xpdfInitPlugin in plugin '{0:t}'",
+	  path);
     goto err2;
   }
 #else
   if (!(xpdfInitPlugin = (XpdfBool (*)(void))dlsym(dlA, "xpdfInitPlugin"))) {
-    error(-1, "Failed to find xpdfInitPlugin in plugin '%s'",
-	  path->getCString());
+    error(errIO, -1, "Failed to find xpdfInitPlugin in plugin '{0:t}'",
+	  path);
     goto err2;
   }
 #endif
 
   if (!(*xpdfInitPlugin)()) {
-    error(-1, "Initialization of plugin '%s' failed",
-	  path->getCString());
+    error(errIO, -1, "Initialization of plugin '{0:t}' failed", path);
     goto err2;
   }
 
@@ -801,8 +799,8 @@ void GlobalParams::parseNameToUnicode(GooString *name) {
   char *tokptr;
 
   if (!(f = fopen(name->getCString(), "r"))) {
-    error(-1, "Couldn't open 'nameToUnicode' file '%s'",
-	  name->getCString());
+    error(errIO, -1, "Couldn't open 'nameToUnicode' file '{0:t}'",
+	  name);
     return;
   }
   line = 1;
@@ -813,8 +811,8 @@ void GlobalParams::parseNameToUnicode(GooString *name) {
       sscanf(tok1, "%x", &u);
       nameToUnicode->add(tok2, u);
     } else {
-      error(-1, "Bad line in 'nameToUnicode' file (%s:%d)",
-	    name->getCString(), line);
+      error(errConfig, -1, "Bad line in 'nameToUnicode' file ({0:t}:{1:d})",
+	    name, line);
     }
     ++line;
   }
@@ -1058,7 +1056,7 @@ static const char *getFontLang(GfxFont *font)
         lang = "xx";
       else
       {
-        error(-1, "Unknown CID font collection, please report to poppler bugzilla.");
+        error(errUnimplemented, -1, "Unknown CID font collection, please report to poppler bugzilla.");
         lang = "xx";
       }
     }

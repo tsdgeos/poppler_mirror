@@ -757,7 +757,7 @@ int HtmlPage::dumpComplexHeaders(FILE * const file, FILE *& pageFile, int page) 
       }
       delete pgNum;
       if (!pageFile) {
-	  error(-1, "Couldn't open html file '%s'", tmp->getCString());
+	  error(errIO, -1, "Couldn't open html file '{0:t}'", tmp);
 	  delete tmp;
 	  return 1;
       } 
@@ -791,7 +791,7 @@ void HtmlPage::dumpComplex(FILE *file, int page){
 
   if( firstPage == -1 ) firstPage = page; 
   
-  if (dumpComplexHeaders(file, pageFile, page)) { error(-1, "Couldn't write headers."); return; }
+  if (dumpComplexHeaders(file, pageFile, page)) { error(errIO, -1, "Couldn't write headers."); return; }
 
   tmp=basename(DocName);
    
@@ -979,7 +979,7 @@ void HtmlOutputDev::doFrame(int firstPage){
   fName->append(".html");
 
   if (!(fContentsFrame = fopen(fName->getCString(), "w"))){
-    error(-1, "Couldn't open html file '%s'", fName->getCString());
+    error(errIO, -1, "Couldn't open html file '{0:t}'", fName);
     delete fName;
     return;
   }
@@ -1056,7 +1056,7 @@ HtmlOutputDev::HtmlOutputDev(char *fileName, char *title,
 
          if (!(fContentsFrame = fopen(left->getCString(), "w")))
          {
-             error(-1, "Couldn't open html file '%s'", left->getCString());
+             error(errIO, -1, "Couldn't open html file '{0:t}'", left);
              delete left;
              return;
          }
@@ -1078,7 +1078,7 @@ HtmlOutputDev::HtmlOutputDev(char *fileName, char *title,
        right->append("s.html");
 
        if (!(page=fopen(right->getCString(),"w"))){
-        error(-1, "Couldn't open html file '%s'", right->getCString());
+        error(errIO, -1, "Couldn't open html file '{0:t}'", right);
         delete right;
 		return;
        }
@@ -1095,7 +1095,7 @@ HtmlOutputDev::HtmlOutputDev(char *fileName, char *title,
       if (!xml) right->append(".html");
       if (xml) right->append(".xml");
       if (!(page=fopen(right->getCString(),"w"))){
-	error(-1, "Couldn't open html file '%s'", right->getCString());
+	error(errIO, -1, "Couldn't open html file '{0:t}'", right);
 	delete right;
 	return;
       }  
@@ -1260,7 +1260,7 @@ void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 
     ++imgNum;
     if (!(f1 = fopen(fName->getCString(), "wb"))) {
-      error(-1, "Couldn't open image file '%s'", fName->getCString());
+      error(errIO, -1, "Couldn't open image file '{0:t}'", fName);
       delete fName;
       return;
     }
@@ -1312,7 +1312,7 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     ++imgNum;
     
     if (!(f1 = fopen(fName->getCString(), "wb"))) {
-      error(-1, "Couldn't open image file '%s'", fName->getCString());
+      error(errIO, -1, "Couldn't open image file '{0:t}'", fName);
       delete fName;
       return;
     }
@@ -1349,7 +1349,7 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 
     // Open the image file
     if (!(f1 = fopen(fName->getCString(), "wb"))) {
-      error(-1, "Couldn't open image file '%s'", fName->getCString());
+      error(errIO, -1, "Couldn't open image file '{0:t}'", fName);
       delete fName;
       return;
     }

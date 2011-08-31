@@ -58,14 +58,14 @@ SecurityHandler *SecurityHandler::make(PDFDoc *docA, Object *encryptDictA) {
       secHdlr = new ExternalSecurityHandler(docA, encryptDictA, xsh);
     } else {
 #endif
-      error(/*errSyntaxError, */-1, "Couldn't find the '%s' security handler",
+      error(errSyntaxError, -1, "Couldn't find the '{0:s}' security handler",
 	    filterObj.getName());
       secHdlr = NULL;
 #ifdef ENABLE_PLUGINS
     }
 #endif
   } else {
-    error(/*errSyntaxError, */-1,
+    error(errSyntaxError, -1,
 	  "Missing or invalid 'Filter' entry in encryption dictionary");
     secHdlr = NULL;
   }
@@ -105,7 +105,7 @@ GBool SecurityHandler::checkEncryption(GooString *ownerPassword,
     }
   }
   if (!ok) {
-    error(/*errCommandLine, */-1, "Incorrect password");
+    error(errCommandLine, -1, "Incorrect password");
   }
   return ok;
 }
@@ -288,15 +288,15 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
 	}
 	ok = gTrue;
       } else if (!(encVersion == -1 && encRevision == -1)) {
-	error(/*errUnimplemented, */-1,
+	error(errUnimplemented, -1,
 	      "Unsupported version/revision (%d/%d) of Standard security handler",
 	      encVersion, encRevision);
       }
     } else {
-      error(/*errSyntaxError, */-1, "Invalid encryption key length");
+      error(errSyntaxError, -1, "Invalid encryption key length");
     }
   } else {
-    error(/*errSyntaxError, */-1, "Weird encryption info");
+    error(errSyntaxError, -1, "Weird encryption info");
   }
   fileIDObj.free();
   permObj.free();

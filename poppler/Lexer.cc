@@ -252,7 +252,7 @@ Object *Lexer::getObj(Object *obj, int objNum) {
       if (c == '-') {
 	// ignore minus signs in the middle of numbers to match
 	// Adobe's behavior
-	error(getPos(), "Badly formatted number");
+	error(errSyntaxWarning, getPos(), "Badly formatted number");
 	getChar();
 	continue;
       }
@@ -285,7 +285,7 @@ Object *Lexer::getObj(Object *obj, int objNum) {
       case '\r':
       case '\n':
 #endif
-	error(getPos(), "Unterminated string");
+	error(errSyntaxError, getPos(), "Unterminated string");
 	done = gTrue;
 	break;
 
@@ -347,7 +347,7 @@ Object *Lexer::getObj(Object *obj, int objNum) {
 	case '\n':
 	  break;
 	case EOF:
-	  error(getPos(), "Unterminated string");
+	  error(errSyntaxError, getPos(), "Unterminated string");
 	  done = gTrue;
 	  break;
 	default:
@@ -376,7 +376,7 @@ Object *Lexer::getObj(Object *obj, int objNum) {
 	    int newObjNum = xref->getNumEntry(curStr.streamGetPos());
 	    if (newObjNum != objNum)
 	    {
-	      error(getPos(), "Unterminated string");
+	      error(errSyntaxError, getPos(), "Unterminated string");
 	      done = gTrue;
 	      delete s;
 	      n = -2;
@@ -426,20 +426,20 @@ Object *Lexer::getObj(Object *obj, int objNum) {
 	} else if (c2 >= 'a' && c2 <= 'f') {
 	  c += c2 - 'a' + 10;
 	} else {
-	  error(getPos(), "Illegal digit in hex char in name");
+	  error(errSyntaxError, getPos(), "Illegal digit in hex char in name");
 	}
       }
      notEscChar:
       if (n == tokBufSize) {
 	if (!s)
 	{
-	  error(getPos(), "Warning: name token is longer than what the specification says it can be");
+	  error(errSyntaxError, getPos(), "Warning: name token is longer than what the specification says it can be");
 	  s = new GooString(tokBuf, tokBufSize);
 	}
 	else
 	{
 	  // the spec says 127 is the maximum, we are already at 256 so bail out
-	  error(getPos(), "Name token too long");
+	  error(errSyntaxError, getPos(), "Name token too long");
 	  break;
 	}
 	p = tokBuf;
@@ -486,7 +486,7 @@ Object *Lexer::getObj(Object *obj, int objNum) {
 	if (c == '>') {
 	  break;
 	} else if (c == EOF) {
-	  error(getPos(), "Unterminated hex string");
+	  error(errSyntaxError, getPos(), "Unterminated hex string");
 	  break;
 	} else if (specialChars[c] != 1) {
 	  c2 = c2 << 4;
@@ -497,7 +497,7 @@ Object *Lexer::getObj(Object *obj, int objNum) {
 	  else if (c >= 'a' && c <= 'f')
 	    c2 += c - 'a' + 10;
 	  else
-	    error(getPos(), "Illegal character <%02x> in hex string", c);
+	    error(errSyntaxError, getPos(), "Illegal character <{0:02x}> in hex string", c);
 	  if (++m == 2) {
 	    if (n == tokBufSize) {
 	      if (!s)
@@ -533,7 +533,7 @@ Object *Lexer::getObj(Object *obj, int objNum) {
       tokBuf[2] = '\0';
       obj->initCmd(tokBuf);
     } else {
-      error(getPos(), "Illegal character '>'");
+      error(errSyntaxError, getPos(), "Illegal character '>'");
       obj->initError();
     }
     break;
@@ -542,7 +542,7 @@ Object *Lexer::getObj(Object *obj, int objNum) {
   case ')':
   case '{':
   case '}':
-    error(getPos(), "Illegal character '%c'", c);
+    error(errSyntaxError, getPos(), "Illegal character '{0:c}'", c);
     obj->initError();
     break;
 
@@ -554,7 +554,7 @@ Object *Lexer::getObj(Object *obj, int objNum) {
     while ((c = lookChar()) != EOF && !specialChars[c]) {
       getChar();
       if (++n == tokBufSize) {
-	error(getPos(), "Command token too long");
+	error(errSyntaxError, getPos(), "Command token too long");
 	break;
       }
       *p++ = c;

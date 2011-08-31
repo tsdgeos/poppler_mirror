@@ -36,7 +36,7 @@ Hints::Hints(BaseStream *str, Linearization *linearization, XRef *xref, Security
   pageEndFirst = linearization->getEndFirst();
   pageObjectFirst = linearization->getObjectNumberFirst();
   if (pageObjectFirst < 0 || pageObjectFirst >= xref->getNumObjects()) {
-    error(-1,
+    error(errSyntaxWarning, -1,
       "Invalid reference for first page object (%d) in linearization table ",
       pageObjectFirst);
     pageObjectFirst = 0;
@@ -44,7 +44,7 @@ Hints::Hints(BaseStream *str, Linearization *linearization, XRef *xref, Security
   pageOffsetFirst = xref->getEntry(pageObjectFirst)->offset;
 
   if (nPages >= INT_MAX / (int)sizeof(Guint)) {
-     error(-1, "Invalid number of pages (%d) for hints table", nPages);
+     error(errSyntaxWarning, -1, "Invalid number of pages ({0:d}) for hints table", nPages);
      nPages = 0;
   }
   nObjects = (Guint *) gmallocn_checkoverflow(nPages, sizeof(Guint));
@@ -56,7 +56,7 @@ Hints::Hints(BaseStream *str, Linearization *linearization, XRef *xref, Security
   sharedObjectId = (Guint **) gmallocn_checkoverflow(nPages, sizeof(Guint*));
   if (!nObjects || !pageObjectNum || !xRefOffset || !pageLength || !pageOffset ||
       !numSharedObject || !sharedObjectId) {
-    error(-1, "Failed to allocate memory for hints tabel");
+    error(errSyntaxWarning, -1, "Failed to allocate memory for hints tabel");
     nPages = 0;
   }
 
@@ -153,10 +153,10 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
         for (int i=0; i<sharedStreamOffset; i++) hintsStream->getChar();
         readSharedObjectsTable(hintsStream);
     } else {
-      error(-1, "Invalid shared object hint table offset");
+      error(errSyntaxWarning, -1, "Invalid shared object hint table offset");
     }
   } else {
-    error(-1, "Failed parsing hints table object");
+    error(errSyntaxWarning, -1, "Failed parsing hints table object");
   }
   obj.free();
 
@@ -166,7 +166,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
 void Hints::readPageOffsetTable(Stream *str)
 {
   if (nPages < 1) {
-    error(-1, "Invalid number of pages reading page offset hints table");
+    error(errSyntaxWarning, -1, "Invalid number of pages reading page offset hints table");
     return;
   }
 
@@ -227,13 +227,13 @@ void Hints::readPageOffsetTable(Stream *str)
   for (int i=1; i<nPages; i++) {
     numSharedObject[i] = readBits(nBitsNumShared, str);
     if (numSharedObject[i] >= INT_MAX / (int)sizeof(Guint)) {
-       error(-1, "Invalid number of shared objects");
+       error(errSyntaxWarning, -1, "Invalid number of shared objects");
        numSharedObject[i] = 0;
        return;
     }
     sharedObjectId[i] = (Guint *) gmallocn_checkoverflow(numSharedObject[i], sizeof(Guint));
     if (numSharedObject[i] && !sharedObjectId[i]) {
-       error(-1, "Failed to allocate memory for shared object IDs");
+       error(errSyntaxWarning, -1, "Failed to allocate memory for shared object IDs");
        numSharedObject[i] = 0;
        return;
     }
@@ -274,12 +274,12 @@ void Hints::readSharedObjectsTable(Stream *str)
   Guint nBitsDiffGroupLength = readBits(16, str);
 
   if ((!nSharedGroups) || (nSharedGroups >= INT_MAX / (int)sizeof(Guint))) {
-     error(-1, "Invalid number of shared object groups");
+     error(errSyntaxWarning, -1, "Invalid number of shared object groups");
      nSharedGroups = 0;
      return;
   }
   if ((!nSharedGroupsFirst) || (nSharedGroupsFirst > nSharedGroups)) {
-     error(-1, "Invalid number of first page shared object groups");
+     error(errSyntaxWarning, -1, "Invalid number of first page shared object groups");
      nSharedGroupsFirst = nSharedGroups;
   }
 
@@ -290,7 +290,7 @@ void Hints::readSharedObjectsTable(Stream *str)
   groupXRefOffset = (Guint *) gmallocn_checkoverflow(nSharedGroups, sizeof(Guint));
   if (!groupLength || !groupOffset || !groupHasSignature ||
       !groupNumObjects || !groupXRefOffset) {
-     error(-1, "Failed to allocate memory for shared object groups");
+     error(errSyntaxWarning, -1, "Failed to allocate memory for shared object groups");
      nSharedGroups = 0;
      return;
   }

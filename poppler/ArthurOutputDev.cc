@@ -322,7 +322,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
         dfp = globalParams->getDisplayFont(gfxFont);
       }
       if (!dfp) {
-	error(-1, "Couldn't find a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -353,7 +353,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
 			   id,
 			   fontsrc,
 			   (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -364,7 +364,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
 			   id,
 			   fontsrc,
 			   (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -375,7 +375,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
 			   id,
 			   fontsrc,
 			   (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -399,7 +399,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
 			   id,
 			   fontsrc,
 			   codeToGID, n))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -410,7 +410,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
       if (!(fontFile = m_fontEngine->loadCIDFont(
 			   id,
 			   fontsrc))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -420,7 +420,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
       if (!(fontFile = m_fontEngine->loadOpenTypeCFFFont(
 			   id,
 			   fontsrc))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;
@@ -451,7 +451,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
 			   id,
 			   fontsrc,
 			   codeToGID, n, faceIndex))) {
-	error(-1, "Couldn't create a font for '%s'",
+	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
 	goto err2;

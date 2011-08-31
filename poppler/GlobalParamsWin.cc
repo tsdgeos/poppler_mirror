@@ -257,7 +257,7 @@ void GlobalParams::setupBaseFonts(char * dir)
             delete fontPath;
         }
 
-        error(-1, "No display font for '%s'", fontName);
+        error(errSyntaxError, -1, "No display font for '{0:s}'", fontName);
     }
 }
 
@@ -281,7 +281,7 @@ DisplayFontParam *GlobalParams::getDisplayFont(GfxFont *font) {
     dfp = (DisplayFontParam *)displayFonts->lookup(fontName);
     if (!dfp) {
         substFontName = findSubstituteName(fontName->getCString());
-        error(-1, "Couldn't find a font for '%s', subst is '%s'", fontName->getCString(), substFontName);
+        error(errSyntaxError, -1, "Couldn't find a font for '{0:t}', subst is '{0:s}'", fontName, substFontName);
         dfp = (DisplayFontParam *)displayFonts->lookup(substFontName);
         assert(dfp);
     }

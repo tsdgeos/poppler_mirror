@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
 
   // get mapping to output encoding
   if (!(uMap = globalParams->getTextEncoding())) {
-    error(-1, "Couldn't get text encoding");
+    error(errCommandLine, -1, "Couldn't get text encoding");
     delete fileName;
     goto err1;
   }
@@ -253,7 +253,7 @@ int main(int argc, char *argv[]) {
 #ifdef ENFORCE_PERMISSIONS
   // check for copy permission
   if (!doc->okToCopy()) {
-    error(-1, "Copying of text from this document is not allowed.");
+    error(errNotAllowed, -1, "Copying of text from this document is not allowed.");
     exitCode = 3;
     goto err2;
   }
@@ -263,7 +263,7 @@ int main(int argc, char *argv[]) {
   if (argc == 3) {
     textFileName = new GooString(argv[2]);
   } else if (fileName->cmp("fd://0") == 0) {
-     error(-1, "You have to provide an output filename when reading form stdin.");
+     error(errCommandLine, -1, "You have to provide an output filename when reading form stdin.");
      goto err2;
   } else {
     p = fileName->getCString() + fileName->getLength() - 4;
@@ -290,7 +290,7 @@ int main(int argc, char *argv[]) {
       f = stdout;
     } else {
       if (!(f = fopen(textFileName->getCString(), "wb"))) {
-	error(-1, "Couldn't open text file '%s'", textFileName->getCString());
+	error(errIO, -1, "Couldn't open text file '{0:t}'", textFileName);
 	exitCode = 2;
 	goto err3;
       }
@@ -335,7 +335,7 @@ int main(int argc, char *argv[]) {
   if (bbox) {
     textOut = new TextOutputDev(NULL, physLayout, rawOrder, htmlMeta);
     if (!(f = fopen(textFileName->getCString(), "ab"))) {
-      error(-1, "Couldn't open text file '%s' for append", textFileName->getCString());
+      error(errIO, -1, "Couldn't open text file '{0:t}' for append", textFileName);
       exitCode = 2;
       delete textOut;
       goto err3;
@@ -395,7 +395,7 @@ int main(int argc, char *argv[]) {
       f = stdout;
     } else {
       if (!(f = fopen(textFileName->getCString(), "ab"))) {
-	error(-1, "Couldn't open text file '%s'", textFileName->getCString());
+	error(errIO, -1, "Couldn't open text file '{0:t}'", textFileName);
 	exitCode = 2;
 	goto err3;
       }

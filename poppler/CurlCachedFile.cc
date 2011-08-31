@@ -56,7 +56,7 @@ CurlCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
      curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &contentLength);
      size = contentLength;
   } else {
-     error(-1, "Failed to get size of '%s'.", url->getCString());
+     error(errInternal, -1, "Failed to get size of '{0:t}'.", url);
      size = -1;
   }
   curl_easy_reset(curl);
