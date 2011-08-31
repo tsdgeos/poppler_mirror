@@ -951,6 +951,17 @@ GBool unicodeTypeR(Unicode c) {
   return getType(c) == 'R';
 }
 
+GBool unicodeTypeNum(Unicode c) {
+  return getType(c) == '#';
+}
+
+GBool unicodeTypeAlphaNum(Unicode c) {
+  char t;
+
+  t = getType(c);
+  return t == 'L' || t == 'R' || t == '#';
+}
+
 Unicode unicodeToUpper(Unicode c) {
   int i;
 
