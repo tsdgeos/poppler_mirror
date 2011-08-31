@@ -1702,7 +1702,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
 	length = sizeof(vheaTab);
 	checksum = computeTableChecksum(vheaTab, length);
       } else if (needVerticalMetrics && i == t42VmtxTable) {
-	length = 4 + (nGlyphs - 1) * 4;
+	length = 4 + (nGlyphs - 1) * 2;
 	vmtxTab = (Guchar *)gmalloc(length);
 	vmtxTab[0] = advance / 256;
 	vmtxTab[1] = advance % 256;
