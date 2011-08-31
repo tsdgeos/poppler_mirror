@@ -188,7 +188,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseUnicodeToUnicode(
   while (getLine(buf, sizeof(buf), f)) {
     ++line;
     if (!(tok = strtok_r(buf, " \t\r\n", &tokptr)) ||
-	sscanf(tok, "%x", &u0) != 1) {
+	!parseHex(tok, strlen(tok), &u0)) {
       error(errSyntaxWarning, -1, "Bad line ({0:d}) in unicodeToUnicode file '{1:t}'",
 	    line, fileName);
       continue;
@@ -200,7 +200,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseUnicodeToUnicode(
         uBufSize += 8;
         uBuf = (Unicode *)greallocn(uBuf, uBufSize, sizeof(Unicode));
       }
-      if (sscanf(tok, "%x", &uBuf[n]) != 1) {
+      if (!parseHex(tok, strlen(tok), &uBuf[n])) {
 	error(errSyntaxWarning, -1, "Bad line ({0:d}) in unicodeToUnicode file '{1:t}'",
 	      line, fileName);
 	break;
@@ -333,7 +333,7 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data,
 	  }
 	}
 	tok1[n1 - 1] = tok2[n2 - 1] = '\0';
-	if (sscanf(tok1 + 1, "%x", &code1) != 1) {
+	if (!parseHex(tok1 + 1, n1 - 2, &code1)) {
 	  error(errSyntaxWarning, -1, "Illegal entry in bfchar block in ToUnicode CMap");
 	  continue;
 	}
@@ -360,8 +360,8 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data,
 	  continue;
 	}
 	tok1[n1 - 1] = tok2[n2 - 1] = '\0';
-	if (sscanf(tok1 + 1, "%x", &code1) != 1 ||
-	    sscanf(tok2 + 1, "%x", &code2) != 1) {
+	if (!parseHex(tok1 + 1, n1 - 2, &code1) ||
+	    !parseHex(tok2 + 1, n2 - 2, &code2)) {
 	  error(errSyntaxWarning, -1, "Illegal entry in bfrange block in ToUnicode CMap");
 	  continue;
 	}
@@ -402,7 +402,6 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n,
 				   int offset) {
   CharCode oldLen, i;
   Unicode u;
-  char uHex[5];
   int j;
 
   if (code >= mapLen) {
@@ -419,7 +418,7 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n,
 	}
   }
   if (n <= 4) {
-    if (sscanf(uStr, "%x", &u) != 1) {
+    if (!parseHex(uStr, n, &u)) {
       error(errSyntaxWarning, -1, "Illegal entry in ToUnicode CMap");
       return;
     }
@@ -435,10 +434,9 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n,
     sMap[sMapLen].len = n / 4;
     sMap[sMapLen].u = (Unicode*)gmallocn(sMap[sMapLen].len, sizeof(Unicode));
     for (j = 0; j < sMap[sMapLen].len; ++j) {
-      strncpy(uHex, uStr + j*4, 4);
-      uHex[4] = '\0';
-      if (sscanf(uHex, "%x", &sMap[sMapLen].u[j]) != 1) {
+      if (!parseHex(uStr + j*4, 4, &sMap[sMapLen].u[j])) {
 	error(errSyntaxWarning, -1, "Illegal entry in ToUnicode CMap");
+	return;
       }
     }
     sMap[sMapLen].u[sMap[sMapLen].len - 1] += offset;
