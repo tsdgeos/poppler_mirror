@@ -82,10 +82,3 @@ void CDECL error(ErrorCategory category, int pos, const char *msg, ...) {
   }
   delete s;
 }
-
-void warning(const char *msg, ...) {
-  va_list args;
-  va_start(args, msg);
-  vprintf(msg, args);
-  va_end(args);
-}

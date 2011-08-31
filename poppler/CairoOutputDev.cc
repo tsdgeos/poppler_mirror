@@ -187,7 +187,7 @@ void CairoOutputDev::setCairo(cairo_t *cairo)
   if (this->cairo != NULL) {
     cairo_status_t status = cairo_status (this->cairo);
     if (status) {
-      warning("cairo context error: %s\n", cairo_status_to_string(status));
+      error(errInternal, -1, "cairo context error: {0:s}\n", cairo_status_to_string(status));
     }
     cairo_destroy (this->cairo);
     assert(!cairo_shape);
@@ -344,7 +344,7 @@ void CairoOutputDev::updateCTM(GfxState *state, double m11, double m12,
    * instead of having to invert the matrix. */
   invert_matrix = matrix;
   if (cairo_matrix_invert(&invert_matrix)) {
-    warning("matrix not invertible\n");
+    error(errSyntaxWarning, -1, "matrix not invertible\n");
     return;
   }
 
@@ -629,7 +629,7 @@ void CairoOutputDev::updateFont(GfxState *state) {
   */
   invert_matrix = matrix;
   if (cairo_matrix_invert(&invert_matrix)) {
-    warning("font matrix not invertible\n");
+    error(errSyntaxWarning, -1, "font matrix not invertible\n");
     return;
   }
 

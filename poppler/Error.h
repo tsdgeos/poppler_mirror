@@ -52,6 +52,5 @@ extern void setErrorCallback(void (*cbk)(void *data, ErrorCategory category,
 			     void *data);
 
 extern void CDECL error(ErrorCategory category, int pos, const char *msg, ...);
-void warning(const char *msg, ...) GCC_PRINTF_FORMAT (1, 2);
 
 #endif
