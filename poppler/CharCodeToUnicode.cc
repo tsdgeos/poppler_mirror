@@ -404,6 +404,11 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n,
   Unicode u;
   int j;
 
+  if (code > 0xffffff) {
+    // This is an arbitrary limit to avoid integer overflow issues.
+    // (I've seen CMaps with mappings for <ffffffff>.)
+    return;
+  }
   if (code >= mapLen) {
     oldLen = mapLen;
     mapLen = (code + 256) & ~255;
