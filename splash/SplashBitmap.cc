@@ -161,11 +161,7 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
     fprintf(f, "P5\n%d %d\n255\n", width, height);
     row = data;
     for (y = 0; y < height; ++y) {
-      p = row;
-      for (x = 0; x < width; ++x) {
-	fputc(*p, f);
-	++p;
-      }
+      fwrite(row, 1, width, f);
       row += rowSize;
     }
     break;
@@ -174,13 +170,7 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
     fprintf(f, "P6\n%d %d\n255\n", width, height);
     row = data;
     for (y = 0; y < height; ++y) {
-      p = row;
-      for (x = 0; x < width; ++x) {
-	fputc(splashRGB8R(p), f);
-	fputc(splashRGB8G(p), f);
-	fputc(splashRGB8B(p), f);
-	p += 3;
-      }
+      fwrite(row, 1, 3 * width, f);
       row += rowSize;
     }
     break;
