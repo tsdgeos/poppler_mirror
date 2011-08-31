@@ -493,6 +493,7 @@ void FoFiTrueType::convertToType42(char *psName, char **encoding,
 				   FoFiOutputFunc outputFunc,
 				   void *outputStream) {
   GooString *buf;
+  int maxUsedGlyph;
   GBool ok;
 
   if (openTypeCFF) {
@@ -522,7 +523,7 @@ void FoFiTrueType::convertToType42(char *psName, char **encoding,
   // write the guts of the dictionary
   cvtEncoding(encoding, outputFunc, outputStream);
   cvtCharStrings(encoding, codeToGID, outputFunc, outputStream);
-  cvtSfnts(outputFunc, outputStream, NULL, gFalse);
+  cvtSfnts(outputFunc, outputStream, NULL, gFalse, &maxUsedGlyph);
 
   // end the dictionary and define the font
   (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
@@ -555,7 +556,7 @@ void FoFiTrueType::convertToCIDType2(char *psName,
 				     FoFiOutputFunc outputFunc,
 				     void *outputStream) {
   GooString *buf;
-  Gushort cid;
+  int cid, maxUsedGlyph;
   GBool ok;
   int i, j, k;
 
@@ -671,7 +672,7 @@ void FoFiTrueType::convertToCIDType2(char *psName,
   (*outputFunc)(outputStream, "  end readonly def\n", 19);
 
   // write the guts of the dictionary
-  cvtSfnts(outputFunc, outputStream, NULL, needVerticalMetrics);
+  cvtSfnts(outputFunc, outputStream, NULL, needVerticalMetrics, &maxUsedGlyph);
 
   // end the dictionary and define the font
   (*outputFunc)(outputStream,
@@ -706,7 +707,7 @@ void FoFiTrueType::convertToType0(char *psName, Gushort *cidMap, int nCIDs,
 				  void *outputStream) {
   GooString *buf;
   GooString *sfntsName;
-  int n, i, j;
+  int maxUsedGlyph, n, i, j;
 
   if (openTypeCFF) {
     return;
@@ -714,11 +715,32 @@ void FoFiTrueType::convertToType0(char *psName, Gushort *cidMap, int nCIDs,
 
   // write the Type 42 sfnts array
   sfntsName = (new GooString(psName))->append("_sfnts");
-  cvtSfnts(outputFunc, outputStream, sfntsName, needVerticalMetrics);
+  cvtSfnts(outputFunc, outputStream, sfntsName, needVerticalMetrics,
+	   &maxUsedGlyph);
   delete sfntsName;
 
   // write the descendant Type 42 fonts
-  n = cidMap ? nCIDs : nGlyphs;
+  // (The following is a kludge: nGlyphs is the glyph count from the
+  // maxp table; maxUsedGlyph is the max glyph number that has a
+  // non-zero-length description, from the loca table.  The problem is
+  // that some TrueType font subsets fail to change the glyph count,
+  // i.e., nGlyphs is much larger than maxUsedGlyph+1, which results
+  // in an unnecessarily huge Type 0 font.  But some other PDF files
+  // have fonts with only zero or one used glyph, and a content stream
+  // that refers to one of the unused glyphs -- this results in PS
+  // errors if we simply use maxUsedGlyph+1 for the Type 0 font.  So
+  // we compromise by always defining at least 256 glyphs.)
+  if (cidMap) {
+    n = nCIDs;
+  } else if (nGlyphs > maxUsedGlyph + 256) {
+    if (maxUsedGlyph <= 255) {
+      n = 256;
+    } else {
+      n = maxUsedGlyph + 1;
+    }
+  } else {
+    n = nGlyphs;
+  }
   for (i = 0; i < n; i += 256) {
     (*outputFunc)(outputStream, "10 dict begin\n", 14);
     (*outputFunc)(outputStream, "/FontName /", 11);
@@ -1530,7 +1552,8 @@ void FoFiTrueType::cvtCharStrings(char **encoding,
 
 void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
 			    void *outputStream, GooString *name,
-			    GBool needVerticalMetrics) {
+			    GBool needVerticalMetrics,
+                            int *maxUsedGlyph) {
   Guchar headData[54];
   TrueTypeLoca *locaTable;
   Guchar *locaData;
@@ -1614,11 +1637,15 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
   locaTable[nGlyphs].len = 0;
   std::sort(locaTable, locaTable + nGlyphs + 1, cmpTrueTypeLocaIdxFunctor());
   pos = 0;
+  *maxUsedGlyph = -1;
   for (i = 0; i <= nGlyphs; ++i) {
     locaTable[i].newOffset = pos;
     pos += locaTable[i].len;
     if (pos & 3) {
       pos += 4 - (pos & 3);
+    }
+    if (locaTable[i].len > 0) {
+      *maxUsedGlyph = i;
     }
   }
 

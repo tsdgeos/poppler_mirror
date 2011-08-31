@@ -169,7 +169,8 @@ private:
 		      void *outputStream);
   void cvtSfnts(FoFiOutputFunc outputFunc,
 		void *outputStream, GooString *name,
-		GBool needVerticalMetrics);
+		GBool needVerticalMetrics,
+                int *maxUsedGlyph);
   void dumpString(Guchar *s, int length,
 		  FoFiOutputFunc outputFunc,
 		  void *outputStream);
