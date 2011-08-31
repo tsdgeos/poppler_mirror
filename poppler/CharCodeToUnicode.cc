@@ -293,11 +293,12 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data,
   char tok1[256], tok2[256], tok3[256];
   int nDigits, n1, n2, n3;
   CharCode i;
-  CharCode code1, code2;
+  CharCode maxCode, code1, code2;
   GooString *name;
   FILE *f;
 
   nDigits = nBits / 4;
+  maxCode = (nBits == 8) ? 0xff : (nBits == 16) ? 0xffff : 0xffffffff;
   pst = new PSTokenizer(getCharFunc, data);
   pst->getToken(tok1, sizeof(tok1), &n1);
   while (pst->getToken(tok2, sizeof(tok2), &n2)) {
@@ -337,6 +338,10 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data,
 	  error(errSyntaxWarning, -1, "Illegal entry in bfchar block in ToUnicode CMap");
 	  continue;
 	}
+	if (code1 > maxCode) {
+	  error(errSyntaxWarning, -1,
+		"Invalid entry in bfchar block in ToUnicode CMap");
+	}
 	addMapping(code1, tok2 + 1, n2 - 2, 0);
       }
       pst->getToken(tok1, sizeof(tok1), &n1);
@@ -364,6 +369,16 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data,
 	    !parseHex(tok2 + 1, n2 - 2, &code2)) {
 	  error(errSyntaxWarning, -1, "Illegal entry in bfrange block in ToUnicode CMap");
 	  continue;
+	}
+	if (code1 > maxCode || code2 > maxCode) {
+	  error(errSyntaxWarning, -1,
+		"Invalid entry in bfrange block in ToUnicode CMap");
+	  if (code1 > maxCode) {
+	    code1 = maxCode;
+	  }
+	  if (code2 > maxCode) {
+	    code2 = maxCode;
+	  }
 	}
 	if (!strcmp(tok3, "[")) {
 	  i = 0;
