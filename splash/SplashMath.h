@@ -114,4 +114,14 @@ static inline SplashCoord splashDist(SplashCoord x0, SplashCoord y0,
 #endif
 }
 
+static inline GBool splashCheckDet(SplashCoord m11, SplashCoord m12,
+				   SplashCoord m21, SplashCoord m22,
+				   SplashCoord epsilon) {
+#if USE_FIXEDPOINT
+  return FixedPoint::checkDet(m11, m12, m21, m22, epsilon);
+#else
+  return fabs(m11 * m22 - m12 * m21) >= epsilon;
+#endif
+}
+
 #endif
