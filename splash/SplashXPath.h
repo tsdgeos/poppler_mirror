@@ -70,7 +70,6 @@ public:
 
 protected:
 
-  SplashXPath();
   SplashXPath(SplashXPath *xPath);
   void transform(SplashCoord *matrix, SplashCoord xi, SplashCoord yi,
 		 SplashCoord *xo, SplashCoord *yo);

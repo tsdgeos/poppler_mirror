@@ -65,11 +65,6 @@ inline void SplashXPath::transform(SplashCoord *matrix,
 // SplashXPath
 //------------------------------------------------------------------------
 
-SplashXPath::SplashXPath() {
-  segs = NULL;
-  length = size = 0;
-}
-
 SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
 			 SplashCoord flatness, GBool closeSubpaths) {
   SplashPathHint *hint;
