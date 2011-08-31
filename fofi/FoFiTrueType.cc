@@ -1820,7 +1820,6 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
 	  dumpString(vheaTab, length, outputFunc, outputStream);
 	} else if (needVerticalMetrics && i == t42VmtxTable) {
 	  dumpString(vmtxTab, length, outputFunc, outputStream);
-	  gfree(vmtxTab);
 	}
       }
     }
@@ -1831,6 +1830,9 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
 
   gfree(locaData);
   gfree(locaTable);
+  if (vmtxTab) {
+    gfree(vmtxTab);
+  }
 }
 
 void FoFiTrueType::dumpString(Guchar *s, int length,
