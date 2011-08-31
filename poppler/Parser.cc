@@ -182,7 +182,10 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
 
   // get stream start position
   lexer->skipToNextLine();
-  pos = lexer->getPos();
+  if (!(str = lexer->getStream())) {
+    return NULL;
+  }
+  pos = str->getPos();
 
   // get length
   dict->dictLookup("Length", &obj, fetchOriginatorNums);
