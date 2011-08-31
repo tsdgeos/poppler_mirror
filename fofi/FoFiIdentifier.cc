@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
-#include "gtypes.h"
+#include "goo/gtypes.h"
 #include "FoFiIdentifier.h"
 
 //------------------------------------------------------------------------
