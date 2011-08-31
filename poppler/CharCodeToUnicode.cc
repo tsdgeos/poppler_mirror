@@ -291,13 +291,12 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data,
 				   int nBits) {
   PSTokenizer *pst;
   char tok1[256], tok2[256], tok3[256];
-  int nDigits, n1, n2, n3;
+  int n1, n2, n3;
   CharCode i;
   CharCode maxCode, code1, code2;
   GooString *name;
   FILE *f;
 
-  nDigits = nBits / 4;
   maxCode = (nBits == 8) ? 0xff : (nBits == 16) ? 0xffff : 0xffffffff;
   pst = new PSTokenizer(getCharFunc, data);
   pst->getToken(tok1, sizeof(tok1), &n1);
@@ -325,13 +324,10 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data,
 	  error(errSyntaxWarning, -1, "Illegal entry in bfchar block in ToUnicode CMap");
 	  break;
 	}
-	if (!(n1 == 2 + nDigits && tok1[0] == '<' && tok1[n1 - 1] == '>' &&
+	if (!(tok1[0] == '<' && tok1[n1 - 1] == '>' &&
 	      tok2[0] == '<' && tok2[n2 - 1] == '>')) {
-	  if (!(n1 == 4 + nDigits && tok1[0] == '<' && tok1[n1 - 1] == '>' && tok1[1] == '0' && tok1[2] == '0' &&
-	        tok2[0] == '<' && tok2[n2 - 1] == '>')) {
-	    error(errSyntaxWarning, -1, "Illegal entry in bfchar block in ToUnicode CMap");
-	    continue;
-	  }
+	  error(errSyntaxWarning, -1, "Illegal entry in bfchar block in ToUnicode CMap");
+	  continue;
 	}
 	tok1[n1 - 1] = tok2[n2 - 1] = '\0';
 	if (!parseHex(tok1 + 1, n1 - 2, &code1)) {
@@ -357,10 +353,8 @@ void CharCodeToUnicode::parseCMap1(int (*getCharFunc)(void *), void *data,
 	  error(errSyntaxWarning, -1, "Illegal entry in bfrange block in ToUnicode CMap");
 	  break;
 	}
-	if (!(((n1 == 2 + nDigits && tok1[0] == '<' && tok1[n1 - 1] == '>') ||
-	       (n1 == 4 + nDigits && tok1[0] == '<' && tok1[n1 - 1] == '>' && tok1[1] == '0' && tok1[2] == '0')) &&
-	      ((n2 == 2 + nDigits && tok2[0] == '<' && tok2[n2 - 1] == '>') ||
-	       (n2 == 4 + nDigits && tok2[0] == '<' && tok2[n2 - 1] == '>' && tok1[1] == '0' && tok1[2] == '0')))) {
+	if (!(tok1[0] == '<' && tok1[n1 - 1] == '>' &&
+	      tok2[0] == '<' && tok2[n2 - 1] == '>')) {
 	  error(errSyntaxWarning, -1, "Illegal entry in bfrange block in ToUnicode CMap");
 	  continue;
 	}
