@@ -73,6 +73,12 @@ static int getCharFromFile(void *data) {
 
 //------------------------------------------------------------------------
 
+//------------------------------------------------------------------------
+
+CharCodeToUnicode *CharCodeToUnicode::makeIdentityMapping() {
+  return new CharCodeToUnicode();
+}
+
 CharCodeToUnicode *CharCodeToUnicode::parseCIDToUnicode(GooString *fileName,
 							GooString *collection) {
   FILE *f;
@@ -405,6 +411,18 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n,
   }
 }
 
+CharCodeToUnicode::CharCodeToUnicode() {
+  tag = NULL;
+  map = NULL;
+  mapLen = 0;
+  sMap = NULL;
+  sMapLen = sMapSize = 0;
+  refCnt = 1;
+#if MULTITHREADED
+  gInitMutex(&mutex);
+#endif
+}
+
 CharCodeToUnicode::CharCodeToUnicode(GooString *tagA) {
   CharCode i;
 
@@ -489,6 +507,9 @@ GBool CharCodeToUnicode::match(GooString *tagA) {
 void CharCodeToUnicode::setMapping(CharCode c, Unicode *u, int len) {
   int i, j;
 
+  if (!map) {
+    return;
+  }
   if (len == 1) {
     map[c] = u[0];
   } else {
@@ -519,6 +540,10 @@ void CharCodeToUnicode::setMapping(CharCode c, Unicode *u, int len) {
 int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode **u) {
   int i;
 
+  if (!map) {
+    *u[0] = (Unicode)c;
+    return 1;
+  }
   if (c >= mapLen) {
     return 0;
   }

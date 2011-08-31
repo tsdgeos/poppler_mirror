@@ -48,6 +48,9 @@ class CharCodeToUnicode {
 friend class UnicodeToCharCode;
 public:
 
+  // Create an identity mapping (Unicode = CharCode).
+  static CharCodeToUnicode *makeIdentityMapping();
+
   // Read the CID-to-Unicode mapping for <collection> from the file
   // specified by <fileName>.  Sets the initial reference count to 1.
   // Returns NULL on failure.
@@ -96,6 +99,7 @@ private:
 
   void parseCMap1(int (*getCharFunc)(void *), void *data, int nBits);
   void addMapping(CharCode code, char *uStr, int n, int offset);
+  CharCodeToUnicode();
   CharCodeToUnicode(GooString *tagA);
   CharCodeToUnicode(GooString *tagA, Unicode *mapA,
 		    CharCode mapLenA, GBool copyMap,
