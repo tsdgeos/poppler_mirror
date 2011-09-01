@@ -90,7 +90,7 @@ SplashT1Font::SplashT1Font(SplashT1FontFile *fontFileA, SplashCoord *matA,
   outlineID = -1;
 
   // compute font size
-  size = (float)splashSqrt(mat[2]*mat[2] + mat[3]*mat[3]);
+  size = (float)splashDist(0, 0, mat[2], mat[3]);
 
   // transform the four corners of the font bounding box -- the min
   // and max values form the bounding box of the transformed font
