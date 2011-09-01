@@ -39,7 +39,6 @@ class PDFDoc;
 class XRef;
 class OutputDev;
 class Links;
-class Catalog;
 class Annots;
 class Annot;
 class Gfx;
