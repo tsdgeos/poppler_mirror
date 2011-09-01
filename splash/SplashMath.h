@@ -69,6 +69,14 @@ static inline int splashRound(SplashCoord x) {
 #endif
 }
 
+static inline SplashCoord splashAvg(SplashCoord x, SplashCoord y) {
+#if USE_FIXEDPOINT
+  return FixedPoint::avg(x, y);
+#else
+  return 0.5 * (x + y);
+#endif
+}
+ 
 static inline SplashCoord splashSqrt(SplashCoord x) {
 #if USE_FIXEDPOINT
   return FixedPoint::sqrt(x);
