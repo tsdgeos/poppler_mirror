@@ -279,7 +279,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
   GooString *fileName;
   char *tmpBuf;
   int tmpBufLen;
-  Gushort *codeToGID;
+  int *codeToGID;
   DisplayFontParam *dfp;
   double *textMat;
   double m11, m12, m21, m22, fontSize;
@@ -433,7 +433,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
       if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
 	n = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
 	if (n) {
-	  codeToGID = (Gushort *)gmallocn(n, sizeof(Gushort));
+	  codeToGID = (int *)gmallocn(n, sizeof(int));
 	  memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(),
 		  n * sizeof(Gushort));
 	}
