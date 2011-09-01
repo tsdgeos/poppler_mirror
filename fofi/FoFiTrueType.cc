@@ -1249,10 +1249,14 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
   newTables = (TrueTypeTable *)gmallocn(nNewTables, sizeof(TrueTypeTable));
   j = 0;
   for (i = 0; i < nTables; ++i) {
-    if (tables[i].len > 0) {
+    if (tables[i].len > 0 &&
+	(tables[i].tag & 0xe0000000) &&
+	(tables[i].tag & 0x00e00000) &&
+	(tables[i].tag & 0x0000e000) &&
+	(tables[i].tag & 0x000000e0)) {
       newTables[j] = tables[i];
       newTables[j].origOffset = tables[i].offset;
-      if (checkRegion(tables[i].offset, newTables[i].len)) {
+      if (checkRegion(tables[i].offset, tables[i].len)) {
 	newTables[j].checksum =
 	    computeTableChecksum(file + tables[i].offset, tables[i].len);
 	if (tables[i].tag == headTag) {
