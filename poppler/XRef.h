@@ -154,7 +154,7 @@ private:
   CryptAlgorithm encAlgorithm;	// encryption algorithm
   int keyLength;		// length of key, in bytes
   int permFlags;		// permission bits
-  Guchar fileKey[16];		// file decryption key
+  Guchar fileKey[32];		// file decryption key
   GBool ownerPasswordOk;	// true if owner password is correct
   Guint prevXRefOffset;		// position of prev XRef section (= next to read)
   Guint mainXRefEntriesOffset;	// offset of entries in main XRef table
