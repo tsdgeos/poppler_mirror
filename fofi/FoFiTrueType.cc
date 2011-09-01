@@ -1974,22 +1974,23 @@ void FoFiTrueType::parse() {
   }
   tables = (TrueTypeTable *)gmallocn(nTables, sizeof(TrueTypeTable));
   pos += 12;
-  int wrongTables = 0;
+  j = 0;
   for (i = 0; i < nTables; ++i) {
-    tables[i].tag = getU32BE(pos, &parsedOk);
-    tables[i].checksum = getU32BE(pos + 4, &parsedOk);
-    tables[i].offset = (int)getU32BE(pos + 8, &parsedOk);
-    tables[i].len = (int)getU32BE(pos + 12, &parsedOk);
-    if (tables[i].offset + tables[i].len < tables[i].offset ||
-	tables[i].offset + tables[i].len > len) {
-      i--;
-      wrongTables++;
-      error(errSyntaxWarning, -1, "Found a bad table definition on true type definition, trying to continue...");
+    tables[j].tag = getU32BE(pos, &parsedOk);
+    tables[j].checksum = getU32BE(pos + 4, &parsedOk);
+    tables[j].offset = (int)getU32BE(pos + 8, &parsedOk);
+    tables[j].len = (int)getU32BE(pos + 12, &parsedOk);
+    if (tables[j].offset + tables[j].len >= tables[j].offset &&
+	tables[j].offset + tables[j].len <= len) {
+      // ignore any bogus entries in the table directory
+      ++j;
     }
     pos += 16;
   }
-  nTables -= wrongTables;
-  tables = (TrueTypeTable *)greallocn_checkoverflow(tables, nTables, sizeof(TrueTypeTable));
+  if (nTables != j) {
+    nTables = j;
+    tables = (TrueTypeTable *)greallocn_checkoverflow(tables, nTables, sizeof(TrueTypeTable));
+  }
   if (!parsedOk || tables == NULL) {
     return;
   }
