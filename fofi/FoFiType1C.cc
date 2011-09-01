@@ -2093,6 +2093,8 @@ void FoFiType1C::readFD(int offset, int length, Type1CPrivateDict *pDict) {
   GBool hasFontMatrix;
 
   hasFontMatrix = gFalse;
+  fontMatrix[0] = fontMatrix[1] = fontMatrix[2] = 0; // make gcc happy
+  fontMatrix[3] = fontMatrix[4] = fontMatrix[5] = 0;
   pSize = pOffset = 0;
   pos = offset;
   nOps = 0;
