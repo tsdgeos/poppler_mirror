@@ -188,6 +188,7 @@ CMap::CMap(GooString *collectionA, GooString *cMapNameA) {
 
   collection = collectionA;
   cMapName = cMapNameA;
+  isIdent = gFalse;
   wMode = 0;
   vector = (CMapVectorEntry *)gmallocn(256, sizeof(CMapVectorEntry));
   for (i = 0; i < 256; ++i) {
@@ -203,6 +204,7 @@ CMap::CMap(GooString *collectionA, GooString *cMapNameA) {
 CMap::CMap(GooString *collectionA, GooString *cMapNameA, int wModeA) {
   collection = collectionA;
   cMapName = cMapNameA;
+  isIdent = gTrue;
   wMode = wModeA;
   vector = NULL;
   refCnt = 1;
@@ -216,12 +218,23 @@ void CMap::useCMap(CMapCache *cache, char *useName) {
   CMap *subCMap;
 
   useNameStr = new GooString(useName);
-  subCMap = cache->getCMap(collection, useNameStr, NULL);
+  // if cache is non-NULL, we already have a lock, and we can use
+  // CMapCache::getCMap() directly; otherwise, we need to use
+  // GlobalParams::getCMap() in order to acqure the lock need to use
+  // GlobalParams::getCMap
+  if (cache) {
+    subCMap = cache->getCMap(collection, useNameStr, NULL);
+  } else {
+    subCMap = globalParams->getCMap(collection, useNameStr);
+  }
   delete useNameStr;
   if (!subCMap) {
     return;
   }
-  copyVector(vector, subCMap->vector);
+  isIdent = subCMap->isIdent;
+  if (subCMap->vector) {
+    copyVector(vector, subCMap->vector);
+  }
   subCMap->decRefCnt();
 }
 
@@ -356,31 +369,33 @@ GBool CMap::match(GooString *collectionA, GooString *cMapNameA) {
   return !collection->cmp(collectionA) && !cMapName->cmp(cMapNameA);
 }
 
-CID CMap::getCID(char *s, int len, int *nUsed) {
+CID CMap::getCID(char *s, int len, CharCode *c, int *nUsed) {
   CMapVectorEntry *vec;
+  CharCode cc;
   int n, i;
 
-  if (!(vec = vector)) {
-    // identity CMap
-    *nUsed = 2;
-    if (len < 2) {
-      return 0;
-    }
-    return ((s[0] & 0xff) << 8) + (s[1] & 0xff);
-  }
+  vec = vector;
+  cc = 0;
   n = 0;
-  while (1) {
-    if (n >= len) {
-      *nUsed = n;
-      return 0;
-    }
+  while (vec && n < len) {
     i = s[n++] & 0xff;
+    cc = (cc << 8) | i;
     if (!vec[i].isVector) {
+      *c = cc;
       *nUsed = n;
       return vec[i].cid;
     }
     vec = vec[i].vector;
   }
+  if (isIdent && len >= 2) {
+    // identity CMap
+    *nUsed = 2;
+    *c = cc = ((s[0] & 0xff) << 8) + (s[1] & 0xff);
+    return cc;
+  }
+  *nUsed = 1;
+  *c = s[0] & 0xff;
+  return 0;
 }
 
 void CMap::setReverseMapVector(Guint startCode, CMapVectorEntry *vec,

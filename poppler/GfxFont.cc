@@ -1702,6 +1702,7 @@ int GfxCIDFont::getNextChar(char *s, int len, CharCode *code,
 			    Unicode **u, int *uLen,
 			    double *dx, double *dy, double *ox, double *oy) {
   CID cid;
+  CharCode c;
   double w, h, vx, vy;
   int n, a, b, m;
 
@@ -1712,7 +1713,7 @@ int GfxCIDFont::getNextChar(char *s, int len, CharCode *code,
     return 1;
   }
 
-  *code = (CharCode)(cid = cMap->getCID(s, len, &n));
+  *code = (CharCode)(cid = cMap->getCID(s, len, &c, &n));
   if (ctu) {
     if (hasToUnicode) {
       int i = 0, c = 0;
@@ -2060,8 +2061,9 @@ double GfxCIDFont::getWidth (char* s, int len) {
   int nUsed;
   double w;
   int a, b, m;
+  CharCode c;
 
-  CID cid = cMap->getCID(s, len, &nUsed);
+  CID cid = cMap->getCID(s, len, &c, &nUsed);
 
   w = widths.defWidth;
   if (widths.nExceps > 0 && cid >= widths.exceps[0].first) {
