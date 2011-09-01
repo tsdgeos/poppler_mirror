@@ -329,7 +329,7 @@ view_new (PopplerDocument *doc)
 
     view->out = new GDKSplashOutputDev (gtk_widget_get_screen (window),
                                         redraw_callback, (void*) view, sc);
-    view->out->startDoc(view->doc->doc->getXRef());
+    view->out->startDoc(view->doc->doc);
   }
 
   g_signal_connect (view->drawing_area,

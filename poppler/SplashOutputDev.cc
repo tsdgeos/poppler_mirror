@@ -51,6 +51,7 @@
 #include "Gfx.h"
 #include "GfxFont.h"
 #include "Page.h"
+#include "PDFDoc.h"
 #include "Link.h"
 #include "CharCodeToUnicode.h"
 #include "FontEncodingTables.h"
@@ -1340,7 +1341,7 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
   }
   keepAlphaChannel = paperColorA == NULL;
 
-  xref = NULL;
+  doc = NULL;
 
   bitmap = new SplashBitmap(1, 1, bitmapRowPad, colorMode,
 			    colorMode != splashModeMono1, bitmapTopDown);
@@ -1427,10 +1428,10 @@ SplashOutputDev::~SplashOutputDev() {
   }
 }
 
-void SplashOutputDev::startDoc(XRef *xrefA) {
+void SplashOutputDev::startDoc(PDFDoc *docA) {
   int i;
 
-  xref = xrefA;
+  doc = docA;
   if (fontEngine) {
     delete fontEngine;
   }
@@ -1771,7 +1772,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 
     // if there is an embedded font, write it to disk
     if (gfxFont->getEmbeddedFontID(&embRef)) {
-      tmpBuf = gfxFont->readEmbFontFile(xref, &tmpBufLen);
+      tmpBuf = gfxFont->readEmbFontFile(doc->getXRef(), &tmpBufLen);
       if (! tmpBuf)
 	goto err2;
 
@@ -3150,7 +3151,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
   if (maskWidth > width || maskHeight > height) {
     decodeLow.initInt(maskInvert ? 0 : 1);
     decodeHigh.initInt(maskInvert ? 1 : 0);
-    maskDecode.initArray(xref);
+    maskDecode.initArray(doc->getXRef());
     maskDecode.arrayAdd(&decodeLow);
     maskDecode.arrayAdd(&decodeHigh);
     maskColorMap = new GfxImageColorMap(1, &maskDecode,
@@ -3901,7 +3902,7 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Catalog *catalog, Obje
 
   box.x1 = bbox[0]; box.y1 = bbox[1];
   box.x2 = bbox[2]; box.y2 = bbox[3];
-  gfx = new Gfx(xref, this, resDict, catalog, &box, NULL);
+  gfx = new Gfx(doc, this, resDict, &box, NULL);
   // set pattern transformation matrix
   gfx->getState()->setCTM(m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
   updateCTM(gfx->getState(), m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);

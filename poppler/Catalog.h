@@ -37,6 +37,7 @@
 
 #include <vector>
 
+class PDFDoc;
 class XRef;
 class Object;
 class Page;
@@ -93,7 +94,7 @@ class Catalog {
 public:
 
   // Constructor.
-  Catalog(XRef *xrefA);
+  Catalog(PDFDoc *docA);
 
   // Destructor.
   ~Catalog();
@@ -185,6 +186,7 @@ private:
   // Get page label info.
   PageLabelInfo *getPageLabelInfo();
 
+  PDFDoc *doc;
   XRef *xref;			// the xref table for this PDF file
   Page **pages;			// array of pages
   Ref *pageRefs;		// object ID for each page

@@ -565,8 +565,7 @@ static const cairo_user_data_key_t type3_font_key = {0};
 
 typedef struct _type3_font_info {
   GfxFont *font;
-  XRef *xref;
-  Catalog *catalog;
+  PDFDoc *doc;
   CairoFontEngine *fontEngine;
   GBool printing;
 } type3_font_info_t;
@@ -631,8 +630,8 @@ _render_type3_glyph (cairo_scaled_font_t  *scaled_font,
   box.y1 = mat[1];
   box.x2 = mat[2];
   box.y2 = mat[3];
-  gfx = new Gfx(info->xref, output_dev, resDict, info->catalog, &box, NULL);
-  output_dev->startDoc(info->xref, info->catalog, info->fontEngine);
+  gfx = new Gfx(info->doc, output_dev, resDict, &box, NULL);
+  output_dev->startDoc(info->doc, info->fontEngine);
   output_dev->startPage (1, gfx->getState());
   output_dev->setInType3Char(gTrue);
   gfx->display(charProcs->getVal(glyph, &charProc));
@@ -660,8 +659,8 @@ _render_type3_glyph (cairo_scaled_font_t  *scaled_font,
 }
 
 
-CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, XRef *xref,
-				       Catalog *catalog, CairoFontEngine *fontEngine,
+CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, PDFDoc *doc,
+				       CairoFontEngine *fontEngine,
 				       GBool printing) {
   Object refObj, strObj;
   type3_font_info_t *info;
@@ -681,8 +680,7 @@ CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, XRef *xref,
   cairo_user_font_face_set_render_glyph_func (font_face, _render_type3_glyph);
   gfxFont->incRefCnt();
   info->font = gfxFont;
-  info->xref = xref;
-  info->catalog = catalog;
+  info->doc = doc;
   info->fontEngine = fontEngine;
   info->printing = printing;
 
@@ -702,12 +700,11 @@ CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, XRef *xref,
     }
   }
 
-  return new CairoType3Font(ref, xref, catalog, font_face, codeToGID, codeToGIDLen, printing);
+  return new CairoType3Font(ref, doc, font_face, codeToGID, codeToGIDLen, printing);
 }
 
 CairoType3Font::CairoType3Font(Ref ref,
-			       XRef *xref,
-			       Catalog *catalog,
+			       PDFDoc *doc,
 			       cairo_font_face_t *cairo_font_face,
 			       int *codeToGID,
 			       Guint codeToGIDLen,
@@ -717,8 +714,7 @@ CairoType3Font::CairoType3Font(Ref ref,
 							   codeToGIDLen,
 							   gFalse,
 							   printing),
-						 xref(xref),
-						 catalog(catalog) { }
+						 doc(doc) { }
 
 CairoType3Font::~CairoType3Font() { }
 
@@ -757,7 +753,7 @@ CairoFontEngine::~CairoFontEngine() {
 }
 
 CairoFont *
-CairoFontEngine::getFont(GfxFont *gfxFont, XRef *xref, Catalog *catalog, GBool printing) {
+CairoFontEngine::getFont(GfxFont *gfxFont, PDFDoc *doc, GBool printing) {
   int i, j;
   Ref ref;
   CairoFont *font;
@@ -778,9 +774,9 @@ CairoFontEngine::getFont(GfxFont *gfxFont, XRef *xref, Catalog *catalog, GBool p
   
   fontType = gfxFont->getType();
   if (fontType == fontType3)
-    font = CairoType3Font::create (gfxFont, xref, catalog, this, printing);
+    font = CairoType3Font::create (gfxFont, doc, this, printing);
   else
-    font = CairoFreeTypeFont::create (gfxFont, xref, lib, useCIDs);
+    font = CairoFreeTypeFont::create (gfxFont, doc->getXRef(), lib, useCIDs);
 
   //XXX: if font is null should we still insert it into the cache?
   if (fontCache[cairoFontCacheSize - 1]) {

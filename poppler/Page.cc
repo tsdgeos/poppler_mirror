@@ -42,6 +42,7 @@
 #include "Object.h"
 #include "Array.h"
 #include "Dict.h"
+#include "PDFDoc.h"
 #include "XRef.h"
 #include "Link.h"
 #include "OutputDev.h"
@@ -255,11 +256,12 @@ GBool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box) {
 // Page
 //------------------------------------------------------------------------
 
-Page::Page(XRef *xrefA, int numA, Dict *pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form) {
+Page::Page(PDFDoc *docA, int numA, Dict *pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form) {
   Object tmp;
 	
   ok = gTrue;
-  xref = xrefA;
+  doc = docA;
+  xref = doc->getXRef();
   num = numA;
   duration = -1;
   annots = NULL;
@@ -446,7 +448,7 @@ Gfx *Page::createGfx(OutputDev *out, double hDPI, double vDPI,
     printf("***** Rotate = %d\n", attrs->getRotate());
   }
 
-  gfx = new Gfx(xref, out, num, attrs->getResourceDict(), catalog,
+  gfx = new Gfx(doc, out, num, attrs->getResourceDict(),
 		hDPI, vDPI, &box, crop ? cropBox : (PDFRectangle *)NULL,
 		rotate, abortCheckCbk, abortCheckCbkData);
 

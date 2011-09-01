@@ -36,7 +36,7 @@
 #include <cairo-ft.h>
 
 #include "GfxFont.h"
-#include "Catalog.h"
+#include "PDFDoc.h"
 
 class CairoFontEngine;
 
@@ -83,20 +83,19 @@ private:
 
 class CairoType3Font : public CairoFont {
 public:
-  static CairoType3Font *create(GfxFont *gfxFont, XRef *xref,
-				Catalog *catalog, CairoFontEngine *fontEngine,
+  static CairoType3Font *create(GfxFont *gfxFont, PDFDoc *doc,
+				CairoFontEngine *fontEngine,
 				GBool printing);
   virtual ~CairoType3Font();
 
   virtual GBool matches(Ref &other, GBool printing);
 
 private:
-  CairoType3Font(Ref ref, XRef *xref, Catalog *catalog,
+  CairoType3Font(Ref ref, PDFDoc *doc,
 		 cairo_font_face_t *cairo_font_face,
 		 int *codeToGID, Guint codeToGIDLen,
 		 GBool printing);
-  XRef *xref;
-  Catalog *catalog;
+  PDFDoc *doc;
 };
 
 //------------------------------------------------------------------------
@@ -114,7 +113,7 @@ public:
   CairoFontEngine(FT_Library libA);
   ~CairoFontEngine();
 
-  CairoFont *getFont(GfxFont *gfxFont, XRef *xref, Catalog *catalog, GBool printing);
+  CairoFont *getFont(GfxFont *gfxFont, PDFDoc *doc, GBool printing);
 
 private:
   CairoFont *fontCache[cairoFontCacheSize];

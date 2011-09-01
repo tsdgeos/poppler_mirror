@@ -1063,8 +1063,6 @@ poppler_page_render_to_ps (PopplerPage   *page,
   if (!ps_file->out)
     ps_file->out = new PSOutputDev (ps_file->filename,
                                     ps_file->document->doc,
-                                    ps_file->document->doc->getXRef(),
-                                    ps_file->document->doc->getCatalog(),
                                     NULL,
                                     ps_file->first_page, ps_file->last_page,
                                     psModePS, (int)ps_file->paper_width,

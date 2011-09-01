@@ -43,9 +43,9 @@
 // PreScanOutputDev
 //------------------------------------------------------------------------
 
-PreScanOutputDev::PreScanOutputDev(XRef *xrefA) {
+PreScanOutputDev::PreScanOutputDev(PDFDoc *docA) {
   level = globalParams->getPSLevel();
-  xref = xrefA;
+  doc = docA;
   clearStats();
 }
 
@@ -90,7 +90,7 @@ GBool PreScanOutputDev::tilingPatternFill(GfxState *state, Catalog *catalog, Obj
   Gfx *gfx;
   box.x1 = bbox[0]; box.y1 = bbox[1];
   box.x2 = bbox[2]; box.y2 = bbox[3];
-  gfx = new Gfx(xref, this, resDict, catalog, &box, NULL);
+  gfx = new Gfx(doc, this, resDict, &box, NULL);
   gfx->display(str);
   delete gfx;
   return gTrue;

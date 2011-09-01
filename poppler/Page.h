@@ -35,6 +35,7 @@
 #include "Object.h"
 
 class Dict;
+class PDFDoc;
 class XRef;
 class OutputDev;
 class Links;
@@ -127,7 +128,7 @@ class Page {
 public:
 
   // Constructor.
-  Page(XRef *xrefA, int numA, Dict *pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form);
+  Page(PDFDoc *docA, int numA, Dict *pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form);
 
   // Destructor.
   ~Page();
@@ -237,6 +238,7 @@ public:
 
 private:
 
+  PDFDoc *doc;
   XRef *xref;			// the xref table for this PDF file
   Object pageObj;               // page dictionary
   Ref pageRef;                  // page reference

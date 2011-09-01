@@ -431,7 +431,7 @@ SplashOutputDev * PdfEnginePoppler::outputDevice() {
         GBool bitmapTopDown = gTrue;
         _outputDev = new SplashOutputDev(gSplashColorMode, 4, gFalse, gBgColor, bitmapTopDown);
         if (_outputDev)
-            _outputDev->startDoc(_pdfDoc->getXRef());
+            _outputDev->startDoc(_pdfDoc);
     }
     return _outputDev;
 }

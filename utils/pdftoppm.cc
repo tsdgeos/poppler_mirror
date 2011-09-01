@@ -372,7 +372,7 @@ int main(int argc, char *argv[]) {
 #endif
 				             splashModeRGB8, 4,
 				  gFalse, paperColor);
-  splashOut->startDoc(doc->getXRef());
+  splashOut->startDoc(doc);
   if (sz != 0) w = h = sz;
   pg_num_len = numberOfCharacters(doc->getNumPages());
   for (pg = firstPage; pg <= lastPage; ++pg) {

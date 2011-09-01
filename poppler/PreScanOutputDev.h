@@ -45,7 +45,7 @@ class PreScanOutputDev: public OutputDev {
 public:
 
   // Constructor.
-  PreScanOutputDev(XRef *xrefA);
+  PreScanOutputDev(PDFDoc *docA);
 
   // Destructor.
   virtual ~PreScanOutputDev();
@@ -159,7 +159,7 @@ private:
   void check(GfxColorSpace *colorSpace, GfxColor *color,
 	     double opacity, GfxBlendMode blendMode);
 
-  XRef *xref;
+  PDFDoc *doc;
   GBool mono;
   GBool gray;
   GBool transparency;

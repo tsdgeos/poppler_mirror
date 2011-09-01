@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include "goo/gmem.h"
 #include "Object.h"
+#include "PDFDoc.h"
 #include "XRef.h"
 #include "Array.h"
 #include "Dict.h"
@@ -57,13 +58,14 @@
 // Catalog
 //------------------------------------------------------------------------
 
-Catalog::Catalog(XRef *xrefA) {
+Catalog::Catalog(PDFDoc *docA) {
   Object catDict, pagesDict, pagesDictRef;
   Object obj, obj2;
   Object optContentProps;
 
   ok = gTrue;
-  xref = xrefA;
+  doc = docA;
+  xref = doc->getXRef();
   pages = NULL;
   pageRefs = NULL;
   numPages = -1;
@@ -355,7 +357,7 @@ GBool Catalog::cachePageTree(int page)
     kids.free();
     if (kid.isDict("Page") || (kid.isDict() && !kid.getDict()->hasKey("Kids"))) {
       PageAttrs *attrs = new PageAttrs(attrsList->back(), kid.getDict());
-      Page *p = new Page(xref, lastCachedPage+1, kid.getDict(),
+      Page *p = new Page(doc, lastCachedPage+1, kid.getDict(),
                      kidRef.getRef(), attrs, form);
       if (!p->isOk()) {
         error(errSyntaxError, -1, "Failed to create page (page {0:d})", lastCachedPage+1);

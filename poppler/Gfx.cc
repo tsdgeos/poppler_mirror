@@ -56,6 +56,7 @@
 #include "GlobalParams.h"
 #include "CharTypes.h"
 #include "Object.h"
+#include "PDFDoc.h"
 #include "Array.h"
 #include "Dict.h"
 #include "Stream.h"
@@ -525,7 +526,7 @@ GBool GfxResources::lookupGStateNF(char *name, Object *obj) {
 // Gfx
 //------------------------------------------------------------------------
 
-Gfx::Gfx(XRef *xrefA, OutputDev *outA, int pageNum, Dict *resDict, Catalog *catalogA,
+Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
 	 double hDPI, double vDPI, PDFRectangle *box,
 	 PDFRectangle *cropBox, int rotate,
 	 GBool (*abortCheckCbkA)(void *data),
@@ -536,8 +537,9 @@ Gfx::Gfx(XRef *xrefA, OutputDev *outA, int pageNum, Dict *resDict, Catalog *cata
 {
   int i;
 
-  xref = xrefA;
-  catalog = catalogA;
+  doc = docA;
+  xref = doc->getXRef();
+  catalog = doc->getCatalog();
   subPage = gFalse;
   printCommands = globalParams->getPrintCommands();
   profileCommands = globalParams->getProfileCommands();
@@ -581,7 +583,7 @@ Gfx::Gfx(XRef *xrefA, OutputDev *outA, int pageNum, Dict *resDict, Catalog *cata
   }
 }
 
-Gfx::Gfx(XRef *xrefA, OutputDev *outA, Dict *resDict, Catalog *catalogA,
+Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict,
 	 PDFRectangle *box, PDFRectangle *cropBox,
 	 GBool (*abortCheckCbkA)(void *data),
 	 void *abortCheckCbkDataA)
@@ -591,8 +593,9 @@ Gfx::Gfx(XRef *xrefA, OutputDev *outA, Dict *resDict, Catalog *catalogA,
 {
   int i;
 
-  xref = xrefA;
-  catalog = catalogA;
+  doc = docA;
+  xref = doc->getXRef();
+  catalog = doc->getCatalog();
   subPage = gTrue;
   printCommands = globalParams->getPrintCommands();
   profileCommands = globalParams->getProfileCommands();

@@ -115,8 +115,7 @@ FT_Library CairoOutputDev::ft_lib;
 GBool CairoOutputDev::ft_lib_initialized = gFalse;
 
 CairoOutputDev::CairoOutputDev() {
-  xref = NULL;
-  catalog = NULL;
+  doc = NULL;
 
   if (!ft_lib_initialized) {
     FT_Init_FreeType(&ft_lib);
@@ -219,10 +218,9 @@ void CairoOutputDev::setTextPage(TextPage *text)
   }
 }
 
-void CairoOutputDev::startDoc(XRef *xrefA, Catalog *catalogA,
+void CairoOutputDev::startDoc(PDFDoc *docA,
 			      CairoFontEngine *parentFontEngine) {
-  xref = xrefA;
-  catalog = catalogA;
+  doc = docA;
   if (parentFontEngine) {
     fontEngine = parentFontEngine;
   } else {
@@ -595,7 +593,7 @@ void CairoOutputDev::updateFont(GfxState *state) {
   if (text)
     text->updateFont(state);
   
-  currentFont = fontEngine->getFont (state->getFont(), xref, catalog, printing);
+  currentFont = fontEngine->getFont (state->getFont(), doc, printing);
 
   if (!currentFont)
     return;
@@ -794,7 +792,7 @@ GBool CairoOutputDev::tilingPatternFill(GfxState *state, Catalog *cat, Object *s
   box.x2 = bbox[2]; box.y2 = bbox[3];
   strokePathTmp = strokePathClip;
   strokePathClip = NULL;
-  gfx = new Gfx(xref, this, resDict, catalog, &box, NULL);
+  gfx = new Gfx(doc, this, resDict, &box, NULL);
   gfx->display(str);
   delete gfx;
   strokePathClip = strokePathTmp;

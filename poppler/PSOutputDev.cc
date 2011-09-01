@@ -994,7 +994,7 @@ static void outputToFile(void *stream, const char *data, int len) {
   fwrite(data, 1, len, (FILE *)stream);
 }
 
-PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc, XRef *xrefA, Catalog *catalog,
+PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc,
 			 char *psTitle,
 			 int firstPage, int lastPage, PSOutMode modeA,
 			 int paperWidthA, int paperHeightA, GBool duplexA,
@@ -1055,7 +1055,7 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc, XRef *xrefA, Catalog
   }
 
   init(outputToFile, f, fileTypeA, psTitle,
-       doc, xrefA, catalog, firstPage, lastPage, modeA,
+       doc, firstPage, lastPage, modeA,
        imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA,
        paperWidthA, paperHeightA, duplexA);
 }
@@ -1063,7 +1063,6 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc, XRef *xrefA, Catalog
 PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
 			 char *psTitle,
 			 PDFDoc *doc,
-			 XRef *xrefA, Catalog *catalog,
 			 int firstPage, int lastPage, PSOutMode modeA,
 			 int paperWidthA, int paperHeightA, GBool duplexA,
 			 int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
@@ -1091,17 +1090,18 @@ PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
   forceRasterize = forceRasterizeA;
 
   init(outputFuncA, outputStreamA, psGeneric, psTitle,
-       doc, xrefA, catalog, firstPage, lastPage, modeA,
+       doc, firstPage, lastPage, modeA,
        imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA,
        paperWidthA, paperHeightA, duplexA);
 }
 
 void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
-		       PSFileType fileTypeA, char *pstitle, PDFDoc *doc, XRef *xrefA, Catalog *catalog,
+		       PSFileType fileTypeA, char *pstitle, PDFDoc *docA,
 		       int firstPage, int lastPage, PSOutMode modeA,
 		       int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
 		       GBool manualCtrlA, int paperWidthA, int paperHeightA,
 		       GBool duplexA) {
+  Catalog *catalog;
   PDFRectangle *box;
 
   // initialize
@@ -1110,8 +1110,9 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   outputFunc = outputFuncA;
   outputStream = outputStreamA;
   fileType = fileTypeA;
-  m_catalog = catalog;
-  xref = xrefA;
+  doc = docA;
+  xref = doc->getXRef();
+  catalog = doc->getCatalog();
   level = globalParams->getPSLevel();
   mode = modeA;
   paperWidth = paperWidthA;
@@ -2621,7 +2622,7 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName,
     box.y1 = m[1];
     box.x2 = m[2];
     box.y2 = m[3];
-    gfx = new Gfx(xref, this, resDict, m_catalog, &box, NULL);
+    gfx = new Gfx(doc, this, resDict, &box, NULL);
     inType3Char = gTrue;
     for (i = 0; i < charProcs->getLength(); ++i) {
       t3Cacheable = gFalse;
@@ -2965,7 +2966,7 @@ void PSOutputDev::setupForm(Ref id, Object *strObj) {
   box.y1 = bbox[1];
   box.x2 = bbox[2];
   box.y2 = bbox[3];
-  gfx = new Gfx(xref, this, resDict, m_catalog, &box, &box);
+  gfx = new Gfx(doc, this, resDict, &box, &box);
   gfx->display(strObj);
   delete gfx;
 
@@ -3004,7 +3005,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   int compCyan;
 
   if (!forceRasterize) {
-    scan = new PreScanOutputDev(xref);
+    scan = new PreScanOutputDev(doc);
     page->displaySlice(scan, 72, 72, rotateA, useMediaBox, crop,
                      sliceX, sliceY, sliceW, sliceH,
                      printing, catalog, abortCheckCbk, abortCheckCbkData);
@@ -3037,7 +3038,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     splashOut = new SplashOutputDev(splashModeRGB8, 1, gFalse,
 				    paperColor, gTrue, gFalse);
   }
-  splashOut->startDoc(xref);
+  splashOut->startDoc(doc);
   splashDPI = globalParams->getSplashResolution();
   if (splashDPI < 1.0) {
     splashDPI = defaultSplashDPI;
@@ -3414,7 +3415,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state) {
 
   if (mode == psModePS || mode == psModePSOrigPageSizes) {
     GooString pageLabel;
-    const GBool gotLabel = m_catalog->indexToLabel(pageNum -1, &pageLabel);
+    const GBool gotLabel = doc->getCatalog()->indexToLabel(pageNum -1, &pageLabel);
     if (gotLabel) {
       // See bug13338 for why we try to avoid parentheses...
       GBool needParens;
@@ -4043,7 +4044,7 @@ GBool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *st
   box.y1 = bbox[1];
   box.x2 = bbox[2];
   box.y2 = bbox[3];
-  gfx = new Gfx(xref, this, resDict, m_catalog, &box, NULL);
+  gfx = new Gfx(doc, this, resDict, &box, NULL);
   writePS("/x {\n");
   if (paintType == 2) {
     writePSFmt("{0:.6g} 0 {1:.6g} {2:.6g} {3:.6g} {4:.6g} setcachedevice\n",
@@ -4098,7 +4099,7 @@ GBool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *st
   box.y1 = bbox[1];
   box.x2 = bbox[2];
   box.y2 = bbox[3];
-  gfx = new Gfx(xref, this, resDict, m_catalog, &box, NULL);
+  gfx = new Gfx(doc, this, resDict, &box, NULL);
   inType3Char = gTrue;
   gfx->display(str);
   inType3Char = gFalse;

@@ -40,6 +40,7 @@
 #include "TextOutputDev.h"
 #include "GfxState.h"
 
+class PDFDoc;
 class GfxState;
 class GfxPath;
 class Gfx8BitFont;
@@ -259,7 +260,7 @@ public:
   //----- special access
   
   // Called to indicate that a new PDF document has been loaded.
-  void startDoc(XRef *xrefA, Catalog *catalogA, CairoFontEngine *fontEngine = NULL);
+  void startDoc(PDFDoc *docA, CairoFontEngine *fontEngine = NULL);
  
   GBool isReverseVideo() { return gFalse; }
   
@@ -305,8 +306,7 @@ protected:
     double miter;
   } *strokePathClip;
 
-  XRef *xref;			// xref table for current document
-  Catalog *catalog;
+  PDFDoc *doc;			// the current document
 
   static FT_Library ft_lib;
   static GBool ft_lib_initialized;

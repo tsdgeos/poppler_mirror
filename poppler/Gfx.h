@@ -44,6 +44,7 @@
 #include <vector>
 
 class GooString;
+class PDFDoc;
 class XRef;
 class Array;
 class Stream;
@@ -143,14 +144,14 @@ class Gfx {
 public:
 
   // Constructor for regular output.
-  Gfx(XRef *xrefA, OutputDev *outA, int pageNum, Dict *resDict, Catalog *catalog,
+  Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
       double hDPI, double vDPI, PDFRectangle *box,
       PDFRectangle *cropBox, int rotate,
       GBool (*abortCheckCbkA)(void *data) = NULL,
       void *abortCheckCbkDataA = NULL);
 
   // Constructor for a sub-page object.
-  Gfx(XRef *xrefA, OutputDev *outA, Dict *resDict, Catalog *catalog,
+  Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict,
       PDFRectangle *box, PDFRectangle *cropBox,
       GBool (*abortCheckCbkA)(void *data) = NULL,
       void *abortCheckCbkDataA = NULL);
@@ -189,6 +190,7 @@ public:
 
 private:
 
+  PDFDoc *doc;
   XRef *xref;			// the xref table for this PDF file
   Catalog *catalog;		// the Catalog for this PDF file  
   OutputDev *out;		// output device

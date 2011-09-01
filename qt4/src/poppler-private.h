@@ -118,7 +118,7 @@ namespace Poppler {
 			SplashOutputDev * splashOutputDev = new SplashOutputDev(splashModeXBGR8, 4, gFalse, bgColor, gTrue, AA);
 			splashOutputDev->setVectorAntialias(m_hints & Document::Antialiasing ? gTrue : gFalse);
 			splashOutputDev->setFreeTypeHinting(m_hints & Document::TextHinting ? gTrue : gFalse, m_hints & Document::TextSlightHinting ? gTrue : gFalse);
-			splashOutputDev->startDoc(doc->getXRef());
+			splashOutputDev->startDoc(doc);
 			m_outputDev = splashOutputDev;
 #endif
 			break;

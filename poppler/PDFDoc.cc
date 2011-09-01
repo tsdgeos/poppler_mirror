@@ -256,7 +256,7 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
   }
 
   // read catalog
-  catalog = new Catalog(xref);
+  catalog = new Catalog(this);
   if (catalog && !catalog->isOk()) {
     if (!wasReconstructed)
     {
@@ -264,7 +264,7 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
       delete catalog;
       delete xref;
       xref = new XRef(str, 0, 0, NULL, true);
-      catalog = new Catalog(xref);
+      catalog = new Catalog(this);
     }
 
     if (catalog && !catalog->isOk()) {
@@ -1490,7 +1490,7 @@ Page *PDFDoc::parsePage(int page)
   }
   pageDict = obj.getDict();
 
-  p = new Page(xref, page, pageDict, pageRef,
+  p = new Page(this, page, pageDict, pageRef,
                new PageAttrs(NULL, pageDict), catalog->getForm());
   obj.free();
 

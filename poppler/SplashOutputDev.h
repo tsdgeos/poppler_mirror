@@ -40,6 +40,7 @@
 #include "OutputDev.h"
 #include "GfxState.h"
 
+class PDFDoc;
 class Gfx8BitFont;
 class SplashBitmap;
 class Splash;
@@ -345,7 +346,7 @@ public:
   //----- special access
 
   // Called to indicate that a new PDF document has been loaded.
-  void startDoc(XRef *xrefA);
+  void startDoc(PDFDoc *docA);
  
   void setPaperColor(SplashColorPtr paperColorA);
 
@@ -417,7 +418,7 @@ private:
   SplashColor paperColor;	// paper color
   SplashScreenParams screenParams;
 
-  XRef *xref;			// xref table for current document
+  PDFDoc *doc;			// the current document
 
   SplashBitmap *bitmap;
   Splash *splash;

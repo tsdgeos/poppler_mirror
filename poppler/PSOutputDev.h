@@ -78,7 +78,7 @@ class PSOutputDev: public OutputDev {
 public:
 
   // Open a PostScript output file, and write the prolog.
-  PSOutputDev(const char *fileName, PDFDoc *doc, XRef *xrefA, Catalog *catalog,
+  PSOutputDev(const char *fileName, PDFDoc *docA,
 	      char *psTitle,
 	      int firstPage, int lastPage, PSOutMode modeA,
 	      int paperWidthA = -1, int paperHeightA = -1,
@@ -91,8 +91,7 @@ public:
   // Open a PSOutputDev that will write to a generic stream.
   PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
 	      char *psTitle,
-	      PDFDoc *doc,
-	      XRef *xrefA, Catalog *catalog,
+	      PDFDoc *docA,
 	      int firstPage, int lastPage, PSOutMode modeA,
 	      int paperWidthA = -1, int paperHeightA = -1,
 	      GBool duplexA = gTrue,
@@ -288,7 +287,7 @@ public:
 private:
 
   void init(PSOutputFunc outputFuncA, void *outputStreamA,
-	    PSFileType fileTypeA, char *pstitle, PDFDoc *doc, XRef *xrefA, Catalog *catalog,
+	    PSFileType fileTypeA, char *pstitle, PDFDoc *doc,
 	    int firstPage, int lastPage, PSOutMode modeA,
 	    int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
 	    GBool manualCtrlA, int paperWidthA, int paperHeightA,
@@ -394,8 +393,8 @@ private:
   void (*overlayCbk)(PSOutputDev *psOut, void *data);
   void *overlayCbkData;
 
+  PDFDoc *doc;
   XRef *xref;			// the xref table for this PDF file
-  Catalog *m_catalog;           // the catalog for this PDF file
 
   Ref *fontIDs;			// list of object IDs of all used fonts
   int fontIDLen;		// number of entries in fontIDs array

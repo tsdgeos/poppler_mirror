@@ -903,7 +903,7 @@ int main(int argc, char *argv[]) {
   }
 
   cairoOut = new CairoOutputDev();
-  cairoOut->startDoc(doc->getXRef(), doc->getCatalog());
+  cairoOut->startDoc(doc);
   if (sz != 0)
     crop_w = crop_h = sz;
   pg_num_len = numberOfCharacters(doc->getNumPages());
