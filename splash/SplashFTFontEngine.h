@@ -56,7 +56,7 @@ public:
   SplashFontFile *loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src);
   SplashFontFile *loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src);
   SplashFontFile *loadTrueTypeFont(SplashFontFileID *idA, SplashFontSrc *src,
-				   Gushort *codeToGID, int codeToGIDLen, int faceIndex = 0);
+				   int *codeToGID, int codeToGIDLen, int faceIndex = 0);
 
 private:
 

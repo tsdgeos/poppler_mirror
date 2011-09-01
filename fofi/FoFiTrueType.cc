@@ -338,8 +338,8 @@ int FoFiTrueType::findCmap(int platform, int encoding) {
   return -1;
 }
 
-Gushort FoFiTrueType::mapCodeToGID(int i, Guint c) {
-  Gushort gid;
+int FoFiTrueType::mapCodeToGID(int i, Guint c) {
+  int gid;
   Guint segCnt, segEnd, segStart, segDelta, segOffset;
   Guint cmapFirst, cmapLen;
   int pos, a, b, m;
@@ -442,9 +442,9 @@ int FoFiTrueType::mapNameToGID(char *name) {
   return nameToGID->lookupInt(name);
 }
 
-Gushort *FoFiTrueType::getCIDToGIDMap(int *nCIDs) {
+int *FoFiTrueType::getCIDToGIDMap(int *nCIDs) {
   FoFiType1C *ff;
-  Gushort *map;
+  int *map;
   int i;
 
   *nCIDs = 0;
@@ -489,7 +489,7 @@ int FoFiTrueType::getEmbeddingRights() {
 }
 
 void FoFiTrueType::convertToType42(char *psName, char **encoding,
-				   Gushort *codeToGID,
+				   int *codeToGID,
 				   FoFiOutputFunc outputFunc,
 				   void *outputStream) {
   GooString *buf;
@@ -551,7 +551,7 @@ void FoFiTrueType::convertToType1(char *psName, const char **newEncoding,
 }
 
 void FoFiTrueType::convertToCIDType2(char *psName,
-				     Gushort *cidMap, int nCIDs,
+				     int *cidMap, int nCIDs,
 				     GBool needVerticalMetrics,
 				     FoFiOutputFunc outputFunc,
 				     void *outputStream) {
@@ -701,7 +701,7 @@ void FoFiTrueType::convertToCIDType0(char *psName,
   delete ff;
 }
 
-void FoFiTrueType::convertToType0(char *psName, Gushort *cidMap, int nCIDs,
+void FoFiTrueType::convertToType0(char *psName, int *cidMap, int nCIDs,
 				  GBool needVerticalMetrics,
 				  FoFiOutputFunc outputFunc,
 				  void *outputStream) {
@@ -828,7 +828,7 @@ void FoFiTrueType::convertToType0(char *psName,
 
 void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
 			    void *outputStream, char *name,
-			    Gushort *codeToGID) {
+			    int *codeToGID) {
   // this substitute cmap table maps char codes 0000-ffff directly to
   // glyphs 0000-ffff
   static char cmapTab[36] = {
@@ -1499,7 +1499,7 @@ void FoFiTrueType::cvtEncoding(char **encoding,
 }
 
 void FoFiTrueType::cvtCharStrings(char **encoding,
-				  Gushort *codeToGID,
+				  int *codeToGID,
 				  FoFiOutputFunc outputFunc,
 				  void *outputStream) {
   char *name;

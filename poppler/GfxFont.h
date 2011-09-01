@@ -295,7 +295,7 @@ public:
 
   // Return a char code-to-GID mapping for the provided font file.
   // (This is only useful for TrueType fonts.)
-  Gushort *getCodeToGIDMap(FoFiTrueType *ff);
+  int *getCodeToGIDMap(FoFiTrueType *ff);
 
   // Return the Type 3 CharProc dictionary, or NULL if none.
   Dict *getCharProcs();
@@ -347,23 +347,23 @@ public:
 
   // Return the CID-to-GID mapping table.  These should only be called
   // if type is fontCIDType2.
-  Gushort *getCIDToGID() { return cidToGID; }
+  int *getCIDToGID() { return cidToGID; }
   int getCIDToGIDLen() { return cidToGIDLen; }
 
-  Gushort *getCodeToGIDMap(FoFiTrueType *ff, int *length);
+  int *getCodeToGIDMap(FoFiTrueType *ff, int *length);
 
   double getWidth(char* s, int len);
 
 private:
   virtual ~GfxCIDFont();
 
-  Gushort mapCodeToGID(FoFiTrueType *ff, int cmapi,
+  int mapCodeToGID(FoFiTrueType *ff, int cmapi,
     Unicode unicode, GBool wmode);
 
   CMap *cMap;			// char code --> CID
   CharCodeToUnicode *ctu;	// CID --> Unicode
   GfxFontCIDWidths widths;	// character widths
-  Gushort *cidToGID;		// CID --> GID mapping (for embedded
+  int *cidToGID;		// CID --> GID mapping (for embedded
 				//   TrueType fonts)
   int cidToGIDLen;
 };

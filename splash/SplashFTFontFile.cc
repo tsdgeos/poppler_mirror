@@ -41,7 +41,7 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA,
 						SplashFontSrc *src,
 						const char **encA) {
   FT_Face faceA;
-  Gushort *codeToGIDA;
+  int *codeToGIDA;
   const char *name;
   int i;
 
@@ -52,11 +52,11 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA,
     if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf, src->bufLen, 0, &faceA))
       return NULL;
   }
-  codeToGIDA = (Gushort *)gmallocn(256, sizeof(int));
+  codeToGIDA = (int *)gmallocn(256, sizeof(int));
   for (i = 0; i < 256; ++i) {
     codeToGIDA[i] = 0;
     if ((name = encA[i])) {
-      codeToGIDA[i] = (Gushort)FT_Get_Name_Index(faceA, (char *)name);
+      codeToGIDA[i] = (int)FT_Get_Name_Index(faceA, (char *)name);
     }
   }
 
@@ -67,7 +67,7 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA,
 SplashFontFile *SplashFTFontFile::loadCIDFont(SplashFTFontEngine *engineA,
 					      SplashFontFileID *idA,
 					      SplashFontSrc *src,
-					      Gushort *codeToGIDA,
+					      int *codeToGIDA,
 					      int codeToGIDLenA) {
   FT_Face faceA;
 
@@ -86,7 +86,7 @@ SplashFontFile *SplashFTFontFile::loadCIDFont(SplashFTFontEngine *engineA,
 SplashFontFile *SplashFTFontFile::loadTrueTypeFont(SplashFTFontEngine *engineA,
 						   SplashFontFileID *idA,
 						   SplashFontSrc *src,
-						   Gushort *codeToGIDA,
+						   int *codeToGIDA,
 						   int codeToGIDLenA,
 						   int faceIndexA) {
   FT_Face faceA;
@@ -107,7 +107,7 @@ SplashFTFontFile::SplashFTFontFile(SplashFTFontEngine *engineA,
 				   SplashFontFileID *idA,
 				   SplashFontSrc *src,
 				   FT_Face faceA,
-				   Gushort *codeToGIDA, int codeToGIDLenA,
+				   int *codeToGIDA, int codeToGIDLenA,
 				   GBool trueTypeA):
   SplashFontFile(idA, src)
 {

@@ -1166,8 +1166,8 @@ CharCodeToUnicode *Gfx8BitFont::getToUnicode() {
   return ctu;
 }
 
-Gushort *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff) {
-  Gushort *map;
+int *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff) {
+  int *map;
   int cmapPlatform, cmapEncoding;
   int unicodeCmap, macRomanCmap, msSymbolCmap, cmap;
   GBool useMacRoman, useUnicode;
@@ -1175,7 +1175,7 @@ Gushort *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff) {
   Unicode u;
   int code, i, n;
 
-  map = (Gushort *)gmallocn(256, sizeof(Gushort));
+  map = (int *)gmallocn(256, sizeof(int));
   for (i = 0; i < 256; ++i) {
     map[i] = 0;
   }
@@ -1281,7 +1281,7 @@ Gushort *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff) {
   // try the TrueType 'post' table to handle any unmapped characters
   for (i = 0; i < 256; ++i) {
     if (!map[i] && (charName = enc[i])) {
-      map[i] = (Gushort)(int)ff->mapNameToGID(charName);
+      map[i] = ff->mapNameToGID(charName);
     }
   }
 
@@ -1505,15 +1505,15 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
     if (obj1.isStream()) {
       cidToGIDLen = 0;
       i = 64;
-      cidToGID = (Gushort *)gmallocn(i, sizeof(Gushort));
+      cidToGID = (int *)gmallocn(i, sizeof(int));
       obj1.streamReset();
       while ((c1 = obj1.streamGetChar()) != EOF &&
 	     (c2 = obj1.streamGetChar()) != EOF) {
 	if (cidToGIDLen == i) {
 	  i *= 2;
-	  cidToGID = (Gushort *)greallocn(cidToGID, i, sizeof(Gushort));
+	  cidToGID = (int *)greallocn(cidToGID, i, sizeof(int));
 	}
-	cidToGID[cidToGIDLen++] = (Gushort)((c1 << 8) + c2);
+	cidToGID[cidToGIDLen++] = (c1 << 8) + c2;
       }
     } else if (!obj1.isName("Identity") && !obj1.isNull()) {
       error(errSyntaxError, -1, "Invalid CIDToGIDMap entry in CID font");
@@ -1798,7 +1798,7 @@ GooString *GfxCIDFont::getCollection() {
   return cMap ? cMap->getCollection() : (GooString *)NULL;
 }
 
-Gushort GfxCIDFont::mapCodeToGID(FoFiTrueType *ff, int cmapi,
+int GfxCIDFont::mapCodeToGID(FoFiTrueType *ff, int cmapi,
   Unicode unicode, GBool wmode) {
   Gushort gid = ff->mapCodeToGID(cmapi,unicode);
   if (wmode) {
@@ -1808,7 +1808,7 @@ Gushort GfxCIDFont::mapCodeToGID(FoFiTrueType *ff, int cmapi,
   return gid;
 }
 
-Gushort *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
+int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
 #define N_UCS_CANDIDATES 2
   /* space characters */
   static const unsigned long spaces[] = { 
@@ -1892,7 +1892,7 @@ Gushort *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
   Unicode *humap = 0;
   Unicode *vumap = 0;
   Unicode *tumap = 0;
-  Gushort *codeToGID = 0;
+  int *codeToGID = 0;
   unsigned long n;
   int i;
   unsigned long code;
@@ -2002,7 +2002,7 @@ Gushort *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
     }
   }
   // map CID -> Unicode -> GID
-  codeToGID = (Gushort *)gmallocn(n, sizeof(Gushort));
+  codeToGID = (int *)gmallocn(n, sizeof(int));
   for (code = 0; code < n; ++code) {
     Unicode unicode;
     unsigned long gid;

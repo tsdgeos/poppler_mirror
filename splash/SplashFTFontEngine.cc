@@ -109,7 +109,7 @@ SplashFontFile *SplashFTFontEngine::loadOpenTypeT1CFont(SplashFontFileID *idA,
 SplashFontFile *SplashFTFontEngine::loadCIDFont(SplashFontFileID *idA,
 						SplashFontSrc *src) {
   FoFiType1C *ff;
-  Gushort *cidToGIDMap;
+  int *cidToGIDMap;
   int nCIDs;
   SplashFontFile *ret;
 
@@ -141,7 +141,7 @@ SplashFontFile *SplashFTFontEngine::loadCIDFont(SplashFontFileID *idA,
 SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA,
 							SplashFontSrc *src) {
   FoFiTrueType *ff;
-  Gushort *cidToGIDMap;
+  int *cidToGIDMap;
   int nCIDs;
   SplashFontFile *ret;
 
@@ -170,7 +170,7 @@ SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA,
 
 SplashFontFile *SplashFTFontEngine::loadTrueTypeFont(SplashFontFileID *idA,
 						     SplashFontSrc *src,
-						     Gushort *codeToGID,
+						     int *codeToGID,
 						     int codeToGIDLen,
 						     int faceIndex) {
 #if 0

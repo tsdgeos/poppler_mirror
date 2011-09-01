@@ -257,7 +257,7 @@ SplashFontFile *SplashFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA,
 
 SplashFontFile *SplashFontEngine::loadTrueTypeFont(SplashFontFileID *idA,
 						   SplashFontSrc *src,
-						   Gushort *codeToGID,
+						   int *codeToGID,
 						   int codeToGIDLen,
 						   int faceIndex) {
   SplashFontFile *fontFile;

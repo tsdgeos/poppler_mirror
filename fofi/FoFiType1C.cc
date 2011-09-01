@@ -116,8 +116,8 @@ char **FoFiType1C::getEncoding() {
   return encoding;
 }
 
-Gushort *FoFiType1C::getCIDToGIDMap(int *nCIDs) {
-  Gushort *map;
+int *FoFiType1C::getCIDToGIDMap(int *nCIDs) {
+  int *map;
   int n, i;
 
   // a CID font's top dict has ROS as the first operator
@@ -135,8 +135,8 @@ Gushort *FoFiType1C::getCIDToGIDMap(int *nCIDs) {
     }
   }
   ++n;
-  map = (Gushort *)gmallocn(n, sizeof(Gushort));
-  memset(map, 0, n * sizeof(Gushort));
+  map = (int *)gmallocn(n, sizeof(int));
+  memset(map, 0, n * sizeof(int));
   for (i = 0; i < nGlyphs; ++i) {
     map[charset[i]] = i;
   }

@@ -47,11 +47,11 @@ public:
   static SplashFontFile *loadCIDFont(SplashFTFontEngine *engineA,
 					 SplashFontFileID *idA,
 					 SplashFontSrc *src,
-					 Gushort *codeToCIDA, int codeToGIDLenA);
+					 int *codeToCIDA, int codeToGIDLenA);
   static SplashFontFile *loadTrueTypeFont(SplashFTFontEngine *engineA,
 					  SplashFontFileID *idA,
 					  SplashFontSrc *src,
-					  Gushort *codeToGIDA,
+					  int *codeToGIDA,
 					  int codeToGIDLenA,
 					  int faceIndexA=0);
 
@@ -68,12 +68,12 @@ private:
 		   SplashFontFileID *idA,
 		   SplashFontSrc *src,
 		   FT_Face faceA,
-		   Gushort *codeToGIDA, int codeToGIDLenA,
+		   int *codeToGIDA, int codeToGIDLenA,
 		   GBool trueTypeA);
 
   SplashFTFontEngine *engine;
   FT_Face face;
-  Gushort *codeToGID;
+  int *codeToGID;
   int codeToGIDLen;
   GBool trueType;
 

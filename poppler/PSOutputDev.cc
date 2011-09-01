@@ -841,7 +841,7 @@ static const PSSubstFont psSubstFonts[] = {
 // Info for 8-bit fonts
 struct PSFont8Info {
   Ref fontID;
-  Gushort *codeToGID;		// code-to-GID mapping for TrueType fonts
+  int *codeToGID;		// code-to-GID mapping for TrueType fonts
 };
 
 // Encoding info for substitute 16-bit font
@@ -2222,7 +2222,7 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id,
   char *fontBuf;
   int fontLen;
   FoFiTrueType *ffTT;
-  Gushort *codeToGID;
+  int *codeToGID;
   int i;
 
   // check if font is already embedded
@@ -2282,7 +2282,7 @@ GooString *PSOutputDev::setupExternalTrueTypeFont(GfxFont *font) {
   char *fontBuf;
   int fontLen;
   FoFiTrueType *ffTT;
-  Gushort *codeToGID;
+  int *codeToGID;
   GooString *psName;
   int i;
 
@@ -2348,7 +2348,7 @@ GooString *PSOutputDev::setupExternalTrueTypeFont(GfxFont *font) {
 
 GooString *PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, GooString *fileName, int faceIndex) {
   FoFiTrueType *ffTT;
-  Gushort *codeToGID;
+  int *codeToGID;
   GooString *psName;
   int i;
   GooString *myFileName;
@@ -2394,8 +2394,8 @@ GooString *PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, GooString *f
   if ((ffTT = FoFiTrueType::load(fileName->getCString(), faceIndex))) {
       int n = ((GfxCIDFont *)font)->getCIDToGIDLen();
       if (n) {
-	codeToGID = (Gushort *)gmallocn(n, sizeof(Gushort));
-	memcpy(codeToGID, ((GfxCIDFont *)font)->getCIDToGID(), n * sizeof(Gushort));
+	codeToGID = (int *)gmallocn(n, sizeof(int));
+	memcpy(codeToGID, ((GfxCIDFont *)font)->getCIDToGID(), n * sizeof(int));
       } else {
 	codeToGID = ((GfxCIDFont *)font)->getCodeToGIDMap(ffTT, &n);
       }
@@ -4541,7 +4541,7 @@ void PSOutputDev::doPath(GfxPath *path) {
 void PSOutputDev::drawString(GfxState *state, GooString *s) {
   GfxFont *font;
   int wMode;
-  Gushort *codeToGID;
+  int *codeToGID;
   GooString *s2;
   double dx, dy, dx2, dy2, originX, originY;
   char *p;

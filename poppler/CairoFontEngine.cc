@@ -65,7 +65,7 @@
 
 CairoFont::CairoFont(Ref ref,
 		     cairo_font_face_t *cairo_font_face,
-		     Gushort *codeToGID,
+		     int *codeToGID,
 		     Guint codeToGIDLen,
 		     GBool substitute,
 		     GBool printing) : ref(ref),
@@ -368,7 +368,7 @@ _ft_new_face (FT_Library lib,
 
 CairoFreeTypeFont::CairoFreeTypeFont(Ref ref,
 				     cairo_font_face_t *cairo_font_face,
-				     Gushort *codeToGID,
+				     int *codeToGID,
 				     Guint codeToGIDLen,
 				     GBool substitute) : CairoFont(ref,
 								   cairo_font_face,
@@ -398,7 +398,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
   FT_Face face;
   cairo_font_face_t *font_face;
 
-  Gushort *codeToGID;
+  int *codeToGID;
   Guint codeToGIDLen;
   
   dfp = NULL;
@@ -458,12 +458,12 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
     
     enc = ((Gfx8BitFont *)gfxFont)->getEncoding();
     
-    codeToGID = (Gushort *)gmallocn(256, sizeof(int));
+    codeToGID = (int *)gmallocn(256, sizeof(int));
     codeToGIDLen = 256;
     for (i = 0; i < 256; ++i) {
       codeToGID[i] = 0;
       if ((name = enc[i])) {
-	codeToGID[i] = (Gushort)FT_Get_Name_Index(face, name);
+	codeToGID[i] = FT_Get_Name_Index(face, name);
       }
     }
     break;
@@ -474,9 +474,9 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
     if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
       n = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
       if (n) {
-	codeToGID = (Gushort *)gmallocn(n, sizeof(Gushort));
+	codeToGID = (int *)gmallocn(n, sizeof(int));
 	memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(),
-		n * sizeof(Gushort));
+		n * sizeof(int));
       }
     } else {
       if (font_data != NULL) {
@@ -667,7 +667,7 @@ CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, XRef *xref,
   type3_font_info_t *info;
   cairo_font_face_t *font_face;
   Ref ref;
-  Gushort *codeToGID;
+  int *codeToGID;
   Guint codeToGIDLen;
   int i, j;
   char **enc;
@@ -689,14 +689,14 @@ CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, XRef *xref,
   cairo_font_face_set_user_data (font_face, &type3_font_key, (void *) info, _free_type3_font_info);
 
   enc = ((Gfx8BitFont *)gfxFont)->getEncoding();
-  codeToGID = (Gushort *)gmallocn(256, sizeof(int));
+  codeToGID = (int *)gmallocn(256, sizeof(int));
   codeToGIDLen = 256;
   for (i = 0; i < 256; ++i) {
     codeToGID[i] = 0;
     if (charProcs && (name = enc[i])) {
       for (j = 0; j < charProcs->getLength(); j++) {
 	if (strcmp(name, charProcs->getKey(j)) == 0) {
-	  codeToGID[i] = (Gushort) j;
+	  codeToGID[i] = j;
 	}
       }
     }
@@ -709,7 +709,7 @@ CairoType3Font::CairoType3Font(Ref ref,
 			       XRef *xref,
 			       Catalog *catalog,
 			       cairo_font_face_t *cairo_font_face,
-			       Gushort *codeToGID,
+			       int *codeToGID,
 			       Guint codeToGIDLen,
 			       GBool printing) : CairoFont(ref,
 							   cairo_font_face,

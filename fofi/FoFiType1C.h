@@ -163,7 +163,7 @@ public:
 
   // Return the mapping from CIDs to GIDs, and return the number of
   // CIDs in *<nCIDs>.  This is only useful for CID fonts.
-  Gushort *getCIDToGIDMap(int *nCIDs);
+  int *getCIDToGIDMap(int *nCIDs);
 
   // Convert to a Type 1 font, suitable for embedding in a PostScript
   // file.  This is only useful with 8-bit fonts.  If <newEncoding> is

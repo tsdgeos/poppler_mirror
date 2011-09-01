@@ -71,7 +71,7 @@ public:
   int findCmap(int platform, int encoding);
 
   // Return the GID corresponding to <c> according to the <i>th cmap.
-  Gushort mapCodeToGID(int i, Guint c);
+  int mapCodeToGID(int i, Guint c);
 
   // map gid to vertical glyph gid if exist.
   //   if not exist return original gid
@@ -85,7 +85,7 @@ public:
   // Return the mapping from CIDs to GIDs, and return the number of
   // CIDs in *<nCIDs>.  This is only useful for CID fonts.  (Only
   // useful for OpenType CFF fonts.)
-  Gushort *getCIDToGIDMap(int *nCIDs);
+  int *getCIDToGIDMap(int *nCIDs);
 
   // Returns the least restrictive embedding licensing right (as
   // defined by the TrueType spec):
@@ -104,7 +104,7 @@ public:
   // <codeToGID> array specifies the mapping from char codes to GIDs.
   // (Not useful for OpenType CFF fonts.)
   void convertToType42(char *psName, char **encoding,
-		       Gushort *codeToGID,
+		       int *codeToGID,
 		       FoFiOutputFunc outputFunc, void *outputStream);
 
   // Convert to a Type 1 font, suitable for embedding in a PostScript
@@ -122,7 +122,7 @@ public:
   // name (so we don't need to depend on the 'name' table in the
   // font).  The <cidMap> array maps CIDs to GIDs; it has <nCIDs>
   // entries.  (Not useful for OpenType CFF fonts.)
-  void convertToCIDType2(char *psName, Gushort *cidMap, int nCIDs,
+  void convertToCIDType2(char *psName, int *cidMap, int nCIDs,
 			 GBool needVerticalMetrics,
 			 FoFiOutputFunc outputFunc, void *outputStream);
 
@@ -137,7 +137,7 @@ public:
   // PostScript font name (so we don't need to depend on the 'name'
   // table in the font).  The <cidMap> array maps CIDs to GIDs; it has
   // <nCIDs> entries.  (Not useful for OpenType CFF fonts.)
-  void convertToType0(char *psName, Gushort *cidMap, int nCIDs,
+  void convertToType0(char *psName, int *cidMap, int nCIDs,
 		      GBool needVerticalMetrics,
 		      FoFiOutputFunc outputFunc, void *outputStream);
 
@@ -154,7 +154,7 @@ public:
   // complete and correct, it will be written unmodified.  (Not useful
   // for OpenType CFF fonts.)
   void writeTTF(FoFiOutputFunc outputFunc, void *outputStream,
-		char *name = NULL, Gushort *codeToGID = NULL);
+		char *name = NULL, int *codeToGID = NULL);
 
   int setupGSUB(const char *tagName);
 private:
@@ -164,7 +164,7 @@ private:
 		   FoFiOutputFunc outputFunc,
 		   void *outputStream);
   void cvtCharStrings(char **encoding,
-		      Gushort *codeToGID,
+		      int *codeToGID,
 		      FoFiOutputFunc outputFunc,
 		      void *outputStream);
   void cvtSfnts(FoFiOutputFunc outputFunc,
