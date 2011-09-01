@@ -4625,7 +4625,7 @@ void PSOutputDev::drawString(GfxState *state, GooString *s) {
 	++nChars;
       }
     } else {
-      if (!codeToGID || codeToGID[code]) {
+      if (!codeToGID || codeToGID[code] >= 0) {
 	s2->append((char)code);
       }
     }

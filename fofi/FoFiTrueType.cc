@@ -1179,8 +1179,16 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
     newCmapTab[42] = 0;		// idRangeOffset[1]
     newCmapTab[43] = 0;
     for (i = 0; i < 256; ++i) {
-      newCmapTab[44 + 2*i] = codeToGID[i] >> 8;
-      newCmapTab[44 + 2*i + 1] = codeToGID[i] & 0xff;
+      if (codeToGID[i] < 0) {
+	//~ this may not be correct - we want this character to never be
+	//~ displayed, but mapping it to the notdef glyph may result in
+	//~ little boxes being displayed
+	newCmapTab[44 + 2*i] = 0;
+	newCmapTab[44 + 2*i + 1] = 0;
+      } else {
+	newCmapTab[44 + 2*i] = codeToGID[i] >> 8;
+	newCmapTab[44 + 2*i + 1] = codeToGID[i] & 0xff;
+      }
     }
   } else {
     newCmapLen = 0;

@@ -291,7 +291,7 @@ double SplashFTFont::getGlyphAdvance(int c)
   } else {
     gid = (FT_UInt)c;
   }
-  if (ff->trueType && gid == 0) {
+  if (ff->trueType && gid < 0) {
     // skip the TrueType notdef glyph
     return -1;
   }
