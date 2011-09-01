@@ -829,14 +829,17 @@ void FoFiTrueType::convertToType0(char *psName,
 void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
 			    void *outputStream, char *name,
 			    int *codeToGID) {
-  // this substitute cmap table maps char codes 0000-ffff directly to
-  // glyphs 0000-ffff
-  static char cmapTab[36] = {
+  // this substitute cmap table maps char code ffff to glyph 0,
+  // with tables for MacRoman and MS Unicode
+  static char cmapTab[44] = {
     0, 0,			// table version number
-    0, 1,			// number of encoding tables
+    0, 2,			// number of encoding tables
     0, 1,			// platform ID
     0, 0,			// encoding ID
-    0, 0, 0, 12,		// offset of subtable
+    0, 0, 0, 20,		// offset of subtable
+    0, 3,			// platform ID
+    0, 1,			// encoding ID
+    0, 0, 0, 20,		// offset of subtable
     0, 4,			// subtable format
     0, 24,			// subtable length
     0, 0,			// subtable version
@@ -846,9 +849,9 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
     0, 0,			// 2*segCount - 2*2^floor(log2(segCount))
     (char)0xff, (char)0xff,	// endCount[0]
     0, 0,			// reserved
-    0, 0,			// startCount[0]
-    0, 0,			// idDelta[0]
-    0, 0			// pad to a mulitple of four bytes
+    (char)0xff, (char)0xff,	// startCount[0]
+    0, 1,			// idDelta[0]
+    0, 0			// idRangeOffset[0]
   };
   static char nameTab[8] = {
     0, 0,			// format
@@ -870,8 +873,8 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
   static char os2Tab[86] = {
     0, 1,			// version
     0, 1,			// xAvgCharWidth
-    0, 0,			// usWeightClass
-    0, 0,			// usWidthClass
+    0x01, (char)0x90,		// usWeightClass
+    0, 5,			// usWidthClass
     0, 0,			// fsType
     0, 0,			// ySubscriptXSize
     0, 0,			// ySubscriptYSize
@@ -897,9 +900,9 @@ void FoFiTrueType::writeTTF(FoFiOutputFunc outputFunc,
     0, 0,			// sTypoAscender
     0, 0,			// sTypoDescender
     0, 0,			// sTypoLineGap
-    0, 0,			// usWinAscent
-    0, 0,			// usWinDescent
-    0, 0, 0, 0,			// ulCodePageRange1
+    0x20, 0x00,			// usWinAscent
+    0x20, 0x00,			// usWinDescent
+    0, 0, 0, 1,			// ulCodePageRange1
     0, 0, 0, 0			// ulCodePageRange2
   };
   GBool missingCmap, missingName, missingPost, missingOS2;
