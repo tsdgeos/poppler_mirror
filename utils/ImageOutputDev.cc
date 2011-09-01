@@ -70,6 +70,15 @@ void ImageOutputDev::setFilename(const char *fileExt) {
   }
 }
 
+GBool ImageOutputDev::tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
+				  double *pmat, int paintType, int tilingType, Dict *resDict,
+				  double *mat, double *bbox,
+				  int x0, int y0, int x1, int y1,
+				  double xStep, double yStep) {
+  return gTrue;
+  // do nothing -- this avoids the potentially slow loop in Gfx.cc
+}
+
 void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 				   int width, int height, GBool invert,
 				   GBool interpolate, GBool inlineImg) {
