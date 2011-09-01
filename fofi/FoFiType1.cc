@@ -59,6 +59,12 @@ FoFiType1::FoFiType1(char *fileA, int lenA, GBool freeFileDataA):
 {
   name = NULL;
   encoding = NULL;
+  fontMatrix[0] = 0.001;
+  fontMatrix[1] = 0;
+  fontMatrix[2] = 0;
+  fontMatrix[3] = 0.001;
+  fontMatrix[4] = 0;
+  fontMatrix[5] = 0;
   parsed = gFalse;
 }
 
@@ -88,6 +94,17 @@ char **FoFiType1::getEncoding() {
     parse();
   }
   return encoding;
+}
+
+void FoFiType1::getFontMatrix(double *mat) {
+  int i;
+
+  if (!parsed) {
+    parse();
+  }
+  for (i = 0; i < 6; ++i) {
+    mat[i] = fontMatrix[i];
+  }
 }
 
 void FoFiType1::writeEncoded(const char **newEncoding,
@@ -195,7 +212,9 @@ void FoFiType1::parse() {
   char c;
   int n, code, i, j;
   char *tokptr;
+  GBool gotMatrix;
 
+  gotMatrix = gFalse;
   for (i = 1, line = (char *)file;
        i <= 100 && line && (!name || !encoding);
        ++i) {
@@ -280,6 +299,24 @@ void FoFiType1::parse() {
 	}
       }
       //~ check for getinterval/putinterval junk
+
+    } else if (!gotMatrix && !strncmp(line, "/FontMatrix", 11)) {
+      strncpy(buf, line + 11, 255);
+      buf[255] = '\0';
+      if ((p = strchr(buf, '['))) {
+	++p;
+	if ((p2 = strchr(p, ']'))) {
+	  *p2 = '\0';
+	  for (j = 0; j < 6; ++j) {
+	    if ((p = strtok(j == 0 ? p : (char *)NULL, " \t\n\r"))) {
+	      fontMatrix[j] = atof(p);
+	    } else {
+	      break;
+	    }
+	  }
+	}
+      }
+      gotMatrix = gTrue;
 
     } else {
       line = getNextLine(line);

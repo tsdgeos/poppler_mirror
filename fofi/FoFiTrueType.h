@@ -96,6 +96,10 @@ public:
   // * 0: restricted license embedding
   int getEmbeddingRights();
 
+  // Return the font matrix as an array of six numbers.  (Only useful
+  // for OpenType CFF fonts.)
+  void getFontMatrix(double *mat);
+
   // Convert to a Type 42 font, suitable for embedding in a PostScript
   // file.  <psName> will be used as the PostScript font name (so we
   // don't need to depend on the 'name' table in the font).  The
@@ -155,6 +159,11 @@ public:
   // for OpenType CFF fonts.)
   void writeTTF(FoFiOutputFunc outputFunc, void *outputStream,
 		char *name = NULL, int *codeToGID = NULL);
+
+  // Returns a pointer to the CFF font embedded in this OpenType font.
+  // If successful, sets *<start> and *<length>, and returns true.
+  // Otherwise returns false.  (Only useful for OpenType CFF fonts).
+  GBool getCFFBlock(char **start, int *length);
 
   int setupGSUB(const char *tagName);
 private:

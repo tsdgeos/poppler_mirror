@@ -442,21 +442,32 @@ int FoFiTrueType::mapNameToGID(char *name) {
   return nameToGID->lookupInt(name);
 }
 
-int *FoFiTrueType::getCIDToGIDMap(int *nCIDs) {
-  FoFiType1C *ff;
-  int *map;
+GBool FoFiTrueType::getCFFBlock(char **start, int *length) {
   int i;
 
-  *nCIDs = 0;
   if (!openTypeCFF) {
-    return NULL;
+    return gFalse;
   }
   i = seekTable("CFF ");
   if (!checkRegion(tables[i].offset, tables[i].len)) {
+    return gFalse;
+  }
+  *start = (char *)file + tables[i].offset;
+  *length = tables[i].len;
+  return gTrue;
+}
+
+int *FoFiTrueType::getCIDToGIDMap(int *nCIDs) {
+  char *start;
+  int length;
+  FoFiType1C *ff;
+  int *map;
+
+  *nCIDs = 0;
+  if (!getCFFBlock(&start, &length)) {
     return NULL;
   }
-  if (!(ff = FoFiType1C::make((char *)file + tables[i].offset,
-			      tables[i].len))) {
+  if (!(ff = FoFiType1C::make(start, length))) {
     return NULL;
   }
   map = ff->getCIDToGIDMap(nCIDs);
@@ -486,6 +497,21 @@ int FoFiTrueType::getEmbeddingRights() {
     return 0;
   }
   return 3;
+}
+
+void FoFiTrueType::getFontMatrix(double *mat) {
+  char *start;
+  int length;
+  FoFiType1C *ff;
+
+  if (!getCFFBlock(&start, &length)) {
+    return;
+  }
+  if (!(ff = FoFiType1C::make(start, length))) {
+    return;
+  }
+  ff->getFontMatrix(mat);
+  delete ff;
 }
 
 void FoFiTrueType::convertToType42(char *psName, char **encoding,
@@ -532,18 +558,14 @@ void FoFiTrueType::convertToType42(char *psName, char **encoding,
 void FoFiTrueType::convertToType1(char *psName, const char **newEncoding,
 				  GBool ascii, FoFiOutputFunc outputFunc,
 				  void *outputStream) {
+  char *start;
+  int length;
   FoFiType1C *ff;
-  int i;
 
-  if (!openTypeCFF) {
+  if (!getCFFBlock(&start, &length)) {
     return;
   }
-  i = seekTable("CFF ");
-  if (!checkRegion(tables[i].offset, tables[i].len)) {
-    return;
-  }
-  if (!(ff = FoFiType1C::make((char *)file + tables[i].offset,
-			      tables[i].len))) {
+  if (!(ff = FoFiType1C::make(start, length))) {
     return;
   }
   ff->convertToType1(psName, newEncoding, ascii, outputFunc, outputStream);
@@ -683,18 +705,14 @@ void FoFiTrueType::convertToCIDType2(char *psName,
 void FoFiTrueType::convertToCIDType0(char *psName,
 				     FoFiOutputFunc outputFunc,
 				     void *outputStream) {
+  char *start;
+  int length;
   FoFiType1C *ff;
-  int i;
 
-  if (!openTypeCFF) {
+  if (!getCFFBlock(&start, &length)) {
     return;
   }
-  i = seekTable("CFF ");
-  if (!checkRegion(tables[i].offset, tables[i].len)) {
-    return;
-  }
-  if (!(ff = FoFiType1C::make((char *)file + tables[i].offset,
-			      tables[i].len))) {
+  if (!(ff = FoFiType1C::make(start, length))) {
     return;
   }
   ff->convertToCIDType0(psName, outputFunc, outputStream);
@@ -808,18 +826,14 @@ void FoFiTrueType::convertToType0(char *psName, int *cidMap, int nCIDs,
 void FoFiTrueType::convertToType0(char *psName,
 				  FoFiOutputFunc outputFunc,
 				  void *outputStream) {
+  char *start;
+  int length;
   FoFiType1C *ff;
-  int i;
 
-  if (!openTypeCFF) {
+  if (!getCFFBlock(&start, &length)) {
     return;
   }
-  i = seekTable("CFF ");
-  if (!checkRegion(tables[i].offset, tables[i].len)) {
-    return;
-  }
-  if (!(ff = FoFiType1C::make((char *)file + tables[i].offset,
-			      tables[i].len))) {
+  if (!(ff = FoFiType1C::make(start, length))) {
     return;
   }
   ff->convertToType0(psName, outputFunc, outputStream);

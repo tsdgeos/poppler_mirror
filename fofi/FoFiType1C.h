@@ -165,6 +165,9 @@ public:
   // CIDs in *<nCIDs>.  This is only useful for CID fonts.
   int *getCIDToGIDMap(int *nCIDs);
 
+  // Return the font matrix as an array of six numbers.
+  void getFontMatrix(double *mat);
+
   // Convert to a Type 1 font, suitable for embedding in a PostScript
   // file.  This is only useful with 8-bit fonts.  If <newEncoding> is
   // not NULL, it will be used in place of the encoding in the Type 1C
