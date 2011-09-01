@@ -128,7 +128,7 @@ public:
   virtual GBool checkPageSlice(Page *page, double hDPI, double vDPI,
 			       int rotate, GBool useMediaBox, GBool crop,
 			       int sliceX, int sliceY, int sliceW, int sliceH,
-			       GBool printing, Catalog * catalog,
+			       GBool printing,
 			       GBool (* abortCheckCbk)(void *data) = NULL,
 			       void * abortCheckCbkData = NULL)
     { return gTrue; }
@@ -305,7 +305,7 @@ public:
   virtual void clearSoftMask(GfxState * /*state*/) {}
 
   //----- links
-  virtual void processLink(AnnotLink * /*link*/, Catalog * /*catalog*/) {}
+  virtual void processLink(AnnotLink * /*link*/) {}
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
   virtual GBool getVectorAntialias() { return gFalse; }

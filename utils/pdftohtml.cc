@@ -370,7 +370,7 @@ int main(int argc, char *argv[]) {
       rawOrder = singleHtml;
 
   // write text file
-  htmlOut = new HtmlOutputDev(htmlFileName->getCString(), 
+  htmlOut = new HtmlOutputDev(doc->getCatalog(), htmlFileName->getCString(), 
 	  docTitle->getCString(), 
 	  author ? author->getCString() : NULL,
 	  keywords ? keywords->getCString() : NULL, 

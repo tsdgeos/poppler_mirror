@@ -5351,7 +5351,7 @@ void TextOutputDev::eoFill(GfxState *state) {
   fill(state);
 }
 
-void TextOutputDev::processLink(AnnotLink *link, Catalog * /*catalog*/) {
+void TextOutputDev::processLink(AnnotLink *link) {
   double x1, y1, x2, y2;
   int xMin, yMin, xMax, yMax, x, y;
 

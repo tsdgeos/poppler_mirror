@@ -40,7 +40,7 @@ class LinkExtractorOutputDev : public OutputDev
     virtual GBool upsideDown() { return gFalse; }
     virtual GBool useDrawChar() { return gFalse; }
     virtual GBool interpretType3Chars() { return gFalse; }
-    virtual void processLink(::AnnotLink *link, Catalog *catalog);
+    virtual void processLink(::AnnotLink *link);
 
     // our stuff
     QList< Link* > links();

@@ -220,7 +220,7 @@ public:
   // 8-bit ISO Latin-1.  <useASCII7> should also be set for Japanese
   // (EUC-JP) text.  If <rawOrder> is true, the text is kept in content
   // stream order.
-  HtmlOutputDev(char *fileName, char *title, 
+  HtmlOutputDev(Catalog *catalogA, char *fileName, char *title, 
 	  char *author,
 	  char *keywords,
 	  char *subject,
@@ -257,12 +257,11 @@ public:
   virtual GBool checkPageSlice(Page *page, double hDPI, double vDPI,
                                int rotate, GBool useMediaBox, GBool crop,
                                int sliceX, int sliceY, int sliceW, int sliceH,
-                               GBool printing, Catalog * catalogA,
+                               GBool printing,
                                GBool (* abortCheckCbk)(void *data) = NULL,
                                void * abortCheckCbkData = NULL)
   {
    docPage = page;
-   catalog = catalogA;
    return gTrue;
   }
 
@@ -305,7 +304,7 @@ private:
   // recognized
   static const char* mapEncodingToHtml(GooString* encoding);
   void doProcessLink(AnnotLink *link);
-  GooString* getLinkDest(AnnotLink *link,Catalog *catalog);
+  GooString* getLinkDest(AnnotLink *link);
   void dumpMetaVars(FILE *);
   void doFrame(int firstPage);
   GBool newOutlineLevel(FILE *output, Object *node, Catalog* catalog, int level = 1);

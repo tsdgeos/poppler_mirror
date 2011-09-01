@@ -1009,13 +1009,14 @@ void HtmlOutputDev::doFrame(int firstPage){
   fclose(fContentsFrame);  
 }
 
-HtmlOutputDev::HtmlOutputDev(char *fileName, char *title, 
+HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, char *fileName, char *title, 
 	char *author, char *keywords, char *subject, char *date,
 	char *extension,
 	GBool rawOrder, int firstPage, GBool outline) 
 {
   const char *htmlEncoding;
   
+  catalog = catalogA;
   fContentsFrame = NULL;
   docTitle = new GooString(title);
   pages = NULL;
@@ -1191,7 +1192,7 @@ void HtmlOutputDev::startPage(int pageNum, GfxState *state) {
 
 
 void HtmlOutputDev::endPage() {
-  Links *linksList = docPage->getLinks(catalog);
+  Links *linksList = docPage->getLinks();
   for (int i = 0; i < linksList->getNumLinks(); ++i)
   {
       doProcessLink(linksList->getLink(i));
@@ -1416,13 +1417,13 @@ void HtmlOutputDev::doProcessLink(AnnotLink* link){
   cvtUserToDev(_x2,_y2,&x2,&y2); 
 
 
-  GooString* _dest=getLinkDest(link,catalog);
+  GooString* _dest=getLinkDest(link);
   HtmlLink t((double) x1,(double) y2,(double) x2,(double) y1,_dest);
   pages->AddLink(t);
   delete _dest;
 }
 
-GooString* HtmlOutputDev::getLinkDest(AnnotLink *link,Catalog* catalog){
+GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
   char *p;
   if (!link->getAction())
     return new GooString();

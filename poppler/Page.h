@@ -166,13 +166,13 @@ public:
   // Get annotations array.
   Object *getAnnots(Object *obj) { return annotsObj.fetch(xref, obj); }
   // Add a new annotation to the page
-  void addAnnot(Annot *annot, Catalog *catalog);
+  void addAnnot(Annot *annot);
 
   // Return a list of links.
-  Links *getLinks(Catalog *catalog);
+  Links *getLinks();
 
   // Return a list of annots. Ownership is transferred to the caller.
-  Annots *getAnnots(Catalog *catalog);
+  Annots *getAnnots();
 
   // Get contents.
   Object *getContents(Object *obj) { return contents.fetch(xref, obj); }
@@ -185,7 +185,7 @@ public:
   Object *getTrans(Object *obj) { return trans.fetch(xref, obj); }
 
   // Get form.
-  FormPageWidgets *getFormWidgets(Catalog *catalog);
+  FormPageWidgets *getFormWidgets();
 
   // Get duration, the maximum length of time, in seconds,
   // that the page is displayed before the presentation automatically
@@ -198,7 +198,7 @@ public:
   Gfx *createGfx(OutputDev *out, double hDPI, double vDPI,
 		 int rotate, GBool useMediaBox, GBool crop,
 		 int sliceX, int sliceY, int sliceW, int sliceH,
-		 GBool printing, Catalog *catalog,
+		 GBool printing,
 		 GBool (*abortCheckCbk)(void *data),
 		 void *abortCheckCbkData,
 		 GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data),
@@ -207,7 +207,7 @@ public:
   // Display a page.
   void display(OutputDev *out, double hDPI, double vDPI,
 	       int rotate, GBool useMediaBox, GBool crop,
-	       GBool printing, Catalog *catalog,
+	       GBool printing,
 	       GBool (*abortCheckCbk)(void *data) = NULL,
 	       void *abortCheckCbkData = NULL,
                GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
@@ -217,7 +217,7 @@ public:
   void displaySlice(OutputDev *out, double hDPI, double vDPI,
 		    int rotate, GBool useMediaBox, GBool crop,
 		    int sliceX, int sliceY, int sliceW, int sliceH,
-		    GBool printing, Catalog *catalog,
+		    GBool printing,
 		    GBool (*abortCheckCbk)(void *data) = NULL,
 		    void *abortCheckCbkData = NULL,
                     GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
@@ -230,7 +230,7 @@ public:
 	       double sliceX, double sliceY, double sliceW, double sliceH,
 	       PDFRectangle *box, GBool *crop);
 
-  void processLinks(OutputDev *out, Catalog *catalog);
+  void processLinks(OutputDev *out);
 
   // Get the page's default CTM.
   void getDefaultCTM(double *ctm, double hDPI, double vDPI,

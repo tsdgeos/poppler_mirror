@@ -555,7 +555,7 @@ QList<Link*> Page::links() const
 QList<Annotation*> Page::annotations() const
 {
     ::Page *pdfPage = m_page->page;
-    Annots* annots = pdfPage->getAnnots(m_page->parentDoc->doc->getCatalog());
+    Annots* annots = pdfPage->getAnnots();
     const uint numAnnotations = annots->getNumAnnots();
     if ( numAnnotations == 0 )
     {
@@ -1309,7 +1309,7 @@ QList<FormField*> Page::formFields() const
 {
   QList<FormField*> fields;
   ::Page *p = m_page->page;
-  ::FormPageWidgets * form = p->getFormWidgets(m_page->parentDoc->doc->getCatalog());
+  ::FormPageWidgets * form = p->getFormWidgets();
   int formcount = form->getNumWidgets();
   for (int i = 0; i < formcount; ++i)
   {

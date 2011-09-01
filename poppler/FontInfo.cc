@@ -74,7 +74,7 @@ GooList *FontInfoScanner::scan(int nPages) {
     if ((resDict = page->getResourceDict())) {
       scanFonts(resDict, result);
     }
-    annots = page->getAnnots(doc->getCatalog());
+    annots = page->getAnnots();
     for (int i = 0; i < annots->getNumAnnots(); ++i) {
       if (annots->getAnnot(i)->getAppearance(&obj1)->isStream()) {
 	obj1.streamGetDict()->lookup("Resources", &obj2);

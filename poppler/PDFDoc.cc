@@ -431,7 +431,7 @@ void PDFDoc::displayPage(OutputDev *out, int page,
 
   if (getPage(page))
     getPage(page)->display(out, hDPI, vDPI,
-				    rotate, useMediaBox, crop, printing, catalog,
+				    rotate, useMediaBox, crop, printing,
 				    abortCheckCbk, abortCheckCbkData,
 				    annotDisplayDecideCbk, annotDisplayDecideCbkData);
 
@@ -465,7 +465,7 @@ void PDFDoc::displayPageSlice(OutputDev *out, int page,
     getPage(page)->displaySlice(out, hDPI, vDPI,
 					 rotate, useMediaBox, crop,
 					 sliceX, sliceY, sliceW, sliceH,
-					 printing, catalog,
+					 printing,
 					 abortCheckCbk, abortCheckCbkData,
 					 annotDisplayDecideCbk, annotDisplayDecideCbkData);
 }
@@ -475,12 +475,12 @@ Links *PDFDoc::getLinks(int page) {
   if (!p) {
     return new Links (NULL);
   }
-  return p->getLinks(catalog);
+  return p->getLinks();
 }
 
 void PDFDoc::processLinks(OutputDev *out, int page) {
   if (getPage(page))
-    getPage(page)->processLinks(out, catalog);
+    getPage(page)->processLinks(out);
 }
 
 Linearization *PDFDoc::getLinearization()

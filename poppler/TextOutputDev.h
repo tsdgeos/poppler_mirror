@@ -731,7 +731,7 @@ public:
   virtual void eoFill(GfxState *state);
 
   //----- link borders
-  virtual void processLink(AnnotLink *link, Catalog *catalog);
+  virtual void processLink(AnnotLink *link);
 
   //----- special access
 
