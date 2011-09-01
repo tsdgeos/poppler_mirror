@@ -107,6 +107,19 @@ extern GBool openTempFile(GooString **name, FILE **f, const char *mode);
 // Execute <command>.  Returns true on success.
 extern GBool executeCommand(char *cmd);
 
+#ifdef WIN32
+// Convert a file name from Latin-1 to UTF-8.
+extern GooString *fileNameToUTF8(char *path);
+
+// Convert a file name from UCS-2 to UTF-8.
+extern GooString *fileNameToUTF8(wchar_t *path);
+#endif
+
+// Open a file.  On Windows, this converts the path from UTF-8 to
+// UCS-2 and calls _wfopen (if available).  On other OSes, this simply
+// calls fopen.
+extern FILE *openFile(const char *path, const char *mode);
+
 // Just like fgets, but handles Unix, Mac, and/or DOS end-of-line
 // conventions.
 extern char *getLine(char *buf, int size, FILE *f);
