@@ -230,13 +230,20 @@ void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     for (y = 0; y < height; ++y) {
 
       // write the line
-      p = imgStr->getLine();
-      for (x = 0; x < width; ++x) {
-	colorMap->getRGB(p, &rgb);
-	fputc(colToByte(rgb.r), f);
-	fputc(colToByte(rgb.g), f);
-	fputc(colToByte(rgb.b), f);
-	p += colorMap->getNumPixelComps();
+      if ((p = imgStr->getLine())) {
+	for (x = 0; x < width; ++x) {
+	  colorMap->getRGB(p, &rgb);
+	  fputc(colToByte(rgb.r), f);
+	  fputc(colToByte(rgb.g), f);
+	  fputc(colToByte(rgb.b), f);
+	  p += colorMap->getNumPixelComps();
+	}
+      } else {
+	for (x = 0; x < width; ++x) {
+	  fputc(0, f);
+	  fputc(0, f);
+	  fputc(0, f);
+	}
       }
     }
     imgStr->close();
