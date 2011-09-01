@@ -798,7 +798,7 @@ void GlobalParams::parseNameToUnicode(GooString *name) {
   Unicode u;
   char *tokptr;
 
-  if (!(f = fopen(name->getCString(), "r"))) {
+  if (!(f = openFile(name->getCString(), "r"))) {
     error(errIO, -1, "Couldn't open 'nameToUnicode' file '{0:t}'",
 	  name);
     return;
@@ -957,7 +957,7 @@ FILE *GlobalParams::getUnicodeMapFile(GooString *encodingName) {
 
   lockGlobalParams;
   if ((fileName = (GooString *)unicodeMaps->lookup(encodingName))) {
-    f = fopen(fileName->getCString(), "r");
+    f = openFile(fileName->getCString(), "r");
   } else {
     f = NULL;
   }
@@ -980,7 +980,7 @@ FILE *GlobalParams::findCMapFile(GooString *collection, GooString *cMapName) {
   for (i = 0; i < list->getLength(); ++i) {
     dir = (GooString *)list->get(i);
     fileName = appendToPath(dir->copy(), cMapName->getCString());
-    f = fopen(fileName->getCString(), "r");
+    f = openFile(fileName->getCString(), "r");
     delete fileName;
     if (f) {
       unlockGlobalParams;
@@ -1000,7 +1000,7 @@ FILE *GlobalParams::findToUnicodeFile(GooString *name) {
   for (i = 0; i < toUnicodeDirs->getLength(); ++i) {
     dir = (GooString *)toUnicodeDirs->get(i);
     fileName = appendToPath(dir->copy(), name->getCString());
-    f = fopen(fileName->getCString(), "r");
+    f = openFile(fileName->getCString(), "r");
     delete fileName;
     if (f) {
       unlockGlobalParams;
@@ -1487,7 +1487,7 @@ GooString *GlobalParams::findFontFile(GooString *fontName, const char **exts) {
     for (ext = exts; *ext; ++ext) {
       fileName = appendToPath(dir->copy(), fontName->getCString());
       fileName->append(*ext);
-      if ((f = fopen(fileName->getCString(), "rb"))) {
+      if ((f = openFile(fileName->getCString(), "rb"))) {
 	fclose(f);
 	unlockGlobalParams;
 	return fileName;

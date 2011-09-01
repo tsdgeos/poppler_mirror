@@ -123,7 +123,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseCIDToUnicode(GooString *fileName,
   Unicode u;
   CharCodeToUnicode *ctu;
 
-  if (!(f = fopen(fileName->getCString(), "r"))) {
+  if (!(f = openFile(fileName->getCString(), "r"))) {
     error(errIO, -1, "Couldn't open cidToUnicode file '{0:t}'",
 	  fileName);
     return NULL;
@@ -170,7 +170,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseUnicodeToUnicode(
   int line, n, i;
   char *tokptr;
 
-  if (!(f = fopen(fileName->getCString(), "r"))) {
+  if (!(f = openFile(fileName->getCString(), "r"))) {
     gfree(uBuf);
     error(errIO, -1, "Couldn't open unicodeToUnicode file '{0:t}'",
 	  fileName);
