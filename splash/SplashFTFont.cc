@@ -159,10 +159,10 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   matrix.yx = (FT_Fixed)((mat[1] / size) * 65536);
   matrix.xy = (FT_Fixed)((mat[2] / size) * 65536);
   matrix.yy = (FT_Fixed)((mat[3] / size) * 65536);
-  textMatrix.xx = (FT_Fixed)((textMat[0] / (size * textScale)) * 65536);
-  textMatrix.yx = (FT_Fixed)((textMat[1] / (size * textScale)) * 65536);
-  textMatrix.xy = (FT_Fixed)((textMat[2] / (size * textScale)) * 65536);
-  textMatrix.yy = (FT_Fixed)((textMat[3] / (size * textScale)) * 65536);
+  textMatrix.xx = (FT_Fixed)((textMat[0] / (textScale * size)) * 65536);
+  textMatrix.yx = (FT_Fixed)((textMat[1] / (textScale * size)) * 65536);
+  textMatrix.xy = (FT_Fixed)((textMat[2] / (textScale * size)) * 65536);
+  textMatrix.yy = (FT_Fixed)((textMat[3] / (textScale * size)) * 65536);
 #endif
 }
 
