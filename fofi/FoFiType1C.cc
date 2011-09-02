@@ -473,7 +473,7 @@ void FoFiType1C::convertToType1(char *psName, const char **newEncoding, GBool as
   (*outputFunc)(outputStream, "cleartomark\n", 12);
 }
 
-void FoFiType1C::convertToCIDType0(char *psName,
+void FoFiType1C::convertToCIDType0(char *psName, int *codeMap, int nCodes,
 				   FoFiOutputFunc outputFunc,
 				   void *outputStream) {
   int *cidMap;
@@ -488,18 +488,36 @@ void FoFiType1C::convertToCIDType0(char *psName,
   int gid, offset, n, i, j, k;
 
   // compute the CID count and build the CID-to-GID mapping
-  nCIDs = 0;
-  for (i = 0; i < nGlyphs; ++i) {
-    if (charset[i] >= nCIDs) {
-      nCIDs = charset[i] + 1;
+  if (codeMap) {
+    nCIDs = nCodes;
+    cidMap = (int *)gmallocn(nCIDs, sizeof(int));
+    for (i = 0; i < nCodes; ++i) {
+      if (codeMap[i] >= 0 && codeMap[i] < nGlyphs) {
+	cidMap[i] = codeMap[i];
+      } else {
+	cidMap[i] = -1;
+      }
     }
-  }
-  cidMap = (int *)gmallocn(nCIDs, sizeof(int));
-  for (i = 0; i < nCIDs; ++i) {
-    cidMap[i] = -1;
-  }
-  for (i = 0; i < nGlyphs; ++i) {
-    cidMap[charset[i]] = i;
+  } else if (topDict.firstOp == 0x0c1e) {
+    nCIDs = 0;
+    for (i = 0; i < nGlyphs; ++i) {
+      if (charset[i] >= nCIDs) {
+	nCIDs = charset[i] + 1;
+      }
+    }
+    cidMap = (int *)gmallocn(nCIDs, sizeof(int));
+    for (i = 0; i < nCIDs; ++i) {
+      cidMap[i] = -1;
+    }
+    for (i = 0; i < nGlyphs; ++i) {
+      cidMap[charset[i]] = i;
+    }
+  } else {
+    nCIDs = nGlyphs;
+    cidMap = (int *)gmallocn(nCIDs, sizeof(int));
+    for (i = 0; i < nCIDs; ++i) {
+      cidMap[i] = i;
+    }
   }
 
   // build the charstrings
@@ -799,7 +817,7 @@ void FoFiType1C::convertToCIDType0(char *psName,
   gfree(cidMap);
 }
 
-void FoFiType1C::convertToType0(char *psName,
+void FoFiType1C::convertToType0(char *psName, int *codeMap, int nCodes,
 				FoFiOutputFunc outputFunc,
 				void *outputStream) {
   int *cidMap;
@@ -812,18 +830,36 @@ void FoFiType1C::convertToType0(char *psName,
   int fd, i, j, k;
 
   // compute the CID count and build the CID-to-GID mapping
-  nCIDs = 0;
-  for (i = 0; i < nGlyphs; ++i) {
-    if (charset[i] >= nCIDs) {
-      nCIDs = charset[i] + 1;
+  if (codeMap) {
+    nCIDs = nCodes;
+    cidMap = (int *)gmallocn(nCIDs, sizeof(int));
+    for (i = 0; i < nCodes; ++i) {
+      if (codeMap[i] >= 0 && codeMap[i] < nGlyphs) {
+	cidMap[i] = codeMap[i];
+      } else {
+	cidMap[i] = -1;
+      }
     }
-  }
-  cidMap = (int *)gmallocn(nCIDs, sizeof(int));
-  for (i = 0; i < nCIDs; ++i) {
-    cidMap[i] = -1;
-  }
-  for (i = 0; i < nGlyphs; ++i) {
-    cidMap[charset[i]] = i;
+  } else if (topDict.firstOp == 0x0c1e) {
+    nCIDs = 0;
+    for (i = 0; i < nGlyphs; ++i) {
+      if (charset[i] >= nCIDs) {
+	nCIDs = charset[i] + 1;
+      }
+    }
+    cidMap = (int *)gmallocn(nCIDs, sizeof(int));
+    for (i = 0; i < nCIDs; ++i) {
+      cidMap[i] = -1;
+    }
+    for (i = 0; i < nGlyphs; ++i) {
+      cidMap[charset[i]] = i;
+    }
+  } else {
+    nCIDs = nGlyphs;
+    cidMap = (int *)gmallocn(nCIDs, sizeof(int));
+    for (i = 0; i < nCIDs; ++i) {
+      cidMap[i] = i;
+    }
   }
 
   // write the descendant Type 1 fonts

@@ -133,7 +133,7 @@ public:
   // Convert to a Type 0 CIDFont, suitable for embedding in a
   // PostScript file.  <psName> will be used as the PostScript font
   // name.  (Only useful for OpenType CFF fonts.)
-  void convertToCIDType0(char *psName,
+  void convertToCIDType0(char *psName, int *cidMap, int nCIDs,
 			 FoFiOutputFunc outputFunc, void *outputStream);
 
   // Convert to a Type 0 (but non-CID) composite font, suitable for
@@ -148,7 +148,7 @@ public:
   // Convert to a Type 0 (but non-CID) composite font, suitable for
   // embedding in a PostScript file.  <psName> will be used as the
   // PostScript font name.  (Only useful for OpenType CFF fonts.)
-  void convertToType0(char *psName,
+  void convertToType0(char *psName, int *cidMap, int nCIDs,
 		      FoFiOutputFunc outputFunc, void *outputStream);
 
   // Write a clean TTF file, filling in missing tables and correcting

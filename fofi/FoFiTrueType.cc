@@ -702,7 +702,7 @@ void FoFiTrueType::convertToCIDType2(char *psName,
 		56);
 }
 
-void FoFiTrueType::convertToCIDType0(char *psName,
+void FoFiTrueType::convertToCIDType0(char *psName, int *cidMap, int nCIDs,
 				     FoFiOutputFunc outputFunc,
 				     void *outputStream) {
   char *start;
@@ -715,7 +715,7 @@ void FoFiTrueType::convertToCIDType0(char *psName,
   if (!(ff = FoFiType1C::make(start, length))) {
     return;
   }
-  ff->convertToCIDType0(psName, outputFunc, outputStream);
+  ff->convertToCIDType0(psName, cidMap, nCIDs, outputFunc, outputStream);
   delete ff;
 }
 
@@ -823,7 +823,7 @@ void FoFiTrueType::convertToType0(char *psName, int *cidMap, int nCIDs,
   (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
 }
 
-void FoFiTrueType::convertToType0(char *psName,
+void FoFiTrueType::convertToType0(char *psName, int *cidMap, int nCIDs,
 				  FoFiOutputFunc outputFunc,
 				  void *outputStream) {
   char *start;
@@ -836,7 +836,7 @@ void FoFiTrueType::convertToType0(char *psName,
   if (!(ff = FoFiType1C::make(start, length))) {
     return;
   }
-  ff->convertToType0(psName, outputFunc, outputStream);
+  ff->convertToType0(psName, cidMap, nCIDs, outputFunc, outputStream);
   delete ff;
 }
 

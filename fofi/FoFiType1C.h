@@ -179,14 +179,25 @@ public:
 
   // Convert to a Type 0 CIDFont, suitable for embedding in a
   // PostScript file.  <psName> will be used as the PostScript font
-  // name.
-  void convertToCIDType0(char *psName,
+  // name.  There are three cases for the CID-to-GID mapping:
+  // (1) if <codeMap> is non-NULL, then it is the CID-to-GID mapping
+  // (2) if <codeMap> is NULL and this is a CID CFF font, then the
+  //     font's internal CID-to-GID mapping is used
+  // (3) is <codeMap> is NULL and this is an 8-bit CFF font, then
+  //     the identity CID-to-GID mapping is used
+  void convertToCIDType0(char *psName, int *codeMap, int nCodes,
 			 FoFiOutputFunc outputFunc, void *outputStream);
 
   // Convert to a Type 0 (but non-CID) composite font, suitable for
   // embedding in a PostScript file.  <psName> will be used as the
-  // PostScript font name.
-  void convertToType0(char *psName,
+  // PostScript font name.  There are three cases for the CID-to-GID
+  // mapping:
+  // (1) if <codeMap> is non-NULL, then it is the CID-to-GID mapping
+  // (2) if <codeMap> is NULL and this is a CID CFF font, then the
+  //     font's internal CID-to-GID mapping is used
+  // (3) is <codeMap> is NULL and this is an 8-bit CFF font, then
+  //     the identity CID-to-GID mapping is used
+  void convertToType0(char *psName, int *codeMap, int nCodes,
 		      FoFiOutputFunc outputFunc, void *outputStream);
 
 private:

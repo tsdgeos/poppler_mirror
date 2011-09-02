@@ -2452,10 +2452,12 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id,
   if ((ffT1C = FoFiType1C::make(fontBuf, fontLen))) {
     if (globalParams->getPSLevel() >= psLevel3) {
       // Level 3: use a CID font
-      ffT1C->convertToCIDType0(psName->getCString(), outputFunc, outputStream);
+      ffT1C->convertToCIDType0(psName->getCString(), NULL, 0,
+                               outputFunc, outputStream);
     } else {
       // otherwise: use a non-CID composite font
-      ffT1C->convertToType0(psName->getCString(), outputFunc, outputStream);
+      ffT1C->convertToType0(psName->getCString(), NULL, 0,
+                            outputFunc, outputStream);
     }
     delete ffT1C;
   }
@@ -2555,10 +2557,15 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id,
       if (globalParams->getPSLevel() >= psLevel3) {
 	// Level 3: use a CID font
 	ffTT->convertToCIDType0(psName->getCString(),
+                                ((GfxCIDFont *)font)->getCIDToGID(),
+                                ((GfxCIDFont *)font)->getCIDToGIDLen(),
 				outputFunc, outputStream);
       } else {
 	// otherwise: use a non-CID composite font
-	ffTT->convertToType0(psName->getCString(), outputFunc, outputStream);
+	ffTT->convertToType0(psName->getCString(),
+                             ((GfxCIDFont *)font)->getCIDToGID(),
+                             ((GfxCIDFont *)font)->getCIDToGIDLen(),
+                             outputFunc, outputStream);
       }
     }
     delete ffTT;
