@@ -161,6 +161,10 @@ public:
   // be NULL).  This is only useful with 8-bit fonts.
   char **getEncoding();
 
+  // Get the glyph names.
+  int getNumGlyphs() { return nGlyphs; }
+  GooString *getGlyphName(int gid);
+
   // Return the mapping from CIDs to GIDs, and return the number of
   // CIDs in *<nCIDs>.  This is only useful for CID fonts.
   int *getCIDToGIDMap(int *nCIDs);

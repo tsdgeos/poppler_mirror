@@ -116,6 +116,18 @@ char **FoFiType1C::getEncoding() {
   return encoding;
 }
 
+GooString *FoFiType1C::getGlyphName(int gid) {
+  char buf[256];
+  GBool ok;
+
+  ok = gTrue;
+  getString(charset[gid], buf, &ok);
+  if (!ok) {
+    return NULL;
+  }
+  return new GooString(buf);
+}
+
 int *FoFiType1C::getCIDToGIDMap(int *nCIDs) {
   int *map;
   int n, i;
