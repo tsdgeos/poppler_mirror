@@ -66,6 +66,7 @@ FoFiType1::FoFiType1(char *fileA, int lenA, GBool freeFileDataA):
   fontMatrix[4] = 0;
   fontMatrix[5] = 0;
   parsed = gFalse;
+  undoPFB();
 }
 
 FoFiType1::~FoFiType1() {
@@ -324,4 +325,39 @@ void FoFiType1::parse() {
   }
 
   parsed = gTrue;
+}
+
+// Undo the PFB encoding, i.e., remove the PFB headers.
+void FoFiType1::undoPFB() {
+  GBool ok;
+  Guchar *file2;
+  int pos1, pos2, type;
+  Guint segLen;
+
+  ok = gTrue;
+  if (getU8(0, &ok) != 0x80 || !ok) {
+    return;
+  }
+  file2 = (Guchar *)gmalloc(len);
+  pos1 = pos2 = 0;
+  while (getU8(pos1, &ok) == 0x80 && ok) {
+    type = getU8(pos1 + 1, &ok);
+    if (type < 1 || type > 2 || !ok) {
+      break;
+    }
+    segLen = getU32LE(pos1 + 2, &ok);
+    pos1 += 6;
+    if (!ok || !checkRegion(pos1, segLen)) {
+      break;
+    }
+    memcpy(file2 + pos2, file + pos1, segLen);
+    pos1 += segLen;
+    pos2 += segLen;
+  }
+  if (freeFileData) {
+    gfree(fileData);
+  }
+  file = fileData = file2;
+  freeFileData = gTrue;
+  len = pos2;
 }

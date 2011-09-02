@@ -51,6 +51,7 @@ private:
 
   char *getNextLine(char *line);
   void parse();
+  void undoPFB();
 
   char *name;
   char **encoding;
