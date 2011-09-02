@@ -211,7 +211,7 @@ void FoFiType1::parse() {
   char *line, *line1, *p, *p2;
   char buf[256];
   char c;
-  int n, code, i, j;
+  int n, code, base, i, j;
   char *tokptr;
   GBool gotMatrix;
 
@@ -243,7 +243,7 @@ void FoFiType1::parse() {
       for (j = 0, line = getNextLine(line);
 	   j < 300 && line && (line1 = getNextLine(line));
 	   ++j, line = line1) {
-	if ((n = line1 - line) > 255) {
+        if ((n = (int)(line1 - line)) > 255) {
 	  error(errSyntaxWarning, -1, "FoFiType1::parse a line has more than 255 characters, we don't support this");
 	  n = 255;
 	}
@@ -251,45 +251,40 @@ void FoFiType1::parse() {
 	buf[n] = '\0';
 	for (p = buf; *p == ' ' || *p == '\t'; ++p) ;
 	if (!strncmp(p, "dup", 3)) {
-	  for (p += 3; *p == ' ' || *p == '\t'; ++p) ;
-	  for (p2 = p; *p2 >= '0' && *p2 <= '9'; ++p2) ;
-	  if (*p2) {
-	    c = *p2; // store it so we can recover it after atoi
-	    *p2 = '\0'; // terminate p so atoi works
-	    code = atoi(p);
-	    *p2 = c;
-	    if (code == 8 && *p2 == '#') {
-	      code = 0;
-	      for (++p2; *p2 >= '0' && *p2 <= '7'; ++p2) {
-		code = code * 8 + (*p2 - '0');
-	      }
+	  while (1) {
+	    p += 3;
+	    for (; *p == ' ' || *p == '\t'; ++p) ;
+	    code = 0;
+	    if (*p == '8' && p[1] == '#') {
+	      base = 8;
+	      p += 2;
+	    } else if (*p >= '0' && *p <= '9') {
+	      base = 10;
+	    } else {
+	      break;
 	    }
-	    if (likely(code < 256 && code >= 0)) {
-	      for (p = p2; *p == ' ' || *p == '\t'; ++p) ;
-	      if (*p == '/') {
-		++p;
-		for (p2 = p; *p2 && *p2 != ' ' && *p2 != '\t'; ++p2) ;
-		c = *p2; // store it so we can recover it after copyString
-		*p2 = '\0'; // terminate p so copyString works
-		encoding[code] = copyString(p);
-		*p2 = c;
-		p = p2;
-		for (; *p == ' ' || *p == '\t'; ++p); // eat spaces between string and put
-		if (!strncmp(p, "put", 3)) {
-		  // eat put and spaces and newlines after put
-		  for (p += 3; *p == ' ' || *p == '\t' || *p == '\n' || *p == '\r'; ++p);
-		  if (*p)
-		  {
-		    // there is still something after the definition
-		    // there might be another definition in this line
-		    // so move line1 to the end of our parsing
-		    // so we start in the potential next definition in the next loop
-		    line1 = &line[p - buf];
-		  }
-		} else {
-		  error(errSyntaxWarning, -1, "FoFiType1::parse no put after dup");
-		}
-	      }
+	    for (; *p >= '0' && *p < '0' + base; ++p) {
+	      code = code * base + (*p - '0');
+	    }
+	    for (; *p == ' ' || *p == '\t'; ++p) ;
+	    if (*p != '/') {
+	      break;
+	    }
+	    ++p;
+	    for (p2 = p; *p2 && *p2 != ' ' && *p2 != '\t'; ++p2) ;
+	    if (code >= 0 && code < 256) {
+	      c = *p2;
+	      *p2 = '\0';
+	      encoding[code] = copyString(p);
+	      *p2 = c;
+	    }
+	    for (p = p2; *p == ' ' || *p == '\t'; ++p) ;
+	    if (strncmp(p, "put", 3)) {
+	      break;
+	    }
+	    for (p += 3; *p == ' ' || *p == '\t'; ++p) ;
+	    if (strncmp(p, "dup", 3)) {
+	      break;
 	    }
 	  }
 	} else {
