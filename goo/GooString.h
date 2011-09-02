@@ -31,6 +31,7 @@
 #pragma interface
 #endif
 
+#include <limits.h> // for LLONG_MAX and ULLONG_MAX
 #include <stdarg.h>
 #include <stdlib.h> // for NULL
 #include "gtypes.h"
@@ -82,10 +83,12 @@ public:
   //     d, x, o, b -- int in decimal, hex, octal, binary
   //     ud, ux, uo, ub -- unsigned int
   //     ld, lx, lo, lb, uld, ulx, ulo, ulb -- long, unsigned long
+  //     lld, llx, llo, llb, ulld, ullx, ullo, ullb
+  //         -- long long, unsigned long long
   //     f, g -- double
   //     c -- char
   //     s -- string (char *)
-  //     t -- GooString *
+  //     t -- GString *
   //     w -- blank space; arg determines width
   // To get literal curly braces, use {{ or }}.
   static GooString *format(const char *fmt, ...);
@@ -164,16 +167,28 @@ private:
   char *s;
 
   void resize(int newLength);
+#ifdef LLONG_MAX
+  static void formatInt(long long x, char *buf, int bufSize,
+			GBool zeroFill, int width, int base,
+			char **p, int *len);
+#else
   static void formatInt(long x, char *buf, int bufSize,
 			GBool zeroFill, int width, int base,
 			const char **p, int *len);
+#endif
+#ifdef ULLONG_MAX
+  static void formatUInt(unsigned long long x, char *buf, int bufSize,
+			 GBool zeroFill, int width, int base,
+			 char **p, int *len);
+#else
   static void formatUInt(Gulong x, char *buf, int bufSize,
 			 GBool zeroFill, int width, int base,
 			 const char **p, int *len);
+#endif
   static void formatDouble(double x, char *buf, int bufSize, int prec,
-			   GBool trim, const char **p, int *len);
+			   GBool trim, char **p, int *len);
   static void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec,
-				     GBool trim, const char **p, int *len);
+				     GBool trim, char **p, int *len);
 };
 
 #endif
