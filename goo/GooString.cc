@@ -344,6 +344,9 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	for (; *p0 >= '0' && *p0 <= '9'; ++p0) {
 	  width = 10 * width + (*p0 - '0');
 	}
+	if (width < 0) {
+	  width = 0;
+	}
 	if (*p0 == '.') {
 	  ++p0;
 	  prec = 0;
@@ -736,7 +739,7 @@ GooString *GooString::insert(int i, const char *str, int lengthA) {
 GooString *GooString::del(int i, int n) {
   int j;
 
-  if (n > 0) {
+  if (i >= 0 && n > 0 && i + n > 0) {
     if (i + n > length) {
       n = length - i;
     }
