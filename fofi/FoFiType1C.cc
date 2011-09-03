@@ -2024,6 +2024,7 @@ GBool FoFiType1C::parse() {
 
   // for 8-bit fonts: read the private dict
   } else {
+    nFDs = 1;
     privateDicts = (Type1CPrivateDict *)gmalloc(sizeof(Type1CPrivateDict));
     readPrivateDict(topDict.privateOffset, topDict.privateSize,
 		    &privateDicts[0]);
