@@ -220,39 +220,39 @@ void FoFiType1C::convertToType1(char *psName, const char **newEncoding, GBool as
   (*outputFunc)(outputStream, "12 dict begin\n", 14);
   (*outputFunc)(outputStream, "/FontInfo 10 dict dup begin\n", 28);
   if (topDict.versionSID != 0) {
-    (*outputFunc)(outputStream, "/version (", 10);
-    (*outputFunc)(outputStream, buf2, strlen(buf2));
-    (*outputFunc)(outputStream, ") readonly def\n", 15);
+    (*outputFunc)(outputStream, "/version ", 9);
+    writePSString(buf2, outputFunc, outputStream);
+    (*outputFunc)(outputStream, " readonly def\n", 14);
   }
   if (topDict.noticeSID != 0) {
     getString(topDict.noticeSID, buf2, &ok);
-    (*outputFunc)(outputStream, "/Notice (", 9);
-    (*outputFunc)(outputStream, buf2, strlen(buf2));
-    (*outputFunc)(outputStream, ") readonly def\n", 15);
+    (*outputFunc)(outputStream, "/Notice ", 8);
+    writePSString(buf2, outputFunc, outputStream);
+    (*outputFunc)(outputStream, " readonly def\n", 14);
   }
   if (topDict.copyrightSID != 0) {
     getString(topDict.copyrightSID, buf2, &ok);
-    (*outputFunc)(outputStream, "/Copyright (", 12);
-    (*outputFunc)(outputStream, buf2, strlen(buf2));
-    (*outputFunc)(outputStream, ") readonly def\n", 15);
+    (*outputFunc)(outputStream, "/Copyright ", 11);
+    writePSString(buf2, outputFunc, outputStream);
+    (*outputFunc)(outputStream, " readonly def\n", 14);
   }
   if (topDict.fullNameSID != 0) {
     getString(topDict.fullNameSID, buf2, &ok);
-    (*outputFunc)(outputStream, "/FullName (", 11);
-    (*outputFunc)(outputStream, buf2, strlen(buf2));
-    (*outputFunc)(outputStream, ") readonly def\n", 15);
+    (*outputFunc)(outputStream, "/FullName ", 10);
+    writePSString(buf2, outputFunc, outputStream);
+    (*outputFunc)(outputStream, " readonly def\n", 14);
   }
   if (topDict.familyNameSID != 0) {
     getString(topDict.familyNameSID, buf2, &ok);
-    (*outputFunc)(outputStream, "/FamilyName (", 13);
-    (*outputFunc)(outputStream, buf2, strlen(buf2));
-    (*outputFunc)(outputStream, ") readonly def\n", 15);
+    (*outputFunc)(outputStream, "/FamilyName ", 12);
+    writePSString(buf2, outputFunc, outputStream);
+    (*outputFunc)(outputStream, " readonly def\n", 14);
   }
   if (topDict.weightSID != 0) {
     getString(topDict.weightSID, buf2, &ok);
-    (*outputFunc)(outputStream, "/Weight (", 9);
-    (*outputFunc)(outputStream, buf2, strlen(buf2));
-    (*outputFunc)(outputStream, ") readonly def\n", 15);
+    (*outputFunc)(outputStream, "/Weight ", 8);
+    writePSString(buf2, outputFunc, outputStream);
+    (*outputFunc)(outputStream, " readonly def\n", 14);
   }
   if (topDict.isFixedPitch) {
     (*outputFunc)(outputStream, "/isFixedPitch true def\n", 23);
@@ -1928,6 +1928,38 @@ void FoFiType1C::eexecWriteCharstring(Type1CEexecBuf *eb,
       (*eb->outputFunc)(eb->outputStream, (char *)&x, 1);
     }
   }
+}
+
+void FoFiType1C::writePSString(char *s, FoFiOutputFunc outputFunc,
+			       void *outputStream) {
+  char buf[80];
+  char *p;
+  int i, c;
+
+  i = 0;
+  buf[i++] = '(';
+  for (p = s; *p; ++p) {
+    c = *p & 0xff;
+    if (c == '(' || c == ')' || c == '\\') {
+      buf[i++] = '\\';
+      buf[i++] = c;
+    } else if (c < 0x20 || c >= 0x80) {
+      buf[i++] = '\\';
+      buf[i++] = '0' + ((c >> 6) & 7);
+      buf[i++] = '0' + ((c >> 3) & 7);
+      buf[i++] = '0' + (c & 7);
+    } else {
+      buf[i++] = c;
+    }
+    if (i >= 64) {
+      buf[i++] = '\\';
+      buf[i++] = '\n';
+      (*outputFunc)(outputStream, buf, i);
+      i = 0;
+    }
+  }
+  buf[i++] = ')';
+  (*outputFunc)(outputStream, buf, i);
 }
 
 GBool FoFiType1C::parse() {

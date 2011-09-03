@@ -219,6 +219,7 @@ private:
   void cvtNum(double x, GBool isFP, GooString *charBuf);
   void eexecWrite(Type1CEexecBuf *eb, const char *s);
   void eexecWriteCharstring(Type1CEexecBuf *eb, Guchar *s, int n);
+  void writePSString(char *s, FoFiOutputFunc outputFunc, void *outputStream);
   GBool parse();
   void readTopDict();
   void readFD(int offset, int length, Type1CPrivateDict *pDict);
