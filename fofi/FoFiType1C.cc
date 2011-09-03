@@ -541,12 +541,13 @@ void FoFiType1C::convertToCIDType0(char *psName, int *codeMap, int nCodes,
       ok = gTrue;
       getIndexVal(&charStringsIdx, gid, &val, &ok);
       if (ok) {
-	getIndex(privateDicts[fdSelect[gid]].subrsOffset, &subrIdx, &ok);
+	getIndex(privateDicts[fdSelect ? fdSelect[gid] : 0].subrsOffset,
+		 &subrIdx, &ok);
 	if (!ok) {
 	  subrIdx.pos = -1;
 	}
 	cvtGlyph(val.pos, val.len, charStrings,
-		 &subrIdx, &privateDicts[fdSelect[gid]], gTrue);
+		 &subrIdx, &privateDicts[fdSelect ? fdSelect[gid] : 0], gTrue);
       }
     }
   }
@@ -791,7 +792,7 @@ void FoFiType1C::convertToCIDType0(char *psName, int *codeMap, int nCodes,
   // write the charstring offset (CIDMap) table
   for (i = 0; i <= nCIDs; i += 6) {
     for (j = 0; j < 6 && i+j <= nCIDs; ++j) {
-      if (i+j < nCIDs && cidMap[i+j] >= 0) {
+      if (i+j < nCIDs && cidMap[i+j] >= 0 && fdSelect) {
 	buf2[0] = (char)fdSelect[cidMap[i+j]];
       } else {
 	buf2[0] = (char)0;
@@ -881,7 +882,8 @@ void FoFiType1C::convertToType0(char *psName, int *codeMap, int nCodes,
     //~ to handle multiple FDs correctly, need to somehow divide the
     //~ font up by FD; as a kludge we ignore CID 0, which is .notdef
     fd = 0;
-    if (fdSelect != NULL) {
+    // if fdSelect is NULL, we have an 8-bit font, so just leave fd=0
+    if (fdSelect) {
       for (j = i==0 ? 1 : 0; j < 256 && i+j < nCIDs; ++j) {
         if (cidMap[i+j] >= 0) {
           fd = fdSelect[cidMap[i+j]];
