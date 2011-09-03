@@ -2715,7 +2715,9 @@ char *FoFiType1C::getString(int sid, char *buf, GBool *ok) {
   Type1CIndexVal val;
   int n;
 
-  if (sid < 391) {
+  if (sid < 0) {
+    buf[0] = '\0';
+  } else if (sid < 391) {
     strcpy(buf, fofiType1CStdStrings[sid]);
   } else {
     sid -= 391;
