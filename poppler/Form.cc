@@ -38,7 +38,6 @@
 #include "XRef.h"
 #include "PDFDocEncoding.h"
 #include "Annot.h"
-#include "Catalog.h"
 #include "Link.h"
 
 //return a newly allocated char* containing an UTF16BE string of size length
@@ -62,12 +61,13 @@ char* pdfDocEncodingToUTF16 (GooString* orig, int* length)
 
 
 
-FormWidget::FormWidget(XRef *xrefA, Object *aobj, unsigned num, Ref aref, FormField *fieldA) 
+FormWidget::FormWidget(PDFDoc *docA, Object *aobj, unsigned num, Ref aref, FormField *fieldA)
 {
   ref = aref;
   ID = 0;
   childNum = num;
-  xref = xrefA;
+  doc = docA;
+  xref = doc->getXRef();
   aobj->copy(&obj);
   type = formUndef;
   field = fieldA;
@@ -87,13 +87,13 @@ void FormWidget::print(int indent) {
 }
 #endif
 
-void FormWidget::createWidgetAnnotation(PDFDoc *docA) {
+void FormWidget::createWidgetAnnotation() {
   if (widget)
     return;
 
   Object obj1;
   obj1.initRef(ref.num, ref.gen);
-  widget = new AnnotWidget(docA, obj.getDict(), &obj1, field);
+  widget = new AnnotWidget(doc, obj.getDict(), &obj1, field);
   obj1.free();
 }
 
@@ -150,8 +150,8 @@ LinkAction *FormWidget::getActivationAction() {
   return widget ? widget->getAction() : NULL;
 }
 
-FormWidgetButton::FormWidgetButton (XRef *xrefA, Object *aobj, unsigned num, Ref ref, FormField *p) :
-	FormWidget(xrefA, aobj, num, ref, p)
+FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
+	FormWidget(docA, aobj, num, ref, p)
 {
   type = formButton;
   parent = static_cast<FormFieldButton*>(field);
@@ -232,8 +232,8 @@ void FormWidgetButton::setNumSiblingsID (int i)
 }
 
 
-FormWidgetText::FormWidgetText (XRef *xrefA, Object *aobj, unsigned num, Ref ref, FormField *p) :
-	FormWidget(xrefA, aobj, num, ref, p)
+FormWidgetText::FormWidgetText (PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
+	FormWidget(docA, aobj, num, ref, p)
 {
   type = formText;
   parent = static_cast<FormFieldText*>(field);
@@ -299,8 +299,8 @@ void FormWidgetText::setContent(GooString* new_content)
   parent->setContentCopy(new_content);
 }
 
-FormWidgetChoice::FormWidgetChoice(XRef *xrefA, Object *aobj, unsigned num, Ref ref, FormField *p) :
-	FormWidget(xrefA, aobj, num, ref, p)
+FormWidgetChoice::FormWidgetChoice(PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
+	FormWidget(docA, aobj, num, ref, p)
 {
   type = formChoice;
   parent = static_cast<FormFieldChoice*>(field);
@@ -417,8 +417,8 @@ bool FormWidgetChoice::isListBox () const
   return parent->isListBox();
 }
 
-FormWidgetSignature::FormWidgetSignature(XRef *xrefA, Object *aobj, unsigned num, Ref ref, FormField *p) :
-	FormWidget(xrefA, aobj, num, ref, p)
+FormWidgetSignature::FormWidgetSignature(PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
+	FormWidget(docA, aobj, num, ref, p)
 {
   type = formSignature;
   parent = static_cast<FormFieldSignature*>(field);
@@ -429,9 +429,10 @@ FormWidgetSignature::FormWidgetSignature(XRef *xrefA, Object *aobj, unsigned num
 // FormField
 //========================================================================
 
-FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, FormField *parentA, std::set<int> *usedParents, FormFieldType ty)
+FormField::FormField(PDFDoc *docA, Object *aobj, const Ref& aref, FormField *parentA, std::set<int> *usedParents, FormFieldType ty)
 {
-  xref = xrefA;
+  doc = docA;
+  xref = doc->getXRef();
   aobj->copy(&obj);
   Dict* dict = obj.getDict();
   ref.num = ref.gen = 0;
@@ -489,7 +490,7 @@ FormField::FormField(XRef* xrefA, Object *aobj, const Ref& aref, FormField *pare
 
           numChildren++;
           children = (FormField**)greallocn(children, numChildren, sizeof(FormField*));
-          children[numChildren - 1] = Form::createFieldFromDict(&childObj, xref, ref, this, &usedParentsAux);
+          children[numChildren - 1] = Form::createFieldFromDict(&childObj, doc, ref, this, &usedParentsAux);
         } else if (childObj.dictLookup("Subtype", &obj2)->isName("Widget")) {
           // Child is a widget annotation
           if (!terminal && numChildren > 0) {
@@ -613,13 +614,13 @@ void FormField::fillChildrenSiblingsID()
   }
 }
 
-void FormField::createWidgetAnnotations(PDFDoc *docA) {
+void FormField::createWidgetAnnotations() {
   if (terminal) {
     for (int i = 0; i < numChildren; i++)
-      widgets[i]->createWidgetAnnotation(docA);
+      widgets[i]->createWidgetAnnotation();
   } else {
     for (int i = 0; i < numChildren; i++)
-      children[i]->createWidgetAnnotations(docA);
+      children[i]->createWidgetAnnotations();
   }
 }
 
@@ -635,16 +636,16 @@ void FormField::_createWidget (Object *obj, Ref aref)
   //ID = index in "widgets" table
   switch (type) {
   case formButton:
-    widgets[numChildren-1] = new FormWidgetButton(xref, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetButton(doc, obj, numChildren-1, aref, this);
     break;
   case formText:
-    widgets[numChildren-1] = new FormWidgetText(xref, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetText(doc, obj, numChildren-1, aref, this);
     break;
   case formChoice:
-    widgets[numChildren-1] = new FormWidgetChoice(xref, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetChoice(doc, obj, numChildren-1, aref, this);
     break;
   case formSignature:
-    widgets[numChildren-1] = new FormWidgetSignature(xref, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetSignature(doc, obj, numChildren-1, aref, this);
     break;
   default:
     error(errSyntaxWarning, -1, "SubType on non-terminal field, invalid document?");
@@ -719,8 +720,8 @@ GooString* FormField::getFullyQualifiedName() {
 //------------------------------------------------------------------------
 // FormFieldButton
 //------------------------------------------------------------------------
-FormFieldButton::FormFieldButton(XRef *xrefA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(xrefA, aobj, ref, parent, usedParents, formButton)
+FormFieldButton::FormFieldButton(PDFDoc *docA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(docA, aobj, ref, parent, usedParents, formButton)
 {
   Dict* dict = obj.getDict();
   active_child = -1;
@@ -886,8 +887,8 @@ FormFieldButton::~FormFieldButton()
 //------------------------------------------------------------------------
 // FormFieldText
 //------------------------------------------------------------------------
-FormFieldText::FormFieldText(XRef *xrefA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(xrefA, aobj, ref, parent, usedParents, formText)
+FormFieldText::FormFieldText(PDFDoc *docA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(docA, aobj, ref, parent, usedParents, formText)
 {
   Dict* dict = obj.getDict();
   Object obj1;
@@ -979,8 +980,8 @@ FormFieldText::~FormFieldText()
 //------------------------------------------------------------------------
 // FormFieldChoice
 //------------------------------------------------------------------------
-FormFieldChoice::FormFieldChoice(XRef *xrefA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(xrefA, aobj, ref, parent, usedParents, formChoice)
+FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(docA, aobj, ref, parent, usedParents, formChoice)
 {
   numChoices = 0;
   choices = NULL;
@@ -1220,8 +1221,8 @@ GooString *FormFieldChoice::getSelectedChoice() {
 //------------------------------------------------------------------------
 // FormFieldSignature
 //------------------------------------------------------------------------
-FormFieldSignature::FormFieldSignature(XRef *xrefA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(xrefA, dict, ref, parent, usedParents, formSignature)
+FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(docA, dict, ref, parent, usedParents, formSignature)
 {
 }
 
@@ -1310,7 +1311,7 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
       }
 
       std::set<int> usedParents;
-      rootFields[numFields++] = createFieldFromDict (&obj2, xref, oref.getRef(), NULL, &usedParents);
+      rootFields[numFields++] = createFieldFromDict (&obj2, doc, oref.getRef(), NULL, &usedParents);
 
       obj2.free();
       oref.free();
@@ -1375,21 +1376,21 @@ Object *Form::fieldLookup(Dict *field, const char *key, Object *obj) {
   return ::fieldLookup(field, key, obj, &usedParents);
 }
 
-FormField *Form::createFieldFromDict (Object* obj, XRef *xrefA, const Ref& pref, FormField *parent, std::set<int> *usedParents)
+FormField *Form::createFieldFromDict (Object* obj, PDFDoc *docA, const Ref& pref, FormField *parent, std::set<int> *usedParents)
 {
     Object obj2;
     FormField *field;
 
     if (Form::fieldLookup(obj->getDict (), "FT", &obj2)->isName("Btn")) {
-      field = new FormFieldButton(xrefA, obj, pref, parent, usedParents);
+      field = new FormFieldButton(docA, obj, pref, parent, usedParents);
     } else if (obj2.isName("Tx")) {
-      field = new FormFieldText(xrefA, obj, pref, parent, usedParents);
+      field = new FormFieldText(docA, obj, pref, parent, usedParents);
     } else if (obj2.isName("Ch")) {
-      field = new FormFieldChoice(xrefA, obj, pref, parent, usedParents);
+      field = new FormFieldChoice(docA, obj, pref, parent, usedParents);
     } else if (obj2.isName("Sig")) {
-      field = new FormFieldSignature(xrefA, obj, pref, parent, usedParents);
+      field = new FormFieldSignature(docA, obj, pref, parent, usedParents);
     } else { //we don't have an FT entry => non-terminal field
-      field = new FormField(xrefA, obj, pref, parent, usedParents);
+      field = new FormField(docA, obj, pref, parent, usedParents);
     }
     obj2.free();
 
@@ -1404,7 +1405,7 @@ void Form::postWidgetsLoad()
   // a FormWidget the Catalog is still creating the form object
   for (int i = 0; i < numFields; i++) {
     rootFields[i]->fillChildrenSiblingsID();
-    rootFields[i]->createWidgetAnnotations(doc);
+    rootFields[i]->createWidgetAnnotations();
   }
 }
 
