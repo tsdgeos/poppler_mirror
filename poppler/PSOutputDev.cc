@@ -1453,7 +1453,7 @@ void PSOutputDev::writeDocSetup(PDFDoc *doc, Catalog *catalog,
     if ((resDict = page->getResourceDict())) {
       setupResources(resDict);
     }
-    annots = new Annots(xref, catalog, page->getAnnots(&obj1));
+    annots = new Annots(doc, page->getAnnots(&obj1));
     obj1.free();
     for (i = 0; i < annots->getNumAnnots(); ++i) {
       if (annots->getAnnot(i)->getAppearance(&obj1)->isStream()) {

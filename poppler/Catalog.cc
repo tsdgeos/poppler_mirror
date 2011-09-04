@@ -116,11 +116,6 @@ Catalog::Catalog(PDFDoc *docA) {
 
   // get the ViewerPreferences dictionary
   catDict.dictLookup("ViewerPreferences", &viewerPreferences);
-
-  // perform form-related loading after all widgets have been loaded
-  if (getForm())
-    getForm()->postWidgetsLoad(this);
-
   catDict.free();
   return;
 
@@ -871,7 +866,9 @@ Form *Catalog::getForm()
 {
   if (!form) {
     if (acroForm.isDict()) {
-      form = new Form(xref,&acroForm);
+      form = new Form(doc, &acroForm);
+      // perform form-related loading after all widgets have been loaded
+      form->postWidgetsLoad();
     }
   }
 

@@ -29,9 +29,9 @@ class Dict;
 class Annot;
 class AnnotWidget;
 class Annots;
-class Catalog;
 class LinkAction;
 class GfxResources;
+class PDFDoc;
 
 enum FormFieldType {
   formButton,
@@ -106,7 +106,7 @@ public:
   // decode id and retrieve pageNum and fieldNum
   static void decodeID (unsigned id, unsigned* pageNum, unsigned* fieldNum);
 
-  void createWidgetAnnotation(Catalog *catalog);
+  void createWidgetAnnotation(PDFDoc *docA);
   AnnotWidget *getWidgetAnnotation() const { return widget; }
 
 #ifdef DEBUG_FORMS
@@ -285,7 +285,7 @@ public:
   // only implemented in FormFieldButton
   virtual void fillChildrenSiblingsID ();
 
-  void createWidgetAnnotations(Catalog *catalog);
+  void createWidgetAnnotations(PDFDoc *docA);
 
 #ifdef DEBUG_FORMS
   void printTree(int indent = 0);
@@ -489,7 +489,7 @@ public:
 
 class Form {
 public:
-  Form(XRef *xrefA, Object* acroForm);
+  Form(PDFDoc *docA, Object* acroForm);
 
   ~Form();
 
@@ -511,11 +511,12 @@ public:
 
   FormWidget* findWidgetByRef (Ref aref);
 
-  void postWidgetsLoad(Catalog *catalog);
+  void postWidgetsLoad();
 private:
   FormField** rootFields;
   int numFields;
   int size;
+  PDFDoc *doc;
   XRef* xref;
   Object *acroForm;
   GBool needAppearances;

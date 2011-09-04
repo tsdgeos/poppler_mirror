@@ -199,7 +199,7 @@ poppler_annot_text_new (PopplerDocument  *doc,
   PDFRectangle pdf_rect(rect->x1, rect->y1,
 			rect->x2, rect->y2);
 
-  annot = new AnnotText (doc->doc->getXRef(), &pdf_rect, doc->doc->getCatalog());
+  annot = new AnnotText (doc->doc, &pdf_rect);
 
   return _poppler_annot_text_new (annot);
 }
@@ -708,7 +708,7 @@ poppler_annot_markup_set_popup (PopplerAnnotMarkup *poppler_annot,
   g_return_if_fail (POPPLER_IS_ANNOT_MARKUP (poppler_annot));
 
   annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT (poppler_annot)->annot);
-  popup = new AnnotPopup (annot->getXRef(), &pdf_rect, (Catalog *)NULL);
+  popup = new AnnotPopup (annot->getDoc(), &pdf_rect);
   annot->setPopup (popup);
 }
 

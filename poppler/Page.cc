@@ -349,7 +349,7 @@ Page::~Page() {
 Annots *Page::getAnnots() {
   if (!annots) {
     Object obj;
-    annots = new Annots(xref, doc->getCatalog(), getAnnots(&obj));
+    annots = new Annots(doc, getAnnots(&obj));
     obj.free();
   }
 

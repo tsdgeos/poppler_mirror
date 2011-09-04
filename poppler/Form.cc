@@ -34,6 +34,7 @@
 #include "Dict.h"
 #include "Gfx.h"
 #include "Form.h"
+#include "PDFDoc.h"
 #include "XRef.h"
 #include "PDFDocEncoding.h"
 #include "Annot.h"
@@ -86,13 +87,13 @@ void FormWidget::print(int indent) {
 }
 #endif
 
-void FormWidget::createWidgetAnnotation(Catalog *catalog) {
+void FormWidget::createWidgetAnnotation(PDFDoc *docA) {
   if (widget)
     return;
 
   Object obj1;
   obj1.initRef(ref.num, ref.gen);
-  widget = new AnnotWidget(xref, obj.getDict(), catalog, &obj1, field);
+  widget = new AnnotWidget(docA, obj.getDict(), &obj1, field);
   obj1.free();
 }
 
@@ -612,13 +613,13 @@ void FormField::fillChildrenSiblingsID()
   }
 }
 
-void FormField::createWidgetAnnotations(Catalog *catalog) {
+void FormField::createWidgetAnnotations(PDFDoc *docA) {
   if (terminal) {
     for (int i = 0; i < numChildren; i++)
-      widgets[i]->createWidgetAnnotation(catalog);
+      widgets[i]->createWidgetAnnotation(docA);
   } else {
     for (int i = 0; i < numChildren; i++)
-      children[i]->createWidgetAnnotations(catalog);
+      children[i]->createWidgetAnnotations(docA);
   }
 }
 
@@ -1241,11 +1242,12 @@ void FormFieldSignature::print(int indent)
 // Form
 //------------------------------------------------------------------------
 
-Form::Form(XRef *xrefA, Object* acroFormA)
+Form::Form(PDFDoc *docA, Object* acroFormA)
 {
   Object obj1;
 
-  xref = xrefA;
+  doc = docA;
+  xref = doc->getXRef();
   acroForm = acroFormA;
   
   size = 0;
@@ -1308,7 +1310,7 @@ Form::Form(XRef *xrefA, Object* acroFormA)
       }
 
       std::set<int> usedParents;
-      rootFields[numFields++] = createFieldFromDict (&obj2, xrefA, oref.getRef(), NULL, &usedParents);
+      rootFields[numFields++] = createFieldFromDict (&obj2, xref, oref.getRef(), NULL, &usedParents);
 
       obj2.free();
       oref.free();
@@ -1394,7 +1396,7 @@ FormField *Form::createFieldFromDict (Object* obj, XRef *xrefA, const Ref& pref,
     return field;
 }
 
-void Form::postWidgetsLoad (Catalog *catalog)
+void Form::postWidgetsLoad()
 {
   // We create the widget annotations associated to
   // every form widget here, because the AnnotWidget constructor
@@ -1402,7 +1404,7 @@ void Form::postWidgetsLoad (Catalog *catalog)
   // a FormWidget the Catalog is still creating the form object
   for (int i = 0; i < numFields; i++) {
     rootFields[i]->fillChildrenSiblingsID();
-    rootFields[i]->createWidgetAnnotations(catalog);
+    rootFields[i]->createWidgetAnnotations(doc);
   }
 }
 

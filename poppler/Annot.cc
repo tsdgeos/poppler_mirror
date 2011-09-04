@@ -47,6 +47,7 @@
 #include "Catalog.h"
 #include "Gfx.h"
 #include "Lexer.h"
+#include "PDFDoc.h"
 #include "Page.h"
 #include "Annot.h"
 #include "GfxFont.h"
@@ -808,14 +809,14 @@ AnnotAppearanceCharacs::~AnnotAppearanceCharacs() {
 // Annot
 //------------------------------------------------------------------------
 
-Annot::Annot(XRef *xrefA, PDFRectangle *rectA, Catalog *catalog) {
+Annot::Annot(PDFDoc *docA, PDFRectangle *rectA) {
   Object obj1;
 
   refCnt = 1;
   flags = flagUnknown;
   type = typeUnknown;
 
-  obj1.initArray (xrefA);
+  obj1.initArray (docA->getXRef());
   Object obj2;
   obj1.arrayAdd (obj2.initReal (rectA->x1));
   obj1.arrayAdd (obj2.initReal (rectA->y1));
@@ -823,26 +824,26 @@ Annot::Annot(XRef *xrefA, PDFRectangle *rectA, Catalog *catalog) {
   obj1.arrayAdd (obj2.initReal (rectA->y2));
   obj2.free ();
 
-  annotObj.initDict (xrefA);
+  annotObj.initDict (docA->getXRef());
   annotObj.dictSet ("Type", obj2.initName ("Annot"));
   annotObj.dictSet ("Rect", &obj1);
   // obj1 is owned by the dict
 
-  ref = xrefA->addIndirectObject (&annotObj);
+  ref = docA->getXRef()->addIndirectObject (&annotObj);
 
-  initialize (xrefA, annotObj.getDict(), catalog);
+  initialize (docA, annotObj.getDict());
 }
 
-Annot::Annot(XRef *xrefA, Dict *dict, Catalog* catalog) {
+Annot::Annot(PDFDoc *docA, Dict *dict) {
   refCnt = 1;
   hasRef = false;
   flags = flagUnknown;
   type = typeUnknown;
   annotObj.initDict (dict);
-  initialize (xrefA, dict, catalog);
+  initialize (docA, dict);
 }
 
-Annot::Annot(XRef *xrefA, Dict *dict, Catalog* catalog, Object *obj) {
+Annot::Annot(PDFDoc *docA, Dict *dict, Object *obj) {
   refCnt = 1;
   if (obj->isRef()) {
     hasRef = gTrue;
@@ -853,16 +854,17 @@ Annot::Annot(XRef *xrefA, Dict *dict, Catalog* catalog, Object *obj) {
   flags = flagUnknown;
   type = typeUnknown;
   annotObj.initDict (dict);
-  initialize (xrefA, dict, catalog);
+  initialize (docA, dict);
 }
 
-void Annot::initialize(XRef *xrefA, Dict *dict, Catalog *catalog) {
+void Annot::initialize(PDFDoc *docA, Dict *dict) {
   Object asObj, obj1, obj2, obj3;
 
   appRef.num = 0;
   appRef.gen = 65535;
   ok = gTrue;
-  xref = xrefA;
+  doc = docA;
+  xref = doc->getXRef();
   appearBuf = NULL;
   fontSize = 0;
 
@@ -910,7 +912,7 @@ void Annot::initialize(XRef *xrefA, Dict *dict, Catalog *catalog) {
   if (dict->lookupNF("P", &obj1)->isRef()) {
     Ref ref = obj1.getRef();
 
-    page = catalog ? catalog->findPage (ref.num, ref.gen) : -1;
+    page = doc->getCatalog()->findPage (ref.num, ref.gen);
   } else {
     page = 0;
   }
@@ -1002,7 +1004,7 @@ void Annot::initialize(XRef *xrefA, Dict *dict, Catalog *catalog) {
   }
   obj1.free();
 
-  optContentConfig = catalog ? catalog->getOptContentConfig() : NULL;
+  optContentConfig = doc->getCatalog()->getOptContentConfig();
   dict->lookupNF("OC", &oc);
   if (!oc.isRef() && !oc.isNull()) {
     error (errSyntaxError, -1, "Annotation OC value not null or dict: {0:d}", oc.getType());
@@ -1355,27 +1357,27 @@ void Annot::draw(Gfx *gfx, GBool printing) {
 // AnnotPopup
 //------------------------------------------------------------------------
 
-AnnotPopup::AnnotPopup(XRef *xrefA, PDFRectangle *rect, Catalog *catalog) :
-    Annot(xrefA, rect, catalog) {
+AnnotPopup::AnnotPopup(PDFDoc *docA, PDFRectangle *rect) :
+    Annot(docA, rect) {
   Object obj1;
 
   type = typePopup;
 
   annotObj.dictSet ("Subtype", obj1.initName ("Popup"));
-  initialize (xrefA, annotObj.getDict(), catalog);
+  initialize (docA, annotObj.getDict());
 }
 
-AnnotPopup::AnnotPopup(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-    Annot(xrefA, dict, catalog, obj) {
+AnnotPopup::AnnotPopup(PDFDoc *docA, Dict *dict, Object *obj) :
+    Annot(docA, dict, obj) {
   type = typePopup;
-  initialize(xrefA, dict, catalog);
+  initialize(docA, dict);
 }
 
 AnnotPopup::~AnnotPopup() {
   parent.free();
 }
 
-void AnnotPopup::initialize(XRef *xrefA, Dict *dict, Catalog *catalog) {
+void AnnotPopup::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
 
   if (!dict->lookupNF("Parent", &parent)->isRef()) {
@@ -1412,14 +1414,14 @@ void AnnotPopup::setOpen(GBool openA) {
 //------------------------------------------------------------------------
 // AnnotMarkup
 //------------------------------------------------------------------------
-AnnotMarkup::AnnotMarkup(XRef *xrefA, PDFRectangle *rect, Catalog *catalog) :
-    Annot(xrefA, rect, catalog) {
-  initialize(xrefA, annotObj.getDict(), catalog, &annotObj);
+AnnotMarkup::AnnotMarkup(PDFDoc *docA, PDFRectangle *rect) :
+    Annot(docA, rect) {
+  initialize(docA, annotObj.getDict(), &annotObj);
 }
 
-AnnotMarkup::AnnotMarkup(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-    Annot(xrefA, dict, catalog, obj) {
-  initialize(xrefA, dict, catalog, obj);
+AnnotMarkup::AnnotMarkup(PDFDoc *docA, Dict *dict, Object *obj) :
+    Annot(docA, dict, obj) {
+  initialize(docA, dict, obj);
 }
 
 AnnotMarkup::~AnnotMarkup() {
@@ -1436,7 +1438,7 @@ AnnotMarkup::~AnnotMarkup() {
     delete subject;
 }
 
-void AnnotMarkup::initialize(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) {
+void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict, Object *obj) {
   Object obj1;
 
   if (dict->lookup("T", &obj1)->isString()) {
@@ -1447,7 +1449,7 @@ void AnnotMarkup::initialize(XRef *xrefA, Dict *dict, Catalog *catalog, Object *
   obj1.free();
 
   if (dict->lookup("Popup", &obj1)->isDict()) {
-    popup = new AnnotPopup(xrefA, obj1.getDict(), catalog, obj);
+    popup = new AnnotPopup(docA, obj1.getDict(), obj);
   } else {
     popup = NULL;
   }
@@ -1553,30 +1555,30 @@ void AnnotMarkup::setOpacity(double opacityA) {
 // AnnotText
 //------------------------------------------------------------------------
 
-AnnotText::AnnotText(XRef *xrefA, PDFRectangle *rect, Catalog *catalog) :
-    AnnotMarkup(xrefA, rect, catalog) {
+AnnotText::AnnotText(PDFDoc *docA, PDFRectangle *rect) :
+    AnnotMarkup(docA, rect) {
   Object obj1;
 
   type = typeText;
   flags |= flagNoZoom | flagNoRotate;
 
   annotObj.dictSet ("Subtype", obj1.initName ("Text"));
-  initialize (xrefA, catalog, annotObj.getDict());
+  initialize (docA, annotObj.getDict());
 }
 
-AnnotText::AnnotText(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-    AnnotMarkup(xrefA, dict, catalog, obj) {
+AnnotText::AnnotText(PDFDoc *docA, Dict *dict, Object *obj) :
+    AnnotMarkup(docA, dict, obj) {
 
   type = typeText;
   flags |= flagNoZoom | flagNoRotate;
-  initialize (xrefA, catalog, dict);
+  initialize (docA, dict);
 }
 
 AnnotText::~AnnotText() {
   delete icon;
 }
 
-void AnnotText::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
+void AnnotText::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
 
   if (dict->lookup("Open", &obj1)->isBool())
@@ -1996,20 +1998,20 @@ void AnnotText::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 // AnnotLink
 //------------------------------------------------------------------------
-AnnotLink::AnnotLink(XRef *xrefA, PDFRectangle *rect, Catalog *catalog) :
-    Annot(xrefA, rect, catalog) {
+AnnotLink::AnnotLink(PDFDoc *docA, PDFRectangle *rect) :
+    Annot(docA, rect) {
   Object obj1;
 
   type = typeLink;
   annotObj.dictSet ("Subtype", obj1.initName ("Link"));
-  initialize (xrefA, catalog, annotObj.getDict());
+  initialize (docA, annotObj.getDict());
 }
 
-AnnotLink::AnnotLink(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-    Annot(xrefA, dict, catalog, obj) {
+AnnotLink::AnnotLink(PDFDoc *docA, Dict *dict, Object *obj) :
+    Annot(docA, dict, obj) {
 
   type = typeLink;
-  initialize (xrefA, catalog, dict);
+  initialize (docA, dict);
 }
 
 AnnotLink::~AnnotLink() {
@@ -2022,7 +2024,7 @@ AnnotLink::~AnnotLink() {
     delete quadrilaterals;
 }
 
-void AnnotLink::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
+void AnnotLink::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
 
   action = NULL;
@@ -2034,7 +2036,7 @@ void AnnotLink::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
   } else {
     obj1.free();
     if (dict->lookup("A", &obj1)->isDict()) {
-      action = LinkAction::parseAction(&obj1, catalog->getBaseURI());
+      action = LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI());
     }
   }
   obj1.free();
@@ -2089,8 +2091,8 @@ void AnnotLink::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 // AnnotFreeText
 //------------------------------------------------------------------------
-AnnotFreeText::AnnotFreeText(XRef *xrefA, PDFRectangle *rect, GooString *da, Catalog *catalog) :
-    AnnotMarkup(xrefA, rect, catalog) {
+AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, GooString *da) :
+    AnnotMarkup(docA, rect) {
   Object obj1;
 
   type = typeFreeText;
@@ -2101,13 +2103,13 @@ AnnotFreeText::AnnotFreeText(XRef *xrefA, PDFRectangle *rect, GooString *da, Cat
   obj2.initString (da->copy());
   annotObj.dictSet("DA", &obj2);
 
-  initialize (xrefA, catalog, annotObj.getDict());
+  initialize (docA, annotObj.getDict());
 }
 
-AnnotFreeText::AnnotFreeText(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-    AnnotMarkup(xrefA, dict, catalog, obj) {
+AnnotFreeText::AnnotFreeText(PDFDoc *docA, Dict *dict, Object *obj) :
+    AnnotMarkup(docA, dict, obj) {
   type = typeFreeText;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
 AnnotFreeText::~AnnotFreeText() {
@@ -2126,7 +2128,7 @@ AnnotFreeText::~AnnotFreeText() {
     delete rectangle;
 }
 
-void AnnotFreeText::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
+void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
 
   if (dict->lookup("DA", &obj1)->isString()) {
@@ -2224,28 +2226,28 @@ void AnnotFreeText::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
 // AnnotLine
 //------------------------------------------------------------------------
 
-AnnotLine::AnnotLine(XRef *xrefA, PDFRectangle *rect, PDFRectangle *lRect, Catalog *catalog) :
-    AnnotMarkup(xrefA, rect, catalog) {
+AnnotLine::AnnotLine(PDFDoc *docA, PDFRectangle *rect, PDFRectangle *lRect) :
+    AnnotMarkup(docA, rect) {
   Object obj1;
 
   type = typeLine;
   annotObj.dictSet ("Subtype", obj1.initName ("Line"));
 
   Object obj2, obj3;
-  obj2.initArray (xrefA);
+  obj2.initArray (doc->getXRef());
   obj2.arrayAdd (obj3.initReal (lRect->x1));
   obj2.arrayAdd (obj3.initReal (lRect->y1));
   obj2.arrayAdd (obj3.initReal (lRect->x2));
   obj2.arrayAdd (obj3.initReal (lRect->y2));
   annotObj.dictSet ("L", &obj2);
 
-  initialize (xrefA, catalog, annotObj.getDict());
+  initialize (docA, annotObj.getDict());
 }
 
-AnnotLine::AnnotLine(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-    AnnotMarkup(xrefA, dict, catalog, obj) {
+AnnotLine::AnnotLine(PDFDoc *docA, Dict *dict, Object *obj) :
+    AnnotMarkup(docA, dict, obj) {
   type = typeLine;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
 AnnotLine::~AnnotLine() {
@@ -2259,7 +2261,7 @@ AnnotLine::~AnnotLine() {
     delete measure;
 }
 
-void AnnotLine::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
+void AnnotLine::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
 
   if (dict->lookup("L", &obj1)->isArray() && obj1.arrayGetLength() == 4) {
@@ -2475,9 +2477,9 @@ void AnnotLine::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 // AnnotTextMarkup
 //------------------------------------------------------------------------
-AnnotTextMarkup::AnnotTextMarkup(XRef *xrefA, PDFRectangle *rect, AnnotSubtype subType,
-				 AnnotQuadrilaterals *quadPoints, Catalog *catalog) :
-    AnnotMarkup(xrefA, rect, catalog) {
+AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType,
+				 AnnotQuadrilaterals *quadPoints) :
+    AnnotMarkup(docA, rect) {
   Object obj1;
 
   switch (subType) {
@@ -2498,7 +2500,7 @@ AnnotTextMarkup::AnnotTextMarkup(XRef *xrefA, PDFRectangle *rect, AnnotSubtype s
   }
 
   Object obj2;
-  obj2.initArray (xrefA);
+  obj2.initArray (doc->getXRef());
 
   for (int i = 0; i < quadPoints->getQuadrilateralsLength(); ++i) {
     Object obj3;
@@ -2515,17 +2517,17 @@ AnnotTextMarkup::AnnotTextMarkup(XRef *xrefA, PDFRectangle *rect, AnnotSubtype s
 
   annotObj.dictSet ("QuadPoints", &obj2);
 
-  initialize(xrefA, catalog, annotObj.getDict());
+  initialize(docA, annotObj.getDict());
 }
 
-AnnotTextMarkup::AnnotTextMarkup(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-  AnnotMarkup(xrefA, dict, catalog, obj) {
+AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, Dict *dict, Object *obj) :
+  AnnotMarkup(docA, dict, obj) {
   // the real type will be read in initialize()
   type = typeHighlight;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
-void AnnotTextMarkup::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
+void AnnotTextMarkup::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
 
   if (dict->lookup("Subtype", &obj1)->isName()) {
@@ -2691,18 +2693,18 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
 // AnnotWidget
 //------------------------------------------------------------------------
 
-AnnotWidget::AnnotWidget(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-    Annot(xrefA, dict, catalog, obj) {
+AnnotWidget::AnnotWidget(PDFDoc *docA, Dict *dict, Object *obj) :
+    Annot(docA, dict, obj) {
   type = typeWidget;
   field = NULL;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
-AnnotWidget::AnnotWidget(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj, FormField *fieldA) :
-    Annot(xrefA, dict, catalog, obj) {
+AnnotWidget::AnnotWidget(PDFDoc *docA, Dict *dict, Object *obj, FormField *fieldA) :
+    Annot(docA, dict, obj) {
   type = typeWidget;
   field = fieldA;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
 AnnotWidget::~AnnotWidget() {
@@ -2719,10 +2721,10 @@ AnnotWidget::~AnnotWidget() {
     delete parent;
 }
 
-void AnnotWidget::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
+void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
 
-  form = catalog->getForm();
+  form = doc->getCatalog()->getForm();
 
   if(dict->lookup("H", &obj1)->isName()) {
     const char *modeName = obj1.getName();
@@ -2750,7 +2752,7 @@ void AnnotWidget::initialize(XRef *xrefA, Catalog *catalog, Dict *dict) {
 
   action = NULL;
   if(dict->lookup("A", &obj1)->isDict()) {
-    action = LinkAction::parseAction(&obj1, catalog->getBaseURI());
+    action = LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI());
   }
   obj1.free();
 
@@ -3885,8 +3887,8 @@ void AnnotWidget::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 // AnnotMovie
 //------------------------------------------------------------------------
-AnnotMovie::AnnotMovie(XRef *xrefA, PDFRectangle *rect, Movie *movieA, Catalog *catalog) :
-    Annot(xrefA, rect, catalog) {
+AnnotMovie::AnnotMovie(PDFDoc *docA, PDFRectangle *rect, Movie *movieA) :
+    Annot(docA, rect) {
   Object obj1;
 
   type = typeMovie;
@@ -3895,13 +3897,13 @@ AnnotMovie::AnnotMovie(XRef *xrefA, PDFRectangle *rect, Movie *movieA, Catalog *
   movie = movieA->copy();
   // TODO: create movie dict from movieA
 
-  initialize(xrefA, catalog, annotObj.getDict());
+  initialize(docA, annotObj.getDict());
 }
 
-AnnotMovie::AnnotMovie(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-  Annot(xrefA, dict, catalog, obj) {
+AnnotMovie::AnnotMovie(PDFDoc *docA, Dict *dict, Object *obj) :
+  Annot(docA, dict, obj) {
   type = typeMovie;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
 AnnotMovie::~AnnotMovie() {
@@ -3910,7 +3912,7 @@ AnnotMovie::~AnnotMovie() {
   delete movie;
 }
 
-void AnnotMovie::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
+void AnnotMovie::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
   if (dict->lookup("T", &obj1)->isString()) {
@@ -4036,20 +4038,20 @@ void AnnotMovie::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 // AnnotScreen
 //------------------------------------------------------------------------
-AnnotScreen::AnnotScreen(XRef *xrefA, PDFRectangle *rect, Catalog *catalog) :
-    Annot(xrefA, rect, catalog) {
+AnnotScreen::AnnotScreen(PDFDoc *docA, PDFRectangle *rect) :
+    Annot(docA, rect) {
   Object obj1;
 
   type = typeScreen;
 
   annotObj.dictSet ("Subtype", obj1.initName ("Screen"));
-  initialize(xrefA, catalog, annotObj.getDict());
+  initialize(docA, annotObj.getDict());
 }
 
-AnnotScreen::AnnotScreen(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-  Annot(xrefA, dict, catalog, obj) {
+AnnotScreen::AnnotScreen(PDFDoc *docA, Dict *dict, Object *obj) :
+  Annot(docA, dict, obj) {
   type = typeScreen;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
 AnnotScreen::~AnnotScreen() {
@@ -4063,7 +4065,7 @@ AnnotScreen::~AnnotScreen() {
   additionAction.free();
 }
 
-void AnnotScreen::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
+void AnnotScreen::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
   title = NULL;
@@ -4074,7 +4076,7 @@ void AnnotScreen::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
 
   action = NULL;
   if (dict->lookup("A", &obj1)->isDict()) {
-    action = LinkAction::parseAction(&obj1, catalog->getBaseURI());
+    action = LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI());
     if (action->getKind() == actionRendition && page == 0) {
       error (errSyntaxError, -1, "Invalid Rendition action: associated screen annotation without P");
       delete action;
@@ -4097,26 +4099,26 @@ void AnnotScreen::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
 //------------------------------------------------------------------------
 // AnnotStamp
 //------------------------------------------------------------------------
-AnnotStamp::AnnotStamp(XRef *xrefA, PDFRectangle *rect, Catalog *catalog) :
-  AnnotMarkup(xrefA, rect, catalog) {
+AnnotStamp::AnnotStamp(PDFDoc *docA, PDFRectangle *rect) :
+  AnnotMarkup(docA, rect) {
   Object obj1;
 
   type = typeStamp;
   annotObj.dictSet ("Subtype", obj1.initName ("Stamp"));
-  initialize(xrefA, catalog, annotObj.getDict());
+  initialize(docA, annotObj.getDict());
 }
 
-AnnotStamp::AnnotStamp(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-  AnnotMarkup(xrefA, dict, catalog, obj) {
+AnnotStamp::AnnotStamp(PDFDoc *docA, Dict *dict, Object *obj) :
+  AnnotMarkup(docA, dict, obj) {
   type = typeStamp;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
 AnnotStamp::~AnnotStamp() {
   delete icon;
 }
 
-void AnnotStamp::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
+void AnnotStamp::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
   if (dict->lookup("Name", &obj1)->isName()) {
@@ -4131,8 +4133,8 @@ void AnnotStamp::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
 //------------------------------------------------------------------------
 // AnnotGeometry
 //------------------------------------------------------------------------
-AnnotGeometry::AnnotGeometry(XRef *xrefA, PDFRectangle *rect, AnnotSubtype subType, Catalog *catalog) :
-    AnnotMarkup(xrefA, rect, catalog) {
+AnnotGeometry::AnnotGeometry(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType) :
+    AnnotMarkup(docA, rect) {
   Object obj1;
 
   switch (subType) {
@@ -4146,14 +4148,14 @@ AnnotGeometry::AnnotGeometry(XRef *xrefA, PDFRectangle *rect, AnnotSubtype subTy
       assert (0 && "Invalid subtype for AnnotGeometry\n");
   }
 
-  initialize(xrefA, catalog, annotObj.getDict());
+  initialize(docA, annotObj.getDict());
 }
 
-AnnotGeometry::AnnotGeometry(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-  AnnotMarkup(xrefA, dict, catalog, obj) {
+AnnotGeometry::AnnotGeometry(PDFDoc *docA, Dict *dict, Object *obj) :
+  AnnotMarkup(docA, dict, obj) {
   // the real type will be read in initialize()
   type = typeSquare;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
 AnnotGeometry::~AnnotGeometry() {
@@ -4162,7 +4164,7 @@ AnnotGeometry::~AnnotGeometry() {
   delete geometryRect;
 }
 
-void AnnotGeometry::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
+void AnnotGeometry::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
   if (dict->lookup("Subtype", &obj1)->isName()) {
@@ -4326,9 +4328,8 @@ void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 // AnnotPolygon
 //------------------------------------------------------------------------
-AnnotPolygon::AnnotPolygon(XRef *xrefA, PDFRectangle *rect, AnnotSubtype subType,
-			   AnnotPath *path, Catalog *catalog) :
-    AnnotMarkup(xrefA, rect, catalog) {
+AnnotPolygon::AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType, AnnotPath *path) :
+    AnnotMarkup(docA, rect) {
   Object obj1;
 
   switch (subType) {
@@ -4343,7 +4344,7 @@ AnnotPolygon::AnnotPolygon(XRef *xrefA, PDFRectangle *rect, AnnotSubtype subType
   }
 
   Object obj2;
-  obj2.initArray (xrefA);
+  obj2.initArray (doc->getXRef());
 
   for (int i = 0; i < path->getCoordsLength(); ++i) {
     Object obj3;
@@ -4354,14 +4355,14 @@ AnnotPolygon::AnnotPolygon(XRef *xrefA, PDFRectangle *rect, AnnotSubtype subType
 
   annotObj.dictSet ("Vertices", &obj2);
 
-  initialize(xrefA, catalog, annotObj.getDict());
+  initialize(docA, annotObj.getDict());
 }
 
-AnnotPolygon::AnnotPolygon(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-  AnnotMarkup(xrefA, dict, catalog, obj) {
+AnnotPolygon::AnnotPolygon(PDFDoc *docA, Dict *dict, Object *obj) :
+  AnnotMarkup(docA, dict, obj) {
   // the real type will be read in initialize()
   type = typePolygon;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
 AnnotPolygon::~AnnotPolygon() {
@@ -4374,7 +4375,7 @@ AnnotPolygon::~AnnotPolygon() {
     delete borderEffect;
 }
 
-void AnnotPolygon::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
+void AnnotPolygon::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
   if (dict->lookup("Subtype", &obj1)->isName()) {
@@ -4449,27 +4450,27 @@ void AnnotPolygon::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
 //------------------------------------------------------------------------
 // AnnotCaret
 //------------------------------------------------------------------------
-AnnotCaret::AnnotCaret(XRef *xrefA, PDFRectangle *rect, Catalog *catalog) :
-    AnnotMarkup(xrefA, rect, catalog) {
+AnnotCaret::AnnotCaret(PDFDoc *docA, PDFRectangle *rect) :
+    AnnotMarkup(docA, rect) {
   Object obj1;
 
   type = typeCaret;
 
   annotObj.dictSet ("Subtype", obj1.initName ("Caret"));
-  initialize(xrefA, catalog, annotObj.getDict());
+  initialize(docA, annotObj.getDict());
 }
 
-AnnotCaret::AnnotCaret(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-  AnnotMarkup(xrefA, dict, catalog, obj) {
+AnnotCaret::AnnotCaret(PDFDoc *docA, Dict *dict, Object *obj) :
+  AnnotMarkup(docA, dict, obj) {
   type = typeCaret;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
 AnnotCaret::~AnnotCaret() {
   delete caretRect;
 }
 
-void AnnotCaret::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
+void AnnotCaret::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
   symbol = symbolNone;
@@ -4495,8 +4496,8 @@ void AnnotCaret::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
 //------------------------------------------------------------------------
 // AnnotInk
 //------------------------------------------------------------------------
-AnnotInk::AnnotInk(XRef *xrefA, PDFRectangle *rect, AnnotPath **paths, int n_paths, Catalog *catalog) :
-    AnnotMarkup(xrefA, rect, catalog) {
+AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rect, AnnotPath **paths, int n_paths) :
+    AnnotMarkup(docA, rect) {
   Object obj1;
 
   type = typeInk;
@@ -4504,12 +4505,12 @@ AnnotInk::AnnotInk(XRef *xrefA, PDFRectangle *rect, AnnotPath **paths, int n_pat
   annotObj.dictSet ("Subtype", obj1.initName ("Ink"));
 
   Object obj2;
-  obj2.initArray (xrefA);
+  obj2.initArray (doc->getXRef());
 
   for (int i = 0; i < n_paths; ++i) {
     AnnotPath *path = paths[i];
     Object obj3;
-    obj3.initArray (xrefA);
+    obj3.initArray (doc->getXRef());
 
     for (int j = 0; j < path->getCoordsLength(); ++j) {
       Object obj4;
@@ -4523,13 +4524,13 @@ AnnotInk::AnnotInk(XRef *xrefA, PDFRectangle *rect, AnnotPath **paths, int n_pat
 
   annotObj.dictSet ("InkList", &obj2);
 
-  initialize(xrefA, catalog, annotObj.getDict());
+  initialize(docA, annotObj.getDict());
 }
 
-AnnotInk::AnnotInk(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-  AnnotMarkup(xrefA, dict, catalog, obj) {
+AnnotInk::AnnotInk(PDFDoc *docA, Dict *dict, Object *obj) :
+  AnnotMarkup(docA, dict, obj) {
   type = typeInk;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
 AnnotInk::~AnnotInk() {
@@ -4540,7 +4541,7 @@ AnnotInk::~AnnotInk() {
   }
 }
 
-void AnnotInk::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
+void AnnotInk::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
   if (dict->lookup("InkList", &obj1)->isArray()) {
@@ -4566,8 +4567,8 @@ void AnnotInk::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
 //------------------------------------------------------------------------
 // AnnotFileAttachment
 //------------------------------------------------------------------------
-AnnotFileAttachment::AnnotFileAttachment(XRef *xrefA, PDFRectangle *rect, GooString *filename, Catalog *catalog) :
-    AnnotMarkup(xrefA, rect, catalog) {
+AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rect, GooString *filename) :
+    AnnotMarkup(docA, rect) {
   Object obj1;
 
   type = typeFileAttachment;
@@ -4578,13 +4579,13 @@ AnnotFileAttachment::AnnotFileAttachment(XRef *xrefA, PDFRectangle *rect, GooStr
   obj2.initString(filename->copy());
   annotObj.dictSet ("FS", &obj2);
 
-  initialize(xrefA, catalog, annotObj.getDict());
+  initialize(docA, annotObj.getDict());
 }
 
-AnnotFileAttachment::AnnotFileAttachment(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-  AnnotMarkup(xrefA, dict, catalog, obj) {
+AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, Dict *dict, Object *obj) :
+  AnnotMarkup(docA, dict, obj) {
   type = typeFileAttachment;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
 AnnotFileAttachment::~AnnotFileAttachment() {
@@ -4594,7 +4595,7 @@ AnnotFileAttachment::~AnnotFileAttachment() {
     delete name;
 }
 
-void AnnotFileAttachment::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
+void AnnotFileAttachment::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
   if (dict->lookup("FS", &obj1)->isDict() || dict->lookup("FS", &obj1)->isString()) {
@@ -4781,8 +4782,8 @@ void AnnotFileAttachment::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 // AnnotSound
 //------------------------------------------------------------------------
-AnnotSound::AnnotSound(XRef *xrefA, PDFRectangle *rect, Sound *soundA, Catalog *catalog) :
-    AnnotMarkup(xrefA, rect, catalog) {
+AnnotSound::AnnotSound(PDFDoc *docA, PDFRectangle *rect, Sound *soundA) :
+    AnnotMarkup(docA, rect) {
   Object obj1;
 
   type = typeSound;
@@ -4795,13 +4796,13 @@ AnnotSound::AnnotSound(XRef *xrefA, PDFRectangle *rect, Sound *soundA, Catalog *
   str->incRef(); //FIXME: initStream should do this?
   annotObj.dictSet ("Sound", &obj2);
 
-  initialize(xrefA, catalog, annotObj.getDict());
+  initialize(docA, annotObj.getDict());
 }
 
-AnnotSound::AnnotSound(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-  AnnotMarkup(xrefA, dict, catalog, obj) {
+AnnotSound::AnnotSound(PDFDoc *docA, Dict *dict, Object *obj) :
+  AnnotMarkup(docA, dict, obj) {
   type = typeSound;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
 AnnotSound::~AnnotSound() {
@@ -4810,7 +4811,7 @@ AnnotSound::~AnnotSound() {
   delete name;
 }
 
-void AnnotSound::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
+void AnnotSound::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
   sound = Sound::parseSound(dict->lookup("Sound", &obj1));
@@ -4942,21 +4943,21 @@ void AnnotSound::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 // Annot3D
 //------------------------------------------------------------------------
-Annot3D::Annot3D(XRef *xrefA, PDFRectangle *rect, Catalog *catalog) :
-    Annot(xrefA, rect, catalog) {
+Annot3D::Annot3D(PDFDoc *docA, PDFRectangle *rect) :
+    Annot(docA, rect) {
   Object obj1;
 
   type = type3D;
 
   annotObj.dictSet ("Subtype", obj1.initName ("3D"));
 
-  initialize(xrefA, catalog, annotObj.getDict());
+  initialize(docA, annotObj.getDict());
 }
 
-Annot3D::Annot3D(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj) :
-  Annot(xrefA, dict, catalog, obj) {
+Annot3D::Annot3D(PDFDoc *docA, Dict *dict, Object *obj) :
+  Annot(docA, dict, obj) {
   type = type3D;
-  initialize(xrefA, catalog, dict);
+  initialize(docA, dict);
 }
 
 Annot3D::~Annot3D() {
@@ -4964,7 +4965,7 @@ Annot3D::~Annot3D() {
     delete activation;
 }
 
-void Annot3D::initialize(XRef *xrefA, Catalog *catalog, Dict* dict) {
+void Annot3D::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
   if (dict->lookup("3DA", &obj1)->isDict()) {
@@ -5063,11 +5064,12 @@ Annot3D::Activation::Activation(Dict *dict) {
 // Annots
 //------------------------------------------------------------------------
 
-Annots::Annots(XRef *xref, Catalog *catalog, Object *annotsObj) {
+Annots::Annots(PDFDoc *docA, Object *annotsObj) {
   Annot *annot;
   Object obj1;
   int i;
 
+  doc = docA;
   annots = NULL;
   size = 0;
   nAnnots = 0;
@@ -5080,7 +5082,7 @@ Annots::Annots(XRef *xref, Catalog *catalog, Object *annotsObj) {
       Object obj2;
       if (annotsObj->arrayGet(i, &obj1)->isDict()) {
         annotsObj->arrayGetNF(i, &obj2);
-        annot = createAnnot (xref, obj1.getDict(), catalog, &obj2);
+        annot = createAnnot (obj1.getDict(), &obj2);
         if (annot) {
           if (annot->isOk()) {
             appendAnnot(annot);
@@ -5105,7 +5107,7 @@ void Annots::appendAnnot(Annot *annot) {
   }
 }
 
-Annot *Annots::createAnnot(XRef *xref, Dict* dict, Catalog *catalog, Object *obj) {
+Annot *Annots::createAnnot(Dict* dict, Object *obj) {
   Annot *annot = NULL;
   Object obj1;
 
@@ -5113,45 +5115,45 @@ Annot *Annots::createAnnot(XRef *xref, Dict* dict, Catalog *catalog, Object *obj
     const char *typeName = obj1.getName();
 
     if (!strcmp(typeName, "Text")) {
-      annot = new AnnotText(xref, dict, catalog, obj);
+      annot = new AnnotText(doc, dict, obj);
     } else if (!strcmp(typeName, "Link")) {
-      annot = new AnnotLink(xref, dict, catalog, obj);
+      annot = new AnnotLink(doc, dict, obj);
     } else if (!strcmp(typeName, "FreeText")) {
-      annot = new AnnotFreeText(xref, dict, catalog, obj);
+      annot = new AnnotFreeText(doc, dict, obj);
     } else if (!strcmp(typeName, "Line")) {
-      annot = new AnnotLine(xref, dict, catalog, obj);
+      annot = new AnnotLine(doc, dict, obj);
     } else if (!strcmp(typeName, "Square")) {
-      annot = new AnnotGeometry(xref, dict, catalog, obj);
+      annot = new AnnotGeometry(doc, dict, obj);
     } else if (!strcmp(typeName, "Circle")) {
-      annot = new AnnotGeometry(xref, dict, catalog, obj);
+      annot = new AnnotGeometry(doc, dict, obj);
     } else if (!strcmp(typeName, "Polygon")) {
-      annot = new AnnotPolygon(xref, dict, catalog, obj);
+      annot = new AnnotPolygon(doc, dict, obj);
     } else if (!strcmp(typeName, "PolyLine")) {
-      annot = new AnnotPolygon(xref, dict, catalog, obj);
+      annot = new AnnotPolygon(doc, dict, obj);
     } else if (!strcmp(typeName, "Highlight")) {
-      annot = new AnnotTextMarkup(xref, dict, catalog, obj);
+      annot = new AnnotTextMarkup(doc, dict, obj);
     } else if (!strcmp(typeName, "Underline")) {
-      annot = new AnnotTextMarkup(xref, dict, catalog, obj);
+      annot = new AnnotTextMarkup(doc, dict, obj);
     } else if (!strcmp(typeName, "Squiggly")) {
-      annot = new AnnotTextMarkup(xref, dict, catalog, obj);
+      annot = new AnnotTextMarkup(doc, dict, obj);
     } else if (!strcmp(typeName, "StrikeOut")) {
-      annot = new AnnotTextMarkup(xref, dict, catalog, obj);
+      annot = new AnnotTextMarkup(doc, dict, obj);
     } else if (!strcmp(typeName, "Stamp")) {
-      annot = new AnnotStamp(xref, dict, catalog, obj);
+      annot = new AnnotStamp(doc, dict, obj);
     } else if (!strcmp(typeName, "Caret")) {
-      annot = new AnnotCaret(xref, dict, catalog, obj);
+      annot = new AnnotCaret(doc, dict, obj);
     } else if (!strcmp(typeName, "Ink")) {
-      annot = new AnnotInk(xref, dict, catalog, obj);
+      annot = new AnnotInk(doc, dict, obj);
     } else if (!strcmp(typeName, "FileAttachment")) {
-      annot = new AnnotFileAttachment(xref, dict, catalog, obj);
+      annot = new AnnotFileAttachment(doc, dict, obj);
     } else if (!strcmp(typeName, "Sound")) {
-      annot = new AnnotSound(xref, dict, catalog, obj);
+      annot = new AnnotSound(doc, dict, obj);
     } else if(!strcmp(typeName, "Movie")) {
-      annot = new AnnotMovie(xref, dict, catalog, obj);
+      annot = new AnnotMovie(doc, dict, obj);
     } else if(!strcmp(typeName, "Widget")) {
       // Find the annot in forms
       if (obj->isRef()) {
-        Form *form = catalog->getForm();
+        Form *form = doc->getCatalog()->getForm();
         if (form) {
           FormWidget *widget = form->findWidgetByRef(obj->getRef());
           if (widget) {
@@ -5161,17 +5163,17 @@ Annot *Annots::createAnnot(XRef *xref, Dict* dict, Catalog *catalog, Object *obj
         }
       }
       if (!annot)
-        annot = new AnnotWidget(xref, dict, catalog, obj);
+        annot = new AnnotWidget(doc, dict, obj);
     } else if(!strcmp(typeName, "Screen")) {
-      annot = new AnnotScreen(xref, dict, catalog, obj);
+      annot = new AnnotScreen(doc, dict, obj);
     } else if(!strcmp(typeName, "PrinterMark")) {
-      annot = new Annot(xref, dict, catalog, obj);
+      annot = new Annot(doc, dict, obj);
     } else if (!strcmp(typeName, "TrapNet")) {
-      annot = new Annot(xref, dict, catalog, obj);
+      annot = new Annot(doc, dict, obj);
     } else if (!strcmp(typeName, "Watermark")) {
-      annot = new Annot(xref, dict, catalog, obj);
+      annot = new Annot(doc, dict, obj);
     } else if (!strcmp(typeName, "3D")) {
-      annot = new Annot3D(xref, dict, catalog, obj);
+      annot = new Annot3D(doc, dict, obj);
     } else if (!strcmp(typeName, "Popup")) {
       /* Popup annots are already handled by markup annots
        * Here we only care about popup annots without a
@@ -5180,13 +5182,13 @@ Annot *Annots::createAnnot(XRef *xref, Dict* dict, Catalog *catalog, Object *obj
       Object obj2;
 
       if (dict->lookup("Parent", &obj2)->isNull())
-        annot = new AnnotPopup(xref, dict, catalog, obj);
+        annot = new AnnotPopup(doc, dict, obj);
       else
         annot = NULL;
       
       obj2.free();
     } else {
-      annot = new Annot(xref, dict, catalog, obj);
+      annot = new Annot(doc, dict, obj);
     }
   }
   obj1.free();

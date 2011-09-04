@@ -39,10 +39,10 @@
 
 class XRef;
 class Gfx;
-class Catalog;
 class CharCodeToUnicode;
 class GfxFont;
 class GfxResources;
+class PDFDoc;
 class Form;
 class FormWidget;
 class FormField;
@@ -455,9 +455,9 @@ public:
     type3D              // 3D             25
   };
 
-  Annot(XRef *xrefA, PDFRectangle *rectA, Catalog *catalog);
-  Annot(XRef *xrefA, Dict *dict, Catalog *catalog);
-  Annot(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  Annot(PDFDoc *docA, PDFRectangle *rectA);
+  Annot(PDFDoc *docA, Dict *dict);
+  Annot(PDFDoc *docA, Dict *dict, Object *obj);
   GBool isOk() { return ok; }
 
   void incRefCnt();
@@ -488,6 +488,7 @@ public:
   void setAppearanceState(const char *state);
 
   // getters
+  PDFDoc *getDoc() const { return doc; }
   XRef *getXRef() const { return xref; }
   GBool getHasRef() const { return hasRef; }
   Ref getRef() const { return ref; }
@@ -514,7 +515,7 @@ private:
   void readArrayNum(Object *pdfArray, int key, double *value);
   // write vStr[i:j[ in appearBuf
 
-  void initialize (XRef *xrefA, Dict *dict, Catalog *catalog);
+  void initialize (PDFDoc *docA, Dict *dict);
 
 
 protected:
@@ -555,6 +556,7 @@ protected:
   OCGs *optContentConfig;           // Optional content config
   Object oc;                        // OC
 
+  PDFDoc *doc;
   XRef *xref;			// the xref table for this PDF file
   Ref ref;                      // object ref identifying this annotation
   GooString *appearBuf;
@@ -572,8 +574,8 @@ protected:
 
 class AnnotPopup: public Annot {
 public:
-  AnnotPopup(XRef *xrefA, PDFRectangle *rect, Catalog *catalog);
-  AnnotPopup(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotPopup(PDFDoc *docA, PDFRectangle *rect);
+  AnnotPopup(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotPopup();
 
   Object *getParent(Object *obj) { return parent.fetch (xref, obj); }
@@ -584,7 +586,7 @@ public:
   void setOpen(GBool openA);
 
 protected:
-  void initialize(XRef *xrefA, Dict *dict, Catalog *catalog);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   Object parent; // Parent
   GBool open;   // Open
@@ -601,8 +603,8 @@ public:
     replyTypeGroup  // Group
   };
 
-  AnnotMarkup(XRef *xrefA, PDFRectangle *rect, Catalog *catalog);
-  AnnotMarkup(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotMarkup(PDFDoc *docA, PDFRectangle *rect);
+  AnnotMarkup(PDFDoc *docA, Dict *dict, Object *obj);
   virtual ~AnnotMarkup();
 
   // getters
@@ -636,7 +638,7 @@ protected:
   AnnotExternalDataType exData; // ExData
 
 private:
-  void initialize(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  void initialize(PDFDoc *docA, Dict *dict, Object *obj);
 };
 
 //------------------------------------------------------------------------
@@ -658,8 +660,8 @@ public:
     stateNone       // None
   };
 
-  AnnotText(XRef *xrefA, PDFRectangle *rect, Catalog *catalog);
-  AnnotText(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotText(PDFDoc *docA, PDFRectangle *rect);
+  AnnotText(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotText();
 
   virtual void draw(Gfx *gfx, GBool printing);
@@ -674,7 +676,7 @@ public:
 
 private:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   GBool open;                       // Open       (Default false)
   GooString *icon;                  // Name       (Default Note)
@@ -691,8 +693,8 @@ private:
 
 class AnnotMovie: public Annot {
  public:
-  AnnotMovie(XRef *xrefA, PDFRectangle *rect, Movie *movieA, Catalog *catalog);
-  AnnotMovie(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotMovie(PDFDoc *docA, PDFRectangle *rect, Movie *movieA);
+  AnnotMovie(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotMovie();
 
   virtual void draw(Gfx *gfx, GBool printing);
@@ -701,7 +703,7 @@ class AnnotMovie: public Annot {
   Movie* getMovie() { return movie; }
 
  private:
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   GooString* title;      // T
   Movie* movie;          // Movie + A
@@ -715,8 +717,8 @@ class AnnotMovie: public Annot {
 class AnnotScreen: public Annot {
  public:
 
-  AnnotScreen(XRef *xrefA, PDFRectangle *rect, Catalog *catalog);
-  AnnotScreen(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotScreen(PDFDoc *docA, PDFRectangle *rect);
+  AnnotScreen(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotScreen();
 
   GooString* getTitle() { return title; }
@@ -726,7 +728,7 @@ class AnnotScreen: public Annot {
   Object* getAdditionActions() { return &additionAction; }
 
  private:
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
 
   GooString* title;                      // T
@@ -751,8 +753,8 @@ public:
     effectPush      // P
   };
 
-  AnnotLink(XRef *xrefA, PDFRectangle *rect, Catalog *catalog);
-  AnnotLink(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotLink(PDFDoc *docA, PDFRectangle *rect);
+  AnnotLink(PDFDoc *docA, Dict *dict, Object *obj);
   virtual ~AnnotLink();
 
   virtual void draw(Gfx *gfx, GBool printing);
@@ -765,7 +767,7 @@ public:
 
 protected:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   LinkAction *action;                  // A, Dest
   AnnotLinkEffect linkEffect;          // H          (Default I)
@@ -793,8 +795,8 @@ public:
     intentFreeTextTypeWriter  // FreeTextTypeWriter
   };
 
-  AnnotFreeText(XRef *xrefA, PDFRectangle *rect, GooString *da, Catalog *catalog);
-  AnnotFreeText(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, GooString *da);
+  AnnotFreeText(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotFreeText();
 
   // getters
@@ -810,7 +812,7 @@ public:
 
 protected:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   // required
   GooString *appearanceString;      // DA
@@ -845,8 +847,8 @@ public:
     captionPosTop     // Top
   };
 
-  AnnotLine(XRef *xrefA, PDFRectangle *rect, PDFRectangle *lRect, Catalog *catalog);
-  AnnotLine(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotLine(PDFDoc *docA, PDFRectangle *rect, PDFRectangle *lRect);
+  AnnotLine(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotLine();
 
   virtual void draw(Gfx *gfx, GBool printing);
@@ -871,7 +873,7 @@ public:
 
 protected:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   // required
   AnnotCoord *coord1, *coord2;
@@ -900,9 +902,9 @@ protected:
 class AnnotTextMarkup: public AnnotMarkup {
 public:
 
-  AnnotTextMarkup(XRef *xrefA, PDFRectangle *rect, AnnotSubtype subType,
-		  AnnotQuadrilaterals *quadPoints, Catalog *catalog);
-  AnnotTextMarkup(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType,
+		  AnnotQuadrilaterals *quadPoints);
+  AnnotTextMarkup(PDFDoc *docA, Dict *dict, Object *obj);
   virtual ~AnnotTextMarkup();
 
   virtual void draw(Gfx *gfx, GBool printing);
@@ -911,7 +913,7 @@ public:
 
 protected:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
   
   AnnotQuadrilaterals *quadrilaterals; // QuadPoints
 };
@@ -923,8 +925,8 @@ protected:
 class AnnotStamp: public AnnotMarkup {
 public:
 
-  AnnotStamp(XRef *xrefA, PDFRectangle *rect, Catalog *catalog);
-  AnnotStamp(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotStamp(PDFDoc *docA, PDFRectangle *rect);
+  AnnotStamp(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotStamp();
 
   // getters
@@ -932,7 +934,7 @@ public:
 
 private:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   GooString *icon;                  // Name       (Default Draft)
 };
@@ -944,8 +946,8 @@ private:
 class AnnotGeometry: public AnnotMarkup {
 public:
 
-  AnnotGeometry(XRef *xrefA, PDFRectangle *rect, AnnotSubtype subType, Catalog *catalog);
-  AnnotGeometry(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotGeometry(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
+  AnnotGeometry(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotGeometry();
 
   virtual void draw(Gfx *gfx, GBool printing);
@@ -957,7 +959,7 @@ public:
 
 private:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   AnnotColor *interiorColor;        // IC
   AnnotBorderEffect *borderEffect;  // BE
@@ -977,9 +979,8 @@ public:
     polygonDimension   // PolygonDimension
   };
 
-  AnnotPolygon(XRef *xrefA, PDFRectangle *rect, AnnotSubtype subType,
-	       AnnotPath *path, Catalog *catalog);
-  AnnotPolygon(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType, AnnotPath *path);
+  AnnotPolygon(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotPolygon();
 
   // getters
@@ -992,7 +993,7 @@ public:
 
 private:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   // required
   AnnotPath *vertices;              // Vertices
@@ -1020,8 +1021,8 @@ public:
     symbolP         // P
   };
 
-  AnnotCaret(XRef *xrefA, PDFRectangle *rect, Catalog *catalog);
-  AnnotCaret(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotCaret(PDFDoc *docA, PDFRectangle *rect);
+  AnnotCaret(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotCaret();
 
   // getters
@@ -1030,7 +1031,7 @@ public:
 
 private:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   AnnotCaretSymbol symbol;       // Sy         (Default None)
   PDFRectangle *caretRect;       // RD (combined with Rect)
@@ -1043,8 +1044,8 @@ private:
 class AnnotInk: public AnnotMarkup {
 public:
 
-  AnnotInk(XRef *xrefA, PDFRectangle *rect, AnnotPath **paths, int n_paths, Catalog *catalog);
-  AnnotInk(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotInk(PDFDoc *docA, PDFRectangle *rect, AnnotPath **paths, int n_paths);
+  AnnotInk(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotInk();
 
   // getters
@@ -1053,7 +1054,7 @@ public:
 
 private:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   // required
   AnnotPath **inkList;       // InkList
@@ -1071,8 +1072,8 @@ private:
 class AnnotFileAttachment: public AnnotMarkup {
 public:
 
-  AnnotFileAttachment(XRef *xrefA, PDFRectangle *rect, GooString *filename, Catalog *catalog);
-  AnnotFileAttachment(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rect, GooString *filename);
+  AnnotFileAttachment(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotFileAttachment();
 
   virtual void draw(Gfx *gfx, GBool printing);
@@ -1083,7 +1084,7 @@ public:
 
 private:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   // required
   Object file;      // FS
@@ -1099,8 +1100,8 @@ private:
 class AnnotSound: public AnnotMarkup {
 public:
 
-  AnnotSound(XRef *xrefA, PDFRectangle *rect, Sound *soundA, Catalog *catalog);
-  AnnotSound(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  AnnotSound(PDFDoc *docA, PDFRectangle *rect, Sound *soundA);
+  AnnotSound(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotSound();
 
   virtual void draw(Gfx *gfx, GBool printing);
@@ -1111,7 +1112,7 @@ public:
 
 private:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   // required
   Sound *sound;                  // Sound
@@ -1134,8 +1135,8 @@ public:
     highlightModePush     // P,T
   };
 
-  AnnotWidget(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
-  AnnotWidget(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj, FormField *fieldA);
+  AnnotWidget(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotWidget(PDFDoc *docA, Dict *dict, Object *obj, FormField *fieldA);
   virtual ~AnnotWidget();
 
   virtual void draw(Gfx *gfx, GBool printing);
@@ -1154,7 +1155,7 @@ public:
 
 private:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   void drawText(GooString *text, GooString *da, GfxResources *resources,
 		GBool multiline, int comb, int quadding,
@@ -1225,15 +1226,15 @@ class Annot3D: public Annot {
   };
 public:
 
-  Annot3D(XRef *xrefA, PDFRectangle *rect, Catalog *catalog);
-  Annot3D(XRef *xrefA, Dict *dict, Catalog *catalog, Object *obj);
+  Annot3D(PDFDoc *docA, PDFRectangle *rect);
+  Annot3D(PDFDoc *docA, Dict *dict, Object *obj);
   ~Annot3D();
 
   // getters
 
 private:
 
-  void initialize(XRef *xrefA, Catalog *catalog, Dict *dict);
+  void initialize(PDFDoc *docA, Dict *dict);
 
   Activation *activation;  // 3DA
 };
@@ -1246,7 +1247,7 @@ class Annots {
 public:
 
   // Build a list of Annot objects.
-  Annots(XRef *xref, Catalog *catalog, Object *annotsObj);
+  Annots(PDFDoc *docA, Object *annotsObj);
 
   ~Annots();
 
@@ -1256,9 +1257,10 @@ public:
   void appendAnnot(Annot *annot);
 
 private:
-  Annot* createAnnot(XRef *xref, Dict* dict, Catalog *catalog, Object *obj);
+  Annot* createAnnot(Dict* dict, Object *obj);
   Annot *findAnnot(Ref *ref);
 
+  PDFDoc *doc;
   Annot **annots;
   int nAnnots;
   int size;
