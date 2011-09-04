@@ -4863,45 +4863,23 @@ void Gfx::opMarkPoint(Object args[], int numArgs) {
 void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor,
 		    double xMin, double yMin, double xMax, double yMax) {
   Dict *dict, *resDict;
-  Object matrixObj, bboxObj, resObj;
-  Object obj1;
-  double m[6], bbox[4], ictm[6];
-  double *ctm;
-  double formX0, formY0, formX1, formY1;
-  double annotX0, annotY0, annotX1, annotY1;
-  double det, x, y, sx, sy;
+  Object matrixObj, bboxObj, resObj, obj1;
+  double formXMin, formYMin, formXMax, formYMax;
+  double x, y, sx, sy, tx, ty;
+  double m[6], bbox[4];
   double r, g, b;
   GfxColor color;
   double *dash, *dash2;
   int dashLength;
   int i;
 
-  //~ can we assume that we're in default user space?
-  //~ (i.e., baseMatrix = ctm)
+  // this function assumes that we are in the default user space,
+  // i.e., baseMatrix = ctm
 
-  // transform the annotation bbox from default user space to user
-  // space: (bbox * baseMatrix) * iCTM
-  ctm = state->getCTM();
-  det = 1 / (ctm[0] * ctm[3] - ctm[1] * ctm[2]);
-  ictm[0] = ctm[3] * det;
-  ictm[1] = -ctm[1] * det;
-  ictm[2] = -ctm[2] * det;
-  ictm[3] = ctm[0] * det;
-  ictm[4] = (ctm[2] * ctm[5] - ctm[3] * ctm[4]) * det;
-  ictm[5] = (ctm[1] * ctm[4] - ctm[0] * ctm[5]) * det;
-  x = baseMatrix[0] * xMin + baseMatrix[2] * yMin + baseMatrix[4];
-  y = baseMatrix[1] * xMin + baseMatrix[3] * yMin + baseMatrix[5];
-  annotX0 = ictm[0] * x + ictm[2] * y + ictm[4];
-  annotY0 = ictm[1] * x + ictm[3] * y + ictm[5];
-  x = baseMatrix[0] * xMax + baseMatrix[2] * yMax + baseMatrix[4];
-  y = baseMatrix[1] * xMax + baseMatrix[3] * yMax + baseMatrix[5];
-  annotX1 = ictm[0] * x + ictm[2] * y + ictm[4];
-  annotY1 = ictm[1] * x + ictm[3] * y + ictm[5];
-  if (annotX0 > annotX1) {
-    x = annotX0; annotX0 = annotX1; annotX1 = x;
-  }
-  if (annotY0 > annotY1) {
-    y = annotY0; annotY0 = annotY1; annotY1 = y;
+  // if the bounding box has zero width or height, don't draw anything
+  // at all
+  if (xMin == xMax || yMin == yMax) {
+    return;
   }
 
   // draw the appearance stream (if there is one)
@@ -4945,39 +4923,77 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor,
     }
     matrixObj.free();
 
-    // transform the form bbox from form space to user space
-    formX0 = bbox[0] * m[0] + bbox[1] * m[2] + m[4];
-    formY0 = bbox[0] * m[1] + bbox[1] * m[3] + m[5];
-    formX1 = bbox[2] * m[0] + bbox[3] * m[2] + m[4];
-    formY1 = bbox[2] * m[1] + bbox[3] * m[3] + m[5];
-    if (formX0 > formX1) {
-      x = formX0; formX0 = formX1; formX1 = x;
+    // transform the four corners of the form bbox to default user
+    // space, and construct the transformed bbox
+    x = bbox[0] * m[0] + bbox[1] * m[2] + m[4];
+    y = bbox[0] * m[1] + bbox[1] * m[3] + m[5];
+    formXMin = formXMax = x;
+    formYMin = formYMax = y;
+    x = bbox[0] * m[0] + bbox[3] * m[2] + m[4];
+    y = bbox[0] * m[1] + bbox[3] * m[3] + m[5];
+    if (x < formXMin) {
+      formXMin = x;
+    } else if (x > formXMax) {
+      formXMax = x;
     }
-    if (formY0 > formY1) {
-      y = formY0; formY0 = formY1; formY1 = y;
+    if (y < formYMin) {
+      formYMin = y;
+    } else if (y > formYMax) {
+      formYMax = y;
+    }
+    x = bbox[2] * m[0] + bbox[1] * m[2] + m[4];
+    y = bbox[2] * m[1] + bbox[1] * m[3] + m[5];
+    if (x < formXMin) {
+      formXMin = x;
+    } else if (x > formXMax) {
+      formXMax = x;
+    }
+    if (y < formYMin) {
+      formYMin = y;
+    } else if (y > formYMax) {
+      formYMax = y;
+    }
+    x = bbox[2] * m[0] + bbox[3] * m[2] + m[4];
+    y = bbox[2] * m[1] + bbox[3] * m[3] + m[5];
+    if (x < formXMin) {
+      formXMin = x;
+    } else if (x > formXMax) {
+      formXMax = x;
+    }
+    if (y < formYMin) {
+      formYMin = y;
+    } else if (y > formYMax) {
+      formYMax = y;
     }
 
-    // scale the form to fit the annotation bbox
-    if (formX1 == formX0) {
+    // construct a mapping matrix, [sx 0  0], which maps the transformed
+    //                             [0  sy 0]
+    //                             [tx ty 1]
+    // bbox to the annotation rectangle
+    if (formXMin == formXMax) {
       // this shouldn't happen
       sx = 1;
     } else {
-      sx = (annotX1 - annotX0) / (formX1 - formX0);
+      sx = (xMax - xMin) / (formXMax - formXMin);
     }
-    if (formY1 == formY0) {
+    if (formYMin == formYMax) {
       // this shouldn't happen
       sy = 1;
     } else {
-      sy = (annotY1 - annotY0) / (formY1 - formY0);
+      sy = (yMax - yMin) / (formYMax - formYMin);
     }
-    m[0] *= sx;
-    m[2] *= sx;
-    m[4] = (m[4] - formX0) * sx + annotX0;
-    m[1] *= sy;
-    m[3] *= sy;
-    m[5] = (m[5] - formY0) * sy + annotY0;
+    tx = -formXMin * sx + xMin;
+    ty = -formYMin * sy + yMin;
 
-    // get resources
+    // the final transform matrix is (form matrix) * (mapping matrix)
+    m[0] *= sx;
+    m[1] *= sy;
+    m[2] *= sx;
+    m[3] *= sy;
+    m[4] = m[4] * sx + tx;
+    m[5] = m[5] * sy + ty;
+
+    // get the resources
     dict->lookup("Resources", &resObj);
     resDict = resObj.isDict() ? resObj.getDict() : (Dict *)NULL;
 
@@ -5007,32 +5023,23 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor,
     color.c[2] = dblToCol(b);
     state->setStrokeColor(&color);
     out->updateStrokeColor(state);
-    // compute the width scale factor when going from default user
-    // space to user space
-    x = (baseMatrix[0] + baseMatrix[2]) * ictm[0] +
-        (baseMatrix[1] + baseMatrix[3]) * ictm[2];
-    y = (baseMatrix[0] + baseMatrix[2]) * ictm[1] +
-        (baseMatrix[1] + baseMatrix[3]) * ictm[3];
-    x = sqrt(0.5 * (x * x + y * y));
-    state->setLineWidth(x * border->getWidth());
+    state->setLineWidth(border->getWidth());
     out->updateLineWidth(state);
     dashLength = border->getDashLength();
     dash = border->getDash();
     if (border->getStyle() == AnnotBorder::borderDashed && dashLength > 0) {
       dash2 = (double *)gmallocn(dashLength, sizeof(double));
-      for (i = 0; i < dashLength; ++i) {
-	dash2[i] = x * dash[i];
-      }
+      memcpy(dash2, dash, dashLength * sizeof(double));
       state->setLineDash(dash2, dashLength, 0);
       out->updateLineDash(state);
     }
     //~ this doesn't currently handle the beveled and engraved styles
     state->clearPath();
-    state->moveTo(annotX0, out->upsideDown() ? annotY0 : annotY1);
-    state->lineTo(annotX1, out->upsideDown() ? annotY0 : annotY1);
+    state->moveTo(xMin, yMin);
+    state->lineTo(xMax, yMin);
     if (border->getStyle() != AnnotBorder::borderUnderlined) {
-      state->lineTo(annotX1, out->upsideDown() ? annotY1 : annotY0);
-      state->lineTo(annotX0, out->upsideDown() ? annotY1 : annotY0);
+      state->lineTo(xMax, yMax);
+      state->lineTo(xMin, yMax);
       state->closePath();
     }
     out->stroke(state);
