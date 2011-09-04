@@ -3019,8 +3019,10 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxResources *resourc
   GooList *daToks;
   GooString *tok, *convertedText;
   GfxFont *font;
+  double dx, dy;
   double fontSize, fontSize2, borderWidth, x, xPrev, y, w, wMax;
   int tfPos, tmPos, i, j;
+  int rot;
   GBool freeText = gFalse;      // true if text should be freed before return
   GBool freeFont = gFalse;
 
@@ -3127,17 +3129,40 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxResources *resourc
     appearBuf->append("/Tx BMC\n");
   }
   appearBuf->append("q\n");
+  rot = appearCharacs ? appearCharacs->getRotation() : 0;
+  switch (rot) {
+  case 90:
+    appearBuf->appendf("0 1 -1 0 {0:.2f} 0 cm\n", rect->x2 - rect->x1);
+    dx = rect->y2 - rect->y1;
+    dy = rect->x2 - rect->x1;
+    break;
+  case 180:
+    appearBuf->appendf("-1 0 0 -1 {0:.2f} {1:.2f} cm\n",
+		       rect->x2 - rect->x1, rect->y2 - rect->y1);
+    dx = rect->x2 - rect->y2;
+    dy = rect->y2 - rect->y1;
+    break;
+  case 270:
+    appearBuf->appendf("0 -1 1 0 0 {0:.2f} cm\n", rect->y2 - rect->y1);
+    dx = rect->y2 - rect->y1;
+    dy = rect->x2 - rect->x1;
+    break;
+  default: // assume rot == 0
+    dx = rect->x2 - rect->x1;
+    dy = rect->y2 - rect->y1;
+    break;
+  }
   appearBuf->append("BT\n");
   // multi-line text
   if (multiline) {
     // note: the comb flag is ignored in multiline mode
 
-    wMax = rect->x2 - rect->x1 - 2 * borderWidth - 4;
+    wMax = dx - 2 * borderWidth - 4;
 
     // compute font autosize
     if (fontSize == 0) {
       for (fontSize = 20; fontSize > 1; --fontSize) {
-        y = rect->y2 - rect->y1;
+        y = dy - 3;
         i = 0;
         while (i < text->getLength()) {
           layoutText(text, convertedText, &i, font, &w, wMax / fontSize, NULL,
@@ -3159,7 +3184,7 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxResources *resourc
     // starting y coordinate
     // (note: each line of text starts with a Td operator that moves
     // down a line)
-    y = rect->y2 - rect->y1;
+    y = dy - 3;
 
     // set the font matrix
     if (tmPos >= 0) {
@@ -3198,10 +3223,10 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxResources *resourc
         x = borderWidth + 2;
         break;
       case quaddingCentered:
-        x = (rect->x2 - rect->x1 - w) / 2;
+        x = (dx - w) / 2;
         break;
       case quaddingRightJustified:
-        x = rect->x2 - rect->x1 - borderWidth - 2 - w;
+        x = dx - borderWidth - 2 - w;
         break;
       }
 
@@ -3223,11 +3248,11 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxResources *resourc
       int charCount;
 
       // compute comb spacing
-      w = (rect->x2 - rect->x1 - 2 * borderWidth) / comb;
+      w = (dx - 2 * borderWidth) / comb;
 
       // compute font autosize
       if (fontSize == 0) {
-        fontSize = rect->y2 - rect->y1 - 2 * borderWidth;
+        fontSize = dy - 2 * borderWidth;
         if (w < fontSize) {
           fontSize = w;
         }
@@ -3258,7 +3283,7 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxResources *resourc
         x = borderWidth + (comb - charCount) * w;
         break;
       }
-      y = 0.5 * (rect->y2 - rect->y1) - 0.4 * fontSize;
+      y = 0.5 * dy - 0.4 * fontSize;
 
       // set the font matrix
       if (tmPos >= 0) {
@@ -3322,8 +3347,8 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxResources *resourc
 
       // compute font autosize
       if (fontSize == 0) {
-        fontSize = rect->y2 - rect->y1 - 2 * borderWidth;
-        fontSize2 = (rect->x2 - rect->x1 - 4 - 2 * borderWidth) / w;
+        fontSize = dy - 2 * borderWidth;
+        fontSize2 = (dx - 4 - 2 * borderWidth) / w;
         if (fontSize2 < fontSize) {
           fontSize = fontSize2;
         }
@@ -3343,13 +3368,13 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxResources *resourc
         x = borderWidth + 2;
         break;
       case quaddingCentered:
-        x = (rect->x2 - rect->x1 - w) / 2;
+        x = (dx - w) / 2;
         break;
       case quaddingRightJustified:
-        x = rect->x2 - rect->x1 - borderWidth - 2 - w;
+        x = dx - borderWidth - 2 - w;
         break;
       }
-      y = 0.5 * (rect->y2 - rect->y1) - 0.4 * fontSize;
+      y = 0.5 * dy - 0.4 * fontSize;
 
       // set the font matrix
       if (tmPos >= 0) {
