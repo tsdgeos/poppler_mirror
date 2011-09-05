@@ -858,13 +858,14 @@ Annot::Annot(PDFDoc *docA, Dict *dict, Object *obj) {
 }
 
 void Annot::initialize(PDFDoc *docA, Dict *dict) {
-  Object asObj, obj1, obj2, obj3;
+  Object apObj, asObj, obj1, obj2, obj3;
 
   appRef.num = 0;
   appRef.gen = 65535;
   ok = gTrue;
   doc = docA;
   xref = doc->getXRef();
+  appearState = NULL;
   appearBuf = NULL;
   fontSize = 0;
 
@@ -940,40 +941,45 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   }
   obj1.free();
 
-  if (dict->lookup("AP", &obj1)->isDict()) {
-    Object obj2;
+  //----- get the appearance state
 
-    if (dict->lookup("AS", &obj2)->isName()) {
-      Object obj3;
+  dict->lookup("AP", &apObj);
+  dict->lookup("AS", &asObj);
+  if (asObj.isName()) {
+    appearState = new GooString(asObj.getName());
+  } else if (apObj.isDict()) {
+    if (apObj.dictLookup("N", &obj1)->isDict()) {
+      error (errSyntaxError, -1, "Invalid or missing AS value in annotation containing one or more appearance subdictionaries");
+      // AS value is required in this case, but if the
+      // N dictionary contains only one entry
+      // take it as default appearance.
+      if (obj1.dictGetLength() == 1)
+        appearState = new GooString(obj1.dictGetKey(0));
+    }
+    obj1.free();
+  }
+  if (!appearState) {
+    appearState = new GooString("Off");
+  }
+  asObj.free();
 
-      appearState = new GooString(obj2.getName());
-      if (obj1.dictLookup("N", &obj3)->isDict()) {
-        Object obj4;
+  //----- get the annotation appearance
 
-        if (obj3.dictLookupNF(appearState->getCString(), &obj4)->isRef()) {
-          obj4.copy(&appearance);
-        } else {
-          obj4.free();
-          if (obj3.dictLookupNF("Off", &obj4)->isRef()) {
-            obj4.copy(&appearance);
-          }
-        } 
-        obj4.free();
+  if (apObj.isDict()) {
+    apObj.dictLookup("N", &obj1);
+    apObj.dictLookupNF("N", &obj2);
+    if (obj1.isDict()) {
+      if (obj1.dictLookupNF(appearState->getCString(), &obj3)->isRef()) {
+	obj3.copy(&appearance);
       }
       obj3.free();
-    } else {
-      obj2.free();
-
-      appearState = NULL;
-      if (obj1.dictLookupNF("N", &obj2)->isRef()) {
-        obj2.copy(&appearance);
-      }
+    } else if (obj2.isRef()) {
+      obj2.copy(&appearance);
     }
+    obj1.free();
     obj2.free();
-  } else {
-    appearState = NULL;
   }
-  obj1.free();
+  apObj.free();
 
   //----- parse the border style
   if (dict->lookup("BS", &obj1)->isDict()) {
