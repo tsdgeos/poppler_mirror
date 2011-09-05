@@ -2299,6 +2299,8 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(GBool huff, GBool refine,
     s = sFirst;
 
     // read the instances
+    // (this loop test is here to avoid an infinite loop with damaged
+    // JBIG2 streams where the normal loop exit doesn't get triggered)
     while (inst < numInstances) {
 
       // T value
