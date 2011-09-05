@@ -1238,7 +1238,7 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
     p = tok->getCString();
     if (isdigit(*p) || *p == '.' || *p == '-') {
       isReal = gFalse;
-      for (++p; *p; ++p) {
+      for (; *p; ++p) {
 	if (*p == '.') {
 	  isReal = gTrue;
 	  break;
