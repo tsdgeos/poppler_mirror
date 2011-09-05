@@ -1309,7 +1309,9 @@ void JBIG2Stream::readSegments() {
       refFlags = (refFlags << 24) | (c1 << 16) | (c2 << 8) | c3;
       nRefSegs = refFlags & 0x1fffffff;
       for (i = 0; i < (nRefSegs + 9) >> 3; ++i) {
-	c1 = curStr->getChar();
+	if ((c1 = curStr->getChar()) == EOF) {
+	  goto eofError1;
+	}
       }
     }
 
@@ -1511,7 +1513,7 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
   Guint symHeight, symWidth, totalWidth, x, symID;
   int dh, dw, refAggNum, refDX, refDY, bmSize;
   GBool ex;
-  int run, cnt;
+  int run, cnt, c;
   Guint i, j, k;
   Guchar *p;
 
@@ -1821,7 +1823,10 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
 	bmSize = symHeight * ((totalWidth + 7) >> 3);
 	p = collBitmap->getDataPtr();
 	for (k = 0; k < (Guint)bmSize; ++k) {
-	  *p++ = curStr->getChar();
+	  if ((c = curStr->getChar()) == EOF) {
+	    break;
+	  }
+	  *p++ = (Guchar)c;
 	}
       } else {
 	collBitmap = readGenericBitmap(gTrue, totalWidth, symHeight,
