@@ -137,6 +137,7 @@ private:
   Stream *curStr;
   Guchar *dataPtr;
   Guchar *dataEnd;
+  Guint byteCounter;
 
   JArithmeticDecoder *arithDecoder;
   JArithmeticDecoderStats *genericRegionStats;
