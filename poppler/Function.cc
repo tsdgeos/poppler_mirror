@@ -1082,7 +1082,7 @@ void PSStack::roll(int n, int j) {
       j = n - j;
     }
   }
-  if (n <= 0 || j == 0) {
+  if (n <= 0 || j == 0 || n > psStackSize || sp + n > psStackSize) {
     return;
   }
   if (j <= n / 2) {
@@ -1318,6 +1318,7 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
     } else {
       a = -1;
       b = nPSOps;
+      cmp = 0; // make gcc happy
       // invariant: psOpNames[a] < tok < psOpNames[b]
       while (b - a > 1) {
 	mid = (a + b) / 2;
@@ -1459,7 +1460,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) {
 	if (i2 > 0) {
 	  stack->pushInt(i1 << i2);
 	} else if (i2 < 0) {
-	  stack->pushInt((int)((Guint)i1 >> i2));
+	  stack->pushInt((int)((Guint)i1 >> -i2));
 	} else {
 	  stack->pushInt(i1);
 	}
