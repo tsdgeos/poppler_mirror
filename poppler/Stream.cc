@@ -794,10 +794,6 @@ void FileStream::setPos(Guint pos, int dir) {
 #endif
     if (pos > size)
       pos = (Guint)size;
-#ifdef __CYGWIN32__
-    //~ work around a bug in cygwin's implementation of fseek
-    rewind(f);
-#endif
 #if HAVE_FSEEKO
     fseeko(f, -(int)pos, SEEK_END);
     bufPos = (Guint)ftello(f);
