@@ -1111,6 +1111,8 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict) {
   Stream *str;
   int codePtr;
   GooString *tok;
+  double in[funcMaxInputs];
+  int i;
 
   code = NULL;
   codeString = NULL;
@@ -1150,6 +1152,13 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict) {
   }
   str->close();
 
+  //----- set up the cache
+  for (i = 0; i < m; ++i) {
+    in[i] = domain[i][0];
+    cacheIn[i] = in[i] - 1;
+  }
+  transform(in, cacheOut);
+
   ok = gTrue;
   
  err2:
@@ -1173,7 +1182,20 @@ PostScriptFunction::~PostScriptFunction() {
 void PostScriptFunction::transform(double *in, double *out) {
   PSStack stack;
   int i;
-  
+
+  // check the cache
+  for (i = 0; i < m; ++i) {
+    if (in[i] != cacheIn[i]) {
+      break;
+    }
+  }
+  if (i == m) {
+    for (i = 0; i < n; ++i) {
+      out[i] = cacheOut[i];
+    }
+    return;
+  }
+
   for (i = 0; i < m; ++i) {
     //~ may need to check for integers here
     stack.pushReal(in[i]);
@@ -1189,9 +1211,18 @@ void PostScriptFunction::transform(double *in, double *out) {
   }
   stack.clear();
 
-  // if (!stack.empty()) {
-  //   error(-1, "Extra values on stack at end of PostScript function");
+  // if (!stack->empty()) {
+  //   error(errSyntaxWarning, -1,
+  //         "Extra values on stack at end of PostScript function");
   // }
+
+  // save current result in the cache
+  for (i = 0; i < m; ++i) {
+    cacheIn[i] = in[i];
+  }
+  for (i = 0; i < n; ++i) {
+    cacheOut[i] = out[i];
+  }
 }
 
 GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {

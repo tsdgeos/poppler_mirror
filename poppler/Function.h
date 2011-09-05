@@ -243,6 +243,8 @@ private:
   GooString *codeString;
   PSObject *code;
   int codeSize;
+  double cacheIn[funcMaxInputs];
+  double cacheOut[funcMaxOutputs];
   GBool ok;
 };
 
