@@ -218,8 +218,10 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
   Guint buf, bitMask;
   int bits;
   Guint s;
-  int i;
+  double in[funcMaxInputs];
+  int i, j, t, bit, idx;
 
+  idxOffset = NULL;
   samples = NULL;
   sBuf = NULL;
   ok = gFalse;
@@ -261,12 +263,30 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
       goto err3;
     }
     sampleSize[i] = obj2.getInt();
+    if (sampleSize[i] <= 0) {
+      error(errSyntaxError, -1, "Illegal non-positive value in function size array");
+      goto err3;
+    }
     obj2.free();
   }
   obj1.free();
-  idxMul[0] = n;
-  for (i = 1; i < m; ++i) {
-    idxMul[i] = idxMul[i-1] * sampleSize[i-1];
+  idxOffset = (int *)gmallocn(1 << m, sizeof(int));
+  for (i = 0; i < (1<<m); ++i) {
+    idx = 0;
+    for (j = m - 1, t = i; j >= 1; --j, t <<= 1) {
+      if (sampleSize[j] == 1) {
+	bit = 0;
+      } else {
+	bit = (t >> (m - 1)) & 1;
+      }
+      idx = (idx + bit) * sampleSize[j-1];
+    }
+    if (sampleSize[0] == 1) {
+      bit = 0;
+    } else {
+      bit = (t >> (m - 1)) & 1;
+    }
+    idxOffset[i] = (idx + bit) * n;
   }
 
   //----- BitsPerSample
@@ -368,6 +388,13 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
   }
   str->close();
 
+  // set up the cache
+  for (i = 0; i < m; ++i) {
+    in[i] = domain[i][0];
+    cacheIn[i] = in[i] - 1;
+  }
+  transform(in, cacheOut);
+
   ok = gTrue;
   return;
 
@@ -380,6 +407,9 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
 }
 
 SampledFunction::~SampledFunction() {
+  if (idxOffset) {
+    gfree(idxOffset);
+  }
   if (samples) {
     gfree(samples);
   }
@@ -390,6 +420,8 @@ SampledFunction::~SampledFunction() {
 
 SampledFunction::SampledFunction(SampledFunction *func) {
   memcpy(this, func, sizeof(SampledFunction));
+  idxOffset = (int *)gmallocn(1 << m, sizeof(int));
+  memcpy(idxOffset, func->idxOffset, (1 << m) * (int)sizeof(int));
   samples = (double *)gmallocn(nSamples, sizeof(double));
   memcpy(samples, func->samples, nSamples * sizeof(double));
   sBuf = (double *)gmallocn(1 << m, sizeof(double));
@@ -397,37 +429,54 @@ SampledFunction::SampledFunction(SampledFunction *func) {
 
 void SampledFunction::transform(double *in, double *out) {
   double x;
-  int e[funcMaxInputs][2];
+  int e[funcMaxInputs];
   double efrac0[funcMaxInputs];
   double efrac1[funcMaxInputs];
-  int i, j, k, idx, t;
+  int i, j, k, idx0, t;
+
+  // check the cache
+  for (i = 0; i < m; ++i) {
+    if (in[i] != cacheIn[i]) {
+      break;
+    }
+  }
+  if (i == m) {
+    for (i = 0; i < n; ++i) {
+      out[i] = cacheOut[i];
+    }
+    return;
+  }
 
   // map input values into sample array
   for (i = 0; i < m; ++i) {
     x = (in[i] - domain[i][0]) * inputMul[i] + encode[i][0];
-    if (x < 0) {
+    if (x < 0 || x != x) {  // x!=x is a more portable version of isnan(x)
       x = 0;
     } else if (x > sampleSize[i] - 1) {
       x = sampleSize[i] - 1;
     }
-    e[i][0] = (int)x;
-    if ((e[i][1] = e[i][0] + 1) >= sampleSize[i]) {
+    e[i] = (int)x;
+    if (e[i] == sampleSize[i] - 1 && sampleSize[i] > 1) {
       // this happens if in[i] = domain[i][1]
-      e[i][1] = e[i][0];
+      e[i] = sampleSize[i] - 2;
     }
-    efrac1[i] = x - e[i][0];
+    efrac1[i] = x - e[i];
     efrac0[i] = 1 - efrac1[i];
   }
+
+  // compute index for the first sample to be used
+  idx0 = 0;
+  for (k = m - 1; k >= 1; --k) {
+    idx0 = (idx0 + e[k]) * sampleSize[k-1];
+  }
+  idx0 = (idx0 + e[0]) * n;
 
   // for each output, do m-linear interpolation
   for (i = 0; i < n; ++i) {
 
     // pull 2^m values out of the sample array
     for (j = 0; j < (1<<m); ++j) {
-      idx = i;
-      for (k = 0, t = j; k < m; ++k, t >>= 1) {
-	idx += idxMul[k] * (e[k][t & 1]);
-      }
+      int idx = idx0 + idxOffset[j] + i;
       if (likely(idx >= 0 && idx < nSamples)) {
         sBuf[j] = samples[idx];
       } else {
@@ -449,6 +498,14 @@ void SampledFunction::transform(double *in, double *out) {
     } else if (out[i] > range[i][1]) {
       out[i] = range[i][1];
     }
+  }
+
+  // save current result in the cache
+  for (i = 0; i < m; ++i) {
+    cacheIn[i] = in[i];
+  }
+  for (i = 0; i < n; ++i) {
+    cacheOut[i] = out[i];
   }
 }
 
