@@ -114,7 +114,7 @@ char *Stream::getLine(char *buf, int size) {
   int i;
   int c;
 
-  if (lookChar() == EOF)
+  if (lookChar() == EOF || size < 0)
     return NULL;
   for (i = 0; i < size - 1; ++i) {
     c = getChar();
