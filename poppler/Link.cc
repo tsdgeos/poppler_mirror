@@ -281,11 +281,12 @@ LinkDest::LinkDest(Array *a) {
       goto err2;
     }
     kind = destFitR;
-    if (!a->get(2, &obj2)->isNum()) {
+    if (a->get(2, &obj2)->isNum()) {
+      left = obj2.getNum();
+    } else {
       error(errSyntaxWarning, -1, "Bad annotation destination position");
       kind = destFit;
     }
-    left = obj2.getNum();
     obj2.free();
     if (!a->get(3, &obj2)->isNum()) {
       error(errSyntaxWarning, -1, "Bad annotation destination position");
