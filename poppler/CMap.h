@@ -82,8 +82,6 @@ private:
   CMap(GooString *collectionA, GooString *cMapNameA, int wModeA);
   void useCMap(CMapCache *cache, char *useName);
   void copyVector(CMapVectorEntry *dest, CMapVectorEntry *src);
-  void addCodeSpace(CMapVectorEntry *vec, Guint start, Guint end,
-		    Guint nBytes);
   void addCIDs(Guint start, Guint end, Guint nBytes, CID firstCID);
   void freeCMapVector(CMapVectorEntry *vec);
   void setReverseMapVector(Guint startCode, CMapVectorEntry *vec,
