@@ -1509,7 +1509,7 @@ void CCITTFaxStream::unfilteredReset () {
 }
 
 void CCITTFaxStream::reset() {
-  short code1;
+  int code1;
 
   unfilteredReset();
 
