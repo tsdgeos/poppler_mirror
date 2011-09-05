@@ -2102,12 +2102,12 @@ short CCITTFaxStream::lookBits(int n) {
       // than are available, but there may still be a valid code in
       // however many bits are available -- we need to return correct
       // data in this case
-      return (inputBuf << (n - inputBits)) & (0xffff >> (16 - n));
+      return (inputBuf << (n - inputBits)) & (0xffffffff >> (32 - n));
     }
     inputBuf = (inputBuf << 8) + c;
     inputBits += 8;
   }
-  return (inputBuf >> (inputBits - n)) & (0xffff >> (16 - n));
+  return (inputBuf >> (inputBits - n)) & (0xffffffff >> (32 - n));
 }
 
 GooString *CCITTFaxStream::getPSFilter(int psLevel, const char *indent) {
