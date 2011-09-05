@@ -4713,6 +4713,52 @@ EOFStream::~EOFStream() {
 }
 
 //------------------------------------------------------------------------
+// BufStream
+//------------------------------------------------------------------------
+
+BufStream::BufStream(Stream *strA, int bufSizeA): FilterStream(strA) {
+  bufSize = bufSizeA;
+  buf = (int *)gmallocn(bufSize, sizeof(int));
+}
+
+BufStream::~BufStream() {
+  gfree(buf);
+  delete str;
+}
+
+void BufStream::reset() {
+  int i;
+
+  str->reset();
+  for (i = 0; i < bufSize; ++i) {
+    buf[i] = str->getChar();
+  }
+}
+
+int BufStream::getChar() {
+  int c, i;
+
+  c = buf[0];
+  for (i = 1; i < bufSize; ++i) {
+    buf[i-1] = buf[i];
+  }
+  buf[bufSize - 1] = str->getChar();
+  return c;
+}
+
+int BufStream::lookChar() {
+  return buf[0];
+}
+
+int BufStream::lookChar(int idx) {
+  return buf[idx];
+}
+
+GBool BufStream::isBinary(GBool last) {
+  return str->isBinary(gTrue);
+}
+
+//------------------------------------------------------------------------
 // FixedLengthEncoder
 //------------------------------------------------------------------------
 
