@@ -1603,10 +1603,14 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
 
   // compute symbol code length, per 6.5.8.2.3
   //  symCodeLen = ceil( log2( numInputSyms + numNewSyms ) )
-  symCodeLen = 1;
-  if (likely(numInputSyms + numNewSyms > 0)) { // don't fail too badly if the sum is 0
-    i = (numInputSyms + numNewSyms - 1) >> 1;
-    while (i) {
+  i = numInputSyms + numNewSyms;
+  if (i <= 1) {
+    symCodeLen = huff ? 1 : 0;
+  } else {
+    --i;
+    symCodeLen = 0;
+    // i = floor((numSyms-1) / 2^symCodeLen)
+    while (i > 0) {
       ++symCodeLen;
       i >>= 1;
     }
