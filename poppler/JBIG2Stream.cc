@@ -2662,7 +2662,7 @@ void JBIG2Stream::readHalftoneRegionSeg(Guint segNum, GBool imm,
 void JBIG2Stream::readGenericRegionSeg(Guint segNum, GBool imm,
 				       GBool lossless, Guint length) {
   JBIG2Bitmap *bitmap;
-  Guint w, h, x, y, segInfoFlags, extCombOp;
+  Guint w, h, x, y, segInfoFlags, extCombOp, rowCount;
   Guint flags, mmr, templ, tpgdOn;
   int atx[4], aty[4];
 
@@ -2727,6 +2727,12 @@ void JBIG2Stream::readGenericRegionSeg(Guint segNum, GBool imm,
   } else {
     bitmap->setSegNum(segNum);
     segments->append(bitmap);
+  }
+
+  // immediate generic segments can have an unspecified length, in
+  // which case, a row count is stored at the end of the segment
+  if (imm && length == 0xffffffff) {
+    readULong(&rowCount);
   }
 
   return;
