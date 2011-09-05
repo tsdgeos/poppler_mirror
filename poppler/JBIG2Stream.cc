@@ -3500,7 +3500,9 @@ void JBIG2Stream::readEndOfStripeSeg(Guint length) {
 
   // skip the segment
   for (i = 0; i < length; ++i) {
-    curStr->getChar();
+    if (curStr->getChar() == EOF) {
+      break;
+    }
   }
 }
 
@@ -3509,7 +3511,9 @@ void JBIG2Stream::readProfilesSeg(Guint length) {
 
   // skip the segment
   for (i = 0; i < length; ++i) {
-    curStr->getChar();
+    if (curStr->getChar() == EOF) {
+      break;
+    }
   }
 }
 
@@ -3582,7 +3586,9 @@ void JBIG2Stream::readExtensionSeg(Guint length) {
 
   // skip the segment
   for (i = 0; i < length; ++i) {
-    curStr->getChar();
+    if (curStr->getChar() == EOF) {
+      break;
+    }
   }
 }
 
