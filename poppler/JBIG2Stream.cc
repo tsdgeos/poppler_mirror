@@ -2018,11 +2018,17 @@ void JBIG2Stream::readTextRegionSeg(Guint segNum, GBool imm,
       return;
     }
   }
-  symCodeLen = 0;
-  i = 1;
-  while (i < numSyms) {
-    ++symCodeLen;
-    i <<= 1;
+  i = numSyms;
+  if (i <= 1) {
+    symCodeLen = huff ? 1 : 0;
+  } else {
+    --i;
+    symCodeLen = 0;
+    // i = floor((numSyms-1) / 2^symCodeLen)
+    while (i > 0) {
+      ++symCodeLen;
+      i >>= 1;
+    }
   }
 
   // get the symbol bitmaps
