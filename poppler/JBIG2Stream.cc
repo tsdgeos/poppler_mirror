@@ -2569,11 +2569,17 @@ void JBIG2Stream::readHalftoneRegionSeg(Guint segNum, GBool imm,
   }
 
   patternDict = (JBIG2PatternDict *)seg;
-  bpp = 0;
-  i = 1;
-  while (i < patternDict->getSize()) {
-    ++bpp;
-    i <<= 1;
+  i = patternDict->getSize();
+  if (i <= 1) {
+    bpp = 0;
+  } else {
+    --i;
+    bpp = 0;
+    // i = floor((size-1) / 2^bpp)
+    while (i > 0) {
+      ++bpp;
+      i >>= 1;
+    }
   }
   patW = patternDict->getBitmap(0)->getWidth();
   patH = patternDict->getBitmap(0)->getHeight();
