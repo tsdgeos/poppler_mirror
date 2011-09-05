@@ -1575,7 +1575,7 @@ inline void CCITTFaxStream::addPixelsNeg(int a1, int blackPixels) {
 }
 
 int CCITTFaxStream::lookChar() {
-  short code1, code2, code3;
+  int code1, code2, code3;
   int b1i, blackPixels, i, bits;
   GBool gotEOL;
 
@@ -1761,27 +1761,49 @@ int CCITTFaxStream::lookChar() {
       }
     }
 
-    // byte-align the row
-    if (byteAlign) {
-      inputBits &= ~7;
-    }
-
     // check for end-of-line marker, skipping over any extra zero bits
+    // (if EncodedByteAlign is true and EndOfLine is false, there can
+    // be "false" EOL markers -- i.e., if the last n unused bits in
+    // row i are set to zero, and the first 11-n bits in row i+1
+    // happen to be zero -- so we don't look for EOL markers in this
+    // case)
     gotEOL = gFalse;
     if (!endOfBlock && row == rows - 1) {
       eof = gTrue;
-    } else {
+    } else if (endOfLine || !byteAlign) {
       code1 = lookBits(12);
-      while (code1 == 0) {
-	eatBits(1);
-	code1 = lookBits(12);
+      if (endOfLine) {
+	while (code1 != EOF && code1 != 0x001) {
+	  eatBits(1);
+	  code1 = lookBits(12);
+	}
+      } else {
+	while (code1 == 0) {
+	  eatBits(1);
+	  code1 = lookBits(12);
+	}
       }
       if (code1 == 0x001) {
 	eatBits(12);
 	gotEOL = gTrue;
-      } else if (code1 == EOF) {
-	eof = gTrue;
       }
+    }
+
+    // byte-align the row
+    // (Adobe apparently doesn't do byte alignment after EOL markers
+    // -- I've seen CCITT image data streams in two different formats,
+    // both with the byteAlign flag set:
+    //   1. xx:x0:01:yy:yy
+    //   2. xx:00:1y:yy:yy
+    // where xx is the previous line, yy is the next line, and colons
+    // separate bytes.)
+    if (byteAlign && !gotEOL) {
+      inputBits &= ~7;
+    }
+
+    // check for end of stream
+    if (lookBits(1) == EOF) {
+      eof = gTrue;
     }
 
     // get 2D encoding tag
@@ -1791,6 +1813,15 @@ int CCITTFaxStream::lookChar() {
     }
 
     // check for end-of-block marker
+    if (endOfBlock && !endOfLine && byteAlign) {
+      // in this case, we didn't check for an EOL code above, so we
+      // need to check here
+      code1 = lookBits(24);
+      if (code1 == 0x001001) {
+	eatBits(12);
+	gotEOL = gTrue;
+      }
+    }
     if (endOfBlock && gotEOL) {
       code1 = lookBits(12);
       if (code1 == 0x001) {
