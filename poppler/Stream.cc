@@ -1527,6 +1527,7 @@ void CCITTFaxStream::reset() {
   }
   if (code1 == 0x001) {
     eatBits(12);
+    endOfLine = gTrue;
   }
   if (encoding > 0) {
     nextLine2D = !lookBits(1);
