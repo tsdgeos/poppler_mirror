@@ -3136,8 +3136,9 @@ int DCTStream::readHuffSym(DCTHuffTable *table) {
   codeBits = 0;
   do {
     // add a bit to the code
-    if ((bit = readBit()) == EOF)
+    if ((bit = readBit()) == EOF) {
       return 9999;
+    }
     code = (code << 1) + bit;
     ++codeBits;
 
