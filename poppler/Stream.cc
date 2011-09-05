@@ -2764,7 +2764,7 @@ GBool DCTStream::readProgressiveDataUnit(DCTHuffTable *dcHuffTable,
     // ZRL
     if (c == 0xf0) {
       k = 0;
-      while (k < 16) {
+      while (k < 16 && i <= scanInfo.lastCoeff) {
 	j = dctZigZag[i++];
 	if (data[j] == 0) {
 	  ++k;
@@ -2810,10 +2810,10 @@ GBool DCTStream::readProgressiveDataUnit(DCTHuffTable *dcHuffTable,
       if ((amp = readAmp(size)) == 9999) {
 	return gFalse;
       }
-      k = 0;
-      do {
+      j = 0; // make gcc happy
+      for (k = 0; k <= run && i <= scanInfo.lastCoeff; ++k) {
 	j = dctZigZag[i++];
-	while (data[j] != 0) {
+	while (data[j] != 0 && i <= scanInfo.lastCoeff) {
 	  if ((bit = readBit()) == EOF) {
 	    return gFalse;
 	  }
@@ -2822,8 +2822,7 @@ GBool DCTStream::readProgressiveDataUnit(DCTHuffTable *dcHuffTable,
 	  }
 	  j = dctZigZag[i++];
 	}
-	++k;
-      } while (k <= run);
+      }
       data[j] = amp << scanInfo.al;
     }
   }
@@ -3143,6 +3142,9 @@ int DCTStream::readHuffSym(DCTHuffTable *table) {
     ++codeBits;
 
     // look up code
+    if (code < table->firstCode[codeBits]) {
+      break;
+    }
     if (code - table->firstCode[codeBits] < table->numCodes[codeBits]) {
       code -= table->firstCode[codeBits];
       return table->sym[table->firstSym[codeBits] + code];
@@ -3296,6 +3298,15 @@ GBool DCTStream::readBaselineSOF() {
     compInfo[i].hSample = (c >> 4) & 0x0f;
     compInfo[i].vSample = c & 0x0f;
     compInfo[i].quantTable = str->getChar();
+    if (compInfo[i].hSample < 1 || compInfo[i].hSample > 4 ||
+	compInfo[i].vSample < 1 || compInfo[i].vSample > 4) {
+      error(errSyntaxError, getPos(), "Bad DCT sampling factor");
+      return gFalse;
+    }
+    if (compInfo[i].quantTable < 0 || compInfo[i].quantTable > 3) {
+      error(errSyntaxError, getPos(), "Bad DCT quant table selector");
+      return gFalse;
+    }
   }
   progressive = gFalse;
   return gTrue;
@@ -3322,6 +3333,15 @@ GBool DCTStream::readProgressiveSOF() {
     compInfo[i].hSample = (c >> 4) & 0x0f;
     compInfo[i].vSample = c & 0x0f;
     compInfo[i].quantTable = str->getChar();
+    if (compInfo[i].hSample < 1 || compInfo[i].hSample > 4 ||
+	compInfo[i].vSample < 1 || compInfo[i].vSample > 4) {
+      error(errSyntaxError, getPos(), "Bad DCT sampling factor");
+      return gFalse;
+    }
+    if (compInfo[i].quantTable < 0 || compInfo[i].quantTable > 3) {
+      error(errSyntaxError, getPos(), "Bad DCT quant table selector");
+      return gFalse;
+    }
   }
   progressive = gTrue;
   return gTrue;
