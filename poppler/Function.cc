@@ -681,8 +681,8 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
     if (!(funcs[i] = Function::parse(&obj2, &usedParentsAux))) {
       goto err2;
     }
-    if (i > 0 && (funcs[i]->getInputSize() != 1 ||
-		  funcs[i]->getOutputSize() != funcs[0]->getOutputSize())) {
+    if (funcs[i]->getInputSize() != 1 ||
+	(i > 0 && funcs[i]->getOutputSize() != funcs[0]->getOutputSize())) {
       error(errSyntaxError, -1,
 	    "Incompatible subfunctions in stitching function");
       goto err2;
@@ -750,8 +750,6 @@ StitchingFunction::StitchingFunction(StitchingFunction *func) {
   int i;
 
   memcpy(this, func, sizeof(StitchingFunction));
-
-  k = func->k;
   funcs = (Function **)gmallocn(k, sizeof(Function *));
   for (i = 0; i < k; ++i) {
     funcs[i] = func->funcs[i]->copy();
