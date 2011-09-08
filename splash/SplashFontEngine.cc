@@ -235,13 +235,15 @@ SplashFontFile *SplashFontEngine::loadCIDFont(SplashFontFileID *idA,
 }
 
 SplashFontFile *SplashFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA,
-						      SplashFontSrc *src) {
+						      SplashFontSrc *src,
+                                                      int *codeToGID,
+                                                      int codeToGIDLen) {
   SplashFontFile *fontFile;
 
   fontFile = NULL;
 #if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   if (!fontFile && ftEngine) {
-    fontFile = ftEngine->loadOpenTypeCFFFont(idA, src);
+    fontFile = ftEngine->loadOpenTypeCFFFont(idA, src, codeToGID, codeToGIDLen);
   }
 #endif
 

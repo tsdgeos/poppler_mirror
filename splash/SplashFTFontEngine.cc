@@ -139,7 +139,9 @@ SplashFontFile *SplashFTFontEngine::loadCIDFont(SplashFontFileID *idA,
 }
 
 SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA,
-							SplashFontSrc *src) {
+							SplashFontSrc *src,
+                                                        int *codeToGID,
+                                                        int codeToGIDLen) {
   FoFiTrueType *ff;
   int *cidToGIDMap;
   int nCIDs;
@@ -147,21 +149,24 @@ SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA,
 
   cidToGIDMap = NULL;
   nCIDs = 0;
-  if (!useCIDs) {
-    if (src->isFile) {
-      ff = FoFiTrueType::load(src->fileName->getCString());
-    } else {
-      ff = FoFiTrueType::make(src->buf, src->bufLen);
-    }
-    if (ff) {
-      if (ff->isOpenTypeCFF()) {
-	cidToGIDMap = ff->getCIDToGIDMap(&nCIDs);
+  if (!codeToGID) {
+    if (!useCIDs) {
+      if (src->isFile) {
+        ff = FoFiTrueType::load(src->fileName->getCString());
+      } else {
+        ff = FoFiTrueType::make(src->buf, src->bufLen);
       }
-      delete ff;
+      if (ff) {
+        if (ff->isOpenTypeCFF()) {
+          cidToGIDMap = ff->getCIDToGIDMap(&nCIDs);
+        }
+        delete ff;
+      }
     }
   }
   ret = SplashFTFontFile::loadCIDFont(this, idA, src,
-				      cidToGIDMap, nCIDs);
+                                      codeToGID ? codeToGID : cidToGIDMap,
+                                      codeToGID ? codeToGIDLen : nCIDs);
   if (!ret) {
     gfree(cidToGIDMap);
   }
