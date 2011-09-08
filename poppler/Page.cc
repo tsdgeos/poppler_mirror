@@ -149,14 +149,6 @@ PageAttrs::PageAttrs(PageAttrs *attrs, Dict *dict) {
   artBox = cropBox;
   readBox(dict, "ArtBox", &artBox);
 
-  if (isPage) {
-    // clip all other boxes to the media box
-    cropBox.clipTo(&mediaBox);
-    bleedBox.clipTo(&mediaBox);
-    trimBox.clipTo(&mediaBox);
-    artBox.clipTo(&mediaBox);
-  }
-
   // rotate
   dict->lookup("Rotate", &obj1);
   if (obj1.isInt()) {
@@ -195,6 +187,13 @@ PageAttrs::~PageAttrs() {
   pieceInfo.free();
   separationInfo.free();
   resources.free();
+}
+
+void PageAttrs::clipBoxes() {
+  cropBox.clipTo(&mediaBox);
+  bleedBox.clipTo(&mediaBox);
+  trimBox.clipTo(&mediaBox);
+  artBox.clipTo(&mediaBox);
 }
 
 GBool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box) {
@@ -271,6 +270,7 @@ Page::Page(PDFDoc *docA, int numA, Dict *pageDict, Ref pageRefA, PageAttrs *attr
 
   // get attributes
   attrs = attrsA;
+  attrs->clipBoxes();
 
   // transtion
   pageDict->lookupNF("Trans", &trans);

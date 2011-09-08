@@ -99,6 +99,9 @@ public:
   Dict *getResourceDict()
     { return resources.isDict() ? resources.getDict() : (Dict *)NULL; }
 
+  // Clip all other boxes to the MediaBox.
+  void clipBoxes();
+
 private:
 
   GBool readBox(Dict *dict, const char *key, PDFRectangle *box);
