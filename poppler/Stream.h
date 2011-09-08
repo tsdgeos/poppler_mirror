@@ -413,15 +413,6 @@ private:
 
   GBool getNextLine();
 
-  inline int doGetChar() {
-    if (predIdx >= rowBytes) {
-      if (!getNextLine()) {
-        return EOF;
-      }
-    }
-    return predLine[predIdx++];
-  }
-
   Stream *str;			// base stream
   int predictor;		// predictor
   int width;			// pixels per line
@@ -453,7 +444,7 @@ public:
   virtual void reset();
   virtual void close();
   virtual int getChar()
-    { return doGetChar(); }
+    { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
   virtual int lookChar()
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
   virtual int getPos() { return bufPos + (bufPtr - buf); }
@@ -468,18 +459,27 @@ private:
 
   GBool fillBuf();
   
-  inline int doGetChar()
-    { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
-
   virtual GBool hasGetChars() { return true; }
   virtual int getChars(int nChars, Guchar *buffer)
     {
-      for (int i = 0; i < nChars; ++i) {
-        const int c = doGetChar();
-        if (likely(c != EOF)) buffer[i] = c;
-        else return i;
+      int n, m;
+
+      n = 0;
+      while (n < nChars) {
+        if (bufPtr >= bufEnd) {
+          if (!fillBuf()) {
+            break;
+          }
+        }
+        m = (int)(bufEnd - bufPtr);
+        if (m > nChars - n) {
+          m = nChars - n;
+        }
+        memcpy(buffer + n, bufPtr, m);
+        bufPtr += m;
+        n += m;
       }
-      return nChars;
+      return n;
     }
 
   FILE *f;
@@ -570,6 +570,9 @@ public:
 
 private:
 
+  virtual GBool hasGetChars() { return true; }
+  virtual int getChars(int nChars, Guchar *buffer);
+
   char *buf;
   Guint start;
   char *bufEnd;
@@ -608,6 +611,9 @@ public:
 
 
 private:
+
+  virtual GBool hasGetChars() { return true; }
+  virtual int getChars(int nChars, Guchar *buffer);
 
   Stream *str;
   GBool limited;
@@ -682,6 +688,9 @@ public:
 
 private:
 
+  virtual GBool hasGetChars() { return true; }
+  virtual int getChars(int nChars, Guchar *buffer);
+
   inline int doGetRawChar() {
     if (eof) {
       return EOF;
@@ -737,6 +746,9 @@ public:
   virtual GBool isBinary(GBool last = gTrue);
 
 private:
+
+  virtual GBool hasGetChars() { return true; }
+  virtual int getChars(int nChars, Guchar *buffer);
 
   char buf[128];		// buffer
   char *bufPtr;			// next char to read
@@ -966,13 +978,6 @@ private:
     index = (index + 1) & flateMask;
     --remain;
     return c;
-  }
-
-  inline int doGetChar() {
-    if (pred) {
-      return pred->getChar();
-    }
-    return doGetRawChar();
   }
 
   virtual GBool hasGetChars() { return true; }

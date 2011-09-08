@@ -556,17 +556,33 @@ int StreamPredictor::lookChar() {
 }
 
 int StreamPredictor::getChar() {
-  return doGetChar();
+  if (predIdx >= rowBytes) {
+    if (!getNextLine()) {
+      return EOF;
+    }
+  }
+  return predLine[predIdx++];
 }
 
-int StreamPredictor::getChars(int nChars, Guchar *buffer)
-{
-  for (int i = 0; i < nChars; ++i) {
-    const int c = doGetChar();
-    if (likely(c != EOF)) buffer[i] = c;
-    else return i;
+int StreamPredictor::getChars(int nChars, Guchar *buffer) {
+  int n, m;
+
+  n = 0;
+  while (n < nChars) {
+    if (predIdx >= rowBytes) {
+      if (!getNextLine()) {
+	break;
+      }
+    }
+    m = rowBytes - predIdx;
+    if (m > nChars - n) {
+      m = nChars - n;
+    }
+    memcpy(buffer + n, predLine + predIdx, m);
+    predIdx += m;
+    n += m;
   }
-  return nChars;
+  return n;
 }
 
 GBool StreamPredictor::getNextLine() {
@@ -954,6 +970,22 @@ void MemStream::reset() {
 void MemStream::close() {
 }
 
+int MemStream::getChars(int nChars, Guchar *buffer) {
+  int n;
+
+  if (nChars <= 0) {
+    return 0;
+  }
+  if (bufEnd - bufPtr < nChars) {
+    n = (int)(bufEnd - bufPtr);
+  } else {
+    n = nChars;
+  }
+  memcpy(buffer, bufPtr, n);
+  bufPtr += n;
+  return n;
+}
+
 void MemStream::setPos(Guint pos, int dir) {
   Guint i;
 
@@ -1010,6 +1042,16 @@ int EmbedStream::lookChar() {
     return EOF;
   }
   return str->lookChar();
+}
+
+int EmbedStream::getChars(int nChars, Guchar *buffer) {
+  if (nChars <= 0) {
+    return 0;
+  }
+  if (limited && length < (Guint)nChars) {
+    nChars = (int)length;
+  }
+  return str->doGetChars(nChars, buffer);
 }
 
 void EmbedStream::setPos(Guint pos, int dir) {
@@ -1266,6 +1308,33 @@ int LZWStream::getRawChar() {
   return doGetRawChar();
 }
 
+int LZWStream::getChars(int nChars, Guchar *buffer) {
+  int n, m;
+
+  if (pred) {
+    return pred->getChars(nChars, buffer);
+  }
+  if (eof) {
+    return 0;
+  }
+  n = 0;
+  while (n < nChars) {
+    if (seqIndex >= seqLength) {
+      if (!processNextCode()) {
+	break;
+      }
+    }
+    m = seqLength - seqIndex;
+    if (m > nChars - n) {
+      m = nChars - n;
+    }
+    memcpy(buffer + n, seqBuf + seqIndex, m);
+    seqIndex += m;
+    n += m;
+  }
+  return n;
+}
+
 void LZWStream::reset() {
   str->reset();
   eof = gFalse;
@@ -1404,6 +1473,27 @@ void RunLengthStream::reset() {
   str->reset();
   bufPtr = bufEnd = buf;
   eof = gFalse;
+}
+
+int RunLengthStream::getChars(int nChars, Guchar *buffer) {
+  int n, m;
+
+  n = 0;
+  while (n < nChars) {
+    if (bufPtr >= bufEnd) {
+      if (!fillBuf()) {
+	break;
+      }
+    }
+    m = (int)(bufEnd - bufPtr);
+    if (m > nChars - n) {
+      m = nChars - n;
+    }
+    memcpy(buffer + n, bufPtr, m);
+    bufPtr += m;
+    n += m;
+  }
+  return n;
 }
 
 GooString *RunLengthStream::getPSFilter(int psLevel, const char *indent) {
@@ -4318,7 +4408,10 @@ void FlateStream::reset() {
 }
 
 int FlateStream::getChar() {
-  return doGetChar();
+  if (pred) {
+    return pred->getChar();
+  }
+  return doGetRawChar();
 }
 
 int FlateStream::getChars(int nChars, Guchar *buffer) {
@@ -4326,7 +4419,7 @@ int FlateStream::getChars(int nChars, Guchar *buffer) {
     return pred->getChars(nChars, buffer);
   } else {
     for (int i = 0; i < nChars; ++i) {
-      const int c = doGetChar();
+      const int c = doGetRawChar();
       if (likely(c != EOF)) buffer[i] = c;
       else return i;
     }

@@ -57,6 +57,8 @@ public:
   virtual GBool isBinary(GBool last = gTrue);
 
 private:
+  virtual GBool hasGetChars() { return true; }
+  virtual int getChars(int nChars, Guchar *buffer);
 
   void readSegments();
   GBool readSymbolDictSeg(Guint segNum, Guint length,
