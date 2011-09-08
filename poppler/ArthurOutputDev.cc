@@ -417,9 +417,19 @@ void ArthurOutputDev::updateFont(GfxState *state)
       }
       break;
     case fontCIDType0COT:
+      if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
+	n = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
+	codeToGID = (int *)gmallocn(n, sizeof(int));
+	memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(),
+	       n * sizeof(int));
+      } else {
+	codeToGID = NULL;
+	n = 0;
+      }      
       if (!(fontFile = m_fontEngine->loadOpenTypeCFFFont(
 			   id,
-			   fontsrc))) {
+			   fontsrc,
+			   codeToGID, n))) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
