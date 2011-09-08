@@ -486,6 +486,10 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI,
     gfx->saveState();
     gfx->display(&obj);
     gfx->restoreState();
+  } else {
+    // empty pages need to call dump to do any setup required by the
+    // OutputDev
+    out->dump();
   }
   obj.free();
 
