@@ -385,6 +385,8 @@ private:
   int nComps;			// components per pixel
   int nBits;			// bits per component
   int nVals;			// components per line
+  int inputLineSize;		// input line buffer size
+  Guchar *inputLine;		// input line buffer
   Guchar *imgLine;		// line buffer
   int imgIdx;			// current index in imgLine
 };

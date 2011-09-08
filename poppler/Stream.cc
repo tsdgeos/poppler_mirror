@@ -415,21 +415,34 @@ ImageStream::ImageStream(Stream *strA, int widthA, int nCompsA, int nBitsA) {
   nBits = nBitsA;
 
   nVals = width * nComps;
-  if (nBits == 1) {
-    imgLineSize = (nVals + 7) & ~7;
-  } else {
-    imgLineSize = nVals;
-  }
-  if (width > INT_MAX / nComps) {
+  inputLineSize = (nVals * nBits + 7) >> 3;
+  if (nVals > INT_MAX / nBits - 7) {
     // force a call to gmallocn(-1,...), which will throw an exception
-    imgLineSize = -1;
+    inputLineSize = -1;
   }
-  imgLine = (Guchar *)gmallocn(imgLineSize, sizeof(Guchar));
+  inputLine = (Guchar *)gmallocn(inputLineSize, sizeof(char));
+  if (nBits == 8) {
+    imgLine = (Guchar *)inputLine;
+  } else {
+    if (nBits == 1) {
+      imgLineSize = (nVals + 7) & ~7;
+    } else {
+      imgLineSize = nVals;
+    }
+    if (width > INT_MAX / nComps) {
+      // force a call to gmallocn(-1,...), which will throw an exception
+      imgLineSize = -1;
+    }
+    imgLine = (Guchar *)gmallocn(imgLineSize, sizeof(Guchar));
+  }
   imgIdx = nVals;
 }
 
 ImageStream::~ImageStream() {
-  gfree(imgLine);
+  if (imgLine != (Guchar *)inputLine) {
+    gfree(imgLine);
+  }
+  gfree(inputLine);
 }
 
 void ImageStream::reset() {
@@ -460,10 +473,14 @@ Guchar *ImageStream::getLine() {
   int bits;
   int c;
   int i;
-
+  Guchar *p;
+ 
+  int readChars = str->doGetChars(inputLineSize, inputLine);
+  for ( ; readChars < inputLineSize; readChars++) inputLine[readChars] = EOF;
   if (nBits == 1) {
+    p = inputLine;
     for (i = 0; i < nVals; i += 8) {
-      c = str->getChar();
+      c = *p++;
       imgLine[i+0] = (Guchar)((c >> 7) & 1);
       imgLine[i+1] = (Guchar)((c >> 6) & 1);
       imgLine[i+2] = (Guchar)((c >> 5) & 1);
@@ -474,25 +491,25 @@ Guchar *ImageStream::getLine() {
       imgLine[i+7] = (Guchar)(c & 1);
     }
   } else if (nBits == 8) {
-    Guchar *line = imgLine;
-    int readChars = str->doGetChars(nVals, line);
-    for ( ; readChars < nVals; readChars++) line[readChars] = EOF;
+    // special case: imgLine == inputLine
   } else if (nBits == 16) {
     // this is a hack to support 16 bits images, everywhere
     // we assume a component fits in 8 bits, with this hack
     // we treat 16 bit images as 8 bit ones until it's fixed correctly.
     // The hack has another part on GfxImageColorMap::GfxImageColorMap
+    p = inputLine;
     for (i = 0; i < nVals; ++i) {
-      imgLine[i] = str->getChar();
-      str->getChar();
+      imgLine[i] = *p++;
+      p++;
     }
   } else {
     bitMask = (1 << nBits) - 1;
     buf = 0;
     bits = 0;
+    p = inputLine;
     for (i = 0; i < nVals; ++i) {
       if (bits < nBits) {
-	buf = (buf << 8) | (str->getChar() & 0xff);
+	buf = (buf << 8) | (*p++ & 0xff);
 	bits += 8;
       }
       imgLine[i] = (Guchar)((buf >> (bits - nBits)) & bitMask);
@@ -503,12 +520,7 @@ Guchar *ImageStream::getLine() {
 }
 
 void ImageStream::skipLine() {
-  int n, i;
-
-  n = (nVals * nBits + 7) >> 3;
-  for (i = 0; i < n; ++i) {
-    str->getChar();
-  }
+  str->doGetChars(inputLineSize, inputLine);
 }
 
 //------------------------------------------------------------------------
