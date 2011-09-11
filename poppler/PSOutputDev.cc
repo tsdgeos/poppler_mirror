@@ -1500,7 +1500,7 @@ void PSOutputDev::writeTrailer() {
       writePS("%%DocumentProcessColors:");
       if (processColors & psProcessCyan) {
 	writePS(" Cyan");
-	 }
+      }
       if (processColors & psProcessMagenta) {
 	writePS(" Magenta");
       }
