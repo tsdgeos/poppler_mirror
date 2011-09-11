@@ -1513,13 +1513,16 @@ void PSOutputDev::writeTrailer() {
       writePS("\n");
       writePS("%%DocumentCustomColors:");
       for (cc = customColors; cc; cc = cc->next) {
-	writePSFmt(" ({0:s})", cc->name->getCString());
+	writePS(" ");
+	writePSString(cc->name);
       }
       writePS("\n");
       writePS("%%CMYKCustomColor:\n");
       for (cc = customColors; cc; cc = cc->next) {
-	writePSFmt("%%+ {0:.4g} {1:.4g} {2:.4g} {3:.4g} ({4:t})\n",
-		   cc->c, cc->m, cc->y, cc->k, cc->name);
+	writePSFmt("%%+ {0:.4g} {1:.4g} {2:.4g} {3:.4g} ",
+		   cc->c, cc->m, cc->y, cc->k);
+	writePSString(cc->name);
+	writePS("\n");
       }
     }
   }
