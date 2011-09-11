@@ -3935,7 +3935,7 @@ void PSOutputDev::updateFont(GfxState *state) {
   if (state->getFont()) {
     writePSFmt("/F{0:d}_{1:d} {2:.6g} Tf\n",
 	       state->getFont()->getID()->num, state->getFont()->getID()->gen,
-	       fabs(state->getFontSize()) < 0.00001 ? 0.00001
+	       fabs(state->getFontSize()) < 0.0001 ? 0.0001
 	                                            : state->getFontSize());
   }
 }
