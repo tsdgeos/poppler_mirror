@@ -4458,7 +4458,7 @@ void Gfx::doForm(Object *str) {
   int i;
 
   // check for excessive recursion
-  if (formDepth > 20) {
+  if (formDepth > 100) {
     return;
   }
 
