@@ -1517,6 +1517,10 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, Gfx *gfx) {
   Object obj1, obj2, obj3;
   int i;
 
+  if (arr->getLength() < 2) {
+    error(errSyntaxError, -1, "Bad ICCBased color space");
+    return NULL;
+  }
   arr->getNF(1, &obj1);
   if (obj1.isRef()) {
     iccProfileStreamA = obj1.getRef();
