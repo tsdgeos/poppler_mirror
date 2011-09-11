@@ -192,15 +192,7 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
       } else {
 	x1 = pts[i].x;
 	y1 = pts[i].y;
-	addSegment(x0, y0, x1, y1,
-		   path->flags[i-1] & splashPathFirst,
-		   path->flags[i] & splashPathLast,
-		   !closeSubpaths &&
-		     (path->flags[i-1] & splashPathFirst) &&
-		     !(path->flags[i-1] & splashPathClosed),
-		   !closeSubpaths &&
-		     (path->flags[i] & splashPathLast) &&
-		     !(path->flags[i] & splashPathClosed));
+	addSegment(x0, y0, x1, y1);
 	x0 = x1;
 	y0 = y1;
 	++i;
@@ -211,8 +203,7 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
 	  (path->flags[i-1] & splashPathLast) &&
 	  (pts[i-1].x != pts[curSubpath].x ||
 	   pts[i-1].y != pts[curSubpath].y)) {
-	addSegment(x0, y0, xsp, ysp,
-		   gFalse, gTrue, gFalse, gFalse);
+	addSegment(x0, y0, xsp, ysp);
       }
     }
   }
@@ -329,11 +320,7 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0,
     // if the curve is flat enough, or no more subdivisions are
     // allowed, add the straight line segment
     if (p2 - p1 == 1 || (d1 <= flatness2 && d2 <= flatness2)) {
-      addSegment(xl0, yl0, xr3, yr3,
-		 p1 == 0 && first,
-		 p2 == splashMaxCurveSplits && last,
-		 p1 == 0 && end0,
-		 p2 == splashMaxCurveSplits && end1);
+      addSegment(xl0, yl0, xr3, yr3);
       p1 = p2;
 
     // otherwise, subdivide the curve
@@ -364,26 +351,13 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0,
 }
 
 void SplashXPath::addSegment(SplashCoord x0, SplashCoord y0,
-			     SplashCoord x1, SplashCoord y1,
-			     GBool first, GBool last, GBool end0, GBool end1) {
+			     SplashCoord x1, SplashCoord y1) {
   grow(1);
   segs[length].x0 = x0;
   segs[length].y0 = y0;
   segs[length].x1 = x1;
   segs[length].y1 = y1;
   segs[length].flags = 0;
-  if (first) {
-    segs[length].flags |= splashXPathFirst;
-  }
-  if (last) {
-    segs[length].flags |= splashXPathLast;
-  }
-  if (end0) {
-    segs[length].flags |= splashXPathEnd0;
-  }
-  if (end1) {
-    segs[length].flags |= splashXPathEnd1;
-  }
   if (y1 == y0) {
     segs[length].dxdy = segs[length].dydx = 0;
     segs[length].flags |= splashXPathHoriz;
