@@ -1384,7 +1384,7 @@ void SplashOutputDev::setupScreenParams(double hDPI, double vDPI) {
   case screenStochasticClustered:
     screenParams.type = splashScreenStochasticClustered;
     if (screenParams.size < 0) {
-      screenParams.size = 100;
+      screenParams.size = 64;
     }
     if (screenParams.dotRadius < 0) {
       screenParams.dotRadius = 2;
@@ -1397,7 +1397,7 @@ void SplashOutputDev::setupScreenParams(double hDPI, double vDPI) {
     if (hDPI > 299.9 && vDPI > 299.9) {
       screenParams.type = splashScreenStochasticClustered;
       if (screenParams.size < 0) {
-	screenParams.size = 100;
+	screenParams.size = 64;
       }
       if (screenParams.dotRadius < 0) {
 	screenParams.dotRadius = 2;
