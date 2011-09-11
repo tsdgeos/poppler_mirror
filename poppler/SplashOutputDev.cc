@@ -1474,10 +1474,12 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state) {
   }
   if (splash) {
     delete splash;
+    splash = NULL;
   }
   if (!bitmap || w != bitmap->getWidth() || h != bitmap->getHeight()) {
     if (bitmap) {
       delete bitmap;
+      bitmap = NULL;
     }
     bitmap = new SplashBitmap(w, h, bitmapRowPad, colorMode,
 			      colorMode != splashModeMono1, bitmapTopDown);
