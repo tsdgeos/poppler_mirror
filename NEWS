@@ -1,3 +1,8 @@
+Release 0.17.4 (0.18 RC)
+        core:
+         * SplashOutputDev: Compile when defining USE_FIXEDPOINT
+         * PNGWriter: Compile with libpng >= 1.5.0
+        
 Release 0.17.3 (0.18 Beta 3)
         core:
          * PSOutputDev: Use Patterns for tiling fill when PS level >= 2
