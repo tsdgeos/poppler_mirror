@@ -26,7 +26,7 @@ import tempfile
 class RunTests(Command):
 
     name = 'run-tests'
-    usage_args = '[ options ... ] documents ... '
+    usage_args = '[ options ... ] tests '
     description = 'Run tests for documents'
 
     def __init__(self):
@@ -44,7 +44,7 @@ class RunTests(Command):
         parser.add_argument('--create-diffs',
                             action = 'store_true', dest = 'create_diffs', default = False,
                             help = 'Create diff files for failed tests')
-        parser.add_argument('documents', nargs='*')
+        parser.add_argument('tests')
 
     def run(self, options):
         config = Config()
@@ -52,18 +52,18 @@ class RunTests(Command):
         config.create_diffs = options['create_diffs']
 
         t = Timer()
-        for doc in options['documents']:
-            if os.path.isdir(doc):
-                docs_dir = doc
-            else:
-                docs_dir = os.path.dirname(doc)
+        doc = options['tests']
+        if os.path.isdir(doc):
+            docs_dir = doc
+        else:
+            docs_dir = os.path.dirname(doc)
 
-            tests = TestRun(docs_dir, options['refs_dir'], options['out_dir'])
-            if doc == docs_dir:
-                tests.run_tests()
-            else:
-                tests.run_test(os.path.basename(doc))
-            tests.summary()
+        tests = TestRun(docs_dir, options['refs_dir'], options['out_dir'])
+        if doc == docs_dir:
+            tests.run_tests()
+        else:
+            tests.run_test(os.path.basename(doc))
+        tests.summary()
         print "Tests run in %s" % (t.elapsed_str())
 
 register_command('run-tests', RunTests)

@@ -26,7 +26,7 @@ import tempfile
 class CreateRefs(Command):
 
     name = 'create-refs'
-    usage_args = '[ options ... ] documents ... '
+    usage_args = '[ options ... ] tests '
     description = 'Create references for tests'
 
     def __init__(self):
@@ -41,7 +41,7 @@ class CreateRefs(Command):
         parser.add_argument('-c', '--checksums-only',
                             action = 'store_true', dest = 'checksums_only', default = False,
                             help = 'Leave only checksum files in references dir, other files will be deleted')
-        parser.add_argument('documents', nargs='*')
+        parser.add_argument('tests')
 
     def run(self, options):
         config = Config()
@@ -49,17 +49,17 @@ class CreateRefs(Command):
         config.checksums_only = options['checksums_only']
 
         t = Timer()
-        for doc in options['documents']:
-            if os.path.isdir(doc):
-                docs_dir = doc
-            else:
-                docs_dir = os.path.dirname(doc)
+        doc = options['tests']
+        if os.path.isdir(doc):
+            docs_dir = doc
+        else:
+            docs_dir = os.path.dirname(doc)
 
-            refs = TestReferences(docs_dir, options['refs_dir'])
-            if doc == docs_dir:
-                refs.create_refs()
-            else:
-                refs.create_refs_for_file(os.path.basename(doc))
+        refs = TestReferences(docs_dir, options['refs_dir'])
+        if doc == docs_dir:
+            refs.create_refs()
+        else:
+            refs.create_refs_for_file(os.path.basename(doc))
         print "Refs created in %s" % (t.elapsed_str())
 
 register_command('create-refs', CreateRefs)

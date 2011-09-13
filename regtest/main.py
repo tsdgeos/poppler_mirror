@@ -42,7 +42,7 @@ def main(args):
     parser = argparse.ArgumentParser(
         description = 'Poppler regression tests',
         prog = 'poppler-regtest',
-        usage = '%(prog)s [options ...] command [command-options ...] tests ...',
+        usage = '%(prog)s [options ...] command [command-options ...] tests',
         add_help = False)
     parser.add_argument('-h', '--help',
                         action = HelpAction, nargs = 0)
