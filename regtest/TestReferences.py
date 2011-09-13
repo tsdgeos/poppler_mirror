@@ -20,13 +20,14 @@ import os
 import errno
 from backends import get_backend, get_all_backends
 from Config import Config
-from Utils import get_document_paths_from_dir
+from Utils import get_document_paths_from_dir, get_skipped_tests
 
 class TestReferences:
 
     def __init__(self, docsdir, refsdir):
         self._docsdir = docsdir
         self._refsdir = refsdir
+        self._skipped = get_skipped_tests(docsdir)
         self.config = Config()
 
         try:
@@ -38,6 +39,10 @@ class TestReferences:
             raise
 
     def create_refs_for_file(self, filename, n_doc = 1, total_docs = 1):
+        if filename in self._skipped:
+            print("Skipping test '%s' (%d/%d)" % (os.path.join(self._docsdir, filename), n_doc, total_docs))
+            return
+
         refs_path = os.path.join(self._refsdir, filename)
         try:
             os.makedirs(refs_path)
@@ -55,7 +60,7 @@ class TestReferences:
 
         for backend in backends:
             if not self.config.force and backend.has_md5(refs_path):
-                print "Checksum file found, skipping '%s' for %s backend" % (doc_path, backend.get_name())
+                print "Checksum file found, skipping '%s' for %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs)
                 continue
             print "Creating refs for '%s' using %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs)
             if backend.create_refs(doc_path, refs_path):

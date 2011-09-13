@@ -32,4 +32,24 @@ def get_document_paths_from_dir(docsdir):
     paths.sort()
     return paths, n_paths
 
+def get_skipped_tests(docsdir):
+    from Config import Config
+    config = Config()
+    if config.skipped_file:
+        skipped_file = config.skipped_file
+    elif os.path.exists(os.path.join(docsdir, 'Skipped')):
+        skipped_file = os.path.join(docsdir, 'Skipped')
+    else:
+        return []
+
+    skipped = []
+    f = open(skipped_file, 'r')
+    for line in f.readlines():
+        line = line.rstrip('\n \t\b\r')
+        if not line or line[0] == '#':
+            continue
+        skipped.append(line)
+    f.close()
+    return skipped
+
 

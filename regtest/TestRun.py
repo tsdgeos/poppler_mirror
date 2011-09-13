@@ -18,7 +18,7 @@
 
 from backends import get_backend, get_all_backends
 from Config import Config
-from Utils import get_document_paths_from_dir
+from Utils import get_document_paths_from_dir, get_skipped_tests
 import sys
 import os
 import errno
@@ -29,6 +29,7 @@ class TestRun:
         self._docsdir = docsdir
         self._refsdir = refsdir
         self._outdir = outdir
+        self._skipped = get_skipped_tests(docsdir)
         self.config = Config()
 
         # Results
@@ -105,6 +106,10 @@ class TestRun:
             return
 
     def run_test(self, filename, n_doc = 1, total_docs = 1):
+        if filename in self._skipped:
+            print("Skipping test '%s' (%d/%d)" % (os.path.join(self._docsdir, filename), n_doc, total_docs))
+            return
+
         out_path = os.path.join(self._outdir, filename)
         try:
             os.makedirs(out_path)
@@ -117,7 +122,7 @@ class TestRun:
         refs_path = os.path.join(self._refsdir, filename)
 
         if not os.path.isdir(refs_path):
-            print "Reference dir not found for %s, skipping" % (doc_path)
+            print "Reference dir not found for %s, skipping (%d/%d)" % (doc_path, n_doc, total_docs)
             return
 
         if self.config.backends:

@@ -49,11 +49,15 @@ def main(args):
     parser.add_argument('--help-command', metavar = 'COMMAND',
                         action = HelpAction,
                         help = 'Show help for a given command')
-    parser.add_argument('--utils-dir', action = 'store', dest = 'utils_dir', default = os.path.abspath("../utils"),
+    parser.add_argument('--utils-dir',
+                        action = 'store', dest = 'utils_dir', default = os.path.abspath("../utils"),
                         help = 'Directory of poppler utils used for the tests')
     parser.add_argument('-b', '--backends',
                         action = ListAction, dest = 'backends',
                         help = 'List of backends that will be used (separated by comma)')
+    parser.add_argument('--skip', metavar = 'FILE',
+                        action = 'store', dest = 'skipped_file',
+                        help = 'File containing tests to skip')
 
     ns, args = parser.parse_known_args(args)
     if not args:
