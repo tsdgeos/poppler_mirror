@@ -18,6 +18,7 @@
 
 from backends import get_backend, get_all_backends
 from Config import Config
+from Utils import get_document_paths_from_dir
 import sys
 import os
 import errno
@@ -46,7 +47,7 @@ class TestRun:
         except:
             raise
 
-    def test(self, refs_path, doc_path, test_path, backend):
+    def test(self, refs_path, doc_path, test_path, backend, n_doc, total_docs):
         # First check whether there are test results for the backend
         ref_has_md5 = backend.has_md5(refs_path)
         ref_is_crashed = backend.is_crashed(refs_path)
@@ -56,7 +57,7 @@ class TestRun:
             return
 
         self._n_tests += 1
-        sys.stdout.write("Testing '%s' using %s backend: " % (doc_path, backend.get_name()))
+        sys.stdout.write("Testing '%s' using %s backend (%d/%d): " % (doc_path, backend.get_name(), n_doc, total_docs))
         sys.stdout.flush()
         test_has_md5 = backend.create_refs(doc_path, test_path)
 
@@ -103,7 +104,7 @@ class TestRun:
             self._failed_status_error("%s (%s)" % (doc_path, backend.get_name()))
             return
 
-    def run_test(self, filename):
+    def run_test(self, filename, n_doc = 1, total_docs = 1):
         out_path = os.path.join(self._outdir, filename)
         try:
             os.makedirs(out_path)
@@ -125,16 +126,14 @@ class TestRun:
             backends = get_all_backends()
 
         for backend in backends:
-            self.test(refs_path, doc_path, out_path, backend)
+            self.test(refs_path, doc_path, out_path, backend, n_doc, total_docs)
 
     def run_tests(self):
-        for root, dirs, files in os.walk(self._docsdir, False):
-              for entry in files:
-                  if not entry.lower().endswith('.pdf'):
-                      continue
-
-                  test_path = os.path.join(root[len(self._docsdir):], entry)
-                  self.run_test(test_path.lstrip(os.path.sep))
+        docs, total_docs = get_document_paths_from_dir(self._docsdir)
+        n_doc = 0
+        for doc in docs:
+            n_doc += 1
+            self.run_test(doc, n_doc, total_docs)
 
     def summary(self):
         if not self._n_tests:

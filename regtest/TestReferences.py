@@ -20,6 +20,7 @@ import os
 import errno
 from backends import get_backend, get_all_backends
 from Config import Config
+from Utils import get_document_paths_from_dir
 
 class TestReferences:
 
@@ -36,7 +37,7 @@ class TestReferences:
         except:
             raise
 
-    def create_refs_for_file(self, filename):
+    def create_refs_for_file(self, filename, n_doc = 1, total_docs = 1):
         refs_path = os.path.join(self._refsdir, filename)
         try:
             os.makedirs(refs_path)
@@ -56,18 +57,13 @@ class TestReferences:
             if not self.config.force and backend.has_md5(refs_path):
                 print "Checksum file found, skipping '%s' for %s backend" % (doc_path, backend.get_name())
                 continue
-            print "Creating refs for '%s' using %s backend" % (doc_path, backend.get_name())
+            print "Creating refs for '%s' using %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs)
             if backend.create_refs(doc_path, refs_path):
                 backend.create_checksums(refs_path, self.config.checksums_only)
 
     def create_refs(self):
-        for root, dirs, files in os.walk(self._docsdir, False):
-            for entry in files:
-                if not entry.lower().endswith('.pdf'):
-                    continue
-
-                test_path = os.path.join(root[len(self._docsdir):], entry)
-                self.create_refs_for_file(test_path.lstrip(os.path.sep))
-
-
-
+        docs, total_docs = get_document_paths_from_dir(self._docsdir)
+        n_doc = 0
+        for doc in docs:
+            n_doc += 1
+            self.create_refs_for_file(doc, n_doc, total_docs)
