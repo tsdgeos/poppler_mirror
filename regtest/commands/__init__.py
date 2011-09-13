@@ -83,11 +83,11 @@ def print_help():
         except ImportError:
             pass
 
-    print "Commands are:"
+    print("Commands are:")
     commands = [(x.name, x.description) for x in _commands.values()]
     commands.sort()
     for name, description in commands:
-        print "  %-15s %s" % (name, description)
+        print("  %-15s %s" % (name, description))
 
     print
-    print "For more information run 'poppler-regtest --help-command <command>'"
+    print("For more information run 'poppler-regtest --help-command <command>'")

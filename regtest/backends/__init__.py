@@ -46,7 +46,7 @@ class Backend:
             if not entry.startswith(self._name) or entry.endswith('.md5'):
                 continue
             ref_path = os.path.join(refs_path, entry)
-            f = open(ref_path, 'r')
+            f = open(ref_path, 'rb')
             md5_file.write("%s %s\n" % (md5(f.read()).hexdigest(), ref_path))
             f.close()
             if delete_refs:
@@ -66,21 +66,21 @@ class Backend:
             basename = os.path.basename(ref_path)
             if not basename in tests:
                 retval = False
-                print "%s found in md5 ref file but missing in output dir %s" % (basename, out_path)
+                print("%s found in md5 ref file but missing in output dir %s" % (basename, out_path))
                 continue
 
             result_path = os.path.join(out_path, basename)
-            f = open(result_path, 'r')
+            f = open(result_path, 'rb')
             matched = md5sum == md5(f.read()).hexdigest()
             f.close()
             if matched:
                 if remove_results:
                     os.remove(result_path)
             else:
-                print "Differences found in %s" % (basename)
+                print("Differences found in %s" % (basename))
                 if create_diffs:
                     if not os.path.exists(ref_path):
-                        print "Reference file %s not found, skipping diff for %s" % (ref_path, result_path)
+                        print("Reference file %s not found, skipping diff for %s" % (ref_path, result_path))
                     else:
                         try:
                             self._create_diff(ref_path, result_path)
@@ -115,7 +115,7 @@ class Backend:
     def __create_stderr_file(self, stderr, out_path):
         if not stderr:
             return
-        stderr_file = open(out_path + '.stderr', 'w')
+        stderr_file = open(out_path + '.stderr', 'wb')
         stderr_file.write(stderr)
         stderr_file.close()
 

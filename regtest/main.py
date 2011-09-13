@@ -71,7 +71,7 @@ def main(args):
         sys.stderr.write("Unknown command: %s\n" % (args[0]))
         commands.print_help()
         sys.exit(1)
-    except backends.UnknownBackendError, e:
+    except backends.UnknownBackendError as e:
         sys.stderr.write(str(e) + "\n")
         sys.stdout.write("Backends are: %s\n" % (", ".join([backend.get_name() for backend in backends.get_all_backends()])))
         sys.exit(1)

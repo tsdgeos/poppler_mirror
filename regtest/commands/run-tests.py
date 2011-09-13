@@ -64,6 +64,6 @@ class RunTests(Command):
         else:
             tests.run_test(os.path.basename(doc))
         tests.summary()
-        print "Tests run in %s" % (t.elapsed_str())
+        print("Tests run in %s" % (t.elapsed_str()))
 
 register_command('run-tests', RunTests)

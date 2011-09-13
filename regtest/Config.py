@@ -27,6 +27,6 @@ class Config:
 
 if __name__ == '__main__':
     c = Config({'foo' : 25})
-    print c.foo
+    print(c.foo)
     cc = Config()
-    print cc.foo
+    print(cc.foo)

@@ -61,13 +61,13 @@ if __name__ == '__main__':
 
     t = Timer()
     sleep(5)
-    print "Elapsed: %s" % (t.elapsed_str())
+    print("Elapsed: %s" % (t.elapsed_str()))
     sleep(1)
-    print "Elapsed: %s" % (t.elapsed_str())
+    print("Elapsed: %s" % (t.elapsed_str()))
 
     t.start()
     sleep(2)
     t.stop()
-    print "Elapsed: %s" % (t.elapsed_str())
+    print("Elapsed: %s" % (t.elapsed_str()))
     sleep(2)
-    print "Elapsed: %s" % (t.elapsed_str())
+    print("Elapsed: %s" % (t.elapsed_str()))

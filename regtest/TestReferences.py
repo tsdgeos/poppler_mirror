@@ -32,7 +32,7 @@ class TestReferences:
 
         try:
             os.makedirs(self._refsdir)
-        except OSError, e:
+        except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
         except:
@@ -46,7 +46,7 @@ class TestReferences:
         refs_path = os.path.join(self._refsdir, filename)
         try:
             os.makedirs(refs_path)
-        except OSError, e:
+        except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
         except:
@@ -60,9 +60,9 @@ class TestReferences:
 
         for backend in backends:
             if not self.config.force and backend.has_md5(refs_path):
-                print "Checksum file found, skipping '%s' for %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs)
+                print("Checksum file found, skipping '%s' for %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs))
                 continue
-            print "Creating refs for '%s' using %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs)
+            print("Creating refs for '%s' using %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs))
             if backend.create_refs(doc_path, refs_path):
                 backend.create_checksums(refs_path, self.config.checksums_only)
 
