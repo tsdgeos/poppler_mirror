@@ -62,7 +62,7 @@ class Backend:
         tests = os.listdir(out_path)
 
         for line in md5_file.readlines():
-            md5sum, ref_path = line.strip('\n').split(' ')
+            md5sum, ref_path = line.strip('\n').split(' ', 1)
             basename = os.path.basename(ref_path)
             if not basename in tests:
                 retval = False
