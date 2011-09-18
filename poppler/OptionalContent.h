@@ -50,7 +50,8 @@ public:
 
 private:
   GBool ok;
-  
+
+  GBool evalOCVisibilityExpr(Object *expr, int recursion);
   bool allOn( Array *ocgArray );
   bool allOff( Array *ocgArray );
   bool anyOn( Array *ocgArray );

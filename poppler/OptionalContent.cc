@@ -25,6 +25,10 @@
 // #include "PDFDocEncoding.h"
 #include "OptionalContent.h"
 
+// Max depth of nested visibility expressions.  This is used to catch
+// infinite loops in the visibility expression object structure.
+#define visibilityExprRecursionLimit 50
+
 //------------------------------------------------------------------------
 
 OCGs::OCGs(Object *ocgObject, XRef *xref) :
@@ -174,6 +178,7 @@ bool OCGs::optContentIsVisible( Object *dictRef )
   Object dictType;
   Object ocg;
   Object policy;
+  Object ve;
   bool result = true;
   dictRef->fetch( m_xref, &dictObj );
   if ( ! dictObj.isDict() ) {
@@ -185,32 +190,34 @@ bool OCGs::optContentIsVisible( Object *dictRef )
   // printf("checking if optContent is visible\n");
   dict->lookup("Type", &dictType);
   if (dictType.isName("OCMD")) {
-    // If we supported Visibility Expressions, we'd check
-    // for a VE entry, and then call out to the parser here...
-    // printf("found OCMD dict\n");
-    dict->lookup("P", &policy);
-    dict->lookupNF("OCGs", &ocg);
-    if (ocg.isArray()) {
-      if (policy.isName("AllOn")) {
-	result = allOn( ocg.getArray() );
-      } else if (policy.isName("AllOff")) {
-	result = allOff( ocg.getArray() );
-      } else if (policy.isName("AnyOff")) {
-	result = anyOff( ocg.getArray() );
-      } else if ( (!policy.isName()) || (policy.isName("AnyOn") ) ) {
-	// this is the default
-	result = anyOn( ocg.getArray() );
+    if (dict->lookup("VE", &ve)->isArray()) {
+      result = evalOCVisibilityExpr(&ve, 0);
+    } else {
+      dict->lookupNF("OCGs", &ocg);
+      if (ocg.isArray()) {
+        dict->lookup("P", &policy);
+        if (policy.isName("AllOn")) {
+          result = allOn( ocg.getArray() );
+        } else if (policy.isName("AllOff")) {
+          result = allOff( ocg.getArray() );
+        } else if (policy.isName("AnyOff")) {
+          result = anyOff( ocg.getArray() );
+        } else if ( (!policy.isName()) || (policy.isName("AnyOn") ) ) {
+          // this is the default
+          result = anyOn( ocg.getArray() );
+        }
+        policy.free();
+      } else if (ocg.isRef()) {
+        OptionalContentGroup *oc = findOcgByRef( ocg.getRef() );
+        if ( oc && oc->getState() == OptionalContentGroup::Off ) {
+          result = false;
+        } else {
+          result = true ;
+        }
       }
-    } else if (ocg.isRef()) {
-      OptionalContentGroup* oc = findOcgByRef( ocg.getRef() );      
-      if ( oc && oc->getState() == OptionalContentGroup::Off ) {
-	result = false;
-      } else {
-	result = true ;
-      }
+      ocg.free();
     }
-    ocg.free();
-    policy.free();
+    ve.free();
   } else if ( dictType.isName("OCG") ) {
     OptionalContentGroup* oc = findOcgByRef( dictRef->getRef() );
     if ( oc && oc->getState() == OptionalContentGroup::Off ) {
@@ -221,6 +228,64 @@ bool OCGs::optContentIsVisible( Object *dictRef )
   dictObj.free();
   // printf("visibility: %s\n", result? "on" : "off");
   return result;
+}
+
+GBool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
+  OptionalContentGroup *ocg;
+  Object expr2, op, obj;
+  GBool ret;
+  int i;
+
+  if (recursion > visibilityExprRecursionLimit) {
+    error(errSyntaxError, -1,
+	  "Loop detected in optional content visibility expression");
+    return gTrue;
+  }
+  if (expr->isRef()) {
+    if ((ocg = findOcgByRef(expr->getRef()))) {
+      return ocg->getState();
+    }
+  }
+  expr->fetch(m_xref, &expr2);
+  if (!expr2.isArray() || expr2.arrayGetLength() < 1) {
+    error(errSyntaxError, -1,
+	  "Invalid optional content visibility expression");
+    expr2.free();
+    return gTrue;
+  }
+  expr2.arrayGet(0, &op);
+  if (op.isName("Not")) {
+    if (expr2.arrayGetLength() == 2) {
+      expr2.arrayGetNF(1, &obj);
+      ret = !evalOCVisibilityExpr(&obj, recursion + 1);
+      obj.free();
+    } else {
+      error(errSyntaxError, -1,
+	    "Invalid optional content visibility expression");
+      ret = gTrue;
+    }
+  } else if (op.isName("And")) {
+    ret = gTrue;
+    for (i = 1; i < expr2.arrayGetLength() && ret; ++i) {
+      expr2.arrayGetNF(i, &obj);
+      ret = evalOCVisibilityExpr(&obj, recursion + 1);
+      obj.free();
+    }
+  } else if (op.isName("Or")) {
+    ret = gFalse;
+    for (i = 1; i < expr2.arrayGetLength() && !ret; ++i) {
+      expr2.arrayGetNF(i, &obj);
+      ret = evalOCVisibilityExpr(&obj, recursion + 1);
+      obj.free();
+    }
+  } else {
+    error(errSyntaxError, -1,
+	  "Invalid optional content visibility expression");
+    ret = gTrue;
+  }
+  op.free();
+  expr2.free();
+  return ret;
 }
 
 bool OCGs::allOn( Array *ocgArray )
