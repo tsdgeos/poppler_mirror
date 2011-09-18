@@ -4804,7 +4804,8 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs) {
 	  bool visible = contentConfig->optContentIsVisible( &markedContent );
 	  MarkedContentStack *mc = mcStack;
 	  mc->ocSuppressed = !(visible);
-       }
+        }
+        markedContent.free();
       } else {
 	error(getPos(), "DID NOT find %s", name1);
       }
