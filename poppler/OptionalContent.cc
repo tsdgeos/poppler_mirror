@@ -360,6 +360,7 @@ bool OCGs::anyOff( Array *ocgArray )
 
 OptionalContentGroup::OptionalContentGroup(Dict *ocgDict) : m_name(NULL)
 {
+  Object obj1, obj2, obj3;
   Object ocgName;
   ocgDict->lookup("Name", &ocgName);
   if (!ocgName.isString()) {
@@ -368,6 +369,33 @@ OptionalContentGroup::OptionalContentGroup(Dict *ocgDict) : m_name(NULL)
     m_name = new GooString( ocgName.getString() );
   }
   ocgName.free();
+
+  viewState = printState = ocUsageUnset;
+  if (ocgDict->lookup("Usage", &obj1)->isDict()) {
+    if (obj1.dictLookup("View", &obj2)->isDict()) {
+      if (obj2.dictLookup("ViewState", &obj3)->isName()) {
+	if (obj3.isName("ON")) {
+	  viewState = ocUsageOn;
+	} else {
+	  viewState = ocUsageOff;
+	}
+      }
+      obj3.free();
+    }
+    obj2.free();
+    if (obj1.dictLookup("Print", &obj2)->isDict()) {
+      if (obj2.dictLookup("PrintState", &obj3)->isName()) {
+	if (obj3.isName("ON")) {
+	  printState = ocUsageOn;
+	} else {
+	  printState = ocUsageOff;
+	}
+      }
+      obj3.free();
+    }
+    obj2.free();
+  }
+  obj1.free();
 }
 
 OptionalContentGroup::OptionalContentGroup(GooString *label)

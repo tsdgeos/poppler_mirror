@@ -70,6 +70,13 @@ class OptionalContentGroup {
 public:
   enum State { On, Off };
 
+  // Values from the optional content usage dictionary.
+  enum UsageState {
+    ocUsageOn,
+    ocUsageOff,
+    ocUsageUnset
+  };
+
   OptionalContentGroup(Dict *dict);
 
   OptionalContentGroup(GooString *label);
@@ -84,11 +91,16 @@ public:
   State getState() { return m_state; };
   void setState(State state) { m_state = state; };
 
+  UsageState getViewState() { return viewState; }
+  UsageState getPrintState() { return printState; }
+
 private:
   XRef *xref;
   GooString *m_name;
   Ref m_ref;
-  State m_state;  
+  State m_state;
+  UsageState viewState;	 // suggested state when viewing
+  UsageState printState; // suggested state when printing
 };
 
 #endif
