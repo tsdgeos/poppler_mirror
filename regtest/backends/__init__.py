@@ -38,12 +38,19 @@ class Backend:
     def get_name(self):
         return self._name
 
+    def __should_have_checksum(self, entry):
+        if not entry.startswith(self._name):
+            return False
+
+        name, ext = os.path.splitext(entry)
+        return ext not in ('.md5', '.crashed', '.failed', '.stderr');
+
     def create_checksums(self, refs_path, delete_refs = False):
         path = os.path.join(refs_path, self._name)
         md5_file = open(path + '.md5', 'w')
 
         for entry in os.listdir(refs_path):
-            if not entry.startswith(self._name) or entry.endswith('.md5'):
+            if not self.__should_have_checksum(entry):
                 continue
             ref_path = os.path.join(refs_path, entry)
             f = open(ref_path, 'rb')
@@ -67,6 +74,9 @@ class Backend:
             if not basename in tests:
                 retval = False
                 print("%s found in md5 ref file but missing in output dir %s" % (basename, out_path))
+                continue
+
+            if not self.__should_have_checksum(basename):
                 continue
 
             result_path = os.path.join(out_path, basename)

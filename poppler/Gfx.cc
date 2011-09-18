@@ -4814,6 +4814,7 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs) {
       } else {
 	error(errSyntaxError, getPos(), "DID NOT find {0:s}", name1);
       }
+      markedContent.free();
     } else {
       error(errSyntaxError, getPos(), "insufficient arguments for Marked Content");
     }
