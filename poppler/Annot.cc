@@ -1011,9 +1011,6 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   obj1.free();
 
   dict->lookupNF("OC", &oc);
-  if (!oc.isRef() && !oc.isNull()) {
-    error (errSyntaxError, -1, "Annotation OC value not null or dict: {0:d}", oc.getType());
-  }
 }
 
 void Annot::getRect(double *x1, double *y1, double *x2, double *y2) const {
@@ -1338,7 +1335,7 @@ GBool Annot::isVisible(GBool printing) {
 
   // check the OC
   OCGs *optContentConfig = doc->getCatalog()->getOptContentConfig();
-  if (optContentConfig && oc.isRef()) {
+  if (optContentConfig) {
     if (! optContentConfig->optContentIsVisible(&oc))
       return gFalse;
   }

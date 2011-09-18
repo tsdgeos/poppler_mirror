@@ -3988,16 +3988,10 @@ void Gfx::opXObject(Object args[], int numArgs) {
   }
 
   obj1.streamGetDict()->lookupNF("OC", &obj2);
-  if (obj2.isNull()) {
-    // No OC entry - so we proceed as normal
-  } else if (obj2.isRef()) {
-    if ( catalog->getOptContentConfig() && ! catalog->getOptContentConfig()->optContentIsVisible( &obj2 ) ) {
-      obj2.free();
-      obj1.free();
-      return;
-    }
-  } else {
-    error(errSyntaxError, getPos(), "XObject OC value not null or dict: {0:d}", obj2.getType());
+  if (catalog->getOptContentConfig() && !catalog->getOptContentConfig()->optContentIsVisible(&obj2)) {
+    obj2.free();
+    obj1.free();
+    return;
   }
   obj2.free();
 
@@ -4804,11 +4798,9 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs) {
       char* name1 = args[1].getName();
       Object markedContent;
       if ( res->lookupMarkedContentNF( name1, &markedContent ) ) {
-	if ( markedContent.isRef() ) {
-	  bool visible = contentConfig->optContentIsVisible( &markedContent );
-	  MarkedContentStack *mc = mcStack;
-	  mc->ocSuppressed = !(visible);
-       }
+        bool visible = contentConfig->optContentIsVisible(&markedContent);
+        MarkedContentStack *mc = mcStack;
+        mc->ocSuppressed = !(visible);
       } else {
 	error(errSyntaxError, getPos(), "DID NOT find {0:s}", name1);
       }
