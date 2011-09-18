@@ -4055,6 +4055,16 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
   // get stream dict
   dict = str->getDict();
 
+  // check for optional content key
+  if (ref) {
+    dict->lookupNF("OC", &obj1);
+    if (catalog->getOptContentConfig() && !catalog->getOptContentConfig()->optContentIsVisible(&obj1)) {
+      obj1.free();
+      return;
+    }
+    obj1.free();
+  }
+
   // get size
   dict->lookup("Width", &obj1);
   if (obj1.isNull()) {
@@ -4461,7 +4471,6 @@ void Gfx::doForm(Object *str) {
   // check for optional content key
   dict->lookupNF("OC", &obj1);
   if (catalog->getOptContentConfig() && !catalog->getOptContentConfig()->optContentIsVisible(&obj1)) {
-    obj2.free();
     obj1.free();
     return;
   }
