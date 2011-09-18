@@ -50,7 +50,6 @@ class FormFieldChoice;
 class PDFRectangle;
 class Movie;
 class LinkAction;
-class OCGs;
 class Sound;
 
 enum AnnotLineEndingStyle {
@@ -553,7 +552,6 @@ protected:
                          //   for the normal appearance
   GooString *appearState;           // AS
   int treeKey;                      // Struct Parent;
-  OCGs *optContentConfig;           // Optional content config
   Object oc;                        // OC
 
   PDFDoc *doc;
