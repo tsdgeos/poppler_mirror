@@ -3987,14 +3987,6 @@ void Gfx::opXObject(Object args[], int numArgs) {
     return;
   }
 
-  obj1.streamGetDict()->lookupNF("OC", &obj2);
-  if (catalog->getOptContentConfig() && !catalog->getOptContentConfig()->optContentIsVisible(&obj2)) {
-    obj2.free();
-    obj1.free();
-    return;
-  }
-  obj2.free();
-
 #if OPI_SUPPORT
   obj1.streamGetDict()->lookup("OPI", &opiDict);
   if (opiDict.isDict()) {
@@ -4463,6 +4455,15 @@ void Gfx::doForm(Object *str) {
   dict->lookup("FormType", &obj1);
   if (!(obj1.isNull() || (obj1.isInt() && obj1.getInt() == 1))) {
     error(errSyntaxError, getPos(), "Unknown form type");
+  }
+  obj1.free();
+
+  // check for optional content key
+  dict->lookupNF("OC", &obj1);
+  if (catalog->getOptContentConfig() && !catalog->getOptContentConfig()->optContentIsVisible(&obj1)) {
+    obj2.free();
+    obj1.free();
+    return;
   }
   obj1.free();
 
