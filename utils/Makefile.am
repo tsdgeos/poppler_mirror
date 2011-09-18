@@ -62,6 +62,8 @@ dist_man1_MANS =				\
 	pdftops.1				\
 	pdftotext.1				\
 	pdftohtml.1				\
+	pdfextract.1				\
+	pdfmerge.1				\
 	$(pdftoppm_manpage)			\
 	$(pdftocairo_manpage)
 
