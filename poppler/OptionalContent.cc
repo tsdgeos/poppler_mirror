@@ -243,7 +243,7 @@ GBool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
   }
   if (expr->isRef()) {
     if ((ocg = findOcgByRef(expr->getRef()))) {
-      return ocg->getState();
+      return ocg->getState() == OptionalContentGroup::On;
     }
   }
   expr->fetch(m_xref, &expr2);
