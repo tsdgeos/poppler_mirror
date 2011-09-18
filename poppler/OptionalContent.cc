@@ -29,6 +29,10 @@
 // infinite loops in the visibility expression object structure.
 #define visibilityExprRecursionLimit 50
 
+// Max depth of nested display nodes.  This is used to catch infinite
+// loops in the "Order" object structure.
+#define displayNodeRecursionLimit 50
+
 //------------------------------------------------------------------------
 
 OCGs::OCGs(Object *ocgObject, XRef *xref) :
@@ -37,6 +41,7 @@ OCGs::OCGs(Object *ocgObject, XRef *xref) :
   // we need to parse the dictionary here, and build optionalContentGroups
   ok = gTrue;
   optionalContentGroups = new GooList();
+  display = NULL;
 
   Object ocgList;
   ocgObject->dictLookup("OCGs", &ocgList);
@@ -145,6 +150,8 @@ OCGs::~OCGs()
 {
   deleteGooList(optionalContentGroups, OptionalContentGroup);
   order.free();
+  if (display)
+    delete display;
   rbgroups.free();
 }
 
@@ -167,6 +174,17 @@ OptionalContentGroup* OCGs::findOcgByRef( const Ref &ref)
 
   // not found
   return NULL;
+}
+
+OCDisplayNode *OCGs::getDisplayRoot()
+{
+  if (display)
+    return display;
+
+  if (order.isArray())
+    display = OCDisplayNode::parse(&order, this, m_xref);
+
+  return display;
 }
 
 bool OCGs::optContentIsVisible( Object *dictRef )
@@ -424,3 +442,112 @@ OptionalContentGroup::~OptionalContentGroup()
   delete m_name;
 }
 
+//------------------------------------------------------------------------
+
+OCDisplayNode *OCDisplayNode::parse(Object *obj, OCGs *oc,
+				    XRef *xref, int recursion) {
+  Object obj2, obj3;
+  OptionalContentGroup *ocgA;
+  OCDisplayNode *node, *child;
+  int i;
+
+  if (recursion > displayNodeRecursionLimit) {
+    error(errSyntaxError, -1, "Loop detected in optional content order");
+    return NULL;
+  }
+  if (obj->isRef()) {
+    if ((ocgA = oc->findOcgByRef(obj->getRef()))) {
+      return new OCDisplayNode(ocgA);
+    }
+  }
+  obj->fetch(xref, &obj2);
+  if (!obj2.isArray()) {
+    obj2.free();
+    return NULL;
+  }
+  i = 0;
+  if (obj2.arrayGetLength() >= 1) {
+    if (obj2.arrayGet(0, &obj3)->isString()) {
+      node = new OCDisplayNode(obj3.getString());
+      i = 1;
+    } else {
+      node = new OCDisplayNode();
+    }
+    obj3.free();
+  } else {
+    node = new OCDisplayNode();
+  }
+  for (; i < obj2.arrayGetLength(); ++i) {
+    obj2.arrayGetNF(i, &obj3);
+    if ((child = OCDisplayNode::parse(&obj3, oc, xref, recursion + 1))) {
+      if (!child->ocg && !child->name && node->getNumChildren() > 0) {
+	node->getChild(node->getNumChildren() - 1)->addChildren(child->takeChildren());
+	delete child;
+      } else {
+	node->addChild(child);
+      }
+    }
+    obj3.free();
+  }
+  obj2.free();
+  return node;
+}
+
+OCDisplayNode::OCDisplayNode() {
+  name = NULL;
+  ocg = NULL;
+  children = NULL;
+}
+
+OCDisplayNode::OCDisplayNode(GooString *nameA) {
+  name = new GooString(nameA);
+  ocg = NULL;
+  children = NULL;
+}
+
+OCDisplayNode::OCDisplayNode(OptionalContentGroup *ocgA) {
+  name = (ocgA->getName()) ? ocgA->getName()->copy() : NULL;
+  ocg = ocgA;
+  children = NULL;
+}
+
+void OCDisplayNode::addChild(OCDisplayNode *child) {
+  if (!children) {
+    children = new GooList();
+  }
+  children->append(child);
+}
+
+void OCDisplayNode::addChildren(GooList *childrenA) {
+  if (!children) {
+    children = new GooList();
+  }
+  children->append(childrenA);
+  delete childrenA;
+}
+
+GooList *OCDisplayNode::takeChildren() {
+  GooList *childrenA;
+
+  childrenA = children;
+  children = NULL;
+  return childrenA;
+}
+
+OCDisplayNode::~OCDisplayNode() {
+  gfree(name);
+  if (children) {
+    deleteGooList(children, OCDisplayNode);
+  }
+}
+
+int OCDisplayNode::getNumChildren() {
+  if (!children) {
+    return 0;
+  }
+  return children->getLength();
+}
+
+OCDisplayNode *OCDisplayNode::getChild(int idx) {
+  return (OCDisplayNode *)children->get(idx);
+}
