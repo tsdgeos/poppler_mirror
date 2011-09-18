@@ -165,8 +165,6 @@ OptionalContentGroup* OCGs::findOcgByRef( const Ref &ref)
     }
   }
 
-  error(errSyntaxWarning, -1, "Could not find a OCG with Ref ({0:d}:{1:d})", ref.num, ref.gen);
-
   // not found
   return NULL;
 }
