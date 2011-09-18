@@ -178,6 +178,16 @@ bool OCGs::optContentIsVisible( Object *dictRef )
   Object policy;
   Object ve;
   bool result = true;
+
+  if (dictRef->isNull())
+    return result;
+
+  if (dictRef->isRef()) {
+    OptionalContentGroup *oc = findOcgByRef(dictRef->getRef());
+    if (oc)
+      return oc->getState() == OptionalContentGroup::On;
+  }
+
   dictRef->fetch( m_xref, &dictObj );
   if ( ! dictObj.isDict() ) {
     error(errSyntaxWarning, -1, "Unexpected oc reference target: {0:d}", dictObj.getType() );
