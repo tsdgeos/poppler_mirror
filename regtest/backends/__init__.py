@@ -71,12 +71,12 @@ class Backend:
         for line in md5_file.readlines():
             md5sum, ref_path = line.strip('\n').split(' ', 1)
             basename = os.path.basename(ref_path)
+            if not self.__should_have_checksum(basename):
+                continue
+
             if not basename in tests:
                 retval = False
                 print("%s found in md5 ref file but missing in output dir %s" % (basename, out_path))
-                continue
-
-            if not self.__should_have_checksum(basename):
                 continue
 
             result_path = os.path.join(out_path, basename)
