@@ -341,6 +341,7 @@ protected:
   cairo_pattern_t *group;
   cairo_pattern_t *shape;
   cairo_pattern_t *mask;
+  cairo_matrix_t mask_matrix;
   cairo_surface_t *cairo_shape_surface;
   cairo_t *cairo_shape;
   int knockoutCount;
@@ -351,8 +352,9 @@ protected:
   } * groupColorSpaceStack;
 
   struct MaskStack {
-      cairo_pattern_t *mask;
-      struct MaskStack *next;
+    cairo_pattern_t *mask;
+    cairo_matrix_t mask_matrix;
+    struct MaskStack *next;
   } *maskStack;
 
   GBool haveCSPattern;	// set if text has been drawn with a
