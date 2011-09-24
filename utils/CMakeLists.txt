@@ -109,6 +109,7 @@ set(pdfextract_SOURCES ${common_srcs}
 add_executable(pdfextract ${pdfextract_SOURCES})
 target_link_libraries(pdfextract ${common_libs})
 install(TARGETS pdfextract DESTINATION bin)
+install(FILES pdfextract.1 DESTINATION share/man/man1)
 
 # pdfmerge
 set(pdfmerge_SOURCES ${common_srcs}
@@ -117,3 +118,4 @@ set(pdfmerge_SOURCES ${common_srcs}
 add_executable(pdfmerge ${pdfmerge_SOURCES})
 target_link_libraries(pdfmerge ${common_libs})
 install(TARGETS pdfmerge DESTINATION bin)
+install(FILES pdfmerge.1 DESTINATION share/man/man1)

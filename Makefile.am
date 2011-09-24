@@ -29,7 +29,7 @@ if BUILD_UTILS
 utils_subdir = utils
 endif
 
-SUBDIRS = goo fofi $(splash_subdir) poppler $(utils_subdir) $(glib_subdir) $(qt_subdir) test $(qt4_subdir) $(cpp_subdir)
+SUBDIRS = goo fofi $(splash_subdir) poppler $(utils_subdir) $(glib_subdir) test $(qt4_subdir) $(cpp_subdir)
 
 EXTRA_DIST =					\
 	README-XPDF				\

@@ -63,6 +63,10 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
     lastPage = doc->getNumPages();
   if (firstPage == 0)
     firstPage = 1;
+  if (firstPage != lastPage && strstr(destFileName, "%d") == NULL) {
+    error(-1, "'%s' must contain '%%d' if more than one page should be extracted", destFileName);
+    return false;
+  }
   for (int pageNo = firstPage; pageNo <= lastPage; pageNo++) {
     sprintf (pathName, destFileName, pageNo);
     GooString *gpageName = new GooString (pathName);

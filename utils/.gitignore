@@ -2,9 +2,11 @@
 .libs
 Makefile
 Makefile.in
+pdfextract
 pdffonts
 pdfimages
 pdfinfo
+pdfmerge
 pdftohtml
 pdftoppm
 pdftops
