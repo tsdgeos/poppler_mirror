@@ -145,12 +145,6 @@ void OutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str,
   drawImage(state, ref, str, width, height, colorMap, interpolate, NULL, gFalse);
 }
 
-void OutputDev::endMarkedContent(GfxState *state) {
-}
-
-void OutputDev::beginMarkedContent(char *name, Dict *properties) {
-}
-
 void OutputDev::markPoint(char *name) {
 }
 

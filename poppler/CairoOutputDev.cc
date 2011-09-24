@@ -1324,16 +1324,16 @@ void CairoOutputDev::endTextObject(GfxState *state) {
   }
 }
 
-void CairoOutputDev::beginMarkedContent(char *name, Dict *properties)
+void CairoOutputDev::beginActualText(GfxState *state, GooString *text)
 {
   if (text)
-    actualText->beginMC(properties);
+    actualText->begin(state, text);
 }
 
-void CairoOutputDev::endMarkedContent(GfxState *state)
+void CairoOutputDev::endActualText(GfxState *state)
 {
   if (text)
-    actualText->endMC(state);
+    actualText->end(state);
 }
 
 static inline int splashRound(SplashCoord x) {

@@ -5037,7 +5037,7 @@ ActualText::ActualText(TextPage *out) {
   out->incRefCnt();
   text = out;
   actualText = NULL;
-  actualTextBMCLevel = 0;
+  actualTextNBytes = 0;
 }
 
 ActualText::~ActualText() {
@@ -5049,98 +5049,73 @@ ActualText::~ActualText() {
 void ActualText::addChar(GfxState *state, double x, double y,
 			 double dx, double dy,
 			 CharCode c, int nBytes, Unicode *u, int uLen) {
-  if (actualTextBMCLevel == 0) {
+  if (!actualText) {
     text->addChar(state, x, y, dx, dy, c, nBytes, u, uLen);
-  } else {
-    // Inside ActualText span.
-    if (newActualTextSpan) {
-      actualText_x = x;
-      actualText_y = y;
-      actualText_dx = dx;
-      actualText_dy = dy;
-      newActualTextSpan = gFalse;
-    } else {
-      if (x < actualText_x)
-	actualText_x = x;
-      if (y < actualText_y)
-	actualText_y = y;
-      if (x + dx > actualText_x + actualText_dx)
-	actualText_dx = x + dx - actualText_x;
-      if (y + dy > actualText_y + actualText_dy)
-	actualText_dy = y + dy - actualText_y;
-    }
-  }
-}
-
-void ActualText::beginMC(Dict *properties) {
-  if (actualTextBMCLevel > 0) {
-    // Already inside a ActualText span.
-    actualTextBMCLevel++;
     return;
   }
 
-  Object obj;
-  if (properties && properties->lookup("ActualText", &obj)) {
-    if (obj.isString()) {
-      actualText = obj.getString();
-      actualTextBMCLevel = 1;
-      newActualTextSpan = gTrue;
-    }
+  // Inside ActualText span.
+  if (!actualTextNBytes) {
+    actualTextX0 = x;
+    actualTextY0 = y;
   }
+  actualTextX1 = x + dx;
+  actualTextY1 = y + dy;
+  actualTextNBytes += nBytes;
 }
 
-void ActualText::endMC(GfxState *state) {
-  char *uniString = NULL;
-  Unicode *uni;
-  int length, i;
+void ActualText::begin(GfxState *state, GooString *text) {
+  if (actualText)
+    delete actualText;
+  actualText = new GooString(text);
+  actualTextNBytes = 0;
+}
 
-  if (actualTextBMCLevel > 0) {
-    actualTextBMCLevel--;
-    if (actualTextBMCLevel == 0) {
-      // ActualText span closed. Output the span text and the
-      // extents of all the glyphs inside the span
+void ActualText::end(GfxState *state) {
+  // ActualText span closed. Output the span text and the
+  // extents of all the glyphs inside the span
 
-      if (newActualTextSpan) {
-	// No content inside span.
-	actualText_x = state->getCurX();
-	actualText_y = state->getCurY();
-	actualText_dx = 0;
-	actualText_dy = 0;
-      }
+  if (actualTextNBytes) {
+    char *uniString = NULL;
+    Unicode *uni;
+    int length, i;
 
-      if (!actualText->hasUnicodeMarker()) {
-	if (actualText->getLength() > 0) {
-	  //non-unicode string -- assume pdfDocEncoding and
-	  //try to convert to UTF16BE
-	  uniString = pdfDocEncodingToUTF16(actualText, &length);
-	} else {
-	  length = 0;
-	}
+    if (!actualText->hasUnicodeMarker()) {
+      if (actualText->getLength() > 0) {
+        //non-unicode string -- assume pdfDocEncoding and
+        //try to convert to UTF16BE
+        uniString = pdfDocEncodingToUTF16(actualText, &length);
       } else {
-	uniString = actualText->getCString();
-	length = actualText->getLength();
+        length = 0;
       }
-
-      if (length < 3)
-	length = 0;
-      else
-	length = length/2 - 1;
-      uni = new Unicode[length];
-      for (i = 0 ; i < length; i++)
-	uni[i] = ((uniString[2 + i*2] & 0xff)<<8)|(uniString[3 + i*2] & 0xff);
-
-      text->addChar(state,
-		    actualText_x, actualText_y,
-		    actualText_dx, actualText_dy,
-		    0, 1, uni, length);
-
-      delete [] uni;
-      if (!actualText->hasUnicodeMarker())
-	delete [] uniString;
-      delete actualText;
-      actualText = NULL;
+    } else {
+      uniString = actualText->getCString();
+      length = actualText->getLength();
     }
+
+    if (length < 3)
+      length = 0;
+    else
+      length = length/2 - 1;
+    uni = new Unicode[length];
+    for (i = 0 ; i < length; i++)
+      uni[i] = ((uniString[2 + i*2] & 0xff)<<8)|(uniString[3 + i*2] & 0xff);
+
+    // now that we have the position info for all of the text inside
+    // the marked content span, we feed the "ActualText" back through
+    // text->addChar()
+    text->addChar(state, actualTextX0, actualTextY0,
+                  actualTextX1 - actualTextX0, actualTextY1 - actualTextY0,
+                  0, actualTextNBytes, uni, length);
+
+    delete [] uni;
+    if (!actualText->hasUnicodeMarker())
+      delete [] uniString;
   }
+
+  delete actualText;
+  actualText = NULL;
+  actualTextNBytes = 0;
 }
 
 //------------------------------------------------------------------------
@@ -5241,14 +5216,14 @@ void TextOutputDev::drawChar(GfxState *state, double x, double y,
   actualText->addChar(state, x, y, dx, dy, c, nBytes, u, uLen);
 }
 
-void TextOutputDev::beginMarkedContent(char *name, Dict *properties)
+void TextOutputDev::beginActualText(GfxState *state, GooString *text)
 {
-  actualText->beginMC(properties);
+  actualText->begin(state, text);
 }
 
-void TextOutputDev::endMarkedContent(GfxState *state)
+void TextOutputDev::endActualText(GfxState *state)
 {
-  actualText->endMC(state);
+  actualText->end(state);
 }
 
 void TextOutputDev::stroke(GfxState *state) {

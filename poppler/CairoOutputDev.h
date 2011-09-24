@@ -184,6 +184,8 @@ public:
 		double dx, double dy,
 		double originX, double originY,
 		CharCode code, int nBytes, Unicode *u, int uLen);
+  void beginActualText(GfxState *state, GooString *text);
+  void endActualText(GfxState *state);
 
   virtual GBool beginType3Char(GfxState *state, double x, double y,
 			       double dx, double dy,
@@ -204,10 +206,6 @@ public:
       return state->getFillColorSpace()->getMode() == csPattern; }
 
   virtual void endMaskClip(GfxState *state);
-
-  //----- grouping operators
-  virtual void beginMarkedContent(char *name, Dict *properties);
-  virtual void endMarkedContent(GfxState *state);  
 
   //----- image drawing
   virtual void drawImageMask(GfxState *state, Object *ref, Stream *str,

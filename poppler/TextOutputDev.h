@@ -644,17 +644,18 @@ public:
   void addChar(GfxState *state, double x, double y,
 	       double dx, double dy,
 	       CharCode c, int nBytes, Unicode *u, int uLen);
-  void beginMC(Dict *properties);
-  void endMC(GfxState *state);
+  void begin(GfxState *state, GooString *text);
+  void end(GfxState *state);
 
 private:
   TextPage *text;
-  int actualTextBMCLevel;       // > 0 when inside ActualText span. Incremented
-                                // for each nested BMC inside the span.
+
   GooString *actualText;        // replacement text for the span
-  GBool newActualTextSpan;      // true at start of span. used to init the extent
-  double actualText_x, actualText_y; // extent of the text inside the span
-  double actualText_dx, actualText_dy;
+  double actualTextX0;
+  double actualTextY0;
+  double actualTextX1;
+  double actualTextY1;
+  int actualTextNBytes;
 };
   
 
@@ -720,10 +721,8 @@ public:
 			double dx, double dy,
 			double originX, double originY,
 			CharCode c, int nBytes, Unicode *u, int uLen);
-
-  //----- grouping operators
-  virtual void beginMarkedContent(char *name, Dict *properties);
-  virtual void endMarkedContent(GfxState *state);
+  virtual void beginActualText(GfxState *state, GooString *text);
+  virtual void endActualText(GfxState *state);
 
   //----- path painting
   virtual void stroke(GfxState *state);

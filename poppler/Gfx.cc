@@ -4766,7 +4766,14 @@ void Gfx::opEndIgnoreUndef(Object args[], int numArgs) {
 // marked content operators
 //------------------------------------------------------------------------
 
+enum GfxMarkedContentKind {
+  gfxMCOptionalContent,
+  gfxMCActualText,
+  gfxMCOther
+};
+
 struct MarkedContentStack {
+  GfxMarkedContentKind kind;
   GBool ocSuppressed;       // are we ignoring content based on OptionalContent?
   MarkedContentStack *next; // next object on stack
 };
@@ -4780,6 +4787,7 @@ void Gfx::popMarkedContent() {
 void Gfx::pushMarkedContent() {
   MarkedContentStack *mc = new MarkedContentStack();
   mc->ocSuppressed = gFalse;
+  mc->kind = gfxMCOther;
   mc->next = mcStack;
   mcStack = mc;
 }
@@ -4807,9 +4815,10 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs) {
       }
       char* name1 = args[1].getName();
       Object markedContent;
+      MarkedContentStack *mc = mcStack;
+      mc->kind = gfxMCOptionalContent;
       if ( res->lookupMarkedContentNF( name1, &markedContent ) ) {
         bool visible = contentConfig->optContentIsVisible(&markedContent);
-        MarkedContentStack *mc = mcStack;
         mc->ocSuppressed = !(visible);
       } else {
 	error(errSyntaxError, getPos(), "DID NOT find {0:s}", name1);
@@ -4818,6 +4827,14 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs) {
     } else {
       error(errSyntaxError, getPos(), "insufficient arguments for Marked Content");
     }
+  } else if (args[0].isName("Span") && numArgs == 2 && args[1].isDict()) {
+    Object obj;
+    if (args[1].dictLookup("ActualText", &obj)->isString()) {
+      out->beginActualText(state, obj.getString());
+      MarkedContentStack *mc = mcStack;
+      mc->kind = gfxMCActualText;
+    }
+    obj.free();
   }
 
   if (printCommands) {
@@ -4827,19 +4844,22 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs) {
     printf("\n");
     fflush(stdout);
   }
-
-  if(numArgs == 2 && args[1].isDict ()) {
-    out->beginMarkedContent(args[0].getName(),args[1].getDict());
-  } else if(numArgs == 1) {
-    out->beginMarkedContent(args[0].getName(),NULL);
-  }
 }
 
 void Gfx::opEndMarkedContent(Object args[], int numArgs) {
+  if (!mcStack) {
+    error(errSyntaxWarning, getPos(), "Mismatched EMC operator");
+    return;
+  }
+
+  MarkedContentStack *mc = mcStack;
+  GfxMarkedContentKind mcKind = mc->kind;
+
   // pop the stack
-  if (mcStack)
-    popMarkedContent();
-  out->endMarkedContent(state);
+  popMarkedContent();
+
+  if (mcKind == gfxMCActualText)
+    out->endActualText(state);
 }
 
 void Gfx::opMarkPoint(Object args[], int numArgs) {

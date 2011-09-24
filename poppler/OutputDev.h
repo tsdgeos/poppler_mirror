@@ -240,6 +240,8 @@ public:
   virtual void beginTextObject(GfxState * /*state*/) {}
   virtual GBool deviceHasTextClip(GfxState * /*state*/) { return gFalse; }
   virtual void endTextObject(GfxState * /*state*/) {}
+  virtual void beginActualText(GfxState * /*state*/, GooString * /*text*/ ) {}
+  virtual void endActualText(GfxState * /*state*/) {}
 
   //----- image drawing
   virtual void drawImageMask(GfxState *state, Object *ref, Stream *str,
@@ -264,8 +266,6 @@ public:
 
   //----- grouping operators
 
-  virtual void endMarkedContent(GfxState *state);
-  virtual void beginMarkedContent(char *name, Dict *properties);
   virtual void markPoint(char *name);
   virtual void markPoint(char *name, Dict *properties);
   
