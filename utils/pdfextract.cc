@@ -64,7 +64,7 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
   if (firstPage == 0)
     firstPage = 1;
   if (firstPage != lastPage && strstr(destFileName, "%d") == NULL) {
-    error(-1, "'%s' must contain '%%d' if more than one page should be extracted", destFileName);
+    error(errSyntaxError, -1, "'{0:s}' must contain '%%d' if more than one page should be extracted", destFileName);
     return false;
   }
   for (int pageNo = firstPage; pageNo <= lastPage; pageNo++) {
