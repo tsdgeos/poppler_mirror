@@ -79,6 +79,28 @@ EmbFile::~EmbFile()
   m_objStr.free();
 }
 
+GBool EmbFile::save(const char *path) {
+  FILE *f;
+  GBool ret;
+
+  if (!(f = fopen(path, "wb"))) {
+    return gFalse;
+  }
+  ret = save2(f);
+  fclose(f);
+  return ret;
+}
+
+GBool EmbFile::save2(FILE *f) {
+  int c;
+
+  m_objStr.streamReset();
+  while ((c = m_objStr.streamGetChar()) != EOF) {
+    fputc(c, f);
+  }
+  return gTrue;
+}
+
 FileSpec::FileSpec(Object *fileSpecA)
 {
   ok = gTrue;

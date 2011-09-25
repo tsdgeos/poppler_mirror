@@ -44,6 +44,7 @@ endif
 AM_LDFLAGS = @auto_import_flags@
 
 bin_PROGRAMS =					\
+	pdfdetach				\
 	pdffonts				\
 	pdfimages				\
 	pdfinfo					\
@@ -56,6 +57,7 @@ bin_PROGRAMS =					\
 	$(pdftocairo_binary)
 
 dist_man1_MANS =				\
+	pdfdetach.1				\
 	pdffonts.1				\
 	pdfimages.1				\
 	pdfinfo.1				\
@@ -68,6 +70,10 @@ dist_man1_MANS =				\
 	$(pdftocairo_manpage)
 
 common = parseargs.cc parseargs.h
+
+pdfdetach_SOURCES = 				\
+	pdfdetach.cc				\
+	$(common)
 
 pdffonts_SOURCES =				\
 	pdffonts.cc				\
