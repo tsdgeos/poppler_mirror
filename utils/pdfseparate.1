@@ -1,16 +1,16 @@
 .\" Copyright 2011 The Poppler Developers - http://poppler.freedesktop.org
-.TH pdfextract 1 "15 September 2011"
+.TH pdfseparate 1 "15 September 2011"
 .SH NAME
-pdfextract \- Portable Document Format (PDF) page extractor
+pdfseparate \- Portable Document Format (PDF) page extractor
 .SH SYNOPSIS
-.B pdfextract
+.B pdfseparate
 [options]
 .I PDF-file PDF-page-pattern
 .SH DESCRIPTION
-.B pdfextract
+.B pdfseparate
 extract single pages from a Portable Document Format (PDF).
 .PP
-pdfextract reads the PDF file
+pdfseparate reads the PDF file
 .IR PDF-file ,
 extracts one or more pages, and writes one PDF file for each page to
 .IR PDF-page-pattern,
@@ -37,13 +37,13 @@ and
 .B \-\-help
 are equivalent.)
 .SH EXAMPLE
-pdfextract sample.pdf sample-%d.pdf
+pdfseparate sample.pdf sample-%d.pdf
 .TP
 extracts all pages from sample.pdf, if i.e. sample.pdf has 3 pages, it produces
 .TP
 sample-1.pdf, sample-2.pdf, sample-3.pdf
 .SH AUTHOR
-The pdfextract software and documentation are copyright 1996-2004 Glyph
+The pdfseparate software and documentation are copyright 1996-2004 Glyph
 & Cog, LLC and copyright 2005-2011 The Poppler Developers - http://poppler.freedesktop.org
 .SH "SEE ALSO"
-.BR pdfmerge (1),
+.BR pdfunite (1),

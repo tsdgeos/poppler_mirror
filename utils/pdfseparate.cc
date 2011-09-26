@@ -1,6 +1,6 @@
 //========================================================================
 //
-// pdfextract.cc
+// pdfseparate.cc
 //
 // This file is licensed under the GPLv2 or later
 //
@@ -95,12 +95,12 @@ main (int argc, char *argv[])
   ok = parseArgs (argDesc, &argc, argv);
   if (!ok || argc != 3 || printVersion || printHelp)
     {
-      fprintf (stderr, "pdfextract version %s\n", PACKAGE_VERSION);
+      fprintf (stderr, "pdfseparate version %s\n", PACKAGE_VERSION);
       fprintf (stderr, "%s\n", popplerCopyright);
       fprintf (stderr, "%s\n", xpdfCopyright);
       if (!printVersion)
 	{
-	  printUsage ("pdfextract", "<PDF-sourcefile> <PDF-pattern-destfile>",
+	  printUsage ("pdfseparate", "<PDF-sourcefile> <PDF-pattern-destfile>",
 		      argDesc);
 	}
       if (printVersion || printHelp)

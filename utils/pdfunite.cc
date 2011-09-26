@@ -1,6 +1,6 @@
 //========================================================================
 //
-// pdfmerge.cc
+// pdfunite.cc
 //
 // This file is licensed under the GPLv2 or later
 //
@@ -54,11 +54,11 @@ int main (int argc, char *argv[])
 
   exitCode = 99;
   if (argc <= 3 || printVersion || printHelp) {
-    fprintf(stderr, "pdfmerge version %s\n", PACKAGE_VERSION);
+    fprintf(stderr, "pdfunite version %s\n", PACKAGE_VERSION);
     fprintf(stderr, "%s\n", popplerCopyright);
     fprintf(stderr, "%s\n", xpdfCopyright);
     if (!printVersion) {
-      printUsage("pdfmerge", "<PDF-sourcefile-1>..<PDF-sourcefile-n> <PDF-destfile>",
+      printUsage("pdfunite", "<PDF-sourcefile-1>..<PDF-sourcefile-n> <PDF-destfile>",
 	argDesc);
     }
     if (printVersion || printHelp)

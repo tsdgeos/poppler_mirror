@@ -50,8 +50,8 @@ bin_PROGRAMS =					\
 	pdftops					\
 	pdftotext				\
 	pdftohtml				\
-	pdfextract				\
-	pdfmerge				\
+	pdfseparate				\
+	pdfunite				\
 	$(pdftoppm_binary)			\
 	$(pdftocairo_binary)
 
@@ -62,8 +62,8 @@ dist_man1_MANS =				\
 	pdftops.1				\
 	pdftotext.1				\
 	pdftohtml.1				\
-	pdfextract.1				\
-	pdfmerge.1				\
+	pdfseparate.1				\
+	pdfunite.1				\
 	$(pdftoppm_manpage)			\
 	$(pdftocairo_manpage)
 
@@ -106,12 +106,12 @@ pdftohtml_SOURCES =				\
 	HtmlUtils.h				\
 	$(common)
 
-pdfextract_SOURCES =				\
-	pdfextract.cc				\
+pdfseparate_SOURCES =				\
+	pdfseparate.cc				\
 	$(common)
 
-pdfmerge_SOURCES =				\
-	pdfmerge.cc				\
+pdfunite_SOURCES =				\
+	pdfunite.cc				\
 	$(common)
 
 # Yay, automake!  It should be able to figure out that it has to dist
