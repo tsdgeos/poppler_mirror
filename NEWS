@@ -1,3 +1,17 @@
+Release 0.18.0
+        core:
+         * Fix small memory leak when dealing with marked content
+         * Remove DCTStream::getRawStream since Stream::getNextStream does the same
+        
+        utils:
+         * Rename pdfmerge to pdfunite
+         * Rename pdfextract to pdfseparate
+         * pdfseparate: Complain if %d is not present and it should
+         * Add pdfseparate and pdfunite man pages
+        
+        build system:
+         * Minor cleanup in regarding removed qt code
+
 Release 0.17.4 (0.18 RC)
         core:
          * SplashOutputDev: Compile when defining USE_FIXEDPOINT
