@@ -17,7 +17,7 @@
 // Copyright (C) 2005-2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2010 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2007, 2011 Adrian Johnson <ajohnson@redneon.com>
