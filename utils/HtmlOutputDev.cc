@@ -57,9 +57,6 @@
 #include "Page.h"
 #include "Annot.h"
 #include "PNGWriter.h"
-#ifdef ENABLE_LIBJPEG
-#include "DCTStream.h"
-#endif
 #include "GlobalParams.h"
 #include "HtmlOutputDev.h"
 #include "HtmlFonts.h"
@@ -1266,7 +1263,7 @@ void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
     }
 
     // initialize stream
-    str = ((DCTStream *)str)->getRawStream();
+    str = str->getNextStream();
     str->reset();
 
     // copy the stream
@@ -1318,7 +1315,7 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     }
 
     // initialize stream
-    str = ((DCTStream *)str)->getRawStream();
+    str = str->getNextStream();
     str->reset();
 
     // copy the stream

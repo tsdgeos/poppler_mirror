@@ -841,7 +841,6 @@ public:
   virtual int lookChar();
   virtual GooString *getPSFilter(int psLevel, char *indent);
   virtual GBool isBinary(GBool last = gTrue);
-  Stream *getRawStream() { return str; }
 
   virtual void unfilteredReset();
 

@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Rainer Keller <class321@gmx.de>
 // Copyright (C) 2008 Timothy Lee <timothy.lee@siriushk.com>
 // Copyright (C) 2008 Vasile Gaburici <gaburici@cs.umd.edu>
@@ -42,9 +42,6 @@
 #include "GfxState.h"
 #include "Object.h"
 #include "Stream.h"
-#ifdef ENABLE_LIBJPEG
-#include "DCTStream.h"
-#endif
 #include "ImageOutputDev.h"
 
 ImageOutputDev::ImageOutputDev(char *fileRootA, GBool pageNamesA, GBool dumpJPEGA) {
@@ -89,7 +86,7 @@ void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
     }
 
     // initialize stream
-    str = ((DCTStream *)str)->getRawStream();
+    str = str->getNextStream();
     str->reset();
 
     // copy the stream
@@ -156,7 +153,7 @@ void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     }
 
     // initialize stream
-    str = ((DCTStream *)str)->getRawStream();
+    str = str->getNextStream();
     str->reset();
 
     // copy the stream
