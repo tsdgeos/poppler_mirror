@@ -434,6 +434,7 @@ public:
   virtual void stroke(GfxState *state) { }
   virtual void fill(GfxState *state) { }
   virtual void eoFill(GfxState *state) { }
+  virtual void clipToStrokePath(GfxState *state) { }
   virtual GBool tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
 				  double *pmat, int paintType, int tilingType, Dict *resDict,
 				  double *mat, double *bbox,
