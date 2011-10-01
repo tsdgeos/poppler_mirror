@@ -4080,7 +4080,6 @@ GBool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *st
 				       double xStep, double yStep) {
   PDFRectangle box;
   Gfx *gfx;
-  double cxMin, cyMin, cxMax, cyMax;
 
   writePS("<<\n  /PatternType 1\n");
   writePSFmt("  /PaintType {0:d}\n", paintType);
@@ -4100,10 +4099,9 @@ GBool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *st
   delete gfx;
   writePS("  }\n");
   writePS(">>\n");
-  writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}]\n", pmat[0], pmat[1], pmat[2], pmat[3], pmat[4], pmat[5]);
+  writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}]\n", mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
   writePS("makepattern setpattern\n");
-  state->getClipBBox(&cxMin, &cyMin, &cxMax, &cyMax);
-  writePSFmt("{0:.6g} {1:.6g} {2:.6g} {3:.6g} rectfill\n", cxMin, cyMin, cxMax - cxMin, cyMax - cyMin);
+  writePS("clippath fill\n"); // Gfx sets up a clip before calling out->tilingPatternFill()
 
   return gTrue;
 }
@@ -4113,9 +4111,6 @@ GBool PSOutputDev::tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
 				     double *mat, double *bbox,
 				     int x0, int y0, int x1, int y1,
 				     double xStep, double yStep) {
-  if (x1 - x0 == 1 && y1 - y0 == 1)
-    return gFalse; // Don't need to use patterns if only one instance of the pattern is used
-
   if (level == psLevel1 || level == psLevel1Sep) {
     return tilingPatternFillL1(state, cat, str, pmat, paintType, tilingType, resDict,
 			       mat, bbox, x0, y0, x1, y1, xStep, yStep);
