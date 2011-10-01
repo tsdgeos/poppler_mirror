@@ -1421,7 +1421,7 @@ height = dummy.height();
               \since 0.10
              */
             enum PSOption {
-                Printing = 0x00000001,              ///< The PS is generated for priting purpouses
+                Printing = 0x00000001,              ///< The PS is generated for printing purpouses
                 StrictMargins = 0x00000002,
                 ForceRasterization = 0x00000004
             };
