@@ -240,7 +240,7 @@ GfxColorSpace *GfxColorSpace::parse(Object *csObj, Gfx *gfx, int recursion) {
     } else {
       error(errSyntaxWarning, -1, "Bad color space '{0:s}'", csObj->getName());
     }
-  } else if (csObj->isArray()) {
+  } else if (csObj->isArray() && csObj->arrayGetLength() > 0) {
     csObj->arrayGet(0, &obj1);
     if (obj1.isName("DeviceGray") || obj1.isName("G")) {
       cs = new GfxDeviceGrayColorSpace();
