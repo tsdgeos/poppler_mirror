@@ -53,6 +53,12 @@
 
 //------------------------------------------------------------------------
 
+// Max depth of nested color spaces.  This is used to catch infinite
+// loops in the color space object structure.
+#define colorSpaceRecursionLimit 8
+
+//------------------------------------------------------------------------
+
 GBool Matrix::invertTo(Matrix *other) const
 {
   double det;
@@ -212,9 +218,14 @@ GfxColorSpace::GfxColorSpace() {
 GfxColorSpace::~GfxColorSpace() {
 }
 
-GfxColorSpace *GfxColorSpace::parse(Object *csObj, Gfx *gfx) {
+GfxColorSpace *GfxColorSpace::parse(Object *csObj, Gfx *gfx, int recursion) {
   GfxColorSpace *cs;
   Object obj1;
+
+  if (recursion > colorSpaceRecursionLimit) {
+    error(errSyntaxError, -1, "Loop detected in color space objects");
+    return NULL;
+  }
 
   cs = NULL;
   if (csObj->isName()) {
@@ -244,15 +255,15 @@ GfxColorSpace *GfxColorSpace::parse(Object *csObj, Gfx *gfx) {
     } else if (obj1.isName("Lab")) {
       cs = GfxLabColorSpace::parse(csObj->getArray());
     } else if (obj1.isName("ICCBased")) {
-      cs = GfxICCBasedColorSpace::parse(csObj->getArray(), gfx);
+      cs = GfxICCBasedColorSpace::parse(csObj->getArray(), gfx, recursion);
     } else if (obj1.isName("Indexed") || obj1.isName("I")) {
-      cs = GfxIndexedColorSpace::parse(csObj->getArray(), gfx);
+      cs = GfxIndexedColorSpace::parse(csObj->getArray(), gfx, recursion);
     } else if (obj1.isName("Separation")) {
-      cs = GfxSeparationColorSpace::parse(csObj->getArray(), gfx);
+      cs = GfxSeparationColorSpace::parse(csObj->getArray(), gfx, recursion);
     } else if (obj1.isName("DeviceN")) {
-      cs = GfxDeviceNColorSpace::parse(csObj->getArray(), gfx);
+      cs = GfxDeviceNColorSpace::parse(csObj->getArray(), gfx, recursion);
     } else if (obj1.isName("Pattern")) {
-      cs = GfxPatternColorSpace::parse(csObj->getArray(), gfx);
+      cs = GfxPatternColorSpace::parse(csObj->getArray(), gfx, recursion);
     } else {
       error(errSyntaxWarning, -1, "Bad color space");
     }
@@ -1508,7 +1519,7 @@ GfxColorSpace *GfxICCBasedColorSpace::copy() {
   return cs;
 }
 
-GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, Gfx *gfx) {
+GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, Gfx *gfx, int recursion) {
   GfxICCBasedColorSpace *cs;
   Ref iccProfileStreamA;
   int nCompsA;
@@ -1562,7 +1573,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, Gfx *gfx) {
     nCompsA = gfxColorMaxComps;
   }
   if (dict->lookup("Alternate", &obj2)->isNull() ||
-      !(altA = GfxColorSpace::parse(&obj2, gfx))) {
+      !(altA = GfxColorSpace::parse(&obj2, gfx, recursion + 1))) {
     switch (nCompsA) {
     case 1:
       altA = new GfxDeviceGrayColorSpace();
@@ -1862,7 +1873,7 @@ GfxColorSpace *GfxIndexedColorSpace::copy() {
   return cs;
 }
 
-GfxColorSpace *GfxIndexedColorSpace::parse(Array *arr, Gfx *gfx) {
+GfxColorSpace *GfxIndexedColorSpace::parse(Array *arr, Gfx *gfx, int recursion) {
   GfxIndexedColorSpace *cs;
   GfxColorSpace *baseA;
   int indexHighA;
@@ -1875,7 +1886,7 @@ GfxColorSpace *GfxIndexedColorSpace::parse(Array *arr, Gfx *gfx) {
     goto err1;
   }
   arr->get(1, &obj1);
-  if (!(baseA = GfxColorSpace::parse(&obj1, gfx))) {
+  if (!(baseA = GfxColorSpace::parse(&obj1, gfx, recursion + 1))) {
     error(errSyntaxWarning, -1, "Bad Indexed color space (base color space)");
     goto err2;
   }
@@ -2051,7 +2062,7 @@ GfxColorSpace *GfxSeparationColorSpace::copy() {
 }
 
 //~ handle the 'All' and 'None' colorants
-GfxColorSpace *GfxSeparationColorSpace::parse(Array *arr, Gfx *gfx) {
+GfxColorSpace *GfxSeparationColorSpace::parse(Array *arr, Gfx *gfx, int recursion) {
   GfxSeparationColorSpace *cs;
   GooString *nameA;
   GfxColorSpace *altA;
@@ -2069,7 +2080,7 @@ GfxColorSpace *GfxSeparationColorSpace::parse(Array *arr, Gfx *gfx) {
   nameA = new GooString(obj1.getName());
   obj1.free();
   arr->get(2, &obj1);
-  if (!(altA = GfxColorSpace::parse(&obj1, gfx))) {
+  if (!(altA = GfxColorSpace::parse(&obj1, gfx, recursion + 1))) {
     error(errSyntaxWarning, -1, "Bad Separation color space (alternate color space)");
     goto err3;
   }
@@ -2174,7 +2185,7 @@ GfxColorSpace *GfxDeviceNColorSpace::copy() {
 }
 
 //~ handle the 'None' colorant
-GfxColorSpace *GfxDeviceNColorSpace::parse(Array *arr, Gfx *gfx) {
+GfxColorSpace *GfxDeviceNColorSpace::parse(Array *arr, Gfx *gfx, int recursion) {
   GfxDeviceNColorSpace *cs;
   int nCompsA;
   GooString *namesA[gfxColorMaxComps];
@@ -2208,7 +2219,7 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(Array *arr, Gfx *gfx) {
   }
   obj1.free();
   arr->get(2, &obj1);
-  if (!(altA = GfxColorSpace::parse(&obj1, gfx))) {
+  if (!(altA = GfxColorSpace::parse(&obj1, gfx, recursion + 1))) {
     error(errSyntaxWarning, -1, "Bad DeviceN color space (alternate color space)");
     goto err3;
   }
@@ -2312,7 +2323,7 @@ GfxColorSpace *GfxPatternColorSpace::copy() {
 				          (GfxColorSpace *)NULL);
 }
 
-GfxColorSpace *GfxPatternColorSpace::parse(Array *arr, Gfx *gfx) {
+GfxColorSpace *GfxPatternColorSpace::parse(Array *arr, Gfx *gfx, int recursion) {
   GfxPatternColorSpace *cs;
   GfxColorSpace *underA;
   Object obj1;
@@ -2324,7 +2335,7 @@ GfxColorSpace *GfxPatternColorSpace::parse(Array *arr, Gfx *gfx) {
   underA = NULL;
   if (arr->getLength() == 2) {
     arr->get(1, &obj1);
-    if (!(underA = GfxColorSpace::parse(&obj1, gfx))) {
+    if (!(underA = GfxColorSpace::parse(&obj1, gfx, recursion + 1))) {
       error(errSyntaxWarning, -1, "Bad Pattern color space (underlying color space)");
       obj1.free();
       return NULL;
