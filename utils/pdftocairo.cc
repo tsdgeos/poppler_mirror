@@ -336,6 +336,8 @@ void writePageImage(GooString *filename)
   gfree(row);
   writer->close();
   delete writer;
+  if (file == stdout) fflush(file);
+  else fclose(file);
 }
 
 static void getCropSize(double page_w, double page_h, double *width, double *height)
