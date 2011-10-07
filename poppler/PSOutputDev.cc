@@ -4111,6 +4111,29 @@ GBool PSOutputDev::tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
 				     double *mat, double *bbox,
 				     int x0, int y0, int x1, int y1,
 				     double xStep, double yStep) {
+  if (x1 - x0 == 1 && y1 - y0 == 1) {
+    // Don't need to use patterns if only one instance of the pattern is used
+    PDFRectangle box;
+    Gfx *gfx;
+    double x, y, tx, ty;
+
+    x = x0 * xStep;
+    y = y0 * yStep;
+    tx = x * mat[0] + y * mat[2] + mat[4];
+    ty = x * mat[1] + y * mat[3] + mat[5];
+    box.x1 = bbox[0];
+    box.y1 = bbox[1];
+    box.x2 = bbox[2];
+    box.y2 = bbox[3];
+    gfx = new Gfx(xref, this, resDict, m_catalog, &box, NULL);
+    writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] cm\n", mat[0], mat[1], mat[2], mat[3], tx, ty);
+    inType3Char = gTrue;
+    gfx->display(str);
+    inType3Char = gFalse;
+    delete gfx;
+    return gTrue;
+  }
+
   if (level == psLevel1 || level == psLevel1Sep) {
     return tilingPatternFillL1(state, cat, str, pmat, paintType, tilingType, resDict,
 			       mat, bbox, x0, y0, x1, y1, xStep, yStep);
