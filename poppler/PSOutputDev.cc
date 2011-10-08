@@ -1149,6 +1149,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   }
   processColors = 0;
   inType3Char = gFalse;
+  inUncoloredPattern = gFalse;
 
 #if OPI_SUPPORT
   // initialize OPI nesting levels
@@ -3688,6 +3689,9 @@ void PSOutputDev::updateLineWidth(GfxState *state) {
 }
 
 void PSOutputDev::updateFillColorSpace(GfxState *state) {
+  if (inUncoloredPattern) {
+    return;
+  }
   switch (level) {
   case psLevel1:
   case psLevel1Sep:
@@ -3706,6 +3710,9 @@ void PSOutputDev::updateFillColorSpace(GfxState *state) {
 }
 
 void PSOutputDev::updateStrokeColorSpace(GfxState *state) {
+  if (inUncoloredPattern) {
+    return;
+  }
   switch (level) {
   case psLevel1:
   case psLevel1Sep:
@@ -3732,6 +3739,9 @@ void PSOutputDev::updateFillColor(GfxState *state) {
   double c, m, y, k;
   int i;
 
+  if (inUncoloredPattern) {
+    return;
+  }
   switch (level) {
   case psLevel1:
     state->getFillGray(&gray);
@@ -3795,6 +3805,9 @@ void PSOutputDev::updateStrokeColor(GfxState *state) {
   double c, m, y, k;
   int i;
 
+  if (inUncoloredPattern) {
+    return;
+  }
   switch (level) {
   case psLevel1:
     state->getStrokeGray(&gray);
@@ -4052,9 +4065,21 @@ GBool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *st
     }
   }
   inType3Char = gTrue;
+  if (paintType == 2) {
+    inUncoloredPattern = gTrue;
+    // ensure any PS procedures that contain sCol or fCol do not change the color
+    writePS("/pdfLastFill true def\n");
+    writePS("/pdfLastStroke true def\n");
+  }
   ++numTilingPatterns;
   gfx->display(str);
   --numTilingPatterns;
+  if (paintType == 2) {
+    inUncoloredPattern = gFalse;
+    // ensure the next PS procedures that uses sCol or fCol will update the color
+    writePS("/pdfLastFill false def\n");
+    writePS("/pdfLastStroke false def\n");
+  }
   inType3Char = gFalse;
   writePS("} def\n");
   delete gfx;
@@ -4081,6 +4106,10 @@ GBool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *st
   PDFRectangle box;
   Gfx *gfx;
 
+  if (paintType == 2) {
+    // setpattern with PaintType 2 needs the paint color
+    writePS("currentcolor\n");
+  }
   writePS("<<\n  /PatternType 1\n");
   writePSFmt("  /PaintType {0:d}\n", paintType);
   writePSFmt("  /TilingType {0:d}\n", tilingType);
@@ -4094,7 +4123,19 @@ GBool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *st
   box.y2 = bbox[3];
   gfx = new Gfx(xref, this, resDict, m_catalog, &box, NULL);
   inType3Char = gTrue;
+  if (paintType == 2) {
+    inUncoloredPattern = gTrue;
+    // ensure any PS procedures that contain sCol or fCol do not change the color
+    writePS("/pdfLastFill true def\n");
+    writePS("/pdfLastStroke true def\n");
+  }
   gfx->display(str);
+  if (paintType == 2) {
+    inUncoloredPattern = gFalse;
+    // ensure the next PS procedures that uses sCol or fCol will update the color
+    writePS("/pdfLastFill false def\n");
+    writePS("/pdfLastStroke false def\n");
+  }
   inType3Char = gFalse;
   delete gfx;
   writePS("  }\n");

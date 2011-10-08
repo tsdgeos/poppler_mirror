@@ -450,6 +450,7 @@ private:
 				//   clipping render mode because of pattern colorspace
 
   GBool inType3Char;		// inside a Type 3 CharProc
+  GBool inUncoloredPattern;     // inside a uncolored pattern (PaintType = 2)
   GooString *t3String;		// Type 3 content string
   double t3WX, t3WY,		// Type 3 character parameters
          t3LLX, t3LLY, t3URX, t3URY;
