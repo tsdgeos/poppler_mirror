@@ -425,7 +425,6 @@ if test x$enable_cairo_output = xyes; then
     # Check for introspection
     GOBJECT_INTROSPECTION_CHECK([0.6.7])
 
-    GLIB_REQ="glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION"
     AC_PATH_PROG([GLIB_MKENUMS],[glib-mkenums])
     POPPLER_GLIB_DISABLE_DEPRECATED="$POPPLER_GLIB_DISABLE_DEPRECATED -DG_DISABLE_DEPRECATED"
     POPPLER_GLIB_DISABLE_SINGLE_INCLUDES="$POPPLER_GLIB_DISABLE_SINGLE_INCLUDES -DG_DISABLE_SINGLE_INCLUDES"
@@ -435,7 +434,6 @@ else
     AC_MSG_ERROR("Cairo output is required to build glib frontend")
   fi
   enable_poppler_glib="no"
-  GLIB_REQ=""
 fi
 AM_CONDITIONAL(BUILD_POPPLER_GLIB, test x$enable_poppler_glib = xyes)
 AM_CONDITIONAL(HAVE_INTROSPECTION, test "x$found_introspection" = "xyes")

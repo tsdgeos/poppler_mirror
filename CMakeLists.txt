@@ -93,7 +93,6 @@ if(CAIRO_FOUND)
     # Check for introspection
     macro_optional_find_package(GObjectIntrospection 0.9.12)
     set(HAVE_INTROSPECTION ${INTROSPECTION_FOUND})
-    set(GLIB_REQ "glib-2.0 >= ${GLIB_REQUIRED} gobject-2.0 >= ${GLIB_REQUIRED} cairo >= ${CAIRO_VERSION}")
     set(POPPLER_GLIB_DISABLE_DEPRECATED "${POPPLER_GLIB_DISABLE_DEPRECATED} -DG_DISABLE_DEPRECATED")
     set(POPPLER_GLIB_DISABLE_SINGLE_INCLUDES "${POPPLER_GLIB_DISABLE_SINGLE_INCLUDES} -DG_DISABLE_SINGLE_INCLUDES")
     macro_optional_find_package(GTK)
