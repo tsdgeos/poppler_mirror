@@ -41,6 +41,8 @@ typedef enum {
 				/*   [val: double *]  */
   argString,			/* string arg      */
 				/*   [val: char *] */
+  argGooString,			/* string arg      */
+				/*   [val: GooString *] */
   /* dummy entries -- these show up in the usage listing only; */
   /* useful for X args, for example                            */
   argFlagDummy,

@@ -32,7 +32,6 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#include <sys/param.h> // for MAXPATHLEN
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -91,7 +90,7 @@ static GBool useCropBox = gFalse;
 static GBool mono = gFalse;
 static GBool gray = gFalse;
 static GBool transp = gFalse;
-static char icc[MAXPATHLEN] = "";
+static GooString icc;
 
 static GBool level2 = gFalse;
 static GBool level3 = gFalse;
@@ -179,7 +178,7 @@ static const ArgDesc argDesc[] = {
   {"-transp",   argFlag,     &transp,          0,
    "use a transparent background instead of white (PNG)"},
 #if USE_CMS
-  {"-icc",   argString,     &icc,          sizeof(icc),
+  {"-icc",   argGooString,     &icc,          0,
    "ICC color profile to use"},
 #endif
 
@@ -756,7 +755,7 @@ int main(int argc, char *argv[]) {
     checkInvalidPrintOption(mono, "-mono");
     checkInvalidPrintOption(gray, "-gray");
     checkInvalidPrintOption(transp, "-transp");
-    checkInvalidPrintOption(icc[0], "-icc");
+    checkInvalidPrintOption(icc.getCString()[0], "-icc");
     checkInvalidPrintOption(singleFile, "-singlefile");
   } else {
     checkInvalidImageOption(level2, "-level2");
@@ -772,7 +771,7 @@ int main(int argc, char *argv[]) {
     checkInvalidImageOption(duplex, "-duplex");
   }
 
-  if (icc[0] && !png) {
+  if (icc.getCString()[0] && !png) {
     fprintf(stderr, "Error: -icc may only be used with png output.\n");
     exit(99);
   }
@@ -842,10 +841,10 @@ int main(int argc, char *argv[]) {
 
 #if USE_CMS
   icc_data = NULL;
-  if (icc[0]) {
-    FILE *file = fopen(icc, "rb");
+  if (icc.getCString()[0]) {
+    FILE *file = fopen(icc.getCString(), "rb");
     if (!file) {
-      fprintf(stderr, "Error: unable to open icc profile %s\n", icc);
+      fprintf(stderr, "Error: unable to open icc profile %s\n", icc.getCString());
       exit(4);
     }
     fseek (file, 0, SEEK_END);
@@ -853,7 +852,7 @@ int main(int argc, char *argv[]) {
     fseek (file, 0, SEEK_SET);
     icc_data = (unsigned char*)gmalloc(icc_data_size);
     if (fread(icc_data, icc_data_size, 1, file) != 1) {
-      fprintf(stderr, "Error: unable to read icc profile %s\n", icc);
+      fprintf(stderr, "Error: unable to read icc profile %s\n", icc.getCString());
       exit(4);
     }
     fclose(file);
