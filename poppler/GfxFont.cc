@@ -133,6 +133,30 @@ static const Base14FontMapEntry base14FontMap[] = {
   { "ZapfDingbats",                 "ZapfDingbats" }
 };
 
+//------------------------------------------------------------------------
+
+// index: {fixed:0, sans-serif:4, serif:8} + bold*2 + italic
+// NB: must be in same order as psSubstFonts in PSOutputDev.cc
+static const char *base14SubstFonts[14] = {
+  "Courier",
+  "Courier-Oblique",
+  "Courier-Bold",
+  "Courier-BoldOblique",
+  "Helvetica",
+  "Helvetica-Oblique",
+  "Helvetica-Bold",
+  "Helvetica-BoldOblique",
+  "Times-Roman",
+  "Times-Italic",
+  "Times-Bold",
+  "Times-BoldItalic",
+  // the last two are never used for substitution
+  "Symbol",
+  "ZapfDingbats"
+};
+
+//------------------------------------------------------------------------
+
 static int parseCharName(char *charName, Unicode *uBuf, int uLen,
 			 GBool names, GBool ligatures, 
 			 GBool numeric, GBool hex, GBool variants);
