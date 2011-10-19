@@ -97,6 +97,41 @@ struct GfxFontCIDWidths {
 };
 
 //------------------------------------------------------------------------
+// GfxFontLoc
+//------------------------------------------------------------------------
+
+enum GfxFontLocType {
+  gfxFontLocEmbedded,		// font embedded in PDF file
+  gfxFontLocExternal,		// external font file
+  gfxFontLocResident		// font resident in PS printer
+};
+
+class GfxFontLoc {
+public:
+
+  GfxFontLoc();
+  ~GfxFontLoc();
+
+  GfxFontLocType locType;
+  GfxFontType fontType;
+  Ref embFontID;		// embedded stream obj ID
+				//   (if locType == gfxFontLocEmbedded)
+  GooString *path;		// font file path
+				//   (if locType == gfxFontLocExternal)
+				// PS font name
+				//   (if locType == gfxFontLocResident)
+  int fontNum;			// for TrueType collections
+				//   (if locType == gfxFontLocExternal)
+  GooString *encoding;		// PS font encoding, only for 16-bit fonts
+				//   (if locType == gfxFontLocResident)
+  int wMode;			// writing mode, only for 16-bit fonts
+				//   (if locType == gfxFontLocResident)
+  int substIdx;			// substitute font index
+				//   (if locType == gfxFontLocExternal,
+				//   and a Base-14 substitution was made)
+};
+
+//------------------------------------------------------------------------
 // GfxFont
 //------------------------------------------------------------------------
 
