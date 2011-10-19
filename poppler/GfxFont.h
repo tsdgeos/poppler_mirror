@@ -45,6 +45,7 @@ class CharCodeToUnicode;
 class FoFiTrueType;
 class DisplayFontParam;
 struct GfxFontCIDWidths;
+struct Base14FontMapEntry;
 
 //------------------------------------------------------------------------
 // GfxFontType
@@ -309,6 +310,7 @@ public:
 private:
   virtual ~Gfx8BitFont();
 
+  const Base14FontMapEntry *base14;	// for Base-14 fonts only; NULL otherwise
   char *enc[256];		// char code --> char name
   char encFree[256];		// boolean for each char name: if set,
 				//   the string is malloc'ed

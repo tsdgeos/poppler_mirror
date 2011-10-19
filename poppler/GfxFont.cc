@@ -60,17 +60,12 @@
 
 //------------------------------------------------------------------------
 
-struct StdFontMapEntry {
+struct Base14FontMapEntry {
   const char *altName;
-  const char *properName;
+  const char *base14Name;
 };
 
-// Acrobat 4.0 and earlier substituted Base14-compatible fonts without
-// providing Widths and a FontDescriptor, so we munge the names into
-// the proper Base14 names.  This table is from implementation note 44
-// in the PDF 1.4 spec, with some additions based on empirical
-// evidence.
-static const StdFontMapEntry stdFontMap[] = {
+static const Base14FontMapEntry base14FontMap[] = {
   { "Arial",                        "Helvetica" },
   { "Arial,Bold",                   "Helvetica-Bold" },
   { "Arial,BoldItalic",             "Helvetica-BoldOblique" },
@@ -548,6 +543,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
 
   // do font name substitution for various aliases of the Base 14 font
   // names
+  base14 = NULL;
   if (name) {
     name2 = name->copy();
     i = 0;
@@ -559,27 +555,27 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
       }
     }
     a = 0;
-    b = sizeof(stdFontMap) / sizeof(StdFontMapEntry);
-    // invariant: stdFontMap[a].altName <= name2 < stdFontMap[b].altName
+    b = sizeof(base14FontMap) / sizeof(Base14FontMapEntry);
+    // invariant: base14FontMap[a].altName <= name2 < base14FontMap[b].altName
     while (b - a > 1) {
       m = (a + b) / 2;
-      if (name2->cmp(stdFontMap[m].altName) >= 0) {
+      if (name2->cmp(base14FontMap[m].altName) >= 0) {
 	a = m;
       } else {
 	b = m;
       }
     }
-    if (!name2->cmp(stdFontMap[a].altName)) {
-      name = new GooString(stdFontMap[a].properName);
+    if (!name2->cmp(base14FontMap[a].altName)) {
+      base14 = &base14FontMap[a];
     }
     delete name2;
   }
 
   // is it a built-in font?
   builtinFont = NULL;
-  if (name) {
+  if (base14) {
     for (i = 0; i < nBuiltinFonts; ++i) {
-      if (!name->cmp(builtinFonts[i].name)) {
+      if (!strcmp(base14->base14Name, builtinFonts[i].name)) {
 	builtinFont = &builtinFonts[i];
 	break;
       }
