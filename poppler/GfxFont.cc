@@ -168,7 +168,6 @@ GfxFont::GfxFont(const char *tagA, Ref idA, GooString *nameA) {
   tag = new GooString(tagA);
   id = idA;
   name = nameA;
-  origName = nameA;
   embFontName = NULL;
   extFontFile = NULL;
   family = NULL;
@@ -182,9 +181,6 @@ GfxFont::GfxFont(const char *tagA, Ref idA, GooString *nameA) {
 GfxFont::~GfxFont() {
   delete tag;
   delete family;
-  if (origName && origName != name) {
-    delete origName;
-  }
   if (name) {
     delete name;
   }

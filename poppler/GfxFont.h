@@ -187,9 +187,6 @@ public:
   // Does this font match the tag?
   GBool matches(char *tagA) { return !tag->cmp(tagA); }
 
-  // Get base font name.
-  GooString *getName() { return name; }
-  
   // Get font family name.
   GooString *getFamily() { return family; }
   
@@ -201,7 +198,7 @@ public:
 
   // Get the original font name (ignornig any munging that might have
   // been done to map to a canonical Base-14 font name).
-  GooString *getOrigName() { return origName; }
+  GooString *getName() { return name; }
 
   // Get font type.
   GfxFontType getType() { return type; }
@@ -281,7 +278,6 @@ protected:
   GooString *family;		// font family
   Stretch stretch;			// font stretch
   Weight weight;			// font weight
-  GooString *origName;		// original font name
   GfxFontType type;		// type of font
   int flags;			// font descriptor flags
   GooString *embFontName;		// name of embedded font

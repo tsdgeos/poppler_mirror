@@ -172,9 +172,9 @@ FontInfo::FontInfo(GfxFont *font, PDFDoc *doc) {
   fontRef = *font->getID();
 
   // font name
-  origName = font->getOrigName();
+  origName = font->getName();
   if (origName != NULL) {
-    name = font->getOrigName()->copy();
+    name = font->getName()->copy();
   } else {
     name = NULL;
   }

@@ -205,9 +205,8 @@ TextFontInfo::TextFontInfo(GfxState *state) {
   if (gfxFont)
     gfxFont->incRefCnt();
 #if TEXTOUT_WORD_LIST
-  fontName = (gfxFont && gfxFont->getOrigName())
-                 ? gfxFont->getOrigName()->copy()
-                 : (GooString *)NULL;
+  fontName = (gfxFont && gfxFont->getName()) ? gfxFont->getName()->copy()
+                                             : (GooString *)NULL;
   flags = gfxFont ? gfxFont->getFlags() : 0;
 #endif
 }

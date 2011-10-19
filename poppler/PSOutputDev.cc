@@ -1708,20 +1708,20 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
   } else if (globalParams->getPSEmbedType1() &&
 	     font->getType() == fontType1C &&
 	     font->getEmbeddedFontID(&fontFileID) &&
-	     font->getOrigName()) {
+	     font->getName()) {
     // use the PDF font name because the embedded font name might
     // not include the subset prefix
-    psName = font->getOrigName()->sanitizedName(gTrue /* ps mode */);
+    psName = font->getName()->sanitizedName(gTrue /* ps mode */);
     setupEmbeddedType1CFont(font, &fontFileID, psName);
 
   // check for embedded OpenType - Type 1C font
   } else if (globalParams->getPSEmbedType1() &&
 	     font->getType() == fontType1COT &&
 	     font->getEmbeddedFontID(&fontFileID) &&
-	     font->getOrigName()) {
+	     font->getName()) {
     // use the PDF font name because the embedded font name might
     // not include the subset prefix
-    psName = font->getOrigName()->sanitizedName(gTrue /* ps mode */);
+    psName = font->getName()->sanitizedName(gTrue /* ps mode */);
     setupEmbeddedOpenTypeT1CFont(font, &fontFileID, psName);
 
   // check for external Type 1 font file
