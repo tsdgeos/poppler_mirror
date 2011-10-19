@@ -138,6 +138,26 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen,
 			 GBool numeric, GBool hex, GBool variants);
 
 //------------------------------------------------------------------------
+// GfxFontLoc
+//------------------------------------------------------------------------
+
+GfxFontLoc::GfxFontLoc() {
+  path = NULL;
+  fontNum = 0;
+  encoding = NULL;
+  substIdx = -1;
+}
+
+GfxFontLoc::~GfxFontLoc() {
+  if (path) {
+    delete path;
+  }
+  if (encoding) {
+    delete encoding;
+  }
+}
+
+//------------------------------------------------------------------------
 // GfxFont
 //------------------------------------------------------------------------
 
