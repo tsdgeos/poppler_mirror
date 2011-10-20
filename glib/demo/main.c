@@ -300,8 +300,11 @@ gint main (gint argc, gchar **argv)
 		return 1;
 	}
 
+/* Threading is always enabled starting from GLib 2.24.0 */
+#if !GLIB_CHECK_VERSION (2, 24, 0)
 	if (!g_thread_supported ())
 		g_thread_init (NULL);
+#endif
 
 	gtk_init (&argc, &argv);
 
