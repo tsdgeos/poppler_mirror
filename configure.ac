@@ -40,6 +40,9 @@ AC_PROG_INSTALL
 dnl ##### Check for pkgconfig
 PKG_PROG_PKG_CONFIG
 
+dnl ##### Export the version
+AC_DEFINE([POPPLER_VERSION], [poppler_version], [Defines the poppler version])
+
 dnl Enable these unconditionally.
 AC_DEFINE([OPI_SUPPORT], [1], [Generate OPI comments in PS output.])
 AC_DEFINE([MULTITHREADED], [1], [Enable multithreading support.])
