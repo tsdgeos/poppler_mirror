@@ -441,7 +441,7 @@ Object *Lexer::getObj(Object *obj, int objNum) {
       } else if (n == tokBufSize) {
 	error(errSyntaxError, getPos(), "Warning: name token is longer than what the specification says it can be");
 	*p = c;
-	s = new GString(tokBuf, n);
+	s = new GooString(tokBuf, n);
       } else {
 	s->append((char)c);
       }
