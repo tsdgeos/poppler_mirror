@@ -228,8 +228,9 @@ Object *Lexer::getObj(Object *obj, int objNum) {
 	break;
       }
     }
-    if (neg)
+    if (neg) {
       xi = -xi;
+    }
     if (unlikely(overflownInteger)) {
       if (overflownUnsignedInteger) {
         obj->initError();
@@ -263,8 +264,9 @@ Object *Lexer::getObj(Object *obj, int objNum) {
       xf = xf + scale * (c - '0');
       scale *= 0.1;
     }
-    if (neg)
+    if (neg) {
       xf = -xf;
+    }
     obj->initReal(xf);
     break;
 
