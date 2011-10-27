@@ -70,7 +70,7 @@ private:
   FT_Matrix matrix;
   FT_Matrix textMatrix;
   SplashCoord textScale;
-  double size;
+  int size;
   GBool enableFreeTypeHinting;
   GBool enableSlightHinting;
 };

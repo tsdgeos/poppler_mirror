@@ -62,27 +62,84 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   enableSlightHinting(fontFileA->engine->enableSlightHinting)
 {
   FT_Face face;
-  double div;
+  int div;
   int x, y;
+#if USE_FIXEDPOINT
+  SplashCoord scale;
+#endif
 
   face = fontFileA->face;
   if (FT_New_Size(face, &sizeObj)) {
     return;
   }
   face->size = sizeObj;
-  size = splashSqrt(mat[2]*mat[2] + mat[3]*mat[3]);
-  if ((int)size < 1) {
+  size = splashRound(splashDist(0, 0, mat[2], mat[3]));
+  if (size < 1) {
     size = 1;
   }
-  if (FT_Set_Pixel_Sizes(face, 0, (int)size)) {
+  if (FT_Set_Pixel_Sizes(face, 0, size)) {
     return;
   }
   // if the textMat values are too small, FreeType's fixed point
   // arithmetic doesn't work so well
-  textScale = splashSqrt(textMat[2]*textMat[2] + textMat[3]*textMat[3]) / size;
+  textScale = splashDist(0, 0, textMat[2], textMat[3]) / size;
 
   div = face->bbox.xMax > 20000 ? 65536 : 1;
 
+#if USE_FIXEDPOINT
+  scale = (SplashCoord)1 / (SplashCoord)face->units_per_EM;
+
+  // transform the four corners of the font bounding box -- the min
+  // and max values form the bounding box of the transformed font
+  x = (int)(mat[0] * (scale * (face->bbox.xMin / div)) +
+	    mat[2] * (scale * (face->bbox.yMin / div)));
+  xMin = xMax = x;
+  y = (int)(mat[1] * (scale * (face->bbox.xMin / div)) +
+	    mat[3] * (scale * (face->bbox.yMin / div)));
+  yMin = yMax = y;
+  x = (int)(mat[0] * (scale * (face->bbox.xMin / div)) +
+	    mat[2] * (scale * (face->bbox.yMax / div)));
+  if (x < xMin) {
+    xMin = x;
+  } else if (x > xMax) {
+    xMax = x;
+  }
+  y = (int)(mat[1] * (scale * (face->bbox.xMin / div)) +
+	    mat[3] * (scale * (face->bbox.yMax / div)));
+  if (y < yMin) {
+    yMin = y;
+  } else if (y > yMax) {
+    yMax = y;
+  }
+  x = (int)(mat[0] * (scale * (face->bbox.xMax / div)) +
+	    mat[2] * (scale * (face->bbox.yMin / div)));
+  if (x < xMin) {
+    xMin = x;
+  } else if (x > xMax) {
+    xMax = x;
+  }
+  y = (int)(mat[1] * (scale * (face->bbox.xMax / div)) +
+	    mat[3] * (scale * (face->bbox.yMin / div)));
+  if (y < yMin) {
+    yMin = y;
+  } else if (y > yMax) {
+    yMax = y;
+  }
+  x = (int)(mat[0] * (scale * (face->bbox.xMax / div)) +
+	    mat[2] * (scale * (face->bbox.yMax / div)));
+  if (x < xMin) {
+    xMin = x;
+  } else if (x > xMax) {
+    xMax = x;
+  }
+  y = (int)(mat[1] * (scale * (face->bbox.xMax / div)) +
+	    mat[3] * (scale * (face->bbox.yMax / div)));
+  if (y < yMin) {
+    yMin = y;
+  } else if (y > yMax) {
+    yMax = y;
+  }
+#else // USE_FIXEDPOINT
   // transform the four corners of the font bounding box -- the min
   // and max values form the bounding box of the transformed font
   x = (int)((mat[0] * face->bbox.xMin + mat[2] * face->bbox.yMin) /
@@ -133,11 +190,12 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   } else if (y > yMax) {
     yMax = y;
   }
+#endif // USE_FIXEDPOINT
   // This is a kludge: some buggy PDF generators embed fonts with
   // zero bounding boxes.
   if (xMax == xMin) {
     xMin = 0;
-    xMax = (int)size;
+    xMax = size;
   }
   if (yMax == yMin) {
     yMin = 0;
