@@ -903,6 +903,10 @@ int main(int argc, char *argv[]) {
     lastPage = firstPage;
   }
 
+  // Make sure firstPage is always used so that beginDocument() is called
+  if ((printOnlyEven && firstPage % 2 == 0) || (printOnlyOdd && firstPage % 2 == 1))
+    firstPage++;
+
   cairoOut = new CairoOutputDev();
   cairoOut->startDoc(doc->getXRef(), doc->getCatalog());
   if (sz != 0)
