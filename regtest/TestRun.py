@@ -66,7 +66,7 @@ class TestRun:
             self._stderr.append("%s (%s)" % (doc_path, backend.get_name()))
 
         if ref_has_md5 and test_has_md5:
-            if backend.compare_checksums(refs_path, test_path, not self.config.keep_results, self.config.create_diffs):
+            if backend.compare_checksums(refs_path, test_path, not self.config.keep_results, self.config.create_diffs, self.config.update_refs):
                 # FIXME: remove dir if it's empty?
                 print("PASS")
                 self._n_passed += 1

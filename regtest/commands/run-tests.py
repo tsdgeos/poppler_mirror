@@ -44,12 +44,16 @@ class RunTests(Command):
         parser.add_argument('--create-diffs',
                             action = 'store_true', dest = 'create_diffs', default = False,
                             help = 'Create diff files for failed tests')
+        parser.add_argument('--update-refs',
+                            action = 'store_true', dest = 'update_refs', default = False,
+                            help = 'Update references for failed tests')
         parser.add_argument('tests')
 
     def run(self, options):
         config = Config()
         config.keep_results = options['keep_results']
         config.create_diffs = options['create_diffs']
+        config.update_refs = options['update_refs']
 
         t = Timer()
         doc = options['tests']
