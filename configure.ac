@@ -412,6 +412,7 @@ if test x$enable_cairo_output = xyes; then
   POPPLER_GLIB_DISABLE_SINGLE_INCLUDES=""
 
   GLIB_REQUIRED=2.18
+  AC_SUBST(GLIB_REQUIRED)
   AC_ARG_ENABLE(poppler-glib,
 	        AC_HELP_STRING([--disable-poppler-glib],
 		               [Don't compile poppler glib wrapper.]),
