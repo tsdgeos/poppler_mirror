@@ -365,7 +365,6 @@ bool FormFieldChoice::isEditable() const
 
 bool FormFieldChoice::multiSelect() const
 {
-//  return m_formData->flags & (1 << 21);
   FormWidgetChoice* fwc = static_cast<FormWidgetChoice*>(m_formData->fm);
   return !fwc->isCombo() ? fwc->isMultiSelect() : false;
 }
