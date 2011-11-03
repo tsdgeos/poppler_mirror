@@ -27,6 +27,7 @@
 #ifndef _POPPLER_PRIVATE_H_
 #define _POPPLER_PRIVATE_H_
 
+#include <QtCore/QFile>
 #include <QtCore/QPointer>
 #include <QtCore/QVector>
 
