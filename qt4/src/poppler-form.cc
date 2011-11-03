@@ -35,26 +35,18 @@
 
 namespace {
 
-Qt::Alignment formTextAlignment(Object *obj)
+Qt::Alignment formTextAlignment(::FormWidget *fm)
 {
-  Object tmp;
-  int align = 0;
-  if (obj->dictLookup("Q", &tmp)->isInt())
+  Qt::Alignment qtalign = Qt::AlignLeft;
+  switch (fm->getField()->getTextQuadding())
   {
-    align = tmp.getInt();
-  }
-  tmp.free();
-  Qt::Alignment qtalign;
-  switch (align)
-  {
-    case 1:
+    case quaddingCentered:
       qtalign = Qt::AlignHCenter;
       break;
-    case 2:
+    case quaddingRightJustified:
       qtalign = Qt::AlignRight;
       break;
-    case 0:
-    default:
+    case quaddingLeftJustified:
       qtalign = Qt::AlignLeft;
   }
   return qtalign;
@@ -321,7 +313,7 @@ int FormFieldText::maximumLength() const
 
 Qt::Alignment FormFieldText::textAlignment() const
 {
-  return formTextAlignment(m_formData->fm->getObj());
+  return formTextAlignment(m_formData->fm);
 }
 
 bool FormFieldText::canBeSpellChecked() const
@@ -399,7 +391,7 @@ void FormFieldChoice::setCurrentChoices( const QList<int> &choice )
 
 Qt::Alignment FormFieldChoice::textAlignment() const
 {
-  return formTextAlignment(m_formData->fm->getObj());
+  return formTextAlignment(m_formData->fm);
 }
 
 bool FormFieldChoice::canBeSpellChecked() const
