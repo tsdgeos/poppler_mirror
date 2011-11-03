@@ -153,7 +153,7 @@ bool FormField::isReadOnly() const
 
 bool FormField::isVisible() const
 {
-  return !(m_formData->annoflags & (1 << 1));
+  return !(m_formData->fm->getWidgetAnnotation()->getFlags() & Annot::flagHidden);
 }
 
 Link* FormField::activationAction() const
