@@ -110,7 +110,6 @@ QByteArray EmbeddedFile::data()
 	if (!stream)
 		return QByteArray();
 	
-	Object obj;
 	stream->reset();
 	int dataLen = 0;
 	QByteArray fileArray;
