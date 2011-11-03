@@ -275,7 +275,7 @@ namespace Poppler {
     {
 	public:
 		FormFieldData(DocumentData *_doc, ::Page *p, ::FormWidget *w) :
-		doc(_doc), page(p), fm(w), flags(0), annoflags(0)
+		doc(_doc), page(p), fm(w)
 		{
 		}
 
@@ -283,8 +283,6 @@ namespace Poppler {
 		::Page *page;
 		::FormWidget *fm;
 		QRectF box;
-		int flags;
-		int annoflags;
     };
 
 }
