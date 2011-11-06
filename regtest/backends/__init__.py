@@ -149,6 +149,9 @@ class Backend:
 
         return status
 
+    def has_results(self, test_path):
+        return self.has_md5(test_path) or self.is_crashed(test_path) or self.is_failed(test_path)
+
     def has_stderr(self, test_path):
         return os.path.exists(os.path.join(test_path, self._name + '.stderr'))
 
