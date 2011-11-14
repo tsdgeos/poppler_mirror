@@ -257,8 +257,20 @@ GfxColorSpace *GfxColorSpace::parse(Object *csObj, Gfx *gfx) {
       error(-1, "Bad color space");
     }
     obj1.free();
+  } else if (csObj->isDict()) {
+    csObj->dictLookup("ColorSpace", &obj1);
+    if (obj1.isName("DeviceGray")) {
+      cs = new GfxDeviceGrayColorSpace();
+    } else if (obj1.isName("DeviceRGB")) {
+      cs = new GfxDeviceRGBColorSpace();
+    } else if (obj1.isName("DeviceCMYK")) {
+      cs = new GfxDeviceCMYKColorSpace();
+    } else {
+      error(-1, "Bad color space '%s'", csObj->getName());
+    }
+    obj1.free();
   } else {
-    error(-1, "Bad color space - expected name or array");
+    error(-1, "Bad color space - expected name, array or dict");
   }
   return cs;
 }
