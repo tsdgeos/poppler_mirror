@@ -30,6 +30,7 @@
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
 // Copyright (C) 2011 Joshua Richardson <jric@chegg.com>
 // Copyright (C) 2011 Stephen Reichling <sreichling@chegg.com>
+// Copyright (C) 2011 Igor Slepchin <igor.slepchin@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -63,6 +64,21 @@
 #include "HtmlUtils.h"
 
 #define DEBUG __FILE__ << ": " << __LINE__ << ": DEBUG: "
+
+class HtmlImage
+{
+public:
+    HtmlImage(GooString *_fName, GfxState *state)
+      : fName(_fName) {
+    state->transform(0, 0, &xMin, &yMax);
+    state->transform(1, 1, &xMax, &yMin);
+  }
+ ~HtmlImage() { delete fName; }
+
+  double xMin, xMax;		// image x coordinates
+  double yMin, yMax;		// image y coordinates
+  GooString  *fName;		// image file name
+};
 
 // returns true if x is closer to y than x is to z
 static inline bool IS_CLOSER(float x, float y, float z) { return fabs((x)-(y)) < fabs((x)-(z)); }
@@ -725,6 +741,15 @@ void HtmlPage::dumpAsXML(FILE* f,int page){
     delete fontCSStyle;
   }
   
+  int listlen=HtmlOutputDev::imgList->getLength();
+  for (int i = 0; i < listlen; i++) {
+    HtmlImage *img = (HtmlImage*)HtmlOutputDev::imgList->del(0);
+    fprintf(f,"<image top=\"%d\" left=\"%d\" ",xoutRound(img->yMin),xoutRound(img->xMin));
+    fprintf(f,"width=\"%d\" height=\"%d\" ",xoutRound(img->xMax-img->xMin),xoutRound(img->yMax-img->yMin));
+    fprintf(f,"src=\"%s\"/>\n",img->fName->getCString());
+    delete img;
+  }
+
   for(HtmlString *tmp=yxStrings;tmp;tmp=tmp->yxNext){
     if (tmp->htext){
       fprintf(f,"<text top=\"%d\" left=\"%d\" ",xoutRound(tmp->yMin),xoutRound(tmp->xMin));
@@ -864,9 +889,9 @@ void HtmlPage::dump(FILE *f, int pageNum)
     // Loop over the list of image names on this page
     int listlen=HtmlOutputDev::imgList->getLength();
     for (int i = 0; i < listlen; i++) {
-      GooString *fName= (GooString *)HtmlOutputDev::imgList->del(0);
-      fprintf(f,"<IMG src=\"%s\"/><br/>\n",fName->getCString());
-      delete fName;
+      HtmlImage *img = (HtmlImage*)HtmlOutputDev::imgList->del(0);
+      fprintf(f,"<IMG src=\"%s\"/><br/>\n",img->fName->getCString());
+      delete img;
     }
     HtmlOutputDev::imgNum=1;
 
@@ -1236,7 +1261,7 @@ void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 				  int width, int height, GBool invert,
 				  GBool interpolate, GBool inlineImg) {
 
-  if (ignore||complexMode) {
+  if (ignore||(complexMode && !xml)) {
     OutputDev::drawImageMask(state, ref, str, width, height, invert, interpolate, inlineImg);
     return;
   }
@@ -1272,7 +1297,10 @@ void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 
     fclose(f1);
    
-  if (fName) imgList->append(fName);
+    if (fName) {
+        HtmlImage *img = new HtmlImage(fName, state);
+        imgList->append(img);
+    }
   }
   else {
     OutputDev::drawImageMask(state, ref, str, width, height, invert, interpolate, inlineImg);
@@ -1283,7 +1311,7 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			      int width, int height, GfxImageColorMap *colorMap,
 			      GBool interpolate, int *maskColors, GBool inlineImg) {
 
-  if (ignore||complexMode) {
+  if (ignore||(complexMode && !xml)) {
     OutputDev::drawImage(state, ref, str, width, height, colorMap, interpolate,
 			 maskColors, inlineImg);
     return;
@@ -1324,7 +1352,10 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     
     fclose(f1);
   
-    if (fName) imgList->append(fName);
+    if (fName) {
+        HtmlImage *img = new HtmlImage(fName, state);
+        imgList->append(img);
+    }
   }
   else {
 #ifdef ENABLE_LIBPNG
@@ -1390,7 +1421,8 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     fclose(f1);
 
     free(row);
-    imgList->append(fName);
+    HtmlImage *img = new HtmlImage(fName, state);
+    imgList->append(img);
     ++imgNum;
     imgStr->close();
     delete imgStr;
