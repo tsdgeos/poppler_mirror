@@ -1048,9 +1048,11 @@ Object *XRef::fetch(int num, int gen, Object *obj, std::set<int> *fetchOriginato
 
   case xrefEntryCompressed:
   {
+#if 0 // Adobe apparently ignores the generation number on compressed objects
     if (gen != 0) {
       goto err;
     }
+#endif
 
     ObjectStream *objStr = NULL;
     ObjectStreamKey key(e->offset);
