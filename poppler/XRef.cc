@@ -877,7 +877,7 @@ GBool XRef::constructXRef(GBool *wasReconstructed) {
             return gFalse;
           }
 	  streamEnds = (Guint *)greallocn(streamEnds,
-					streamEndsSize, sizeof(int));
+					streamEndsSize, sizeof(Guint));
         }
         streamEnds[streamEndsLen++] = pos;
       }
