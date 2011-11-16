@@ -96,6 +96,7 @@ public:
   GBool okToFillForm(GBool ignoreOwnerPW = gFalse);
   GBool okToAccessibility(GBool ignoreOwnerPW = gFalse);
   GBool okToAssemble(GBool ignoreOwnerPW = gFalse);
+  int getPermFlags() { return permFlags; }
 
   // Get catalog object.
   Object *getCatalog(Object *obj) { return fetch(rootNum, rootGen, obj); }
