@@ -1053,6 +1053,11 @@ Object *XRef::fetch(int num, int gen, Object *obj, std::set<int> *fetchOriginato
       goto err;
     }
 #endif
+    if (e->offset >= (Guint)size ||
+	entries[e->offset].type != xrefEntryUncompressed) {
+      error(errSyntaxError, -1, "Invalid object stream");
+      goto err;
+    }
 
     ObjectStream *objStr = NULL;
     ObjectStreamKey key(e->offset);
