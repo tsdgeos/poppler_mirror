@@ -119,11 +119,22 @@ PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
 	       GooString *userPassword, void *guiDataA) {
   Object obj;
   int size = 0;
+#ifdef _WIN32
+  int n, i;
+#endif
 
   init();
 
   fileName = fileNameA;
   guiData = guiDataA;
+#ifdef _WIN32
+  n = fileName->getLength();
+  fileNameU = (wchar_t *)gmallocn(n + 1, sizeof(wchar_t));
+  for (i = 0; i < n; ++i) {
+    fileNameU[i] = (wchar_t)(fileName->getChar(i) & 0xff);
+  }
+  fileNameU[n] = L'\0';
+#endif
 
   struct stat buf;
   if (stat(fileName->getCString(), &buf) == 0) {
@@ -157,7 +168,6 @@ PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
 PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
 	       GooString *userPassword, void *guiDataA) {
   OSVERSIONINFO version;
-  wchar_t fileName2[MAX_PATH + 1];
   Object obj;
   int i;
 
@@ -165,17 +175,15 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
 
   guiData = guiDataA;
 
-  //~ file name should be stored in Unicode (?)
+  // save both Unicode and 8-bit copies of the file name
   fileName = new GooString();
+  fileNameU = (wchar_t *)gmallocn(fileNameLen + 1, sizeof(wchar_t));
   for (i = 0; i < fileNameLen; ++i) {
     fileName->append((char)fileNameA[i]);
+    fileNameU[i] = fileNameA[i];
   }
+  fileNameU[fileNameLen] = L'\0';
 
-  // zero-terminate the file name string
-  for (i = 0; i < fileNameLen && i < MAX_PATH; ++i) {
-    fileName2[i] = fileNameA[i];
-  }
-  fileName2[i] = 0;
 
   // try to open file
   // NB: _wfopen is only available in NT
@@ -187,7 +195,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
     if (_wstat(fileName2, &buf) == 0) {
       size = buf.st_size;
     }
-    file = _wfopen(fileName2, L"rb");
+    file = _wfopen(fileNameU, L"rb");
   } else {
     if (_stat(fileName->getCString(), &buf) == 0) {
       size = buf.st_size;
@@ -210,13 +218,27 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
 
 PDFDoc::PDFDoc(BaseStream *strA, GooString *ownerPassword,
 	       GooString *userPassword, void *guiDataA) {
+#ifdef _WIN32
+  int n, i;
+#endif
 
   init();
   guiData = guiDataA;
   if (strA->getFileName()) {
     fileName = strA->getFileName()->copy();
+#ifdef _WIN32
+    n = fileName->getLength();
+    fileNameU = (wchar_t *)gmallocn(n + 1, sizeof(wchar_t));
+    for (i = 0; i < n; ++i) {
+      fileNameU[i] = (wchar_t)(fileName->getChar(i) & 0xff);
+    }
+    fileNameU[n] = L'\0';
+#endif
   } else {
     fileName = NULL;
+#ifdef _WIN32
+    fileNameU = NULL;
+#endif
   }
   str = strA;
   ok = setup(ownerPassword, userPassword);
@@ -314,6 +336,11 @@ PDFDoc::~PDFDoc() {
   if (fileName) {
     delete fileName;
   }
+#ifdef _WIN32
+  if (fileNameU) {
+    gfree(fileNameU);
+  }
+#endif
 }
 
 
