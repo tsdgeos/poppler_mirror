@@ -1392,13 +1392,16 @@ PDFDoc *PDFDoc::ErrorPDFDoc(int errorCode, GooString *fileNameA)
 }
 
 Guint PDFDoc::strToUnsigned(char *s) {
-  Guint x;
+  Guint x, d;
   char *p;
-  int i;
 
   x = 0;
-  for (p = s, i = 0; *p && isdigit(*p) && i < 10; ++p, ++i) {
-    x = 10 * x + (*p - '0');
+  for (p = s; *p && isdigit(*p & 0xff); ++p) {
+    d = *p - '0';
+    if (x > (UINT_MAX - d) / 10) {
+      break;
+    }
+    x = 10 * x + d;
   }
   return x;
 }
