@@ -33,6 +33,7 @@
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2010 Nils Höglund <nils.hoglund@gmail.com>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
+// Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1453,7 +1454,7 @@ void Gfx::opSetFillRGBColor(Object args[], int numArgs) {
   }
   state->setFillPattern(NULL);
   res->lookupColorSpace("DefaultRGB", &obj);
-  if (obj.isNull()) {
+  if (!obj.isNull()) {
     colorSpace = GfxColorSpace::parse(&obj, this);
   }
   if (colorSpace == NULL) {
