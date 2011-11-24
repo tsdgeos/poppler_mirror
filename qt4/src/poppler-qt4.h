@@ -619,12 +619,12 @@ delete it;
 	QList<TextBox*> textList(Rotation rotate = Rotate0) const;
 
 	/**
-	   \return The dimensions (cropbox) of the page, in points (i.e. 1/72th on an inch)
+	   \return The dimensions (cropbox) of the page, in points (i.e. 1/72th of an inch)
 	*/
 	QSizeF pageSizeF() const;
 
 	/**
-	   \return The dimensions (cropbox) of the page, in points (i.e. 1/72th on an inch)
+	   \return The dimensions (cropbox) of the page, in points (i.e. 1/72th of an inch)
 	*/
 	QSize pageSize() const;
 
