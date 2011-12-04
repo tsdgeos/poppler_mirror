@@ -707,34 +707,43 @@ int PDFDoc::saveAs(GooString *name, PDFWriteMode mode) {
 
 int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode) {
 
-  // we don't support files with Encrypt at the moment
+  // find if we have updated objects
+  GBool updated = gFalse;
+  for(int i=0; i<xref->getNumObjects(); i++) {
+    if (xref->getEntry(i)->updated) {
+      updated = gTrue;
+      break;
+    }
+  }
+
+  // we don't support rewriting files with Encrypt at the moment
   Object obj;
   xref->getTrailerDict()->getDict()->lookupNF("Encrypt", &obj);
   if (!obj.isNull())
   {
     obj.free();
-    return errEncrypted;
-  }
-  obj.free();
-
-  if (mode == writeForceRewrite) {
-    saveCompleteRewrite(outStr);
-  } else if (mode == writeForceIncremental) {
-    saveIncrementalUpdate(outStr); 
-  } else { // let poppler decide
-    // find if we have updated objects
-    GBool updated = gFalse;
-    for(int i=0; i<xref->getNumObjects(); i++) {
-      if (xref->getEntry(i)->updated) {
-        updated = gTrue;
-        break;
-      }
-    }
-    if(updated) { 
-      saveIncrementalUpdate(outStr);
-    } else {
+    if (!updated && mode == writeStandard) {
       // simply copy the original file
       saveWithoutChangesAs (outStr);
+    } else {
+      return errEncrypted;
+    }
+  }
+  else
+  {
+    obj.free();
+
+    if (mode == writeForceRewrite) {
+      saveCompleteRewrite(outStr);
+    } else if (mode == writeForceIncremental) {
+      saveIncrementalUpdate(outStr); 
+    } else { // let poppler decide
+      if(updated) { 
+        saveIncrementalUpdate(outStr);
+      } else {
+        // simply copy the original file
+        saveWithoutChangesAs (outStr);
+      }
     }
   }
 
