@@ -1,6 +1,6 @@
 //========================================================================
 //
-// pdftoppm.cc
+// pdftocairo.cc
 //
 // Copyright 2003 Glyph & Cog, LLC
 //
@@ -24,6 +24,7 @@
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
