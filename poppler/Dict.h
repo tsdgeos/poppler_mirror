@@ -72,7 +72,7 @@ public:
 
   // Look up an entry and return the value.  Returns a null object
   // if <key> is not in the dictionary.
-  Object *lookup(const char *key, Object *obj, std::set<int> *fetchOriginatorNums = NULL);
+  Object *lookup(const char *key, Object *obj, int recursion = 0);
   Object *lookupNF(const char *key, Object *obj);
   GBool lookupInt(const char *key, const char *alt_key, int *value);
 

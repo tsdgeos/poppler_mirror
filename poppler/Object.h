@@ -154,7 +154,7 @@ public:
 
   // If object is a Ref, fetch and return the referenced object.
   // Otherwise, return a copy of the object.
-  Object *fetch(XRef *xref, Object *obj, std::set<int> *fetchOriginatorNums = NULL);
+  Object *fetch(XRef *xref, Object *obj, int recursion = 0);
 
   // Free object contents.
   void free();
@@ -213,7 +213,7 @@ public:
   void dictAdd(char *key, Object *val);
   void dictSet(const char *key, Object *val);
   GBool dictIs(const char *dictType);
-  Object *dictLookup(const char *key, Object *obj, std::set<int> *fetchOriginatorNums = NULL);
+  Object *dictLookup(const char *key, Object *obj, int recursion = 0);
   Object *dictLookupNF(const char *key, Object *obj);
   char *dictGetKey(int i);
   Object *dictGetVal(int i, Object *obj);
@@ -300,8 +300,8 @@ inline GBool Object::dictIs(const char *dictType)
 inline GBool Object::isDict(const char *dictType)
   { return type == objDict && dictIs(dictType); }
 
-inline Object *Object::dictLookup(const char *key, Object *obj, std::set<int> *fetchOriginatorNums)
-  { OBJECT_TYPE_CHECK(objDict); return dict->lookup(key, obj, fetchOriginatorNums); }
+inline Object *Object::dictLookup(const char *key, Object *obj, int recursion)
+  { OBJECT_TYPE_CHECK(objDict); return dict->lookup(key, obj, recursion); }
 
 inline Object *Object::dictLookupNF(const char *key, Object *obj)
   { OBJECT_TYPE_CHECK(objDict); return dict->lookupNF(key, obj); }

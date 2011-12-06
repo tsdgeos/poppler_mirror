@@ -37,6 +37,11 @@
 #include "XRef.h"
 #include "Error.h"
 
+// Max number of nested objects.  This is used to catch infinite loops
+// in the object structure. And also technically valid files with
+// lots of nested arrays that made us consume all the stack
+#define recursionLimit 500
+
 Parser::Parser(XRef *xrefA, Lexer *lexerA, GBool allowStreamsA) {
   xref = xrefA;
   lexer = lexerA;
@@ -52,21 +57,14 @@ Parser::~Parser() {
   delete lexer;
 }
 
-Object *Parser::getObj(Object *obj, Guchar *fileKey,
-           CryptAlgorithm encAlgorithm, int keyLength,
-           int objNum, int objGen) {
-  std::set<int> fetchOriginatorNums;
-  return getObj(obj, fileKey, encAlgorithm, keyLength, objNum, objGen, &fetchOriginatorNums);
-}
-
-Object *Parser::getObj(Object *obj, std::set<int> *fetchOriginatorNums)
+Object *Parser::getObj(Object *obj, int recursion)
 {
-  return getObj(obj, NULL, cryptRC4, 0, 0, 0, fetchOriginatorNums);
+  return getObj(obj, NULL, cryptRC4, 0, 0, 0, recursion);
 }
 
 Object *Parser::getObj(Object *obj, Guchar *fileKey,
 		       CryptAlgorithm encAlgorithm, int keyLength,
-		       int objNum, int objGen, std::set<int> *fetchOriginatorNums) {
+		       int objNum, int objGen, int recursion) {
   char *key;
   Stream *str;
   Object obj2;
@@ -85,18 +83,18 @@ Object *Parser::getObj(Object *obj, Guchar *fileKey,
   }
 
   // array
-  if (buf1.isCmd("[")) {
+  if (likely(recursion < recursionLimit) && buf1.isCmd("[")) {
     shift();
     obj->initArray(xref);
     while (!buf1.isCmd("]") && !buf1.isEOF())
       obj->arrayAdd(getObj(&obj2, fileKey, encAlgorithm, keyLength,
-			   objNum, objGen, fetchOriginatorNums));
+			   objNum, objGen, recursion + 1));
     if (buf1.isEOF())
       error(errSyntaxError, getPos(), "End of file inside array");
     shift();
 
   // dictionary or stream
-  } else if (buf1.isCmd("<<")) {
+  } else if (likely(recursion < recursionLimit) && buf1.isCmd("<<")) {
     shift(objNum);
     obj->initDict(xref);
     while (!buf1.isCmd(">>") && !buf1.isEOF()) {
@@ -111,7 +109,7 @@ Object *Parser::getObj(Object *obj, Guchar *fileKey,
 	  gfree(key);
 	  break;
 	}
-	obj->dictAdd(key, getObj(&obj2, fileKey, encAlgorithm, keyLength, objNum, objGen, fetchOriginatorNums));
+	obj->dictAdd(key, getObj(&obj2, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1));
       }
     }
     if (buf1.isEOF())
@@ -120,7 +118,7 @@ Object *Parser::getObj(Object *obj, Guchar *fileKey,
     // object streams
     if (allowStreams && buf2.isCmd("stream")) {
       if ((str = makeStream(obj, fileKey, encAlgorithm, keyLength,
-			    objNum, objGen, fetchOriginatorNums))) {
+			    objNum, objGen, recursion + 1))) {
 	obj->initStream(str);
       } else {
 	obj->free();
@@ -174,7 +172,7 @@ Object *Parser::getObj(Object *obj, Guchar *fileKey,
 
 Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
 			   CryptAlgorithm encAlgorithm, int keyLength,
-			   int objNum, int objGen, std::set<int> *fetchOriginatorNums) {
+			   int objNum, int objGen, int recursion) {
   Object obj;
   BaseStream *baseStr;
   Stream *str;
@@ -188,7 +186,7 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
   pos = str->getPos();
 
   // get length
-  dict->dictLookup("Length", &obj, fetchOriginatorNums);
+  dict->dictLookup("Length", &obj, recursion);
   if (obj.isInt()) {
     length = (Guint)obj.getInt();
     obj.free();

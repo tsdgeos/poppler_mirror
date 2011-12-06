@@ -115,9 +115,9 @@ Object *Object::copy(Object *obj) {
   return obj;
 }
 
-Object *Object::fetch(XRef *xref, Object *obj, std::set<int> *fetchOriginatorNums) {
+Object *Object::fetch(XRef *xref, Object *obj, int recursion) {
   return (type == objRef && xref) ?
-         xref->fetch(ref.num, ref.gen, obj, fetchOriginatorNums) : copy(obj);
+         xref->fetch(ref.num, ref.gen, obj, recursion) : copy(obj);
 }
 
 void Object::free() {

@@ -193,10 +193,10 @@ GBool Dict::is(const char *type) {
   return (e = find("Type")) && e->val.isName(type);
 }
 
-Object *Dict::lookup(const char *key, Object *obj, std::set<int> *fetchOriginatorNums) {
+Object *Dict::lookup(const char *key, Object *obj, int recursion) {
   DictEntry *e;
 
-  return (e = find(key)) ? e->val.fetch(xref, obj, fetchOriginatorNums) : obj->initNull();
+  return (e = find(key)) ? e->val.fetch(xref, obj, recursion) : obj->initNull();
 }
 
 Object *Dict::lookupNF(const char *key, Object *obj) {
