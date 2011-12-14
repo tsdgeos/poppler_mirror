@@ -4669,10 +4669,9 @@ GBool TextPage::findCharRange(int pos, int length,
     return gFalse;
   }
 
-  //~ this doesn't correctly handle:
-  //~ - ranges split across multiple lines (the highlighted region
-  //~   is the bounding box of all the parts of the range)
-  //~ - cases where characters don't convert one-to-one into Unicode
+  //~ this doesn't correctly handle ranges split across multiple lines
+  //~ (the highlighted region is the bounding box of all the parts of
+  //~ the range)
   first = gTrue;
   xMin0 = xMax0 = yMin0 = yMax0 = 0; // make gcc happy
   xMin1 = xMax1 = yMin1 = yMax1 = 0; // make gcc happy
@@ -4791,7 +4790,9 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc,
       delete s;
       if (word->next &&
 	  fabs(word->next->base - word->base) <
-	    maxIntraLineDelta * word->fontSize) {
+	    maxIntraLineDelta * word->fontSize &&
+	  word->next->xMin >
+	    word->xMax - minDupBreakOverlap * word->fontSize) {
 	if (word->next->xMin > word->xMax + minWordSpacing * word->fontSize) {
 	  (*outputFunc)(outputStream, space, spaceLen);
 	}
@@ -5041,7 +5042,9 @@ int TextPage::dumpFragment(Unicode *text, int len, UnicodeMap *uMap,
 	}
 	i = j;
 	// output a right-to-left section
-	for (j = i; j < len && !unicodeTypeL(text[j]); ++j) ;
+	for (j = i;
+	     j < len && !(unicodeTypeL(text[j]) || unicodeTypeNum(text[j]));
+	     ++j) ;
 	if (j > i) {
 	  s->append(rle, rleLen);
 	  for (k = j - 1; k >= i; --k) {
@@ -5056,11 +5059,17 @@ int TextPage::dumpFragment(Unicode *text, int len, UnicodeMap *uMap,
 
     } else {
 
+      // Note: This code treats numeric characters (European and
+      // Arabic/Indic) as left-to-right, which isn't strictly correct
+      // (incurs extra LRE/POPDF pairs), but does produce correct
+      // visual formatting.
       s->append(rle, rleLen);
       i = len - 1;
       while (i >= 0) {
 	// output a right-to-left section
-	for (j = i; j >= 0 && !unicodeTypeL(text[j]); --j) ;
+	for (j = i;
+	     j >= 0 && !(unicodeTypeL(text[j]) || unicodeTypeNum(text[j]));
+	     --j) ;
 	for (k = i; k > j; --k) {
 	  n = uMap->mapUnicode(text[k], buf, sizeof(buf));
 	  s->append(buf, n);
