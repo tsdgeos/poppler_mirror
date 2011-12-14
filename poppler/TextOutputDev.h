@@ -114,14 +114,15 @@ public:
 
   // Constructor.
   TextWord(GfxState *state, int rotA, double x0, double y0,
-	   int charPosA, TextFontInfo *fontA, double fontSize);
+	   TextFontInfo *fontA, double fontSize);
 
   // Destructor.
   ~TextWord();
 
   // Add a character to the word.
   void addChar(GfxState *state, double x, double y,
-	       double dx, double dy, CharCode c, Unicode u);
+	       double dx, double dy, int charPosA, int charLen,
+	       CharCode c, Unicode u);
 
   // Merge <word> onto the end of <this>.
   void merge(TextWord *word);
@@ -159,8 +160,8 @@ public:
 		   double *xMaxA, double *yMaxA);
   double getFontSize() { return fontSize; }
   int getRotation() { return rot; }
-  int getCharPos() { return charPos; }
-  int getCharLen() { return charLen; }
+  int getCharPos() { return charPos[0]; }
+  int getCharLen() { return charPos[len] - charPos[0]; }
   GBool getSpaceAfter() { return spaceAfter; }
 #endif
   GBool isUnderlined() { return underlined; }
@@ -180,11 +181,11 @@ private:
   CharCode *charcode;		// glyph indices
   double *edge;			// "near" edge x or y coord of each char
 				//   (plus one extra entry for the last char)
-  int len;			// length of text and edge arrays
-  int size;			// size of text and edge arrays
-  int charPos;                  // character position (within content stream)
-  int charLen;                  // number of content stream characters in
-                                //   this word
+  int *charPos;			// character position (within content stream)
+				//   of each char (plus one extra entry for
+				//   the last char)
+  int len;			// length of text/edge/charPos arrays
+  int size;			// size of text/edge/charPos arrays
   TextFontInfo *font;		// font information
   double fontSize;		// font size
   GBool spaceAfter;		// set if there is a space between this
