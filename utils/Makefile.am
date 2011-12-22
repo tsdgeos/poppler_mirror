@@ -17,7 +17,7 @@ INCLUDES =					\
 	-I$(top_srcdir)/poppler			\
 	$(UTILS_CFLAGS)				\
 	$(FONTCONFIG_CFLAGS)			\
-	$(CAIRO_CFLAGS)
+	$(PDFTOCAIRO_CFLAGS)
 
 LDADD =						\
 	$(top_builddir)/poppler/libpoppler.la	\
@@ -32,7 +32,7 @@ pdftocairo_SOURCES =				\
 
 pdftocairo_LDADD =				\
 	$(top_builddir)/poppler/libpoppler-cairo.la \
-	$(LDADD) $(CAIRO_LIBS)
+	$(LDADD) $(PDFTOCAIRO_LIBS)
 
 
 pdftocairo_binary = pdftocairo
