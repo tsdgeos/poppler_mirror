@@ -449,7 +449,7 @@ CharCodeToUnicode *GfxFont::readToUnicodeCMap(Dict *fontDict, int nBits,
 
 void GfxFont::findExtFontFile() {
   static char *type1Exts[] = { ".pfa", ".pfb", ".ps", "", NULL };
-  static char *ttExts[] = { ".ttf", ".ttc", NULL };
+  static char *ttExts[] = { ".ttf", ".ttc", ".otf", NULL };
 
   if (name) {
     if (type == fontType1) {

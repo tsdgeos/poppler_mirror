@@ -1247,7 +1247,7 @@ DisplayFontParam *GlobalParams::getDisplayFont(GfxFont *font) {
         ext = strrchr((char*)s,'.');
         if (!ext)
           continue;
-        if (!strncasecmp(ext,".ttf",4) || !strncasecmp(ext, ".ttc", 4))
+        if (!strncasecmp(ext,".ttf",4) || !strncasecmp(ext, ".ttc", 4) || !strncasecmp(ext, ".otf", 4))
         {
           dfp = new DisplayFontParam(fontName->copy(), displayFontTT);  
           dfp->tt.fileName = new GooString((char*)s);
