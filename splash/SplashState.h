@@ -87,6 +87,9 @@ public:
   void setStrokeOverprint(GBool strokeOverprintA) { strokeOverprint = strokeOverprintA; }
   void setOverprintMode(int overprintModeA) { overprintMode = overprintModeA; }
 
+  // Set the transfer function.
+  void setTransfer(Guchar *red, Guchar *green, Guchar *blue, Guchar *gray);
+
 private:
 
   SplashState(SplashState *state);
@@ -114,6 +117,15 @@ private:
   GBool fillOverprint;
   GBool strokeOverprint;
   int overprintMode;
+  Guchar rgbTransferR[256],
+         rgbTransferG[256],
+         rgbTransferB[256];
+  Guchar grayTransfer[256];
+  Guchar cmykTransferC[256],
+         cmykTransferM[256],
+         cmykTransferY[256],
+         cmykTransferK[256];
+  Guint overprintMask;
 
   SplashState *next;		// used by Splash class
 

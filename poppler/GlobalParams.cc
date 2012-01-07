@@ -694,6 +694,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   screenGamma = 1.0;
   screenBlackThreshold = 0.0;
   screenWhiteThreshold = 1.0;
+  overprintPreview = gFalse;
   mapNumericCharNames = gTrue;
   mapUnknownCharNames = gFalse;
   printCommands = gFalse;
@@ -1919,6 +1920,12 @@ void GlobalParams::setScreenWhiteThreshold(double whiteThreshold)
 {
   lockGlobalParams;
   screenWhiteThreshold = whiteThreshold;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setOverprintPreview(GBool overprintPreviewA) {
+  lockGlobalParams;
+  overprintPreview = overprintPreviewA;
   unlockGlobalParams;
 }
 

@@ -47,6 +47,7 @@ int splashColorModeNComps[] = {
 SplashState::SplashState(int width, int height, GBool vectorAntialias,
 			 SplashScreenParams *screenParams) {
   SplashColor color;
+  int i;
 
   matrix[0] = 1;  matrix[1] = 0;
   matrix[2] = 0;  matrix[3] = 1;
@@ -74,12 +75,24 @@ SplashState::SplashState(int width, int height, GBool vectorAntialias,
   fillOverprint = gFalse;
   strokeOverprint = gFalse;
   overprintMode = 0;	  
+  for (i = 0; i < 256; ++i) {
+    rgbTransferR[i] = (Guchar)i;
+    rgbTransferG[i] = (Guchar)i;
+    rgbTransferB[i] = (Guchar)i;
+    grayTransfer[i] = (Guchar)i;
+    cmykTransferC[i] = (Guchar)i;
+    cmykTransferM[i] = (Guchar)i;
+    cmykTransferY[i] = (Guchar)i;
+    cmykTransferK[i] = (Guchar)i;
+  }
+  overprintMask = 0xffffffff;
   next = NULL;
 }
 
 SplashState::SplashState(int width, int height, GBool vectorAntialias,
 			 SplashScreen *screenA) {
   SplashColor color;
+  int i;
 
   matrix[0] = 1;  matrix[1] = 0;
   matrix[2] = 0;  matrix[3] = 1;
@@ -107,6 +120,17 @@ SplashState::SplashState(int width, int height, GBool vectorAntialias,
   fillOverprint = gFalse;
   strokeOverprint = gFalse;
   overprintMode = 0;	  
+  for (i = 0; i < 256; ++i) {
+    rgbTransferR[i] = (Guchar)i;
+    rgbTransferG[i] = (Guchar)i;
+    rgbTransferB[i] = (Guchar)i;
+    grayTransfer[i] = (Guchar)i;
+    cmykTransferC[i] = (Guchar)i;
+    cmykTransferM[i] = (Guchar)i;
+    cmykTransferY[i] = (Guchar)i;
+    cmykTransferK[i] = (Guchar)i;
+  }
+  overprintMask = 0xffffffff;
   next = NULL;
 }
 
@@ -140,6 +164,15 @@ SplashState::SplashState(SplashState *state) {
   fillOverprint = state->fillOverprint;
   strokeOverprint = state->strokeOverprint;
   overprintMode = state->overprintMode;	  
+  memcpy(rgbTransferR, state->rgbTransferR, 256);
+  memcpy(rgbTransferG, state->rgbTransferG, 256);
+  memcpy(rgbTransferB, state->rgbTransferB, 256);
+  memcpy(grayTransfer, state->grayTransfer, 256);
+  memcpy(cmykTransferC, state->cmykTransferC, 256);
+  memcpy(cmykTransferM, state->cmykTransferM, 256);
+  memcpy(cmykTransferY, state->cmykTransferY, 256);
+  memcpy(cmykTransferK, state->cmykTransferK, 256);
+  overprintMask = state->overprintMask;
   next = NULL;
 }
 
@@ -188,4 +221,20 @@ void SplashState::setSoftMask(SplashBitmap *softMaskA) {
   }
   softMask = softMaskA;
   deleteSoftMask = gTrue;
+}
+
+void SplashState::setTransfer(Guchar *red, Guchar *green, Guchar *blue,
+			      Guchar *gray) {
+  int i;
+
+  memcpy(rgbTransferR, red, 256);
+  memcpy(rgbTransferG, green, 256);
+  memcpy(rgbTransferB, blue, 256);
+  memcpy(grayTransfer, gray, 256);
+  for (i = 0; i < 256; ++i) {
+    cmykTransferC[i] = 255 - rgbTransferR[255 - i];
+    cmykTransferM[i] = 255 - rgbTransferG[255 - i];
+    cmykTransferY[i] = 255 - rgbTransferB[255 - i];
+    cmykTransferK[i] = 255 - grayTransfer[255 - i];
+  }
 }

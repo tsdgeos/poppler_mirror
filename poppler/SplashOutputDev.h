@@ -264,6 +264,7 @@ public:
   virtual void updateFillOverprint(GfxState *state);
   virtual void updateStrokeOverprint(GfxState *state);
   virtual void updateOverprintMode(GfxState *state);
+  virtual void updateTransfer(GfxState *state);
 
   //----- update text state
   virtual void updateFont(GfxState *state);
@@ -389,9 +390,12 @@ private:
 #else
   SplashPattern *getColor(GfxGray gray, GfxRGB *rgb);
 #endif
-  SplashPath *convertPath(GfxState *state, GfxPath *path);
+  void setOverprintMask(GfxColorSpace *colorSpace, GBool overprintFlag,
+			int overprintMode, GfxColor *singleColor);
+  SplashPath *convertPath(GfxState *state, GfxPath *path,
+			  GBool dropEmptySubpaths);
   void doUpdateFont(GfxState *state);
-  void drawType3Glyph(T3FontCache *t3Font,
+  void drawType3Glyph(GfxState *state, T3FontCache *t3Font,
 		      T3FontCacheTag *tag, Guchar *data);
   static GBool imageMaskSrc(void *data, SplashColorPtr line);
   static GBool imageSrc(void *data, SplashColorPtr colorLine,

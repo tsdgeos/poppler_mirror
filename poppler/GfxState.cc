@@ -213,6 +213,7 @@ cmsHPROFILE GfxColorSpace::getDisplayProfile() {
 //------------------------------------------------------------------------
 
 GfxColorSpace::GfxColorSpace() {
+  overprintMask = 0x0f;
 }
 
 GfxColorSpace::~GfxColorSpace() {
@@ -1857,6 +1858,7 @@ GfxIndexedColorSpace::GfxIndexedColorSpace(GfxColorSpace *baseA,
   indexHigh = indexHighA;
   lookup = (Guchar *)gmallocn((indexHigh + 1) * base->getNComps(),
 			      sizeof(Guchar));
+  overprintMask = base->getOverprintMask();
 }
 
 GfxIndexedColorSpace::~GfxIndexedColorSpace() {
@@ -2049,6 +2051,27 @@ GfxSeparationColorSpace::GfxSeparationColorSpace(GooString *nameA,
   alt = altA;
   func = funcA;
   nonMarking = !name->cmp("None");
+  if (!name->cmp("Cyan")) {
+    overprintMask = 0x01;
+  } else if (!name->cmp("Magenta")) {
+    overprintMask = 0x02;
+  } else if (!name->cmp("Yellow")) {
+    overprintMask = 0x04;
+  } else if (!name->cmp("Black")) {
+    overprintMask = 0x08;
+  }
+}
+
+GfxSeparationColorSpace::GfxSeparationColorSpace(GooString *nameA,
+						 GfxColorSpace *altA,
+						 Function *funcA,
+						 GBool nonMarkingA,
+						 Guint overprintMaskA) {
+  name = nameA;
+  alt = altA;
+  func = funcA;
+  nonMarking = nonMarkingA;
+  overprintMask = overprintMaskA;
 }
 
 GfxSeparationColorSpace::~GfxSeparationColorSpace() {
@@ -2058,7 +2081,8 @@ GfxSeparationColorSpace::~GfxSeparationColorSpace() {
 }
 
 GfxColorSpace *GfxSeparationColorSpace::copy() {
-  return new GfxSeparationColorSpace(name->copy(), alt->copy(), func->copy());
+  return new GfxSeparationColorSpace(name->copy(), alt->copy(), func->copy(),
+				     nonMarking, overprintMask);
 }
 
 //~ handle the 'All' and 'None' colorants
@@ -2154,12 +2178,51 @@ void GfxSeparationColorSpace::getDefaultColor(GfxColor *color) {
 //------------------------------------------------------------------------
 
 GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
+					   GooString **namesA,
 					   GfxColorSpace *altA,
 					   Function *funcA) {
+  int i;
+
   nComps = nCompsA;
   alt = altA;
   func = funcA;
-  nonMarking = gFalse;
+  nonMarking = gTrue;
+  overprintMask = 0;
+  for (i = 0; i < nComps; ++i) {
+    names[i] = namesA[i];
+    if (names[i]->cmp("None")) {
+      nonMarking = gFalse;
+    }
+    if (!names[i]->cmp("Cyan")) {
+      overprintMask |= 0x01;
+    } else if (!names[i]->cmp("Magenta")) {
+      overprintMask |= 0x02;
+    } else if (!names[i]->cmp("Yellow")) {
+      overprintMask |= 0x04;
+    } else if (!names[i]->cmp("Black")) {
+      overprintMask |= 0x08;
+    } else {
+      overprintMask = 0x0f;
+    }
+  }
+}
+
+GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
+					   GooString **namesA,
+					   GfxColorSpace *altA,
+					   Function *funcA,
+					   GBool nonMarkingA,
+					   Guint overprintMaskA) {
+  int i;
+
+  nComps = nCompsA;
+  alt = altA;
+  func = funcA;
+  nonMarking = nonMarkingA;
+  overprintMask = overprintMaskA;
+  for (i = 0; i < nComps; ++i) {
+    names[i] = namesA[i]->copy();
+  }
 }
 
 GfxDeviceNColorSpace::~GfxDeviceNColorSpace() {
@@ -2173,15 +2236,8 @@ GfxDeviceNColorSpace::~GfxDeviceNColorSpace() {
 }
 
 GfxColorSpace *GfxDeviceNColorSpace::copy() {
-  GfxDeviceNColorSpace *cs;
-  int i;
-
-  cs = new GfxDeviceNColorSpace(nComps, alt->copy(), func->copy());
-  for (i = 0; i < nComps; ++i) {
-    cs->names[i] = names[i]->copy();
-  }
-  cs->nonMarking = nonMarking;
-  return cs;
+  return new GfxDeviceNColorSpace(nComps, names, alt->copy(), func->copy(),
+				  nonMarking, overprintMask);
 }
 
 //~ handle the 'None' colorant
@@ -2229,7 +2285,7 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(Array *arr, Gfx *gfx, int recursion) 
     goto err4;
   }
   obj1.free();
-  cs = new GfxDeviceNColorSpace(nCompsA, altA, funcA);
+  cs = new GfxDeviceNColorSpace(nCompsA, namesA, altA, funcA);
   cs->nonMarking = gTrue;
   for (i = 0; i < nCompsA; ++i) {
     cs->names[i] = namesA[i];

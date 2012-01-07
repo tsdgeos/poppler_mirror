@@ -1701,6 +1701,41 @@ SplashPattern *SplashOutputDev::getColor(GfxGray gray, GfxRGB *rgb) {
   return pattern;
 }
 
+void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace,
+				       GBool overprintFlag,
+				       int overprintMode,
+				       GfxColor *singleColor) {
+#if SPLASH_CMYK
+  Guint mask;
+  GfxCMYK cmyk;
+
+  if (overprintFlag && globalParams->getOverprintPreview()) {
+    mask = colorSpace->getOverprintMask();
+    if (singleColor && overprintMode &&
+	(colorSpace->getMode() == csDeviceCMYK ||
+	 (colorSpace->getMode() == csICCBased &&
+	  colorSpace->getNComps() == 4))) {
+      colorSpace->getCMYK(singleColor, &cmyk);
+      if (cmyk.c == 0) {
+	mask &= ~1;
+      }
+      if (cmyk.m == 0) {
+	mask &= ~2;
+      }
+      if (cmyk.y == 0) {
+	mask &= ~4;
+      }
+      if (cmyk.k == 0) {
+	mask &= ~8;
+      }
+    }
+  } else {
+    mask = 0xffffffff;
+  }
+  splash->setOverprintMask(mask);
+#endif
+}
+
 void SplashOutputDev::updateBlendMode(GfxState *state) {
   splash->setBlendFunc(splashOutBlendFuncs[state->getBlendMode()]);
 }
@@ -1723,6 +1758,51 @@ void SplashOutputDev::updateStrokeOverprint(GfxState *state) {
 
 void SplashOutputDev::updateOverprintMode(GfxState *state) {
   splash->setOverprintMode(state->getOverprintMode());
+}
+
+void SplashOutputDev::updateTransfer(GfxState *state) {
+  Function **transfer;
+  Guchar red[256], green[256], blue[256], gray[256];
+  double x, y;
+  int i;
+
+  transfer = state->getTransfer();
+  if (transfer[0] &&
+      transfer[0]->getInputSize() == 1 &&
+      transfer[0]->getOutputSize() == 1) {
+    if (transfer[1] &&
+	transfer[1]->getInputSize() == 1 &&
+	transfer[1]->getOutputSize() == 1 &&
+	transfer[2] &&
+	transfer[2]->getInputSize() == 1 &&
+	transfer[2]->getOutputSize() == 1 &&
+	transfer[3] &&
+	transfer[3]->getInputSize() == 1 &&
+	transfer[3]->getOutputSize() == 1) {
+      for (i = 0; i < 256; ++i) {
+	x = i / 255.0;
+	transfer[0]->transform(&x, &y);
+	red[i] = (Guchar)(y * 255.0 + 0.5);
+	transfer[1]->transform(&x, &y);
+	green[i] = (Guchar)(y * 255.0 + 0.5);
+	transfer[2]->transform(&x, &y);
+	blue[i] = (Guchar)(y * 255.0 + 0.5);
+	transfer[3]->transform(&x, &y);
+	gray[i] = (Guchar)(y * 255.0 + 0.5);
+      }
+    } else {
+      for (i = 0; i < 256; ++i) {
+	x = i / 255.0;
+	transfer[0]->transform(&x, &y);
+	red[i] = green[i] = blue[i] = gray[i] = (Guchar)(y * 255.0 + 0.5);
+      }
+    }
+  } else {
+    for (i = 0; i < 256; ++i) {
+      red[i] = green[i] = blue[i] = gray[i] = (Guchar)i;
+    }
+  }
+  splash->setTransfer(red, green, blue, gray);
 }
 
 void SplashOutputDev::updateFont(GfxState * /*state*/) {
@@ -2011,7 +2091,9 @@ void SplashOutputDev::stroke(GfxState *state) {
   if (state->getStrokeColorSpace()->isNonMarking()) {
     return;
   }
-  path = convertPath(state, state->getPath());
+  setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(),
+		   state->getOverprintMode(), state->getStrokeColor());
+  path = convertPath(state, state->getPath(), gFalse);
   splash->stroke(path);
   delete path;
 }
@@ -2022,7 +2104,9 @@ void SplashOutputDev::fill(GfxState *state) {
   if (state->getFillColorSpace()->isNonMarking()) {
     return;
   }
-  path = convertPath(state, state->getPath());
+  setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(),
+		   state->getOverprintMode(), state->getFillColor());
+  path = convertPath(state, state->getPath(), gTrue);
   splash->fill(path, gFalse);
   delete path;
 }
@@ -2033,7 +2117,9 @@ void SplashOutputDev::eoFill(GfxState *state) {
   if (state->getFillColorSpace()->isNonMarking()) {
     return;
   }
-  path = convertPath(state, state->getPath());
+  setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(),
+		   state->getOverprintMode(), state->getFillColor());
+  path = convertPath(state, state->getPath(), gTrue);
   splash->fill(path, gTrue);
   delete path;
 }
@@ -2041,7 +2127,7 @@ void SplashOutputDev::eoFill(GfxState *state) {
 void SplashOutputDev::clip(GfxState *state) {
   SplashPath *path;
 
-  path = convertPath(state, state->getPath());
+  path = convertPath(state, state->getPath(), gTrue);
   splash->clipToPath(path, gFalse);
   delete path;
 }
@@ -2049,7 +2135,7 @@ void SplashOutputDev::clip(GfxState *state) {
 void SplashOutputDev::eoClip(GfxState *state) {
   SplashPath *path;
 
-  path = convertPath(state, state->getPath());
+  path = convertPath(state, state->getPath(), gTrue);
   splash->clipToPath(path, gTrue);
   delete path;
 }
@@ -2057,22 +2143,24 @@ void SplashOutputDev::eoClip(GfxState *state) {
 void SplashOutputDev::clipToStrokePath(GfxState *state) {
   SplashPath *path, *path2;
 
-  path = convertPath(state, state->getPath());
-  path2 = splash->makeStrokePath(path);
+  path = convertPath(state, state->getPath(), gFalse);
+  path2 = splash->makeStrokePath(path, state->getLineWidth());
   delete path;
   splash->clipToPath(path2, gFalse);
   delete path2;
 }
 
-SplashPath *SplashOutputDev::convertPath(GfxState * /*state*/, GfxPath *path) {
+SplashPath *SplashOutputDev::convertPath(GfxState *state, GfxPath *path,
+					 GBool dropEmptySubpaths) {
   SplashPath *sPath;
   GfxSubpath *subpath;
-  int i, j;
+  int n, i, j;
 
+  n = dropEmptySubpaths ? 1 : 0;
   sPath = new SplashPath();
   for (i = 0; i < path->getNumSubpaths(); ++i) {
     subpath = path->getSubpath(i);
-    if (subpath->getNumPoints() > 0) {
+    if (subpath->getNumPoints() > n) {
       sPath->moveTo((SplashCoord)subpath->getX(0),
 		    (SplashCoord)subpath->getY(0));
       j = 1;
@@ -2126,6 +2214,8 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y,
   // fill
   if (!(render & 1)) {
     if (!haveCSPattern && !state->getFillColorSpace()->isNonMarking()) {
+      setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(),
+	       state->getOverprintMode(), state->getFillColor());
       splash->fillChar((SplashCoord)x, (SplashCoord)y, code, font);
     }
   }
@@ -2135,6 +2225,10 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y,
     if (!state->getStrokeColorSpace()->isNonMarking()) {
       if ((path = font->getGlyphPath(code))) {
 	path->offset((SplashCoord)x, (SplashCoord)y);
+    setOverprintMask(state->getStrokeColorSpace(),
+		       state->getStrokeOverprint(),
+		       state->getOverprintMode(),
+		       state->getStrokeColor());
 	splash->stroke(path);
 	delete path;
       }
@@ -2264,7 +2358,7 @@ GBool SplashOutputDev::beginType3Char(GfxState *state, double x, double y,
     if (t3Font->cacheTags != NULL) {
       if ((t3Font->cacheTags[i+j].mru & 0x8000) &&
 	t3Font->cacheTags[i+j].code == code) {
-        drawType3Glyph(t3Font, &t3Font->cacheTags[i+j],
+        drawType3Glyph(state, t3Font, &t3Font->cacheTags[i+j],
 		     t3Font->cacheData + (i+j) * t3Font->glyphSize);
         return gTrue;
       }
@@ -2298,7 +2392,7 @@ void SplashOutputDev::endType3Char(GfxState *state) {
     state->setCTM(ctm[0], ctm[1], ctm[2], ctm[3],
 		  t3GlyphStack->origCTM4, t3GlyphStack->origCTM5);
     updateCTM(state, 0, 0, 0, 0, 0, 0);
-    drawType3Glyph(t3GlyphStack->cache,
+    drawType3Glyph(state, t3GlyphStack->cache,
 		   t3GlyphStack->cacheTag, t3GlyphStack->cacheData);
   }
   t3gs = t3GlyphStack;
@@ -2431,10 +2525,12 @@ void SplashOutputDev::type3D1(GfxState *state, double wx, double wy,
   updateCTM(state, 0, 0, 0, 0, 0, 0);
 }
 
-void SplashOutputDev::drawType3Glyph(T3FontCache *t3Font,
+void SplashOutputDev::drawType3Glyph(GfxState *state, T3FontCache *t3Font,
 				     T3FontCacheTag * /*tag*/, Guchar *data) {
   SplashGlyphBitmap glyph;
 
+  setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(),
+		   state->getOverprintMode(), state->getFillColor());
   glyph.x = -t3Font->glyphX;
   glyph.y = -t3Font->glyphY;
   glyph.w = t3Font->glyphW;
@@ -2523,6 +2619,8 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
   if (state->getFillColorSpace()->isNonMarking()) {
     return;
   }
+  setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(),
+		   state->getOverprintMode(), state->getFillColor());
 
   ctm = state->getCTM();
   for (int i = 0; i < 6; ++i) {
@@ -2919,6 +3017,8 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   Guchar pix;
   int n, i;
 
+  setOverprintMask(colorMap->getColorSpace(), state->getFillOverprint(),
+		   state->getOverprintMode(), NULL);
   ctm = state->getCTM();
   for (i = 0; i < 6; ++i) {
     if (!isfinite(ctm[i])) return;
@@ -3158,6 +3258,8 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
   Guchar pix;
   int n, i;
 
+  setOverprintMask(colorMap->getColorSpace(), state->getFillOverprint(),
+		   state->getOverprintMode(), NULL);
   // If the mask is higher resolution than the image, use
   // drawSoftMaskedImage() instead.
   if (maskWidth > width || maskHeight > height) {
@@ -3327,6 +3429,8 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
   Guchar pix;
   int n, i;
 
+  setOverprintMask(colorMap->getColorSpace(), state->getFillOverprint(),
+		   state->getOverprintMode(), NULL);
   ctm = state->getCTM();
   for (i = 0; i < 6; ++i) {
     if (!isfinite(ctm[i])) return;
@@ -3599,6 +3703,7 @@ void SplashOutputDev::paintTransparencyGroup(GfxState * /*state*/, double * /*bb
 
   // paint the transparency group onto the parent bitmap
   // - the clip path was set in the parent's state)
+  splash->setOverprintMask(0xffffffff);
   splash->composite(tBitmap, 0, 0, tx, ty,
 		    tBitmap->getWidth(), tBitmap->getHeight(),
 		    gFalse, !isolated);
@@ -3948,6 +4053,7 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Catalog *catalog, Obje
   matc[1] = ctm[1];
   matc[2] = ctm[2];
   matc[3] = ctm[3];
+  splash->setOverprintMask(0xffffffff);
   splash->drawImage(&tilingBitmapSrc, &imgData, colorMode, gTrue, result_width, result_height, matc);
   delete tBitmap;
   delete gfx;
@@ -4032,7 +4138,7 @@ GBool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePat
   state->lineTo(xMax, yMax);
   state->lineTo(xMin, yMax);
   state->closePath();
-  path = convertPath(state, state->getPath());
+  path = convertPath(state, state->getPath(), gTrue);
 
   retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern) == splashOk);
   state->clearPath();

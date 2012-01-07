@@ -235,7 +235,7 @@ void GlobalParams::setupBaseFonts(char * dir)
     GetWindowsFontDir(winFontDir, sizeof(winFontDir));
 
     for (int i = 0; displayFontTab[i].name; ++i) {
-        char *fontName = displayFontTab[i].name;
+        char *fontName = (char *) displayFontTab[i].name;
         if (displayFonts->lookup(fontName))
             continue;
 

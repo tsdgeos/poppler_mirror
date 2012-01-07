@@ -192,7 +192,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
   version.dwOSVersionInfoSize = sizeof(version);
   GetVersionEx(&version);
   if (version.dwPlatformId == VER_PLATFORM_WIN32_NT) {
-    if (_wstat(fileName2, &buf) == 0) {
+    if (_wstat(fileNameU, &buf) == 0) {
       size = buf.st_size;
     }
     file = _wfopen(fileNameU, L"rb");

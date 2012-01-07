@@ -227,6 +227,9 @@ public:
   // mark the page (e.g., the "None" colorant).
   virtual GBool isNonMarking() { return gFalse; }
 
+  // Return the color space's overprint mask.
+  Guint getOverprintMask() { return overprintMask; }
+
   // Return the number of color space modes
   static int getNumColorSpaceModes();
 
@@ -243,6 +246,9 @@ public:
   // result will be a cmsHPROFILE 
   static void *getDisplayProfile();
 #endif
+protected:
+
+  Guint overprintMask;
 };
 
 //------------------------------------------------------------------------
@@ -580,6 +586,10 @@ public:
 
 private:
 
+  GfxSeparationColorSpace(GooString *nameA, GfxColorSpace *altA,
+			  Function *funcA, GBool nonMarkingA,
+			  Guint overprintMaskA);
+
   GooString *name;		// colorant name
   GfxColorSpace *alt;		// alternate color space
   Function *func;		// tint transform (into alternate color space)
@@ -593,7 +603,8 @@ private:
 class GfxDeviceNColorSpace: public GfxColorSpace {
 public:
 
-  GfxDeviceNColorSpace(int nCompsA, GfxColorSpace *alt, Function *func);
+  GfxDeviceNColorSpace(int nCompsA, GooString **namesA,
+		       GfxColorSpace *alt, Function *func);
   virtual ~GfxDeviceNColorSpace();
   virtual GfxColorSpace *copy();
   virtual GfxColorSpaceMode getMode() { return csDeviceN; }
@@ -616,6 +627,10 @@ public:
   Function *getTintTransformFunc() { return func; }
 
 private:
+
+  GfxDeviceNColorSpace(int nCompsA, GooString **namesA,
+		       GfxColorSpace *alt, Function *func,
+		       GBool nonMarkingA, Guint overprintMaskA);
 
   int nComps;			// number of components
   GooString			// colorant names
