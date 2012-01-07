@@ -173,10 +173,10 @@ class Backend:
         return True
 
     def _check_exit_status(self, p, out_path):
-        status = p.wait()
-
         stderr = p.stderr.read()
         self.__create_stderr_file(stderr, out_path)
+
+        status = p.wait()
 
         if not os.WIFEXITED(status):
             open(out_path + '.crashed', 'w').close()
@@ -188,11 +188,11 @@ class Backend:
         return True
 
     def _check_exit_status2(self, p1, p2, out_path):
+        p1_stderr = p1.stderr.read()
         status1 = p1.wait()
+        p2_stderr = p2.stderr.read()
         status2 = p2.wait()
 
-        p1_stderr = p1.stderr.read()
-        p2_stderr = p2.stderr.read()
         if p1_stderr or p2_stderr:
             self.__create_stderr_file(p1_stderr + p2_stderr, out_path)
 
