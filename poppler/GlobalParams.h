@@ -91,13 +91,14 @@ public:
   GooString *name;		// font name for 8-bit fonts and named
 				//   CID fonts; collection name for
 				//   generic CID fonts
+  GooString *substituteName;
   DisplayFontParamKind kind;
   union {
     DisplayFontParamT1 t1;
     DisplayFontParamTT tt;
   };
 
-  DisplayFontParam(GooString *nameA, DisplayFontParamKind kindA);
+  DisplayFontParam(GooString *nameA, GooString *substNameA, DisplayFontParamKind kindA);
   void setFileName(GooString *fileNameA) {
     if (displayFontT1 == kind)
         t1.fileName = fileNameA;

@@ -126,8 +126,10 @@ GlobalParams *globalParams = NULL;
 //------------------------------------------------------------------------
 
 DisplayFontParam::DisplayFontParam(GooString *nameA,
+                                   GooString *substNameA,
 				   DisplayFontParamKind kindA) {
   name = nameA;
+  substituteName = substNameA;
   kind = kindA;
   switch (kind) {
   case displayFontT1:
@@ -141,6 +143,7 @@ DisplayFontParam::DisplayFontParam(GooString *nameA,
 
 DisplayFontParam::~DisplayFontParam() {
   delete name;
+  delete substituteName;
   switch (kind) {
   case displayFontT1:
     if (t1.fileName) {
@@ -1244,18 +1247,40 @@ DisplayFontParam *GlobalParams::getDisplayFont(GfxFont *font) {
             continue;
           }
         }
+        FcChar8* s2;
+        GooString *substName = NULL;
+        res = FcPatternGetString(set->fonts[i], FC_FULLNAME, 0, &s2);
+        if (res == FcResultMatch && s2) {
+          substName = new GooString((char*)s2);
+        } else {
+          // fontconfig does not extract fullname for some fonts
+          // create the fullname from family and style
+          res = FcPatternGetString(set->fonts[i], FC_FAMILY, 0, &s2);
+          if (res == FcResultMatch && s2) {
+            substName = new GooString((char*)s2);
+            res = FcPatternGetString(set->fonts[i], FC_STYLE, 0, &s2);
+            if (res == FcResultMatch && s2) {
+              GooString *style = new GooString((char*)s2);
+              if (style->cmp("Regular") != 0) {
+                substName->append(" ");
+                substName->append(style);
+              }
+              delete style;
+            }
+          }
+        }
         ext = strrchr((char*)s,'.');
         if (!ext)
           continue;
         if (!strncasecmp(ext,".ttf",4) || !strncasecmp(ext, ".ttc", 4) || !strncasecmp(ext, ".otf", 4))
         {
-          dfp = new DisplayFontParam(fontName->copy(), displayFontTT);  
+          dfp = new DisplayFontParam(fontName->copy(), substName, displayFontTT);
           dfp->tt.fileName = new GooString((char*)s);
           FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, &(dfp->tt.faceIndex));
         }
         else if (!strncasecmp(ext,".pfa",4) || !strncasecmp(ext,".pfb",4)) 
         {
-          dfp = new DisplayFontParam(fontName->copy(), displayFontT1);  
+          dfp = new DisplayFontParam(fontName->copy(), substName, displayFontT1);
           dfp->t1.fileName = new GooString((char*)s);
         }
         else

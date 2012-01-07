@@ -55,6 +55,7 @@ public:
   ~FontInfo();
 
   GooString *getName()      { return name; };
+  GooString *getSubstituteName() { return substituteName; };
   GooString *getFile()      { return file; };
   Type       getType()      { return type; };
   GBool      getEmbedded()  { return emb; };
@@ -65,6 +66,7 @@ public:
 
 private:
   GooString *name;
+  GooString *substituteName;
   GooString *file;
   Type type;
   GBool emb;
