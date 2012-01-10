@@ -318,6 +318,66 @@ private:
 			      SplashPattern *pattern, SplashCoord alpha);
   GBool pathAllOutside(SplashPath *path);
   void fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noclip);
+  void arbitraryTransformMask(SplashImageMaskSource src, void *srcData,
+			      int srcWidth, int srcHeight,
+			      SplashCoord *mat, GBool glyphMode);
+  SplashBitmap *scaleMask(SplashImageMaskSource src, void *srcData,
+			  int srcWidth, int srcHeight,
+			  int scaledWidth, int scaledHeight);
+  void scaleMaskYdXd(SplashImageMaskSource src, void *srcData,
+		     int srcWidth, int srcHeight,
+		     int scaledWidth, int scaledHeight,
+		     SplashBitmap *dest);
+  void scaleMaskYdXu(SplashImageMaskSource src, void *srcData,
+		     int srcWidth, int srcHeight,
+		     int scaledWidth, int scaledHeight,
+		     SplashBitmap *dest);
+  void scaleMaskYuXd(SplashImageMaskSource src, void *srcData,
+		     int srcWidth, int srcHeight,
+		     int scaledWidth, int scaledHeight,
+		     SplashBitmap *dest);
+  void scaleMaskYuXu(SplashImageMaskSource src, void *srcData,
+		     int srcWidth, int srcHeight,
+		     int scaledWidth, int scaledHeight,
+		     SplashBitmap *dest);
+  void blitMask(SplashBitmap *src, int xDest, int yDest,
+		SplashClipResult clipRes);
+  SplashError arbitraryTransformImage(SplashImageSource src, void *srcData,
+			       SplashColorMode srcMode, int nComps,
+			       GBool srcAlpha,
+			       int srcWidth, int srcHeight,
+			       SplashCoord *mat);
+  SplashBitmap *scaleImage(SplashImageSource src, void *srcData,
+			   SplashColorMode srcMode, int nComps,
+			   GBool srcAlpha, int srcWidth, int srcHeight,
+			   int scaledWidth, int scaledHeight);
+  void scaleImageYdXd(SplashImageSource src, void *srcData,
+		      SplashColorMode srcMode, int nComps,
+		      GBool srcAlpha, int srcWidth, int srcHeight,
+		      int scaledWidth, int scaledHeight,
+		      SplashBitmap *dest);
+  void scaleImageYdXu(SplashImageSource src, void *srcData,
+		      SplashColorMode srcMode, int nComps,
+		      GBool srcAlpha, int srcWidth, int srcHeight,
+		      int scaledWidth, int scaledHeight,
+		      SplashBitmap *dest);
+  void scaleImageYuXd(SplashImageSource src, void *srcData,
+		      SplashColorMode srcMode, int nComps,
+		      GBool srcAlpha, int srcWidth, int srcHeight,
+		      int scaledWidth, int scaledHeight,
+		      SplashBitmap *dest);
+  void scaleImageYuXu(SplashImageSource src, void *srcData,
+		      SplashColorMode srcMode, int nComps,
+		      GBool srcAlpha, int srcWidth, int srcHeight,
+		      int scaledWidth, int scaledHeight,
+		      SplashBitmap *dest);
+  void vertFlipImage(SplashBitmap *img, int width, int height,
+		     int nComps);
+  void blitImage(SplashBitmap *src, GBool srcAlpha, int xDest, int yDest,
+		 SplashClipResult clipRes);
+  void blitImageClipped(SplashBitmap *src, GBool srcAlpha,
+			int xSrc, int ySrc, int xDest, int yDest,
+			int w, int h);
   void dumpPath(SplashPath *path);
   void dumpXPath(SplashXPath *path);
 

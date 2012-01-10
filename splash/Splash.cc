@@ -71,6 +71,47 @@ static inline Guchar clip255(int x) {
 template<typename T>
 inline void Guswap( T&a, T&b ) { T tmp = a; a=b; b=tmp; }
 
+// The PDF spec says that all pixels whose *centers* lie within the
+// image target region get painted, so we want to round n+0.5 down to
+// n.  But this causes problems, e.g., with PDF files that fill a
+// rectangle with black and then draw an image to the exact same
+// rectangle, so we instead use the fill scan conversion rule.
+// However, the correct rule works better for glyphs, so we also
+// provide that option in fillImageMask.
+#if 0
+static inline int imgCoordMungeLower(SplashCoord x) {
+  return splashCeil(x + 0.5) - 1;
+}
+static inline int imgCoordMungeUpper(SplashCoord x) {
+  return splashCeil(x + 0.5) - 1;
+}
+#else
+static inline int imgCoordMungeLower(SplashCoord x) {
+  return splashFloor(x);
+}
+static inline int imgCoordMungeUpper(SplashCoord x) {
+  return splashFloor(x) + 1;
+}
+static inline int imgCoordMungeLowerC(SplashCoord x, GBool glyphMode) {
+  return glyphMode ? (splashCeil(x + 0.5) - 1) : splashFloor(x);
+}
+static inline int imgCoordMungeUpperC(SplashCoord x, GBool glyphMode) {
+  return glyphMode ? (splashCeil(x + 0.5) - 1) : (splashFloor(x) + 1);
+}
+#endif
+
+// Used by drawImage and fillImageMask to divide the target
+// quadrilateral into sections.
+struct ImageSection {
+  int y0, y1;				// actual y range
+  int ia0, ia1;				// vertex indices for edge A
+  int ib0, ib1;				// vertex indices for edge A
+  SplashCoord xa0, ya0, xa1, ya1;	// edge A
+  SplashCoord dxdya;			// slope of edge A
+  SplashCoord xb0, yb0, xb1, yb1;	// edge B
+  SplashCoord dxdyb;			// slope of edge B
+};
+
 //------------------------------------------------------------------------
 // SplashPipe
 //------------------------------------------------------------------------
@@ -2416,7 +2457,8 @@ void Splash::fillGlyph(SplashCoord x, SplashCoord y,
 
 void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) {
   SplashPipe pipe;
-  int alpha0, alpha;
+  int alpha0;
+  Guchar alpha;
   Guchar *p;
   int x1, y1, xx, xx1, yy;
 
@@ -2547,22 +2589,11 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
 SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData,
 				  int w, int h, SplashCoord *mat,
 				  GBool glyphMode) {
-  SplashPipe pipe;
-  GBool rot;
-  SplashCoord xScale, yScale, xShear, yShear, yShear1;
-  int tx, tx2, ty, ty2, scaledWidth, scaledHeight, xSign, ySign;
-  int ulx, uly, llx, lly, urx, ury, lrx, lry;
-  int ulx1, uly1, llx1, lly1, urx1, ury1, lrx1, lry1;
-  int xMin, xMax, yMin, yMax;
-  SplashClipResult clipRes, clipRes2;
-  int yp, yq, yt, yStep, lastYStep;
-  int xp, xq, xt, xStep, xSrc;
-  int k1, spanXMin, spanXMax, spanY;
-  SplashColorPtr pixBuf, p;
-  int pixAcc;
-  int x, y, x1, x2, y2;
-  SplashCoord y1;
-  int n, m, i, j;
+  SplashBitmap *scaledMask;
+  SplashClipResult clipRes;
+  GBool minorAxisZero;
+  int x0, y0, x1, y1, scaledWidth, scaledHeight;
+  int yp;
 
   if (debugMode) {
     printf("fillImageMask: w=%d h=%d mat=[%.2f %.2f %.2f %.2f %.2f %.2f]\n",
@@ -2573,289 +2604,738 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData,
   if (w == 0 && h == 0) return splashErrZeroImage;
 
   // check for singular matrix
-  if (splashAbs(mat[0] * mat[3] - mat[1] * mat[2]) < 0.000001) {
+  if (!splashCheckDet(mat[0], mat[1], mat[2], mat[3], 0.000001)) {
     return splashErrSingularMatrix;
   }
 
-  // compute scale, shear, rotation, translation parameters
-  rot = splashAbs(mat[1]) > splashAbs(mat[0]);
-  if (rot) {
-    xScale = -mat[1];
-    yScale = mat[2] - (mat[0] * mat[3]) / mat[1];
-    xShear = -mat[3] / yScale;
-    yShear = -mat[0] / mat[1];
+  minorAxisZero = mat[1] == 0 && mat[2] == 0;
+
+  // scaling only
+  if (mat[0] > 0 && minorAxisZero && mat[3] > 0) {
+    x0 = imgCoordMungeLowerC(mat[4], glyphMode);
+    y0 = imgCoordMungeLowerC(mat[5], glyphMode);
+    x1 = imgCoordMungeUpperC(mat[0] + mat[4], glyphMode);
+    y1 = imgCoordMungeUpperC(mat[3] + mat[5], glyphMode);
+    // make sure narrow images cover at least one pixel
+    if (x0 == x1) {
+      ++x1;
+    }
+    if (y0 == y1) {
+      ++y1;
+    }
+    clipRes = state->clip->testRect(x0, y0, x1 - 1, y1 - 1);
+    opClipRes = clipRes;
+    if (clipRes != splashClipAllOutside) {
+      scaledWidth = x1 - x0;
+      scaledHeight = y1 - y0;
+      yp = h / scaledHeight;
+      if (yp < 0 || yp > INT_MAX - 1) {
+        return splashErrBadArg;
+      }
+      scaledMask = scaleMask(src, srcData, w, h, scaledWidth, scaledHeight);
+      blitMask(scaledMask, x0, y0, clipRes);
+      delete scaledMask;
+    }
+    
+  // scaling plus vertical flip
+  } else if (mat[0] > 0 && minorAxisZero && mat[3] < 0) {
+    x0 = imgCoordMungeLowerC(mat[4], glyphMode);
+    y0 = imgCoordMungeLowerC(mat[3] + mat[5], glyphMode);
+    x1 = imgCoordMungeUpperC(mat[0] + mat[4], glyphMode);
+    y1 = imgCoordMungeUpperC(mat[5], glyphMode);
+    // make sure narrow images cover at least one pixel
+    if (x0 == x1) {
+      ++x1;
+    }
+    if (y0 == y1) {
+      ++y1;
+    }
+    clipRes = state->clip->testRect(x0, y0, x1 - 1, y1 - 1);
+    opClipRes = clipRes;
+    if (clipRes != splashClipAllOutside) {
+      scaledWidth = x1 - x0;
+      scaledHeight = y1 - y0;
+      yp = h / scaledHeight;
+      if (yp < 0 || yp > INT_MAX - 1) {
+        return splashErrBadArg;
+      }
+      scaledMask = scaleMask(src, srcData, w, h, scaledWidth, scaledHeight);
+      vertFlipImage(scaledMask, scaledWidth, scaledHeight, 1);
+      blitMask(scaledMask, x0, y0, clipRes);
+      delete scaledMask;
+    }
+
+  // all other cases
   } else {
-    xScale = mat[0];
-    yScale = mat[3] - (mat[1] * mat[2]) / mat[0];
-    xShear = mat[2] / yScale;
-    yShear = mat[1] / mat[0];
+    arbitraryTransformMask(src, srcData, w, h, mat, glyphMode);
   }
-  // Note 1: The PDF spec says that all pixels whose *centers* lie
-  // within the region get painted -- but that doesn't seem to match
-  // up with what Acrobat actually does: it ends up leaving gaps
-  // between image stripes.  So we use the same rule here as for
-  // fills: any pixel that overlaps the region gets painted.
-  // Note 2: The "glyphMode" flag is a kludge: it switches back to
-  // "correct" behavior (matching the spec), for use in rendering Type
-  // 3 fonts.
-  // Note 3: The +/-0.01 in these computations is to avoid floating
-  // point precision problems which can lead to gaps between image
-  // stripes (it can cause image stripes to overlap, but that's a much
-  // less visible problem).
-  if (glyphMode) {
-    if (xScale >= 0) {
-      tx = splashRound(mat[4]);
-      tx2 = splashRound(mat[4] + xScale) - 1;
-    } else {
-      tx = splashRound(mat[4]) - 1;
-      tx2 = splashRound(mat[4] + xScale);
-    }
-  } else {
-    if (xScale >= 0) {
-      tx = splashFloor(mat[4] - 0.01);
-      tx2 = splashFloor(mat[4] + xScale + 0.01);
-    } else {
-      tx = splashFloor(mat[4] + 0.01);
-      tx2 = splashFloor(mat[4] + xScale - 0.01);
-    }
-  }
-  scaledWidth = abs(tx2 - tx) + 1;
-  if (glyphMode) {
-    if (yScale >= 0) {
-      ty = splashRound(mat[5]);
-      ty2 = splashRound(mat[5] + yScale) - 1;
-    } else {
-      ty = splashRound(mat[5]) - 1;
-      ty2 = splashRound(mat[5] + yScale);
-    }
-  } else {
-    if (yScale >= 0) {
-      ty = splashFloor(mat[5] - 0.01);
-      ty2 = splashFloor(mat[5] + yScale + 0.01);
-    } else {
-      ty = splashFloor(mat[5] + 0.01);
-      ty2 = splashFloor(mat[5] + yScale - 0.01);
-    }
-  }
-  scaledHeight = abs(ty2 - ty) + 1;
-  xSign = (xScale < 0) ? -1 : 1;
-  ySign = (yScale < 0) ? -1 : 1;
-  yShear1 = (SplashCoord)xSign * yShear;
+
+  return splashOk;
+}
+
+void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData,
+				    int srcWidth, int srcHeight,
+				    SplashCoord *mat, GBool glyphMode) {
+  SplashBitmap *scaledMask;
+  SplashClipResult clipRes, clipRes2;
+  SplashPipe pipe;
+  int scaledWidth, scaledHeight, t0, t1;
+  SplashCoord r00, r01, r10, r11, det, ir00, ir01, ir10, ir11;
+  SplashCoord vx[4], vy[4];
+  int xMin, yMin, xMax, yMax;
+  ImageSection section[3];
+  int nSections;
+  int y, xa, xb, x, i, xx, yy;
+
+  // compute the four vertices of the target quadrilateral
+  vx[0] = mat[4];                    vy[0] = mat[5];
+  vx[1] = mat[2] + mat[4];           vy[1] = mat[3] + mat[5];
+  vx[2] = mat[0] + mat[2] + mat[4];  vy[2] = mat[1] + mat[3] + mat[5];
+  vx[3] = mat[0] + mat[4];           vy[3] = mat[1] + mat[5];
 
   // clipping
-  ulx1 = 0;
-  uly1 = 0;
-  urx1 = xSign * (scaledWidth - 1);
-  ury1 = (int)(yShear * urx1);
-  llx1 = splashRound(xShear * ySign * (scaledHeight - 1));
-  lly1 = ySign * (scaledHeight - 1) + (int)(yShear * llx1);
-  lrx1 = xSign * (scaledWidth - 1) +
-           splashRound(xShear * ySign * (scaledHeight - 1));
-  lry1 = ySign * (scaledHeight - 1) + (int)(yShear * lrx1);
-  if (rot) {
-    ulx = tx + uly1;    uly = ty - ulx1;
-    urx = tx + ury1;    ury = ty - urx1;
-    llx = tx + lly1;    lly = ty - llx1;
-    lrx = tx + lry1;    lry = ty - lrx1;
-  } else {
-    ulx = tx + ulx1;    uly = ty + uly1;
-    urx = tx + urx1;    ury = ty + ury1;
-    llx = tx + llx1;    lly = ty + lly1;
-    lrx = tx + lrx1;    lry = ty + lry1;
+  xMin = imgCoordMungeLowerC(vx[0], glyphMode);
+  xMax = imgCoordMungeUpperC(vx[0], glyphMode);
+  yMin = imgCoordMungeLowerC(vy[0], glyphMode);
+  yMax = imgCoordMungeUpperC(vy[0], glyphMode);
+  for (i = 1; i < 4; ++i) {
+    t0 = imgCoordMungeLowerC(vx[i], glyphMode);
+    if (t0 < xMin) {
+      xMin = t0;
+    }
+    t0 = imgCoordMungeUpperC(vx[i], glyphMode);
+    if (t0 > xMax) {
+      xMax = t0;
+    }
+    t1 = imgCoordMungeLowerC(vy[i], glyphMode);
+    if (t1 < yMin) {
+      yMin = t1;
+    }
+    t1 = imgCoordMungeUpperC(vy[i], glyphMode);
+    if (t1 > yMax) {
+      yMax = t1;
+    }
   }
-  xMin = (ulx < urx) ? (ulx < llx) ? (ulx < lrx) ? ulx : lrx
-                                   : (llx < lrx) ? llx : lrx
-		     : (urx < llx) ? (urx < lrx) ? urx : lrx
-                                   : (llx < lrx) ? llx : lrx;
-  xMax = (ulx > urx) ? (ulx > llx) ? (ulx > lrx) ? ulx : lrx
-                                   : (llx > lrx) ? llx : lrx
-		     : (urx > llx) ? (urx > lrx) ? urx : lrx
-                                   : (llx > lrx) ? llx : lrx;
-  yMin = (uly < ury) ? (uly < lly) ? (uly < lry) ? uly : lry
-                                   : (lly < lry) ? lly : lry
-		     : (ury < lly) ? (ury < lry) ? ury : lry
-                                   : (lly < lry) ? lly : lry;
-  yMax = (uly > ury) ? (uly > lly) ? (uly > lry) ? uly : lry
-                                   : (lly > lry) ? lly : lry
-		     : (ury > lly) ? (ury > lry) ? ury : lry
-                                   : (lly > lry) ? lly : lry;
-  clipRes = state->clip->testRect(xMin, yMin, xMax, yMax);
+  clipRes = state->clip->testRect(xMin, yMin, xMax - 1, yMax - 1);
   opClipRes = clipRes;
-
-  // compute Bresenham parameters for x and y scaling
-  yp = h / scaledHeight;
-  yq = h % scaledHeight;
-  xp = w / scaledWidth;
-  xq = w % scaledWidth;
-
-  // allocate pixel buffer
-  if (yp < 0 || yp > INT_MAX - 1) {
-    return splashErrBadArg;
+  if (clipRes == splashClipAllOutside) {
+    return;
   }
-  pixBuf = (SplashColorPtr)gmallocn((yp + 1), w);
+
+  // compute the scale factors
+  if (mat[0] >= 0) {
+    t0 = imgCoordMungeUpperC(mat[0] + mat[4], glyphMode) -
+         imgCoordMungeLowerC(mat[4], glyphMode);
+  } else {
+    t0 = imgCoordMungeUpperC(mat[4], glyphMode) -
+         imgCoordMungeLowerC(mat[0] + mat[4], glyphMode);
+  }
+  if (mat[1] >= 0) {
+    t1 = imgCoordMungeUpperC(mat[1] + mat[5], glyphMode) -
+         imgCoordMungeLowerC(mat[5], glyphMode);
+  } else {
+    t1 = imgCoordMungeUpperC(mat[5], glyphMode) -
+         imgCoordMungeLowerC(mat[1] + mat[5], glyphMode);
+  }
+  scaledWidth = t0 > t1 ? t0 : t1;
+  if (mat[2] >= 0) {
+    t0 = imgCoordMungeUpperC(mat[2] + mat[4], glyphMode) -
+         imgCoordMungeLowerC(mat[4], glyphMode);
+  } else {
+    t0 = imgCoordMungeUpperC(mat[4], glyphMode) -
+         imgCoordMungeLowerC(mat[2] + mat[4], glyphMode);
+  }
+  if (mat[3] >= 0) {
+    t1 = imgCoordMungeUpperC(mat[3] + mat[5], glyphMode) -
+         imgCoordMungeLowerC(mat[5], glyphMode);
+  } else {
+    t1 = imgCoordMungeUpperC(mat[5], glyphMode) -
+         imgCoordMungeLowerC(mat[3] + mat[5], glyphMode);
+  }
+  scaledHeight = t0 > t1 ? t0 : t1;
+  if (scaledWidth == 0) {
+    scaledWidth = 1;
+  }
+  if (scaledHeight == 0) {
+    scaledHeight = 1;
+  }
+
+  // compute the inverse transform (after scaling) matrix
+  r00 = mat[0] / scaledWidth;
+  r01 = mat[1] / scaledWidth;
+  r10 = mat[2] / scaledHeight;
+  r11 = mat[3] / scaledHeight;
+  det = r00 * r11 - r01 * r10;
+  if (splashAbs(det) < 1e-6) {
+    // this should be caught by the singular matrix check in fillImageMask
+    return;
+  }
+  ir00 = r11 / det;
+  ir01 = -r01 / det;
+  ir10 = -r10 / det;
+  ir11 = r00 / det;
+
+  // scale the input image
+  scaledMask = scaleMask(src, srcData, srcWidth, srcHeight,
+			 scaledWidth, scaledHeight);
+
+  // construct the three sections
+  i = (vy[2] <= vy[3]) ? 2 : 3;
+  if (vy[1] <= vy[i]) {
+    i = 1;
+  }
+  if (vy[0] < vy[i] || (i != 3 && vy[0] == vy[i])) {
+    i = 0;
+  }
+  if (vy[i] == vy[(i+1) & 3]) {
+    section[0].y0 = imgCoordMungeLowerC(vy[i], glyphMode);
+    section[0].y1 = imgCoordMungeUpperC(vy[(i+2) & 3], glyphMode) - 1;
+    if (vx[i] < vx[(i+1) & 3]) {
+      section[0].ia0 = i;
+      section[0].ia1 = (i+3) & 3;
+      section[0].ib0 = (i+1) & 3;
+      section[0].ib1 = (i+2) & 3;
+    } else {
+      section[0].ia0 = (i+1) & 3;
+      section[0].ia1 = (i+2) & 3;
+      section[0].ib0 = i;
+      section[0].ib1 = (i+3) & 3;
+    }
+    nSections = 1;
+  } else {
+    section[0].y0 = imgCoordMungeLowerC(vy[i], glyphMode);
+    section[2].y1 = imgCoordMungeUpperC(vy[(i+2) & 3], glyphMode) - 1;
+    section[0].ia0 = section[0].ib0 = i;
+    section[2].ia1 = section[2].ib1 = (i+2) & 3;
+    if (vx[(i+1) & 3] < vx[(i+3) & 3]) {
+      section[0].ia1 = section[2].ia0 = (i+1) & 3;
+      section[0].ib1 = section[2].ib0 = (i+3) & 3;
+    } else {
+      section[0].ia1 = section[2].ia0 = (i+3) & 3;
+      section[0].ib1 = section[2].ib0 = (i+1) & 3;
+    }
+    if (vy[(i+1) & 3] < vy[(i+3) & 3]) {
+      section[1].y0 = imgCoordMungeLowerC(vy[(i+1) & 3], glyphMode);
+      section[2].y0 = imgCoordMungeUpperC(vy[(i+3) & 3], glyphMode);
+      if (vx[(i+1) & 3] < vx[(i+3) & 3]) {
+	section[1].ia0 = (i+1) & 3;
+	section[1].ia1 = (i+2) & 3;
+	section[1].ib0 = i;
+	section[1].ib1 = (i+3) & 3;
+      } else {
+	section[1].ia0 = i;
+	section[1].ia1 = (i+3) & 3;
+	section[1].ib0 = (i+1) & 3;
+	section[1].ib1 = (i+2) & 3;
+      }
+    } else {
+      section[1].y0 = imgCoordMungeLowerC(vy[(i+3) & 3], glyphMode);
+      section[2].y0 = imgCoordMungeUpperC(vy[(i+1) & 3], glyphMode);
+      if (vx[(i+1) & 3] < vx[(i+3) & 3]) {
+	section[1].ia0 = i;
+	section[1].ia1 = (i+1) & 3;
+	section[1].ib0 = (i+3) & 3;
+	section[1].ib1 = (i+2) & 3;
+      } else {
+	section[1].ia0 = (i+3) & 3;
+	section[1].ia1 = (i+2) & 3;
+	section[1].ib0 = i;
+	section[1].ib1 = (i+1) & 3;
+      }
+    }
+    section[0].y1 = section[1].y0 - 1;
+    section[1].y1 = section[2].y0 - 1;
+    nSections = 3;
+  }
+  for (i = 0; i < nSections; ++i) {
+    section[i].xa0 = vx[section[i].ia0];
+    section[i].ya0 = vy[section[i].ia0];
+    section[i].xa1 = vx[section[i].ia1];
+    section[i].ya1 = vy[section[i].ia1];
+    section[i].xb0 = vx[section[i].ib0];
+    section[i].yb0 = vy[section[i].ib0];
+    section[i].xb1 = vx[section[i].ib1];
+    section[i].yb1 = vy[section[i].ib1];
+    section[i].dxdya = (section[i].xa1 - section[i].xa0) /
+                       (section[i].ya1 - section[i].ya0);
+    section[i].dxdyb = (section[i].xb1 - section[i].xb0) /
+                       (section[i].yb1 - section[i].yb0);
+  }
 
   // initialize the pixel pipe
-  pipeInit(&pipe, 0, 0, state->fillPattern, NULL, (Guchar)splashRound(state->fillAlpha * 255),
-	   gTrue, gFalse);
+  pipeInit(&pipe, 0, 0, state->fillPattern, NULL,
+	   (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
   if (vectorAntialias) {
     drawAAPixelInit();
   }
 
+  // make sure narrow images cover at least one pixel
+  if (nSections == 1) {
+    if (section[0].y0 == section[0].y1) {
+      ++section[0].y1;
+      clipRes = opClipRes = splashClipPartial;
+    }
+  } else {
+    if (section[0].y0 == section[2].y1) {
+      ++section[1].y1;
+      clipRes = opClipRes = splashClipPartial;
+    }
+  }
+
+  // scan all pixels inside the target region
+  for (i = 0; i < nSections; ++i) {
+    for (y = section[i].y0; y <= section[i].y1; ++y) {
+      xa = imgCoordMungeLowerC(section[i].xa0 +
+			         ((SplashCoord)y + 0.5 - section[i].ya0) *
+			           section[i].dxdya,
+			       glyphMode);
+      xb = imgCoordMungeUpperC(section[i].xb0 +
+			         ((SplashCoord)y + 0.5 - section[i].yb0) *
+			           section[i].dxdyb,
+			       glyphMode);
+      // make sure narrow images cover at least one pixel
+      if (xa == xb) {
+	++xb;
+      }
+      if (clipRes != splashClipAllInside) {
+	clipRes2 = state->clip->testSpan(xa, xb - 1, y);
+      } else {
+	clipRes2 = clipRes;
+      }
+      for (x = xa; x < xb; ++x) {
+	// map (x+0.5, y+0.5) back to the scaled image
+	xx = splashFloor(((SplashCoord)x + 0.5 - mat[4]) * ir00 +
+			 ((SplashCoord)y + 0.5 - mat[5]) * ir10);
+	yy = splashFloor(((SplashCoord)x + 0.5 - mat[4]) * ir01 +
+			 ((SplashCoord)y + 0.5 - mat[5]) * ir11);
+	// xx should always be within bounds, but floating point
+	// inaccuracy can cause problems
+	if (xx < 0) {
+	  xx = 0;
+	} else if (xx >= scaledWidth) {
+	  xx = scaledWidth - 1;
+	}
+	if (yy < 0) {
+	  yy = 0;
+	} else if (yy >= scaledHeight) {
+	  yy = scaledHeight - 1;
+	}
+	pipe.shape = scaledMask->data[yy * scaledWidth + xx];
+	if (vectorAntialias && clipRes2 != splashClipAllInside) {
+	  drawAAPixel(&pipe, x, y);
+	} else {
+	  drawPixel(&pipe, x, y, clipRes2 == splashClipAllInside);
+	}
+      }
+    }
+  }
+
+  delete scaledMask;
+}
+
+// Scale an image mask into a SplashBitmap.
+SplashBitmap *Splash::scaleMask(SplashImageMaskSource src, void *srcData,
+				int srcWidth, int srcHeight,
+				int scaledWidth, int scaledHeight) {
+  SplashBitmap *dest;
+
+  dest = new SplashBitmap(scaledWidth, scaledHeight, 1, splashModeMono8,
+			  gFalse);
+  if (scaledHeight < srcHeight) {
+    if (scaledWidth < srcWidth) {
+      scaleMaskYdXd(src, srcData, srcWidth, srcHeight,
+		    scaledWidth, scaledHeight, dest);
+    } else {
+      scaleMaskYdXu(src, srcData, srcWidth, srcHeight,
+		    scaledWidth, scaledHeight, dest);
+    }
+  } else {
+    if (scaledWidth < srcWidth) {
+      scaleMaskYuXd(src, srcData, srcWidth, srcHeight,
+		    scaledWidth, scaledHeight, dest);
+    } else {
+      scaleMaskYuXu(src, srcData, srcWidth, srcHeight,
+		    scaledWidth, scaledHeight, dest);
+    }
+  }
+  return dest;
+}
+
+void Splash::scaleMaskYdXd(SplashImageMaskSource src, void *srcData,
+			   int srcWidth, int srcHeight,
+			   int scaledWidth, int scaledHeight,
+			   SplashBitmap *dest) {
+  Guchar *lineBuf;
+  Guint *pixBuf;
+  Guint pix;
+  Guchar *destPtr;
+  int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx, d, d0, d1;
+  int i, j;
+
+  // Bresenham parameters for y scale
+  yp = srcHeight / scaledHeight;
+  yq = srcHeight % scaledHeight;
+
+  // Bresenham parameters for x scale
+  xp = srcWidth / scaledWidth;
+  xq = srcWidth % scaledWidth;
+
+  // allocate buffers
+  lineBuf = (Guchar *)gmalloc(srcWidth);
+  pixBuf = (Guint *)gmallocn(srcWidth, sizeof(int));
+
   // init y scale Bresenham
   yt = 0;
-  lastYStep = 1;
 
+  destPtr = dest->data;
   for (y = 0; y < scaledHeight; ++y) {
 
     // y scale Bresenham
-    yStep = yp;
-    yt += yq;
-    if (yt >= scaledHeight) {
+    if ((yt += yq) >= scaledHeight) {
       yt -= scaledHeight;
-      ++yStep;
-    }
-
-    // read row(s) from image
-    n = (yp > 0) ? yStep : lastYStep;
-    if (n > 0) {
-      p = pixBuf;
-      for (i = 0; i < n; ++i) {
-	(*src)(srcData, p);
-	p += w;
-      }
-    }
-    lastYStep = yStep;
-
-    // loop-invariant constants
-    k1 = splashRound(xShear * ySign * y);
-
-    // clipping test
-    if (clipRes != splashClipAllInside &&
-	!rot &&
-	(int)(yShear * k1) ==
-	  (int)(yShear * (xSign * (scaledWidth - 1) + k1))) {
-      if (xSign > 0) {
-	spanXMin = tx + k1;
-	spanXMax = spanXMin + (scaledWidth - 1);
-      } else {
-	spanXMax = tx + k1;
-	spanXMin = spanXMax - (scaledWidth - 1);
-      }
-      spanY = ty + ySign * y + (int)(yShear * k1);
-      clipRes2 = state->clip->testSpan(spanXMin, spanXMax, spanY);
-      if (clipRes2 == splashClipAllOutside) {
-	continue;
-      }
+      yStep = yp + 1;
     } else {
-      clipRes2 = clipRes;
+      yStep = yp;
+    }
+
+    // read rows from image
+    memset(pixBuf, 0, srcWidth * sizeof(int));
+    for (i = 0; i < yStep; ++i) {
+      (*src)(srcData, lineBuf);
+      for (j = 0; j < srcWidth; ++j) {
+	pixBuf[j] += lineBuf[j];
+      }
     }
 
     // init x scale Bresenham
     xt = 0;
-    xSrc = 0;
+    d0 = (255 << 23) / (yStep * xp);
+    d1 = (255 << 23) / (yStep * (xp + 1));
 
-    // x shear
-    x1 = k1;
-
-    // y shear
-    y1 = (SplashCoord)ySign * y + yShear * x1;
-    // this is a kludge: if yShear1 is negative, then (int)y1 would
-    // change immediately after the first pixel, which is not what we
-    // want
-    if (yShear1 < 0) {
-      y1 += 0.999;
-    }
-
-    // loop-invariant constants
-    n = yStep > 0 ? yStep : 1;
-
+    xx = 0;
     for (x = 0; x < scaledWidth; ++x) {
 
       // x scale Bresenham
-      xStep = xp;
-      xt += xq;
-      if (xt >= scaledWidth) {
+      if ((xt += xq) >= scaledWidth) {
 	xt -= scaledWidth;
-	++xStep;
-      }
-
-      // rotation
-      if (rot) {
-	x2 = (int)y1;
-	y2 = -x1;
+	xStep = xp + 1;
+	d = d1;
       } else {
-	x2 = x1;
-	y2 = (int)y1;
+	xStep = xp;
+	d = d0;
       }
 
-      // compute the alpha value for (x,y) after the x and y scaling
-      // operations
-      m = xStep > 0 ? xStep : 1;
-      p = pixBuf + xSrc;
-      pixAcc = 0;
-      for (i = 0; i < n; ++i) {
-	for (j = 0; j < m; ++j) {
-	  pixAcc += *p++;
-	}
-	p += w - m;
+      // compute the final pixel
+      pix = 0;
+      for (i = 0; i < xStep; ++i) {
+	pix += pixBuf[xx++];
       }
+      // (255 * pix) / xStep * yStep
+      pix = (pix * d) >> 23;
 
-      // blend fill color with background
-      if (pixAcc != 0) {
-	pipe.shape = ((pixAcc == n * m)
-	                 ? (SplashCoord)1
-	                 : (SplashCoord)pixAcc / (SplashCoord)(n * m)) * 255;
-	if (vectorAntialias && clipRes2 != splashClipAllInside) {
-	  drawAAPixel(&pipe, tx + x2, ty + y2);
-	} else {
-	  drawPixel(&pipe, tx + x2, ty + y2, clipRes2 == splashClipAllInside);
-	}
-      }
-
-      // x scale Bresenham
-      xSrc += xStep;
-
-      // x shear
-      x1 += xSign;
-
-      // y shear
-      y1 += yShear1;
+      // store the pixel
+      *destPtr++ = (Guchar)pix;
     }
   }
 
-  // free memory
   gfree(pixBuf);
+  gfree(lineBuf);
+}
 
-  return splashOk;
+void Splash::scaleMaskYdXu(SplashImageMaskSource src, void *srcData,
+			   int srcWidth, int srcHeight,
+			   int scaledWidth, int scaledHeight,
+			   SplashBitmap *dest) {
+  Guchar *lineBuf;
+  Guint *pixBuf;
+  Guint pix;
+  Guchar *destPtr;
+  int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, d;
+  int i, j;
+
+  // Bresenham parameters for y scale
+  yp = srcHeight / scaledHeight;
+  yq = srcHeight % scaledHeight;
+
+  // Bresenham parameters for x scale
+  xp = scaledWidth / srcWidth;
+  xq = scaledWidth % srcWidth;
+
+  // allocate buffers
+  lineBuf = (Guchar *)gmalloc(srcWidth);
+  pixBuf = (Guint *)gmallocn(srcWidth, sizeof(int));
+
+  // init y scale Bresenham
+  yt = 0;
+
+  destPtr = dest->data;
+  for (y = 0; y < scaledHeight; ++y) {
+
+    // y scale Bresenham
+    if ((yt += yq) >= scaledHeight) {
+      yt -= scaledHeight;
+      yStep = yp + 1;
+    } else {
+      yStep = yp;
+    }
+
+    // read rows from image
+    memset(pixBuf, 0, srcWidth * sizeof(int));
+    for (i = 0; i < yStep; ++i) {
+      (*src)(srcData, lineBuf);
+      for (j = 0; j < srcWidth; ++j) {
+	pixBuf[j] += lineBuf[j];
+      }
+    }
+
+    // init x scale Bresenham
+    xt = 0;
+    d = (255 << 23) / yStep;
+
+    for (x = 0; x < srcWidth; ++x) {
+
+      // x scale Bresenham
+      if ((xt += xq) >= srcWidth) {
+	xt -= srcWidth;
+	xStep = xp + 1;
+      } else {
+	xStep = xp;
+      }
+
+      // compute the final pixel
+      pix = pixBuf[x];
+      // (255 * pix) / yStep
+      pix = (pix * d) >> 23;
+
+      // store the pixel
+      for (i = 0; i < xStep; ++i) {
+	*destPtr++ = (Guchar)pix;
+      }
+    }
+  }
+
+  gfree(pixBuf);
+  gfree(lineBuf);
+}
+
+void Splash::scaleMaskYuXd(SplashImageMaskSource src, void *srcData,
+			   int srcWidth, int srcHeight,
+			   int scaledWidth, int scaledHeight,
+			   SplashBitmap *dest) {
+  Guchar *lineBuf;
+  Guint pix;
+  Guchar *destPtr0, *destPtr;
+  int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx, d, d0, d1;
+  int i;
+
+  // Bresenham parameters for y scale
+  yp = scaledHeight / srcHeight;
+  yq = scaledHeight % srcHeight;
+
+  // Bresenham parameters for x scale
+  xp = srcWidth / scaledWidth;
+  xq = srcWidth % scaledWidth;
+
+  // allocate buffers
+  lineBuf = (Guchar *)gmalloc(srcWidth);
+
+  // init y scale Bresenham
+  yt = 0;
+
+  destPtr0 = dest->data;
+  for (y = 0; y < srcHeight; ++y) {
+
+    // y scale Bresenham
+    if ((yt += yq) >= srcHeight) {
+      yt -= srcHeight;
+      yStep = yp + 1;
+    } else {
+      yStep = yp;
+    }
+
+    // read row from image
+    (*src)(srcData, lineBuf);
+
+    // init x scale Bresenham
+    xt = 0;
+    d0 = (255 << 23) / xp;
+    d1 = (255 << 23) / (xp + 1);
+
+    xx = 0;
+    for (x = 0; x < scaledWidth; ++x) {
+
+      // x scale Bresenham
+      if ((xt += xq) >= scaledWidth) {
+	xt -= scaledWidth;
+	xStep = xp + 1;
+	d = d1;
+      } else {
+	xStep = xp;
+	d = d0;
+      }
+
+      // compute the final pixel
+      pix = 0;
+      for (i = 0; i < xStep; ++i) {
+	pix += lineBuf[xx++];
+      }
+      // (255 * pix) / xStep
+      pix = (pix * d) >> 23;
+
+      // store the pixel
+      for (i = 0; i < yStep; ++i) {
+	destPtr = destPtr0 + i * scaledWidth + x;
+	*destPtr = (Guchar)pix;
+      }
+    }
+
+    destPtr0 += yStep * scaledWidth;
+  }
+
+  gfree(lineBuf);
+}
+
+void Splash::scaleMaskYuXu(SplashImageMaskSource src, void *srcData,
+			   int srcWidth, int srcHeight,
+			   int scaledWidth, int scaledHeight,
+			   SplashBitmap *dest) {
+  Guchar *lineBuf;
+  Guint pix;
+  Guchar *destPtr0, *destPtr;
+  int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx;
+  int i, j;
+
+  // Bresenham parameters for y scale
+  yp = scaledHeight / srcHeight;
+  yq = scaledHeight % srcHeight;
+
+  // Bresenham parameters for x scale
+  xp = scaledWidth / srcWidth;
+  xq = scaledWidth % srcWidth;
+
+  // allocate buffers
+  lineBuf = (Guchar *)gmalloc(srcWidth);
+
+  // init y scale Bresenham
+  yt = 0;
+
+  destPtr0 = dest->data;
+  for (y = 0; y < srcHeight; ++y) {
+
+    // y scale Bresenham
+    if ((yt += yq) >= srcHeight) {
+      yt -= srcHeight;
+      yStep = yp + 1;
+    } else {
+      yStep = yp;
+    }
+
+    // read row from image
+    (*src)(srcData, lineBuf);
+
+    // init x scale Bresenham
+    xt = 0;
+
+    xx = 0;
+    for (x = 0; x < srcWidth; ++x) {
+
+      // x scale Bresenham
+      if ((xt += xq) >= srcWidth) {
+	xt -= srcWidth;
+	xStep = xp + 1;
+      } else {
+	xStep = xp;
+      }
+
+      // compute the final pixel
+      pix = lineBuf[x] ? 255 : 0;
+
+      // store the pixel
+      for (i = 0; i < yStep; ++i) {
+	for (j = 0; j < xStep; ++j) {
+	  destPtr = destPtr0 + i * scaledWidth + xx + j;
+	  *destPtr++ = (Guchar)pix;
+	}
+      }
+
+      xx += xStep;
+    }
+
+    destPtr0 += yStep * scaledWidth;
+  }
+
+  gfree(lineBuf);
+}
+
+void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
+		      SplashClipResult clipRes) {
+  SplashPipe pipe;
+  Guchar *p;
+  int w, h, x, y;
+
+  w = src->getWidth();
+  h = src->getHeight();
+  if (vectorAntialias && clipRes != splashClipAllInside) {
+    pipeInit(&pipe, xDest, yDest, state->fillPattern, NULL,
+	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
+    drawAAPixelInit();
+    p = src->getDataPtr();
+    for (y = 0; y < h; ++y) {
+      for (x = 0; x < w; ++x) {
+	pipe.shape = *p++;
+	drawAAPixel(&pipe, xDest + x, yDest + y);
+      }
+    }
+  } else {
+    pipeInit(&pipe, xDest, yDest, state->fillPattern, NULL,
+	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
+    p = src->getDataPtr();
+    if (clipRes == splashClipAllInside) {
+      for (y = 0; y < h; ++y) {
+	pipeSetXY(&pipe, xDest, yDest + y);
+	for (x = 0; x < w; ++x) {
+	  if (*p) {
+	    pipe.shape = *p;
+	    (this->*pipe.run)(&pipe);
+	  } else {
+	    pipeIncX(&pipe);
+	  }
+	  ++p;
+	}
+      }
+      updateModX(xDest);
+      updateModX(xDest + w - 1);
+      updateModY(yDest);
+      updateModY(yDest + h - 1);
+    } else {
+      for (y = 0; y < h; ++y) {
+	pipeSetXY(&pipe, xDest, yDest + y);
+	for (x = 0; x < w; ++x) {
+	  if (*p && state->clip->test(xDest + x, yDest + y)) {
+	    pipe.shape = *p;
+	    (this->*pipe.run)(&pipe);
+	    updateModX(xDest + x);
+	    updateModY(yDest + y);
+	  } else {
+	    pipeIncX(&pipe);
+	  }
+	  ++p;
+	}
+      }
+    }
+  }
 }
 
 SplashError Splash::drawImage(SplashImageSource src, void *srcData,
 			      SplashColorMode srcMode, GBool srcAlpha,
 			      int w, int h, SplashCoord *mat, SplashPattern *opImagePattern) {
-  SplashPipe pipe;
-  GBool ok, rot;
-  SplashCoord xScale, yScale, xShear, yShear, yShear1;
-  int tx, tx2, ty, ty2, scaledWidth, scaledHeight, xSign, ySign;
-  int ulx, uly, llx, lly, urx, ury, lrx, lry;
-  int ulx1, uly1, llx1, lly1, urx1, ury1, lrx1, lry1;
-  int xMin, xMax, yMin, yMax;
-  SplashClipResult clipRes, clipRes2;
-  int yp, yq, yt, yStep, lastYStep;
-  int xp, xq, xt, xStep, xSrc;
-  int k1, spanXMin, spanXMax, spanY;
-  SplashColorPtr colorBuf, p;
-  SplashColor pix;
-  Guchar *alphaBuf, *q;
-#if SPLASH_CMYK
-  int pixAcc0, pixAcc1, pixAcc2, pixAcc3;
-#else
-  int pixAcc0, pixAcc1, pixAcc2;
-#endif
-  int alphaAcc;
-  SplashCoord pixMul, alphaMul, alpha;
-  int x, y, x1, x2, y2;
-  SplashCoord y1;
-  int nComps, n, m, i, j;
+  GBool ok;
+  SplashBitmap *scaledImg;
+  SplashClipResult clipRes;
+  GBool minorAxisZero;
+  int x0, y0, x1, y1, scaledWidth, scaledHeight;
+  int nComps;
+  int yp;
 
   if (debugMode) {
     printf("drawImage: srcMode=%d srcAlpha=%d w=%d h=%d mat=[%.2f %.2f %.2f %.2f %.2f %.2f]\n",
@@ -2890,799 +3370,1242 @@ SplashError Splash::drawImage(SplashImageSource src, void *srcData,
     nComps = 4;
     break;
 #endif
+  default:
+    ok = gFalse;
+    break;
   }
   if (!ok) {
     return splashErrModeMismatch;
   }
 
   // check for singular matrix
-  if (splashAbs(mat[0] * mat[3] - mat[1] * mat[2]) < 0.000001) {
+  if (!splashCheckDet(mat[0], mat[1], mat[2], mat[3], 0.000001)) {
     return splashErrSingularMatrix;
   }
 
-  // compute scale, shear, rotation, translation parameters
-  rot = splashAbs(mat[1]) > splashAbs(mat[0]);
-  if (rot) {
-    xScale = -mat[1];
-    yScale = mat[2] - (mat[0] * mat[3]) / mat[1];
-    xShear = -mat[3] / yScale;
-    yShear = -mat[0] / mat[1];
+  minorAxisZero = mat[1] == 0 && mat[2] == 0;
+
+  // scaling only
+  if (mat[0] > 0 && minorAxisZero && mat[3] > 0) {
+    x0 = imgCoordMungeLower(mat[4]);
+    y0 = imgCoordMungeLower(mat[5]);
+    x1 = imgCoordMungeUpper(mat[0] + mat[4]);
+    y1 = imgCoordMungeUpper(mat[3] + mat[5]);
+    // make sure narrow images cover at least one pixel
+    if (x0 == x1) {
+      ++x1;
+    }
+    if (y0 == y1) {
+      ++y1;
+    }
+    clipRes = state->clip->testRect(x0, y0, x1 - 1, y1 - 1);
+    opClipRes = clipRes;
+    if (clipRes != splashClipAllOutside) {
+      scaledWidth = x1 - x0;
+      scaledHeight = y1 - y0;
+      yp = h / scaledHeight;
+      if (yp < 0 || yp > INT_MAX - 1) {
+        return splashErrBadArg;
+      }
+      scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h,
+			     scaledWidth, scaledHeight);
+      blitImage(scaledImg, srcAlpha, x0, y0, clipRes);
+      delete scaledImg;
+    }
+    
+  // scaling plus vertical flip
+  } else if (mat[0] > 0 && minorAxisZero && mat[3] < 0) {
+    x0 = imgCoordMungeLower(mat[4]);
+    y0 = imgCoordMungeLower(mat[3] + mat[5]);
+    x1 = imgCoordMungeUpper(mat[0] + mat[4]);
+    y1 = imgCoordMungeUpper(mat[5]);
+    if (x0 == x1) {
+      if (mat[4] + mat[0] * 0.5 < x0) {
+	--x0;
+      } else {
+	++x1;
+      }
+    }
+    if (y0 == y1) {
+      if (mat[5] + mat[1] * 0.5 < y0) {
+	--y0;
+      } else {
+	++y1;
+      }
+    }
+    clipRes = state->clip->testRect(x0, y0, x1 - 1, y1 - 1);
+    opClipRes = clipRes;
+    if (clipRes != splashClipAllOutside) {
+      scaledWidth = x1 - x0;
+      scaledHeight = y1 - y0;
+      yp = h / scaledHeight;
+      if (yp < 0 || yp > INT_MAX - 1) {
+        return splashErrBadArg;
+      }
+      scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h,
+			     scaledWidth, scaledHeight);
+      vertFlipImage(scaledImg, scaledWidth, scaledHeight, nComps);
+      blitImage(scaledImg, srcAlpha, x0, y0, clipRes);
+      delete scaledImg;
+    }
+
+  // all other cases
   } else {
-    xScale = mat[0];
-    yScale = mat[3] - (mat[1] * mat[2]) / mat[0];
-    xShear = mat[2] / yScale;
-    yShear = mat[1] / mat[0];
+    return arbitraryTransformImage(src, srcData, srcMode, nComps, srcAlpha,
+			    w, h, mat);
   }
-  // Note 1: The PDF spec says that all pixels whose *centers* lie
-  // within the region get painted -- but that doesn't seem to match
-  // up with what Acrobat actually does: it ends up leaving gaps
-  // between image stripes.  So we use the same rule here as for
-  // fills: any pixel that overlaps the region gets painted.
-  // Note 2: The +/-0.01 in these computations is to avoid floating
-  // point precision problems which can lead to gaps between image
-  // stripes (it can cause image stripes to overlap, but that's a much
-  // less visible problem).
-  if (xScale >= 0) {
-    tx = splashFloor(mat[4] - 0.01);
-    tx2 = splashFloor(mat[4] + xScale + 0.01);
-  } else {
-    tx = splashFloor(mat[4] + 0.01);
-    tx2 = splashFloor(mat[4] + xScale - 0.01);
-  }
-  scaledWidth = abs(tx2 - tx) + 1;
-  if (yScale >= 0) {
-    ty = splashFloor(mat[5] - 0.01);
-    ty2 = splashFloor(mat[5] + yScale + 0.01);
-  } else {
-    ty = splashFloor(mat[5] + 0.01);
-    ty2 = splashFloor(mat[5] + yScale - 0.01);
-  }
-  scaledHeight = abs(ty2 - ty) + 1;
-  xSign = (xScale < 0) ? -1 : 1;
-  ySign = (yScale < 0) ? -1 : 1;
-  yShear1 = (SplashCoord)xSign * yShear;
+
+  return splashOk;
+}
+
+SplashError Splash::arbitraryTransformImage(SplashImageSource src, void *srcData,
+				     SplashColorMode srcMode, int nComps,
+				     GBool srcAlpha,
+				     int srcWidth, int srcHeight,
+				     SplashCoord *mat) {
+  SplashBitmap *scaledImg;
+  SplashClipResult clipRes, clipRes2;
+  SplashPipe pipe;
+  SplashColor pixel;
+  int scaledWidth, scaledHeight, t0, t1;
+  SplashCoord r00, r01, r10, r11, det, ir00, ir01, ir10, ir11;
+  SplashCoord vx[4], vy[4];
+  int xMin, yMin, xMax, yMax;
+  ImageSection section[3];
+  int nSections;
+  int y, xa, xb, x, i, xx, yy, yp;
+
+  // compute the four vertices of the target quadrilateral
+  vx[0] = mat[4];                    vy[0] = mat[5];
+  vx[1] = mat[2] + mat[4];           vy[1] = mat[3] + mat[5];
+  vx[2] = mat[0] + mat[2] + mat[4];  vy[2] = mat[1] + mat[3] + mat[5];
+  vx[3] = mat[0] + mat[4];           vy[3] = mat[1] + mat[5];
 
   // clipping
-  ulx1 = 0;
-  uly1 = 0;
-  urx1 = xSign * (scaledWidth - 1);
-  ury1 = (int)(yShear * urx1);
-  llx1 = splashRound(xShear * ySign * (scaledHeight - 1));
-  lly1 = ySign * (scaledHeight - 1) + (int)(yShear * llx1);
-  lrx1 = xSign * (scaledWidth - 1) +
-           splashRound(xShear * ySign * (scaledHeight - 1));
-  lry1 = ySign * (scaledHeight - 1) + (int)(yShear * lrx1);
-  if (rot) {
-    ulx = tx + uly1;    uly = ty - ulx1;
-    urx = tx + ury1;    ury = ty - urx1;
-    llx = tx + lly1;    lly = ty - llx1;
-    lrx = tx + lry1;    lry = ty - lrx1;
-  } else {
-    ulx = tx + ulx1;    uly = ty + uly1;
-    urx = tx + urx1;    ury = ty + ury1;
-    llx = tx + llx1;    lly = ty + lly1;
-    lrx = tx + lrx1;    lry = ty + lry1;
+  xMin = imgCoordMungeLower(vx[0]);
+  xMax = imgCoordMungeUpper(vx[0]);
+  yMin = imgCoordMungeLower(vy[0]);
+  yMax = imgCoordMungeUpper(vy[0]);
+  for (i = 1; i < 4; ++i) {
+    t0 = imgCoordMungeLower(vx[i]);
+    if (t0 < xMin) {
+      xMin = t0;
+    }
+    t0 = imgCoordMungeUpper(vx[i]);
+    if (t0 > xMax) {
+      xMax = t0;
+    }
+    t1 = imgCoordMungeLower(vy[i]);
+    if (t1 < yMin) {
+      yMin = t1;
+    }
+    t1 = imgCoordMungeUpper(vy[i]);
+    if (t1 > yMax) {
+      yMax = t1;
+    }
   }
-  xMin = (ulx < urx) ? (ulx < llx) ? (ulx < lrx) ? ulx : lrx
-                                   : (llx < lrx) ? llx : lrx
-		     : (urx < llx) ? (urx < lrx) ? urx : lrx
-                                   : (llx < lrx) ? llx : lrx;
-  xMax = (ulx > urx) ? (ulx > llx) ? (ulx > lrx) ? ulx : lrx
-                                   : (llx > lrx) ? llx : lrx
-		     : (urx > llx) ? (urx > lrx) ? urx : lrx
-                                   : (llx > lrx) ? llx : lrx;
-  yMin = (uly < ury) ? (uly < lly) ? (uly < lry) ? uly : lry
-                                   : (lly < lry) ? lly : lry
-		     : (ury < lly) ? (ury < lry) ? ury : lry
-                                   : (lly < lry) ? lly : lry;
-  yMax = (uly > ury) ? (uly > lly) ? (uly > lry) ? uly : lry
-                                   : (lly > lry) ? lly : lry
-		     : (ury > lly) ? (ury > lry) ? ury : lry
-                                   : (lly > lry) ? lly : lry;
-  clipRes = state->clip->testRect(xMin, yMin, xMax, yMax);
+  clipRes = state->clip->testRect(xMin, yMin, xMax - 1, yMax - 1);
   opClipRes = clipRes;
   if (clipRes == splashClipAllOutside) {
     return splashOk;
   }
 
-  // compute Bresenham parameters for x and y scaling
-  yp = h / scaledHeight;
-  yq = h % scaledHeight;
-  xp = w / scaledWidth;
-  xq = w % scaledWidth;
+  // compute the scale factors
+  if (mat[0] >= 0) {
+    t0 = imgCoordMungeUpper(mat[0] + mat[4]) - imgCoordMungeLower(mat[4]);
+  } else {
+    t0 = imgCoordMungeUpper(mat[4]) - imgCoordMungeLower(mat[0] + mat[4]);
+  }
+  if (mat[1] >= 0) {
+    t1 = imgCoordMungeUpper(mat[1] + mat[5]) - imgCoordMungeLower(mat[5]);
+  } else {
+    t1 = imgCoordMungeUpper(mat[5]) - imgCoordMungeLower(mat[1] + mat[5]);
+  }
+  scaledWidth = t0 > t1 ? t0 : t1;
+  if (mat[2] >= 0) {
+    t0 = imgCoordMungeUpper(mat[2] + mat[4]) - imgCoordMungeLower(mat[4]);
+  } else {
+    t0 = imgCoordMungeUpper(mat[4]) - imgCoordMungeLower(mat[2] + mat[4]);
+  }
+  if (mat[3] >= 0) {
+    t1 = imgCoordMungeUpper(mat[3] + mat[5]) - imgCoordMungeLower(mat[5]);
+  } else {
+    t1 = imgCoordMungeUpper(mat[5]) - imgCoordMungeLower(mat[3] + mat[5]);
+  }
+  scaledHeight = t0 > t1 ? t0 : t1;
+  if (scaledWidth == 0) {
+    scaledWidth = 1;
+  }
+  if (scaledHeight == 0) {
+    scaledHeight = 1;
+  }
 
-  // allocate pixel buffers
+  // compute the inverse transform (after scaling) matrix
+  r00 = mat[0] / scaledWidth;
+  r01 = mat[1] / scaledWidth;
+  r10 = mat[2] / scaledHeight;
+  r11 = mat[3] / scaledHeight;
+  det = r00 * r11 - r01 * r10;
+  if (splashAbs(det) < 1e-6) {
+    // this should be caught by the singular matrix check in drawImage
+    return splashErrBadArg;
+  }
+  ir00 = r11 / det;
+  ir01 = -r01 / det;
+  ir10 = -r10 / det;
+  ir11 = r00 / det;
+
+  // scale the input image
+  yp = srcHeight / scaledHeight;
   if (yp < 0 || yp > INT_MAX - 1) {
     return splashErrBadArg;
   }
-  colorBuf = (SplashColorPtr)gmallocn3((yp + 1), w, nComps);
-  if (srcAlpha) {
-    alphaBuf = (Guchar *)gmallocn((yp + 1), w);
+  scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha,
+			 srcWidth, srcHeight, scaledWidth, scaledHeight);
+
+  // construct the three sections
+  i = 0;
+  if (vy[1] < vy[i]) {
+    i = 1;
+  }
+  if (vy[2] < vy[i]) {
+    i = 2;
+  }
+  if (vy[3] < vy[i]) {
+    i = 3;
+  }
+  // NB: if using fixed point, 0.000001 will be truncated to zero,
+  // so these two comparisons must be <=, not <
+  if (splashAbs(vy[i] - vy[(i-1) & 3]) <= 0.000001 &&
+      vy[(i-1) & 3] < vy[(i+1) & 3]) {
+    i = (i-1) & 3;
+  }
+  if (splashAbs(vy[i] - vy[(i+1) & 3]) <= 0.000001) {
+    section[0].y0 = imgCoordMungeLower(vy[i]);
+    section[0].y1 = imgCoordMungeUpper(vy[(i+2) & 3]) - 1;
+    if (vx[i] < vx[(i+1) & 3]) {
+      section[0].ia0 = i;
+      section[0].ia1 = (i+3) & 3;
+      section[0].ib0 = (i+1) & 3;
+      section[0].ib1 = (i+2) & 3;
+    } else {
+      section[0].ia0 = (i+1) & 3;
+      section[0].ia1 = (i+2) & 3;
+      section[0].ib0 = i;
+      section[0].ib1 = (i+3) & 3;
+    }
+    nSections = 1;
   } else {
-    alphaBuf = NULL;
+    section[0].y0 = imgCoordMungeLower(vy[i]);
+    section[2].y1 = imgCoordMungeUpper(vy[(i+2) & 3]) - 1;
+    section[0].ia0 = section[0].ib0 = i;
+    section[2].ia1 = section[2].ib1 = (i+2) & 3;
+    if (vx[(i+1) & 3] < vx[(i+3) & 3]) {
+      section[0].ia1 = section[2].ia0 = (i+1) & 3;
+      section[0].ib1 = section[2].ib0 = (i+3) & 3;
+    } else {
+      section[0].ia1 = section[2].ia0 = (i+3) & 3;
+      section[0].ib1 = section[2].ib0 = (i+1) & 3;
+    }
+    if (vy[(i+1) & 3] < vy[(i+3) & 3]) {
+      section[1].y0 = imgCoordMungeLower(vy[(i+1) & 3]);
+      section[2].y0 = imgCoordMungeUpper(vy[(i+3) & 3]);
+      if (vx[(i+1) & 3] < vx[(i+3) & 3]) {
+	section[1].ia0 = (i+1) & 3;
+	section[1].ia1 = (i+2) & 3;
+	section[1].ib0 = i;
+	section[1].ib1 = (i+3) & 3;
+      } else {
+	section[1].ia0 = i;
+	section[1].ia1 = (i+3) & 3;
+	section[1].ib0 = (i+1) & 3;
+	section[1].ib1 = (i+2) & 3;
+      }
+    } else {
+      section[1].y0 = imgCoordMungeLower(vy[(i+3) & 3]);
+      section[2].y0 = imgCoordMungeUpper(vy[(i+1) & 3]);
+      if (vx[(i+1) & 3] < vx[(i+3) & 3]) {
+	section[1].ia0 = i;
+	section[1].ia1 = (i+1) & 3;
+	section[1].ib0 = (i+3) & 3;
+	section[1].ib1 = (i+2) & 3;
+      } else {
+	section[1].ia0 = (i+3) & 3;
+	section[1].ia1 = (i+2) & 3;
+	section[1].ib0 = i;
+	section[1].ib1 = (i+1) & 3;
+      }
+    }
+    section[0].y1 = section[1].y0 - 1;
+    section[1].y1 = section[2].y0 - 1;
+    nSections = 3;
+  }
+  for (i = 0; i < nSections; ++i) {
+    section[i].xa0 = vx[section[i].ia0];
+    section[i].ya0 = vy[section[i].ia0];
+    section[i].xa1 = vx[section[i].ia1];
+    section[i].ya1 = vy[section[i].ia1];
+    section[i].xb0 = vx[section[i].ib0];
+    section[i].yb0 = vy[section[i].ib0];
+    section[i].xb1 = vx[section[i].ib1];
+    section[i].yb1 = vy[section[i].ib1];
+    section[i].dxdya = (section[i].xa1 - section[i].xa0) /
+                       (section[i].ya1 - section[i].ya0);
+    section[i].dxdyb = (section[i].xb1 - section[i].xb0) /
+                       (section[i].yb1 - section[i].yb0);
   }
 
-  pixAcc0 = pixAcc1 = pixAcc2 = 0; // make gcc happy
-#if SPLASH_CMYK
-  pixAcc3 = 0; // make gcc happy
-#endif
-
   // initialize the pixel pipe
-  pipeInit(&pipe, 0, 0, NULL, pix, (Guchar)splashRound(state->fillAlpha * 255),
+  pipeInit(&pipe, 0, 0, NULL, pixel,
+	   (Guchar)splashRound(state->fillAlpha * 255),
 	   srcAlpha || (vectorAntialias && clipRes != splashClipAllInside),
 	   gFalse);
   if (vectorAntialias) {
     drawAAPixelInit();
   }
 
-  if (srcAlpha) {
-
-    // init y scale Bresenham
-    yt = 0;
-    lastYStep = 1;
-
-    for (y = 0; y < scaledHeight; ++y) {
-
-      // y scale Bresenham
-      yStep = yp;
-      yt += yq;
-      if (yt >= scaledHeight) {
-	yt -= scaledHeight;
-	++yStep;
-      }
-
-      // read row(s) from image
-      n = (yp > 0) ? yStep : lastYStep;
-      if (n > 0) {
-	p = colorBuf;
-	q = alphaBuf;
-	for (i = 0; i < n; ++i) {
-	  (*src)(srcData, p, q);
-	  p += w * nComps;
-	  q += w;
-	}
-      }
-      lastYStep = yStep;
-
-      // loop-invariant constants
-      k1 = splashRound(xShear * ySign * y);
-
-      // clipping test
-      if (clipRes != splashClipAllInside &&
-	  !rot &&
-	  (int)(yShear * k1) ==
-	    (int)(yShear * (xSign * (scaledWidth - 1) + k1))) {
-	if (xSign > 0) {
-	  spanXMin = tx + k1;
-	  spanXMax = spanXMin + (scaledWidth - 1);
-	} else {
-	  spanXMax = tx + k1;
-	  spanXMin = spanXMax - (scaledWidth - 1);
-	}
-	spanY = ty + ySign * y + (int)(yShear * k1);
-	clipRes2 = state->clip->testSpan(spanXMin, spanXMax, spanY);
-	if (clipRes2 == splashClipAllOutside) {
-	  continue;
-	}
-      } else {
-	clipRes2 = clipRes;
-      }
-
-      // init x scale Bresenham
-      xt = 0;
-      xSrc = 0;
-
-      // x shear
-      x1 = k1;
-
-      // y shear
-      y1 = (SplashCoord)ySign * y + yShear * x1;
-      // this is a kludge: if yShear1 is negative, then (int)y1 would
-      // change immediately after the first pixel, which is not what
-      // we want
-      if (yShear1 < 0) {
-	y1 += 0.999;
-      }
-
-      // loop-invariant constants
-      n = yStep > 0 ? yStep : 1;
-
-      switch (srcMode) {
-
-      case splashModeMono1:
-      case splashModeMono8:
-	for (x = 0; x < scaledWidth; ++x) {
-
-	  // x scale Bresenham
-	  xStep = xp;
-	  xt += xq;
-	  if (xt >= scaledWidth) {
-	    xt -= scaledWidth;
-	    ++xStep;
-	  }
-
-	  // rotation
-	  if (rot) {
-	    x2 = (int)y1;
-	    y2 = -x1;
-	  } else {
-	    x2 = x1;
-	    y2 = (int)y1;
-	  }
-
-	  // compute the filtered pixel at (x,y) after the x and y scaling
-	  // operations
-	  m = xStep > 0 ? xStep : 1;
-	  alphaAcc = 0;
-	  p = colorBuf + xSrc;
-	  q = alphaBuf + xSrc;
-	  pixAcc0 = 0;
-	  for (i = 0; i < n; ++i) {
-	    for (j = 0; j < m; ++j) {
-	      pixAcc0 += *p++;
-	      alphaAcc += *q++;
-	    }
-	    p += w - m;
-	    q += w - m;
-	  }
-	  pixMul = (SplashCoord)1 / (SplashCoord)(n * m);
-	  alphaMul = pixMul * (1.0 / 255.0);
-	  alpha = (SplashCoord)alphaAcc * pixMul;
-
-	  if (alpha > 0) {
-	    pix[0] = (int)((SplashCoord)pixAcc0 * pixMul);
-
-	    // set pixel
-	    pipe.shape = alpha;
-	    if (vectorAntialias && clipRes != splashClipAllInside) {
-	      drawAAPixel(&pipe, tx + x2, ty + y2);
-	    } else {
-	      drawPixel(&pipe, tx + x2, ty + y2,
-			clipRes2 == splashClipAllInside);
-	    }
-	  }
-
-	  // x scale Bresenham
-	  xSrc += xStep;
-
-	  // x shear
-	  x1 += xSign;
-
-	  // y shear
-	  y1 += yShear1;
-	}
-	break;
-
-      case splashModeRGB8:
-      case splashModeBGR8:
-	for (x = 0; x < scaledWidth; ++x) {
-
-	  // x scale Bresenham
-	  xStep = xp;
-	  xt += xq;
-	  if (xt >= scaledWidth) {
-	    xt -= scaledWidth;
-	    ++xStep;
-	  }
-
-	  // rotation
-	  if (rot) {
-	    x2 = (int)y1;
-	    y2 = -x1;
-	  } else {
-	    x2 = x1;
-	    y2 = (int)y1;
-	  }
-
-	  // compute the filtered pixel at (x,y) after the x and y scaling
-	  // operations
-	  m = xStep > 0 ? xStep : 1;
-	  alphaAcc = 0;
-	  p = colorBuf + xSrc * 3;
-	  q = alphaBuf + xSrc;
-	  pixAcc0 = pixAcc1 = pixAcc2 = 0;
-	  for (i = 0; i < n; ++i) {
-	    for (j = 0; j < m; ++j) {
-	      pixAcc0 += *p++;
-	      pixAcc1 += *p++;
-	      pixAcc2 += *p++;
-	      alphaAcc += *q++;
-	    }
-	    p += 3 * (w - m);
-	    q += w - m;
-	  }
-	  pixMul = (SplashCoord)1 / (SplashCoord)(n * m);
-	  alphaMul = pixMul * (1.0 / 255.0);
-	  alpha = (SplashCoord)alphaAcc * pixMul;
-
-	  if (alpha > 0) {
-	    pix[0] = (int)((SplashCoord)pixAcc0 * pixMul);
-	    pix[1] = (int)((SplashCoord)pixAcc1 * pixMul);
-	    pix[2] = (int)((SplashCoord)pixAcc2 * pixMul);
-
-	    // set pixel
-	    pipe.shape = alpha;
-	    if (vectorAntialias && clipRes != splashClipAllInside) {
-	      drawAAPixel(&pipe, tx + x2, ty + y2);
-	    } else {
-	      drawPixel(&pipe, tx + x2, ty + y2,
-			clipRes2 == splashClipAllInside);
-	    }
-	  }
-
-	  // x scale Bresenham
-	  xSrc += xStep;
-
-	  // x shear
-	  x1 += xSign;
-
-	  // y shear
-	  y1 += yShear1;
-	}
-	break;
-
-      case splashModeXBGR8:
-	for (x = 0; x < scaledWidth; ++x) {
-	  // x scale Bresenham
-	  xStep = xp;
-	  xt += xq;
-	  if (xt >= scaledWidth) {
-	    xt -= scaledWidth;
-	    ++xStep;
-	  }
-
-	  // rotation
-	  if (rot) {
-	    x2 = (int)y1;
-	    y2 = -x1;
-	  } else {
-	    x2 = x1;
-	    y2 = (int)y1;
-	  }
-
-	  // compute the filtered pixel at (x,y) after the x and y scaling
-	  // operations
-	  m = xStep > 0 ? xStep : 1;
-	  alphaAcc = 0;
-	  p = colorBuf + xSrc * 4;
-	  q = alphaBuf + xSrc;
-	  pixAcc0 = pixAcc1 = pixAcc2 = 0;
-	  for (i = 0; i < n; ++i) {
-	    for (j = 0; j < m; ++j) {
-	      pixAcc0 += *p++;
-	      pixAcc1 += *p++;
-	      pixAcc2 += *p++;
-	      p++;
-	      alphaAcc += *q++;
-	    }
-	    p += 4 * (w - m);
-	    q += w - m;
-	  }
-	  pixMul = (SplashCoord)1 / (SplashCoord)(n * m);
-	  alphaMul = pixMul * (1.0 / 255.0);
-	  alpha = (SplashCoord)alphaAcc * pixMul;
-
-	  if (alpha > 0) {
-	    pix[0] = (int)((SplashCoord)pixAcc0 * pixMul);
-	    pix[1] = (int)((SplashCoord)pixAcc1 * pixMul);
-	    pix[2] = (int)((SplashCoord)pixAcc2 * pixMul);
-	    pix[3] = 255;
-
-	    // set pixel
-	    pipe.shape = alpha;
-	    if (vectorAntialias && clipRes != splashClipAllInside) {
-	      drawAAPixel(&pipe, tx + x2, ty + y2);
-	    } else {
-	      drawPixel(&pipe, tx + x2, ty + y2,
-			clipRes2 == splashClipAllInside);
-	    }
-	  }
-
-	  // x scale Bresenham
-	  xSrc += xStep;
-
-	  // x shear
-	  x1 += xSign;
-
-	  // y shear
-	  y1 += yShear1;
-	}
-	break;
-
-
-#if SPLASH_CMYK
-      case splashModeCMYK8:
-	for (x = 0; x < scaledWidth; ++x) {
-
-	  // x scale Bresenham
-	  xStep = xp;
-	  xt += xq;
-	  if (xt >= scaledWidth) {
-	    xt -= scaledWidth;
-	    ++xStep;
-	  }
-
-	  // rotation
-	  if (rot) {
-	    x2 = (int)y1;
-	    y2 = -x1;
-	  } else {
-	    x2 = x1;
-	    y2 = (int)y1;
-	  }
-
-	  // compute the filtered pixel at (x,y) after the x and y scaling
-	  // operations
-	  m = xStep > 0 ? xStep : 1;
-	  alphaAcc = 0;
-	  p = colorBuf + xSrc * 4;
-	  q = alphaBuf + xSrc;
-	  pixAcc0 = pixAcc1 = pixAcc2 = pixAcc3 = 0;
-	  for (i = 0; i < n; ++i) {
-	    for (j = 0; j < m; ++j) {
-	      pixAcc0 += *p++;
-	      pixAcc1 += *p++;
-	      pixAcc2 += *p++;
-	      pixAcc3 += *p++;
-	      alphaAcc += *q++;
-	    }
-	    p += 4 * (w - m);
-	    q += w - m;
-	  }
-	  pixMul = (SplashCoord)1 / (SplashCoord)(n * m);
-	  alphaMul = pixMul * (1.0 / 255.0);
-	  alpha = (SplashCoord)alphaAcc * pixMul;
-
-	  if (alpha > 0) {
-	    pix[0] = (int)((SplashCoord)pixAcc0 * pixMul);
-	    pix[1] = (int)((SplashCoord)pixAcc1 * pixMul);
-	    pix[2] = (int)((SplashCoord)pixAcc2 * pixMul);
-	    pix[3] = (int)((SplashCoord)pixAcc3 * pixMul);
-
-	    // set pixel
-	    pipe.shape = alpha;
-	    if (vectorAntialias && clipRes != splashClipAllInside) {
-	      drawAAPixel(&pipe, tx + x2, ty + y2);
-	    } else {
-	      drawPixel(&pipe, tx + x2, ty + y2,
-			clipRes2 == splashClipAllInside);
-	    }
-	  }
-
-	  // x scale Bresenham
-	  xSrc += xStep;
-
-	  // x shear
-	  x1 += xSign;
-
-	  // y shear
-	  y1 += yShear1;
-	}
-	break;
-#endif // SPLASH_CMYK
-      }
+  // make sure narrow images cover at least one pixel
+  if (nSections == 1) {
+    if (section[0].y0 == section[0].y1) {
+      ++section[0].y1;
+      clipRes = opClipRes = splashClipPartial;
     }
-
   } else {
-
-    // init y scale Bresenham
-    yt = 0;
-    lastYStep = 1;
-
-    for (y = 0; y < scaledHeight; ++y) {
-
-      // y scale Bresenham
-      yStep = yp;
-      yt += yq;
-      if (yt >= scaledHeight) {
-	yt -= scaledHeight;
-	++yStep;
-      }
-
-      // read row(s) from image
-      n = (yp > 0) ? yStep : lastYStep;
-      if (n > 0) {
-	p = colorBuf;
-	for (i = 0; i < n; ++i) {
-	  (*src)(srcData, p, NULL);
-	  p += w * nComps;
-	}
-      }
-      lastYStep = yStep;
-
-      // loop-invariant constants
-      k1 = splashRound(xShear * ySign * y);
-
-      // clipping test
-      if (clipRes != splashClipAllInside &&
-	  !rot &&
-	  (int)(yShear * k1) ==
-	    (int)(yShear * (xSign * (scaledWidth - 1) + k1))) {
-	if (xSign > 0) {
-	  spanXMin = tx + k1;
-	  spanXMax = spanXMin + (scaledWidth - 1);
-	} else {
-	  spanXMax = tx + k1;
-	  spanXMin = spanXMax - (scaledWidth - 1);
-	}
-	spanY = ty + ySign * y + (int)(yShear * k1);
-	clipRes2 = state->clip->testSpan(spanXMin, spanXMax, spanY);
-	if (clipRes2 == splashClipAllOutside) {
-	  continue;
-	}
-      } else {
-	clipRes2 = clipRes;
-      }
-
-      // init x scale Bresenham
-      xt = 0;
-      xSrc = 0;
-
-      // x shear
-      x1 = k1;
-
-      // y shear
-      y1 = (SplashCoord)ySign * y + yShear * x1;
-      // this is a kludge: if yShear1 is negative, then (int)y1 would
-      // change immediately after the first pixel, which is not what
-      // we want
-      if (yShear1 < 0) {
-	y1 += 0.999;
-      }
-
-      // loop-invariant constants
-      n = yStep > 0 ? yStep : 1;
-
-      switch (srcMode) {
-
-      case splashModeMono1:
-      case splashModeMono8:
-	for (x = 0; x < scaledWidth; ++x) {
-
-	  // x scale Bresenham
-	  xStep = xp;
-	  xt += xq;
-	  if (xt >= scaledWidth) {
-	    xt -= scaledWidth;
-	    ++xStep;
-	  }
-
-	  // rotation
-	  if (rot) {
-	    x2 = (int)y1;
-	    y2 = -x1;
-	  } else {
-	    x2 = x1;
-	    y2 = (int)y1;
-	  }
-
-	  // compute the filtered pixel at (x,y) after the x and y scaling
-	  // operations
-	  m = xStep > 0 ? xStep : 1;
-	  p = colorBuf + xSrc;
-	  pixAcc0 = 0;
-	  for (i = 0; i < n; ++i) {
-	    for (j = 0; j < m; ++j) {
-	      pixAcc0 += *p++;
-	    }
-	    p += w - m;
-	  }
-	  pixMul = (SplashCoord)1 / (SplashCoord)(n * m);
-
-	  pix[0] = (int)((SplashCoord)pixAcc0 * pixMul);
-
-	  // set pixel
-	  if (vectorAntialias && clipRes != splashClipAllInside) {
-	    pipe.shape = (SplashCoord)255;
-	    drawAAPixel(&pipe, tx + x2, ty + y2);
-	  } else {
-	    drawPixel(&pipe, tx + x2, ty + y2,
-		      clipRes2 == splashClipAllInside);
-	  }
-
-	  // x scale Bresenham
-	  xSrc += xStep;
-
-	  // x shear
-	  x1 += xSign;
-
-	  // y shear
-	  y1 += yShear1;
-	}
-	break;
-
-      case splashModeRGB8:
-      case splashModeBGR8:
-	for (x = 0; x < scaledWidth; ++x) {
-
-	  // x scale Bresenham
-	  xStep = xp;
-	  xt += xq;
-	  if (xt >= scaledWidth) {
-	    xt -= scaledWidth;
-	    ++xStep;
-	  }
-
-	  // rotation
-	  if (rot) {
-	    x2 = (int)y1;
-	    y2 = -x1;
-	  } else {
-	    x2 = x1;
-	    y2 = (int)y1;
-	  }
-
-	  // compute the filtered pixel at (x,y) after the x and y scaling
-	  // operations
-	  m = xStep > 0 ? xStep : 1;
-	  p = colorBuf + xSrc * 3;
-	  pixAcc0 = pixAcc1 = pixAcc2 = 0;
-	  for (i = 0; i < n; ++i) {
-	    for (j = 0; j < m; ++j) {
-	      pixAcc0 += *p++;
-	      pixAcc1 += *p++;
-	      pixAcc2 += *p++;
-	    }
-	    p += 3 * (w - m);
-	  }
-	  pixMul = (SplashCoord)1 / (SplashCoord)(n * m);
-
-	  pix[0] = (int)((SplashCoord)pixAcc0 * pixMul);
-	  pix[1] = (int)((SplashCoord)pixAcc1 * pixMul);
-	  pix[2] = (int)((SplashCoord)pixAcc2 * pixMul);
-
-	  // set pixel
-	  if (vectorAntialias && clipRes != splashClipAllInside) {
-	    pipe.shape = (SplashCoord)255;
-	    drawAAPixel(&pipe, tx + x2, ty + y2);
-	  } else {
-	    drawPixel(&pipe, tx + x2, ty + y2,
-		      clipRes2 == splashClipAllInside);
-	  }
-
-	  // x scale Bresenham
-	  xSrc += xStep;
-
-	  // x shear
-	  x1 += xSign;
-
-	  // y shear
-	  y1 += yShear1;
-	}
-	break;
-
-      case splashModeXBGR8:
-	for (x = 0; x < scaledWidth; ++x) {
-
-	  // x scale Bresenham
-	  xStep = xp;
-	  xt += xq;
-	  if (xt >= scaledWidth) {
-	    xt -= scaledWidth;
-	    ++xStep;
-	  }
-
-	  // rotation
-	  if (rot) {
-	    x2 = (int)y1;
-	    y2 = -x1;
-	  } else {
-	    x2 = x1;
-	    y2 = (int)y1;
-	  }
-
-	  // compute the filtered pixel at (x,y) after the x and y scaling
-	  // operations
-	  m = xStep > 0 ? xStep : 1;
-	  p = colorBuf + xSrc * 4;
-	  pixAcc0 = pixAcc1 = pixAcc2 = 0;
-	  for (i = 0; i < n; ++i) {
-	    for (j = 0; j < m; ++j) {
-	      pixAcc0 += *p++;
-	      pixAcc1 += *p++;
-	      pixAcc2 += *p++;
-	      p++;
-	    }
-	    p += 4 * (w - m);
-	  }
-	  pixMul = (SplashCoord)1 / (SplashCoord)(n * m);
-
-	  pix[0] = (int)((SplashCoord)pixAcc0 * pixMul);
-	  pix[1] = (int)((SplashCoord)pixAcc1 * pixMul);
-	  pix[2] = (int)((SplashCoord)pixAcc2 * pixMul);
-	  pix[3] = 255;
-
-	  // set pixel
-	  if (vectorAntialias && clipRes != splashClipAllInside) {
-	    pipe.shape = (SplashCoord)255;
-	    drawAAPixel(&pipe, tx + x2, ty + y2);
-	  } else {
-	    drawPixel(&pipe, tx + x2, ty + y2,
-		      clipRes2 == splashClipAllInside);
-	  }
-
-	  // x scale Bresenham
-	  xSrc += xStep;
-
-	  // x shear
-	  x1 += xSign;
-
-	  // y shear
-	  y1 += yShear1;
-	}
-	break;
-
-#if SPLASH_CMYK
-      case splashModeCMYK8:
-	for (x = 0; x < scaledWidth; ++x) {
-
-	  // x scale Bresenham
-	  xStep = xp;
-	  xt += xq;
-	  if (xt >= scaledWidth) {
-	    xt -= scaledWidth;
-	    ++xStep;
-	  }
-
-	  // rotation
-	  if (rot) {
-	    x2 = (int)y1;
-	    y2 = -x1;
-	  } else {
-	    x2 = x1;
-	    y2 = (int)y1;
-	  }
-
-	  // compute the filtered pixel at (x,y) after the x and y scaling
-	  // operations
-	  m = xStep > 0 ? xStep : 1;
-	  p = colorBuf + xSrc * 4;
-	  pixAcc0 = pixAcc1 = pixAcc2 = pixAcc3 = 0;
-	  for (i = 0; i < n; ++i) {
-	    for (j = 0; j < m; ++j) {
-	      pixAcc0 += *p++;
-	      pixAcc1 += *p++;
-	      pixAcc2 += *p++;
-	      pixAcc3 += *p++;
-	    }
-	    p += 4 * (w - m);
-	  }
-	  pixMul = (SplashCoord)1 / (SplashCoord)(n * m);
-
-	  pix[0] = (int)((SplashCoord)pixAcc0 * pixMul);
-	  pix[1] = (int)((SplashCoord)pixAcc1 * pixMul);
-	  pix[2] = (int)((SplashCoord)pixAcc2 * pixMul);
-	  pix[3] = (int)((SplashCoord)pixAcc3 * pixMul);
-
-	  // set pixel
-	  if (vectorAntialias && clipRes != splashClipAllInside) {
-	    pipe.shape = (SplashCoord)255;
-	    drawAAPixel(&pipe, tx + x2, ty + y2);
-	  } else {
-	    drawPixel(&pipe, tx + x2, ty + y2,
-		      clipRes2 == splashClipAllInside);
-	  }
-
-	  // x scale Bresenham
-	  xSrc += xStep;
-
-	  // x shear
-	  x1 += xSign;
-
-	  // y shear
-	  y1 += yShear1;
-	}
-	break;
-#endif // SPLASH_CMYK
-      }
+    if (section[0].y0 == section[2].y1) {
+      ++section[1].y1;
+      clipRes = opClipRes = splashClipPartial;
     }
-
   }
 
-  gfree(colorBuf);
-  gfree(alphaBuf);
+  // scan all pixels inside the target region
+  for (i = 0; i < nSections; ++i) {
+    for (y = section[i].y0; y <= section[i].y1; ++y) {
+      xa = imgCoordMungeLower(section[i].xa0 +
+			      ((SplashCoord)y + 0.5 - section[i].ya0) *
+			        section[i].dxdya);
+      xb = imgCoordMungeUpper(section[i].xb0 +
+			      ((SplashCoord)y + 0.5 - section[i].yb0) *
+			        section[i].dxdyb);
+      // make sure narrow images cover at least one pixel
+      if (xa == xb) {
+	++xb;
+      }
+      if (clipRes != splashClipAllInside) {
+	clipRes2 = state->clip->testSpan(xa, xb - 1, y);
+      } else {
+	clipRes2 = clipRes;
+      }
+      for (x = xa; x < xb; ++x) {
+	// map (x+0.5, y+0.5) back to the scaled image
+	xx = splashFloor(((SplashCoord)x + 0.5 - mat[4]) * ir00 +
+			 ((SplashCoord)y + 0.5 - mat[5]) * ir10);
+	yy = splashFloor(((SplashCoord)x + 0.5 - mat[4]) * ir01 +
+			 ((SplashCoord)y + 0.5 - mat[5]) * ir11);
+	// xx should always be within bounds, but floating point
+	// inaccuracy can cause problems
+	if (xx < 0) {
+	  xx = 0;
+	} else if (xx >= scaledWidth) {
+	  xx = scaledWidth - 1;
+	}
+	if (yy < 0) {
+	  yy = 0;
+	} else if (yy >= scaledHeight) {
+	  yy = scaledHeight - 1;
+	}
+	scaledImg->getPixel(xx, yy, pixel);
+	if (srcAlpha) {
+	  pipe.shape = scaledImg->alpha[yy * scaledWidth + xx];
+	} else {
+	  pipe.shape = 255;
+	}
+	if (vectorAntialias && clipRes2 != splashClipAllInside) {
+	  drawAAPixel(&pipe, x, y);
+	} else {
+	  drawPixel(&pipe, x, y, clipRes2 == splashClipAllInside);
+	}
+      }
+    }
+  }
 
+  delete scaledImg;
   return splashOk;
+}
+
+// Scale an image into a SplashBitmap.
+SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData,
+				 SplashColorMode srcMode, int nComps,
+				 GBool srcAlpha, int srcWidth, int srcHeight,
+				 int scaledWidth, int scaledHeight) {
+  SplashBitmap *dest;
+
+  dest = new SplashBitmap(scaledWidth, scaledHeight, 1, srcMode, srcAlpha);
+  if (scaledHeight < srcHeight) {
+    if (scaledWidth < srcWidth) {
+      scaleImageYdXd(src, srcData, srcMode, nComps, srcAlpha,
+		     srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+    } else {
+      scaleImageYdXu(src, srcData, srcMode, nComps, srcAlpha,
+		     srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+    }
+  } else {
+    if (scaledWidth < srcWidth) {
+      scaleImageYuXd(src, srcData, srcMode, nComps, srcAlpha,
+		     srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+    } else {
+      scaleImageYuXu(src, srcData, srcMode, nComps, srcAlpha,
+		     srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+    }
+  }
+  return dest;
+}
+
+void Splash::scaleImageYdXd(SplashImageSource src, void *srcData,
+			    SplashColorMode srcMode, int nComps,
+			    GBool srcAlpha, int srcWidth, int srcHeight,
+			    int scaledWidth, int scaledHeight,
+			    SplashBitmap *dest) {
+  Guchar *lineBuf, *alphaLineBuf;
+  Guint *pixBuf, *alphaPixBuf;
+  Guint pix0, pix1, pix2;
+#if SPLASH_CMYK
+  Guint pix3;
+#endif
+  Guint alpha;
+  Guchar *destPtr, *destAlphaPtr;
+  int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx, xxa, d, d0, d1;
+  int i, j;
+
+  // Bresenham parameters for y scale
+  yp = srcHeight / scaledHeight;
+  yq = srcHeight % scaledHeight;
+
+  // Bresenham parameters for x scale
+  xp = srcWidth / scaledWidth;
+  xq = srcWidth % scaledWidth;
+
+  // allocate buffers
+  lineBuf = (Guchar *)gmallocn(srcWidth, nComps);
+  pixBuf = (Guint *)gmallocn(srcWidth, nComps * sizeof(int));
+  if (srcAlpha) {
+    alphaLineBuf = (Guchar *)gmalloc(srcWidth);
+    alphaPixBuf = (Guint *)gmallocn(srcWidth, sizeof(int));
+  } else {
+    alphaLineBuf = NULL;
+    alphaPixBuf = NULL;
+  }
+
+  // init y scale Bresenham
+  yt = 0;
+
+  destPtr = dest->data;
+  destAlphaPtr = dest->alpha;
+  for (y = 0; y < scaledHeight; ++y) {
+
+    // y scale Bresenham
+    if ((yt += yq) >= scaledHeight) {
+      yt -= scaledHeight;
+      yStep = yp + 1;
+    } else {
+      yStep = yp;
+    }
+
+    // read rows from image
+    memset(pixBuf, 0, srcWidth * nComps * sizeof(int));
+    if (srcAlpha) {
+      memset(alphaPixBuf, 0, srcWidth * sizeof(int));
+    }
+    for (i = 0; i < yStep; ++i) {
+      (*src)(srcData, lineBuf, alphaLineBuf);
+      for (j = 0; j < srcWidth * nComps; ++j) {
+	pixBuf[j] += lineBuf[j];
+      }
+      if (srcAlpha) {
+	for (j = 0; j < srcWidth; ++j) {
+	  alphaPixBuf[j] += alphaLineBuf[j];
+	}
+      }
+    }
+
+    // init x scale Bresenham
+    xt = 0;
+    d0 = (1 << 23) / (yStep * xp);
+    d1 = (1 << 23) / (yStep * (xp + 1));
+
+    xx = xxa = 0;
+    for (x = 0; x < scaledWidth; ++x) {
+
+      // x scale Bresenham
+      if ((xt += xq) >= scaledWidth) {
+	xt -= scaledWidth;
+	xStep = xp + 1;
+	d = d1;
+      } else {
+	xStep = xp;
+	d = d0;
+      }
+
+      switch (srcMode) {
+
+      case splashModeMono8:
+
+	// compute the final pixel
+	pix0 = 0;
+	for (i = 0; i < xStep; ++i) {
+	  pix0 += pixBuf[xx++];
+	}
+	// pix / xStep * yStep
+	pix0 = (pix0 * d) >> 23;
+
+	// store the pixel
+	*destPtr++ = (Guchar)pix0;
+	break;
+
+      case splashModeRGB8:
+
+	// compute the final pixel
+	pix0 = pix1 = pix2 = 0;
+	for (i = 0; i < xStep; ++i) {
+	  pix0 += pixBuf[xx];
+	  pix1 += pixBuf[xx+1];
+	  pix2 += pixBuf[xx+2];
+	  xx += 3;
+	}
+	// pix / xStep * yStep
+	pix0 = (pix0 * d) >> 23;
+	pix1 = (pix1 * d) >> 23;
+	pix2 = (pix2 * d) >> 23;
+
+	// store the pixel
+	*destPtr++ = (Guchar)pix0;
+	*destPtr++ = (Guchar)pix1;
+	*destPtr++ = (Guchar)pix2;
+	break;
+
+      case splashModeXBGR8:
+
+	// compute the final pixel
+	pix0 = pix1 = pix2 = 0;
+	for (i = 0; i < xStep; ++i) {
+	  pix0 += pixBuf[xx];
+	  pix1 += pixBuf[xx+1];
+	  pix2 += pixBuf[xx+2];
+	  xx += 4;
+	}
+	// pix / xStep * yStep
+	pix0 = (pix0 * d) >> 23;
+	pix1 = (pix1 * d) >> 23;
+	pix2 = (pix2 * d) >> 23;
+
+	// store the pixel
+	*destPtr++ = (Guchar)pix2;
+	*destPtr++ = (Guchar)pix1;
+	*destPtr++ = (Guchar)pix0;
+	*destPtr++ = (Guchar)255;	
+	break;
+
+      case splashModeBGR8:
+
+	// compute the final pixel
+	pix0 = pix1 = pix2 = 0;
+	for (i = 0; i < xStep; ++i) {
+	  pix0 += pixBuf[xx];
+	  pix1 += pixBuf[xx+1];
+	  pix2 += pixBuf[xx+2];
+	  xx += 3;
+	}
+	// pix / xStep * yStep
+	pix0 = (pix0 * d) >> 23;
+	pix1 = (pix1 * d) >> 23;
+	pix2 = (pix2 * d) >> 23;
+
+	// store the pixel
+	*destPtr++ = (Guchar)pix2;
+	*destPtr++ = (Guchar)pix1;
+	*destPtr++ = (Guchar)pix0;
+	break;
+
+#if SPLASH_CMYK
+      case splashModeCMYK8:
+
+	// compute the final pixel
+	pix0 = pix1 = pix2 = pix3 = 0;
+	for (i = 0; i < xStep; ++i) {
+	  pix0 += pixBuf[xx];
+	  pix1 += pixBuf[xx+1];
+	  pix2 += pixBuf[xx+2];
+	  pix3 += pixBuf[xx+3];
+	  xx += 4;
+	}
+	// pix / xStep * yStep
+	pix0 = (pix0 * d) >> 23;
+	pix1 = (pix1 * d) >> 23;
+	pix2 = (pix2 * d) >> 23;
+	pix3 = (pix3 * d) >> 23;
+
+	// store the pixel
+	*destPtr++ = (Guchar)pix0;
+	*destPtr++ = (Guchar)pix1;
+	*destPtr++ = (Guchar)pix2;
+	*destPtr++ = (Guchar)pix3;
+	break;
+#endif
+
+
+      case splashModeMono1: // mono1 is not allowed
+      default:
+	break;
+      }
+
+      // process alpha
+      if (srcAlpha) {
+	alpha = 0;
+	for (i = 0; i < xStep; ++i, ++xxa) {
+	  alpha += alphaPixBuf[xxa];
+	}
+	// alpha / xStep * yStep
+	alpha = (alpha * d) >> 23;
+	*destAlphaPtr++ = (Guchar)alpha;
+      }
+    }
+  }
+
+  gfree(alphaPixBuf);
+  gfree(alphaLineBuf);
+  gfree(pixBuf);
+  gfree(lineBuf);
+}
+
+void Splash::scaleImageYdXu(SplashImageSource src, void *srcData,
+			    SplashColorMode srcMode, int nComps,
+			    GBool srcAlpha, int srcWidth, int srcHeight,
+			    int scaledWidth, int scaledHeight,
+			    SplashBitmap *dest) {
+  Guchar *lineBuf, *alphaLineBuf;
+  Guint *pixBuf, *alphaPixBuf;
+  Guint pix[splashMaxColorComps];
+  Guint alpha;
+  Guchar *destPtr, *destAlphaPtr;
+  int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, d;
+  int i, j;
+
+  // Bresenham parameters for y scale
+  yp = srcHeight / scaledHeight;
+  yq = srcHeight % scaledHeight;
+
+  // Bresenham parameters for x scale
+  xp = scaledWidth / srcWidth;
+  xq = scaledWidth % srcWidth;
+
+  // allocate buffers
+  lineBuf = (Guchar *)gmallocn(srcWidth, nComps);
+  pixBuf = (Guint *)gmallocn(srcWidth, nComps * sizeof(int));
+  if (srcAlpha) {
+    alphaLineBuf = (Guchar *)gmalloc(srcWidth);
+    alphaPixBuf = (Guint *)gmallocn(srcWidth, sizeof(int));
+  } else {
+    alphaLineBuf = NULL;
+    alphaPixBuf = NULL;
+  }
+
+  // init y scale Bresenham
+  yt = 0;
+
+  destPtr = dest->data;
+  destAlphaPtr = dest->alpha;
+  for (y = 0; y < scaledHeight; ++y) {
+
+    // y scale Bresenham
+    if ((yt += yq) >= scaledHeight) {
+      yt -= scaledHeight;
+      yStep = yp + 1;
+    } else {
+      yStep = yp;
+    }
+
+    // read rows from image
+    memset(pixBuf, 0, srcWidth * nComps * sizeof(int));
+    if (srcAlpha) {
+      memset(alphaPixBuf, 0, srcWidth * sizeof(int));
+    }
+    for (i = 0; i < yStep; ++i) {
+      (*src)(srcData, lineBuf, alphaLineBuf);
+      for (j = 0; j < srcWidth * nComps; ++j) {
+	pixBuf[j] += lineBuf[j];
+      }
+      if (srcAlpha) {
+	for (j = 0; j < srcWidth; ++j) {
+	  alphaPixBuf[j] += alphaLineBuf[j];
+	}
+      }
+    }
+
+    // init x scale Bresenham
+    xt = 0;
+    d = (1 << 23) / yStep;
+
+    for (x = 0; x < srcWidth; ++x) {
+
+      // x scale Bresenham
+      if ((xt += xq) >= srcWidth) {
+	xt -= srcWidth;
+	xStep = xp + 1;
+      } else {
+	xStep = xp;
+      }
+
+      // compute the final pixel
+      for (i = 0; i < nComps; ++i) {
+	// pixBuf[] / yStep
+	pix[i] = (pixBuf[x * nComps + i] * d) >> 23;
+      }
+
+      // store the pixel
+      switch (srcMode) {
+      case splashModeMono1: // mono1 is not allowed
+	break;
+      case splashModeMono8:
+	for (i = 0; i < xStep; ++i) {
+	  *destPtr++ = (Guchar)pix[0];
+	}
+	break;
+      case splashModeRGB8:
+	for (i = 0; i < xStep; ++i) {
+	  *destPtr++ = (Guchar)pix[0];
+	  *destPtr++ = (Guchar)pix[1];
+	  *destPtr++ = (Guchar)pix[2];
+	}
+	break;
+      case splashModeXBGR8:
+	for (i = 0; i < xStep; ++i) {
+	  *destPtr++ = (Guchar)pix[2];
+	  *destPtr++ = (Guchar)pix[1];
+	  *destPtr++ = (Guchar)pix[0];
+	  *destPtr++ = (Guchar)255;	  
+	}
+	break;
+      case splashModeBGR8:
+	for (i = 0; i < xStep; ++i) {
+	  *destPtr++ = (Guchar)pix[2];
+	  *destPtr++ = (Guchar)pix[1];
+	  *destPtr++ = (Guchar)pix[0];
+	}
+	break;
+#if SPLASH_CMYK
+      case splashModeCMYK8:
+	for (i = 0; i < xStep; ++i) {
+	  *destPtr++ = (Guchar)pix[0];
+	  *destPtr++ = (Guchar)pix[1];
+	  *destPtr++ = (Guchar)pix[2];
+	  *destPtr++ = (Guchar)pix[3];
+	}
+	break;
+#endif
+      }
+
+      // process alpha
+      if (srcAlpha) {
+	// alphaPixBuf[] / yStep
+	alpha = (alphaPixBuf[x] * d) >> 23;
+	for (i = 0; i < xStep; ++i) {
+	  *destAlphaPtr++ = (Guchar)alpha;
+	}
+      }
+    }
+  }
+
+  gfree(alphaPixBuf);
+  gfree(alphaLineBuf);
+  gfree(pixBuf);
+  gfree(lineBuf);
+}
+
+void Splash::scaleImageYuXd(SplashImageSource src, void *srcData,
+			    SplashColorMode srcMode, int nComps,
+			    GBool srcAlpha, int srcWidth, int srcHeight,
+			    int scaledWidth, int scaledHeight,
+			    SplashBitmap *dest) {
+  Guchar *lineBuf, *alphaLineBuf;
+  Guint pix[splashMaxColorComps];
+  Guint alpha;
+  Guchar *destPtr0, *destPtr, *destAlphaPtr0, *destAlphaPtr;
+  int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx, xxa, d, d0, d1;
+  int i, j;
+
+  // Bresenham parameters for y scale
+  yp = scaledHeight / srcHeight;
+  yq = scaledHeight % srcHeight;
+
+  // Bresenham parameters for x scale
+  xp = srcWidth / scaledWidth;
+  xq = srcWidth % scaledWidth;
+
+  // allocate buffers
+  lineBuf = (Guchar *)gmallocn(srcWidth, nComps);
+  if (srcAlpha) {
+    alphaLineBuf = (Guchar *)gmalloc(srcWidth);
+  } else {
+    alphaLineBuf = NULL;
+  }
+
+  // init y scale Bresenham
+  yt = 0;
+
+  destPtr0 = dest->data;
+  destAlphaPtr0 = dest->alpha;
+  for (y = 0; y < srcHeight; ++y) {
+
+    // y scale Bresenham
+    if ((yt += yq) >= srcHeight) {
+      yt -= srcHeight;
+      yStep = yp + 1;
+    } else {
+      yStep = yp;
+    }
+
+    // read row from image
+    (*src)(srcData, lineBuf, alphaLineBuf);
+
+    // init x scale Bresenham
+    xt = 0;
+    d0 = (1 << 23) / xp;
+    d1 = (1 << 23) / (xp + 1);
+
+    xx = xxa = 0;
+    for (x = 0; x < scaledWidth; ++x) {
+
+      // x scale Bresenham
+      if ((xt += xq) >= scaledWidth) {
+	xt -= scaledWidth;
+	xStep = xp + 1;
+	d = d1;
+      } else {
+	xStep = xp;
+	d = d0;
+      }
+
+      // compute the final pixel
+      for (i = 0; i < nComps; ++i) {
+	pix[i] = 0;
+      }
+      for (i = 0; i < xStep; ++i) {
+	for (j = 0; j < nComps; ++j, ++xx) {
+	  pix[j] += lineBuf[xx];
+	}
+      }
+      for (i = 0; i < nComps; ++i) {
+	// pix[] / xStep
+	pix[i] = (pix[i] * d) >> 23;
+      }
+
+      // store the pixel
+      switch (srcMode) {
+      case splashModeMono1: // mono1 is not allowed
+	break;
+      case splashModeMono8:
+	for (i = 0; i < yStep; ++i) {
+	  destPtr = destPtr0 + (i * scaledWidth + x) * nComps;
+	  *destPtr++ = (Guchar)pix[0];
+	}
+	break;
+      case splashModeRGB8:
+	for (i = 0; i < yStep; ++i) {
+	  destPtr = destPtr0 + (i * scaledWidth + x) * nComps;
+	  *destPtr++ = (Guchar)pix[0];
+	  *destPtr++ = (Guchar)pix[1];
+	  *destPtr++ = (Guchar)pix[2];
+	}
+	break;
+      case splashModeXBGR8:
+	for (i = 0; i < yStep; ++i) {
+	  destPtr = destPtr0 + (i * scaledWidth + x) * nComps;
+	  *destPtr++ = (Guchar)pix[2];
+	  *destPtr++ = (Guchar)pix[1];
+	  *destPtr++ = (Guchar)pix[0];
+	  *destPtr++ = (Guchar)255;	  
+	}
+	break;
+      case splashModeBGR8:
+	for (i = 0; i < yStep; ++i) {
+	  destPtr = destPtr0 + (i * scaledWidth + x) * nComps;
+	  *destPtr++ = (Guchar)pix[2];
+	  *destPtr++ = (Guchar)pix[1];
+	  *destPtr++ = (Guchar)pix[0];
+	}
+	break;
+#if SPLASH_CMYK
+      case splashModeCMYK8:
+	for (i = 0; i < yStep; ++i) {
+	  destPtr = destPtr0 + (i * scaledWidth + x) * nComps;
+	  *destPtr++ = (Guchar)pix[0];
+	  *destPtr++ = (Guchar)pix[1];
+	  *destPtr++ = (Guchar)pix[2];
+	  *destPtr++ = (Guchar)pix[3];
+	}
+	break;
+#endif
+      }
+
+      // process alpha
+      if (srcAlpha) {
+	alpha = 0;
+	for (i = 0; i < xStep; ++i, ++xxa) {
+	  alpha += alphaLineBuf[xxa];
+	}
+	// alpha / xStep
+	alpha = (alpha * d) >> 23;
+	for (i = 0; i < yStep; ++i) {
+	  destAlphaPtr = destAlphaPtr0 + i * scaledWidth + x;
+	  *destAlphaPtr = (Guchar)alpha;
+	}
+      }
+    }
+
+    destPtr0 += yStep * scaledWidth * nComps;
+    if (srcAlpha) {
+      destAlphaPtr0 += yStep * scaledWidth;
+    }
+  }
+
+  gfree(alphaLineBuf);
+  gfree(lineBuf);
+}
+
+void Splash::scaleImageYuXu(SplashImageSource src, void *srcData,
+			    SplashColorMode srcMode, int nComps,
+			    GBool srcAlpha, int srcWidth, int srcHeight,
+			    int scaledWidth, int scaledHeight,
+			    SplashBitmap *dest) {
+  Guchar *lineBuf, *alphaLineBuf;
+  Guint pix[splashMaxColorComps];
+  Guint alpha;
+  Guchar *destPtr0, *destPtr, *destAlphaPtr0, *destAlphaPtr;
+  int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx;
+  int i, j;
+
+  // Bresenham parameters for y scale
+  yp = scaledHeight / srcHeight;
+  yq = scaledHeight % srcHeight;
+
+  // Bresenham parameters for x scale
+  xp = scaledWidth / srcWidth;
+  xq = scaledWidth % srcWidth;
+
+  // allocate buffers
+  lineBuf = (Guchar *)gmallocn(srcWidth, nComps);
+  if (srcAlpha) {
+    alphaLineBuf = (Guchar *)gmalloc(srcWidth);
+  } else {
+    alphaLineBuf = NULL;
+  }
+
+  // init y scale Bresenham
+  yt = 0;
+
+  destPtr0 = dest->data;
+  destAlphaPtr0 = dest->alpha;
+  for (y = 0; y < srcHeight; ++y) {
+
+    // y scale Bresenham
+    if ((yt += yq) >= srcHeight) {
+      yt -= srcHeight;
+      yStep = yp + 1;
+    } else {
+      yStep = yp;
+    }
+
+    // read row from image
+    (*src)(srcData, lineBuf, alphaLineBuf);
+
+    // init x scale Bresenham
+    xt = 0;
+
+    xx = 0;
+    for (x = 0; x < srcWidth; ++x) {
+
+      // x scale Bresenham
+      if ((xt += xq) >= srcWidth) {
+	xt -= srcWidth;
+	xStep = xp + 1;
+      } else {
+	xStep = xp;
+      }
+
+      // compute the final pixel
+      for (i = 0; i < nComps; ++i) {
+	pix[i] = lineBuf[x * nComps + i];
+      }
+
+      // store the pixel
+      switch (srcMode) {
+      case splashModeMono1: // mono1 is not allowed
+	break;
+      case splashModeMono8:
+	for (i = 0; i < yStep; ++i) {
+	  for (j = 0; j < xStep; ++j) {
+	    destPtr = destPtr0 + (i * scaledWidth + xx + j) * nComps;
+	    *destPtr++ = (Guchar)pix[0];
+	  }
+	}
+	break;
+      case splashModeRGB8:
+	for (i = 0; i < yStep; ++i) {
+	  for (j = 0; j < xStep; ++j) {
+	    destPtr = destPtr0 + (i * scaledWidth + xx + j) * nComps;
+	    *destPtr++ = (Guchar)pix[0];
+	    *destPtr++ = (Guchar)pix[1];
+	    *destPtr++ = (Guchar)pix[2];
+	  }
+	}
+	break;
+      case splashModeXBGR8:
+	for (i = 0; i < yStep; ++i) {
+	  for (j = 0; j < xStep; ++j) {
+	    destPtr = destPtr0 + (i * scaledWidth + xx + j) * nComps;
+	    *destPtr++ = (Guchar)pix[2];
+	    *destPtr++ = (Guchar)pix[1];
+	    *destPtr++ = (Guchar)pix[0];
+	    *destPtr++ = (Guchar)255;	    
+	  }
+	}
+	break;
+      case splashModeBGR8:
+	for (i = 0; i < yStep; ++i) {
+	  for (j = 0; j < xStep; ++j) {
+	    destPtr = destPtr0 + (i * scaledWidth + xx + j) * nComps;
+	    *destPtr++ = (Guchar)pix[2];
+	    *destPtr++ = (Guchar)pix[1];
+	    *destPtr++ = (Guchar)pix[0];
+	  }
+	}
+	break;
+#if SPLASH_CMYK
+      case splashModeCMYK8:
+	for (i = 0; i < yStep; ++i) {
+	  for (j = 0; j < xStep; ++j) {
+	    destPtr = destPtr0 + (i * scaledWidth + xx + j) * nComps;
+	    *destPtr++ = (Guchar)pix[0];
+	    *destPtr++ = (Guchar)pix[1];
+	    *destPtr++ = (Guchar)pix[2];
+	    *destPtr++ = (Guchar)pix[3];
+	  }
+	}
+	break;
+#endif
+      }
+
+      // process alpha
+      if (srcAlpha) {
+	alpha = alphaLineBuf[x];
+	for (i = 0; i < yStep; ++i) {
+	  for (j = 0; j < xStep; ++j) {
+	    destAlphaPtr = destAlphaPtr0 + i * scaledWidth + xx + j;
+	    *destAlphaPtr = (Guchar)alpha;
+	  }
+	}
+      }
+
+      xx += xStep;
+    }
+
+    destPtr0 += yStep * scaledWidth * nComps;
+    if (srcAlpha) {
+      destAlphaPtr0 += yStep * scaledWidth;
+    }
+  }
+
+  gfree(alphaLineBuf);
+  gfree(lineBuf);
+}
+
+void Splash::vertFlipImage(SplashBitmap *img, int width, int height,
+			   int nComps) {
+  Guchar *lineBuf;
+  Guchar *p0, *p1;
+  int w;
+
+  w = width * nComps;
+  lineBuf = (Guchar *)gmalloc(w);
+  for (p0 = img->data, p1 = img->data + (height - 1) * w;
+       p0 < p1;
+       p0 += w, p1 -= w) {
+    memcpy(lineBuf, p0, w);
+    memcpy(p0, p1, w);
+    memcpy(p1, lineBuf, w);
+  }
+  if (img->alpha) {
+    for (p0 = img->alpha, p1 = img->alpha + (height - 1) * width;
+	 p0 < p1;
+	 p0 += width, p1 -= width) {
+      memcpy(lineBuf, p0, width);
+      memcpy(p0, p1, width);
+      memcpy(p1, lineBuf, width);
+    }
+  }
+  gfree(lineBuf);
+}
+
+void Splash::blitImage(SplashBitmap *src, GBool srcAlpha, int xDest, int yDest,
+		       SplashClipResult clipRes) {
+  SplashPipe pipe;
+  SplashColor pixel;
+  Guchar *ap;
+  int w, h, x0, y0, x1, y1, x, y;
+
+  // split the image into clipped and unclipped regions
+  w = src->getWidth();
+  h = src->getHeight();
+  if (clipRes == splashClipAllInside) {
+    x0 = 0;
+    y0 = 0;
+    x1 = w;
+    y1 = h;
+  } else {
+    if (state->clip->getNumPaths()) {
+      x0 = x1 = w;
+      y0 = y1 = h;
+    } else {
+      if ((x0 = splashCeil(state->clip->getXMin()) - xDest) < 0) {
+	x0 = 0;
+      }
+      if ((y0 = splashCeil(state->clip->getYMin()) - yDest) < 0) {
+	y0 = 0;
+      }
+      if ((x1 = splashFloor(state->clip->getXMax()) - xDest) > w) {
+	x1 = w;
+      }
+      if (x1 < x0) {
+	x1 = x0;
+      }
+      if ((y1 = splashFloor(state->clip->getYMax()) - yDest) > h) {
+	y1 = h;
+      }
+      if (y1 < y0) {
+	y1 = y0;
+      }
+    }
+  }
+
+  // draw the unclipped region
+  if (x0 < w && y0 < h && x0 < x1 && y0 < y1) {
+    pipeInit(&pipe, xDest + x0, yDest + y0, NULL, pixel,
+	     (Guchar)splashRound(state->fillAlpha * 255), srcAlpha, gFalse);
+//  pipeInit(&pipe, xDest + x0, yDest + y0, NULL, pixel, state->fillAlpha,
+//	   srcAlpha,
+//	   gFalse, opImagePattern);
+    if (srcAlpha) {
+      for (y = y0; y < y1; ++y) {
+	pipeSetXY(&pipe, xDest + x0, yDest + y);
+	ap = src->getAlphaPtr() + y * w + x0;
+	for (x = x0; x < x1; ++x) {
+	  src->getPixel(x, y, pixel);
+	  pipe.shape = *ap++;
+	  (this->*pipe.run)(&pipe);
+	}
+      }
+    } else {
+      for (y = y0; y < y1; ++y) {
+	pipeSetXY(&pipe, xDest + x0, yDest + y);
+	for (x = x0; x < x1; ++x) {
+	  src->getPixel(x, y, pixel);
+	  (this->*pipe.run)(&pipe);
+	}
+      }
+    }
+    updateModX(xDest + x0);
+    updateModX(xDest + x1 - 1);
+    updateModY(yDest + y0);
+    updateModY(yDest + y1 - 1);
+  }
+
+  // draw the clipped regions
+  if (y0 > 0) {
+    blitImageClipped(src, srcAlpha, 0, 0, xDest, yDest, w, y0);
+  }
+  if (y1 < h) {
+    blitImageClipped(src, srcAlpha, 0, y1, xDest, yDest + y1, w, h - y1);
+  }
+  if (x0 > 0 && y0 < y1) {
+    blitImageClipped(src, srcAlpha, 0, y0, xDest, yDest + y0, x0, y1 - y0);
+  }
+  if (x1 < w && y0 < y1) {
+    blitImageClipped(src, srcAlpha, x1, y0, xDest + x1, yDest + y0,
+		     w - x1, y1 - y0);
+  }
+}
+
+void Splash::blitImageClipped(SplashBitmap *src, GBool srcAlpha,
+			      int xSrc, int ySrc, int xDest, int yDest,
+			      int w, int h) {
+  SplashPipe pipe;
+  SplashColor pixel;
+  Guchar *ap;
+  int x, y;
+
+  if (vectorAntialias) {
+    pipeInit(&pipe, xDest, yDest, NULL, pixel,
+	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
+//  pipeInit(&pipe, xDest, yDest, NULL, pixel, state->fillAlpha,
+//	   gTrue,
+//	   gFalse, opImagePattern);
+    drawAAPixelInit();
+    if (srcAlpha) {
+      for (y = 0; y < h; ++y) {
+	ap = src->getAlphaPtr() + (ySrc + y) * src->getWidth() + xSrc;
+	for (x = 0; x < w; ++x) {
+	  src->getPixel(xSrc + x, ySrc + y, pixel);
+	  pipe.shape = *ap++;
+	  drawAAPixel(&pipe, xDest + x, yDest + y);
+	}
+      }
+    } else {
+      for (y = 0; y < h; ++y) {
+	for (x = 0; x < w; ++x) {
+	  src->getPixel(xSrc + x, ySrc + y, pixel);
+	  pipe.shape = 255;
+	  drawAAPixel(&pipe, xDest + x, yDest + y);
+	}
+      }
+    }
+  } else {
+    pipeInit(&pipe, xDest, yDest, NULL, pixel,
+	     (Guchar)splashRound(state->fillAlpha * 255), srcAlpha, gFalse);
+//  pipeInit(&pipe, xDest, yDest, NULL, pixel, state->fillAlpha,
+//	   srcAlpha,
+//	   gFalse, opImagePattern);
+    if (srcAlpha) {
+      for (y = 0; y < h; ++y) {
+	ap = src->getAlphaPtr() + (ySrc + y) * src->getWidth() + xSrc;
+	pipeSetXY(&pipe, xDest, yDest + y);
+	for (x = 0; x < w; ++x) {
+	  if (state->clip->test(xDest + x, yDest + y)) {
+	    src->getPixel(xSrc + x, ySrc + y, pixel);
+	    pipe.shape = *ap++;
+	    (this->*pipe.run)(&pipe);
+	    updateModX(xDest + x);
+	    updateModY(yDest + y);
+	  } else {
+	    pipeIncX(&pipe);
+	    ++ap;
+	  }
+	}
+      }
+    } else {
+      for (y = 0; y < h; ++y) {
+	pipeSetXY(&pipe, xDest, yDest + y);
+	for (x = 0; x < w; ++x) {
+	  if (state->clip->test(xDest + x, yDest + y)) {
+	    src->getPixel(xSrc + x, ySrc + y, pixel);
+	    (this->*pipe.run)(&pipe);
+	    updateModX(xDest + x);
+	    updateModY(yDest + y);
+	  } else {
+	    pipeIncX(&pipe);
+	  }
+	}
+      }
+    }
+  }
 }
 
 SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
@@ -3699,39 +4622,72 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
   }
 
   if (src->alpha) {
-    pipeInit(&pipe, xDest, yDest, NULL, pixel, (Guchar)splashRound(state->fillAlpha * 255),
-	     gTrue, nonIsolated);
-    for (y = 0; y < h; ++y) {
-      pipeSetXY(&pipe, xDest, yDest + y);
-      ap = src->getAlphaPtr() + (ySrc + y) * src->getWidth() + xSrc;
-      for (x = 0; x < w; ++x) {
-	alpha = *ap++;
-	if (noClip || state->clip->test(xDest + x, yDest + y)) {
+    pipeInit(&pipe, xDest, yDest, NULL, pixel,
+	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, nonIsolated);
+    if (noClip) {
+      for (y = 0; y < h; ++y) {
+	pipeSetXY(&pipe, xDest, yDest + y);
+	ap = src->getAlphaPtr() + (ySrc + y) * src->getWidth() + xSrc;
+	for (x = 0; x < w; ++x) {
+	  src->getPixel(xSrc + x, ySrc + y, pixel);
+	  alpha = *ap++;
 	  // this uses shape instead of alpha, which isn't technically
 	  // correct, but works out the same
-	  src->getPixel(xSrc + x, ySrc + y, pixel);
 	  pipe.shape = alpha;
 	  (this->*pipe.run)(&pipe);
-	  updateModX(xDest + x);
-	  updateModY(yDest + y);
-	} else {
-	  pipeIncX(&pipe);
+	}
+      }
+      updateModX(xDest);
+      updateModX(xDest + w - 1);
+      updateModY(yDest);
+      updateModY(yDest + h - 1);
+    } else {
+      for (y = 0; y < h; ++y) {
+	pipeSetXY(&pipe, xDest, yDest + y);
+	ap = src->getAlphaPtr() + (ySrc + y) * src->getWidth() + xSrc;
+	for (x = 0; x < w; ++x) {
+	  src->getPixel(xSrc + x, ySrc + y, pixel);
+	  alpha = *ap++;
+	  if (state->clip->test(xDest + x, yDest + y)) {
+	    // this uses shape instead of alpha, which isn't technically
+	    // correct, but works out the same
+	    pipe.shape = alpha;
+	    (this->*pipe.run)(&pipe);
+	    updateModX(xDest + x);
+	    updateModY(yDest + y);
+	  } else {
+	    pipeIncX(&pipe);
+	  }
 	}
       }
     }
   } else {
-    pipeInit(&pipe, xDest, yDest, NULL, pixel, (Guchar)splashRound(state->fillAlpha * 255),
-	     gFalse, nonIsolated);
-    for (y = 0; y < h; ++y) {
-      pipeSetXY(&pipe, xDest, yDest + y);
-      for (x = 0; x < w; ++x) {
-	if (noClip || state->clip->test(xDest + x, yDest + y)) {
+    pipeInit(&pipe, xDest, yDest, NULL, pixel,
+	     (Guchar)splashRound(state->fillAlpha * 255), gFalse, nonIsolated);
+    if (noClip) {
+      for (y = 0; y < h; ++y) {
+	pipeSetXY(&pipe, xDest, yDest + y);
+	for (x = 0; x < w; ++x) {
 	  src->getPixel(xSrc + x, ySrc + y, pixel);
 	  (this->*pipe.run)(&pipe);
-	  updateModX(xDest + x);
-	  updateModY(yDest + y);
-	} else {
-	  pipeIncX(&pipe);
+	}
+      }
+      updateModX(xDest);
+      updateModX(xDest + w - 1);
+      updateModY(yDest);
+      updateModY(yDest + h - 1);
+    } else {
+      for (y = 0; y < h; ++y) {
+	pipeSetXY(&pipe, xDest, yDest + y);
+	for (x = 0; x < w; ++x) {
+	  src->getPixel(xSrc + x, ySrc + y, pixel);
+	  if (state->clip->test(xDest + x, yDest + y)) {
+	    (this->*pipe.run)(&pipe);
+	    updateModX(xDest + x);
+	    updateModY(yDest + y);
+	  } else {
+	    pipeIncX(&pipe);
+	  }
 	}
       }
     }
@@ -3856,11 +4812,21 @@ void Splash::compositeBackground(SplashColorPtr color) {
       q = &bitmap->alpha[y * bitmap->width];
       for (x = 0; x < bitmap->width; ++x) {
 	alpha = *q++;
-	alpha1 = 255 - alpha;
-	p[0] = div255(alpha1 * color0 + alpha * p[0]);
-	p[1] = div255(alpha1 * color1 + alpha * p[1]);
-	p[2] = div255(alpha1 * color2 + alpha * p[2]);
-	p[3] = div255(alpha1 * color3 + alpha * p[3]);
+	if (alpha == 0)
+	{
+	  p[0] = color0;
+	  p[1] = color1;
+	  p[2] = color2;
+	  p[3] = color3;
+	}
+	else if (alpha != 255)
+	{
+	  alpha1 = 255 - alpha;
+	  p[0] = div255(alpha1 * color0 + alpha * p[0]);
+	  p[1] = div255(alpha1 * color1 + alpha * p[1]);
+	  p[2] = div255(alpha1 * color2 + alpha * p[2]);
+    p[3] = div255(alpha1 * color3 + alpha * p[3]);
+	}
 	p += 4;
       }
     }
