@@ -1985,7 +1985,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat,
   GfxPatternColorSpace *patCS;
   GfxColorSpace *cs;
   GfxColor color;
-  GfxPath *savedPath;
+  GfxState *savedState;
   double xMin, yMin, xMax, yMax, x, y, x1, y1;
   double cxMin, cyMin, cxMax, cyMax;
   int xi0, yi0, xi1, yi1, xi, yi;
@@ -2036,12 +2036,13 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat,
   imb[5] = (m1[1] * m1[4] - m1[0] * m1[5]) * det;
 
   // save current graphics state
-  savedPath = state->getPath()->copy();
-  saveState();
+  savedState = saveStateStack();
 
   // set underlying color space (for uncolored tiling patterns); set
   // various other parameters (stroke color, line width) to match
   // Adobe's behavior
+  state->setFillPattern(NULL);
+  state->setStrokePattern(NULL);
   if (tPat->getPaintType() == 2 && (cs = patCS->getUnder())) {
     state->setFillColorSpace(cs->copy());
     out->updateFillColorSpace(state);
@@ -2052,6 +2053,8 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat,
     } else {
 	state->setStrokeColor(state->getFillColor());
     }
+    out->updateFillColor(state);
+    out->updateStrokeColor(state);
   } else {
     cs = new GfxDeviceGrayColorSpace();
     state->setFillColorSpace(cs);
@@ -2062,10 +2065,10 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat,
     state->setStrokeColor(&color);
     out->updateStrokeColorSpace(state);
   }
-  state->setFillPattern(NULL);
-  out->updateFillColor(state);
-  state->setStrokePattern(NULL);
-  out->updateStrokeColor(state);
+  if (!stroke) {
+    state->setLineWidth(0);
+    out->updateLineWidth(state);
+  }
 
   // clip to current path
   if (stroke) {
@@ -2080,8 +2083,6 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat,
     }
   }
   state->clearPath();
-  state->setLineWidth(0);
-  out->updateLineWidth(state);
 
   // get the clip region, check for empty
   state->getClipBBox(&cxMin, &cyMin, &cxMax, &cyMax);
@@ -2145,7 +2146,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat,
     m1[4] = m[4];
     m1[5] = m[5];
     if (out->useTilingPatternFill() &&
-    	out->tilingPatternFill(state, catalog, tPat->getContentStream(),
+    	out->tilingPatternFill(state, this, catalog, tPat->getContentStream(),
 			       tPat->getMatrix(), tPat->getPaintType(), tPat->getTilingType(),
 			       tPat->getResDict(), m1, tPat->getBBox(),
 			       xi0, yi0, xi1, yi1, xstep, ystep)) {
@@ -2166,8 +2167,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat,
 
   // restore graphics state
  restore:
-  restoreState();
-  state->setPath(savedPath);
+  restoreStateStack(savedState);
 }
 
 void Gfx::doShadingPatternFill(GfxShadingPattern *sPat,
@@ -5098,6 +5098,27 @@ void Gfx::restoreState() {
   state = state->restore();
   out->restoreState(state);
   stackHeight--;
+}
+
+// Create a new state stack, and initialize it with a copy of the
+// current state.
+GfxState *Gfx::saveStateStack() {
+  GfxState *oldState;
+
+  out->saveState(state);
+  oldState = state;
+  state = state->copy(gTrue);
+  return oldState;
+}
+
+// Switch back to the previous state stack.
+void Gfx::restoreStateStack(GfxState *oldState) {
+  while (state->hasSaves()) {
+    restoreState();
+  }
+  delete state;
+  state = oldState;
+  out->restoreState(state);
 }
 
 void Gfx::pushResources(Dict *resDict) {

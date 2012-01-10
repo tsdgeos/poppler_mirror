@@ -81,18 +81,17 @@ void PreScanOutputDev::eoFill(GfxState *state) {
 	state->getFillOpacity(), state->getBlendMode());
 }
 
-GBool PreScanOutputDev::tilingPatternFill(GfxState *state, Catalog *catalog, Object *str,
+GBool PreScanOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *catalog, Object *str,
 					  double *pmat, int paintType, int /*tilingType*/, Dict *resDict,
 					double *mat, double *bbox,
 					int x0, int y0, int x1, int y1,
 					double xStep, double yStep) {
-  PDFRectangle box;
-  Gfx *gfx;
-  box.x1 = bbox[0]; box.y1 = bbox[1];
-  box.x2 = bbox[2]; box.y2 = bbox[3];
-  gfx = new Gfx(doc, this, resDict, &box, NULL);
-  gfx->display(str);
-  delete gfx;
+  if (paintType == 1) {
+    gfx->doForm1(str, resDict, mat, bbox);
+  } else {
+    check(state->getFillColorSpace(), state->getFillColor(),
+	  state->getFillOpacity(), state->getBlendMode());
+  }
   return gTrue;
 }
 

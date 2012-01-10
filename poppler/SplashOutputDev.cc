@@ -1359,6 +1359,7 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
   textClipPath = NULL;
   haveCSPattern = gFalse;
   transpGroupStack = NULL;
+  nestCount = 0;
 }
 
 void SplashOutputDev::setupScreenParams(double hDPI, double vDPI) {
@@ -2384,6 +2385,7 @@ void SplashOutputDev::endType3Char(GfxState *state) {
   double *ctm;
 
   if (t3GlyphStack->cacheTag) {
+    --nestCount;
     memcpy(t3GlyphStack->cacheData, bitmap->getDataPtr(),
 	   t3GlyphStack->cache->glyphSize);
     delete bitmap;
@@ -2525,6 +2527,7 @@ void SplashOutputDev::type3D1(GfxState *state, double wx, double wy,
   state->setCTM(ctm[0], ctm[1], ctm[2], ctm[3],
 		-t3Font->glyphX, -t3Font->glyphY);
   updateCTM(state, 0, 0, 0, 0, 0, 0);
+  ++nestCount;
 }
 
 void SplashOutputDev::drawType3Glyph(GfxState *state, T3FontCache *t3Font,
@@ -3681,10 +3684,12 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
   transpGroup->tBitmap = bitmap;
   state->shiftCTM(-tx, -ty);
   updateCTM(state, 0, 0, 0, 0, 0, 0);
+  ++nestCount;
 }
 
 void SplashOutputDev::endTransparencyGroup(GfxState *state) {
   // restore state
+  --nestCount;
   delete splash;
   bitmap = transpGroupStack->origBitmap;
   splash = transpGroupStack->origSplash;
@@ -3896,7 +3901,7 @@ void SplashOutputDev::setFreeTypeHinting(GBool enable, GBool enableSlightHinting
   enableSlightHinting = enableSlightHintingA;
 }
 
-GBool SplashOutputDev::tilingPatternFill(GfxState *state, Catalog *catalog, Object *str,
+GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx1, Catalog *catalog, Object *str,
 					double *ptm, int paintType, int /*tilingType*/, Dict *resDict,
 					double *mat, double *bbox,
 					int x0, int y0, int x1, int y1,
@@ -4056,7 +4061,6 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Catalog *catalog, Obje
   matc[1] = ctm[1];
   matc[2] = ctm[2];
   matc[3] = ctm[3];
-  splash->setOverprintMask(0xffffffff);
   splash->drawImage(&tilingBitmapSrc, &imgData, colorMode, gTrue, result_width, result_height, matc);
   delete tBitmap;
   delete gfx;

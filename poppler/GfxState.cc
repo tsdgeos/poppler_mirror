@@ -5580,7 +5580,7 @@ GfxState::~GfxState() {
 }
 
 // Used for copy();
-GfxState::GfxState(GfxState *state) {
+GfxState::GfxState(GfxState *state, GBool copyPath) {
   int i;
 
   memcpy(this, state, sizeof(GfxState));
@@ -5608,6 +5608,9 @@ GfxState::GfxState(GfxState *state) {
   if (font)
     font->incRefCnt();
 
+  if (copyPath) {
+    path = state->path->copy();
+  }
   saved = NULL;
 }
 

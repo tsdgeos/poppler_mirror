@@ -43,6 +43,7 @@ class Dict;
 class GooHash;
 class GooString;
 class GfxState;
+class Gfx;
 struct GfxColor;
 class GfxColorSpace;
 class GfxImageColorMap;
@@ -196,7 +197,7 @@ public:
   virtual void stroke(GfxState * /*state*/) {}
   virtual void fill(GfxState * /*state*/) {}
   virtual void eoFill(GfxState * /*state*/) {}
-  virtual GBool tilingPatternFill(GfxState * /*state*/, Catalog * /*cat*/, Object * /*str*/,
+  virtual GBool tilingPatternFill(GfxState * /*state*/, Gfx * /*gfx*/, Catalog * /*cat*/, Object * /*str*/,
 				  double * /*pmat*/, int /*paintType*/, int /*tilingType*/, Dict * /*resDict*/,
 				  double * /*mat*/, double * /*bbox*/,
 				  int /*x0*/, int /*y0*/, int /*x1*/, int /*y1*/,

@@ -273,7 +273,7 @@ public:
   virtual void stroke(GfxState *state);
   virtual void fill(GfxState *state);
   virtual void eoFill(GfxState *state);
-  virtual GBool tilingPatternFill(GfxState *state, Catalog *catalog, Object *str,
+  virtual GBool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *catalog, Object *str,
 				  double *pmat, int paintType, int tilingType, Dict *resDict,
 				  double *mat, double *bbox,
 				  int x0, int y0, int x1, int y1,
@@ -441,6 +441,7 @@ private:
   SplashTransparencyGroup *	// transparency group stack
     transpGroupStack;
   SplashBitmap *maskBitmap; // for image masks in pattern colorspace
+  int nestCount;
 };
 
 #endif

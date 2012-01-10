@@ -1313,7 +1313,8 @@ public:
   ~GfxState();
 
   // Copy.
-  GfxState *copy() { return new GfxState(this); }
+  GfxState *copy(GBool copyPath = gFalse)
+    { return new GfxState(this, copyPath); }
 
   // Accessors.
   double getHDPI() { return hDPI; }
@@ -1539,7 +1540,7 @@ private:
 
   GfxState *saved;		// next GfxState on stack
 
-  GfxState(GfxState *state);
+  GfxState(GfxState *state, GBool copyPath);
 };
 
 #endif

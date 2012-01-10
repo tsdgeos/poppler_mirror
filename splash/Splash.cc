@@ -2636,7 +2636,7 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData,
       blitMask(scaledMask, x0, y0, clipRes);
       delete scaledMask;
     }
-    
+
   // scaling plus vertical flip
   } else if (mat[0] > 0 && minorAxisZero && mat[3] < 0) {
     x0 = imgCoordMungeLowerC(mat[4], glyphMode);
@@ -3412,7 +3412,7 @@ SplashError Splash::drawImage(SplashImageSource src, void *srcData,
       blitImage(scaledImg, srcAlpha, x0, y0, clipRes);
       delete scaledImg;
     }
-    
+
   // scaling plus vertical flip
   } else if (mat[0] > 0 && minorAxisZero && mat[3] < 0) {
     x0 = imgCoordMungeLower(mat[4]);
@@ -3467,7 +3467,7 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, void *srcData
   SplashClipResult clipRes, clipRes2;
   SplashPipe pipe;
   SplashColor pixel;
-  int scaledWidth, scaledHeight, t0, t1;
+  int scaledWidth, scaledHeight, t0, t1, th;
   SplashCoord r00, r01, r10, r11, det, ir00, ir01, ir10, ir11;
   SplashCoord vx[4], vy[4];
   int xMin, yMin, xMax, yMax;
@@ -3524,13 +3524,29 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, void *srcData
   scaledWidth = t0 > t1 ? t0 : t1;
   if (mat[2] >= 0) {
     t0 = imgCoordMungeUpper(mat[2] + mat[4]) - imgCoordMungeLower(mat[4]);
+    if (splashAbs(mat[1]) >= 1) {
+      th = imgCoordMungeUpper(mat[2]) - imgCoordMungeLower(mat[0] * mat[3] / mat[1]);
+	  if (th > t0) t0 = th;
+    }
   } else {
     t0 = imgCoordMungeUpper(mat[4]) - imgCoordMungeLower(mat[2] + mat[4]);
+    if (splashAbs(mat[1]) >= 1) {
+      th = imgCoordMungeUpper(mat[0] * mat[3] / mat[1]) - imgCoordMungeLower(mat[2]);
+      if (th > t0) t0 = th;
+    }
   }
   if (mat[3] >= 0) {
     t1 = imgCoordMungeUpper(mat[3] + mat[5]) - imgCoordMungeLower(mat[5]);
+    if (splashAbs(mat[0]) >= 1) {
+      th = imgCoordMungeUpper(mat[3]) - imgCoordMungeLower(mat[1] * mat[2] / mat[0]);
+	  if (th > t1) t1 = th;
+    }
   } else {
     t1 = imgCoordMungeUpper(mat[5]) - imgCoordMungeLower(mat[3] + mat[5]);
+    if (splashAbs(mat[0]) >= 1) {
+      th = imgCoordMungeUpper(mat[1] * mat[2] / mat[0]) - imgCoordMungeLower(mat[3]);
+	  if (th > t1) t1 = th;
+    }
   }
   scaledHeight = t0 > t1 ? t0 : t1;
   if (scaledWidth == 0) {
@@ -3901,7 +3917,7 @@ void Splash::scaleImageYdXd(SplashImageSource src, void *srcData,
 	*destPtr++ = (Guchar)pix2;
 	*destPtr++ = (Guchar)pix1;
 	*destPtr++ = (Guchar)pix0;
-	*destPtr++ = (Guchar)255;	
+	*destPtr++ = (Guchar)255;
 	break;
 
       case splashModeBGR8:
@@ -4081,7 +4097,7 @@ void Splash::scaleImageYdXu(SplashImageSource src, void *srcData,
 	  *destPtr++ = (Guchar)pix[2];
 	  *destPtr++ = (Guchar)pix[1];
 	  *destPtr++ = (Guchar)pix[0];
-	  *destPtr++ = (Guchar)255;	  
+	  *destPtr++ = (Guchar)255;
 	}
 	break;
       case splashModeBGR8:
@@ -4222,7 +4238,7 @@ void Splash::scaleImageYuXd(SplashImageSource src, void *srcData,
 	  *destPtr++ = (Guchar)pix[2];
 	  *destPtr++ = (Guchar)pix[1];
 	  *destPtr++ = (Guchar)pix[0];
-	  *destPtr++ = (Guchar)255;	  
+	  *destPtr++ = (Guchar)255;
 	}
 	break;
       case splashModeBGR8:
@@ -4365,7 +4381,7 @@ void Splash::scaleImageYuXu(SplashImageSource src, void *srcData,
 	    *destPtr++ = (Guchar)pix[2];
 	    *destPtr++ = (Guchar)pix[1];
 	    *destPtr++ = (Guchar)pix[0];
-	    *destPtr++ = (Guchar)255;	    
+	    *destPtr++ = (Guchar)255;
 	  }
 	}
 	break;
@@ -5243,7 +5259,7 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
 
 SplashPath *Splash::makeStrokePath(SplashPath *path, SplashCoord w,
 				    GBool flatten) {
-  SplashPath *pathIn, *dashPath, *pathOut;
+SplashPath *pathIn, *dashPath, *pathOut;
   SplashCoord d, dx, dy, wdx, wdy, dxNext, dyNext, wdxNext, wdyNext;
   SplashCoord crossprod, dotprod, miter, m;
   GBool first, last, closed;

@@ -181,6 +181,13 @@ public:
   // Get the current graphics state object.
   GfxState *getState() { return state; }
 
+  void doForm1(Object *str, Dict *resDict, double *matrix, double *bbox,
+	       GBool transpGroup = gFalse, GBool softMask = gFalse,
+	       GfxColorSpace *blendingColorSpace = NULL,
+	       GBool isolated = gFalse, GBool knockout = gFalse,
+	       GBool alpha = gFalse, Function *transferFunc = NULL,
+	       GfxColor *backdropColor = NULL);
+
   void pushResources(Dict *resDict);
   void popResources();
   
@@ -347,12 +354,6 @@ private:
   void opXObject(Object args[], int numArgs);
   void doImage(Object *ref, Stream *str, GBool inlineImg);
   void doForm(Object *str);
-  void doForm1(Object *str, Dict *resDict, double *matrix, double *bbox,
-	       GBool transpGroup = gFalse, GBool softMask = gFalse,
-	       GfxColorSpace *blendingColorSpace = NULL,
-	       GBool isolated = gFalse, GBool knockout = gFalse,
-	       GBool alpha = gFalse, Function *transferFunc = NULL,
-	       GfxColor *backdropColor = NULL);
 
   // in-line image operators
   void opBeginImage(Object args[], int numArgs);
@@ -372,6 +373,8 @@ private:
   void opBeginMarkedContent(Object args[], int numArgs);
   void opEndMarkedContent(Object args[], int numArgs);
   void opMarkPoint(Object args[], int numArgs);
+  GfxState *saveStateStack();
+  void restoreStateStack(GfxState *oldState);
   GBool contentIsHidden();
   void pushMarkedContent();
   void popMarkedContent();
