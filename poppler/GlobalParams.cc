@@ -685,6 +685,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   textKeepTinyChars = gFalse;
   fontDirs = new GooList();
   enableFreeType = gTrue;
+  disableFreeTypeHinting = gFalse;
   antialias = gTrue;
   vectorAntialias = gTrue;
   strokeAdjust = gTrue;
@@ -1509,6 +1510,14 @@ GBool GlobalParams::getEnableFreeType() {
   return f;
 }
 
+GBool GlobalParams::getDisableFreeTypeHinting() {
+  GBool f;
+
+  lockGlobalParams;
+  f = disableFreeTypeHinting;
+  unlockGlobalParams;
+  return f;
+}
 
 GBool GlobalParams::getAntialias() {
   GBool f;
@@ -1855,6 +1864,14 @@ GBool GlobalParams::setEnableFreeType(char *s) {
   return ok;
 }
 
+GBool GlobalParams::setDisableFreeTypeHinting(char *s) {
+  GBool ok;
+
+  lockGlobalParams;
+  ok = parseYesNo2(s, &disableFreeTypeHinting);
+  unlockGlobalParams;
+  return ok;
+}
 
 GBool GlobalParams::setAntialias(char *s) {
   GBool ok;

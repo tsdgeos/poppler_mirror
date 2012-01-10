@@ -69,6 +69,7 @@ SplashFontEngine::SplashFontEngine(
 #endif
 #if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
 				   GBool enableFreeType,
+				   GBool enableAutoHinting,
 				   GBool enableFreeTypeHinting,
 				   GBool enableSlightHinting,
 #endif
@@ -88,7 +89,7 @@ SplashFontEngine::SplashFontEngine(
 #endif
 #if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   if (enableFreeType) {
-    ftEngine = SplashFTFontEngine::init(aa, enableFreeTypeHinting, enableSlightHinting);
+    ftEngine = SplashFTFontEngine::init(aa, enableAutoHinting, enableFreeTypeHinting, enableSlightHinting);
   } else {
     ftEngine = NULL;
   }

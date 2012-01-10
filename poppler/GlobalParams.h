@@ -204,6 +204,7 @@ public:
   GBool getTextKeepTinyChars();
   GooString *findFontFile(GooString *fontName, const char **exts);
   GBool getEnableFreeType();
+  GBool getDisableFreeTypeHinting();
   GBool getAntialias();
   GBool getVectorAntialias();
   GBool getStrokeAdjust();
@@ -251,6 +252,7 @@ public:
   void setTextPageBreaks(GBool pageBreaks);
   void setTextKeepTinyChars(GBool keep);
   GBool setEnableFreeType(char *s);
+  GBool setDisableFreeTypeHinting(char *s);
   GBool setAntialias(char *s);
   GBool setVectorAntialias(char *s);
   void setStrokeAdjust(GBool strokeAdjust);
@@ -338,6 +340,7 @@ private:
   GBool textKeepTinyChars;	// keep all characters in text output
   GooList *fontDirs;		// list of font dirs [GooString]
   GBool enableFreeType;		// FreeType enable flag
+  GBool disableFreeTypeHinting;	// FreeType disable hinting flag
   GBool antialias;		// anti-aliasing enable flag
   GBool vectorAntialias;	// vector anti-aliasing enable flag
   GBool strokeAdjust;		// stroke adjustment enable flag

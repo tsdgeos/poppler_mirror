@@ -1330,6 +1330,7 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
   vectorAntialias = allowAntialias &&
 		      globalParams->getVectorAntialias() &&
 		      colorMode != splashModeMono1;
+  enableAutoHinting = !globalParams->getDisableFreeTypeHinting();
   enableFreeTypeHinting = gFalse;
   enableSlightHinting = gFalse;
   setupScreenParams(72.0, 72.0);
@@ -1441,6 +1442,7 @@ void SplashOutputDev::startDoc(PDFDoc *docA) {
 #endif
 #if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
 				    globalParams->getEnableFreeType(),
+				    enableAutoHinting,
 				    enableFreeTypeHinting,
 				    enableSlightHinting,
 #endif
@@ -3889,6 +3891,7 @@ void SplashOutputDev::setVectorAntialias(GBool vaa) {
 
 void SplashOutputDev::setFreeTypeHinting(GBool enable, GBool enableSlightHintingA)
 {
+  enableAutoHinting = gFalse;
   enableFreeTypeHinting = enable;
   enableSlightHinting = enableSlightHintingA;
 }

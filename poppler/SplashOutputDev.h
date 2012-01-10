@@ -416,6 +416,7 @@ private:
   GBool bitmapTopDown;
   GBool allowAntialias;
   GBool vectorAntialias;
+  GBool enableAutoHinting;
   GBool enableFreeTypeHinting;
   GBool enableSlightHinting;
   GBool reverseVideo;		// reverse video mode
