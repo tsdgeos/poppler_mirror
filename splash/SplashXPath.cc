@@ -71,8 +71,7 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
   SplashXPathPoint *pts;
   SplashXPathAdjust *adjusts, *adjust;
   SplashCoord x0, y0, x1, y1, x2, y2, x3, y3, xsp, ysp;
-  SplashCoord adj0, adj1, w;
-  int ww;
+  SplashCoord adj0, adj1;
   int curSubpath, i, j;
 
   // transform the points
@@ -114,19 +113,24 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
 	adj0 = adj1;
 	adj1 = x0;
       }
-      w = adj1 - adj0;
-      ww = splashRound(w);
-      if (ww == 0) {
-	ww = 1;
-      }
       adjusts[i].x0a = adj0 - 0.01;
       adjusts[i].x0b = adj0 + 0.01;
       adjusts[i].xma = (SplashCoord)0.5 * (adj0 + adj1) - 0.01;
       adjusts[i].xmb = (SplashCoord)0.5 * (adj0 + adj1) + 0.01;
       adjusts[i].x1a = adj1 - 0.01;
       adjusts[i].x1b = adj1 + 0.01;
-      adjusts[i].x0 = (SplashCoord)splashRound(adj0);
-      adjusts[i].x1 = adjusts[i].x0 + ww - 0.01;
+      // rounding both edge coordinates can result in lines of
+      // different widths (e.g., adj=10.1, adj1=11.3 --> x0=10, x1=11;
+      // adj0=10.4, adj1=11.6 --> x0=10, x1=12), but it has the
+      // benefit of making adjacent strokes/fills line up without any
+      // gaps between them
+      x0 = splashRound(adj0);
+      x1 = splashRound(adj1);
+      if (x1 == x0) {
+	x1 = x1 + 1;
+      }
+      adjusts[i].x0 = (SplashCoord)x0;
+      adjusts[i].x1 = (SplashCoord)x1 - 0.01;
       adjusts[i].xm = (SplashCoord)0.5 * (adjusts[i].x0 + adjusts[i].x1);
       adjusts[i].firstPt = hint->firstPt;
       adjusts[i].lastPt = hint->lastPt;
