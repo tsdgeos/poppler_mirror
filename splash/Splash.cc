@@ -5151,7 +5151,7 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
 				    int xDest, int yDest, int w, int h) {
   SplashColorPtr p, sp;
   Guchar *q;
-  int x, y, mask;
+  int x, y, mask, srcMask;
 
   if (src->mode != bitmap->mode) {
     return splashErrModeMismatch;
@@ -5161,10 +5161,11 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
   case splashModeMono1:
     for (y = 0; y < h; ++y) {
       p = &bitmap->data[(yDest + y) * bitmap->rowSize + (xDest >> 3)];
-      sp = &src->data[(ySrc + y) * bitmap->rowSize + (xSrc >> 3)];
       mask = 0x80 >> (xDest & 7);
+      sp = &src->data[(ySrc + y) * src->rowSize + (xSrc >> 3)];
+      srcMask = 0x80 >> (xSrc & 7);
       for (x = 0; x < w; ++x) {
-	if (sp[0] & (0x80 >> (x & 7))) {
+	if (*sp & srcMask) {
 	  *p |= mask;
 	} else {
 	  *p &= ~mask;
@@ -5172,6 +5173,9 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
 	if (!(mask >>= 1)) {
 	  mask = 0x80;
 	  ++p;
+	}
+	if (!(srcMask >>= 1)) {
+	  srcMask = 0x80;
 	  ++sp;
 	}
       }
