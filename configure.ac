@@ -381,12 +381,17 @@ AC_ARG_ENABLE(cairo-output,
                              [Don't build the cairo graphics backend.]),
               enable_cairo_output=$enableval,
               enable_cairo_output="try")
+use_cairo=""
 if test x$enable_cairo_output = xyes; then
   PKG_CHECK_MODULES(CAIRO, cairo >= $CAIRO_VERSION cairo-ft >= $CAIRO_VERSION)
 elif test x$enable_cairo_output = xtry; then
   PKG_CHECK_MODULES(CAIRO, cairo >= $CAIRO_VERSION cairo-ft >= $CAIRO_VERSION,
                     [enable_cairo_output="yes"],
-                    [enable_cairo_output="no"])
+                    [enable_cairo_output="no"
+		     use_cairo="no (requires cairo >= $CAIRO_VERSION)"])
+fi
+if test x$use_cairo = x; then
+   use_cairo=$enable_cairo_output
 fi
 
 AC_SUBST(CAIRO_CFLAGS)
@@ -644,7 +649,7 @@ echo ""
 echo "Building poppler with support for:"
 echo "  font configuration: $with_font_configuration"
 echo "  splash output:      $enable_splash_output"
-echo "  cairo output:       $enable_cairo_output"
+echo "  cairo output:       $use_cairo"
 echo "  qt4 wrapper:        $enable_poppler_qt4"
 echo "  glib wrapper:       $enable_poppler_glib"
 echo "    introspection:    $found_introspection"
