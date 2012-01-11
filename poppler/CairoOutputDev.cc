@@ -2779,15 +2779,17 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 
   cairo_save (cairo);
   cairo_set_source (cairo, pattern);
-  if (printing)
-    cairo_rectangle (cairo, 0., 0., width, height);
-  else
+  if (!printing)
     cairo_rectangle (cairo, 0., 0., 1., 1.);
   if (maskPattern) {
-    cairo_clip (cairo);
+    if (!printing)
+      cairo_clip (cairo);
     cairo_mask (cairo, maskPattern);
   } else {
-    cairo_fill (cairo);
+    if (printing)
+      cairo_paint (cairo);
+    else
+      cairo_fill (cairo);
   }
   cairo_restore (cairo);
 
@@ -2796,11 +2798,12 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   if (cairo_shape) {
     cairo_save (cairo_shape);
     cairo_set_source (cairo_shape, pattern);
-    if (printing)
-      cairo_rectangle (cairo_shape, 0., 0., width, height);
-    else
+    if (printing) {
+      cairo_paint (cairo_shape);
+    } else {
       cairo_rectangle (cairo_shape, 0., 0., 1., 1.);
-    cairo_fill (cairo_shape);
+      cairo_fill (cairo_shape);
+    }
     cairo_restore (cairo_shape);
   }
 
