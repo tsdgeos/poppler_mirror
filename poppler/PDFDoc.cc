@@ -26,7 +26,7 @@
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Srinivas Adicherla <srinivas.adicherla@geodesic.com>
 // Copyright (C) 2010 Philip Lorenz <lorenzph+freedesktop@gmail.com>
-// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1234,6 +1234,8 @@ void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, Guint numOffse
         } else {
           XRefEntry *entry = countRef->getEntry(obj->getRef().num + numOffset);
           entry->gen++;
+          if (entry->gen > 9)
+            break;
         } 
         Object obj1;
         getXRef()->fetch(obj->getRef().num, obj->getRef().gen, &obj1);
