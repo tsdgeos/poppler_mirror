@@ -108,6 +108,17 @@ void OutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
   }
 }
 
+void OutputDev::setSoftMaskFromImageMask(GfxState *state,
+					 Object *ref, Stream *str,
+					 int width, int height, GBool invert,
+					 GBool inlineImg) {
+  drawImageMask(state, ref, str, width, height, invert, gFalse, inlineImg);
+}
+
+void OutputDev::unsetSoftMaskFromImageMask(GfxState *state) {
+  return;
+}
+
 void OutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			  int width, int height, GfxImageColorMap *colorMap,
 			  GBool interpolate, int *maskColors, GBool inlineImg) {
@@ -166,7 +177,7 @@ void OutputDev::startProfile() {
 
   profileHash = new GooHash (true);
 }
- 
+
 GooHash *OutputDev::endProfile() {
   GooHash *profile = profileHash;
 

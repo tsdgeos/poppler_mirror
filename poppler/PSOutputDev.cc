@@ -1020,7 +1020,6 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc,
   embFontList = NULL;
   customColors = NULL;
   haveTextClip = gFalse;
-  haveCSPattern = gFalse;
   t3String = NULL;
 
   forceRasterize = forceRasterizeA;
@@ -1084,7 +1083,6 @@ PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
   embFontList = NULL;
   customColors = NULL;
   haveTextClip = gFalse;
-  haveCSPattern = gFalse;
   t3String = NULL;
 
   forceRasterize = forceRasterizeA;
@@ -4001,6 +3999,14 @@ void PSOutputDev::updateTextShift(GfxState *state, double shift) {
   }
 }
 
+void PSOutputDev::saveTextPos(GfxState *state) {
+  writePS("currentpoint\n");
+}
+
+void PSOutputDev::restoreTextPos(GfxState *state) {
+  writePS("m\n");
+}
+
 void PSOutputDev::stroke(GfxState *state) {
   doPath(state->getPath());
   if (t3String) {
@@ -4664,44 +4670,19 @@ void PSOutputDev::drawString(GfxState *state, GooString *s) {
   }
   delete s2;
 
-  if (state->getRender() & 4 || haveCSPattern) {
+  if (state->getRender() & 4) {
     haveTextClip = gTrue;
   }
 }
 
 void PSOutputDev::beginTextObject(GfxState *state) {
-  if (state->getFillColorSpace()->getMode() == csPattern) {
-    saveState(state);
-    haveCSPattern = gTrue;
-    writePS("true Tp\n");
-  }
 }
 
 void PSOutputDev::endTextObject(GfxState *state) {
-  if (haveCSPattern) {
-    if (haveTextClip) {
-      writePS("Tclip*\n");
-      haveTextClip = gFalse;
-      if (state->getFillColorSpace()->getMode() != csPattern) {
-        double cxMin, cyMin, cxMax, cyMax;
-        state->getClipBBox(&cxMin, &cyMin, &cxMax, &cyMax);
-        writePSFmt("{0:.6g} {1:.6g} {2:.6g} {3:.6g} re\n",
-                   cxMin, cyMin,
-                   cxMax, cyMax);
-        writePS("f*\n");
-        restoreState(state);
-        updateFillColor(state);
-      }
-    }
-    haveCSPattern = gFalse;
-  } else if (haveTextClip) {
+  if (haveTextClip) {
     writePS("Tclip\n");
     haveTextClip = gFalse;
   }
-}
-
-void PSOutputDev::endMaskClip(GfxState * state) {
-  writePS("pdfImClipEnd\n");
 }
 
 void PSOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
@@ -4710,26 +4691,36 @@ void PSOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
   int len;
 
   len = height * ((width + 7) / 8);
-  if (state->getFillColorSpace()->getMode() == csPattern && (level != psLevel1 && level != psLevel1Sep)) {
+  switch (level) {
+    case psLevel1:
+    case psLevel1Sep:
+      doImageL1(ref, NULL, invert, inlineImg, str, width, height, len,
+                NULL, NULL, 0, 0, gFalse);
+    break;
+    case psLevel2:
+    case psLevel2Sep:
+      doImageL2(ref, NULL, invert, inlineImg, str, width, height, len,
+                NULL, NULL, 0, 0, gFalse);
+    break;
+    case psLevel3:
+    case psLevel3Sep:
+      doImageL3(ref, NULL, invert, inlineImg, str, width, height, len,
+                NULL, NULL, 0, 0, gFalse);
+    break;
+  }
+}
+
+void PSOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str,
+				int width, int height, GBool invert,
+				GBool inlineImg) {
+  if (level != psLevel1 && level != psLevel1Sep) {
     maskToClippingPath(str, width, height, invert);
-  } else {
-    switch (level) {
-      case psLevel1:
-      case psLevel1Sep:
-        doImageL1(ref, NULL, invert, inlineImg, str, width, height, len,
-                  NULL, NULL, 0, 0, gFalse);
-      break;
-      case psLevel2:
-      case psLevel2Sep:
-        doImageL2(ref, NULL, invert, inlineImg, str, width, height, len,
-                  NULL, NULL, 0, 0, gFalse);
-      break;
-      case psLevel3:
-      case psLevel3Sep:
-        doImageL3(ref, NULL, invert, inlineImg, str, width, height, len,
-                  NULL, NULL, 0, 0, gFalse);
-      break;
-    }
+  }
+}
+
+void PSOutputDev::unsetSoftMaskFromImageMask(GfxState * state) {
+  if (level != psLevel1 && level != psLevel1Sep) {
+    writePS("pdfImClipEnd\n");
   }
 }
 

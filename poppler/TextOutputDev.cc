@@ -2379,6 +2379,10 @@ void TextPage::addChar(GfxState *state, double x, double y,
   charPos += nBytes;
 }
 
+void TextPage::incCharCount(int nChars) {
+  charPos += nChars;
+}
+
 void TextPage::endWord() {
   // This check is needed because Type 3 characters can contain
   // text-drawing operations (when TextPage is being used via
@@ -5294,6 +5298,10 @@ void TextOutputDev::drawChar(GfxState *state, double x, double y,
 			     double originX, double originY,
 			     CharCode c, int nBytes, Unicode *u, int uLen) {
   actualText->addChar(state, x, y, dx, dy, c, nBytes, u, uLen);
+}
+
+void TextOutputDev::incCharCount(int nChars) {
+  text->incCharCount(nChars);
 }
 
 void TextOutputDev::beginActualText(GfxState *state, GooString *text)

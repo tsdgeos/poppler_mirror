@@ -181,7 +181,7 @@ public:
   // Get the current graphics state object.
   GfxState *getState() { return state; }
 
-  void doForm1(Object *str, Dict *resDict, double *matrix, double *bbox,
+  void drawForm(Object *str, Dict *resDict, double *matrix, double *bbox,
 	       GBool transpGroup = gFalse, GBool softMask = gFalse,
 	       GfxColorSpace *blendingColorSpace = NULL,
 	       GBool isolated = gFalse, GBool knockout = gFalse,
@@ -190,7 +190,7 @@ public:
 
   void pushResources(Dict *resDict);
   void popResources();
-  
+ 
 #ifdef USE_CMS
   PopplerCache *getIccColorSpaceCache();
 #endif
@@ -204,9 +204,6 @@ private:
   GBool subPage;		// is this a sub-page object?
   GBool printCommands;		// print the drawing commands (for debugging)
   GBool profileCommands;	// profile the drawing commands (for debugging)
-  GBool textHaveCSPattern;	// in text drawing and text has pattern colorspace
-  GBool drawText;		// in text drawing
-  GBool maskHaveCSPattern;	// in mask drawing and mask has pattern colorspace
   GBool commandAborted;         // did the previous command abort the drawing?
   GfxResources *res;		// resource stack
   int updateLevel;
@@ -220,11 +217,16 @@ private:
   double baseMatrix[6];		// default matrix for most recent
 				//   page/form/pattern
   int formDepth;
+  double textClipBBox[4];	// text clipping bounding box
+  GBool textClipBBoxEmpty;	// true if textClipBBox has not been
+				//   initialized yet
+  GBool ocState;		// true if drawing is enabled, false if
+				//   disabled
 
   MarkedContentStack *mcStack;	// current BMC/EMC stack
 
   Parser *parser;		// parser for page content stream(s)
- 
+
 #ifdef USE_CMS
   PopplerCache iccColorSpaceCache;
 #endif
@@ -295,10 +297,13 @@ private:
   void opCloseEOFillStroke(Object args[], int numArgs);
   void doPatternFill(GBool eoFill);
   void doPatternStroke();
+  void doPatternText();
+  void doPatternImageMask(Object *ref, Stream *str, int width, int height,
+			  GBool invert, GBool inlineImg);
   void doTilingPatternFill(GfxTilingPattern *tPat,
-			   GBool stroke, GBool eoFill);
+			   GBool stroke, GBool eoFill, GBool text);
   void doShadingPatternFill(GfxShadingPattern *sPat,
-			    GBool stroke, GBool eoFill);
+			    GBool stroke, GBool eoFill, GBool text);
   void opShFill(Object args[], int numArgs);
   void doFunctionShFill(GfxFunctionShading *shading);
   void doFunctionShFill1(GfxFunctionShading *shading,
@@ -349,6 +354,7 @@ private:
   void opMoveSetShowText(Object args[], int numArgs);
   void opShowSpaceText(Object args[], int numArgs);
   void doShowText(GooString *s);
+  void doIncCharCount(GooString *s);
 
   // XObject operators
   void opXObject(Object args[], int numArgs);

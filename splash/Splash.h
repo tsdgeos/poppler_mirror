@@ -209,7 +209,7 @@ public:
   // The matrix behaves as for fillImageMask.
   SplashError drawImage(SplashImageSource src, void *srcData,
 			SplashColorMode srcMode, GBool srcAlpha,
-			int w, int h, SplashCoord *mat, SplashPattern *overprintPattern = NULL);
+			int w, int h, SplashCoord *mat);
 
   // Composite a rectangular region from <src> onto this Splash
   // object.

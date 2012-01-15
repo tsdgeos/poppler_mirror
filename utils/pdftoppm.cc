@@ -352,6 +352,7 @@ int main(int argc, char *argv[]) {
   // write PPM files
 #if SPLASH_CMYK
   if (jpegcmyk || overprint) {
+    globalParams->setOverprintPreview(gTrue);
     paperColor[0] = 0;
     paperColor[1] = 0;
     paperColor[2] = 0;

@@ -134,10 +134,6 @@ public:
   // text in Type 3 fonts will be drawn with drawChar/drawString.
   virtual GBool interpretType3Chars() { return gFalse; }
 
-  // This device now supports text in pattern colorspace!
-  virtual GBool supportTextCSPattern(GfxState *state)
-  	{ return state->getFillColorSpace()->getMode() == csPattern; }
-
   //----- header/trailer (used only if manualCtrl is true)
 
   // Write the document-level header.
@@ -204,6 +200,8 @@ public:
   virtual void updateHorizScaling(GfxState *state);
   virtual void updateTextPos(GfxState *state);
   virtual void updateTextShift(GfxState *state, double shift);
+  virtual void saveTextPos(GfxState *state);
+  virtual void restoreTextPos(GfxState *state);
 
   //----- path painting
   virtual void stroke(GfxState *state);
@@ -227,13 +225,18 @@ public:
   //----- text drawing
   virtual void drawString(GfxState *state, GooString *s);
   virtual void beginTextObject(GfxState *state);
-  virtual GBool deviceHasTextClip(GfxState *state) { return haveTextClip && haveCSPattern; }
+  virtual GBool deviceHasTextClip(GfxState *state) { return haveTextClip; }
   virtual void endTextObject(GfxState *state);
 
   //----- image drawing
   virtual void drawImageMask(GfxState *state, Object *ref, Stream *str,
 			     int width, int height, GBool invert,
 			     GBool interpolate, GBool inlineImg);
+  virtual void setSoftMaskFromImageMask(GfxState *state,
+					Object *ref, Stream *str,
+					int width, int height, GBool invert,
+					GBool inlineImg);
+  virtual void unsetSoftMaskFromImageMask(GfxState *state);
   virtual void drawImage(GfxState *state, Object *ref, Stream *str,
 			 int width, int height, GfxImageColorMap *colorMap,
 			 GBool interpolate, int *maskColors, GBool inlineImg);
@@ -243,12 +246,6 @@ public:
 			       GBool interpolate,
 			       Stream *maskStr, int maskWidth, int maskHeight,
 			       GBool maskInvert, GBool maskInterpolate);
-  // If current colorspace ist pattern,
-  // need this device special handling for masks in pattern colorspace?
-  // Default is false
-  virtual GBool fillMaskCSPattern(GfxState * state)
-  	{ return state->getFillColorSpace()->getMode() == csPattern && (level != psLevel1 && level != psLevel1Sep); }
-  virtual void endMaskClip(GfxState * /*state*/);
 
 #if OPI_SUPPORT
   //----- OPI functions
@@ -445,8 +442,6 @@ private:
 
   GBool haveTextClip;		// set if text has been drawn with a
 				//   clipping render mode
-  GBool haveCSPattern;		// set if text has been drawn with a
-				//   clipping render mode because of pattern colorspace
 
   GBool inType3Char;		// inside a Type 3 CharProc
   GooString *t3String;		// Type 3 content string

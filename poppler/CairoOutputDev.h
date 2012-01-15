@@ -192,25 +192,18 @@ public:
 			       CharCode code, Unicode *u, int uLen);
   virtual void endType3Char(GfxState *state);
   virtual void beginTextObject(GfxState *state);
-  virtual GBool deviceHasTextClip(GfxState *state) { return textClipPath && haveCSPattern; }
+  virtual GBool deviceHasTextClip(GfxState *state) { return textClipPath; }
   virtual void endTextObject(GfxState *state);
-
-  // If current colorspace is pattern,
-  // does this device support text in pattern colorspace?
-  virtual GBool supportTextCSPattern(GfxState *state) {
-      return state->getFillColorSpace()->getMode() == csPattern; }
-
-  // If current colorspace is pattern,
-  // need this device special handling for masks in pattern colorspace?
-  virtual GBool fillMaskCSPattern(GfxState * state) {
-      return state->getFillColorSpace()->getMode() == csPattern; }
-
-  virtual void endMaskClip(GfxState *state);
 
   //----- image drawing
   virtual void drawImageMask(GfxState *state, Object *ref, Stream *str,
 			     int width, int height, GBool invert, GBool interpolate,
 			     GBool inlineImg);
+  virtual void setSoftMaskFromImageMask(GfxState *state,
+					Object *ref, Stream *str,
+					int width, int height, GBool invert,
+					GBool inlineImg);
+  virtual void unsetSoftMaskFromImageMask(GfxState *state);
   void drawImageMaskPrescaled(GfxState *state, Object *ref, Stream *str,
 			      int width, int height, GBool invert, GBool interpolate,
 			      GBool inlineImg);
@@ -353,8 +346,6 @@ protected:
       struct MaskStack *next;
   } *maskStack;
 
-  GBool haveCSPattern;	// set if text has been drawn with a
-                        //   clipping render mode because of pattern colorspace
 };
 
 //------------------------------------------------------------------------

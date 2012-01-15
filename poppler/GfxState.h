@@ -1466,6 +1466,7 @@ public:
   // Update clip region.
   void clip();
   void clipToStrokePath();
+  void clipToRect(double xMin, double yMin, double xMax, double yMax);
 
   // Text position.
   void textSetPos(double tx, double ty) { lineX = tx; lineY = ty; }

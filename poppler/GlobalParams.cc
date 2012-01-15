@@ -695,6 +695,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   screenGamma = 1.0;
   screenBlackThreshold = 0.0;
   screenWhiteThreshold = 1.0;
+  minLineWidth = 0.0;
   overprintPreview = gFalse;
   mapNumericCharNames = gTrue;
   mapUnknownCharNames = gFalse;
@@ -1600,6 +1601,15 @@ double GlobalParams::getScreenWhiteThreshold() {
   return thresh;
 }
 
+double GlobalParams::getMinLineWidth() {
+  double minLineWidthA;
+
+  lockGlobalParams;
+  minLineWidthA = minLineWidth;
+  unlockGlobalParams;
+  return minLineWidthA;
+}
+
 GBool GlobalParams::getMapNumericCharNames() {
   GBool map;
 
@@ -1937,6 +1947,13 @@ void GlobalParams::setScreenWhiteThreshold(double whiteThreshold)
 {
   lockGlobalParams;
   screenWhiteThreshold = whiteThreshold;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setMinLineWidth(double minLineWidthA)
+{
+  lockGlobalParams;
+  minLineWidth = minLineWidthA;
   unlockGlobalParams;
 }
 

@@ -53,33 +53,6 @@ struct T3GlyphStack;
 struct SplashTransparencyGroup;
 
 //------------------------------------------------------------------------
-// SplashOverprintColor
-//------------------------------------------------------------------------
-
-class SplashOverprintColor: public SplashPattern {
-public:
-  SplashOverprintColor(GfxColorSpace *colorSpace, SplashColorPtr colorA, Guchar tolerance);
-
-  virtual SplashPattern *copy() { return new SplashOverprintColor(colorSpace, color, tolerance); }
-
-  virtual ~SplashOverprintColor();
-
-  virtual GBool getColor(int x, int y, SplashColorPtr c);
-
-  virtual GBool testPosition(int x, int y) { return gFalse; }
-
-  virtual GBool isStatic() { return gTrue; }
-
-  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
-                         Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult);
-
-private:
-  GfxColorSpace *colorSpace;
-  SplashColor color;
-  Guchar tolerance;
-};
-
-//------------------------------------------------------------------------
 // Splash dynamic pattern
 //------------------------------------------------------------------------
 
@@ -119,13 +92,9 @@ public:
 
   virtual GBool getParameter(double xs, double ys, double *t);
 
-  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
-                         Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult);
-
 private:
   double x0, y0, x1, y1;
   double dx, dy, mul;
-  SplashOverprintColor *opPattern;
 };
 
 // see GfxState.h, GfxGouraudTriangleShading
@@ -153,13 +122,10 @@ public:
 
   virtual void getParameterizedColor(double t, SplashColorMode mode, SplashColorPtr c);
 
-  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
-                         Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult);
 private:
   GfxGouraudTriangleShading *shading;
   GfxState *state;
   GBool bDirectColorTranslation;
-  SplashOverprintColor *opPattern;
   SplashColorMode mode;
 };
 
@@ -175,13 +141,9 @@ public:
 
   virtual GBool getParameter(double xs, double ys, double *t);
 
-  virtual void overprint(GBool op, Guchar alphaSrc, SplashColorPtr colorSrc, 
-                         Guchar alphaDest, SplashColorPtr colorDest, SplashColorPtr colorResult);
-
 private:
   double x0, y0, r0, dx, dy, dr;
   double a, inva;
-  SplashOverprintColor *opPattern;
 };
 
 //------------------------------------------------------------------------
@@ -220,7 +182,7 @@ public:
 
   // Does this device use upside-down coordinates?
   // (Upside-down means (0,0) is the top left corner of the page.)
-  virtual GBool upsideDown() { return gTrue; }
+  virtual GBool upsideDown() { return bitmapTopDown ^ bitmapUpsideDown; }
 
   // Does this device use drawChar() or drawString()?
   virtual GBool useDrawChar() { return gTrue; }
@@ -228,10 +190,6 @@ public:
   // Does this device use beginType3Char/endType3Char?  Otherwise,
   // text in Type 3 fonts will be drawn with drawChar/drawString.
   virtual GBool interpretType3Chars() { return gTrue; }
-
-  // This device now supports text in pattern colorspace!
-  virtual GBool supportTextCSPattern(GfxState *state)
-  	{ return state->getFillColorSpace()->getMode() == csPattern; }
 
   //----- initialization and control
 
@@ -297,13 +255,18 @@ public:
 			       CharCode code, Unicode *u, int uLen);
   virtual void endType3Char(GfxState *state);
   virtual void beginTextObject(GfxState *state);
-  virtual GBool deviceHasTextClip(GfxState *state) { return textClipPath && haveCSPattern; }
+  virtual GBool deviceHasTextClip(GfxState *state) { return textClipPath; }
   virtual void endTextObject(GfxState *state);
 
   //----- image drawing
   virtual void drawImageMask(GfxState *state, Object *ref, Stream *str,
 			     int width, int height, GBool invert,
 			     GBool interpolate, GBool inlineImg);
+  virtual void setSoftMaskFromImageMask(GfxState *state,
+					Object *ref, Stream *str,
+					int width, int height, GBool invert,
+					GBool inlineImg);
+  virtual void unsetSoftMaskFromImageMask(GfxState *state);
   virtual void drawImage(GfxState *state, Object *ref, Stream *str,
 			 int width, int height, GfxImageColorMap *colorMap,
 			 GBool interpolate, int *maskColors, GBool inlineImg);
@@ -321,12 +284,6 @@ public:
 				   int maskWidth, int maskHeight,
 				   GfxImageColorMap *maskColorMap,
 				   GBool maskInterpolate);
-  // If current colorspace ist pattern,
-  // need this device special handling for masks in pattern colorspace?
-  // Default is false
-  virtual GBool fillMaskCSPattern(GfxState * state)
-  	{ return state->getFillColorSpace()->getMode() == csPattern; }
-  virtual void endMaskClip(GfxState * /*state*/);
 
   //----- Type 3 font operators
   virtual void type3D0(GfxState *state, double wx, double wy);
@@ -363,6 +320,10 @@ public:
   // caller.
   SplashBitmap *takeBitmap();
 
+  // Set this flag to true to generate an upside-down bitmap (useful
+  // for Windows BMP files).
+  void setBitmapUpsideDown(GBool f) { bitmapUpsideDown = f; }
+
   // Get the Splash object.
   Splash *getSplash() { return splash; }
 
@@ -373,6 +334,13 @@ public:
   void clearModRegion();
 
   SplashFont *getCurrentFont() { return font; }
+
+  // If <skipTextA> is true, don't draw horizontal text.
+  // If <skipRotatedTextA> is true, don't draw rotated (non-horizontal) text.
+  void setSkipText(GBool skipHorizTextA, GBool skipRotatedTextA)
+    { skipHorizText = skipHorizTextA; skipRotatedText = skipRotatedTextA; }
+
+  int getNestCount() { return nestCount; }
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
   virtual GBool getVectorAntialias();
@@ -385,10 +353,10 @@ private:
   GBool univariateShadedFill(GfxState *state, SplashUnivariatePattern *pattern, double tMin, double tMax);
 
   void setupScreenParams(double hDPI, double vDPI);
+  SplashPattern *getColor(GfxGray gray);
+  SplashPattern *getColor(GfxRGB *rgb);
 #if SPLASH_CMYK
-  SplashPattern *getColor(GfxColorSpace *colorSpace, GfxGray gray, GfxRGB *rgb, GfxCMYK *cmyk);
-#else
-  SplashPattern *getColor(GfxGray gray, GfxRGB *rgb);
+  SplashPattern *getColor(GfxCMYK *cmyk);
 #endif
   void setOverprintMask(GfxColorSpace *colorSpace, GBool overprintFlag,
 			int overprintMode, GfxColor *singleColor);
@@ -407,13 +375,12 @@ private:
   static GBool tilingBitmapSrc(void *data, SplashColorPtr line,
 			     Guchar *alphaLine);
 
-  GBool haveCSPattern;		// set if text has been drawn with a
-							//   clipping render mode because of pattern colorspace
   GBool keepAlphaChannel;	// don't fill with paper color, keep alpha channel
 
   SplashColorMode colorMode;
   int bitmapRowPad;
   GBool bitmapTopDown;
+  GBool bitmapUpsideDown;
   GBool allowAntialias;
   GBool vectorAntialias;
   GBool enableAutoHinting;
@@ -422,6 +389,8 @@ private:
   GBool reverseVideo;		// reverse video mode
   SplashColor paperColor;	// paper color
   SplashScreenParams screenParams;
+  GBool skipHorizText;
+  GBool skipRotatedText;
 
   PDFDoc *doc;			// the current document
 
@@ -433,6 +402,7 @@ private:
     t3FontCache[splashOutT3FontCacheSize];
   int nT3Fonts;			// number of valid entries in t3FontCache
   T3GlyphStack *t3GlyphStack;	// Type 3 glyph context stack
+  GBool haveT3Dx;		// set after seeing a d0/d1 operator
 
   SplashFont *font;		// current font
   GBool needFontUpdate;		// set when the font needs to be updated

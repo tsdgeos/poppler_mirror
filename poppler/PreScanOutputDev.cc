@@ -87,7 +87,7 @@ GBool PreScanOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *ca
 					int x0, int y0, int x1, int y1,
 					double xStep, double yStep) {
   if (paintType == 1) {
-    gfx->doForm1(str, resDict, mat, bbox);
+    gfx->drawForm(str, resDict, mat, bbox);
   } else {
     check(state->getFillColorSpace(), state->getFillColor(),
 	  state->getFillOpacity(), state->getBlendMode());

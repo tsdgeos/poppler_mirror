@@ -53,17 +53,3 @@ GBool SplashSolidColor::getColor(int x, int y, SplashColorPtr c) {
   splashColorCopy(c, color);
   return gTrue;
 }
-
-void SplashSolidColor::overprint(GBool op, Guchar aSrc, SplashColorPtr cSrc, 
-                                 Guchar aDest, SplashColorPtr cDest, 
-                                 SplashColorPtr colorResult) {
-  // default for overprint is knockout:
-  colorResult[0] = (Guchar)(((aDest - aSrc) * cDest[0] +
-                   aSrc * cSrc[0]) / aDest);
-  colorResult[1] = (Guchar)(((aDest - aSrc) * cDest[1] +
-                   aSrc * cSrc[1]) / aDest);
-  colorResult[2] = (Guchar)(((aDest - aSrc) * cDest[2] +
-                   aSrc * cSrc[2]) / aDest);
-  colorResult[3] = (Guchar)(((aDest - aSrc) * cDest[3] +
-                   aSrc * cSrc[3]) / aDest);
-}

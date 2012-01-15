@@ -505,6 +505,9 @@ public:
 	       double dx, double dy,
 	       CharCode c, int nBytes, Unicode *u, int uLen);
 
+  // Add <nChars> invisible characters.
+  void incCharCount(int nChars);
+
   // End the current word, sorting it into the list of words.
   void endWord();
 
@@ -704,6 +707,10 @@ public:
   // Does this device need non-text content?
   virtual GBool needNonText() { return gFalse; }
 
+  // Does this device require incCharCount to be called for text on
+  // non-shown layers?
+  virtual GBool needCharCount() { return gTrue; }
+
   //----- initialization and control
 
   // Start a page.
@@ -722,6 +729,7 @@ public:
 			double dx, double dy,
 			double originX, double originY,
 			CharCode c, int nBytes, Unicode *u, int uLen);
+  virtual void incCharCount(int nChars);
   virtual void beginActualText(GfxState *state, GooString *text);
   virtual void endActualText(GfxState *state);
 

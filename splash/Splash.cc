@@ -3328,7 +3328,7 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
 
 SplashError Splash::drawImage(SplashImageSource src, void *srcData,
 			      SplashColorMode srcMode, GBool srcAlpha,
-			      int w, int h, SplashCoord *mat, SplashPattern *opImagePattern) {
+			      int w, int h, SplashCoord *mat) {
   GBool ok;
   SplashBitmap *scaledImg;
   SplashClipResult clipRes;
@@ -4506,9 +4506,6 @@ void Splash::blitImage(SplashBitmap *src, GBool srcAlpha, int xDest, int yDest,
   if (x0 < w && y0 < h && x0 < x1 && y0 < y1) {
     pipeInit(&pipe, xDest + x0, yDest + y0, NULL, pixel,
 	     (Guchar)splashRound(state->fillAlpha * 255), srcAlpha, gFalse);
-//  pipeInit(&pipe, xDest + x0, yDest + y0, NULL, pixel, state->fillAlpha,
-//	   srcAlpha,
-//	   gFalse, opImagePattern);
     if (srcAlpha) {
       for (y = y0; y < y1; ++y) {
 	pipeSetXY(&pipe, xDest + x0, yDest + y);
@@ -4561,9 +4558,6 @@ void Splash::blitImageClipped(SplashBitmap *src, GBool srcAlpha,
   if (vectorAntialias) {
     pipeInit(&pipe, xDest, yDest, NULL, pixel,
 	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
-//  pipeInit(&pipe, xDest, yDest, NULL, pixel, state->fillAlpha,
-//	   gTrue,
-//	   gFalse, opImagePattern);
     drawAAPixelInit();
     if (srcAlpha) {
       for (y = 0; y < h; ++y) {
@@ -4586,9 +4580,6 @@ void Splash::blitImageClipped(SplashBitmap *src, GBool srcAlpha,
   } else {
     pipeInit(&pipe, xDest, yDest, NULL, pixel,
 	     (Guchar)splashRound(state->fillAlpha * 255), srcAlpha, gFalse);
-//  pipeInit(&pipe, xDest, yDest, NULL, pixel, state->fillAlpha,
-//	   srcAlpha,
-//	   gFalse, opImagePattern);
     if (srcAlpha) {
       for (y = 0; y < h; ++y) {
 	ap = src->getAlphaPtr() + (ySrc + y) * src->getWidth() + xSrc;
