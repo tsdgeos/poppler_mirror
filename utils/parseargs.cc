@@ -156,8 +156,7 @@ static GBool grabArg(const ArgDesc *arg, int i, int *argc, char *argv[]) {
     break;
   case argGooString:
     if (i + 1 < *argc) {
-      ((GooString*)arg->val)->Set(argv[i+1], arg->size - 1);
-      ((GooString*)arg->val)->append('\0');
+      ((GooString*)arg->val)->Set(argv[i+1]);
       n = 2;
     } else {
       ok = gFalse;
