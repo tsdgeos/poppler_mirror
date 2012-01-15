@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 //========================================================================
 #include "config.h"
@@ -17,6 +17,7 @@
 #include "goo/GooString.h"
 #include "PDFDoc.h"
 #include "ErrorCodes.h"
+#include "GlobalParams.h"
 
 static int firstPage = 0;
 static int lastPage = 0;
@@ -107,7 +108,9 @@ main (int argc, char *argv[])
 	exitCode = 0;
       goto err0;
     }
+  globalParams = new GlobalParams();
   extractPages (argv[1], argv[2]);
+  delete globalParams;
 
 err0:
 
