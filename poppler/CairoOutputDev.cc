@@ -729,8 +729,8 @@ void CairoOutputDev::fill(GfxState *state) {
   LOG(printf ("fill\n"));
   //XXX: how do we get the path
   if (mask) {
-    cairo_clip (cairo);
     cairo_save (cairo);
+    cairo_clip (cairo);
     cairo_set_matrix (cairo, &mask_matrix);
     cairo_mask (cairo, mask);
     cairo_restore (cairo);
