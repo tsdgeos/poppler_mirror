@@ -175,7 +175,7 @@ poppler_page_get_duration (PopplerPage *page)
  *
  * Returns the transition effect of @page
  *
- * Return value: a #PopplerPageTransition or NULL.
+ * Return value: a #PopplerPageTransition or %NULL.
  **/
 PopplerPageTransition *
 poppler_page_get_transition (PopplerPage *page)
@@ -691,7 +691,8 @@ poppler_page_get_selection_region (PopplerPage           *page,
 
 /**
  * poppler_page_selection_region_free:
- * @region: a #GList of #PopplerRectangle
+ * @region: (element-type PopplerRectangle): a #GList of
+ *   #PopplerRectangle
  *
  * Frees @region
  *
@@ -1030,7 +1031,8 @@ poppler_page_get_image (PopplerPage *page,
 
 /**
  * poppler_page_free_image_mapping:
- * @list: A list of #PopplerImageMapping<!-- -->s
+ * @list: (element-type PopplerImageMapping): A list of
+ *   #PopplerImageMapping<!-- -->s
  *
  * Frees a list of #PopplerImageMapping<!-- -->s allocated by
  * poppler_page_get_image_mapping().
@@ -1209,7 +1211,9 @@ poppler_page_get_link_mapping (PopplerPage *page)
 
 /**
  * poppler_page_free_link_mapping:
- * @list: A list of #PopplerLinkMapping<!-- -->s
+
+ * @list: (element-type PopplerLinkMapping): A list of
+ *   #PopplerLinkMapping<!-- -->s
  * 
  * Frees a list of #PopplerLinkMapping<!-- -->s allocated by
  * poppler_page_get_link_mapping().  It also frees the #PopplerAction<!-- -->s
@@ -1277,7 +1281,8 @@ poppler_page_get_form_field_mapping (PopplerPage *page)
 
 /**
  * poppler_page_free_form_field_mapping:
- * @list: A list of #PopplerFormFieldMapping<!-- -->s
+ * @list: (element-type PopplerFormFieldMapping): A list of
+ *   #PopplerFormFieldMapping<!-- -->s
  *
  * Frees a list of #PopplerFormFieldMapping<!-- -->s allocated by
  * poppler_page_get_form_field_mapping().
@@ -1396,7 +1401,8 @@ poppler_page_get_annot_mapping (PopplerPage *page)
 
 /**
  * poppler_page_free_annot_mapping:
- * @list: A list of #PopplerAnnotMapping<!-- -->s
+ * @list: (element-type PopplerAnnotMapping): A list of
+ *   #PopplerAnnotMapping<!-- -->s
  *
  * Frees a list of #PopplerAnnotMapping<!-- -->s allocated by
  * poppler_page_get_annot_mapping().  It also frees the #PopplerAnnot<!-- -->s
@@ -2007,8 +2013,9 @@ poppler_page_get_text_layout (PopplerPage       *page,
 }
 
 /**
- * poppler_page_free_text_attributes;
- * @list: A list of #PopplerTextAttributes<!-- -->s
+ * poppler_page_free_text_attributes:
+ * @list: (element-type PopplerTextAttributes): A list of
+ *   #PopplerTextAttributes<!-- -->s
  *
  * Frees a list of #PopplerTextAttributes<!-- -->s allocated by
  * poppler_page_get_text_attributes().
