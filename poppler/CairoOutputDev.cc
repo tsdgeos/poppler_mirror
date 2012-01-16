@@ -1396,6 +1396,7 @@ void CairoOutputDev::beginTransparencyGroup(GfxState * /*state*/, double * /*bbo
   ColorSpaceStack* css = new ColorSpaceStack;
   css->cs = blendingColorSpace;
   css->knockout = knockout;
+  cairo_get_matrix(cairo, &css->group_matrix);
   css->next = groupColorSpaceStack;
   groupColorSpaceStack = css;
 
@@ -1452,9 +1453,11 @@ void CairoOutputDev::endTransparencyGroup(GfxState * /*state*/) {
 }
 
 void CairoOutputDev::paintTransparencyGroup(GfxState * /*state*/, double * /*bbox*/) {
-  cairo_set_source (cairo, group);
-
   LOG(printf ("paint transparency group\n"));
+
+  cairo_save (cairo);
+  cairo_set_matrix (cairo, &groupColorSpaceStack->group_matrix);
+  cairo_set_source (cairo, group);
 
   if (!mask) {
     //XXX: deal with mask && shape case
@@ -1495,6 +1498,7 @@ void CairoOutputDev::paintTransparencyGroup(GfxState * /*state*/, double * /*bbo
   }
 
   popTransparencyGroup();
+  cairo_restore(cairo);
 }
 
 static int luminocity(uint32_t x)

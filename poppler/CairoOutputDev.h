@@ -348,6 +348,7 @@ protected:
   struct ColorSpaceStack {
     GBool knockout;
     GfxColorSpace *cs;
+    cairo_matrix_t group_matrix;
     struct ColorSpaceStack *next;
   } * groupColorSpaceStack;
 
