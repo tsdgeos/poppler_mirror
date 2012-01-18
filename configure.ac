@@ -421,6 +421,7 @@ fi
 AC_SUBST(CAIRO_FEATURE)
 AC_SUBST(CAIRO_REQ)
 
+use_glib=""
 found_introspection=no
 if test x$enable_cairo_output = xyes; then
   POPPLER_GLIB_DISABLE_DEPRECATED=""
@@ -438,7 +439,8 @@ if test x$enable_cairo_output = xyes; then
   elif test x$enable_poppler_glib = xtry; then
     PKG_CHECK_MODULES(POPPLER_GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION,
                       [enable_poppler_glib="yes"],
-                      [enable_poppler_glib="no"])
+                      [enable_poppler_glib="no"
+                      use_glib="no (requires glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION)"])
   fi
   if test x$enable_poppler_glib = xyes; then
     # Check for introspection
@@ -452,7 +454,11 @@ else
   if test x$enable_poppler_glib = xyes; then
     AC_MSG_ERROR("Cairo output is required to build glib frontend")
   fi
+  use_glib="no (requires cairo output)"
   enable_poppler_glib="no"
+fi
+if test x$use_glib = x; then
+   use_glib=$enable_poppler_glib
 fi
 AM_CONDITIONAL(BUILD_POPPLER_GLIB, test x$enable_poppler_glib = xyes)
 AM_CONDITIONAL(HAVE_INTROSPECTION, test "x$found_introspection" = "xyes")
@@ -651,7 +657,7 @@ echo "  font configuration: $with_font_configuration"
 echo "  splash output:      $enable_splash_output"
 echo "  cairo output:       $use_cairo"
 echo "  qt4 wrapper:        $enable_poppler_qt4"
-echo "  glib wrapper:       $enable_poppler_glib"
+echo "  glib wrapper:       $use_glib"
 echo "    introspection:    $found_introspection"
 echo "  cpp wrapper:        $enable_poppler_cpp"
 echo "  use gtk-doc:        $enable_gtk_doc"
