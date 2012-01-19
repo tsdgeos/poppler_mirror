@@ -1834,7 +1834,11 @@ void CairoOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
   cairo_get_matrix (cairo, &matrix);
   //XXX: it is possible that we should only do sub pixel positioning if 
   // we are rendering fonts */
-  if (!printing && prescaleImages && matrix.xy == 0.0 && matrix.yx == 0.0) {
+  if (!printing && prescaleImages
+      /* not rotated */
+      && matrix.xy == 0 && matrix.yx == 0
+      /* axes not flipped / not 180 deg rotated */
+      && matrix.xx > 0 && (upsideDown() ? -1 : 1) * matrix.yy > 0) {
     drawImageMaskPrescaled(state, ref, str, width, height, invert, interpolate, inlineImg);
   } else {
     drawImageMaskRegular(state, ref, str, width, height, invert, interpolate, inlineImg);
@@ -1968,6 +1972,8 @@ void CairoOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream
   int row_stride;
 
   /* cairo does a very poor job of scaling down images so we scale them ourselves */
+
+  LOG (printf ("drawImageMaskPrescaled %dx%d\n", width, height));
 
   /* this scaling code is adopted from the splash image scaling code */
   cairo_get_matrix(cairo, &matrix);
