@@ -439,7 +439,7 @@ void CairoOutputDev::updateLineWidth(GfxState *state) {
 
       /* find out line width in device units */
       cairo_user_to_device_distance(cairo, &x, &y);
-      if (x <= 1.0 && y <= 1.0) {
+      if (fabs(x) <= 1.0 && fabs(y) <= 1.0) {
 	/* adjust width to at least one device pixel */
 	x = y = 1.0;
 	cairo_device_to_user_distance(cairo, &x, &y);
