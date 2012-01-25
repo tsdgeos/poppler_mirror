@@ -147,6 +147,7 @@ CairoOutputDev::CairoOutputDev() {
   inUncoloredPattern = gFalse;
   inType3Char = gFalse;
   t3_glyph_has_bbox = gFalse;
+  text_matrix_valid = gTrue;
 
   groupColorSpaceStack = NULL;
   maskStack = NULL;
@@ -282,6 +283,8 @@ void CairoOutputDev::restoreState(GfxState *state) {
   cairo_restore (cairo);
   if (cairo_shape)
       cairo_restore (cairo_shape);
+
+  text_matrix_valid = gTrue;
 
   /* These aren't restored by cairo_restore() since we keep them in
    * the output device. */
@@ -657,11 +660,13 @@ void CairoOutputDev::updateFont(GfxState *state) {
   */
   invert_matrix = matrix;
   if (cairo_matrix_invert(&invert_matrix)) {
-    error(errSyntaxWarning, -1, "font matrix not invertible\n");
+    error(errSyntaxWarning, -1, "font matrix not invertible");
+    text_matrix_valid = gFalse;
     return;
   }
 
   cairo_set_font_matrix (cairo, &matrix);
+  text_matrix_valid = gTrue;
 }
 
 /* Tolerance in pixels for checking if strokes are horizontal or vertical
@@ -1250,10 +1255,8 @@ void CairoOutputDev::endString(GfxState *state)
   // ignore empty strings and invisible text -- this is used by
   // Acrobat Capture
   render = state->getRender();
-  if (render == 3 || glyphCount == 0) {
-    gfree(glyphs);
-    glyphs = NULL;
-    return;
+  if (render == 3 || glyphCount == 0 || !text_matrix_valid) {
+    goto finish;
   }
 
   if (!(render & 1)) {
@@ -1305,6 +1308,7 @@ void CairoOutputDev::endString(GfxState *state)
     }
   }
 
+finish:
   gfree (glyphs);
   glyphs = NULL;
   if (use_show_text_glyphs) {
