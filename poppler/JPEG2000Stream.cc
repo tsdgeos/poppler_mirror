@@ -4,7 +4,7 @@
 //
 // A JPX stream decoder using OpenJPEG
 //
-// Copyright 2008-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright 2008-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright 2011 Daniel Glöckner <daniel-gl@gmx.net>
 //
 // Licensed under GPLv2 or later
@@ -12,6 +12,8 @@
 //========================================================================
 
 #include "JPEG2000Stream.h"
+
+#include "config.h"
 
 JPXStream::JPXStream(Stream *strA) : FilterStream(strA)
 {
@@ -127,6 +129,9 @@ void JPXStream::init2(unsigned char *buf, int bufLen, OPJ_CODEC_FORMAT format)
   /* Use default decompression parameters */
   opj_dparameters_t parameters;
   opj_set_default_decoder_parameters(&parameters);
+#ifdef WITH_OPENJPEG_IGNORE_PCLR_CMAP_CDEF_FLAG
+  parameters.flags = OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG;
+#endif
 
   /* Configure the event manager to receive errors and warnings */
   opj_event_mgr_t event_mgr;
