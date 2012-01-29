@@ -117,8 +117,11 @@ if (HAVE_INTROSPECTION)
   list(APPEND _abs_introspection_files
     ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.c
     ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h
+    ${CMAKE_CURRENT_BINARY_DIR}/poppler-features.h
   )
   set(Poppler_0_18_gir_FILES ${_abs_introspection_files})
+  set(Poppler_0_18_gir_SCANNERFLAGS --c-include poppler.h)
+  set(Poppler_0_18_gir_EXPORT_PACKAGES poppler-glib)
 
   list(APPEND INTROSPECTION_GIRS Poppler-0.18.gir)
 
