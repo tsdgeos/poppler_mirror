@@ -30,6 +30,11 @@ pdftocairo_SOURCES =				\
 	pdftocairo.cc				\
 	$(common)
 
+if USE_CMS
+PDFTOCAIRO_CFLAGS += $(LCMS_CFLAGS)
+PDFTOCAIRO_LIBS += $(LCMS_LIBS)
+endif
+
 pdftocairo_LDADD =				\
 	$(top_builddir)/poppler/libpoppler-cairo.la \
 	$(LDADD) $(PDFTOCAIRO_LIBS)
