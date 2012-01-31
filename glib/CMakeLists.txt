@@ -106,7 +106,7 @@ if (HAVE_INTROSPECTION)
   set(INTROSPECTION_SCANNER_ARGS "--add-include-path=${CMAKE_CURRENT_SOURCE_DIR}")
   set(INTROSPECTION_COMPILER_ARGS "--includedir=${CMAKE_CURRENT_SOURCE_DIR}")
 
-  set(introspection_files ${poppler_glib_SRCS} ${poppler_glib_public_headers} poppler-private.h)
+  set(introspection_files ${poppler_glib_SRCS} ${poppler_glib_public_headers})
   set(Poppler_0_18_gir "poppler-glib")
   set(Poppler_0_18_gir_INCLUDES GObject-2.0 cairo-1.0)
   get_directory_property(_tmp_includes INCLUDE_DIRECTORIES)
