@@ -666,9 +666,15 @@ pgd_annots_add_annot (GtkWidget     *button,
 
     vbox = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
 
+#if GTK_CHECK_VERSION (2, 24, 0)
+    type_selector = gtk_combo_box_text_new ();
+    gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (type_selector), "POPPLER_ANNOT_UNKNOWN");
+    gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (type_selector), "POPPLER_ANNOT_TEXT");
+#else
     type_selector = gtk_combo_box_new_text ();
     gtk_combo_box_append_text (GTK_COMBO_BOX (type_selector), "POPPLER_ANNOT_UNKNOWN");
     gtk_combo_box_append_text (GTK_COMBO_BOX (type_selector), "POPPLER_ANNOT_TEXT");
+#endif
     gtk_combo_box_set_active (GTK_COMBO_BOX (type_selector), 1);
     gtk_box_pack_start (GTK_BOX (vbox), type_selector, TRUE, TRUE, 0);
     gtk_widget_show (type_selector);
