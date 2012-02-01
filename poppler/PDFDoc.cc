@@ -603,22 +603,38 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   }
   outStr = new FileOutStream(f,0);
 
-  yRef = new XRef();
+  yRef = new XRef(getXRef()->getTrailerDict());
   countRef = new XRef();
   yRef->add(0, 65535, 0, gFalse);
   writeHeader(outStr, getPDFMajorVersion(), getPDFMinorVersion());
 
-  // get and mark optional content groups
-  OCGs *ocgs = getCatalog()->getOptContentConfig();
-  if (ocgs != NULL) {
-    Object catDict, optContentProps;
-    getXRef()->getCatalog(&catDict);
-    catDict.dictLookup("OCProperties", &optContentProps);
-    Dict *pageDict = optContentProps.getDict();
-    markPageObjects(pageDict, yRef, countRef, 0);
-    catDict.free();
-    optContentProps.free();
+  // get and mark info dict
+  Object infoObj;
+  getXRef()->getDocInfo(&infoObj);
+  if (infoObj.isDict()) {
+    Dict *infoDict = infoObj.getDict();
+    markPageObjects(infoDict, yRef, countRef, 0);
+    Object *trailerObj = getXRef()->getTrailerDict();
+    if (trailerObj->isDict()) {
+      Dict *trailerDict = trailerObj->getDict();
+      Object ref;
+      trailerDict->lookupNF("Info", &ref);
+      if (ref.isRef()) {
+        yRef->add(ref.getRef().num, ref.getRef().gen, 0, gTrue);
+        if (getXRef()->getEntry(ref.getRef().num)->type == xrefEntryCompressed) {
+          yRef->getEntry(ref.getRef().num)->type = xrefEntryCompressed;
+        }
+      }
+      ref.free();
+    }
   }
+  infoObj.free();
+  
+  // get and mark output intents etc.
+  Object catObj;
+  getXRef()->getCatalog(&catObj);
+  Dict *catDict = catObj.getDict();
+  markPageObjects(catDict, yRef, countRef, 0);
 
   Dict *pageDict = page.getDict();
   markPageObjects(pageDict, yRef, countRef, 0);
@@ -627,24 +643,20 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   yRef->add(rootNum,0,outStr->getPos(),gTrue);
   outStr->printf("%d 0 obj\n", rootNum);
   outStr->printf("<< /Type /Catalog /Pages %d 0 R", rootNum + 1); 
-  if (ocgs != NULL) {
-    Object catDict, optContentProps;
-    getXRef()->getCatalog(&catDict);
-    catDict.dictLookup("OCProperties", &optContentProps);
-    outStr->printf(" /OCProperties <<");
-    Dict *pageDict = optContentProps.getDict();
-    for (int n = 0; n < pageDict->getLength(); n++) {
-      if (n > 0) outStr->printf(" ");
-      const char *key = pageDict->getKey(n);
-      Object value; pageDict->getValNF(n, &value);
+  for (int j = 0; j < catDict->getLength(); j++) {
+    const char *key = catDict->getKey(j);
+    if (strcmp(key, "Type") != 0 &&
+      strcmp(key, "Catalog") != 0 &&
+      strcmp(key, "Pages") != 0) 
+    {
+      if (j > 0) outStr->printf(" ");
+      Object value; catDict->getValNF(j, &value);
       outStr->printf("/%s ", key);
       writeObject(&value, NULL, outStr, getXRef(), 0);
       value.free();
     }
-    outStr->printf(" >> ");
-    catDict.free();
-    optContentProps.free();
   }
+  catObj.free();
   outStr->printf(">>\nendobj\n");
   objectsCount++;
 
@@ -1293,6 +1305,9 @@ void PDFDoc::replacePageDict(int pageNo, int rotate,
     cropBoxObj->arrayAdd(cllx);
     cropBoxObj->arrayAdd(clly);
     pageDict->add(copyString("CropBox"), cropBoxObj);
+    pageDict->add(copyString("TrimBox"), cropBoxObj);
+  } else {
+    pageDict->add(copyString("TrimBox"), mediaBoxObj);
   }
   Object *rotateObj = new Object();
   rotateObj->initInt(rotate);
