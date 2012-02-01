@@ -191,12 +191,8 @@ FontInfo::FontInfo(GfxFont *font, PDFDoc *doc) {
 
   if (!emb)
   {
-    DisplayFontParam *dfp = globalParams->getDisplayFont(font);
-    if (dfp)
-    {
-      if (dfp->kind == displayFontT1) file = dfp->t1.fileName->copy();
-      else file = dfp->tt.fileName->copy();
-    }
+    GooString *fontFile = globalParams->findFontFile(font->getName());
+    if (fontFile != NULL) file = fontFile->copy();
     else file = NULL;
   }
   else file = NULL;

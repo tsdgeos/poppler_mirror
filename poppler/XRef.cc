@@ -826,25 +826,25 @@ GBool XRef::constructXRef(GBool *wasReconstructed) {
         delete parser;
 
       // look for object
-      } else if (isdigit(*p)) {
+      } else if (*p > 0 && isdigit(*p)) {
         num = atoi(p);
         if (num > 0) {
 	  do {
 	    ++p;
-	  } while (*p && isdigit(*p));
-	  if (isspace(*p)) {
+	  } while (*p > 0 && isdigit(*p));
+	  if (*p > 0 && isspace(*p)) {
 	    do {
 	      ++p;
-	    } while (*p && isspace(*p));
-	    if (isdigit(*p)) {
+	    } while (*p > 0 && isspace(*p));
+	    if (*p > 0 && isdigit(*p)) {
 	      gen = atoi(p);
 	      do {
 	        ++p;
-	      } while (*p && isdigit(*p));
-	      if (isspace(*p)) {
+	      } while (*p > 0 && isdigit(*p));
+	      if (*p > 0 && isspace(*p)) {
 	        do {
 		  ++p;
-	        } while (*p && isspace(*p));
+	        } while (*p > 0 && isspace(*p));
 	        if (!strncmp(p, "obj", 3)) {
 		  if (num >= size) {
 		    newSize = (num + 1 + 255) & ~255;

@@ -60,9 +60,7 @@ struct XpdfSecurityHandler;
 class GlobalParams;
 class GfxFont;
 class Stream;
-#ifdef _WIN32
-class WinFontList;
-#endif
+class SysFontList;
 
 //------------------------------------------------------------------------
 
@@ -71,60 +69,27 @@ extern GlobalParams *globalParams;
 
 //------------------------------------------------------------------------
 
-enum DisplayFontParamKind {
-  displayFontT1,
-  displayFontTT
-};
-
-struct DisplayFontParamT1 {
-  GooString *fileName;
-};
-
-struct DisplayFontParamTT {
-  GooString *fileName;
-  int faceIndex;
-};
-
-class DisplayFontParam {
-public:
-
-  GooString *name;		// font name for 8-bit fonts and named
-				//   CID fonts; collection name for
-				//   generic CID fonts
-  DisplayFontParamKind kind;
-  union {
-    DisplayFontParamT1 t1;
-    DisplayFontParamTT tt;
-  };
-
-  DisplayFontParam(GooString *nameA, DisplayFontParamKind kindA);
-  void setFileName(GooString *fileNameA) {
-    if (displayFontT1 == kind)
-        t1.fileName = fileNameA;
-    else {
-        assert(displayFontTT == kind);
-        tt.fileName = fileNameA;
-    }
-  }  
-  virtual ~DisplayFontParam();
+enum SysFontType {
+  sysFontPFA,
+  sysFontPFB,
+  sysFontTTF,
+  sysFontTTC
 };
 
 //------------------------------------------------------------------------
 
-class PSFontParam {
+class PSFontParam16 {
 public:
 
-  GooString *pdfFontName;		// PDF font name for 8-bit fonts and
-				//   named 16-bit fonts; char collection
-				//   name for generic 16-bit fonts
-  int wMode;			// writing mode (0=horiz, 1=vert) for
-				//   16-bit fonts
+  GooString *name;		// PDF font name for psResidentFont16;
+				//   char collection name for psResidentFontCC
+  int wMode;			// writing mode (0=horiz, 1=vert)
   GooString *psFontName;		// PostScript font name
-  GooString *encoding;		// encoding, for 16-bit fonts only
+  GooString *encoding;		// encoding
 
-  PSFontParam(GooString *pdfFontNameA, int wModeA,
-	      GooString *psFontNameA, GooString *encodingA);
-  ~PSFontParam();
+  PSFontParam16(GooString *nameA, int wModeA,
+		GooString *psFontNameA, GooString *encodingA);
+  ~PSFontParam16();
 };
 
 //------------------------------------------------------------------------
@@ -167,10 +132,7 @@ public:
   ~GlobalParams();
 
   void setBaseDir(const char *dir);
-
-#if WITH_FONTCONFIGURATION_WIN32
   void setupBaseFonts(char *dir);
-#endif
 
   //----- accessors
 
@@ -182,18 +144,23 @@ public:
   FILE *getUnicodeMapFile(GooString *encodingName);
   FILE *findCMapFile(GooString *collection, GooString *cMapName);
   FILE *findToUnicodeFile(GooString *name);
-  DisplayFontParam *getDisplayFont(GfxFont *font);
+  GooString *findFontFile(GooString *fontName);
+  GooString *findSystemFontFile(GfxFont *font, SysFontType *type,
+			      int *fontNum);
+  GooString *findCCFontFile(GooString *collection);
   GBool getPSExpandSmaller();
   GBool getPSShrinkLarger();
   GBool getPSCenter();
   PSLevel getPSLevel();
-  PSFontParam *getPSFont(GooString *fontName);
-  PSFontParam *getPSFont16(GooString *fontName, GooString *collection, int wMode);
+  GooString *getPSResidentFont(GooString *fontName);
+  GooList *getPSResidentFonts();
+  PSFontParam16 *getPSResidentFont16(GooString *fontName, int wMode);
+  PSFontParam16 *getPSResidentFontCC(GooString *collection, int wMode);
   GBool getPSEmbedType1();
   GBool getPSEmbedTrueType();
   GBool getPSEmbedCIDPostScript();
   GBool getPSEmbedCIDTrueType();
-  GBool getPSSubstFonts();
+  GBool getPSFontPassthrough();
   GBool getPSPreload();
   GBool getPSOPI();
   GBool getPSASCIIHex();
@@ -202,7 +169,6 @@ public:
   EndOfLineKind getTextEOL();
   GBool getTextPageBreaks();
   GBool getTextKeepTinyChars();
-  GooString *findFontFile(GooString *fontName, const char **exts);
   GBool getEnableFreeType();
   GBool getDisableFreeTypeHinting();
   GBool getAntialias();
@@ -235,6 +201,8 @@ public:
   GooList *getEncodingNames();
 
   //----- functions to set parameters
+  void addFontFile(GooString *fontName, GooString *path);
+  void setPSFile(char *file);
   void setPSExpandSmaller(GBool expand);
   void setPSShrinkLarger(GBool shrink);
   void setPSCenter(GBool center);
@@ -244,6 +212,7 @@ public:
   void setPSEmbedCIDPostScript(GBool embed);
   void setPSEmbedCIDTrueType(GBool embed);
   void setPSSubstFonts(GBool substFonts);
+  void setPSFontPassthrough(GBool passthrough);
   void setPSPreload(GBool preload);
   void setPSOPI(GBool opi);
   void setPSASCIIHex(GBool hex);
@@ -310,25 +279,35 @@ private:
   GooHash *cMapDirs;		// list of CMap dirs, indexed by collection
 				//   name [GooList[GooString]]
   GooList *toUnicodeDirs;		// list of ToUnicode CMap dirs [GooString]
-  GooHash *displayFonts;		// display font info, indexed by font name
-				//   [DisplayFontParam]
 #ifdef _WIN32
   GBool baseFontsInitialized;
-  WinFontList *winFontList;	// system TrueType fonts
 #endif
+  GooHash *fontFiles;		// font files: font name mapped to path
+				//   [GString]
+  GooList *fontDirs;		// list of font dirs [GString]
+  GooHash *ccFontFiles;	// character collection font files:
+				//   collection name  mapped to path [GString]
+  SysFontList *sysFonts;	// system fonts
+  GooString *psFile;		// PostScript file or command (for xpdf)
   GBool psExpandSmaller;	// expand smaller pages to fill paper
   GBool psShrinkLarger;		// shrink larger pages to fit paper
   GBool psCenter;		// center pages on the paper
   PSLevel psLevel;		// PostScript level to generate
-  GooHash *psFonts;		// PostScript font info, indexed by PDF
-				//   font name [PSFontParam]
-  GooList *psNamedFonts16;	// named 16-bit fonts [PSFontParam]
-  GooList *psFonts16;		// generic 16-bit fonts [PSFontParam]
+  GooHash *psResidentFonts;	// 8-bit fonts resident in printer:
+				//   PDF font name mapped to PS font name
+				//   [GString]
+  GooList *psResidentFonts16;	// 16-bit fonts resident in printer:
+				//   PDF font name mapped to font info
+				//   [PSFontParam16]
+  GooList *psResidentFontsCC;	// 16-bit character collection fonts
+				//   resident in printer: collection name
+				//   mapped to font info [PSFontParam16]
   GBool psEmbedType1;		// embed Type 1 fonts?
   GBool psEmbedTrueType;	// embed TrueType fonts?
   GBool psEmbedCIDPostScript;	// embed CID PostScript fonts?
   GBool psEmbedCIDTrueType;	// embed CID TrueType fonts?
   GBool psSubstFonts;		// substitute missing fonts?
+  GBool psFontPassthrough;	// pass all fonts through as-is?
   GBool psPreload;		// preload PostScript images and forms into
 				//   memory
   GBool psOPI;			// generate PostScript OPI comments?
@@ -340,7 +319,6 @@ private:
 				//   output
   GBool textPageBreaks;		// insert end-of-page markers?
   GBool textKeepTinyChars;	// keep all characters in text output
-  GooList *fontDirs;		// list of font dirs [GooString]
   GBool enableFreeType;		// FreeType enable flag
   GBool disableFreeTypeHinting;	// FreeType disable hinting flag
   GBool antialias;		// anti-aliasing enable flag
@@ -367,8 +345,8 @@ private:
   CMapCache *cMapCache;
   
 #ifdef ENABLE_PLUGINS
-  GList *plugins;		// list of plugins [Plugin]
-  GList *securityHandlers;	// list of loaded security handlers
+  GooList *plugins;		// list of plugins [Plugin]
+  GooList *securityHandlers;	// list of loaded security handlers
 				//   [XpdfSecurityHandler]
 #endif
 

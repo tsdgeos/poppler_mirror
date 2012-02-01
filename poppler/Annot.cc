@@ -3082,10 +3082,10 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxResources *resourc
           // We are forcing ZaDb but the font does not exist
           // so create a fake one
           Ref r; // dummy Ref, it's not used at all in this codepath
-          r.num = 0;
-          r.gen = 0;
+          r.num = -1;
+          r.gen = -1;
           Dict *d = new Dict(xref);
-          font = new Gfx8BitFont(xref, "ZaDb", r, new GooString("ZapfDingbats"), fontType1, d);
+          font = new Gfx8BitFont(xref, "ZaDb", r, new GooString("ZapfDingbats"), fontType1, r, d);
           delete d;
           freeFont = gTrue;
           addDingbatsResource = gTrue;

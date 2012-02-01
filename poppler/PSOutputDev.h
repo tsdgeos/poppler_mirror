@@ -297,13 +297,18 @@ private:
   void setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psName);
   void setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString *psName);
   void setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id, GooString *psName);
-  GooString *setupExternalTrueTypeFont(GfxFont *font);
+  void setupExternalTrueTypeFont(GfxFont *font, GooString *fileName,
+				 GooString *psName);
   void setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *psName);
   void setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id, GooString *psName,
 				    GBool needVerticalMetrics);
+  void setupExternalCIDTrueTypeFont(GfxFont *font,
+				    GooString *fileName,
+				    GooString *psName,
+				    GBool needVerticalMetrics);
   void setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString *psName);
-  GooString *setupExternalCIDTrueTypeFont(GfxFont *font, GooString *fileName, int faceIndex = 0);
   void setupType3Font(GfxFont *font, GooString *psName, Dict *parentResDict);
+  GooString *makePSFontName(GfxFont *font, Ref *id);
   void setupImages(Dict *resDict);
   void setupImage(Ref id, Stream *str);
   void setupForms(Dict *resDict);
@@ -353,6 +358,7 @@ private:
 		    double *x1, double *y1);
 #endif
   void cvtFunction(Function *func);
+  GooString *filterPSName(GooString *name);
 
   // Write the document-level setup.
   void writeDocSetup(PDFDoc *doc, Catalog *catalog, int firstPage, int lastPage, GBool duplexA);
@@ -376,7 +382,6 @@ private:
                                 // (only psModePSOrigPageSizes output mode)
   int imgLLX, imgLLY,		// imageable area, in pts
       imgURX, imgURY;
-  GBool substFonts;		// substitute missing fonts
   GBool preload;		// load all images into memory, and
 				//   predefine forms
 
@@ -396,6 +401,7 @@ private:
   Ref *fontIDs;			// list of object IDs of all used fonts
   int fontIDLen;		// number of entries in fontIDs array
   int fontIDSize;		// size of fontIDs array
+  GooHash *fontNames;		// all used font names
   Ref *fontFileIDs;		// list of object IDs of all embedded fonts
   int fontFileIDLen;		// number of entries in fontFileIDs array
   int fontFileIDSize;		// size of fontFileIDs array

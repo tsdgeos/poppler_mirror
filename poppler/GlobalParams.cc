@@ -122,37 +122,21 @@ extern XpdfPluginVecTable xpdfPluginVecTable;
 GlobalParams *globalParams = NULL;
 
 //------------------------------------------------------------------------
-// DisplayFontParam
+// PSFontParam16
 //------------------------------------------------------------------------
 
-DisplayFontParam::DisplayFontParam(GooString *nameA,
-				   DisplayFontParamKind kindA) {
+PSFontParam16::PSFontParam16(GooString *nameA, int wModeA,
+			     GooString *psFontNameA, GooString *encodingA) {
   name = nameA;
-  kind = kindA;
-  switch (kind) {
-  case displayFontT1:
-    t1.fileName = NULL;
-    break;
-  case displayFontTT:
-    tt.fileName = NULL;
-    break;
-  }
+  wMode = wModeA;
+  psFontName = psFontNameA;
+  encoding = encodingA;
 }
 
-DisplayFontParam::~DisplayFontParam() {
+PSFontParam16::~PSFontParam16() {
   delete name;
-  switch (kind) {
-  case displayFontT1:
-    if (t1.fileName) {
-      delete t1.fileName;
-    }
-    break;
-  case displayFontTT:
-    if (tt.fileName) {
-      delete tt.fileName;
-    }
-    break;
-  }
+  delete psFontName;
+  delete encoding;
 }
 
 #if ENABLE_RELOCATABLE && defined(_WIN32)
@@ -211,182 +195,123 @@ get_poppler_datadir (void)
 
 #endif
 
-#ifdef _WIN32
-
 //------------------------------------------------------------------------
-// WinFontInfo
+// SysFontInfo
 //------------------------------------------------------------------------
 
-class WinFontInfo: public DisplayFontParam {
+class SysFontInfo {
 public:
 
-  GBool bold, italic;
+  GooString *name;
+  GBool bold;
+  GBool italic;
+  GooString *path;
+  SysFontType type;
+  int fontNum;			// for TrueType collections
 
-  static WinFontInfo *make(GooString *nameA, GBool boldA, GBool italicA,
-			   HKEY regKey, char *winFontDir);
-  WinFontInfo(GooString *nameA, GBool boldA, GBool italicA,
-	      GooString *fileNameA);
-  virtual ~WinFontInfo();
-  GBool equals(WinFontInfo *fi);
+  SysFontInfo(GooString *nameA, GBool boldA, GBool italicA,
+	      GooString *pathA, SysFontType typeA, int fontNumA);
+  ~SysFontInfo();
+  GBool match(SysFontInfo *fi);
+  GBool match(GooString *nameA, GBool boldA, GBool italicA);
 };
 
-WinFontInfo *WinFontInfo::make(GooString *nameA, GBool boldA, GBool italicA,
-			       HKEY regKey, char *winFontDir) {
-  GooString *regName;
-  GooString *fileNameA;
-  char buf[MAX_PATH];
-  DWORD n;
-  char c;
-  int i;
-
-  //----- find the font file
-  fileNameA = NULL;
-  regName = nameA->copy();
-  if (boldA) {
-    regName->append(" Bold");
-  }
-  if (italicA) {
-    regName->append(" Italic");
-  }
-  regName->append(" (TrueType)");
-  n = sizeof(buf);
-  if (RegQueryValueEx(regKey, regName->getCString(), NULL, NULL,
-		      (LPBYTE)buf, &n) == ERROR_SUCCESS) {
-    fileNameA = new GooString(winFontDir);
-    fileNameA->append('\\')->append(buf);
-  }
-  delete regName;
-  if (!fileNameA) {
-    delete nameA;
-    return NULL;
-  }
-
-  //----- normalize the font name
-  i = 0;
-  while (i < nameA->getLength()) {
-    c = nameA->getChar(i);
-    if (c == ' ' || c == ',' || c == '-') {
-      nameA->del(i);
-    } else {
-      ++i;
-    }
-  }
-
-  return new WinFontInfo(nameA, boldA, italicA, fileNameA);
-}
-
-WinFontInfo::WinFontInfo(GooString *nameA, GBool boldA, GBool italicA,
-			 GooString *fileNameA):
-  DisplayFontParam(nameA, displayFontTT)
-{
+SysFontInfo::SysFontInfo(GooString *nameA, GBool boldA, GBool italicA,
+			 GooString *pathA, SysFontType typeA, int fontNumA) {
+  name = nameA;
   bold = boldA;
   italic = italicA;
-  tt.fileName = fileNameA;
+  path = pathA;
+  type = typeA;
+  fontNum = fontNumA;
 }
 
-WinFontInfo::~WinFontInfo() {
+SysFontInfo::~SysFontInfo() {
+  delete name;
+  delete path;
 }
 
-GBool WinFontInfo::equals(WinFontInfo *fi) {
-  return !name->cmp(fi->name) && bold == fi->bold && italic == fi->italic;
+GBool SysFontInfo::match(SysFontInfo *fi) {
+  return !strcasecmp(name->getCString(), fi->name->getCString()) &&
+         bold == fi->bold && italic == fi->italic;
+}
+
+GBool SysFontInfo::match(GooString *nameA, GBool boldA, GBool italicA) {
+  return !strcasecmp(name->getCString(), nameA->getCString()) &&
+         bold == boldA && italic == italicA;
 }
 
 //------------------------------------------------------------------------
-// WinFontList
+// SysFontList
 //------------------------------------------------------------------------
 
-class WinFontList {
+class SysFontList {
 public:
 
-  WinFontList(char *winFontDirA);
-  ~WinFontList();
-  WinFontInfo *find(GooString *font);
+  SysFontList();
+  ~SysFontList();
+  SysFontInfo *find(GooString *name, GBool exact);
 
+#ifdef WIN32
+  void scanWindowsFonts(GooString *winFontDir);
+#endif
+#ifdef WITH_FONTCONFIGURATION_FONTCONFIG
+  void addFcFont(SysFontInfo *si) {fonts->append(si);}
+#endif
 private:
 
-  void add(WinFontInfo *fi);
-  static int CALLBACK enumFunc1(CONST LOGFONT *font,
-				CONST TEXTMETRIC *metrics,
-				DWORD type, LPARAM data);
-  static int CALLBACK enumFunc2(CONST LOGFONT *font,
-				CONST TEXTMETRIC *metrics,
-				DWORD type, LPARAM data);
+#ifdef WIN32
+  SysFontInfo *makeWindowsFont(char *name, int fontNum,
+			       char *path);
+#endif
 
-  GooList *fonts;			// [WinFontInfo]
-  HDC dc;			// (only used during enumeration)
-  HKEY regKey;			// (only used during enumeration)
-  char *winFontDir;		// (only used during enumeration)
+  GooList *fonts;			// [SysFontInfo]
 };
 
-WinFontList::WinFontList(char *winFontDirA) {
-  OSVERSIONINFO version;
-  char *path;
-
+SysFontList::SysFontList() {
   fonts = new GooList();
-  dc = GetDC(NULL);
-  winFontDir = winFontDirA;
-  version.dwOSVersionInfoSize = sizeof(version);
-  GetVersionEx(&version);
-  if (version.dwPlatformId == VER_PLATFORM_WIN32_NT) {
-    path = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts\\";
-  } else {
-    path = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Fonts\\";
-  }
-  if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, path, 0,
-		   KEY_QUERY_VALUE | KEY_ENUMERATE_SUB_KEYS,
-		   &regKey) == ERROR_SUCCESS) {
-    EnumFonts(dc, NULL, &WinFontList::enumFunc1, (LPARAM)this);
-    RegCloseKey(regKey);
-  }
-  ReleaseDC(NULL, dc);
 }
 
-WinFontList::~WinFontList() {
-  deleteGooList(fonts, WinFontInfo);
+SysFontList::~SysFontList() {
+  deleteGooList(fonts, SysFontInfo);
 }
 
-void WinFontList::add(WinFontInfo *fi) {
-  int i;
-
-  for (i = 0; i < fonts->getLength(); ++i) {
-    if (((WinFontInfo *)fonts->get(i))->equals(fi)) {
-      delete fi;
-      return;
-    }
-  }
-  fonts->append(fi);
-}
-
-WinFontInfo *WinFontList::find(GooString *font) {
-  GooString *name;
+SysFontInfo *SysFontList::find(GooString *name, GBool exact) {
+  GooString *name2;
   GBool bold, italic;
-  WinFontInfo *fi;
+  SysFontInfo *fi;
   char c;
   int n, i;
 
-  name = font->copy();
+  name2 = name->copy();
 
   // remove space, comma, dash chars
   i = 0;
-  while (i < name->getLength()) {
-    c = name->getChar(i);
+  while (i < name2->getLength()) {
+    c = name2->getChar(i);
     if (c == ' ' || c == ',' || c == '-') {
-      name->del(i);
+      name2->del(i);
     } else {
       ++i;
     }
   }
-  n = name->getLength();
+  n = name2->getLength();
 
   // remove trailing "MT" (Foo-MT, Foo-BoldMT, etc.)
-  if (!strcmp(name->getCString() + n - 2, "MT")) {
-    name->del(n - 2, 2);
+  if (n > 2 && !strcmp(name2->getCString() + n - 2, "MT")) {
+    name2->del(n - 2, 2);
     n -= 2;
   }
 
+  // look for "Regular"
+  if (n > 7 && !strcmp(name2->getCString() + n - 7, "Regular")) {
+    name2->del(n - 7, 7);
+    n -= 7;
+  }
+
   // look for "Italic"
-  if (!strcmp(name->getCString() + n - 6, "Italic")) {
-    name->del(n - 6, 6);
+  if (n > 6 && !strcmp(name2->getCString() + n - 6, "Italic")) {
+    name2->del(n - 6, 6);
     italic = gTrue;
     n -= 6;
   } else {
@@ -394,8 +319,8 @@ WinFontInfo *WinFontList::find(GooString *font) {
   }
 
   // look for "Bold"
-  if (!strcmp(name->getCString() + n - 4, "Bold")) {
-    name->del(n - 4, 4);
+  if (n > 4 && !strcmp(name2->getCString() + n - 4, "Bold")) {
+    name2->del(n - 4, 4);
     bold = gTrue;
     n -= 4;
   } else {
@@ -403,78 +328,57 @@ WinFontInfo *WinFontList::find(GooString *font) {
   }
 
   // remove trailing "MT" (FooMT-Bold, etc.)
-  if (!strcmp(name->getCString() + n - 2, "MT")) {
-    name->del(n - 2, 2);
+  if (n > 2 && !strcmp(name2->getCString() + n - 2, "MT")) {
+    name2->del(n - 2, 2);
     n -= 2;
   }
 
   // remove trailing "PS"
-  if (!strcmp(name->getCString() + n - 2, "PS")) {
-    name->del(n - 2, 2);
+  if (n > 2 && !strcmp(name2->getCString() + n - 2, "PS")) {
+    name2->del(n - 2, 2);
     n -= 2;
+  }
+
+  // remove trailing "IdentityH"
+  if (n > 9 && !strcmp(name2->getCString() + n - 9, "IdentityH")) {
+    name2->del(n - 9, 9);
+    n -= 9;
   }
 
   // search for the font
   fi = NULL;
   for (i = 0; i < fonts->getLength(); ++i) {
-    fi = (WinFontInfo *)fonts->get(i);
-    if (!fi->name->cmp(name) && fi->bold == bold && fi->italic == italic) {
+    fi = (SysFontInfo *)fonts->get(i);
+    if (fi->match(name2, bold, italic)) {
       break;
     }
     fi = NULL;
   }
+  if (!fi && !exact && bold) {
+    // try ignoring the bold flag
+    for (i = 0; i < fonts->getLength(); ++i) {
+      fi = (SysFontInfo *)fonts->get(i);
+      if (fi->match(name2, gFalse, italic)) {
+	break;
+      }
+      fi = NULL;
+    }
+  }
+  if (!fi && !exact && (bold || italic)) {
+    // try ignoring the bold and italic flags
+    for (i = 0; i < fonts->getLength(); ++i) {
+      fi = (SysFontInfo *)fonts->get(i);
+      if (fi->match(name2, gFalse, gFalse)) {
+	break;
+      }
+      fi = NULL;
+    }
+  }
 
-  delete name;
+  delete name2;
   return fi;
 }
 
-int CALLBACK WinFontList::enumFunc1(CONST LOGFONT *font,
-				    CONST TEXTMETRIC *metrics,
-				    DWORD type, LPARAM data) {
-  WinFontList *fl = (WinFontList *)data;
-
-  EnumFonts(fl->dc, font->lfFaceName, &WinFontList::enumFunc2, (LPARAM)fl);
-  return 1;
-}
-
-int CALLBACK WinFontList::enumFunc2(CONST LOGFONT *font,
-				    CONST TEXTMETRIC *metrics,
-				    DWORD type, LPARAM data) {
-  WinFontList *fl = (WinFontList *)data;
-  WinFontInfo *fi;
-
-  if (type & TRUETYPE_FONTTYPE) {
-    if ((fi = WinFontInfo::make(new GooString(font->lfFaceName),
-				font->lfWeight >= 600,
-				font->lfItalic ? gTrue : gFalse,
-				fl->regKey, fl->winFontDir))) {
-      fl->add(fi);
-    }
-  }
-  return 1;
-}
-
-#endif // _WIN32
-
-//------------------------------------------------------------------------
-// PSFontParam
-//------------------------------------------------------------------------
-
-PSFontParam::PSFontParam(GooString *pdfFontNameA, int wModeA,
-			 GooString *psFontNameA, GooString *encodingA) {
-  pdfFontName = pdfFontNameA;
-  wMode = wModeA;
-  psFontName = psFontNameA;
-  encoding = encodingA;
-}
-
-PSFontParam::~PSFontParam() {
-  delete pdfFontName;
-  delete psFontName;
-  if (encoding) {
-    delete encoding;
-  }
-}
 
 #ifdef ENABLE_PLUGINS
 //------------------------------------------------------------------------
@@ -656,18 +560,23 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   unicodeMaps = new GooHash(gTrue);
   cMapDirs = new GooHash(gTrue);
   toUnicodeDirs = new GooList();
-  displayFonts = new GooHash();
+  fontFiles = new GooHash(gTrue);
+  fontDirs = new GooList();
+  ccFontFiles = new GooHash(gTrue);
+  sysFonts = new SysFontList();
   psExpandSmaller = gFalse;
   psShrinkLarger = gTrue;
   psCenter = gTrue;
   psLevel = psLevel2;
-  psFonts = new GooHash();
-  psNamedFonts16 = new GooList();
-  psFonts16 = new GooList();
+  psFile = NULL;
+  psResidentFonts = new GooHash(gTrue);
+  psResidentFonts16 = new GooList();
+  psResidentFontsCC = new GooList();
   psEmbedType1 = gTrue;
   psEmbedTrueType = gTrue;
   psEmbedCIDPostScript = gTrue;
   psEmbedCIDTrueType = gTrue;
+  psFontPassthrough = gFalse;
   psSubstFonts = gTrue;
   psPreload = gFalse;
   psOPI = gFalse;
@@ -683,7 +592,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
 #endif
   textPageBreaks = gTrue;
   textKeepTinyChars = gFalse;
-  fontDirs = new GooList();
   enableFreeType = gTrue;
   disableFreeTypeHinting = gFalse;
   antialias = gTrue;
@@ -712,9 +620,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
 
 #ifdef _WIN32
   baseFontsInitialized = gFalse;
-  winFontList = NULL;
 #endif
-
 #ifdef ENABLE_PLUGINS
   plugins = new GooList();
   securityHandlers = new GooList();
@@ -875,15 +781,17 @@ GlobalParams::~GlobalParams() {
   deleteGooHash(residentUnicodeMaps, UnicodeMap);
   deleteGooHash(unicodeMaps, GooString);
   deleteGooList(toUnicodeDirs, GooString);
-  deleteGooHash(displayFonts, DisplayFontParam);
-#ifdef _WIN32
-  delete winFontList;
-#endif
-  deleteGooHash(psFonts, PSFontParam);
-  deleteGooList(psNamedFonts16, PSFontParam);
-  deleteGooList(psFonts16, PSFontParam);
-  delete textEncoding;
+  deleteGooHash(fontFiles, GooString);
   deleteGooList(fontDirs, GooString);
+  deleteGooHash(ccFontFiles, GooString);
+  delete sysFonts;
+  if (psFile) {
+    delete psFile;
+  }
+  deleteGooHash(psResidentFonts, GooString);
+  deleteGooList(psResidentFonts16, PSFontParam16);
+  deleteGooList(psResidentFontsCC, PSFontParam16);
+  delete textEncoding;
 
   GooHashIter *iter;
   GooString *key;
@@ -1187,21 +1095,71 @@ static FcPattern *buildFcPattern(GfxFont *font)
 }
 #endif
 
+GooString *GlobalParams::findFontFile(GooString *fontName) {
+  static const char *exts[] = { ".pfa", ".pfb", ".ttf", ".ttc" };
+  GooString *path, *dir;
+#ifdef WIN32
+  GooString *fontNameU;
+#endif
+  const char *ext;
+  FILE *f;
+  int i, j;
+
+  lockGlobalParams;
+  setupBaseFonts(NULL);
+  if ((path = (GooString *)fontFiles->lookup(fontName))) {
+    path = path->copy();
+    unlockGlobalParams;
+    return path;
+  }
+  for (i = 0; i < fontDirs->getLength(); ++i) {
+    dir = (GooString *)fontDirs->get(i);
+    for (j = 0; j < (int)(sizeof(exts) / sizeof(exts[0])); ++j) {
+      ext = exts[j];
+#ifdef WIN32
+      fontNameU = fileNameToUTF8(fontName->getCString());
+      path = appendToPath(dir->copy(), fontNameU->getCString());
+      delete fontNameU;
+#else
+      path = appendToPath(dir->copy(), fontName->getCString());
+#endif
+      path->append(ext);
+      if ((f = openFile(path->getCString(), "rb"))) {
+	fclose(f);
+	unlockGlobalParams;
+	return path;
+      }
+      delete path;
+    }
+  }
+  unlockGlobalParams;
+  return NULL;
+}
+
 /* if you can't or don't want to use Fontconfig, you need to implement
    this function for your platform. For Windows, it's in GlobalParamsWin.cc
 */
 #if WITH_FONTCONFIGURATION_FONTCONFIG
-DisplayFontParam *GlobalParams::getDisplayFont(GfxFont *font) {
-  DisplayFontParam *dfp;
-  FcPattern *p=0;
+// not needed for fontconfig
+void GlobalParams::setupBaseFonts(char *dir) {
+}
 
+GooString *GlobalParams::findSystemFontFile(GfxFont *font,
+					  SysFontType *type,
+					  int *fontNum) {
+  SysFontInfo *fi = NULL;
+  FcPattern *p=0;
+  GooString *path = NULL;
   GooString *fontName = font->getName();
   if (!fontName) return NULL;
-  
+  fontName = fontName->copy();
   lockGlobalParams;
-  dfp = font->dfp;
-  if (!dfp)
-  {
+
+  if ((fi = sysFonts->find(fontName, gTrue))) {
+    path = fi->path->copy();
+    *type = fi->type;
+    *fontNum = fi->fontNum;
+  } else {
     FcChar8* s;
     char * ext;
     FcResult res;
@@ -1230,38 +1188,70 @@ DisplayFontParam *GlobalParams::getDisplayFont(GfxFont *font) {
       first: fonts support the language
       second: all fonts (fall back)
     */
-    while (dfp == NULL)
+    while (fi == NULL)
     {
       for (i = 0; i < set->nfont; ++i)
       {
-        res = FcPatternGetString(set->fonts[i], FC_FILE, 0, &s);
-        if (res != FcResultMatch || !s)
-          continue;
-        if (lb != NULL) {
-          FcLangSet *l;
-          res = FcPatternGetLangSet(set->fonts[i], FC_LANG, 0, &l);
-          if (res != FcResultMatch || !FcLangSetContains(l,lb)) {
-            continue;
-          }
-        }
-        ext = strrchr((char*)s,'.');
-        if (!ext)
-          continue;
-        if (!strncasecmp(ext,".ttf",4) || !strncasecmp(ext, ".ttc", 4))
-        {
-          dfp = new DisplayFontParam(fontName->copy(), displayFontTT);  
-          dfp->tt.fileName = new GooString((char*)s);
-          FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, &(dfp->tt.faceIndex));
-        }
-        else if (!strncasecmp(ext,".pfa",4) || !strncasecmp(ext,".pfb",4)) 
-        {
-          dfp = new DisplayFontParam(fontName->copy(), displayFontT1);  
-          dfp->t1.fileName = new GooString((char*)s);
-        }
-        else
-          continue;
-        font->dfp = dfp;
-        break;
+	res = FcPatternGetString(set->fonts[i], FC_FILE, 0, &s);
+	if (res != FcResultMatch || !s)
+	  continue;
+	if (lb != NULL) {
+	  FcLangSet *l;
+	  res = FcPatternGetLangSet(set->fonts[i], FC_LANG, 0, &l);
+	  if (res != FcResultMatch || !FcLangSetContains(l,lb)) {
+	    continue;
+	  }
+	}
+	ext = strrchr((char*)s,'.');
+	if (!ext)
+	  continue;
+	if (!strncasecmp(ext,".ttf",4) || !strncasecmp(ext, ".ttc", 4))
+	{
+	  int weight, slant;
+	  GBool bold = font->isBold();
+	  GBool italic = font->isItalic();
+	  FcPatternGetInteger(set->fonts[i], FC_WEIGHT, 0, &weight);
+	  FcPatternGetInteger(set->fonts[i], FC_SLANT, 0, &slant);
+	  if (weight == FC_WEIGHT_DEMIBOLD || weight == FC_WEIGHT_BOLD 
+	      || weight == FC_WEIGHT_EXTRABOLD || weight == FC_WEIGHT_BLACK)
+	  {
+	    bold = gTrue;
+	  }
+	  if (slant == FC_SLANT_ITALIC)
+	    italic = gTrue;
+	  *fontNum = 0;
+	  *type = (!strncasecmp(ext,".ttf",4)) ? sysFontTTF : sysFontTTC;
+	  FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
+	  fi = new SysFontInfo(fontName->copy(), bold, italic,
+			       new GooString((char*)s), *type, *fontNum);
+	  sysFonts->addFcFont(fi);
+	  path = new GooString((char*)s);
+	}
+	else if (!strncasecmp(ext,".pfa",4) || !strncasecmp(ext,".pfb",4)) 
+	{
+	  int weight, slant;
+	  GBool bold = font->isBold();
+	  GBool italic = font->isItalic();
+	  FcPatternGetInteger(set->fonts[i], FC_WEIGHT, 0, &weight);
+	  FcPatternGetInteger(set->fonts[i], FC_SLANT, 0, &slant);
+	  if (weight == FC_WEIGHT_DEMIBOLD || weight == FC_WEIGHT_BOLD 
+	      || weight == FC_WEIGHT_EXTRABOLD || weight == FC_WEIGHT_BLACK)
+	  {
+		bold = gTrue;
+	  }
+	  if (slant == FC_SLANT_ITALIC)
+	    italic = gTrue;
+	  *fontNum = 0;
+	  *type = (!strncasecmp(ext,".pfa",4)) ? sysFontPFA : sysFontPFB;
+	  FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
+	  fi = new SysFontInfo(fontName->copy(), bold, italic,
+			       new GooString((char*)s), *type, *fontNum);
+	  sysFonts->addFcFont(fi);
+	  path = new GooString((char*)s);
+	}
+	else
+	  continue;
+	break;
       }
       if (lb != NULL) {
         FcLangSetDestroy(lb);
@@ -1273,17 +1263,123 @@ DisplayFontParam *GlobalParams::getDisplayFont(GfxFont *font) {
     }
     FcFontSetDestroy(set);
   }
+  if (path == NULL && (fi = sysFonts->find(fontName, gFalse))) {
+    path = fi->path->copy();
+    *type = fi->type;
+    *fontNum = fi->fontNum;
+  }
 fin:
   if (p)
     FcPatternDestroy(p);
-
   unlockGlobalParams;
-  return dfp;
+  return path;
+}
+
+#elif WITH_FONTCONFIGURATION_WIN32
+#include "GlobalParamsWin.cc"
+#else
+static struct {
+  const char *name;
+  const char *t1FileName;
+  const char *ttFileName;
+} displayFontTab[] = {
+  {"Courier",               "n022003l.pfb", "cour.ttf"},
+  {"Courier-Bold",          "n022004l.pfb", "courbd.ttf"},
+  {"Courier-BoldOblique",   "n022024l.pfb", "courbi.ttf"},
+  {"Courier-Oblique",       "n022023l.pfb", "couri.ttf"},
+  {"Helvetica",             "n019003l.pfb", "arial.ttf"},
+  {"Helvetica-Bold",        "n019004l.pfb", "arialbd.ttf"},
+  {"Helvetica-BoldOblique", "n019024l.pfb", "arialbi.ttf"},
+  {"Helvetica-Oblique",     "n019023l.pfb", "ariali.ttf"},
+  {"Symbol",                "s050000l.pfb", NULL},
+  {"Times-Bold",            "n021004l.pfb", "timesbd.ttf"},
+  {"Times-BoldItalic",      "n021024l.pfb", "timesbi.ttf"},
+  {"Times-Italic",          "n021023l.pfb", "timesi.ttf"},
+  {"Times-Roman",           "n021003l.pfb", "times.ttf"},
+  {"ZapfDingbats",          "d050000l.pfb", NULL},
+  {NULL}
+};
+
+static const char *displayFontDirs[] = {
+  "/usr/share/ghostscript/fonts",
+  "/usr/local/share/ghostscript/fonts",
+  "/usr/share/fonts/default/Type1",
+  "/usr/share/fonts/default/ghostscript",
+  "/usr/share/fonts/type1/gsfonts",
+  NULL
+};
+
+void GlobalParams::setupBaseFonts(char *dir) {
+  GooString *fontName;
+  GooString *fileName;
+  FILE *f;
+  int i, j;
+
+  for (i = 0; displayFontTab[i].name; ++i) {
+    if (fontFiles->lookup(displayFontTab[i].name)) {
+      continue;
+    }
+    fontName = new GooString(displayFontTab[i].name);
+    fileName = NULL;
+    if (dir) {
+      fileName = appendToPath(new GooString(dir), displayFontTab[i].t1FileName);
+      if ((f = fopen(fileName->getCString(), "rb"))) {
+	      fclose(f);
+      } else {
+	      delete fileName;
+	      fileName = NULL;
+      }
+    }
+    for (j = 0; !fileName && displayFontDirs[j]; ++j) {
+      fileName = appendToPath(new GooString(displayFontDirs[j]),
+			      displayFontTab[i].t1FileName);
+      if ((f = fopen(fileName->getCString(), "rb"))) {
+	      fclose(f);
+      } else {
+	      delete fileName;
+	      fileName = NULL;
+      }
+    }
+    if (!fileName) {
+      error(errConfig, -1, "No display font for '{0:s}'",
+	    displayFontTab[i].name);
+      delete fontName;
+      continue;
+    }
+    addFontFile(fontName, fileName);
+  }
+
+}
+
+GooString *GlobalParams::findSystemFontFile(GfxFont *font,
+					  SysFontType *type,
+					  int *fontNum) {
+  SysFontInfo *fi;
+  GooString *path;
+
+  path = NULL;
+  lockGlobalParams;
+  if ((fi = sysFonts->find(font->getName(), gFalse))) {
+    path = fi->path->copy();
+    *type = fi->type;
+    *fontNum = fi->fontNum;
+  }
+  unlockGlobalParams;
+  return path;
 }
 #endif
-#if WITH_FONTCONFIGURATION_WIN32
-#include "GlobalParamsWin.cc"
-#endif
+
+GooString *GlobalParams::findCCFontFile(GooString *collection) {
+  GooString *path;
+
+  lockGlobalParams;
+  if ((path = (GooString *)ccFontFiles->lookup(collection))) {
+    path = path->copy();
+  }
+  unlockGlobalParams;
+  return path;
+}
+
 
 GBool GlobalParams::getPSExpandSmaller() {
   GBool f;
@@ -1321,41 +1417,62 @@ PSLevel GlobalParams::getPSLevel() {
   return level;
 }
 
-PSFontParam *GlobalParams::getPSFont(GooString *fontName) {
-  PSFontParam *p;
+GooString *GlobalParams::getPSResidentFont(GooString *fontName) {
+  GooString *psName;
 
   lockGlobalParams;
-  p = (PSFontParam *)psFonts->lookup(fontName);
+  psName = (GooString *)psResidentFonts->lookup(fontName);
   unlockGlobalParams;
-  return p;
+  return psName;
 }
 
-PSFontParam *GlobalParams::getPSFont16(GooString *fontName,
-				       GooString *collection, int wMode) {
-  PSFontParam *p;
+GooList *GlobalParams::getPSResidentFonts() {
+  GooList *names;
+  GooHashIter *iter;
+  GooString *name;
+  GooString *psName;
+
+  names = new GooList();
+  lockGlobalParams;
+  psResidentFonts->startIter(&iter);
+  while (psResidentFonts->getNext(&iter, &name, (void **)&psName)) {
+    names->append(psName->copy());
+  }
+  unlockGlobalParams;
+  return names;
+}
+
+PSFontParam16 *GlobalParams::getPSResidentFont16(GooString *fontName,
+						 int wMode) {
+  PSFontParam16 *p;
   int i;
 
   lockGlobalParams;
   p = NULL;
-  if (fontName) {
-    for (i = 0; i < psNamedFonts16->getLength(); ++i) {
-      p = (PSFontParam *)psNamedFonts16->get(i);
-      if (!p->pdfFontName->cmp(fontName) &&
-	  p->wMode == wMode) {
-	break;
-      }
-      p = NULL;
+  for (i = 0; i < psResidentFonts16->getLength(); ++i) {
+    p = (PSFontParam16 *)psResidentFonts16->get(i);
+    if (!(p->name->cmp(fontName)) && p->wMode == wMode) {
+      break;
     }
+    p = NULL;
   }
-  if (!p && collection) {
-    for (i = 0; i < psFonts16->getLength(); ++i) {
-      p = (PSFontParam *)psFonts16->get(i);
-      if (!p->pdfFontName->cmp(collection) &&
-	  p->wMode == wMode) {
-	break;
-      }
-      p = NULL;
+  unlockGlobalParams;
+  return p;
+}
+
+PSFontParam16 *GlobalParams::getPSResidentFontCC(GooString *collection,
+						 int wMode) {
+  PSFontParam16 *p;
+  int i;
+
+  lockGlobalParams;
+  p = NULL;
+  for (i = 0; i < psResidentFontsCC->getLength(); ++i) {
+    p = (PSFontParam16 *)psResidentFontsCC->get(i);
+    if (!(p->name->cmp(collection)) && p->wMode == wMode) {
+      break;
     }
+    p = NULL;
   }
   unlockGlobalParams;
   return p;
@@ -1397,11 +1514,11 @@ GBool GlobalParams::getPSEmbedCIDTrueType() {
   return e;
 }
 
-GBool GlobalParams::getPSSubstFonts() {
+GBool GlobalParams::getPSFontPassthrough() {
   GBool e;
 
   lockGlobalParams;
-  e = psSubstFonts;
+  e = psFontPassthrough;
   unlockGlobalParams;
   return e;
 }
@@ -1476,30 +1593,6 @@ GBool GlobalParams::getTextKeepTinyChars() {
   tiny = textKeepTinyChars;
   unlockGlobalParams;
   return tiny;
-}
-
-GooString *GlobalParams::findFontFile(GooString *fontName, const char **exts) {
-  GooString *dir, *fileName;
-  const char **ext;
-  FILE *f;
-  int i;
-
-  lockGlobalParams;
-  for (i = 0; i < fontDirs->getLength(); ++i) {
-    dir = (GooString *)fontDirs->get(i);
-    for (ext = exts; *ext; ++ext) {
-      fileName = appendToPath(dir->copy(), fontName->getCString());
-      fileName->append(*ext);
-      if ((f = openFile(fileName->getCString(), "rb"))) {
-	fclose(f);
-	unlockGlobalParams;
-	return fileName;
-      }
-      delete fileName;
-    }
-  }
-  unlockGlobalParams;
-  return NULL;
 }
 
 GBool GlobalParams::getEnableFreeType() {
@@ -1752,6 +1845,21 @@ GooList *GlobalParams::getEncodingNames()
 // functions to set parameters
 //------------------------------------------------------------------------
 
+void GlobalParams::addFontFile(GooString *fontName, GooString *path) {
+  lockGlobalParams;
+  fontFiles->add(fontName, path);
+  unlockGlobalParams;
+}
+
+void GlobalParams::setPSFile(char *file) {
+  lockGlobalParams;
+  if (psFile) {
+    delete psFile;
+  }
+  psFile = new GooString(file);
+  unlockGlobalParams;
+}
+
 void GlobalParams::setPSExpandSmaller(GBool expand) {
   lockGlobalParams;
   psExpandSmaller = expand;
@@ -1803,6 +1911,12 @@ void GlobalParams::setPSEmbedCIDTrueType(GBool embed) {
 void GlobalParams::setPSSubstFonts(GBool substFonts) {
   lockGlobalParams;
   psSubstFonts = substFonts;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setPSFontPassthrough(GBool passthrough) {
+  lockGlobalParams;
+  psFontPassthrough = passthrough;
   unlockGlobalParams;
 }
 

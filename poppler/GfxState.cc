@@ -1568,10 +1568,11 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, Gfx *gfx, int recursion)
   }
   nCompsA = obj2.getInt();
   obj2.free();
-  if (nCompsA > gfxColorMaxComps) {
-    error(errSyntaxWarning, -1, "ICCBased color space with too many ({0:d} > {1:d}) components",
-	  nCompsA, gfxColorMaxComps);
-    nCompsA = gfxColorMaxComps;
+  if (nCompsA > 4) {
+    error(errSyntaxError, -1,
+	  "ICCBased color space with too many ({0:d} > 4) components",
+	  nCompsA);
+    nCompsA = 4;
   }
   if (dict->lookup("Alternate", &obj2)->isNull() ||
       !(altA = GfxColorSpace::parse(&obj2, gfx, recursion + 1))) {
@@ -2286,13 +2287,6 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(Array *arr, Gfx *gfx, int recursion) 
   }
   obj1.free();
   cs = new GfxDeviceNColorSpace(nCompsA, namesA, altA, funcA);
-  cs->nonMarking = gTrue;
-  for (i = 0; i < nCompsA; ++i) {
-    cs->names[i] = namesA[i];
-    if (namesA[i]->cmp("None")) {
-      cs->nonMarking = gFalse;
-    }
-  }
   return cs;
 
  err4:
@@ -4767,7 +4761,7 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
   GfxIndexedColorSpace *indexedCS;
   GfxSeparationColorSpace *sepCS;
   int maxPixel, indexHigh;
-  Guchar *lookup2;
+  Guchar *indexedLookup;
   Function *sepFunc;
   Object obj;
   double x[gfxColorMaxComps];
@@ -4791,7 +4785,7 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
 
   // initialize
   for (k = 0; k < gfxColorMaxComps; ++k) {
-    lookup[k] = NULL;
+    lookup2[k] = NULL;
   }
   byte_lookup = NULL;
 
@@ -4829,10 +4823,18 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
   // Construct a lookup table -- this stores pre-computed decoded
   // values for each component, i.e., the result of applying the
   // decode mapping to each possible image pixel component value.
-  //
+  for (k = 0; k < nComps; ++k) {
+    lookup[k] = (GfxColorComp *)gmallocn(maxPixel + 1,
+					 sizeof(GfxColorComp));
+    for (i = 0; i <= maxPixel; ++i) {
+      lookup[k][i] = dblToCol(decodeLow[k] +
+			      (i * decodeRange[k]) / maxPixel);
+    }
+  }
+
   // Optimization: for Indexed and Separation color spaces (which have
-  // only one component), we store color values in the lookup table
-  // rather than component values.
+  // only one component), we pre-compute a second lookup table with
+  // color values
   colorSpace2 = NULL;
   nComps2 = 0;
   useByteLookup = gFalse;
@@ -4845,14 +4847,14 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
     colorSpace2 = indexedCS->getBase();
     indexHigh = indexedCS->getIndexHigh();
     nComps2 = colorSpace2->getNComps();
-    lookup2 = indexedCS->getLookup();
+    indexedLookup = indexedCS->getLookup();
     colorSpace2->getDefaultRanges(x, y, indexHigh);
     if (colorSpace2->useGetGrayLine() || colorSpace2->useGetRGBLine()) {
       byte_lookup = (Guchar *)gmallocn ((maxPixel + 1), nComps2);
       useByteLookup = gTrue;
     }
     for (k = 0; k < nComps2; ++k) {
-      lookup[k] = (GfxColorComp *)gmallocn(maxPixel + 1,
+      lookup2[k] = (GfxColorComp *)gmallocn(maxPixel + 1,
 					   sizeof(GfxColorComp));
       for (i = 0; i <= maxPixel; ++i) {
 	j = (int)(decodeLow[0] + (i * decodeRange[0]) / maxPixel + 0.5);
@@ -4862,8 +4864,8 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
 	  j = indexHigh;
 	}
 
-	mapped = x[k] + (lookup2[j*nComps2 + k] / 255.0) * y[k];
-	lookup[k][i] = dblToCol(mapped);
+	mapped = x[k] + (indexedLookup[j*nComps2 + k] / 255.0) * y[k];
+	lookup2[k][i] = dblToCol(mapped);
 	if (useByteLookup)
 	  byte_lookup[i * nComps2 + k] = (Guchar) (mapped * 255);
       }
@@ -4879,12 +4881,12 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
       useByteLookup = gTrue;
     }
     for (k = 0; k < nComps2; ++k) {
-      lookup[k] = (GfxColorComp *)gmallocn(maxPixel + 1,
+      lookup2[k] = (GfxColorComp *)gmallocn(maxPixel + 1,
 					   sizeof(GfxColorComp));
       for (i = 0; i <= maxPixel; ++i) {
 	x[0] = decodeLow[0] + (i * decodeRange[0]) / maxPixel;
 	sepFunc->transform(x, y);
-	lookup[k][i] = dblToCol(y[k]);
+	lookup2[k][i] = dblToCol(y[k]);
 	if (useByteLookup)
 	  byte_lookup[i*nComps2 + k] = (Guchar) (y[k] * 255);
       }
@@ -4896,11 +4898,11 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
       useByteLookup = gTrue;
     }
     for (k = 0; k < nComps; ++k) {
-      lookup[k] = (GfxColorComp *)gmallocn(maxPixel + 1,
+      lookup2[k] = (GfxColorComp *)gmallocn(maxPixel + 1,
 					   sizeof(GfxColorComp));
       for (i = 0; i <= maxPixel; ++i) {
 	mapped = decodeLow[k] + (i * decodeRange[k]) / maxPixel;
-	lookup[k][i] = dblToCol(mapped);
+	lookup2[k][i] = dblToCol(mapped);
 	if (useByteLookup) {
 	  int byte;
 
@@ -4971,7 +4973,7 @@ GfxImageColorMap::~GfxImageColorMap() {
 
   delete colorSpace;
   for (i = 0; i < gfxColorMaxComps; ++i) {
-    gfree(lookup[i]);
+    gfree(lookup2[i]);
   }
   gfree(byte_lookup);
 }
@@ -4982,12 +4984,12 @@ void GfxImageColorMap::getGray(Guchar *x, GfxGray *gray) {
 
   if (colorSpace2) {
     for (i = 0; i < nComps2; ++i) {
-      color.c[i] = lookup[i][x[0]];
+      color.c[i] = lookup2[i][x[0]];
     }
     colorSpace2->getGray(&color, gray);
   } else {
     for (i = 0; i < nComps; ++i) {
-      color.c[i] = lookup[i][x[i]];
+      color.c[i] = lookup2[i][x[i]];
     }
     colorSpace->getGray(&color, gray);
   }
@@ -4999,12 +5001,12 @@ void GfxImageColorMap::getRGB(Guchar *x, GfxRGB *rgb) {
 
   if (colorSpace2) {
     for (i = 0; i < nComps2; ++i) {
-      color.c[i] = lookup[i][x[0]];
+      color.c[i] = lookup2[i][x[0]];
     }
     colorSpace2->getRGB(&color, rgb);
   } else {
     for (i = 0; i < nComps; ++i) {
-      color.c[i] = lookup[i][x[i]];
+      color.c[i] = lookup2[i][x[i]];
     }
     colorSpace->getRGB(&color, rgb);
   }
@@ -5334,13 +5336,18 @@ void GfxPath::moveTo(double x, double y) {
 }
 
 void GfxPath::lineTo(double x, double y) {
-  if (justMoved) {
+  if (justMoved || (n > 0 && subpaths[n-1]->isClosed())) {
     if (n >= size) {
       size *= 2;
       subpaths = (GfxSubpath **)
 	           greallocn(subpaths, size, sizeof(GfxSubpath *));
     }
-    subpaths[n] = new GfxSubpath(firstX, firstY);
+    if (justMoved) {
+      subpaths[n] = new GfxSubpath(firstX, firstY);
+    } else {
+      subpaths[n] = new GfxSubpath(subpaths[n-1]->getLastX(),
+				   subpaths[n-1]->getLastY());
+    }
     ++n;
     justMoved = gFalse;
   }
@@ -5349,13 +5356,18 @@ void GfxPath::lineTo(double x, double y) {
 
 void GfxPath::curveTo(double x1, double y1, double x2, double y2,
 	     double x3, double y3) {
-  if (justMoved) {
+  if (justMoved || (n > 0 && subpaths[n-1]->isClosed())) {
     if (n >= size) {
       size *= 2;
       subpaths = (GfxSubpath **) 
  	         greallocn(subpaths, size, sizeof(GfxSubpath *));
     }
-    subpaths[n] = new GfxSubpath(firstX, firstY);
+    if (justMoved) {
+      subpaths[n] = new GfxSubpath(firstX, firstY);
+    } else {
+      subpaths[n] = new GfxSubpath(subpaths[n-1]->getLastX(),
+				   subpaths[n-1]->getLastY());
+    }
     ++n;
     justMoved = gFalse;
   }
@@ -5570,9 +5582,6 @@ GfxState::~GfxState() {
   if (path) {
     // this gets set to NULL by restore()
     delete path;
-  }
-  if (saved) {
-    delete saved;
   }
   if (font) {
     font->decRefCnt();

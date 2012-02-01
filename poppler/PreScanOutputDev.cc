@@ -108,8 +108,6 @@ void PreScanOutputDev::beginStringOp(GfxState *state) {
   int render;
   GfxFont *font;
   double m11, m12, m21, m22;
-  Ref embRef;
-  DisplayFontParam *dfp;
   GBool simpleTTF;
 
   render = state->getRender();
@@ -124,18 +122,14 @@ void PreScanOutputDev::beginStringOp(GfxState *state) {
 
   font = state->getFont();
   state->getFontTransMat(&m11, &m12, &m21, &m22);
+  //~ this should check for external fonts that are non-TrueType
   simpleTTF = fabs(m11 + m22) < 0.01 &&
               m11 > 0 &&
               fabs(m12) < 0.01 &&
               fabs(m21) < 0.01 &&
               fabs(state->getHorizScaling() - 1) < 0.001 &&
               (font->getType() == fontTrueType ||
-	       font->getType() == fontTrueTypeOT) &&
-              (font->getEmbeddedFontID(&embRef) ||
-	       font->getExtFontFile() ||
-	       (font->getName() &&
-		(dfp = globalParams->getDisplayFont(font)) &&
-		dfp->kind == displayFontTT));
+	       font->getType() == fontTrueTypeOT);
   if (simpleTTF) {
     //~ need to create a FoFiTrueType object, and check for a Unicode cmap
   }

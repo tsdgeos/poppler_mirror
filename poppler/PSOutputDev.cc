@@ -46,6 +46,7 @@
 #include <limits.h>
 #include "goo/GooString.h"
 #include "goo/GooList.h"
+#include "goo/GooHash.h"
 #include "poppler-config.h"
 #include "GlobalParams.h"
 #include "Object.h"
@@ -64,6 +65,7 @@
 #include "XRef.h"
 #include "PreScanOutputDev.h"
 #include "FileSpec.h"
+#include "CharCodeToUnicode.h"
 #if HAVE_SPLASH
 #  include "splash/Splash.h"
 #  include "splash/SplashBitmap.h"
@@ -805,25 +807,12 @@ struct PSSubstFont {
   double mWidth;		// width of 'm' character
 };
 
-static const char *psFonts[] = {
-  "Courier",
-  "Courier-Bold",
-  "Courier-Oblique",
-  "Courier-BoldOblique",
-  "Helvetica",
-  "Helvetica-Bold",
-  "Helvetica-Oblique",
-  "Helvetica-BoldOblique",
-  "Symbol",
-  "Times-Roman",
-  "Times-Bold",
-  "Times-Italic",
-  "Times-BoldItalic",
-  "ZapfDingbats",
-  NULL
-};
-
-static const PSSubstFont psSubstFonts[] = {
+// NB: must be in same order as base14SubstFonts in GfxFont.cc
+static PSSubstFont psBase14SubstFonts[14] = {
+  {"Courier",               0.600},
+  {"Courier-Oblique",       0.600},
+  {"Courier-Bold",          0.600},
+  {"Courier-BoldOblique",   0.600},
   {"Helvetica",             0.833},
   {"Helvetica-Oblique",     0.833},
   {"Helvetica-Bold",        0.889},
@@ -832,10 +821,16 @@ static const PSSubstFont psSubstFonts[] = {
   {"Times-Italic",          0.722},
   {"Times-Bold",            0.833},
   {"Times-BoldItalic",      0.778},
-  {"Courier",               0.600},
-  {"Courier-Oblique",       0.600},
-  {"Courier-Bold",          0.600},
-  {"Courier-BoldOblique",   0.600}
+  // the last two are never used for substitution
+  {"Symbol",                0},
+  {"ZapfDingbats",          0}
+};
+
+// Mapping from Type 1/1C font file to PS font name.
+struct PST1FontName {
+  Ref fontFileID;
+  GooString *psName;		// PostScript font name used for this
+				//   embedded font file
 };
 
 // Info for 8-bit fonts
@@ -1010,6 +1005,7 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc,
   overlayCbkData = NULL;
 
   fontIDs = NULL;
+  fontNames = new GooHash(gTrue);
   fontFileIDs = NULL;
   fontFileNames = NULL;
   font8Info = NULL;
@@ -1073,6 +1069,7 @@ PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
   overlayCbkData = NULL;
 
   fontIDs = NULL;
+  fontNames = new GooHash(gTrue);
   fontFileIDs = NULL;
   fontFileNames = NULL;
   font8Info = NULL;
@@ -1130,7 +1127,6 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
       paperHeight = 1;
     }
   }
-  substFonts = globalParams->getPSSubstFonts();
   preload = globalParams->getPSPreload();
   if (imgLLX == 0 && imgURX == 0 && imgLLY == 0 && imgURY == 0) {
     imgLLX = imgLLY = 0;
@@ -1256,6 +1252,7 @@ PSOutputDev::~PSOutputDev() {
   if (fontIDs) {
     gfree(fontIDs);
   }
+  delete fontNames;
   if (fontFileIDs) {
     gfree(fontFileIDs);
   }
@@ -1656,9 +1653,7 @@ void PSOutputDev::setupFonts(Dict *resDict) {
 }
 
 void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
-  Ref fontFileID;
-  GooString *name;
-  PSFontParam *fontParam;
+  GfxFontLoc *fontLoc;
   GooString *psName;
   char buf[16];
   GBool subst;
@@ -1667,9 +1662,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
   double xs, ys;
   int code;
   double w1, w2;
-  double *fm;
   int i, j;
-  DisplayFontParam *dfp;
 
   // check if font is already set up
   for (i = 0; i < fontIDLen; ++i) {
@@ -1686,205 +1679,162 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
   }
   fontIDs[fontIDLen++] = *font->getID();
 
+  psName = NULL;
   xs = ys = 1;
   subst = gFalse;
 
-  // check for resident 8-bit font
-  if (font->getName() &&
-      (fontParam = globalParams->getPSFont(font->getName()))) {
-    psName = new GooString(fontParam->psFontName->getCString());
-
-  // check for embedded Type 1 font
-  } else if (globalParams->getPSEmbedType1() &&
-	     font->getType() == fontType1 &&
-	     font->getEmbeddedFontID(&fontFileID) &&
-	     font->getEmbeddedFontName()) {
-    psName = font->getEmbeddedFontName()->sanitizedName(gTrue /* ps mode */);
-    setupEmbeddedType1Font(&fontFileID, psName);
-
-  // check for embedded Type 1C font
-  } else if (globalParams->getPSEmbedType1() &&
-	     font->getType() == fontType1C &&
-	     font->getEmbeddedFontID(&fontFileID) &&
-	     font->getName()) {
-    // use the PDF font name because the embedded font name might
-    // not include the subset prefix
-    psName = font->getName()->sanitizedName(gTrue /* ps mode */);
-    setupEmbeddedType1CFont(font, &fontFileID, psName);
-
-  // check for embedded OpenType - Type 1C font
-  } else if (globalParams->getPSEmbedType1() &&
-	     font->getType() == fontType1COT &&
-	     font->getEmbeddedFontID(&fontFileID) &&
-	     font->getName()) {
-    // use the PDF font name because the embedded font name might
-    // not include the subset prefix
-    psName = font->getName()->sanitizedName(gTrue /* ps mode */);
-    setupEmbeddedOpenTypeT1CFont(font, &fontFileID, psName);
-
-  // check for external Type 1 font file
-  } else if (globalParams->getPSEmbedType1() &&
-	     font->getType() == fontType1 &&
-	     font->getExtFontFile() &&
-	     font->getName()) {
-    // this assumes that the PS font name matches the PDF font name
-    psName = font->getName()->copy();
-    setupExternalType1Font(font->getExtFontFile(), psName);
-
-  // check for embedded TrueType font
-  } else if (globalParams->getPSEmbedTrueType() &&
-	     (font->getType() == fontTrueType ||
-	      font->getType() == fontTrueTypeOT) &&
-	     font->getEmbeddedFontID(&fontFileID) &&
-	     font->getEmbeddedFontName()) {
-    psName = font->getEmbeddedFontName()->sanitizedName(gTrue /* ps mode */);
-    setupEmbeddedTrueTypeFont(font, &fontFileID, psName);
-
-  // check for external TrueType font file
-  } else if (globalParams->getPSEmbedTrueType() &&
-	     font->getType() == fontTrueType &&
-	     font->getExtFontFile()) {
-    psName = setupExternalTrueTypeFont(font);
-
-  // check for embedded CID PostScript font
-  } else if (globalParams->getPSEmbedCIDPostScript() &&
-	     font->getType() == fontCIDType0C &&
-	     font->getEmbeddedFontID(&fontFileID) &&
-	     font->getEmbeddedFontName()) {
-    psName = font->getEmbeddedFontName()->sanitizedName(gTrue /* ps mode */);
-    setupEmbeddedCIDType0Font(font, &fontFileID, psName);
-
-  // check for embedded CID TrueType font
-  } else if (globalParams->getPSEmbedCIDTrueType() &&
-	     (font->getType() == fontCIDType2 ||
-	      font->getType() == fontCIDType2OT) &&
-	     font->getEmbeddedFontID(&fontFileID) &&
-	     font->getEmbeddedFontName()) {
-    psName = font->getEmbeddedFontName()->sanitizedName(gTrue /* ps mode */);
-    setupEmbeddedCIDTrueTypeFont(font, &fontFileID, psName, gTrue);
-
-  // check for embedded OpenType - CID CFF font
-  } else if (globalParams->getPSEmbedCIDPostScript() &&
-	     font->getType() == fontCIDType0COT &&
-	     font->getEmbeddedFontID(&fontFileID) &&
-	     font->getEmbeddedFontName()) {
-    psName = font->getEmbeddedFontName()->sanitizedName(gTrue /* ps mode */);
-    setupEmbeddedOpenTypeCFFFont(font, &fontFileID, psName);
-
-  // check for Type 3 font
-  } else if (font->getType() == fontType3) {
+  if (font->getType() == fontType3) {
     psName = GooString::format("T3_{0:d}_{1:d}",
 			     font->getID()->num, font->getID()->gen);
     setupType3Font(font, psName, parentResDict);
+  } else {
+    fontLoc = font->locateFont(xref, gTrue);
+    switch (fontLoc->locType) {
+    case gfxFontLocEmbedded:
+      switch (fontLoc->fontType) {
+      case fontType1:
+	// this assumes that the PS font name matches the PDF font name
+	psName = font->getEmbeddedFontName()->copy();
+	setupEmbeddedType1Font(&fontLoc->embFontID, psName);
+	break;
+      case fontType1C:
+	psName = makePSFontName(font, &fontLoc->embFontID);
+	setupEmbeddedType1CFont(font, &fontLoc->embFontID, psName);
+	break;
+      case fontType1COT:
+	psName = makePSFontName(font, &fontLoc->embFontID);
+	setupEmbeddedOpenTypeT1CFont(font, &fontLoc->embFontID, psName);
+	break;
+      case fontTrueType:
+      case fontTrueTypeOT:
+	psName = makePSFontName(font, font->getID());
+	setupEmbeddedTrueTypeFont(font, &fontLoc->embFontID, psName);
+	break;
+      case fontCIDType0C:
+	psName = makePSFontName(font, &fontLoc->embFontID);
+	setupEmbeddedCIDType0Font(font, &fontLoc->embFontID, psName);
+	break;
+      case fontCIDType2:
+      case fontCIDType2OT:
+	psName = makePSFontName(font, font->getID());
+	//~ should check to see if font actually uses vertical mode
+	setupEmbeddedCIDTrueTypeFont(font, &fontLoc->embFontID, psName, gTrue);
+	break;
+      case fontCIDType0COT:
+	psName = makePSFontName(font, &fontLoc->embFontID);
+	setupEmbeddedOpenTypeCFFFont(font, &fontLoc->embFontID, psName);
+	break;
+      default:
+	break;
+      }
+      break;
+    case gfxFontLocExternal:
+      //~ add cases for external 16-bit fonts
+      switch (fontLoc->fontType) {
+      case fontType1:
+	if (font->getName()) {
+	  // this assumes that the PS font name matches the PDF font name
+	  psName = font->getName()->copy();
+	} else {
+	  //~ this won't work -- the PS font name won't match
+	  psName = makePSFontName(font, font->getID());
+	}
+	setupExternalType1Font(fontLoc->path, psName);
+	break;
+      case fontTrueType:
+      case fontTrueTypeOT:
+	psName = makePSFontName(font, font->getID());
+	setupExternalTrueTypeFont(font, fontLoc->path, psName);
+	break;
+      case fontCIDType2:
+      case fontCIDType2OT:
+	psName = makePSFontName(font, font->getID());
+	//~ should check to see if font actually uses vertical mode
+	setupExternalCIDTrueTypeFont(font, fontLoc->path, psName, gTrue);
+	break;
+      default:
+	break;
+      }
+      break;
+    case gfxFontLocResident:
+      psName = fontLoc->path->copy();
+      break;
+    }
 
-  // check for external CID TrueType font file
-  } else if (globalParams->getPSEmbedCIDTrueType() &&
-	     font->getType() == fontCIDType2 &&
-	     font->getExtFontFile()) {
-    psName = setupExternalCIDTrueTypeFont(font, font->getExtFontFile());
+    if (!psName) {
+      if (font->isCIDFont()) {
+	error(errSyntaxError, -1,
+	      "Couldn't find a font to substitute for '{0:s}' ('{1:s}' character collection)",
+	      font->getName() ? font->getName()->getCString()
+	                      : "(unnamed)",
+	      ((GfxCIDFont *)font)->getCollection()
+	          ? ((GfxCIDFont *)font)->getCollection()->getCString()
+	          : "(unknown)");
+	if (font16EncLen >= font16EncSize) {
+	  font16EncSize += 16;
+	  font16Enc = (PSFont16Enc *)greallocn(font16Enc,
+					       font16EncSize,
+					       sizeof(PSFont16Enc));
+	}
+	font16Enc[font16EncLen].fontID = *font->getID();
+	font16Enc[font16EncLen].enc = NULL;
+	++font16EncLen;
+      } else {
+	error(errSyntaxError, -1,
+	      "Couldn't find a font to substitute for '{0:s}'",
+	      font->getName() ? font->getName()->getCString()
+	                      : "(unnamed)");
+      }
+      delete fontLoc;
+      return;
+    }
 
-  // do 8-bit font substitution
-  } else if (!font->isCIDFont()) {
-    subst = gTrue;
-    name = font->getName();
-    psName = NULL;
-    if (name) {
-      for (i = 0; psFonts[i]; ++i) {
-	if (name->cmp(psFonts[i]) == 0) {
-	  psName = new GooString(psFonts[i]);
+    // scale substituted 8-bit fonts
+    if (fontLoc->locType == gfxFontLocResident &&
+	fontLoc->substIdx >= 0) {
+      subst = gTrue;
+      for (code = 0; code < 256; ++code) {
+	if ((charName = ((Gfx8BitFont *)font)->getCharName(code)) &&
+	    charName[0] == 'm' && charName[1] == '\0') {
 	  break;
 	}
       }
-    }
-    if (!psName) {
-      if (substFonts) {
-	if (font->isFixedWidth()) {
-	  i = 8;
-	} else if (font->isSerif()) {
-	  i = 4;
-	} else {
-	  i = 0;
-	}
-	if (font->isBold()) {
-	  i += 2;
-	}
-	if (font->isItalic()) {
-	  i += 1;
-	}
-	psName = new GooString(psSubstFonts[i].psName);
-	for (code = 0; code < 256; ++code) {
-	  if ((charName = ((Gfx8BitFont *)font)->getCharName(code)) &&
-	      charName[0] == 'm' && charName[1] == '\0') {
-	    break;
-	  }
-	}
-	if (code < 256) {
-	  w1 = ((Gfx8BitFont *)font)->getWidth(code);
-	} else {
-	  w1 = 0;
-	}
-	w2 = psSubstFonts[i].mWidth;
-	xs = w1 / w2;
-	if (xs < 0.1) {
-	  xs = 1;
-	}
+      if (code < 256) {
+	w1 = ((Gfx8BitFont *)font)->getWidth(code);
       } else {
-	psName = new GooString(name);
+	w1 = 0;
+      }
+      w2 = psBase14SubstFonts[fontLoc->substIdx].mWidth;
+      xs = w1 / w2;
+      if (xs < 0.1) {
 	xs = 1;
       }
-      if (font->getType() == fontType3) {
-	// This is a hack which makes it possible to substitute for some
-	// Type 3 fonts.  The problem is that it's impossible to know what
-	// the base coordinate system used in the font is without actually
-	// rendering the font.
-	ys = xs;
-	fm = font->getFontMatrix();
-	if (fm[0] != 0) {
-	  ys *= fm[3] / fm[0];
-	}
-      } else {
-	ys = 1;
+    }
+
+    // handle encodings for substituted CID fonts
+    if (fontLoc->locType == gfxFontLocResident &&
+	fontLoc->fontType >= fontCIDType0) {
+      subst = gTrue;
+      if (font16EncLen >= font16EncSize) {
+	font16EncSize += 16;
+	font16Enc = (PSFont16Enc *)greallocn(font16Enc,
+					     font16EncSize,
+					     sizeof(PSFont16Enc));
       }
-    }
-
-  // do 16-bit font substitution
-  } else if ((fontParam = globalParams->
-	        getPSFont16(font->getName(),
-			    ((GfxCIDFont *)font)->getCollection(),
-			    font->getWMode()))) {
-    subst = gTrue;
-    psName = fontParam->psFontName->copy();
-    if (font16EncLen >= font16EncSize) {
-      font16EncSize += 16;
-      font16Enc = (PSFont16Enc *)greallocn(font16Enc,
-					   font16EncSize, sizeof(PSFont16Enc));
-    }
-    font16Enc[font16EncLen].fontID = *font->getID();
-    font16Enc[font16EncLen].enc = fontParam->encoding->copy();
-    if ((uMap = globalParams->getUnicodeMap(font16Enc[font16EncLen].enc))) {
-      uMap->decRefCnt();
+      font16Enc[font16EncLen].fontID = *font->getID();
+      if ((uMap = globalParams->getUnicodeMap(fontLoc->encoding))) {
+	font16Enc[font16EncLen].enc = fontLoc->encoding->copy();
+	uMap->decRefCnt();
+      } else {
+	error(errSyntaxError, -1,
+	      "Couldn't find Unicode map for 16-bit font encoding '{0:t}'",
+	      fontLoc->encoding);
+	font16Enc[font16EncLen].enc = NULL;
+      }
       ++font16EncLen;
-    } else {
-      error(errSyntaxError, -1, "Couldn't find Unicode map for 16-bit font encoding '{0:t}'",
-	    font16Enc[font16EncLen].enc);
     }
 
-    // try the display font for embedding
-  } else if (globalParams->getPSEmbedCIDTrueType() &&
-	     ((GfxCIDFont *)font)->getCollection() &&
-	     (dfp = globalParams->
-	      getDisplayFont(font)) &&
-	     dfp->kind == displayFontTT) {
-    psName = setupExternalCIDTrueTypeFont(font, dfp->tt.fileName, dfp->tt.faceIndex);
-
-  // give up - can't do anything with this font
-  } else {
-    error(errSyntaxError, -1, "Couldn't find a font to substitute for '{0:s}' ('{1:s}' character collection)",
-	  font->getName() ? font->getName()->getCString() : "(unnamed)",
-	  ((GfxCIDFont *)font)->getCollection()
-	    ? ((GfxCIDFont *)font)->getCollection()->getCString()
-	    : "(unknown)");
-    return;
+    delete fontLoc;
   }
 
   // generate PostScript code to set up the font
@@ -1911,11 +1861,6 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
 	  charName = buf;
 	} else {
 	  charName = ((Gfx8BitFont *)font)->getCharName(i+j);
-	  // this is a kludge for broken PDF files that encode char 32
-	  // as .notdef
-	  if (i+j == 32 && charName && !strcmp(charName, ".notdef")) {
-	    charName = "space";
-	  }
 	}
 	writePS("/");
 	writePSName(charName ? charName : (char *)".notdef");
@@ -2279,39 +2224,10 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id,
   writePS("%%EndResource\n");
 }
 
-GooString *PSOutputDev::setupExternalTrueTypeFont(GfxFont *font) {
-  GooString *fileName;
-  char *fontBuf;
-  int fontLen;
+void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, GooString *fileName,
+					    GooString *psName) {
   FoFiTrueType *ffTT;
   int *codeToGID;
-  GooString *psName;
-  int i;
-
-  // check if font is already embedded
-  fileName = font->getExtFontFile();
-  for (i = 0; i < fontFileNameLen; ++i) {
-    if (!fontFileNames[i]->cmp(fileName)) {
-      return psFileNames[i]->copy();
-    }
-  }
-
-  psName = font->getName()->sanitizedName(gTrue /* ps mode */);
-  // add entry to fontFileNames list
-  if (i == fontFileNameLen) {
-    if (fontFileNameLen >= fontFileNameSize) {
-      fontFileNameSize += 64;
-      fontFileNames =
-	(GooString **)greallocn(fontFileNames,
-			      fontFileNameSize, sizeof(GooString *));
-      psFileNames =
-	(GooString **)greallocn(psFileNames,
-			     fontFileNameSize, sizeof(GooString *));
-    }
-    fontFileNames[fontFileNameLen] = fileName->copy();
-    psFileNames[fontFileNameLen] = psName->copy();
-    fontFileNameLen++;
-  }
 
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2320,8 +2236,7 @@ GooString *PSOutputDev::setupExternalTrueTypeFont(GfxFont *font) {
   embFontList->append("\n");
 
   // convert it to a Type 42 font
-  fontBuf = font->readExtFontFile(&fontLen);
-  if ((ffTT = FoFiTrueType::make(fontBuf, fontLen))) {
+  if ((ffTT = FoFiTrueType::load(fileName->getCString()))) {
     codeToGID = ((Gfx8BitFont *)font)->getCodeToGIDMap(ffTT);
     ffTT->convertToType42(psName->getCString(),
 			  ((Gfx8BitFont *)font)->getHasEncoding()
@@ -2341,50 +2256,21 @@ GooString *PSOutputDev::setupExternalTrueTypeFont(GfxFont *font) {
     }
     delete ffTT;
   }
-  gfree(fontBuf);
 
   // ending comment
   writePS("%%EndResource\n");
-  return psName;
 }
 
-GooString *PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, GooString *fileName, int faceIndex) {
+void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font,
+					       GooString *fileName,
+					       GooString *psName,
+					       GBool needVerticalMetrics) {
   FoFiTrueType *ffTT;
   int *codeToGID;
-  GooString *psName;
-  int i;
-  GooString *myFileName;
-
-  myFileName = fileName->copy();
-  if (faceIndex > 0) {
-    char tmp[32];
-    sprintf(tmp, ",%d", faceIndex);
-    myFileName->append(tmp);
-  }
-  // check if font is already embedded
-  for (i = 0; i < fontFileNameLen; ++i) {
-    if (!fontFileNames[i]->cmp(myFileName)) {
-      delete myFileName;
-      return psFileNames[i]->copy();
-    }
-  }
-
-  psName = font->getName()->sanitizedName(gTrue /* ps mode */);
-  // add entry to fontFileNames list
-  if (i == fontFileNameLen) {
-    if (fontFileNameLen >= fontFileNameSize) {
-      fontFileNameSize += 64;
-      fontFileNames =
-	(GooString **)grealloc(fontFileNames,
-			     fontFileNameSize * sizeof(GooString *));
-      psFileNames =
-	(GooString **)grealloc(psFileNames,
-			     fontFileNameSize * sizeof(GooString *));
-    }
-  }
-  fontFileNames[fontFileNameLen] = myFileName;
-  psFileNames[fontFileNameLen] = psName->copy();
-  fontFileNameLen++;
+  int codeToGIDLen;
+  CharCodeToUnicode *ctu;
+  Unicode *uBuf;
+  int cmap, code;
 
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2392,33 +2278,66 @@ GooString *PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font, GooString *f
   embFontList->append(psName->getCString());
   embFontList->append("\n");
 
-  // convert it to a CID type2 font
-  if ((ffTT = FoFiTrueType::load(fileName->getCString(), faceIndex))) {
-      int n = ((GfxCIDFont *)font)->getCIDToGIDLen();
-      if (n) {
-	codeToGID = (int *)gmallocn(n, sizeof(int));
-	memcpy(codeToGID, ((GfxCIDFont *)font)->getCIDToGID(), n * sizeof(int));
+  // convert it to a Type 0 font
+  //~ this should use fontNum to load the correct font
+  if ((ffTT = FoFiTrueType::load(fileName->getCString()))) {
+
+    // check for embedding permission
+    if (ffTT->getEmbeddingRights() >= 1) {
+
+      // create a CID-to-GID mapping, via Unicode
+      if ((ctu = ((GfxCIDFont *)font)->getToUnicode())) {
+	// look for a Unicode cmap
+	for (cmap = 0; cmap < ffTT->getNumCmaps(); ++cmap) {
+	  if ((ffTT->getCmapPlatform(cmap) == 3 &&
+	       ffTT->getCmapEncoding(cmap) == 1) ||
+	      ffTT->getCmapPlatform(cmap) == 0) {
+	    break;
+	  }
+	}
+	if (cmap < ffTT->getNumCmaps()) {
+	  // map CID -> Unicode -> GID
+	  codeToGIDLen = ctu->getLength();
+	  codeToGID = (int *)gmallocn(codeToGIDLen, sizeof(int));
+	  for (code = 0; code < codeToGIDLen; ++code) {
+	    if (ctu->mapToUnicode(code, &uBuf) > 0) {
+	      codeToGID[code] = ffTT->mapCodeToGID(cmap, uBuf[0]);
+	    } else {
+	      codeToGID[code] = 0;
+	    }
+	  }
+	  if (globalParams->getPSLevel() >= psLevel3) {
+	    // Level 3: use a CID font
+	    ffTT->convertToCIDType2(psName->getCString(),
+				    codeToGID, codeToGIDLen,
+				    needVerticalMetrics,
+				    outputFunc, outputStream);
+	  } else {
+	    // otherwise: use a non-CID composite font
+	    ffTT->convertToType0(psName->getCString(),
+				 codeToGID, codeToGIDLen,
+				 needVerticalMetrics,
+				 outputFunc, outputStream);
+	  }
+	  gfree(codeToGID);
+	}
+	ctu->decRefCnt();
       } else {
-	codeToGID = ((GfxCIDFont *)font)->getCodeToGIDMap(ffTT, &n);
+	error(errSyntaxError, -1,
+	      "Couldn't find a mapping to Unicode for font '{0:s}'",
+	      font->getName() ? font->getName()->getCString() : "(unnamed)");
       }
-      if (globalParams->getPSLevel() >= psLevel3) {
-	// Level 3: use a CID font
-	ffTT->convertToCIDType2(psName->getCString(),
-				codeToGID, n, gTrue,
-				outputFunc, outputStream);
-      } else {
-	// otherwise: use a non-CID composite font
-	ffTT->convertToType0(psName->getCString(),
-			     codeToGID, n, gTrue,
-			     outputFunc, outputStream);
-      }
-      gfree(codeToGID);
-      delete ffTT;
+    } else {
+      error(errSyntaxError, -1,
+	    "TrueType font '%s' does not allow embedding",
+	    font->getName() ? font->getName()->getCString() : "(unnamed)");
+	    
+    }
+    delete ffTT;
   }
 
   // ending comment
   writePS("%%EndResource\n");
-  return psName;
 }
 
 void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id,
@@ -2668,6 +2587,41 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName,
 
   // ending comment
   writePS("%%EndResource\n");
+}
+
+// Make a unique PS font name, based on the names given in the PDF
+// font object, and an object ID (font file object for 
+GooString *PSOutputDev::makePSFontName(GfxFont *font, Ref *id) {
+  GooString *psName, *s;
+
+  if ((s = font->getEmbeddedFontName())) {
+    psName = filterPSName(s);
+    if (!fontNames->lookupInt(psName)) {
+      fontNames->add(psName->copy(), 1);
+      return psName;
+    }
+    delete psName;
+  }
+  if ((s = font->getName())) {
+    psName = filterPSName(s);
+    if (!fontNames->lookupInt(psName)) {
+      fontNames->add(psName->copy(), 1);
+      return psName;
+    }
+    delete psName;
+  }
+  psName = GooString::format("FF{0:d}_{1:d}", id->num, id->gen);
+  if ((s = font->getEmbeddedFontName())) {
+    s = filterPSName(s);
+    psName->append('_')->append(s);
+    delete s;
+  } else if ((s = font->getName())) {
+    s = filterPSName(s);
+    psName->append('_')->append(s);
+    delete s;
+  }
+  fontNames->add(psName->copy(), 1);
+  return psName;
 }
 
 void PSOutputDev::setupImages(Dict *resDict) {
@@ -6907,6 +6861,37 @@ void PSOutputDev::writePSName(const char *s) {
       writePSChar(c);
     }
   }
+}
+
+GooString *PSOutputDev::filterPSName(GooString *name) {
+  GooString *name2;
+  char buf[8];
+  int i;
+  char c;
+
+  name2 = new GooString();
+
+  // ghostscript chokes on names that begin with out-of-limits
+  // numbers, e.g., 1e4foo is handled correctly (as a name), but
+  // 1e999foo generates a limitcheck error
+  c = name->getChar(0);
+  if (c >= '0' && c <= '9') {
+    name2->append('f');
+  }
+
+  for (i = 0; i < name->getLength(); ++i) {
+    c = name->getChar(i);
+    if (c <= (char)0x20 || c >= (char)0x7f ||
+	c == '(' || c == ')' || c == '<' || c == '>' ||
+	c == '[' || c == ']' || c == '{' || c == '}' ||
+	c == '/' || c == '%') {
+      sprintf(buf, "#%02x", c & 0xff);
+      name2->append(buf);
+    } else {
+      name2->append(c);
+    }
+  }
+  return name2;
 }
 
 // Convert GooString to GooString, with appropriate escaping

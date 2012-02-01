@@ -60,9 +60,9 @@ description for all fonts available in Windows. That's how MuPDF works.
 #define DEFAULT_SUBSTITUTE_FONT "Helvetica"
 
 static struct {
-    const char *name;
-    const char *t1FileName;
-    const char *ttFileName;
+    char *name;
+    char *t1FileName;
+    char *ttFileName;
 } displayFontTab[] = {
     {"Courier",               "n022003l.pfb", "cour.ttf"},
     {"Courier-Bold",          "n022004l.pfb", "courbd.ttf"},
@@ -218,11 +218,124 @@ static bool FileExists(const char *path)
     return false;
 }
 
-static void AddFont(GooHash *displayFonts, char *fontName, GooString *fontPath, DisplayFontParamKind kind)
-{
-    DisplayFontParam *dfp = new DisplayFontParam(new GooString(fontName), kind);
-    dfp->setFileName(fontPath);
-    displayFonts->add(dfp->name, dfp);
+void SysFontList::scanWindowsFonts(GooString *winFontDir) {
+  OSVERSIONINFO version;
+  char *path;
+  DWORD idx, valNameLen, dataLen, type;
+  HKEY regKey;
+  char valName[1024], data[1024];
+  int n, fontNum;
+  char *p0, *p1;
+  GooString *fontPath;
+
+  version.dwOSVersionInfoSize = sizeof(version);
+  GetVersionEx(&version);
+  if (version.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+    path = "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts\\";
+  } else {
+    path = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Fonts\\";
+  }
+  if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, path, 0,
+		   KEY_QUERY_VALUE | KEY_ENUMERATE_SUB_KEYS,
+		   &regKey) == ERROR_SUCCESS) {
+    idx = 0;
+    while (1) {
+      valNameLen = sizeof(valName) - 1;
+      dataLen = sizeof(data) - 1;
+      if (RegEnumValue(regKey, idx, valName, &valNameLen, NULL,
+		       &type, (LPBYTE)data, &dataLen) != ERROR_SUCCESS) {
+	break;
+      }
+      if (type == REG_SZ &&
+	  valNameLen > 0 && valNameLen < sizeof(valName) &&
+	  dataLen > 0 && dataLen < sizeof(data)) {
+	valName[valNameLen] = '\0';
+	data[dataLen] = '\0';
+	n = strlen(data);
+	if (!strcasecmp(data + n - 4, ".ttf") ||
+	    !strcasecmp(data + n - 4, ".ttc")) {
+	  fontPath = new GooString(data);
+	  if (!(dataLen >= 3 && data[1] == ':' && data[2] == '\\')) {
+	    fontPath->insert(0, '\\');
+	    fontPath->insert(0, winFontDir);
+		fontPath->append('\0');
+	  }
+	  p0 = valName;
+	  fontNum = 0;
+	  while (*p0) {
+	    p1 = strstr(p0, " & ");
+	    if (p1) {
+	      *p1 = '\0';
+	      p1 = p1 + 3;
+	    } else {
+	      p1 = p0 + strlen(p0);
+	    }
+	    fonts->append(makeWindowsFont(p0, fontNum,
+					  fontPath->getCString()));
+	    p0 = p1;
+	    ++fontNum;
+	  }
+	  delete fontPath;
+	}
+      }
+      ++idx;
+    }
+    RegCloseKey(regKey);
+  }
+}
+
+SysFontInfo *SysFontList::makeWindowsFont(char *name, int fontNum,
+					  char *path) {
+  int n;
+  GBool bold, italic;
+  GooString *s;
+  char c;
+  int i;
+  SysFontType type;
+
+  n = strlen(name);
+  bold = italic = gFalse;
+
+  // remove trailing ' (TrueType)'
+  if (n > 11 && !strncmp(name + n - 11, " (TrueType)", 11)) {
+    n -= 11;
+  }
+
+  // remove trailing ' Italic'
+  if (n > 7 && !strncmp(name + n - 7, " Italic", 7)) {
+    n -= 7;
+    italic = gTrue;
+  }
+
+  // remove trailing ' Bold'
+  if (n > 5 && !strncmp(name + n - 5, " Bold", 5)) {
+    n -= 5;
+    bold = gTrue;
+  }
+
+  // remove trailing ' Regular'
+  if (n > 5 && !strncmp(name + n - 8, " Regular", 8)) {
+    n -= 8;
+  }
+
+  //----- normalize the font name
+  s = new GooString(name, n);
+  i = 0;
+  while (i < s->getLength()) {
+    c = s->getChar(i);
+    if (c == ' ' || c == ',' || c == '-') {
+      s->del(i);
+    } else {
+      ++i;
+    }
+  }
+
+  if (!strcasecmp(path + strlen(path) - 4, ".ttc")) {
+    type = sysFontTTC;
+  } else {
+    type = sysFontTTF;
+  }
+  return new SysFontInfo(s, bold, italic, new GooString(path), type, fontNum);
 }
 
 void GlobalParams::setupBaseFonts(char * dir)
@@ -235,14 +348,14 @@ void GlobalParams::setupBaseFonts(char * dir)
     GetWindowsFontDir(winFontDir, sizeof(winFontDir));
 
     for (int i = 0; displayFontTab[i].name; ++i) {
-        char *fontName = (char *) displayFontTab[i].name;
-        if (displayFonts->lookup(fontName))
+        GooString  *fontName = new GooString(displayFontTab[i].name);
+        if (fontFiles->lookup(fontName))
             continue;
 
         if (dir) {
             GooString *fontPath = appendToPath(new GooString(dir), displayFontTab[i].t1FileName);
             if (FileExists(fontPath->getCString())) {
-                AddFont(displayFonts, fontName, fontPath, displayFontT1);
+                addFontFile(fontName, fontPath);
                 continue;
             }
             delete fontPath;
@@ -251,13 +364,16 @@ void GlobalParams::setupBaseFonts(char * dir)
         if (winFontDir[0] && displayFontTab[i].ttFileName) {
             GooString *fontPath = appendToPath(new GooString(winFontDir), displayFontTab[i].ttFileName);
             if (FileExists(fontPath->getCString())) {
-                AddFont(displayFonts, fontName, fontPath, displayFontTT);
+                addFontFile(fontName, fontPath);
                 continue;
             }
             delete fontPath;
         }
 
         error(errSyntaxError, -1, "No display font for '{0:s}'", fontName);
+    }
+    if (winFontDir[0]) {
+      sysFonts->scanWindowsFonts(new GooString(winFontDir));
     }
 }
 
@@ -270,22 +386,28 @@ static char *findSubstituteName(const char *origName)
 }
 
 /* Windows implementation of external font matching code */
-DisplayFontParam *GlobalParams::getDisplayFont(GfxFont *font) {
-    DisplayFontParam *  dfp;
-    GooString *         fontName = font->getName();
-    char *              substFontName = NULL;
-
-    if (!fontName) return NULL;
-    lockGlobalParams;
-    setupBaseFonts(NULL);
-    dfp = (DisplayFontParam *)displayFonts->lookup(fontName);
-    if (!dfp) {
-        substFontName = findSubstituteName(fontName->getCString());
-        error(errSyntaxError, -1, "Couldn't find a font for '{0:t}', subst is '{0:s}'", fontName, substFontName);
-        dfp = (DisplayFontParam *)displayFonts->lookup(substFontName);
-        assert(dfp);
+GooString *GlobalParams::findSystemFontFile(GfxFont *font,
+					  SysFontType *type,
+					  int *fontNum) {
+  SysFontInfo *fi;
+  GooString *path = NULL;
+  GooString *fontName = font->getName();
+  if (!fontName) return NULL;
+  lockGlobalParams;
+  setupBaseFonts(NULL);
+  if ((fi = sysFonts->find(fontName, gFalse))) {
+    path = fi->path->copy();
+    *type = fi->type;
+    *fontNum = fi->fontNum;
+  } else {
+    GooString *substFontName = new GooString(findSubstituteName(fontName->getCString()));
+    error(errSyntaxError, -1, "Couldn't find a font for '{0:t}', subst is '{0:s}'", fontName, substFontName);
+    if ((fi = sysFonts->find(substFontName, gFalse))) {
+      path = fi->path->copy();
+      *type = fi->type;
+      *fontNum = fi->fontNum;
     }
-    unlockGlobalParams;
-    return dfp;
+  }      
+  unlockGlobalParams;
+  return path;
 }
-

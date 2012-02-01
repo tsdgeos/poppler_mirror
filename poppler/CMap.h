@@ -37,6 +37,7 @@
 #endif
 
 class GooString;
+class Object;
 struct CMapVectorEntry;
 class CMapCache;
 class Stream;
@@ -45,6 +46,19 @@ class Stream;
 
 class CMap {
 public:
+
+  // Parse a CMap from <obj>, which can be a name or a stream.  Sets
+  // the initial reference count to 1.  Returns NULL on failure.
+  static CMap *parse(CMapCache *cache, GooString *collectionA, Object *obj);
+
+  // Create the CMap specified by <collection> and <cMapName>.  Sets
+  // the initial reference count to 1.  Returns NULL on failure.
+  static CMap *parse(CMapCache *cache, GooString *collectionA,
+		     GooString *cMapNameA);
+
+  // Parse a CMap from <str>.  Sets the initial reference count to 1.
+  // Returns NULL on failure.
+  static CMap *parse(CMapCache *cache, GooString *collectionA, Stream *str);
 
   // Create the CMap specified by <collection> and <cMapName>.  Sets
   // the initial reference count to 1.
@@ -78,9 +92,11 @@ public:
 
 private:
 
+  void parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data);
   CMap(GooString *collectionA, GooString *cMapNameA);
   CMap(GooString *collectionA, GooString *cMapNameA, int wModeA);
   void useCMap(CMapCache *cache, char *useName);
+  void useCMap(CMapCache *cache, Object *obj);
   void copyVector(CMapVectorEntry *dest, CMapVectorEntry *src);
   void addCIDs(Guint start, Guint end, Guint nBytes, CID firstCID);
   void freeCMapVector(CMapVectorEntry *vec);

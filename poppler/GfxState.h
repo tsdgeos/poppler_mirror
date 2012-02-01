@@ -1120,6 +1120,8 @@ private:
   int nComps2;			// number of components in colorSpace2
   GfxColorComp *		// lookup table
     lookup[gfxColorMaxComps];
+  GfxColorComp *		// optimized case lookup table
+    lookup2[gfxColorMaxComps];
   Guchar *byte_lookup;
   double			// minimum values for each component
     decodeLow[gfxColorMaxComps];

@@ -62,6 +62,75 @@ static int getCharFromStream(void *data) {
 
 //------------------------------------------------------------------------
 
+CMap *CMap::parse(CMapCache *cache, GooString *collectionA, Object *obj) {
+  CMap *cMap;
+  GooString *cMapNameA;
+
+  if (obj->isName()) {
+    cMapNameA = new GooString(obj->getName());
+    if (!(cMap = globalParams->getCMap(collectionA, cMapNameA))) {
+      error(errSyntaxError, -1,
+	    "Unknown CMap '{0:t}' for character collection '{1:t}'",
+	    cMapNameA, collectionA);
+    }
+    delete cMapNameA;
+  } else if (obj->isStream()) {
+    if (!(cMap = CMap::parse(NULL, collectionA, obj->getStream()))) {
+      error(errSyntaxError, -1, "Invalid CMap in Type 0 font");
+    }
+  } else {
+    error(errSyntaxError, -1, "Invalid Encoding in Type 0 font");
+    return NULL;
+  }
+  return cMap;
+}
+
+CMap *CMap::parse(CMapCache *cache, GooString *collectionA,
+		  GooString *cMapNameA) {
+  FILE *f;
+  CMap *cMap;
+
+  if (!(f = globalParams->findCMapFile(collectionA, cMapNameA))) {
+
+    // Check for an identity CMap.
+    if (!cMapNameA->cmp("Identity") || !cMapNameA->cmp("Identity-H")) {
+      return new CMap(collectionA->copy(), cMapNameA->copy(), 0);
+    }
+    if (!cMapNameA->cmp("Identity-V")) {
+      return new CMap(collectionA->copy(), cMapNameA->copy(), 1);
+    }
+
+    error(errSyntaxError, -1,
+	  "Couldn't find '{0:t}' CMap file for '{1:t}' collection",
+	  cMapNameA, collectionA);
+    return NULL;
+  }
+
+  cMap = new CMap(collectionA->copy(), cMapNameA->copy());
+  cMap->parse2(cache, &getCharFromFile, f);
+
+  fclose(f);
+
+  return cMap;
+}
+
+CMap *CMap::parse(CMapCache *cache, GooString *collectionA, Stream *str) {
+  Object obj1;
+  CMap *cMap;
+
+  cMap = new CMap(collectionA->copy(), NULL);
+
+  if (!str->getDict()->lookup("UseCMap", &obj1)->isNull()) {
+    cMap->useCMap(cache, &obj1);
+  }
+  obj1.free();
+
+  str->reset();
+  cMap->parse2(cache, &getCharFromStream, str);
+  str->close();
+  return cMap;
+}
+
 CMap *CMap::parse(CMapCache *cache, GooString *collectionA,
 		  GooString *cMapNameA, Stream *stream) {
   FILE *f = NULL;
@@ -163,6 +232,76 @@ CMap *CMap::parse(CMapCache *cache, GooString *collectionA,
   return cmap;
 }
 
+void CMap::parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data) {
+  PSTokenizer *pst;
+  char tok1[256], tok2[256], tok3[256];
+  int n1, n2, n3;
+  Guint start, end, code;
+
+  pst = new PSTokenizer(getCharFunc, data);
+  pst->getToken(tok1, sizeof(tok1), &n1);
+  while (pst->getToken(tok2, sizeof(tok2), &n2)) {
+    if (!strcmp(tok2, "usecmap")) {
+      if (tok1[0] == '/') {
+	useCMap(cache, tok1 + 1);
+      }
+      pst->getToken(tok1, sizeof(tok1), &n1);
+    } else if (!strcmp(tok1, "/WMode")) {
+      wMode = atoi(tok2);
+      pst->getToken(tok1, sizeof(tok1), &n1);
+    } else if (!strcmp(tok2, "begincidchar")) {
+      while (pst->getToken(tok1, sizeof(tok1), &n1)) {
+	if (!strcmp(tok1, "endcidchar")) {
+	  break;
+	}
+	if (!pst->getToken(tok2, sizeof(tok2), &n2) ||
+	    !strcmp(tok2, "endcidchar")) {
+	  error(errSyntaxError, -1, "Illegal entry in cidchar block in CMap");
+	  break;
+	}
+	if (!(tok1[0] == '<' && tok1[n1 - 1] == '>' &&
+	      n1 >= 4 && (n1 & 1) == 0)) {
+	  error(errSyntaxError, -1, "Illegal entry in cidchar block in CMap");
+	  continue;
+	}
+	tok1[n1 - 1] = '\0';
+	if (sscanf(tok1 + 1, "%x", &code) != 1) {
+	  error(errSyntaxError, -1, "Illegal entry in cidchar block in CMap");
+	  continue;
+	}
+	n1 = (n1 - 2) / 2;
+	addCIDs(code, code, n1, (CID)atoi(tok2));
+      }
+      pst->getToken(tok1, sizeof(tok1), &n1);
+    } else if (!strcmp(tok2, "begincidrange")) {
+      while (pst->getToken(tok1, sizeof(tok1), &n1)) {
+	if (!strcmp(tok1, "endcidrange")) {
+	  break;
+	}
+	if (!pst->getToken(tok2, sizeof(tok2), &n2) ||
+	    !strcmp(tok2, "endcidrange") ||
+	    !pst->getToken(tok3, sizeof(tok3), &n3) ||
+	    !strcmp(tok3, "endcidrange")) {
+	  error(errSyntaxError, -1, "Illegal entry in cidrange block in CMap");
+	  break;
+	}
+	if (tok1[0] == '<' && tok2[0] == '<' &&
+	    n1 == n2 && n1 >= 4 && (n1 & 1) == 0) {
+	  tok1[n1 - 1] = tok2[n1 - 1] = '\0';
+	  sscanf(tok1 + 1, "%x", &start);
+	  sscanf(tok2 + 1, "%x", &end);
+	  n1 = (n1 - 2) / 2;
+	  addCIDs(start, end, n1, (CID)atoi(tok3));
+	}
+      }
+      pst->getToken(tok1, sizeof(tok1), &n1);
+    } else {
+      strcpy(tok1, tok2);
+    }
+  }
+  delete pst;
+}
+
 CMap::CMap(GooString *collectionA, GooString *cMapNameA) {
   int i;
 
@@ -208,6 +347,20 @@ void CMap::useCMap(CMapCache *cache, char *useName) {
     subCMap = globalParams->getCMap(collection, useNameStr);
   }
   delete useNameStr;
+  if (!subCMap) {
+    return;
+  }
+  isIdent = subCMap->isIdent;
+  if (subCMap->vector) {
+    copyVector(vector, subCMap->vector);
+  }
+  subCMap->decRefCnt();
+}
+
+void CMap::useCMap(CMapCache *cache, Object *obj) {
+  CMap *subCMap;
+
+  subCMap = CMap::parse(cache, collection, obj);
   if (!subCMap) {
     return;
   }

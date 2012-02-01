@@ -381,15 +381,14 @@ CairoFreeTypeFont::~CairoFreeTypeFont() { }
 
 CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
 					     FT_Library lib, GBool useCIDs) {
-  Ref embRef;
   Object refObj, strObj;
   GooString *fileName;
   char *fileNameC;
   char *font_data;
   int font_data_len;
-  DisplayFontParam *dfp;
   int i, n;
   GfxFontType fontType;
+  GfxFontLoc *fontLoc;
   char **enc;
   char *name;
   FoFiTrueType *ff;
@@ -401,7 +400,6 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
   int *codeToGID;
   Guint codeToGIDLen;
   
-  dfp = NULL;
   codeToGID = NULL;
   codeToGIDLen = 0;
   font_data = NULL;
@@ -414,32 +412,23 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
   ref = *gfxFont->getID();
   fontType = gfxFont->getType();
 
-  if (gfxFont->getEmbeddedFontID(&embRef)) {
+  if (!(fontLoc = gfxFont->locateFont(xref, gFalse))) {
+    error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'",
+    	gfxFont->getName() ? gfxFont->getName()->getCString()
+	                       : "(unnamed)");
+    goto err2;
+  }
+
+  // embedded font
+  if (fontLoc->locType == gfxFontLocEmbedded) {
     font_data = gfxFont->readEmbFontFile(xref, &font_data_len);
     if (NULL == font_data)
       goto err2;
-  } else if (!(fileName = gfxFont->getExtFontFile())) {
-    // look for a display font mapping or a substitute font
-    dfp = NULL;
-    if (gfxFont->getName()) {
-      dfp = globalParams->getDisplayFont(gfxFont);
-    }
-    if (!dfp) {
-      error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'",
-	    gfxFont->getName() ? gfxFont->getName()->getCString()
-	    : "(unnamed)");
-      goto err2;
-    }
-    switch (dfp->kind) {
-    case displayFontT1:
-      fileName = dfp->t1.fileName;
-      fontType = gfxFont->isCIDFont() ? fontCIDType0 : fontType1;
-      break;
-    case displayFontTT:
-      fileName = dfp->tt.fileName;
-      fontType = gfxFont->isCIDFont() ? fontCIDType2 : fontTrueType;
-      break;
-    }
+
+  // external font
+  } else { // gfxFontLocExternal
+    fileName = fontLoc->path;
+    fontType = fontLoc->fontType;
     substitute = gTrue;
   }
 
@@ -546,6 +535,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
     break;
   }
 
+  delete fontLoc;
   return new CairoFreeTypeFont(ref,
 		       font_face,
 		       codeToGID, codeToGIDLen,
@@ -553,6 +543,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
 
  err2:
   /* hmm? */
+  delete fontLoc;
   fprintf (stderr, "some font thing failed\n");
   return NULL;
 }
