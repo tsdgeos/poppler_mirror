@@ -1402,9 +1402,9 @@ poppler_page_get_annot_mapping (PopplerPage *page)
  *   #PopplerAnnotMapping<!-- -->s
  *
  * Frees a list of #PopplerAnnotMapping<!-- -->s allocated by
- * poppler_page_get_annot_mapping().  It also frees the #PopplerAnnot<!-- -->s
+ * poppler_page_get_annot_mapping().  It also unreferences the #PopplerAnnot<!-- -->s
  * that each mapping contains, so if you want to keep them around, you need to
- * copy them with poppler_annot_copy().
+ * reference them with g_object_ref().
  **/
 void
 poppler_page_free_annot_mapping (GList *list)
