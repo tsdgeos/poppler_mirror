@@ -1340,10 +1340,16 @@ void PDFDoc::replacePageDict(int pageNo, int rotate,
 
 void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset) 
 {
+  pageDict->remove("Names");
+  pageDict->remove("OpenAction");
+  pageDict->remove("Outlines");
+  pageDict->remove("StructTreeRoot");
+
   for (int n = 0; n < pageDict->getLength(); n++) {
     const char *key = pageDict->getKey(n);
     Object value; pageDict->getValNF(n, &value);
-    if (strcmp(key, "Parent") != 0) {
+    if (strcmp(key, "Parent") != 0 &&
+	      strcmp(key, "Pages") != 0) {
       markObject(&value, xRef, countRef, numOffset);
     }
     value.free();
