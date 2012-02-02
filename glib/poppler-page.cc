@@ -624,8 +624,7 @@ poppler_page_get_thumbnail_size (PopplerPage *page,
  * @selection: start and end point of selection as a rectangle
  * 
  * Returns a region containing the area that would be rendered by
- * poppler_page_render_selection() or 
- * poppler_page_render_selection_to_pixbuf() as a #GList of
+ * poppler_page_render_selection() as a #GList of
  * #PopplerRectangle. The returned list must be freed with
  * poppler_page_selection_region_free().
  * 
@@ -716,8 +715,7 @@ poppler_page_selection_region_free (GList *region)
  * @selection: start and end point of selection as a rectangle
  *
  * Returns a region containing the area that would be rendered by
- * poppler_page_render_selection() or
- * poppler_page_render_selection_to_pixbuf().
+ * poppler_page_render_selection().
  * The returned region must be freed with cairo_region_destroy()
  *
  * Return value: (transfer full): a cairo_region_t
