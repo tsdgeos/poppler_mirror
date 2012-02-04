@@ -2320,10 +2320,9 @@ poppler_layers_iter_get_title (PopplerLayersIter *iter)
 /**
  * poppler_layers_iter_get_layer:
  * @iter: a #PopplerLayersIter
- * 
- * Returns the #PopplerLayer associated with @iter.  It must be freed with
- * poppler_layer_free().
- * 
+ *
+ * Returns the #PopplerLayer associated with @iter.
+ *
  * Return value: (transfer full): a new #PopplerLayer, or %NULL if
  * there isn't any layer associated with @iter
  *
