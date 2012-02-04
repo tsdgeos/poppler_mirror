@@ -228,11 +228,13 @@ Object *Lexer::getObj(Object *obj, int objNum) {
 	break;
       }
     }
-    if (neg)
+    if (neg) {
       xi = -xi;
+      xf = -xf;
+    }
     if (unlikely(overflownInteger)) {
       if (overflownUnsignedInteger) {
-        obj->initError();
+        obj->initReal(xf);
       } else {
         obj->initUint(xui);
       }
