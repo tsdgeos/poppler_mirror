@@ -1164,10 +1164,10 @@ poppler_annot_free_text_get_quadding (PopplerAnnotFreeText *poppler_annot)
  * poppler_annot_free_text_get_callout_line:
  * @poppler_annot: a #PopplerAnnotFreeText
  *
- * Retrieves a #PopplerCalloutLine of four or six numbers specifying a callout
+ * Retrieves a #PopplerAnnotCalloutLine of four or six numbers specifying a callout
  * line attached to the @poppler_annot.
  *
- * Return value: a new allocated #PopplerCalloutLine if the annot has a callout
+ * Return value: a new allocated #PopplerAnnotCalloutLine if the annot has a callout
  *               line, %NULL in other case. It must be freed with g_free() when
  *               done.
  **/
@@ -1278,7 +1278,7 @@ poppler_annot_callout_line_new (void)
 
 /**
  * poppler_annot_callout_line_copy:
- * @callout: the #PopplerAnnotCalloutline to be copied.
+ * @callout: the #PopplerAnnotCalloutLine to be copied.
  *
  * It does copy @callout to a new #PopplerAnnotCalloutLine.
  *

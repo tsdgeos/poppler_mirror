@@ -470,7 +470,7 @@ create_surface_from_thumbnail_data (guchar *data,
 
 /**
  * poppler_page_get_thumbnail:
- * @page: the #PopperPage to get the thumbnail for
+ * @page: the #PopplerPage to get the thumbnail for
  * 
  * Get the embedded thumbnail for the specified page.  If the document
  * doesn't have an embedded thumbnail for the page, this function
@@ -1211,7 +1211,6 @@ poppler_page_get_link_mapping (PopplerPage *page)
 
 /**
  * poppler_page_free_link_mapping:
-
  * @list: (element-type PopplerLinkMapping): A list of
  *   #PopplerLinkMapping<!-- -->s
  * 

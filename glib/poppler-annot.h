@@ -219,7 +219,7 @@ PopplerMovie                 *poppler_annot_movie_get_movie                    (
 GType                         poppler_annot_screen_get_type                    (void) G_GNUC_CONST;
 PopplerAction                *poppler_annot_screen_get_action                  (PopplerAnnotScreen *poppler_annot);
 
-/* PopplerCalloutLine */
+/* PopplerAnnotCalloutLine */
 GType                         poppler_annot_callout_line_get_type              (void) G_GNUC_CONST;
 PopplerAnnotCalloutLine      *poppler_annot_callout_line_new                   (void);
 PopplerAnnotCalloutLine      *poppler_annot_callout_line_copy                  (PopplerAnnotCalloutLine *callout);
