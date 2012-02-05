@@ -109,7 +109,7 @@ public:
   Object *getDocInfoNF(Object *obj);
 
   // Return the number of objects in the xref table.
-  int getNumObjects() { return size; }
+  int getNumObjects() { return last + 1; }
 
   // Return the catalog object reference.
   int getRootNum() { return rootNum; }
@@ -141,6 +141,7 @@ private:
   XRefEntry *entries;		// xref entries
   int capacity;			// size of <entries> array
   int size;			// number of entries
+  int last;			// last used index in <entries>
   int rootNum, rootGen;		// catalog dict
   GBool ok;			// true if xref table is valid
   int errCode;			// error code (if <ok> is false)

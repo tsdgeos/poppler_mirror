@@ -134,7 +134,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
   if (parser->getObj(&obj)->isInt() &&
      (num = obj.getInt(), obj.free(), parser->getObj(&obj)->isInt()) &&
      (gen = obj.getInt(), obj.free(), parser->getObj(&obj)->isCmd("obj")) &&
-     (obj.free(), parser->getObj(&obj,
+     (obj.free(), parser->getObj(&obj, gFalse,
          secHdlr ? secHdlr->getFileKey() : (Guchar *)NULL,
          secHdlr ? secHdlr->getEncAlgorithm() : cryptRC4,
          secHdlr ? secHdlr->getFileKeyLength() : 0,

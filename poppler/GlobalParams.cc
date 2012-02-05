@@ -582,6 +582,10 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   psOPI = gFalse;
   psASCIIHex = gFalse;
   psBinary = gFalse;
+  psUncompressPreloadedImages = gFalse;
+  psRasterResolution = 300;
+  psRasterMono = gFalse;
+  psAlwaysRasterize = gFalse;
   textEncoding = new GooString("UTF-8");
 #if defined(_WIN32)
   textEOL = eolDOS;
@@ -596,6 +600,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   disableFreeTypeHinting = gFalse;
   antialias = gTrue;
   vectorAntialias = gTrue;
+  antialiasPrinting = gFalse;
   strokeAdjust = gTrue;
   screenType = screenUnset;
   screenSize = -1;
@@ -610,7 +615,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   printCommands = gFalse;
   profileCommands = gFalse;
   errQuiet = gFalse;
-  splashResolution = 0.0;
 
   cidToUnicodeCache = new CharCodeToUnicodeCache(cidToUnicodeCacheSize);
   unicodeToUnicodeCache =
@@ -1559,6 +1563,42 @@ GBool GlobalParams::getPSBinary() {
   return binary;
 }
 
+GBool GlobalParams::getPSUncompressPreloadedImages() {
+  GBool ah;
+
+  lockGlobalParams;
+  ah = psUncompressPreloadedImages;
+  unlockGlobalParams;
+  return ah;
+}
+
+double GlobalParams::getPSRasterResolution() {
+  double res;
+
+  lockGlobalParams;
+  res = psRasterResolution;
+  unlockGlobalParams;
+  return res;
+}
+
+GBool GlobalParams::getPSRasterMono() {
+  GBool mono;
+
+  lockGlobalParams;
+  mono = psRasterMono;
+  unlockGlobalParams;
+  return mono;
+}
+
+GBool GlobalParams::getPSAlwaysRasterize() {
+  GBool rast;
+
+  lockGlobalParams;
+  rast = psAlwaysRasterize;
+  unlockGlobalParams;
+  return rast;
+}
+
 GooString *GlobalParams::getTextEncodingName() {
   GooString *s;
 
@@ -1627,6 +1667,15 @@ GBool GlobalParams::getVectorAntialias() {
 
   lockGlobalParams;
   f = vectorAntialias;
+  unlockGlobalParams;
+  return f;
+}
+
+GBool GlobalParams::getAntialiasPrinting() {
+  GBool f;
+
+  lockGlobalParams;
+  f = antialiasPrinting;
   unlockGlobalParams;
   return f;
 }
@@ -1743,14 +1792,6 @@ GBool GlobalParams::getErrQuiet() {
   // no locking -- this function may get called from inside a locked
   // section
   return errQuiet;
-}
-
-double GlobalParams::getSplashResolution() {
-  double r;
-  lockGlobalParams;
-  r = splashResolution;
-  unlockGlobalParams;
-  return r;
 }
 
 CharCodeToUnicode *GlobalParams::getCIDToUnicode(GooString *collection) {
@@ -1944,6 +1985,30 @@ void GlobalParams::setPSBinary(GBool binary) {
   unlockGlobalParams;
 }
 
+void GlobalParams::setPSUncompressPreloadedImages(GBool uncomp) {
+  lockGlobalParams;
+  psUncompressPreloadedImages = uncomp;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setPSRasterResolution(double res) {
+  lockGlobalParams;
+  psRasterResolution = res;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setPSRasterMono(GBool mono) {
+  lockGlobalParams;
+  psRasterMono = mono;
+  unlockGlobalParams;
+}
+
+void GlobalParams::setPSAlwaysRasterize(GBool always) {
+  lockGlobalParams;
+  psAlwaysRasterize = always;
+  unlockGlobalParams;
+}
+
 void GlobalParams::setTextEncoding(char *encodingName) {
   lockGlobalParams;
   delete textEncoding;
@@ -2013,6 +2078,12 @@ GBool GlobalParams::setVectorAntialias(char *s) {
   ok = parseYesNo2(s, &vectorAntialias);
   unlockGlobalParams;
   return ok;
+}
+
+void GlobalParams::setAntialiasPrinting(GBool anti) {
+  lockGlobalParams;
+  antialiasPrinting = anti;
+  unlockGlobalParams;
 }
 
 void GlobalParams::setStrokeAdjust(GBool adjust)
@@ -2104,12 +2175,6 @@ void GlobalParams::setProfileCommands(GBool profileCommandsA) {
 void GlobalParams::setErrQuiet(GBool errQuietA) {
   lockGlobalParams;
   errQuiet = errQuietA;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setSplashResolution(double SplashResolutionA) {
-  lockGlobalParams;
-  splashResolution = SplashResolutionA;
   unlockGlobalParams;
 }
 

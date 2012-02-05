@@ -273,7 +273,7 @@ int main(int argc, char *argv[]) {
     globalParams->setPSLevel(level);
   }
   if (splashResolution > 0) {
-    globalParams->setSplashResolution(splashResolution);
+    globalParams->setPSRasterResolution(splashResolution);
   }
   if (noEmbedT1Fonts) {
     globalParams->setPSEmbedType1(!noEmbedT1Fonts);

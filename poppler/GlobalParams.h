@@ -165,6 +165,10 @@ public:
   GBool getPSOPI();
   GBool getPSASCIIHex();
   GBool getPSBinary();
+  GBool getPSUncompressPreloadedImages();
+  double getPSRasterResolution();
+  GBool getPSRasterMono();
+  GBool getPSAlwaysRasterize();
   GooString *getTextEncodingName();
   EndOfLineKind getTextEOL();
   GBool getTextPageBreaks();
@@ -173,6 +177,7 @@ public:
   GBool getDisableFreeTypeHinting();
   GBool getAntialias();
   GBool getVectorAntialias();
+  GBool getAntialiasPrinting();
   GBool getStrokeAdjust();
   ScreenType getScreenType();
   int getScreenSize();
@@ -217,6 +222,10 @@ public:
   void setPSOPI(GBool opi);
   void setPSASCIIHex(GBool hex);
   void setPSBinary(GBool binary);
+  void setPSUncompressPreloadedImages(GBool uncomp);
+  void setPSRasterResolution(double res);
+  void setPSRasterMono(GBool mono);
+  void setPSAlwaysRasterize(GBool always);
   void setTextEncoding(char *encodingName);
   GBool setTextEOL(char *s);
   void setTextPageBreaks(GBool pageBreaks);
@@ -225,6 +234,7 @@ public:
   GBool setDisableFreeTypeHinting(char *s);
   GBool setAntialias(char *s);
   GBool setVectorAntialias(char *s);
+  void setAntialiasPrinting(GBool print);
   void setStrokeAdjust(GBool strokeAdjust);
   void setScreenType(ScreenType st);
   void setScreenSize(int size);
@@ -239,7 +249,6 @@ public:
   void setPrintCommands(GBool printCommandsA);
   void setProfileCommands(GBool profileCommandsA);
   void setErrQuiet(GBool errQuietA);
-  void setSplashResolution(double splashResolutionA);
 
   //----- security handlers
 
@@ -313,6 +322,12 @@ private:
   GBool psOPI;			// generate PostScript OPI comments?
   GBool psASCIIHex;		// use ASCIIHex instead of ASCII85?
   GBool psBinary;		// use binary instead of hex
+  GBool psUncompressPreloadedImages;  // uncompress all preloaded images
+  double psRasterResolution;	// PostScript rasterization resolution (dpi)
+  GBool psRasterMono;		// true to do PostScript rasterization
+				//   in monochrome (gray); false to do it
+				//   in color (RGB/CMYK)
+  GBool psAlwaysRasterize;	// force PostScript rasterization
   GooString *textEncoding;	// encoding (unicodeMap) to use for text
 				//   output
   EndOfLineKind textEOL;	// type of EOL marker to use for text
@@ -323,6 +338,7 @@ private:
   GBool disableFreeTypeHinting;	// FreeType disable hinting flag
   GBool antialias;		// anti-aliasing enable flag
   GBool vectorAntialias;	// vector anti-aliasing enable flag
+  GBool antialiasPrinting;	// allow anti-aliasing when printing
   GBool strokeAdjust;		// stroke adjustment enable flag
   ScreenType screenType;	// halftone screen type
   int screenSize;		// screen matrix size

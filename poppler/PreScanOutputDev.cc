@@ -95,6 +95,46 @@ GBool PreScanOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *ca
   return gTrue;
 }
 
+GBool PreScanOutputDev::functionShadedFill(GfxState *state,
+					   GfxFunctionShading *shading) {
+  if (shading->getColorSpace()->getMode() != csDeviceGray &&
+      shading->getColorSpace()->getMode() != csCalGray) {
+    gray = gFalse;
+  }
+  mono = gFalse;
+  if (state->getFillOpacity() != 1 ||
+      state->getBlendMode() != gfxBlendNormal) {
+    transparency = gTrue;
+  }
+  return gTrue;
+}
+
+GBool PreScanOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading, double /*tMin*/, double /*tMax*/) {
+  if (shading->getColorSpace()->getMode() != csDeviceGray &&
+      shading->getColorSpace()->getMode() != csCalGray) {
+    gray = gFalse;
+  }
+  mono = gFalse;
+  if (state->getFillOpacity() != 1 ||
+      state->getBlendMode() != gfxBlendNormal) {
+    transparency = gTrue;
+  }
+  return gTrue;
+}
+
+GBool PreScanOutputDev::radialShadedFill(GfxState *state, GfxRadialShading *shading, double /*sMin*/, double /*sMax*/) {
+  if (shading->getColorSpace()->getMode() != csDeviceGray &&
+      shading->getColorSpace()->getMode() != csCalGray) {
+    gray = gFalse;
+  }
+  mono = gFalse;
+  if (state->getFillOpacity() != 1 ||
+      state->getBlendMode() != gfxBlendNormal) {
+    transparency = gTrue;
+  }
+  return gTrue;
+}
+
 void PreScanOutputDev::clip(GfxState * /*state*/) {
   //~ check for a rectangle "near" the edge of the page;
   //~   else set gdi to false
@@ -161,7 +201,7 @@ void PreScanOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *
   gdi = gFalse;
   if ((level == psLevel1 || level == psLevel1Sep) &&
       state->getFillColorSpace()->getMode() == csPattern) {
-    level1PSBug = gTrue;
+    patternImgMask = gTrue;
   }
 
   if (inlineImg) {
@@ -184,12 +224,17 @@ void PreScanOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str,
   if (colorSpace->getMode() == csIndexed) {
     colorSpace = ((GfxIndexedColorSpace *)colorSpace)->getBase();
   }
-  if (colorSpace->getMode() != csDeviceGray &&
-      colorSpace->getMode() != csCalGray) {
+  if (colorSpace->getMode() == csDeviceGray ||
+      colorSpace->getMode() == csCalGray) {
+    if (colorMap->getBits() > 1) {
+      mono = gFalse;
+    }
+  } else {
     gray = gFalse;
+    mono = gFalse;
   }
-  mono = gFalse;
-  if (state->getBlendMode() != gfxBlendNormal) {
+  if (state->getFillOpacity() != 1 ||
+      state->getBlendMode() != gfxBlendNormal) {
     transparency = gTrue;
   }
   gdi = gFalse;
@@ -218,12 +263,17 @@ void PreScanOutputDev::drawMaskedImage(GfxState *state, Object * /*ref*/,
   if (colorSpace->getMode() == csIndexed) {
     colorSpace = ((GfxIndexedColorSpace *)colorSpace)->getBase();
   }
-  if (colorSpace->getMode() != csDeviceGray &&
-      colorSpace->getMode() != csCalGray) {
+  if (colorSpace->getMode() == csDeviceGray ||
+      colorSpace->getMode() == csCalGray) {
+    if (colorMap->getBits() > 1) {
+      mono = gFalse;
+    }
+  } else {
     gray = gFalse;
+    mono = gFalse;
   }
-  mono = gFalse;
-  if (state->getBlendMode() != gfxBlendNormal) {
+  if (state->getFillOpacity() != 1 ||
+      state->getBlendMode() != gfxBlendNormal) {
     transparency = gTrue;
   }
   gdi = gFalse;
@@ -303,5 +353,5 @@ void PreScanOutputDev::clearStats() {
   gray = gTrue;
   transparency = gFalse;
   gdi = gTrue;
-  level1PSBug = gFalse;
+  patternImgMask = gFalse;
 }

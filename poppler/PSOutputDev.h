@@ -43,16 +43,20 @@
 #include "GlobalParams.h"
 #include "OutputDev.h"
 
+class GHooash;
+class PDFDoc;
+class XRef;
+class Function;
 class GfxPath;
 class GfxFont;
 class GfxColorSpace;
 class GfxSeparationColorSpace;
 class PDFRectangle;
+struct PST1FontName;
 struct PSFont8Info;
 struct PSFont16Enc;
 class PSOutCustomColor;
-class Function;
-class PDFDoc;
+class PSOutputDev;
 
 //------------------------------------------------------------------------
 // PSOutputDev
@@ -72,7 +76,16 @@ enum PSFileType {
   psGeneric			// write to a generic stream
 };
 
+enum PSOutCustomCodeLocation {
+  psOutCustomDocSetup,
+  psOutCustomPageSetup
+};
+
 typedef void (*PSOutputFunc)(void *stream, const char *data, int len);
+
+typedef GooString *(*PSOutCustomCodeCbk)(PSOutputDev *psOut,
+				       PSOutCustomCodeLocation loc, int n, 
+				       void *data);
 
 class PSOutputDev: public OutputDev {
 public:
@@ -85,8 +98,9 @@ public:
 	      GBool duplexA = gTrue,
 	      int imgLLXA = 0, int imgLLYA = 0,
 	      int imgURXA = 0, int imgURYA = 0,
-	      GBool forceRasterizeA = gFalse,
-	      GBool manualCtrlA = gFalse);
+	      GBool manualCtrlA = gFalse,
+	      PSOutCustomCodeCbk customCodeCbkA = NULL,
+	      void *customCodeCbkDataA = NULL);
 
   // Open a PSOutputDev that will write to a generic stream.
   PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
@@ -97,8 +111,9 @@ public:
 	      GBool duplexA = gTrue,
 	      int imgLLXA = 0, int imgLLYA = 0,
 	      int imgURXA = 0, int imgURYA = 0,
-	      GBool forceRasterizeA = gFalse,
-	      GBool manualCtrlA = gFalse);
+	      GBool manualCtrlA = gFalse,
+	      PSOutCustomCodeCbk customCodeCbkA = NULL,
+	      void *customCodeCbkDataA = NULL);
 
   // Destructor -- writes the trailer and closes the file.
   virtual ~PSOutputDev();
@@ -310,7 +325,7 @@ private:
   void setupType3Font(GfxFont *font, GooString *psName, Dict *parentResDict);
   GooString *makePSFontName(GfxFont *font, Ref *id);
   void setupImages(Dict *resDict);
-  void setupImage(Ref id, Stream *str);
+  void setupImage(Ref id, Stream *str, GBool mask);
   void setupForms(Dict *resDict);
   void setupForm(Ref id, Object *strObj);
   void addProcessColor(double c, double m, double y, double k);
@@ -376,6 +391,7 @@ private:
   PSOutMode mode;		// PostScript mode (PS, EPS, form)
   int paperWidth;		// width of paper, in pts
   int paperHeight;		// height of paper, in pts
+  GBool paperMatch;		// true if paper size is set to match each page
   int prevWidth;		// width of previous page
                                 // (only psModePSOrigPageSizes output mode)
   int prevHeight;		// height of previous page
@@ -394,6 +410,10 @@ private:
   void *underlayCbkData;
   void (*overlayCbk)(PSOutputDev *psOut, void *data);
   void *overlayCbkData;
+  GooString *(*customCodeCbk)(PSOutputDev *psOut,
+			    PSOutCustomCodeLocation loc, int n, 
+			    void *data);
+  void *customCodeCbkData;
 
   PDFDoc *doc;
   XRef *xref;			// the xref table for this PDF file
@@ -402,15 +422,9 @@ private:
   int fontIDLen;		// number of entries in fontIDs array
   int fontIDSize;		// size of fontIDs array
   GooHash *fontNames;		// all used font names
-  Ref *fontFileIDs;		// list of object IDs of all embedded fonts
-  int fontFileIDLen;		// number of entries in fontFileIDs array
-  int fontFileIDSize;		// size of fontFileIDs array
-  GooString **fontFileNames;	// list of names of all embedded external fonts
-  GooString **psFileNames;	// list of names of all embedded external fonts
-  int fontFileNameLen;		// number of entries in fontFileNames array
-  int fontFileNameSize;		// size of fontFileNames array
-  int nextTrueTypeNum;		// next unique number to append to a TrueType
-				//   font name
+  PST1FontName *t1FontNames;	// font names for Type 1/1C fonts
+  int t1FontNameLen;		// number of entries in t1FontNames array
+  int t1FontNameSize;		// size of t1FontNames array
   PSFont8Info *font8Info;	// info for 8-bit fonts
   int font8InfoLen;		// number of entries in font8Info array
   int font8InfoSize;		// size of font8Info array
@@ -429,6 +443,8 @@ private:
   int numTilingPatterns;	// current number of nested tiling patterns
   int nextFunc;			// next unique number to use for a function
 
+  GooList *paperSizes;		// list of used paper sizes, if paperMatch
+				//   is true [PSOutPaperSize]
   double tx0, ty0;		// global translation
   double xScale0, yScale0;	// global scaling
   int rotate0;			// rotation angle (0, 90, 180, 270)
@@ -453,9 +469,9 @@ private:
   GooString *t3String;		// Type 3 content string
   double t3WX, t3WY,		// Type 3 character parameters
          t3LLX, t3LLY, t3URX, t3URY;
+  GBool t3FillColorOnly;	// operators should only use the fill color
   GBool t3Cacheable;		// cleared if char is not cacheable
   GBool t3NeedsRestore;		// set if a 'q' operator was issued
-  GBool forceRasterize;		// forces the page to be rasterized into a image before printing
   GBool displayText;		// displayText
 
 #if OPI_SUPPORT
@@ -464,7 +480,6 @@ private:
 #endif
 
   GBool ok;			// set up ok?
-
 
   friend class WinPDFPrinter;
 };

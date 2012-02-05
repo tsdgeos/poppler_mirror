@@ -260,6 +260,7 @@ void XRef::init() {
   entries = NULL;
   capacity = 0;
   size = 0;
+  last = -1;
   streamEnds = NULL;
   streamEndsLen = 0;
   objStrs = new PopplerCache(5);
@@ -430,7 +431,7 @@ GBool XRef::readXRef(Guint *pos, std::vector<Guint> *followedXRefStm) {
 	     new Lexer(NULL,
 	       str->makeSubStream(start + *pos, gFalse, 0, &obj)),
 	     gTrue);
-  parser->getObj(&obj);
+  parser->getObj(&obj, gTrue);
 
   // parse an old-style xref table
   if (obj.isCmd("xref")) {
@@ -440,11 +441,11 @@ GBool XRef::readXRef(Guint *pos, std::vector<Guint> *followedXRefStm) {
   // parse an xref stream
   } else if (obj.isInt()) {
     obj.free();
-    if (!parser->getObj(&obj)->isInt()) {
+    if (!parser->getObj(&obj, gTrue)->isInt()) {
       goto err1;
     }
     obj.free();
-    if (!parser->getObj(&obj)->isCmd("obj")) {
+    if (!parser->getObj(&obj, gTrue)->isCmd("obj")) {
       goto err1;
     }
     obj.free();
@@ -479,7 +480,7 @@ GBool XRef::readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *follow
   int first, n, i;
 
   while (1) {
-    parser->getObj(&obj);
+    parser->getObj(&obj, gTrue);
     if (obj.isCmd("trailer")) {
       obj.free();
       break;
@@ -489,7 +490,7 @@ GBool XRef::readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *follow
     }
     first = obj.getInt();
     obj.free();
-    if (!parser->getObj(&obj)->isInt()) {
+    if (!parser->getObj(&obj, gTrue)->isInt()) {
       goto err1;
     }
     n = obj.getInt();
@@ -504,19 +505,19 @@ GBool XRef::readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *follow
       }
     }
     for (i = first; i < first + n; ++i) {
-      if (!parser->getObj(&obj)->isInt()) {
+      if (!parser->getObj(&obj, gTrue)->isInt()) {
 	goto err1;
       }
       entry.offset = (Guint)obj.getInt();
       obj.free();
-      if (!parser->getObj(&obj)->isInt()) {
+      if (!parser->getObj(&obj, gTrue)->isInt()) {
 	goto err1;
       }
       entry.gen = obj.getInt();
       entry.obj.initNull ();
       entry.updated = false;
       obj.free();
-      parser->getObj(&obj);
+      parser->getObj(&obj, gTrue);
       if (obj.isCmd("n")) {
 	entry.type = xrefEntryUncompressed;
       } else if (obj.isCmd("f")) {
@@ -537,6 +538,9 @@ GBool XRef::readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *follow
 	  entries[0] = entries[1];
 	  entries[1].offset = 0xffffffff;
 	}
+	if (i > last) {
+	  last = i;
+	}
       }
     }
   }
@@ -549,13 +553,25 @@ GBool XRef::readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *follow
   // get the 'Prev' pointer
   obj.getDict()->lookupNF("Prev", &obj2);
   if (obj2.isInt()) {
-    *pos = (Guint)obj2.getInt();
-    more = gTrue;
+    pos2 = (Guint)obj2.getInt();
+    if (pos2 != *pos) {
+      *pos = pos2;
+      more = gTrue;
+    } else {
+      error(errSyntaxWarning, -1, "Infinite loop in xref table");
+      more = gFalse;
+    }
   } else if (obj2.isRef()) {
     // certain buggy PDF generators generate "/Prev NNN 0 R" instead
     // of "/Prev NNN"
-    *pos = (Guint)obj2.getRefNum();
-    more = gTrue;
+    pos2 = (Guint)obj2.getRefNum();
+    if (pos2 != *pos) {
+      *pos = pos2;
+      more = gTrue;
+    } else {
+      error(errSyntaxWarning, -1, "Infinite loop in xref table");
+      more = gFalse;
+    }
   } else {
     more = gFalse;
   }
@@ -743,6 +759,9 @@ GBool XRef::readXRefStreamSection(Stream *xrefStr, int *w, int first, int n) {
       default:
 	return gFalse;
       }
+      if (i > last) {
+	last = i;
+      }
     }
   }
 
@@ -769,7 +788,6 @@ GBool XRef::constructXRef(GBool *wasReconstructed) {
   size = 0;
   entries = NULL;
 
-  error(errSyntaxWarning, -1, "PDF file is damaged - attempting to reconstruct xref table...");
   gotRoot = gFalse;
   streamEndsLen = streamEndsSize = 0;
 
@@ -826,32 +844,32 @@ GBool XRef::constructXRef(GBool *wasReconstructed) {
         delete parser;
 
       // look for object
-      } else if (*p > 0 && isdigit(*p)) {
-        num = atoi(p);
-        if (num > 0) {
+    } else if (isdigit(*p & 0xff)) {
+      num = atoi(p);
+      if (num > 0) {
+	do {
+	  ++p;
+	} while (*p && isdigit(*p & 0xff));
+	if (isspace(*p & 0xff)) {
 	  do {
 	    ++p;
-	  } while (*p > 0 && isdigit(*p));
-	  if (*p > 0 && isspace(*p)) {
+	  } while (*p && isspace(*p & 0xff));
+	  if (isdigit(*p & 0xff)) {
+	    gen = atoi(p);
 	    do {
 	      ++p;
-	    } while (*p > 0 && isspace(*p));
-	    if (*p > 0 && isdigit(*p)) {
-	      gen = atoi(p);
+	    } while (*p && isdigit(*p & 0xff));
+	    if (isspace(*p & 0xff)) {
 	      do {
-	        ++p;
-	      } while (*p > 0 && isdigit(*p));
-	      if (*p > 0 && isspace(*p)) {
-	        do {
-		  ++p;
-	        } while (*p > 0 && isspace(*p));
-	        if (!strncmp(p, "obj", 3)) {
-		  if (num >= size) {
-		    newSize = (num + 1 + 255) & ~255;
-		    if (newSize < 0) {
-		      error(errSyntaxError, -1, "Bad object number");
-		      return gFalse;
-		    }
+		++p;
+	      } while (*p && isspace(*p & 0xff));
+	      if (!strncmp(p, "obj", 3)) {
+		if (num >= size) {
+		  newSize = (num + 1 + 255) & ~255;
+		  if (newSize < 0) {
+		    error(errSyntaxError, -1, "Bad object number");
+		    return gFalse;
+		  }
 		    if (resize(newSize) != newSize) {
 		      error(errSyntaxError, -1, "Invalid 'obj' parameters");
 		      return gFalse;
@@ -862,7 +880,10 @@ GBool XRef::constructXRef(GBool *wasReconstructed) {
 		    entries[num].offset = pos - start;
 		    entries[num].gen = gen;
 		    entries[num].type = xrefEntryUncompressed;
+		  if (num > last) {
+		    last = num;
 		  }
+		}
 	        }
 	      }
 	    }
@@ -1030,7 +1051,7 @@ Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
       delete parser;
       goto err;
     }
-    parser->getObj(obj, encrypted ? fileKey : (Guchar *)NULL,
+    parser->getObj(obj, gFalse, encrypted ? fileKey : (Guchar *)NULL,
 		   encAlgorithm, keyLength, num, gen, recursion);
     obj1.free();
     obj2.free();

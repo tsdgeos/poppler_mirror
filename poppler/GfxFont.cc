@@ -729,7 +729,7 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, GBool ps) {
   if (!isCIDFont()) {
 
     //----- 8-bit PS resident font
-    if (ps) {
+    if (name && ps) {
       if ((path = globalParams->getPSResidentFont(name))) {
 	fontLoc = new GfxFontLoc();
 	fontLoc->locType = gfxFontLocResident;
@@ -756,7 +756,7 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, GBool ps) {
     substName = new GooString(base14SubstFonts[substIdx]);
     if (ps) {
       error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:t}'",
-	    base14SubstFonts[substIdx], name);
+	    base14SubstFonts[substIdx], name ? name : new GooString("null"));
       fontLoc = new GfxFontLoc();
       fontLoc->locType = gfxFontLocResident;
       fontLoc->fontType = fontType1;

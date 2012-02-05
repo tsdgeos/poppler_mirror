@@ -60,9 +60,9 @@ description for all fonts available in Windows. That's how MuPDF works.
 #define DEFAULT_SUBSTITUTE_FONT "Helvetica"
 
 static struct {
-    char *name;
-    char *t1FileName;
-    char *ttFileName;
+    const char *name;
+    const char *t1FileName;
+    const char *ttFileName;
 } displayFontTab[] = {
     {"Courier",               "n022003l.pfb", "cour.ttf"},
     {"Courier-Bold",          "n022004l.pfb", "courbd.ttf"},
@@ -253,7 +253,8 @@ void SysFontList::scanWindowsFonts(GooString *winFontDir) {
 	data[dataLen] = '\0';
 	n = strlen(data);
 	if (!strcasecmp(data + n - 4, ".ttf") ||
-	    !strcasecmp(data + n - 4, ".ttc")) {
+	    !strcasecmp(data + n - 4, ".ttc") ||
+	    !strcasecmp(data + n - 4, ".otf")) {
 	  fontPath = new GooString(data);
 	  if (!(dataLen >= 3 && data[1] == ':' && data[2] == '\\')) {
 	    fontPath->insert(0, '\\');
@@ -298,6 +299,11 @@ SysFontInfo *SysFontList::makeWindowsFont(char *name, int fontNum,
 
   // remove trailing ' (TrueType)'
   if (n > 11 && !strncmp(name + n - 11, " (TrueType)", 11)) {
+    n -= 11;
+  }
+
+  // remove trailing ' (OpenType)'
+  if (n > 11 && !strncmp(name + n - 11, " (OpenType)", 11)) {
     n -= 11;
   }
 
@@ -401,7 +407,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
     *fontNum = fi->fontNum;
   } else {
     GooString *substFontName = new GooString(findSubstituteName(fontName->getCString()));
-    error(errSyntaxError, -1, "Couldn't find a font for '{0:t}', subst is '{0:s}'", fontName, substFontName);
+    error(errSyntaxError, -1, "Couldn't find a font for '{0:t}', subst is '{1:t}'", fontName, substFontName);
     if ((fi = sysFonts->find(substFontName, gFalse))) {
       path = fi->path->copy();
       *type = fi->type;

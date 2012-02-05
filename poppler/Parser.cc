@@ -59,10 +59,11 @@ Parser::~Parser() {
 
 Object *Parser::getObj(Object *obj, int recursion)
 {
-  return getObj(obj, NULL, cryptRC4, 0, 0, 0, recursion);
+  return getObj(obj, gFalse, NULL, cryptRC4, 0, 0, 0, recursion);
 }
 
-Object *Parser::getObj(Object *obj, Guchar *fileKey,
+Object *Parser::getObj(Object *obj, GBool simpleOnly,
+           Guchar *fileKey,
 		       CryptAlgorithm encAlgorithm, int keyLength,
 		       int objNum, int objGen, int recursion) {
   char *key;
@@ -83,18 +84,18 @@ Object *Parser::getObj(Object *obj, Guchar *fileKey,
   }
 
   // array
-  if (likely(recursion < recursionLimit) && buf1.isCmd("[")) {
+  if (!simpleOnly && likely(recursion < recursionLimit) && buf1.isCmd("[")) {
     shift();
     obj->initArray(xref);
     while (!buf1.isCmd("]") && !buf1.isEOF())
-      obj->arrayAdd(getObj(&obj2, fileKey, encAlgorithm, keyLength,
+      obj->arrayAdd(getObj(&obj2, gFalse, fileKey, encAlgorithm, keyLength,
 			   objNum, objGen, recursion + 1));
     if (buf1.isEOF())
       error(errSyntaxError, getPos(), "End of file inside array");
     shift();
 
   // dictionary or stream
-  } else if (likely(recursion < recursionLimit) && buf1.isCmd("<<")) {
+  } else if (!simpleOnly && likely(recursion < recursionLimit) && buf1.isCmd("<<")) {
     shift(objNum);
     obj->initDict(xref);
     while (!buf1.isCmd(">>") && !buf1.isEOF()) {
@@ -109,7 +110,7 @@ Object *Parser::getObj(Object *obj, Guchar *fileKey,
 	  gfree(key);
 	  break;
 	}
-	obj->dictAdd(key, getObj(&obj2, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1));
+	obj->dictAdd(key, getObj(&obj2, gFalse, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1));
       }
     }
     if (buf1.isEOF())
