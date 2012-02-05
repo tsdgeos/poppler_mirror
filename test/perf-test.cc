@@ -840,7 +840,7 @@ static void RenderPdfAsText(const char *fileName)
 
     LogInfo("started: %s\n", fileName);
 
-    TextOutputDev * textOut = new TextOutputDev(NULL, gTrue, gFalse, gFalse);
+    TextOutputDev * textOut = new TextOutputDev(NULL, gTrue, 0, gFalse, gFalse);
     if (!textOut->isOk()) {
         delete textOut;
         return;

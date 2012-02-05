@@ -68,6 +68,7 @@ static int w = 0;
 static int h = 0;
 static GBool bbox = gFalse;
 static GBool physLayout = gFalse;
+static double fixedPitch = 0;
 static GBool rawOrder = gFalse;
 static GBool htmlMeta = gFalse;
 static char textEncName[128] = "";
@@ -97,6 +98,8 @@ static const ArgDesc argDesc[] = {
    "height of crop area in pixels (default is 0)"},
   {"-layout",  argFlag,     &physLayout,    0,
    "maintain original physical layout"},
+  {"-fixed",   argFP,       &fixedPitch,    0,
+   "assume fixed-pitch (or tabular) text"},
   {"-raw",     argFlag,     &rawOrder,      0,
    "keep strings in content stream order"},
   {"-htmlmeta", argFlag,   &htmlMeta,       0,
@@ -197,6 +200,9 @@ int main(int argc, char *argv[]) {
   }
 
   fileName = new GooString(argv[1]);
+  if (fixedPitch) {
+    physLayout = gTrue;
+  }
 
   if (textEncName[0]) {
     globalParams->setTextEncoding(textEncName);
@@ -333,7 +339,7 @@ int main(int argc, char *argv[]) {
 
   // write text file
   if (bbox) {
-    textOut = new TextOutputDev(NULL, physLayout, rawOrder, htmlMeta);
+    textOut = new TextOutputDev(NULL, physLayout, fixedPitch, rawOrder, htmlMeta);
     if (!(f = fopen(textFileName->getCString(), "ab"))) {
       error(errIO, -1, "Couldn't open text file '{0:t}' for append", textFileName);
       exitCode = 2;
@@ -367,7 +373,7 @@ int main(int argc, char *argv[]) {
     fclose(f);
   } else {
     textOut = new TextOutputDev(textFileName->getCString(),
-				physLayout, rawOrder, htmlMeta);
+				physLayout, fixedPitch, rawOrder, htmlMeta);
     if (textOut->isOk()) {
       if ((w==0) && (h==0) && (x==0) && (y==0)) {
 	doc->displayPages(textOut, firstPage, lastPage, resolution, resolution, 0,

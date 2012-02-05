@@ -333,7 +333,7 @@ public:
 
   void addWord(TextWord *word);
 
-  void coalesce(UnicodeMap *uMap);
+  void coalesce(UnicodeMap *uMap, double fixedPitch);
 
   // Update this block's priMin and priMax values, looking at <blk>.
   void updatePriMinMax(TextBlock *blk);
@@ -521,7 +521,7 @@ public:
   void addLink(int xMin, int yMin, int xMax, int yMax, AnnotLink *link);
 
   // Coalesce strings that look like parts of the same line.
-  void coalesce(GBool physLayout, GBool doHTML);
+  void coalesce(GBool physLayout, double fixedPitch, GBool doHTML);
 
   // Find a string.  If <startAtTop> is true, starts looking at the
   // top of the page; else if <startAtLast> is true, starts looking
@@ -534,6 +534,7 @@ public:
 		 GBool startAtTop, GBool stopAtBottom,
 		 GBool startAtLast, GBool stopAtLast,
 		 GBool caseSensitive, GBool backward,
+		 GBool wholeWord,
 		 double *xMin, double *yMin,
 		 double *xMax, double *yMax);
 
@@ -676,14 +677,16 @@ public:
   // is maintained.  If <rawOrder> is true, the text is kept in
   // content stream order.
   TextOutputDev(char *fileName, GBool physLayoutA,
-		GBool rawOrderA, GBool append);
+		double fixedPitchA, GBool rawOrderA,
+		GBool append);
 
   // Create a TextOutputDev which will write to a generic stream.  If
   // <physLayoutA> is true, the original physical layout of the text
   // is maintained.  If <rawOrder> is true, the text is kept in
   // content stream order.
   TextOutputDev(TextOutputFunc func, void *stream,
-		GBool physLayoutA, GBool rawOrderA);
+		GBool physLayoutA, double fixedPitchA,
+		GBool rawOrderA);
 
   // Destructor.
   virtual ~TextOutputDev();
@@ -718,6 +721,9 @@ public:
 
   // End a page.
   virtual void endPage();
+
+  //----- save/restore graphics state
+  virtual void restoreState(GfxState *state);
 
   //----- update text state
   virtual void updateFont(GfxState *state);
@@ -754,6 +760,7 @@ public:
 		 GBool startAtTop, GBool stopAtBottom,
 		 GBool startAtLast, GBool stopAtLast,
 		 GBool caseSensitive, GBool backward,
+		 GBool wholeWord,
 		 double *xMin, double *yMin,
 		 double *xMax, double *yMax);
 
@@ -804,6 +811,9 @@ private:
   TextPage *text;		// text for the current page
   GBool physLayout;		// maintain original physical layout when
 				//   dumping text
+  double fixedPitch;		// if physLayout is true and this is non-zero,
+				//   assume fixed-pitch characters with this
+				//   width
   GBool rawOrder;		// keep text in content stream order
   GBool doHTML;			// extra processing for HTML conversion
   GBool ok;			// set up ok?

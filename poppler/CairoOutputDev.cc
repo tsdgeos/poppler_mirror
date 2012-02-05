@@ -246,7 +246,7 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state) {
 void CairoOutputDev::endPage() {
   if (text) {
     text->endPage();
-    text->coalesce(gTrue, gFalse);
+    text->coalesce(gTrue, 0, gFalse);
   }
 }
 

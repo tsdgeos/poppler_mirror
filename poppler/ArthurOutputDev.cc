@@ -292,6 +292,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
   m_font = NULL;
   fileName = NULL;
   tmpBuf = NULL;
+  fontLoc = NULL;
 
   if (!(gfxFont = state->getFont())) {
     goto err1;

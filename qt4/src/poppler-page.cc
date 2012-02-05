@@ -330,7 +330,7 @@ QString Page::text(const QRectF &r, TextLayout textLayout) const
   QString result;
   
   const GBool rawOrder = textLayout == RawOrderLayout;
-  output_dev = new TextOutputDev(0, gFalse, rawOrder, gFalse);
+  output_dev = new TextOutputDev(0, gFalse, 0, rawOrder, gFalse);
   m_page->parentDoc->doc->displayPageSlice(output_dev, m_page->index + 1, 72, 72,
       0, false, true, false, -1, -1, -1, -1);
   if (r.isNull())
@@ -371,19 +371,19 @@ bool Page::search(const QString &text, double &sLeft, double &sTop, double &sRig
   int rotation = (int)rotate * 90;
 
   // fetch ourselves a textpage
-  TextOutputDev td(NULL, gTrue, gFalse, gFalse);
+  TextOutputDev td(NULL, gTrue, 0, gFalse, gFalse);
   m_page->parentDoc->doc->displayPage( &td, m_page->index + 1, 72, 72, rotation, false, true, false );
   TextPage *textPage=td.takeText();
 
   if (direction == FromTop)
     found = textPage->findText( u.data(), len, 
-            gTrue, gTrue, gFalse, gFalse, sCase, gFalse, &sLeft, &sTop, &sRight, &sBottom );
+            gTrue, gTrue, gFalse, gFalse, sCase, gFalse, gFalse, &sLeft, &sTop, &sRight, &sBottom );
   else if ( direction == NextResult )
     found = textPage->findText( u.data(), len, 
-            gFalse, gTrue, gTrue, gFalse, sCase, gFalse, &sLeft, &sTop, &sRight, &sBottom );
+            gFalse, gTrue, gTrue, gFalse, sCase, gFalse, gFalse, &sLeft, &sTop, &sRight, &sBottom );
   else if ( direction == PreviousResult )
     found = textPage->findText( u.data(), len, 
-            gFalse, gTrue, gTrue, gFalse, sCase, gTrue, &sLeft, &sTop, &sRight, &sBottom );
+            gFalse, gTrue, gTrue, gFalse, sCase, gTrue, gFalse, &sLeft, &sTop, &sRight, &sBottom );
 
   textPage->decRefCnt();
 
@@ -414,7 +414,7 @@ QList<TextBox*> Page::textList(Rotation rotate) const
   
   QList<TextBox*> output_list;
   
-  output_dev = new TextOutputDev(0, gFalse, gFalse, gFalse);
+  output_dev = new TextOutputDev(0, gFalse, 0, gFalse, gFalse);
   
   int rotation = (int)rotate * 90;
 

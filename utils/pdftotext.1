@@ -53,6 +53,10 @@ Maintain (as best as possible) the original physical layout of the
 text.  The default is to \'undo' physical layout (columns,
 hyphenation, etc.) and output the text in reading order.
 .TP
+.BI \-fixed " number"
+Assume fixed-pitch (or tabular) text, with the specified character
+width (in points).  This forces physical layout mode.
+.TP
 .B \-raw
 Keep the text in content stream order.  This is a hack which often
 "undoes" column formatting, etc.  Use of raw mode is no longer

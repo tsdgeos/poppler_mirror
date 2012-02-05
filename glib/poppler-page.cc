@@ -263,7 +263,7 @@ poppler_page_get_text_page (PopplerPage *page)
     TextOutputDev *text_dev;
     Gfx           *gfx;
 
-    text_dev = new TextOutputDev (NULL, gTrue, gFalse, gFalse);
+    text_dev = new TextOutputDev (NULL, gTrue, 0, gFalse, gFalse);
     gfx = page->page->createGfx(text_dev,
 				72.0, 72.0, 0,
 				gFalse, /* useMediaBox */
@@ -888,6 +888,7 @@ poppler_page_find_text (PopplerPage *page,
 			     gFalse, gTrue, // startAtTop, stopAtBottom
 			     gFalse, gFalse, // startAtLast, stopAtLast
 			     gFalse, gFalse, // caseSensitive, backwards
+			     gFalse, // wholeWord
 			     &xMin, &yMin, &xMax, &yMax))
     {
       match = poppler_rectangle_new ();
@@ -1064,7 +1065,7 @@ poppler_page_render_to_ps (PopplerPage   *page,
                                     ps_file->first_page, ps_file->last_page,
                                     psModePS, (int)ps_file->paper_width,
                                     (int)ps_file->paper_height, ps_file->duplex,
-                                    0, 0, 0, 0, gFalse, gFalse);
+                                    0, 0, 0, 0, gFalse);
 
 
   ps_file->document->doc->displayPage (ps_file->out, page->index + 1, 72.0, 72.0,

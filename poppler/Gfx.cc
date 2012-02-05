@@ -2866,7 +2866,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
   GfxColor colorA, colorB;
   double xa, ya, xb, yb, ra, rb;
   double ta, tb, sa, sb;
-  double sz, sMin, sMax, h;
+  double sMin, sMax, h;
   double sLeft, sRight, sTop, sBottom, sZero, sDiag;
   GBool haveSLeft, haveSRight, haveSTop, haveSBottom, haveSZero;
   GBool haveSMin, haveSMax;
@@ -2888,18 +2888,14 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
   if (h == 0) {
     enclosed = gTrue;
     theta = 0; // make gcc happy
-    sz = 0; // make gcc happy
   } else if (r1 - r0 == 0) {
     enclosed = gFalse;
     theta = 0;
-    sz = 0; // make gcc happy
   } else if (fabs(r1 - r0) >= h) {
     enclosed = gTrue;
     theta = 0; // make gcc happy
-    sz = 0; // make gcc happy
   } else {
     enclosed = gFalse;
-    sz = -r0 / (r1 - r0);
     theta = asin((r1 - r0) / h);
   }
 

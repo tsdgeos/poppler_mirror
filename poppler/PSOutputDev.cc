@@ -4178,7 +4178,7 @@ GBool PSOutputDev::radialShadedFill(GfxState *state, GfxRadialShading *shading, 
   double xMin, yMin, xMax, yMax;
   double x0, y0, r0, x1, y1, r1, t0, t1;
   double xa, ya, ra;
-  double sz, sMin, sMax, h, ta;
+  double sMin, sMax, h, ta;
   double sLeft, sRight, sTop, sBottom, sZero, sDiag;
   GBool haveSLeft, haveSRight, haveSTop, haveSBottom, haveSZero;
   GBool haveSMin, haveSMax;
@@ -4206,18 +4206,14 @@ GBool PSOutputDev::radialShadedFill(GfxState *state, GfxRadialShading *shading, 
   if (h == 0) {
     enclosed = gTrue;
     theta = 0; // make gcc happy
-    sz = 0; // make gcc happy
   } else if (r1 - r0 == 0) {
     enclosed = gFalse;
     theta = 0;
-    sz = 0; // make gcc happy
   } else if (fabs(r1 - r0) >= h) {
     enclosed = gTrue;
     theta = 0; // make gcc happy
-    sz = 0; // make gcc happy
   } else {
     enclosed = gFalse;
-    sz = -r0 / (r1 - r0);
     theta = asin((r1 - r0) / h);
   }
   if (enclosed) {
