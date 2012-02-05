@@ -419,7 +419,10 @@ GBool PDFDoc::checkEncryption(GooString *ownerPassword, GooString *userPassword)
   xref->getTrailerDict()->dictLookup("Encrypt", &encrypt);
   if ((encrypted = encrypt.isDict())) {
     if ((secHdlr = SecurityHandler::make(this, &encrypt))) {
-      if (secHdlr->checkEncryption(ownerPassword, userPassword)) {
+      if (secHdlr->isUnencrypted()) {
+	// no encryption
+	ret = gTrue;
+      } else if (secHdlr->checkEncryption(ownerPassword, userPassword)) {
 	// authorization succeeded
        	xref->setEncryption(secHdlr->getPermissionFlags(),
 			    secHdlr->getOwnerPasswordOk(),
