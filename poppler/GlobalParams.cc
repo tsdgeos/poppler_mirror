@@ -597,7 +597,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   textPageBreaks = gTrue;
   textKeepTinyChars = gFalse;
   enableFreeType = gTrue;
-  disableFreeTypeHinting = gFalse;
   antialias = gTrue;
   vectorAntialias = gTrue;
   antialiasPrinting = gFalse;
@@ -1663,15 +1662,6 @@ GBool GlobalParams::getEnableFreeType() {
 
   lockGlobalParams;
   f = enableFreeType;
-  unlockGlobalParams;
-  return f;
-}
-
-GBool GlobalParams::getDisableFreeTypeHinting() {
-  GBool f;
-
-  lockGlobalParams;
-  f = disableFreeTypeHinting;
   unlockGlobalParams;
   return f;
 }

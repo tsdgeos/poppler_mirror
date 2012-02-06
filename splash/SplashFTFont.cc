@@ -58,7 +58,6 @@ static int glyphPathCubicTo(const FT_Vector *ctrl1, const FT_Vector *ctrl2,
 SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
 			   SplashCoord *textMatA):
   SplashFont(fontFileA, matA, textMatA, fontFileA->engine->aa), 
-  enableAutoHinting(fontFileA->engine->enableAutoHinting),
   enableFreeTypeHinting(fontFileA->engine->enableFreeTypeHinting),
   enableSlightHinting(fontFileA->engine->enableSlightHinting)
 {
@@ -233,30 +232,29 @@ GBool SplashFTFont::getGlyph(int c, int xFrac, int yFrac,
   return SplashFont::getGlyph(c, xFrac, 0, bitmap, x0, y0, clip, clipRes);
 }
 
-static FT_Int32 getFTLoadFlags(GBool type1, GBool trueType, GBool aa, 
-							   GBool enableAutoHinting, GBool enableFreeTypeHinting, GBool enableSlightHinting)
+static FT_Int32 getFTLoadFlags(GBool type1, GBool trueType, GBool aa, GBool enableFreeTypeHinting, GBool enableSlightHinting)
 {
   int ret = FT_LOAD_DEFAULT;
   if (aa)
     ret |= FT_LOAD_NO_BITMAP;
   
-  if (enableAutoHinting) {
-    if (trueType) {
-	  // FT2's autohinting doesn't always work very well (especially with
-      // font subsets), so turn it off if anti-aliasing is enabled; if
-      // anti-aliasing is disabled, this seems to be a tossup - some fonts
-      // look better with hinting, some without, so leave hinting on
-      if (aa) {
-        ret |= FT_LOAD_NO_AUTOHINT;
+  if (enableFreeTypeHinting) {
+    if (enableSlightHinting) {
+      ret |= FT_LOAD_TARGET_LIGHT;
+    } else {
+      if (trueType) {
+	// FT2's autohinting doesn't always work very well (especially with
+	// font subsets), so turn it off if anti-aliasing is enabled; if
+	// anti-aliasing is disabled, this seems to be a tossup - some fonts
+	// look better with hinting, some without, so leave hinting on
+	if (aa) {
+	  ret |= FT_LOAD_NO_AUTOHINT;
+	}
+      } else if (type1) {
+	// Type 1 fonts seem to look better with 'light' hinting mode
+	ret |= FT_LOAD_TARGET_LIGHT;
       }
-    } else if (type1) {
-      // Type 1 fonts seem to look better with 'light' hinting mode
-      ret |= FT_LOAD_TARGET_LIGHT;
     }
-
-  } else if (enableFreeTypeHinting) {
-    if (enableSlightHinting)
-      ret |= FT_LOAD_TARGET_LIGHT;
   } else {
     ret |= FT_LOAD_NO_HINTING;
   }
@@ -287,7 +285,7 @@ GBool SplashFTFont::makeGlyph(int c, int xFrac, int yFrac,
     gid = (FT_UInt)c;
   }
 
-  if (FT_Load_Glyph(ff->face, gid, getFTLoadFlags(ff->type1, ff->trueType, aa, enableAutoHinting, enableFreeTypeHinting, enableSlightHinting))) {
+  if (FT_Load_Glyph(ff->face, gid, getFTLoadFlags(ff->type1, ff->trueType, aa, enableFreeTypeHinting, enableSlightHinting))) {
     return gFalse;
   }
 
@@ -376,7 +374,7 @@ double SplashFTFont::getGlyphAdvance(int c)
     return -1;
   }
 
-  if (FT_Load_Glyph(ff->face, gid, getFTLoadFlags(ff->type1, ff->trueType, aa, enableAutoHinting, enableFreeTypeHinting, enableSlightHinting))) {
+  if (FT_Load_Glyph(ff->face, gid, getFTLoadFlags(ff->type1, ff->trueType, aa, enableFreeTypeHinting, enableSlightHinting))) {
     return -1;
   }
 
@@ -424,7 +422,7 @@ SplashPath *SplashFTFont::getGlyphPath(int c) {
     // skip the TrueType notdef glyph
     return NULL;
   }
-  if (FT_Load_Glyph(ff->face, gid, getFTLoadFlags(ff->type1, ff->trueType, aa, enableAutoHinting, enableFreeTypeHinting, enableSlightHinting))) {
+  if (FT_Load_Glyph(ff->face, gid, getFTLoadFlags(ff->type1, ff->trueType, aa, enableFreeTypeHinting, enableSlightHinting))) {
     return NULL;
   }
   if (FT_Get_Glyph(slot, &glyph)) {

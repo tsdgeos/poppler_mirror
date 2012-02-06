@@ -59,12 +59,11 @@ static void fileWrite(void *stream, const char *data, int len) {
 // SplashFTFontEngine
 //------------------------------------------------------------------------
 
-SplashFTFontEngine::SplashFTFontEngine(GBool aaA, GBool enableAutoHintingA, GBool enableFreeTypeHintingA,
+SplashFTFontEngine::SplashFTFontEngine(GBool aaA, GBool enableFreeTypeHintingA,
 				       GBool enableSlightHintingA, FT_Library libA) {
   FT_Int major, minor, patch;
 
   aa = aaA;
-  enableAutoHinting = enableAutoHintingA;
   enableFreeTypeHinting = enableFreeTypeHintingA;
   enableSlightHinting = enableSlightHintingA;
   lib = libA;
@@ -75,14 +74,14 @@ SplashFTFontEngine::SplashFTFontEngine(GBool aaA, GBool enableAutoHintingA, GBoo
             (major == 2 && (minor > 1 || (minor == 1 && patch > 7)));
 }
 
-SplashFTFontEngine *SplashFTFontEngine::init(GBool aaA, GBool enableAutoHintingA, GBool enableFreeTypeHintingA,
+SplashFTFontEngine *SplashFTFontEngine::init(GBool aaA, GBool enableFreeTypeHintingA,
 					     GBool enableSlightHintingA) {
   FT_Library libA;
 
   if (FT_Init_FreeType(&libA)) {
     return NULL;
   }
-  return new SplashFTFontEngine(aaA, enableAutoHintingA, enableFreeTypeHintingA, enableSlightHintingA, libA);
+  return new SplashFTFontEngine(aaA, enableFreeTypeHintingA, enableSlightHintingA, libA);
 }
 
 SplashFTFontEngine::~SplashFTFontEngine() {

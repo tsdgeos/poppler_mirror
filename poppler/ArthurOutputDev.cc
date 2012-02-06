@@ -116,7 +116,6 @@ void ArthurOutputDev::startDoc(XRef *xrefA) {
 #endif
 #if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   globalParams->getEnableFreeType(),
-  !globalParams->getDisableFreeTypeHinting(),
   isHintingEnabled,
   isSlightHinting,
 #endif

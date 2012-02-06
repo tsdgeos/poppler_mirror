@@ -58,7 +58,6 @@ public:
 #endif
 #if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
 		   GBool enableFreeType,
-		   GBool enabbleAutoHinting,
 		   GBool enableFreeTypeHinting,
 		   GBool enableSlightHinting,
 #endif

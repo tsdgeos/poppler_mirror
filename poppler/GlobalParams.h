@@ -174,7 +174,6 @@ public:
   GBool getTextPageBreaks();
   GBool getTextKeepTinyChars();
   GBool getEnableFreeType();
-  GBool getDisableFreeTypeHinting();
   GBool getAntialias();
   GBool getVectorAntialias();
   GBool getAntialiasPrinting();

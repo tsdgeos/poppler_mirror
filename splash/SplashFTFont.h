@@ -71,7 +71,6 @@ private:
   FT_Matrix textMatrix;
   SplashCoord textScale;
   int size;
-  GBool enableAutoHinting;
   GBool enableFreeTypeHinting;
   GBool enableSlightHinting;
 };

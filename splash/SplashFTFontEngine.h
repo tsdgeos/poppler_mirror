@@ -45,7 +45,7 @@ class SplashFontSrc;
 class SplashFTFontEngine {
 public:
 
-  static SplashFTFontEngine *init(GBool aaA, GBool enableAutoHintingA, GBool enableFreeTypeHintingA, GBool enableSlightHinting);
+  static SplashFTFontEngine *init(GBool aaA, GBool enableFreeTypeHintingA, GBool enableSlightHinting);
 
   ~SplashFTFontEngine();
 
@@ -61,10 +61,9 @@ public:
 
 private:
 
-  SplashFTFontEngine(GBool aaA, GBool enableAutoHintingA, GBool enableFreeTypeHintingA, GBool enableSlightHintingA, FT_Library libA);
+  SplashFTFontEngine(GBool aaA, GBool enableFreeTypeHintingA, GBool enableSlightHintingA, FT_Library libA);
 
   GBool aa;
-  GBool enableAutoHinting;
   GBool enableFreeTypeHinting;
   GBool enableSlightHinting;
   FT_Library lib;

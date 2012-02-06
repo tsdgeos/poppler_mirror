@@ -369,7 +369,7 @@ int main(int argc, char *argv[]) {
 #if SPLASH_CMYK
 				    (jpegcmyk || overprint) ? splashModeCMYK8 :
 #endif
-				             splashModeRGB8, 4,
+				             splashModeBGR8, 4,
 				  gFalse, paperColor);
   splashOut->startDoc(doc);
   if (sz != 0) w = h = sz;
