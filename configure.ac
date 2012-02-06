@@ -1,6 +1,6 @@
 m4_define([poppler_version_major],[0])
-m4_define([poppler_version_minor],[17])
-m4_define([poppler_version_micro],[4])
+m4_define([poppler_version_minor],[18])
+m4_define([poppler_version_micro],[0])
 m4_define([poppler_version],[poppler_version_major.poppler_version_minor.poppler_version_micro])
 
 AC_PREREQ(2.59)
@@ -39,6 +39,9 @@ AC_PROG_INSTALL
 
 dnl ##### Check for pkgconfig
 PKG_PROG_PKG_CONFIG
+
+dnl ##### Export the version
+AC_DEFINE([POPPLER_VERSION], [poppler_version], [Defines the poppler version])
 
 dnl Enable these unconditionally.
 AC_DEFINE([OPI_SUPPORT], [1], [Generate OPI comments in PS output.])
@@ -168,6 +171,14 @@ if test x$enable_libopenjpeg = xyes; then
   LIBOPENJPEG_LIBS="-lopenjpeg"
   AC_SUBST(LIBOPENJPEG_LIBS)
   AC_DEFINE(ENABLE_LIBOPENJPEG)
+  AC_TRY_COMPILE([
+#include <openjpeg.h>
+], [
+  int foo = OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG;
+], have_openjpeg_flag="yes", am_cv_proto_iconv_arg1="no")
+  if test x$have_openjpeg_flag = xyes; then
+    AC_DEFINE(WITH_OPENJPEG_IGNORE_PCLR_CMAP_CDEF_FLAG, 1, [OpenJPEG with the OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG flag.])
+  fi
 fi
 
 AM_CONDITIONAL(BUILD_LIBOPENJPEG, test x$enable_libopenjpeg = xyes)
@@ -378,12 +389,17 @@ AC_ARG_ENABLE(cairo-output,
                              [Don't build the cairo graphics backend.]),
               enable_cairo_output=$enableval,
               enable_cairo_output="try")
+use_cairo=""
 if test x$enable_cairo_output = xyes; then
-  PKG_CHECK_MODULES(CAIRO, cairo >= $CAIRO_VERSION)
+  PKG_CHECK_MODULES(CAIRO, cairo >= $CAIRO_VERSION cairo-ft >= $CAIRO_VERSION)
 elif test x$enable_cairo_output = xtry; then
-  PKG_CHECK_MODULES(CAIRO, cairo >= $CAIRO_VERSION,
+  PKG_CHECK_MODULES(CAIRO, cairo >= $CAIRO_VERSION cairo-ft >= $CAIRO_VERSION,
                     [enable_cairo_output="yes"],
-                    [enable_cairo_output="no"])
+                    [enable_cairo_output="no"
+		     use_cairo="no (requires cairo >= $CAIRO_VERSION)"])
+fi
+if test x$use_cairo = x; then
+   use_cairo=$enable_cairo_output
 fi
 
 AC_SUBST(CAIRO_CFLAGS)
@@ -392,6 +408,16 @@ AC_SUBST(CAIRO_LIBS)
 AM_CONDITIONAL(BUILD_CAIRO_OUTPUT, test x$enable_cairo_output = xyes)
 AH_TEMPLATE([HAVE_CAIRO], [Use cairo for rendering.])
 if test x$enable_cairo_output = xyes; then
+  PDFTOCAIRO_DEPS="cairo cairo-ft"
+  dnl Check for optional cairo backends used by pdftocairo
+  PKG_CHECK_EXISTS(cairo-pdf, [PDFTOCAIRO_DEPS="$PDFTOCAIRO_DEPS cairo-pdf"], [])
+  PKG_CHECK_EXISTS(cairo-ps,  [PDFTOCAIRO_DEPS="$PDFTOCAIRO_DEPS cairo-ps"],  [])
+  PKG_CHECK_EXISTS(cairo-svg, [PDFTOCAIRO_DEPS="$PDFTOCAIRO_DEPS cairo-svg"], [])
+
+  PKG_CHECK_MODULES(PDFTOCAIRO, $PDFTOCAIRO_DEPS)
+  AC_SUBST(PDFTOCAIRO_CFLAGS)
+  AC_SUBST(PDFTOCAIRO_LIBS)
+
   AC_DEFINE(HAVE_CAIRO)
   CAIRO_FEATURE="#define POPPLER_HAS_CAIRO 1"
   CAIRO_REQ="cairo"
@@ -403,12 +429,14 @@ fi
 AC_SUBST(CAIRO_FEATURE)
 AC_SUBST(CAIRO_REQ)
 
+use_glib=""
 found_introspection=no
 if test x$enable_cairo_output = xyes; then
   POPPLER_GLIB_DISABLE_DEPRECATED=""
   POPPLER_GLIB_DISABLE_SINGLE_INCLUDES=""
 
   GLIB_REQUIRED=2.18
+  AC_SUBST(GLIB_REQUIRED)
   AC_ARG_ENABLE(poppler-glib,
 	        AC_HELP_STRING([--disable-poppler-glib],
 		               [Don't compile poppler glib wrapper.]),
@@ -419,13 +447,13 @@ if test x$enable_cairo_output = xyes; then
   elif test x$enable_poppler_glib = xtry; then
     PKG_CHECK_MODULES(POPPLER_GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION,
                       [enable_poppler_glib="yes"],
-                      [enable_poppler_glib="no"])
+                      [enable_poppler_glib="no"
+                      use_glib="no (requires glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION)"])
   fi
   if test x$enable_poppler_glib = xyes; then
     # Check for introspection
     GOBJECT_INTROSPECTION_CHECK([0.6.7])
 
-    GLIB_REQ="glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION"
     AC_PATH_PROG([GLIB_MKENUMS],[glib-mkenums])
     POPPLER_GLIB_DISABLE_DEPRECATED="$POPPLER_GLIB_DISABLE_DEPRECATED -DG_DISABLE_DEPRECATED"
     POPPLER_GLIB_DISABLE_SINGLE_INCLUDES="$POPPLER_GLIB_DISABLE_SINGLE_INCLUDES -DG_DISABLE_SINGLE_INCLUDES"
@@ -434,8 +462,11 @@ else
   if test x$enable_poppler_glib = xyes; then
     AC_MSG_ERROR("Cairo output is required to build glib frontend")
   fi
+  use_glib="no (requires cairo output)"
   enable_poppler_glib="no"
-  GLIB_REQ=""
+fi
+if test x$use_glib = x; then
+   use_glib=$enable_poppler_glib
 fi
 AM_CONDITIONAL(BUILD_POPPLER_GLIB, test x$enable_poppler_glib = xyes)
 AM_CONDITIONAL(HAVE_INTROSPECTION, test "x$found_introspection" = "xyes")
@@ -632,9 +663,9 @@ echo ""
 echo "Building poppler with support for:"
 echo "  font configuration: $with_font_configuration"
 echo "  splash output:      $enable_splash_output"
-echo "  cairo output:       $enable_cairo_output"
+echo "  cairo output:       $use_cairo"
 echo "  qt4 wrapper:        $enable_poppler_qt4"
-echo "  glib wrapper:       $enable_poppler_glib"
+echo "  glib wrapper:       $use_glib"
 echo "    introspection:    $found_introspection"
 echo "  cpp wrapper:        $enable_poppler_cpp"
 echo "  use gtk-doc:        $enable_gtk_doc"

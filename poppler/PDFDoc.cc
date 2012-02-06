@@ -26,7 +26,7 @@
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Srinivas Adicherla <srinivas.adicherla@geodesic.com>
 // Copyright (C) 2010 Philip Lorenz <lorenzph+freedesktop@gmail.com>
-// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -632,22 +632,38 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   }
   outStr = new FileOutStream(f,0);
 
-  yRef = new XRef();
+  yRef = new XRef(getXRef()->getTrailerDict());
   countRef = new XRef();
   yRef->add(0, 65535, 0, gFalse);
   writeHeader(outStr, getPDFMajorVersion(), getPDFMinorVersion());
 
-  // get and mark optional content groups
-  OCGs *ocgs = getCatalog()->getOptContentConfig();
-  if (ocgs != NULL) {
-    Object catDict, optContentProps;
-    getXRef()->getCatalog(&catDict);
-    catDict.dictLookup("OCProperties", &optContentProps);
-    Dict *pageDict = optContentProps.getDict();
-    markPageObjects(pageDict, yRef, countRef, 0);
-    catDict.free();
-    optContentProps.free();
+  // get and mark info dict
+  Object infoObj;
+  getXRef()->getDocInfo(&infoObj);
+  if (infoObj.isDict()) {
+    Dict *infoDict = infoObj.getDict();
+    markPageObjects(infoDict, yRef, countRef, 0);
+    Object *trailerObj = getXRef()->getTrailerDict();
+    if (trailerObj->isDict()) {
+      Dict *trailerDict = trailerObj->getDict();
+      Object ref;
+      trailerDict->lookupNF("Info", &ref);
+      if (ref.isRef()) {
+        yRef->add(ref.getRef().num, ref.getRef().gen, 0, gTrue);
+        if (getXRef()->getEntry(ref.getRef().num)->type == xrefEntryCompressed) {
+          yRef->getEntry(ref.getRef().num)->type = xrefEntryCompressed;
+        }
+      }
+      ref.free();
+    }
   }
+  infoObj.free();
+  
+  // get and mark output intents etc.
+  Object catObj;
+  getXRef()->getCatalog(&catObj);
+  Dict *catDict = catObj.getDict();
+  markPageObjects(catDict, yRef, countRef, 0);
 
   Dict *pageDict = page.getDict();
   markPageObjects(pageDict, yRef, countRef, 0);
@@ -656,24 +672,20 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   yRef->add(rootNum,0,outStr->getPos(),gTrue);
   outStr->printf("%d 0 obj\n", rootNum);
   outStr->printf("<< /Type /Catalog /Pages %d 0 R", rootNum + 1); 
-  if (ocgs != NULL) {
-    Object catDict, optContentProps;
-    getXRef()->getCatalog(&catDict);
-    catDict.dictLookup("OCProperties", &optContentProps);
-    outStr->printf(" /OCProperties <<");
-    Dict *pageDict = optContentProps.getDict();
-    for (int n = 0; n < pageDict->getLength(); n++) {
-      if (n > 0) outStr->printf(" ");
-      const char *key = pageDict->getKey(n);
-      Object value; pageDict->getValNF(n, &value);
+  for (int j = 0; j < catDict->getLength(); j++) {
+    const char *key = catDict->getKey(j);
+    if (strcmp(key, "Type") != 0 &&
+      strcmp(key, "Catalog") != 0 &&
+      strcmp(key, "Pages") != 0) 
+    {
+      if (j > 0) outStr->printf(" ");
+      Object value; catDict->getValNF(j, &value);
       outStr->printf("/%s ", key);
       writeObject(&value, NULL, outStr, getXRef(), 0);
       value.free();
     }
-    outStr->printf(" >> ");
-    catDict.free();
-    optContentProps.free();
   }
+  catObj.free();
   outStr->printf(">>\nendobj\n");
   objectsCount++;
 
@@ -736,34 +748,43 @@ int PDFDoc::saveAs(GooString *name, PDFWriteMode mode) {
 
 int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode) {
 
-  // we don't support files with Encrypt at the moment
+  // find if we have updated objects
+  GBool updated = gFalse;
+  for(int i=0; i<xref->getNumObjects(); i++) {
+    if (xref->getEntry(i)->updated) {
+      updated = gTrue;
+      break;
+    }
+  }
+
+  // we don't support rewriting files with Encrypt at the moment
   Object obj;
   xref->getTrailerDict()->getDict()->lookupNF("Encrypt", &obj);
   if (!obj.isNull())
   {
     obj.free();
-    return errEncrypted;
-  }
-  obj.free();
-
-  if (mode == writeForceRewrite) {
-    saveCompleteRewrite(outStr);
-  } else if (mode == writeForceIncremental) {
-    saveIncrementalUpdate(outStr); 
-  } else { // let poppler decide
-    // find if we have updated objects
-    GBool updated = gFalse;
-    for(int i=0; i<xref->getNumObjects(); i++) {
-      if (xref->getEntry(i)->updated) {
-        updated = gTrue;
-        break;
-      }
-    }
-    if(updated) { 
-      saveIncrementalUpdate(outStr);
-    } else {
+    if (!updated && mode == writeStandard) {
       // simply copy the original file
       saveWithoutChangesAs (outStr);
+    } else {
+      return errEncrypted;
+    }
+  }
+  else
+  {
+    obj.free();
+
+    if (mode == writeForceRewrite) {
+      saveCompleteRewrite(outStr);
+    } else if (mode == writeForceIncremental) {
+      saveIncrementalUpdate(outStr); 
+    } else { // let poppler decide
+      if(updated) { 
+        saveIncrementalUpdate(outStr);
+      } else {
+        // simply copy the original file
+        saveWithoutChangesAs (outStr);
+      }
     }
   }
 
@@ -1254,6 +1275,8 @@ void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, Guint numOffse
         } else {
           XRefEntry *entry = countRef->getEntry(obj->getRef().num + numOffset);
           entry->gen++;
+          if (entry->gen > 9)
+            break;
         } 
         Object obj1;
         getXRef()->fetch(obj->getRef().num, obj->getRef().gen, &obj1);
@@ -1311,6 +1334,9 @@ void PDFDoc::replacePageDict(int pageNo, int rotate,
     cropBoxObj->arrayAdd(cllx);
     cropBoxObj->arrayAdd(clly);
     pageDict->add(copyString("CropBox"), cropBoxObj);
+    pageDict->add(copyString("TrimBox"), cropBoxObj);
+  } else {
+    pageDict->add(copyString("TrimBox"), mediaBoxObj);
   }
   Object *rotateObj = new Object();
   rotateObj->initInt(rotate);
@@ -1343,10 +1369,16 @@ void PDFDoc::replacePageDict(int pageNo, int rotate,
 
 void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset) 
 {
+  pageDict->remove("Names");
+  pageDict->remove("OpenAction");
+  pageDict->remove("Outlines");
+  pageDict->remove("StructTreeRoot");
+
   for (int n = 0; n < pageDict->getLength(); n++) {
     const char *key = pageDict->getKey(n);
     Object value; pageDict->getValNF(n, &value);
-    if (strcmp(key, "Parent") != 0) {
+    if (strcmp(key, "Parent") != 0 &&
+	      strcmp(key, "Pages") != 0) {
       markObject(&value, xRef, countRef, numOffset);
     }
     value.free();

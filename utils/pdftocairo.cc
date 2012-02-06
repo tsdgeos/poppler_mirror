@@ -1,6 +1,6 @@
 //========================================================================
 //
-// pdftoppm.cc
+// pdftocairo.cc
 //
 // Copyright 2003 Glyph & Cog, LLC
 //
@@ -24,6 +24,7 @@
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -32,7 +33,6 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#include <sys/param.h> // for MAXPATHLEN
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -91,7 +91,7 @@ static GBool useCropBox = gFalse;
 static GBool mono = gFalse;
 static GBool gray = gFalse;
 static GBool transp = gFalse;
-static char icc[MAXPATHLEN] = "";
+static GooString icc;
 
 static GBool level2 = gFalse;
 static GBool level3 = gFalse;
@@ -179,7 +179,7 @@ static const ArgDesc argDesc[] = {
   {"-transp",   argFlag,     &transp,          0,
    "use a transparent background instead of white (PNG)"},
 #if USE_CMS
-  {"-icc",   argString,     &icc,          sizeof(icc),
+  {"-icc",   argGooString,     &icc,          0,
    "ICC color profile to use"},
 #endif
 
@@ -336,6 +336,8 @@ void writePageImage(GooString *filename)
   gfree(row);
   writer->close();
   delete writer;
+  if (file == stdout) fflush(file);
+  else fclose(file);
 }
 
 static void getCropSize(double page_w, double page_h, double *width, double *height)
@@ -754,7 +756,7 @@ int main(int argc, char *argv[]) {
     checkInvalidPrintOption(mono, "-mono");
     checkInvalidPrintOption(gray, "-gray");
     checkInvalidPrintOption(transp, "-transp");
-    checkInvalidPrintOption(icc[0], "-icc");
+    checkInvalidPrintOption(icc.getCString()[0], "-icc");
     checkInvalidPrintOption(singleFile, "-singlefile");
   } else {
     checkInvalidImageOption(level2, "-level2");
@@ -770,7 +772,7 @@ int main(int argc, char *argv[]) {
     checkInvalidImageOption(duplex, "-duplex");
   }
 
-  if (icc[0] && !png) {
+  if (icc.getCString()[0] && !png) {
     fprintf(stderr, "Error: -icc may only be used with png output.\n");
     exit(99);
   }
@@ -840,10 +842,10 @@ int main(int argc, char *argv[]) {
 
 #if USE_CMS
   icc_data = NULL;
-  if (icc[0]) {
-    FILE *file = fopen(icc, "rb");
+  if (icc.getCString()[0]) {
+    FILE *file = fopen(icc.getCString(), "rb");
     if (!file) {
-      fprintf(stderr, "Error: unable to open icc profile %s\n", icc);
+      fprintf(stderr, "Error: unable to open icc profile %s\n", icc.getCString());
       exit(4);
     }
     fseek (file, 0, SEEK_END);
@@ -851,7 +853,7 @@ int main(int argc, char *argv[]) {
     fseek (file, 0, SEEK_SET);
     icc_data = (unsigned char*)gmalloc(icc_data_size);
     if (fread(icc_data, icc_data_size, 1, file) != 1) {
-      fprintf(stderr, "Error: unable to read icc profile %s\n", icc);
+      fprintf(stderr, "Error: unable to read icc profile %s\n", icc.getCString());
       exit(4);
     }
     fclose(file);
@@ -901,6 +903,10 @@ int main(int argc, char *argv[]) {
     }
     lastPage = firstPage;
   }
+
+  // Make sure firstPage is always used so that beginDocument() is called
+  if ((printOnlyEven && firstPage % 2 == 0) || (printOnlyOdd && firstPage % 2 == 1))
+    firstPage++;
 
   cairoOut = new CairoOutputDev();
   cairoOut->startDoc(doc);

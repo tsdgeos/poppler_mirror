@@ -347,5 +347,5 @@ cleanup:
     free (y_coverage);
     free (temp_buf);
 
-    return gTrue;
+    return retval;
 }

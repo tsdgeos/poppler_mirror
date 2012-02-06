@@ -332,18 +332,21 @@ protected:
   cairo_pattern_t *group;
   cairo_pattern_t *shape;
   cairo_pattern_t *mask;
+  cairo_matrix_t mask_matrix;
   cairo_surface_t *cairo_shape_surface;
   cairo_t *cairo_shape;
   int knockoutCount;
   struct ColorSpaceStack {
     GBool knockout;
     GfxColorSpace *cs;
+    cairo_matrix_t group_matrix;
     struct ColorSpaceStack *next;
   } * groupColorSpaceStack;
 
   struct MaskStack {
-      cairo_pattern_t *mask;
-      struct MaskStack *next;
+    cairo_pattern_t *mask;
+    cairo_matrix_t mask_matrix;
+    struct MaskStack *next;
   } *maskStack;
 
 };
@@ -423,6 +426,7 @@ public:
   virtual void stroke(GfxState *state) { }
   virtual void fill(GfxState *state) { }
   virtual void eoFill(GfxState *state) { }
+  virtual void clipToStrokePath(GfxState *state) { }
   virtual GBool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
 				  double *pmat, int paintType, int tilingType, Dict *resDict,
 				  double *mat, double *bbox,

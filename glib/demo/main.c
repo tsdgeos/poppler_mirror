@@ -180,7 +180,9 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 	action_area = gtk_dialog_get_action_area (dialog);
 
 	/* Set the dialog up with HIG properties */
+#if !GTK_CHECK_VERSION (2, 22, 0)
 	gtk_dialog_set_has_separator (dialog, FALSE);
+#endif
 	gtk_container_set_border_width (GTK_CONTAINER (dialog), 5);
 	gtk_box_set_spacing (GTK_BOX (content_area), 2); /* 2 * 5 + 2 = 12 */
 	gtk_container_set_border_width (GTK_CONTAINER (action_area), 5);
@@ -300,8 +302,11 @@ gint main (gint argc, gchar **argv)
 		return 1;
 	}
 
+/* Threading is always enabled starting from GLib 2.24.0 */
+#if !GLIB_CHECK_VERSION (2, 24, 0)
 	if (!g_thread_supported ())
 		g_thread_init (NULL);
+#endif
 
 	gtk_init (&argc, &argv);
 

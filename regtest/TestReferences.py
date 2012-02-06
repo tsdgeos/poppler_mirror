@@ -59,8 +59,8 @@ class TestReferences:
             backends = get_all_backends()
 
         for backend in backends:
-            if not self.config.force and backend.has_md5(refs_path):
-                print("Checksum file found, skipping '%s' for %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs))
+            if not self.config.force and backend.has_results(refs_path):
+                print("Results found, skipping '%s' for %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs))
                 continue
             print("Creating refs for '%s' using %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs))
             if backend.create_refs(doc_path, refs_path):

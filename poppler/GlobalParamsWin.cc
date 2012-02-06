@@ -394,7 +394,7 @@ static char *findSubstituteName(const char *origName)
 /* Windows implementation of external font matching code */
 GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 					  SysFontType *type,
-					  int *fontNum) {
+					  int *fontNum, , GooString * /*substituteFontName*/) {
   SysFontInfo *fi;
   GooString *path = NULL;
   GooString *fontName = font->getName();

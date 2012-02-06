@@ -1,10 +1,10 @@
 //========================================================================
 //
-// pdfextract.cc
+// pdfseparate.cc
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 //========================================================================
 #include "config.h"
@@ -17,6 +17,7 @@
 #include "goo/GooString.h"
 #include "PDFDoc.h"
 #include "ErrorCodes.h"
+#include "GlobalParams.h"
 
 static int firstPage = 0;
 static int lastPage = 0;
@@ -95,19 +96,21 @@ main (int argc, char *argv[])
   ok = parseArgs (argDesc, &argc, argv);
   if (!ok || argc != 3 || printVersion || printHelp)
     {
-      fprintf (stderr, "pdfextract version %s\n", PACKAGE_VERSION);
+      fprintf (stderr, "pdfseparate version %s\n", PACKAGE_VERSION);
       fprintf (stderr, "%s\n", popplerCopyright);
       fprintf (stderr, "%s\n", xpdfCopyright);
       if (!printVersion)
 	{
-	  printUsage ("pdfextract", "<PDF-sourcefile> <PDF-pattern-destfile>",
+	  printUsage ("pdfseparate", "<PDF-sourcefile> <PDF-pattern-destfile>",
 		      argDesc);
 	}
       if (printVersion || printHelp)
 	exitCode = 0;
       goto err0;
     }
+  globalParams = new GlobalParams();
   extractPages (argv[1], argv[2]);
+  delete globalParams;
 
 err0:
 

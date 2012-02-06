@@ -15,12 +15,12 @@ The %Poppler Qt4 interface library is quite stable and working.
 @section refimpl Example Programs
 
 Examples programs can be found in the qt4/test directory. The %Poppler
-Qt4 interface library is also used in the development version of KDE's
+Qt4 interface library is also used in the KDE's
 document viewer <a href="http://okular.kde.org">Okular</a>. The source files
-for Okular's PDF plugin (%Poppler-based) can be found on the subversion server
+for Okular's PDF plugin (%Poppler-based) can be found on the git server
 of the KDE project, under
 <a
-href="http://websvn.kde.org/trunk/KDE/kdegraphics/okular/generators/poppler">this
+href="http://quickgit.kde.org/?p=okular.git&a=tree&f=generators/poppler">this
 URL</a>.
 
 

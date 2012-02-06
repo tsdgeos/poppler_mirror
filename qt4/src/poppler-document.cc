@@ -3,7 +3,7 @@
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2005-2010, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+ * Copyright (C) 2010, 2011 Hib Eris <hib@hiberis.nl>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ namespace Poppler {
   Document *Document::load(const QString &filePath, const QByteArray &ownerPassword,
 			   const QByteArray &userPassword)
     {
-	DocumentData *doc = new DocumentData(new GooString(QFile::encodeName(filePath)), 
+	DocumentData *doc = new DocumentData(filePath, 
 					     new GooString(ownerPassword.data()),
 					     new GooString(userPassword.data()));
 	return DocumentData::checkDocument(doc);
@@ -128,7 +128,7 @@ namespace Poppler {
 	    }
 	    else
 	    {
-		doc2 = new DocumentData(new GooString(m_doc->doc->getFileName()),
+		doc2 = new DocumentData(m_doc->m_filePath,
 					new GooString(ownerPassword.data()),
 					new GooString(userPassword.data()));
 	    }

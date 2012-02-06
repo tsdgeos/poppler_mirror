@@ -8,6 +8,7 @@
  * Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2010 Matthias Fauconneau <matthias.fauconneau@gmail.com>
  * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
+ * Copyright (C) 2011 Glad Deschrijver <glad.deschrijver@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -618,12 +619,12 @@ delete it;
 	QList<TextBox*> textList(Rotation rotate = Rotate0) const;
 
 	/**
-	   \return The dimensions (cropbox) of the page, in points (i.e. 1/72th on an inch)
+	   \return The dimensions (cropbox) of the page, in points (i.e. 1/72th of an inch)
 	*/
 	QSizeF pageSizeF() const;
 
 	/**
-	   \return The dimensions (cropbox) of the page, in points (i.e. 1/72th on an inch)
+	   \return The dimensions (cropbox) of the page, in points (i.e. 1/72th of an inch)
 	*/
 	QSize pageSize() const;
 
@@ -1421,9 +1422,10 @@ height = dummy.height();
               \since 0.10
              */
             enum PSOption {
-                Printing = 0x00000001,              ///< The PS is generated for priting purpouses
+                Printing = 0x00000001,              ///< The PS is generated for printing purposes
                 StrictMargins = 0x00000002,
-                ForceRasterization = 0x00000004
+                ForceRasterization = 0x00000004,
+                PrintToEPS = 0x00000008             ///< Output EPS instead of PS \since 0.20
             };
             Q_DECLARE_FLAGS( PSOptions, PSOption )
 

@@ -30,6 +30,7 @@
 #include "parseargs.h"
 
 #include "goo/gstrtod.h"
+#include "goo/GooString.h"
 
 static const ArgDesc *findArg(const ArgDesc *args, char *arg);
 static GBool grabArg(const ArgDesc *arg, int i, int *argc, char *argv[]);
@@ -87,6 +88,7 @@ void printUsage(const char *program, const char *otherArgs, const ArgDesc *args)
       break;
     case argString:
     case argStringDummy:
+    case argGooString:
       typ = " <string>";
       break;
     case argFlag:
@@ -146,6 +148,15 @@ static GBool grabArg(const ArgDesc *arg, int i, int *argc, char *argv[]) {
     if (i + 1 < *argc) {
       strncpy((char *)arg->val, argv[i+1], arg->size - 1);
       ((char *)arg->val)[arg->size - 1] = '\0';
+      n = 2;
+    } else {
+      ok = gFalse;
+      n = 1;
+    }
+    break;
+  case argGooString:
+    if (i + 1 < *argc) {
+      ((GooString*)arg->val)->Set(argv[i+1]);
       n = 2;
     } else {
       ok = gFalse;

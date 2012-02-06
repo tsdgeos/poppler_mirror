@@ -14,6 +14,11 @@
 // around #undef look odd, but it's to silence warnings about
 // redefining those symbols.
 
+/* Defines the poppler version */
+#ifndef POPPLER_VERSION
+#define POPPLER_VERSION ${POPPLER_VERSION}
+#endif
+
 /* Enable multithreading support. */
 #ifndef MULTITHREADED
 #cmakedefine MULTITHREADED 1

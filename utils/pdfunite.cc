@@ -1,13 +1,15 @@
 //========================================================================
 //
-// pdfmerge.cc
+// pdfunite.cc
 //
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 //
 //========================================================================
 #include <PDFDoc.h>
+#include <GlobalParams.h>
 #include "parseargs.h"
 #include "config.h"
 #include <poppler-config.h>
@@ -54,11 +56,11 @@ int main (int argc, char *argv[])
 
   exitCode = 99;
   if (argc <= 3 || printVersion || printHelp) {
-    fprintf(stderr, "pdfmerge version %s\n", PACKAGE_VERSION);
+    fprintf(stderr, "pdfunite version %s\n", PACKAGE_VERSION);
     fprintf(stderr, "%s\n", popplerCopyright);
     fprintf(stderr, "%s\n", xpdfCopyright);
     if (!printVersion) {
-      printUsage("pdfmerge", "<PDF-sourcefile-1>..<PDF-sourcefile-n> <PDF-destfile>",
+      printUsage("pdfunite", "<PDF-sourcefile-1>..<PDF-sourcefile-n> <PDF-destfile>",
 	argDesc);
     }
     if (printVersion || printHelp)
@@ -66,6 +68,7 @@ int main (int argc, char *argv[])
     return exitCode;
   }
   exitCode = 0;
+  globalParams = new GlobalParams();
 
   for (i = 1; i < argc - 1; i++) {
     GooString *gfileName = new GooString(argv[i]);
@@ -172,5 +175,6 @@ int main (int argc, char *argv[])
   delete countRef;
   for (j = 0; j < (int) pages.size (); j++) pages[j].free();
   for (i = 0; i < (int) docs.size (); i++) delete docs[i];
+  delete globalParams;
   return exitCode;
 }

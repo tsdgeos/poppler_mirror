@@ -23,15 +23,11 @@ poppler_page_get_duration
 poppler_page_get_transition
 poppler_page_get_thumbnail_size
 poppler_page_get_thumbnail
-poppler_page_get_thumbnail_pixbuf
 poppler_page_render
 poppler_page_render_for_printing
 poppler_page_render_for_printing_with_options
-poppler_page_render_to_pixbuf
-poppler_page_render_to_pixbuf_for_printing
 poppler_page_render_to_ps
 poppler_page_render_selection
-poppler_page_render_selection_to_pixbuf
 poppler_page_get_selected_region
 poppler_page_get_selection_region
 poppler_page_selection_region_free
@@ -78,6 +74,7 @@ POPPLER_PAGE
 POPPLER_IS_PAGE
 POPPLER_TYPE_PAGE
 POPPLER_TYPE_RECTANGLE
+POPPLER_TYPE_TEXT_ATTRIBUTES
 POPPLER_TYPE_PAGE_TRANSITION
 POPPLER_TYPE_LINK_MAPPING
 POPPLER_TYPE_IMAGE_MAPPING
@@ -135,7 +132,6 @@ poppler_document_get_page_layout
 poppler_document_get_page_mode
 poppler_document_get_permissions
 poppler_document_get_metadata
-poppler_document_get_permissions
 poppler_document_is_linearized
 poppler_document_get_n_pages
 poppler_document_get_page
@@ -352,6 +348,7 @@ POPPLER_TYPE_ORIENTATION
 POPPLER_TYPE_PRINT_FLAGS
 
 <SUBSECTION Private>
+POPPLER_DEFINE_BOXED_TYPE
 poppler_error_get_type
 poppler_error_quark
 poppler_backend_get_type
@@ -489,6 +486,7 @@ POPPLER_IS_LAYER
 POPPLER_TYPE_LAYER
 
 <SUBSECTION Private>
+Layer
 poppler_layer_get_type
 </SECTION>
 

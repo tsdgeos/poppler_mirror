@@ -19,7 +19,8 @@
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2010 Ilya Gorenbein <igorenbein@finjan.com>
-// Copyright 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@kabelmail.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -270,6 +271,12 @@ void XRef::init() {
 
 XRef::XRef() {
   init();
+}
+
+XRef::XRef(Object *trailerDictA) {
+  init();
+  if (trailerDictA->isDict())
+    trailerDict.initDict(trailerDictA->getDict());
 }
 
 XRef::XRef(BaseStream *strA, Guint pos, Guint mainXRefEntriesOffsetA, GBool *wasReconstructed, GBool reconstruct) {

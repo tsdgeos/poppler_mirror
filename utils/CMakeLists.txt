@@ -111,20 +111,20 @@ target_link_libraries(pdftohtml ${common_libs})
 install(TARGETS pdftohtml DESTINATION bin)
 install(FILES pdftohtml.1 DESTINATION share/man/man1)
 
-# pdfextract
-set(pdfextract_SOURCES ${common_srcs}
-  pdfextract.cc
+# pdfseparate
+set(pdfseparate_SOURCES ${common_srcs}
+  pdfseparate.cc
 )
-add_executable(pdfextract ${pdfextract_SOURCES})
-target_link_libraries(pdfextract ${common_libs})
-install(TARGETS pdfextract DESTINATION bin)
-install(FILES pdfextract.1 DESTINATION share/man/man1)
+add_executable(pdfseparate ${pdfseparate_SOURCES})
+target_link_libraries(pdfseparate ${common_libs})
+install(TARGETS pdfseparate DESTINATION bin)
+install(FILES pdfseparate.1 DESTINATION share/man/man1)
 
-# pdfmerge
-set(pdfmerge_SOURCES ${common_srcs}
-  pdfmerge.cc
+# pdfunite
+set(pdfunite_SOURCES ${common_srcs}
+  pdfunite.cc
 )
-add_executable(pdfmerge ${pdfmerge_SOURCES})
-target_link_libraries(pdfmerge ${common_libs})
-install(TARGETS pdfmerge DESTINATION bin)
-install(FILES pdfmerge.1 DESTINATION share/man/man1)
+add_executable(pdfunite ${pdfunite_SOURCES})
+target_link_libraries(pdfunite ${common_libs})
+install(TARGETS pdfunite DESTINATION bin)
+install(FILES pdfunite.1 DESTINATION share/man/man1)

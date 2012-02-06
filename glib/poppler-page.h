@@ -157,7 +157,7 @@ void              poppler_color_free          (PopplerColor *color);
  * @start_index: start position this text attributes apply
  * @end_index: end position this text text attributes apply
  *
- * A #PopplerTextInfo is used to describe text attriutes of a reange of text
+ * A #PopplerTextAttributes is used to describe text attributes of a range of text
  *
  * Since: 0.18
  */
@@ -290,7 +290,7 @@ void                     poppler_form_field_mapping_free     (PopplerFormFieldMa
 /**
  * PopplerAnnotMapping:
  * @area: a #PopplerRectangle representing an area of the page
- * @annot: a #PopplerAannot
+ * @annot: a #PopplerAnnot
  *
  * A #PopplerAnnotMapping structure represents the location
  * of @annot on the page

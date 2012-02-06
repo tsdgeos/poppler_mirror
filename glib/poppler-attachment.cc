@@ -210,7 +210,7 @@ poppler_attachment_save (PopplerAttachment  *attachment,
       return FALSE;
     }
 
-  return TRUE;
+  return result;
 }
 
 #define BUF_SIZE 1024

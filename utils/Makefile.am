@@ -17,7 +17,7 @@ INCLUDES =					\
 	-I$(top_srcdir)/poppler			\
 	$(UTILS_CFLAGS)				\
 	$(FONTCONFIG_CFLAGS)			\
-	$(CAIRO_CFLAGS)
+	$(PDFTOCAIRO_CFLAGS)
 
 LDADD =						\
 	$(top_builddir)/poppler/libpoppler.la	\
@@ -30,9 +30,14 @@ pdftocairo_SOURCES =				\
 	pdftocairo.cc				\
 	$(common)
 
+if USE_CMS
+PDFTOCAIRO_CFLAGS += $(LCMS_CFLAGS)
+PDFTOCAIRO_LIBS += $(LCMS_LIBS)
+endif
+
 pdftocairo_LDADD =				\
 	$(top_builddir)/poppler/libpoppler-cairo.la \
-	$(LDADD) $(CAIRO_LIBS)
+	$(LDADD) $(PDFTOCAIRO_LIBS)
 
 
 pdftocairo_binary = pdftocairo
@@ -51,8 +56,8 @@ bin_PROGRAMS =					\
 	pdftops					\
 	pdftotext				\
 	pdftohtml				\
-	pdfextract				\
-	pdfmerge				\
+	pdfseparate				\
+	pdfunite				\
 	$(pdftoppm_binary)			\
 	$(pdftocairo_binary)
 
@@ -64,8 +69,8 @@ dist_man1_MANS =				\
 	pdftops.1				\
 	pdftotext.1				\
 	pdftohtml.1				\
-	pdfextract.1				\
-	pdfmerge.1				\
+	pdfseparate.1				\
+	pdfunite.1				\
 	$(pdftoppm_manpage)			\
 	$(pdftocairo_manpage)
 
@@ -112,12 +117,12 @@ pdftohtml_SOURCES =				\
 	HtmlUtils.h				\
 	$(common)
 
-pdfextract_SOURCES =				\
-	pdfextract.cc				\
+pdfseparate_SOURCES =				\
+	pdfseparate.cc				\
 	$(common)
 
-pdfmerge_SOURCES =				\
-	pdfmerge.cc				\
+pdfunite_SOURCES =				\
+	pdfunite.cc				\
 	$(common)
 
 # Yay, automake!  It should be able to figure out that it has to dist

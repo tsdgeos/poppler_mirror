@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "config.h"
 #include "poppler.h"
 #include "poppler-private.h"
 
@@ -1163,11 +1164,11 @@ poppler_annot_free_text_get_quadding (PopplerAnnotFreeText *poppler_annot)
  * poppler_annot_free_text_get_callout_line:
  * @poppler_annot: a #PopplerAnnotFreeText
  *
- * Retrieves a #PopplerCalloutLine of four or six numbers specifying a callout
+ * Retrieves a #PopplerAnnotCalloutLine of four or six numbers specifying a callout
  * line attached to the @poppler_annot.
  *
- * Return value: a new allocated #PopplerCalloutLine if the annot has a callout
- *               line, NULL in other case. It must be freed with g_free() when
+ * Return value: a new allocated #PopplerAnnotCalloutLine if the annot has a callout
+ *               line, %NULL in other case. It must be freed with g_free() when
  *               done.
  **/
 PopplerAnnotCalloutLine *
@@ -1211,7 +1212,7 @@ poppler_annot_free_text_get_callout_line (PopplerAnnotFreeText *poppler_annot)
  * Creates a #PopplerAttachment for the file of the file attachment annotation @annot.
  * The #PopplerAttachment must be unrefed with g_object_unref by the caller.
  *
- * Return value: @PopplerAttachment
+ * Return value: (transfer full): @PopplerAttachment
  *
  * Since: 0.14
  **/
@@ -1266,7 +1267,7 @@ POPPLER_DEFINE_BOXED_TYPE (PopplerAnnotCalloutLine, poppler_annot_callout_line,
  *
  * Creates a new empty #PopplerAnnotCalloutLine.
  *
- * Return value: a new allocated #PopplerAnnotCalloutLine, NULL in other case.
+ * Return value: a new allocated #PopplerAnnotCalloutLine, %NULL in other case.
  *               It must be freed when done.
  **/
 PopplerAnnotCalloutLine *
@@ -1277,12 +1278,12 @@ poppler_annot_callout_line_new (void)
 
 /**
  * poppler_annot_callout_line_copy:
- * @callout: the #PopplerAnnotCalloutline to be copied.
+ * @callout: the #PopplerAnnotCalloutLine to be copied.
  *
  * It does copy @callout to a new #PopplerAnnotCalloutLine.
  *
  * Return value: a new allocated #PopplerAnnotCalloutLine as exact copy of
- *               @callout, NULL in other case. It must be freed when done.
+ *               @callout, %NULL in other case. It must be freed when done.
  **/
 PopplerAnnotCalloutLine *
 poppler_annot_callout_line_copy (PopplerAnnotCalloutLine *callout)

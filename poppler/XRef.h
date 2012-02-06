@@ -18,7 +18,8 @@
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
-// Copyright 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@kabelmail.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -66,6 +67,8 @@ public:
 
   // Constructor, create an empty XRef, used for PDF writing
   XRef();
+  // Constructor, create an empty XRef but with info dict, used for PDF writing
+  XRef(Object *trailerDictA);
   // Constructor.  Read xref table from stream.
   XRef(BaseStream *strA, Guint pos, Guint mainXRefEntriesOffsetA = 0, GBool *wasReconstructed = NULL, GBool reconstruct = false);
 

@@ -271,9 +271,9 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0,
 			   SplashCoord x3, SplashCoord y3,
 			   SplashCoord flatness,
 			   GBool first, GBool last, GBool end0, GBool end1) {
-  SplashCoord cx[splashMaxCurveSplits + 1][3];
-  SplashCoord cy[splashMaxCurveSplits + 1][3];
-  int cNext[splashMaxCurveSplits + 1];
+  SplashCoord *cx = new SplashCoord[(splashMaxCurveSplits + 1) * 3];
+  SplashCoord *cy = new SplashCoord[(splashMaxCurveSplits + 1) * 3];
+  int *cNext = new int[splashMaxCurveSplits + 1];
   SplashCoord xl0, xl1, xl2, xr0, xr1, xr2, xr3, xx1, xx2, xh;
   SplashCoord yl0, yl1, yl2, yr0, yr1, yr2, yr3, yy1, yy2, yh;
   SplashCoord dx, dy, mx, my, d1, d2, flatness2;
@@ -288,20 +288,34 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0,
   // initial segment
   p1 = 0;
   p2 = splashMaxCurveSplits;
-  cx[p1][0] = x0;  cy[p1][0] = y0;
-  cx[p1][1] = x1;  cy[p1][1] = y1;
-  cx[p1][2] = x2;  cy[p1][2] = y2;
-  cx[p2][0] = x3;  cy[p2][0] = y3;
-  cNext[p1] = p2;
+
+  *(cx + p1 * 3 + 0) = x0;
+  *(cx + p1 * 3 + 1) = x1;
+  *(cx + p1 * 3 + 2) = x2;
+  *(cx + p2 * 3 + 0) = x3;
+
+  *(cy + p1 * 3 + 0) = y0;
+  *(cy + p1 * 3 + 1) = y1;
+  *(cy + p1 * 3 + 2) = y2;
+  *(cy + p2 * 3 + 0) = y3;
+
+  *(cNext + p1) = p2;
 
   while (p1 < splashMaxCurveSplits) {
 
     // get the next segment
-    xl0 = cx[p1][0];  yl0 = cy[p1][0];
-    xx1 = cx[p1][1];  yy1 = cy[p1][1];
-    xx2 = cx[p1][2];  yy2 = cy[p1][2];
-    p2 = cNext[p1];
-    xr3 = cx[p2][0];  yr3 = cy[p2][0];
+    xl0 = *(cx + p1 * 3 + 0);
+    xx1 = *(cx + p1 * 3 + 1);
+    xx2 = *(cx + p1 * 3 + 2);
+
+    yl0 = *(cy + p1 * 3 + 0);
+    yy1 = *(cy + p1 * 3 + 1);
+    yy2 = *(cy + p1 * 3 + 2);
+
+    p2 = *(cNext + p1);
+
+    xr3 = *(cx + p2 * 3 + 0);
+    yr3 = *(cy + p2 * 3 + 0);
 
     // compute the distances from the control points to the
     // midpoint of the straight line (this is a bit of a hack, but
@@ -343,15 +357,30 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0,
       yr0 = (yl2 + yr1) * 0.5;
       // add the new subdivision points
       p3 = (p1 + p2) / 2;
-      cx[p1][1] = xl1;  cy[p1][1] = yl1;
-      cx[p1][2] = xl2;  cy[p1][2] = yl2;
-      cNext[p1] = p3;
-      cx[p3][0] = xr0;  cy[p3][0] = yr0;
-      cx[p3][1] = xr1;  cy[p3][1] = yr1;
-      cx[p3][2] = xr2;  cy[p3][2] = yr2;
-      cNext[p3] = p2;
+
+      *(cx + p1 * 3 + 1) = xl1;
+      *(cx + p1 * 3 + 2) = xl2;
+
+      *(cy + p1 * 3 + 1) = yl1;
+      *(cy + p1 * 3 + 2) = yl2;
+
+      *(cNext + p1) = p3;
+
+      *(cx + p3 * 3 + 0) = xr0;
+      *(cx + p3 * 3 + 1) = xr1;
+      *(cx + p3 * 3 + 2) = xr2;
+
+      *(cy + p3 * 3 + 0) = yr0;
+      *(cy + p3 * 3 + 1) = yr1;
+      *(cy + p3 * 3 + 2) = yr2;
+
+      *(cNext + p3) = p2;
     }
   }
+
+  delete [] cx;
+  delete [] cy;
+  delete [] cNext;
 }
 
 void SplashXPath::addSegment(SplashCoord x0, SplashCoord y0,

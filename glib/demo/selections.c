@@ -538,11 +538,19 @@ pgd_selections_properties_selector_create (PgdSelectionsDemo *demo)
 	gtk_box_pack_start (GTK_BOX (rotate_hbox), label, TRUE, TRUE, 0);
 	gtk_widget_show (label);
 
+#if GTK_CHECK_VERSION (2, 24, 0)
+	rotate_selector = gtk_combo_box_text_new ();
+	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (rotate_selector), "0");
+	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (rotate_selector), "90");
+	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (rotate_selector), "180");
+	gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (rotate_selector), "270");
+#else
 	rotate_selector = gtk_combo_box_new_text ();
 	gtk_combo_box_append_text (GTK_COMBO_BOX (rotate_selector), "0");
 	gtk_combo_box_append_text (GTK_COMBO_BOX (rotate_selector), "90");
 	gtk_combo_box_append_text (GTK_COMBO_BOX (rotate_selector), "180");
 	gtk_combo_box_append_text (GTK_COMBO_BOX (rotate_selector), "270");
+#endif
 	gtk_combo_box_set_active (GTK_COMBO_BOX (rotate_selector), 0);
 #if 0
 	g_signal_connect (G_OBJECT (rotate_selector), "changed",

@@ -30,6 +30,7 @@
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
 // Copyright (C) 2011 Joshua Richardson <jric@chegg.com>
 // Copyright (C) 2011 Stephen Reichling <sreichling@chegg.com>
+// Copyright (C) 2011, 2012 Igor Slepchin <igor.slepchin@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -57,15 +58,29 @@
 #include "Page.h"
 #include "Annot.h"
 #include "PNGWriter.h"
-#ifdef ENABLE_LIBJPEG
-#include "DCTStream.h"
-#endif
 #include "GlobalParams.h"
 #include "HtmlOutputDev.h"
 #include "HtmlFonts.h"
 #include "HtmlUtils.h"
+#include "Outline.h"
+#include "PDFDoc.h"
 
 #define DEBUG __FILE__ << ": " << __LINE__ << ": DEBUG: "
+
+class HtmlImage
+{
+public:
+    HtmlImage(GooString *_fName, GfxState *state)
+      : fName(_fName) {
+    state->transform(0, 0, &xMin, &yMax);
+    state->transform(1, 1, &xMax, &yMin);
+  }
+ ~HtmlImage() { delete fName; }
+
+  double xMin, xMax;		// image x coordinates
+  double yMin, yMax;		// image y coordinates
+  GooString  *fName;		// image file name
+};
 
 // returns true if x is closer to y than x is to z
 static inline bool IS_CLOSER(float x, float y, float z) { return fabs((x)-(y)) < fabs((x)-(z)); }
@@ -728,6 +743,15 @@ void HtmlPage::dumpAsXML(FILE* f,int page){
     delete fontCSStyle;
   }
   
+  int listlen=HtmlOutputDev::imgList->getLength();
+  for (int i = 0; i < listlen; i++) {
+    HtmlImage *img = (HtmlImage*)HtmlOutputDev::imgList->del(0);
+    fprintf(f,"<image top=\"%d\" left=\"%d\" ",xoutRound(img->yMin),xoutRound(img->xMin));
+    fprintf(f,"width=\"%d\" height=\"%d\" ",xoutRound(img->xMax-img->xMin),xoutRound(img->yMax-img->yMin));
+    fprintf(f,"src=\"%s\"/>\n",img->fName->getCString());
+    delete img;
+  }
+
   for(HtmlString *tmp=yxStrings;tmp;tmp=tmp->yxNext){
     if (tmp->htext){
       fprintf(f,"<text top=\"%d\" left=\"%d\" ",xoutRound(tmp->yMin),xoutRound(tmp->xMin));
@@ -867,9 +891,9 @@ void HtmlPage::dump(FILE *f, int pageNum)
     // Loop over the list of image names on this page
     int listlen=HtmlOutputDev::imgList->getLength();
     for (int i = 0; i < listlen; i++) {
-      GooString *fName= (GooString *)HtmlOutputDev::imgList->del(0);
-      fprintf(f,"<IMG src=\"%s\"/><br/>\n",fName->getCString());
-      delete fName;
+      HtmlImage *img = (HtmlImage*)HtmlOutputDev::imgList->del(0);
+      fprintf(f,"<IMG src=\"%s\"/><br/>\n",img->fName->getCString());
+      delete img;
     }
     HtmlOutputDev::imgNum=1;
 
@@ -1240,7 +1264,7 @@ void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 				  int width, int height, GBool invert,
 				  GBool interpolate, GBool inlineImg) {
 
-  if (ignore||complexMode) {
+  if (ignore||(complexMode && !xml)) {
     OutputDev::drawImageMask(state, ref, str, width, height, invert, interpolate, inlineImg);
     return;
   }
@@ -1267,7 +1291,7 @@ void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
     }
 
     // initialize stream
-    str = ((DCTStream *)str)->getRawStream();
+    str = str->getNextStream();
     str->reset();
 
     // copy the stream
@@ -1276,7 +1300,10 @@ void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 
     fclose(f1);
    
-  if (fName) imgList->append(fName);
+    if (fName) {
+        HtmlImage *img = new HtmlImage(fName, state);
+        imgList->append(img);
+    }
   }
   else {
     OutputDev::drawImageMask(state, ref, str, width, height, invert, interpolate, inlineImg);
@@ -1287,7 +1314,7 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			      int width, int height, GfxImageColorMap *colorMap,
 			      GBool interpolate, int *maskColors, GBool inlineImg) {
 
-  if (ignore||complexMode) {
+  if (ignore||(complexMode && !xml)) {
     OutputDev::drawImage(state, ref, str, width, height, colorMap, interpolate,
 			 maskColors, inlineImg);
     return;
@@ -1319,7 +1346,7 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     }
 
     // initialize stream
-    str = ((DCTStream *)str)->getRawStream();
+    str = str->getNextStream();
     str->reset();
 
     // copy the stream
@@ -1328,7 +1355,10 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     
     fclose(f1);
   
-    if (fName) imgList->append(fName);
+    if (fName) {
+        HtmlImage *img = new HtmlImage(fName, state);
+        imgList->append(img);
+    }
   }
   else {
 #ifdef ENABLE_LIBPNG
@@ -1394,7 +1424,8 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     fclose(f1);
 
     free(row);
-    imgList->append(fName);
+    HtmlImage *img = new HtmlImage(fName, state);
+    imgList->append(img);
     ++imgNum;
     imgStr->close();
     delete imgStr;
@@ -1555,17 +1586,25 @@ void HtmlOutputDev::dumpMetaVars(FILE *file)
   }
 }
 
-GBool HtmlOutputDev::dumpDocOutline(Catalog* catalog)
+GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 { 
+#ifdef DISABLE_OUTLINE
+	return gFalse;
+#else
 	FILE * output = NULL;
 	GBool bClose = gFalse;
+	Catalog *catalog = doc->getCatalog();
 
 	if (!ok || xml)
-    	return gFalse;
+                return gFalse;
   
-	Object *outlines = catalog->getOutline();
-  	if (!outlines->isDict())
-    	return gFalse;
+	Outline *outline = doc->getOutline();
+	if (!outline)
+		return gFalse;
+
+	GooList *outlines = outline->getItems();
+	if (!outlines)
+		return gFalse;
   
 	if (!complexMode && !xml)
   	{
@@ -1587,7 +1626,17 @@ GBool HtmlOutputDev::dumpDocOutline(Catalog* catalog)
 				return gFalse;
 			delete str;
 			bClose = gTrue;
-     		fputs("<HTML xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"\" xml:lang=\"\">\n<HEAD>\n<TITLE>Document Outline</TITLE>\n</HEAD>\n<BODY>\n", output);
+
+			const char *htmlEncoding =
+				HtmlOutputDev::mapEncodingToHtml(globalParams->getTextEncodingName());
+
+			fprintf(output, "<HTML xmlns=\"http://www.w3.org/1999/xhtml\" " \
+                                "lang=\"\" xml:lang=\"\">\n"            \
+                                "<HEAD>\n"                              \
+                                "<TITLE>Document Outline</TITLE>\n"     \
+                                "<META http-equiv=\"Content-Type\" content=\"text/html; " \
+                                "charset=%s\"/>\n"                      \
+                                "</HEAD>\n<BODY>\n", htmlEncoding);
 		}
 	}
  
@@ -1601,97 +1650,92 @@ GBool HtmlOutputDev::dumpDocOutline(Catalog* catalog)
 		fclose(output);
 	}
   	return done;
+#endif
 }
 
-GBool HtmlOutputDev::newOutlineLevel(FILE *output, Object *node, Catalog* catalog, int level)
+GBool HtmlOutputDev::newOutlineLevel(FILE *output, GooList *outlines, Catalog* catalog, int level)
 {
-  Object curr, next;
-  GBool atLeastOne = gFalse;
-  
-  if (node->dictLookup("First", &curr)->isDict()) {
-    if (level == 1)
+	GBool atLeastOne = gFalse;
+
+	if (level == 1)
 	{
 		fputs("<A name=\"outline\"></a>", output);
 		fputs("<h1>Document Outline</h1>\n", output);
 	}
-    fputs("<ul>",output);
-    do {
-      // get title, give up if not found
-      Object title;
-      if (curr.dictLookup("Title", &title)->isNull()) {
-		title.free();
-		break;
-      }
-      GooString *titleStr = new GooString(title.getString());
-      title.free();
+	fputs("<ul>",output);
 
-      // get corresponding link
-      // Note: some code duplicated from HtmlOutputDev::getLinkDest().
-      GooString *linkName = NULL;;
-      Object dest;
-      if (!curr.dictLookup("Dest", &dest)->isNull()) {
-		LinkGoTo *link = new LinkGoTo(&dest);
-		LinkDest *linkdest=NULL;
-		if (link->getDest()!=NULL)
-			linkdest=link->getDest()->copy();
-		else if (link->getNamedDest()!=NULL)
-			linkdest=catalog->findDest(link->getNamedDest());
-			
-		delete link;
-		if (linkdest) { 
-	  		int page;
-	  		if (linkdest->isPageRef()) {
-	    		Ref pageref=linkdest->getPageRef();
-	    		page=catalog->findPage(pageref.num,pageref.gen);
-	  		} else {
-	    		page=linkdest->getPageNum();
-	  		}
-	  		delete linkdest;
+	for (int i = 0; i < outlines->getLength(); i++)
+	{
+		OutlineItem *item = (OutlineItem*)outlines->get(i);
+		GooString *titleStr = HtmlFont::HtmlFilter(item->getTitle(),
+							   item->getTitleLength());
 
-			/* 			complex 	simple
-			frames		file-4.html	files.html#4
-			noframes	file.html#4	file.html#4
-	   		*/
-	  		linkName=basename(Docname);
-	  		GooString *str=GooString::fromInt(page);
-	  		if (noframes) {
-	    		linkName->append(".html#");
-				linkName->append(str);
-	  		} else {
-    			if( complexMode ) {
-	   		   		linkName->append("-");
-	      			linkName->append(str);
-	      			linkName->append(".html");
-	    		} else {
-	      			linkName->append("s.html#");
-	      			linkName->append(str);
-	    		}
-	  		}
-			delete str;
+		// get corresponding link
+		GooString *linkName = NULL;;
+		LinkAction *action = item->getAction();
+		LinkGoTo *link = NULL;
+		Object dest;
+		if (action && action->getKind() == actionGoTo)
+			link = dynamic_cast<LinkGoTo*>(action);
+		if (link && link->isOk()) {
+			LinkDest *linkdest=NULL;
+			if (link->getDest()!=NULL)
+				linkdest=link->getDest()->copy();
+			else if (link->getNamedDest()!=NULL)
+				linkdest=catalog->findDest(link->getNamedDest());
+
+			if (linkdest) {
+				int page;
+				if (linkdest->isPageRef()) {
+					Ref pageref=linkdest->getPageRef();
+					page=catalog->findPage(pageref.num,pageref.gen);
+				} else {
+					page=linkdest->getPageNum();
+				}
+				delete linkdest;
+
+				/*		complex		simple
+				frames		file-4.html	files.html#4
+				noframes	file.html#4	file.html#4
+				*/
+				linkName=basename(Docname);
+				GooString *str=GooString::fromInt(page);
+				if (noframes) {
+					linkName->append(".html#");
+					linkName->append(str);
+				} else {
+					if( complexMode ) {
+						linkName->append("-");
+						linkName->append(str);
+						linkName->append(".html");
+					} else {
+						linkName->append("s.html#");
+						linkName->append(str);
+					}
+				}
+				delete str;
+			}
 		}
-      }
-      dest.free();
+		dest.free();
 
-      fputs("<li>",output);
-      if (linkName)
-		fprintf(output,"<A href=\"%s\">", linkName->getCString());
-      fputs(titleStr->getCString(),output);
-      if (linkName) {
-		fputs("</A>",output);
-		delete linkName;
-      }
-      fputs("\n",output);
-      delete titleStr;
-      atLeastOne = gTrue;
+		fputs("<li>",output);
+		if (linkName)
+			fprintf(output,"<A href=\"%s\">", linkName->getCString());
+		fputs(titleStr->getCString(),output);
+		if (linkName) {
+			fputs("</A>",output);
+			delete linkName;
+		}
+		fputs("\n",output);
+		delete titleStr;
+		atLeastOne = gTrue;
 
-      newOutlineLevel(output, &curr, catalog, level+1);
-      curr.dictLookup("Next", &next);
-      curr.free();
-      curr = next;
-    } while(curr.isDict());
-    fputs("</ul>",output);
-  }
-  curr.free();
+		item->open();
+		if (item->hasKids())
+			newOutlineLevel(output, item->getKids(), catalog, level+1);
+		item->close();
+	}
+	fputs("</ul>",output);
 
-  return atLeastOne;
+	return atLeastOne;
 }

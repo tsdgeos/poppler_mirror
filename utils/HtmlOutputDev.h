@@ -21,6 +21,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Joshua Richardson <jric@chegg.com>
 // Copyright (C) 2011 Stephen Reichling <sreichling@chegg.com>
+// Copyright (C) 2012 Igor Slepchin <igor.redhat@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -58,6 +59,7 @@
 
 class GfxState;
 class GooString;
+class PDFDoc;
 //------------------------------------------------------------------------
 // HtmlString
 //------------------------------------------------------------------------
@@ -297,7 +299,7 @@ public:
   int getPageWidth() { return maxPageWidth; }
   int getPageHeight() { return maxPageHeight; }
 
-  GBool dumpDocOutline(Catalog* catalog);
+  GBool dumpDocOutline(PDFDoc* catalog);
 
 private:
   // convert encoding into a HTML standard, or encoding->getCString if not
@@ -307,7 +309,7 @@ private:
   GooString* getLinkDest(AnnotLink *link);
   void dumpMetaVars(FILE *);
   void doFrame(int firstPage);
-  GBool newOutlineLevel(FILE *output, Object *node, Catalog* catalog, int level = 1);
+  GBool newOutlineLevel(FILE *output, GooList *outlines, Catalog* catalog, int level = 1);
 
   FILE *fContentsFrame;
   FILE *page;                   // html file

@@ -106,7 +106,7 @@ CairoFont::getGlyph(CharCode code,
 double
 CairoFont::getSubstitutionCorrection(GfxFont *gfxFont)
 {
-  double w1, w2,w3;
+  double w1, w2;
   CharCode code;
   char *name;
 
@@ -134,7 +134,6 @@ CairoFont::getSubstitutionCorrection(GfxFont *gfxFont)
 
 	cairo_scaled_font_destroy(scaled_font);
 	cairo_font_options_destroy(options);
-	w3 = extents.width;
 	w2 = extents.x_advance;
       }
       if (!gfxFont->isSymbolic()) {

@@ -16,6 +16,7 @@
 // Copyright (C) 2006 Dom Lachowicz <cinamod@hotmail.com>
 // Copyright (C) 2007-2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2011 Vittal Aithal <vittal.aithal@cognidox.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -115,6 +116,7 @@ int main(int argc, char *argv[]) {
   int exitCode;
   int pg, i;
   GBool multiPage;
+  int r;
 
   exitCode = 99;
 
@@ -278,6 +280,12 @@ int main(int argc, char *argv[]) {
       }
     }
     printf("\n");
+    r = doc->getPageRotate(pg);
+    if (multiPage) {
+      printf("Page %4d rot:  %d\n", pg, r);
+    } else {
+      printf("Page rot:       %d\n", r);
+    }
   } 
 
   // print the boxes

@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006-2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2006 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
@@ -46,13 +46,11 @@
 #include "XRef.h"
 #include "Link.h"
 #include "OutputDev.h"
-#ifndef PDF_PARSER_ONLY
 #include "Gfx.h"
 #include "GfxState.h"
 #include "Annot.h"
 #include "TextOutputDev.h"
 #include "Form.h"
-#endif
 #include "Error.h"
 #include "Page.h"
 #include "Catalog.h"

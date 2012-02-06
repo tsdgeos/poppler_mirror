@@ -4,6 +4,7 @@
  * Copyright (C) 2006-2009, 2011 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2009, 2011 by Pino Toscano <pino@kde.org>
  * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
+ * Copyright (C) 2011 Hib Eris <hib@hiberis.nl>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -26,6 +27,7 @@
 #ifndef _POPPLER_PRIVATE_H_
 #define _POPPLER_PRIVATE_H_
 
+#include <QtCore/QFile>
 #include <QtCore/QPointer>
 #include <QtCore/QVector>
 
@@ -75,10 +77,21 @@ namespace Poppler {
 
     class DocumentData {
     public:
-	DocumentData(GooString *filePath, GooString *ownerPassword, GooString *userPassword)
+	DocumentData(const QString &filePath, GooString *ownerPassword, GooString *userPassword)
 	    {
 		init();
-		doc = new PDFDoc(filePath, ownerPassword, userPassword);
+		m_filePath = filePath;	
+
+#if defined(_WIN32)
+		wchar_t *fileName = new WCHAR[filePath.length()];
+		int length = filePath.toWCharArray(fileName); 
+		doc = new PDFDoc(fileName, length, ownerPassword, userPassword);
+		delete fileName;
+#else
+		GooString *fileName = new GooString(QFile::encodeName(filePath));
+		doc = new PDFDoc(fileName, ownerPassword, userPassword);
+#endif
+
 		delete ownerPassword;
 		delete userPassword;
 	    }
@@ -173,6 +186,7 @@ namespace Poppler {
 	static Document *checkDocument(DocumentData *doc);
 
 	PDFDoc *doc;
+	QString m_filePath;
 	QByteArray fileContents;
 	bool locked;
 	FontIterator *m_fontInfoIterator;
@@ -261,7 +275,7 @@ namespace Poppler {
     {
 	public:
 		FormFieldData(DocumentData *_doc, ::Page *p, ::FormWidget *w) :
-		doc(_doc), page(p), fm(w), flags(0), annoflags(0)
+		doc(_doc), page(p), fm(w)
 		{
 		}
 
@@ -269,8 +283,6 @@ namespace Poppler {
 		::Page *page;
 		::FormWidget *fm;
 		QRectF box;
-		int flags;
-		int annoflags;
     };
 
 }

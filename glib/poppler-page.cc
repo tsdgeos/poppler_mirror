@@ -175,7 +175,7 @@ poppler_page_get_duration (PopplerPage *page)
  *
  * Returns the transition effect of @page
  *
- * Return value: a #PopplerPageTransition or NULL.
+ * Return value: a #PopplerPageTransition or %NULL.
  **/
 PopplerPageTransition *
 poppler_page_get_transition (PopplerPage *page)
@@ -468,7 +468,7 @@ create_surface_from_thumbnail_data (guchar *data,
 
 /**
  * poppler_page_get_thumbnail:
- * @page: the #PopperPage to get the thumbnail for
+ * @page: the #PopplerPage to get the thumbnail for
  * 
  * Get the embedded thumbnail for the specified page.  If the document
  * doesn't have an embedded thumbnail for the page, this function
@@ -622,8 +622,7 @@ poppler_page_get_thumbnail_size (PopplerPage *page,
  * @selection: start and end point of selection as a rectangle
  * 
  * Returns a region containing the area that would be rendered by
- * poppler_page_render_selection() or 
- * poppler_page_render_selection_to_pixbuf() as a #GList of
+ * poppler_page_render_selection() as a #GList of
  * #PopplerRectangle. The returned list must be freed with
  * poppler_page_selection_region_free().
  * 
@@ -689,7 +688,8 @@ poppler_page_get_selection_region (PopplerPage           *page,
 
 /**
  * poppler_page_selection_region_free:
- * @region: a #GList of #PopplerRectangle
+ * @region: (element-type PopplerRectangle): a #GList of
+ *   #PopplerRectangle
  *
  * Frees @region
  *
@@ -713,8 +713,7 @@ poppler_page_selection_region_free (GList *region)
  * @selection: start and end point of selection as a rectangle
  *
  * Returns a region containing the area that would be rendered by
- * poppler_page_render_selection() or
- * poppler_page_render_selection_to_pixbuf().
+ * poppler_page_render_selection().
  * The returned region must be freed with cairo_region_destroy()
  *
  * Return value: (transfer full): a cairo_region_t
@@ -1028,7 +1027,8 @@ poppler_page_get_image (PopplerPage *page,
 
 /**
  * poppler_page_free_image_mapping:
- * @list: A list of #PopplerImageMapping<!-- -->s
+ * @list: (element-type PopplerImageMapping): A list of
+ *   #PopplerImageMapping<!-- -->s
  *
  * Frees a list of #PopplerImageMapping<!-- -->s allocated by
  * poppler_page_get_image_mapping().
@@ -1205,7 +1205,8 @@ poppler_page_get_link_mapping (PopplerPage *page)
 
 /**
  * poppler_page_free_link_mapping:
- * @list: A list of #PopplerLinkMapping<!-- -->s
+ * @list: (element-type PopplerLinkMapping): A list of
+ *   #PopplerLinkMapping<!-- -->s
  * 
  * Frees a list of #PopplerLinkMapping<!-- -->s allocated by
  * poppler_page_get_link_mapping().  It also frees the #PopplerAction<!-- -->s
@@ -1273,7 +1274,8 @@ poppler_page_get_form_field_mapping (PopplerPage *page)
 
 /**
  * poppler_page_free_form_field_mapping:
- * @list: A list of #PopplerFormFieldMapping<!-- -->s
+ * @list: (element-type PopplerFormFieldMapping): A list of
+ *   #PopplerFormFieldMapping<!-- -->s
  *
  * Frees a list of #PopplerFormFieldMapping<!-- -->s allocated by
  * poppler_page_get_form_field_mapping().
@@ -1392,12 +1394,13 @@ poppler_page_get_annot_mapping (PopplerPage *page)
 
 /**
  * poppler_page_free_annot_mapping:
- * @list: A list of #PopplerAnnotMapping<!-- -->s
+ * @list: (element-type PopplerAnnotMapping): A list of
+ *   #PopplerAnnotMapping<!-- -->s
  *
  * Frees a list of #PopplerAnnotMapping<!-- -->s allocated by
- * poppler_page_get_annot_mapping().  It also frees the #PopplerAnnot<!-- -->s
+ * poppler_page_get_annot_mapping().  It also unreferences the #PopplerAnnot<!-- -->s
  * that each mapping contains, so if you want to keep them around, you need to
- * copy them with poppler_annot_copy().
+ * reference them with g_object_ref().
  **/
 void
 poppler_page_free_annot_mapping (GList *list)
@@ -2003,8 +2006,9 @@ poppler_page_get_text_layout (PopplerPage       *page,
 }
 
 /**
- * poppler_page_free_text_attributes;
- * @list: A list of #PopplerTextAttributes<!-- -->s
+ * poppler_page_free_text_attributes:
+ * @list: (element-type PopplerTextAttributes): A list of
+ *   #PopplerTextAttributes<!-- -->s
  *
  * Frees a list of #PopplerTextAttributes<!-- -->s allocated by
  * poppler_page_get_text_attributes().

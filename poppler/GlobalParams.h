@@ -146,7 +146,7 @@ public:
   FILE *findToUnicodeFile(GooString *name);
   GooString *findFontFile(GooString *fontName);
   GooString *findSystemFontFile(GfxFont *font, SysFontType *type,
-			      int *fontNum);
+			      int *fontNum, GooString *substituteFontName = NULL);
   GooString *findCCFontFile(GooString *collection);
   GBool getPSExpandSmaller();
   GBool getPSShrinkLarger();

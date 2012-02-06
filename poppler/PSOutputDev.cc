@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2009, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
@@ -1217,6 +1217,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   }
   processColors = 0;
   inType3Char = gFalse;
+  inUncoloredPattern = gFalse;
 
 #if OPI_SUPPORT
   // initialize OPI nesting levels
@@ -1385,7 +1386,7 @@ void PSOutputDev::writeHeader(int firstPage, int lastPage,
     writePS("%!PS-Adobe-3.0 Resource-Form\n");
     break;
   }
-  writePSFmt("% Produced by poppler pdftops version: {0:s} (http://poppler.freedesktop.org)\n", PACKAGE_VERSION);
+  writePSFmt("%Produced by poppler pdftops version: {0:s} (http://poppler.freedesktop.org)\n", PACKAGE_VERSION);
   xref->getDocInfo(&info);
   if (info.isDict() && info.dictLookup("Creator", &obj1)->isString()) {
     writePS("%%Creator: ");
@@ -3591,6 +3592,9 @@ void PSOutputDev::updateLineWidth(GfxState *state) {
 }
 
 void PSOutputDev::updateFillColorSpace(GfxState *state) {
+  if (inUncoloredPattern) {
+    return;
+  }
   switch (level) {
   case psLevel1:
   case psLevel1Sep:
@@ -3609,6 +3613,9 @@ void PSOutputDev::updateFillColorSpace(GfxState *state) {
 }
 
 void PSOutputDev::updateStrokeColorSpace(GfxState *state) {
+  if (inUncoloredPattern) {
+    return;
+  }
   switch (level) {
   case psLevel1:
   case psLevel1Sep:
@@ -3635,6 +3642,9 @@ void PSOutputDev::updateFillColor(GfxState *state) {
   double c, m, y, k;
   int i;
 
+  if (inUncoloredPattern) {
+    return;
+  }
   switch (level) {
   case psLevel1:
     state->getFillGray(&gray);
@@ -3698,6 +3708,9 @@ void PSOutputDev::updateStrokeColor(GfxState *state) {
   double c, m, y, k;
   int i;
 
+  if (inUncoloredPattern) {
+    return;
+  }
   switch (level) {
   case psLevel1:
     state->getStrokeGray(&gray);
@@ -3965,9 +3978,21 @@ GBool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *st
     t3FillColorOnly = gFalse;
   }
   inType3Char = gTrue;
+  if (paintType == 2) {
+    inUncoloredPattern = gTrue;
+    // ensure any PS procedures that contain sCol or fCol do not change the color
+    writePS("/pdfLastFill true def\n");
+    writePS("/pdfLastStroke true def\n");
+  }
   ++numTilingPatterns;
   gfx->display(str);
   --numTilingPatterns;
+  if (paintType == 2) {
+    inUncoloredPattern = gFalse;
+    // ensure the next PS procedures that uses sCol or fCol will update the color
+    writePS("/pdfLastFill false def\n");
+    writePS("/pdfLastStroke false def\n");
+  }
   inType3Char = gFalse;
   writePS("} def\n");
   delete gfx;
@@ -3994,8 +4019,11 @@ GBool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *st
 				       double xStep, double yStep) {
   PDFRectangle box;
   Gfx *gfx;
-  double cxMin, cyMin, cxMax, cyMax;
 
+  if (paintType == 2) {
+    // setpattern with PaintType 2 needs the paint color
+    writePS("currentcolor\n");
+  }
   writePS("<<\n  /PatternType 1\n");
   writePSFmt("  /PaintType {0:d}\n", paintType);
   writePSFmt("  /TilingType {0:d}\n", tilingType);
@@ -4009,15 +4037,26 @@ GBool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *st
   box.y2 = bbox[3];
   gfx = new Gfx(doc, this, resDict, &box, NULL);
   inType3Char = gTrue;
+  if (paintType == 2) {
+    inUncoloredPattern = gTrue;
+    // ensure any PS procedures that contain sCol or fCol do not change the color
+    writePS("/pdfLastFill true def\n");
+    writePS("/pdfLastStroke true def\n");
+  }
   gfx->display(str);
+  if (paintType == 2) {
+    inUncoloredPattern = gFalse;
+    // ensure the next PS procedures that uses sCol or fCol will update the color
+    writePS("/pdfLastFill false def\n");
+    writePS("/pdfLastStroke false def\n");
+  }
   inType3Char = gFalse;
   delete gfx;
   writePS("  }\n");
   writePS(">>\n");
-  writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}]\n", pmat[0], pmat[1], pmat[2], pmat[3], pmat[4], pmat[5]);
+  writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}]\n", mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
   writePS("makepattern setpattern\n");
-  state->getClipBBox(&cxMin, &cyMin, &cxMax, &cyMax);
-  writePSFmt("{0:.6g} {1:.6g} {2:.6g} {3:.6g} rectfill\n", cxMin, cyMin, cxMax - cxMin, cyMax - cyMin);
+  writePS("clippath fill\n"); // Gfx sets up a clip before calling out->tilingPatternFill()
 
   return gTrue;
 }
@@ -4027,8 +4066,28 @@ GBool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Ob
 				     double *mat, double *bbox,
 				     int x0, int y0, int x1, int y1,
 				     double xStep, double yStep) {
-  if (x1 - x0 == 1 && y1 - y0 == 1)
-    return gFalse; // Don't need to use patterns if only one instance of the pattern is used
+  if (x1 - x0 == 1 && y1 - y0 == 1) {
+    // Don't need to use patterns if only one instance of the pattern is used
+    PDFRectangle box;
+    Gfx *gfx;
+    double x, y, tx, ty;
+
+    x = x0 * xStep;
+    y = y0 * yStep;
+    tx = x * mat[0] + y * mat[2] + mat[4];
+    ty = x * mat[1] + y * mat[3] + mat[5];
+    box.x1 = bbox[0];
+    box.y1 = bbox[1];
+    box.x2 = bbox[2];
+    box.y2 = bbox[3];
+    gfx = new Gfx(doc, this, resDict, &box, NULL);
+    writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] cm\n", mat[0], mat[1], mat[2], mat[3], tx, ty);
+    inType3Char = gTrue;
+    gfx->display(str);
+    inType3Char = gFalse;
+    delete gfx;
+    return gTrue;
+  }
 
   if (level == psLevel1 || level == psLevel1Sep) {
     return tilingPatternFillL1(state, cat, str, pmat, paintType, tilingType, resDict,

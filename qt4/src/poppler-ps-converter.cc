@@ -2,6 +2,7 @@
  * Copyright (C) 2007, 2009, 2010, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+ * Copyright (C) 2011 Glad Deschrijver <glad.deschrijver@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -209,7 +210,7 @@ bool PSConverter::convert()
 	                                     d->document->doc,
 	                                     1,
 	                                     d->document->doc->getNumPages(),
-	                                     psModePS,
+	                                     (d->opts & PrintToEPS) ? psModeEPS : psModePS,
 	                                     d->paperWidth,
 	                                     d->paperHeight,
 	                                     gFalse,

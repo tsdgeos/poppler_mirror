@@ -1100,7 +1100,7 @@ static FcPattern *buildFcPattern(GfxFont *font)
 #endif
 
 GooString *GlobalParams::findFontFile(GooString *fontName) {
-  static const char *exts[] = { ".pfa", ".pfb", ".ttf", ".ttc" };
+  static const char *exts[] = { ".pfa", ".pfb", ".ttf", ".ttc", ".otf" };
   GooString *path, *dir;
 #ifdef WIN32
   GooString *fontNameU;
@@ -1150,7 +1150,7 @@ void GlobalParams::setupBaseFonts(char *dir) {
 
 GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 					  SysFontType *type,
-					  int *fontNum) {
+					  int *fontNum, GooString *substituteFontName) {
   SysFontInfo *fi = NULL;
   FcPattern *p=0;
   GooString *path = NULL;
@@ -1206,10 +1206,33 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 	    continue;
 	  }
 	}
+	FcChar8* s2;
+	if (substituteFontName) {
+	  res = FcPatternGetString(set->fonts[i], FC_FULLNAME, 0, &s2);
+	  if (res == FcResultMatch && s2) {
+	    substituteFontName->Set((char*)s2);
+	  } else {
+	    // fontconfig does not extract fullname for some fonts
+	    // create the fullname from family and style
+	    res = FcPatternGetString(set->fonts[i], FC_FAMILY, 0, &s2);
+	    if (res == FcResultMatch && s2) {
+	      substituteFontName->Set((char*)s2);
+	      res = FcPatternGetString(set->fonts[i], FC_STYLE, 0, &s2);
+	      if (res == FcResultMatch && s2) {
+		GooString *style = new GooString((char*)s2);
+		if (style->cmp("Regular") != 0) {
+		  substituteFontName->append(" ");
+		  substituteFontName->append(style);
+		}
+		delete style;
+	      }
+	    }
+	  }
+	}
 	ext = strrchr((char*)s,'.');
 	if (!ext)
 	  continue;
-	if (!strncasecmp(ext,".ttf",4) || !strncasecmp(ext, ".ttc", 4))
+	if (!strncasecmp(ext,".ttf",4) || !strncasecmp(ext, ".ttc", 4) || !strncasecmp(ext, ".otf", 4))
 	{
 	  int weight, slant;
 	  GBool bold = font->isBold();
@@ -1224,7 +1247,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 	  if (slant == FC_SLANT_ITALIC)
 	    italic = gTrue;
 	  *fontNum = 0;
-	  *type = (!strncasecmp(ext,".ttf",4)) ? sysFontTTF : sysFontTTC;
+	  *type = (!strncasecmp(ext,".ttc",4)) ? sysFontTTC : sysFontTTF;
 	  FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
 	  fi = new SysFontInfo(fontName->copy(), bold, italic,
 			       new GooString((char*)s), *type, *fontNum);
@@ -1357,7 +1380,7 @@ void GlobalParams::setupBaseFonts(char *dir) {
 
 GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 					  SysFontType *type,
-					  int *fontNum) {
+					  int *fontNum, GooString * /*substituteFontName*/) {
   SysFontInfo *fi;
   GooString *path;
 

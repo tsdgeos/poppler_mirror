@@ -35,26 +35,18 @@
 
 namespace {
 
-Qt::Alignment formTextAlignment(Object *obj)
+Qt::Alignment formTextAlignment(::FormWidget *fm)
 {
-  Object tmp;
-  int align = 0;
-  if (obj->dictLookup("Q", &tmp)->isInt())
+  Qt::Alignment qtalign = Qt::AlignLeft;
+  switch (fm->getField()->getTextQuadding())
   {
-    align = tmp.getInt();
-  }
-  tmp.free();
-  Qt::Alignment qtalign;
-  switch (align)
-  {
-    case 1:
+    case quaddingCentered:
       qtalign = Qt::AlignHCenter;
       break;
-    case 2:
+    case quaddingRightJustified:
       qtalign = Qt::AlignRight;
       break;
-    case 0:
-    default:
+    case quaddingLeftJustified:
       qtalign = Qt::AlignLeft;
   }
   return qtalign;
@@ -90,22 +82,6 @@ FormField::FormField(FormFieldData &dd)
   QPointF bottomRight;
   XPDFReader::transform( MTX, qMax( left, right ), qMin( top, bottom ), bottomRight );
   m_formData->box = QRectF(topLeft, QSizeF(bottomRight.x() - topLeft.x(), bottomRight.y() - topLeft.y()));
-
-  Dict *dict = m_formData->fm->getObj()->getDict();
-  Object tmp;
-
-  // reading the flags
-  if (dict->lookup("Ff", &tmp)->isInt())
-  {
-    m_formData->flags = tmp.getInt();
-  }
-  tmp.free();
-  // reading the widget annotation flags
-  if (dict->lookup("F", &tmp)->isInt())
-  {
-    m_formData->annoflags = tmp.getInt();
-  }
-  tmp.free();
 }
 
 FormField::~FormField()
@@ -161,7 +137,7 @@ bool FormField::isReadOnly() const
 
 bool FormField::isVisible() const
 {
-  return !(m_formData->annoflags & (1 << 1));
+  return !(m_formData->fm->getWidgetAnnotation()->getFlags() & Annot::flagHidden);
 }
 
 Link* FormField::activationAction() const
@@ -321,7 +297,7 @@ int FormFieldText::maximumLength() const
 
 Qt::Alignment FormFieldText::textAlignment() const
 {
-  return formTextAlignment(m_formData->fm->getObj());
+  return formTextAlignment(m_formData->fm);
 }
 
 bool FormFieldText::canBeSpellChecked() const
@@ -373,7 +349,6 @@ bool FormFieldChoice::isEditable() const
 
 bool FormFieldChoice::multiSelect() const
 {
-//  return m_formData->flags & (1 << 21);
   FormWidgetChoice* fwc = static_cast<FormWidgetChoice*>(m_formData->fm);
   return !fwc->isCombo() ? fwc->isMultiSelect() : false;
 }
@@ -399,7 +374,7 @@ void FormFieldChoice::setCurrentChoices( const QList<int> &choice )
 
 Qt::Alignment FormFieldChoice::textAlignment() const
 {
-  return formTextAlignment(m_formData->fm->getObj());
+  return formTextAlignment(m_formData->fm);
 }
 
 bool FormFieldChoice::canBeSpellChecked() const

@@ -106,7 +106,7 @@ if (HAVE_INTROSPECTION)
   set(INTROSPECTION_SCANNER_ARGS "--add-include-path=${CMAKE_CURRENT_SOURCE_DIR}")
   set(INTROSPECTION_COMPILER_ARGS "--includedir=${CMAKE_CURRENT_SOURCE_DIR}")
 
-  set(introspection_files ${poppler_glib_SRCS} ${poppler_glib_public_headers} poppler-private.h)
+  set(introspection_files ${poppler_glib_SRCS} ${poppler_glib_public_headers})
   set(Poppler_0_18_gir "poppler-glib")
   set(Poppler_0_18_gir_INCLUDES GObject-2.0 cairo-1.0)
   get_directory_property(_tmp_includes INCLUDE_DIRECTORIES)
@@ -117,8 +117,11 @@ if (HAVE_INTROSPECTION)
   list(APPEND _abs_introspection_files
     ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.c
     ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.h
+    ${CMAKE_CURRENT_BINARY_DIR}/poppler-features.h
   )
   set(Poppler_0_18_gir_FILES ${_abs_introspection_files})
+  set(Poppler_0_18_gir_SCANNERFLAGS --c-include poppler.h)
+  set(Poppler_0_18_gir_EXPORT_PACKAGES poppler-glib)
 
   list(APPEND INTROSPECTION_GIRS Poppler-0.18.gir)
 

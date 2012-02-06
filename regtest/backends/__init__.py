@@ -18,6 +18,8 @@
 
 from hashlib import md5
 import os
+import shutil
+import errno
 from Config import Config
 
 __all__ = [ 'register_backend',
@@ -61,12 +63,13 @@ class Backend:
 
         md5_file.close()
 
-    def compare_checksums(self, refs_path, out_path, remove_results = True, create_diffs = True):
+    def compare_checksums(self, refs_path, out_path, remove_results = True, create_diffs = True, update_refs = False):
         retval = True
 
         md5_path = os.path.join(refs_path, self._name)
         md5_file = open(md5_path + '.md5', 'r')
         tests = os.listdir(out_path)
+        result_md5 = []
 
         for line in md5_file.readlines():
             md5sum, ref_path = line.strip('\n').split(' ', 1)
@@ -81,8 +84,13 @@ class Backend:
 
             result_path = os.path.join(out_path, basename)
             f = open(result_path, 'rb')
-            matched = md5sum == md5(f.read()).hexdigest()
+            result_md5sum = md5(f.read()).hexdigest()
+            matched = md5sum == result_md5sum
             f.close()
+
+            if update_refs:
+                result_md5.append("%s %s\n" % (result_md5sum, ref_path))
+
             if matched:
                 if remove_results:
                     os.remove(result_path)
@@ -97,8 +105,30 @@ class Backend:
                         except NotImplementedError:
                             # Diff not supported by backend
                             pass
+
+                if update_refs:
+                    if os.path.exists(ref_path):
+                        print("Updating image reference %s" % (ref_path))
+                        shutil.copyfile(result_path, ref_path)
+
                 retval = False
         md5_file.close()
+
+        if update_refs and not retval:
+            print("Updating md5 reference %s" % (md5_path))
+            f = open(md5_path + '.md5.tmp', 'wb')
+            f.writelines(result_md5)
+            f.close()
+            os.rename(md5_path + '.md5.tmp', md5_path + '.md5')
+
+            for ref in ('.crashed', '.failed', '.stderr'):
+                src = os.path.join(out_path, self._name + ref)
+                dest = os.path.join(refs_path, self._name + ref)
+                try:
+                    shutil.copyfile(src, dest)
+                except IOError as e:
+                    if e.errno != errno.ENOENT:
+                        raise
 
         return retval
 
@@ -118,6 +148,9 @@ class Backend:
         f.close()
 
         return status
+
+    def has_results(self, test_path):
+        return self.has_md5(test_path) or self.is_crashed(test_path) or self.is_failed(test_path)
 
     def has_stderr(self, test_path):
         return os.path.exists(os.path.join(test_path, self._name + '.stderr'))
@@ -140,10 +173,10 @@ class Backend:
         return True
 
     def _check_exit_status(self, p, out_path):
-        status = p.wait()
-
         stderr = p.stderr.read()
         self.__create_stderr_file(stderr, out_path)
+
+        status = p.wait()
 
         if not os.WIFEXITED(status):
             open(out_path + '.crashed', 'w').close()
@@ -155,11 +188,11 @@ class Backend:
         return True
 
     def _check_exit_status2(self, p1, p2, out_path):
+        p1_stderr = p1.stderr.read()
         status1 = p1.wait()
+        p2_stderr = p2.stderr.read()
         status2 = p2.wait()
 
-        p1_stderr = p1.stderr.read()
-        p2_stderr = p2.stderr.read()
         if p1_stderr or p2_stderr:
             self.__create_stderr_file(p1_stderr + p2_stderr, out_path)
 

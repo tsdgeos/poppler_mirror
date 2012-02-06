@@ -53,6 +53,10 @@ bool JpegWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 	// Initialize libjpeg
 	jpeg_create_compress(&cinfo);
 	
+        // Set colorspace and initialise defaults
+	cinfo.in_color_space = colorMode; /* colorspace of input image */
+	jpeg_set_defaults(&cinfo);
+
 	// Set destination file
 	jpeg_stdio_dest(&cinfo, f);
 	
@@ -62,7 +66,6 @@ bool JpegWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 	cinfo.density_unit = 1; // dots per inch
 	cinfo.X_density = hDPI;
 	cinfo.Y_density = vDPI;
-	cinfo.in_color_space = colorMode; /* colorspace of input image */
 	/* # of color components per pixel */
 	switch (colorMode) {
 		case JCS_GRAYSCALE:
@@ -77,7 +80,6 @@ bool JpegWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 		default:
 			return false;
 	}
-	jpeg_set_defaults(&cinfo);
 	if (cinfo.in_color_space == JCS_CMYK) {
 		jpeg_set_colorspace(&cinfo, JCS_YCCK);
 		cinfo.write_JFIF_header = TRUE;

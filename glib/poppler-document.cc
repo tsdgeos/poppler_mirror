@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "config.h"
 #include <string.h>
 
 #ifndef __GI_SCANNER__
@@ -733,7 +734,7 @@ poppler_document_get_pdf_version_string (PopplerDocument *document)
  * @major_version: (out) (allow-none): return location for the PDF major version number
  * @minor_version: (out) (allow-none): return location for the PDF minor version number
  *
- * Returns the major and minor PDF version numbers.
+ * Returns: the major and minor PDF version numbers
  *
  * Since: 0.16
  **/
@@ -2319,11 +2320,11 @@ poppler_layers_iter_get_title (PopplerLayersIter *iter)
 /**
  * poppler_layers_iter_get_layer:
  * @iter: a #PopplerLayersIter
- * 
- * Returns the #PopplerLayer associated with @iter.  It must be freed with
- * poppler_layer_free().
- * 
- * Return value: a new #PopplerLayer, or %NULL if there isn't any layer associated with @iter
+ *
+ * Returns the #PopplerLayer associated with @iter.
+ *
+ * Return value: (transfer full): a new #PopplerLayer, or %NULL if
+ * there isn't any layer associated with @iter
  *
  * Since: 0.12
  **/
@@ -2496,7 +2497,8 @@ poppler_ps_file_free (PopplerPSFile *ps_file)
  * Returns the #PopplerFormField for the given @id. It must be freed with
  * g_object_unref()
  *
- * Return value: a new #PopplerFormField or NULL if not found
+ * Return value: (transfer full): a new #PopplerFormField or %NULL if
+ * not found
  **/
 PopplerFormField *
 poppler_document_get_form_field (PopplerDocument *document,

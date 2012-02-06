@@ -17,7 +17,7 @@
 // Copyright (C) 2005-2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2010 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2007, 2011 Adrian Johnson <ajohnson@redneon.com>
@@ -33,6 +33,7 @@
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2010 Nils Höglund <nils.hoglund@gmail.com>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
+// Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1379,15 +1380,16 @@ void Gfx::opSetRenderingIntent(Object args[], int numArgs) {
 
 void Gfx::opSetFillGray(Object args[], int numArgs) {
   GfxColor color;
-  GfxColorSpace *colorSpace;
+  GfxColorSpace *colorSpace = NULL;
   Object obj;
 
   state->setFillPattern(NULL);
   res->lookupColorSpace("DefaultGray", &obj);
-  if (obj.isNull()) {
-    colorSpace = new GfxDeviceGrayColorSpace();
-  } else {
+  if (!obj.isNull()) {
     colorSpace = GfxColorSpace::parse(&obj, this);
+  }
+  if (colorSpace == NULL) {
+    colorSpace = new GfxDeviceGrayColorSpace();
   }
   obj.free();
   state->setFillColorSpace(colorSpace);
@@ -1399,15 +1401,16 @@ void Gfx::opSetFillGray(Object args[], int numArgs) {
 
 void Gfx::opSetStrokeGray(Object args[], int numArgs) {
   GfxColor color;
-  GfxColorSpace *colorSpace;
+  GfxColorSpace *colorSpace = NULL;
   Object obj;
 
   state->setStrokePattern(NULL);
   res->lookupColorSpace("DefaultGray", &obj);
-  if (obj.isNull()) {
-    colorSpace = new GfxDeviceGrayColorSpace();
-  } else {
+  if (!obj.isNull()) {
     colorSpace = GfxColorSpace::parse(&obj, this);
+  }
+  if (colorSpace == NULL) {
+    colorSpace = new GfxDeviceGrayColorSpace();
   }
   obj.free();
   state->setStrokeColorSpace(colorSpace);
@@ -1419,15 +1422,16 @@ void Gfx::opSetStrokeGray(Object args[], int numArgs) {
 
 void Gfx::opSetFillCMYKColor(Object args[], int numArgs) {
   GfxColor color;
-  GfxColorSpace *colorSpace;
+  GfxColorSpace *colorSpace = NULL;
   Object obj;
   int i;
 
   res->lookupColorSpace("DefaultCMYK", &obj);
-  if (obj.isNull()) {
-    colorSpace = new GfxDeviceCMYKColorSpace();
-  } else {
+  if (!obj.isNull()) {
     colorSpace = GfxColorSpace::parse(&obj, this);
+  }
+  if (colorSpace == NULL) {
+    colorSpace = new GfxDeviceCMYKColorSpace();
   }
   obj.free();
   state->setFillPattern(NULL);
@@ -1442,16 +1446,17 @@ void Gfx::opSetFillCMYKColor(Object args[], int numArgs) {
 
 void Gfx::opSetStrokeCMYKColor(Object args[], int numArgs) {
   GfxColor color;
-  GfxColorSpace *colorSpace;
+  GfxColorSpace *colorSpace = NULL;
   Object obj;
   int i;
 
   state->setStrokePattern(NULL);
   res->lookupColorSpace("DefaultCMYK", &obj);
-  if (obj.isNull()) {
-    colorSpace = new GfxDeviceCMYKColorSpace();
-  } else {
+  if (!obj.isNull()) {
     colorSpace = GfxColorSpace::parse(&obj, this);
+  }
+  if (colorSpace == NULL) {
+    colorSpace = new GfxDeviceCMYKColorSpace();
   }
   obj.free();
   state->setStrokeColorSpace(colorSpace);
@@ -1465,16 +1470,17 @@ void Gfx::opSetStrokeCMYKColor(Object args[], int numArgs) {
 
 void Gfx::opSetFillRGBColor(Object args[], int numArgs) {
   Object obj;
-  GfxColorSpace *colorSpace;
+  GfxColorSpace *colorSpace = NULL;
   GfxColor color;
   int i;
 
   state->setFillPattern(NULL);
   res->lookupColorSpace("DefaultRGB", &obj);
-  if (obj.isNull()) {
-    colorSpace = new GfxDeviceRGBColorSpace();
-  } else {
+  if (!obj.isNull()) {
     colorSpace = GfxColorSpace::parse(&obj, this);
+  }
+  if (colorSpace == NULL) {
+    colorSpace = new GfxDeviceRGBColorSpace();
   }
   obj.free();
   state->setFillColorSpace(colorSpace);
@@ -1488,16 +1494,17 @@ void Gfx::opSetFillRGBColor(Object args[], int numArgs) {
 
 void Gfx::opSetStrokeRGBColor(Object args[], int numArgs) {
   Object obj;
-  GfxColorSpace *colorSpace;
+  GfxColorSpace *colorSpace = NULL;
   GfxColor color;
   int i;
 
   state->setStrokePattern(NULL);
   res->lookupColorSpace("DefaultRGB", &obj);
-  if (obj.isNull()) {
-    colorSpace = new GfxDeviceRGBColorSpace();
-  } else {
+  if (!obj.isNull()) {
     colorSpace = GfxColorSpace::parse(&obj, this);
+  }
+  if (colorSpace == NULL) {
+    colorSpace = new GfxDeviceRGBColorSpace();
   }
   obj.free();
   state->setStrokeColorSpace(colorSpace);
