@@ -2775,7 +2775,8 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 
   cairo_surface_mark_dirty (image);
 
-  setMimeData(str, ref, image);
+  if (!inlineImg) /* don't read stream twice if it is an inline image */
+    setMimeData(str, ref, image);
 
   pattern = cairo_pattern_create_for_surface (image);
   cairo_surface_destroy (image);
