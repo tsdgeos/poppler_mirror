@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Kjartan Maraas <kmaraas@gnome.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Haruyuki Kawabe <Haruyuki.Kawabe@unisys.co.jp>
@@ -766,7 +766,6 @@ void HtmlPage::dumpAsXML(FILE* f,int page){
 
 int HtmlPage::dumpComplexHeaders(FILE * const file, FILE *& pageFile, int page) {
   GooString* tmp;
-  char* htmlEncoding;
 
   if( !noframes )
   {
@@ -793,11 +792,12 @@ int HtmlPage::dumpComplexHeaders(FILE * const file, FILE *& pageFile, int page) 
 
       delete tmp;
 
-      htmlEncoding = HtmlOutputDev::mapEncodingToHtml(globalParams->getTextEncodingName());
+      GooString *htmlEncoding = HtmlOutputDev::mapEncodingToHtml(globalParams->getTextEncodingName());
       if (!singleHtml)
-        fprintf(pageFile, "<META http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding);
+        fprintf(pageFile, "<META http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding->getCString());
       else
-        fprintf(pageFile, "<META http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n <br/>\n", htmlEncoding);
+        fprintf(pageFile, "<META http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n <br/>\n", htmlEncoding->getCString());
+      delete htmlEncoding;
   }
   else 
   {
@@ -983,23 +983,23 @@ static char* HtmlEncodings[][2] = {
     {NULL, NULL}
 };
 
-
-char* HtmlOutputDev::mapEncodingToHtml(GooString* encoding)
+GooString* HtmlOutputDev::mapEncodingToHtml(GooString* encoding)
 {
-    char* enc = encoding->getCString();
-    for(int i = 0; HtmlEncodings[i][0] != NULL; i++)
+  GooString* enc = encoding;
+  for(int i = 0; HtmlEncodings[i][0] != NULL; i++)
+  {
+    if( enc->cmp(HtmlEncodings[i][0]) == 0 )
     {
-	if( strcmp(enc, HtmlEncodings[i][0]) == 0 )
-	{
-	    return HtmlEncodings[i][1];
-	}
+      delete enc;
+      return new GooString(HtmlEncodings[i][1]);
     }
-    return enc; 
+  }
+  return enc; 
 }
 
 void HtmlOutputDev::doFrame(int firstPage){
   GooString* fName=new GooString(Docname);
-  char* htmlEncoding;
+  GooString* htmlEncoding;
   fName->append(".html");
 
   if (!(fContentsFrame = fopen(fName->getCString(), "w"))){
@@ -1016,7 +1016,7 @@ void HtmlOutputDev::doFrame(int firstPage){
   fputs("\n<HEAD>",fContentsFrame);
   fprintf(fContentsFrame,"\n<TITLE>%s</TITLE>",docTitle->getCString());
   htmlEncoding = mapEncodingToHtml(globalParams->getTextEncodingName());
-  fprintf(fContentsFrame, "\n<META http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding);
+  fprintf(fContentsFrame, "\n<META http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding->getCString());
   dumpMetaVars(fContentsFrame);
   fprintf(fContentsFrame, "</HEAD>\n");
   fputs("<FRAMESET cols=\"100,*\">\n",fContentsFrame);
@@ -1030,6 +1030,7 @@ void HtmlOutputDev::doFrame(int firstPage){
   fputs(">\n</FRAMESET>\n</HTML>\n",fContentsFrame);
  
   delete fName;
+  delete htmlEncoding;
   fclose(fContentsFrame);  
 }
 
@@ -1038,8 +1039,6 @@ HtmlOutputDev::HtmlOutputDev(char *fileName, char *title,
 	char *extension,
 	GBool rawOrder, int firstPage, GBool outline) 
 {
-  char *htmlEncoding;
-  
   fContentsFrame = NULL;
   docTitle = new GooString(title);
   pages = NULL;
@@ -1126,10 +1125,10 @@ HtmlOutputDev::HtmlOutputDev(char *fileName, char *title,
       delete right;
     }
 
-    htmlEncoding = mapEncodingToHtml(globalParams->getTextEncodingName()); 
+    GooString *htmlEncoding = mapEncodingToHtml(globalParams->getTextEncodingName()); 
     if (xml) 
     {
-      fprintf(page, "<?xml version=\"1.0\" encoding=\"%s\"?>\n", htmlEncoding);
+      fprintf(page, "<?xml version=\"1.0\" encoding=\"%s\"?>\n", htmlEncoding->getCString());
       fputs("<!DOCTYPE pdf2xml SYSTEM \"pdf2xml.dtd\">\n\n", page);
       fputs("<pdf2xml>\n",page);
     } 
@@ -1137,12 +1136,13 @@ HtmlOutputDev::HtmlOutputDev(char *fileName, char *title,
     {
       fprintf(page,"%s\n<HTML xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"\" xml:lang=\"\">\n<HEAD>\n<TITLE>%s</TITLE>\n", DOCTYPE, docTitle->getCString());
       
-      fprintf(page, "<META http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding);
+      fprintf(page, "<META http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding->getCString());
       
       dumpMetaVars(page);
       fprintf(page,"</HEAD>\n");
       fprintf(page,"<BODY bgcolor=\"#A0A0A0\" vlink=\"blue\" link=\"blue\">\n");
     }
+    delete htmlEncoding;
   }
   ok = gTrue; 
 }
@@ -1626,7 +1626,7 @@ GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 			delete str;
 			bClose = gTrue;
 
-			char *htmlEncoding =
+			GooString *htmlEncoding =
 				HtmlOutputDev::mapEncodingToHtml(globalParams->getTextEncodingName());
 
 			fprintf(output, "<HTML xmlns=\"http://www.w3.org/1999/xhtml\" " \
@@ -1635,7 +1635,8 @@ GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
                                 "<TITLE>Document Outline</TITLE>\n"     \
                                 "<META http-equiv=\"Content-Type\" content=\"text/html; " \
                                 "charset=%s\"/>\n"                      \
-                                "</HEAD>\n<BODY>\n", htmlEncoding);
+                                "</HEAD>\n<BODY>\n", htmlEncoding->getCString());
+			delete htmlEncoding;
 		}
 	}
  
