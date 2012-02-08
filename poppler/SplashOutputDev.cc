@@ -3018,25 +3018,15 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
       break;
 #if SPLASH_CMYK
     case splashModeCMYK8:
-      grayIndexed = colorMap->getColorSpace()->getMode() != csDeviceGray;
       imgData.lookup = (SplashColorPtr)gmallocn(n, 4);
       for (i = 0; i < n; ++i) {
 	pix = (Guchar)i;
 	colorMap->getCMYK(&pix, &cmyk);
-	if (cmyk.c != 0 || cmyk.m != 0 || cmyk.y != 0) {
-	  grayIndexed = gFalse;
-	}
 	imgData.lookup[4*i] = colToByte(cmyk.c);
 	imgData.lookup[4*i+1] = colToByte(cmyk.m);
 	imgData.lookup[4*i+2] = colToByte(cmyk.y);
 	imgData.lookup[4*i+3] = colToByte(cmyk.k);
       }
-#ifndef USE_CMS
-	  if (colorMap->getColorSpace()->getMode() == csIndexed) {
-		  if (((GfxIndexedColorSpace *) colorMap->getColorSpace())->getBase()->getMode() == csICCBased)
-			  grayIndexed = gFalse;
-	  }
-#endif
       break;
 #endif
     }
