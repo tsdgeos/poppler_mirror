@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Mike Slegeir <tehpola@yahoo.com>
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -528,7 +528,6 @@ static GooString* getInfoString(Dict *infoDict, char *key) {
     rawString = obj.getString();
 
     // Convert rawString to unicode
-    encodedString = new GooString();
     if (rawString->hasUnicodeMarker()) {
       isUnicode = gTrue;
       unicodeLength = (obj.getString()->getLength() - 2) / 2;
