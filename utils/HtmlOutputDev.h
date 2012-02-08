@@ -155,7 +155,13 @@ public:
     links->AddLink(x);
   }
 
- void dump(FILE *f, int pageNum);
+  // add an image to the current page
+  void addImage(GooString *fname, GfxState *state);
+
+  // number of images on the current page
+  int  getNumImages() { return imgList->getLength(); }
+
+  void dump(FILE *f, int pageNum);
 
   // Clear the page.
   void clear();
@@ -182,12 +188,12 @@ private:
   int fontsPageMarker; 
   HtmlFontAccu *fonts;
   HtmlLinks *links; 
+  GooList   *imgList;
   
   GooString *DocName;
   GooString *imgExt;
   int pageWidth;
   int pageHeight;
-  static int pgNum;
   int firstPage;                // used to begin the numeration of pages
 
   friend class HtmlOutputDev;
@@ -300,7 +306,7 @@ public:
   int getPageWidth() { return maxPageWidth; }
   int getPageHeight() { return maxPageHeight; }
 
-  GBool dumpDocOutline(PDFDoc* catalog);
+  GBool dumpDocOutline(PDFDoc* doc);
 
 private:
   // convert encoding into a HTML standard, or encoding->getCString if not
@@ -312,6 +318,7 @@ private:
   void dumpMetaVars(FILE *);
   void doFrame(int firstPage);
   GBool newOutlineLevel(FILE *output, GooList *outlines, Catalog* catalog, int level = 1);
+  void drawJpegImage(GfxState *state, Stream *str);
 
   FILE *fContentsFrame;
   FILE *page;                   // html file
@@ -326,8 +333,6 @@ private:
   int pageNum;
   int maxPageWidth;
   int maxPageHeight;
-  static int imgNum;
-  static GooList *imgList;
   GooString *Docname;
   GooString *docTitle;
   GooList *glMetaVars;

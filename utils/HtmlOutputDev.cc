@@ -85,10 +85,6 @@ public:
 // returns true if x is closer to y than x is to z
 static inline bool IS_CLOSER(float x, float y, float z) { return fabs((x)-(y)) < fabs((x)-(z)); }
 
-int HtmlPage::pgNum=0;
-int HtmlOutputDev::imgNum=1;
-GooList *HtmlOutputDev::imgList=new GooList();
-
 extern GBool complexMode;
 extern GBool singleHtml;
 extern GBool ignore;
@@ -273,6 +269,7 @@ HtmlPage::HtmlPage(GBool rawOrder, char *imgExtVal) {
   yxCur1 = yxCur2 = NULL;
   fonts=new HtmlFontAccu();
   links=new HtmlLinks();
+  imgList=new GooList();
   pageWidth=0;
   pageHeight=0;
   fontsPageMarker = 0;
@@ -283,10 +280,11 @@ HtmlPage::HtmlPage(GBool rawOrder, char *imgExtVal) {
 
 HtmlPage::~HtmlPage() {
   clear();
-  if (DocName) delete DocName;
-  if (fonts) delete fonts;
-  if (links) delete links;
-  if (imgExt) delete imgExt;  
+  delete DocName;
+  delete fonts;
+  delete links;
+  delete imgExt;
+  deleteGooList(imgList, HtmlImage);
 }
 
 void HtmlPage::updateFont(GfxState *state) {
@@ -743,9 +741,9 @@ void HtmlPage::dumpAsXML(FILE* f,int page){
     delete fontCSStyle;
   }
   
-  int listlen=HtmlOutputDev::imgList->getLength();
+  int listlen=imgList->getLength();
   for (int i = 0; i < listlen; i++) {
-    HtmlImage *img = (HtmlImage*)HtmlOutputDev::imgList->del(0);
+    HtmlImage *img = (HtmlImage*)imgList->del(0);
     fprintf(f,"<image top=\"%d\" left=\"%d\" ",xoutRound(img->yMin),xoutRound(img->xMin));
     fprintf(f,"width=\"%d\" height=\"%d\" ",xoutRound(img->xMax-img->xMin),xoutRound(img->yMax-img->yMin));
     fprintf(f,"src=\"%s\"/>\n",img->fName->getCString());
@@ -889,13 +887,12 @@ void HtmlPage::dump(FILE *f, int pageNum)
   {
     fprintf(f,"<A name=%d></a>",pageNum);
     // Loop over the list of image names on this page
-    int listlen=HtmlOutputDev::imgList->getLength();
+    int listlen=imgList->getLength();
     for (int i = 0; i < listlen; i++) {
-      HtmlImage *img = (HtmlImage*)HtmlOutputDev::imgList->del(0);
+      HtmlImage *img = (HtmlImage*)imgList->del(0);
       fprintf(f,"<IMG src=\"%s\"/><br/>\n",img->fName->getCString());
       delete img;
     }
-    HtmlOutputDev::imgNum=1;
 
     GooString* str;
     for(HtmlString *tmp=yxStrings;tmp;tmp=tmp->yxNext){
@@ -946,6 +943,11 @@ void HtmlPage::clear() {
 
 void HtmlPage::setDocName(char *fname){
   DocName=new GooString(fname);
+}
+
+void HtmlPage::addImage(GooString *fname, GfxState *state) {
+  HtmlImage *img = new HtmlImage(fname, state);
+  imgList->append(img);
 }
 
 //------------------------------------------------------------------------
@@ -1047,7 +1049,6 @@ HtmlOutputDev::HtmlOutputDev(char *fileName, char *title,
   this->rawOrder = rawOrder;
   this->doOutline = outline;
   ok = gFalse;
-  imgNum=1;
   //this->firstPage = firstPage;
   //pageNum=firstPage;
   // open file
@@ -1259,6 +1260,41 @@ void HtmlOutputDev::drawChar(GfxState *state, double x, double y,
   pages->addChar(state, x, y, dx, dy, originX, originY, u, uLen);
 }
 
+void HtmlOutputDev::drawJpegImage(GfxState *state, Stream *str)
+{
+  FILE *f1;
+  int c;
+  GooString *fName=new GooString(Docname);
+  fName->append("-");
+  GooString *pgNum= GooString::fromInt(pageNum);
+  GooString *imgnum= GooString::fromInt(pages->getNumImages()+1);
+
+  // open the image file
+  fName->append(pgNum)->append("_")->append(imgnum)->append(".jpg");
+  delete pgNum;
+  delete imgnum;
+
+  if (!(f1 = fopen(fName->getCString(), "wb"))) {
+    error(-1, "Couldn't open image file '%s'", fName->getCString());
+    delete fName;
+    return;
+  }
+
+  // initialize stream
+  str = str->getNextStream();
+  str->reset();
+
+  // copy the stream
+  while ((c = str->getChar()) != EOF)
+    fputc(c, f1);
+
+  fclose(f1);
+
+  if (fName) {
+      pages->addImage(fName, state);
+  }
+}
+
 void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 				  int width, int height, GBool invert,
 				  GBool interpolate, GBool inlineImg) {
@@ -1268,41 +1304,9 @@ void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
     return;
   }
   
-  FILE *f1;
-  int c;
-  
   // dump JPEG file
   if (dumpJPEG  && str->getKind() == strDCT) {
-    GooString *fName=new GooString(Docname);
-    fName->append("-");
-    GooString *pgNum=GooString::fromInt(pageNum);
-    GooString *imgnum=GooString::fromInt(imgNum);
-    // open the image file
-    fName->append(pgNum)->append("_")->append(imgnum)->append(".jpg");
-    delete pgNum;
-    delete imgnum;
-
-    ++imgNum;
-    if (!(f1 = fopen(fName->getCString(), "wb"))) {
-      error(-1, "Couldn't open image file '%s'", fName->getCString());
-      delete fName;
-      return;
-    }
-
-    // initialize stream
-    str = str->getNextStream();
-    str->reset();
-
-    // copy the stream
-    while ((c = str->getChar()) != EOF)
-      fputc(c, f1);
-
-    fclose(f1);
-   
-    if (fName) {
-        HtmlImage *img = new HtmlImage(fName, state);
-        imgList->append(img);
-    }
+    drawJpegImage(state, str);
   }
   else {
     OutputDev::drawImageMask(state, ref, str, width, height, invert, interpolate, inlineImg);
@@ -1318,51 +1322,18 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			 maskColors, inlineImg);
     return;
   }
-
-  FILE *f1;
-  int c;
   
   /*if( !globalParams->getErrQuiet() )
     printf("image stream of kind %d\n", str->getKind());*/
   // dump JPEG file
   if (dumpJPEG && str->getKind() == strDCT) {
-    GooString *fName=new GooString(Docname);
-    fName->append("-");
-    GooString *pgNum= GooString::fromInt(pageNum);
-    GooString *imgnum= GooString::fromInt(imgNum);  
-    
-    // open the image file
-    fName->append(pgNum)->append("_")->append(imgnum)->append(".jpg");
-    delete pgNum;
-    delete imgnum;
-
-    ++imgNum;
-    
-    if (!(f1 = fopen(fName->getCString(), "wb"))) {
-      error(-1, "Couldn't open image file '%s'", fName->getCString());
-      delete fName;
-      return;
-    }
-
-    // initialize stream
-    str = str->getNextStream();
-    str->reset();
-
-    // copy the stream
-    while ((c = str->getChar()) != EOF)
-      fputc(c, f1);
-    
-    fclose(f1);
-  
-    if (fName) {
-        HtmlImage *img = new HtmlImage(fName, state);
-        imgList->append(img);
-    }
+    drawJpegImage(state, str);
   }
   else {
 #ifdef ENABLE_LIBPNG
     // Dump the image as a PNG file. Much of the PNG code
     // comes from an example by Guillaume Cottenceau.
+    FILE *f1;
     Guchar *p;
     GfxRGB rgb;
     png_byte *row = (png_byte *) malloc(3 * width);   // 3 bytes/pixel: RGB
@@ -1372,7 +1343,7 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     GooString *fName=new GooString(Docname);
     fName->append("-");
     GooString *pgNum= GooString::fromInt(pageNum);
-    GooString *imgnum= GooString::fromInt(imgNum);  
+    GooString *imgnum= GooString::fromInt(pages->getNumImages()+1);
     fName->append(pgNum)->append("_")->append(imgnum)->append(".png");
     delete pgNum;
     delete imgnum;
@@ -1423,9 +1394,7 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     fclose(f1);
 
     free(row);
-    HtmlImage *img = new HtmlImage(fName, state);
-    imgList->append(img);
-    ++imgNum;
+    pages->addImage(fName, state);
     imgStr->close();
     delete imgStr;
 #else
@@ -1674,7 +1643,6 @@ GBool HtmlOutputDev::newOutlineLevel(FILE *output, GooList *outlines, Catalog* c
 		GooString *linkName = NULL;;
 		LinkAction *action = item->getAction();
 		LinkGoTo *link = NULL;
-		Object dest;
 		if (action && action->getKind() == actionGoTo)
 			link = dynamic_cast<LinkGoTo*>(action);
 		if (link && link->isOk()) {
@@ -1716,7 +1684,6 @@ GBool HtmlOutputDev::newOutlineLevel(FILE *output, GooList *outlines, Catalog* c
 				delete str;
 			}
 		}
-		dest.free();
 
 		fputs("<li>",output);
 		if (linkName)
