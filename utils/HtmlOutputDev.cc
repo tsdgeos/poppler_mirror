@@ -1631,7 +1631,7 @@ GBool HtmlOutputDev::newOutlineLevel(FILE *output, GooList *outlines, Catalog* c
 		fputs("<A name=\"outline\"></a>", output);
 		fputs("<h1>Document Outline</h1>\n", output);
 	}
-	fputs("<ul>",output);
+	fputs("<ul>\n",output);
 
 	for (int i = 0; i < outlines->getLength(); i++)
 	{
@@ -1693,16 +1693,19 @@ GBool HtmlOutputDev::newOutlineLevel(FILE *output, GooList *outlines, Catalog* c
 			fputs("</A>",output);
 			delete linkName;
 		}
-		fputs("\n",output);
 		delete titleStr;
 		atLeastOne = gTrue;
 
 		item->open();
 		if (item->hasKids())
+		{
+			fputs("\n",output);
 			newOutlineLevel(output, item->getKids(), catalog, level+1);
+		}
 		item->close();
+		fputs("</li>\n",output);
 	}
-	fputs("</ul>",output);
+	fputs("</ul>\n",output);
 
 	return atLeastOne;
 }
