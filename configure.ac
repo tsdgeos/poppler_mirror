@@ -508,13 +508,15 @@ AC_SUBST(POPPLER_QT4_LIBS)
 AC_SUBST(POPPLER_QT4_TEST_LIBS)
 
 if test x$enable_poppler_qt4 = xyes; then
+  AC_CHECK_TOOL(MOCQT4, moc)
   AC_MSG_CHECKING([for Qt4 moc])
-  MOCQT4=`which moc`
   mocversion=`$MOCQT4 -v 2>&1`
   mocversiongrep=`echo $mocversion | grep "Qt 4"`
   if test x"$mocversiongrep" != x"$mocversion"; then
+    AC_MSG_RESULT([no])
     # moc was not the qt4 one, try with moc-qt4
-    MOCQT4=`which moc-qt4`
+    AC_CHECK_TOOL(MOCQT4, moc-qt4)
+    AC_MSG_CHECKING([for Qt4 moc-qt4])
     mocversion=`$MOCQT4 -v 2>&1`
     mocversiongrep=`echo $mocversion | grep "Qt 4"`
     if test x"$mocversiongrep" != x"$mocversion"; then
