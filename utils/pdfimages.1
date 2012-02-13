@@ -35,6 +35,107 @@ Normally, all images are written as PBM (for monochrome images) or PPM
 format are saved as JPEG files.  All non-DCT images are saved in
 PBM/PPM format as usual.
 .TP
+.B \-list
+Instead of writing the images, list the images along with various information for each image. Do not specify an
+.IR image-root
+with this option.
+.IP
+The following information is listed for each font:
+.RS
+.TP
+.B page
+the page number containing the image
+.TP
+.B num
+the image number
+.TP
+.B type
+the image type:
+.PP
+.RS
+image - an opaque image
+.RE
+.RS
+mask - a monochrome mask image
+.RE
+.RS
+smask - a soft-mask image
+.RE
+.RS
+stencil - a monochrome mask image used for painting a color or pattern
+.RE
+.PP
+Note: Tranparency in images is represented in PDF using a separate image for the image and the mask/smask.
+The mask/smask used as part of a transparent image always immediately follows the image in the image list.
+.TP
+.B width
+image width (in pixels)
+.TP
+.B height
+image height (in pixels)
+.PP
+Note: the image width/height is the size of the embedded image, not the size the image will be rendered at.
+.TP
+.B color
+image color space:
+.PP
+.RS
+gray - Gray
+.RE
+.RS
+rgb - RGB
+.RE
+.RS
+cmyk - CMYK
+.RE
+.RS
+lab - L*a*b
+.RE
+.RS
+icc - ICC Based
+.RE
+.RS
+index - Indexed Color
+.RE
+.RS
+sep - Separation
+.RE
+.RS
+devn - DeviceN
+.RE
+.TP
+.B comp
+number of color components
+.TP
+.B bpc
+bits per component
+.TP
+.B enc
+encoding:
+.PP
+.RS
+image - raster image (may be Flate or LZW compressed but does not use an image encoding)
+.RE
+.RS
+jpeg - Joint Photographic Experts Group
+.RE
+.RS
+jp2 - JPEG2000
+.RE
+.RS
+jbig2 - Joint Bi-Level Image Experts Group
+.RE
+.RS
+ccitt - CCITT Group 3 or Group 4 Fax
+.RE
+.TP
+.B interp
+"yes" if the interpolation is to be performed when scaling up the image
+.TP
+.B object ID
+the font dictionary object ID (number and generation)
+.RE
+.TP
 .BI \-opw " password"
 Specify the owner password for the PDF file.  Providing this will
 bypass all security restrictions.

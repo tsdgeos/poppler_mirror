@@ -48,6 +48,7 @@
 
 static int firstPage = 1;
 static int lastPage = 0;
+static GBool listImages = gFalse;
 static GBool dumpJPEG = gFalse;
 static GBool pageNames = gFalse;
 static char ownerPassword[33] = "\001";
@@ -63,6 +64,8 @@ static const ArgDesc argDesc[] = {
    "last page to convert"},
   {"-j",      argFlag,     &dumpJPEG,      0,
    "write JPEG images as JPEG files"},
+  {"-list",   argFlag,     &listImages,      0,
+   "print list of images instead of saving"},
   {"-opw",    argString,   ownerPassword,  sizeof(ownerPassword),
    "owner password (for encrypted files)"},
   {"-upw",    argString,   userPassword,   sizeof(userPassword),
@@ -87,7 +90,7 @@ static const ArgDesc argDesc[] = {
 int main(int argc, char *argv[]) {
   PDFDoc *doc;
   GooString *fileName;
-  char *imgRoot;
+  char *imgRoot = NULL;
   GooString *ownerPW, *userPW;
   ImageOutputDev *imgOut;
   GBool ok;
@@ -97,7 +100,7 @@ int main(int argc, char *argv[]) {
 
   // parse args
   ok = parseArgs(argDesc, &argc, argv);
-  if (!ok || argc != 3 || printVersion || printHelp) {
+  if (!ok || (listImages && argc != 2) || (!listImages && argc != 3) || printVersion || printHelp) {
     fprintf(stderr, "pdfimages version %s\n", PACKAGE_VERSION);
     fprintf(stderr, "%s\n", popplerCopyright);
     fprintf(stderr, "%s\n", xpdfCopyright);
@@ -109,7 +112,8 @@ int main(int argc, char *argv[]) {
     goto err0;
   }
   fileName = new GooString(argv[1]);
-  imgRoot = argv[2];
+  if (!listImages)
+    imgRoot = argv[2];
 
   // read config file
   globalParams = new GlobalParams();
@@ -163,7 +167,7 @@ int main(int argc, char *argv[]) {
     lastPage = doc->getNumPages();
 
   // write image files
-  imgOut = new ImageOutputDev(imgRoot, pageNames, dumpJPEG);
+  imgOut = new ImageOutputDev(imgRoot, pageNames, dumpJPEG, listImages);
   if (imgOut->isOk()) {
       doc->displayPages(imgOut, firstPage, lastPage, 72, 72, 0,
 			gTrue, gFalse, gFalse);

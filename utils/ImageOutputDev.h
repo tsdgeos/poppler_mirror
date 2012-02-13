@@ -44,13 +44,19 @@ class GfxState;
 
 class ImageOutputDev: public OutputDev {
 public:
+  enum ImageType {
+    imgImage,
+    imgStencil,
+    imgMask,
+    imgSmask
+  };
 
   // Create an OutputDev which will write images to files named
   // <fileRoot>-NNN.<type> or <fileRoot>-PPP-NNN.<type>, if 
   // <pageNames> is set. Normally, all images are written as PBM
   // (.pbm) or PPM (.ppm) files.  If <dumpJPEG> is set, JPEG images 
   // are written as JPEG (.jpg) files.
-  ImageOutputDev(char *fileRootA, GBool pageNamesA, GBool dumpJPEGA);
+  ImageOutputDev(char *fileRootA, GBool pageNamesA, GBool dumpJPEGA, GBool listImagesA);
 
   // Destructor.
   virtual ~ImageOutputDev();
@@ -115,10 +121,22 @@ public:
 private:
   // Sets the output filename with a given file extension
   void setFilename(const char *fileExt);
+  void listImage(GfxState *state, Object *ref, Stream *str,
+		 int width, int height,
+		 GfxImageColorMap *colorMap,
+		 GBool interpolate, GBool inlineImg,
+		 ImageType imageType);
+  void writeMask(GfxState *state, Object *ref, Stream *str,
+		 int width, int height, GBool invert,
+		 GBool interpolate, GBool inlineImg);
+  void writeImage(GfxState *state, Object *ref, Stream *str,
+                  int width, int height, GfxImageColorMap *colorMap,
+                  GBool interpolate, int *maskColors, GBool inlineImg);
 
 
   char *fileRoot;		// root of output file names
   char *fileName;		// buffer for output file names
+  GBool listImages;		// list images instead of dumping
   GBool dumpJPEG;		// set to dump native JPEG files
   GBool pageNames;		// set to include page number in file names
   int pageNum;			// current page number

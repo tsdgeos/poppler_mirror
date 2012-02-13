@@ -44,19 +44,29 @@
 #include "Stream.h"
 #include "ImageOutputDev.h"
 
-ImageOutputDev::ImageOutputDev(char *fileRootA, GBool pageNamesA, GBool dumpJPEGA) {
-  fileRoot = copyString(fileRootA);
-  fileName = (char *)gmalloc(strlen(fileRoot) + 45);
+ImageOutputDev::ImageOutputDev(char *fileRootA, GBool pageNamesA, GBool dumpJPEGA, GBool listImagesA) {
+  listImages = listImagesA;
+  if (!listImages) {
+    fileRoot = copyString(fileRootA);
+    fileName = (char *)gmalloc(strlen(fileRoot) + 45);
+  }
   dumpJPEG = dumpJPEGA;
   pageNames = pageNamesA;
   imgNum = 0;
   pageNum = 0;
   ok = gTrue;
+  if (listImages) {
+    printf("page   num  type   width height color comp bpc  enc interp  object ID\n");
+    printf("---------------------------------------------------------------------\n");
+  }
 }
 
+
 ImageOutputDev::~ImageOutputDev() {
-  gfree(fileName);
-  gfree(fileRoot);
+  if (!listImages) {
+    gfree(fileName);
+    gfree(fileRoot);
+  }
 }
 
 void ImageOutputDev::setFilename(const char *fileExt) {
@@ -67,18 +77,124 @@ void ImageOutputDev::setFilename(const char *fileExt) {
   }
 }
 
-GBool ImageOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
-				  double *pmat, int paintType, int tilingType, Dict *resDict,
-				  double *mat, double *bbox,
-				  int x0, int y0, int x1, int y1,
-				  double xStep, double yStep) {
-  return gTrue;
-  // do nothing -- this avoids the potentially slow loop in Gfx.cc
+void ImageOutputDev::listImage(GfxState *state, Object *ref, Stream *str,
+			       int width, int height,
+			       GfxImageColorMap *colorMap,
+			       GBool interpolate, GBool inlineImg,
+			       ImageType imageType) {
+  const char *type;
+  const char *colorspace;
+  const char *enc;
+  int components, bpc;
+
+  printf("%4d %5d ", pageNum, imgNum);
+  type = "";
+  switch (imageType) {
+  case imgImage:
+    type = "image";
+    break;
+  case imgStencil:
+    type = "stencil";
+    break;
+  case imgMask:
+    type = "mask";
+    break;
+  case imgSmask:
+    type = "smask";
+    break;
+  }
+  printf("%-7s %5d %5d  ", type, width, height);
+
+  colorspace = "-";
+  /* masks and stencils default to ncomps = 1 and bpc = 1 */
+  components = 1;
+  bpc = 1;
+  if (colorMap && colorMap->isOk()) {
+    switch (colorMap->getColorSpace()->getMode()) {
+      case csDeviceGray:
+      case csCalGray:
+        colorspace = "gray";
+        break;
+      case csDeviceRGB:
+      case csCalRGB:
+        colorspace = "rgb";
+        break;
+      case csDeviceCMYK:
+        colorspace = "cmyk";
+        break;
+      case csLab:
+        colorspace = "lab";
+        break;
+      case csICCBased:
+        colorspace = "icc";
+        break;
+      case csIndexed:
+        colorspace = "index";
+        break;
+      case csSeparation:
+        colorspace = "sep";
+        break;
+      case csDeviceN:
+        colorspace = "devn";
+        break;
+      case csPattern:
+      default:
+        colorspace = "-";
+        break;
+    }
+    components = colorMap->getNumPixelComps();
+    bpc = colorMap->getBits();
+  }
+  printf("%-5s  %2d  %2d  ", colorspace, components, bpc);
+
+  switch (str->getKind()) {
+  case strCCITTFax:
+    enc = "ccitt";
+    break;
+  case strDCT:
+    enc = "jpeg";
+    break;
+  case strJPX:
+    enc = "jpx";
+    break;
+  case strJBIG2:
+    enc = "jbig2";
+    break;
+  case strFile:
+  case strFlate:
+  case strCachedFile:
+  case strASCIIHex:
+  case strASCII85:
+  case strLZW:
+  case strRunLength:
+  case strWeird:
+  default:
+    enc = "image";
+    break;
+  }
+  printf("%-5s  ", enc);
+
+  printf("%-3s  ", interpolate ? "yes" : "no");
+
+  if (inlineImg) {
+    printf("[inline]\n");
+  } else if (ref->isRef()) {
+    const Ref imageRef = ref->getRef();
+    if (imageRef.gen >= 100000) {
+      printf("[none]\n");
+    } else {
+      printf(" %6d %2d\n", imageRef.num, imageRef.gen);
+    }
+  } else {
+    printf("[none]\n");
+  }
+
+  ++imgNum;
 }
 
-void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
-				   int width, int height, GBool invert,
-				   GBool interpolate, GBool inlineImg) {
+void ImageOutputDev::writeMask(GfxState *state, Object *ref, Stream *str,
+			       int width, int height, GBool invert,
+			       GBool interpolate, GBool inlineImg) {
   FILE *f;
   int c;
   int size, i;
@@ -132,10 +248,10 @@ void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
   }
 }
 
-void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
-			       int width, int height,
-			       GfxImageColorMap *colorMap,
-			       GBool interpolate, int *maskColors, GBool inlineImg) {
+void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
+				int width, int height,
+				GfxImageColorMap *colorMap,
+				GBool interpolate, int *maskColors, GBool inlineImg) {
   FILE *f;
   ImageStream *imgStr;
   Guchar *p;
@@ -250,13 +366,46 @@ void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   }
 }
 
+GBool ImageOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
+				  double *pmat, int paintType, int tilingType, Dict *resDict,
+				  double *mat, double *bbox,
+				  int x0, int y0, int x1, int y1,
+				  double xStep, double yStep) {
+  return gTrue;
+  // do nothing -- this avoids the potentially slow loop in Gfx.cc
+}
+
+void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
+				   int width, int height, GBool invert,
+				   GBool interpolate, GBool inlineImg) {
+  if (listImages)
+    listImage(state, ref, str, width, height, NULL, interpolate, inlineImg, imgMask);
+  else
+    writeMask(state, ref, str, width, height, invert, interpolate, inlineImg);
+}
+
+void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
+			       int width, int height,
+			       GfxImageColorMap *colorMap,
+			       GBool interpolate, int *maskColors, GBool inlineImg) {
+  if (listImages)
+    listImage(state, ref, str, width, height, colorMap, interpolate, inlineImg, imgImage);
+  else
+    writeImage(state, ref, str, width, height, colorMap, interpolate, maskColors, inlineImg);
+}
+
 void ImageOutputDev::drawMaskedImage(
   GfxState *state, Object *ref, Stream *str,
   int width, int height, GfxImageColorMap *colorMap, GBool interpolate,
   Stream *maskStr, int maskWidth, int maskHeight, GBool maskInvert, GBool maskInterpolate) {
-  drawImage(state, ref, str, width, height, colorMap, interpolate, NULL, gFalse);
-  drawImageMask(state, ref, maskStr, maskWidth, maskHeight, maskInvert,
-		maskInterpolate, gFalse);
+  if (listImages) {
+    listImage(state, ref, str, width, height, colorMap, interpolate, gFalse, imgImage);
+    listImage(state, ref, str, maskWidth, maskHeight, NULL, maskInterpolate, gFalse, imgMask);
+  } else {
+    drawImage(state, ref, str, width, height, colorMap, interpolate, NULL, gFalse);
+    drawImageMask(state, ref, maskStr, maskWidth, maskHeight, maskInvert,
+		  maskInterpolate, gFalse);
+  }
 }
 
 void ImageOutputDev::drawSoftMaskedImage(
@@ -264,7 +413,12 @@ void ImageOutputDev::drawSoftMaskedImage(
   int width, int height, GfxImageColorMap *colorMap, GBool interpolate,
   Stream *maskStr, int maskWidth, int maskHeight,
   GfxImageColorMap *maskColorMap, GBool maskInterpolate) {
-  drawImage(state, ref, str, width, height, colorMap, interpolate, NULL, gFalse);
-  drawImage(state, ref, maskStr, maskWidth, maskHeight,
-	    maskColorMap, maskInterpolate, NULL, gFalse);
+  if (listImages) {
+    listImage(state, ref, str, width, height, colorMap, interpolate, gFalse, imgImage);
+    listImage(state, ref, maskStr, maskWidth, height, maskColorMap, maskInterpolate, gFalse, imgSmask);
+  } else {
+    drawImage(state, ref, str, width, height, colorMap, interpolate, NULL, gFalse);
+    drawImage(state, ref, maskStr, maskWidth, maskHeight,
+	      maskColorMap, maskInterpolate, NULL, gFalse);
+  }
 }
