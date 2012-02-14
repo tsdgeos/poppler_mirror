@@ -1,5 +1,5 @@
 ACLOCAL_AMFLAGS = -I m4
-DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc
+DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc --with-testdatadir=$(TESTDATADIR)
 
 if BUILD_SPLASH_OUTPUT
 splash_subdir = splash

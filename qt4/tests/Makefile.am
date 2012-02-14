@@ -4,6 +4,7 @@ INCLUDES =					\
 	-I$(top_srcdir)				\
 	-I$(top_srcdir)/poppler			\
 	-I$(top_srcdir)/qt4/src			\
+	-DTESTDATADIR=\"$(TESTDATADIR)\"        \
 	$(FONTCONFIG_CFLAGS)			\
 	$(POPPLER_QT4_CFLAGS)
 

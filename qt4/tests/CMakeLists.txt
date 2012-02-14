@@ -1,4 +1,5 @@
 add_definitions(${QT4_DEFINITIONS})
+add_definitions(-DTESTDATADIR=\"${TESTDATADIR}\")
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}

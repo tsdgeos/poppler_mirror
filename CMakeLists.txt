@@ -41,6 +41,25 @@ endif(WIN32)
 
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)")
 
+set(TESTDATADIR "${CMAKE_SOURCE_DIR}/../test" CACHE STRING "Specify test data dir.")
+if(NOT (EXISTS ${TESTDATADIR} AND EXISTS ${TESTDATADIR}/test-poppler.c))
+  message(WARNING "
+ No test data found in $testdatadir.
+ You will not be able to run 'make test' successfully.
+
+ The test data is not included in the source packages
+ and is also not part of the main git repository. Instead,
+ you can checkout the test data from its own git
+ repository with:
+
+   git clone git://git.freedesktop.org/git/poppler/test
+
+ You should checkout the test data as a sibling of your
+ poppler source folder or specify the location of your
+ checkout with -DTESTDATADIR=/path/to/checkoutdir/test.
+  ")
+endif()
+
 if(WIN32)
   set(_default_fontconfiguration "win32")
 else(WIN32)
@@ -577,6 +596,7 @@ show_end_message_yesno("use curl" ENABLE_LIBCURL)
 show_end_message_yesno("use libopenjpeg" LIBOPENJPEG_FOUND)
 show_end_message_yesno("use cms" USE_CMS)
 show_end_message_yesno("command line utils" ENABLE_UTILS)
+show_end_message("test data dir" ${TESTDATADIR})
 
 if(USE_FIXEDPOINT AND USE_FLOAT)
   message("Warning: Single precision and fixed point options should not be enabled at the same time")

@@ -596,6 +596,47 @@ if test "x$enable_cms" = "xyes"; then
 fi
 AM_CONDITIONAL(USE_CMS, test x$enable_cms = xyes)
 
+AC_ARG_WITH([testdatadir],
+   [AS_HELP_STRING([--testdatadir=/path/to/testdatadir],
+                   [Specify test data dir])],
+   [case $withval in
+       [[\\/]]* | ?:[[\\/]]* )  # Absolute name.
+          TESTDATADIR=$withval ;;
+       *) # Relative name.
+          TESTDATADIR=$ac_pwd/$withval ;;
+    esac
+   ],
+   [case $srcdir in
+       [[\\/]]* | ?:[[\\/]]* )  # Absolute name.
+          TESTDATADIR=$srcdir/../test ;;
+       *) # Relative name.
+          TESTDATADIR=$ac_pwd/$srcdir/../test ;;
+    esac
+   ]
+)
+AC_MSG_CHECKING([for test data in $TESTDATADIR])
+if test -d $TESTDATADIR && test -f $TESTDATADIR/test-poppler.c; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+  AC_MSG_WARN([
+ No test data found in $TESTDATADIR.
+ You will not be able to run 'make check' successfully.
+
+ The test data is not included in the source packages
+ and is also not part of the main git repository. Instead,
+ you can checkout the test data from its own git
+ repository with:
+
+   git clone git://git.freedesktop.org/git/poppler/test
+
+ You should checkout the test data as a sibling of your
+ poppler source folder or specify the location of your
+ checkout with --testdatadir=/path/to/checkoutdir/test.
+])
+fi
+AC_SUBST(TESTDATADIR)
+
 if test "x$GCC" != xyes; then
   enable_compile_warnings=no
 fi
@@ -679,6 +720,7 @@ echo "  use libcurl:        $enable_libcurl"
 echo "  use libopenjpeg:    $enable_libopenjpeg"
 echo "  use cms:            $enable_cms"
 echo "  command line utils: $enable_utils"
+echo "  test data dir:      $TESTDATADIR"
 echo ""
 
 if test x$enable_splash_output = xno -a x$enable_cairo_output = xno; then
