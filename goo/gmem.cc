@@ -71,7 +71,12 @@ inline static void *gmalloc(size_t size, bool checkoverflow) {
   void *data;
   unsigned long *trl, *p;
 
-  if (size <= 0) {
+  if (size < 0) {
+    fprintf(stderr, "Invalid memory allocation size\n");
+    if (checkoverflow) return NULL;
+    else exit(1);
+  }
+  if (size == 0) {
     return NULL;
   }
   size1 = gMemDataSize(size);
@@ -104,7 +109,12 @@ inline static void *gmalloc(size_t size, bool checkoverflow) {
 #else
   void *p;
 
-  if (size <= 0) {
+  if (size < 0) {
+    fprintf(stderr, "Invalid memory allocation size\n");
+    if (checkoverflow) return NULL;
+    else exit(1);
+  }
+  if (size == 0) {
     return NULL;
   }
   if (!(p = malloc(size))) {
@@ -130,7 +140,12 @@ inline static void *grealloc(void *p, size_t size, bool checkoverflow) {
   void *q;
   int oldSize;
 
-  if (size <= 0) {
+  if (size < 0) {
+    fprintf(stderr, "Invalid memory allocation size\n");
+    if (checkoverflow) return NULL;
+    else exit(1);
+  }
+  if (size == 0) {
     if (p) {
       gfree(p);
     }
@@ -149,7 +164,12 @@ inline static void *grealloc(void *p, size_t size, bool checkoverflow) {
 #else
   void *q;
 
-  if (size <= 0) {
+  if (size < 0) {
+    fprintf(stderr, "Invalid memory allocation size\n");
+    if (checkoverflow) return NULL;
+    else exit(1);
+  }
+  if (size == 0) {
     if (p) {
       free(p);
     }
@@ -310,7 +330,7 @@ void gMemReport(FILE *f) {
 }
 #endif
 
-char *copyString(char *s) {
+char *copyString(const char *s) {
   char *s1;
 
   s1 = (char *)gmalloc(strlen(s) + 1);

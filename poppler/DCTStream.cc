@@ -125,7 +125,7 @@ void DCTStream::reset() {
       c = str->getChar();
       if (c == -1)
       {
-        error(-1, "Could not find start of jpeg data");
+        error(errSyntaxError, -1, "Could not find start of jpeg data");
         return;
       }
       if (c != 0xFF) c = 0;
@@ -225,7 +225,7 @@ int DCTStream::lookChar() {
   return *current;
 }
 
-GooString *DCTStream::getPSFilter(int psLevel, char *indent) {
+GooString *DCTStream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 2) {

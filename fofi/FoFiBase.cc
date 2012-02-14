@@ -28,6 +28,7 @@
 #endif
 
 #include <stdio.h>
+#include <limits.h>
 #include "goo/gmem.h"
 #include "poppler/Error.h"
 #include "FoFiBase.h"
@@ -54,22 +55,22 @@ char *FoFiBase::readFile(char *fileName, int *fileLen) {
   int n;
 
   if (!(f = fopen(fileName, "rb"))) {
-    error(-1, "Cannot open '%s'", fileName);
+    error(errIO, -1, "Cannot open '{0:s}'", fileName);
     return NULL;
   }
   if (fseek(f, 0, SEEK_END) != 0) {
-    error(-1, "Cannot seek to end of '%s'", fileName);
+    error(errIO, -1, "Cannot seek to end of '{0:s}'", fileName);
     fclose(f);
     return NULL;
   }
   n = (int)ftell(f);
   if (n < 0) {
-    error(-1, "Cannot determine length of '%s'", fileName);
+    error(errIO, -1, "Cannot determine length of '{0:s}'", fileName);
     fclose(f);
     return NULL;
   }
   if (fseek(f, 0, SEEK_SET) != 0) {
-    error(-1, "Cannot seek to start of '%s'", fileName);
+    error(errIO, -1, "Cannot seek to start of '{0:s}'", fileName);
     fclose(f);
     return NULL;
   }
@@ -109,7 +110,7 @@ int FoFiBase::getU8(int pos, GBool *ok) {
 int FoFiBase::getS16BE(int pos, GBool *ok) {
   int x;
 
-  if (pos < 0 || pos+1 >= len) {
+  if (pos < 0 || pos+1 >= len || pos > INT_MAX - 1) {
     *ok = gFalse;
     return 0;
   }
@@ -124,7 +125,7 @@ int FoFiBase::getS16BE(int pos, GBool *ok) {
 int FoFiBase::getU16BE(int pos, GBool *ok) {
   int x;
 
-  if (pos < 0 || pos+1 >= len) {
+  if (pos < 0 || pos+1 >= len || pos > INT_MAX - 1) {
     *ok = gFalse;
     return 0;
   }
@@ -136,7 +137,7 @@ int FoFiBase::getU16BE(int pos, GBool *ok) {
 int FoFiBase::getS32BE(int pos, GBool *ok) {
   int x;
 
-  if (pos < 0 || pos+3 >= len) {
+  if (pos < 0 || pos+3 >= len || pos > INT_MAX - 3) {
     *ok = gFalse;
     return 0;
   }
@@ -153,7 +154,7 @@ int FoFiBase::getS32BE(int pos, GBool *ok) {
 Guint FoFiBase::getU32BE(int pos, GBool *ok) {
   Guint x;
 
-  if (pos < 0 || pos+3 >= len) {
+  if (pos < 0 || pos+3 >= len || pos > INT_MAX - 3) {
     *ok = gFalse;
     return 0;
   }
@@ -164,11 +165,25 @@ Guint FoFiBase::getU32BE(int pos, GBool *ok) {
   return x;
 }
 
+Guint FoFiBase::getU32LE(int pos, GBool *ok) {
+  Guint x;
+
+  if (pos < 0 || pos+3 >= len || pos > INT_MAX - 3) {
+    *ok = gFalse;
+    return 0;
+  }
+  x = file[pos+3];
+  x = (x << 8) + file[pos+2];
+  x = (x << 8) + file[pos+1];
+  x = (x << 8) + file[pos];
+  return x;
+}
+
 Guint FoFiBase::getUVarBE(int pos, int size, GBool *ok) {
   Guint x;
   int i;
 
-  if (pos < 0 || pos + size > len) {
+  if (pos < 0 || pos + size > len || pos > INT_MAX - size) {
     *ok = gFalse;
     return 0;
   }

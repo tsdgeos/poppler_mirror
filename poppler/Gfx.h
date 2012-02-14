@@ -44,6 +44,7 @@
 #include <vector>
 
 class GooString;
+class PDFDoc;
 class XRef;
 class Array;
 class Stream;
@@ -114,7 +115,7 @@ public:
   GBool lookupXObject(char *name, Object *obj);
   GBool lookupXObjectNF(char *name, Object *obj);
   GBool lookupMarkedContentNF(char *name, Object *obj);
-  void lookupColorSpace(char *name, Object *obj);
+  void lookupColorSpace(const char *name, Object *obj);
   GfxPattern *lookupPattern(char *name, Gfx *gfx);
   GfxShading *lookupShading(char *name, Gfx *gfx);
   GBool lookupGState(char *name, Object *obj);
@@ -143,14 +144,14 @@ class Gfx {
 public:
 
   // Constructor for regular output.
-  Gfx(XRef *xrefA, OutputDev *outA, int pageNum, Dict *resDict, Catalog *catalog,
+  Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
       double hDPI, double vDPI, PDFRectangle *box,
       PDFRectangle *cropBox, int rotate,
       GBool (*abortCheckCbkA)(void *data) = NULL,
       void *abortCheckCbkDataA = NULL);
 
   // Constructor for a sub-page object.
-  Gfx(XRef *xrefA, OutputDev *outA, Dict *resDict, Catalog *catalog,
+  Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict,
       PDFRectangle *box, PDFRectangle *cropBox,
       GBool (*abortCheckCbkA)(void *data) = NULL,
       void *abortCheckCbkDataA = NULL);
@@ -180,24 +181,29 @@ public:
   // Get the current graphics state object.
   GfxState *getState() { return state; }
 
+  void drawForm(Object *str, Dict *resDict, double *matrix, double *bbox,
+	       GBool transpGroup = gFalse, GBool softMask = gFalse,
+	       GfxColorSpace *blendingColorSpace = NULL,
+	       GBool isolated = gFalse, GBool knockout = gFalse,
+	       GBool alpha = gFalse, Function *transferFunc = NULL,
+	       GfxColor *backdropColor = NULL);
+
   void pushResources(Dict *resDict);
   void popResources();
-  
+ 
 #ifdef USE_CMS
   PopplerCache *getIccColorSpaceCache();
 #endif
 
 private:
 
+  PDFDoc *doc;
   XRef *xref;			// the xref table for this PDF file
   Catalog *catalog;		// the Catalog for this PDF file  
   OutputDev *out;		// output device
   GBool subPage;		// is this a sub-page object?
   GBool printCommands;		// print the drawing commands (for debugging)
   GBool profileCommands;	// profile the drawing commands (for debugging)
-  GBool textHaveCSPattern;	// in text drawing and text has pattern colorspace
-  GBool drawText;		// in text drawing
-  GBool maskHaveCSPattern;	// in mask drawing and mask has pattern colorspace
   GBool commandAborted;         // did the previous command abort the drawing?
   GfxResources *res;		// resource stack
   int updateLevel;
@@ -211,11 +217,16 @@ private:
   double baseMatrix[6];		// default matrix for most recent
 				//   page/form/pattern
   int formDepth;
+  double textClipBBox[4];	// text clipping bounding box
+  GBool textClipBBoxEmpty;	// true if textClipBBox has not been
+				//   initialized yet
+  GBool ocState;		// true if drawing is enabled, false if
+				//   disabled
 
   MarkedContentStack *mcStack;	// current BMC/EMC stack
 
   Parser *parser;		// parser for page content stream(s)
- 
+
 #ifdef USE_CMS
   PopplerCache iccColorSpaceCache;
 #endif
@@ -286,10 +297,13 @@ private:
   void opCloseEOFillStroke(Object args[], int numArgs);
   void doPatternFill(GBool eoFill);
   void doPatternStroke();
+  void doPatternText();
+  void doPatternImageMask(Object *ref, Stream *str, int width, int height,
+			  GBool invert, GBool inlineImg);
   void doTilingPatternFill(GfxTilingPattern *tPat,
-			   GBool stroke, GBool eoFill);
+			   GBool stroke, GBool eoFill, GBool text);
   void doShadingPatternFill(GfxShadingPattern *sPat,
-			    GBool stroke, GBool eoFill);
+			    GBool stroke, GBool eoFill, GBool text);
   void opShFill(Object args[], int numArgs);
   void doFunctionShFill(GfxFunctionShading *shading);
   void doFunctionShFill1(GfxFunctionShading *shading,
@@ -340,17 +354,12 @@ private:
   void opMoveSetShowText(Object args[], int numArgs);
   void opShowSpaceText(Object args[], int numArgs);
   void doShowText(GooString *s);
+  void doIncCharCount(GooString *s);
 
   // XObject operators
   void opXObject(Object args[], int numArgs);
   void doImage(Object *ref, Stream *str, GBool inlineImg);
   void doForm(Object *str);
-  void doForm1(Object *str, Dict *resDict, double *matrix, double *bbox,
-	       GBool transpGroup = gFalse, GBool softMask = gFalse,
-	       GfxColorSpace *blendingColorSpace = NULL,
-	       GBool isolated = gFalse, GBool knockout = gFalse,
-	       GBool alpha = gFalse, Function *transferFunc = NULL,
-	       GfxColor *backdropColor = NULL);
 
   // in-line image operators
   void opBeginImage(Object args[], int numArgs);
@@ -370,6 +379,8 @@ private:
   void opBeginMarkedContent(Object args[], int numArgs);
   void opEndMarkedContent(Object args[], int numArgs);
   void opMarkPoint(Object args[], int numArgs);
+  GfxState *saveStateStack();
+  void restoreStateStack(GfxState *oldState);
   GBool contentIsHidden();
   void pushMarkedContent();
   void popMarkedContent();

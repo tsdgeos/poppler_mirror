@@ -39,6 +39,7 @@
 #    include <sys/stat.h>
 #    include <fcntl.h>
 #  endif
+#  include <time.h>
 #  include <limits.h>
 #  include <string.h>
 #  if !defined(VMS) && !defined(ACORN) && !defined(MACOS)
@@ -123,7 +124,7 @@ GooString *getCurrentDir() {
   return new GooString();
 }
 
-GooString *appendToPath(GooString *path, char *fileName) {
+GooString *appendToPath(GooString *path, const char *fileName) {
 #if defined(VMS)
   //---------- VMS ----------
   //~ this should handle everything necessary for file
@@ -458,7 +459,7 @@ time_t getModTime(char *fileName) {
 #endif
 }
 
-GBool openTempFile(GooString **name, FILE **f, char *mode) {
+GBool openTempFile(GooString **name, FILE **f, const char *mode) {
 #if defined(_WIN32)
   //---------- Win32 ----------
   char *tempDir;
@@ -476,11 +477,11 @@ GBool openTempFile(GooString **name, FILE **f, char *mode) {
   } else {
     s = new GooString();
   }
-  s->append("x");
+  s->appendf("x_{0:d}_{1:d}_",
+	     (int)GetCurrentProcessId(), (int)GetCurrentThreadId());
   t = (int)time(NULL);
   for (i = 0; i < 1000; ++i) {
-    sprintf(buf, "%d", t + i);
-    s2 = s->copy()->append(buf);
+    s2 = s->copy()->appendf("{0:d}", t + i);
     if (!(f2 = fopen(s2->getCString(), "r"))) {
       if (!(f2 = fopen(s2->getCString(), mode))) {
 	delete s2;
@@ -511,6 +512,7 @@ GBool openTempFile(GooString **name, FILE **f, char *mode) {
   *name = new GooString(s);
   if (!(*f = fopen((*name)->getCString(), mode))) {
     delete (*name);
+    *name = NULL;
     return gFalse;
   }
   return gTrue;
@@ -536,6 +538,7 @@ GBool openTempFile(GooString **name, FILE **f, char *mode) {
 #endif // HAVE_MKSTEMP
   if (fd < 0 || !(*f = fdopen(fd, mode))) {
     delete *name;
+    *name = NULL;
     return gFalse;
   }
   return gTrue;
@@ -547,6 +550,107 @@ GBool executeCommand(char *cmd) {
   return system(cmd) ? gTrue : gFalse;
 #else
   return system(cmd) ? gFalse : gTrue;
+#endif
+}
+
+#ifdef WIN32
+GooString *fileNameToUTF8(char *path) {
+  GooString *s;
+  char *p;
+
+  s = new GooString();
+  for (p = path; *p; ++p) {
+    if (*p & 0x80) {
+      s->append((char)(0xc0 | ((*p >> 6) & 0x03)));
+      s->append((char)(0x80 | (*p & 0x3f)));
+    } else {
+      s->append(*p);
+    }
+  }
+  return s;
+}
+
+GooString *fileNameToUTF8(wchar_t *path) {
+  GooString *s;
+  wchar_t *p;
+
+  s = new GooString();
+  for (p = path; *p; ++p) {
+    if (*p < 0x80) {
+      s->append((char)*p);
+    } else if (*p < 0x800) {
+      s->append((char)(0xc0 | ((*p >> 6) & 0x1f)));
+      s->append((char)(0x80 | (*p & 0x3f)));
+    } else {
+      s->append((char)(0xe0 | ((*p >> 12) & 0x0f)));
+      s->append((char)(0x80 | ((*p >> 6) & 0x3f)));
+      s->append((char)(0x80 | (*p & 0x3f)));
+    }
+  }
+  return s;
+}
+#endif
+
+FILE *openFile(const char *path, const char *mode) {
+#ifdef WIN32
+  OSVERSIONINFO version;
+  wchar_t wPath[_MAX_PATH + 1];
+  char nPath[_MAX_PATH + 1];
+  wchar_t wMode[8];
+  const char *p;
+  int i;
+
+  // NB: _wfopen is only available in NT
+  version.dwOSVersionInfoSize = sizeof(version);
+  GetVersionEx(&version);
+  if (version.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+    for (p = path, i = 0; *p && i < _MAX_PATH; ++i) {
+      if ((p[0] & 0xe0) == 0xc0 &&
+	  p[1] && (p[1] & 0xc0) == 0x80) {
+	wPath[i] = (wchar_t)(((p[0] & 0x1f) << 6) |
+			     (p[1] & 0x3f));
+	p += 2;
+      } else if ((p[0] & 0xf0) == 0xe0 &&
+		 p[1] && (p[1] & 0xc0) == 0x80 &&
+		 p[2] && (p[2] & 0xc0) == 0x80) {
+	wPath[i] = (wchar_t)(((p[0] & 0x0f) << 12) |
+			     ((p[1] & 0x3f) << 6) |
+			     (p[2] & 0x3f));
+	p += 3;
+      } else {
+	wPath[i] = (wchar_t)(p[0] & 0xff);
+	p += 1;
+      }
+    }
+    wPath[i] = (wchar_t)0;
+    for (i = 0; mode[i] && i < sizeof(mode) - 1; ++i) {
+      wMode[i] = (wchar_t)(mode[i] & 0xff);
+    }
+    wMode[i] = (wchar_t)0;
+    return _wfopen(wPath, wMode);
+  } else {
+    for (p = path, i = 0; *p && i < _MAX_PATH; ++i) {
+      if ((p[0] & 0xe0) == 0xc0 &&
+	  p[1] && (p[1] & 0xc0) == 0x80) {
+	nPath[i] = (char)(((p[0] & 0x1f) << 6) |
+			  (p[1] & 0x3f));
+	p += 2;
+      } else if ((p[0] & 0xf0) == 0xe0 &&
+		 p[1] && (p[1] & 0xc0) == 0x80 &&
+		 p[2] && (p[2] & 0xc0) == 0x80) {
+	nPath[i] = (char)(((p[1] & 0x3f) << 6) |
+			  (p[2] & 0x3f));
+	p += 3;
+      } else {
+	nPath[i] = p[0];
+	p += 1;
+      }
+    }
+    nPath[i] = '\0';
+    return fopen(nPath, mode);
+  }
+#else
+  return fopen(path, mode);
 #endif
 }
 

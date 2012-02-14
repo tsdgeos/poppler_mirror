@@ -263,14 +263,13 @@ poppler_page_get_text_page (PopplerPage *page)
     TextOutputDev *text_dev;
     Gfx           *gfx;
 
-    text_dev = new TextOutputDev (NULL, gTrue, gFalse, gFalse);
+    text_dev = new TextOutputDev (NULL, gTrue, 0, gFalse, gFalse);
     gfx = page->page->createGfx(text_dev,
 				72.0, 72.0, 0,
 				gFalse, /* useMediaBox */
 				gTrue, /* Crop */
 				-1, -1, -1, -1,
 				gFalse, /* printing */
-				page->document->doc->getCatalog (),
 				NULL, NULL, NULL, NULL);
     page->page->display(gfx);
     text_dev->endPage();
@@ -354,7 +353,6 @@ _poppler_page_render (PopplerPage      *page,
 			   -1, -1,
 			   -1, -1,
 			   printing,
-			   page->document->doc->getCatalog (),
 			   NULL, NULL,
 			   printing ? poppler_print_annot_cb : NULL,
                            printing ? GINT_TO_POINTER ((gint)print_flags) : NULL);
@@ -889,6 +887,7 @@ poppler_page_find_text (PopplerPage *page,
 			     gFalse, gTrue, // startAtTop, stopAtBottom
 			     gFalse, gFalse, // startAtLast, stopAtLast
 			     gFalse, gFalse, // caseSensitive, backwards
+			     gFalse, // wholeWord
 			     &xMin, &yMin, &xMax, &yMax))
     {
       match = poppler_rectangle_new ();
@@ -925,7 +924,6 @@ poppler_page_get_image_output_dev (PopplerPage *page,
 			      gTrue, /* Crop */
 			      -1, -1, -1, -1,
 			      gFalse, /* printing */
-			      page->document->doc->getCatalog (),
 			      NULL, NULL, NULL, NULL);
   page->page->display(gfx);
   delete gfx;
@@ -1063,13 +1061,11 @@ poppler_page_render_to_ps (PopplerPage   *page,
   if (!ps_file->out)
     ps_file->out = new PSOutputDev (ps_file->filename,
                                     ps_file->document->doc,
-                                    ps_file->document->doc->getXRef(),
-                                    ps_file->document->doc->getCatalog(),
                                     NULL,
                                     ps_file->first_page, ps_file->last_page,
                                     psModePS, (int)ps_file->paper_width,
                                     (int)ps_file->paper_height, ps_file->duplex,
-                                    0, 0, 0, 0, gFalse, gFalse);
+                                    0, 0, 0, 0, gFalse);
 
 
   ps_file->document->doc->displayPage (ps_file->out, page->index + 1, 72.0, 72.0,
@@ -1141,7 +1137,7 @@ poppler_page_get_link_mapping (PopplerPage *page)
   
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
   
-  links = new Links (page->page->getAnnots (page->document->doc->getCatalog ()));
+  links = new Links (page->page->getAnnots ());
 
   if (links == NULL)
     return NULL;
@@ -1246,7 +1242,7 @@ poppler_page_get_form_field_mapping (PopplerPage *page)
   
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
 
-  forms = page->page->getFormWidgets (page->document->doc->getCatalog ());
+  forms = page->page->getFormWidgets ();
 
   if (forms == NULL)
     return NULL;
@@ -1314,7 +1310,7 @@ poppler_page_get_annot_mapping (PopplerPage *page)
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
 
-  annots = page->page->getAnnots (page->document->doc->getCatalog ());
+  annots = page->page->getAnnots ();
   if (!annots)
     return NULL;
 
@@ -1432,7 +1428,7 @@ poppler_page_add_annot (PopplerPage  *page,
   g_return_if_fail (POPPLER_IS_PAGE (page));
   g_return_if_fail (POPPLER_IS_ANNOT (annot));
 
-  page->page->addAnnot (annot->annot, page->document->doc->getCatalog ());
+  page->page->addAnnot (annot->annot);
 }
 
 /* PopplerRectangle type */

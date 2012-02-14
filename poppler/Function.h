@@ -146,10 +146,12 @@ private:
     decode[funcMaxOutputs][2];
   double			// input multipliers
     inputMul[funcMaxInputs];
-  int idxMul[funcMaxInputs];	// sample array index multipliers
+  int *idxOffset;
   double *samples;		// the samples
   int nSamples;			// size of the samples array
   double *sBuf;			// buffer for the transform function
+  double cacheIn[funcMaxInputs];
+  double cacheOut[funcMaxOutputs];
   GBool ok;
 };
 
@@ -241,6 +243,8 @@ private:
   GooString *codeString;
   PSObject *code;
   int codeSize;
+  double cacheIn[funcMaxInputs];
+  double cacheOut[funcMaxOutputs];
   GBool ok;
 };
 

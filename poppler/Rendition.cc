@@ -308,7 +308,7 @@ MediaRendition::MediaRendition(Object* obj) {
 
 	  // TODO: D might be a form XObject too
 	} else {
-	  error (-1, "Invalid Media Clip Data");
+	  error (errSyntaxError, -1, "Invalid Media Clip Data");
 	  ok = gFalse;
 	}
 	obj1.free();
@@ -322,7 +322,7 @@ MediaRendition::MediaRendition(Object* obj) {
         // TODO
       }
     } else {
-      error (-1, "Invalid Media Clip");
+      error (errSyntaxError, -1, "Invalid Media Clip");
       ok = gFalse;
     }
     tmp.free();
@@ -345,7 +345,7 @@ MediaRendition::MediaRendition(Object* obj) {
     }
     params.free();
   } else if (hasClip) {
-    error (-1, "Invalid Media Rendition");
+    error (errSyntaxError, -1, "Invalid Media Rendition");
     ok = gFalse;
   }
   tmp2.free();

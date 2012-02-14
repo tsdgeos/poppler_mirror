@@ -120,8 +120,7 @@ FT_Library CairoOutputDev::ft_lib;
 GBool CairoOutputDev::ft_lib_initialized = gFalse;
 
 CairoOutputDev::CairoOutputDev() {
-  xref = NULL;
-  catalog = NULL;
+  doc = NULL;
 
   if (!ft_lib_initialized) {
     FT_Init_FreeType(&ft_lib);
@@ -139,7 +138,6 @@ CairoOutputDev::CairoOutputDev() {
   fill_opacity = 1.0;
   textClipPath = NULL;
   strokePathClip = NULL;
-  haveCSPattern = gFalse;
   cairo = NULL;
   currentFont = NULL;
   prescaleImages = gTrue;
@@ -192,7 +190,7 @@ void CairoOutputDev::setCairo(cairo_t *cairo)
   if (this->cairo != NULL) {
     cairo_status_t status = cairo_status (this->cairo);
     if (status) {
-      warning("cairo context error: %s\n", cairo_status_to_string(status));
+      error(errInternal, -1, "cairo context error: {0:s}\n", cairo_status_to_string(status));
     }
     cairo_destroy (this->cairo);
     assert(!cairo_shape);
@@ -224,10 +222,9 @@ void CairoOutputDev::setTextPage(TextPage *text)
   }
 }
 
-void CairoOutputDev::startDoc(XRef *xrefA, Catalog *catalogA,
+void CairoOutputDev::startDoc(PDFDoc *docA,
 			      CairoFontEngine *parentFontEngine) {
-  xref = xrefA;
-  catalog = catalogA;
+  doc = docA;
   if (parentFontEngine) {
     fontEngine = parentFontEngine;
   } else {
@@ -254,7 +251,7 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state) {
 void CairoOutputDev::endPage() {
   if (text) {
     text->endPage();
-    text->coalesce(gTrue, gFalse);
+    text->coalesce(gTrue, 0, gFalse);
   }
 }
 
@@ -351,7 +348,7 @@ void CairoOutputDev::updateCTM(GfxState *state, double m11, double m12,
    * instead of having to invert the matrix. */
   invert_matrix = matrix;
   if (cairo_matrix_invert(&invert_matrix)) {
-    warning("matrix not invertible\n");
+    error(errSyntaxWarning, -1, "matrix not invertible\n");
     return;
   }
 
@@ -600,7 +597,7 @@ void CairoOutputDev::updateFont(GfxState *state) {
   if (text)
     text->updateFont(state);
   
-  currentFont = fontEngine->getFont (state->getFont(), xref, catalog, printing);
+  currentFont = fontEngine->getFont (state->getFont(), doc, printing);
 
   if (!currentFont)
     return;
@@ -634,7 +631,7 @@ void CairoOutputDev::updateFont(GfxState *state) {
   */
   invert_matrix = matrix;
   if (cairo_matrix_invert(&invert_matrix)) {
-    warning("font matrix not invertible\n");
+    error(errSyntaxWarning, -1, "font matrix not invertible\n");
     return;
   }
 
@@ -761,7 +758,7 @@ void CairoOutputDev::eoFill(GfxState *state) {
 
 }
 
-GBool CairoOutputDev::tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
+GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx1, Catalog *cat, Object *str,
 					double *pmat, int paintType, int /*tilingType*/, Dict *resDict,
 					double *mat, double *bbox,
 					int x0, int y0, int x1, int y1,
@@ -802,7 +799,7 @@ GBool CairoOutputDev::tilingPatternFill(GfxState *state, Catalog *cat, Object *s
   box.x2 = bbox[2]; box.y2 = bbox[3];
   strokePathTmp = strokePathClip;
   strokePathClip = NULL;
-  gfx = new Gfx(xref, this, resDict, catalog, &box, NULL);
+  gfx = new Gfx(doc, this, resDict, &box, NULL);
   gfx->display(str);
   delete gfx;
   strokePathClip = strokePathTmp;
@@ -1177,7 +1174,7 @@ void CairoOutputDev::endString(GfxState *state)
     return;
   }
 
-  if (!(render & 1) && !haveCSPattern) {
+  if (!(render & 1)) {
     LOG (printf ("fill string\n"));
     cairo_set_source (cairo, fill_pattern);
     if (use_show_text_glyphs)
@@ -1201,7 +1198,7 @@ void CairoOutputDev::endString(GfxState *state)
   }
 
   // clip
-  if (haveCSPattern || (render & 4)) {
+  if ((render & 4)) {
     LOG (printf ("clip string\n"));
     // append the glyph path to textClipPath.
 
@@ -1291,36 +1288,9 @@ void CairoOutputDev::type3D1(GfxState *state, double wx, double wy,
 }
 
 void CairoOutputDev::beginTextObject(GfxState *state) {
-  if (!(state->getRender() & 4) && state->getFillColorSpace()->getMode() == csPattern) {
-    haveCSPattern = gTrue;
-    saveState(state);
-  }
 }
 
 void CairoOutputDev::endTextObject(GfxState *state) {
-  if (haveCSPattern) {
-    haveCSPattern = gFalse;
-    if (state->getFillColorSpace()->getMode() != csPattern) {
-      if (textClipPath) {
-	cairo_new_path (cairo);
-	cairo_append_path (cairo, textClipPath);
-	cairo_set_fill_rule (cairo, CAIRO_FILL_RULE_WINDING);
-	cairo_set_source (cairo, fill_pattern);
-	cairo_fill (cairo);
-	if (cairo_shape) {
-	  cairo_new_path (cairo_shape);
-	  cairo_append_path (cairo_shape, textClipPath);
-	  cairo_set_fill_rule (cairo_shape, CAIRO_FILL_RULE_WINDING);
-	  cairo_fill (cairo_shape);
-	}
-	cairo_path_destroy (textClipPath);
-	textClipPath = NULL;
-      }
-      restoreState(state);
-      updateFillColor(state);
-    }
-  }
-
   if (textClipPath) {
     // clip the accumulated text path
     cairo_append_path (cairo, textClipPath);
@@ -1334,16 +1304,16 @@ void CairoOutputDev::endTextObject(GfxState *state) {
   }
 }
 
-void CairoOutputDev::beginMarkedContent(char *name, Dict *properties)
+void CairoOutputDev::beginActualText(GfxState *state, GooString *text)
 {
   if (text)
-    actualText->beginMC(properties);
+    actualText->begin(state, text);
 }
 
-void CairoOutputDev::endMarkedContent(GfxState *state)
+void CairoOutputDev::endActualText(GfxState *state)
 {
   if (text)
-    actualText->endMC(state);
+    actualText->end(state);
 }
 
 static inline int splashRound(SplashCoord x) {
@@ -1654,10 +1624,6 @@ void CairoOutputDev::clearSoftMask(GfxState * /*state*/) {
   mask = NULL;
 }
 
-void CairoOutputDev::endMaskClip(GfxState *state) {
-  clearSoftMask(state);
-}
-
 /* Taken from cairo/doc/tutorial/src/singular.c */
 static void
 get_singular_values (const cairo_matrix_t *matrix,
@@ -1825,9 +1791,6 @@ void CairoOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
     return;
   }
 
-  if (state->getFillColorSpace()->getMode() == csPattern)
-    cairo_push_group_with_content (cairo, CAIRO_CONTENT_ALPHA);
-
   /* shape is 1.0 for painted areas, 0.0 for unpainted ones */
 
   cairo_matrix_t matrix;
@@ -1844,12 +1807,65 @@ void CairoOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
     drawImageMaskRegular(state, ref, str, width, height, invert, interpolate, inlineImg);
   }
 
-  if (state->getFillColorSpace()->getMode() == csPattern) {
-    if (mask)
-      cairo_pattern_destroy (mask);
-    mask = cairo_pop_group (cairo);
-    cairo_get_matrix (cairo, &mask_matrix);
+}
+
+void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str,
+				   int width, int height, GBool invert,
+				   GBool inlineImg) {
+
+  /* FIXME: Doesn't the image mask support any colorspace? */
+  cairo_set_source (cairo, fill_pattern);
+
+  /* work around a cairo bug when scaling 1x1 surfaces */
+  if (width == 1 && height == 1) {
+    ImageStream *imgStr;
+    Guchar pix;
+    int invert_bit;
+
+    imgStr = new ImageStream(str, width, 1, 1);
+    imgStr->reset();
+    imgStr->getPixel(&pix);
+    imgStr->close();
+    delete imgStr;
+
+    invert_bit = invert ? 1 : 0;
+    if (pix ^ invert_bit)
+      return;
+
+    cairo_save (cairo);
+    cairo_rectangle (cairo, 0., 0., width, height);
+    cairo_fill (cairo);
+    cairo_restore (cairo);
+    if (cairo_shape) {
+      cairo_save (cairo_shape);
+      cairo_rectangle (cairo_shape, 0., 0., width, height);
+      cairo_fill (cairo_shape);
+      cairo_restore (cairo_shape);
+    }
+    return;
   }
+
+  cairo_push_group_with_content (cairo, CAIRO_CONTENT_ALPHA);
+
+  /* shape is 1.0 for painted areas, 0.0 for unpainted ones */
+
+  cairo_matrix_t matrix;
+  cairo_get_matrix (cairo, &matrix);
+  //XXX: it is possible that we should only do sub pixel positioning if 
+  // we are rendering fonts */
+  if (!printing && prescaleImages && matrix.xy == 0.0 && matrix.yx == 0.0) {
+    drawImageMaskPrescaled(state, ref, str, width, height, invert, gFalse, inlineImg);
+  } else {
+    drawImageMaskRegular(state, ref, str, width, height, invert, gFalse, inlineImg);
+  }
+
+  if (mask)
+    cairo_pattern_destroy (mask);
+  mask = cairo_pop_group (cairo);
+}
+
+void CairoOutputDev::unsetSoftMaskFromImageMask(GfxState *state) {
+  clearSoftMask(state);
 }
 
 void CairoOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *str,

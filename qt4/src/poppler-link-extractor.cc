@@ -49,7 +49,7 @@ LinkExtractorOutputDev::~LinkExtractorOutputDev()
   qDeleteAll(m_links);
 }
 
-void LinkExtractorOutputDev::processLink(::AnnotLink *link, Catalog *catalog)
+void LinkExtractorOutputDev::processLink(::AnnotLink *link)
 {
   if (!link->isOk())
     return;
@@ -71,7 +71,7 @@ void LinkExtractorOutputDev::processLink(::AnnotLink *link, Catalog *catalog)
   {
     m_links.append(popplerLink);
   }
-  OutputDev::processLink(link, catalog);
+  OutputDev::processLink(link);
 }
 
 QList< Link* > LinkExtractorOutputDev::links()

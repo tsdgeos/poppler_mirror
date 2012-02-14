@@ -50,13 +50,14 @@ public:
   ~SplashFTFontEngine();
 
   // Load fonts.
-  SplashFontFile *loadType1Font(SplashFontFileID *idA, SplashFontSrc *src,  char **enc);
-  SplashFontFile *loadType1CFont(SplashFontFileID *idA, SplashFontSrc *src,  char **enc);
-  SplashFontFile *loadOpenTypeT1CFont(SplashFontFileID *idA, SplashFontSrc *src,  char **enc);
+  SplashFontFile *loadType1Font(SplashFontFileID *idA, SplashFontSrc *src,  const char **enc);
+  SplashFontFile *loadType1CFont(SplashFontFileID *idA, SplashFontSrc *src,  const char **enc);
+  SplashFontFile *loadOpenTypeT1CFont(SplashFontFileID *idA, SplashFontSrc *src,  const char **enc);
   SplashFontFile *loadCIDFont(SplashFontFileID *idA, SplashFontSrc *src);
-  SplashFontFile *loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src);
+  SplashFontFile *loadOpenTypeCFFFont(SplashFontFileID *idA, SplashFontSrc *src,
+                                      int *codeToGID, int codeToGIDLen);
   SplashFontFile *loadTrueTypeFont(SplashFontFileID *idA, SplashFontSrc *src,
-				   Gushort *codeToGID, int codeToGIDLen, int faceIndex = 0);
+				   int *codeToGID, int codeToGIDLen, int faceIndex = 0);
 
 private:
 

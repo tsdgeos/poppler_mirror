@@ -43,6 +43,7 @@ class Dict;
 class GooHash;
 class GooString;
 class GfxState;
+class Gfx;
 struct GfxColor;
 class GfxColorSpace;
 class GfxImageColorMap;
@@ -105,16 +106,9 @@ public:
   // Does this device need non-text content?
   virtual GBool needNonText() { return gTrue; }
 
-  // If current colorspace ist pattern,
-  // does this device support text in pattern colorspace?
-  // Default is false
-  virtual GBool supportTextCSPattern(GfxState * /*state*/) { return gFalse; }
-
-  // If current colorspace ist pattern,
-  // need this device special handling for masks in pattern colorspace?
-  // Default is false
-  virtual GBool fillMaskCSPattern(GfxState * /*state*/) { return gFalse; }
-  virtual void endMaskClip(GfxState * /*state*/) {}
+  // Does this device require incCharCount to be called for text on
+  // non-shown layers?
+  virtual GBool needCharCount() { return gFalse; }
 
   //----- initialization and control
 
@@ -128,7 +122,7 @@ public:
   virtual GBool checkPageSlice(Page *page, double hDPI, double vDPI,
 			       int rotate, GBool useMediaBox, GBool crop,
 			       int sliceX, int sliceY, int sliceW, int sliceH,
-			       GBool printing, Catalog * catalog,
+			       GBool printing,
 			       GBool (* abortCheckCbk)(void *data) = NULL,
 			       void * abortCheckCbkData = NULL)
     { return gTrue; }
@@ -191,12 +185,14 @@ public:
   virtual void updateHorizScaling(GfxState * /*state*/) {}
   virtual void updateTextPos(GfxState * /*state*/) {}
   virtual void updateTextShift(GfxState * /*state*/, double /*shift*/) {}
+  virtual void saveTextPos(GfxState * /*state*/) {}
+  virtual void restoreTextPos(GfxState * /*state*/) {}
 
   //----- path painting
   virtual void stroke(GfxState * /*state*/) {}
   virtual void fill(GfxState * /*state*/) {}
   virtual void eoFill(GfxState * /*state*/) {}
-  virtual GBool tilingPatternFill(GfxState * /*state*/, Catalog * /*cat*/, Object * /*str*/,
+  virtual GBool tilingPatternFill(GfxState * /*state*/, Gfx * /*gfx*/, Catalog * /*cat*/, Object * /*str*/,
 				  double * /*pmat*/, int /*paintType*/, int /*tilingType*/, Dict * /*resDict*/,
 				  double * /*mat*/, double * /*bbox*/,
 				  int /*x0*/, int /*y0*/, int /*x1*/, int /*y1*/,
@@ -240,11 +236,19 @@ public:
   virtual void beginTextObject(GfxState * /*state*/) {}
   virtual GBool deviceHasTextClip(GfxState * /*state*/) { return gFalse; }
   virtual void endTextObject(GfxState * /*state*/) {}
+  virtual void incCharCount(int /*nChars*/) {}
+  virtual void beginActualText(GfxState * /*state*/, GooString * /*text*/ ) {}
+  virtual void endActualText(GfxState * /*state*/) {}
 
   //----- image drawing
   virtual void drawImageMask(GfxState *state, Object *ref, Stream *str,
 			     int width, int height, GBool invert, GBool interpolate,
 			     GBool inlineImg);
+  virtual void setSoftMaskFromImageMask(GfxState *state,
+					Object *ref, Stream *str,
+					int width, int height, GBool invert,
+					GBool inlineImg);
+  virtual void unsetSoftMaskFromImageMask(GfxState *state);
   virtual void drawImage(GfxState *state, Object *ref, Stream *str,
 			 int width, int height, GfxImageColorMap *colorMap,
 			 GBool interpolate, int *maskColors, GBool inlineImg);
@@ -264,12 +268,10 @@ public:
 
   //----- grouping operators
 
-  virtual void endMarkedContent(GfxState *state);
-  virtual void beginMarkedContent(char *name, Dict *properties);
   virtual void markPoint(char *name);
   virtual void markPoint(char *name, Dict *properties);
-  
-  
+
+
 
 #if OPI_SUPPORT
   //----- OPI functions
@@ -305,7 +307,7 @@ public:
   virtual void clearSoftMask(GfxState * /*state*/) {}
 
   //----- links
-  virtual void processLink(AnnotLink * /*link*/, Catalog * /*catalog*/) {}
+  virtual void processLink(AnnotLink * /*link*/) {}
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
   virtual GBool getVectorAntialias() { return gFalse; }

@@ -40,6 +40,7 @@
 #include "TextOutputDev.h"
 #include "GfxState.h"
 
+class PDFDoc;
 class GfxState;
 class GfxPath;
 class Gfx8BitFont;
@@ -158,7 +159,7 @@ public:
   virtual void fill(GfxState *state);
   virtual void eoFill(GfxState *state);
   virtual void clipToStrokePath(GfxState *state);
-  virtual GBool tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
+  virtual GBool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
 				  double *pmat, int paintType, int tilingType, Dict *resDict,
 				  double *mat, double *bbox,
 				  int x0, int y0, int x1, int y1,
@@ -183,35 +184,26 @@ public:
 		double dx, double dy,
 		double originX, double originY,
 		CharCode code, int nBytes, Unicode *u, int uLen);
+  void beginActualText(GfxState *state, GooString *text);
+  void endActualText(GfxState *state);
 
   virtual GBool beginType3Char(GfxState *state, double x, double y,
 			       double dx, double dy,
 			       CharCode code, Unicode *u, int uLen);
   virtual void endType3Char(GfxState *state);
   virtual void beginTextObject(GfxState *state);
-  virtual GBool deviceHasTextClip(GfxState *state) { return textClipPath && haveCSPattern; }
+  virtual GBool deviceHasTextClip(GfxState *state) { return textClipPath; }
   virtual void endTextObject(GfxState *state);
-
-  // If current colorspace is pattern,
-  // does this device support text in pattern colorspace?
-  virtual GBool supportTextCSPattern(GfxState *state) {
-      return state->getFillColorSpace()->getMode() == csPattern; }
-
-  // If current colorspace is pattern,
-  // need this device special handling for masks in pattern colorspace?
-  virtual GBool fillMaskCSPattern(GfxState * state) {
-      return state->getFillColorSpace()->getMode() == csPattern; }
-
-  virtual void endMaskClip(GfxState *state);
-
-  //----- grouping operators
-  virtual void beginMarkedContent(char *name, Dict *properties);
-  virtual void endMarkedContent(GfxState *state);  
 
   //----- image drawing
   virtual void drawImageMask(GfxState *state, Object *ref, Stream *str,
 			     int width, int height, GBool invert, GBool interpolate,
 			     GBool inlineImg);
+  virtual void setSoftMaskFromImageMask(GfxState *state,
+					Object *ref, Stream *str,
+					int width, int height, GBool invert,
+					GBool inlineImg);
+  virtual void unsetSoftMaskFromImageMask(GfxState *state);
   void drawImageMaskPrescaled(GfxState *state, Object *ref, Stream *str,
 			      int width, int height, GBool invert, GBool interpolate,
 			      GBool inlineImg);
@@ -259,7 +251,7 @@ public:
   //----- special access
   
   // Called to indicate that a new PDF document has been loaded.
-  void startDoc(XRef *xrefA, Catalog *catalogA, CairoFontEngine *fontEngine = NULL);
+  void startDoc(PDFDoc *docA, CairoFontEngine *fontEngine = NULL);
  
   GBool isReverseVideo() { return gFalse; }
   
@@ -305,8 +297,7 @@ protected:
     double miter;
   } *strokePathClip;
 
-  XRef *xref;			// xref table for current document
-  Catalog *catalog;
+  PDFDoc *doc;			// the current document
 
   static FT_Library ft_lib;
   static GBool ft_lib_initialized;
@@ -358,8 +349,6 @@ protected:
     struct MaskStack *next;
   } *maskStack;
 
-  GBool haveCSPattern;	// set if text has been drawn with a
-                        //   clipping render mode because of pattern colorspace
 };
 
 //------------------------------------------------------------------------
@@ -438,7 +427,7 @@ public:
   virtual void fill(GfxState *state) { }
   virtual void eoFill(GfxState *state) { }
   virtual void clipToStrokePath(GfxState *state) { }
-  virtual GBool tilingPatternFill(GfxState *state, Catalog *cat, Object *str,
+  virtual GBool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
 				  double *pmat, int paintType, int tilingType, Dict *resDict,
 				  double *mat, double *bbox,
 				  int x0, int y0, int x1, int y1,

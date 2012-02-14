@@ -93,6 +93,9 @@ public:
 
   // Get file name.
   GooString *getFileName() { return fileName; }
+#ifdef _WIN32
+  wchar_t *getFileNameU() { return fileNameU; }
+#endif
 
   // Get the linearization table.
   Linearization *getLinearization();
@@ -281,6 +284,9 @@ private:
   Guint strToUnsigned(char *s);
 
   GooString *fileName;
+#ifdef _WIN32
+  wchar_t *fileNameU;
+#endif
   FILE *file;
   BaseStream *str;
   void *guiData;

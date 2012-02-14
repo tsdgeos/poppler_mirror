@@ -32,9 +32,25 @@
 #include <stdarg.h>
 #include "poppler-config.h"
 
-extern void CDECL error(int pos, char *msg, ...) GCC_PRINTF_FORMAT (2, 3);
-void warning(char *msg, ...) GCC_PRINTF_FORMAT (1, 2);
+enum ErrorCategory {
+  errSyntaxWarning,    // PDF syntax error which can be worked around;
+                       //   output will probably be correct
+  errSyntaxError,      // PDF syntax error which can be worked around;
+                       //   output will probably be incorrect
+  errConfig,           // error in Xpdf config info (xpdfrc file, etc.)
+  errCommandLine,      // error in user-supplied parameters, action not
+                       //   allowed, etc. (only used by command-line tools)
+  errIO,               // error in file I/O
+  errNotAllowed,       // action not allowed by PDF permission bits
+  errUnimplemented,    // unimplemented PDF feature - display will be
+                       //   incorrect
+  errInternal          // internal error - malfunction within the Xpdf code
+};
 
-void setErrorFunction(void (* f)(int , char *, va_list args));
+extern void setErrorCallback(void (*cbk)(void *data, ErrorCategory category,
+					 int pos, char *msg),
+			     void *data);
+
+extern void CDECL error(ErrorCategory category, int pos, const char *msg, ...);
 
 #endif

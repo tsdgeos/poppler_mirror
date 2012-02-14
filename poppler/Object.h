@@ -41,15 +41,15 @@
 
 #define OBJECT_TYPE_CHECK(wanted_type) \
     if (unlikely(type != wanted_type)) { \
-        error(0, (char *) "Call to Object where the object was type %d, " \
-                 "not the expected type %d", type, wanted_type); \
+        error(errInternal, 0, (char *) "Call to Object where the object was type {0:d}, " \
+                 "not the expected type {1:d}", type, wanted_type); \
         abort(); \
     }
 
 #define OBJECT_2TYPES_CHECK(wanted_type1, wanted_type2) \
     if (unlikely(type != wanted_type1) && unlikely(type != wanted_type2)) { \
-        error(0, (char *) "Call to Object where the object was type %d, " \
-                 "not the expected type %d or %d", type, wanted_type1, wanted_type2); \
+        error(errInternal, 0, (char *) "Call to Object where the object was type {0:d}, " \
+                 "not the expected type {1:d} or {2:d}", type, wanted_type1, wanted_type2); \
         abort(); \
     }
 
@@ -126,7 +126,7 @@ public:
     { initObj(objReal); real = realA; return this; }
   Object *initString(GooString *stringA)
     { initObj(objString); string = stringA; return this; }
-  Object *initName(char *nameA)
+  Object *initName(const char *nameA)
     { initObj(objName); name = copyString(nameA); return this; }
   Object *initNull()
     { initObj(objNull); return this; }
@@ -154,7 +154,7 @@ public:
 
   // If object is a Ref, fetch and return the referenced object.
   // Otherwise, return a copy of the object.
-  Object *fetch(XRef *xref, Object *obj, std::set<int> *fetchOriginatorNums = NULL);
+  Object *fetch(XRef *xref, Object *obj, int recursion = 0);
 
   // Free object contents.
   void free();
@@ -179,11 +179,11 @@ public:
   GBool isUint() { return type == objUint; }
 
   // Special type checking.
-  GBool isName(char *nameA)
+  GBool isName(const char *nameA)
     { return type == objName && !strcmp(name, nameA); }
-  GBool isDict(char *dictType);
+  GBool isDict(const char *dictType);
   GBool isStream(char *dictType);
-  GBool isCmd(char *cmdA)
+  GBool isCmd(const char *cmdA)
     { return type == objCmd && !strcmp(cmd, cmdA); }
 
   // Accessors.
@@ -211,10 +211,10 @@ public:
   // Dict accessors.
   int dictGetLength();
   void dictAdd(char *key, Object *val);
-  void dictSet(char *key, Object *val);
-  GBool dictIs(char *dictType);
-  Object *dictLookup(char *key, Object *obj, std::set<int> *fetchOriginatorNums = NULL);
-  Object *dictLookupNF(char *key, Object *obj);
+  void dictSet(const char *key, Object *val);
+  GBool dictIs(const char *dictType);
+  Object *dictLookup(const char *key, Object *obj, int recursion = 0);
+  Object *dictLookupNF(const char *key, Object *obj);
   char *dictGetKey(int i);
   Object *dictGetVal(int i, Object *obj);
   Object *dictGetValNF(int i, Object *obj);
@@ -232,7 +232,7 @@ public:
   Dict *streamGetDict();
 
   // Output.
-  char *getTypeName();
+  const char *getTypeName();
   void print(FILE *f = stdout);
 
   // Memory testing.
@@ -291,19 +291,19 @@ inline int Object::dictGetLength()
 inline void Object::dictAdd(char *key, Object *val)
   { OBJECT_TYPE_CHECK(objDict); dict->add(key, val); }
 
-inline void Object::dictSet(char *key, Object *val)
+inline void Object::dictSet(const char *key, Object *val)
  	{ OBJECT_TYPE_CHECK(objDict); dict->set(key, val); }
 
-inline GBool Object::dictIs(char *dictType)
+inline GBool Object::dictIs(const char *dictType)
   { OBJECT_TYPE_CHECK(objDict); return dict->is(dictType); }
 
-inline GBool Object::isDict(char *dictType)
+inline GBool Object::isDict(const char *dictType)
   { return type == objDict && dictIs(dictType); }
 
-inline Object *Object::dictLookup(char *key, Object *obj, std::set<int> *fetchOriginatorNums)
-  { OBJECT_TYPE_CHECK(objDict); return dict->lookup(key, obj, fetchOriginatorNums); }
+inline Object *Object::dictLookup(const char *key, Object *obj, int recursion)
+  { OBJECT_TYPE_CHECK(objDict); return dict->lookup(key, obj, recursion); }
 
-inline Object *Object::dictLookupNF(char *key, Object *obj)
+inline Object *Object::dictLookupNF(const char *key, Object *obj)
   { OBJECT_TYPE_CHECK(objDict); return dict->lookupNF(key, obj); }
 
 inline char *Object::dictGetKey(int i)

@@ -533,7 +533,7 @@ static void renderPage(PDFDoc *doc, CairoOutputDev *cairoOut, int pg,
 
   status = cairo_status(cr);
   if (status)
-      error(-1, "cairo error: %s\n", cairo_status_to_string(status));
+      error(errInternal, -1, "cairo error: {0:s}\n", cairo_status_to_string(status));
   cairo_destroy (cr);
 }
 
@@ -548,7 +548,7 @@ static void endPage(GooString *imageFileName)
     cairo_surface_finish(surface);
     status = cairo_surface_status(surface);
     if (status)
-      error(-1, "cairo error: %s\n", cairo_status_to_string(status));
+      error(errInternal, -1, "cairo error: {0:s}\n", cairo_status_to_string(status));
     cairo_surface_destroy(surface);
   }
 
@@ -562,7 +562,7 @@ static void endDocument()
     cairo_surface_finish(surface);
     status = cairo_surface_status(surface);
     if (status)
-      error(-1, "cairo error: %s\n", cairo_status_to_string(status));
+      error(errInternal, -1, "cairo error: {0:s}\n", cairo_status_to_string(status));
     cairo_surface_destroy(surface);
     fclose(output_file);
   }
@@ -682,7 +682,7 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
   return name;
 }
 
-static void checkInvalidPrintOption(GBool option, char *option_name)
+static void checkInvalidPrintOption(GBool option, const char *option_name)
 {
   if (option) {
     fprintf(stderr, "Error: %s may only be used with the -png or -jpeg output options.\n", option_name);
@@ -690,7 +690,7 @@ static void checkInvalidPrintOption(GBool option, char *option_name)
   }
 }
 
-static void checkInvalidImageOption(GBool option, char *option_name)
+static void checkInvalidImageOption(GBool option, const char *option_name)
 {
   if (option) {
     fprintf(stderr, "Error: %s may only be used with the -ps, -eps, -pdf, or -svg output options.\n", option_name);
@@ -909,7 +909,7 @@ int main(int argc, char *argv[]) {
     firstPage++;
 
   cairoOut = new CairoOutputDev();
-  cairoOut->startDoc(doc->getXRef(), doc->getCatalog());
+  cairoOut->startDoc(doc);
   if (sz != 0)
     crop_w = crop_h = sz;
   pg_num_len = numberOfCharacters(doc->getNumPages());

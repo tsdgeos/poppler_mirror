@@ -43,6 +43,15 @@ if (HAVE_CAIRO)
   install(FILES pdftocairo.1 DESTINATION share/man/man1)
 endif (HAVE_CAIRO)
 
+# pdfdetach
+set(pdfdetach_SOURCES ${common_srcs}
+  pdfdetach.cc
+)
+add_executable(pdfdetach ${pdfdetach_SOURCES})
+target_link_libraries(pdfdetach ${common_libs})
+install(TARGETS pdfdetach DESTINATION bin)
+install(FILES pdfdetach.1 DESTINATION share/man/man1)
+
 # pdffonts
 set(pdffonts_SOURCES ${common_srcs}
   pdffonts.cc

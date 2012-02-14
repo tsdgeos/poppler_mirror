@@ -99,19 +99,20 @@ public:
   GBool okToFillForm(GBool ignoreOwnerPW = gFalse);
   GBool okToAccessibility(GBool ignoreOwnerPW = gFalse);
   GBool okToAssemble(GBool ignoreOwnerPW = gFalse);
+  int getPermFlags() { return permFlags; }
 
   // Get catalog object.
   Object *getCatalog(Object *obj) { return fetch(rootNum, rootGen, obj); }
 
   // Fetch an indirect reference.
-  Object *fetch(int num, int gen, Object *obj, std::set<int> *fetchOriginatorNums = NULL);
+  Object *fetch(int num, int gen, Object *obj, int recursion = 0);
 
   // Return the document's Info dictionary (if any).
   Object *getDocInfo(Object *obj);
   Object *getDocInfoNF(Object *obj);
 
   // Return the number of objects in the xref table.
-  int getNumObjects() { return size; }
+  int getNumObjects() { return last + 1; }
 
   // Return the catalog object reference.
   int getRootNum() { return rootNum; }
@@ -143,6 +144,7 @@ private:
   XRefEntry *entries;		// xref entries
   int capacity;			// size of <entries> array
   int size;			// number of entries
+  int last;			// last used index in <entries>
   int rootNum, rootGen;		// catalog dict
   GBool ok;			// true if xref table is valid
   int errCode;			// error code (if <ok> is false)
@@ -157,7 +159,7 @@ private:
   CryptAlgorithm encAlgorithm;	// encryption algorithm
   int keyLength;		// length of key, in bytes
   int permFlags;		// permission bits
-  Guchar fileKey[16];		// file decryption key
+  Guchar fileKey[32];		// file decryption key
   GBool ownerPasswordOk;	// true if owner password is correct
   Guint prevXRefOffset;		// position of prev XRef section (= next to read)
   Guint mainXRefEntriesOffset;	// offset of entries in main XRef table

@@ -74,7 +74,7 @@ GooList *FontInfoScanner::scan(int nPages) {
     if ((resDict = page->getResourceDict())) {
       scanFonts(resDict, result);
     }
-    annots = page->getAnnots(doc->getCatalog());
+    annots = page->getAnnots();
     for (int i = 0; i < annots->getNumAnnots(); ++i) {
       if (annots->getAnnot(i)->getAppearance(&obj1)->isStream()) {
 	obj1.streamGetDict()->lookup("Resources", &obj2);
@@ -130,7 +130,7 @@ void FontInfoScanner::scanFonts(Dict *resDict, GooList *fontsList) {
 
   // recursively scan any resource dictionaries in objects in this
   // resource dictionary
-  char *resTypes[] = { "XObject", "Pattern" };
+  const char *resTypes[] = { "XObject", "Pattern" };
   for (Guint resType = 0; resType < sizeof(resTypes) / sizeof(resTypes[0]); ++resType) {
     resDict->lookup(resTypes[resType], &objDict);
     if (objDict.isDict()) {
@@ -172,9 +172,9 @@ FontInfo::FontInfo(GfxFont *font, PDFDoc *doc) {
   fontRef = *font->getID();
 
   // font name
-  origName = font->getOrigName();
+  origName = font->getName();
   if (origName != NULL) {
-    name = font->getOrigName()->copy();
+    name = font->getName()->copy();
   } else {
     name = NULL;
   }
@@ -193,14 +193,12 @@ FontInfo::FontInfo(GfxFont *font, PDFDoc *doc) {
   substituteName = NULL;
   if (!emb)
   {
-    DisplayFontParam *dfp = globalParams->getDisplayFont(font);
-    if (dfp)
-    {
-      if (dfp->substituteName)
-	substituteName = dfp->substituteName->copy();
-      if (dfp->kind == displayFontT1) file = dfp->t1.fileName->copy();
-      else file = dfp->tt.fileName->copy();
-    }
+    SysFontType dummy;
+    int dummy2;
+    GooString substituteNameAux;
+    file = globalParams->findSystemFontFile(font, &dummy, &dummy2, &substituteNameAux);
+    if (substituteNameAux.getLength() > 0)
+	substituteName = substituteNameAux.copy();
   }
 
   // look for a ToUnicode map

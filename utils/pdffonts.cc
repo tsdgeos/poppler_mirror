@@ -38,7 +38,7 @@
 #include "PDFDocFactory.h"
 #include "FontInfo.h"
 
-static char *fontTypeNames[] = {
+static const char *fontTypeNames[] = {
   "unknown",
   "Type 1",
   "Type 1C",

@@ -118,7 +118,7 @@ void Dict::add(char *key, Object *val) {
   ++length;
 }
 
-inline DictEntry *Dict::find(char *key) {
+inline DictEntry *Dict::find(const char *key) {
   if (!sorted && length >= SORT_LENGTH_LOWER_LIMIT)
   {
       sorted = gTrue;
@@ -141,11 +141,11 @@ inline DictEntry *Dict::find(char *key) {
   return NULL;
 }
 
-GBool Dict::hasKey(char *key) {
+GBool Dict::hasKey(const char *key) {
   return find(key) != NULL;
 }
 
-void Dict::remove(char *key) {
+void Dict::remove(const char *key) {
   if (sorted) {
     const int pos = binarySearch(key, entries, length);
     if (pos != -1) {
@@ -175,7 +175,7 @@ void Dict::remove(char *key) {
   }
 }
 
-void Dict::set(char *key, Object *val) {
+void Dict::set(const char *key, Object *val) {
   DictEntry *e;
   e = find (key);
   if (e) {
@@ -187,19 +187,19 @@ void Dict::set(char *key, Object *val) {
 }
 
 
-GBool Dict::is(char *type) {
+GBool Dict::is(const char *type) {
   DictEntry *e;
 
   return (e = find("Type")) && e->val.isName(type);
 }
 
-Object *Dict::lookup(char *key, Object *obj, std::set<int> *fetchOriginatorNums) {
+Object *Dict::lookup(const char *key, Object *obj, int recursion) {
   DictEntry *e;
 
-  return (e = find(key)) ? e->val.fetch(xref, obj, fetchOriginatorNums) : obj->initNull();
+  return (e = find(key)) ? e->val.fetch(xref, obj, recursion) : obj->initNull();
 }
 
-Object *Dict::lookupNF(char *key, Object *obj) {
+Object *Dict::lookupNF(const char *key, Object *obj) {
   DictEntry *e;
 
   return (e = find(key)) ? e->val.copy(obj) : obj->initNull();

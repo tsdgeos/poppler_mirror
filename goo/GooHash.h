@@ -32,12 +32,12 @@ public:
   void replace(GooString *key, int val);
   void *lookup(GooString *key);
   int lookupInt(GooString *key);
-  void *lookup(char *key);
-  int lookupInt(char *key);
+  void *lookup(const char *key);
+  int lookupInt(const char *key);
   void *remove(GooString *key);
   int removeInt(GooString *key);
-  void *remove(char *key);
-  int removeInt(char *key);
+  void *remove(const char *key);
+  int removeInt(const char *key);
   int getLength() { return len; }
   void startIter(GooHashIter **iter);
   GBool getNext(GooHashIter **iter, GooString **key, void **val);
@@ -48,9 +48,9 @@ private:
 
   void expand();
   GooHashBucket *find(GooString *key, int *h);
-  GooHashBucket *find(char *key, int *h);
+  GooHashBucket *find(const char *key, int *h);
   int hash(GooString *key);
-  int hash(char *key);
+  int hash(const char *key);
 
   GBool deleteKeys;		// set if key strings should be deleted
   int size;			// number of buckets

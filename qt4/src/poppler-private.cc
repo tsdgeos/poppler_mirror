@@ -53,10 +53,9 @@ namespace Debug {
         Debug::debugClosure = closure;
     }
 
-    void qt4ErrorFunction(int pos, char *msg, va_list args)
+    void qt4ErrorFunction(void * /*data*/, ErrorCategory /*category*/, int pos, char *msg)
     {
         QString emsg;
-        char buffer[1024]; // should be big enough
 
         if (pos >= 0)
         {
@@ -66,8 +65,7 @@ namespace Debug {
         {
             emsg = QString::fromLatin1("Error: ");
         }
-        qvsnprintf(buffer, sizeof(buffer) - 1, msg, args);
-        emsg += QString::fromAscii(buffer);
+        emsg += QString::fromAscii(msg);
         (*Debug::debugFunction)(emsg, Debug::debugClosure);
     }
 
@@ -252,7 +250,7 @@ namespace Debug {
         {
             utf8Map = 0;
             globalParams = new GlobalParams();
-            setErrorFunction(qt4ErrorFunction);
+            setErrorCallback(qt4ErrorFunction, NULL);
         }
         count ++;
     }

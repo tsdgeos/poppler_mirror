@@ -65,6 +65,7 @@ public:
 
   SplashError writePNMFile(char *fileName);
   SplashError writePNMFile(FILE *f);
+  SplashError writeAlphaPGMFile(char *fileName);
   
   SplashError writeImgFile(SplashImageFileFormat format, char *fileName, int hDPI, int vDPI, const char *compressionString = "");
   SplashError writeImgFile(SplashImageFileFormat format, FILE *f, int hDPI, int vDPI, const char *compressionString = "");
@@ -73,6 +74,11 @@ public:
   void getPixel(int x, int y, SplashColorPtr pixel);
   void getRGBLine(int y, SplashColorPtr line);
   Guchar getAlpha(int x, int y);
+
+  // Caller takes ownership of the bitmap data.  The SplashBitmap
+  // object is no longer valid -- the next call should be to the
+  // destructor.
+  SplashColorPtr takeData();
 
 private:
 

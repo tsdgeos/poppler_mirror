@@ -48,11 +48,11 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
   PDFDoc *doc = new PDFDoc (gfileName, NULL, NULL, NULL);
 
   if (!doc->isOk()) {
-    error(-1, "Could not extract page(s) from damaged file ('%s')", srcFileName);
+    error(errSyntaxError, -1, "Could not extract page(s) from damaged file ('{0:s}')", srcFileName);
     return false;
   }
   if (doc->isEncrypted()) {
-    error(-1, "Could not extract page(s) from encrypted file ('%s')", srcFileName);
+    error(errSyntaxError, -1, "Could not extract page(s) from encrypted file ('{0:s}')", srcFileName);
     return false;
   }
 
@@ -65,7 +65,7 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
   if (firstPage == 0)
     firstPage = 1;
   if (firstPage != lastPage && strstr(destFileName, "%d") == NULL) {
-    error(-1, "'%s' must contain '%%d' if more than one page should be extracted", destFileName);
+    error(errSyntaxError, -1, "'{0:s}' must contain '%%d' if more than one page should be extracted", destFileName);
     return false;
   }
   for (int pageNo = firstPage; pageNo <= lastPage; pageNo++) {

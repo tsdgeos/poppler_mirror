@@ -89,8 +89,8 @@ static char userPassword[33] = "";
 static char gsDevice[33] = "none";
 static GBool printVersion = gFalse;
 
-static GooString* getInfoString(Dict *infoDict, char *key);
-static GooString* getInfoDate(Dict *infoDict, char *key);
+static GooString* getInfoString(Dict *infoDict, const char *key);
+static GooString* getInfoDate(Dict *infoDict, const char *key);
 
 static char textEncName[128] = "";
 
@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
   char *p;
   GooString *ownerPW, *userPW;
   Object info;
-  char * extsList[] = {"png", "jpeg", "bmp", "pcx", "tiff", "pbm", NULL};
+  const char * extsList[] = {"png", "jpeg", "bmp", "pcx", "tiff", "pbm", NULL};
 
   // parse args
   ok = parseArgs(argDesc, &argc, argv);
@@ -253,7 +253,7 @@ int main(int argc, char *argv[]) {
   // check for copy permission
   if (!doc->okToCopy()) {
     if (!noDrm) {
-      error(-1, "Copying of text from this document is not allowed.");
+      error(errNotAllowed, -1, "Copying of text from this document is not allowed.");
       goto error;
     }
     fprintf(stderr, "Document has copy-protection bit set.\n");
@@ -282,7 +282,7 @@ int main(int argc, char *argv[]) {
     }
     delete tmp;
   } else if (fileName->cmp("fd://0") == 0) {
-      error(-1, "You have to provide an output filename when reading form stdin.");
+      error(errCommandLine, -1, "You have to provide an output filename when reading form stdin.");
       goto error;
   } else {
     p = fileName->getCString() + fileName->getLength() - 4;
@@ -371,7 +371,7 @@ int main(int argc, char *argv[]) {
       rawOrder = singleHtml;
 
   // write text file
-  htmlOut = new HtmlOutputDev(htmlFileName->getCString(), 
+  htmlOut = new HtmlOutputDev(doc->getCatalog(), htmlFileName->getCString(), 
 	  docTitle->getCString(), 
 	  author ? author->getCString() : NULL,
 	  keywords ? keywords->getCString() : NULL, 
@@ -421,7 +421,7 @@ int main(int argc, char *argv[]) {
           splashFormatPng : splashFormatJpeg;
 
       splashOut = new SplashOutputDevNoText(splashModeRGB8, 4, gFalse, color);
-      splashOut->startDoc(doc->getXRef());
+      splashOut->startDoc(doc);
 
       for (int pg = firstPage; pg <= lastPage; ++pg) {
         doc->displayPage(splashOut, pg,
@@ -449,8 +449,8 @@ int main(int argc, char *argv[]) {
       psFileName = new GooString(htmlFileName->getCString());
       psFileName->append(".ps");
 
-      psOut = new PSOutputDev(psFileName->getCString(), doc, doc->getXRef(),
-          doc->getCatalog(), NULL, firstPage, lastPage, psModePS, w, h);
+      psOut = new PSOutputDev(psFileName->getCString(), doc,
+          NULL, firstPage, lastPage, psModePS, w, h);
       psOut->setDisplayText(gFalse);
       doc->displayPages(psOut, firstPage, lastPage, 72, 72, 0,
           gTrue, gFalse, gFalse);
@@ -483,7 +483,7 @@ int main(int argc, char *argv[]) {
       gsCmd->append("\"");
       //    printf("running: %s\n", gsCmd->getCString());
       if( !executeCommand(gsCmd->getCString()) && !errQuiet) {
-        error(-1, "Failed to launch Ghostscript!\n");
+        error(errIO, -1, "Failed to launch Ghostscript!\n");
       }
       unlink(psFileName->getCString());
       delete tw;
@@ -512,7 +512,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-static GooString* getInfoString(Dict *infoDict, char *key) {
+static GooString* getInfoString(Dict *infoDict, const char *key) {
   Object obj;
   // Raw value as read from PDF (may be in pdfDocEncoding or UCS2)
   GooString *rawString;
@@ -555,7 +555,7 @@ static GooString* getInfoString(Dict *infoDict, char *key) {
   return encodedString;
 }
 
-static GooString* getInfoDate(Dict *infoDict, char *key) {
+static GooString* getInfoDate(Dict *infoDict, const char *key) {
   Object obj;
   char *s;
   int year, mon, day, hour, min, sec, tz_hour, tz_minute;

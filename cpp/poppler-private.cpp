@@ -28,7 +28,7 @@
 
 using namespace poppler;
 
-void detail::error_function(int pos, char *msg, va_list args)
+void detail::error_function(void * /*data*/, ErrorCategory /*category*/, int pos, char *msg)
 {
     std::ostringstream oss;
     if (pos >= 0) {
@@ -36,9 +36,7 @@ void detail::error_function(int pos, char *msg, va_list args)
     } else {
         oss << "poppler/error: ";
     }
-    char buffer[4096]; // should be big enough
-    vsnprintf(buffer, sizeof(buffer) - 1, msg, args);
-    oss << buffer;
+    oss << msg;
     std::cerr << oss.str();
 }
 

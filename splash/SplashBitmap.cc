@@ -111,12 +111,13 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
   }
 }
 
-
 SplashBitmap::~SplashBitmap() {
-  if (rowSize < 0) {
-    gfree(data + (height - 1) * rowSize);
-  } else {
-    gfree(data);
+  if (data) {
+    if (rowSize < 0) {
+      gfree(data + (height - 1) * rowSize);
+    } else {
+      gfree(data);
+    }
   }
   gfree(alpha);
 }
@@ -160,11 +161,7 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
     fprintf(f, "P5\n%d %d\n255\n", width, height);
     row = data;
     for (y = 0; y < height; ++y) {
-      p = row;
-      for (x = 0; x < width; ++x) {
-	fputc(*p, f);
-	++p;
-      }
+      fwrite(row, 1, width, f);
       row += rowSize;
     }
     break;
@@ -173,13 +170,7 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
     fprintf(f, "P6\n%d %d\n255\n", width, height);
     row = data;
     for (y = 0; y < height; ++y) {
-      p = row;
-      for (x = 0; x < width; ++x) {
-	fputc(splashRGB8R(p), f);
-	fputc(splashRGB8G(p), f);
-	fputc(splashRGB8B(p), f);
-	p += 3;
-      }
+      fwrite(row, 1, 3 * width, f);
       row += rowSize;
     }
     break;
@@ -218,7 +209,7 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
 #if SPLASH_CMYK
   case splashModeCMYK8:
     // PNM doesn't support CMYK
-    error(-1, "unsupported SplashBitmap mode");
+    error(errInternal, -1, "unsupported SplashBitmap mode");
     return splashErrGeneric;
     break;
 #endif
@@ -226,6 +217,20 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
   return splashOk;
 }
 
+SplashError SplashBitmap::writeAlphaPGMFile(char *fileName) {
+  FILE *f;
+
+  if (!alpha) {
+    return splashErrModeMismatch;
+  }
+  if (!(f = fopen(fileName, "wb"))) {
+    return splashErrOpenFile;
+  }
+  fprintf(f, "P5\n%d %d\n255\n", width, height);
+  fwrite(alpha, 1, width * height, f);
+  fclose(f);
+  return splashOk;
+}
 
 void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel) {
   SplashColorPtr p;
@@ -277,6 +282,14 @@ Guchar SplashBitmap::getAlpha(int x, int y) {
   return alpha[y * width + x];
 }
 
+SplashColorPtr SplashBitmap::takeData() {
+  SplashColorPtr data2;
+
+  data2 = data;
+  data = NULL;
+  return data2;
+}
+
 SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, char *fileName, int hDPI, int vDPI, const char *compressionString) {
   FILE *f;
   SplashError e;
@@ -326,7 +339,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
     default:
       // Not the greatest error message, but users of this function should
       // have already checked whether their desired format is compiled in.
-      error(-1, "Support for this image type not compiled in");
+      error(errInternal, -1, "Support for this image type not compiled in");
       return splashErrGeneric;
   }
 
@@ -364,7 +377,7 @@ SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int
       && mode != splashModeCMYK8
 #endif
      ) {
-    error(-1, "unsupported SplashBitmap mode");
+    error(errInternal, -1, "unsupported SplashBitmap mode");
     return splashErrGeneric;
   }
 

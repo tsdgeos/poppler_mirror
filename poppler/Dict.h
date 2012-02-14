@@ -63,17 +63,17 @@ public:
   void add(char *key, Object *val);
 
   // Update the value of an existing entry, otherwise create it
-  void set(char *key, Object *val);
+  void set(const char *key, Object *val);
   // Remove an entry. This invalidate indexes
-  void remove(char *key);
+  void remove(const char *key);
 
   // Check if dictionary is of specified type.
-  GBool is(char *type);
+  GBool is(const char *type);
 
   // Look up an entry and return the value.  Returns a null object
   // if <key> is not in the dictionary.
-  Object *lookup(char *key, Object *obj, std::set<int> *fetchOriginatorNums = NULL);
-  Object *lookupNF(char *key, Object *obj);
+  Object *lookup(const char *key, Object *obj, int recursion = 0);
+  Object *lookupNF(const char *key, Object *obj);
   GBool lookupInt(const char *key, const char *alt_key, int *value);
 
   // Iterative accessors.
@@ -88,7 +88,7 @@ public:
   
   XRef *getXRef() { return xref; }
   
-  GBool hasKey(char *key);
+  GBool hasKey(const char *key);
 
 private:
 
@@ -99,7 +99,7 @@ private:
   int length;			// number of entries in dictionary
   int ref;			// reference count
 
-  DictEntry *find(char *key);
+  DictEntry *find(const char *key);
 };
 
 #endif

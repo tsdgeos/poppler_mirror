@@ -108,6 +108,17 @@ void OutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
   }
 }
 
+void OutputDev::setSoftMaskFromImageMask(GfxState *state,
+					 Object *ref, Stream *str,
+					 int width, int height, GBool invert,
+					 GBool inlineImg) {
+  drawImageMask(state, ref, str, width, height, invert, gFalse, inlineImg);
+}
+
+void OutputDev::unsetSoftMaskFromImageMask(GfxState *state) {
+  return;
+}
+
 void OutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			  int width, int height, GfxImageColorMap *colorMap,
 			  GBool interpolate, int *maskColors, GBool inlineImg) {
@@ -145,12 +156,6 @@ void OutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str,
   drawImage(state, ref, str, width, height, colorMap, interpolate, NULL, gFalse);
 }
 
-void OutputDev::endMarkedContent(GfxState *state) {
-}
-
-void OutputDev::beginMarkedContent(char *name, Dict *properties) {
-}
-
 void OutputDev::markPoint(char *name) {
 }
 
@@ -172,7 +177,7 @@ void OutputDev::startProfile() {
 
   profileHash = new GooHash (true);
 }
- 
+
 GooHash *OutputDev::endProfile() {
   GooHash *profile = profileHash;
 

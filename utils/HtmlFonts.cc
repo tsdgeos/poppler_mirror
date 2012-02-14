@@ -36,8 +36,8 @@
 #include <stdio.h>
 
  struct Fonts{
-    char *Fontname;
-    char *name;
+    const char *Fontname;
+    const char *name;
   };
 
 const int font_num=13;

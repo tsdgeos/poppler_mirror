@@ -42,16 +42,15 @@ public:
   // Destructor.
   ~Parser();
 
-  // Get the next object from the input stream.
-  Object *getObj(Object *obj, Guchar *fileKey = NULL,
+  // Get the next object from the input stream.  If <simpleOnly> is
+  // true, do not parse compound objects (arrays, dictionaries, or
+  // streams).
+  Object *getObj(Object *obj, GBool simpleOnly = gFalse, 
+     Guchar *fileKey = NULL,
 		 CryptAlgorithm encAlgorithm = cryptRC4, int keyLength = 0,
-		 int objNum = 0, int objGen = 0);
+		 int objNum = 0, int objGen = 0, int recursion = 0);
   
-  Object *getObj(Object *obj, Guchar *fileKey,
-     CryptAlgorithm encAlgorithm, int keyLength,
-     int objNum, int objGen, std::set<int> *fetchOriginatorNums);
-
-  Object *getObj(Object *obj, std::set<int> *fetchOriginatorNums);
+  Object *getObj(Object *obj, int recursion);
 
   // Get stream.
   Stream *getStream() { return lexer->getStream(); }
@@ -69,7 +68,7 @@ private:
 
   Stream *makeStream(Object *dict, Guchar *fileKey,
 		     CryptAlgorithm encAlgorithm, int keyLength,
-		     int objNum, int objGen, std::set<int> *fetchOriginatorNums);
+		     int objNum, int objGen, int recursion);
   void shift(int objNum = -1);
 };
 

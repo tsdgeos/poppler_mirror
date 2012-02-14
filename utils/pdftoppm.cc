@@ -49,8 +49,6 @@
 #include "splash/Splash.h"
 #include "SplashOutputDev.h"
 
-#define PPM_FILE_SZ 512
-
 static int firstPage = 1;
 static int lastPage = 0;
 static GBool printOnlyOdd = gFalse;
@@ -244,7 +242,7 @@ int main(int argc, char *argv[]) {
   PDFDoc *doc;
   GooString *fileName = NULL;
   char *ppmRoot = NULL;
-  char ppmFile[PPM_FILE_SZ];
+  char *ppmFile;
   GooString *ownerPW, *userPW;
   SplashColor paperColor;
   SplashOutputDev *splashOut;
@@ -354,6 +352,7 @@ int main(int argc, char *argv[]) {
   // write PPM files
 #if SPLASH_CMYK
   if (jpegcmyk || overprint) {
+    globalParams->setOverprintPreview(gTrue);
     paperColor[0] = 0;
     paperColor[1] = 0;
     paperColor[2] = 0;
@@ -372,7 +371,7 @@ int main(int argc, char *argv[]) {
 #endif
 				             splashModeRGB8, 4,
 				  gFalse, paperColor);
-  splashOut->startDoc(doc->getXRef());
+  splashOut->startDoc(doc);
   if (sz != 0) w = h = sz;
   pg_num_len = numberOfCharacters(doc->getNumPages());
   for (pg = firstPage; pg <= lastPage; ++pg) {
@@ -407,13 +406,14 @@ int main(int argc, char *argv[]) {
     if (ppmRoot != NULL) {
       const char *ext = png ? "png" : (jpeg || jpegcmyk) ? "jpg" : tiff ? "tif" : mono ? "pbm" : gray ? "pgm" : "ppm";
       if (singleFile) {
-        snprintf(ppmFile, PPM_FILE_SZ, "%.*s.%s",
-              PPM_FILE_SZ - 32, ppmRoot, ext);
+        ppmFile = new char[strlen(ppmRoot) + 1 + strlen(ext) + 1];
+        sprintf(ppmFile, "%s.%s", ppmRoot, ext);
       } else {
-        snprintf(ppmFile, PPM_FILE_SZ, "%.*s-%0*d.%s",
-              PPM_FILE_SZ - 32, ppmRoot, pg_num_len, pg, ext);
+        ppmFile = new char[strlen(ppmRoot) + 1 + pg_num_len + 1 + strlen(ext) + 1];
+        sprintf(ppmFile, "%s-%0*d.%s", ppmRoot, pg_num_len, pg, ext);
       }
       savePageSlice(doc, splashOut, pg, x, y, w, h, pg_w, pg_h, ppmFile);
+      delete[] ppmFile;
     } else {
       savePageSlice(doc, splashOut, pg, x, y, w, h, pg_w, pg_h, NULL);
     }

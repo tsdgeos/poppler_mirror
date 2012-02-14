@@ -22,6 +22,7 @@
 #include "poppler-global.h"
 #include "poppler-rectangle.h"
 
+#include "Error.h"
 #include "CharTypes.h"
 
 #include <stdarg.h>
@@ -37,7 +38,7 @@ namespace poppler
 namespace detail
 {
 
-void error_function(int pos, char *msg, va_list args);
+void error_function(void *data, ErrorCategory category, int pos, char *msg);
 
 rectf pdfrectangle_to_rectf(const PDFRectangle &pdfrect);
 

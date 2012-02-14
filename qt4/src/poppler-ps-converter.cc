@@ -26,7 +26,7 @@
 
 #include "PSOutputDev.h"
 
-static void outputToQIODevice(void *stream, char *data, int len)
+static void outputToQIODevice(void *stream, const char *data, int len)
 {
 	static_cast<QIODevice*>(stream)->write(data, len);
 }
@@ -208,8 +208,6 @@ bool PSConverter::convert()
 	PSOutputDev *psOut = new PSOutputDev(outputToQIODevice, dev,
 	                                     pstitlechar,
 	                                     d->document->doc,
-	                                     d->document->doc->getXRef(),
-	                                     d->document->doc->getCatalog(),
 	                                     1,
 	                                     d->document->doc->getNumPages(),
 	                                     (d->opts & PrintToEPS) ? psModeEPS : psModePS,

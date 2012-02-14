@@ -52,7 +52,7 @@ public:
   virtual int lookChar();
   virtual int getRawChar();
   virtual void getRawChars(int nChars, int *buffer);
-  virtual GooString *getPSFilter(int psLevel, char *indent);
+  virtual GooString *getPSFilter(int psLevel, const char *indent);
   virtual GBool isBinary(GBool last = gTrue);
 
 private:

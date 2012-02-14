@@ -32,7 +32,7 @@ public:
   virtual int getPos();
   virtual int getChar();
   virtual int lookChar();
-  virtual GooString *getPSFilter(int psLevel, char *indent);
+  virtual GooString *getPSFilter(int psLevel, const char *indent);
   virtual GBool isBinary(GBool last = gTrue);
   virtual void getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode);
 

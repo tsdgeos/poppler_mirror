@@ -33,8 +33,11 @@ public:
   GooString *mimeType() { return m_mimetype; }
   Stream *stream() { return isOk() ? m_objStr.getStream() : NULL; }
   GBool isOk() { return m_objStr.isStream(); }
+  GBool save(const char *path);
 
 private:
+  GBool save2(FILE *f);
+
   int m_size;
   GooString *m_createDate;
   GooString *m_modDate;

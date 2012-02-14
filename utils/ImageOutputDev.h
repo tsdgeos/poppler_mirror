@@ -58,6 +58,11 @@ public:
   // Check if file was successfully created.
   virtual GBool isOk() { return ok; }
 
+  // Does this device use tilingPatternFill()?  If this returns false,
+  // tiling pattern fills will be reduced to a series of other drawing
+  // operations.
+  virtual GBool useTilingPatternFill() { return gTrue; }
+
   // Does this device use beginType3Char/endType3Char?  Otherwise,
   // text in Type 3 fonts will be drawn with drawChar/drawString.
   virtual GBool interpretType3Chars() { return gFalse; }
@@ -77,6 +82,13 @@ public:
 
   // Does this device use drawChar() or drawString()?
   virtual GBool useDrawChar() { return gFalse; }
+
+  //----- path painting
+  virtual GBool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
+				  double *pmat, int paintType, int tilingType, Dict *resDict,
+				  double *mat, double *bbox,
+				  int x0, int y0, int x1, int y1,
+				  double xStep, double yStep);
 
   //----- image drawing
   virtual void drawImageMask(GfxState *state, Object *ref, Stream *str,
