@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2007, 2011 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2010, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2010-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -146,7 +146,7 @@ public:
   void setInNonIsolatedGroup(SplashBitmap *alpha0BitmapA,
 			     int alpha0XA, int alpha0YA);
   void setTransfer(Guchar *red, Guchar *green, Guchar *blue, Guchar *gray);
-  void setOverprintMask(Guint overprintMask);
+  void setOverprintMask(Guint overprintMask, GBool additive);
 
   //----- state save/restore
 

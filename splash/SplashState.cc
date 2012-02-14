@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009, 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -86,6 +86,7 @@ SplashState::SplashState(int width, int height, GBool vectorAntialias,
     cmykTransferK[i] = (Guchar)i;
   }
   overprintMask = 0xffffffff;
+  overprintAdditive = gFalse;
   next = NULL;
 }
 
@@ -131,6 +132,7 @@ SplashState::SplashState(int width, int height, GBool vectorAntialias,
     cmykTransferK[i] = (Guchar)i;
   }
   overprintMask = 0xffffffff;
+  overprintAdditive = gFalse;
   next = NULL;
 }
 
@@ -173,6 +175,7 @@ SplashState::SplashState(SplashState *state) {
   memcpy(cmykTransferY, state->cmykTransferY, 256);
   memcpy(cmykTransferK, state->cmykTransferK, 256);
   overprintMask = state->overprintMask;
+  overprintAdditive = state->overprintAdditive;
   next = NULL;
 }
 

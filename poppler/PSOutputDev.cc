@@ -20,7 +20,7 @@
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008, 2010 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2009-2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2011 William Bader <williambader@hotmail.com>
@@ -161,6 +161,8 @@ static const char *prolog[] = {
   "  /pdfStroke [0] def",
   "  /pdfFillOP false def",
   "  /pdfStrokeOP false def",
+  "~3sn",
+  "  /pdfOPM false def",
   "~123sn",
   "  /pdfLastFill false def",
   "  /pdfLastStroke false def",
@@ -253,6 +255,9 @@ static const char *prolog[] = {
   "    /pdfLastStroke true def /pdfLastFill false def",
   "  } if",
   "} def",
+  "~3n",
+  "/opm { dup /pdfOPM exch def",
+  "      setoverprintmode } def",
   "~23n",
   "/cs { /pdfFillXform exch def dup /pdfFillCS exch def",
   "      setcolorspace } def",
@@ -284,6 +289,9 @@ static const char *prolog[] = {
   "    /pdfLastStroke true def /pdfLastFill false def",
   "  } if",
   "} def",
+  "~3s",
+  "/opm { dup /pdfOPM exch def",
+  "      setoverprintmode } def",
   "~23s",
   "/k { 4 copy 4 array astore /pdfFill exch def setcmykcolor",
   "     /pdfLastFill true def /pdfLastStroke false def } def",
@@ -378,6 +386,12 @@ static const char *prolog[] = {
   "      pdfStrokeOP setoverprint",
   "    } ifelse",
   "  } if",
+  "~3sn",
+  "  /pdfOPM where {",
+  "    pop",
+  "    pdfOPM setoverprintmode",
+  "  } if",
+  "~23sn",
   "} def",
   "~123sn",
   "/cm { concat } def",
@@ -3054,6 +3068,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   double m0, m1, m2, m3, m4, m5;
   int nStripes, stripeH, stripeY;
   int c, w, h, x, y, comp, i;
+  int numComps;
 #endif
 
   if (globalParams->getPSAlwaysRasterize()) {
@@ -3089,13 +3104,13 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   delete state;
 
   // set up the SplashOutputDev
-  if (mono || level == psLevel1) {
+  if (mono) {
     paperColor[0] = 0xff;
     splashOut = new SplashOutputDev(splashModeMono8, 1, gFalse,
 				    paperColor, gFalse,
 				    globalParams->getAntialiasPrinting());
 #if SPLASH_CMYK
-  } else if (level == psLevel1Sep) {
+  } else if (level == psLevel1Sep || globalParams->getOverprintPreview()) {
     paperColor[0] = paperColor[1] = paperColor[2] = paperColor[3] = 0;
     splashOut = new SplashOutputDev(splashModeCMYK8, 1, gFalse,
 				    paperColor, gFalse,
@@ -3210,6 +3225,10 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     case psLevel3Sep:
       if (mono) {
 	writePS("/DeviceGray setcolorspace\n");
+#if SPLASH_CMYK
+      } else if (globalParams->getOverprintPreview()) {
+	writePS("/DeviceCMYK setcolorspace\n");
+#endif      
       } else {
 	writePS("/DeviceRGB setcolorspace\n");
       }
@@ -3220,8 +3239,15 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
       writePS("  /BitsPerComponent 8\n");
       if (mono) {
 	writePS("  /Decode [0 1]\n");
+	numComps = 1;
+#if SPLASH_CMYK
+      } else if (globalParams->getOverprintPreview()) {
+	writePS("  /Decode [0 1 0 1 0 1 0 1]\n");
+	numComps = 4;
+#endif      
       } else {
 	writePS("  /Decode [0 1 0 1 0 1]\n");
+	numComps = 3;
       }
       writePS("  /DataSource currentfile\n");
       if (globalParams->getPSASCIIHex()) {
@@ -3234,7 +3260,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
       writePS("image\n");
       obj.initNull();
       p = bitmap->getDataPtr() + (h - 1) * bitmap->getRowSize();
-      str0 = new MemStream((char *)p, 0, w * h * (mono ? 1 : 3), &obj);
+      str0 = new MemStream((char *)p, 0, w * h * numComps, &obj);
       str = new RunLengthEncoder(str0);
       if (globalParams->getPSASCIIHex()) {
 	str = new ASCIIHexEncoder(str);
@@ -3808,6 +3834,12 @@ void PSOutputDev::updateFillOverprint(GfxState *state) {
 void PSOutputDev::updateStrokeOverprint(GfxState *state) {
   if (level >= psLevel2) {
     writePSFmt("{0:s} OP\n", state->getStrokeOverprint() ? "true" : "false");
+  }
+}
+
+void PSOutputDev::updateOverprintMode(GfxState *state) {
+  if (level >= psLevel3) {
+    writePSFmt("{0:s} opm\n", state->getOverprintMode() ? "true" : "false");
   }
 }
 
@@ -6211,7 +6243,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
     numComps = baseCS->getNComps();
     lookup = indexedCS->getLookup();
     writePSFmt(" {0:d} <\n", n);
-    if (baseCS->getMode() == csDeviceN) {
+    if (baseCS->getMode() == csDeviceN && level != psLevel3 && level != psLevel3Sep) {
       func = ((GfxDeviceNColorSpace *)baseCS)->getTintTransformFunc();
       baseCS->getDefaultRanges(low, range, indexedCS->getIndexHigh());
       if (((GfxDeviceNColorSpace *)baseCS)->getAlt()->getMode() == csLab) {
@@ -6294,12 +6326,29 @@ void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
     break;
 
   case csDeviceN:
-    // DeviceN color spaces are a Level 3 PostScript feature.
     deviceNCS = (GfxDeviceNColorSpace *)colorSpace;
-    dumpColorSpaceL2(deviceNCS->getAlt(), gFalse, updateColors, map01);
-    if (genXform) {
-      writePS(" ");
+    if (level == psLevel3 || level == psLevel3Sep) {      
+      writePS("[/DeviceN\n");
+      writePS("  [ ");
+      for (i = 0; i < deviceNCS->getNComps(); i++) {
+        writePSString(deviceNCS->getColorantName(i));
+        writePS(" ");
+      }
+      writePS("]\n");
+      dumpColorSpaceL2(deviceNCS->getAlt(), gFalse, updateColors, map01);
+      writePS("\n");
       cvtFunction(deviceNCS->getTintTransformFunc());
+      writePS("]\n");
+      if (genXform) {
+        writePS(" {}");
+      }
+    } else {
+      // DeviceN color spaces are a Level 3 PostScript feature.
+      dumpColorSpaceL2(deviceNCS->getAlt(), gFalse, updateColors, map01);
+      if (genXform) {
+        writePS(" ");
+        cvtFunction(deviceNCS->getTintTransformFunc());
+      }
     }
     break;
 

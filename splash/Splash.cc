@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2005-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2010, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2010-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 William Bader <williambader@hotmail.com>
 //
@@ -48,6 +48,7 @@
 #include "SplashFont.h"
 #include "SplashGlyphBitmap.h"
 #include "Splash.h"
+#include <algorithm>
 
 //------------------------------------------------------------------------
 
@@ -383,16 +384,24 @@ void Splash::pipeRun(SplashPipe *pipe) {
 #if SPLASH_CMYK
     case splashModeCMYK8:
       if (state->overprintMask & 1) {
-	pipe->destColorPtr[0] = state->cmykTransferC[pipe->cSrc[0]];
+	pipe->destColorPtr[0] = (state->overprintAdditive) ? 
+              std::min<int>(pipe->destColorPtr[0] + state->cmykTransferC[pipe->cSrc[0]], 255) :
+              state->cmykTransferC[pipe->cSrc[0]];
       }
       if (state->overprintMask & 2) {
-	pipe->destColorPtr[1] = state->cmykTransferM[pipe->cSrc[1]];
+	pipe->destColorPtr[1] = (state->overprintAdditive) ? 
+              std::min<int>(pipe->destColorPtr[1] + state->cmykTransferM[pipe->cSrc[1]], 255) :
+              state->cmykTransferC[pipe->cSrc[1]];
       }
       if (state->overprintMask & 4) {
-	pipe->destColorPtr[2] = state->cmykTransferY[pipe->cSrc[2]];
+	pipe->destColorPtr[2] = (state->overprintAdditive) ? 
+              std::min<int>(pipe->destColorPtr[2] + state->cmykTransferY[pipe->cSrc[2]], 255) :
+              state->cmykTransferC[pipe->cSrc[2]];
       }
       if (state->overprintMask & 8) {
-	pipe->destColorPtr[3] = state->cmykTransferK[pipe->cSrc[3]];
+	pipe->destColorPtr[3] = (state->overprintAdditive) ? 
+              std::min<int>(pipe->destColorPtr[3] + state->cmykTransferK[pipe->cSrc[3]], 255) :
+              state->cmykTransferC[pipe->cSrc[3]];
       }
       pipe->destColorPtr += 4;
       break;
@@ -708,16 +717,24 @@ void Splash::pipeRun(SplashPipe *pipe) {
 #if SPLASH_CMYK
     case splashModeCMYK8:
       if (state->overprintMask & 1) {
-	pipe->destColorPtr[0] = cResult0;
+	pipe->destColorPtr[0] = (state->overprintAdditive) ? 
+              std::min<int>(pipe->destColorPtr[0] + cResult0, 255) :
+              cResult0;
       }
       if (state->overprintMask & 2) {
-	pipe->destColorPtr[1] = cResult1;
+	pipe->destColorPtr[1] = (state->overprintAdditive) ? 
+              std::min<int>(pipe->destColorPtr[1] + cResult1, 255) :
+              cResult1;
       }
       if (state->overprintMask & 4) {
-	pipe->destColorPtr[2] = cResult2;
+	pipe->destColorPtr[2] = (state->overprintAdditive) ? 
+              std::min<int>(pipe->destColorPtr[2] + cResult2, 255) :
+              cResult2;
       }
       if (state->overprintMask & 8) {
-	pipe->destColorPtr[3] = cResult3;
+	pipe->destColorPtr[3] = (state->overprintAdditive) ? 
+              std::min<int>(pipe->destColorPtr[3] + cResult3, 255) :
+              cResult3;
       }
       pipe->destColorPtr += 4;
       break;
@@ -811,16 +828,24 @@ void Splash::pipeRunSimpleBGR8(SplashPipe *pipe) {
 void Splash::pipeRunSimpleCMYK8(SplashPipe *pipe) {
   //----- write destination pixel
   if (state->overprintMask & 1) {
-    pipe->destColorPtr[0] = state->cmykTransferC[pipe->cSrc[0]];
+    pipe->destColorPtr[0] = (state->overprintAdditive) ? 
+              std::min<int>(pipe->destColorPtr[0] + state->cmykTransferC[pipe->cSrc[0]], 255) :
+              state->cmykTransferC[pipe->cSrc[0]];
   }
   if (state->overprintMask & 2) {
-    pipe->destColorPtr[1] = state->cmykTransferM[pipe->cSrc[1]];
+    pipe->destColorPtr[1] = (state->overprintAdditive) ? 
+              std::min<int>(pipe->destColorPtr[1] + state->cmykTransferM[pipe->cSrc[1]], 255) :
+              state->cmykTransferC[pipe->cSrc[1]];
   }
   if (state->overprintMask & 4) {
-    pipe->destColorPtr[2] = state->cmykTransferY[pipe->cSrc[2]];
+    pipe->destColorPtr[2] = (state->overprintAdditive) ? 
+              std::min<int>(pipe->destColorPtr[2] + state->cmykTransferY[pipe->cSrc[2]], 255) :
+              state->cmykTransferC[pipe->cSrc[2]];
   }
   if (state->overprintMask & 8) {
-    pipe->destColorPtr[3] = state->cmykTransferK[pipe->cSrc[3]];
+    pipe->destColorPtr[3] = (state->overprintAdditive) ? 
+              std::min<int>(pipe->destColorPtr[3] + state->cmykTransferK[pipe->cSrc[3]], 255) :
+              state->cmykTransferC[pipe->cSrc[3]];
   }
   pipe->destColorPtr += 4;
   *pipe->destAlphaPtr++ = 255;
@@ -1084,16 +1109,24 @@ void Splash::pipeRunAACMYK8(SplashPipe *pipe) {
 
   //----- write destination pixel
   if (state->overprintMask & 1) {
-    pipe->destColorPtr[0] = cResult0;
+    pipe->destColorPtr[0] = (state->overprintAdditive && pipe->shape != 0) ? 
+              std::min<int>(pipe->destColorPtr[0] + cResult0, 255) :
+              cResult0;
   }
   if (state->overprintMask & 2) {
-    pipe->destColorPtr[1] = cResult1;
+    pipe->destColorPtr[1] = (state->overprintAdditive && pipe->shape != 0) ? 
+              std::min<int>(pipe->destColorPtr[1] + cResult1, 255) :
+              cResult1;
   }
   if (state->overprintMask & 4) {
-    pipe->destColorPtr[2] = cResult2;
+    pipe->destColorPtr[2] = (state->overprintAdditive && pipe->shape != 0) ? 
+              std::min<int>(pipe->destColorPtr[2] + cResult2, 255) :
+              cResult2;
   }
   if (state->overprintMask & 8) {
-    pipe->destColorPtr[3] = cResult3;
+    pipe->destColorPtr[3] = (state->overprintAdditive && pipe->shape != 0) ? 
+              std::min<int>(pipe->destColorPtr[3] + cResult3, 255) :
+              cResult3;
   }
   pipe->destColorPtr += 4;
   *pipe->destAlphaPtr++ = aResult;
@@ -1606,8 +1639,9 @@ void Splash::setTransfer(Guchar *red, Guchar *green, Guchar *blue,
   state->setTransfer(red, green, blue, gray);
 }
 
-void Splash::setOverprintMask(Guint overprintMask) {
+void Splash::setOverprintMask(Guint overprintMask, GBool additive) {
   state->overprintMask = overprintMask;
+  state->overprintAdditive = additive;
 }
 
 //------------------------------------------------------------------------
