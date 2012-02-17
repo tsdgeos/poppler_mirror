@@ -19,6 +19,7 @@
 // Copyright (C) 2008, 2009 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+// Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -231,7 +232,7 @@ static const char *macGlyphNames[258] = {
   "paragraph",      "germandbls",     "registered",     "copyright",
   "trademark",      "acute",          "dieresis",       "notequal",
   "AE",             "Oslash",         "infinity",       "plusminus",
-  "lessequal",      "greaterequal",   "yen",            "mu1",
+  "lessequal",      "greaterequal",   "yen",            "mu",
   "partialdiff",    "summation",      "product",        "pi",
   "integral",       "ordfeminine",    "ordmasculine",   "Ohm",
   "ae",             "oslash",         "questiondown",   "exclamdown",
