@@ -23,6 +23,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Tomas Hoger <thoger@redhat.com>
 // Copyright (C) 2011 William Bader <williambader@hotmail.com>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1599,8 +1600,11 @@ CCITTFaxStream::~CCITTFaxStream() {
   gfree(codingLine);
 }
 
-void CCITTFaxStream::unfilteredReset () {
-  str->reset();
+void CCITTFaxStream::ccittReset(GBool unfiltered) {
+  if (unfiltered)
+    str->unfilteredReset();
+  else
+    str->reset();
 
   row = 0;
   nextLine2D = encoding < 0;
@@ -1610,10 +1614,14 @@ void CCITTFaxStream::unfilteredReset () {
   buf = EOF;
 }
 
+void CCITTFaxStream::unfilteredReset() {
+  ccittReset(gTrue);
+}
+
 void CCITTFaxStream::reset() {
   int code1;
 
-  unfilteredReset();
+  ccittReset(gFalse);
 
   if (codingLine != NULL && refLine != NULL) {
     eof = gFalse;
@@ -2333,8 +2341,11 @@ DCTStream::~DCTStream() {
   delete str;
 }
 
-void DCTStream::unfilteredReset() {
-  str->reset();
+void DCTStream::dctReset(GBool unfiltered) {
+  if (unfiltered)
+    str->unfilteredReset()
+  else
+    str->reset();
 
   progressive = interleaved = gFalse;
   width = height = 0;
@@ -2347,11 +2358,14 @@ void DCTStream::unfilteredReset() {
   restartInterval = 0;
 }
 
+void DCTStream::unfilteredReset() {
+  dctReset(gTrue);
+}
 
 void DCTStream::reset() {
   int i, j;
 
-  unfilteredReset();
+  dctReset(gFalse);
 
   if (!readHeader()) {
     y = height;
