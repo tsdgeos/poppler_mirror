@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -112,7 +112,7 @@ public:
   Object *getDocInfoNF(Object *obj);
 
   // Return the number of objects in the xref table.
-  int getNumObjects() { return last + 1; }
+  int getNumObjects() { return size; }
 
   // Return the catalog object reference.
   int getRootNum() { return rootNum; }
@@ -126,7 +126,6 @@ public:
   int getNumEntry(Guint offset);
 
   // Direct access.
-  int getSize() { return size; }
   XRefEntry *getEntry(int i);
   Object *getTrailerDict() { return &trailerDict; }
 
@@ -144,7 +143,6 @@ private:
   XRefEntry *entries;		// xref entries
   int capacity;			// size of <entries> array
   int size;			// number of entries
-  int last;			// last used index in <entries>
   int rootNum, rootGen;		// catalog dict
   GBool ok;			// true if xref table is valid
   int errCode;			// error code (if <ok> is false)

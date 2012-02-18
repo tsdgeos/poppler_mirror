@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Dan Sheridan <dan.sheridan@postman.org.uk>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -261,7 +261,6 @@ void XRef::init() {
   entries = NULL;
   capacity = 0;
   size = 0;
-  last = -1;
   streamEnds = NULL;
   streamEndsLen = 0;
   objStrs = new PopplerCache(5);
@@ -545,9 +544,6 @@ GBool XRef::readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *follow
 	  entries[0] = entries[1];
 	  entries[1].offset = 0xffffffff;
 	}
-	if (i > last) {
-	  last = i;
-	}
       }
     }
   }
@@ -766,9 +762,6 @@ GBool XRef::readXRefStreamSection(Stream *xrefStr, int *w, int first, int n) {
       default:
 	return gFalse;
       }
-      if (i > last) {
-	last = i;
-      }
     }
   }
 
@@ -887,9 +880,6 @@ GBool XRef::constructXRef(GBool *wasReconstructed) {
 		    entries[num].offset = pos - start;
 		    entries[num].gen = gen;
 		    entries[num].type = xrefEntryUncompressed;
-		  if (num > last) {
-		    last = num;
-		  }
 		}
 	        }
 	      }

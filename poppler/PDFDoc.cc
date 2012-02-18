@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2007-2009, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2009, 2011, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -608,7 +608,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   FILE *f;
   OutStream *outStr;
   XRef *yRef, *countRef;
-  int rootNum = getXRef()->getSize() + 1;
+  int rootNum = getXRef()->getNumObjects() + 1;
 
   if (pageNo < 1 || pageNo > getNumPages()) {
     error(errInternal, -1, "Illegal pageNo: {0:d}({1:d})", pageNo, getNumPages() );
@@ -851,7 +851,7 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
       obj1.free();
     }
   }
-  if (uxref->getSize() == 0) { //we have nothing to update
+  if (uxref->getNumObjects() == 0) { //we have nothing to update
     delete uxref;
     return;
   }
@@ -859,7 +859,7 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
   Guint uxrefOffset = outStr->getPos();
   uxref->writeToFile(outStr, gFalse /* do not write unnecessary entries */);
 
-  writeTrailer(uxrefOffset, xref->getSize(), outStr, gTrue);
+  writeTrailer(uxrefOffset, xref->getNumObjects(), outStr, gTrue);
 
   delete uxref;
 }
@@ -899,7 +899,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
   Guint uxrefOffset = outStr->getPos();
   uxref->writeToFile(outStr, gTrue /* write all entries */);
 
-  writeTrailer(uxrefOffset, uxref->getSize(), outStr, gFalse);
+  writeTrailer(uxrefOffset, uxref->getNumObjects(), outStr, gFalse);
 
 
   delete uxref;
