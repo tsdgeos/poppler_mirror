@@ -88,7 +88,7 @@ public:
   //     f, g -- double
   //     c -- char
   //     s -- string (char *)
-  //     t -- GString *
+  //     t -- GooString *
   //     w -- blank space; arg determines width
   // To get literal curly braces, use {{ or }}.
   static GooString *format(const char *fmt, ...);
