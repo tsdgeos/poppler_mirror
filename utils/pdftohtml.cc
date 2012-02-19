@@ -46,6 +46,7 @@
 #include "XRef.h"
 #include "Catalog.h"
 #include "Page.h"
+#include "Outline.h"
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
 #include "HtmlOutputDev.h"
@@ -182,6 +183,7 @@ int main(int argc, char *argv[]) {
   SplashOutputDev *splashOut = NULL;
 #endif
   PSOutputDev *psOut = NULL;
+  GBool doOutline;
   GBool ok;
   char *p;
   GooString *ownerPW, *userPW;
@@ -370,6 +372,11 @@ int main(int argc, char *argv[]) {
   else
       rawOrder = singleHtml;
 
+#ifdef DISABLE_OUTLINE
+  doOutline = gFalse;
+#else
+  doOutline = doc->getOutline()->getItems() != NULL;
+#endif
   // write text file
   htmlOut = new HtmlOutputDev(doc->getCatalog(), htmlFileName->getCString(), 
 	  docTitle->getCString(), 
@@ -380,7 +387,7 @@ int main(int argc, char *argv[]) {
 	  extension,
 	  rawOrder, 
 	  firstPage,
-	  doc->getCatalog()->getOutline()->isDict());
+	  doOutline);
   delete docTitle;
   if( author )
   {   
