@@ -1306,7 +1306,7 @@ void CairoOutputDev::endTextObject(GfxState *state) {
 
 void CairoOutputDev::beginActualText(GfxState *state, GooString *text)
 {
-  if (text)
+  if (this->text)
     actualText->begin(state, text);
 }
 
