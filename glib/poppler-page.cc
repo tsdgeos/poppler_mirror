@@ -987,7 +987,7 @@ image_draw_decide_cb (int image_id, void *data)
 /**
  * poppler_page_get_image:
  * @page: A #PopplerPage
- * @image_id: The image identificator
+ * @image_id: The image identifier
  *
  * Returns a cairo surface for the image of the @page
  *
