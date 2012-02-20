@@ -25,6 +25,7 @@
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2012 Koji Otani <sho@bbr.jp>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -50,7 +51,11 @@
 #include "PDFDocFactory.h"
 #include "CairoOutputDev.h"
 #if USE_CMS
+#ifdef USE_LCMS1
 #include <lcms.h>
+#else
+#include <lcms2.h>
+#endif
 #endif
 #include <cairo.h>
 #if CAIRO_HAS_PS_SURFACE
@@ -257,10 +262,22 @@ void writePageImage(GooString *filename)
       writer = new PNGWriter(PNGWriter::RGB);
 
 #if USE_CMS
+#ifdef USE_LCMS1
     if (icc_data)
       static_cast<PNGWriter*>(writer)->setICCProfile(cmsTakeProductName(profile), icc_data, icc_data_size);
     else
       static_cast<PNGWriter*>(writer)->setSRGBProfile();
+#else
+    if (icc_data) {
+      cmsUInt8Number profileID[17];
+      profileID[16] = '\0';
+
+      cmsGetHeaderProfileID(profile,profileID);
+      static_cast<PNGWriter*>(writer)->setICCProfile(reinterpret_cast<char *>(profileID), icc_data, icc_data_size);
+    } else {
+      static_cast<PNGWriter*>(writer)->setSRGBProfile();
+    }
+#endif
 #endif
 #endif
 

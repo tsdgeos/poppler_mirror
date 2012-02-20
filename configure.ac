@@ -586,15 +586,28 @@ AC_ARG_ENABLE(cms,
               enable_cms=$enableval,
               enable_cms="try")
 if test x$enable_cms = xyes; then
-  PKG_CHECK_MODULES(LCMS, lcms)
+  PKG_CHECK_MODULES(LCMS, lcms2, [lcms2=yes], [lcms2=no])
+  if test x$lcms2 = xno; then
+      PKG_CHECK_MODULES(LCMS, lcms)
+  fi
 elif test x$enable_cms = xtry; then
-  PKG_CHECK_MODULES(LCMS, lcms, [enable_cms=yes], [enable_cms=no])
+  PKG_CHECK_MODULES(LCMS, lcms2,[lcms2=yes],[lcms2=no])
+  if test x$lcms2 = xyes; then
+    enable_cms=yes
+  else
+      PKG_CHECK_MODULES(LCMS, lcms,[enable_cms=yes],[enable_cms=no])
+  fi
 fi
 
 if test "x$enable_cms" = "xyes"; then
   AC_DEFINE(USE_CMS, 1, [Defines if use cms])
+  if test "x$lcms2" != "xyes"; then
+    lcms1=yes;
+    AC_DEFINE(USE_LCMS1, 1, [Defines if use lcms1])
+  fi
 fi
 AM_CONDITIONAL(USE_CMS, test x$enable_cms = xyes)
+AM_CONDITIONAL(USE_LCMS1, test x$lcms1 = xyes)
 
 AC_ARG_WITH([testdatadir],
    [AS_HELP_STRING([--testdatadir=/path/to/testdatadir],
@@ -719,6 +732,13 @@ echo "  use zlib:           $enable_zlib"
 echo "  use libcurl:        $enable_libcurl"
 echo "  use libopenjpeg:    $enable_libopenjpeg"
 echo "  use cms:            $enable_cms"
+if test x$enable_cms = xyes;then
+    if test x$lcms1 = xyes;then
+        echo "      with lcms1"
+    else
+        echo "      with lcms2"
+    fi
+fi
 echo "  command line utils: $enable_utils"
 echo "  test data dir:      $TESTDATADIR"
 echo ""

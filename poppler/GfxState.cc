@@ -17,7 +17,7 @@
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2006-2011 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2009 Koji Otani <sho@bbr.jp>
+// Copyright (C) 2009, 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Christian Persch <chpe@gnome.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
@@ -152,7 +152,40 @@ static const char *gfxColorSpaceModeNames[] = {
 
 #ifdef USE_CMS
 
+#ifdef USE_LCMS1
 #include <lcms.h>
+#define cmsColorSpaceSignature icColorSpaceSignature
+#define cmsSetLogErrorHandler cmsSetErrorHandler
+#define cmsSigXYZData icSigXYZData
+#define cmsSigLuvData icSigLuvData
+#define cmsSigLabData icSigLabData
+#define cmsSigYCbCrData icSigYCbCrData
+#define cmsSigYxyData icSigYxyData
+#define cmsSigRgbData icSigRgbData
+#define cmsSigHsvData icSigHsvData
+#define cmsSigHlsData icSigHlsData
+#define cmsSigCmyData icSigCmyData
+#define cmsSig3colorData icSig3colorData
+#define cmsSigGrayData icSigGrayData
+#define cmsSigCmykData icSigCmykData
+#define cmsSig4colorData icSig4colorData
+#define cmsSig2colorData icSig2colorData
+#define cmsSig5colorData icSig5colorData
+#define cmsSig6colorData icSig6colorData
+#define cmsSig7colorData icSig7colorData
+#define cmsSig8colorData icSig8colorData
+#define cmsSig9colorData icSig9colorData
+#define cmsSig10colorData icSig10colorData
+#define cmsSig11colorData icSig11colorData
+#define cmsSig12colorData icSig12colorData
+#define cmsSig13colorData icSig13colorData
+#define cmsSig14colorData icSig14colorData
+#define cmsSig15colorData icSig15colorData
+#define LCMS_FLAGS 0
+#else
+#include <lcms2.h>
+#define LCMS_FLAGS cmsFLAGS_NOOPTIMIZE
+#endif
 
 #define COLOR_PROFILE_DIR "/ColorProfiles/"
 #define GLOBAL_COLOR_PROFILE_DIR POPPLER_DATADIR COLOR_PROFILE_DIR
@@ -186,8 +219,8 @@ static unsigned int displayPixelType = 0;
 static GfxColorTransform *XYZ2DisplayTransform = NULL;
 
 // convert color space signature to cmsColor type 
-static unsigned int getCMSColorSpaceType(icColorSpaceSignature cs);
-static unsigned int getCMSNChannels(icColorSpaceSignature cs);
+static unsigned int getCMSColorSpaceType(cmsColorSpaceSignature cs);
+static unsigned int getCMSNChannels(cmsColorSpaceSignature cs);
 static cmsHPROFILE loadColorProfile(const char *fileName);
 
 void GfxColorSpace::setDisplayProfile(void *displayProfileA) {
@@ -344,11 +377,18 @@ cmsHPROFILE loadColorProfile(const char *fileName)
   return hp;
 }
 
+#ifdef USE_LCMS1
 static int CMSError(int ecode, const char *msg)
 {
     error(errSyntaxWarning, -1, "{0:s}", msg);
     return 1;
 }
+#else
+static void CMSError(cmsContext /*contextId*/, cmsUInt32Number /*ecode*/, const char *text)
+{
+    error(errSyntaxWarning, -1, "{0:s}", text);
+}
+#endif
 
 int GfxColorSpace::setupColorProfiles()
 {
@@ -361,7 +401,7 @@ int GfxColorSpace::setupColorProfiles()
   initialized = gTrue;
 
   // set error handlor
-  cmsSetErrorHandler(CMSError);
+  cmsSetLogErrorHandler(CMSError);
 
   if (displayProfile == NULL) {
     // load display profile if it was not already loaded.
@@ -387,7 +427,7 @@ int GfxColorSpace::setupColorProfiles()
 	   displayProfile, 
 	   COLORSPACE_SH(displayPixelType) |
 	     CHANNELS_SH(nChannels) | BYTES_SH(1),
-	  INTENT_RELATIVE_COLORIMETRIC,0)) == 0) {
+	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == 0) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
       XYZ2DisplayTransform = new GfxColorTransform(transform);
@@ -397,125 +437,124 @@ int GfxColorSpace::setupColorProfiles()
   return 0;
 }
 
-unsigned int getCMSColorSpaceType(icColorSpaceSignature cs)
+unsigned int getCMSColorSpaceType(cmsColorSpaceSignature cs)
 {
     switch (cs) {
-    case icSigXYZData:
+    case cmsSigXYZData:
       return PT_XYZ;
       break;
-    case icSigLabData:
+    case cmsSigLabData:
       return PT_Lab;
       break;
-    case icSigLuvData:
+    case cmsSigLuvData:
       return PT_YUV;
       break;
-    case icSigYCbCrData:
+    case cmsSigYCbCrData:
       return PT_YCbCr;
       break;
-    case icSigYxyData:
+    case cmsSigYxyData:
       return PT_Yxy;
       break;
-    case icSigRgbData:
+    case cmsSigRgbData:
       return PT_RGB;
       break;
-    case icSigGrayData:
+    case cmsSigGrayData:
       return PT_GRAY;
       break;
-    case icSigHsvData:
+    case cmsSigHsvData:
       return PT_HSV;
       break;
-    case icSigHlsData:
+    case cmsSigHlsData:
       return PT_HLS;
       break;
-    case icSigCmykData:
+    case cmsSigCmykData:
       return PT_CMYK;
       break;
-    case icSigCmyData:
+    case cmsSigCmyData:
       return PT_CMY;
       break;
-    case icSig2colorData:
-    case icSig3colorData:
-    case icSig4colorData:
-    case icSig5colorData:
-    case icSig6colorData:
-    case icSig7colorData:
-    case icSig8colorData:
-    case icSig9colorData:
-    case icSig10colorData:
-    case icSig11colorData:
-    case icSig12colorData:
-    case icSig13colorData:
-    case icSig14colorData:
-    case icSig15colorData:
+    case cmsSig2colorData:
+    case cmsSig3colorData:
+    case cmsSig4colorData:
+    case cmsSig5colorData:
+    case cmsSig6colorData:
+    case cmsSig7colorData:
+    case cmsSig8colorData:
+    case cmsSig9colorData:
+    case cmsSig10colorData:
+    case cmsSig11colorData:
+    case cmsSig12colorData:
+    case cmsSig13colorData:
+    case cmsSig14colorData:
+    case cmsSig15colorData:
     default:
       break;
     }
     return PT_RGB;
 }
 
-unsigned int getCMSNChannels(icColorSpaceSignature cs)
+unsigned int getCMSNChannels(cmsColorSpaceSignature cs)
 {
     switch (cs) {
-    case icSigXYZData:
-    case icSigLuvData:
-    case icSigLabData:
-    case icSigYCbCrData:
-    case icSigYxyData:
-    case icSigRgbData:
-    case icSigHsvData:
-    case icSigHlsData:
-    case icSigCmyData:
-    case icSig3colorData:
+    case cmsSigXYZData:
+    case cmsSigLuvData:
+    case cmsSigLabData:
+    case cmsSigYCbCrData:
+    case cmsSigYxyData:
+    case cmsSigRgbData:
+    case cmsSigHsvData:
+    case cmsSigHlsData:
+    case cmsSigCmyData:
+    case cmsSig3colorData:
       return 3;
       break;
-    case icSigGrayData:
+    case cmsSigGrayData:
       return 1;
       break;
-    case icSigCmykData:
-    case icSig4colorData:
+    case cmsSigCmykData:
+    case cmsSig4colorData:
       return 4;
       break;
-    case icSig2colorData:
+    case cmsSig2colorData:
       return 2;
       break;
-    case icSig5colorData:
+    case cmsSig5colorData:
       return 5;
       break;
-    case icSig6colorData:
+    case cmsSig6colorData:
       return 6;
       break;
-    case icSig7colorData:
+    case cmsSig7colorData:
       return 7;
       break;
-    case icSig8colorData:
+    case cmsSig8colorData:
       return 8;
       break;
-    case icSig9colorData:
+    case cmsSig9colorData:
       return 9;
       break;
-    case icSig10colorData:
+    case cmsSig10colorData:
       return 10;
       break;
-    case icSig11colorData:
+    case cmsSig11colorData:
       return 11;
       break;
-    case icSig12colorData:
+    case cmsSig12colorData:
       return 12;
       break;
-    case icSig13colorData:
+    case cmsSig13colorData:
       return 13;
       break;
-    case icSig14colorData:
+    case cmsSig14colorData:
       return 14;
       break;
-    case icSig15colorData:
+    case cmsSig15colorData:
       return 15;
     default:
       break;
     }
     return 3;
 }
-
 #endif
 
 //------------------------------------------------------------------------
@@ -1648,7 +1687,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, Gfx *gfx, int recursion)
 	   dhp,
 	   COLORSPACE_SH(dcst) |
 	     CHANNELS_SH(dNChannels) | BYTES_SH(1),
-	  INTENT_RELATIVE_COLORIMETRIC,0)) == 0) {
+	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == 0) {
       error(errSyntaxWarning, -1, "Can't create transform");
       cs->transform = NULL;
     } else {
@@ -1658,7 +1697,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, Gfx *gfx, int recursion)
        // create line transform only when the display is RGB type color space 
       if ((transform = cmsCreateTransform(hp,
 	    CHANNELS_SH(nCompsA) | BYTES_SH(1),dhp,
-	    TYPE_RGB_8,INTENT_RELATIVE_COLORIMETRIC,0)) == 0) {
+	    TYPE_RGB_8,INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == 0) {
 	error(errSyntaxWarning, -1, "Can't create transform");
 	cs->lineTransform = NULL;
       } else {

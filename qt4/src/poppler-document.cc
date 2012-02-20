@@ -4,6 +4,7 @@
  * Copyright (C) 2005-2010, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, 2011 Hib Eris <hib@hiberis.nl>
+ * Copyright (C) 2012 Koji Otani <sho@bbr.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +41,11 @@
 #include "poppler-page-private.h"
 
 #if defined(USE_CMS)
+#if defined(USE_LCMS1)
 #include <lcms.h>
+#else
+#include <lcms2.h>
+#endif
 #endif
 
 namespace Poppler {
