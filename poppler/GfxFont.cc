@@ -26,7 +26,7 @@
 // Copyright (C) 2009 Peter Kerzum <kerzum@yandex-team.ru>
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
-// Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2011, 2012 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -55,6 +55,7 @@
 #include "CharCodeToUnicode.h"
 #include "FontEncodingTables.h"
 #include "BuiltinFontTables.h"
+#include "UnicodeTypeTable.h"
 #include <fofi/FoFiIdentifier.h>
 #include <fofi/FoFiType1.h>
 #include <fofi/FoFiType1C.h>
@@ -1227,6 +1228,17 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
 
   // construct the char code -> Unicode mapping object
   ctu = CharCodeToUnicode::make8BitToUnicode(toUnicode);
+
+  // pass 1a: Expand ligatures in the Alphabetic Presentation Form
+  // block (eg "fi", "ffi") to normal form
+  for (code = 0; code < 256; ++code) {
+    if (unicodeIsAlphabeticPresentationForm(toUnicode[code])) {
+      Unicode *normalized = unicodeNormalizeNFKC(&toUnicode[code], 1, &len, NULL);
+      if (len > 1)
+        ctu->setMapping((CharCode)code, normalized, len);
+      gfree(normalized);
+    }
+  }
 
   // pass 2: try to fill in the missing chars, looking for ligatures, numeric
   // references and variants

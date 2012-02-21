@@ -16,6 +16,7 @@
 // Copyright (C) 2006, 2007 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -960,6 +961,14 @@ GBool unicodeTypeAlphaNum(Unicode c) {
 
   t = getType(c);
   return t == 'L' || t == 'R' || t == '#';
+}
+
+#define UNICODE_ALPHABETIC_PRESENTATION_BLOCK_BEGIN 0xFB00
+#define UNICODE_ALPHABETIC_PRESENTATION_BLOCK_END   0xFB4F
+
+GBool unicodeIsAlphabeticPresentationForm(Unicode c) {
+  return c >= UNICODE_ALPHABETIC_PRESENTATION_BLOCK_BEGIN
+    && c <= UNICODE_ALPHABETIC_PRESENTATION_BLOCK_END;
 }
 
 Unicode unicodeToUpper(Unicode c) {
