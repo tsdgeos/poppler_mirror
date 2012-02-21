@@ -14,9 +14,10 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dom Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Vittal Aithal <vittal.aithal@cognidox.com>
+// Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -379,7 +380,7 @@ static void printInfoString(Dict *infoDict, const char *key, const char *text,
   Object obj;
   GooString *s1;
   GBool isUnicode;
-  Unicode u;
+  Unicode u, u2;
   char buf[8];
   int i, n;
 
@@ -399,6 +400,15 @@ static void printInfoString(Dict *infoDict, const char *key, const char *text,
 	u = ((s1->getChar(i) & 0xff) << 8) |
 	    (s1->getChar(i+1) & 0xff);
 	i += 2;
+	if (u >= 0xd800 && u <= 0xdbff && i < obj.getString()->getLength()) {
+	  // surrogate pair
+	  u2 = ((s1->getChar(i) & 0xff) << 8) |
+	    (s1->getChar(i+1) & 0xff);
+	  i += 2;
+	  if (u2 >= 0xdc00 && u2 <= 0xdfff) {
+	    u = 0x10000 + ((u - 0xd800) << 10) + (u2 - 0xdc00);
+	  }
+	}
       } else {
 	u = pdfDocEncoding[s1->getChar(i) & 0xff];
 	++i;
