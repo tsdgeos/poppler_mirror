@@ -148,27 +148,33 @@ then
 fi
 
 
-dnl Test for libopenjpeg
+dnl Test for libopenjpeg. Versions prior to 1.4 do not provide a pkgconfig file.
 AC_ARG_ENABLE(libopenjpeg,
 	      AC_HELP_STRING([--disable-libopenjpeg],
 	                     [Don't build against libopenjpeg.]),
               enable_libopenjpeg=$enableval,
               enable_libopenjpeg="try")
 if test x$enable_libopenjpeg = xyes; then
-  AC_CHECK_LIB([openjpeg], [opj_cio_open],,
-	       AC_MSG_ERROR("*** libopenjpeg library not found ***"))
-  AC_CHECK_HEADERS([openjpeg.h],,
-		   AC_MSG_ERROR("*** libopenjpeg headers not found ***"))
+  PKG_CHECK_MODULES(LIBOPENJPEG, libopenjpeg,
+  		    [],
+    		    [AC_CHECK_LIB([openjpeg], [opj_cio_open],
+  			LIBOPENJPEG_LIBS="-lopenjpeg",
+		        AC_MSG_ERROR("*** libopenjpeg library not found ***"))
+		     AC_CHECK_HEADERS([openjpeg.h],,
+		     	AC_MSG_ERROR("*** libopenjpeg headers not found ***"))])
 elif test x$enable_libopenjpeg = xtry; then
-  AC_CHECK_LIB([openjpeg], [opj_cio_open],
-               [enable_libopenjpeg="yes"],
-	       [enable_libopenjpeg="no"])
-  AC_CHECK_HEADERS([openjpeg.h],,
-		   [enable_libopenjpeg="no"])
+  PKG_CHECK_MODULES(LIBOPENJPEG, libopenjpeg,
+                    [enable_libopenjpeg="yes"],
+  		    [AC_CHECK_LIB([openjpeg], [opj_cio_open],
+		        [enable_libopenjpeg="yes"
+  			 LIBOPENJPEG_LIBS="-lopenjpeg"],
+	                [enable_libopenjpeg="no"])
+		     AC_CHECK_HEADERS([openjpeg.h],,
+		         [enable_libopenjpeg="no"])])
 fi
 
 if test x$enable_libopenjpeg = xyes; then
-  LIBOPENJPEG_LIBS="-lopenjpeg"
+  AC_SUBST(LIBOPENJPEG_CFLAGS)
   AC_SUBST(LIBOPENJPEG_LIBS)
   AC_DEFINE(ENABLE_LIBOPENJPEG)
   AC_TRY_COMPILE([
