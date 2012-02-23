@@ -24,6 +24,7 @@
 // Copyright (C) 2010 Tomas Hoger <thoger@redhat.com>
 // Copyright (C) 2011 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012 Oliver Sander <sander@mi.fu-berlin.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2343,7 +2344,7 @@ DCTStream::~DCTStream() {
 
 void DCTStream::dctReset(GBool unfiltered) {
   if (unfiltered)
-    str->unfilteredReset()
+    str->unfilteredReset();
   else
     str->reset();
 
