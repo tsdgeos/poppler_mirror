@@ -16,7 +16,7 @@
 //
 // Copyright (C) 2005-2008 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
@@ -53,7 +53,6 @@
 #include "GfxFont.h"
 #include "Page.h"
 #include "Link.h"
-#include "CharCodeToUnicode.h"
 #include "FontEncodingTables.h"
 #include "PDFDocEncoding.h"
 #include <fofi/FoFiTrueType.h>

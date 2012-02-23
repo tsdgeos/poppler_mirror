@@ -17,7 +17,7 @@
 // Copyright (C) 2005-2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
-// Copyright (C) 2005, 2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006, 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
@@ -37,7 +37,6 @@
 #include <string.h>
 #include "CairoFontEngine.h"
 #include "CairoOutputDev.h"
-#include "CharCodeToUnicode.h"
 #include "GlobalParams.h"
 #include <fofi/FoFiTrueType.h>
 #include <fofi/FoFiType1C.h>

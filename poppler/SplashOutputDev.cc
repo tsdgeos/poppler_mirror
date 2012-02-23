@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -53,7 +53,6 @@
 #include "Page.h"
 #include "PDFDoc.h"
 #include "Link.h"
-#include "CharCodeToUnicode.h"
 #include "FontEncodingTables.h"
 #include "fofi/FoFiTrueType.h"
 #include "splash/SplashBitmap.h"
