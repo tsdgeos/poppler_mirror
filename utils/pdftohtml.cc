@@ -410,10 +410,7 @@ int main(int argc, char *argv[]) {
   {
     doc->displayPages(htmlOut, firstPage, lastPage, 72 * scale, 72 * scale, 0,
 		      gTrue, gFalse, gFalse);
-  	if (!xml)
-	{
-		htmlOut->dumpDocOutline(doc);
-	}
+    htmlOut->dumpDocOutline(doc);
   }
   
   if ((complexMode || singleHtml) && !xml && !ignore) {

@@ -1564,7 +1564,7 @@ GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 	GBool bClose = gFalse;
 	Catalog *catalog = doc->getCatalog();
 
-	if (!ok || xml)
+	if (!ok)
                 return gFalse;
   
 	Outline *outline = doc->getOutline();
@@ -1575,7 +1575,7 @@ GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 	if (!outlines)
 		return gFalse;
   
-	if (!complexMode && !xml)
+	if (!complexMode || xml)
   	{
 		output = page;
   	}
@@ -1610,21 +1610,30 @@ GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 		}
 	}
  
-  	GBool done = newOutlineLevel(output, outlines, catalog);
-  	if (done && !complexMode)
-    	fputs("<hr>\n", output);
-	
-	if (bClose)
+	if (!xml)
 	{
-		fputs("</BODY>\n</HTML>\n", output);
-		fclose(output);
+		GBool done = newHtmlOutlineLevel(output, outlines, catalog);
+		if (done && !complexMode)
+			fputs("<hr>\n", output);
+	
+		if (bClose)
+		{
+			fputs("</BODY>\n</HTML>\n", output);
+			fclose(output);
+		}
 	}
-  	return done;
+	else
+		newXmlOutlineLevel(output, outlines, catalog);
+
+	return gTrue;
 #endif
 }
 
-GBool HtmlOutputDev::newOutlineLevel(FILE *output, GooList *outlines, Catalog* catalog, int level)
+GBool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, GooList *outlines, Catalog* catalog, int level)
 {
+#ifdef DISABLE_OUTLINE
+	return gFalse;
+#else
 	GBool atLeastOne = gFalse;
 
 	if (level == 1)
@@ -1640,29 +1649,10 @@ GBool HtmlOutputDev::newOutlineLevel(FILE *output, GooList *outlines, Catalog* c
 		GooString *titleStr = HtmlFont::HtmlFilter(item->getTitle(),
 							   item->getTitleLength());
 
-		// get corresponding link
 		GooString *linkName = NULL;;
-		LinkAction *action = item->getAction();
-		LinkGoTo *link = NULL;
-		if (action && action->getKind() == actionGoTo)
-			link = dynamic_cast<LinkGoTo*>(action);
-		if (link && link->isOk()) {
-			LinkDest *linkdest=NULL;
-			if (link->getDest()!=NULL)
-				linkdest=link->getDest()->copy();
-			else if (link->getNamedDest()!=NULL)
-				linkdest=catalog->findDest(link->getNamedDest());
-
-			if (linkdest) {
-				int page;
-				if (linkdest->isPageRef()) {
-					Ref pageref=linkdest->getPageRef();
-					page=catalog->findPage(pageref.num,pageref.gen);
-				} else {
-					page=linkdest->getPageNum();
-				}
-				delete linkdest;
-
+        int page = getOutlinePageNum(item);
+        if (page > 0)
+        {
 				/*		complex		simple
 				frames		file-4.html	files.html#4
 				noframes	file.html#4	file.html#4
@@ -1683,7 +1673,6 @@ GBool HtmlOutputDev::newOutlineLevel(FILE *output, GooList *outlines, Catalog* c
 					}
 				}
 				delete str;
-			}
 		}
 
 		fputs("<li>",output);
@@ -1701,7 +1690,7 @@ GBool HtmlOutputDev::newOutlineLevel(FILE *output, GooList *outlines, Catalog* c
 		if (item->hasKids())
 		{
 			fputs("\n",output);
-			newOutlineLevel(output, item->getKids(), catalog, level+1);
+			newHtmlOutlineLevel(output, item->getKids(), catalog, level+1);
 		}
 		item->close();
 		fputs("</li>\n",output);
@@ -1709,4 +1698,75 @@ GBool HtmlOutputDev::newOutlineLevel(FILE *output, GooList *outlines, Catalog* c
 	fputs("</ul>\n",output);
 
 	return atLeastOne;
+#endif
 }
+
+void HtmlOutputDev::newXmlOutlineLevel(FILE *output, GooList *outlines, Catalog* catalog)
+{
+#ifndef DISABLE_OUTLINE
+    fputs("<outline>\n", output);
+
+    for (int i = 0; i < outlines->getLength(); i++)
+    {
+        OutlineItem *item     = (OutlineItem*)outlines->get(i);
+        GooString   *titleStr = HtmlFont::HtmlFilter(item->getTitle(),
+                                                     item->getTitleLength());
+        int page = getOutlinePageNum(item);
+        if (page > 0)
+        {
+            fprintf(output, "<item page=\"%d\">%s</item>\n",
+                    page, titleStr->getCString());
+        }
+        else
+        {
+            fprintf(output, "<item>%s</item>\n", titleStr->getCString());
+        }
+        delete titleStr;
+
+        item->open();
+        if (item->hasKids())
+        {
+            newXmlOutlineLevel(output, item->getKids(), catalog);
+        }
+        item->close();
+    }    
+
+    fputs("</outline>\n", output);
+#endif
+}
+
+#ifndef DISABLE_OUTLINE
+int HtmlOutputDev::getOutlinePageNum(OutlineItem *item)
+{
+    LinkAction *action   = item->getAction();
+    LinkGoTo   *link     = NULL;
+    LinkDest   *linkdest = NULL;
+    int         pagenum  = -1;
+
+    if (!action || action->getKind() != actionGoTo)
+        return pagenum;
+
+    link = dynamic_cast<LinkGoTo*>(action);
+
+    if (!link || !link->isOk())
+        return pagenum;
+
+    if (link->getDest())
+        linkdest = link->getDest()->copy();
+    else if (link->getNamedDest())
+        linkdest = catalog->findDest(link->getNamedDest());
+
+    if (!linkdest)
+        return pagenum;
+
+    if (linkdest->isPageRef()) {
+        Ref pageref = linkdest->getPageRef();
+        pagenum = catalog->findPage(pageref.num, pageref.gen);
+    } else {
+        pagenum = linkdest->getPageNum();
+    }
+
+    delete linkdest;
+    return pagenum;
+}
+#endif

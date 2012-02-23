@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!ELEMENT pdf2xml (page+)>
+<!ELEMENT pdf2xml (page+, outline?)>
 <!ELEMENT page (fontspec*, image*, text*)>
 <!ATTLIST page
 	number CDATA #REQUIRED
@@ -37,4 +37,9 @@
 	width CDATA #REQUIRED
 	height CDATA #REQUIRED
 	src CDATA #REQUIRED
+>
+<!ELEMENT outline (item | outline)*>
+<!ELEMENT item (#PCDATA)>
+<!ATTLIST item
+	page CDATA #IMPLIED
 >

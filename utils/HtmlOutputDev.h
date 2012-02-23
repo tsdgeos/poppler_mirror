@@ -60,6 +60,7 @@
 class GfxState;
 class GooString;
 class PDFDoc;
+class OutlineItem;
 //------------------------------------------------------------------------
 // HtmlString
 //------------------------------------------------------------------------
@@ -316,7 +317,11 @@ private:
   GooString* getLinkDest(AnnotLink *link);
   void dumpMetaVars(FILE *);
   void doFrame(int firstPage);
-  GBool newOutlineLevel(FILE *output, GooList *outlines, Catalog* catalog, int level = 1);
+  GBool newHtmlOutlineLevel(FILE *output, GooList *outlines, Catalog* catalog, int level = 1);
+  void newXmlOutlineLevel(FILE *output, GooList *outlines, Catalog* catalog);
+#ifndef DISABLE_OUTLINE
+  int getOutlinePageNum(OutlineItem *item);
+#endif
   void drawJpegImage(GfxState *state, Stream *str);
 
   FILE *fContentsFrame;
