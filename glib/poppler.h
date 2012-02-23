@@ -138,7 +138,7 @@ typedef enum
  * PopplerPrintFlags:
  * @POPPLER_PRINT_DOCUMENT: print main document contents
  * @POPPLER_PRINT_MARKUP_ANNOTS: print document and markup annotations
- * @POPPLER_PRINT_STAMP_ANNOTS_ONLY: print doucment and only stamp annotations
+ * @POPPLER_PRINT_STAMP_ANNOTS_ONLY: print document and only stamp annotations
  * @POPPLER_PRINT_ALL: print main document contents and all markup annotations
  *
  * Printing flags
