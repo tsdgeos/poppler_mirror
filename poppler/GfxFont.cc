@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2006, 2008-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2006, 2008-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -1785,11 +1785,12 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
   if (!(ctu = readToUnicodeCMap(fontDict, 16, NULL))) {
     ctuUsesCharCode = gFalse;
 
-    // the "Adobe-Identity" and "Adobe-UCS" collections don't have
-    // cidToUnicode files
-    if (collection->cmp("Adobe-Identity") &&
-	collection->cmp("Adobe-UCS")) {
-
+    // use an identity mapping for the "Adobe-Identity" and
+    // "Adobe-UCS" collections
+    if (!collection->cmp("Adobe-Identity") ||
+	!collection->cmp("Adobe-UCS")) {
+      ctu = CharCodeToUnicode::makeIdentityMapping();
+    } else {
       // look for a user-supplied .cidToUnicode file
       if (!(ctu = globalParams->getCIDToUnicode(collection))) {
 	// I'm not completely sure that this is the best thing to do
