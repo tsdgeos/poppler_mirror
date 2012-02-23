@@ -398,7 +398,19 @@ void HtmlPage::addChar(GfxState *state, double x, double y,
     h1 /= uLen;
   }
   for (i = 0; i < uLen; ++i) {
-    curStr->addChar(state, x1 + i*w1, y1 + i*h1, w1, h1, u[i]);
+    Unicode u1 = u[i];
+    if (u1 >= 0xd800 && u1 <= 0xdbff && i < uLen) {
+      // surrogate pair
+      const Unicode u2 = u[i + 1];
+      if (u2 >= 0xdc00 && u2 <= 0xdfff) {
+	u1 = 0x10000 + ((u1 - 0xd800) << 10) + (u2 - 0xdc00);
+	
+	curStr->addChar(state, x1 + i*w1, y1 + i*h1, w1, h1, u1);
+      }
+      ++i;
+    } else {
+      curStr->addChar(state, x1 + i*w1, y1 + i*h1, w1, h1, u1);
+    }
   }
 }
 
