@@ -136,6 +136,21 @@ class Backend:
 
         return retval
 
+    def get_ref_names(self, refs_path):
+        retval = []
+        md5_path = os.path.join(refs_path, self._name)
+        md5_file = open(md5_path + '.md5', 'r')
+        for line in md5_file.readlines():
+            md5sum, ref_path = line.strip('\n').split(' ', 1)
+            basename = os.path.basename(ref_path)
+            if not self.__should_have_checksum(basename):
+                continue
+
+            retval.append(basename)
+        md5_file.close()
+
+        return retval
+
     def has_md5(self, test_path):
         return os.path.exists(os.path.join(test_path, self._name + '.md5'))
 
@@ -156,8 +171,11 @@ class Backend:
     def has_results(self, test_path):
         return self.has_md5(test_path) or self.is_crashed(test_path) or self.is_failed(test_path)
 
+    def get_stderr(self, test_path):
+        return os.path.join(test_path, self._name + '.stderr')
+
     def has_stderr(self, test_path):
-        return os.path.exists(os.path.join(test_path, self._name + '.stderr'))
+        return os.path.exists(self.get_stderr(test_path))
 
     def has_diff(self, test_result):
         if not self._diff_ext:
