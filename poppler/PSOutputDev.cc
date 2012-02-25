@@ -23,7 +23,7 @@
 // Copyright (C) 2009-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2011 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009-2011 Adrian Johnson <ajohnson@redneon.com>
 //
@@ -3104,7 +3104,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   delete state;
 
   // set up the SplashOutputDev
-  if (mono) {
+  if (mono || level == psLevel1) {
     paperColor[0] = 0xff;
     splashOut = new SplashOutputDev(splashModeMono8, 1, gFalse,
 				    paperColor, gFalse,
