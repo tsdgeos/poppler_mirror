@@ -33,12 +33,16 @@ class UnknownBackendError(Exception):
 
 class Backend:
 
-    def __init__(self, name):
+    def __init__(self, name, diff_ext = None):
         self._name = name
+        self._diff_ext = diff_ext
         self._utilsdir = Config().utils_dir
 
     def get_name(self):
         return self._name
+
+    def get_diff_ext(self):
+        return self._diff_ext
 
     def __should_have_checksum(self, entry):
         if not entry.startswith(self._name):
@@ -155,6 +159,14 @@ class Backend:
     def has_stderr(self, test_path):
         return os.path.exists(os.path.join(test_path, self._name + '.stderr'))
 
+    def has_diff(self, test_result):
+        if not self._diff_ext:
+            return False
+        basename = os.path.basename(test_result)
+        if not basename.startswith(self._name):
+            return False
+        return os.path.exists(test_result + self._diff_ext)
+
     def __create_stderr_file(self, stderr, out_path):
         if not stderr:
             return
@@ -216,7 +228,7 @@ class Backend:
         ref = Image.open(ref_path)
         result = Image.open(result_path)
         diff = ImageChops.difference(ref, result)
-        diff.save(result_path + '.diff', 'png')
+        diff.save(result_path + '.diff.png', 'png')
 
     def _create_diff(self, ref_path, result_path):
         raise NotImplementedError

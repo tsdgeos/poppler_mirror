@@ -23,7 +23,7 @@ import os
 class Text(Backend):
 
     def __init__(self, name):
-        Backend.__init__(self, name)
+        Backend.__init__(self, name, '.diff')
         self._pdftotext = os.path.join(self._utilsdir, 'pdftotext');
 
     def create_refs(self, doc_path, refs_path):

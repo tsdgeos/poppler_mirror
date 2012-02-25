@@ -23,7 +23,7 @@ import os
 class Cairo(Backend):
 
     def __init__(self, name):
-        Backend.__init__(self, name)
+        Backend.__init__(self, name, '.diff.png')
         self._pdftocairo = os.path.join(self._utilsdir, 'pdftocairo');
 
     def create_refs(self, doc_path, refs_path):
