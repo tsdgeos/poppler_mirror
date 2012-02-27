@@ -48,7 +48,9 @@ Specifies the X resolution, in DPI.  The default is 150 DPI.
 Specifies the Y resolution, in DPI.  The default is 150 DPI.
 .TP
 .BI \-scale-to " number"
-Scales each page to fit in scale-to*scale-to pixel box.
+Scales the long side of each page (width for landscape pages, height
+for portrait pages) to fit in scale-to pixels. The size of the short
+side will be determined by the aspect ratio of the page.
 .TP
 .BI \-scale-to-x " number"
 Scales each page horizontally to fit in scale-to-x pixels. If
