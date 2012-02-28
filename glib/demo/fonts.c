@@ -155,6 +155,7 @@ pgd_fonts_fill_model (PgdFontsDemo *demo)
 			const gchar *name;
 			const gchar *type;
 			const gchar *embedded;
+			const gchar *substitute;
 			const gchar *filename;
 			gchar       *details;
 
@@ -173,10 +174,11 @@ pgd_fonts_fill_model (PgdFontsDemo *demo)
 				embedded = "Not embedded";
 			}
 
+			substitute = poppler_fonts_iter_get_substitute_name (fonts_iter);
 			filename = poppler_fonts_iter_get_file_name (fonts_iter);
 
-			if (filename)
-				details = g_markup_printf_escaped ("%s\n%s (%s)", type, embedded, filename);
+			if (substitute && filename)
+				details = g_markup_printf_escaped ("%s\n%s, substituting with <b>%s</b>\n(%s)", type, embedded, substitute, filename);
 			else
 				details = g_markup_printf_escaped ("%s\n%s", type, embedded);
 
