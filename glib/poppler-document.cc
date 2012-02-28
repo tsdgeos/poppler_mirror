@@ -1716,6 +1716,33 @@ poppler_fonts_iter_get_name (PopplerFontsIter *iter)
 }
 
 /**
+ * poppler_fonts_iter_get_substitute_name:
+ * @iter: a #PopplerFontsIter
+ *
+ * The name of the substitute font of the font associated with @iter or %NULL if
+ * the font is embedded
+ *
+ * Returns: the name of the substitute font or %NULL y font is emebedded
+ *
+ * Since: 0.20
+ */
+const char *
+poppler_fonts_iter_get_substitute_name (PopplerFontsIter *iter)
+{
+	GooString *name;
+	FontInfo *info;
+
+	info = (FontInfo *)iter->items->get (iter->index);
+
+	name = info->getSubstituteName();
+	if (name != NULL) {
+		return name->getCString();
+	} else {
+		return NULL;
+	}
+}
+
+/**
  * poppler_fonts_iter_get_file_name:
  * @iter: a #PopplerFontsIter
  *
