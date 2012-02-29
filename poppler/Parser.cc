@@ -16,6 +16,7 @@
 // Copyright (C) 2006, 2009, 201, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
+// Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -65,7 +66,8 @@ Object *Parser::getObj(Object *obj, int recursion)
 Object *Parser::getObj(Object *obj, GBool simpleOnly,
            Guchar *fileKey,
 		       CryptAlgorithm encAlgorithm, int keyLength,
-		       int objNum, int objGen, int recursion) {
+		       int objNum, int objGen, int recursion,
+		       GBool strict) {
   char *key;
   Stream *str;
   Object obj2;
@@ -90,8 +92,10 @@ Object *Parser::getObj(Object *obj, GBool simpleOnly,
     while (!buf1.isCmd("]") && !buf1.isEOF())
       obj->arrayAdd(getObj(&obj2, gFalse, fileKey, encAlgorithm, keyLength,
 			   objNum, objGen, recursion + 1));
-    if (buf1.isEOF())
+    if (buf1.isEOF()) {
       error(errSyntaxError, getPos(), "End of file inside array");
+      if (strict) goto err;
+    }
     shift();
 
   // dictionary or stream
@@ -101,6 +105,7 @@ Object *Parser::getObj(Object *obj, GBool simpleOnly,
     while (!buf1.isCmd(">>") && !buf1.isEOF()) {
       if (!buf1.isName()) {
 	error(errSyntaxError, getPos(), "Dictionary key must be a name object");
+	if (strict) goto err;
 	shift();
       } else {
 	// buf1 might go away in shift(), so construct the key
@@ -108,18 +113,22 @@ Object *Parser::getObj(Object *obj, GBool simpleOnly,
 	shift();
 	if (buf1.isEOF() || buf1.isError()) {
 	  gfree(key);
+	  if (strict && buf1.isError()) goto err;
 	  break;
 	}
 	obj->dictAdd(key, getObj(&obj2, gFalse, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1));
       }
     }
-    if (buf1.isEOF())
+    if (buf1.isEOF()) {
       error(errSyntaxError, getPos(), "End of file inside dictionary");
+      if (strict) goto err;
+    }
     // stream objects are not allowed inside content streams or
     // object streams
     if (allowStreams && buf2.isCmd("stream")) {
       if ((str = makeStream(obj, fileKey, encAlgorithm, keyLength,
-			    objNum, objGen, recursion + 1))) {
+			    objNum, objGen, recursion + 1,
+			    strict))) {
 	obj->initStream(str);
       } else {
 	obj->free();
@@ -169,11 +178,18 @@ Object *Parser::getObj(Object *obj, GBool simpleOnly,
   }
 
   return obj;
+
+err:
+  obj->free();
+  obj->initError();
+  return obj;
+
 }
 
 Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
 			   CryptAlgorithm encAlgorithm, int keyLength,
-			   int objNum, int objGen, int recursion) {
+			   int objNum, int objGen, int recursion,
+                           GBool strict) {
   Object obj;
   BaseStream *baseStr;
   Stream *str;
@@ -194,6 +210,7 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
   } else {
     error(errSyntaxError, getPos(), "Bad 'Length' attribute in stream");
     obj.free();
+    if (strict) return NULL;
     length = 0;
   }
 
@@ -223,7 +240,8 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
   if (buf1.isCmd("endstream")) {
     shift();
   } else {
-    error(errSyntaxError, getPos(), "Missing 'endstream'");
+    error(errSyntaxError, getPos(), "Missing 'endstream' or incorrect stream length");
+    if (strict) return NULL;
     if (xref) {
       // shift until we find the proper endstream or we change to another object or reach eof
       while (!buf1.isCmd("endstream") && xref->getNumEntry(lexer->getPos()) == objNum && !buf1.isEOF()) {

@@ -14,6 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -48,7 +49,8 @@ public:
   Object *getObj(Object *obj, GBool simpleOnly = gFalse, 
      Guchar *fileKey = NULL,
 		 CryptAlgorithm encAlgorithm = cryptRC4, int keyLength = 0,
-		 int objNum = 0, int objGen = 0, int recursion = 0);
+		 int objNum = 0, int objGen = 0, int recursion = 0,
+		 GBool strict = gFalse);
   
   Object *getObj(Object *obj, int recursion);
 
@@ -68,7 +70,8 @@ private:
 
   Stream *makeStream(Object *dict, Guchar *fileKey,
 		     CryptAlgorithm encAlgorithm, int keyLength,
-		     int objNum, int objGen, int recursion);
+		     int objNum, int objGen, int recursion,
+		     GBool strict);
   void shift(int objNum = -1);
 };
 

@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright 2010 Hib Eris <hib@hiberis.nl>
+// Copyright 2010, 2012 Hib Eris <hib@hiberis.nl>
 // Copyright 2010, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Pino Toscano <pino@kde.org>
 //
@@ -60,6 +60,8 @@ Hints::Hints(BaseStream *str, Linearization *linearization, XRef *xref, Security
     nPages = 0;
   }
 
+  memset(pageLength, 0, nPages * sizeof(Guint));
+  memset(pageOffset, 0, nPages * sizeof(Guint));
   memset(numSharedObject, 0, nPages * sizeof(Guint));
   memset(pageObjectNum, 0, nPages * sizeof(int));
 
@@ -138,7 +140,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
          secHdlr ? secHdlr->getFileKey() : (Guchar *)NULL,
          secHdlr ? secHdlr->getEncAlgorithm() : cryptRC4,
          secHdlr ? secHdlr->getFileKeyLength() : 0,
-         num, gen)->isStream())) {
+         num, gen, 0, gTrue)->isStream())) {
     Stream *hintsStream = obj.getStream();
     Dict *hintsDict = obj.streamGetDict();
 
