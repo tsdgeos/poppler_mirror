@@ -22,7 +22,7 @@
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Tomas Hoger <thoger@redhat.com>
-// Copyright (C) 2011 William Bader <williambader@hotmail.com>
+// Copyright (C) 2011, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Oliver Sander <sander@mi.fu-berlin.de>
 //
@@ -5160,27 +5160,27 @@ GBool RunLengthEncoder::fillBuf() {
 }
 
 //------------------------------------------------------------------------
-// CMKYGrayEncoder
+// CMYKGrayEncoder
 //------------------------------------------------------------------------
 
-CMKYGrayEncoder::CMKYGrayEncoder(Stream *strA):
+CMYKGrayEncoder::CMYKGrayEncoder(Stream *strA):
     FilterStream(strA) {
   bufPtr = bufEnd = buf;
   eof = gFalse;
 }
 
-CMKYGrayEncoder::~CMKYGrayEncoder() {
+CMYKGrayEncoder::~CMYKGrayEncoder() {
   if (str->isEncoder())
     delete str;
 }
 
-void CMKYGrayEncoder::reset() {
+void CMYKGrayEncoder::reset() {
   str->reset();
   bufPtr = bufEnd = buf;
   eof = gFalse;
 }
 
-GBool CMKYGrayEncoder::fillBuf() {
+GBool CMYKGrayEncoder::fillBuf() {
   int c0, c1, c2, c3;
   int i;
 
@@ -5201,3 +5201,46 @@ GBool CMKYGrayEncoder::fillBuf() {
   *bufEnd++ = (char) i;
   return gTrue;
 }
+
+//------------------------------------------------------------------------
+// RGBGrayEncoder
+//------------------------------------------------------------------------
+
+RGBGrayEncoder::RGBGrayEncoder(Stream *strA):
+    FilterStream(strA) {
+  bufPtr = bufEnd = buf;
+  eof = gFalse;
+}
+
+RGBGrayEncoder::~RGBGrayEncoder() {
+  if (str->isEncoder())
+    delete str;
+}
+
+void RGBGrayEncoder::reset() {
+  str->reset();
+  bufPtr = bufEnd = buf;
+  eof = gFalse;
+}
+
+GBool RGBGrayEncoder::fillBuf() {
+  int c0, c1, c2;
+  int i;
+
+  if (eof) {
+    return gFalse;
+  }
+  c0 = str->getChar();
+  c1 = str->getChar();
+  c2 = str->getChar();
+  if (c2 == EOF) {
+    eof = gTrue;
+    return gFalse;
+  }
+  i = 255 - (3 * c0 + 6 * c1 + c2) / 10;
+  if (i < 0) i = 0;
+  bufPtr = bufEnd = buf;
+  *bufEnd++ = (char) i;
+  return gTrue;
+}
+
