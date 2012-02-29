@@ -1249,7 +1249,6 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   fontIDSize = 64;
   fontIDLen = 0;
   fontIDs = (Ref *)gmallocn(fontIDSize, sizeof(Ref));
-  fontIDs = (Ref *)gmallocn(fontIDSize, sizeof(Ref));
   for (i = 0; i < 14; ++i) {
     fontNames->add(new GooString(psBase14SubstFonts[i].psName), 1);
   }
