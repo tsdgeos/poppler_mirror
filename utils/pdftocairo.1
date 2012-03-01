@@ -112,7 +112,9 @@ Specifies the X resolution, in pixels per inch of image files (or rasterized reg
 Specifies the Y resolution, in pixels per inch of image files (or rasterized regions in vector output). The default is 150 PPI.
 .TP
 .BI \-scale-to " number"
-Scales each page to fit in scale-to*scale-to pixel box (PNG/JPEG only).
+Scales the long side of each page (width for landscape pages, height
+for portrait pages) to fit in scale-to pixels. The size of the short
+side will be determined by the aspect ratio of the page (PNG/JPEG only).
 .TP
 .BI \-scale-to-x " number"
 Scales each page horizontally to fit in scale-to-x pixels. If
