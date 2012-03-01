@@ -1,3 +1,51 @@
+Release 0.19.0
+        core:
+         * Merge Xpdf 3.03
+         * Add support for lcms2
+         * SplashOutputDev: Implement Overprint
+         * PSOutputDev: Implement Overprint
+         * Expand glyph name ligatures such as "ff", "ffi" etc to normal form (Bug #7002)
+         * Use an Identity CharCodeToUnicode for Adobe-Identity and Adobe-UCS collections (Bug #35468)
+         * CairoOutputDev: Avoid setting huge clip area when printing (Bug #44002)
+         * CairoOutputDev: Fix test for rotation (Bug #14619)
+         * CairoOutputDev: Don't read inline image streams twice (Bug #45668)
+         * CairoOutputDev: set mask matrix before drawing an image with a mask (Bug #40828)
+         * Update glyph names to Unicode values mapping (Bug #13131)
+         * Only use Hints table when there are no parse errors (Bug #46459)
+         * Expose POPPLER_VERSION in poppler-config.h
+        
+        utils:
+         * pdftohtml: Output images in -xml mode if no -i option is specified
+         * pdftohtml: Get rid of static data members; merge duplicated jpeg dumping code
+         * pdftohtml: Be more consistent generating the outlines
+         * pdftohtml: Generate outlines in pdftohtml in -xml mode (Bug #56993)
+         * pdftohtml: Combine UTF16 surrogate pairs (Bug #46521)
+         * pdfinfo: Report page rotation
+         * pdfinfo: Decode utf-16 surrogate pairs
+         * pdftoppm: Allow one of -scale-to-[xy] = -1 to mean the aspect ratio is to be preserved (Bug #43393)
+         * pdftocairo: Allow one of -scale-to-[xy] = -1 to mean the aspect ratio is to be preserved
+         * pdffonts: Add -subst option to list the substitute font name and filename
+         * pdfseparate: Produce PDF/X conformant pdf pages if the original PDF was PDF/X conformant
+         * pdfimages: Add -list option to list all images (Bug #46066)
+         * Improve various manpages
+         
+        glib:
+         * Add poppler_fonts_iter_get_substitute_name
+         * Demo improvements
+         * Update gtk-doc makefile and m4 file
+         * Fix typos in documentation
+        
+        qt4:
+         * Add the option of PSConverter creating EPS
+         * Form support improvements
+        
+        build system:
+         * autotools: Print the cairo version required if not found (Bug #44619)
+         * autotools: Print the glib version required if not found
+         * autotools: Use pkgconfig to check for libopenjpeg (Bug #21789)
+         * autotools: Replace openjpeg compile test with a version test
+         * Add a configuration option for the test data dir
+
 Release 0.18.0
         core:
          * Fix small memory leak when dealing with marked content
