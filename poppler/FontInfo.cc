@@ -8,7 +8,7 @@
 // Copyright (C) 2006 Kouhei Sutou <kou@cozmixng.org>
 // Copyright (C) 2009 Pino Toscano <pino@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2010 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2010, 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 //
