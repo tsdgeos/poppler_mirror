@@ -115,10 +115,14 @@ Specifies the Y resolution, in pixels per inch of image files (or rasterized reg
 Scales each page to fit in scale-to*scale-to pixel box (PNG/JPEG only).
 .TP
 .BI \-scale-to-x " number"
-Scales each page horizontally to fit in scale-to-x pixels (PNG/JPEG only).
+Scales each page horizontally to fit in scale-to-x pixels. If
+scale-to-y is set to -1, the vertical size will determined by the
+aspect ratio of the page (PNG/JPEG only).
 .TP
 .BI \-scale-to-y " number"
-Scales each page vertically to fit in scale-to-y pixels (PNG/JPEG only).
+Scales each page vertically to fit in scale-to-y pixels. If scale-to-x
+is set to -1, the horizontal size will determined by the aspect ratio
+of the page (PNG/JPEG only).
 .TP
 .BI \-x " number"
 Specifies the x-coordinate of the crop area top left corner in pixels (image output) or points (vector output)
