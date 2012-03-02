@@ -23,7 +23,7 @@
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007, 2009 Jonathan Kew <jonathan_kew@sil.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
-// Copyright (C) 2009, 2011 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Patrick Spendrin <ps_ml@gmx.de>
@@ -579,7 +579,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   psEmbedCIDPostScript = gTrue;
   psEmbedCIDTrueType = gTrue;
   psFontPassthrough = gFalse;
-  psSubstFonts = gTrue;
   psPreload = gFalse;
   psOPI = gFalse;
   psASCIIHex = gFalse;
@@ -1961,12 +1960,6 @@ void GlobalParams::setPSEmbedCIDPostScript(GBool embed) {
 void GlobalParams::setPSEmbedCIDTrueType(GBool embed) {
   lockGlobalParams;
   psEmbedCIDTrueType = embed;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSSubstFonts(GBool substFonts) {
-  lockGlobalParams;
-  psSubstFonts = substFonts;
   unlockGlobalParams;
 }
 

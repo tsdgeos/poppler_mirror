@@ -19,7 +19,7 @@
 // Copyright (C) 2007-2008, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Sanjoy Mahajan <sanjoy@mit.edu>
-// Copyright (C) 2009, 2011 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
@@ -92,7 +92,7 @@ static GBool noEmbedT1Fonts = gFalse;
 static GBool noEmbedTTFonts = gFalse;
 static GBool noEmbedCIDPSFonts = gFalse;
 static GBool noEmbedCIDTTFonts = gFalse;
-static GBool noSubstFonts = gFalse;
+static GBool fontPassthrough = gFalse;
 static GBool preload = gFalse;
 static char paperSize[15] = "";
 static int paperWidth = -1;
@@ -150,7 +150,7 @@ static const ArgDesc argDesc[] = {
    "don't embed CID PostScript fonts"},
   {"-noembcidtt", argFlag, &noEmbedCIDTTFonts,  0,
    "don't embed CID TrueType fonts"},
-  {"-passfonts",  argFlag,        &noSubstFonts,0,
+  {"-passfonts",  argFlag,        &fontPassthrough,0,
    "don't substitute missing fonts"},
   {"-preload",    argFlag,     &preload,        0,
    "preload images and forms"},
@@ -300,8 +300,8 @@ int main(int argc, char *argv[]) {
   if (noEmbedCIDTTFonts) {
     globalParams->setPSEmbedCIDTrueType(!noEmbedCIDTTFonts);
   }
-  if (noSubstFonts) {
-    globalParams->setPSSubstFonts(!noSubstFonts);
+  if (fontPassthrough) {
+    globalParams->setPSFontPassthrough(fontPassthrough);
   }
   if (preload) {
     globalParams->setPSPreload(preload);

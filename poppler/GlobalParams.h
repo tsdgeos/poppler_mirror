@@ -20,7 +20,7 @@
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2009 Jonathan Kew <jonathan_kew@sil.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
-// Copyright (C) 2009, 2011 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Pino Toscano <pino@kde.org>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
@@ -216,7 +216,6 @@ public:
   void setPSEmbedTrueType(GBool embed);
   void setPSEmbedCIDPostScript(GBool embed);
   void setPSEmbedCIDTrueType(GBool embed);
-  void setPSSubstFonts(GBool substFonts);
   void setPSFontPassthrough(GBool passthrough);
   void setPSPreload(GBool preload);
   void setPSOPI(GBool opi);
@@ -315,7 +314,6 @@ private:
   GBool psEmbedTrueType;	// embed TrueType fonts?
   GBool psEmbedCIDPostScript;	// embed CID PostScript fonts?
   GBool psEmbedCIDTrueType;	// embed CID TrueType fonts?
-  GBool psSubstFonts;		// substitute missing fonts?
   GBool psFontPassthrough;	// pass all fonts through as-is?
   GBool psPreload;		// preload PostScript images and forms into
 				//   memory
