@@ -58,6 +58,7 @@ public:
   GooString *getName()      { return name; };
   GooString *getSubstituteName() { return substituteName; };
   GooString *getFile()      { return file; };
+  GooString *getEncoding()      { return encoding; };
   Type       getType()      { return type; };
   GBool      getEmbedded()  { return emb; };
   GBool      getSubset()    { return subset; };
@@ -69,6 +70,7 @@ private:
   GooString *name;
   GooString *substituteName;
   GooString *file;
+  GooString *encoding;
   Type type;
   GBool emb;
   GBool subset;

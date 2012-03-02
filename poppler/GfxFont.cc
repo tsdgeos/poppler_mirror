@@ -240,6 +240,7 @@ GfxFont::GfxFont(const char *tagA, Ref idA, GooString *nameA,
   stretch = StretchNotDefined;
   weight = WeightNotDefined;
   refCnt = 1;
+  encodingName = new GooString("");
   hasToUnicode = gFalse;
 }
 
@@ -251,6 +252,9 @@ GfxFont::~GfxFont() {
   }
   if (embFontName) {
     delete embFontName;
+  }
+  if (encodingName) {
+    delete encodingName;
   }
 }
 
@@ -1136,6 +1140,22 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     }
   }
 
+  if (baseEncFromFontFile) {
+    encodingName->Set("Builtin");
+  } else if (baseEnc == winAnsiEncoding) {
+    encodingName->Set("WinAnsi");
+  } else if (baseEnc == macRomanEncoding) {
+    encodingName->Set("MacRoman");
+  } else if (baseEnc == macExpertEncoding) {
+    encodingName->Set("MacExpert");
+  } else if (baseEnc == symbolEncoding) {
+    encodingName->Set("Symbol");
+  } else if (baseEnc == zapfDingbatsEncoding) {
+    encodingName->Set("ZapfDingbats");
+  } else {
+    encodingName->Set("Standard");
+  }
+
   // copy the base encoding
   for (i = 0; i < 256; ++i) {
     enc[i] = (char *)baseEnc[i];
@@ -1161,6 +1181,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
   if (obj1.isDict()) {
     obj1.dictLookup("Differences", &obj2);
     if (obj2.isArray()) {
+      encodingName->Set("Custom");
       hasEncoding = gTrue;
       code = 0;
       for (i = 0; i < obj2.arrayGetLength(); ++i) {
@@ -1847,6 +1868,11 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
     goto err2;
   }
   obj1.free();
+  if (cMap->getCMapName()) {
+    encodingName->Set(cMap->getCMapName()->getCString());
+  } else {
+    encodingName->Set("Custom");
+  }
 
   // CIDToGIDMap (for embedded TrueType fonts)
   if (type == fontCIDType2 || type == fontCIDType2OT) {

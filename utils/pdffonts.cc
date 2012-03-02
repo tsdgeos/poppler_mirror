@@ -182,14 +182,15 @@ int main(int argc, char *argv[]) {
       }
     } else {
       // print the font info
-      printf("name                                 type              emb sub uni object ID\n");
-      printf("------------------------------------ ----------------- --- --- --- ---------\n");
+      printf("name                                 type              encoding         emb sub uni object ID\n");
+      printf("------------------------------------ ----------------- ---------------- --- --- --- ---------\n");
       if (fonts) {
         for (int i = 0; i < fonts->getLength(); ++i) {
           FontInfo *font = (FontInfo *)fonts->get(i);
-          printf("%-36s %-17s %-3s %-3s %-3s",
+          printf("%-36s %-17s %-16s %-3s %-3s %-3s",
                  font->getName() ? font->getName()->getCString() : "[none]",
                  fontTypeNames[font->getType()],
+                 font->getEncoding()->getCString(),
                  font->getEmbedded() ? "yes" : "no",
                  font->getSubset() ? "yes" : "no",
                  font->getToUnicode() ? "yes" : "no");

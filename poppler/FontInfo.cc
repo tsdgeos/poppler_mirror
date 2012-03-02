@@ -200,6 +200,7 @@ FontInfo::FontInfo(GfxFont *font, PDFDoc *doc) {
     if (substituteNameAux.getLength() > 0)
 	substituteName = substituteNameAux.copy();
   }
+  encoding = font->getEncodingName()->copy();
 
   // look for a ToUnicode map
   hasToUnicode = gFalse;
@@ -225,6 +226,7 @@ FontInfo::FontInfo(GfxFont *font, PDFDoc *doc) {
 FontInfo::FontInfo(FontInfo& f) {
   name = f.name ? f.name->copy() : NULL;
   file = f.file ? f.file->copy() : NULL;
+  encoding = f.encoding ? f.encoding->copy() : NULL;
   type = f.type;
   emb = f.emb;
   subset = f.subset;
@@ -236,6 +238,7 @@ FontInfo::FontInfo(FontInfo& f) {
 FontInfo::~FontInfo() {
   delete name;
   delete file;
+  delete encoding;
   if (substituteName)
     delete substituteName;
 }

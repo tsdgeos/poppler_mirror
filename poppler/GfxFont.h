@@ -260,6 +260,9 @@ public:
   // Does this font have a toUnicode map?
   GBool hasToUnicodeCMap() { return hasToUnicode; }
 
+  // Return the name of the encoding
+  GooString *getEncodingName() { return encodingName; }
+
 protected:
 
   virtual ~GfxFont();
@@ -288,6 +291,7 @@ protected:
   int refCnt;
   GBool ok;
   GBool hasToUnicode;
+  GooString *encodingName;
 };
 
 //------------------------------------------------------------------------

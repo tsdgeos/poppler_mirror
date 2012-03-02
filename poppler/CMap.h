@@ -76,6 +76,8 @@ public:
   // Return collection name (<registry>-<ordering>).
   GooString *getCollection() { return collection; }
 
+  GooString *getCMapName() { return cMapName; }
+
   // Return true if this CMap matches the specified <collectionA>, and
   // <cMapNameA>.
   GBool match(GooString *collectionA, GooString *cMapNameA);
