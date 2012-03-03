@@ -138,6 +138,8 @@ class BackendTestResult:
         self._results = []
 
         ref_path = os.path.join(self._refsdir, self._test)
+        if not backend.has_md5(ref_path):
+            return
         ref_names = backend.get_ref_names(ref_path)
         for result in results:
             basename = os.path.basename(result)
@@ -186,6 +188,9 @@ class TestResult:
         self._doc = os.path.join(docsdir, self._test)
         self._results = {}
         for backend in backends:
+            ref_path = os.path.join(self._refsdir, self._test)
+            if not backend.has_md5(ref_path) and not backend.is_crashed(ref_path) and not backend.is_failed(ref_path):
+                continue
             self._results[backend] = BackendTestResult(self._test, refsdir, outdir, backend, results)
 
     def get_test(self):
