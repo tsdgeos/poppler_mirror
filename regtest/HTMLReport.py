@@ -19,7 +19,112 @@
 from backends import get_backend, get_all_backends
 from Config import Config
 import os
+import errno
 import subprocess
+
+class HTMLPrettyDiff:
+
+    def write(self, test, outdir, actual, expected, diff):
+        raise NotImplementedError
+
+    def _create_diff_for_test(self, outdir, test):
+        diffdir = os.path.join(outdir, 'html', test)
+        try:
+            os.makedirs(diffdir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+        except:
+            raise
+        return diffdir
+
+class HTMLPrettyDiffImage(HTMLPrettyDiff):
+
+    def write(self, test, outdir, result, actual, expected, diff):
+        html = """
+<html>
+<head>
+<title>%s</title>
+<style>.label{font-weight:bold}</style>
+</head>
+<body>
+Difference between images: <a href="%s">diff</a><br>
+<div class=imageText></div>
+<div class=imageContainer
+     actual="%s"
+     expected="%s">Loading...</div>
+<script>
+(function() {
+    var preloadedImageCount = 0;
+    function preloadComplete() {
+        ++preloadedImageCount;
+        if (preloadedImageCount < 2)
+            return;
+        toggleImages();
+        setInterval(toggleImages, 2000)
+    }
+
+    function preloadImage(url) {
+        image = new Image();
+        image.addEventListener('load', preloadComplete);
+        image.src = url;
+        return image;
+    }
+
+    function toggleImages() {
+        if (text.textContent == 'Expected Image') {
+            text.textContent = 'Actual Image';
+            container.replaceChild(actualImage, container.firstChild);
+        } else {
+            text.textContent = 'Expected Image';
+            container.replaceChild(expectedImage, container.firstChild);
+        }
+    }
+
+    var text = document.querySelector('.imageText');
+    var container = document.querySelector('.imageContainer');
+    var actualImage = preloadImage(container.getAttribute('actual'));
+    var expectedImage = preloadImage(container.getAttribute('expected'));
+})();
+</script>
+</body>
+</html>
+""" % (test, diff, actual, expected)
+
+        diffdir = self._create_diff_for_test(outdir, test)
+        pretty_diff = os.path.abspath(os.path.join(diffdir, result + '-pretty-diff.html'))
+        f = open(pretty_diff, 'w')
+        f.write(html)
+        f.close()
+
+        return pretty_diff
+
+class HTMLPrettyDiffText(HTMLPrettyDiff):
+    def write(self, test, outdir, result, actual, expected, diff):
+        import difflib
+
+        actual_file = open(actual, 'r')
+        expected_file = open(expected, 'r')
+        html = difflib.HtmlDiff().make_file(actual_file.readlines(),
+                                            expected_file.readlines(),
+                                            "Actual", "Expected", context=True)
+        actual_file.close()
+        expected_file.close()
+
+        diffdir = self._create_diff_for_test(outdir, test)
+        pretty_diff = os.path.abspath(os.path.join(diffdir, result + '-pretty-diff.html'))
+        f = open(pretty_diff, 'w')
+        f.write(html)
+        f.close()
+
+        return pretty_diff
+
+def create_pretty_diff(backend):
+    if backend.get_diff_ext() == '.diff.png':
+        return HTMLPrettyDiffImage()
+    if backend.get_diff_ext() == '.diff':
+        return HTMLPrettyDiffText()
+    return None
 
 class BackendTestResult:
 
@@ -28,6 +133,7 @@ class BackendTestResult:
         self._refsdir = refsdir
         self._outdir = outdir
         self._backend = backend
+        self.config = Config()
 
         self._results = []
 
@@ -57,7 +163,12 @@ class BackendTestResult:
             expected = os.path.abspath(os.path.join(self._refsdir, self._test, result))
             html += "<li><a href='%s'>actual</a> <a href='%s'>expected</a> " % (actual, expected)
             if self._backend.has_diff(actual):
-                html += "<a href='%s'>diff</a>" % (os.path.abspath(actual + self._backend.get_diff_ext()))
+                diff = os.path.abspath(actual + self._backend.get_diff_ext())
+                html += "<a href='%s'>diff</a> " % (diff)
+                if self.config.pretty_diff:
+                    pretty_diff = create_pretty_diff(self._backend)
+                    if pretty_diff:
+                        html += "<a href='%s'>pretty diff</a> " % (pretty_diff.write (self._test, self._outdir, result, actual, expected, diff))
             html += "</li>\n"
 
         if html:
@@ -71,7 +182,7 @@ class TestResult:
         self._refsdir = refsdir
         self._outdir = outdir
 
-        self._test = resultdir[len(self._outdir):]
+        self._test = resultdir[len(self._outdir):].lstrip('/')
         self._doc = os.path.join(docsdir, self._test)
         self._results = {}
         for backend in backends:
@@ -134,7 +245,16 @@ class HTMLReport:
         self._docsdir = docsdir
         self._refsdir = refsdir
         self._outdir = outdir
+        self._htmldir = os.path.join(outdir, 'html')
         self.config = Config()
+
+        try:
+            os.makedirs(self._htmldir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+        except:
+            raise
 
     def create(self):
         html = "<html><body><a name='top'></a>"
@@ -148,6 +268,8 @@ class HTMLReport:
             if not files:
                 continue
             if not root.lower().endswith('.pdf'):
+                continue
+            if root.startswith(self._htmldir):
                 continue
 
             results[root] = TestResult(self._docsdir, self._refsdir, self._outdir, root, files, backends)
@@ -189,7 +311,7 @@ class HTMLReport:
 
         html += failed + crashed + failed_to_run + "</body></html>"
 
-        report_index = os.path.join(self._outdir, 'index.html')
+        report_index = os.path.join(self._htmldir, 'index.html')
         f = open(report_index, 'wb')
         f.write(html)
         f.close()

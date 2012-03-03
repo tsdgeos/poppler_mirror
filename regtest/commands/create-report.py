@@ -37,10 +37,14 @@ class CreateReport(Command):
         parser.add_argument('-o', '--out-dir',
                             action = 'store', dest = 'out_dir', default = os.path.join(tempfile.gettempdir(), 'out'),
                             help = 'Directory containing the results')
+        parser.add_argument('-p', '--pretty-diff',
+                            action = 'store_true', dest = 'pretty_diff', default = False,
+                            help = 'Include pretty diff output')
         parser.add_argument('tests')
 
     def run(self, options):
         config = Config()
+        config.pretty_diff = options['pretty_diff']
 
         doc = options['tests']
         if os.path.isdir(doc):
