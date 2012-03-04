@@ -32,6 +32,7 @@
 // Copyright (C) 2011 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2012 Yi Yang <ahyangyi@gmail.com>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -552,6 +553,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
 #ifdef _WIN32
   // baseDir will be set by a call to setBaseDir
   baseDir = new GooString();
+  substFiles = new GooHash(gTrue);
 #else
   baseDir = appendToPath(getHomeDir(), ".xpdf");
 #endif
@@ -788,6 +790,9 @@ GlobalParams::~GlobalParams() {
   deleteGooHash(fontFiles, GooString);
   deleteGooList(fontDirs, GooString);
   deleteGooHash(ccFontFiles, GooString);
+#ifdef _WIN32
+  deleteGooHash(substFiles, GooString);
+#endif
   delete sysFonts;
   if (psFile) {
     delete psFile;

@@ -2,6 +2,7 @@
    but mostly based on xpdf code.
    
    // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+   // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 
 TODO: instead of a fixed mapping defined in displayFontTab, it could
 scan the whole fonts directory, parse TTF files and build font
@@ -40,6 +41,11 @@ description for all fonts available in Windows. That's how MuPDF works.
 #include "FontEncodingTables.h"
 #include "GlobalParams.h"
 #include "GfxFont.h"
+#include <sys/stat.h>
+#include "Object.h"
+#include "Stream.h"
+#include "Lexer.h"
+#include "Parser.h"
 
 #if MULTITHREADED
 #  define lockGlobalParams            gLockMutex(&mutex)
@@ -58,6 +64,7 @@ description for all fonts available in Windows. That's how MuPDF works.
 #endif
 
 #define DEFAULT_SUBSTITUTE_FONT "Helvetica"
+#define DEFAULT_CID_FONT "MS-Mincho"
 
 static struct {
     const char *name;
@@ -147,7 +154,8 @@ static struct {
     {"Georgia-Bold", NULL, "georgiab.ttf"},
     {"Georgia-Italic", NULL, "georgiai.ttf"},
     {"Georgia-BoldItalic", NULL, "georgiaz.ttf"},
-
+    // default CID font:
+    {"MS-Mincho", NULL, "msmincho.ttf"},
     {NULL}
 };
 
@@ -346,6 +354,12 @@ SysFontInfo *SysFontList::makeWindowsFont(char *name, int fontNum,
 
 void GlobalParams::setupBaseFonts(char * dir)
 {
+    const char *dataRoot = popplerDataDir ? popplerDataDir : POPPLER_DATADIR;
+    GooString *fileName = NULL;
+    struct stat buf;
+    FILE *file;
+    int size = 0;
+
     if (baseFontsInitialized)
         return;
     baseFontsInitialized = true;
@@ -381,20 +395,85 @@ void GlobalParams::setupBaseFonts(char * dir)
     if (winFontDir[0]) {
       sysFonts->scanWindowsFonts(new GooString(winFontDir));
     }
+
+    fileName = new GooString(dataRoot);
+    fileName->append("/cidfmap");
+    if (stat(fileName->getCString(), &buf) == 0) {
+      size = buf.st_size;
+    }
+    // try to open file
+#ifdef VMS
+    file = fopen(fileName->getCString(), "rb", "ctx=stm");
+#else
+    file = fopen(fileName->getCString(), "rb");
+#endif
+
+    if (file != NULL) {
+      Parser *parser;
+      Object obj1, obj2;
+
+      obj1.initNull();
+      parser = new Parser(NULL,
+	      new Lexer(NULL,
+	      new FileStream(file, 0, gFalse, size, &obj1)),
+	      gTrue);
+      obj1.free();
+      parser->getObj(&obj1);
+      while (!obj1.isEOF()) {
+	parser->getObj(&obj2);
+	if (obj1.isName()) {
+	  // Substitutions
+	  if (obj2.isDict()) {
+	    Object obj3;
+	    obj2.getDict()->lookup("Path", &obj3);
+	    if (obj3.isString())
+	      addFontFile(new GooString(obj1.getName()), obj3.getString()->copy());
+	    obj3.free();
+	  // Aliases
+	  } else if (obj2.isName()) {
+	    substFiles->add(new GooString(obj1.getName()), new GooString(obj2.getName()));
+	  }
+	}
+	obj2.free();
+	obj1.free();
+	parser->getObj(&obj1);
+	// skip trailing ';'
+	while (obj1.isCmd(";")) {
+	  obj1.free();
+	  parser->getObj(&obj1);
+	}
+      }
+      fclose(file);
+      delete parser;
+    }
 }
 
-static char *findSubstituteName(const char *origName)
+static char *findSubstituteName(GfxFont *font, GooHash *substFiles, const char *origName)
 {
     assert(origName);
     if (!origName) return NULL;
+    GooString *name2 = new GooString(origName);
+    int n = strlen(origName);
+    // remove trailing "-Identity-H"
+    if (n > 11 && !strcmp(name2->getCString() + n - 11, "-Identity-H")) {
+      name2->del(n - 11, 11);
+      n -= 11;
+    }
+    GooString *substName = (GooString *)substFiles->lookup(name2);
+    if (substName != NULL) {
+      delete name2;
+      return substName->getCString();
+    }
+
     /* TODO: try to at least guess bold/italic/bolditalic from the name */
-    return DEFAULT_SUBSTITUTE_FONT;
+    delete name2;
+    return (font->isCIDFont()) ? DEFAULT_CID_FONT: DEFAULT_SUBSTITUTE_FONT;
 }
 
 /* Windows implementation of external font matching code */
 GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 					  SysFontType *type,
-					  int *fontNum, GooString * /*substituteFontName*/) {
+					  int *fontNum, GooString *substituteFontName) {
   SysFontInfo *fi;
   GooString *path = NULL;
   GooString *fontName = font->getName();
@@ -406,14 +485,21 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
     *type = fi->type;
     *fontNum = fi->fontNum;
   } else {
-    GooString *substFontName = new GooString(findSubstituteName(fontName->getCString()));
+    GooString *substFontName = new GooString(findSubstituteName(font, substFiles, fontName->getCString()));
+    GooString *path2 = NULL;
     error(errSyntaxError, -1, "Couldn't find a font for '{0:t}', subst is '{1:t}'", fontName, substFontName);
-    if ((fi = sysFonts->find(substFontName, gFalse))) {
-      path = fi->path->copy();
-      *type = fi->type;
-      *fontNum = fi->fontNum;
+    if ((path2 = (GooString *)fontFiles->lookup(substFontName))) {
+      path = new GooString(path2);
+      if (substituteFontName)
+	substituteFontName->Set(path->getCString());
+      if (!strcasecmp(path->getCString() + path->getLength() - 4, ".ttc")) {
+	*type = sysFontTTC;
+      } else {
+	*type = sysFontTTF;
+      }
+      *fontNum = 0;
     }
-  }      
+  }
   unlockGlobalParams;
   return path;
 }
