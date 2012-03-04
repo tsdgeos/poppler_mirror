@@ -1788,6 +1788,32 @@ poppler_fonts_iter_get_font_type (PopplerFontsIter *iter)
 }
 
 /**
+ * poppler_fonts_iter_get_encoding:
+ * @iter: a #PopplerFontsIter
+ *
+ * Returns the encoding of the font associated with @iter
+ *
+ * Returns: the font encoding
+ *
+ * Since: 0.20
+ */
+const char *
+poppler_fonts_iter_get_encoding (PopplerFontsIter *iter)
+{
+	GooString *encoding;
+	FontInfo *info;
+
+	info = (FontInfo *)iter->items->get (iter->index);
+
+	encoding = info->getEncoding();
+	if (encoding != NULL) {
+		return encoding->getCString();
+	} else {
+		return NULL;
+	}
+}
+
+/**
  * poppler_fonts_iter_is_embedded:
  * @iter: a #PopplerFontsIter
  *
