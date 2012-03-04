@@ -17,7 +17,7 @@
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
-// Copyright (C) 2008-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -174,7 +174,7 @@ private:
 #else
   static void formatInt(long x, char *buf, int bufSize,
 			GBool zeroFill, int width, int base,
-			const char **p, int *len);
+			char **p, int *len);
 #endif
 #ifdef ULLONG_MAX
   static void formatUInt(unsigned long long x, char *buf, int bufSize,
@@ -183,7 +183,7 @@ private:
 #else
   static void formatUInt(Gulong x, char *buf, int bufSize,
 			 GBool zeroFill, int width, int base,
-			 const char **p, int *len);
+			 char **p, int *len);
 #endif
   static void formatDouble(double x, char *buf, int bufSize, int prec,
 			   GBool trim, char **p, int *len);
