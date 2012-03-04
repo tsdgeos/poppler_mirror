@@ -157,11 +157,16 @@ pgd_fonts_fill_model (PgdFontsDemo *demo)
 			const gchar *embedded;
 			const gchar *substitute;
 			const gchar *filename;
+			const gchar *encoding;
 			gchar       *details;
 
 			name = poppler_fonts_iter_get_name (fonts_iter);
 			if (!name)
 				name = "No name";
+
+			encoding = poppler_fonts_iter_get_encoding (fonts_iter);
+			if (!encoding)
+				encoding = "None";
 
 			type = font_type_to_string (poppler_fonts_iter_get_font_type (fonts_iter));
 			
@@ -178,9 +183,9 @@ pgd_fonts_fill_model (PgdFontsDemo *demo)
 			filename = poppler_fonts_iter_get_file_name (fonts_iter);
 
 			if (substitute && filename)
-				details = g_markup_printf_escaped ("%s\n%s, substituting with <b>%s</b>\n(%s)", type, embedded, substitute, filename);
+				details = g_markup_printf_escaped ("%s\nEncoding: %s\n%s, substituting with <b>%s</b>\n(%s)", type, encoding, embedded, substitute, filename);
 			else
-				details = g_markup_printf_escaped ("%s\n%s", type, embedded);
+				details = g_markup_printf_escaped ("%s\nEncoding: %s\n%s", type, encoding, embedded);
 
 			gtk_list_store_append (GTK_LIST_STORE (model), &iter);
 			gtk_list_store_set (GTK_LIST_STORE (model), &iter,
