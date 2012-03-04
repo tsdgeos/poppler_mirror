@@ -34,6 +34,7 @@
 // Copyright (C) 2010 Nils Höglund <nils.hoglund@gmail.com>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
+// Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -4380,6 +4381,9 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
     if (obj1.isNull()) {
       obj1.free();
       dict->lookup("D", &obj1);
+    }
+    if (bits == 0) {
+      goto err2;
     }
     colorMap = new GfxImageColorMap(bits, &obj1, colorSpace);
     obj1.free();
