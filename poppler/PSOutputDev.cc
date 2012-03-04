@@ -1815,76 +1815,78 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
     setupType3Font(font, psName, parentResDict);
   } else {
     fontLoc = font->locateFont(xref, gTrue);
-    switch (fontLoc->locType) {
-    case gfxFontLocEmbedded:
-      switch (fontLoc->fontType) {
-      case fontType1:
-	// this assumes that the PS font name matches the PDF font name
-	psName = font->getEmbeddedFontName()->copy();
-	setupEmbeddedType1Font(&fontLoc->embFontID, psName);
-	break;
-      case fontType1C:
-	psName = makePSFontName(font, &fontLoc->embFontID);
-	setupEmbeddedType1CFont(font, &fontLoc->embFontID, psName);
-	break;
-      case fontType1COT:
-	psName = makePSFontName(font, &fontLoc->embFontID);
-	setupEmbeddedOpenTypeT1CFont(font, &fontLoc->embFontID, psName);
-	break;
-      case fontTrueType:
-      case fontTrueTypeOT:
-	psName = makePSFontName(font, font->getID());
-	setupEmbeddedTrueTypeFont(font, &fontLoc->embFontID, psName);
-	break;
-      case fontCIDType0C:
-	psName = makePSFontName(font, &fontLoc->embFontID);
-	setupEmbeddedCIDType0Font(font, &fontLoc->embFontID, psName);
-	break;
-      case fontCIDType2:
-      case fontCIDType2OT:
-	psName = makePSFontName(font, font->getID());
-	//~ should check to see if font actually uses vertical mode
-	setupEmbeddedCIDTrueTypeFont(font, &fontLoc->embFontID, psName, gTrue);
-	break;
-      case fontCIDType0COT:
-	psName = makePSFontName(font, &fontLoc->embFontID);
-	setupEmbeddedOpenTypeCFFFont(font, &fontLoc->embFontID, psName);
-	break;
-      default:
-	break;
-      }
-      break;
-    case gfxFontLocExternal:
-      //~ add cases for external 16-bit fonts
-      switch (fontLoc->fontType) {
-      case fontType1:
-	if (font->getName()) {
+    if (fontLoc != NULL) {
+      switch (fontLoc->locType) {
+      case gfxFontLocEmbedded:
+	switch (fontLoc->fontType) {
+	case fontType1:
 	  // this assumes that the PS font name matches the PDF font name
-	  psName = font->getName()->copy();
-	} else {
-	  //~ this won't work -- the PS font name won't match
+	  psName = font->getEmbeddedFontName()->copy();
+	  setupEmbeddedType1Font(&fontLoc->embFontID, psName);
+	  break;
+	case fontType1C:
+	  psName = makePSFontName(font, &fontLoc->embFontID);
+	  setupEmbeddedType1CFont(font, &fontLoc->embFontID, psName);
+	  break;
+	case fontType1COT:
+	  psName = makePSFontName(font, &fontLoc->embFontID);
+	  setupEmbeddedOpenTypeT1CFont(font, &fontLoc->embFontID, psName);
+	  break;
+	case fontTrueType:
+	case fontTrueTypeOT:
 	  psName = makePSFontName(font, font->getID());
+	  setupEmbeddedTrueTypeFont(font, &fontLoc->embFontID, psName);
+	  break;
+	case fontCIDType0C:
+	  psName = makePSFontName(font, &fontLoc->embFontID);
+	  setupEmbeddedCIDType0Font(font, &fontLoc->embFontID, psName);
+	  break;
+	case fontCIDType2:
+	case fontCIDType2OT:
+	  psName = makePSFontName(font, font->getID());
+	  //~ should check to see if font actually uses vertical mode
+	  setupEmbeddedCIDTrueTypeFont(font, &fontLoc->embFontID, psName, gTrue);
+	  break;
+	case fontCIDType0COT:
+	  psName = makePSFontName(font, &fontLoc->embFontID);
+	  setupEmbeddedOpenTypeCFFFont(font, &fontLoc->embFontID, psName);
+	  break;
+	default:
+	  break;
 	}
-	setupExternalType1Font(fontLoc->path, psName);
 	break;
-      case fontTrueType:
-      case fontTrueTypeOT:
-	psName = makePSFontName(font, font->getID());
-	setupExternalTrueTypeFont(font, fontLoc->path, psName);
+      case gfxFontLocExternal:
+	//~ add cases for external 16-bit fonts
+	switch (fontLoc->fontType) {
+	case fontType1:
+	  if (font->getName()) {
+	    // this assumes that the PS font name matches the PDF font name
+	    psName = font->getName()->copy();
+	  } else {
+	    //~ this won't work -- the PS font name won't match
+	    psName = makePSFontName(font, font->getID());
+	  }
+	  setupExternalType1Font(fontLoc->path, psName);
+	  break;
+	case fontTrueType:
+	case fontTrueTypeOT:
+	  psName = makePSFontName(font, font->getID());
+	  setupExternalTrueTypeFont(font, fontLoc->path, psName);
+	  break;
+	case fontCIDType2:
+	case fontCIDType2OT:
+	  psName = makePSFontName(font, font->getID());
+	  //~ should check to see if font actually uses vertical mode
+	  setupExternalCIDTrueTypeFont(font, fontLoc->path, psName, gTrue);
+	  break;
+	default:
+	  break;
+	}
 	break;
-      case fontCIDType2:
-      case fontCIDType2OT:
-	psName = makePSFontName(font, font->getID());
-	//~ should check to see if font actually uses vertical mode
-	setupExternalCIDTrueTypeFont(font, fontLoc->path, psName, gTrue);
-	break;
-      default:
+      case gfxFontLocResident:
+	psName = fontLoc->path->copy();
 	break;
       }
-      break;
-    case gfxFontLocResident:
-      psName = fontLoc->path->copy();
-      break;
     }
 
     if (!psName) {
@@ -2363,9 +2365,6 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font,
   FoFiTrueType *ffTT;
   int *codeToGID;
   int codeToGIDLen;
-  CharCodeToUnicode *ctu;
-  Unicode *uBuf;
-  int cmap, code;
 
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
@@ -2379,54 +2378,36 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font,
 
     // check for embedding permission
     if (ffTT->getEmbeddingRights() >= 1) {
-
-      // create a CID-to-GID mapping, via Unicode
-      if ((ctu = ((GfxCIDFont *)font)->getToUnicode())) {
-	// look for a Unicode cmap
-	for (cmap = 0; cmap < ffTT->getNumCmaps(); ++cmap) {
-	  if ((ffTT->getCmapPlatform(cmap) == 3 &&
-	       ffTT->getCmapEncoding(cmap) == 1) ||
-	      ffTT->getCmapPlatform(cmap) == 0) {
-	    break;
-	  }
+      codeToGID = NULL;
+      codeToGIDLen = 0;
+      if (((GfxCIDFont *)font)->getCIDToGID()) {
+	codeToGIDLen = ((GfxCIDFont *)font)->getCIDToGIDLen();
+	if (codeToGIDLen) {
+		codeToGID = (int *)gmallocn(codeToGIDLen, sizeof(int));
+		memcpy(codeToGID, ((GfxCIDFont *)font)->getCIDToGID(),
+			codeToGIDLen * sizeof(int));
 	}
-	if (cmap < ffTT->getNumCmaps()) {
-	  // map CID -> Unicode -> GID
-	  codeToGIDLen = ctu->getLength();
-	  codeToGID = (int *)gmallocn(codeToGIDLen, sizeof(int));
-	  for (code = 0; code < codeToGIDLen; ++code) {
-	    int n = ctu->mapToUnicode(code, &uBuf);
-	    if (n > 0) {
-	      codeToGID[code] = ffTT->mapCodeToGID(cmap, uBuf[0]);
-	    } else {
-	      codeToGID[code] = 0;
-	    }
-	  }
-          if (ffTT->isOpenTypeCFF()) {
-	    ffTT->convertToCIDType0(psName->getCString(),
-				 codeToGID, codeToGIDLen,
-				 outputFunc, outputStream);
-          } else if (globalParams->getPSLevel() >= psLevel3) {
-	    // Level 3: use a CID font
-	    ffTT->convertToCIDType2(psName->getCString(),
-				    codeToGID, codeToGIDLen,
-				    needVerticalMetrics,
-				    outputFunc, outputStream);
-	  } else {
-	    // otherwise: use a non-CID composite font
-	    ffTT->convertToType0(psName->getCString(),
-				 codeToGID, codeToGIDLen,
-				 needVerticalMetrics,
-				 outputFunc, outputStream);
-	  }
-	  gfree(codeToGID);
-	}
-	ctu->decRefCnt();
       } else {
-	error(errSyntaxError, -1,
-	      "Couldn't find a mapping to Unicode for font '{0:s}'",
-	      font->getName() ? font->getName()->getCString() : "(unnamed)");
+	codeToGID = ((GfxCIDFont *)font)->getCodeToGIDMap(ffTT, &codeToGIDLen);
       }
+      if (ffTT->isOpenTypeCFF()) {
+	ffTT->convertToCIDType0(psName->getCString(),
+		codeToGID, codeToGIDLen,
+		outputFunc, outputStream);
+      } else if (globalParams->getPSLevel() >= psLevel3) {
+	// Level 3: use a CID font
+	ffTT->convertToCIDType2(psName->getCString(),
+		codeToGID, codeToGIDLen,
+		needVerticalMetrics,
+		outputFunc, outputStream);
+      } else {
+	// otherwise: use a non-CID composite font
+	ffTT->convertToType0(psName->getCString(),
+		codeToGID, codeToGIDLen,
+		needVerticalMetrics,
+		outputFunc, outputStream);
+      }
+      gfree(codeToGID);
     } else {
       error(errSyntaxError, -1,
 	    "TrueType font '%s' does not allow embedding",
