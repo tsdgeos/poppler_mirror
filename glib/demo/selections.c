@@ -127,7 +127,7 @@ pgd_selections_update_selection_region (PgdSelectionsDemo *demo)
 }
 
 static void
-pgd_selections_update_seleted_text (PgdSelectionsDemo *demo)
+pgd_selections_update_selected_text (PgdSelectionsDemo *demo)
 {
 	GList *region;
 	gchar *text;
@@ -319,7 +319,7 @@ pgd_selections_drawing_area_button_release (GtkWidget         *area,
 		return FALSE;
 
 	if (demo->start.x != -1)
-		pgd_selections_update_seleted_text (demo);
+		pgd_selections_update_selected_text (demo);
 
 	demo->start.x = -1;
 
