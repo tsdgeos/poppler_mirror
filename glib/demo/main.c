@@ -296,6 +296,8 @@ gint main (gint argc, gchar **argv)
 	gchar            *uri;
 	GTimer           *timer;
 	GError           *error = NULL;
+	GtkAccelGroup    *gtk_accel;
+	GClosure         *closure;
 
 	if (argc != 2) {
 		g_print ("Usage: poppler-glib-demo FILE\n");
@@ -363,6 +365,13 @@ gint main (gint argc, gchar **argv)
 	gtk_window_set_title (GTK_WINDOW (win), "Poppler GLib Demo");
 	g_signal_connect (G_OBJECT (win), "delete-event",
 			  G_CALLBACK (gtk_main_quit), NULL);
+
+	gtk_accel = gtk_accel_group_new ();
+	closure = g_cclosure_new (G_CALLBACK (gtk_main_quit), NULL, NULL);
+	gtk_accel_group_connect (gtk_accel, gdk_keyval_from_name ("q"),
+				 GDK_CONTROL_MASK, 0, closure);
+	g_closure_unref (closure);
+	gtk_window_add_accel_group (GTK_WINDOW(win), gtk_accel);
 
 	hbox = gtk_hbox_new (FALSE, 6);
 
