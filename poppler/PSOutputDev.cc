@@ -2840,7 +2840,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
   outerSize = size/65535 + 1;
 
   writePSFmt("{0:d} array dup /{1:s}Data_{2:d}_{3:d} exch def\n",
-	     size, mask ? "Mask" : "Im", id.num, id.gen);
+	     outerSize, mask ? "Mask" : "Im", id.num, id.gen);
   str->close();
 
   // write the data into the array
