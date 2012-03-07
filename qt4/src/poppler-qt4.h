@@ -10,6 +10,7 @@
  * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
  * Copyright (C) 2011 Glad Deschrijver <glad.deschrijver@gmail.com>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
+ * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -676,6 +677,11 @@ delete it;
 	
 	/**
 	 Returns the annotations of the page
+
+	 \note If you call this method twice, you get different objects
+	       pointing to the same annotations (see Annotation).
+	       The caller owns the returned objects and they should be deleted
+	       when no longer required.
 	*/
 	QList<Annotation*> annotations() const;
 

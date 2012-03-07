@@ -11,6 +11,7 @@
  * Copyright (C) 2010 Matthias Fauconneau <matthias.fauconneau@gmail.com>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012 Tobias Koenig <tokoe@kdab.com>
+ * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,17 +62,6 @@
 #include "poppler-media.h"
 
 namespace Poppler {
-
-class DummyAnnotation : public Annotation
-{
-    public:
-        DummyAnnotation()
-            : Annotation( *new AnnotationPrivate() )
-        {
-        }
-
-        virtual SubType subType() const { return A_BASE; }
-};
 
 Link* PageData::convertLinkActionToLink(::LinkAction * a, const QRectF &linkArea)
 {
@@ -698,9 +688,9 @@ QList<Annotation*> Page::annotations() const
                 if ( border_effect )
                 {
                     // -> style.effect
-                    t->style.effect = (Annotation::LineEffect)border_effect->getEffectType();
+                    t->d_ptr->style.setLineEffect( (Annotation::LineEffect)border_effect->getEffectType() );
                     // -> style.effectIntensity
-                    t->style.effectIntensity = (int)border_effect->getIntensity();
+                    t->d_ptr->style.setEffectIntensity( (int)border_effect->getIntensity() );
                 }
                 break;
             }
@@ -797,9 +787,9 @@ QList<Annotation*> Page::annotations() const
                 if ( border_effect )
                 {
                     // -> style.effect
-                    g->style.effect = (Annotation::LineEffect)border_effect->getEffectType();
+                    g->d_ptr->style.setLineEffect( (Annotation::LineEffect)border_effect->getEffectType() );
                     // -> style.effectIntensity
-                    g->style.effectIntensity = (int)border_effect->getIntensity();
+                    g->d_ptr->style.setEffectIntensity( (int)border_effect->getIntensity() );
                 }
 
                 // TODO RD
@@ -918,8 +908,8 @@ QList<Annotation*> Page::annotations() const
                 // no need to parse parent annotation id
                 //XPDFReader::lookupIntRef( annotDict, "Parent", popup->... );
 
-                // use the 'dummy annotation' for getting other parameters
-                popup->dummyAnnotation = new DummyAnnotation();
+                // pretend it's a GeomAnnotation for getting other parameters
+                popup->dummyAnnotation = new GeomAnnotation();
                 annotation = popup->dummyAnnotation;
 
                 break;
@@ -1122,14 +1112,14 @@ QList<Annotation*> Page::annotations() const
             {
                 AnnotBorderArray * border_array = static_cast< AnnotBorderArray * >( border );
                 // -> style.xCorners
-                annotation->style.xCorners = border_array->getHorizontalCorner();
+                annotation->d_ptr->style.setXCorners(border_array->getHorizontalCorner());
                 // -> style.yCorners
-                annotation->style.yCorners = border_array->getVerticalCorner();
+                annotation->d_ptr->style.setYCorners(border_array->getVerticalCorner());
             }
             // -> style.width
-            annotation->style.width = border->getWidth();
+            annotation->d_ptr->style.setWidth(border->getWidth());
             // -> style.style
-            annotation->style.style = (Annotation::LineStyle)( 1 << border->getStyle() );
+            annotation->d_ptr->style.setLineStyle((Annotation::LineStyle)( 1 << border->getStyle() ));
 #if 0
             // -> style.marks and style.spaces
             // TODO
@@ -1154,7 +1144,7 @@ QList<Annotation*> Page::annotations() const
 #endif
         }
         // -> style.color
-        annotation->style.color = convertAnnotColor( ann->getColor() );
+        annotation->d_ptr->style.setColor(convertAnnotColor( ann->getColor() ));
 
         /** 1.4. PARSE markup { common, Popup, Revision } parameters */
         if ( markupann )
@@ -1166,12 +1156,12 @@ QList<Annotation*> Page::annotations() const
                 annotation->setCreationDate( convertDate( createDate->getCString() ) );
             }
             // -> style.opacity
-            annotation->style.opacity = markupann->getOpacity();
+            annotation->d_ptr->style.setOpacity( markupann->getOpacity() );
             // -> window.title and author
-            annotation->window.title = UnicodeParsedString( markupann->getLabel() );
-            annotation->setAuthor( annotation->window.title );
+            annotation->d_ptr->popup.setTitle(UnicodeParsedString( markupann->getLabel() ));
+            annotation->setAuthor( annotation->d_ptr->popup.title() );
             // -> window.summary
-            annotation->window.summary = UnicodeParsedString( markupann->getSubject() );
+            annotation->d_ptr->popup.setSummary(UnicodeParsedString( markupann->getSubject() ));
 #if 0
             // -> window.text
             // TODO
@@ -1271,17 +1261,21 @@ QList<Annotation*> Page::annotations() const
                 // set annotation's window properties taking ones from popup
                 PopupWindow * pop = popupsMap[ request.popup ];
                 Annotation * pa = pop->dummyAnnotation;
-                Annotation::Window & w = request.annotation->window;
+                Annotation * ann = request.annotation;
 
                 // transfer properties to Annotation's window
-                w.flags = pa->flags() & (Annotation::Hidden |
+                int flags = pa->flags() & (Annotation::Hidden |
                     Annotation::FixedSize | Annotation::FixedRotation);
                 if ( !pop->shown )
-                    w.flags |= Annotation::Hidden;
-                w.topLeft.setX(pa->boundary().left());
-                w.topLeft.setY(pa->boundary().top());
-                w.width = (int)( pa->boundary().right() - pa->boundary().left() );
-                w.height = (int)( pa->boundary().bottom() - pa->boundary().top() );
+                    flags |= Annotation::Hidden;
+                ann->d_ptr->popup.setFlags(flags);
+
+                QRectF geom;
+                geom.setLeft(pa->boundary().left());
+                geom.setTop(pa->boundary().top());
+                geom.setWidth( pa->boundary().right() - pa->boundary().left() );
+                geom.setHeight( pa->boundary().bottom() - pa->boundary().top() );
+                ann->d_ptr->popup.setGeometry(geom);
             }
         }
 
@@ -1312,12 +1306,10 @@ QList<Annotation*> Page::annotations() const
                           << parentID << ".";
             else
             {
-                // compile and add a Revision structure to the parent annotation
-                Annotation::Revision childRevision;
-                childRevision.annotation = request.nextAnnotation;
-                childRevision.scope = request.nextScope;
-                childRevision.type = request.nextType;
-                annotationsMap[ parentID ]->revisions().append( childRevision );
+                // add annotation as a reply to the parent annotation
+                Annotation *curr = request.nextAnnotation;
+                annotationsMap[ parentID ]->addRevision( curr, request.nextScope, request.nextType );
+                delete curr;
                 // exclude child annotation from being rooted in page
                 excludeIDs[ excludeIndex++ ] = request.nextAnnotationID;
             }
@@ -1335,22 +1327,24 @@ QList<Annotation*> Page::annotations() const
         for ( ; it != end; ++it )
         {
             const PostProcessText & request = *it;
-            Annotation::Window & window = request.textAnnotation->window;
+            Annotation * reqann = request.textAnnotation;
+            int flags = reqann->d_ptr->popup.flags();
             // if not present, 'create' the window in-place over the annotation
-            if ( window.flags == -1 )
+            if ( flags == -1 )
             {
-                window.flags = 0;
-                QRectF geom = request.textAnnotation->boundary();
                 // initialize window geometry to annotation's one
-                window.width = (int)( geom.right() - geom.left() );
-                window.height = (int)( geom.bottom() - geom.top() );
-                window.topLeft.setX( geom.left() > 0.0 ? geom.left() : 0.0 );
-                window.topLeft.setY( geom.top() > 0.0 ? geom.top() : 0.0 );
+                QPointF tl = reqann->boundary().topLeft();
+                QSizeF size = reqann->boundary().size();
+                if (tl.x() < 0) tl.setX(0);
+                if (tl.y() < 0) tl.setY(0);
+                reqann->d_ptr->popup.setGeometry( QRectF (tl, size) );
+                flags = 0;
             }
             // (pdf) if text is not 'opened', force window hiding. if the window
             // was parsed from popup, the flag should already be set
-            if ( !request.opened && window.flags != -1 )
-                window.flags |= Annotation::Hidden;
+            if ( !request.opened && flags != -1 )
+                flags |= Annotation::Hidden;
+            reqann->d_ptr->popup.setFlags( flags );
         }
     }
 

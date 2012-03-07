@@ -1,6 +1,7 @@
 /* poppler-link-extractor-private.h: qt interface to poppler
  * Copyright (C) 2007, Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
+ * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,8 @@
 #ifndef _POPPLER_ANNOTATION_PRIVATE_H_
 #define _POPPLER_ANNOTATION_PRIVATE_H_
 
+#include <QtCore/QSharedDataPointer>
+
 #include "poppler-annotation.h"
 
 #include <Object.h>
@@ -27,11 +30,15 @@
 namespace Poppler
 {
 
-class AnnotationPrivate
+class AnnotationPrivate : public QSharedData
 {
     public:
         AnnotationPrivate();
         virtual ~AnnotationPrivate();
+
+        /* Returns an Annotation of the right subclass whose d_ptr points to
+         * this AnnotationPrivate */
+        virtual Annotation * makeAlias() = 0;
 
         /* properties: contents related */
         QString author;
@@ -44,7 +51,15 @@ class AnnotationPrivate
         int flags;
         QRectF boundary;
 
-        QLinkedList< Annotation::Revision > revisions;
+        /* style and popup */
+        Annotation::Style style;
+        Annotation::Popup popup;
+
+        /* revisions */
+        Annotation::RevScope revisionScope;
+        Annotation::RevType revisionType;
+        QList<Annotation*> revisions;
+
         Ref pdfObjectReference;
 };
 
