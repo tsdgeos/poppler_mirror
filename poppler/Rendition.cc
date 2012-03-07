@@ -344,7 +344,7 @@ MediaRendition::MediaRendition(Object* obj) {
       BE.parseMediaPlayParameters(&params);
     }
     params.free();
-  } else if (hasClip) {
+  } else if (!hasClip) {
     error (errSyntaxError, -1, "Invalid Media Rendition");
     ok = gFalse;
   }
