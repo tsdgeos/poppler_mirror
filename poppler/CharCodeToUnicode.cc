@@ -43,6 +43,7 @@
 #include "GlobalParams.h"
 #include "PSTokenizer.h"
 #include "CharCodeToUnicode.h"
+#include "UTF.h"
 
 //------------------------------------------------------------------------
 
@@ -453,15 +454,16 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n,
     }
     map[code] = 0;
     sMap[sMapLen].c = code;
-    sMap[sMapLen].len = n / 4;
-    sMap[sMapLen].u = (Unicode*)gmallocn(sMap[sMapLen].len, sizeof(Unicode));
-    for (j = 0; j < sMap[sMapLen].len; ++j) {
-      if (!parseHex(uStr + j*4, 4, &sMap[sMapLen].u[j])) {
+    int utf16Len = n / 4;
+    Unicode *utf16 = (Unicode*)gmallocn(utf16Len, sizeof(Unicode));
+    for (j = 0; j < utf16Len; ++j) {
+      if (!parseHex(uStr + j*4, 4, &utf16[j])) {
 	error(errSyntaxWarning, -1, "Illegal entry in ToUnicode CMap");
 	return;
       }
     }
-    sMap[sMapLen].u[sMap[sMapLen].len - 1] += offset;
+    utf16[utf16Len - 1] += offset;
+    sMap[sMapLen].len = UTF16toUCS4(utf16, utf16Len, &sMap[sMapLen].u);
     ++sMapLen;
   }
 }

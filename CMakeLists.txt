@@ -296,6 +296,7 @@ set(poppler_SRCS
   poppler/strtok_r.cpp
   poppler/UnicodeMap.cc
   poppler/UnicodeTypeTable.cc
+  poppler/UTF.cc
   poppler/XRef.cc
   poppler/PSOutputDev.cc
   poppler/TextOutputDev.cc
@@ -466,7 +467,7 @@ if(ENABLE_XPDF_HEADERS)
     poppler/SecurityHandler.h
     poppler/StdinCachedFile.h
     poppler/StdinPDFDocBuilder.h
-    poppler/UTF8.h
+    poppler/UTF.h
     poppler/XpdfPluginAPI.h
     poppler/Sound.h
     ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h

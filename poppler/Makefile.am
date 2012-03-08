@@ -251,7 +251,7 @@ poppler_include_HEADERS =	\
 	PSOutputDev.h		\
 	TextOutputDev.h		\
 	SecurityHandler.h	\
-	UTF8.h			\
+	UTF.h			\
 	XpdfPluginAPI.h		\
 	Sound.h
 nodist_poppler_include_HEADERS = poppler-config.h
@@ -317,6 +317,7 @@ libpoppler_la_SOURCES =		\
 	strtok_r.cpp		\
 	UnicodeMap.cc		\
 	UnicodeTypeTable.cc	\
+	UTF.cc                  \
 	ViewerPreferences.cc	\
 	XRef.cc			\
 	PSOutputDev.cc		\

@@ -1,6 +1,6 @@
 //========================================================================
 //
-// UTF8.h
+// UTF.h
 //
 // Copyright 2001-2003 Glyph & Cog, LLC
 //
@@ -19,6 +19,23 @@
 // came with your tarball or type make ChangeLog if you are building from git
 //
 //========================================================================
+
+#ifndef UTF_H
+#define UTF_H
+
+#ifdef USE_GCC_PRAGMAS
+#pragma implementation
+#endif
+
+#include "CharTypes.h"
+
+// Convert a UTF-16 string to a UCS-4
+//   utf16      - utf16 bytes
+//   utf16_len  - number of UTF-16 characters
+//   ucs4_out   - if not NULL, allocates and returns UCS-4 string. Free with gfree.
+//   returns number of UCS-4 characters
+int UTF16toUCS4(const Unicode *utf16, int utf16_len, Unicode **ucs4_out);
+
 
 static int mapUTF8(Unicode u, char *buf, int bufSize) {
   if        (u <= 0x0000007f) {
@@ -60,7 +77,7 @@ static int mapUCS2(Unicode u, char *buf, int bufSize) {
   if (u <= 0xffff) {
     if (bufSize < 2) {
       return 0;
-    }
+     }
     buf[0] = (char)((u >> 8) & 0xff);
     buf[1] = (char)(u & 0xff);
     return 2;
@@ -82,3 +99,5 @@ static int mapUCS2(Unicode u, char *buf, int bufSize) {
     return 0;
   }
 }
+
+#endif

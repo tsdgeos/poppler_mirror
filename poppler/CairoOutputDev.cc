@@ -61,7 +61,7 @@
 #include "CairoOutputDev.h"
 #include "CairoFontEngine.h"
 #include "CairoRescaleBox.h"
-#include "UTF8.h"
+#include "UTF.h"
 //------------------------------------------------------------------------
 
 // #define LOG_CAIRO

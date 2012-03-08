@@ -2392,24 +2392,7 @@ void TextPage::addChar(GfxState *state, double x, double y,
     w1 /= uLen;
     h1 /= uLen;
     for (i = 0; i < uLen; ++i) {
-      if (u[i] >= 0xd800 && u[i] < 0xdc00) { /* surrogate pair */
-	if (i + 1 < uLen && u[i+1] >= 0xdc00 && u[i+1] < 0xe000) {
-	  /* next code is a low surrogate */
-	  Unicode uu = (((u[i] & 0x3ff) << 10) | (u[i+1] & 0x3ff)) + 0x10000;
-	  i++;
-	  curWord->addChar(state, x1 + i*w1, y1 + i*h1, w1, h1, charPos, nBytes, c, uu);
-	} else {
-	    /* missing low surrogate
-	     replace it with REPLACEMENT CHARACTER (U+FFFD) */
-	  curWord->addChar(state, x1 + i*w1, y1 + i*h1, w1, h1, charPos, nBytes, c, 0xfffd);
-	}
-      } else if (u[i] >= 0xdc00 && u[i] < 0xe000) {
-	  /* invalid low surrogate
-	   replace it with REPLACEMENT CHARACTER (U+FFFD) */
-	curWord->addChar(state, x1 + i*w1, y1 + i*h1, w1, h1, charPos, nBytes, c, 0xfffd);
-      } else {
-	curWord->addChar(state, x1 + i*w1, y1 + i*h1, w1, h1, charPos, nBytes, c, u[i]);
-      }
+      curWord->addChar(state, x1 + i*w1, y1 + i*h1, w1, h1, charPos, nBytes, c, u[i]);
     }
   }
   charPos += nBytes;
