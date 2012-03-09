@@ -1,6 +1,7 @@
 /* poppler-annotation-helper.h: qt interface to poppler
  * Copyright (C) 2006, 2008, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -20,6 +21,8 @@
  */
 
 #include <QtCore/QDebug>
+
+#include <Object.h>
 
 class QColor;
 
@@ -174,34 +177,6 @@ void XPDFReader::transform( double * M, double x, double y, QPointF &res )
     res.setX( M[0] * x + M[2] * y + M[4] );
     res.setY( M[1] * x + M[3] * y + M[5] );
 }
-
-/** @short Helper classes for CROSSDEPS resolving and DS conversion. */
-struct ResolveRevision
-{
-    int           prevAnnotationID; // ID of the annotation to be reparended
-    int           nextAnnotationID; // (only needed for speeding up resolving)
-    Annotation *  nextAnnotation;   // annotation that will act as parent
-    Annotation::RevScope nextScope; // scope of revision (Reply)
-    Annotation::RevType  nextType;  // type of revision (None)
-};
-
-struct ResolveWindow
-{
-    AnnotPopup *  popup;            // the (maybe shared) window
-    Annotation *  annotation;       // annotation having the popup window
-};
-
-struct PostProcessText              // this handles a special pdf case conversion
-{
-    Annotation *  textAnnotation;   // a popup text annotation (not FreeText)
-    bool          opened;           // pdf property to convert to window flags
-};
-
-struct PopupWindow
-{
-    Annotation *  dummyAnnotation;  // window properties (in pdf as Annotation)
-    bool          shown;            // converted to Annotation::Hidden flag
-};
 
 QColor convertAnnotColor( AnnotColor *color );
 

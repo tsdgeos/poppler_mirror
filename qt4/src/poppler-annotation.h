@@ -106,7 +106,6 @@ class POPPLER_QT4_EXPORT Annotation
 {
   friend class AnnotationUtils;
   friend class LinkMovie;
-  friend class Page;
 
   public:
     // enum definitions
@@ -308,26 +307,21 @@ class POPPLER_QT4_EXPORT Annotation
  */
 class POPPLER_QT4_EXPORT TextAnnotation : public Annotation
 {
-  friend class Page;
   friend class AnnotationUtils;
+  friend class AnnotationPrivate;
 
   public:
-    virtual ~TextAnnotation();
-    virtual SubType subType() const;
-
     // local enums
     enum TextType { Linked, InPlace };
     enum InplaceIntent { Unknown, Callout, TypeWriter };
+
+    virtual ~TextAnnotation();
+    virtual SubType subType() const;
 
     /**
        The type of text annotation represented by this object
     */
     TextType textType() const;
-
-    /**
-       Set the type of text annotation represented by this object
-    */
-    void setTextType( TextType type );
 
     /**
        The name of the icon for this text annotation.
@@ -370,16 +364,20 @@ class POPPLER_QT4_EXPORT TextAnnotation : public Annotation
     void setInplaceText( const QString &text );
 
     QPointF calloutPoint( int id ) const;
-    void setCalloutPoint( int id, const QPointF &point );
+    /// \since 0.20
+    QVector<QPointF> calloutPoints() const;
+    /// \since 0.20
+    void setCalloutPoints( const QVector<QPointF> &points );
 
     InplaceIntent inplaceIntent() const;
     void setInplaceIntent( InplaceIntent intent );
 
   private:
-    TextAnnotation();
+    TextAnnotation( TextType type );
     TextAnnotation( const QDomNode &node );
     TextAnnotation( TextAnnotationPrivate &dd );
     virtual void store( QDomNode &parentNode, QDomDocument &document ) const;
+    void setTextType( TextType type );
     Q_DECLARE_PRIVATE( TextAnnotation )
     Q_DISABLE_COPY( TextAnnotation )
 };
@@ -391,17 +389,21 @@ class POPPLER_QT4_EXPORT TextAnnotation : public Annotation
  */
 class POPPLER_QT4_EXPORT LineAnnotation : public Annotation
 {
-  friend class Page;
   friend class AnnotationUtils;
+  friend class AnnotationPrivate;
 
   public:
-    virtual ~LineAnnotation();
-    virtual SubType subType() const;
-
     // local enums
+    /// \since 0.20
+    enum LineType { StraightLine, Polyline };
     enum TermStyle { Square, Circle, Diamond, OpenArrow, ClosedArrow, None,
                      Butt, ROpenArrow, RClosedArrow, Slash };
     enum LineIntent { Unknown, Arrow, Dimension, PolygonCloud };
+
+    virtual ~LineAnnotation();
+    virtual SubType subType() const;
+
+    LineType lineType() const;
 
     QLinkedList<QPointF> linePoints() const;
     void setLinePoints( const QLinkedList<QPointF> &points );
@@ -431,10 +433,11 @@ class POPPLER_QT4_EXPORT LineAnnotation : public Annotation
     void setLineIntent( LineIntent intent );
 
   private:
-    LineAnnotation();
+    LineAnnotation( LineType type );
     LineAnnotation( const QDomNode &node );
     LineAnnotation( LineAnnotationPrivate &dd );
     virtual void store( QDomNode &parentNode, QDomDocument &document ) const;
+    void setLineType( LineType type );
     Q_DECLARE_PRIVATE( LineAnnotation )
     Q_DISABLE_COPY( LineAnnotation )
 };
@@ -447,8 +450,8 @@ class POPPLER_QT4_EXPORT LineAnnotation : public Annotation
  */
 class POPPLER_QT4_EXPORT GeomAnnotation : public Annotation
 {
-  friend class Page;
   friend class AnnotationUtils;
+  friend class AnnotationPrivate;
 
   public:
     virtual ~GeomAnnotation();
@@ -479,8 +482,8 @@ class POPPLER_QT4_EXPORT GeomAnnotation : public Annotation
  */
 class POPPLER_QT4_EXPORT HighlightAnnotation : public Annotation
 {
-  friend class Page;
   friend class AnnotationUtils;
+  friend class AnnotationPrivate;
 
   public:
     virtual ~HighlightAnnotation();
@@ -546,8 +549,8 @@ class POPPLER_QT4_EXPORT HighlightAnnotation : public Annotation
  */
 class POPPLER_QT4_EXPORT StampAnnotation : public Annotation
 {
-  friend class Page;
   friend class AnnotationUtils;
+  friend class AnnotationPrivate;
 
   public:
     virtual ~StampAnnotation();
@@ -597,8 +600,8 @@ class POPPLER_QT4_EXPORT StampAnnotation : public Annotation
  */
 class POPPLER_QT4_EXPORT InkAnnotation : public Annotation
 {
-  friend class Page;
   friend class AnnotationUtils;
+  friend class AnnotationPrivate;
 
   public:
     virtual ~InkAnnotation();
@@ -618,7 +621,8 @@ class POPPLER_QT4_EXPORT InkAnnotation : public Annotation
 
 class POPPLER_QT4_EXPORT LinkAnnotation : public Annotation
 {
-  friend class Page;
+  friend class AnnotationUtils;
+  friend class AnnotationPrivate;
 
   public:
     virtual ~LinkAnnotation();
@@ -652,8 +656,8 @@ class POPPLER_QT4_EXPORT LinkAnnotation : public Annotation
  */
 class POPPLER_QT4_EXPORT CaretAnnotation : public Annotation
 {
-  friend class Page;
   friend class AnnotationUtils;
+  friend class AnnotationPrivate;
 
   public:
     virtual ~CaretAnnotation();
@@ -685,7 +689,7 @@ class POPPLER_QT4_EXPORT CaretAnnotation : public Annotation
  */
 class POPPLER_QT4_EXPORT FileAttachmentAnnotation : public Annotation
 {
-  friend class Page;
+  friend class AnnotationPrivate;
 
   public:
     virtual ~FileAttachmentAnnotation();
@@ -729,7 +733,7 @@ class POPPLER_QT4_EXPORT FileAttachmentAnnotation : public Annotation
  */
 class POPPLER_QT4_EXPORT SoundAnnotation : public Annotation
 {
-  friend class Page;
+  friend class AnnotationPrivate;
 
   public:
     virtual ~SoundAnnotation();
@@ -773,7 +777,7 @@ class POPPLER_QT4_EXPORT SoundAnnotation : public Annotation
  */
 class POPPLER_QT4_EXPORT MovieAnnotation : public Annotation
 {
-  friend class Page;
+  friend class AnnotationPrivate;
 
   public:
     virtual ~MovieAnnotation();
@@ -817,7 +821,7 @@ class POPPLER_QT4_EXPORT MovieAnnotation : public Annotation
  */
 class POPPLER_QT4_EXPORT ScreenAnnotation : public Annotation
 {
-  friend class Page;
+  friend class AnnotationPrivate;
 
   public:
     virtual ~ScreenAnnotation();

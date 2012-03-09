@@ -310,7 +310,7 @@ delete it;
     */
     class POPPLER_QT4_EXPORT EmbeddedFile {
 	friend class DocumentData;
-	friend class Page;
+	friend class AnnotationPrivate;
     public:
 	/// \cond PRIVATE
 	EmbeddedFile(EmbFile *embfile);
@@ -1677,7 +1677,7 @@ height = dummy.height();
        \since 0.10
     */
     class POPPLER_QT4_EXPORT MovieObject {
-    friend class Page;
+    friend class AnnotationPrivate;
     public:
 	/**
 	   The play mode for playing the movie

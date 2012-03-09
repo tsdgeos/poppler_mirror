@@ -27,8 +27,13 @@
 
 #include <Object.h>
 
+class Annot;
+class Page;
+class PDFRectangle;
+
 namespace Poppler
 {
+class DocumentData;
 
 class AnnotationPrivate : public QSharedData
 {
@@ -60,7 +65,23 @@ class AnnotationPrivate : public QSharedData
         Annotation::RevType revisionType;
         QList<Annotation*> revisions;
 
-        Ref pdfObjectReference;
+        /* After this call, the Annotation object will behave like a wrapper for
+         * the specified Annot object. All cached values are discarded */
+        void tieToNativeAnnot(Annot *ann, ::Page *page, DocumentData *doc);
+
+        /* Inited to 0 (i.e. untied annotation) */
+        Annot *pdfAnnot;
+        ::Page *pdfPage;
+        DocumentData * parentDoc;
+
+        /* The following helpers only work if pdfPage is set */
+        void fillMTX(double MTX[6]) const;
+        QRectF fromPdfRectangle(const PDFRectangle &r) const;
+
+        /* Scan page for annotations, parentId=0 searches for root annotations */
+        static QList<Annotation*> findAnnotations(::Page *pdfPage, DocumentData *doc, int parentId = 0);
+
+        Ref pdfObjectReference() const;
 };
 
 }

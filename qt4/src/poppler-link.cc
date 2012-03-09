@@ -645,7 +645,7 @@ class LinkMoviePrivate : public LinkPrivate
 	bool LinkMovie::isReferencedAnnotation( const MovieAnnotation *annotation ) const
 	{
 		Q_D( const LinkMovie );
-		if ( d->annotationReference.num != -1 && d->annotationReference == annotation->d_ptr->pdfObjectReference )
+		if ( d->annotationReference.num != -1 && d->annotationReference == annotation->d_ptr->pdfObjectReference() )
 		{
 			return true;
 		}
