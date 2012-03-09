@@ -77,6 +77,7 @@ class AnnotationPrivate : public QSharedData
         /* The following helpers only work if pdfPage is set */
         void fillMTX(double MTX[6]) const;
         QRectF fromPdfRectangle(const PDFRectangle &r) const;
+        PDFRectangle toPdfRectangle(const QRectF &r) const;
 
         /* Scan page for annotations, parentId=0 searches for root annotations */
         static QList<Annotation*> findAnnotations(::Page *pdfPage, DocumentData *doc, int parentId = 0);

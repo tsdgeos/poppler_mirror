@@ -197,6 +197,32 @@ QRectF AnnotationPrivate::fromPdfRectangle(const PDFRectangle &r) const
     return QRectF( QPointF(tl_x,tl_y) , QPointF(br_x,br_y) );
 }
 
+PDFRectangle AnnotationPrivate::toPdfRectangle(const QRectF &r) const
+{
+    double MTX[6];
+    fillMTX(MTX);
+
+    double tl_x, tl_y, br_x, br_y, swp;
+    XPDFReader::invTransform( MTX, r.topLeft(), tl_x, tl_y );
+    XPDFReader::invTransform( MTX, r.bottomRight(), br_x, br_y );
+
+    if (tl_x > br_x)
+    {
+        swp = tl_x;
+        tl_x = br_x;
+        br_x = swp;
+    }
+
+    if (tl_y > br_y)
+    {
+        swp = tl_y;
+        tl_y = br_y;
+        br_y = swp;
+    }
+
+    return PDFRectangle(tl_x, tl_y, br_x, br_y);
+}
+
 QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentData *doc, int parentID)
 {
     Annots* annots = pdfPage->getAnnots();
@@ -906,7 +932,13 @@ void Annotation::setAuthor( const QString &author )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup*>(d->pdfAnnot);
+    if (markupann)
+    {
+        GooString *s = QStringToUnicodeGooString(author);
+        markupann->setLabel(s);
+        delete s;
+    }
 }
 
 QString Annotation::contents() const
@@ -929,7 +961,9 @@ void Annotation::setContents( const QString &contents )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    GooString *s = QStringToUnicodeGooString(contents);
+    d->pdfAnnot->setContents(s);
+    delete s;
 }
 
 QString Annotation::uniqueName() const
@@ -952,7 +986,9 @@ void Annotation::setUniqueName( const QString &uniqueName )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    QByteArray ascii = uniqueName.toAscii();
+    GooString s(ascii.constData());
+    d->pdfAnnot->setName(&s);
 }
 
 QDateTime Annotation::modificationDate() const
@@ -978,7 +1014,15 @@ void Annotation::setModificationDate( const QDateTime &date )
         return;
     }
 
-    // TODO: Set pdfAnnot
+#if 0 // TODO: Conversion routine is broken
+    if (d->pdfAnnot)
+    {
+        time_t t = date.toTime_t();
+        GooString *s = timeToDateString(&t);
+        d->pdfAnnot->setModified(s);
+        delete s;
+    }
+#endif
 }
 
 QDateTime Annotation::creationDate() const
@@ -1006,7 +1050,16 @@ void Annotation::setCreationDate( const QDateTime &date )
         return;
     }
 
-    // TODO: Set pdfAnnot
+#if 0 // TODO: Conversion routine is broken
+    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup*>(d->pdfAnnot);
+    if (markupann)
+    {
+        time_t t = date.toTime_t();
+        GooString *s = timeToDateString(&t);
+        markupann->setDate(s);
+        delete s;
+    }
+#endif
 }
 
 static int fromPdfFlags(int flags)
@@ -1031,6 +1084,28 @@ static int fromPdfFlags(int flags)
     return qtflags;
 }
 
+static int toPdfFlags(int qtflags)
+{
+    int flags = 0;
+
+    if ( qtflags & Annotation::Hidden )
+        flags |= Annot::flagHidden;
+    if ( qtflags & Annotation::FixedSize )
+        flags |= Annot::flagNoZoom;
+    if ( qtflags & Annotation::FixedRotation )
+        flags |= Annot::flagNoRotate;
+    if ( !( qtflags & Annotation::DenyPrint ) )
+        flags |= Annot::flagPrint;
+    if ( qtflags & Annotation::DenyWrite )
+        flags |= Annot::flagReadOnly;
+    if ( qtflags & Annotation::DenyDelete )
+        flags |= Annot::flagLocked;
+    if ( qtflags & Annotation::ToggleHidingOnMouse )
+        flags |= Annot::flagToggleNoView;
+
+    return flags;
+}
+
 int Annotation::flags() const
 {
     Q_D( const Annotation );
@@ -1051,7 +1126,7 @@ void Annotation::setFlags( int flags )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    d->pdfAnnot->setFlags(toPdfFlags( flags ));
 }
 
 QRectF Annotation::boundary() const
@@ -1075,7 +1150,8 @@ void Annotation::setBoundary( const QRectF &boundary )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    PDFRectangle rect = d->toPdfRectangle(boundary);
+    d->pdfAnnot->setRect(&rect);
 }
 
 Annotation::Style Annotation::style() const
@@ -1145,7 +1221,17 @@ void Annotation::setStyle( const Annotation::Style& style )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    d->pdfAnnot->setColor(convertQColor( style.color() ));
+
+    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup*>(d->pdfAnnot);
+    if (markupann)
+        markupann->setOpacity( style.opacity() );
+
+    AnnotBorderArray * border = new AnnotBorderArray();
+    border->setWidth( style.width() );
+    border->setHorizontalCorner( style.xCorners() );
+    border->setVerticalCorner( style.yCorners() );
+    d->pdfAnnot->setBorder(border);
 }
 
 Annotation::Popup Annotation::popup() const
@@ -1210,7 +1296,23 @@ void Annotation::setPopup( const Annotation::Popup& popup )
         return;
     }
 
-    // TODO: Set pdfAnnot
+#if 0 /* TODO: Remove old popup and add AnnotPopup to page */
+    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup*>(d->pdfAnnot);
+    if (!markupann)
+        return;
+
+    // Create a new AnnotPopup and assign it to pdfAnnot
+    PDFRectangle rect = d->toPdfRectangle( popup.geometry() );
+    AnnotPopup * p = new AnnotPopup( d->pdfPage->getDoc(), &rect );
+    p->setOpen( !(popup.flags() & Annotation::Hidden) );
+    if (!popup.summary().isEmpty())
+    {
+        GooString *s = QStringToUnicodeGooString(popup.summary());
+        markupann->setLabel(s);
+        delete s;
+    }
+    markupann->setPopup(p);
+#endif
 }
 
 Annotation::RevScope Annotation::revisionScope() const
@@ -3612,6 +3714,14 @@ QColor convertAnnotColor( AnnotColor *color )
             break;
     }
     return newcolor;
+}
+
+AnnotColor* convertQColor( const QColor &c )
+{
+    if (!c.isValid() || c.alpha() == 0)
+        return new AnnotColor(); // Transparent
+    else
+        return new AnnotColor(c.redF(), c.greenF(), c.blueF());
 }
 //END utility annotation functions
 

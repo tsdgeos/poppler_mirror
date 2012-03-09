@@ -45,6 +45,7 @@ class XPDFReader
         static inline void lookupDate( Dict *, char *, QDateTime & dest );
         // transform from user coords to normalized ones using the matrix M
         static inline void transform( double * M, double x, double y, QPointF &res );
+        static inline void invTransform( double * M, const QPointF &p, double &x, double &y );
 };
 
 void XPDFReader::lookupName( Dict * dict, char * type, QString & dest )
@@ -178,6 +179,20 @@ void XPDFReader::transform( double * M, double x, double y, QPointF &res )
     res.setY( M[1] * x + M[3] * y + M[5] );
 }
 
+void XPDFReader::invTransform( double * M, const QPointF &p, double &x, double &y )
+{
+    const double det = M[0]*M[3] - M[1]*M[2];
+    Q_ASSERT(det != 0);
+
+    const double invM[4] = { M[3]/det, -M[1]/det, -M[2]/det, M[0]/det };
+    const double xt = p.x() - M[4];
+    const double yt = p.y() - M[5];
+
+    x = invM[0] * xt + invM[2] * yt;
+    y = invM[1] * xt + invM[3] * yt;
+}
+
 QColor convertAnnotColor( AnnotColor *color );
+AnnotColor* convertQColor( const QColor &color );
 
 }
