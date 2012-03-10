@@ -29,7 +29,7 @@ class TestRun:
         self._docsdir = docsdir
         self._refsdir = refsdir
         self._outdir = outdir
-        self._skipped = get_skipped_tests(docsdir)
+        self._skip = get_skipped_tests(docsdir)
         self.config = Config()
 
         # Results
@@ -39,6 +39,7 @@ class TestRun:
         self._crashed = []
         self._failed_status_error = []
         self._stderr = []
+        self._skipped = []
 
         try:
             os.makedirs(self._outdir);
@@ -54,6 +55,7 @@ class TestRun:
         ref_is_crashed = backend.is_crashed(refs_path)
         ref_is_failed = backend.is_failed(refs_path)
         if not ref_has_md5 and not ref_is_crashed and not ref_is_failed:
+            self._skipped.append("%s (%s)" % (doc_path, backend.get_name()))
             print("Reference files not found, skipping '%s' for %s backend" % (doc_path, backend.get_name()))
             return
 
@@ -106,8 +108,10 @@ class TestRun:
             return
 
     def run_test(self, filename, n_doc = 1, total_docs = 1):
-        if filename in self._skipped:
-            print("Skipping test '%s' (%d/%d)" % (os.path.join(self._docsdir, filename), n_doc, total_docs))
+        if filename in self._skip:
+            doc_path = os.path.join(self._docsdir, filename)
+            self._skipped.append("%s" % (doc_path))
+            print("Skipping test '%s' (%d/%d)" % (doc_path, n_doc, total_docs))
             return
 
         out_path = os.path.join(self._outdir, filename)
@@ -122,6 +126,7 @@ class TestRun:
         refs_path = os.path.join(self._refsdir, filename)
 
         if not os.path.isdir(refs_path):
+            self._skipped.append("%s" % (doc_path))
             print("Reference dir not found for %s, skipping (%d/%d)" % (doc_path, n_doc, total_docs))
             return
 
@@ -156,5 +161,6 @@ class TestRun:
         report_tests(self._crashed, "crashed")
         report_tests(self._failed_status_error, "failed to run")
         report_tests(self._stderr, "have stderr output")
+        report_tests(self._skipped, "skipped")
 
 
