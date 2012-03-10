@@ -488,6 +488,7 @@ class POPPLER_QT4_EXPORT HighlightAnnotation : public Annotation
   friend class AnnotationPrivate;
 
   public:
+    HighlightAnnotation();
     virtual ~HighlightAnnotation();
     virtual SubType subType() const;
 
@@ -536,7 +537,6 @@ class POPPLER_QT4_EXPORT HighlightAnnotation : public Annotation
     void setHighlightQuads( const QList< Quad > &quads );
 
   private:
-    HighlightAnnotation();
     HighlightAnnotation( const QDomNode &node );
     HighlightAnnotation( HighlightAnnotationPrivate &dd );
     virtual void store( QDomNode &parentNode, QDomDocument &document ) const;
@@ -555,6 +555,7 @@ class POPPLER_QT4_EXPORT StampAnnotation : public Annotation
   friend class AnnotationPrivate;
 
   public:
+    StampAnnotation();
     virtual ~StampAnnotation();
     virtual SubType subType() const;
 
@@ -587,7 +588,6 @@ class POPPLER_QT4_EXPORT StampAnnotation : public Annotation
     void setStampIconName( const QString &name );
 
   private:
-    StampAnnotation();
     StampAnnotation( const QDomNode &node );
     StampAnnotation( StampAnnotationPrivate &dd );
     virtual void store( QDomNode &parentNode, QDomDocument &document ) const;

@@ -73,10 +73,10 @@ Annotation * AnnotationUtils::createAnnotation( const QDomElement & annElement )
             //annotation = new GeomAnnotation( annElement );
             break;
         case Annotation::AHighlight:
-            //annotation = new HighlightAnnotation( annElement );
+            annotation = new HighlightAnnotation( annElement );
             break;
         case Annotation::AStamp:
-            //annotation = new StampAnnotation( annElement );
+            annotation = new StampAnnotation( annElement );
             break;
         case Annotation::AInk:
             //annotation = new InkAnnotation( annElement );
@@ -2633,7 +2633,9 @@ class HighlightAnnotationPrivate : public AnnotationPrivate
         QList< HighlightAnnotation::Quad > highlightQuads; // not empty
 
         // helpers
+        static Annot::AnnotSubtype toAnnotSubType( HighlightAnnotation::HighlightType type );
         QList< HighlightAnnotation::Quad > fromQuadrilaterals(AnnotQuadrilaterals *quads) const;
+        AnnotQuadrilaterals * toQuadrilaterals(const QList< HighlightAnnotation::Quad > &quads) const;
 };
 
 HighlightAnnotationPrivate::HighlightAnnotationPrivate()
@@ -2644,6 +2646,21 @@ HighlightAnnotationPrivate::HighlightAnnotationPrivate()
 Annotation * HighlightAnnotationPrivate::makeAlias()
 {
     return new HighlightAnnotation(*this);
+}
+
+Annot::AnnotSubtype HighlightAnnotationPrivate::toAnnotSubType( HighlightAnnotation::HighlightType type )
+{
+    switch (type)
+    {
+        default: // HighlightAnnotation::Highlight:
+            return Annot::typeHighlight;
+        case HighlightAnnotation::Underline:
+            return Annot::typeUnderline;
+        case HighlightAnnotation::Squiggly:
+            return Annot::typeSquiggly;
+        case HighlightAnnotation::StrikeOut:
+            return Annot::typeStrikeOut;
+    }
 }
 
 QList< HighlightAnnotation::Quad > HighlightAnnotationPrivate::fromQuadrilaterals(AnnotQuadrilaterals *hlquads) const
@@ -2679,9 +2696,49 @@ QList< HighlightAnnotation::Quad > HighlightAnnotationPrivate::fromQuadrilateral
     return quads;
 }
 
+AnnotQuadrilaterals * HighlightAnnotationPrivate::toQuadrilaterals(const QList< HighlightAnnotation::Quad > &quads) const
+{
+    const int count = quads.size();
+    AnnotQuadrilaterals::AnnotQuadrilateral **ac =
+        (AnnotQuadrilaterals::AnnotQuadrilateral**)
+            gmallocn( count, sizeof(AnnotQuadrilaterals::AnnotQuadrilateral*) );
+
+    double MTX[6];
+    fillMTX(MTX);
+
+    int pos = 0;
+    foreach (const HighlightAnnotation::Quad &q, quads)
+    {
+        double x1, y1, x2, y2, x3, y3, x4, y4;
+        XPDFReader::invTransform( MTX, q.points[0], x1, y1 );
+        XPDFReader::invTransform( MTX, q.points[1], x2, y2 );
+        // Swap points 3 and 4 (see HighlightAnnotationPrivate::fromQuadrilaterals)
+        XPDFReader::invTransform( MTX, q.points[3], x3, y3 );
+        XPDFReader::invTransform( MTX, q.points[2], x4, y4 );
+        ac[pos++] = new AnnotQuadrilaterals::AnnotQuadrilateral(x1, y1, x2, y2, x3, y3, x4, y4);
+    }
+
+    return new AnnotQuadrilaterals(ac, count);
+}
+
 Annot* HighlightAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
 {
-    return 0; // Not implemented
+    // Set page and document
+    pdfPage = destPage;
+    parentDoc = doc;
+
+    // Set pdfAnnot
+    PDFRectangle rect = toPdfRectangle(boundary);
+    AnnotQuadrilaterals * quads = toQuadrilaterals(highlightQuads);
+    pdfAnnot = new AnnotTextMarkup(destPage->getDoc(), &rect, toAnnotSubType(highlightType), quads);
+    delete quads;
+
+    // Set properties
+    flushBaseAnnotationProperties();
+
+    highlightQuads.clear(); // Free up memory
+
+    return pdfAnnot;
 }
 
 HighlightAnnotation::HighlightAnnotation()
@@ -2815,7 +2872,8 @@ void HighlightAnnotation::setHighlightType( HighlightAnnotation::HighlightType t
         return;
     }
 
-    // TODO: Set pdfAnnot
+    AnnotTextMarkup * hlann = static_cast<AnnotTextMarkup*>(d->pdfAnnot);
+    hlann->setType(HighlightAnnotationPrivate::toAnnotSubType( type ));
 }
 
 QList< HighlightAnnotation::Quad > HighlightAnnotation::highlightQuads() const
@@ -2839,7 +2897,10 @@ void HighlightAnnotation::setHighlightQuads( const QList< HighlightAnnotation::Q
         return;
     }
 
-    // TODO: Set pdfAnnot
+    AnnotTextMarkup * hlann = static_cast<AnnotTextMarkup*>(d->pdfAnnot);
+    AnnotQuadrilaterals * quadrilaterals = d->toQuadrilaterals(quads);
+    hlann->setQuadrilaterals(quadrilaterals);
+    delete quadrilaterals;
 }
 
 
@@ -2867,7 +2928,25 @@ Annotation * StampAnnotationPrivate::makeAlias()
 
 Annot* StampAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
 {
-    return 0; // Not implemented
+    StampAnnotation *q = static_cast<StampAnnotation*>( makeAlias() );
+
+    // Set page and document
+    pdfPage = destPage;
+    parentDoc = doc;
+
+    // Set pdfAnnot
+    PDFRectangle rect = toPdfRectangle(boundary);
+    pdfAnnot = new AnnotStamp(destPage->getDoc(), &rect);
+
+    // Set properties
+    flushBaseAnnotationProperties();
+    q->setStampIconName(stampIconName);
+
+    delete q;
+
+    stampIconName.clear(); // Free up memory
+
+    return pdfAnnot;
 }
 
 StampAnnotation::StampAnnotation()
@@ -2943,7 +3022,10 @@ void StampAnnotation::setStampIconName( const QString &name )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    AnnotStamp * stampann = static_cast<AnnotStamp*>(d->pdfAnnot);
+    QByteArray encoded = name.toLatin1();
+    GooString s(encoded.constData());
+    stampann->setIcon(&s);
 }
 
 /** InkAnnotation [Annotation] */
