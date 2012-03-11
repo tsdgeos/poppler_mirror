@@ -20,6 +20,7 @@
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -349,6 +350,9 @@ public:
 
   void setFreeTypeHinting(GBool enable, GBool enableSlightHinting);
 
+protected:
+  void doUpdateFont(GfxState *state);
+
 private:
   GBool univariateShadedFill(GfxState *state, SplashUnivariatePattern *pattern, double tMin, double tMax);
 
@@ -362,7 +366,6 @@ private:
 			int overprintMode, GfxColor *singleColor, GBool grayIndexed = gFalse);
   SplashPath *convertPath(GfxState *state, GfxPath *path,
 			  GBool dropEmptySubpaths);
-  void doUpdateFont(GfxState *state);
   void drawType3Glyph(GfxState *state, T3FontCache *t3Font,
 		      T3FontCacheTag *tag, Guchar *data);
   static GBool imageMaskSrc(void *data, SplashColorPtr line);
