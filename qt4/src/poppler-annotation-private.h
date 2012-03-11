@@ -1,5 +1,6 @@
 /* poppler-link-extractor-private.h: qt interface to poppler
  * Copyright (C) 2007, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,8 @@
 #define _POPPLER_ANNOTATION_PRIVATE_H_
 
 #include "poppler-annotation.h"
+
+#include "poppler-objectreference_p.h"
 
 namespace Poppler
 {
@@ -42,6 +45,7 @@ class AnnotationPrivate
         QRectF boundary;
 
         QLinkedList< Annotation::Revision > revisions;
+        ObjectReference pdfObjectReference;
 };
 
 }

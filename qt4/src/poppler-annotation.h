@@ -3,6 +3,7 @@
  * Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
  * Copyright (C) 2007, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2010, Philip Lorenz <lorenzph+freedesktop@gmail.com>
+ * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -93,6 +94,9 @@ class POPPLER_QT4_EXPORT AnnotationUtils
  */
 class POPPLER_QT4_EXPORT Annotation
 {
+  friend class LinkMovie;
+  friend class Page;
+
   public:
     // enum definitions
     // WARNING!!! oKular uses that very same values so if you change them notify the author!

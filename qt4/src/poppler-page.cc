@@ -10,6 +10,7 @@
  * Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2010 Matthias Fauconneau <matthias.fauconneau@gmail.com>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+ * Copyright (C) 2012 Tobias Koenig <tokoe@kdab.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -171,15 +172,33 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
     break;
 
     case actionMovie:
-/*      TODO this (Movie link)
-          m_type = Movie;
-          LinkMovie * m = (LinkMovie *) a;
-          // copy Movie parameters (2 IDs and a const char *)
-          Ref * r = m->getAnnotRef();
-          m_refNum = r->num;
-          m_refGen = r->gen;
-          copyString( m_uri, m->getTitle()->getCString() );
-*/  break;
+    {
+      ::LinkMovie *lm = (::LinkMovie *)a;
+
+      const QString title = ( lm->hasAnnotTitle() ? UnicodeParsedString( lm->getAnnotTitle() ) : QString() );
+
+      const ObjectReference reference = ( lm->hasAnnotRef() ? ObjectReference( lm->getAnnotRef()->num, lm->getAnnotRef()->gen ) : ObjectReference() );
+
+      LinkMovie::Operation operation = LinkMovie::Play;
+      switch ( lm->getOperation() )
+      {
+        case ::LinkMovie::operationTypePlay:
+          operation = LinkMovie::Play;
+          break;
+        case ::LinkMovie::operationTypePause:
+          operation = LinkMovie::Pause;
+          break;
+        case ::LinkMovie::operationTypeResume:
+          operation = LinkMovie::Resume;
+          break;
+        case ::LinkMovie::operationTypeStop:
+          operation = LinkMovie::Stop;
+          break;
+      };
+
+      popplerLink = new LinkMovie( linkArea, operation, title, reference );
+    }
+    break;
 
     case actionUnknown:
     break;
@@ -1029,6 +1048,8 @@ QList<Annotation*> Page::annotations() const
            //annotation->rUnscaledHeight = (r[3] > r[1]) ? r[3] - r[1] : r[1] - r[3];
         }
         annotation->setBoundary( boundaryRect );
+        // -> PDF object reference
+        annotation->d_ptr->pdfObjectReference = ObjectReference( ann->getRef().num, ann->getRef().gen );
         // -> contents
         annotation->setContents( UnicodeParsedString( ann->getContents() ) );
         // -> uniqueName

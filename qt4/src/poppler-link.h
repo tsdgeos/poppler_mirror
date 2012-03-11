@@ -2,6 +2,7 @@
  * Copyright (C) 2006, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2008, 2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, Guillermo Amaral <gamaral@kdab.com>
+ * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -40,6 +41,7 @@ class LinkJavaScriptPrivate;
 class LinkMoviePrivate;
 class LinkDestinationData;
 class LinkDestinationPrivate;
+class ObjectReference;
 class SoundObject;
 
 /**
@@ -471,21 +473,52 @@ class POPPLER_QT4_EXPORT LinkJavaScript : public Link
 		Q_DISABLE_COPY( LinkJavaScript )
 };	
 
-#if 0
-/** Movie: Not yet defined -> think renaming to 'Media' link **/
+/**
+ * Movie: a movie to be played.
+ *
+ * \since 0.20
+ */
 class POPPLER_QT4_EXPORT LinkMovie : public Link
-// TODO this (Movie link)
 {
 	public:
-		LinkMovie( const QRectF &linkArea );
+		/**
+		 * Describes the operation to be performed on the movie.
+		 */
+		enum Operation { Play,
+		                 Stop,
+		                 Pause,
+		                 Resume
+		};
+
+		/**
+		 * Create a new Movie link.
+		 *
+		 * \param linkArea the active area of the link
+		 * \param operation the operation to be performed on the movie
+		 * \param annotationTitle the title of the movie annotation identifying the movie to be played
+		 * \param annotationReference the object reference of the movie annotation identifying the movie to be played
+		 *
+		 * Note: This constructor is supposed to be used by Poppler::Page only.
+		 */
+		LinkMovie( const QRectF &linkArea, Operation operation, const QString &annotationTitle, const ObjectReference &annotationReference );
+		/**
+		 * Destructor.
+		 */
 		~LinkMovie();
 		LinkType linkType() const;
+		/**
+		 * Returns the operation to be performed on the movie.
+		 */
+		Operation operation() const;
+		/**
+		 * Returns whether the given @p annotation is the referenced movie annotation for this movie @p link.
+		 */
+		bool isReferencedAnnotation( const MovieAnnotation *annotation ) const;
 
 	private:
 		Q_DECLARE_PRIVATE( LinkMovie )
 		Q_DISABLE_COPY( LinkMovie )
 };
-#endif
 
 }
 

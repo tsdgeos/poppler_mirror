@@ -2,6 +2,7 @@
  * Copyright (C) 2006-2007, Albert Astals Cid
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+ * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -24,6 +25,9 @@
 #include <poppler-private.h>
 
 #include <QtCore/QStringList>
+
+#include "poppler-annotation-private.h"
+#include "poppler-objectreference_p.h"
 
 #include "Link.h"
 
@@ -167,18 +171,20 @@ class LinkJavaScriptPrivate : public LinkPrivate
 	{
 	}
 
-#if 0
 class LinkMoviePrivate : public LinkPrivate
 {
 	public:
-		LinkMoviePrivate( const QRectF &area );
+		LinkMoviePrivate( const QRectF &area, LinkMovie::Operation operation, const QString &title, const ObjectReference &reference );
+
+		LinkMovie::Operation operation;
+		QString annotationTitle;
+		ObjectReference annotationReference;
 };
 
-	LinkMoviePrivate::LinkMoviePrivate( const QRectF &area )
-		: LinkPrivate( area )
+	LinkMoviePrivate::LinkMoviePrivate( const QRectF &area, LinkMovie::Operation _operation, const QString &title, const ObjectReference &reference  )
+		: LinkPrivate( area ), operation( _operation ), annotationTitle( title ), annotationReference( reference )
 	{
 	}
-#endif
 
 	static void cvtUserToDev(::Page *page, double xu, double yu, int *xd, int *yd) {
 		double ctm[6];
@@ -567,10 +573,9 @@ class LinkMoviePrivate : public LinkPrivate
 		return d->js;
 	}
 
-#if 0
 	// LinkMovie
-	LinkMovie::LinkMovie( const QRectF &linkArea )
-		: Link( *new LinkMoviePrivate( linkArea ) )
+	LinkMovie::LinkMovie( const QRectF &linkArea, Operation operation, const QString &annotationTitle, const ObjectReference &annotationReference )
+		: Link( *new LinkMoviePrivate( linkArea, operation, annotationTitle, annotationReference ) )
 	{
 	}
 	
@@ -582,6 +587,25 @@ class LinkMoviePrivate : public LinkPrivate
 	{
 		return Movie;
 	}
-#endif
+	
+	LinkMovie::Operation LinkMovie::operation() const
+	{
+		Q_D( const LinkMovie );
+		return d->operation;
+	}
 
+	bool LinkMovie::isReferencedAnnotation( const MovieAnnotation *annotation ) const
+	{
+		Q_D( const LinkMovie );
+		if ( d->annotationReference.isValid() && d->annotationReference == annotation->d_ptr->pdfObjectReference )
+		{
+			return true;
+		}
+		else if ( !d->annotationTitle.isNull() )
+		{
+			return ( annotation->movieTitle() == d->annotationTitle );
+		}
+
+		return false;
+	}
 }
