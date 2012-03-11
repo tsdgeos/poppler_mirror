@@ -456,6 +456,7 @@ class POPPLER_QT4_EXPORT GeomAnnotation : public Annotation
   friend class AnnotationPrivate;
 
   public:
+    GeomAnnotation();
     virtual ~GeomAnnotation();
     virtual SubType subType() const;
 
@@ -469,7 +470,6 @@ class POPPLER_QT4_EXPORT GeomAnnotation : public Annotation
     void setGeomInnerColor( const QColor &color );
 
   private:
-    GeomAnnotation();
     GeomAnnotation( const QDomNode &node );
     GeomAnnotation( GeomAnnotationPrivate &dd );
     virtual void store( QDomNode &parentNode, QDomDocument &document ) const;
@@ -606,6 +606,7 @@ class POPPLER_QT4_EXPORT InkAnnotation : public Annotation
   friend class AnnotationPrivate;
 
   public:
+    InkAnnotation();
     virtual ~InkAnnotation();
     virtual SubType subType() const;
 
@@ -613,7 +614,6 @@ class POPPLER_QT4_EXPORT InkAnnotation : public Annotation
     void setInkPaths( const QList< QLinkedList<QPointF> > &paths );
 
   private:
-    InkAnnotation();
     InkAnnotation( const QDomNode &node );
     virtual void store( QDomNode &parentNode, QDomDocument &document ) const;
     InkAnnotation(InkAnnotationPrivate &dd);
@@ -662,6 +662,7 @@ class POPPLER_QT4_EXPORT CaretAnnotation : public Annotation
   friend class AnnotationPrivate;
 
   public:
+    CaretAnnotation();
     virtual ~CaretAnnotation();
     virtual SubType subType() const;
 
@@ -674,7 +675,6 @@ class POPPLER_QT4_EXPORT CaretAnnotation : public Annotation
     void setCaretSymbol( CaretSymbol symbol );
 
   private:
-    CaretAnnotation();
     CaretAnnotation( const QDomNode &node );
     CaretAnnotation( CaretAnnotationPrivate &dd );
     virtual void store( QDomNode &parentNode, QDomDocument &document ) const;

@@ -70,7 +70,7 @@ Annotation * AnnotationUtils::createAnnotation( const QDomElement & annElement )
             annotation = new LineAnnotation( annElement );
             break;
         case Annotation::AGeom:
-            //annotation = new GeomAnnotation( annElement );
+            annotation = new GeomAnnotation( annElement );
             break;
         case Annotation::AHighlight:
             annotation = new HighlightAnnotation( annElement );
@@ -79,10 +79,10 @@ Annotation * AnnotationUtils::createAnnotation( const QDomElement & annElement )
             annotation = new StampAnnotation( annElement );
             break;
         case Annotation::AInk:
-            //annotation = new InkAnnotation( annElement );
+            annotation = new InkAnnotation( annElement );
             break;
         case Annotation::ACaret:
-            //annotation = new CaretAnnotation( annElement );
+            annotation = new CaretAnnotation( annElement );
             break;
     }
 
@@ -2510,7 +2510,29 @@ Annotation * GeomAnnotationPrivate::makeAlias()
 
 Annot* GeomAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
 {
-    return 0; // Not implemented
+    // Setters are defined in the public class
+    GeomAnnotation *q = static_cast<GeomAnnotation*>( makeAlias() );
+
+    // Set page and document
+    pdfPage = destPage;
+    parentDoc = doc;
+
+    Annot::AnnotSubtype type;
+    if (geomType == GeomAnnotation::InscribedSquare)
+        type = Annot::typeSquare;
+    else // GeomAnnotation::InscribedCircle
+        type = Annot::typeCircle;
+
+    // Set pdfAnnot
+    PDFRectangle rect = toPdfRectangle(boundary);
+    pdfAnnot = new AnnotGeometry(destPage->getDoc(), &rect, type);
+
+    // Set properties
+    flushBaseAnnotationProperties();
+    q->setGeomInnerColor(geomInnerColor);
+
+    delete q;
+    return pdfAnnot;
 }
 
 GeomAnnotation::GeomAnnotation()
@@ -2592,7 +2614,11 @@ void GeomAnnotation::setGeomType( GeomAnnotation::GeomType type )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    AnnotGeometry * geomann = static_cast<AnnotGeometry*>(d->pdfAnnot);
+    if (type == GeomAnnotation::InscribedSquare)
+        geomann->setType(Annot::typeSquare);
+    else // GeomAnnotation::InscribedCircle
+        geomann->setType(Annot::typeCircle);
 }
 
 QColor GeomAnnotation::geomInnerColor() const
@@ -2616,7 +2642,8 @@ void GeomAnnotation::setGeomInnerColor( const QColor &color )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    AnnotGeometry * geomann = static_cast<AnnotGeometry*>(d->pdfAnnot);
+    geomann->setInteriorColor(convertQColor( color ));
 }
 
 
@@ -3038,6 +3065,9 @@ class InkAnnotationPrivate : public AnnotationPrivate
 
         // data fields
         QList< QLinkedList<QPointF> > inkPaths;
+
+        // helper
+        AnnotPath **toAnnotPaths(const QList< QLinkedList<QPointF> > &inkPaths);
 };
 
 InkAnnotationPrivate::InkAnnotationPrivate()
@@ -3050,9 +3080,38 @@ Annotation * InkAnnotationPrivate::makeAlias()
     return new InkAnnotation(*this);
 }
 
+// Note: Caller is required to delete array elements and the array itself after use
+AnnotPath **InkAnnotationPrivate::toAnnotPaths(const QList< QLinkedList<QPointF> > &inkPaths)
+{
+    const int pathsNumber = inkPaths.size();
+    AnnotPath **res = new AnnotPath*[pathsNumber];
+    for (int i = 0; i < pathsNumber; ++i)
+        res[i] = toAnnotPath( inkPaths[i] );
+    return res;
+}
+
 Annot* InkAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
 {
-    return 0; // Not implemented
+    // Set page and document
+    pdfPage = destPage;
+    parentDoc = doc;
+
+    // Set pdfAnnot
+    PDFRectangle rect = toPdfRectangle(boundary);
+    AnnotPath **paths = toAnnotPaths(inkPaths);
+    const int pathsNumber = inkPaths.size();
+    pdfAnnot = new AnnotInk(destPage->getDoc(), &rect, paths, pathsNumber);
+
+    for (int i = 0; i < pathsNumber; ++i)
+        delete paths[i];
+    delete[] paths;
+
+    // Set properties
+    flushBaseAnnotationProperties();
+
+    inkPaths.clear(); // Free up memory
+
+    return pdfAnnot;
 }
 
 InkAnnotation::InkAnnotation()
@@ -3198,7 +3257,14 @@ void InkAnnotation::setInkPaths( const QList< QLinkedList<QPointF> > &paths )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    AnnotInk * inkann = static_cast<AnnotInk*>(d->pdfAnnot);
+    AnnotPath **annotpaths = d->toAnnotPaths(paths);
+    const int pathsNumber = paths.size();
+    inkann->setInkList(annotpaths, pathsNumber);
+
+    for (int i = 0; i < pathsNumber; ++i)
+        delete annotpaths[i];
+    delete[] annotpaths;
 }
 
 
@@ -3570,7 +3636,23 @@ Annotation * CaretAnnotationPrivate::makeAlias()
 
 Annot* CaretAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
 {
-    return 0; // Not implemented
+    // Setters are defined in the public class
+    CaretAnnotation *q = static_cast<CaretAnnotation*>( makeAlias() );
+
+    // Set page and document
+    pdfPage = destPage;
+    parentDoc = doc;
+
+    // Set pdfAnnot
+    PDFRectangle rect = toPdfRectangle(boundary);
+    pdfAnnot = new AnnotCaret(destPage->getDoc(), &rect);
+
+    // Set properties
+    flushBaseAnnotationProperties();
+    q->setCaretSymbol(symbol);
+
+    delete q;
+    return pdfAnnot;
 }
 
 CaretAnnotation::CaretAnnotation()
@@ -3648,7 +3730,8 @@ void CaretAnnotation::setCaretSymbol( CaretAnnotation::CaretSymbol symbol )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    AnnotCaret * caretann = static_cast<AnnotCaret *>(d->pdfAnnot);
+    caretann->setSymbol((AnnotCaret::AnnotCaretSymbol)symbol);
 }
 
 /** FileAttachmentAnnotation [Annotation] */
