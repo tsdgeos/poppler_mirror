@@ -31,6 +31,7 @@
 // Copyright (C) 2011 Joshua Richardson <jric@chegg.com>
 // Copyright (C) 2011 Stephen Reichling <sreichling@chegg.com>
 // Copyright (C) 2011, 2012 Igor Slepchin <igor.slepchin@gmail.com>
+// Copyright (C) 2012 Ihar Filipau <thephilips@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -95,6 +96,8 @@ extern GBool stout;
 extern GBool xml;
 extern GBool showHidden;
 extern GBool noMerge;
+
+extern double wordBreakThreshold;
 
 static GBool debug = gFalse;
 static GooString *gstr_buff0 = NULL; // a workspace in which I format strings
@@ -379,7 +382,7 @@ void HtmlPage::addChar(GfxState *state, double x, double y,
       // right, which will not necessarily be the case, e.g. if rotated;
       // It assesses whether or not two characters are close enough to
       // be part of the same string
-      fabs(x1 - curStr->xRight[n-1]) > 0.1 * (curStr->yMax - curStr->yMin) &&
+      fabs(x1 - curStr->xRight[n-1]) > wordBreakThreshold * (curStr->yMax - curStr->yMin) &&
       // rotation is (cos q, sin q, -sin q, cos q, 0, 0)
       // sin q is zero iff there is no rotation, or 180 deg. rotation;
       // for 180 rotation, cos q will be negative
@@ -625,7 +628,7 @@ void HtmlPage::coalesce() {
     {
 //      printf("yes\n");
       n = str1->len + str2->len;
-      if ((addSpace = horSpace > 0.1 * space)) {
+      if ((addSpace = horSpace > wordBreakThreshold * space)) {
         ++n;
       }
       if (addLineBreak) {
