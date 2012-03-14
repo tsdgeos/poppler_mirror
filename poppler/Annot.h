@@ -304,6 +304,8 @@ public:
   AnnotColorSpace getSpace() const { return (AnnotColorSpace) length; }
   const double *getValues() const { return values; }
 
+  void writeToObject(XRef *xref, Object *dest) const;
+
 private:
 
   double values[4];
@@ -859,6 +861,14 @@ public:
 
   virtual void draw(Gfx *gfx, GBool printing);
 
+  void setVertices(double x1, double y1, double x2, double y2);
+  void setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end);
+  void setInteriorColor(AnnotColor *new_color);
+  void setLeaderLineLength(double len);
+  void setLeaderLineExtension(double len);
+  void setCaption(bool new_cap);
+  void setIntent(AnnotLineIntent new_intent);
+
   // getters
   AnnotLineEndingStyle getStartStyle() const { return startStyle; }
   AnnotLineEndingStyle getEndStyle() const { return endStyle; }
@@ -988,6 +998,12 @@ public:
   AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType, AnnotPath *path);
   AnnotPolygon(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotPolygon();
+
+  void setType(AnnotSubtype new_type); // typePolygon or typePolyLine
+  void setVertices(AnnotPath *path);
+  void setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end);
+  void setInteriorColor(AnnotColor *new_color);
+  void setIntent(AnnotPolygonIntent new_intent);
 
   // getters
   AnnotPath *getVertices() const { return vertices; }

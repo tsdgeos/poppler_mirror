@@ -125,6 +125,31 @@ AnnotLineEndingStyle parseAnnotLineEndingStyle(GooString *string) {
   }  
 }
 
+const char* convertAnnotLineEndingStyle(AnnotLineEndingStyle style) {
+  switch (style) {
+    case annotLineEndingSquare:
+      return "Square";
+    case annotLineEndingCircle:
+      return "Circle";
+    case annotLineEndingDiamond:
+      return "Diamond";
+    case annotLineEndingOpenArrow:
+      return "OpenArrow";
+    case annotLineEndingClosedArrow:
+      return "ClosedArrow";
+    case annotLineEndingButt:
+      return "Butt";
+    case annotLineEndingROpenArrow:
+      return "ROpenArrow";
+    case annotLineEndingRClosedArrow:
+      return "RClosedArrow";
+    case annotLineEndingSlash:
+      return "Slash";
+    default:
+      return "None";
+  }
+}
+
 static AnnotExternalDataType parseAnnotExternalData(Dict* dict) {
   Object obj1;
   AnnotExternalDataType type;
@@ -659,6 +684,19 @@ void AnnotColor::adjustColor(int adjust) {
   }
 }
 
+void AnnotColor::writeToObject(XRef *xref, Object *obj1) const {
+  Object obj2;
+  int i;
+
+  if (length == 0) {
+    obj1->initNull(); // Transparent (no color)
+  } else {
+    obj1->initArray(xref);
+    for (i = 0; i < length; ++i)
+      obj1->arrayAdd( obj2.initReal( values[i] ) );
+  }
+}
+
 //------------------------------------------------------------------------
 // AnnotIconFit
 //------------------------------------------------------------------------
@@ -1130,12 +1168,8 @@ void Annot::setColor(AnnotColor *new_color) {
   delete color;
 
   if (new_color) {
-    Object obj1, obj2;
-    const double *values = new_color->getValues();
-
-    obj1.initArray(xref);
-    for (int i = 0; i < (int)new_color->getSpace(); i++)
-      obj1.arrayAdd(obj2.initReal (values[i]));
+    Object obj1;
+    new_color->writeToObject(xref, &obj1);
     update ("C", &obj1);
     color = new_color;
   } else {
@@ -2481,6 +2515,88 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict) {
     captionTextHorizontal = captionTextVertical = 0;
   }
   obj1.free();
+}
+
+void AnnotLine::setVertices(double x1, double y1, double x2, double y2) {
+  Object obj1, obj2;
+
+  delete coord1;
+  coord1 = new AnnotCoord(x1, y1);
+  delete coord2;
+  coord2 = new AnnotCoord(x2, y2);
+
+  obj1.initArray(xref);
+  obj1.arrayAdd( obj2.initReal(x1) );
+  obj1.arrayAdd( obj2.initReal(y1) );
+  obj1.arrayAdd( obj2.initReal(x2) );
+  obj1.arrayAdd( obj2.initReal(y2) );
+
+  update("L", &obj1);
+}
+
+void AnnotLine::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end) {
+  Object obj1, obj2;
+
+  startStyle = start;
+  endStyle = end;
+
+  obj1.initArray(xref);
+  obj1.arrayAdd( obj2.initName(convertAnnotLineEndingStyle( startStyle )) );
+  obj1.arrayAdd( obj2.initName(convertAnnotLineEndingStyle( endStyle )) );
+
+  update("LE", &obj1);
+}
+
+void AnnotLine::setInteriorColor(AnnotColor *new_color) {
+  delete interiorColor;
+
+  if (new_color) {
+    Object obj1;
+    new_color->writeToObject(xref, &obj1);
+    update ("IC", &obj1);
+    interiorColor = new_color;
+  } else {
+    interiorColor = NULL;
+  }
+}
+
+void AnnotLine::setLeaderLineLength(double len) {
+  Object obj1;
+
+  leaderLineLength = len;
+  obj1.initReal(len);
+  update ("LL", &obj1);
+}
+
+void AnnotLine::setLeaderLineExtension(double len) {
+  Object obj1;
+
+  leaderLineExtension = len;
+  obj1.initReal(len);
+  update ("LLE", &obj1);
+
+  // LL is required if LLE is present
+  obj1.initReal(leaderLineLength);
+  update ("LL", &obj1);
+}
+
+void AnnotLine::setCaption(bool new_cap) {
+  Object obj1;
+
+  caption = new_cap;
+  obj1.initBool(new_cap);
+  update ("Cap", &obj1);
+}
+
+void AnnotLine::setIntent(AnnotLineIntent new_intent) {
+  Object obj1;
+
+  intent = new_intent;
+  if (new_intent == intentLineArrow)
+    obj1.initName("LineArrow");
+  else // intentLineDimension
+    obj1.initName("LineDimension");
+  update ("IT", &obj1);
 }
 
 void AnnotLine::draw(Gfx *gfx, GBool printing) {
@@ -4555,6 +4671,79 @@ void AnnotPolygon::initialize(PDFDoc *docA, Dict* dict) {
     intent = polygonCloud;
   }
   obj1.free();
+}
+
+void AnnotPolygon::setType(AnnotSubtype new_type) {
+  Object obj1;
+
+  switch (new_type) {
+    case typePolygon:
+      obj1.initName("Polygon");
+      break;
+    case typePolyLine:
+      obj1.initName("PolyLine");
+      break;
+    default:
+      assert(!"Invalid subtype");
+  }
+
+  type = new_type;
+  update("Subtype", &obj1);
+}
+
+void AnnotPolygon::setVertices(AnnotPath *path) {
+  Object obj1, obj2;
+  delete vertices;
+
+  obj1.initArray(xref);
+
+  for (int i = 0; i < path->getCoordsLength(); i++) {
+    obj1.arrayAdd (obj2.initReal (path->getX(i)));
+    obj1.arrayAdd (obj2.initReal (path->getY(i)));
+  }
+
+  vertices = new AnnotPath(obj1.getArray());
+
+  update("Vertices", &obj1);
+}
+
+void AnnotPolygon::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end) {
+  Object obj1, obj2;
+
+  startStyle = start;
+  endStyle = end;
+
+  obj1.initArray(xref);
+  obj1.arrayAdd( obj2.initName(convertAnnotLineEndingStyle( startStyle )) );
+  obj1.arrayAdd( obj2.initName(convertAnnotLineEndingStyle( endStyle )) );
+
+  update("LE", &obj1);
+}
+
+void AnnotPolygon::setInteriorColor(AnnotColor *new_color) {
+  delete interiorColor;
+
+  if (new_color) {
+    Object obj1;
+    new_color->writeToObject(xref, &obj1);
+    update ("IC", &obj1);
+    interiorColor = new_color;
+  } else {
+    interiorColor = NULL;
+  }
+}
+
+void AnnotPolygon::setIntent(AnnotPolygonIntent new_intent) {
+  Object obj1;
+
+  intent = new_intent;
+  if (new_intent == polygonCloud)
+    obj1.initName("PolygonCloud");
+  else if (new_intent == polylineDimension)
+    obj1.initName("PolyLineDimension");
+  else // polygonDimension
+    obj1.initName("PolygonDimension");
+  update ("IT", &obj1);
 }
 
 //------------------------------------------------------------------------
