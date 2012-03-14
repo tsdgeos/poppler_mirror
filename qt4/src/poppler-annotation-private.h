@@ -22,7 +22,7 @@
 
 #include "poppler-annotation.h"
 
-#include "poppler-objectreference_p.h"
+#include <Object.h>
 
 namespace Poppler
 {
@@ -45,7 +45,7 @@ class AnnotationPrivate
         QRectF boundary;
 
         QLinkedList< Annotation::Revision > revisions;
-        ObjectReference pdfObjectReference;
+        Ref pdfObjectReference;
 };
 
 }

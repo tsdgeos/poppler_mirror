@@ -106,6 +106,7 @@ QDomElement AnnotationUtils::findChildElement( const QDomNode & parentNode,
 AnnotationPrivate::AnnotationPrivate()
     : flags( 0 )
 {
+    pdfObjectReference.num = pdfObjectReference.gen = -1;
 }
 
 AnnotationPrivate::~AnnotationPrivate()

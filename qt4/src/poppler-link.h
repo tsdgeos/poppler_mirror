@@ -29,6 +29,8 @@
 #include <QtCore/QSharedDataPointer>
 #include "poppler-export.h"
 
+struct Ref;
+
 namespace Poppler {
 
 class LinkPrivate;
@@ -41,7 +43,6 @@ class LinkJavaScriptPrivate;
 class LinkMoviePrivate;
 class LinkDestinationData;
 class LinkDestinationPrivate;
-class ObjectReference;
 class SoundObject;
 
 /**
@@ -500,7 +501,7 @@ class POPPLER_QT4_EXPORT LinkMovie : public Link
 		 *
 		 * Note: This constructor is supposed to be used by Poppler::Page only.
 		 */
-		LinkMovie( const QRectF &linkArea, Operation operation, const QString &annotationTitle, const ObjectReference &annotationReference );
+		LinkMovie( const QRectF &linkArea, Operation operation, const QString &annotationTitle, const Ref &annotationReference );
 		/**
 		 * Destructor.
 		 */

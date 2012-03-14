@@ -177,7 +177,10 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
 
       const QString title = ( lm->hasAnnotTitle() ? UnicodeParsedString( lm->getAnnotTitle() ) : QString() );
 
-      const ObjectReference reference = ( lm->hasAnnotRef() ? ObjectReference( lm->getAnnotRef()->num, lm->getAnnotRef()->gen ) : ObjectReference() );
+      Ref reference;
+      reference.num = reference.gen = -1;
+      if ( lm->hasAnnotRef() )
+        reference = *lm->getAnnotRef();
 
       LinkMovie::Operation operation = LinkMovie::Play;
       switch ( lm->getOperation() )
@@ -1049,7 +1052,7 @@ QList<Annotation*> Page::annotations() const
         }
         annotation->setBoundary( boundaryRect );
         // -> PDF object reference
-        annotation->d_ptr->pdfObjectReference = ObjectReference( ann->getRef().num, ann->getRef().gen );
+        annotation->d_ptr->pdfObjectReference = ann->getRef();
         // -> contents
         annotation->setContents( UnicodeParsedString( ann->getContents() ) );
         // -> uniqueName

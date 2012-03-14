@@ -27,9 +27,13 @@
 #include <QtCore/QStringList>
 
 #include "poppler-annotation-private.h"
-#include "poppler-objectreference_p.h"
 
 #include "Link.h"
+
+bool operator==( const Ref &r1, const Ref &r2 )
+{
+	return r1.num == r2.num && r1.gen == r2.gen;
+}
 
 namespace Poppler {
 
@@ -174,14 +178,14 @@ class LinkJavaScriptPrivate : public LinkPrivate
 class LinkMoviePrivate : public LinkPrivate
 {
 	public:
-		LinkMoviePrivate( const QRectF &area, LinkMovie::Operation operation, const QString &title, const ObjectReference &reference );
+		LinkMoviePrivate( const QRectF &area, LinkMovie::Operation operation, const QString &title, const Ref &reference );
 
 		LinkMovie::Operation operation;
 		QString annotationTitle;
-		ObjectReference annotationReference;
+		Ref annotationReference;
 };
 
-	LinkMoviePrivate::LinkMoviePrivate( const QRectF &area, LinkMovie::Operation _operation, const QString &title, const ObjectReference &reference  )
+	LinkMoviePrivate::LinkMoviePrivate( const QRectF &area, LinkMovie::Operation _operation, const QString &title, const Ref &reference  )
 		: LinkPrivate( area ), operation( _operation ), annotationTitle( title ), annotationReference( reference )
 	{
 	}
@@ -574,7 +578,7 @@ class LinkMoviePrivate : public LinkPrivate
 	}
 
 	// LinkMovie
-	LinkMovie::LinkMovie( const QRectF &linkArea, Operation operation, const QString &annotationTitle, const ObjectReference &annotationReference )
+	LinkMovie::LinkMovie( const QRectF &linkArea, Operation operation, const QString &annotationTitle, const Ref &annotationReference )
 		: Link( *new LinkMoviePrivate( linkArea, operation, annotationTitle, annotationReference ) )
 	{
 	}
@@ -597,7 +601,7 @@ class LinkMoviePrivate : public LinkPrivate
 	bool LinkMovie::isReferencedAnnotation( const MovieAnnotation *annotation ) const
 	{
 		Q_D( const LinkMovie );
-		if ( d->annotationReference.isValid() && d->annotationReference == annotation->d_ptr->pdfObjectReference )
+		if ( d->annotationReference.num != -1 && d->annotationReference == annotation->d_ptr->pdfObjectReference )
 		{
 			return true;
 		}
