@@ -24,6 +24,7 @@
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2011 José Aliste <jaliste@src.gnome.org>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1020,18 +1021,52 @@ void Annot::getRect(double *x1, double *y1, double *x2, double *y2) const {
   *y2 = rect->y2;
 }
 
+void Annot::setRect(PDFRectangle *rect) {
+    setRect(rect->x1, rect->y1, rect->x2, rect->y2);
+}
+
+void Annot::setRect(double x1, double y1, double x2, double y2) {
+  Object obj1, obj2;
+
+  if (x1 < x2) {
+    rect->x1 = x1;
+    rect->x2 = x2;
+  } else {
+    rect->x1 = x2;
+    rect->x2 = x1;
+  }
+
+  if (y1 < y2) {
+    rect->y1 = y1;
+    rect->y2 = y2;
+  } else {
+    rect->y1 = y2;
+    rect->y2 = y1;
+  }
+
+  obj1.initArray (xref);
+  obj1.arrayAdd (obj2.initReal (rect->x1));
+  obj1.arrayAdd (obj2.initReal (rect->y1));
+  obj1.arrayAdd (obj2.initReal (rect->x2));
+  obj1.arrayAdd (obj2.initReal (rect->y2));
+
+  update("Rect", &obj1);
+}
+
 GBool Annot::inRect(double x, double y) const {
   return rect->contains(x, y);
 }
 
 void Annot::update(const char *key, Object *value) {
-  /* Set M to current time */
-  delete modified;
-  modified = timeToDateString(NULL);
+  /* Set M to current time, unless we are updating M itself */
+  if (strcmp(key, "M") != 0) {
+    delete modified;
+    modified = timeToDateString(NULL);
 
-  Object obj1;
-  obj1.initString (modified->copy());
-  annotObj.dictSet("M", &obj1);
+    Object obj1;
+    obj1.initString (modified->copy());
+    annotObj.dictSet("M", &obj1);
+  }
 
   annotObj.dictSet(const_cast<char*>(key), value);
   
@@ -1055,6 +1090,40 @@ void Annot::setContents(GooString *new_content) {
   Object obj1;
   obj1.initString(contents->copy());
   update ("Contents", &obj1);
+}
+
+void Annot::setName(GooString *new_name) {
+  delete name;
+
+  if (new_name) {
+    name = new GooString(new_name);
+  } else {
+    name = new GooString();
+  }
+
+  Object obj1;
+  obj1.initString(name->copy());
+  update ("NM", &obj1);
+}
+
+void Annot::setModified(GooString *new_modified) {
+  delete modified;
+
+  if (new_modified)
+    modified = new GooString(new_modified);
+  else
+    modified = new GooString();
+
+  Object obj1;
+  obj1.initString(modified->copy());
+  update ("M", &obj1);
+}
+
+void Annot::setFlags(Guint new_flags) {
+  Object obj1;
+  flags = new_flags;
+  obj1.initInt(flags);
+  update ("F", &obj1);
 }
 
 void Annot::setColor(AnnotColor *new_color) {
@@ -1552,6 +1621,19 @@ void AnnotMarkup::setOpacity(double opacityA) {
   opacity = opacityA;
   obj1.initReal(opacity);
   update ("CA", &obj1);
+}
+
+void AnnotMarkup::setDate(GooString *new_date) {
+  delete date;
+
+  if (new_date)
+    date = new GooString(new_date);
+  else
+    date = new GooString();
+
+  Object obj1;
+  obj1.initString(date->copy());
+  update ("CreationDate", &obj1);
 }
 
 //------------------------------------------------------------------------

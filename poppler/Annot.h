@@ -22,6 +22,7 @@
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2009-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -474,9 +475,15 @@ public:
 
   double getFontSize() { return fontSize; }
 
+  void setRect(PDFRectangle *rect);
+  void setRect(double x1, double y1, double x2, double y2);
+
   // Sets the annot contents to new_content
   // new_content should never be NULL
   void setContents(GooString *new_content);
+  void setName(GooString *new_name);
+  void setModified(GooString *new_date);
+  void setFlags(Guint new_flags);
 
   // The annotation takes the ownership of
   // new_color. 
@@ -620,6 +627,7 @@ public:
   void setPopup(AnnotPopup *new_popup);
   void setLabel(GooString *new_label);
   void setOpacity(double opacityA);
+  void setDate(GooString *new_date);
 
 protected:
   GooString *label;             // T            (Default autor)
