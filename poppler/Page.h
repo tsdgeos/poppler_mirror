@@ -19,6 +19,7 @@
 // Copyright (C) 2006, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Iñigo Martínez <inigomartinez@gmail.com>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -161,6 +162,7 @@ public:
   Stream *getMetadata() { return attrs->getMetadata(); }
   Dict *getPieceInfo() { return attrs->getPieceInfo(); }
   Dict *getSeparationInfo() { return attrs->getSeparationInfo(); }
+  PDFDoc *getDoc() { return doc; }
 
   // Get resource dictionary.
   Dict *getResourceDict() { return attrs->getResourceDict(); }
