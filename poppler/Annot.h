@@ -177,6 +177,7 @@ private:
 //------------------------------------------------------------------------
 
 class AnnotQuadrilaterals {
+public:
   class AnnotQuadrilateral {
   public:
     AnnotQuadrilateral(double x1, double y1, double x2, double y2, double x3,
@@ -185,9 +186,8 @@ class AnnotQuadrilaterals {
     AnnotCoord coord1, coord2, coord3, coord4;
   };
 
-public:
-
   AnnotQuadrilaterals(Array *array, PDFRectangle *rect);
+  AnnotQuadrilaterals(AnnotQuadrilateral **quads, int quadsLength);
   ~AnnotQuadrilaterals();
 
   double getX1(int quadrilateral);
@@ -925,6 +925,11 @@ public:
 
   virtual void draw(Gfx *gfx, GBool printing);
 
+  // typeHighlight, typeUnderline, typeSquiggly or typeStrikeOut
+  void setType(AnnotSubtype new_type);
+
+  void setQuadrilaterals(AnnotQuadrilaterals *quadPoints);
+
   AnnotQuadrilaterals *getQuadrilaterals() const { return quadrilaterals; }
 
 protected:
@@ -944,6 +949,8 @@ public:
   AnnotStamp(PDFDoc *docA, PDFRectangle *rect);
   AnnotStamp(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotStamp();
+
+  void setIcon(GooString *new_icon);
 
   // getters
   GooString *getIcon() const { return icon; }

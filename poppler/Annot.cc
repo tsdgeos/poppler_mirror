@@ -394,6 +394,11 @@ AnnotQuadrilaterals::AnnotQuadrilaterals(Array *array, PDFRectangle *rect) {
   }
 }
 
+AnnotQuadrilaterals::AnnotQuadrilaterals(AnnotQuadrilaterals::AnnotQuadrilateral **quads, int quadsLength) {
+  quadrilaterals = quads;
+  quadrilateralsLength = quadsLength;
+}
+
 AnnotQuadrilaterals::~AnnotQuadrilaterals() {
   if (quadrilaterals) {
     for(int i = 0; i < quadrilateralsLength; i++)
@@ -2761,7 +2766,49 @@ AnnotTextMarkup::~AnnotTextMarkup() {
   }
 }
 
+void AnnotTextMarkup::setType(AnnotSubtype new_type) {
+  Object obj1;
 
+  switch (new_type) {
+    case typeHighlight:
+      obj1.initName("Highlight");
+      break;
+    case typeUnderline:
+      obj1.initName("Underline");
+      break;
+    case typeSquiggly:
+      obj1.initName("Squiggly");
+      break;
+    case typeStrikeOut:
+      obj1.initName("StrikeOut");
+      break;
+    default:
+      assert(!"Invalid subtype");
+  }
+
+  type = new_type;
+  update("Subtype", &obj1);
+}
+
+void AnnotTextMarkup::setQuadrilaterals(AnnotQuadrilaterals *quadPoints) {
+  Object obj1, obj2;
+  obj1.initArray (xref);
+
+  for (int i = 0; i < quadPoints->getQuadrilateralsLength(); ++i) {
+    obj1.arrayAdd (obj2.initReal (quadPoints->getX1(i)));
+    obj1.arrayAdd (obj2.initReal (quadPoints->getY1(i)));
+    obj1.arrayAdd (obj2.initReal (quadPoints->getX2(i)));
+    obj1.arrayAdd (obj2.initReal (quadPoints->getY2(i)));
+    obj1.arrayAdd (obj2.initReal (quadPoints->getX3(i)));
+    obj1.arrayAdd (obj2.initReal (quadPoints->getY3(i)));
+    obj1.arrayAdd (obj2.initReal (quadPoints->getX4(i)));
+    obj1.arrayAdd (obj2.initReal (quadPoints->getY4(i)));
+  }
+
+  quadrilaterals = new AnnotQuadrilaterals(obj1.getArray(), rect);
+
+  annotObj.dictSet ("QuadPoints", &obj1);
+}
 
 void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
   Object obj;
@@ -4354,6 +4401,20 @@ void AnnotStamp::initialize(PDFDoc *docA, Dict* dict) {
   }
   obj1.free();
 
+}
+
+void AnnotStamp::setIcon(GooString *new_icon) {
+  delete icon;
+
+  if (new_icon) {
+    icon = new GooString (new_icon);
+  } else {
+    icon = new GooString();
+  }
+
+  Object obj1;
+  obj1.initName (icon->getCString());
+  update("Name", &obj1);
 }
 
 //------------------------------------------------------------------------
