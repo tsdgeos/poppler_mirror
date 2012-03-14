@@ -975,6 +975,9 @@ public:
 
   virtual void draw(Gfx *gfx, GBool printing);
 
+  void setType(AnnotSubtype new_type); // typeSquare or typeCircle
+  void setInteriorColor(AnnotColor *new_color);
+
   // getters
   AnnotColor *getInteriorColor() const { return interiorColor; }
   AnnotBorderEffect *getBorderEffect() const { return borderEffect; }
@@ -1054,6 +1057,8 @@ public:
   AnnotCaret(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotCaret();
 
+  void setSymbol(AnnotCaretSymbol new_symbol);
+
   // getters
   AnnotCaretSymbol getSymbol() const { return symbol; }
   PDFRectangle *getCaretRect() const { return caretRect; }
@@ -1077,6 +1082,8 @@ public:
   AnnotInk(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotInk();
 
+  void setInkList(AnnotPath **paths, int n_paths);
+
   // getters
   AnnotPath **getInkList() const { return inkList; }
   int getInkListLength() const { return inkListLength; }
@@ -1084,6 +1091,9 @@ public:
 private:
 
   void initialize(PDFDoc *docA, Dict *dict);
+  void writeInkList(AnnotPath **paths, int n_paths, Array *dest_array);
+  void parseInkList(Array *src_array);
+  void freeInkList();
 
   // required
   AnnotPath **inkList;       // InkList

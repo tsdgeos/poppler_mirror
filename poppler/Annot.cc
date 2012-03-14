@@ -4486,6 +4486,37 @@ void AnnotGeometry::initialize(PDFDoc *docA, Dict* dict) {
 
 }
 
+void AnnotGeometry::setType(AnnotSubtype new_type) {
+  Object obj1;
+
+  switch (new_type) {
+    case typeSquare:
+      obj1.initName("Square");
+      break;
+    case typeCircle:
+      obj1.initName("Circle");
+      break;
+    default:
+      assert(!"Invalid subtype");
+  }
+
+  type = new_type;
+  update("Subtype", &obj1);
+}
+
+void AnnotGeometry::setInteriorColor(AnnotColor *new_color) {
+  delete interiorColor;
+
+  if (new_color) {
+    Object obj1;
+    new_color->writeToObject(xref, &obj1);
+    update ("IC", &obj1);
+    interiorColor = new_color;
+  } else {
+    interiorColor = NULL;
+  }
+}
+
 void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
   Object obj;
   double ca = 1;
@@ -4853,6 +4884,13 @@ void AnnotCaret::initialize(PDFDoc *docA, Dict* dict) {
 
 }
 
+void AnnotCaret::setSymbol(AnnotCaretSymbol new_symbol) {
+  Object obj1;
+  obj1.initName( new_symbol == symbolP ? "P" : "None" );
+  symbol = new_symbol;
+  update("Sy", &obj1);
+}
+
 //------------------------------------------------------------------------
 // AnnotInk
 //------------------------------------------------------------------------
@@ -4866,21 +4904,7 @@ AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rect, AnnotPath **paths, int n_pa
 
   Object obj2;
   obj2.initArray (doc->getXRef());
-
-  for (int i = 0; i < n_paths; ++i) {
-    AnnotPath *path = paths[i];
-    Object obj3;
-    obj3.initArray (doc->getXRef());
-
-    for (int j = 0; j < path->getCoordsLength(); ++j) {
-      Object obj4;
-
-      obj3.arrayAdd (obj4.initReal (path->getX(j)));
-      obj3.arrayAdd (obj4.initReal (path->getY(j)));
-    }
-
-    obj2.arrayAdd (&obj3);
-  }
+  writeInkList(paths, n_paths, obj2.getArray());
 
   annotObj.dictSet ("InkList", &obj2);
 
@@ -4894,27 +4918,14 @@ AnnotInk::AnnotInk(PDFDoc *docA, Dict *dict, Object *obj) :
 }
 
 AnnotInk::~AnnotInk() {
-  if (inkList) {
-    for (int i = 0; i < inkListLength; ++i)
-      delete inkList[i];
-    gfree(inkList);
-  }
+  freeInkList();
 }
 
 void AnnotInk::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
   if (dict->lookup("InkList", &obj1)->isArray()) {
-    Array *array = obj1.getArray();
-    inkListLength = array->getLength();
-    inkList = (AnnotPath **) gmallocn ((inkListLength), sizeof(AnnotPath *));
-    memset(inkList, 0, inkListLength * sizeof(AnnotPath *));
-    for (int i = 0; i < inkListLength; i++) {
-      Object obj2;
-      if (array->get(i, &obj2)->isArray())
-        inkList[i] = new AnnotPath(obj2.getArray());
-      obj2.free();
-    }
+    parseInkList(obj1.getArray());
   } else {
     inkListLength = 0;
     inkList = NULL;
@@ -4922,6 +4933,51 @@ void AnnotInk::initialize(PDFDoc *docA, Dict* dict) {
     ok = gFalse;
   }
   obj1.free();
+}
+
+void AnnotInk::writeInkList(AnnotPath **paths, int n_paths, Array *dest_array) {
+  Object obj1, obj2;
+  for (int i = 0; i < n_paths; ++i) {
+    AnnotPath *path = paths[i];
+    obj1.initArray (xref);
+    for (int j = 0; j < path->getCoordsLength(); ++j) {
+      obj1.arrayAdd (obj2.initReal (path->getX(j)));
+      obj1.arrayAdd (obj2.initReal (path->getY(j)));
+    }
+    dest_array->add (&obj1);
+  }
+}
+
+void AnnotInk::parseInkList(Array *array) {
+  inkListLength = array->getLength();
+  inkList = (AnnotPath **) gmallocn ((inkListLength), sizeof(AnnotPath *));
+  memset(inkList, 0, inkListLength * sizeof(AnnotPath *));
+  for (int i = 0; i < inkListLength; i++) {
+    Object obj2;
+    if (array->get(i, &obj2)->isArray())
+      inkList[i] = new AnnotPath(obj2.getArray());
+    obj2.free();
+  }
+}
+
+void AnnotInk::freeInkList() {
+  if (inkList) {
+    for (int i = 0; i < inkListLength; ++i)
+      delete inkList[i];
+    gfree(inkList);
+  }
+}
+
+void AnnotInk::setInkList(AnnotPath **paths, int n_paths) {
+  Object obj1;
+
+  freeInkList();
+
+  obj1.initArray (xref);
+  writeInkList(paths, n_paths, obj1.getArray());
+
+  parseInkList(obj1.getArray());
+  annotObj.dictSet ("InkList", &obj1);
 }
 
 //------------------------------------------------------------------------
