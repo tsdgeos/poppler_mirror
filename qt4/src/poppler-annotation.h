@@ -4,6 +4,7 @@
  * Copyright (C) 2007, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2010, Philip Lorenz <lorenzph+freedesktop@gmail.com>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
+ * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -50,10 +51,12 @@ class CaretAnnotationPrivate;
 class FileAttachmentAnnotationPrivate;
 class SoundAnnotationPrivate;
 class MovieAnnotationPrivate;
+class ScreenAnnotationPrivate;
 class EmbeddedFile;
 class Link;
 class SoundObject;
 class MovieObject;
+class LinkRendition;
 
 /**
  * \short Helper class for (recursive) Annotation retrieval/storage.
@@ -102,7 +105,7 @@ class POPPLER_QT4_EXPORT Annotation
     // WARNING!!! oKular uses that very same values so if you change them notify the author!
     enum SubType { AText = 1, ALine = 2, AGeom = 3, AHighlight = 4, AStamp = 5,
                    AInk = 6, ALink = 7, ACaret = 8, AFileAttachment = 9, ASound = 10,
-                   AMovie = 11, A_BASE = 0 };
+                   AMovie = 11, AScreen = 12, A_BASE = 0 };
     enum Flag { Hidden = 1, FixedSize = 2, FixedRotation = 4, DenyPrint = 8,
                 DenyWrite = 16, DenyDelete = 32, ToggleHidingOnMouse = 64, External = 128 };
     enum LineStyle { Solid = 1, Dashed = 2, Beveled = 4, Inset = 8, Underline = 16 };
@@ -683,6 +686,48 @@ class POPPLER_QT4_EXPORT MovieAnnotation : public Annotation
   private:
     Q_DECLARE_PRIVATE( MovieAnnotation )
     Q_DISABLE_COPY( MovieAnnotation )
+};
+
+/**
+ * \short Screen annotation.
+ *
+ * The screen annotation represents a screen to be played when activated.
+ *
+ * \since 0.20
+ */
+class POPPLER_QT4_EXPORT ScreenAnnotation : public Annotation
+{
+  public:
+    ScreenAnnotation();
+    virtual ~ScreenAnnotation();
+
+    virtual SubType subType() const;
+
+    /**
+     * Returns the LinkRendition of this annotation.
+     */
+    LinkRendition* action() const;
+
+    /**
+     * Sets a new LinkRendition for this annotation.
+     *
+     * \note ScreenAnnotation takes ownership of the object
+     */
+    void setAction( LinkRendition *action );
+
+    /**
+     * Returns the title of the screen of this annotation.
+     */
+    QString screenTitle() const;
+
+    /**
+     * Sets a new title for the screen of this annotation.
+     */
+    void setScreenTitle( const QString &title );
+
+  private:
+    Q_DECLARE_PRIVATE( ScreenAnnotation )
+    Q_DISABLE_COPY( ScreenAnnotation )
 };
 
 }

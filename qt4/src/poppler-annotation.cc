@@ -1,6 +1,7 @@
 /* poppler-annotation.cc: qt interface to poppler
  * Copyright (C) 2006, 2009 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
+ * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -1617,6 +1618,11 @@ void LinkAnnotation::store( QDomNode & node, QDomDocument & document ) const
                 hyperlinkElement.setAttribute( "type", "Movie" );
                 break;
             }
+            case Poppler::Link::Rendition:
+            {
+                hyperlinkElement.setAttribute( "type", "Rendition" );
+                break;
+            }
             case Poppler::Link::Sound:
             {
                 // FIXME: implement me
@@ -2035,6 +2041,66 @@ QString MovieAnnotation::movieTitle() const
 void MovieAnnotation::setMovieTitle( const QString &title )
 {
     Q_D( MovieAnnotation );
+    d->title = title;
+}
+
+/** ScreenAnnotation [Annotation] */
+class ScreenAnnotationPrivate : public AnnotationPrivate
+{
+    public:
+        ScreenAnnotationPrivate();
+        ~ScreenAnnotationPrivate();
+
+        // data fields
+        LinkRendition *action;
+        QString title;
+};
+
+ScreenAnnotationPrivate::ScreenAnnotationPrivate()
+    : AnnotationPrivate(), action( 0 )
+{
+}
+
+ScreenAnnotationPrivate::~ScreenAnnotationPrivate()
+{
+    delete action;
+}
+
+ScreenAnnotation::ScreenAnnotation()
+    : Annotation( *new ScreenAnnotationPrivate() )
+{
+}
+
+ScreenAnnotation::~ScreenAnnotation()
+{
+}
+
+Annotation::SubType ScreenAnnotation::subType() const
+{
+    return AScreen;
+}
+
+LinkRendition* ScreenAnnotation::action() const
+{
+    Q_D( const ScreenAnnotation );
+    return d->action;
+}
+
+void ScreenAnnotation::setAction( LinkRendition *action )
+{
+    Q_D( ScreenAnnotation );
+    d->action = action;
+}
+
+QString ScreenAnnotation::screenTitle() const
+{
+    Q_D( const ScreenAnnotation );
+    return d->title;
+}
+
+void ScreenAnnotation::setScreenTitle( const QString &title )
+{
+    Q_D( ScreenAnnotation );
     d->title = title;
 }
 

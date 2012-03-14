@@ -9,6 +9,7 @@
  * Copyright (C) 2010 Matthias Fauconneau <matthias.fauconneau@gmail.com>
  * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
  * Copyright (C) 2011 Glad Deschrijver <glad.deschrijver@gmail.com>
+ * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +43,7 @@
 class EmbFile;
 class Sound;
 class AnnotMovie;
+class AnnotScreen;
 
 /**
    The %Poppler Qt4 binding.

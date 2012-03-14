@@ -3,6 +3,7 @@
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
+ * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -23,12 +24,14 @@
 
 #include <poppler-qt4.h>
 #include <poppler-private.h>
+#include <poppler-media.h>
 
 #include <QtCore/QStringList>
 
 #include "poppler-annotation-private.h"
 
 #include "Link.h"
+#include "Rendition.h"
 
 bool operator==( const Ref &r1, const Ref &r2 )
 {
@@ -160,6 +163,26 @@ class LinkSoundPrivate : public LinkPrivate
 	LinkSoundPrivate::~LinkSoundPrivate()
 	{
 		delete sound;
+	}
+
+class LinkRenditionPrivate : public LinkPrivate
+{
+	public:
+		LinkRenditionPrivate( const QRectF &area, ::MediaRendition *rendition );
+		~LinkRenditionPrivate();
+
+		MediaRendition *rendition;
+};
+
+	LinkRenditionPrivate::LinkRenditionPrivate( const QRectF &area, ::MediaRendition *r )
+		: LinkPrivate( area )
+		, rendition( new MediaRendition( r ) )
+	{
+	}
+
+	LinkRenditionPrivate::~LinkRenditionPrivate()
+	{
+		delete rendition;
 	}
 
 class LinkJavaScriptPrivate : public LinkPrivate
@@ -552,6 +575,27 @@ class LinkMoviePrivate : public LinkPrivate
 	{
 		Q_D( const LinkSound );
 		return d->sound;
+	}
+
+	// LinkRendition
+	LinkRendition::LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition )
+		: Link( *new LinkRenditionPrivate( linkArea, rendition ) )
+	{
+	}
+	
+	LinkRendition::~LinkRendition()
+	{
+	}
+	
+	Link::LinkType LinkRendition::linkType() const
+	{
+		return Rendition;
+	}
+	
+	MediaRendition * LinkRendition::rendition() const
+	{
+		Q_D( const LinkRendition );
+		return d->rendition;
 	}
 
 	// LinkJavaScript

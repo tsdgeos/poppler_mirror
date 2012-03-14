@@ -1,7 +1,7 @@
 /* poppler-link.h: qt interface to poppler
  * Copyright (C) 2006, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2008, 2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2010, Guillermo Amaral <gamaral@kdab.com>
+ * Copyright (C) 2010, 2012, Guillermo Amaral <gamaral@kdab.com>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -30,6 +30,7 @@
 #include "poppler-export.h"
 
 struct Ref;
+class MediaRendition;
 
 namespace Poppler {
 
@@ -43,6 +44,8 @@ class LinkJavaScriptPrivate;
 class LinkMoviePrivate;
 class LinkDestinationData;
 class LinkDestinationPrivate;
+class LinkRenditionPrivate;
+class MediaRendition;
 class SoundObject;
 
 /**
@@ -186,6 +189,7 @@ class POPPLER_QT4_EXPORT Link
 		    Action,   ///< A "standard" action to be executed in the viewer
 		    Sound,    ///< A link representing a sound to be played
 		    Movie,    ///< An action to be executed on a movie
+		    Rendition,    ///< A rendition link \since 0.20
 		    JavaScript    ///< A JavaScript code to be interpreted \since 0.10
 		};
 
@@ -440,6 +444,38 @@ class POPPLER_QT4_EXPORT LinkSound : public Link
 	private:
 		Q_DECLARE_PRIVATE( LinkSound )
 		Q_DISABLE_COPY( LinkSound )
+};
+
+/**
+ * Rendition: Rendition link.
+ *
+ * \since 0.20
+ */
+class POPPLER_QT4_EXPORT LinkRendition : public Link
+{
+	public:
+		/**
+		 * Create a new media rendition link.
+		 *
+		 * \param linkArea the active area of the link
+		 * \param rendition 
+		 */
+		LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition );
+		/**
+		 * Destructor.
+		 */
+		virtual ~LinkRendition();
+
+		LinkType linkType() const;
+
+		/**
+		 * 
+		 */
+		MediaRendition *rendition() const;
+
+	private:
+		Q_DECLARE_PRIVATE( LinkRendition )
+		Q_DISABLE_COPY( LinkRendition )
 };
 
 /**

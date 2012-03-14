@@ -6,7 +6,7 @@
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2009 Shawn Rutledge <shawn.t.rutledge@gmail.com>
- * Copyright (C) 2010, Guillermo Amaral <gamaral@kdab.com>
+ * Copyright (C) 2010, 2012, Guillermo Amaral <gamaral@kdab.com>
  * Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2010 Matthias Fauconneau <matthias.fauconneau@gmail.com>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
@@ -45,6 +45,7 @@
 #include <Link.h>
 #include <FileSpec.h>
 #include <ArthurOutputDev.h>
+#include <Rendition.h>
 #if defined(HAVE_SPLASH)
 #include <SplashOutputDev.h>
 #include <splash/SplashBitmap.h>
@@ -57,6 +58,8 @@
 #include "poppler-annotation-helper.h"
 #include "poppler-annotation-private.h"
 #include "poppler-form.h"
+#include "poppler-media.h"
+#include "poppler-streamsequentialdevice-private.h"
 
 namespace Poppler {
 
@@ -200,6 +203,13 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
       };
 
       popplerLink = new LinkMovie( linkArea, operation, title, reference );
+    }
+    break;
+
+    case actionRendition:
+    {
+      ::LinkRendition *lrn = (::LinkRendition *)a;
+      popplerLink = new LinkRendition( linkArea, lrn->getMedia() );
     }
     break;
 
@@ -994,6 +1004,26 @@ QList<Annotation*> Page::annotations() const
                 {
                     m->setMovieTitle( QString::fromLatin1( movietitle->getCString() ) );
                 }
+
+                break;
+            }
+            case Annot::typeScreen:
+            {
+                AnnotScreen * screenann = static_cast< AnnotScreen * >( ann );
+
+                if (!screenann->getAction())
+                  continue;
+
+                ScreenAnnotation * s = new ScreenAnnotation();
+                annotation = s;
+
+                // -> screen
+                s->setAction( static_cast<Poppler::LinkRendition *>(m_page->convertLinkActionToLink( screenann->getAction(), QRectF() ) ) );
+
+                // -> screenTitle
+                GooString * screentitle = screenann->getTitle();
+                if ( screentitle )
+                    s->setScreenTitle( UnicodeParsedString( screentitle ) );
 
                 break;
             }

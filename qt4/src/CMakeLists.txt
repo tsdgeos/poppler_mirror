@@ -25,6 +25,8 @@ set(poppler_qt4_SRCS
   poppler-sound.cc
   poppler-textbox.cc
   poppler-page-transition.cc
+  poppler-streamsequentialdevice.cc
+  poppler-media.cc
   ${CMAKE_SOURCE_DIR}/poppler/ArthurOutputDev.cc
 )
 qt4_automoc(${poppler_qt4_SRCS})
@@ -44,5 +46,6 @@ install(FILES
   poppler-optcontent.h
   poppler-export.h
   poppler-page-transition.h
+  poppler-media.h
   DESTINATION include/poppler/qt4)
 
