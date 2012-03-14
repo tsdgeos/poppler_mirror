@@ -576,6 +576,11 @@ QList<Annotation*> Page::annotations() const
   return AnnotationPrivate::findAnnotations(m_page->page, m_page->parentDoc);
 }
 
+void Page::addAnnotation( const Annotation *ann )
+{
+  AnnotationPrivate::addAnnotationToPage(m_page->page, m_page->parentDoc, ann);
+}
+
 QList<FormField*> Page::formFields() const
 {
   QList<FormField*> fields;

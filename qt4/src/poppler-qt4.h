@@ -686,6 +686,15 @@ delete it;
 	QList<Annotation*> annotations() const;
 
 	/**
+	 Adds an annotation to the page
+
+	 \note Ownership of the annotation object stays with the caller, who can
+	       delete it at any time.
+	 \since 0.20
+	*/
+	void addAnnotation( const Annotation *ann );
+
+	/**
 	 Returns the form fields on the page
 	 The caller gets the ownership of the returned objects.
 

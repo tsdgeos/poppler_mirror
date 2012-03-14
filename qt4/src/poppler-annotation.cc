@@ -67,7 +67,7 @@ Annotation * AnnotationUtils::createAnnotation( const QDomElement & annElement )
             //annotation = new TextAnnotation( annElement );
             break;
         case Annotation::ALine:
-            //annotation = new LineAnnotation( annElement );
+            annotation = new LineAnnotation( annElement );
             break;
         case Annotation::AGeom:
             //annotation = new GeomAnnotation( annElement );
@@ -151,6 +151,42 @@ void AnnotationPrivate::tieToNativeAnnot(Annot *ann, ::Page *page, Poppler::Docu
     pdfAnnot->incRefCnt();
 }
 
+/* This method is called when a new annotation is created, after pdfAnnot and
+ * pdfPage have been set */
+void AnnotationPrivate::flushBaseAnnotationProperties()
+{
+    Q_ASSERT ( pdfPage );
+
+    Annotation *q = makeAlias(); // Setters are defined in the public class
+
+    // Since pdfAnnot has been set, this calls will write in the Annot object
+    q->setAuthor(author);
+    q->setContents(contents);
+    q->setUniqueName(uniqueName);
+    q->setModificationDate(modDate);
+    q->setCreationDate(creationDate);
+    q->setFlags(flags);
+    //q->setBoundary(boundary); -- already set by subclass-specific code
+    q->setStyle(style);
+    q->setPopup(popup);
+
+    // Flush revisions
+    foreach (Annotation *r, revisions)
+    {
+        // addRevision creates a native Annot because pdfAnnot is set
+        q->addRevision(r, r->d_ptr->revisionScope, r->d_ptr->revisionType);
+        delete r; // Object is no longer needed
+    }
+
+    delete q;
+
+    // Clear some members to save memory
+    author.clear();
+    contents.clear();
+    uniqueName.clear();
+    revisions.clear();
+}
+
 void AnnotationPrivate::fillMTX(double MTX[6]) const
 {
     Q_ASSERT ( pdfPage );
@@ -221,6 +257,25 @@ PDFRectangle AnnotationPrivate::toPdfRectangle(const QRectF &r) const
     }
 
     return PDFRectangle(tl_x, tl_y, br_x, br_y);
+}
+
+AnnotPath * AnnotationPrivate::toAnnotPath(const QLinkedList<QPointF> &list) const
+{
+    const int count = list.size();
+    AnnotCoord **ac = (AnnotCoord **) gmallocn(count, sizeof(AnnotCoord*));
+
+    double MTX[6];
+    fillMTX(MTX);
+
+    int pos = 0;
+    foreach (const QPointF &p, list)
+    {
+        double x, y;
+        XPDFReader::invTransform( MTX, p, x, y );
+        ac[pos++] = new AnnotCoord(x, y);
+    }
+
+    return new AnnotPath(ac, count);
 }
 
 QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentData *doc, int parentID)
@@ -415,6 +470,21 @@ Ref AnnotationPrivate::pdfObjectReference() const
     }
 
     return pdfAnnot->getRef();
+}
+
+void AnnotationPrivate::addAnnotationToPage(::Page *pdfPage, DocumentData *doc, const Annotation * ann)
+{
+    if (ann->d_ptr->pdfAnnot != 0)
+    {
+        error(errIO, -1, "Annotation is already tied");
+        return;
+    }
+
+    // Unimplemented annotations can't be created by the user because their ctor
+    // is private. Therefore, createNativeAnnot will never return 0
+    Annot *nativeAnnot = ann->d_ptr->createNativeAnnot(pdfPage, doc);
+    Q_ASSERT(nativeAnnot);
+    pdfPage->addAnnot(nativeAnnot);
 }
 
 class Annotation::Style::Private : public QSharedData
@@ -1441,6 +1511,7 @@ class TextAnnotationPrivate : public AnnotationPrivate
     public:
         TextAnnotationPrivate();
         Annotation * makeAlias();
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
 
         // data fields
         TextAnnotation::TextType textType;
@@ -1462,6 +1533,11 @@ TextAnnotationPrivate::TextAnnotationPrivate()
 Annotation * TextAnnotationPrivate::makeAlias()
 {
     return new TextAnnotation(*this);
+}
+
+Annot* TextAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    return 0; // Not implemented
 }
 
 TextAnnotation::TextAnnotation( TextAnnotation::TextType type )
@@ -1807,6 +1883,7 @@ class LineAnnotationPrivate : public AnnotationPrivate
     public:
         LineAnnotationPrivate();
         Annotation * makeAlias();
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
 
         // data fields (note uses border for rendering style)
         QLinkedList<QPointF> linePoints;
@@ -1832,6 +1909,47 @@ LineAnnotationPrivate::LineAnnotationPrivate()
 Annotation * LineAnnotationPrivate::makeAlias()
 {
     return new LineAnnotation(*this);
+}
+
+Annot* LineAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    // Setters are defined in the public class
+    LineAnnotation *q = static_cast<LineAnnotation*>( makeAlias() );
+
+    // Set page and document
+    pdfPage = destPage;
+    parentDoc = doc;
+
+    // Set pdfAnnot
+    AnnotPath * path = toAnnotPath(linePoints);
+    PDFRectangle rect = toPdfRectangle(boundary);
+    if (lineType == LineAnnotation::StraightLine)
+    {
+        PDFRectangle lrect(path->getX(0), path->getY(0), path->getX(1), path->getY(1));
+        pdfAnnot = new AnnotLine(doc->doc, &rect, &lrect);
+    }
+    else
+    {
+        pdfAnnot = new AnnotPolygon(doc->doc, &rect,
+                lineClosed ? Annot::typePolygon : Annot::typePolyLine, path );
+    }
+    delete path;
+
+    // Set properties
+    flushBaseAnnotationProperties();
+    q->setLineStartStyle(lineStartStyle);
+    q->setLineEndStyle(lineEndStyle);
+    q->setLineInnerColor(lineInnerColor);
+    q->setLineLeadingForwardPoint(lineLeadingFwdPt);
+    q->setLineLeadingBackPoint(lineLeadingBackPt);
+    q->setLineShowCaption(lineShowCaption);
+    q->setLineIntent(lineIntent);
+
+    delete q;
+
+    linePoints.clear(); // Free up memory
+
+    return pdfAnnot;
 }
 
 LineAnnotation::LineAnnotation( LineAnnotation::LineType type )
@@ -2019,7 +2137,28 @@ void LineAnnotation::setLinePoints( const QLinkedList<QPointF> &points )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    if (d->pdfAnnot->getType() == Annot::typeLine)
+    {
+        AnnotLine *lineann = static_cast<AnnotLine*>(d->pdfAnnot);
+        if (points.size() != 2)
+        {
+            error(errSyntaxError, -1, "Expected two points for a straight line");
+            return;
+        }
+        double x1, y1, x2, y2;
+        double MTX[6];
+        d->fillMTX(MTX);
+        XPDFReader::invTransform( MTX, points.first(), x1, y1 );
+        XPDFReader::invTransform( MTX, points.last(), x2, y2 );
+        lineann->setVertices(x1, y1, x2, y2);
+    }
+    else
+    {
+        AnnotPolygon *polyann = static_cast<AnnotPolygon*>(d->pdfAnnot);
+        AnnotPath * p = d->toAnnotPath(points);
+        polyann->setVertices(p);
+        delete p;
+    }
 }
 
 LineAnnotation::TermStyle LineAnnotation::lineStartStyle() const
@@ -2051,7 +2190,16 @@ void LineAnnotation::setLineStartStyle( LineAnnotation::TermStyle style )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    if (d->pdfAnnot->getType() == Annot::typeLine)
+    {
+        AnnotLine *lineann = static_cast<AnnotLine*>(d->pdfAnnot);
+        lineann->setStartEndStyle((AnnotLineEndingStyle)style, lineann->getEndStyle());
+    }
+    else
+    {
+        AnnotPolygon *polyann = static_cast<AnnotPolygon*>(d->pdfAnnot);
+        polyann->setStartEndStyle((AnnotLineEndingStyle)style, polyann->getEndStyle());
+    }
 }
 
 LineAnnotation::TermStyle LineAnnotation::lineEndStyle() const
@@ -2083,7 +2231,16 @@ void LineAnnotation::setLineEndStyle( LineAnnotation::TermStyle style )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    if (d->pdfAnnot->getType() == Annot::typeLine)
+    {
+        AnnotLine *lineann = static_cast<AnnotLine*>(d->pdfAnnot);
+        lineann->setStartEndStyle(lineann->getStartStyle(), (AnnotLineEndingStyle)style);
+    }
+    else
+    {
+        AnnotPolygon *polyann = static_cast<AnnotPolygon*>(d->pdfAnnot);
+        polyann->setStartEndStyle(polyann->getStartStyle(), (AnnotLineEndingStyle)style);
+    }
 }
 
 bool LineAnnotation::isLineClosed() const
@@ -2106,7 +2263,24 @@ void LineAnnotation::setLineClosed( bool closed )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    if (d->pdfAnnot->getType() != Annot::typeLine)
+    {
+        AnnotPolygon *polyann = static_cast<AnnotPolygon*>(d->pdfAnnot);
+
+        // Set new subtype and switch intent if necessary
+        if (closed)
+        {
+            polyann->setType(Annot::typePolygon);
+            if (polyann->getIntent() == AnnotPolygon::polylineDimension)
+                polyann->setIntent( AnnotPolygon::polygonDimension );
+        }
+        else
+        {
+            polyann->setType(Annot::typePolyLine);
+            if (polyann->getIntent() == AnnotPolygon::polygonDimension)
+                polyann->setIntent( AnnotPolygon::polylineDimension );
+        }
+    }
 }
 
 QColor LineAnnotation::lineInnerColor() const
@@ -2142,7 +2316,18 @@ void LineAnnotation::setLineInnerColor( const QColor &color )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    AnnotColor * c = convertQColor(color);
+
+    if (d->pdfAnnot->getType() == Annot::typeLine)
+    {
+        AnnotLine *lineann = static_cast<AnnotLine*>(d->pdfAnnot);
+        lineann->setInteriorColor(c);
+    }
+    else
+    {
+        AnnotPolygon *polyann = static_cast<AnnotPolygon*>(d->pdfAnnot);
+        polyann->setInteriorColor(c);
+    }
 }
 
 double LineAnnotation::lineLeadingForwardPoint() const
@@ -2171,7 +2356,11 @@ void LineAnnotation::setLineLeadingForwardPoint( double point )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    if (d->pdfAnnot->getType() == Annot::typeLine)
+    {
+        AnnotLine *lineann = static_cast<AnnotLine*>(d->pdfAnnot);
+        lineann->setLeaderLineLength(point);
+    }
 }
 
 double LineAnnotation::lineLeadingBackPoint() const
@@ -2200,7 +2389,11 @@ void LineAnnotation::setLineLeadingBackPoint( double point )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    if (d->pdfAnnot->getType() == Annot::typeLine)
+    {
+        AnnotLine *lineann = static_cast<AnnotLine*>(d->pdfAnnot);
+        lineann->setLeaderLineExtension(point);
+    }
 }
 
 bool LineAnnotation::lineShowCaption() const
@@ -2229,7 +2422,11 @@ void LineAnnotation::setLineShowCaption( bool show )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    if (d->pdfAnnot->getType() == Annot::typeLine)
+    {
+        AnnotLine *lineann = static_cast<AnnotLine*>(d->pdfAnnot);
+        lineann->setCaption(show);
+    }
 }
 
 LineAnnotation::LineIntent LineAnnotation::lineIntent() const
@@ -2264,7 +2461,27 @@ void LineAnnotation::setLineIntent( LineAnnotation::LineIntent intent )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    if ( intent == LineAnnotation::Unknown )
+        return; // Do not set (actually, it should clear the property)
+
+    if (d->pdfAnnot->getType() == Annot::typeLine)
+    {
+        AnnotLine * lineann = static_cast<AnnotLine*>(d->pdfAnnot);
+        lineann->setIntent((AnnotLine::AnnotLineIntent)( intent - 1 ));
+    }
+    else
+    {
+        AnnotPolygon * polyann = static_cast<AnnotPolygon*>(d->pdfAnnot);
+        if ( intent == LineAnnotation::PolygonCloud)
+            polyann->setIntent( AnnotPolygon::polygonCloud );
+        else // LineAnnotation::Dimension
+        {
+            if ( d->pdfAnnot->getType() == Annot::typePolygon )
+                polyann->setIntent( AnnotPolygon::polygonDimension );
+            else // Annot::typePolyLine
+                polyann->setIntent( AnnotPolygon::polylineDimension );
+        }
+    }
 }
 
 
@@ -2274,6 +2491,7 @@ class GeomAnnotationPrivate : public AnnotationPrivate
     public:
         GeomAnnotationPrivate();
         Annotation * makeAlias();
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
 
         // data fields (note uses border for rendering style)
         GeomAnnotation::GeomType geomType;
@@ -2288,6 +2506,11 @@ GeomAnnotationPrivate::GeomAnnotationPrivate()
 Annotation * GeomAnnotationPrivate::makeAlias()
 {
     return new GeomAnnotation(*this);
+}
+
+Annot* GeomAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    return 0; // Not implemented
 }
 
 GeomAnnotation::GeomAnnotation()
@@ -2403,6 +2626,7 @@ class HighlightAnnotationPrivate : public AnnotationPrivate
     public:
         HighlightAnnotationPrivate();
         Annotation * makeAlias();
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
 
         // data fields
         HighlightAnnotation::HighlightType highlightType;
@@ -2453,6 +2677,11 @@ QList< HighlightAnnotation::Quad > HighlightAnnotationPrivate::fromQuadrilateral
     }
 
     return quads;
+}
+
+Annot* HighlightAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    return 0; // Not implemented
 }
 
 HighlightAnnotation::HighlightAnnotation()
@@ -2620,6 +2849,7 @@ class StampAnnotationPrivate : public AnnotationPrivate
     public:
         StampAnnotationPrivate();
         Annotation * makeAlias();
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
 
         // data fields
         QString stampIconName;
@@ -2633,6 +2863,11 @@ StampAnnotationPrivate::StampAnnotationPrivate()
 Annotation * StampAnnotationPrivate::makeAlias()
 {
     return new StampAnnotation(*this);
+}
+
+Annot* StampAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    return 0; // Not implemented
 }
 
 StampAnnotation::StampAnnotation()
@@ -2717,6 +2952,7 @@ class InkAnnotationPrivate : public AnnotationPrivate
     public:
         InkAnnotationPrivate();
         Annotation * makeAlias();
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
 
         // data fields
         QList< QLinkedList<QPointF> > inkPaths;
@@ -2730,6 +2966,11 @@ InkAnnotationPrivate::InkAnnotationPrivate()
 Annotation * InkAnnotationPrivate::makeAlias()
 {
     return new InkAnnotation(*this);
+}
+
+Annot* InkAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    return 0; // Not implemented
 }
 
 InkAnnotation::InkAnnotation()
@@ -2886,6 +3127,7 @@ class LinkAnnotationPrivate : public AnnotationPrivate
         LinkAnnotationPrivate();
         ~LinkAnnotationPrivate();
         Annotation * makeAlias();
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
 
         // data fields
         Link * linkDestination;
@@ -2906,6 +3148,11 @@ LinkAnnotationPrivate::~LinkAnnotationPrivate()
 Annotation * LinkAnnotationPrivate::makeAlias()
 {
     return new LinkAnnotation(*this);
+}
+
+Annot* LinkAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    return 0; // Not implemented
 }
 
 LinkAnnotation::LinkAnnotation()
@@ -3202,6 +3449,7 @@ class CaretAnnotationPrivate : public AnnotationPrivate
     public:
         CaretAnnotationPrivate();
         Annotation * makeAlias();
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
 
         // data fields
         CaretAnnotation::CaretSymbol symbol;
@@ -3236,6 +3484,11 @@ CaretAnnotationPrivate::CaretAnnotationPrivate()
 Annotation * CaretAnnotationPrivate::makeAlias()
 {
     return new CaretAnnotation(*this);
+}
+
+Annot* CaretAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    return 0; // Not implemented
 }
 
 CaretAnnotation::CaretAnnotation()
@@ -3323,6 +3576,7 @@ class FileAttachmentAnnotationPrivate : public AnnotationPrivate
         FileAttachmentAnnotationPrivate();
         ~FileAttachmentAnnotationPrivate();
         Annotation * makeAlias();
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
 
         // data fields
         QString icon;
@@ -3342,6 +3596,11 @@ FileAttachmentAnnotationPrivate::~FileAttachmentAnnotationPrivate()
 Annotation * FileAttachmentAnnotationPrivate::makeAlias()
 {
     return new FileAttachmentAnnotation(*this);
+}
+
+Annot* FileAttachmentAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    return 0; // Not implemented
 }
 
 FileAttachmentAnnotation::FileAttachmentAnnotation()
@@ -3421,6 +3680,7 @@ class SoundAnnotationPrivate : public AnnotationPrivate
         SoundAnnotationPrivate();
         ~SoundAnnotationPrivate();
         Annotation * makeAlias();
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
 
         // data fields
         QString icon;
@@ -3440,6 +3700,11 @@ SoundAnnotationPrivate::~SoundAnnotationPrivate()
 Annotation * SoundAnnotationPrivate::makeAlias()
 {
     return new SoundAnnotation(*this);
+}
+
+Annot* SoundAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    return 0; // Not implemented
 }
 
 SoundAnnotation::SoundAnnotation()
@@ -3519,6 +3784,7 @@ class MovieAnnotationPrivate : public AnnotationPrivate
         MovieAnnotationPrivate();
         ~MovieAnnotationPrivate();
         Annotation * makeAlias();
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
 
         // data fields
         MovieObject *movie;
@@ -3538,6 +3804,11 @@ MovieAnnotationPrivate::~MovieAnnotationPrivate()
 Annotation * MovieAnnotationPrivate::makeAlias()
 {
     return new MovieAnnotation(*this);
+}
+
+Annot* MovieAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    return 0; // Not implemented
 }
 
 MovieAnnotation::MovieAnnotation()
@@ -3617,6 +3888,7 @@ class ScreenAnnotationPrivate : public AnnotationPrivate
         ScreenAnnotationPrivate();
         ~ScreenAnnotationPrivate();
         Annotation * makeAlias();
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
 
         // data fields
         LinkRendition *action;
@@ -3640,6 +3912,11 @@ ScreenAnnotation::ScreenAnnotation(ScreenAnnotationPrivate &dd)
 Annotation * ScreenAnnotationPrivate::makeAlias()
 {
     return new ScreenAnnotation(*this);
+}
+
+Annot* ScreenAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    return 0; // Not implemented
 }
 
 ScreenAnnotation::ScreenAnnotation()

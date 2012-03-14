@@ -400,9 +400,12 @@ class POPPLER_QT4_EXPORT LineAnnotation : public Annotation
                      Butt, ROpenArrow, RClosedArrow, Slash };
     enum LineIntent { Unknown, Arrow, Dimension, PolygonCloud };
 
+    /// \since 0.20
+    LineAnnotation( LineType type );
     virtual ~LineAnnotation();
     virtual SubType subType() const;
 
+    /// \since 0.20
     LineType lineType() const;
 
     QLinkedList<QPointF> linePoints() const;
@@ -433,7 +436,6 @@ class POPPLER_QT4_EXPORT LineAnnotation : public Annotation
     void setLineIntent( LineIntent intent );
 
   private:
-    LineAnnotation( LineType type );
     LineAnnotation( const QDomNode &node );
     LineAnnotation( LineAnnotationPrivate &dd );
     virtual void store( QDomNode &parentNode, QDomDocument &document ) const;

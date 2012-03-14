@@ -21,6 +21,8 @@
 #ifndef _POPPLER_ANNOTATION_PRIVATE_H_
 #define _POPPLER_ANNOTATION_PRIVATE_H_
 
+#include <QtCore/QLinkedList>
+#include <QtCore/QPointF>
 #include <QtCore/QSharedDataPointer>
 
 #include "poppler-annotation.h"
@@ -28,6 +30,7 @@
 #include <Object.h>
 
 class Annot;
+class AnnotPath;
 class Page;
 class PDFRectangle;
 
@@ -69,18 +72,27 @@ class AnnotationPrivate : public QSharedData
          * the specified Annot object. All cached values are discarded */
         void tieToNativeAnnot(Annot *ann, ::Page *page, DocumentData *doc);
 
+        /* Creates a new Annot object on the specified page, flushes current
+         * values to that object and ties this Annotation to that object */
+        virtual Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) = 0;
+
         /* Inited to 0 (i.e. untied annotation) */
         Annot *pdfAnnot;
         ::Page *pdfPage;
         DocumentData * parentDoc;
 
         /* The following helpers only work if pdfPage is set */
+        void flushBaseAnnotationProperties();
         void fillMTX(double MTX[6]) const;
         QRectF fromPdfRectangle(const PDFRectangle &r) const;
         PDFRectangle toPdfRectangle(const QRectF &r) const;
+        AnnotPath * toAnnotPath(const QLinkedList<QPointF> &l) const;
 
         /* Scan page for annotations, parentId=0 searches for root annotations */
         static QList<Annotation*> findAnnotations(::Page *pdfPage, DocumentData *doc, int parentId = 0);
+
+        /* Add given annotation to given page */
+        static void addAnnotationToPage(::Page *pdfPage, DocumentData *doc, const Annotation * ann);
 
         Ref pdfObjectReference() const;
 };
