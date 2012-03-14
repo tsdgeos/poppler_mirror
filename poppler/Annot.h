@@ -807,6 +807,10 @@ public:
   AnnotFreeText(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotFreeText();
 
+  void setQuadding(AnnotFreeTextQuadding new_quadding);
+  void setStyleString(GooString *new_string);
+  void setIntent(AnnotFreeTextIntent new_intent);
+
   // getters
   GooString *getAppearanceString() const { return appearanceString; }
   AnnotFreeTextQuadding getQuadding() const { return quadding; }

@@ -2346,6 +2346,45 @@ void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict) {
   obj1.free();
 }
 
+void AnnotFreeText::setQuadding(AnnotFreeTextQuadding new_quadding) {
+  Object obj1;
+  quadding = new_quadding;
+  obj1.initInt((int)quadding);
+  update ("Q", &obj1);
+}
+
+void AnnotFreeText::setStyleString(GooString *new_string) {
+  delete styleString;
+
+  if (new_string) {
+    styleString = new GooString(new_string);
+    //append the unicode marker <FE FF> if needed
+    if (!styleString->hasUnicodeMarker()) {
+      styleString->insert(0, 0xff);
+      styleString->insert(0, 0xfe);
+    }
+  } else {
+    styleString = new GooString();
+  }
+
+  Object obj1;
+  obj1.initString(styleString->copy());
+  update ("DS", &obj1);
+}
+
+void AnnotFreeText::setIntent(AnnotFreeTextIntent new_intent) {
+  Object obj1;
+
+  intent = new_intent;
+  if (new_intent == intentFreeText)
+    obj1.initName("FreeText");
+  else if (new_intent == intentFreeTextCallout)
+    obj1.initName("FreeTextCallout");
+  else // intentFreeTextTypeWriter
+    obj1.initName("FreeTextTypeWriter");
+  update ("IT", &obj1);
+}
+
 //------------------------------------------------------------------------
 // AnnotLine
 //------------------------------------------------------------------------
