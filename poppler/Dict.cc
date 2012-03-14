@@ -18,6 +18,7 @@
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -177,6 +178,10 @@ void Dict::remove(const char *key) {
 
 void Dict::set(const char *key, Object *val) {
   DictEntry *e;
+  if (val->isNull()) {
+    remove(key);
+    return;
+  }
   e = find (key);
   if (e) {
     e->val.free();
