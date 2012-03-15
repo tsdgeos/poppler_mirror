@@ -323,6 +323,9 @@ private:
   int getOutlinePageNum(OutlineItem *item);
 #endif
   void drawJpegImage(GfxState *state, Stream *str);
+  void drawPngImage(GfxState *state, Stream *str, int width, int height,
+                    GfxImageColorMap *colorMap, GBool isMask = gFalse);
+  GooString *createImageFileName(const char *ext);
 
   FILE *fContentsFrame;
   FILE *page;                   // html file

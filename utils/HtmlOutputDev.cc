@@ -1280,16 +1280,9 @@ void HtmlOutputDev::drawJpegImage(GfxState *state, Stream *str)
 {
   FILE *f1;
   int c;
-  GooString *fName=new GooString(Docname);
-  fName->append("-");
-  GooString *pgNum= GooString::fromInt(pageNum);
-  GooString *imgnum= GooString::fromInt(pages->getNumImages()+1);
 
   // open the image file
-  fName->append(pgNum)->append("_")->append(imgnum)->append(".jpg");
-  delete pgNum;
-  delete imgnum;
-
+  GooString *fName=createImageFileName("jpg");
   if (!(f1 = fopen(fName->getCString(), "wb"))) {
     error(errIO, -1, "Couldn't open image file '%s'", fName->getCString());
     delete fName;
@@ -1311,6 +1304,127 @@ void HtmlOutputDev::drawJpegImage(GfxState *state, Stream *str)
   }
 }
 
+void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int height,
+                                 GfxImageColorMap *colorMap, GBool isMask)
+{
+#ifdef ENABLE_LIBPNG
+  FILE *f1;
+
+  if (!colorMap && !isMask) {
+    error(errInternal, -1, "Can't have color image without a color map");
+    return;
+  }
+
+  // open the image file
+  GooString *fName=createImageFileName("png");
+  if (!(f1 = fopen(fName->getCString(), "wb"))) {
+    error(errIO, -1, "Couldn't open image file '%s'", fName->getCString());
+    delete fName;
+    return;
+  }
+
+  PNGWriter *writer = new PNGWriter( isMask ? PNGWriter::MONOCHROME : PNGWriter::RGB );
+  // TODO can we calculate the resolution of the image?
+  if (!writer->init(f1, width, height, 72, 72)) {
+    error(errInternal, -1, "Can't init PNG for image '%s'", fName->getCString());
+    delete writer;
+    fclose(f1);
+    return;
+  }
+
+  if (!isMask) {
+    Guchar *p;
+    GfxRGB rgb;
+    png_byte *row = (png_byte *) gmalloc(3 * width);   // 3 bytes/pixel: RGB
+    png_bytep *row_pointer= &row;
+
+    // Initialize the image stream
+    ImageStream *imgStr = new ImageStream(str, width,
+                        colorMap->getNumPixelComps(), colorMap->getBits());
+    imgStr->reset();
+
+    // For each line...
+    for (int y = 0; y < height; y++) {
+
+      // Convert into a PNG row
+      p = imgStr->getLine();
+      for (int x = 0; x < width; x++) {
+        colorMap->getRGB(p, &rgb);
+        // Write the RGB pixels into the row
+        row[3*x]= colToByte(rgb.r);
+        row[3*x+1]= colToByte(rgb.g);
+        row[3*x+2]= colToByte(rgb.b);
+        p += colorMap->getNumPixelComps();
+      }
+
+      if (!writer->writeRow(row_pointer)) {
+        error(errIO, -1, "Failed to write into PNG '%s'", fName->getCString());
+        delete writer;
+        delete imgStr;
+        fclose(f1);
+        return;
+      }
+    }
+    gfree(row);
+    imgStr->close();
+    delete imgStr;
+  }
+  else { // isMask == true
+    ImageStream *imgStr = new ImageStream(str, width, 1, 1);
+    imgStr->reset();
+
+    Guchar *png_row = (Guchar *)gmalloc( width );
+
+    for (int ri = 0; ri < height; ++ri)
+    {
+      // read the row of the mask
+      Guchar *bit_row = imgStr->getLine();
+
+      // invert for PNG
+      for(int i = 0; i < width; i++)
+        png_row[i] = bit_row[i] ? 0x00 : 0xff ;
+
+      if (!writer->writeRow( &png_row ))
+      {
+        error(errIO, -1, "Failed to write into PNG '%s'", fName->getCString());
+        delete writer;
+        fclose(f1);
+        delete imgStr;
+        gfree(png_row);
+        return;
+      }
+    }
+    imgStr->close();
+    delete imgStr;
+    gfree(png_row);
+  }
+
+  str->close();
+
+  writer->close();
+  delete writer;
+  fclose(f1);
+
+  pages->addImage(fName, state);
+#else
+  return;
+#endif
+}
+
+GooString *HtmlOutputDev::createImageFileName(const char *ext)
+{
+  GooString *fName=new GooString(Docname);
+  fName->append("-");
+  GooString *pgNum= GooString::fromInt(pageNum);
+  GooString *imgnum= GooString::fromInt(pages->getNumImages()+1);
+
+  fName->append(pgNum)->append("_")->append(imgnum)->append(".")->append(ext);
+  delete pgNum;
+  delete imgnum;
+
+  return fName;
+}
+
 void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 				  int width, int height, GBool invert,
 				  GBool interpolate, GBool inlineImg) {
@@ -1325,7 +1439,11 @@ void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
     drawJpegImage(state, str);
   }
   else {
+#ifdef ENABLE_LIBPNG
+    drawPngImage(state, str, width, height, NULL, gTrue);
+#else
     OutputDev::drawImageMask(state, ref, str, width, height, invert, interpolate, inlineImg);
+#endif
   }
 }
 
@@ -1347,75 +1465,10 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   }
   else {
 #ifdef ENABLE_LIBPNG
-    // Dump the image as a PNG file. Much of the PNG code
-    // comes from an example by Guillaume Cottenceau.
-    FILE *f1;
-    Guchar *p;
-    GfxRGB rgb;
-    png_byte *row = (png_byte *) malloc(3 * width);   // 3 bytes/pixel: RGB
-    png_bytep *row_pointer= &row;
-
-    // Create the image filename
-    GooString *fName=new GooString(Docname);
-    fName->append("-");
-    GooString *pgNum= GooString::fromInt(pageNum);
-    GooString *imgnum= GooString::fromInt(pages->getNumImages()+1);
-    fName->append(pgNum)->append("_")->append(imgnum)->append(".png");
-    delete pgNum;
-    delete imgnum;
-
-    // Open the image file
-    if (!(f1 = fopen(fName->getCString(), "wb"))) {
-      error(errIO, -1, "Couldn't open image file '{0:t}'", fName);
-      delete fName;
-      return;
-    }
-
-    PNGWriter *writer = new PNGWriter();
-    // TODO can we calculate the resolution of the image?
-    if (!writer->init(f1, width, height, 72, 72)) {
-        delete writer;
-        fclose(f1);
-        return;
-    }
-
-    // Initialize the image stream
-    ImageStream *imgStr = new ImageStream(str, width,
-                        colorMap->getNumPixelComps(), colorMap->getBits());
-    imgStr->reset();
-
-    // For each line...
-    for (int y = 0; y < height; y++) {
-
-      // Convert into a PNG row
-      p = imgStr->getLine();
-      for (int x = 0; x < width; x++) {
-        colorMap->getRGB(p, &rgb);
-	// Write the RGB pixels into the row
-	row[3*x]= colToByte(rgb.r);
-	row[3*x+1]= colToByte(rgb.g);
-	row[3*x+2]= colToByte(rgb.b);
-         p += colorMap->getNumPixelComps();
-      }
-
-      if (!writer->writeRow(row_pointer)) {
-        delete writer;
-        fclose(f1);
-        return;
-      }
-    }
-
-    writer->close();
-    delete writer;
-    fclose(f1);
-
-    free(row);
-    pages->addImage(fName, state);
-    imgStr->close();
-    delete imgStr;
+    drawPngImage(state, str, width, height, colorMap );
 #else
     OutputDev::drawImage(state, ref, str, width, height, colorMap, interpolate,
-			 maskColors, inlineImg);
+                         maskColors, inlineImg);
 #endif
   }
 }
