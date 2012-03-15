@@ -21,7 +21,10 @@
 #include "Rendition.h"
 
 #include "poppler-private.h"
-#include "poppler-streamsequentialdevice-private.h"
+
+#include <QtCore/QBuffer>
+
+#define BUFFER_MAX 4096
 
 namespace Poppler
 {
@@ -31,26 +34,20 @@ class MediaRenditionPrivate
 public:
 
   MediaRenditionPrivate(::MediaRendition *rendition)
-  : rendition(rendition), device(0)
+  : rendition(rendition)
   {
   }
 
   ::MediaRendition *rendition;
-  QIODevice *device;
 };
 
 MediaRendition::MediaRendition(::MediaRendition *rendition)
   : d_ptr(new MediaRenditionPrivate(rendition))
 {
-  Q_D( MediaRendition );
-
-  if (d->rendition)
-     d->device = new StreamSequentialDevice(d->rendition->getEmbbededStream());
 }
 
 MediaRendition::~MediaRendition()
 {
-  delete d_ptr->device;
   delete d_ptr;
 }
 
@@ -85,11 +82,27 @@ MediaRendition::isEmbedded() const
   return d->rendition->getIsEmbedded();
 }
 
-QIODevice *
-MediaRendition::streamDevice() const
+QByteArray
+MediaRendition::data() const
 {
+  Q_ASSERT(isValid() && "Invalid media rendition.");
   Q_D( const MediaRendition );
-  return d->device;
+
+  Stream *s = d->rendition->getEmbbededStream();
+  if (!s)
+    return QByteArray();
+
+  QBuffer buffer;
+  Guchar data[BUFFER_MAX];
+  int bread;
+
+  buffer.open(QIODevice::WriteOnly);
+  s->reset();
+  while ((bread = s->doGetChars(BUFFER_MAX, data)) != 0)
+    buffer.write(reinterpret_cast<const char *>(data), bread);
+  buffer.close();
+
+  return buffer.data();
 }
 
 bool

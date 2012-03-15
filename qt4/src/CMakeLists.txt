@@ -25,7 +25,6 @@ set(poppler_qt4_SRCS
   poppler-sound.cc
   poppler-textbox.cc
   poppler-page-transition.cc
-  poppler-streamsequentialdevice.cc
   poppler-media.cc
   ${CMAKE_SOURCE_DIR}/poppler/ArthurOutputDev.cc
 )

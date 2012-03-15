@@ -60,9 +60,9 @@ namespace Poppler
     bool isEmbedded() const;
 
     /**
-      Returns data stream device.
+      Returns data buffer.
      */
-    QIODevice *streamDevice() const;
+    QByteArray data() const;
 
     /**
       Convenience accessor for auto-play parameter.

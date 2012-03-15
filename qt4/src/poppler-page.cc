@@ -59,7 +59,6 @@
 #include "poppler-annotation-private.h"
 #include "poppler-form.h"
 #include "poppler-media.h"
-#include "poppler-streamsequentialdevice-private.h"
 
 namespace Poppler {
 
