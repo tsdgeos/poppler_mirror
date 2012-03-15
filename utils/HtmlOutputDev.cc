@@ -777,6 +777,42 @@ void HtmlPage::dumpAsXML(FILE* f,int page){
   fputs("</page>\n",f);
 }
 
+static void printCSS(FILE *f)
+{
+  // Image flip/flop CSS
+  // Source:
+  // http://stackoverflow.com/questions/1309055/cross-browser-way-to-flip-html-image-via-javascript-css
+  // tested in Chrome, Fx (Linux) and IE9 (W7)
+  static const char css[] = 
+    "<STYLE type=\"text/css\">" "\n"
+    "<!--" "\n"
+    ".xflip {" "\n"
+    "    -moz-transform: scaleX(-1);" "\n"
+    "    -webkit-transform: scaleX(-1);" "\n"
+    "    -o-transform: scaleX(-1);" "\n"
+    "    transform: scaleX(-1);" "\n"
+    "    filter: fliph;" "\n"
+    "}" "\n"
+    ".yflip {" "\n"
+    "    -moz-transform: scaleY(-1);" "\n"
+    "    -webkit-transform: scaleY(-1);" "\n"
+    "    -o-transform: scaleY(-1);" "\n"
+    "    transform: scaleY(-1);" "\n"
+    "    filter: flipv;" "\n"
+    "}" "\n"
+    ".xyflip {" "\n"
+    "    -moz-transform: scaleX(-1) scaleY(-1);" "\n"
+    "    -webkit-transform: scaleX(-1) scaleY(-1);" "\n"
+    "    -o-transform: scaleX(-1) scaleY(-1);" "\n"
+    "    transform: scaleX(-1) scaleY(-1);" "\n"
+    "    filter: fliph + flipv;" "\n"
+    "}" "\n"
+    "-->" "\n"
+    "</STYLE>" "\n";
+
+  fwrite( css, sizeof(css)-1, 1, f );
+}
+
 int HtmlPage::dumpComplexHeaders(FILE * const file, FILE *& pageFile, int page) {
   GooString* tmp;
 
@@ -905,7 +941,14 @@ void HtmlPage::dump(FILE *f, int pageNum)
     int listlen=imgList->getLength();
     for (int i = 0; i < listlen; i++) {
       HtmlImage *img = (HtmlImage*)imgList->del(0);
-      fprintf(f,"<IMG src=\"%s\"/><br/>\n",img->fName->getCString());
+
+      // see printCSS() for class names
+      const char *styles[4] = { "", " class=\"xflip\"", " class=\"yflip\"", " class=\"xyflip\"" };
+      int style_index=0;
+      if (img->xMin > img->xMax) style_index += 1; // xFlip
+      if (img->yMin > img->yMax) style_index += 2; // yFlip
+
+      fprintf(f,"<IMG%s src=\"%s\"/><br/>\n",styles[style_index],img->fName->getCString());
       delete img;
     }
 
@@ -1124,7 +1167,9 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, char *fileName, char *title,
        }
        delete right;
        fputs(DOCTYPE, page);
-       fputs("<HTML>\n<HEAD>\n<TITLE></TITLE>\n</HEAD>\n<BODY>\n",page);
+       fputs("<HTML>\n<HEAD>\n<TITLE></TITLE>\n",page);
+       printCSS(page);
+       fputs("</HEAD>\n<BODY>\n",page);
      }
   }
 
@@ -1156,6 +1201,7 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, char *fileName, char *title,
       fprintf(page, "<META http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding->getCString());
       
       dumpMetaVars(page);
+      printCSS(page);
       fprintf(page,"</HEAD>\n");
       fprintf(page,"<BODY bgcolor=\"#A0A0A0\" vlink=\"blue\" link=\"blue\">\n");
     }
