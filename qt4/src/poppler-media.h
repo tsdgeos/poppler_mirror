@@ -1,5 +1,6 @@
 /* poppler-media.h: qt interface to poppler
  * Copyright (C) 2012 Guillermo A. Amaral B. <gamaral@kde.org>
+ * Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +20,8 @@
 #ifndef __POPPLER_MEDIARENDITION_H__
 #define __POPPLER_MEDIARENDITION_H__
 
+#include "poppler-export.h"
+
 #include <QtCore/QSize>
 #include <QtCore/QString>
 
@@ -34,7 +37,7 @@ namespace Poppler
 
     \since 0.20
    */
-  class MediaRendition {
+  class POPPLER_QT4_EXPORT MediaRendition {
    public:
     MediaRendition(::MediaRendition *rendition);
     ~MediaRendition();
