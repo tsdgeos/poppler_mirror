@@ -1,3 +1,28 @@
+Release 0.19.1
+        core:
+         * Improve CJK suport in PSOutputDev
+         * CJK substitute implementation on WIndows platforms
+         * Do not crash on malformed files with 0 bits in the color map of an image
+         * Fix regression in some PSOutputDev array sizing
+         * Improvements to Annotation editing
+         * Fix logic error in Rendition parsing code (Bug #47063)
+         * Minor API changes to SplashOutputDev (Bug #46622)
+         * Fix mismatch in some functions declarations
+         * Update poppler copyright year
+        
+        utils:
+         * pdftops: Fix -passfonts regression. (Bug #46744)
+         * pdffonts: List the encoding of each font. (Bug #46888)
+         * pdftohtml: Add possibilty of controlling word breaks percentage. (Bug #47022)
+         
+        qt4:
+         * Support for LinkMovie object (Bug #40561)
+         * Support for Media Rendition
+         
+         glib:
+         * Add poppler_fonts_iter_get_encoding
+         * Improvements to the demo
+
 Release 0.19.0
         core:
          * Merge Xpdf 3.03
@@ -45,6 +70,91 @@ Release 0.19.0
          * autotools: Use pkgconfig to check for libopenjpeg (Bug #21789)
          * autotools: Replace openjpeg compile test with a version test
          * Add a configuration option for the test data dir
+
+Release 0.18.4
+        core:
+         * CairoOutputDev: Restore temporary clip used in CairoOutputDev::fill when painting a mask
+         * CairoOutputDev: Ensure paintTransparencyGroup uses same ctm as beginTransparencyGroup. Bug #29968
+         * CairoOutputDev: Use fabs when comparing the transformed line width. Bug #43441
+         * CairoOutputDev: Remove unused variable in CairoFontEngine.cc. Bug #45442
+         * SplashOutputDev: Do not use 50Kb of stack in SplashXPath::addCurve. Bug #44905
+         * JpegWriter: set image parameters after jpeg_set_defaults(). Bug #45224
+         * OpenJPEG decoder: Set OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG if you have it. Bug #43414
+         * Lexer: convert integer to real when overflow occurs. Bug #45605
+
+        glib:
+         * Various minor introspection and documentation improvements. Bug #44790
+         * Fix return values. Bug #45440. Bug #45441
+         * gtk-doc improvements. Bug #45549
+         * Introspection improvements. Bug #45455
+        
+        utils:
+         * HtmlOutputDev: Proper unicode support when dumping PDF outline. Bug #45572
+         * HtmlOutputDev: Fix leaks. Bug #45805
+         * HtmlOutputDev: Close li tags in generated outlines. Bug #45807
+         * man pages: fix minor issues with hypens and %
+
+        build system:
+         * automake: Link to lcms if needed
+         * automake: Fix build for builddir != srcdir. Bug #45434
+         * automake: Improve moc detection when cross compiling
+         * Fix build with latest mingw-w64 headers. Bug #45407
+        
+        qt4:
+         * remove non-existing 'qt' include dirs
+        
+Release 0.18.3
+        core:
+         * Do not fail if we are trying to save a file with Encrypt that has not been modified. KDE Bug #288045
+         * Include .otf fonts when finding substitute fonts. Bug #44412
+         * Fix stack overflow in PDFDoc::markObject(). Bug #44660
+         * Include strings.h as we use memcpy. Bug #43558
+
+        utils:
+         * pdfunite: Properly initialize globalParams. Bug #44659
+         * pdfseparate: Properly initialize globalParams
+         * Fix iniliazialization of GooString arguments
+
+        build system:
+         * autoconf: Check for cairo-ft and other cairo backends. Bug #43969
+        
+Release 0.18.2
+        core:
+         * Fix leak in GooString when resizing to a smaller string
+         * Fix crash if failing to parse the colorspace. Bug #42793
+         * Make GfxColorSpace::parse accept dicts
+
+        qt4:
+         * Use PDFDoc(wchar_t *, ...) on Windows. Bug #35378
+         * Add missing include
+         * Minor fixes in documentation
+
+        utils:
+         * pdftocairo: Fix crash when rendering only odd/even pages in a printing format
+        
+        build system:
+         * Fix pkg-config files
+        
+Release 0.18.1
+        core:
+         * PSOutputDev: Output PS that does not confuse libspectre
+         * PSOutputDev: Fix tiling pattern fill matrix. Bug #41374
+         * PSOutputDev: Emit non repeating patterns just once
+         * PSOutputDev: Fix uncolored tiling patterns. Bug #41462
+         * CairoOutputDev: Fix crash when using poppler_page_get_image()
+         * CairoOutputDev: Fix various setSoftMask bugs. Bug #41005
+        
+        utils:
+         * pdftocairo: Flush/close files one we are done using them
+         * pdftocairo: Compile in Windows
+        
+        build system:
+         * CMake: Fix typo in option description
+         * CMake: Correctly include fontconfig include dir
+         * Remove poppler-cairo dependency from poppler-glib pkg-config file
+        
+        qt4:
+         * Minor fixes in documentation
 
 Release 0.18.0
         core:
