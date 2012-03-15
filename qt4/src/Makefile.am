@@ -39,6 +39,8 @@ libpoppler_qt4_la_SOURCES =			\
 	poppler-qiodeviceoutstream.cc		\
 	poppler-private.cc			\
 	poppler-movie.cc			\
+	poppler-media.cc			\
+	poppler-streamsequentialdevice.cc	\
 	poppler-annotation-helper.h		\
 	poppler-page-private.h			\
 	poppler-link-extractor-private.h	\
