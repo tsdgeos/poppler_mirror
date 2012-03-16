@@ -807,8 +807,10 @@ public:
   AnnotFreeText(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotFreeText();
 
+  void setAppearanceString(GooString *new_string);
   void setQuadding(AnnotFreeTextQuadding new_quadding);
   void setStyleString(GooString *new_string);
+  void setCalloutLine(AnnotCalloutLine *line);
   void setIntent(AnnotFreeTextIntent new_intent);
 
   // getters

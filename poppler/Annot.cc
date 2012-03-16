@@ -2346,6 +2346,20 @@ void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict) {
   obj1.free();
 }
 
+void AnnotFreeText::setAppearanceString(GooString *new_string) {
+  delete appearanceString;
+
+  if (new_string) {
+    appearanceString = new GooString(new_string);
+  } else {
+    appearanceString = new GooString();
+  }
+
+  Object obj1;
+  obj1.initString(appearanceString->copy());
+  update ("DA", &obj1);
+}
+
 void AnnotFreeText::setQuadding(AnnotFreeTextQuadding new_quadding) {
   Object obj1;
   quadding = new_quadding;
@@ -2370,6 +2384,37 @@ void AnnotFreeText::setStyleString(GooString *new_string) {
   Object obj1;
   obj1.initString(styleString->copy());
   update ("DS", &obj1);
+}
+
+void AnnotFreeText::setCalloutLine(AnnotCalloutLine *line) {
+  delete calloutLine;
+
+  Object obj1;
+  if (line == NULL) {
+    obj1.initNull();
+    calloutLine = NULL;
+  } else {
+    double x1 = line->getX1(), y1 = line->getY1();
+    double x2 = line->getX2(), y2 = line->getY2();
+    Object obj2;
+    obj1.initArray(xref);
+    obj1.arrayAdd( obj2.initReal(x1) );
+    obj1.arrayAdd( obj2.initReal(y1) );
+    obj1.arrayAdd( obj2.initReal(x2) );
+    obj1.arrayAdd( obj2.initReal(y2) );
+
+    AnnotCalloutMultiLine *mline = dynamic_cast<AnnotCalloutMultiLine*>(line);
+    if (mline) {
+      double x3 = mline->getX3(), y3 = mline->getY3();
+      obj1.arrayAdd( obj2.initReal(x3) );
+      obj1.arrayAdd( obj2.initReal(y3) );
+      calloutLine = new AnnotCalloutMultiLine(x1, y1, x2, y2, x3, y3);
+    } else {
+      calloutLine = new AnnotCalloutLine(x1, y1, x2, y2);
+    }
+  }
+
+  update("CL", &obj1);
 }
 
 void AnnotFreeText::setIntent(AnnotFreeTextIntent new_intent) {
