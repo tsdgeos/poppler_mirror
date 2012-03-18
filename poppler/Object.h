@@ -17,6 +17,7 @@
 // Copyright (C) 2008 Kees Cook <kees@outflux.net>
 // Copyright (C) 2008, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jakub Wilk <ubanus@users.sf.net>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -205,6 +206,7 @@ public:
   // Array accessors.
   int arrayGetLength();
   void arrayAdd(Object *elem);
+  void arrayRemove(int i);
   Object *arrayGet(int i, Object *obj);
   Object *arrayGetNF(int i, Object *obj);
 
@@ -272,6 +274,9 @@ inline int Object::arrayGetLength()
 
 inline void Object::arrayAdd(Object *elem)
   { OBJECT_TYPE_CHECK(objArray); array->add(elem); }
+
+inline void Object::arrayRemove(int i)
+  { OBJECT_TYPE_CHECK(objArray); array->remove(i); }
 
 inline Object *Object::arrayGet(int i, Object *obj)
   { OBJECT_TYPE_CHECK(objArray); return array->get(i, obj); }

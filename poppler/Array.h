@@ -14,6 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -53,6 +54,9 @@ public:
 
   // Add an element.
   void add(Object *elem);
+
+  // Remove an element by position
+  void remove(int i);
 
   // Accessors.
   Object *get(int i, Object *obj);
