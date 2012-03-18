@@ -21,6 +21,7 @@
 // Copyright (C) 2009, 2010 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@kabelmail.de>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1220,6 +1221,20 @@ Ref XRef::addIndirectObject (Object* o) {
   r.num = entryIndexToUse;
   r.gen = e->gen;
   return r;
+}
+
+void XRef::removeIndirectObject(Ref r) {
+  if (r.num < 0 || r.num >= size) {
+    error(errInternal, -1,"XRef::removeIndirectObject on unknown ref: {0:d}, {1:d}\n", r.num, r.gen);
+    return;
+  }
+  XRefEntry *e = getEntry(r.num);
+  if (e->type == xrefEntryFree)
+    return;
+  e->obj.free();
+  e->type = xrefEntryFree;
+  e->gen++;
+  e->updated = true;
 }
 
 void XRef::writeToFile(OutStream* outStr, GBool writeAllEntries) {

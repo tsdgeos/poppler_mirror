@@ -27,6 +27,7 @@
 // Copyright (C) 2010 Srinivas Adicherla <srinivas.adicherla@geodesic.com>
 // Copyright (C) 2010 Philip Lorenz <lorenzph+freedesktop@gmail.com>
 // Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -841,14 +842,18 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
       continue;
 
     if (xref->getEntry(i)->updated) { //we have an updated object
-      Object obj1;
       Ref ref;
       ref.num = i;
       ref.gen = xref->getEntry(i)->type == xrefEntryCompressed ? 0 : xref->getEntry(i)->gen;
-      xref->fetch(ref.num, ref.gen, &obj1);
-      Guint offset = writeObject(&obj1, &ref, outStr);
-      uxref->add(ref.num, ref.gen, offset, gTrue);
-      obj1.free();
+      if (xref->getEntry(i)->type != xrefEntryFree) {
+        Object obj1;
+        xref->fetch(ref.num, ref.gen, &obj1);
+        Guint offset = writeObject(&obj1, &ref, outStr);
+        uxref->add(ref.num, ref.gen, offset, gTrue);
+        obj1.free();
+      } else {
+        uxref->add(ref.num, ref.gen, 0, gFalse);
+      }
     }
   }
   if (uxref->getNumObjects() == 0) { //we have nothing to update
