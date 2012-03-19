@@ -1573,7 +1573,7 @@ AnnotMarkup::~AnnotMarkup() {
 }
 
 void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict, Object *obj) {
-  Object obj1;
+  Object obj1, obj2;
 
   if (dict->lookup("T", &obj1)->isString()) {
     label = obj1.getString()->copy();
@@ -1582,8 +1582,8 @@ void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict, Object *obj) {
   }
   obj1.free();
 
-  if (dict->lookup("Popup", &obj1)->isDict()) {
-    popup = new AnnotPopup(docA, obj1.getDict(), obj);
+  if (dict->lookup("Popup", &obj1)->isDict() && dict->lookupNF("Popup", &obj2)->isRef()) {
+    popup = new AnnotPopup(docA, obj1.getDict(), &obj2);
   } else {
     popup = NULL;
   }
