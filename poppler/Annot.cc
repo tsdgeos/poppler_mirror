@@ -557,6 +557,16 @@ AnnotBorderArray::AnnotBorderArray(Array *array) {
   }
 }
 
+void AnnotBorderArray::writeToObject(XRef *xref, Object *obj1) const {
+  Object obj2;
+
+  obj1->initArray(xref);
+  obj1->arrayAdd(obj2.initReal( horizontalCorner ));
+  obj1->arrayAdd(obj2.initReal( verticalCorner ));
+  obj1->arrayAdd(obj2.initReal( width ));
+  // TODO: Dash array
+}
+
 //------------------------------------------------------------------------
 // AnnotBorderBS
 //------------------------------------------------------------------------
@@ -1167,6 +1177,19 @@ void Annot::setFlags(Guint new_flags) {
   flags = new_flags;
   obj1.initInt(flags);
   update ("F", &obj1);
+}
+
+void Annot::setBorder(AnnotBorderArray *new_border) {
+  delete border;
+
+  if (new_border) {
+    Object obj1;
+    new_border->writeToObject(xref, &obj1);
+    update ("Border", &obj1);
+    border = new_border;
+  } else {
+    border = NULL;
+  }
 }
 
 void Annot::setColor(AnnotColor *new_color) {

@@ -228,6 +228,8 @@ public:
   AnnotBorder();
   virtual ~AnnotBorder();
 
+  virtual void setWidth(double new_width) { width = new_width; }
+
   virtual AnnotBorderType getType() const { return type; }
   virtual double getWidth() const { return width; }
   virtual int getDashLength() const { return dashLength; }
@@ -253,6 +255,11 @@ class AnnotBorderArray: public AnnotBorder {
 public:
   AnnotBorderArray();
   AnnotBorderArray(Array *array);
+
+  void writeToObject(XRef *xref, Object *dest) const;
+
+  void setHorizontalCorner(double hc) { horizontalCorner = hc; }
+  void setVerticalCorner(double vc) { verticalCorner = vc; }
 
   double getHorizontalCorner() const { return horizontalCorner; }
   double getVerticalCorner() const { return verticalCorner; }
@@ -486,6 +493,8 @@ public:
   void setName(GooString *new_name);
   void setModified(GooString *new_date);
   void setFlags(Guint new_flags);
+
+  void setBorder(AnnotBorderArray *new_border); // Takes ownership
 
   // The annotation takes the ownership of
   // new_color. 
