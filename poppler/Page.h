@@ -171,6 +171,9 @@ public:
   Object *getAnnots(Object *obj) { return annotsObj.fetch(xref, obj); }
   // Add a new annotation to the page
   void addAnnot(Annot *annot);
+  // Remove an existing annotation from the page
+  // Note: Caller is responsible for deleting popup and appearance streams too
+  void removeAnnot(Annot *annot);
 
   // Return a list of links.
   Links *getLinks();

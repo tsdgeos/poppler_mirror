@@ -5726,6 +5726,23 @@ void Annots::appendAnnot(Annot *annot) {
   }
 }
 
+GBool Annots::removeAnnot(Annot *annot) {
+  int idx = -1;
+  // Search annot and remove it by swapping with last element
+  for (int i = 0; idx == -1 && i < nAnnots; i++) {
+    if (annots[i] == annot) {
+      idx = i;
+    }
+  }
+  if (idx == -1) {
+    return gFalse;
+  } else {
+    annots[idx] = annots[--nAnnots];
+    annot->decRefCnt();
+    return gTrue;
+  }
+}
+
 Annot *Annots::createAnnot(Dict* dict, Object *obj) {
   Annot *annot = NULL;
   Object obj1;

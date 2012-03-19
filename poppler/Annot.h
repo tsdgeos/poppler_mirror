@@ -1330,6 +1330,7 @@ public:
   int getNumAnnots() { return nAnnots; }
   Annot *getAnnot(int i) { return annots[i]; }
   void appendAnnot(Annot *annot);
+  GBool removeAnnot(Annot *annot);
 
 private:
   Annot* createAnnot(Dict* dict, Object *obj);

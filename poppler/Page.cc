@@ -24,6 +24,7 @@
 // Copyright (C) 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008 Ilya Gorenbein <igorenbein@finjan.com>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -392,6 +393,41 @@ void Page::addAnnot(Annot *annot) {
   annots->appendAnnot(annot);
 
   annot->setPage(&pageRef, num);
+}
+
+void Page::removeAnnot(Annot *annot) {
+  Ref annotRef = annot->getRef();
+  Object annArray;
+
+  getAnnots(&annArray);
+  if (annArray.isArray()) {
+    int idx = -1;
+    // Get annotation position
+    for (int i = 0; idx == -1 && i < annArray.arrayGetLength(); ++i) {
+      Object tmp;
+      Ref currAnnot = annArray.arrayGetNF(i, &tmp)->getRef();
+      tmp.free();
+      if (currAnnot.num == annotRef.num && currAnnot.gen == annotRef.gen) {
+        idx = i;
+      }
+    }
+
+    if (idx == -1) {
+      error(errInternal, -1, "Annotation doesn't belong to this page");
+      annArray.free();
+      return;
+    }
+    annots->removeAnnot(annot); // Gracefully fails on popup windows
+    annArray.arrayRemove(idx);
+    xref->removeIndirectObject(annotRef);
+
+    if (annotsObj.isRef()) {
+      xref->setModifiedObject (&annArray, annotsObj.getRef());
+    } else {
+      xref->setModifiedObject (&pageObj, pageRef);
+    }
+  }
+  annArray.free();
 }
 
 Links *Page::getLinks() {
