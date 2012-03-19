@@ -487,6 +487,35 @@ void AnnotationPrivate::addAnnotationToPage(::Page *pdfPage, DocumentData *doc, 
     pdfPage->addAnnot(nativeAnnot);
 }
 
+void AnnotationPrivate::removeAnnotationFromPage(::Page *pdfPage, const Annotation * ann)
+{
+    if (ann->d_ptr->pdfAnnot == 0)
+    {
+        error(errIO, -1, "Annotation is not tied");
+        return;
+    }
+
+    if (ann->d_ptr->pdfPage != pdfPage)
+    {
+        error(errIO, -1, "Annotation doesn't belong to the specified page");
+        return;
+    }
+
+    // Remove popup window
+    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup*>(ann->d_ptr->pdfAnnot);
+    if (markupann && markupann->getPopup())
+        pdfPage->removeAnnot(markupann->getPopup());
+
+    // Remove appearance streams (if any)
+    ann->d_ptr->pdfAnnot->invalidateAppearance();
+
+    // Remove annotation
+    pdfPage->removeAnnot(ann->d_ptr->pdfAnnot);
+
+    // Destroy object
+    delete ann;
+}
+
 class Annotation::Style::Private : public QSharedData
 {
   public:

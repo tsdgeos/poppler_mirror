@@ -94,6 +94,9 @@ class AnnotationPrivate : public QSharedData
         /* Add given annotation to given page */
         static void addAnnotationToPage(::Page *pdfPage, DocumentData *doc, const Annotation * ann);
 
+        /* Remove annotation from page and destroy ann */
+        static void removeAnnotationFromPage(::Page *pdfPage, const Annotation * ann);
+
         Ref pdfObjectReference() const;
 };
 

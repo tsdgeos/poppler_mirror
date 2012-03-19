@@ -581,6 +581,11 @@ void Page::addAnnotation( const Annotation *ann )
   AnnotationPrivate::addAnnotationToPage(m_page->page, m_page->parentDoc, ann);
 }
 
+void Page::removeAnnotation( const Annotation *ann )
+{
+  AnnotationPrivate::removeAnnotationFromPage(m_page->page, ann);
+}
+
 QList<FormField*> Page::formFields() const
 {
   QList<FormField*> fields;

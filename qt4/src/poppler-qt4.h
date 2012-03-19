@@ -695,6 +695,14 @@ delete it;
 	void addAnnotation( const Annotation *ann );
 
 	/**
+	 Removes an annotation from the page and destroys the annotation object
+
+	 \note There mustn't be other Annotation objects pointing this annotation
+	 \since 0.20
+	*/
+	void removeAnnotation( const Annotation *ann );
+
+	/**
 	 Returns the form fields on the page
 	 The caller gets the ownership of the returned objects.
 
