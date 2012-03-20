@@ -22,6 +22,7 @@
  */
 
 // qt/kde includes
+#include <QtCore/QRegExp>
 #include <QtCore/QtAlgorithms>
 #include <QtXml/QDomElement>
 #include <QtGui/QColor>
@@ -62,9 +63,8 @@ Annotation * AnnotationUtils::createAnnotation( const QDomElement & annElement )
     int typeNumber = annElement.attribute( "type" ).toInt();
     switch ( typeNumber )
     {
-        // Some annot types are commented because their creation is temporarly disabled
         case Annotation::AText:
-            //annotation = new TextAnnotation( annElement );
+            annotation = new TextAnnotation( annElement );
             break;
         case Annotation::ALine:
             annotation = new LineAnnotation( annElement );
@@ -1518,9 +1518,11 @@ class TextAnnotationPrivate : public AnnotationPrivate
         QString textIcon;
         QFont textFont;
         int inplaceAlign; // 0:left, 1:center, 2:right
-        QString inplaceText;  // overrides contents
         QVector<QPointF> inplaceCallout;
         TextAnnotation::InplaceIntent inplaceIntent;
+
+        // Helper
+        static GooString * toAppearanceString(const QFont &font);
 };
 
 TextAnnotationPrivate::TextAnnotationPrivate()
@@ -1535,9 +1537,45 @@ Annotation * TextAnnotationPrivate::makeAlias()
     return new TextAnnotation(*this);
 }
 
+GooString * TextAnnotationPrivate::toAppearanceString(const QFont &font)
+{
+    GooString * s = GooString::format("/Invalid_font {0:d} Tf", font.pointSize());
+    // TODO: Font family, style (bold, italic, ...) and pointSize as float
+    return s;
+}
+
 Annot* TextAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
 {
-    return 0; // Not implemented
+    // Setters are defined in the public class
+    TextAnnotation *q = static_cast<TextAnnotation*>( makeAlias() );
+
+    // Set page and contents
+    pdfPage = destPage;
+    parentDoc = doc;
+
+    // Set pdfAnnot
+    PDFRectangle rect = toPdfRectangle(boundary);
+    if (textType == TextAnnotation::Linked)
+    {
+        pdfAnnot = new AnnotText(destPage->getDoc(), &rect);
+    }
+    else
+    {
+        GooString * da = toAppearanceString(textFont);
+        pdfAnnot = new AnnotFreeText(destPage->getDoc(), &rect, da);
+        delete da;
+    }
+
+    // Set properties
+    flushBaseAnnotationProperties();
+    q->setTextIcon(textIcon);
+    q->setInplaceAlign(inplaceAlign);
+    q->setCalloutPoints(inplaceCallout);
+    q->setInplaceIntent(inplaceIntent);
+
+    delete q;
+
+    return pdfAnnot;
 }
 
 TextAnnotation::TextAnnotation( TextAnnotation::TextType type )
@@ -1710,7 +1748,13 @@ void TextAnnotation::setTextIcon( const QString &icon )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    if (d->pdfAnnot->getType() == Annot::typeText)
+    {
+        AnnotText * textann = static_cast<AnnotText*>(d->pdfAnnot);
+        QByteArray encoded = icon.toLatin1();
+        GooString s(encoded.constData());
+        textann->setIcon(&s);
+    }
 }
 
 QFont TextAnnotation::textFont() const
@@ -1720,7 +1764,24 @@ QFont TextAnnotation::textFont() const
     if (!d->pdfAnnot)
         return d->textFont;
 
-    return QFont(); // TODO: AnnotFreeText::getAppearanceString
+    QFont font;
+
+    if (d->pdfAnnot->getType() == Annot::typeFreeText)
+    {
+        const AnnotFreeText * ftextann = static_cast<const AnnotFreeText*>(d->pdfAnnot);
+        const GooString * da = ftextann->getAppearanceString();
+        if (da)
+        {
+            // At the moment, only font size is parsed
+            QString style = QString::fromLatin1( da->getCString() );
+            QRegExp rx("(\\d+)(\\.\\d*)? Tf");
+            if (rx.indexIn(style) != -1)
+                font.setPointSize( rx.cap(1).toInt() );
+            // TODO: Other properties
+        }
+    }
+
+    return font;
 }
 
 void TextAnnotation::setTextFont( const QFont &font )
@@ -1733,7 +1794,13 @@ void TextAnnotation::setTextFont( const QFont &font )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    if (d->pdfAnnot->getType() != Annot::typeFreeText)
+        return;
+
+    AnnotFreeText * ftextann = static_cast<AnnotFreeText*>(d->pdfAnnot);
+    GooString * da = TextAnnotationPrivate::toAppearanceString(font);
+    ftextann->setAppearanceString(da);
+    delete da;
 }
 
 int TextAnnotation::inplaceAlign() const
@@ -1762,40 +1829,21 @@ void TextAnnotation::setInplaceAlign( int align )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    if (d->pdfAnnot->getType() == Annot::typeFreeText)
+    {
+        AnnotFreeText * ftextann = static_cast<AnnotFreeText*>(d->pdfAnnot);
+        ftextann->setQuadding((AnnotFreeText::AnnotFreeTextQuadding)align);
+    }
 }
 
 QString TextAnnotation::inplaceText() const
 {
-    Q_D( const TextAnnotation );
-
-    if (!d->pdfAnnot)
-        return d->inplaceText;
-
-    if (d->pdfAnnot->getType() == Annot::typeFreeText)
-    {
-        const AnnotFreeText * ftextann = static_cast<const AnnotFreeText*>(d->pdfAnnot);
-        QString tmpstring;
-        GooString *styleString = ftextann->getStyleString();
-
-        if (styleString)
-            return UnicodeParsedString( styleString );
-    }
-
-    return QString();
+    return contents();
 }
 
 void TextAnnotation::setInplaceText( const QString &text )
 {
-    Q_D( TextAnnotation );
-
-    if (!d->pdfAnnot)
-    {
-        d->inplaceText = text;
-        return;
-    }
-
-    // TODO: Set pdfAnnot
+    setContents(text);
 }
 
 QPointF TextAnnotation::calloutPoint( int id ) const
@@ -1844,7 +1892,44 @@ void TextAnnotation::setCalloutPoints( const QVector<QPointF> &points )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    if (d->pdfAnnot->getType() != Annot::typeFreeText)
+        return;
+
+    AnnotFreeText * ftextann = static_cast<AnnotFreeText*>(d->pdfAnnot);
+    const int count = points.size();
+
+    if (count == 0)
+    {
+        ftextann->setCalloutLine(0);
+        return;
+    }
+
+    if (count != 2 && count != 3)
+    {
+        error(errSyntaxError, -1, "Expected zero, two or three points for callout");
+        return;
+    }
+
+    AnnotCalloutLine *callout;
+    double x1, y1, x2, y2;
+    double MTX[6];
+    d->fillMTX(MTX);
+
+    XPDFReader::invTransform( MTX, points[0], x1, y1 );
+    XPDFReader::invTransform( MTX, points[1], x2, y2 );
+    if (count == 3)
+    {
+        double x3, y3;
+        XPDFReader::invTransform( MTX, points[2], x3, y3 );
+        callout = new AnnotCalloutMultiLine(x1, y1, x2, y2, x3, y3);
+    }
+    else
+    {
+        callout = new AnnotCalloutLine(x1, y1, x2, y2);
+    }
+
+    ftextann->setCalloutLine(callout);
+    delete callout;
 }
 
 TextAnnotation::InplaceIntent TextAnnotation::inplaceIntent() const
@@ -1873,7 +1958,11 @@ void TextAnnotation::setInplaceIntent( TextAnnotation::InplaceIntent intent )
         return;
     }
 
-    // TODO: Set pdfAnnot
+    if (d->pdfAnnot->getType() == Annot::typeFreeText)
+    {
+        AnnotFreeText * ftextann = static_cast<AnnotFreeText*>(d->pdfAnnot);
+        ftextann->setIntent((AnnotFreeText::AnnotFreeTextIntent)intent);
+    }
 }
 
 
