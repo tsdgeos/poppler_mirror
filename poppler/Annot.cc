@@ -5041,6 +5041,93 @@ void AnnotPolygon::setIntent(AnnotPolygonIntent new_intent) {
   update ("IT", &obj1);
 }
 
+void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
+  Object obj;
+  double ca = 1;
+
+  if (!isVisible (printing))
+    return;
+
+  if (appearance.isNull()) {
+    ca = opacity;
+
+    appearBuf = new GooString ();
+    appearBuf->append ("q\n");
+
+    if (color) {
+      setColor(color, gFalse);
+    }
+
+    if (border) {
+      int i, dashLength;
+      double *dash;
+
+      switch (border->getStyle()) {
+      case AnnotBorder::borderDashed:
+        appearBuf->append("[");
+        dashLength = border->getDashLength();
+        dash = border->getDash();
+        for (i = 0; i < dashLength; ++i)
+          appearBuf->appendf(" {0:.2f}", dash[i]);
+        appearBuf->append(" ] 0 d\n");
+        break;
+      default:
+        appearBuf->append("[] 0 d\n");
+        break;
+      }
+      appearBuf->appendf("{0:.2f} w\n", border->getWidth());
+    }
+
+    if (interiorColor) {
+      setColor(interiorColor, gTrue);
+    }
+
+    if (vertices->getCoordsLength() != 0) {
+      appearBuf->appendf ("{0:.2f} {1:.2f} m\n", vertices->getX(0) - rect->x1, vertices->getY(0) - rect->y1);
+
+      for (int i = 1; i < vertices->getCoordsLength(); ++i) {
+        appearBuf->appendf ("{0:.2f} {1:.2f} l\n", vertices->getX(i) - rect->x1, vertices->getY(i) - rect->y1);
+      }
+
+      if (type == typePolygon) {
+        if (interiorColor && interiorColor->getSpace() != AnnotColor::colorTransparent) {
+          appearBuf->append ("b\n");
+        } else {
+          appearBuf->append ("s\n");
+        }
+      } else {
+        appearBuf->append ("S\n");
+      }
+    }
+
+    appearBuf->append ("Q\n");
+
+    double bbox[4];
+    bbox[0] = bbox[1] = 0;
+    bbox[2] = rect->x2 - rect->x1;
+    bbox[3] = rect->y2 - rect->y1;
+    if (ca == 1) {
+      createForm(bbox, gFalse, NULL, &appearance);
+    } else {
+      Object aStream, resDict;
+
+      createForm(bbox, gTrue, NULL, &aStream);
+      delete appearBuf;
+
+      appearBuf = new GooString ("/GS0 gs\n/Fm0 Do");
+      createResourcesDict("Fm0", &aStream, "GS0", ca, NULL, &resDict);
+      createForm(bbox, gFalse, &resDict, &appearance);
+    }
+    delete appearBuf;
+  }
+
+  // draw the appearance stream
+  appearance.fetch(xref, &obj);
+  gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
+                 rect->x1, rect->y1, rect->x2, rect->y2);
+  obj.free();
+}
+
 //------------------------------------------------------------------------
 // AnnotCaret
 //------------------------------------------------------------------------

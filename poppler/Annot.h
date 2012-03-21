@@ -1045,6 +1045,8 @@ public:
   AnnotPolygon(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotPolygon();
 
+  virtual void draw(Gfx *gfx, GBool printing);
+
   void setType(AnnotSubtype new_type); // typePolygon or typePolyLine
   void setVertices(AnnotPath *path);
   void setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end);
