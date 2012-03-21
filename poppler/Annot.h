@@ -1120,6 +1120,8 @@ public:
   AnnotInk(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotInk();
 
+  virtual void draw(Gfx *gfx, GBool printing);
+
   void setInkList(AnnotPath **paths, int n_paths);
 
   // getters

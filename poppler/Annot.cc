@@ -5270,6 +5270,68 @@ void AnnotInk::setInkList(AnnotPath **paths, int n_paths) {
   annotObj.dictSet ("InkList", &obj1);
 }
 
+void AnnotInk::draw(Gfx *gfx, GBool printing) {
+  Object obj;
+  double ca = 1;
+
+  if (!isVisible (printing))
+    return;
+
+  if (appearance.isNull()) {
+    ca = opacity;
+
+    appearBuf = new GooString ();
+    appearBuf->append ("q\n");
+
+    if (color) {
+      setColor(color, gFalse);
+    }
+
+    if (border) {
+      appearBuf->appendf("{0:.2f} w\n", border->getWidth());
+    }
+
+    for (int i = 0; i < inkListLength; ++i) {
+      const AnnotPath * path = inkList[i];
+      if (path->getCoordsLength() != 0) {
+        appearBuf->appendf ("{0:.2f} {1:.2f} m\n", path->getX(0) - rect->x1, path->getY(0) - rect->y1);
+
+        for (int j = 1; j < path->getCoordsLength(); ++j) {
+          appearBuf->appendf ("{0:.2f} {1:.2f} l\n", path->getX(j) - rect->x1, path->getY(j) - rect->y1);
+        }
+
+        appearBuf->append ("S\n");
+      }
+    }
+
+    appearBuf->append ("Q\n");
+
+    double bbox[4];
+    bbox[0] = bbox[1] = 0;
+    bbox[2] = rect->x2 - rect->x1;
+    bbox[3] = rect->y2 - rect->y1;
+    if (ca == 1) {
+      createForm(bbox, gFalse, NULL, &appearance);
+    } else {
+      Object aStream, resDict;
+
+      createForm(bbox, gTrue, NULL, &aStream);
+      delete appearBuf;
+
+      appearBuf = new GooString ("/GS0 gs\n/Fm0 Do");
+      createResourcesDict("Fm0", &aStream, "GS0", ca, NULL, &resDict);
+      createForm(bbox, gFalse, &resDict, &appearance);
+    }
+    delete appearBuf;
+  }
+
+  // draw the appearance stream
+  appearance.fetch(xref, &obj);
+  gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
+                 rect->x1, rect->y1, rect->x2, rect->y2);
+  obj.free();
+}
+
 //------------------------------------------------------------------------
 // AnnotFileAttachment
 //------------------------------------------------------------------------
