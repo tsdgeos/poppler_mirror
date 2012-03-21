@@ -4812,7 +4812,7 @@ void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
 
       }
 
-      if (interiorColor)
+      if (interiorColor && interiorColor->getSpace() != AnnotColor::colorTransparent)
         appearBuf->append ("b\n");
       else
         appearBuf->append ("S\n");
