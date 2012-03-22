@@ -912,7 +912,7 @@ void Annotation::storeBaseAnnotationProperties( QDomNode & annNode, QDomDocument
     // store -other- attributes
     if ( flags() )
         e.setAttribute( "flags", flags() );
-    if ( s.color().isValid() && s.color() != Qt::black )
+    if ( s.color().isValid() )
         e.setAttribute( "color", s.color().name() );
     if ( s.opacity() != 1.0 )
         e.setAttribute( "opacity", QString::number( s.opacity() ) );
