@@ -2851,10 +2851,52 @@ void AnnotLine::draw(Gfx *gfx, GBool printing) {
       }
       appearBuf->appendf("{0:.2f} w\n", border->getWidth());
     }
-    appearBuf->appendf ("{0:.2f} {1:.2f} m\n", coord1->getX() - rect->x1, coord1->getY() - rect->y1);
-    appearBuf->appendf ("{0:.2f} {1:.2f} l\n", coord2->getX() - rect->x1, coord2->getY() - rect->y1);
-    // TODO: Line ending, caption, leader lines
-    appearBuf->append ("S\n");
+
+    const double x1 = coord1->getX();
+    const double y1 = coord1->getY();
+    const double x2 = coord2->getX();
+    const double y2 = coord2->getY();
+
+    // Main segment length
+    const double main_len = sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+
+    // Main segment becomes positive x direction, coord1 becomes (0,0)
+    Matrix matr;
+    const double angle = atan2(y2 - y1, x2 - x1);
+    matr.m[0] = matr.m[3] = cos(angle);
+    matr.m[1] = sin(angle);
+    matr.m[2] = -matr.m[1];
+    matr.m[4] = x1-rect->x1;
+    matr.m[5] = y1-rect->y1;
+
+    double tx, ty;
+
+    // Draw main segment
+    matr.transform (0, leaderLineLength, &tx, &ty);
+    appearBuf->appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+
+    matr.transform (main_len, leaderLineLength, &tx, &ty);
+    appearBuf->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
+
+    // TODO: Line ending, caption
+
+    // Draw leader lines
+    double ll_len = fabs(leaderLineLength) + leaderLineExtension;
+    double sign = leaderLineLength >= 0 ? 1 : -1;
+    if (ll_len != 0) {
+      matr.transform (0, 0, &tx, &ty);
+      appearBuf->appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+
+      matr.transform (0, sign*ll_len, &tx, &ty);
+      appearBuf->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
+
+      matr.transform (main_len, 0, &tx, &ty);
+      appearBuf->appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+
+      matr.transform (main_len, sign*ll_len, &tx, &ty);
+      appearBuf->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
+    }
+
     appearBuf->append ("Q\n");
 
     double bbox[4];
