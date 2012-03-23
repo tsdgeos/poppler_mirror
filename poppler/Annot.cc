@@ -2549,6 +2549,139 @@ void AnnotFreeText::setIntent(AnnotFreeTextIntent new_intent) {
   update ("IT", &obj1);
 }
 
+static GfxFont * createAnnotDrawFont(XRef * xref, Object *fontResDict)
+{
+  Ref dummyRef = { -1, -1 };
+
+  Object baseFontObj, subtypeObj, encodingObj;
+  baseFontObj.initName("Helvetica");
+  subtypeObj.initName("Type0");
+  encodingObj.initName("WinAnsiEncoding");
+
+  Object fontDictObj;
+  Dict *fontDict = new Dict(xref);
+  fontDict->decRef();
+  fontDict->add(copyString("BaseFont"), &baseFontObj);
+  fontDict->add(copyString("Subtype"), &subtypeObj);
+  fontDict->add(copyString("Encoding"), &encodingObj);
+  fontDictObj.initDict(fontDict);
+
+  Object fontsDictObj;
+  Dict *fontsDict = new Dict(xref);
+  fontsDict->decRef();
+  fontsDict->add(copyString("AnnotDrawFont"), &fontDictObj);
+  fontsDictObj.initDict(fontsDict);
+
+  Dict *dict = new Dict(xref);
+  dict->add(copyString("Font"), &fontsDictObj);
+
+  fontResDict->initDict(dict);
+  return GfxFont::makeFont(xref, "AnnotDrawFont", dummyRef, fontDict);
+}
+
+void AnnotFreeText::generateFreeTextAppearance()
+{
+  double ca = opacity;
+
+  appearBuf = new GooString ();
+  appearBuf->append ("q\n");
+  if (color) {
+    setColor(color, gTrue);
+  }
+
+  // Main segment length
+  const double width = rect->x2 - rect->x1;
+  const double height = rect->y2 - rect->y1;
+
+  // Parse text size from appearance string (TODO: other properties)
+  double fontsize = 0;
+  GooString * da = appearanceString;
+  if (da) {
+    GooList * daToks = new GooList();
+    int j, i = 0;
+    while (i < da->getLength()) {
+      while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
+        ++i;
+      }
+      if (i < da->getLength()) {
+        for (j = i + 1; j < da->getLength() && !Lexer::isSpace(da->getChar(j)); ++j) {
+        }
+        daToks->append(new GooString(da, i, j - i));
+        i = j;
+      }
+    }
+    for (i = 2; i < daToks->getLength(); ++i) {
+      if (!((GooString *)daToks->get(i))->cmp("Tf")) {
+        GooString * tok = (GooString *)daToks->get(i - 1);
+        fontsize = gatof(tok->getCString());
+        break;
+      }
+    }
+    deleteGooList(daToks, GooString);
+  }
+  if (fontsize <= 0) {
+    fontsize = 10; // Default value
+  }
+
+  // Draw box and setup clipping
+  appearBuf->appendf ("[] 0 d 1 w 0 G 0 0 {0:.2f} {1:.2f} re b\n", width, height);
+  appearBuf->appendf ("2 0 {0:.2f} {1:.2f} re W n\n", width-4, height);
+
+  // Set font state
+  appearBuf->appendf ("0 g BT 1 0 0 1 2 {0:.2f} Tm\n", height);
+  appearBuf->appendf ("{0:.2f} TL /AnnotDrawFont {0:.2f} Tf\n", fontsize);
+
+  Object fontResDict;
+  GfxFont *font = createAnnotDrawFont(xref, &fontResDict);
+
+  int i = 0;
+  while (i < contents->getLength()) {
+    GooString out;
+    layoutText(contents, &out, &i, font, NULL, 0, NULL, gFalse);
+    writeString(&out, appearBuf);
+    appearBuf->append("'\n");
+  }
+
+  font->decRefCnt();
+  appearBuf->append ("ET Q\n");
+
+  double bbox[4];
+  bbox[0] = bbox[1] = 0;
+  bbox[2] = rect->x2 - rect->x1;
+  bbox[3] = rect->y2 - rect->y1;
+
+  if (ca == 1) {
+    createForm(bbox, gFalse, &fontResDict, &appearance);
+  } else {
+    Object aStream, resDict;
+
+    createForm(bbox, gTrue, &fontResDict, &aStream);
+    delete appearBuf;
+
+    appearBuf = new GooString ("/GS0 gs\n/Fm0 Do");
+    createResourcesDict("Fm0", &aStream, "GS0", ca, NULL, &resDict);
+    createForm(bbox, gFalse, &resDict, &appearance);
+  }
+  delete appearBuf;
+}
+
+void AnnotFreeText::draw(Gfx *gfx, GBool printing) {
+  Object obj;
+
+  if (!isVisible (printing))
+    return;
+
+  if (appearance.isNull()) {
+    generateFreeTextAppearance();
+  }
+
+  // draw the appearance stream
+  appearance.fetch(xref, &obj);
+  gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
+                 rect->x1, rect->y1, rect->x2, rect->y2);
+  obj.free();
+}
+
 //------------------------------------------------------------------------
 // AnnotLine
 //------------------------------------------------------------------------
@@ -3308,7 +3441,7 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
 // TODO: Handle surrogate pairs in UTF-16.
 //       Should be able to generate output for any CID-keyed font.
 //       Doesn't handle vertical fonts--should it?
-void AnnotWidget::layoutText(GooString *text, GooString *outBuf, int *i,
+void Annot::layoutText(GooString *text, GooString *outBuf, int *i,
                              GfxFont *font, double *width, double widthLimit,
                              int *charCount, GBool noReencode)
 {
@@ -3502,7 +3635,7 @@ void AnnotWidget::layoutText(GooString *text, GooString *outBuf, int *i,
 
 // Copy the given string to appearBuf, adding parentheses around it and
 // escaping characters as appropriate.
-void AnnotWidget::writeString(GooString *str, GooString *appearBuf)
+void Annot::writeString(GooString *str, GooString *appearBuf)
 {
   char c;
   int i;

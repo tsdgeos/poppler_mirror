@@ -563,6 +563,10 @@ protected:
   void drawCircle(double cx, double cy, double r, GBool fill);
   void drawCircleTopLeft(double cx, double cy, double r);
   void drawCircleBottomRight(double cx, double cy, double r);
+  void layoutText(GooString *text, GooString *outBuf, int *i, GfxFont *font,
+		  double *width, double widthLimit, int *charCount,
+		  GBool noReencode);
+  void writeString(GooString *str, GooString *appearBuf);
   void createForm(double *bbox, GBool transparencyGroup, Object *resDict, Object *aStream);
   void createResourcesDict(const char *formName, Object *formStream, const char *stateName,
 			   double opacity, const char *blendMode, Object *resDict);
@@ -837,6 +841,8 @@ public:
   AnnotFreeText(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotFreeText();
 
+  virtual void draw(Gfx *gfx, GBool printing);
+
   void setAppearanceString(GooString *new_string);
   void setQuadding(AnnotFreeTextQuadding new_quadding);
   void setStyleString(GooString *new_string);
@@ -857,6 +863,7 @@ public:
 protected:
 
   void initialize(PDFDoc *docA, Dict *dict);
+  void generateFreeTextAppearance();
 
   // required
   GooString *appearanceString;      // DA
@@ -1242,10 +1249,6 @@ private:
 		GBool password=false);
   void drawListBox(FormFieldChoice *fieldChoice,
 		   GooString *da, GfxResources *resources, int quadding);
-  void layoutText(GooString *text, GooString *outBuf, int *i, GfxFont *font,
-		  double *width, double widthLimit, int *charCount,
-		  GBool noReencode);
-  void writeString(GooString *str, GooString *appearBuf);
 
   Form *form;
   FormField *field;                       // FormField object for this annotation
