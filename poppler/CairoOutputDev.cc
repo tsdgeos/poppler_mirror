@@ -889,7 +889,7 @@ GBool CairoOutputDev::radialShadedSupportExtend(GfxState *state, GfxRadialShadin
   return (shading->getExtend0() == shading->getExtend1());
 }
 
-#if CAIRO_VERSION == CAIRO_VERSION_ENCODE(1, 11, 2)
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
 GBool CairoOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading)
 {
   double x0, y0, x1, y1, x2, y2;
@@ -906,21 +906,21 @@ GBool CairoOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTrian
 			 &x1, &y1, &color[1],
 			 &x2, &y2, &color[2]);
 
-    cairo_pattern_mesh_begin_patch (fill_pattern);
+    cairo_mesh_pattern_begin_patch (fill_pattern);
 
-    cairo_pattern_mesh_move_to (fill_pattern, x0, y0);
-    cairo_pattern_mesh_line_to (fill_pattern, x1, y1);
-    cairo_pattern_mesh_line_to (fill_pattern, x2, y2);
+    cairo_mesh_pattern_move_to (fill_pattern, x0, y0);
+    cairo_mesh_pattern_line_to (fill_pattern, x1, y1);
+    cairo_mesh_pattern_line_to (fill_pattern, x2, y2);
 
     for (j = 0; j < 3; j++) {
 	shading->getColorSpace()->getRGB(&color[j], &rgb);
-	cairo_pattern_mesh_set_corner_color_rgb (fill_pattern, j,
+	cairo_mesh_pattern_set_corner_color_rgb (fill_pattern, j,
 						 colToDbl(rgb.r),
 						 colToDbl(rgb.g),
 						 colToDbl(rgb.b));
     }
 
-    cairo_pattern_mesh_end_patch (fill_pattern);
+    cairo_mesh_pattern_end_patch (fill_pattern);
   }
 
   double xMin, yMin, xMax, yMax;
@@ -949,33 +949,33 @@ GBool CairoOutputDev::patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *
     GfxColor color;
     GfxRGB rgb;
 
-    cairo_pattern_mesh_begin_patch (fill_pattern);
+    cairo_mesh_pattern_begin_patch (fill_pattern);
 
-    cairo_pattern_mesh_move_to (fill_pattern, patch->x[0][0], patch->y[0][0]);
-    cairo_pattern_mesh_curve_to (fill_pattern,
+    cairo_mesh_pattern_move_to (fill_pattern, patch->x[0][0], patch->y[0][0]);
+    cairo_mesh_pattern_curve_to (fill_pattern,
 			    patch->x[0][1], patch->y[0][1],
 			    patch->x[0][2], patch->y[0][2],
 			    patch->x[0][3], patch->y[0][3]);
 
-    cairo_pattern_mesh_curve_to (fill_pattern,
+    cairo_mesh_pattern_curve_to (fill_pattern,
 			    patch->x[1][3], patch->y[1][3],
 			    patch->x[2][3], patch->y[2][3],
 			    patch->x[3][3], patch->y[3][3]);
 
-    cairo_pattern_mesh_curve_to (fill_pattern,
+    cairo_mesh_pattern_curve_to (fill_pattern,
 			    patch->x[3][2], patch->y[3][2],
 			    patch->x[3][1], patch->y[3][1],
 			    patch->x[3][0], patch->y[3][0]);
 
-    cairo_pattern_mesh_curve_to (fill_pattern,
+    cairo_mesh_pattern_curve_to (fill_pattern,
 			    patch->x[2][0], patch->y[2][0],
 			    patch->x[1][0], patch->y[1][0],
 			    patch->x[0][0], patch->y[0][0]);
 
-    cairo_pattern_mesh_set_control_point (fill_pattern, 0, patch->x[1][1], patch->y[1][1]);
-    cairo_pattern_mesh_set_control_point (fill_pattern, 1, patch->x[1][2], patch->y[1][2]);
-    cairo_pattern_mesh_set_control_point (fill_pattern, 2, patch->x[2][2], patch->y[2][2]);
-    cairo_pattern_mesh_set_control_point (fill_pattern, 3, patch->x[2][1], patch->y[2][1]);
+    cairo_mesh_pattern_set_control_point (fill_pattern, 0, patch->x[1][1], patch->y[1][1]);
+    cairo_mesh_pattern_set_control_point (fill_pattern, 1, patch->x[1][2], patch->y[1][2]);
+    cairo_mesh_pattern_set_control_point (fill_pattern, 2, patch->x[2][2], patch->y[2][2]);
+    cairo_mesh_pattern_set_control_point (fill_pattern, 3, patch->x[2][1], patch->y[2][1]);
 
     for (j = 0; j < 4; j++) {
       int u, v;
@@ -1005,12 +1005,12 @@ GBool CairoOutputDev::patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *
       }
 
       shading->getColorSpace()->getRGB(&color, &rgb);
-      cairo_pattern_mesh_set_corner_color_rgb (fill_pattern, j,
+      cairo_mesh_pattern_set_corner_color_rgb (fill_pattern, j,
 					       colToDbl(rgb.r),
 					       colToDbl(rgb.g),
 					       colToDbl(rgb.b));
     }
-    cairo_pattern_mesh_end_patch (fill_pattern);
+    cairo_mesh_pattern_end_patch (fill_pattern);
   }
 
   double xMin, yMin, xMax, yMax;
@@ -1026,7 +1026,7 @@ GBool CairoOutputDev::patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *
 
   return gTrue;
 }
-#endif /* CAIRO_VERSION == CAIRO_VERSION_ENCODE(1, 11, 2) */
+#endif /* CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0) */
 
 void CairoOutputDev::clip(GfxState *state) {
   doPath (cairo, state, state->getPath());
