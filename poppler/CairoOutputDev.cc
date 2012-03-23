@@ -1859,12 +1859,28 @@ void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stre
     drawImageMaskRegular(state, ref, str, width, height, invert, gFalse, inlineImg);
   }
 
+  if (state->getFillColorSpace()->getMode() == csPattern) {
+    cairo_set_source_rgb (cairo, 1, 1, 1);
+    cairo_set_matrix (cairo, &mask_matrix);
+    cairo_mask (cairo, mask);
+  }
+
   if (mask)
     cairo_pattern_destroy (mask);
   mask = cairo_pop_group (cairo);
+
+  saveState(state);
+  double bbox[4] = {0,0,1,1}; // dummy
+  beginTransparencyGroup(state, bbox, state->getFillColorSpace(),
+                         gTrue, gFalse, gFalse);
 }
 
 void CairoOutputDev::unsetSoftMaskFromImageMask(GfxState *state) {
+  double bbox[4] = {0,0,1,1}; // dummy
+
+  endTransparencyGroup(state);
+  restoreState(state);
+  paintTransparencyGroup(state, bbox);
   clearSoftMask(state);
 }
 
