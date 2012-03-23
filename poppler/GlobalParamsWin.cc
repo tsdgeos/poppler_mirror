@@ -3,6 +3,7 @@
    
    // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
    // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+   // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 
 TODO: instead of a fixed mapping defined in displayFontTab, it could
 scan the whole fonts directory, parse TTF files and build font
@@ -448,7 +449,7 @@ void GlobalParams::setupBaseFonts(char * dir)
     }
 }
 
-static char *findSubstituteName(GfxFont *font, GooHash *substFiles, const char *origName)
+static const char *findSubstituteName(GfxFont *font, GooHash *substFiles, const char *origName)
 {
     assert(origName);
     if (!origName) return NULL;
