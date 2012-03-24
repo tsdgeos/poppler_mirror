@@ -21,6 +21,7 @@
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -39,6 +40,7 @@
 #include "CharTypes.h"
 #include "Object.h"
 
+class Annot;
 class Dict;
 class GooHash;
 class GooString;
@@ -124,7 +126,9 @@ public:
 			       int sliceX, int sliceY, int sliceW, int sliceH,
 			       GBool printing,
 			       GBool (* abortCheckCbk)(void *data) = NULL,
-			       void * abortCheckCbkData = NULL)
+			       void * abortCheckCbkData = NULL,
+			       GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
+			       void *annotDisplayDecideCbkData = NULL)
     { return gTrue; }
 
   // Start a page.

@@ -505,7 +505,8 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI,
   if (!out->checkPageSlice(this, hDPI, vDPI, rotate, useMediaBox, crop,
 			   sliceX, sliceY, sliceW, sliceH,
 			   printing,
-			   abortCheckCbk, abortCheckCbkData)) {
+			   abortCheckCbk, abortCheckCbkData,
+			   annotDisplayDecideCbk, annotDisplayDecideCbkData)) {
     return;
   }
 

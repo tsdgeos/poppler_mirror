@@ -26,6 +26,7 @@
 // Copyright (C) 2009, 2011, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009-2011 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -3033,7 +3034,9 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 				  int sliceW, int sliceH,
 				  GBool printing,
 				  GBool (*abortCheckCbk)(void *data),
-				  void *abortCheckCbkData) {
+				  void *abortCheckCbkData,
+				  GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data),
+				  void *annotDisplayDecideCbkData) {
   PreScanOutputDev *scan;
   GBool rasterize;
 #if HAVE_SPLASH
@@ -3065,7 +3068,8 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     scan = new PreScanOutputDev(doc);
     page->displaySlice(scan, 72, 72, rotateA, useMediaBox, crop,
 		       sliceX, sliceY, sliceW, sliceH,
-		       printing, abortCheckCbk, abortCheckCbkData);
+		       printing, abortCheckCbk, abortCheckCbkData,
+		       annotDisplayDecideCbk, annotDisplayDecideCbkData);
     rasterize = scan->usesTransparency() || scan->usesPatternImageMask();
     delete scan;
   }
@@ -3148,7 +3152,8 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     page->displaySlice(splashOut, hDPI2, vDPI2,
 		       (360 - page->getRotate()) % 360, useMediaBox, crop,
 		       sliceX, stripeY, sliceW, stripeH,
-		       printing, abortCheckCbk, abortCheckCbkData);
+		       printing, abortCheckCbk, abortCheckCbkData,
+		       annotDisplayDecideCbk, annotDisplayDecideCbkData);
 
     // draw the rasterized image
     bitmap = splashOut->getBitmap();
