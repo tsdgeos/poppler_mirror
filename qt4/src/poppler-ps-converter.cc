@@ -3,6 +3,7 @@
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2011 Glad Deschrijver <glad.deschrijver@gmail.com>
+ * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -178,6 +179,14 @@ void PSConverter::setPageConvertedCallback(void (* callback)(int page, void *pay
 	d->pageConvertedPayload = payload;
 }
 
+static GBool annotDisplayDecideCbk(Annot *annot, void *user_data)
+{
+	if (annot->getType() == Annot::typeWidget)
+		return gTrue; // Never hide forms
+	else
+		return *(GBool*)user_data;
+}
+
 bool PSConverter::convert()
 {
 	Q_D(PSConverter);
@@ -230,9 +239,21 @@ bool PSConverter::convert()
 	if (psOut->isOk())
 	{
 		GBool isPrinting = (d->opts & Printing) ? gTrue : gFalse;
+		GBool showAnnotations = (d->opts & HideAnnotations) ? gFalse : gTrue;
 		foreach(int page, d->pageList)
 		{
-			d->document->doc->displayPage(psOut, page, d->hDPI, d->vDPI, d->rotate, gFalse, gTrue, isPrinting);
+			d->document->doc->displayPage(psOut,
+			                              page,
+			                              d->hDPI,
+			                              d->vDPI,
+			                              d->rotate,
+			                              gFalse,
+			                              gTrue,
+			                              isPrinting,
+			                              NULL,
+			                              NULL,
+			                              annotDisplayDecideCbk,
+			                              &showAnnotations);
 			if (d->pageConvertedCallback)
 				(*d->pageConvertedCallback)(page, d->pageConvertedPayload);
 		}

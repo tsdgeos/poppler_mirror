@@ -1450,7 +1450,8 @@ height = dummy.height();
                 Printing = 0x00000001,              ///< The PS is generated for printing purposes
                 StrictMargins = 0x00000002,
                 ForceRasterization = 0x00000004,
-                PrintToEPS = 0x00000008             ///< Output EPS instead of PS \since 0.20
+                PrintToEPS = 0x00000008,            ///< Output EPS instead of PS \since 0.20
+                HideAnnotations = 0x00000010        ///< Don't print annotations \since 0.20
             };
             Q_DECLARE_FLAGS( PSOptions, PSOption )
 
