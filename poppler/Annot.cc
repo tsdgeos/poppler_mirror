@@ -3065,42 +3065,40 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
     return;
 
   if (appearance.isNull() || type == typeHighlight) {
+    GBool blendMultiply = gTrue;
     ca = opacity;
 
     appearBuf = new GooString ();
+    appearBuf->append ("q\n");
 
     switch (type) {
     case typeUnderline:
       if (color) {
         setColor(color, gFalse);
-	setColor(color, gTrue);
       }
+      appearBuf->append ("[] 0 d 1 w\n");
 
       for (i = 0; i < quadrilaterals->getQuadrilateralsLength(); ++i) {
         double x1, x2, y3;
-	double x, y;
 
 	x1 = quadrilaterals->getX1(i);
 	x2 = quadrilaterals->getX2(i);
 	y3 = quadrilaterals->getY3(i);
 
-	x = x1 - rect->x1;
-	y = y3 - rect->y1;
-	appearBuf->append ("[]0 d 2 w\n");
-	appearBuf->appendf ("{0:.2f} {1:.2f} m\n", x, y);
-	appearBuf->appendf ("{0:.2f} {1:.2f} l\n", x + (x2 - x1), y);
+	appearBuf->appendf ("{0:.2f} {1:.2f} m\n", x1, y3);
+	appearBuf->appendf ("{0:.2f} {1:.2f} l\n", x2, y3);
 	appearBuf->append ("S\n");
       }
       break;
     case typeStrikeOut:
       if (color) {
         setColor(color, gFalse);
-	setColor(color, gTrue);
       }
+      blendMultiply = gFalse;
+      appearBuf->append ("[] 0 d 1 w\n");
 
       for (i = 0; i < quadrilaterals->getQuadrilateralsLength(); ++i) {
         double x1, y1, x2, y3;
-	double x, y;
 	double h2;
 
 	x1 = quadrilaterals->getX1(i);
@@ -3109,16 +3107,37 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
 	y3 = quadrilaterals->getY3(i);
 	h2 = (y1 - y3) / 2.0;
 
-	x = x1 - rect->x1;
-	y = (y3 - rect->y1) + h2;
-	appearBuf->append ("[]0 d 2 w\n");
-	appearBuf->appendf ("{0:.2f} {1:.2f} m\n", x, y);
-	appearBuf->appendf ("{0:.2f} {1:.2f} l\n", x + (x2 - x1), y);
+	appearBuf->appendf ("{0:.2f} {1:.2f} m\n", x1, y3+h2);
+	appearBuf->appendf ("{0:.2f} {1:.2f} l\n", x2, y3+h2);
 	appearBuf->append ("S\n");
       }
       break;
     case typeSquiggly:
-      // TODO
+      if (color) {
+        setColor(color, gFalse);
+      }
+      appearBuf->append ("[] 0 d 1 w\n");
+
+      for (i = 0; i < quadrilaterals->getQuadrilateralsLength(); ++i) {
+        double x1, y1, x2, y3;
+        double h6;
+
+        x1 = quadrilaterals->getX1(i);
+        y1 = quadrilaterals->getY1(i);
+        x2 = quadrilaterals->getX2(i);
+        y3 = quadrilaterals->getY3(i);
+        h6 = (y1 - y3) / 6.0;
+
+        appearBuf->appendf ("{0:.2f} {1:.2f} m\n", x1, y3+h6);
+        bool down = false;
+        do {
+          down = !down; // Zigzag line
+          x1 += 2;
+          appearBuf->appendf ("{0:.2f} {1:.2f} l\n", x1, y3 + (down ? 0 : h6));
+        } while (x1 < x2);
+        appearBuf->append ("S\n");
+      }
+      break;
     default:
     case typeHighlight:
       appearance.free();
@@ -3138,7 +3157,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
 	y3 = quadrilaterals->getY3(i);
 	x4 = quadrilaterals->getX4(i);
 	y4 = quadrilaterals->getY4(i);
-	h4 = abs(y1 - y3) / 4.0;
+	h4 = fabs(y1 - y3) / 4.0;
 
 	appearBuf->appendf ("{0:.2f} {1:.2f} m\n", x3, y3);
 	appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
@@ -3148,31 +3167,32 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
 			    x2 + h4, y2 - h4, x4 + h4, y4 + h4, x4, y4);
 	appearBuf->append ("f\n");
       }
+      break;
+    }
+    appearBuf->append ("Q\n");
 
-      Object aStream, resDict;
-      double bbox[4];
-      bbox[0] = rect->x1;
-      bbox[1] = rect->y1;
-      bbox[2] = rect->x2;
-      bbox[3] = rect->y2;
-      createForm(bbox, gTrue, NULL, &aStream);
+    Object aStream, resDict;
+    double bbox[4];
+    bbox[0] = rect->x1;
+    bbox[1] = rect->y1;
+    bbox[2] = rect->x2;
+    bbox[3] = rect->y2;
+    createForm(bbox, gTrue, NULL, &aStream);
+    delete appearBuf;
+
+    appearBuf = new GooString ("/GS0 gs\n/Fm0 Do");
+    createResourcesDict("Fm0", &aStream, "GS0", 1, blendMultiply ? "Multiply" : NULL, &resDict);
+    if (ca == 1) {
+      createForm(bbox, gFalse, &resDict, &appearance);
+    } else {
+      createForm(bbox, gTrue, &resDict, &aStream);
       delete appearBuf;
 
       appearBuf = new GooString ("/GS0 gs\n/Fm0 Do");
-      createResourcesDict("Fm0", &aStream, "GS0", 1, "Multiply", &resDict);
-      if (ca == 1) {
-        createForm(bbox, gFalse, &resDict, &appearance);
-      } else {
-        createForm(bbox, gTrue, &resDict, &aStream);
-	delete appearBuf;
-
-	appearBuf = new GooString ("/GS0 gs\n/Fm0 Do");
-	createResourcesDict("Fm0", &aStream, "GS0", ca, NULL, &resDict);
-	createForm(bbox, gFalse, &resDict, &appearance);
-      }
-      delete appearBuf;
-      break;
+      createResourcesDict("Fm0", &aStream, "GS0", ca, NULL, &resDict);
+      createForm(bbox, gFalse, &resDict, &appearance);
     }
+    delete appearBuf;
   }
 
   // draw the appearance stream
