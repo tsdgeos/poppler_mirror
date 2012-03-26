@@ -4166,7 +4166,9 @@ GooString *TextSelectionDumper::getText (void)
       // not a table
       else {
         page->dumpFragment (frag->line->text + frag->start, frag->len, uMap, s);
-        s->append (eol, eolLen);
+        if (i < nFrags - 1) {
+          s->append (eol, eolLen);
+        }
       }
     }
 
