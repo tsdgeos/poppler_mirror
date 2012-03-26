@@ -28,6 +28,7 @@
 // Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
 // Copyright (C) 2011, 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Yi Yang <ahyangyi@gmail.com>
+// Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2232,36 +2233,37 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
   static struct CMapListEntry {
     const char *collection;
     const char *scriptTag;
+    const char *languageTag;
     const char *toUnicodeMap;
     const char **CMaps;
   } CMapList[] = {
     {
       "Adobe-CNS1",
-      "kana",
+      "hani", "CHN ",
       "Adobe-CNS1-UCS2",
       adobe_cns1_cmaps,
     },
     {
       "Adobe-GB1",
-      "kana",
+      "hani", "CHN ",
       "Adobe-GB1-UCS2",
       adobe_gb1_cmaps,
     },
     {
       "Adobe-Japan1",
-      "kana",
+      "kana", "JAN ",
       "Adobe-Japan1-UCS2",
       adobe_japan1_cmaps,
     },
     {
       "Adobe-Japan2",
-      "kana",
+      "kana", "JAN ",
       "Adobe-Japan2-UCS2",
       adobe_japan2_cmaps,
     },
     {
       "Adobe-Korea1",
-      "kana",
+      "hang", "KOR ",
       "Adobe-Korea1-UCS2",
       adobe_korea1_cmaps,
     },
@@ -2359,7 +2361,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
 	cMap->decRefCnt();
       }
     }
-    ff->setupGSUB(lp->scriptTag);
+    ff->setupGSUB(lp->scriptTag, lp->languageTag);
   } else {
     error(errSyntaxError, -1, "Unknown character collection {0:t}\n",
       getCollection());

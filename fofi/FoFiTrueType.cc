@@ -18,6 +18,7 @@
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008, 2009 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
+// Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2219,7 +2220,17 @@ Guint FoFiTrueType::charToTag(const char *tagName)
   setup GSUB table data
   Only supporting vertical text substitution.
 */
-int FoFiTrueType::setupGSUB(const char *tagName)
+int FoFiTrueType::setupGSUB(const char *scriptName)
+{
+  return setupGSUB(scriptName, NULL);
+}
+
+/*
+  setup GSUB table data
+  Only supporting vertical text substitution.
+*/
+int FoFiTrueType::setupGSUB(const char *scriptName,
+                            const char *languageName)
 {
   Guint gsubTable;
   unsigned int i;
@@ -2236,11 +2247,11 @@ int FoFiTrueType::setupGSUB(const char *tagName)
   int x;
   Guint pos;
 
-  if (tagName == 0) {
+  if (scriptName == 0) {
     gsubFeatureTable = 0;
     return 0;
   }
-  scriptTag = charToTag(tagName);
+  scriptTag = charToTag(scriptName);
   /* read GSUB Header */
   if ((x = seekTable("GSUB")) < 0) {
     return 0; /* GSUB table not found */
@@ -2277,11 +2288,25 @@ int FoFiTrueType::setupGSUB(const char *tagName)
   /* read script table */
   /* use default language system */
   pos = gsubTable+scriptList+scriptTable;
-  langSys = getU16BE(pos,&parsedOk);/* default language system */
+  langSys = 0;
+  if (languageName) {
+    Guint langTag = charToTag(languageName);
+    Guint langCount = getU16BE(pos+2,&parsedOk);
+    for (i = 0;i < langCount && langSys == 0;i++) {
+      tag = getU32BE(pos+4+i*(4+2),&parsedOk);
+      if (tag == langTag) {
+        langSys = getU16BE(pos+4+i*(4+2)+4,&parsedOk);
+      }
+    }
+  }
+  if (langSys == 0) {
+    /* default language system */
+    langSys = getU16BE(pos,&parsedOk);
+  }
 
   /* read LangSys table */
   if (langSys == 0) {
-    /* no ldefault LangSys */
+    /* no default LangSys */
     return 0;
   }
 
@@ -2453,6 +2478,9 @@ int FoFiTrueType::checkGIDInCoverage(Guint coverage, Guint orgGID)
   case 1:
     count = getU16BE(pos,&parsedOk);
     pos += 2;
+    // In some poor CJK fonts, key GIDs are not sorted,
+    // thus we cannot finish checking even when the range
+    // including orgGID seems to have already passed.
     for (i = 0;i < count;i++) {
       Guint gid;
 
@@ -2461,9 +2489,6 @@ int FoFiTrueType::checkGIDInCoverage(Guint coverage, Guint orgGID)
       if (gid == orgGID) {
         /* found */
         index = i;
-        break;
-      } else if (gid > orgGID) {
-        /* not found */
         break;
       }
     }
@@ -2481,12 +2506,12 @@ int FoFiTrueType::checkGIDInCoverage(Guint coverage, Guint orgGID)
       pos += 2;
       startIndex = getU16BE(pos,&parsedOk);
       pos += 2;
+      // In some poor CJK fonts, key GIDs are not sorted,
+      // thus we cannot finish checking even when the range
+      // including orgGID seems to have already passed.
       if (startGID <= orgGID && orgGID <= endGID) {
         /* found */
         index = startIndex+orgGID-startGID;
-        break;
-      } else if (orgGID <= endGID) {
-        /* not found */
         break;
       }
     }

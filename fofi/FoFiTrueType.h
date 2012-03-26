@@ -16,6 +16,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -165,7 +166,12 @@ public:
   // Otherwise returns false.  (Only useful for OpenType CFF fonts).
   GBool getCFFBlock(char **start, int *length);
 
-  int setupGSUB(const char *tagName);
+  // setup vert/vrt2 GSUB for default lang
+  int setupGSUB(const char *scriptName);
+
+  // setup vert/vrt2 GSUB for specified lang
+  int setupGSUB(const char *scriptName, const char* languageName);
+
 private:
 
   FoFiTrueType(char *fileA, int lenA, GBool freeFileDataA, int faceIndexA);
