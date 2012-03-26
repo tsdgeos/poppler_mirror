@@ -588,7 +588,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   psUncompressPreloadedImages = gFalse;
   psRasterResolution = 300;
   psRasterMono = gFalse;
-  psAlwaysRasterize = gFalse;
   textEncoding = new GooString("UTF-8");
 #if defined(_WIN32)
   textEOL = eolDOS;
@@ -1618,15 +1617,6 @@ GBool GlobalParams::getPSRasterMono() {
   return mono;
 }
 
-GBool GlobalParams::getPSAlwaysRasterize() {
-  GBool rast;
-
-  lockGlobalParams;
-  rast = psAlwaysRasterize;
-  unlockGlobalParams;
-  return rast;
-}
-
 GooString *GlobalParams::getTextEncodingName() {
   GooString *s;
 
@@ -2013,12 +2003,6 @@ void GlobalParams::setPSRasterResolution(double res) {
 void GlobalParams::setPSRasterMono(GBool mono) {
   lockGlobalParams;
   psRasterMono = mono;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSAlwaysRasterize(GBool always) {
-  lockGlobalParams;
-  psAlwaysRasterize = always;
   unlockGlobalParams;
 }
 

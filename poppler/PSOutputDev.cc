@@ -1052,6 +1052,7 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc,
 			 int firstPage, int lastPage, PSOutMode modeA,
 			 int paperWidthA, int paperHeightA, GBool duplexA,
 			 int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
+			 GBool forceRasterizeA,
 			 GBool manualCtrlA,
 			 PSOutCustomCodeCbk customCodeCbkA,
 			 void *customCodeCbkDataA) {
@@ -1078,6 +1079,7 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc,
   customColors = NULL;
   haveTextClip = gFalse;
   t3String = NULL;
+  forceRasterize = forceRasterizeA;
 
   // open file or pipe
   if (!strcmp(fileName, "-")) {
@@ -1120,6 +1122,7 @@ PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
 			 int firstPage, int lastPage, PSOutMode modeA,
 			 int paperWidthA, int paperHeightA, GBool duplexA,
 			 int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
+			 GBool forceRasterizeA,
 			 GBool manualCtrlA,
 			 PSOutCustomCodeCbk customCodeCbkA,
 			 void *customCodeCbkDataA) {
@@ -1143,6 +1146,7 @@ PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
   customColors = NULL;
   haveTextClip = gFalse;
   t3String = NULL;
+  forceRasterize = forceRasterizeA;
 
   init(outputFuncA, outputStreamA, psGeneric, psTitle,
        doc, firstPage, lastPage, modeA,
@@ -3055,7 +3059,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   GBool useBinary;
   GBool isGray;
 
-  if (globalParams->getPSAlwaysRasterize()) {
+  if (forceRasterize) {
     rasterize = gTrue;
   } else {
     scan = new PreScanOutputDev(doc);

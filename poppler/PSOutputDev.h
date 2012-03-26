@@ -98,6 +98,7 @@ public:
 	      GBool duplexA = gTrue,
 	      int imgLLXA = 0, int imgLLYA = 0,
 	      int imgURXA = 0, int imgURYA = 0,
+	      GBool forceRasterizeA = gFalse,
 	      GBool manualCtrlA = gFalse,
 	      PSOutCustomCodeCbk customCodeCbkA = NULL,
 	      void *customCodeCbkDataA = NULL);
@@ -111,6 +112,7 @@ public:
 	      GBool duplexA = gTrue,
 	      int imgLLXA = 0, int imgLLYA = 0,
 	      int imgURXA = 0, int imgURYA = 0,
+	      GBool forceRasterizeA = gFalse,
 	      GBool manualCtrlA = gFalse,
 	      PSOutCustomCodeCbk customCodeCbkA = NULL,
 	      void *customCodeCbkDataA = NULL);
@@ -474,6 +476,7 @@ private:
   GBool t3FillColorOnly;	// operators should only use the fill color
   GBool t3Cacheable;		// cleared if char is not cacheable
   GBool t3NeedsRestore;		// set if a 'q' operator was issued
+  GBool forceRasterize;		// forces the page to be rasterized into a image before printing
   GBool displayText;		// displayText
 
 #if OPI_SUPPORT

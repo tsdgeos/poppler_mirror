@@ -170,7 +170,6 @@ public:
   GBool getPSUncompressPreloadedImages();
   double getPSRasterResolution();
   GBool getPSRasterMono();
-  GBool getPSAlwaysRasterize();
   GooString *getTextEncodingName();
   EndOfLineKind getTextEOL();
   GBool getTextPageBreaks();
@@ -225,7 +224,6 @@ public:
   void setPSUncompressPreloadedImages(GBool uncomp);
   void setPSRasterResolution(double res);
   void setPSRasterMono(GBool mono);
-  void setPSAlwaysRasterize(GBool always);
   void setTextEncoding(char *encodingName);
   GBool setTextEOL(char *s);
   void setTextPageBreaks(GBool pageBreaks);
@@ -327,7 +325,6 @@ private:
   GBool psRasterMono;		// true to do PostScript rasterization
 				//   in monochrome (gray); false to do it
 				//   in color (RGB/CMYK)
-  GBool psAlwaysRasterize;	// force PostScript rasterization
   GooString *textEncoding;	// encoding (unicodeMap) to use for text
 				//   output
   EndOfLineKind textEOL;	// type of EOL marker to use for text
