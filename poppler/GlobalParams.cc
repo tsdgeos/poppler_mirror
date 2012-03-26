@@ -208,22 +208,27 @@ public:
   GooString *name;
   GBool bold;
   GBool italic;
+  GBool oblique;
+  GBool fixedWidth;
   GooString *path;
   SysFontType type;
   int fontNum;			// for TrueType collections
 
-  SysFontInfo(GooString *nameA, GBool boldA, GBool italicA,
+  SysFontInfo(GooString *nameA, GBool boldA, GBool italicA, GBool obliqueA, GBool fixedWidthA,
 	      GooString *pathA, SysFontType typeA, int fontNumA);
   ~SysFontInfo();
   GBool match(SysFontInfo *fi);
+  GBool match(GooString *nameA, GBool boldA, GBool italicA, GBool obliqueA, GBool fixedWidthA);
   GBool match(GooString *nameA, GBool boldA, GBool italicA);
 };
 
-SysFontInfo::SysFontInfo(GooString *nameA, GBool boldA, GBool italicA,
+SysFontInfo::SysFontInfo(GooString *nameA, GBool boldA, GBool italicA, GBool obliqueA, GBool fixedWidthA,
 			 GooString *pathA, SysFontType typeA, int fontNumA) {
   name = nameA;
   bold = boldA;
   italic = italicA;
+  oblique = obliqueA;
+  fixedWidth = fixedWidthA;
   path = pathA;
   type = typeA;
   fontNum = fontNumA;
@@ -236,7 +241,12 @@ SysFontInfo::~SysFontInfo() {
 
 GBool SysFontInfo::match(SysFontInfo *fi) {
   return !strcasecmp(name->getCString(), fi->name->getCString()) &&
-         bold == fi->bold && italic == fi->italic;
+         bold == fi->bold && italic == fi->italic && oblique == fi->oblique && fixedWidth == fi->fixedWidth;
+}
+
+GBool SysFontInfo::match(GooString *nameA, GBool boldA, GBool italicA, GBool obliqueA, GBool fixedWidthA) {
+  return !strcasecmp(name->getCString(), nameA->getCString()) &&
+         bold == boldA && italic == italicA && oblique == obliqueA && fixedWidth == fixedWidthA;
 }
 
 GBool SysFontInfo::match(GooString *nameA, GBool boldA, GBool italicA) {
@@ -253,7 +263,7 @@ public:
 
   SysFontList();
   ~SysFontList();
-  SysFontInfo *find(GooString *name, GBool exact);
+  SysFontInfo *find(GooString *name, GBool isFixedWidth, GBool exact);
 
 #ifdef WIN32
   void scanWindowsFonts(GooString *winFontDir);
@@ -279,9 +289,9 @@ SysFontList::~SysFontList() {
   deleteGooList(fonts, SysFontInfo);
 }
 
-SysFontInfo *SysFontList::find(GooString *name, GBool exact) {
+SysFontInfo *SysFontList::find(GooString *name, GBool fixedWidth, GBool exact) {
   GooString *name2;
-  GBool bold, italic;
+  GBool bold, italic, oblique;
   SysFontInfo *fi;
   char c;
   int n, i;
@@ -321,6 +331,15 @@ SysFontInfo *SysFontList::find(GooString *name, GBool exact) {
     italic = gFalse;
   }
 
+  // look for "Oblique"
+  if (n > 6 && !strcmp(name2->getCString() + n - 7, "Oblique")) {
+    name2->del(n - 7, 7);
+    oblique = gTrue;
+    n -= 6;
+  } else {
+    oblique = gFalse;
+  }
+
   // look for "Bold"
   if (n > 4 && !strcmp(name2->getCString() + n - 4, "Bold")) {
     name2->del(n - 4, 4);
@@ -352,7 +371,7 @@ SysFontInfo *SysFontList::find(GooString *name, GBool exact) {
   fi = NULL;
   for (i = 0; i < fonts->getLength(); ++i) {
     fi = (SysFontInfo *)fonts->get(i);
-    if (fi->match(name2, bold, italic)) {
+    if (fi->match(name2, bold, italic, oblique, fixedWidth)) {
       break;
     }
     fi = NULL;
@@ -623,9 +642,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   unicodeMapCache = new UnicodeMapCache();
   cMapCache = new CMapCache();
 
-#ifdef _WIN32
   baseFontsInitialized = gFalse;
-#endif
 #ifdef ENABLE_PLUGINS
   plugins = new GooList();
   securityHandlers = new GooList();
@@ -985,7 +1002,7 @@ static const char *getFontLang(GfxFont *font)
   return lang;
 }
 
-static FcPattern *buildFcPattern(GfxFont *font)
+static FcPattern *buildFcPattern(GfxFont *font, GooString *base14Name)
 {
   int weight = -1,
       slant = -1,
@@ -997,7 +1014,7 @@ static FcPattern *buildFcPattern(GfxFont *font)
   FcPattern *p;
 
   // this is all heuristics will be overwritten if font had proper info
-  name = font->getName()->getCString();
+  name = (base14Name == NULL) ? font->getName()->getCString() : base14Name->getCString();
   
   modifiers = strchr (name, ',');
   if (modifiers == NULL)
@@ -1113,8 +1130,8 @@ GooString *GlobalParams::findFontFile(GooString *fontName) {
   FILE *f;
   int i, j;
 
-  lockGlobalParams;
   setupBaseFonts(NULL);
+  lockGlobalParams;
   if ((path = (GooString *)fontFiles->lookup(fontName))) {
     path = path->copy();
     unlockGlobalParams;
@@ -1152,9 +1169,16 @@ GooString *GlobalParams::findFontFile(GooString *fontName) {
 void GlobalParams::setupBaseFonts(char *dir) {
 }
 
+GooString *GlobalParams::findBase14FontFile(GooString *base14Name, GfxFont *font) {
+  SysFontType type;
+  int fontNum;
+  
+  return findSystemFontFile(font, &type, &fontNum, NULL, base14Name);
+}
+
 GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 					  SysFontType *type,
-					  int *fontNum, GooString *substituteFontName) {
+					  int *fontNum, GooString *substituteFontName, GooString *base14Name) {
   SysFontInfo *fi = NULL;
   FcPattern *p=0;
   GooString *path = NULL;
@@ -1163,7 +1187,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
   fontName = fontName->copy();
   lockGlobalParams;
 
-  if ((fi = sysFonts->find(fontName, gTrue))) {
+  if ((fi = sysFonts->find(fontName, font->isFixedWidth(), gTrue))) {
     path = fi->path->copy();
     *type = fi->type;
     *fontNum = fi->fontNum;
@@ -1174,7 +1198,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
     FcFontSet *set;
     int i;
     FcLangSet *lb = NULL;
-    p = buildFcPattern(font);
+    p = buildFcPattern(font, base14Name);
 
     if (!p)
       goto fin;
@@ -1241,6 +1265,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 	  int weight, slant;
 	  GBool bold = font->isBold();
 	  GBool italic = font->isItalic();
+	  GBool oblique = gFalse;
 	  FcPatternGetInteger(set->fonts[i], FC_WEIGHT, 0, &weight);
 	  FcPatternGetInteger(set->fonts[i], FC_SLANT, 0, &slant);
 	  if (weight == FC_WEIGHT_DEMIBOLD || weight == FC_WEIGHT_BOLD 
@@ -1250,10 +1275,12 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 	  }
 	  if (slant == FC_SLANT_ITALIC)
 	    italic = gTrue;
+	  if (slant == FC_SLANT_OBLIQUE)
+	    oblique = gTrue;
 	  *fontNum = 0;
 	  *type = (!strncasecmp(ext,".ttc",4)) ? sysFontTTC : sysFontTTF;
 	  FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-	  fi = new SysFontInfo(fontName->copy(), bold, italic,
+	  fi = new SysFontInfo(fontName->copy(), bold, italic, oblique, font->isFixedWidth(),
 			       new GooString((char*)s), *type, *fontNum);
 	  sysFonts->addFcFont(fi);
 	  path = new GooString((char*)s);
@@ -1263,6 +1290,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 	  int weight, slant;
 	  GBool bold = font->isBold();
 	  GBool italic = font->isItalic();
+	  GBool oblique = gFalse;
 	  FcPatternGetInteger(set->fonts[i], FC_WEIGHT, 0, &weight);
 	  FcPatternGetInteger(set->fonts[i], FC_SLANT, 0, &slant);
 	  if (weight == FC_WEIGHT_DEMIBOLD || weight == FC_WEIGHT_BOLD 
@@ -1272,10 +1300,12 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 	  }
 	  if (slant == FC_SLANT_ITALIC)
 	    italic = gTrue;
+	  if (slant == FC_SLANT_OBLIQUE)
+	    oblique = gTrue;
 	  *fontNum = 0;
 	  *type = (!strncasecmp(ext,".pfa",4)) ? sysFontPFA : sysFontPFB;
 	  FcPatternGetInteger(set->fonts[i], FC_INDEX, 0, fontNum);
-	  fi = new SysFontInfo(fontName->copy(), bold, italic,
+	  fi = new SysFontInfo(fontName->copy(), bold, italic, oblique, font->isFixedWidth(),
 			       new GooString((char*)s), *type, *fontNum);
 	  sysFonts->addFcFont(fi);
 	  path = new GooString((char*)s);
@@ -1294,7 +1324,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
     }
     FcFontSetDestroy(set);
   }
-  if (path == NULL && (fi = sysFonts->find(fontName, gFalse))) {
+  if (path == NULL && (fi = sysFonts->find(fontName, font->isFixedWidth(), gFalse))) {
     path = fi->path->copy();
     *type = fi->type;
     *fontNum = fi->fontNum;
@@ -1308,7 +1338,15 @@ fin:
 
 #elif WITH_FONTCONFIGURATION_WIN32
 #include "GlobalParamsWin.cc"
+
+GooString *GlobalParams::findBase14FontFile(GooString *base14Name, GfxFont *font) {
+  return findFontFile(base14Name);
+}
 #else
+GooString *GlobalParams::findBase14FontFile(GooString *base14Name, GfxFont *font) {
+  return findFontFile(base14Name);
+}
+
 static struct {
   const char *name;
   const char *t1FileName;
@@ -1390,12 +1428,12 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 
   path = NULL;
   lockGlobalParams;
-  if ((fi = sysFonts->find(font->getName(), gFalse))) {
+  if ((fi = sysFonts->find(font->getName(), font->isFixedWidth(), gFalse))) {
     path = fi->path->copy();
     *type = fi->type;
     *fontNum = fi->fontNum;
   }
-  unlockGlobalParams;
+  unlockGlobalParams; 
   return path;
 }
 #endif

@@ -29,6 +29,7 @@
 // Copyright (C) 2011, 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Yi Yang <ahyangyi@gmail.com>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -693,7 +694,7 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, GBool ps) {
   //----- external font file for Base-14 font
   if (!ps && !isCIDFont() && ((Gfx8BitFont *)this)->base14) {
     base14Name = new GooString(((Gfx8BitFont *)this)->base14->base14Name);
-    if ((path = globalParams->findFontFile(base14Name))) {
+    if ((path = globalParams->findBase14FontFile(base14Name, this))) {
       if ((fontLoc = getExternalFont(path, gFalse))) {
 	delete base14Name;
 	return fontLoc;

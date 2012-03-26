@@ -20,6 +20,7 @@
 // Copyright (C) 2008 Vasile Gaburici <gaburici@cs.umd.edu>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Jakub Wilk <ubanus@users.sf.net>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -621,6 +622,10 @@ int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode **u) {
 int CharCodeToUnicode::mapToCharCode(Unicode* u, CharCode *c, int usize) {
   //look for charcode in map
   if (usize == 1) {
+    if (isIdentity) {
+      *c = (CharCode) *u;
+      return 1;
+    }
     for (CharCode i=0; i<mapLen; i++) {
       if (map[i] == *u) {
         *c = i;

@@ -147,8 +147,10 @@ public:
   FILE *findCMapFile(GooString *collection, GooString *cMapName);
   FILE *findToUnicodeFile(GooString *name);
   GooString *findFontFile(GooString *fontName);
+  GooString *findBase14FontFile(GooString *base14Name, GfxFont *font);
   GooString *findSystemFontFile(GfxFont *font, SysFontType *type,
-			      int *fontNum, GooString *substituteFontName = NULL);
+			      int *fontNum, GooString *substituteFontName = NULL, 
+		              GooString *base14Name = NULL);
   GooString *findCCFontFile(GooString *collection);
   GBool getPSExpandSmaller();
   GBool getPSShrinkLarger();
@@ -286,8 +288,8 @@ private:
   GooHash *cMapDirs;		// list of CMap dirs, indexed by collection
 				//   name [GooList[GooString]]
   GooList *toUnicodeDirs;		// list of ToUnicode CMap dirs [GooString]
-#ifdef _WIN32
   GBool baseFontsInitialized;
+#ifdef _WIN32
   GooHash *substFiles;	// windows font substitutes (for CID fonts)
 #endif
   GooHash *fontFiles;		// font files: font name mapped to path

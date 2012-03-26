@@ -28,7 +28,7 @@
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2008 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009 M Joonas Pihlaja <jpihlaja@cc.helsinki.fi>
-// Copyright (C) 2009-2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2010 Nils Höglund <nils.hoglund@gmail.com>
@@ -2576,10 +2576,10 @@ void Gfx::doAxialShFill(GfxAxialShading *shading) {
   double xMin, yMin, xMax, yMax;
   double x0, y0, x1, y1;
   double dx, dy, mul;
-  GBool dxdyZero, horiz;
+  GBool dxZero, dyZero;
   double bboxIntersections[4];
   double tMin, tMax, tx, ty;
-  double sMin, sMax, tmp;
+  double s[4], sMin, sMax, tmp;
   double ux0, uy0, ux1, uy1, vx0, vy0, vx1, vy1;
   double t0, t1, tt;
   double ta[axialMaxSplits + 1];
@@ -2597,9 +2597,9 @@ void Gfx::doAxialShFill(GfxAxialShading *shading) {
   shading->getCoords(&x0, &y0, &x1, &y1);
   dx = x1 - x0;
   dy = y1 - y0;
-  dxdyZero = fabs(dx) < 0.01 && fabs(dy) < 0.01;
-  horiz = fabs(dy) < fabs(dx);
-  if (dxdyZero) {
+  dxZero = fabs(dx) < 0.01;
+  dyZero = fabs(dy) < 0.01;
+  if (dxZero && dyZero) {
     tMin = tMax = 0;
   } else {
     mul = 1 / (dx * dx + dy * dy);
@@ -2636,16 +2636,18 @@ void Gfx::doAxialShFill(GfxAxialShading *shading) {
   //     y(s) = ty + s * dx    -->   s = (y - ty) / dx
   //
   // Then look at the intersection of this line with the bounding box
-  // (xMin, yMin, xMax, yMax).  For -1 < |dy/dx| < 1, look at the
-  // intersection with yMin, yMax:
-  //
-  //     s0 = (yMin - ty) / dx
-  //     s1 = (yMax - ty) / dx
-  //
-  // else look at the intersection with xMin, xMax:
+  // (xMin, yMin, xMax, yMax).  In the general case, there are four
+  // intersection points:
   //
   //     s0 = (xMin - tx) / -dy
   //     s1 = (xMax - tx) / -dy
+  //     s2 = (yMin - ty) / dx
+  //     s3 = (yMax - ty) / dx
+  //
+  // and we want the middle two s values.
+  //
+  // In the case where dx = 0, take s0 and s1; in the case where dy =
+  // 0, take s2 and s3.
   //
   // Each filled polygon is bounded by two of these line segments
   // perpdendicular to the t axis.
@@ -2654,10 +2656,13 @@ void Gfx::doAxialShFill(GfxAxialShading *shading) {
   // difference across a region is small enough, and then the region
   // is painted with a single color.
 
-  // set up
+  // set up: require at least one split to avoid problems when the two
+  // ends of the t axis have the same color
   nComps = shading->getColorSpace()->getNComps();
   ta[0] = tMin;
-  next[0] = axialMaxSplits;
+  next[0] = axialMaxSplits / 2;
+  ta[axialMaxSplits / 2] = 0.5 * (tMin + tMax);
+  next[axialMaxSplits / 2] = axialMaxSplits;
   ta[axialMaxSplits] = tMax;
 
   // compute the color at t = tMin
@@ -2681,19 +2686,24 @@ void Gfx::doAxialShFill(GfxAxialShading *shading) {
   // bounding box
   tx = x0 + tMin * dx;
   ty = y0 + tMin * dy;
-  if (dxdyZero) {
+  if (dxZero && dyZero) {
     sMin = sMax = 0;
+  } else if (dxZero) {
+    sMin = (xMin - tx) / -dy;
+    sMax = (xMax - tx) / -dy;
+    if (sMin > sMax) { tmp = sMin; sMin = sMax; sMax = tmp; }
+  } else if (dyZero) {
+    sMin = (yMin - ty) / dx;
+    sMax = (yMax - ty) / dx;
+    if (sMin > sMax) { tmp = sMin; sMin = sMax; sMax = tmp; }
   } else {
-    if (horiz) {
-      sMin = (yMin - ty) / dx;
-      sMax = (yMax - ty) / dx;
-    } else {
-      sMin = (xMin - tx) / -dy;
-      sMax = (xMax - tx) / -dy;
-    }
-    if (sMin > sMax) {
-      tmp = sMin; sMin = sMax; sMax = tmp;
-    }
+    s[0] = (yMin - ty) / dx;
+    s[1] = (yMax - ty) / dx;
+    s[2] = (xMin - tx) / -dy;
+    s[3] = (xMax - tx) / -dy;
+    bubbleSort(s);
+    sMin = s[1];
+    sMax = s[2];
   }
   ux0 = tx - sMin * dy;
   uy0 = ty + sMin * dx;
@@ -2702,7 +2712,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading) {
 
   i = 0;
   bool doneBBox1, doneBBox2;
-  if (dxdyZero) {
+  if (dxZero && dyZero) {
     doneBBox1 = doneBBox2 = true;
   } else {
     doneBBox1 = bboxIntersections[1] < tMin;
@@ -2782,21 +2792,24 @@ void Gfx::doAxialShFill(GfxAxialShading *shading) {
     // bounding box
     tx = x0 + ta[j] * dx;
     ty = y0 + ta[j] * dy;
-    tx = x0 + ta[j] * dx;
-    ty = y0 + ta[j] * dy;
-    if (dxdyZero) {
+    if (dxZero && dyZero) {
       sMin = sMax = 0;
+    } else if (dxZero) {
+      sMin = (xMin - tx) / -dy;
+      sMax = (xMax - tx) / -dy;
+      if (sMin > sMax) { tmp = sMin; sMin = sMax; sMax = tmp; }
+    } else if (dyZero) {
+      sMin = (yMin - ty) / dx;
+      sMax = (yMax - ty) / dx;
+      if (sMin > sMax) { tmp = sMin; sMin = sMax; sMax = tmp; }
     } else {
-      if (horiz) {
-	sMin = (yMin - ty) / dx;
-	sMax = (yMax - ty) / dx;
-      } else {
-	sMin = (xMin - tx) / -dy;
-	sMax = (xMax - tx) / -dy;
-      }
-      if (sMin > sMax) {
-	tmp = sMin; sMin = sMax; sMax = tmp;
-      }
+      s[0] = (yMin - ty) / dx;
+      s[1] = (yMax - ty) / dx;
+      s[2] = (xMin - tx) / -dy;
+      s[3] = (xMax - tx) / -dy;
+      bubbleSort(s);
+      sMin = s[1];
+      sMax = s[2];
     }
     ux1 = tx - sMin * dy;
     uy1 = ty + sMin * dx;
@@ -2874,10 +2887,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
   GfxColor colorA, colorB;
   double xa, ya, xb, yb, ra, rb;
   double ta, tb, sa, sb;
-  double sMin, sMax, h;
-  double sLeft, sRight, sTop, sBottom, sZero, sDiag;
-  GBool haveSLeft, haveSRight, haveSTop, haveSBottom, haveSZero;
-  GBool haveSMin, haveSMax;
+  double sz, xz, yz, sMin, sMax;
   GBool enclosed;
   int ia, ib, k, n;
   double *ctm;
@@ -2892,21 +2902,24 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
 
   // Compute the point at which r(s) = 0; check for the enclosed
   // circles case; and compute the angles for the tangent lines.
-  h = sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
-  if (h == 0) {
+  if (x0 == x1 && y0 == y1) {
     enclosed = gTrue;
     theta = 0; // make gcc happy
-  } else if (r1 - r0 == 0) {
+    sz = 0; // make gcc happy
+  } else if (r0 == r1) {
     enclosed = gFalse;
     theta = 0;
-  } else if (fabs(r1 - r0) >= h) {
-    enclosed = gTrue;
-    theta = 0; // make gcc happy
+    sz = 0; // make gcc happy
   } else {
-    enclosed = gFalse;
-    theta = asin((r1 - r0) / h);
+    sz = (r1 > r0) ? -r0 / (r1 - r0) : -r1 / (r0 - r1);
+    xz = x0 + sz * (x1 - x0);
+    yz = y0 + sz * (y1 - y0);
+    enclosed = (xz - x0) * (xz - x0) + (yz - y0) * (yz - y0) <= r0 * r0;
+    theta = asin(r0 / sqrt((x0 - xz) * (x0 - xz) + (y0 - yz) * (y0 - yz)));
+    if (r0 > r1) {
+      theta = -theta;
+    }
   }
-
   if (enclosed) {
     alpha = 0;
   } else {
@@ -2919,101 +2932,59 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
     sMin = 0;
     sMax = 1;
   } else {
-    // solve x(sLeft) + r(sLeft) = xMin
-    if ((haveSLeft = fabs((x1 + r1) - (x0 + r0)) > 0.000001)) {
-      sLeft = (xMin - (x0 + r0)) / ((x1 + r1) - (x0 + r0));
-    } else {
-      sLeft = 0; // make gcc happy
-    }
-    // solve x(sRight) - r(sRight) = xMax
-    if ((haveSRight = fabs((x1 - r1) - (x0 - r0)) > 0.000001)) {
-      sRight = (xMax - (x0 - r0)) / ((x1 - r1) - (x0 - r0));
-    } else {
-      sRight = 0; // make gcc happy
-    }
-    // solve y(sBottom) + r(sBottom) = yMin
-    if ((haveSBottom = fabs((y1 + r1) - (y0 + r0)) > 0.000001)) {
-      sBottom = (yMin - (y0 + r0)) / ((y1 + r1) - (y0 + r0));
-    } else {
-      sBottom = 0; // make gcc happy
-    }
-    // solve y(sTop) - r(sTop) = yMax
-    if ((haveSTop = fabs((y1 - r1) - (y0 - r0)) > 0.000001)) {
-      sTop = (yMax - (y0 - r0)) / ((y1 - r1) - (y0 - r0));
-    } else {
-      sTop = 0; // make gcc happy
-    }
-    // solve r(sZero) = 0
-    if ((haveSZero = fabs(r1 - r0) > 0.000001)) {
-      sZero = -r0 / (r1 - r0);
-    } else {
-      sZero = 0; // make gcc happy
-    }
-    // solve r(sDiag) = sqrt((xMax-xMin)^2 + (yMax-yMin)^2)
-    if (haveSZero) {
-      sDiag = (sqrt((xMax - xMin) * (xMax - xMin) +
-		    (yMax - yMin) * (yMax - yMin)) - r0) / (r1 - r0);
-    } else {
-      sDiag = 0; // make gcc happy
-    }
-    // compute sMin
-    if (shading->getExtend0()) {
-      sMin = 0;
-      haveSMin = gFalse;
-      if (x0 < x1 && haveSLeft && sLeft < 0) {
-	sMin = sLeft;
-	haveSMin = gTrue;
-      } else if (x0 > x1 && haveSRight && sRight < 0) {
-	sMin = sRight;
-	haveSMin = gTrue;
+    sMin = 1;
+    sMax = 0;
+    // solve for x(s) + r(s) = xMin
+    if ((x1 + r1) - (x0 + r0) != 0) {
+      sa = (xMin - (x0 + r0)) / ((x1 + r1) - (x0 + r0));
+      if (sa < sMin) {
+	sMin = sa;
+      } else if (sa > sMax) {
+	sMax = sa;
       }
-      if (y0 < y1 && haveSBottom && sBottom < 0) {
-	if (!haveSMin || sBottom > sMin) {
-	  sMin = sBottom;
-	  haveSMin = gTrue;
-	}
-      } else if (y0 > y1 && haveSTop && sTop < 0) {
-	if (!haveSMin || sTop > sMin) {
-	  sMin = sTop;
-	  haveSMin = gTrue;
-	}
+    }
+    // solve for x(s) - r(s) = xMax
+    if ((x1 - r1) - (x0 - r0) != 0) {
+      sa = (xMax - (x0 - r0)) / ((x1 - r1) - (x0 - r0));
+      if (sa < sMin) {
+	sMin = sa;
+      } else if (sa > sMax) {
+	sMax = sa;
       }
-      if (haveSZero && sZero < 0) {
-	if (!haveSMin || sZero > sMin) {
-	  sMin = sZero;
-	}
+    }
+    // solve for y(s) + r(s) = yMin
+    if ((y1 + r1) - (y0 + r0) != 0) {
+      sa = (yMin - (y0 + r0)) / ((y1 + r1) - (y0 + r0));
+      if (sa < sMin) {
+	sMin = sa;
+      } else if (sa > sMax) {
+	sMax = sa;
       }
-    } else {
+    }
+    // solve for y(s) - r(s) = yMax
+    if ((y1 - r1) - (y0 - r0) != 0) {
+      sa = (yMax - (y0 - r0)) / ((y1 - r1) - (y0 - r0));
+      if (sa < sMin) {
+	sMin = sa;
+      } else if (sa > sMax) {
+	sMax = sa;
+      }
+    }
+    // check against sz
+    if (r0 < r1) {
+      if (sMin < sz) {
+	sMin = sz;
+      }
+    } else if (r0 > r1) {
+      if (sMax > sz) {
+	sMax = sz;
+      }
+    }
+    // check the 'extend' flags
+    if (!shading->getExtend0() && sMin < 0) {
       sMin = 0;
     }
-    // compute sMax
-    if (shading->getExtend1()) {
-      sMax = 1;
-      haveSMax = gFalse;
-      if (x1 < x0 && haveSLeft && sLeft > 1) {
-	sMax = sLeft;
-	haveSMax = gTrue;
-      } else if (x1 > x0 && haveSRight && sRight > 1) {
-	sMax = sRight;
-	haveSMax = gTrue;
-      }
-      if (y1 < y0 && haveSBottom && sBottom > 1) {
-	if (!haveSMax || sBottom < sMax) {
-	  sMax = sBottom;
-	  haveSMax = gTrue;
-	}
-      } else if (y1 > y0 && haveSTop && sTop > 1) {
-	if (!haveSMax || sTop < sMax) {
-	  sMax = sTop;
-	  haveSMax = gTrue;
-	}
-      }
-      if (haveSZero && sDiag > 1) {
-	if (!haveSMax || sDiag < sMax) {
-	  sMax = sDiag;
-	}
-      }
-    } else {
+    if (!shading->getExtend1() && sMax > 1) {
       sMax = 1;
     }
   }
@@ -3758,11 +3729,10 @@ void Gfx::opShowText(Object args[], int numArgs) {
     out->updateFont(state);
     fontChanged = gFalse;
   }
-  if (ocState) {
-    out->beginStringOp(state);
-    doShowText(args[0].getString());
-    out->endStringOp(state);
-  } else {
+  out->beginStringOp(state);
+  doShowText(args[0].getString());
+  out->endStringOp(state);
+  if (!ocState) {
     doIncCharCount(args[0].getString());
   }
 }
@@ -3782,11 +3752,10 @@ void Gfx::opMoveShowText(Object args[], int numArgs) {
   ty = state->getLineY() - state->getLeading();
   state->textMoveTo(tx, ty);
   out->updateTextPos(state);
-  if (ocState) {
-    out->beginStringOp(state);
-    doShowText(args[0].getString());
-    out->endStringOp(state);
-  } else {
+  out->beginStringOp(state);
+  doShowText(args[0].getString());
+  out->endStringOp(state);
+  if (!ocState) {
     doIncCharCount(args[0].getString());
   }
 }
@@ -3810,11 +3779,10 @@ void Gfx::opMoveSetShowText(Object args[], int numArgs) {
   out->updateWordSpace(state);
   out->updateCharSpace(state);
   out->updateTextPos(state);
+  out->beginStringOp(state);
+  doShowText(args[2].getString());
+  out->endStringOp(state);
   if (ocState) {
-    out->beginStringOp(state);
-    doShowText(args[2].getString());
-    out->endStringOp(state);
-  } else {
     doIncCharCount(args[2].getString());
   }
 }
@@ -3833,34 +3801,33 @@ void Gfx::opShowSpaceText(Object args[], int numArgs) {
     out->updateFont(state);
     fontChanged = gFalse;
   }
-  if (ocState) {
-    out->beginStringOp(state);
-    wMode = state->getFont()->getWMode();
-    a = args[0].getArray();
-    for (i = 0; i < a->getLength(); ++i) {
-      a->get(i, &obj);
-      if (obj.isNum()) {
+  out->beginStringOp(state);
+  wMode = state->getFont()->getWMode();
+  a = args[0].getArray();
+  for (i = 0; i < a->getLength(); ++i) {
+    a->get(i, &obj);
+    if (obj.isNum()) {
       // this uses the absolute value of the font size to match
       // Acrobat's behavior
-	if (wMode) {
-	  state->textShift(0, -obj.getNum() * 0.001 *
-			   state->getFontSize());
-	} else {
-	  state->textShift(-obj.getNum() * 0.001 *
-			   state->getFontSize() *
-			   state->getHorizScaling(), 0);
-	}
-	out->updateTextShift(state, obj.getNum());
-      } else if (obj.isString()) {
-	doShowText(obj.getString());
+      if (wMode) {
+        state->textShift(0, -obj.getNum() * 0.001 *
+          state->getFontSize());
       } else {
-	error(errSyntaxError, getPos(),
-	      "Element of show/space array must be number or string");
+        state->textShift(-obj.getNum() * 0.001 *
+          state->getFontSize() *
+          state->getHorizScaling(), 0);
       }
-      obj.free();
+      out->updateTextShift(state, obj.getNum());
+    } else if (obj.isString()) {
+      doShowText(obj.getString());
+    } else {
+      error(errSyntaxError, getPos(),
+        "Element of show/space array must be number or string");
     }
-    out->endStringOp(state);
-  } else {
+    obj.free();
+  }
+  out->endStringOp(state);
+  if (!ocState) {
     a = args[0].getArray();
     for (i = 0; i < a->getLength(); ++i) {
       a->get(i, &obj);
@@ -4018,7 +3985,8 @@ void Gfx::doShowText(GooString *s) {
       originX *= state->getFontSize();
       originY *= state->getFontSize();
       state->textTransformDelta(originX, originY, &tOriginX, &tOriginY);
-      out->drawChar(state, state->getCurX() + riseX, state->getCurY() + riseY,
+      if (ocState)
+        out->drawChar(state, state->getCurX() + riseX, state->getCurY() + riseY,
 		      tdx, tdy, tOriginX, tOriginY, code, n, u, uLen);
       state->shift(tdx, tdy);
       p += n;
@@ -4055,7 +4023,8 @@ void Gfx::doShowText(GooString *s) {
       dy *= state->getFontSize();
     }
     state->textTransformDelta(dx, dy, &tdx, &tdy);
-    out->drawString(state, s);
+    if (ocState)
+      out->drawString(state, s);
     state->shift(tdx, tdy);
   }
 
@@ -4063,7 +4032,7 @@ void Gfx::doShowText(GooString *s) {
     out->endString(state);
   }
 
-  if (patternFill) {
+  if (patternFill && ocState) {
     out->saveTextPos(state);
     // tell the OutputDev to do the clipping
     out->endTextObject(state);
