@@ -546,8 +546,8 @@ else
   use_glib="no (requires cairo output)"
   enable_poppler_glib="no"
 fi
-if test x$use_glib = x; then
-   use_glib=$enable_poppler_glib
+if test x"$use_glib" = x; then
+   use_glib="$enable_poppler_glib"
 fi
 AM_CONDITIONAL(BUILD_POPPLER_GLIB, test x$enable_poppler_glib = xyes)
 AM_CONDITIONAL(HAVE_INTROSPECTION, test "x$found_introspection" = "xyes")
