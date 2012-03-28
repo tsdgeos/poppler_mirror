@@ -776,6 +776,111 @@ AnnotIconFit::AnnotIconFit(Dict* dict) {
 }
 
 //------------------------------------------------------------------------
+// AnnotAppearance
+//------------------------------------------------------------------------
+
+AnnotAppearance::AnnotAppearance(PDFDoc *docA, Object *dict) {
+  assert(dict->isDict());
+  xref = docA->getXRef();
+  dict->copy(&appearDict);
+}
+
+AnnotAppearance::~AnnotAppearance() {
+  appearDict.free();
+}
+
+void AnnotAppearance::getAppearanceStream(AnnotAppearance::AnnotAppearanceType type, const char *state, Object *dest) {
+  Object apData, stream;
+  apData.initNull();
+
+  // Obtain dictionary or stream associated to appearance type
+  if (type == appearRollover) {
+    appearDict.dictLookupNF("R", &apData);
+  } else if (type == appearDown) {
+    appearDict.dictLookupNF("D", &apData);
+  }
+  if (apData.isNull()) { // Normal appearance, also used as fallback
+    appearDict.dictLookupNF("N", &apData);
+  }
+
+  // Search state if it's a subdictionary
+  if (apData.isDict() && state) {
+    Object obj1;
+    apData.dictLookupNF(state, &obj1);
+    apData.free();
+    obj1.copy(&apData);
+    obj1.free();
+  }
+
+  dest->initNull();
+  // Sanity check on the value we are about to return: it must be a ref to stream
+  if (apData.isRef()) {
+    apData.fetch(xref, &stream);
+    if (stream.isStream()) {
+      apData.copy(dest);
+    } else {
+      error(errSyntaxWarning, -1, "AP points to a non-stream object");
+    }
+    stream.free();
+  }
+  apData.free();
+}
+
+GooString * AnnotAppearance::getStateKey(int i) {
+  Object obj1;
+  GooString * res = NULL;
+  appearDict.dictLookupNF("N", &obj1);
+  if (obj1.isDict()) {
+    res = new GooString(obj1.dictGetKey(i));
+  }
+  obj1.free();
+  return res;
+}
+
+int AnnotAppearance::getNumStates() {
+  Object obj1;
+  int res = 0;
+  appearDict.dictLookupNF("N", &obj1);
+  if (obj1.isDict()) {
+    res = obj1.dictGetLength();
+  }
+  obj1.free();
+  return res;
+}
+
+// Removes stream if obj is a Ref, or removes pointed streams if obj is a Dict
+void AnnotAppearance::removeStateStreams(Object *obj1) {
+  // TODO: Remove XObject resources, check for XObjects shared by multiple
+  //       annotations, delete streams from name table (if any)
+  if (obj1->isRef()) {
+    xref->removeIndirectObject(obj1->getRef());
+  } else if (obj1->isDict()) {
+    const int size = obj1->dictGetLength();
+    for (int i = 0; i < size; ++i) {
+      Object obj2;
+      obj1->dictGetValNF(i, &obj2);
+      if (obj2.isRef()) {
+        xref->removeIndirectObject(obj2.getRef());
+      }
+      obj2.free();
+    }
+  }
+}
+
+void AnnotAppearance::removeAllStreams() {
+  Object obj1;
+  appearDict.dictLookupNF("N", &obj1);
+  removeStateStreams(&obj1);
+  obj1.free();
+  appearDict.dictLookupNF("R", &obj1);
+  removeStateStreams(&obj1);
+  obj1.free();
+  appearDict.dictLookupNF("D", &obj1);
+  removeStateStreams(&obj1);
+  obj1.free();
+}
+
+//------------------------------------------------------------------------
 // AnnotAppearanceCharacs
 //------------------------------------------------------------------------
 
@@ -912,13 +1017,12 @@ Annot::Annot(PDFDoc *docA, Dict *dict, Object *obj) {
 }
 
 void Annot::initialize(PDFDoc *docA, Dict *dict) {
-  Object apObj, asObj, obj1, obj2, obj3;
+  Object apObj, asObj, obj1, obj2;
 
-  appRef.num = 0;
-  appRef.gen = 65535;
   ok = gTrue;
   doc = docA;
   xref = doc->getXRef();
+  appearStreams = NULL;
   appearState = NULL;
   appearBuf = NULL;
   fontSize = 0;
@@ -995,22 +1099,25 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   }
   obj1.free();
 
-  //----- get the appearance state
-
+  //----- get the annotation appearance dictionary
   dict->lookup("AP", &apObj);
+  if (apObj.isDict()) {
+    appearStreams = new AnnotAppearance(doc, &apObj);
+  }
+  apObj.free();
+
+  //----- get the appearance state
   dict->lookup("AS", &asObj);
   if (asObj.isName()) {
     appearState = new GooString(asObj.getName());
-  } else if (apObj.isDict()) {
-    if (apObj.dictLookup("N", &obj1)->isDict()) {
-      error (errSyntaxError, -1, "Invalid or missing AS value in annotation containing one or more appearance subdictionaries");
-      // AS value is required in this case, but if the
-      // N dictionary contains only one entry
-      // take it as default appearance.
-      if (obj1.dictGetLength() == 1)
-        appearState = new GooString(obj1.dictGetKey(0));
+  } else if (appearStreams && appearStreams->getNumStates() != 0) {
+    error (errSyntaxError, -1, "Invalid or missing AS value in annotation containing one or more appearance subdictionaries");
+    // AS value is required in this case, but if the
+    // N dictionary contains only one entry
+    // take it as default appearance.
+    if (appearStreams->getNumStates() == 1) {
+      appearState = appearStreams->getStateKey(0);
     }
-    obj1.free();
   }
   if (!appearState) {
     appearState = new GooString("Off");
@@ -1018,22 +1125,9 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   asObj.free();
 
   //----- get the annotation appearance
-
-  if (apObj.isDict()) {
-    apObj.dictLookup("N", &obj1);
-    apObj.dictLookupNF("N", &obj2);
-    if (obj1.isDict()) {
-      if (obj1.dictLookupNF(appearState->getCString(), &obj3)->isRef()) {
-	obj3.copy(&appearance);
-      }
-      obj3.free();
-    } else if (obj2.isRef()) {
-      obj2.copy(&appearance);
-    }
-    obj1.free();
-    obj2.free();
+  if (appearStreams) {
+    appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->getCString(), &appearance);
   }
-  apObj.free();
 
   //----- parse the border style
   if (dict->lookup("BS", &obj1)->isDict()) {
@@ -1218,9 +1312,6 @@ void Annot::setAppearanceState(const char *state) {
   if (!state)
     return;
 
-  if (appearState && appearState->cmp(state) == 0)
-    return;
-
   delete appearState;
   appearState = new GooString(state);
 
@@ -1229,23 +1320,27 @@ void Annot::setAppearanceState(const char *state) {
   update ("AS", &obj1);
 
   // The appearance state determines the current appearance stream
-  Object obj2;
-  if (annotObj.dictLookup("AP", &obj2)->isDict()) {
-    Object obj3;
-
-    if (obj2.dictLookup("N", &obj3)->isDict()) {
-      Object obj4;
-
-      appearance.free();
-      if (obj3.dictLookupNF(state, &obj4)->isRef())
-        obj4.copy(&appearance);
-      else
-        appearance.initNull();
-      obj4.free();
-    }
-    obj3.free();
+  appearance.free();
+  if (appearStreams) {
+    appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->getCString(), &appearance);
+  } else {
+    appearance.initNull();
   }
-  obj2.free();
+}
+
+void Annot::invalidateAppearance() {
+  if (appearStreams) { // Remove existing appearance streams
+    appearStreams->removeAllStreams();
+  }
+  delete appearStreams;
+  appearStreams = NULL;
+
+  setAppearanceState("Off"); // Default appearance state
+
+  Object obj1;
+  obj1.initNull();
+  update ("AP", &obj1); // Remove AP
+  update ("AS", &obj1); // Remove AS
 }
 
 double Annot::getXMin() {
@@ -1292,6 +1387,7 @@ Annot::~Annot() {
   if (modified)
     delete modified;
 
+  delete appearStreams;
   appearance.free();
 
   if (appearState)

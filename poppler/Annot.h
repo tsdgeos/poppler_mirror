@@ -368,7 +368,26 @@ public:
     appearDown
   };
 
-  AnnotAppearance(Dict *dict);
+  AnnotAppearance(PDFDoc *docA, Object *dict);
+  ~AnnotAppearance();
+
+  // State is ignored if no subdictionary is present
+  void getAppearanceStream(AnnotAppearanceType type, const char *state, Object *dest);
+
+  // Access keys in normal appearance subdictionary (N)
+  GooString * getStateKey(int i);
+  int getNumStates();
+
+  // Removes all associated streams in the xref table. Caller is required to
+  // reset parent annotation's AP and AS after this call.
+  void removeAllStreams();
+
+private:
+  void removeStateStreams(Object *state);
+
+protected:
+  XRef *xref;                   // the xref table for this PDF file
+  Object appearDict;            // Annotation's AP
 };
 
 //------------------------------------------------------------------------
@@ -504,6 +523,9 @@ public:
 
   void setAppearanceState(const char *state);
 
+  // Delete appearance streams and reset appearance state
+  void invalidateAppearance();
+
   // getters
   PDFDoc *getDoc() const { return doc; }
   XRef *getXRef() const { return xref; }
@@ -517,7 +539,7 @@ public:
   GooString *getName() const { return name; }
   GooString *getModified() const { return modified; }
   Guint getFlags() const { return flags; }
-  /*Dict *getAppearDict() const { return appearDict; }*/
+  AnnotAppearance *getAppearStreams() const { return appearStreams; }
   GooString *getAppearState() const { return appearState; }
   AnnotBorder *getBorder() const { return border; }
   AnnotColor *getColor() const { return color; }
@@ -564,8 +586,7 @@ protected:
   GooString *name;                  // NM
   GooString *modified;              // M
   Guint flags;                      // F (must be a 32 bit unsigned int)
-  //Dict *appearDict;                 // AP (should be correctly parsed)
-  Ref appRef;                       //the reference to the indirect appearance object in XRef 
+  AnnotAppearance *appearStreams;   // AP
   Object appearance;     // a reference to the Form XObject stream
                          //   for the normal appearance
   GooString *appearState;           // AS
