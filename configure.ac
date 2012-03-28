@@ -193,21 +193,46 @@ AC_ARG_ENABLE(libtiff,
 		enable_libtiff=$enableval,
 		enable_libtiff="try")
 
+AC_ARG_VAR([LIBTIFF_CFLAGS], [C compiler flags for LIBTIFF])
+AC_ARG_VAR([LIBTIFF_LIBS], [linker flags to link LIBTIFF (default is -ltiff)])
+ac_save_CPPFLAGS="$CPPFLAGS"
+ac_save_CXXFLAGS="$CXXFLAGS"
+ac_save_LIBS="$LDFLAGS"
+CPPFLAGS="$CPPFLAGS $LIBTIFF_CFLAGS"
+CXXFLAGS="$CXXFLAGS $LIBTIFF_CFLAGS"
+LIBS="$LIBS $LIBTIFF_LIBS"
 if test x$enable_libtiff = xyes; then
-  AC_CHECK_LIB([tiff], [TIFFOpen],,
-		AC_MSG_ERROR("*** libtiff library not found ***"))
+  if test x"$LIBTIFF_LIBS" != ; then
+    AC_CHECK_FUNC([TIFFOpen],,
+		  AC_MSG_ERROR("*** libtiff library not found ***"))
+  else
+    AC_CHECK_LIB([tiff], [TIFFOpen],,
+		  AC_MSG_ERROR("*** libtiff library not found ***"))
+  fi
   AC_CHECK_HEADERS([tiffio.h],,
 		AC_MSG_ERROR("*** libtiff headers not found ***"))
 elif test x$enable_libtiff = xtry; then
-  AC_CHECK_LIB([tiff], [TIFFOpen],
-		[enable_libtiff="yes"],
-		[enable_libtiff="no"])
+  if test x"$LIBTIFF_LIBS" != x; then
+    AC_CHECK_FUNC([TIFFOpen],
+		  [enable_libtiff="yes"],
+		  [enable_libtiff="no"])
+  else
+    AC_CHECK_LIB([tiff], [TIFFOpen],
+		 [enable_libtiff="yes"],
+		 [enable_libtiff="no"])
+  fi
   AC_CHECK_HEADERS([tiffio.h],,
 		[enable_libtiff="no"])
 fi
+CPPFLAGS="$ac_save_CPPFLAGS"
+CXXFLAGS="$ac_save_CXXFLAGS"
+LIBS="$ac_save_LIBS"
 
 if test x$enable_libtiff = xyes; then
-  LIBTIFF_LIBS="-ltiff"
+  if test x"$LIBTIFF_LIBS" = x; then
+    LIBTIFF_LIBS="-ltiff"
+  fi
+  AC_SUBST(LIBTIFF_CFLAGSS)
   AC_SUBST(LIBTIFF_LIBS)
   AC_DEFINE(ENABLE_LIBTIFF)
 fi
@@ -283,8 +308,21 @@ AC_ARG_ENABLE(libjpeg,
 	                     [Don't build against libjpeg.]),
               enable_libjpeg=$enableval,
               enable_libjpeg="try")
+AC_ARG_VAR([LIBJPEG_CFLAGS], [C compiler flags for LIBJPEG])
 if test x$enable_libjpeg != xno; then
+  dnl
+  dnl POPPLER_FIND_JPEG uses "USER_INCLUDES" and "USER_LIBS"
+  dnl to receive the flags for header and library directories.
+  dnl
+  ac_save_USER_INCLUDES="$USER_INCLUDES"
+  ac_save_USER_LDFLAGS="$USER_LDFLAGS"
+  USER_INCLUDES="$USER_INCLUDES $LIBJPEG_CFLAGS"
+  USER_LDFLAGS="$USER_LDFLAGS $LIBJPEG_CFLAGS"
   POPPLER_FIND_JPEG
+  dnl POPPLER_FIND_JPEG sets LIBJPEG_LIBS
+  AC_SUBST(LIBJPEG_CFLAGS)
+  USER_INCLUDES="$ac_save_USER_INCLUDES"
+  USER_LDFLAGS="$ac_save_USER_LDFLAGS"
 fi
 
 AM_CONDITIONAL(BUILD_LIBJPEG, test x$enable_libjpeg = xyes)
