@@ -117,6 +117,12 @@ pdftohtml_SOURCES =				\
 	HtmlUtils.h				\
 	$(common)
 
+# HtmlOutputDev uses goo/PNGWriter.h that may depend on libpng header
+pdftohtml_CXXFLAGS = $(AM_CXXFLAGS)
+if BUILD_LIBPNG
+pdftohtml_CXXFLAGS += $(LIBPNG_CFLAGS)
+endif
+
 pdfseparate_SOURCES =				\
 	pdfseparate.cc				\
 	$(common)

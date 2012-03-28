@@ -61,6 +61,8 @@ libjpeg_sources =				\
 
 libjpeg_libs =					\
 	$(LIBJPEG_LIBS)
+libjpeg_includes =				\
+	$(LIBJPEG_CFLAGS)
 
 endif
 
@@ -90,6 +92,8 @@ libjpeg2000_sources =				\
 
 libjpeg2000_libs =				\
 	$(LIBOPENJPEG_LIBS)
+libjpeg2000_includes =				\
+	$(LIBOPENJPEG_CFLAGS)
 
 else
 
@@ -141,7 +145,9 @@ INCLUDES =					\
 	$(splash_includes)			\
 	$(cairo_includes)			\
 	$(arthur_includes)			\
+	$(libjpeg_includes)			\
 	$(libtiff_includes)			\
+	$(libjpeg2000_includes)			\
 	$(libpng_includes)			\
 	$(libcurl_includes)			\
 	$(FREETYPE_CFLAGS)			\

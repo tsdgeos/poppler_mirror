@@ -22,12 +22,27 @@ poppler_goo_include_HEADERS =			\
 
 endif
 
+if BUILD_LIBJPEG
+libjpeg_includes = $(LIBJPEG_CFLAGS)
+endif
+
+if BUILD_LIBTIFF
+libtiff_includes = $(LIBTIFF_CFLAGS)
+endif
+
+if BUILD_LIBOPENJPEG
+libjpeg2000_includes = $(LIBOPENJPEG_CFLAGS)
+endif
+
 if BUILD_LIBPNG
 libpng_includes = $(LIBPNG_CFLAGS)
 endif
 
 INCLUDES =					\
 	-I$(top_srcdir)				\
+	$(libjpeg_includes)                     \
+	$(libtiff_includes)                     \
+	$(libjpeg2000_includes)                 \
 	$(libpng_includes)
 
 libgoo_la_SOURCES =				\
