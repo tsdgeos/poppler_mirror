@@ -310,6 +310,7 @@ AC_ARG_ENABLE(libjpeg,
               enable_libjpeg="try")
 AC_ARG_VAR([LIBJPEG_CFLAGS], [C compiler flags for LIBJPEG])
 if test x$enable_libjpeg != xno; then
+
   dnl
   dnl POPPLER_FIND_JPEG uses "USER_INCLUDES" and "USER_LIBS"
   dnl to receive the flags for header and library directories.
@@ -319,6 +320,47 @@ if test x$enable_libjpeg != xno; then
   USER_INCLUDES="$USER_INCLUDES $LIBJPEG_CFLAGS"
   USER_LDFLAGS="$USER_LDFLAGS $LIBJPEG_CFLAGS"
   POPPLER_FIND_JPEG
+
+  dnl check INT16, INT32 typedef conflict in jmorecfg.h
+  ac_save_CPPFLAGS="$CPPFLAGS"
+  ac_save_CFLAGS="$CFLAGS"
+  CPPFLAGS="$CPPFLAGS $LIBJPEG_CFLAGS"
+  CFLAGS="$CFLAGS $LIBJPEG_CFLAGS"
+  AC_MSG_CHECKING([libjpeg.h works correctly])
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([
+#ifdef _WIN32
+#include <windows.h>
+#endif
+#include <sys/types.h>
+#include <stdio.h>
+#include <jpeglib.h>
+],[{return 0;}])],[
+    AC_MSG_RESULT([ok])
+  ],[
+    AC_MSG_RESULT([no])
+    AC_MSG_CHECKING([libjpeg.h problem can be fixed by XMD_H macro])
+    CPPFLAGS="$CPPFLAGS -DXMD_H"
+    CFLAGS="$CFLAGS -DXMD_H"
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([
+#ifdef _WIN32
+#include <windows.h>
+#endif
+#include <sys/types.h>
+#include <stdio.h>
+#include <jpeglib.h>
+],[{return 0;}])],[
+      AC_MSG_RESULT([ok, -DXMD_H is added to LIBJPEG_CFLAGS])
+      LIBJPEG_CFLAGS="$LIBJPEG_CFLAGS -DXMD_H"
+    ],[
+      AC_MSG_RESULT([no, disable libjpeg])
+      enable_libjpeg="no"
+    ])
+  ])
+  CPPFLAGS="$ac_save_CPPFLAGS"
+  CFLAGS="$ac_save_CFLAGS"
+
   dnl POPPLER_FIND_JPEG sets LIBJPEG_LIBS
   AC_SUBST(LIBJPEG_CFLAGS)
   USER_INCLUDES="$ac_save_USER_INCLUDES"
