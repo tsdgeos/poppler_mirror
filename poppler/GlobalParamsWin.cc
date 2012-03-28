@@ -297,14 +297,14 @@ void SysFontList::scanWindowsFonts(GooString *winFontDir) {
 SysFontInfo *SysFontList::makeWindowsFont(char *name, int fontNum,
 					  char *path) {
   int n;
-  GBool bold, italic;
+  GBool bold, italic, oblique, fixedWidth;
   GooString *s;
   char c;
   int i;
   SysFontType type;
 
   n = strlen(name);
-  bold = italic = gFalse;
+  bold = italic = oblique = fixedWidth = gFalse;
 
   // remove trailing ' (TrueType)'
   if (n > 11 && !strncmp(name + n - 11, " (TrueType)", 11)) {
@@ -322,6 +322,12 @@ SysFontInfo *SysFontList::makeWindowsFont(char *name, int fontNum,
     italic = gTrue;
   }
 
+  // remove trailing ' Oblique'
+  if (n > 7 && !strncmp(name + n - 8, " Oblique", 8)) {
+    n -= 8;
+    oblique = gTrue;
+  }
+
   // remove trailing ' Bold'
   if (n > 5 && !strncmp(name + n - 5, " Bold", 5)) {
     n -= 5;
@@ -332,6 +338,17 @@ SysFontInfo *SysFontList::makeWindowsFont(char *name, int fontNum,
   if (n > 5 && !strncmp(name + n - 8, " Regular", 8)) {
     n -= 8;
   }
+
+  // the familyname cannot indicate whether a font is fixedWidth or not.
+  // some well-known fixedWidth typeface family names or keyword are checked.
+  if ( strstr(name, "Courier") ||
+       strstr(name, "Fixed")   ||
+      (strstr(name, "Mono") && !strstr(name, "Monotype")) ||
+       strstr(name, "Typewriter") )
+    fixedWidth = gTrue;
+  else
+    fixedWidth = gFalse;
+
 
   //----- normalize the font name
   s = new GooString(name, n);
@@ -350,7 +367,9 @@ SysFontInfo *SysFontList::makeWindowsFont(char *name, int fontNum,
   } else {
     type = sysFontTTF;
   }
-  return new SysFontInfo(s, bold, italic, new GooString(path), type, fontNum);
+
+  return new SysFontInfo(s, bold, italic, oblique, fixedWidth,
+                         new GooString(path), type, fontNum);
 }
 
 void GlobalParams::setupBaseFonts(char * dir)
@@ -474,14 +493,20 @@ static const char *findSubstituteName(GfxFont *font, GooHash *substFiles, const 
 /* Windows implementation of external font matching code */
 GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 					  SysFontType *type,
-					  int *fontNum, GooString *substituteFontName) {
+					  int *fontNum, GooString *substituteFontName,
+                                          GooString *base14Name) {
   SysFontInfo *fi;
   GooString *path = NULL;
   GooString *fontName = font->getName();
   if (!fontName) return NULL;
   lockGlobalParams;
   setupBaseFonts(NULL);
-  if ((fi = sysFonts->find(fontName, gFalse))) {
+
+  // TODO: base14Name should be changed?
+  // In the system using FontConfig, findSystemFontFile() uses
+  // base14Name only for the creation of query pattern.
+
+  if ((fi = sysFonts->find(fontName, gFalse, gFalse))) {
     path = fi->path->copy();
     *type = fi->type;
     *fontNum = fi->fontNum;
