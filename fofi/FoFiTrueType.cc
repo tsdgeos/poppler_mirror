@@ -16,7 +16,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2008, 2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2009, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
@@ -234,7 +234,7 @@ static const char *macGlyphNames[258] = {
   "AE",             "Oslash",         "infinity",       "plusminus",
   "lessequal",      "greaterequal",   "yen",            "mu",
   "partialdiff",    "summation",      "product",        "pi",
-  "integral",       "ordfeminine",    "ordmasculine",   "Ohm",
+  "integral",       "ordfeminine",    "ordmasculine",   "Omega",
   "ae",             "oslash",         "questiondown",   "exclamdown",
   "logicalnot",     "radical",        "florin",         "approxequal",
   "increment",      "guillemotleft",  "guillemotright", "ellipsis",
