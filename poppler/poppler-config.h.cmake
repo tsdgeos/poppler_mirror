@@ -16,7 +16,7 @@
 
 /* Defines the poppler version */
 #ifndef POPPLER_VERSION
-#define POPPLER_VERSION ${POPPLER_VERSION}
+#define POPPLER_VERSION "${POPPLER_VERSION}"
 #endif
 
 /* Enable multithreading support. */
