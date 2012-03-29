@@ -1,3 +1,24 @@
+Release 0.19.2
+        core:
+         * Annotation improvements
+         * CairoOutputDev: update cairo mesh pattern to 1.12 api
+         * CairoOutputDev: fix some transparency issues (Bug #47739)
+         * CairoOutputDev: Fix regression in some shadings
+         * TextOutputDev: Don't add newline to last line extracted by TextSelectionDumper (Bug #45955)
+         * CJK font improvements
+         * Improve font matching for non embedded fonts
+         * Fix regression regarding forceRasterize in PSOutputDev
+         * Fix typos glyph names in truetype 'post' table standard mac ordering
+        
+        build system:
+         * minor cmake fixes
+         * misc autoconf fixes
+         * POPPLER_VERSION is now wrapped in quotes
+
+         utils:
+         * pdftohtml: extract mask images even if they are not JPEG (Bug #47186)
+         * pdftohtml: Flip images if they need to (Bug #32340)
+         
 Release 0.19.1
         core:
          * Improve CJK suport in PSOutputDev
@@ -19,7 +40,7 @@ Release 0.19.1
          * Support for LinkMovie object (Bug #40561)
          * Support for Media Rendition
          
-         glib:
+        glib:
          * Add poppler_fonts_iter_get_encoding
          * Improvements to the demo
 
