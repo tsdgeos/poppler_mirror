@@ -691,7 +691,7 @@ AM_CONDITIONAL(USE_CMS, test x$enable_cms = xyes)
 AM_CONDITIONAL(USE_LCMS1, test x$lcms1 = xyes)
 
 AC_ARG_WITH([testdatadir],
-   [AS_HELP_STRING([--testdatadir=/path/to/testdatadir],
+   [AS_HELP_STRING([--with-testdatadir=/path/to/testdatadir],
                    [Specify test data dir])],
    [case $withval in
        [[\\/]]* | ?:[[\\/]]* )  # Absolute name.
@@ -726,7 +726,7 @@ else
 
  You should checkout the test data as a sibling of your
  poppler source folder or specify the location of your
- checkout with --testdatadir=/path/to/checkoutdir/test.
+ checkout with --with-testdatadir=/path/to/checkoutdir/test.
 ])
 fi
 AC_SUBST(TESTDATADIR)
