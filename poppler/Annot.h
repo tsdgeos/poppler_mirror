@@ -492,8 +492,8 @@ public:
   void decRefCnt();
 
   virtual void draw(Gfx *gfx, GBool printing);
-  // Get appearance object.
-  Object *getAppearance(Object *obj) { return appearance.fetch(xref, obj); }
+  // Get the resource dict of the appearance stream
+  virtual Object *getAppearanceResDict(Object *dest);
 
   GBool match(Ref *refA)
     { return ref.num == refA->num && ref.gen == refA->gen; }
@@ -842,6 +842,7 @@ public:
   ~AnnotFreeText();
 
   virtual void draw(Gfx *gfx, GBool printing);
+  virtual Object *getAppearanceResDict(Object *dest);
 
   void setAppearanceString(GooString *new_string);
   void setQuadding(AnnotFreeTextQuadding new_quadding);

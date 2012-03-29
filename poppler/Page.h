@@ -178,7 +178,7 @@ public:
   // Return a list of links.
   Links *getLinks();
 
-  // Return a list of annots. Ownership is transferred to the caller.
+  // Return a list of annots. It will be valid until the page is destroyed
   Annots *getAnnots();
 
   // Get contents.

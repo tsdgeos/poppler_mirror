@@ -1553,19 +1553,13 @@ void PSOutputDev::writeDocSetup(PDFDoc *doc, Catalog *catalog,
     if ((resDict = page->getResourceDict())) {
       setupResources(resDict);
     }
-    annots = new Annots(doc, page->getAnnots(&obj1));
-    obj1.free();
+    annots = page->getAnnots();
     for (i = 0; i < annots->getNumAnnots(); ++i) {
-      if (annots->getAnnot(i)->getAppearance(&obj1)->isStream()) {
-	obj1.streamGetDict()->lookup("Resources", &obj2);
-	if (obj2.isDict()) {
-	  setupResources(obj2.getDict());
-	}
-	obj2.free();
+      if (annots->getAnnot(i)->getAppearanceResDict(&obj1)->isDict()) {
+        setupResources(obj1.getDict());
       }
       obj1.free();
     }
-    delete annots;
   }
   if ((acroForm = catalog->getAcroForm()) && acroForm->isDict()) {
     if (acroForm->dictLookup("DR", &obj1)->isDict()) {

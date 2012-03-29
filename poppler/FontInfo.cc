@@ -11,6 +11,7 @@
 // Copyright (C) 2010, 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -53,7 +54,7 @@ GooList *FontInfoScanner::scan(int nPages) {
   Page *page;
   Dict *resDict;
   Annots *annots;
-  Object obj1, obj2;
+  Object obj1;
   int lastPage;
 
   if (currentPage > doc->getNumPages()) {
@@ -76,12 +77,8 @@ GooList *FontInfoScanner::scan(int nPages) {
     }
     annots = page->getAnnots();
     for (int i = 0; i < annots->getNumAnnots(); ++i) {
-      if (annots->getAnnot(i)->getAppearance(&obj1)->isStream()) {
-	obj1.streamGetDict()->lookup("Resources", &obj2);
-	if (obj2.isDict()) {
-	  scanFonts(obj2.getDict(), result);
-	}
-	obj2.free();
+      if (annots->getAnnot(i)->getAppearanceResDict(&obj1)->isDict()) {
+        scanFonts(obj1.getDict(), result);
       }
       obj1.free();
     }

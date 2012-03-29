@@ -1552,6 +1552,25 @@ void Annot::createResourcesDict(const char *formName, Object *formStream,
   resDict->dictSet("XObject", &formDict);
 }
 
+Object *Annot::getAppearanceResDict(Object *dest) {
+  Object obj1, obj2;
+
+  dest->initNull(); // Default value
+
+  // Fetch appearance's resource dict (if any)
+  appearance.fetch(xref, &obj1);
+  if (obj1.isStream()) {
+    obj1.streamGetDict()->lookup("Resources", &obj2);
+    if (obj2.isDict()) {
+      obj2.copy(dest);
+    }
+    obj2.free();
+  }
+  obj1.free();
+
+  return dest;
+}
+
 GBool Annot::isVisible(GBool printing) {
   // check the flags
   if ((flags & flagHidden) ||
@@ -2680,6 +2699,15 @@ void AnnotFreeText::draw(Gfx *gfx, GBool printing) {
   gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
                  rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
+}
+
+// Before retrieving the res dict, regenerate the appearance stream if needed,
+// because AnnotFreeText::draw needs to store font info in the res dict
+Object *AnnotFreeText::getAppearanceResDict(Object *dest) {
+  if (appearance.isNull()) {
+    generateFreeTextAppearance();
+  }
+  return Annot::getAppearanceResDict(dest);
 }
 
 //------------------------------------------------------------------------
