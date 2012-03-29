@@ -65,7 +65,12 @@ description for all fonts available in Windows. That's how MuPDF works.
 #endif
 
 #define DEFAULT_SUBSTITUTE_FONT "Helvetica"
-#define DEFAULT_CID_FONT "MS-Mincho"
+#define DEFAULT_CID_FONT_AC1_MSWIN "MingLiU"   /* Adobe-CNS1 for Taiwan, HongKong */
+#define DEFAULT_CID_FONT_AG1_MSWIN "SimSun"    /* Adobe-GB1 for PRC, Singapore */
+#define DEFAULT_CID_FONT_AJ1_MSWIN "MS-Mincho" /* Adobe-Japan1 */
+#define DEFAULT_CID_FONT_AJ2_MSWIN "MS-Mincho" /* Adobe-Japan2 (legacy) */
+#define DEFAULT_CID_FONT_AK1_MSWIN "Batang"    /* Adobe-Korea1 */
+#define DEFAULT_CID_FONT_MSWIN "ArialUnicode"  /* Unknown */
 
 static struct {
     const char *name;
@@ -155,8 +160,13 @@ static struct {
     {"Georgia-Bold", NULL, "georgiab.ttf"},
     {"Georgia-Italic", NULL, "georgiai.ttf"},
     {"Georgia-BoldItalic", NULL, "georgiaz.ttf"},
-    // default CID font:
-    {"MS-Mincho", NULL, "msmincho.ttf"},
+
+    // fallback for Adobe CID fonts:
+    {"MingLiU", NULL, "mingliu.ttc"},
+    {"SimSun", NULL, "simsun.ttc"},
+    {"MS-Mincho", NULL, "msmincho.ttc"},
+    {"Batang", NULL, "batang.ttc"},
+    {"ArialUnicode", NULL, "arialuni.ttf"},
     {NULL}
 };
 
@@ -479,6 +489,11 @@ static const char *findSubstituteName(GfxFont *font, GooHash *substFiles, const 
       name2->del(n - 11, 11);
       n -= 11;
     }
+    // remove trailing "-Identity-V"
+    if (n > 11 && !strcmp(name2->getCString() + n - 11, "-Identity-V")) {
+      name2->del(n - 11, 11);
+      n -= 11;
+    }
     GooString *substName = (GooString *)substFiles->lookup(name2);
     if (substName != NULL) {
       delete name2;
@@ -487,7 +502,22 @@ static const char *findSubstituteName(GfxFont *font, GooHash *substFiles, const 
 
     /* TODO: try to at least guess bold/italic/bolditalic from the name */
     delete name2;
-    return (font->isCIDFont()) ? DEFAULT_CID_FONT: DEFAULT_SUBSTITUTE_FONT;
+    if (font->isCIDFont()) {
+      GooString *collection = ((GfxCIDFont *)font)->getCollection();
+      if ( !collection->cmp("Adobe-CNS1") )
+        return DEFAULT_CID_FONT_AC1_MSWIN;
+      else if ( !collection->cmp("Adobe-GB1") )
+        return DEFAULT_CID_FONT_AG1_MSWIN;
+      else if ( !collection->cmp("Adobe-Japan1") )
+        return DEFAULT_CID_FONT_AJ1_MSWIN;
+      else if ( !collection->cmp("Adobe-Japan2") )
+        return DEFAULT_CID_FONT_AJ2_MSWIN;
+      else if ( !collection->cmp("Adobe-Korea1") )
+        return DEFAULT_CID_FONT_AK1_MSWIN;
+      else /* unknown or ad-Hoc collection name, like "Adobe-Identity" */
+        return DEFAULT_CID_FONT_MSWIN;
+    } else
+      return DEFAULT_SUBSTITUTE_FONT;
 }
 
 /* Windows implementation of external font matching code */
