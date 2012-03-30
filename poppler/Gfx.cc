@@ -35,6 +35,7 @@
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -5178,6 +5179,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor,
 
   // draw the border
   if (border && border->getWidth() > 0) {
+    saveState();
     if (state->getStrokeColorSpace()->getMode() != csDeviceRGB) {
       state->setStrokePattern(NULL);
       state->setStrokeColorSpace(new GfxDeviceRGBColorSpace());
@@ -5216,6 +5218,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor,
       state->closePath();
     }
     out->stroke(state);
+    restoreState();
   }
 }
 
