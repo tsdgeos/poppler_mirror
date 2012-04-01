@@ -34,7 +34,6 @@ class GitBisect:
             sys.stdout.write(stdout)
 
         status = p.returncode
-        print status
         if not os.WIFEXITED(status) or os.WEXITSTATUS(status) != 0:
             raise Exception('Command %s returned non-zero exit status %d' % (str(cmd), status))
 
