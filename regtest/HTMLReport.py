@@ -205,6 +205,8 @@ class TestResult:
     def get_failed_html(self):
         html = ""
         for backend in self._results:
+            if self._results[backend].is_crashed() or self._results[backend].is_failed_to_run():
+                continue
             backend_html = self._results[backend].get_failed_html()
             if not backend_html:
                 continue
