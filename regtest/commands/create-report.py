@@ -53,9 +53,6 @@ class CreateReport(Command):
             docs_dir = os.path.dirname(doc)
 
         report = HTMLReport(docs_dir, options['refs_dir'], options['out_dir'])
-        if doc == docs_dir:
-            report.create()
-        else:
-            report.create_for_file(os.path.basename(doc))
+        report.create()
 
 register_command('create-report', CreateReport)
