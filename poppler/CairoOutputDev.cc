@@ -454,7 +454,8 @@ void CairoOutputDev::updateFillColor(GfxState *state) {
   GfxRGB color = fill_color;
 
   state->getFillRGB(&fill_color);
-  if (color.r != fill_color.r ||
+  if (cairo_pattern_get_type (fill_pattern) != CAIRO_PATTERN_TYPE_SOLID ||
+      color.r != fill_color.r ||
       color.g != fill_color.g ||
       color.b != fill_color.b)
   {
@@ -473,7 +474,8 @@ void CairoOutputDev::updateStrokeColor(GfxState *state) {
   GfxRGB color = stroke_color;
 
   state->getStrokeRGB(&stroke_color);
-  if (color.r != stroke_color.r ||
+  if (cairo_pattern_get_type (fill_pattern) != CAIRO_PATTERN_TYPE_SOLID ||
+      color.r != stroke_color.r ||
       color.g != stroke_color.g ||
       color.b != stroke_color.b)
   {
