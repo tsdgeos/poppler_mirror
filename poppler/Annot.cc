@@ -965,6 +965,59 @@ AnnotAppearanceCharacs::~AnnotAppearanceCharacs() {
 }
 
 //------------------------------------------------------------------------
+// AnnotAppearanceBBox
+//------------------------------------------------------------------------
+
+AnnotAppearanceBBox::AnnotAppearanceBBox(PDFRectangle *rect) {
+  origX = rect->x1;
+  origY = rect->y1;
+  borderWidth = 0;
+
+  // Initially set the same size as rect
+  minX = 0;
+  minY = 0;
+  maxX = rect->x2 - rect->x1;
+  maxY = rect->y2 - rect->y1;
+}
+
+void AnnotAppearanceBBox::extendTo(double x, double y) {
+  if (x < minX) {
+    minX = x;
+  } else if (x > maxX) {
+    maxX = x;
+  }
+  if (y < minY) {
+    minY = y;
+  } else if (y > maxY) {
+    maxY = y;
+  }
+}
+
+void AnnotAppearanceBBox::getBBoxRect(double bbox[4]) const {
+  Object obj2;
+  bbox[0] = minX - borderWidth;
+  bbox[1] = minY - borderWidth;
+  bbox[2] = maxX + borderWidth;
+  bbox[3] = maxY + borderWidth;
+}
+
+double AnnotAppearanceBBox::getPageXMin() const {
+  return origX + minX - borderWidth;
+}
+
+double AnnotAppearanceBBox::getPageYMin() const {
+  return origY + minY - borderWidth;
+}
+
+double AnnotAppearanceBBox::getPageXMax() const {
+  return origX + maxX + borderWidth;
+}
+
+double AnnotAppearanceBBox::getPageYMax() const {
+  return origY + maxY + borderWidth;
+}
+
+//------------------------------------------------------------------------
 // Annot
 //------------------------------------------------------------------------
 
@@ -1023,6 +1076,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   doc = docA;
   xref = doc->getXRef();
   appearStreams = NULL;
+  appearBBox = NULL;
   appearState = NULL;
   appearBuf = NULL;
   fontSize = 0;
@@ -1315,6 +1369,9 @@ void Annot::setAppearanceState(const char *state) {
   delete appearState;
   appearState = new GooString(state);
 
+  delete appearBBox;
+  appearBBox = NULL;
+
   Object obj1;
   obj1.initName(state);
   update ("AS", &obj1);
@@ -1388,6 +1445,7 @@ Annot::~Annot() {
     delete modified;
 
   delete appearStreams;
+  delete appearBBox;
   appearance.free();
 
   if (appearState)
@@ -2975,17 +3033,8 @@ void AnnotLine::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  /* Some documents like pdf_commenting_new.pdf,
-   * have y1 = y2 but line_width > 0, acroread
-   * renders the lines in such cases even though
-   * the annot bbox is empty. We adjust the bbox here
-   * to avoid having an empty bbox so that lines
-   * are rendered
-   */
-  if (rect->y1 == rect->y2)
-    rect->y2 += border ? border->getWidth() : 1;
-
   if (appearance.isNull()) {
+    appearBBox = new AnnotAppearanceBBox(rect);
     ca = opacity;
 
     appearBuf = new GooString ();
@@ -3011,6 +3060,7 @@ void AnnotLine::draw(Gfx *gfx, GBool printing) {
         break;
       }
       appearBuf->appendf("{0:.2f} w\n", border->getWidth());
+      appearBBox->setBorderWidth(border->getWidth());
     }
 
     const double x1 = coord1->getX();
@@ -3035,9 +3085,11 @@ void AnnotLine::draw(Gfx *gfx, GBool printing) {
     // Draw main segment
     matr.transform (0, leaderLineLength, &tx, &ty);
     appearBuf->appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+    appearBBox->extendTo (tx, ty);
 
     matr.transform (main_len, leaderLineLength, &tx, &ty);
     appearBuf->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
+    appearBBox->extendTo (tx, ty);
 
     // TODO: Line ending, caption
 
@@ -3047,23 +3099,25 @@ void AnnotLine::draw(Gfx *gfx, GBool printing) {
     if (ll_len != 0) {
       matr.transform (0, 0, &tx, &ty);
       appearBuf->appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+      appearBBox->extendTo (tx, ty);
 
       matr.transform (0, sign*ll_len, &tx, &ty);
       appearBuf->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
+      appearBBox->extendTo (tx, ty);
 
       matr.transform (main_len, 0, &tx, &ty);
       appearBuf->appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+      appearBBox->extendTo (tx, ty);
 
       matr.transform (main_len, sign*ll_len, &tx, &ty);
       appearBuf->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
+      appearBBox->extendTo (tx, ty);
     }
 
     appearBuf->append ("Q\n");
 
     double bbox[4];
-    bbox[0] = bbox[1] = 0;
-    bbox[2] = rect->x2 - rect->x1;
-    bbox[3] = rect->y2 - rect->y1;
+    appearBBox->getBBoxRect(bbox);
     if (ca == 1) {
       createForm(bbox, gFalse, NULL, &appearance);
     } else {
@@ -3081,8 +3135,14 @@ void AnnotLine::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   appearance.fetch(xref, &obj);
-  gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
-		 rect->x1, rect->y1, rect->x2, rect->y2);
+  if (appearBBox) {
+    gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
+                   appearBBox->getPageXMin(), appearBBox->getPageYMin(),
+                   appearBBox->getPageXMax(), appearBBox->getPageYMax());
+  } else {
+    gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
+                   rect->x1, rect->y1, rect->x2, rect->y2);
+  }
   obj.free();
 }
 
@@ -5272,6 +5332,7 @@ void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
     return;
 
   if (appearance.isNull()) {
+    appearBBox = new AnnotAppearanceBBox(rect);
     ca = opacity;
 
     appearBuf = new GooString ();
@@ -5299,6 +5360,7 @@ void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
         break;
       }
       appearBuf->appendf("{0:.2f} w\n", border->getWidth());
+      appearBBox->setBorderWidth(border->getWidth());
     }
 
     if (interiorColor) {
@@ -5307,9 +5369,11 @@ void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
 
     if (vertices->getCoordsLength() != 0) {
       appearBuf->appendf ("{0:.2f} {1:.2f} m\n", vertices->getX(0) - rect->x1, vertices->getY(0) - rect->y1);
+      appearBBox->extendTo (vertices->getX(0) - rect->x1, vertices->getY(0) - rect->y1);
 
       for (int i = 1; i < vertices->getCoordsLength(); ++i) {
         appearBuf->appendf ("{0:.2f} {1:.2f} l\n", vertices->getX(i) - rect->x1, vertices->getY(i) - rect->y1);
+        appearBBox->extendTo (vertices->getX(i) - rect->x1, vertices->getY(i) - rect->y1);
       }
 
       if (type == typePolygon) {
@@ -5326,9 +5390,7 @@ void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
     appearBuf->append ("Q\n");
 
     double bbox[4];
-    bbox[0] = bbox[1] = 0;
-    bbox[2] = rect->x2 - rect->x1;
-    bbox[3] = rect->y2 - rect->y1;
+    appearBBox->getBBoxRect(bbox);
     if (ca == 1) {
       createForm(bbox, gFalse, NULL, &appearance);
     } else {
@@ -5346,8 +5408,14 @@ void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   appearance.fetch(xref, &obj);
-  gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
-                 rect->x1, rect->y1, rect->x2, rect->y2);
+  if (appearBBox) {
+    gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
+                   appearBBox->getPageXMin(), appearBBox->getPageYMin(),
+                   appearBBox->getPageXMax(), appearBBox->getPageYMax());
+  } else {
+    gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
+                   rect->x1, rect->y1, rect->x2, rect->y2);
+  }
   obj.free();
 }
 
@@ -5501,6 +5569,7 @@ void AnnotInk::draw(Gfx *gfx, GBool printing) {
     return;
 
   if (appearance.isNull()) {
+    appearBBox = new AnnotAppearanceBBox(rect);
     ca = opacity;
 
     appearBuf = new GooString ();
@@ -5512,15 +5581,18 @@ void AnnotInk::draw(Gfx *gfx, GBool printing) {
 
     if (border) {
       appearBuf->appendf("{0:.2f} w\n", border->getWidth());
+      appearBBox->setBorderWidth(border->getWidth());
     }
 
     for (int i = 0; i < inkListLength; ++i) {
       const AnnotPath * path = inkList[i];
       if (path->getCoordsLength() != 0) {
         appearBuf->appendf ("{0:.2f} {1:.2f} m\n", path->getX(0) - rect->x1, path->getY(0) - rect->y1);
+        appearBBox->extendTo (path->getX(0) - rect->x1, path->getY(0) - rect->y1);
 
         for (int j = 1; j < path->getCoordsLength(); ++j) {
           appearBuf->appendf ("{0:.2f} {1:.2f} l\n", path->getX(j) - rect->x1, path->getY(j) - rect->y1);
+          appearBBox->extendTo (path->getX(j) - rect->x1, path->getY(j) - rect->y1);
         }
 
         appearBuf->append ("S\n");
@@ -5530,9 +5602,7 @@ void AnnotInk::draw(Gfx *gfx, GBool printing) {
     appearBuf->append ("Q\n");
 
     double bbox[4];
-    bbox[0] = bbox[1] = 0;
-    bbox[2] = rect->x2 - rect->x1;
-    bbox[3] = rect->y2 - rect->y1;
+    appearBBox->getBBoxRect(bbox);
     if (ca == 1) {
       createForm(bbox, gFalse, NULL, &appearance);
     } else {
@@ -5550,8 +5620,14 @@ void AnnotInk::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   appearance.fetch(xref, &obj);
-  gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
-                 rect->x1, rect->y1, rect->x2, rect->y2);
+  if (appearBBox) {
+    gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
+                   appearBBox->getPageXMin(), appearBBox->getPageYMin(),
+                   appearBBox->getPageXMax(), appearBBox->getPageYMax());
+  } else {
+    gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
+                   rect->x1, rect->y1, rect->x2, rect->y2);
+  }
   obj.free();
 }
 

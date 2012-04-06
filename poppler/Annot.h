@@ -435,6 +435,32 @@ protected:
 };
 
 //------------------------------------------------------------------------
+// AnnotAppearanceBBox
+//------------------------------------------------------------------------
+
+class AnnotAppearanceBBox
+{
+public:
+  AnnotAppearanceBBox(PDFRectangle *init);
+
+  void setBorderWidth(double w) { borderWidth = w; }
+
+  // The following functions operate on coords relative to [origX origY]
+  void extendTo(double x, double y);
+  void getBBoxRect(double bbox[4]) const;
+
+  // Get boundaries in page coordinates
+  double getPageXMin() const;
+  double getPageYMin() const;
+  double getPageXMax() const;
+  double getPageYMax() const;
+
+private:
+  double origX, origY, borderWidth;
+  double minX, minY, maxX, maxY;
+};
+
+//------------------------------------------------------------------------
 // Annot
 //------------------------------------------------------------------------
 
@@ -593,6 +619,7 @@ protected:
   AnnotAppearance *appearStreams;   // AP
   Object appearance;     // a reference to the Form XObject stream
                          //   for the normal appearance
+  AnnotAppearanceBBox *appearBBox;  // BBox of generated appearance
   GooString *appearState;           // AS
   int treeKey;                      // Struct Parent;
   Object oc;                        // OC
