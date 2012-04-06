@@ -76,97 +76,98 @@ static struct {
     const char *name;
     const char *t1FileName;
     const char *ttFileName;
+    GBool warnIfMissing;
 } displayFontTab[] = {
-    {"Courier",               "n022003l.pfb", "cour.ttf"},
-    {"Courier-Bold",          "n022004l.pfb", "courbd.ttf"},
-    {"Courier-BoldOblique",   "n022024l.pfb", "courbi.ttf"},
-    {"Courier-Oblique",       "n022023l.pfb", "couri.ttf"},
-    {"Helvetica",             "n019003l.pfb", "arial.ttf"},
-    {"Helvetica-Bold",        "n019004l.pfb", "arialbd.ttf"},
-    {"Helvetica-BoldOblique", "n019024l.pfb", "arialbi.ttf"},
-    {"Helvetica-Oblique",     "n019023l.pfb", "ariali.ttf"},
+    {"Courier",               "n022003l.pfb", "cour.ttf", gTrue},
+    {"Courier-Bold",          "n022004l.pfb", "courbd.ttf", gTrue},
+    {"Courier-BoldOblique",   "n022024l.pfb", "courbi.ttf", gTrue},
+    {"Courier-Oblique",       "n022023l.pfb", "couri.ttf", gTrue},
+    {"Helvetica",             "n019003l.pfb", "arial.ttf", gTrue},
+    {"Helvetica-Bold",        "n019004l.pfb", "arialbd.ttf", gTrue},
+    {"Helvetica-BoldOblique", "n019024l.pfb", "arialbi.ttf", gTrue},
+    {"Helvetica-Oblique",     "n019023l.pfb", "ariali.ttf", gTrue},
     // TODO: not sure if "symbol.ttf" is right
-    {"Symbol",                "s050000l.pfb", "symbol.ttf"},
-    {"Times-Bold",            "n021004l.pfb", "timesbd.ttf"},
-    {"Times-BoldItalic",      "n021024l.pfb", "timesbi.ttf"},
-    {"Times-Italic",          "n021023l.pfb", "timesi.ttf"},
-    {"Times-Roman",           "n021003l.pfb", "times.ttf"},
+    {"Symbol",                "s050000l.pfb", "symbol.ttf", gTrue},
+    {"Times-Bold",            "n021004l.pfb", "timesbd.ttf", gTrue},
+    {"Times-BoldItalic",      "n021024l.pfb", "timesbi.ttf", gTrue},
+    {"Times-Italic",          "n021023l.pfb", "timesi.ttf", gTrue},
+    {"Times-Roman",           "n021003l.pfb", "times.ttf", gTrue},
     // TODO: not sure if "wingding.ttf" is right
-    {"ZapfDingbats",          "d050000l.pfb", "wingding.ttf"},
+    {"ZapfDingbats",          "d050000l.pfb", "wingding.ttf", gTrue},
 
     // those seem to be frequently accessed by PDF files and I kind of guess
     // which font file do the refer to
-    {"Palatino", NULL, "pala.ttf"},
-    {"Palatino-Roman", NULL, "pala.ttf"},
-    {"Palatino-Bold", NULL, "palab.ttf"},
-    {"Palatino-Italic", NULL, "palai.ttf"},
-    {"Palatino,Italic", NULL, "palai.ttf"},
-    {"Palatino-BoldItalic", NULL, "palabi.ttf"},
+    {"Palatino", NULL, "pala.ttf", gTrue},
+    {"Palatino-Roman", NULL, "pala.ttf", gTrue},
+    {"Palatino-Bold", NULL, "palab.ttf", gTrue},
+    {"Palatino-Italic", NULL, "palai.ttf", gTrue},
+    {"Palatino,Italic", NULL, "palai.ttf", gTrue},
+    {"Palatino-BoldItalic", NULL, "palabi.ttf", gTrue},
 
-    {"ArialBlack",        NULL, "arialbd.ttf"},
+    {"ArialBlack",        NULL, "arialbd.ttf", gTrue},
 
-    {"ArialNarrow", NULL, "arialn.ttf"},
-    {"ArialNarrow,Bold", NULL, "arialnb.ttf"},
-    {"ArialNarrow,Italic", NULL, "arialni.ttf"},
-    {"ArialNarrow,BoldItalic", NULL, "arialnbi.ttf"},
-    {"ArialNarrow-Bold", NULL, "arialnb.ttf"},
-    {"ArialNarrow-Italic", NULL, "arialni.ttf"},
-    {"ArialNarrow-BoldItalic", NULL, "arialnbi.ttf"},
+    {"ArialNarrow", NULL, "arialn.ttf", gTrue},
+    {"ArialNarrow,Bold", NULL, "arialnb.ttf", gTrue},
+    {"ArialNarrow,Italic", NULL, "arialni.ttf", gTrue},
+    {"ArialNarrow,BoldItalic", NULL, "arialnbi.ttf", gTrue},
+    {"ArialNarrow-Bold", NULL, "arialnb.ttf", gTrue},
+    {"ArialNarrow-Italic", NULL, "arialni.ttf", gTrue},
+    {"ArialNarrow-BoldItalic", NULL, "arialnbi.ttf", gTrue},
 
-    {"HelveticaNarrow", NULL, "arialn.ttf"},
-    {"HelveticaNarrow,Bold", NULL, "arialnb.ttf"},
-    {"HelveticaNarrow,Italic", NULL, "arialni.ttf"},
-    {"HelveticaNarrow,BoldItalic", NULL, "arialnbi.ttf"},
-    {"HelveticaNarrow-Bold", NULL, "arialnb.ttf"},
-    {"HelveticaNarrow-Italic", NULL, "arialni.ttf"},
-    {"HelveticaNarrow-BoldItalic", NULL, "arialnbi.ttf"},
+    {"HelveticaNarrow", NULL, "arialn.ttf", gTrue},
+    {"HelveticaNarrow,Bold", NULL, "arialnb.ttf", gTrue},
+    {"HelveticaNarrow,Italic", NULL, "arialni.ttf", gTrue},
+    {"HelveticaNarrow,BoldItalic", NULL, "arialnbi.ttf", gTrue},
+    {"HelveticaNarrow-Bold", NULL, "arialnb.ttf", gTrue},
+    {"HelveticaNarrow-Italic", NULL, "arialni.ttf", gTrue},
+    {"HelveticaNarrow-BoldItalic", NULL, "arialnbi.ttf", gTrue},
 
-    {"BookAntiqua", NULL, "bkant.ttf"},
-    {"BookAntiqua,Bold", NULL, "bkant.ttf"},
-    {"BookAntiqua,Italic", NULL, "bkant.ttf"},
-    {"BookAntiqua,BoldItalic", NULL, "bkant.ttf"},
-    {"BookAntiqua-Bold", NULL, "bkant.ttf"},
-    {"BookAntiqua-Italic", NULL, "bkant.ttf"},
-    {"BookAntiqua-BoldItalic", NULL, "bkant.ttf"},
+    {"BookAntiqua", NULL, "bkant.ttf", gTrue},
+    {"BookAntiqua,Bold", NULL, "bkant.ttf", gTrue},
+    {"BookAntiqua,Italic", NULL, "bkant.ttf", gTrue},
+    {"BookAntiqua,BoldItalic", NULL, "bkant.ttf", gTrue},
+    {"BookAntiqua-Bold", NULL, "bkant.ttf", gTrue},
+    {"BookAntiqua-Italic", NULL, "bkant.ttf", gTrue},
+    {"BookAntiqua-BoldItalic", NULL, "bkant.ttf", gTrue},
 
-    {"Verdana", NULL, "verdana.ttf"},
-    {"Verdana,Bold", NULL, "verdanab.ttf"},
-    {"Verdana,Italic", NULL, "verdanai.ttf"},
-    {"Verdana,BoldItalic", NULL, "verdanaz.ttf"},
-    {"Verdana-Bold", NULL, "verdanab.ttf"},
-    {"Verdana-Italic", NULL, "verdanai.ttf"},
-    {"Verdana-BoldItalic", NULL, "verdanaz.ttf"},
+    {"Verdana", NULL, "verdana.ttf", gTrue},
+    {"Verdana,Bold", NULL, "verdanab.ttf", gTrue},
+    {"Verdana,Italic", NULL, "verdanai.ttf", gTrue},
+    {"Verdana,BoldItalic", NULL, "verdanaz.ttf", gTrue},
+    {"Verdana-Bold", NULL, "verdanab.ttf", gTrue},
+    {"Verdana-Italic", NULL, "verdanai.ttf", gTrue},
+    {"Verdana-BoldItalic", NULL, "verdanaz.ttf", gTrue},
 
-    {"Tahoma", NULL, "tahoma.ttf"},
-    {"Tahoma,Bold", NULL, "tahomabd.ttf"},
-    {"Tahoma,Italic", NULL, "tahoma.ttf"},
-    {"Tahoma,BoldItalic", NULL, "tahomabd.ttf"},
-    {"Tahoma-Bold", NULL, "tahomabd.ttf"},
-    {"Tahoma-Italic", NULL, "tahoma.ttf"},
-    {"Tahoma-BoldItalic", NULL, "tahomabd.ttf"},
+    {"Tahoma", NULL, "tahoma.ttf", gTrue},
+    {"Tahoma,Bold", NULL, "tahomabd.ttf", gTrue},
+    {"Tahoma,Italic", NULL, "tahoma.ttf", gTrue},
+    {"Tahoma,BoldItalic", NULL, "tahomabd.ttf", gTrue},
+    {"Tahoma-Bold", NULL, "tahomabd.ttf", gTrue},
+    {"Tahoma-Italic", NULL, "tahoma.ttf", gTrue},
+    {"Tahoma-BoldItalic", NULL, "tahomabd.ttf", gTrue},
 
-    {"CCRIKH+Verdana", NULL, "verdana.ttf"},
-    {"CCRIKH+Verdana,Bold", NULL, "verdanab.ttf"},
-    {"CCRIKH+Verdana,Italic", NULL, "verdanai.ttf"},
-    {"CCRIKH+Verdana,BoldItalic", NULL, "verdanaz.ttf"},
-    {"CCRIKH+Verdana-Bold", NULL, "verdanab.ttf"},
-    {"CCRIKH+Verdana-Italic", NULL, "verdanai.ttf"},
-    {"CCRIKH+Verdana-BoldItalic", NULL, "verdanaz.ttf"},
+    {"CCRIKH+Verdana", NULL, "verdana.ttf", gTrue},
+    {"CCRIKH+Verdana,Bold", NULL, "verdanab.ttf", gTrue},
+    {"CCRIKH+Verdana,Italic", NULL, "verdanai.ttf", gTrue},
+    {"CCRIKH+Verdana,BoldItalic", NULL, "verdanaz.ttf", gTrue},
+    {"CCRIKH+Verdana-Bold", NULL, "verdanab.ttf", gTrue},
+    {"CCRIKH+Verdana-Italic", NULL, "verdanai.ttf", gTrue},
+    {"CCRIKH+Verdana-BoldItalic", NULL, "verdanaz.ttf", gTrue},
 
-    {"Georgia", NULL, "georgia.ttf"},
-    {"Georgia,Bold", NULL, "georgiab.ttf"},
-    {"Georgia,Italic", NULL, "georgiai.ttf"},
-    {"Georgia,BoldItalic", NULL, "georgiaz.ttf"},
-    {"Georgia-Bold", NULL, "georgiab.ttf"},
-    {"Georgia-Italic", NULL, "georgiai.ttf"},
-    {"Georgia-BoldItalic", NULL, "georgiaz.ttf"},
+    {"Georgia", NULL, "georgia.ttf", gTrue},
+    {"Georgia,Bold", NULL, "georgiab.ttf", gTrue},
+    {"Georgia,Italic", NULL, "georgiai.ttf", gTrue},
+    {"Georgia,BoldItalic", NULL, "georgiaz.ttf", gTrue},
+    {"Georgia-Bold", NULL, "georgiab.ttf", gTrue},
+    {"Georgia-Italic", NULL, "georgiai.ttf", gTrue},
+    {"Georgia-BoldItalic", NULL, "georgiaz.ttf", gTrue},
 
     // fallback for Adobe CID fonts:
-    {"MingLiU", NULL, "mingliu.ttc"},
-    {"SimSun", NULL, "simsun.ttc"},
-    {"MS-Mincho", NULL, "msmincho.ttc"},
-    {"Batang", NULL, "batang.ttc"},
-    {"ArialUnicode", NULL, "arialuni.ttf"},
+    {"MingLiU", NULL, "mingliu.ttf", gFalse},
+    {"SimSun", NULL, "simsun.ttf", gFalse},
+    {"MS-Mincho", NULL, "msmincho.ttf", gFalse},
+    {"Batang", NULL, "batang.ttf", gFalse},
+    {"ArialUnicode", NULL, "arialuni.ttf", gTrue},
     {NULL}
 };
 
@@ -382,6 +383,24 @@ SysFontInfo *SysFontList::makeWindowsFont(char *name, int fontNum,
                          new GooString(path), type, fontNum);
 }
 
+static GooString* replaceSuffix(GooString *path,
+                                const char* suffixA, const char* suffixB)
+{
+  int suffLenA = strlen(suffixA);
+  int suffLenB = strlen(suffixB);
+  int baseLenA = path->getLength() - suffLenA;
+  int baseLenB = path->getLength() - suffLenB;
+
+  if (!strcasecmp(path->getCString()+baseLenA, suffixA)) {
+    path->del(baseLenA,suffLenA)->append(suffixB);
+  } else if (!strcasecmp(path->getCString()+baseLenB, suffixB)) {
+    path->del(baseLenB,suffLenB)->append(suffixA);
+  }
+
+  return path;
+}
+
+
 void GlobalParams::setupBaseFonts(char * dir)
 {
     const char *dataRoot = popplerDataDir ? popplerDataDir : POPPLER_DATADIR;
@@ -404,7 +423,8 @@ void GlobalParams::setupBaseFonts(char * dir)
 
         if (dir) {
             GooString *fontPath = appendToPath(new GooString(dir), displayFontTab[i].t1FileName);
-            if (FileExists(fontPath->getCString())) {
+            if (FileExists(fontPath->getCString()) ||
+                FileExists(replaceSuffix(fontPath, ".pfb", ".pfa")->getCString())) {
                 addFontFile(fontName, fontPath);
                 continue;
             }
@@ -413,14 +433,16 @@ void GlobalParams::setupBaseFonts(char * dir)
 
         if (winFontDir[0] && displayFontTab[i].ttFileName) {
             GooString *fontPath = appendToPath(new GooString(winFontDir), displayFontTab[i].ttFileName);
-            if (FileExists(fontPath->getCString())) {
+            if (FileExists(fontPath->getCString()) ||
+                FileExists(replaceSuffix(fontPath, ".ttc", ".ttf")->getCString())) {
                 addFontFile(fontName, fontPath);
                 continue;
             }
             delete fontPath;
         }
 
-        error(errSyntaxError, -1, "No display font for '{0:s}'", fontName);
+        if (displayFontTab[i].warnIfMissing)
+          error(errSyntaxError, -1, "No display font for '{0:s}'", fontName);
     }
     if (winFontDir[0]) {
       sysFonts->scanWindowsFonts(new GooString(winFontDir));
@@ -478,7 +500,9 @@ void GlobalParams::setupBaseFonts(char * dir)
     }
 }
 
-static const char *findSubstituteName(GfxFont *font, GooHash *substFiles, const char *origName)
+static const char *findSubstituteName(GfxFont *font, GooHash *fontFiles,
+                                      GooHash *substFiles,
+                                      const char *origName)
 {
     assert(origName);
     if (!origName) return NULL;
@@ -504,20 +528,26 @@ static const char *findSubstituteName(GfxFont *font, GooHash *substFiles, const 
     delete name2;
     if (font->isCIDFont()) {
       GooString *collection = ((GfxCIDFont *)font)->getCollection();
+
+      const char* name3 = NULL;
       if ( !collection->cmp("Adobe-CNS1") )
-        return DEFAULT_CID_FONT_AC1_MSWIN;
+        name3 = DEFAULT_CID_FONT_AC1_MSWIN;
       else if ( !collection->cmp("Adobe-GB1") )
-        return DEFAULT_CID_FONT_AG1_MSWIN;
+        name3 = DEFAULT_CID_FONT_AG1_MSWIN;
       else if ( !collection->cmp("Adobe-Japan1") )
-        return DEFAULT_CID_FONT_AJ1_MSWIN;
+        name3 = DEFAULT_CID_FONT_AJ1_MSWIN;
       else if ( !collection->cmp("Adobe-Japan2") )
-        return DEFAULT_CID_FONT_AJ2_MSWIN;
+        name3 = DEFAULT_CID_FONT_AJ2_MSWIN;
       else if ( !collection->cmp("Adobe-Korea1") )
-        return DEFAULT_CID_FONT_AK1_MSWIN;
-      else /* unknown or ad-Hoc collection name, like "Adobe-Identity" */
+        name3 = DEFAULT_CID_FONT_AK1_MSWIN;
+
+      if (name3 && fontFiles->lookup(name3))
+        return name3;
+
+      if (fontFiles->lookup(DEFAULT_CID_FONT_MSWIN))
         return DEFAULT_CID_FONT_MSWIN;
-    } else
-      return DEFAULT_SUBSTITUTE_FONT;
+    } 
+    return DEFAULT_SUBSTITUTE_FONT;
 }
 
 /* Windows implementation of external font matching code */
@@ -541,7 +571,9 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
     *type = fi->type;
     *fontNum = fi->fontNum;
   } else {
-    GooString *substFontName = new GooString(findSubstituteName(font, substFiles, fontName->getCString()));
+    GooString *substFontName = new GooString(findSubstituteName(font, fontFiles,
+                                                                substFiles,
+                                                                fontName->getCString()));
     GooString *path2 = NULL;
     error(errSyntaxError, -1, "Couldn't find a font for '{0:t}', subst is '{1:t}'", fontName, substFontName);
     if ((path2 = (GooString *)fontFiles->lookup(substFontName))) {
