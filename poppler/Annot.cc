@@ -93,10 +93,6 @@
 // = (4 * (sqrt(2) - 1) / 3) * r
 #define bezierCircle 0.55228475
 
-// Ensures that x is between the limits set by low and high.
-// If low is greater than high the result is undefined.
-#define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
-
 AnnotLineEndingStyle parseAnnotLineEndingStyle(GooString *string) {
   if (string != NULL) {
     if (!string->cmp("Square")) {
@@ -361,10 +357,7 @@ AnnotQuadrilaterals::AnnotQuadrilaterals(Array *array, PDFRectangle *rect) {
       for (int j = 0; j < 8; j++) {
         Object obj;
         if (array->get(i * 8 + j, &obj)->isNum()) {
-          if (j % 2 == 1)
-	    quadArray[j] = CLAMP (obj.getNum(), rect->y1, rect->y2);
-          else
-	    quadArray[j] = CLAMP (obj.getNum(), rect->x1, rect->x2);
+          quadArray[j] = obj.getNum();
         } else {
             correct = gFalse;
 	    obj.free();
@@ -3292,6 +3285,16 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
     appearBuf = new GooString ();
     appearBuf->append ("q\n");
 
+    /* Adjust BBox */
+    delete appearBBox;
+    appearBBox = new AnnotAppearanceBBox(rect);
+    for (i = 0; i < quadrilaterals->getQuadrilateralsLength(); ++i) {
+      appearBBox->extendTo (quadrilaterals->getX1(i) - rect->x1, quadrilaterals->getY1(i) - rect->y1);
+      appearBBox->extendTo (quadrilaterals->getX2(i) - rect->x1, quadrilaterals->getY2(i) - rect->y1);
+      appearBBox->extendTo (quadrilaterals->getX3(i) - rect->x1, quadrilaterals->getY3(i) - rect->y1);
+      appearBBox->extendTo (quadrilaterals->getX4(i) - rect->x1, quadrilaterals->getY4(i) - rect->y1);
+    }
+
     switch (type) {
     case typeUnderline:
       if (color) {
@@ -3366,6 +3369,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
       if (color)
         setColor(color, gTrue);
 
+      double biggestBorder = 0;
       for (i = 0; i < quadrilaterals->getQuadrilateralsLength(); ++i) {
         double x1, y1, x2, y2, x3, y3, x4, y4;
 	double h4;
@@ -3380,6 +3384,10 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
 	y4 = quadrilaterals->getY4(i);
 	h4 = fabs(y1 - y3) / 4.0;
 
+	if (h4 > biggestBorder) {
+	  biggestBorder = h4;
+	}
+
 	appearBuf->appendf ("{0:.2f} {1:.2f} m\n", x3, y3);
 	appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
 			    x3 - h4, y3 + h4, x1 - h4, y1 - h4, x1, y1);
@@ -3388,16 +3396,17 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
 			    x2 + h4, y2 - h4, x4 + h4, y4 + h4, x4, y4);
 	appearBuf->append ("f\n");
       }
+      appearBBox->setBorderWidth(biggestBorder);
       break;
     }
     appearBuf->append ("Q\n");
 
     Object aStream, resDict;
     double bbox[4];
-    bbox[0] = rect->x1;
-    bbox[1] = rect->y1;
-    bbox[2] = rect->x2;
-    bbox[3] = rect->y2;
+    bbox[0] = appearBBox->getPageXMin();
+    bbox[1] = appearBBox->getPageYMin();
+    bbox[2] = appearBBox->getPageXMax();
+    bbox[3] = appearBBox->getPageYMax();
     createForm(bbox, gTrue, NULL, &aStream);
     delete appearBuf;
 
@@ -3418,8 +3427,14 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   appearance.fetch(xref, &obj);
-  gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
-		 rect->x1, rect->y1, rect->x2, rect->y2);
+  if (appearBBox) {
+    gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
+                   appearBBox->getPageXMin(), appearBBox->getPageYMin(),
+                   appearBBox->getPageXMax(), appearBBox->getPageYMax());
+  } else {
+    gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
+                   rect->x1, rect->y1, rect->x2, rect->y2);
+  }
   obj.free();
 }
 
