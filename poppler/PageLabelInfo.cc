@@ -5,6 +5,7 @@
 // Copyright (C) 2005-2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005, 2009 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Simon Kellner <kellner@kit.edu>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -352,8 +353,6 @@ GBool PageLabelInfo::indexToLabel(int index, GooString *label)
 	  ucs2_char[1] = number_string.getChar(i);
 	  label->append(ucs2_char, 2);
       }
-      ucs2_char[1] = 0;
-      label->append(ucs2_char, 2);
   } else {
       label->append(&number_string);
   }
