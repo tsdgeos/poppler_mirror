@@ -640,48 +640,90 @@ void CairoOutputDev::updateFont(GfxState *state) {
   cairo_set_font_matrix (cairo, &matrix);
 }
 
-void CairoOutputDev::alignStrokeCoords(double *x, double *y)
+/* Tolerance in pixels for checking if strokes are horizontal or vertical
+ * lines in device space */
+#define STROKE_COORD_TOLERANCE 0.5
+
+/* Align stroke coordinate i if the point is the start or end of a
+ * horizontal or vertical line */
+void CairoOutputDev::alignStrokeCoords(GfxSubpath *subpath, int i, double *x, double *y)
 {
-  /* see http://www.cairographics.org/FAQ/#sharp_lines */
-  cairo_user_to_device (cairo, x, y);
-  *x = floor(*x) + 0.5;
-  *y = floor(*y) + 0.5;
-  cairo_device_to_user (cairo, x, y);
+  double x1, y1, x2, y2;
+  GBool align = gFalse;
+
+  x1 = subpath->getX(i);
+  y1 = subpath->getY(i);
+  cairo_user_to_device (cairo, &x1, &y1);
+
+  // Does the current coord and prev coord form a horiz or vert line?
+  if (i > 0 && !subpath->getCurve(i - 1)) {
+    x2 = subpath->getX(i - 1);
+    y2 = subpath->getY(i - 1);
+    cairo_user_to_device (cairo, &x2, &y2);
+    if (fabs(x2 - x1) < STROKE_COORD_TOLERANCE || fabs(y2 - y1) < STROKE_COORD_TOLERANCE)
+      align = gTrue;
+  }
+
+  // Does the current coord and next coord form a horiz or vert line?
+  if (i < subpath->getNumPoints() - 1 && !subpath->getCurve(i + 1)) {
+    x2 = subpath->getX(i + 1);
+    y2 = subpath->getY(i + 1);
+    cairo_user_to_device (cairo, &x2, &y2);
+    if (fabs(x2 - x1) < STROKE_COORD_TOLERANCE || fabs(y2 - y1) < STROKE_COORD_TOLERANCE)
+      align = gTrue;
+  }
+
+  *x = subpath->getX(i);
+  *y = subpath->getY(i);
+  if (align) {
+    /* see http://www.cairographics.org/FAQ/#sharp_lines */
+    cairo_user_to_device (cairo, x, y);
+    *x = floor(*x) + 0.5;
+    *y = floor(*y) + 0.5;
+    cairo_device_to_user (cairo, x, y);
+  }
 }
+
+#undef STROKE_COORD_TOLERANCE
 
 void CairoOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path) {
   GfxSubpath *subpath;
   int i, j;
+  double x, y;
   cairo_new_path (cairo);
   for (i = 0; i < path->getNumSubpaths(); ++i) {
     subpath = path->getSubpath(i);
     if (subpath->getNumPoints() > 0) {
       if (align_stroke_coords) {
-	double x = subpath->getX(0);
-	double y = subpath->getY(0);
-	alignStrokeCoords(&x, &y);
-	cairo_move_to (cairo, x, y);
+        alignStrokeCoords(subpath, 0, &x, &y);
       } else {
-	cairo_move_to (cairo, subpath->getX(0), subpath->getY(0));
+        x = subpath->getX(0);
+        y = subpath->getY(0);
       }
+      cairo_move_to (cairo, x, y);
       j = 1;
       while (j < subpath->getNumPoints()) {
 	if (subpath->getCurve(j)) {
+	  if (align_stroke_coords) {
+            alignStrokeCoords(subpath, j + 2, &x, &y);
+          } else {
+            x = subpath->getX(j+2);
+            y = subpath->getY(j+2);
+          }
 	  cairo_curve_to( cairo,
 			  subpath->getX(j), subpath->getY(j),
 			  subpath->getX(j+1), subpath->getY(j+1),
-			  subpath->getX(j+2), subpath->getY(j+2));
+			  x, y);
 
 	  j += 3;
 	} else {
 	  if (align_stroke_coords) {
-	    double x = subpath->getX(j);
-	    double y = subpath->getY(j);
-	    alignStrokeCoords(&x, &y);
-	    cairo_line_to (cairo, x, y);
-	  } else {
-	    cairo_line_to (cairo, subpath->getX(j), subpath->getY(j));
-	  }
+            alignStrokeCoords(subpath, j, &x, &y);
+          } else {
+            x = subpath->getX(j);
+            y = subpath->getY(j);
+          }
+          cairo_line_to (cairo, x, y);
 	  ++j;
 	}
       }

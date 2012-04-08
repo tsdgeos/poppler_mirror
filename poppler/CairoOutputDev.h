@@ -274,7 +274,7 @@ protected:
   GBool getStreamData (Stream *str, char **buffer, int *length);
   void setMimeData(Stream *str, Object *ref, cairo_surface_t *image);
   void fillToStrokePathClip();
-  void alignStrokeCoords(double *x, double *y);
+  void alignStrokeCoords(GfxSubpath *subpath, int i, double *x, double *y);
 
   GfxRGB fill_color, stroke_color;
   cairo_pattern_t *fill_pattern, *stroke_pattern;
