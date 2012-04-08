@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
@@ -1184,7 +1184,6 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
   GooString *path = NULL;
   GooString *fontName = font->getName();
   if (!fontName) return NULL;
-  fontName = fontName->copy();
   lockGlobalParams;
 
   if ((fi = sysFonts->find(fontName, font->isFixedWidth(), gTrue))) {
