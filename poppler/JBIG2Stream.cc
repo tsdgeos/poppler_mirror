@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Raj Kumar <rkumar@archive.org>
 // Copyright (C) 2006 Paul Walmsley <paul@booyaka.com>
-// Copyright (C) 2006-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Edward Jiang <ejiang@google.com>
 //
@@ -1634,8 +1634,13 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
   }
 
   // get the input symbol bitmaps
-  bitmaps = (JBIG2Bitmap **)gmallocn(numInputSyms + numNewSyms,
+  bitmaps = (JBIG2Bitmap **)gmallocn_checkoverflow(numInputSyms + numNewSyms,
 				     sizeof(JBIG2Bitmap *));
+  if (!bitmaps) {
+    error(errSyntaxError, curStr->getPos(), "Too many input symbols in JBIG2 symbol dictionary");
+    delete codeTables;
+    goto eofError;
+  }
   for (i = 0; i < numInputSyms + numNewSyms; ++i) {
     bitmaps[i] = NULL;
   }
