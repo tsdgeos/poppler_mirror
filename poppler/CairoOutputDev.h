@@ -273,7 +273,7 @@ protected:
 				     GBool interpolate);
   GBool getStreamData (Stream *str, char **buffer, int *length);
   void setMimeData(Stream *str, Object *ref, cairo_surface_t *image);
-  void fillToStrokePathClip();
+  void fillToStrokePathClip(GfxState *state);
   void alignStrokeCoords(GfxSubpath *subpath, int i, double *x, double *y);
 
   GfxRGB fill_color, stroke_color;
@@ -286,7 +286,7 @@ protected:
   CairoFont *currentFont;
 
   struct StrokePathClip {
-    cairo_path_t *path;
+    GfxPath *path;
     cairo_matrix_t ctm;
     double line_width;
     double *dashes;

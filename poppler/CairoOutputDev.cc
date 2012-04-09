@@ -776,7 +776,7 @@ void CairoOutputDev::fill(GfxState *state) {
     cairo_mask (cairo, mask);
     cairo_restore (cairo);
   } else if (strokePathClip) {
-    fillToStrokePathClip();
+    fillToStrokePathClip(state);
   } else {
     cairo_fill (cairo);
   }
@@ -865,7 +865,7 @@ GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx1, Catalog *cat
   cairo_set_source (cairo, pattern);
   cairo_pattern_set_extend (pattern, CAIRO_EXTEND_REPEAT);
   if (strokePathClip) {
-    fillToStrokePathClip();
+    fillToStrokePathClip(state);
   } else {
     cairo_fill (cairo);
   }
@@ -1100,8 +1100,7 @@ void CairoOutputDev::eoClip(GfxState *state) {
 void CairoOutputDev::clipToStrokePath(GfxState *state) {
   LOG(printf("clip-to-stroke-path\n"));
   strokePathClip = (StrokePathClip*)gmalloc (sizeof(*strokePathClip));
-  doPath (cairo, state, state->getPath());
-  strokePathClip->path = cairo_copy_path (cairo);
+  strokePathClip->path = state->getPath()->copy();
   cairo_get_matrix (cairo, &strokePathClip->ctm);
   strokePathClip->line_width = cairo_get_line_width (cairo);
   strokePathClip->dash_count = cairo_get_dash_count (cairo);
@@ -1116,7 +1115,7 @@ void CairoOutputDev::clipToStrokePath(GfxState *state) {
   strokePathClip->miter = cairo_get_miter_limit (cairo);
 }
 
-void CairoOutputDev::fillToStrokePathClip() {
+void CairoOutputDev::fillToStrokePathClip(GfxState *state) {
   cairo_save (cairo);
 
   cairo_set_matrix (cairo, &strokePathClip->ctm);
@@ -1126,14 +1125,12 @@ void CairoOutputDev::fillToStrokePathClip() {
   cairo_set_line_cap (cairo, strokePathClip->cap);
   cairo_set_line_join (cairo, strokePathClip->join);
   cairo_set_miter_limit (cairo, strokePathClip->miter);
-
-  cairo_new_path (cairo);
-  cairo_append_path (cairo, strokePathClip->path);
+  doPath (cairo, state, strokePathClip->path);
   cairo_stroke (cairo);
 
   cairo_restore (cairo);
 
-  cairo_path_destroy (strokePathClip->path);
+  delete strokePathClip->path;
   if (strokePathClip->dashes)
     gfree (strokePathClip->dashes);
   gfree (strokePathClip);
