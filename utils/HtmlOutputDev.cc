@@ -1192,7 +1192,7 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, char *fileName, char *title,
     {
       fprintf(page, "<?xml version=\"1.0\" encoding=\"%s\"?>\n", htmlEncoding->getCString());
       fputs("<!DOCTYPE pdf2xml SYSTEM \"pdf2xml.dtd\">\n\n", page);
-      fputs("<pdf2xml>\n",page);
+      fprintf(page,"<pdf2xml producer=\"%s\" version=\"%s\">\n", PACKAGE_NAME, PACKAGE_VERSION);
     } 
     else 
     {
