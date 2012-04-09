@@ -3101,111 +3101,202 @@ void AnnotLine::setIntent(AnnotLineIntent new_intent) {
   update ("IT", &obj1);
 }
 
+void AnnotLine::generateLineAppearance()
+{
+  double borderWidth, ca = opacity;
+
+  appearBBox = new AnnotAppearanceBBox(rect);
+  appearBuf = new GooString ();
+  appearBuf->append ("q\n");
+  if (color) {
+    setColor(color, gFalse);
+  }
+
+  if (border) {
+    int i, dashLength;
+    double *dash;
+
+    switch (border->getStyle()) {
+    case AnnotBorder::borderDashed:
+      appearBuf->append("[");
+      dashLength = border->getDashLength();
+      dash = border->getDash();
+      for (i = 0; i < dashLength; ++i)
+        appearBuf->appendf(" {0:.2f}", dash[i]);
+      appearBuf->append(" ] 0 d\n");
+      break;
+    default:
+      appearBuf->append("[] 0 d\n");
+      break;
+    }
+    borderWidth = border->getWidth();
+    appearBuf->appendf("{0:.2f} w\n", borderWidth);
+    appearBBox->setBorderWidth(borderWidth);
+  } else {
+    borderWidth = 0;
+  }
+
+  const double x1 = coord1->getX();
+  const double y1 = coord1->getY();
+  const double x2 = coord2->getX();
+  const double y2 = coord2->getY();
+
+  // Main segment length
+  const double main_len = sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+
+  // Main segment becomes positive x direction, coord1 becomes (0,0)
+  Matrix matr;
+  const double angle = atan2(y2 - y1, x2 - x1);
+  matr.m[0] = matr.m[3] = cos(angle);
+  matr.m[1] = sin(angle);
+  matr.m[2] = -matr.m[1];
+  matr.m[4] = x1-rect->x1;
+  matr.m[5] = y1-rect->y1;
+
+  double tx, ty, captionwidth = 0, captionheight = 0;
+  AnnotLineCaptionPos actualCaptionPos = captionPos;
+  const double fontsize = 9;
+  const double captionhmargin = 2; // Left and right margin (inline caption only)
+  const double captionmaxwidth = main_len - 2 * captionhmargin;
+
+  Object fontResDict;
+  GfxFont *font;
+
+  // Calculate caption width and height
+  if (caption) {
+    font = createAnnotDrawFont(xref, &fontResDict);
+    int lines = 0;
+    int i = 0;
+    while (i < contents->getLength()) {
+      GooString out;
+      double linewidth;
+      layoutText(contents, &out, &i, font, &linewidth, 0, NULL, gFalse);
+      linewidth *= fontsize;
+      if (linewidth > captionwidth) {
+        captionwidth = linewidth;
+      }
+      ++lines;
+    }
+    captionheight = lines * fontsize;
+    // If text is longer than available space, turn into captionPosTop
+    if (captionwidth > captionmaxwidth) {
+      actualCaptionPos = captionPosTop;
+    }
+  } else {
+    fontResDict.initNull();
+    font = NULL;
+  }
+
+  // Draw main segment
+  matr.transform (0, leaderLineLength, &tx, &ty);
+  appearBuf->appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+  appearBBox->extendTo (tx, ty);
+
+  if (captionwidth != 0 && actualCaptionPos == captionPosInline) { // Break in the middle
+    matr.transform ((main_len-captionwidth)/2 - captionhmargin, leaderLineLength, &tx, &ty);
+    appearBuf->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
+
+    matr.transform ((main_len+captionwidth)/2 + captionhmargin, leaderLineLength, &tx, &ty);
+    appearBuf->appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+  }
+
+  matr.transform (main_len, leaderLineLength, &tx, &ty);
+  appearBuf->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
+  appearBBox->extendTo (tx, ty);
+
+  // TODO: Line endings
+
+  // Draw caption text
+  if (caption) {
+    double tlx = (main_len - captionwidth) / 2, tly; // Top-left coords
+    if (actualCaptionPos == captionPosInline) {
+      tly = leaderLineLength + captionheight / 2;
+    } else {
+      tly = leaderLineLength + captionheight + 2*borderWidth;
+    }
+
+    tlx += captionTextHorizontal;
+    tly += captionTextVertical;
+
+    // Adjust bounding box
+    matr.transform (tlx, tly-captionheight, &tx, &ty);
+    appearBBox->extendTo (tx, ty);
+    matr.transform (tlx+captionwidth, tly-captionheight, &tx, &ty);
+    appearBBox->extendTo (tx, ty);
+    matr.transform (tlx+captionwidth, tly, &tx, &ty);
+    appearBBox->extendTo (tx, ty);
+    matr.transform (tlx, tly, &tx, &ty);
+    appearBBox->extendTo (tx, ty);
+
+    // Setup text state (reusing transformed top-left coord)
+    appearBuf->appendf ("0 g BT /AnnotDrawFont {0:.2f} Tf\n", fontsize); // Font color: black
+    appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} Tm\n",
+                        matr.m[0], matr.m[1], matr.m[2], matr.m[3], tx, ty);
+    appearBuf->appendf ("0 {0:.2f} Td\n",  -fontsize * font->getDescent());
+    // Draw text
+    int i = 0;
+    double xposPrev = 0;
+    while (i < contents->getLength()) {
+      GooString out;
+      double linewidth, xpos;
+      layoutText(contents, &out, &i, font, &linewidth, 0, NULL, gFalse);
+      linewidth *= fontsize;
+      xpos = (captionwidth - linewidth) / 2;
+      appearBuf->appendf("{0:.2f} {1:.2f} Td\n", xpos - xposPrev, -fontsize);
+      writeString(&out, appearBuf);
+      appearBuf->append ("Tj\n");
+      xposPrev = xpos;
+    }
+    appearBuf->append ("ET\n");
+    font->decRefCnt();
+  }
+
+  // Draw leader lines
+  double ll_len = fabs(leaderLineLength) + leaderLineExtension;
+  double sign = leaderLineLength >= 0 ? 1 : -1;
+  if (ll_len != 0) {
+    matr.transform (0, 0, &tx, &ty);
+    appearBuf->appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+    appearBBox->extendTo (tx, ty);
+    matr.transform (0, sign*ll_len, &tx, &ty);
+    appearBuf->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
+    appearBBox->extendTo (tx, ty);
+
+    matr.transform (main_len, 0, &tx, &ty);
+    appearBuf->appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+    appearBBox->extendTo (tx, ty);
+    matr.transform (main_len, sign*ll_len, &tx, &ty);
+    appearBuf->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
+    appearBBox->extendTo (tx, ty);
+  }
+
+  appearBuf->append ("Q\n");
+
+  double bbox[4];
+  appearBBox->getBBoxRect(bbox);
+  if (ca == 1) {
+    createForm(bbox, gFalse, &fontResDict, &appearance);
+  } else {
+    Object aStream, resDict;
+
+    createForm(bbox, gTrue, &fontResDict, &aStream);
+    delete appearBuf;
+
+    appearBuf = new GooString ("/GS0 gs\n/Fm0 Do");
+    createResourcesDict("Fm0", &aStream, "GS0", ca, NULL, &resDict);
+    createForm(bbox, gFalse, &resDict, &appearance);
+  }
+  delete appearBuf;
+}
+
 void AnnotLine::draw(Gfx *gfx, GBool printing) {
   Object obj;
-  double ca = 1;
 
   if (!isVisible (printing))
     return;
 
   if (appearance.isNull()) {
-    appearBBox = new AnnotAppearanceBBox(rect);
-    ca = opacity;
-
-    appearBuf = new GooString ();
-    appearBuf->append ("q\n");
-    if (color)
-      setColor(color, gFalse);
-
-    if (border) {
-      int i, dashLength;
-      double *dash;
-
-      switch (border->getStyle()) {
-      case AnnotBorder::borderDashed:
-        appearBuf->append("[");
-	dashLength = border->getDashLength();
-	dash = border->getDash();
-	for (i = 0; i < dashLength; ++i)
-	  appearBuf->appendf(" {0:.2f}", dash[i]);
-	appearBuf->append(" ] 0 d\n");
-	break;
-      default:
-        appearBuf->append("[] 0 d\n");
-        break;
-      }
-      appearBuf->appendf("{0:.2f} w\n", border->getWidth());
-      appearBBox->setBorderWidth(border->getWidth());
-    }
-
-    const double x1 = coord1->getX();
-    const double y1 = coord1->getY();
-    const double x2 = coord2->getX();
-    const double y2 = coord2->getY();
-
-    // Main segment length
-    const double main_len = sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
-
-    // Main segment becomes positive x direction, coord1 becomes (0,0)
-    Matrix matr;
-    const double angle = atan2(y2 - y1, x2 - x1);
-    matr.m[0] = matr.m[3] = cos(angle);
-    matr.m[1] = sin(angle);
-    matr.m[2] = -matr.m[1];
-    matr.m[4] = x1-rect->x1;
-    matr.m[5] = y1-rect->y1;
-
-    double tx, ty;
-
-    // Draw main segment
-    matr.transform (0, leaderLineLength, &tx, &ty);
-    appearBuf->appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
-    appearBBox->extendTo (tx, ty);
-
-    matr.transform (main_len, leaderLineLength, &tx, &ty);
-    appearBuf->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
-    appearBBox->extendTo (tx, ty);
-
-    // TODO: Line ending, caption
-
-    // Draw leader lines
-    double ll_len = fabs(leaderLineLength) + leaderLineExtension;
-    double sign = leaderLineLength >= 0 ? 1 : -1;
-    if (ll_len != 0) {
-      matr.transform (0, 0, &tx, &ty);
-      appearBuf->appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
-      appearBBox->extendTo (tx, ty);
-
-      matr.transform (0, sign*ll_len, &tx, &ty);
-      appearBuf->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
-      appearBBox->extendTo (tx, ty);
-
-      matr.transform (main_len, 0, &tx, &ty);
-      appearBuf->appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
-      appearBBox->extendTo (tx, ty);
-
-      matr.transform (main_len, sign*ll_len, &tx, &ty);
-      appearBuf->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
-      appearBBox->extendTo (tx, ty);
-    }
-
-    appearBuf->append ("Q\n");
-
-    double bbox[4];
-    appearBBox->getBBoxRect(bbox);
-    if (ca == 1) {
-      createForm(bbox, gFalse, NULL, &appearance);
-    } else {
-      Object aStream, resDict;
-
-      createForm(bbox, gTrue, NULL, &aStream);
-      delete appearBuf;
-
-      appearBuf = new GooString ("/GS0 gs\n/Fm0 Do");
-      createResourcesDict("Fm0", &aStream, "GS0", ca, NULL, &resDict);
-      createForm(bbox, gFalse, &resDict, &appearance);
-    }
-    delete appearBuf;
+    generateLineAppearance();
   }
 
   // draw the appearance stream
@@ -3219,6 +3310,15 @@ void AnnotLine::draw(Gfx *gfx, GBool printing) {
                    rect->x1, rect->y1, rect->x2, rect->y2);
   }
   obj.free();
+}
+
+// Before retrieving the res dict, regenerate the appearance stream if needed,
+// because AnnotLine::draw may need to store font info in the res dict
+Object *AnnotLine::getAppearanceResDict(Object *dest) {
+  if (appearance.isNull()) {
+    generateLineAppearance();
+  }
+  return Annot::getAppearanceResDict(dest);
 }
 
 //------------------------------------------------------------------------

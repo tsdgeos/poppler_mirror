@@ -932,6 +932,7 @@ public:
   ~AnnotLine();
 
   virtual void draw(Gfx *gfx, GBool printing);
+  virtual Object *getAppearanceResDict(Object *dest);
 
   void setVertices(double x1, double y1, double x2, double y2);
   void setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end);
@@ -962,6 +963,7 @@ public:
 protected:
 
   void initialize(PDFDoc *docA, Dict *dict);
+  void generateLineAppearance();
 
   // required
   AnnotCoord *coord1, *coord2;
