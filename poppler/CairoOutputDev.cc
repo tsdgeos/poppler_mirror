@@ -1460,11 +1460,17 @@ void CairoOutputDev::paintTransparencyGroup(GfxState * /*state*/, double * /*bbo
     if (status)
       printf("BAD status: %s\n", cairo_status_to_string(status));
   } else {
+    if (fill_opacity < 1.0) {
+      cairo_push_group(cairo);
+    }
     cairo_save(cairo);
     cairo_set_matrix(cairo, &mask_matrix);
     cairo_mask(cairo, mask);
     cairo_restore(cairo);
-
+    if (fill_opacity < 1.0) {
+      cairo_pop_group_to_source(cairo);
+      cairo_paint_with_alpha (cairo, fill_opacity);
+    }
     cairo_pattern_destroy(mask);
     mask = NULL;
   }
