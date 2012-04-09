@@ -2649,26 +2649,14 @@ static GfxFont * createAnnotDrawFont(XRef * xref, Object *fontResDict)
   return GfxFont::makeFont(xref, "AnnotDrawFont", dummyRef, fontDict);
 }
 
-void AnnotFreeText::generateFreeTextAppearance()
-{
-  double ca = opacity;
-
-  appearBuf = new GooString ();
-  appearBuf->append ("q\n");
-  if (color) {
-    setColor(color, gTrue);
-  }
-
-  // Main segment length
-  const double width = rect->x2 - rect->x1;
-  const double height = rect->y2 - rect->y1;
-
-  // Parse text size from appearance string (TODO: other properties)
-  double fontsize = 0;
-  GooString * da = appearanceString;
+void AnnotFreeText::parseAppearanceString(GooString *da, double &fontsize, AnnotColor* &fontcolor) {
+  fontsize = -1;
+  fontcolor = NULL;
   if (da) {
     GooList * daToks = new GooList();
     int j, i = 0;
+
+    // Tokenize
     while (i < da->getLength()) {
       while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
         ++i;
@@ -2680,39 +2668,133 @@ void AnnotFreeText::generateFreeTextAppearance()
         i = j;
       }
     }
-    for (i = 2; i < daToks->getLength(); ++i) {
-      if (!((GooString *)daToks->get(i))->cmp("Tf")) {
-        GooString * tok = (GooString *)daToks->get(i - 1);
-        fontsize = gatof(tok->getCString());
-        break;
+
+    // Scan backwards: we are looking for the last set value
+    for (i = daToks->getLength()-1; i >= 0; --i) {
+      if (fontsize == -1) {
+        if (!((GooString *)daToks->get(i))->cmp("Tf") && i >= 2) {
+            // TODO: Font name
+            fontsize = gatof(( (GooString *)daToks->get(i-1) )->getCString());
+        }
+      }
+      if (fontcolor == NULL) {
+        if (!((GooString *)daToks->get(i))->cmp("g") && i >= 1) {
+          fontcolor = new AnnotColor(gatof(( (GooString *)daToks->get(i-1) )->getCString()));
+        } else if (!((GooString *)daToks->get(i))->cmp("rg") && i >= 3) {
+          fontcolor = new AnnotColor(gatof(( (GooString *)daToks->get(i-3) )->getCString()),
+                                     gatof(( (GooString *)daToks->get(i-2) )->getCString()),
+                                     gatof(( (GooString *)daToks->get(i-1) )->getCString()));
+        } else if (!((GooString *)daToks->get(i))->cmp("k") && i >= 4) {
+          fontcolor = new AnnotColor(gatof(( (GooString *)daToks->get(i-4) )->getCString()),
+                                     gatof(( (GooString *)daToks->get(i-3) )->getCString()),
+                                     gatof(( (GooString *)daToks->get(i-2) )->getCString()),
+                                     gatof(( (GooString *)daToks->get(i-1) )->getCString()));
+        }
       }
     }
     deleteGooList(daToks, GooString);
   }
-  if (fontsize <= 0) {
-    fontsize = 10; // Default value
+}
+
+void AnnotFreeText::generateFreeTextAppearance()
+{
+  double borderWidth, ca = opacity;
+
+  appearBuf = new GooString ();
+  appearBuf->append ("q\n");
+  
+  if (border) {
+    int i, dashLength;
+    double *dash;
+    borderWidth = border->getWidth();
+
+    switch (border->getStyle()) {
+    case AnnotBorder::borderDashed:
+      appearBuf->append("[");
+      dashLength = border->getDashLength();
+      dash = border->getDash();
+      for (i = 0; i < dashLength; ++i)
+        appearBuf->appendf(" {0:.2f}", dash[i]);
+      appearBuf->append(" ] 0 d\n");
+      break;
+    default:
+      appearBuf->append("[] 0 d\n");
+      break;
+    }
+    appearBuf->appendf("{0:.2f} w\n", borderWidth);
+  } else {
+    borderWidth = 0; // No border
   }
 
-  // Draw box and setup clipping
-  appearBuf->appendf ("[] 0 d 1 w 0 G 0 0 {0:.2f} {1:.2f} re b\n", width, height);
-  appearBuf->appendf ("2 0 {0:.2f} {1:.2f} re W n\n", width-4, height);
+  // Box size
+  const double width = rect->x2 - rect->x1;
+  const double height = rect->y2 - rect->y1;
 
-  // Set font state
-  appearBuf->appendf ("0 g BT 1 0 0 1 2 {0:.2f} Tm\n", height);
-  appearBuf->appendf ("{0:.2f} TL /AnnotDrawFont {0:.2f} Tf\n", fontsize);
+  // Parse some properties from the appearance string
+  double fontsize;
+  AnnotColor *fontcolor;
+  parseAppearanceString(appearanceString, fontsize, fontcolor);
+  // Default values
+  if (fontsize <= 0)
+    fontsize = 10;
+  if (fontcolor == NULL)
+    fontcolor = new AnnotColor(0, 0, 0); // Black
+
+  // Draw box
+  GBool doFill = (color && color->getSpace() != AnnotColor::colorTransparent);
+  GBool doStroke = (borderWidth != 0);
+  if (doFill || doStroke) {
+    if (doStroke) {
+      setColor(fontcolor, gFalse); // Border color: same as font color
+    }
+    appearBuf->appendf ("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re\n", borderWidth/2, width-borderWidth, height-borderWidth);
+    if (doFill) {
+      setColor(color, gTrue);
+      appearBuf->append(doStroke ? "B\n" : "f\n");
+    } else {
+      appearBuf->append("S\n");
+    }
+  }
+
+  // Setup text clipping
+  const double textmargin = borderWidth * 2;
+  const double textwidth = width - 2*textmargin;
+  appearBuf->appendf ("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re W n\n", textmargin, textwidth, height - 2*textmargin);
 
   Object fontResDict;
   GfxFont *font = createAnnotDrawFont(xref, &fontResDict);
 
+  // Set font state
+  setColor(fontcolor, gTrue);
+  appearBuf->appendf ("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin - fontsize * font->getDescent());
+  appearBuf->appendf ("/AnnotDrawFont {0:.2f} Tf\n", fontsize);
+
   int i = 0;
+  double xposPrev = 0;
   while (i < contents->getLength()) {
     GooString out;
-    layoutText(contents, &out, &i, font, NULL, 0, NULL, gFalse);
+    double linewidth, xpos;
+    layoutText(contents, &out, &i, font, &linewidth, textwidth/fontsize, NULL, gFalse);
+    linewidth *= fontsize;
+    switch (quadding) {
+    case quaddingCentered:
+      xpos = (textwidth - linewidth) / 2;
+      break;
+    case quaddingRightJustified:
+      xpos = textwidth - linewidth;
+      break;
+    default: // quaddingLeftJustified:
+      xpos = 0;
+      break;
+    }
+    appearBuf->appendf("{0:.2f} {1:.2f} Td\n", xpos - xposPrev, -fontsize);
     writeString(&out, appearBuf);
-    appearBuf->append("'\n");
+    appearBuf->append("Tj\n");
+    xposPrev = xpos;
   }
 
   font->decRefCnt();
+  delete fontcolor;
   appearBuf->append ("ET Q\n");
 
   double bbox[4];

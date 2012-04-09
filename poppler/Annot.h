@@ -891,6 +891,7 @@ public:
 protected:
 
   void initialize(PDFDoc *docA, Dict *dict);
+  static void parseAppearanceString(GooString *da, double &fontsize, AnnotColor* &fontcolor);
   void generateFreeTextAppearance();
 
   // required
