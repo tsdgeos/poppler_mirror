@@ -417,9 +417,25 @@ void CairoOutputDev::updateMiterLimit(GfxState *state) {
 void CairoOutputDev::updateLineWidth(GfxState *state) {
   LOG(printf ("line width: %f\n", state->getLineWidth()));
   adjusted_stroke_width = gFalse;
-  if (state->getLineWidth() == 0.0) {
-    /* find out how big pixels (device unit) are in the x and y directions
-     * choose the smaller of the two as our line width */
+  double width = state->getLineWidth();
+  if (stroke_adjust && !printing) {
+    double x, y;
+    x = y = width;
+
+    /* find out line width in device units */
+    cairo_user_to_device_distance(cairo, &x, &y);
+    if (fabs(x) <= 1.0 && fabs(y) <= 1.0) {
+      /* adjust width to at least one device pixel */
+      x = y = 1.0;
+      cairo_device_to_user_distance(cairo, &x, &y);
+      width = MIN(fabs(x),fabs(y));
+      adjusted_stroke_width = gTrue;
+    }
+  } else if (width == 0.0) {
+    /* Cairo does not support 0 line width == 1 device pixel. Find out
+     * how big pixels (device unit) are in the x and y
+     * directions. Choose the smaller of the two as our line width.
+     */
     double x = 1.0, y = 1.0;
     if (printing) {
       // assume printer pixel size is 1/600 inch
@@ -427,25 +443,9 @@ void CairoOutputDev::updateLineWidth(GfxState *state) {
       y = 72.0/600;
     }
     cairo_device_to_user_distance(cairo, &x, &y);
-    cairo_set_line_width (cairo, MIN(fabs(x),fabs(y)));
-  } else {
-    double width = state->getLineWidth();
-    if (stroke_adjust && !printing) {
-      double x, y;
-      x = y = width;
-
-      /* find out line width in device units */
-      cairo_user_to_device_distance(cairo, &x, &y);
-      if (fabs(x) <= 1.0 && fabs(y) <= 1.0) {
-	/* adjust width to at least one device pixel */
-	x = y = 1.0;
-	cairo_device_to_user_distance(cairo, &x, &y);
-	width = MIN(fabs(x),fabs(y));
-	adjusted_stroke_width = gTrue;
-      }
-    }
-    cairo_set_line_width (cairo, width);
+    width = MIN(fabs(x),fabs(y));
   }
+  cairo_set_line_width (cairo, width);
   if (cairo_shape)
     cairo_set_line_width (cairo_shape, cairo_get_line_width (cairo));
 }
