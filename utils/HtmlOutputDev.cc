@@ -1428,7 +1428,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
 
       // invert for PNG
       for(int i = 0; i < width; i++)
-        png_row[i] = bit_row[i] ? 0x00 : 0xff ;
+        png_row[i] = bit_row[i] ? 0xff : 0x00;
 
       if (!writer->writeRow( &png_row ))
       {
