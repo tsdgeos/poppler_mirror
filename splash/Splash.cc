@@ -5260,7 +5260,7 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
   case splashModeCMYK8:
     for (y = 0; y < h; ++y) {
       p = &bitmap->data[(yDest + y) * bitmap->rowSize + 4 * xDest];
-      sp = &src->data[(ySrc + y) * bitmap->rowSize + 4 * xSrc];
+      sp = &src->data[(ySrc + y) * src->rowSize + 4 * xSrc];
       for (x = 0; x < w; ++x) {
 	*p++ = *sp++;
 	*p++ = *sp++;

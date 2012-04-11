@@ -661,6 +661,11 @@ static void splashOutBlendSoftLight(SplashColorPtr src, SplashColorPtr dest,
     SplashColor rgbSrc;
     SplashColor rgbDest;
     SplashColor rgbBlend;
+    for (i = 0; i < 4; i++) {
+      // convert back to subtractive (s. Splash.cc)
+      src[i] = 0xff - src[i];
+      dest[i] = 0xff - dest[i];
+    }
     cmykToRGB(src, rgbSrc);
     cmykToRGB(dest, rgbDest);
     for (i = 0; i < 3; ++i) {
@@ -676,6 +681,10 @@ static void splashOutBlendSoftLight(SplashColorPtr src, SplashColorPtr dest,
       }
     }
     rgbToCMYK(rgbBlend, blend);
+    for (i = 0; i < 4; i++) {
+      // convert back to additive (s. Splash.cc)
+      blend[i] = 0xff - blend[i];
+    }
   } else
 #endif
   {
