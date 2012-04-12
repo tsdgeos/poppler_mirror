@@ -1222,14 +1222,16 @@ HtmlOutputDev::~HtmlOutputDev() {
       fputs("</BODY>\n</HTML>\n",fContentsFrame);  
       fclose(fContentsFrame);
     }
-    if (xml) {
-      fputs("</pdf2xml>\n",page);  
-      fclose(page);
-    } else
-    if ( !complexMode || xml || noframes )
-    { 
-      fputs("</BODY>\n</HTML>\n",page);  
-      fclose(page);
+    if (page != NULL) {
+      if (xml) {
+        fputs("</pdf2xml>\n",page);  
+        fclose(page);
+      } else
+      if ( !complexMode || xml || noframes )
+      { 
+        fputs("</BODY>\n</HTML>\n",page);  
+        fclose(page);
+      }
     }
     if (pages)
       delete pages;
