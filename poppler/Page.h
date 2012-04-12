@@ -20,6 +20,7 @@
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -207,9 +208,7 @@ public:
 		 int sliceX, int sliceY, int sliceW, int sliceH,
 		 GBool printing,
 		 GBool (*abortCheckCbk)(void *data),
-		 void *abortCheckCbkData,
-		 GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data),
-		 void *annotDisplayDecideCbkData);
+		 void *abortCheckCbkData);
 
   // Display a page.
   void display(OutputDev *out, double hDPI, double vDPI,

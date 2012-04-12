@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006-2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2006 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
@@ -455,9 +455,7 @@ Gfx *Page::createGfx(OutputDev *out, double hDPI, double vDPI,
 		     int sliceX, int sliceY, int sliceW, int sliceH,
 		     GBool printing,
 		     GBool (*abortCheckCbk)(void *data),
-		     void *abortCheckCbkData,
-		     GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data),
-		     void *annotDisplayDecideCbkData) {
+		     void *abortCheckCbkData) {
   PDFRectangle *mediaBox, *cropBox;
   PDFRectangle box;
   Gfx *gfx;
@@ -513,8 +511,7 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI,
   gfx = createGfx(out, hDPI, vDPI, rotate, useMediaBox, crop,
 		  sliceX, sliceY, sliceW, sliceH,
 		  printing,
-		  abortCheckCbk, abortCheckCbkData,
-		  annotDisplayDecideCbk, annotDisplayDecideCbkData);
+		  abortCheckCbk, abortCheckCbkData);
 
   contents.fetch(xref, &obj);
   if (!obj.isNull()) {

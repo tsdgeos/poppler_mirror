@@ -270,7 +270,7 @@ poppler_page_get_text_page (PopplerPage *page)
 				gTrue, /* Crop */
 				-1, -1, -1, -1,
 				gFalse, /* printing */
-				NULL, NULL, NULL, NULL);
+				NULL, NULL);
     page->page->display(gfx);
     text_dev->endPage();
 
@@ -924,7 +924,7 @@ poppler_page_get_image_output_dev (PopplerPage *page,
 			      gTrue, /* Crop */
 			      -1, -1, -1, -1,
 			      gFalse, /* printing */
-			      NULL, NULL, NULL, NULL);
+			      NULL, NULL);
   page->page->display(gfx);
   delete gfx;
 
