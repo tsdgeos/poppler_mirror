@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
@@ -748,6 +748,8 @@ Annotation::~Annotation()
 Annotation::Annotation( AnnotationPrivate &dd, const QDomNode &annNode )
     : d_ptr( &dd )
 {
+    window.width = window.height = 0;
+
     // get the [base] element of the annotation node
     QDomElement e = AnnotationUtils::findChildElement( annNode, "base" );
     if ( e.isNull() )
