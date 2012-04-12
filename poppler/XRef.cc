@@ -1358,6 +1358,17 @@ XRefEntry *XRef::getEntry(int i)
            break;
         }
       }
+      
+      // We might have reconstructed the xref
+      // Check again i is in bounds
+      if (unlikely(i >= size)) {
+        static XRefEntry dummy;
+        dummy.offset = 0;
+        dummy.gen = -1;
+        dummy.type = xrefEntryNone;
+        dummy.updated = false;
+        return &dummy;
+      }
 
       if (entries[i].type == xrefEntryNone) {
          error(errSyntaxError, -1, "Invalid XRef entry");
