@@ -279,19 +279,6 @@ class POPPLER_QT4_EXPORT Annotation
     void storeBaseAnnotationProperties( QDomNode & parentNode, QDomDocument & document ) const;
     Q_DECLARE_PRIVATE( Annotation )
     QExplicitlySharedDataPointer<AnnotationPrivate> d_ptr;
-
-    //BEGIN: To be made public when revision write support is implemented
-    void setRevisionType( RevType type );
-    void setRevisionScope( RevScope scope );
-    /**
-     * Adds a revision to this annotation. Scope and type are assigned to the
-     * newly added annotation.
-     *
-     * \note Ownership of the annotation object stays with the caller, who can
-     *       delete it at any time.
-     */
-    void addRevision( Annotation *ann, RevScope scope = Reply, RevType type = None );
-    //END
     /// \endcond
 
   private:

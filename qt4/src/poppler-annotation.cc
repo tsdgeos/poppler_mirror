@@ -126,6 +126,16 @@ AnnotationPrivate::AnnotationPrivate()
 {
 }
 
+void AnnotationPrivate::addRevision( Annotation *ann, Annotation::RevScope scope, Annotation::RevType type )
+{
+    /* Since ownership stays with the caller, create an alias of ann */
+    revisions.append( ann->d_ptr->makeAlias() );
+
+    /* Set revision properties */
+    revisionScope = scope;
+    revisionType = type;
+}
+
 AnnotationPrivate::~AnnotationPrivate()
 {
     // Delete all children revisions
@@ -173,8 +183,7 @@ void AnnotationPrivate::flushBaseAnnotationProperties()
     // Flush revisions
     foreach (Annotation *r, revisions)
     {
-        // addRevision creates a native Annot because pdfAnnot is set
-        q->addRevision(r, r->d_ptr->revisionScope, r->d_ptr->revisionType);
+        // TODO: Flush revision
         delete r; // Object is no longer needed
     }
 
@@ -748,6 +757,8 @@ Annotation::~Annotation()
 Annotation::Annotation( AnnotationPrivate &dd, const QDomNode &annNode )
     : d_ptr( &dd )
 {
+    Q_D( Annotation );
+
     window.width = window.height = 0;
 
     // get the [base] element of the annotation node
@@ -884,7 +895,7 @@ Annotation::Annotation( AnnotationPrivate &dd, const QDomNode &annNode )
         {
             RevScope scope = (RevScope)revElement.attribute( "revScope" ).toInt();
             RevType type = (RevType)revElement.attribute( "revType" ).toInt();
-            addRevision(reply, scope, type);
+            d->addRevision(reply, scope, type);
             delete reply;
         }
     }
@@ -1443,19 +1454,6 @@ Annotation::RevScope Annotation::revisionScope() const
     return Annotation::Root; // It's not a revision
 }
 
-void Annotation::setRevisionScope( Annotation::RevScope scope )
-{
-    Q_D( Annotation );
-
-    if (!d->pdfAnnot)
-    {
-        d->revisionScope = scope;
-        return;
-    }
-
-    // TODO: Set pdfAnnot
-}
-
 Annotation::RevType Annotation::revisionType() const
 {
     Q_D( const Annotation );
@@ -1489,19 +1487,6 @@ Annotation::RevType Annotation::revisionType() const
     return Annotation::None;
 }
 
-void Annotation::setRevisionType( Annotation::RevType type )
-{
-    Q_D( Annotation );
-
-    if (!d->pdfAnnot)
-    {
-        d->revisionType = type;
-        return;
-    }
-
-    // TODO: Set pdfAnnot
-}
-
 QList<Annotation*> Annotation::revisions() const
 {
     Q_D( const Annotation );
@@ -1516,25 +1501,6 @@ QList<Annotation*> Annotation::revisions() const
     }
 
     return AnnotationPrivate::findAnnotations( d->pdfPage, d->parentDoc, d->pdfAnnot->getId() );
-}
-
-void Annotation::addRevision( Annotation *ann, RevScope scope, RevType type )
-{
-    Q_D( Annotation );
-
-    if (!d->pdfAnnot)
-    {
-        /* Since ownership stays with the caller, create an alias of ann */
-        d->revisions.append( ann->d_ptr->makeAlias() );
-    }
-    else
-    {
-        // TODO: Add annotation to page and set IRT
-    }
-
-    /* Set revision properties */
-    ann->setRevisionScope(scope);
-    ann->setRevisionType(type);
 }
 
 //END Annotation implementation

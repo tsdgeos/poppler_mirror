@@ -44,6 +44,8 @@ class AnnotationPrivate : public QSharedData
         AnnotationPrivate();
         virtual ~AnnotationPrivate();
 
+        void addRevision(Annotation *ann, Annotation::RevScope scope, Annotation::RevType type);
+
         /* Returns an Annotation of the right subclass whose d_ptr points to
          * this AnnotationPrivate */
         virtual Annotation * makeAlias() = 0;
