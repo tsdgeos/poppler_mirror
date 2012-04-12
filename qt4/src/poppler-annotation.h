@@ -1,5 +1,5 @@
 /* poppler-annotation.h: qt interface to poppler
- * Copyright (C) 2006-2008, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2008, 2012 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
  * Copyright (C) 2007, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2010, Philip Lorenz <lorenzph+freedesktop@gmail.com>
@@ -112,12 +112,12 @@ class POPPLER_QT4_EXPORT Annotation
     // WARNING!!! oKular uses that very same values so if you change them notify the author!
     enum SubType { AText = 1, ALine = 2, AGeom = 3, AHighlight = 4, AStamp = 5,
                    AInk = 6, ALink = 7, ACaret = 8, AFileAttachment = 9, ASound = 10,
-                   AMovie = 11, AScreen = 12, A_BASE = 0 };
+                   AMovie = 11, AScreen = 12 /** \since 0.20 */, A_BASE = 0 };
     enum Flag { Hidden = 1, FixedSize = 2, FixedRotation = 4, DenyPrint = 8,
                 DenyWrite = 16, DenyDelete = 32, ToggleHidingOnMouse = 64, External = 128 };
     enum LineStyle { Solid = 1, Dashed = 2, Beveled = 4, Inset = 8, Underline = 16 };
     enum LineEffect { NoEffect = 1, Cloudy = 2};
-    enum RevScope { Root = 0, Reply = 1, Group = 2, Delete = 4 };
+    enum RevScope { Root = 0 /** \since 0.20 */, Reply = 1, Group = 2, Delete = 4 };
     enum RevType { None = 1,  Marked = 2, Unmarked = 4,  Accepted = 8, Rejected = 16, Cancelled = 32, Completed = 64 };
 
     /**
@@ -633,6 +633,7 @@ class POPPLER_QT4_EXPORT LinkAnnotation : public Annotation
     // local enums
     enum HighlightMode { None, Invert, Outline, Push };
 
+    /** \since 0.20 */
     Link* linkDestination() const;
     void setLinkDestination( Link *link );
 
