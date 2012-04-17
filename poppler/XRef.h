@@ -127,7 +127,7 @@ public:
   int getNumEntry(Guint offset);
 
   // Direct access.
-  XRefEntry *getEntry(int i);
+  XRefEntry *getEntry(int i, GBool complainIfMissing = gTrue);
   Object *getTrailerDict() { return &trailerDict; }
 
   // Write access

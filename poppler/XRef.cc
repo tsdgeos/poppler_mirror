@@ -1145,7 +1145,7 @@ int XRef::getNumEntry(Guint offset)
     XRefEntry *e;
     for (int i = 1; i < size; ++i)
     {
-      e = getEntry(i);
+      e = getEntry(i, gFalse);
       if (e->offset < offset && e->offset >= resOffset)
       {
         res = i;
@@ -1314,7 +1314,7 @@ GBool XRef::parseEntry(Guint offset, XRefEntry *entry)
   return r;
 }
 
-XRefEntry *XRef::getEntry(int i)
+XRefEntry *XRef::getEntry(int i, GBool complainIfMissing)
 {
   if (entries[i].type == xrefEntryNone) {
 
@@ -1371,8 +1371,10 @@ XRefEntry *XRef::getEntry(int i)
       }
 
       if (entries[i].type == xrefEntryNone) {
-         error(errSyntaxError, -1, "Invalid XRef entry");
-         entries[i].type = xrefEntryFree;
+        if (complainIfMissing) {
+          error(errSyntaxError, -1, "Invalid XRef entry");
+        }
+        entries[i].type = xrefEntryFree;
       }
     }
   }
