@@ -1146,7 +1146,7 @@ int XRef::getNumEntry(Guint offset)
     for (int i = 1; i < size; ++i)
     {
       e = getEntry(i, gFalse);
-      if (e->offset < offset && e->offset >= resOffset)
+      if (e->type != xrefEntryFree && e->offset < offset && e->offset >= resOffset)
       {
         res = i;
         resOffset = e->offset;
