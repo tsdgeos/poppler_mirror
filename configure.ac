@@ -31,7 +31,13 @@ if test "x$GXX" = "xyes"; then
     cygwin* | mingw*)
     ;;
     *)
-      CXXFLAGS="$CXXFLAGS -ansi"
+      case "${CXXFLAGS}" in
+      *-std=*)
+        ;;
+      *)
+        CXXFLAGS="$CXXFLAGS -ansi"
+        ;;
+      esac
     ;;
   esac
 fi
