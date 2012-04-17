@@ -2303,7 +2303,7 @@ void AnnotText::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   appearance.fetch(xref, &obj);
-  gfx->drawAnnot(&obj, border, color,
+  gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
 		 rect->x1, rect->y1, rectx2, recty2);
   obj.free();
 }
