@@ -487,7 +487,6 @@ int main(int argc, char *argv[]) {
       gsCmd->append(tw);
       gsCmd->append("x");
       th = GooString::fromInt(static_cast<int>(scale*h));
-      th = GooString::fromInt(static_cast<int>(scale*h));
       gsCmd->append(th);
       gsCmd->append(" -q \"");
       gsCmd->append(psFileName);
