@@ -6446,7 +6446,7 @@ void Annots::appendAnnot(Annot *annot) {
 
 GBool Annots::removeAnnot(Annot *annot) {
   int idx = -1;
-  // Search annot and remove it by swapping with last element
+  // Search annot and determine its index
   for (int i = 0; idx == -1 && i < nAnnots; i++) {
     if (annots[i] == annot) {
       idx = i;
@@ -6455,7 +6455,8 @@ GBool Annots::removeAnnot(Annot *annot) {
   if (idx == -1) {
     return gFalse;
   } else {
-    annots[idx] = annots[--nAnnots];
+    --nAnnots;
+    memmove( annots + idx, annots + idx + 1, sizeof(annots[0]) * (nAnnots - idx) );
     annot->decRefCnt();
     return gTrue;
   }
