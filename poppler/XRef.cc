@@ -1199,7 +1199,10 @@ void XRef::setModifiedObject (Object* o, Ref r) {
 Ref XRef::addIndirectObject (Object* o) {
   int entryIndexToUse = -1;
   for (int i = 1; entryIndexToUse == -1 && i < size; ++i) {
-    if (getEntry(i)->type == xrefEntryFree) entryIndexToUse = i;
+    XRefEntry *e = getEntry(i);
+    if (e->type == xrefEntryFree && e->gen != 65535) {
+      entryIndexToUse = i;
+    }
   }
 
   XRefEntry *e;
