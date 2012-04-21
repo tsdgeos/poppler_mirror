@@ -2248,8 +2248,6 @@ void AnnotText::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  double rectx2 = rect->x2;
-  double recty2 = rect->y2;
   if (appearance.isNull()) {
     ca = opacity;
 
@@ -2280,9 +2278,11 @@ void AnnotText::draw(Gfx *gfx, GBool printing) {
       appearBuf->append (ANNOT_TEXT_AP_CIRCLE);
     appearBuf->append ("Q\n");
 
+    // Force 24x24 rectangle
+    PDFRectangle fixedRect(rect->x1, rect->y1, rect->x1 + 24, rect->y1 + 24);
+    appearBBox = new AnnotAppearanceBBox(&fixedRect);
     double bbox[4];
-    bbox[0] = bbox[1] = 0;
-    bbox[2] = bbox[3] = 24;
+    appearBBox->getBBoxRect(bbox);
     if (ca == 1) {
       createForm(bbox, gFalse, NULL, &appearance);
     } else {
@@ -2296,15 +2296,18 @@ void AnnotText::draw(Gfx *gfx, GBool printing) {
       createForm(bbox, gFalse, &resDict, &appearance);
     }
     delete appearBuf;
-
-    rectx2 = rect->x1 + 24;
-    recty2 = rect->y1 + 24;
   }
 
   // draw the appearance stream
   appearance.fetch(xref, &obj);
-  gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
-		 rect->x1, rect->y1, rectx2, recty2);
+  if (appearBBox) {
+    gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
+                   appearBBox->getPageXMin(), appearBBox->getPageYMin(),
+                   appearBBox->getPageXMax(), appearBBox->getPageYMax());
+  } else {
+    gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
+                   rect->x1, rect->y1, rect->x2, rect->y2);
+  }
   obj.free();
 }
 
