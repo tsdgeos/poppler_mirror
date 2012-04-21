@@ -774,6 +774,7 @@ AnnotIconFit::AnnotIconFit(Dict* dict) {
 
 AnnotAppearance::AnnotAppearance(PDFDoc *docA, Object *dict) {
   assert(dict->isDict());
+  doc = docA;
   xref = docA->getXRef();
   dict->copy(&appearDict);
 }
@@ -841,19 +842,88 @@ int AnnotAppearance::getNumStates() {
   return res;
 }
 
+// Test if stateObj (a Ref or a Dict) points to the specified stream
+GBool AnnotAppearance::referencesStream(Object *stateObj, Ref refToStream) {
+  if (stateObj->isRef()) {
+    Ref r = stateObj->getRef();
+    if (r.num == refToStream.num && r.gen == refToStream.gen) {
+      return gTrue;
+    }
+  } else if (stateObj->isDict()) { // Test each value
+    const int size = stateObj->dictGetLength();
+    for (int i = 0; i < size; ++i) {
+      Object obj1;
+      stateObj->dictGetValNF(i, &obj1);
+      if (obj1.isRef()) {
+        Ref r = obj1.getRef();
+        if (r.num == refToStream.num && r.gen == refToStream.gen) {
+          return gTrue;
+        }
+      }
+      obj1.free();
+    }
+  }
+  return gFalse; // Not found
+}
+
+// Test if this AnnotAppearance references the specified stream
+GBool AnnotAppearance::referencesStream(Ref refToStream) {
+  Object obj1;
+  GBool found;
+
+  // Scan each state's ref/subdictionary
+  appearDict.dictLookupNF("N", &obj1);
+  found = referencesStream(&obj1, refToStream);
+  obj1.free();
+  if (found)
+    return gTrue;
+
+  appearDict.dictLookupNF("R", &obj1);
+  found = referencesStream(&obj1, refToStream);
+  obj1.free();
+  if (found)
+    return gTrue;
+
+  appearDict.dictLookupNF("D", &obj1);
+  found = referencesStream(&obj1, refToStream);
+  obj1.free();
+  return found;
+}
+
+// If this is the only annotation in the document that references the
+// specified appearance stream, remove the appearance stream
+void AnnotAppearance::removeStream(Ref refToStream) {
+  const int lastpage = doc->getNumPages();
+  for (int pg = 1; pg <= lastpage; ++pg) { // Scan all annotations in the document
+    Page *page = doc->getPage(pg);
+    if (!page) {
+      error(errSyntaxError, -1, "Failed check for shared annotation stream at page {0:d}", pg);
+      continue;
+    }
+    Annots *annots = page->getAnnots();
+    for (int i = 0; i < annots->getNumAnnots(); ++i) {
+      AnnotAppearance *annotAp = annots->getAnnot(i)->getAppearStreams();
+      if (annotAp && annotAp != this && annotAp->referencesStream(refToStream)) {
+        return; // Another annotation points to the stream -> Don't delete it
+      }
+    }
+  }
+
+  // TODO: stream resources (e.g. font), AP name tree
+  xref->removeIndirectObject(refToStream);
+}
+
 // Removes stream if obj is a Ref, or removes pointed streams if obj is a Dict
 void AnnotAppearance::removeStateStreams(Object *obj1) {
-  // TODO: Remove XObject resources, check for XObjects shared by multiple
-  //       annotations, delete streams from name table (if any)
   if (obj1->isRef()) {
-    xref->removeIndirectObject(obj1->getRef());
+    removeStream(obj1->getRef());
   } else if (obj1->isDict()) {
     const int size = obj1->dictGetLength();
     for (int i = 0; i < size; ++i) {
       Object obj2;
       obj1->dictGetValNF(i, &obj2);
       if (obj2.isRef()) {
-        xref->removeIndirectObject(obj2.getRef());
+        removeStream(obj2.getRef());
       }
       obj2.free();
     }

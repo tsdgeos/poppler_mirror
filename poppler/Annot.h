@@ -382,10 +382,16 @@ public:
   // reset parent annotation's AP and AS after this call.
   void removeAllStreams();
 
+  // Test if this AnnotAppearance references the specified stream
+  GBool referencesStream(Ref targetStreamRef);
+
 private:
+  static GBool referencesStream(Object *stateObj, Ref targetStreamRef);
+  void removeStream(Ref refToStream);
   void removeStateStreams(Object *state);
 
 protected:
+  PDFDoc *doc;
   XRef *xref;                   // the xref table for this PDF file
   Object appearDict;            // Annotation's AP
 };
