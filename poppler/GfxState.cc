@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2006-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Christian Persch <chpe@gnome.org>
@@ -4464,6 +4464,9 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(int typeA, Dict *dict,
 	}
 	break;
       case 1:
+	if (nPatchesA == 0) {
+	  goto err1;
+	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[0][3];
 	p->y[0][0] = patchesA[nPatchesA-1].y[0][3];
 	p->x[0][1] = patchesA[nPatchesA-1].x[1][3];
@@ -4496,6 +4499,9 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(int typeA, Dict *dict,
 	}
 	break;
       case 2:
+	if (nPatchesA == 0) {
+	  goto err1;
+	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[3][3];
 	p->y[0][0] = patchesA[nPatchesA-1].y[3][3];
 	p->x[0][1] = patchesA[nPatchesA-1].x[3][2];
@@ -4528,6 +4534,9 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(int typeA, Dict *dict,
 	}
 	break;
       case 3:
+	if (nPatchesA == 0) {
+	  goto err1;
+	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[3][0];
 	p->y[0][0] = patchesA[nPatchesA-1].y[3][0];
 	p->x[0][1] = patchesA[nPatchesA-1].x[2][0];
@@ -4603,6 +4612,9 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(int typeA, Dict *dict,
 	}
 	break;
       case 1:
+	if (nPatchesA == 0) {
+	  goto err1;
+	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[0][3];
 	p->y[0][0] = patchesA[nPatchesA-1].y[0][3];
 	p->x[0][1] = patchesA[nPatchesA-1].x[1][3];
@@ -4643,6 +4655,9 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(int typeA, Dict *dict,
 	}
 	break;
       case 2:
+	if (nPatchesA == 0) {
+	  goto err1;
+	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[3][3];
 	p->y[0][0] = patchesA[nPatchesA-1].y[3][3];
 	p->x[0][1] = patchesA[nPatchesA-1].x[3][2];
@@ -4683,6 +4698,9 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(int typeA, Dict *dict,
 	}
 	break;
       case 3:
+	if (nPatchesA == 0) {
+	  goto err1;
+	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[3][0];
 	p->y[0][0] = patchesA[nPatchesA-1].y[3][0];
 	p->x[0][1] = patchesA[nPatchesA-1].x[2][0];
