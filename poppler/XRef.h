@@ -79,6 +79,9 @@ public:
   // Is xref table valid?
   GBool isOk() { return ok; }
 
+  // Is the last XRef section a stream or a table?
+  GBool isXRefStream() { return xRefStream; }
+
   // Get the error code (if isOk() returns false).
   int getErrorCode() { return errCode; }
 
@@ -135,7 +138,11 @@ public:
   Ref addIndirectObject (Object* o);
   void removeIndirectObject(Ref r);
   void add(int num, int gen,  Guint offs, GBool used);
+
+  // Output XRef table to stream
   void writeTableToFile(OutStream* outStr, GBool writeAllEntries);
+  // Output XRef stream contents to GooString and fill trailerDict fields accordingly
+  void writeStreamToBuffer(GooString *stmBuf, Dict *xrefDict, XRef *xref);
 
 private:
 
@@ -176,6 +183,33 @@ private:
   GBool constructXRef(GBool *wasReconstructed);
   GBool parseEntry(Guint offset, XRefEntry *entry);
 
+  class XRefWriter {
+  public:
+    virtual void startSection(int first, int count) = 0;
+    virtual void writeEntry(Guint offset, int gen, XRefEntryType type) = 0;
+    virtual ~XRefWriter() {};
+  };
+
+  class XRefTableWriter: public XRefWriter {
+  public:
+    XRefTableWriter(OutStream* outStrA);
+    void startSection(int first, int count);
+    void writeEntry(Guint offset, int gen, XRefEntryType type);
+  private:
+    OutStream* outStr;
+  };
+
+  class XRefStreamWriter: public XRefWriter {
+  public:
+    XRefStreamWriter(Object *index, GooString *stmBuf);
+    void startSection(int first, int count);
+    void writeEntry(Guint offset, int gen, XRefEntryType type);
+  private:
+    Object *index;
+    GooString *stmBuf;
+  };
+
+  void writeXRef(XRefWriter *writer, GBool writeAllEntries);
 };
 
 #endif

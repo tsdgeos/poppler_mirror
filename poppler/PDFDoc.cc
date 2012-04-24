@@ -864,8 +864,30 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
   }
 
   Guint uxrefOffset = outStr->getPos();
-  writeXRefTableTrailer(uxrefOffset, uxref, gFalse /* do not write unnecessary entries */,
-                        xref->getNumObjects(), outStr, gTrue /* incremental update */);
+  int numobjects = xref->getNumObjects();
+  const char *fileNameA = fileName ? fileName->getCString() : NULL;
+  Ref rootRef, uxrefStreamRef;
+  rootRef.num = getXRef()->getRootNum();
+  rootRef.gen = getXRef()->getRootGen();
+
+  // Output a xref stream if there is a xref stream already
+  GBool xRefStream = xref->isXRefStream();
+
+  if (xRefStream) {
+    // Append an entry for the xref stream itself
+    uxrefStreamRef.num = numobjects++;
+    uxrefStreamRef.gen = 0;
+    uxref->add(uxrefStreamRef.num, uxrefStreamRef.gen, uxrefOffset, gTrue);
+  }
+
+  Dict *trailerDict = createTrailerDict(numobjects, gTrue, getStartXRef(), &rootRef, getXRef(), fileNameA, uxrefOffset);
+  if (xRefStream) {
+    writeXRefStreamTrailer(trailerDict, uxref, &uxrefStreamRef, uxrefOffset, outStr, getXRef());
+  } else {
+    writeXRefTableTrailer(trailerDict, uxref, gFalse, uxrefOffset, outStr, getXRef());
+  }
+
+  delete trailerDict;
   delete uxref;
 }
 
@@ -1199,6 +1221,25 @@ void PDFDoc::writeXRefTableTrailer(Dict *trailerDict, XRef *uxref, GBool writeAl
   outStr->printf( "trailer\r\n");
   writeDictionnary(trailerDict, outStr, xRef, 0);
   outStr->printf( "\r\nstartxref\r\n");
+  outStr->printf( "%i\r\n", uxrefOffset);
+  outStr->printf( "%%%%EOF\r\n");
+}
+
+void PDFDoc::writeXRefStreamTrailer (Dict *trailerDict, XRef *uxref, Ref *uxrefStreamRef, Guint uxrefOffset, OutStream* outStr, XRef *xRef)
+{
+  GooString stmData;
+
+  // Fill stmData and some trailerDict fields
+  uxref->writeStreamToBuffer(&stmData, trailerDict, xRef);
+
+  // Create XRef stream object and write it
+  Object obj1;
+  MemStream *mStream = new MemStream( stmData.getCString(), 0,
+                                      stmData.getLength(), obj1.initDict(trailerDict) );
+  writeObject(obj1.initStream(mStream), uxrefStreamRef, outStr, xRef, 0);
+  obj1.free();
+
+  outStr->printf( "startxref\r\n");
   outStr->printf( "%i\r\n", uxrefOffset);
   outStr->printf( "%%%%EOF\r\n");
 }

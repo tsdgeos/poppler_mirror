@@ -1240,10 +1240,10 @@ void XRef::removeIndirectObject(Ref r) {
   e->updated = true;
 }
 
-void XRef::writeTableToFile(OutStream* outStr, GBool writeAllEntries) {
+void XRef::writeXRef(XRef::XRefWriter *writer, GBool writeAllEntries) {
   //create free entries linked-list
   if (getEntry(0)->gen != 65535) {
-    error(errInternal, -1, "XRef::writeToFile, entry 0 of the XRef is invalid (gen != 65535)\n");
+    error(errInternal, -1, "XRef::writeXRef, entry 0 of the XRef is invalid (gen != 65535)\n");
   }
   int lastFreeEntry = 0;
   for (int i=0; i<size; i++) {
@@ -1254,18 +1254,13 @@ void XRef::writeTableToFile(OutStream* outStr, GBool writeAllEntries) {
   }
 
   if (writeAllEntries) {
-    //write the new xref
-    outStr->printf("xref\r\n");
-    outStr->printf("%i %i\r\n", 0, size);
+    writer->startSection(0, size);
     for (int i=0; i<size; i++) {
       XRefEntry *e = getEntry(i);
-
       if(e->gen > 65535) e->gen = 65535; //cap generation number to 65535 (required by PDFReference)
-      outStr->printf("%010i %05i %c\r\n", e->offset, e->gen, (e->type==xrefEntryFree)?'f':'n');
+      writer->writeEntry(e->offset, e->gen, e->type);
     }
   } else {
-    //write the new xref
-    outStr->printf("xref\r\n");
     int i = 0;
     while (i < size) {
       int j;
@@ -1275,17 +1270,76 @@ void XRef::writeTableToFile(OutStream* outStr, GBool writeAllEntries) {
       }
       if (j-i != 0)
       {
-        outStr->printf("%i %i\r\n", i, j-i);
+        writer->startSection(i, j-i);
         for (int k=i; k<j; k++) {
           XRefEntry *e = getEntry(k);
           if(e->gen > 65535) e->gen = 65535; //cap generation number to 65535 (required by PDFReference)
-          outStr->printf("%010i %05i %c\r\n", e->offset, e->gen, (e->type==xrefEntryFree)?'f':'n');
+          writer->writeEntry(e->offset, e->gen, e->type);
         }
         i = j;
       }
       else ++i;
     }
   }
+}
+
+XRef::XRefTableWriter::XRefTableWriter(OutStream* outStrA) {
+  outStr = outStrA;
+}
+
+void XRef::XRefTableWriter::startSection(int first, int count) {
+  outStr->printf("%i %i\r\n", first, count);
+}
+
+void XRef::XRefTableWriter::writeEntry(Guint offset, int gen, XRefEntryType type) {
+  outStr->printf("%010i %05i %c\r\n", offset, gen, (type==xrefEntryFree)?'f':'n');
+}
+
+void XRef::writeTableToFile(OutStream* outStr, GBool writeAllEntries) {
+  XRefTableWriter writer(outStr);
+  outStr->printf("xref\r\n");
+  writeXRef(&writer, writeAllEntries);
+}
+
+XRef::XRefStreamWriter::XRefStreamWriter(Object *indexA, GooString *stmBufA) {
+  index = indexA;
+  stmBuf = stmBufA;
+}
+
+void XRef::XRefStreamWriter::startSection(int first, int count) {
+  Object obj;
+  index->arrayAdd( obj.initInt(first) );
+  index->arrayAdd( obj.initInt(count) );
+}
+
+void XRef::XRefStreamWriter::writeEntry(Guint offset, int gen, XRefEntryType type) {
+  char data[7];
+  data[0] = (type==xrefEntryFree) ? 0 : 1;
+  data[1] = (offset >> 24) & 0xff;
+  data[2] = (offset >> 16) & 0xff;
+  data[3] = (offset >> 8) & 0xff;
+  data[4] = offset & 0xff;
+  data[5] = (gen >> 8) & 0xff;
+  data[6] = gen & 0xff;
+  stmBuf->append(data, 7);
+}
+
+void XRef::writeStreamToBuffer(GooString *stmBuf, Dict *xrefDict, XRef *xref) {
+  Object index;
+  index.initArray(xref);
+  stmBuf->clear();
+
+  XRefStreamWriter writer(&index, stmBuf);
+  writeXRef(&writer, gFalse);
+
+  Object obj1, obj2;
+  xrefDict->set("Type", obj1.initName("XRef"));
+  xrefDict->set("Index", &index);
+  obj2.initArray(xref);
+  obj2.arrayAdd( obj1.initInt(1) );
+  obj2.arrayAdd( obj1.initInt(4) );
+  obj2.arrayAdd( obj1.initInt(2) );
+  xrefDict->set("W", &obj2);
 }
 
 GBool XRef::parseEntry(Guint offset, XRefEntry *entry)
