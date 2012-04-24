@@ -135,7 +135,7 @@ public:
   Ref addIndirectObject (Object* o);
   void removeIndirectObject(Ref r);
   void add(int num, int gen,  Guint offs, GBool used);
-  void writeToFile(OutStream* outStr, GBool writeAllEntries);
+  void writeTableToFile(OutStream* outStr, GBool writeAllEntries);
 
 private:
 

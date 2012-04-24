@@ -6,6 +6,7 @@
 //
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 //========================================================================
 #include <PDFDoc.h>
@@ -161,13 +162,14 @@ int main (int argc, char *argv[])
     objectsCount++;
   }
   Guint uxrefOffset = outStr->getPos();
-  yRef->writeToFile(outStr, gFalse /* do not write unnecessary entries */ );
-
   Ref ref;
   ref.num = rootNum;
   ref.gen = 0;
-  PDFDoc::writeTrailer(uxrefOffset, objectsCount, outStr, (GBool) gFalse, 0,
-	&ref, yRef, fileName, outStr->getPos());
+  Dict *trailerDict = PDFDoc::createTrailerDict(objectsCount, gFalse, 0, &ref, yRef,
+                                                fileName, outStr->getPos());
+  PDFDoc::writeXRefTableTrailer(trailerDict, yRef, gFalse /* do not write unnecessary entries */,
+                                uxrefOffset, outStr, yRef);
+  delete trailerDict;
 
   outStr->close();
   fclose(f);

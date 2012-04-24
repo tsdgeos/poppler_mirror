@@ -1240,7 +1240,7 @@ void XRef::removeIndirectObject(Ref r) {
   e->updated = true;
 }
 
-void XRef::writeToFile(OutStream* outStr, GBool writeAllEntries) {
+void XRef::writeTableToFile(OutStream* outStr, GBool writeAllEntries) {
   //create free entries linked-list
   if (getEntry(0)->gen != 65535) {
     error(errInternal, -1, "XRef::writeToFile, entry 0 of the XRef is invalid (gen != 65535)\n");

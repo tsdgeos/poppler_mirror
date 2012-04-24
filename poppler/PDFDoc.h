@@ -23,6 +23,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Srinivas Adicherla <srinivas.adicherla@geodesic.com>
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -244,8 +245,14 @@ public:
   Guint writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset);
   static Guint writeObject (Object *obj, Ref *ref, OutStream* outStr, XRef *xref, Guint numOffset);
   static void writeHeader(OutStream *outStr, int major, int minor);
-  static void writeTrailer (Guint uxrefOffset, int uxrefSize, OutStream* outStr, GBool incrUpdate,
-                            Guint startxRef, Ref *root, XRef *xRef, const char *fileName, Guint fileSize);
+
+  // Ownership goes to the caller
+  static Dict *createTrailerDict (int uxrefSize, GBool incrUpdate, Guint startxRef,
+                                  Ref *root, XRef *xRef, const char *fileName, Guint fileSize);
+  static void writeXRefTableTrailer (Dict *trailerDict, XRef *uxref, GBool writeAllEntries,
+                                     Guint uxrefOffset, OutStream* outStr, XRef *xRef);
+  static void writeXRefStreamTrailer (Dict *trailerDict, XRef *uxref, Ref *uxrefStreamRef,
+                                      Guint uxrefOffset, OutStream* outStr, XRef *xRef);
 
 private:
   // insert referenced objects in XRef
@@ -260,7 +267,8 @@ private:
   { writeDictionnary(dict, outStr, getXRef(), 0); }
   static void writeStream (Stream* str, OutStream* outStr);
   static void writeRawStream (Stream* str, OutStream* outStr);
-  void writeTrailer (Guint uxrefOffset, int uxrefSize, OutStream* outStr, GBool incrUpdate);
+  void writeXRefTableTrailer (Guint uxrefOffset, XRef *uxref, GBool writeAllEntries,
+                              int uxrefSize, OutStream* outStr, GBool incrUpdate);
   static void writeString (GooString* s, OutStream* outStr);
   void saveIncrementalUpdate (OutStream* outStr);
   void saveCompleteRewrite (OutStream* outStr);
