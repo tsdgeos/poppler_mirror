@@ -17,7 +17,7 @@
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2011 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2009-2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -251,8 +251,8 @@ public:
   virtual void setSoftMaskFromImageMask(GfxState *state,
 					Object *ref, Stream *str,
 					int width, int height, GBool invert,
-					GBool inlineImg);
-  virtual void unsetSoftMaskFromImageMask(GfxState *state);
+					GBool inlineImg, double *baseMatrix);
+  virtual void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix);
   virtual void drawImage(GfxState *state, Object *ref, Stream *str,
 			 int width, int height, GfxImageColorMap *colorMap,
 			 GBool interpolate, int *maskColors, GBool inlineImg);

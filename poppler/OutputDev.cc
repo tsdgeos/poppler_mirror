@@ -18,6 +18,7 @@
 // Copyright (C) 2007 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -111,11 +112,11 @@ void OutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 void OutputDev::setSoftMaskFromImageMask(GfxState *state,
 					 Object *ref, Stream *str,
 					 int width, int height, GBool invert,
-					 GBool inlineImg) {
+					 GBool inlineImg, double *baseMatrix) {
   drawImageMask(state, ref, str, width, height, invert, gFalse, inlineImg);
 }
 
-void OutputDev::unsetSoftMaskFromImageMask(GfxState *state) {
+void OutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) {
   return;
 }
 

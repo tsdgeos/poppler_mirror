@@ -25,7 +25,7 @@
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
 // Copyright (C) 2008 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
-// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Patrick Pfeifer <p2000@mailinator.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -1858,7 +1858,7 @@ void CairoOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 
 void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str,
 				   int width, int height, GBool invert,
-				   GBool inlineImg) {
+				   GBool inlineImg, double *baseMatrix) {
 
   /* FIXME: Doesn't the image mask support any colorspace? */
   cairo_set_source (cairo, fill_pattern);
@@ -1922,7 +1922,7 @@ void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stre
                          gTrue, gFalse, gFalse);
 }
 
-void CairoOutputDev::unsetSoftMaskFromImageMask(GfxState *state) {
+void CairoOutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) {
   double bbox[4] = {0,0,1,1}; // dummy
 
   endTransparencyGroup(state);

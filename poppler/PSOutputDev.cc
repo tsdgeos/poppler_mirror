@@ -4946,13 +4946,13 @@ void PSOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 
 void PSOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str,
 				int width, int height, GBool invert,
-				GBool inlineImg) {
+				GBool inlineImg, double *baseMatrix) {
   if (level != psLevel1 && level != psLevel1Sep) {
     maskToClippingPath(str, width, height, invert);
   }
 }
 
-void PSOutputDev::unsetSoftMaskFromImageMask(GfxState * state) {
+void PSOutputDev::unsetSoftMaskFromImageMask(GfxState * state, double *baseMatrix) {
   if (level != psLevel1 && level != psLevel1Sep) {
     writePS("pdfImClipEnd\n");
   }

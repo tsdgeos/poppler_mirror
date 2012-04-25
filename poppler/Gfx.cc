@@ -2030,7 +2030,7 @@ void Gfx::doPatternImageMask(Object *ref, Stream *str, int width, int height,
   saveState();
 
   out->setSoftMaskFromImageMask(state, ref, str,
-				width, height, invert, inlineImg);
+				width, height, invert, inlineImg, baseMatrix);
 
   state->clearPath();
   state->moveTo(0, 0);
@@ -2040,7 +2040,7 @@ void Gfx::doPatternImageMask(Object *ref, Stream *str, int width, int height,
   state->closePath();
   doPatternText();
 
-  out->unsetSoftMaskFromImageMask(state);
+  out->unsetSoftMaskFromImageMask(state, baseMatrix);
   restoreState();
 }
 
