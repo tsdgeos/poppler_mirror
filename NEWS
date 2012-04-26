@@ -1,3 +1,20 @@
+Release 0.19.4
+        core:
+         * Annotation improvements
+         * More compatible file writing
+         * SplashOutputDev: Fix slow rendering of pdf with a lot of image masks in pattern colorspace
+         * Fix crashes in broken documents
+         * Fix spurious warning messages
+        
+        utils:
+         * pdftotext: Add missing section heading to man page
+         * pdftohtml: Fix crash when the destination file does not exist
+        
+        build system:
+         * autoconf: Do not append "-ansi" to CXXFLAG, if "-std=XXX" is already specified.
+         * autoconf: Do not clear FREETYPE_CFLAGS, FREETYPE_LIBS before PKG_CHECK_MODULES()
+         * autoconf: Copying graphics library CFLAGS to cpp frontend Makefile.am
+
 Release 0.19.3
         core:
          * Annotation improvements
