@@ -1406,7 +1406,7 @@ XRefEntry *XRef::getEntry(int i, GBool complainIfMissing)
 
         // if there was a problem with the xref table,
         // try to reconstruct it
-        if (!ok) {
+        if (!ok || (!prevXRefOffset && entries[i].type == xrefEntryNone)) {
            GBool wasReconstructed = false;
            if (!(ok = constructXRef(&wasReconstructed))) {
                errCode = errDamaged;
