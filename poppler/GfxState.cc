@@ -2010,9 +2010,16 @@ GfxColor *GfxIndexedColorSpace::mapColorToBase(GfxColor *color,
 
   n = base->getNComps();
   base->getDefaultRanges(low, range, indexHigh);
-  p = &lookup[(int)(colToDbl(color->c[0]) + 0.5) * n];
-  for (i = 0; i < n; ++i) {
-    baseColor->c[i] = dblToCol(low[i] + (p[i] / 255.0) * range[i]);
+  const int idx = (int)(colToDbl(color->c[0]) + 0.5) * n;
+  if (likely(idx + n < (indexHigh + 1) * base->getNComps())) {
+    p = &lookup[idx];
+    for (i = 0; i < n; ++i) {
+      baseColor->c[i] = dblToCol(low[i] + (p[i] / 255.0) * range[i]);
+    }
+  } else {
+    for (i = 0; i < n; ++i) {
+      baseColor->c[i] = 0;
+    }
   }
   return baseColor;
 }
