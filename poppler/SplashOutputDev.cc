@@ -1145,6 +1145,11 @@ struct SplashTransparencyGroup {
   GfxColorSpace *blendingColorSpace;
   GBool isolated;
 
+  //----- for knockout
+  SplashBitmap *shape;
+  GBool knockout;
+  SplashCoord knockoutOpacity;
+
   //----- saved state
   SplashBitmap *origBitmap;
   Splash *origSplash;
@@ -1631,10 +1636,16 @@ void SplashOutputDev::updateBlendMode(GfxState *state) {
 
 void SplashOutputDev::updateFillOpacity(GfxState *state) {
   splash->setFillAlpha((SplashCoord)state->getFillOpacity());
+  if (transpGroupStack != NULL && (SplashCoord)state->getFillOpacity() < transpGroupStack->knockoutOpacity) {
+    transpGroupStack->knockoutOpacity = (SplashCoord)state->getFillOpacity();
+  }
 }
 
 void SplashOutputDev::updateStrokeOpacity(GfxState *state) {
   splash->setStrokeAlpha((SplashCoord)state->getStrokeOpacity());
+  if (transpGroupStack != NULL && (SplashCoord)state->getStrokeOpacity() < transpGroupStack->knockoutOpacity) {
+    transpGroupStack->knockoutOpacity = (SplashCoord)state->getStrokeOpacity();
+  }
 }
 
 void SplashOutputDev::updateFillOverprint(GfxState *state) {
@@ -3585,6 +3596,9 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
   transpGroup->ty = ty;
   transpGroup->blendingColorSpace = blendingColorSpace;
   transpGroup->isolated = isolated;
+  transpGroup->shape = (knockout) ? SplashBitmap::copy(bitmap) : NULL;
+  transpGroup->knockout = gFalse; 
+  transpGroup->knockoutOpacity = 1.0;
   transpGroup->next = transpGroupStack;
   transpGroupStack = transpGroup;
 
@@ -3637,8 +3651,10 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
     if (colorMode == splashModeXBGR8) color[3] = 255;
     splash->clear(color, 0);
   } else {
+    SplashBitmap *shape = (knockout) ? transpGroup->shape :
+                                       (transpGroup->next != NULL && transpGroup->next->shape != NULL) ? transpGroup->next->shape : transpGroup->origBitmap;
     splash->blitTransparent(transpGroup->origBitmap, tx, ty, 0, 0, w, h);
-    splash->setInNonIsolatedGroup(transpGroup->origBitmap, tx, ty);
+    splash->setInNonIsolatedGroup(shape, tx, ty);
   }
   transpGroup->tBitmap = bitmap;
   state->shiftCTM(-tx, -ty);
@@ -3671,15 +3687,24 @@ void SplashOutputDev::paintTransparencyGroup(GfxState *state, double *bbox) {
   // paint the transparency group onto the parent bitmap
   // - the clip path was set in the parent's state)
   if (tx < bitmap->getWidth() && ty < bitmap->getHeight()) {
+    SplashCoord knockoutOpacity = (transpGroupStack->next != NULL) ? transpGroupStack->next->knockoutOpacity
+                                                                   : transpGroupStack->knockoutOpacity;
     splash->setOverprintMask(0xffffffff, gFalse);
     splash->composite(tBitmap, 0, 0, tx, ty,
-		      tBitmap->getWidth(), tBitmap->getHeight(),
-		      gFalse, !isolated);
+	      tBitmap->getWidth(), tBitmap->getHeight(),
+	      gFalse, !isolated, transpGroupStack->next != NULL && transpGroupStack->next->knockout, knockoutOpacity);
+    if (transpGroupStack->next != NULL && transpGroupStack->next->shape != NULL) {
+      transpGroupStack->next->knockout = gTrue;
+    }
   }
 
   // pop the stack
   transpGroup = transpGroupStack;
   transpGroupStack = transpGroup->next;
+  if (transpGroupStack != NULL && transpGroup->knockoutOpacity < transpGroupStack->knockoutOpacity) {
+    transpGroupStack->knockoutOpacity = transpGroup->knockoutOpacity;
+  }
+  delete transpGroup->shape;
   delete transpGroup;
 
   delete tBitmap;

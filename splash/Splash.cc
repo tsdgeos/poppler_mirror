@@ -135,6 +135,10 @@ struct SplashPipe {
   // non-isolated group alpha0
   Guchar *alpha0Ptr;
 
+  // knockout groups
+  GBool knockout;
+  Guchar knockoutOpacity;
+
   // soft mask
   SplashColorPtr softMaskPtr;
 
@@ -240,7 +244,8 @@ inline void Splash::updateModY(int y) {
 inline void Splash::pipeInit(SplashPipe *pipe, int x, int y,
 			     SplashPattern *pattern, SplashColorPtr cSrc,
 			     Guchar aInput, GBool usesShape,
-			     GBool nonIsolatedGroup) {
+			     GBool nonIsolatedGroup,
+			     GBool knockout, Guchar knockoutOpacity) {
   pipeSetXY(pipe, x, y);
   pipe->pattern = NULL;
 
@@ -259,6 +264,10 @@ inline void Splash::pipeInit(SplashPipe *pipe, int x, int y,
   // source alpha
   pipe->aInput = aInput;
   pipe->usesShape = usesShape;
+
+  // knockout
+  pipe->knockout = knockout;
+  pipe->knockoutOpacity = knockoutOpacity;
 
   // result alpha
   if (aInput == 255 && !state->softMask && !usesShape &&
@@ -500,6 +509,10 @@ void Splash::pipeRun(SplashPipe *pipe) {
 	  break;
 	}
 	cSrc = cSrcNonIso;
+        // knockout: remove backdrop color
+        if (pipe->knockout && pipe->shape >= pipe->knockoutOpacity) {
+          aDest = 0;
+        }
       }
     } else {
       cSrc = pipe->cSrc;
@@ -4651,7 +4664,8 @@ void Splash::blitImageClipped(SplashBitmap *src, GBool srcAlpha,
 
 SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
 			      int xDest, int yDest, int w, int h,
-			      GBool noClip, GBool nonIsolated) {
+			      GBool noClip, GBool nonIsolated,
+			      GBool knockout, SplashCoord knockoutOpacity) {
   SplashPipe pipe;
   SplashColor pixel;
   Guchar alpha;
@@ -4664,7 +4678,8 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
 
   if (src->alpha) {
     pipeInit(&pipe, xDest, yDest, NULL, pixel,
-	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, nonIsolated);
+	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, nonIsolated,
+	     knockout, (Guchar)splashRound(knockoutOpacity * 255));
     if (noClip) {
       for (y = 0; y < h; ++y) {
 	pipeSetXY(&pipe, xDest, yDest + y);

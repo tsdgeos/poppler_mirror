@@ -19,7 +19,7 @@
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
-// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -109,6 +109,26 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
   } else {
     alpha = NULL;
   }
+}
+
+SplashBitmap *SplashBitmap::copy(SplashBitmap *src) {
+  SplashBitmap *result = new SplashBitmap(src->getWidth(), src->getHeight(), src->getRowPad(), 
+        src->getMode(), src->getAlphaPtr() != NULL, src->getRowSize() >= 0);
+  Guchar *dataSource = src->getDataPtr();
+  Guchar *dataDest = result->getDataPtr();
+  int amount = src->getRowSize();
+  if (amount < 0) {
+    dataSource = dataSource + (src->getHeight() - 1) * amount;
+    dataDest = dataDest + (src->getHeight() - 1) * amount;
+    amount *= -src->getHeight();
+  } else {
+    amount *= src->getHeight();
+  }
+  memcpy(dataDest, dataSource, amount);
+  if (src->getAlphaPtr() != NULL) {
+    memcpy(result->getAlphaPtr(), src->getAlphaPtr(), src->getWidth() * src->getHeight());
+  }
+  return result;
 }
 
 SplashBitmap::~SplashBitmap() {

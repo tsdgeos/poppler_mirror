@@ -215,7 +215,8 @@ public:
   // object.
   SplashError composite(SplashBitmap *src, int xSrc, int ySrc,
 			int xDest, int yDest, int w, int h,
-			GBool noClip, GBool nonIsolated);
+			GBool noClip, GBool nonIsolated,
+			GBool knockout = gFalse, SplashCoord knockoutOpacity = 1.0);
 
   // Composite this Splash object onto a background color.  The
   // background alpha is assumed to be 1.
@@ -274,7 +275,8 @@ private:
   void pipeInit(SplashPipe *pipe, int x, int y,
 		SplashPattern *pattern, SplashColorPtr cSrc,
 		Guchar aInput, GBool usesShape,
-		GBool nonIsolatedGroup);
+		GBool nonIsolatedGroup,
+		GBool knockout = gFalse, Guchar knockoutOpacity = 255);
   void pipeRun(SplashPipe *pipe);
   void pipeRunSimpleMono1(SplashPipe *pipe);
   void pipeRunSimpleMono8(SplashPipe *pipe);

@@ -19,6 +19,7 @@
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -51,6 +52,7 @@ public:
   SplashBitmap(int widthA, int heightA, int rowPad,
 	       SplashColorMode modeA, GBool alphaA,
 	       GBool topDown = gTrue);
+  static SplashBitmap *copy(SplashBitmap *src);
 
   ~SplashBitmap();
 
