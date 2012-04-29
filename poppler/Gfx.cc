@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
-// Copyright (C) 2005-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -1621,9 +1621,11 @@ void Gfx::opSetFillColorN(Object args[], int numArgs) {
       state->setFillColor(&color);
       out->updateFillColor(state);
     }
-    if (args[numArgs-1].isName() &&
-	(pattern = res->lookupPattern(args[numArgs-1].getName(), this))) {
-      state->setFillPattern(pattern);
+    if (numArgs > 0) {
+      if (args[numArgs-1].isName() &&
+	  (pattern = res->lookupPattern(args[numArgs-1].getName(), this))) {
+        state->setFillPattern(pattern);
+      }
     }
 
   } else {
