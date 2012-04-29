@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2006-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright 2007-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright 2007-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2007 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2007 Iñigo Martínez <inigomartinez@gmail.com>
@@ -13,7 +13,7 @@
 // Copyright 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright 2009 Matthias Drochner <M.Drochner@fz-juelich.de>
 // Copyright 2009 KDAB via Guillermo Amaral <gamaral@amaral.com.mx>
-// Copyright 2010 Mark Riedesel <mark@klowner.com>
+// Copyright 2010, 2012 Mark Riedesel <mark@klowner.com>
 // 
 //========================================================================
 
@@ -59,6 +59,15 @@ char* pdfDocEncodingToUTF16 (GooString* orig, int* length)
   return result;
 }
 
+static GooString *convertToUtf16(GooString *pdfDocEncodingString)
+{
+  int tmp_length;
+  char* tmp_str = pdfDocEncodingToUTF16(pdfDocEncodingString, &tmp_length);
+  delete pdfDocEncodingString;
+  pdfDocEncodingString = new GooString(tmp_str, tmp_length);
+  delete [] tmp_str;
+  return pdfDocEncodingString;
+}
 
 
 FormWidget::FormWidget(PDFDoc *docA, Object *aobj, unsigned num, Ref aref, FormField *fieldA)
@@ -676,6 +685,7 @@ GooString* FormField::getFullyQualifiedName() {
   Object parent;
   GooString *parent_name;
   GooString *full_name;
+  GBool unicode_encoded = gFalse;
 
   if (fullyQualifiedName)
     return fullyQualifiedName;
@@ -687,14 +697,26 @@ GooString* FormField::getFullyQualifiedName() {
     if (parent.dictLookup("T", &obj2)->isString()) {
       parent_name = obj2.getString();
 
-      if (parent_name->hasUnicodeMarker()) {
-        parent_name->del(0, 2); // Remove the unicode BOM
-	full_name->insert(0, "\0.", 2); // 2-byte unicode period
+      if (unicode_encoded) {
+        full_name->insert(0, "\0.", 2); // 2-byte unicode period
+        if (parent_name->hasUnicodeMarker()) {
+          full_name->insert(0, parent_name->getCString() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
+        } else {
+          int tmp_length;
+          char* tmp_str = pdfDocEncodingToUTF16(parent_name, &tmp_length);
+          full_name->insert(0, tmp_str + 2, tmp_length - 2); // Remove the unicode BOM
+          delete [] tmp_str;
+        }
       } else {
         full_name->insert(0, '.'); // 1-byte ascii period
+        if (parent_name->hasUnicodeMarker()) {          
+          unicode_encoded = gTrue;
+          full_name = convertToUtf16(full_name);
+          full_name->insert(0, parent_name->getCString() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
+        } else {
+          full_name->insert(0, parent_name);
+        }
       }
-
-      full_name->insert(0, parent_name);
       obj2.free();
     }
     obj1.free();
@@ -705,12 +727,41 @@ GooString* FormField::getFullyQualifiedName() {
   parent.free();
 
   if (partialName) {
-    full_name->append(partialName);
+    if (unicode_encoded) {
+      if (partialName->hasUnicodeMarker()) {
+        full_name->append(partialName->getCString() + 2, partialName->getLength() - 2); // Remove the unicode BOM
+      } else {
+        int tmp_length;
+        char* tmp_str = pdfDocEncodingToUTF16(partialName, &tmp_length);
+        full_name->append(tmp_str + 2, tmp_length - 2); // Remove the unicode BOM
+        delete [] tmp_str;
+      }
+    } else {
+      if (partialName->hasUnicodeMarker()) {
+          unicode_encoded = gTrue;        
+          full_name = convertToUtf16(full_name);
+          full_name->append(partialName->getCString() + 2, partialName->getLength() - 2); // Remove the unicode BOM
+      } else {
+        full_name->append(partialName);
+      }
+    }
   } else {
     int len = full_name->getLength();
     // Remove the last period
-    if (len > 0)
-      full_name->del(len - 1, 1);
+    if (unicode_encoded) {
+      if (len > 1) {
+        full_name->del(len - 2, 2);
+      }
+    } else {
+      if (len > 0) {
+        full_name->del(len - 1, 1);
+      }
+    }
+  }
+  
+  if (unicode_encoded) {
+    full_name->insert(0, 0xff);
+    full_name->insert(0, 0xfe);
   }
 
   fullyQualifiedName = full_name;
