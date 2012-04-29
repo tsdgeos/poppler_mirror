@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2006-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -1727,9 +1727,11 @@ int CCITTFaxStream::lookChar() {
 	code1 = getTwoDimCode();
 	switch (code1) {
 	case twoDimPass:
-	  addPixels(refLine[b1i + 1], blackPixels);
-	  if (refLine[b1i + 1] < columns) {
-	    b1i += 2;
+	  if (likely(b1i + 1 < columns + 2)) {
+	    addPixels(refLine[b1i + 1], blackPixels);
+	    if (refLine[b1i + 1] < columns) {
+	      b1i += 2;
+	    }
 	  }
 	  break;
 	case twoDimHoriz:
