@@ -2581,6 +2581,9 @@ GBool DCTStream::readMCURow() {
       vSub = vert / 8;
       for (y2 = 0; y2 < mcuHeight; y2 += vert) {
 	for (x2 = 0; x2 < mcuWidth; x2 += horiz) {
+	  if (unlikely(scanInfo.dcHuffTable[cc] >= 4) || unlikely(scanInfo.acHuffTable[cc] >= 4)) {
+	    return gFalse;
+	  }
 	  if (!readDataUnit(&dcHuffTables[scanInfo.dcHuffTable[cc]],
 			    &acHuffTables[scanInfo.acHuffTable[cc]],
 			    &compInfo[cc].prevDC,
