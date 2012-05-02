@@ -192,7 +192,7 @@ poppler_document_new_from_file (const char  *uri,
   length = MultiByteToWideChar(CP_UTF8, 0, filename, -1, filenameW, length);
 
   newDoc = new PDFDoc(filenameW, length, password_g, password_g);
-  delete filenameW;
+  delete [] filenameW;
 #else
   filename_g = new GooString (filename);
   newDoc = new PDFDoc(filename_g, password_g, password_g);
