@@ -2238,7 +2238,6 @@ XpdfSecurityHandler *GlobalParams::getSecurityHandler(char *name) {
   if (!loadPlugin("security", name)) {
     return NULL;
   }
-  deleteGooList(keyBindings, KeyBinding);
 
   lockGlobalParams;
   for (i = 0; i < securityHandlers->getLength(); ++i) {
