@@ -20,6 +20,7 @@
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Kenji Uno <ku@digitaldolphins.jp>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -65,29 +66,35 @@ union GooStringFormatArg {
 enum GooStringFormatType {
   fmtIntDecimal,
   fmtIntHex,
+  fmtIntHexUpper,
   fmtIntOctal,
   fmtIntBinary,
   fmtUIntDecimal,
   fmtUIntHex,
+  fmtUIntHexUpper,
   fmtUIntOctal,
   fmtUIntBinary,
   fmtLongDecimal,
   fmtLongHex,
+  fmtLongHexUpper,
   fmtLongOctal,
   fmtLongBinary,
   fmtULongDecimal,
   fmtULongHex,
+  fmtULongHexUpper,
   fmtULongOctal,
   fmtULongBinary,
 #ifdef LLONG_MAX
   fmtLongLongDecimal,
   fmtLongLongHex,
+  fmtLongLongHexUpper,
   fmtLongLongOctal,
   fmtLongLongBinary,
 #endif
 #ifdef ULLONG_MAX
   fmtULongLongDecimal,
   fmtULongLongHex,
+  fmtULongLongHexUpper,
   fmtULongLongOctal,
   fmtULongLongBinary,
 #endif
@@ -101,13 +108,13 @@ enum GooStringFormatType {
 };
 
 static const char *formatStrings[] = {
-  "d", "x", "o", "b", "ud", "ux", "uo", "ub",
-  "ld", "lx", "lo", "lb", "uld", "ulx", "ulo", "ulb",
+  "d", "x", "X", "o", "b", "ud", "ux", "uX", "uo", "ub",
+  "ld", "lx", "lX", "lo", "lb", "uld", "ulx", "ulX", "ulo", "ulb",
 #ifdef LLONG_MAX
-  "lld", "llx", "llo", "llb",
+  "lld", "llx", "llX", "llo", "llb",
 #endif
 #ifdef ULLONG_MAX
-  "ulld", "ullx", "ullo", "ullb",
+  "ulld", "ullx", "ullX", "ullo", "ullb",
 #endif
   "f", "gs", "g",
   "c",
@@ -388,6 +395,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  switch (ft) {
 	  case fmtIntDecimal:
 	  case fmtIntHex:
+	  case fmtIntHexUpper:
 	  case fmtIntOctal:
 	  case fmtIntBinary:
 	  case fmtSpace:
@@ -395,18 +403,21 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	    break;
 	  case fmtUIntDecimal:
 	  case fmtUIntHex:
+	  case fmtUIntHexUpper:
 	  case fmtUIntOctal:
 	  case fmtUIntBinary:
 	    args[argsLen].ui = va_arg(argList, Guint);
 	    break;
 	  case fmtLongDecimal:
 	  case fmtLongHex:
+	  case fmtLongHexUpper:
 	  case fmtLongOctal:
 	  case fmtLongBinary:
 	    args[argsLen].l = va_arg(argList, long);
 	    break;
 	  case fmtULongDecimal:
 	  case fmtULongHex:
+	  case fmtULongHexUpper:
 	  case fmtULongOctal:
 	  case fmtULongBinary:
 	    args[argsLen].ul = va_arg(argList, Gulong);
@@ -414,6 +425,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 #ifdef LLONG_MAX
 	  case fmtLongLongDecimal:
 	  case fmtLongLongHex:
+	  case fmtLongLongHexUpper:
 	  case fmtLongLongOctal:
 	  case fmtLongLongBinary:
 	    args[argsLen].ll = va_arg(argList, long long);
@@ -422,6 +434,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 #ifdef ULLONG_MAX
 	  case fmtULongLongDecimal:
 	  case fmtULongLongHex:
+	  case fmtULongLongHexUpper:
 	  case fmtULongLongOctal:
 	  case fmtULongLongBinary:
 	    args[argsLen].ull = va_arg(argList, unsigned long long);
@@ -454,6 +467,10 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	case fmtIntHex:
 	  formatInt(arg.i, buf, sizeof(buf), zeroFill, width, 16, &str, &len);
 	  break;
+	case fmtIntHexUpper:
+	  formatInt(arg.i, buf, sizeof(buf), zeroFill, width, 16, &str, &len,
+		    gTrue);
+	  break;
 	case fmtIntOctal:
 	  formatInt(arg.i, buf, sizeof(buf), zeroFill, width, 8, &str, &len);
 	  break;
@@ -468,6 +485,10 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  formatUInt(arg.ui, buf, sizeof(buf), zeroFill, width, 16,
 		     &str, &len);
 	  break;
+	case fmtUIntHexUpper:
+	  formatUInt(arg.ui, buf, sizeof(buf), zeroFill, width, 16,
+		     &str, &len, gTrue);
+	  break;
 	case fmtUIntOctal:
 	  formatUInt(arg.ui, buf, sizeof(buf), zeroFill, width, 8, &str, &len);
 	  break;
@@ -479,6 +500,10 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  break;
 	case fmtLongHex:
 	  formatInt(arg.l, buf, sizeof(buf), zeroFill, width, 16, &str, &len);
+	  break;
+	case fmtLongHexUpper:
+	  formatInt(arg.l, buf, sizeof(buf), zeroFill, width, 16, &str, &len,
+		    gTrue);
 	  break;
 	case fmtLongOctal:
 	  formatInt(arg.l, buf, sizeof(buf), zeroFill, width, 8, &str, &len);
@@ -494,6 +519,10 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  formatUInt(arg.ul, buf, sizeof(buf), zeroFill, width, 16,
 		     &str, &len);
 	  break;
+	case fmtULongHexUpper:
+	  formatUInt(arg.ul, buf, sizeof(buf), zeroFill, width, 16,
+		     &str, &len, gTrue);
+	  break;
 	case fmtULongOctal:
 	  formatUInt(arg.ul, buf, sizeof(buf), zeroFill, width, 8, &str, &len);
 	  break;
@@ -506,6 +535,10 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  break;
 	case fmtLongLongHex:
 	  formatInt(arg.ll, buf, sizeof(buf), zeroFill, width, 16, &str, &len);
+	  break;
+	case fmtLongLongHexUpper:
+	  formatInt(arg.ll, buf, sizeof(buf), zeroFill, width, 16, &str, &len,
+		    gTrue);
 	  break;
 	case fmtLongLongOctal:
 	  formatInt(arg.ll, buf, sizeof(buf), zeroFill, width, 8, &str, &len);
@@ -522,6 +555,10 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	case fmtULongLongHex:
 	  formatUInt(arg.ull, buf, sizeof(buf), zeroFill, width, 16,
 		     &str, &len);
+	  break;
+	case fmtULongLongHexUpper:
+	  formatUInt(arg.ull, buf, sizeof(buf), zeroFill, width, 16,
+		     &str, &len, gTrue);
 	  break;
 	case fmtULongLongOctal:
 	  formatUInt(arg.ull, buf, sizeof(buf), zeroFill, width, 8,
@@ -595,16 +632,20 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
   gfree(args);
   return this;
 }
+
+static const char lowerCaseDigits[17] = "0123456789abcdef";
+static const char upperCaseDigits[17] = "0123456789ABCDEF";
+
 #ifdef LLONG_MAX
 void GooString::formatInt(long long x, char *buf, int bufSize,
                           GBool zeroFill, int width, int base,
-                          char **p, int *len) {
+                          char **p, int *len, GBool upperCase) {
 #else
 void GooString::formatInt(long x, char *buf, int bufSize,
                           GBool zeroFill, int width, int base,
-                          char **p, int *len) {
+                          char **p, int *len, GBool upperCase) {
 #endif
-  static char vals[17] = "0123456789abcdef";
+  const char *vals = upperCase ? upperCaseDigits : lowerCaseDigits;
   GBool neg;
   int start, i, j;
 
@@ -636,13 +677,13 @@ void GooString::formatInt(long x, char *buf, int bufSize,
 #ifdef ULLONG_MAX
 void GooString::formatUInt(unsigned long long x, char *buf, int bufSize,
                            GBool zeroFill, int width, int base,
-                           char **p, int *len) {
+                           char **p, int *len, GBool upperCase) {
 #else
 void GooString::formatUInt(Gulong x, char *buf, int bufSize,
                            GBool zeroFill, int width, int base,
-                           char **p, int *len) {
+                           char **p, int *len, GBool upperCase) {
 #endif
-  static char vals[17] = "0123456789abcdef";
+  const char *vals = upperCase ? upperCaseDigits : lowerCaseDigits;
   int i, j;
 
   i = bufSize;

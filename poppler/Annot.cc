@@ -3891,7 +3891,7 @@ void Annot::layoutText(GooString *text, GooString *outBuf, int *i,
         }
       } else {
         ccToUnicode->decRefCnt();
-        error(errSyntaxError, -1, "AnnotWidget::layoutText, cannot convert U+{0:04ux}", uChar);
+        error(errSyntaxError, -1, "AnnotWidget::layoutText, cannot convert U+{0:04uX}", uChar);
       }
     }
 

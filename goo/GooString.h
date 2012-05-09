@@ -18,6 +18,7 @@
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2008-2010, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -80,10 +81,10 @@ public:
   // - <precision> is the number of digits to the right of the decimal
   //   point (for floating point numbers)
   // - <type> is one of:
-  //     d, x, o, b -- int in decimal, hex, octal, binary
-  //     ud, ux, uo, ub -- unsigned int
-  //     ld, lx, lo, lb, uld, ulx, ulo, ulb -- long, unsigned long
-  //     lld, llx, llo, llb, ulld, ullx, ullo, ullb
+  //     d, x, X, o, b -- int in decimal, lowercase hex, uppercase hex, octal, binary
+  //     ud, ux, uX, uo, ub -- unsigned int
+  //     ld, lx, lX, lo, lb, uld, ulx, ulX, ulo, ulb -- long, unsigned long
+  //     lld, llx, llX, llo, llb, ulld, ullx, ullX, ullo, ullb
   //         -- long long, unsigned long long
   //     f, g -- double
   //     c -- char
@@ -170,20 +171,20 @@ private:
 #ifdef LLONG_MAX
   static void formatInt(long long x, char *buf, int bufSize,
 			GBool zeroFill, int width, int base,
-			char **p, int *len);
+			char **p, int *len, GBool upperCase = gFalse);
 #else
   static void formatInt(long x, char *buf, int bufSize,
 			GBool zeroFill, int width, int base,
-			char **p, int *len);
+			char **p, int *len, GBool upperCase = gFalse);
 #endif
 #ifdef ULLONG_MAX
   static void formatUInt(unsigned long long x, char *buf, int bufSize,
 			 GBool zeroFill, int width, int base,
-			 char **p, int *len);
+			 char **p, int *len, GBool upperCase = gFalse);
 #else
   static void formatUInt(Gulong x, char *buf, int bufSize,
 			 GBool zeroFill, int width, int base,
-			 char **p, int *len);
+			 char **p, int *len, GBool upperCase = gFalse);
 #endif
   static void formatDouble(double x, char *buf, int bufSize, int prec,
 			   GBool trim, char **p, int *len);
