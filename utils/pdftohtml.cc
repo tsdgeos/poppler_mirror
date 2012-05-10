@@ -62,10 +62,6 @@
 #include "DateInfo.h"
 #include "goo/gfile.h"
 
-#ifndef GHOSTSCRIPT
-# define GHOSTSCRIPT "gs"
-#endif
-
 static int firstPage = 1;
 static int lastPage = 0;
 static GBool rawOrder = gTrue;
