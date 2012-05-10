@@ -133,14 +133,12 @@ public:
 
   ~GlobalParams();
 
-  void setBaseDir(const char *dir);
   void setupBaseFonts(char *dir);
 
   //----- accessors
 
   CharCode getMacRomanCharCode(char *charName);
 
-  GooString *getBaseDir();
   Unicode mapNameToUnicode(const char *charName);
   UnicodeMap *getResidentUnicodeMap(GooString *encodingName);
   FILE *getUnicodeMapFile(GooString *encodingName);
@@ -273,7 +271,6 @@ private:
 
   //----- user-modifiable settings
 
-  GooString *baseDir;		// base directory - for plugins, etc.
   NameToCharCode *		// mapping from char name to Unicode
     nameToUnicode;
   GooHash *cidToUnicodes;		// files for mappings from char collections

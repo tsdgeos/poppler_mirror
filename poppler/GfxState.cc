@@ -354,9 +354,8 @@ cmsHPROFILE loadColorProfile(const char *fileName)
     }
     return hp;
   }
-  // try to load from user directory
-  GooString *path = globalParams->getBaseDir();
-  path->append(COLOR_PROFILE_DIR);
+  // try to load from global directory
+  GooString *path = new GooString(GLOBAL_COLOR_PROFILE_DIR);
   path->append(fileName);
   // check if open the file
   if ((fp = fopen(path->getCString(),"r")) != NULL) {
@@ -364,17 +363,6 @@ cmsHPROFILE loadColorProfile(const char *fileName)
     hp = cmsOpenProfileFromFile(path->getCString(),"r");
   }
   delete path;
-  if (hp == NULL) {
-    // load from global directory
-    path = new GooString(GLOBAL_COLOR_PROFILE_DIR);
-    path->append(fileName);
-    // check if open the file
-    if ((fp = fopen(path->getCString(),"r")) != NULL) {
-      fclose(fp);
-      hp = cmsOpenProfileFromFile(path->getCString(),"r");
-    }
-    delete path;
-  }
   return hp;
 }
 

@@ -571,11 +571,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   }
 
 #ifdef _WIN32
-  // baseDir will be set by a call to setBaseDir
-  baseDir = new GooString();
   substFiles = new GooHash(gTrue);
-#else
-  baseDir = appendToPath(getHomeDir(), ".xpdf");
 #endif
   nameToUnicode = new NameToCharCode();
   cidToUnicodes = new GooHash(gTrue);
@@ -797,7 +793,6 @@ GlobalParams::~GlobalParams() {
 
   delete macRomanReverseMap;
 
-  delete baseDir;
   delete nameToUnicode;
   deleteGooHash(cidToUnicodes, GooString);
   deleteGooHash(unicodeToUnicodes, GooString);
@@ -847,28 +842,12 @@ GlobalParams::~GlobalParams() {
 }
 
 //------------------------------------------------------------------------
-
-void GlobalParams::setBaseDir(const char *dir) {
-  delete baseDir;
-  baseDir = new GooString(dir);
-}
-
-//------------------------------------------------------------------------
 // accessors
 //------------------------------------------------------------------------
 
 CharCode GlobalParams::getMacRomanCharCode(char *charName) {
   // no need to lock - macRomanReverseMap is constant
   return macRomanReverseMap->lookup(charName);
-}
-
-GooString *GlobalParams::getBaseDir() {
-  GooString *s;
-
-  lockGlobalParams;
-  s = baseDir->copy();
-  unlockGlobalParams;
-  return s;
 }
 
 Unicode GlobalParams::mapNameToUnicode(const char *charName) {

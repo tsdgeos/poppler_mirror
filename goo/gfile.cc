@@ -60,52 +60,6 @@
 
 //------------------------------------------------------------------------
 
-GooString *getHomeDir() {
-#ifdef VMS
-  //---------- VMS ----------
-  return new GooString("SYS$LOGIN:");
-
-#elif defined(__EMX__) || defined(_WIN32)
-  //---------- OS/2+EMX and Win32 ----------
-  char *s;
-  GooString *ret;
-
-  if ((s = getenv("HOME")))
-    ret = new GooString(s);
-  else
-    ret = new GooString(".");
-  return ret;
-
-#elif defined(ACORN)
-  //---------- RISCOS ----------
-  return new GooString("@");
-
-#elif defined(MACOS)
-  //---------- MacOS ----------
-  return new GooString(":");
-
-#else
-  //---------- Unix ----------
-  char *s;
-  struct passwd *pw;
-  GooString *ret;
-
-  if ((s = getenv("HOME"))) {
-    ret = new GooString(s);
-  } else {
-    if ((s = getenv("USER")))
-      pw = getpwnam(s);
-    else
-      pw = getpwuid(getuid());
-    if (pw)
-      ret = new GooString(pw->pw_dir);
-    else
-      ret = new GooString(".");
-  }
-  return ret;
-#endif
-}
-
 GooString *getCurrentDir() {
   char buf[PATH_MAX+1];
 

@@ -71,9 +71,6 @@ class GooString;
 
 //------------------------------------------------------------------------
 
-// Get home directory path.
-extern GooString *getHomeDir();
-
 // Get current directory.
 extern GooString *getCurrentDir();
 

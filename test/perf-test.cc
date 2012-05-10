@@ -1242,7 +1242,6 @@ int main(int argc, char **argv)
     if (!globalParams)
         return 1;
     globalParams->setErrQuiet(gFalse);
-    globalParams->setBaseDir("");
 
     FILE * outFile = NULL;
     if (gOutFileName) {
