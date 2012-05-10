@@ -436,7 +436,7 @@ Plugin *Plugin::load(char *type, char *name) {
   void *dlA;
 #endif
 
-  path = globalParams->getBaseDir();
+  path = new GooString(POPPLER_DATADIR);
   appendToPath(path, "plugins");
   appendToPath(path, type);
   appendToPath(path, name);
