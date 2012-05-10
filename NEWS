@@ -1,3 +1,19 @@
+Release 0.20.0
+        core:
+         * Reconstruct xref table if xref needed but missing (Bug #40719)
+         * Fix getFullyQualifiedName with unicode field names (Bug #49256)
+         * SplashOutputDev: Fix rendering of knockout groups (Bug #12185)
+         * SplashOutputDev: Fix cmyk transfer bug (Bug #49341)
+         * Fix crashes in broken documents
+         * Bring back the Outputdev::begin/endMarkedContent virtuals
+         * Build fixes
+        
+        qt4:
+         * Convert propertly unicode encoded field qualified names
+        
+        glib:
+         * glib: Use delete[] to free array allocated with new[] (Bug #48447)
+
 Release 0.19.4
         core:
          * Annotation improvements
