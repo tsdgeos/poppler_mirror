@@ -85,10 +85,6 @@ extern GooString *grabPath(char *fileName);
 // Is this an absolute path or file name?
 extern GBool isAbsolutePath(char *path);
 
-// Make this path absolute by prepending current directory (if path is
-// relative) or prepending user's directory (if path starts with '~').
-extern GooString *makePathAbsolute(GooString *path);
-
 // Get the modification time for <fileName>.  Returns 0 if there is an
 // error.
 extern time_t getModTime(char *fileName);
