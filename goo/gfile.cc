@@ -545,14 +545,6 @@ GBool openTempFile(GooString **name, FILE **f, const char *mode) {
 #endif
 }
 
-GBool executeCommand(char *cmd) {
-#ifdef VMS
-  return system(cmd) ? gTrue : gFalse;
-#else
-  return system(cmd) ? gFalse : gTrue;
-#endif
-}
-
 #ifdef WIN32
 GooString *fileNameToUTF8(char *path) {
   GooString *s;
