@@ -33,6 +33,7 @@
 // Copyright (C) 2012 Yi Yang <ahyangyi@gmail.com>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012 Peter Breitenlohner <peb@mppmu.mpg.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1421,7 +1422,8 @@ void GlobalParams::setupBaseFonts(char *dir) {
 
 GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 					  SysFontType *type,
-					  int *fontNum, GooString * /*substituteFontName*/) {
+					  int *fontNum, GooString * /*substituteFontName*/,
+					  GooString * /*base14Name*/) {
   SysFontInfo *fi;
   GooString *path;
 
