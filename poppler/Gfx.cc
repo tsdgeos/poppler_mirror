@@ -4996,6 +4996,12 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs) {
     fflush(stdout);
   }
   ocState = !contentIsHidden();
+  
+  if (numArgs == 2 && args[1].isDict()) {
+    out->beginMarkedContent(args[0].getName(), args[1].getDict());
+  } else if(numArgs == 1) {
+    out->beginMarkedContent(args[0].getName(), NULL);
+  }
 }
 
 void Gfx::opEndMarkedContent(Object args[], int numArgs) {
@@ -5013,6 +5019,8 @@ void Gfx::opEndMarkedContent(Object args[], int numArgs) {
   if (mcKind == gfxMCActualText)
     out->endActualText(state);
   ocState = !contentIsHidden();
+  
+  out->endMarkedContent(state);
 }
 
 void Gfx::opMarkPoint(Object args[], int numArgs) {
