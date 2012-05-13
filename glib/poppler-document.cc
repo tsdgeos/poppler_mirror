@@ -134,6 +134,23 @@ _poppler_document_new_from_pdfdoc (PDFDoc  *newDoc,
   return document;
 }
 
+static GooString *
+poppler_password_to_latin1 (const gchar *password)
+{
+  gchar *password_latin;
+  GooString *password_g;
+
+  if (!password)
+    return NULL;
+
+  password_latin = g_convert(password, -1, "ISO-8859-1", "UTF-8",
+                             NULL, NULL, NULL);
+  password_g = new GooString (password_latin);
+  g_free (password_latin);
+
+  return password_g;
+}
+
 /**
  * poppler_document_new_from_file:
  * @uri: uri of the file to load
@@ -164,21 +181,7 @@ poppler_document_new_from_file (const char  *uri,
   if (!filename)
     return NULL;
 
-  password_g = NULL;
-  if (password != NULL) {
-    if (g_utf8_validate (password, -1, NULL)) {
-      gchar *password_latin;
-      
-      password_latin = g_convert (password, -1,
-				  "ISO-8859-1",
-				  "UTF-8",
-				  NULL, NULL, NULL);
-      password_g = new GooString (password_latin);
-      g_free (password_latin);
-    } else {
-      password_g = new GooString (password);
-    }
-  }
+  password_g = poppler_password_to_latin1(password);
 
 #ifdef G_OS_WIN32
   wchar_t *filenameW;
@@ -237,10 +240,7 @@ poppler_document_new_from_data (char        *data,
   obj.initNull();
   str = new MemStream(data, 0, length, &obj);
 
-  password_g = NULL;
-  if (password != NULL)
-    password_g = new GooString (password);
-
+  password_g = poppler_password_to_latin1(password);
   newDoc = new PDFDoc(str, password_g, password_g);
   delete password_g;
 
@@ -304,10 +304,7 @@ poppler_document_new_from_stream (GInputStream *stream,
     str = new CachedFileStream(cachedFile, 0, gFalse, cachedFile->getLength(), &obj);
   }
 
-  password_g = NULL;
-  if (password != NULL)
-    password_g = new GooString (password);
-
+  password_g = poppler_password_to_latin1(password);
   newDoc = new PDFDoc(str, password_g, password_g);
   delete password_g;
 
