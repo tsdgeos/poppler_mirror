@@ -293,7 +293,6 @@ gint main (gint argc, gchar **argv)
 	GtkWidget        *treeview;
 	GtkTreeSelection *selection;
 	GFile            *file;
-	gchar            *uri;
 	GTimer           *timer;
 	GError           *error = NULL;
 	GtkAccelGroup    *gtk_accel;
@@ -313,10 +312,9 @@ gint main (gint argc, gchar **argv)
 	gtk_init (&argc, &argv);
 
 	file = g_file_new_for_commandline_arg (argv[1]);
-	uri = g_file_get_uri (file);
 
 	timer = g_timer_new ();
-	document = poppler_document_new_from_file (uri, NULL, &error);
+	document = poppler_document_new_from_gfile (file, NULL, NULL, &error);
 	g_timer_stop (timer);
 	if (error) {
 		while (g_error_matches (error, POPPLER_ERROR, POPPLER_ERROR_ENCRYPTED)) {
@@ -327,7 +325,6 @@ gint main (gint argc, gchar **argv)
 			if (gtk_dialog_run (dialog) != GTK_RESPONSE_OK) {
 				g_print ("Error: no password provided\n");
 				g_object_unref (file);
-				g_free (uri);
 
 				return 1;
 			}
@@ -336,7 +333,7 @@ gint main (gint argc, gchar **argv)
 			password = g_object_get_data (G_OBJECT (dialog), "pgd-password");
 
 			g_timer_start (timer);
-			document = poppler_document_new_from_file (uri, password, &error);
+			document = poppler_document_new_from_gfile (file, password, NULL, &error);
 			g_timer_stop (timer);
 
 			gtk_widget_destroy (GTK_WIDGET (dialog));
@@ -346,14 +343,12 @@ gint main (gint argc, gchar **argv)
 			g_print ("Error: %s\n", error->message);
 			g_error_free (error);
 			g_object_unref (file);
-			g_free (uri);
 
 			return 1;
 		}
 	}
 
 	g_object_unref (file);
-	g_free (uri);
 
 	g_print ("Document successfully loaded in %.4f seconds\n",
 		 g_timer_elapsed (timer, NULL));
