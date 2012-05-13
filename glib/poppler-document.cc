@@ -259,6 +259,7 @@ stream_is_memory_buffer_or_local_file (GInputStream *stream)
  * @stream: a #GInputStream to read from
  * @length: the stream length, or -1 if not known
  * @password: (allow-none): password to unlock the file with, or %NULL
+ * @cancellable: (allow-none): a #GCancellable, or %NULL
  * @error: (allow-none): Return location for an error, or %NULL
  *
  * Creates a new #PopplerDocument reading the PDF contents from @stream.
