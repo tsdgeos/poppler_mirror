@@ -313,6 +313,7 @@ SysFontInfo *SysFontList::makeWindowsFont(char *name, int fontNum,
   char c;
   int i;
   SysFontType type;
+  GooString substituteName;
 
   n = strlen(name);
   bold = italic = oblique = fixedWidth = gFalse;
@@ -380,7 +381,7 @@ SysFontInfo *SysFontList::makeWindowsFont(char *name, int fontNum,
   }
 
   return new SysFontInfo(s, bold, italic, oblique, fixedWidth,
-                         new GooString(path), type, fontNum);
+                         new GooString(path), type, fontNum, substituteName.copy());
 }
 
 static GooString* replaceSuffix(GooString *path,
@@ -570,6 +571,8 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
     path = fi->path->copy();
     *type = fi->type;
     *fontNum = fi->fontNum;
+    if (substituteFontName)
+      substituteFontName.Set(fi->substituteName->getCString());
   } else {
     GooString *substFontName = new GooString(findSubstituteName(font, fontFiles,
                                                                 substFiles,
