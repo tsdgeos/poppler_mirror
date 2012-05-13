@@ -38,6 +38,8 @@
 #include "poppler.h"
 #include "poppler-private.h"
 #include "poppler-enums.h"
+#include "poppler-input-stream.h"
+#include "poppler-cached-file-loader.h"
 
 /**
  * SECTION:poppler-document
@@ -235,6 +237,73 @@ poppler_document_new_from_data (char        *data,
   // create stream
   obj.initNull();
   str = new MemStream(data, 0, length, &obj);
+
+  password_g = NULL;
+  if (password != NULL)
+    password_g = new GooString (password);
+
+  newDoc = new PDFDoc(str, password_g, password_g);
+  delete password_g;
+
+  return _poppler_document_new_from_pdfdoc (newDoc, error);
+}
+
+static inline gboolean
+stream_is_memory_buffer_or_local_file (GInputStream *stream)
+{
+  return G_IS_MEMORY_INPUT_STREAM(stream) ||
+    (G_IS_FILE_INPUT_STREAM(stream) && strcmp(g_type_name_from_instance((GTypeInstance*)stream), "GLocalFileInputStream") == 0);
+}
+
+/**
+ * poppler_document_new_from_stream:
+ * @stream: a #GInputStream to read from
+ * @length: the stream length, or -1 if not known
+ * @password: (allow-none): password to unlock the file with, or %NULL
+ * @error: (allow-none): Return location for an error, or %NULL
+ *
+ * Creates a new #PopplerDocument reading the PDF contents from @stream.
+ * Note that the given #GInputStream must be seekable or %G_IO_ERROR_NOT_SUPPORTED
+ * will be returned.
+ * Possible errors include those in the #POPPLER_ERROR and #G_FILE_ERROR
+ * domains.
+ *
+ * Returns: (transfer full): a new #PopplerDocument, or %NULL
+ *
+ * Since: 0.22
+ */
+PopplerDocument *
+poppler_document_new_from_stream (GInputStream *stream,
+                                  goffset       length,
+                                  const char   *password,
+                                  GCancellable *cancellable,
+                                  GError      **error)
+{
+  Object obj;
+  PDFDoc *newDoc;
+  BaseStream *str;
+  GooString *password_g;
+
+  g_return_val_if_fail(G_IS_INPUT_STREAM(stream), NULL);
+  g_return_val_if_fail(length == (goffset)-1 || length > 0, NULL);
+
+  if (!globalParams) {
+    globalParams = new GlobalParams();
+  }
+
+  if (!G_IS_SEEKABLE(stream) || !g_seekable_can_seek(G_SEEKABLE(stream))) {
+    g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                        "Stream is not seekable");
+    return NULL;
+  }
+
+  obj.initNull();
+  if (stream_is_memory_buffer_or_local_file(stream)) {
+    str = new PopplerInputStream(stream, cancellable, 0, gFalse, 0, &obj);
+  } else {
+    CachedFile *cachedFile = new CachedFile(new PopplerCachedFileLoader(stream, cancellable, length), new GooString());
+    str = new CachedFileStream(cachedFile, 0, gFalse, cachedFile->getLength(), &obj);
+  }
 
   password_g = NULL;
   if (password != NULL)

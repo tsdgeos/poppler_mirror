@@ -64,6 +64,10 @@ libpoppler_glib_la_SOURCES =			\
 	poppler-layer.cc			\
 	poppler-media.cc			\
 	poppler-movie.cc			\
+	poppler-cached-file-loader.cc		\
+	poppler-cached-file-loader.h		\
+	poppler-input-stream.cc			\
+	poppler-input-stream.h			\
 	poppler.cc				\
 	poppler-private.h
 

@@ -531,12 +531,12 @@ if test x$enable_cairo_output = xyes; then
               		       enable_poppler_glib=$enableval,
 			       enable_poppler_glib="try")
   if test x$enable_poppler_glib = xyes; then
-    PKG_CHECK_MODULES(POPPLER_GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION)
+    PKG_CHECK_MODULES(POPPLER_GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED gio-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION)
   elif test x$enable_poppler_glib = xtry; then
-    PKG_CHECK_MODULES(POPPLER_GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION,
+    PKG_CHECK_MODULES(POPPLER_GLIB, glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED gio-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION,
                       [enable_poppler_glib="yes"],
                       [enable_poppler_glib="no"
-                      use_glib="no (requires glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION)"])
+                      use_glib="no (requires glib-2.0 >= $GLIB_REQUIRED gobject-2.0 >= $GLIB_REQUIRED gio-2.0 >= $GLIB_REQUIRED cairo >= $CAIRO_VERSION)"])
   fi
   if test x$enable_poppler_glib = xyes; then
     # Check for introspection
@@ -644,9 +644,9 @@ AC_ARG_ENABLE(gtk-test,
               enable_gtk_test=$enableval,
               enable_gtk_test="try")
 if test x$enable_gtk_test = xyes; then
-  PKG_CHECK_MODULES(GTK_TEST, gtk+-2.0 >= 2.14 gdk-pixbuf-2.0 gthread-2.0 gio-2.0)
+  PKG_CHECK_MODULES(GTK_TEST, gtk+-2.0 >= 2.14 gdk-pixbuf-2.0 gthread-2.0)
 elif test x$enable_gtk_test = xtry; then
-  PKG_CHECK_MODULES(GTK_TEST, gtk+-2.0 >= 2.14 gdk-pixbuf-2.0 gthread-2.0 gio-2.0,
+  PKG_CHECK_MODULES(GTK_TEST, gtk+-2.0 >= 2.14 gdk-pixbuf-2.0 gthread-2.0,
                     [enable_gtk_test="yes"],
                     [enable_gtk_test="no"])
 fi

@@ -20,6 +20,7 @@
 #define __POPPLER_DOCUMENT_H__
 
 #include <glib-object.h>
+#include <gio/gio.h>
 #include "poppler.h"
 
 G_BEGIN_DECLS
@@ -172,6 +173,11 @@ PopplerDocument   *poppler_document_new_from_data          (char            *dat
 							    int              length,
 							    const char      *password,
 							    GError         **error);
+PopplerDocument   *poppler_document_new_from_stream        (GInputStream    *stream,
+                                                            goffset          length,
+                                                            const char      *password,
+                                                            GCancellable    *cancellable,
+                                                            GError         **error);
 gboolean           poppler_document_save                   (PopplerDocument *document,
 							    const char      *uri,
 							    GError         **error);
