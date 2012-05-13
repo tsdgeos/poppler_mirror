@@ -178,6 +178,10 @@ PopplerDocument   *poppler_document_new_from_stream        (GInputStream    *str
                                                             const char      *password,
                                                             GCancellable    *cancellable,
                                                             GError         **error);
+PopplerDocument   *poppler_document_new_from_gfile         (GFile           *file,
+                                                            const char      *password,
+                                                            GCancellable    *cancellable,
+                                                            GError         **error);
 gboolean           poppler_document_save                   (PopplerDocument *document,
 							    const char      *uri,
 							    GError         **error);

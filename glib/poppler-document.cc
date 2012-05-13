@@ -312,6 +312,52 @@ poppler_document_new_from_stream (GInputStream *stream,
   return _poppler_document_new_from_pdfdoc (newDoc, error);
 }
 
+/**
+ * poppler_document_new_from_gfile:
+ * @file: a #GFile to load
+ * @password: (allow-none): password to unlock the file with, or %NULL
+ * @cancellable: (allow-none): a #GCancellable, or %NULL
+ * @error: (allow-none): Return location for an error, or %NULL
+ *
+ * Creates a new #PopplerDocument reading the PDF contents from @file.
+ * Possible errors include those in the #POPPLER_ERROR and #G_FILE_ERROR
+ * domains.
+ *
+ * Returns: (transfer full): a new #PopplerDocument, or %NULL
+ *
+ * Since: 0.22
+ */
+PopplerDocument *
+poppler_document_new_from_gfile (GFile        *file,
+                                 const char   *password,
+                                 GCancellable *cancellable,
+                                 GError      **error)
+{
+  PopplerDocument *document;
+  GFileInputStream *stream;
+
+  g_return_val_if_fail(G_IS_FILE(file), NULL);
+
+  if (g_file_is_native(file)) {
+    gchar *uri;
+
+    uri = g_file_get_uri(file);
+    document = poppler_document_new_from_file(uri, password, error);
+    g_free(uri);
+
+    return document;
+  }
+
+  stream = g_file_read(file, cancellable, error);
+  if (!stream)
+    return NULL;
+
+  document = poppler_document_new_from_stream(G_INPUT_STREAM(stream), -1, password, cancellable, error);
+  g_object_unref(stream);
+
+  return document;
+}
+
 static gboolean
 handle_save_error (int      err_code,
 		   GError **error)

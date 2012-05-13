@@ -116,6 +116,7 @@ PopplerPermissions
 poppler_document_new_from_file
 poppler_document_new_from_data
 poppler_document_new_from_stream
+poppler_document_new_from_gfile
 poppler_document_save
 poppler_document_save_a_copy
 poppler_document_get_id
