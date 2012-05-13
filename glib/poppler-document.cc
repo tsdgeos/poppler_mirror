@@ -84,8 +84,6 @@ _poppler_document_new_from_pdfdoc (PDFDoc  *newDoc,
 {
   PopplerDocument *document;
 
-  document = (PopplerDocument *) g_object_new (POPPLER_TYPE_DOCUMENT, NULL, NULL);
-
   if (!newDoc->isOk()) {
     int fopen_errno;
     switch (newDoc->getErrorCode())
@@ -125,6 +123,7 @@ _poppler_document_new_from_pdfdoc (PDFDoc  *newDoc,
     return NULL;
   }
 
+  document = (PopplerDocument *) g_object_new (POPPLER_TYPE_DOCUMENT, NULL);
   document->doc = newDoc;
 
   document->output_dev = new CairoOutputDev ();
