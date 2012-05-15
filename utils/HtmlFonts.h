@@ -21,6 +21,7 @@
 // Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Steven Murdoch <Steven.Murdoch@cl.cam.ac.uk>
 // Copyright (C) 2011 Joshua Richardson <jric@chegg.com>
+// Copyright (C) 2012 Igor Slepchin <igor.slepchin@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -72,7 +73,7 @@ class HtmlFont{
 public:  
 
    HtmlFont(){FontName=NULL; rotOrSkewed = gFalse;}
-   HtmlFont(GooString* fontname,int _size, GfxRGB rgb);
+   HtmlFont(GfxFont *font,int _size, GfxRGB rgb);
    HtmlFont(const HtmlFont& x);
    HtmlFont& operator=(const HtmlFont& x);
    HtmlFontColor getColor() const {return color;}

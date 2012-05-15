@@ -174,9 +174,7 @@ HtmlString::HtmlString(GfxState *state, double fontSize, HtmlFontAccu* _fonts) :
     yMax = y - descent * fontSize;
     GfxRGB rgb;
     state->getFillRGB(&rgb);
-    GooString *name = state->getFont()->getName();
-    if (!name) name = HtmlFont::getDefaultFont(); //new GooString("default");
-    HtmlFont hfont=HtmlFont(name, static_cast<int>(fontSize-1), rgb);
+    HtmlFont hfont=HtmlFont(font, static_cast<int>(fontSize-1), rgb);
     if (isMatRotOrSkew(state->getTextMat())) {
       double normalizedMatrix[4];
       memcpy(normalizedMatrix, state->getTextMat(), sizeof(normalizedMatrix));
