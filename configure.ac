@@ -660,7 +660,7 @@ AC_ARG_ENABLE(utils,
 AM_CONDITIONAL(BUILD_UTILS, test x$enable_utils = xyes)
 
 AC_ARG_ENABLE(compile-warnings,
-              AC_HELP_STRING([--enable-compile-warnings=@<:@no/yes/kde@:>@]
+              AC_HELP_STRING([--enable-compile-warnings=@<:@no/yes/kde@:>@],
                              [Turn on compiler warnings.]),,
               [enable_compile_warnings="yes"])
 
@@ -669,31 +669,30 @@ dnl   Color Management
 dnl
 
 AC_ARG_ENABLE(cms,
-	      AC_HELP_STRING([--disable-cms],
-	                     [Don't use color management system.]),
-              enable_cms=$enableval,
-              enable_cms="try")
-if test x$enable_cms = xyes; then
+              AC_HELP_STRING([--enable-cms=@<:@auto/lcms1/lcms2/none@:>@],
+                             [Use color management system. 'auto' prefers lcms2 over lcms1 if both are available [[default=auto]]]),
+              [enable_cms=$enableval],
+              [enable_cms="auto"])
+if test x$enable_cms = xauto; then
   PKG_CHECK_MODULES(LCMS, lcms2, [lcms2=yes], [lcms2=no])
   if test x$lcms2 = xno; then
-      PKG_CHECK_MODULES(LCMS, lcms)
+      PKG_CHECK_MODULES(LCMS, lcms, [lcms1=yes], [lcms1=no])
   fi
-elif test x$enable_cms = xtry; then
-  PKG_CHECK_MODULES(LCMS, lcms2,[lcms2=yes],[lcms2=no])
-  if test x$lcms2 = xyes; then
-    enable_cms=yes
-  else
-      PKG_CHECK_MODULES(LCMS, lcms,[enable_cms=yes],[enable_cms=no])
-  fi
+elif test x$enable_cms = xlcms1; then
+  PKG_CHECK_MODULES(LCMS, lcms, [lcms1=yes], [lcms1=no])
+elif test x$enable_cms = xlcms2; then
+  PKG_CHECK_MODULES(LCMS, lcms2, [lcms2=yes], [lcms2=no])
 fi
 
-if test "x$enable_cms" = "xyes"; then
+if test x$lcms1 = xyes || test x$lcms2 = xyes; then
+  enable_cms=yes
   AC_DEFINE(USE_CMS, 1, [Defines if use cms])
-  if test "x$lcms2" != "xyes"; then
+  if test x$lcms1 = xyes; then
     lcms1=yes;
     AC_DEFINE(USE_LCMS1, 1, [Defines if use lcms1])
   fi
 fi
+
 AM_CONDITIONAL(USE_CMS, test x$enable_cms = xyes)
 AM_CONDITIONAL(USE_LCMS1, test x$lcms1 = xyes)
 
