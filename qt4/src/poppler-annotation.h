@@ -302,6 +302,7 @@ class POPPLER_QT4_EXPORT TextAnnotation : public Annotation
     enum TextType { Linked, InPlace };
     enum InplaceIntent { Unknown, Callout, TypeWriter };
 
+    TextAnnotation( TextType type );
     virtual ~TextAnnotation();
     virtual SubType subType() const;
 
@@ -360,7 +361,6 @@ class POPPLER_QT4_EXPORT TextAnnotation : public Annotation
     void setInplaceIntent( InplaceIntent intent );
 
   private:
-    TextAnnotation( TextType type );
     TextAnnotation( const QDomNode &node );
     TextAnnotation( TextAnnotationPrivate &dd );
     virtual void store( QDomNode &parentNode, QDomDocument &document ) const;
