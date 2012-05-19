@@ -77,7 +77,6 @@ pgd_selections_clear_selections (PgdSelectionsDemo *demo)
 		cairo_region_destroy (demo->selected_region);
 		demo->selected_region = NULL;
 	}
-	gtk_widget_set_sensitive(demo->copy_button, FALSE);
 }
 
 static void
@@ -394,6 +393,7 @@ pgd_selections_render (GtkButton         *button,
 
 	pgd_selections_clear_selections (demo);
 	pgd_selections_update_selection_region (demo);
+        gtk_widget_set_sensitive (demo->copy_button, FALSE);
 
 	if (demo->surface)
 		cairo_surface_destroy (demo->surface);
