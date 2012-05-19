@@ -180,9 +180,6 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 	action_area = gtk_dialog_get_action_area (dialog);
 
 	/* Set the dialog up with HIG properties */
-#if !GTK_CHECK_VERSION (2, 22, 0)
-	gtk_dialog_set_has_separator (dialog, FALSE);
-#endif
 	gtk_container_set_border_width (GTK_CONTAINER (dialog), 5);
 	gtk_box_set_spacing (GTK_BOX (content_area), 2); /* 2 * 5 + 2 = 12 */
 	gtk_container_set_border_width (GTK_CONTAINER (action_area), 5);
@@ -206,7 +203,7 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 						 -1);
 
 	/* Build contents */
-	hbox = gtk_hbox_new (FALSE, 12);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
 	gtk_container_set_border_width (GTK_CONTAINER (hbox), 5);
 	gtk_box_pack_start (GTK_BOX (content_area), hbox, TRUE, TRUE, 0);
 	gtk_widget_show (hbox);
@@ -218,7 +215,7 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 	gtk_box_pack_start (GTK_BOX (hbox), icon, FALSE, FALSE, 0);
 	gtk_widget_show (icon);
 
-	main_vbox = gtk_vbox_new (FALSE, 18);
+	main_vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
 	gtk_box_pack_start (GTK_BOX (hbox), main_vbox, TRUE, TRUE, 0);
 	gtk_widget_show (main_vbox);
 
@@ -238,7 +235,7 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 			    FALSE, FALSE, 0);
 	gtk_widget_show (label);
 
-	vbox = gtk_vbox_new (FALSE, 6);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
 	gtk_box_pack_start (GTK_BOX (main_vbox), vbox, FALSE, FALSE, 0);
 	gtk_widget_show (vbox);
 
@@ -252,9 +249,9 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 			    FALSE, FALSE, 0);
 	gtk_widget_show (entry_container);
 
-	table = gtk_table_new (1, 2, FALSE);
-	gtk_table_set_col_spacings (GTK_TABLE (table), 12);
-	gtk_table_set_row_spacings (GTK_TABLE (table), 6);
+	table = gtk_grid_new ();
+	gtk_grid_set_column_spacing (GTK_GRID (table), 12);
+	gtk_grid_set_row_spacing (GTK_GRID (table), 6);
 	gtk_container_add (GTK_CONTAINER (entry_container), table);
 	gtk_widget_show (table);
 
@@ -270,13 +267,11 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 			  G_CALLBACK (pgd_demo_auth_dialog_entry_activated),
 			  dialog);
 
-	gtk_table_attach (GTK_TABLE (table), label,
-			  0, 1, 0, 1,
-			  GTK_FILL, GTK_EXPAND | GTK_FILL, 0, 0);
+	gtk_grid_attach (GTK_GRID (table), label, 0, 0, 1, 1);
 	gtk_widget_show (label);
 
-	gtk_table_attach_defaults (GTK_TABLE (table), password_entry,
-				   1, 2, 0, 1);
+        gtk_grid_attach (GTK_GRID (table), password_entry, 1, 0, 1, 1);
+        gtk_widget_set_hexpand (password_entry, TRUE);
 	gtk_widget_show (password_entry);
 
 	gtk_label_set_mnemonic_widget (GTK_LABEL (label), password_entry);
@@ -302,12 +297,6 @@ gint main (gint argc, gchar **argv)
 		g_print ("Usage: poppler-glib-demo FILE\n");
 		return 1;
 	}
-
-/* Threading is always enabled starting from GLib 2.24.0 */
-#if !GLIB_CHECK_VERSION (2, 24, 0)
-	if (!g_thread_supported ())
-		g_thread_init (NULL);
-#endif
 
 	gtk_init (&argc, &argv);
 
@@ -368,7 +357,7 @@ gint main (gint argc, gchar **argv)
 	g_closure_unref (closure);
 	gtk_window_add_accel_group (GTK_WINDOW(win), gtk_accel);
 
-	hbox = gtk_hbox_new (FALSE, 6);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
 	treeview = pgd_demo_list_create ();
 	gtk_box_pack_start (GTK_BOX (hbox), treeview, FALSE, TRUE, 0);

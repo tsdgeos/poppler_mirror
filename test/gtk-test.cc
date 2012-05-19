@@ -156,15 +156,13 @@ void GDKSplashOutputDev::redraw(int srcX, int srcY,
 }
 
 static gboolean
-drawing_area_expose (GtkWidget      *drawing_area,
-                     GdkEventExpose *event,
-                     View           *view)
+drawing_area_draw (GtkWidget *drawing_area,
+                   cairo_t   *cr,
+                   View      *view)
 {
-  cairo_t *cr;
   GdkRectangle document;
+  GdkRectangle clip;
   GdkRectangle draw;
-
-  gdk_window_clear (drawing_area->window);
 
   document.x = 0;
   document.y = 0;
@@ -176,8 +174,10 @@ drawing_area_expose (GtkWidget      *drawing_area,
     document.height = view->out->getBitmapHeight();
   }
 
-  cr = gdk_cairo_create (drawing_area->window);
-  if (!gdk_rectangle_intersect (&document, &event->area, &draw))
+  if (!gdk_cairo_get_clip_rectangle (cr, &clip))
+    return FALSE;
+
+  if (!gdk_rectangle_intersect (&document, &clip, &draw))
     return FALSE;
 
   if (cairo_output) {
@@ -189,8 +189,6 @@ drawing_area_expose (GtkWidget      *drawing_area,
                        draw.x, draw.y,
                        draw.width, draw.height);
   }
-
-  cairo_destroy (cr);
 
   return TRUE;
 }
@@ -281,6 +279,7 @@ view_new (PopplerDocument *doc)
   GtkWidget *sw;
   GtkWidget *vbox, *hbox;
   guint n_pages;
+  PopplerPage *page;
 
   view = g_slice_new0 (View);
 
@@ -291,7 +290,16 @@ view_new (PopplerDocument *doc)
                     G_CALLBACK (destroy_window_callback),
                     view);
 
-  vbox = gtk_vbox_new (FALSE, 5);
+  page = poppler_document_get_page (doc, 0);
+  if (page) {
+    double width, height;
+
+    poppler_page_get_size (page, &width, &height);
+    gtk_window_set_default_size (GTK_WINDOW (window), (gint)width, (gint)height);
+    g_object_unref (page);
+  }
+
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
 
   view->drawing_area = gtk_drawing_area_new ();
   sw = gtk_scrolled_window_new (NULL, NULL);
@@ -305,7 +313,7 @@ view_new (PopplerDocument *doc)
   gtk_box_pack_end (GTK_BOX (vbox), sw, TRUE, TRUE, 0);
   gtk_widget_show (sw);
 
-  hbox = gtk_hbox_new (FALSE, 5);
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 5);
 
   n_pages = poppler_document_get_n_pages (doc);
   view->spin_button = gtk_spin_button_new_with_range  (0, n_pages - 1, 1);
@@ -333,8 +341,8 @@ view_new (PopplerDocument *doc)
   }
 
   g_signal_connect (view->drawing_area,
-                    "expose_event",
-                    G_CALLBACK (drawing_area_expose),
+                    "draw",
+                    G_CALLBACK (drawing_area_draw),
                     view);
 
   return view;
@@ -366,27 +374,27 @@ main (int argc, char *argv [])
   for (int i = 0; file_arguments[i]; i++) {
     View            *view;
     GFile           *file;
-    gchar           *uri;
     PopplerDocument *doc;
     GError          *error = NULL;
 
     file = g_file_new_for_commandline_arg (file_arguments[i]);
-    uri = g_file_get_uri (file);
-    g_object_unref (file);
-
-    doc = poppler_document_new_from_file (uri, NULL, &error);
+    doc = poppler_document_new_from_gfile (file, NULL, NULL, &error);
     if (!doc) {
+      gchar *uri;
+
+      uri = g_file_get_uri (file);
       g_printerr ("Error opening document %s: %s\n", uri, error->message);
       g_error_free (error);
       g_free (uri);
+      g_object_unref (file);
 
       continue;
     }
+    g_object_unref (file);
 
     view = view_new (doc);
     view_list = g_list_prepend (view_list, view);
     view_set_page (view, CLAMP (page, 0, poppler_document_get_n_pages (doc) - 1));
-    g_free (uri);
   }
 
   gtk_main ();

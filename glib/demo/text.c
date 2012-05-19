@@ -303,11 +303,11 @@ pgd_text_create_widget (PopplerDocument *document)
 
 	n_pages = poppler_document_get_n_pages (document);
 
-	vbox = gtk_vbox_new (FALSE, 12);
-	vbox2 = gtk_vbox_new (FALSE, 12);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+	vbox2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
 	textinfo = gtk_label_new ("TextInfo");
 
-	hbox = gtk_hbox_new (FALSE, 6);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
 	label = gtk_label_new ("Page:");
 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
@@ -342,7 +342,7 @@ pgd_text_create_widget (PopplerDocument *document)
 	gtk_box_pack_start (GTK_BOX (vbox), demo->timer_label, FALSE, TRUE, 0);
 	gtk_widget_show (demo->timer_label);
 
-	hpaned = gtk_hpaned_new ();
+	hpaned = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
 	gtk_paned_set_position (GTK_PANED (hpaned), 300);
 
 	swindow = gtk_scrolled_window_new (NULL, NULL);
@@ -414,18 +414,18 @@ pgd_text_create_widget (PopplerDocument *document)
         gtk_container_add (GTK_CONTAINER (frame), alignment);
         gtk_widget_show (alignment);
 
-        table = gtk_table_new (4, 2, FALSE);
-        gtk_table_set_col_spacings (GTK_TABLE (table), 6);
-        gtk_table_set_row_spacings (GTK_TABLE (table), 6);
+        table = gtk_grid_new ();
+        gtk_grid_set_column_spacing (GTK_GRID (table), 6);
+        gtk_grid_set_row_spacing (GTK_GRID (table), 6);
 
         demo->font_name = gtk_label_new (NULL);
-        pgd_table_add_property_with_custom_widget (GTK_TABLE (table), "<b>Font Name:</b>", demo->font_name, &row);
+        pgd_table_add_property_with_custom_widget (GTK_GRID (table), "<b>Font Name:</b>", demo->font_name, &row);
         demo->font_size = gtk_label_new (NULL);
-        pgd_table_add_property_with_custom_widget (GTK_TABLE (table), "<b>Font Size:</b>", demo->font_size, &row);
+        pgd_table_add_property_with_custom_widget (GTK_GRID (table), "<b>Font Size:</b>", demo->font_size, &row);
         demo->is_underlined = gtk_label_new (NULL);
-        pgd_table_add_property_with_custom_widget (GTK_TABLE (table), "<b>Underlined:</b>", demo->is_underlined, &row);
+        pgd_table_add_property_with_custom_widget (GTK_GRID (table), "<b>Underlined:</b>", demo->is_underlined, &row);
         demo->text_color = gtk_image_new ();
-        pgd_table_add_property_with_custom_widget (GTK_TABLE (table), "<b>Color:</b>", demo->text_color, &row);
+        pgd_table_add_property_with_custom_widget (GTK_GRID (table), "<b>Color:</b>", demo->text_color, &row);
 
         gtk_container_add (GTK_CONTAINER (alignment), table);
         gtk_widget_show (table);

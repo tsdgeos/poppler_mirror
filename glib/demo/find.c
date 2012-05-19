@@ -190,9 +190,9 @@ pgd_find_create_widget (PopplerDocument *document)
 
 	demo->n_pages = poppler_document_get_n_pages (document);
 
-	vbox = gtk_vbox_new (FALSE, 12);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
 
-	hbox = gtk_hbox_new (FALSE, 6);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
 	demo->entry = gtk_entry_new ();
 	gtk_box_pack_start (GTK_BOX (hbox), demo->entry, FALSE, TRUE, 0);

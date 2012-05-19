@@ -114,24 +114,18 @@ pgd_print_create_custom_widget (GtkPrintOperation *op,
                                                            PGD_PRINT_OPTIONS,
                                                            PRINT_DOCUMENT_MARKUPS);
 
-        hbox = gtk_hbox_new (FALSE, 0);
+        hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
         gtk_container_set_border_width (GTK_CONTAINER (hbox), 12);
 
         label = gtk_label_new ("Print: ");
         gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
         gtk_widget_show (label);
 
-#if GTK_CHECK_VERSION (2, 24, 0)
         combo = gtk_combo_box_text_new ();
         gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (combo), "Document");
         gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (combo), "Document and markup");
         gtk_combo_box_text_append_text (GTK_COMBO_BOX_TEXT (combo), "Document and stamps");
-#else
-        combo = gtk_combo_box_new_text ();
-        gtk_combo_box_append_text (GTK_COMBO_BOX (combo), "Document");
-        gtk_combo_box_append_text (GTK_COMBO_BOX (combo), "Document and markup");
-        gtk_combo_box_append_text (GTK_COMBO_BOX (combo), "Document and stamps");
-#endif
+
         demo->options_combo = combo;
         gtk_combo_box_set_active (GTK_COMBO_BOX (combo), options);
         gtk_box_pack_start (GTK_BOX (hbox), combo, FALSE, FALSE, 0);
@@ -210,9 +204,9 @@ pgd_print_create_widget (PopplerDocument *document)
 
 	demo->doc = g_object_ref (document);
 
-	vbox = gtk_vbox_new (FALSE, 12);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
 
-	hbox = gtk_hbox_new (FALSE, 6);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
 	button = gtk_button_new_with_label ("Print...");
 	g_signal_connect (G_OBJECT (button), "clicked",

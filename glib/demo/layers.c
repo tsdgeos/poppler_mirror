@@ -181,24 +181,18 @@ pgd_layers_render_page (PgdLayersDemo *demo)
 }
 
 static gboolean
-pgd_layers_viewer_drawing_area_expose (GtkWidget      *area,
-				       GdkEventExpose *event,
-				       PgdLayersDemo  *demo)
+pgd_layers_viewer_drawing_area_draw (GtkWidget     *area,
+                                     cairo_t       *cr,
+                                     PgdLayersDemo *demo)
 {
-	cairo_t *cr;
-	
 	if (!demo->surface) {
 		demo->surface = pgd_layers_render_page (demo);
 		if (!demo->surface)
 			return FALSE;
 	}
 
-	gdk_window_clear (gtk_widget_get_window (area));
-
-	cr = gdk_cairo_create (gtk_widget_get_window (area));
 	cairo_set_source_surface (cr, demo->surface, 0, 0);
 	cairo_paint (cr);
-	cairo_destroy (cr);
 
 	return TRUE;
 }
@@ -238,9 +232,9 @@ pgd_layers_create_viewer (PgdLayersDemo *demo)
 	guint      n_pages;
 	gchar     *str;
 
-	vbox = gtk_vbox_new (FALSE, 6);
+	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
 
-	hbox = gtk_hbox_new (FALSE, 6);
+	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
 	label = gtk_label_new ("Page:");
 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
@@ -264,8 +258,8 @@ pgd_layers_create_viewer (PgdLayersDemo *demo)
 	gtk_widget_show (hbox);
 
 	demo->darea = gtk_drawing_area_new ();
-	g_signal_connect (G_OBJECT (demo->darea), "expose_event",
-			  G_CALLBACK (pgd_layers_viewer_drawing_area_expose),
+	g_signal_connect (G_OBJECT (demo->darea), "draw",
+			  G_CALLBACK (pgd_layers_viewer_drawing_area_draw),
 			  (gpointer)demo);
 
 	swindow = gtk_scrolled_window_new (NULL, NULL);
@@ -385,7 +379,7 @@ pgd_layers_create_widget (PopplerDocument *document)
 	demo = g_new0 (PgdLayersDemo, 1);
 	demo->doc = g_object_ref (document);
 	
-	hpaned = gtk_hpaned_new ();
+	hpaned = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
 
 	viewer = pgd_layers_create_viewer (demo);
 	
