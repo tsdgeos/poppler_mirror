@@ -398,7 +398,7 @@ pgd_text_create_widget (PopplerDocument *document)
 	gtk_container_add (GTK_CONTAINER (swindow), treeview);
 	gtk_widget_show (treeview);
 
-	gtk_container_add (GTK_CONTAINER (vbox2), swindow);
+        gtk_box_pack_start (GTK_BOX (vbox2), swindow, TRUE, TRUE, 0);
         gtk_widget_show (swindow);
 
         /* Text attributes */
