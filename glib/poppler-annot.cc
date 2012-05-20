@@ -114,12 +114,27 @@ G_DEFINE_TYPE (PopplerAnnotFileAttachment, poppler_annot_file_attachment, POPPLE
 G_DEFINE_TYPE (PopplerAnnotMovie, poppler_annot_movie, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE (PopplerAnnotScreen, poppler_annot_screen, POPPLER_TYPE_ANNOT)
 
+static PopplerAnnot *
+_poppler_create_annot (GType annot_type, Annot *annot)
+{
+  PopplerAnnot *poppler_annot;
+
+  poppler_annot = POPPLER_ANNOT (g_object_new (annot_type, NULL));
+  poppler_annot->annot = annot;
+  annot->incRefCnt();
+
+  return poppler_annot;
+}
+
 static void
 poppler_annot_finalize (GObject *object)
 {
   PopplerAnnot *poppler_annot = POPPLER_ANNOT (object);
 
-  poppler_annot->annot = NULL;
+  if (poppler_annot->annot) {
+    poppler_annot->annot->decRefCnt();
+    poppler_annot->annot = NULL;
+  }
 
   G_OBJECT_CLASS (poppler_annot_parent_class)->finalize (object);
 }
@@ -140,12 +155,7 @@ poppler_annot_class_init (PopplerAnnotClass *klass)
 PopplerAnnot *
 _poppler_annot_new (Annot *annot)
 {
-  PopplerAnnot *poppler_annot;
-
-  poppler_annot = POPPLER_ANNOT (g_object_new (POPPLER_TYPE_ANNOT, NULL));
-  poppler_annot->annot = annot;
-
-  return poppler_annot;
+  return _poppler_create_annot (POPPLER_TYPE_ANNOT, annot);
 }
 
 static void
@@ -171,12 +181,7 @@ poppler_annot_text_class_init (PopplerAnnotTextClass *klass)
 PopplerAnnot *
 _poppler_annot_text_new (Annot *annot)
 {
-  PopplerAnnot *poppler_annot;
-
-  poppler_annot = POPPLER_ANNOT (g_object_new (POPPLER_TYPE_ANNOT_TEXT, NULL));
-  poppler_annot->annot = annot;
-
-  return poppler_annot;
+  return _poppler_create_annot (POPPLER_TYPE_ANNOT_TEXT, annot);
 }
 
 /**
@@ -218,12 +223,7 @@ poppler_annot_free_text_class_init (PopplerAnnotFreeTextClass *klass)
 PopplerAnnot *
 _poppler_annot_free_text_new (Annot *annot)
 {
-  PopplerAnnot *poppler_annot;
-
-  poppler_annot = POPPLER_ANNOT (g_object_new (POPPLER_TYPE_ANNOT_FREE_TEXT, NULL));
-  poppler_annot->annot = annot;
-
-  return poppler_annot;
+  return _poppler_create_annot (POPPLER_TYPE_ANNOT_FREE_TEXT, annot);
 }
 
 static void
@@ -239,12 +239,7 @@ poppler_annot_file_attachment_class_init (PopplerAnnotFileAttachmentClass *klass
 PopplerAnnot *
 _poppler_annot_file_attachment_new (Annot *annot)
 {
-  PopplerAnnot *poppler_annot;
-
-  poppler_annot = POPPLER_ANNOT (g_object_new (POPPLER_TYPE_ANNOT_FILE_ATTACHMENT, NULL));
-  poppler_annot->annot = annot;
-
-  return poppler_annot;
+  return _poppler_create_annot (POPPLER_TYPE_ANNOT_FILE_ATTACHMENT, annot);
 }
 
 
@@ -280,9 +275,7 @@ _poppler_annot_movie_new (Annot *annot)
   PopplerAnnot *poppler_annot;
   AnnotMovie   *annot_movie;
 
-  poppler_annot = POPPLER_ANNOT (g_object_new (POPPLER_TYPE_ANNOT_MOVIE, NULL));
-  poppler_annot->annot = annot;
-
+  poppler_annot = _poppler_create_annot (POPPLER_TYPE_ANNOT_MOVIE, annot);
   annot_movie = static_cast<AnnotMovie *>(poppler_annot->annot);
   POPPLER_ANNOT_MOVIE (poppler_annot)->movie = _poppler_movie_new (annot_movie->getMovie());
 
@@ -322,9 +315,7 @@ _poppler_annot_screen_new (Annot *annot)
   AnnotScreen  *annot_screen;
   LinkAction   *action;
 
-  poppler_annot = POPPLER_ANNOT (g_object_new (POPPLER_TYPE_ANNOT_SCREEN, NULL));
-  poppler_annot->annot = annot;
-
+  poppler_annot = _poppler_create_annot (POPPLER_TYPE_ANNOT_SCREEN, annot);
   annot_screen = static_cast<AnnotScreen *>(poppler_annot->annot);
   action = annot_screen->getAction();
   if (action)
