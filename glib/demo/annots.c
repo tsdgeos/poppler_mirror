@@ -40,6 +40,7 @@ typedef struct {
     PopplerDocument *doc;
     PopplerPage     *page;
 
+    GtkWidget       *tree_view;
     GtkListStore    *model;
     GtkWidget       *annot_view;
     GtkWidget       *timer_label;
@@ -281,6 +282,28 @@ get_free_text_callout_line (PopplerAnnotFreeText *poppler_annot)
 }
 
 static void
+pgd_annots_remove_annot (GtkWidget     *button,
+                         PgdAnnotsDemo *demo)
+{
+    GtkTreeSelection *selection;
+    GtkTreeModel *model;
+    GtkTreeIter   iter;
+
+    selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (demo->tree_view));
+
+    if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
+        PopplerAnnot *annot;
+
+        gtk_tree_model_get (model, &iter,
+                            ANNOTS_COLUMN, &annot,
+                           -1);
+        poppler_page_remove_annot (demo->page, annot);
+        g_object_unref (annot);
+        gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
+    }
+}
+
+static void
 pgd_annot_view_set_annot_markup (GtkWidget          *table,
                                  PopplerAnnotMarkup *markup,
                                  gint               *row)
@@ -452,24 +475,25 @@ pgd_annot_view_set_annot_screen (GtkWidget          *table,
 }
 
 static void
-pgd_annot_view_set_annot (GtkWidget    *annot_view,
-                          PopplerAnnot *annot)
+pgd_annot_view_set_annot (PgdAnnotsDemo *demo,
+                          PopplerAnnot  *annot)
 {
     GtkWidget  *alignment;
     GtkWidget  *table;
+    GtkWidget  *button;
     GEnumValue *enum_value;
     gint        row = 0;
     gchar      *text, *warning;
     time_t      timet;
 
-    alignment = gtk_bin_get_child (GTK_BIN (annot_view));
+    alignment = gtk_bin_get_child (GTK_BIN (demo->annot_view));
     if (alignment) {
-        gtk_container_remove (GTK_CONTAINER (annot_view), alignment);
+        gtk_container_remove (GTK_CONTAINER (demo->annot_view), alignment);
     }
 
     alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
     gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 5, 5, 12, 5);
-    gtk_container_add (GTK_CONTAINER (annot_view), alignment);
+    gtk_container_add (GTK_CONTAINER (demo->annot_view), alignment);
     gtk_widget_show (alignment);
 
     if (!annot)
@@ -527,6 +551,13 @@ pgd_annot_view_set_annot (GtkWidget    *annot_view,
           break;
     }
 
+    button = gtk_button_new_from_stock (GTK_STOCK_REMOVE);
+    g_signal_connect (G_OBJECT (button), "clicked",
+                      G_CALLBACK (pgd_annots_remove_annot),
+                      (gpointer) demo);
+    gtk_grid_attach (GTK_GRID (table), button, 0, row, 2, 1);
+    gtk_widget_show (button);
+
     gtk_container_add (GTK_CONTAINER (alignment), table);
     gtk_widget_show (table);
 }
@@ -540,7 +571,7 @@ pgd_annots_get_annots (GtkWidget     *button,
     GTimer      *timer;
 
     gtk_list_store_clear (demo->model);
-    pgd_annot_view_set_annot (demo->annot_view, NULL);
+    pgd_annot_view_set_annot (demo, NULL);
 
     if (demo->page) {
         g_object_unref (demo->page);
@@ -632,8 +663,10 @@ pgd_annots_selection_changed (GtkTreeSelection *treeselection,
         gtk_tree_model_get (model, &iter,
                             ANNOTS_COLUMN, &annot,
                            -1);
-        pgd_annot_view_set_annot (demo->annot_view, annot);
+        pgd_annot_view_set_annot (demo, annot);
         g_object_unref (annot);
+    } else {
+        pgd_annot_view_set_annot (demo, NULL);
     }
 }
 
@@ -825,6 +858,7 @@ pgd_annots_create_widget (PopplerDocument *document)
 				      G_TYPE_BOOLEAN, G_TYPE_BOOLEAN,
 				      G_TYPE_OBJECT);
     treeview = gtk_tree_view_new_with_model (GTK_TREE_MODEL (demo->model));
+    demo->tree_view = treeview;
 
     renderer = gtk_cell_renderer_text_new ();
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (treeview),
