@@ -47,6 +47,7 @@ poppler_page_free_form_field_mapping
 poppler_page_get_annot_mapping
 poppler_page_free_annot_mapping
 poppler_page_add_annot
+poppler_page_remove_annot
 poppler_rectangle_new
 poppler_rectangle_copy
 poppler_rectangle_free

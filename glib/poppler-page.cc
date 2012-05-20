@@ -1431,6 +1431,25 @@ poppler_page_add_annot (PopplerPage  *page,
   page->page->addAnnot (annot->annot);
 }
 
+/**
+ * poppler_page_remove_annot:
+ * @page: a #PopplerPage
+ * @annot: a #PopplerAnnot to remove
+ *
+ * Removes annotation @annot from @page
+ *
+ * Since: 0.22
+ */
+void
+poppler_page_remove_annot (PopplerPage  *page,
+                           PopplerAnnot *annot)
+{
+  g_return_if_fail (POPPLER_IS_PAGE (page));
+  g_return_if_fail (POPPLER_IS_ANNOT (annot));
+
+  page->page->removeAnnot (annot->annot);
+}
+
 /* PopplerRectangle type */
 
 POPPLER_DEFINE_BOXED_TYPE (PopplerRectangle, poppler_rectangle,

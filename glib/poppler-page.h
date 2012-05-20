@@ -89,6 +89,8 @@ GList                 *poppler_page_get_annot_mapping    (PopplerPage        *pa
 void                   poppler_page_free_annot_mapping   (GList              *list);
 void                   poppler_page_add_annot            (PopplerPage        *page,
 							  PopplerAnnot       *annot);
+void                   poppler_page_remove_annot         (PopplerPage        *page,
+                                                          PopplerAnnot       *annot);
 void 		      poppler_page_get_crop_box 	 (PopplerPage        *page,
 							  PopplerRectangle   *rect);
 gboolean               poppler_page_get_text_layout      (PopplerPage        *page,
