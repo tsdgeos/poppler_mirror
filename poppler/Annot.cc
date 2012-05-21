@@ -1185,6 +1185,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   }
   obj1.free();
 
+  // Note: This value is overwritten by Annots ctor
   if (dict->lookupNF("P", &obj1)->isRef()) {
     Ref ref = obj1.getRef();
 
@@ -1416,13 +1417,22 @@ void Annot::setColor(AnnotColor *new_color) {
   }
 }
 
-void Annot::setPage(Ref *pageRef, int pageIndex)
-{
+void Annot::setPage(int pageIndex, GBool updateP) {
+  Page *pageobj = doc->getPage(pageIndex);
   Object obj1;
 
-  obj1.initRef(pageRef->num, pageRef->gen);
-  update("P", &obj1);
-  page = pageIndex;
+  if (pageobj) {
+    Ref pageRef = pageobj->getRef();
+    obj1.initRef(pageRef.num, pageRef.gen);
+    page = pageIndex;
+  } else {
+    obj1.initNull();
+    page = 0;
+  }
+
+  if (updateP) {
+    update("P", &obj1);
+  }
 }
 
 void Annot::setAppearanceState(const char *state) {
@@ -1482,6 +1492,11 @@ void Annot::readArrayNum(Object *pdfArray, int key, double *value) {
     ok = gFalse;
   }
   valueObject.free();
+}
+
+void Annot::removeReferencedObjects() {
+  // Remove appearance streams (if any)
+  invalidateAppearance();
 }
 
 void Annot::incRefCnt() {
@@ -1932,6 +1947,18 @@ void AnnotMarkup::setDate(GooString *new_date) {
   Object obj1;
   obj1.initString(date->copy());
   update ("CreationDate", &obj1);
+}
+
+void AnnotMarkup::removeReferencedObjects() {
+  Page *pageobj = doc->getPage(page);
+  assert(pageobj != NULL); // We're called when removing an annot from a page
+
+  // Remove popup
+  if (popup) {
+    pageobj->removeAnnot(popup);
+  }
+
+  Annot::removeReferencedObjects();
 }
 
 //------------------------------------------------------------------------
@@ -6400,7 +6427,7 @@ Annot3D::Activation::Activation(Dict *dict) {
 // Annots
 //------------------------------------------------------------------------
 
-Annots::Annots(PDFDoc *docA, Object *annotsObj) {
+Annots::Annots(PDFDoc *docA, int page, Object *annotsObj) {
   Annot *annot;
   Object obj1;
   int i;
@@ -6421,6 +6448,7 @@ Annots::Annots(PDFDoc *docA, Object *annotsObj) {
         annot = createAnnot (obj1.getDict(), &obj2);
         if (annot) {
           if (annot->isOk()) {
+            annot->setPage(page, gFalse); // Don't change /P
             appendAnnot(annot);
           }
           annot->decRefCnt();

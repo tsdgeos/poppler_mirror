@@ -164,6 +164,7 @@ public:
   Dict *getPieceInfo() { return attrs->getPieceInfo(); }
   Dict *getSeparationInfo() { return attrs->getSeparationInfo(); }
   PDFDoc *getDoc() { return doc; }
+  Ref getRef() { return pageRef; }
 
   // Get resource dictionary.
   Dict *getResourceDict() { return attrs->getResourceDict(); }
@@ -173,7 +174,6 @@ public:
   // Add a new annotation to the page
   void addAnnot(Annot *annot);
   // Remove an existing annotation from the page
-  // Note: Caller is responsible for deleting popup and appearance streams too
   void removeAnnot(Annot *annot);
 
   // Return a list of links.

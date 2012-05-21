@@ -348,7 +348,7 @@ Page::~Page() {
 Annots *Page::getAnnots() {
   if (!annots) {
     Object obj;
-    annots = new Annots(doc, getAnnots(&obj));
+    annots = new Annots(doc, num, getAnnots(&obj));
     obj.free();
   }
 
@@ -391,8 +391,7 @@ void Page::addAnnot(Annot *annot) {
   }
 
   annots->appendAnnot(annot);
-
-  annot->setPage(&pageRef, num);
+  annot->setPage(num, gTrue);
 }
 
 void Page::removeAnnot(Annot *annot) {
@@ -428,6 +427,8 @@ void Page::removeAnnot(Annot *annot) {
     }
   }
   annArray.free();
+  annot->removeReferencedObjects(); // Note: Might recurse in removeAnnot again
+  annot->setPage(0, gFalse);
 }
 
 Links *Page::getLinks() {

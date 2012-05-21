@@ -510,14 +510,6 @@ void AnnotationPrivate::removeAnnotationFromPage(::Page *pdfPage, const Annotati
         return;
     }
 
-    // Remove popup window
-    AnnotMarkup *markupann = dynamic_cast<AnnotMarkup*>(ann->d_ptr->pdfAnnot);
-    if (markupann && markupann->getPopup())
-        pdfPage->removeAnnot(markupann->getPopup());
-
-    // Remove appearance streams (if any)
-    ann->d_ptr->pdfAnnot->invalidateAppearance();
-
     // Remove annotation
     pdfPage->removeAnnot(ann->d_ptr->pdfAnnot);
 

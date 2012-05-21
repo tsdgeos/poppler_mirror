@@ -43,6 +43,7 @@ class Gfx;
 class CharCodeToUnicode;
 class GfxFont;
 class GfxResources;
+class Page;
 class PDFDoc;
 class Form;
 class FormWidget;
@@ -471,6 +472,8 @@ private:
 //------------------------------------------------------------------------
 
 class Annot {
+  friend class Annots;
+  friend class Page;
 public:
   enum AnnotFlag {
     flagUnknown        = 0x0000,
@@ -551,8 +554,6 @@ public:
   // new_color. 
   void setColor(AnnotColor *new_color);
 
-  void setPage(Ref *pageRef, int pageIndex);
-
   void setAppearanceState(const char *state);
 
   // Delete appearance streams and reset appearance state
@@ -587,10 +588,12 @@ private:
   // write vStr[i:j[ in appearBuf
 
   void initialize (PDFDoc *docA, Dict *dict);
+  void setPage (int new_page, GBool updateP); // Called by Page::addAnnot and Annots ctor
 
 
 protected:
   virtual ~Annot();
+  virtual void removeReferencedObjects(); // Called by Page::removeAnnot
   void setColor(AnnotColor *color, GBool fill);
   void drawCircle(double cx, double cy, double r, GBool fill);
   void drawCircleTopLeft(double cx, double cy, double r);
@@ -699,6 +702,8 @@ public:
   void setDate(GooString *new_date);
 
 protected:
+  virtual void removeReferencedObjects();
+
   GooString *label;             // T            (Default autor)
   AnnotPopup *popup;            // Popup
   double opacity;               // CA           (Default 1.0)
@@ -1365,8 +1370,8 @@ private:
 class Annots {
 public:
 
-  // Build a list of Annot objects.
-  Annots(PDFDoc *docA, Object *annotsObj);
+  // Build a list of Annot objects and call setPage on them
+  Annots(PDFDoc *docA, int page, Object *annotsObj);
 
   ~Annots();
 
