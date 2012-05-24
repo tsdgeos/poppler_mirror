@@ -203,10 +203,22 @@ void AnnotationPrivate::fillMTX(double MTX[6]) const
     // build a normalized transform matrix for this page at 100% scale
     GfxState * gfxState = new GfxState( 72.0, 72.0, pdfPage->getCropBox(), pdfPage->getRotate(), gTrue );
     double * gfxCTM = gfxState->getCTM();
+
+    double w = pdfPage->getCropWidth();
+    double h = pdfPage->getCropHeight();
+
+    // Swap width and height if the page is rotated landscape or seascape
+    if ( pdfPage->getRotate() == 90 || pdfPage->getRotate() == 270 )
+    {
+        double t = w;
+        w = h;
+        h = t;
+    }
+
     for ( int i = 0; i < 6; i+=2 )
     {
-        MTX[i] = gfxCTM[i] / pdfPage->getCropWidth();
-        MTX[i+1] = gfxCTM[i+1] / pdfPage->getCropHeight();
+        MTX[i] = gfxCTM[i] / w;
+        MTX[i+1] = gfxCTM[i+1] / h;
     }
     delete gfxState;
 }
