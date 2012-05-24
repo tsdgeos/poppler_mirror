@@ -1834,7 +1834,7 @@ poppler_fonts_iter_get_name (PopplerFontsIter *iter)
  * The name of the substitute font of the font associated with @iter or %NULL if
  * the font is embedded
  *
- * Returns: the name of the substitute font or %NULL y font is emebedded
+ * Returns: the name of the substitute font or %NULL if font is embedded
  *
  * Since: 0.20
  */
@@ -1861,7 +1861,7 @@ poppler_fonts_iter_get_substitute_name (PopplerFontsIter *iter)
  * The filename of the font associated with @iter or %NULL if
  * the font is embedded
  *
- * Returns: the filename of the font or %NULL y font is emebedded
+ * Returns: the filename of the font or %NULL if font is embedded
  */
 const char *
 poppler_fonts_iter_get_file_name (PopplerFontsIter *iter)
