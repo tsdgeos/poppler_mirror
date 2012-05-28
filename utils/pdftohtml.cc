@@ -21,6 +21,7 @@
 // Copyright (C) 2011 Steven Murdoch <Steven.Murdoch@cl.cam.ac.uk>
 // Copyright (C) 2012 Igor Slepchin <igor.redhat@gmail.com>
 // Copyright (C) 2012 Ihar Filipau <thephilips@gmail.com>
+// Copyright (C) 2012 Luis Parravicini <lparravi@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -82,6 +83,7 @@ double wordBreakThreshold=10;  // 10%, below converted into a coefficient - 0.1
 
 GBool showHidden = gFalse;
 GBool noMerge = gFalse;
+GBool fontFullName = gFalse;
 static char ownerPassword[33] = "";
 static char userPassword[33] = "";
 static GBool printVersion = gFalse;
@@ -138,6 +140,8 @@ static const ArgDesc argDesc[] = {
    "override document DRM settings"},
   {"-wbt",    argFP,    &wordBreakThreshold, 0,
    "word break threshold (default 10 percent)"},
+  {"-fontfullname", argFlag, &fontFullName, 0,
+   "outputs font full name"},   
   {NULL}
 };
 

@@ -24,6 +24,7 @@
 // Copyright (C) 2011 Joshua Richardson <jric@chegg.com>
 // Copyright (C) 2011 Stephen Reichling <sreichling@chegg.com>
 // Copyright (C) 2012 Igor Slepchin <igor.slepchin@gmail.com>
+// Copyright (C) 2012 Luis Parravicini <lparravi@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -63,6 +64,7 @@ static Fonts fonts[font_num+1]={
 
 #define xoutRound(x) ((int)(x + 0.5))
 extern GBool xml;
+extern GBool fontFullName;
 
 GooString* HtmlFont::DefaultFont=new GooString("Times"); // Arial,Helvetica,sans-serif
 
@@ -318,7 +320,7 @@ GooString* HtmlFontAccu::CSStyle(int i, int j){
    HtmlFont font=*g;
    GooString *Size=GooString::fromInt(font.getSize());
    GooString *colorStr=font.getColor().toString();
-   GooString *fontName=font.getFontName();
+   GooString *fontName=(fontFullName ? font.getFullName() : font.getFontName());
    GooString *lSize;
    
    if(!xml){
