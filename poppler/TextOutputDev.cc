@@ -3653,76 +3653,80 @@ GBool TextPage::findText(Unicode *s, int len,
       j = backward ? m - len : 0;
       p = txt + j;
       while (backward ? j >= 0 : j <= m - len) {
+        if (!wholeWord ||
+            ((j == 0 || !unicodeTypeAlphaNum(txt[j - 1])) &&
+             (j + len == m || !unicodeTypeAlphaNum(txt[j + len])))) {
 
-	// compare the strings
-	for (k = 0; k < len; ++k) {
-	  if (p[k] != s2[k]) {
-	    break;
-	  }
-	}
+          // compare the strings
+          for (k = 0; k < len; ++k) {
+            if (p[k] != s2[k]) {
+              break;
+            }
+          }
 
-	// found it
-	if (k == len) {
-	  // where s2 matches a subsequence of a compatibility equivalence
-	  // decomposition, highlight the entire glyph, since we don't know
-	  // the internal layout of subglyph components
-	  int normStart = line->normalized_idx[j];
-	  int normAfterEnd = line->normalized_idx[j + len - 1] + 1;
-	  switch (line->rot) {
-	  case 0:
-	    xMin1 = line->edge[normStart];
-	    xMax1 = line->edge[normAfterEnd];
-	    yMin1 = line->yMin;
-	    yMax1 = line->yMax;
-	    break;
-	  case 1:
-	    xMin1 = line->xMin;
-	    xMax1 = line->xMax;
-	    yMin1 = line->edge[normStart];
-	    yMax1 = line->edge[normAfterEnd];
-	    break;
-	  case 2:
-	    xMin1 = line->edge[normAfterEnd];
-	    xMax1 = line->edge[normStart];
-	    yMin1 = line->yMin;
-	    yMax1 = line->yMax;
-	    break;
-	  case 3:
-	    xMin1 = line->xMin;
-	    xMax1 = line->xMax;
-	    yMin1 = line->edge[normAfterEnd];
-	    yMax1 = line->edge[normStart];
-	    break;
-	  }
-	  if (backward) {
-	    if ((startAtTop ||
-		 yMin1 < yStart || (yMin1 == yStart && xMin1 < xStart)) &&
-		(stopAtBottom ||
-		 yMin1 > yStop || (yMin1 == yStop && xMin1 > xStop))) {
-	      if (!found ||
-		  yMin1 > yMin0 || (yMin1 == yMin0 && xMin1 > xMin0)) {
-		xMin0 = xMin1;
-		xMax0 = xMax1;
-		yMin0 = yMin1;
-		yMax0 = yMax1;
-		found = gTrue;
-	      }
-	    }
-	  } else {
-	    if ((startAtTop ||
-		 yMin1 > yStart || (yMin1 == yStart && xMin1 > xStart)) &&
-		(stopAtBottom ||
-		 yMin1 < yStop || (yMin1 == yStop && xMin1 < xStop))) {
-	      if (!found ||
-		  yMin1 < yMin0 || (yMin1 == yMin0 && xMin1 < xMin0)) {
-		xMin0 = xMin1;
-		xMax0 = xMax1;
-		yMin0 = yMin1;
-		yMax0 = yMax1;
-		found = gTrue;
-	      }
-	    }
-	  }
+          // found it
+          if (k == len) {
+            // where s2 matches a subsequence of a compatibility equivalence
+            // decomposition, highlight the entire glyph, since we don't know
+            // the internal layout of subglyph components
+            int normStart = line->normalized_idx[j];
+            int normAfterEnd = line->normalized_idx[j + len - 1] + 1;
+            switch (line->rot) {
+            case 0:
+              xMin1 = line->edge[normStart];
+              xMax1 = line->edge[normAfterEnd];
+              yMin1 = line->yMin;
+              yMax1 = line->yMax;
+              break;
+            case 1:
+              xMin1 = line->xMin;
+              xMax1 = line->xMax;
+              yMin1 = line->edge[normStart];
+              yMax1 = line->edge[normAfterEnd];
+              break;
+            case 2:
+              xMin1 = line->edge[normAfterEnd];
+              xMax1 = line->edge[normStart];
+              yMin1 = line->yMin;
+              yMax1 = line->yMax;
+              break;
+            case 3:
+              xMin1 = line->xMin;
+              xMax1 = line->xMax;
+              yMin1 = line->edge[normAfterEnd];
+              yMax1 = line->edge[normStart];
+              break;
+            }
+            if (backward) {
+              if ((startAtTop ||
+                   yMin1 < yStart || (yMin1 == yStart && xMin1 < xStart)) &&
+                  (stopAtBottom ||
+                   yMin1 > yStop || (yMin1 == yStop && xMin1 > xStop))) {
+                if (!found ||
+                    yMin1 > yMin0 || (yMin1 == yMin0 && xMin1 > xMin0)) {
+                  xMin0 = xMin1;
+                  xMax0 = xMax1;
+                  yMin0 = yMin1;
+                  yMax0 = yMax1;
+                  found = gTrue;
+                }
+              }
+            } else {
+              if ((startAtTop ||
+                   yMin1 > yStart || (yMin1 == yStart && xMin1 > xStart)) &&
+                  (stopAtBottom ||
+                   yMin1 < yStop || (yMin1 == yStop && xMin1 < xStop))) {
+                if (!found ||
+                    yMin1 < yMin0 || (yMin1 == yMin0 && xMin1 < xMin0)) {
+                  xMin0 = xMin1;
+                  xMax0 = xMax1;
+                  yMin0 = yMin1;
+                  yMax0 = yMax1;
+                  found = gTrue;
+                }
+              }
+            }
+          }
 	}
 	if (backward) {
 	  --j;
@@ -3733,7 +3737,7 @@ GBool TextPage::findText(Unicode *s, int len,
 	}
       }
     }
-    }
+  }
 
   gfree(s2);
   if (!caseSensitive) {
