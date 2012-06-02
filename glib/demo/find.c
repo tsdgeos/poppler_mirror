@@ -39,6 +39,7 @@ typedef struct {
 	GtkWidget       *entry;
 	GtkWidget       *progress;
 
+        PopplerFindFlags options;
 	gint             n_pages;
 	gint             page_index;
 
@@ -103,7 +104,7 @@ pgd_find_find_text (PgdFindDemo *demo)
 
         model = gtk_tree_view_get_model (GTK_TREE_VIEW (demo->treeview));
 	timer = g_timer_new ();
-	matches = poppler_page_find_text (page, gtk_entry_get_text (GTK_ENTRY (demo->entry)));
+	matches = poppler_page_find_text_with_options (page, gtk_entry_get_text (GTK_ENTRY (demo->entry)), demo->options);
 	g_timer_stop (timer);
 	if (matches) {
 		GtkTreeIter iter;
@@ -335,6 +336,36 @@ pgd_find_selection_changed (GtkTreeSelection *treeselection,
         }
 }
 
+static void
+pgd_find_case_sensitive_toggled (GtkToggleButton *togglebutton,
+                                 PgdFindDemo     *demo)
+{
+        if (gtk_toggle_button_get_active (togglebutton))
+                demo->options |= POPPLER_FIND_CASE_SENSITIVE;
+        else
+                demo->options &= ~POPPLER_FIND_CASE_SENSITIVE;
+}
+
+static void
+pgd_find_backwards_toggled (GtkToggleButton *togglebutton,
+                            PgdFindDemo     *demo)
+{
+        if (gtk_toggle_button_get_active (togglebutton))
+                demo->options |= POPPLER_FIND_BACKWARDS;
+        else
+                demo->options &= ~POPPLER_FIND_BACKWARDS;
+}
+
+static void
+pgd_find_whole_words_toggled (GtkToggleButton *togglebutton,
+                              PgdFindDemo     *demo)
+{
+        if (gtk_toggle_button_get_active (togglebutton))
+                demo->options |= POPPLER_FIND_WHOLE_WORDS_ONLY;
+        else
+                demo->options &= ~POPPLER_FIND_WHOLE_WORDS_ONLY;
+}
+
 GtkWidget *
 pgd_find_create_widget (PopplerDocument *document)
 {
@@ -342,6 +373,7 @@ pgd_find_create_widget (PopplerDocument *document)
 	GtkWidget        *vbox, *hbox;
 	GtkWidget        *button;
 	GtkWidget        *swindow;
+        GtkWidget        *checkbutton;
         GtkTreeModel     *model;
 	GtkWidget        *treeview;
 	GtkCellRenderer  *renderer;
@@ -354,6 +386,7 @@ pgd_find_create_widget (PopplerDocument *document)
 
 	demo->n_pages = poppler_document_get_n_pages (document);
         demo->selected_page = -1;
+        demo->options = POPPLER_FIND_DEFAULT;
 
         hpaned = gtk_paned_new (GTK_ORIENTATION_HORIZONTAL);
         gtk_paned_set_position (GTK_PANED (hpaned), 300);
@@ -385,6 +418,32 @@ pgd_find_create_widget (PopplerDocument *document)
 
 	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 6);
 	gtk_widget_show (hbox);
+
+        hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+
+        checkbutton = gtk_check_button_new_with_label ("Case sensitive");
+        g_signal_connect (checkbutton, "toggled",
+                          G_CALLBACK (pgd_find_case_sensitive_toggled),
+                          demo);
+        gtk_box_pack_start (GTK_BOX (hbox), checkbutton, FALSE, FALSE, 0);
+        gtk_widget_show (checkbutton);
+
+        checkbutton = gtk_check_button_new_with_label ("Backwards");
+        g_signal_connect (checkbutton, "toggled",
+                          G_CALLBACK (pgd_find_backwards_toggled),
+                          demo);
+        gtk_box_pack_start (GTK_BOX (hbox), checkbutton, FALSE, FALSE, 0);
+        gtk_widget_show (checkbutton);
+
+        checkbutton = gtk_check_button_new_with_label ("Whole words only");
+        g_signal_connect (checkbutton, "toggled",
+                          G_CALLBACK (pgd_find_whole_words_toggled),
+                          demo);
+        gtk_box_pack_start (GTK_BOX (hbox), checkbutton, FALSE, FALSE, 0);
+        gtk_widget_show (checkbutton);
+
+        gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+        gtk_widget_show (hbox);
 
 	swindow = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (swindow),
