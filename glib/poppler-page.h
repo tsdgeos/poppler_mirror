@@ -60,6 +60,9 @@ PopplerPageTransition *poppler_page_get_transition       (PopplerPage        *pa
 gboolean               poppler_page_get_thumbnail_size   (PopplerPage        *page,
 							  int                *width,
 							  int                *height);
+GList             *poppler_page_find_text_with_options   (PopplerPage        *page,
+							  const  char        *text,
+							  PopplerFindFlags    options);
 GList     	      *poppler_page_find_text            (PopplerPage        *page,
 							  const  char        *text);
 void                   poppler_page_render_to_ps         (PopplerPage        *page,

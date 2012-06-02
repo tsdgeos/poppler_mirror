@@ -850,18 +850,23 @@ poppler_page_get_text (PopplerPage *page)
 }
 
 /**
- * poppler_page_find_text:
+ * poppler_page_find_text_with_options:
  * @page: a #PopplerPage
  * @text: the text to search for (UTF-8 encoded)
- * 
- * A #GList of rectangles for each occurance of the text on the page.
+ * @options: find options
+ *
+ * Finds @text in @page with the given #PopplerFindFlags options and
+ * returns a #GList of rectangles for each occurance of the text on the page.
  * The coordinates are in PDF points.
- * 
+ *
  * Return value: (element-type PopplerRectangle) (transfer full): a #GList of #PopplerRectangle,
+ *
+ * Since: 0.22
  **/
 GList *
-poppler_page_find_text (PopplerPage *page,
-			const char  *text)
+poppler_page_find_text_with_options (PopplerPage     *page,
+                                     const char      *text,
+                                     PopplerFindFlags options)
 {
   PopplerRectangle *match;
   GList *matches;
@@ -870,6 +875,7 @@ poppler_page_find_text (PopplerPage *page,
   glong ucs4_len;
   double height;
   TextPage *text_dev;
+  gboolean backwards;
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
   g_return_val_if_fail (text != NULL, NULL);
@@ -878,17 +884,19 @@ poppler_page_find_text (PopplerPage *page,
 
   ucs4 = g_utf8_to_ucs4_fast (text, -1, &ucs4_len);
   poppler_page_get_size (page, NULL, &height);
-  
+
+  backwards = options & POPPLER_FIND_BACKWARDS;
   matches = NULL;
   xMin = 0;
-  yMin = 0;
+  yMin = backwards ? height : 0;
 
   while (text_dev->findText (ucs4, ucs4_len,
-			     gFalse, gTrue, // startAtTop, stopAtBottom
-			     gFalse, gFalse, // startAtLast, stopAtLast
-			     gFalse, gFalse, // caseSensitive, backwards
-			     gFalse, // wholeWord
-			     &xMin, &yMin, &xMax, &yMax))
+                             gFalse, gTrue, // startAtTop, stopAtBottom
+                             gTrue, gFalse, // startAtLast, stopAtLast
+                             options & POPPLER_FIND_CASE_SENSITIVE,
+                             backwards,
+                             options & POPPLER_FIND_WHOLE_WORDS_ONLY,
+                             &xMin, &yMin, &xMax, &yMax))
     {
       match = poppler_rectangle_new ();
       match->x1 = xMin;
@@ -901,6 +909,24 @@ poppler_page_find_text (PopplerPage *page,
   g_free (ucs4);
 
   return g_list_reverse (matches);
+}
+
+/**
+ * poppler_page_find_text:
+ * @page: a #PopplerPage
+ * @text: the text to search for (UTF-8 encoded)
+ *
+ * Finds @text in @page with the default options (%POPPLER_FIND_DEFAULT) and
+ * returns a #GList of rectangles for each occurance of the text on the page.
+ * The coordinates are in PDF points.
+ *
+ * Return value: (element-type PopplerRectangle) (transfer full): a #GList of #PopplerRectangle,
+ **/
+GList *
+poppler_page_find_text (PopplerPage *page,
+			const char  *text)
+{
+  return poppler_page_find_text_with_options (page, text, POPPLER_FIND_DEFAULT);
 }
 
 static CairoImageOutputDev *
