@@ -1662,7 +1662,7 @@ void TextAnnotation::store( QDomNode & node, QDomDocument & document ) const
     // store the optional attributes
     if ( textType() != Linked )
         textElement.setAttribute( "type", (int)textType() );
-    if ( textIcon() != "Comment" )
+    if ( textIcon() != "Note" )
         textElement.setAttribute( "icon", textIcon() );
     if ( inplaceAlign() )
         textElement.setAttribute( "align", inplaceAlign() );
