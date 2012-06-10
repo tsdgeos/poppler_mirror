@@ -11,6 +11,7 @@
  * Copyright (C) 2011 Glad Deschrijver <glad.deschrijver@gmail.com>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2012, Tobias Koenig <tobias.koenig@kdab.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1732,6 +1733,20 @@ height = dummy.height();
 	   How to play the movie
 	*/
 	PlayMode playMode() const;
+
+	/**
+	   Returns whether a poster image should be shown if the movie is not playing.
+	   \since 0.22
+	*/
+	bool showPosterImage() const;
+
+	/**
+	   Returns the poster image that should be shown if the movie is not playing.
+	   If the image is null but showImagePoster() returns @c true, the first frame of the movie
+	   should be used as poster image.
+	   \since 0.22
+	*/
+	QImage posterImage() const;
 
     private:
 	/// \cond PRIVATE
