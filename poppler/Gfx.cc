@@ -1158,8 +1158,9 @@ void Gfx::opSetExtGState(Object args[], int numArgs) {
 	  funcs[0] = NULL;
 	} else {
 	  funcs[0] = Function::parse(&obj3);
-	  if (funcs[0]->getInputSize() != 1 ||
-	      funcs[0]->getOutputSize() != 1) {
+      if (funcs[0] == NULL ||
+          funcs[0]->getInputSize() != 1 ||
+          funcs[0]->getOutputSize() != 1) {
 	    error(errSyntaxError, getPos(),
 		  "Invalid transfer function in soft mask in ExtGState");
 	    delete funcs[0];
