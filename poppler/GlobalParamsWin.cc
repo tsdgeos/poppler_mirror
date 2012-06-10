@@ -4,6 +4,7 @@
    // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
    // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
    // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+   // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 
 TODO: instead of a fixed mapping defined in displayFontTab, it could
 scan the whole fonts directory, parse TTF files and build font
