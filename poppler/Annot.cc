@@ -783,50 +783,38 @@ AnnotAppearance::~AnnotAppearance() {
   appearDict.free();
 }
 
-void AnnotAppearance::getAppearanceStream(AnnotAppearance::AnnotAppearanceType type, const char *state, Object *dest) {
+void AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char *state, Object *dest) {
   Object apData, stream;
   apData.initNull();
 
   // Obtain dictionary or stream associated to appearance type
-  if (type == appearRollover) {
-    appearDict.dictLookupNF("R", &apData);
-  } else if (type == appearDown) {
-    appearDict.dictLookupNF("D", &apData);
-  }
-  if (apData.isNull()) { // Normal appearance, also used as fallback
+  switch (type) {
+  case appearRollover:
+    if (appearDict.dictLookupNF("R", &apData)->isNull())
+      appearDict.dictLookupNF("N", &apData);
+    break;
+  case appearDown:
+    if (appearDict.dictLookupNF("D", &apData)->isNull())
+      appearDict.dictLookupNF("N", &apData);
+    break;
+  case appearNormal:
     appearDict.dictLookupNF("N", &apData);
-  }
-
-  // Search state if it's a subdictionary
-  if (apData.isDict() && state) {
-    Object obj1;
-    apData.dictLookupNF(state, &obj1);
-    apData.free();
-    obj1.copy(&apData);
-    obj1.free();
+    break;
   }
 
   dest->initNull();
-  // Sanity check on the value we are about to return: it must be a ref to stream
-  if (apData.isRef()) {
-    apData.fetch(xref, &stream);
-    if (stream.isStream()) {
-      apData.copy(dest);
-    } else {
-      error(errSyntaxWarning, -1, "AP points to a non-stream object");
-    }
-    stream.free();
-  }
+  if (apData.isDict() && state)
+    apData.dictLookupNF(state, dest);
+  else if (apData.isRef())
+    apData.copy(dest);
   apData.free();
 }
 
 GooString * AnnotAppearance::getStateKey(int i) {
   Object obj1;
   GooString * res = NULL;
-  appearDict.dictLookupNF("N", &obj1);
-  if (obj1.isDict()) {
+  if (appearDict.dictLookupNF("N", &obj1)->isDict())
     res = new GooString(obj1.dictGetKey(i));
-  }
   obj1.free();
   return res;
 }
@@ -834,10 +822,8 @@ GooString * AnnotAppearance::getStateKey(int i) {
 int AnnotAppearance::getNumStates() {
   Object obj1;
   int res = 0;
-  appearDict.dictLookupNF("N", &obj1);
-  if (obj1.isDict()) {
+  if (appearDict.dictLookupNF("N", &obj1)->isDict())
     res = obj1.dictGetLength();
-  }
   obj1.free();
   return res;
 }
