@@ -128,7 +128,6 @@ pgd_selections_update_selection_region (PgdSelectionsDemo *demo)
 static void
 pgd_selections_update_selected_text (PgdSelectionsDemo *demo)
 {
-	GList *region;
 	gchar *text;
 
 	if (demo->selected_region)
