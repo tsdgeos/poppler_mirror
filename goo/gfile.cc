@@ -461,7 +461,7 @@ FILE *openFile(const char *path, const char *mode) {
   char nPath[_MAX_PATH + 1];
   wchar_t wMode[8];
   const char *p;
-  int i;
+  size_t i;
 
   // NB: _wfopen is only available in NT
   version.dwOSVersionInfoSize = sizeof(version);
