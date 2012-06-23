@@ -373,7 +373,6 @@ pgd_layers_create_widget (PopplerDocument *document)
 	GtkWidget        *treeview;
 	GtkTreeModel     *model;
 	GtkCellRenderer  *renderer;
-	GtkTreeSelection *selection;
 	GtkWidget        *hpaned, *viewer;
 
 	demo = g_new0 (PgdLayersDemo, 1);
