@@ -236,7 +236,7 @@ pgd_render_properties_selector_create (PgdRenderDemo *demo)
 	GtkWidget *scale_hbox, *scale_selector;
 	GtkWidget *rotate_hbox, *rotate_selector;
 	GtkWidget *printing_selector;
-	GtkWidget *slice_hbox, *slice_selector;
+	GtkWidget *slice_hbox;
 	GtkWidget *button;
 	gint       n_pages;
 	gchar     *str;
