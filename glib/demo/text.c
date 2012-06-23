@@ -285,7 +285,6 @@ pgd_text_create_widget (PopplerDocument *document)
 	PgdTextDemo      *demo;
 	GtkWidget        *label;
 	GtkWidget        *vbox, *vbox2;
-	GtkWidget	 *textinfo;
 	GtkWidget        *hbox, *page_selector;
 	GtkWidget        *button;
 	GtkWidget        *swindow, *textview, *treeview;
@@ -305,7 +304,6 @@ pgd_text_create_widget (PopplerDocument *document)
 
 	vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
 	vbox2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
-	textinfo = gtk_label_new ("TextInfo");
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
