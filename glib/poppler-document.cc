@@ -169,7 +169,6 @@ poppler_document_new_from_file (const char  *uri,
 				GError     **error)
 {
   PDFDoc *newDoc;
-  GooString *filename_g;
   GooString *password_g;
   char *filename;
 
@@ -198,6 +197,7 @@ poppler_document_new_from_file (const char  *uri,
   newDoc = new PDFDoc(filenameW, length, password_g, password_g);
   delete [] filenameW;
 #else
+  GooString *filename_g;
   filename_g = new GooString (filename);
   newDoc = new PDFDoc(filename_g, password_g, password_g);
 #endif
