@@ -262,7 +262,7 @@ pgd_text_view_query_tooltip (GtkTextView   *textview,
                 g_free (x2);
                 g_free (y2);
 
-                page = page = poppler_document_get_page (demo->doc, demo->page);
+                page = poppler_document_get_page (demo->doc, demo->page);
                 text = poppler_page_get_selected_text (page, POPPLER_SELECTION_GLYPH, &rect);
                 gtk_tooltip_set_text (tooltip, text);
                 g_free (text);
