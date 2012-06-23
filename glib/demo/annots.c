@@ -262,7 +262,6 @@ gchar *
 get_free_text_callout_line (PopplerAnnotFreeText *poppler_annot)
 {
     PopplerAnnotCalloutLine *callout;
-    gdouble x1, y1, x2, y2;
     gchar *text;
     
     if ((callout = poppler_annot_free_text_get_callout_line (poppler_annot))) {
@@ -481,9 +480,8 @@ pgd_annot_view_set_annot (PgdAnnotsDemo *demo,
     GtkWidget  *alignment;
     GtkWidget  *table;
     GtkWidget  *button;
-    GEnumValue *enum_value;
     gint        row = 0;
-    gchar      *text, *warning;
+    gchar      *text;
     time_t      timet;
 
     alignment = gtk_bin_get_child (GTK_BIN (demo->annot_view));
