@@ -21,7 +21,7 @@
 // Copyright (C) 2009 Eric Toombs <ewtoombs@uwaterloo.ca>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009, 2011 Axel Struebing <axel.struebing@freenet.de>
-// Copyright (C) 2010, 2011 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2010-2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jakub Wilk <ubanus@users.sf.net>
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Srinivas Adicherla <srinivas.adicherla@geodesic.com>
@@ -189,7 +189,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
   // try to open file
   // NB: _wfopen is only available in NT
   struct _stat buf;
-  int size;
+  int size = 0;
   version.dwOSVersionInfoSize = sizeof(version);
   GetVersionEx(&version);
   if (version.dwPlatformId == VER_PLATFORM_WIN32_NT) {
@@ -203,7 +203,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
     }
     file = fopen(fileName->getCString(), "rb");
   }
-  if (!file) {
+  if (!size || !file) {
     error(errIO, -1, "Couldn't open file '{0:t}'", fileName);
     errCode = errOpenFile;
     return;
