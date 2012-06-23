@@ -411,7 +411,7 @@ pgd_action_view_set_action (GtkWidget     *action_view,
 
 		for (l = action->ocg_state.state_list; l; l = g_list_next (l)) {
 			PopplerActionLayer *action_layer = (PopplerActionLayer *)l->data;
-			gchar *text;
+			gchar *text = NULL;
 			gint   n_layers = g_list_length (action_layer->layers);
 
 			switch (action_layer->action) {
