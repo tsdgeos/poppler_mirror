@@ -8,6 +8,7 @@
 // Copyright (C) 2008-2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -229,7 +230,7 @@ GBool getFileSpecNameForPlatform (Object *fileSpec, Object *fileName)
       if (!fileSpec->dictLookup("F", fileName)->isString ()) {
         fileName->free();
 #ifdef _WIN32
-	char *platform = "DOS";
+	const char *platform = "DOS";
 #else
 	const char *platform = "Unix";
 #endif

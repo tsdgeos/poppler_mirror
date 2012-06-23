@@ -1,7 +1,7 @@
 /* Written by Krzysztof Kowalczyk (http://blog.kowalczyk.info)
    but mostly based on xpdf code.
    
-   // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+   // Copyright (C) 2010, 2012 Hib Eris <hib@hiberis.nl>
    // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
    // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
    // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
@@ -242,7 +242,7 @@ static bool FileExists(const char *path)
 
 void SysFontList::scanWindowsFonts(GooString *winFontDir) {
   OSVERSIONINFO version;
-  char *path;
+  const char *path;
   DWORD idx, valNameLen, dataLen, type;
   HKEY regKey;
   char valName[1024], data[1024];
