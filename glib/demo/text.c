@@ -267,8 +267,10 @@ pgd_text_view_query_tooltip (GtkTextView   *textview,
                 gtk_tooltip_set_text (tooltip, text);
                 g_free (text);
                 g_object_unref (page);
+                return TRUE;
+        } else {
+                return FALSE;
         }
-
 }
 
 
