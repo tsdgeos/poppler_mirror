@@ -1512,6 +1512,11 @@ QList<Annotation*> Annotation::revisions() const
         return res;
     }
 
+    /* If the annotation doesn't live in a object on its own (eg bug51361), it
+     * has no ref, therefore it can't have revisions */
+    if ( !d->pdfAnnot->getHasRef() )
+        return QList<Annotation*>();
+
     return AnnotationPrivate::findAnnotations( d->pdfPage, d->parentDoc, d->pdfAnnot->getId() );
 }
 
