@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2010-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -3625,6 +3625,10 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, void *srcData
   }
   scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha,
 			 srcWidth, srcHeight, scaledWidth, scaledHeight);
+  
+  if (scaledImg == NULL) {
+    return splashErrBadArg;
+  }
 
   // construct the three sections
   i = 0;
@@ -3803,22 +3807,27 @@ SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData,
   SplashBitmap *dest;
 
   dest = new SplashBitmap(scaledWidth, scaledHeight, 1, srcMode, srcAlpha);
-  if (scaledHeight < srcHeight) {
-    if (scaledWidth < srcWidth) {
-      scaleImageYdXd(src, srcData, srcMode, nComps, srcAlpha,
-		     srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+  if (dest->getDataPtr() != NULL) {
+    if (scaledHeight < srcHeight) {
+      if (scaledWidth < srcWidth) {
+	scaleImageYdXd(src, srcData, srcMode, nComps, srcAlpha,
+		      srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+      } else {
+	scaleImageYdXu(src, srcData, srcMode, nComps, srcAlpha,
+		      srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+      }
     } else {
-      scaleImageYdXu(src, srcData, srcMode, nComps, srcAlpha,
-		     srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+      if (scaledWidth < srcWidth) {
+	scaleImageYuXd(src, srcData, srcMode, nComps, srcAlpha,
+		      srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+      } else {
+	scaleImageYuXu(src, srcData, srcMode, nComps, srcAlpha,
+		      srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
+      }
     }
   } else {
-    if (scaledWidth < srcWidth) {
-      scaleImageYuXd(src, srcData, srcMode, nComps, srcAlpha,
-		     srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
-    } else {
-      scaleImageYuXu(src, srcData, srcMode, nComps, srcAlpha,
-		     srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
-    }
+    delete dest;
+    dest = NULL;
   }
   return dest;
 }

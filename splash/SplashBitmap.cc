@@ -101,13 +101,17 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
     rowSize += rowPad - 1;
     rowSize -= rowSize % rowPad;
   }
-  data = (SplashColorPtr)gmallocn(rowSize, height);
-  if (!topDown) {
-    data += (height - 1) * rowSize;
-    rowSize = -rowSize;
-  }
-  if (alphaA) {
-    alpha = (Guchar *)gmallocn(width, height);
+  data = (SplashColorPtr)gmallocn_checkoverflow(rowSize, height);
+  if (data != NULL) {
+    if (!topDown) {
+      data += (height - 1) * rowSize;
+      rowSize = -rowSize;
+    }
+    if (alphaA) {
+      alpha = (Guchar *)gmallocn(width, height);
+    } else {
+      alpha = NULL;
+    }
   } else {
     alpha = NULL;
   }
