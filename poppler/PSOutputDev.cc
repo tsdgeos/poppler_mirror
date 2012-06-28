@@ -3984,6 +3984,26 @@ void PSOutputDev::addCustomColor(GfxSeparationColorSpace *sepCS) {
   GfxColor color;
   GfxCMYK cmyk;
 
+  if (!sepCS->getName()->cmp("Black")) {
+    processColors |= psProcessBlack;
+    return;
+  }
+  if (!sepCS->getName()->cmp("Cyan")) {
+    processColors |= psProcessCyan;
+    return;
+  }
+  if (!sepCS->getName()->cmp("Yellow")) {
+    processColors |= psProcessYellow;
+    return;
+  }
+  if (!sepCS->getName()->cmp("Magenta")) {
+    processColors |= psProcessMagenta;
+    return;
+  }
+  if (!sepCS->getName()->cmp("All")) 
+    return;
+  if (!sepCS->getName()->cmp("None")) 
+    return;
   for (cc = customColors; cc; cc = cc->next) {
     if (!cc->name->cmp(sepCS->getName())) {
       return;
