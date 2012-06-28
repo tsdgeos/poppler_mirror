@@ -12,6 +12,7 @@
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012 Tobias Koenig <tokoe@kdab.com>
  * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2012 Adam Reichold <adamreichold@myopera.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -425,6 +426,44 @@ bool Page::search(const QString &text, QRectF &rect, SearchDirection direction, 
   rect.setBottom( sBottom );
 
   return found;
+}
+
+QList<QRectF> Page::search(const QString &text, SearchMode caseSensitive, Rotation rotate) const
+{
+  const QChar * str = text.unicode();
+  int len = text.length();
+  QVector<Unicode> u(len);
+  for (int i = 0; i < len; ++i) u[i] = str[i].unicode();
+
+  GBool sCase;
+  if (caseSensitive == CaseSensitive) sCase = gTrue;
+  else sCase = gFalse;
+
+  int rotation = (int)rotate * 90;
+  
+  QList<QRectF> results;
+  double sLeft = 0.0, sTop = 0.0, sRight = 0.0, sBottom = 0.0;
+  
+  TextOutputDev td(NULL, gTrue, 0, gFalse, gFalse);
+  m_page->parentDoc->doc->displayPage( &td, m_page->index + 1, 72, 72, rotation, false, true, false );
+  TextPage *textPage=td.takeText();
+  
+  while(textPage->findText( u.data(), len, 
+        gFalse, gTrue, gTrue, gFalse, sCase, gFalse, gFalse, &sLeft, &sTop, &sRight, &sBottom ))
+  {
+      QRectF result;
+      
+      result.setLeft(sLeft);
+      result.setTop(sTop);
+      result.setRight(sRight);
+      result.setBottom(sBottom);
+      
+      results.append(result);
+  }
+  
+  textPage->decRefCnt();
+
+  return results;
 }
 
 QList<TextBox*> Page::textList(Rotation rotate) const
