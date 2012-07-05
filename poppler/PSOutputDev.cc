@@ -6099,15 +6099,6 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
       n = (1 << colorMap->getBits()) - 1;
       writePSFmt("{0:.4g} {1:.4g}", colorMap->getDecodeLow(0) * n,
 		 colorMap->getDecodeHigh(0) * n);
-    } else if (colorMap->getColorSpace()->getMode() == csDeviceN) {
-      numComps = ((GfxDeviceNColorSpace *)colorMap->getColorSpace())->
-	           getAlt()->getNComps();
-      for (i = 0; i < numComps; ++i) {
-	if (i > 0) {
-	  writePS(" ");
-	}
-	writePS("0 1");
-      }
     } else {
       numComps = colorMap->getNumPixelComps();
       for (i = 0; i < numComps; ++i) {
@@ -6235,11 +6226,6 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
       str = new FixedLengthEncoder(str, len);
     } else if (useCompressed) {
       str = str->getUndecodedStream();
-    }
-
-    // recode DeviceN data
-    if (colorMap && colorMap->getColorSpace()->getMode() == csDeviceN) {
-      str = new DeviceNRecoder(str, width, height, colorMap);
     }
 
     // add RunLengthEncode and ASCIIHex/85 encode filters
