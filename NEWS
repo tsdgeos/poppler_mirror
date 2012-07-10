@@ -1,3 +1,14 @@
+Release 0.20.2
+        core:
+         * Fix compilation on Windows
+         * Copy resources content defined in the pages dict on save (Bug #51369)
+         * PSOutputDev: Correct %%DocumentCustomColors (Bug #51479)
+         * PSOutputDev: Fix handling of DeviceN images in level 3 PostScript (Bug #51548)
+         * Fix crash in malformed documents
+        
+        qt4:
+         * Do not hang on malformed /Annots objects (Bug #51361)
+
 Release 0.20.1
         core:
          * Remove unnecesary transparency group handling in splash (Bug #13487)
