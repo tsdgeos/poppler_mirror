@@ -3375,7 +3375,8 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
 
 SplashError Splash::drawImage(SplashImageSource src, void *srcData,
 			      SplashColorMode srcMode, GBool srcAlpha,
-			      int w, int h, SplashCoord *mat) {
+			      int w, int h, SplashCoord *mat,
+			      GBool tilingPattern) {
   GBool ok;
   SplashBitmap *scaledImg;
   SplashClipResult clipRes;
@@ -3499,7 +3500,7 @@ SplashError Splash::drawImage(SplashImageSource src, void *srcData,
   // all other cases
   } else {
     return arbitraryTransformImage(src, srcData, srcMode, nComps, srcAlpha,
-			    w, h, mat);
+			    w, h, mat, tilingPattern);
   }
 
   return splashOk;
@@ -3509,7 +3510,8 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, void *srcData
 				     SplashColorMode srcMode, int nComps,
 				     GBool srcAlpha,
 				     int srcWidth, int srcHeight,
-				     SplashCoord *mat) {
+				     SplashCoord *mat,
+				     GBool tilingPattern) {
   SplashBitmap *scaledImg;
   SplashClipResult clipRes, clipRes2;
   SplashPipe pipe;
@@ -3558,44 +3560,53 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, void *srcData
   }
 
   // compute the scale factors
-  if (mat[0] >= 0) {
-    t0 = imgCoordMungeUpper(mat[0] + mat[4]) - imgCoordMungeLower(mat[4]);
+  if (splashAbs(mat[0]) >= splashAbs(mat[1])) {
+    scaledWidth = xMax - xMin;
+    scaledHeight = yMax - yMin;
   } else {
-    t0 = imgCoordMungeUpper(mat[4]) - imgCoordMungeLower(mat[0] + mat[4]);
+    scaledWidth = yMax - yMin;
+    scaledHeight = xMax - xMin;
   }
-  if (mat[1] >= 0) {
-    t1 = imgCoordMungeUpper(mat[1] + mat[5]) - imgCoordMungeLower(mat[5]);
-  } else {
-    t1 = imgCoordMungeUpper(mat[5]) - imgCoordMungeLower(mat[1] + mat[5]);
+  if (scaledHeight <= 1 || scaledHeight <= 1 || tilingPattern) {
+    if (mat[0] >= 0) {
+      t0 = imgCoordMungeUpper(mat[0] + mat[4]) - imgCoordMungeLower(mat[4]);
+    } else {
+      t0 = imgCoordMungeUpper(mat[4]) - imgCoordMungeLower(mat[0] + mat[4]);
+    }
+    if (mat[1] >= 0) {
+      t1 = imgCoordMungeUpper(mat[1] + mat[5]) - imgCoordMungeLower(mat[5]);
+    } else {
+      t1 = imgCoordMungeUpper(mat[5]) - imgCoordMungeLower(mat[1] + mat[5]);
+    }
+    scaledWidth = t0 > t1 ? t0 : t1;
+    if (mat[2] >= 0) {
+      t0 = imgCoordMungeUpper(mat[2] + mat[4]) - imgCoordMungeLower(mat[4]);
+      if (splashAbs(mat[1]) >= 1) {
+        th = imgCoordMungeUpper(mat[2]) - imgCoordMungeLower(mat[0] * mat[3] / mat[1]);
+	    if (th > t0) t0 = th;
+      }
+    } else {
+      t0 = imgCoordMungeUpper(mat[4]) - imgCoordMungeLower(mat[2] + mat[4]);
+      if (splashAbs(mat[1]) >= 1) {
+        th = imgCoordMungeUpper(mat[0] * mat[3] / mat[1]) - imgCoordMungeLower(mat[2]);
+        if (th > t0) t0 = th;
+      }
+    }
+    if (mat[3] >= 0) {
+      t1 = imgCoordMungeUpper(mat[3] + mat[5]) - imgCoordMungeLower(mat[5]);
+      if (splashAbs(mat[0]) >= 1) {
+        th = imgCoordMungeUpper(mat[3]) - imgCoordMungeLower(mat[1] * mat[2] / mat[0]);
+	    if (th > t1) t1 = th;
+      }
+    } else {
+      t1 = imgCoordMungeUpper(mat[5]) - imgCoordMungeLower(mat[3] + mat[5]);
+      if (splashAbs(mat[0]) >= 1) {
+        th = imgCoordMungeUpper(mat[1] * mat[2] / mat[0]) - imgCoordMungeLower(mat[3]);
+	    if (th > t1) t1 = th;
+      }
+    }
+    scaledHeight = t0 > t1 ? t0 : t1;
   }
-  scaledWidth = t0 > t1 ? t0 : t1;
-  if (mat[2] >= 0) {
-    t0 = imgCoordMungeUpper(mat[2] + mat[4]) - imgCoordMungeLower(mat[4]);
-    if (splashAbs(mat[1]) >= 1) {
-      th = imgCoordMungeUpper(mat[2]) - imgCoordMungeLower(mat[0] * mat[3] / mat[1]);
-	  if (th > t0) t0 = th;
-    }
-  } else {
-    t0 = imgCoordMungeUpper(mat[4]) - imgCoordMungeLower(mat[2] + mat[4]);
-    if (splashAbs(mat[1]) >= 1) {
-      th = imgCoordMungeUpper(mat[0] * mat[3] / mat[1]) - imgCoordMungeLower(mat[2]);
-      if (th > t0) t0 = th;
-    }
-  }
-  if (mat[3] >= 0) {
-    t1 = imgCoordMungeUpper(mat[3] + mat[5]) - imgCoordMungeLower(mat[5]);
-    if (splashAbs(mat[0]) >= 1) {
-      th = imgCoordMungeUpper(mat[3]) - imgCoordMungeLower(mat[1] * mat[2] / mat[0]);
-	  if (th > t1) t1 = th;
-    }
-  } else {
-    t1 = imgCoordMungeUpper(mat[5]) - imgCoordMungeLower(mat[3] + mat[5]);
-    if (splashAbs(mat[0]) >= 1) {
-      th = imgCoordMungeUpper(mat[1] * mat[2] / mat[0]) - imgCoordMungeLower(mat[3]);
-	  if (th > t1) t1 = th;
-    }
-  }
-  scaledHeight = t0 > t1 ? t0 : t1;
   if (scaledWidth == 0) {
     scaledWidth = 1;
   }
