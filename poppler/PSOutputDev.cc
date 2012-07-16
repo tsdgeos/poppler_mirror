@@ -6514,9 +6514,9 @@ void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
         writePS(" ");
       }
       writePS("]\n");
-      dumpColorSpaceL2(deviceNCS->getAlt(), gFalse, updateColors, map01);
+      dumpColorSpaceL2(deviceNCS->getAlt(), gFalse, updateColors, gFalse);
       writePS("\n");
-      cvtFunction(deviceNCS->getTintTransformFunc());
+      cvtFunction(deviceNCS->getTintTransformFunc(), map01 && deviceNCS->getAlt()->getMode() == csLab);
       writePS("]\n");
       if (genXform) {
         writePS(" {}");
@@ -6979,7 +6979,7 @@ void PSOutputDev::psXObject(Stream *psStream, Stream *level1Stream) {
 
 //~ can nextFunc be reset to 0 -- maybe at the start of each page?
 //~   or maybe at the start of each color space / pattern?
-void PSOutputDev::cvtFunction(Function *func) {
+void PSOutputDev::cvtFunction(Function *func, GBool invertPSFunction) {
   SampledFunction *func0;
   ExponentialFunction *func2;
   StitchingFunction *func3;
@@ -7069,7 +7069,14 @@ void PSOutputDev::cvtFunction(Function *func) {
       // [e01] [efrac] y(0) ... y(i-1) y(i)
     }
     // [e01] [efrac] y(0) ... y(n-1)
-    writePSFmt("{0:d} {1:d} roll pop pop }}\n", n+2, n);
+    writePSFmt("{0:d} {1:d} roll pop pop \n", n+2, n);
+    if (invertPSFunction) {
+      for (i = 0; i < n; ++i) {
+        writePSFmt("{0:d} -1 roll ", n);
+        writePSFmt("{0:.6g} sub {1:.6g} div ", func0->getRangeMin(i), func0->getRangeMax(i) - func0->getRangeMin(i));
+      }
+    }
+    writePS("}\n");
     break;
 
   case 2:			// exponential
@@ -7091,7 +7098,14 @@ void PSOutputDev::cvtFunction(Function *func) {
       }
     }
     // x y(0) .. y(n-1)
-    writePSFmt("{0:d} {1:d} roll pop }}\n", n+1, n);
+    writePSFmt("{0:d} {1:d} roll pop \n", n+1, n);
+    if (invertPSFunction && func2->getHasRange()) {
+      for (i = 0; i < n; ++i) {
+        writePSFmt("{0:d} -1 roll ", n);
+        writePSFmt("{0:.6g} sub {1:.6g} div ", func2->getRangeMin(i), func2->getRangeMax(i) - func2->getRangeMin(i));
+      }
+    }
+    writePS("}\n");
     break;
 
   case 3:			// stitching
@@ -7120,13 +7134,39 @@ void PSOutputDev::cvtFunction(Function *func) {
     for (i = 0; i < func3->getNumFuncs() - 1; ++i) {
       writePS("} ifelse\n");
     }
+    if (invertPSFunction && func3->getHasRange()) {
+      n = func3->getOutputSize();
+      for (i = 0; i < n; ++i) {
+        writePSFmt("{0:d} -1 roll ", n);
+        writePSFmt("{0:.6g} sub {1:.6g} div ", func3->getRangeMin(i), func3->getRangeMax(i) - func3->getRangeMin(i));
+      }
+    }
     writePS("}\n");
     break;
 
   case 4:			// PostScript
     func4 = (PostScriptFunction *)func;
-    writePS(func4->getCodeString()->getCString());
-    writePS("\n");
+    if (invertPSFunction) {
+      GooString *codeString = new GooString(func4->getCodeString());
+      for (i = codeString->getLength() -1; i > 0; i--) {
+        if (codeString->getChar(i) == '}') {
+          codeString->del(i);
+          break;
+        }
+      }
+      writePS(codeString->getCString());
+      writePS("\n");
+      delete codeString;
+      n = func4->getOutputSize();
+      for (i = 0; i < n; ++i) {
+        writePSFmt("{0:d} -1 roll ", n);
+        writePSFmt("{0:.6g} sub {1:.6g} div ", func4->getRangeMin(i), func4->getRangeMax(i) - func4->getRangeMin(i));
+      }
+      writePS("}\n");
+    } else {
+      writePS(func4->getCodeString()->getCString());
+      writePS("\n");
+    }
     break;
   }
 }
