@@ -378,7 +378,7 @@ private:
   void opiTransform(GfxState *state, double x0, double y0,
 		    double *x1, double *y1);
 #endif
-  void cvtFunction(Function *func);
+  void cvtFunction(Function *func, GBool invertPSFunction = gFalse);
   GooString *filterPSName(GooString *name);
 
   // Write the document-level setup.
