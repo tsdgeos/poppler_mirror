@@ -21,7 +21,7 @@
 #ifndef SPLASHMATH_H
 #define SPLASHMATH_H
 
-#include "poppler/poppler-config.h"
+#include "poppler-config.h"
 
 #if USE_FIXEDPOINT
 #include "goo/FixedPoint.h"

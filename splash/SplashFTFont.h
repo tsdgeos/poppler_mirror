@@ -23,7 +23,7 @@
 #ifndef SPLASHFTFONT_H
 #define SPLASHFTFONT_H
 
-#include "poppler/poppler-config.h"
+#include "poppler-config.h"
 
 #if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
 

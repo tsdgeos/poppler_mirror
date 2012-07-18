@@ -15,7 +15,7 @@
 #ifndef PNGWRITER_H
 #define PNGWRITER_H
 
-#include "poppler/poppler-config.h"
+#include "poppler-config.h"
 
 #ifdef ENABLE_LIBPNG
 

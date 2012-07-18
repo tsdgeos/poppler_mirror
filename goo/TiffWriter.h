@@ -12,7 +12,7 @@
 #ifndef TIFFWRITER_H
 #define TIFFWRITER_H
 
-#include "poppler/poppler-config.h"
+#include "poppler-config.h"
 
 #ifdef ENABLE_LIBTIFF
 

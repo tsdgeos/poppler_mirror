@@ -26,7 +26,7 @@
 #define GMEM_H
 
 #include <stdio.h>
-#include "poppler/poppler-config.h"
+#include "poppler-config.h"
 
 #ifdef __cplusplus
 extern "C" {

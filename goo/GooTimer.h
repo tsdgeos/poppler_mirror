@@ -19,7 +19,7 @@
 #pragma interface
 #endif
 
-#include "poppler/poppler-config.h"
+#include "poppler-config.h"
 #include "gtypes.h"
 #ifdef HAVE_GETTIMEOFDAY
 #include <sys/time.h>

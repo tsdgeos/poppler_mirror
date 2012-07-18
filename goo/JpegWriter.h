@@ -17,7 +17,7 @@
 #ifndef JPEGWRITER_H
 #define JPEGWRITER_H
 
-#include "poppler/poppler-config.h"
+#include "poppler-config.h"
 
 #ifdef ENABLE_LIBJPEG
 
