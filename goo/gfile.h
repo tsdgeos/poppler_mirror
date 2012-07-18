@@ -27,7 +27,7 @@
 #ifndef GFILE_H
 #define GFILE_H
 
-#include "poppler/poppler-config.h"
+#include "poppler-config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
