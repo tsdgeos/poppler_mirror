@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 #include "config.h"
@@ -109,7 +110,10 @@ main (int argc, char *argv[])
       goto err0;
     }
   globalParams = new GlobalParams();
-  extractPages (argv[1], argv[2]);
+  ok = extractPages (argv[1], argv[2]);
+  if (ok) {
+    exitCode = 0;
+  }
   delete globalParams;
 
 err0:
