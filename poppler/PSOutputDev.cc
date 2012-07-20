@@ -3049,7 +3049,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   double m0, m1, m2, m3, m4, m5;
   int nStripes, stripeH, stripeY;
   int c, w, h, x, y, comp, i;
-  int numComps;
+  int numComps, initialNumComps;
 #endif
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   Guchar digit;
@@ -3132,6 +3132,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   stripeH = (sliceH + nStripes - 1) / nStripes;
 
   // render the stripes
+  initialNumComps = numComps;
   for (stripeY = sliceY; stripeY < sliceH; stripeY += stripeH) {
 
     // rasterize a stripe
@@ -3151,6 +3152,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 
     // draw the rasterized image
     bitmap = splashOut->getBitmap();
+    numComps = initialNumComps;
     w = bitmap->getWidth();
     h = bitmap->getHeight();
     writePS("gsave\n");
