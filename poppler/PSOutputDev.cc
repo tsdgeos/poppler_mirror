@@ -3521,6 +3521,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state) {
     saveState(NULL);
   }
 
+  xScale = yScale = 1;
   switch (mode) {
 
   case psModePSOrigPageSizes:
@@ -3631,8 +3632,6 @@ void PSOutputDev::startPage(int pageNum, GfxState *state) {
       } else {
 	yScale = xScale;
       }
-    } else {
-      xScale = yScale = 1;
     }
     // deal with odd bounding boxes or clipping
     if (clipLLX0 < clipURX0 && clipLLY0 < clipURY0) {
@@ -3694,7 +3693,6 @@ void PSOutputDev::startPage(int pageNum, GfxState *state) {
     if (tx != 0 || ty != 0) {
       writePSFmt("{0:.6g} {1:.6g} translate\n", tx, ty);
     }
-    xScale = yScale = 1;
     break;
 
   case psModeForm:
@@ -3702,7 +3700,6 @@ void PSOutputDev::startPage(int pageNum, GfxState *state) {
     writePS("begin xpdf begin\n");
     writePS("pdfStartPage\n");
     tx = ty = 0;
-    xScale = yScale = 1;
     rotate = 0;
     break;
   }
