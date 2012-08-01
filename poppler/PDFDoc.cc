@@ -772,35 +772,13 @@ int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode) {
     }
   }
 
-  // we don't support rewriting files with Encrypt at the moment
-  Object obj;
-  xref->getTrailerDict()->getDict()->lookupNF("Encrypt", &obj);
-  if (!obj.isNull())
-  {
-    obj.free();
-    if (!updated && mode == writeStandard) {
-      // simply copy the original file
-      saveWithoutChangesAs (outStr);
-    } else {
-      return errEncrypted;
-    }
-  }
-  else
-  {
-    obj.free();
-
-    if (mode == writeForceRewrite) {
-      saveCompleteRewrite(outStr);
-    } else if (mode == writeForceIncremental) {
-      saveIncrementalUpdate(outStr); 
-    } else { // let poppler decide
-      if(updated) { 
-        saveIncrementalUpdate(outStr);
-      } else {
-        // simply copy the original file
-        saveWithoutChangesAs (outStr);
-      }
-    }
+  if (!updated && mode == writeStandard) {
+    // simply copy the original file
+    saveWithoutChangesAs (outStr);
+  } if (mode == writeForceRewrite) {
+    saveCompleteRewrite(outStr);
+  } else {
+    saveIncrementalUpdate(outStr);
   }
 
   return errNone;
@@ -905,6 +883,10 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
 
 void PDFDoc::saveCompleteRewrite (OutStream* outStr)
 {
+  // Make sure that special flags are set, because we are going to read
+  // all objects, including Unencrypted ones.
+  xref->scanSpecialFlags();
+
   outStr->printf("%%PDF-%d.%d\r\n",pdfMajorVersion,pdfMinorVersion);
   XRef *uxref = new XRef();
   uxref->add(0, 65535, 0, gFalse);
@@ -1179,6 +1161,15 @@ Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Guint startxRef
     }
   }
   obj1.free();
+
+  if (!xRef->getTrailerDict()->isNone()) {
+    Object obj2;
+    xRef->getTrailerDict()->dictLookupNF("Encrypt", &obj2);
+    if (!obj2.isNull()) {
+      trailerDict->set("Encrypt", &obj2);
+      obj2.free();
+    }
+  }
 
   //calculate md5 digest
   Guchar digest[16];

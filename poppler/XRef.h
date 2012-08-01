@@ -63,7 +63,11 @@ struct XRefEntry {
   Object obj; //if this entry was updated, obj will contains the updated object
 
   enum Flag {
-    Updated   // Set if the entry was modified
+    // Regular flags
+    Updated,     // Entry was modified
+
+    // Special flags -- available only after xref->scanSpecialFlags() is run
+    Unencrypted  // Entry is stored in unencrypted form (meaningless in unencrypted documents)
   };
 
   inline GBool getFlag(Flag flag) {
@@ -147,6 +151,14 @@ public:
   // Retuns the entry that belongs to the offset
   int getNumEntry(Guint offset);
 
+  // Scans the document and sets special flags in all xref entries. One of those
+  // flags is Unencrypted, which affects how the object is fetched. Therefore,
+  // this function must be called before fetching unencrypted objects (e.g.
+  // Encrypt dictionary, XRef streams). Note that the code that initializes
+  // decryption doesn't need to call this function, because it runs before
+  // decryption is enabled, and therefore the Unencrypted flag is ignored.
+  void scanSpecialFlags();
+
   // Direct access.
   XRefEntry *getEntry(int i, GBool complainIfMissing = gTrue);
   Object *getTrailerDict() { return &trailerDict; }
@@ -189,6 +201,7 @@ private:
   Guint prevXRefOffset;		// position of prev XRef section (= next to read)
   Guint mainXRefEntriesOffset;	// offset of entries in main XRef table
   GBool xRefStream;		// true if last XRef section is a stream
+  GBool scannedSpecialFlags;	// true if scanSpecialFlags has been called
 
   void init();
   int reserve(int newSize);
@@ -199,6 +212,7 @@ private:
   GBool readXRefStream(Stream *xrefStr, Guint *pos);
   GBool constructXRef(GBool *wasReconstructed);
   GBool parseEntry(Guint offset, XRefEntry *entry);
+  void markUnencrypted(Object *obj);
 
   class XRefWriter {
   public:

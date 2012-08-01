@@ -267,6 +267,7 @@ void XRef::init() {
   objStrs = new PopplerCache(5);
   mainXRefEntriesOffset = 0;
   xRefStream = gFalse;
+  scannedSpecialFlags = gFalse;
 }
 
 XRef::XRef() {
@@ -1049,7 +1050,7 @@ Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
       delete parser;
       goto err;
     }
-    parser->getObj(obj, gFalse, encrypted ? fileKey : (Guchar *)NULL,
+    parser->getObj(obj, gFalse, (encrypted && !e->getFlag(XRefEntry::Unencrypted)) ? fileKey : NULL,
 		   encAlgorithm, keyLength, num, gen, recursion);
     obj1.free();
     obj2.free();
@@ -1437,6 +1438,65 @@ XRefEntry *XRef::getEntry(int i, GBool complainIfMissing)
   }
 
   return &entries[i];
+}
+
+// Recursively sets the Unencrypted flag in all referenced xref entries
+void XRef::markUnencrypted(Object *obj) {
+  Object obj1;
+
+  switch (obj->getType()) {
+    case objArray:
+    {
+      Array *array = obj->getArray();
+      for (int i = 0; i < array->getLength(); i++) {
+        markUnencrypted(array->getNF(i, &obj1));
+        obj1.free();
+      }
+      break;
+    }
+    case objStream:
+    case objDict:
+    {
+      Dict *dict;
+      if (obj->getType() == objStream) {
+        Stream *stream = obj->getStream();
+        dict = stream->getDict();
+      } else {
+        dict = obj->getDict();
+      }
+      for (int i = 0; i < dict->getLength(); i++) {
+        markUnencrypted(dict->getValNF(i, &obj1));
+        obj1.free();
+      }
+      break;
+    }
+    case objRef:
+    {
+      Ref ref = obj->getRef();
+      XRefEntry *e = getEntry(ref.num);
+      if (e->getFlag(XRefEntry::Unencrypted))
+        return; // We've already been here: prevent infinite recursion
+      e->setFlag(XRefEntry::Unencrypted, gTrue);
+      fetch(ref.num, ref.gen, &obj1);
+      markUnencrypted(&obj1);
+      obj1.free();
+      break;
+    }
+    default:
+      break;
+  }
+}
+
+void XRef::scanSpecialFlags() {
+  if (scannedSpecialFlags) {
+    return;
+  }
+  scannedSpecialFlags = gTrue;
+
+  // Mark objects referred from the Encrypt dict as Unencrypted
+  Object obj;
+  markUnencrypted(trailerDict.dictLookupNF("Encrypt", &obj));
+  obj.free();
 }
 
 
