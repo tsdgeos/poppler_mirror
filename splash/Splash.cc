@@ -337,9 +337,6 @@ void Splash::pipeRun(SplashPipe *pipe) {
   SplashColorPtr cSrc;
   Guchar cResult0, cResult1, cResult2, cResult3;
   int t;
-#if SPLASH_CMYK
-  SplashColor cSrc2, cDest2;
-#endif
 
   //----- source color
 
@@ -521,25 +518,6 @@ void Splash::pipeRun(SplashPipe *pipe) {
     //----- blend function
 
     if (state->blendFunc) {
-#if SPLASH_CMYK
-      if (bitmap->mode == splashModeCMYK8) {
-	// convert colors to additive
-	cSrc2[0] = 0xff - cSrc[0];
-	cSrc2[1] = 0xff - cSrc[1];
-	cSrc2[2] = 0xff - cSrc[2];
-	cSrc2[3] = 0xff - cSrc[3];
-	cDest2[0] = 0xff - cDest[0];
-	cDest2[1] = 0xff - cDest[1];
-	cDest2[2] = 0xff - cDest[2];
-	cDest2[3] = 0xff - cDest[3];
-	(*state->blendFunc)(cSrc2, cDest2, cBlend, bitmap->mode);
-	// convert result back to subtractive
-	cBlend[0] = 0xff - cBlend[0];
-	cBlend[1] = 0xff - cBlend[1];
-	cBlend[2] = 0xff - cBlend[2];
-	cBlend[3] = 0xff - cBlend[3];
-      } else
-#endif
       (*state->blendFunc)(cSrc, cDest, cBlend, bitmap->mode);
     }
 
