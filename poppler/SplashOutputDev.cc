@@ -661,11 +661,6 @@ static void splashOutBlendSoftLight(SplashColorPtr src, SplashColorPtr dest,
     SplashColor rgbSrc;
     SplashColor rgbDest;
     SplashColor rgbBlend;
-    for (i = 0; i < 4; i++) {
-      // convert back to subtractive (s. Splash.cc)
-      src[i] = 0xff - src[i];
-      dest[i] = 0xff - dest[i];
-    }
     cmykToRGB(src, rgbSrc);
     cmykToRGB(dest, rgbDest);
     for (i = 0; i < 3; ++i) {
@@ -681,10 +676,6 @@ static void splashOutBlendSoftLight(SplashColorPtr src, SplashColorPtr dest,
       }
     }
     rgbToCMYK(rgbBlend, blend);
-    for (i = 0; i < 4; i++) {
-      // convert back to additive (s. Splash.cc)
-      blend[i] = 0xff - blend[i];
-    }
   } else
 #endif
   {
@@ -848,6 +839,8 @@ static void splashOutBlendHue(SplashColorPtr src, SplashColorPtr dest,
   Guchar r0, g0, b0;
 #ifdef SPLASH_CMYK
   Guchar r1, g1, b1;
+  int i;
+  SplashColor src2, dest2;
 #endif
 
   switch (cm) {
@@ -866,15 +859,24 @@ static void splashOutBlendHue(SplashColorPtr src, SplashColorPtr dest,
     break;
 #if SPLASH_CMYK
   case splashModeCMYK8:
+    for (i = 0; i < 4; i++) {
+      // convert to additive
+      src2[i] = 0xff - src[i];
+      dest2[i] = 0xff - dest[i];
+    }
     // NB: inputs have already been converted to additive mode
-    setSat(src[0], src[1], src[2], getSat(dest[0], dest[1], dest[2]),
+    setSat(src2[0], src2[1], src2[2], getSat(dest2[0], dest2[1], dest2[2]),
 	   &r0, &g0, &b0);
-    setLum(r0, g0, b0, getLum(dest[0], dest[1], dest[2]),
+    setLum(r0, g0, b0, getLum(dest2[0], dest2[1], dest2[2]),
 	   &r1, &g1, &b1);
     blend[0] = r1;
     blend[1] = g1;
     blend[2] = b1;
-    blend[3] = dest[3];
+    blend[3] = dest2[3];
+    for (i = 0; i < 4; i++) {
+      // convert back to subtractive
+      blend[i] = 0xff - blend[i];
+    }
     break;
 #endif
   }
@@ -886,6 +888,8 @@ static void splashOutBlendSaturation(SplashColorPtr src, SplashColorPtr dest,
   Guchar r0, g0, b0;
 #ifdef SPLASH_CMYK
   Guchar r1, g1, b1;
+  int i;
+  SplashColor src2, dest2;
 #endif
 
   switch (cm) {
@@ -904,15 +908,23 @@ static void splashOutBlendSaturation(SplashColorPtr src, SplashColorPtr dest,
     break;
 #if SPLASH_CMYK
   case splashModeCMYK8:
-    // NB: inputs have already been converted to additive mode
-    setSat(dest[0], dest[1], dest[2], getSat(src[0], src[1], src[2]),
+    for (i = 0; i < 4; i++) {
+      // convert to additive
+      src2[i] = 0xff - src[i];
+      dest2[i] = 0xff - dest[i];
+    }
+    setSat(dest2[0], dest2[1], dest2[2], getSat(src2[0], src2[1], src2[2]),
 	   &r0, &g0, &b0);
-    setLum(r0, g0, b0, getLum(dest[0], dest[1], dest[2]),
+    setLum(r0, g0, b0, getLum(dest2[0], dest2[1], dest2[2]),
 	   &r1, &g1, &b1);
     blend[0] = r1;
     blend[1] = g1;
     blend[2] = b1;
-    blend[3] = dest[3];
+    blend[3] = dest2[3];
+    for (i = 0; i < 4; i++) {
+      // convert back to subtractive
+      blend[i] = 0xff - blend[i];
+    }
     break;
 #endif
   }
@@ -922,6 +934,8 @@ static void splashOutBlendColor(SplashColorPtr src, SplashColorPtr dest,
 				SplashColorPtr blend, SplashColorMode cm) {
 #if SPLASH_CMYK
   Guchar r, g, b;
+  int i;
+  SplashColor src2, dest2;
 #endif
 
   switch (cm) {
@@ -938,13 +952,21 @@ static void splashOutBlendColor(SplashColorPtr src, SplashColorPtr dest,
     break;
 #if SPLASH_CMYK
   case splashModeCMYK8:
-    // NB: inputs have already been converted to additive mode
-    setLum(src[0], src[1], src[2], getLum(dest[0], dest[1], dest[2]),
+    for (i = 0; i < 4; i++) {
+      // convert to additive
+      src2[i] = 0xff - src[i];
+      dest2[i] = 0xff - dest[i];
+    }
+    setLum(src2[0], src2[1], src2[2], getLum(dest2[0], dest2[1], dest2[2]),
 	   &r, &g, &b);
     blend[0] = r;
     blend[1] = g;
     blend[2] = b;
-    blend[3] = dest[3];
+    blend[3] = dest2[3];
+    for (i = 0; i < 4; i++) {
+      // convert back to subtractive
+      blend[i] = 0xff - blend[i];
+    }
     break;
 #endif
   }
@@ -955,6 +977,8 @@ static void splashOutBlendLuminosity(SplashColorPtr src, SplashColorPtr dest,
 				     SplashColorMode cm) {
 #if SPLASH_CMYK
   Guchar r, g, b;
+  int i;
+  SplashColor src2, dest2;
 #endif
 
   switch (cm) {
@@ -971,13 +995,21 @@ static void splashOutBlendLuminosity(SplashColorPtr src, SplashColorPtr dest,
     break;
 #if SPLASH_CMYK
   case splashModeCMYK8:
-    // NB: inputs have already been converted to additive mode
-    setLum(dest[0], dest[1], dest[2], getLum(src[0], src[1], src[2]),
+    for (i = 0; i < 4; i++) {
+      // convert to additive
+      src2[i] = 0xff - src[i];
+      dest2[i] = 0xff - dest[i];
+    }
+    setLum(dest2[0], dest2[1], dest2[2], getLum(src2[0], src2[1], src2[2]),
 	   &r, &g, &b);
     blend[0] = r;
     blend[1] = g;
     blend[2] = b;
-    blend[3] = src[3];
+    blend[3] = src2[3];
+    for (i = 0; i < 4; i++) {
+      // convert back to subtractive
+      blend[i] = 0xff - blend[i];
+    }
     break;
 #endif
   }
