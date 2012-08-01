@@ -5839,7 +5839,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
     }
 #endif
     if ((level == psLevel2Sep || level == psLevel3Sep) && colorMap &&
-	colorMap->getColorSpace()->getMode() == csSeparation) {
+	colorMap->getColorSpace()->getMode() == csSeparation && colorMap->getBits() == 8) {
       color.c[0] = gfxColorComp1;
       sepCS = (GfxSeparationColorSpace *)colorMap->getColorSpace();
       sepCS->getCMYK(&color, &cmyk);
@@ -6198,7 +6198,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
   } else {
 
     if ((level == psLevel2Sep || level == psLevel3Sep) && colorMap &&
-	colorMap->getColorSpace()->getMode() == csSeparation) {
+	colorMap->getColorSpace()->getMode() == csSeparation && colorMap->getBits() == 8) {
       color.c[0] = gfxColorComp1;
       sepCS = (GfxSeparationColorSpace *)colorMap->getColorSpace();
       sepCS->getCMYK(&color, &cmyk);
