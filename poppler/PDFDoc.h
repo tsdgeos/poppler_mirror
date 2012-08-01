@@ -243,7 +243,7 @@ public:
   void markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset);
   // write all objects used by pageDict to outStr
   Guint writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset);
-  static Guint writeObject (Object *obj, Ref *ref, OutStream* outStr, XRef *xref, Guint numOffset);
+  static void writeObject (Object *obj, OutStream* outStr, XRef *xref, Guint numOffset);
   static void writeHeader(OutStream *outStr, int major, int minor);
 
   // Ownership goes to the caller
@@ -260,9 +260,12 @@ private:
   void markObject (Object *obj, XRef *xRef, XRef *countRef, Guint numOffset);
   static void writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint numOffset);
 
-  // Add object to current file stream and return the offset of the beginning of the object
-  Guint writeObject (Object *obj, Ref *ref, OutStream* outStr)
-  { return writeObject(obj, ref, outStr, getXRef(), 0); }
+  // Write object header to current file stream and return its offset
+  static Guint writeObjectHeader (Ref *ref, OutStream* outStr);
+  static void writeObjectFooter (OutStream* outStr);
+
+  void writeObject (Object *obj, OutStream* outStr)
+  { writeObject(obj, outStr, getXRef(), 0); }
   void writeDictionnary (Dict* dict, OutStream* outStr)
   { writeDictionnary(dict, outStr, getXRef(), 0); }
   static void writeStream (Stream* str, OutStream* outStr);

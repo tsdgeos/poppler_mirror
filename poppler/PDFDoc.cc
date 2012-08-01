@@ -687,7 +687,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
       if (j > 0) outStr->printf(" ");
       Object value; catDict->getValNF(j, &value);
       outStr->printf("/%s ", key);
-      writeObject(&value, NULL, outStr, getXRef(), 0);
+      writeObject(&value, outStr, getXRef(), 0);
       value.free();
     }
   }
@@ -701,7 +701,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   outStr->printf("<< /Type /Pages /Kids [ %d 0 R ] /Count 1 ", rootNum + 2);
   if (resourcesObj.isDict()) {
     outStr->printf("/Resources ");
-    writeObject(&resourcesObj, NULL, outStr, getXRef(), 0);
+    writeObject(&resourcesObj, outStr, getXRef(), 0);
     resourcesObj.free();
   }
   outStr->printf(">>\n");
@@ -719,7 +719,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
       outStr->printf("/Parent %d 0 R", rootNum + 1);
     } else {
       outStr->printf("/%s ", key);
-      writeObject(&value, NULL, outStr, getXRef(), 0); 
+      writeObject(&value, outStr, getXRef(), 0);
     }
     value.free();
   }
@@ -840,7 +840,9 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
       if (xref->getEntry(i)->type != xrefEntryFree) {
         Object obj1;
         xref->fetch(ref.num, ref.gen, &obj1);
-        Guint offset = writeObject(&obj1, &ref, outStr);
+        Guint offset = writeObjectHeader(&ref, outStr);
+        writeObject(&obj1, outStr);
+        writeObjectFooter(outStr);
         uxref->add(ref.num, ref.gen, offset, gTrue);
         obj1.free();
       } else {
@@ -905,14 +907,18 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
       ref.num = i;
       ref.gen = xref->getEntry(i)->gen;
       xref->fetch(ref.num, ref.gen, &obj1);
-      Guint offset = writeObject(&obj1, &ref, outStr);
+      Guint offset = writeObjectHeader(&ref, outStr);
+      writeObject(&obj1, outStr);
+      writeObjectFooter(outStr);
       uxref->add(ref.num, ref.gen, offset, gTrue);
       obj1.free();
     } else if (type == xrefEntryCompressed) {
       ref.num = i;
       ref.gen = 0; //compressed entries have gen == 0
       xref->fetch(ref.num, ref.gen, &obj1);
-      Guint offset = writeObject(&obj1, &ref, outStr);
+      Guint offset = writeObjectHeader(&ref, outStr);
+      writeObject(&obj1, outStr);
+      writeObjectFooter(outStr);
       uxref->add(ref.num, ref.gen, offset, gTrue);
       obj1.free();
     }
@@ -932,7 +938,7 @@ void PDFDoc::writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint 
     GooString *keyNameToPrint = keyName.sanitizedName(gFalse /* non ps mode */);
     outStr->printf("/%s ", keyNameToPrint->getCString());
     delete keyNameToPrint;
-    writeObject(dict->getValNF(i, &obj1), NULL, outStr, xRef, numOffset);
+    writeObject(dict->getValNF(i, &obj1), outStr, xRef, numOffset);
     obj1.free();
   }
   outStr->printf(">> ");
@@ -1005,15 +1011,18 @@ void PDFDoc::writeString (GooString* s, OutStream* outStr)
   }
 }
 
-Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef, Guint numOffset)
+Guint PDFDoc::writeObjectHeader (Ref *ref, OutStream* outStr)
+{
+  Guint offset = outStr->getPos();
+  outStr->printf("%i %i obj ", ref->num, ref->gen);
+  return offset;
+}
+
+void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numOffset)
 {
   Array *array;
   Object obj1;
-  Guint offset = outStr->getPos();
   int tmp;
-
-  if(ref) 
-    outStr->printf("%i %i obj ", ref->num, ref->gen);
 
   switch (obj->getType()) {
     case objBool:
@@ -1050,7 +1059,7 @@ Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef,
       array = obj->getArray();
       outStr->printf("[");
       for (int i=0; i<array->getLength(); i++) {
-        writeObject(array->getNF(i, &obj1), NULL,outStr, xRef, numOffset);
+        writeObject(array->getNF(i, &obj1), outStr, xRef, numOffset);
         obj1.free();
       }
       outStr->printf("] ");
@@ -1119,9 +1128,11 @@ Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef,
       error(errUnimplemented, -1,"Unhandled objType : {0:d}, please report a bug with a testcase\r\n", obj->getType());
       break;
   }
-  if (ref)
-    outStr->printf("endobj\r\n");
-  return offset;
+}
+
+void PDFDoc::writeObjectFooter (OutStream* outStr)
+{
+  outStr->printf("endobj\r\n");
 }
 
 Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Guint startxRef,
@@ -1245,7 +1256,9 @@ void PDFDoc::writeXRefStreamTrailer (Dict *trailerDict, XRef *uxref, Ref *uxrefS
   Object obj1;
   MemStream *mStream = new MemStream( stmData.getCString(), 0,
                                       stmData.getLength(), obj1.initDict(trailerDict) );
-  writeObject(obj1.initStream(mStream), uxrefStreamRef, outStr, xRef, 0);
+  writeObjectHeader(uxrefStreamRef, outStr);
+  writeObject(obj1.initStream(mStream), outStr, xRef, 0);
+  writeObjectFooter(outStr);
   obj1.free();
 
   outStr->printf( "startxref\r\n");
@@ -1451,7 +1464,9 @@ Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset)
       ref.gen = xRef->getEntry(n)->gen;
       objectsCount++;
       getXRef()->fetch(ref.num - numOffset, ref.gen, &obj);
-      Guint offset = writeObject(&obj, &ref, outStr, xRef, numOffset);
+      Guint offset = writeObjectHeader(&ref, outStr);
+      writeObject(&obj, outStr, xRef, numOffset);
+      writeObjectFooter(outStr);
       xRef->add(ref.num, ref.gen, offset, gTrue);
       obj.free();
     }

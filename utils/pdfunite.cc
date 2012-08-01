@@ -154,7 +154,7 @@ int main (int argc, char *argv[])
         outStr->printf("/Parent %d 0 R", rootNum + 1);
       } else {
         outStr->printf("/%s ", key);
-        PDFDoc::writeObject(&value, NULL, outStr, yRef, offsets[i]);
+        PDFDoc::writeObject(&value, outStr, yRef, offsets[i]);
       }
       value.free();
     }
