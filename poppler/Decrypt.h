@@ -15,6 +15,7 @@
 //
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -63,13 +64,12 @@ private:
 };
 
 //------------------------------------------------------------------------
-// DecryptStream
+// Helper classes
 //------------------------------------------------------------------------
 
 struct DecryptRC4State {
   Guchar state[256];
   Guchar x, y;
-  int buf;
 };
 
 struct DecryptAESState {
@@ -88,27 +88,26 @@ struct DecryptAES256State {
   int bufIdx;
 };
 
-class DecryptStream: public FilterStream {
+class BaseCryptStream : public FilterStream {
 public:
 
-  DecryptStream(Stream *strA, Guchar *fileKey,
-		CryptAlgorithm algoA, int keyLength,
-		int objNum, int objGen);
-  virtual ~DecryptStream();
+  BaseCryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm algoA,
+                  int keyLength, int objNum, int objGen);
+  virtual ~BaseCryptStream();
   virtual StreamKind getKind() { return strWeird; }
   virtual void reset();
   virtual int getChar();
-  virtual int lookChar();
+  virtual int lookChar() = 0;
   virtual int getPos();
   virtual GBool isBinary(GBool last);
   virtual Stream *getUndecodedStream() { return this; }
 
-private:
-
+protected:
   CryptAlgorithm algo;
   int objKeyLength;
   Guchar objKey[32];
   int charactersRead; // so that getPos() can be correct
+  int nextCharBuff;   // EOF means not read yet
 
   union {
     DecryptRC4State rc4;
@@ -116,11 +115,23 @@ private:
     DecryptAES256State aes256;
   } state;
 };
+
+//------------------------------------------------------------------------
+// DecryptStream
+//------------------------------------------------------------------------
+
+class DecryptStream : public BaseCryptStream {
+public:
+
+  DecryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm algoA,
+                int keyLength, int objNum, int objGen);
+  ~DecryptStream();
+  virtual void reset();
+  virtual int lookChar();
+};
  
 //------------------------------------------------------------------------
 
-extern void rc4InitKey(Guchar *key, int keyLen, Guchar *state);
-extern Guchar rc4DecryptByte(Guchar *state, Guchar *x, Guchar *y, Guchar c);
 extern void md5(Guchar *msg, int msgLen, Guchar *digest);
 
 #endif
