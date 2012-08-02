@@ -16,6 +16,7 @@
 // Copyright (C) 2010-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011, 2012 William Bader <williambader@hotmail.com>
+// Copyright (C) 2012 Markus Trippelsdorf <markus@trippelsdorf.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -3435,6 +3436,9 @@ SplashError Splash::drawImage(SplashImageSource src, void *srcData,
       }
       scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h,
 			     scaledWidth, scaledHeight);
+      if (scaledImg == NULL) {
+        return splashErrBadArg;
+      }
       blitImage(scaledImg, srcAlpha, x0, y0, clipRes);
       delete scaledImg;
     }
@@ -3470,6 +3474,9 @@ SplashError Splash::drawImage(SplashImageSource src, void *srcData,
       }
       scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h,
 			     scaledWidth, scaledHeight);
+      if (scaledImg == NULL) {
+        return splashErrBadArg;
+      }
       vertFlipImage(scaledImg, scaledWidth, scaledHeight, nComps);
       blitImage(scaledImg, srcAlpha, x0, y0, clipRes);
       delete scaledImg;
