@@ -25,6 +25,7 @@
 // Copyright (C) 2011, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Oliver Sander <sander@mi.fu-berlin.de>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -4399,7 +4400,12 @@ FlateStream::~FlateStream() {
   delete str;
 }
 
-void FlateStream::unfilteredReset() {
+void FlateStream::flateReset(GBool unfiltered) {
+  if (unfiltered)
+    str->unfilteredReset();
+  else
+    str->reset();
+
   index = 0;
   remain = 0;
   codeBuf = 0;
@@ -4407,14 +4413,16 @@ void FlateStream::unfilteredReset() {
   compressedBlock = gFalse;
   endOfBlock = gTrue;
   eof = gTrue;
+}
 
-  str->reset();
+void FlateStream::unfilteredReset() {
+  flateReset(gTrue);
 }
 
 void FlateStream::reset() {
   int cmf, flg;
 
-  unfilteredReset();
+  flateReset(gFalse);
 
   // read header
   //~ need to look at window size?
