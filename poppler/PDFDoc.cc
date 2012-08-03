@@ -1040,6 +1040,9 @@ Guint PDFDoc::writeObject (Object* obj, Ref* ref, OutStream* outStr, XRef *xRef,
     case objInt:
       outStr->printf("%i ", obj->getInt());
       break;
+    case objUint:
+      outStr->printf("%u ", obj->getUint());
+      break;
     case objReal:
     {
       GooString s;
