@@ -1162,11 +1162,13 @@ Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Guint startxRef
   }
   obj1.free();
 
+  GBool hasEncrypt = gFalse;
   if (!xRef->getTrailerDict()->isNone()) {
     Object obj2;
     xRef->getTrailerDict()->dictLookupNF("Encrypt", &obj2);
     if (!obj2.isNull()) {
       trailerDict->set("Encrypt", &obj2);
+      hasEncrypt = gTrue;
       obj2.free();
     }
   }
@@ -1180,7 +1182,8 @@ Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Guint startxRef
   Object obj2,obj3,obj5;
   obj2.initArray(xRef);
 
-  if (incrUpdate) {
+  // In case of encrypted files, the ID must not be changed because it's used to calculate the key
+  if (incrUpdate || hasEncrypt) {
     Object obj4;
     //only update the second part of the array
     xRef->getTrailerDict()->getDict()->lookup("ID", &obj4);
