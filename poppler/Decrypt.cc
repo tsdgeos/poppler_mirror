@@ -41,9 +41,11 @@ static Guchar rc4DecryptByte(Guchar *state, Guchar *x, Guchar *y, Guchar c);
 static GBool aesReadBlock(Stream  *str, Guchar *in, GBool addPadding);
 
 static void aesKeyExpansion(DecryptAESState *s, Guchar *objKey, int objKeyLen, GBool decrypt);
+static void aesEncryptBlock(DecryptAESState *s, Guchar *in);
 static void aesDecryptBlock(DecryptAESState *s, Guchar *in, GBool last);
 
 static void aes256KeyExpansion(DecryptAES256State *s, Guchar *objKey, int objKeyLen, GBool decrypt);
+static void aes256EncryptBlock(DecryptAES256State *s, Guchar *in);
 static void aes256DecryptBlock(DecryptAES256State *s, Guchar *in, GBool last);
 
 static void sha256(Guchar *msg, int msgLen, Guchar *hash);
@@ -354,6 +356,94 @@ GBool BaseCryptStream::isBinary(GBool last) {
 }
 
 //------------------------------------------------------------------------
+// EncryptStream
+//------------------------------------------------------------------------
+
+EncryptStream::EncryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm algoA,
+			     int keyLength, int objNum, int objGen):
+  BaseCryptStream(strA, fileKey, algoA, keyLength, objNum, objGen)
+{
+  // Fill the CBC initialization vector for AES and AES-256
+  switch (algo) {
+  case cryptAES:
+    memset(state.aes.cbc, 0, 16); // TODO: Nonce
+    break;
+  case cryptAES256:
+    memset(state.aes256.cbc, 0, 16); // TODO: Nonce
+    break;
+  default:
+    break;
+  }
+}
+
+EncryptStream::~EncryptStream() {
+}
+
+void EncryptStream::reset() {
+  BaseCryptStream::reset();
+
+  switch (algo) {
+  case cryptRC4:
+    state.rc4.x = state.rc4.y = 0;
+    rc4InitKey(objKey, objKeyLength, state.rc4.state);
+    break;
+  case cryptAES:
+    aesKeyExpansion(&state.aes, objKey, objKeyLength, gFalse);
+    memcpy(state.aes.buf, state.aes.cbc, 16); // Copy CBC IV to buf
+    state.aes.bufIdx = 0;
+    state.aes.paddingReached = gFalse;
+    break;
+  case cryptAES256:
+    aes256KeyExpansion(&state.aes256, objKey, objKeyLength, gFalse);
+    memcpy(state.aes256.buf, state.aes256.cbc, 16); // Copy CBC IV to buf
+    state.aes256.bufIdx = 0;
+    state.aes256.paddingReached = gFalse;
+    break;
+  }
+}
+
+int EncryptStream::lookChar() {
+  Guchar in[16];
+  int c;
+
+  if (nextCharBuff != EOF)
+    return nextCharBuff;
+
+  c = EOF; // make gcc happy
+  switch (algo) {
+  case cryptRC4:
+    if ((c = str->getChar()) != EOF) {
+      // RC4 is XOR-based: the decryption algorithm works for encryption too
+      c = rc4DecryptByte(state.rc4.state, &state.rc4.x, &state.rc4.y, (Guchar)c);
+    }
+    break;
+  case cryptAES:
+    if (state.aes.bufIdx == 16 && !state.aes.paddingReached) {
+      state.aes.paddingReached = !aesReadBlock(str, in, gTrue);
+      aesEncryptBlock(&state.aes, in);
+    }
+    if (state.aes.bufIdx == 16) {
+      c = EOF;
+    } else {
+      c = state.aes.buf[state.aes.bufIdx++];
+    }
+    break;
+  case cryptAES256:
+    if (state.aes256.bufIdx == 16 && !state.aes256.paddingReached) {
+      state.aes256.paddingReached = !aesReadBlock(str, in, gTrue);
+      aes256EncryptBlock(&state.aes256, in);
+    }
+    if (state.aes256.bufIdx == 16) {
+      c = EOF;
+    } else {
+      c = state.aes256.buf[state.aes256.bufIdx++];
+    }
+    break;
+  }
+  return (nextCharBuff = c);
+}
+
+//------------------------------------------------------------------------
 // DecryptStream
 //------------------------------------------------------------------------
 
@@ -564,12 +654,43 @@ static inline Guint rotWord(Guint x) {
   return ((x << 8) & 0xffffffff) | (x >> 24);
 }
 
+static inline void subBytes(Guchar *state) {
+  int i;
+
+  for (i = 0; i < 16; ++i) {
+    state[i] = sbox[state[i]];
+  }
+}
+
 static inline void invSubBytes(Guchar *state) {
   int i;
 
   for (i = 0; i < 16; ++i) {
     state[i] = invSbox[state[i]];
   }
+}
+
+static inline void shiftRows(Guchar *state) {
+  Guchar t;
+
+  t = state[4];
+  state[4] = state[5];
+  state[5] = state[6];
+  state[6] = state[7];
+  state[7] = t;
+
+  t = state[8];
+  state[8] = state[10];
+  state[10] = t;
+  t = state[9];
+  state[9] = state[11];
+  state[11] = t;
+
+  t = state[15];
+  state[15] = state[14];
+  state[14] = state[13];
+  state[13] = state[12];
+  state[12] = t;
 }
 
 static inline void invShiftRows(Guchar *state) {
@@ -593,6 +714,17 @@ static inline void invShiftRows(Guchar *state) {
   state[13] = state[14];
   state[14] = state[15];
   state[15] = t;
+}
+
+// {02} \cdot s
+static inline Guchar mul02(Guchar s) {
+  return (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
+}
+
+// {03} \cdot s
+static inline Guchar mul03(Guchar s) {
+  Guchar s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
+  return s ^ s2;
 }
 
 // {09} \cdot s
@@ -633,6 +765,22 @@ static inline Guchar mul0e(Guchar s) {
   s4 = (s2 & 0x80) ? ((s2 << 1) ^ 0x1b) : (s2 << 1);
   s8 = (s4 & 0x80) ? ((s4 << 1) ^ 0x1b) : (s4 << 1);
   return s2 ^ s4 ^ s8;
+}
+
+static inline void mixColumns(Guchar *state) {
+  int c;
+  Guchar s0, s1, s2, s3;
+
+  for (c = 0; c < 4; ++c) {
+    s0 = state[c];
+    s1 = state[4+c];
+    s2 = state[8+c];
+    s3 = state[12+c];
+    state[c] =    mul02(s0) ^ mul03(s1) ^ s2 ^ s3;
+    state[4+c] =  s0 ^ mul02(s1) ^ mul03(s2) ^ s3;
+    state[8+c] =  s0 ^ s1 ^ mul02(s2) ^ mul03(s3);
+    state[12+c] = mul03(s0) ^ s1 ^ s2 ^ mul02(s3);
+  }
 }
 
 static inline void invMixColumns(Guchar *state) {
@@ -703,6 +851,43 @@ static void aesKeyExpansion(DecryptAESState *s,
       invMixColumnsW(&s->w[round * 4]);
     }
   }
+}
+
+static void aesEncryptBlock(DecryptAESState *s, Guchar *in) {
+  int c, round;
+
+  // initial state (input is xor'd with previous output because of CBC)
+  for (c = 0; c < 4; ++c) {
+    s->state[c] = in[4*c] ^ s->buf[4*c];
+    s->state[4+c] = in[4*c+1] ^ s->buf[4*c+1];
+    s->state[8+c] = in[4*c+2] ^ s->buf[4*c+2];
+    s->state[12+c] = in[4*c+3] ^ s->buf[4*c+3];
+  }
+
+  // round 0
+  addRoundKey(s->state, &s->w[0]);
+
+  // rounds 1-9
+  for (round = 1; round <= 9; ++round) {
+    subBytes(s->state);
+    shiftRows(s->state);
+    mixColumns(s->state);
+    addRoundKey(s->state, &s->w[round * 4]);
+  }
+
+  // round 10
+  subBytes(s->state);
+  shiftRows(s->state);
+  addRoundKey(s->state, &s->w[10 * 4]);
+
+  for (c = 0; c < 4; ++c) {
+    s->buf[4*c] = s->state[c];
+    s->buf[4*c+1] = s->state[4+c];
+    s->buf[4*c+2] = s->state[8+c];
+    s->buf[4*c+3] = s->state[12+c];
+  }
+
+  s->bufIdx = 0;
 }
 
 static void aesDecryptBlock(DecryptAESState *s, Guchar *in, GBool last) {
@@ -790,6 +975,43 @@ static void aes256KeyExpansion(DecryptAES256State *s,
       invMixColumnsW(&s->w[round * 4]);
     }
   }
+}
+
+static void aes256EncryptBlock(DecryptAES256State *s, Guchar *in) {
+  int c, round;
+
+  // initial state (input is xor'd with previous output because of CBC)
+  for (c = 0; c < 4; ++c) {
+    s->state[c] = in[4*c] ^ s->buf[4*c];
+    s->state[4+c] = in[4*c+1] ^ s->buf[4*c+1];
+    s->state[8+c] = in[4*c+2] ^ s->buf[4*c+2];
+    s->state[12+c] = in[4*c+3] ^ s->buf[4*c+3];
+  }
+
+  // round 0
+  addRoundKey(s->state, &s->w[0]);
+
+  // rounds 1-13
+  for (round = 1; round <= 13; ++round) {
+    subBytes(s->state);
+    shiftRows(s->state);
+    mixColumns(s->state);
+    addRoundKey(s->state, &s->w[round * 4]);
+  }
+
+  // round 14
+  subBytes(s->state);
+  shiftRows(s->state);
+  addRoundKey(s->state, &s->w[14 * 4]);
+
+  for (c = 0; c < 4; ++c) {
+    s->buf[4*c] = s->state[c];
+    s->buf[4*c+1] = s->state[4+c];
+    s->buf[4*c+2] = s->state[8+c];
+    s->buf[4*c+3] = s->state[12+c];
+  }
+
+  s->bufIdx = 0;
 }
 
 static void aes256DecryptBlock(DecryptAES256State *s, Guchar *in, GBool last) {

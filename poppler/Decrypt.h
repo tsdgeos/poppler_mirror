@@ -67,6 +67,13 @@ private:
 // Helper classes
 //------------------------------------------------------------------------
 
+/* DecryptRC4State, DecryptAESState, DecryptAES256State are named like this for
+ * historical reasons, but they're used for encryption too.
+ * In case of decryption, the cbc field in AES and AES-256 contains the previous
+ * input block or the CBC initialization vector (IV) if the stream has just been
+ * reset). In case of encryption, it always contains the IV, whereas the
+ * previous output is kept in buf. The paddingReached field is only used in
+ * case of encryption. */
 struct DecryptRC4State {
   Guchar state[256];
   Guchar x, y;
@@ -77,6 +84,7 @@ struct DecryptAESState {
   Guchar state[16];
   Guchar cbc[16];
   Guchar buf[16];
+  GBool paddingReached; // encryption only
   int bufIdx;
 };
 
@@ -85,6 +93,7 @@ struct DecryptAES256State {
   Guchar state[16];
   Guchar cbc[16];
   Guchar buf[16];
+  GBool paddingReached; // encryption only
   int bufIdx;
 };
 
@@ -117,8 +126,18 @@ protected:
 };
 
 //------------------------------------------------------------------------
-// DecryptStream
+// EncryptStream / DecryptStream
 //------------------------------------------------------------------------
+
+class EncryptStream : public BaseCryptStream {
+public:
+
+  EncryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm algoA,
+                int keyLength, int objNum, int objGen);
+  ~EncryptStream();
+  virtual void reset();
+  virtual int lookChar();
+};
 
 class DecryptStream : public BaseCryptStream {
 public:
