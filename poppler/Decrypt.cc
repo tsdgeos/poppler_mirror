@@ -326,10 +326,13 @@ BaseCryptStream::BaseCryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm a
   }
 
   charactersRead = 0;
+  autoDelete = gTrue;
 }
 
 BaseCryptStream::~BaseCryptStream() {
-  delete str;
+  if (autoDelete) {
+    delete str;
+  }
 }
 
 void BaseCryptStream::reset() {
@@ -354,6 +357,10 @@ int BaseCryptStream::getChar() {
 
 GBool BaseCryptStream::isBinary(GBool last) {
   return str->isBinary(last);
+}
+
+void BaseCryptStream::setAutoDelete(GBool val) {
+  autoDelete = val;
 }
 
 //------------------------------------------------------------------------

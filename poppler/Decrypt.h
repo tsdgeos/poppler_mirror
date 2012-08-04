@@ -110,6 +110,7 @@ public:
   virtual int getPos();
   virtual GBool isBinary(GBool last);
   virtual Stream *getUndecodedStream() { return this; }
+  void setAutoDelete(GBool val);
 
 protected:
   CryptAlgorithm algo;
@@ -117,6 +118,7 @@ protected:
   Guchar objKey[32];
   int charactersRead; // so that getPos() can be correct
   int nextCharBuff;   // EOF means not read yet
+  GBool autoDelete;
 
   union {
     DecryptRC4State rc4;

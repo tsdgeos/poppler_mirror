@@ -1112,6 +1112,15 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numO
         Stream *stream = obj->getStream();
         if (stream->getKind() == strWeird) {
           //we write the stream unencoded => TODO: write stream encoder
+
+          // Encrypt stream
+          EncryptStream *encStream = NULL;
+          if (fileKey) {
+            encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, objNum, objGen);
+            encStream->setAutoDelete(gFalse);
+            stream = encStream;
+          }
+
           stream->reset();
           //recalculate stream length
           tmp = 0;
@@ -1127,6 +1136,7 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numO
 
           writeDictionnary (stream->getDict(),outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen);
           writeStream (stream,outStr);
+          delete encStream;
           obj1.free();
         } else {
           //raw stream copy
