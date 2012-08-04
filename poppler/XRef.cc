@@ -941,6 +941,20 @@ void XRef::setEncryption(int permFlagsA, GBool ownerPasswordOkA,
   encAlgorithm = encAlgorithmA;
 }
 
+void XRef::getEncryptionParameters(Guchar **fileKeyA, CryptAlgorithm *encAlgorithmA,
+                              int *keyLengthA) {
+  if (encrypted) {
+    *fileKeyA = fileKey;
+    *encAlgorithmA = encAlgorithm;
+    *keyLengthA = keyLength;
+  } else {
+    // null encryption parameters
+    *fileKeyA = NULL;
+    *encAlgorithmA = cryptRC4;
+    *keyLengthA = 0;
+  }
+}
+
 GBool XRef::okToPrint(GBool ignoreOwnerPW) {
   return (!ignoreOwnerPW && ownerPasswordOk) || (permFlags & permPrint);
 }

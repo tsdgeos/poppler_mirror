@@ -46,6 +46,7 @@
 
 class GooString;
 class BaseStream;
+enum CryptAlgorithm;
 class OutputDev;
 class Links;
 class LinkAction;
@@ -243,7 +244,8 @@ public:
   void markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset);
   // write all objects used by pageDict to outStr
   Guint writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset);
-  static void writeObject (Object *obj, OutStream* outStr, XRef *xref, Guint numOffset);
+  static void writeObject (Object *obj, OutStream* outStr, XRef *xref, Guint numOffset, Guchar *fileKey,
+                           CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
   static void writeHeader(OutStream *outStr, int major, int minor);
 
   // Ownership goes to the caller
@@ -258,21 +260,25 @@ private:
   // insert referenced objects in XRef
   void markDictionnary (Dict* dict, XRef *xRef, XRef *countRef, Guint numOffset);
   void markObject (Object *obj, XRef *xRef, XRef *countRef, Guint numOffset);
-  static void writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint numOffset);
+  static void writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint numOffset, Guchar *fileKey,
+                                CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
 
   // Write object header to current file stream and return its offset
   static Guint writeObjectHeader (Ref *ref, OutStream* outStr);
   static void writeObjectFooter (OutStream* outStr);
 
-  void writeObject (Object *obj, OutStream* outStr)
-  { writeObject(obj, outStr, getXRef(), 0); }
-  void writeDictionnary (Dict* dict, OutStream* outStr)
-  { writeDictionnary(dict, outStr, getXRef(), 0); }
+  void writeObject (Object *obj, OutStream* outStr, Guchar *fileKey, CryptAlgorithm encAlgorithm,
+                    int keyLength, int objNum, int objGen)
+  { writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, objNum, objGen); }
+  void writeDictionnary (Dict* dict, OutStream* outStr, Guchar *fileKey, CryptAlgorithm encAlgorithm,
+                         int keyLength, int objNum, int objGen)
+  { writeDictionnary(dict, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, objNum, objGen); }
   static void writeStream (Stream* str, OutStream* outStr);
   static void writeRawStream (Stream* str, OutStream* outStr);
   void writeXRefTableTrailer (Guint uxrefOffset, XRef *uxref, GBool writeAllEntries,
                               int uxrefSize, OutStream* outStr, GBool incrUpdate);
-  static void writeString (GooString* s, OutStream* outStr);
+  static void writeString (GooString* s, OutStream* outStr, Guchar *fileKey,
+                           CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
   void saveIncrementalUpdate (OutStream* outStr);
   void saveCompleteRewrite (OutStream* outStr);
 

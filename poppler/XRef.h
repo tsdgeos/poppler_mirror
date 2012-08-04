@@ -113,6 +113,8 @@ public:
 		     int encVersionA, int encRevisionA,
 		     CryptAlgorithm encAlgorithmA);
 
+  void getEncryptionParameters(Guchar **fileKeyA, CryptAlgorithm *encAlgorithmA, int *keyLengthA);
+
   // Is the file encrypted?
   GBool isEncrypted() { return encrypted; }
 
