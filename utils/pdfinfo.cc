@@ -246,11 +246,31 @@ int main(int argc, char *argv[]) {
   // print encryption info
   printf("Encrypted:      ");
   if (doc->isEncrypted()) {
-    printf("yes (print:%s copy:%s change:%s addNotes:%s)\n",
+    Guchar *fileKey;
+    CryptAlgorithm encAlgorithm;
+    int keyLength;
+    doc->getXRef()->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
+
+    const char *encAlgorithmName = "unknown";
+    switch (encAlgorithm)
+    {
+      case cryptRC4:
+	encAlgorithmName = "RC4";
+	break;
+      case cryptAES:
+	encAlgorithmName = "AES";
+	break;
+      case cryptAES256:
+	encAlgorithmName = "AES-256";
+	break;
+    }
+
+    printf("yes (print:%s copy:%s change:%s addNotes:%s algorithm:%s)\n",
 	   doc->okToPrint(gTrue) ? "yes" : "no",
 	   doc->okToCopy(gTrue) ? "yes" : "no",
 	   doc->okToChange(gTrue) ? "yes" : "no",
-	   doc->okToAddNotes(gTrue) ? "yes" : "no");
+	   doc->okToAddNotes(gTrue) ? "yes" : "no",
+	   encAlgorithmName);
   } else {
     printf("no\n");
   }
