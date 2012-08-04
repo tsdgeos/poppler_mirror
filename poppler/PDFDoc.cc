@@ -995,6 +995,24 @@ void PDFDoc::writeRawStream (Stream* str, OutStream* outStr)
 void PDFDoc::writeString (GooString* s, OutStream* outStr, Guchar *fileKey,
                           CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
 {
+  // Encrypt string if encryption is enabled
+  GooString *sEnc = NULL;
+  if (fileKey) {
+    Object obj;
+    EncryptStream *enc = new EncryptStream(new MemStream(s->getCString(), 0, s->getLength(), obj.initNull()),
+                                           fileKey, encAlgorithm, keyLength, objNum, objGen);
+    sEnc = new GooString();
+    int c;
+    enc->reset();
+    while ((c = enc->getChar()) != EOF) {
+      sEnc->append((char)c);
+    }
+
+    delete enc;
+    s = sEnc;
+  }
+
+  // Write data
   if (s->hasUnicodeMarker()) {
     //unicode string don't necessary end with \0
     const char* c = s->getCString();
@@ -1026,6 +1044,8 @@ void PDFDoc::writeString (GooString* s, OutStream* outStr, Guchar *fileKey,
     }
     outStr->printf(") ");
   }
+
+  delete sEnc;
 }
 
 Guint PDFDoc::writeObjectHeader (Ref *ref, OutStream* outStr)
