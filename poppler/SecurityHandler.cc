@@ -105,7 +105,12 @@ GBool SecurityHandler::checkEncryption(GooString *ownerPassword,
     }
   }
   if (!ok) {
-    error(errCommandLine, -1, "Incorrect password");
+    if (!ownerPassword && !userPassword) {
+      GooString dummy;
+      return checkEncryption(&dummy, &dummy);
+    } else {
+      error(errCommandLine, -1, "Incorrect password");
+    }
   }
   return ok;
 }
