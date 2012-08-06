@@ -28,6 +28,7 @@
 #include <string.h>
 #include <algorithm>
 #include "goo/gmem.h"
+#include "goo/grandom.h"
 #include "SplashMath.h"
 #include "SplashScreen.h"
 
@@ -253,9 +254,6 @@ void SplashScreen::buildSCDMatrix(int r) {
   int *region, *dist;
   int x, y, xx, yy, x0, x1, y0, y1, i, j, d, iMin, dMin, n;
 
-  //~ this should probably happen somewhere else
-  srand(123);
-
   // generate the random space-filling curve
   pts = (SplashScreenPoint *)gmallocn(size * size, sizeof(SplashScreenPoint));
   i = 0;
@@ -267,8 +265,7 @@ void SplashScreen::buildSCDMatrix(int r) {
     }
   }
   for (i = 0; i < size * size; ++i) {
-    j = i + (int)((double)(size * size - i) *
-		  (double)rand() / ((double)RAND_MAX + 1.0));
+    j = i + (int)((double)(size * size - i) * grandom_double());
     x = pts[i].x;
     y = pts[i].y;
     pts[i].x = pts[j].x;
