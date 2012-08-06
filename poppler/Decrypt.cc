@@ -32,6 +32,7 @@
 
 #include <string.h>
 #include "goo/gmem.h"
+#include "goo/grandom.h"
 #include "Decrypt.h"
 #include "Error.h"
 
@@ -366,10 +367,10 @@ EncryptStream::EncryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm algoA
   // Fill the CBC initialization vector for AES and AES-256
   switch (algo) {
   case cryptAES:
-    memset(state.aes.cbc, 0, 16); // TODO: Nonce
+    grandom_fill(state.aes.cbc, 16);
     break;
   case cryptAES256:
-    memset(state.aes256.cbc, 0, 16); // TODO: Nonce
+    grandom_fill(state.aes256.cbc, 16);
     break;
   default:
     break;
