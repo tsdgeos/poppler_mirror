@@ -76,6 +76,9 @@
 /* Define to 1 if you have the `mkstemps' function. */
 #cmakedefine HAVE_MKSTEMPS 1
 
+/* Define to 1 if you have the `rand_r' function. */
+#cmakedefine HAVE_RAND_R 1
+
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #cmakedefine HAVE_NDIR_H 1
 

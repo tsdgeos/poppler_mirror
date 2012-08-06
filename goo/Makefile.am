@@ -18,7 +18,8 @@ poppler_goo_include_HEADERS =			\
 	TiffWriter.h				\
 	ImgWriter.h				\
 	GooLikely.h				\
-	gstrtod.h
+	gstrtod.h				\
+	grandom.h
 
 endif
 
@@ -59,4 +60,5 @@ libgoo_la_SOURCES =				\
 	TiffWriter.cc				\
 	ImgWriter.cc				\
 	gtypes_p.h				\
-	gstrtod.cc
+	gstrtod.cc				\
+	grandom.cc

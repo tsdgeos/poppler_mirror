@@ -33,6 +33,7 @@ check_function_exists(localtime_r HAVE_LOCALTIME_R)
 check_function_exists(popen HAVE_POPEN)
 check_function_exists(mkstemp HAVE_MKSTEMP)
 check_function_exists(mkstemps HAVE_MKSTEMPS)
+check_function_exists(rand_r HAVE_RAND_R)
 
 macro(CHECK_FOR_DIR include var)
   check_c_source_compiles(

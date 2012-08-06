@@ -243,6 +243,7 @@ set(poppler_SRCS
   goo/JpegWriter.cc
   goo/ImgWriter.cc
   goo/gstrtod.cc
+  goo/grandom.cc
   fofi/FoFiBase.cc
   fofi/FoFiEncodings.cc
   fofi/FoFiTrueType.cc
@@ -485,6 +486,7 @@ if(ENABLE_XPDF_HEADERS)
     goo/ImgWriter.h
     goo/GooLikely.h
     goo/gstrtod.h
+    goo/grandom.h
     DESTINATION include/poppler/goo)
   if(PNG_FOUND)
     install(FILES
