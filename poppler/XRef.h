@@ -59,8 +59,26 @@ struct XRefEntry {
   Guint offset;
   int gen;
   XRefEntryType type;
-  bool updated;
+  int flags;
   Object obj; //if this entry was updated, obj will contains the updated object
+
+  enum Flag {
+    Updated   // Set if the entry was modified
+  };
+
+  inline GBool getFlag(Flag flag) {
+    const int mask = (1 << (int)flag);
+    return (flags & mask) != 0;
+  }
+
+  inline void setFlag(Flag flag, GBool value) {
+    const int mask = (1 << (int)flag);
+    if (value) {
+      flags |= mask;
+    } else {
+      flags &= ~mask;
+    }
+  }
 };
 
 class XRef {

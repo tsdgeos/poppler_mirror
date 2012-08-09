@@ -766,7 +766,7 @@ int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode) {
   // find if we have updated objects
   GBool updated = gFalse;
   for(int i=0; i<xref->getNumObjects(); i++) {
-    if (xref->getEntry(i)->updated) {
+    if (xref->getEntry(i)->getFlag(XRefEntry::Updated)) {
       updated = gTrue;
       break;
     }
@@ -855,7 +855,7 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
         (xref->getEntry(i)->gen == 0)) //we skip the irrelevant free objects
       continue;
 
-    if (xref->getEntry(i)->updated) { //we have an updated object
+    if (xref->getEntry(i)->getFlag(XRefEntry::Updated)) { //we have an updated object
       Ref ref;
       ref.num = i;
       ref.gen = xref->getEntry(i)->type == xrefEntryCompressed ? 0 : xref->getEntry(i)->gen;

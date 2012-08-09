@@ -411,7 +411,7 @@ int XRef::resize(int newSize)
       entries[i].offset = 0xffffffff;
       entries[i].type = xrefEntryNone;
       entries[i].obj.initNull ();
-      entries[i].updated = false;
+      entries[i].flags = 0;
       entries[i].gen = 0;
     }
   } else {
@@ -522,7 +522,7 @@ GBool XRef::readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *follow
       }
       entry.gen = obj.getInt();
       entry.obj.initNull ();
-      entry.updated = false;
+      entry.flags = 0;
       obj.free();
       parser->getObj(&obj, gTrue);
       if (obj.isCmd("n")) {
@@ -1167,7 +1167,7 @@ void XRef::add(int num, int gen, Guint offs, GBool used) {
       entries[i].offset = 0xffffffff;
       entries[i].type = xrefEntryFree;
       entries[i].obj.initNull ();
-      entries[i].updated = false;
+      entries[i].flags = 0;
       entries[i].gen = 0;
     }
     size = num + 1;
@@ -1175,7 +1175,7 @@ void XRef::add(int num, int gen, Guint offs, GBool used) {
   XRefEntry *e = getEntry(num);
   e->gen = gen;
   e->obj.initNull ();
-  e->updated = false;
+  e->flags = 0;
   if (used) {
     e->type = xrefEntryUncompressed;
     e->offset = offs;
@@ -1193,7 +1193,7 @@ void XRef::setModifiedObject (Object* o, Ref r) {
   XRefEntry *e = getEntry(r.num);
   e->obj.free();
   o->copy(&(e->obj));
-  e->updated = true;
+  e->setFlag(XRefEntry::Updated, gTrue);
 }
 
 Ref XRef::addIndirectObject (Object* o) {
@@ -1218,7 +1218,7 @@ Ref XRef::addIndirectObject (Object* o) {
   }
   e->type = xrefEntryUncompressed;
   o->copy(&e->obj);
-  e->updated = true;
+  e->setFlag(XRefEntry::Updated, gTrue);
 
   Ref r;
   r.num = entryIndexToUse;
@@ -1237,7 +1237,7 @@ void XRef::removeIndirectObject(Ref r) {
   e->obj.free();
   e->type = xrefEntryFree;
   e->gen++;
-  e->updated = true;
+  e->setFlag(XRefEntry::Updated, gTrue);
 }
 
 void XRef::writeXRef(XRef::XRefWriter *writer, GBool writeAllEntries) {
@@ -1359,7 +1359,7 @@ GBool XRef::parseEntry(Guint offset, XRefEntry *entry)
     entry->gen = obj2.getInt();
     entry->type = obj3.isCmd("n") ? xrefEntryUncompressed : xrefEntryFree;
     entry->obj.initNull ();
-    entry->updated = false;
+    entry->flags = 0;
     r = gTrue;
   } else {
     r = gFalse;
@@ -1423,7 +1423,7 @@ XRefEntry *XRef::getEntry(int i, GBool complainIfMissing)
         dummy.offset = 0;
         dummy.gen = -1;
         dummy.type = xrefEntryNone;
-        dummy.updated = false;
+        dummy.flags = 0;
         return &dummy;
       }
 
