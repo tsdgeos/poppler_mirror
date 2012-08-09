@@ -76,7 +76,8 @@ perf_test_LDADD =				\
 	$(X_EXTRA_LIBS)
 
 pdf_fullrewrite_SOURCES = \
-	pdf-fullrewrite.cc
+	pdf-fullrewrite.cc		\
+	../utils/parseargs.cc
 
 pdf_fullrewrite_LDADD = \
 	$(top_builddir)/poppler/libpoppler.la
