@@ -293,7 +293,7 @@ XRef::XRef(BaseStream *strA, Guint pos, Guint mainXRefEntriesOffsetA, GBool *was
   // read the trailer
   str = strA;
   start = str->getStart();
-  prevXRefOffset = pos;
+  prevXRefOffset = mainXRefOffset = pos;
 
   if (reconstruct && !(ok = constructXRef(wasReconstructed)))
   {
@@ -313,7 +313,7 @@ XRef::XRef(BaseStream *strA, Guint pos, Guint mainXRefEntriesOffsetA, GBool *was
     // read the xref table
     } else {
       std::vector<Guint> followedXRefStm;
-      readXRef(&prevXRefOffset, &followedXRefStm);
+      readXRef(&prevXRefOffset, &followedXRefStm, NULL);
 
       // if there was a problem with the xref table,
       // try to reconstruct it
@@ -426,9 +426,20 @@ int XRef::resize(int newSize)
   return size;
 }
 
-// Read one xref table section.  Also reads the associated trailer
-// dictionary, and returns the prev pointer (if any).
-GBool XRef::readXRef(Guint *pos, std::vector<Guint> *followedXRefStm) {
+/* Read one xref table section.  Also reads the associated trailer
+ * dictionary, and returns the prev pointer (if any).
+ * Arguments:
+ *   pos                Points to a Guint containing the offset of the XRef
+ *                      section to be read. If a prev pointer is found, *pos is
+ *                      updated with its value
+ *   followedXRefStm    Used in case of nested readXRef calls to spot circular
+ *                      references in XRefStm pointers
+ *   xrefStreamObjsNum  If not NULL, every time a XRef stream is encountered,
+ *                      its object number is appended
+ * Return value:
+ *   gTrue if a prev pointer is found, otherwise gFalse
+ */
+GBool XRef::readXRef(Guint *pos, std::vector<Guint> *followedXRefStm, std::vector<int> *xrefStreamObjsNum) {
   Parser *parser;
   Object obj;
   GBool more;
@@ -444,10 +455,11 @@ GBool XRef::readXRef(Guint *pos, std::vector<Guint> *followedXRefStm) {
   // parse an old-style xref table
   if (obj.isCmd("xref")) {
     obj.free();
-    more = readXRefTable(parser, pos, followedXRefStm);
+    more = readXRefTable(parser, pos, followedXRefStm, xrefStreamObjsNum);
 
   // parse an xref stream
   } else if (obj.isInt()) {
+    const int objNum = obj.getInt();
     obj.free();
     if (!parser->getObj(&obj, gTrue)->isInt()) {
       goto err1;
@@ -462,6 +474,9 @@ GBool XRef::readXRef(Guint *pos, std::vector<Guint> *followedXRefStm) {
     }
     if (trailerDict.isNone()) {
       xRefStream = gTrue;
+    }
+    if (xrefStreamObjsNum) {
+      xrefStreamObjsNum->push_back(objNum);
     }
     more = readXRefStream(obj.getStream(), pos);
     obj.free();
@@ -480,7 +495,7 @@ GBool XRef::readXRef(Guint *pos, std::vector<Guint> *followedXRefStm) {
   return gFalse;
 }
 
-GBool XRef::readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *followedXRefStm) {
+GBool XRef::readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *followedXRefStm, std::vector<int> *xrefStreamObjsNum) {
   XRefEntry entry;
   GBool more;
   Object obj, obj2;
@@ -597,7 +612,7 @@ GBool XRef::readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *follow
     }
     if (ok) {
       followedXRefStm->push_back(pos2);
-      readXRef(&pos2, followedXRefStm);
+      readXRef(&pos2, followedXRefStm, xrefStreamObjsNum);
     }
     if (!ok) {
       obj2.free();
@@ -1386,6 +1401,50 @@ GBool XRef::parseEntry(Guint offset, XRefEntry *entry)
   return r;
 }
 
+/* Traverse all XRef tables and, if untilEntryNum != -1, stop as soon as
+ * untilEntryNum is found, or try to reconstruct the xref table if it's not
+ * present in any xref.
+ * If xrefStreamObjsNum is not NULL, it is filled with the list of the object
+ * numbers of the XRef streams that have been traversed */
+void XRef::readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum)
+{
+  std::vector<Guint> followedPrev;
+  while (prevXRefOffset && (untilEntryNum == -1 || entries[untilEntryNum].type == xrefEntryNone)) {
+    bool followed = false;
+    for (size_t j = 0; j < followedPrev.size(); j++) {
+      if (followedPrev.at(j) == prevXRefOffset) {
+        followed = true;
+        break;
+      }
+    }
+    if (followed) {
+      error(errSyntaxError, -1, "Circular XRef");
+      if (!(ok = constructXRef(NULL))) {
+        errCode = errDamaged;
+      }
+      break;
+    }
+
+    followedPrev.push_back (prevXRefOffset);
+
+    std::vector<Guint> followedXRefStm;
+    if (!readXRef(&prevXRefOffset, &followedXRefStm, xrefStreamObjsNum)) {
+        prevXRefOffset = 0;
+    }
+
+    // if there was a problem with the xref table, or we haven't found the entry
+    // we were looking for, try to reconstruct the xref
+    if (!ok || (!prevXRefOffset && untilEntryNum != -1 && entries[untilEntryNum].type == xrefEntryNone)) {
+        GBool wasReconstructed = false;
+        if (!(ok = constructXRef(&wasReconstructed))) {
+            errCode = errDamaged;
+            break;
+        }
+        break;
+    }
+  }
+}
+
 XRefEntry *XRef::getEntry(int i, GBool complainIfMissing)
 {
   if (entries[i].type == xrefEntryNone) {
@@ -1395,41 +1454,8 @@ XRefEntry *XRef::getEntry(int i, GBool complainIfMissing)
         error(errSyntaxError, -1, "Failed to parse XRef entry [{0:d}].", i);
       }
     } else {
-      std::vector<Guint> followedPrev;
-      while (prevXRefOffset && entries[i].type == xrefEntryNone) {
-        bool followed = false;
-        for (size_t j = 0; j < followedPrev.size(); j++) {
-          if (followedPrev.at(j) == prevXRefOffset) {
-            followed = true;
-            break;
-          }
-        }
-        if (followed) {
-          error(errSyntaxError, -1, "Circular XRef");
-          if (!(ok = constructXRef(NULL))) {
-            errCode = errDamaged;
-          }
-          break;
-        }
-
-        followedPrev.push_back (prevXRefOffset);
-
-        std::vector<Guint> followedXRefStm;
-        if (!readXRef(&prevXRefOffset, &followedXRefStm)) {
-            prevXRefOffset = 0;
-        }
-
-        // if there was a problem with the xref table,
-        // try to reconstruct it
-        if (!ok || (!prevXRefOffset && entries[i].type == xrefEntryNone)) {
-           GBool wasReconstructed = false;
-           if (!(ok = constructXRef(&wasReconstructed))) {
-               errCode = errDamaged;
-               break;
-           }
-           break;
-        }
-      }
+      // Read XRef tables until the entry we're looking for is found
+      readXRefUntil(i);
       
       // We might have reconstructed the xref
       // Check again i is in bounds
@@ -1506,6 +1532,20 @@ void XRef::scanSpecialFlags() {
     return;
   }
   scannedSpecialFlags = gTrue;
+
+  // "Rewind" the XRef linked list, so that readXRefUntil re-reads all XRef
+  // tables/streams, even those that had already been parsed
+  prevXRefOffset = mainXRefOffset;
+
+  std::vector<int> xrefStreamObjNums;
+  readXRefUntil(-1 /* read all xref sections */, &xrefStreamObjNums);
+
+  // Mark XRef streams objects as Unencrypted and DontRewrite
+  for (size_t i = 0; i < xrefStreamObjNums.size(); ++i) {
+    const int objNum = xrefStreamObjNums.at(i);
+    getEntry(objNum)->setFlag(XRefEntry::Unencrypted, gTrue);
+    getEntry(objNum)->setFlag(XRefEntry::DontRewrite, gTrue);
+  }
 
   // Mark objects referred from the Encrypt dict as Unencrypted
   Object obj;

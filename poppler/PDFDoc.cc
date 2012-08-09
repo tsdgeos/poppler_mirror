@@ -913,6 +913,11 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
           and we don't want the one with num=0 because it has already been added (gen = 65535)*/
       if (ref.gen > 0 && ref.num > 0)
         uxref->add(ref.num, ref.gen, 0, gFalse);
+    } else if (xref->getEntry(i)->getFlag(XRefEntry::DontRewrite)) {
+      // This entry must not be written, put a free entry instead (with incremented gen)
+      ref.num = i;
+      ref.gen = xref->getEntry(i)->gen + 1;
+      uxref->add(ref.num, ref.gen, 0, gFalse);
     } else if (type == xrefEntryUncompressed){ 
       ref.num = i;
       ref.gen = xref->getEntry(i)->gen;
