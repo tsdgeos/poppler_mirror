@@ -1,3 +1,19 @@
+Release 0.20.3
+        core:
+         * If NULL, NULL fails as password try EMPTY, EMPTY before failing (Bug #3498)
+         * SplashOutputDev: Fix bogus memory allocation size in Splash::arbitraryTransformImage (Bug #49523)
+         * SplashOutputDev: Fix segfault when scaleImage returns NULL (Bug #52488)
+         * SplashOutputDev: Blend mode enhancements for CMYK
+         * PSOutputDev: Fix conversion when creating multiple strips (Bug #51982)
+         * PSOutputDev: Fix Bitmaps in level2sep or level3sep (Bug #52384)
+         * PSOutputDev: Fix DeviceN images with alternate Lab colorspace in level 3 PostScript (Bug #51822)
+         * PSOutputDev: Make sure xScale and yScale are always initialized (Bug #52215)
+         * Unify poppler-config.h includes in core "installed" headers (Bug #52193)
+         * Replace c++ style includes with c style ones (Bug #52426)
+
+        utils:
+         * pdfseparate: Return 0 on success
+        
 Release 0.20.2
         core:
          * Fix compilation on Windows
