@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2009, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2009, 2011, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
@@ -1469,11 +1469,8 @@ void PSOutputDev::writeHeader(int firstPage, int lastPage,
     }
     writePSFmt("%%BoundingBox: {0:d} {1:d} {2:d} {3:d}\n",
 	       (int)floor(x1), (int)floor(y1), (int)ceil(x2), (int)ceil(y2));
-    if (floor(x1) != ceil(x1) || floor(y1) != ceil(y1) ||
-	floor(x2) != ceil(x2) || floor(y2) != ceil(y2)) {
-      writePSFmt("%%HiResBoundingBox: {0:.6g} {1:.6g} {2:.6g} {3:.6g}\n",
+    writePSFmt("%%HiResBoundingBox: {0:.6g} {1:.6g} {2:.6g} {3:.6g}\n",
 		 x1, y1, x2, y2);
-    }
     writePS("%%DocumentSuppliedResources: (atend)\n");
     writePS("%%EndComments\n");
     break;
