@@ -7,7 +7,6 @@ INCLUDES =					\
 	-I$(top_srcdir)/poppler			\
 	$(POPPLER_GLIB_CFLAGS)			\
 	$(FREETYPE_CFLAGS)			\
-	$(FONTCONFIG_CFLAGS)                    \
 	$(POPPLER_GLIB_DISABLE_DEPRECATED)	\
 	$(POPPLER_GLIB_DISABLE_SINGLE_INCLUDES)
 
@@ -75,8 +74,7 @@ libpoppler_glib_la_LIBADD =				\
 	$(top_builddir)/poppler/libpoppler.la		\
 	$(top_builddir)/poppler/libpoppler-cairo.la	\
 	$(POPPLER_GLIB_LIBS)				\
-	$(FREETYPE_LIBS)				\
-	$(FONTCONFIG_LIBS)
+	$(FREETYPE_LIBS)
 
 libpoppler_glib_la_LDFLAGS = -version-info 12:0:4 @create_shared_lib@ @auto_import_flags@
 

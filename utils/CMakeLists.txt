@@ -5,9 +5,6 @@ set(common_srcs
 set(common_libs
   poppler
 )
-if (FONTCONFIG_FOUND)
-  set(common_libs ${common_libs} ${FONTCONFIG_LIBRARIES})
-endif (FONTCONFIG_FOUND)
 
 if (ENABLE_SPLASH)
   # pdftoppm

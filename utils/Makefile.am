@@ -16,13 +16,11 @@ INCLUDES =					\
 	-I$(top_srcdir)/utils			\
 	-I$(top_srcdir)/poppler			\
 	$(UTILS_CFLAGS)				\
-	$(FONTCONFIG_CFLAGS)			\
 	$(PDFTOCAIRO_CFLAGS)
 
 LDADD =						\
 	$(top_builddir)/poppler/libpoppler.la	\
-	$(UTILS_LIBS)				\
-	$(FONTCONFIG_LIBS)
+	$(UTILS_LIBS)
 
 if BUILD_CAIRO_OUTPUT
 

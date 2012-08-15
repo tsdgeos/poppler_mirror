@@ -5,13 +5,11 @@ INCLUDES =					\
 	-I$(top_srcdir)/poppler			\
 	-I$(top_srcdir)/qt4/src			\
 	-DTESTDATADIR=\"$(TESTDATADIR)\"        \
-	$(FONTCONFIG_CFLAGS)			\
 	$(POPPLER_QT4_CFLAGS)
 
 LDADDS =					\
 	$(top_builddir)/poppler/libpoppler.la	\
 	$(top_builddir)/qt4/src/libpoppler-qt4.la	\
-	$(FONTCONFIG_LIBS)				\
 	$(POPPLER_QT4_LIBS)
 
 SUFFIXES: .moc
