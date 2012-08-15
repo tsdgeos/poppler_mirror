@@ -1540,6 +1540,19 @@ void XRef::scanSpecialFlags() {
   std::vector<int> xrefStreamObjNums;
   readXRefUntil(-1 /* read all xref sections */, &xrefStreamObjNums);
 
+  // Mark object streams as DontRewrite, because we write each object
+  // individually in full rewrite mode.
+  for (int i = 0; i < size; ++i) {
+    if (entries[i].type == xrefEntryCompressed) {
+      const int objStmNum = entries[i].offset;
+      if (unlikely(objStmNum < 0 || objStmNum >= size)) {
+        error(errSyntaxError, -1, "Compressed object offset out of xref bounds");
+      } else {
+        getEntry(objStmNum)->setFlag(XRefEntry::DontRewrite, gTrue);
+      }
+    }
+  }
+
   // Mark XRef streams objects as Unencrypted and DontRewrite
   for (size_t i = 0; i < xrefStreamObjNums.size(); ++i) {
     const int objNum = xrefStreamObjNums.at(i);
