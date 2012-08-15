@@ -175,7 +175,6 @@ private:
   void init();
   int reserve(int newSize);
   int resize(int newSize);
-  Guint getStartXref();
   GBool readXRef(Guint *pos, std::vector<Guint> *followedXRefStm);
   GBool readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *followedXRefStm);
   GBool readXRefStreamSection(Stream *xrefStr, int *w, int first, int n);
