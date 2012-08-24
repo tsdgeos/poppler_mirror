@@ -518,6 +518,22 @@ public:
     type3D              // 3D             25
   };
 
+  /**
+   * Describes the additional actions of a screen or widget annotation.
+   */
+  enum AdditionalActionsType {
+    actionCursorEntering, ///< Performed when the cursor enters the annotation's active area
+    actionCursorLeaving,  ///< Performed when the cursor exists the annotation's active area
+    actionMousePressed,   ///< Performed when the mouse button is pressed inside the annotation's active area
+    actionMouseReleased,  ///< Performed when the mouse button is released inside the annotation's active area
+    actionFocusIn,        ///< Performed when the annotation receives the input focus
+    actionFocusOut,       ///< Performed when the annotation loses the input focus
+    actionPageOpening,    ///< Performed when the page containing the annotation is opened
+    actionPageClosing,    ///< Performed when the page containing the annotation is closed
+    actionPageVisible,    ///< Performed when the page containing the annotation becomes visible
+    actionPageInvisible   ///< Performed when the page containing the annotation becomes invisible
+  };
+
   Annot(PDFDoc *docA, PDFRectangle *rectA);
   Annot(PDFDoc *docA, Dict *dict);
   Annot(PDFDoc *docA, Dict *dict, Object *obj);
@@ -805,7 +821,7 @@ class AnnotScreen: public Annot {
 
   AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs; }
   LinkAction* getAction() { return action; }
-  Object* getAdditionActions() { return &additionAction; }
+  LinkAction *getAdditionalAction(AdditionalActionsType type);
 
  private:
   void initialize(PDFDoc *docA, Dict *dict);
@@ -816,7 +832,7 @@ class AnnotScreen: public Annot {
   AnnotAppearanceCharacs* appearCharacs; // MK
 
   LinkAction *action;                    // A
-  Object additionAction;                 // AA
+  Object additionalActions;              // AA
 };
 
 //------------------------------------------------------------------------
@@ -1278,7 +1294,7 @@ public:
   AnnotWidgetHighlightMode getMode() { return mode; }
   AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs; }
   LinkAction *getAction() { return action; }
-  Dict *getAdditionActions() { return additionActions; }
+  LinkAction *getAdditionalAction(AdditionalActionsType type);
   Dict *getParent() { return parent; }
 
 private:
@@ -1297,7 +1313,7 @@ private:
   AnnotWidgetHighlightMode mode;          // H  (Default I)
   AnnotAppearanceCharacs *appearCharacs;  // MK
   LinkAction *action;                     // A
-  Dict *additionActions;                  // AA
+  Object additionalActions;               // AA
   // inherited  from Annot
   // AnnotBorderBS border;                // BS
   Dict *parent;                           // Parent

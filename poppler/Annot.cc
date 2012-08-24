@@ -195,6 +195,34 @@ PDFRectangle *parseDiffRectangle(Array *array, PDFRectangle *rect) {
   return newRect;
 }
 
+static LinkAction* getAdditionalAction(Annot::AdditionalActionsType type, Object *additionalActions, PDFDoc *doc) {
+  Object additionalActionsObject;
+  LinkAction *linkAction = NULL;
+
+  if (additionalActions->fetch(doc->getXRef(), &additionalActionsObject)->isDict()) {
+    const char *key = (type == Annot::actionCursorEntering ? "E" :
+                       type == Annot::actionCursorLeaving ?  "X" :
+                       type == Annot::actionMousePressed ?   "D" :
+                       type == Annot::actionMouseReleased ?  "U" :
+                       type == Annot::actionFocusIn ?       "Fo" :
+                       type == Annot::actionFocusOut ?      "BI" :
+                       type == Annot::actionPageOpening ?   "PO" :
+                       type == Annot::actionPageClosing ?   "PC" :
+                       type == Annot::actionPageVisible ?   "PV" :
+                       type == Annot::actionPageInvisible ? "PI" : NULL);
+
+    Object actionObject;
+
+    if (additionalActionsObject.dictLookup(key, &actionObject)->isDict())
+      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+    actionObject.free();
+  }
+
+  additionalActionsObject.free();
+
+  return linkAction;
+}
+
 //------------------------------------------------------------------------
 // AnnotBorderEffect
 //------------------------------------------------------------------------
@@ -3730,10 +3758,9 @@ AnnotWidget::~AnnotWidget() {
   
   if (action)
     delete action;
-    
-  if (additionActions)
-    delete additionActions;
-    
+
+  additionalActions.free();
+
   if (parent)
     delete parent;
 }
@@ -3773,12 +3800,7 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
   }
   obj1.free();
 
-  if(dict->lookup("AA", &obj1)->isDict()) {
-    additionActions = NULL;
-  } else {
-    additionActions = NULL;
-  }
-  obj1.free();
+  dict->lookupNF("AA", &additionalActions);
 
   if(dict->lookup("Parent", &obj1)->isDict()) {
     parent = NULL;
@@ -3786,6 +3808,11 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
     parent = NULL;
   }
   obj1.free();
+}
+
+LinkAction* AnnotWidget::getAdditionalAction(AdditionalActionsType type)
+{
+  return ::getAdditionalAction(type, &additionalActions, doc);
 }
 
 // Grand unified handler for preparing text strings to be drawn into form
@@ -5103,7 +5130,7 @@ AnnotScreen::~AnnotScreen() {
   if (action)
     delete action;
 
-  additionAction.free();
+  additionalActions.free();
 }
 
 void AnnotScreen::initialize(PDFDoc *docA, Dict* dict) {
@@ -5127,14 +5154,21 @@ void AnnotScreen::initialize(PDFDoc *docA, Dict* dict) {
   }
   obj1.free();
 
-  dict->lookup("AA", &additionAction);
+  dict->lookupNF("AA", &additionalActions);
 
   appearCharacs = NULL;
   if(dict->lookup("MK", &obj1)->isDict()) {
     appearCharacs = new AnnotAppearanceCharacs(obj1.getDict());
   }
   obj1.free();
+}
 
+LinkAction* AnnotScreen::getAdditionalAction(AdditionalActionsType type)
+{
+  if (type == actionFocusIn || type == actionFocusOut) // not defined for screen annotation
+    return NULL;
+
+  return ::getAdditionalAction(type, &additionalActions, doc);
 }
 
 //------------------------------------------------------------------------
