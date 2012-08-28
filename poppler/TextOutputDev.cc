@@ -127,7 +127,7 @@
 
 // Minimum spacing between characters within a word, as a fraction of
 // the font size.
-#define minCharSpacing -0.2
+#define minCharSpacing -0.5
 
 // Maximum spacing between characters within a word, as a fraction of
 // the font size, when there is no obvious extra-wide character
