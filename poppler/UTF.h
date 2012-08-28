@@ -27,6 +27,7 @@
 #pragma implementation
 #endif
 
+#include "goo/GooString.h"
 #include "CharTypes.h"
 
 // Convert a UTF-16 string to a UCS-4
@@ -35,6 +36,13 @@
 //   ucs4_out   - if not NULL, allocates and returns UCS-4 string. Free with gfree.
 //   returns number of UCS-4 characters
 int UTF16toUCS4(const Unicode *utf16, int utf16_len, Unicode **ucs4_out);
+
+// Convert a PDF Text String to UCS-4
+//   s          - PDF text string
+//   ucs4       - if the number of UCS-4 characters is > 0, allocates and
+//                returns UCS-4 string. Free with gfree.
+//   returns number of UCS-4 characters
+int TextStringToUCS4(GooString *textStr, Unicode **ucs4);
 
 
 static int mapUTF8(Unicode u, char *buf, int bufSize) {

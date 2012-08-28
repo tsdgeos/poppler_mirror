@@ -48,7 +48,7 @@
 #include "PDFDocFactory.h"
 #include "CharTypes.h"
 #include "UnicodeMap.h"
-#include "PDFDocEncoding.h"
+#include "UTF.h"
 #include "Error.h"
 #include "DateInfo.h"
 
@@ -379,41 +379,16 @@ static void printInfoString(Dict *infoDict, const char *key, const char *text,
 			    UnicodeMap *uMap) {
   Object obj;
   GooString *s1;
-  GBool isUnicode;
-  Unicode u, u2;
+  Unicode *u;
   char buf[8];
-  int i, n;
+  int i, n, len;
 
   if (infoDict->lookup(key, &obj)->isString()) {
     fputs(text, stdout);
     s1 = obj.getString();
-    if ((s1->getChar(0) & 0xff) == 0xfe &&
-	(s1->getChar(1) & 0xff) == 0xff) {
-      isUnicode = gTrue;
-      i = 2;
-    } else {
-      isUnicode = gFalse;
-      i = 0;
-    }
-    while (i < obj.getString()->getLength()) {
-      if (isUnicode) {
-	u = ((s1->getChar(i) & 0xff) << 8) |
-	    (s1->getChar(i+1) & 0xff);
-	i += 2;
-	if (u >= 0xd800 && u <= 0xdbff && i < obj.getString()->getLength()) {
-	  // surrogate pair
-	  u2 = ((s1->getChar(i) & 0xff) << 8) |
-	    (s1->getChar(i+1) & 0xff);
-	  i += 2;
-	  if (u2 >= 0xdc00 && u2 <= 0xdfff) {
-	    u = 0x10000 + ((u - 0xd800) << 10) + (u2 - 0xdc00);
-	  }
-	}
-      } else {
-	u = pdfDocEncoding[s1->getChar(i) & 0xff];
-	++i;
-      }
-      n = uMap->mapUnicode(u, buf, sizeof(buf));
+    len = TextStringToUCS4(s1, &u);
+    for (i = 0; i < len; i++) {
+      n = uMap->mapUnicode(u[i], buf, sizeof(buf));
       fwrite(buf, 1, n, stdout);
     }
     fputc('\n', stdout);

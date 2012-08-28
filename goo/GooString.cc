@@ -895,7 +895,7 @@ int GooString::cmpN(const char *sA, int n) const {
 
 GBool GooString::hasUnicodeMarker(void)
 {
-    return (s[0] & 0xff) == 0xfe && (s[1] & 0xff) == 0xff;
+  return length > 1 && (s[0] & 0xff) == 0xfe && (s[1] & 0xff) == 0xff;
 }
 
 GooString *GooString::sanitizedName(GBool psmode)

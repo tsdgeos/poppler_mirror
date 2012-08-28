@@ -63,7 +63,7 @@
 #include "TextOutputDev.h"
 #include "Page.h"
 #include "Annot.h"
-#include "PDFDocEncoding.h"
+#include "UTF.h"
 
 #ifdef MACOS
 // needed for setting type/creator of MacOS files
@@ -5230,41 +5230,17 @@ void ActualText::end(GfxState *state) {
   // extents of all the glyphs inside the span
 
   if (actualTextNBytes) {
-    char *uniString = NULL;
     Unicode *uni;
-    int length, i;
-
-    if (!actualText->hasUnicodeMarker()) {
-      if (actualText->getLength() > 0) {
-        //non-unicode string -- assume pdfDocEncoding and
-        //try to convert to UTF16BE
-        uniString = pdfDocEncodingToUTF16(actualText, &length);
-      } else {
-        length = 0;
-      }
-    } else {
-      uniString = actualText->getCString();
-      length = actualText->getLength();
-    }
-
-    if (length < 3)
-      length = 0;
-    else
-      length = length/2 - 1;
-    uni = new Unicode[length];
-    for (i = 0 ; i < length; i++)
-      uni[i] = ((uniString[2 + i*2] & 0xff)<<8)|(uniString[3 + i*2] & 0xff);
+    int length;
 
     // now that we have the position info for all of the text inside
     // the marked content span, we feed the "ActualText" back through
     // text->addChar()
+    length = TextStringToUCS4(actualText, &uni);
     text->addChar(state, actualTextX0, actualTextY0,
                   actualTextX1 - actualTextX0, actualTextY1 - actualTextY0,
                   0, actualTextNBytes, uni, length);
-
-    delete [] uni;
-    if (!actualText->hasUnicodeMarker())
-      delete [] uniString;
+    gfree(uni);
   }
 
   delete actualText;

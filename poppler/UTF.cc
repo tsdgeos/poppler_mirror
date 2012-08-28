@@ -1,4 +1,5 @@
 #include "goo/gmem.h"
+#include "PDFDocEncoding.h"
 #include "UTF.h"
 
 int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4)
@@ -45,3 +46,36 @@ int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4)
   return len;
 }
 
+int TextStringToUCS4(GooString *textStr, Unicode **ucs4)
+{
+  int i, len;
+  const char *s;
+  Unicode *u;
+
+  len = textStr->getLength();
+  s = textStr->getCString();
+  if (len == 0)
+    return 0;
+
+  if (textStr->hasUnicodeMarker()) {
+    Unicode *utf16;
+    len = len/2 - 1;
+    if (len > 0) {
+      utf16 = new Unicode[len];
+      for (i = 0 ; i < len; i++) {
+        utf16[i] = (s[2 + i*2] & 0xff) << 8 | (s[3 + i*2] & 0xff);
+      }
+      len = UTF16toUCS4(utf16, len, &u);
+      delete utf16;
+    } else {
+      u = NULL;
+    }
+  } else {
+    u = (Unicode*)gmallocn(len, sizeof(Unicode));
+    for (i = 0 ; i < len; i++) {
+      u[i] = pdfDocEncoding[s[i]];
+    }
+  }
+  *ucs4 = u;
+  return len;
+}
