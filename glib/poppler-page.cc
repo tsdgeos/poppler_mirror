@@ -344,7 +344,7 @@ _poppler_page_render (PopplerPage      *page,
 
 
   if (!printing && page->text == NULL) {
-    page->text = new TextPage(gFalse);
+    page->text = new TextPage (gFalse);
     output_dev->setTextPage (page->text);
   }
   /* NOTE: instead of passing -1 we should/could use cairo_clip_extents()
