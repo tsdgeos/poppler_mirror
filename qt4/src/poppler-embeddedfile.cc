@@ -1,5 +1,5 @@
 /* poppler-document.cc: qt interface to poppler
- * Copyright (C) 2005, 2008, 2009, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005, 2008, 2009, 2012, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2008, 2011, Pino Toscano <pino@kde.org>
  *
@@ -44,6 +44,11 @@ EmbeddedFileData::~EmbeddedFileData()
 	delete filespec;
 }
 
+EmbFile *EmbeddedFileData::embFile() const
+{
+	return filespec->isOk() ? filespec->getEmbeddedFile() : NULL;
+}
+
 
 EmbeddedFile::EmbeddedFile(EmbFile *embfile)
 	: m_embeddedFile(0)
@@ -75,30 +80,30 @@ QString EmbeddedFile::description() const
 
 int EmbeddedFile::size() const
 {
-	return m_embeddedFile->filespec->getEmbeddedFile()->size();
+	return m_embeddedFile->embFile() ? m_embeddedFile->embFile()->size() : -1;
 }
 
 QDateTime EmbeddedFile::modDate() const
 {
-	GooString *goo = m_embeddedFile->filespec->getEmbeddedFile()->modDate();
+	GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->modDate() : NULL;
 	return goo ? convertDate(goo->getCString()) : QDateTime();
 }
 
 QDateTime EmbeddedFile::createDate() const
 {
-	GooString *goo = m_embeddedFile->filespec->getEmbeddedFile()->createDate();
+    GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->createDate() : NULL;
 	return goo ? convertDate(goo->getCString()) : QDateTime();
 }
 
 QByteArray EmbeddedFile::checksum() const
 {
-	GooString *goo = m_embeddedFile->filespec->getEmbeddedFile()->checksum();
+    GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->checksum() : NULL;
 	return goo ? QByteArray::fromRawData(goo->getCString(), goo->getLength()) : QByteArray();
 }
 
 QString EmbeddedFile::mimeType() const
 {
-	GooString *goo = m_embeddedFile->filespec->getEmbeddedFile()->mimeType();
+    GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->mimeType() : NULL;
 	return goo ? QString(goo->getCString()) : QString();
 }
 
@@ -106,7 +111,7 @@ QByteArray EmbeddedFile::data()
 {
 	if (!isValid())
 		return QByteArray();
-	Stream *stream = m_embeddedFile->filespec->getEmbeddedFile()->stream();
+	Stream *stream = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->stream() : NULL;
 	if (!stream)
 		return QByteArray();
 	
