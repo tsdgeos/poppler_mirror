@@ -7,6 +7,7 @@
 //
 // Copyright (C) 2008-2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
+// Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -151,6 +152,9 @@ FileSpec::~FileSpec()
 
 EmbFile *FileSpec::getEmbeddedFile()
 {
+  if(!ok)
+    return NULL;
+
   if (embFile)
     return embFile;
 
