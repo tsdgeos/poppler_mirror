@@ -91,19 +91,19 @@ QDateTime EmbeddedFile::modDate() const
 
 QDateTime EmbeddedFile::createDate() const
 {
-    GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->createDate() : NULL;
+	GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->createDate() : NULL;
 	return goo ? convertDate(goo->getCString()) : QDateTime();
 }
 
 QByteArray EmbeddedFile::checksum() const
 {
-    GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->checksum() : NULL;
+	GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->checksum() : NULL;
 	return goo ? QByteArray::fromRawData(goo->getCString(), goo->getLength()) : QByteArray();
 }
 
 QString EmbeddedFile::mimeType() const
 {
-    GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->mimeType() : NULL;
+	GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->mimeType() : NULL;
 	return goo ? QString(goo->getCString()) : QString();
 }
 
