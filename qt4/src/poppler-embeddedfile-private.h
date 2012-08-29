@@ -1,5 +1,5 @@
 /* poppler-embeddedfile-private.h: Qt4 interface to poppler
- * Copyright (C) 2005, 2008, 2009, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005, 2008, 2009, 2012, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2008, 2011, Pino Toscano <pino@kde.org>
  *
@@ -31,6 +31,8 @@ class EmbeddedFileData
 public:
 	EmbeddedFileData(FileSpec *fs);
 	~EmbeddedFileData();
+    
+	EmbFile *embFile() const;
 
 	FileSpec *filespec;
 };
