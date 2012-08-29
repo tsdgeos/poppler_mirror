@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
@@ -462,6 +462,8 @@ FileSpec *Catalog::embeddedFile(int i)
       Object fsDict;
       embeddedFile = new FileSpec(obj.fetch(xref, &fsDict));
       fsDict.free();
+    } else if (obj.isDict()) {
+      embeddedFile = new FileSpec(&obj);
     } else {
       Object null;
       embeddedFile = new FileSpec(&null);
