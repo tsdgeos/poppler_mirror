@@ -1269,6 +1269,7 @@ void XRef::writeXRef(XRef::XRefWriter *writer, GBool writeAllEntries) {
       lastFreeEntry = i;
     }
   }
+  getEntry(lastFreeEntry)->offset = 0;
 
   if (writeAllEntries) {
     writer->startSection(0, size);
