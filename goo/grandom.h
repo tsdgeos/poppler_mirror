@@ -1,6 +1,8 @@
 /*
  * grandom.h
  *
+ * This file is licensed under the GPLv2 or later
+ *
  * Pseudo-random number generation
  *
  * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
