@@ -1636,7 +1636,7 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
   // get the input symbol bitmaps
   bitmaps = (JBIG2Bitmap **)gmallocn_checkoverflow(numInputSyms + numNewSyms,
 				     sizeof(JBIG2Bitmap *));
-  if (!bitmaps) {
+  if (!bitmaps && (numInputSyms + numNewSyms > 0)) {
     error(errSyntaxError, curStr->getPos(), "Too many input symbols in JBIG2 symbol dictionary");
     delete codeTables;
     goto eofError;
