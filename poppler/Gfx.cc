@@ -4356,6 +4356,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
       dict->lookup("D", &obj1);
     }
     if (bits == 0) {
+      delete colorSpace;
       goto err2;
     }
     colorMap = new GfxImageColorMap(bits, &obj1, colorSpace);
