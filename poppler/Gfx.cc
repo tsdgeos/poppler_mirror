@@ -1671,6 +1671,10 @@ void Gfx::opSetStrokeColorN(Object args[], int numArgs) {
       state->setStrokeColor(&color);
       out->updateStrokeColor(state);
     }
+    if (numArgs <= 0) {
+      error(errSyntaxError, getPos(), "Incorrect number of arguments in 'SCN' command");
+      return;
+    }
     if (args[numArgs-1].isName() &&
 	(pattern = res->lookupPattern(args[numArgs-1].getName(), this))) {
       state->setStrokePattern(pattern);
