@@ -10,6 +10,7 @@
 // Copyright 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2011 Daiki Ueno <ueno@unixuser.org>
 // Copyright 2011 Tomas Hoger <thoger@redhat.com>
+// Copyright 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 //========================================================================
 
@@ -222,6 +223,9 @@ int DCTStream::getChars(int nChars, Guchar *buffer) {
 }
 
 int DCTStream::lookChar() {
+  if (current == NULL) {
+    return EOF;
+  }
   return *current;
 }
 
