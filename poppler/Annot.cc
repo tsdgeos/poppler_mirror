@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007, 2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2007-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
@@ -25,6 +25,7 @@
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2011 José Aliste <jaliste@src.gnome.org>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -4539,6 +4540,14 @@ void AnnotWidget::drawListBox(FormFieldChoice *fieldChoice,
     wMax = 0;
     for (i = 0; i < fieldChoice->getNumChoices(); ++i) {
       j = 0;
+      if (fieldChoice->getChoice(i) == NULL) {
+        error(errSyntaxError, -1, "Invalid annotation listbox");
+        if (daToks) {
+          deleteGooList(daToks, GooString);
+        }
+        delete convertedText;
+        return;
+      }
       layoutText(fieldChoice->getChoice(i), convertedText, &j, font, &w, 0.0, NULL, gFalse);
       if (w > wMax) {
         wMax = w;
