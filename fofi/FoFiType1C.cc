@@ -14,6 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2009, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -78,6 +79,7 @@ FoFiType1C::FoFiType1C(char *fileA, int lenA, GBool freeFileDataA):
   privateDicts = NULL;
   fdSelect = NULL;
   charset = NULL;
+  charsetLength = 0;
 }
 
 FoFiType1C::~FoFiType1C() {
@@ -121,6 +123,8 @@ GooString *FoFiType1C::getGlyphName(int gid) {
   GBool ok;
 
   ok = gTrue;
+  if (gid < 0 || gid >= charsetLength)
+    return NULL;
   getString(charset[gid], buf, &ok);
   if (!ok) {
     return NULL;
@@ -141,7 +145,7 @@ int *FoFiType1C::getCIDToGIDMap(int *nCIDs) {
   // in a CID font, the charset data is the GID-to-CID mapping, so all
   // we have to do is reverse it
   n = 0;
-  for (i = 0; i < nGlyphs; ++i) {
+  for (i = 0; i < nGlyphs && i < charsetLength; ++i) {
     if (charset[i] > n) {
       n = charset[i];
     }
@@ -461,7 +465,7 @@ void FoFiType1C::convertToType1(char *psName, const char **newEncoding, GBool as
   for (i = 0; i < nGlyphs; ++i) {
     ok = gTrue;
     getIndexVal(&charStringsIdx, i, &val, &ok);
-    if (ok) {
+    if (ok && i < charsetLength) {
       getString(charset[i], buf2, &ok);
       if (ok) {
 	eexecCvtGlyph(&eb, buf2, val.pos, val.len, &subrIdx, &privateDicts[0]);
@@ -512,7 +516,7 @@ void FoFiType1C::convertToCIDType0(char *psName, int *codeMap, int nCodes,
     }
   } else if (topDict.firstOp == 0x0c1e) {
     nCIDs = 0;
-    for (i = 0; i < nGlyphs; ++i) {
+    for (i = 0; i < nGlyphs && i < charsetLength; ++i) {
       if (charset[i] >= nCIDs) {
 	nCIDs = charset[i] + 1;
       }
@@ -521,7 +525,7 @@ void FoFiType1C::convertToCIDType0(char *psName, int *codeMap, int nCodes,
     for (i = 0; i < nCIDs; ++i) {
       cidMap[i] = -1;
     }
-    for (i = 0; i < nGlyphs; ++i) {
+    for (i = 0; i < nGlyphs && i < charsetLength; ++i) {
       cidMap[charset[i]] = i;
     }
   } else {
@@ -855,7 +859,7 @@ void FoFiType1C::convertToType0(char *psName, int *codeMap, int nCodes,
     }
   } else if (topDict.firstOp == 0x0c1e) {
     nCIDs = 0;
-    for (i = 0; i < nGlyphs; ++i) {
+    for (i = 0; i < nGlyphs && i < charsetLength; ++i) {
       if (charset[i] >= nCIDs) {
 	nCIDs = charset[i] + 1;
       }
@@ -864,7 +868,7 @@ void FoFiType1C::convertToType0(char *psName, int *codeMap, int nCodes,
     for (i = 0; i < nCIDs; ++i) {
       cidMap[i] = -1;
     }
-    for (i = 0; i < nGlyphs; ++i) {
+    for (i = 0; i < nGlyphs && i < charsetLength; ++i) {
       cidMap[charset[i]] = i;
     }
   } else {
@@ -2415,7 +2419,7 @@ void FoFiType1C::buildEncoding() {
       if (nCodes > nGlyphs) {
 	nCodes = nGlyphs;
       }
-      for (i = 1; i < nCodes; ++i) {
+      for (i = 1; i < nCodes && i < charsetLength; ++i) {
 	c = getU8(pos++, &parsedOk);
 	if (!parsedOk) {
 	  return;
@@ -2437,7 +2441,7 @@ void FoFiType1C::buildEncoding() {
 	if (!parsedOk) {
 	  return;
 	}
-	for (j = 0; j <= nLeft && nCodes < nGlyphs; ++j) {
+	for (j = 0; j <= nLeft && nCodes < nGlyphs && nCodes < charsetLength; ++j) {
 	  if (c < 256) {
 	    if (encoding[c]) {
 	      gfree(encoding[c]);
@@ -2480,12 +2484,16 @@ GBool FoFiType1C::readCharset() {
 
   if (topDict.charsetOffset == 0) {
     charset = fofiType1CISOAdobeCharset;
+    charsetLength = sizeof(fofiType1CISOAdobeCharset) / sizeof(Gushort);
   } else if (topDict.charsetOffset == 1) {
     charset = fofiType1CExpertCharset;
+    charsetLength = sizeof(fofiType1CExpertCharset) / sizeof(Gushort);
   } else if (topDict.charsetOffset == 2) {
     charset = fofiType1CExpertSubsetCharset;
+    charsetLength = sizeof(fofiType1CExpertSubsetCharset) / sizeof(Gushort);
   } else {
     charset = (Gushort *)gmallocn(nGlyphs, sizeof(Gushort));
+    charsetLength = nGlyphs;
     for (i = 0; i < nGlyphs; ++i) {
       charset[i] = 0;
     }
@@ -2530,6 +2538,7 @@ GBool FoFiType1C::readCharset() {
     if (!parsedOk) {
       gfree(charset);
       charset = NULL;
+      charsetLength = 0;
       return gFalse;
     }
   }
