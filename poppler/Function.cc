@@ -17,6 +17,7 @@
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1010,6 +1011,10 @@ public:
       return;
     }
     --sp;
+    if (sp + i + 1 >= psStackSize) {
+      error(errSyntaxError, -1, "Stack underflow in PostScript function");
+      return;
+    }
     stack[sp] = stack[sp + 1 + i];
   }
   void pop()
