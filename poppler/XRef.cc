@@ -774,7 +774,7 @@ GBool XRef::readXRefStreamSection(Stream *xrefStr, int *w, int first, int n) {
 }
 
 // Attempt to construct an xref table for a damaged file.
-GBool XRef::constructXRef(GBool *wasReconstructed) {
+GBool XRef::constructXRef(GBool *wasReconstructed, GBool needCatalogDict) {
   Parser *parser;
   Object newTrailerDict, obj;
   char buf[256];
@@ -834,7 +834,7 @@ GBool XRef::constructXRef(GBool *wasReconstructed) {
         parser->getObj(&newTrailerDict);
         if (newTrailerDict.isDict()) {
 	  newTrailerDict.dictLookupNF("Root", &obj);
-	  if (obj.isRef()) {
+	  if (obj.isRef() && (!gotRoot || !needCatalogDict) && rootNum != obj.getRefNum()) {
 	    rootNum = obj.getRefNum();
 	    rootGen = obj.getRefGen();
 	    if (!trailerDict.isNone()) {
@@ -988,6 +988,16 @@ GBool XRef::okToAccessibility(GBool ignoreOwnerPW) {
 
 GBool XRef::okToAssemble(GBool ignoreOwnerPW) {
   return (!ignoreOwnerPW && ownerPasswordOk) || (permFlags & permAssemble);
+}
+
+Object *XRef::getCatalog(Object *catalog) {
+  Object *obj = fetch(rootNum, rootGen, catalog);
+  if (obj->isDict()) {
+    return obj;
+  }
+  GBool wasReconstructed = false;
+  GBool ok = constructXRef(&wasReconstructed, gTrue);
+  return (ok) ? fetch(rootNum, rootGen, catalog) : obj;
 }
 
 Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {

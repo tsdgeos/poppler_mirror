@@ -106,7 +106,7 @@ public:
   int getPermFlags() { return permFlags; }
 
   // Get catalog object.
-  Object *getCatalog(Object *obj) { return fetch(rootNum, rootGen, obj); }
+  Object *getCatalog(Object *obj);
 
   // Fetch an indirect reference.
   Object *fetch(int num, int gen, Object *obj, int recursion = 0);
@@ -179,7 +179,7 @@ private:
   GBool readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *followedXRefStm);
   GBool readXRefStreamSection(Stream *xrefStr, int *w, int first, int n);
   GBool readXRefStream(Stream *xrefStr, Guint *pos);
-  GBool constructXRef(GBool *wasReconstructed);
+  GBool constructXRef(GBool *wasReconstructed, GBool needCatalogDict = gFalse);
   GBool parseEntry(Guint offset, XRefEntry *entry);
 
   class XRefWriter {
