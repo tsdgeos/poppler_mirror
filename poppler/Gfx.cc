@@ -1671,7 +1671,7 @@ void Gfx::opSetStrokeColorN(Object args[], int numArgs) {
       state->setStrokeColor(&color);
       out->updateStrokeColor(state);
     }
-    if (numArgs <= 0) {
+    if (unlikely(numArgs <= 0)) {
       error(errSyntaxError, getPos(), "Incorrect number of arguments in 'SCN' command");
       return;
     }
