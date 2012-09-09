@@ -521,8 +521,8 @@ FormField::FormField(PDFDoc *docA, Object *aobj, const Ref& aref, FormField *par
     obj1.free();
     if (dict->lookup("Subtype", &obj1)->isName("Widget"))
       _createWidget(&obj, ref);
-    obj1.free();
   }
+  obj1.free();
 
   //flags
   if (Form::fieldLookup(dict, "Ff", &obj1)->isInt()) {

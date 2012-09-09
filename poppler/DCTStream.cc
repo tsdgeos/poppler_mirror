@@ -5,11 +5,12 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright 2005-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright 2005-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright 2009 Ryszard Trojnacki <rysiek@menel.com>
 // Copyright 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2011 Daiki Ueno <ueno@unixuser.org>
 // Copyright 2011 Tomas Hoger <thoger@redhat.com>
+// Copyright 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 //========================================================================
 
@@ -222,6 +223,9 @@ int DCTStream::getChars(int nChars, Guchar *buffer) {
 }
 
 int DCTStream::lookChar() {
+  if (unlikely(current == NULL)) {
+    return EOF;
+  }
   return *current;
 }
 

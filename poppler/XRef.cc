@@ -735,6 +735,10 @@ GBool XRef::readXRefStreamSection(Stream *xrefStr, int *w, int first, int n) {
       error(errSyntaxError, -1, "Invalid 'size' inside xref table");
       return gFalse;
     }
+    if (first + n > size) {
+      error(errSyntaxError, -1, "Invalid 'first' or 'n' inside xref table");
+      return gFalse;
+    }
   }
   for (i = first; i < first + n; ++i) {
     if (w[0] == 0) {
@@ -1115,6 +1119,8 @@ Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
 	objStr = NULL;
 	goto err;
       } else {
+	// XRef could be reconstructed in constructor of ObjectStream:
+	e = getEntry(num);
 	ObjectStreamKey *newkey = new ObjectStreamKey(e->offset);
 	ObjectStreamItem *newitem = new ObjectStreamItem(objStr);
 	objStrs->put(newkey, newitem);

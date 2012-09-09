@@ -18,6 +18,7 @@
 // Copyright (C) 2006-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Edward Jiang <ejiang@google.com>
+// Copyright (C) 2012 William Bader <williambader@hotmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -719,6 +720,13 @@ JBIG2Bitmap::JBIG2Bitmap(Guint segNumA, int wA, int hA):
 JBIG2Bitmap::JBIG2Bitmap(Guint segNumA, JBIG2Bitmap *bitmap):
   JBIG2Segment(segNumA)
 {
+  if (unlikely(bitmap == NULL)) {
+    error(errSyntaxError, -1, "NULL bitmap in JBIG2Bitmap");
+    w = h = line = 0;
+    data = NULL;
+    return;
+  }
+
   w = bitmap->w;
   h = bitmap->h;
   line = bitmap->line;

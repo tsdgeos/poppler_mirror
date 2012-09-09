@@ -441,6 +441,9 @@ void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf,
       }
     }
   }
+  if (xxMin > xxMax) {
+    xxMin = xxMax;
+  }
   *x0 = xxMin / splashAASize;
   *x1 = (xxMax - 1) / splashAASize;
 }

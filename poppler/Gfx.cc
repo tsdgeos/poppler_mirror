@@ -1671,6 +1671,10 @@ void Gfx::opSetStrokeColorN(Object args[], int numArgs) {
       state->setStrokeColor(&color);
       out->updateStrokeColor(state);
     }
+    if (unlikely(numArgs <= 0)) {
+      error(errSyntaxError, getPos(), "Incorrect number of arguments in 'SCN' command");
+      return;
+    }
     if (args[numArgs-1].isName() &&
 	(pattern = res->lookupPattern(args[numArgs-1].getName(), this))) {
       state->setStrokePattern(pattern);
@@ -4356,6 +4360,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
       dict->lookup("D", &obj1);
     }
     if (bits == 0) {
+      delete colorSpace;
       goto err2;
     }
     colorMap = new GfxImageColorMap(bits, &obj1, colorSpace);
