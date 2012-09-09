@@ -384,4 +384,27 @@ void SplashClip::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y) {
   for (i = 0; i < length; ++i) {
     scanners[i]->clipAALine(aaBuf, x0, x1, y);
   }
+  if (*x0 > *x1) {
+    *x0 = *x1;
+  }
+  if (*x0 < 0) {
+    *x0 = 0;
+  }
+  if ((*x0>>1) >= aaBuf->getRowSize()) {
+    xx0 = *x0;
+    *x0 = (aaBuf->getRowSize() - 1) << 1;
+    if (xx0 & 1) {
+      *x0 = *x0 + 1;
+    }
+  }
+  if (*x1 < *x0) {
+    *x1 = *x0;
+  }
+  if ((*x1>>1) >= aaBuf->getRowSize()) {
+    xx0 = *x1;
+    *x1 = (aaBuf->getRowSize() - 1) << 1;
+    if (xx0 & 1) {
+      *x1 = *x1 + 1;
+    }
+  }
 }
