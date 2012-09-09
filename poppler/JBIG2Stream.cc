@@ -720,7 +720,7 @@ JBIG2Bitmap::JBIG2Bitmap(Guint segNumA, int wA, int hA):
 JBIG2Bitmap::JBIG2Bitmap(Guint segNumA, JBIG2Bitmap *bitmap):
   JBIG2Segment(segNumA)
 {
-  if (!bitmap) {
+  if (unlikely(bitmap == NULL)) {
     error(errSyntaxError, -1, "NULL bitmap in JBIG2Bitmap");
     w = h = line = 0;
     data = NULL;
