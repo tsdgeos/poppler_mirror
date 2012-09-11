@@ -29,6 +29,7 @@
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2011 Sam Liao <phyomh@gmail.com>
 // Copyright (C) 2012 Horst Prote <prote@fmi.uni-stuttgart.de>
+// Copyright (C) 2012 Jason Crain <jason@aquaticape.us>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2299,7 +2300,9 @@ void TextPage::addChar(GfxState *state, double x, double y,
   state->transform(x, y, &x1, &y1);
   if (x1 + w1 < 0 || x1 > pageWidth ||
       y1 + h1 < 0 || y1 > pageHeight ||
-      w1 > pageWidth || h1 > pageHeight) {
+      w1 > pageWidth || h1 > pageHeight ||
+      isnan(x1) || isnan(y1) ||
+      isnan(w1) || isnan(h1)) {
     charPos += nBytes;
     return;
   }
