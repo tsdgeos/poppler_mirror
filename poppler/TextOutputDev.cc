@@ -277,6 +277,7 @@ void TextWord::addChar(GfxState *state, TextFontInfo *fontA, double x, double y,
 		       CharCode c, Unicode u) {
   GfxFont *gfxFont;
   double ascent, descent;
+  ascent = descent = 0; // make gcc happy
 
   if (len == size) {
     size += 16;
