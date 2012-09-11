@@ -4084,6 +4084,7 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx1, Catalog *ca
   Matrix m1;
   double *ctm, savedCTM[6];
   double kx, ky, sx, sy;
+  GBool retValue = gFalse;
 
   width = bbox[2] - bbox[0];
   height = bbox[3] - bbox[1];
@@ -4143,6 +4144,8 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx1, Catalog *ca
     repeatX = x1 - x0;
     repeatY = y1 - y0;
   } else {
+    if ((unsigned long) result_width * result_height > 0x800000L)
+      return gFalse;
     while(fabs(kx) > 16384 || fabs(ky) > 16384) {
       // limit pattern bitmap size
       m1.m[0] /= 2;
@@ -4230,10 +4233,10 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx1, Catalog *ca
   matc[1] = ctm[1];
   matc[2] = ctm[2];
   matc[3] = ctm[3];
-  splash->drawImage(&tilingBitmapSrc, &imgData, colorMode, gTrue, result_width, result_height, matc, gTrue);
+  retValue = splash->drawImage(&tilingBitmapSrc, &imgData, colorMode, gTrue, result_width, result_height, matc, gTrue) == splashOk;
   delete tBitmap;
   delete gfx;
-  return gTrue;
+  return retValue;
 }
 
 GBool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading)
