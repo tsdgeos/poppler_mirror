@@ -20,7 +20,7 @@
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2010, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009 Ross Moore <ross@maths.mq.edu.au>
@@ -2301,8 +2301,8 @@ void TextPage::addChar(GfxState *state, double x, double y,
   if (x1 + w1 < 0 || x1 > pageWidth ||
       y1 + h1 < 0 || y1 > pageHeight ||
       w1 > pageWidth || h1 > pageHeight ||
-      isnan(x1) || isnan(y1) ||
-      isnan(w1) || isnan(h1)) {
+      x1 != x1 || y1 != y1 || // IEEE way of checking for isnan
+      w1 != w1 || h1 != h1) {
     charPos += nBytes;
     return;
   }
