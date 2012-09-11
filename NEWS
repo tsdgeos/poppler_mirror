@@ -1,3 +1,16 @@
+Release 0.20.4
+        core:
+         * Improvements regarding embedded file handling. (KDE Bug #306008)
+         * Fix opening some broken files (Bug #14303)
+         * Fix memory leaks
+         * Fix crashes in various broken files
+         * Refine warning to only complain when really needed
+         * Remove function declared but not implemented
+         * Remove execution permissions from a header file
+
+        qt4:
+         * Improvements regarding embedded file handling. (KDE Bug #306008)
+
 Release 0.20.3
         core:
          * If NULL, NULL fails as password try EMPTY, EMPTY before failing (Bug #3498)
