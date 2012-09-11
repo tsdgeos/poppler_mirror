@@ -3,6 +3,7 @@
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -42,6 +43,7 @@
 #include <Gfx.h>
 #include <Error.h>
 #include <FileSpec.h>
+#include <Link.h>
 
 /* Almost all getters directly query the underlying poppler annotation, with
  * the exceptions of link, file attachment, sound, movie and screen annotations,
@@ -455,7 +457,8 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
             case Annot::typeUnknown:
                 continue; // special case for ignoring unknown annotations
             case Annot::typeWidget:
-                continue; // handled as forms or some other way
+                annotation = new WidgetAnnotation();
+                break;
             default:
             {
 #define CASE_FOR_TYPE( thetype ) \
@@ -491,6 +494,42 @@ Ref AnnotationPrivate::pdfObjectReference() const
     }
 
     return pdfAnnot->getRef();
+}
+
+Link* AnnotationPrivate::additionalAction( Annotation::AdditionalActionsType type ) const
+{
+    if ( pdfAnnot->getType() != Annot::typeScreen && pdfAnnot->getType() != Annot::typeWidget )
+        return 0;
+
+    Annot::AdditionalActionsType actionType = Annot::actionCursorEntering;
+    switch ( type )
+    {
+        case Annotation::CursorEnteringAction: actionType = Annot::actionCursorEntering; break;
+        case Annotation::CursorLeavingAction: actionType = Annot::actionCursorLeaving; break;
+        case Annotation::MousePressedAction: actionType = Annot::actionMousePressed; break;
+        case Annotation::MouseReleasedAction: actionType = Annot::actionMouseReleased; break;
+        case Annotation::FocusInAction: actionType = Annot::actionFocusIn; break;
+        case Annotation::FocusOutAction: actionType = Annot::actionFocusOut; break;
+        case Annotation::PageOpeningAction: actionType = Annot::actionPageOpening; break;
+        case Annotation::PageClosingAction: actionType = Annot::actionPageClosing; break;
+        case Annotation::PageVisibleAction: actionType = Annot::actionPageVisible; break;
+        case Annotation::PageInvisibleAction: actionType = Annot::actionPageInvisible; break;
+    }
+
+    ::LinkAction *linkAction = 0;
+    if ( pdfAnnot->getType() == Annot::typeScreen )
+        linkAction = static_cast<AnnotScreen*>( pdfAnnot )->getAdditionalAction( actionType );
+    else
+        linkAction = static_cast<AnnotWidget*>( pdfAnnot )->getAdditionalAction( actionType );
+
+    Link *link = 0;
+
+    if ( linkAction )
+        link = PageData::convertLinkActionToLink( linkAction, parentDoc, QRectF() );
+
+    delete linkAction;
+
+    return link;
 }
 
 void AnnotationPrivate::addAnnotationToPage(::Page *pdfPage, DocumentData *doc, const Annotation * ann)
@@ -4259,6 +4298,64 @@ void ScreenAnnotation::setScreenTitle( const QString &title )
 {
     Q_D( ScreenAnnotation );
     d->title = title;
+}
+
+Link* ScreenAnnotation::additionalAction( AdditionalActionsType type ) const
+{
+    Q_D( const ScreenAnnotation );
+    return d->additionalAction( type );
+}
+
+/** WidgetAnnotation [Annotation] */
+class WidgetAnnotationPrivate : public AnnotationPrivate
+{
+    public:
+        Annotation * makeAlias();
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+};
+
+Annotation * WidgetAnnotationPrivate::makeAlias()
+{
+    return new WidgetAnnotation(*this);
+}
+
+Annot* WidgetAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
+{
+    return 0; // Not implemented
+}
+
+WidgetAnnotation::WidgetAnnotation(WidgetAnnotationPrivate &dd)
+    : Annotation( dd )
+{}
+
+WidgetAnnotation::WidgetAnnotation()
+    : Annotation( *new WidgetAnnotationPrivate() )
+{
+}
+
+WidgetAnnotation::~WidgetAnnotation()
+{
+}
+
+void WidgetAnnotation::store( QDomNode & node, QDomDocument & document ) const
+{
+    // store base annotation properties
+    storeBaseAnnotationProperties( node, document );
+
+    // create [widget] element
+    QDomElement widgetElement = document.createElement( "widget" );
+    node.appendChild( widgetElement );
+}
+
+Annotation::SubType WidgetAnnotation::subType() const
+{
+    return AWidget;
+}
+
+Link* WidgetAnnotation::additionalAction( AdditionalActionsType type ) const
+{
+    Q_D( const WidgetAnnotation );
+    return d->additionalAction( type );
 }
 
 //BEGIN utility annotation functions

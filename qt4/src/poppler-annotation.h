@@ -55,6 +55,7 @@ class FileAttachmentAnnotationPrivate;
 class SoundAnnotationPrivate;
 class MovieAnnotationPrivate;
 class ScreenAnnotationPrivate;
+class WidgetAnnotationPrivate;
 class EmbeddedFile;
 class Link;
 class SoundObject;
@@ -112,7 +113,7 @@ class POPPLER_QT4_EXPORT Annotation
     // WARNING!!! oKular uses that very same values so if you change them notify the author!
     enum SubType { AText = 1, ALine = 2, AGeom = 3, AHighlight = 4, AStamp = 5,
                    AInk = 6, ALink = 7, ACaret = 8, AFileAttachment = 9, ASound = 10,
-                   AMovie = 11, AScreen = 12 /** \since 0.20 */, A_BASE = 0 };
+                   AMovie = 11, AScreen = 12 /** \since 0.20 */, AWidget = 13 /** \since 0.22 */, A_BASE = 0 };
     enum Flag { Hidden = 1, FixedSize = 2, FixedRotation = 4, DenyPrint = 8,
                 DenyWrite = 16, DenyDelete = 32, ToggleHidingOnMouse = 64, External = 128 };
     enum LineStyle { Solid = 1, Dashed = 2, Beveled = 4, Inset = 8, Underline = 16 };
@@ -271,6 +272,28 @@ class POPPLER_QT4_EXPORT Annotation
      * Destructor.
      */
     virtual ~Annotation();
+
+    /**
+     * Describes the flags from an annotations 'AA' dictionary.
+     *
+     * This flag is used by the additionalAction() method for ScreenAnnotation
+     * and WidgetAnnotation.
+     *
+     * \since 0.22
+     */
+    enum AdditionalActionsType
+    {
+        CursorEnteringAction, ///< Performed when the cursor enters the annotation's active area
+        CursorLeavingAction,  ///< Performed when the cursor exists the annotation's active area
+        MousePressedAction,   ///< Performed when the mouse button is pressed inside the annotation's active area
+        MouseReleasedAction,  ///< Performed when the mouse button is released inside the annotation's active area
+        FocusInAction,        ///< Performed when the annotation receives the input focus
+        FocusOutAction,       ///< Performed when the annotation loses the input focus
+        PageOpeningAction,    ///< Performed when the page containing the annotation is opened
+        PageClosingAction,    ///< Performed when the page containing the annotation is closed
+        PageVisibleAction,    ///< Performed when the page containing the annotation becomes visible
+        PageInvisibleAction   ///< Performed when the page containing the annotation becomes invisible
+    };
 
   protected:
     /// \cond PRIVATE
@@ -840,12 +863,55 @@ class POPPLER_QT4_EXPORT ScreenAnnotation : public Annotation
      */
     void setScreenTitle( const QString &title );
 
+    /**
+     * Returns the additional action of the given @p type fo the annotation or
+     * @c 0 if no action has been defined.
+     *
+     * \since 0.22
+     */
+    Link* additionalAction( AdditionalActionsType type ) const;
+
   private:
     ScreenAnnotation();
     ScreenAnnotation( ScreenAnnotationPrivate &dd );
     virtual void store( QDomNode &parentNode, QDomDocument &document ) const; // stub
     Q_DECLARE_PRIVATE( ScreenAnnotation )
     Q_DISABLE_COPY( ScreenAnnotation )
+};
+
+/**
+ * \short Widget annotation.
+ *
+ * The widget annotation represents a widget (form field) on a page.
+ *
+ * \note This class is just provided for consistency of the annotation API,
+ *       use the FormField classes to get all the form-related information.
+ *
+ * \since 0.22
+ */
+class POPPLER_QT4_EXPORT WidgetAnnotation : public Annotation
+{
+  friend class AnnotationPrivate;
+
+  public:
+    virtual ~WidgetAnnotation();
+
+    virtual SubType subType() const;
+
+    /**
+     * Returns the additional action of the given @p type fo the annotation or
+     * @c 0 if no action has been defined.
+     *
+     * \since 0.22
+     */
+    Link* additionalAction( AdditionalActionsType type ) const;
+
+  private:
+    WidgetAnnotation();
+    WidgetAnnotation( WidgetAnnotationPrivate &dd );
+    virtual void store( QDomNode &parentNode, QDomDocument &document ) const; // stub
+    Q_DECLARE_PRIVATE( WidgetAnnotation )
+    Q_DISABLE_COPY( WidgetAnnotation )
 };
 
 }

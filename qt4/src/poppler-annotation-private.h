@@ -31,6 +31,7 @@
 
 class Annot;
 class AnnotPath;
+class Link;
 class Page;
 class PDFRectangle;
 
@@ -100,6 +101,8 @@ class AnnotationPrivate : public QSharedData
         static void removeAnnotationFromPage(::Page *pdfPage, const Annotation * ann);
 
         Ref pdfObjectReference() const;
+
+        Link* additionalAction( Annotation::AdditionalActionsType type ) const;
 };
 
 }
