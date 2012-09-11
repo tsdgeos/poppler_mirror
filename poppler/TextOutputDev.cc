@@ -29,6 +29,7 @@
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2011 Sam Liao <phyomh@gmail.com>
 // Copyright (C) 2012 Horst Prote <prote@fmi.uni-stuttgart.de>
+// Copyright (C) 2012 Jason Crain <jason@aquaticape.us>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -234,104 +235,14 @@ GBool TextFontInfo::matches(TextFontInfo *fontInfo) {
 // TextWord
 //------------------------------------------------------------------------
 
-TextWord::TextWord(GfxState *state, int rotA, double x0, double y0,
-		   TextFontInfo *fontA, double fontSizeA) {
-  GfxFont *gfxFont;
-  double x, y, ascent, descent;
-  int wMode;
-  
+TextWord::TextWord(GfxState *state, int rotA, double fontSizeA) {
   rot = rotA;
-  font = fontA;
   fontSize = fontSizeA;
-  state->transform(x0, y0, &x, &y);
-  if ((gfxFont = font->gfxFont)) {
-    ascent = gfxFont->getAscent() * fontSize;
-    descent = gfxFont->getDescent() * fontSize;
-    wMode = gfxFont->getWMode();
-  } else {
-    // this means that the PDF file draws text without a current font,
-    // which should never happen
-    ascent = 0.95 * fontSize;
-    descent = -0.35 * fontSize;
-    wMode = 0;
-  }
-  if (wMode) { // vertical writing mode
-    // NB: the rotation value has been incremented by 1 (in
-    // TextPage::beginWord()) for vertical writing mode
-    switch (rot) {
-    case 0:
-      yMin = y - fontSize;
-      yMax = y;
-      base = y;
-      break;
-    case 1:
-      xMin = x;
-      xMax = x + fontSize;
-      base = x;
-      break;
-    case 2:
-      yMin = y;
-      yMax = y + fontSize;
-      base = y;
-      break;
-    case 3:
-      xMin = x - fontSize;
-      xMax = x;
-      base = x;
-      break;
-    }
-  } else { // horizontal writing mode
-    switch (rot) {
-    case 0:
-      yMin = y - ascent;
-      yMax = y - descent;
-      if (yMin == yMax) {
-	// this is a sanity check for a case that shouldn't happen -- but
-	// if it does happen, we want to avoid dividing by zero later
-	yMin = y;
-	yMax = y + 1;
-      }
-      base = y;
-      break;
-    case 1:
-      xMin = x + descent;
-      xMax = x + ascent;
-      if (xMin == xMax) {
-	// this is a sanity check for a case that shouldn't happen -- but
-	// if it does happen, we want to avoid dividing by zero later
-	xMin = x;
-	xMax = x + 1;
-      }
-      base = x;
-      break;
-    case 2:
-      yMin = y + descent;
-      yMax = y + ascent;
-      if (yMin == yMax) {
-	// this is a sanity check for a case that shouldn't happen -- but
-	// if it does happen, we want to avoid dividing by zero later
-	yMin = y;
-	yMax = y + 1;
-      }
-      base = y;
-      break;
-    case 3:
-      xMin = x - ascent;
-      xMax = x - descent;
-      if (xMin == xMax) {
-	// this is a sanity check for a case that shouldn't happen -- but
-	// if it does happen, we want to avoid dividing by zero later
-	xMin = x;
-	xMax = x + 1;
-      }
-      base = x;
-      break;
-    }
-  }
   text = NULL;
   charcode = NULL;
   edge = NULL;
   charPos = NULL;
+  font = NULL;
   len = size = 0;
   spaceAfter = gFalse;
   next = NULL;
@@ -358,12 +269,14 @@ TextWord::~TextWord() {
   gfree(charcode);
   gfree(edge);
   gfree(charPos);
+  gfree(font);
 }
 
-void TextWord::addChar(GfxState *state, double x, double y,
+void TextWord::addChar(GfxState *state, TextFontInfo *fontA, double x, double y,
 		       double dx, double dy, int charPosA, int charLen,
 		       CharCode c, Unicode u) {
-  int wMode;
+  GfxFont *gfxFont;
+  double ascent, descent;
 
   if (len == size) {
     size += 16;
@@ -371,12 +284,28 @@ void TextWord::addChar(GfxState *state, double x, double y,
     charcode = (Unicode *)greallocn(charcode, size, sizeof(CharCode));
     edge = (double *)greallocn(edge, (size + 1), sizeof(double));
     charPos = (int *)greallocn(charPos, size + 1, sizeof(int));
+    font = (TextFontInfo **)greallocn(font, size, sizeof(TextFontInfo *));
   }
   text[len] = u;
   charcode[len] = c;
   charPos[len] = charPosA;
   charPos[len + 1] = charPosA + charLen;
-  wMode = font->gfxFont ? font->gfxFont->getWMode() : 0;
+  font[len] = fontA;
+
+  if (len == 0) {
+    if ((gfxFont = fontA->gfxFont)) {
+      ascent = gfxFont->getAscent() * fontSize;
+      descent = gfxFont->getDescent() * fontSize;
+      wMode = gfxFont->getWMode();
+    } else {
+      // this means that the PDF file draws text without a current font,
+      // which should never happen
+      ascent = 0.95 * fontSize;
+      descent = -0.35 * fontSize;
+      wMode = 0;
+    }
+  }
+
   if (wMode) { // vertical writing mode
     // NB: the rotation value has been incremented by 1 (in
     // TextPage::beginWord()) for vertical writing mode
@@ -384,27 +313,39 @@ void TextWord::addChar(GfxState *state, double x, double y,
     case 0:
       if (len == 0) {
 	xMin = x - fontSize;
+	yMin = y - fontSize;
+	yMax = y;
+	base = y;
       }
       edge[len] = x - fontSize;
       xMax = edge[len+1] = x;
       break;
     case 1:
       if (len == 0) {
+	xMin = x;
 	yMin = y - fontSize;
+	xMax = x + fontSize;
+	base = x;
       }
       edge[len] = y - fontSize;
       yMax = edge[len+1] = y;
       break;
     case 2:
       if (len == 0) {
+	yMin = y;
 	xMax = x + fontSize;
+	yMax = y + fontSize;
+	base = y;
       }
       edge[len] = x + fontSize;
       xMin = edge[len+1] = x;
       break;
     case 3:
       if (len == 0) {
+	xMin = x - fontSize;
+	xMax = x;
 	yMax = y + fontSize;
+	base = x;
       }
       edge[len] = y + fontSize;
       yMin = edge[len+1] = y;
@@ -415,27 +356,63 @@ void TextWord::addChar(GfxState *state, double x, double y,
     case 0:
       if (len == 0) {
 	xMin = x;
+	yMin = y - ascent;
+	yMax = y - descent;
+	if (yMin == yMax) {
+	  // this is a sanity check for a case that shouldn't happen -- but
+	  // if it does happen, we want to avoid dividing by zero later
+	  yMin = y;
+	  yMax = y + 1;
+	}
+	base = y;
       }
       edge[len] = x;
       xMax = edge[len+1] = x + dx;
       break;
     case 1:
       if (len == 0) {
+	xMin = x + descent;
 	yMin = y;
+	xMax = x + ascent;
+	if (xMin == xMax) {
+	  // this is a sanity check for a case that shouldn't happen -- but
+	  // if it does happen, we want to avoid dividing by zero later
+	  xMin = x;
+	  xMax = x + 1;
+	}
+	base = x;
       }
       edge[len] = y;
       yMax = edge[len+1] = y + dy;
       break;
     case 2:
       if (len == 0) {
+	yMin = y + descent;
 	xMax = x;
+	yMax = y + ascent;
+	if (yMin == yMax) {
+	  // this is a sanity check for a case that shouldn't happen -- but
+	  // if it does happen, we want to avoid dividing by zero later
+	  yMin = y;
+	  yMax = y + 1;
+	}
+	base = y;
       }
       edge[len] = x;
       xMin = edge[len+1] = x + dx;
       break;
     case 3:
       if (len == 0) {
+	xMin = x - ascent;
+	xMax = x - descent;
 	yMax = y;
+	if (xMin == xMax) {
+	  // this is a sanity check for a case that shouldn't happen -- but
+	  // if it does happen, we want to avoid dividing by zero later
+	  xMin = x;
+	  xMax = x + 1;
+	}
+	base = x;
       }
       edge[len] = y;
       yMin = edge[len+1] = y + dy;
@@ -466,12 +443,14 @@ void TextWord::merge(TextWord *word) {
     charcode = (CharCode *)greallocn(charcode, (size + 1), sizeof(CharCode));
     edge = (double *)greallocn(edge, (size + 1), sizeof(double));
     charPos = (int *)greallocn(charPos, size + 1, sizeof(int));
+    font = (TextFontInfo **)greallocn(font, size, sizeof(TextFontInfo *));
   }
   for (i = 0; i < word->len; ++i) {
     text[len + i] = word->text[i];
     charcode[len + i] = word->charcode[i];
     edge[len + i] = word->edge[i];
     charPos[len + i] = word->charPos[i];
+    font[len + i] = word->font[i];
   }
   edge[len + word->len] = word->edge[word->len];
   charPos[len + word->len] = word->charPos[word->len];
@@ -863,7 +842,7 @@ void TextLine::coalesce(UnicodeMap *uMap) {
 	word0->spaceAfter = gTrue;
 	word0 = word1;
 	word1 = word1->next;
-      } else if (word0->font == word1->font &&
+      } else if (word0->font[word0->len - 1] == word1->font[0] &&
 		 word0->underlined == word1->underlined &&
 		 fabs(word0->fontSize - word1->fontSize) <
 		   maxWordFontSizeDelta * words->fontSize &&
@@ -2234,7 +2213,7 @@ void TextPage::updateFont(GfxState *state) {
   }
 }
 
-void TextPage::beginWord(GfxState *state, double x0, double y0) {
+void TextPage::beginWord(GfxState *state) {
   GfxFont *gfxFont;
   double *fontm;
   double m[4], m2[4];
@@ -2274,7 +2253,7 @@ void TextPage::beginWord(GfxState *state, double x0, double y0) {
     rot = (rot + 1) & 3;
   }
 
-  curWord = new TextWord(state, rot, x0, y0, curFont, curFontSize);
+  curWord = new TextWord(state, rot, curFontSize);
 }
 
 void TextPage::addChar(GfxState *state, double x, double y,
@@ -2283,6 +2262,7 @@ void TextPage::addChar(GfxState *state, double x, double y,
   double x1, y1, w1, h1, dx2, dy2, base, sp, delta;
   GBool overlap;
   int i;
+  int wMode;
 
   // subtract char and word spacing from the dx,dy values
   sp = state->getCharSpace();
@@ -2329,6 +2309,7 @@ void TextPage::addChar(GfxState *state, double x, double y,
   // (3) the previous character was an overlap (we want each duplicated
   //     character to be in a word by itself at this stage),
   // (4) the font size has changed
+  // (5) the WMode changed
   if (curWord && curWord->len > 0) {
     base = sp = delta = 0; // make gcc happy
     switch (curWord->rot) {
@@ -2355,11 +2336,13 @@ void TextPage::addChar(GfxState *state, double x, double y,
     }
     overlap = fabs(delta) < dupMaxPriDelta * curWord->fontSize &&
               fabs(base - curWord->base) < dupMaxSecDelta * curWord->fontSize;
+    wMode = curFont->gfxFont ? curFont->gfxFont->getWMode() : 0;
     if (overlap || lastCharOverlap ||
 	sp < -minDupBreakOverlap * curWord->fontSize ||
 	sp > minWordBreakSpace * curWord->fontSize ||
 	fabs(base - curWord->base) > 0.5 ||
-	curFontSize != curWord->fontSize) {
+	curFontSize != curWord->fontSize ||
+	wMode != curWord->wMode) {
       endWord();
     }
     lastCharOverlap = overlap;
@@ -2370,7 +2353,7 @@ void TextPage::addChar(GfxState *state, double x, double y,
   if (uLen != 0) {
     // start a new word if needed
     if (!curWord) {
-      beginWord(state, x, y);
+      beginWord(state);
     }
 
     // page rotation and/or transform matrices can cause text to be
@@ -2381,7 +2364,7 @@ void TextPage::addChar(GfxState *state, double x, double y,
         (curWord->rot == 2 && w1 > 0) ||
         (curWord->rot == 3 && h1 > 0)) {
       endWord();
-      beginWord(state, x + dx, y + dy);
+      beginWord(state);
       x1 += w1;
       y1 += h1;
       w1 = -w1;
@@ -2392,7 +2375,7 @@ void TextPage::addChar(GfxState *state, double x, double y,
     w1 /= uLen;
     h1 /= uLen;
     for (i = 0; i < uLen; ++i) {
-      curWord->addChar(state, x1 + i*w1, y1 + i*h1, w1, h1, charPos, nBytes, c, u[i]);
+      curWord->addChar(state, curFont, x1 + i*w1, y1 + i*h1, w1, h1, charPos, nBytes, c, u[i]);
     }
   }
   charPos += nBytes;
@@ -4339,29 +4322,32 @@ void TextSelectionPainter::visitLine (TextLine *line,
 void TextSelectionPainter::visitWord (TextWord *word, int begin, int end,
 				      PDFRectangle *selection)
 {
-  GooString *string;
-  int i;
-
   state->setFillColor(glyph_color);
   out->updateFillColor(state);
-  word->font->gfxFont->incRefCnt();
-  state->setFont(word->font->gfxFont, word->fontSize);
-  out->updateFont(state);
 
-  /* The only purpose of this string is to let the output device query
-   * it's length.  Might want to change this interface later. */
+  while (begin < end) {
+    TextFontInfo *font = word->font[begin];
+    font->gfxFont->incRefCnt();
+    state->setFont(font->gfxFont, word->fontSize);
+    out->updateFont(state);
 
-  string = new GooString ((char *) word->charcode, end - begin);
+    int fEnd = begin + 1;
+    while (fEnd < end && font->matches(word->font[fEnd]))
+      fEnd++;
 
-  out->beginString(state, string);
+    /* The only purpose of this string is to let the output device query
+     * it's length.  Might want to change this interface later. */
+    GooString *string = new GooString ((char *) word->charcode, fEnd - begin);
+    out->beginString(state, string);
 
-  for (i = begin; i < end; i++)
-    out->drawChar(state, word->edge[i], word->base, 0, 0, 0, 0,
-		  word->charcode[i], 1, NULL, 0);
-  
-  out->endString(state);
-
-  delete string;
+    for (int i = begin; i < fEnd; i++) {
+      out->drawChar(state, word->edge[i], word->base, 0, 0, 0, 0,
+		    word->charcode[i], 1, NULL, 0);
+    }
+    out->endString(state);
+    delete string;
+    begin = fEnd;
+  }
 }
 
 void TextWord::visitSelection(TextSelectionVisitor *visitor,

@@ -1545,9 +1545,9 @@ poppler_text_attributes_new (void)
 }
 
 static gchar *
-get_font_name_from_word (TextWord *word)
+get_font_name_from_word (TextWord *word, gint word_i)
 {
-  GooString *font_name = word->getFontName();
+  GooString *font_name = word->getFontName(word_i);
   const gchar *name;
   gboolean subset;
   gint i;
@@ -1573,12 +1573,12 @@ get_font_name_from_word (TextWord *word)
  * Allocates a new PopplerTextAttributes with word attributes
  */
 static PopplerTextAttributes *
-poppler_text_attributes_new_from_word (TextWord *word)
+poppler_text_attributes_new_from_word (TextWord *word, gint i)
 {
   PopplerTextAttributes *attrs = poppler_text_attributes_new ();
   gdouble r, g, b;
 
-  attrs->font_name = get_font_name_from_word (word);
+  attrs->font_name = get_font_name_from_word (word, i);
   attrs->font_size = word->getFontSize();
   attrs->is_underlined = word->isUnderlined();
   word->getColor (&r, &g, &b);
@@ -2071,11 +2071,11 @@ poppler_page_free_text_attributes (GList *list)
 }
 
 static gboolean
-word_text_attributes_equal (TextWord *a, TextWord *b)
+word_text_attributes_equal (TextWord *a, gint ai, TextWord *b, gint bi)
 {
   double ar, ag, ab, br, bg, bb;
 
-  if (!a->getFontInfo()->matches (b->getFontInfo()))
+  if (!a->getFontInfo(ai)->matches (b->getFontInfo(bi)))
     return FALSE;
 
   if (a->getFontSize() != b->getFontSize())
@@ -2125,23 +2125,32 @@ poppler_page_get_text_attributes (PopplerPage *page)
       return NULL;
     }
 
+  TextWord *word, *prev_word = NULL;
+  gint word_i, prev_word_i;
+
   // Calculating each word attributes
   for (i = 0; i < wordlist->getLength (); i++)
     {
-      TextWord *word = wordlist->get (i);
+      word = wordlist->get (i);
 
-      // each char of the word has the same attributes
-      if (i > 0 && word_text_attributes_equal (word, wordlist->get (i - 1))) {
-        attrs = previous;
-      } else {
-        attrs = poppler_text_attributes_new_from_word (word);
-        attrs->start_index = offset;
-        if (previous)
-          previous->end_index--;
-        previous = attrs;
-        attributes = g_list_prepend (attributes, attrs);
-      }
-      offset += word->getLength () + 1;
+      for (word_i = 0; word_i < word->getLength (); word_i++)
+	{
+	  if (prev_word && word_text_attributes_equal (word, word_i, prev_word, prev_word_i)) {
+	    attrs = previous;
+	  } else {
+	    attrs = poppler_text_attributes_new_from_word (word, word_i);
+	    attrs->start_index = offset;
+	    if (previous)
+	      previous->end_index--;
+	    previous = attrs;
+	    attributes = g_list_prepend (attributes, attrs);
+	  }
+	  offset++;
+	  attrs->end_index = offset;
+	  prev_word = word;
+	  prev_word_i = word_i;
+	}
+      offset++;
       attrs->end_index = offset;
     }
   if (attrs)
