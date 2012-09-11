@@ -16,6 +16,7 @@
 // Copyright (C) 2009, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -79,6 +80,7 @@ public:
   double getRangeMin(int i) { return range[i][0]; }
   double getRangeMax(int i) { return range[i][1]; }
   GBool getHasRange() { return hasRange; }
+  virtual GBool hasDifferentResultSet(Function *func) { return gFalse; }
 
   // Transform an input tuple into an output tuple.
   virtual void transform(double *in, double *out) = 0;
@@ -126,6 +128,7 @@ public:
   virtual int getType() { return 0; }
   virtual void transform(double *in, double *out);
   virtual GBool isOk() { return ok; }
+  virtual GBool hasDifferentResultSet(Function *func);
 
   int getSampleSize(int i) { return sampleSize[i]; }
   double getEncodeMin(int i) { return encode[i][0]; }
@@ -133,6 +136,7 @@ public:
   double getDecodeMin(int i) { return decode[i][0]; }
   double getDecodeMax(int i) { return decode[i][1]; }
   double *getSamples() { return samples; }
+  int getSampleNumber() { return nSamples; }
 
 private:
 

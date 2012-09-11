@@ -20,7 +20,7 @@
 // Copyright (C) 2009-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
-// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -48,6 +48,7 @@ class GfxFont;
 class PDFRectangle;
 class GfxShading;
 class PopplerCache;
+class GooList;
 
 class Matrix {
 public:
@@ -202,10 +203,14 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray) = 0;
   virtual void getRGB(GfxColor *color, GfxRGB *rgb) = 0;
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk) = 0;
+  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN) = 0;
   virtual void getGrayLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) { error(errInternal, -1, "GfxColorSpace::getGrayLine this should not happen"); }
   virtual void getRGBLine(Guchar * /*in*/, unsigned int * /*out*/, int /*length*/) { error(errInternal, -1, "GfxColorSpace::getRGBLine (first variant) this should not happen"); }
   virtual void getRGBLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getRGBLine (second variant) this should not happen"); }
   virtual void getRGBXLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getRGBXLine this should not happen"); }
+
+  // create mapping for spot colorants
+  virtual void createMapping(GooList *separationList, int maxSepComps);
 
   // Does this ColorSpace support getRGBLine?
   virtual GBool useGetRGBLine() { return gFalse; }
@@ -249,6 +254,7 @@ public:
 protected:
 
   Guint overprintMask;
+  int *mapping;
 };
 
 //------------------------------------------------------------------------
@@ -266,6 +272,7 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
+  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
   virtual void getGrayLine(Guchar *in, Guchar *out, int length);
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
   virtual void getRGBLine(Guchar *in, Guchar *out, int length);
@@ -298,6 +305,7 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
+  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
 
   virtual int getNComps() { return 1; }
   virtual void getDefaultColor(GfxColor *color);
@@ -335,6 +343,7 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
+  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
   virtual void getGrayLine(Guchar *in, Guchar *out, int length);
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
   virtual void getRGBLine(Guchar *in, Guchar *out, int length);
@@ -367,6 +376,7 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
+  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
 
   virtual int getNComps() { return 3; }
   virtual void getDefaultColor(GfxColor *color);
@@ -408,6 +418,7 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
+  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
   virtual void getRGBLine(Guchar *, Guchar *out, int length);
   virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
@@ -437,6 +448,7 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
+  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
 
   virtual int getNComps() { return 3; }
   virtual void getDefaultColor(GfxColor *color);
@@ -484,6 +496,7 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
+  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
   virtual void getRGBLine(Guchar *in, Guchar *out, int length);
   virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
@@ -529,6 +542,7 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
+  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
   virtual void getRGBLine(Guchar *in, Guchar *out, int length);
   virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
@@ -546,6 +560,10 @@ public:
   int getIndexHigh() { return indexHigh; }
   Guchar *getLookup() { return lookup; }
   GfxColor *mapColorToBase(GfxColor *color, GfxColor *baseColor);
+  Guint getOverprintMask() { return base->getOverprintMask(); }
+  virtual void createMapping(GooList *separationList, int maxSepComps)
+    { base->createMapping(separationList, maxSepComps); }
+
 
 private:
 
@@ -573,6 +591,9 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
+  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
+
+  virtual void createMapping(GooList *separationList, int maxSepComps);
 
   virtual int getNComps() { return 1; }
   virtual void getDefaultColor(GfxColor *color);
@@ -588,7 +609,7 @@ private:
 
   GfxSeparationColorSpace(GooString *nameA, GfxColorSpace *altA,
 			  Function *funcA, GBool nonMarkingA,
-			  Guint overprintMaskA);
+			  Guint overprintMaskA, int *mappingA);
 
   GooString *name;		// colorant name
   GfxColorSpace *alt;		// alternate color space
@@ -604,7 +625,7 @@ class GfxDeviceNColorSpace: public GfxColorSpace {
 public:
 
   GfxDeviceNColorSpace(int nCompsA, GooString **namesA,
-		       GfxColorSpace *alt, Function *func);
+		       GfxColorSpace *alt, Function *func, GooList *sepsCS);
   virtual ~GfxDeviceNColorSpace();
   virtual GfxColorSpace *copy();
   virtual GfxColorSpaceMode getMode() { return csDeviceN; }
@@ -615,6 +636,9 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
+  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
+
+  virtual void createMapping(GooList *separationList, int maxSepComps);
 
   virtual int getNComps() { return nComps; }
   virtual void getDefaultColor(GfxColor *color);
@@ -629,8 +653,8 @@ public:
 private:
 
   GfxDeviceNColorSpace(int nCompsA, GooString **namesA,
-		       GfxColorSpace *alt, Function *func,
-		       GBool nonMarkingA, Guint overprintMaskA);
+		       GfxColorSpace *alt, Function *func, GooList *sepsCSA,
+		       int *mappingA, GBool nonMarkingA, Guint overprintMaskA);
 
   int nComps;			// number of components
   GooString			// colorant names
@@ -638,6 +662,7 @@ private:
   GfxColorSpace *alt;		// alternate color space
   Function *func;		// tint transform (into alternate color space)
   GBool nonMarking;
+  GooList *sepsCS; // list of separation cs for spot colorants;
 };
 
 //------------------------------------------------------------------------
@@ -658,6 +683,7 @@ public:
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
   virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
+  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
 
   virtual int getNComps() { return 0; }
   virtual void getDefaultColor(GfxColor *color);
@@ -1107,6 +1133,7 @@ public:
   void getRGBXLine(Guchar *in, Guchar *out, int length);
   void getGrayLine(Guchar *in, Guchar *out, int length);
   void getCMYK(Guchar *x, GfxCMYK *cmyk);
+  void getDeviceN(Guchar *x, GfxColor *deviceN);
   void getColor(Guchar *x, GfxColor *color);
 
 private:
@@ -1342,8 +1369,12 @@ public:
     { strokeColorSpace->getRGB(&strokeColor, rgb); }
   void getFillCMYK(GfxCMYK *cmyk)
     { fillColorSpace->getCMYK(&fillColor, cmyk); }
+  void getFillDeviceN(GfxColor *deviceN)
+    { fillColorSpace->getDeviceN(&fillColor, deviceN); }
   void getStrokeCMYK(GfxCMYK *cmyk)
     { strokeColorSpace->getCMYK(&strokeColor, cmyk); }
+  void getStrokeDeviceN(GfxColor *deviceN)
+    { strokeColorSpace->getDeviceN(&strokeColor, deviceN); }
   GfxColorSpace *getFillColorSpace() { return fillColorSpace; }
   GfxColorSpace *getStrokeColorSpace() { return strokeColorSpace; }
   GfxPattern *getFillPattern() { return fillPattern; }

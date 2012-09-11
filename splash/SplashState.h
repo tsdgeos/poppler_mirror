@@ -121,10 +121,13 @@ private:
          rgbTransferG[256],
          rgbTransferB[256];
   Guchar grayTransfer[256];
+#if SPLASH_CMYK
   Guchar cmykTransferC[256],
          cmykTransferM[256],
          cmykTransferY[256],
          cmykTransferK[256];
+  Guchar deviceNTransfer[SPOT_NCOMPS+4][256];
+#endif
   Guint overprintMask;
   GBool overprintAdditive;
 

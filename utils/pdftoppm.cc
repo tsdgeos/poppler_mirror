@@ -23,7 +23,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
-// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -353,10 +353,8 @@ int main(int argc, char *argv[]) {
 #if SPLASH_CMYK
   if (jpegcmyk || overprint) {
     globalParams->setOverprintPreview(gTrue);
-    paperColor[0] = 0;
-    paperColor[1] = 0;
-    paperColor[2] = 0;
-    paperColor[3] = 0;
+    for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
+      paperColor[cp] = 0;
   } else 
 #endif
   {
@@ -367,7 +365,7 @@ int main(int argc, char *argv[]) {
   splashOut = new SplashOutputDev(mono ? splashModeMono1 :
 				    gray ? splashModeMono8 :
 #if SPLASH_CMYK
-				    (jpegcmyk || overprint) ? splashModeCMYK8 :
+				    (jpegcmyk || overprint) ? splashModeDeviceN8 :
 #endif
 				             splashModeRGB8, 4,
 				  gFalse, paperColor);

@@ -36,6 +36,7 @@
 #include <math.h>
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"
+#include "goo/GooList.h"
 #include "poppler/Error.h"
 #include "SplashErrorCodes.h"
 #include "SplashMath.h"
@@ -170,7 +171,8 @@ SplashPipeResultColorCtrl Splash::pipeResultColorNoAlphaBlend[] = {
   splashPipeResultColorNoAlphaBlendRGB
 #if SPLASH_CMYK
   ,
-  splashPipeResultColorNoAlphaBlendCMYK
+  splashPipeResultColorNoAlphaBlendCMYK,
+  splashPipeResultColorNoAlphaBlendDeviceN
 #endif
 };
 
@@ -182,7 +184,8 @@ SplashPipeResultColorCtrl Splash::pipeResultColorAlphaNoBlend[] = {
   splashPipeResultColorAlphaNoBlendRGB
 #if SPLASH_CMYK
   ,
-  splashPipeResultColorAlphaNoBlendCMYK
+  splashPipeResultColorAlphaNoBlendCMYK,
+  splashPipeResultColorAlphaNoBlendDeviceN
 #endif
 };
 
@@ -194,7 +197,8 @@ SplashPipeResultColorCtrl Splash::pipeResultColorAlphaBlend[] = {
   splashPipeResultColorAlphaBlendRGB
 #if SPLASH_CMYK
   ,
-  splashPipeResultColorAlphaBlendCMYK
+  splashPipeResultColorAlphaBlendCMYK,
+  splashPipeResultColorAlphaBlendDeviceN
 #endif
 };
 
@@ -307,6 +311,8 @@ inline void Splash::pipeInit(SplashPipe *pipe, int x, int y,
 #if SPLASH_CMYK
     } else if (bitmap->mode == splashModeCMYK8 && pipe->destAlphaPtr) {
       pipe->run = &Splash::pipeRunSimpleCMYK8;
+    } else if (bitmap->mode == splashModeDeviceN8 && pipe->destAlphaPtr) {
+      pipe->run = &Splash::pipeRunSimpleDeviceN8;
 #endif
     }
   } else if (!pipe->pattern && !pipe->noTransparency && !state->softMask &&
@@ -326,6 +332,8 @@ inline void Splash::pipeInit(SplashPipe *pipe, int x, int y,
 #if SPLASH_CMYK
     } else if (bitmap->mode == splashModeCMYK8 && pipe->destAlphaPtr) {
       pipe->run = &Splash::pipeRunAACMYK8;
+    } else if (bitmap->mode == splashModeDeviceN8 && pipe->destAlphaPtr) {
+      pipe->run = &Splash::pipeRunAADeviceN8;
 #endif
     }
   }
@@ -338,6 +346,10 @@ void Splash::pipeRun(SplashPipe *pipe) {
   SplashColorPtr cSrc;
   Guchar cResult0, cResult1, cResult2, cResult3;
   int t;
+#if SPLASH_CMYK
+  int cp, mask;
+  Guchar cResult[SPOT_NCOMPS+4];
+#endif
 
   //----- source color
 
@@ -412,6 +424,16 @@ void Splash::pipeRun(SplashPipe *pipe) {
       }
       pipe->destColorPtr += 4;
       break;
+    case splashModeDeviceN8:
+      mask = 1;
+      for (cp = 0; cp < SPOT_NCOMPS + 4; cp ++) {
+        if (state->overprintMask & mask) {
+          pipe->destColorPtr[cp] = state->deviceNTransfer[cp][pipe->cSrc[cp]];
+        }
+        mask <<= 1;
+      }
+      pipe->destColorPtr += (SPOT_NCOMPS+4);
+      break;
 #endif
     }
     if (pipe->destAlphaPtr) {
@@ -452,6 +474,10 @@ void Splash::pipeRun(SplashPipe *pipe) {
       cDest[2] = pipe->destColorPtr[2];
       cDest[3] = pipe->destColorPtr[3];
       break;
+    case splashModeDeviceN8:
+      for (cp = 0; cp < SPOT_NCOMPS + 4; cp++)
+        cDest[cp] = pipe->destColorPtr[cp];
+      break;
 #endif
     }
     if (pipe->destAlphaPtr) {
@@ -489,6 +515,10 @@ void Splash::pipeRun(SplashPipe *pipe) {
 	t = (aDest * 255) / pipe->shape - aDest;
 	switch (bitmap->mode) {
 #if SPLASH_CMYK
+	case splashModeDeviceN8:
+	  for (cp = 4; cp < SPOT_NCOMPS + 4; cp++)
+	    cSrcNonIso[cp] = clip255(pipe->cSrc[cp] +
+				  ((pipe->cSrc[cp] - cDest[cp]) * t) / 255);
 	case splashModeCMYK8:
 	  cSrcNonIso[3] = clip255(pipe->cSrc[3] +
 				  ((pipe->cSrc[3] - cDest[3]) * t) / 255);
@@ -570,6 +600,11 @@ void Splash::pipeRun(SplashPipe *pipe) {
       cResult3 = state->cmykTransferK[div255((255 - aDest) * cSrc[3] +
 					     aDest * cBlend[3])];
       break;
+    case splashPipeResultColorNoAlphaBlendDeviceN:
+      for (cp = 0; cp < SPOT_NCOMPS+4; cp++)
+        cResult[cp] = state->deviceNTransfer[cp][div255((255 - aDest) * cSrc[cp] +
+					     aDest * cBlend[cp])];
+      break;
 #endif
 
     case splashPipeResultColorAlphaNoBlendMono:
@@ -610,6 +645,16 @@ void Splash::pipeRun(SplashPipe *pipe) {
 					 aSrc * cSrc[2]) / alphaI];
 	cResult3 = state->cmykTransferK[((alphaI - aSrc) * cDest[3] +
 					 aSrc * cSrc[3]) / alphaI];
+      }
+      break;
+    case splashPipeResultColorAlphaNoBlendDeviceN:
+      if (alphaI == 0) {
+        for (cp = 0; cp < SPOT_NCOMPS+4; cp++)
+          cResult[cp] = 0;
+      } else {
+        for (cp = 0; cp < SPOT_NCOMPS+4; cp++)
+          cResult[cp] = state->deviceNTransfer[cp][((alphaI - aSrc) * cDest[cp] +
+					 aSrc * cSrc[cp]) / alphaI];
       }
       break;
 #endif
@@ -668,6 +713,18 @@ void Splash::pipeRun(SplashPipe *pipe) {
 					 aSrc * ((255 - alphaIm1) * cSrc[3] +
 						 alphaIm1 * cBlend[3]) / 255) /
 					alphaI];
+      }
+      break;
+    case splashPipeResultColorAlphaBlendDeviceN:
+      if (alphaI == 0) {
+        for (cp = 0; cp < SPOT_NCOMPS+4; cp++)
+          cResult[cp] = 0;
+      } else {
+        for (cp = 0; cp < SPOT_NCOMPS+4; cp++)
+          cResult[cp] = state->deviceNTransfer[cp][((alphaI - aSrc) * cDest[cp] +
+            aSrc * ((255 - alphaIm1) * cSrc[cp] +
+						alphaIm1 * cBlend[cp]) / 255) /
+					  alphaI];
       }
       break;
 #endif
@@ -729,6 +786,16 @@ void Splash::pipeRun(SplashPipe *pipe) {
               cResult3;
       }
       pipe->destColorPtr += 4;
+      break;
+    case splashModeDeviceN8:
+      mask = 1;
+      for (cp = 0; cp < SPOT_NCOMPS+4; cp++) {
+        if (state->overprintMask & mask) {
+          pipe->destColorPtr[cp] = cResult[cp];
+        }
+        mask <<=1;
+      }
+      pipe->destColorPtr += (SPOT_NCOMPS+4);
       break;
 #endif
     }
@@ -844,8 +911,25 @@ void Splash::pipeRunSimpleCMYK8(SplashPipe *pipe) {
 
   ++pipe->x;
 }
-#endif
 
+// special case:
+// !pipe->pattern && pipe->noTransparency && !state->blendFunc &&
+// bitmap->mode == splashModeDeviceN8 && pipe->destAlphaPtr) {
+void Splash::pipeRunSimpleDeviceN8(SplashPipe *pipe) {
+  //----- write destination pixel
+  int mask = 1;
+  for (int cp = 0; cp < SPOT_NCOMPS+4; cp++) {
+    if (state->overprintMask & mask) {
+      pipe->destColorPtr[cp] = state->deviceNTransfer[cp][pipe->cSrc[cp]];
+    }
+    mask <<=1;
+  }
+  pipe->destColorPtr += (SPOT_NCOMPS+4);
+  *pipe->destAlphaPtr++ = 255;
+
+  ++pipe->x;
+}
+#endif
 
 // special case:
 // !pipe->pattern && !pipe->noTransparency && !state->softMask &&
@@ -1125,6 +1209,53 @@ void Splash::pipeRunAACMYK8(SplashPipe *pipe) {
 
   ++pipe->x;
 }
+
+// special case:
+// !pipe->pattern && !pipe->noTransparency && !state->softMask &&
+// pipe->usesShape && !pipe->alpha0Ptr && !state->blendFunc &&
+// !pipe->nonIsolatedGroup &&
+// bitmap->mode == splashModeDeviceN8 && pipe->destAlphaPtr
+void Splash::pipeRunAADeviceN8(SplashPipe *pipe) {
+  Guchar aSrc, aDest, alpha2, aResult;
+  SplashColor cDest;
+  Guchar cResult[SPOT_NCOMPS+4];
+  int cp, mask;
+
+  //----- read destination pixel
+  for (cp=0; cp < SPOT_NCOMPS+4; cp++)
+    cDest[cp] = pipe->destColorPtr[cp];
+  aDest = *pipe->destAlphaPtr;
+
+  //----- source alpha
+  aSrc = div255(pipe->aInput * pipe->shape);
+
+  //----- result alpha and non-isolated group element correction
+  aResult = aSrc + aDest - div255(aSrc * aDest);
+  alpha2 = aResult;
+
+  //----- result color
+  if (alpha2 == 0) {
+    for (cp=0; cp < SPOT_NCOMPS+4; cp++)
+      cResult[cp] = 0;
+  } else {
+    for (cp=0; cp < SPOT_NCOMPS+4; cp++)
+      cResult[cp] = state->deviceNTransfer[cp][(Guchar)(((alpha2 - aSrc) * cDest[cp] +
+					      aSrc * pipe->cSrc[cp]) / alpha2)];
+  }
+
+  //----- write destination pixel
+  mask = 1;
+  for (cp=0; cp < SPOT_NCOMPS+4; cp++) {
+    if (state->overprintMask & mask) {
+      pipe->destColorPtr[cp] = cResult[cp];
+    }
+    mask <<= 1;
+  }
+  pipe->destColorPtr += (SPOT_NCOMPS+4);
+  *pipe->destAlphaPtr++ = aResult;
+
+  ++pipe->x;
+}
 #endif
 
 inline void Splash::pipeSetXY(SplashPipe *pipe, int x, int y) {
@@ -1152,6 +1283,9 @@ inline void Splash::pipeSetXY(SplashPipe *pipe, int x, int y) {
 #if SPLASH_CMYK
   case splashModeCMYK8:
     pipe->destColorPtr = &bitmap->data[y * bitmap->rowSize + 4 * x];
+    break;
+  case splashModeDeviceN8:
+    pipe->destColorPtr = &bitmap->data[y * bitmap->rowSize + (SPOT_NCOMPS + 4) * x];
     break;
 #endif
   }
@@ -1194,6 +1328,9 @@ inline void Splash::pipeIncX(SplashPipe *pipe) {
 #if SPLASH_CMYK
   case splashModeCMYK8:
     pipe->destColorPtr += 4;
+    break;
+  case splashModeDeviceN8:
+    pipe->destColorPtr += (SPOT_NCOMPS+4);
     break;
 #endif
   }
@@ -1772,6 +1909,17 @@ void Splash::clear(SplashColorPtr color, Guchar alpha) {
 	}
 	row += bitmap->rowSize;
       }
+    }
+    break;
+  case splashModeDeviceN8:
+    row = bitmap->data;
+    for (y = 0; y < bitmap->height; ++y) {
+      p = row;
+      for (x = 0; x < bitmap->width; ++x) {
+        for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
+          *p++ = color[cp];
+      }
+      row += bitmap->rowSize;
     }
     break;
 #endif
@@ -3355,7 +3503,7 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
 SplashError Splash::drawImage(SplashImageSource src, void *srcData,
 			      SplashColorMode srcMode, GBool srcAlpha,
 			      int w, int h, SplashCoord *mat,
-			      GBool tilingPattern) {
+            GBool tilingPattern) {
   GBool ok;
   SplashBitmap *scaledImg;
   SplashClipResult clipRes;
@@ -3395,6 +3543,10 @@ SplashError Splash::drawImage(SplashImageSource src, void *srcData,
   case splashModeCMYK8:
     ok = srcMode == splashModeCMYK8;
     nComps = 4;
+    break;
+  case splashModeDeviceN8:
+    ok = srcMode == splashModeDeviceN8;
+    nComps = SPOT_NCOMPS+4;
     break;
 #endif
   default:
@@ -3496,7 +3648,7 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, void *srcData
 				     GBool srcAlpha,
 				     int srcWidth, int srcHeight,
 				     SplashCoord *mat,
-				     GBool tilingPattern) {
+             GBool tilingPattern) {
   SplashBitmap *scaledImg;
   SplashClipResult clipRes, clipRes2;
   SplashPipe pipe;
@@ -3621,7 +3773,7 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, void *srcData
   }
   scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha,
 			 srcWidth, srcHeight, scaledWidth, scaledHeight);
-  
+
   if (scaledImg == NULL) {
     return splashErrBadArg;
   }
@@ -3802,7 +3954,7 @@ SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData,
 				 int scaledWidth, int scaledHeight) {
   SplashBitmap *dest;
 
-  dest = new SplashBitmap(scaledWidth, scaledHeight, 1, srcMode, srcAlpha);
+  dest = new SplashBitmap(scaledWidth, scaledHeight, 1, srcMode, srcAlpha, gTrue, bitmap->getSeparationList());
   if (dest->getDataPtr() != NULL) {
     if (scaledHeight < srcHeight) {
       if (scaledWidth < srcWidth) {
@@ -3838,6 +3990,7 @@ void Splash::scaleImageYdXd(SplashImageSource src, void *srcData,
   Guint pix0, pix1, pix2;
 #if SPLASH_CMYK
   Guint pix3;
+  Guint pix[SPOT_NCOMPS+4], cp;
 #endif
   Guint alpha;
   Guchar *destPtr, *destAlphaPtr;
@@ -4017,6 +4170,25 @@ void Splash::scaleImageYdXd(SplashImageSource src, void *srcData,
 	*destPtr++ = (Guchar)pix2;
 	*destPtr++ = (Guchar)pix3;
 	break;
+      case splashModeDeviceN8:
+
+	// compute the final pixel
+  for (cp = 0; cp < SPOT_NCOMPS+4; cp++)
+    pix[cp] = 0;
+	for (i = 0; i < xStep; ++i) {
+    for (cp = 0; cp < SPOT_NCOMPS+4; cp++) {
+      pix[cp] += pixBuf[xx + cp];
+    }
+    xx += (SPOT_NCOMPS+4);
+	}
+	// pix / xStep * yStep
+  for (cp = 0; cp < SPOT_NCOMPS+4; cp++)
+    pix[cp] = (pix[cp] * d) >> 23;
+
+	// store the pixel
+  for (cp = 0; cp < SPOT_NCOMPS+4; cp++)
+    *destPtr++ = (Guchar)pix[cp];
+	break;
 #endif
 
 
@@ -4168,6 +4340,12 @@ void Splash::scaleImageYdXu(SplashImageSource src, void *srcData,
 	  *destPtr++ = (Guchar)pix[3];
 	}
 	break;
+      case splashModeDeviceN8:
+	for (i = 0; i < xStep; ++i) {
+    for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
+      *destPtr++ = (Guchar)pix[cp];
+	}
+	break;
 #endif
       }
 
@@ -4309,6 +4487,13 @@ void Splash::scaleImageYuXd(SplashImageSource src, void *srcData,
 	  *destPtr++ = (Guchar)pix[1];
 	  *destPtr++ = (Guchar)pix[2];
 	  *destPtr++ = (Guchar)pix[3];
+	}
+	break;
+      case splashModeDeviceN8:
+	for (i = 0; i < yStep; ++i) {
+	  destPtr = destPtr0 + (i * scaledWidth + x) * nComps;
+    for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
+      *destPtr++ = (Guchar)pix[cp];
 	}
 	break;
 #endif
@@ -4456,6 +4641,15 @@ void Splash::scaleImageYuXu(SplashImageSource src, void *srcData,
 	    *destPtr++ = (Guchar)pix[1];
 	    *destPtr++ = (Guchar)pix[2];
 	    *destPtr++ = (Guchar)pix[3];
+	  }
+	}
+	break;
+      case splashModeDeviceN8:
+	for (i = 0; i < yStep; ++i) {
+	  for (j = 0; j < xStep; ++j) {
+	    destPtr = destPtr0 + (i * scaledWidth + xx + j) * nComps;
+      for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
+        *destPtr++ = (Guchar)pix[cp];
 	  }
 	}
 	break;
@@ -4681,6 +4875,10 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
     return splashErrModeMismatch;
   }
 
+  if(src->getSeparationList()->getLength() > bitmap->getSeparationList()->getLength()) {
+    for (x = bitmap->getSeparationList()->getLength(); x < src->getSeparationList()->getLength(); x++)
+      bitmap->getSeparationList()->append(((GfxSeparationColorSpace *)src->getSeparationList()->get(x))->copy());
+  }
   if (src->alpha) {
     pipeInit(&pipe, xDest, yDest, NULL, pixel,
 	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, nonIsolated,
@@ -4694,7 +4892,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
 	  alpha = *ap++;
 	  // this uses shape instead of alpha, which isn't technically
 	  // correct, but works out the same
-	  pipe.shape = alpha;
+    pipe.shape = alpha;
 	  (this->*pipe.run)(&pipe);
 	}
       }
@@ -4712,7 +4910,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
 	  if (state->clip->test(xDest + x, yDest + y)) {
 	    // this uses shape instead of alpha, which isn't technically
 	    // correct, but works out the same
-	    pipe.shape = alpha;
+      pipe.shape = alpha;
 	    (this->*pipe.run)(&pipe);
 	    updateModX(xDest + x);
 	    updateModY(yDest + y);
@@ -4763,6 +4961,7 @@ void Splash::compositeBackground(SplashColorPtr color) {
   Guchar alpha, alpha1, c, color0, color1, color2;
 #if SPLASH_CMYK
   Guchar color3;
+  Guchar colorsp[SPOT_NCOMPS+4], cp;
 #endif
   int x, y, mask;
 
@@ -4892,6 +5091,29 @@ void Splash::compositeBackground(SplashColorPtr color) {
       }
     }
     break;
+  case splashModeDeviceN8:
+    for (cp = 0; cp < SPOT_NCOMPS+4; cp++)
+      colorsp[cp] = color[cp];
+    for (y = 0; y < bitmap->height; ++y) {
+      p = &bitmap->data[y * bitmap->rowSize];
+      q = &bitmap->alpha[y * bitmap->width];
+      for (x = 0; x < bitmap->width; ++x) {
+	alpha = *q++;
+	if (alpha == 0)
+	{
+    for (cp = 0; cp < SPOT_NCOMPS+4; cp++)
+      p[cp] = colorsp[cp];
+	}
+	else if (alpha != 255)
+	{
+	  alpha1 = 255 - alpha;
+    for (cp = 0; cp < SPOT_NCOMPS+4; cp++)
+      p[cp] = div255(alpha1 * colorsp[cp] + alpha * p[cp]);
+	}
+	p += (SPOT_NCOMPS+4);
+      }
+    }
+    break;
 #endif
   }
   memset(bitmap->alpha, 255, bitmap->width * bitmap->height);
@@ -4950,6 +5172,9 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
 #if SPLASH_CMYK
     case splashModeCMYK8:
       colorComps=4;
+    break;
+    case splashModeDeviceN8:
+      colorComps=SPOT_NCOMPS+4;
     break;
 #endif
   }
@@ -5286,6 +5511,16 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
 	*p++ = *sp++;
 	*p++ = *sp++;
 	*p++ = *sp++;
+      }
+    }
+    break;
+  case splashModeDeviceN8:
+    for (y = 0; y < h; ++y) {
+      p = &bitmap->data[(yDest + y) * bitmap->rowSize + (SPOT_NCOMPS+4) * xDest];
+      sp = &src->data[(ySrc + y) * src->rowSize + (SPOT_NCOMPS+4) * xSrc];
+      for (x = 0; x < w; ++x) {
+        for (int cp=0; cp < SPOT_NCOMPS+4; cp++)
+          *p++ = *sp++;
       }
     }
     break;

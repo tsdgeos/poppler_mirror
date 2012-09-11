@@ -248,6 +248,7 @@ cmsHPROFILE GfxColorSpace::getDisplayProfile() {
 
 GfxColorSpace::GfxColorSpace() {
   overprintMask = 0x0f;
+  mapping = NULL;
 }
 
 GfxColorSpace::~GfxColorSpace() {
@@ -319,6 +320,10 @@ GfxColorSpace *GfxColorSpace::parse(Object *csObj, Gfx *gfx, int recursion) {
     error(errSyntaxWarning, -1, "Bad color space - expected name or array or dict");
   }
   return cs;
+}
+
+void GfxColorSpace::createMapping(GooList *separationList, int maxSepComps) {
+  return;
 }
 
 void GfxColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange,
@@ -602,6 +607,12 @@ void GfxDeviceGrayColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
   cmyk->k = clip01(gfxColorComp1 - color->c[0]);
 }
 
+void GfxDeviceGrayColorSpace::getDeviceN(GfxColor *color, GfxColor *deviceN) {
+  for (int i = 0; i < gfxColorMaxComps; i++)
+    deviceN->c[i] = 0;
+  deviceN->c[3] = clip01(gfxColorComp1 - color->c[0]);
+}
+
 void GfxDeviceGrayColorSpace::getDefaultColor(GfxColor *color) {
   color->c[0] = 0;
 }
@@ -810,6 +821,17 @@ void GfxCalGrayColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
   cmyk->k = k;
 }
 
+void GfxCalGrayColorSpace::getDeviceN(GfxColor *color, GfxColor *deviceN) {
+  GfxCMYK cmyk;
+  for (int i = 0; i < gfxColorMaxComps; i++)
+    deviceN->c[i] = 0;
+  getCMYK(color, &cmyk);
+  deviceN->c[0] = cmyk.c;
+  deviceN->c[1] = cmyk.m;
+  deviceN->c[2] = cmyk.y;
+  deviceN->c[3] = cmyk.k;
+}
+
 void GfxCalGrayColorSpace::getDefaultColor(GfxColor *color) {
   color->c[0] = 0;
 }
@@ -893,6 +915,17 @@ void GfxDeviceRGBColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
   cmyk->m = m - k;
   cmyk->y = y - k;
   cmyk->k = k;
+}
+
+void GfxDeviceRGBColorSpace::getDeviceN(GfxColor *color, GfxColor *deviceN) {
+  GfxCMYK cmyk;
+  for (int i = 0; i < gfxColorMaxComps; i++)
+    deviceN->c[i] = 0;
+  getCMYK(color, &cmyk);
+  deviceN->c[0] = cmyk.c;
+  deviceN->c[1] = cmyk.m;
+  deviceN->c[2] = cmyk.y;
+  deviceN->c[3] = cmyk.k;
 }
 
 void GfxDeviceRGBColorSpace::getDefaultColor(GfxColor *color) {
@@ -1127,6 +1160,17 @@ void GfxCalRGBColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
   cmyk->k = k;
 }
 
+void GfxCalRGBColorSpace::getDeviceN(GfxColor *color, GfxColor *deviceN) {
+  GfxCMYK cmyk;
+  for (int i = 0; i < gfxColorMaxComps; i++)
+    deviceN->c[i] = 0;
+  getCMYK(color, &cmyk);
+  deviceN->c[0] = cmyk.c;
+  deviceN->c[1] = cmyk.m;
+  deviceN->c[2] = cmyk.y;
+  deviceN->c[3] = cmyk.k;
+}
+
 void GfxCalRGBColorSpace::getDefaultColor(GfxColor *color) {
   color->c[0] = 0;
   color->c[1] = 0;
@@ -1225,6 +1269,15 @@ void GfxDeviceCMYKColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
   cmyk->m = clip01(color->c[1]);
   cmyk->y = clip01(color->c[2]);
   cmyk->k = clip01(color->c[3]);
+}
+
+void GfxDeviceCMYKColorSpace::getDeviceN(GfxColor *color, GfxColor *deviceN) {
+  for (int i = 0; i < gfxColorMaxComps; i++)
+    deviceN->c[i] = 0;
+  deviceN->c[0] = clip01(color->c[0]);
+  deviceN->c[1] = clip01(color->c[1]);
+  deviceN->c[2] = clip01(color->c[2]);
+  deviceN->c[3] = clip01(color->c[3]);
 }
 
 void GfxDeviceCMYKColorSpace::getDefaultColor(GfxColor *color) {
@@ -1451,6 +1504,17 @@ void GfxLabColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
   cmyk->m = m - k;
   cmyk->y = y - k;
   cmyk->k = k;
+}
+
+void GfxLabColorSpace::getDeviceN(GfxColor *color, GfxColor *deviceN) {
+  GfxCMYK cmyk;
+  for (int i = 0; i < gfxColorMaxComps; i++)
+    deviceN->c[i] = 0;
+  getCMYK(color, &cmyk);
+  deviceN->c[0] = cmyk.c;
+  deviceN->c[1] = cmyk.m;
+  deviceN->c[2] = cmyk.y;
+  deviceN->c[3] = cmyk.k;
 }
 
 void GfxLabColorSpace::getDefaultColor(GfxColor *color) {
@@ -1858,6 +1922,17 @@ GBool GfxICCBasedColorSpace::useGetRGBLine() {
 #endif
 }
 
+void GfxICCBasedColorSpace::getDeviceN(GfxColor *color, GfxColor *deviceN) {
+  GfxCMYK cmyk;
+  for (int i = 0; i < gfxColorMaxComps; i++)
+    deviceN->c[i] = 0;
+  getCMYK(color, &cmyk);
+  deviceN->c[0] = cmyk.c;
+  deviceN->c[1] = cmyk.m;
+  deviceN->c[2] = cmyk.y;
+  deviceN->c[3] = cmyk.k;
+}
+
 void GfxICCBasedColorSpace::getDefaultColor(GfxColor *color) {
   int i;
 
@@ -2077,6 +2152,12 @@ void GfxIndexedColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
   base->getCMYK(mapColorToBase(color, &color2), cmyk);
 }
 
+void GfxIndexedColorSpace::getDeviceN(GfxColor *color, GfxColor *deviceN) {
+  GfxColor color2;
+
+  base->getDeviceN(mapColorToBase(color, &color2), deviceN);
+}
+
 void GfxIndexedColorSpace::getDefaultColor(GfxColor *color) {
   color->c[0] = 0;
 }
@@ -2107,6 +2188,8 @@ GfxSeparationColorSpace::GfxSeparationColorSpace(GooString *nameA,
     overprintMask = 0x04;
   } else if (!name->cmp("Black")) {
     overprintMask = 0x08;
+  } else if (!name->cmp("All")) {
+    overprintMask = 0xffffffff;
   }
 }
 
@@ -2114,23 +2197,32 @@ GfxSeparationColorSpace::GfxSeparationColorSpace(GooString *nameA,
 						 GfxColorSpace *altA,
 						 Function *funcA,
 						 GBool nonMarkingA,
-						 Guint overprintMaskA) {
+						 Guint overprintMaskA,
+						 int *mappingA) {
   name = nameA;
   alt = altA;
   func = funcA;
   nonMarking = nonMarkingA;
   overprintMask = overprintMaskA;
+  mapping = mappingA;
 }
 
 GfxSeparationColorSpace::~GfxSeparationColorSpace() {
   delete name;
   delete alt;
   delete func;
+  if (mapping != NULL)
+    gfree(mapping);
 }
 
 GfxColorSpace *GfxSeparationColorSpace::copy() {
+  int *mappingA = NULL;
+  if (mapping != NULL) {
+    mappingA = (int *) gmalloc(sizeof(int));
+    *mappingA = *mapping;
+  }
   return new GfxSeparationColorSpace(name->copy(), alt->copy(), func->copy(),
-				     nonMarking, overprintMask);
+				     nonMarking, overprintMask, mappingA);
 }
 
 //~ handle the 'All' and 'None' colorants
@@ -2217,8 +2309,73 @@ void GfxSeparationColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
   alt->getCMYK(&color2, cmyk);
 }
 
+void GfxSeparationColorSpace::getDeviceN(GfxColor *color, GfxColor *deviceN) {
+  for (int i = 0; i < gfxColorMaxComps; i++)
+    deviceN->c[i] = 0;
+  if (mapping == NULL || mapping[0] == -1) {
+    GfxCMYK cmyk;
+
+    getCMYK(color, &cmyk);
+    deviceN->c[0] = cmyk.c;
+    deviceN->c[1] = cmyk.m;
+    deviceN->c[2] = cmyk.y;
+    deviceN->c[3] = cmyk.k;
+  } else {
+    deviceN->c[mapping[0]] = color->c[0];
+  }
+}
+
 void GfxSeparationColorSpace::getDefaultColor(GfxColor *color) {
   color->c[0] = gfxColorComp1;
+}
+
+void GfxSeparationColorSpace::createMapping(GooList *separationList, int maxSepComps) {
+  if (nonMarking)
+    return;
+  mapping = (int *)gmalloc(sizeof(int));
+  switch (overprintMask) {
+    case 0x01:
+      *mapping = 0;
+      break;
+    case 0x02:
+      *mapping = 1;
+      break;
+    case 0x04:
+      *mapping = 2;
+      break;
+    case 0x08:
+      *mapping = 3;
+      break;
+    default:
+      Guint newOverprintMask = 0x10;
+      for (int i = 0; i < separationList->getLength(); i++) {
+        GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)separationList->get(i);
+        if (!sepCS->getName()->cmp(name)) {
+          if (sepCS->getFunc()->hasDifferentResultSet(func)) {
+            error(errSyntaxWarning, -1,
+              "Different functions found for '{0:s}', convert immediately", name);
+            gfree(mapping);
+            mapping = NULL;
+            return;
+          }
+          *mapping = i+4;
+          overprintMask = newOverprintMask;
+          return;
+        }
+        newOverprintMask <<=1;
+      }
+      if (separationList->getLength() == maxSepComps) {
+        error(errSyntaxWarning, -1,
+	        "Too many ({0:d}) spots, convert '{1:s}' immediately", maxSepComps, name);
+        gfree(mapping);
+        mapping = NULL;
+        return;
+      }
+      *mapping = separationList->getLength() + 4;
+      separationList->append(copy());
+      overprintMask = newOverprintMask;
+      break;
+  }
 }
 
 //------------------------------------------------------------------------
@@ -2228,14 +2385,17 @@ void GfxSeparationColorSpace::getDefaultColor(GfxColor *color) {
 GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
 					   GooString **namesA,
 					   GfxColorSpace *altA,
-					   Function *funcA) {
+					   Function *funcA,
+					   GooList *sepsCSA) {
   int i;
 
   nComps = nCompsA;
   alt = altA;
   func = funcA;
+  sepsCS = sepsCSA;
   nonMarking = gTrue;
   overprintMask = 0;
+  mapping = NULL;
   for (i = 0; i < nComps; ++i) {
     names[i] = namesA[i];
     if (names[i]->cmp("None")) {
@@ -2249,6 +2409,8 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
       overprintMask |= 0x04;
     } else if (!names[i]->cmp("Black")) {
       overprintMask |= 0x08;
+    } else if (!names[i]->cmp("All")) {
+      overprintMask = 0xffffffff;
     } else {
       overprintMask = 0x0f;
     }
@@ -2259,6 +2421,8 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
 					   GooString **namesA,
 					   GfxColorSpace *altA,
 					   Function *funcA,
+					   GooList *sepsCSA,
+					   int *mappingA,
 					   GBool nonMarkingA,
 					   Guint overprintMaskA) {
   int i;
@@ -2266,6 +2430,8 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
   nComps = nCompsA;
   alt = altA;
   func = funcA;
+  sepsCS = sepsCSA;
+  mapping = mappingA;
   nonMarking = nonMarkingA;
   overprintMask = overprintMaskA;
   for (i = 0; i < nComps; ++i) {
@@ -2281,11 +2447,25 @@ GfxDeviceNColorSpace::~GfxDeviceNColorSpace() {
   }
   delete alt;
   delete func;
+  deleteGooList(sepsCS, GfxSeparationColorSpace);
+  if (mapping != NULL)
+    gfree(mapping);
 }
 
 GfxColorSpace *GfxDeviceNColorSpace::copy() {
+  int i;
+  int *mappingA = NULL;
+
+  GooList *sepsCSA = new GooList(sepsCS->getLength());
+  for (i = 0; i < sepsCS->getLength(); i++)
+    sepsCSA->append(((GfxSeparationColorSpace *) sepsCS->get(i))->copy());
+  if (mapping != NULL) {
+    mappingA = (int *)gmalloc(sizeof(int) * nComps);
+    for (i = 0; i < nComps; i++)
+      mappingA[i] = mapping[i];
+  }
   return new GfxDeviceNColorSpace(nComps, names, alt->copy(), func->copy(),
-				  nonMarking, overprintMask);
+				  sepsCSA, mappingA, nonMarking, overprintMask);
 }
 
 //~ handle the 'None' colorant
@@ -2297,6 +2477,7 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(Array *arr, Gfx *gfx, int recursion) 
   Function *funcA;
   Object obj1, obj2;
   int i;
+  GooList *separationList = new GooList();
 
   if (arr->getLength() != 4 && arr->getLength() != 5) {
     error(errSyntaxWarning, -1, "Bad DeviceN color space");
@@ -2333,7 +2514,26 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(Array *arr, Gfx *gfx, int recursion) 
     goto err4;
   }
   obj1.free();
-  cs = new GfxDeviceNColorSpace(nCompsA, namesA, altA, funcA);
+  if (arr->getLength() == 5) {
+    if (!arr->get(4, &obj1)->isDict()) {
+      error(errSyntaxWarning, -1, "Bad DeviceN color space (attributes)");
+      goto err4;
+    }
+    Dict *attribs = obj1.getDict();
+    attribs->lookup("Colorants", &obj2);
+    if (obj2.isDict()) {
+      Dict *colorants = obj2.getDict();
+      for (i = 0; i < colorants->getLength(); i++) {
+        Object obj3;
+        colorants->getVal(i, &obj3);
+        separationList->append(GfxSeparationColorSpace::parse(obj3.getArray(), gfx, recursion));
+        obj3.free();
+      }
+    }
+    obj2.free();
+    obj1.free();
+  }
+  cs = new GfxDeviceNColorSpace(nCompsA, namesA, altA, funcA, separationList);
   return cs;
 
  err4:
@@ -2345,6 +2545,7 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(Array *arr, Gfx *gfx, int recursion) 
  err2:
   obj1.free();
  err1:
+  delete separationList;
   return NULL;
 }
 
@@ -2393,12 +2594,119 @@ void GfxDeviceNColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
   alt->getCMYK(&color2, cmyk);
 }
 
+void GfxDeviceNColorSpace::getDeviceN(GfxColor *color, GfxColor *deviceN) {
+  for (int i = 0; i < gfxColorMaxComps; i++)
+    deviceN->c[i] = 0;
+  if (mapping == NULL) {
+    GfxCMYK cmyk;
+
+    getCMYK(color, &cmyk);
+    deviceN->c[0] = cmyk.c;
+    deviceN->c[1] = cmyk.m;
+    deviceN->c[2] = cmyk.y;
+    deviceN->c[3] = cmyk.k;
+  } else {
+    for (int j = 0; j < nComps; j++)
+      if (mapping[j] != -1)
+        deviceN->c[mapping[j]] = color->c[j];
+  }
+}
+
 void GfxDeviceNColorSpace::getDefaultColor(GfxColor *color) {
   int i;
 
   for (i = 0; i < nComps; ++i) {
     color->c[i] = gfxColorComp1;
   }
+}
+
+void GfxDeviceNColorSpace::createMapping(GooList *separationList, int maxSepComps) {
+  if (nonMarking)               // None
+    return;
+  mapping = (int *)gmalloc(sizeof(int) * nComps);
+  Guint newOverprintMask = 0;
+  for (int i = 0; i < nComps; i++) {
+    if (!names[i]->cmp("None")) {
+      mapping[i] = -1;
+    } else if (!names[i]->cmp("Cyan")) {
+      newOverprintMask |= 0x01;
+      mapping[i] = 0;
+    } else if (!names[i]->cmp("Magenta")) {
+      newOverprintMask |= 0x02;
+      mapping[i] = 1;
+    } else if (!names[i]->cmp("Yellow")) {
+      newOverprintMask |= 0x04;
+      mapping[i] = 2;
+    } else if (!names[i]->cmp("Black")) {
+      newOverprintMask |= 0x08;
+      mapping[i] = 3;
+    } else {
+      Guint startOverprintMask = 0x10;
+      GBool found = gFalse;
+      Function *sepFunc = NULL;
+      if (nComps == 1)
+        sepFunc = func;
+      else {
+        for (int k = 0; k < sepsCS->getLength(); k++) {
+          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)sepsCS->get(k);
+          if (!sepCS->getName()->cmp(names[i])) {
+            sepFunc = sepCS->getFunc();
+            break;
+          }
+        }
+      }
+      for (int j = 0; j < separationList->getLength(); j++) {
+        GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)separationList->get(j);
+        if (!sepCS->getName()->cmp(names[i])) {
+          if (sepFunc != NULL && sepCS->getFunc()->hasDifferentResultSet(sepFunc)) {
+            error(errSyntaxWarning, -1,
+              "Different functions found for '{0:s}', convert immediately", names[i]);
+            gfree(mapping);
+            mapping = NULL;
+            overprintMask = 0xffffffff;
+            return;
+          }
+          mapping[i] = j+4;
+          newOverprintMask |= startOverprintMask;
+          found = gTrue;
+          break;
+        }
+        startOverprintMask <<=1;
+      }
+      if (!found) {
+        if (separationList->getLength() == maxSepComps) {
+          error(errSyntaxWarning, -1,
+            "Too many ({0:d}) spots, convert '{1:s}' immediately", maxSepComps, names[i]);
+          gfree(mapping);
+          mapping = NULL;
+          overprintMask = 0xffffffff;
+          return;
+        }
+        mapping[i] = separationList->getLength() + 4;
+        newOverprintMask |= startOverprintMask;
+        if (nComps == 1)
+          separationList->append(new GfxSeparationColorSpace(names[i]->copy(),alt->copy(), func->copy()));
+        else {
+          for (int k = 0; k < sepsCS->getLength(); k++) {
+            GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)sepsCS->get(k);
+            if (!sepCS->getName()->cmp(names[i])) {
+              found = gTrue;
+              separationList->append(sepCS->copy());
+              break;
+            }
+          }
+          if(!found) {
+            error(errSyntaxWarning, -1, "DeviceN has no suitable colorant");
+            gfree(mapping);
+            mapping = NULL;
+            overprintMask = 0xffffffff;
+            return;
+          }
+        }
+      }
+    }
+  }
+  overprintMask = newOverprintMask;
 }
 
 //------------------------------------------------------------------------
@@ -2454,6 +2762,12 @@ void GfxPatternColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
 void GfxPatternColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
   cmyk->c = cmyk->m = cmyk->y = 0;
   cmyk->k = 1;
+}
+
+void GfxPatternColorSpace::getDeviceN(GfxColor *color, GfxColor *deviceN) {
+  for (int i = 0; i < gfxColorMaxComps; i++)
+    deviceN->c[i] = 0;
+  deviceN->c[3] = 1;
 }
 
 void GfxPatternColorSpace::getDefaultColor(GfxColor *color) {
@@ -5270,6 +5584,23 @@ void GfxImageColorMap::getCMYK(Guchar *x, GfxCMYK *cmyk) {
       color.c[i] = lookup[i][x[i]];
     }
     colorSpace->getCMYK(&color, cmyk);
+  }
+}
+
+void GfxImageColorMap::getDeviceN(Guchar *x, GfxColor *deviceN) {
+  GfxColor color;
+  int i;
+
+  if (colorSpace2) {
+    for (i = 0; i < nComps2; ++i) {
+      color.c[i] = lookup2[i][x[0]];
+    }
+    colorSpace2->getDeviceN(&color, deviceN);
+  } else {
+    for (i = 0; i < nComps; ++i) {
+      color.c[i] = lookup[i][x[i]];
+    }
+    colorSpace->getDeviceN(&color, deviceN);
   }
 }
 

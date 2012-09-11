@@ -510,6 +510,20 @@ void SampledFunction::transform(double *in, double *out) {
   }
 }
 
+GBool SampledFunction::hasDifferentResultSet(Function *func) {
+  if (func->getType() == 0) {
+    SampledFunction *compTo = (SampledFunction *) func;
+    if (compTo->getSampleNumber() != nSamples)
+      return gTrue;
+    double *compSamples = compTo->getSamples();
+    for (int i = 0; i < nSamples; i++) {
+      if (samples[i] != compSamples[i])
+        return gTrue;
+    }
+  }
+  return gFalse;
+}
+
 //------------------------------------------------------------------------
 // ExponentialFunction
 //------------------------------------------------------------------------

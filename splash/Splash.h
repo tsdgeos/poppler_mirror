@@ -60,6 +60,7 @@ typedef GBool (*SplashImageSource)(void *data, SplashColorPtr colorLine,
 enum SplashPipeResultColorCtrl {
 #if SPLASH_CMYK
   splashPipeResultColorNoAlphaBlendCMYK,
+  splashPipeResultColorNoAlphaBlendDeviceN,
 #endif
   splashPipeResultColorNoAlphaBlendRGB,
   splashPipeResultColorNoAlphaBlendMono,
@@ -67,12 +68,14 @@ enum SplashPipeResultColorCtrl {
   splashPipeResultColorAlphaNoBlendRGB,
 #if SPLASH_CMYK
   splashPipeResultColorAlphaNoBlendCMYK,
+  splashPipeResultColorAlphaNoBlendDeviceN,
 #endif
   splashPipeResultColorAlphaBlendMono,
   splashPipeResultColorAlphaBlendRGB
 #if SPLASH_CMYK
   ,
-  splashPipeResultColorAlphaBlendCMYK
+  splashPipeResultColorAlphaBlendCMYK,
+  splashPipeResultColorAlphaBlendDeviceN
 #endif
 };
 
@@ -285,6 +288,7 @@ private:
   void pipeRunSimpleBGR8(SplashPipe *pipe);
 #if SPLASH_CMYK
   void pipeRunSimpleCMYK8(SplashPipe *pipe);
+  void pipeRunSimpleDeviceN8(SplashPipe *pipe);
 #endif
   void pipeRunAAMono1(SplashPipe *pipe);
   void pipeRunAAMono8(SplashPipe *pipe);
@@ -293,6 +297,7 @@ private:
   void pipeRunAABGR8(SplashPipe *pipe);
 #if SPLASH_CMYK
   void pipeRunAACMYK8(SplashPipe *pipe);
+  void pipeRunAADeviceN8(SplashPipe *pipe);
 #endif
   void pipeSetXY(SplashPipe *pipe, int x, int y);
   void pipeIncX(SplashPipe *pipe);
