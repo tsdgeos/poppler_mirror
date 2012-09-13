@@ -186,10 +186,6 @@ int main( int argc, char **argv )
     qDebug() << "OK to add notes: " << doc->okToAddNotes();
     qDebug() << "      Page mode: " << doc->pageMode();
     qDebug() << "       Metadata: " << doc->metadata();
-    QStringList fontNameList;
-    foreach( const Poppler::FontInfo &font, doc->fonts() )
-	fontNameList += font.name();
-    qDebug() << "          Fonts: " << fontNameList.join( ", " );
 
     if ( doc->hasEmbeddedFiles() ) {
         qDebug() << "Embedded files:";
