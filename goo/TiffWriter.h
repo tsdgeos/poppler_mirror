@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2010 William Bader <williambader@hotmail.com>
+// Copyright (C) 2010, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
@@ -38,6 +38,8 @@ class TiffWriter : public ImgWriter
 		bool writePointers(unsigned char **rowPointers, int rowCount);
 		bool writeRow(unsigned char **rowData);
 		
+		bool supportCMYK() { return true; }
+
 		bool close();
 	
 	private:
