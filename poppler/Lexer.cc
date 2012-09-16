@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
@@ -237,7 +237,17 @@ Object *Lexer::getObj(Object *obj, int objNum) {
       if (overflownUnsignedInteger) {
         obj->initReal(xf);
       } else {
-        obj->initUint(xui);
+        if (neg) {
+          if (xui-1 == INT_MAX) {
+            obj->initInt(INT_MIN);
+          } else {
+            xf = xui;
+            xf = -xf;
+            obj->initReal(xf);
+          }
+        } else {
+          obj->initUint(xui);
+        }
       }
     } else {
       obj->initInt(xi);
