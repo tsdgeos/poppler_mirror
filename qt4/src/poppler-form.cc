@@ -226,13 +226,20 @@ void FormFieldButton::setState( bool state )
 QList<int> FormFieldButton::siblings() const
 {
   FormWidgetButton* fwb = static_cast<FormWidgetButton*>(m_formData->fm);
+  ::FormFieldButton* ffb = static_cast< ::FormFieldButton* >(fwb->getField());
   if (fwb->getButtonType() == formButtonPush)
     return QList<int>();
 
   QList<int> ret;
-  unsigned *sibls = fwb->getSiblingsID();
-  for (int i = 0; i < fwb->getNumSiblingsID(); ++i)
-    ret.append(sibls[i]);
+  for (int i = 0; i < ffb->getNumSiblings(); ++i)
+  {
+    ::FormFieldButton* sibling = static_cast< ::FormFieldButton* >(ffb->getSibling(i));
+    for (int j = 0; j < sibling->getNumWidgets(); ++j)
+    {
+        FormWidget *w = sibling->getWidget(j);
+        if (w) ret.append(w->getID());
+    }
+  }
 
   return ret;
 }

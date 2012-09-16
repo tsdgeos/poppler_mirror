@@ -165,8 +165,6 @@ FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Re
   type = formButton;
   parent = static_cast<FormFieldButton*>(field);
   onStr = NULL;
-  siblingsID = NULL;
-  numSiblingsID = 0;
 
   Object obj1, obj2;
 
@@ -199,8 +197,6 @@ char *FormWidgetButton::getOnStr() {
 
 FormWidgetButton::~FormWidgetButton ()
 {
-  if (siblingsID)
-    gfree(siblingsID);
   delete onStr;
 }
 
@@ -232,12 +228,6 @@ void FormWidgetButton::setState (GBool astate)
 GBool FormWidgetButton::getState ()
 {
   return onStr ? parent->getState(onStr->getCString()) : gFalse;
-}
-
-void FormWidgetButton::setNumSiblingsID (int i)
-{ 
-  numSiblingsID = i; 
-  siblingsID = (unsigned*)greallocn(siblingsID, numSiblingsID, sizeof(unsigned));
 }
 
 
@@ -777,6 +767,8 @@ FormFieldButton::FormFieldButton(PDFDoc *docA, Object *aobj, const Ref& ref, For
   Dict* dict = obj.getDict();
   active_child = -1;
   noAllOff = false;
+  siblings = NULL;
+  numSiblings = 0;
   appearanceState.initNull();
 
   Object obj1;
@@ -827,20 +819,31 @@ void FormFieldButton::print(int indent)
 }
 #endif
 
+void FormFieldButton::setNumSiblings (int num)
+{ 
+  numSiblings = num; 
+  siblings = (FormFieldButton**)greallocn(siblings, numSiblings, sizeof(FormFieldButton*));
+}
+
 void FormFieldButton::fillChildrenSiblingsID()
 {
   if (!terminal) {
     for(int i=0; i<numChildren; i++) {
-      children[i]->fillChildrenSiblingsID();
-    }
-  } else {
-    for(int i=0; i<numChildren; i++) {
-      FormWidgetButton *btn = static_cast<FormWidgetButton*>(widgets[i]);
-      btn->setNumSiblingsID(numChildren-1);
-      for(int j=0, counter=0; j<numChildren; j++) {
-        if (i == j) continue;
-        btn->setSiblingsID(counter, widgets[j]->getID());
-        counter++;
+      FormFieldButton *child = dynamic_cast<FormFieldButton*>(children[i]);
+      if (child != NULL) {
+        // Fill the siblings of this node childs
+        child->setNumSiblings(numChildren-1);
+        for(int j=0, counter=0; j<numChildren; j++) {
+          FormFieldButton *otherChild = dynamic_cast<FormFieldButton*>(children[j]);
+          if (i == j) continue;
+          if (child == otherChild) continue;
+          child->setSibling(counter, otherChild);
+          counter++;
+        }
+
+        // now call ourselves on the child
+        // to fill its children data
+        child->fillChildrenSiblingsID();
       }
     }
   }
@@ -933,6 +936,8 @@ void FormFieldButton::updateState(char *state) {
 FormFieldButton::~FormFieldButton()
 {
   appearanceState.free();
+  if (siblings)
+    gfree(siblings);
 }
 
 //------------------------------------------------------------------------

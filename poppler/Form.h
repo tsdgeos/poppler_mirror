@@ -6,7 +6,7 @@
 //
 // Copyright 2006 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright 2007, 2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2007-2010 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
 //
@@ -155,17 +155,7 @@ public:
   char* getOnStr();
   void setAppearanceState(const char *state);
 
-  void setNumSiblingsID (int i);
-  void setSiblingsID (int i, unsigned id) { siblingsID[i] = id; }
-
-  //For radio buttons, return the IDs of the other radio buttons in the same group
-  unsigned* getSiblingsID () const { return siblingsID; }
-  int getNumSiblingsID () const { return numSiblingsID; }
-
 protected:
-  unsigned* siblingsID; // IDs of dependent buttons (each button of a radio field has all the others buttons
-                        // of the same field in this array)
-  int numSiblingsID;
   GooString *onStr;
   FormFieldButton *parent;
 };
@@ -281,6 +271,7 @@ public:
   GooString *getFullyQualifiedName();
 
   FormWidget* findWidgetByRef (Ref aref);
+  int getNumWidgets() { return terminal ? numChildren : 0; }
   FormWidget *getWidget(int i) { return terminal ? widgets[i] : NULL; }
 
   // only implemented in FormFieldButton
@@ -345,6 +336,13 @@ public:
   char *getAppearanceState() { return appearanceState.isName() ? appearanceState.getName() : NULL; }
 
   void fillChildrenSiblingsID ();
+  
+  void setNumSiblings (int num);
+  void setSibling (int i, FormFieldButton *id) { siblings[i] = id; }
+
+  //For radio buttons, return the fields of the other radio buttons in the same group
+  FormFieldButton* getSibling (int i) const { return siblings[i]; }
+  int getNumSiblings () const { return numSiblings; }
 
 #ifdef DEBUG_FORMS
   void print(int indent = 0);
@@ -353,6 +351,10 @@ public:
   virtual ~FormFieldButton();
 protected:
   void updateState(char *state);
+
+  FormFieldButton** siblings; // IDs of dependent buttons (each button of a radio field has all the others buttons
+                               // of the same field in this array)
+  int numSiblings;
 
   FormButtonType btype;
   int size;
