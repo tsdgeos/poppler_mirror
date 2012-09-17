@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2010, 2012 William Bader <williambader@hotmail.com>
+// Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -126,11 +127,13 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, int hDPI, int vDP
     photometric = PHOTOMETRIC_RGB;
     break;
 
+#if SPLASH_CMYK
   case splashModeCMYK8:
   case splashModeDeviceN8:
     samplesperpixel = 4;
     photometric = PHOTOMETRIC_SEPARATED;
     break;
+#endif
 
   default:
     fprintf(stderr, "TiffWriter: Mode %d not supported\n", splashMode);
@@ -165,10 +168,12 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, int hDPI, int vDP
   TIFFSetField(f, TIFFTAG_YRESOLUTION, (double) vDPI);
   TIFFSetField(f, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
 
+#if SPLASH_CMYK
   if (splashMode == splashModeCMYK8 || splashMode == splashModeDeviceN8) {
     TIFFSetField(f, TIFFTAG_INKSET, INKSET_CMYK);
     TIFFSetField(f, TIFFTAG_NUMBEROFINKS, 4);
   }
+#endif
 
   return true;
 }
