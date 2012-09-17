@@ -52,10 +52,6 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
     error(errSyntaxError, -1, "Could not extract page(s) from damaged file ('{0:s}')", srcFileName);
     return false;
   }
-  if (doc->isEncrypted()) {
-    error(errSyntaxError, -1, "Could not extract page(s) from encrypted file ('{0:s}')", srcFileName);
-    return false;
-  }
 
   if (firstPage == 0 && lastPage == 0) {
     firstPage = 1;

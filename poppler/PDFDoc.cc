@@ -611,6 +611,15 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   XRef *yRef, *countRef;
   int rootNum = getXRef()->getNumObjects() + 1;
 
+  // Make sure that special flags are set, because we are going to read
+  // all objects, including Unencrypted ones.
+  xref->scanSpecialFlags();
+
+  Guchar *fileKey;
+  CryptAlgorithm encAlgorithm;
+  int keyLength;
+  xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
+
   if (pageNo < 1 || pageNo > getNumPages()) {
     error(errInternal, -1, "Illegal pageNo: {0:d}({1:d})", pageNo, getNumPages() );
     return errOpenFile;
@@ -634,7 +643,18 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   outStr = new FileOutStream(f,0);
 
   yRef = new XRef(getXRef()->getTrailerDict());
+  Object encrypt;
+  getXRef()->getTrailerDict()->dictLookup("Encrypt", &encrypt);
+
+  if (secHdlr != NULL && !secHdlr->isUnencrypted()) {
+    yRef->setEncryption(secHdlr->getPermissionFlags(), 
+      secHdlr->getOwnerPasswordOk(), fileKey, keyLength, secHdlr->getEncVersion(), secHdlr->getEncRevision(), encAlgorithm);
+  }
   countRef = new XRef();
+  Object *trailerObj = getXRef()->getTrailerDict();
+  if (trailerObj->isDict()) {
+    markPageObjects(trailerObj->getDict(), yRef, countRef, 0);
+  }
   yRef->add(0, 65535, 0, gFalse);
   writeHeader(outStr, getPDFMajorVersion(), getPDFMinorVersion());
 
@@ -644,7 +664,6 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   if (infoObj.isDict()) {
     Dict *infoDict = infoObj.getDict();
     markPageObjects(infoDict, yRef, countRef, 0);
-    Object *trailerObj = getXRef()->getTrailerDict();
     if (trailerObj->isDict()) {
       Dict *trailerDict = trailerObj->getDict();
       Object ref;
@@ -673,6 +692,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
 
   Dict *pageDict = page.getDict();
   markPageObjects(pageDict, yRef, countRef, 0);
+  yRef->markUnencrypted();
   Guint objectsCount = writePageObjects(outStr, yRef, 0);
 
   yRef->add(rootNum,0,outStr->getPos(),gTrue);
@@ -1498,7 +1518,8 @@ void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint n
     const char *key = pageDict->getKey(n);
     Object value; pageDict->getValNF(n, &value);
     if (strcmp(key, "Parent") != 0 &&
-	      strcmp(key, "Pages") != 0) {
+	      strcmp(key, "Pages") != 0 &&
+        strcmp(key, "Root") != 0) {
       markObject(&value, xRef, countRef, numOffset);
     }
     value.free();
@@ -1508,6 +1529,10 @@ void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint n
 Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset) 
 {
   Guint objectsCount = 0; //count the number of objects in the XRef(s)
+  Guchar *fileKey;
+  CryptAlgorithm encAlgorithm;
+  int keyLength;
+  xRef->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
 
   for (int n = numOffset; n < xRef->getNumObjects(); n++) {
     if (xRef->getEntry(n)->type != xrefEntryFree) {
@@ -1518,7 +1543,11 @@ Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset)
       objectsCount++;
       getXRef()->fetch(ref.num - numOffset, ref.gen, &obj);
       Guint offset = writeObjectHeader(&ref, outStr);
-      writeObject(&obj, outStr, xRef, numOffset, NULL, cryptRC4, 0, 0, 0);
+      if (xRef->getEntry(n)->getFlag(XRefEntry::Unencrypted)) {
+        writeObject(&obj, outStr, NULL, cryptRC4, 0, 0, 0);
+      } else {
+        writeObject(&obj, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
+      }
       writeObjectFooter(outStr);
       xRef->add(ref.num, ref.gen, offset, gTrue);
       obj.free();

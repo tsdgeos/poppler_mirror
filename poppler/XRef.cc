@@ -276,6 +276,11 @@ XRef::XRef() {
 
 XRef::XRef(Object *trailerDictA) {
   init();
+
+  encrypted = gFalse;
+  permFlags = defPermFlags;
+  ownerPasswordOk = gFalse;
+
   if (trailerDictA->isDict())
     trailerDict.initDict(trailerDictA->getDict());
 }
@@ -1582,4 +1587,14 @@ void XRef::scanSpecialFlags() {
   obj.free();
 }
 
+void XRef::markUnencrypted() {
+  // Mark objects referred from the Encrypt dict as Unencrypted
+  Object obj;
+  trailerDict.dictLookupNF("Encrypt", &obj);
+  if (obj.isRef()) {
+    XRefEntry *e = getEntry(obj.getRefNum());
+    e->setFlag(XRefEntry::Unencrypted, gTrue);
+  }
+  obj.free();
+}
 

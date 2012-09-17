@@ -113,6 +113,8 @@ public:
 		     Guchar *fileKeyA, int keyLengthA,
 		     int encVersionA, int encRevisionA,
 		     CryptAlgorithm encAlgorithmA);
+  // Mark Encrypt entry as Unencrypted
+  void markUnencrypted();
 
   void getEncryptionParameters(Guchar **fileKeyA, CryptAlgorithm *encAlgorithmA, int *keyLengthA);
 
