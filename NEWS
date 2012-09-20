@@ -1,3 +1,42 @@
+Release 0.21.0
+        core:
+         * Support the modification of files with Encrypt
+         * Annotation improvements
+         * Form improvements
+         * Splash: Implement DeviceN support
+         * Splash: Avoid bogus memory error for tilingPattern
+         * TextOutputDev: Allow multiple fonts in a TextWord
+         * Kill the concept of base dir
+         * PSOutputDev: Always write HiResBoundingBox (Bug #53159)
+         * Convert UTF-16 to UCS-4 when reading toUnicode cmap
+         * GooString formatting: add support for uppercase hexadecimal
+         * Use error() instead of fprintf(stderr, ...) in Annot::layoutText
+         * poppler-config.h: remove WITH_FONTCONFIGURATION_* macros
+
+        glib:
+         * Annotation improvements
+         * Add poppler_page_remove_annot()
+         * Add poppler_document_new_from_stream
+         * Add poppler_document_new_from_gfile
+         * Add poppler_page_find_text_with_options (Bug #2951)
+         * Demo improvements
+         * Port tests and demo to GTK+3
+
+        qt4:
+         * Add accessor methods for movie poster information
+         * Make 'additional actions' available in Annotation API (Bug #53589)
+         * Add whole-page search method to Poppler::Page
+         * Small changes in tests
+
+        utils:
+         * pdftohtml: Make the output more xhtml compliant
+         * pdftohtml: Add -fontfullname. (Bug #49872)
+         * pdftohtml: Do not invoke gs anymore
+
+        build system:
+         * Add the possibility of using lcms1 even if lcms2 is installed
+         * Remove extra fontconfig CFLAGS and LIBS
+
 Release 0.20.4
         core:
          * Improvements regarding embedded file handling. (KDE Bug #306008)
