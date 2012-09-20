@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005-2007 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
-// Copyright (C) 2006-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2006-2008, 2011, 2012 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2006, 2007 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008, 2012 Adrian Johnson <ajohnson@redneon.com>
