@@ -36,6 +36,7 @@
 // Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2012 Lu Wang <coolwanglu@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -4285,7 +4286,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
     obj1.free();
 
     // if drawing is disabled, skip over inline image data
-    if (!ocState) {
+    if (!ocState || !out->needNonText()) {
       str->reset();
       n = height * ((width + 7) / 8);
       for (i = 0; i < n; ++i) {
@@ -4544,7 +4545,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
     }
 
     // if drawing is disabled, skip over inline image data
-    if (!ocState) {
+    if (!ocState || !out->needNonText()) {
       str->reset();
       n = height * ((width * colorMap->getNumPixelComps() *
 		     colorMap->getBits() + 7) / 8);
