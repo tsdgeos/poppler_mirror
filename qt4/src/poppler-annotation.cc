@@ -496,7 +496,7 @@ Ref AnnotationPrivate::pdfObjectReference() const
     return pdfAnnot->getRef();
 }
 
-Link* AnnotationPrivate::additionalAction( Annotation::AdditionalActionsType type ) const
+Link* AnnotationPrivate::additionalAction( Annotation::AdditionalActionType type ) const
 {
     if ( pdfAnnot->getType() != Annot::typeScreen && pdfAnnot->getType() != Annot::typeWidget )
         return 0;
@@ -4300,7 +4300,7 @@ void ScreenAnnotation::setScreenTitle( const QString &title )
     d->title = title;
 }
 
-Link* ScreenAnnotation::additionalAction( AdditionalActionsType type ) const
+Link* ScreenAnnotation::additionalAction( AdditionalActionType type ) const
 {
     Q_D( const ScreenAnnotation );
     return d->additionalAction( type );
@@ -4352,7 +4352,7 @@ Annotation::SubType WidgetAnnotation::subType() const
     return AWidget;
 }
 
-Link* WidgetAnnotation::additionalAction( AdditionalActionsType type ) const
+Link* WidgetAnnotation::additionalAction( AdditionalActionType type ) const
 {
     Q_D( const WidgetAnnotation );
     return d->additionalAction( type );

@@ -281,7 +281,7 @@ class POPPLER_QT4_EXPORT Annotation
      *
      * \since 0.22
      */
-    enum AdditionalActionsType
+    enum AdditionalActionType
     {
         CursorEnteringAction, ///< Performed when the cursor enters the annotation's active area
         CursorLeavingAction,  ///< Performed when the cursor exists the annotation's active area
@@ -869,7 +869,7 @@ class POPPLER_QT4_EXPORT ScreenAnnotation : public Annotation
      *
      * \since 0.22
      */
-    Link* additionalAction( AdditionalActionsType type ) const;
+    Link* additionalAction( AdditionalActionType type ) const;
 
   private:
     ScreenAnnotation();
@@ -904,7 +904,7 @@ class POPPLER_QT4_EXPORT WidgetAnnotation : public Annotation
      *
      * \since 0.22
      */
-    Link* additionalAction( AdditionalActionsType type ) const;
+    Link* additionalAction( AdditionalActionType type ) const;
 
   private:
     WidgetAnnotation();
