@@ -108,7 +108,7 @@
 
 #include "NameToUnicodeTable.h"
 #include "UnicodeMapTables.h"
-#include "UTF.h"
+#include "UTF8.h"
 
 #ifdef ENABLE_PLUGINS
 #  ifdef _WIN32
