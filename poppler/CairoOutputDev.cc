@@ -23,7 +23,7 @@
 // Copyright (C) 2008-2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
-// Copyright (C) 2008 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2008, 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Patrick Pfeifer <p2000@mailinator.com>
@@ -61,7 +61,7 @@
 #include "CairoOutputDev.h"
 #include "CairoFontEngine.h"
 #include "CairoRescaleBox.h"
-#include "UTF.h"
+#include "UnicodeMap.h"
 //------------------------------------------------------------------------
 
 // #define LOG_CAIRO
@@ -1169,6 +1169,8 @@ void CairoOutputDev::drawChar(GfxState *state, double x, double y,
     glyphs[glyphCount].y = y - originY;
     glyphCount++;
     if (use_show_text_glyphs) {
+      GooString enc("UTF-8");
+      UnicodeMap *utf8Map = globalParams->getUnicodeMap(&enc);
       if (utf8Max - utf8Count < uLen*6) {
         // utf8 encoded characters can be up to 6 bytes
 	if (utf8Max > uLen*6)
@@ -1179,7 +1181,7 @@ void CairoOutputDev::drawChar(GfxState *state, double x, double y,
       }
       clusters[clusterCount].num_bytes = 0;
       for (int i = 0; i < uLen; i++) {
-	int size = mapUTF8 (u[i], utf8 + utf8Count, utf8Max - utf8Count);
+	int size = utf8Map->mapUnicode(u[i], utf8 + utf8Count, utf8Max - utf8Count);
 	utf8Count += size;
 	clusters[clusterCount].num_bytes += size;
       }
