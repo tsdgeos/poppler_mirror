@@ -49,6 +49,9 @@ def main(args):
     parser.add_argument('--help-command', metavar = 'COMMAND',
                         action = HelpAction,
                         help = 'Show help for a given command')
+    parser.add_argument('-v', '--verbose',
+                        action = 'store_true', dest = 'verbose', default = False,
+                        help = 'Run in verbose mode')
     parser.add_argument('--utils-dir',
                         action = 'store', dest = 'utils_dir', default = os.path.abspath("../utils"),
                         help = 'Directory of poppler utils used for the tests')

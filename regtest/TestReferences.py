@@ -20,6 +20,7 @@ import os
 import errno
 from backends import get_backend, get_all_backends
 from Config import Config
+from Printer import get_printer
 from Utils import get_document_paths_from_dir, get_skipped_tests
 
 class TestReferences:
@@ -29,6 +30,7 @@ class TestReferences:
         self._refsdir = refsdir
         self._skipped = get_skipped_tests(docsdir)
         self.config = Config()
+        self.printer = get_printer()
 
         try:
             os.makedirs(self._refsdir)
@@ -40,7 +42,7 @@ class TestReferences:
 
     def create_refs_for_file(self, filename, n_doc = 1, total_docs = 1):
         if filename in self._skipped:
-            print("Skipping test '%s' (%d/%d)" % (os.path.join(self._docsdir, filename), n_doc, total_docs))
+            self.printer.print_default("Skipping test '%s' (%d/%d)" % (os.path.join(self._docsdir, filename), n_doc, total_docs))
             return
 
         refs_path = os.path.join(self._refsdir, filename)
@@ -60,9 +62,9 @@ class TestReferences:
 
         for backend in backends:
             if not self.config.force and backend.has_results(refs_path):
-                print("Results found, skipping '%s' for %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs))
+                self.printer.print_default("Results found, skipping '%s' for %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs))
                 continue
-            print("Creating refs for '%s' using %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs))
+            self.printer.printout_ln("Creating refs for '%s' using %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs))
             if backend.create_refs(doc_path, refs_path):
                 backend.create_checksums(refs_path, self.config.checksums_only)
 

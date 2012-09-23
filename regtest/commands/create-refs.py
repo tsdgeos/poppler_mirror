@@ -20,6 +20,7 @@ from commands import Command, register_command
 from TestReferences import TestReferences
 from Timer import Timer
 from Config import Config
+from Printer import get_printer
 import os
 import tempfile
 
@@ -60,6 +61,6 @@ class CreateRefs(Command):
             refs.create_refs()
         else:
             refs.create_refs_for_file(os.path.basename(doc))
-        print("Refs created in %s" % (t.elapsed_str()))
+        get_printer().printout_ln("Refs created in %s" % (t.elapsed_str()))
 
 register_command('create-refs', CreateRefs)

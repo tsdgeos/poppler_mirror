@@ -20,6 +20,7 @@ from commands import Command, register_command
 from Bisect import Bisect
 from Timer import Timer
 from Config import Config
+from Printer import get_printer
 import os
 import tempfile
 
@@ -66,12 +67,12 @@ class FindRegression(Command):
 
         doc = options['test']
         if not os.path.isfile(doc):
-            print("Invalid test %s: not a regulat file" % (doc))
+            get_printer().printerr("Invalid test %s: not a regulat file" % (doc))
             return
 
         t = Timer()
         bisect = Bisect(options['test'], options['refs_dir'], options['out_dir'])
         bisect.run()
-        print("Tests run in %s" % (t.elapsed_str()))
+        get_printer().printout_ln("Tests run in %s" % (t.elapsed_str()))
 
 register_command('find-regression', FindRegression)

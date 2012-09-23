@@ -19,6 +19,7 @@
 from backends import get_backend, get_all_backends
 from Config import Config
 from Utils import get_document_paths_from_dir, get_skipped_tests
+from Printer import get_printer
 import sys
 import os
 import errno
@@ -31,6 +32,7 @@ class TestRun:
         self._outdir = outdir
         self._skip = get_skipped_tests(docsdir)
         self.config = Config()
+        self.printer = get_printer()
 
         # Results
         self._n_tests = 0
@@ -56,12 +58,11 @@ class TestRun:
         ref_is_failed = backend.is_failed(refs_path)
         if not ref_has_md5 and not ref_is_crashed and not ref_is_failed:
             self._skipped.append("%s (%s)" % (doc_path, backend.get_name()))
-            print("Reference files not found, skipping '%s' for %s backend" % (doc_path, backend.get_name()))
+            self.printer.print_default("Reference files not found, skipping '%s' for %s backend" % (doc_path, backend.get_name()))
             return
 
         self._n_tests += 1
-        sys.stdout.write("Testing '%s' using %s backend (%d/%d): " % (doc_path, backend.get_name(), n_doc, total_docs))
-        sys.stdout.flush()
+        self.printer.print_test_start("Testing '%s' using %s backend (%d/%d): " % (doc_path, backend.get_name(), n_doc, total_docs))
         test_has_md5 = backend.create_refs(doc_path, test_path)
 
         if backend.has_stderr(test_path):
@@ -70,7 +71,7 @@ class TestRun:
         if ref_has_md5 and test_has_md5:
             if backend.compare_checksums(refs_path, test_path, not self.config.keep_results, self.config.create_diffs, self.config.update_refs):
                 # FIXME: remove dir if it's empty?
-                print("PASS")
+                self.printer.print_test_result("PASS")
                 self._n_passed += 1
             else:
                 print("FAIL")
@@ -78,32 +79,31 @@ class TestRun:
             return
         elif test_has_md5:
             if ref_is_crashed:
-                print("DOES NOT CRASH")
+                self.printer.print_test_result("DOES NOT CRASH")
             elif ref_is_failed:
-                print("DOES NOT FAIL")
-
+                self.printer.print_test_result("DOES NOT FAIL")
             return
 
         test_is_crashed = backend.is_crashed(test_path)
         if ref_is_crashed and test_is_crashed:
-            print("PASS (Expected crash)")
+            self.printer.print_test_result("PASS (Expected crash)")
             self._n_passed += 1
             return
 
         test_is_failed = backend.is_failed(test_path)
         if ref_is_failed and test_is_failed:
             # FIXME: compare status errors
-            print("PASS (Expected fail with status error %d)" % (test_is_failed))
+            self.printer.print_test_result("PASS (Expected fail with status error %d)" % (test_is_failed))
             self._n_passed += 1
             return
 
         if test_is_crashed:
-            print("CRASH")
+            self.printer.print_test_result("CRASH")
             self._crashed.append("%s (%s)" % (doc_path, backend.get_name()))
             return
 
         if test_is_failed:
-            print("FAIL (status error %d)" % (test_is_failed))
+            self.printer.print_test_result("FAIL (status error %d)" % (test_is_failed))
             self._failed_status_error("%s (%s)" % (doc_path, backend.get_name()))
             return
 
@@ -111,7 +111,7 @@ class TestRun:
         if filename in self._skip:
             doc_path = os.path.join(self._docsdir, filename)
             self._skipped.append("%s" % (doc_path))
-            print("Skipping test '%s' (%d/%d)" % (doc_path, n_doc, total_docs))
+            self.printer.print_default("Skipping test '%s' (%d/%d)" % (doc_path, n_doc, total_docs))
             return
 
         out_path = os.path.join(self._outdir, filename)
@@ -127,7 +127,7 @@ class TestRun:
 
         if not os.path.isdir(refs_path):
             self._skipped.append("%s" % (doc_path))
-            print("Reference dir not found for %s, skipping (%d/%d)" % (doc_path, n_doc, total_docs))
+            self.printer.print_default("Reference dir not found for %s, skipping (%d/%d)" % (doc_path, n_doc, total_docs))
             return
 
         if self.config.backends:
@@ -147,16 +147,17 @@ class TestRun:
 
     def summary(self):
         if not self._n_tests:
-            print("No tests run")
+            self.printer.printout_ln("No tests run")
             return
 
-        print("Total %d tests" % (self._n_tests))
-        print("%d tests passed (%.2f%%)" % (self._n_passed, (self._n_passed * 100.) / self._n_tests))
+        self.printer.printout_ln("Total %d tests" % (self._n_tests))
+        self.printer.printout_ln("%d tests passed (%.2f%%)" % (self._n_passed, (self._n_passed * 100.) / self._n_tests))
         def report_tests(test_list, test_type):
             n_tests = len(test_list)
             if not n_tests:
                 return
-            print("%d tests %s (%.2f%%): %s" % (n_tests, test_type, (n_tests * 100.) / self._n_tests, ", ".join(test_list)))
+            self.printer.printout_ln("%d tests %s (%.2f%%): %s" % (n_tests, test_type, (n_tests * 100.) / self._n_tests, ", ".join(test_list)))
+
         report_tests(self._failed, "failed")
         report_tests(self._crashed, "crashed")
         report_tests(self._failed_status_error, "failed to run")

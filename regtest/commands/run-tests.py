@@ -20,6 +20,7 @@ from commands import Command, register_command
 from TestRun import TestRun
 from Timer import Timer
 from Config import Config
+from Printer import get_printer
 import os
 import tempfile
 
@@ -68,6 +69,6 @@ class RunTests(Command):
         else:
             tests.run_test(os.path.basename(doc))
         tests.summary()
-        print("Tests run in %s" % (t.elapsed_str()))
+        get_printer().printout_ln("Tests run in %s" % (t.elapsed_str()))
 
 register_command('run-tests', RunTests)
