@@ -2,7 +2,8 @@ INCLUDES =					\
 	-I$(top_srcdir)				\
 	-I$(top_srcdir)/poppler			\
 	$(FONTCONFIG_CFLAGS)			\
-	$(POPPLER_QT4_CFLAGS)
+	$(POPPLER_QT4_CFLAGS)			\
+	$(LCMS_CFLAGS)
 
 SUFFIXES: .moc
 
