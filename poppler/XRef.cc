@@ -271,6 +271,7 @@ void XRef::init() {
   encrypted = gFalse;
   permFlags = defPermFlags;
   ownerPasswordOk = gFalse;
+  rootNum = -1;
 }
 
 XRef::XRef() {
