@@ -586,7 +586,7 @@ int JBIG2MMRDecoder::getBlackCode() {
       } else {
 	code = buf >> (bufLen - 12);
       }
-      if ((code & 0xff) < 64) {
+      if (unlikely((code & 0xff) < 64)) {
         break;
       }
       p = &blackTab2[(code & 0xff) - 64];
@@ -1105,7 +1105,7 @@ public:
   virtual ~JBIG2PatternDict();
   virtual JBIG2SegmentType getType() { return jbig2SegPatternDict; }
   Guint getSize() { return size; }
-  void setBitmap(Guint idx, JBIG2Bitmap *bitmap) { if (idx < size) bitmaps[idx] = bitmap; }
+  void setBitmap(Guint idx, JBIG2Bitmap *bitmap) { if (likely(idx < size)) bitmaps[idx] = bitmap; }
   JBIG2Bitmap *getBitmap(Guint idx) { return (idx < size) ? bitmaps[idx] : NULL; }
 
 private:
@@ -1766,7 +1766,7 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
       goto syntaxError;
     }
     symHeight += dh;
-    if (symHeight > 0x40000000) {
+    if (unlikely(symHeight > 0x40000000)) {
       error(errSyntaxError, curStr->getPos(), "Bad height value in JBIG2 symbol dictionary");
       goto syntaxError;
     }
@@ -1837,7 +1837,7 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
 	    goto syntaxError;
 	  }
 	  refBitmap = bitmaps[symID];
-	  if (!refBitmap) {
+	  if (unlikely(refBitmap == NULL)) {
 	    error(errSyntaxError, curStr->getPos(), "Invalid ref bitmap for symbol ID {0:d} in JBIG2 symbol dictionary", symID);
 	    goto syntaxError;
 	  }
@@ -1876,7 +1876,7 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
 	collBitmap = new JBIG2Bitmap(0, totalWidth, symHeight);
 	bmSize = symHeight * ((totalWidth + 7) >> 3);
 	p = collBitmap->getDataPtr();
-	if (p == NULL) {
+	if (unlikely(p == NULL)) {
 	  delete collBitmap;
 	  goto syntaxError;
 	}
@@ -2229,7 +2229,7 @@ void JBIG2Stream::readTextRegionSeg(Guint segNum, GBool imm,
 	  symCodeTab[i++].prefixLen = 0;
 	}
       } else if (j > 0x100) {
-	if (i == 0) ++i;
+	if (unlikely(i == 0)) ++i;
 	for (j -= 0x100; j && i < numSyms; --j) {
 	  symCodeTab[i].prefixLen = symCodeTab[i-1].prefixLen;
 	  ++i;
@@ -2397,7 +2397,7 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(GBool huff, GBool refine,
 
       if (symID >= (Guint)numSyms) {
 	error(errSyntaxError, curStr->getPos(), "Invalid symbol number in JBIG2 text region");
-	if (numInstances - inst > 0x800) {
+	if (unlikely(numInstances - inst > 0x800)) {
 	  // don't loop too often with damaged JBIg2 streams
 	  delete bitmap;
 	  return NULL;
@@ -2453,7 +2453,7 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(GBool huff, GBool refine,
 	  //~ something is wrong here - refCorner shouldn't degenerate into
 	  //~   two cases
 	  bw = symbolBitmap->getWidth() - 1;
-	  if (symbolBitmap->getHeight() == 0) {
+	  if (unlikely(symbolBitmap->getHeight() == 0)) {
 	    error(errSyntaxError, curStr->getPos(), "Invalid symbol bitmap height");
 	    if (ri) {
 	      delete symbolBitmap;
@@ -2463,7 +2463,7 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(GBool huff, GBool refine,
 	  }
 	  bh = symbolBitmap->getHeight() - 1;
 	  if (transposed) {
-	    if (s > 2 * bitmap->getHeight()) {
+	    if (unlikely(s > 2 * bitmap->getHeight())) {
 	      error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
 	      if (ri) {
 	        delete symbolBitmap;
@@ -2489,7 +2489,7 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(GBool huff, GBool refine,
 	  } else {
 	    switch (refCorner) {
 	    case 0: // bottom left
-	      if (tt - (int) bh > 2 * bitmap->getHeight()) {
+	      if (unlikely(tt - (int) bh > 2 * bitmap->getHeight())) {
 		error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
 		if (ri) {
 		  delete symbolBitmap;
@@ -2500,7 +2500,7 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(GBool huff, GBool refine,
 	      bitmap->combine(symbolBitmap, s, tt - bh, combOp);
 	      break;
 	    case 1: // top left
-	      if (tt > 2 * bitmap->getHeight()) {
+	      if (unlikely(tt > 2 * bitmap->getHeight())) {
 		error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
 		if (ri) {
 		  delete symbolBitmap;
@@ -2511,7 +2511,7 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(GBool huff, GBool refine,
 	      bitmap->combine(symbolBitmap, s, tt, combOp);
 	      break;
 	    case 2: // bottom right
-	      if (tt - (int) bh > 2 * bitmap->getHeight()) {
+	      if (unlikely(tt - (int) bh > 2 * bitmap->getHeight())) {
 		error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
 		if (ri) {
 		  delete symbolBitmap;
@@ -2522,7 +2522,7 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(GBool huff, GBool refine,
 	      bitmap->combine(symbolBitmap, s, tt - bh, combOp);
 	      break;
 	    case 3: // top right
-	      if (tt > 2 * bitmap->getHeight()) {
+	      if (unlikely(tt > 2 * bitmap->getHeight())) {
 		error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
 		if (ri) {
 		  delete symbolBitmap;
@@ -2756,7 +2756,7 @@ void JBIG2Stream::readHalftoneRegionSeg(Guint segNum, GBool imm,
     for (n = 0; n < gridW; ++n) {
       if (!(enableSkip && skipBitmap->getPixel(n, m))) {
 	patternBitmap = patternDict->getBitmap(grayImg[i]);
-	if (patternBitmap == NULL) {
+	if (unlikely(patternBitmap == NULL)) {
 	  error(errSyntaxError, curStr->getPos(), "Bad pattern bitmap");
 	  return;
 	}
