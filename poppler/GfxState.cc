@@ -2253,10 +2253,16 @@ GfxColorSpace *GfxSeparationColorSpace::parse(Array *arr, Gfx *gfx, int recursio
   if (!(funcA = Function::parse(&obj1))) {
     goto err4;
   }
+  if (funcA->getInputSize() != 1) {
+    error(errSyntaxWarning, -1, "Bad SeparationColorSpace function");
+    goto err5;
+  }
   obj1.free();
   cs = new GfxSeparationColorSpace(nameA, altA, funcA);
   return cs;
 
+ err5:
+  delete funcA;
  err4:
   delete altA;
  err3:
@@ -3398,6 +3404,10 @@ void GfxUnivariateShading::getColor(double t, GfxColor *color) {
       out[i] = 0;
     }
     for (i = 0; i < nFuncs; ++i) {
+      if (funcs[i]->getInputSize() != 1) {
+        error(errSyntaxWarning, -1, "Invalid shading function (input != 1)");
+        break;
+      }
       funcs[i]->transform(&t, &out[i]);
     }
   }
@@ -3569,7 +3579,7 @@ GfxAxialShading *GfxAxialShading::parse(Dict *dict, Gfx *gfx) {
   dict->lookup("Function", &obj1);
   if (obj1.isArray()) {
     nFuncsA = obj1.arrayGetLength();
-    if (nFuncsA > gfxColorMaxComps) {
+    if (nFuncsA > gfxColorMaxComps || nFuncsA == 0) {
       error(errSyntaxWarning, -1, "Invalid Function array in shading dictionary");
       goto err1;
     }
@@ -3594,9 +3604,19 @@ GfxAxialShading *GfxAxialShading::parse(Dict *dict, Gfx *gfx) {
   extend0A = extend1A = gFalse;
   if (dict->lookup("Extend", &obj1)->isArray() &&
       obj1.arrayGetLength() == 2) {
-    extend0A = obj1.arrayGet(0, &obj2)->getBool();
+    obj1.arrayGet(0, &obj2);
+    if (obj2.isBool()) {
+      extend0A = obj2.getBool();
+    } else {
+      error(errSyntaxWarning, -1, "Invalid axial shading extend (0)");
+    }
     obj2.free();
-    extend1A = obj1.arrayGet(1, &obj2)->getBool();
+    obj1.arrayGet(1, &obj2);
+    if (obj2.isBool()) {
+      extend1A = obj2.getBool();
+    } else {
+      error(errSyntaxWarning, -1, "Invalid axial shading extend (1)");
+    }
     obj2.free();
   }
   obj1.free();

@@ -19,6 +19,7 @@
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Edward Jiang <ejiang@google.com>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -585,6 +586,9 @@ int JBIG2MMRDecoder::getBlackCode() {
       } else {
 	code = buf >> (bufLen - 12);
       }
+      if (unlikely((code & 0xff) < 64)) {
+        break;
+      }
       p = &blackTab2[(code & 0xff) - 64];
     } else {
       if (bufLen <= 6) {
@@ -713,8 +717,10 @@ JBIG2Bitmap::JBIG2Bitmap(Guint segNumA, int wA, int hA):
     return;
   }
   // need to allocate one extra guard byte for use in combine()
-  data = (Guchar *)gmalloc(h * line + 1);
-  data[h * line] = 0;
+  data = (Guchar *)gmalloc_checkoverflow(h * line + 1);
+  if (data != NULL) {
+    data[h * line] = 0;
+  }
 }
 
 JBIG2Bitmap::JBIG2Bitmap(Guint segNumA, JBIG2Bitmap *bitmap):
@@ -1099,8 +1105,8 @@ public:
   virtual ~JBIG2PatternDict();
   virtual JBIG2SegmentType getType() { return jbig2SegPatternDict; }
   Guint getSize() { return size; }
-  void setBitmap(Guint idx, JBIG2Bitmap *bitmap) { bitmaps[idx] = bitmap; }
-  JBIG2Bitmap *getBitmap(Guint idx) { return bitmaps[idx]; }
+  void setBitmap(Guint idx, JBIG2Bitmap *bitmap) { if (likely(idx < size)) bitmaps[idx] = bitmap; }
+  JBIG2Bitmap *getBitmap(Guint idx) { return (idx < size) ? bitmaps[idx] : NULL; }
 
 private:
 
@@ -1111,8 +1117,13 @@ private:
 JBIG2PatternDict::JBIG2PatternDict(Guint segNumA, Guint sizeA):
   JBIG2Segment(segNumA)
 {
-  size = sizeA;
-  bitmaps = (JBIG2Bitmap **)gmallocn(size, sizeof(JBIG2Bitmap *));
+  bitmaps = (JBIG2Bitmap **)gmallocn_checkoverflow(sizeA, sizeof(JBIG2Bitmap *));
+  if (bitmaps) {
+    size = sizeA;
+  } else {
+    size = 0;
+    error(errSyntaxError, -1, "JBIG2PatternDict: can't allocate bitmaps");
+  }
 }
 
 JBIG2PatternDict::~JBIG2PatternDict() {
@@ -1755,6 +1766,10 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
       goto syntaxError;
     }
     symHeight += dh;
+    if (unlikely(symHeight > 0x40000000)) {
+      error(errSyntaxError, curStr->getPos(), "Bad height value in JBIG2 symbol dictionary");
+      goto syntaxError;
+    }
     symWidth = 0;
     totalWidth = 0;
     j = i;
@@ -1822,6 +1837,10 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
 	    goto syntaxError;
 	  }
 	  refBitmap = bitmaps[symID];
+	  if (unlikely(refBitmap == NULL)) {
+	    error(errSyntaxError, curStr->getPos(), "Invalid ref bitmap for symbol ID {0:d} in JBIG2 symbol dictionary", symID);
+	    goto syntaxError;
+	  }
 	  bitmaps[numInputSyms + i] =
 	      readGenericRefinementRegion(symWidth, symHeight,
 					  sdrTemplate, gFalse,
@@ -1857,6 +1876,10 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
 	collBitmap = new JBIG2Bitmap(0, totalWidth, symHeight);
 	bmSize = symHeight * ((totalWidth + 7) >> 3);
 	p = collBitmap->getDataPtr();
+	if (unlikely(p == NULL)) {
+	  delete collBitmap;
+	  goto syntaxError;
+	}
 	for (k = 0; k < (Guint)bmSize; ++k) {
 	  if ((c = curStr->getChar()) == EOF) {
 	    break;
@@ -2206,6 +2229,7 @@ void JBIG2Stream::readTextRegionSeg(Guint segNum, GBool imm,
 	  symCodeTab[i++].prefixLen = 0;
 	}
       } else if (j > 0x100) {
+	if (unlikely(i == 0)) ++i;
 	for (j -= 0x100; j && i < numSyms; --j) {
 	  symCodeTab[i].prefixLen = symCodeTab[i-1].prefixLen;
 	  ++i;
@@ -2373,6 +2397,11 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(GBool huff, GBool refine,
 
       if (symID >= (Guint)numSyms) {
 	error(errSyntaxError, curStr->getPos(), "Invalid symbol number in JBIG2 text region");
+	if (unlikely(numInstances - inst > 0x800)) {
+	  // don't loop too often with damaged JBIg2 streams
+	  delete bitmap;
+	  return NULL;
+	}
       } else {
 
 	// get the symbol bitmap
@@ -2424,8 +2453,24 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(GBool huff, GBool refine,
 	  //~ something is wrong here - refCorner shouldn't degenerate into
 	  //~   two cases
 	  bw = symbolBitmap->getWidth() - 1;
+	  if (unlikely(symbolBitmap->getHeight() == 0)) {
+	    error(errSyntaxError, curStr->getPos(), "Invalid symbol bitmap height");
+	    if (ri) {
+	      delete symbolBitmap;
+	    }
+	    delete bitmap;
+	    return NULL;
+	  }
 	  bh = symbolBitmap->getHeight() - 1;
 	  if (transposed) {
+	    if (unlikely(s > 2 * bitmap->getHeight())) {
+	      error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
+	      if (ri) {
+	        delete symbolBitmap;
+	      }
+	      delete bitmap;
+	      return NULL;
+	    }
 	    switch (refCorner) {
 	    case 0: // bottom left
 	      bitmap->combine(symbolBitmap, tt, s, combOp);
@@ -2444,15 +2489,47 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(GBool huff, GBool refine,
 	  } else {
 	    switch (refCorner) {
 	    case 0: // bottom left
+	      if (unlikely(tt - (int) bh > 2 * bitmap->getHeight())) {
+		error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
+		if (ri) {
+		  delete symbolBitmap;
+		}
+		delete bitmap;
+		return NULL;
+	      }
 	      bitmap->combine(symbolBitmap, s, tt - bh, combOp);
 	      break;
 	    case 1: // top left
+	      if (unlikely(tt > 2 * bitmap->getHeight())) {
+		error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
+		if (ri) {
+		  delete symbolBitmap;
+		}
+		delete bitmap;
+		return NULL;
+	      }
 	      bitmap->combine(symbolBitmap, s, tt, combOp);
 	      break;
 	    case 2: // bottom right
+	      if (unlikely(tt - (int) bh > 2 * bitmap->getHeight())) {
+		error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
+		if (ri) {
+		  delete symbolBitmap;
+		}
+		delete bitmap;
+		return NULL;
+	      }
 	      bitmap->combine(symbolBitmap, s, tt - bh, combOp);
 	      break;
 	    case 3: // top right
+	      if (unlikely(tt > 2 * bitmap->getHeight())) {
+		error(errSyntaxError, curStr->getPos(), "Invalid JBIG2 combine");
+		if (ri) {
+		  delete symbolBitmap;
+		}
+		delete bitmap;
+		return NULL;
+	      }
 	      bitmap->combine(symbolBitmap, s, tt, combOp);
 	      break;
 	    }
@@ -2528,7 +2605,7 @@ void JBIG2Stream::readPatternDictSeg(Guint segNum, Guint length) {
 
   // split up the bitmap
   x = 0;
-  for (i = 0; i <= grayMax; ++i) {
+  for (i = 0; i <= grayMax && i < patternDict->getSize(); ++i) {
     patternDict->setBitmap(i, bitmap->getSlice(x, 0, patternW, patternH));
     x += patternW;
   }
@@ -2679,6 +2756,10 @@ void JBIG2Stream::readHalftoneRegionSeg(Guint segNum, GBool imm,
     for (n = 0; n < gridW; ++n) {
       if (!(enableSkip && skipBitmap->getPixel(n, m))) {
 	patternBitmap = patternDict->getBitmap(grayImg[i]);
+	if (unlikely(patternBitmap == NULL)) {
+	  error(errSyntaxError, curStr->getPos(), "Bad pattern bitmap");
+	  return;
+	}
 	bitmap->combine(patternBitmap, xx >> 8, yy >> 8, combOp);
       }
       xx += stepX;
@@ -3135,7 +3216,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(GBool mmr, int w, int h,
 	    atx[2] >= -8 && atx[2] <= 8 &&
 	    atx[3] >= -8 && atx[3] <= 8) {
 	  // set up the adaptive context
-	  if (y + aty[0] >= 0) {
+	  if (y + aty[0] >= 0 && y + aty[0] < bitmap->getHeight()) {
 	    atP0 = bitmap->getDataPtr() + (y + aty[0]) * bitmap->getLineSize();
 	    atBuf0 = *atP0++ << 8;
 	  } else {
@@ -3143,7 +3224,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(GBool mmr, int w, int h,
 	    atBuf0 = 0;
 	  }
 	  atShift0 = 15 - atx[0];
-	  if (y + aty[1] >= 0) {
+	  if (y + aty[1] >= 0 && y + aty[1] < bitmap->getHeight()) {
 	    atP1 = bitmap->getDataPtr() + (y + aty[1]) * bitmap->getLineSize();
 	    atBuf1 = *atP1++ << 8;
 	  } else {
@@ -3151,7 +3232,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(GBool mmr, int w, int h,
 	    atBuf1 = 0;
 	  }
 	  atShift1 = 15 - atx[1];
-	  if (y + aty[2] >= 0) {
+	  if (y + aty[2] >= 0 && y + aty[2] < bitmap->getHeight()) {
 	    atP2 = bitmap->getDataPtr() + (y + aty[2]) * bitmap->getLineSize();
 	    atBuf2 = *atP2++ << 8;
 	  } else {
@@ -3159,7 +3240,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(GBool mmr, int w, int h,
 	    atBuf2 = 0;
 	  }
 	  atShift2 = 15 - atx[2];
-	  if (y + aty[3] >= 0) {
+	  if (y + aty[3] >= 0 && y + aty[3] < bitmap->getHeight()) {
 	    atP3 = bitmap->getDataPtr() + (y + aty[3]) * bitmap->getLineSize();
 	    atBuf3 = *atP3++ << 8;
 	  } else {
@@ -3678,7 +3759,7 @@ void JBIG2Stream::readGenericRefinementRegionSeg(Guint segNum, GBool imm,
 				       refBitmap, 0, 0, atx, aty);
 
   // combine the region bitmap into the page bitmap
-  if (imm) {
+  if (imm && bitmap) {
     pageBitmap->combine(bitmap, x, y, extCombOp);
     delete bitmap;
 

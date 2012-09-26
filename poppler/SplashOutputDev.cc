@@ -2332,6 +2332,14 @@ GBool SplashOutputDev::beginType3Char(GfxState *state, double x, double y,
 
       // create new entry in the font cache
       if (nT3Fonts == splashOutT3FontCacheSize) {
+	t3gs = t3GlyphStack;
+	while (t3gs != NULL) {
+	  if (t3gs->cache == t3FontCache[nT3Fonts - 1]) {
+	    error(errSyntaxWarning, -1, "t3FontCache reaches limit but font still on stack in SplashOutputDev::beginType3Char");
+	    return gTrue;
+	  }
+	  t3gs = t3gs->next;
+	}
 	delete t3FontCache[nT3Fonts - 1];
 	--nT3Fonts;
       }
