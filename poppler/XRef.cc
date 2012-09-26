@@ -267,6 +267,7 @@ void XRef::init() {
   objStrs = new PopplerCache(5);
   mainXRefEntriesOffset = 0;
   xRefStream = gFalse;
+  rootNum = -1;
 }
 
 XRef::XRef() {
