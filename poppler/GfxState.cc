@@ -313,7 +313,7 @@ GfxColorSpace *GfxColorSpace::parse(Object *csObj, Gfx *gfx, int recursion) {
     } else if (obj1.isName("DeviceCMYK")) {
       cs = new GfxDeviceCMYKColorSpace();
     } else {
-      error(errSyntaxWarning, -1, "Bad color space '{0:s}'", csObj->getName());
+      error(errSyntaxWarning, -1, "Bad color space dict'");
     }
     obj1.free();
   } else {
