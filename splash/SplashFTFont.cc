@@ -16,6 +16,7 @@
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
+// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -426,6 +427,9 @@ SplashPath *SplashFTFont::getGlyphPath(int c) {
     return NULL;
   }
   if (FT_Get_Glyph(slot, &glyph)) {
+    return NULL;
+  }
+  if (FT_Outline_Check(&((FT_OutlineGlyph)glyph)->outline)) {
     return NULL;
   }
   path.path = new SplashPath();
