@@ -2392,7 +2392,7 @@ void AnnotText::draw(Gfx *gfx, GBool printing) {
     appearBuf->append ("Q\n");
 
     // Force 24x24 rectangle
-    PDFRectangle fixedRect(rect->x1, rect->y1, rect->x1 + 24, rect->y1 + 24);
+    PDFRectangle fixedRect(rect->x1, rect->y2 - 24, rect->x1 + 24, rect->y2);
     appearBBox = new AnnotAppearanceBBox(&fixedRect);
     double bbox[4];
     appearBBox->getBBoxRect(bbox);
