@@ -356,6 +356,8 @@ poppler_document_finalize (GObject *object)
   poppler_document_layers_free (document);
   delete document->output_dev;
   delete document->doc;
+
+  G_OBJECT_CLASS (poppler_document_parent_class)->finalize (object);
 }
 
 /**
@@ -1957,6 +1959,8 @@ poppler_font_info_finalize (GObject *object)
 
         delete font_info->scanner;
         g_object_unref (font_info->document);
+
+        G_OBJECT_CLASS (poppler_font_info_parent_class)->finalize (object);
 }
 
 /**
@@ -2458,6 +2462,8 @@ poppler_ps_file_finalize (GObject *object)
         delete ps_file->out;
         g_object_unref (ps_file->document);
         g_free (ps_file->filename);
+
+        G_OBJECT_CLASS (poppler_ps_file_parent_class)->finalize (object);
 }
 
 /**
