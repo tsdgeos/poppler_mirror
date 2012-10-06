@@ -79,6 +79,8 @@ poppler_page_finalize (GObject *object)
   if (page->text != NULL) 
     page->text->decRefCnt();
   /* page->page is owned by the document */
+
+  G_OBJECT_CLASS (poppler_page_parent_class)->finalize (object);
 }
 
 /**
