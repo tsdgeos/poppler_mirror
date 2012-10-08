@@ -107,6 +107,7 @@ class POPPLER_QT4_EXPORT Annotation
 {
   friend class AnnotationUtils;
   friend class LinkMovie;
+  friend class LinkRendition;
 
   public:
     // enum definitions

@@ -527,8 +527,6 @@ Link* AnnotationPrivate::additionalAction( Annotation::AdditionalActionType type
     if ( linkAction )
         link = PageData::convertLinkActionToLink( linkAction, parentDoc, QRectF() );
 
-    delete linkAction;
-
     return link;
 }
 

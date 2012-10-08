@@ -168,16 +168,40 @@ class LinkSoundPrivate : public LinkPrivate
 class LinkRenditionPrivate : public LinkPrivate
 {
 	public:
-		LinkRenditionPrivate( const QRectF &area, ::MediaRendition *rendition );
+		LinkRenditionPrivate( const QRectF &area, ::MediaRendition *rendition, ::LinkRendition::RenditionOperation operation, const QString &script, const Ref &annotationReference );
 		~LinkRenditionPrivate();
 
 		MediaRendition *rendition;
+		LinkRendition::RenditionAction action;
+		QString script;
+		Ref annotationReference;
 };
 
-	LinkRenditionPrivate::LinkRenditionPrivate( const QRectF &area, ::MediaRendition *r )
+	LinkRenditionPrivate::LinkRenditionPrivate( const QRectF &area, ::MediaRendition *r, ::LinkRendition::RenditionOperation operation, const QString &javaScript, const Ref &ref )
 		: LinkPrivate( area )
-		, rendition( new MediaRendition( r ) )
+		, rendition( r ? new MediaRendition( r ) : 0 )
+		, action( LinkRendition::PlayRendition )
+		, script( javaScript )
+		, annotationReference( ref )
 	{
+		switch ( operation )
+		{
+			case ::LinkRendition::NoRendition:
+				action = LinkRendition::NoRendition;
+				break;
+			case ::LinkRendition::PlayRendition:
+				action = LinkRendition::PlayRendition;
+				break;
+			case ::LinkRendition::StopRendition:
+				action = LinkRendition::StopRendition;
+				break;
+			case ::LinkRendition::PauseRendition:
+				action = LinkRendition::PauseRendition;
+				break;
+			case ::LinkRendition::ResumeRendition:
+				action = LinkRendition::ResumeRendition;
+				break;
+		}
 	}
 
 	LinkRenditionPrivate::~LinkRenditionPrivate()
@@ -579,10 +603,15 @@ class LinkMoviePrivate : public LinkPrivate
 
 	// LinkRendition
 	LinkRendition::LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition )
-		: Link( *new LinkRenditionPrivate( linkArea, rendition ) )
+		: Link( *new LinkRenditionPrivate( linkArea, rendition, ::LinkRendition::NoRendition, QString(), Ref() ) )
 	{
 	}
 	
+	LinkRendition::LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref &annotationReference )
+		: Link( *new LinkRenditionPrivate( linkArea, rendition, static_cast<enum ::LinkRendition::RenditionOperation>(operation), script, annotationReference ) )
+	{
+	}
+
 	LinkRendition::~LinkRendition()
 	{
 	}
@@ -596,6 +625,29 @@ class LinkMoviePrivate : public LinkPrivate
 	{
 		Q_D( const LinkRendition );
 		return d->rendition;
+	}
+
+	LinkRendition::RenditionAction LinkRendition::action() const
+	{
+		Q_D( const LinkRendition );
+		return d->action;
+	}
+
+	QString LinkRendition::script() const
+	{
+		Q_D( const LinkRendition );
+		return d->script;
+	}
+
+	bool LinkRendition::isReferencedAnnotation( const ScreenAnnotation *annotation ) const
+	{
+		Q_D( const LinkRendition );
+		if ( d->annotationReference.num != -1 && d->annotationReference == annotation->d_ptr->pdfObjectReference() )
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	// LinkJavaScript

@@ -197,7 +197,13 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
     case actionRendition:
     {
       ::LinkRendition *lrn = (::LinkRendition *)a;
-      popplerLink = new LinkRendition( linkArea, lrn->getMedia() );
+
+      Ref reference;
+      reference.num = reference.gen = -1;
+      if ( lrn->hasScreenAnnot() )
+        reference = lrn->getScreenAnnot();
+
+      popplerLink = new LinkRendition( linkArea, lrn->getMedia(), lrn->getOperation(), UnicodeParsedString( lrn->getScript() ), reference );
     }
     break;
 

@@ -19,6 +19,7 @@
 // Copyright (C) 2008-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
+// Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -700,9 +701,10 @@ LinkSound::~LinkSound() {
 //------------------------------------------------------------------------
 
 LinkRendition::LinkRendition(Object *obj) {
-  operation = -1;
+  operation = NoRendition;
   media = NULL;
   js = NULL;
+  int operationCode = -1;
 
   if (obj->isDict()) {
     Object tmp;
@@ -721,24 +723,42 @@ LinkRendition::LinkRendition(Object *obj) {
     tmp.free();
 
     if (obj->dictLookup("OP", &tmp)->isInt()) {
-      operation = tmp.getInt();
-      if (!js && (operation < 0 || operation > 4)) {
-        error(errSyntaxWarning, -1, "Invalid Rendition Action: unrecognized operation valued: {0:d}", operation);
+      operationCode = tmp.getInt();
+      if (!js && (operationCode < 0 || operationCode > 4)) {
+        error(errSyntaxWarning, -1, "Invalid Rendition Action: unrecognized operation valued: {0:d}", operationCode);
       } else {
         Object obj1;
 
         // retrieve rendition object
         if (obj->dictLookup("R", &renditionObj)->isDict()) {
           media = new MediaRendition(&renditionObj);
-	} else if (operation == 0 || operation == 4) {
-          error(errSyntaxWarning, -1, "Invalid Rendition Action: no R field with op = {0:d}", operation);
+	} else if (operationCode == 0 || operationCode == 4) {
+          error(errSyntaxWarning, -1, "Invalid Rendition Action: no R field with op = {0:d}", operationCode);
 	  renditionObj.free();
 	}
 
 	if (!obj->dictLookupNF("AN", &screenRef)->isRef() && operation >= 0 && operation <= 4) {
-	  error(errSyntaxWarning, -1, "Invalid Rendition Action: no AN field with op = {0:d}", operation);
+	  error(errSyntaxWarning, -1, "Invalid Rendition Action: no AN field with op = {0:d}", operationCode);
 	  screenRef.free();
 	}
+      }
+
+      switch (operationCode) {
+        case 0:
+          operation = PlayRendition;
+          break;
+        case 1:
+          operation = StopRendition;
+          break;
+        case 2:
+          operation = PauseRendition;
+          break;
+        case 3:
+          operation = ResumeRendition;
+          break;
+        case 4:
+          operation = PlayRendition;
+          break;
       }
     } else if (!js) {
       error(errSyntaxWarning, -1, "Invalid Rendition action: no OP or JS field defined");

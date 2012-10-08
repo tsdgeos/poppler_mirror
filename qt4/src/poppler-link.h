@@ -455,12 +455,40 @@ class POPPLER_QT4_EXPORT LinkRendition : public Link
 {
 	public:
 		/**
-		 * Create a new media rendition link.
+		 * Describes the possible rendition actions.
+		 *
+		 * \since 0.22
+		 */
+		enum RenditionAction {
+			NoRendition,
+			PlayRendition,
+			StopRendition,
+			PauseRendition,
+			ResumeRendition
+		};
+
+		/**
+		 * Create a new rendition link.
 		 *
 		 * \param linkArea the active area of the link
-		 * \param rendition 
+		 * \param rendition the media rendition object
+		 *
+		 * \deprecated Use the constructor that takes all parameter instead
 		 */
-		LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition );
+		Q_DECL_DEPRECATED LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition );
+
+		/**
+		 * Create a new rendition link.
+		 *
+		 * \param linkArea the active area of the link
+		 * \param rendition the media rendition object
+		 * \param operation the numeric operation (action) (@see ::LinkRendition::RenditionOperation)
+		 * \param script the java script code
+		 * \param annotationReference the object reference of the screen annotation associated with this rendition action
+		 * \since 0.22
+		 */
+		LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref &annotationReference );
+
 		/**
 		 * Destructor.
 		 */
@@ -469,9 +497,30 @@ class POPPLER_QT4_EXPORT LinkRendition : public Link
 		LinkType linkType() const;
 
 		/**
-		 * 
+		 * Returns the media rendition object if the redition provides one, @c 0 otherwise
 		 */
 		MediaRendition *rendition() const;
+
+		/**
+		 * Returns the action that should be executed if a rendition object is provided.
+		 *
+		 * \since 0.22
+		 */
+		RenditionAction action() const;
+
+		/**
+		 * The JS code that shall be executed or an empty string.
+		 *
+		 * \since 0.22
+		 */
+		QString script() const;
+
+		/**
+		 * Returns whether the given @p annotation is the referenced screen annotation for this rendition @p link.
+		 *
+		 * \since 0.22
+		 */
+		bool isReferencedAnnotation( const ScreenAnnotation *annotation ) const;
 
 	private:
 		Q_DECLARE_PRIVATE( LinkRendition )
