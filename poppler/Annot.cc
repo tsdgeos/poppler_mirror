@@ -4905,6 +4905,14 @@ void AnnotWidget::generateFieldAppearance() {
   appearStream->setNeedFree(gTrue);
 }
 
+// NOTE: This is a temporary implementation!
+// TODO: Generate new appearance stream *here* and write it
+void AnnotWidget::updateAppearanceStream()
+{
+  // Remove the old appearance so that AnnotWidget::draw will rebuild it next time
+  appearance.free();
+  appearance.initNull();
+}
 
 void AnnotWidget::draw(Gfx *gfx, GBool printing) {
   Object obj;
@@ -4916,13 +4924,9 @@ void AnnotWidget::draw(Gfx *gfx, GBool printing) {
 
   // Only construct the appearance stream when
   // - annot doesn't have an AP or
-  // - it's a field containing text (text and choices) and
-  // - NeedAppearances is true or
-  // - widget has been modified or
+  // - NeedAppearances is true
   if (field) {
-    if (appearance.isNull() || (form && form->getNeedAppearances()) ||
-        ((field->getType() == formText || field->getType() == formChoice) &&
-         field->isModified()))
+    if (appearance.isNull() || (form && form->getNeedAppearances()))
       generateFieldAppearance();
   }
 

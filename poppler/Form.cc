@@ -14,6 +14,7 @@
 // Copyright 2009 Matthias Drochner <M.Drochner@fz-juelich.de>
 // Copyright 2009 KDAB via Guillermo Amaral <gamaral@amaral.com.mx>
 // Copyright 2010, 2012 Mark Riedesel <mark@klowner.com>
+// Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // 
 //========================================================================
 
@@ -124,10 +125,6 @@ bool FormWidget::isReadOnly() const
   return field->isReadOnly();
 }
 
-GBool FormWidget::isModified() const {
-  return field->isModified();
-}
-
 int FormWidget::encodeID (unsigned pageNum, unsigned fieldNum)
 {
   return (pageNum << 4*sizeof(unsigned)) + fieldNum;
@@ -211,6 +208,11 @@ void FormWidgetButton::setAppearanceState(const char *state) {
   widget->setAppearanceState(state);
 }
 
+void FormWidgetButton::updateWidgetAppearance()
+{
+  // The appearance stream must NOT be regenerated for this widget type
+}
+
 void FormWidgetButton::setState (GBool astate)
 {
   //pushButtons don't have state
@@ -247,7 +249,13 @@ GooString* FormWidgetText::getContentCopy ()
 {
   return parent->getContentCopy();
 }
-  
+
+void FormWidgetText::updateWidgetAppearance()
+{
+  if (widget)
+    widget->updateAppearanceStream();
+}
+
 bool FormWidgetText::isMultiline () const 
 { 
   return parent->isMultiline(); 
@@ -356,6 +364,12 @@ GooString* FormWidgetChoice::getEditChoice ()
   return parent->getEditChoice();
 }
 
+void FormWidgetChoice::updateWidgetAppearance()
+{
+  if (widget)
+    widget->updateAppearanceStream();
+}
+
 bool FormWidgetChoice::isSelected (int i)
 {
   if (!_checkRange(i)) return false;
@@ -423,6 +437,11 @@ FormWidgetSignature::FormWidgetSignature(PDFDoc *docA, Object *aobj, unsigned nu
   parent = static_cast<FormFieldSignature*>(field);
 }
 
+void FormWidgetSignature::updateWidgetAppearance()
+{
+  // Unimplemented
+}
+
 
 //========================================================================
 // FormField
@@ -446,7 +465,6 @@ FormField::FormField(PDFDoc *docA, Object *aobj, const Ref& aref, FormField *par
   fullyQualifiedName = NULL;
   quadding = quaddingLeftJustified;
   hasQuadding = gFalse;
-  modified = gFalse;
 
   ref = aref;
 
@@ -623,10 +641,6 @@ void FormField::createWidgetAnnotations() {
   }
 }
 
-GBool FormField::isModified() const {
-  return modified ? gTrue : parent ? parent->isModified() : gFalse;
-}
-
 void FormField::_createWidget (Object *obj, Ref aref)
 {
   terminal = true;
@@ -758,6 +772,18 @@ GooString* FormField::getFullyQualifiedName() {
   return fullyQualifiedName;
 }
 
+void FormField::updateChildrenAppearance()
+{
+  // Recursively update each child's appearance
+  if (terminal) {
+    for (int i = 0; i < numChildren; i++)
+      widgets[i]->updateWidgetAppearance();
+  } else {
+    for (int i = 0; i < numChildren; i++)
+      children[i]->updateChildrenAppearance();
+  }
+}
+
 //------------------------------------------------------------------------
 // FormFieldButton
 //------------------------------------------------------------------------
@@ -864,7 +890,6 @@ GBool FormFieldButton::setState(char *state)
   if (terminal && parent && parent->getType() == formButton && appearanceState.isNull()) {
     // It's button in a set, set state on parent
     if (static_cast<FormFieldButton*>(parent)->setState(state)) {
-      modified = gTrue;
       return gTrue;
     }
     return gFalse;
@@ -910,7 +935,6 @@ GBool FormFieldButton::setState(char *state)
   }
 
   updateState(state);
-  modified = gTrue;
 
   return gTrue;
 }
@@ -1024,7 +1048,7 @@ void FormFieldText::setContentCopy (GooString* new_content)
   obj1.initString(content ? content->copy() : new GooString(""));
   obj.getDict()->set("V", &obj1);
   xref->setModifiedObject(&obj, ref);
-  modified = gTrue;
+  updateChildrenAppearance();
 }
 
 FormFieldText::~FormFieldText()
@@ -1199,7 +1223,7 @@ void FormFieldChoice::updateSelection() {
 
   obj.getDict()->set("V", &obj1);
   xref->setModifiedObject(&obj, ref);
-  modified = gTrue;
+  updateChildrenAppearance();
 }
 
 void FormFieldChoice::unselectAll ()

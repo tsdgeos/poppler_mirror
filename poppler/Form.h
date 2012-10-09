@@ -9,6 +9,7 @@
 // Copyright 2007-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
+// Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 //========================================================================
 
@@ -109,6 +110,8 @@ public:
   void createWidgetAnnotation();
   AnnotWidget *getWidgetAnnotation() const { return widget; }
 
+  virtual void updateWidgetAppearance() = 0;
+
 #ifdef DEBUG_FORMS
   void print(int indent = 0);
 #endif
@@ -154,6 +157,7 @@ public:
 
   char* getOnStr();
   void setAppearanceState(const char *state);
+  void updateWidgetAppearance();
 
 protected:
   GooString *onStr;
@@ -174,6 +178,8 @@ public:
 
   //except a UTF16BE string
   void setContent(GooString* new_content);
+
+  void updateWidgetAppearance();
 
   bool isMultiline () const; 
   bool isPassword () const; 
@@ -214,6 +220,7 @@ public:
 
   GooString* getEditChoice ();
 
+  void updateWidgetAppearance();
   bool isSelected (int i);
 
   bool isCombo () const; 
@@ -234,6 +241,7 @@ protected:
 class FormWidgetSignature: public FormWidget {
 public:
   FormWidgetSignature(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
+  void updateWidgetAppearance();
 protected:
   FormFieldSignature *parent;
 };
@@ -258,8 +266,6 @@ public:
 
   void setReadOnly (bool b) { readOnly = b; }
   bool isReadOnly () const { return readOnly; }
-
-  GBool isModified () const;
 
   GooString* getDefaultAppearance() const { return defaultAppearance; }
   GBool hasTextQuadding() const { return hasQuadding; }
@@ -288,6 +294,7 @@ public:
  protected:
   void _createWidget (Object *obj, Ref aref);
   void createChildren(std::set<int> *usedParents);
+  void updateChildrenAppearance();
 
   FormFieldType type;           // field type
   Ref ref;
@@ -300,7 +307,6 @@ public:
   int numChildren;
   FormWidget **widgets;
   bool readOnly;
-  GBool modified;
 
   GooString *partialName; // T field
   GooString *alternateUiName; // TU field
