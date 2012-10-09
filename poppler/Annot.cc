@@ -4905,13 +4905,33 @@ void AnnotWidget::generateFieldAppearance() {
   appearStream->setNeedFree(gTrue);
 }
 
-// NOTE: This is a temporary implementation!
-// TODO: Generate new appearance stream *here* and write it
 void AnnotWidget::updateAppearanceStream()
 {
-  // Remove the old appearance so that AnnotWidget::draw will rebuild it next time
-  appearance.free();
-  appearance.initNull();
+  // Destroy the old appearance if any
+  invalidateAppearance();
+
+  // There's no need to create a new appearance stream if NeedAppearances is
+  // set, because it will be ignored next time anyway.
+  if (form && form->getNeedAppearances())
+    return;
+
+  // Create the new appearance
+  generateFieldAppearance();
+
+  // Fetch the appearance stream we've just created
+  Object obj1, obj2;
+  Ref apRef;
+  appearance.fetch(xref, &obj1);
+  apRef = xref->addIndirectObject(&obj1);
+  obj1.free();
+
+  // Write the AP dictionary
+  obj1.initDict(xref);
+  obj1.dictAdd(copyString("N"), obj2.initRef(apRef.num, apRef.gen));
+  update("AP", &obj1);
+
+  // Update our internal pointers to the appearance dictionary
+  appearStreams = new AnnotAppearance(doc, &obj1);
 }
 
 void AnnotWidget::draw(Gfx *gfx, GBool printing) {
