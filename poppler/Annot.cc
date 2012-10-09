@@ -3810,6 +3810,8 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
     parent = NULL;
   }
   obj1.free();
+
+  updatedAppearanceStream.num = updatedAppearanceStream.gen = -1;
 }
 
 LinkAction* AnnotWidget::getAdditionalAction(AdditionalActionsType type)
@@ -4907,8 +4909,11 @@ void AnnotWidget::generateFieldAppearance() {
 
 void AnnotWidget::updateAppearanceStream()
 {
-  // Destroy the old appearance if any
-  invalidateAppearance();
+  // If this the first time updateAppearanceStream() is called on this widget,
+  // destroy the AP dictionary because we are going to create a new one.
+  if (updatedAppearanceStream.num == -1) {
+    invalidateAppearance(); // Delete AP dictionary and all referenced streams
+  }
 
   // There's no need to create a new appearance stream if NeedAppearances is
   // set, because it will be ignored next time anyway.
@@ -4919,19 +4924,30 @@ void AnnotWidget::updateAppearanceStream()
   generateFieldAppearance();
 
   // Fetch the appearance stream we've just created
-  Object obj1, obj2;
-  Ref apRef;
+  Object obj1;
   appearance.fetch(xref, &obj1);
-  apRef = xref->addIndirectObject(&obj1);
-  obj1.free();
 
-  // Write the AP dictionary
-  obj1.initDict(xref);
-  obj1.dictAdd(copyString("N"), obj2.initRef(apRef.num, apRef.gen));
-  update("AP", &obj1);
+  // If this the first time updateAppearanceStream() is called on this widget,
+  // create a new AP dictionary containing the new appearance stream.
+  // Otherwise, just update the stream we had created previously.
+  if (updatedAppearanceStream.num == -1) {
+    // Write the appearance stream
+    updatedAppearanceStream = xref->addIndirectObject(&obj1);
+    obj1.free();
 
-  // Update our internal pointers to the appearance dictionary
-  appearStreams = new AnnotAppearance(doc, &obj1);
+    // Write the AP dictionary
+    Object obj2;
+    obj1.initDict(xref);
+    obj1.dictAdd(copyString("N"), obj2.initRef(updatedAppearanceStream.num, updatedAppearanceStream.gen));
+    update("AP", &obj1);
+
+    // Update our internal pointers to the appearance dictionary
+    appearStreams = new AnnotAppearance(doc, &obj1);
+  } else {
+    // Replace the existing appearance stream
+    xref->setModifiedObject(&obj1, updatedAppearanceStream);
+    obj1.free();
+  }
 }
 
 void AnnotWidget::draw(Gfx *gfx, GBool printing) {

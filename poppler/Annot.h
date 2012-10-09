@@ -1320,6 +1320,7 @@ private:
   // AnnotBorderBS border;                // BS
   Dict *parent;                           // Parent
   GBool addDingbatsResource;
+  Ref updatedAppearanceStream; // {-1,-1} if updateAppearanceStream has never been called
 };
 
 //------------------------------------------------------------------------
