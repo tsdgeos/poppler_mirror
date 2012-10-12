@@ -1130,7 +1130,7 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, For
       for (int j = 0; j < obj1.arrayGetLength(); j++) {
         Object obj2;
 
-        obj1.arrayGet(i, &obj2);
+        obj1.arrayGet(j, &obj2);
         if (choices[i].optionName->cmp(obj2.getString()) == 0) {
           choices[i].selected = true;
           obj2.free();
