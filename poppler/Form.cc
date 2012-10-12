@@ -1179,35 +1179,57 @@ void FormFieldChoice::print(int indent)
 #endif
 
 void FormFieldChoice::updateSelection() {
-  Object obj1;
+  Object objV, objI, obj1;
+  objI.initNull();
 
-  //this is an editable combo-box with user-entered text
   if (edit && editedChoice) {
-    obj1.initString(editedChoice->copy());
+    // This is an editable combo-box with user-entered text
+    objV.initString(editedChoice->copy());
   } else {
-    int numSelected = getNumSelected();
+    const int numSelected = getNumSelected();
+
+    // Create /I array only if multiple selection is allowed (as per PDF spec)
+    if (multiselect) {
+      objI.initArray(xref);
+    }
+
     if (numSelected == 0) {
-      obj1.initString(new GooString(""));
+      // No options are selected
+      objV.initString(new GooString(""));
     } else if (numSelected == 1) {
+      // Only one option is selected
       for (int i = 0; i < numChoices; i++) {
-        if (choices[i].optionName && choices[i].selected) {
-          obj1.initString(choices[i].optionName->copy());
-          break;
+        if (choices[i].selected) {
+          if (multiselect) {
+            objI.arrayAdd(obj1.initInt(i));
+          }
+
+          if (choices[i].optionName) {
+            objV.initString(choices[i].optionName->copy());
+          }
+
+          break; // We've just written the selected option. No need to keep on scanning
         }
       }
     } else {
-      obj1.initArray(xref);
+      // More than one option is selected
+      objV.initArray(xref);
       for (int i = 0; i < numChoices; i++) {
-        if (choices[i].optionName && choices[i].selected) {
-          Object obj2;
-          obj2.initString(choices[i].optionName->copy());
-          obj1.arrayAdd(&obj2);
+        if (choices[i].selected) {
+          if (multiselect) {
+            objI.arrayAdd(obj1.initInt(i));
+          }
+
+          if (choices[i].optionName) {
+            objV.arrayAdd(obj1.initString(choices[i].optionName->copy()));
+          }
         }
       }
     }
   }
 
-  obj.getDict()->set("V", &obj1);
+  obj.getDict()->set("V", &objV);
+  obj.getDict()->set("I", &objI);
   xref->setModifiedObject(&obj, ref);
   updateChildrenAppearance();
 }
