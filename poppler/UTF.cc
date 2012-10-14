@@ -15,6 +15,7 @@
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -96,7 +97,7 @@ int TextStringToUCS4(GooString *textStr, Unicode **ucs4)
   } else {
     u = (Unicode*)gmallocn(len, sizeof(Unicode));
     for (i = 0 ; i < len; i++) {
-      u[i] = pdfDocEncoding[s[i]];
+      u[i] = pdfDocEncoding[s[i] & 0xff];
     }
   }
   *ucs4 = u;
