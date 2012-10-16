@@ -37,6 +37,21 @@ Release 0.21.0
          * Add the possibility of using lcms1 even if lcms2 is installed
          * Remove extra fontconfig CFLAGS and LIBS
 
+Release 0.20.5
+        core:
+         * Fix crashes in malformed documents
+         * Fix parsing of very big numbers
+         * Splash: Do not render invalid font outlines (Bug #55573)
+         * Check for NaN in TextPage::addChar
+
+        build system:
+         * Fix build using mingw64 with winpthread
+         * autotools: Fix compilation when lcms is on non standard locations (Bug #55326)
+         * Support automake-1.12 (Bug #55541)
+
+        glib:
+         * Chain up finalize to the parent class (Bug #55521)
+
 Release 0.20.4
         core:
          * Improvements regarding embedded file handling. (KDE Bug #306008)
