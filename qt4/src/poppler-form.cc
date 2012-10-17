@@ -2,6 +2,7 @@
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008, 2011, 2012 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
+ * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -377,6 +378,28 @@ void FormFieldChoice::setCurrentChoices( const QList<int> &choice )
   fwc->deselectAll();
   for ( int i = 0; i < choice.count(); ++i )
     fwc->select( choice.at( i ) );
+}
+
+QString FormFieldChoice::editChoice() const
+{
+  FormWidgetChoice* fwc = static_cast<FormWidgetChoice*>(m_formData->fm);
+  
+  if ( fwc->isCombo() && fwc->hasEdit() )
+    return UnicodeParsedString(fwc->getEditChoice());
+  else
+    return QString();
+}
+
+void FormFieldChoice::setEditChoice(const QString& text)
+{
+  FormWidgetChoice* fwc = static_cast<FormWidgetChoice*>(m_formData->fm);
+  
+  if ( fwc->isCombo() && fwc->hasEdit() )
+  {
+    GooString* goo = QStringToUnicodeGooString( text );
+    fwc->setEditChoice( goo );
+    delete goo;
+  }
 }
 
 Qt::Alignment FormFieldChoice::textAlignment() const
