@@ -32,7 +32,9 @@ QList<Poppler::FontInfo> loadFontsViaIterator( Poppler::Document *doc, int from 
     return list;
 }
 
-bool operator==( const Poppler::FontInfo &f1, const Poppler::FontInfo &f2 )
+namespace Poppler
+{
+bool operator==( const FontInfo &f1, const FontInfo &f2 )
 {
     if ( f1.name() != f2.name() )
         return false;
@@ -48,7 +50,7 @@ bool operator==( const Poppler::FontInfo &f1, const Poppler::FontInfo &f2 )
         return false;
     return true;
 }
-
+}
 
 void TestFontsData::checkNoFonts()
 {
