@@ -93,7 +93,7 @@ INTROSPECTION_GIRS =
 INTROSPECTION_SCANNER_ARGS = --add-include-path=$(srcdir) --warn-all
 INTROSPECTION_COMPILER_ARGS = --includedir=$(srcdir)
 
-introspection_files = $(filter-out poppler-private.h, $(libpoppler_glib_la_SOURCES)) $(poppler_glib_include_HEADERS) $(nodist_poppler_glib_include_HEADERS)
+introspection_files = $(filter-out poppler-private.h poppler-input-stream.h, $(libpoppler_glib_la_SOURCES)) $(poppler_glib_include_HEADERS) $(nodist_poppler_glib_include_HEADERS)
 Poppler-0.18.gir: libpoppler-glib.la
 Poppler_0_18_gir_INCLUDES = GObject-2.0 Gio-2.0 cairo-1.0
 Poppler_0_18_gir_CFLAGS = $(INCLUDES) -I$(top_builddir)
