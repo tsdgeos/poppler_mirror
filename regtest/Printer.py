@@ -29,7 +29,7 @@ class Printer:
 
         self._verbose = Config().verbose
         self._stream = sys.stdout
-        self._rewrite = self._stream.isatty() #and not self.config.verbose
+        self._rewrite = self._stream.isatty() and not self._verbose
         self._current_line = None
 
         Printer.__single = self
