@@ -80,6 +80,9 @@ class Printer:
     def print_test_result(self, msg):
         self.printout_update(msg)
 
+    def print_test_result_ln(self, msg):
+        self.printout_update(self._ensure_new_line(msg))
+
     def print_default(self, msg):
         if self._verbose:
             self.printout_ln(msg)

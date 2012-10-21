@@ -74,14 +74,14 @@ class TestRun:
                 self.printer.print_test_result("PASS")
                 self._n_passed += 1
             else:
-                print("FAIL")
+                self.printer.print_test_result_ln("FAIL")
                 self._failed.append("%s (%s)" % (doc_path, backend.get_name()))
             return
         elif test_has_md5:
             if ref_is_crashed:
-                self.printer.print_test_result("DOES NOT CRASH")
+                self.printer.print_test_result_ln("DOES NOT CRASH")
             elif ref_is_failed:
-                self.printer.print_test_result("DOES NOT FAIL")
+                self.printer.print_test_result_ln("DOES NOT FAIL")
             return
 
         test_is_crashed = backend.is_crashed(test_path)
@@ -98,12 +98,12 @@ class TestRun:
             return
 
         if test_is_crashed:
-            self.printer.print_test_result("CRASH")
+            self.printer.print_test_result_ln("CRASH")
             self._crashed.append("%s (%s)" % (doc_path, backend.get_name()))
             return
 
         if test_is_failed:
-            self.printer.print_test_result("FAIL (status error %d)" % (test_is_failed))
+            self.printer.print_test_result_ln("FAIL (status error %d)" % (test_is_failed))
             self._failed_status_error("%s (%s)" % (doc_path, backend.get_name()))
             return
 
