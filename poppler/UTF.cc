@@ -26,6 +26,14 @@
 #include "PDFDocEncoding.h"
 #include "UTF.h"
 
+bool UnicodeIsValid(Unicode ucs4)
+{
+  return (ucs4 < 0x110000) &&
+    ((ucs4 & 0xfffff800) != 0xd800) &&
+    (ucs4 < 0xfdd0 || ucs4 > 0xfdef) &&
+    ((ucs4 & 0xfffe) != 0xfffe);
+}
+
 int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4)
 {
   int i, n, len;
@@ -63,6 +71,9 @@ int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4)
       u[n] = 0xfffd;
     } else {
       u[n] = utf16[i];
+    }
+    if (!UnicodeIsValid(u[n])) {
+      u[n] = 0xfffd;
     }
     n++;
   }

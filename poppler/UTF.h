@@ -32,4 +32,8 @@ int UTF16toUCS4(const Unicode *utf16, int utf16_len, Unicode **ucs4_out);
 //   returns number of UCS-4 characters
 int TextStringToUCS4(GooString *textStr, Unicode **ucs4);
 
+// check if UCS-4 character is valid
+bool UnicodeIsValid(Unicode ucs4);
+
+
 #endif

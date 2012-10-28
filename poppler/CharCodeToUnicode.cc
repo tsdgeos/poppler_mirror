@@ -439,7 +439,7 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n,
       for (i = oldLen; i < mapLen; ++i) {
         map[i] = 0;
       }
-	}
+    }
   }
   if (n <= 4) {
     if (!parseHex(uStr, n, &u)) {
@@ -447,6 +447,9 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n,
       return;
     }
     map[code] = u + offset;
+    if (!UnicodeIsValid(map[code])) {
+      map[code] = 0xfffd;
+    }
   } else {
     if (sMapLen >= sMapSize) {
       sMapSize = sMapSize + 16;
@@ -595,7 +598,11 @@ void CharCodeToUnicode::setMapping(CharCode c, Unicode *u, int len) {
     sMap[i].len = len;
     sMap[i].u = (Unicode*)gmallocn(len, sizeof(Unicode));
     for (j = 0; j < len; ++j) {
-      sMap[i].u[j] = u[j];
+      if (UnicodeIsValid(u[j])) {
+        sMap[i].u[j] = u[j];
+      } else {
+        sMap[i].u[j] = 0xfffd;
+      }
     }
   }
 }
