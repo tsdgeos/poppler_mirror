@@ -945,10 +945,21 @@ GBool CairoOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTrian
   fill_pattern = cairo_pattern_create_mesh ();
 
   for (i = 0; i < shading->getNTriangles(); i++) {
-    shading->getTriangle(i,
-			 &x0, &y0, &color[0],
-			 &x1, &y1, &color[1],
-			 &x2, &y2, &color[2]);
+    if (shading->isParameterized()) {
+      double color0, color1, color2;
+      shading->getTriangle(i, &x0, &y0, &color0,
+                              &x1, &y1, &color1,
+                              &x2, &y2, &color2);
+      shading->getParameterizedColor(color0, &color[0]);
+      shading->getParameterizedColor(color1, &color[1]);
+      shading->getParameterizedColor(color2, &color[2]);
+    } else {
+      shading->getTriangle(i,
+                           &x0, &y0, &color[0],
+                           &x1, &y1, &color[1],
+                           &x2, &y2, &color[2]);
+
+    }
 
     cairo_mesh_pattern_begin_patch (fill_pattern);
 
