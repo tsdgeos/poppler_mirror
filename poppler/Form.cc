@@ -1130,7 +1130,7 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, For
   }
   obj1.free();
 
-  // find selected items and convert choice's human readable strings to UTF16
+  // find selected items
   if (Form::fieldLookup(dict, "V", &obj1)->isString()) {
     for (int i = 0; i < numChoices; i++) {
       if (!choices[i].optionName)
@@ -1138,13 +1138,6 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, For
 
       if (choices[i].optionName->cmp(obj1.getString()) == 0)
         choices[i].selected = true;
-
-      if (!choices[i].optionName->hasUnicodeMarker()) {
-        int len;
-        char* buffer = pdfDocEncodingToUTF16(choices[i].optionName, &len);
-        choices[i].optionName->Set(buffer, len);
-        delete [] buffer;
-      }
     }
   } else if (obj1.isArray()) {
     for (int i = 0; i < numChoices; i++) {
@@ -1161,13 +1154,6 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, For
           break;
         }
         obj2.free();
-      }
-
-      if (!choices[i].optionName->hasUnicodeMarker()) {
-        int len;
-        char* buffer = pdfDocEncodingToUTF16(choices[i].optionName, &len);
-        choices[i].optionName->Set(buffer, len);
-        delete [] buffer;
       }
     }
   }
