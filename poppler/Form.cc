@@ -1130,44 +1130,57 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, For
   }
   obj1.free();
 
-  // find selected items
-  // Note: According to PDF specs, /V should *never* contain the exportVal.
-  // However, if /Opt is an array of (exportVal,optionName) pairs, acroread
-  // seems to expect the exportVal instead of the optionName and so we do too.
-  if (Form::fieldLookup(dict, "V", &obj1)->isString()) {
-    for (int i = 0; i < numChoices; i++) {
-      if (choices[i].exportVal) {
-        if (choices[i].exportVal->cmp(obj1.getString()) == 0) {
-          choices[i].selected = true;
-        }
-      } else if (choices[i].optionName) {
-        if (choices[i].optionName->cmp(obj1.getString()) == 0) {
-          choices[i].selected = true;
-        }
+  // Find selected items
+  // Note: PDF specs say that /V has precedence over /I, but acroread seems to
+  // do the opposite. We do the same.
+  if (Form::fieldLookup(dict, "I", &obj1)->isArray()) {
+    for (int i = 0; i < obj1.arrayGetLength(); i++) {
+      Object obj2;
+      if (obj1.arrayGet(i, &obj2)->isInt() && obj2.getInt() >= 0 && obj2.getInt() < numChoices) {
+        choices[obj2.getInt()].selected = true;
       }
+      obj2.free();
     }
-  } else if (obj1.isArray()) {
-    for (int i = 0; i < numChoices; i++) {
-      for (int j = 0; j < obj1.arrayGetLength(); j++) {
-        Object obj2;
-        obj1.arrayGet(j, &obj2);
-        GBool matches = gFalse;
-
+  } else {
+    obj1.free();
+    // Note: According to PDF specs, /V should *never* contain the exportVal.
+    // However, if /Opt is an array of (exportVal,optionName) pairs, acroread
+    // seems to expect the exportVal instead of the optionName and so we do too.
+    if (Form::fieldLookup(dict, "V", &obj1)->isString()) {
+      for (int i = 0; i < numChoices; i++) {
         if (choices[i].exportVal) {
-          if (choices[i].exportVal->cmp(obj2.getString()) == 0) {
-            matches = gTrue;
+          if (choices[i].exportVal->cmp(obj1.getString()) == 0) {
+            choices[i].selected = true;
           }
         } else if (choices[i].optionName) {
-          if (choices[i].optionName->cmp(obj2.getString()) == 0) {
-            matches = gTrue;
+          if (choices[i].optionName->cmp(obj1.getString()) == 0) {
+            choices[i].selected = true;
           }
         }
+      }
+    } else if (obj1.isArray()) {
+      for (int i = 0; i < numChoices; i++) {
+        for (int j = 0; j < obj1.arrayGetLength(); j++) {
+          Object obj2;
+          obj1.arrayGet(j, &obj2);
+          GBool matches = gFalse;
 
-        obj2.free();
+          if (choices[i].exportVal) {
+            if (choices[i].exportVal->cmp(obj2.getString()) == 0) {
+              matches = gTrue;
+            }
+          } else if (choices[i].optionName) {
+            if (choices[i].optionName->cmp(obj2.getString()) == 0) {
+              matches = gTrue;
+            }
+          }
 
-        if (matches) {
-          choices[i].selected = true;
-          break; // We've determined that this option is selected. No need to keep on scanning
+          obj2.free();
+
+          if (matches) {
+            choices[i].selected = true;
+            break; // We've determined that this option is selected. No need to keep on scanning
+          }
         }
       }
     }
