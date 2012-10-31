@@ -1165,6 +1165,11 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, For
           break; // We've determined that this option is selected. No need to keep on scanning
         }
       }
+
+      // Set custom value if /V doesn't refer to any predefined option and the field is user-editable
+      if (!optionFound && edit) {
+        editedChoice = obj1.getString()->copy();
+      }
     } else if (obj1.isArray()) {
       for (int i = 0; i < numChoices; i++) {
         for (int j = 0; j < obj1.arrayGetLength(); j++) {
