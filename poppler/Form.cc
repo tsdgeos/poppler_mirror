@@ -1131,29 +1131,44 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, For
   obj1.free();
 
   // find selected items
+  // Note: According to PDF specs, /V should *never* contain the exportVal.
+  // However, if /Opt is an array of (exportVal,optionName) pairs, acroread
+  // seems to expect the exportVal instead of the optionName and so we do too.
   if (Form::fieldLookup(dict, "V", &obj1)->isString()) {
     for (int i = 0; i < numChoices; i++) {
-      if (!choices[i].optionName)
-        continue;
-
-      if (choices[i].optionName->cmp(obj1.getString()) == 0)
-        choices[i].selected = true;
+      if (choices[i].exportVal) {
+        if (choices[i].exportVal->cmp(obj1.getString()) == 0) {
+          choices[i].selected = true;
+        }
+      } else if (choices[i].optionName) {
+        if (choices[i].optionName->cmp(obj1.getString()) == 0) {
+          choices[i].selected = true;
+        }
+      }
     }
   } else if (obj1.isArray()) {
     for (int i = 0; i < numChoices; i++) {
-      if (!choices[i].optionName)
-        continue;
-
       for (int j = 0; j < obj1.arrayGetLength(); j++) {
         Object obj2;
-
         obj1.arrayGet(j, &obj2);
-        if (choices[i].optionName->cmp(obj2.getString()) == 0) {
-          choices[i].selected = true;
-          obj2.free();
-          break;
+        GBool matches = gFalse;
+
+        if (choices[i].exportVal) {
+          if (choices[i].exportVal->cmp(obj2.getString()) == 0) {
+            matches = gTrue;
+          }
+        } else if (choices[i].optionName) {
+          if (choices[i].optionName->cmp(obj2.getString()) == 0) {
+            matches = gTrue;
+          }
         }
+
         obj2.free();
+
+        if (matches) {
+          choices[i].selected = true;
+          break; // We've determined that this option is selected. No need to keep on scanning
+        }
       }
     }
   }
@@ -1204,7 +1219,9 @@ void FormFieldChoice::updateSelection() {
             objI.arrayAdd(obj1.initInt(i));
           }
 
-          if (choices[i].optionName) {
+          if (choices[i].exportVal) {
+            objV.initString(choices[i].exportVal->copy());
+          } else if (choices[i].optionName) {
             objV.initString(choices[i].optionName->copy());
           }
 
@@ -1220,7 +1237,9 @@ void FormFieldChoice::updateSelection() {
             objI.arrayAdd(obj1.initInt(i));
           }
 
-          if (choices[i].optionName) {
+          if (choices[i].exportVal) {
+            objV.arrayAdd(obj1.initString(choices[i].exportVal->copy()));
+          } else if (choices[i].optionName) {
             objV.arrayAdd(obj1.initString(choices[i].optionName->copy()));
           }
         }
