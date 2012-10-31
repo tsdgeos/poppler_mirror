@@ -1147,15 +1147,22 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, For
     // However, if /Opt is an array of (exportVal,optionName) pairs, acroread
     // seems to expect the exportVal instead of the optionName and so we do too.
     if (Form::fieldLookup(dict, "V", &obj1)->isString()) {
+      GBool optionFound = gFalse;
+
       for (int i = 0; i < numChoices; i++) {
         if (choices[i].exportVal) {
           if (choices[i].exportVal->cmp(obj1.getString()) == 0) {
-            choices[i].selected = true;
+            optionFound = gTrue;
           }
         } else if (choices[i].optionName) {
           if (choices[i].optionName->cmp(obj1.getString()) == 0) {
-            choices[i].selected = true;
+            optionFound = gTrue;
           }
+        }
+
+        if (optionFound) {
+          choices[i].selected = true;
+          break; // We've determined that this option is selected. No need to keep on scanning
         }
       }
     } else if (obj1.isArray()) {
