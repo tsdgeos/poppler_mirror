@@ -1198,7 +1198,7 @@ void FormFieldChoice::updateSelection() {
     if (numSelected == 0) {
       obj1.initString(new GooString(""));
     } else if (numSelected == 1) {
-      for (int i = 0; numChoices; i++) {
+      for (int i = 0; i < numChoices; i++) {
         if (choices[i].optionName && choices[i].selected) {
           obj1.initString(choices[i].optionName->copy());
           break;
