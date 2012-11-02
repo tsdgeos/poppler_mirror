@@ -1286,20 +1286,30 @@ void FormFieldChoice::unselectAll ()
 }
 
 void FormFieldChoice::deselectAll () {
+  delete editedChoice;
+  editedChoice = NULL;
+
   unselectAll();
   updateSelection();
 }
 
 void FormFieldChoice::toggle (int i)
 {
+  delete editedChoice;
+  editedChoice = NULL;
+
   choices[i].selected = !choices[i].selected;
   updateSelection();
 }
 
 void FormFieldChoice::select (int i)
 {
+  delete editedChoice;
+  editedChoice = NULL;
+
   if (!multiselect)
     unselectAll();
+
   choices[i].selected = true;
   updateSelection();
 }
