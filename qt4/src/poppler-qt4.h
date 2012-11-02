@@ -853,6 +853,17 @@ delete it;
 	Q_DECLARE_FLAGS( RenderHints, RenderHint )
 
 	/**
+	   Form types
+
+	   \since 0.22
+	*/
+	enum FormType {
+	    NoForm,    ///< Document doesn't contain forms
+	    AcroForm,  ///< AcroForm
+	    XfaForm    ///< Adobe XML Forms Architecture (XFA), currently unsupported
+	};
+
+	/**
 	  Set a color display profile for the current document.
 
 	  \param outputProfileA is a \c cmsHPROFILE of the LCMS library.
@@ -1362,6 +1373,13 @@ QString subject = m_doc->info("Subject");
 	   \since 0.16
 	*/
 	bool getPdfId(QByteArray *permanentId, QByteArray *updateId) const;
+
+	/**
+	   Returns the type of forms contained in the document
+
+	   \since 0.22
+	*/
+	FormType formType() const;
 
 	/**
 	   Destructor.

@@ -229,16 +229,17 @@ int main(int argc, char *argv[]) {
 	 doc->getStructTreeRoot()->isDict() ? "yes" : "no");
 
   // print form info
-  if ((acroForm = doc->getCatalog()->getAcroForm())->isDict()) {
-    acroForm->dictLookup("XFA", &xfa);
-    if (xfa.isStream() || xfa.isArray()) {
-      printf("Form:           XFA\n");
-    } else {
+  switch (doc->getCatalog()->getFormType())
+  {
+    case Catalog::NoForm:
+      printf("Form:           none\n");
+      break;
+    case Catalog::AcroForm:
       printf("Form:           AcroForm\n");
-    }
-    xfa.free();
-  } else {
-    printf("Form:           none\n");
+      break;
+    case Catalog::XfaForm:
+      printf("Form:           XFA\n");
+      break;
   }
 
   // print page count

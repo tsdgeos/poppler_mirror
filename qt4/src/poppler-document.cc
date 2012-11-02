@@ -6,6 +6,7 @@
  * Copyright (C) 2010, 2011 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012 Koji Otani <sho@bbr.jp>
  * Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+ * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -610,6 +611,21 @@ namespace Poppler {
             *updateId = gooUpdateId.getCString();
 
         return true;
+    }
+
+    Document::FormType Document::formType() const
+    {
+        switch ( m_doc->doc->getCatalog()->getFormType() )
+        {
+            case Catalog::NoForm:
+                return Document::NoForm;
+            case Catalog::AcroForm:
+                return Document::AcroForm;
+            case Catalog::XfaForm:
+                return Document::XfaForm;
+        }
+
+        return Document::NoForm; // make gcc happy
     }
 
     QDateTime convertDate( char *dateString )

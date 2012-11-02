@@ -24,6 +24,7 @@
 // Copyright (C) 2008, 2011 Pino Toscano <pino@kde.org>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -862,6 +863,24 @@ Object *Catalog::getDests()
   }
 
   return &dests;
+}
+
+Catalog::FormType Catalog::getFormType()
+{
+  Object xfa;
+  FormType res = NoForm;
+
+  if (acroForm.isDict()) {
+    acroForm.dictLookup("XFA", &xfa);
+    if (xfa.isStream() || xfa.isArray()) {
+      res = XfaForm;
+    } else {
+      res = AcroForm;
+    }
+    xfa.free();
+  }
+
+  return res;
 }
 
 Form *Catalog::getForm()
