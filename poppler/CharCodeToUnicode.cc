@@ -459,12 +459,14 @@ void CharCodeToUnicode::addMapping(CharCode code, char *uStr, int n,
     Unicode *utf16 = (Unicode*)gmallocn(utf16Len, sizeof(Unicode));
     for (j = 0; j < utf16Len; ++j) {
       if (!parseHex(uStr + j*4, 4, &utf16[j])) {
+	gfree(utf16);
 	error(errSyntaxWarning, -1, "Illegal entry in ToUnicode CMap");
 	return;
       }
     }
     utf16[utf16Len - 1] += offset;
     sMap[sMapLen].len = UTF16toUCS4(utf16, utf16Len, &sMap[sMapLen].u);
+    gfree(utf16);
     ++sMapLen;
   }
 }
