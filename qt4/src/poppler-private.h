@@ -1,10 +1,11 @@
 /* poppler-private.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2006-2009, 2011 by Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2009, 2011, 2012 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2009, 2011 by Pino Toscano <pino@kde.org>
  * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
  * Copyright (C) 2011 Hib Eris <hib@hiberis.nl>
+ * Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -124,11 +125,46 @@ namespace Poppler {
 			{
 #if defined(HAVE_SPLASH)
 			SplashColor bgColor;
-			bgColor[0] = paperColor.blue();
-			bgColor[1] = paperColor.green();
-			bgColor[2] = paperColor.red();
+			GBool overprint = m_hints & Document::OverprintPreview ? gTrue : gFalse;
+			globalParams->setOverprintPreview(overprint);
+#if defined(SPLASH_CMYK)
+			if (overprint)
+			{
+				Guchar c, m, y, k;
+
+				c = 255 - paperColor.blue();
+				m = 255 - paperColor.red();
+				y = 255 - paperColor.green();
+				k = c;
+				if (m < k) {
+					k = m;
+				}
+				if (y < k) {
+					k = y;
+				}
+				bgColor[0] = c - k;
+				bgColor[1] = m - k;
+				bgColor[2] = y - k;
+				bgColor[3] = k;
+				for (int i = 4; i < SPOT_NCOMPS + 4; i++) {
+					bgColor[i] = 0;
+				}
+			}
+			else
+#endif
+			{
+				bgColor[0] = paperColor.blue();
+				bgColor[1] = paperColor.green();
+				bgColor[2] = paperColor.red();
+			}
 			GBool AA = m_hints & Document::TextAntialiasing ? gTrue : gFalse;
-			SplashOutputDev * splashOutputDev = new SplashOutputDev(splashModeXBGR8, 4, gFalse, bgColor, gTrue, AA);
+			SplashOutputDev * splashOutputDev = new SplashOutputDev(
+#if defined(SPLASH_CMYK)
+				(overprint) ? splashModeDeviceN8 : splashModeXBGR8,
+#else
+				splashModeXBGR8,
+#endif 
+				4, gFalse, bgColor, gTrue, AA);
 			splashOutputDev->setVectorAntialias(m_hints & Document::Antialiasing ? gTrue : gFalse);
 			splashOutputDev->setFreeTypeHinting(m_hints & Document::TextHinting ? gTrue : gFalse, m_hints & Document::TextSlightHinting ? gTrue : gFalse);
 			splashOutputDev->startDoc(doc);
@@ -149,25 +185,10 @@ namespace Poppler {
 			return;
 
 		paperColor = color;
-		if ( m_outputDev == NULL )
-			return;
-
-		switch ( m_backend )
-		{
-			case Document::SplashBackend:
-			{
-#if defined(HAVE_SPLASH)
-				SplashOutputDev *splash_output = static_cast<SplashOutputDev *>( m_outputDev );
-				SplashColor bgColor;
-				bgColor[0] = paperColor.blue();
-				bgColor[1] = paperColor.green();
-				bgColor[2] = paperColor.red();
-				splash_output->setPaperColor(bgColor);
-#endif
-				break;
-			}
-			default: ;
-		}
+		
+		// Make sure the new paper color will be picked up for the next rendering
+		delete m_outputDev;
+		m_outputDev = NULL;
 	}
 	
 	void fillMembers()

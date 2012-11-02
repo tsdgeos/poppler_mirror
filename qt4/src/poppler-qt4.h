@@ -13,6 +13,7 @@
  * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012, Tobias Koenig <tobias.koenig@kdab.com>
  * Copyright (C) 2012 Adam Reichold <adamreichold@myopera.com>
+ * Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -846,7 +847,8 @@ delete it;
 	    Antialiasing = 0x00000001,      ///< Antialiasing for graphics
 	    TextAntialiasing = 0x00000002,  ///< Antialiasing for text
 	    TextHinting = 0x00000004,       ///< Hinting for text \since 0.12.1
-	    TextSlightHinting = 0x00000008  ///< Lighter hinting for text when combined with TextHinting \since 0.18
+	    TextSlightHinting = 0x00000008, ///< Lighter hinting for text when combined with TextHinting \since 0.18
+	    OverprintPreview = 0x00000010   ///< Overprint preview \since 0.22
 	};
 	Q_DECLARE_FLAGS( RenderHints, RenderHint )
 
@@ -1624,6 +1626,13 @@ height = dummy.height();
        \since 0.12
     */
     POPPLER_QT4_EXPORT bool isCmsAvailable();
+    
+    /**
+       Whether the overprint preview functionality is available.
+
+       \since 0.22
+    */
+    POPPLER_QT4_EXPORT bool isOverprintPreviewAvailable();
 
     class SoundData;
     /**

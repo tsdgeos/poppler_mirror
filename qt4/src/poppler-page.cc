@@ -13,6 +13,7 @@
  * Copyright (C) 2012 Tobias Koenig <tokoe@kdab.com>
  * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012 Adam Reichold <adamreichold@myopera.com>
+ * Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -266,27 +267,30 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       int bw = bitmap->getWidth();
       int bh = bitmap->getHeight();
 
-      SplashColorPtr dataPtr = splash_output->getBitmap()->getDataPtr();
-
-      if (QSysInfo::BigEndian == QSysInfo::ByteOrder)
+      if (bitmap->convertToXBGR())
       {
-        uchar c;
-        int count = bw * bh * 4;
-        for (int k = 0; k < count; k += 4)
+        SplashColorPtr dataPtr = bitmap->getDataPtr();
+
+        if (QSysInfo::BigEndian == QSysInfo::ByteOrder)
         {
-          c = dataPtr[k];
-          dataPtr[k] = dataPtr[k+3];
-          dataPtr[k+3] = c;
+            uchar c;
+            int count = bw * bh * 4;
+            for (int k = 0; k < count; k += 4)
+            {
+            c = dataPtr[k];
+            dataPtr[k] = dataPtr[k+3];
+            dataPtr[k+3] = c;
 
-          c = dataPtr[k+1];
-          dataPtr[k+1] = dataPtr[k+2];
-          dataPtr[k+2] = c;
+            c = dataPtr[k+1];
+            dataPtr[k+1] = dataPtr[k+2];
+            dataPtr[k+2] = c;
+            }
         }
-      }
 
-      // construct a qimage SHARING the raw bitmap data in memory
-      QImage tmpimg( dataPtr, bw, bh, QImage::Format_ARGB32 );
-      img = tmpimg.copy();
+        // construct a qimage SHARING the raw bitmap data in memory
+        QImage tmpimg( dataPtr, bw, bh, QImage::Format_ARGB32 );
+        img = tmpimg.copy();
+      }
       // unload underlying xpdf bitmap
       splash_output->startPage( 0, NULL );
 #endif
