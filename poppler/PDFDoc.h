@@ -43,10 +43,10 @@
 #include "Page.h"
 #include "Annot.h"
 #include "OptionalContent.h"
+#include "Stream.h"
 
 class GooString;
 class BaseStream;
-enum CryptAlgorithm;
 class OutputDev;
 class Links;
 class LinkAction;
