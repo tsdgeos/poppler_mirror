@@ -1,3 +1,17 @@
+Release 0.21.1
+        core:
+         * Annotation improvements
+         * Form improvements
+         * CairoImageOutputDev: Support parameterized Gouraud shading (Bug #56463)
+         * UTF validation fixes
+         * Do not call drawing routines if we don't need non text (Bug #54617)
+         * Fix Memory leak in CharCodeToUnicode (Bug #54702)
+
+        qt4:
+         * Make LinkRendition properties available (Bug #55378)
+         * Accessors for FormWidgetChoice::editChoice
+         * Implement overprint
+
 Release 0.21.0
         core:
          * Support the modification of files with Encrypt
