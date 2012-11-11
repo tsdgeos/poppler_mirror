@@ -1750,49 +1750,6 @@ void CairoOutputDev::getScaledSize(int  orig_width,
   }
 }
 
-cairo_surface_t *CairoOutputDev::downscaleSurface(cairo_surface_t *orig_surface) {
-  cairo_surface_t *dest_surface;
-  unsigned char *dest_buffer;
-  int dest_stride;
-  unsigned char *orig_buffer;
-  int orig_width, orig_height;
-  int orig_stride;
-  int scaledHeight;
-  int scaledWidth;
-  GBool res;
-
-  if (printing)
-    return NULL;
-
-  orig_width = cairo_image_surface_get_width (orig_surface);
-  orig_height = cairo_image_surface_get_height (orig_surface);
-  getScaledSize (orig_width, orig_height, &scaledWidth, &scaledHeight);
-  if (scaledWidth >= orig_width || scaledHeight >= orig_height)
-    return NULL;
-
-  dest_surface = cairo_surface_create_similar (orig_surface,
-					       cairo_surface_get_content (orig_surface),
-					       scaledWidth, scaledHeight);
-  dest_buffer = cairo_image_surface_get_data (dest_surface);
-  dest_stride = cairo_image_surface_get_stride (dest_surface);
-
-  orig_buffer = cairo_image_surface_get_data (orig_surface);
-  orig_stride = cairo_image_surface_get_stride (orig_surface);
-
-  res = downscale_box_filter((uint32_t *)orig_buffer,
-			     orig_stride, orig_width, orig_height,
-			     scaledWidth, scaledHeight, 0, 0,
-			     scaledWidth, scaledHeight,
-			     (uint32_t *)dest_buffer, dest_stride);
-  if (!res) {
-    cairo_surface_destroy (dest_surface);
-    return NULL;
-  }
-
-  return dest_surface;
-
-}
-
 cairo_filter_t
 CairoOutputDev::getFilterForSurface(cairo_surface_t *image,
 				    GBool interpolate)
@@ -2738,63 +2695,119 @@ void CairoOutputDev::setMimeData(Stream *str, Object *ref, cairo_surface_t *imag
   }
 }
 
-void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
-			       int width, int height,
-			       GfxImageColorMap *colorMap,
-			       GBool interpolate,
-			       int *maskColors, GBool inlineImg)
-{
-  cairo_surface_t *image;
-  cairo_pattern_t *pattern, *maskPattern;
+class RescaleDrawImage : public CairoRescaleBox {
+private:
   ImageStream *imgStr;
-  cairo_matrix_t matrix;
-  unsigned char *buffer;
-  int stride, i;
-  GfxRGB *lookup = NULL;
-  cairo_filter_t filter = CAIRO_FILTER_BILINEAR;
+  GfxRGB *lookup;
+  int width;
+  GfxImageColorMap *colorMap;
+  int *maskColors;
+  int current_row;
 
-  /* TODO: Do we want to cache these? */
-  imgStr = new ImageStream(str, width,
-			   colorMap->getNumPixelComps(),
-			   colorMap->getBits());
-  imgStr->reset();
+public:
+  cairo_surface_t *getSourceImage(Stream *str,
+                                  int widthA, int height,
+                                  int scaledWidth, int scaledHeight,
+                                  GBool printing,
+                                  GfxImageColorMap *colorMapA,
+                                  int *maskColorsA) {
+    cairo_surface_t *image = NULL;
+    int i;
+
+    lookup = NULL;
+    colorMap = colorMapA;
+    maskColors = maskColorsA;
+    width = widthA;
+    current_row = -1;
+
+    /* TODO: Do we want to cache these? */
+    imgStr = new ImageStream(str, width,
+                             colorMap->getNumPixelComps(),
+                             colorMap->getBits());
+    imgStr->reset();
 
 #if 0
-  /* ICCBased color space doesn't do any color correction
-   * so check its underlying color space as well */
-  int is_identity_transform;
-  is_identity_transform = colorMap->getColorSpace()->getMode() == csDeviceRGB ||
-		  (colorMap->getColorSpace()->getMode() == csICCBased &&
-		   ((GfxICCBasedColorSpace*)colorMap->getColorSpace())->getAlt()->getMode() == csDeviceRGB);
+    /* ICCBased color space doesn't do any color correction
+     * so check its underlying color space as well */
+    int is_identity_transform;
+    is_identity_transform = colorMap->getColorSpace()->getMode() == csDeviceRGB ||
+      (colorMap->getColorSpace()->getMode() == csICCBased &&
+       ((GfxICCBasedColorSpace*)colorMap->getColorSpace())->getAlt()->getMode() == csDeviceRGB);
 #endif
 
-  image = cairo_image_surface_create (maskColors ?
-				      CAIRO_FORMAT_ARGB32 :
-				      CAIRO_FORMAT_RGB24,
-				      width, height);
-  if (cairo_surface_status (image))
-    goto cleanup;
+    // special case for one-channel (monochrome/gray/separation) images:
+    // build a lookup table here
+    if (colorMap->getNumPixelComps() == 1) {
+      int n;
+      Guchar pix;
 
-  // special case for one-channel (monochrome/gray/separation) images:
-  // build a lookup table here
-  if (colorMap->getNumPixelComps() == 1) {
-    int n;
-    Guchar pix;
+      n = 1 << colorMap->getBits();
+      lookup = (GfxRGB *)gmallocn(n, sizeof(GfxRGB));
+      for (i = 0; i < n; ++i) {
+        pix = (Guchar)i;
 
-    n = 1 << colorMap->getBits();
-    lookup = (GfxRGB *)gmallocn(n, sizeof(GfxRGB));
-    for (i = 0; i < n; ++i) {
-      pix = (Guchar)i;
-
-      colorMap->getRGB(&pix, &lookup[i]);
+        colorMap->getRGB(&pix, &lookup[i]);
+      }
     }
+
+    if (printing || scaledWidth >= width || scaledHeight >= height) {
+      // No downscaling. Create cairo image containing the source image data.
+      unsigned char *buffer;
+      int stride;
+
+      image = cairo_image_surface_create (maskColors ?
+                                          CAIRO_FORMAT_ARGB32 :
+                                          CAIRO_FORMAT_RGB24,
+                                          width, height);
+      if (cairo_surface_status (image))
+        goto cleanup;
+
+      buffer = cairo_image_surface_get_data (image);
+      stride = cairo_image_surface_get_stride (image);
+      for (int y = 0; y < height; y++) {
+        uint32_t *dest = (uint32_t *) (buffer + y * stride);
+        getRow(y, dest);
+      }
+    } else {
+      // // Downscaling required. Create cairo image the size of the
+      // rescaled image and // downscale the source image data into
+      // the cairo image. downScaleImage() will call getRow() to read
+      // source image data from the image stream. This avoids having
+      // to create an image the size of the source image which may
+      // exceed cairo's 32676x32767 image size limit (and also saves a
+      // lot of memory).
+      image = cairo_image_surface_create (maskColors ?
+                                          CAIRO_FORMAT_ARGB32 :
+                                          CAIRO_FORMAT_RGB24,
+                                          scaledWidth, scaledHeight);
+      if (cairo_surface_status (image))
+        goto cleanup;
+
+      downScaleImage(width, height,
+                     scaledWidth, scaledHeight,
+                     0, 0, scaledWidth, scaledHeight,
+                     image);
+    }
+    cairo_surface_mark_dirty (image);
+
+  cleanup:
+    gfree(lookup);
+    imgStr->close();
+    delete imgStr;
+    return image;
   }
 
-  buffer = cairo_image_surface_get_data (image);
-  stride = cairo_image_surface_get_stride (image);
-  for (int y = 0; y < height; y++) {
-    uint32_t *dest = (uint32_t *) (buffer + y * stride);
-    Guchar *pix = imgStr->getLine();
+  void getRow(int row_num, uint32_t *row_data) {
+    int i;
+    Guchar *pix;
+
+    if (row_num == current_row)
+      return;
+
+    while (current_row  < row_num) {
+      pix = imgStr->getLine();
+      current_row++;
+    }
 
     if (lookup) {
       Guchar *p = pix;
@@ -2802,54 +2815,63 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 
       for (i = 0; i < width; i++) {
         rgb = lookup[*p];
-        dest[i] =
-		((int) colToByte(rgb.r) << 16) |
-		((int) colToByte(rgb.g) << 8) |
-		((int) colToByte(rgb.b) << 0);
-	p++;
+        row_data[i] =
+          ((int) colToByte(rgb.r) << 16) |
+          ((int) colToByte(rgb.g) << 8) |
+          ((int) colToByte(rgb.b) << 0);
+        p++;
       }
     } else {
-      colorMap->getRGBLine (pix, dest, width);
+      colorMap->getRGBLine (pix, row_data, width);
     }
 
     if (maskColors) {
       for (int x = 0; x < width; x++) {
-	bool is_opaque = false;
-	for (int i = 0; i < colorMap->getNumPixelComps(); ++i) {
-	  if (pix[i] < maskColors[2*i] ||
-	      pix[i] > maskColors[2*i+1]) {
-	    is_opaque = true;
-	    break;
-	  }
-	}
-	if (is_opaque)
-	  *dest |= 0xff000000;
-	else
-	  *dest = 0;
-	dest++;
-	pix += colorMap->getNumPixelComps();
+        bool is_opaque = false;
+        for (int i = 0; i < colorMap->getNumPixelComps(); ++i) {
+          if (pix[i] < maskColors[2*i] ||
+              pix[i] > maskColors[2*i+1]) {
+            is_opaque = true;
+            break;
+          }
+        }
+        if (is_opaque)
+          *row_data |= 0xff000000;
+        else
+          *row_data = 0;
+        row_data++;
+        pix += colorMap->getNumPixelComps();
       }
     }
   }
-  gfree(lookup);
 
-  LOG (printf ("drawImage %dx%d\n", width, height));
+};
 
-  cairo_surface_t *scaled_surface;
+void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
+			       int widthA, int heightA,
+			       GfxImageColorMap *colorMap,
+			       GBool interpolate,
+			       int *maskColors, GBool inlineImg)
+{
+  cairo_surface_t *image;
+  cairo_pattern_t *pattern, *maskPattern;
+  cairo_matrix_t matrix;
+  int width, height;
+  int scaledWidth, scaledHeight;
+  cairo_filter_t filter = CAIRO_FILTER_BILINEAR;
+  RescaleDrawImage rescale;
 
-  scaled_surface = downscaleSurface (image);
-  if (scaled_surface) {
-    if (cairo_surface_status (scaled_surface))
-      goto cleanup;
-    cairo_surface_destroy (image);
-    image = scaled_surface;
-    width = cairo_image_surface_get_width (image);
-    height = cairo_image_surface_get_height (image);
-  } else {
+  LOG (printf ("drawImage %dx%d\n", widthA, heightA));
+
+  getScaledSize (widthA, heightA, &scaledWidth, &scaledHeight);
+  image = rescale.getSourceImage(str, widthA, heightA, scaledWidth, scaledHeight, printing, colorMap, maskColors);
+  if (!image)
+    return;
+
+  width = cairo_image_surface_get_width (image);
+  height = cairo_image_surface_get_height (image);
+  if (width == widthA && height == heightA)
     filter = getFilterForSurface (image, interpolate);
-  }
-
-  cairo_surface_mark_dirty (image);
 
   if (!inlineImg) /* don't read stream twice if it is an inline image */
     setMimeData(str, ref, image);
@@ -2857,7 +2879,7 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   pattern = cairo_pattern_create_for_surface (image);
   cairo_surface_destroy (image);
   if (cairo_pattern_status (pattern))
-    goto cleanup;
+    return;
 
   cairo_pattern_set_filter (pattern, filter);
 
@@ -2869,7 +2891,7 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   cairo_pattern_set_matrix (pattern, &matrix);
   if (cairo_pattern_status (pattern)) {
     cairo_pattern_destroy (pattern);
-    goto cleanup;
+    return;
   }
 
   if (!mask && fill_opacity != 1.0) {
@@ -2912,10 +2934,6 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   }
 
   cairo_pattern_destroy (pattern);
-
-cleanup:
-  imgStr->close();
-  delete imgStr;
 }
 
 
