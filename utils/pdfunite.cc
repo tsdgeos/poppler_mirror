@@ -7,6 +7,7 @@
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 #include <PDFDoc.h>
@@ -56,7 +57,8 @@ int main (int argc, char *argv[])
   int exitCode;
 
   exitCode = 99;
-  if (argc <= 3 || printVersion || printHelp) {
+  const GBool ok = parseArgs (argDesc, &argc, argv);
+  if (!ok || argc <= 3 || printVersion || printHelp) {
     fprintf(stderr, "pdfunite version %s\n", PACKAGE_VERSION);
     fprintf(stderr, "%s\n", popplerCopyright);
     fprintf(stderr, "%s\n", xpdfCopyright);
