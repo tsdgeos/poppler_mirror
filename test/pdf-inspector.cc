@@ -1,9 +1,8 @@
 //========================================================================
 //
-// GDKSplashOutputDev.cc
+// pdf-inspector.cc
 //
-// Copyright 2003 Glyph & Cog, LLC
-// Copyright 2004 Red Hat, Inc. (GDK port)
+// Copyright 2005 Jonathan Blandford <jrb@redhat.com>
 //
 //========================================================================
 
