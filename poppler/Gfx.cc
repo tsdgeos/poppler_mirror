@@ -568,7 +568,6 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
     baseMatrix[i] = state->getCTM()[i];
   }
   formDepth = 0;
-  textClipBBoxEmpty = gTrue;
   ocState = gTrue;
   parser = NULL;
   abortCheckCbk = abortCheckCbkA;
@@ -621,7 +620,6 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict,
     baseMatrix[i] = state->getCTM()[i];
   }
   formDepth = 0;
-  textClipBBoxEmpty = gTrue;
   ocState = gTrue;
   parser = NULL;
   abortCheckCbk = abortCheckCbkA;
@@ -3618,7 +3616,6 @@ void Gfx::opBeginText(Object args[], int numArgs) {
   out->updateTextMat(state);
   out->updateTextPos(state);
   fontChanged = gTrue;
-  textClipBBoxEmpty = gTrue;
 }
 
 void Gfx::opEndText(Object args[], int numArgs) {

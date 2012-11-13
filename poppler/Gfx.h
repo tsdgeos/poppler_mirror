@@ -17,7 +17,7 @@
 // Copyright (C) 2007 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2010, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -219,9 +219,6 @@ private:
   double baseMatrix[6];		// default matrix for most recent
 				//   page/form/pattern
   int formDepth;
-  double textClipBBox[4];	// text clipping bounding box
-  GBool textClipBBoxEmpty;	// true if textClipBBox has not been
-				//   initialized yet
   GBool ocState;		// true if drawing is enabled, false if
 				//   disabled
 
