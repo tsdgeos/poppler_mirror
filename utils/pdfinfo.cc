@@ -109,7 +109,6 @@ int main(int argc, char *argv[]) {
   UnicodeMap *uMap;
   Page *page;
   Object info, xfa;
-  Object *acroForm;
   char buf[256];
   double w, h, wISO, hISO;
   FILE *f;
