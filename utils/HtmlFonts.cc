@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007, 2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
@@ -83,10 +83,10 @@ GooString *HtmlFontColor::convtoX(unsigned int xcol) const{
   char tmp;
   unsigned  int k;
   k = (xcol/16);
-  if ((k>=0)&&(k<10)) tmp=(char) ('0'+k); else tmp=(char)('a'+k-10);
+  if (k<10) tmp=(char) ('0'+k); else tmp=(char)('a'+k-10);
   xret->append(tmp);
   k = (xcol%16);
-  if ((k>=0)&&(k<10)) tmp=(char) ('0'+k); else tmp=(char)('a'+k-10);
+  if (k<10) tmp=(char) ('0'+k); else tmp=(char)('a'+k-10);
   xret->append(tmp);
  return xret;
 }

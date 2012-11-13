@@ -18,7 +18,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
-// Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Steven Murdoch <Steven.Murdoch@cl.cam.ac.uk>
 // Copyright (C) 2011 Joshua Richardson <jric@chegg.com>
 // Copyright (C) 2012 Igor Slepchin <igor.slepchin@gmail.com>
@@ -40,7 +40,7 @@ class HtmlFontColor{
    unsigned int r;
    unsigned int g;
    unsigned int b;
-   GBool Ok(unsigned int xcol){ return ((xcol<=255)&&(xcol>=0));}
+   GBool Ok(unsigned int xcol){ return xcol<=255;}
    GooString *convtoX(unsigned  int xcol) const;
  public:
    HtmlFontColor():r(0),g(0),b(0){}
