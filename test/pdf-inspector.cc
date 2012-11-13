@@ -287,7 +287,6 @@ PdfInspector::load(const char *file_name)
 
       filename_g = new GooString (file_name);
       doc = new PDFDoc(filename_g, 0, 0);
-      delete filename_g;
     }
   
   if (doc && !doc->isOk())
