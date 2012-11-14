@@ -2581,9 +2581,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
 
   cairo_set_source (cairo, pattern);
   if (!printing) {
-    cairo_rectangle (cairo, 0., 0.,
-		     MIN (width, maskWidth) / (double)width,
-		     MIN (height, maskHeight) / (double)height);
+    cairo_rectangle (cairo, 0., 0., 1., 1.);
     cairo_clip (cairo);
   }
   cairo_mask (cairo, maskPattern);
@@ -2592,9 +2590,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
     cairo_pop_group_to_source (cairo);
     cairo_save (cairo);
     if (!printing) {
-      cairo_rectangle (cairo, 0., 0.,
-		       MIN (width, maskWidth) / (double)width,
-		       MIN (height, maskHeight) / (double)height);
+      cairo_rectangle (cairo, 0., 0., 1., 1.);
       cairo_clip (cairo);
     }
     cairo_paint_with_alpha (cairo, fill_opacity);
@@ -2605,9 +2601,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
     cairo_save (cairo_shape);
     cairo_set_source (cairo_shape, pattern);
     if (!printing) {
-      cairo_rectangle (cairo_shape, 0., 0.,
-		       MIN (width, maskWidth) / (double)width,
-		       MIN (height, maskHeight) / (double)height);
+      cairo_rectangle (cairo_shape, 0., 0., 1., 1.);
       cairo_fill (cairo_shape);
     } else {
       cairo_mask (cairo_shape, pattern);
