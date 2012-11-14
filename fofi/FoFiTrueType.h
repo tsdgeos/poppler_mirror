@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2011, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 //
 // To see a description of the changes please see the Changelog file that
@@ -151,15 +151,6 @@ public:
   // PostScript font name.  (Only useful for OpenType CFF fonts.)
   void convertToType0(char *psName, int *cidMap, int nCIDs,
 		      FoFiOutputFunc outputFunc, void *outputStream);
-
-  // Write a clean TTF file, filling in missing tables and correcting
-  // various other errors.  If <name> is non-NULL, the font is renamed
-  // to <name>.  If <codeToGID> is non-NULL, the font is re-encoded,
-  // using a Windows Unicode cmap.  If <name> is NULL and the font is
-  // complete and correct, it will be written unmodified.  (Not useful
-  // for OpenType CFF fonts.)
-  void writeTTF(FoFiOutputFunc outputFunc, void *outputStream,
-		char *name = NULL, int *codeToGID = NULL);
 
   // Returns a pointer to the CFF font embedded in this OpenType font.
   // If successful, sets *<start> and *<length>, and returns true.

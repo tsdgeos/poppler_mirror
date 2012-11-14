@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2009, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 //
@@ -45,14 +45,6 @@
 #if (__VMS_VER < 70000000)
 extern "C" int unlink(char *filename);
 #endif
-#endif
-
-//------------------------------------------------------------------------
-
-#if 0
-static void fileWrite(void *stream, const char *data, int len) {
-  fwrite(data, 1, len, (FILE *)stream);
-}
 #endif
 
 //------------------------------------------------------------------------
@@ -178,43 +170,11 @@ SplashFontFile *SplashFTFontEngine::loadTrueTypeFont(SplashFontFileID *idA,
 						     int *codeToGID,
 						     int codeToGIDLen,
 						     int faceIndex) {
-#if 0
-  FoFiTrueType *ff;
-  GooString *tmpFileName;
-  FILE *tmpFile;
-  SplashFontFile *ret;
-
-  if (!(ff = FoFiTrueType::load(fileName))) {
-    return NULL;
-  }
-  tmpFileName = NULL;
-  if (!openTempFile(&tmpFileName, &tmpFile, "wb")) {
-    delete ff;
-    return NULL;
-  }
-  ff->writeTTF(&fileWrite, tmpFile);
-  delete ff;
-  fclose(tmpFile);
-  ret = SplashFTFontFile::loadTrueTypeFont(this, idA,
-					   tmpFileName->getCString(),
-					   gTrue, codeToGID, codeToGIDLen,
-					   faceIndex);
-  if (ret) {
-    if (deleteFile) {
-      unlink(fileName);
-    }
-  } else {
-    unlink(tmpFileName->getCString());
-  }
-  delete tmpFileName;
-  return ret;
-#else
   SplashFontFile *ret;
   ret = SplashFTFontFile::loadTrueTypeFont(this, idA, src,
 					   codeToGID, codeToGIDLen,
 					   faceIndex);
   return ret;
-#endif
 }
 
 #endif // HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
