@@ -465,6 +465,11 @@ public:
 			       Stream *maskStr,
 			       int maskWidth, int maskHeight,
 			       GBool maskInvert, GBool maskInterpolate);
+  virtual void setSoftMaskFromImageMask(GfxState *state, Object *ref, Stream *str,
+                                        int width, int height, GBool invert,
+                                        GBool inlineImg, double *baseMatrix);
+  virtual void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) {}
+
 
   //----- transparency groups and soft masks
   virtual void beginTransparencyGroup(GfxState * /*state*/, double * /*bbox*/,
