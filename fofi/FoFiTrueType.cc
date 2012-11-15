@@ -1415,32 +1415,6 @@ void FoFiTrueType::parse() {
     return;
   }
 
-  // make sure the loca table is sane (correct length and entries are
-  // in bounds)
-  if (!openTypeCFF) {
-    i = seekTable("loca");
-    if (tables[i].len < 0) {
-      parsedOk = gFalse;
-      return;
-    }
-    if (tables[i].len < (nGlyphs + 1) * (locaFmt ? 4 : 2)) {
-      nGlyphs = tables[i].len / (locaFmt ? 4 : 2) - 1;
-    }
-    for (j = 0; j <= nGlyphs; ++j) {
-      if (locaFmt) {
-	pos = (int)getU32BE(tables[i].offset + j*4, &parsedOk);
-      } else {
-	pos = getU16BE(tables[i].offset + j*2, &parsedOk);
-      }
-      if (pos < 0 || pos > len) {
-	parsedOk = gFalse;
-      }
-    }
-    if (!parsedOk) {
-      return;
-    }
-  }
-
   // read the post table
   readPostTable();
 }
