@@ -45,6 +45,7 @@
 #include "goo/ImgWriter.h"
 #include "goo/JpegWriter.h"
 #include "goo/PNGWriter.h"
+#include "goo/TiffWriter.h"
 #include "GlobalParams.h"
 #include "Object.h"
 #include "PDFDoc.h"
@@ -75,6 +76,7 @@ static GBool ps = gFalse;
 static GBool eps = gFalse;
 static GBool pdf = gFalse;
 static GBool svg = gFalse;
+static GBool tiff = gFalse;
 
 static int firstPage = 1;
 static int lastPage = 0;
@@ -109,6 +111,7 @@ static GBool expand = gFalse;
 static GBool noShrink = gFalse;
 static GBool noCenter = gFalse;
 static GBool duplex = gFalse;
+static char tiffCompressionStr[16] = "";
 
 static char ownerPassword[33] = "";
 static char userPassword[33] = "";
@@ -124,6 +127,12 @@ static const ArgDesc argDesc[] = {
 #if ENABLE_LIBJPEG
   {"-jpeg",   argFlag,     &jpeg,           0,
    "generate a JPEG file"},
+#endif
+#if ENABLE_LIBTIFF
+  {"-tiff",    argFlag,     &tiff,           0,
+   "generate a TIFF file"},
+  {"-tiffcompression", argString, tiffCompressionStr, sizeof(tiffCompressionStr),
+   "set TIFF compression: none, packbits, jpeg, lzw, deflate"},
 #endif
 #if CAIRO_HAS_PS_SURFACE
   {"-ps",     argFlag,     &ps,            0,
@@ -288,6 +297,18 @@ void writePageImage(GooString *filename)
     else
       writer = new JpegWriter(JCS_RGB);
 #endif
+  } else if (tiff) {
+#if ENABLE_LIBTIFF
+    if (transp)
+      writer = new TiffWriter(TiffWriter::RGBA_PREMULTIPLIED);
+    else if (gray)
+      writer = new TiffWriter(TiffWriter::GRAY);
+    else if (mono)
+      writer = new TiffWriter(TiffWriter::MONOCHROME);
+    else
+      writer = new TiffWriter(TiffWriter::RGB);
+    static_cast<TiffWriter*>(writer)->setCompressionString(tiffCompressionStr);
+#endif
   }
   if (!writer)
     return;
@@ -316,21 +337,30 @@ void writePageImage(GooString *filename)
   for (int y = 0; y < height; y++ ) {
     uint32_t *pixel = (uint32_t *) (data + y*stride);
     unsigned char *rowp = row;
+    int bit = 7;
     for (int x = 0; x < width; x++, pixel++) {
       if (transp) {
+        if (tiff) {
+          // RGBA premultipled format
+          *rowp++ = (*pixel &   0xff0000) >> 16;
+          *rowp++ = (*pixel &   0x00ff00) >>  8;
+          *rowp++ = (*pixel &   0x0000ff) >>  0;
+          *rowp++ = (*pixel & 0xff000000) >> 24;
+        } else {
 	// unpremultiply into RGBA format
-	uint8_t a;
-	a = (*pixel & 0xff000000) >> 24;
-	if (a == 0) {
-	  *rowp++ = 0;
-	  *rowp++ = 0;
-	  *rowp++ = 0;
-	} else {
-	  *rowp++ = (((*pixel & 0xff0000) >> 16) * 255 + a / 2) / a;
-	  *rowp++ = (((*pixel & 0x00ff00) >>  8) * 255 + a / 2) / a;
-	  *rowp++ = (((*pixel & 0x0000ff) >>  0) * 255 + a / 2) / a;
-	}
-	*rowp++ = a;
+          uint8_t a;
+          a = (*pixel & 0xff000000) >> 24;
+          if (a == 0) {
+            *rowp++ = 0;
+            *rowp++ = 0;
+            *rowp++ = 0;
+          } else {
+            *rowp++ = (((*pixel & 0xff0000) >> 16) * 255 + a / 2) / a;
+            *rowp++ = (((*pixel & 0x00ff00) >>  8) * 255 + a / 2) / a;
+            *rowp++ = (((*pixel & 0x0000ff) >>  0) * 255 + a / 2) / a;
+          }
+          *rowp++ = a;
+        }
       } else if (gray || mono) {
 	// convert to gray
         // The PDF Reference specifies the DeviceRGB to DeviceGray conversion as
@@ -340,7 +370,19 @@ void writePageImage(GooString *filename)
 	int b = (*pixel & 0x000000ff) >>  0;
 	// an arbitrary integer approximation of .3*r + .59*g + .11*b
 	int y = (r*19661+g*38666+b*7209 + 32829)>>16;
-	*rowp++ = y;
+        if (tiff && mono) {
+          if (bit == 7)
+            *rowp = 0;
+          if (y > 127)
+            *rowp |= (1 << bit);
+          bit--;
+          if (bit < 0) {
+            bit = 7;
+            rowp++;
+          }
+        } else {
+          *rowp++ = y;
+        }
       } else {
 	// copy into RGB format
 	*rowp++ = (*pixel & 0x00ff0000) >> 16;
@@ -630,6 +672,8 @@ static GooString *getImageFileName(GooString *outputFileName, int numDigits, int
     imageName->append(".png");
   else if (jpeg)
     imageName->append(".jpg");
+  else if (tiff)
+    imageName->append(".tif");
 
   return imageName;
 }
@@ -702,7 +746,7 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
 static void checkInvalidPrintOption(GBool option, const char *option_name)
 {
   if (option) {
-    fprintf(stderr, "Error: %s may only be used with the -png or -jpeg output options.\n", option_name);
+    fprintf(stderr, "Error: %s may only be used with the -png, -jpeg, or -tiff output options.\n", option_name);
     exit(99);
   }
 }
@@ -752,6 +796,7 @@ int main(int argc, char *argv[]) {
 
   num_outputs = (png ? 1 : 0) +
                 (jpeg ? 1 : 0) +
+                (tiff ? 1 : 0) +
                 (ps ? 1 : 0) +
                 (eps ? 1 : 0) +
                 (pdf ? 1 : 0) +
@@ -764,7 +809,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Error: use only one of the output format options (-png, -jpeg, -ps, -eps, -pdf, -svg).\n");
     exit(99);
   }
-  if (png || jpeg)
+  if (png || jpeg || tiff)
     printing = gFalse;
   else
     printing = gTrue;
@@ -794,8 +839,8 @@ int main(int argc, char *argv[]) {
     exit(99);
   }
 
-  if (transp && !png) {
-    fprintf(stderr, "Error: -transp may only be used with png output.\n");
+  if (transp && !(png || tiff)) {
+    fprintf(stderr, "Error: -transp may only be used with png or tiff output.\n");
     exit(99);
   }
 
@@ -804,8 +849,13 @@ int main(int argc, char *argv[]) {
     exit(99);
   }
 
-  if (mono && !png) {
-    fprintf(stderr, "Error: -mono may only be used with png output.\n");
+  if (mono && !(png || tiff)) {
+    fprintf(stderr, "Error: -mono may only be used with png or tiff output.\n");
+    exit(99);
+  }
+
+  if (strlen(tiffCompressionStr) > 0 && !tiff) {
+    fprintf(stderr, "Error: -tiffcompression may only be used with tiff output.\n");
     exit(99);
   }
 
