@@ -27,11 +27,18 @@ extern "C" {
 class TiffWriter : public ImgWriter
 {
 	public:
-		TiffWriter();
+		/* RGB                 - 3 bytes/pixel
+		 * RGBA_PREMULTIPLIED  - 4 bytes/pixel premultiplied by alpha
+		 * GRAY                - 1 byte/pixel
+		 * MONOCHROME          - 8 pixels/byte
+		 * CMYK                - 4 bytes/pixel
+		 */
+		enum Format { RGB, RGBA_PREMULTIPLIED, GRAY, MONOCHROME, CMYK };
+
+		TiffWriter(Format format = RGB);
 		~TiffWriter();
 		
 		void setCompressionString(const char *compressionStringArg);
-		void setSplashMode(SplashColorMode splashModeArg);
 
 		bool init(FILE *openedFile, int width, int height, int hDPI, int vDPI);
 		
@@ -47,7 +54,7 @@ class TiffWriter : public ImgWriter
 		int numRows;				// number of rows in the image
 		int curRow;				// number of rows written
 		const char *compressionString;		// compression type
-		SplashColorMode splashMode;		// format of image data
+		Format format;				// format of image data
 
 };
 

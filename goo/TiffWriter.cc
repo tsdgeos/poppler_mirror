@@ -20,13 +20,12 @@ TiffWriter::~TiffWriter()
   // no cleanup needed
 }
 
-TiffWriter::TiffWriter()
+TiffWriter::TiffWriter(Format formatA) : format(formatA)
 {
   f = NULL;
   numRows = 0;
   curRow = 0;
   compressionString = NULL;
-  splashMode = splashModeRGB8;
 }
 
 // Set the compression type
@@ -34,13 +33,6 @@ TiffWriter::TiffWriter()
 void TiffWriter::setCompressionString(const char *compressionStringArg)
 {
   compressionString = compressionStringArg;
-}
-
-// Set the bitmap mode
-
-void TiffWriter::setSplashMode(SplashColorMode splashModeArg)
-{
-  splashMode = splashModeArg;
 }
 
 // Write a TIFF file.
@@ -109,35 +101,31 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, int hDPI, int vDP
     }
   }
 
-  // Set bits per sample, samples per pixel, and photometric type from the splash mode
+  // Set bits per sample, samples per pixel, and photometric type from format
 
-  bitspersample = (splashMode == splashModeMono1? 1: 8);
+  bitspersample = (format == MONOCHROME ? 1 : 8);
 
-  switch (splashMode) {
-
-  case splashModeMono1:
-  case splashModeMono8:
+  switch (format) {
+  case MONOCHROME:
+  case GRAY:
     samplesperpixel = 1;
     photometric = PHOTOMETRIC_MINISBLACK;
     break;
 
-  case splashModeRGB8:
-  case splashModeBGR8:
+  case RGB:
     samplesperpixel = 3;
     photometric = PHOTOMETRIC_RGB;
     break;
 
-#if SPLASH_CMYK
-  case splashModeCMYK8:
-  case splashModeDeviceN8:
+  case RGBA_PREMULTIPLIED:
+    samplesperpixel = 4;
+    photometric = PHOTOMETRIC_RGB;
+    break;
+
+  case CMYK:
     samplesperpixel = 4;
     photometric = PHOTOMETRIC_SEPARATED;
     break;
-#endif
-
-  default:
-    fprintf(stderr, "TiffWriter: Mode %d not supported\n", splashMode);
-    return false;
   }
 
   // Open the file
@@ -168,12 +156,15 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, int hDPI, int vDP
   TIFFSetField(f, TIFFTAG_YRESOLUTION, (double) vDPI);
   TIFFSetField(f, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
 
-#if SPLASH_CMYK
-  if (splashMode == splashModeCMYK8 || splashMode == splashModeDeviceN8) {
+  if (format == RGBA_PREMULTIPLIED) {
+    uint16 extra = EXTRASAMPLE_ASSOCALPHA;
+    TIFFSetField(f, TIFFTAG_EXTRASAMPLES, 1, &extra);
+  }
+
+  if (format == CMYK) {
     TIFFSetField(f, TIFFTAG_INKSET, INKSET_CMYK);
     TIFFSetField(f, TIFFTAG_NUMBEROFINKS, 4);
   }
-#endif
 
   return true;
 }
