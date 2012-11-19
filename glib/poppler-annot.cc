@@ -491,7 +491,7 @@ poppler_annot_get_modified (PopplerAnnot *poppler_annot)
 }
 
 /**
- * poppler_annot_get_flags
+ * poppler_annot_get_flags:
  * @poppler_annot: a #PopplerAnnot
  *
  * Retrieves the flag field specifying various characteristics of the

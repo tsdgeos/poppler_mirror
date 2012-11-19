@@ -133,7 +133,7 @@ poppler_form_field_get_id (PopplerFormField *field)
 }
 
 /**
- * poppler_form_field_get_font_size
+ * poppler_form_field_get_font_size:
  * @field: a #PopplerFormField
  *
  * Gets the font size of @field
@@ -149,7 +149,7 @@ poppler_form_field_get_font_size (PopplerFormField *field)
 }
 
 /**
- * poppler_form_field_is_read_only
+ * poppler_form_field_is_read_only:
  * @field: a #PopplerFormField
  *
  * Checks whether @field is read only
@@ -195,7 +195,7 @@ poppler_form_field_get_action (PopplerFormField *field)
 
 /* Button Field */
 /**
- * poppler_form_field_button_get_button_type
+ * poppler_form_field_button_get_button_type:
  * @field: a #PopplerFormField
  *
  * Gets the button type of @field
@@ -221,7 +221,7 @@ poppler_form_field_button_get_button_type (PopplerFormField *field)
 }
 
 /**
- * poppler_form_field_button_get_state
+ * poppler_form_field_button_get_state:
  * @field: a #PopplerFormField
  *
  * Queries a #PopplerFormField and returns its current state. Returns %TRUE if
@@ -238,7 +238,7 @@ poppler_form_field_button_get_state (PopplerFormField *field)
 }
 
 /**
- * poppler_form_field_button_set_state
+ * poppler_form_field_button_set_state:
  * @field: a #PopplerFormField
  * @state: %TRUE or %FALSE
  *
