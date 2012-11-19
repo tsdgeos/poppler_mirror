@@ -1979,7 +1979,7 @@ SplashError Splash::stroke(SplashPath *path) {
     strokeWide(path2, w);
   } else if (bitmap->mode == splashModeMono1) {
     // this gets close to Adobe's behavior in mono mode
-    if (d1 <= 2) {
+    if (d1 * state->lineWidth <= 2) {
       strokeNarrow(path2);
     } else {
       strokeWide(path2, state->lineWidth);
