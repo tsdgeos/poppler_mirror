@@ -342,9 +342,11 @@ _poppler_page_render (PopplerPage      *page,
   output_dev->setCairo (cairo);
   output_dev->setPrinting (printing);
 
-  if (!printing)
-    output_dev->setTextPage (page->text);
 
+  if (!printing && page->text == NULL) {
+    page->text = new TextPage(gFalse);
+    output_dev->setTextPage (page->text);
+  }
   /* NOTE: instead of passing -1 we should/could use cairo_clip_extents()
    * to get a bounding box */
   cairo_save (cairo);
@@ -379,9 +381,6 @@ poppler_page_render (PopplerPage *page,
 		     cairo_t *cairo)
 {
   g_return_if_fail (POPPLER_IS_PAGE (page));
-
-  if (!page->text)
-    page->text = new TextPage(gFalse);
 
   _poppler_page_render (page, cairo, gFalse, (PopplerPrintFlags)0);
 }
