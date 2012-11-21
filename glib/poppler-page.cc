@@ -1980,7 +1980,9 @@ poppler_page_get_text_layout (PopplerPage       *page,
   TextWordList *wordlist;
   TextWord *word, *nextword;
   PopplerRectangle *rect;
-  int i, j, offset = 0;
+  int i, j;
+  guint offset = 0;
+  guint n_rects = 0;
   gdouble x1, y1, x2, y2;
   gdouble x3, y3, x4, y4;
 
@@ -2001,10 +2003,14 @@ poppler_page_get_text_layout (PopplerPage       *page,
   for (i = 0; i < wordlist->getLength (); i++)
     {
       word = wordlist->get (i);
-      *n_rectangles += word->getLength () + 1;
+      n_rects += word->getLength ();
+      if (!word->getNext () || word->getSpaceAfter ())
+	n_rects++;
     }
+  n_rects--;
 
-  *rectangles = g_new (PopplerRectangle, *n_rectangles);
+  *n_rectangles = n_rects;
+  *rectangles = g_new (PopplerRectangle, n_rects);
 
   // Calculating each char position
   for (i = 0; i < wordlist->getLength (); i++)
@@ -2028,23 +2034,27 @@ poppler_page_get_text_layout (PopplerPage       *page,
       nextword = word->getNext ();
       if (nextword)
         {
-	  nextword->getBBox (&x3, &y3, &x4, &y4);
-	  // space is from one word to other and with the same height as
-	  // first word.
-	  rect->x1 = x2;
-	  rect->y1 = y1;
-	  rect->x2 = x3;
-	  rect->y2 = y2;
-	}
-      else
+	  if (word->getSpaceAfter ())
+	    {
+	      nextword->getBBox (&x3, &y3, &x4, &y4);
+	      // space is from one word to other and with the same height as
+	      // first word.
+	      rect->x1 = x2;
+	      rect->y1 = y1;
+	      rect->x2 = x3;
+	      rect->y2 = y2;
+	      offset++;
+	    }
+	  }
+      else if (offset < n_rects)
         {
 	  // end of line
 	  rect->x1 = x2;
 	  rect->y1 = y2;
 	  rect->x2 = x2;
 	  rect->y2 = y2;
+	  offset++;
 	}
-      offset++;
     }
 
   delete wordlist;
@@ -2112,7 +2122,6 @@ poppler_page_get_text_attributes (PopplerPage *page)
   TextPage *text;
   TextWordList *wordlist;
   PopplerTextAttributes *attrs = NULL;
-  PopplerTextAttributes *previous = NULL;
   gint i, offset = 0;
   GList *attributes = NULL;
 
@@ -2137,23 +2146,22 @@ poppler_page_get_text_attributes (PopplerPage *page)
 
       for (word_i = 0; word_i < word->getLength (); word_i++)
 	{
-	  if (prev_word && word_text_attributes_equal (word, word_i, prev_word, prev_word_i)) {
-	    attrs = previous;
-	  } else {
-	    attrs = poppler_text_attributes_new_from_word (word, word_i);
-	    attrs->start_index = offset;
-	    if (previous)
-	      previous->end_index--;
-	    previous = attrs;
-	    attributes = g_list_prepend (attributes, attrs);
-	  }
-	  offset++;
+	  if (!prev_word || !word_text_attributes_equal (word, word_i, prev_word, prev_word_i))
+            {
+              attrs = poppler_text_attributes_new_from_word (word, word_i);
+              attrs->start_index = offset;
+              attributes = g_list_prepend (attributes, attrs);
+            }
 	  attrs->end_index = offset;
+	  offset++;
 	  prev_word = word;
 	  prev_word_i = word_i;
 	}
-      offset++;
-      attrs->end_index = offset;
+      if (!word->getNext () || word->getSpaceAfter ())
+        {
+          attrs->end_index = offset;
+          offset++;
+        }
     }
   if (attrs)
     attrs->end_index--;
