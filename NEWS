@@ -1,3 +1,16 @@
+Release 0.21.2
+        core:
+         * CairoOutputDev: make drawImage work with images > 32767 in width/height (Bug #56858)
+         * CairoOutputDev: Fix soft mask when image resolution != smask resolution (Bug #57070)
+         * CairoOutputDev: Fix crash in CairoImageOutputDev with setSoftMaskFromImageMask (Bug #57067)
+         * Remove a check on fonts that we don't need (Bug #56753)
+         * Misc code cleanups
+
+        utils:
+         * pdftocairo: Add tiff output support (Bug #57006)
+         * pdfunite: Fix -v (Bug #56817)
+         * Misc code cleanups
+
 Release 0.21.1
         core:
          * Annotation improvements
