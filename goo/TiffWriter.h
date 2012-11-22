@@ -6,6 +6,7 @@
 //
 // Copyright (C) 2010, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
 
