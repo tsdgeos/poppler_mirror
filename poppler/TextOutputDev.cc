@@ -4615,7 +4615,8 @@ void TextPage::visitSelection(TextSelectionVisitor *visitor,
 	if (!best_block[i] ||
 	    d < best_d[i] ||
 	    (!blk->next && !flow->next &&
-	     x[i] > xMax && y[i] > yMax)) {
+	     x[i] >= fmin(xMax, pageWidth) &&
+	     y[i] >= fmin(yMax, pageHeight))) {
 	  best_block[i] = blk;
 	  best_flow[i] = flow;
 	  best_count[i] = count;
