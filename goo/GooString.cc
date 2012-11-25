@@ -22,6 +22,7 @@
 // Copyright (C) 2011 Kenji Uno <ku@digitaldolphins.jp>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012 Pino Toscano <pino@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -769,14 +770,12 @@ GooString *GooString::insert(int i, GooString *str) {
 }
 
 GooString *GooString::insert(int i, const char *str, int lengthA) {
-  int j;
   int prevLen = length;
   if (CALC_STRING_LEN == lengthA)
     lengthA = strlen(str);
 
   resize(length + lengthA);
-  for (j = prevLen; j >= i; --j)
-    s[j+lengthA] = s[j];
+  memmove(s+i+lengthA, s+i, prevLen);
   memcpy(s+i, str, lengthA);
   return this;
 }
