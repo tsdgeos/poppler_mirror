@@ -17,6 +17,7 @@
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012 Adam Reichold <adamreichold@myopera.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -90,6 +91,8 @@ public:
 protected:
   static Function *parse(Object *funcObj, std::set<int> *usedParents);
 
+  Function(const Function *func);
+
   int m, n;			// size of input and output tuples
   double			// min and max values for function domain
     domain[funcMaxInputs][2];
@@ -140,7 +143,7 @@ public:
 
 private:
 
-  SampledFunction(SampledFunction *func);
+  SampledFunction(const SampledFunction *func);
 
   int				// number of samples for each domain element
     sampleSize[funcMaxInputs];
@@ -179,7 +182,7 @@ public:
 
 private:
 
-  ExponentialFunction(ExponentialFunction *func);
+  ExponentialFunction(const ExponentialFunction *func);
 
   double c0[funcMaxOutputs];
   double c1[funcMaxOutputs];
@@ -210,7 +213,7 @@ public:
 
 private:
 
-  StitchingFunction(StitchingFunction *func);
+  StitchingFunction(const StitchingFunction *func);
 
   int k;
   Function **funcs;
@@ -238,7 +241,7 @@ public:
 
 private:
 
-  PostScriptFunction(PostScriptFunction *func);
+  PostScriptFunction(const PostScriptFunction *func);
   GBool parseCode(Stream *str, int *codePtr);
   GooString *getToken(Stream *str);
   void resizeCode(int newSize);

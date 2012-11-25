@@ -18,6 +18,7 @@
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012 Adam Reichold <adamreichold@myopera.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -104,6 +105,16 @@ Function *Function::parse(Object *funcObj, std::set<int> *usedParents) {
   }
 
   return func;
+}
+
+Function::Function(const Function *func) {
+    m = func->m;
+    n = func->n;
+
+    memcpy(domain, func->domain, funcMaxInputs * 2 * sizeof(double));
+    memcpy(range, func->range, funcMaxOutputs * 2 * sizeof(double));
+
+    hasRange = func->hasRange;
 }
 
 GBool Function::init(Dict *dict) {
@@ -419,13 +430,28 @@ SampledFunction::~SampledFunction() {
   }
 }
 
-SampledFunction::SampledFunction(SampledFunction *func) {
-  memcpy(this, func, sizeof(SampledFunction));
+SampledFunction::SampledFunction(const SampledFunction *func) : Function(func) {
+  memcpy(sampleSize, func->sampleSize, funcMaxInputs * sizeof(int));
+
+  memcpy(encode, func->encode, funcMaxInputs * 2 * sizeof(double));
+  memcpy(decode, func->decode, funcMaxOutputs * 2 * sizeof(double));
+
+  memcpy(inputMul, func->inputMul, funcMaxInputs * sizeof(double));
+
+  nSamples = func->nSamples;
+
   idxOffset = (int *)gmallocn(1 << m, sizeof(int));
   memcpy(idxOffset, func->idxOffset, (1 << m) * (int)sizeof(int));
+
   samples = (double *)gmallocn(nSamples, sizeof(double));
   memcpy(samples, func->samples, nSamples * sizeof(double));
+
   sBuf = (double *)gmallocn(1 << m, sizeof(double));
+
+  memcpy(cacheIn, func->cacheIn, funcMaxInputs * sizeof(double));
+  memcpy(cacheOut, func->cacheOut, funcMaxOutputs * sizeof(double));
+
+  ok = func->ok;
 }
 
 void SampledFunction::transform(double *in, double *out) {
@@ -616,8 +642,13 @@ ExponentialFunction::ExponentialFunction(Object *funcObj, Dict *dict) {
 ExponentialFunction::~ExponentialFunction() {
 }
 
-ExponentialFunction::ExponentialFunction(ExponentialFunction *func) {
-  memcpy(this, func, sizeof(ExponentialFunction));
+ExponentialFunction::ExponentialFunction(const ExponentialFunction *func) : Function(func) {
+  memcpy(c0, func->c0, funcMaxOutputs * sizeof(double));
+  memcpy(c1, func->c1, funcMaxOutputs * sizeof(double));
+
+  e = func->e;
+  isLinear = func->isLinear;
+  ok = func->ok;
 }
 
 void ExponentialFunction::transform(double *in, double *out) {
@@ -761,21 +792,24 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
   obj1.free();
 }
 
-StitchingFunction::StitchingFunction(StitchingFunction *func) {
-  int i;
+StitchingFunction::StitchingFunction(const StitchingFunction *func) : Function(func) {
+  k = func->k;
 
-  memcpy(this, func, sizeof(StitchingFunction));
   funcs = (Function **)gmallocn(k, sizeof(Function *));
-  for (i = 0; i < k; ++i) {
+  for (int i = 0; i < k; ++i) {
     funcs[i] = func->funcs[i]->copy();
   }
+
   bounds = (double *)gmallocn(k + 1, sizeof(double));
   memcpy(bounds, func->bounds, (k + 1) * sizeof(double));
+
   encode = (double *)gmallocn(2 * k, sizeof(double));
   memcpy(encode, func->encode, 2 * k * sizeof(double));
+
   scale = (double *)gmallocn(k, sizeof(double));
   memcpy(scale, func->scale, k * sizeof(double));
-  ok = gTrue;
+
+  ok = func->ok;
 }
 
 StitchingFunction::~StitchingFunction() {
@@ -1184,11 +1218,18 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict) {
   return;
 }
 
-PostScriptFunction::PostScriptFunction(PostScriptFunction *func) {
-  memcpy(this, func, sizeof(PostScriptFunction));
+PostScriptFunction::PostScriptFunction(const PostScriptFunction *func) : Function(func) {
+  codeSize = func->codeSize;
+
   code = (PSObject *)gmallocn(codeSize, sizeof(PSObject));
   memcpy(code, func->code, codeSize * sizeof(PSObject));
+
   codeString = func->codeString->copy();
+
+  memcpy(cacheIn, func->cacheIn, funcMaxInputs * sizeof(double));
+  memcpy(cacheOut, func->cacheOut, funcMaxOutputs * sizeof(double));
+
+  ok = func->ok;
 }
 
 PostScriptFunction::~PostScriptFunction() {
