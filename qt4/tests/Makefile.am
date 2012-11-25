@@ -78,7 +78,8 @@ TESTS = \
 	check_pagelayout	\
 	check_search		\
 	check_strings		\
-	check_lexer
+	check_lexer		\
+	check_goostring
 
 check_PROGRAMS = $(TESTS)
 
@@ -137,6 +138,10 @@ check_strings_LDADD = $(LDADDS) $(POPPLER_QT4_TEST_LIBS)
 check_lexer_SOURCES = check_lexer.cpp
 check_lexer.$(OBJEXT): check_lexer.moc
 check_lexer_LDADD = $(LDADDS) $(POPPLER_QT4_TEST_LIBS)
+
+check_goostring_SOURCES = check_goostring.cpp
+check_goostring.$(OBJEXT): check_goostring.moc
+check_goostring_LDADD = $(LDADDS) $(POPPLER_QT4_TEST_LIBS)
 
 endif
 
