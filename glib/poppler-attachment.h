@@ -47,7 +47,7 @@ G_BEGIN_DECLS
  * @error and return %FALSE, in which case poppler_attachment_save_to_callback()
  * will fail with the same error.
  *
- * @Returns: %TRUE if successful, %FALSE (with @error set) if failed.
+ * Returns: %TRUE if successful, %FALSE (with @error set) if failed.
  */
 typedef gboolean (*PopplerAttachmentSaveFunc) (const gchar  *buf,
 					       gsize         count,
