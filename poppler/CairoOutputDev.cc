@@ -2797,7 +2797,7 @@ public:
     int i;
     Guchar *pix;
 
-    if (row_num == current_row)
+    if (row_num <= current_row)
       return;
 
     while (current_row  < row_num) {
