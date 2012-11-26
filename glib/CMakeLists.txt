@@ -110,7 +110,7 @@ if (HAVE_INTROSPECTION)
 
   set(introspection_files ${poppler_glib_SRCS} ${poppler_glib_public_headers})
   set(Poppler_0_18_gir "poppler-glib")
-  set(Poppler_0_18_gir_INCLUDES GObject-2.0 cairo-1.0)
+  set(Poppler_0_18_gir_INCLUDES GObject-2.0 Gio-2.0 cairo-1.0)
   get_directory_property(_tmp_includes INCLUDE_DIRECTORIES)
   _list_prefix(_includes _tmp_includes "-I")
   set(Poppler_0_18_gir_CFLAGS ${_includes})
