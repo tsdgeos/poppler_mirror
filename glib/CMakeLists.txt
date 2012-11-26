@@ -105,7 +105,7 @@ endmacro(_list_prefix)
 if (HAVE_INTROSPECTION)
   include(GObjectIntrospectionMacros)
   set(INTROSPECTION_GIRS)
-  set(INTROSPECTION_SCANNER_ARGS "--add-include-path=${CMAKE_CURRENT_SOURCE_DIR}")
+  set(INTROSPECTION_SCANNER_ARGS "--add-include-path=${CMAKE_CURRENT_SOURCE_DIR} --warn-all")
   set(INTROSPECTION_COMPILER_ARGS "--includedir=${CMAKE_CURRENT_SOURCE_DIR}")
 
   set(introspection_files ${poppler_glib_SRCS} ${poppler_glib_public_headers})
