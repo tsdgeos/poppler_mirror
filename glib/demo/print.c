@@ -65,7 +65,9 @@ pgd_print_draw_page (GtkPrintOperation *op,
 {
 	PopplerPage      *page;
 	cairo_t          *cr;
+#if 0
         GtkPrintSettings *settings;
+#endif
         PgdPrintOptions   options;
         PopplerPrintFlags flags = 0;
 
@@ -73,13 +75,14 @@ pgd_print_draw_page (GtkPrintOperation *op,
 	if (!page)
 		return;
 
-        settings = gtk_print_operation_get_print_settings (op);
-        /* Workaround for gtk+ bug, we need to save the options ourselves */
-        options = demo->options;
 #if 0
+        settings = gtk_print_operation_get_print_settings (op);
         options = gtk_print_settings_get_int_with_default (settings,
                                                            PGD_PRINT_OPTIONS,
                                                            PRINT_DOCUMENT_MARKUPS);
+#else
+        /* Workaround for gtk+ bug, we need to save the options ourselves */
+        options = demo->options;
 #endif
         switch (options) {
         case PRINT_DOCUMENT:
