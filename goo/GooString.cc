@@ -775,7 +775,7 @@ GooString *GooString::insert(int i, const char *str, int lengthA) {
     lengthA = strlen(str);
 
   resize(length + lengthA);
-  memmove(s+i+lengthA, s+i, prevLen);
+  memmove(s+i+lengthA, s+i, prevLen-i);
   memcpy(s+i, str, lengthA);
   return this;
 }
