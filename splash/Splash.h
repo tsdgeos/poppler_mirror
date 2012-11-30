@@ -15,6 +15,7 @@
 // Copyright (C) 2007, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
+// Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -212,7 +213,8 @@ public:
   // The matrix behaves as for fillImageMask.
   SplashError drawImage(SplashImageSource src, void *srcData,
 			SplashColorMode srcMode, GBool srcAlpha,
-			int w, int h, SplashCoord *mat, GBool tilingPattern = gFalse);
+			int w, int h, SplashCoord *mat, GBool interpolate,
+			GBool tilingPattern = gFalse);
 
   // Composite a rectangular region from <src> onto this Splash
   // object.
@@ -353,11 +355,11 @@ private:
 			       SplashColorMode srcMode, int nComps,
 			       GBool srcAlpha,
 			       int srcWidth, int srcHeight,
-			       SplashCoord *mat, GBool tilingPattern = gFalse);
+                               SplashCoord *mat, GBool interpolate, GBool tilingPattern = gFalse);
   SplashBitmap *scaleImage(SplashImageSource src, void *srcData,
 			   SplashColorMode srcMode, int nComps,
 			   GBool srcAlpha, int srcWidth, int srcHeight,
-			   int scaledWidth, int scaledHeight);
+			   int scaledWidth, int scaledHeight, GBool interpolate);
   void scaleImageYdXd(SplashImageSource src, void *srcData,
 		      SplashColorMode srcMode, int nComps,
 		      GBool srcAlpha, int srcWidth, int srcHeight,
@@ -374,6 +376,11 @@ private:
 		      int scaledWidth, int scaledHeight,
 		      SplashBitmap *dest);
   void scaleImageYuXu(SplashImageSource src, void *srcData,
+		      SplashColorMode srcMode, int nComps,
+		      GBool srcAlpha, int srcWidth, int srcHeight,
+		      int scaledWidth, int scaledHeight,
+		      SplashBitmap *dest);
+  void scaleImageYuXuBilinear(SplashImageSource src, void *srcData,
 		      SplashColorMode srcMode, int nComps,
 		      GBool srcAlpha, int srcWidth, int srcHeight,
 		      int scaledWidth, int scaledHeight,
