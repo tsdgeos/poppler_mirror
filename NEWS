@@ -1,3 +1,20 @@
+Release 0.21.3
+        core:
+         * Splash: Implement bilinear image scaling (Bug #22138)
+         * CairoOutputDev: Update fill and stroke color in startPage (Bug #54526)
+         * Fix GooString::insert()
+         * Allow large chars in TextPage
+         * Fix crash on ActualText::end
+         * Don't use memcpy to copy classes
+         * Fix warnings
+
+        glib:
+         * Check if words end with spaces (Bug #54504)
+         * Ensure text is only computed on first render
+         * Fix warnings while generating introspection file
+         * Fix returns tag in PopplerAttachmentSaveFunc api doc
+         * Minor demo fixes
+
 Release 0.21.2
         core:
          * CairoOutputDev: make drawImage work with images > 32767 in width/height (Bug #56858)
