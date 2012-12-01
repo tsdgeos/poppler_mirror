@@ -363,7 +363,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
     #ifdef ENABLE_LIBJPEG
     #ifdef SPLASH_CMYK
     case splashFormatJpegCMYK:
-      writer = new JpegWriter(JCS_CMYK);
+      writer = new JpegWriter(JpegWriter::CMYK);
       break;
     #endif
     case splashFormatJpeg:

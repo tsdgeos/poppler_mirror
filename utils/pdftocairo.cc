@@ -293,9 +293,9 @@ void writePageImage(GooString *filename)
   } else if (jpeg) {
 #if ENABLE_LIBJPEG
     if (gray)
-      writer = new JpegWriter(JCS_GRAYSCALE);
+      writer = new JpegWriter(JpegWriter::GRAY);
     else
-      writer = new JpegWriter(JCS_RGB);
+      writer = new JpegWriter(JpegWriter::RGB);
 #endif
   } else if (tiff) {
 #if ENABLE_LIBTIFF

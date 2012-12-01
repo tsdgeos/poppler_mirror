@@ -15,7 +15,19 @@
 
 #ifdef ENABLE_LIBJPEG
 
+extern "C" {
+#include <jpeglib.h>
+}
+
 #include "poppler/Error.h"
+
+struct JpegWriterPrivate {
+  bool progressive;
+  int quality;
+  JpegWriter::Format format;
+  struct jpeg_compress_struct cinfo;
+  struct jpeg_error_mgr jerr;
+};
 
 void outputMessage(j_common_ptr cinfo)
 {
@@ -28,85 +40,103 @@ void outputMessage(j_common_ptr cinfo)
   error(errInternal, -1, "{0:s}", buffer);
 }
 
-JpegWriter::JpegWriter(int q, bool p, J_COLOR_SPACE cm)
-  : progressive(p), quality(q), colorMode(cm)
+JpegWriter::JpegWriter(int q, bool p, Format formatA)
 {
+  priv = new JpegWriterPrivate;
+  priv->progressive = p;
+  priv->quality = q;
+  priv->format = formatA;
 }
 
-JpegWriter::JpegWriter(J_COLOR_SPACE cm)
-  : progressive(false), quality(-1), colorMode(cm)
+JpegWriter::JpegWriter(Format formatA)
 {
+  priv = new JpegWriterPrivate;
+  priv->progressive = false;
+  priv->quality = -1;
+  priv->format = formatA;
 }
 
 JpegWriter::~JpegWriter()
 {
   // cleanup
-  jpeg_destroy_compress(&cinfo);
+  jpeg_destroy_compress(&priv->cinfo);
+  delete priv;
 }
 
 bool JpegWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 {
   // Setup error handler
-  cinfo.err = jpeg_std_error(&jerr);
-  jerr.output_message = &outputMessage;
+  priv->cinfo.err = jpeg_std_error(&priv->jerr);
+  priv->jerr.output_message = &outputMessage;
 
   // Initialize libjpeg
-  jpeg_create_compress(&cinfo);
+  jpeg_create_compress(&priv->cinfo);
 
-  // Set colorspace and initialise defaults
-  cinfo.in_color_space = colorMode; /* colorspace of input image */
-  jpeg_set_defaults(&cinfo);
-
-  // Set destination file
-  jpeg_stdio_dest(&cinfo, f);
-
-  // Set libjpeg configuration
-  cinfo.image_width = width;
-  cinfo.image_height = height;
-  cinfo.density_unit = 1; // dots per inch
-  cinfo.X_density = hDPI;
-  cinfo.Y_density = vDPI;
-  /* # of color components per pixel */
-  switch (colorMode) {
-    case JCS_GRAYSCALE:
-      cinfo.input_components = 1;
+  // First set colorspace and call jpeg_set_defaults() since
+  // jpeg_set_defaults() sets default values for all fields in
+  // cinfo based on the colorspace.
+  switch (priv->format) {
+    case RGB:
+      priv->cinfo.in_color_space = JCS_RGB;
       break;
-    case JCS_RGB:
-      cinfo.input_components = 3;
+    case GRAY:
+      priv->cinfo.in_color_space = JCS_GRAYSCALE;
       break;
-    case JCS_CMYK:
-      cinfo.input_components = 4;
+    case CMYK:
+      priv->cinfo.in_color_space = JCS_CMYK;
       break;
     default:
       return false;
   }
-  if (cinfo.in_color_space == JCS_CMYK) {
-    jpeg_set_colorspace(&cinfo, JCS_YCCK);
-    cinfo.write_JFIF_header = TRUE;
+  jpeg_set_defaults(&priv->cinfo);
+
+  // Set destination file
+  jpeg_stdio_dest(&priv->cinfo, f);
+
+  // Set libjpeg configuration
+  priv->cinfo.image_width = width;
+  priv->cinfo.image_height = height;
+  priv->cinfo.density_unit = 1; // dots per inch
+  priv->cinfo.X_density = hDPI;
+  priv->cinfo.Y_density = vDPI;
+  switch (priv->format) {
+    case GRAY:
+      priv->cinfo.input_components = 1;
+      break;
+    case RGB:
+      priv->cinfo.input_components = 3;
+      break;
+    case CMYK:
+      priv->cinfo.input_components = 4;
+      jpeg_set_colorspace(&priv->cinfo, JCS_YCCK);
+      priv->cinfo.write_JFIF_header = TRUE;
+      break;
+    default:
+      return false;
   }
 
   // Set quality
-  if( quality >= 0 && quality <= 100 ) {
-    jpeg_set_quality(&cinfo, quality, true);
+  if (priv->quality >= 0 && priv->quality <= 100) {
+    jpeg_set_quality(&priv->cinfo, priv->quality, true);
   }
 
   // Use progressive mode
-  if( progressive) {
-    jpeg_simple_progression(&cinfo);
+  if (priv->progressive) {
+    jpeg_simple_progression(&priv->cinfo);
   }
 
   // Get ready for data
-  jpeg_start_compress(&cinfo, TRUE);
+  jpeg_start_compress(&priv->cinfo, TRUE);
 
   return true;
 }
 
 bool JpegWriter::writePointers(unsigned char **rowPointers, int rowCount)
 {
-  if (colorMode == JCS_CMYK) {
+  if (priv->format == CMYK) {
     for (int y = 0; y < rowCount; y++) {
       unsigned char *row = rowPointers[y];
-      for (unsigned int x = 0; x < cinfo.image_width; x++) {
+      for (unsigned int x = 0; x < priv->cinfo.image_width; x++) {
 	for (int n = 0; n < 4; n++) {
 	  *row = 0xff - *row;
 	  row++;
@@ -115,16 +145,16 @@ bool JpegWriter::writePointers(unsigned char **rowPointers, int rowCount)
     }
   }
   // Write all rows to the file
-  jpeg_write_scanlines(&cinfo, rowPointers, rowCount);
+  jpeg_write_scanlines(&priv->cinfo, rowPointers, rowCount);
 
   return true;
 }
 
 bool JpegWriter::writeRow(unsigned char **rowPointer)
 {
-  if (colorMode == JCS_CMYK) {
+  if (priv->format == CMYK) {
     unsigned char *row = rowPointer[0];
-    for (unsigned int x = 0; x < cinfo.image_width; x++) {
+    for (unsigned int x = 0; x < priv->cinfo.image_width; x++) {
       for (int n = 0; n < 4; n++) {
 	*row = 0xff - *row;
 	row++;
@@ -132,16 +162,22 @@ bool JpegWriter::writeRow(unsigned char **rowPointer)
     }
   }
   // Write the row to the file
-  jpeg_write_scanlines(&cinfo, rowPointer, 1);
+  jpeg_write_scanlines(&priv->cinfo, rowPointer, 1);
 
   return true;
 }
 
 bool JpegWriter::close()
 {
-  jpeg_finish_compress(&cinfo);
+  jpeg_finish_compress(&priv->cinfo);
 
   return true;
 }
+
+bool JpegWriter::supportCMYK()
+{
+  return priv->format == CMYK;
+}
+
 
 #endif

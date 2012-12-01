@@ -24,15 +24,19 @@
 #include <sys/types.h>
 #include "ImgWriter.h"
 
-extern "C" {
-#include <jpeglib.h>
-}
+struct JpegWriterPrivate;
 
 class JpegWriter : public ImgWriter
 {
 public:
-  JpegWriter(int quality, bool progressive, J_COLOR_SPACE colorMode = JCS_RGB);
-  JpegWriter(J_COLOR_SPACE colorMode = JCS_RGB);
+  /* RGB                 - 3 bytes/pixel
+   * GRAY                - 1 byte/pixel
+   * CMYK                - 4 bytes/pixel
+   */
+  enum Format { RGB, GRAY, CMYK };
+
+  JpegWriter(int quality, bool progressive, Format format = RGB);
+  JpegWriter(Format format = RGB);
   ~JpegWriter();
 
   bool init(FILE *f, int width, int height, int hDPI, int vDPI);
@@ -41,14 +45,13 @@ public:
   bool writeRow(unsigned char **row);
 
   bool close();
-  bool supportCMYK() { return colorMode == JCS_CMYK; }
+  bool supportCMYK();
 
 private:
-  bool progressive;
-  int quality;
-  J_COLOR_SPACE colorMode;
-  struct jpeg_compress_struct cinfo;
-  struct jpeg_error_mgr jerr;
+  JpegWriter(const JpegWriter &other);
+  JpegWriter& operator=(const JpegWriter &other);
+
+  JpegWriterPrivate *priv;
 };
 
 #endif
