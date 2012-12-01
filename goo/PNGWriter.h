@@ -25,37 +25,37 @@
 
 class PNGWriter : public ImgWriter
 {
-	public:
+public:
 
-		/* RGB        - 3 bytes/pixel
-		 * RGBA       - 4 bytes/pixel
-		 * GRAY       - 1 byte/pixel
-		 * MONOCHROME - 1 byte/pixel. PNGWriter will bitpack to 8 pixels/byte
-		 */
-		enum Format { RGB, RGBA, GRAY, MONOCHROME };
+  /* RGB        - 3 bytes/pixel
+   * RGBA       - 4 bytes/pixel
+   * GRAY       - 1 byte/pixel
+   * MONOCHROME - 1 byte/pixel. PNGWriter will bitpack to 8 pixels/byte
+   */
+  enum Format { RGB, RGBA, GRAY, MONOCHROME };
 
-		PNGWriter(Format format = RGB);
-		~PNGWriter();
+  PNGWriter(Format format = RGB);
+  ~PNGWriter();
 
-		void setICCProfile(const char *name, unsigned char *data, int size);
-		void setSRGBProfile();
+  void setICCProfile(const char *name, unsigned char *data, int size);
+  void setSRGBProfile();
 
-		
-		bool init(FILE *f, int width, int height, int hDPI, int vDPI);
-		
-		bool writePointers(unsigned char **rowPointers, int rowCount);
-		bool writeRow(unsigned char **row);
-		
-		bool close();
-	
-	private:
-		Format format;
-		png_structp png_ptr;
-		png_infop info_ptr;
-		unsigned char *icc_data;
-		int icc_data_size;
-		char *icc_name;
-		bool sRGB_profile;
+
+  bool init(FILE *f, int width, int height, int hDPI, int vDPI);
+
+  bool writePointers(unsigned char **rowPointers, int rowCount);
+  bool writeRow(unsigned char **row);
+
+  bool close();
+
+private:
+  Format format;
+  png_structp png_ptr;
+  png_infop info_ptr;
+  unsigned char *icc_data;
+  int icc_data_size;
+  char *icc_name;
+  bool sRGB_profile;
 };
 
 #endif

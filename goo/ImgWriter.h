@@ -16,18 +16,18 @@
 #define IMGWRITER_H
 
 #include <stdio.h>
-	
+
 class ImgWriter
 {
-	public:
-		virtual ~ImgWriter();
-		virtual bool init(FILE *f, int width, int height, int hDPI, int vDPI) = 0;
-		
-		virtual bool writePointers(unsigned char **rowPointers, int rowCount) = 0;
-		virtual bool writeRow(unsigned char **row) = 0;
-		
-		virtual bool close() = 0;
-		virtual bool supportCMYK() { return false; }
+public:
+  virtual ~ImgWriter();
+  virtual bool init(FILE *f, int width, int height, int hDPI, int vDPI) = 0;
+
+  virtual bool writePointers(unsigned char **rowPointers, int rowCount) = 0;
+  virtual bool writeRow(unsigned char **row) = 0;
+
+  virtual bool close() = 0;
+  virtual bool supportCMYK() { return false; }
 };
 
 #endif

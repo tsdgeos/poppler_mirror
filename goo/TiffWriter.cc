@@ -107,26 +107,26 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, int hDPI, int vDP
   bitspersample = (format == MONOCHROME ? 1 : 8);
 
   switch (format) {
-  case MONOCHROME:
-  case GRAY:
-    samplesperpixel = 1;
-    photometric = PHOTOMETRIC_MINISBLACK;
-    break;
+    case MONOCHROME:
+    case GRAY:
+      samplesperpixel = 1;
+      photometric = PHOTOMETRIC_MINISBLACK;
+      break;
 
-  case RGB:
-    samplesperpixel = 3;
-    photometric = PHOTOMETRIC_RGB;
-    break;
+    case RGB:
+      samplesperpixel = 3;
+      photometric = PHOTOMETRIC_RGB;
+      break;
 
-  case RGBA_PREMULTIPLIED:
-    samplesperpixel = 4;
-    photometric = PHOTOMETRIC_RGB;
-    break;
+    case RGBA_PREMULTIPLIED:
+      samplesperpixel = 4;
+      photometric = PHOTOMETRIC_RGB;
+      break;
 
-  case CMYK:
-    samplesperpixel = 4;
-    photometric = PHOTOMETRIC_SEPARATED;
-    break;
+    case CMYK:
+      samplesperpixel = 4;
+      photometric = PHOTOMETRIC_SEPARATED;
+      break;
   }
 
   // Open the file

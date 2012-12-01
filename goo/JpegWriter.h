@@ -30,25 +30,25 @@ extern "C" {
 
 class JpegWriter : public ImgWriter
 {
-	public:
-		JpegWriter(int quality, bool progressive, J_COLOR_SPACE colorMode = JCS_RGB);
-		JpegWriter(J_COLOR_SPACE colorMode = JCS_RGB);
-		~JpegWriter();
-		
-		bool init(FILE *f, int width, int height, int hDPI, int vDPI);
-		
-		bool writePointers(unsigned char **rowPointers, int rowCount);
-		bool writeRow(unsigned char **row);
-		
-		bool close();
-		bool supportCMYK() { return colorMode == JCS_CMYK; }
-	
-	private:
-		bool progressive;
-		int quality;
-		J_COLOR_SPACE colorMode;
-		struct jpeg_compress_struct cinfo;
-		struct jpeg_error_mgr jerr;
+public:
+  JpegWriter(int quality, bool progressive, J_COLOR_SPACE colorMode = JCS_RGB);
+  JpegWriter(J_COLOR_SPACE colorMode = JCS_RGB);
+  ~JpegWriter();
+
+  bool init(FILE *f, int width, int height, int hDPI, int vDPI);
+
+  bool writePointers(unsigned char **rowPointers, int rowCount);
+  bool writeRow(unsigned char **row);
+
+  bool close();
+  bool supportCMYK() { return colorMode == JCS_CMYK; }
+
+private:
+  bool progressive;
+  int quality;
+  J_COLOR_SPACE colorMode;
+  struct jpeg_compress_struct cinfo;
+  struct jpeg_error_mgr jerr;
 };
 
 #endif

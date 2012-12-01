@@ -27,35 +27,35 @@ extern "C" {
 
 class TiffWriter : public ImgWriter
 {
-	public:
-		/* RGB                 - 3 bytes/pixel
-		 * RGBA_PREMULTIPLIED  - 4 bytes/pixel premultiplied by alpha
-		 * GRAY                - 1 byte/pixel
-		 * MONOCHROME          - 8 pixels/byte
-		 * CMYK                - 4 bytes/pixel
-		 */
-		enum Format { RGB, RGBA_PREMULTIPLIED, GRAY, MONOCHROME, CMYK };
+public:
+  /* RGB                 - 3 bytes/pixel
+   * RGBA_PREMULTIPLIED  - 4 bytes/pixel premultiplied by alpha
+   * GRAY                - 1 byte/pixel
+   * MONOCHROME          - 8 pixels/byte
+   * CMYK                - 4 bytes/pixel
+   */
+  enum Format { RGB, RGBA_PREMULTIPLIED, GRAY, MONOCHROME, CMYK };
 
-		TiffWriter(Format format = RGB);
-		~TiffWriter();
-		
-		void setCompressionString(const char *compressionStringArg);
+  TiffWriter(Format format = RGB);
+  ~TiffWriter();
 
-		bool init(FILE *openedFile, int width, int height, int hDPI, int vDPI);
-		
-		bool writePointers(unsigned char **rowPointers, int rowCount);
-		bool writeRow(unsigned char **rowData);
-		
-		bool supportCMYK() { return true; }
+  void setCompressionString(const char *compressionStringArg);
 
-		bool close();
-	
-	private:
-		TIFF *f;				// LibTiff file context
-		int numRows;				// number of rows in the image
-		int curRow;				// number of rows written
-		const char *compressionString;		// compression type
-		Format format;				// format of image data
+  bool init(FILE *openedFile, int width, int height, int hDPI, int vDPI);
+
+  bool writePointers(unsigned char **rowPointers, int rowCount);
+  bool writeRow(unsigned char **rowData);
+
+  bool supportCMYK() { return true; }
+
+  bool close();
+
+private:
+  TIFF *f;				// LibTiff file context
+  int numRows;				// number of rows in the image
+  int curRow;				// number of rows written
+  const char *compressionString;	// compression type
+  Format format;			// format of image data
 
 };
 
