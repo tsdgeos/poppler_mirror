@@ -1,6 +1,6 @@
 #include <QtTest/QtTest>
 
-#include "GooString.h"
+#include "goo/GooString.h"
 
 class TestGooString : public QObject
 {
