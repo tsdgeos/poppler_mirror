@@ -2280,7 +2280,6 @@ void TextPage::addChar(GfxState *state, double x, double y,
   state->transform(x, y, &x1, &y1);
   if (x1 + w1 < 0 || x1 > pageWidth ||
       y1 + h1 < 0 || y1 > pageHeight ||
-      w1 > pageWidth || h1 > pageHeight ||
       x1 != x1 || y1 != y1 || // IEEE way of checking for isnan
       w1 != w1 || h1 != h1) {
     charPos += nBytes;
