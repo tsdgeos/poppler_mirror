@@ -5218,7 +5218,7 @@ void ActualText::end(GfxState *state) {
   // extents of all the glyphs inside the span
 
   if (actualTextNBytes) {
-    Unicode *uni;
+    Unicode *uni = NULL;
     int length;
 
     // now that we have the position info for all of the text inside
