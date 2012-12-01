@@ -40,10 +40,10 @@ void TiffWriter::setCompressionString(const char *compressionStringArg)
 bool TiffWriter::init(FILE *openedFile, int width, int height, int hDPI, int vDPI)
 {
   unsigned int compression;
-  uint16 photometric;
+  uint16 photometric = 0;
   uint32 rowsperstrip = (uint32) -1;
   int bitspersample;
-  uint16 samplesperpixel;
+  uint16 samplesperpixel = 0;
   const struct compression_name_tag {
     const char *compressionName;		// name of the compression option from the command line
     unsigned int compressionCode;		// internal libtiff code
