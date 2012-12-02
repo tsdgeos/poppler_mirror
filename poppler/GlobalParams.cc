@@ -166,7 +166,7 @@ DllMain (HINSTANCE hinstDLL,
 }
 }
 
-static char *
+static const char *
 get_poppler_datadir (void)
 {
   static char retval[MAX_PATH];
