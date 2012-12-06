@@ -23,6 +23,9 @@ from Config import Config
 from Printer import get_printer
 from Utils import get_document_paths_from_dir, get_skipped_tests
 
+from Queue import Queue
+from threading import Thread
+
 class TestReferences:
 
     def __init__(self, docsdir, refsdir):
@@ -31,6 +34,8 @@ class TestReferences:
         self._skipped = get_skipped_tests(docsdir)
         self.config = Config()
         self.printer = get_printer()
+
+        self._queue = Queue()
 
         try:
             os.makedirs(self._refsdir)
@@ -68,9 +73,25 @@ class TestReferences:
             if backend.create_refs(doc_path, refs_path):
                 backend.create_checksums(refs_path, self.config.checksums_only)
 
+    def _worker_thread(self):
+        while True:
+            doc, n_doc, total_docs = self._queue.get()
+            self.create_refs_for_file(doc, n_doc, total_docs)
+            self._queue.task_done()
+    
     def create_refs(self):
         docs, total_docs = get_document_paths_from_dir(self._docsdir)
+        
+        self.printer.printout_ln('Process %d is spawning %d worker threads...' % (os.getpid(), self.config.threads))
+        
+        for n_thread in range(self.config.threads):
+            thread = Thread(target=self._worker_thread)
+            thread.daemon = True
+            thread.start()
+        
         n_doc = 0
         for doc in docs:
             n_doc += 1
-            self.create_refs_for_file(doc, n_doc, total_docs)
+            self._queue.put( (doc, n_doc, total_docs) )
+        
+        self._queue.join()

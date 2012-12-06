@@ -24,6 +24,9 @@ import sys
 import os
 import errno
 
+from Queue import Queue
+from threading import Thread, RLock
+
 class TestRun:
 
     def __init__(self, docsdir, refsdir, outdir):
@@ -43,6 +46,9 @@ class TestRun:
         self._stderr = []
         self._skipped = []
 
+        self._queue = Queue()
+        self._lock = RLock()
+
         try:
             os.makedirs(self._outdir);
         except OSError as e:
@@ -57,25 +63,31 @@ class TestRun:
         ref_is_crashed = backend.is_crashed(refs_path)
         ref_is_failed = backend.is_failed(refs_path)
         if not ref_has_md5 and not ref_is_crashed and not ref_is_failed:
-            self._skipped.append("%s (%s)" % (doc_path, backend.get_name()))
+            with self._lock:
+                self._skipped.append("%s (%s)" % (doc_path, backend.get_name()))
             self.printer.print_default("Reference files not found, skipping '%s' for %s backend" % (doc_path, backend.get_name()))
             return
 
-        self._n_tests += 1
+        with self._lock:
+            self._n_tests += 1
+
         self.printer.print_test_start("Testing '%s' using %s backend (%d/%d): " % (doc_path, backend.get_name(), n_doc, total_docs))
         test_has_md5 = backend.create_refs(doc_path, test_path)
 
         if backend.has_stderr(test_path):
-            self._stderr.append("%s (%s)" % (doc_path, backend.get_name()))
+            with self._lock:
+                self._stderr.append("%s (%s)" % (doc_path, backend.get_name()))
 
         if ref_has_md5 and test_has_md5:
             if backend.compare_checksums(refs_path, test_path, not self.config.keep_results, self.config.create_diffs, self.config.update_refs):
                 # FIXME: remove dir if it's empty?
                 self.printer.print_test_result("PASS")
-                self._n_passed += 1
+                with self._lock:
+                    self._n_passed += 1
             else:
                 self.printer.print_test_result_ln("FAIL")
-                self._failed.append("%s (%s)" % (doc_path, backend.get_name()))
+                with self._lock:
+                    self._failed.append("%s (%s)" % (doc_path, backend.get_name()))
             return
         elif test_has_md5:
             if ref_is_crashed:
@@ -87,30 +99,35 @@ class TestRun:
         test_is_crashed = backend.is_crashed(test_path)
         if ref_is_crashed and test_is_crashed:
             self.printer.print_test_result("PASS (Expected crash)")
-            self._n_passed += 1
+            with self._lock:
+                self._n_passed += 1
             return
 
         test_is_failed = backend.is_failed(test_path)
         if ref_is_failed and test_is_failed:
             # FIXME: compare status errors
             self.printer.print_test_result("PASS (Expected fail with status error %d)" % (test_is_failed))
-            self._n_passed += 1
+            with self._lock:
+                self._n_passed += 1
             return
 
         if test_is_crashed:
             self.printer.print_test_result_ln("CRASH")
-            self._crashed.append("%s (%s)" % (doc_path, backend.get_name()))
+            with self._lock:
+                self._crashed.append("%s (%s)" % (doc_path, backend.get_name()))
             return
 
         if test_is_failed:
             self.printer.print_test_result_ln("FAIL (status error %d)" % (test_is_failed))
-            self._failed_status_error("%s (%s)" % (doc_path, backend.get_name()))
+            with self._lock:
+                self._failed_status_error("%s (%s)" % (doc_path, backend.get_name()))
             return
 
     def run_test(self, filename, n_doc = 1, total_docs = 1):
         if filename in self._skip:
             doc_path = os.path.join(self._docsdir, filename)
-            self._skipped.append("%s" % (doc_path))
+            with self._lock:
+                self._skipped.append("%s" % (doc_path))
             self.printer.print_default("Skipping test '%s' (%d/%d)" % (doc_path, n_doc, total_docs))
             return
 
@@ -126,7 +143,8 @@ class TestRun:
         refs_path = os.path.join(self._refsdir, filename)
 
         if not os.path.isdir(refs_path):
-            self._skipped.append("%s" % (doc_path))
+            with self._lock:
+                self._skipped.append("%s" % (doc_path))
             self.printer.print_default("Reference dir not found for %s, skipping (%d/%d)" % (doc_path, n_doc, total_docs))
             return
 
@@ -138,12 +156,28 @@ class TestRun:
         for backend in backends:
             self.test(refs_path, doc_path, out_path, backend, n_doc, total_docs)
 
+    def _worker_thread(self):
+        while True:
+            doc, n_doc, total_docs = self._queue.get()
+            self.run_test(doc, n_doc, total_docs)
+            self._queue.task_done()
+    
     def run_tests(self):
         docs, total_docs = get_document_paths_from_dir(self._docsdir)
+        
+        self.printer.printout_ln('Process %d is spawning %d worker threads...' % (os.getpid(), self.config.threads))
+        
+        for n_thread in range(self.config.threads):
+            thread = Thread(target=self._worker_thread)
+            thread.daemon = True
+            thread.start()
+        
         n_doc = 0
         for doc in docs:
             n_doc += 1
-            self.run_test(doc, n_doc, total_docs)
+            self._queue.put( (doc, n_doc, total_docs) )
+        
+        self._queue.join()
 
     def summary(self):
         if not self._n_tests:

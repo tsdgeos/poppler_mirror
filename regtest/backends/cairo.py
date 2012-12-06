@@ -28,9 +28,8 @@ class Cairo(Backend):
 
     def create_refs(self, doc_path, refs_path):
         out_path = os.path.join(refs_path, 'cairo')
-        p1 = subprocess.Popen([self._pdftocairo, '-cropbox', '-r', '72', '-e', '-png', doc_path, out_path], stderr = subprocess.PIPE)
-        p2 = subprocess.Popen([self._pdftocairo, '-cropbox', '-r', '72', '-o', '-png', doc_path, out_path], stderr = subprocess.PIPE)
-        return self._check_exit_status2(p1, p2, out_path)
+        p = subprocess.Popen([self._pdftocairo, '-cropbox', '-r', '72', '-png', doc_path, out_path], stderr = subprocess.PIPE)
+        return self._check_exit_status(p, out_path)
 
     def _create_diff(self, ref_path, result_path):
         self._diff_png(ref_path, result_path)
