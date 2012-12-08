@@ -161,22 +161,22 @@ class TestRun:
             doc, n_doc, total_docs = self._queue.get()
             self.run_test(doc, n_doc, total_docs)
             self._queue.task_done()
-    
+
     def run_tests(self):
         docs, total_docs = get_document_paths_from_dir(self._docsdir)
-        
+
         self.printer.printout_ln('Process %d is spawning %d worker threads...' % (os.getpid(), self.config.threads))
-        
+
         for n_thread in range(self.config.threads):
             thread = Thread(target=self._worker_thread)
             thread.daemon = True
             thread.start()
-        
+
         n_doc = 0
         for doc in docs:
             n_doc += 1
             self._queue.put( (doc, n_doc, total_docs) )
-        
+
         self._queue.join()
 
     def summary(self):

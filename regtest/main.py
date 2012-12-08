@@ -73,10 +73,10 @@ def main(args):
         sys.exit(0)
 
     c = Config(vars(ns))
-    
+
     if c.threads <= 0:
-        c.threads = cpu_count() - c.threads         
-    
+        c.threads = cpu_count() - c.threads
+
     try:
         commands.run(args)
     except commands.UnknownCommandError:
