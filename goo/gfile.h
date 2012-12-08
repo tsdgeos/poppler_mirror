@@ -128,6 +128,8 @@ public:
   GBool isDir() { return dir; }
 
 private:
+  GDirEntry(const GDirEntry &other);
+  GDirEntry& operator=(const GDirEntry &other);
 
   GooString *name;		// dir/file name
   GooString *fullPath;
@@ -143,6 +145,8 @@ public:
   void rewind();
 
 private:
+  GDir(const GDir &other);
+  GDir& operator=(const GDir &other);
 
   GooString *path;		// directory path
   GBool doStat;			// call stat() for each entry?

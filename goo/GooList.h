@@ -6,6 +6,20 @@
 //
 //========================================================================
 
+//========================================================================
+//
+// Modified under the Poppler project - http://poppler.freedesktop.org
+//
+// All changes made under the Poppler project to this file are licensed
+// under GPL version 2 or later
+//
+// Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
+//
+// To see a description of the changes please see the Changelog file that
+// came with your tarball or type make ChangeLog if you are building from git
+//
+//========================================================================
+
 #ifndef GLIST_H
 #define GLIST_H
 
@@ -79,6 +93,8 @@ public:
   void setAllocIncr(int incA) { inc = incA; }
 
 private:
+  GooList(const GooList &other);
+  GooList& operator=(const GooList &other);
 
   void expand();
   void shrink();

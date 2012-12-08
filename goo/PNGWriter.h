@@ -6,7 +6,7 @@
 //
 // Copyright (C) 2009 Warren Toomey <wkt@tuhs.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
-// Copyright (C) 2009, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010, 2011 Adrian Johnson <ajohnson@redneon.com>
 //
@@ -49,6 +49,9 @@ public:
   bool close();
 
 private:
+  PNGWriter(const PNGWriter &other);
+  PNGWriter& operator=(const PNGWriter &other);
+
   Format format;
   png_structp png_ptr;
   png_infop info_ptr;

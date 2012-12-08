@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2010, 2012 William Bader <williambader@hotmail.com>
-// Copyright (C) 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2011, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
@@ -51,6 +51,9 @@ public:
   bool close();
 
 private:
+  TiffWriter(const TiffWriter &other);
+  TiffWriter& operator=(const TiffWriter &other);
+  
   TIFF *f;				// LibTiff file context
   int numRows;				// number of rows in the image
   int curRow;				// number of rows written
