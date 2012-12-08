@@ -508,6 +508,28 @@ poppler_annot_get_flags (PopplerAnnot *poppler_annot)
 }
 
 /**
+ * poppler_annot_set_flags:
+ * @poppler_annot: a #PopplerAnnot
+ * @flags: a #PopplerAnnotFlag
+ *
+ * Sets the flag field specifying various characteristics of the
+ * @poppler_annot.
+ *
+ * Since: 0.22
+ **/
+void
+poppler_annot_set_flags (PopplerAnnot *poppler_annot, PopplerAnnotFlag flags)
+{
+  g_return_if_fail (POPPLER_IS_ANNOT (poppler_annot));
+
+  if (poppler_annot_get_flags (poppler_annot) == flags)
+    return;
+
+  poppler_annot->annot->setFlags ((guint) flags);
+}
+
+
+/**
  * poppler_annot_get_color:
  * @poppler_annot: a #PopplerAnnot
  *

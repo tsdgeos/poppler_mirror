@@ -162,6 +162,8 @@ void                          poppler_annot_set_contents                       (
 gchar                        *poppler_annot_get_name                           (PopplerAnnot *poppler_annot);
 gchar                        *poppler_annot_get_modified                       (PopplerAnnot *poppler_annot);
 PopplerAnnotFlag              poppler_annot_get_flags                          (PopplerAnnot *poppler_annot);
+void                          poppler_annot_set_flags                          (PopplerAnnot *poppler_annot,
+										PopplerAnnotFlag flags);
 PopplerColor                 *poppler_annot_get_color                          (PopplerAnnot *poppler_annot);
 void                          poppler_annot_set_color                          (PopplerAnnot *poppler_annot,
 										PopplerColor *poppler_color);
