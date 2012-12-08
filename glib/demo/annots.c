@@ -669,6 +669,62 @@ pgd_annots_selection_changed (GtkTreeSelection *treeselection,
 }
 
 static void
+pgd_annots_flags_toggled (GtkCellRendererToggle *renderer,
+			  gchar *path_str,
+			  PgdAnnotsDemo *demo,
+			  gint column,
+			  PopplerAnnotFlag flag_bit)
+{
+    GtkTreeIter  iter;
+    gboolean fixed;
+    PopplerAnnot *annot;
+    PopplerAnnotFlag flags;
+    GtkTreePath *path = gtk_tree_path_new_from_string (path_str);
+    GtkTreeModel *model =  GTK_TREE_MODEL (demo->model);
+
+    gtk_tree_model_get_iter (model, &iter, path);
+    gtk_tree_model_get (model, &iter, column, &fixed, ANNOTS_COLUMN, &annot,-1);
+
+    fixed ^= 1;
+    flags = poppler_annot_get_flags (annot);
+
+    if (fixed)
+        flags |= flag_bit;
+    else
+        flags &= ~flag_bit;
+
+    poppler_annot_set_flags (annot, flags);
+    gtk_list_store_set (GTK_LIST_STORE (model), &iter, column, fixed, -1);
+
+    pgd_annot_view_set_annot (demo, annot);
+    gtk_tree_path_free (path);
+}
+
+static void
+pgd_annots_hidden_flag_toggled (GtkCellRendererToggle *renderer,
+				gchar *path_str,
+				PgdAnnotsDemo *demo)
+{
+    pgd_annots_flags_toggled (renderer, path_str, demo, ANNOTS_FLAG_HIDDEN_COLUMN, POPPLER_ANNOT_FLAG_HIDDEN);
+}
+
+static void
+pgd_annots_print_flag_toggled (GtkCellRendererToggle *renderer,
+                               gchar *path_str,
+                               PgdAnnotsDemo *demo)
+{
+    pgd_annots_flags_toggled (renderer, path_str, demo, ANNOTS_FLAG_PRINT_COLUMN, POPPLER_ANNOT_FLAG_PRINT);
+}
+
+static void
+pgd_annots_invisible_flag_toggled (GtkCellRendererToggle *renderer,
+                                   gchar *path_str,
+                                   PgdAnnotsDemo *demo)
+{
+    pgd_annots_flags_toggled (renderer, path_str, demo, ANNOTS_FLAG_INVISIBLE_COLUMN, POPPLER_ANNOT_FLAG_INVISIBLE);
+}
+
+static void
 pgd_annots_add_annot (GtkWidget     *button,
 		      PgdAnnotsDemo *demo)
 {
@@ -898,6 +954,9 @@ pgd_annots_create_widget (PopplerDocument *document)
                                                  NULL);
 
     renderer = gtk_cell_renderer_toggle_new ();
+    g_signal_connect (renderer, "toggled",
+		      G_CALLBACK (pgd_annots_invisible_flag_toggled),
+		      (gpointer) demo);
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (treeview),
                                                  ANNOTS_FLAG_INVISIBLE_COLUMN, "Invisible",
                                                  renderer,
@@ -905,6 +964,9 @@ pgd_annots_create_widget (PopplerDocument *document)
                                                  NULL);
 
     renderer = gtk_cell_renderer_toggle_new ();
+    g_signal_connect (renderer, "toggled",
+                      G_CALLBACK (pgd_annots_hidden_flag_toggled),
+                      (gpointer) demo);
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (treeview),
                                                  ANNOTS_FLAG_HIDDEN_COLUMN, "Hidden",
                                                  renderer,
@@ -912,6 +974,9 @@ pgd_annots_create_widget (PopplerDocument *document)
                                                  NULL);
 
     renderer = gtk_cell_renderer_toggle_new ();
+    g_signal_connect (renderer, "toggled",
+                      G_CALLBACK (pgd_annots_print_flag_toggled),
+                      (gpointer) demo);
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (treeview),
                                                  ANNOTS_FLAG_PRINT_COLUMN, "Print",
                                                  renderer,
