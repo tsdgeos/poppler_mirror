@@ -41,6 +41,8 @@ class HelpAction(argparse.Action):
         sys.exit(0)
 
 def main(args):
+    n_cpus = cpu_count()
+
     parser = argparse.ArgumentParser(
         description = 'Poppler regression tests',
         prog = 'poppler-regtest',
@@ -64,8 +66,8 @@ def main(args):
                         action = 'store', dest = 'skipped_file',
                         help = 'File containing tests to skip')
     parser.add_argument('-t', '--threads',
-                        action = 'store', dest = 'threads', type = int, default = 1,
-                        help = 'Number of worker threads')
+                        action = 'store', dest = 'threads', type = int, default = n_cpus,
+                        help = 'Number of worker threads (Default: %d)' % n_cpus)
 
     ns, args = parser.parse_known_args(args)
     if not args:
@@ -75,7 +77,7 @@ def main(args):
     c = Config(vars(ns))
 
     if c.threads <= 0:
-        c.threads = cpu_count() - c.threads
+        c.threads = n_cpus - c.threads
 
     try:
         commands.run(args)
