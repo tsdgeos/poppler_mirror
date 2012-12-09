@@ -67,6 +67,10 @@
 #include "Outline.h"
 #include "PDFDoc.h"
 
+#ifdef ENABLE_LIBPNG
+#include <png.h>
+#endif
+
 #define DEBUG __FILE__ << ": " << __LINE__ << ": DEBUG: "
 
 class HtmlImage

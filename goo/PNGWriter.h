@@ -19,9 +19,9 @@
 
 #ifdef ENABLE_LIBPNG
 
-#include <cstdio>
-#include <png.h>
 #include "ImgWriter.h"
+
+class PNGWriterPrivate;
 
 class PNGWriter : public ImgWriter
 {
@@ -52,13 +52,7 @@ private:
   PNGWriter(const PNGWriter &other);
   PNGWriter& operator=(const PNGWriter &other);
 
-  Format format;
-  png_structp png_ptr;
-  png_infop info_ptr;
-  unsigned char *icc_data;
-  int icc_data_size;
-  char *icc_name;
-  bool sRGB_profile;
+  PNGWriterPrivate *priv;
 };
 
 #endif
