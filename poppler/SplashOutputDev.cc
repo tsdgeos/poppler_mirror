@@ -4190,7 +4190,7 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx1, Catalog *ca
   m1.m[4] = -kx;
   m1.m[5] = -ky;
 
-  bitmap = new SplashBitmap(surface_width, surface_height, colorMode != splashModeMono1,
+  bitmap = new SplashBitmap(surface_width, surface_height, 1,
                             (paintType == 1) ? colorMode : splashModeMono8, gTrue);
   memset(bitmap->getAlphaPtr(), 0, bitmap->getWidth() * bitmap->getHeight());
   if (paintType == 2) {
