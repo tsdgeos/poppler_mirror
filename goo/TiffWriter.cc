@@ -16,24 +16,38 @@
 
 #include <string.h>
 
-TiffWriter::~TiffWriter()
-{
-  // no cleanup needed
+extern "C" {
+#include <tiffio.h>
 }
 
-TiffWriter::TiffWriter(Format formatA) : format(formatA)
+struct TiffWriterPrivate {
+  TIFF *f;				// LibTiff file context
+  int numRows;				// number of rows in the image
+  int curRow;				// number of rows written
+  const char *compressionString;	// compression type
+  TiffWriter::Format format;		// format of image data
+};
+
+TiffWriter::~TiffWriter()
 {
-  f = NULL;
-  numRows = 0;
-  curRow = 0;
-  compressionString = NULL;
+  delete priv;
+}
+
+TiffWriter::TiffWriter(Format formatA)
+{
+  priv = new TiffWriterPrivate;
+  priv->f = NULL;
+  priv->numRows = 0;
+  priv->curRow = 0;
+  priv->compressionString = NULL;
+  priv->format = formatA;
 }
 
 // Set the compression type
 
 void TiffWriter::setCompressionString(const char *compressionStringArg)
 {
-  compressionString = compressionStringArg;
+  priv->compressionString = compressionStringArg;
 }
 
 // Write a TIFF file.
@@ -72,29 +86,29 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, int hDPI, int vDP
 
   // Initialize
 
-  f = NULL;
-  curRow = 0;
+  priv->f = NULL;
+  priv->curRow = 0;
 
   // Store the number of rows
 
-  numRows = height;
+  priv->numRows = height;
 
   // Set the compression
 
   compression = COMPRESSION_NONE;
 
-  if (compressionString == NULL || strcmp(compressionString, "") == 0) {
+  if (priv->compressionString == NULL || strcmp(priv->compressionString, "") == 0) {
     compression = COMPRESSION_NONE;
   } else {
     int i;
     for (i = 0; compressionList[i].compressionName != NULL; i++) {
-      if (strcmp(compressionString, compressionList[i].compressionName) == 0) {
+      if (strcmp(priv->compressionString, compressionList[i].compressionName) == 0) {
 	compression = compressionList[i].compressionCode;
 	break;
       }
     }
     if (compressionList[i].compressionName == NULL) {
-      fprintf(stderr, "TiffWriter: Unknown compression type '%.10s', using 'none'.\n", compressionString);
+      fprintf(stderr, "TiffWriter: Unknown compression type '%.10s', using 'none'.\n", priv->compressionString);
       fprintf(stderr, "Known compression types (the tiff library might not support every type)\n");
       for (i = 0; compressionList[i].compressionName != NULL; i++) {
 	fprintf(stderr, "%10s %s\n", compressionList[i].compressionName, compressionList[i].compressionDescription);
@@ -104,9 +118,9 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, int hDPI, int vDP
 
   // Set bits per sample, samples per pixel, and photometric type from format
 
-  bitspersample = (format == MONOCHROME ? 1 : 8);
+  bitspersample = (priv->format == MONOCHROME ? 1 : 8);
 
-  switch (format) {
+  switch (priv->format) {
     case MONOCHROME:
     case GRAY:
       samplesperpixel = 1;
@@ -136,35 +150,35 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, int hDPI, int vDP
     return false;
   }
 
-  f = TIFFFdOpen(fileno(openedFile), "-", "w");
+  priv->f = TIFFFdOpen(fileno(openedFile), "-", "w");
 
-  if (!f) {
+  if (!priv->f) {
     return false;
   }
 
   // Set TIFF tags
 
-  TIFFSetField(f, TIFFTAG_IMAGEWIDTH,  width);
-  TIFFSetField(f, TIFFTAG_IMAGELENGTH, height);
-  TIFFSetField(f, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
-  TIFFSetField(f, TIFFTAG_SAMPLESPERPIXEL, samplesperpixel);
-  TIFFSetField(f, TIFFTAG_BITSPERSAMPLE, bitspersample);
-  TIFFSetField(f, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-  TIFFSetField(f, TIFFTAG_PHOTOMETRIC, photometric);
-  TIFFSetField(f, TIFFTAG_COMPRESSION, (uint16) compression);
-  TIFFSetField(f, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(f, rowsperstrip));
-  TIFFSetField(f, TIFFTAG_XRESOLUTION, (double) hDPI);
-  TIFFSetField(f, TIFFTAG_YRESOLUTION, (double) vDPI);
-  TIFFSetField(f, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
+  TIFFSetField(priv->f, TIFFTAG_IMAGEWIDTH,  width);
+  TIFFSetField(priv->f, TIFFTAG_IMAGELENGTH, height);
+  TIFFSetField(priv->f, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+  TIFFSetField(priv->f, TIFFTAG_SAMPLESPERPIXEL, samplesperpixel);
+  TIFFSetField(priv->f, TIFFTAG_BITSPERSAMPLE, bitspersample);
+  TIFFSetField(priv->f, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+  TIFFSetField(priv->f, TIFFTAG_PHOTOMETRIC, photometric);
+  TIFFSetField(priv->f, TIFFTAG_COMPRESSION, (uint16) compression);
+  TIFFSetField(priv->f, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(priv->f, rowsperstrip));
+  TIFFSetField(priv->f, TIFFTAG_XRESOLUTION, (double) hDPI);
+  TIFFSetField(priv->f, TIFFTAG_YRESOLUTION, (double) vDPI);
+  TIFFSetField(priv->f, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
 
-  if (format == RGBA_PREMULTIPLIED) {
+  if (priv->format == RGBA_PREMULTIPLIED) {
     uint16 extra = EXTRASAMPLE_ASSOCALPHA;
-    TIFFSetField(f, TIFFTAG_EXTRASAMPLES, 1, &extra);
+    TIFFSetField(priv->f, TIFFTAG_EXTRASAMPLES, 1, &extra);
   }
 
-  if (format == CMYK) {
-    TIFFSetField(f, TIFFTAG_INKSET, INKSET_CMYK);
-    TIFFSetField(f, TIFFTAG_NUMBEROFINKS, 4);
+  if (priv->format == CMYK) {
+    TIFFSetField(priv->f, TIFFTAG_INKSET, INKSET_CMYK);
+    TIFFSetField(priv->f, TIFFTAG_NUMBEROFINKS, 4);
   }
 
   return true;
@@ -175,7 +189,7 @@ bool TiffWriter::writePointers(unsigned char **rowPointers, int rowCount)
   // Write all rows to the file
 
   for (int row = 0; row < rowCount; row++) {
-    if (TIFFWriteScanline(f, rowPointers[row], row, 0) < 0) {
+    if (TIFFWriteScanline(priv->f, rowPointers[row], row, 0) < 0) {
       fprintf(stderr, "TiffWriter: Error writing tiff row %d\n", row);
       return false;
     }
@@ -188,12 +202,12 @@ bool TiffWriter::writeRow(unsigned char **rowData)
 {
   // Add a single row
 
-  if (TIFFWriteScanline(f, *rowData, curRow, 0) < 0) {
-    fprintf(stderr, "TiffWriter: Error writing tiff row %d\n", curRow);
+  if (TIFFWriteScanline(priv->f, *rowData, priv->curRow, 0) < 0) {
+    fprintf(stderr, "TiffWriter: Error writing tiff row %d\n", priv->curRow);
     return false;
   }
 
-  curRow++;
+  priv->curRow++;
 
   return true;
 }
@@ -202,7 +216,7 @@ bool TiffWriter::close()
 {
   // Close the file
 
-  TIFFClose(f);
+  TIFFClose(priv->f);
 
   return true;
 }

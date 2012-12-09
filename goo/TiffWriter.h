@@ -19,11 +19,8 @@
 
 #include <sys/types.h>
 #include "ImgWriter.h"
-#include "splash/SplashTypes.h"
 
-extern "C" {
-#include "tiffio.h"
-}
+struct TiffWriterPrivate;
 
 class TiffWriter : public ImgWriter
 {
@@ -53,13 +50,8 @@ public:
 private:
   TiffWriter(const TiffWriter &other);
   TiffWriter& operator=(const TiffWriter &other);
-  
-  TIFF *f;				// LibTiff file context
-  int numRows;				// number of rows in the image
-  int curRow;				// number of rows written
-  const char *compressionString;	// compression type
-  Format format;			// format of image data
 
+  TiffWriterPrivate *priv;
 };
 
 #endif
