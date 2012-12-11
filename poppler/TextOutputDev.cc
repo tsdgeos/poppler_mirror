@@ -3371,7 +3371,7 @@ void TextPage::coalesce(GBool physLayout, double fixedPitch, GBool doHTML) {
    *  so that they extend in x without hitting neighbours
    */
   for (blk1 = blkList; blk1; blk1 = blk1->next) {
-    if (!blk1->tableId >= 0) {
+    if (!(blk1->tableId >= 0)) {
       double xMax = DBL_MAX;
       double xMin = DBL_MIN;
 
