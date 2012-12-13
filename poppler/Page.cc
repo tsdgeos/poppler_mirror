@@ -481,6 +481,9 @@ Gfx *Page::createGfx(OutputDev *out, double hDPI, double vDPI,
     printf("***** Rotate = %d\n", attrs->getRotate());
   }
 
+  if (!crop) {
+    crop = (box == *cropBox) && out->needClipToCropBox();
+  }
   gfx = new Gfx(doc, out, num, attrs->getResourceDict(),
 		hDPI, vDPI, &box, crop ? cropBox : (PDFRectangle *)NULL,
 		rotate, abortCheckCbk, abortCheckCbkData);

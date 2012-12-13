@@ -59,6 +59,8 @@ public:
   GBool isValid() { return x1 != 0 || y1 != 0 || x2 != 0 || y2 != 0; }
   GBool contains(double x, double y) { return x1 <= x && x <= x2 && y1 <= y && y <= y2; }
   void clipTo(PDFRectangle *rect);
+  
+  bool operator==(const PDFRectangle &rect) const { return x1 == rect.x1 && y1 == rect.y1 && x2 == rect.x2 && y2 == rect.y2; }
 };
 
 //------------------------------------------------------------------------
