@@ -4601,7 +4601,7 @@ GBool Gfx::checkTransparencyGroup(Dict *resDict) {
       Object obj1, obj2;
       GfxBlendMode mode;
 
-      if (res->lookupGState(dict->getKey(i), &obj1)) {
+      if (res->lookupGState(dict->getKey(i), &obj1) && obj1.isDict()) {
         if (!obj1.dictLookup("BM", &obj2)->isNull()) {
           if (state->parseBlendMode(&obj2, &mode)) {
             if (mode != gfxBlendNormal)
