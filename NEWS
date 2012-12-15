@@ -1,3 +1,21 @@
+Release 0.21.4
+        core:
+         * SplashOutputDev: Fix crash when rendering in monochrome mode
+         * SplashOutputDev: Fix line widths in monochrome mode (Bug #57294)
+         * PSOutputDev: Fix crop on EPS conversion (Bug #30692)
+         * TextOutputDev: Fix minor logic mistake
+         * Fix assert on some malformed files (Bug #58257)
+         * Move #include "jpeglib.h" into .cc file (Bug #57687)
+         * Filter text that may end up being written to the shell
+         * Fix windows compile warnings
+
+        glib:
+         * Add poppler_annot_set_flags (Bug #58015)
+         * Demo fixes and improvements
+
+        qt4:
+         * Fix check_lexer on 32-bit systems
+
 Release 0.21.3
         core:
          * Splash: Implement bilinear image scaling (Bug #22138)
