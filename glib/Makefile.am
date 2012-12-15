@@ -76,7 +76,7 @@ libpoppler_glib_la_LIBADD =				\
 	$(POPPLER_GLIB_LIBS)				\
 	$(FREETYPE_LIBS)
 
-libpoppler_glib_la_LDFLAGS = -version-info 13:0:5 @create_shared_lib@ @auto_import_flags@
+libpoppler_glib_la_LDFLAGS = -version-info 14:0:6 @create_shared_lib@ @auto_import_flags@
 
 BUILT_SOURCES =					\
 	poppler-enums.c				\
