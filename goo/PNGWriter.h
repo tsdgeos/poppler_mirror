@@ -9,6 +9,7 @@
 // Copyright (C) 2009, 2011, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010, 2011 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012 Pino Toscano <pino@kde.org>
 //
 //========================================================================
 

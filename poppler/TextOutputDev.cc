@@ -31,6 +31,7 @@
 // Copyright (C) 2011 Sam Liao <phyomh@gmail.com>
 // Copyright (C) 2012 Horst Prote <prote@fmi.uni-stuttgart.de>
 // Copyright (C) 2012 Jason Crain <jason@aquaticape.us>
+// Copyright (C) 2012 Peter Breitenlohner <peb@mppmu.mpg.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
