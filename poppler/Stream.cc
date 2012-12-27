@@ -26,6 +26,7 @@
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Oliver Sander <sander@mi.fu-berlin.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -419,11 +420,11 @@ ImageStream::ImageStream(Stream *strA, int widthA, int nCompsA, int nBitsA) {
 
   nVals = width * nComps;
   inputLineSize = (nVals * nBits + 7) >> 3;
-  if (nVals > INT_MAX / nBits - 7) {
+  if (nBits <= 0 || nVals > INT_MAX / nBits - 7) {
     // force a call to gmallocn(-1,...), which will throw an exception
     inputLineSize = -1;
   }
-  inputLine = (Guchar *)gmallocn(inputLineSize, sizeof(char));
+  inputLine = (Guchar *)gmallocn_checkoverflow(inputLineSize, sizeof(char));
   if (nBits == 8) {
     imgLine = (Guchar *)inputLine;
   } else {
