@@ -530,13 +530,19 @@ void JPXStream::getImageParams(int *bitsPerComponent,
 		csPrec = csPrec1;
 		haveCSMode = gTrue;
 	      }
-	      for (i = 0; i < dataLen - 7; ++i) {
-		bufStr->getChar();
+	      if( dataLen >= 7 ) {
+		for (i = 0; i < dataLen - 7; ++i) {
+		  if (bufStr->getChar() == EOF)
+		    break;
+		}
 	      }
 	    }
 	  } else {
-	    for (i = 0; i < dataLen - 3; ++i) {
-	      bufStr->getChar();
+	    if( dataLen >= 3 ) {
+	      for (i = 0; i < dataLen - 3; ++i) {
+		if (bufStr->getChar() == EOF)
+		  break;
+	      }
 	    }
 	  }
 	}
