@@ -153,7 +153,7 @@ PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
     // Keep a copy of the errno returned by fopen so that it can be 
     // referred to later.
     fopenErrno = errno;
-    error(errIO, -1, "Couldn't open file '{0:t}': {0:s}.", fileName, strerror(errno));
+    error(errIO, -1, "Couldn't open file '{0:t}': {1:s}.", fileName, strerror(errno));
     errCode = errOpenFile;
     return;
   }
