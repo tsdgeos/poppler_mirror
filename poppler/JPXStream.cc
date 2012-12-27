@@ -15,6 +15,7 @@
 //
 // Copyright (C) 2008, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -974,7 +975,7 @@ GBool JPXStream::readCodestream(Guint len) {
 	            / img.yTileSize;
       // check for overflow before allocating memory
       if (img.nXTiles <= 0 || img.nYTiles <= 0 ||
-	  img.nXTiles >= INT_MAX / img.nYTiles) {
+	  img.nXTiles >= 65535 / img.nYTiles) {
 	error(errSyntaxError, getPos(),
 	      "Bad tile count in JPX SIZ marker segment");
 	return gFalse;
