@@ -1526,7 +1526,7 @@ void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint n
   }
 }
 
-Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset) 
+Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, GBool combine) 
 {
   Guint objectsCount = 0; //count the number of objects in the XRef(s)
   Guchar *fileKey;
@@ -1543,7 +1543,9 @@ Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset)
       objectsCount++;
       getXRef()->fetch(ref.num - numOffset, ref.gen, &obj);
       Guint offset = writeObjectHeader(&ref, outStr);
-      if (xRef->getEntry(n)->getFlag(XRefEntry::Unencrypted)) {
+      if (combine) {
+        writeObject(&obj, outStr, getXRef(), numOffset, NULL, cryptRC4, 0, 0, 0);
+      } else if (xRef->getEntry(n)->getFlag(XRefEntry::Unencrypted)) {
         writeObject(&obj, outStr, NULL, cryptRC4, 0, 0, 0);
       } else {
         writeObject(&obj, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
