@@ -71,7 +71,7 @@ class TestRun:
         with self._lock:
             self._n_tests += 1
 
-        self.printer.print_test_start("Testing '%s' using %s backend (%d/%d): " % (doc_path, backend.get_name(), n_doc, total_docs))
+        self.printer.print_test_start(doc_path, backend.get_name(), n_doc, total_docs)
         test_has_md5 = backend.create_refs(doc_path, test_path)
 
         if backend.has_stderr(test_path):
@@ -81,24 +81,24 @@ class TestRun:
         if ref_has_md5 and test_has_md5:
             if backend.compare_checksums(refs_path, test_path, not self.config.keep_results, self.config.create_diffs, self.config.update_refs):
                 # FIXME: remove dir if it's empty?
-                self.printer.print_test_result("PASS")
+                self.printer.print_test_result(doc_path, backend.get_name(), "PASS")
                 with self._lock:
                     self._n_passed += 1
             else:
-                self.printer.print_test_result_ln("FAIL")
+                self.printer.print_test_result_ln(doc_path, backend.get_name(), "FAIL")
                 with self._lock:
                     self._failed.append("%s (%s)" % (doc_path, backend.get_name()))
             return
         elif test_has_md5:
             if ref_is_crashed:
-                self.printer.print_test_result_ln("DOES NOT CRASH")
+                self.printer.print_test_result_ln(doc_path, backend.get_name(), "DOES NOT CRASH")
             elif ref_is_failed:
-                self.printer.print_test_result_ln("DOES NOT FAIL")
+                self.printer.print_test_result_ln(doc_path, backend.get_name(), "DOES NOT FAIL")
             return
 
         test_is_crashed = backend.is_crashed(test_path)
         if ref_is_crashed and test_is_crashed:
-            self.printer.print_test_result("PASS (Expected crash)")
+            self.printer.print_test_result(doc_path, backend.get_name(), "PASS (Expected crash)")
             with self._lock:
                 self._n_passed += 1
             return
@@ -106,19 +106,19 @@ class TestRun:
         test_is_failed = backend.is_failed(test_path)
         if ref_is_failed and test_is_failed:
             # FIXME: compare status errors
-            self.printer.print_test_result("PASS (Expected fail with status error %d)" % (test_is_failed))
+            self.printer.print_test_result(doc_path, backend.get_name(), "PASS (Expected fail with status error %d)" % (test_is_failed))
             with self._lock:
                 self._n_passed += 1
             return
 
         if test_is_crashed:
-            self.printer.print_test_result_ln("CRASH")
+            self.printer.print_test_result_ln(doc_path, backend.get_name(), "CRASH")
             with self._lock:
                 self._crashed.append("%s (%s)" % (doc_path, backend.get_name()))
             return
 
         if test_is_failed:
-            self.printer.print_test_result_ln("FAIL (status error %d)" % (test_is_failed))
+            self.printer.print_test_result_ln(doc_path, backend.get_name(), "FAIL (status error %d)" % (test_is_failed))
             with self._lock:
                 self._failed_status_error("%s (%s)" % (doc_path, backend.get_name()))
             return

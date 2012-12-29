@@ -34,6 +34,8 @@ class Printer:
         self._rewrite = self._stream.isatty() and not self._verbose
         self._current_line = None
 
+        self._tests = {}
+
         self._lock = RLock()
 
         Printer.__single = self
@@ -82,14 +84,25 @@ class Printer:
             self.stderr.write(self._ensure_new_line(msg))
             self.stderr.flush()
 
-    def print_test_start(self, msg):
+    def print_test_start(self, doc_path, backend_name, n_doc, total_docs):
+        with self._lock:
+            self._tests[(doc_path, backend_name)] = n_doc, total_docs
+
+    def print_test_result(self, doc_path, backend_name, msg):
+        if not self._rewrite:
+            self.print_test_result_ln(doc_path, backend_name, msg)
+            return
+
+        with self._lock:
+            n_doc, total_docs = self._tests.pop((doc_path, backend_name))
+            msg = "Tested '%s' using %s backend (%d/%d): %s" % (doc_path, backend_name, n_doc, total_docs, msg)
         self.printout(msg)
 
-    def print_test_result(self, msg):
-        self.printout_update(msg)
-
-    def print_test_result_ln(self, msg):
-        self.printout_update(self._ensure_new_line(msg))
+    def print_test_result_ln(self, doc_path, backend_name, msg):
+        with self._lock:
+            n_doc, total_docs = self._tests.pop((doc_path, backend_name))
+            msg = "Tested '%s' using %s backend (%d/%d): %s" % (doc_path, backend_name, n_doc, total_docs, msg)
+        self.printout_ln(msg)
 
     def print_default(self, msg):
         if self._verbose:
