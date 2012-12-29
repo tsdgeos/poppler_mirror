@@ -1,3 +1,17 @@
+Release 0.22.0
+        core:
+         * Fix crash in invalid files that define a <= 0 bits per image value
+         * Fix a few issues in JPX decoding when not using OpenJPEG
+         * TextOutputDev: Use page size for max value in TextPage::visitSelection
+         * Fix typo in error message
+
+        utils:
+         * Fix pdfunite regression (Bug #58569)
+         * Demo fixes and improvements
+
+        misc:
+         * pdf-inspector improvements
+
 Release 0.21.4
         core:
          * SplashOutputDev: Fix crash when rendering in monochrome mode
