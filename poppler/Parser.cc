@@ -125,14 +125,14 @@ Object *Parser::getObj(Object *obj, GBool simpleOnly,
     }
     // stream objects are not allowed inside content streams or
     // object streams
-    if (allowStreams && buf2.isCmd("stream")) {
-      if ((str = makeStream(obj, fileKey, encAlgorithm, keyLength,
-			    objNum, objGen, recursion + 1,
-			    strict))) {
-	obj->initStream(str);
+    if (buf2.isCmd("stream")) {
+      if (allowStreams && (str = makeStream(obj, fileKey, encAlgorithm, keyLength,
+                                            objNum, objGen, recursion + 1,
+                                            strict))) {
+        obj->initStream(str);
       } else {
-	obj->free();
-	obj->initError();
+        obj->free();
+        obj->initError();
       }
     } else {
       shift();
