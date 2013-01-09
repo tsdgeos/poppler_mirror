@@ -2954,6 +2954,11 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData,
   // scale the input image
   scaledMask = scaleMask(src, srcData, srcWidth, srcHeight,
 			 scaledWidth, scaledHeight);
+  if (scaledMask->data == NULL) {
+    error(errInternal, -1, "scaledMask->data is NULL in Splash::scaleMaskYuXu");
+    delete scaledMask;
+    return;
+  }
 
   // construct the three sections
   i = (vy[2] <= vy[3]) ? 2 : 3;
@@ -3381,6 +3386,12 @@ void Splash::scaleMaskYuXu(SplashImageMaskSource src, void *srcData,
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx;
   int i, j;
 
+  destPtr0 = dest->data;
+  if (destPtr0 == NULL) {
+    error(errInternal, -1, "dest->data is NULL in Splash::scaleMaskYuXu");
+    return;
+  }
+
   // Bresenham parameters for y scale
   yp = scaledHeight / srcHeight;
   yq = scaledHeight % srcHeight;
@@ -3395,7 +3406,6 @@ void Splash::scaleMaskYuXu(SplashImageMaskSource src, void *srcData,
   // init y scale Bresenham
   yt = 0;
 
-  destPtr0 = dest->data;
   for (y = 0; y < srcHeight; ++y) {
 
     // y scale Bresenham
