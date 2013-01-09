@@ -2955,7 +2955,7 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData,
   scaledMask = scaleMask(src, srcData, srcWidth, srcHeight,
 			 scaledWidth, scaledHeight);
   if (scaledMask->data == NULL) {
-    error(errInternal, -1, "scaledMask->data is NULL in Splash::scaleMaskYuXu");
+    error(errInternal, -1, "scaledMask->data is NULL in Splash::arbitraryTransformMask");
     delete scaledMask;
     return;
   }
@@ -3461,11 +3461,15 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
 
   w = src->getWidth();
   h = src->getHeight();
+  p = src->getDataPtr();
+  if (p == NULL) {
+    error(errInternal, -1, "src->getDataPtr() is NULL in Splash::blitMask");
+    return;    
+  }
   if (vectorAntialias && clipRes != splashClipAllInside) {
     pipeInit(&pipe, xDest, yDest, state->fillPattern, NULL,
 	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
     drawAAPixelInit();
-    p = src->getDataPtr();
     for (y = 0; y < h; ++y) {
       for (x = 0; x < w; ++x) {
 	pipe.shape = *p++;
@@ -3475,7 +3479,6 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
   } else {
     pipeInit(&pipe, xDest, yDest, state->fillPattern, NULL,
 	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
-    p = src->getDataPtr();
     if (clipRes == splashClipAllInside) {
       for (y = 0; y < h; ++y) {
 	pipeSetXY(&pipe, xDest, yDest + y);
