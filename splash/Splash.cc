@@ -3233,6 +3233,12 @@ void Splash::scaleMaskYdXu(SplashImageMaskSource src, void *srcData,
   Guchar *destPtr;
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, d;
   int i, j;
+  
+  destPtr = dest->data;
+  if (destPtr == NULL) {
+    error(errInternal, -1, "dest->data is NULL in Splash::scaleMaskYdXu");
+    return;
+  }
 
   // Bresenham parameters for y scale
   yp = srcHeight / scaledHeight;
@@ -3249,7 +3255,6 @@ void Splash::scaleMaskYdXu(SplashImageMaskSource src, void *srcData,
   // init y scale Bresenham
   yt = 0;
 
-  destPtr = dest->data;
   for (y = 0; y < scaledHeight; ++y) {
 
     // y scale Bresenham
