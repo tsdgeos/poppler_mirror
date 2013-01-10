@@ -70,7 +70,7 @@ dnl then search the headers (can't use simply AC_TRY_xxx, as jpeglib.h
 dnl requires system dependent includes loaded before it)
 ac_save_CPPFLAGS="$CPPFLAGS"
 ac_save_CFLAGS="$CFLAGS"
-CPPFLAGS="$CFLAGS $all_includes $USER_INCLUDES"
+CPPFLAGS="$CPPFLAGS $all_includes $USER_INCLUDES"
 CFLAGS="$CFLAGS $all_includes $USER_INCLUDES"
 AC_CHECK_HEADER([jpeglib.h], [jpeg_incdir=yes], [jpeg_incdir=NO])
 CPPFLAGS="$ac_save_CPPFLAGS"
