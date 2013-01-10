@@ -14,7 +14,7 @@
 // Copyright (C) 2005-2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2010-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2010 Christian Feuers‰nger <cfeuersaenger@googlemail.com>
+// Copyright (C) 2010 Christian Feuers√§nger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012 Markus Trippelsdorf <markus@trippelsdorf.de>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
@@ -3308,6 +3308,12 @@ void Splash::scaleMaskYuXd(SplashImageMaskSource src, void *srcData,
   Guchar *destPtr0, *destPtr;
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx, d, d0, d1;
   int i;
+  
+  destPtr0 = dest->data;
+  if (destPtr0 == NULL) {
+    error(errInternal, -1, "dest->data is NULL in Splash::scaleMaskYuXd");
+    return;
+  }
 
   // Bresenham parameters for y scale
   yp = scaledHeight / srcHeight;
@@ -3323,7 +3329,6 @@ void Splash::scaleMaskYuXd(SplashImageMaskSource src, void *srcData,
   // init y scale Bresenham
   yt = 0;
 
-  destPtr0 = dest->data;
   for (y = 0; y < srcHeight; ++y) {
 
     // y scale Bresenham
@@ -4862,6 +4867,11 @@ void Splash::vertFlipImage(SplashBitmap *img, int width, int height,
   Guchar *lineBuf;
   Guchar *p0, *p1;
   int w;
+  
+  if (unlikely(img->data == NULL)) {
+    error(errInternal, -1, "img->data is NULL in Splash::vertFlipImage");
+    return;
+  }
 
   w = width * nComps;
   lineBuf = (Guchar *)gmalloc(w);
