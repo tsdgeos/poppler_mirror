@@ -33,6 +33,7 @@ public:
   PopplerInputStream(GInputStream *inputStream, GCancellable *cancellableA,
                      Guint startA, GBool limitedA, Guint lengthA, Object *dictA);
   virtual ~PopplerInputStream();
+  virtual BaseStream *copy();
   virtual Stream *makeSubStream(Guint start, GBool limited,
                                 Guint lengthA, Object *dictA);
   virtual StreamKind getKind() { return strWeird; }

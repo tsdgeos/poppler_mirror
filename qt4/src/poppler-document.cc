@@ -5,7 +5,7 @@
  * Copyright (C) 2006-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, 2011 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012 Koji Otani <sho@bbr.jp>
- * Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+ * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -239,8 +239,10 @@ namespace Poppler {
 	if (fi.isEmbedded())
 	{
 		Object refObj, strObj;
+		XRef *xref = m_doc->doc->getXRef()->copy();
+
 		refObj.initRef(fi.m_data->embRef.num, fi.m_data->embRef.gen);
-		refObj.fetch(m_doc->doc->getXRef(), &strObj);
+		refObj.fetch(xref, &strObj);
 		refObj.free();
 		if (strObj.isStream())
 		{
@@ -253,6 +255,7 @@ namespace Poppler {
 			strObj.streamClose();
 		}
 		strObj.free();
+		delete xref;
 	}
 	return result;
     }
@@ -265,7 +268,8 @@ namespace Poppler {
 	if ( m_doc->locked )
 	    return QString();
 
-	m_doc->doc->getDocInfo( &info );
+	QScopedPointer<XRef> xref(m_doc->doc->getXRef()->copy());
+	xref->getDocInfo(&info);
 	if ( !info.isDict() )
 	    return QString();
 
@@ -295,7 +299,8 @@ namespace Poppler {
 	if ( m_doc->locked )
 	    return QStringList();
 
-	m_doc->doc->getDocInfo( &info );
+	QScopedPointer<XRef> xref(m_doc->doc->getXRef()->copy());
+	xref->getDocInfo(&info);
 	if ( !info.isDict() )
 	    return QStringList();
 
@@ -317,7 +322,8 @@ namespace Poppler {
 	    return QDateTime();
 
 	Object info;
-	m_doc->doc->getDocInfo( &info );
+	QScopedPointer<XRef> xref(m_doc->doc->getXRef()->copy());
+	xref->getDocInfo(&info);
 	if ( !info.isDict() ) {
 	    info.free();
 	    return QDateTime();
@@ -521,7 +527,6 @@ namespace Poppler {
 
     void Document::setRenderHint( Document::RenderHint hint, bool on )
     {
-        const bool touchesAntialias = hint & ( Document::Antialiasing | Document::TextAntialiasing | Document::TextHinting );
         const bool touchesOverprinting = hint & Document::OverprintPreview;
         
         int hintForOperation = hint;
@@ -533,12 +538,6 @@ namespace Poppler {
         else
             m_doc->m_hints &= ~hintForOperation;
 
-        // the only way to set antialiasing for Splash is on creation
-        if ( m_doc->m_backend == Document::SplashBackend && (touchesAntialias || touchesOverprinting) )
-        {
-            delete m_doc->m_outputDev;
-            m_doc->m_outputDev = NULL;
-        }
     }
 
     Document::RenderHints Document::renderHints() const

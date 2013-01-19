@@ -20,7 +20,7 @@
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008, 2010 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2009-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2011, 2012 William Bader <williambader@hotmail.com>
@@ -3085,7 +3085,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     rotateA += 360;
   }
   state = new GfxState(dpi, dpi, &box, rotateA, gFalse);
-  startPage(page->getNum(), state);
+  startPage(page->getNum(), state, xref);
   delete state;
 
   // set up the SplashOutputDev
@@ -3471,14 +3471,14 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 #endif // HAVE_SPLASH
 }
 
-void PSOutputDev::startPage(int pageNum, GfxState *state) {
+void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   Page *page;
   int x1, y1, x2, y2, width, height, t;
   int imgWidth, imgHeight, imgWidth2, imgHeight2;
   GBool landscape;
   GooString *s;
 
-
+  xref = xrefA;
   if (mode == psModePS || mode == psModePSOrigPageSizes) {
     GooString pageLabel;
     const GBool gotLabel = doc->getCatalog()->indexToLabel(pageNum -1, &pageLabel);
@@ -4284,7 +4284,7 @@ GBool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *st
   return gTrue;
 }
 
-GBool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
+GBool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Object *str,
 				     double *pmat, int paintType, int tilingType, Dict *resDict,
 				     double *mat, double *bbox,
 				     int x0, int y0, int x1, int y1,
@@ -4303,7 +4303,7 @@ GBool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Ob
     box.y1 = bbox[1];
     box.x2 = bbox[2];
     box.y2 = bbox[3];
-    gfx = new Gfx(doc, this, resDict, &box, NULL);
+    gfx = new Gfx(doc, this, resDict, &box, NULL, NULL, NULL, gfxA->getXRef());
     writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] cm\n", mat[0], mat[1], mat[2], mat[3], tx, ty);
     inType3Char = gTrue;
     gfx->display(str);

@@ -26,7 +26,7 @@
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Srinivas Adicherla <srinivas.adicherla@geodesic.com>
 // Copyright (C) 2010 Philip Lorenz <lorenzph+freedesktop@gmail.com>
-// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
@@ -75,6 +75,14 @@
 #include "PDFDoc.h"
 #include "Hints.h"
 
+#if MULTITHREADED
+#  define lockPDFDoc   gLockMutex(&mutex)
+#  define unlockPDFDoc gUnlockMutex(&mutex)
+#else
+#  define lockPDFDoc
+#  define unlockPDFDoc
+#endif
+
 //------------------------------------------------------------------------
 
 #define headerSearchSize 1024	// read this many bytes at beginning of
@@ -94,6 +102,9 @@
 
 void PDFDoc::init()
 {
+#if MULTITHREADED
+  gInitMutex(&mutex);
+#endif
   ok = gFalse;
   errCode = errNone;
   fileName = NULL;
@@ -160,7 +171,7 @@ PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
 
   // create stream
   obj.initNull();
-  str = new FileStream(file, 0, gFalse, size, &obj);
+  str = new FileStream(file, fileName->getCString(), 0, gFalse, size, &obj);
 
   ok = setup(ownerPassword, userPassword);
 }
@@ -211,7 +222,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
 
   // create stream
   obj.initNull();
-  str = new FileStream(file, 0, gFalse, size, &obj);
+  str = new FileStream(file, fileName->getCString(), 0, gFalse, size, &obj);
 
   ok = setup(ownerPassword, userPassword);
 }
@@ -246,10 +257,12 @@ PDFDoc::PDFDoc(BaseStream *strA, GooString *ownerPassword,
 }
 
 GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
+  lockPDFDoc;
   str->setPos(0, -1);
   if (str->getPos() < 0)
   {
     error(errSyntaxError, -1, "Document base stream is not seekable");
+    unlockPDFDoc;
     return gFalse;
   }
 
@@ -269,12 +282,14 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
   if (!xref->isOk()) {
     error(errSyntaxError, -1, "Couldn't read xref table");
     errCode = xref->getErrorCode();
+    unlockPDFDoc;
     return gFalse;
   }
 
   // check for encryption
   if (!checkEncryption(ownerPassword, userPassword)) {
     errCode = errEncrypted;
+    unlockPDFDoc;
     return gFalse;
   }
 
@@ -293,11 +308,13 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
     if (catalog && !catalog->isOk()) {
       error(errSyntaxError, -1, "Couldn't read page catalog");
       errCode = errBadCatalog;
+      unlockPDFDoc;
       return gFalse;
     }
   }
 
   // done
+  unlockPDFDoc;
   return gTrue;
 }
 
@@ -341,6 +358,9 @@ PDFDoc::~PDFDoc() {
   if (fileNameU) {
     gfree(fileNameU);
   }
+#endif
+#if MULTITHREADED
+  gDestroyMutex(&mutex);
 #endif
 }
 
@@ -455,7 +475,7 @@ void PDFDoc::displayPage(OutputDev *out, int page,
 			 GBool (*abortCheckCbk)(void *data),
 			 void *abortCheckCbkData,
                          GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data),
-                         void *annotDisplayDecideCbkData) {
+                         void *annotDisplayDecideCbkData, GBool copyXRef) {
   if (globalParams->getPrintCommands()) {
     printf("***** page %d *****\n", page);
   }
@@ -464,7 +484,7 @@ void PDFDoc::displayPage(OutputDev *out, int page,
     getPage(page)->display(out, hDPI, vDPI,
 				    rotate, useMediaBox, crop, printing,
 				    abortCheckCbk, abortCheckCbkData,
-				    annotDisplayDecideCbk, annotDisplayDecideCbkData);
+				    annotDisplayDecideCbk, annotDisplayDecideCbkData, copyXRef);
 
 }
 
@@ -491,14 +511,14 @@ void PDFDoc::displayPageSlice(OutputDev *out, int page,
 			      GBool (*abortCheckCbk)(void *data),
 			      void *abortCheckCbkData,
                               GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data),
-                              void *annotDisplayDecideCbkData) {
+                              void *annotDisplayDecideCbkData, GBool copyXRef) {
   if (getPage(page))
     getPage(page)->displaySlice(out, hDPI, vDPI,
 					 rotate, useMediaBox, crop,
 					 sliceX, sliceY, sliceW, sliceH,
 					 printing,
 					 abortCheckCbk, abortCheckCbkData,
-					 annotDisplayDecideCbk, annotDisplayDecideCbkData);
+					 annotDisplayDecideCbk, annotDisplayDecideCbkData, copyXRef);
 }
 
 Links *PDFDoc::getLinks(int page) {
@@ -826,11 +846,13 @@ int PDFDoc::saveWithoutChangesAs(GooString *name) {
 int PDFDoc::saveWithoutChangesAs(OutStream *outStr) {
   int c;
   
-  str->reset();
-  while ((c = str->getChar()) != EOF) {
+  BaseStream *copyStr = str->copy();
+  copyStr->reset();
+  while ((c = copyStr->getChar()) != EOF) {
     outStr->put(c);
   }
-  str->close();
+  copyStr->close();
+  delete copyStr;
 
   return errNone;
 }
@@ -840,11 +862,13 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
   XRef *uxref;
   int c;
   //copy the original file
-  str->reset();
-  while ((c = str->getChar()) != EOF) {
+  BaseStream *copyStr = str->copy();
+  copyStr->reset();
+  while ((c = copyStr->getChar()) != EOF) {
     outStr->put(c);
   }
-  str->close();
+  copyStr->close();
+  delete copyStr;
 
   Guchar *fileKey;
   CryptAlgorithm encAlgorithm;
@@ -853,6 +877,7 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
 
   uxref = new XRef();
   uxref->add(0, 65535, 0, gFalse);
+  xref->lock();
   for(int i=0; i<xref->getNumObjects(); i++) {
     if ((xref->getEntry(i)->type == xrefEntryFree) && 
         (xref->getEntry(i)->gen == 0)) //we skip the irrelevant free objects
@@ -864,7 +889,7 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
       ref.gen = xref->getEntry(i)->type == xrefEntryCompressed ? 0 : xref->getEntry(i)->gen;
       if (xref->getEntry(i)->type != xrefEntryFree) {
         Object obj1;
-        xref->fetch(ref.num, ref.gen, &obj1);
+        xref->fetch(ref.num, ref.gen, &obj1, 1);
         Guint offset = writeObjectHeader(&ref, outStr);
         writeObject(&obj1, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
         writeObjectFooter(outStr);
@@ -875,6 +900,7 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
       }
     }
   }
+  xref->unlock();
   if (uxref->getNumObjects() == 0) { //we have nothing to update
     delete uxref;
     return;
@@ -922,6 +948,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
   outStr->printf("%%PDF-%d.%d\r\n",pdfMajorVersion,pdfMinorVersion);
   XRef *uxref = new XRef();
   uxref->add(0, 65535, 0, gFalse);
+  xref->lock();
   for(int i=0; i<xref->getNumObjects(); i++) {
     Object obj1;
     Ref ref;
@@ -941,7 +968,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
     } else if (type == xrefEntryUncompressed){ 
       ref.num = i;
       ref.gen = xref->getEntry(i)->gen;
-      xref->fetch(ref.num, ref.gen, &obj1);
+      xref->fetch(ref.num, ref.gen, &obj1, 1);
       Guint offset = writeObjectHeader(&ref, outStr);
       // Write unencrypted objects in unencrypted form
       if (xref->getEntry(i)->getFlag(XRefEntry::Unencrypted)) {
@@ -955,7 +982,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
     } else if (type == xrefEntryCompressed) {
       ref.num = i;
       ref.gen = 0; //compressed entries have gen == 0
-      xref->fetch(ref.num, ref.gen, &obj1);
+      xref->fetch(ref.num, ref.gen, &obj1, 1);
       Guint offset = writeObjectHeader(&ref, outStr);
       writeObject(&obj1, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
       writeObjectFooter(outStr);
@@ -963,6 +990,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
       obj1.free();
     }
   }
+  xref->unlock();
   Guint uxrefOffset = outStr->getPos();
   writeXRefTableTrailer(uxrefOffset, uxref, gTrue /* write all entries */,
                         uxref->getNumObjects(), outStr, gFalse /* complete rewrite */);
@@ -1562,8 +1590,10 @@ Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, G
 Outline *PDFDoc::getOutline()
 {
   if (!outline) {
+    lockPDFDoc;
     // read outline
     outline = new Outline(catalog->getOutline(), xref);
+    unlockPDFDoc;
   }
 
   return outline;
@@ -1720,14 +1750,18 @@ Page *PDFDoc::getPage(int page)
   if ((page < 1) || page > getNumPages()) return NULL;
 
   if (isLinearized()) {
+    lockPDFDoc;
     if (!pageCache) {
       pageCache = (Page **) gmallocn(getNumPages(), sizeof(Page *));
       for (int i = 0; i < getNumPages(); i++) {
         pageCache[i] = NULL;
       }
     }
+    unlockPDFDoc;
     if (!pageCache[page-1]) {
+      lockPDFDoc;
       pageCache[page-1] = parsePage(page);
+      unlockPDFDoc;
     }
     if (pageCache[page-1]) {
        return pageCache[page-1];

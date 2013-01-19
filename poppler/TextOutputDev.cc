@@ -33,6 +33,7 @@
 // Copyright (C) 2012 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2012 Peter Breitenlohner <peb@mppmu.mpg.de>
 // Copyright (C) 2013 José Aliste <jaliste@src.gnome.org>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -4267,7 +4268,7 @@ TextSelectionPainter::TextSelectionPainter(TextPage *page,
 
   state = new GfxState(72 * scale, 72 * scale, &box, rotation, gFalse);
 
-  out->startPage (0, state);
+  out->startPage (0, state, NULL);
   out->setDefaultCTM (state->getCTM());
 
   state->setTextMat(1, 0, 0, -1, 0, 0);
@@ -5313,7 +5314,7 @@ TextOutputDev::~TextOutputDev() {
   delete actualText;
 }
 
-void TextOutputDev::startPage(int pageNum, GfxState *state) {
+void TextOutputDev::startPage(int pageNum, GfxState *state, XRef *xref) {
   text->startPage(state);
 }
 

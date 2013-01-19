@@ -18,6 +18,7 @@
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -86,7 +87,7 @@ public:
   //----- initialization and control
 
   // Start a page.
-  virtual void startPage(int pageNum, GfxState *state);
+  virtual void startPage(int pageNum, GfxState *state, XRef *xref);
 
   // End a page.
   virtual void endPage();

@@ -18,7 +18,7 @@
 // Copyright (C) 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009-2012 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2009, 2010, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009, 2010, 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 //
@@ -148,15 +148,17 @@ public:
       double hDPI, double vDPI, PDFRectangle *box,
       PDFRectangle *cropBox, int rotate,
       GBool (*abortCheckCbkA)(void *data) = NULL,
-      void *abortCheckCbkDataA = NULL);
+      void *abortCheckCbkDataA = NULL, XRef *xrefA = NULL);
 
   // Constructor for a sub-page object.
   Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict,
       PDFRectangle *box, PDFRectangle *cropBox,
       GBool (*abortCheckCbkA)(void *data) = NULL,
-      void *abortCheckCbkDataA = NULL);
+      void *abortCheckCbkDataA = NULL, XRef *xrefA = NULL);
 
   ~Gfx();
+
+  XRef *getXRef() { return xref; }
 
   // Interpret a stream or array of streams.
   void display(Object *obj, GBool topLevel = gTrue);

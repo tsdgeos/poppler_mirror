@@ -20,6 +20,7 @@
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2010 Matthias Fauconneau <matthias.fauconneau@gmail.com>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -122,7 +123,7 @@ void ArthurOutputDev::startDoc(XRef *xrefA) {
 #endif
 }
 
-void ArthurOutputDev::startPage(int pageNum, GfxState *state)
+void ArthurOutputDev::startPage(int pageNum, GfxState *state, XRef *xref)
 {
   // fill page with white background.
   int w = static_cast<int>(state->getPageWidth());

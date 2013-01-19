@@ -18,6 +18,7 @@
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -31,7 +32,9 @@
 #pragma interface
 #endif
 
+#include "poppler-config.h"
 #include "Object.h"
+#include "goo/GooMutex.h"
 
 //------------------------------------------------------------------------
 // Dict
@@ -48,13 +51,14 @@ public:
   // Constructor.
   Dict(XRef *xrefA);
   Dict(Dict* dictA);
+  Dict *copy(XRef *xrefA);
 
   // Destructor.
   ~Dict();
 
   // Reference counting.
-  int incRef() { return ++ref; }
-  int decRef() { return --ref; }
+  int incRef();
+  int decRef();
 
   // Get number of entries.
   int getLength() { return length; }
@@ -98,6 +102,9 @@ private:
   int size;			// size of <entries> array
   int length;			// number of entries in dictionary
   int ref;			// reference count
+#if MULTITHREADED
+  GooMutex mutex;
+#endif
 
   DictEntry *find(const char *key);
 };

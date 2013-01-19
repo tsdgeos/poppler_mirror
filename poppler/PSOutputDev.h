@@ -17,7 +17,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006-2008, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Brad Hards <bradh@kde.org>
-// Copyright (C) 2009-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2011 William Bader <williambader@hotmail.com>
@@ -186,7 +186,7 @@ public:
 			       void *annotDisplayDecideCbkData = NULL);
 
   // Start a page.
-  virtual void startPage(int pageNum, GfxState *state);
+  virtual void startPage(int pageNum, GfxState *state, XRef *xref);
 
   // End a page.
   virtual void endPage();

@@ -25,7 +25,7 @@
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2011 José Aliste <jaliste@src.gnome.org>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Tobias Koenig <tokoe@kdab.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -1205,7 +1205,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   if (dict->lookupNF("P", &obj1)->isRef()) {
     Ref ref = obj1.getRef();
 
-    page = doc->getCatalog()->findPage (ref.num, ref.gen);
+    page = doc->getCatalog()->findPage (ref.num, ref.gen, gFalse);
   } else {
     page = 0;
   }
@@ -1748,7 +1748,7 @@ void Annot::draw(Gfx *gfx, GBool printing) {
     return;
 
   // draw the appearance stream
-  appearance.fetch(xref, &obj);
+  appearance.fetch(gfx->getXRef(), &obj);
   gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
       rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
@@ -2412,7 +2412,7 @@ void AnnotText::draw(Gfx *gfx, GBool printing) {
   }
 
   // draw the appearance stream
-  appearance.fetch(xref, &obj);
+  appearance.fetch(gfx->getXRef(), &obj);
   if (appearBBox) {
     gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
                    appearBBox->getPageXMin(), appearBBox->getPageYMin(),
@@ -2511,7 +2511,7 @@ void AnnotLink::draw(Gfx *gfx, GBool printing) {
     return;
 
   // draw the appearance stream
-  appearance.fetch(xref, &obj);
+  appearance.fetch(gfx->getXRef(), &obj);
   gfx->drawAnnot(&obj, border, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
@@ -2944,7 +2944,7 @@ void AnnotFreeText::draw(Gfx *gfx, GBool printing) {
   }
 
   // draw the appearance stream
-  appearance.fetch(xref, &obj);
+  appearance.fetch(gfx->getXRef(), &obj);
   gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
                  rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
@@ -3416,7 +3416,7 @@ void AnnotLine::draw(Gfx *gfx, GBool printing) {
   }
 
   // draw the appearance stream
-  appearance.fetch(xref, &obj);
+  appearance.fetch(gfx->getXRef(), &obj);
   if (appearBBox) {
     gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
                    appearBBox->getPageXMin(), appearBBox->getPageYMin(),
@@ -3724,7 +3724,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
   }
 
   // draw the appearance stream
-  appearance.fetch(xref, &obj);
+  appearance.fetch(gfx->getXRef(), &obj);
   if (appearBBox) {
     gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
                    appearBBox->getPageXMin(), appearBBox->getPageYMin(),
@@ -3770,7 +3770,7 @@ AnnotWidget::~AnnotWidget() {
 void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
 
-  form = doc->getCatalog()->getForm();
+  form = doc->getCatalog()->getForm(gFalse);
 
   if(dict->lookup("H", &obj1)->isName()) {
     const char *modeName = obj1.getName();
@@ -4967,7 +4967,7 @@ void AnnotWidget::draw(Gfx *gfx, GBool printing) {
   }
 
   // draw the appearance stream
-  appearance.fetch(xref, &obj);
+  appearance.fetch(gfx->getXRef(), &obj);
   if (addDingbatsResource) {
     // We are forcing ZaDb but the font does not exist
     // so create a fake one
@@ -4976,19 +4976,19 @@ void AnnotWidget::draw(Gfx *gfx, GBool printing) {
     subtypeObj.initName("Type1");
 
     Object fontDictObj;
-    Dict *fontDict = new Dict(xref);
+    Dict *fontDict = new Dict(gfx->getXRef());
     fontDict->decRef();
     fontDict->add(copyString("BaseFont"), &baseFontObj);
     fontDict->add(copyString("Subtype"), &subtypeObj);
     fontDictObj.initDict(fontDict);
 
     Object fontsDictObj;
-    Dict *fontsDict = new Dict(xref);
+    Dict *fontsDict = new Dict(gfx->getXRef());
     fontsDict->decRef();
     fontsDict->add(copyString("ZaDb"), &fontDictObj);
     fontsDictObj.initDict(fontsDict);
 
-    Dict *dict = new Dict(xref);
+    Dict *dict = new Dict(gfx->getXRef());
     dict->add(copyString("Font"), &fontsDictObj);
     gfx->pushResources(dict);
     delete dict;
@@ -5084,25 +5084,25 @@ void AnnotMovie::draw(Gfx *gfx, GBool printing) {
       appearBuf->append ("Q\n");
 
       Object imgDict;
-      imgDict.initDict(xref);
+      imgDict.initDict(gfx->getXRef());
       imgDict.dictSet ("MImg", &poster);
 
       Object resDict;
-      resDict.initDict(xref);
+      resDict.initDict(gfx->getXRef());
       resDict.dictSet ("XObject", &imgDict);
 
       Object formDict, obj1, obj2;
-      formDict.initDict(xref);
+      formDict.initDict(gfx->getXRef());
       formDict.dictSet("Length", obj1.initInt(appearBuf->getLength()));
       formDict.dictSet("Subtype", obj1.initName("Form"));
       formDict.dictSet("Name", obj1.initName("FRM"));
-      obj1.initArray(xref);
+      obj1.initArray(gfx->getXRef());
       obj1.arrayAdd(obj2.initInt(0));
       obj1.arrayAdd(obj2.initInt(0));
       obj1.arrayAdd(obj2.initInt(width));
       obj1.arrayAdd(obj2.initInt(height));
       formDict.dictSet("BBox", &obj1);
-      obj1.initArray(xref);
+      obj1.initArray(gfx->getXRef());
       obj1.arrayAdd(obj2.initInt(1));
       obj1.arrayAdd(obj2.initInt(0));
       obj1.arrayAdd(obj2.initInt(0));
@@ -5120,10 +5120,10 @@ void AnnotMovie::draw(Gfx *gfx, GBool printing) {
       delete appearBuf;
 
       Object objDict;
-      objDict.initDict(xref);
+      objDict.initDict(gfx->getXRef());
       objDict.dictSet ("FRM", &aStream);
 
-      resDict.initDict(xref);
+      resDict.initDict(gfx->getXRef());
       resDict.dictSet ("XObject", &objDict);
 
       appearBuf = new GooString ();
@@ -5147,7 +5147,7 @@ void AnnotMovie::draw(Gfx *gfx, GBool printing) {
   }
 
   // draw the appearance stream
-  appearance.fetch(xref, &obj);
+  appearance.fetch(gfx->getXRef(), &obj);
   gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
@@ -5489,7 +5489,7 @@ void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
   }
 
   // draw the appearance stream
-  appearance.fetch(xref, &obj);
+  appearance.fetch(gfx->getXRef(), &obj);
   gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
@@ -5773,7 +5773,7 @@ void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
   }
 
   // draw the appearance stream
-  appearance.fetch(xref, &obj);
+  appearance.fetch(gfx->getXRef(), &obj);
   if (appearBBox) {
     gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
                    appearBBox->getPageXMin(), appearBBox->getPageYMin(),
@@ -5985,7 +5985,7 @@ void AnnotInk::draw(Gfx *gfx, GBool printing) {
   }
 
   // draw the appearance stream
-  appearance.fetch(xref, &obj);
+  appearance.fetch(gfx->getXRef(), &obj);
   if (appearBBox) {
     gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
                    appearBBox->getPageXMin(), appearBBox->getPageYMin(),
@@ -6206,7 +6206,7 @@ void AnnotFileAttachment::draw(Gfx *gfx, GBool printing) {
   }
 
   // draw the appearance stream
-  appearance.fetch(xref, &obj);
+  appearance.fetch(gfx->getXRef(), &obj);
   gfx->drawAnnot(&obj, border, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
@@ -6367,7 +6367,7 @@ void AnnotSound::draw(Gfx *gfx, GBool printing) {
   }
 
   // draw the appearance stream
-  appearance.fetch(xref, &obj);
+  appearance.fetch(gfx->getXRef(), &obj);
   gfx->drawAnnot(&obj, border, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();

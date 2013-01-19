@@ -41,6 +41,10 @@ PopplerInputStream::~PopplerInputStream()
     g_object_unref(cancellable);
 }
 
+BaseStream *PopplerInputStream::copy() {
+  return new PopplerInputStream(inputStream, cancellable, start, limited, length, &dict);
+}
+
 Stream *PopplerInputStream::makeSubStream(Guint startA, GBool limitedA,
                                           Guint lengthA, Object *dictA)
 {

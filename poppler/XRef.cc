@@ -20,7 +20,7 @@
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2010 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@kabelmail.de>
+// Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@kabelmail.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
@@ -65,6 +65,14 @@
 #define permHighResPrint  (1<<11) // bit 12
 #define defPermFlags 0xfffc
 
+#if MULTITHREADED
+#  define lockXRef   gLockMutex(&mutex)
+#  define unlockXRef gUnlockMutex(&mutex)
+#else
+#  define lockXRef
+#  define unlockXRef
+#endif
+
 //------------------------------------------------------------------------
 // ObjectStream
 //------------------------------------------------------------------------
@@ -74,7 +82,7 @@ public:
 
   // Create an object stream, using object number <objStrNum>,
   // generation 0.
-  ObjectStream(XRef *xref, int objStrNumA);
+  ObjectStream(XRef *xref, int objStrNumA, int recursion = 0);
 
   GBool isOk() { return ok; }
 
@@ -127,7 +135,7 @@ class ObjectStreamItem : public PopplerCacheItem
     ObjectStream *objStream;
 };
 
-ObjectStream::ObjectStream(XRef *xref, int objStrNumA) {
+ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion) {
   Stream *str;
   Parser *parser;
   int *offsets;
@@ -140,11 +148,11 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA) {
   objNums = NULL;
   ok = gFalse;
 
-  if (!xref->fetch(objStrNum, 0, &objStr)->isStream()) {
+  if (!xref->fetch(objStrNum, 0, &objStr, recursion)->isStream()) {
     goto err1;
   }
 
-  if (!objStr.streamGetDict()->lookup("N", &obj1)->isInt()) {
+  if (!objStr.streamGetDict()->lookup("N", &obj1, recursion)->isInt()) {
     obj1.free();
     goto err1;
   }
@@ -154,7 +162,7 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA) {
     goto err1;
   }
 
-  if (!objStr.streamGetDict()->lookup("First", &obj1)->isInt()) {
+  if (!objStr.streamGetDict()->lookup("First", &obj1, recursion)->isInt()) {
     obj1.free();
     goto err1;
   }
@@ -257,6 +265,9 @@ Object *ObjectStream::getObject(int objIdx, int objNum, Object *obj) {
 //------------------------------------------------------------------------
 
 void XRef::init() {
+#if MULTITHREADED
+  gInitMutex(&mutex);
+#endif
   ok = gTrue;
   errCode = errNone;
   entries = NULL;
@@ -272,6 +283,7 @@ void XRef::init() {
   permFlags = defPermFlags;
   ownerPasswordOk = gFalse;
   rootNum = -1;
+  strOwner = gFalse;
 }
 
 XRef::XRef() {
@@ -375,6 +387,59 @@ XRef::~XRef() {
   if (objStrs) {
     delete objStrs;
   }
+  if (strOwner) {
+    delete str;
+  }
+#if MULTITHREADED
+  gDestroyMutex(&mutex);
+#endif
+}
+
+XRef *XRef::copy() {
+  XRef *xref = new XRef();
+  xref->str = str->copy();
+  xref->strOwner = gTrue;
+  xref->encrypted = encrypted;
+  xref->permFlags = permFlags;
+  xref->ownerPasswordOk = ownerPasswordOk;
+  xref->rootGen = rootGen;
+  xref->rootNum = rootNum;
+
+  xref->start = start;
+  xref->prevXRefOffset = prevXRefOffset;
+  xref->mainXRefEntriesOffset = mainXRefEntriesOffset;
+  xref->xRefStream = xRefStream;
+  trailerDict.copy(&xref->trailerDict);
+  xref->encAlgorithm = encAlgorithm;
+  xref->encRevision = encRevision;
+  xref->encVersion = encVersion;
+  xref->permFlags = permFlags;
+  xref->keyLength = keyLength;
+  xref->permFlags = permFlags;
+  for (int i = 0; i < 32; i++) {
+    xref->fileKey[i] = fileKey[i];
+  }
+
+  if (xref->reserve(size) == 0) {
+    error(errSyntaxError, -1, "unable to allocate {0:d} entries", size);
+    return NULL;
+  }
+  xref->size = size;
+  for (int i = 0; i < size; ++i) {
+    xref->entries[i].offset = entries[i].offset;
+    xref->entries[i].type = entries[i].type;
+    xref->entries[i].obj.initNull ();
+    xref->entries[i].flags = entries[i].flags;
+    xref->entries[i].gen = entries[i].gen;
+  }
+  xref->streamEndsLen = streamEndsLen;
+  if (streamEndsLen  != 0) {
+    xref->streamEnds = (Guint *)gmalloc(streamEndsLen * sizeof(Guint));
+    for (int i = 0; i < streamEndsLen; i++) {
+      xref->streamEnds[i] = streamEnds[i];
+    }
+  }
+  return xref;
 }
 
 int XRef::reserve(int newSize)
@@ -1036,6 +1101,7 @@ Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
   Parser *parser;
   Object obj1, obj2, obj3;
 
+  if (recursion == 0) lockXRef;
   // check for bogus ref - this can happen in corrupted PDF files
   if (num < 0 || num >= size) {
     goto err;
@@ -1044,6 +1110,7 @@ Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
   e = getEntry(num);
   if(!e->obj.isNull ()) { //check for updated object
     obj = e->obj.copy(obj);
+    if (recursion == 0) unlockXRef;
     return obj;
   }
 
@@ -1124,7 +1191,7 @@ Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
     }
 
     if (!objStr) {
-      objStr = new ObjectStream(this, e->offset);
+      objStr = new ObjectStream(this, e->offset, recursion + 1);
       if (!objStr->isOk()) {
 	delete objStr;
 	objStr = NULL;
@@ -1145,10 +1212,20 @@ Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
     goto err;
   }
   
+  if (recursion == 0) unlockXRef;
   return obj;
 
  err:
+  if (recursion == 0) unlockXRef;
   return obj->initNull();
+}
+
+void XRef::lock() {
+  lockXRef;
+}
+
+void XRef::unlock() {
+  unlockXRef;
 }
 
 Object *XRef::getDocInfo(Object *obj) {
@@ -1205,6 +1282,7 @@ int XRef::getNumEntry(Guint offset)
 }
 
 void XRef::add(int num, int gen, Guint offs, GBool used) {
+  lockXRef;
   if (num >= size) {
     if (num >= capacity) {
       entries = (XRefEntry *)greallocn(entries, num + 1, sizeof(XRefEntry));
@@ -1230,17 +1308,21 @@ void XRef::add(int num, int gen, Guint offs, GBool used) {
     e->type = xrefEntryFree;
     e->offset = 0;
   }
+  unlockXRef;
 }
 
 void XRef::setModifiedObject (Object* o, Ref r) {
+  lockXRef;
   if (r.num < 0 || r.num >= size) {
     error(errInternal, -1,"XRef::setModifiedObject on unknown ref: {0:d}, {1:d}\n", r.num, r.gen);
+    unlockXRef;
     return;
   }
   XRefEntry *e = getEntry(r.num);
   e->obj.free();
   o->copy(&(e->obj));
   e->setFlag(XRefEntry::Updated, gTrue);
+  unlockXRef;
 }
 
 Ref XRef::addIndirectObject (Object* o) {
@@ -1274,8 +1356,10 @@ Ref XRef::addIndirectObject (Object* o) {
 }
 
 void XRef::removeIndirectObject(Ref r) {
+  lockXRef;
   if (r.num < 0 || r.num >= size) {
     error(errInternal, -1,"XRef::removeIndirectObject on unknown ref: {0:d}, {1:d}\n", r.num, r.gen);
+    unlockXRef;
     return;
   }
   XRefEntry *e = getEntry(r.num);
@@ -1285,6 +1369,7 @@ void XRef::removeIndirectObject(Ref r) {
   e->type = xrefEntryFree;
   e->gen++;
   e->setFlag(XRefEntry::Updated, gTrue);
+  unlockXRef;
 }
 
 void XRef::writeXRef(XRef::XRefWriter *writer, GBool writeAllEntries) {

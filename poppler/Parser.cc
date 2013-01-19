@@ -17,6 +17,7 @@
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -271,7 +272,7 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
   }
 
   // get filters
-  str = str->addFilters(dict);
+  str = str->addFilters(dict, recursion);
 
   return str;
 }

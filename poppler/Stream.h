@@ -20,7 +20,7 @@
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011, 2012 William Bader <williambader@hotmail.com>
-// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
@@ -39,6 +39,7 @@
 #include <stdio.h>
 #include "goo/gtypes.h"
 #include "Object.h"
+#include "goo/GooMutex.h"
 
 class BaseStream;
 class CachedFile;
@@ -98,8 +99,8 @@ public:
   virtual ~Stream();
 
   // Reference counting.
-  int incRef() { return ++ref; }
-  int decRef() { return --ref; }
+  int incRef();
+  int decRef();
 
   // Get kind of stream.
   virtual StreamKind getKind() = 0;
@@ -218,15 +219,18 @@ public:
 
   // Add filters to this stream according to the parameters in <dict>.
   // Returns the new stream.
-  Stream *addFilters(Object *dict);
+  Stream *addFilters(Object *dict, int recursion = 0);
 
 private:
   virtual GBool hasGetChars() { return false; }
   virtual int getChars(int nChars, Guchar *buffer);
 
-  Stream *makeFilter(char *name, Stream *str, Object *params);
+  Stream *makeFilter(char *name, Stream *str, Object *params, int recursion = 0);
 
   int ref;			// reference count
+#if MULTITHREADED
+  GooMutex mutex;
+#endif
 };
 
 
@@ -299,6 +303,7 @@ public:
 
   BaseStream(Object *dictA, Guint lengthA);
   virtual ~BaseStream();
+  virtual BaseStream *copy() = 0;
   virtual Stream *makeSubStream(Guint start, GBool limited,
 				Guint length, Object *dict) = 0;
   virtual void setPos(Guint pos, int dir = 0) = 0;
@@ -316,9 +321,6 @@ public:
 protected:
 
   Guint length;
-
-private:
-
   Object dict;
 };
 
@@ -439,9 +441,10 @@ private:
 class FileStream: public BaseStream {
 public:
 
-  FileStream(FILE *fA, Guint startA, GBool limitedA,
+  FileStream(FILE *fA, char *fileName, Guint startA, GBool limitedA,
 	     Guint lengthA, Object *dictA);
   virtual ~FileStream();
+  virtual BaseStream *copy();
   virtual Stream *makeSubStream(Guint startA, GBool limitedA,
 				Guint lengthA, Object *dictA);
   virtual StreamKind getKind() { return strFile; }
@@ -486,7 +489,10 @@ private:
       return n;
     }
 
+protected:
   FILE *f;
+  char *fileName;
+private:
   Guint start;
   GBool limited;
   char buf[fileStreamBufSize];
@@ -495,6 +501,14 @@ private:
   Guint bufPos;
   int savePos;
   GBool saved;
+};
+
+class UniqueFileStream: public FileStream {
+public:
+
+  UniqueFileStream(FILE *fA, char *fileNameA, Guint startA, GBool limitedA,
+	     Guint lengthA, Object *dictA);
+  virtual ~UniqueFileStream();
 };
 
 //------------------------------------------------------------------------
@@ -509,6 +523,7 @@ public:
   CachedFileStream(CachedFile *ccA, Guint startA, GBool limitedA,
 	     Guint lengthA, Object *dictA);
   virtual ~CachedFileStream();
+  virtual BaseStream *copy();
   virtual Stream *makeSubStream(Guint startA, GBool limitedA,
 				Guint lengthA, Object *dictA);
   virtual StreamKind getKind() { return strCachedFile; }
@@ -551,6 +566,7 @@ public:
 
   MemStream(char *bufA, Guint startA, Guint lengthA, Object *dictA);
   virtual ~MemStream();
+  virtual BaseStream *copy();
   virtual Stream *makeSubStream(Guint start, GBool limited,
 				Guint lengthA, Object *dictA);
   virtual StreamKind getKind() { return strWeird; }
@@ -599,6 +615,7 @@ public:
 
   EmbedStream(Stream *strA, Object *dictA, GBool limitedA, Guint lengthA);
   virtual ~EmbedStream();
+  virtual BaseStream *copy();
   virtual Stream *makeSubStream(Guint start, GBool limitedA,
 				Guint lengthA, Object *dictA);
   virtual StreamKind getKind() { return str->getKind(); }

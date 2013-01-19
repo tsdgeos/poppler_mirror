@@ -22,7 +22,7 @@
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Srinivas Adicherla <srinivas.adicherla@geodesic.com>
-// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
@@ -37,7 +37,9 @@
 #pragma interface
 #endif
 
+#include "poppler-config.h"
 #include <stdio.h>
+#include "goo/GooMutex.h"
 #include "XRef.h"
 #include "Catalog.h"
 #include "Page.h"
@@ -146,7 +148,7 @@ public:
 		   GBool (*abortCheckCbk)(void *data) = NULL,
 		   void *abortCheckCbkData = NULL,
                    GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
-                   void *annotDisplayDecideCbkData = NULL);
+                   void *annotDisplayDecideCbkData = NULL, GBool copyXRef = gFalse);
 
   // Display a range of pages.
   void displayPages(OutputDev *out, int firstPage, int lastPage,
@@ -165,7 +167,7 @@ public:
 			GBool (*abortCheckCbk)(void *data) = NULL,
 			void *abortCheckCbkData = NULL,
                         GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
-                        void *annotDisplayDecideCbkData = NULL);
+                        void *annotDisplayDecideCbkData = NULL, GBool copyXRef = gFalse);
 
   // Find a page, given its object ID.  Returns page number, or 0 if
   // not found.
@@ -326,6 +328,9 @@ private:
   int fopenErrno;
 
   Guint startXRefPos;		// offset of last xref table
+#if MULTITHREADED
+  GooMutex mutex;
+#endif
 };
 
 #endif

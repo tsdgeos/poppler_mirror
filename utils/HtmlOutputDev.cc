@@ -34,6 +34,7 @@
 // Copyright (C) 2012 Ihar Filipau <thephilips@gmail.com>
 // Copyright (C) 2012 Gerald Schmidt <solahcin@gmail.com>
 // Copyright (C) 2012 Pino Toscano <pino@kde.org>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1229,7 +1230,7 @@ HtmlOutputDev::~HtmlOutputDev() {
       delete pages;
 }
 
-void HtmlOutputDev::startPage(int pageNum, GfxState *state) {
+void HtmlOutputDev::startPage(int pageNum, GfxState *state, XRef *xref) {
 #if 0
   if (mode&&!xml){
     if (write){

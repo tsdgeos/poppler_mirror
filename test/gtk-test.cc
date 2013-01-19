@@ -116,7 +116,7 @@ GDKSplashOutputDev::~GDKSplashOutputDev() {
 
 void GDKSplashOutputDev::clear() {
   startDoc(NULL);
-  startPage(0, NULL);
+  startPage(0, NULL, NULL);
 }
 
 void GDKSplashOutputDev::endPage() {

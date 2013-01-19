@@ -25,7 +25,7 @@
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
 // Copyright (C) 2008, 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
-// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Patrick Pfeifer <p2000@mailinator.com>
 // Copyright (C) 2012 Jason Crain <jason@aquaticape.us>
 //
@@ -163,6 +163,7 @@ CairoOutputDev::CairoOutputDev() {
   stroke_adjust = globalParams->getStrokeAdjust();
   align_stroke_coords = gFalse;
   adjusted_stroke_width = gFalse;
+  xref = NULL;
 }
 
 CairoOutputDev::~CairoOutputDev() {
@@ -235,9 +236,10 @@ void CairoOutputDev::startDoc(PDFDoc *docA,
     fontEngine = new CairoFontEngine(ft_lib);
     fontEngine_owner = gTrue;
   }
+  xref = doc->getXRef();
 }
 
-void CairoOutputDev::startPage(int pageNum, GfxState *state) {
+void CairoOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   /* set up some per page defaults */
   cairo_pattern_destroy(fill_pattern);
   cairo_pattern_destroy(stroke_pattern);
@@ -249,6 +251,9 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state) {
 
   if (text)
     text->startPage(state);
+  if (xrefA != NULL) {
+    xref = xrefA;
+  }
 }
 
 void CairoOutputDev::endPage() {
@@ -602,7 +607,7 @@ void CairoOutputDev::updateFont(GfxState *state) {
   if (text)
     text->updateFont(state);
   
-  currentFont = fontEngine->getFont (state->getFont(), doc, printing);
+  currentFont = fontEngine->getFont (state->getFont(), doc, printing, xref);
 
   if (!currentFont)
     return;
@@ -805,7 +810,7 @@ void CairoOutputDev::eoFill(GfxState *state) {
 
 }
 
-GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx1, Catalog *cat, Object *str,
+GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Object *str,
 					double *pmat, int paintType, int /*tilingType*/, Dict *resDict,
 					double *mat, double *bbox,
 					int x0, int y0, int x1, int y1,
@@ -846,7 +851,7 @@ GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx1, Catalog *cat
   box.x2 = bbox[2]; box.y2 = bbox[3];
   strokePathTmp = strokePathClip;
   strokePathClip = NULL;
-  gfx = new Gfx(doc, this, resDict, &box, NULL);
+  gfx = new Gfx(doc, this, resDict, &box, NULL, NULL, NULL, gfxA->getXRef());
   gfx->display(str);
   delete gfx;
   strokePathClip = strokePathTmp;

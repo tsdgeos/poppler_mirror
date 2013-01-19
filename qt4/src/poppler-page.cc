@@ -13,7 +13,7 @@
  * Copyright (C) 2012 Tobias Koenig <tokoe@kdab.com>
  * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012 Adam Reichold <adamreichold@myopera.com>
- * Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+ * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -258,10 +258,59 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
     case Poppler::Document::SplashBackend:
     {
 #if defined(HAVE_SPLASH)
-      SplashOutputDev *splash_output = static_cast<SplashOutputDev *>(m_page->parentDoc->getOutputDev());
+      SplashColor bgColor;
+#if defined(SPLASH_CMYK)
+      GBool overprint = m_page->parentDoc->m_hints & Document::OverprintPreview ? gTrue : gFalse;
+      globalParams->setOverprintPreview(overprint);
+      if (overprint)
+      {
+        Guchar c, m, y, k;
+
+        c = 255 - m_page->parentDoc->paperColor.blue();
+        m = 255 - m_page->parentDoc->paperColor.red();
+        y = 255 - m_page->parentDoc->paperColor.green();
+        k = c;
+        if (m < k) {
+          k = m;
+        }
+        if (y < k) {
+          k = y;
+        }
+        bgColor[0] = c - k;
+        bgColor[1] = m - k;
+        bgColor[2] = y - k;
+        bgColor[3] = k;
+        for (int i = 4; i < SPOT_NCOMPS + 4; i++) {
+          bgColor[i] = 0;
+        }
+      }
+      else
+#endif
+      {
+        bgColor[0] = m_page->parentDoc->paperColor.blue();
+        bgColor[1] = m_page->parentDoc->paperColor.green();
+        bgColor[2] = m_page->parentDoc->paperColor.red();
+      }
+ 
+      GBool AA = m_page->parentDoc->m_hints & Document::TextAntialiasing ? gTrue : gFalse;
+
+      SplashOutputDev * splash_output = new SplashOutputDev(
+#if defined(SPLASH_CMYK)
+                      (overprint) ? splashModeDeviceN8 : splashModeXBGR8,
+#else
+                      splashModeXBGR8,
+#endif 
+                      4, gFalse, bgColor, gTrue, AA);
+
+      splash_output->setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? gTrue : gFalse);
+      splash_output->setFreeTypeHinting(m_page->parentDoc->m_hints & Document::TextHinting ? gTrue : gFalse, 
+                                        m_page->parentDoc->m_hints & Document::TextSlightHinting ? gTrue : gFalse);
+
+      splash_output->startDoc(m_page->parentDoc->doc);      
 
       m_page->parentDoc->doc->displayPageSlice(splash_output, m_page->index + 1, xres, yres,
-						 rotation, false, true, false, x, y, w, h);
+                                               rotation, false, true, false, x, y, w, h,
+                                               NULL, NULL, NULL, NULL, gTrue);
 
       SplashBitmap *bitmap = splash_output->getBitmap();
       int bw = bitmap->getWidth();
@@ -291,8 +340,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
         QImage tmpimg( dataPtr, bw, bh, QImage::Format_ARGB32 );
         img = tmpimg.copy();
       }
-      // unload underlying xpdf bitmap
-      splash_output->startPage( 0, NULL );
+      delete splash_output;
 #endif
       break;
     }
@@ -381,7 +429,8 @@ QString Page::text(const QRectF &r, TextLayout textLayout) const
   const GBool rawOrder = textLayout == RawOrderLayout;
   output_dev = new TextOutputDev(0, gFalse, 0, rawOrder, gFalse);
   m_page->parentDoc->doc->displayPageSlice(output_dev, m_page->index + 1, 72, 72,
-      0, false, true, false, -1, -1, -1, -1);
+      0, false, true, false, -1, -1, -1, -1,
+      NULL, NULL, NULL, NULL, gTrue);
   if (r.isNull())
   {
     rect = m_page->page->getCropBox();
@@ -482,7 +531,8 @@ QList<TextBox*> Page::textList(Rotation rotate) const
   int rotation = (int)rotate * 90;
 
   m_page->parentDoc->doc->displayPageSlice(output_dev, m_page->index + 1, 72, 72,
-      rotation, false, false, false, -1, -1, -1, -1);
+      rotation, false, false, false, -1, -1, -1, -1,
+      NULL, NULL, NULL, NULL, gTrue);
 
   TextWordList *word_list = output_dev->makeWordList();
   

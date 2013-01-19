@@ -20,7 +20,7 @@
 // Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008, 2009, 2011, 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
-// Copyright (C) 2010-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2010-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -124,7 +124,7 @@ public:
   //----- initialization and control
 
   // Start a page.
-  virtual void startPage(int pageNum, GfxState *state);
+  virtual void startPage(int pageNum, GfxState *state, XRef *xref);
 
   // End a page.
   virtual void endPage();
@@ -284,6 +284,7 @@ protected:
   GBool adjusted_stroke_width;
   GBool align_stroke_coords;
   CairoFont *currentFont;
+  XRef *xref;
 
   struct StrokePathClip {
     GfxPath *path;

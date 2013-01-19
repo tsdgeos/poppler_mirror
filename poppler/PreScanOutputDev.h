@@ -16,7 +16,7 @@
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 William Bader <williambader@hotmail.com>
-// Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -76,7 +76,7 @@ public:
   //----- initialization and control
 
   // Start a page.
-  virtual void startPage(int pageNum, GfxState *state);
+  virtual void startPage(int pageNum, GfxState *state, XRef *xref);
 
   // End a page.
   virtual void endPage();

@@ -23,7 +23,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Tomas Hoger <thoger@redhat.com>
 // Copyright (C) 2011, 2012 William Bader <williambader@hotmail.com>
-// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Oliver Sander <sander@mi.fu-berlin.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
@@ -86,15 +86,42 @@ static GBool setDJSYSFLAGS = gFalse;
 #endif
 #endif
 
+#if MULTITHREADED
+#  define lockStream   gLockMutex(&mutex)
+#  define unlockStream gUnlockMutex(&mutex)
+#else
+#  define lockStream
+#  define unlockStream
+#endif
 //------------------------------------------------------------------------
 // Stream (base class)
 //------------------------------------------------------------------------
 
 Stream::Stream() {
   ref = 1;
+#if MULTITHREADED
+  gInitMutex(&mutex);
+#endif
 }
 
 Stream::~Stream() {
+#if MULTITHREADED
+  gDestroyMutex(&mutex);
+#endif
+}
+
+int Stream::incRef() {
+  lockStream;
+  ++ref;
+  unlockStream;
+  return ref;
+}
+
+int Stream::decRef() {
+  lockStream;
+  --ref;
+  unlockStream;
+  return ref;
 }
 
 void Stream::close() {
@@ -139,34 +166,34 @@ GooString *Stream::getPSFilter(int psLevel, const char *indent) {
   return new GooString();
 }
 
-Stream *Stream::addFilters(Object *dict) {
+Stream *Stream::addFilters(Object *dict, int recursion) {
   Object obj, obj2;
   Object params, params2;
   Stream *str;
   int i;
 
   str = this;
-  dict->dictLookup("Filter", &obj);
+  dict->dictLookup("Filter", &obj, recursion);
   if (obj.isNull()) {
     obj.free();
     dict->dictLookup("F", &obj);
   }
-  dict->dictLookup("DecodeParms", &params);
+  dict->dictLookup("DecodeParms", &params, recursion);
   if (params.isNull()) {
     params.free();
     dict->dictLookup("DP", &params);
   }
   if (obj.isName()) {
-    str = makeFilter(obj.getName(), str, &params);
+    str = makeFilter(obj.getName(), str, &params, recursion);
   } else if (obj.isArray()) {
     for (i = 0; i < obj.arrayGetLength(); ++i) {
       obj.arrayGet(i, &obj2);
       if (params.isArray())
-	params.arrayGet(i, &params2);
+	params.arrayGet(i, &params2, recursion);
       else
 	params2.initNull();
       if (obj2.isName()) {
-	str = makeFilter(obj2.getName(), str, &params2);
+	str = makeFilter(obj2.getName(), str, &params2, recursion);
       } else {
 	error(errSyntaxError, getPos(), "Bad filter name");
 	str = new EOFStream(str);
@@ -183,7 +210,7 @@ Stream *Stream::addFilters(Object *dict) {
   return str;
 }
 
-Stream *Stream::makeFilter(char *name, Stream *str, Object *params) {
+Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursion) {
   int pred;			// parameters
   int colors;
   int bits;
@@ -205,23 +232,23 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params) {
     bits = 8;
     early = 1;
     if (params->isDict()) {
-      params->dictLookup("Predictor", &obj);
+      params->dictLookup("Predictor", &obj, recursion);
       if (obj.isInt())
 	pred = obj.getInt();
       obj.free();
-      params->dictLookup("Columns", &obj);
+      params->dictLookup("Columns", &obj, recursion);
       if (obj.isInt())
 	columns = obj.getInt();
       obj.free();
-      params->dictLookup("Colors", &obj);
+      params->dictLookup("Colors", &obj, recursion);
       if (obj.isInt())
 	colors = obj.getInt();
       obj.free();
-      params->dictLookup("BitsPerComponent", &obj);
+      params->dictLookup("BitsPerComponent", &obj, recursion);
       if (obj.isInt())
 	bits = obj.getInt();
       obj.free();
-      params->dictLookup("EarlyChange", &obj);
+      params->dictLookup("EarlyChange", &obj, recursion);
       if (obj.isInt())
 	early = obj.getInt();
       obj.free();
@@ -238,37 +265,37 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params) {
     endOfBlock = gTrue;
     black = gFalse;
     if (params->isDict()) {
-      params->dictLookup("K", &obj);
+      params->dictLookup("K", &obj, recursion);
       if (obj.isInt()) {
 	encoding = obj.getInt();
       }
       obj.free();
-      params->dictLookup("EndOfLine", &obj);
+      params->dictLookup("EndOfLine", &obj, recursion);
       if (obj.isBool()) {
 	endOfLine = obj.getBool();
       }
       obj.free();
-      params->dictLookup("EncodedByteAlign", &obj);
+      params->dictLookup("EncodedByteAlign", &obj, recursion);
       if (obj.isBool()) {
 	byteAlign = obj.getBool();
       }
       obj.free();
-      params->dictLookup("Columns", &obj);
+      params->dictLookup("Columns", &obj, recursion);
       if (obj.isInt()) {
 	columns = obj.getInt();
       }
       obj.free();
-      params->dictLookup("Rows", &obj);
+      params->dictLookup("Rows", &obj, recursion);
       if (obj.isInt()) {
 	rows = obj.getInt();
       }
       obj.free();
-      params->dictLookup("EndOfBlock", &obj);
+      params->dictLookup("EndOfBlock", &obj, recursion);
       if (obj.isBool()) {
 	endOfBlock = obj.getBool();
       }
       obj.free();
-      params->dictLookup("BlackIs1", &obj);
+      params->dictLookup("BlackIs1", &obj, recursion);
       if (obj.isBool()) {
 	black = obj.getBool();
       }
@@ -279,7 +306,7 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params) {
   } else if (!strcmp(name, "DCTDecode") || !strcmp(name, "DCT")) {
     colorXform = -1;
     if (params->isDict()) {
-      if (params->dictLookup("ColorTransform", &obj)->isInt()) {
+      if (params->dictLookup("ColorTransform", &obj, recursion)->isInt()) {
 	colorXform = obj.getInt();
       }
       obj.free();
@@ -291,19 +318,19 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params) {
     colors = 1;
     bits = 8;
     if (params->isDict()) {
-      params->dictLookup("Predictor", &obj);
+      params->dictLookup("Predictor", &obj, recursion);
       if (obj.isInt())
 	pred = obj.getInt();
       obj.free();
-      params->dictLookup("Columns", &obj);
+      params->dictLookup("Columns", &obj, recursion);
       if (obj.isInt())
 	columns = obj.getInt();
       obj.free();
-      params->dictLookup("Colors", &obj);
+      params->dictLookup("Colors", &obj, recursion);
       if (obj.isInt())
 	colors = obj.getInt();
       obj.free();
-      params->dictLookup("BitsPerComponent", &obj);
+      params->dictLookup("BitsPerComponent", &obj, recursion);
       if (obj.isInt())
 	bits = obj.getInt();
       obj.free();
@@ -311,7 +338,7 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params) {
     str = new FlateStream(str, pred, columns, colors, bits);
   } else if (!strcmp(name, "JBIG2Decode")) {
     if (params->isDict()) {
-      params->dictLookup("JBIG2Globals", &globals);
+      params->dictLookup("JBIG2Globals", &globals, recursion);
     }
     str = new JBIG2Stream(str, &globals);
     globals.free();
@@ -726,13 +753,29 @@ GBool StreamPredictor::getNextLine() {
 }
 
 //------------------------------------------------------------------------
+// UniqueFileStream
+//------------------------------------------------------------------------
+
+UniqueFileStream::UniqueFileStream(FILE *fA, char *fileNameA, Guint startA, GBool limitedA,
+		       Guint lengthA, Object *dictA):
+    FileStream(fA, fileNameA, startA, limitedA, lengthA, dictA) {
+  f = fopen(fileName, "rb");
+}
+
+UniqueFileStream::~UniqueFileStream() {
+  close();
+  fclose(f);
+}
+
+//------------------------------------------------------------------------
 // FileStream
 //------------------------------------------------------------------------
 
-FileStream::FileStream(FILE *fA, Guint startA, GBool limitedA,
+FileStream::FileStream(FILE *fA, char *fileNameA, Guint startA, GBool limitedA,
 		       Guint lengthA, Object *dictA):
     BaseStream(dictA, lengthA) {
   f = fA;
+  fileName = fileNameA;
   start = startA;
   limited = limitedA;
   length = lengthA;
@@ -746,9 +789,13 @@ FileStream::~FileStream() {
   close();
 }
 
+BaseStream *FileStream::copy() {
+  return new UniqueFileStream(f, fileName, start, limited, length, &dict);
+}
+
 Stream *FileStream::makeSubStream(Guint startA, GBool limitedA,
 				  Guint lengthA, Object *dictA) {
-  return new FileStream(f, startA, limitedA, lengthA, dictA);
+  return new FileStream(f, fileName, startA, limitedA, lengthA, dictA);
 }
 
 void FileStream::reset() {
@@ -870,6 +917,11 @@ CachedFileStream::~CachedFileStream()
   cc->decRefCnt();
 }
 
+BaseStream *CachedFileStream::copy() {
+  cc->incRefCnt();
+  return new CachedFileStream(cc, start, limited, length, &dict);
+}
+
 Stream *CachedFileStream::makeSubStream(Guint startA, GBool limitedA,
         Guint lengthA, Object *dictA)
 {
@@ -965,6 +1017,10 @@ MemStream::~MemStream() {
   }
 }
 
+BaseStream *MemStream::copy() {
+  return new MemStream(buf, start, length, &dict);
+}
+
 Stream *MemStream::makeSubStream(Guint startA, GBool limited,
 				 Guint lengthA, Object *dictA) {
   MemStream *subStr;
@@ -1037,6 +1093,11 @@ EmbedStream::EmbedStream(Stream *strA, Object *dictA,
 }
 
 EmbedStream::~EmbedStream() {
+}
+
+BaseStream *EmbedStream::copy() {
+  error(errInternal, -1, "Called copy() on EmbedStream");
+  return NULL;
 }
 
 Stream *EmbedStream::makeSubStream(Guint start, GBool limitedA,

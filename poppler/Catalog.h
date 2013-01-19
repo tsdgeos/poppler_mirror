@@ -21,6 +21,7 @@
 // Copyright (C) 2008, 2011 Pino Toscano <pino@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -34,7 +35,9 @@
 #pragma interface
 #endif
 
+#include "poppler-config.h"
 #include "Object.h"
+#include "goo/GooMutex.h"
 
 #include <vector>
 
@@ -104,13 +107,13 @@ public:
   GBool isOk() { return ok; }
 
   // Get number of pages.
-  int getNumPages();
+  int getNumPages(GBool lock = gTrue);
 
   // Get a page.
   Page *getPage(int i);
 
   // Get the reference for a page object.
-  Ref *getPageRef(int i);
+  Ref *getPageRef(int i, GBool lock = gTrue);
 
   // Return base URI, or NULL if none.
   GooString *getBaseURI() { return baseURI; }
@@ -124,7 +127,7 @@ public:
 
   // Find a page, given its object ID.  Returns page number, or 0 if
   // not found.
-  int findPage(int num, int gen);
+  int findPage(int num, int gen, GBool lock = gTrue);
 
   // Find a named destination.  Returns the link destination, or
   // NULL if <name> is not a destination.
@@ -162,7 +165,7 @@ public:
   };
 
   FormType getFormType();
-  Form* getForm();
+  Form* getForm(GBool lock = gTrue);
 
   ViewerPreferences *getViewerPreferences();
 
@@ -225,6 +228,7 @@ private:
   PageMode pageMode;		// page mode
   PageLayout pageLayout;	// page layout
 
+  void createPages();       // create pages for caching
   GBool cachePageTree(int page); // Cache first <page> pages.
   Object *findDestInTree(Object *tree, GooString *name, Object *obj);
 
@@ -232,6 +236,9 @@ private:
   NameTree *getDestNameTree();
   NameTree *getEmbeddedFileNameTree();
   NameTree *getJSNameTree();
+#if MULTITHREADED
+  GooMutex mutex;
+#endif
 
 };
 

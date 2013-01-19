@@ -17,7 +17,7 @@
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2011 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2009-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -137,7 +137,7 @@ public:
     { return gTrue; }
 
   // Start a page.
-  virtual void startPage(int pageNum, GfxState *state) {}
+  virtual void startPage(int pageNum, GfxState *state, XRef *xref) {}
 
   // End a page.
   virtual void endPage() {}

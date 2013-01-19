@@ -23,6 +23,7 @@
 // Copyright (C) 2011 Stephen Reichling <sreichling@chegg.com>
 // Copyright (C) 2012 Igor Slepchin <igor.redhat@gmail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -279,7 +280,7 @@ public:
 
 
   // Start a page.
-  virtual void startPage(int pageNum, GfxState *state);
+  virtual void startPage(int pageNum, GfxState *state, XRef *xref);
 
   // End a page.
   virtual void endPage();

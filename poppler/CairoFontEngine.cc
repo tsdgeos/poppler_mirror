@@ -26,6 +26,7 @@
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2010 Jan Kümmel <jan+freedesktop@snorc.org>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -58,6 +59,13 @@
 #pragma implementation
 #endif
 
+#if MULTITHREADED
+#  define lockFontEngine   gLockMutex(&mutex)
+#  define unlockFontEngine gUnlockMutex(&mutex)
+#else
+#  define lockFontEngine
+#  define unlockFontEngine
+#endif
 
 //------------------------------------------------------------------------
 // CairoFont
@@ -558,6 +566,7 @@ typedef struct _type3_font_info {
   PDFDoc *doc;
   CairoFontEngine *fontEngine;
   GBool printing;
+  XRef *xref;
 } type3_font_info_t;
 
 static void
@@ -645,7 +654,7 @@ _render_type3_glyph (cairo_scaled_font_t  *scaled_font,
   box.y2 = mat[3];
   gfx = new Gfx(info->doc, output_dev, resDict, &box, NULL);
   output_dev->startDoc(info->doc, info->fontEngine);
-  output_dev->startPage (1, gfx->getState());
+  output_dev->startPage (1, gfx->getState(), gfx->getXRef());
   output_dev->setInType3Char(gTrue);
   gfx->display(charProcs->getVal(glyph, &charProc));
 
@@ -674,7 +683,7 @@ _render_type3_glyph (cairo_scaled_font_t  *scaled_font,
 
 CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, PDFDoc *doc,
 				       CairoFontEngine *fontEngine,
-				       GBool printing) {
+				       GBool printing, XRef *xref) {
   Object refObj, strObj;
   type3_font_info_t *info;
   cairo_font_face_t *font_face;
@@ -697,6 +706,7 @@ CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, PDFDoc *doc,
   info->doc = doc;
   info->fontEngine = fontEngine;
   info->printing = printing;
+  info->xref = xref;
 
   cairo_font_face_set_user_data (font_face, &type3_font_key, (void *) info, _free_type3_font_info);
 
@@ -714,7 +724,7 @@ CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, PDFDoc *doc,
     }
   }
 
-  return new CairoType3Font(ref, doc, font_face, codeToGID, codeToGIDLen, printing);
+  return new CairoType3Font(ref, doc, font_face, codeToGID, codeToGIDLen, printing, xref);
 }
 
 CairoType3Font::CairoType3Font(Ref ref,
@@ -722,7 +732,7 @@ CairoType3Font::CairoType3Font(Ref ref,
 			       cairo_font_face_t *cairo_font_face,
 			       int *codeToGID,
 			       Guint codeToGIDLen,
-			       GBool printing) : CairoFont(ref,
+			       GBool printing, XRef *xref) : CairoFont(ref,
 							   cairo_font_face,
 							   codeToGID,
 							   codeToGIDLen,
@@ -755,6 +765,9 @@ CairoFontEngine::CairoFontEngine(FT_Library libA) {
   FT_Library_Version(lib, &major, &minor, &patch);
   useCIDs = major > 2 ||
             (major == 2 && (minor > 1 || (minor == 1 && patch > 7)));
+#if MULTITHREADED
+  gInitMutex(&mutex);
+#endif
 }
 
 CairoFontEngine::~CairoFontEngine() {
@@ -764,15 +777,19 @@ CairoFontEngine::~CairoFontEngine() {
     if (fontCache[i])
       delete fontCache[i];
   }
+#if MULTITHREADED
+  gDestroyMutex(&mutex);
+#endif
 }
 
 CairoFont *
-CairoFontEngine::getFont(GfxFont *gfxFont, PDFDoc *doc, GBool printing) {
+CairoFontEngine::getFont(GfxFont *gfxFont, PDFDoc *doc, GBool printing, XRef *xref) {
   int i, j;
   Ref ref;
   CairoFont *font;
   GfxFontType fontType;
   
+  lockFontEngine;
   ref = *gfxFont->getID();
 
   for (i = 0; i < cairoFontCacheSize; ++i) {
@@ -782,15 +799,16 @@ CairoFontEngine::getFont(GfxFont *gfxFont, PDFDoc *doc, GBool printing) {
 	fontCache[j] = fontCache[j-1];
       }
       fontCache[0] = font;
+      unlockFontEngine;
       return font;
     }
   }
   
   fontType = gfxFont->getType();
   if (fontType == fontType3)
-    font = CairoType3Font::create (gfxFont, doc, this, printing);
+    font = CairoType3Font::create (gfxFont, doc, this, printing, xref);
   else
-    font = CairoFreeTypeFont::create (gfxFont, doc->getXRef(), lib, useCIDs);
+    font = CairoFreeTypeFont::create (gfxFont, xref, lib, useCIDs);
 
   //XXX: if font is null should we still insert it into the cache?
   if (fontCache[cairoFontCacheSize - 1]) {
@@ -800,5 +818,6 @@ CairoFontEngine::getFont(GfxFont *gfxFont, PDFDoc *doc, GBool printing) {
     fontCache[j] = fontCache[j-1];
   }
   fontCache[0] = font;
+  unlockFontEngine;
   return font;
 }

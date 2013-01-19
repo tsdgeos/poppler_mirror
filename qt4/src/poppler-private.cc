@@ -2,6 +2,7 @@
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2006, 2011 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, 2010, 2011 by Pino Toscano <pino@kde.org>
+ * Copyright (C) 2013 by Thomas Freitag <Thomas.Freitag@alfa.de>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -226,7 +227,6 @@ namespace Debug {
         qDeleteAll(m_embeddedFiles);
         delete (OptContentModel *)m_optContentModel;
         delete doc;
-        delete m_outputDev;
         delete m_fontInfoIterator;
     
         count --;
@@ -241,7 +241,6 @@ namespace Debug {
     {
         m_fontInfoIterator = 0;
         m_backend = Document::SplashBackend;
-        m_outputDev = 0;
         paperColor = Qt::white;
         m_hints = 0;
         m_optContentModel = 0;
