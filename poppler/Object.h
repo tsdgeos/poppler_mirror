@@ -48,10 +48,10 @@
         abort(); \
     }
 
-#define OBJECT_2TYPES_CHECK(wanted_type1, wanted_type2) \
-    if (unlikely(type != wanted_type1) && unlikely(type != wanted_type2)) { \
+#define OBJECT_3TYPES_CHECK(wanted_type1, wanted_type2, wanted_type3) \
+    if (unlikely(type != wanted_type1) && unlikely(type != wanted_type2) && unlikely(type != wanted_type3)) { \
         error(errInternal, 0, (char *) "Call to Object where the object was type {0:d}, " \
-                 "not the expected type {1:d} or {2:d}", type, wanted_type1, wanted_type2); \
+	      "not the expected type {1:d}, {2:d} or {3:d}", type, wanted_type1, wanted_type2, wanted_type3); \
         abort(); \
     }
 
@@ -95,7 +95,7 @@ enum ObjType {
   objNone,			// uninitialized object
 
   // poppler-only objects
-  objUint			// overflown integer that still fits in a unsigned integer
+  objInt64			// integer with at least 64-bits
 };
 
 #define numObjTypes 15		// total number of object types
@@ -144,8 +144,8 @@ public:
     { initObj(objError); return this; }
   Object *initEOF()
     { initObj(objEOF); return this; }
-  Object *initUint(unsigned int uintgA)
-    { initObj(objUint); uintg = uintgA; return this; }
+  Object *initInt64(long long int64gA)
+    { initObj(objInt64); int64g = int64gA; return this; }
 
   // Copy an object.
   Object *copy(Object *obj);
@@ -166,7 +166,7 @@ public:
   GBool isBool() { return type == objBool; }
   GBool isInt() { return type == objInt; }
   GBool isReal() { return type == objReal; }
-  GBool isNum() { return type == objInt || type == objReal; }
+  GBool isNum() { return type == objInt || type == objReal || type == objInt64; }
   GBool isString() { return type == objString; }
   GBool isName() { return type == objName; }
   GBool isNull() { return type == objNull; }
@@ -178,7 +178,7 @@ public:
   GBool isError() { return type == objError; }
   GBool isEOF() { return type == objEOF; }
   GBool isNone() { return type == objNone; }
-  GBool isUint() { return type == objUint; }
+  GBool isInt64() { return type == objInt64; }
 
   // Special type checking.
   GBool isName(const char *nameA)
@@ -192,7 +192,11 @@ public:
   GBool getBool() { OBJECT_TYPE_CHECK(objBool); return booln; }
   int getInt() { OBJECT_TYPE_CHECK(objInt); return intg; }
   double getReal() { OBJECT_TYPE_CHECK(objReal); return real; }
-  double getNum() { OBJECT_2TYPES_CHECK(objInt, objReal); return type == objInt ? (double)intg : real; }
+
+  // Note: integers larger than 2^53 can not be exactly represented by a double.
+  // Where the exact value of integers up to 2^63 is required, use isInt64()/getInt64().
+  double getNum() { OBJECT_3TYPES_CHECK(objInt, objInt64, objReal);
+    return type == objInt ? (double)intg : type == objInt64 ? (double)int64g : real; }
   GooString *getString() { OBJECT_TYPE_CHECK(objString); return string; }
   char *getName() { OBJECT_TYPE_CHECK(objName); return name; }
   Array *getArray() { OBJECT_TYPE_CHECK(objArray); return array; }
@@ -202,7 +206,7 @@ public:
   int getRefNum() { OBJECT_TYPE_CHECK(objRef); return ref.num; }
   int getRefGen() { OBJECT_TYPE_CHECK(objRef); return ref.gen; }
   char *getCmd() { OBJECT_TYPE_CHECK(objCmd); return cmd; }
-  unsigned int getUint() { OBJECT_TYPE_CHECK(objUint); return uintg; }
+  long long getInt64() { OBJECT_TYPE_CHECK(objInt64); return int64g; }
 
   // Array accessors.
   int arrayGetLength();
@@ -247,7 +251,7 @@ private:
   union {			// value for each type:
     GBool booln;		//   boolean
     int intg;			//   integer
-    unsigned int uintg;		//   unsigned integer
+    long long int64g;           //   64-bit integer
     double real;		//   real
     GooString *string;		//   string
     char *name;			//   name

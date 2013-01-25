@@ -167,8 +167,8 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
   encryptDictA->dictLookup("OE", &ownerEncObj);
   encryptDictA->dictLookup("UE", &userEncObj);
   encryptDictA->dictLookup("P", &permObj);
-  if (permObj.isUint()) {
-      unsigned int permUint = permObj.getUint();
+  if (permObj.isInt64()) {
+      unsigned int permUint = permObj.getInt64();
       int perms = permUint - UINT_MAX - 1;
       permObj.free();
       permObj.initInt(perms);

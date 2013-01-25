@@ -149,6 +149,7 @@ static GBool compareObjects(Object *objA, Object *objB)
       }
     }
     case objInt:
+    case objInt64:
     case objReal:
     {
       if (!objB->isNum()) {
@@ -157,14 +158,6 @@ static GBool compareObjects(Object *objA, Object *objB)
         // Fuzzy comparison
         const double diff = objA->getNum() - objB->getNum();
         return (-0.01 < diff) && (diff < 0.01);
-      }
-    }
-    case objUint:
-    {
-      if (objB->getType() != objUint) {
-        return gFalse;
-      } else {
-        return (objA->getUint() == objB->getUint());
       }
     }
     case objString:

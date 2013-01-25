@@ -1122,8 +1122,8 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numO
     case objInt:
       outStr->printf("%i ", obj->getInt());
       break;
-    case objUint:
-      outStr->printf("%u ", obj->getUint());
+    case objInt64:
+      outStr->printf("%lli ", obj->getInt64());
       break;
     case objReal:
     {

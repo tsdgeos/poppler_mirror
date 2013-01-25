@@ -53,7 +53,7 @@ static const char *objTypeNames[numObjTypes] = {
   "error",
   "eof",
   "none",
-  "unsigned integer"
+  "integer64"
 };
 
 #ifdef DEBUG_MEM
@@ -224,8 +224,8 @@ void Object::print(FILE *f) {
   case objNone:
     fprintf(f, "<none>");
     break;
-  case objUint:
-    fprintf(f, "%u", uintg);
+  case objInt64:
+    fprintf(f, "%lld", int64g);
     break;
   }
 }

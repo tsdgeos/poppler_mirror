@@ -62,6 +62,7 @@ static const char specialChars[256] = {
 };
 
 static const int IntegerSafeLimit = (INT_MAX - 9) / 10;
+static const long long LongLongSafeLimit = (LLONG_MAX - 9) / 10;
 
 //------------------------------------------------------------------------
 // Lexer
@@ -155,10 +156,10 @@ int Lexer::lookChar() {
 Object *Lexer::getObj(Object *obj, int objNum) {
   char *p;
   int c, c2;
-  GBool comment, neg, done, overflownInteger, overflownUnsignedInteger;
+  GBool comment, neg, done, overflownInteger, overflownLongLong;
   int numParen;
   int xi;
-  unsigned int xui = 0;
+  long long xll = 0;
   double xf = 0, scale;
   GooString *s;
   int n, m;
@@ -187,7 +188,7 @@ Object *Lexer::getObj(Object *obj, int objNum) {
   case '5': case '6': case '7': case '8': case '9':
   case '+': case '-': case '.':
     overflownInteger = gFalse;
-    overflownUnsignedInteger = gFalse;
+    overflownLongLong = gFalse;
     neg = gFalse;
     xi = 0;
     if (c == '-') {
@@ -201,23 +202,21 @@ Object *Lexer::getObj(Object *obj, int objNum) {
       c = lookChar();
       if (isdigit(c)) {
 	getChar();
-	if (unlikely(overflownInteger)) {
-	  if (overflownUnsignedInteger) {
-	    xf = xf * 10.0 + (c - '0');
+	if (unlikely(overflownLongLong)) {
+	  xf = xf * 10.0 + (c - '0');
+	} else if (unlikely (overflownInteger)) {
+	  if (unlikely(xll > LongLongSafeLimit) &&
+	      (xll > (LLONG_MAX - (c - '0')) / 10.0)) {
+	    overflownLongLong = gTrue;
+	    xf = xll * 10.0 + (c - '0');
 	  } else {
-	    overflownUnsignedInteger = gTrue;
-	    xf = xui * 10.0 + (c - '0');
+	    xll = xll * 10 + (c - '0');
 	  }
 	} else {
 	  if (unlikely(xi > IntegerSafeLimit) &&
 	      (xi > (INT_MAX - (c - '0')) / 10.0)) {
 	    overflownInteger = gTrue;
-	    if (xi > (UINT_MAX - (c - '0')) / 10.0) {
-	      overflownUnsignedInteger = gTrue;
-	      xf = xi * 10.0 + (c - '0');
-	    } else {
-	      xui = xi * 10.0 + (c - '0');
-	    }
+	    xll = xi * 10LL + (c - '0');
 	  } else {
 	    xi = xi * 10 + (c - '0');
 	  }
@@ -231,22 +230,17 @@ Object *Lexer::getObj(Object *obj, int objNum) {
     }
     if (neg) {
       xi = -xi;
+      xll = -xll;
       xf = -xf;
     }
     if (unlikely(overflownInteger)) {
-      if (overflownUnsignedInteger) {
+      if (overflownLongLong) {
         obj->initReal(xf);
       } else {
-        if (neg) {
-          if (xui-1 == INT_MAX) {
-            obj->initInt(INT_MIN);
-          } else {
-            xf = xui;
-            xf = -xf;
-            obj->initReal(xf);
-          }
+        if (unlikely(xll == INT_MIN)) {
+          obj->initInt(INT_MIN);
         } else {
-          obj->initUint(xui);
+          obj->initInt64(xll);
         }
       }
     } else {
@@ -256,8 +250,8 @@ Object *Lexer::getObj(Object *obj, int objNum) {
   doReal:
     if (likely(!overflownInteger)) {
       xf = xi;
-    } else if (!overflownUnsignedInteger) {
-      xf = xui;
+    } else if (!overflownLongLong) {
+      xf = xll;
     }
     scale = 0.1;
     while (1) {
