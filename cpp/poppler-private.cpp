@@ -28,7 +28,7 @@
 
 using namespace poppler;
 
-void detail::error_function(void * /*data*/, ErrorCategory /*category*/, int pos, char *msg)
+void detail::error_function(void * /*data*/, ErrorCategory /*category*/, Goffset pos, char *msg)
 {
     std::ostringstream oss;
     if (pos >= 0) {

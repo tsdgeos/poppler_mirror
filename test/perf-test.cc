@@ -742,7 +742,7 @@ void OutputDebugString(const char *txt)
 #define _vsnprintf vsnprintf
 #endif
 
-void my_error(void *, ErrorCategory, int pos, char *msg) {
+void my_error(void *, ErrorCategory, Goffset pos, char *msg) {
 #if 0
     char        buf[4096], *p = buf;
 
@@ -752,7 +752,7 @@ void my_error(void *, ErrorCategory, int pos, char *msg) {
     }
 
     if (pos >= 0) {
-        p += _snprintf(p, sizeof(buf)-1, "Error (%d): ", pos);
+      p += _snprintf(p, sizeof(buf)-1, "Error (%lld): ", (long long)pos);
         *p   = '\0';
         OutputDebugString(p);
     } else {
@@ -769,7 +769,7 @@ void my_error(void *, ErrorCategory, int pos, char *msg) {
     OutputDebugString(buf);
 
     if (pos >= 0) {
-        p += _snprintf(p, sizeof(buf)-1, "Error (%d): ", pos);
+        p += _snprintf(p, sizeof(buf)-1, "Error (%lld): ", (long long)pos);
         *p   = '\0';
         OutputDebugString(buf);
         if (gErrFile)

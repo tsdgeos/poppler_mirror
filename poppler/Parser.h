@@ -58,7 +58,7 @@ public:
   Stream *getStream() { return lexer->getStream(); }
 
   // Get current position in file.
-  int getPos() { return lexer->getPos(); }
+  Goffset getPos() { return lexer->getPos(); }
 
 private:
 

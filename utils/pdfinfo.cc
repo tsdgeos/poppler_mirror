@@ -353,13 +353,13 @@ int main(int argc, char *argv[]) {
   if (f) {
 #if HAVE_FSEEKO
     fseeko(f, 0, SEEK_END);
-    printf("File size:      %u bytes\n", (Guint)ftello(f));
+    printf("File size:      %lld bytes\n", (long long)ftello(f));
 #elif HAVE_FSEEK64
     fseek64(f, 0, SEEK_END);
-    printf("File size:      %u bytes\n", (Guint)ftell64(f));
+    printf("File size:      %lld bytes\n", (long long)ftell64(f));
 #else
     fseek(f, 0, SEEK_END);
-    printf("File size:      %d bytes\n", (int)ftell(f));
+    printf("File size:      %lld bytes\n", (long long)ftell(f));
 #endif
     fclose(f);
   }

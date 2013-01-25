@@ -33,7 +33,7 @@ class QIODeviceOutStream : public OutStream
     virtual ~QIODeviceOutStream();
 
     virtual void close();
-    virtual int getPos();
+    virtual Goffset getPos();
     virtual void put(char c);
     virtual void printf(const char *format, ...);
 

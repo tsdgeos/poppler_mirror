@@ -341,7 +341,7 @@ void BaseCryptStream::reset() {
   str->reset();
 }
 
-int BaseCryptStream::getPos() {
+Goffset BaseCryptStream::getPos() {
   return charactersRead;
 }
 

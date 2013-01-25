@@ -48,17 +48,17 @@ static const char *errorCategoryNames[] = {
 };
 
 static void (*errorCbk)(void *data, ErrorCategory category,
-			int pos, char *msg) = NULL;
+			Goffset pos, char *msg) = NULL;
 static void *errorCbkData = NULL;
 
 void setErrorCallback(void (*cbk)(void *data, ErrorCategory category,
-				  int pos, char *msg),
+				  Goffset pos, char *msg),
 		      void *data) {
   errorCbk = cbk;
   errorCbkData = data;
 }
 
-void CDECL error(ErrorCategory category, int pos, const char *msg, ...) {
+void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...) {
   va_list args;
   GooString *s, *sanitized;
 
@@ -84,8 +84,8 @@ void CDECL error(ErrorCategory category, int pos, const char *msg, ...) {
     (*errorCbk)(errorCbkData, category, pos, sanitized->getCString());
   } else {
     if (pos >= 0) {
-      fprintf(stderr, "%s (%d): %s\n",
-	      errorCategoryNames[category], pos, sanitized->getCString());
+      fprintf(stderr, "%s (%lld): %s\n",
+	      errorCategoryNames[category], (long long)pos, sanitized->getCString());
     } else {
       fprintf(stderr, "%s: %s\n",
 	      errorCategoryNames[category], sanitized->getCString());

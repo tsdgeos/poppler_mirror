@@ -234,8 +234,8 @@ public:
   int streamGetChars(int nChars, Guchar *buffer);
   int streamLookChar();
   char *streamGetLine(char *buf, int size);
-  Guint streamGetPos();
-  void streamSetPos(Guint pos, int dir = 0);
+  Goffset streamGetPos();
+  void streamSetPos(Goffset pos, int dir = 0);
   Dict *streamGetDict();
 
   // Output.
@@ -355,10 +355,10 @@ inline int Object::streamLookChar()
 inline char *Object::streamGetLine(char *buf, int size)
   { OBJECT_TYPE_CHECK(objStream); return stream->getLine(buf, size); }
 
-inline Guint Object::streamGetPos()
+inline Goffset Object::streamGetPos()
   { OBJECT_TYPE_CHECK(objStream); return stream->getPos(); }
 
-inline void Object::streamSetPos(Guint pos, int dir)
+inline void Object::streamSetPos(Goffset pos, int dir)
   { OBJECT_TYPE_CHECK(objStream); stream->setPos(pos, dir); }
 
 inline Dict *Object::streamGetDict()

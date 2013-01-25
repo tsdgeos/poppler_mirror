@@ -67,12 +67,12 @@ public:
     { return curStr.isStream() ? curStr.getStream() : (Stream *)NULL; }
 
   // Get current position in file.  This is only used for error
-  // messages, so it returns an int instead of a Guint.
-  int getPos()
-    { return curStr.isStream() ? (int)curStr.streamGetPos() : -1; }
+  // messages.
+  Goffset getPos()
+    { return curStr.isStream() ? curStr.streamGetPos() : -1; }
 
   // Set position in file.
-  void setPos(Guint pos, int dir = 0)
+  void setPos(Goffset pos, int dir = 0)
     { if (curStr.isStream()) curStr.streamSetPos(pos, dir); }
 
   // Returns true if <c> is a whitespace character.

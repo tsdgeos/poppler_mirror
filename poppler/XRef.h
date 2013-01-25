@@ -59,7 +59,7 @@ enum XRefEntryType {
 };
 
 struct XRefEntry {
-  Guint offset;
+  Goffset offset;
   int gen;
   XRefEntryType type;
   int flags;
@@ -97,7 +97,7 @@ public:
   // Constructor, create an empty XRef but with info dict, used for PDF writing
   XRef(Object *trailerDictA);
   // Constructor.  Read xref table from stream.
-  XRef(BaseStream *strA, Guint pos, Guint mainXRefEntriesOffsetA = 0, GBool *wasReconstructed = NULL, GBool reconstruct = false);
+  XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA = 0, GBool *wasReconstructed = NULL, GBool reconstruct = false);
 
   // Destructor.
   ~XRef();
@@ -157,10 +157,10 @@ public:
 
   // Get end position for a stream in a damaged file.
   // Returns false if unknown or file is not damaged.
-  GBool getStreamEnd(Guint streamStart, Guint *streamEnd);
+  GBool getStreamEnd(Goffset streamStart, Goffset *streamEnd);
 
   // Retuns the entry that belongs to the offset
-  int getNumEntry(Guint offset);
+  int getNumEntry(Goffset offset);
 
   // Scans the document and sets special flags in all xref entries. One of those
   // flags is Unencrypted, which affects how the object is fetched. Therefore,
@@ -178,7 +178,7 @@ public:
   void setModifiedObject(Object* o, Ref r);
   Ref addIndirectObject (Object* o);
   void removeIndirectObject(Ref r);
-  void add(int num, int gen,  Guint offs, GBool used);
+  void add(int num, int gen,  Goffset offs, GBool used);
 
   // Output XRef table to stream
   void writeTableToFile(OutStream* outStr, GBool writeAllEntries);
@@ -192,7 +192,7 @@ public:
 private:
 
   BaseStream *str;		// input stream
-  Guint start;			// offset in file (to allow for garbage
+  Goffset start;		// offset in file (to allow for garbage
 				//   at beginning of file)
   XRefEntry *entries;		// xref entries
   int capacity;			// size of <entries> array
@@ -201,7 +201,7 @@ private:
   GBool ok;			// true if xref table is valid
   int errCode;			// error code (if <ok> is false)
   Object trailerDict;		// trailer dictionary
-  Guint *streamEnds;		// 'endstream' positions - only used in
+  Goffset *streamEnds;		// 'endstream' positions - only used in
 				//   damaged files
   int streamEndsLen;		// number of valid entries in streamEnds
   PopplerCache *objStrs;	// cached object streams
@@ -213,10 +213,10 @@ private:
   int permFlags;		// permission bits
   Guchar fileKey[32];		// file decryption key
   GBool ownerPasswordOk;	// true if owner password is correct
-  Guint prevXRefOffset;		// position of prev XRef section (= next to read)
-  Guint mainXRefEntriesOffset;	// offset of entries in main XRef table
+  Goffset prevXRefOffset;		// position of prev XRef section (= next to read)
+  Goffset mainXRefEntriesOffset; // offset of entries in main XRef table
   GBool xRefStream;		// true if last XRef section is a stream
-  Guint mainXRefOffset;		// position of the main XRef table/stream
+  Goffset mainXRefOffset;	// position of the main XRef table/stream
   GBool scannedSpecialFlags;	// true if scanSpecialFlags has been called
   GBool strOwner;     // true if str is owned by the instance
 #if MULTITHREADED
@@ -226,19 +226,19 @@ private:
   void init();
   int reserve(int newSize);
   int resize(int newSize);
-  GBool readXRef(Guint *pos, std::vector<Guint> *followedXRefStm, std::vector<int> *xrefStreamObjsNum);
-  GBool readXRefTable(Parser *parser, Guint *pos, std::vector<Guint> *followedXRefStm, std::vector<int> *xrefStreamObjsNum);
+  GBool readXRef(Goffset *pos, std::vector<Goffset> *followedXRefStm, std::vector<int> *xrefStreamObjsNum);
+  GBool readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *followedXRefStm, std::vector<int> *xrefStreamObjsNum);
   GBool readXRefStreamSection(Stream *xrefStr, int *w, int first, int n);
-  GBool readXRefStream(Stream *xrefStr, Guint *pos);
+  GBool readXRefStream(Stream *xrefStr, Goffset *pos);
   GBool constructXRef(GBool *wasReconstructed, GBool needCatalogDict = gFalse);
-  GBool parseEntry(Guint offset, XRefEntry *entry);
+  GBool parseEntry(Goffset offset, XRefEntry *entry);
   void readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum = NULL);
   void markUnencrypted(Object *obj);
 
   class XRefWriter {
   public:
     virtual void startSection(int first, int count) = 0;
-    virtual void writeEntry(Guint offset, int gen, XRefEntryType type) = 0;
+    virtual void writeEntry(Goffset offset, int gen, XRefEntryType type) = 0;
     virtual ~XRefWriter() {};
   };
 
@@ -246,7 +246,7 @@ private:
   public:
     XRefTableWriter(OutStream* outStrA);
     void startSection(int first, int count);
-    void writeEntry(Guint offset, int gen, XRefEntryType type);
+    void writeEntry(Goffset offset, int gen, XRefEntryType type);
   private:
     OutStream* outStr;
   };
@@ -255,7 +255,7 @@ private:
   public:
     XRefStreamWriter(Object *index, GooString *stmBuf);
     void startSection(int first, int count);
-    void writeEntry(Guint offset, int gen, XRefEntryType type);
+    void writeEntry(Goffset offset, int gen, XRefEntryType type);
   private:
     Object *index;
     GooString *stmBuf;

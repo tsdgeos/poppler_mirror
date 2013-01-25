@@ -38,7 +38,7 @@ namespace poppler
 namespace detail
 {
 
-void error_function(void *data, ErrorCategory category, int pos, char *msg);
+void error_function(void *data, ErrorCategory category, Goffset pos, char *msg);
 
 rectf pdfrectangle_to_rectf(const PDFRectangle &pdfrect);
 

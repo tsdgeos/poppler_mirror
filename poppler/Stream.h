@@ -184,12 +184,12 @@ public:
   virtual char *getLine(char *buf, int size);
 
   // Get current position in file.
-  virtual int getPos() = 0;
+  virtual Goffset getPos() = 0;
 
   // Go to a position in the stream.  If <dir> is negative, the
   // position is from the end of the file; otherwise the position is
   // from the start of the file.
-  virtual void setPos(Guint pos, int dir = 0) = 0;
+  virtual void setPos(Goffset pos, int dir = 0) = 0;
 
   // Get PostScript command for the filter(s).
   virtual GooString *getPSFilter(int psLevel, const char *indent);
@@ -255,7 +255,7 @@ public:
   virtual void close() = 0;
 
   // Return position in stream
-  virtual int getPos() = 0;
+  virtual Goffset getPos() = 0;
 
   // Put a char in the stream
   virtual void put (char c) = 0;
@@ -274,20 +274,20 @@ private:
 //------------------------------------------------------------------------
 class FileOutStream : public OutStream {
 public:
-  FileOutStream (FILE* fa, Guint startA);
+  FileOutStream (FILE* fa, Goffset startA);
 
   virtual ~FileOutStream ();
 
   virtual void close();
 
-  virtual int getPos();
+  virtual Goffset getPos();
 
   virtual void put (char c);
 
   virtual void printf (const char *format, ...);
 private:
   FILE *f;
-  Guint start;
+  Goffset start;
 
 };
 
@@ -301,26 +301,26 @@ private:
 class BaseStream: public Stream {
 public:
 
-  BaseStream(Object *dictA, Guint lengthA);
+  BaseStream(Object *dictA, Goffset lengthA);
   virtual ~BaseStream();
   virtual BaseStream *copy() = 0;
-  virtual Stream *makeSubStream(Guint start, GBool limited,
-				Guint length, Object *dict) = 0;
-  virtual void setPos(Guint pos, int dir = 0) = 0;
+  virtual Stream *makeSubStream(Goffset start, GBool limited,
+				Goffset length, Object *dict) = 0;
+  virtual void setPos(Goffset pos, int dir = 0) = 0;
   virtual GBool isBinary(GBool last = gTrue) { return last; }
   virtual BaseStream *getBaseStream() { return this; }
   virtual Stream *getUndecodedStream() { return this; }
   virtual Dict *getDict() { return dict.getDict(); }
   virtual GooString *getFileName() { return NULL; }
-  virtual Guint getLength() { return length; }
+  virtual Goffset getLength() { return length; }
 
   // Get/set position of first byte of stream within the file.
-  virtual Guint getStart() = 0;
-  virtual void moveStart(int delta) = 0;
+  virtual Goffset getStart() = 0;
+  virtual void moveStart(Goffset delta) = 0;
 
 protected:
 
-  Guint length;
+  Goffset length;
   Object dict;
 };
 
@@ -336,8 +336,8 @@ public:
   FilterStream(Stream *strA);
   virtual ~FilterStream();
   virtual void close();
-  virtual int getPos() { return str->getPos(); }
-  virtual void setPos(Guint pos, int dir = 0);
+  virtual Goffset getPos() { return str->getPos(); }
+  virtual void setPos(Goffset pos, int dir = 0);
   virtual BaseStream *getBaseStream() { return str->getBaseStream(); }
   virtual Stream *getUndecodedStream() { return str->getUndecodedStream(); }
   virtual Dict *getDict() { return str->getDict(); }
@@ -441,12 +441,12 @@ private:
 class FileStream: public BaseStream {
 public:
 
-  FileStream(FILE *fA, char *fileName, Guint startA, GBool limitedA,
-	     Guint lengthA, Object *dictA);
+  FileStream(FILE *fA, char *fileName, Goffset startA, GBool limitedA,
+	     Goffset lengthA, Object *dictA);
   virtual ~FileStream();
   virtual BaseStream *copy();
-  virtual Stream *makeSubStream(Guint startA, GBool limitedA,
-				Guint lengthA, Object *dictA);
+  virtual Stream *makeSubStream(Goffset startA, GBool limitedA,
+				Goffset lengthA, Object *dictA);
   virtual StreamKind getKind() { return strFile; }
   virtual void reset();
   virtual void close();
@@ -454,10 +454,10 @@ public:
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
   virtual int lookChar()
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-  virtual int getPos() { return bufPos + (bufPtr - buf); }
-  virtual void setPos(Guint pos, int dir = 0);
-  virtual Guint getStart() { return start; }
-  virtual void moveStart(int delta);
+  virtual Goffset getPos() { return bufPos + (bufPtr - buf); }
+  virtual void setPos(Goffset pos, int dir = 0);
+  virtual Goffset getStart() { return start; }
+  virtual void moveStart(Goffset delta);
 
   virtual int getUnfilteredChar () { return getChar(); }
   virtual void unfilteredReset () { reset(); }
@@ -493,13 +493,13 @@ protected:
   FILE *f;
   char *fileName;
 private:
-  Guint start;
+  Goffset start;
   GBool limited;
   char buf[fileStreamBufSize];
   char *bufPtr;
   char *bufEnd;
-  Guint bufPos;
-  int savePos;
+  Goffset bufPos;
+  Goffset savePos;
   GBool saved;
 };
 
@@ -520,12 +520,12 @@ public:
 class CachedFileStream: public BaseStream {
 public:
 
-  CachedFileStream(CachedFile *ccA, Guint startA, GBool limitedA,
-	     Guint lengthA, Object *dictA);
+  CachedFileStream(CachedFile *ccA, Goffset startA, GBool limitedA,
+	     Goffset lengthA, Object *dictA);
   virtual ~CachedFileStream();
   virtual BaseStream *copy();
-  virtual Stream *makeSubStream(Guint startA, GBool limitedA,
-				Guint lengthA, Object *dictA);
+  virtual Stream *makeSubStream(Goffset startA, GBool limitedA,
+				Goffset lengthA, Object *dictA);
   virtual StreamKind getKind() { return strCachedFile; }
   virtual void reset();
   virtual void close();
@@ -533,10 +533,10 @@ public:
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
   virtual int lookChar()
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-  virtual int getPos() { return bufPos + (bufPtr - buf); }
-  virtual void setPos(Guint pos, int dir = 0);
-  virtual Guint getStart() { return start; }
-  virtual void moveStart(int delta);
+  virtual Goffset getPos() { return bufPos + (bufPtr - buf); }
+  virtual void setPos(Goffset pos, int dir = 0);
+  virtual Goffset getStart() { return start; }
+  virtual void moveStart(Goffset delta);
 
   virtual int getUnfilteredChar () { return getChar(); }
   virtual void unfilteredReset () { reset(); }
@@ -546,7 +546,7 @@ private:
   GBool fillBuf();
 
   CachedFile *cc;
-  Guint start;
+  Goffset start;
   GBool limited;
   char buf[cachedStreamBufSize];
   char *bufPtr;
@@ -564,11 +564,11 @@ private:
 class MemStream: public BaseStream {
 public:
 
-  MemStream(char *bufA, Guint startA, Guint lengthA, Object *dictA);
+  MemStream(char *bufA, Goffset startA, Guint lengthA, Object *dictA);
   virtual ~MemStream();
   virtual BaseStream *copy();
-  virtual Stream *makeSubStream(Guint start, GBool limited,
-				Guint lengthA, Object *dictA);
+  virtual Stream *makeSubStream(Goffset start, GBool limited,
+				Goffset lengthA, Object *dictA);
   virtual StreamKind getKind() { return strWeird; }
   virtual void reset();
   virtual void close();
@@ -576,10 +576,10 @@ public:
     { return (bufPtr < bufEnd) ? (*bufPtr++ & 0xff) : EOF; }
   virtual int lookChar()
     { return (bufPtr < bufEnd) ? (*bufPtr & 0xff) : EOF; }
-  virtual int getPos() { return (int)(bufPtr - buf); }
-  virtual void setPos(Guint pos, int dir = 0);
-  virtual Guint getStart() { return start; }
-  virtual void moveStart(int delta);
+  virtual Goffset getPos() { return (int)(bufPtr - buf); }
+  virtual void setPos(Goffset pos, int dir = 0);
+  virtual Goffset getStart() { return start; }
+  virtual void moveStart(Goffset delta);
 
   //if needFree = true, the stream will delete buf when it is destroyed
   //otherwise it will not touch it. Default value is false
@@ -594,7 +594,7 @@ private:
   virtual int getChars(int nChars, Guchar *buffer);
 
   char *buf;
-  Guint start;
+  Goffset start;
   char *bufEnd;
   char *bufPtr;
   GBool needFree;
@@ -613,19 +613,19 @@ private:
 class EmbedStream: public BaseStream {
 public:
 
-  EmbedStream(Stream *strA, Object *dictA, GBool limitedA, Guint lengthA);
+  EmbedStream(Stream *strA, Object *dictA, GBool limitedA, Goffset lengthA);
   virtual ~EmbedStream();
   virtual BaseStream *copy();
-  virtual Stream *makeSubStream(Guint start, GBool limitedA,
-				Guint lengthA, Object *dictA);
+  virtual Stream *makeSubStream(Goffset start, GBool limitedA,
+				Goffset lengthA, Object *dictA);
   virtual StreamKind getKind() { return str->getKind(); }
   virtual void reset() {}
   virtual int getChar();
   virtual int lookChar();
-  virtual int getPos() { return str->getPos(); }
-  virtual void setPos(Guint pos, int dir = 0);
-  virtual Guint getStart();
-  virtual void moveStart(int delta);
+  virtual Goffset getPos() { return str->getPos(); }
+  virtual void setPos(Goffset pos, int dir = 0);
+  virtual Goffset getStart();
+  virtual void moveStart(Goffset delta);
 
   virtual int getUnfilteredChar () { return str->getUnfilteredChar(); }
   virtual void unfilteredReset () { str->unfilteredReset(); }

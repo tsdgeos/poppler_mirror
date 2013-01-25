@@ -39,9 +39,9 @@ void QIODeviceOutStream::close()
 {
 }
 
-int QIODeviceOutStream::getPos()
+Goffset QIODeviceOutStream::getPos()
 {
-  return (int)m_device->pos();
+  return m_device->pos();
 }
 
 void QIODeviceOutStream::put(char c)

@@ -163,7 +163,7 @@ int main (int argc, char *argv[])
     outStr->printf(" >>\nendobj\n");
     objectsCount++;
   }
-  Guint uxrefOffset = outStr->getPos();
+  Goffset uxrefOffset = outStr->getPos();
   Ref ref;
   ref.num = rootNum;
   ref.gen = 0;

@@ -54,7 +54,7 @@ namespace Debug {
         Debug::debugClosure = closure;
     }
 
-    void qt4ErrorFunction(void * /*data*/, ErrorCategory /*category*/, int pos, char *msg)
+    void qt4ErrorFunction(void * /*data*/, ErrorCategory /*category*/, Goffset pos, char *msg)
     {
         QString emsg;
 

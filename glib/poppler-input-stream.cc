@@ -21,7 +21,7 @@
 #include "poppler-input-stream.h"
 
 PopplerInputStream::PopplerInputStream(GInputStream *inputStreamA, GCancellable *cancellableA,
-                                       Guint startA, GBool limitedA, Guint lengthA, Object *dictA)
+                                       Goffset startA, GBool limitedA, Goffset lengthA, Object *dictA)
   : BaseStream(dictA, lengthA)
 {
   inputStream = (GInputStream *)g_object_ref(inputStreamA);
@@ -45,8 +45,8 @@ BaseStream *PopplerInputStream::copy() {
   return new PopplerInputStream(inputStream, cancellable, start, limited, length, &dict);
 }
 
-Stream *PopplerInputStream::makeSubStream(Guint startA, GBool limitedA,
-                                          Guint lengthA, Object *dictA)
+Stream *PopplerInputStream::makeSubStream(Goffset startA, GBool limitedA,
+                                          Goffset lengthA, Object *dictA)
 {
   return new PopplerInputStream(inputStream, cancellable, startA, limitedA, lengthA, dictA);
 }
@@ -70,7 +70,7 @@ void PopplerInputStream::close()
   saved = gFalse;
 }
 
-void PopplerInputStream::setPos(Guint pos, int dir)
+void PopplerInputStream::setPos(Goffset pos, int dir)
 {
   Guint size;
   GSeekable *seekable = G_SEEKABLE(inputStream);
@@ -90,7 +90,7 @@ void PopplerInputStream::setPos(Guint pos, int dir)
   bufPtr = bufEnd = buf;
 }
 
-void PopplerInputStream::moveStart(int delta)
+void PopplerInputStream::moveStart(Goffset delta)
 {
   start += delta;
   bufPtr = bufEnd = buf;

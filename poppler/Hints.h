@@ -33,7 +33,7 @@ public:
   ~Hints();
 
   int getPageObjectNum(int page);
-  Guint getPageOffset(int page);
+  Goffset getPageOffset(int page);
   std::vector<ByteRange>* getPageRanges(int page);
 
 private:
@@ -54,7 +54,7 @@ private:
   int nPages;
   int pageFirst;
   int pageObjectFirst;
-  Guint pageOffsetFirst;
+  Goffset pageOffsetFirst;
   Guint pageEndFirst;
   int objectNumberFirst;
 
@@ -76,7 +76,7 @@ private:
   int *pageObjectNum;
   Guint *xRefOffset;
   Guint *pageLength;
-  Guint *pageOffset;
+  Goffset *pageOffset;
   Guint *numSharedObject;
   Guint **sharedObjectId;
 

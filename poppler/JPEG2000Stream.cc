@@ -46,7 +46,7 @@ void JPXStream::close() {
   }
 }
 
-int JPXStream::getPos() {
+Goffset JPXStream::getPos() {
   return counter * ncomps + ccounter;
 }
 

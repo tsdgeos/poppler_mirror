@@ -31,6 +31,7 @@
 
 #include <stdarg.h>
 #include "poppler-config.h"
+#include "goo/gtypes.h"
 
 enum ErrorCategory {
   errSyntaxWarning,    // PDF syntax error which can be worked around;
@@ -48,9 +49,9 @@ enum ErrorCategory {
 };
 
 extern void setErrorCallback(void (*cbk)(void *data, ErrorCategory category,
-					 int pos, char *msg),
+					 Goffset pos, char *msg),
 			     void *data);
 
-extern void CDECL error(ErrorCategory category, int pos, const char *msg, ...);
+extern void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...);
 
 #endif

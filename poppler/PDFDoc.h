@@ -252,11 +252,11 @@ public:
 
   // Ownership goes to the caller
   static Dict *createTrailerDict (int uxrefSize, GBool incrUpdate, Guint startxRef,
-                                  Ref *root, XRef *xRef, const char *fileName, Guint fileSize);
+                                  Ref *root, XRef *xRef, const char *fileName, Goffset fileSize);
   static void writeXRefTableTrailer (Dict *trailerDict, XRef *uxref, GBool writeAllEntries,
-                                     Guint uxrefOffset, OutStream* outStr, XRef *xRef);
+                                     Goffset uxrefOffset, OutStream* outStr, XRef *xRef);
   static void writeXRefStreamTrailer (Dict *trailerDict, XRef *uxref, Ref *uxrefStreamRef,
-                                      Guint uxrefOffset, OutStream* outStr, XRef *xRef);
+                                      Goffset uxrefOffset, OutStream* outStr, XRef *xRef);
 
 private:
   // insert referenced objects in XRef
@@ -296,11 +296,11 @@ private:
   void checkHeader();
   GBool checkEncryption(GooString *ownerPassword, GooString *userPassword);
   // Get the offset of the start xref table.
-  Guint getStartXRef();
+  Goffset getStartXRef();
   // Get the offset of the entries in the main XRef table of a
   // linearized document (0 for non linearized documents).
-  Guint getMainXRefEntriesOffset();
-  Guint strToUnsigned(char *s);
+  Goffset getMainXRefEntriesOffset();
+  long long strToLongLong(char *s);
 
   GooString *fileName;
 #ifdef _WIN32
@@ -327,7 +327,7 @@ private:
   //then the POSIX errno will be here.
   int fopenErrno;
 
-  Guint startXRefPos;		// offset of last xref table
+  Goffset startXRefPos;		// offset of last xref table
 #if MULTITHREADED
   GooMutex mutex;
 #endif

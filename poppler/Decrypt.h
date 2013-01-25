@@ -107,7 +107,7 @@ public:
   virtual void reset();
   virtual int getChar();
   virtual int lookChar() = 0;
-  virtual int getPos();
+  virtual Goffset getPos();
   virtual GBool isBinary(GBool last);
   virtual Stream *getUndecodedStream() { return this; }
   void setAutoDelete(GBool val);

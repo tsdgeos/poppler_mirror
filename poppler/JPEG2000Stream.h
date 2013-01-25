@@ -29,7 +29,7 @@ public:
   virtual StreamKind getKind() { return strJPX; }
   virtual void reset();
   virtual void close();
-  virtual int getPos();
+  virtual Goffset getPos();
   virtual int getChar();
   virtual int lookChar();
   virtual GooString *getPSFilter(int psLevel, const char *indent);
