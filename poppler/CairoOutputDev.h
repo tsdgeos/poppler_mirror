@@ -319,6 +319,7 @@ protected:
   int utf8Count;
   int utf8Max;
   cairo_path_t *textClipPath;
+  GBool inUncoloredPattern;     // inside a uncolored pattern (PaintType = 2)
   GBool inType3Char;		// inside a Type 3 CharProc
   double t3_glyph_wx, t3_glyph_wy;
   GBool t3_glyph_has_bbox;

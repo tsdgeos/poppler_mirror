@@ -144,6 +144,7 @@ CairoOutputDev::CairoOutputDev() {
   prescaleImages = gTrue;
   printing = gTrue;
   use_show_text_glyphs = gFalse;
+  inUncoloredPattern = gFalse;
   inType3Char = gFalse;
   t3_glyph_has_bbox = gFalse;
 
@@ -461,6 +462,9 @@ void CairoOutputDev::updateLineWidth(GfxState *state) {
 void CairoOutputDev::updateFillColor(GfxState *state) {
   GfxRGB color = fill_color;
 
+  if (inUncoloredPattern)
+    return;
+
   state->getFillRGB(&fill_color);
   if (cairo_pattern_get_type (fill_pattern) != CAIRO_PATTERN_TYPE_SOLID ||
       color.r != fill_color.r ||
@@ -480,6 +484,9 @@ void CairoOutputDev::updateFillColor(GfxState *state) {
 
 void CairoOutputDev::updateStrokeColor(GfxState *state) {
   GfxRGB color = stroke_color;
+
+  if (inUncoloredPattern)
+    return;
 
   state->getStrokeRGB(&stroke_color);
   if (cairo_pattern_get_type (fill_pattern) != CAIRO_PATTERN_TYPE_SOLID ||
@@ -501,6 +508,9 @@ void CairoOutputDev::updateStrokeColor(GfxState *state) {
 void CairoOutputDev::updateFillOpacity(GfxState *state) {
   double opacity = fill_opacity;
 
+  if (inUncoloredPattern)
+    return;
+
   fill_opacity = state->getFillOpacity();
   if (opacity != fill_opacity) {
     cairo_pattern_destroy(fill_pattern);
@@ -516,6 +526,9 @@ void CairoOutputDev::updateFillOpacity(GfxState *state) {
 void CairoOutputDev::updateStrokeOpacity(GfxState *state) {
   double opacity = stroke_opacity;
 
+  if (inUncoloredPattern)
+    return;
+
   stroke_opacity = state->getStrokeOpacity();
   if (opacity != stroke_opacity) {
     cairo_pattern_destroy(stroke_pattern);
@@ -529,6 +542,9 @@ void CairoOutputDev::updateStrokeOpacity(GfxState *state) {
 }
 
 void CairoOutputDev::updateFillColorStop(GfxState *state, double offset) {
+  if (inUncoloredPattern)
+    return;
+
   state->getFillRGB(&fill_color);
 
   cairo_pattern_add_color_stop_rgba(fill_pattern, offset,
@@ -852,7 +868,11 @@ GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
   strokePathTmp = strokePathClip;
   strokePathClip = NULL;
   gfx = new Gfx(doc, this, resDict, &box, NULL, NULL, NULL, gfxA->getXRef());
+  if (paintType == 2)
+    inUncoloredPattern = gTrue;
   gfx->display(str);
+  if (paintType == 2)
+    inUncoloredPattern = gFalse;
   delete gfx;
   strokePathClip = strokePathTmp;
 
