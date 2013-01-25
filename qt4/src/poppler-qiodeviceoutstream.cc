@@ -1,5 +1,6 @@
 /* poppler-qiodevicestream.cc: Qt4 interface to poppler
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

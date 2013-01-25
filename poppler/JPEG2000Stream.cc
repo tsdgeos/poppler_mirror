@@ -6,6 +6,7 @@
 //
 // Copyright 2008-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright 2011 Daniel Glöckner <daniel-gl@gmx.net>
+// Copyright 2013 Adrian Johnson <ajohnson@redneon.com>
 //
 // Licensed under GPLv2 or later
 //
