@@ -805,6 +805,9 @@ void FileStream::reset() {
 #elif HAVE_FSEEK64
   savePos = ftell64(f);
   fseek64(f, start, SEEK_SET);
+#elif _WIN32
+  savePos = _ftelli64(f);
+  _fseeki64(f, start, SEEK_SET);
 #else
   savePos = ftell(f);
   fseek(f, start, SEEK_SET);
@@ -820,6 +823,8 @@ void FileStream::close() {
     fseeko(f, savePos, SEEK_SET);
 #elif HAVE_FSEEK64
     fseek64(f, savePos, SEEK_SET);
+#elif _WIN32
+    _fseeki64(f, savePos, SEEK_SET);
 #else
     fseek(f, savePos, SEEK_SET);
 #endif
@@ -856,6 +861,8 @@ void FileStream::setPos(Goffset pos, int dir) {
     fseeko(f, pos, SEEK_SET);
 #elif HAVE_FSEEK64
     fseek64(f, pos, SEEK_SET);
+#elif _WIN32
+    _fseeki64(f, pos, SEEK_SET);
 #else
     fseek(f, pos, SEEK_SET);
 #endif
@@ -867,6 +874,9 @@ void FileStream::setPos(Goffset pos, int dir) {
 #elif HAVE_FSEEK64
     fseek64(f, 0, SEEK_END);
     size = ftell64(f);
+#elif _WIN32
+    _fseeki64(f, 0, SEEK_END);
+    size = _ftelli64(f);
 #else
     fseek(f, 0, SEEK_END);
     size = ftell(f);
@@ -879,6 +889,9 @@ void FileStream::setPos(Goffset pos, int dir) {
 #elif HAVE_FSEEK64
     fseek64(f, -pos, SEEK_END);
     bufPos = ftell64(f);
+#elif _WIN32
+    _fseeki64(f, -pos, SEEK_END);
+    bufPos = _ftelli64(f);
 #else
     fseek(f, -pos, SEEK_END);
     bufPos = ftell(f);

@@ -55,6 +55,8 @@ typedef unsigned long Gulong;
 typedef off_t Goffset;
 #elif HAVE_FSEEK64
 typedef off64_t Goffset;
+#elif _WIN32
+typedef __int64 Goffset;
 #else
 typedef long Goffset;
 #endif
