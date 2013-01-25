@@ -17,6 +17,7 @@
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -117,7 +118,7 @@ protected:
   CryptAlgorithm algo;
   int objKeyLength;
   Guchar objKey[32];
-  int charactersRead; // so that getPos() can be correct
+  Goffset charactersRead; // so that getPos() can be correct
   int nextCharBuff;   // EOF means not read yet
   GBool autoDelete;
 

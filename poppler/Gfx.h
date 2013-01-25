@@ -17,7 +17,7 @@
 // Copyright (C) 2007 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009-2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2010, 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -242,7 +242,7 @@ private:
   void execOp(Object *cmd, Object args[], int numArgs);
   Operator *findOp(char *name);
   GBool checkArg(Object *arg, TchkType type);
-  int getPos();
+  Goffset getPos();
 
   int bottomGuard();
 
