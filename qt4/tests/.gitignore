@@ -16,6 +16,8 @@ check_actualtext
 check_attachments
 check_dateConversion
 check_fonts
+check_goostring
+check_lexer
 check_links
 check_metadata
 check_optcontent
