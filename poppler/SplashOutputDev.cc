@@ -4194,17 +4194,18 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *ca
 
   bitmap = new SplashBitmap(surface_width, surface_height, 1,
                             (paintType == 1) ? colorMode : splashModeMono8, gTrue);
-  memset(bitmap->getAlphaPtr(), 0, bitmap->getWidth() * bitmap->getHeight());
-  if (paintType == 2) {
-#if SPLASH_CMYK
-    memset(bitmap->getDataPtr(), 
-      (colorMode == splashModeCMYK8 || colorMode == splashModeDeviceN8) ? 0x00 : 0xFF, 
-      bitmap->getRowSize() * bitmap->getHeight());
-#else
-    memset(bitmap->getDataPtr(), 0xFF, bitmap->getRowSize() * bitmap->getHeight());
-#endif
-  }
   splash = new Splash(bitmap, gTrue);
+  if (paintType == 2) {
+    SplashColor clearColor;
+#if SPLASH_CMYK
+    clearColor[0] = (colorMode == splashModeCMYK8 || colorMode == splashModeDeviceN8) ? 0x00 : 0xFF;
+#else
+    clearColor[0] = 0xFF;
+#endif
+    splash->clear(clearColor, 0);
+  } else {
+    splash->clear(paperColor, 0);
+  }
   splash->setMinLineWidth(globalParams->getMinLineWidth());
 
   box.x1 = bbox[0]; box.y1 = bbox[1];
