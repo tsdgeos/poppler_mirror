@@ -118,9 +118,9 @@ PageTransition::PageTransition (Object *trans) {
   }
   obj.free();
 
-  // get sacle
-  if (dict->lookup("SS", &obj)->isReal()) {
-    scale = obj.getReal();
+  // get scale
+  if (dict->lookup("SS", &obj)->isNum()) {
+    scale = obj.getNum();
   }
   obj.free();
 
