@@ -248,7 +248,6 @@ public:
   //----- text drawing
   virtual void drawString(GfxState *state, GooString *s);
   virtual void beginTextObject(GfxState *state);
-  virtual GBool deviceHasTextClip(GfxState *state) { return haveTextClip; }
   virtual void endTextObject(GfxState *state);
 
   //----- image drawing

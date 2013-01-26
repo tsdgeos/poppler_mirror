@@ -165,7 +165,6 @@ public:
       CharCode code, Unicode *u, int uLen) { return false; }
   void endType3Char(GfxState *state) { }
   void beginTextObject(GfxState *state) { }
-  GBool deviceHasTextClip(GfxState *state) { return false; }
   void endTextObject(GfxState *state) { }
   GBool interpretType3Chars() { return gFalse; }
 };

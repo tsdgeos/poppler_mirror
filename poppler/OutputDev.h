@@ -243,7 +243,6 @@ public:
 			       CharCode /*code*/, Unicode * /*u*/, int /*uLen*/);
   virtual void endType3Char(GfxState * /*state*/) {}
   virtual void beginTextObject(GfxState * /*state*/) {}
-  virtual GBool deviceHasTextClip(GfxState * /*state*/) { return gFalse; }
   virtual void endTextObject(GfxState * /*state*/) {}
   virtual void incCharCount(int /*nChars*/) {}
   virtual void beginActualText(GfxState * /*state*/, GooString * /*text*/ ) {}
