@@ -41,6 +41,7 @@
 #include <math.h>
 #include <ctype.h>
 #include <limits.h>
+#include <limits>
 #include <float.h>
 #include "goo/gmem.h"
 #include "Object.h"
@@ -759,7 +760,7 @@ GBool XRef::readXRefStream(Stream *xrefStr, Goffset *pos) {
     }
   }
   obj.free();
-  if (w[0] > (int)sizeof(int) || w[1] > (int)sizeof(Goffset) || w[2] > (int)sizeof(int)) {
+  if (w[0] > (int)sizeof(int) || w[1] > (int)sizeof(long long) || w[2] > (int)sizeof(int)) {
     goto err1;
   }
 
@@ -818,7 +819,7 @@ GBool XRef::readXRefStream(Stream *xrefStr, Goffset *pos) {
 }
 
 GBool XRef::readXRefStreamSection(Stream *xrefStr, int *w, int first, int n) {
-  Goffset offset;
+  unsigned long long offset;
   int type, gen, c, i, j;
 
   if (first + n < 0) {
@@ -850,6 +851,10 @@ GBool XRef::readXRefStreamSection(Stream *xrefStr, int *w, int first, int n) {
 	return gFalse;
       }
       offset = (offset << 8) + c;
+    }
+    if (offset > (unsigned long long)std::numeric_limits<Goffset>::max()) {
+      error(errSyntaxError, -1, "Offset inside xref table too large for fseek");
+      return gFalse;
     }
     for (gen = 0, j = 0; j < w[2]; ++j) {
       if ((c = xrefStr->getChar()) == EOF) {
