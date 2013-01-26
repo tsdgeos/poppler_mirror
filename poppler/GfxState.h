@@ -21,6 +21,7 @@
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1443,7 +1444,7 @@ public:
 	      double d, double e, double f);
   void concatCTM(double a, double b, double c,
 		 double d, double e, double f);
-  void shiftCTM(double tx, double ty);
+  void shiftCTMAndClip(double tx, double ty);
   void setFillColorSpace(GfxColorSpace *colorSpace);
   void setStrokeColorSpace(GfxColorSpace *colorSpace);
   void setFillColor(GfxColor *color) { fillColor = *color; }

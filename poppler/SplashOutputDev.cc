@@ -30,6 +30,7 @@
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011, 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -3839,7 +3840,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
     splash->setInNonIsolatedGroup(shape, tx, ty);
   }
   transpGroup->tBitmap = bitmap;
-  state->shiftCTM(-tx, -ty);
+  state->shiftCTMAndClip(-tx, -ty);
   updateCTM(state, 0, 0, 0, 0, 0, 0);
   ++nestCount;
 }
@@ -3851,7 +3852,7 @@ void SplashOutputDev::endTransparencyGroup(GfxState *state) {
   bitmap = transpGroupStack->origBitmap;
   colorMode = bitmap->getMode();
   splash = transpGroupStack->origSplash;
-  state->shiftCTM(transpGroupStack->tx, transpGroupStack->ty);
+  state->shiftCTMAndClip(transpGroupStack->tx, transpGroupStack->ty);
   updateCTM(state, 0, 0, 0, 0, 0, 0);
 }
 

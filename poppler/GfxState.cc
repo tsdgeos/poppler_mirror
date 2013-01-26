@@ -24,6 +24,7 @@
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
+// Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -6160,7 +6161,7 @@ void GfxState::concatCTM(double a, double b, double c,
   ctm[5] = e * b1 + f * d1 + ctm[5];
 }
 
-void GfxState::shiftCTM(double tx, double ty) {
+void GfxState::shiftCTMAndClip(double tx, double ty) {
   ctm[4] += tx;
   ctm[5] += ty;
   clipXMin += tx;
