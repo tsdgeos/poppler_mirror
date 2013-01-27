@@ -565,7 +565,7 @@ private:
 class MemStream: public BaseStream {
 public:
 
-  MemStream(char *bufA, Goffset startA, Guint lengthA, Object *dictA);
+  MemStream(char *bufA, Goffset startA, Goffset lengthA, Object *dictA);
   virtual ~MemStream();
   virtual BaseStream *copy();
   virtual Stream *makeSubStream(Goffset start, GBool limited,

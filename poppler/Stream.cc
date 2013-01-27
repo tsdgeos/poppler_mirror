@@ -1015,7 +1015,7 @@ void CachedFileStream::moveStart(Goffset delta)
 // MemStream
 //------------------------------------------------------------------------
 
-MemStream::MemStream(char *bufA, Goffset startA, Guint lengthA, Object *dictA):
+MemStream::MemStream(char *bufA, Goffset startA, Goffset lengthA, Object *dictA):
     BaseStream(dictA, lengthA) {
   buf = bufA;
   start = startA;
