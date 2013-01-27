@@ -26,7 +26,10 @@
 #define GTYPES_H
 
 #include "poppler-config.h"
-#include <stdio.h> // for off_t
+
+#ifndef _WIN32
+#include <sys/types.h> // for off_t
+#endif
 
 /*
  * These have stupid names to avoid conflicts with some (but not all)
