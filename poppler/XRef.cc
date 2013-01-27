@@ -852,7 +852,7 @@ GBool XRef::readXRefStreamSection(Stream *xrefStr, int *w, int first, int n) {
       }
       offset = (offset << 8) + c;
     }
-    if (offset > (unsigned long long)std::numeric_limits<Goffset>::max()) {
+    if (offset > (unsigned long long)(std::numeric_limits<Goffset>::max)()) {
       error(errSyntaxError, -1, "Offset inside xref table too large for fseek");
       return gFalse;
     }
