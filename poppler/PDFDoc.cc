@@ -891,7 +891,7 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
       if (xref->getEntry(i)->type != xrefEntryFree) {
         Object obj1;
         xref->fetch(ref.num, ref.gen, &obj1, 1);
-        Guint offset = writeObjectHeader(&ref, outStr);
+        Goffset offset = writeObjectHeader(&ref, outStr);
         writeObject(&obj1, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
         writeObjectFooter(outStr);
         uxref->add(ref.num, ref.gen, offset, gTrue);
@@ -970,7 +970,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
       ref.num = i;
       ref.gen = xref->getEntry(i)->gen;
       xref->fetch(ref.num, ref.gen, &obj1, 1);
-      Guint offset = writeObjectHeader(&ref, outStr);
+      Goffset offset = writeObjectHeader(&ref, outStr);
       // Write unencrypted objects in unencrypted form
       if (xref->getEntry(i)->getFlag(XRefEntry::Unencrypted)) {
         writeObject(&obj1, outStr, NULL, cryptRC4, 0, 0, 0);
@@ -984,7 +984,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
       ref.num = i;
       ref.gen = 0; //compressed entries have gen == 0
       xref->fetch(ref.num, ref.gen, &obj1, 1);
-      Guint offset = writeObjectHeader(&ref, outStr);
+      Goffset offset = writeObjectHeader(&ref, outStr);
       writeObject(&obj1, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
       writeObjectFooter(outStr);
       uxref->add(ref.num, ref.gen, offset, gTrue);
@@ -1106,7 +1106,7 @@ void PDFDoc::writeString (GooString* s, OutStream* outStr, Guchar *fileKey,
   delete sEnc;
 }
 
-Guint PDFDoc::writeObjectHeader (Ref *ref, OutStream* outStr)
+Goffset PDFDoc::writeObjectHeader (Ref *ref, OutStream* outStr)
 {
   Goffset offset = outStr->getPos();
   outStr->printf("%i %i obj ", ref->num, ref->gen);
@@ -1241,7 +1241,7 @@ void PDFDoc::writeObjectFooter (OutStream* outStr)
   outStr->printf("endobj\r\n");
 }
 
-Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Guint startxRef,
+Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Goffset startxRef,
                                 Ref *root, XRef *xRef, const char *fileName, Goffset fileSize)
 {
   Dict *trailerDict = new Dict(xRef);
@@ -1327,7 +1327,7 @@ Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Guint startxRef
   trailerDict->set("Root", &obj1);
 
   if (incrUpdate) { 
-    obj1.initInt(startxRef);
+    obj1.initInt64(startxRef);
     trailerDict->set("Prev", &obj1);
   }
   
@@ -1372,7 +1372,7 @@ void PDFDoc::writeXRefStreamTrailer (Dict *trailerDict, XRef *uxref, Ref *uxrefS
   outStr->printf( "%%%%EOF\r\n");
 }
 
-void PDFDoc::writeXRefTableTrailer(Guint uxrefOffset, XRef *uxref, GBool writeAllEntries,
+void PDFDoc::writeXRefTableTrailer(Goffset uxrefOffset, XRef *uxref, GBool writeAllEntries,
                                    int uxrefSize, OutStream* outStr, GBool incrUpdate)
 {
   const char *fileNameA = fileName ? fileName->getCString() : NULL;
@@ -1575,7 +1575,7 @@ Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, G
       ref.gen = xRef->getEntry(n)->gen;
       objectsCount++;
       getXRef()->fetch(ref.num - numOffset, ref.gen, &obj);
-      Guint offset = writeObjectHeader(&ref, outStr);
+      Goffset offset = writeObjectHeader(&ref, outStr);
       if (combine) {
         writeObject(&obj, outStr, getXRef(), numOffset, NULL, cryptRC4, 0, 0, 0);
       } else if (xRef->getEntry(n)->getFlag(XRefEntry::Unencrypted)) {

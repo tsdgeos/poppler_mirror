@@ -65,7 +65,7 @@ private:
   char buf[inputStreamBufSize];
   char *bufPtr;
   char *bufEnd;
-  Guint bufPos;
+  Goffset bufPos;
   int savePos;
   GBool saved;
 };

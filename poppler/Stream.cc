@@ -757,8 +757,8 @@ GBool StreamPredictor::getNextLine() {
 // UniqueFileStream
 //------------------------------------------------------------------------
 
-UniqueFileStream::UniqueFileStream(FILE *fA, char *fileNameA, Guint startA, GBool limitedA,
-		       Guint lengthA, Object *dictA):
+UniqueFileStream::UniqueFileStream(FILE *fA, char *fileNameA, Goffset startA, GBool limitedA,
+		       Goffset lengthA, Object *dictA):
     FileStream(fA, fileNameA, startA, limitedA, lengthA, dictA) {
   f = fopen(fileName, "rb");
 }

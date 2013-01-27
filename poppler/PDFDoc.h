@@ -252,7 +252,7 @@ public:
   static void writeHeader(OutStream *outStr, int major, int minor);
 
   // Ownership goes to the caller
-  static Dict *createTrailerDict (int uxrefSize, GBool incrUpdate, Guint startxRef,
+  static Dict *createTrailerDict (int uxrefSize, GBool incrUpdate, Goffset startxRef,
                                   Ref *root, XRef *xRef, const char *fileName, Goffset fileSize);
   static void writeXRefTableTrailer (Dict *trailerDict, XRef *uxref, GBool writeAllEntries,
                                      Goffset uxrefOffset, OutStream* outStr, XRef *xRef);
@@ -267,7 +267,7 @@ private:
                                 CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
 
   // Write object header to current file stream and return its offset
-  static Guint writeObjectHeader (Ref *ref, OutStream* outStr);
+  static Goffset writeObjectHeader (Ref *ref, OutStream* outStr);
   static void writeObjectFooter (OutStream* outStr);
 
   void writeObject (Object *obj, OutStream* outStr, Guchar *fileKey, CryptAlgorithm encAlgorithm,
@@ -278,7 +278,7 @@ private:
   { writeDictionnary(dict, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, objNum, objGen); }
   static void writeStream (Stream* str, OutStream* outStr);
   static void writeRawStream (Stream* str, OutStream* outStr);
-  void writeXRefTableTrailer (Guint uxrefOffset, XRef *uxref, GBool writeAllEntries,
+  void writeXRefTableTrailer (Goffset uxrefOffset, XRef *uxref, GBool writeAllEntries,
                               int uxrefSize, OutStream* outStr, GBool incrUpdate);
   static void writeString (GooString* s, OutStream* outStr, Guchar *fileKey,
                            CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);

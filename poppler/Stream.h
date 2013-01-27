@@ -507,8 +507,8 @@ private:
 class UniqueFileStream: public FileStream {
 public:
 
-  UniqueFileStream(FILE *fA, char *fileNameA, Guint startA, GBool limitedA,
-	     Guint lengthA, Object *dictA);
+  UniqueFileStream(FILE *fA, char *fileNameA, Goffset startA, GBool limitedA,
+	     Goffset lengthA, Object *dictA);
   virtual ~UniqueFileStream();
 };
 
