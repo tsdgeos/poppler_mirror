@@ -41,8 +41,8 @@
 #include <math.h>
 #include <ctype.h>
 #include <limits.h>
-#include <limits>
 #include <float.h>
+#include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "Object.h"
 #include "Stream.h"
@@ -852,7 +852,7 @@ GBool XRef::readXRefStreamSection(Stream *xrefStr, int *w, int first, int n) {
       }
       offset = (offset << 8) + c;
     }
-    if (offset > (unsigned long long)(std::numeric_limits<Goffset>::max)()) {
+    if (offset > (unsigned long long)GoffsetMax()) {
       error(errSyntaxError, -1, "Offset inside xref table too large for fseek");
       return gFalse;
     }

@@ -385,7 +385,7 @@ void FileOutStream::close ()
 
 Goffset FileOutStream::getPos ()
 {
-  return ftell(f);
+  return Gftell(f);
 }
 
 void FileOutStream::put (char c)
@@ -800,19 +800,8 @@ Stream *FileStream::makeSubStream(Goffset startA, GBool limitedA,
 }
 
 void FileStream::reset() {
-#if HAVE_FSEEKO
-  savePos = ftello(f);
-  fseeko(f, start, SEEK_SET);
-#elif HAVE_FSEEK64
-  savePos = ftell64(f);
-  fseek64(f, start, SEEK_SET);
-#elif _WIN32
-  savePos = _ftelli64(f);
-  _fseeki64(f, start, SEEK_SET);
-#else
-  savePos = ftell(f);
-  fseek(f, start, SEEK_SET);
-#endif
+  savePos = Gftell(f);
+  Gfseek(f, start, SEEK_SET);
   saved = gTrue;
   bufPtr = bufEnd = buf;
   bufPos = start;
@@ -820,15 +809,7 @@ void FileStream::reset() {
 
 void FileStream::close() {
   if (saved) {
-#if HAVE_FSEEKO
-    fseeko(f, savePos, SEEK_SET);
-#elif HAVE_FSEEK64
-    fseek64(f, savePos, SEEK_SET);
-#elif _WIN32
-    _fseeki64(f, savePos, SEEK_SET);
-#else
-    fseek(f, savePos, SEEK_SET);
-#endif
+    Gfseek(f, savePos, SEEK_SET);
     saved = gFalse;
   }
 }
@@ -858,45 +839,15 @@ void FileStream::setPos(Goffset pos, int dir) {
   Goffset size;
 
   if (dir >= 0) {
-#if HAVE_FSEEKO
-    fseeko(f, pos, SEEK_SET);
-#elif HAVE_FSEEK64
-    fseek64(f, pos, SEEK_SET);
-#elif _WIN32
-    _fseeki64(f, pos, SEEK_SET);
-#else
-    fseek(f, pos, SEEK_SET);
-#endif
+    Gfseek(f, pos, SEEK_SET);
     bufPos = pos;
   } else {
-#if HAVE_FSEEKO
-    fseeko(f, 0, SEEK_END);
-    size = ftello(f);
-#elif HAVE_FSEEK64
-    fseek64(f, 0, SEEK_END);
-    size = ftell64(f);
-#elif _WIN32
-    _fseeki64(f, 0, SEEK_END);
-    size = _ftelli64(f);
-#else
-    fseek(f, 0, SEEK_END);
-    size = ftell(f);
-#endif
+    Gfseek(f, 0, SEEK_END);
+    size = Gftell(f);
     if (pos > size)
       pos = size;
-#if HAVE_FSEEKO
-    fseeko(f, -pos, SEEK_END);
-    bufPos = ftello(f);
-#elif HAVE_FSEEK64
-    fseek64(f, -pos, SEEK_END);
-    bufPos = ftell64(f);
-#elif _WIN32
-    _fseeki64(f, -pos, SEEK_END);
-    bufPos = _ftelli64(f);
-#else
-    fseek(f, -pos, SEEK_END);
-    bufPos = ftell(f);
-#endif
+    Gfseek(f, -pos, SEEK_END);
+    bufPos = Gftell(f);
   }
   bufPtr = bufEnd = buf;
 }

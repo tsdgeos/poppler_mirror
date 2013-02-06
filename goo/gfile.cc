@@ -49,6 +49,8 @@
 #    include <unixlib.h>
 #  endif
 #endif // _WIN32
+#include <stdio.h>
+#include <limits>
 #include "GooString.h"
 #include "gfile.h"
 
@@ -544,6 +546,42 @@ char *getLine(char *buf, int size, FILE *f) {
     return NULL;
   }
   return buf;
+}
+
+int Gfseek(FILE *f, Goffset offset, int whence) {
+#if HAVE_FSEEKO
+  return fseeko(f, offset, whence);
+#elif HAVE_FSEEK64
+  return fseek64(f, offset, whence);
+#elif _WIN32
+  return _fseeki64(f, offset, whence);
+#else
+  return fseek(f, offset, whence);
+#endif
+}
+
+Goffset Gftell(FILE *f) {
+#if HAVE_FSEEKO
+  return ftello(f);
+#elif HAVE_FSEEK64
+  return ftell64(f);
+#elif _WIN32
+  return _ftelli64(f);
+#else
+  return ftell(f);
+#endif
+}
+
+Goffset GoffsetMax() {
+#if HAVE_FSEEKO
+  return (std::numeric_limits<off_t>::max)();
+#elif HAVE_FSEEK64
+  return (std::numeric_limits<off64_t>::max)();
+#elif _WIN32
+  return (std::numeric_limits<__int64>::max)();
+#else
+  return (std::numeric_limits<long>::max)();
+#endif
 }
 
 //------------------------------------------------------------------------

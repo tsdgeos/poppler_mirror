@@ -114,6 +114,13 @@ extern FILE *openFile(const char *path, const char *mode);
 // conventions.
 extern char *getLine(char *buf, int size, FILE *f);
 
+// Like fseek/ftell but uses platform specific variants that support large files
+extern int Gfseek(FILE *f, Goffset offset, int whence);
+extern Goffset Gftell(FILE *f);
+
+// Largest offset supported by Gfseek/Gftell
+extern Goffset GoffsetMax();
+
 //------------------------------------------------------------------------
 // GDir and GDirEntry
 //------------------------------------------------------------------------

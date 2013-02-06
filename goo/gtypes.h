@@ -27,10 +27,6 @@
 
 #include "poppler-config.h"
 
-#ifndef _WIN32
-#include <sys/types.h> // for off_t
-#endif
-
 /*
  * These have stupid names to avoid conflicts with some (but not all)
  * C++ compilers which define them.
@@ -51,19 +47,6 @@ typedef unsigned char Guchar;
 typedef unsigned short Gushort;
 typedef unsigned int Guint;
 typedef unsigned long Gulong;
-
-/* Define Goffset to be the offset type used by the version of
- * fseek we are using.
- */
-#if HAVE_FSEEKO
-typedef off_t Goffset;
-#elif HAVE_FSEEK64
-typedef off64_t Goffset;
-#elif _WIN32
-typedef __int64 Goffset;
-#else
-typedef long Goffset;
-#endif
-
+typedef long long Goffset;
 
 #endif

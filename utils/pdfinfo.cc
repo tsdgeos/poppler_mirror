@@ -36,6 +36,7 @@
 #include "parseargs.h"
 #include "printencodings.h"
 #include "goo/GooString.h"
+#include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "GlobalParams.h"
 #include "Object.h"
@@ -351,19 +352,8 @@ int main(int argc, char *argv[]) {
   f = fopen(fileName->getCString(), "rb");
 #endif
   if (f) {
-#if HAVE_FSEEKO
-    fseeko(f, 0, SEEK_END);
-    printf("File size:      %lld bytes\n", (long long)ftello(f));
-#elif HAVE_FSEEK64
-    fseek64(f, 0, SEEK_END);
-    printf("File size:      %lld bytes\n", (long long)ftell64(f));
-#elif _WIN32
-    _fseeki64(f, 0, SEEK_END);
-    printf("File size:      %lld bytes\n", (long long)_ftelli64(f));
-#else
-    fseek(f, 0, SEEK_END);
-    printf("File size:      %lld bytes\n", (long long)ftell(f));
-#endif
+    Gfseek(f, 0, SEEK_END);
+    printf("File size:      %lld bytes\n", (long long)Gftell(f));
     fclose(f);
   }
 

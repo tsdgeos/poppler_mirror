@@ -107,12 +107,6 @@
 #cmakedefine USE_CMS 1
 #endif
 
-/* Define to 1 if you have the `fseek64' function. */
-#cmakedefine HAVE_FSEEK64 1
-
-/* Define to 1 if fseeko (and presumably ftello) exists and is declared. */
-#cmakedefine HAVE_FSEEKO 1
-
 // Also, there are preprocessor symbols in the header files
 // that are used but never defined when building poppler using configure
 // or cmake: DISABLE_OUTLINE, DEBUG_MEM, SPLASH_CMYK, HAVE_T1LIB_H,
