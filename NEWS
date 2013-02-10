@@ -1,3 +1,12 @@
+Release 0.22.1
+        core:
+         * Fix crash in some pdf files when extracting text (Bug #59561)
+         * Fix crashes in wrongly formed files
+         * Fix wrong warning when opening some files (Bug #58966)
+
+        build system:
+         * Improve autoconf jpeglib.h detection (Bug #59186)
+
 Release 0.22.0
         core:
          * Fix crash in invalid files that define a <= 0 bits per image value
