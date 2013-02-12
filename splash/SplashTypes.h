@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2006, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
-// Copyright (C) 2009, 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009, 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
 //
@@ -76,6 +76,12 @@ enum SplashColorMode {
 #endif
 };
 
+enum SplashThinLineMode {
+  splashThinLineDefault,  // if SA on: draw solid if requested line width, transformed into 
+                          // device space, is less than half a pixel and a shaped line else
+  splashThinLineSolid,     // draw line solid at least with 1 pixel 
+  splashThinLineShape     // draw line shaped at least with 1 pixel
+};
 // number of components in each color mode
 // (defined in SplashState.cc)
 extern int splashColorModeNComps[];

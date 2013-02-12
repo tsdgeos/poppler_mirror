@@ -13,6 +13,7 @@
 //
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2010, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -66,7 +67,8 @@ inline void SplashXPath::transform(SplashCoord *matrix,
 //------------------------------------------------------------------------
 
 SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
-			 SplashCoord flatness, GBool closeSubpaths) {
+			 SplashCoord flatness, GBool closeSubpaths,
+			 GBool adjustLines, int linePosI) {
   SplashPathHint *hint;
   SplashXPathPoint *pts;
   SplashXPathAdjust *adjusts, *adjust;
@@ -127,7 +129,15 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
       x0 = splashRound(adj0);
       x1 = splashRound(adj1);
       if (x1 == x0) {
-	x1 = x1 + 1;
+        if (adjustLines) {
+          // the adjustment moves thin lines (clip rectangle with
+          // empty width or height) out of clip area, here we need
+          // a special adjustment:
+          x0 = linePosI;
+          x1 = x0 + 1;
+        } else {
+          x1 = x1 + 1;
+        }
       }
       adjusts[i].x0 = (SplashCoord)x0;
       adjusts[i].x1 = (SplashCoord)x1 - 0.01;

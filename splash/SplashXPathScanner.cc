@@ -13,6 +13,7 @@
 //
 // Copyright (C) 2008, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -367,7 +368,7 @@ void SplashXPathScanner::addIntersection(double segYMin, double segYMax,
 }
 
 void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf,
-				      int *x0, int *x1, int y) {
+				      int *x0, int *x1, int y, GBool adjustVertLine) {
   int xx0, xx1, xx, xxMin, xxMax, yy, interEnd;
   Guchar mask;
   SplashColorPtr p;
@@ -418,8 +419,8 @@ void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf,
 	  xx = xx0;
 	  p = aaBuf->getDataPtr() + yy * aaBuf->getRowSize() + (xx >> 3);
 	  if (xx & 7) {
-	    mask = 0xff >> (xx & 7);
-	    if ((xx & ~7) == (xx1 & ~7)) {
+	    mask = adjustVertLine ? 0xff : 0xff >> (xx & 7);
+	    if (!adjustVertLine && (xx & ~7) == (xx1 & ~7)) {
 	      mask &= (Guchar)(0xff00 >> (xx1 & 7));
 	    }
 	    *p++ |= mask;
@@ -429,7 +430,7 @@ void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf,
 	    *p++ |= 0xff;
 	  }
 	  if (xx < xx1) {
-	    *p |= (Guchar)(0xff00 >> (xx1 & 7));
+	    *p |= adjustVertLine ? 0xff : (Guchar)(0xff00 >> (xx1 & 7));
 	  }
 	}
 	if (xx0 < xxMin) {

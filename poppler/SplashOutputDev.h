@@ -163,7 +163,8 @@ public:
   SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA,
 		  GBool reverseVideoA, SplashColorPtr paperColorA,
 		  GBool bitmapTopDownA = gTrue,
-		  GBool allowAntialiasA = gTrue);
+		  GBool allowAntialiasA = gTrue,
+		  SplashThinLineMode thinLineMode = splashThinLineDefault);
 
   // Destructor.
   virtual ~SplashOutputDev();

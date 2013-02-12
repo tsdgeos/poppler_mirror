@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2005-2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2010-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2010-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012 Markus Trippelsdorf <markus@trippelsdorf.de>
@@ -1450,7 +1450,7 @@ inline void Splash::drawSpan(SplashPipe *pipe, int x0, int x1, int y,
   }
 }
 
-inline void Splash::drawAALine(SplashPipe *pipe, int x0, int x1, int y) {
+inline void Splash::drawAALine(SplashPipe *pipe, int x0, int x1, int y, GBool adjustLine, Guchar lineOpacity) {
 #if splashAASize == 4
   static int bitCount4[16] = { 0, 1, 1, 2, 1, 2, 2, 3,
 			       1, 2, 2, 3, 2, 3, 3, 4 };
@@ -1493,7 +1493,7 @@ inline void Splash::drawAALine(SplashPipe *pipe, int x0, int x1, int y) {
 #endif
 
     if (t != 0) {
-      pipe->shape = aaGamma[t];
+      pipe->shape = (adjustLine) ? div255((int) lineOpacity * aaGamma[t]) : aaGamma[t];
       (this->*pipe->run)(pipe);
       updateModX(x);
       updateModY(y);
@@ -1542,6 +1542,7 @@ Splash::Splash(SplashBitmap *bitmapA, GBool vectorAntialiasA,
     aaBuf = NULL;
   }
   minLineWidth = 0;
+  thinLineMode = splashThinLineDefault;
   clearModRegion();
   debugMode = gFalse;
 }
@@ -1568,6 +1569,7 @@ Splash::Splash(SplashBitmap *bitmapA, GBool vectorAntialiasA,
     aaBuf = NULL;
   }
   minLineWidth = 0;
+  thinLineMode = splashThinLineDefault;
   clearModRegion();
   debugMode = gFalse;
 }
@@ -2365,6 +2367,8 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
   SplashXPathScanner *scanner;
   int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
   SplashClipResult clipRes, clipRes2;
+  GBool adjustLine = gFalse; 
+  int linePosI = 0;
 
   if (path->length == 0) {
     return splashErrEmptyPath;
@@ -2397,7 +2401,24 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
     }
   }
 
-  xPath = new SplashXPath(path, state->matrix, state->flatness, gTrue);
+  if (thinLineMode != splashThinLineDefault) {
+    if (state->clip->getXMinI() == state->clip->getXMaxI()) {
+      linePosI = state->clip->getXMinI();
+      adjustLine = gTrue;
+    } else if (state->clip->getXMinI() == state->clip->getXMaxI() - 1) {
+      adjustLine = gTrue;
+      linePosI = splashFloor(state->clip->getXMin() + state->lineWidth);
+    } else if (state->clip->getYMinI() == state->clip->getYMaxI()) {
+      linePosI = state->clip->getYMinI();
+      adjustLine = gTrue;
+    } else if (state->clip->getYMinI() == state->clip->getYMaxI() - 1) {
+      adjustLine = gTrue;
+      linePosI = splashFloor(state->clip->getYMin() + state->lineWidth);
+    }
+  }
+
+  xPath = new SplashXPath(path, state->matrix, state->flatness, gTrue, 
+    adjustLine, linePosI);
   if (vectorAntialias && !inShading) {
     xPath->aaScale();
   }
@@ -2430,11 +2451,13 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
     // draw the spans
     if (vectorAntialias && !inShading) {
       for (y = yMinI; y <= yMaxI; ++y) {
-	scanner->renderAALine(aaBuf, &x0, &x1, y);
+	scanner->renderAALine(aaBuf, &x0, &x1, y, thinLineMode != splashThinLineDefault && xMinI == xMaxI);
 	if (clipRes != splashClipAllInside) {
-	  state->clip->clipAALine(aaBuf, &x0, &x1, y);
+	  state->clip->clipAALine(aaBuf, &x0, &x1, y, thinLineMode != splashThinLineDefault && xMinI == xMaxI);
 	}
-	drawAALine(&pipe, x0, x1, y);
+	drawAALine(&pipe, x0, x1, y,
+		thinLineMode == splashThinLineShape && (xMinI == xMaxI || yMinI == yMaxI), 
+		clip255(splashRound(state->lineWidth * 255)));     
       }
     } else {
       for (y = yMinI; y <= yMaxI; ++y) {

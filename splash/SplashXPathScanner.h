@@ -4,6 +4,20 @@
 //
 //========================================================================
 
+//========================================================================
+//
+// Modified under the Poppler project - http://poppler.freedesktop.org
+//
+// All changes made under the Poppler project to this file are licensed
+// under GPL version 2 or later
+//
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+//
+// To see a description of the changes please see the Changelog file that
+// came with your tarball or type make ChangeLog if you are building from git
+//
+//========================================================================
+
 #ifndef SPLASHXPATHSCANNER_H
 #define SPLASHXPATHSCANNER_H
 
@@ -60,7 +74,8 @@ public:
 
   // Renders one anti-aliased line into <aaBuf>.  Returns the min and
   // max x coordinates with non-zero pixels in <x0> and <x1>.
-  void renderAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y);
+  void renderAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y,
+    GBool adjustVertLine = gFalse);
 
   // Clips an anti-aliased line by setting pixels to zero.  On entry,
   // all non-zero pixels are between <x0> and <x1>.  This function

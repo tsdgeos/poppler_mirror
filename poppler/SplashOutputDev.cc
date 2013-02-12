@@ -1211,7 +1211,7 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
 				 GBool reverseVideoA,
 				 SplashColorPtr paperColorA,
 				 GBool bitmapTopDownA,
-				 GBool allowAntialiasA) {
+				 GBool allowAntialiasA, SplashThinLineMode thinLineMode) {
   colorMode = colorModeA;
   bitmapRowPad = bitmapRowPadA;
   bitmapTopDown = bitmapTopDownA;
@@ -1239,6 +1239,7 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
 			    colorMode != splashModeMono1, bitmapTopDown);
   splash = new Splash(bitmap, vectorAntialias, &screenParams);
   splash->setMinLineWidth(globalParams->getMinLineWidth());
+  splash->setThinLineMode(thinLineMode);
   splash->clear(paperColor, 0);
 
   fontEngine = NULL;
@@ -1367,7 +1368,9 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   } else {
     w = h = 1;
   }
+  SplashThinLineMode thinLineMode = splashThinLineDefault;
   if (splash) {
+    thinLineMode = splash->getThinLineMode();
     delete splash;
     splash = NULL;
   }
@@ -1380,6 +1383,7 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
 			      colorMode != splashModeMono1, bitmapTopDown);
   }
   splash = new Splash(bitmap, vectorAntialias, &screenParams);
+  splash->setThinLineMode(thinLineMode);
   splash->setMinLineWidth(globalParams->getMinLineWidth());
   if (state) {
     ctm = state->getCTM();
@@ -2584,6 +2588,7 @@ void SplashOutputDev::type3D1(GfxState *state, double wx, double wy,
     color[0] = 0xff;
   }
   splash->setMinLineWidth(globalParams->getMinLineWidth());
+  splash->setThinLineMode(splashThinLineDefault);
   splash->setFillPattern(new SplashSolidColor(color));
   splash->setStrokePattern(new SplashSolidColor(color));
   //~ this should copy other state from t3GlyphStack->origSplash?
@@ -3819,6 +3824,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
 			    bitmapTopDown, bitmap->getSeparationList());
   splash = new Splash(bitmap, vectorAntialias,
 		      transpGroup->origSplash->getScreen());
+  splash->setThinLineMode(transpGroup->origSplash->getThinLineMode());
   splash->setMinLineWidth(globalParams->getMinLineWidth());
   //~ Acrobat apparently copies at least the fill and stroke colors, and
   //~ maybe other state(?) -- but not the clipping path (and not sure
@@ -4207,6 +4213,7 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *ca
   } else {
     splash->clear(paperColor, 0);
   }
+  splash->setThinLineMode(formerSplash->getThinLineMode());
   splash->setMinLineWidth(globalParams->getMinLineWidth());
 
   box.x1 = bbox[0]; box.y1 = bbox[1];

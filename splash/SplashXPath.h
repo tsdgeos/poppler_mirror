@@ -4,6 +4,20 @@
 //
 //========================================================================
 
+//========================================================================
+//
+// Modified under the Poppler project - http://poppler.freedesktop.org
+//
+// All changes made under the Poppler project to this file are licensed
+// under GPL version 2 or later
+//
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+//
+// To see a description of the changes please see the Changelog file that
+// came with your tarball or type make ChangeLog if you are building from git
+//
+//========================================================================
+
 #ifndef SPLASHXPATH_H
 #define SPLASHXPATH_H
 
@@ -50,7 +64,8 @@ public:
   // space, via <matrix>.  If <closeSubpaths> is true, closes all open
   // subpaths.
   SplashXPath(SplashPath *path, SplashCoord *matrix,
-	      SplashCoord flatness, GBool closeSubpaths);
+	      SplashCoord flatness, GBool closeSubpaths,
+	      GBool adjustLines = gFalse, int linePosI = 0);
 
   // Copy an expanded path.
   SplashXPath *copy() { return new SplashXPath(this); }
