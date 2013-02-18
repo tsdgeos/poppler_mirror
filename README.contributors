@@ -4,7 +4,7 @@ Licensing
 ---------
 Only send patches to poppler if you agree to license (or relicense) them under
 GPLv2 and later (or something more permissive that can be "upgraded" to GPLv2
-and later. If you do not agree to this license, please explain the problem / bug
+and later). If you do not agree to this license, please explain the problem / bug
 and how you would solve it in words instead of code.
 
 By default all patches attached to the bugzilla or sent to the mailing list will
