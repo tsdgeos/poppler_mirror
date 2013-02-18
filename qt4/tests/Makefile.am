@@ -139,6 +139,10 @@ check_lexer_SOURCES = check_lexer.cpp
 check_lexer.$(OBJEXT): check_lexer.moc
 check_lexer_LDADD = $(LDADDS) $(POPPLER_QT4_TEST_LIBS)
 
+check_pagelabelinfo_SOURCES = check_pagelabelinfo.cpp
+check_pagelabelinfo.$(OBJEXT): check_pagelabelinfo.moc
+check_pagelabelinfo_LDADD = $(LDADDS) $(POPPLER_QT4_TEST_LIBS)
+
 check_goostring_SOURCES = check_goostring.cpp
 check_goostring.$(OBJEXT): check_goostring.moc
 check_goostring_LDADD = $(LDADDS) $(POPPLER_QT4_TEST_LIBS)

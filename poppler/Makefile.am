@@ -330,4 +330,5 @@ libpoppler_la_SOURCES =		\
 	XpdfPluginAPI.cc
 
 EXTRA_DIST = gen-unicode-tables.py	\
-             GlobalParamsWin.cc
+             GlobalParamsWin.cc         \
+             PageLabelInfo_p.h
