@@ -5087,7 +5087,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
 	  alpha = *ap++;
 	  // this uses shape instead of alpha, which isn't technically
 	  // correct, but works out the same
-    pipe.shape = alpha;
+	  pipe.shape = alpha;
 	  (this->*pipe.run)(&pipe);
 	}
       }
@@ -5105,7 +5105,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
 	  if (state->clip->test(xDest + x, yDest + y)) {
 	    // this uses shape instead of alpha, which isn't technically
 	    // correct, but works out the same
-      pipe.shape = alpha;
+	    pipe.shape = alpha;
 	    (this->*pipe.run)(&pipe);
 	    updateModX(xDest + x);
 	    updateModY(yDest + y);
