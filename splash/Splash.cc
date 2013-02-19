@@ -525,8 +525,9 @@ void Splash::pipeRun(SplashPipe *pipe) {
 	  cSrcNonIso[3] = clip255(pipe->cSrc[3] +
 				  ((pipe->cSrc[3] - cDest[3]) * t) / 255);
 #endif
-	case splashModeRGB8:
 	case splashModeXBGR8:
+	  cSrcNonIso[3] = 255;
+	case splashModeRGB8:
 	case splashModeBGR8:
 	  cSrcNonIso[2] = clip255(pipe->cSrc[2] +
 				  ((pipe->cSrc[2] - cDest[2]) * t) / 255);
