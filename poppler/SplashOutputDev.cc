@@ -1211,7 +1211,9 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
 				 GBool reverseVideoA,
 				 SplashColorPtr paperColorA,
 				 GBool bitmapTopDownA,
-				 GBool allowAntialiasA, SplashThinLineMode thinLineMode) {
+				 GBool allowAntialiasA, 
+         SplashThinLineMode thinLineMode,
+         GBool overprintPreviewA) {
   colorMode = colorModeA;
   bitmapRowPad = bitmapRowPadA;
   bitmapTopDown = bitmapTopDownA;
@@ -1220,6 +1222,7 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
   vectorAntialias = allowAntialias &&
 		      globalParams->getVectorAntialias() &&
 		      colorMode != splashModeMono1;
+  overprintPreview = overprintPreviewA;
   enableFreeTypeHinting = gFalse;
   enableSlightHinting = gFalse;
   setupScreenParams(72.0, 72.0);
@@ -1674,7 +1677,7 @@ void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace,
 		     grayIndexed);
 		return;
 	}
-  if (overprintFlag && globalParams->getOverprintPreview()) {
+  if (overprintFlag && overprintPreview) {
     mask = colorSpace->getOverprintMask();
     if (singleColor && overprintMode &&
 	colorSpace->getMode() == csDeviceCMYK) {

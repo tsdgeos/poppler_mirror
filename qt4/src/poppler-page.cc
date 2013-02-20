@@ -229,7 +229,8 @@ TextPage *PageData::prepareTextSearch(const QString &text, Page::SearchMode case
 
   // fetch ourselves a textpage
   TextOutputDev td(NULL, gTrue, 0, gFalse, gFalse);
-  parentDoc->doc->displayPage( &td, index + 1, 72, 72, rotation, false, true, false );
+  parentDoc->doc->displayPage( &td, index + 1, 72, 72, rotation, false, true, false,
+    NULL, NULL, NULL, NULL, gTrue);
   TextPage *textPage=td.takeText();
   
   return textPage;
@@ -259,9 +260,9 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
     {
 #if defined(HAVE_SPLASH)
       SplashColor bgColor;
+      GBool overprint = gFalse;
 #if defined(SPLASH_CMYK)
-      GBool overprint = m_page->parentDoc->m_hints & Document::OverprintPreview ? gTrue : gFalse;
-      globalParams->setOverprintPreview(overprint);
+      overprint = m_page->parentDoc->m_hints & Document::OverprintPreview ? gTrue : gFalse;
       if (overprint)
       {
         Guchar c, m, y, k;
@@ -300,7 +301,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 #else
                       splashModeXBGR8,
 #endif 
-                      4, gFalse, bgColor, gTrue, AA);
+                      4, gFalse, bgColor, gTrue, AA, splashThinLineDefault, overprint);
 
       splash_output->setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? gTrue : gFalse);
       splash_output->setFreeTypeHinting(m_page->parentDoc->m_hints & Document::TextHinting ? gTrue : gFalse, 

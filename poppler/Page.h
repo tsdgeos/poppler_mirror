@@ -174,10 +174,10 @@ public:
   Ref getRef() { return pageRef; }
 
   // Get resource dictionary.
-  Dict *getResourceDict() { return attrs->getResourceDict(); }
+  Dict *getResourceDict(XRef *xrefA = NULL);
 
   // Get annotations array.
-  Object *getAnnots(Object *obj) { return annotsObj.fetch(xref, obj); }
+  Object *getAnnots(Object *obj, XRef *xrefA = NULL) { return annotsObj.fetch((xrefA == NULL) ? xref : xrefA, obj); }
   // Add a new annotation to the page
   void addAnnot(Annot *annot);
   // Remove an existing annotation from the page
@@ -187,7 +187,7 @@ public:
   Links *getLinks();
 
   // Return a list of annots. It will be valid until the page is destroyed
-  Annots *getAnnots();
+  Annots *getAnnots(XRef *xrefA = NULL);
 
   // Get contents.
   Object *getContents(Object *obj) { return contents.fetch(xref, obj); }

@@ -4,6 +4,7 @@
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2011 Glad Deschrijver <glad.deschrijver@gmail.com>
  * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -253,7 +254,7 @@ bool PSConverter::convert()
 			                              NULL,
 			                              NULL,
 			                              annotDisplayDecideCbk,
-			                              &showAnnotations);
+			                              &showAnnotations, gTrue);
 			if (d->pageConvertedCallback)
 				(*d->pageConvertedCallback)(page, d->pageConvertedPayload);
 		}

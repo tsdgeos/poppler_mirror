@@ -40,6 +40,7 @@
 #include "poppler-config.h"
 #include "OutputDev.h"
 #include "GfxState.h"
+#include "GlobalParams.h"
 
 class PDFDoc;
 class Gfx8BitFont;
@@ -164,7 +165,8 @@ public:
 		  GBool reverseVideoA, SplashColorPtr paperColorA,
 		  GBool bitmapTopDownA = gTrue,
 		  GBool allowAntialiasA = gTrue,
-		  SplashThinLineMode thinLineMode = splashThinLineDefault);
+		  SplashThinLineMode thinLineMode = splashThinLineDefault,
+      GBool overprintPreviewA = globalParams->getOverprintPreview());
 
   // Destructor.
   virtual ~SplashOutputDev();
@@ -390,6 +392,7 @@ private:
   GBool bitmapUpsideDown;
   GBool allowAntialias;
   GBool vectorAntialias;
+  GBool overprintPreview;
   GBool enableFreeTypeHinting;
   GBool enableSlightHinting;
   GBool reverseVideo;		// reverse video mode

@@ -7,6 +7,7 @@
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2009 Pino Toscano <pino@kde.org>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -49,7 +50,7 @@ public:
   };
     
   // Constructor.
-  FontInfo(GfxFont *fontA, PDFDoc *doc);
+  FontInfo(GfxFont *fontA, XRef *xrefA);
   // Copy constructor
   FontInfo(FontInfo& f);
   // Destructor.
@@ -96,7 +97,7 @@ private:
   std::set<int> fonts;
   std::set<int> visitedObjects;
 
-  void scanFonts(Dict *resDict, GooList *fontsList);
+  void scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList);
 };
 
 #endif

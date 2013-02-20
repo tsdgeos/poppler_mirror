@@ -24,6 +24,7 @@
 // Copyright (C) 2009-2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Tobias Koenig <tokoe@kdab.com>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -571,7 +572,7 @@ public:
   // new_color. 
   void setColor(AnnotColor *new_color);
 
-  void setAppearanceState(const char *state);
+  void setAppearanceState(const char *state, GBool lock = gTrue);
 
   // Delete appearance streams and reset appearance state
   void invalidateAppearance();
@@ -626,7 +627,7 @@ protected:
 
   // Updates the field key of the annotation dictionary
   // and sets M to the current time
-  void update(const char *key, Object *value);
+  void update(const char *key, Object *value, GBool lock = gTrue);
 
   int refCnt;
 
@@ -660,6 +661,9 @@ protected:
   GBool ok;
 
   bool hasRef;
+#if MULTITHREADED
+  GooMutex mutex;
+#endif
 };
 
 //------------------------------------------------------------------------

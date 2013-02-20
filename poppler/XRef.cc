@@ -1396,8 +1396,10 @@ void XRef::removeIndirectObject(Ref r) {
     return;
   }
   XRefEntry *e = getEntry(r.num);
-  if (e->type == xrefEntryFree)
+  if (e->type == xrefEntryFree) {
+    unlockXRef;
     return;
+  }
   e->obj.free();
   e->type = xrefEntryFree;
   e->gen++;

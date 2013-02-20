@@ -359,6 +359,13 @@ Page::~Page() {
 #endif
 }
 
+Dict *Page::getResourceDict(XRef *xrefA) { 
+  lockPage;
+  Dict *dict = (xrefA == NULL) ? attrs->getResourceDict() : attrs->getResourceDict()->copy(xrefA); 
+  unlockPage;
+  return dict;
+}
+
 void Page::replaceXRef(XRef *xrefA) {
   Object obj1;
   Dict *pageDict = pageObj.getDict()->copy(xrefA);
@@ -386,10 +393,10 @@ void Page::replaceXRef(XRef *xrefA) {
   delete pageDict;
 }
 
-Annots *Page::getAnnots() {
+Annots *Page::getAnnots(XRef *xrefA) {
   if (!annots) {
     Object obj;
-    annots = new Annots(doc, num, getAnnots(&obj));
+    annots = new Annots(doc, num, getAnnots(&obj, (xrefA == NULL) ? xref : xrefA));
     obj.free();
   }
 
