@@ -2456,9 +2456,17 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
 	if (clipRes != splashClipAllInside) {
 	  state->clip->clipAALine(aaBuf, &x0, &x1, y, thinLineMode != splashThinLineDefault && xMinI == xMaxI);
 	}
-	drawAALine(&pipe, x0, x1, y,
-		thinLineMode == splashThinLineShape && (xMinI == xMaxI || yMinI == yMaxI), 
-		clip255(splashRound(state->lineWidth * 255)));     
+	Guchar lineShape = 255;
+	GBool adjustLine = gFalse;
+	if (thinLineMode == splashThinLineShape && (xMinI == xMaxI || yMinI == yMaxI)) {
+	  // compute line shape for thin lines:
+	  SplashCoord mx, my, delta;
+	  transform(state->matrix, 0, 0, &mx, &my);
+	  transform(state->matrix, state->lineWidth, 0, &delta, &my);
+	  adjustLine = gTrue;
+	  lineShape = clip255((delta - mx) * 255);
+	}
+	drawAALine(&pipe, x0, x1, y, adjustLine, lineShape);
       }
     } else {
       for (y = yMinI; y <= yMaxI; ++y) {
