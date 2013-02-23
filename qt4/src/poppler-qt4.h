@@ -13,7 +13,7 @@
  * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012, Tobias Koenig <tobias.koenig@kdab.com>
  * Copyright (C) 2012 Adam Reichold <adamreichold@myopera.com>
- * Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+ * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -848,7 +848,9 @@ delete it;
 	    TextAntialiasing = 0x00000002,  ///< Antialiasing for text
 	    TextHinting = 0x00000004,       ///< Hinting for text \since 0.12.1
 	    TextSlightHinting = 0x00000008, ///< Lighter hinting for text when combined with TextHinting \since 0.18
-	    OverprintPreview = 0x00000010   ///< Overprint preview \since 0.22
+	    OverprintPreview = 0x00000010,  ///< Overprint preview \since 0.22
+	    ThinLineSolid = 0x00000020,     ///< Enhance thin lines solid \since 0.24
+	    ThinLineShape = 0x00000040      ///< Enhance thin lines shape. Wins over ThinLineSolid \since 0.24
 	};
 	Q_DECLARE_FLAGS( RenderHints, RenderHint )
 

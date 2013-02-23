@@ -294,6 +294,9 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       }
  
       GBool AA = m_page->parentDoc->m_hints & Document::TextAntialiasing ? gTrue : gFalse;
+      SplashThinLineMode thinLineMode = splashThinLineDefault;
+      if (m_page->parentDoc->m_hints & Document::ThinLineShape) thinLineMode = splashThinLineShape;
+      if (m_page->parentDoc->m_hints & Document::ThinLineSolid) thinLineMode = splashThinLineSolid;
 
       SplashOutputDev * splash_output = new SplashOutputDev(
 #if defined(SPLASH_CMYK)
@@ -301,7 +304,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 #else
                       splashModeXBGR8,
 #endif 
-                      4, gFalse, bgColor, gTrue, AA, splashThinLineDefault, overprint);
+                      4, gFalse, bgColor, gTrue, AA, thinLineMode, overprint);
 
       splash_output->setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? gTrue : gFalse);
       splash_output->setFreeTypeHinting(m_page->parentDoc->m_hints & Document::TextHinting ? gTrue : gFalse, 
