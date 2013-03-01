@@ -960,7 +960,7 @@ public:
     captionPosTop     // Top
   };
 
-  AnnotLine(PDFDoc *docA, PDFRectangle *rect, PDFRectangle *lRect);
+  AnnotLine(PDFDoc *docA, PDFRectangle *rect);
   AnnotLine(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotLine();
 
@@ -1025,8 +1025,7 @@ protected:
 class AnnotTextMarkup: public AnnotMarkup {
 public:
 
-  AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType,
-		  AnnotQuadrilaterals *quadPoints);
+  AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
   AnnotTextMarkup(PDFDoc *docA, Dict *dict, Object *obj);
   virtual ~AnnotTextMarkup();
 
@@ -1112,7 +1111,7 @@ public:
     polygonDimension   // PolygonDimension
   };
 
-  AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType, AnnotPath *path);
+  AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
   AnnotPolygon(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotPolygon();
 
@@ -1187,7 +1186,7 @@ private:
 class AnnotInk: public AnnotMarkup {
 public:
 
-  AnnotInk(PDFDoc *docA, PDFRectangle *rect, AnnotPath **paths, int n_paths);
+  AnnotInk(PDFDoc *docA, PDFRectangle *rect);
   AnnotInk(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotInk();
 

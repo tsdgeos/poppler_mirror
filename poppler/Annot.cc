@@ -3019,20 +3019,12 @@ Object *AnnotFreeText::getAppearanceResDict(Object *dest) {
 // AnnotLine
 //------------------------------------------------------------------------
 
-AnnotLine::AnnotLine(PDFDoc *docA, PDFRectangle *rect, PDFRectangle *lRect) :
+AnnotLine::AnnotLine(PDFDoc *docA, PDFRectangle *rect) :
     AnnotMarkup(docA, rect) {
   Object obj1;
 
   type = typeLine;
   annotObj.dictSet ("Subtype", obj1.initName ("Line"));
-
-  Object obj2, obj3;
-  obj2.initArray (doc->getXRef());
-  obj2.arrayAdd (obj3.initReal (lRect->x1));
-  obj2.arrayAdd (obj3.initReal (lRect->y1));
-  obj2.arrayAdd (obj3.initReal (lRect->x2));
-  obj2.arrayAdd (obj3.initReal (lRect->y2));
-  annotObj.dictSet ("L", &obj2);
 
   initialize (docA, annotObj.getDict());
 }
@@ -3498,8 +3490,7 @@ Object *AnnotLine::getAppearanceResDict(Object *dest) {
 //------------------------------------------------------------------------
 // AnnotTextMarkup
 //------------------------------------------------------------------------
-AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType,
-				 AnnotQuadrilaterals *quadPoints) :
+AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType) :
     AnnotMarkup(docA, rect) {
   Object obj1;
 
@@ -3520,22 +3511,12 @@ AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype 
       assert (0 && "Invalid subtype for AnnotTextMarkup\n");
   }
 
-  Object obj2;
+  // Store dummy quadrilateral with null coordinates
+  Object obj2, obj3;
   obj2.initArray (doc->getXRef());
-
-  for (int i = 0; i < quadPoints->getQuadrilateralsLength(); ++i) {
-    Object obj3;
-
-    obj2.arrayAdd (obj3.initReal (quadPoints->getX1(i)));
-    obj2.arrayAdd (obj3.initReal (quadPoints->getY1(i)));
-    obj2.arrayAdd (obj3.initReal (quadPoints->getX2(i)));
-    obj2.arrayAdd (obj3.initReal (quadPoints->getY2(i)));
-    obj2.arrayAdd (obj3.initReal (quadPoints->getX3(i)));
-    obj2.arrayAdd (obj3.initReal (quadPoints->getY3(i)));
-    obj2.arrayAdd (obj3.initReal (quadPoints->getX4(i)));
-    obj2.arrayAdd (obj3.initReal (quadPoints->getY4(i)));
+  for (int i = 0; i < 4*2; ++i) {
+    obj2.arrayAdd (obj3.initReal (0));
   }
-
   annotObj.dictSet ("QuadPoints", &obj2);
 
   initialize(docA, annotObj.getDict());
@@ -5566,7 +5547,7 @@ void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 // AnnotPolygon
 //------------------------------------------------------------------------
-AnnotPolygon::AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType, AnnotPath *path) :
+AnnotPolygon::AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType) :
     AnnotMarkup(docA, rect) {
   Object obj1;
 
@@ -5581,16 +5562,11 @@ AnnotPolygon::AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subTyp
       assert (0 && "Invalid subtype for AnnotGeometry\n");
   }
 
-  Object obj2;
+  // Store dummy path with one null vertex only
+  Object obj2, obj3;
   obj2.initArray (doc->getXRef());
-
-  for (int i = 0; i < path->getCoordsLength(); ++i) {
-    Object obj3;
-
-    obj2.arrayAdd (obj3.initReal (path->getX(i)));
-    obj2.arrayAdd (obj3.initReal (path->getY(i)));
-  }
-
+  obj2.arrayAdd (obj3.initReal (0));
+  obj2.arrayAdd (obj3.initReal (0));
   annotObj.dictSet ("Vertices", &obj2);
 
   initialize(docA, annotObj.getDict());
@@ -5911,7 +5887,7 @@ void AnnotCaret::setSymbol(AnnotCaretSymbol new_symbol) {
 //------------------------------------------------------------------------
 // AnnotInk
 //------------------------------------------------------------------------
-AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rect, AnnotPath **paths, int n_paths) :
+AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rect) :
     AnnotMarkup(docA, rect) {
   Object obj1;
 
@@ -5919,10 +5895,12 @@ AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rect, AnnotPath **paths, int n_pa
 
   annotObj.dictSet ("Subtype", obj1.initName ("Ink"));
 
-  Object obj2;
+  // Store dummy path with one null vertex only
+  Object obj2, obj3, obj4;
   obj2.initArray (doc->getXRef());
-  writeInkList(paths, n_paths, obj2.getArray());
-
+  obj2.arrayAdd (obj3.initArray (doc->getXRef()));
+  obj3.arrayAdd (obj4.initReal (0));
+  obj3.arrayAdd (obj4.initReal (0));
   annotObj.dictSet ("InkList", &obj2);
 
   initialize(docA, annotObj.getDict());
