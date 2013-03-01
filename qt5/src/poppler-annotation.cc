@@ -2,7 +2,7 @@
  * Copyright (C) 2006, 2009, 2012 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
- * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -2050,22 +2050,20 @@ Annot* LineAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *
     parentDoc = doc;
 
     // Set pdfAnnot
-    AnnotPath * path = toAnnotPath(linePoints);
     PDFRectangle rect = toPdfRectangle(boundary);
     if (lineType == LineAnnotation::StraightLine)
     {
-        PDFRectangle lrect(path->getX(0), path->getY(0), path->getX(1), path->getY(1));
-        pdfAnnot = new AnnotLine(doc->doc, &rect, &lrect);
+        pdfAnnot = new AnnotLine(doc->doc, &rect);
     }
     else
     {
         pdfAnnot = new AnnotPolygon(doc->doc, &rect,
-                lineClosed ? Annot::typePolygon : Annot::typePolyLine, path );
+                lineClosed ? Annot::typePolygon : Annot::typePolyLine );
     }
-    delete path;
 
     // Set properties
     flushBaseAnnotationProperties();
+    q->setLinePoints(linePoints);
     q->setLineStartStyle(lineStartStyle);
     q->setLineEndStyle(lineEndStyle);
     q->setLineInnerColor(lineInnerColor);
@@ -2897,20 +2895,24 @@ AnnotQuadrilaterals * HighlightAnnotationPrivate::toQuadrilaterals(const QList< 
 
 Annot* HighlightAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
 {
+    // Setters are defined in the public class
+    HighlightAnnotation *q = static_cast<HighlightAnnotation*>( makeAlias() );
+
     // Set page and document
     pdfPage = destPage;
     parentDoc = doc;
 
     // Set pdfAnnot
     PDFRectangle rect = toPdfRectangle(boundary);
-    AnnotQuadrilaterals * quads = toQuadrilaterals(highlightQuads);
-    pdfAnnot = new AnnotTextMarkup(destPage->getDoc(), &rect, toAnnotSubType(highlightType), quads);
-    delete quads;
+    pdfAnnot = new AnnotTextMarkup(destPage->getDoc(), &rect, toAnnotSubType(highlightType));
 
     // Set properties
     flushBaseAnnotationProperties();
+    q->setHighlightQuads(highlightQuads);
 
     highlightQuads.clear(); // Free up memory
+
+    delete q;
 
     return pdfAnnot;
 }
@@ -3242,24 +3244,24 @@ AnnotPath **InkAnnotationPrivate::toAnnotPaths(const QList< QLinkedList<QPointF>
 
 Annot* InkAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
 {
+    // Setters are defined in the public class
+    InkAnnotation *q = static_cast<InkAnnotation*>( makeAlias() );
+
     // Set page and document
     pdfPage = destPage;
     parentDoc = doc;
 
     // Set pdfAnnot
     PDFRectangle rect = toPdfRectangle(boundary);
-    AnnotPath **paths = toAnnotPaths(inkPaths);
-    const int pathsNumber = inkPaths.size();
-    pdfAnnot = new AnnotInk(destPage->getDoc(), &rect, paths, pathsNumber);
-
-    for (int i = 0; i < pathsNumber; ++i)
-        delete paths[i];
-    delete[] paths;
+    pdfAnnot = new AnnotInk(destPage->getDoc(), &rect);
 
     // Set properties
     flushBaseAnnotationProperties();
+    q->setInkPaths(inkPaths);
 
     inkPaths.clear(); // Free up memory
+
+    delete q;
 
     return pdfAnnot;
 }
