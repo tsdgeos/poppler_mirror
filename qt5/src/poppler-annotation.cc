@@ -27,6 +27,7 @@
 #include <QtCore/QtAlgorithms>
 #include <QtXml/QDomElement>
 #include <QtGui/QColor>
+#include <QtGui/QTransform>
 
 // local includes
 #include "poppler-annotation.h"
@@ -198,19 +199,21 @@ void AnnotationPrivate::flushBaseAnnotationProperties()
     revisions.clear();
 }
 
-void AnnotationPrivate::fillMTX(double MTX[6]) const
+// Returns matrix to convert from user space coords (oriented according to the
+// specified rotation) to normalized coords
+void AnnotationPrivate::fillNormalizationMTX(double MTX[6], int pageRotation) const
 {
     Q_ASSERT ( pdfPage );
 
     // build a normalized transform matrix for this page at 100% scale
-    GfxState * gfxState = new GfxState( 72.0, 72.0, pdfPage->getCropBox(), pdfPage->getRotate(), gTrue );
+    GfxState * gfxState = new GfxState( 72.0, 72.0, pdfPage->getCropBox(), pageRotation, gTrue );
     double * gfxCTM = gfxState->getCTM();
 
     double w = pdfPage->getCropWidth();
     double h = pdfPage->getCropHeight();
 
     // Swap width and height if the page is rotated landscape or seascape
-    if ( pdfPage->getRotate() == 90 || pdfPage->getRotate() == 270 )
+    if ( pageRotation == 90 || pageRotation == 270 )
     {
         double t = w;
         w = h;
@@ -225,10 +228,51 @@ void AnnotationPrivate::fillMTX(double MTX[6]) const
     delete gfxState;
 }
 
+// Returns matrix to convert from user space coords (i.e. those that are stored
+// in the PDF file) to normalized coords (i.e. those that we expose to clients).
+// This method also applies a rotation around the top-left corner if the
+// FixedRotation flag is set.
+void AnnotationPrivate::fillTransformationMTX(double MTX[6]) const
+{
+    Q_ASSERT ( pdfPage );
+    Q_ASSERT ( pdfAnnot );
+
+    const int pageRotate = pdfPage->getRotate();
+
+    if ( pageRotate == 0 || ( pdfAnnot->getFlags() & Annot::flagNoRotate ) == 0 )
+    {
+        // Use the normalization matrix for this page's rotation
+        fillNormalizationMTX( MTX, pageRotate );
+    }
+    else
+    {
+        // Clients expect coordinates relative to this page's rotation, but
+        // FixedRotation annotations internally use unrotated coordinates:
+        // construct matrix to both normalize and rotate coordinates using the
+        // top-left corner as rotation pivot
+
+        double MTXnorm[6];
+        fillNormalizationMTX( MTXnorm, pageRotate );
+
+        QTransform transform( MTXnorm[0], MTXnorm[1], MTXnorm[2],
+                              MTXnorm[3], MTXnorm[4], MTXnorm[5] );
+        transform.translate( +pdfAnnot->getXMin(), +pdfAnnot->getYMax() );
+        transform.rotate( pageRotate );
+        transform.translate( -pdfAnnot->getXMin(), -pdfAnnot->getYMax() );
+
+        MTX[0] = transform.m11();
+        MTX[1] = transform.m12();
+        MTX[2] = transform.m21();
+        MTX[3] = transform.m22();
+        MTX[4] = transform.dx();
+        MTX[5] = transform.dy();
+    }
+}
+
 QRectF AnnotationPrivate::fromPdfRectangle(const PDFRectangle &r) const
 {
     double swp, MTX[6];
-    fillMTX(MTX);
+    fillTransformationMTX(MTX);
 
     QPointF p1, p2;
     XPDFReader::transform( MTX, r.x1, r.y1, p1 );
@@ -256,10 +300,20 @@ QRectF AnnotationPrivate::fromPdfRectangle(const PDFRectangle &r) const
     return QRectF( QPointF(tl_x,tl_y) , QPointF(br_x,br_y) );
 }
 
-PDFRectangle AnnotationPrivate::toPdfRectangle(const QRectF &r) const
+// This function converts a boundary QRectF in normalized coords to a
+// PDFRectangle in user coords. If the FixedRotation flag is set, this function
+// also applies a rotation around the top-left corner: it's the inverse of
+// the transformation produced by fillTransformationMTX, but we can't use
+// fillTransformationMTX here because it relies on the native annotation
+// object's boundary rect to be already set up.
+PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int flags) const
 {
+    Q_ASSERT ( pdfPage );
+
+    const int pageRotate = pdfPage->getRotate();
+
     double MTX[6];
-    fillMTX(MTX);
+    fillNormalizationMTX( MTX, pageRotate );
 
     double tl_x, tl_y, br_x, br_y, swp;
     XPDFReader::invTransform( MTX, r.topLeft(), tl_x, tl_y );
@@ -279,7 +333,18 @@ PDFRectangle AnnotationPrivate::toPdfRectangle(const QRectF &r) const
         br_y = swp;
     }
 
-    return PDFRectangle(tl_x, tl_y, br_x, br_y);
+    const int rotationFixUp = ( flags & Annotation::FixedRotation ) ? pageRotate : 0;
+    const double width = br_x - tl_x;
+    const double height = br_y - tl_y;
+
+    if ( rotationFixUp == 0 )
+        return PDFRectangle(tl_x, tl_y, br_x, br_y);
+    else if ( rotationFixUp == 90 )
+        return PDFRectangle(tl_x, tl_y - width, tl_x + height, tl_y);
+    else if ( rotationFixUp == 180 )
+        return PDFRectangle(br_x, tl_y - height, br_x + width, tl_y);
+    else // rotationFixUp == 270
+        return PDFRectangle(br_x, br_y - width, br_x + height, br_y);
 }
 
 AnnotPath * AnnotationPrivate::toAnnotPath(const QLinkedList<QPointF> &list) const
@@ -288,7 +353,7 @@ AnnotPath * AnnotationPrivate::toAnnotPath(const QLinkedList<QPointF> &list) con
     AnnotCoord **ac = (AnnotCoord **) gmallocn(count, sizeof(AnnotCoord*));
 
     double MTX[6];
-    fillMTX(MTX);
+    fillTransformationMTX(MTX);
 
     int pos = 0;
     foreach (const QPointF &p, list)
@@ -1302,7 +1367,7 @@ void Annotation::setBoundary( const QRectF &boundary )
         return;
     }
 
-    PDFRectangle rect = d->toPdfRectangle(boundary);
+    PDFRectangle rect = d->boundaryToPdfRectangle( boundary, flags() );
     d->pdfAnnot->setRect(&rect);
     d->pdfAnnot->invalidateAppearance();
 }
@@ -1598,7 +1663,7 @@ Annot* TextAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *
     parentDoc = doc;
 
     // Set pdfAnnot
-    PDFRectangle rect = toPdfRectangle(boundary);
+    PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
     if (textType == TextAnnotation::Linked)
     {
         pdfAnnot = new AnnotText(destPage->getDoc(), &rect);
@@ -1909,7 +1974,7 @@ QVector<QPointF> TextAnnotation::calloutPoints() const
         return QVector<QPointF>();
 
     double MTX[6];
-    d->fillMTX(MTX);
+    d->fillTransformationMTX(MTX);
 
     const AnnotCalloutMultiLine * callout_v6 = dynamic_cast<const AnnotCalloutMultiLine*>(callout);
     QVector<QPointF> res(callout_v6 ? 3 : 2);
@@ -1951,7 +2016,7 @@ void TextAnnotation::setCalloutPoints( const QVector<QPointF> &points )
     AnnotCalloutLine *callout;
     double x1, y1, x2, y2;
     double MTX[6];
-    d->fillMTX(MTX);
+    d->fillTransformationMTX(MTX);
 
     XPDFReader::invTransform( MTX, points[0], x1, y1 );
     XPDFReader::invTransform( MTX, points[1], x2, y2 );
@@ -2050,7 +2115,7 @@ Annot* LineAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *
     parentDoc = doc;
 
     // Set pdfAnnot
-    PDFRectangle rect = toPdfRectangle(boundary);
+    PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
     if (lineType == LineAnnotation::StraightLine)
     {
         pdfAnnot = new AnnotLine(doc->doc, &rect);
@@ -2226,7 +2291,7 @@ QLinkedList<QPointF> LineAnnotation::linePoints() const
         return d->linePoints;
 
     double MTX[6];
-    d->fillMTX(MTX);
+    d->fillTransformationMTX(MTX);
 
     QLinkedList<QPointF> res;
     if (d->pdfAnnot->getType() == Annot::typeLine)
@@ -2274,7 +2339,7 @@ void LineAnnotation::setLinePoints( const QLinkedList<QPointF> &points )
         }
         double x1, y1, x2, y2;
         double MTX[6];
-        d->fillMTX(MTX);
+        d->fillTransformationMTX(MTX);
         XPDFReader::invTransform( MTX, points.first(), x1, y1 );
         XPDFReader::invTransform( MTX, points.last(), x2, y2 );
         lineann->setVertices(x1, y1, x2, y2);
@@ -2666,7 +2731,7 @@ Annot* GeomAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *
         type = Annot::typeCircle;
 
     // Set pdfAnnot
-    PDFRectangle rect = toPdfRectangle(boundary);
+    PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
     pdfAnnot = new AnnotGeometry(destPage->getDoc(), &rect, type);
 
     // Set properties
@@ -2844,7 +2909,7 @@ QList< HighlightAnnotation::Quad > HighlightAnnotationPrivate::fromQuadrilateral
     const int quadsCount = hlquads->getQuadrilateralsLength();
 
     double MTX[6];
-    fillMTX(MTX);
+    fillTransformationMTX(MTX);
 
     for (int q = 0; q < quadsCount; ++q)
     {
@@ -2876,7 +2941,7 @@ AnnotQuadrilaterals * HighlightAnnotationPrivate::toQuadrilaterals(const QList< 
             gmallocn( count, sizeof(AnnotQuadrilaterals::AnnotQuadrilateral*) );
 
     double MTX[6];
-    fillMTX(MTX);
+    fillTransformationMTX(MTX);
 
     int pos = 0;
     foreach (const HighlightAnnotation::Quad &q, quads)
@@ -2903,7 +2968,7 @@ Annot* HighlightAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentD
     parentDoc = doc;
 
     // Set pdfAnnot
-    PDFRectangle rect = toPdfRectangle(boundary);
+    PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
     pdfAnnot = new AnnotTextMarkup(destPage->getDoc(), &rect, toAnnotSubType(highlightType));
 
     // Set properties
@@ -3113,7 +3178,7 @@ Annot* StampAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData 
     parentDoc = doc;
 
     // Set pdfAnnot
-    PDFRectangle rect = toPdfRectangle(boundary);
+    PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
     pdfAnnot = new AnnotStamp(destPage->getDoc(), &rect);
 
     // Set properties
@@ -3252,7 +3317,7 @@ Annot* InkAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *d
     parentDoc = doc;
 
     // Set pdfAnnot
-    PDFRectangle rect = toPdfRectangle(boundary);
+    PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
     pdfAnnot = new AnnotInk(destPage->getDoc(), &rect);
 
     // Set properties
@@ -3377,7 +3442,7 @@ QList< QLinkedList<QPointF> > InkAnnotation::inkPaths() const
         return QList< QLinkedList<QPointF> >();
 
     double MTX[6];
-    d->fillMTX(MTX);
+    d->fillTransformationMTX(MTX);
 
     const int pathsNumber = inkann->getInkListLength();
     QList< QLinkedList<QPointF> > inkPaths;
@@ -3798,7 +3863,7 @@ Annot* CaretAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData 
     parentDoc = doc;
 
     // Set pdfAnnot
-    PDFRectangle rect = toPdfRectangle(boundary);
+    PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
     pdfAnnot = new AnnotCaret(destPage->getDoc(), &rect);
 
     // Set properties
