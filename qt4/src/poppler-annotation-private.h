@@ -1,7 +1,7 @@
 /* poppler-annotation-private.h: qt interface to poppler
  * Copyright (C) 2007, Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
- * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -87,9 +87,10 @@ class AnnotationPrivate : public QSharedData
 
         /* The following helpers only work if pdfPage is set */
         void flushBaseAnnotationProperties();
-        void fillMTX(double MTX[6]) const;
+        void fillNormalizationMTX(double MTX[6], int pageRotation) const;
+        void fillTransformationMTX(double MTX[6]) const;
         QRectF fromPdfRectangle(const PDFRectangle &r) const;
-        PDFRectangle toPdfRectangle(const QRectF &r) const;
+        PDFRectangle boundaryToPdfRectangle(const QRectF &r, int flags) const;
         AnnotPath * toAnnotPath(const QLinkedList<QPointF> &l) const;
 
         /* Scan page for annotations, parentId=0 searches for root annotations */

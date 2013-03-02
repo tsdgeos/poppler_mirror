@@ -1520,6 +1520,14 @@ double Annot::getYMin() {
   return rect->y1;
 }
 
+double Annot::getXMax() {
+  return rect->x2;
+}
+
+double Annot::getYMax() {
+  return rect->y2;
+}
+
 void Annot::readArrayNum(Object *pdfArray, int key, double *value) {
   Object valueObject;
 

@@ -553,6 +553,8 @@ public:
 
   double getXMin();
   double getYMin();
+  double getXMax();
+  double getYMax();
 
   double getFontSize() { return fontSize; }
 
