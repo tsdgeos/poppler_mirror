@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Dan Sheridan <dan.sheridan@postman.org.uk>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010, 2012, 2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -70,11 +70,11 @@
 #define defPermFlags 0xfffc
 
 #if MULTITHREADED
-#  define lockXRef()   Poppler::Lock lock(&mutex)
-#  define condLockXRef(X)  Poppler::Lock condlock(&mutex, (X))
+#  define xrefLocker()   MutexLocker locker(&mutex)
+#  define xrefCondLocker(X)  MutexLocker locker(&mutex, (X))
 #else
-#  define lockXRef()
-#  define condLockXRef(X)
+#  define xrefLocker()
+#  define xrefCondLocker(X)
 #endif
 
 //------------------------------------------------------------------------
@@ -1134,7 +1134,7 @@ Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
   Parser *parser;
   Object obj1, obj2, obj3;
 
-  condLockXRef((recursion == 0) ? Poppler::DoLock : Poppler::DoNotLock);
+  xrefCondLocker((recursion == 0) ? DoLockMutex : DoNotLockMutex);
   // check for bogus ref - this can happen in corrupted PDF files
   if (num < 0 || num >= size) {
     goto err;
@@ -1312,7 +1312,7 @@ int XRef::getNumEntry(Goffset offset)
 }
 
 void XRef::add(int num, int gen, Goffset offs, GBool used) {
-  lockXRef();
+  xrefLocker();
   if (num >= size) {
     if (num >= capacity) {
       entries = (XRefEntry *)greallocn(entries, num + 1, sizeof(XRefEntry));
@@ -1341,7 +1341,7 @@ void XRef::add(int num, int gen, Goffset offs, GBool used) {
 }
 
 void XRef::setModifiedObject (Object* o, Ref r) {
-  lockXRef();
+  xrefLocker();
   if (r.num < 0 || r.num >= size) {
     error(errInternal, -1,"XRef::setModifiedObject on unknown ref: {0:d}, {1:d}\n", r.num, r.gen);
     return;
@@ -1383,7 +1383,7 @@ Ref XRef::addIndirectObject (Object* o) {
 }
 
 void XRef::removeIndirectObject(Ref r) {
-  lockXRef();
+  xrefLocker();
   if (r.num < 0 || r.num >= size) {
     error(errInternal, -1,"XRef::removeIndirectObject on unknown ref: {0:d}, {1:d}\n", r.num, r.gen);
     return;

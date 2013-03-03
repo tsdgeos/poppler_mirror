@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -41,9 +41,9 @@
 #include "Dict.h"
 
 #if MULTITHREADED
-#  define lockDict()   Poppler::Lock lock(&mutex)
+#  define dictLocker()   MutexLocker locker(&mutex)
 #else
-#  define lockDict()
+#  define dictLocker()
 #endif
 //------------------------------------------------------------------------
 // Dict
@@ -102,7 +102,7 @@ Dict::Dict(Dict* dictA) {
 }
 
 Dict *Dict::copy(XRef *xrefA) {
-  lockDict();
+  dictLocker();
   Dict *dictA = new Dict(this);
   dictA->xref = xrefA;
   for (int i=0; i<length; i++) {
@@ -132,19 +132,19 @@ Dict::~Dict() {
 }
 
 int Dict::incRef() {
-  lockDict();
+  dictLocker();
   ++ref;
   return ref;
 }
 
 int Dict::decRef() {
-  lockDict();
+  dictLocker();
   --ref;
   return ref;
 }
 
 void Dict::add(char *key, Object *val) {
-  lockDict();
+  dictLocker();
   if (sorted) {
     // We use add on very few occasions so
     // virtually this will never be hit
@@ -167,7 +167,7 @@ void Dict::add(char *key, Object *val) {
 inline DictEntry *Dict::find(const char *key) {
   if (!sorted && length >= SORT_LENGTH_LOWER_LIMIT)
   {
-      lockDict();
+      dictLocker();
       sorted = gTrue;
       std::sort(entries, entries+length, cmpDictEntries);
   }
@@ -193,7 +193,7 @@ GBool Dict::hasKey(const char *key) {
 }
 
 void Dict::remove(const char *key) {
-  lockDict();
+  dictLocker();
   if (sorted) {
     const int pos = binarySearch(key, entries, length);
     if (pos != -1) {
@@ -235,7 +235,7 @@ void Dict::set(const char *key, Object *val) {
   }
   e = find (key);
   if (e) {
-    lockDict();
+    dictLocker();
     e->val.free();
     e->val = *val;
   } else {

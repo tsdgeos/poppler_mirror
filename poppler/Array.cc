@@ -16,6 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -35,9 +36,9 @@
 #include "Array.h"
 
 #if MULTITHREADED
-#  define lockArray()   Poppler::Lock lock(&mutex)
+#  define arrayLocker()   MutexLocker locker(&mutex)
 #else
-#  define lockArray()
+#  define arrayLocker()
 #endif
 //------------------------------------------------------------------------
 // Array
@@ -65,7 +66,7 @@ Array::~Array() {
 }
 
 Object *Array::copy(XRef *xrefA, Object *obj) {
-  lockArray();
+  arrayLocker();
   obj->initArray(xrefA);
   for (int i = 0; i < length; ++i) {
     Object obj1;
@@ -75,19 +76,19 @@ Object *Array::copy(XRef *xrefA, Object *obj) {
 }
 
 int Array::incRef() {
-  lockArray();
+  arrayLocker();
   ++ref;
   return ref;
 }
 
 int Array::decRef() {
-  lockArray();
+  arrayLocker();
   --ref;
   return ref;
 }
 
 void Array::add(Object *elem) {
-  lockArray();
+  arrayLocker();
   if (length == size) {
     if (length == 0) {
       size = 8;
@@ -101,7 +102,7 @@ void Array::add(Object *elem) {
 }
 
 void Array::remove(int i) {
-  lockArray();
+  arrayLocker();
   if (i < 0 || i >= length) {
 #ifdef DEBUG_MEM
     abort();

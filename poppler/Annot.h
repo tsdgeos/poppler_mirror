@@ -21,7 +21,7 @@
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
-// Copyright (C) 2009-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Tobias Koenig <tokoe@kdab.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -572,7 +572,7 @@ public:
   // new_color. 
   void setColor(AnnotColor *new_color);
 
-  void setAppearanceState(const char *state, Poppler::LockMode lock = Poppler::DoLock);
+  void setAppearanceState(const char *state, MutexLockMode lock = DoLockMutex);
 
   // Delete appearance streams and reset appearance state
   void invalidateAppearance();
@@ -627,7 +627,7 @@ protected:
 
   // Updates the field key of the annotation dictionary
   // and sets M to the current time
-  void update(const char *key, Object *value, Poppler::LockMode lock = Poppler::DoLock);
+  void update(const char *key, Object *value, MutexLockMode lock = DoLockMutex);
 
   int refCnt;
 

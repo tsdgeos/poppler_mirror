@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
@@ -57,11 +57,11 @@
 #include "FileSpec.h"
 
 #if MULTITHREADED
-#  define lockCatalog()   Poppler::Lock lock(&mutex)
-#  define condLockCatalog(X)  Poppler::Lock condlock(&mutex, (X))
+#  define catalogLocker()   MutexLocker locker(&mutex)
+#  define catalogCondLocker(X)  MutexLocker locker(&mutex, (X))
 #else
-#  define lockCatalog()
-#  define condLockCatalog(X)
+#  define catalogLocker()
+#  define catalogCondLocker(X)
 #endif
 //------------------------------------------------------------------------
 // Catalog
@@ -191,7 +191,7 @@ GooString *Catalog::readMetadata() {
   Dict *dict;
   Object obj;
 
-  lockCatalog();
+  catalogLocker();
   if (metadata.isNone()) {
     Object catDict;
 
@@ -224,7 +224,7 @@ Page *Catalog::getPage(int i)
 {
   if (i < 1) return NULL;
 
-  lockCatalog();
+  catalogLocker();
   if (i > lastCachedPage) {
      GBool cached = cachePageTree(i);
      if ( cached == gFalse) {
@@ -234,11 +234,11 @@ Page *Catalog::getPage(int i)
   return pages[i-1];
 }
 
-Ref *Catalog::getPageRef(int i, Poppler::LockMode lock)
+Ref *Catalog::getPageRef(int i, MutexLockMode lock)
 {
   if (i < 1) return NULL;
 
-  condLockCatalog(lock);
+  catalogCondLocker(lock);
   if (i > lastCachedPage) {
      GBool cached = cachePageTree(i);
      if ( cached == gFalse) {
@@ -294,7 +294,7 @@ GBool Catalog::cachePageTree(int page)
       return gFalse;
     }
 
-    pagesSize = getNumPages(Poppler::DoNotLock);
+    pagesSize = getNumPages(DoNotLockMutex);
     pages = (Page **)gmallocn(pagesSize, sizeof(Page *));
     pageRefs = (Ref *)gmallocn(pagesSize, sizeof(Ref));
     for (int i = 0; i < pagesSize; ++i) {
@@ -421,7 +421,7 @@ GBool Catalog::cachePageTree(int page)
   return gFalse;
 }
 
-int Catalog::findPage(int num, int gen, Poppler::LockMode lock) {
+int Catalog::findPage(int num, int gen, MutexLockMode lock) {
   int i;
 
   for (i = 0; i < getNumPages(lock); ++i) {
@@ -446,7 +446,7 @@ LinkDest *Catalog::findDest(GooString *name) {
       obj1.free();
   }
   if (!found) {
-    lockCatalog();
+    catalogLocker();
     if (getDestNameTree()->lookup(name, &obj1))
       found = gTrue;
     else
@@ -481,7 +481,7 @@ FileSpec *Catalog::embeddedFile(int i)
 {
     Object efDict;
     Object obj;
-    lockCatalog();
+    catalogLocker();
     obj = getEmbeddedFileNameTree()->getValue(i);
     FileSpec *embeddedFile = 0;
     if (obj.isRef()) {
@@ -502,7 +502,7 @@ GooString *Catalog::getJS(int i)
   Object obj;
   // getJSNameTree()->getValue(i) returns a shallow copy of the object so we
   // do not need to free it
-  lockCatalog();
+  catalogLocker();
   getJSNameTree()->getValue(i).fetch(xref, &obj);
 
   if (!obj.isDict()) {
@@ -538,7 +538,7 @@ GooString *Catalog::getJS(int i)
 
 Catalog::PageMode Catalog::getPageMode() {
 
-  lockCatalog();
+  catalogLocker();
   if (pageMode == pageModeNull) {
 
     Object catDict, obj;
@@ -574,7 +574,7 @@ Catalog::PageMode Catalog::getPageMode() {
 
 Catalog::PageLayout Catalog::getPageLayout() {
 
-  lockCatalog();
+  catalogLocker();
   if (pageLayout == pageLayoutNull) {
 
     Object catDict, obj;
@@ -772,9 +772,9 @@ GBool Catalog::indexToLabel(int index, GooString *label)
   }
 }
 
-int Catalog::getNumPages(Poppler::LockMode lock)
+int Catalog::getNumPages(MutexLockMode lock)
 {
-  condLockCatalog((numPages == -1 && lock == Poppler::DoLock) ? lock : Poppler::DoNotLock);
+  catalogCondLocker((numPages == -1 && lock == DoLockMutex) ? DoLockMutex : DoNotLockMutex);
   if (numPages == -1)
   {
     Object catDict, pagesDict, obj;
@@ -816,7 +816,7 @@ int Catalog::getNumPages(Poppler::LockMode lock)
 
 PageLabelInfo *Catalog::getPageLabelInfo()
 {
-  lockCatalog();
+  catalogLocker();
   if (!pageLabelInfo) {
     Object catDict;
     Object obj;
@@ -829,7 +829,7 @@ PageLabelInfo *Catalog::getPageLabelInfo()
     }
 
     if (catDict.dictLookup("PageLabels", &obj)->isDict()) {
-      pageLabelInfo = new PageLabelInfo(&obj, getNumPages(Poppler::DoLock));
+      pageLabelInfo = new PageLabelInfo(&obj, getNumPages(DoNotLockMutex));
     }
     obj.free();
     catDict.free();
@@ -840,7 +840,7 @@ PageLabelInfo *Catalog::getPageLabelInfo()
 
 Object *Catalog::getStructTreeRoot()
 {
-  lockCatalog();
+  catalogLocker();
   if (structTreeRoot.isNone())
   {
      Object catDict;
@@ -860,7 +860,7 @@ Object *Catalog::getStructTreeRoot()
 
 Object *Catalog::getOutline()
 {
-  lockCatalog();
+  catalogLocker();
   if (outline.isNone())
   {
      Object catDict;
@@ -880,7 +880,7 @@ Object *Catalog::getOutline()
 
 Object *Catalog::getDests()
 {
-  lockCatalog();
+  catalogLocker();
   if (dests.isNone())
   {
      Object catDict;
@@ -916,9 +916,9 @@ Catalog::FormType Catalog::getFormType()
   return res;
 }
 
-Form *Catalog::getForm(Poppler::LockMode lock)
+Form *Catalog::getForm(MutexLockMode lock)
 {
-  condLockCatalog(lock);
+  catalogCondLocker(lock);
   if (!form) {
     if (acroForm.isDict()) {
       form = new Form(doc, &acroForm);
@@ -932,7 +932,7 @@ Form *Catalog::getForm(Poppler::LockMode lock)
 
 ViewerPreferences *Catalog::getViewerPreferences()
 {
-  lockCatalog();
+  catalogLocker();
   if (!viewerPrefs) {
     if (viewerPreferences.isDict()) {
       viewerPrefs = new ViewerPreferences(viewerPreferences.getDict());

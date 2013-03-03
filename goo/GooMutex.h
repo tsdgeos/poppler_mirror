@@ -16,6 +16,8 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -60,20 +62,19 @@ typedef pthread_mutex_t GooMutex;
 
 #endif
 
-namespace Poppler {
-  enum LockMode {
-    DoNotLock,  // for conditional locks: do not lock 
-    DoLock      // for conditional locks: do lock 
-  };
+enum MutexLockMode {
+  DoNotLockMutex,  // for conditional locks: do not lock 
+  DoLockMutex      // for conditional locks: do lock 
+};
 
-  class Lock {
-  public:
-    Lock(GooMutex *mutexA) : mutex(mutexA) { mode = DoLock; gLockMutex(mutex); }
-    Lock(GooMutex *mutexA, LockMode modeA) : mutex(mutexA) { mode = modeA; if (mode == DoLock) gLockMutex(mutex); }
-    ~Lock() { if (mode == DoLock) gUnlockMutex(mutex); }
-  private:
-    GooMutex *mutex;
-    LockMode mode;
-  };
-}
+class MutexLocker {
+public:
+  MutexLocker(GooMutex *mutexA, MutexLockMode modeA = DoLockMutex) : mutex(mutexA), mode(modeA) { if (mode == DoLockMutex) gLockMutex(mutex); }
+  ~MutexLocker() { if (mode == DoLockMutex) gUnlockMutex(mutex); }
+
+private:
+  GooMutex *mutex;
+  const MutexLockMode mode;
+};
+
 #endif

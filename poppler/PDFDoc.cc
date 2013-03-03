@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2007-2009, 2011, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2009, 2011-2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -77,9 +77,9 @@
 #include "Hints.h"
 
 #if MULTITHREADED
-#  define lockPDFDoc()   Poppler::Lock lock(&mutex)
+#  define pdfdocLocker()   MutexLocker locker(&mutex)
 #else
-#  define lockPDFDoc()
+#  define pdfdocLocker()
 #endif
 
 //------------------------------------------------------------------------
@@ -256,7 +256,7 @@ PDFDoc::PDFDoc(BaseStream *strA, GooString *ownerPassword,
 }
 
 GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
-  lockPDFDoc();
+  pdfdocLocker();
   str->setPos(0, -1);
   if (str->getPos() < 0)
   {
@@ -1588,7 +1588,7 @@ Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, G
 Outline *PDFDoc::getOutline()
 {
   if (!outline) {
-    lockPDFDoc();
+    pdfdocLocker();
     // read outline
     outline = new Outline(catalog->getOutline(), xref);
   }
@@ -1747,7 +1747,7 @@ Page *PDFDoc::getPage(int page)
   if ((page < 1) || page > getNumPages()) return NULL;
 
   if (isLinearized()) {
-    lockPDFDoc();
+    pdfdocLocker();
     if (!pageCache) {
       pageCache = (Page **) gmallocn(getNumPages(), sizeof(Page *));
       for (int i = 0; i < getNumPages(); i++) {

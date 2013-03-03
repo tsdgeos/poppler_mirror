@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005-2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006-2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2006 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
@@ -59,9 +59,9 @@
 #include "Form.h"
 
 #if MULTITHREADED
-#  define lockPage()   Poppler::Lock lock(&mutex)
+#  define pageLocker()   MutexLocker locker(&mutex)
 #else
-#  define lockPage()
+#  define pageLocker()
 #endif
 //------------------------------------------------------------------------
 // PDFRectangle
@@ -362,7 +362,7 @@ Dict *Page::getResourceDict() {
 }
 
 Dict *Page::getResourceDictCopy(XRef *xrefA) { 
-  lockPage();
+  pageLocker();
   return attrs->getResourceDict()->copy(xrefA);
 }
 
@@ -411,7 +411,7 @@ void Page::addAnnot(Annot *annot) {
   // Make sure we have annots before adding the new one
   // even if it's an empty list so that we can safely
   // call annots->appendAnnot(annot)
-  lockPage();
+  pageLocker();
   getAnnots();
 
   if (annotsObj.isNull()) {
@@ -447,7 +447,7 @@ void Page::removeAnnot(Annot *annot) {
   Ref annotRef = annot->getRef();
   Object annArray;
 
-  lockPage();
+  pageLocker();
   getAnnots(&annArray);
   if (annArray.isArray()) {
     int idx = -1;
@@ -563,7 +563,7 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI,
 			   annotDisplayDecideCbk, annotDisplayDecideCbkData)) {
     return;
   }
-  lockPage();
+  pageLocker();
   XRef *localXRef = (copyXRef) ? xref->copy() : xref;
   if (copyXRef) {
     replaceXRef(localXRef);
@@ -637,7 +637,7 @@ GBool Page::loadThumb(unsigned char **data_out,
   GfxImageColorMap *colorMap;
 
   /* Get stream dict */
-  lockPage();
+  pageLocker();
   thumb.fetch(xref, &fetched_thumb);
   if (!fetched_thumb.isStream()) {
     fetched_thumb.free();

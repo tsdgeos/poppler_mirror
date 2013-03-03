@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007, 2009-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2009-2011, 2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -107,13 +107,13 @@ public:
   GBool isOk() { return ok; }
 
   // Get number of pages.
-  int getNumPages(Poppler::LockMode lock = Poppler::DoLock);
+  int getNumPages(MutexLockMode lock = DoLockMutex);
 
   // Get a page.
   Page *getPage(int i);
 
   // Get the reference for a page object.
-  Ref *getPageRef(int i, Poppler::LockMode lock = Poppler::DoLock);
+  Ref *getPageRef(int i, MutexLockMode lock = DoLockMutex);
 
   // Return base URI, or NULL if none.
   GooString *getBaseURI() { return baseURI; }
@@ -127,7 +127,7 @@ public:
 
   // Find a page, given its object ID.  Returns page number, or 0 if
   // not found.
-  int findPage(int num, int gen, Poppler::LockMode lock = Poppler::DoLock);
+  int findPage(int num, int gen, MutexLockMode lock = DoLockMutex);
 
   // Find a named destination.  Returns the link destination, or
   // NULL if <name> is not a destination.
@@ -165,7 +165,7 @@ public:
   };
 
   FormType getFormType();
-  Form* getForm(Poppler::LockMode lock = Poppler::DoLock);
+  Form* getForm(MutexLockMode lock = DoLockMutex);
 
   ViewerPreferences *getViewerPreferences();
 

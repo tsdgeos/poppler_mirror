@@ -88,9 +88,9 @@ static GBool setDJSYSFLAGS = gFalse;
 #endif
 
 #if MULTITHREADED
-#  define lockStream()   Poppler::Lock lock(&mutex)
+#  define streamLocker()   MutexLocker locker(&mutex)
 #else
-#  define lockStream()
+#  define streamLocker()
 #endif
 //------------------------------------------------------------------------
 // Stream (base class)
@@ -110,13 +110,13 @@ Stream::~Stream() {
 }
 
 int Stream::incRef() {
-  lockStream();
+  streamLocker();
   ++ref;
   return ref;
 }
 
 int Stream::decRef() {
-  lockStream();
+  streamLocker();
   --ref;
   return ref;
 }
