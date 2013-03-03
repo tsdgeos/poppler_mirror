@@ -73,7 +73,7 @@ GooList *FontInfoScanner::scan(int nPages) {
     page = doc->getPage(pg);
     if (!page) continue;
 
-    if ((resDict = page->getResourceDict(xrefA))) {
+    if ((resDict = page->getResourceDictCopy(xrefA))) {
       scanFonts(xrefA, resDict, result);
       delete resDict;
     }

@@ -60,4 +60,20 @@ typedef pthread_mutex_t GooMutex;
 
 #endif
 
+namespace Poppler {
+  enum LockMode {
+    DoNotLock,  // for conditional locks: do not lock 
+    DoLock      // for conditional locks: do lock 
+  };
+
+  class Lock {
+  public:
+    Lock(GooMutex *mutexA) : mutex(mutexA) { mode = DoLock; gLockMutex(mutex); }
+    Lock(GooMutex *mutexA, LockMode modeA) : mutex(mutexA) { mode = modeA; if (mode == DoLock) gLockMutex(mutex); }
+    ~Lock() { if (mode == DoLock) gUnlockMutex(mutex); }
+  private:
+    GooMutex *mutex;
+    LockMode mode;
+  };
+}
 #endif

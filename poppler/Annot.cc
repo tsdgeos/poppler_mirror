@@ -68,11 +68,11 @@
 #include <string.h>
 
 #if MULTITHREADED
-#  define lockAnnot   gLockMutex(&mutex)
-#  define unlockAnnot gUnlockMutex(&mutex)
+#  define lockAnnot()   Poppler::Lock lock(&mutex)
+#  define condLockAnnot(X)  Poppler::Lock condlock(&mutex, (X))
 #else
-#  define lockAnnot
-#  define unlockAnnot
+#  define lockAnnot()
+#  define condLockAnnot(X)
 #endif
 
 #define fieldFlagReadOnly           0x00000001
@@ -1213,7 +1213,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   if (dict->lookupNF("P", &obj1)->isRef()) {
     Ref ref = obj1.getRef();
 
-    page = doc->getCatalog()->findPage (ref.num, ref.gen, gFalse);
+    page = doc->getCatalog()->findPage (ref.num, ref.gen, Poppler::DoNotLock);
   } else {
     page = 0;
   }
@@ -1350,8 +1350,8 @@ GBool Annot::inRect(double x, double y) const {
   return rect->contains(x, y);
 }
 
-void Annot::update(const char *key, Object *value, GBool lock) {
-  if (lock) lockAnnot;
+void Annot::update(const char *key, Object *value, Poppler::LockMode lock) {
+  condLockAnnot(lock);
   /* Set M to current time, unless we are updating M itself */
   if (strcmp(key, "M") != 0) {
     delete modified;
@@ -1365,11 +1365,10 @@ void Annot::update(const char *key, Object *value, GBool lock) {
   annotObj.dictSet(const_cast<char*>(key), value);
   
   xref->setModifiedObject(&annotObj, ref);
-  if (lock) unlockAnnot;
 }
 
 void Annot::setContents(GooString *new_content) {
-  lockAnnot;
+  lockAnnot();
   delete contents;
 
   if (new_content) {
@@ -1385,12 +1384,11 @@ void Annot::setContents(GooString *new_content) {
   
   Object obj1;
   obj1.initString(contents->copy());
-  update ("Contents", &obj1, gFalse);
-  unlockAnnot;
+  update ("Contents", &obj1, Poppler::DoNotLock);
 }
 
 void Annot::setName(GooString *new_name) {
-  lockAnnot;
+  lockAnnot();
   delete name;
 
   if (new_name) {
@@ -1401,12 +1399,11 @@ void Annot::setName(GooString *new_name) {
 
   Object obj1;
   obj1.initString(name->copy());
-  update ("NM", &obj1, gFalse);
-  unlockAnnot;
+  update ("NM", &obj1, Poppler::DoNotLock);
 }
 
 void Annot::setModified(GooString *new_modified) {
-  lockAnnot;
+  lockAnnot();
   delete modified;
 
   if (new_modified)
@@ -1416,51 +1413,47 @@ void Annot::setModified(GooString *new_modified) {
 
   Object obj1;
   obj1.initString(modified->copy());
-  update ("M", &obj1, gFalse);
-  unlockAnnot;
+  update ("M", &obj1, Poppler::DoNotLock);
 }
 
 void Annot::setFlags(Guint new_flags) {
-  lockAnnot;
+  lockAnnot();
   Object obj1;
   flags = new_flags;
   obj1.initInt(flags);
-  update ("F", &obj1, gFalse);
-  unlockAnnot;
+  update ("F", &obj1, Poppler::DoNotLock);
 }
 
 void Annot::setBorder(AnnotBorderArray *new_border) {
-  lockAnnot;
+  lockAnnot();
   delete border;
 
   if (new_border) {
     Object obj1;
     new_border->writeToObject(xref, &obj1);
-    update ("Border", &obj1, gFalse);
+    update ("Border", &obj1, Poppler::DoNotLock);
     border = new_border;
   } else {
     border = NULL;
   }
-  unlockAnnot;
 }
 
 void Annot::setColor(AnnotColor *new_color) {
-  lockAnnot;
+  lockAnnot();
   delete color;
 
   if (new_color) {
     Object obj1;
     new_color->writeToObject(xref, &obj1);
-    update ("C", &obj1, gFalse);
+    update ("C", &obj1, Poppler::DoNotLock);
     color = new_color;
   } else {
     color = NULL;
   }
-  unlockAnnot;
 }
 
 void Annot::setPage(int pageIndex, GBool updateP) {
-  lockAnnot;
+  lockAnnot();
   Page *pageobj = doc->getPage(pageIndex);
   Object obj1;
 
@@ -1474,16 +1467,15 @@ void Annot::setPage(int pageIndex, GBool updateP) {
   }
 
   if (updateP) {
-    update("P", &obj1, gFalse);
+    update("P", &obj1, Poppler::DoNotLock);
   }
-  unlockAnnot;
 }
 
-void Annot::setAppearanceState(const char *state, GBool lock) {
+void Annot::setAppearanceState(const char *state, Poppler::LockMode lock) {
+  condLockAnnot(lock);
   if (!state)
     return;
 
-  if (lock) lockAnnot;
   delete appearState;
   appearState = new GooString(state);
 
@@ -1492,7 +1484,7 @@ void Annot::setAppearanceState(const char *state, GBool lock) {
 
   Object obj1;
   obj1.initName(state);
-  update ("AS", &obj1, gFalse);
+  update ("AS", &obj1, Poppler::DoNotLock);
 
   // The appearance state determines the current appearance stream
   appearance.free();
@@ -1501,24 +1493,22 @@ void Annot::setAppearanceState(const char *state, GBool lock) {
   } else {
     appearance.initNull();
   }
-  if (lock) unlockAnnot;
 }
 
 void Annot::invalidateAppearance() {
-  lockAnnot;
+  lockAnnot();
   if (appearStreams) { // Remove existing appearance streams
     appearStreams->removeAllStreams();
   }
   delete appearStreams;
   appearStreams = NULL;
 
-  setAppearanceState("Off", gFalse); // Default appearance state
+  setAppearanceState("Off", Poppler::DoNotLock); // Default appearance state
 
   Object obj1;
   obj1.initNull();
-  update ("AP", &obj1, gFalse); // Remove AP
-  update ("AS", &obj1, gFalse); // Remove AS
-  unlockAnnot;
+  update ("AP", &obj1, Poppler::DoNotLock); // Remove AP
+  update ("AS", &obj1, Poppler::DoNotLock); // Remove AS
 }
 
 double Annot::getXMin() {
@@ -1548,19 +1538,16 @@ void Annot::removeReferencedObjects() {
 }
 
 void Annot::incRefCnt() {
-  lockAnnot;
+  lockAnnot();
   refCnt++;
-  unlockAnnot;
 }
 
 void Annot::decRefCnt() {
-  lockAnnot;
+  lockAnnot();
   if (--refCnt == 0) {
-    unlockAnnot;
     delete this;
     return;
   }
-  unlockAnnot;
 }
 
 Annot::~Annot() {
@@ -1787,7 +1774,7 @@ GBool Annot::isVisible(GBool printing) {
 void Annot::draw(Gfx *gfx, GBool printing) {
   Object obj;
 
-  lockAnnot;
+  lockAnnot();
   if (!isVisible (printing))
     return;
 
@@ -1796,7 +1783,6 @@ void Annot::draw(Gfx *gfx, GBool printing) {
   gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
       rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
-  unlockAnnot;
 }
 
 //------------------------------------------------------------------------
@@ -2406,7 +2392,7 @@ void AnnotText::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  lockAnnot;
+  lockAnnot();
   if (appearance.isNull()) {
     ca = opacity;
 
@@ -2468,7 +2454,6 @@ void AnnotText::draw(Gfx *gfx, GBool printing) {
                    rect->x1, rect->y1, rect->x2, rect->y2);
   }
   obj.free();
-  unlockAnnot;
 }
 
 //------------------------------------------------------------------------
@@ -2557,13 +2542,12 @@ void AnnotLink::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  lockAnnot;
+  lockAnnot();
   // draw the appearance stream
   appearance.fetch(gfx->getXRef(), &obj);
   gfx->drawAnnot(&obj, border, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
-  unlockAnnot;
 }
 
 //------------------------------------------------------------------------
@@ -2988,7 +2972,7 @@ void AnnotFreeText::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  lockAnnot;
+  lockAnnot();
   if (appearance.isNull()) {
     generateFreeTextAppearance();
   }
@@ -2998,7 +2982,6 @@ void AnnotFreeText::draw(Gfx *gfx, GBool printing) {
   gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
                  rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
-  unlockAnnot;
 }
 
 // Before retrieving the res dict, regenerate the appearance stream if needed,
@@ -3462,7 +3445,7 @@ void AnnotLine::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  lockAnnot;
+  lockAnnot();
   if (appearance.isNull()) {
     generateLineAppearance();
   }
@@ -3478,7 +3461,6 @@ void AnnotLine::draw(Gfx *gfx, GBool printing) {
                    rect->x1, rect->y1, rect->x2, rect->y2);
   }
   obj.free();
-  unlockAnnot;
 }
 
 // Before retrieving the res dict, regenerate the appearance stream if needed,
@@ -3629,7 +3611,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  lockAnnot;
+  lockAnnot();
   if (appearance.isNull() || type == typeHighlight) {
     GBool blendMultiply = gTrue;
     ca = opacity;
@@ -3793,7 +3775,6 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
                    rect->x1, rect->y1, rect->x2, rect->y2);
   }
   obj.free();
-  unlockAnnot;
 }
 
 //------------------------------------------------------------------------
@@ -3830,7 +3811,7 @@ AnnotWidget::~AnnotWidget() {
 void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
 
-  form = doc->getCatalog()->getForm(gFalse);
+  form = doc->getCatalog()->getForm(Poppler::DoNotLock);
 
   if(dict->lookup("H", &obj1)->isName()) {
     const char *modeName = obj1.getName();
@@ -5016,7 +4997,7 @@ void AnnotWidget::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  lockAnnot;
+  lockAnnot();
   addDingbatsResource = gFalse;
 
   // Only construct the appearance stream when
@@ -5060,7 +5041,6 @@ void AnnotWidget::draw(Gfx *gfx, GBool printing) {
     gfx->popResources();
   }
   obj.free();
-  unlockAnnot;
 }
 
 
@@ -5130,7 +5110,7 @@ void AnnotMovie::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  lockAnnot;
+  lockAnnot();
   if (appearance.isNull() && movie->getShowPoster()) {
     int width, height;
     Object poster;
@@ -5214,7 +5194,6 @@ void AnnotMovie::draw(Gfx *gfx, GBool printing) {
   gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
-  unlockAnnot;
 }
 
 //------------------------------------------------------------------------
@@ -5440,7 +5419,7 @@ void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  lockAnnot;
+  lockAnnot();
   if (appearance.isNull()) {
     ca = opacity;
 
@@ -5558,7 +5537,6 @@ void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
   gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
-  unlockAnnot;
 }
 
 //------------------------------------------------------------------------
@@ -5763,7 +5741,7 @@ void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  lockAnnot;
+  lockAnnot();
   if (appearance.isNull()) {
     appearBBox = new AnnotAppearanceBBox(rect);
     ca = opacity;
@@ -5850,7 +5828,6 @@ void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
                    rect->x1, rect->y1, rect->x2, rect->y2);
   }
   obj.free();
-  unlockAnnot;
 }
 
 //------------------------------------------------------------------------
@@ -6002,7 +5979,7 @@ void AnnotInk::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  lockAnnot;
+  lockAnnot();
   if (appearance.isNull()) {
     appearBBox = new AnnotAppearanceBBox(rect);
     ca = opacity;
@@ -6064,7 +6041,6 @@ void AnnotInk::draw(Gfx *gfx, GBool printing) {
                    rect->x1, rect->y1, rect->x2, rect->y2);
   }
   obj.free();
-  unlockAnnot;
 }
 
 //------------------------------------------------------------------------
@@ -6236,7 +6212,7 @@ void AnnotFileAttachment::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  lockAnnot;
+  lockAnnot();
   if (appearance.isNull()) {
     ca = opacity;
 
@@ -6281,7 +6257,6 @@ void AnnotFileAttachment::draw(Gfx *gfx, GBool printing) {
   gfx->drawAnnot(&obj, border, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
-  unlockAnnot;
 }
 
 //------------------------------------------------------------------------
@@ -6404,7 +6379,7 @@ void AnnotSound::draw(Gfx *gfx, GBool printing) {
   if (!isVisible (printing))
     return;
 
-  lockAnnot;
+  lockAnnot();
   if (appearance.isNull()) {
     ca = opacity;
 
@@ -6444,7 +6419,6 @@ void AnnotSound::draw(Gfx *gfx, GBool printing) {
   gfx->drawAnnot(&obj, border, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2);
   obj.free();
-  unlockAnnot;
 }
 
 //------------------------------------------------------------------------

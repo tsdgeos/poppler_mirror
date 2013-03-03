@@ -41,11 +41,9 @@
 #include "Dict.h"
 
 #if MULTITHREADED
-#  define lockDict   gLockMutex(&mutex)
-#  define unlockDict gUnlockMutex(&mutex)
+#  define lockDict()   Poppler::Lock lock(&mutex)
 #else
-#  define lockDict
-#  define unlockDict
+#  define lockDict()
 #endif
 //------------------------------------------------------------------------
 // Dict
@@ -104,7 +102,7 @@ Dict::Dict(Dict* dictA) {
 }
 
 Dict *Dict::copy(XRef *xrefA) {
-  lockDict;
+  lockDict();
   Dict *dictA = new Dict(this);
   dictA->xref = xrefA;
   for (int i=0; i<length; i++) {
@@ -117,7 +115,6 @@ Dict *Dict::copy(XRef *xrefA) {
        obj.free();
     }
   }
-  unlockDict;
   return dictA;
 }
 
@@ -135,21 +132,19 @@ Dict::~Dict() {
 }
 
 int Dict::incRef() {
-  lockDict;
+  lockDict();
   ++ref;
-  unlockDict;
   return ref;
 }
 
 int Dict::decRef() {
-  lockDict;
+  lockDict();
   --ref;
-  unlockDict;
   return ref;
 }
 
 void Dict::add(char *key, Object *val) {
-  lockDict;
+  lockDict();
   if (sorted) {
     // We use add on very few occasions so
     // virtually this will never be hit
@@ -167,16 +162,14 @@ void Dict::add(char *key, Object *val) {
   entries[length].key = key;
   entries[length].val = *val;
   ++length;
-  unlockDict;
 }
 
 inline DictEntry *Dict::find(const char *key) {
   if (!sorted && length >= SORT_LENGTH_LOWER_LIMIT)
   {
-      lockDict;
+      lockDict();
       sorted = gTrue;
       std::sort(entries, entries+length, cmpDictEntries);
-      unlockDict;
   }
 
   if (sorted) {
@@ -200,7 +193,7 @@ GBool Dict::hasKey(const char *key) {
 }
 
 void Dict::remove(const char *key) {
-  lockDict;
+  lockDict();
   if (sorted) {
     const int pos = binarySearch(key, entries, length);
     if (pos != -1) {
@@ -214,7 +207,6 @@ void Dict::remove(const char *key) {
     bool found = false;
     DictEntry tmp;
     if(length == 0) {
-      unlockDict;
       return;
     }
 
@@ -225,7 +217,6 @@ void Dict::remove(const char *key) {
       }
     }
     if(!found) {
-      unlockDict;
       return;
     }
     //replace the deleted entry with the last entry
@@ -234,7 +225,6 @@ void Dict::remove(const char *key) {
     if (i!=length) //don't copy the last entry if it is deleted 
       entries[i] = tmp;
   }
-  unlockDict;
 }
 
 void Dict::set(const char *key, Object *val) {
@@ -245,10 +235,9 @@ void Dict::set(const char *key, Object *val) {
   }
   e = find (key);
   if (e) {
-    lockDict;
+    lockDict();
     e->val.free();
     e->val = *val;
-    unlockDict;
   } else {
     add (copyString(key), val);
   }

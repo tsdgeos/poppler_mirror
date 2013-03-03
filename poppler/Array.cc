@@ -35,11 +35,9 @@
 #include "Array.h"
 
 #if MULTITHREADED
-#  define lockArray   gLockMutex(&mutex)
-#  define unlockArray gUnlockMutex(&mutex)
+#  define lockArray()   Poppler::Lock lock(&mutex)
 #else
-#  define lockArray
-#  define unlockArray
+#  define lockArray()
 #endif
 //------------------------------------------------------------------------
 // Array
@@ -67,32 +65,29 @@ Array::~Array() {
 }
 
 Object *Array::copy(XRef *xrefA, Object *obj) {
-  lockArray;
+  lockArray();
   obj->initArray(xrefA);
   for (int i = 0; i < length; ++i) {
     Object obj1;
     obj->arrayAdd(elems[i].copy(&obj1));
   }
-  unlockArray;
   return obj;
 }
 
 int Array::incRef() {
-  lockArray;
+  lockArray();
   ++ref;
-  unlockArray;
   return ref;
 }
 
 int Array::decRef() {
-  lockArray;
+  lockArray();
   --ref;
-  unlockArray;
   return ref;
 }
 
 void Array::add(Object *elem) {
-  lockArray;
+  lockArray();
   if (length == size) {
     if (length == 0) {
       size = 8;
@@ -103,22 +98,19 @@ void Array::add(Object *elem) {
   }
   elems[length] = *elem;
   ++length;
-  unlockArray;
 }
 
 void Array::remove(int i) {
-  lockArray;
+  lockArray();
   if (i < 0 || i >= length) {
 #ifdef DEBUG_MEM
     abort();
 #else
-    unlockArray;
     return;
 #endif
   }
   --length;
   memmove( elems + i, elems + i + 1, sizeof(elems[0]) * (length - i) );
-  unlockArray;
 }
 
 Object *Array::get(int i, Object *obj, int recursion) {

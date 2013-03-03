@@ -174,7 +174,8 @@ public:
   Ref getRef() { return pageRef; }
 
   // Get resource dictionary.
-  Dict *getResourceDict(XRef *xrefA = NULL);
+  Dict *getResourceDict();
+  Dict *getResourceDictCopy(XRef *xrefA);
 
   // Get annotations array.
   Object *getAnnots(Object *obj, XRef *xrefA = NULL) { return annotsObj.fetch((xrefA == NULL) ? xref : xrefA, obj); }

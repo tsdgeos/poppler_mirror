@@ -60,11 +60,9 @@
 #endif
 
 #if MULTITHREADED
-#  define lockFontEngine   gLockMutex(&mutex)
-#  define unlockFontEngine gUnlockMutex(&mutex)
+#  define lockFontEngine()   Poppler::Lock lock(&mutex)
 #else
-#  define lockFontEngine
-#  define unlockFontEngine
+#  define lockFontEngine()
 #endif
 
 //------------------------------------------------------------------------
@@ -789,7 +787,7 @@ CairoFontEngine::getFont(GfxFont *gfxFont, PDFDoc *doc, GBool printing, XRef *xr
   CairoFont *font;
   GfxFontType fontType;
   
-  lockFontEngine;
+  lockFontEngine();
   ref = *gfxFont->getID();
 
   for (i = 0; i < cairoFontCacheSize; ++i) {
@@ -799,7 +797,6 @@ CairoFontEngine::getFont(GfxFont *gfxFont, PDFDoc *doc, GBool printing, XRef *xr
 	fontCache[j] = fontCache[j-1];
       }
       fontCache[0] = font;
-      unlockFontEngine;
       return font;
     }
   }
@@ -818,6 +815,5 @@ CairoFontEngine::getFont(GfxFont *gfxFont, PDFDoc *doc, GBool printing, XRef *xr
     fontCache[j] = fontCache[j-1];
   }
   fontCache[0] = font;
-  unlockFontEngine;
   return font;
 }

@@ -77,11 +77,9 @@
 #include "Hints.h"
 
 #if MULTITHREADED
-#  define lockPDFDoc   gLockMutex(&mutex)
-#  define unlockPDFDoc gUnlockMutex(&mutex)
+#  define lockPDFDoc()   Poppler::Lock lock(&mutex)
 #else
-#  define lockPDFDoc
-#  define unlockPDFDoc
+#  define lockPDFDoc()
 #endif
 
 //------------------------------------------------------------------------
@@ -258,12 +256,11 @@ PDFDoc::PDFDoc(BaseStream *strA, GooString *ownerPassword,
 }
 
 GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
-  lockPDFDoc;
+  lockPDFDoc();
   str->setPos(0, -1);
   if (str->getPos() < 0)
   {
     error(errSyntaxError, -1, "Document base stream is not seekable");
-    unlockPDFDoc;
     return gFalse;
   }
 
@@ -283,14 +280,12 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
   if (!xref->isOk()) {
     error(errSyntaxError, -1, "Couldn't read xref table");
     errCode = xref->getErrorCode();
-    unlockPDFDoc;
     return gFalse;
   }
 
   // check for encryption
   if (!checkEncryption(ownerPassword, userPassword)) {
     errCode = errEncrypted;
-    unlockPDFDoc;
     return gFalse;
   }
 
@@ -309,13 +304,11 @@ GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
     if (catalog && !catalog->isOk()) {
       error(errSyntaxError, -1, "Couldn't read page catalog");
       errCode = errBadCatalog;
-      unlockPDFDoc;
       return gFalse;
     }
   }
 
   // done
-  unlockPDFDoc;
   return gTrue;
 }
 
@@ -1595,10 +1588,9 @@ Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, G
 Outline *PDFDoc::getOutline()
 {
   if (!outline) {
-    lockPDFDoc;
+    lockPDFDoc();
     // read outline
     outline = new Outline(catalog->getOutline(), xref);
-    unlockPDFDoc;
   }
 
   return outline;
@@ -1755,18 +1747,15 @@ Page *PDFDoc::getPage(int page)
   if ((page < 1) || page > getNumPages()) return NULL;
 
   if (isLinearized()) {
-    lockPDFDoc;
+    lockPDFDoc();
     if (!pageCache) {
       pageCache = (Page **) gmallocn(getNumPages(), sizeof(Page *));
       for (int i = 0; i < getNumPages(); i++) {
         pageCache[i] = NULL;
       }
     }
-    unlockPDFDoc;
     if (!pageCache[page-1]) {
-      lockPDFDoc;
       pageCache[page-1] = parsePage(page);
-      unlockPDFDoc;
     }
     if (pageCache[page-1]) {
        return pageCache[page-1];

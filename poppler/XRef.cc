@@ -70,11 +70,11 @@
 #define defPermFlags 0xfffc
 
 #if MULTITHREADED
-#  define lockXRef   gLockMutex(&mutex)
-#  define unlockXRef gUnlockMutex(&mutex)
+#  define lockXRef()   Poppler::Lock lock(&mutex)
+#  define condLockXRef(X)  Poppler::Lock condlock(&mutex, (X))
 #else
-#  define lockXRef
-#  define unlockXRef
+#  define lockXRef()
+#  define condLockXRef(X)
 #endif
 
 //------------------------------------------------------------------------
@@ -1134,7 +1134,7 @@ Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
   Parser *parser;
   Object obj1, obj2, obj3;
 
-  if (recursion == 0) lockXRef;
+  condLockXRef((recursion == 0) ? Poppler::DoLock : Poppler::DoNotLock);
   // check for bogus ref - this can happen in corrupted PDF files
   if (num < 0 || num >= size) {
     goto err;
@@ -1143,7 +1143,6 @@ Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
   e = getEntry(num);
   if(!e->obj.isNull ()) { //check for updated object
     obj = e->obj.copy(obj);
-    if (recursion == 0) unlockXRef;
     return obj;
   }
 
@@ -1245,20 +1244,18 @@ Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
     goto err;
   }
   
-  if (recursion == 0) unlockXRef;
   return obj;
 
  err:
-  if (recursion == 0) unlockXRef;
   return obj->initNull();
 }
 
 void XRef::lock() {
-  lockXRef;
+  gLockMutex(&mutex);
 }
 
 void XRef::unlock() {
-  unlockXRef;
+  gUnlockMutex(&mutex);
 }
 
 Object *XRef::getDocInfo(Object *obj) {
@@ -1315,7 +1312,7 @@ int XRef::getNumEntry(Goffset offset)
 }
 
 void XRef::add(int num, int gen, Goffset offs, GBool used) {
-  lockXRef;
+  lockXRef();
   if (num >= size) {
     if (num >= capacity) {
       entries = (XRefEntry *)greallocn(entries, num + 1, sizeof(XRefEntry));
@@ -1341,21 +1338,18 @@ void XRef::add(int num, int gen, Goffset offs, GBool used) {
     e->type = xrefEntryFree;
     e->offset = 0;
   }
-  unlockXRef;
 }
 
 void XRef::setModifiedObject (Object* o, Ref r) {
-  lockXRef;
+  lockXRef();
   if (r.num < 0 || r.num >= size) {
     error(errInternal, -1,"XRef::setModifiedObject on unknown ref: {0:d}, {1:d}\n", r.num, r.gen);
-    unlockXRef;
     return;
   }
   XRefEntry *e = getEntry(r.num);
   e->obj.free();
   o->copy(&(e->obj));
   e->setFlag(XRefEntry::Updated, gTrue);
-  unlockXRef;
 }
 
 Ref XRef::addIndirectObject (Object* o) {
@@ -1389,22 +1383,19 @@ Ref XRef::addIndirectObject (Object* o) {
 }
 
 void XRef::removeIndirectObject(Ref r) {
-  lockXRef;
+  lockXRef();
   if (r.num < 0 || r.num >= size) {
     error(errInternal, -1,"XRef::removeIndirectObject on unknown ref: {0:d}, {1:d}\n", r.num, r.gen);
-    unlockXRef;
     return;
   }
   XRefEntry *e = getEntry(r.num);
   if (e->type == xrefEntryFree) {
-    unlockXRef;
     return;
   }
   e->obj.free();
   e->type = xrefEntryFree;
   e->gen++;
   e->setFlag(XRefEntry::Updated, gTrue);
-  unlockXRef;
 }
 
 void XRef::writeXRef(XRef::XRefWriter *writer, GBool writeAllEntries) {

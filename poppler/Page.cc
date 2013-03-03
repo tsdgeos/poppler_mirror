@@ -59,11 +59,9 @@
 #include "Form.h"
 
 #if MULTITHREADED
-#  define lockPage   gLockMutex(&mutex)
-#  define unlockPage gUnlockMutex(&mutex)
+#  define lockPage()   Poppler::Lock lock(&mutex)
 #else
-#  define lockPage
-#  define unlockPage
+#  define lockPage()
 #endif
 //------------------------------------------------------------------------
 // PDFRectangle
@@ -359,11 +357,13 @@ Page::~Page() {
 #endif
 }
 
-Dict *Page::getResourceDict(XRef *xrefA) { 
-  lockPage;
-  Dict *dict = (xrefA == NULL) ? attrs->getResourceDict() : attrs->getResourceDict()->copy(xrefA); 
-  unlockPage;
-  return dict;
+Dict *Page::getResourceDict() { 
+  return attrs->getResourceDict();
+}
+
+Dict *Page::getResourceDictCopy(XRef *xrefA) { 
+  lockPage();
+  return attrs->getResourceDict()->copy(xrefA);
 }
 
 void Page::replaceXRef(XRef *xrefA) {
@@ -411,7 +411,7 @@ void Page::addAnnot(Annot *annot) {
   // Make sure we have annots before adding the new one
   // even if it's an empty list so that we can safely
   // call annots->appendAnnot(annot)
-  lockPage;
+  lockPage();
   getAnnots();
 
   if (annotsObj.isNull()) {
@@ -441,14 +441,13 @@ void Page::addAnnot(Annot *annot) {
 
   annots->appendAnnot(annot);
   annot->setPage(num, gTrue);
-  unlockPage;
 }
 
 void Page::removeAnnot(Annot *annot) {
   Ref annotRef = annot->getRef();
   Object annArray;
 
-  lockPage;
+  lockPage();
   getAnnots(&annArray);
   if (annArray.isArray()) {
     int idx = -1;
@@ -465,7 +464,6 @@ void Page::removeAnnot(Annot *annot) {
     if (idx == -1) {
       error(errInternal, -1, "Annotation doesn't belong to this page");
       annArray.free();
-      unlockPage;
       return;
     }
     annots->removeAnnot(annot); // Gracefully fails on popup windows
@@ -481,7 +479,6 @@ void Page::removeAnnot(Annot *annot) {
   annArray.free();
   annot->removeReferencedObjects(); // Note: Might recurse in removeAnnot again
   annot->setPage(0, gFalse);
-  unlockPage;
 }
 
 Links *Page::getLinks() {
@@ -566,7 +563,7 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI,
 			   annotDisplayDecideCbk, annotDisplayDecideCbkData)) {
     return;
   }
-  lockPage;
+  lockPage();
   XRef *localXRef = (copyXRef) ? xref->copy() : xref;
   if (copyXRef) {
     replaceXRef(localXRef);
@@ -612,7 +609,6 @@ void Page::displaySlice(OutputDev *out, double hDPI, double vDPI,
     replaceXRef(doc->getXRef());
     delete localXRef;
   }
-  unlockPage;
 }
 
 void Page::display(Gfx *gfx) {
@@ -641,11 +637,10 @@ GBool Page::loadThumb(unsigned char **data_out,
   GfxImageColorMap *colorMap;
 
   /* Get stream dict */
-  lockPage;
+  lockPage();
   thumb.fetch(xref, &fetched_thumb);
   if (!fetched_thumb.isStream()) {
     fetched_thumb.free();
-    unlockPage;
     return gFalse;
   }
 
@@ -728,7 +723,6 @@ GBool Page::loadThumb(unsigned char **data_out,
 
   delete colorMap;
  fail1:
-  unlockPage;
   fetched_thumb.free();
 
   return success;
