@@ -3958,6 +3958,8 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, void *srcData
       xa = imgCoordMungeLower(section[i].xa0 +
 			      ((SplashCoord)y + 0.5 - section[i].ya0) *
 			        section[i].dxdya);
+      if (unlikely(xa < 0))
+        xa = 0;
       xb = imgCoordMungeUpper(section[i].xb0 +
 			      ((SplashCoord)y + 0.5 - section[i].yb0) *
 			        section[i].dxdyb);
