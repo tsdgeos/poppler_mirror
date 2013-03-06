@@ -1684,6 +1684,8 @@ Annot* TextAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *
 
     delete q;
 
+    inplaceCallout.clear(); // Free up memory
+
     return pdfAnnot;
 }
 
