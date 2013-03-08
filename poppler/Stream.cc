@@ -23,7 +23,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Tomas Hoger <thoger@redhat.com>
 // Copyright (C) 2011, 2012 William Bader <williambader@hotmail.com>
-// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Oliver Sander <sander@mi.fu-berlin.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
@@ -157,7 +157,7 @@ Stream *Stream::addFilters(Object *dict) {
     dict->dictLookup("DP", &params);
   }
   if (obj.isName()) {
-    str = makeFilter(obj.getName(), str, &params);
+    str = makeFilter(obj.getName(), str, &params, dict);
   } else if (obj.isArray()) {
     for (i = 0; i < obj.arrayGetLength(); ++i) {
       obj.arrayGet(i, &obj2);
@@ -183,7 +183,7 @@ Stream *Stream::addFilters(Object *dict) {
   return str;
 }
 
-Stream *Stream::makeFilter(char *name, Stream *str, Object *params) {
+Stream *Stream::makeFilter(char *name, Stream *str, Object *params, Object *dict) {
   int pred;			// parameters
   int colors;
   int bits;
@@ -284,7 +284,7 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params) {
       }
       obj.free();
     }
-    str = new DCTStream(str, colorXform);
+    str = new DCTStream(str, colorXform, dict);
   } else if (!strcmp(name, "FlateDecode") || !strcmp(name, "Fl")) {
     pred = 1;
     columns = 1;
