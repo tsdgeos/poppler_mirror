@@ -181,7 +181,7 @@ Stream *Stream::addFilters(Object *dict, int recursion) {
     dict->dictLookup("DP", &params);
   }
   if (obj.isName()) {
-    str = makeFilter(obj.getName(), str, &params, recursion);
+    str = makeFilter(obj.getName(), str, &params, recursion, dict);
   } else if (obj.isArray()) {
     for (i = 0; i < obj.arrayGetLength(); ++i) {
       obj.arrayGet(i, &obj2);
@@ -207,7 +207,7 @@ Stream *Stream::addFilters(Object *dict, int recursion) {
   return str;
 }
 
-Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursion) {
+Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursion, Object *dict) {
   int pred;			// parameters
   int colors;
   int bits;
@@ -308,7 +308,7 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursio
       }
       obj.free();
     }
-    str = new DCTStream(str, colorXform);
+    str = new DCTStream(str, colorXform, dict);
   } else if (!strcmp(name, "FlateDecode") || !strcmp(name, "Fl")) {
     pred = 1;
     columns = 1;
@@ -2432,7 +2432,7 @@ static const int dctZigZag[64] = {
   63
 };
 
-DCTStream::DCTStream(Stream *strA, int colorXformA):
+DCTStream::DCTStream(Stream *strA, int colorXformA, Object *dict):
     FilterStream(strA) {
   int i, j;
 
