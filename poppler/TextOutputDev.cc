@@ -247,6 +247,7 @@ TextWord::TextWord(GfxState *state, int rotA, double fontSizeA) {
   edge = NULL;
   charPos = NULL;
   font = NULL;
+  textMat = NULL;
   len = size = 0;
   spaceAfter = gFalse;
   next = NULL;
@@ -274,11 +275,12 @@ TextWord::~TextWord() {
   gfree(edge);
   gfree(charPos);
   gfree(font);
+  gfree(textMat);
 }
 
 void TextWord::addChar(GfxState *state, TextFontInfo *fontA, double x, double y,
 		       double dx, double dy, int charPosA, int charLen,
-		       CharCode c, Unicode u) {
+		       CharCode c, Unicode u, Matrix textMatA) {
   GfxFont *gfxFont;
   double ascent, descent;
   ascent = descent = 0; // make gcc happy
@@ -290,12 +292,14 @@ void TextWord::addChar(GfxState *state, TextFontInfo *fontA, double x, double y,
     edge = (double *)greallocn(edge, (size + 1), sizeof(double));
     charPos = (int *)greallocn(charPos, size + 1, sizeof(int));
     font = (TextFontInfo **)greallocn(font, size, sizeof(TextFontInfo *));
+    textMat = (Matrix *)greallocn(textMat, size, sizeof(Matrix));
   }
   text[len] = u;
   charcode[len] = c;
   charPos[len] = charPosA;
   charPos[len + 1] = charPosA + charLen;
   font[len] = fontA;
+  textMat[len] = textMatA;
 
   if (len == 0) {
     if ((gfxFont = fontA->gfxFont)) {
@@ -449,6 +453,7 @@ void TextWord::merge(TextWord *word) {
     edge = (double *)greallocn(edge, (size + 1), sizeof(double));
     charPos = (int *)greallocn(charPos, size + 1, sizeof(int));
     font = (TextFontInfo **)greallocn(font, size, sizeof(TextFontInfo *));
+    textMat = (Matrix *)greallocn(textMat, size, sizeof(Matrix));
   }
   for (i = 0; i < word->len; ++i) {
     text[len + i] = word->text[i];
@@ -456,6 +461,7 @@ void TextWord::merge(TextWord *word) {
     edge[len + i] = word->edge[i];
     charPos[len + i] = word->charPos[i];
     font[len + i] = word->font[i];
+    textMat[len + i] = word->textMat[i];
   }
   edge[len + word->len] = word->edge[word->len];
   charPos[len + word->len] = word->charPos[word->len];
@@ -2268,6 +2274,7 @@ void TextPage::addChar(GfxState *state, double x, double y,
   GBool overlap;
   int i;
   int wMode;
+  Matrix mat;
 
   // subtract char and word spacing from the dx,dy values
   sp = state->getCharSpace();
@@ -2362,6 +2369,10 @@ void TextPage::addChar(GfxState *state, double x, double y,
       beginWord(state);
     }
 
+    state->getFontTransMat(&mat.m[0], &mat.m[1], &mat.m[2], &mat.m[3]);
+    mat.m[4] = x1;
+    mat.m[5] = y1;
+
     // page rotation and/or transform matrices can cause text to be
     // drawn in reverse order -- in this case, swap the begin/end
     // coordinates and break text into individual chars
@@ -2381,7 +2392,7 @@ void TextPage::addChar(GfxState *state, double x, double y,
     w1 /= uLen;
     h1 /= uLen;
     for (i = 0; i < uLen; ++i) {
-      curWord->addChar(state, curFont, x1 + i*w1, y1 + i*h1, w1, h1, charPos, nBytes, c, u[i]);
+      curWord->addChar(state, curFont, x1 + i*w1, y1 + i*h1, w1, h1, charPos, nBytes, c, u[i], mat);
     }
   }
   charPos += nBytes;
@@ -4271,9 +4282,7 @@ TextSelectionPainter::TextSelectionPainter(TextPage *page,
   out->startPage (0, state, NULL);
   out->setDefaultCTM (state->getCTM());
 
-  state->setTextMat(1, 0, 0, -1, 0, 0);
   state->setFillColorSpace(new GfxDeviceRGBColorSpace());
-
 }
 
 TextSelectionPainter::~TextSelectionPainter()
@@ -4334,11 +4343,18 @@ void TextSelectionPainter::visitWord (TextWord *word, int begin, int end,
   while (begin < end) {
     TextFontInfo *font = word->font[begin];
     font->gfxFont->incRefCnt();
-    state->setFont(font->gfxFont, word->fontSize);
+    Matrix *mat = &word->textMat[begin];
+
+    state->setTextMat(mat->m[0], mat->m[1], mat->m[2], mat->m[3], 0, 0);
+    state->setFont(font->gfxFont, 1);
     out->updateFont(state);
 
     int fEnd = begin + 1;
-    while (fEnd < end && font->matches(word->font[fEnd]))
+    while (fEnd < end && font->matches(word->font[fEnd]) &&
+	   mat->m[0] == word->textMat[fEnd].m[0] &&
+	   mat->m[1] == word->textMat[fEnd].m[1] &&
+	   mat->m[2] == word->textMat[fEnd].m[2] &&
+	   mat->m[3] == word->textMat[fEnd].m[3])
       fEnd++;
 
     /* The only purpose of this string is to let the output device query
@@ -4347,7 +4363,7 @@ void TextSelectionPainter::visitWord (TextWord *word, int begin, int end,
     out->beginString(state, string);
 
     for (int i = begin; i < fEnd; i++) {
-      out->drawChar(state, word->edge[i], word->base, 0, 0, 0, 0,
+      out->drawChar(state, word->textMat[i].m[4], word->textMat[i].m[5], 0, 0, 0, 0,
 		    word->charcode[i], 1, NULL, 0);
     }
     out->endString(state);

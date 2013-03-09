@@ -123,7 +123,7 @@ public:
   // Add a character to the word.
   void addChar(GfxState *state, TextFontInfo *fontA, double x, double y,
 	       double dx, double dy, int charPosA, int charLen,
-	       CharCode c, Unicode u);
+	       CharCode c, Unicode u, Matrix textMatA);
 
   // Merge <word> onto the end of <this>.
   void merge(TextWord *word);
@@ -188,6 +188,7 @@ private:
   int len;			// length of text/edge/charPos/font arrays
   int size;			// size of text/edge/charPos/font arrays
   TextFontInfo **font;		// font information for each char
+  Matrix *textMat;		// transformation matrix for each char
   double fontSize;		// font size
   GBool spaceAfter;		// set if there is a space between this
 				//   word and the next word on the line
