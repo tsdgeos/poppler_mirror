@@ -1,3 +1,19 @@
+Release 0.22.2
+        core:
+         * Correct rendering of underline and strike out annotations (Bug #61518)
+         * Workaround broken jpeg stream definitions (Bug #61994)
+         * SplashOutputDev: Restore CTM on early exits (Bug #61413)
+         * SplashOutputDev: Make sure we don't try to paint in x < 0 (KDE Bug #315432)
+         * Fix latin page labels. (Bug #61034)
+         * Fix compilation with jpeglib9
+         * Fix minor valgrind warning
+
+        utils:
+         * pdfimages: Fix extraction of some images (Bug #61168)
+
+        build system:
+         * Fix the build with automake-1.13
+
 Release 0.22.1
         core:
          * Fix crash in some pdf files when extracting text (Bug #59561)
