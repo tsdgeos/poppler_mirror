@@ -693,7 +693,7 @@ GBool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fo
     if (obj2.isInt())
       pos2 = obj2.getInt();
     else
-      pos2 = obj2.getInt();
+      pos2 = obj2.getInt64();
     for (size_t i = 0; ok == gTrue && i < followedXRefStm->size(); ++i) {
       if (followedXRefStm->at(i) == pos2) {
         ok = gFalse;
