@@ -1765,6 +1765,10 @@ CairoOutputDev::getFilterForSurface(cairo_surface_t *image,
   if (orig_width == 0 || orig_height == 0)
 	  return CAIRO_FILTER_NEAREST;
 
+  /* When printing, don't change the interpolation. */
+  if (printing)
+    return CAIRO_FILTER_NEAREST;
+
   int scaled_width, scaled_height;
   getScaledSize (orig_width, orig_height, &scaled_width, &scaled_height);
 
