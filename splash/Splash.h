@@ -327,6 +327,7 @@ private:
 		    SplashCoord *matrix, SplashCoord flatness2,
 		    SplashPath *fPath);
   SplashPath *makeDashedPath(SplashPath *xPath);
+  void getBBoxFP(SplashPath *path, SplashCoord *xMinA, SplashCoord *yMinA, SplashCoord *xMaxA, SplashCoord *yMaxA);
   SplashError fillWithPattern(SplashPath *path, GBool eo,
 			      SplashPattern *pattern, SplashCoord alpha);
   GBool pathAllOutside(SplashPath *path);
