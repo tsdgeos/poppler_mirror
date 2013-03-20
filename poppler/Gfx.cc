@@ -28,7 +28,7 @@
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2008 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009 M Joonas Pihlaja <jpihlaja@cc.helsinki.fi>
-// Copyright (C) 2009-2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2010 Nils Höglund <nils.hoglund@gmail.com>
@@ -2205,10 +2205,20 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat,
   //~ edge instead of left/bottom (?)
   xstep = fabs(tPat->getXStep());
   ystep = fabs(tPat->getYStep());
-  xi0 = (int)ceil((xMin - tPat->getBBox()[2]) / xstep);
-  xi1 = (int)floor((xMax - tPat->getBBox()[0]) / xstep) + 1;
-  yi0 = (int)ceil((yMin - tPat->getBBox()[3]) / ystep);
-  yi1 = (int)floor((yMax - tPat->getBBox()[1]) / ystep) + 1;
+  if (tPat->getBBox()[0] < tPat->getBBox()[2]) {
+    xi0 = (int)ceil((xMin - tPat->getBBox()[2]) / xstep);
+    xi1 = (int)floor((xMax - tPat->getBBox()[0]) / xstep) + 1;
+  } else {
+    xi0 = (int)ceil((xMin - tPat->getBBox()[0]) / xstep);
+    xi1 = (int)floor((xMax - tPat->getBBox()[2]) / xstep) + 1;
+  }
+  if (tPat->getBBox()[1] < tPat->getBBox()[3]) {
+    yi0 = (int)ceil((yMin - tPat->getBBox()[3]) / ystep);
+    yi1 = (int)floor((yMax - tPat->getBBox()[1]) / ystep) + 1;
+  } else {
+    yi0 = (int)ceil((yMin - tPat->getBBox()[1]) / ystep);
+    yi1 = (int)floor((yMax - tPat->getBBox()[3]) / ystep) + 1;
+  }
   for (i = 0; i < 4; ++i) {
     m1[i] = m[i];
   }
