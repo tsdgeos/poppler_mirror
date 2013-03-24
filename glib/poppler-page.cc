@@ -877,6 +877,7 @@ poppler_page_find_text_with_options (PopplerPage     *page,
   double height;
   TextPage *text_dev;
   gboolean backwards;
+  gboolean start_at_last = FALSE;
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
   g_return_val_if_fail (text != NULL, NULL);
@@ -893,7 +894,8 @@ poppler_page_find_text_with_options (PopplerPage     *page,
 
   while (text_dev->findText (ucs4, ucs4_len,
                              gFalse, gTrue, // startAtTop, stopAtBottom
-                             gTrue, gFalse, // startAtLast, stopAtLast
+                             start_at_last,
+                             gFalse, //stopAtLast
                              options & POPPLER_FIND_CASE_SENSITIVE,
                              backwards,
                              options & POPPLER_FIND_WHOLE_WORDS_ONLY,
@@ -905,6 +907,7 @@ poppler_page_find_text_with_options (PopplerPage     *page,
       match->x2 = xMax;
       match->y2 = height - yMin;
       matches = g_list_prepend (matches, match);
+      start_at_last = TRUE;
     }
 
   g_free (ucs4);
