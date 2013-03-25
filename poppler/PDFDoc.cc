@@ -809,7 +809,7 @@ int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode) {
   if (!updated && mode == writeStandard) {
     // simply copy the original file
     saveWithoutChangesAs (outStr);
-  } if (mode == writeForceRewrite) {
+  } else if (mode == writeForceRewrite) {
     saveCompleteRewrite(outStr);
   } else {
     saveIncrementalUpdate(outStr);
