@@ -18,6 +18,7 @@
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2009, 2011, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
+// Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -120,6 +121,35 @@ extern Goffset Gftell(FILE *f);
 
 // Largest offset supported by Gfseek/Gftell
 extern Goffset GoffsetMax();
+
+//------------------------------------------------------------------------
+// GooFile
+//------------------------------------------------------------------------
+
+class GooFile
+{
+public:
+  int read(char *buf, int n, Goffset offset) const;
+  Goffset size() const;
+  
+  static GooFile *open(const GooString *fileName);
+  
+#ifdef _WIN32
+  static GooFile *open(const wchar_t *fileName);
+  
+  ~GooFile() { CloseHandle(handle); }
+  
+private:
+  GooFile(HANDLE handleA): handle(handleA) {}
+  HANDLE handle;
+#else
+  ~GooFile() { close(fd); }
+    
+private:
+  GooFile(int fdA) : fd(fdA) {}
+  int fd;
+#endif // _WIN32
+};
 
 //------------------------------------------------------------------------
 // GDir and GDirEntry

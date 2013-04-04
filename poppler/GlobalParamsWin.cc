@@ -6,6 +6,7 @@
    // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
    // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
    // Copyright (C) 2012 Mark Brand <mabrand@mabrand.nl>
+   // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 
 TODO: instead of a fixed mapping defined in displayFontTab, it could
 scan the whole fonts directory, parse TTF files and build font
@@ -408,9 +409,7 @@ void GlobalParams::setupBaseFonts(char * dir)
 {
     const char *dataRoot = popplerDataDir ? popplerDataDir : POPPLER_DATADIR;
     GooString *fileName = NULL;
-    struct stat buf;
-    FILE *file;
-    int size = 0;
+    GooFile *file;
 
     if (baseFontsInitialized)
         return;
@@ -453,15 +452,9 @@ void GlobalParams::setupBaseFonts(char * dir)
 
     fileName = new GooString(dataRoot);
     fileName->append("/cidfmap");
-    if (stat(fileName->getCString(), &buf) == 0) {
-      size = buf.st_size;
-    }
+
     // try to open file
-#ifdef VMS
-    file = fopen(fileName->getCString(), "rb", "ctx=stm");
-#else
-    file = fopen(fileName->getCString(), "rb");
-#endif
+    file = GooFile::open(fileName);
 
     if (file != NULL) {
       Parser *parser;
@@ -470,7 +463,7 @@ void GlobalParams::setupBaseFonts(char * dir)
       obj1.initNull();
       parser = new Parser(NULL,
 	      new Lexer(NULL,
-	      new FileStream(file, fileName->getCString(), 0, gFalse, size, &obj1)),
+	      new FileStream(file, 0, gFalse, file->size(), &obj1)),
 	      gTrue);
       obj1.free();
       parser->getObj(&obj1);
@@ -498,7 +491,7 @@ void GlobalParams::setupBaseFonts(char * dir)
 	  parser->getObj(&obj1);
 	}
       }
-      fclose(file);
+      delete file;
       delete parser;
     }
 }

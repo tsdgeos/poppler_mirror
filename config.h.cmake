@@ -46,6 +46,12 @@
 /* Define to 1 if you have the `ftell64' function. */
 #cmakedefine HAVE_FTELL64 1
 
+/* Define to 1 if you have the `pread64' function. */
+#cmakedefine HAVE_PREAD64 1
+
+/* Define to 1 if you have the `lseek64' function. */
+#cmakedefine HAVE_LSEEK64 1
+
 /* Defines if gettimeofday is available on your system */
 #cmakedefine HAVE_GETTIMEOFDAY 1
 

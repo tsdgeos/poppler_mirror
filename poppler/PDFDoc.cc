@@ -29,6 +29,7 @@
 // Copyright (C) 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -55,6 +56,7 @@
 #include <sys/stat.h>
 #include "goo/gstrtod.h"
 #include "goo/GooString.h"
+#include "goo/gfile.h"
 #include "poppler-config.h"
 #include "GlobalParams.h"
 #include "Page.h"
@@ -129,7 +131,6 @@ PDFDoc::PDFDoc()
 PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
 	       GooString *userPassword, void *guiDataA) {
   Object obj;
-  Goffset size = 0;
 #ifdef _WIN32
   int n, i;
 #endif
@@ -147,17 +148,8 @@ PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
   fileNameU[n] = L'\0';
 #endif
 
-  struct stat buf;
-  if (stat(fileName->getCString(), &buf) == 0) {
-     size = buf.st_size;
-  }
-
   // try to open file
-#ifdef VMS
-  file = fopen(fileName->getCString(), "rb", "ctx=stm");
-#else
-  file = fopen(fileName->getCString(), "rb");
-#endif
+  file = GooFile::open(fileName);
   if (file == NULL) {
     // fopen() has failed.
     // Keep a copy of the errno returned by fopen so that it can be 
@@ -170,7 +162,7 @@ PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
 
   // create stream
   obj.initNull();
-  str = new FileStream(file, fileName->getCString(), 0, gFalse, size, &obj);
+  str = new FileStream(file, 0, gFalse, file->size(), &obj);
 
   ok = setup(ownerPassword, userPassword);
 }
@@ -194,26 +186,17 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
     fileNameU[i] = fileNameA[i];
   }
   fileNameU[fileNameLen] = L'\0';
-
-
+  
   // try to open file
   // NB: _wfopen is only available in NT
-  struct _stat buf;
-  int size = 0;
   version.dwOSVersionInfoSize = sizeof(version);
   GetVersionEx(&version);
   if (version.dwPlatformId == VER_PLATFORM_WIN32_NT) {
-    if (_wstat(fileNameU, &buf) == 0) {
-      size = buf.st_size;
-    }
-    file = _wfopen(fileNameU, L"rb");
+    file = GooFile::open(fileNameU);
   } else {
-    if (_stat(fileName->getCString(), &buf) == 0) {
-      size = buf.st_size;
-    }
-    file = fopen(fileName->getCString(), "rb");
+    file = GooFile::open(fileName);
   }
-  if (!size || !file) {
+  if (!file) {
     error(errIO, -1, "Couldn't open file '{0:t}'", fileName);
     errCode = errOpenFile;
     return;
@@ -221,7 +204,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
 
   // create stream
   obj.initNull();
-  str = new FileStream(file, fileName->getCString(), 0, gFalse, size, &obj);
+  str = new FileStream(file, 0, gFalse, file->size(), &obj);
 
   ok = setup(ownerPassword, userPassword);
 }
@@ -343,7 +326,7 @@ PDFDoc::~PDFDoc() {
     delete str;
   }
   if (file) {
-    fclose(file);
+    delete file;
   }
   if (fileName) {
     delete fileName;

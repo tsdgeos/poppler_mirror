@@ -21,6 +21,7 @@
 // Copyright (C) 2008, 2010, 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
+// Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -583,6 +584,85 @@ Goffset GoffsetMax() {
   return (std::numeric_limits<long>::max)();
 #endif
 }
+
+//------------------------------------------------------------------------
+// GooFile
+//------------------------------------------------------------------------
+
+#ifdef _WIN32
+
+int GooFile::read(char *buf, int n, Goffset offset) const {
+  DWORD m;
+  
+  LARGE_INTEGER largeInteger = {0};
+  largeInteger.QuadPart = offset;
+  
+  OVERLAPPED overlapped = {0};
+  overlapped.Offset = largeInteger.LowPart;
+  overlapped.OffsetHigh = largeInteger.HighPart;
+
+  return FALSE == ReadFile(handle, buf, n, &m, &overlapped) ? -1 : m;
+}
+
+Goffset GooFile::size() const {
+  LARGE_INTEGER size = {-1,-1};
+  
+  GetFileSizeEx(handle, &size);
+
+  return size.QuadPart;
+}
+
+GooFile* GooFile::open(const GooString *fileName) {
+  HANDLE handle = CreateFile(fileName->getCString(),
+                              GENERIC_READ,
+                              FILE_SHARE_READ,
+                              NULL,
+                              OPEN_EXISTING,
+                              FILE_ATTRIBUTE_NORMAL, NULL);
+  
+  return handle == INVALID_HANDLE_VALUE ? NULL : new GooFile(handle);
+}
+
+GooFile* GooFile::open(const wchar_t *fileName) {
+  HANDLE handle = CreateFileW(fileName,
+                              GENERIC_READ,
+                              FILE_SHARE_READ,
+                              NULL,
+                              OPEN_EXISTING,
+                              FILE_ATTRIBUTE_NORMAL, NULL);
+  
+  return handle == INVALID_HANDLE_VALUE ? NULL : new GooFile(handle);
+}
+
+#else
+
+int GooFile::read(char *buf, int n, Goffset offset) const {
+#ifdef HAVE_PREAD64
+  return pread64(fd, buf, n, offset);
+#else
+  return pread(fd, buf, n, offset);
+#endif
+}
+
+Goffset GooFile::size() const {
+#ifdef HAVE_LSEEK64
+  return lseek64(fd, 0, SEEK_END);
+#else
+  return lseek(fd, 0, SEEK_END);
+#endif
+}
+
+GooFile* GooFile::open(const GooString *fileName) {
+#ifdef VMS
+  int fd = ::open(fileName->getCString(), Q_RDONLY, "ctx=stm");
+#else
+  int fd = ::open(fileName->getCString(), O_RDONLY);
+#endif
+  
+  return fd < 0 ? NULL : new GooFile(fd);
+}
+
+#endif // _WIN32
 
 //------------------------------------------------------------------------
 // GDir and GDirEntry

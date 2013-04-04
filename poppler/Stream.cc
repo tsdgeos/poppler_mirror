@@ -28,6 +28,7 @@
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -750,30 +751,14 @@ GBool StreamPredictor::getNextLine() {
 }
 
 //------------------------------------------------------------------------
-// UniqueFileStream
-//------------------------------------------------------------------------
-
-UniqueFileStream::UniqueFileStream(FILE *fA, char *fileNameA, Goffset startA, GBool limitedA,
-		       Goffset lengthA, Object *dictA):
-    FileStream(fA, fileNameA, startA, limitedA, lengthA, dictA) {
-  f = fopen(fileName, "rb");
-}
-
-UniqueFileStream::~UniqueFileStream() {
-  close();
-  fclose(f);
-}
-
-//------------------------------------------------------------------------
 // FileStream
 //------------------------------------------------------------------------
 
-FileStream::FileStream(FILE *fA, char *fileNameA, Goffset startA, GBool limitedA,
+FileStream::FileStream(GooFile* fileA, Goffset startA, GBool limitedA,
 		       Goffset lengthA, Object *dictA):
     BaseStream(dictA, lengthA) {
-  f = fA;
-  fileName = fileNameA;
-  start = startA;
+  file = fileA;
+  offset = start = startA;
   limited = limitedA;
   length = lengthA;
   bufPtr = bufEnd = buf;
@@ -787,17 +772,17 @@ FileStream::~FileStream() {
 }
 
 BaseStream *FileStream::copy() {
-  return new UniqueFileStream(f, fileName, start, limited, length, &dict);
+  return new FileStream(file, start, limited, length, &dict);
 }
 
 Stream *FileStream::makeSubStream(Goffset startA, GBool limitedA,
 				  Goffset lengthA, Object *dictA) {
-  return new FileStream(f, fileName, startA, limitedA, lengthA, dictA);
+  return new FileStream(file, startA, limitedA, lengthA, dictA);
 }
 
 void FileStream::reset() {
-  savePos = Gftell(f);
-  Gfseek(f, start, SEEK_SET);
+  savePos = offset;
+  offset = start;
   saved = gTrue;
   bufPtr = bufEnd = buf;
   bufPos = start;
@@ -805,7 +790,7 @@ void FileStream::reset() {
 
 void FileStream::close() {
   if (saved) {
-    Gfseek(f, savePos, SEEK_SET);
+    offset = savePos;
     saved = gFalse;
   }
 }
@@ -823,7 +808,8 @@ GBool FileStream::fillBuf() {
   } else {
     n = fileStreamBufSize;
   }
-  n = fread(buf, 1, n, f);
+  n = file->read(buf, n, offset);
+  offset += n;
   bufEnd = buf + n;
   if (bufPtr >= bufEnd) {
     return gFalse;
@@ -835,15 +821,13 @@ void FileStream::setPos(Goffset pos, int dir) {
   Goffset size;
 
   if (dir >= 0) {
-    Gfseek(f, pos, SEEK_SET);
-    bufPos = pos;
+    offset = bufPos = pos;
   } else {
-    Gfseek(f, 0, SEEK_END);
-    size = Gftell(f);
+    size = file->size();
     if (pos > size)
       pos = size;
-    Gfseek(f, -pos, SEEK_END);
-    bufPos = Gftell(f);
+    offset = size - pos;
+    bufPos = offset;
   }
   bufPtr = bufEnd = buf;
 }

@@ -264,6 +264,7 @@ AC_CHECK_FUNCS(ftell64, xpdf_cv_func_ftell64=yes, xpdf_cv_func_ftell64=no)
 if test "$xpdf_cv_func_fseek64" = yes -a "$xpdf_cv_func_ftell64" = yes; then
   AC_DEFINE(HAVE_FSEEK64)
 fi
+AC_CHECK_FUNCS(pread64 lseek64)
 
 dnl Test for zlib
 AC_ARG_ENABLE([zlib],
