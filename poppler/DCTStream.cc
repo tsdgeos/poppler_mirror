@@ -60,16 +60,16 @@ static void str_term_source(j_decompress_ptr cinfo)
 {
 }
 
-DCTStream::DCTStream(Stream *strA, int colorXformA, Object *dict) :
+DCTStream::DCTStream(Stream *strA, int colorXformA, Object *dict, int recursion) :
   FilterStream(strA) {
   colorXform = colorXformA;
   if (dict != NULL) {
     Object obj;
 
-    dict->dictLookup("Width", &obj);
+    dict->dictLookup("Width", &obj, recursion);
     err.width = (obj.isInt() && obj.getInt() <= JPEG_MAX_DIMENSION) ? obj.getInt() : 0;
     obj.free();
-    dict->dictLookup("Height", &obj);
+    dict->dictLookup("Height", &obj, recursion);
     err.height = (obj.isInt() && obj.getInt() <= JPEG_MAX_DIMENSION) ? obj.getInt() : 0;
     obj.free();
   } else

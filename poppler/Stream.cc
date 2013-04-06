@@ -309,7 +309,7 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursio
       }
       obj.free();
     }
-    str = new DCTStream(str, colorXform, dict);
+    str = new DCTStream(str, colorXform, dict, recursion);
   } else if (!strcmp(name, "FlateDecode") || !strcmp(name, "Fl")) {
     pred = 1;
     columns = 1;
@@ -2416,7 +2416,7 @@ static const int dctZigZag[64] = {
   63
 };
 
-DCTStream::DCTStream(Stream *strA, int colorXformA, Object *dict):
+DCTStream::DCTStream(Stream *strA, int colorXformA, Object *dict, int recursion):
     FilterStream(strA) {
   int i, j;
 
