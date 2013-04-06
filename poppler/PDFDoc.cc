@@ -1163,6 +1163,7 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numO
                     removeFilter = gFalse;
                     break;
                   }
+                  filterEle.free();
                 }
                 if (removeFilter) {
                   encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, objNum, objGen);
