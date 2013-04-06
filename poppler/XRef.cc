@@ -20,7 +20,7 @@
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2010 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@kabelmail.de>
+// Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@kabelmail.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
