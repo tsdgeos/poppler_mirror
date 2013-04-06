@@ -1144,12 +1144,41 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numO
         //We can't modify stream with the current implementation (no write functions in Stream API)
         // => the only type of streams which that have been modified are internal streams (=strWeird)
         Stream *stream = obj->getStream();
-        if (stream->getKind() == strWeird) {
+        if (stream->getKind() == strWeird || stream->getKind() == strCrypt) {
           //we write the stream unencoded => TODO: write stream encoder
 
           // Encrypt stream
           EncryptStream *encStream = NULL;
-          if (fileKey) {
+          GBool removeFilter = gTrue;
+          if (stream->getKind() == strWeird && fileKey) {
+            Object filter;
+            stream->getDict()->lookup("Filter", &filter);
+            if (!filter.isName("Crypt")) {
+              if (filter.isArray()) {
+                for (int i = 0; i < filter.arrayGetLength(); i++) {
+                  Object filterEle;
+                  filter.arrayGet(i, &filterEle);
+                  if (filterEle.isName("Crypt")) {
+                    filterEle.free();
+                    removeFilter = gFalse;
+                    break;
+                  }
+                }
+                if (removeFilter) {
+                  encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, objNum, objGen);
+                  encStream->setAutoDelete(gFalse);
+                  stream = encStream;
+                }
+              } else {
+                encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, objNum, objGen);
+                encStream->setAutoDelete(gFalse);
+                stream = encStream;
+              }
+            } else {
+              removeFilter = gFalse;
+            }
+            filter.free();
+          } else if (fileKey != NULL) { // Encrypt stream
             encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, objNum, objGen);
             encStream->setAutoDelete(gFalse);
             stream = encStream;
@@ -1165,7 +1194,9 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numO
           stream->getDict()->set("Length", &obj1);
 
           //Remove Stream encoding
-          stream->getDict()->remove("Filter");
+          if (removeFilter) {
+            stream->getDict()->remove("Filter");
+          }
           stream->getDict()->remove("DecodeParms");
 
           writeDictionnary (stream->getDict(),outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen);

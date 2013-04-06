@@ -62,7 +62,8 @@ enum StreamKind {
   strFlate,
   strJBIG2,
   strJPX,
-  strWeird			// internal-use stream types
+  strWeird,			// internal-use stream types
+  strCrypt			// internal-use to detect decode streams
 };
 
 enum StreamColorSpaceMode {

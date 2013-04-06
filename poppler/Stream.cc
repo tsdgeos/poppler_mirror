@@ -342,6 +342,12 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursio
     globals.free();
   } else if (!strcmp(name, "JPXDecode")) {
     str = new JPXStream(str);
+  } else if (!strcmp(name, "Crypt")) {
+    if (str->getKind() == strCrypt) {
+      str = str->getBaseStream();
+    } else {
+      error(errSyntaxError, getPos(), "Can't revert non decrypt streams");
+    }
   } else {
     error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
     str = new EOFStream(str);

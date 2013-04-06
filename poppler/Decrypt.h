@@ -18,6 +18,7 @@
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -105,7 +106,7 @@ public:
   BaseCryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm algoA,
                   int keyLength, int objNum, int objGen);
   virtual ~BaseCryptStream();
-  virtual StreamKind getKind() { return strWeird; }
+  virtual StreamKind getKind() { return strCrypt; }
   virtual void reset();
   virtual int getChar();
   virtual int lookChar() = 0;
