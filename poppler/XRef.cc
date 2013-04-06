@@ -1556,7 +1556,9 @@ void XRef::scanSpecialFlags() {
   prevXRefOffset = mainXRefOffset;
 
   std::vector<int> xrefStreamObjNums;
-  readXRefUntil(-1 /* read all xref sections */, &xrefStreamObjNums);
+  if (!streamEndsLen) { // don't do it for already reconstructed xref
+    readXRefUntil(-1 /* read all xref sections */, &xrefStreamObjNums);
+  }
 
   // Mark object streams as DontRewrite, because we write each object
   // individually in full rewrite mode.
