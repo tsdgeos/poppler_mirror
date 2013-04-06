@@ -18,6 +18,7 @@
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -53,26 +54,18 @@ typedef CRITICAL_SECTION GooMutex;
 
 #include <pthread.h>
 
-typedef struct {
-  pthread_mutexattr_t attributes;
-  pthread_mutex_t mutex;
-} GooMutex;
+typedef pthread_mutex_t GooMutex;
 
 inline void gInitMutex(GooMutex *m) {
-  pthread_mutexattr_init(&m->attributes);
-  pthread_mutexattr_settype(&m->attributes, PTHREAD_MUTEX_RECURSIVE);
-  pthread_mutex_init(&m->mutex, &m->attributes);
+  pthread_mutexattr_t mutexattr;
+  pthread_mutexattr_init(&mutexattr);
+  pthread_mutexattr_settype(&mutexattr, PTHREAD_MUTEX_RECURSIVE);
+  pthread_mutex_init(m, &mutexattr);
+  pthread_mutexattr_destroy(&mutexattr);
 }
-inline void gDestroyMutex(GooMutex *m) {
-  pthread_mutex_destroy(&m->mutex);
-  pthread_mutexattr_destroy(&m->attributes);
-}
-inline void gLockMutex(GooMutex *m) {
-  pthread_mutex_lock(&m->mutex);
-}
-inline void gUnlockMutex(GooMutex *m) {
-  pthread_mutex_unlock(&m->mutex);
-}
+#define gDestroyMutex(m) pthread_mutex_destroy(m)
+#define gLockMutex(m) pthread_mutex_lock(m)
+#define gUnlockMutex(m) pthread_mutex_unlock(m)
 
 #endif
 
