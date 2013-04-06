@@ -16,6 +16,7 @@
 // Copyright (C) 2006, 2007, 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -56,6 +57,7 @@ public:
 
   // Get the next object from the input stream.
   Object *getObj(Object *obj, int objNum = -1);
+  Object *getObj(Object *obj, const char *cmdA);
 
   // Skip to the beginning of the next line in the input stream.
   void skipToNextLine();

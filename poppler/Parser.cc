@@ -242,7 +242,7 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
 
   // refill token buffers and check for 'endstream'
   shift();  // kill '>>'
-  shift();  // kill 'stream'
+  shift("endstream");  // kill 'stream'
   if (buf1.isCmd("endstream")) {
     shift();
   } else {
@@ -251,7 +251,7 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
     if (xref) {
       // shift until we find the proper endstream or we change to another object or reach eof
       while (!buf1.isCmd("endstream") && xref->getNumEntry(lexer->getPos()) == objNum && !buf1.isEOF()) {
-        shift();
+        shift("endstream");
       }
       length = lexer->getPos() - pos;
       if (buf1.isCmd("endstream")) {
@@ -301,4 +301,28 @@ void Parser::shift(int objNum) {
     buf2.initNull();
   else
     lexer->getObj(&buf2, objNum);
+}
+
+void Parser::shift(const char *cmdA) {
+  if (inlineImg > 0) {
+    if (inlineImg < 2) {
+      ++inlineImg;
+    } else {
+      // in a damaged content stream, if 'ID' shows up in the middle
+      // of a dictionary, we need to reset
+      inlineImg = 0;
+    }
+  } else if (buf2.isCmd("ID")) {
+    lexer->skipChar();		// skip char after 'ID' command
+    inlineImg = 1;
+  }
+  buf1.free();
+  buf2.shallowCopy(&buf1);
+  if (inlineImg > 0) {
+    buf2.initNull();
+  } else if (buf1.isCmd(cmdA)) {
+    lexer->getObj(&buf2, -1);
+  } else {
+    lexer->getObj(&buf2, cmdA);
+  }
 }

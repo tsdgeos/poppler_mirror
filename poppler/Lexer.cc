@@ -17,6 +17,7 @@
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012, 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -577,6 +578,50 @@ Object *Lexer::getObj(Object *obj, int objNum) {
     break;
   }
 
+  return obj;
+}
+
+Object *Lexer::getObj(Object *obj, const char *cmdA) {
+  char *p;
+  int c, c2;
+  GBool comment, done;
+  int numParen;
+  GooString *s;
+  int n, m;
+
+  // skip whitespace and comments
+  comment = gFalse;
+  const char *cmd1 = tokBuf;
+  *tokBuf = 0;
+  while (strcmp(cmdA, cmd1)) {
+    while (1) {
+      if ((c = getChar()) == EOF) {
+        return obj->initEOF();
+      }
+      if (comment) {
+        if (c == '\r' || c == '\n') {
+          comment = gFalse;
+        }
+      } else if (c == '%') {
+        comment = gTrue;
+      } else if (specialChars[c] != 1) {
+        break;
+      }
+    }
+    p = tokBuf;
+    *p++ = c;
+    n = 1;
+    while ((c = lookChar()) != EOF && specialChars[c] == 0) {
+      getChar();
+      if (++n == tokBufSize) {
+        break;
+      }
+      *p++ = c;
+    }
+    *p = '\0';
+  }
+  obj->initCmd(tokBuf);
+  
   return obj;
 }
 
