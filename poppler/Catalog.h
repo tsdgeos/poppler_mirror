@@ -107,13 +107,13 @@ public:
   GBool isOk() { return ok; }
 
   // Get number of pages.
-  int getNumPages(MutexLockMode lock = DoLockMutex);
+  int getNumPages();
 
   // Get a page.
   Page *getPage(int i);
 
   // Get the reference for a page object.
-  Ref *getPageRef(int i, MutexLockMode lock = DoLockMutex);
+  Ref *getPageRef(int i);
 
   // Return base URI, or NULL if none.
   GooString *getBaseURI() { return baseURI; }
@@ -127,7 +127,7 @@ public:
 
   // Find a page, given its object ID.  Returns page number, or 0 if
   // not found.
-  int findPage(int num, int gen, MutexLockMode lock = DoLockMutex);
+  int findPage(int num, int gen);
 
   // Find a named destination.  Returns the link destination, or
   // NULL if <name> is not a destination.
@@ -165,7 +165,7 @@ public:
   };
 
   FormType getFormType();
-  Form* getForm(MutexLockMode lock = DoLockMutex);
+  Form* getForm();
 
   ViewerPreferences *getViewerPreferences();
 

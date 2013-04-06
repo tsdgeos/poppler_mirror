@@ -1134,7 +1134,7 @@ Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
   Parser *parser;
   Object obj1, obj2, obj3;
 
-  xrefCondLocker((recursion == 0) ? DoLockMutex : DoNotLockMutex);
+  xrefLocker();
   // check for bogus ref - this can happen in corrupted PDF files
   if (num < 0 || num >= size) {
     goto err;

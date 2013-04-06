@@ -58,10 +58,8 @@
 
 #if MULTITHREADED
 #  define catalogLocker()   MutexLocker locker(&mutex)
-#  define catalogCondLocker(X)  MutexLocker locker(&mutex, (X))
 #else
 #  define catalogLocker()
-#  define catalogCondLocker(X)
 #endif
 //------------------------------------------------------------------------
 // Catalog
@@ -234,11 +232,11 @@ Page *Catalog::getPage(int i)
   return pages[i-1];
 }
 
-Ref *Catalog::getPageRef(int i, MutexLockMode lock)
+Ref *Catalog::getPageRef(int i)
 {
   if (i < 1) return NULL;
 
-  catalogCondLocker(lock);
+  catalogLocker();
   if (i > lastCachedPage) {
      GBool cached = cachePageTree(i);
      if ( cached == gFalse) {
@@ -294,7 +292,7 @@ GBool Catalog::cachePageTree(int page)
       return gFalse;
     }
 
-    pagesSize = getNumPages(DoNotLockMutex);
+    pagesSize = getNumPages();
     pages = (Page **)gmallocn(pagesSize, sizeof(Page *));
     pageRefs = (Ref *)gmallocn(pagesSize, sizeof(Ref));
     for (int i = 0; i < pagesSize; ++i) {
@@ -421,11 +419,11 @@ GBool Catalog::cachePageTree(int page)
   return gFalse;
 }
 
-int Catalog::findPage(int num, int gen, MutexLockMode lock) {
+int Catalog::findPage(int num, int gen) {
   int i;
 
-  for (i = 0; i < getNumPages(lock); ++i) {
-    Ref *ref = getPageRef(i+1, lock);
+  for (i = 0; i < getNumPages(); ++i) {
+    Ref *ref = getPageRef(i+1);
     if (ref != NULL && ref->num == num && ref->gen == gen)
       return i + 1;
   }
@@ -772,9 +770,9 @@ GBool Catalog::indexToLabel(int index, GooString *label)
   }
 }
 
-int Catalog::getNumPages(MutexLockMode lock)
+int Catalog::getNumPages()
 {
-  catalogCondLocker((numPages == -1 && lock == DoLockMutex) ? DoLockMutex : DoNotLockMutex);
+  catalogLocker();
   if (numPages == -1)
   {
     Object catDict, pagesDict, obj;
@@ -829,7 +827,7 @@ PageLabelInfo *Catalog::getPageLabelInfo()
     }
 
     if (catDict.dictLookup("PageLabels", &obj)->isDict()) {
-      pageLabelInfo = new PageLabelInfo(&obj, getNumPages(DoNotLockMutex));
+      pageLabelInfo = new PageLabelInfo(&obj, getNumPages());
     }
     obj.free();
     catDict.free();
@@ -916,9 +914,9 @@ Catalog::FormType Catalog::getFormType()
   return res;
 }
 
-Form *Catalog::getForm(MutexLockMode lock)
+Form *Catalog::getForm()
 {
-  catalogCondLocker(lock);
+  catalogLocker();
   if (!form) {
     if (acroForm.isDict()) {
       form = new Form(doc, &acroForm);

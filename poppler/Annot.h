@@ -572,7 +572,7 @@ public:
   // new_color. 
   void setColor(AnnotColor *new_color);
 
-  void setAppearanceState(const char *state, MutexLockMode lock = DoLockMutex);
+  void setAppearanceState(const char *state);
 
   // Delete appearance streams and reset appearance state
   void invalidateAppearance();
@@ -627,7 +627,7 @@ protected:
 
   // Updates the field key of the annotation dictionary
   // and sets M to the current time
-  void update(const char *key, Object *value, MutexLockMode lock = DoLockMutex);
+  void update(const char *key, Object *value);
 
   int refCnt;
 

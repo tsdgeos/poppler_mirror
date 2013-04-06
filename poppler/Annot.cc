@@ -1213,7 +1213,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   if (dict->lookupNF("P", &obj1)->isRef()) {
     Ref ref = obj1.getRef();
 
-    page = doc->getCatalog()->findPage (ref.num, ref.gen, DoNotLockMutex);
+    page = doc->getCatalog()->findPage (ref.num, ref.gen);
   } else {
     page = 0;
   }
@@ -1350,8 +1350,8 @@ GBool Annot::inRect(double x, double y) const {
   return rect->contains(x, y);
 }
 
-void Annot::update(const char *key, Object *value, MutexLockMode lock) {
-  annotCondLocker(lock);
+void Annot::update(const char *key, Object *value) {
+  annotLocker();
   /* Set M to current time, unless we are updating M itself */
   if (strcmp(key, "M") != 0) {
     delete modified;
@@ -1384,7 +1384,7 @@ void Annot::setContents(GooString *new_content) {
   
   Object obj1;
   obj1.initString(contents->copy());
-  update ("Contents", &obj1, DoNotLockMutex);
+  update ("Contents", &obj1);
 }
 
 void Annot::setName(GooString *new_name) {
@@ -1399,7 +1399,7 @@ void Annot::setName(GooString *new_name) {
 
   Object obj1;
   obj1.initString(name->copy());
-  update ("NM", &obj1, DoNotLockMutex);
+  update ("NM", &obj1);
 }
 
 void Annot::setModified(GooString *new_modified) {
@@ -1413,7 +1413,7 @@ void Annot::setModified(GooString *new_modified) {
 
   Object obj1;
   obj1.initString(modified->copy());
-  update ("M", &obj1, DoNotLockMutex);
+  update ("M", &obj1);
 }
 
 void Annot::setFlags(Guint new_flags) {
@@ -1421,7 +1421,7 @@ void Annot::setFlags(Guint new_flags) {
   Object obj1;
   flags = new_flags;
   obj1.initInt(flags);
-  update ("F", &obj1, DoNotLockMutex);
+  update ("F", &obj1);
 }
 
 void Annot::setBorder(AnnotBorderArray *new_border) {
@@ -1431,7 +1431,7 @@ void Annot::setBorder(AnnotBorderArray *new_border) {
   if (new_border) {
     Object obj1;
     new_border->writeToObject(xref, &obj1);
-    update ("Border", &obj1, DoNotLockMutex);
+    update ("Border", &obj1);
     border = new_border;
   } else {
     border = NULL;
@@ -1445,7 +1445,7 @@ void Annot::setColor(AnnotColor *new_color) {
   if (new_color) {
     Object obj1;
     new_color->writeToObject(xref, &obj1);
-    update ("C", &obj1, DoNotLockMutex);
+    update ("C", &obj1);
     color = new_color;
   } else {
     color = NULL;
@@ -1467,12 +1467,12 @@ void Annot::setPage(int pageIndex, GBool updateP) {
   }
 
   if (updateP) {
-    update("P", &obj1, DoNotLockMutex);
+    update("P", &obj1);
   }
 }
 
-void Annot::setAppearanceState(const char *state, MutexLockMode lock) {
-  annotCondLocker(lock);
+void Annot::setAppearanceState(const char *state) {
+  annotLocker();
   if (!state)
     return;
 
@@ -1484,7 +1484,7 @@ void Annot::setAppearanceState(const char *state, MutexLockMode lock) {
 
   Object obj1;
   obj1.initName(state);
-  update ("AS", &obj1, DoNotLockMutex);
+  update ("AS", &obj1);
 
   // The appearance state determines the current appearance stream
   appearance.free();
@@ -1503,12 +1503,12 @@ void Annot::invalidateAppearance() {
   delete appearStreams;
   appearStreams = NULL;
 
-  setAppearanceState("Off", DoNotLockMutex); // Default appearance state
+  setAppearanceState("Off"); // Default appearance state
 
   Object obj1;
   obj1.initNull();
-  update ("AP", &obj1, DoNotLockMutex); // Remove AP
-  update ("AS", &obj1, DoNotLockMutex); // Remove AS
+  update ("AP", &obj1); // Remove AP
+  update ("AS", &obj1); // Remove AS
 }
 
 double Annot::getXMin() {
@@ -3813,7 +3813,7 @@ AnnotWidget::~AnnotWidget() {
 void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
 
-  form = doc->getCatalog()->getForm(DoNotLockMutex);
+  form = doc->getCatalog()->getForm();
 
   if(dict->lookup("H", &obj1)->isName()) {
     const char *modeName = obj1.getName();

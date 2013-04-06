@@ -53,28 +53,36 @@ typedef CRITICAL_SECTION GooMutex;
 
 #include <pthread.h>
 
-typedef pthread_mutex_t GooMutex;
+typedef struct {
+  pthread_mutexattr_t attributes;
+  pthread_mutex_t mutex;
+} GooMutex;
 
-#define gInitMutex(m) pthread_mutex_init(m, NULL)
-#define gDestroyMutex(m) pthread_mutex_destroy(m)
-#define gLockMutex(m) pthread_mutex_lock(m)
-#define gUnlockMutex(m) pthread_mutex_unlock(m)
+inline void gInitMutex(GooMutex *m) {
+  pthread_mutexattr_init(&m->attributes);
+  pthread_mutexattr_settype(&m->attributes, PTHREAD_MUTEX_RECURSIVE);
+  pthread_mutex_init(&m->mutex, &m->attributes);
+}
+inline void gDestroyMutex(GooMutex *m) {
+  pthread_mutex_destroy(&m->mutex);
+  pthread_mutexattr_destroy(&m->attributes);
+}
+inline void gLockMutex(GooMutex *m) {
+  pthread_mutex_lock(&m->mutex);
+}
+inline void gUnlockMutex(GooMutex *m) {
+  pthread_mutex_unlock(&m->mutex);
+}
 
 #endif
 
-enum MutexLockMode {
-  DoNotLockMutex,  // for conditional locks: do not lock 
-  DoLockMutex      // for conditional locks: do lock 
-};
-
 class MutexLocker {
 public:
-  MutexLocker(GooMutex *mutexA, MutexLockMode modeA = DoLockMutex) : mutex(mutexA), mode(modeA) { if (mode == DoLockMutex) gLockMutex(mutex); }
-  ~MutexLocker() { if (mode == DoLockMutex) gUnlockMutex(mutex); }
+  MutexLocker(GooMutex *mutexA) : mutex(mutexA) { gLockMutex(mutex); }
+  ~MutexLocker() { gUnlockMutex(mutex); }
 
 private:
   GooMutex *mutex;
-  const MutexLockMode mode;
 };
 
 #endif
