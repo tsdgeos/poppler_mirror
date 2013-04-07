@@ -1,5 +1,5 @@
 /* poppler-link.h: qt interface to poppler
- * Copyright (C) 2006, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2013, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2008, 2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, 2012, Guillermo Amaral <gamaral@kdab.com>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
@@ -471,7 +471,7 @@ class POPPLER_QT4_EXPORT LinkRendition : public Link
 		 * Create a new rendition link.
 		 *
 		 * \param linkArea the active area of the link
-		 * \param rendition the media rendition object
+		 * \param rendition the media rendition object. Ownership is taken
 		 *
 		 * \deprecated Use the constructor that takes all parameter instead
 		 */
@@ -481,7 +481,7 @@ class POPPLER_QT4_EXPORT LinkRendition : public Link
 		 * Create a new rendition link.
 		 *
 		 * \param linkArea the active area of the link
-		 * \param rendition the media rendition object
+		 * \param rendition the media rendition object. Ownership is taken
 		 * \param operation the numeric operation (action) (@see ::LinkRendition::RenditionOperation)
 		 * \param script the java script code
 		 * \param annotationReference the object reference of the screen annotation associated with this rendition action
