@@ -1,3 +1,23 @@
+Release 0.22.3
+        core:
+         * Check order bounding box values in tiling pattern (Bug #62369)
+         * CairoImageOutputDev: Don't change image interpolation when printing (Bug #62418)
+         * TextOutputDev: Set text matrix when painting selection (Bug #61042)
+         * Only write the file once when saving (Bug #62739)
+         * Fix for complete rewrites in repaired files
+         * Fixlet regarding spec interpretation for Link Zoom value
+         * Fix typos in man pages
+         * Fix compile when not using libjpeg
+
+        glib:
+         * Always start from the beginning when starting a new search on a page (Bug #59972)
+
+        qt4:
+         * Fix crash in files with LinkRendition (KDE Bug #317710)
+
+        build system:
+         * Small cmake improvements
+
 Release 0.22.2
         core:
          * Correct rendering of underline and strike out annotations (Bug #61518)
