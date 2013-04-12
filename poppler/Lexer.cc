@@ -583,11 +583,9 @@ Object *Lexer::getObj(Object *obj, int objNum) {
 
 Object *Lexer::getObj(Object *obj, const char *cmdA) {
   char *p;
-  int c, c2;
-  GBool comment, done;
-  int numParen;
-  GooString *s;
-  int n, m;
+  int c;
+  GBool comment;
+  int n;
 
   // skip whitespace and comments
   comment = gFalse;
