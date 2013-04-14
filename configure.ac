@@ -251,6 +251,7 @@ fi
 
 dnl ##### Checks for library functions.
 AC_CHECK_FUNCS(popen mkstemp mkstemps)
+AC_CHECK_FUNCS(strcpy_s strcat_s)
 
 dnl ##### Back to C for the library tests.
 AC_LANG_C
