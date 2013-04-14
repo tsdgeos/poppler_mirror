@@ -36,6 +36,8 @@ check_function_exists(popen HAVE_POPEN)
 check_function_exists(mkstemp HAVE_MKSTEMP)
 check_function_exists(mkstemps HAVE_MKSTEMPS)
 check_function_exists(rand_r HAVE_RAND_R)
+check_function_exists(strcpy_s HAVE_STRCPY_S)
+check_function_exists(strcat_s HAVE_STRCAT_S)
 
 macro(CHECK_FOR_DIR include var)
   check_c_source_compiles(

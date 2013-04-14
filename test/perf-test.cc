@@ -1,5 +1,5 @@
 /* Copyright Krzysztof Kowalczyk 2006-2007
-   Copyright Hib Eris <hib@hiberis.nl> 2008
+   Copyright Hib Eris <hib@hiberis.nl> 2008, 2013
    License: GPLv2 */
 /*
   A tool to stress-test poppler rendering and measure rendering times for
@@ -325,7 +325,7 @@ void sleep_milliseconds(int milliseconds)
 #endif
 }
 
-#ifndef _MSC_VER
+#ifndef HAVE_STRCPY_S
 void strcpy_s(char* dst, size_t dst_size, const char* src)
 {
     size_t src_size = strlen(src) + 1;
@@ -338,7 +338,9 @@ void strcpy_s(char* dst, size_t dst_size, const char* src)
         }
     }
 }
+#endif
 
+#ifndef HAVE_STRCAT_S
 void strcat_s(char *dst, size_t dst_size, const char* src)
 {
     size_t dst_len = strlen(dst);
