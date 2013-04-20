@@ -1577,7 +1577,7 @@ void CairoOutputDev::setSoftMask(GfxState * state, double * bbox, GBool alpha,
 
   LOG(printf ("set softMask\n"));
 
-  if (alpha == false) {
+  if (!alpha || transferFunc) {
     /* We need to mask according to the luminocity of the group.
      * So we paint the group to an image surface convert it to a luminocity map
      * and then use that as the mask. */
@@ -1620,13 +1620,15 @@ void CairoOutputDev::setSoftMask(GfxState * state, double * bbox, GBool alpha,
     cairo_t *maskCtx = cairo_create(source);
 
     //XXX: hopefully this uses the correct color space */
-    GfxRGB backdropColorRGB;
-    groupColorSpaceStack->cs->getRGB(backdropColor, &backdropColorRGB);
-    /* paint the backdrop */
-    cairo_set_source_rgb(maskCtx,
-			 colToDbl(backdropColorRGB.r),
-			 colToDbl(backdropColorRGB.g),
-			 colToDbl(backdropColorRGB.b));
+    if (!alpha) {
+      GfxRGB backdropColorRGB;
+      groupColorSpaceStack->cs->getRGB(backdropColor, &backdropColorRGB);
+      /* paint the backdrop */
+      cairo_set_source_rgb(maskCtx,
+                           colToDbl(backdropColorRGB.r),
+                           colToDbl(backdropColorRGB.g),
+                           colToDbl(backdropColorRGB.b));
+    }
     cairo_paint(maskCtx);
 
     /* Copy source ctm to mask ctm and translate origin so that the
@@ -1653,15 +1655,14 @@ void CairoOutputDev::setSoftMask(GfxState * state, double * bbox, GBool alpha,
     int stride = cairo_image_surface_get_stride(source)/4;
     for (int y=0; y<height; y++) {
       for (int x=0; x<width; x++) {
-	int lum;
-	lum = luminocity(source_data[y*stride + x]);
-	if (transferFunc) {
-	  double lum_in, lum_out;
-	  lum_in = lum/256.0;
-	  transferFunc->transform(&lum_in, &lum_out);
-	  lum = (int)(lum_out * 255.0 + 0.5);
-	}
-	source_data[y*stride + x] = lum << 24;
+	int lum = alpha ? fill_opacity : luminocity(source_data[y*stride + x]);
+        if (transferFunc) {
+          double lum_in, lum_out;
+          lum_in = lum/256.0;
+          transferFunc->transform(&lum_in, &lum_out);
+          lum = (int)(lum_out * 255.0 + 0.5);
+        }
+        source_data[y*stride + x] = lum << 24;
       }
     }
     cairo_surface_mark_dirty (source);
@@ -1681,7 +1682,7 @@ void CairoOutputDev::setSoftMask(GfxState * state, double * bbox, GBool alpha,
     }
 
     cairo_surface_destroy(source);
-  } else {
+  } else if (alpha) {
     mask = cairo_pattern_reference(group);
     cairo_get_matrix(cairo, &mask_matrix);
   }
