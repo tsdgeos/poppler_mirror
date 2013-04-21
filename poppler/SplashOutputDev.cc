@@ -3987,7 +3987,12 @@ void SplashOutputDev::setSoftMask(GfxState *state, double *bbox,
   for (y = 0; y < yMax; ++y) {
     for (x = 0; x < xMax; ++x) {
       if (alpha) {
-	p[x] = tBitmap->getAlpha(x, y);
+	if (transferFunc) {
+	  lum = tBitmap->getAlpha(x, y) / 255.0;
+	  transferFunc->transform(&lum, &lum2);
+	  p[x] = (int)(lum2 * 255.0 + 0.5);
+	} else 
+	  p[x] = tBitmap->getAlpha(x, y);
       } else {
 	  tBitmap->getPixel(x, y, color);
 	  // convert to luminosity
