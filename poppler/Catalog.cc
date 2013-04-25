@@ -97,6 +97,7 @@ Catalog::Catalog(PDFDoc *docA) {
   attrsList = NULL;
   kidsIdxList = NULL;
   lastCachedPage = 0;
+  markInfo = markInfoNull;
 
   xref->getCatalog(&catDict);
   if (!catDict.isDict()) {
@@ -855,6 +856,50 @@ Object *Catalog::getStructTreeRoot()
   }
 
   return &structTreeRoot;
+}
+
+Guint Catalog::getMarkInfo()
+{
+  if (markInfo == markInfoNull) {
+    markInfo = 0;
+
+    Object catDict;
+    catalogLocker();
+    xref->getCatalog(&catDict);
+
+    if (catDict.isDict()) {
+      Object markInfoDict;
+      catDict.dictLookup("MarkInfo", &markInfoDict);
+      if (markInfoDict.isDict()) {
+        Object value;
+
+        if (markInfoDict.dictLookup("Marked", &value)->isBool() && value.getBool())
+          markInfo |= markInfoMarked;
+        else if (!value.isNull())
+          error(errSyntaxError, -1, "Marked object is wrong type ({0:s})", value.getTypeName());
+        value.free();
+
+        if (markInfoDict.dictLookup("Suspects", &value)->isBool() && value.getBool())
+          markInfo |= markInfoSuspects;
+        else if (!value.isNull())
+          error(errSyntaxError, -1, "Suspects object is wrong type ({0:s})", value.getTypeName());
+        value.free();
+
+        if (markInfoDict.dictLookup("UserProperties", &value)->isBool() && value.getBool())
+          markInfo |= markInfoUserProperties;
+        else if (!value.isNull())
+          error(errSyntaxError, -1, "UserProperties object is wrong type ({0:s})", value.getTypeName());
+        value.free();
+      } else if (!markInfoDict.isNull()) {
+        error(errSyntaxError, -1, "MarkInfo object is wrong type ({0:s})", markInfoDict.getTypeName());
+      }
+      markInfoDict.free();
+    } else {
+      error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
+    }
+    catDict.free();
+  }
+  return markInfo;
 }
 
 Object *Catalog::getOutline()
