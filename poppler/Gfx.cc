@@ -4133,10 +4133,25 @@ void Gfx::opXObject(Object args[], int numArgs) {
     }
   } else if (obj2.isName("Form")) {
     res->lookupXObjectNF(name, &refObj);
-    if (out->useDrawForm() && refObj.isRef()) {
-      out->drawForm(refObj.getRef());
-    } else {
-      doForm(&obj1);
+    GBool shouldDoForm = gTrue;
+    std::set<int>::iterator drawingFormIt;
+    if (refObj.isRef()) {
+      const int num = refObj.getRef().num;
+      if (formsDrawing.find(num) == formsDrawing.end()) {
+	drawingFormIt = formsDrawing.insert(num).first;
+      } else {
+	shouldDoForm = gFalse;	
+      }
+    }
+    if (shouldDoForm) {
+      if (out->useDrawForm() && refObj.isRef()) {
+	out->drawForm(refObj.getRef());
+      } else {
+	doForm(&obj1);
+      }
+    }
+    if (refObj.isRef() && shouldDoForm) {
+      formsDrawing.erase(drawingFormIt);
     }
     refObj.free();
   } else if (obj2.isName("PS")) {
