@@ -21,7 +21,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Peter Breitenlohner <peb@mppmu.mpg.de>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
@@ -266,9 +266,7 @@ public:
   // Put a char in the stream
   virtual void put (char c) = 0;
 
-  //FIXME
-  // Printf-like function                         2,3 because the first arg is class instance ?
-  virtual void printf (const char *format, ...) = 0 ; //__attribute__((format(printf, 2,3))) = 0;
+  virtual void printf (const char *format, ...) GCC_PRINTF_FORMAT(2,3) = 0;
 
 private:
   int ref; // reference count
