@@ -125,6 +125,15 @@ public:
   // Return the structure tree root object.
   Object *getStructTreeRoot();
 
+  // Return values from the MarkInfo dictionary as flags in a bitfield.
+  enum MarkInfoFlags {
+    markInfoNull           = 1 << 0,
+    markInfoMarked         = 1 << 1,
+    markInfoUserProperties = 1 << 2,
+    markInfoSuspects       = 1 << 3,
+  };
+  Guint getMarkInfo();
+
   // Find a page, given its object ID.  Returns page number, or 0 if
   // not found.
   int findPage(int num, int gen);
@@ -219,6 +228,7 @@ private:
   GooString *baseURI;		// base URI for URI-type links
   Object metadata;		// metadata stream
   Object structTreeRoot;	// structure tree root dictionary
+  Guint markInfo;               // Flags from MarkInfo dictionary
   Object outline;		// outline dictionary
   Object acroForm;		// AcroForm dictionary
   Object viewerPreferences;     // ViewerPreference dictionary
