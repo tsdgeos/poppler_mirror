@@ -225,8 +225,12 @@ int main(int argc, char *argv[]) {
   info.free();
 
   // print tagging info
-  printf("Tagged:         %s\n",
-	 doc->getStructTreeRoot()->isDict() ? "yes" : "no");
+   printf("Tagged:         %s\n",
+	  (doc->getCatalog()->getMarkInfo() & Catalog::markInfoMarked) ? "yes" : "no");
+   printf("UserProperties: %s\n",
+	  (doc->getCatalog()->getMarkInfo() & Catalog::markInfoUserProperties) ? "yes" : "no");
+   printf("Suspects:       %s\n",
+	  (doc->getCatalog()->getMarkInfo() & Catalog::markInfoSuspects) ? "yes" : "no");
 
   // print form info
   switch (doc->getCatalog()->getFormType())
