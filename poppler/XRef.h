@@ -20,7 +20,7 @@
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@kabelmail.de>
-// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -243,6 +243,7 @@ private:
     virtual ~XRefWriter() {};
   };
 
+  // XRefWriter subclass that writes a XRef table
   class XRefTableWriter: public XRefWriter {
   public:
     XRefTableWriter(OutStream* outStrA);
@@ -252,14 +253,26 @@ private:
     OutStream* outStr;
   };
 
+  // XRefWriter subclass that writes a XRef stream
   class XRefStreamWriter: public XRefWriter {
   public:
-    XRefStreamWriter(Object *index, GooString *stmBuf);
+    XRefStreamWriter(Object *index, GooString *stmBuf, int offsetSize);
     void startSection(int first, int count);
     void writeEntry(Goffset offset, int gen, XRefEntryType type);
   private:
     Object *index;
     GooString *stmBuf;
+    int offsetSize;
+  };
+
+  // Dummy XRefWriter subclass that only checks if all offsets fit in 4 bytes
+  class XRefPreScanWriter: public XRefWriter {
+  public:
+    XRefPreScanWriter();
+    void startSection(int first, int count);
+    void writeEntry(Goffset offset, int gen, XRefEntryType type);
+
+    GBool hasOffsetsBeyond4GB;
   };
 
   void writeXRef(XRefWriter *writer, GBool writeAllEntries);
