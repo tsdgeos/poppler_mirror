@@ -227,6 +227,8 @@ private:
   MarkedContentStack *mcStack;	// current BMC/EMC stack
 
   Parser *parser;		// parser for page content stream(s)
+  
+  std::set<int> formsDrawing;	// the forms that are being drawn
 
 #ifdef USE_CMS
   PopplerCache iccColorSpaceCache;
