@@ -1796,7 +1796,7 @@ GBool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, GooList *outlines, Catalo
 		atLeastOne = gTrue;
 
 		item->open();
-		if (item->hasKids())
+		if (item->hasKids() && item->getKids())
 		{
 			fputs("\n",output);
 			newHtmlOutlineLevel(output, item->getKids(), catalog, level+1);
@@ -1833,7 +1833,7 @@ void HtmlOutputDev::newXmlOutlineLevel(FILE *output, GooList *outlines, Catalog*
         delete titleStr;
 
         item->open();
-        if (item->hasKids())
+        if (item->hasKids() && item->getKids())
         {
             newXmlOutlineLevel(output, item->getKids(), catalog);
         }
