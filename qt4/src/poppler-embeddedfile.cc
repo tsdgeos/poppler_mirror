@@ -1,5 +1,5 @@
 /* poppler-document.cc: qt interface to poppler
- * Copyright (C) 2005, 2008, 2009, 2012, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005, 2008, 2009, 2012, 2013, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2008, 2011, Pino Toscano <pino@kde.org>
  *
@@ -69,7 +69,7 @@ EmbeddedFile::~EmbeddedFile()
 QString EmbeddedFile::name() const
 {
 	GooString *goo = m_embeddedFile->filespec->getFileName();
-	return goo ? QString(goo->getCString()) : QString();
+	return goo ? UnicodeParsedString(goo) : QString();
 }
 
 QString EmbeddedFile::description() const
