@@ -3,6 +3,7 @@
 // pdfinfo.cc
 //
 // Copyright 1998-2003 Glyph & Cog, LLC
+// Copyright 2013 Igalia S.L.
 //
 //========================================================================
 
@@ -56,11 +57,15 @@
 #include "Error.h"
 #include "DateInfo.h"
 #include "JSInfo.h"
+#include "StructTreeRoot.h"
+#include "StructElement.h"
 
 static void printInfoString(Dict *infoDict, const char *key, const char *text,
 			    UnicodeMap *uMap);
 static void printInfoDate(Dict *infoDict, const char *key, const char *text);
 static void printBox(const char *text, PDFRectangle *box);
+static void printStruct(const StructElement *element, unsigned indent = 0);
+static void printIndent(unsigned level);
 
 static int firstPage = 1;
 static int lastPage = 0;
@@ -74,6 +79,8 @@ static char userPassword[33] = "\001";
 static GBool printVersion = gFalse;
 static GBool printHelp = gFalse;
 static GBool printEnc = gFalse;
+static GBool printStructure = gFalse;
+static GBool printStructureText = gFalse;
 
 static const ArgDesc argDesc[] = {
   {"-f",      argInt,      &firstPage,        0,
@@ -86,6 +93,10 @@ static const ArgDesc argDesc[] = {
    "print the document metadata (XML)"},
   {"-js",     argFlag,     &printJS,          0,
    "print all JavaScript in the PDF"},
+  {"-struct", argFlag,     &printStructure,   0,
+   "print the logical document structure (for tagged files)"},
+  {"-struct-text", argFlag, &printStructureText, 0,
+   "print text contents along with document structure (for tagged files)"},
   {"-rawdates", argFlag,   &rawDates,         0,
    "print the undecoded date strings directly from the PDF file"},
   {"-enc",    argString,   textEncName,    sizeof(textEncName),
@@ -141,6 +152,9 @@ int main(int argc, char *argv[]) {
       exitCode = 0;
     goto err0;
   }
+
+  if (printStructureText)
+    printStructure = gTrue;
 
   // read config file
   globalParams = new GlobalParams();
@@ -401,6 +415,15 @@ int main(int argc, char *argv[]) {
     jsInfo.scanJS(lastPage - firstPage + 1, stdout, uMap);
   }
 
+  // print the structure
+  const StructTreeRoot *structTree;
+  if (printStructure && (structTree = doc->getCatalog()->getStructTreeRoot())) {
+    fputs("Structure:\n", stdout);
+    for (unsigned i = 0; i < structTree->getNumChildren(); i++) {
+      printStruct(structTree->getChild(i), 1);
+    }
+  }
+
   exitCode = 0;
 
   // clean up
@@ -480,4 +503,77 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text) {
 static void printBox(const char *text, PDFRectangle *box) {
   printf("%s%8.2f %8.2f %8.2f %8.2f\n",
 	 text, box->x1, box->y1, box->x2, box->y2);
+}
+
+static void printIndent(unsigned indent) {
+  while (indent--) {
+    putchar(' ');
+    putchar(' ');
+  }
+}
+
+static void printAttribute(const Attribute *attribute, unsigned indent)
+{
+  printIndent(indent);
+  printf(" /%s ", attribute->getTypeName());
+  if (attribute->getType() == Attribute::UserProperty) {
+    GooString *name = attribute->getName();
+    printf("(%s) ", name->getCString());
+    delete name;
+  }
+  attribute->getValue()->print(stdout);
+  if (attribute->getFormattedValue()) {
+    printf(" \"%s\"", attribute->getFormattedValue());
+  }
+  if (attribute->isHidden()) {
+    printf(" [hidden]");
+  }
+}
+
+static void printStruct(const StructElement *element, unsigned indent) {
+  if (element->isObjectRef()) {
+    printIndent(indent);
+    printf("Object %i %i\n", element->getObjectRef().num, element->getObjectRef().gen);
+    return;
+  }
+
+  if (printStructureText && element->isContent()) {
+    GooString *text = element->getText(gFalse);
+    printIndent(indent);
+    if (text) {
+      printf("\"%s\"\n", text->getCString());
+    } else {
+      printf("(No content?)\n");
+    }
+    delete text;
+  }
+
+  if (!element->isContent()) {
+      printIndent(indent);
+      printf("%s", element->getTypeName());
+      if (element->getID()) {
+          printf(" <%s>", element->getID()->getCString());
+      }
+      if (element->getTitle()) {
+          printf(" \"%s\"", element->getTitle()->getCString());
+      }
+      if (element->getRevision() > 0) {
+          printf(" r%u", element->getRevision());
+      }
+      if (element->isInline() || element->isBlock()) {
+          printf(" (%s)", element->isInline() ? "inline" : "block");
+      }
+      if (element->getNumAttributes()) {
+          putchar(':');
+          for (unsigned i = 0; i < element->getNumAttributes(); i++) {
+              putchar('\n');
+              printAttribute(element->getAttribute(i), indent + 1);
+          }
+      }
+
+      putchar('\n');
+      for (unsigned i = 0; i < element->getNumChildren(); i++) {
+          printStruct(element->getChild(i), indent + 1);
+      }
+  }
 }
