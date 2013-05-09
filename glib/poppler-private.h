@@ -17,6 +17,7 @@
 #include <OptionalContent.h>
 #include <CairoOutputDev.h>
 #include <FileSpec.h>
+#include <StructElement.h>
 #endif
 
 struct _PopplerDocument
@@ -93,6 +94,15 @@ struct _PopplerLayer
   Layer *layer;
   GList *rbgroup;
   gchar *title;
+};
+
+
+struct _PopplerStructureElement
+{
+  /*< private >*/
+  GObject parent_instance;
+  PopplerDocument *document;
+  StructElement *elem;
 };
 
 GList         *_poppler_document_get_layers (PopplerDocument *document);

@@ -208,6 +208,8 @@ typedef struct _PopplerAnnotLine           PopplerAnnotLine;
 typedef struct _PopplerAnnotCircle         PopplerAnnotCircle;
 typedef struct _PopplerAnnotSquare         PopplerAnnotSquare;
 typedef struct _PopplerQuadrilateral       PopplerQuadrilateral;
+typedef struct _PopplerStructureElement    PopplerStructureElement;
+typedef struct _PopplerStructureElementIter PopplerStructureElementIter;
 
 typedef enum
 {
@@ -233,5 +235,6 @@ G_END_DECLS
 #include "poppler-date.h"
 #include "poppler-movie.h"
 #include "poppler-media.h"
+#include "poppler-structure-element.h"
 
 #endif /* __POPPLER_GLIB_H__ */

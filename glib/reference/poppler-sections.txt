@@ -585,6 +585,43 @@ poppler_movie_get_type
 </SECTION>
 
 <SECTION>
+<FILE>poppler-structure-element</FILE>
+<TITLE>PopplerStructureElement</TITLE>
+PopplerStructureElement
+PopplerStructureElementKind
+PopplerStructureElementIter
+poppler_structure_element_iter_new
+poppler_structure_element_iter_next
+poppler_structure_element_iter_copy
+poppler_structure_element_iter_free
+poppler_structure_element_iter_get_child
+poppler_structure_element_iter_get_element
+poppler_structure_element_get_kind
+poppler_structure_element_get_page
+poppler_structure_element_is_content
+poppler_structure_element_is_inline
+poppler_structure_element_is_block
+poppler_structure_element_get_id
+poppler_structure_element_get_title
+poppler_structure_element_get_abbreviation
+poppler_structure_element_get_language
+poppler_structure_element_get_text
+poppler_structure_element_get_alt_text
+poppler_structure_element_get_actual_text
+
+<SUBSECTION Standard>
+POPPLER_STRUCTURE_ELEMENT
+POPPLER_IS_STRUCTURE_ELEMENT
+POPPLER_TYPE_STRUCTURE_ELEMENT
+POPPLER_TYPE_STRUCTURE_ELEMENT_ITER
+POPPLER_TYPE_STRUCTURE_ELEMENT_KIND
+
+<SUBSECTION Private>
+poppler_structure_element_get_type
+poppler_structure_element_iter_get_type
+</SECTION>
+
+<SECTION>
 <FILE>poppler-features</FILE>
 POPPLER_HAS_CAIRO
 POPPLER_MAJOR_VERSION
