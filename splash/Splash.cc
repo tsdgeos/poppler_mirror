@@ -1494,7 +1494,7 @@ inline void Splash::drawAALine(SplashPipe *pipe, int x0, int x1, int y, GBool ad
 #endif
 
     if (t != 0) {
-      pipe->shape = (adjustLine) ? div255((int) lineOpacity * aaGamma[t]) : aaGamma[t];
+      pipe->shape = (adjustLine) ? div255((int) lineOpacity * (double)aaGamma[t]) : (double)aaGamma[t];
       (this->*pipe->run)(pipe);
       updateModX(x);
       updateModY(y);
