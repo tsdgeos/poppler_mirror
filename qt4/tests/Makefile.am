@@ -73,6 +73,7 @@ TESTS = \
 	check_metadata         	\
 	check_optcontent	\
 	check_permissions      	\
+	check_pagelabelinfo    	\
 	check_pagemode    	\
 	check_password    	\
 	check_pagelayout	\
