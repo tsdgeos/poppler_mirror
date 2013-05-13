@@ -1,3 +1,18 @@
+Release 0.22.4
+        core:
+         * Always consider a softmask transfer function (Bug #63587)
+         * Fix crash on malformed files (Bug #63190)
+         * Splash: Fix compilation with fixed point mode enabled
+
+        utils:
+         * Fix crash on some files (Bug #63909)
+
+        qt4:
+         * Fix name decoding of some attachments (KDE Bug #307786)
+
+        build system:
+         * Fix compilation with mingw-w64 compiler
+
 Release 0.22.3
         core:
          * Check order bounding box values in tiling pattern (Bug #62369)
