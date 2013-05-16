@@ -182,7 +182,7 @@ SplashPipeResultColorCtrl Splash::pipeResultColorAlphaNoBlend[] = {
   splashPipeResultColorAlphaNoBlendMono,
   splashPipeResultColorAlphaNoBlendMono,
   splashPipeResultColorAlphaNoBlendRGB,
-  splashPipeResultColorNoAlphaBlendRGB,
+  splashPipeResultColorAlphaNoBlendRGB,
   splashPipeResultColorAlphaNoBlendRGB
 #if SPLASH_CMYK
   ,
@@ -195,7 +195,7 @@ SplashPipeResultColorCtrl Splash::pipeResultColorAlphaBlend[] = {
   splashPipeResultColorAlphaBlendMono,
   splashPipeResultColorAlphaBlendMono,
   splashPipeResultColorAlphaBlendRGB,
-  splashPipeResultColorNoAlphaBlendRGB,
+  splashPipeResultColorAlphaBlendRGB,
   splashPipeResultColorAlphaBlendRGB
 #if SPLASH_CMYK
   ,
