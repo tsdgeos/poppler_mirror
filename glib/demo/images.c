@@ -95,8 +95,12 @@ pgd_image_view_new ()
 			  (gpointer)swindow);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (swindow),
 					GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+#if GTK_CHECK_VERSION(3, 7, 8)
+	gtk_container_add(GTK_CONTAINER(swindow), darea);
+#else
 	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (swindow),
 					       darea);
+#endif
 	gtk_widget_show (darea);
 
 	return swindow;

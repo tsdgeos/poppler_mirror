@@ -671,8 +671,12 @@ pgd_selections_create_widget (PopplerDocument *document)
 	demo->swindow = gtk_scrolled_window_new (NULL, NULL);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (demo->swindow),
 					GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+#if GTK_CHECK_VERSION(3, 7, 8)
+	gtk_container_add(GTK_CONTAINER(demo->swindow), demo->darea);
+#else
 	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (demo->swindow),
 					       demo->darea);
+#endif
 	gtk_widget_show (demo->darea);
 
 	gtk_box_pack_start (GTK_BOX (vbox), demo->swindow, TRUE, TRUE, 0);

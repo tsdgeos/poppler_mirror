@@ -507,7 +507,11 @@ pgd_find_create_widget (PopplerDocument *document)
                           demo);
 
         swindow = gtk_scrolled_window_new (NULL, NULL);
+#if GTK_CHECK_VERSION(3, 7, 8)
+        gtk_container_add(GTK_CONTAINER(swindow), demo->darea);
+#else
         gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (swindow), demo->darea);
+#endif
         gtk_widget_show (demo->darea);
 
         gtk_paned_add2 (GTK_PANED (hpaned), swindow);

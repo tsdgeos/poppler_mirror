@@ -306,8 +306,12 @@ view_new (PopplerDocument *doc)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
                                   GTK_POLICY_AUTOMATIC,
                                   GTK_POLICY_AUTOMATIC);
+#if GTK_CHECK_VERSION(3, 7, 8)
+  gtk_container_add(GTK_CONTAINER(sw), view->drawing_area);
+#else
   gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (sw),
                                          view->drawing_area);
+#endif
   gtk_widget_show (view->drawing_area);
 
   gtk_box_pack_end (GTK_BOX (vbox), sw, TRUE, TRUE, 0);
