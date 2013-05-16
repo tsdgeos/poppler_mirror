@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2009, 2011, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2009, 2011-2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
@@ -1414,7 +1414,14 @@ void PSOutputDev::writeHeader(int firstPage, int lastPage,
   obj1.free();
   info.free();
   if(psTitle) {
-    writePSFmt("%%Title: {0:s}\n", psTitle);
+    char *sanitizedTile = strdup(psTitle);
+    for (Guint i = 0; i < strlen(sanitizedTile); ++i) {
+      if (sanitizedTile[i] == '\n' || sanitizedTile[i] == '\r') {
+        sanitizedTile[i] = ' ';
+      }
+    }
+    writePSFmt("%%Title: {0:s}\n", sanitizedTile);
+    free(sanitizedTile);
   }
   writePSFmt("%%LanguageLevel: {0:d}\n",
 	     (level == psLevel1 || level == psLevel1Sep) ? 1 :
