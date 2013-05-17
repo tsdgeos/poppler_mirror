@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010, 2012 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2011, 2013 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Pino Toscano <pino@kde.org>
 //
 //========================================================================
@@ -282,7 +282,8 @@ void Hints::readSharedObjectsTable(Stream *str)
   }
   if ((!nSharedGroupsFirst) || (nSharedGroupsFirst > nSharedGroups)) {
      error(errSyntaxWarning, -1, "Invalid number of first page shared object groups");
-     nSharedGroupsFirst = nSharedGroups;
+     nSharedGroups = 0;
+     return;
   }
 
   groupLength = (Guint *) gmallocn_checkoverflow(nSharedGroups, sizeof(Guint));
