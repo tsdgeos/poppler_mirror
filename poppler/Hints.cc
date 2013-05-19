@@ -57,7 +57,7 @@ Hints::Hints(BaseStream *str, Linearization *linearization, XRef *xref, Security
   sharedObjectId = (Guint **) gmallocn_checkoverflow(nPages, sizeof(Guint*));
   if (!nObjects || !pageObjectNum || !xRefOffset || !pageLength || !pageOffset ||
       !numSharedObject || !sharedObjectId) {
-    error(errSyntaxWarning, -1, "Failed to allocate memory for hints tabel");
+    error(errSyntaxWarning, -1, "Failed to allocate memory for hints table");
     nPages = 0;
   }
 
