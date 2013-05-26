@@ -913,7 +913,7 @@ GBool CachedFileStream::fillBuf()
   } else {
     n = cachedStreamBufSize - (bufPos % cachedStreamBufSize);
   }
-  cc->read(buf, 1, n);
+  n = cc->read(buf, 1, n);
   bufEnd = buf + n;
   if (bufPtr >= bufEnd) {
     return gFalse;
