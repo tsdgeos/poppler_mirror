@@ -13,6 +13,8 @@ include(MacroBoolTo01)
 find_package(Threads)
 include(TestBigEndian)
 test_big_endian(WORDS_BIGENDIAN)
+include(CheckFileOffsetBits)
+CHECK_FILE_OFFSET_BITS()
 
 set(POPPLER_MAJOR_VERSION "0")
 set(POPPLER_MINOR_VERSION "23")
