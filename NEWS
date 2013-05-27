@@ -1,3 +1,14 @@
+Release 0.23.1
+        core:
+         * XRef stream writing: Write 32-bit offsets when possible
+         * Fix splashModeBGR8 rendering (Bug #64381)
+
+        glib:
+         * Do not use deprecated gtk_scrolled_window_add_with_viewport() (Bug #64683)
+
+        build system:
+         * Fix Large file support when using cmake
+
 Release 0.23.0
         core:
          * Make rendering thread safe

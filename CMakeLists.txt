@@ -18,7 +18,7 @@ CHECK_FILE_OFFSET_BITS()
 
 set(POPPLER_MAJOR_VERSION "0")
 set(POPPLER_MINOR_VERSION "23")
-set(POPPLER_MICRO_VERSION "0")
+set(POPPLER_MICRO_VERSION "1")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION}.${POPPLER_MICRO_VERSION}")
 
 # command line switches
@@ -398,7 +398,7 @@ add_library(poppler STATIC ${poppler_SRCS})
 else(MSVC)
 add_library(poppler SHARED ${poppler_SRCS})
 endif(MSVC)
-set_target_properties(poppler PROPERTIES VERSION 38.0.0 SOVERSION 38)
+set_target_properties(poppler PROPERTIES VERSION 39.0.0 SOVERSION 39)
 target_link_libraries(poppler ${poppler_LIBS})
 if(HAVE_PTHREAD)
   target_link_libraries(poppler -lpthread)
