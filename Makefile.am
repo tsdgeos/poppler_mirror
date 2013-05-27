@@ -68,6 +68,8 @@ EXTRA_DIST +=							\
 	utils/CMakeLists.txt					\
 	CMakeLists.txt						\
 	ConfigureChecks.cmake					\
+	cmake/modules/CheckFileOffsetBits.c			\
+	cmake/modules/CheckFileOffsetBits.cmake			\
 	cmake/modules/COPYING-CMAKE-SCRIPTS			\
 	cmake/modules/FindCairo.cmake				\
 	cmake/modules/FindFontconfig.cmake			\
