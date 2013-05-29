@@ -42,6 +42,8 @@ poppler_glib_demo_SOURCES = 			\
 	selections.h				\
 	selections.c				\
 	text.h					\
+	taggedstruct.h				\
+	taggedstruct.c				\
 	text.c					\
 	transitions.h				\
 	transitions.c				\

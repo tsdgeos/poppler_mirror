@@ -34,6 +34,7 @@
 #include "attachments.h"
 #include "layers.h"
 #include "text.h"
+#include "taggedstruct.h"
 #include "find.h"
 #include "print.h"
 #include "selections.h"
@@ -65,6 +66,7 @@ static const PopplerGlibDemo demo_list[] = {
 	{ "Attachments",      pgd_attachments_create_widget },
 	{ "Layers",           pgd_layers_create_widget },
 	{ "Text",             pgd_text_create_widget },
+        { "Tagged Structure", pgd_taggedstruct_create_widget },
 	{ "Find",             pgd_find_create_widget },
 	{ "Print",            pgd_print_create_widget }
 };
