@@ -18,7 +18,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2008 Adam Batkin <adam@batkin.net>
-// Copyright (C) 2008, 2010, 2012 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2008, 2010, 2012, 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
@@ -606,7 +606,7 @@ int GooFile::read(char *buf, int n, Goffset offset) const {
 }
 
 Goffset GooFile::size() const {
-  LARGE_INTEGER size = {-1,-1};
+  LARGE_INTEGER size = {(DWORD)-1,-1};
   
   GetFileSizeEx(handle, &size);
 
