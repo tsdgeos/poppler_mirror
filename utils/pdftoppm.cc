@@ -23,7 +23,8 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
-// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -48,6 +49,18 @@
 #include "splash/SplashBitmap.h"
 #include "splash/Splash.h"
 #include "SplashOutputDev.h"
+
+// Uncomment to build pdftoppm with pthreads
+// You may also have to change the buildsystem to
+// link pdftoppm to pthread library
+// This is here for developer testing not user ready
+// #define UTILS_USE_PTHREADS 1
+
+#ifdef UTILS_USE_PTHREADS
+#include <errno.h>
+#include <pthread.h>
+#include <deque>
+#endif // UTILS_USE_PTHREADS
 
 static int firstPage = 1;
 static int lastPage = 0;
@@ -81,6 +94,9 @@ static char vectorAntialiasStr[16] = "";
 static char ownerPassword[33] = "";
 static char userPassword[33] = "";
 static char TiffCompressionStr[16] = "";
+#ifdef UTILS_USE_PTHREADS
+static int numberOfJobs = 1;
+#endif // UTILS_USE_PTHREADS
 static GBool quiet = gFalse;
 static GBool printVersion = gFalse;
 static GBool printHelp = gFalse;
@@ -164,6 +180,11 @@ static const ArgDesc argDesc[] = {
   {"-upw",    argString,   userPassword,   sizeof(userPassword),
    "user password (for encrypted files)"},
   
+#ifdef UTILS_USE_PTHREADS
+  {"-j",      argInt,      &numberOfJobs,  0,
+   "number of jobs to run concurrently"},
+#endif // UTILS_USE_PTHREADS
+
   {"-q",      argFlag,     &quiet,         0,
    "don't print any messages or errors"},
   {"-v",      argFlag,     &printVersion,  0,
@@ -226,6 +247,54 @@ static void savePageSlice(PDFDoc *doc,
   }
 }
 
+#ifdef UTILS_USE_PTHREADS
+
+struct PageJob {
+  PDFDoc *doc;
+  int pg;
+  
+  double pg_w, pg_h;
+  SplashColor* paperColor;
+  
+  char *ppmFile;
+};
+
+static std::deque<PageJob> pageJobQueue;
+static pthread_mutex_t pageJobMutex = PTHREAD_MUTEX_INITIALIZER;
+
+static void processPageJobs() {
+  while(true) {
+    // pop the next job or exit if queue is empty
+    pthread_mutex_lock(&pageJobMutex);
+    
+    if(pageJobQueue.empty()) {
+      pthread_mutex_unlock(&pageJobMutex);
+      return;
+    }
+    
+    PageJob pageJob = pageJobQueue.front();
+    pageJobQueue.pop_front();
+    
+    pthread_mutex_unlock(&pageJobMutex);
+    
+    // process the job    
+    SplashOutputDev *splashOut = new SplashOutputDev(mono ? splashModeMono1 :
+                  gray ? splashModeMono8 :
+#if SPLASH_CMYK
+        			    (jpegcmyk || overprint) ? splashModeDeviceN8 :
+#endif
+		              splashModeRGB8, 4, gFalse, *pageJob.paperColor);
+    splashOut->startDoc(pageJob.doc);
+    
+    savePageSlice(pageJob.doc, splashOut, pageJob.pg, x, y, w, h, pageJob.pg_w, pageJob.pg_h, pageJob.ppmFile);
+    
+    delete splashOut;
+    delete[] pageJob.ppmFile;
+  }
+}
+
+#endif // UTILS_USE_PTHREADS
+
 static int numberOfCharacters(unsigned int n)
 {
   int charNum = 0;
@@ -245,7 +314,11 @@ int main(int argc, char *argv[]) {
   char *ppmFile;
   GooString *ownerPW, *userPW;
   SplashColor paperColor;
+#ifndef UTILS_USE_PTHREADS
   SplashOutputDev *splashOut;
+#else
+  pthread_t* jobs;
+#endif // UTILS_USE_PTHREADS
   GBool ok;
   int exitCode;
   int pg, pg_num_len;
@@ -362,6 +435,9 @@ int main(int argc, char *argv[]) {
     paperColor[1] = 255;
     paperColor[2] = 255;
   }
+  
+#ifndef UTILS_USE_PTHREADS
+
   splashOut = new SplashOutputDev(mono ? splashModeMono1 :
 				    gray ? splashModeMono8 :
 #if SPLASH_CMYK
@@ -370,6 +446,9 @@ int main(int argc, char *argv[]) {
 				             splashModeRGB8, 4,
 				  gFalse, paperColor);
   splashOut->startDoc(doc);
+  
+#endif // UTILS_USE_PTHREADS
+  
   if (sz != 0) w = h = sz;
   pg_num_len = numberOfCharacters(doc->getNumPages());
   for (pg = firstPage; pg <= lastPage; ++pg) {
@@ -414,13 +493,56 @@ int main(int argc, char *argv[]) {
         ppmFile = new char[strlen(ppmRoot) + 1 + pg_num_len + 1 + strlen(ext) + 1];
         sprintf(ppmFile, "%s-%0*d.%s", ppmRoot, pg_num_len, pg, ext);
       }
-      savePageSlice(doc, splashOut, pg, x, y, w, h, pg_w, pg_h, ppmFile);
-      delete[] ppmFile;
     } else {
-      savePageSlice(doc, splashOut, pg, x, y, w, h, pg_w, pg_h, NULL);
+      ppmFile = NULL;
+    }
+#ifndef UTILS_USE_PTHREADS
+    // process job in main thread
+    savePageSlice(doc, splashOut, pg, x, y, w, h, pg_w, pg_h, ppmFile);
+    
+    delete[] ppmFile;
+#else
+    
+    // queue job for worker threads
+    PageJob pageJob = {
+      .doc = doc,
+      .pg = pg,
+      
+      .pg_w = pg_w, .pg_h = pg_h,
+      
+      .paperColor = &paperColor,
+      
+      .ppmFile = ppmFile
+    };
+    
+    pageJobQueue.push_back(pageJob);
+    
+#endif // UTILS_USE_PTHREADS
+  }
+#ifndef UTILS_USE_PTHREADS
+  delete splashOut;
+#else
+  
+  // spawn worker threads and wait on them
+  jobs = (pthread_t*)malloc(numberOfJobs * sizeof(pthread_t));
+
+  for(int i=0; i < numberOfJobs; ++i) {
+    if(pthread_create(&jobs[i], NULL, (void* (*)(void*))processPageJobs, NULL) != 0) {
+	    fprintf(stderr, "pthread_create() failed with errno: %d\n", errno);
+	    exit(EXIT_FAILURE);
     }
   }
-  delete splashOut;
+  
+  for(int i=0; i < numberOfJobs; ++i) {
+    if(pthread_join(jobs[i], NULL) != 0) {
+      fprintf(stderr, "pthread_join() failed with errno: %d\n", errno);
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  free(jobs);
+  
+#endif // UTILS_USE_PTHREADS
 
   exitCode = 0;
 
