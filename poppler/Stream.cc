@@ -421,7 +421,6 @@ ImageStream::ImageStream(Stream *strA, int widthA, int nCompsA, int nBitsA) {
   nVals = width * nComps;
   inputLineSize = (nVals * nBits + 7) >> 3;
   if (nBits <= 0 || nVals > INT_MAX / nBits - 7) {
-    // force a call to gmallocn(-1,...), which will throw an exception
     inputLineSize = -1;
   }
   inputLine = (Guchar *)gmallocn_checkoverflow(inputLineSize, sizeof(char));
@@ -478,6 +477,10 @@ Guchar *ImageStream::getLine() {
   int c;
   int i;
   Guchar *p;
+  
+  if (unlikely(inputLine == NULL)) {
+      return NULL;
+  }
  
   int readChars = str->doGetChars(inputLineSize, inputLine);
   for ( ; readChars < inputLineSize; readChars++) inputLine[readChars] = EOF;
