@@ -66,6 +66,9 @@ case "$host_os" in
     win32_libs="-lgdi32"
     create_shared_lib="-no-undefined"
     auto_import_flags="-Wl,--enable-auto-import"
+
+    # Use mingw's ansi stdio extensions
+    CXXFLAGS="$CXXFLAGS -D__USE_MINGW_ANSI_STDIO=1"
   ;;
 esac
 
