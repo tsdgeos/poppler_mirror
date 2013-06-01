@@ -148,7 +148,7 @@ int main( int argc, char **argv )
         argc > 3)
     {
 	// use argument as file name
-	qWarning() << "usage: test-poppler-qt filename [-extract|-arthur|-textRects]";
+	qWarning() << "usage: test-poppler-qt4 filename [-extract|-arthur|-textRects]";
 	exit(1);
     }
   
