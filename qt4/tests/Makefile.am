@@ -19,7 +19,8 @@ SUFFIXES: .moc
 
 noinst_PROGRAMS = test-poppler-qt4 stress-poppler-qt4 \
 	poppler-fonts test-password-qt4 stress-poppler-dir \
-	poppler-attachments poppler-texts poppler-forms
+	poppler-attachments poppler-texts poppler-forms \
+	stress-threads-qt4
 
 
 test_poppler_qt4_SOURCES =			\
@@ -64,6 +65,12 @@ stress_poppler_dir_SOURCES =			\
        stress-poppler-dir.cpp
 
 stress_poppler_dir_LDADD = $(LDADDS)
+
+stress-threads-qt4_SOURCES =			\
+       stress-threads-qt4.cpp
+
+stress-threads-qt4_LDADD = $(LDADDS)
+
 
 clean-generic:
 	rm -f *.moc
