@@ -251,7 +251,7 @@ void CrazyThread::run()
 
 int main(int argc, char** argv)
 {
-    if(argc < 3)
+    if(argc < 5)
     {
         qDebug() << "usage: stress-threads-qt duration sillyCount crazyCount file(s)";
         
