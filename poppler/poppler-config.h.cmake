@@ -164,7 +164,7 @@ char * strtok_r (char *s, const char *delim, char **save_ptr);
 #else
 #define GCC_PRINTF_FORMAT(fmt_index, va_index) \
 	__attribute__((__format__(__printf__, fmt_index, va_index)))
-#end
+#endif
 #else
 #define GCC_PRINTF_FORMAT(fmt_index, va_index)
 #endif
