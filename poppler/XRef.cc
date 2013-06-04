@@ -1252,11 +1252,15 @@ Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
 }
 
 void XRef::lock() {
+#if MULTITHREADED
   gLockMutex(&mutex);
+#endif
 }
 
 void XRef::unlock() {
+#if MULTITHREADED
   gUnlockMutex(&mutex);
+#endif
 }
 
 Object *XRef::getDocInfo(Object *obj) {

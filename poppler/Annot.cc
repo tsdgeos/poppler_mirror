@@ -27,6 +27,7 @@
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Tobias Koenig <tokoe@kdab.com>
+// Copyright (C) 2013 Peter Breitenlohner <peb@mppmu.mpg.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1543,13 +1544,19 @@ void Annot::incRefCnt() {
 }
 
 void Annot::decRefCnt() {
+#if MULTITHREADED
   gLockMutex(&mutex);
+#endif
   if (--refCnt == 0) {
+#if MULTITHREADED
     gUnlockMutex(&mutex);
+#endif
     delete this;
     return;
   }
+#if MULTITHREADED
   gUnlockMutex(&mutex);
+#endif
 }
 
 Annot::~Annot() {
