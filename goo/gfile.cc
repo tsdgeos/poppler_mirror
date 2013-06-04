@@ -23,6 +23,7 @@
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013 Peter Breitenlohner <peb@mppmu.mpg.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -555,6 +556,8 @@ int Gfseek(FILE *f, Goffset offset, int whence) {
   return fseeko(f, offset, whence);
 #elif HAVE_FSEEK64
   return fseek64(f, offset, whence);
+#elif defined(__MINGW32__)
+  return fseeko64(f, offset, whence);
 #elif _WIN32
   return _fseeki64(f, offset, whence);
 #else
@@ -567,6 +570,8 @@ Goffset Gftell(FILE *f) {
   return ftello(f);
 #elif HAVE_FSEEK64
   return ftell64(f);
+#elif defined(__MINGW32__)
+  return ftello64(f);
 #elif _WIN32
   return _ftelli64(f);
 #else
@@ -577,7 +582,7 @@ Goffset Gftell(FILE *f) {
 Goffset GoffsetMax() {
 #if HAVE_FSEEKO
   return (std::numeric_limits<off_t>::max)();
-#elif HAVE_FSEEK64
+#elif HAVE_FSEEK64 || defined(__MINGW32__)
   return (std::numeric_limits<off64_t>::max)();
 #elif _WIN32
   return (std::numeric_limits<__int64>::max)();
