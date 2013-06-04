@@ -31,6 +31,7 @@
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011, 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
+// Copyright (C) 2013 Li Junling <lijunling@sina.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -4237,6 +4238,7 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *ca
   gfx->getState()->setCTM(m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
   updateCTM(gfx->getState(), m1.m[0], m1.m[1], m1.m[2], m1.m[3], m1.m[4], m1.m[5]);
   gfx->display(str);
+  delete splash;
   splash = formerSplash;
   TilingSplashOutBitmap imgData;
   imgData.bitmap = bitmap;
