@@ -459,7 +459,7 @@ void GfxResources::lookupColorSpace(const char *name, Object *obj) {
   obj->initNull();
 }
 
-GfxPattern *GfxResources::lookupPattern(char *name, Gfx *gfx) {
+GfxPattern *GfxResources::lookupPattern(char *name, OutputDev *out) {
   GfxResources *resPtr;
   GfxPattern *pattern;
   Object obj;
@@ -467,7 +467,7 @@ GfxPattern *GfxResources::lookupPattern(char *name, Gfx *gfx) {
   for (resPtr = this; resPtr; resPtr = resPtr->next) {
     if (resPtr->patternDict.isDict()) {
       if (!resPtr->patternDict.dictLookup(name, &obj)->isNull()) {
-	pattern = GfxPattern::parse(&obj, gfx);
+	pattern = GfxPattern::parse(&obj, out);
 	obj.free();
 	return pattern;
       }
@@ -478,7 +478,7 @@ GfxPattern *GfxResources::lookupPattern(char *name, Gfx *gfx) {
   return NULL;
 }
 
-GfxShading *GfxResources::lookupShading(char *name, Gfx *gfx) {
+GfxShading *GfxResources::lookupShading(char *name, OutputDev *out) {
   GfxResources *resPtr;
   GfxShading *shading;
   Object obj;
@@ -486,7 +486,7 @@ GfxShading *GfxResources::lookupShading(char *name, Gfx *gfx) {
   for (resPtr = this; resPtr; resPtr = resPtr->next) {
     if (resPtr->shadingDict.isDict()) {
       if (!resPtr->shadingDict.dictLookup(name, &obj)->isNull()) {
-	shading = GfxShading::parse(&obj, gfx);
+	shading = GfxShading::parse(&obj, out);
 	obj.free();
 	return shading;
       }
@@ -537,9 +537,6 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
 	 PDFRectangle *cropBox, int rotate,
 	 GBool (*abortCheckCbkA)(void *data),
 	 void *abortCheckCbkDataA, XRef *xrefA)
-#ifdef USE_CMS
- : iccColorSpaceCache(5)
-#endif
 {
   int i;
 
@@ -592,9 +589,6 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict,
 	 PDFRectangle *box, PDFRectangle *cropBox,
 	 GBool (*abortCheckCbkA)(void *data),
 	 void *abortCheckCbkDataA, XRef *xrefA)
- #ifdef USE_CMS
- : iccColorSpaceCache(5)
-#endif
 {
   int i;
 
@@ -1188,7 +1182,7 @@ void Gfx::opSetExtGState(Object args[], int numArgs) {
 	  blendingColorSpace = NULL;
 	  isolated = knockout = gFalse;
 	  if (!obj4.dictLookup("CS", &obj5)->isNull()) {
-	    blendingColorSpace = GfxColorSpace::parse(&obj5, this);
+	    blendingColorSpace = GfxColorSpace::parse(&obj5, out);
 	  }
 	  obj5.free();
 	  if (obj4.dictLookup("I", &obj5)->isBool()) {
@@ -1390,7 +1384,7 @@ void Gfx::opSetFillGray(Object args[], int numArgs) {
   state->setFillPattern(NULL);
   res->lookupColorSpace("DefaultGray", &obj);
   if (!obj.isNull()) {
-    colorSpace = GfxColorSpace::parse(&obj, this);
+    colorSpace = GfxColorSpace::parse(&obj, out);
   }
   if (colorSpace == NULL) {
     colorSpace = new GfxDeviceGrayColorSpace();
@@ -1411,7 +1405,7 @@ void Gfx::opSetStrokeGray(Object args[], int numArgs) {
   state->setStrokePattern(NULL);
   res->lookupColorSpace("DefaultGray", &obj);
   if (!obj.isNull()) {
-    colorSpace = GfxColorSpace::parse(&obj, this);
+    colorSpace = GfxColorSpace::parse(&obj, out);
   }
   if (colorSpace == NULL) {
     colorSpace = new GfxDeviceGrayColorSpace();
@@ -1432,7 +1426,7 @@ void Gfx::opSetFillCMYKColor(Object args[], int numArgs) {
 
   res->lookupColorSpace("DefaultCMYK", &obj);
   if (!obj.isNull()) {
-    colorSpace = GfxColorSpace::parse(&obj, this);
+    colorSpace = GfxColorSpace::parse(&obj, out);
   }
   if (colorSpace == NULL) {
     colorSpace = new GfxDeviceCMYKColorSpace();
@@ -1457,7 +1451,7 @@ void Gfx::opSetStrokeCMYKColor(Object args[], int numArgs) {
   state->setStrokePattern(NULL);
   res->lookupColorSpace("DefaultCMYK", &obj);
   if (!obj.isNull()) {
-    colorSpace = GfxColorSpace::parse(&obj, this);
+    colorSpace = GfxColorSpace::parse(&obj, out);
   }
   if (colorSpace == NULL) {
     colorSpace = new GfxDeviceCMYKColorSpace();
@@ -1481,7 +1475,7 @@ void Gfx::opSetFillRGBColor(Object args[], int numArgs) {
   state->setFillPattern(NULL);
   res->lookupColorSpace("DefaultRGB", &obj);
   if (!obj.isNull()) {
-    colorSpace = GfxColorSpace::parse(&obj, this);
+    colorSpace = GfxColorSpace::parse(&obj, out);
   }
   if (colorSpace == NULL) {
     colorSpace = new GfxDeviceRGBColorSpace();
@@ -1505,7 +1499,7 @@ void Gfx::opSetStrokeRGBColor(Object args[], int numArgs) {
   state->setStrokePattern(NULL);
   res->lookupColorSpace("DefaultRGB", &obj);
   if (!obj.isNull()) {
-    colorSpace = GfxColorSpace::parse(&obj, this);
+    colorSpace = GfxColorSpace::parse(&obj, out);
   }
   if (colorSpace == NULL) {
     colorSpace = new GfxDeviceRGBColorSpace();
@@ -1527,9 +1521,9 @@ void Gfx::opSetFillColorSpace(Object args[], int numArgs) {
 
   res->lookupColorSpace(args[0].getName(), &obj);
   if (obj.isNull()) {
-    colorSpace = GfxColorSpace::parse(&args[0], this);
+    colorSpace = GfxColorSpace::parse(&args[0], out);
   } else {
-    colorSpace = GfxColorSpace::parse(&obj, this);
+    colorSpace = GfxColorSpace::parse(&obj, out);
   }
   obj.free();
   if (colorSpace) {
@@ -1552,9 +1546,9 @@ void Gfx::opSetStrokeColorSpace(Object args[], int numArgs) {
   state->setStrokePattern(NULL);
   res->lookupColorSpace(args[0].getName(), &obj);
   if (obj.isNull()) {
-    colorSpace = GfxColorSpace::parse(&args[0], this);
+    colorSpace = GfxColorSpace::parse(&args[0], out);
   } else {
-    colorSpace = GfxColorSpace::parse(&obj, this);
+    colorSpace = GfxColorSpace::parse(&obj, out);
   }
   obj.free();
   if (colorSpace) {
@@ -1625,7 +1619,7 @@ void Gfx::opSetFillColorN(Object args[], int numArgs) {
     }
     if (numArgs > 0) {
       if (args[numArgs-1].isName() &&
-	  (pattern = res->lookupPattern(args[numArgs-1].getName(), this))) {
+	  (pattern = res->lookupPattern(args[numArgs-1].getName(), out))) {
         state->setFillPattern(pattern);
       }
     }
@@ -1677,7 +1671,7 @@ void Gfx::opSetStrokeColorN(Object args[], int numArgs) {
       return;
     }
     if (args[numArgs-1].isName() &&
-	(pattern = res->lookupPattern(args[numArgs-1].getName(), this))) {
+	(pattern = res->lookupPattern(args[numArgs-1].getName(), out))) {
       state->setStrokePattern(pattern);
     }
 
@@ -2387,7 +2381,7 @@ void Gfx::opShFill(Object args[], int numArgs) {
     return;
   }
 
-  if (!(shading = res->lookupShading(args[0].getName(), this))) {
+  if (!(shading = res->lookupShading(args[0].getName(), out))) {
     return;
   }
 
@@ -4344,14 +4338,14 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
       }
     }
     if (!obj1.isNull()) {
-      colorSpace = GfxColorSpace::parse(&obj1, this);
+      colorSpace = GfxColorSpace::parse(&obj1, out);
     } else if (csMode == streamCSDeviceGray) {
       Object objCS;
       res->lookupColorSpace("DefaultGray", &objCS);
       if (objCS.isNull()) {
         colorSpace = new GfxDeviceGrayColorSpace();
       } else {
-        colorSpace = GfxColorSpace::parse(&objCS, this);
+        colorSpace = GfxColorSpace::parse(&objCS, out);
       }
       objCS.free();
     } else if (csMode == streamCSDeviceRGB) {
@@ -4360,7 +4354,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
       if (objCS.isNull()) {
         colorSpace = new GfxDeviceRGBColorSpace();
       } else {
-        colorSpace = GfxColorSpace::parse(&objCS, this);
+        colorSpace = GfxColorSpace::parse(&objCS, out);
       }
       objCS.free();
     } else if (csMode == streamCSDeviceCMYK) {
@@ -4369,7 +4363,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
       if (objCS.isNull()) {
         colorSpace = new GfxDeviceCMYKColorSpace();
       } else {
-        colorSpace = GfxColorSpace::parse(&objCS, this);
+        colorSpace = GfxColorSpace::parse(&objCS, out);
       }
       objCS.free();
     } else {
@@ -4464,7 +4458,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
 	  obj2.free();
 	}
       }
-      maskColorSpace = GfxColorSpace::parse(&obj1, this);
+      maskColorSpace = GfxColorSpace::parse(&obj1, out);
       obj1.free();
       if (!maskColorSpace || maskColorSpace->getMode() != csDeviceGray) {
 	goto err1;
@@ -4760,7 +4754,7 @@ void Gfx::doForm(Object *str) {
   if (dict->lookup("Group", &obj1)->isDict()) {
     if (obj1.dictLookup("S", &obj2)->isName("Transparency")) {
       if (!obj1.dictLookup("CS", &obj3)->isNull()) {
-	blendingColorSpace = GfxColorSpace::parse(&obj3, this);
+	blendingColorSpace = GfxColorSpace::parse(&obj3, out);
       }
       obj3.free();
       if (obj1.dictLookup("I", &obj3)->isBool()) {
@@ -5388,10 +5382,3 @@ void Gfx::popResources() {
   delete res;
   res = resPtr;
 }
-
-#ifdef USE_CMS
-PopplerCache *Gfx::getIccColorSpaceCache()
-{
-  return &iccColorSpaceCache;
-}
-#endif

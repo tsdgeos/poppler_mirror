@@ -17,7 +17,7 @@
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2007 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -193,3 +193,9 @@ GooHash *OutputDev::endProfile() {
   return profile;
 }
 
+#ifdef USE_CMS
+PopplerCache *OutputDev::getIccColorSpaceCache()
+{
+  return &iccColorSpaceCache;
+}
+#endif
