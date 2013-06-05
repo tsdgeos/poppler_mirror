@@ -66,10 +66,10 @@ stress_poppler_dir_SOURCES =			\
 
 stress_poppler_dir_LDADD = $(LDADDS)
 
-stress-threads-qt4_SOURCES =			\
+stress_threads_qt4_SOURCES =			\
        stress-threads-qt4.cpp
 
-stress-threads-qt4_LDADD = $(LDADDS)
+stress_threads_qt4_LDADD = $(LDADDS)
 
 
 clean-generic:
