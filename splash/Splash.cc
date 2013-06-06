@@ -3682,7 +3682,7 @@ SplashError Splash::drawImage(SplashImageSource src, void *srcData,
         return splashErrBadArg;
       }
       scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h,
-			     scaledWidth, scaledHeight, interpolate);
+			     scaledWidth, scaledHeight, interpolate, tilingPattern);
       if (scaledImg == NULL) {
         return splashErrBadArg;
       }
@@ -3720,7 +3720,7 @@ SplashError Splash::drawImage(SplashImageSource src, void *srcData,
         return splashErrBadArg;
       }
       scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h,
-			     scaledWidth, scaledHeight, interpolate);
+			     scaledWidth, scaledHeight, interpolate, tilingPattern);
       if (scaledImg == NULL) {
         return splashErrBadArg;
       }
@@ -4063,7 +4063,7 @@ static GBool isImageInterpolationRequired(int srcWidth, int srcHeight,
 SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData,
 				 SplashColorMode srcMode, int nComps,
 				 GBool srcAlpha, int srcWidth, int srcHeight,
-				 int scaledWidth, int scaledHeight, GBool interpolate) {
+				 int scaledWidth, int scaledHeight, GBool interpolate, GBool tilingPattern) {
   SplashBitmap *dest;
 
   dest = new SplashBitmap(scaledWidth, scaledHeight, 1, srcMode, srcAlpha, gTrue, bitmap->getSeparationList());
@@ -4081,7 +4081,7 @@ SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData,
 	scaleImageYuXd(src, srcData, srcMode, nComps, srcAlpha,
 		      srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
       } else {
-	if (isImageInterpolationRequired(srcWidth, srcHeight, scaledWidth, scaledHeight, interpolate)) {
+	if (!tilingPattern && isImageInterpolationRequired(srcWidth, srcHeight, scaledWidth, scaledHeight, interpolate)) {
 	  scaleImageYuXuBilinear(src, srcData, srcMode, nComps, srcAlpha,
 				srcWidth, srcHeight, scaledWidth, scaledHeight, dest);
 	} else {
@@ -4969,6 +4969,13 @@ void Splash::vertFlipImage(SplashBitmap *img, int width, int height,
     }
   }
   gfree(lineBuf);
+}
+
+void Splash::blitImage(SplashBitmap *src, GBool srcAlpha, int xDest, int yDest) {
+  SplashClipResult clipRes = state->clip->testRect(xDest, yDest, xDest + src->getWidth() - 1, yDest + src->getHeight() - 1);
+  if (clipRes != splashClipAllOutside) {
+    blitImage(src, srcAlpha, xDest, yDest, clipRes);
+  }
 }
 
 void Splash::blitImage(SplashBitmap *src, GBool srcAlpha, int xDest, int yDest,

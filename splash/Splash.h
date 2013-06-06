@@ -232,6 +232,7 @@ public:
   // zero.
   SplashError blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
 			      int xDest, int yDest, int w, int h);
+  void blitImage(SplashBitmap *src, GBool srcAlpha, int xDest, int yDest);
 
   //----- misc
 
@@ -364,7 +365,7 @@ private:
   SplashBitmap *scaleImage(SplashImageSource src, void *srcData,
 			   SplashColorMode srcMode, int nComps,
 			   GBool srcAlpha, int srcWidth, int srcHeight,
-			   int scaledWidth, int scaledHeight, GBool interpolate);
+			   int scaledWidth, int scaledHeight, GBool interpolate, GBool tilingPattern = gFalse);
   void scaleImageYdXd(SplashImageSource src, void *srcData,
 		      SplashColorMode srcMode, int nComps,
 		      GBool srcAlpha, int srcWidth, int srcHeight,

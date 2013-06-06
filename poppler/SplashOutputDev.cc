@@ -4268,7 +4268,20 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *ca
   matc[1] = ctm[1];
   matc[2] = ctm[2];
   matc[3] = ctm[3];
-  retValue = splash->drawImage(&tilingBitmapSrc, &imgData, colorMode, gTrue, result_width, result_height, matc, gTrue) == splashOk;
+  GBool minorAxisZero = matc[1] == 0 && matc[2] == 0;
+  if (matc[0] > 0 && minorAxisZero && matc[3] > 0) {
+    // draw the tiles
+    for (int y = 0; y < imgData.repeatY; ++y) {
+      for (int x = 0; x < imgData.repeatX; ++x) {
+        x0 = splashFloor(matc[4]) + x * tBitmap->getWidth();
+        y0 = splashFloor(matc[5]) + y * tBitmap->getHeight();
+        splash->blitImage(tBitmap, gTrue, x0, y0);
+      }
+    }
+    retValue = gTrue;
+  } else {
+    retValue = splash->drawImage(&tilingBitmapSrc, &imgData, colorMode, gTrue, result_width, result_height, matc, gFalse, gTrue) == splashOk;
+  }
   delete tBitmap;
   delete gfx;
   return retValue;
