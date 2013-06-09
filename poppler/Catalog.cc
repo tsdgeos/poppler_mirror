@@ -26,6 +26,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -138,7 +139,7 @@ Catalog::~Catalog() {
   delete kidsIdxList;
   if (attrsList) {
     std::vector<PageAttrs *>::iterator it;
-    for (it = attrsList->begin() ; it < attrsList->end(); it++ ) {
+    for (it = attrsList->begin() ; it != attrsList->end(); ++it ) {
       delete *it;
     }
     delete attrsList;
@@ -146,7 +147,7 @@ Catalog::~Catalog() {
   delete pagesRefList;
   if (pagesList) {
     std::vector<Dict *>::iterator it;
-    for (it = pagesList->begin() ; it < pagesList->end(); it++ ) {
+    for (it = pagesList->begin() ; it != pagesList->end(); ++it ) {
       if (!(*it)->decRef()) {
          delete *it;
       }

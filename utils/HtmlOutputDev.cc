@@ -35,6 +35,7 @@
 // Copyright (C) 2012 Gerald Schmidt <solahcin@gmail.com>
 // Copyright (C) 2012 Pino Toscano <pino@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1700,9 +1701,9 @@ GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 			GooString *str = Docname->copy();
 			str->append("-outline.html");
 			output = fopen(str->getCString(), "w");
+			delete str;
 			if (output == NULL)
 				return gFalse;
-			delete str;
 			bClose = gTrue;
 
 			GooString *htmlEncoding =

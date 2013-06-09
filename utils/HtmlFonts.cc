@@ -25,6 +25,7 @@
 // Copyright (C) 2011 Stephen Reichling <sreichling@chegg.com>
 // Copyright (C) 2012 Igor Slepchin <igor.slepchin@gmail.com>
 // Copyright (C) 2012 Luis Parravicini <lparravi@gmail.com>
+// Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -297,7 +298,7 @@ HtmlFontAccu::~HtmlFontAccu(){
 
 int HtmlFontAccu::AddFont(const HtmlFont& font){
  std::vector<HtmlFont>::iterator i; 
- for (i=accu->begin();i!=accu->end();i++)
+ for (i=accu->begin();i!=accu->end();++i)
  {
 	if (font.isEqual(*i)) 
 	{

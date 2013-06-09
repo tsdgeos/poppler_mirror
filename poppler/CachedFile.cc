@@ -7,6 +7,7 @@
 // Copyright 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright 2010, 2011 Hib Eris <hib@hiberis.nl>
 // Copyright 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 //
 //========================================================================
 
@@ -213,7 +214,7 @@ size_t CachedFileWriter::write(const char *ptr, size_t size)
   while (len) {
     if (chunks) {
       if (offset == CachedFileChunkSize) {
-         it++;
+         ++it;
          if (it == (*chunks).end()) return written;
          offset = 0;
       }
