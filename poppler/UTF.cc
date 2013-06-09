@@ -101,7 +101,7 @@ int TextStringToUCS4(GooString *textStr, Unicode **ucs4)
         utf16[i] = (s[2 + i*2] & 0xff) << 8 | (s[3 + i*2] & 0xff);
       }
       len = UTF16toUCS4(utf16, len, &u);
-      delete utf16;
+      delete[] utf16;
     } else {
       u = NULL;
     }
