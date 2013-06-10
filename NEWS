@@ -1,3 +1,15 @@
+Release 0.23.2
+        core:
+         * SplashOutputDev: Speed-up some tiling on a 10x factor
+         * Improve caching of lcms2 ICC color profiles
+         * Put some private classes in an anonymous namespace
+
+        qt4:
+         * Add a thread stresser tool
+
+        build system:
+         * Fix mingw build
+
 Release 0.23.1
         core:
          * XRef stream writing: Write 32-bit offsets when possible
