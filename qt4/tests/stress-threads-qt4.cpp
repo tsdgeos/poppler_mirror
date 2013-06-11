@@ -1,5 +1,6 @@
 
 #include <unistd.h>
+#include <time.h>
 
 #include <poppler-qt4.h>
 #include <poppler-form.h>
@@ -26,11 +27,12 @@ private:
 class CrazyThread : public QThread
 {
 public:
-    CrazyThread(Poppler::Document* document, QMutex* annotationMutex, QObject* parent = 0);
+    CrazyThread(uint seed, Poppler::Document* document, QMutex* annotationMutex, QObject* parent = 0);
 
     void run();
 
 private:
+    uint m_seed;
     Poppler::Document* m_document;
     QMutex* m_annotationMutex;
 
@@ -86,7 +88,8 @@ void SillyThread::run()
     }
 }
 
-CrazyThread::CrazyThread(Poppler::Document* document, QMutex* annotationMutex, QObject* parent) : QThread(parent),
+CrazyThread::CrazyThread(uint seed, Poppler::Document* document, QMutex* annotationMutex, QObject* parent) : QThread(parent),
+    m_seed(seed),
     m_document(document),
     m_annotationMutex(annotationMutex)
 {
@@ -96,7 +99,7 @@ void CrazyThread::run()
 {
     typedef QScopedPointer< Poppler::Page > PagePointer;
 
-    qsrand(static_cast< uint >(currentThreadId()));
+    qsrand(m_seed);
 
     forever
     {
@@ -262,6 +265,8 @@ int main(int argc, char** argv)
     const int duration = atoi(argv[1]);
     const int sillyCount = atoi(argv[2]);
     const int crazyCount = atoi(argv[3]);
+    
+    qsrand(time(0));
 
     for(int argi = 4; argi < argc; ++argi)
     {
@@ -289,7 +294,7 @@ int main(int argc, char** argv)
 
         for(int i = 0; i < crazyCount; ++i)
         {
-            (new CrazyThread(document, annotationMutex))->start();
+            (new CrazyThread(qrand(), document, annotationMutex))->start();
         }
     }
 
