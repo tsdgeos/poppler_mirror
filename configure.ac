@@ -491,7 +491,7 @@ elif test x$enable_cairo_output = xtry; then
                     [enable_cairo_output="no"
 		     use_cairo="no (requires cairo >= $CAIRO_VERSION)"])
 fi
-if test x$use_cairo = x; then
+if test "x$use_cairo" = "x"; then
    use_cairo=$enable_cairo_output
 fi
 
