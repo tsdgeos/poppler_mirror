@@ -624,6 +624,61 @@ fi
 
 AM_CONDITIONAL(BUILD_POPPLER_QT4, test "x$enable_poppler_qt4" = "xyes")
 
+dnl 
+dnl Try Qt5
+dnl
+
+AC_ARG_ENABLE(poppler-qt5,
+              AC_HELP_STRING([--disable-poppler-qt5],
+	                     [Don't compile poppler Qt5 wrapper.]),
+              enable_poppler_qt5=$enableval,
+              enable_poppler_qt5="try")
+if test x$enable_poppler_qt5 = xyes; then
+  PKG_CHECK_MODULES(POPPLER_QT5, 
+	            Qt5Core >= 5.0.0 Qt5Gui >= 5.0.0 Qt5Xml >= 5.0.0 Qt5Widgets >= 5.0.0)
+  PKG_CHECK_MODULES(POPPLER_QT5_TEST, 
+	            Qt5Test >= 5.0.0 ) 
+elif test x$enable_poppler_qt5 = xtry; then
+  PKG_CHECK_MODULES(POPPLER_QT5,
+                    Qt5Core >= 5.0.0 Qt5Gui >= 5.0.0 Qt5Xml >= 5.0.0 Qt5Widgets >= 5.0.0,
+                    [enable_poppler_qt5="yes"],
+                    [enable_poppler_qt5="no"])
+  if test x$enable_poppler_qt5 = xyes; then
+    PKG_CHECK_MODULES(POPPLER_QT5_TEST,
+                    Qt5Test >= 5.0.0,
+                    [enable_poppler_qt5="yes"],
+                    [enable_poppler_qt5="no"])
+  fi
+fi
+
+AC_SUBST(POPPLER_QT5_CXXFLAGS)
+AC_SUBST(POPPLER_QT5_LIBS)
+AC_SUBST(POPPLER_QT5_TEST_LIBS)
+
+if test x$enable_poppler_qt5 = xyes; then
+  AC_CHECK_TOOL(MOCQT5, moc)
+  AC_MSG_CHECKING([for Qt5 moc])
+  mocversion=`$MOCQT5 -v 2>&1`
+  mocversiongrep=`echo $mocversion | grep "Qt 5"`
+  if test x"$mocversiongrep" != x"$mocversion"; then
+    AC_MSG_RESULT([no])
+    # moc was not the qt5 one, try with moc-qt5
+    AC_CHECK_TOOL(MOCQT5, moc-qt5)
+    AC_MSG_CHECKING([for Qt5 moc-qt5])
+    mocversion=`$MOCQT5 -v 2>&1`
+    mocversiongrep=`echo $mocversion | grep "Qt 5"`
+    if test x"$mocversiongrep" != x"$mocversion"; then
+      # no valid moc found
+      enable_poppler_qt5=no;
+      MOCQT5="not found"
+    fi
+  fi
+  AC_SUBST(MOCQT5)
+  AC_MSG_RESULT([$MOCQT5])
+fi
+
+AM_CONDITIONAL(BUILD_POPPLER_QT5, test "x$enable_poppler_qt5" = "xyes")
+
 dnl
 dnl CPP frontend
 dnl
@@ -747,14 +802,14 @@ if test "x$GCC" != xyes; then
 fi
 case "$enable_compile_warnings" in
   no)	;;
-  yes)	CXXFLAGS="-Wall -Woverloaded-virtual -Wnon-virtual-dtor -Wcast-align -fno-exceptions -fno-check-new -fno-common $CXXFLAGS";
+  yes)	CXXFLAGS="-Wall -Woverloaded-virtual -Wnon-virtual-dtor -Wcast-align -fno-exceptions -fno-check-new -fno-common -fPIE $CXXFLAGS";
         CFLAGS="-Wall $CFLAGS" ;;
   kde)	CXXFLAGS="-Wnon-virtual-dtor -Wno-long-long -Wundef \
 		-D_XOPEN_SOURCE=600 -D_BSD_SOURCE -Wcast-align \
 		-Wconversion -Wall -W -Wpointer-arith \
 		-Wwrite-strings -O2 -Wformat-security \
 		-Wmissing-format-attribute -fno-exceptions -fno-check-new \
-		-fno-common $CXXFLAGS" ;;
+		-fno-common -fPIE $CXXFLAGS" ;;
 esac
 
 case `$PKG_CONFIG --version` in
@@ -791,6 +846,10 @@ qt4/Makefile
 qt4/src/Makefile
 qt4/tests/Makefile
 qt4/demos/Makefile
+qt5/Makefile
+qt5/src/Makefile
+qt5/tests/Makefile
+qt5/demos/Makefile
 cpp/Makefile
 cpp/poppler-version.h
 cpp/tests/Makefile
@@ -804,6 +863,8 @@ poppler-glib.pc
 poppler-glib-uninstalled.pc
 poppler-qt4.pc
 poppler-qt4-uninstalled.pc
+poppler-qt5.pc
+poppler-qt5-uninstalled.pc
 poppler-cpp.pc
 poppler-cpp-uninstalled.pc])
 
@@ -814,6 +875,7 @@ echo "  font configuration: $with_font_configuration"
 echo "  splash output:      $enable_splash_output"
 echo "  cairo output:       $use_cairo"
 echo "  qt4 wrapper:        $enable_poppler_qt4"
+echo "  qt5 wrapper:        $enable_poppler_qt5"
 echo "  glib wrapper:       $use_glib"
 echo "    introspection:    $found_introspection"
 echo "  cpp wrapper:        $enable_poppler_cpp"
