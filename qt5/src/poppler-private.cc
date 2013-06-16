@@ -55,7 +55,7 @@ namespace Debug {
         Debug::debugClosure = closure;
     }
 
-    void qt4ErrorFunction(void * /*data*/, ErrorCategory /*category*/, Goffset pos, char *msg)
+    void qt5ErrorFunction(void * /*data*/, ErrorCategory /*category*/, Goffset pos, char *msg)
     {
         QString emsg;
 
@@ -250,7 +250,7 @@ namespace Debug {
         {
             utf8Map = 0;
             globalParams = new GlobalParams();
-            setErrorCallback(qt4ErrorFunction, NULL);
+            setErrorCallback(qt5ErrorFunction, NULL);
         }
         count ++;
     }

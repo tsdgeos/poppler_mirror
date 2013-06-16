@@ -1,4 +1,4 @@
-/* poppler-converter-private.h: Qt4 interface to poppler
+/* poppler-converter-private.h: Qt interface to poppler
  * Copyright (C) 2007, 2009, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  *
@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef POPPLER_QT4_CONVERTER_PRIVATE_H
-#define POPPLER_QT4_CONVERTER_PRIVATE_H
+#ifndef POPPLER_QT5_CONVERTER_PRIVATE_H
+#define POPPLER_QT5_CONVERTER_PRIVATE_H
 
 #include <QtCore/QString>
 

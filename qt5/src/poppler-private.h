@@ -61,7 +61,7 @@ namespace Poppler {
 
     GooString *QStringToGooString(const QString &s);
 
-    void qt4ErrorFunction(int pos, char *msg, va_list args);
+    void qt5ErrorFunction(int pos, char *msg, va_list args);
 
     class LinkDestinationData
     {
