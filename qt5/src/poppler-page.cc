@@ -479,24 +479,6 @@ bool Page::search(const QString &text, double &sLeft, double &sTop, double &sRig
   return found;
 }
 
-bool Page::search(const QString &text, QRectF &rect, SearchDirection direction, SearchMode caseSensitive, Rotation rotate) const
-{
-  double sLeft, sTop, sRight, sBottom;
-  sLeft = rect.left();
-  sTop = rect.top();
-  sRight = rect.right();
-  sBottom = rect.bottom();
-
-  bool found = search(text, sLeft, sTop, sRight, sBottom, direction, caseSensitive, rotate);
-
-  rect.setLeft( sLeft );
-  rect.setTop( sTop );
-  rect.setRight( sRight );
-  rect.setBottom( sBottom );
-
-  return found;
-}
-
 QList<QRectF> Page::search(const QString &text, SearchMode caseSensitive, Rotation rotate) const
 {
   GBool sCase;

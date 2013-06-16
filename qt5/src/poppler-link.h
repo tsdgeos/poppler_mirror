@@ -473,16 +473,6 @@ class POPPLER_QT5_EXPORT LinkRendition : public Link
 		 *
 		 * \param linkArea the active area of the link
 		 * \param rendition the media rendition object. Ownership is taken
-		 *
-		 * \deprecated Use the constructor that takes all parameter instead
-		 */
-		Q_DECL_DEPRECATED LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition );
-
-		/**
-		 * Create a new rendition link.
-		 *
-		 * \param linkArea the active area of the link
-		 * \param rendition the media rendition object. Ownership is taken
 		 * \param operation the numeric operation (action) (@see ::LinkRendition::RenditionOperation)
 		 * \param script the java script code
 		 * \param annotationReference the object reference of the screen annotation associated with this rendition action

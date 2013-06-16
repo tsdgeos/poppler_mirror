@@ -244,11 +244,6 @@ class POPPLER_QT5_EXPORT Annotation
     /// \since 0.20
     void setPopup( const Popup& popup );
 
-    /// \cond PRIVATE
-    // This field is deprecated and not used any more. Use popup
-    Q_DECL_DEPRECATED struct { int width, height; } window; // Always set to zero
-    /// \endcond
-
     /// \since 0.20
     RevScope revisionScope() const; // Root
 
@@ -362,19 +357,6 @@ class POPPLER_QT5_EXPORT TextAnnotation : public Annotation
 
     int inplaceAlign() const;
     void setInplaceAlign( int align );
-
-    /**
-       Synonym for contents()
-
-       \deprecated Use contents() instead
-    */
-    QString inplaceText() const;
-    /**
-       Synonym for setContents()
-
-       \deprecated Use setContents() instead
-    */
-    void setInplaceText( const QString &text );
 
     QPointF calloutPoint( int id ) const;
     /// \since 0.20

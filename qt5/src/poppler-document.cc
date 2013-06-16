@@ -214,20 +214,6 @@ namespace Poppler {
 	return m_doc->m_embeddedFiles;
     }
 
-    bool Document::scanForFonts( int numPages, QList<FontInfo> *fontList ) const
-    {
-	if ( !m_doc->m_fontInfoIterator )
-		return false;
-	if ( !m_doc->m_fontInfoIterator->hasNext() )
-		return false;
-	while ( m_doc->m_fontInfoIterator->hasNext() && numPages )
-	{
-		(*fontList) += m_doc->m_fontInfoIterator->next();
-		--numPages;
-	}
-	return true;
-    }
-
     FontIterator* Document::newFontIterator( int startPage ) const
     {
 	return new FontIterator( startPage, m_doc );
@@ -396,11 +382,6 @@ namespace Poppler {
     bool Document::okToAssemble() const
     {
 	return m_doc->doc->okToAssemble();
-    }
-
-    double Document::pdfVersion() const
-    {
-	return m_doc->doc->getPDFMajorVersion () + m_doc->doc->getPDFMinorVersion() / 10.0;
     }
 
     void Document::getPdfVersion(int *major, int *minor) const

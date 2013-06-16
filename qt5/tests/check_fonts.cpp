@@ -15,7 +15,7 @@ private slots:
     void checkFontIterator();
     void checkSecondDocumentQuery();
     void checkMultipleIterations();
-    void checkScanForFonts();
+    void checkIteratorFonts();
 };
 
 
@@ -216,7 +216,7 @@ void TestFontsData::checkMultipleIterations()
     delete doc;
 }
 
-void TestFontsData::checkScanForFonts()
+void TestFontsData::checkIteratorFonts()
 {
     Poppler::Document *doc;
     doc = Poppler::Document::load(TESTDATADIR "/tests/fonts.pdf");
@@ -224,21 +224,10 @@ void TestFontsData::checkScanForFonts()
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
     QCOMPARE( listOfFonts.size(), 3 );
-    // check we get the very same result when gatering fonts using scanForFonts
-    QList<Poppler::FontInfo> listOfFonts2;
-    for ( int i = 0; i < doc->numPages(); ++i )
-    {
-        doc->scanForFonts( 1, &listOfFonts2 );
-    }
+    
+    // check we get the very same result when gatering fonts using the iterator
+    QList<Poppler::FontInfo> listOfFonts2 = loadFontsViaIterator( doc );
     QCOMPARE( listOfFonts, listOfFonts2 );
-
-   // check doing a second scanForFonts gives no result
-    QList<Poppler::FontInfo> listOfFonts3;
-    for ( int i = 0; i < doc->numPages(); ++i )
-    {
-        doc->scanForFonts( 1, &listOfFonts3 );
-    }
-    QVERIFY( listOfFonts3.isEmpty() );
 
     delete doc;
 }

@@ -788,7 +788,6 @@ void Annotation::Popup::setText( const QString &text )
 Annotation::Annotation( AnnotationPrivate &dd )
     : d_ptr( &dd )
 {
-    window.width = window.height = 0;
 }
 
 Annotation::~Annotation()
@@ -799,8 +798,6 @@ Annotation::Annotation( AnnotationPrivate &dd, const QDomNode &annNode )
     : d_ptr( &dd )
 {
     Q_D( Annotation );
-
-    window.width = window.height = 0;
 
     // get the [base] element of the annotation node
     QDomElement e = AnnotationUtils::findChildElement( annNode, "base" );
@@ -1672,7 +1669,7 @@ TextAnnotation::TextAnnotation( const QDomNode & node )
 
             if ( ee.tagName() == "escapedText" )
             {
-                setInplaceText(ee.firstChild().toCDATASection().data());
+                setContents(ee.firstChild().toCDATASection().data());
             }
             else if ( ee.tagName() == "callout" )
             {
@@ -1718,11 +1715,11 @@ void TextAnnotation::store( QDomNode & node, QDomDocument & document ) const
     textElement.setAttribute( "font", textFont().toString() );
 
     // Sub-Node-1 - escapedText
-    if ( !inplaceText().isEmpty() )
+    if ( !contents().isEmpty() )
     {
         QDomElement escapedText = document.createElement( "escapedText" );
         textElement.appendChild( escapedText );
-        QDomCDATASection textCData = document.createCDATASection( inplaceText() );
+        QDomCDATASection textCData = document.createCDATASection( contents() );
         escapedText.appendChild( textCData );
     }
 
@@ -1884,16 +1881,6 @@ void TextAnnotation::setInplaceAlign( int align )
         ftextann->setQuadding((AnnotFreeText::AnnotFreeTextQuadding)align);
         d->pdfAnnot->invalidateAppearance();
     }
-}
-
-QString TextAnnotation::inplaceText() const
-{
-    return contents();
-}
-
-void TextAnnotation::setInplaceText( const QString &text )
-{
-    setContents(text);
 }
 
 QPointF TextAnnotation::calloutPoint( int id ) const

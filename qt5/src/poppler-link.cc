@@ -602,11 +602,6 @@ class LinkMoviePrivate : public LinkPrivate
 	}
 
 	// LinkRendition
-	LinkRendition::LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition )
-		: Link( *new LinkRenditionPrivate( linkArea, rendition, ::LinkRendition::NoRendition, QString(), Ref() ) )
-	{
-	}
-	
 	LinkRendition::LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref &annotationReference )
 		: Link( *new LinkRenditionPrivate( linkArea, rendition, static_cast<enum ::LinkRendition::RenditionOperation>(operation), script, annotationReference ) )
 	{

@@ -17,21 +17,24 @@ void TestSearch::bug7063()
     QVERIFY( doc );
    
     Poppler::Page *page = doc->page(0);
-    QRectF pageRegion( QPointF(0,0), page->pageSize() );
+    double rectLeft, rectTop, rectRight, rectBottom;
+    rectLeft = 0;
+    rectTop = 0;
+    rectRight = page->pageSize().width();
+    rectBottom = page->pageSize().height();
+    QCOMPARE( page->search(QString("non-ascii:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
 
-    QCOMPARE( page->search(QString("non-ascii:"), pageRegion, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
+    QCOMPARE( page->search(QString("Ascii"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), false );
+    QCOMPARE( page->search(QString("Ascii"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::CaseInsensitive), true );
 
-    QCOMPARE( page->search(QString("Ascii"), pageRegion, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), false );
-    QCOMPARE( page->search(QString("Ascii"), pageRegion, Poppler::Page::FromTop, Poppler::Page::CaseInsensitive), true );
+    QCOMPARE( page->search(QString("latin1:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), false );
 
-    QCOMPARE( page->search(QString("latin1:"), pageRegion, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), false );
-
-    QCOMPARE( page->search(QString::fromUtf8("é"), pageRegion, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
-    QCOMPARE( page->search(QString::fromUtf8("à"), pageRegion, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
-    QCOMPARE( page->search(QString::fromUtf8("ç"), pageRegion, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
-    QCOMPARE( page->search(QString::fromUtf8("search \"é\", \"à\" or \"ç\""), pageRegion, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
-    QCOMPARE( page->search(QString::fromUtf8("¥µ©"), pageRegion, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
-    QCOMPARE( page->search(QString::fromUtf8("¥©"), pageRegion, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), false );
+    QCOMPARE( page->search(QString::fromUtf8("é"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
+    QCOMPARE( page->search(QString::fromUtf8("à"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
+    QCOMPARE( page->search(QString::fromUtf8("ç"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
+    QCOMPARE( page->search(QString::fromUtf8("search \"é\", \"à\" or \"ç\""), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
+    QCOMPARE( page->search(QString::fromUtf8("¥µ©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
+    QCOMPARE( page->search(QString::fromUtf8("¥©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), false );
   
     delete doc;
 }
@@ -43,45 +46,49 @@ void TestSearch::testNextAndPrevious()
     QVERIFY( doc );
   
     Poppler::Page *page = doc->page(0);
-    QRectF region( QPointF(0,0), page->pageSize() );
+    double rectLeft, rectTop, rectRight, rectBottom;
+    rectLeft = 0;
+    rectTop = 0;
+    rectRight = page->pageSize().width();
+    rectBottom = page->pageSize().height();
     
-    QCOMPARE( page->search(QString("is"), region, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
-    QVERIFY( qAbs(region.x() - 161.44) < 0.01 );
-    QVERIFY( qAbs(region.y() - 127.85) < 0.01 );
-    QVERIFY( qAbs(region.width() - 6.70) < 0.01 );
-    QVERIFY( qAbs(region.height() - 8.85) < 0.01 );
-    QCOMPARE( page->search(QString("is"), region, Poppler::Page::NextResult, Poppler::Page::CaseSensitive), true );
-    QVERIFY( qAbs(region.x() - 171.46) < 0.01 );
-    QVERIFY( qAbs(region.y() - 127.85) < 0.01 );
-    QVERIFY( qAbs(region.width() - 6.70) < 0.01 );
-    QVERIFY( qAbs(region.height() - 8.85) < 0.01 );
-    QCOMPARE( page->search(QString("is"), region, Poppler::Page::NextResult, Poppler::Page::CaseSensitive), true );
-    QVERIFY( qAbs(region.x() - 161.44) < 0.01 );
-    QVERIFY( qAbs(region.y() - 139.81) < 0.01 );
-    QVERIFY( qAbs(region.width() - 6.70) < 0.01 );
-    QVERIFY( qAbs(region.height() - 8.85) < 0.01 );
-    QCOMPARE( page->search(QString("is"), region, Poppler::Page::NextResult, Poppler::Page::CaseSensitive), true );
-    QVERIFY( qAbs(region.x() - 171.46) < 0.01 );
-    QVERIFY( qAbs(region.y() - 139.81) < 0.01 );
-    QVERIFY( qAbs(region.width() - 6.70) < 0.01 );
-    QVERIFY( qAbs(region.height() - 8.85) < 0.01 );
-    QCOMPARE( page->search(QString("is"), region, Poppler::Page::NextResult, Poppler::Page::CaseSensitive), false );
-    QCOMPARE( page->search(QString("is"), region, Poppler::Page::PreviousResult, Poppler::Page::CaseSensitive), true );
-    QVERIFY( qAbs(region.x() - 161.44) < 0.01 );
-    QVERIFY( qAbs(region.y() - 139.81) < 0.01 );
-    QVERIFY( qAbs(region.width() - 6.70) < 0.01 );
-    QVERIFY( qAbs(region.height() - 8.85) < 0.01 );
-    QCOMPARE( page->search(QString("is"), region, Poppler::Page::PreviousResult, Poppler::Page::CaseSensitive), true );
-    QVERIFY( qAbs(region.x() - 171.46) < 0.01 );
-    QVERIFY( qAbs(region.y() - 127.85) < 0.01 );
-    QVERIFY( qAbs(region.width() - 6.70) < 0.01 );
-    QVERIFY( qAbs(region.height() - 8.85) < 0.01 );
-    QCOMPARE( page->search(QString("is"), region, Poppler::Page::PreviousResult, Poppler::Page::CaseSensitive), true );
-    QVERIFY( qAbs(region.x() - 161.44) < 0.01 );
-    QVERIFY( qAbs(region.y() - 127.85) < 0.01 );
-    QVERIFY( qAbs(region.width() - 6.70) < 0.01 );
-    QVERIFY( qAbs(region.height() - 8.85) < 0.01 );
-    QCOMPARE( page->search(QString("is"), region, Poppler::Page::PreviousResult, Poppler::Page::CaseSensitive), false );
+    QCOMPARE( page->search(QString("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::CaseSensitive), true );
+    QVERIFY( qAbs(rectLeft - 161.44) < 0.01 );
+    QVERIFY( qAbs(rectTop - 127.85) < 0.01 );
+    QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
+    QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
+    QCOMPARE( page->search(QString("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult, Poppler::Page::CaseSensitive), true );
+    QVERIFY( qAbs(rectLeft - 171.46) < 0.01 );
+    QVERIFY( qAbs(rectTop - 127.85) < 0.01 );
+    QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
+    QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
+    QCOMPARE( page->search(QString("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult, Poppler::Page::CaseSensitive), true );
+    QVERIFY( qAbs(rectLeft - 161.44) < 0.01 );
+    QVERIFY( qAbs(rectTop - 139.81) < 0.01 );
+    QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
+    QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
+    QCOMPARE( page->search(QString("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult, Poppler::Page::CaseSensitive), true );
+    QVERIFY( qAbs(rectLeft - 171.46) < 0.01 );
+    QVERIFY( qAbs(rectTop - 139.81) < 0.01 );
+    QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
+    QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
+    QCOMPARE( page->search(QString("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult, Poppler::Page::CaseSensitive), false );
+    QCOMPARE( page->search(QString("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult, Poppler::Page::CaseSensitive), true );
+    QVERIFY( qAbs(rectLeft - 161.44) < 0.01 );
+    QVERIFY( qAbs(rectTop - 139.81) < 0.01 );
+    QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
+    QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
+    QCOMPARE( page->search(QString("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult, Poppler::Page::CaseSensitive), true );
+    QVERIFY( qAbs(rectLeft - 171.46) < 0.01 );
+    QVERIFY( qAbs(rectTop - 127.85) < 0.01 );
+    QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
+    QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
+    QCOMPARE( page->search(QString("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult, Poppler::Page::CaseSensitive), true );
+    QVERIFY( qAbs(rectLeft - 161.44) < 0.01 );
+    QVERIFY( qAbs(rectTop - 127.85) < 0.01 );
+    QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
+    QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
+    QCOMPARE( page->search(QString("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult, Poppler::Page::CaseSensitive), false );
     
     delete doc;
 }
