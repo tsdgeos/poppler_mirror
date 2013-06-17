@@ -58,6 +58,7 @@
 #include "OptionalContent.h"
 #include "ViewerPreferences.h"
 #include "FileSpec.h"
+#include "StructTreeRoot.h"
 
 #if MULTITHREADED
 #  define catalogLocker()   MutexLocker locker(&mutex)
@@ -93,6 +94,7 @@ Catalog::Catalog(PDFDoc *docA) {
   embeddedFileNameTree = NULL;
   jsNameTree = NULL;
   viewerPrefs = NULL;
+  structTreeRoot = NULL;
 
   pagesList = NULL;
   pagesRefList = NULL;
@@ -181,8 +183,8 @@ Catalog::~Catalog() {
   delete form;
   delete optContent;
   delete viewerPrefs;
+  delete structTreeRoot;
   metadata.free();
-  structTreeRoot.free();
   outline.free();
   acroForm.free();
   viewerPreferences.free();
@@ -844,24 +846,28 @@ PageLabelInfo *Catalog::getPageLabelInfo()
   return pageLabelInfo;
 }
 
-Object *Catalog::getStructTreeRoot()
+StructTreeRoot *Catalog::getStructTreeRoot()
 {
   catalogLocker();
-  if (structTreeRoot.isNone())
-  {
-     Object catDict;
+  if (!structTreeRoot) {
+    Object catalog;
+    Object root;
 
-     xref->getCatalog(&catDict);
-     if (catDict.isDict()) {
-       catDict.dictLookup("StructTreeRoot", &structTreeRoot);
-     } else {
-       error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
-       structTreeRoot.initNull();
-     }
-     catDict.free();
+    xref->getCatalog(&catalog);
+    if (!catalog.isDict()) {
+      error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catalog.getTypeName());
+      catalog.free();
+      return NULL;
+    }
+
+    if (catalog.dictLookup("StructTreeRoot", &root)->isDict("StructTreeRoot")) {
+      structTreeRoot = new StructTreeRoot(doc, root.getDict());
+    }
+
+    root.free();
+    catalog.free();
   }
-
-  return &structTreeRoot;
+  return structTreeRoot;
 }
 
 Guint Catalog::getMarkInfo()

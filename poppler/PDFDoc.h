@@ -60,6 +60,7 @@ class Outline;
 class Linearization;
 class SecurityHandler;
 class Hints;
+class StructTreeRoot;
 
 enum PDFWriteMode {
   writeStandard,
@@ -139,7 +140,7 @@ public:
   GooString *readMetadata() { return catalog->readMetadata(); }
 
   // Return the structure tree root object.
-  Object *getStructTreeRoot() { return catalog->getStructTreeRoot(); }
+  StructTreeRoot *getStructTreeRoot() { return catalog->getStructTreeRoot(); }
 
   // Get page.
   Page *getPage(int page);

@@ -56,6 +56,7 @@ class Form;
 class OCGs;
 class ViewerPreferences;
 class FileSpec;
+class StructTreeRoot;
 
 //------------------------------------------------------------------------
 // NameTree
@@ -126,7 +127,7 @@ public:
   GooString *readMetadata();
 
   // Return the structure tree root object.
-  Object *getStructTreeRoot();
+  StructTreeRoot *getStructTreeRoot();
 
   // Return values from the MarkInfo dictionary as flags in a bitfield.
   enum MarkInfoFlags {
@@ -241,7 +242,7 @@ private:
   NameTree *jsNameTree;		// Java Script name-tree
   GooString *baseURI;		// base URI for URI-type links
   Object metadata;		// metadata stream
-  Object structTreeRoot;	// structure tree root dictionary
+  StructTreeRoot *structTreeRoot;	// structure tree root
   Guint markInfo;               // Flags from MarkInfo dictionary
   Object outline;		// outline dictionary
   Object acroForm;		// AcroForm dictionary
