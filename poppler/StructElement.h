@@ -17,6 +17,7 @@
 
 #include "goo/gtypes.h"
 #include "goo/GooString.h"
+#include "MarkedContentOutputDev.h"
 #include "Object.h"
 #include <vector>
 #include <set>
@@ -218,9 +219,36 @@ public:
   const GooString *getActualText() const { return isContent() ? NULL : s->actualText; }
   GooString *getActualText() { return isContent() ? NULL : s->actualText; }
 
+  // Content text referenced by the element:
+  //
+  // - For MCID reference elements, this is just the text of the
+  //   corresponding marked content object in the page stream, regardless
+  //   of the setting of the "recursive" flag.
+  // - For other elements, if the "recursive" flag is set, the text
+  //   enclosed by *all* the child MCID reference elements of the subtree
+  //   is returned. The text is assembled by traversing the leaf MCID
+  //   reference elements in logical order.
+  // - In any other case, the function returns NULL.
+  //
+  // A new string is returned, and the ownership passed to the caller.
+  //
+  GooString *getText(GBool recursive = gTrue) const {
+    return appendSubTreeText(NULL, recursive);
+  }
+
+  const TextSpanArray getTextSpans() const {
+    if (!isContent())
+      return TextSpanArray();
+    MarkedContentOutputDev mcdev(getMCID());
+    return getTextSpansInternal(mcdev);
+  }
+
   ~StructElement();
 
 private:
+  GooString* appendSubTreeText(GooString *string, GBool recursive) const;
+  const TextSpanArray& getTextSpansInternal(MarkedContentOutputDev& mcdev) const;
+
   typedef std::vector<Attribute*>     AttrPtrArray;
   typedef std::vector<StructElement*> ElemPtrArray;
 

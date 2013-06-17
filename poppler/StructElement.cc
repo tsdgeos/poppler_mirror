@@ -14,6 +14,8 @@
 
 #include "StructElement.h"
 #include "StructTreeRoot.h"
+#include "GlobalParams.h"
+#include "UnicodeMap.h"
 #include "PDFDoc.h"
 #include "Dict.h"
 
@@ -979,6 +981,54 @@ const Attribute *StructElement::findAttribute(Attribute::Type attributeType, GBo
   }
 
   return NULL;
+}
+
+GooString* StructElement::appendSubTreeText(GooString *string, GBool recursive) const
+{
+  if (isContent() && !isObjectRef()) {
+    MarkedContentOutputDev mcdev(getMCID());
+    const TextSpanArray& spans(getTextSpansInternal(mcdev));
+
+    if (!string)
+      string = new GooString();
+
+    for (TextSpanArray::const_iterator i = spans.begin(); i != spans.end(); ++i)
+      string->append(i->getText());
+
+    return string;
+  }
+
+  if (!recursive)
+    return NULL;
+
+  // Do a depth-first traversal, to get elements in logical order
+  if (!string)
+    string = new GooString();
+
+  for (unsigned i = 0; i < getNumElements(); i++)
+    getElement(i)->appendSubTreeText(string, recursive);
+
+  return string;
+}
+
+const TextSpanArray& StructElement::getTextSpansInternal(MarkedContentOutputDev& mcdev) const
+{
+  assert(isContent());
+
+  int startPage = 0, endPage = 0;
+
+  Ref ref;
+  if (getPageRef(ref)) {
+    startPage = endPage = treeRoot->getDoc()->findPage(ref.num, ref.gen);
+  }
+
+  if (!(startPage && endPage)) {
+    startPage = 1;
+    endPage = treeRoot->getDoc()->getNumPages();
+  }
+
+  treeRoot->getDoc()->displayPages(&mcdev, startPage, endPage, 72.0, 72.0, 0, gTrue, gFalse, gFalse);
+  return mcdev.getTextSpans();
 }
 
 static StructElement::Type roleMapResolve(Dict *roleMap, const char *name, const char *curName, Object *resolved)
