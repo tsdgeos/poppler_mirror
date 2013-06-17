@@ -665,14 +665,16 @@ if test x$enable_poppler_qt5 = xyes; then
   if test x"$mocversiongrep" != x"$mocversion"; then
     AC_MSG_RESULT([no])
     # moc was not the qt5 one, try with moc-qt5
-    AC_CHECK_TOOL(MOCQT5, moc-qt5)
+    AC_CHECK_TOOL(MOCQT52, moc-qt5)
     AC_MSG_CHECKING([for Qt5 moc-qt5])
-    mocversion=`$MOCQT5 -v 2>&1`
+    mocversion=`$MOCQT52 -v 2>&1`
     mocversiongrep=`echo $mocversion | grep "Qt 5"`
     if test x"$mocversiongrep" != x"$mocversion"; then
       # no valid moc found
       enable_poppler_qt5=no;
       MOCQT5="not found"
+    else
+      MOCQT5=$MOCQT52
     fi
   fi
   AC_SUBST(MOCQT5)
