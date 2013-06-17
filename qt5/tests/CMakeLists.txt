@@ -37,7 +37,6 @@ macro(QT5_ADD_QTEST exe source)
       ${source}
     )
     poppler_add_unittest(${exe} BUILD_QT5_TESTS ${${test_name}_SOURCES})
-	qt5_generate_moc(${${test_name}_SOURCES} ${test_name}.moc)
 	target_link_libraries(${exe} poppler-qt5 ${Qt5Widgets_LIBRARIES} ${Qt5Test_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES})
     if(MSVC)
 		target_link_libraries(${exe} poppler ${poppler_LIBS})
