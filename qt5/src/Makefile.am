@@ -61,7 +61,7 @@ libpoppler_qt5_la_LIBADD = 			\
 	$(top_builddir)/poppler/libpoppler-arthur.la	\
 	$(POPPLER_QT5_LIBS)
 
-libpoppler_qt5_la_LDFLAGS = -version-info 7:0:3 @create_shared_lib@ @auto_import_flags@
+libpoppler_qt5_la_LDFLAGS = -version-info 1:0:0 @create_shared_lib@ @auto_import_flags@
 
 # This rule lets GNU make create any *.moc from the equivalent *.h
 .h.moc:
