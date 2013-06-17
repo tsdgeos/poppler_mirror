@@ -608,14 +608,16 @@ if test x$enable_poppler_qt4 = xyes; then
   if test x"$mocversiongrep" != x"$mocversion"; then
     AC_MSG_RESULT([no])
     # moc was not the qt4 one, try with moc-qt4
-    AC_CHECK_TOOL(MOCQT4, moc-qt4)
+    AC_CHECK_TOOL(MOCQT42, moc-qt4)
     AC_MSG_CHECKING([for Qt4 moc-qt4])
-    mocversion=`$MOCQT4 -v 2>&1`
+    mocversion=`$MOCQT42 -v 2>&1`
     mocversiongrep=`echo $mocversion | grep "Qt 4"`
     if test x"$mocversiongrep" != x"$mocversion"; then
       # no valid moc found
       enable_poppler_qt4=no;
       MOCQT4="not found"
+    else
+      MOCQT4=$MOCQT42
     fi
   fi
   AC_SUBST(MOCQT4)
@@ -802,14 +804,14 @@ if test "x$GCC" != xyes; then
 fi
 case "$enable_compile_warnings" in
   no)	;;
-  yes)	CXXFLAGS="-Wall -Woverloaded-virtual -Wnon-virtual-dtor -Wcast-align -fno-exceptions -fno-check-new -fno-common -fPIE $CXXFLAGS";
+  yes)	CXXFLAGS="-Wall -Woverloaded-virtual -Wnon-virtual-dtor -Wcast-align -fno-exceptions -fno-check-new -fno-common $CXXFLAGS";
         CFLAGS="-Wall $CFLAGS" ;;
   kde)	CXXFLAGS="-Wnon-virtual-dtor -Wno-long-long -Wundef \
 		-D_XOPEN_SOURCE=600 -D_BSD_SOURCE -Wcast-align \
 		-Wconversion -Wall -W -Wpointer-arith \
 		-Wwrite-strings -O2 -Wformat-security \
 		-Wmissing-format-attribute -fno-exceptions -fno-check-new \
-		-fno-common -fPIE $CXXFLAGS" ;;
+		-fno-common $CXXFLAGS" ;;
 esac
 
 case `$PKG_CONFIG --version` in

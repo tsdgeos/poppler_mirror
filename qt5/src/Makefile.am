@@ -54,7 +54,7 @@ libpoppler_qt5_la_SOURCES =			\
 	poppler-embeddedfile-private.h
 
 libpoppler_qt5_la_CXXFLAGS = 			\
-	-Dpoppler_qt5_EXPORTS
+	-Dpoppler_qt5_EXPORTS -fPIC
 
 libpoppler_qt5_la_LIBADD = 			\
 	$(top_builddir)/poppler/libpoppler.la	\
