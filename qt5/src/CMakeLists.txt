@@ -31,7 +31,6 @@ set(poppler_qt5_SRCS
   poppler-media.cc
   ${CMAKE_SOURCE_DIR}/poppler/ArthurOutputDev.cc
 )
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Core_EXECUTABLE_COMPILE_FLAGS}")
 add_library(poppler-qt5 SHARED ${poppler_qt5_SRCS})
 set_target_properties(poppler-qt5 PROPERTIES VERSION 1.0.0 SOVERSION 1)
 target_link_libraries(poppler-qt5 poppler ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Xml_LIBRARIES})
