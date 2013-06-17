@@ -824,6 +824,7 @@ case "$enable_compile_warnings" in
 		-Wmissing-format-attribute -fno-exceptions -fno-check-new \
 		-fno-common $CXXFLAGS" ;;
 esac
+CXXFLAGS="-fPIC $CXXFLAGS";
 
 case `$PKG_CONFIG --version` in
   0.?|0.1[0-7])
