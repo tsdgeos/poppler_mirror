@@ -29,7 +29,7 @@ set(poppler_qt5_SRCS
   poppler-textbox.cc
   poppler-page-transition.cc
   poppler-media.cc
-  ${CMAKE_SOURCE_DIR}/poppler/ArthurOutputDev.cc
+  ArthurOutputDev.cc
 )
 add_library(poppler-qt5 SHARED ${poppler_qt5_SRCS})
 set_target_properties(poppler-qt5 PROPERTIES VERSION 1.0.0 SOVERSION 1)

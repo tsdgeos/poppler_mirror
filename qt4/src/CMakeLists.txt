@@ -26,7 +26,7 @@ set(poppler_qt4_SRCS
   poppler-textbox.cc
   poppler-page-transition.cc
   poppler-media.cc
-  ${CMAKE_SOURCE_DIR}/poppler/ArthurOutputDev.cc
+  ArthurOutputDev.cc
 )
 qt4_automoc(${poppler_qt4_SRCS})
 add_library(poppler-qt4 SHARED ${poppler_qt4_SRCS})

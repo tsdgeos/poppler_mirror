@@ -51,14 +51,15 @@ libpoppler_qt5_la_SOURCES =			\
 	poppler-export.h			\
 	poppler-private.h			\
 	poppler-page-transition-private.h	\
-	poppler-embeddedfile-private.h
+	poppler-embeddedfile-private.h		\
+	ArthurOutputDev.h			\
+	ArthurOutputDev.cc
 
 libpoppler_qt5_la_CXXFLAGS = 			\
 	-Dpoppler_qt5_EXPORTS -fPIC
 
 libpoppler_qt5_la_LIBADD = 			\
 	$(top_builddir)/poppler/libpoppler.la	\
-	$(top_builddir)/poppler/libpoppler-arthur.la	\
 	$(POPPLER_QT5_LIBS)
 
 libpoppler_qt5_la_LDFLAGS = -version-info 1:0:0 @create_shared_lib@ @auto_import_flags@
