@@ -255,7 +255,7 @@ namespace Poppler
 
   void OptContentModelPrivate::setRootNode(OptContentItem *node)
   {
-	q->beginResetModel();
+    q->beginResetModel();
     delete m_rootNode;
     m_rootNode = node;
     q->endResetModel();
