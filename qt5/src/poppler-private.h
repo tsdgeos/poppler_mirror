@@ -88,7 +88,7 @@ namespace Poppler {
 		wchar_t *fileName = new WCHAR[filePath.length()];
 		int length = filePath.toWCharArray(fileName); 
 		doc = new PDFDoc(fileName, length, ownerPassword, userPassword);
-		delete fileName;
+		delete[] fileName;
 #else
 		GooString *fileName = new GooString(QFile::encodeName(filePath));
 		doc = new PDFDoc(fileName, ownerPassword, userPassword);

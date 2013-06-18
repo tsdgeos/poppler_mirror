@@ -52,6 +52,7 @@ qt5_add_simpletest(poppler-fonts poppler-fonts.cpp)
 qt5_add_simpletest(poppler_attachments poppler-attachments.cpp)
 qt5_add_simpletest(stress-poppler-qt5 stress-poppler-qt5.cpp)
 qt5_add_simpletest(stress-poppler-dir stress-poppler-dir.cpp)
+qt5_add_simpletest(stress-threads-qt5 stress-threads-qt5.cpp)
 qt5_add_simpletest(poppler-texts poppler-texts.cpp)
 
 qt5_add_qtest(check_attachments check_attachments.cpp)
