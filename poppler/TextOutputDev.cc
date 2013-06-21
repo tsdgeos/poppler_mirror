@@ -4257,11 +4257,28 @@ public:
 			  PDFRectangle *selection);
   virtual void visitWord (TextWord *word, int begin, int end,
 			  PDFRectangle *selection);
+  void endPage();
 
 private:
   OutputDev *out;
   GfxColor *box_color, *glyph_color;
   GfxState *state;
+  GooList *selectionList;
+  Matrix ctm, ictm;
+
+  class TextSelection {
+  public:
+    TextSelection(TextWord *word, int begin, int end)
+      : word(word),
+	begin(begin),
+	end(end)
+    {
+    }
+
+    TextWord *word;
+    int begin;
+    int end;
+  };
 };
 
 TextSelectionPainter::TextSelectionPainter(TextPage *page,
@@ -4277,18 +4294,23 @@ TextSelectionPainter::TextSelectionPainter(TextPage *page,
 {
   PDFRectangle box(0, 0, page->pageWidth, page->pageHeight);
 
+  selectionList = new GooList();
   state = new GfxState(72 * scale, 72 * scale, &box, rotation, gFalse);
 
-  out->startPage (0, state, NULL);
+  state->getCTM(&ctm);
+  ctm.invertTo(&ictm);
+
+  out->startPage(0, state, NULL);
   out->setDefaultCTM (state->getCTM());
 
   state->setFillColorSpace(new GfxDeviceRGBColorSpace());
+  state->setFillColor(box_color);
+  out->updateFillColor(state);
 }
 
 TextSelectionPainter::~TextSelectionPainter()
 {
-  out->endPage ();
-
+  deleteGooList(selectionList, TextSelection);
   delete state;
 }
 
@@ -4300,10 +4322,6 @@ void TextSelectionPainter::visitLine (TextLine *line,
 				      PDFRectangle *selection)
 {
   double x1, y1, x2, y2, margin;
-  Matrix ctm, ictm;
-
-  state->setFillColor(box_color);
-  out->updateFillColor(state);
 
   margin = (line->yMax - line->yMin) / 8;
   x1 = floor (line->edge[edge_begin]);
@@ -4311,7 +4329,6 @@ void TextSelectionPainter::visitLine (TextLine *line,
   x2 = ceil (line->edge[edge_end]);
   y2 = ceil (line->yMax + margin);
 
-  state->getCTM (&ctm);
   ctm.transform(line->edge[edge_begin], line->yMin - margin, &x1, &y1);
   ctm.transform(line->edge[edge_end], line->yMax + margin, &x2, &y2);
 
@@ -4320,7 +4337,6 @@ void TextSelectionPainter::visitLine (TextLine *line,
   x2 = ceil (x2);
   y2 = ceil (y2);
 
-  ctm.invertTo (&ictm);
   ictm.transform(x1, y1, &x1, &y1);
   ictm.transform(x2, y2, &x2, &y2);
 
@@ -4329,47 +4345,59 @@ void TextSelectionPainter::visitLine (TextLine *line,
   state->lineTo(x2, y2);
   state->lineTo(x1, y2);
   state->closePath();
-
-  out->fill(state);
-  state->clearPath();
 }
 
 void TextSelectionPainter::visitWord (TextWord *word, int begin, int end,
 				      PDFRectangle *selection)
 {
+  selectionList->append(new TextSelection(word, begin, end));
+}
+
+void TextSelectionPainter::endPage()
+{
+  out->fill(state);
+  state->clearPath();
+
   state->setFillColor(glyph_color);
   out->updateFillColor(state);
 
-  while (begin < end) {
-    TextFontInfo *font = word->font[begin];
-    font->gfxFont->incRefCnt();
-    Matrix *mat = &word->textMat[begin];
+  for (int i = 0; i < selectionList->getLength(); i++) {
+    TextSelection *sel = (TextSelection *) selectionList->get(i);
+    int begin = sel->begin;
 
-    state->setTextMat(mat->m[0], mat->m[1], mat->m[2], mat->m[3], 0, 0);
-    state->setFont(font->gfxFont, 1);
-    out->updateFont(state);
+    while (begin < sel->end) {
+      TextFontInfo *font = sel->word->font[begin];
+      font->gfxFont->incRefCnt();
+      Matrix *mat = &sel->word->textMat[begin];
 
-    int fEnd = begin + 1;
-    while (fEnd < end && font->matches(word->font[fEnd]) &&
-	   mat->m[0] == word->textMat[fEnd].m[0] &&
-	   mat->m[1] == word->textMat[fEnd].m[1] &&
-	   mat->m[2] == word->textMat[fEnd].m[2] &&
-	   mat->m[3] == word->textMat[fEnd].m[3])
-      fEnd++;
+      state->setTextMat(mat->m[0], mat->m[1], mat->m[2], mat->m[3], 0, 0);
+      state->setFont(font->gfxFont, 1);
+      out->updateFont(state);
 
-    /* The only purpose of this string is to let the output device query
-     * it's length.  Might want to change this interface later. */
-    GooString *string = new GooString ((char *) word->charcode, fEnd - begin);
-    out->beginString(state, string);
+      int fEnd = begin + 1;
+      while (fEnd < sel->end && font->matches(sel->word->font[fEnd]) &&
+	     mat->m[0] == sel->word->textMat[fEnd].m[0] &&
+	     mat->m[1] == sel->word->textMat[fEnd].m[1] &&
+	     mat->m[2] == sel->word->textMat[fEnd].m[2] &&
+	     mat->m[3] == sel->word->textMat[fEnd].m[3])
+	fEnd++;
 
-    for (int i = begin; i < fEnd; i++) {
-      out->drawChar(state, word->textMat[i].m[4], word->textMat[i].m[5], 0, 0, 0, 0,
-		    word->charcode[i], 1, NULL, 0);
+      /* The only purpose of this string is to let the output device query
+       * it's length.  Might want to change this interface later. */
+      GooString *string = new GooString ((char *) sel->word->charcode, fEnd - begin);
+      out->beginString(state, string);
+
+      for (int i = begin; i < fEnd; i++) {
+	out->drawChar(state, sel->word->textMat[i].m[4], sel->word->textMat[i].m[5], 0, 0, 0, 0,
+		      sel->word->charcode[i], 1, NULL, 0);
+      }
+      out->endString(state);
+      delete string;
+      begin = fEnd;
     }
-    out->endString(state);
-    delete string;
-    begin = fEnd;
   }
+
+  out->endPage ();
 }
 
 void TextWord::visitSelection(TextSelectionVisitor *visitor,
@@ -4715,6 +4743,7 @@ void TextPage::drawSelection(OutputDev *out,
 			       out, box_color, glyph_color);
 
   visitSelection(&painter, selection, style);
+  painter.endPage();
 }
 
 GooList *TextPage::getSelectionRegion(PDFRectangle *selection,
