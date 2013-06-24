@@ -3999,6 +3999,21 @@ public:
 			  PDFRectangle *selection) = 0;
 
 protected:
+
+  class TextWordSelection {
+  public:
+    TextWordSelection(TextWord *word, int begin, int end)
+      : word(word),
+        begin(begin),
+        end(end)
+    {
+    }
+
+    TextWord *word;
+    int begin;
+    int end;
+  };
+
   TextPage *page;
 };
 
@@ -4265,20 +4280,6 @@ private:
   GfxState *state;
   GooList *selectionList;
   Matrix ctm, ictm;
-
-  class TextSelection {
-  public:
-    TextSelection(TextWord *word, int begin, int end)
-      : word(word),
-	begin(begin),
-	end(end)
-    {
-    }
-
-    TextWord *word;
-    int begin;
-    int end;
-  };
 };
 
 TextSelectionPainter::TextSelectionPainter(TextPage *page,
@@ -4310,7 +4311,7 @@ TextSelectionPainter::TextSelectionPainter(TextPage *page,
 
 TextSelectionPainter::~TextSelectionPainter()
 {
-  deleteGooList(selectionList, TextSelection);
+  deleteGooList(selectionList, TextWordSelection);
   delete state;
 }
 
@@ -4350,7 +4351,7 @@ void TextSelectionPainter::visitLine (TextLine *line,
 void TextSelectionPainter::visitWord (TextWord *word, int begin, int end,
 				      PDFRectangle *selection)
 {
-  selectionList->append(new TextSelection(word, begin, end));
+  selectionList->append(new TextWordSelection(word, begin, end));
 }
 
 void TextSelectionPainter::endPage()
@@ -4362,7 +4363,7 @@ void TextSelectionPainter::endPage()
   out->updateFillColor(state);
 
   for (int i = 0; i < selectionList->getLength(); i++) {
-    TextSelection *sel = (TextSelection *) selectionList->get(i);
+    TextWordSelection *sel = (TextWordSelection *) selectionList->get(i);
     int begin = sel->begin;
 
     while (begin < sel->end) {
