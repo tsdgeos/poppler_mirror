@@ -1,12 +1,15 @@
-add_definitions(${QT4_DEFINITIONS})
+add_definitions(${QT5_DEFINITIONS})
+add_definitions(${Qt5Core_DEFINITIONS})
+
+set(CMAKE_AUTOMOC ON)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${QT4_INCLUDE_DIR}
+  ${Qt5Core_INCLUDE_DIRS}
   ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-set(poppler_qt4_SRCS
+set(poppler_qt5_SRCS
   poppler-annotation.cc
   poppler-document.cc
   poppler-embeddedfile.cc
@@ -28,17 +31,16 @@ set(poppler_qt4_SRCS
   poppler-media.cc
   ArthurOutputDev.cc
 )
-qt4_automoc(${poppler_qt4_SRCS})
-add_library(poppler-qt4 SHARED ${poppler_qt4_SRCS})
-set_target_properties(poppler-qt4 PROPERTIES VERSION 4.3.0 SOVERSION 4)
-target_link_libraries(poppler-qt4 poppler ${QT4_QTCORE_LIBRARY} ${QT4_QTGUI_LIBRARY} ${QT4_QTXML_LIBRARY})
+add_library(poppler-qt5 SHARED ${poppler_qt5_SRCS})
+set_target_properties(poppler-qt5 PROPERTIES VERSION 1.0.0 SOVERSION 1)
+target_link_libraries(poppler-qt5 poppler ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Xml_LIBRARIES})
 if(MSVC)
-target_link_libraries(poppler-qt4 poppler ${poppler_LIBS})
+target_link_libraries(poppler-qt5 poppler ${poppler_LIBS})
 endif(MSVC)
-install(TARGETS poppler-qt4 RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
+install(TARGETS poppler-qt5 RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
 
 install(FILES
-  poppler-qt4.h
+  poppler-qt5.h
   poppler-link.h
   poppler-annotation.h
   poppler-form.h
@@ -46,5 +48,5 @@ install(FILES
   poppler-export.h
   poppler-page-transition.h
   poppler-media.h
-  DESTINATION include/poppler/qt4)
+  DESTINATION include/poppler/qt5)
 

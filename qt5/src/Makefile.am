@@ -1,15 +1,15 @@
 INCLUDES =					\
 	-I$(top_srcdir)				\
 	-I$(top_srcdir)/poppler			\
-	$(POPPLER_QT4_CFLAGS)			\
+	$(POPPLER_QT5_CFLAGS)			\
 	$(LCMS_CFLAGS)
 
 SUFFIXES: .moc
 
-poppler_includedir = $(includedir)/poppler/qt4
+poppler_includedir = $(includedir)/poppler/qt5
 
 poppler_include_HEADERS =			\
-	poppler-qt4.h				\
+	poppler-qt5.h				\
 	poppler-link.h				\
 	poppler-annotation.h			\
 	poppler-form.h				\
@@ -18,9 +18,9 @@ poppler_include_HEADERS =			\
 	poppler-media.h				\
 	poppler-page-transition.h
 
-lib_LTLIBRARIES = libpoppler-qt4.la
+lib_LTLIBRARIES = libpoppler-qt5.la
 
-libpoppler_qt4_la_SOURCES =			\
+libpoppler_qt5_la_SOURCES =			\
 	poppler-document.cc			\
 	poppler-page.cc				\
 	poppler-fontinfo.cc			\
@@ -55,18 +55,18 @@ libpoppler_qt4_la_SOURCES =			\
 	ArthurOutputDev.h			\
 	ArthurOutputDev.cc
 
-libpoppler_qt4_la_CXXFLAGS = 			\
-	-Dpoppler_qt4_EXPORTS
+libpoppler_qt5_la_CXXFLAGS = 			\
+	-Dpoppler_qt5_EXPORTS -fPIC
 
-libpoppler_qt4_la_LIBADD = 			\
+libpoppler_qt5_la_LIBADD = 			\
 	$(top_builddir)/poppler/libpoppler.la	\
-	$(POPPLER_QT4_LIBS)
+	$(POPPLER_QT5_LIBS)
 
-libpoppler_qt4_la_LDFLAGS = -version-info 7:0:3 @create_shared_lib@ @auto_import_flags@
+libpoppler_qt5_la_LDFLAGS = -version-info 1:0:0 @create_shared_lib@ @auto_import_flags@
 
 # This rule lets GNU make create any *.moc from the equivalent *.h
 .h.moc:
-	$(AM_V_GEN) $(MOCQT4) -i $< -o $@
+	$(AM_V_GEN) $(MOCQT5) -i $< -o $@
 
 BUILT_SOURCES = poppler-optcontent.moc
 
