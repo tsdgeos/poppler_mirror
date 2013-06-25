@@ -1979,66 +1979,66 @@ poppler_page_get_text_layout (PopplerPage       *page,
                               guint             *n_rectangles)
 {
   TextPage *text;
-  TextWordList *wordlist;
-  TextWord *word, *nextword;
   PopplerRectangle *rect;
-  int i, j;
+  PDFRectangle selection;
+  int i, j, k;
   guint offset = 0;
   guint n_rects = 0;
   gdouble x1, y1, x2, y2;
   gdouble x3, y3, x4, y4;
+  GooList **word_list;
+  int n_lines;
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), FALSE);
 
   *n_rectangles = 0;
 
+  poppler_page_get_size (page, &selection.x2, &selection.y2);
   text = poppler_page_get_text_page (page);
-  wordlist = text->makeWordList (gFalse);
+  word_list = text->getSelectionWords (&selection, selectionStyleGlyph, &n_lines);
+  if (!word_list)
+          return FALSE;
 
-  if (wordlist->getLength () <= 0)
+  n_rects += n_lines - 1;
+  for (i = 0; i < n_lines; i++)
     {
-      delete wordlist;
-      return FALSE;
+      GooList *line_words = word_list[i];
+      n_rects += line_words->getLength() - 1;
+      for (j = 0; j < line_words->getLength(); j++)
+        {
+          TextWord *word = (TextWord *)line_words->get(j);
+          n_rects += word->getLength();
+        }
     }
 
-  // Getting the array size
-  for (i = 0; i < wordlist->getLength (); i++)
-    {
-      word = wordlist->get (i);
-      n_rects += word->getLength ();
-      if (!word->getNext () || word->getSpaceAfter ())
-	n_rects++;
-    }
-  n_rects--;
-
-  *n_rectangles = n_rects;
   *rectangles = g_new (PopplerRectangle, n_rects);
+  *n_rectangles = n_rects;
 
-  // Calculating each char position
-  for (i = 0; i < wordlist->getLength (); i++)
+  for (i = 0; i < n_lines; i++)
     {
-      word = wordlist->get (i);
-      for (j = 0; j < word->getLength (); j++)
+      GooList *line_words = word_list[i];
+      for (j = 0; j < line_words->getLength(); j++)
         {
+          TextWord *word = (TextWord *)line_words->get(j);
+          for (k = 0; k < word->getLength(); k++)
+            {
+              rect = *rectangles + offset;
+              word->getCharBBox (k,
+                                 &(rect->x1),
+                                 &(rect->y1),
+                                 &(rect->x2),
+                                 &(rect->y2));
+              offset++;
+            }
+
           rect = *rectangles + offset;
-	  word->getCharBBox (j,
-			     &(rect->x1),
-			     &(rect->y1),
-			     &(rect->x2),
-			     &(rect->y2));
-	  offset++;
-	}
+          word->getBBox (&x1, &y1, &x2, &y2);
 
-      // adding spaces and break lines
-      rect = *rectangles + offset;
-      word->getBBox (&x1, &y1, &x2, &y2);
+          if (j < line_words->getLength() - 1)
+            {
+              TextWord *next_word = (TextWord *)line_words->get(j + 1);
 
-      nextword = word->getNext ();
-      if (nextword)
-        {
-	  if (word->getSpaceAfter ())
-	    {
-	      nextword->getBBox (&x3, &y3, &x4, &y4);
+              next_word->getBBox(&x3, &y3, &x4, &y4);
 	      // space is from one word to other and with the same height as
 	      // first word.
 	      rect->x1 = x2;
@@ -2046,20 +2046,23 @@ poppler_page_get_text_layout (PopplerPage       *page,
 	      rect->x2 = x3;
 	      rect->y2 = y2;
 	      offset++;
-	    }
-	  }
-      else if (offset < n_rects)
+            }
+        }
+
+      if (i < n_lines - 1 && offset > 0)
         {
-	  // end of line
-	  rect->x1 = x2;
-	  rect->y1 = y2;
-	  rect->x2 = x2;
-	  rect->y2 = y2;
-	  offset++;
-	}
+          // end of line
+          rect->x1 = x2;
+          rect->y1 = y2;
+          rect->x2 = x2;
+          rect->y2 = y2;
+          offset++;
+        }
+
+      delete line_words;
     }
 
-  delete wordlist;
+  gfree (word_list);
 
   return TRUE;
 }
@@ -2122,53 +2125,62 @@ GList *
 poppler_page_get_text_attributes (PopplerPage *page)
 {
   TextPage *text;
-  TextWordList *wordlist;
+  PDFRectangle selection;
+  GooList **word_list;
+  int n_lines;
   PopplerTextAttributes *attrs = NULL;
-  gint i, offset = 0;
+  TextWord *word, *prev_word = NULL;
+  gint word_i, prev_word_i;
+  gint i, j;
+  gint offset = 0;
   GList *attributes = NULL;
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
 
+  poppler_page_get_size (page, &selection.x2, &selection.y2);
   text = poppler_page_get_text_page (page);
-  wordlist = text->makeWordList (gFalse);
+  word_list = text->getSelectionWords (&selection, selectionStyleGlyph, &n_lines);
+  if (!word_list)
+          return NULL;
 
-  if (wordlist->getLength () <= 0)
+  for (i = 0; i < n_lines; i++)
     {
-      delete wordlist;
-      return NULL;
-    }
+      GooList *line_words = word_list[i];
+      for (j = 0; j < line_words->getLength(); j++)
+        {
+          word = (TextWord *)line_words->get(j);
 
-  TextWord *word, *prev_word = NULL;
-  gint word_i, prev_word_i;
-
-  // Calculating each word attributes
-  for (i = 0; i < wordlist->getLength (); i++)
-    {
-      word = wordlist->get (i);
-
-      for (word_i = 0; word_i < word->getLength (); word_i++)
-	{
-	  if (!prev_word || !word_text_attributes_equal (word, word_i, prev_word, prev_word_i))
+          for (word_i = 0; word_i < word->getLength (); word_i++)
             {
-              attrs = poppler_text_attributes_new_from_word (word, word_i);
-              attrs->start_index = offset;
-              attributes = g_list_prepend (attributes, attrs);
+              if (!prev_word || !word_text_attributes_equal (word, word_i, prev_word, prev_word_i))
+                {
+                  attrs = poppler_text_attributes_new_from_word (word, word_i);
+                  attrs->start_index = offset;
+                  attributes = g_list_prepend (attributes, attrs);
+                }
+              attrs->end_index = offset;
+              offset++;
+              prev_word = word;
+              prev_word_i = word_i;
             }
-	  attrs->end_index = offset;
-	  offset++;
-	  prev_word = word;
-	  prev_word_i = word_i;
-	}
-      if (!word->getNext () || word->getSpaceAfter ())
+
+          if (j < line_words->getLength() - 1)
+            {
+              attrs->end_index = offset;
+              offset++;
+            }
+        }
+
+      if (i < n_lines - 1)
         {
           attrs->end_index = offset;
           offset++;
         }
-    }
-  if (attrs)
-    attrs->end_index--;
 
-  delete wordlist;
+      delete line_words;
+    }
+
+  gfree (word_list);
 
   return g_list_reverse(attributes);
 }
