@@ -4043,6 +4043,7 @@ public:
   void endPage();
 
   GooString *getText(void);
+  GooList **getWordList(int *nLines);
 
 private:
 
@@ -4175,6 +4176,29 @@ GooString *TextSelectionDumper::getText (void)
   uMap->decRefCnt();
 
   return text;
+}
+
+GooList **TextSelectionDumper::getWordList(int *nLinesOut)
+{
+  int i, j;
+
+  if (nLines == 0)
+    return NULL;
+
+  GooList **wordList = (GooList **)gmallocn(nLines, sizeof(GooList *));
+
+  for (i = 0; i < nLines; i++) {
+    GooList *lineWords = lines[i];
+    wordList[i] = new GooList();
+    for (j = 0; j < lineWords->getLength(); j++) {
+      TextWordSelection *sel = (TextWordSelection *)lineWords->get(j);
+      wordList[i]->append(sel->word);
+    }
+  }
+
+  *nLinesOut = nLines;
+
+  return wordList;
 }
 
 class TextSelectionSizer : public TextSelectionVisitor {
@@ -4749,6 +4773,18 @@ GooString *TextPage::getSelectionText(PDFRectangle *selection,
   dumper.endPage();
 
   return dumper.getText();
+}
+
+GooList **TextPage::getSelectionWords(PDFRectangle *selection,
+                                      SelectionStyle style,
+                                      int *nLines)
+{
+  TextSelectionDumper dumper(this);
+
+  visitSelection(&dumper, selection, style);
+  dumper.endPage();
+
+  return dumper.getWordList(nLines);
 }
 
 GBool TextPage::findCharRange(int pos, int length,

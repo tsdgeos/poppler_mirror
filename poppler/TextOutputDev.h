@@ -563,6 +563,10 @@ public:
   GooString *getSelectionText(PDFRectangle *selection,
 			      SelectionStyle style);
 
+  GooList **getSelectionWords(PDFRectangle *selection,
+                              SelectionStyle style,
+                              int *nLines);
+
   // Find a string by character position and length.  If found, sets
   // the text bounding rectangle and returns true; otherwise returns
   // false.
