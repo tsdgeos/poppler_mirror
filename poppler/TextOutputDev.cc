@@ -4039,26 +4039,55 @@ public:
 			  int edge_end,
 			  PDFRectangle *selection);
   virtual void visitWord (TextWord *word, int begin, int end,
-			  PDFRectangle *selection) { };
+			  PDFRectangle *selection);
+  void endPage();
 
   GooString *getText(void);
 
 private:
-  TextLineFrag *frags;
-  int nFrags, fragsSize;
+
+  void startLine();
+  void finishLine();
+
+  GooList **lines;
+  int nLines, linesSize;
+  GooList *words;
+  int tableId;
+  TextBlock *currentBlock;
 };
 
 TextSelectionDumper::TextSelectionDumper(TextPage *page)
     : TextSelectionVisitor(page)
 {
-  fragsSize = 256;
-  frags = (TextLineFrag *)gmallocn(fragsSize, sizeof(TextLineFrag));
-  nFrags = 0;
+  linesSize = 256;
+  lines = (GooList **)gmallocn(linesSize, sizeof(GooList *));
+  nLines = 0;
+
+  tableId = -1;
+  currentBlock = NULL;
+  words = NULL;
 }
 
 TextSelectionDumper::~TextSelectionDumper()
 {
-  gfree(frags);
+  for (int i = 0; i < nLines; i++)
+    deleteGooList(lines[i], TextWordSelection);
+  gfree(lines);
+}
+
+void TextSelectionDumper::startLine()
+{
+  finishLine();
+  words = new GooList();
+}
+
+void TextSelectionDumper::finishLine()
+{
+  if (words && words->getLength() > 0)
+    lines[nLines++] = words;
+  else if (words)
+    delete words;
+  words = NULL;
 }
 
 void TextSelectionDumper::visitLine (TextLine *line,
@@ -4068,130 +4097,84 @@ void TextSelectionDumper::visitLine (TextLine *line,
 				     int edge_end,
 				     PDFRectangle *selection)
 {
-  if (nFrags == fragsSize) {
-    fragsSize *= 2;
-    frags = (TextLineFrag *) grealloc(frags, fragsSize * sizeof(TextLineFrag));
+  TextLineFrag frag;
+
+  if (nLines == linesSize) {
+    linesSize *= 2;
+    lines = (GooList **)grealloc(lines, linesSize * sizeof(GooList *));
   }
 
-  frags[nFrags].init(line, edge_begin, edge_end - edge_begin);
-  ++nFrags;
+  frag.init(line, edge_begin, edge_end - edge_begin);
 
+  if (tableId >= 0 && frag.line->blk->tableId < 0) {
+    finishLine();
+
+    tableId = -1;
+    currentBlock = NULL;
+  }
+
+  if (frag.line->blk->tableId >= 0) { // a table
+    if (tableId == -1) {
+      tableId = frag.line->blk->tableId;
+      currentBlock = frag.line->blk;
+    }
+
+    if (currentBlock == frag.line->blk) { // the same block
+      startLine();
+    } else { // another block
+      if (currentBlock->tableEnd) { // previous block ended its row
+        startLine();
+      }
+      currentBlock = frag.line->blk;
+    }
+  } else { // not a table
+    startLine();
+  }
+}
+
+void TextSelectionDumper::visitWord (TextWord *word, int begin, int end,
+                                     PDFRectangle *selection)
+{
+  words->append(new TextWordSelection(word, begin, end));
+}
+
+void TextSelectionDumper::endPage()
+{
+  finishLine();
 }
 
 GooString *TextSelectionDumper::getText (void)
 {
-  GooString *s;
-  TextLineFrag *frag;
+  GooString *text;
   int i, j;
   UnicodeMap *uMap;
   char space[8], eol[16];
   int spaceLen, eolLen;
-  GooList *strings = NULL;
-  int actual_table = -1;
-  int actual_line = -1;
-  int last_length = 0;
-  TextBlock *actual_block = NULL;
 
-  s = new GooString();
+  text = new GooString();
 
-  uMap = globalParams->getTextEncoding();
-
-  if (uMap == NULL)
-      return s;
+  if (!(uMap = globalParams->getTextEncoding()))
+    return text;
 
   spaceLen = uMap->mapUnicode(0x20, space, sizeof(space));
   eolLen = uMap->mapUnicode(0x0a, eol, sizeof(eol));
 
-  if (nFrags > 0) {
-    for (i = 0; i < nFrags; ++i) {
-      frag = &frags[i];
+  for (i = 0; i < nLines; i++) {
+    GooList *lineWords = lines[i];
+    for (j = 0; j < lineWords->getLength(); j++) {
+      TextWordSelection *sel = (TextWordSelection *)lineWords->get(j);
 
-      if (actual_table >= 0 && frag->line->blk->tableId < 0) {
-        for (j = 0; j < strings->getLength (); j++) {
-          s->append ((GooString*) strings->get (j));
-          s->append (eol, eolLen);
-          delete ((GooString*) strings->get (j));
-        }
-        delete strings;
-        strings = NULL;
-        actual_table = -1;
-        actual_line = -1;
-        actual_block = NULL;
-      }
-
-      // a table
-      if (frag->line->blk->tableId >= 0) {
-        if (actual_table == -1) {
-          strings = new GooList();
-          actual_table = frag->line->blk->tableId;
-          actual_block = frag->line->blk;
-          actual_line = -1;
-        }
-
-        // the same block
-        if (actual_block == frag->line->blk) {
-          actual_line++;
-          if (actual_line >= strings->getLength ()) {
-            GooString *t = new GooString ();
-            // add some spaces to have this block correctly aligned
-            if (actual_line > 0)
-              for (j = 0; j < ((GooString*) (strings->get (actual_line - 1)))->getLength() - last_length - 1; j++)
-                t->append (space, spaceLen);
-            strings->append (t);
-          }
-        }
-        // another block
-        else {
-          // previous block ended its row
-          if (actual_block->tableEnd) {
-            for (j = 0; j < strings->getLength (); j++) {
-              s->append ((GooString*) strings->get (j));
-              s->append (eol, eolLen);
-              delete ((GooString*) strings->get (j));
-            }
-            delete strings;
-
-            strings = new GooList();
-            GooString *t = new GooString ();
-            strings->append (t);
-          }
-          actual_block = frag->line->blk;
-          actual_line = 0;
-        }
-
-        page->dumpFragment(frag->line->text + frag->start, frag->len, uMap, ((GooString*) strings->get (actual_line)));
-        last_length = frag->len;
-
-        if (!frag->line->blk->tableEnd) {
-          ((GooString*) strings->get (actual_line))->append (space, spaceLen);
-        }
-      }
-      // not a table
-      else {
-        page->dumpFragment (frag->line->text + frag->start, frag->len, uMap, s);
-        if (i < nFrags - 1) {
-          s->append (eol, eolLen);
-        }
-      }
+      page->dumpFragment (sel->word->text + sel->begin, sel->end - sel->begin, uMap, text);
+      if (j < lineWords->getLength() - 1)
+        text->append(space, spaceLen);
     }
-
-    if (strings != NULL) {
-      for (j = 0; j < strings->getLength (); j++) {
-        s->append((GooString*) strings->get (j));
-        s->append(eol, eolLen);
-        delete ((GooString*) strings->get (j));
-      }
-      delete strings;
-      strings = NULL;
-      actual_table = -1;
-      actual_line = -1;
-      actual_block = NULL;
-    }
+    if (i < nLines - 1)
+      text->append(eol, eolLen);
   }
 
   uMap->decRefCnt();
 
-  return s;
+  return text;
 }
 
 class TextSelectionSizer : public TextSelectionVisitor {
@@ -4763,6 +4746,7 @@ GooString *TextPage::getSelectionText(PDFRectangle *selection,
   TextSelectionDumper dumper(this);
 
   visitSelection(&dumper, selection, style);
+  dumper.endPage();
 
   return dumper.getText();
 }
