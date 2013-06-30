@@ -1504,13 +1504,24 @@ void Annot::invalidateAppearance() {
   delete appearStreams;
   appearStreams = NULL;
 
+  delete appearState;
+  appearState = NULL;
+
+  delete appearBBox;
+  appearBBox = NULL;
+
   appearance.free();
   appearance.initNull();
 
-  Object obj1;
+  Object obj1, obj2;
   obj1.initNull();
-  update ("AP", &obj1); // Remove AP
-  update ("AS", &obj1); // Remove AS
+  if (!annotObj.dictLookup("AP", &obj2)->isNull())
+    update ("AP", &obj1); // Remove AP
+  obj2.free();
+
+  if (!annotObj.dictLookup("AS", &obj2)->isNull())
+    update ("AS", &obj1); // Remove AS
+  obj2.free();
 }
 
 double Annot::getXMin() {
