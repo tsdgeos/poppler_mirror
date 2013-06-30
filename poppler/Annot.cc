@@ -1344,6 +1344,7 @@ void Annot::setRect(double x1, double y1, double x2, double y2) {
   obj1.arrayAdd (obj2.initReal (rect->y2));
 
   update("Rect", &obj1);
+  invalidateAppearance();
 }
 
 GBool Annot::inRect(double x, double y) const {
@@ -1436,6 +1437,7 @@ void Annot::setBorder(AnnotBorderArray *new_border) {
   } else {
     border = NULL;
   }
+  invalidateAppearance();
 }
 
 void Annot::setColor(AnnotColor *new_color) {
@@ -1450,6 +1452,7 @@ void Annot::setColor(AnnotColor *new_color) {
   } else {
     color = NULL;
   }
+  invalidateAppearance();
 }
 
 void Annot::setPage(int pageIndex, GBool updateP) {
@@ -2021,6 +2024,7 @@ void AnnotMarkup::setOpacity(double opacityA) {
   opacity = opacityA;
   obj1.initReal(opacity);
   update ("CA", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotMarkup::setDate(GooString *new_date) {
@@ -2179,6 +2183,7 @@ void AnnotText::setIcon(GooString *new_icon) {
   Object obj1;
   obj1.initName (icon->getCString());
   update("Name", &obj1);
+  invalidateAppearance();
 }
 
 #define ANNOT_TEXT_AP_NOTE                                                    \
@@ -2725,6 +2730,11 @@ void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict) {
   obj1.free();
 }
 
+void AnnotFreeText::setContents(GooString *new_content) {
+  Annot::setContents(new_content);
+  invalidateAppearance();
+}
+
 void AnnotFreeText::setAppearanceString(GooString *new_string) {
   delete appearanceString;
 
@@ -2737,6 +2747,7 @@ void AnnotFreeText::setAppearanceString(GooString *new_string) {
   Object obj1;
   obj1.initString(appearanceString->copy());
   update ("DA", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotFreeText::setQuadding(AnnotFreeTextQuadding new_quadding) {
@@ -2744,6 +2755,7 @@ void AnnotFreeText::setQuadding(AnnotFreeTextQuadding new_quadding) {
   quadding = new_quadding;
   obj1.initInt((int)quadding);
   update ("Q", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotFreeText::setStyleString(GooString *new_string) {
@@ -2794,6 +2806,7 @@ void AnnotFreeText::setCalloutLine(AnnotCalloutLine *line) {
   }
 
   update("CL", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotFreeText::setIntent(AnnotFreeTextIntent new_intent) {
@@ -3202,6 +3215,12 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict) {
   obj1.free();
 }
 
+void AnnotLine::setContents(GooString *new_content) {
+  Annot::setContents(new_content);
+  if (caption)
+    invalidateAppearance();
+}
+
 void AnnotLine::setVertices(double x1, double y1, double x2, double y2) {
   Object obj1, obj2;
 
@@ -3217,6 +3236,7 @@ void AnnotLine::setVertices(double x1, double y1, double x2, double y2) {
   obj1.arrayAdd( obj2.initReal(y2) );
 
   update("L", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotLine::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end) {
@@ -3230,6 +3250,7 @@ void AnnotLine::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyl
   obj1.arrayAdd( obj2.initName(convertAnnotLineEndingStyle( endStyle )) );
 
   update("LE", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotLine::setInteriorColor(AnnotColor *new_color) {
@@ -3243,6 +3264,7 @@ void AnnotLine::setInteriorColor(AnnotColor *new_color) {
   } else {
     interiorColor = NULL;
   }
+  invalidateAppearance();
 }
 
 void AnnotLine::setLeaderLineLength(double len) {
@@ -3251,6 +3273,7 @@ void AnnotLine::setLeaderLineLength(double len) {
   leaderLineLength = len;
   obj1.initReal(len);
   update ("LL", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotLine::setLeaderLineExtension(double len) {
@@ -3263,6 +3286,7 @@ void AnnotLine::setLeaderLineExtension(double len) {
   // LL is required if LLE is present
   obj1.initReal(leaderLineLength);
   update ("LL", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotLine::setCaption(bool new_cap) {
@@ -3271,6 +3295,7 @@ void AnnotLine::setCaption(bool new_cap) {
   caption = new_cap;
   obj1.initBool(new_cap);
   update ("Cap", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotLine::setIntent(AnnotLineIntent new_intent) {
@@ -3603,6 +3628,7 @@ void AnnotTextMarkup::setType(AnnotSubtype new_type) {
 
   type = new_type;
   update("Subtype", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotTextMarkup::setQuadrilaterals(AnnotQuadrilaterals *quadPoints) {
@@ -3623,6 +3649,7 @@ void AnnotTextMarkup::setQuadrilaterals(AnnotQuadrilaterals *quadPoints) {
   quadrilaterals = new AnnotQuadrilaterals(obj1.getArray(), rect);
 
   annotObj.dictSet ("QuadPoints", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
@@ -5334,6 +5361,7 @@ void AnnotStamp::setIcon(GooString *new_icon) {
   Object obj1;
   obj1.initName (icon->getCString());
   update("Name", &obj1);
+  invalidateAppearance();
 }
 
 //------------------------------------------------------------------------
@@ -5421,6 +5449,7 @@ void AnnotGeometry::setType(AnnotSubtype new_type) {
 
   type = new_type;
   update("Subtype", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotGeometry::setInteriorColor(AnnotColor *new_color) {
@@ -5434,6 +5463,7 @@ void AnnotGeometry::setInteriorColor(AnnotColor *new_color) {
   } else {
     interiorColor = NULL;
   }
+  invalidateAppearance();
 }
 
 void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
@@ -5696,6 +5726,7 @@ void AnnotPolygon::setType(AnnotSubtype new_type) {
 
   type = new_type;
   update("Subtype", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotPolygon::setVertices(AnnotPath *path) {
@@ -5712,6 +5743,7 @@ void AnnotPolygon::setVertices(AnnotPath *path) {
   vertices = new AnnotPath(obj1.getArray());
 
   update("Vertices", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotPolygon::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end) {
@@ -5725,6 +5757,7 @@ void AnnotPolygon::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingS
   obj1.arrayAdd( obj2.initName(convertAnnotLineEndingStyle( endStyle )) );
 
   update("LE", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotPolygon::setInteriorColor(AnnotColor *new_color) {
@@ -5738,6 +5771,7 @@ void AnnotPolygon::setInteriorColor(AnnotColor *new_color) {
   } else {
     interiorColor = NULL;
   }
+  invalidateAppearance();
 }
 
 void AnnotPolygon::setIntent(AnnotPolygonIntent new_intent) {
@@ -5901,6 +5935,7 @@ void AnnotCaret::setSymbol(AnnotCaretSymbol new_symbol) {
   obj1.initName( new_symbol == symbolP ? "P" : "None" );
   symbol = new_symbol;
   update("Sy", &obj1);
+  invalidateAppearance();
 }
 
 //------------------------------------------------------------------------
@@ -5992,6 +6027,7 @@ void AnnotInk::setInkList(AnnotPath **paths, int n_paths) {
 
   parseInkList(obj1.getArray());
   annotObj.dictSet ("InkList", &obj1);
+  invalidateAppearance();
 }
 
 void AnnotInk::draw(Gfx *gfx, GBool printing) {

@@ -1182,7 +1182,6 @@ void Annotation::setContents( const QString &contents )
     GooString *s = QStringToUnicodeGooString(contents);
     d->pdfAnnot->setContents(s);
     delete s;
-    d->pdfAnnot->invalidateAppearance();
 }
 
 QString Annotation::uniqueName() const
@@ -1346,7 +1345,6 @@ void Annotation::setFlags( int flags )
     }
 
     d->pdfAnnot->setFlags(toPdfFlags( flags ));
-    d->pdfAnnot->invalidateAppearance();
 }
 
 QRectF Annotation::boundary() const
@@ -1372,7 +1370,6 @@ void Annotation::setBoundary( const QRectF &boundary )
 
     PDFRectangle rect = d->boundaryToPdfRectangle( boundary, flags() );
     d->pdfAnnot->setRect(&rect);
-    d->pdfAnnot->invalidateAppearance();
 }
 
 Annotation::Style Annotation::style() const
@@ -1453,7 +1450,6 @@ void Annotation::setStyle( const Annotation::Style& style )
     border->setHorizontalCorner( style.xCorners() );
     border->setVerticalCorner( style.yCorners() );
     d->pdfAnnot->setBorder(border);
-    d->pdfAnnot->invalidateAppearance();
 }
 
 Annotation::Popup Annotation::popup() const
@@ -1868,7 +1864,6 @@ void TextAnnotation::setTextIcon( const QString &icon )
         QByteArray encoded = icon.toLatin1();
         GooString s(encoded.constData());
         textann->setIcon(&s);
-        d->pdfAnnot->invalidateAppearance();
     }
 }
 
@@ -1916,7 +1911,6 @@ void TextAnnotation::setTextFont( const QFont &font )
     GooString * da = TextAnnotationPrivate::toAppearanceString(font);
     ftextann->setAppearanceString(da);
     delete da;
-    d->pdfAnnot->invalidateAppearance();
 }
 
 int TextAnnotation::inplaceAlign() const
@@ -1949,7 +1943,6 @@ void TextAnnotation::setInplaceAlign( int align )
     {
         AnnotFreeText * ftextann = static_cast<AnnotFreeText*>(d->pdfAnnot);
         ftextann->setQuadding((AnnotFreeText::AnnotFreeTextQuadding)align);
-        d->pdfAnnot->invalidateAppearance();
     }
 }
 
@@ -2018,7 +2011,6 @@ void TextAnnotation::setCalloutPoints( const QVector<QPointF> &points )
     if (count == 0)
     {
         ftextann->setCalloutLine(0);
-        d->pdfAnnot->invalidateAppearance();
         return;
     }
 
@@ -2048,7 +2040,6 @@ void TextAnnotation::setCalloutPoints( const QVector<QPointF> &points )
 
     ftextann->setCalloutLine(callout);
     delete callout;
-    d->pdfAnnot->invalidateAppearance();
 }
 
 TextAnnotation::InplaceIntent TextAnnotation::inplaceIntent() const
@@ -2081,7 +2072,6 @@ void TextAnnotation::setInplaceIntent( TextAnnotation::InplaceIntent intent )
     {
         AnnotFreeText * ftextann = static_cast<AnnotFreeText*>(d->pdfAnnot);
         ftextann->setIntent((AnnotFreeText::AnnotFreeTextIntent)intent);
-        d->pdfAnnot->invalidateAppearance();
     }
 }
 
@@ -2366,8 +2356,6 @@ void LineAnnotation::setLinePoints( const QLinkedList<QPointF> &points )
         polyann->setVertices(p);
         delete p;
     }
-
-    d->pdfAnnot->invalidateAppearance();
 }
 
 LineAnnotation::TermStyle LineAnnotation::lineStartStyle() const
@@ -2409,8 +2397,6 @@ void LineAnnotation::setLineStartStyle( LineAnnotation::TermStyle style )
         AnnotPolygon *polyann = static_cast<AnnotPolygon*>(d->pdfAnnot);
         polyann->setStartEndStyle((AnnotLineEndingStyle)style, polyann->getEndStyle());
     }
-
-    d->pdfAnnot->invalidateAppearance();
 }
 
 LineAnnotation::TermStyle LineAnnotation::lineEndStyle() const
@@ -2452,8 +2438,6 @@ void LineAnnotation::setLineEndStyle( LineAnnotation::TermStyle style )
         AnnotPolygon *polyann = static_cast<AnnotPolygon*>(d->pdfAnnot);
         polyann->setStartEndStyle(polyann->getStartStyle(), (AnnotLineEndingStyle)style);
     }
-
-    d->pdfAnnot->invalidateAppearance();
 }
 
 bool LineAnnotation::isLineClosed() const
@@ -2493,8 +2477,6 @@ void LineAnnotation::setLineClosed( bool closed )
             if (polyann->getIntent() == AnnotPolygon::polygonDimension)
                 polyann->setIntent( AnnotPolygon::polylineDimension );
         }
-
-        d->pdfAnnot->invalidateAppearance();
     }
 }
 
@@ -2543,8 +2525,6 @@ void LineAnnotation::setLineInnerColor( const QColor &color )
         AnnotPolygon *polyann = static_cast<AnnotPolygon*>(d->pdfAnnot);
         polyann->setInteriorColor(c);
     }
-
-    d->pdfAnnot->invalidateAppearance();
 }
 
 double LineAnnotation::lineLeadingForwardPoint() const
@@ -2577,7 +2557,6 @@ void LineAnnotation::setLineLeadingForwardPoint( double point )
     {
         AnnotLine *lineann = static_cast<AnnotLine*>(d->pdfAnnot);
         lineann->setLeaderLineLength(point);
-        d->pdfAnnot->invalidateAppearance();
     }
 }
 
@@ -2611,7 +2590,6 @@ void LineAnnotation::setLineLeadingBackPoint( double point )
     {
         AnnotLine *lineann = static_cast<AnnotLine*>(d->pdfAnnot);
         lineann->setLeaderLineExtension(point);
-        d->pdfAnnot->invalidateAppearance();
     }
 }
 
@@ -2645,7 +2623,6 @@ void LineAnnotation::setLineShowCaption( bool show )
     {
         AnnotLine *lineann = static_cast<AnnotLine*>(d->pdfAnnot);
         lineann->setCaption(show);
-        d->pdfAnnot->invalidateAppearance();
     }
 }
 
@@ -2702,8 +2679,6 @@ void LineAnnotation::setLineIntent( LineAnnotation::LineIntent intent )
                 polyann->setIntent( AnnotPolygon::polylineDimension );
         }
     }
-
-    d->pdfAnnot->invalidateAppearance();
 }
 
 
@@ -2841,8 +2816,6 @@ void GeomAnnotation::setGeomType( GeomAnnotation::GeomType type )
         geomann->setType(Annot::typeSquare);
     else // GeomAnnotation::InscribedCircle
         geomann->setType(Annot::typeCircle);
-
-    d->pdfAnnot->invalidateAppearance();
 }
 
 QColor GeomAnnotation::geomInnerColor() const
@@ -2868,7 +2841,6 @@ void GeomAnnotation::setGeomInnerColor( const QColor &color )
 
     AnnotGeometry * geomann = static_cast<AnnotGeometry*>(d->pdfAnnot);
     geomann->setInteriorColor(convertQColor( color ));
-    d->pdfAnnot->invalidateAppearance();
 }
 
 
@@ -3130,7 +3102,6 @@ void HighlightAnnotation::setHighlightType( HighlightAnnotation::HighlightType t
 
     AnnotTextMarkup * hlann = static_cast<AnnotTextMarkup*>(d->pdfAnnot);
     hlann->setType(HighlightAnnotationPrivate::toAnnotSubType( type ));
-    d->pdfAnnot->invalidateAppearance();
 }
 
 QList< HighlightAnnotation::Quad > HighlightAnnotation::highlightQuads() const
@@ -3158,7 +3129,6 @@ void HighlightAnnotation::setHighlightQuads( const QList< HighlightAnnotation::Q
     AnnotQuadrilaterals * quadrilaterals = d->toQuadrilaterals(quads);
     hlann->setQuadrilaterals(quadrilaterals);
     delete quadrilaterals;
-    d->pdfAnnot->invalidateAppearance();
 }
 
 
@@ -3284,7 +3254,6 @@ void StampAnnotation::setStampIconName( const QString &name )
     QByteArray encoded = name.toLatin1();
     GooString s(encoded.constData());
     stampann->setIcon(&s);
-    d->pdfAnnot->invalidateAppearance();
 }
 
 /** InkAnnotation [Annotation] */
@@ -3497,8 +3466,6 @@ void InkAnnotation::setInkPaths( const QList< QLinkedList<QPointF> > &paths )
     for (int i = 0; i < pathsNumber; ++i)
         delete annotpaths[i];
     delete[] annotpaths;
-
-    d->pdfAnnot->invalidateAppearance();
 }
 
 
@@ -3966,7 +3933,6 @@ void CaretAnnotation::setCaretSymbol( CaretAnnotation::CaretSymbol symbol )
 
     AnnotCaret * caretann = static_cast<AnnotCaret *>(d->pdfAnnot);
     caretann->setSymbol((AnnotCaret::AnnotCaretSymbol)symbol);
-    d->pdfAnnot->invalidateAppearance();
 }
 
 /** FileAttachmentAnnotation [Annotation] */

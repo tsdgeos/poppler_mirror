@@ -563,7 +563,7 @@ public:
 
   // Sets the annot contents to new_content
   // new_content should never be NULL
-  void setContents(GooString *new_content);
+  virtual void setContents(GooString *new_content);
   void setName(GooString *new_name);
   void setModified(GooString *new_date);
   void setFlags(Guint new_flags);
@@ -575,9 +575,6 @@ public:
   void setColor(AnnotColor *new_color);
 
   void setAppearanceState(const char *state);
-
-  // Delete appearance streams and reset appearance state
-  void invalidateAppearance();
 
   // getters
   PDFDoc *getDoc() const { return doc; }
@@ -631,6 +628,9 @@ protected:
   // Updates the field key of the annotation dictionary
   // and sets M to the current time
   void update(const char *key, Object *value);
+
+  // Delete appearance streams and reset appearance state
+  void invalidateAppearance();
 
   int refCnt;
 
@@ -905,6 +905,7 @@ public:
 
   virtual void draw(Gfx *gfx, GBool printing);
   virtual Object *getAppearanceResDict(Object *dest);
+  virtual void setContents(GooString *new_content);
 
   void setAppearanceString(GooString *new_string);
   void setQuadding(AnnotFreeTextQuadding new_quadding);
@@ -968,6 +969,7 @@ public:
 
   virtual void draw(Gfx *gfx, GBool printing);
   virtual Object *getAppearanceResDict(Object *dest);
+  virtual void setContents(GooString *new_content);
 
   void setVertices(double x1, double y1, double x2, double y2);
   void setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end);
