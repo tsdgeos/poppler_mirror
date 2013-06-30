@@ -1082,7 +1082,6 @@ void AnnotAppearanceBBox::extendTo(double x, double y) {
 }
 
 void AnnotAppearanceBBox::getBBoxRect(double bbox[4]) const {
-  Object obj2;
   bbox[0] = minX - borderWidth;
   bbox[1] = minY - borderWidth;
   bbox[2] = maxX + borderWidth;
