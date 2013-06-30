@@ -1504,7 +1504,8 @@ void Annot::invalidateAppearance() {
   delete appearStreams;
   appearStreams = NULL;
 
-  setAppearanceState("Off"); // Default appearance state
+  appearance.free();
+  appearance.initNull();
 
   Object obj1;
   obj1.initNull();
