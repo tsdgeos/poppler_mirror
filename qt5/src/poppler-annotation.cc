@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012, 2013 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
