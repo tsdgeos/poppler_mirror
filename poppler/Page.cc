@@ -26,6 +26,7 @@
 // Copyright (C) 2008 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -363,7 +364,8 @@ Dict *Page::getResourceDict() {
 
 Dict *Page::getResourceDictCopy(XRef *xrefA) { 
   pageLocker();
-  return attrs->getResourceDict()->copy(xrefA);
+  Dict *dict = attrs->getResourceDict();
+  return dict ? dict->copy(xrefA) : NULL;
 }
 
 void Page::replaceXRef(XRef *xrefA) {
