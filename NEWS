@@ -1,3 +1,21 @@
+Release 0.23.3
+        core:
+         * Annotation improvements
+         * Fix crashes on malformed files
+         * TextSelectionPainter: Draw glyphs after selection background
+         * TextOutputDev: add a method to TextPage to get the selection as a list of words
+
+        qt5:
+         * Initial Qt5 port
+
+        qt4:
+         * Windows compile fixes
+         * Demo: Allow the choose the page rotation
+
+        build system:
+         * Fix mingw build
+         * Minor autotools fixes
+
 Release 0.23.2
         core:
          * SplashOutputDev: Speed-up some tiling on a 10x factor
