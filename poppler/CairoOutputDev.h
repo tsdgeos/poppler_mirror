@@ -266,7 +266,8 @@ public:
 protected:
   void doPath(cairo_t *cairo, GfxState *state, GfxPath *path);
   cairo_surface_t *downscaleSurface(cairo_surface_t *orig_surface);
-  void getScaledSize(int orig_width, int orig_height,
+  void getScaledSize(const cairo_matrix_t *matrix,
+                     int orig_width, int orig_height,
 		     int *scaledWidth, int *scaledHeight);
   cairo_filter_t getFilterForSurface(cairo_surface_t *image,
 				     GBool interpolate);
@@ -493,6 +494,8 @@ public:
 
 private:
   void saveImage(CairoImage *image);
+  void getBBox(GfxState *state, int width, int height,
+               double *x1, double *y1, double *x2, double *y2);
   
   CairoImage **images;
   int numImages;
