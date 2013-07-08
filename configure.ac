@@ -76,7 +76,7 @@ AC_SUBST(win32_libs)
 AC_SUBST(create_shared_lib)
 AC_SUBST(auto_import_flags)
 
-ACX_PTHREAD()
+AX_PTHREAD()
 
 dnl Install xpdf headers
 AC_ARG_ENABLE(xpdf-headers,
