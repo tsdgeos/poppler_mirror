@@ -35,7 +35,9 @@ endif
 
 pdftocairo_LDADD =				\
 	$(top_builddir)/poppler/libpoppler-cairo.la \
-	$(LDADD) $(PDFTOCAIRO_LIBS)
+	$(LDADD)				\
+	$(PDFTOCAIRO_LIBS)			\
+	$(PTHREAD_LIBS)
 
 
 pdftocairo_binary = pdftocairo

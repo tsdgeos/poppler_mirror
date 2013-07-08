@@ -52,7 +52,8 @@ gtk_test_LDADD =					\
 	$(top_builddir)/poppler/libpoppler.la           \
 	$(top_builddir)/glib/libpoppler-glib.la         \
 	$(CAIRO_LIBS)					\
-	$(GTK_TEST_LIBS)
+	$(GTK_TEST_LIBS)				\
+	$(PTHREAD_LIBS)
 
 
 pdf_inspector_SOURCES =			\
@@ -64,7 +65,8 @@ pdf_inspector_LDADD =					\
 	$(CAIRO_LIBS)					\
 	$(FREETYPE_LIBS)				\
 	$(GTK_TEST_LIBS)				\
-	$(X_EXTRA_LIBS)
+	$(X_EXTRA_LIBS)					\
+	$(PTHREAD_LIBS)
 
 perf_test_SOURCES =			\
        perf-test.cc                     \
