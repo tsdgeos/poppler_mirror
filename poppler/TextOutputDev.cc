@@ -4364,6 +4364,10 @@ void TextSelectionPainter::visitWord (TextWord *word, int begin, int end,
 void TextSelectionPainter::endPage()
 {
   out->fill(state);
+
+  out->saveState(state);
+  out->clip(state);
+
   state->clearPath();
 
   state->setFillColor(glyph_color);
@@ -4405,6 +4409,7 @@ void TextSelectionPainter::endPage()
     }
   }
 
+  out->restoreState(state);
   out->endPage ();
 }
 
