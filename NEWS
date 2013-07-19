@@ -1,3 +1,11 @@
+Release 0.23.4
+        core:
+         * TextOutputDev: clip the selected text rendering to the selection box. Bug #66983
+         * CairoImageOutputDev: Fix the bounding box of saved images
+
+        build system:
+         * Improve linking against pthreads
+
 Release 0.23.3
         core:
          * Annotation improvements
