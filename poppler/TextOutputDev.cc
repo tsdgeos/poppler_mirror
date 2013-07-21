@@ -4400,6 +4400,9 @@ void TextSelectionPainter::endPage()
       out->beginString(state, string);
 
       for (int i = begin; i < fEnd; i++) {
+        if (i != begin && sel->word->charPos[i] == sel->word->charPos[i - 1])
+          continue;
+
 	out->drawChar(state, sel->word->textMat[i].m[4], sel->word->textMat[i].m[5], 0, 0, 0, 0,
 		      sel->word->charcode[i], 1, NULL, 0);
       }
