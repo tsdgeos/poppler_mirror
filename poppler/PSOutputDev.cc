@@ -1238,6 +1238,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   processColors = 0;
   inType3Char = gFalse;
   inUncoloredPattern = gFalse;
+  t3FillColorOnly = gFalse;
 
 #if OPI_SUPPORT
   // initialize OPI nesting levels
