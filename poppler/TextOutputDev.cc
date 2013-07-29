@@ -34,6 +34,7 @@
 // Copyright (C) 2012 Peter Breitenlohner <peb@mppmu.mpg.de>
 // Copyright (C) 2013 José Aliste <jaliste@src.gnome.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013 Ed Catmur <ed@catmur.co.uk>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
