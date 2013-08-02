@@ -53,6 +53,7 @@
 #include "UTF.h"
 #include "Error.h"
 #include "DateInfo.h"
+#include "JSInfo.h"
 
 static void printInfoString(Dict *infoDict, const char *key, const char *text,
 			    UnicodeMap *uMap);
@@ -244,6 +245,13 @@ int main(int argc, char *argv[]) {
     case Catalog::XfaForm:
       printf("Form:           XFA\n");
       break;
+  }
+
+  // print javascript info
+  {
+    JSInfo jsInfo(doc, firstPage - 1);
+    jsInfo.scanJS(lastPage - firstPage + 1);
+    printf("JavaScript:     %s\n", jsInfo.containsJS() ? "yes" : "no");
   }
 
   // print page count

@@ -44,6 +44,7 @@ class PDFDoc;
 class XRef;
 class OutputDev;
 class Links;
+class LinkAction;
 class Annots;
 class Annot;
 class Gfx;
@@ -211,6 +212,13 @@ public:
   // Get actions
   Object *getActions(Object *obj) { return actions.fetch(xref, obj); }
 
+  enum PageAdditionalActionsType {
+    actionOpenPage,     ///< Performed when opening the page
+    actionClosePage,    ///< Performed when closing the page
+  };
+
+  LinkAction *getAdditionalAction(PageAdditionalActionsType type);
+
   Gfx *createGfx(OutputDev *out, double hDPI, double vDPI,
 		 int rotate, GBool useMediaBox, GBool crop,
 		 int sliceX, int sliceY, int sliceW, int sliceH,
@@ -267,7 +275,7 @@ private:
   Object contents;		// page contents
   Object thumb;			// page thumbnail
   Object trans;			// page transition
-  Object actions;		// page addiction actions
+  Object actions;		// page additional actions
   double duration;              // page duration
   GBool ok;			// true if page is valid
 #if MULTITHREADED

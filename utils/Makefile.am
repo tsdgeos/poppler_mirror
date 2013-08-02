@@ -88,12 +88,16 @@ pdfimages_SOURCES =				\
 	pdfimages.cc				\
 	ImageOutputDev.cc			\
 	ImageOutputDev.h			\
+	JSInfo.cc				\
+	JSInfo.h				\
 	$(common)
 
 pdfinfo_SOURCES =				\
 	pdfinfo.cc				\
 	printencodings.cc			\
 	printencodings.h			\
+	JSInfo.cc				\
+	JSInfo.h				\
 	$(common)
 
 pdftops_SOURCES =				\

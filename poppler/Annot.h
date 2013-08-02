@@ -536,6 +536,13 @@ public:
     actionPageInvisible   ///< Performed when the page containing the annotation becomes invisible
   };
 
+  enum FormAdditionalActionsType {
+    actionFieldModified,   ///< Performed when the when the user modifies the field
+    actionFormatField,     ///< Performed before the field is formatted to display its value
+    actionValidateField,   ///< Performed when the field value changes
+    actionCalculateField,  ///< Performed when the field needs to be recalculated
+  };
+
   Annot(PDFDoc *docA, PDFRectangle *rectA);
   Annot(PDFDoc *docA, Dict *dict);
   Annot(PDFDoc *docA, Dict *dict, Object *obj);
@@ -1305,6 +1312,7 @@ public:
   AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs; }
   LinkAction *getAction() { return action; }
   LinkAction *getAdditionalAction(AdditionalActionsType type);
+  LinkAction *getFormAdditionalAction(FormAdditionalActionsType type);
   Dict *getParent() { return parent; }
 
 private:

@@ -48,6 +48,7 @@ class Page;
 class PageAttrs;
 struct Ref;
 class LinkDest;
+class LinkAction;
 class PageLabelInfo;
 class Form;
 class OCGs;
@@ -202,6 +203,16 @@ public:
   PageMode getPageMode();
   PageLayout getPageLayout();
 
+  enum DocumentAdditionalActionsType {
+    actionCloseDocument,        ///< Performed before closing the document
+    actionSaveDocumentStart,    ///< Performed before saving the document
+    actionSaveDocumentFinish,   ///< Performed after saving the document
+    actionPrintDocumentStart,   ///< Performed before printing the document
+    actionPrintDocumentFinish,  ///< Performed after printing the document
+  };
+
+  LinkAction *getAdditionalAction(DocumentAdditionalActionsType type);
+
 private:
 
   // Get page label info.
@@ -237,6 +248,7 @@ private:
   PageLabelInfo *pageLabelInfo; // info about page labels
   PageMode pageMode;		// page mode
   PageLayout pageLayout;	// page layout
+  Object additionalActions;     // page additional actions
 
   GBool cachePageTree(int page); // Cache first <page> pages.
   Object *findDestInTree(Object *tree, GooString *name, Object *obj);

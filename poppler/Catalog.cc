@@ -126,6 +126,9 @@ Catalog::Catalog(PDFDoc *docA) {
   }
   optContentProps.free();
 
+  // actions
+  catDict.dictLookupNF("AA", &additionalActions);
+
   // get the ViewerPreferences dictionary
   catDict.dictLookup("ViewerPreferences", &viewerPreferences);
   catDict.free();
@@ -181,6 +184,7 @@ Catalog::~Catalog() {
   outline.free();
   acroForm.free();
   viewerPreferences.free();
+  additionalActions.free();
 #if MULTITHREADED
   gDestroyMutex(&mutex);
 #endif
@@ -1062,3 +1066,25 @@ NameTree *Catalog::getJSNameTree()
   return jsNameTree;
 }
 
+LinkAction* Catalog::getAdditionalAction(DocumentAdditionalActionsType type) {
+  Object additionalActionsObject;
+  LinkAction *linkAction = NULL;
+
+  if (additionalActions.fetch(doc->getXRef(), &additionalActionsObject)->isDict()) {
+    const char *key = (type == actionCloseDocument ?       "WC" :
+                       type == actionSaveDocumentStart ?   "WS" :
+                       type == actionSaveDocumentFinish ?  "DS" :
+                       type == actionPrintDocumentStart ?  "WP" :
+                       type == actionPrintDocumentFinish ? "DP" : NULL);
+
+    Object actionObject;
+
+    if (additionalActionsObject.dictLookup(key, &actionObject)->isDict())
+      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+    actionObject.free();
+  }
+
+  additionalActionsObject.free();
+
+  return linkAction;
+}

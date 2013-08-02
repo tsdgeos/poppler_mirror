@@ -823,3 +823,23 @@ void Page::getDefaultCTM(double *ctm, double hDPI, double vDPI,
   }
  delete state;
 }
+
+LinkAction* Page::getAdditionalAction(PageAdditionalActionsType type) {
+  Object additionalActionsObject;
+  LinkAction *linkAction = NULL;
+
+  if (actions.fetch(doc->getXRef(), &additionalActionsObject)->isDict()) {
+    const char *key = (type == actionOpenPage ?  "O" :
+                       type == actionClosePage ? "C" : NULL);
+
+    Object actionObject;
+
+    if (additionalActionsObject.dictLookup(key, &actionObject)->isDict())
+      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+    actionObject.free();
+  }
+
+  additionalActionsObject.free();
+
+  return linkAction;
+}

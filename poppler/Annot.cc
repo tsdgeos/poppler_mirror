@@ -234,6 +234,28 @@ static LinkAction* getAdditionalAction(Annot::AdditionalActionsType type, Object
   return linkAction;
 }
 
+static LinkAction* getFormAdditionalAction(Annot::FormAdditionalActionsType type, Object *additionalActions, PDFDoc *doc) {
+  Object additionalActionsObject;
+  LinkAction *linkAction = NULL;
+
+  if (additionalActions->fetch(doc->getXRef(), &additionalActionsObject)->isDict()) {
+    const char *key = (type == Annot::actionFieldModified ?  "K" :
+                       type == Annot::actionFormatField ?    "F" :
+                       type == Annot::actionValidateField ?  "V" :
+                       type == Annot::actionCalculateField ? "C" : NULL);
+
+    Object actionObject;
+
+    if (additionalActionsObject.dictLookup(key, &actionObject)->isDict())
+      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+    actionObject.free();
+  }
+
+  additionalActionsObject.free();
+
+  return linkAction;
+}
+
 //------------------------------------------------------------------------
 // AnnotBorderEffect
 //------------------------------------------------------------------------
@@ -3909,6 +3931,11 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
 LinkAction* AnnotWidget::getAdditionalAction(AdditionalActionsType type)
 {
   return ::getAdditionalAction(type, &additionalActions, doc);
+}
+
+LinkAction* AnnotWidget::getFormAdditionalAction(FormAdditionalActionsType type)
+{
+  return ::getFormAdditionalAction(type, &additionalActions, doc);
 }
 
 // Grand unified handler for preparing text strings to be drawn into form

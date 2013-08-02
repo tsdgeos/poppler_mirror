@@ -21,6 +21,7 @@
 #endif
 
 #include "Object.h"
+#include "Annot.h"
 
 #include <set>
 
@@ -101,6 +102,7 @@ public:
   bool isReadOnly() const;
 
   LinkAction *getActivationAction();
+  LinkAction *getAdditionalAction(Annot::FormAdditionalActionsType type);
 
   // return the unique ID corresponding to pageNum/fieldNum
   static int encodeID (unsigned pageNum, unsigned fieldNum);
