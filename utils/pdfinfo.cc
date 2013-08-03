@@ -64,6 +64,7 @@ static int firstPage = 1;
 static int lastPage = 0;
 static GBool printBoxes = gFalse;
 static GBool printMetadata = gFalse;
+static GBool printJS = gFalse;
 static GBool rawDates = gFalse;
 static char textEncName[128] = "";
 static char ownerPassword[33] = "\001";
@@ -81,6 +82,8 @@ static const ArgDesc argDesc[] = {
    "print the page bounding boxes"},
   {"-meta",   argFlag,     &printMetadata,    0,
    "print the document metadata (XML)"},
+  {"-js",     argFlag,     &printJS,          0,
+   "print all JavaScript in the PDF"},
   {"-rawdates", argFlag,   &rawDates,         0,
    "print the undecoded date strings directly from the PDF file"},
   {"-enc",    argString,   textEncName,    sizeof(textEncName),
@@ -381,6 +384,13 @@ int main(int argc, char *argv[]) {
     fputs(metadata->getCString(), stdout);
     fputc('\n', stdout);
     delete metadata;
+  }
+
+  // print javascript
+  if (printJS) {
+    JSInfo jsInfo(doc, firstPage - 1);
+    fputs("\n", stdout);
+    jsInfo.scanJS(lastPage - firstPage + 1, stdout, uMap);
   }
 
   exitCode = 0;

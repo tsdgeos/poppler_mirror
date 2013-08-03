@@ -153,6 +153,7 @@ public:
 
   // Get the number of javascript scripts
   int numJS() { return getJSNameTree()->numEntries(); }
+  GooString *getJSName(int i) { return getJSNameTree()->getName(i); }
 
   // Get the i'th JavaScript script (at the Document level) in the document
   GooString *getJS(int i);
