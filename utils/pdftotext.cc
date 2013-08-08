@@ -22,6 +22,7 @@
 // Copyright (C) 2010 Kenneth Berland <ken@hero.com>
 // Copyright (C) 2011 Tom Gleason <tom@buildadam.com>
 // Copyright (C) 2011 Steven Murdoch <Steven.Murdoch@cl.cam.ac.uk>
+// Copyright (C) 2013 Yury G. Kudryashov <urkud.urkud@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -331,21 +332,17 @@ int main(int argc, char *argv[]) {
     info.free();
     fputs("</head>\n", f);
     fputs("<body>\n", f);
-    if (!bbox) fputs("<pre>\n", f);
-    if (f != stdout) {
-      fclose(f);
+    if (!bbox) {
+      fputs("<pre>\n", f);
+      if (f != stdout) {
+	fclose(f);
+      }
     }
   }
 
   // write text file
   if (bbox) {
     textOut = new TextOutputDev(NULL, physLayout, fixedPitch, rawOrder, htmlMeta);
-    if (!(f = fopen(textFileName->getCString(), "ab"))) {
-      error(errIO, -1, "Couldn't open text file '{0:t}' for append", textFileName);
-      exitCode = 2;
-      delete textOut;
-      goto err3;
-    }
 
     if (textOut->isOk()) {
       fprintf(f, "<doc>\n");
