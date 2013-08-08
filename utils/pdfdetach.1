@@ -11,14 +11,6 @@ extractor (version 3.03)
 .B Pdfdetach
 lists or extracts embedded files (attachments) from a Portable
 Document Format (PDF) file.
-.SH CONFIGURATION FILE
-Pdfdetach reads a configuration file at startup.  It first tries to
-find the user's private config file, ~/.xpdfrc.  If that doesn't
-exist, it looks for a system-wide config file, typically
-/usr/local/etc/xpdfrc (but this location can be changed when pdfinfo
-is built).  See the
-.BR xpdfrc (5)
-man page for details.
 .SH OPTIONS
 Some of the following options can be set with configuration file
 commands.  These are listed in square brackets with the description of
@@ -44,12 +36,8 @@ Set the file name used when saving an embedded file with the "\-save"
 switch, or the directory used by "\-saveall".
 .TP
 .BI \-enc " encoding-name"
-Sets the encoding to use for text output (embedded file names).  The
-.I encoding\-name
-must be defined with the unicodeMap command (see
-.BR xpdfrc (5)).
-This defaults to "Latin1" (which is a built-in encoding).
-.RB "[config file: " textEncoding ]
+Sets the encoding to use for text output (embedded file names).
+This defaults to "UTF-8".
 .TP
 .BI \-opw " password"
 Specify the owner password for the PDF file.  Providing this will
@@ -57,11 +45,6 @@ bypass all security restrictions.
 .TP
 .BI \-upw " password"
 Specify the user password for the PDF file.
-.TP
-.BI \-cfg " config-file"
-Read
-.I config-file
-in place of ~/.xpdfrc or the system-wide config file.
 .TP
 .B \-v
 Print copyright and version information.
