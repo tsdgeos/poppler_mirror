@@ -14,6 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2013 Yury G. Kudryashov <urkud.urkud@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -46,7 +47,6 @@ static char savePath[1024] = "";
 static char textEncName[128] = "";
 static char ownerPassword[33] = "\001";
 static char userPassword[33] = "\001";
-static char cfgFileName[256] = "";
 static GBool printVersion = gFalse;
 static GBool printHelp = gFalse;
 
@@ -65,8 +65,6 @@ static ArgDesc argDesc[] = {
    "owner password (for encrypted files)"},
   {"-upw",    argString,   userPassword,   sizeof(userPassword),
    "user password (for encrypted files)"},
-  {"-cfg",        argString,      cfgFileName,    sizeof(cfgFileName),
-   "configuration file to use in place of .xpdfrc"},
   {"-v",      argFlag,     &printVersion,  0,
    "print copyright and version info"},
   {"-h",      argFlag,     &printHelp,     0,
@@ -121,7 +119,7 @@ int main(int argc, char *argv[]) {
   fileName = new GooString(argv[1]);
 
   // read config file
-  globalParams = new GlobalParams(cfgFileName);
+  globalParams = new GlobalParams();
   if (textEncName[0]) {
     globalParams->setTextEncoding(textEncName);
   }
