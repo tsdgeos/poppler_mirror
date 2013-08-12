@@ -103,7 +103,7 @@ namespace Poppler {
     public:
       /**
 	 The default constructor sets the \p text and the rectangle that
-	 contains the text. Coordinated for the \p bBox are in points =
+	 contains the text. Coordinates for the \p bBox are in points =
 	 1/72 of an inch.
       */
       TextBox(const QString& text, const QRectF &bBox);
