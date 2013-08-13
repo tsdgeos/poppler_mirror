@@ -102,6 +102,18 @@ Specifies the TIFF compression type.  This defaults to "none".
 Enable or disable FreeType (a TrueType / Type 1 font rasterizer).
 This defaults to "yes".
 .TP
+.BI \-thinlinemode " none | solid | shape"
+Specifies the thin line mode. This defaults to "none".
+.TP
+"solid": 
+adjust lines with a width less than one pixel to pixel boundary 
+and paint it with a width of one pixel.
+.TP
+"shape": 
+adjust lines with a width less than one pixel to pixel boundary 
+and paint it with a width of one pixel but with a shape in proportion
+to its width.
+.TP
 .BI \-aa " yes | no"
 Enable or disable font anti-aliasing.  This defaults to "yes".
 .TP
