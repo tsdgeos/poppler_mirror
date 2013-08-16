@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2013 Albert Astals Cid <aacid@kde.org>
 // Copyright 2013 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
@@ -57,7 +57,6 @@ private:
   int pageObjectFirst;
   Goffset pageOffsetFirst;
   Guint pageEndFirst;
-  int objectNumberFirst;
 
   Guint nObjectLeast;
   Guint objectOffsetFirst;
