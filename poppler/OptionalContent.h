@@ -4,6 +4,7 @@
 //
 // Copyright 2007 Brad Hards <bradh@kde.org>
 // Copyright 2008 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright 2013 Albert Astals Cid <aacid@kde.org>
 //
 // Released under the GPL (version 2, or later, at your option)
 //
@@ -101,7 +102,6 @@ public:
   UsageState getPrintState() { return printState; }
 
 private:
-  XRef *xref;
   GooString *m_name;
   Ref m_ref;
   State m_state;
