@@ -36,6 +36,7 @@
 // Copyright (C) 2012 Pino Toscano <pino@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
+// Copyright (C) 2013 Johannes Brandstätter <jbrandstaetter@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1502,7 +1503,8 @@ void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   /*if( !globalParams->getErrQuiet() )
     printf("image stream of kind %d\n", str->getKind());*/
   // dump JPEG file
-  if (dumpJPEG && str->getKind() == strDCT) {
+  if (dumpJPEG && str->getKind() == strDCT && (colorMap->getNumPixelComps() == 1 ||
+	  colorMap->getNumPixelComps() == 3) && !inlineImg) {
     drawJpegImage(state, str);
   }
   else {
