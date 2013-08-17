@@ -467,7 +467,7 @@ void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 				   int width, int height, GBool invert,
 				   GBool interpolate, GBool inlineImg) {
   if (listImages)
-    listImage(state, ref, str, width, height, NULL, interpolate, inlineImg, imgMask);
+    listImage(state, ref, str, width, height, NULL, interpolate, inlineImg, imgStencil);
   else
     writeMask(state, ref, str, width, height, invert, interpolate, inlineImg);
 }
