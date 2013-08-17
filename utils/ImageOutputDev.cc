@@ -20,7 +20,7 @@
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Jakob Voss <jakob.voss@gbv.de>
-// Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Fischer <fischer@unix-ag.uni-kl.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <ctype.h>
+#include <math.h>
 #include "goo/gmem.h"
 #include "Error.h"
 #include "GfxState.h"
@@ -58,8 +59,8 @@ ImageOutputDev::ImageOutputDev(char *fileRootA, GBool pageNamesA, GBool dumpJPEG
   pageNum = 0;
   ok = gTrue;
   if (listImages) {
-    printf("page   num  type   width height color comp bpc  enc interp  object ID\n");
-    printf("---------------------------------------------------------------------\n");
+    printf("page   num  type   width height color comp bpc  enc interp  object ID x-ppi y-ppi size ratio\n");
+    printf("--------------------------------------------------------------------------------------------\n");
   }
 }
 
@@ -76,6 +77,34 @@ void ImageOutputDev::setFilename(const char *fileExt) {
     sprintf(fileName, "%s-%03d-%03d.%s", fileRoot, pageNum, imgNum, fileExt);
   } else {
     sprintf(fileName, "%s-%03d.%s", fileRoot, imgNum, fileExt);
+  }
+}
+
+
+// Print a floating point number between 0 - 9999 using 4 characters
+// eg '1.23', '12.3', ' 123', '1234'
+//
+// We need to be careful to handle the cases where rounding adds an
+// extra digit before the decimal. eg printf("%4.2f", 9.99999)
+// outputs "10.00" instead of "9.99".
+static void printNumber(double d)
+{
+  char buf[10];
+
+  if (d < 10.0) {
+    sprintf(buf, "%4.2f", d);
+    buf[4] = 0;
+    printf("%s", buf);
+  } else if (d < 100.0) {
+    sprintf(buf, "%4.1f", d);
+    if (!isdigit(buf[3])) {
+      buf[3] = 0;
+      printf(" %s", buf);
+    } else {
+      printf("%s", buf);
+    }
+  } else {
+    printf("%4.0f", d);
   }
 }
 
@@ -179,17 +208,74 @@ void ImageOutputDev::listImage(GfxState *state, Object *ref, Stream *str,
   printf("%-3s  ", interpolate ? "yes" : "no");
 
   if (inlineImg) {
-    printf("[inline]\n");
+    printf("[inline]   ");
   } else if (ref->isRef()) {
     const Ref imageRef = ref->getRef();
     if (imageRef.gen >= 100000) {
-      printf("[none]\n");
+      printf("[none]     ");
     } else {
-      printf(" %6d %2d\n", imageRef.num, imageRef.gen);
+      printf(" %6d %2d ", imageRef.num, imageRef.gen);
     }
   } else {
-    printf("[none]\n");
+    printf("[none]     ");
   }
+
+  double *mat = state->getCTM();
+  double width2 = mat[0] + mat[2];
+  double height2 = mat[1] + mat[3];
+  double xppi = fabs(width*72.0/width2) + 0.5;
+  double yppi = fabs(height*72.0/height2) + 0.5;
+  if (xppi < 1.0)
+    printf("%5.3f ", xppi);
+  else
+    printf("%5.0f ", xppi);
+  if (yppi < 1.0)
+    printf("%5.3f ", yppi);
+  else
+    printf("%5.0f ", yppi);
+
+  Goffset embedSize = -1;
+  if (!inlineImg)
+    embedSize = str->getBaseStream()->getLength();
+
+  long long imageSize = 0;
+  if (colorMap && colorMap->isOk())
+    imageSize = ((long long)width * height * colorMap->getNumPixelComps() * colorMap->getBits())/8;
+  else
+    imageSize = (long long)width*height/8; // mask
+
+  double ratio = -1.0;
+  if (imageSize > 0)
+    ratio = 100.0*embedSize/imageSize;
+
+  if (embedSize < 0) {
+    printf("   - ");
+  } else if (embedSize <= 9999) {
+    printf("%4lldB", embedSize);
+  } else {
+    double d = embedSize/1024.0;
+    if (d <= 9999.0) {
+      printNumber(d);
+      putchar('K');
+    } else {
+      d /= 1024.0;
+      if (d <= 9999.0) {
+        printNumber(d);
+        putchar('M');
+      } else {
+        d /= 1024.0;
+        printNumber(d);
+        putchar('G');
+      }
+    }
+  }
+
+  if (ratio > 9.9)
+    printf(" %3.0f%%\n", ratio);
+  else if (ratio >= 0.0)
+    printf(" %3.1f%%\n", ratio);
+  else
+    printf("   - \n");
 
   ++imgNum;
 }
