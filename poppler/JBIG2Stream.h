@@ -56,6 +56,7 @@ public:
   virtual int lookChar();
   virtual GooString *getPSFilter(int psLevel, const char *indent);
   virtual GBool isBinary(GBool last = gTrue);
+  virtual Object *getGlobalsStream() { return &globalsStream; }
 
 private:
   virtual GBool hasGetChars() { return true; }

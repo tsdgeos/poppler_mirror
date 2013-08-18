@@ -48,6 +48,7 @@
 #include "GfxState.h"
 #include "Object.h"
 #include "Stream.h"
+#include "JBIG2Stream.h"
 #include "ImageOutputDev.h"
 
 ImageOutputDev::ImageOutputDev(char *fileRootA, GBool pageNamesA, GBool listImagesA) {
@@ -428,6 +429,30 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
   } else if (dumpJP2 && str->getKind() == strJPX && !inlineImg) {
     // dump JPEG2000 file
     writeRawImage(str, "jp2");
+
+  } else if (dumpJBIG2 && str->getKind() == strJBIG2 && !inlineImg) {
+    // dump JBIG2 globals stream if available
+    JBIG2Stream *jb2Str = static_cast<JBIG2Stream *>(str);
+    Object *globals = jb2Str->getGlobalsStream();
+    if (globals->isStream()) {
+      FILE *f;
+      int c;
+      Stream *str = globals->getStream();
+
+      setFilename("jb2g");
+      if (!(f = fopen(fileName, "wb"))) {
+        error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
+        return;
+      }
+      str->reset();
+      while ((c = str->getChar()) != EOF)
+        fputc(c, f);
+      str->close();
+      fclose(f);
+    }
+
+    // dump JBIG2 embedded file
+    writeRawImage(str, "jb2e");
 
   } else if (outputPNG) {
     // output in PNG format

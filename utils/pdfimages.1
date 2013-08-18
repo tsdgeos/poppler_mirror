@@ -11,7 +11,7 @@ pdfimages \- Portable Document Format (PDF) image extractor
 .B Pdfimages
 saves images from a Portable Document Format (PDF) file as Portable
 Pixmap (PPM), Portable Bitmap (PBM), Portable Network Graphics (PNG),
-Tagged Image File Format (TIFF), JPEG, or JPEG2000 files.
+Tagged Image File Format (TIFF), JPEG, JPEG2000, or JBIG2 files.
 .PP
 Pdfimages reads the PDF file
 .IR PDF-file ,
@@ -21,12 +21,12 @@ where
 .I nnn
 is the image number and
 .I xxx
-is the image type (.ppm, .pbm, .png, .tif, .jpg, or jp2).
+is the image type (.ppm, .pbm, .png, .tif, .jpg, jp2, jb2e, or jb2g).
 .PP
 The default output format is PBM (for monochrome images) or PPM for non-monochrome. The
-\-png or \-tiff options change to default output to PNG or TIFF respectively. In addition the \-j and
-\-jp2 options will cause JPEG and JPEG2000, respectively, images in the PDF file to be written in their
-native format.
+\-png or \-tiff options change to default output to PNG or TIFF respectively. In addition the \-j,
+\-jp2, and \-jbig2 options will cause JPEG, JPEG2000, and JBIG2, respectively, images in the PDF file
+to be written in their native format.
 .SH OPTIONS
 .TP
 .BI \-f " number"
@@ -46,6 +46,9 @@ Write images in JPEG format as JPEG files instead of the default format. The JPE
 .TP
 .B \-jp2
 Write images in JPEG2000 format as JP2 files instead of the default format. The JP2 file is identical to the JPEG2000 data stored in the PDF.
+.TP
+.B \-jbig2
+Write images in JBIG2 format as JBIG2 files instead of the default format. JBIG2 data in PDF is of the embedded type. The embedded type of JBIG2 has an optional separate file containing global data. The embedded data is written with the extension .jb2e and the global data (if available) will be written to the same image number with the extension .jb2g. The content of both these files is indentical to the JBIG2 data in the PDF.
 .TP
 .B \-list
 Instead of writing the images, list the images along with various information for each image. Do not specify an
