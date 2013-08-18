@@ -79,6 +79,9 @@ public:
   // Use Jpeg format for Jpeg files
   void enableJpeg(GBool jpeg) { dumpJPEG = jpeg; }
 
+  // Use Jpeg2000 format for Jpeg2000 files
+  void enableJpeg2000(GBool jp2) { dumpJP2 = jp2; }
+
   // Check if file was successfully created.
   virtual GBool isOk() { return ok; }
 
@@ -154,6 +157,7 @@ private:
   char *fileName;		// buffer for output file names
   GBool listImages;		// list images instead of dumping
   GBool dumpJPEG;		// set to dump native JPEG files
+  GBool dumpJP2;		// set to dump native JPEG2000 files
   GBool outputPNG;		// set to output in PNG format
   GBool outputTiff;		// set to output in TIFF format
   GBool pageNames;		// set to include page number in file names

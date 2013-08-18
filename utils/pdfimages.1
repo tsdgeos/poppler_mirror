@@ -11,7 +11,7 @@ pdfimages \- Portable Document Format (PDF) image extractor
 .B Pdfimages
 saves images from a Portable Document Format (PDF) file as Portable
 Pixmap (PPM), Portable Bitmap (PBM), Portable Network Graphics (PNG),
-Tagged Image File Format (TIFF), or JPEG files.
+Tagged Image File Format (TIFF), JPEG, or JPEG2000 files.
 .PP
 Pdfimages reads the PDF file
 .IR PDF-file ,
@@ -21,11 +21,12 @@ where
 .I nnn
 is the image number and
 .I xxx
-is the image type (.ppm, .pbm, .png, .tif, or .jpg).
+is the image type (.ppm, .pbm, .png, .tif, .jpg, or jp2).
 .PP
 The default output format is PBM (for monochrome images) or PPM for non-monochrome. The
-\-png or \-tiff options change to default output to PNG or TIFF respectively. In addition the \-j option
-will cause JPEG images in the PDF file to be written in JPEG format.
+\-png or \-tiff options change to default output to PNG or TIFF respectively. In addition the \-j and
+\-jp2 options will cause JPEG and JPEG2000, respectively, images in the PDF file to be written in their
+native format.
 .SH OPTIONS
 .TP
 .BI \-f " number"
@@ -42,6 +43,9 @@ Change the default output format to TIFF.
 .TP
 .B \-j
 Write images in JPEG format as JPEG files instead of the default format. The JPEG file is identical to the JPEG data stored in the PDF.
+.TP
+.B \-jp2
+Write images in JPEG2000 format as JP2 files instead of the default format. The JP2 file is identical to the JPEG2000 data stored in the PDF.
 .TP
 .B \-list
 Instead of writing the images, list the images along with various information for each image. Do not specify an

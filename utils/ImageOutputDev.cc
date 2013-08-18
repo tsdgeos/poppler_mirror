@@ -425,6 +425,10 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
     // dump JPEG file
     writeRawImage(str, "jpg");
 
+  } else if (dumpJP2 && str->getKind() == strJPX && !inlineImg) {
+    // dump JPEG2000 file
+    writeRawImage(str, "jp2");
+
   } else if (outputPNG) {
     // output in PNG format
 

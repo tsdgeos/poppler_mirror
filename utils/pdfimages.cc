@@ -53,6 +53,7 @@ static GBool listImages = gFalse;
 static GBool enablePNG = gFalse;
 static GBool enableTiff = gFalse;
 static GBool dumpJPEG = gFalse;
+static GBool dumpJP2 = gFalse;
 static GBool pageNames = gFalse;
 static char ownerPassword[33] = "\001";
 static char userPassword[33] = "\001";
@@ -75,6 +76,8 @@ static const ArgDesc argDesc[] = {
 #endif
   {"-j",      argFlag,     &dumpJPEG,      0,
    "write JPEG images as JPEG files"},
+  {"-jp2",      argFlag,     &dumpJP2,      0,
+   "write JPEG2000 images as JP2 files"},
   {"-list",   argFlag,     &listImages,      0,
    "print list of images instead of saving"},
   {"-opw",    argString,   ownerPassword,  sizeof(ownerPassword),
@@ -183,6 +186,7 @@ int main(int argc, char *argv[]) {
     imgOut->enablePNG(enablePNG);
     imgOut->enableTiff(enableTiff);
     imgOut->enableJpeg(dumpJPEG);
+    imgOut->enableJpeg2000(dumpJP2);
     doc->displayPages(imgOut, firstPage, lastPage, 72, 72, 0,
                       gTrue, gFalse, gFalse);
   }
