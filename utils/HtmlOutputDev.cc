@@ -1413,32 +1413,39 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
     delete imgStr;
   }
   else { // isMask == true
-    ImageStream *imgStr = new ImageStream(str, width, 1, 1);
-    imgStr->reset();
+    int size = (width + 7)/8;
 
-    Guchar *png_row = (Guchar *)gmalloc( width );
+    // PDF masks use 0 = draw current color, 1 = leave unchanged.
+    // We invert this to provide the standard interpretation of alpha
+    // (0 = transparent, 1 = opaque). If the colorMap already inverts
+    // the mask we leave the data unchanged.
+    int invert_bits = 0xff;
+    if (colorMap) {
+      GfxGray gray;
+      Guchar zero = 0;
+      colorMap->getGray(&zero, &gray);
+      if (colToByte(gray) == 0)
+        invert_bits = 0x00;
+    }
+
+    str->reset();
+    Guchar *png_row = (Guchar *)gmalloc(size);
 
     for (int ri = 0; ri < height; ++ri)
     {
-      // read the row of the mask
-      Guchar *bit_row = imgStr->getLine();
-
-      // invert for PNG
-      for(int i = 0; i < width; i++)
-        png_row[i] = bit_row[i] ? 0xff : 0x00;
+      for(int i = 0; i < size; i++)
+        png_row[i] = str->getChar() ^ invert_bits;
 
       if (!writer->writeRow( &png_row ))
       {
         error(errIO, -1, "Failed to write into PNG '%s'", fName->getCString());
         delete writer;
         fclose(f1);
-        delete imgStr;
         gfree(png_row);
         return;
       }
     }
-    imgStr->close();
-    delete imgStr;
+    str->close();
     gfree(png_row);
   }
 

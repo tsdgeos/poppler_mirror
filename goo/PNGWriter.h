@@ -31,7 +31,7 @@ public:
   /* RGB        - 3 bytes/pixel
    * RGBA       - 4 bytes/pixel
    * GRAY       - 1 byte/pixel
-   * MONOCHROME - 1 byte/pixel. PNGWriter will bitpack to 8 pixels/byte
+   * MONOCHROME - 8 pixels/byte
    */
   enum Format { RGB, RGBA, GRAY, MONOCHROME };
 

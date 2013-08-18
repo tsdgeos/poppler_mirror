@@ -315,7 +315,7 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
   GfxRGB rgb;
   GfxGray gray;
   Guchar zero = 0;
-  int invert_bits = 0xff;
+  int invert_bits;
 
   setFilename(ext);
   ++imgNum;
@@ -341,8 +341,11 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
 
   row = (unsigned char *) gmallocn(width, sizeof(unsigned int));
 
-  // if 0 comes out as 0 in the color map, the we _flip_ stream bits
-  // otherwise we pass through stream bits unmolested
+  // PDF masks use 0 = draw current color, 1 = leave unchanged.
+  // We invert this to provide the standard interpretation of alpha
+  // (0 = transparent, 1 = opaque). If the colorMap already inverts
+  // the mask we leave the data unchanged.
+  invert_bits = 0xff;
   if (colorMap) {
     colorMap->getGray(&zero, &gray);
     if (colToByte(gray) == 0)

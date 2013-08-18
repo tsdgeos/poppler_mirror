@@ -147,10 +147,6 @@ bool PNGWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
     return false;
   }
 
-  // pack 1 pixel/byte rows into 8 pixels/byte
-  if (priv->format == MONOCHROME)
-    png_set_packing(priv->png_ptr);
-
   return true;
 }
 

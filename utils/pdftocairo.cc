@@ -370,7 +370,7 @@ void writePageImage(GooString *filename)
 	int b = (*pixel & 0x000000ff) >>  0;
 	// an arbitrary integer approximation of .3*r + .59*g + .11*b
 	int y = (r*19661+g*38666+b*7209 + 32829)>>16;
-        if (tiff && mono) {
+        if (mono) {
           if (bit == 7)
             *rowp = 0;
           if (y > 127)
