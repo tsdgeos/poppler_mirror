@@ -13,6 +13,7 @@ poppler_goo_include_HEADERS =			\
 	gmem.h					\
 	gfile.h					\
 	FixedPoint.h				\
+	NetPBMWriter.h				\
 	PNGWriter.h				\
 	JpegWriter.h				\
 	TiffWriter.h				\
@@ -55,6 +56,7 @@ libgoo_la_SOURCES =				\
 	GooString.cc				\
 	gmem.cc					\
 	FixedPoint.cc				\
+	NetPBMWriter.cc				\
 	PNGWriter.cc				\
 	JpegWriter.cc				\
 	TiffWriter.cc				\

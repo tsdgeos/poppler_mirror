@@ -36,6 +36,7 @@
 
 #include <stdio.h>
 #include "goo/gtypes.h"
+#include "goo/ImgWriter.h"
 #include "OutputDev.h"
 
 class GfxState;
@@ -51,6 +52,10 @@ public:
     imgStencil,
     imgMask,
     imgSmask
+  };
+  enum ImageFormat {
+    imgRGB,
+    imgMonochrome
   };
 
   // Create an OutputDev which will write images to files named
@@ -128,13 +133,11 @@ private:
 		 GfxImageColorMap *colorMap,
 		 GBool interpolate, GBool inlineImg,
 		 ImageType imageType);
-  void writeMask(GfxState *state, Object *ref, Stream *str,
-		 int width, int height, GBool invert,
-		 GBool interpolate, GBool inlineImg);
   void writeImage(GfxState *state, Object *ref, Stream *str,
-                  int width, int height, GfxImageColorMap *colorMap,
-                  GBool interpolate, int *maskColors, GBool inlineImg);
-
+                  int width, int height, GfxImageColorMap *colorMap, GBool inlineImg);
+  void writeRawImage(Stream *str, const char *ext);
+  void writeImageFile(ImgWriter *writer, ImageFormat format, const char *ext,
+                      Stream *str, int width, int height, GfxImageColorMap *colorMap);
 
   char *fileRoot;		// root of output file names
   char *fileName;		// buffer for output file names

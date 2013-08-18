@@ -41,6 +41,7 @@
 #include <ctype.h>
 #include <math.h>
 #include "goo/gmem.h"
+#include "goo/NetPBMWriter.h"
 #include "Error.h"
 #include "GfxState.h"
 #include "Object.h"
@@ -280,177 +281,145 @@ void ImageOutputDev::listImage(GfxState *state, Object *ref, Stream *str,
   ++imgNum;
 }
 
-void ImageOutputDev::writeMask(GfxState *state, Object *ref, Stream *str,
-			       int width, int height, GBool invert,
-			       GBool interpolate, GBool inlineImg) {
+void ImageOutputDev::writeRawImage(Stream *str, const char *ext) {
   FILE *f;
   int c;
-  int size, i;
 
-  // dump JPEG file
-  if (dumpJPEG && str->getKind() == strDCT && !inlineImg) {
-
-    // open the image file
-    setFilename("jpg");
-    ++imgNum;
-    if (!(f = fopen(fileName, "wb"))) {
-      error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
-      return;
-    }
-
-    // initialize stream
-    str = str->getNextStream();
-    str->reset();
-
-    // copy the stream
-    while ((c = str->getChar()) != EOF)
-      fputc(c, f);
-
-    str->close();
-    fclose(f);
-
-  // dump PBM file
-  } else {
-
-    // open the image file and write the PBM header
-    setFilename("pbm");
-    ++imgNum;
-    if (!(f = fopen(fileName, "wb"))) {
-      error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
-      return;
-    }
-    fprintf(f, "P4\n");
-    fprintf(f, "%d %d\n", width, height);
-
-    // initialize stream
-    str->reset();
-
-    // copy the stream
-    size = height * ((width + 7) / 8);
-    for (i = 0; i < size; ++i) {
-      fputc(str->getChar(), f);
-    }
-
-    str->close();
-    fclose(f);
+  // open the image file
+  setFilename(ext);
+  ++imgNum;
+  if (!(f = fopen(fileName, "wb"))) {
+    error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
+    return;
   }
+
+  // initialize stream
+  str = str->getNextStream();
+  str->reset();
+
+  // copy the stream
+  while ((c = str->getChar()) != EOF)
+    fputc(c, f);
+
+  str->close();
+  fclose(f);
+}
+
+void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const char *ext,
+                                    Stream *str, int width, int height, GfxImageColorMap *colorMap) {
+  FILE *f;
+  ImageStream *imgStr;
+  unsigned char *row;
+  unsigned char *rowp;
+  Guchar *p;
+  GfxRGB rgb;
+  GfxGray gray;
+  Guchar zero = 0;
+  int invert_bits = 0xff;
+
+  setFilename(ext);
+  ++imgNum;
+  if (!(f = fopen(fileName, "wb"))) {
+    error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
+    return;
+  }
+
+  if (!writer->init(f, width, height, 72, 72)) {
+    error(errIO, -1, "Error writing '{0:s}'", fileName);
+    return;
+  }
+
+  if (format != imgMonochrome) {
+    // initialize stream
+    imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(),
+                             colorMap->getBits());
+    imgStr->reset();
+  } else {
+    // initialize stream
+    str->reset();
+  }
+
+  row = (unsigned char *) gmallocn(width, sizeof(unsigned int));
+
+  // if 0 comes out as 0 in the color map, the we _flip_ stream bits
+  // otherwise we pass through stream bits unmolested
+  if (colorMap) {
+    colorMap->getGray(&zero, &gray);
+    if (colToByte(gray) == 0)
+      invert_bits = 0x00;
+  }
+
+  // for each line...
+  for (int y = 0; y < height; y++) {
+    switch (format) {
+    case imgRGB:
+      p = imgStr->getLine();
+      rowp = row;
+      for (int x = 0; x < width; ++x) {
+        if (p) {
+          colorMap->getRGB(p, &rgb);
+          *rowp++ = colToByte(rgb.r);
+          *rowp++ = colToByte(rgb.g);
+          *rowp++ = colToByte(rgb.b);
+          p += colorMap->getNumPixelComps();
+        } else {
+          *rowp++ = 0;
+          *rowp++ = 0;
+          *rowp++ = 0;
+        }
+      }
+      writer->writeRow(&row);
+      break;
+
+    case imgMonochrome:
+      int size = (width + 7)/8;
+      for (int x = 0; x < size; x++)
+        row[x] = str->getChar() ^ invert_bits;
+      writer->writeRow(&row);
+      break;
+    }
+  }
+
+  gfree(row);
+  if (format != imgMonochrome) {
+    imgStr->close();
+    delete imgStr;
+  }
+  str->close();
+  writer->close();
+  fclose(f);
 }
 
 void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
 				int width, int height,
-				GfxImageColorMap *colorMap,
-				GBool interpolate, int *maskColors, GBool inlineImg) {
-  FILE *f;
-  ImageStream *imgStr;
-  Guchar *p;
-  Guchar zero = 0;
-  GfxGray gray;
-  GfxRGB rgb;
-  int x, y;
-  int c;
-  int size, i;
-  int pbm_mask = 0xff;
+				GfxImageColorMap *colorMap, GBool inlineImg) {
+  ImageFormat format;
 
-  // dump JPEG file
   if (dumpJPEG && str->getKind() == strDCT &&
       (colorMap->getNumPixelComps() == 1 ||
        colorMap->getNumPixelComps() == 3) &&
       !inlineImg) {
 
-    // open the image file
-    setFilename("jpg");
-    ++imgNum;
-    if (!(f = fopen(fileName, "wb"))) {
-      error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
-      return;
-    }
+    // dump JPEG file
+    writeRawImage(str, "jpg");
 
-    // initialize stream
-    str = str->getNextStream();
-    str->reset();
-
-    // copy the stream
-    while ((c = str->getChar()) != EOF)
-      fputc(c, f);
-
-    str->close();
-    fclose(f);
-
-  // dump PBM file
-  } else if (colorMap->getNumPixelComps() == 1 &&
-	     colorMap->getBits() == 1) {
-
-    // open the image file and write the PBM header
-    setFilename("pbm");
-    ++imgNum;
-    if (!(f = fopen(fileName, "wb"))) {
-      error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
-      return;
-    }
-    fprintf(f, "P4\n");
-    fprintf(f, "%d %d\n", width, height);
-
-    // initialize stream
-    str->reset();
-
-    // if 0 comes out as 0 in the color map, the we _flip_ stream bits
-    // otherwise we pass through stream bits unmolested
-    colorMap->getGray(&zero, &gray);
-    if(colToByte(gray))
-      pbm_mask = 0;
-
-    // copy the stream
-    size = height * ((width + 7) / 8);
-    for (i = 0; i < size; ++i) {
-      fputc(str->getChar() ^ pbm_mask, f);
-    }
-
-    str->close();
-    fclose(f);
-
-  // dump PPM file
   } else {
+    ImgWriter *writer;
 
-    // open the image file and write the PPM header
-    setFilename("ppm");
-    ++imgNum;
-    if (!(f = fopen(fileName, "wb"))) {
-      error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
-      return;
+    // dump PBM file
+    if (!colorMap || (colorMap->getNumPixelComps() == 1 && colorMap->getBits() == 1)) {
+      writer = new NetPBMWriter(NetPBMWriter::MONOCHROME);
+      format = imgMonochrome;
+    } else {
+      writer = new NetPBMWriter(NetPBMWriter::RGB);
+      format = imgRGB;
     }
-    fprintf(f, "P6\n");
-    fprintf(f, "%d %d\n", width, height);
-    fprintf(f, "255\n");
 
-    // initialize stream
-    imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(),
-			     colorMap->getBits());
-    imgStr->reset();
+    writeImageFile(writer, format,
+                   format == imgRGB ? "ppm" : "pbm",
+                   str, width, height, colorMap);
 
-    // for each line...
-    for (y = 0; y < height; ++y) {
-
-      // write the line
-      if ((p = imgStr->getLine())) {
-	for (x = 0; x < width; ++x) {
-	  colorMap->getRGB(p, &rgb);
-	  fputc(colToByte(rgb.r), f);
-	  fputc(colToByte(rgb.g), f);
-	  fputc(colToByte(rgb.b), f);
-	  p += colorMap->getNumPixelComps();
-	}
-      } else {
-	for (x = 0; x < width; ++x) {
-	  fputc(0, f);
-	  fputc(0, f);
-	  fputc(0, f);
-	}
-      }
-    }
-    imgStr->close();
-    delete imgStr;
-
-    fclose(f);
+    delete writer;
   }
 }
 
@@ -469,7 +438,7 @@ void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
   if (listImages)
     listImage(state, ref, str, width, height, NULL, interpolate, inlineImg, imgStencil);
   else
-    writeMask(state, ref, str, width, height, invert, interpolate, inlineImg);
+    writeImage(state, ref, str, width, height, NULL, inlineImg);
 }
 
 void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
@@ -479,7 +448,7 @@ void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   if (listImages)
     listImage(state, ref, str, width, height, colorMap, interpolate, inlineImg, imgImage);
   else
-    writeImage(state, ref, str, width, height, colorMap, interpolate, maskColors, inlineImg);
+    writeImage(state, ref, str, width, height, colorMap, inlineImg);
 }
 
 void ImageOutputDev::drawMaskedImage(
@@ -490,9 +459,8 @@ void ImageOutputDev::drawMaskedImage(
     listImage(state, ref, str, width, height, colorMap, interpolate, gFalse, imgImage);
     listImage(state, ref, str, maskWidth, maskHeight, NULL, maskInterpolate, gFalse, imgMask);
   } else {
-    drawImage(state, ref, str, width, height, colorMap, interpolate, NULL, gFalse);
-    drawImageMask(state, ref, maskStr, maskWidth, maskHeight, maskInvert,
-		  maskInterpolate, gFalse);
+    writeImage(state, ref, str, width, height, colorMap, gFalse);
+    writeImage(state, ref, maskStr, maskWidth, maskHeight, NULL, gFalse);
   }
 }
 
@@ -505,8 +473,7 @@ void ImageOutputDev::drawSoftMaskedImage(
     listImage(state, ref, str, width, height, colorMap, interpolate, gFalse, imgImage);
     listImage(state, ref, maskStr, maskWidth, maskHeight, maskColorMap, maskInterpolate, gFalse, imgSmask);
   } else {
-    drawImage(state, ref, str, width, height, colorMap, interpolate, NULL, gFalse);
-    drawImage(state, ref, maskStr, maskWidth, maskHeight,
-	      maskColorMap, maskInterpolate, NULL, gFalse);
+    writeImage(state, ref, str, width, height, colorMap, gFalse);
+    writeImage(state, ref, maskStr, maskWidth, maskHeight, maskColorMap, gFalse);
   }
 }

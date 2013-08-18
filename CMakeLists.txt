@@ -264,6 +264,7 @@ set(poppler_SRCS
   goo/GooString.cc
   goo/gmem.cc
   goo/FixedPoint.cc
+  goo/NetPBMWriter.cc
   goo/PNGWriter.cc
   goo/TiffWriter.cc
   goo/JpegWriter.cc
