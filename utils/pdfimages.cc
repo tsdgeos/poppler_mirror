@@ -50,6 +50,8 @@
 static int firstPage = 1;
 static int lastPage = 0;
 static GBool listImages = gFalse;
+static GBool enablePNG = gFalse;
+static GBool enableTiff = gFalse;
 static GBool dumpJPEG = gFalse;
 static GBool pageNames = gFalse;
 static char ownerPassword[33] = "\001";
@@ -63,6 +65,14 @@ static const ArgDesc argDesc[] = {
    "first page to convert"},
   {"-l",      argInt,      &lastPage,      0,
    "last page to convert"},
+#if ENABLE_LIBPNG
+  {"-png",      argFlag,     &enablePNG,      0,
+   "change the default output format to PNG"},
+#endif
+#if ENABLE_LIBTIFF
+  {"-tiff",      argFlag,     &enableTiff,      0,
+   "change the default output format to TIFF"},
+#endif
   {"-j",      argFlag,     &dumpJPEG,      0,
    "write JPEG images as JPEG files"},
   {"-list",   argFlag,     &listImages,      0,
@@ -168,10 +178,13 @@ int main(int argc, char *argv[]) {
     lastPage = doc->getNumPages();
 
   // write image files
-  imgOut = new ImageOutputDev(imgRoot, pageNames, dumpJPEG, listImages);
+  imgOut = new ImageOutputDev(imgRoot, pageNames, listImages);
   if (imgOut->isOk()) {
-      doc->displayPages(imgOut, firstPage, lastPage, 72, 72, 0,
-			gTrue, gFalse, gFalse);
+    imgOut->enablePNG(enablePNG);
+    imgOut->enableTiff(enableTiff);
+    imgOut->enableJpeg(dumpJPEG);
+    doc->displayPages(imgOut, firstPage, lastPage, 72, 72, 0,
+                      gTrue, gFalse, gFalse);
   }
   delete imgOut;
 

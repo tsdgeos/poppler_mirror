@@ -42,19 +42,23 @@
 #include <math.h>
 #include "goo/gmem.h"
 #include "goo/NetPBMWriter.h"
+#include "goo/PNGWriter.h"
+#include "goo/TiffWriter.h"
 #include "Error.h"
 #include "GfxState.h"
 #include "Object.h"
 #include "Stream.h"
 #include "ImageOutputDev.h"
 
-ImageOutputDev::ImageOutputDev(char *fileRootA, GBool pageNamesA, GBool dumpJPEGA, GBool listImagesA) {
+ImageOutputDev::ImageOutputDev(char *fileRootA, GBool pageNamesA, GBool listImagesA) {
   listImages = listImagesA;
   if (!listImages) {
     fileRoot = copyString(fileRootA);
     fileName = (char *)gmalloc(strlen(fileRoot) + 45);
   }
-  dumpJPEG = dumpJPEGA;
+  outputPNG = gFalse;
+  outputTiff = gFalse;
+  dumpJPEG =  gFalse;
   pageNames = pageNamesA;
   imgNum = 0;
   pageNum = 0;
@@ -374,6 +378,21 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
       writer->writeRow(&row);
       break;
 
+    case imgGray:
+      p = imgStr->getLine();
+      rowp = row;
+      for (int x = 0; x < width; ++x) {
+        if (p) {
+          colorMap->getGray(p, &gray);
+          *rowp++ = colToByte(gray);
+          p += colorMap->getNumPixelComps();
+        } else {
+          *rowp++ = 0;
+        }
+      }
+      writer->writeRow(&row);
+      break;
+
     case imgMonochrome:
       int size = (width + 7)/8;
       for (int x = 0; x < size; x++)
@@ -406,10 +425,52 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
     // dump JPEG file
     writeRawImage(str, "jpg");
 
-  } else {
+  } else if (outputPNG) {
+    // output in PNG format
+
+#if ENABLE_LIBPNG
     ImgWriter *writer;
 
-    // dump PBM file
+    if (!colorMap || (colorMap->getNumPixelComps() == 1 && colorMap->getBits() == 1)) {
+      writer = new PNGWriter(PNGWriter::MONOCHROME);
+      format = imgMonochrome;
+    } else if (colorMap->getColorSpace()->getMode() == csDeviceGray ||
+               colorMap->getColorSpace()->getMode() == csCalGray) {
+      writer = new PNGWriter(PNGWriter::GRAY);
+      format = imgGray;
+    } else {
+      writer = new PNGWriter(PNGWriter::RGB);
+      format = imgRGB;
+    }
+
+    writeImageFile(writer, format, "png", str, width, height, colorMap);
+#endif
+
+  } else if (outputTiff) {
+    // output in TIFF format
+
+#if ENABLE_LIBTIFF
+    ImgWriter *writer;
+
+    if (!colorMap || (colorMap->getNumPixelComps() == 1 && colorMap->getBits() == 1)) {
+      writer = new TiffWriter(TiffWriter::MONOCHROME);
+      format = imgMonochrome;
+    } else if (colorMap->getColorSpace()->getMode() == csDeviceGray ||
+               colorMap->getColorSpace()->getMode() == csCalGray) {
+      writer = new TiffWriter(TiffWriter::GRAY);
+      format = imgGray;
+    } else {
+      writer = new TiffWriter(TiffWriter::RGB);
+      format = imgRGB;
+    }
+
+    writeImageFile(writer, format, "tif", str, width, height, colorMap);
+#endif
+
+  } else {
+    // output in PPM/PBM format
+    ImgWriter *writer;
+
     if (!colorMap || (colorMap->getNumPixelComps() == 1 && colorMap->getBits() == 1)) {
       writer = new NetPBMWriter(NetPBMWriter::MONOCHROME);
       format = imgMonochrome;

@@ -55,18 +55,29 @@ public:
   };
   enum ImageFormat {
     imgRGB,
+    imgGray,
     imgMonochrome
   };
 
   // Create an OutputDev which will write images to files named
   // <fileRoot>-NNN.<type> or <fileRoot>-PPP-NNN.<type>, if 
   // <pageNames> is set. Normally, all images are written as PBM
-  // (.pbm) or PPM (.ppm) files.  If <dumpJPEG> is set, JPEG images 
+  // (.pbm) or PPM (.ppm) files unless PNG or Tiff output is enabled
+  // (PNG is used if both are enabled).  If Jpeg is enabled, JPEG images
   // are written as JPEG (.jpg) files.
-  ImageOutputDev(char *fileRootA, GBool pageNamesA, GBool dumpJPEGA, GBool listImagesA);
+  ImageOutputDev(char *fileRootA, GBool pageNamesA, GBool listImagesA);
 
   // Destructor.
   virtual ~ImageOutputDev();
+
+  // Use PNG format for output
+  void enablePNG(GBool png) { outputPNG = png; }
+
+  // Use TIFF format for output
+  void enableTiff(GBool tiff) { outputTiff = tiff; }
+
+  // Use Jpeg format for Jpeg files
+  void enableJpeg(GBool jpeg) { dumpJPEG = jpeg; }
 
   // Check if file was successfully created.
   virtual GBool isOk() { return ok; }
@@ -143,6 +154,8 @@ private:
   char *fileName;		// buffer for output file names
   GBool listImages;		// list images instead of dumping
   GBool dumpJPEG;		// set to dump native JPEG files
+  GBool outputPNG;		// set to output in PNG format
+  GBool outputTiff;		// set to output in TIFF format
   GBool pageNames;		// set to include page number in file names
   int pageNum;			// current page number
   int imgNum;			// current image number
