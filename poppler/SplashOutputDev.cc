@@ -2862,20 +2862,28 @@ GBool SplashOutputDev::imageSrc(void *data, SplashColorPtr colorLine,
       break;
     case splashModeRGB8:
     case splashModeBGR8:
-      for (x = 0, q = colorLine; x < imgData->width; ++x, p += nComps) {
-	imgData->colorMap->getRGB(p, &rgb);
-	*q++ = colToByte(rgb.r);
-	*q++ = colToByte(rgb.g);
-	*q++ = colToByte(rgb.b);
+      if (imgData->colorMap->useRGBLine()) {
+	imgData->colorMap->getRGBLine(p, (Guchar *) colorLine, imgData->width);
+      } else {
+	for (x = 0, q = colorLine; x < imgData->width; ++x, p += nComps) {
+	  imgData->colorMap->getRGB(p, &rgb);
+	  *q++ = colToByte(rgb.r);
+	  *q++ = colToByte(rgb.g);
+	  *q++ = colToByte(rgb.b);
+	}
       }
       break;
     case splashModeXBGR8:
-      for (x = 0, q = colorLine; x < imgData->width; ++x, p += nComps) {
-	imgData->colorMap->getRGB(p, &rgb);
-	*q++ = colToByte(rgb.r);
-	*q++ = colToByte(rgb.g);
-	*q++ = colToByte(rgb.b);
-	*q++ = 255;
+      if (imgData->colorMap->useRGBLine()) {
+	imgData->colorMap->getRGBXLine(p, (Guchar *) colorLine, imgData->width);
+      } else {
+	for (x = 0, q = colorLine; x < imgData->width; ++x, p += nComps) {
+	  imgData->colorMap->getRGB(p, &rgb);
+	  *q++ = colToByte(rgb.r);
+	  *q++ = colToByte(rgb.g);
+	  *q++ = colToByte(rgb.b);
+	  *q++ = 255;
+	}
       }
       break;
 #if SPLASH_CMYK
