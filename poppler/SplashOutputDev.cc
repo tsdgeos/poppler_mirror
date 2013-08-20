@@ -3802,7 +3802,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
   transpGroup->ty = ty;
   transpGroup->blendingColorSpace = blendingColorSpace;
   transpGroup->isolated = isolated;
-  transpGroup->shape = (knockout) ? SplashBitmap::copy(bitmap) : NULL;
+  transpGroup->shape = (knockout && !isolated) ? SplashBitmap::copy(bitmap) : NULL;
   transpGroup->knockout = gFalse; 
   transpGroup->knockoutOpacity = 1.0;
   transpGroup->next = transpGroupStack;
