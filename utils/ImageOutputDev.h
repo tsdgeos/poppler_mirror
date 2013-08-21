@@ -85,6 +85,9 @@ public:
   // Use JBIG2 format for JBIG2 files
   void enableJBig2(GBool jbig2) { dumpJBIG2 = jbig2; }
 
+  // Use CCITT format for CCITT files
+  void enableCCITT(GBool ccitt) { dumpCCITT = ccitt; }
+
   // Check if file was successfully created.
   virtual GBool isOk() { return ok; }
 
@@ -162,6 +165,7 @@ private:
   GBool dumpJPEG;		// set to dump native JPEG files
   GBool dumpJP2;		// set to dump native JPEG2000 files
   GBool dumpJBIG2;		// set to dump native JBIG2 files
+  GBool dumpCCITT;		// set to dump native CCITT files
   GBool outputPNG;		// set to output in PNG format
   GBool outputTiff;		// set to output in TIFF format
   GBool pageNames;		// set to include page number in file names

@@ -797,6 +797,11 @@ public:
 
   virtual void unfilteredReset ();
 
+  int getEncoding() { return encoding; }
+  GBool getEndOfLine() { return endOfLine; }
+  int getColumns() { return columns; }
+  GBool getBlackIs1() { return black; }
+
 private:
 
   void ccittReset(GBool unfiltered);

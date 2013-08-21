@@ -454,6 +454,41 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
     // dump JBIG2 embedded file
     writeRawImage(str, "jb2e");
 
+  } else if (dumpCCITT && str->getKind() == strCCITTFax && !inlineImg) {
+    // write CCITT parameters
+    CCITTFaxStream *ccittStr = static_cast<CCITTFaxStream *>(str);
+    FILE *f;
+    setFilename("params");
+    if (!(f = fopen(fileName, "wb"))) {
+      error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
+      return;
+    }
+    if (ccittStr->getEncoding() < 0)
+      fprintf(f, "-4 ");
+    else if (ccittStr->getEncoding() == 0)
+      fprintf(f, "-1 ");
+    else
+      fprintf(f, "-2 ");
+
+    if (ccittStr->getEndOfLine())
+      fprintf(f, "-A ");
+    else
+      fprintf(f, "-P ");
+
+    fprintf(f, "-X %d ", ccittStr->getColumns());
+
+    if (ccittStr->getBlackIs1())
+      fprintf(f, "-W ");
+    else
+      fprintf(f, "-B ");
+
+    fprintf(f, "-M\n"); // PDF uses MSB first
+
+    fclose(f);
+
+    // dump CCITT file
+    writeRawImage(str, "ccitt");
+
   } else if (outputPNG) {
     // output in PNG format
 
