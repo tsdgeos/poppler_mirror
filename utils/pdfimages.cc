@@ -56,6 +56,7 @@ static GBool dumpJPEG = gFalse;
 static GBool dumpJP2 = gFalse;
 static GBool dumpJBIG2 = gFalse;
 static GBool dumpCCITT = gFalse;
+static GBool allFormats = gFalse;
 static GBool pageNames = gFalse;
 static char ownerPassword[33] = "\001";
 static char userPassword[33] = "\001";
@@ -84,6 +85,8 @@ static const ArgDesc argDesc[] = {
    "write JBIG2 images as JBIG2 files"},
   {"-ccitt",      argFlag,     &dumpCCITT,      0,
    "write CCITT images as CCITT files"},
+  {"-all",      argFlag,     &allFormats,    0,
+   "equivalent to -png -j -jp2 -jbig2 -ccitt"},
   {"-list",   argFlag,     &listImages,      0,
    "print list of images instead of saving"},
   {"-opw",    argString,   ownerPassword,  sizeof(ownerPassword),
@@ -189,12 +192,20 @@ int main(int argc, char *argv[]) {
   // write image files
   imgOut = new ImageOutputDev(imgRoot, pageNames, listImages);
   if (imgOut->isOk()) {
-    imgOut->enablePNG(enablePNG);
-    imgOut->enableTiff(enableTiff);
-    imgOut->enableJpeg(dumpJPEG);
-    imgOut->enableJpeg2000(dumpJP2);
-    imgOut->enableJBig2(dumpJBIG2);
-    imgOut->enableCCITT(dumpCCITT);
+    if (allFormats) {
+      imgOut->enablePNG(gTrue);
+      imgOut->enableJpeg(gTrue);
+      imgOut->enableJpeg2000(gTrue);
+      imgOut->enableJBig2(gTrue);
+      imgOut->enableCCITT(gTrue);
+    } else {
+      imgOut->enablePNG(enablePNG);
+      imgOut->enableTiff(enableTiff);
+      imgOut->enableJpeg(dumpJPEG);
+      imgOut->enableJpeg2000(dumpJP2);
+      imgOut->enableJBig2(dumpJBIG2);
+      imgOut->enableCCITT(dumpCCITT);
+    }
     doc->displayPages(imgOut, firstPage, lastPage, 72, 72, 0,
                       gTrue, gFalse, gFalse);
   }

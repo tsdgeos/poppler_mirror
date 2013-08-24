@@ -87,6 +87,10 @@ Encoding uses 0 for black and 1 for white
 Input data fills from most significant bit to least significant bit.
 .RE
 .TP
+.B \-all
+Write JPEG, JPEG2000, JBIG2, and CCITT images in their native format. All other images are written as PNG files.
+This is equivalent to specifying the options \-png \-j \-jp2 \-jbig2 \-ccitt.
+.TP
 .B \-list
 Instead of writing the images, list the images along with various information for each image. Do not specify an
 .IR image-root
