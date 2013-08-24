@@ -10,6 +10,7 @@
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright 2013 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
 
