@@ -46,10 +46,8 @@ typedef double SplashCoord;
 
 #define splashAASize 4
 
-#ifdef SPLASH_CMYK
 #ifndef SPOT_NCOMPS
 #define SPOT_NCOMPS 4
-#endif
 #endif
 
 //------------------------------------------------------------------------

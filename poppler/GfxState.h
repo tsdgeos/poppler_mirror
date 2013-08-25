@@ -20,7 +20,7 @@
 // Copyright (C) 2009-2011, 2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
-// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -210,6 +210,8 @@ public:
   virtual void getRGBLine(Guchar * /*in*/, unsigned int * /*out*/, int /*length*/) { error(errInternal, -1, "GfxColorSpace::getRGBLine (first variant) this should not happen"); }
   virtual void getRGBLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getRGBLine (second variant) this should not happen"); }
   virtual void getRGBXLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getRGBXLine this should not happen"); }
+  virtual void getCMYKLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getCMYKLine this should not happen"); }
+  virtual void getDeviceNLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getDeviceNLine this should not happen"); }
 
   // create mapping for spot colorants
   virtual void createMapping(GooList *separationList, int maxSepComps);
@@ -218,6 +220,10 @@ public:
   virtual GBool useGetRGBLine() { return gFalse; }
   // Does this ColorSpace support getGrayLine?
   virtual GBool useGetGrayLine() { return gFalse; }
+  // Does this ColorSpace support getCMYKLine?
+  virtual GBool useGetCMYKLine() { return gFalse; }
+  // Does this ColorSpace support getDeviceNLine?
+  virtual GBool useGetDeviceNLine() { return gFalse; }
 
   // Return the number of color components.
   virtual int getNComps() = 0;
@@ -279,9 +285,13 @@ public:
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
   virtual void getRGBLine(Guchar *in, Guchar *out, int length);
   virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
+  virtual void getCMYKLine(Guchar *in, Guchar *out, int length);
+  virtual void getDeviceNLine(Guchar *in, Guchar *out, int length);
 
   virtual GBool useGetRGBLine() { return gTrue; }
   virtual GBool useGetGrayLine() { return gTrue; }
+  virtual GBool useGetCMYKLine() { return gTrue; }
+  virtual GBool useGetDeviceNLine() { return gTrue; }
 
   virtual int getNComps() { return 1; }
   virtual void getDefaultColor(GfxColor *color);
@@ -350,9 +360,13 @@ public:
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
   virtual void getRGBLine(Guchar *in, Guchar *out, int length);
   virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
+  virtual void getCMYKLine(Guchar *in, Guchar *out, int length);
+  virtual void getDeviceNLine(Guchar *in, Guchar *out, int length);
 
   virtual GBool useGetRGBLine() { return gTrue; }
   virtual GBool useGetGrayLine() { return gTrue; }
+  virtual GBool useGetCMYKLine() { return gTrue; }
+  virtual GBool useGetDeviceNLine() { return gTrue; }
 
   virtual int getNComps() { return 3; }
   virtual void getDefaultColor(GfxColor *color);
@@ -424,7 +438,11 @@ public:
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
   virtual void getRGBLine(Guchar *, Guchar *out, int length);
   virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
+  virtual void getCMYKLine(Guchar *in, Guchar *out, int length);
+  virtual void getDeviceNLine(Guchar *in, Guchar *out, int length);
   virtual GBool useGetRGBLine() { return gTrue; }
+  virtual GBool useGetCMYKLine() { return gTrue; }
+  virtual GBool useGetDeviceNLine() { return gTrue; }
 
   virtual int getNComps() { return 4; }
   virtual void getDefaultColor(GfxColor *color);
@@ -502,8 +520,12 @@ public:
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
   virtual void getRGBLine(Guchar *in, Guchar *out, int length);
   virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
+  virtual void getCMYKLine(Guchar *in, Guchar *out, int length);
+  virtual void getDeviceNLine(Guchar *in, Guchar *out, int length);
 
   virtual GBool useGetRGBLine();
+  virtual GBool useGetCMYKLine();
+  virtual GBool useGetDeviceNLine();
 
   virtual int getNComps() { return nComps; }
   virtual void getDefaultColor(GfxColor *color);
@@ -548,8 +570,12 @@ public:
   virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
   virtual void getRGBLine(Guchar *in, Guchar *out, int length);
   virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
+  virtual void getCMYKLine(Guchar *in, Guchar *out, int length);
+  virtual void getDeviceNLine(Guchar *in, Guchar *out, int length);
 
   virtual GBool useGetRGBLine() { return gTrue; }
+  virtual GBool useGetCMYKLine() { return gTrue; }
+  virtual GBool useGetDeviceNLine() { return gTrue; }
 
   virtual int getNComps() { return 1; }
   virtual void getDefaultColor(GfxColor *color);
@@ -1126,6 +1152,8 @@ public:
   double getDecodeHigh(int i) { return decodeLow[i] + decodeRange[i]; }
   
   bool useRGBLine() { return (colorSpace2 && colorSpace2->useGetRGBLine ()) || (!colorSpace2 && colorSpace->useGetRGBLine ()); }
+  bool useCMYKLine() { return (colorSpace2 && colorSpace2->useGetCMYKLine ()) || (!colorSpace2 && colorSpace->useGetCMYKLine ()); }
+  bool useDeviceNLine() { return (colorSpace2 && colorSpace2->useGetDeviceNLine ()) || (!colorSpace2 && colorSpace->useGetDeviceNLine ()); }
 
   // Convert an image pixel to a color.
   void getGray(Guchar *x, GfxGray *gray);
@@ -1134,6 +1162,8 @@ public:
   void getRGBLine(Guchar *in, Guchar *out, int length);
   void getRGBXLine(Guchar *in, Guchar *out, int length);
   void getGrayLine(Guchar *in, Guchar *out, int length);
+  void getCMYKLine(Guchar *in, Guchar *out, int length);
+  void getDeviceNLine(Guchar *in, Guchar *out, int length);
   void getCMYK(Guchar *x, GfxCMYK *cmyk);
   void getDeviceN(Guchar *x, GfxColor *deviceN);
   void getColor(Guchar *x, GfxColor *color);
