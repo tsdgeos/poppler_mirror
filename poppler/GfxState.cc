@@ -5516,7 +5516,7 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
     }
     break;
   default:
-    if (colorSpace->useGetGrayLine() || colorSpace->useGetRGBLine() || colorSpace->useGetCMYKLine() || colorSpace2->useGetDeviceNLine()) {
+    if (colorSpace->useGetGrayLine() || colorSpace->useGetRGBLine() || colorSpace->useGetCMYKLine() || colorSpace->useGetDeviceNLine()) {
       byte_lookup = (Guchar *)gmallocn ((maxPixel + 1), nComps);
       useByteLookup = gTrue;
     }
