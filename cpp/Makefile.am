@@ -41,8 +41,6 @@ poppler_include_HEADERS =			\
 
 lib_LTLIBRARIES = libpoppler-cpp.la
 libpoppler_cpp_la_SOURCES =			\
-	PNMWriter.cc				\
-	PNMWriter.h				\
 	poppler-document.cpp			\
 	poppler-document-private.h		\
 	poppler-embedded-file.cpp		\
