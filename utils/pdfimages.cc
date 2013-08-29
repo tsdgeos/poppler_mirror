@@ -86,7 +86,7 @@ static const ArgDesc argDesc[] = {
   {"-ccitt",      argFlag,     &dumpCCITT,      0,
    "write CCITT images as CCITT files"},
   {"-all",      argFlag,     &allFormats,    0,
-   "equivalent to -png -j -jp2 -jbig2 -ccitt"},
+   "equivalent to -png -tiff -j -jp2 -jbig2 -ccitt"},
   {"-list",   argFlag,     &listImages,      0,
    "print list of images instead of saving"},
   {"-opw",    argString,   ownerPassword,  sizeof(ownerPassword),
@@ -194,6 +194,7 @@ int main(int argc, char *argv[]) {
   if (imgOut->isOk()) {
     if (allFormats) {
       imgOut->enablePNG(gTrue);
+      imgOut->enableTiff(gTrue);
       imgOut->enableJpeg(gTrue);
       imgOut->enableJpeg2000(gTrue);
       imgOut->enableJBig2(gTrue);

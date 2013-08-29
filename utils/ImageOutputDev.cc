@@ -318,6 +318,7 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
   unsigned char *rowp;
   Guchar *p;
   GfxRGB rgb;
+  GfxCMYK cmyk;
   GfxGray gray;
   Guchar zero = 0;
   int invert_bits;
@@ -371,6 +372,27 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
           *rowp++ = colToByte(rgb.b);
           p += colorMap->getNumPixelComps();
         } else {
+          *rowp++ = 0;
+          *rowp++ = 0;
+          *rowp++ = 0;
+        }
+      }
+      writer->writeRow(&row);
+      break;
+
+    case imgCMYK:
+      p = imgStr->getLine();
+      rowp = row;
+      for (int x = 0; x < width; ++x) {
+        if (p) {
+          colorMap->getCMYK(p, &cmyk);
+          *rowp++ = colToByte(cmyk.c);
+          *rowp++ = colToByte(cmyk.m);
+          *rowp++ = colToByte(cmyk.y);
+          *rowp++ = colToByte(cmyk.k);
+          p += colorMap->getNumPixelComps();
+        } else {
+          *rowp++ = 0;
           *rowp++ = 0;
           *rowp++ = 0;
           *rowp++ = 0;
@@ -489,7 +511,11 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
     // dump CCITT file
     writeRawImage(str, "ccitt");
 
-  } else if (outputPNG) {
+  } else if (outputPNG && !(outputTiff && colorMap &&
+                            (colorMap->getColorSpace()->getMode() == csDeviceCMYK ||
+                             (colorMap->getColorSpace()->getMode() == csICCBased &&
+                              colorMap->getNumPixelComps() == 4)))) {
+
     // output in PNG format
 
 #if ENABLE_LIBPNG
@@ -523,6 +549,10 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
                colorMap->getColorSpace()->getMode() == csCalGray) {
       writer = new TiffWriter(TiffWriter::GRAY);
       format = imgGray;
+    } else if (colorMap->getColorSpace()->getMode() == csDeviceCMYK ||
+               (colorMap->getColorSpace()->getMode() == csICCBased && colorMap->getNumPixelComps() == 4)) {
+      writer = new TiffWriter(TiffWriter::CMYK);
+      format = imgCMYK;
     } else {
       writer = new TiffWriter(TiffWriter::RGB);
       format = imgRGB;

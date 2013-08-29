@@ -56,7 +56,8 @@ public:
   enum ImageFormat {
     imgRGB,
     imgGray,
-    imgMonochrome
+    imgMonochrome,
+    imgCMYK
   };
 
   // Create an OutputDev which will write images to files named
