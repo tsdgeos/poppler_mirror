@@ -60,6 +60,9 @@ ImageOutputDev::ImageOutputDev(char *fileRootA, GBool pageNamesA, GBool listImag
   outputPNG = gFalse;
   outputTiff = gFalse;
   dumpJPEG =  gFalse;
+  dumpJP2 = gFalse;
+  dumpJBIG2 = gFalse;
+  dumpCCITT = gFalse;
   pageNames = pageNamesA;
   imgNum = 0;
   pageNum = 0;
