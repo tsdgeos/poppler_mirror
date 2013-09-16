@@ -44,7 +44,7 @@ static const ArgDesc argDesc[] = {
 };
 
 bool extractPages (const char *srcFileName, const char *destFileName) {
-  char pathName[1024];
+  char pathName[4096];
   GooString *gfileName = new GooString (srcFileName);
   PDFDoc *doc = new PDFDoc (gfileName, NULL, NULL, NULL);
 
@@ -66,7 +66,7 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
     return false;
   }
   for (int pageNo = firstPage; pageNo <= lastPage; pageNo++) {
-    sprintf (pathName, destFileName, pageNo);
+    snprintf (pathName, sizeof (pathName) - 1, destFileName, pageNo);
     GooString *gpageName = new GooString (pathName);
     int errCode = doc->savePageAs(gpageName, pageNo);
     if ( errCode != errNone) {
