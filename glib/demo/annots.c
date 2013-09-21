@@ -85,7 +85,7 @@ pgd_annot_view_new (void)
     frame = gtk_frame_new (NULL);
     gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_NONE);
     label = gtk_label_new (NULL);
-    gtk_label_set_markup (GTK_LABEL (label), "<b>Annot Properties</b>");
+    gtk_label_set_markup (GTK_LABEL (label), "<b>Annotation Properties</b>");
     gtk_frame_set_label_widget (GTK_FRAME (frame), label);
     gtk_widget_show (label);
 
@@ -599,12 +599,12 @@ pgd_annots_get_annots (PgdAnnotsDemo *demo)
     if (n_fields > 0) {
         gchar *str;
 
-        str = g_strdup_printf ("<i>%d annots found in %.4f seconds</i>",
+        str = g_strdup_printf ("<i>%d annotations found in %.4f seconds</i>",
                                n_fields, g_timer_elapsed (timer, NULL));
         gtk_label_set_markup (GTK_LABEL (demo->timer_label), str);
         g_free (str);
     } else {
-        gtk_label_set_markup (GTK_LABEL (demo->timer_label), "<i>No annots found</i>");
+        gtk_label_set_markup (GTK_LABEL (demo->timer_label), "<i>No annotations found</i>");
     }
 
     g_timer_destroy (timer);
@@ -967,7 +967,7 @@ pgd_annots_create_widget (PopplerDocument *document)
     gtk_widget_show (label);
     g_free (str);
 
-    button = gtk_button_new_with_label ("Add Annot");
+    button = gtk_button_new_with_label ("Add Annotation");
     g_signal_connect (G_OBJECT (button), "clicked",
 		      G_CALLBACK (pgd_annots_add_annot),
 		      (gpointer) demo);
@@ -978,7 +978,7 @@ pgd_annots_create_widget (PopplerDocument *document)
     gtk_widget_show (hbox);
 
     demo->timer_label = gtk_label_new (NULL);
-    gtk_label_set_markup (GTK_LABEL (demo->timer_label), "<i>No annots found</i>");
+    gtk_label_set_markup (GTK_LABEL (demo->timer_label), "<i>No annotations found</i>");
     g_object_set (G_OBJECT (demo->timer_label), "xalign", 1.0, NULL);
     gtk_box_pack_start (GTK_BOX (vbox), demo->timer_label, FALSE, TRUE, 0);
     gtk_widget_show (demo->timer_label);
