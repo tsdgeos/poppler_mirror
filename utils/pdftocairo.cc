@@ -26,6 +26,7 @@
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Koji Otani <sho@bbr.jp>
+// Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -484,7 +485,13 @@ static void beginDocument(GooString *outputFileName, double w, double h)
     if (outputFileName->cmp("fd://0") == 0)
       output_file = stdout;
     else
+    {
       output_file = fopen(outputFileName->getCString(), "wb");
+      if (!output_file) {
+        fprintf(stderr, "Error opening output file %s\n", outputFileName->getCString());
+        exit(2);
+      }
+    }
 
     if (ps || eps) {
 #if CAIRO_HAS_PS_SURFACE
