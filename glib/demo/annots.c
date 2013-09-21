@@ -42,11 +42,16 @@ typedef struct {
 
     GtkWidget       *tree_view;
     GtkListStore    *model;
+    GtkWidget       *darea;
     GtkWidget       *annot_view;
     GtkWidget       *timer_label;
 
     gint             num_page;
+
+    cairo_surface_t *surface;
 } PgdAnnotsDemo;
+
+static void pgd_annots_viewer_queue_redraw (PgdAnnotsDemo *demo);
 
 static void
 pgd_annots_free (PgdAnnotsDemo *demo)
@@ -299,6 +304,8 @@ pgd_annots_remove_annot (GtkWidget     *button,
         poppler_page_remove_annot (demo->page, annot);
         g_object_unref (annot);
         gtk_list_store_remove (GTK_LIST_STORE (model), &iter);
+
+        pgd_annots_viewer_queue_redraw (demo);
     }
 }
 
@@ -561,8 +568,7 @@ pgd_annot_view_set_annot (PgdAnnotsDemo *demo,
 }
 
 static void
-pgd_annots_get_annots (GtkWidget     *button,
-                       PgdAnnotsDemo *demo)
+pgd_annots_get_annots (PgdAnnotsDemo *demo)
 {
     GList       *mapping, *l;
     gint         n_fields;
@@ -646,6 +652,8 @@ pgd_annots_page_selector_value_changed (GtkSpinButton *spinbutton,
                                         PgdAnnotsDemo *demo)
 {
     demo->num_page = (gint) gtk_spin_button_get_value (spinbutton) - 1;
+    pgd_annots_viewer_queue_redraw (demo);
+    pgd_annots_get_annots (demo);
 }
 
 static void
@@ -698,6 +706,8 @@ pgd_annots_flags_toggled (GtkCellRendererToggle *renderer,
 
     pgd_annot_view_set_annot (demo, annot);
     gtk_tree_path_free (path);
+
+    pgd_annots_viewer_queue_redraw (demo);
 }
 
 static void
@@ -829,14 +839,91 @@ pgd_annots_add_annot (GtkWidget     *button,
     g_object_unref (page);
 
     gtk_widget_destroy (dialog);
+
+    pgd_annots_viewer_queue_redraw (demo);
+    pgd_annots_get_annots (demo);
 }
 
+/* Render area */
+static cairo_surface_t *
+pgd_annots_render_page (PgdAnnotsDemo *demo)
+{
+    cairo_t *cr;
+    PopplerPage *page;
+    gdouble width, height;
+    cairo_surface_t *surface = NULL;
+
+    page = poppler_document_get_page (demo->doc, demo->num_page);
+    if (!page)
+        return NULL;
+
+    poppler_page_get_size (page, &width, &height);
+    gtk_widget_set_size_request (demo->darea, width, height);
+
+    surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24,
+                                          width, height);
+    cr = cairo_create (surface);
+
+    cairo_save (cr);
+    cairo_set_source_rgb (cr, 1, 1, 1);
+    cairo_rectangle (cr, 0, 0, width, height);
+    cairo_fill (cr);
+    cairo_restore (cr);
+
+    cairo_save (cr);
+    poppler_page_render (page, cr);
+    cairo_restore (cr);
+
+    cairo_destroy (cr);
+    g_object_unref (page);
+
+    return surface;
+}
+
+static gboolean
+pgd_annots_view_drawing_area_draw (GtkWidget   *area,
+                                   cairo_t     *cr,
+                                   PgdAnnotsDemo *demo)
+{
+    if (demo->num_page == -1)
+        return FALSE;
+
+    if (!demo->surface) {
+        demo->surface = pgd_annots_render_page (demo);
+        if (!demo->surface)
+            return FALSE;
+    }
+
+    cairo_set_source_surface (cr, demo->surface, 0, 0);
+    cairo_paint (cr);
+
+    return TRUE;
+}
+
+static gboolean
+pgd_annots_viewer_redraw (PgdAnnotsDemo *demo)
+{
+    cairo_surface_destroy (demo->surface);
+    demo->surface = NULL;
+
+    gtk_widget_queue_draw (demo->darea);
+
+    return FALSE;
+}
+
+static void
+pgd_annots_viewer_queue_redraw (PgdAnnotsDemo *demo)
+{
+    g_idle_add ((GSourceFunc)pgd_annots_viewer_redraw, demo);
+}
+
+/* Main UI */
 GtkWidget *
 pgd_annots_create_widget (PopplerDocument *document)
 {
     PgdAnnotsDemo    *demo;
     GtkWidget        *label;
-    GtkWidget        *vbox;
+    GtkWidget        *vbox, *vbox2;
     GtkWidget        *hbox, *page_selector;
     GtkWidget        *button;
     GtkWidget        *hpaned;
@@ -853,6 +940,7 @@ pgd_annots_create_widget (PopplerDocument *document)
     n_pages = poppler_document_get_n_pages (document);
 
     vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+    vbox2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
 
     hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
@@ -872,13 +960,6 @@ pgd_annots_create_widget (PopplerDocument *document)
     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
     gtk_widget_show (label);
     g_free (str);
-
-    button = gtk_button_new_with_label ("Get Annots");
-    g_signal_connect (G_OBJECT (button), "clicked",
-                      G_CALLBACK (pgd_annots_get_annots),
-                      (gpointer) demo);
-    gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, FALSE, 0);
-    gtk_widget_show (button);
 
     button = gtk_button_new_with_label ("Add Annot");
     g_signal_connect (G_OBJECT (button), "clicked",
@@ -988,14 +1069,36 @@ pgd_annots_create_widget (PopplerDocument *document)
                       G_CALLBACK (pgd_annots_selection_changed),
                       (gpointer) demo);
 
+    /* Annotation's list */
     gtk_container_add (GTK_CONTAINER (swindow), treeview);
     gtk_widget_show (treeview);
 
-    gtk_paned_add1 (GTK_PANED (hpaned), swindow);
+    gtk_box_pack_start (GTK_BOX (vbox2), swindow, TRUE, TRUE, 0);
     gtk_widget_show (swindow);
 
-    gtk_paned_add2 (GTK_PANED (hpaned), demo->annot_view);
+    /* Annotation Properties */
+    gtk_box_pack_start (GTK_BOX (vbox2), demo->annot_view, FALSE, FALSE, 6);
     gtk_widget_show (demo->annot_view);
+
+    gtk_paned_add1 (GTK_PANED (hpaned), vbox2);
+    gtk_widget_show (vbox2);
+
+    /* Demo Area (Render) */
+    demo->darea = gtk_drawing_area_new ();
+    g_signal_connect (demo->darea, "draw",
+                      G_CALLBACK (pgd_annots_view_drawing_area_draw),
+                      demo);
+
+    swindow = gtk_scrolled_window_new (NULL, NULL);
+#if GTK_CHECK_VERSION(3, 7, 8)
+    gtk_container_add(GTK_CONTAINER(swindow), demo->darea);
+#else
+    gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (swindow), demo->darea);
+#endif
+    gtk_widget_show (demo->darea);
+
+    gtk_paned_add2 (GTK_PANED (hpaned), swindow);
+    gtk_widget_show (swindow);
 
     gtk_paned_set_position (GTK_PANED (hpaned), 300);
 
@@ -1005,6 +1108,9 @@ pgd_annots_create_widget (PopplerDocument *document)
     g_object_weak_ref (G_OBJECT (vbox),
                        (GWeakNotify)pgd_annots_free,
                        demo);
+
+    pgd_annots_viewer_queue_redraw (demo);
+    pgd_annots_get_annots (demo);
 
     return vbox;
 }
