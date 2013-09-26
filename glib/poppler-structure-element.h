@@ -86,23 +86,241 @@ typedef enum {
   POPPLER_STRUCTURE_ELEMENT_FORM,
 } PopplerStructureElementKind;
 
-GType                        poppler_structure_element_get_type                   (void) G_GNUC_CONST;
-PopplerStructureElementKind  poppler_structure_element_get_kind                   (PopplerStructureElement  *poppler_structure_element);
-gint                         poppler_structure_element_get_page                   (PopplerStructureElement  *poppler_structure_element);
-gboolean                     poppler_structure_element_is_content                 (PopplerStructureElement  *poppler_structure_element);
-gboolean                     poppler_structure_element_is_inline                  (PopplerStructureElement  *poppler_structure_element);
-gboolean                     poppler_structure_element_is_block                   (PopplerStructureElement  *poppler_structure_element);
-gboolean                     poppler_structure_element_is_grouping                (PopplerStructureElement  *poppler_structure_element);
-gchar                       *poppler_structure_element_get_id                     (PopplerStructureElement  *poppler_structure_element);
-gchar                       *poppler_structure_element_get_title                  (PopplerStructureElement  *poppler_structure_element);
-gchar                       *poppler_structure_element_get_abbreviation           (PopplerStructureElement  *poppler_structure_element);
-gchar                       *poppler_structure_element_get_language               (PopplerStructureElement  *poppler_structure_element);
-gchar                       *poppler_structure_element_get_text                   (PopplerStructureElement  *poppler_structure_element,
-                                                                                   gboolean                  recursive);
-gchar                       *poppler_structure_element_get_alt_text               (PopplerStructureElement  *poppler_structure_element);
-gchar                       *poppler_structure_element_get_actual_text            (PopplerStructureElement  *poppler_structure_element);
-PopplerTextSpan            **poppler_structure_element_get_text_spans             (PopplerStructureElement  *poppler_structure_element,
-                                                                                   guint                    *n_text_spans);
+/**
+ * PopplerStructurePlacement:
+ */
+typedef enum {
+  POPPLER_STRUCTURE_PLACEMENT_BLOCK,
+  POPPLER_STRUCTURE_PLACEMENT_INLINE,
+  POPPLER_STRUCTURE_PLACEMENT_BEFORE,
+  POPPLER_STRUCTURE_PLACEMENT_START,
+  POPPLER_STRUCTURE_PLACEMENT_END,
+} PopplerStructurePlacement;
+
+/**
+ * PopplerStructureWritingMode:
+ */
+typedef enum {
+  POPPLER_STRUCTURE_WRITING_MODE_LR_TB,
+  POPPLER_STRUCTURE_WRITING_MODE_RL_TB,
+  POPPLER_STRUCTURE_WRITING_MODE_TB_RL,
+} PopplerStructureWritingMode;
+
+/**
+ * PopplerStructureBorderStyle:
+ */
+typedef enum {
+  POPPLER_STRUCTURE_BORDER_STYLE_NONE,
+  POPPLER_STRUCTURE_BORDER_STYLE_HIDDEN,
+  POPPLER_STRUCTURE_BORDER_STYLE_DOTTED,
+  POPPLER_STRUCTURE_BORDER_STYLE_DASHED,
+  POPPLER_STRUCTURE_BORDER_STYLE_SOLID,
+  POPPLER_STRUCTURE_BORDER_STYLE_DOUBLE,
+  POPPLER_STRUCTURE_BORDER_STYLE_GROOVE,
+  POPPLER_STRUCTURE_BORDER_STYLE_INSET,
+  POPPLER_STRUCTURE_BORDER_STYLE_OUTSET,
+} PopplerStructureBorderStyle;
+
+/**
+ * PopplerStructureTextAlign:
+ */
+typedef enum {
+  POPPLER_STRUCTURE_TEXT_ALIGN_START,
+  POPPLER_STRUCTURE_TEXT_ALIGN_CENTER,
+  POPPLER_STRUCTURE_TEXT_ALIGN_END,
+  POPPLER_STRUCTURE_TEXT_ALIGN_JUSTIFY,
+} PopplerStructureTextAlign;
+
+/**
+ * PopplerStructureBlockAlign:
+ */
+typedef enum {
+  POPPLER_STRUCTURE_BLOCK_ALIGN_BEFORE,
+  POPPLER_STRUCTURE_BLOCK_ALIGN_MIDDLE,
+  POPPLER_STRUCTURE_BLOCK_ALIGN_AFTER,
+  POPPLER_STRUCTURE_BLOCK_ALIGN_JUSTIFY,
+} PopplerStructureBlockAlign;
+
+/**
+ * PopplerStructureInlineAlign:
+ */
+typedef enum {
+  POPPLER_STRUCTURE_INLINE_ALIGN_START,
+  POPPLER_STRUCTURE_INLINE_ALIGN_CENTER,
+  POPPLER_STRUCTURE_INLINE_ALIGN_END,
+} PopplerStructureInlineAlign;
+
+/**
+ * PopplerStructureTextDecoration:
+ */
+typedef enum {
+  POPPLER_STRUCTURE_TEXT_DECORATION_NONE,
+  POPPLER_STRUCTURE_TEXT_DECORATION_UNDERLINE,
+  POPPLER_STRUCTURE_TEXT_DECORATION_OVERLINE,
+  POPPLER_STRUCTURE_TEXT_DECORATION_LINETHROUGH,
+} PopplerStructureTextDecoration;
+
+/**
+ * PopplerStructureRubyAlign:
+ */
+typedef enum
+{
+  POPPLER_STRUCTURE_RUBY_ALIGN_START,
+  POPPLER_STRUCTURE_RUBY_ALIGN_CENTER,
+  POPPLER_STRUCTURE_RUBY_ALIGN_END,
+  POPPLER_STRUCTURE_RUBY_ALIGN_JUSTIFY,
+  POPPLER_STRUCTURE_RUBY_ALIGN_DISTRIBUTE,
+} PopplerStructureRubyAlign;
+
+/**
+ * PopplerStructureRubyPosition:
+ */
+typedef enum {
+  POPPLER_STRUCTURE_RUBY_POSITION_BEFORE,
+  POPPLER_STRUCTURE_RUBY_POSITION_AFTER,
+  POPPLER_STRUCTURE_RUBY_POSITION_WARICHU,
+  POPPLER_STRUCTURE_RUBY_POSITION_INLINE,
+} PopplerStructureRubyPosition;
+
+/**
+ * PopplerStructureGlyphOrientation:
+ */
+typedef enum {
+  POPPLER_STRUCTURE_GLYPH_ORIENTATION_AUTO,
+  POPPLER_STRUCTURE_GLYPH_ORIENTATION_0 = POPPLER_STRUCTURE_GLYPH_ORIENTATION_AUTO,
+  POPPLER_STRUCTURE_GLYPH_ORIENTATION_90,
+  POPPLER_STRUCTURE_GLYPH_ORIENTATION_180,
+  POPPLER_STRUCTURE_GLYPH_ORIENTATION_270,
+} PopplerStructureGlyphOrientation;
+
+/**
+ * PopplerStructureListNumbering:
+ */
+typedef enum {
+  POPPLER_STRUCTURE_LIST_NUMBERING_NONE,
+  POPPLER_STRUCTURE_LIST_NUMBERING_DISC,
+  POPPLER_STRUCTURE_LIST_NUMBERING_CIRCLE,
+  POPPLER_STRUCTURE_LIST_NUMBERING_SQUARE,
+  POPPLER_STRUCTURE_LIST_NUMBERING_DECIMAL,
+  POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ROMAN,
+  POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ROMAN,
+  POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ALPHA,
+  POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ALPHA,
+} PopplerStructureListNumbering;
+
+/**
+ * PopplerStructureFormRole:
+ */
+typedef enum {
+  POPPLER_STRUCTURE_FORM_ROLE_UNDEFINED,
+  POPPLER_STRUCTURE_FORM_ROLE_RADIO_BUTTON,
+  POPPLER_STRUCTURE_FORM_ROLE_PUSH_BUTTON,
+  POPPLER_STRUCTURE_FORM_ROLE_TEXT_VALUE,
+  POPPLER_STRUCTURE_FORM_ROLE_CHECKBOX,
+} PopplerStructureFormRole;
+
+/**
+ * PopplerStructureFormState:
+ */
+typedef enum {
+  POPPLER_STRUCTURE_FORM_STATE_ON,
+  POPPLER_STRUCTURE_FORM_STATE_OFF,
+  POPPLER_STRUCTURE_FORM_STATE_NEUTRAL,
+} PopplerStructureFormState;
+
+/**
+ * PopplerStructureScope:
+ */
+typedef enum {
+  POPPLER_STRUCTURE_SCOPE_ROW,
+  POPPLER_STRUCTURE_SCOPE_COLUMN,
+  POPPLER_STRUCTURE_SCOPE_BOTH,
+} PopplerStructureScope;
+
+
+typedef struct _PopplerTextSpan PopplerTextSpan;
+
+
+GType                            poppler_structure_element_get_type               (void) G_GNUC_CONST;
+PopplerStructureElementKind      poppler_structure_element_get_kind               (PopplerStructureElement     *poppler_structure_element);
+gint                             poppler_structure_element_get_page               (PopplerStructureElement     *poppler_structure_element);
+gboolean                         poppler_structure_element_is_content             (PopplerStructureElement     *poppler_structure_element);
+gboolean                         poppler_structure_element_is_inline              (PopplerStructureElement     *poppler_structure_element);
+gboolean                         poppler_structure_element_is_block               (PopplerStructureElement     *poppler_structure_element);
+gboolean                         poppler_structure_element_is_grouping            (PopplerStructureElement     *poppler_structure_element);
+gchar                           *poppler_structure_element_get_id                 (PopplerStructureElement     *poppler_structure_element);
+gchar                           *poppler_structure_element_get_title              (PopplerStructureElement     *poppler_structure_element);
+gchar                           *poppler_structure_element_get_abbreviation       (PopplerStructureElement     *poppler_structure_element);
+gchar                           *poppler_structure_element_get_language           (PopplerStructureElement     *poppler_structure_element);
+gchar                           *poppler_structure_element_get_text               (PopplerStructureElement     *poppler_structure_element,
+                                                                                   gboolean                     recursive);
+gchar                           *poppler_structure_element_get_alt_text           (PopplerStructureElement     *poppler_structure_element);
+gchar                           *poppler_structure_element_get_actual_text        (PopplerStructureElement     *poppler_structure_element);
+PopplerTextSpan                **poppler_structure_element_get_text_spans         (PopplerStructureElement     *poppler_structure_element,
+                                                                                   guint                       *n_text_spans);
+
+PopplerStructurePlacement        poppler_structure_element_get_placement          (PopplerStructureElement     *poppler_structure_element);
+PopplerStructureWritingMode      poppler_structure_element_get_writing_mode       (PopplerStructureElement     *poppler_structure_element);
+gboolean                         poppler_structure_element_get_background_color   (PopplerStructureElement     *poppler_structure_element,
+                                                                                   PopplerColor                *color);
+gboolean                         poppler_structure_element_get_border_color       (PopplerStructureElement     *poppler_structure_element,
+                                                                                   PopplerColor                *colors);
+void                             poppler_structure_element_get_border_style       (PopplerStructureElement     *poppler_structure_element,
+                                                                                   PopplerStructureBorderStyle *border_styles);
+gboolean                         poppler_structure_element_get_border_thickness   (PopplerStructureElement     *poppler_structure_element,
+                                                                                   gdouble                     *border_thicknesses);
+void                             poppler_structure_element_get_padding            (PopplerStructureElement     *poppler_structure_element,
+                                                                                   gdouble                     *paddings);
+gboolean                         poppler_structure_element_get_color              (PopplerStructureElement     *poppler_structure_element,
+                                                                                   PopplerColor                *color);
+
+gdouble                          poppler_structure_element_get_space_before       (PopplerStructureElement     *poppler_structure_element);
+gdouble                          poppler_structure_element_get_space_after        (PopplerStructureElement     *poppler_structure_element);
+gdouble                          poppler_structure_element_get_start_indent       (PopplerStructureElement     *poppler_structure_element);
+gdouble                          poppler_structure_element_get_end_indent         (PopplerStructureElement     *poppler_structure_element);
+gdouble                          poppler_structure_element_get_text_indent        (PopplerStructureElement     *poppler_structure_element);
+PopplerStructureTextAlign        poppler_structure_element_get_text_align         (PopplerStructureElement     *poppler_structure_element);
+gboolean                         poppler_structure_element_get_bounding_box       (PopplerStructureElement     *poppler_structure_element,
+                                                                                   PopplerRectangle            *bounding_box);
+gdouble                          poppler_structure_element_get_width              (PopplerStructureElement     *poppler_structure_element);
+gdouble                          poppler_structure_element_get_height             (PopplerStructureElement     *poppler_structure_element);
+PopplerStructureBlockAlign       poppler_structure_element_get_block_align        (PopplerStructureElement     *poppler_structure_element);
+PopplerStructureInlineAlign      poppler_structure_element_get_inline_align       (PopplerStructureElement     *poppler_structure_element);
+void                             poppler_structure_element_get_table_border_style (PopplerStructureElement     *poppler_structure_element,
+                                                                                   PopplerStructureBorderStyle *border_styles);
+void                             poppler_structure_element_get_table_padding      (PopplerStructureElement     *poppler_structure_element,
+                                                                                   gdouble                     *paddings);
+
+gdouble                          poppler_structure_element_get_baseline_shift     (PopplerStructureElement     *poppler_structure_element);
+gdouble                          poppler_structure_element_get_line_height        (PopplerStructureElement     *poppler_structure_element);
+gboolean                         poppler_structure_element_get_text_decoration_color
+                                                                                  (PopplerStructureElement     *poppler_structure_element,
+                                                                                   PopplerColor                *color);
+gdouble                          poppler_structure_element_get_text_decoration_thickness
+                                                                                  (PopplerStructureElement     *poppler_structure_element);
+PopplerStructureTextDecoration   poppler_structure_element_get_text_decoration_type
+                                                                                  (PopplerStructureElement     *poppler_structure_element);
+PopplerStructureRubyAlign        poppler_structure_element_get_ruby_align         (PopplerStructureElement     *poppler_structure_element);
+PopplerStructureRubyPosition     poppler_structure_element_get_ruby_position      (PopplerStructureElement     *poppler_structure_element);
+PopplerStructureGlyphOrientation poppler_structure_element_get_glyph_orientation  (PopplerStructureElement     *poppler_structure_element);
+
+guint                            poppler_structure_element_get_column_count       (PopplerStructureElement     *poppler_structure_element);
+gdouble                         *poppler_structure_element_get_column_gaps        (PopplerStructureElement     *poppler_structure_element,
+                                                                                   guint                       *n_values);
+gdouble                         *poppler_structure_element_get_column_widths      (PopplerStructureElement     *poppler_structure_element,
+                                                                                   guint                       *n_values);
+
+PopplerStructureListNumbering    poppler_structure_element_get_list_numbering     (PopplerStructureElement     *poppler_structure_element);
+
+PopplerStructureFormRole         poppler_structure_element_get_form_role          (PopplerStructureElement     *poppler_structure_element);
+PopplerStructureFormState        poppler_structure_element_get_form_state         (PopplerStructureElement     *poppler_structure_element);
+gchar                           *poppler_structure_element_get_form_description   (PopplerStructureElement     *poppler_structure_element);
+
+guint                            poppler_structure_element_get_table_row_span     (PopplerStructureElement     *poppler_structure_element);
+guint                            poppler_structure_element_get_table_column_span  (PopplerStructureElement     *poppler_structure_element);
+gchar                          **poppler_structure_element_get_table_headers      (PopplerStructureElement     *poppler_structure_element);
+PopplerStructureScope            poppler_structure_element_get_table_scope        (PopplerStructureElement     *poppler_structure_element);
+gchar                           *poppler_structure_element_get_table_summary      (PopplerStructureElement     *poppler_structure_element);
 
 #define POPPLER_TYPE_STRUCTURE_ELEMENT_ITER                                       (poppler_structure_element_iter_get_type ())
 GType                        poppler_structure_element_iter_get_type              (void) G_GNUC_CONST;

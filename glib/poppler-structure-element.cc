@@ -24,6 +24,7 @@
 #include <StructElement.h>
 #include <GlobalParams.h>
 #include <UnicodeMap.h>
+#include <math.h>
 #endif /* !__GI_SCANNER__ */
 
 #include "poppler.h"
@@ -220,6 +221,201 @@ poppler_structure_element_get_kind (PopplerStructureElement *poppler_structure_e
   g_assert_not_reached ();
   return POPPLER_STRUCTURE_ELEMENT_CONTENT;
 }
+
+
+template <typename EnumType>
+struct EnumNameValue {
+  const gchar *name;
+  EnumType     value;
+
+  static const EnumNameValue<EnumType> values[];
+  static const Attribute::Type attribute_type;
+};
+
+#define ENUM_VALUES(E, A) \
+  template<> const Attribute::Type EnumNameValue<E>::attribute_type = Attribute::A; \
+  template<> const EnumNameValue<E> EnumNameValue<E>::values[] =
+
+ENUM_VALUES (PopplerStructurePlacement, Placement)
+{
+  { "Block",  POPPLER_STRUCTURE_PLACEMENT_BLOCK  },
+  { "Inline", POPPLER_STRUCTURE_PLACEMENT_INLINE },
+  { "Before", POPPLER_STRUCTURE_PLACEMENT_BEFORE },
+  { "Start",  POPPLER_STRUCTURE_PLACEMENT_START  },
+  { "End",    POPPLER_STRUCTURE_PLACEMENT_END    },
+  { NULL }
+};
+
+ENUM_VALUES (PopplerStructureWritingMode, WritingMode)
+{
+  { "LrTb", POPPLER_STRUCTURE_WRITING_MODE_LR_TB },
+  { "RlTb", POPPLER_STRUCTURE_WRITING_MODE_RL_TB },
+  { "TbRl", POPPLER_STRUCTURE_WRITING_MODE_TB_RL },
+  { NULL }
+};
+
+ENUM_VALUES (PopplerStructureBorderStyle, BorderStyle)
+{
+  { "None",   POPPLER_STRUCTURE_BORDER_STYLE_NONE   },
+  { "Hidden", POPPLER_STRUCTURE_BORDER_STYLE_HIDDEN },
+  { "Dotted", POPPLER_STRUCTURE_BORDER_STYLE_DOTTED },
+  { "Dashed", POPPLER_STRUCTURE_BORDER_STYLE_DASHED },
+  { "Solid",  POPPLER_STRUCTURE_BORDER_STYLE_SOLID  },
+  { "Double", POPPLER_STRUCTURE_BORDER_STYLE_DOUBLE },
+  { "Groove", POPPLER_STRUCTURE_BORDER_STYLE_GROOVE },
+  { "Inset",  POPPLER_STRUCTURE_BORDER_STYLE_INSET  },
+  { "Outset", POPPLER_STRUCTURE_BORDER_STYLE_OUTSET },
+  { NULL }
+};
+
+ENUM_VALUES (PopplerStructureTextAlign, TextAlign)
+{
+  { "Start",   POPPLER_STRUCTURE_TEXT_ALIGN_START   },
+  { "Center",  POPPLER_STRUCTURE_TEXT_ALIGN_CENTER  },
+  { "End",     POPPLER_STRUCTURE_TEXT_ALIGN_END     },
+  { "Justify", POPPLER_STRUCTURE_TEXT_ALIGN_JUSTIFY },
+  { NULL }
+};
+
+ENUM_VALUES (PopplerStructureBlockAlign, BlockAlign)
+{
+  { "Before",  POPPLER_STRUCTURE_BLOCK_ALIGN_BEFORE  },
+  { "Middle",  POPPLER_STRUCTURE_BLOCK_ALIGN_MIDDLE  },
+  { "After",   POPPLER_STRUCTURE_BLOCK_ALIGN_AFTER   },
+  { "Justify", POPPLER_STRUCTURE_BLOCK_ALIGN_JUSTIFY },
+  { NULL }
+};
+
+ENUM_VALUES (PopplerStructureInlineAlign, InlineAlign)
+{
+  { "Start",  POPPLER_STRUCTURE_INLINE_ALIGN_START  },
+  { "Center", POPPLER_STRUCTURE_INLINE_ALIGN_CENTER },
+  { "End",    POPPLER_STRUCTURE_INLINE_ALIGN_END    },
+  { NULL }
+};
+
+ENUM_VALUES (PopplerStructureTextDecoration, TextDecorationType)
+{
+  { "None",        POPPLER_STRUCTURE_TEXT_DECORATION_NONE        },
+  { "Underline",   POPPLER_STRUCTURE_TEXT_DECORATION_UNDERLINE   },
+  { "Overline",    POPPLER_STRUCTURE_TEXT_DECORATION_OVERLINE    },
+  { "LineThrough", POPPLER_STRUCTURE_TEXT_DECORATION_LINETHROUGH },
+  { NULL }
+};
+
+ENUM_VALUES (PopplerStructureRubyAlign, RubyAlign)
+{
+  { "Start",      POPPLER_STRUCTURE_RUBY_ALIGN_START      },
+  { "Center",     POPPLER_STRUCTURE_RUBY_ALIGN_CENTER     },
+  { "End",        POPPLER_STRUCTURE_RUBY_ALIGN_END        },
+  { "Justify",    POPPLER_STRUCTURE_RUBY_ALIGN_JUSTIFY    },
+  { "Distribute", POPPLER_STRUCTURE_RUBY_ALIGN_DISTRIBUTE },
+  { NULL }
+};
+
+ENUM_VALUES (PopplerStructureRubyPosition, RubyPosition)
+{
+  { "Before",  POPPLER_STRUCTURE_RUBY_POSITION_BEFORE  },
+  { "After",   POPPLER_STRUCTURE_RUBY_POSITION_AFTER   },
+  { "Warichu", POPPLER_STRUCTURE_RUBY_POSITION_WARICHU },
+  { "Inline",  POPPLER_STRUCTURE_RUBY_POSITION_INLINE  },
+  { NULL }
+};
+
+ENUM_VALUES (PopplerStructureGlyphOrientation, GlyphOrientationVertical)
+{
+  { "Auto", POPPLER_STRUCTURE_GLYPH_ORIENTATION_AUTO },
+  { "90",   POPPLER_STRUCTURE_GLYPH_ORIENTATION_90   },
+  { "180",  POPPLER_STRUCTURE_GLYPH_ORIENTATION_180  },
+  { "270",  POPPLER_STRUCTURE_GLYPH_ORIENTATION_270  },
+  { "360",  POPPLER_STRUCTURE_GLYPH_ORIENTATION_0    },
+  { "-90",  POPPLER_STRUCTURE_GLYPH_ORIENTATION_270  },
+  { "-180", POPPLER_STRUCTURE_GLYPH_ORIENTATION_180  },
+  { NULL }
+};
+
+ENUM_VALUES (PopplerStructureListNumbering, ListNumbering)
+{
+  { "None",       POPPLER_STRUCTURE_LIST_NUMBERING_NONE        },
+  { "Disc",       POPPLER_STRUCTURE_LIST_NUMBERING_DISC        },
+  { "Circle",     POPPLER_STRUCTURE_LIST_NUMBERING_CIRCLE      },
+  { "Square",     POPPLER_STRUCTURE_LIST_NUMBERING_SQUARE      },
+  { "Decimal",    POPPLER_STRUCTURE_LIST_NUMBERING_DECIMAL     },
+  { "UpperRoman", POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ROMAN },
+  { "LowerRoman", POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ROMAN },
+  { "UpperAlpha", POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ALPHA },
+  { "LowerAlpha", POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ALPHA },
+  { NULL }
+};
+
+ENUM_VALUES (PopplerStructureFormRole, Role)
+{
+  { "rb", POPPLER_STRUCTURE_FORM_ROLE_RADIO_BUTTON },
+  { "cb", POPPLER_STRUCTURE_FORM_ROLE_CHECKBOX     },
+  { "pb", POPPLER_STRUCTURE_FORM_ROLE_PUSH_BUTTON  },
+  { "tv", POPPLER_STRUCTURE_FORM_ROLE_TEXT_VALUE   },
+  { NULL }
+};
+
+ENUM_VALUES (PopplerStructureFormState, checked)
+{
+  { "on",      POPPLER_STRUCTURE_FORM_STATE_ON      },
+  { "off",     POPPLER_STRUCTURE_FORM_STATE_OFF     },
+  { "neutral", POPPLER_STRUCTURE_FORM_STATE_NEUTRAL },
+  { NULL }
+};
+
+ENUM_VALUES (PopplerStructureScope, Scope)
+{
+  { "Row",    POPPLER_STRUCTURE_SCOPE_ROW    },
+  { "Column", POPPLER_STRUCTURE_SCOPE_COLUMN },
+  { "Both",   POPPLER_STRUCTURE_SCOPE_BOTH   },
+  { NULL }
+};
+
+#undef ENUM_VALUES
+
+
+template <typename EnumType>
+static EnumType
+name_to_enum (Object *name_value)
+{
+  /*
+   * Non-NULL names must always be valid because Poppler
+   * discards the invalid attributes when parsing them.
+   */
+  g_assert (name_value != NULL);
+
+  for (const EnumNameValue<EnumType> *item = EnumNameValue<EnumType>::values ; item->name; item++)
+    if (name_value->isName (item->name))
+      return item->value;
+
+  g_assert_not_reached ();
+  return static_cast<EnumType> (-1);
+}
+
+
+template <typename EnumType>
+static EnumType
+attr_to_enum (PopplerStructureElement *poppler_structure_element)
+{
+  const Attribute *attr =
+      poppler_structure_element->elem->findAttribute (EnumNameValue<EnumType>::attribute_type, gTrue);
+  return name_to_enum<EnumType> ((attr != NULL)
+                                 ? attr->getValue ()
+                                 : Attribute::getDefaultValue (EnumNameValue<EnumType>::attribute_type));
+}
+
+
+static inline Object *
+attr_value_or_default (PopplerStructureElement *poppler_structure_element,
+                       Attribute::Type          attribute_type)
+{
+  const Attribute *attr =
+      poppler_structure_element->elem->findAttribute (attribute_type, gTrue);
+  return attr ? attr->getValue () : Attribute::getDefaultValue (attribute_type);
+}
+
 
 /**
  * poppler_structure_element_get_page:
@@ -916,7 +1112,6 @@ poppler_text_span_get_font_name (PopplerTextSpan *poppler_text_span)
   return poppler_text_span->font_name;
 }
 
-
 /**
  * poppler_structure_element_get_text_spans:
  * @poppler_structure_element: A #PopplerStructureElement
@@ -964,4 +1159,1086 @@ poppler_structure_element_get_text_spans (PopplerStructureElement *poppler_struc
   *n_text_spans = spans.size ();
 
   return text_spans;
+}
+
+/* General Layout Attributes */
+
+/**
+ * poppler_structure_element_get_placement:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the placement type of the structure element.
+ *
+ * Return value: A #PopplerStructurePlacement value.
+ *
+ * Since: 0.26
+ */
+PopplerStructurePlacement
+poppler_structure_element_get_placement (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element),
+                        EnumNameValue<PopplerStructurePlacement>::values[0].value);
+  return attr_to_enum<PopplerStructurePlacement> (poppler_structure_element);
+}
+
+/**
+ * poppler_structure_element_get_writing_mode:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the writing mode (writing direction) of the content associated
+ * with a structure element.
+ *
+ * Return value: A #PopplerStructureWritingMode value.
+ *
+ * Since: 0.26
+ */
+PopplerStructureWritingMode
+poppler_structure_element_get_writing_mode (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element),
+                        EnumNameValue<PopplerStructureWritingMode>::values[0].value);
+  return attr_to_enum<PopplerStructureWritingMode> (poppler_structure_element);
+}
+
+
+static void
+convert_border_style (Object *object, PopplerStructureBorderStyle *values)
+{
+  g_assert (object != NULL);
+  g_assert (values != NULL);
+
+  if (object->isArray ())
+    {
+      g_assert (object->arrayGetLength () == 4);
+      for (guint i = 0; i < 4; i++)
+        {
+          Object item;
+          values[i] = name_to_enum<PopplerStructureBorderStyle> (object->arrayGet (i, &item));
+          item.free ();
+        }
+    }
+  else
+    {
+      values[0] = values[1] = values[2] = values[3] =
+        name_to_enum<PopplerStructureBorderStyle> (object);
+    }
+}
+
+/**
+ * poppler_structure_element_get_border_style:
+ * @poppler_structure_element: A #PopplerStructureElement
+ * @border_styles: (out) (array fixed-size=4) (element-type PopplerStructureBorderStyle):
+ *    An array of four #PopplerStructureBorderStyle elements.
+ *
+ * Obtains the border style of a structure element. The result values
+ * are in before-after-start-end ordering. For example, using Western
+ * left-to-right writing, that is top-bottom-left-right.
+ *
+ * Since: 0.26
+ */
+void
+poppler_structure_element_get_border_style (PopplerStructureElement     *poppler_structure_element,
+                                            PopplerStructureBorderStyle *border_styles)
+{
+  g_return_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element));
+  g_return_if_fail (border_styles != NULL);
+
+  convert_border_style (attr_value_or_default (poppler_structure_element,
+                                               Attribute::BorderStyle),
+                        border_styles);
+}
+
+static inline void
+convert_doubles_array (Object *object, gdouble **values, guint *n_values)
+{
+  g_assert (object->isArray ());
+  g_assert (n_values != NULL);
+  g_assert (values != NULL);
+
+  *n_values = object->arrayGetLength ();
+  gdouble* doubles = g_new (gdouble, *n_values);
+
+  for (guint i = 0; i < *n_values; i++)
+    {
+      Object item;
+      doubles[i] = object->arrayGet (i, &item)->getNum ();
+      item.free ();
+    }
+}
+
+static inline void
+convert_color (Object *object, PopplerColor *color)
+{
+  g_assert (color != NULL);
+  g_assert (object->isArray () && object->arrayGetLength () != 3);
+
+  Object item;
+
+  color->red = object->arrayGet (0, &item)->getNum () * 65535;
+  item.free ();
+
+  color->green = object->arrayGet (1, &item)->getNum () * 65535;
+  item.free ();
+
+  color->blue = object->arrayGet (2, &item)->getNum () * 65535;
+  item.free ();
+}
+
+/**
+ * poppler_structure_element_get_color:
+ * @poppler_structure_element: A #PopplerStructureElement
+ * @color: (out): A #PopplerColor.
+ *
+ * Obtains the color of the content contained in the element.
+ * If this attribute is not specified, the color for this element shall
+ * be the current text fill color in effect at the start of its associated content.
+ *
+ * Return value: %TRUE if a color is defined for the element,
+ *    %FALSE otherwise.
+ *
+ * Since: 0.26
+ */
+gboolean
+poppler_structure_element_get_color (PopplerStructureElement *poppler_structure_element,
+                                     PopplerColor            *color)
+{
+  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), FALSE);
+  g_return_val_if_fail (color != NULL, FALSE);
+
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Color);
+  if (value == NULL)
+    return FALSE;
+
+  convert_color (value, color);
+  return TRUE;
+}
+
+/**
+ * poppler_structure_element_get_background_color:
+ * @poppler_structure_element: A #PopplerStructureElement
+ * @color: (out): A #PopplerColor.
+ *
+ * Obtains the background color of the element. If this attribute is
+ * not specified, the element shall be treated as if it were transparent.
+ *
+ * Return value: %TRUE if a color is defined for the element,
+ *    %FALSE otherwise.
+ *
+ * Since: 0.26
+ */
+gboolean
+poppler_structure_element_get_background_color (PopplerStructureElement *poppler_structure_element,
+                                                PopplerColor            *color)
+{
+  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), FALSE);
+  g_return_val_if_fail (color != NULL, FALSE);
+
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::BackgroundColor);
+  if (value == NULL)
+    return FALSE;
+
+  convert_color (value, color);
+  return TRUE;
+}
+
+/**
+ * poppler_structure_element_get_border_color:
+ * @poppler_structure_element: A #PopplerStructureElement
+ * @colors: (out) (array fixed-size=4) (element-type PopplerColor): An array
+ *    of four #PopplerColor.
+ *
+ * Obtains the color of border around the element. The result values
+ * are in before-after-start-end ordering (for the typical Western
+ * left-to-right writing, that is top-bottom-left-right).
+ * If this attribute is not specified, the border color for this element shall
+ * be the current text fill color in effect at the start of its associated
+ * content.
+ *
+ * Return value: %TRUE if a color is defined for the element,
+ *    %FALSE otherwise.
+ *
+ * Since: 0.26
+ */
+gboolean
+poppler_structure_element_get_border_color (PopplerStructureElement *poppler_structure_element,
+                                            PopplerColor            *colors)
+{
+  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), FALSE);
+  g_return_val_if_fail (colors != NULL, FALSE);
+
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::BorderColor);
+  if (value == NULL)
+    return FALSE;
+
+  g_assert (value->isArray ());
+  if (value->arrayGetLength () == 4)
+    {
+      // One color per side.
+      for (guint i = 0; i < 4; i++)
+        {
+          Object item;
+          convert_color (value->arrayGet (i, &item), &colors[i]);
+          item.free ();
+        }
+    }
+  else
+    {
+      // Same color in all sides.
+      g_assert (value->arrayGetLength () == 3);
+      convert_color (value, &colors[0]);
+      colors[1] = colors[2] = colors[3] = colors[0];
+    }
+
+  return TRUE;
+}
+
+static inline void
+convert_double_or_4_doubles (Object *object, gdouble *value)
+{
+  g_assert (object != NULL);
+
+  if (object->isArray ())
+    {
+      g_assert (object->arrayGetLength () == 4);
+      for (guint i = 0; i < 4; i++)
+        {
+          Object item;
+          value[i] = object->arrayGet (i, &item)->getNum ();
+          item.free ();
+        }
+    }
+  else
+    {
+      g_assert (object->isNum ());
+      value[0] = value[1] = value[2] = value[3] = object->getNum ();
+    }
+}
+
+/**
+ * poppler_structure_element_get_border_thickness:
+ * @poppler_structure_element: A #PopplerStructureElement
+ * @border_thicknesses: (out) (array fixed-size=4) (element-type gdouble):
+ *    Array with the four values of border thicknesses.
+ *
+ * Obtains the thickness of the border of an element. The result values
+ * are in before-after-start-end ordering (for the typical Western
+ * left-to-right writing, that is top-bottom-left-right).
+ * A value of 0 indicates that the border shall not be drawn.
+ *
+ * Return value: %TRUE if the border thickness attribute is defined for
+ *    the element, %FALSE otherwise.
+ *
+ * Since: 0.26
+ */
+gboolean
+poppler_structure_element_get_border_thickness (PopplerStructureElement *poppler_structure_element,
+                                                gdouble                 *border_thicknesses)
+{
+  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), FALSE);
+  g_return_val_if_fail (border_thicknesses != NULL, FALSE);
+
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::BorderThickness);
+  if (value == NULL)
+    return FALSE;
+
+  convert_double_or_4_doubles (value, border_thicknesses);
+  return TRUE;
+}
+
+/**
+ * poppler_structure_element_get_padding:
+ * @poppler_structure_element: A #PopplerStructureElement
+ * @paddings: (out) (array fixed-size=4) (element-type gdouble):
+ *    Padding for the four sides of the element.
+ *
+ * Obtains the padding of an element (space around it). The result
+ * values are in before-after-start-end ordering. For example using
+ * Western left-to-right writing, that is top-bottom-left-right.
+ *
+ * Since: 0.26
+ */
+void
+poppler_structure_element_get_padding (PopplerStructureElement *poppler_structure_element,
+                                       gdouble                 *paddings)
+{
+  g_return_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element));
+  g_return_if_fail (paddings != NULL);
+
+  convert_double_or_4_doubles (attr_value_or_default (poppler_structure_element,
+                                                      Attribute::Padding),
+                               paddings);
+}
+
+/* Layout Attributes for block-level structure elements */
+
+/**
+ * poppler_structure_element_get_space_before:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the amount of empty space before the block-level structure element.
+ *
+ * Return value: A positive value.
+ *
+ * Since: 0.26
+ */
+gdouble
+poppler_structure_element_get_space_before (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
+  return attr_value_or_default (poppler_structure_element, Attribute::SpaceBefore)->getNum ();
+}
+
+/**
+ * poppler_structure_element_get_space_after:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the amount of empty space after the block-level structure element.
+ *
+ * Return value: A positive value.
+ *
+ * Since: 0.26
+ */
+gdouble
+poppler_structure_element_get_space_after (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
+  return attr_value_or_default (poppler_structure_element, Attribute::SpaceAfter)->getNum ();
+}
+
+/**
+ * poppler_structure_element_get_start_indent:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the amount of indentation at the beginning of the block-level structure element.
+ *
+ * Return value: A numeric value.
+ *
+ * Since: 0.26
+ */
+gdouble
+poppler_structure_element_get_start_indent (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
+  return attr_value_or_default (poppler_structure_element, Attribute::StartIndent)->getNum ();
+}
+
+/**
+ * poppler_structure_element_get_end_indent:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the amount of indentation at the end of the block-level structure element.
+ *
+ * Return value: A numeric value.
+ *
+ * Since: 0.26
+ */
+gdouble
+poppler_structure_element_get_end_indent (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
+  return attr_value_or_default (poppler_structure_element, Attribute::EndIndent)->getNum ();
+}
+
+/**
+ * poppler_structure_element_get_text_indent:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the amount of indentation of the text contained in the block-level structure element.
+ *
+ * Return value: A numeric value.
+ *
+ * Since: 0.26
+ */
+gdouble
+poppler_structure_element_get_text_indent (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
+  return attr_value_or_default (poppler_structure_element, Attribute::TextIndent)->getNum ();
+}
+
+/**
+ * poppler_structure_element_get_text_align:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the text alignment mode of the text contained into a
+ * block-level structure element.
+ *
+ * Return value: A #PopplerStructureTextAlign value.
+ *
+ * Since: 0.26
+ */
+PopplerStructureTextAlign
+poppler_structure_element_get_text_align (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element),
+                        EnumNameValue<PopplerStructureTextAlign>::values[0].value);
+  return attr_to_enum<PopplerStructureTextAlign> (poppler_structure_element);
+}
+
+/**
+ * poppler_structure_element_get_bounding_box:
+ * @poppler_structure_element: A #PopplerStructureElement
+ * @bounding_box: (out): A #PopplerRectangle.
+ *
+ * Obtains the size of the bounding box of a block-level structure element.
+ *
+ * Return value: %TRUE if a bounding box is defined for the element,
+ *    %FALSE otherwise.
+ *
+ * Since: 0.26
+ */
+gboolean
+poppler_structure_element_get_bounding_box (PopplerStructureElement *poppler_structure_element,
+                                            PopplerRectangle        *bounding_box)
+{
+  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), FALSE);
+  g_return_val_if_fail (bounding_box != NULL, FALSE);
+
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::BBox);
+  if (value == NULL)
+    return FALSE;
+
+  gdouble dimensions[4];
+  convert_double_or_4_doubles (value, dimensions);
+
+  bounding_box->x1 = dimensions[0];
+  bounding_box->y1 = dimensions[1];
+  bounding_box->x2 = dimensions[2];
+  bounding_box->y2 = dimensions[3];
+
+  return TRUE;
+}
+
+/**
+ * poppler_structure_element_get_width:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the width of the block-level structure element. Note that for elements which do
+ * not specify a width, it has to be calculated, and in this case -1 is returned.
+ *
+ * Return value: A positive value if a width is defined, or -1
+ *    if the width is to be calculated automatically.
+ *
+ * Since: 0.26
+ */
+gdouble
+poppler_structure_element_get_width (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Width);
+  return value->isName ("Auto") ? -1.0 : value->getNum ();
+}
+
+/**
+ * poppler_structure_element_get_height:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the height of the block-level structure element. Note that for elements which do
+ * not specify a height, it has to be calculated, and in this case -1 is returned.
+ *
+ * Return value: A positive value if a width is defined, or -1
+ *    if the height is to be calculated automatically.
+ *
+ * Since: 0.26
+ */
+gdouble
+poppler_structure_element_get_height (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element), NAN);
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Height);
+  return value->isName ("Auto") ? -1.0 : value->getNum ();
+}
+
+/**
+ * poppler_structure_element_get_block_align:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the block-alignment mode of the block-level structure element.
+ *
+ * Return value: A #PopplerStructureBlockAlign value.
+ *
+ * Since: 0.26
+ */
+PopplerStructureBlockAlign
+poppler_structure_element_get_block_align (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element),
+                        EnumNameValue<PopplerStructureBlockAlign>::values[0].value);
+  return attr_to_enum<PopplerStructureBlockAlign> (poppler_structure_element);
+}
+
+/**
+ * poppler_structure_element_get_inline_align:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the inline-alignment mode of the block-level structure element.
+ *
+ * Return value: A #PopplerStructureInlineAlign value.
+ *
+ * Since: 0.26
+ */
+PopplerStructureInlineAlign
+poppler_structure_element_get_inline_align (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_block (poppler_structure_element),
+                        EnumNameValue<PopplerStructureInlineAlign>::values[0].value);
+  return attr_to_enum<PopplerStructureInlineAlign> (poppler_structure_element);
+}
+
+/**
+ * poppler_structure_element_get_table_border_style:
+ * @poppler_structure_element: A #PopplerStructureElement
+ * @border_styles: (out) (array fixed-size=4) (element-type PopplerStructureBorderStyle):
+ *    An array of four #PopplerStructureBorderStyle elements.
+ *
+ * Obtains the table cell border style of a block-level structure element. The result values
+ * are in before-after-start-end ordering. For example, using Western
+ * left-to-right writing, that is top-bottom-left-right.
+ *
+ * Since: 0.26
+ */
+void
+poppler_structure_element_get_table_border_style (PopplerStructureElement     *poppler_structure_element,
+                                                  PopplerStructureBorderStyle *border_styles)
+{
+  g_return_if_fail (poppler_structure_element_is_block (poppler_structure_element));
+  g_return_if_fail (border_styles != NULL);
+
+  convert_border_style (attr_value_or_default (poppler_structure_element,
+                                               Attribute::TBorderStyle),
+                        border_styles);
+}
+
+/**
+ * poppler_structure_element_get_table_padding:
+ * @poppler_structure_element: A #PopplerStructureElement
+ * @paddings: (out) (array fixed-size=4) (element-type gdouble):
+ *    Padding for the four sides of the element.
+ *
+ * Obtains the padding between the table cell’s content rectangle and the
+ * surrounding border of a block-level structure element. The result
+ * values are in before-after-start-end ordering (for the typical
+ * Western left-to-right writing, that is top-bottom-left-right).
+ *
+ * Since: 0.26
+ */
+void
+poppler_structure_element_get_table_padding (PopplerStructureElement *poppler_structure_element,
+                                             gdouble                 *paddings)
+{
+  g_return_if_fail (poppler_structure_element_is_block (poppler_structure_element));
+  g_return_if_fail (paddings != NULL);
+
+  convert_double_or_4_doubles (attr_value_or_default (poppler_structure_element,
+                                                      Attribute::TPadding),
+                               paddings);
+}
+
+/* Layout Attributes for inline-level structure elements */
+
+/**
+ * poppler_structure_element_get_baseline_shift:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains how much the text contained in the inline-level structure element should be shifted,
+ * measuring from the baseline of the glyphs.
+ *
+ * Return value: A numeric value.
+ *
+ * Since: 0.26
+ */
+gdouble
+poppler_structure_element_get_baseline_shift (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element), NAN);
+  return attr_value_or_default (poppler_structure_element, Attribute::BaselineShift)->getNum ();
+}
+
+/**
+ * poppler_structure_element_get_line_height:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the line height for the text contained in the inline-level structure element.
+ * Note that for elements which do not specify a line height, it has to be calculated,
+ * and in this case -1 is returned.
+ *
+ * Return value: A positive value if a line height is defined, or -1
+ *    if the height is to be calculated automatically.
+ *
+ * Since: 0.26
+ */
+gdouble
+poppler_structure_element_get_line_height (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element), NAN);
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::LineHeight);
+  return (value->isName ("Normal") || value->isName ("Auto")) ? -1.0 : value->getNum ();
+}
+
+/**
+ * poppler_structure_element_get_text_decoration_color:
+ * @poppler_structure_element: A #PopplerStructureElement
+ * @color: (out): A #PopplerColor.
+ *
+ * Obtains the color of the text decoration for the text contained
+ * in the inline-level structure element.
+ * If this attribute is not specified, the color for this element shall be the current fill
+ * color in effect at the start of its associated content.
+ *
+ * Return value: %TRUE if a color is defined for the element,
+ *    %FALSE otherwise.
+ *
+ * Since: 0.26
+ */
+gboolean
+poppler_structure_element_get_text_decoration_color (PopplerStructureElement *poppler_structure_element,
+                                                     PopplerColor            *color)
+{
+  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element), FALSE);
+  g_return_val_if_fail (color != NULL, FALSE);
+
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::TextDecorationColor);
+  if (value == NULL)
+    return FALSE;
+
+  convert_color (value, color);
+  return FALSE;
+}
+
+/**
+ * poppler_structure_element_get_text_decoration_thickness:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the thickness of the text decoration for the text contained
+ * in the inline-level structure element.
+ * If this attribute is not specified, it shall be derived from the current
+ * stroke thickness in effect at the start of the element’s associated content.
+ *
+ * Return value: Thickness of the text decoration, or %NaN if not defined.
+ *
+ * Since: 0.26
+ */
+gdouble
+poppler_structure_element_get_text_decoration_thickness (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element), NAN);
+
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::TextDecorationThickness);
+  return (value == NULL) ? NAN : value->getNum ();
+}
+
+/**
+ * poppler_structure_element_get_text_decoration_type:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the text decoration type of the text contained in the
+ * inline-level structure element.
+ *
+ * Return value: A #PopplerStructureTextDecoration value.
+ *
+ * Since: 0.26
+ */
+PopplerStructureTextDecoration
+poppler_structure_element_get_text_decoration_type (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element),
+                        EnumNameValue<PopplerStructureTextDecoration>::values[0].value);
+  return attr_to_enum<PopplerStructureTextDecoration> (poppler_structure_element);
+}
+
+/**
+ * poppler_structure_element_get_ruby_align:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the alignment for the ruby text contained in a
+ * inline-level structure element.
+ *
+ * Return value: A #PopplerStructureRubyAlign value.
+ *
+ * Since: 0.26
+ */
+PopplerStructureRubyAlign
+poppler_structure_element_get_ruby_align (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element),
+                        EnumNameValue<PopplerStructureRubyAlign>::values[0].value);
+  return attr_to_enum<PopplerStructureRubyAlign> (poppler_structure_element);
+}
+
+/**
+ * poppler_structure_element_get_ruby_position:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the position for the ruby text contained in a
+ * inline-level structure element.
+ *
+ * Return value: A #PopplerStructureRubyPosition value.
+ *
+ * Since: 0.26
+ */
+PopplerStructureRubyPosition
+poppler_structure_element_get_ruby_position (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element),
+                        EnumNameValue<PopplerStructureRubyPosition>::values[0].value);
+  return attr_to_enum<PopplerStructureRubyPosition> (poppler_structure_element);
+}
+
+/**
+ * poppler_structure_element_get_glyph_orientation:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the glyph orientation for the text contained in a
+ * inline-level structure element.
+ *
+ * Return value: A #PopplerStructureGlyphOrientation value.
+ *
+ * Since: 0.26
+ */
+PopplerStructureGlyphOrientation
+poppler_structure_element_get_glyph_orientation (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_inline (poppler_structure_element),
+                        EnumNameValue<PopplerStructureGlyphOrientation>::values[0].value);
+  return attr_to_enum<PopplerStructureGlyphOrientation> (poppler_structure_element);
+}
+
+/* Column Attributes */
+
+/**
+ * poppler_structure_element_get_column_count:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the number of columns used to lay out the content contained
+ * in the grouping element.
+ *
+ * Return value: Number of columns.
+ *
+ * Since: 0.26
+ */
+guint
+poppler_structure_element_get_column_count (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_is_grouping (poppler_structure_element), 0);
+  return static_cast<guint> (attr_value_or_default (poppler_structure_element,
+                                                    Attribute::ColumnCount)->getInt ());
+}
+
+/**
+ * poppler_structure_element_get_column_gaps:
+ * @poppler_structure_element: A #PopplerStructureElement
+ * @n_values: (out): Size of the returned array.
+ *
+ * Obtains the size of the gaps in between adjacent columns. Returns an
+ * array of elements: the first one is the size of the gap in between
+ * columns 1 and 2, second is the size between columns 2 and 3, and so on.
+ *
+ * For elements which use a single column, %NULL is returned and %n_values
+ * is set to zero.
+ *
+ * If the attribute is undefined, %NULL is returned and %n_values is set
+ * to a non-zero value.
+ *
+ * The array with the results is allocated by the function. When it is
+ * not needed anymore, be sure to call g_free() on it.
+ *
+ * Return value: (transfer full) (array length=n_values) (element-type gdouble):
+ *    Array containing the values for the column gaps, or %NULL if the
+ *    array is empty or the attribute is not defined.
+ *
+ * Since: 0.26
+ */
+gdouble *
+poppler_structure_element_get_column_gaps (PopplerStructureElement *poppler_structure_element,
+                                           guint                   *n_values)
+{
+  g_return_val_if_fail (poppler_structure_element_is_grouping (poppler_structure_element), NULL);
+  g_return_val_if_fail (n_values != NULL, NULL);
+
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::ColumnGap);
+  if (value == NULL)
+    {
+      *n_values = static_cast<guint> (-1);
+      return NULL;
+    }
+
+  gdouble *result = NULL;
+  convert_doubles_array (value, &result, n_values);
+  return result;
+}
+
+/**
+ * poppler_structure_element_get_column_widths:
+ * @poppler_structure_element: A #PopplerStructureElement
+ * @n_values: (out): Size of the returned array.
+ *
+ * Obtains an array with the widths of the columns.
+ *
+ * The array with the results is allocated by the function. When it is
+ * not needed anymore, be sure to call g_free() on it.
+ *
+ * Return value: (transfer full) (array length=n_values) (element-type gdouble):
+ *    Array containing widths of the columns, or %NULL if the attribute
+ *    is not defined.
+ *
+ * Since: 0.26
+ */
+gdouble *
+poppler_structure_element_get_column_widths (PopplerStructureElement *poppler_structure_element,
+                                             guint                   *n_values)
+{
+  g_return_val_if_fail (poppler_structure_element_is_grouping (poppler_structure_element), NULL);
+  g_return_val_if_fail (n_values != NULL, NULL);
+
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::ColumnWidths);
+  if (value == NULL)
+    return NULL;
+
+  gdouble *result = NULL;
+  convert_doubles_array (value, &result, n_values);
+  return result;
+}
+
+/* List Attribute */
+
+/**
+ * poppler_structure_element_get_list_numbering:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the list numbering style for list items.
+ *
+ * Return value: A #PopplerStructureListNumbering value.
+ *
+ * Since: 0.26
+ */
+PopplerStructureListNumbering
+poppler_structure_element_get_list_numbering (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_LIST_ITEM,
+                        EnumNameValue<PopplerStructureListNumbering>::values[0].value);
+  return attr_to_enum<PopplerStructureListNumbering> (poppler_structure_element);
+}
+
+/* PrintField Attributes */
+
+/**
+ * poppler_structure_element_get_form_role:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the role of a form structure element that is part of a form, or is
+ * a form field. This hints how the control for the element is intended
+ * to be rendered.
+ *
+ * Return value: A #PopplerStructureFormRole value.
+ *
+ * Since: 0.26
+ */
+PopplerStructureFormRole
+poppler_structure_element_get_form_role (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_FORM,
+                        EnumNameValue<PopplerStructureFormRole>::values[0].value);
+
+  /*
+   * The Role attribute can actually be undefined.
+   */
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Role);
+  if (value == NULL)
+    return POPPLER_STRUCTURE_FORM_ROLE_UNDEFINED;
+
+  return name_to_enum<PopplerStructureFormRole> (value);
+}
+
+/**
+ * poppler_structure_element_get_form_state:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * For a structure element that is a form field, obtains in which state
+ * the associated control is expected to be rendered.
+ *
+ * Return value: A #PopplerStructureFormState value.
+ *
+ * Since: 0.26
+ */
+PopplerStructureFormState
+poppler_structure_element_get_formstate (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_FORM,
+                        EnumNameValue<PopplerStructureFormState>::values[0].value);
+  return attr_to_enum<PopplerStructureFormState> (poppler_structure_element);
+}
+
+/**
+ * poppler_structure_element_get_form_description:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the textual description of the form element. Note that the
+ * description is for informative purposes, and it is not intended
+ * to be rendered. For example, assistive technologies may use the
+ * description field to provide an alternate way of presenting an
+ * element to the user.
+ *
+ * The returned string is allocated by the function. When it is
+ * not needed anymore, be sure to call g_free() on it.
+ *
+ * Return value: (transfer full): A string, or %NULL if the attribute
+ *    is not defined.
+ *
+ * Since: 0.26
+ */
+gchar *
+poppler_structure_element_get_form_description (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_FORM, NULL);
+
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Desc);
+  if (value == NULL)
+    return NULL;
+  if (value->isString ())
+    return _poppler_goo_string_to_utf8 (value->getString ());
+  if (value->isName ())
+    return g_strdup (value->getName ());
+
+  g_assert_not_reached ();
+  return NULL;
+}
+
+/* Table Attributes */
+
+/**
+ * poppler_structure_element_get_table_row_span:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the number of rows the table element spans to.
+ *
+ * Return value: A positive, non-zero value.
+ *
+ * Since: 0.26
+ */
+guint
+poppler_structure_element_get_table_row_span (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE, 0);
+  return static_cast<guint> (attr_value_or_default (poppler_structure_element,
+                                                    Attribute::RowSpan)->getInt ());
+}
+
+/**
+ * poppler_structure_element_get_table_column_span:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the number of columns the table element spans to.
+ *
+ * Return value: A positive, non-zero value.
+ *
+ * Since: 0.26
+ */
+guint
+poppler_structure_element_get_table_column_span (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE, 0);
+  return static_cast<guint> (attr_value_or_default (poppler_structure_element,
+                                                    Attribute::ColSpan)->getInt ());
+}
+
+/**
+ * poppler_structure_element_get_table_headers:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains an array with the names of the table column headers. This is only
+ * useful for table header row elements.
+ *
+ * The array with the results is allocated by the function. The number
+ * of items in the returned array can be obtained with g_strv_length().
+ * The returned value must be freed using g_strfreev().
+ *
+ * Return value: (transfer full) (array zero-terminated=1) (element-type gchar*):
+ *    Zero-terminated array of strings with the table header names,
+ *    or %NULL if the attribute is not defined.
+ *
+ * Since: 0.26
+ */
+gchar **
+poppler_structure_element_get_table_headers (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE, NULL);
+
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Headers);
+  if (value == NULL)
+    return NULL;
+
+  g_assert (value->isArray ());
+
+  const guint n_values = value->arrayGetLength ();
+  gchar **result = g_new0 (gchar*, n_values + 1);
+
+  for (guint i = 0; i < n_values; i++)
+    {
+      Object item;
+
+      if (value->arrayGet (i, &item)->isString ())
+        result[i] = _poppler_goo_string_to_utf8 (item.getString ());
+      else if (item.isName ())
+        result[i] = g_strdup (item.getName ());
+      else
+        g_assert_not_reached ();
+
+      item.free ();
+    }
+
+  return result;
+}
+
+/**
+ * poppler_structure_element_get_table_scope:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the scope of a table structure element.
+ *
+ * Return value: A #PopplerStructureScope value.
+ *
+ * Since: 0.26
+ */
+PopplerStructureScope
+poppler_structure_element_get_table_scope (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE,
+                        EnumNameValue<PopplerStructureScope>::values[0].value);
+  return attr_to_enum<PopplerStructureScope> (poppler_structure_element);
+}
+
+/**
+ * poppler_structure_element_get_table_summary:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Obtains the textual summary of the contents of the table element. Note that
+ * the summary is meant for informative purposes, and it is not intended
+ * to be rendered. For example, assistive technologies may use the
+ * description field to provide an alternate way of presenting an element
+ * to the user, or a document indexer may want to scan it for additional
+ * keywords.
+ *
+ * The returned string is allocated by the function. When it is
+ * not needed anymore, be sure to call g_free() on it.
+ *
+ * Return value: (transfer full): A string, or %NULL if the attribute
+ *    is not defined.
+ *
+ * Since: 0.26
+ */
+gchar *
+poppler_structure_element_get_table_summary (PopplerStructureElement *poppler_structure_element)
+{
+  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), NULL);
+
+  Object *value = attr_value_or_default (poppler_structure_element, Attribute::Summary);
+  if (value == NULL)
+    return NULL;
+  if (value->isString ())
+    return _poppler_goo_string_to_utf8 (value->getString ());
+  if (value->isName ())
+    return g_strdup (value->getName ());
+
+  g_assert_not_reached ();
+  return NULL;
 }
