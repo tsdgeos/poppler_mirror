@@ -590,6 +590,7 @@ poppler_movie_get_type
 PopplerStructureElement
 PopplerStructureElementKind
 PopplerStructureElementIter
+PopplerTextSpan
 poppler_structure_element_iter_new
 poppler_structure_element_iter_next
 poppler_structure_element_iter_copy
@@ -608,6 +609,15 @@ poppler_structure_element_get_language
 poppler_structure_element_get_text
 poppler_structure_element_get_alt_text
 poppler_structure_element_get_actual_text
+poppler_structure_element_get_text_spans
+poppler_text_span_copy
+poppler_text_span_free
+poppler_text_span_is_fixed_width_font
+poppler_text_span_is_serif_font
+poppler_text_span_is_bold_font
+poppler_text_span_get_color
+poppler_text_span_get_text
+poppler_text_span_get_font_name
 
 <SUBSECTION Standard>
 POPPLER_STRUCTURE_ELEMENT
@@ -618,7 +628,9 @@ POPPLER_TYPE_STRUCTURE_ELEMENT_KIND
 
 <SUBSECTION Private>
 poppler_structure_element_get_type
+poppler_structure_element_kind_get_type
 poppler_structure_element_iter_get_type
+poppler_text_span_get_type
 </SECTION>
 
 <SECTION>

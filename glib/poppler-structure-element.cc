@@ -661,3 +661,272 @@ poppler_structure_element_iter_get_child (PopplerStructureElementIter *parent)
 
   return NULL;
 }
+
+
+struct _PopplerTextSpan {
+  gchar *text;
+  gchar *font_name;
+  guint  flags;
+  PopplerColor color;
+};
+
+POPPLER_DEFINE_BOXED_TYPE (PopplerTextSpan,
+                           poppler_text_span,
+                           poppler_text_span_copy,
+                           poppler_text_span_free)
+
+enum {
+  POPPLER_TEXT_SPAN_FIXED_WIDTH = (1 << 0),
+  POPPLER_TEXT_SPAN_SERIF       = (1 << 1),
+  POPPLER_TEXT_SPAN_ITALIC      = (1 << 2),
+  POPPLER_TEXT_SPAN_BOLD        = (1 << 3),
+};
+
+static PopplerTextSpan *
+text_span_poppler_text_span (const TextSpan& span)
+{
+    PopplerTextSpan *new_span = g_slice_new0 (PopplerTextSpan);
+    if (GooString *text = span.getText ())
+      new_span->text = _poppler_goo_string_to_utf8 (text);
+
+    new_span->color.red = colToDbl (span.getColor ().r) * 65535;
+    new_span->color.green = colToDbl (span.getColor ().g) * 65535;
+    new_span->color.blue = colToDbl (span.getColor ().b) * 65535;
+
+    if (span.getFont ())
+      {
+        // GfxFont sometimes does not have a family name but there
+        // is always a font name that can be used as fallback.
+        GooString *font_name = span.getFont ()->getFamily ();
+        if (font_name == NULL)
+          font_name = span.getFont ()->getName ();
+
+        new_span->font_name = _poppler_goo_string_to_utf8 (font_name);
+        if (span.getFont ()->isFixedWidth ())
+          new_span->flags |= POPPLER_TEXT_SPAN_FIXED_WIDTH;
+        if (span.getFont ()->isSerif ())
+            new_span->flags |= POPPLER_TEXT_SPAN_SERIF;
+        if (span.getFont ()->isItalic ())
+            new_span->flags |= POPPLER_TEXT_SPAN_ITALIC;
+        if (span.getFont ()->isBold ())
+            new_span->flags |= POPPLER_TEXT_SPAN_BOLD;
+
+        /* isBold() can return false for some fonts whose weight is heavy */
+        switch (span.getFont ()->getWeight ())
+          {
+          case GfxFont::W500:
+          case GfxFont::W600:
+          case GfxFont::W700:
+          case GfxFont::W800:
+          case GfxFont::W900:
+            new_span->flags |= POPPLER_TEXT_SPAN_BOLD;
+          default:
+            break;
+          }
+      }
+
+    return new_span;
+}
+
+/**
+ * poppler_text_span_copy:
+ * @poppler_text_span: a #PopplerTextSpan
+ *
+ * Makes a copy of a text span.
+ *
+ * Return value: (transfer full): A new #PopplerTextSpan
+ *
+ * Since: 0.26
+ */
+PopplerTextSpan *
+poppler_text_span_copy (PopplerTextSpan *poppler_text_span)
+{
+  PopplerTextSpan *new_span;
+
+  g_return_val_if_fail (poppler_text_span != NULL, NULL);
+
+  new_span = g_slice_dup (PopplerTextSpan, poppler_text_span);
+  new_span->text = g_strdup (poppler_text_span->text);
+  if (poppler_text_span->font_name)
+    new_span->font_name = g_strdup (poppler_text_span->font_name);
+  return new_span;
+}
+
+/**
+ * poppler_text_span_free:
+ * @poppler_text_span: A #PopplerTextSpan
+ *
+ * Frees a text span.
+ *
+ * Since: 0.26
+ */
+void
+poppler_text_span_free (PopplerTextSpan *poppler_text_span)
+{
+  if (G_UNLIKELY (poppler_text_span == NULL))
+    return;
+
+  g_free (poppler_text_span->text);
+  g_free (poppler_text_span->font_name);
+  g_slice_free (PopplerTextSpan, poppler_text_span);
+}
+
+/**
+ * poppler_text_span_is_fixed_width_font:
+ * @poppler_text_span: a #PopplerTextSpan
+ *
+ * Check wether a text span is meant to be rendered using a fixed-width font.
+ *
+ * Return value: Whether the span uses a fixed-width font.
+ *
+ * Since: 0.26
+ */
+gboolean
+poppler_text_span_is_fixed_width_font (PopplerTextSpan *poppler_text_span)
+{
+  g_return_val_if_fail (poppler_text_span != NULL, FALSE);
+
+  return (poppler_text_span->flags & POPPLER_TEXT_SPAN_FIXED_WIDTH);
+}
+
+/**
+ * poppler_text_span_is_serif_font:
+ * @poppler_text_span: a #PopplerTextSpan
+ *
+ * Check whether a text span is meant to be rendered using a serif font.
+ *
+ * Return value: Whether the span uses a serif font.
+ *
+ * Since: 0.26
+ */
+gboolean
+poppler_text_span_is_serif_font (PopplerTextSpan *poppler_text_span)
+{
+  g_return_val_if_fail (poppler_text_span != NULL, FALSE);
+
+  return (poppler_text_span->flags & POPPLER_TEXT_SPAN_SERIF);
+}
+
+/**
+ * poppler_text_span_is_bold_font:
+ * @poppler_text_span: a #PopplerTextSpan
+ *
+ * Check whether a text span is meant to be rendered using a bold font.
+ *
+ * Return value: Whether the span uses bold font.
+ *
+ * Since: 0.26
+ */
+gboolean
+poppler_text_span_is_bold_font (PopplerTextSpan *poppler_text_span)
+{
+  g_return_val_if_fail (poppler_text_span != NULL, FALSE);
+
+  return (poppler_text_span->flags & POPPLER_TEXT_SPAN_BOLD);
+}
+
+/**
+ * poppler_text_span_get_color:
+ * @poppler_text_span: a #PopplerTextSpan
+ * @color: (out): a return location for a #PopplerColor
+ *
+ * Obtains the color in which the text is to be rendered.
+ *
+ * Since: 0.26
+ */
+void
+poppler_text_span_get_color (PopplerTextSpan *poppler_text_span,
+                             PopplerColor *color)
+{
+  g_return_if_fail (poppler_text_span != NULL);
+  g_return_if_fail (color != NULL);
+
+  *color = poppler_text_span->color;
+}
+
+/**
+ * poppler_text_span_get_text:
+ * @poppler_text_span: a #PopplerTextSpan
+ *
+ * Obtains the text contained in the span.
+ *
+ * Return value: (transfer none): A string.
+ *
+ * Since: 0.26
+ */
+const gchar *
+poppler_text_span_get_text (PopplerTextSpan *poppler_text_span)
+{
+  g_return_val_if_fail (poppler_text_span != NULL, NULL);
+
+  return poppler_text_span->text;
+}
+
+/**
+ * poppler_text_span_get_font_name:
+ * @poppler_text_span: a #PopplerTextSpan
+ *
+ * Obtains the name of the font in which the span is to be rendered.
+ *
+ * Return value: (transfer none): A string containing the font name, or
+ *   %NULL if a font is not defined.
+ *
+ * Since: 0.26
+ */
+const gchar *
+poppler_text_span_get_font_name (PopplerTextSpan *poppler_text_span)
+{
+  g_return_val_if_fail (poppler_text_span != NULL, NULL);
+
+  return poppler_text_span->font_name;
+}
+
+
+/**
+ * poppler_structure_element_get_text_spans:
+ * @poppler_structure_element: A #PopplerStructureElement
+ * @n_text_spans: (out): A pointer to the location where the number of elements in
+ *    the returned array will be stored.
+ *
+ * Obtains the text enclosed by an element, as an array of #PopplerTextSpan
+ * structures. Each item in the list is a piece of text which share the same
+ * attributes, plus its attributes. The following example shows how to
+ * obtain and free the text spans of an element:
+ *
+ * <informalexample><programlisting>
+ * guint i, n_spans;
+ * PopplerTextSpan **text_spans =
+ *    poppler_structure_element_get_text_spans (element, &n_spans);
+ * /<!-- -->* Use the text spans *<!-- -->/
+ * for (i = 0; i < n_spans; i++)
+ *    poppler_text_span_free (text_spans[i]);
+ * g_free (text_spans);
+ * </programlisting></informalexample>
+ *
+ * Return value: (transfer full) (array length=n_text_spans) (element-type PopplerTextSpan):
+ *    An array of #PopplerTextSpan elments.
+ *
+ * Since: 0.26
+ */
+PopplerTextSpan **
+poppler_structure_element_get_text_spans (PopplerStructureElement *poppler_structure_element,
+                                          guint                   *n_text_spans)
+{
+  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), NULL);
+  g_return_val_if_fail (n_text_spans != NULL, NULL);
+  g_return_val_if_fail (poppler_structure_element->elem != NULL, NULL);
+
+  if (!poppler_structure_element->elem->isContent ())
+    return NULL;
+
+  const TextSpanArray spans(poppler_structure_element->elem->getTextSpans ());
+  PopplerTextSpan **text_spans = g_new0 (PopplerTextSpan*, spans.size ());
+
+  size_t i = 0;
+  for (TextSpanArray::const_iterator s = spans.begin (); s != spans.end (); ++s)
+    text_spans[i++] = text_span_poppler_text_span (*s);
+
+  *n_text_spans = spans.size ();
+
+  return text_spans;
+}

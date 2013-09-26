@@ -210,6 +210,7 @@ typedef struct _PopplerAnnotSquare         PopplerAnnotSquare;
 typedef struct _PopplerQuadrilateral       PopplerQuadrilateral;
 typedef struct _PopplerStructureElement    PopplerStructureElement;
 typedef struct _PopplerStructureElementIter PopplerStructureElementIter;
+typedef struct _PopplerTextSpan            PopplerTextSpan;
 
 typedef enum
 {

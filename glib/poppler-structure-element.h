@@ -82,7 +82,6 @@ typedef enum {
   POPPLER_STRUCTURE_ELEMENT_FORM,
 } PopplerStructureElementKind;
 
-
 GType                        poppler_structure_element_get_type                   (void) G_GNUC_CONST;
 PopplerStructureElementKind  poppler_structure_element_get_kind                   (PopplerStructureElement  *poppler_structure_element);
 gint                         poppler_structure_element_get_page                   (PopplerStructureElement  *poppler_structure_element);
@@ -97,6 +96,8 @@ gchar                       *poppler_structure_element_get_text                 
                                                                                    gboolean                  recursive);
 gchar                       *poppler_structure_element_get_alt_text               (PopplerStructureElement  *poppler_structure_element);
 gchar                       *poppler_structure_element_get_actual_text            (PopplerStructureElement  *poppler_structure_element);
+PopplerTextSpan            **poppler_structure_element_get_text_spans             (PopplerStructureElement  *poppler_structure_element,
+                                                                                   guint                    *n_text_spans);
 
 #define POPPLER_TYPE_STRUCTURE_ELEMENT_ITER                                       (poppler_structure_element_iter_get_type ())
 GType                        poppler_structure_element_iter_get_type              (void) G_GNUC_CONST;
@@ -106,6 +107,19 @@ PopplerStructureElementIter *poppler_structure_element_iter_copy                
 PopplerStructureElement     *poppler_structure_element_iter_get_element           (PopplerStructureElementIter *iter);
 gboolean                     poppler_structure_element_iter_next                  (PopplerStructureElementIter *iter);
 void                         poppler_structure_element_iter_free                  (PopplerStructureElementIter *iter);
+
+#define POPPLER_TYPE_TEXT_SPAN                                                    (poppler_text_span_get_type ())
+GType                        poppler_text_span_get_type                           (void) G_GNUC_CONST;
+PopplerTextSpan             *poppler_text_span_copy                               (PopplerTextSpan *poppler_text_span);
+void                         poppler_text_span_free                               (PopplerTextSpan *poppler_text_span);
+gboolean                     poppler_text_span_is_fixed_width_font                (PopplerTextSpan *poppler_text_span);
+gboolean                     poppler_text_span_is_serif_font                      (PopplerTextSpan *poppler_text_span);
+gboolean                     poppler_text_span_is_bold_font                       (PopplerTextSpan *poppler_text_span);
+gboolean                     poppler_text_span_is_link                            (PopplerTextSpan *poppler_text_span);
+void                         poppler_text_span_get_color                          (PopplerTextSpan *poppler_text_span,
+                                                                                   PopplerColor    *color);
+const gchar                 *poppler_text_span_get_text                           (PopplerTextSpan *poppler_text_span);
+const gchar                 *poppler_text_span_get_font_name                      (PopplerTextSpan *poppler_text_span);
 
 G_END_DECLS
 
