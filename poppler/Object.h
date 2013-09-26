@@ -199,6 +199,10 @@ public:
   double getNum() { OBJECT_3TYPES_CHECK(objInt, objInt64, objReal);
     return type == objInt ? (double)intg : type == objInt64 ? (double)int64g : real; }
   GooString *getString() { OBJECT_TYPE_CHECK(objString); return string; }
+  // After takeString() the only method that should be called for the object is free()
+  // because the object it's not expected to have a NULL string.
+  GooString *takeString() {
+    OBJECT_TYPE_CHECK(objString); GooString *s = string; string = NULL; return s; }
   char *getName() { OBJECT_TYPE_CHECK(objName); return name; }
   Array *getArray() { OBJECT_TYPE_CHECK(objArray); return array; }
   Dict *getDict() { OBJECT_TYPE_CHECK(objDict); return dict; }
