@@ -6,6 +6,7 @@
 //
 // Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2013 Pino Toscano <pino@kde.org>
 //
 //========================================================================
 #include "config.h"
