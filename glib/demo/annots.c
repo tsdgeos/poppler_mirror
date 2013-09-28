@@ -160,7 +160,12 @@ get_annot_color (PopplerAnnot *poppler_annot)
     PopplerColor *poppler_color;
 
     if ((poppler_color = poppler_annot_get_color (poppler_annot))) {
-        GdkPixbuf *pixbuf = pgd_pixbuf_new_for_color (poppler_color);
+        GdkPixbuf *pixbuf_tmp, *pixbuf;
+
+        pixbuf_tmp = pgd_pixbuf_new_for_color (poppler_color);
+        pixbuf = gdk_pixbuf_scale_simple(pixbuf_tmp, 16, 16, GDK_INTERP_BILINEAR);
+        g_object_unref (pixbuf_tmp);
+
         g_free (poppler_color);
 
         return pixbuf;
@@ -930,6 +935,7 @@ pgd_annots_create_widget (PopplerDocument *document)
     GtkWidget        *swindow, *treeview;
     GtkTreeSelection *selection;
     GtkCellRenderer  *renderer;
+    GtkTreeViewColumn *column;
     gchar            *str;
     gint              n_pages;
 
@@ -1020,19 +1026,17 @@ pgd_annots_create_widget (PopplerDocument *document)
                                                  "text", ANNOTS_Y2_COLUMN,
                                                  NULL);
 
-    renderer = gtk_cell_renderer_text_new ();
-    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (treeview),
-                                                 ANNOTS_TYPE_COLUMN, "Type",
-                                                 renderer,
-                                                 "text", ANNOTS_TYPE_COLUMN,
-                                                 NULL);
+    column = gtk_tree_view_column_new ();
+    gtk_tree_view_column_set_title (column, "Type");
+    gtk_tree_view_append_column (GTK_TREE_VIEW (treeview), column);
 
     renderer = gtk_cell_renderer_pixbuf_new ();
-    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (treeview),
-                                                 ANNOTS_COLOR_COLUMN, "Color",
-                                                 renderer,
-                                                 "pixbuf", ANNOTS_COLOR_COLUMN,
-                                                 NULL);
+    gtk_tree_view_column_pack_start (column, renderer, TRUE);
+    gtk_tree_view_column_add_attribute (column, renderer, "pixbuf", ANNOTS_COLOR_COLUMN);
+
+    renderer = gtk_cell_renderer_text_new ();
+    gtk_tree_view_column_pack_start (column, renderer, TRUE);
+    gtk_tree_view_column_add_attribute (column, renderer, "text", ANNOTS_TYPE_COLUMN);
 
     renderer = gtk_cell_renderer_toggle_new ();
     g_signal_connect (renderer, "toggled",
