@@ -45,6 +45,7 @@ typedef struct {
     GtkWidget       *darea;
     GtkWidget       *annot_view;
     GtkWidget       *timer_label;
+    GtkWidget       *remove_button;
 
     gint             num_page;
 
@@ -491,7 +492,6 @@ pgd_annot_view_set_annot (PgdAnnotsDemo *demo,
 {
     GtkWidget  *alignment;
     GtkWidget  *table;
-    GtkWidget  *button;
     gint        row = 0;
     gchar      *text;
     time_t      timet;
@@ -560,13 +560,6 @@ pgd_annot_view_set_annot (PgdAnnotsDemo *demo,
         default:
           break;
     }
-
-    button = gtk_button_new_from_stock (GTK_STOCK_REMOVE);
-    g_signal_connect (G_OBJECT (button), "clicked",
-                      G_CALLBACK (pgd_annots_remove_annot),
-                      (gpointer) demo);
-    gtk_grid_attach (GTK_GRID (table), button, 0, row, 2, 1);
-    gtk_widget_show (button);
 
     gtk_container_add (GTK_CONTAINER (alignment), table);
     gtk_widget_show (table);
@@ -676,8 +669,11 @@ pgd_annots_selection_changed (GtkTreeSelection *treeselection,
                            -1);
         pgd_annot_view_set_annot (demo, annot);
         g_object_unref (annot);
+
+        gtk_widget_set_sensitive (demo->remove_button, TRUE);
     } else {
         pgd_annot_view_set_annot (demo, NULL);
+        gtk_widget_set_sensitive (demo->remove_button, FALSE);
     }
 }
 
@@ -929,8 +925,8 @@ pgd_annots_create_widget (PopplerDocument *document)
     PgdAnnotsDemo    *demo;
     GtkWidget        *label;
     GtkWidget        *vbox, *vbox2;
-    GtkWidget        *hbox, *page_selector;
     GtkWidget        *button;
+    GtkWidget        *hbox, *page_selector;
     GtkWidget        *hpaned;
     GtkWidget        *swindow, *treeview;
     GtkTreeSelection *selection;
@@ -966,6 +962,14 @@ pgd_annots_create_widget (PopplerDocument *document)
     gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, TRUE, 0);
     gtk_widget_show (label);
     g_free (str);
+
+    demo->remove_button = gtk_button_new_from_stock (GTK_STOCK_REMOVE);
+    gtk_widget_set_sensitive (demo->remove_button, FALSE);
+    g_signal_connect (G_OBJECT (demo->remove_button), "clicked",
+                      G_CALLBACK (pgd_annots_remove_annot),
+                      (gpointer) demo);
+    gtk_box_pack_end (GTK_BOX (hbox), demo->remove_button, FALSE, FALSE, 6);
+    gtk_widget_show (demo->remove_button);
 
     button = gtk_button_new_with_label ("Add Annotation");
     g_signal_connect (G_OBJECT (button), "clicked",
