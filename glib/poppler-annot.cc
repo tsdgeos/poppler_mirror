@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2007 Inigo Martinez <inigomartinez@gmail.com>
  * Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
+ * Copyright (C) 2013 German Poo-Caamano <gpoo@gnome.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -623,6 +624,53 @@ poppler_annot_get_page_index (PopplerAnnot *poppler_annot)
 
   page_num = poppler_annot->annot->getPageNum();
   return page_num <= 0 ? -1 : page_num - 1;
+}
+
+/**
+ * poppler_annot_get_rectangle:
+ * @poppler_annot: a #PopplerAnnot
+ * @poppler_rect: (out): a #PopplerRectangle to store the annotation's coordinates
+ *
+ * Retrieves the rectangle representing the page coordinates where the
+ * annotation @poppler_annot is placed.
+ *
+ * Since: 0.26
+ */
+void
+poppler_annot_get_rectangle (PopplerAnnot     *poppler_annot,
+                             PopplerRectangle *poppler_rect)
+{
+  PDFRectangle *annot_rect;
+
+  g_return_if_fail (POPPLER_IS_ANNOT (poppler_annot));
+  g_return_if_fail (poppler_rect != NULL);
+
+  annot_rect = poppler_annot->annot->getRect ();
+  poppler_rect->x1 = annot_rect->x1;
+  poppler_rect->x2 = annot_rect->x2;
+  poppler_rect->y1 = annot_rect->y1;
+  poppler_rect->y2 = annot_rect->y2;
+}
+
+/**
+ * poppler_annot_set_rectangle:
+ * @poppler_annot: a #PopplerAnnot
+ * @poppler_rect: a #PopplerRectangle with the new annotation's coordinates
+ *
+ * Move the annotation to the rectangle representing the page coordinates
+ * where the annotation @poppler_annot should be placed.
+ *
+ * Since: 0.26
+ */
+void
+poppler_annot_set_rectangle (PopplerAnnot     *poppler_annot,
+                             PopplerRectangle *poppler_rect)
+{
+  g_return_if_fail (POPPLER_IS_ANNOT (poppler_annot));
+  g_return_if_fail (poppler_rect != NULL);
+
+  poppler_annot->annot->setRect (poppler_rect->x1, poppler_rect->y1,
+                                 poppler_rect->x2, poppler_rect->y2);
 }
 
 /* PopplerAnnotMarkup */

@@ -390,6 +390,8 @@ poppler_annot_set_color
 poppler_annot_get_contents
 poppler_annot_set_contents
 poppler_annot_get_modified
+poppler_annot_get_rectangle
+poppler_annot_set_rectangle
 poppler_annot_markup_get_label
 poppler_annot_markup_set_label
 poppler_annot_markup_get_subject

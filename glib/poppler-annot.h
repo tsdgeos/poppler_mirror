@@ -168,6 +168,10 @@ PopplerColor                 *poppler_annot_get_color                          (
 void                          poppler_annot_set_color                          (PopplerAnnot *poppler_annot,
 										PopplerColor *poppler_color);
 gint                          poppler_annot_get_page_index                     (PopplerAnnot *poppler_annot);
+void                          poppler_annot_get_rectangle                      (PopplerAnnot     *poppler_annot,
+										PopplerRectangle *poppler_rect);
+void                          poppler_annot_set_rectangle                      (PopplerAnnot     *poppler_annot,
+										PopplerRectangle *poppler_rect);
 
 /* PopplerAnnotMarkup */
 GType                         poppler_annot_markup_get_type                    (void) G_GNUC_CONST;
