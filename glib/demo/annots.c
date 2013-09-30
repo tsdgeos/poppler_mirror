@@ -821,8 +821,8 @@ pgd_annots_add_annot (GtkWidget     *button,
 
     rect.x1 = gtk_spin_button_get_value (GTK_SPIN_BUTTON (rect_x1));
     rect.x2 = gtk_spin_button_get_value (GTK_SPIN_BUTTON (rect_x2));
-    rect.y1 = height - gtk_spin_button_get_value (GTK_SPIN_BUTTON (rect_y2));
-    rect.y2 = height - gtk_spin_button_get_value (GTK_SPIN_BUTTON (rect_y1));
+    rect.y1 = height - gtk_spin_button_get_value (GTK_SPIN_BUTTON (rect_y1));
+    rect.y2 = height - gtk_spin_button_get_value (GTK_SPIN_BUTTON (rect_y2));
     annot = poppler_annot_text_new (demo->doc, &rect);
     poppler_page_add_annot (page, annot);
 
