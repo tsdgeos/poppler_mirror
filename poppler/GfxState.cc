@@ -156,6 +156,8 @@ static const char *gfxColorSpaceModeNames[] = {
 
 #ifdef USE_CMS
 
+static const int CMSCACHE_LIMIT = 2048;
+
 #ifdef USE_LCMS1
 #include <lcms.h>
 #define cmsColorSpaceSignature icColorSpaceSignature
@@ -1869,8 +1871,28 @@ void GfxICCBasedColorSpace::getGray(GfxColor *color, GfxGray *gray) {
     for (int i = 0;i < nComps;i++) {
 	in[i] = colToByte(color->c[i]);
     }
+    if (nComps <= 4) {
+      unsigned int key = 0;
+      for (int j = 0; j < nComps; j++) {
+        key = (key << 8) + in[j];
+      }
+      std::map<unsigned int, unsigned int>::iterator it = cmsCache.find(key);
+      if (it != cmsCache.end()) {
+        unsigned int value = it->second;
+        *gray = byteToCol(value & 0xff);
+        return;
+      }
+    }    
     transform->doTransform(in,out,1);
     *gray = byteToCol(out[0]);
+    if (nComps <= 4 && cmsCache.size() <= CMSCACHE_LIMIT) {
+      unsigned int key = 0;
+      for (int j = 0; j < nComps; j++) {
+        key = (key << 8) + in[j];
+      }
+      unsigned int value = out[0];
+      cmsCache.insert(std::pair<unsigned int, unsigned int>(key, value));
+    }
   } else {
     GfxRGB rgb;
     getRGB(color,&rgb);
@@ -1893,10 +1915,76 @@ void GfxICCBasedColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
     for (int i = 0;i < nComps;i++) {
 	in[i] = colToByte(color->c[i]);
     }
+    if (nComps <= 4) {
+      unsigned int key = 0;
+      for (int j = 0; j < nComps; j++) {
+        key = (key << 8) + in[j];
+      }
+      std::map<unsigned int, unsigned int>::iterator it = cmsCache.find(key);
+      if (it != cmsCache.end()) {
+        unsigned int value = it->second;
+        rgb->r = byteToCol(value >> 16);
+        rgb->g = byteToCol((value >> 8) & 0xff);
+        rgb->b = byteToCol(value & 0xff);
+        return;
+      }
+    }    
     transform->doTransform(in,out,1);
     rgb->r = byteToCol(out[0]);
     rgb->g = byteToCol(out[1]);
     rgb->b = byteToCol(out[2]);
+    if (nComps <= 4 && cmsCache.size() <= CMSCACHE_LIMIT) {
+      unsigned int key = 0;
+      for (int j = 0; j < nComps; j++) {
+        key = (key << 8) + in[j];
+      }
+      unsigned int value = (out[0] << 16) + (out[1] << 8) + out[2];
+      cmsCache.insert(std::pair<unsigned int, unsigned int>(key, value));
+    }
+  } else if (transform != 0
+       && (displayProfile == NULL || displayPixelType == PT_CMYK)) {
+    Guchar in[gfxColorMaxComps];
+    Guchar out[gfxColorMaxComps];
+    double c, m, y, k, c1, m1, y1, k1, r, g, b;    
+
+    for (int i = 0;i < nComps;i++) {
+	in[i] = colToByte(color->c[i]);
+    }
+    if (nComps <= 4) {
+      unsigned int key = 0;
+      for (int j = 0; j < nComps; j++) {
+        key = (key << 8) + in[j];
+      }
+      std::map<unsigned int, unsigned int>::iterator it = cmsCache.find(key);
+      if (it != cmsCache.end()) {
+        unsigned int value = it->second;
+        rgb->r = byteToCol(value >> 16);
+        rgb->g = byteToCol((value >> 8) & 0xff);
+        rgb->b = byteToCol(value & 0xff);
+        return;
+      }
+    }    
+    transform->doTransform(in,out,1);
+    c = byteToDbl(out[0]);
+    m = byteToDbl(out[1]);
+    y = byteToDbl(out[2]);
+    k = byteToDbl(out[3]);
+    c1 = 1 - c;
+    m1 = 1 - m;
+    y1 = 1 - y;
+    k1 = 1 - k;
+    cmykToRGBMatrixMultiplication(c, m, y, k, c1, m1, y1, k1, r, g, b);
+    rgb->r = clip01(dblToCol(r));
+    rgb->g = clip01(dblToCol(g));
+    rgb->b = clip01(dblToCol(b));
+    if (nComps <= 4 && cmsCache.size() <= CMSCACHE_LIMIT) {
+      unsigned int key = 0;
+      for (int j = 0; j < nComps; j++) {
+        key = (key << 8) + in[j];
+      }
+      unsigned int value = (dblToByte(r) << 16) + (dblToByte(g) << 8) + dblToByte(b);
+      cmsCache.insert(std::pair<unsigned int, unsigned int>(key, value));
+    }
   } else {
     alt->getRGB(color, rgb);
   }
@@ -2054,11 +2142,34 @@ void GfxICCBasedColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
     for (int i = 0;i < nComps;i++) {
 	in[i] = colToByte(color->c[i]);
     }
+    if (nComps <= 4) {
+      unsigned int key = 0;
+      for (int j = 0; j < nComps; j++) {
+        key = (key << 8) + in[j];
+      }
+      std::map<unsigned int, unsigned int>::iterator it = cmsCache.find(key);
+      if (it != cmsCache.end()) {
+        unsigned int value = it->second;
+        cmyk->c = byteToCol(value >> 24);
+        cmyk->m = byteToCol((value >> 16) & 0xff);
+        cmyk->y = byteToCol((value >> 8) & 0xff);
+        cmyk->k = byteToCol(value & 0xff);
+        return;
+      }
+    }    
     transform->doTransform(in,out,1);
     cmyk->c = byteToCol(out[0]);
     cmyk->m = byteToCol(out[1]);
     cmyk->y = byteToCol(out[2]);
     cmyk->k = byteToCol(out[3]);
+    if (nComps <= 4 && cmsCache.size() <= CMSCACHE_LIMIT) {
+      unsigned int key = 0;
+      for (int j = 0; j < nComps; j++) {
+        key = (key << 8) + in[j];
+      }
+      unsigned int value = (out[0] << 24) + (out[1] << 16) + (out[2] << 8) + out[3];
+      cmsCache.insert(std::pair<unsigned int, unsigned int>(key, value));
+    }
   } else {
     GfxRGB rgb;
     GfxColorComp c, m, y, k;

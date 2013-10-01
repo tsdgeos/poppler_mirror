@@ -42,6 +42,7 @@
 #include "Function.h"
 
 #include <assert.h>
+#include <map>
 
 class Array;
 class Gfx;
@@ -546,6 +547,7 @@ private:
 #ifdef USE_CMS
   GfxColorTransform *transform;
   GfxColorTransform *lineTransform; // color transform for line
+  std::map<unsigned int, unsigned int> cmsCache;
 #endif
 };
 //------------------------------------------------------------------------
