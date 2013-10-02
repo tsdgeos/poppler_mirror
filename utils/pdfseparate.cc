@@ -7,6 +7,7 @@
 // Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
+// Copyright (C) 2013 Daniel Kahn Gillmor <dkg@fifthhorseman.net>
 //
 //========================================================================
 #include "config.h"
@@ -62,9 +63,24 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
     lastPage = doc->getNumPages();
   if (firstPage == 0)
     firstPage = 1;
-  if (firstPage != lastPage && strstr(destFileName, "%d") == NULL) {
-    error(errSyntaxError, -1, "'{0:s}' must contain '%%d' if more than one page should be extracted", destFileName);
-    return false;
+  if (firstPage != lastPage) {
+    bool foundmatch = false;
+    if (strstr(destFileName, "%d") != NULL) {
+      foundmatch = true;
+    } else {
+      char pattern[5];
+      for (int i = 2; i < 10; i++) {
+        sprintf(pattern, "%%0%dd", i);
+        if (strstr(destFileName, pattern) != NULL) {
+          foundmatch = true;
+          break;
+        }
+      }
+    }
+    if (!foundmatch) {
+      error(errSyntaxError, -1, "'{0:s}' must contain '%%d' if more than one page should be extracted", destFileName);
+      return false;
+    }
   }
   for (int pageNo = firstPage; pageNo <= lastPage; pageNo++) {
     snprintf (pathName, sizeof (pathName) - 1, destFileName, pageNo);
