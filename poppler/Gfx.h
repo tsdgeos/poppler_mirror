@@ -117,8 +117,8 @@ public:
   GBool lookupXObjectNF(char *name, Object *obj);
   GBool lookupMarkedContentNF(char *name, Object *obj);
   void lookupColorSpace(const char *name, Object *obj);
-  GfxPattern *lookupPattern(char *name, OutputDev *out);
-  GfxShading *lookupShading(char *name, OutputDev *out);
+  GfxPattern *lookupPattern(char *name, OutputDev *out, GfxState *state);
+  GfxShading *lookupShading(char *name, OutputDev *out, GfxState *state);
   GBool lookupGState(char *name, Object *obj);
   GBool lookupGStateNF(char *name, Object *obj);
 
@@ -156,7 +156,9 @@ public:
       PDFRectangle *box, PDFRectangle *cropBox,
       GBool (*abortCheckCbkA)(void *data) = NULL,
       void *abortCheckCbkDataA = NULL, XRef *xrefA = NULL);
-
+#ifdef USE_CMS
+  void initDisplayProfile();
+#endif
   ~Gfx();
 
   XRef *getXRef() { return xref; }

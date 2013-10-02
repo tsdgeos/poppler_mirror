@@ -201,9 +201,11 @@ void GfxColorTransform::doTransform(void *in, void *out, unsigned int size) {
 }
 
 // transformA should be a cmsHTRANSFORM
-GfxColorTransform::GfxColorTransform(void *transformA) {
+GfxColorTransform::GfxColorTransform(void *transformA, int cmsIntentA, unsigned int transformPixelTypeA) {
   transform = transformA;
   refCount = 1;
+  cmsIntent = cmsIntentA;
+  transformPixelType = transformPixelTypeA;
 }
 
 GfxColorTransform::~GfxColorTransform() {
@@ -231,6 +233,25 @@ static cmsHPROFILE loadColorProfile(const char *fileName);
 
 void GfxColorSpace::setDisplayProfile(void *displayProfileA) {
   displayProfile = displayProfileA;
+  if (displayProfile != NULL) {
+    cmsHTRANSFORM transform;
+    unsigned int nChannels;
+
+    displayPixelType = getCMSColorSpaceType(cmsGetColorSpace(displayProfile));
+    nChannels = getCMSNChannels(cmsGetColorSpace(displayProfile));
+    // create transform from XYZ
+    cmsHPROFILE XYZProfile = cmsCreateXYZProfile();
+    if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
+	   displayProfile,
+	   COLORSPACE_SH(displayPixelType) |
+	     CHANNELS_SH(nChannels) | BYTES_SH(1),
+	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == 0) {
+      error(errSyntaxWarning, -1, "Can't create Lab transform");
+    } else {
+      XYZ2DisplayTransform = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, displayPixelType);
+    }
+    cmsCloseProfile(XYZProfile);
+  }
 }
 
 void GfxColorSpace::setDisplayProfileName(GooString *name) {
@@ -259,7 +280,7 @@ GfxColorSpace::GfxColorSpace() {
 GfxColorSpace::~GfxColorSpace() {
 }
 
-GfxColorSpace *GfxColorSpace::parse(Object *csObj, OutputDev *out, int recursion) {
+GfxColorSpace *GfxColorSpace::parse(Object *csObj, OutputDev *out, GfxState *state, int recursion) {
   GfxColorSpace *cs;
   Object obj1;
 
@@ -290,21 +311,21 @@ GfxColorSpace *GfxColorSpace::parse(Object *csObj, OutputDev *out, int recursion
     } else if (obj1.isName("DeviceCMYK") || obj1.isName("CMYK")) {
       cs = new GfxDeviceCMYKColorSpace();
     } else if (obj1.isName("CalGray")) {
-      cs = GfxCalGrayColorSpace::parse(csObj->getArray());
+      cs = GfxCalGrayColorSpace::parse(csObj->getArray(), state);
     } else if (obj1.isName("CalRGB")) {
-      cs = GfxCalRGBColorSpace::parse(csObj->getArray());
+      cs = GfxCalRGBColorSpace::parse(csObj->getArray(), state);
     } else if (obj1.isName("Lab")) {
-      cs = GfxLabColorSpace::parse(csObj->getArray());
+      cs = GfxLabColorSpace::parse(csObj->getArray(), state);
     } else if (obj1.isName("ICCBased")) {
-      cs = GfxICCBasedColorSpace::parse(csObj->getArray(), out, recursion);
+      cs = GfxICCBasedColorSpace::parse(csObj->getArray(), out, state, recursion);
     } else if (obj1.isName("Indexed") || obj1.isName("I")) {
-      cs = GfxIndexedColorSpace::parse(csObj->getArray(), out, recursion);
+      cs = GfxIndexedColorSpace::parse(csObj->getArray(), out, state, recursion);
     } else if (obj1.isName("Separation")) {
-      cs = GfxSeparationColorSpace::parse(csObj->getArray(), out, recursion);
+      cs = GfxSeparationColorSpace::parse(csObj->getArray(), out, state, recursion);
     } else if (obj1.isName("DeviceN")) {
-      cs = GfxDeviceNColorSpace::parse(csObj->getArray(), out, recursion);
+      cs = GfxDeviceNColorSpace::parse(csObj->getArray(), out, state, recursion);
     } else if (obj1.isName("Pattern")) {
-      cs = GfxPatternColorSpace::parse(csObj->getArray(), out, recursion);
+      cs = GfxPatternColorSpace::parse(csObj->getArray(), out, state, recursion);
     } else {
       error(errSyntaxWarning, -1, "Bad color space");
     }
@@ -423,13 +444,13 @@ int GfxColorSpace::setupColorProfiles()
     // create transform from XYZ
     cmsHPROFILE XYZProfile = cmsCreateXYZProfile();
     if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
-	   displayProfile, 
+	   displayProfile,
 	   COLORSPACE_SH(displayPixelType) |
 	     CHANNELS_SH(nChannels) | BYTES_SH(1),
 	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == 0) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransform = new GfxColorTransform(transform);
+      XYZ2DisplayTransform = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, displayPixelType);
     }
     cmsCloseProfile(XYZProfile);
   }
@@ -651,6 +672,11 @@ GfxCalGrayColorSpace::GfxCalGrayColorSpace() {
 }
 
 GfxCalGrayColorSpace::~GfxCalGrayColorSpace() {
+#ifdef USE_CMS
+  if (transform != NULL) {
+    if (transform->unref() == 0) delete transform;
+  }
+#endif
 }
 
 GfxColorSpace *GfxCalGrayColorSpace::copy() {
@@ -664,6 +690,10 @@ GfxColorSpace *GfxCalGrayColorSpace::copy() {
   cs->blackY = blackY;
   cs->blackZ = blackZ;
   cs->gamma = gamma;
+#ifdef USE_CMS
+  cs->transform = transform;
+  if (transform != NULL) transform->ref();
+#endif
   return cs;
 }
 
@@ -675,7 +705,7 @@ static const double xyzrgb[3][3] = {
   {  0.055643, -0.204026,  1.057229 }
 };
 
-GfxColorSpace *GfxCalGrayColorSpace::parse(Array *arr) {
+GfxColorSpace *GfxCalGrayColorSpace::parse(Array *arr, GfxState *state) {
   GfxCalGrayColorSpace *cs;
   Object obj1, obj2, obj3;
 
@@ -733,7 +763,10 @@ GfxColorSpace *GfxCalGrayColorSpace::parse(Array *arr) {
   cs->kb = 1 / (xyzrgb[2][0] * cs->whiteX +
 		xyzrgb[2][1] * cs->whiteY +
 		xyzrgb[2][2] * cs->whiteZ);
-
+#ifdef USE_CMS
+  cs->transform = (state != NULL) ? state->getXYZ2DisplayTransform() : XYZ2DisplayTransform;
+  if (cs->transform != NULL) cs->transform->ref();
+#endif
   return cs;
 }
 
@@ -752,7 +785,7 @@ void GfxCalGrayColorSpace::getGray(GfxColor *color, GfxGray *gray) {
   GfxRGB rgb;
 
 #ifdef USE_CMS
-  if (XYZ2DisplayTransform != NULL && displayPixelType == PT_GRAY) {
+  if (transform != NULL && transform->getTransformPixelType() == PT_GRAY) {
     Guchar out[gfxColorMaxComps];
     double in[gfxColorMaxComps];
     double X, Y, Z;
@@ -761,7 +794,7 @@ void GfxCalGrayColorSpace::getGray(GfxColor *color, GfxGray *gray) {
     in[0] = clip01(X);
     in[1] = clip01(Y);
     in[2] = clip01(Z);
-    XYZ2DisplayTransform->doTransform(in,out,1);
+    transform->doTransform(in,out,1);
     *gray = byteToCol(out[0]);
     return;
   }
@@ -778,14 +811,14 @@ void GfxCalGrayColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
 
   getXYZ(color,&X,&Y,&Z);
 #ifdef USE_CMS
-  if (XYZ2DisplayTransform != NULL && displayPixelType == PT_RGB) {
+  if (transform != NULL && transform->getTransformPixelType() == PT_RGB) {
     Guchar out[gfxColorMaxComps];
     double in[gfxColorMaxComps];
     
     in[0] = clip01(X);
     in[1] = clip01(Y);
     in[2] = clip01(Z);
-    XYZ2DisplayTransform->doTransform(in,out,1);
+    transform->doTransform(in,out,1);
     rgb->r = byteToCol(out[0]);
     rgb->g = byteToCol(out[1]);
     rgb->b = byteToCol(out[2]);
@@ -809,7 +842,7 @@ void GfxCalGrayColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
   GfxColorComp c, m, y, k;
 
 #ifdef USE_CMS
-  if (XYZ2DisplayTransform != NULL && displayPixelType == PT_CMYK) {
+  if (transform != NULL && transform->getTransformPixelType() == PT_CMYK) {
     double in[gfxColorMaxComps];
     Guchar out[gfxColorMaxComps];
     double X, Y, Z;
@@ -819,7 +852,7 @@ void GfxCalGrayColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
     in[1] = clip01(Y);
     in[2] = clip01(Z);
     
-    XYZ2DisplayTransform->doTransform(in,out,1);
+    transform->doTransform(in,out,1);
     cmyk->c = byteToCol(out[0]);
     cmyk->m = byteToCol(out[1]);
     cmyk->y = byteToCol(out[2]);
@@ -1017,6 +1050,11 @@ GfxCalRGBColorSpace::GfxCalRGBColorSpace() {
 }
 
 GfxCalRGBColorSpace::~GfxCalRGBColorSpace() {
+#ifdef USE_CMS
+  if (transform != NULL) {
+    if (transform->unref() == 0) delete transform;
+  }
+#endif
 }
 
 GfxColorSpace *GfxCalRGBColorSpace::copy() {
@@ -1036,10 +1074,14 @@ GfxColorSpace *GfxCalRGBColorSpace::copy() {
   for (i = 0; i < 9; ++i) {
     cs->mat[i] = mat[i];
   }
+#ifdef USE_CMS
+  cs->transform = transform;
+  if (transform != NULL) transform->ref();
+#endif
   return cs;
 }
 
-GfxColorSpace *GfxCalRGBColorSpace::parse(Array *arr) {
+GfxColorSpace *GfxCalRGBColorSpace::parse(Array *arr, GfxState *state) {
   GfxCalRGBColorSpace *cs;
   Object obj1, obj2, obj3;
   int i;
@@ -1121,6 +1163,10 @@ GfxColorSpace *GfxCalRGBColorSpace::parse(Array *arr) {
 		xyzrgb[2][1] * cs->whiteY +
 		xyzrgb[2][2] * cs->whiteZ);
 
+#ifdef USE_CMS
+  cs->transform = (state != NULL) ? state->getXYZ2DisplayTransform() : XYZ2DisplayTransform;
+  if (cs->transform != NULL) cs->transform->ref();
+#endif
   return cs;
 }
 
@@ -1141,7 +1187,7 @@ void GfxCalRGBColorSpace::getGray(GfxColor *color, GfxGray *gray) {
   GfxRGB rgb;
 
 #ifdef USE_CMS
-  if (XYZ2DisplayTransform != NULL && displayPixelType == PT_GRAY) {
+  if (transform != NULL && transform->getTransformPixelType() == PT_GRAY) {
     Guchar out[gfxColorMaxComps];
     double in[gfxColorMaxComps];
     double X, Y, Z;
@@ -1150,7 +1196,7 @@ void GfxCalRGBColorSpace::getGray(GfxColor *color, GfxGray *gray) {
     in[0] = clip01(X);
     in[1] = clip01(Y);
     in[2] = clip01(Z);
-    XYZ2DisplayTransform->doTransform(in,out,1);
+    transform->doTransform(in,out,1);
     *gray = byteToCol(out[0]);
     return;
   }
@@ -1167,14 +1213,14 @@ void GfxCalRGBColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
 
   getXYZ(color,&X,&Y,&Z);
 #ifdef USE_CMS
-  if (XYZ2DisplayTransform != NULL && displayPixelType == PT_RGB) {
+  if (transform != NULL && transform->getTransformPixelType() == PT_RGB) {
     Guchar out[gfxColorMaxComps];
     double in[gfxColorMaxComps];
     
     in[0] = clip01(X/whiteX);
     in[1] = clip01(Y/whiteY);
     in[2] = clip01(Z/whiteZ);
-    XYZ2DisplayTransform->doTransform(in,out,1);
+    transform->doTransform(in,out,1);
     rgb->r = byteToCol(out[0]);
     rgb->g = byteToCol(out[1]);
     rgb->b = byteToCol(out[2]);
@@ -1195,7 +1241,7 @@ void GfxCalRGBColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
   GfxColorComp c, m, y, k;
 
 #ifdef USE_CMS
-  if (XYZ2DisplayTransform != NULL && displayPixelType == PT_CMYK) {
+  if (transform != NULL && transform->getTransformPixelType() == PT_CMYK) {
     double in[gfxColorMaxComps];
     Guchar out[gfxColorMaxComps];
     double X, Y, Z;
@@ -1204,7 +1250,7 @@ void GfxCalRGBColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
     in[0] = clip01(X);
     in[1] = clip01(Y);
     in[2] = clip01(Z);
-    XYZ2DisplayTransform->doTransform(in,out,1);
+    transform->doTransform(in,out,1);
     cmyk->c = byteToCol(out[0]);
     cmyk->m = byteToCol(out[1]);
     cmyk->y = byteToCol(out[2]);
@@ -1391,6 +1437,11 @@ GfxLabColorSpace::GfxLabColorSpace() {
 }
 
 GfxLabColorSpace::~GfxLabColorSpace() {
+#ifdef USE_CMS
+  if (transform != NULL) {
+    if (transform->unref() == 0) delete transform;
+  }
+#endif
 }
 
 GfxColorSpace *GfxLabColorSpace::copy() {
@@ -1410,10 +1461,14 @@ GfxColorSpace *GfxLabColorSpace::copy() {
   cs->kr = kr;
   cs->kg = kg;
   cs->kb = kb;
+#ifdef USE_CMS
+  cs->transform = transform;
+  if (transform != NULL) transform->ref();
+#endif
   return cs;
 }
 
-GfxColorSpace *GfxLabColorSpace::parse(Array *arr) {
+GfxColorSpace *GfxLabColorSpace::parse(Array *arr, GfxState *state) {
   GfxLabColorSpace *cs;
   Object obj1, obj2, obj3;
 
@@ -1478,6 +1533,10 @@ GfxColorSpace *GfxLabColorSpace::parse(Array *arr) {
 		xyzrgb[2][1] * cs->whiteY +
 		xyzrgb[2][2] * cs->whiteZ);
 
+#ifdef USE_CMS
+  cs->transform = (state != NULL) ? state->getXYZ2DisplayTransform() : XYZ2DisplayTransform;
+  if (cs->transform != NULL) cs->transform->ref();
+#endif
   return cs;
 }
 
@@ -1485,12 +1544,12 @@ void GfxLabColorSpace::getGray(GfxColor *color, GfxGray *gray) {
   GfxRGB rgb;
 
 #ifdef USE_CMS
-  if (XYZ2DisplayTransform != NULL && displayPixelType == PT_GRAY) {
+  if (transform != NULL && transform->getTransformPixelType() == PT_GRAY) {
     Guchar out[gfxColorMaxComps];
     double in[gfxColorMaxComps];
     
     getXYZ(color, &in[0], &in[1], &in[2]);
-    XYZ2DisplayTransform->doTransform(in,out,1);
+    transform->doTransform(in,out,1);
     *gray = byteToCol(out[0]);
     return;
   }
@@ -1537,17 +1596,39 @@ void GfxLabColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
 
   getXYZ(color, &X, &Y, &Z);
 #ifdef USE_CMS
-  if (XYZ2DisplayTransform != NULL && displayPixelType == PT_RGB) {
+  if (transform != NULL && transform->getTransformPixelType() == PT_RGB) {
     Guchar out[gfxColorMaxComps];
     double in[gfxColorMaxComps];
     
     in[0] = clip01(X);
     in[1] = clip01(Y);
     in[2] = clip01(Z);
-    XYZ2DisplayTransform->doTransform(in,out,1);
+    transform->doTransform(in,out,1);
     rgb->r = byteToCol(out[0]);
     rgb->g = byteToCol(out[1]);
     rgb->b = byteToCol(out[2]);
+    return;
+  } else if (transform != NULL && transform->getTransformPixelType() == PT_CMYK) {
+    Guchar out[gfxColorMaxComps];
+    double in[gfxColorMaxComps];
+    double c, m, y, k, c1, m1, y1, k1, r, g, b;
+
+    in[0] = clip01(X);
+    in[1] = clip01(Y);
+    in[2] = clip01(Z);
+    transform->doTransform(in,out,1);
+    c = byteToDbl(out[0]);
+    m = byteToDbl(out[1]);
+    y = byteToDbl(out[2]);
+    k = byteToDbl(out[3]);
+    c1 = 1 - c;
+    m1 = 1 - m;
+    y1 = 1 - y;
+    k1 = 1 - k;
+    cmykToRGBMatrixMultiplication(c, m, y, k, c1, m1, y1, k1, r, g, b);
+    rgb->r = clip01(dblToCol(r));
+    rgb->g = clip01(dblToCol(g));
+    rgb->b = clip01(dblToCol(b));
     return;
   }
 #endif
@@ -1568,12 +1649,12 @@ void GfxLabColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
   GfxColorComp c, m, y, k;
 
 #ifdef USE_CMS
-  if (XYZ2DisplayTransform != NULL && displayPixelType == PT_CMYK) {
+  if (transform != NULL && transform->getTransformPixelType() == PT_CMYK) {
     double in[gfxColorMaxComps];
     Guchar out[gfxColorMaxComps];
     
     getXYZ(color, &in[0], &in[1], &in[2]);
-    XYZ2DisplayTransform->doTransform(in,out,1);
+    transform->doTransform(in,out,1);
     cmyk->c = byteToCol(out[0]);
     cmyk->m = byteToCol(out[1]);
     cmyk->y = byteToCol(out[2]);
@@ -1716,7 +1797,7 @@ GfxColorSpace *GfxICCBasedColorSpace::copy() {
   return cs;
 }
 
-GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, int recursion) {
+GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState *state, int recursion) {
   GfxICCBasedColorSpace *cs;
   Ref iccProfileStreamA;
   int nCompsA;
@@ -1745,7 +1826,24 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, int recu
     if (item != NULL)
     {
       cs = static_cast<GfxICCBasedColorSpace*>(item->cs->copy());
-      return cs;
+      int transformIntent = cs->getIntent();
+      int cmsIntent = INTENT_RELATIVE_COLORIMETRIC;
+      if (state != NULL) {
+        const char *intent = state->getRenderingIntent();
+        if (intent != NULL) {
+          if (strcmp(intent, "AbsoluteColorimetric") == 0) {
+            cmsIntent = INTENT_ABSOLUTE_COLORIMETRIC;
+          } else if (strcmp(intent, "Saturation") == 0) {
+            cmsIntent = INTENT_SATURATION;
+          } else if (strcmp(intent, "Perceptual") == 0) {
+            cmsIntent = INTENT_PERCEPTUAL;
+          }
+        }
+      }
+      if (transformIntent == cmsIntent) {
+        return cs;
+      }
+      delete cs;
     }
   }
 #endif
@@ -1771,7 +1869,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, int recu
     nCompsA = 4;
   }
   if (dict->lookup("Alternate", &obj2)->isNull() ||
-      !(altA = GfxColorSpace::parse(&obj2, out, recursion + 1))) {
+      !(altA = GfxColorSpace::parse(&obj2, out, state, recursion + 1))) {
     switch (nCompsA) {
     case 1:
       altA = new GfxDeviceGrayColorSpace();
@@ -1821,32 +1919,46 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, int recu
   if (hp == 0) {
     error(errSyntaxWarning, -1, "read ICCBased color space profile error");
   } else {
-    cmsHPROFILE dhp = displayProfile;
+    cmsHPROFILE dhp = (state != NULL && state->getDisplayProfile() != NULL) ? state->getDisplayProfile() : displayProfile;
     if (dhp == NULL) dhp = RGBProfile;
     unsigned int cst = getCMSColorSpaceType(cmsGetColorSpace(hp));
     unsigned int dNChannels = getCMSNChannels(cmsGetColorSpace(dhp));
     unsigned int dcst = getCMSColorSpaceType(cmsGetColorSpace(dhp));
     cmsHTRANSFORM transform;
+
+    int cmsIntent = INTENT_RELATIVE_COLORIMETRIC;
+    if (state != NULL) {
+      const char *intent = state->getRenderingIntent();
+      if (intent != NULL) {
+        if (strcmp(intent, "AbsoluteColorimetric") == 0) {
+          cmsIntent = INTENT_ABSOLUTE_COLORIMETRIC;
+        } else if (strcmp(intent, "Saturation") == 0) {
+          cmsIntent = INTENT_SATURATION;
+        } else if (strcmp(intent, "Perceptual") == 0) {
+          cmsIntent = INTENT_PERCEPTUAL;
+        }
+      }
+    }
     if ((transform = cmsCreateTransform(hp,
 	   COLORSPACE_SH(cst) |CHANNELS_SH(nCompsA) | BYTES_SH(1),
 	   dhp,
 	   COLORSPACE_SH(dcst) |
 	     CHANNELS_SH(dNChannels) | BYTES_SH(1),
-	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == 0) {
+	   cmsIntent, LCMS_FLAGS)) == 0) {
       error(errSyntaxWarning, -1, "Can't create transform");
       cs->transform = NULL;
     } else {
-      cs->transform = new GfxColorTransform(transform);
+      cs->transform = new GfxColorTransform(transform, cmsIntent, dcst);
     }
-    if (dcst == PT_RGB) {
+    if (dcst == PT_RGB || dcst == PT_CMYK) {
        // create line transform only when the display is RGB type color space 
       if ((transform = cmsCreateTransform(hp,
 	    CHANNELS_SH(nCompsA) | BYTES_SH(1),dhp,
-	    TYPE_RGB_8,INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == 0) {
+	    (dcst == PT_RGB) ? TYPE_RGB_8 : TYPE_CMYK_8, cmsIntent, LCMS_FLAGS)) == 0) {
 	error(errSyntaxWarning, -1, "Can't create transform");
 	cs->lineTransform = NULL;
       } else {
-	cs->lineTransform = new GfxColorTransform(transform);
+	cs->lineTransform = new GfxColorTransform(transform, cmsIntent, dcst);
       }
     }
     cmsCloseProfile(hp);
@@ -1864,7 +1976,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, int recu
 
 void GfxICCBasedColorSpace::getGray(GfxColor *color, GfxGray *gray) {
 #ifdef USE_CMS
-  if (transform != 0 && displayPixelType == PT_GRAY) {
+  if (transform != 0 && transform->getTransformPixelType() == PT_GRAY) {
     Guchar in[gfxColorMaxComps];
     Guchar out[gfxColorMaxComps];
     
@@ -1907,8 +2019,7 @@ void GfxICCBasedColorSpace::getGray(GfxColor *color, GfxGray *gray) {
 
 void GfxICCBasedColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
 #ifdef USE_CMS
-  if (transform != 0
-       && (displayProfile == NULL || displayPixelType == PT_RGB)) {
+  if (transform != 0 && transform->getTransformPixelType() == PT_RGB) {
     Guchar in[gfxColorMaxComps];
     Guchar out[gfxColorMaxComps];
     
@@ -1941,11 +2052,10 @@ void GfxICCBasedColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
       unsigned int value = (out[0] << 16) + (out[1] << 8) + out[2];
       cmsCache.insert(std::pair<unsigned int, unsigned int>(key, value));
     }
-  } else if (transform != 0
-       && (displayProfile == NULL || displayPixelType == PT_CMYK)) {
+  } else if (transform != NULL && transform->getTransformPixelType() == PT_CMYK) {
     Guchar in[gfxColorMaxComps];
     Guchar out[gfxColorMaxComps];
-    double c, m, y, k, c1, m1, y1, k1, r, g, b;    
+    double c, m, y, k, c1, m1, y1, k1, r, g, b;
 
     for (int i = 0;i < nComps;i++) {
 	in[i] = colToByte(color->c[i]);
@@ -1996,7 +2106,7 @@ void GfxICCBasedColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
 void GfxICCBasedColorSpace::getRGBLine(Guchar *in, unsigned int *out,
 				       int length) {
 #ifdef USE_CMS
-  if (lineTransform != 0) {
+  if (lineTransform != 0 && lineTransform->getTransformPixelType() == PT_RGB) {
     Guchar* tmp = (Guchar *)gmallocn(3 * length, sizeof(Guchar));
     lineTransform->doTransform(in, tmp, length);
     for (int i = 0; i < length; ++i) {
@@ -2014,7 +2124,7 @@ void GfxICCBasedColorSpace::getRGBLine(Guchar *in, unsigned int *out,
 
 void GfxICCBasedColorSpace::getRGBLine(Guchar *in, Guchar *out, int length) {
 #ifdef USE_CMS
-  if (lineTransform != 0) {
+  if (lineTransform != 0 && lineTransform->getTransformPixelType() == PT_RGB) {
     Guchar* tmp = (Guchar *)gmallocn(3 * length, sizeof(Guchar));
     lineTransform->doTransform(in, tmp, length);
     Guchar *current = tmp;
@@ -2022,6 +2132,26 @@ void GfxICCBasedColorSpace::getRGBLine(Guchar *in, Guchar *out, int length) {
         *out++ = *current++;
         *out++ = *current++;
         *out++ = *current++;
+    }
+    gfree(tmp);
+  } else if (lineTransform != NULL && lineTransform->getTransformPixelType() == PT_CMYK) {
+    Guchar* tmp = (Guchar *)gmallocn(4 * length, sizeof(Guchar));
+    lineTransform->doTransform(in, tmp, length);
+    Guchar *current = tmp;
+    double c, m, y, k, c1, m1, y1, k1, r, g, b;
+    for (int i = 0; i < length; ++i) {
+      c = byteToDbl(*current++);
+      m = byteToDbl(*current++);
+      y = byteToDbl(*current++);
+      k = byteToDbl(*current++);
+      c1 = 1 - c;
+      m1 = 1 - m;
+      y1 = 1 - y;
+      k1 = 1 - k;
+      cmykToRGBMatrixMultiplication(c, m, y, k, c1, m1, y1, k1, r, g, b);
+      *out++ = dblToByte(r);
+      *out++ = dblToByte(g);
+      *out++ = dblToByte(b);
     }
     gfree(tmp);
   } else {
@@ -2034,7 +2164,7 @@ void GfxICCBasedColorSpace::getRGBLine(Guchar *in, Guchar *out, int length) {
 
 void GfxICCBasedColorSpace::getRGBXLine(Guchar *in, Guchar *out, int length) {
 #ifdef USE_CMS
-  if (lineTransform != 0) {
+  if (lineTransform != 0 && lineTransform->getTransformPixelType() == PT_RGB) {
     Guchar* tmp = (Guchar *)gmallocn(3 * length, sizeof(Guchar));
     lineTransform->doTransform(in, tmp, length);
     Guchar *current = tmp;
@@ -2055,7 +2185,7 @@ void GfxICCBasedColorSpace::getRGBXLine(Guchar *in, Guchar *out, int length) {
 
 void GfxICCBasedColorSpace::getCMYKLine(Guchar *in, Guchar *out, int length) {
 #ifdef USE_CMS
-  if (lineTransform != NULL && displayPixelType == PT_CMYK) {
+  if (lineTransform != NULL && lineTransform->getTransformPixelType() == PT_CMYK) {
     transform->doTransform(in,out,length);
   } else if (lineTransform != NULL) {
     GfxColorComp c, m, y, k;
@@ -2089,7 +2219,7 @@ void GfxICCBasedColorSpace::getCMYKLine(Guchar *in, Guchar *out, int length) {
 
 void GfxICCBasedColorSpace::getDeviceNLine(Guchar *in, Guchar *out, int length) {
 #ifdef USE_CMS
-  if (lineTransform != NULL && displayPixelType == PT_CMYK) {
+  if (lineTransform != NULL && lineTransform->getTransformPixelType() == PT_CMYK) {
     Guchar* tmp = (Guchar *)gmallocn(4 * length, sizeof(Guchar));
     transform->doTransform(in,tmp,length);
     Guchar *p = tmp;
@@ -2135,7 +2265,7 @@ void GfxICCBasedColorSpace::getDeviceNLine(Guchar *in, Guchar *out, int length) 
 
 void GfxICCBasedColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
 #ifdef USE_CMS
-  if (transform != NULL && displayPixelType == PT_CMYK) {
+  if (transform != NULL && transform->getTransformPixelType() == PT_CMYK) {
     Guchar in[gfxColorMaxComps];
     Guchar out[gfxColorMaxComps];
     
@@ -2288,7 +2418,7 @@ GfxColorSpace *GfxIndexedColorSpace::copy() {
   return cs;
 }
 
-GfxColorSpace *GfxIndexedColorSpace::parse(Array *arr, OutputDev *out, int recursion) {
+GfxColorSpace *GfxIndexedColorSpace::parse(Array *arr, OutputDev *out, GfxState *state, int recursion) {
   GfxIndexedColorSpace *cs;
   GfxColorSpace *baseA;
   int indexHighA;
@@ -2301,7 +2431,7 @@ GfxColorSpace *GfxIndexedColorSpace::parse(Array *arr, OutputDev *out, int recur
     goto err1;
   }
   arr->get(1, &obj1);
-  if (!(baseA = GfxColorSpace::parse(&obj1, out, recursion + 1))) {
+  if (!(baseA = GfxColorSpace::parse(&obj1, out, state, recursion + 1))) {
     error(errSyntaxWarning, -1, "Bad Indexed color space (base color space)");
     goto err2;
   }
@@ -2553,7 +2683,7 @@ GfxColorSpace *GfxSeparationColorSpace::copy() {
 }
 
 //~ handle the 'All' and 'None' colorants
-GfxColorSpace *GfxSeparationColorSpace::parse(Array *arr, OutputDev *out, int recursion) {
+GfxColorSpace *GfxSeparationColorSpace::parse(Array *arr, OutputDev *out, GfxState *state, int recursion) {
   GfxSeparationColorSpace *cs;
   GooString *nameA;
   GfxColorSpace *altA;
@@ -2571,7 +2701,7 @@ GfxColorSpace *GfxSeparationColorSpace::parse(Array *arr, OutputDev *out, int re
   nameA = new GooString(obj1.getName());
   obj1.free();
   arr->get(2, &obj1);
-  if (!(altA = GfxColorSpace::parse(&obj1, out, recursion + 1))) {
+  if (!(altA = GfxColorSpace::parse(&obj1, out, state, recursion + 1))) {
     error(errSyntaxWarning, -1, "Bad Separation color space (alternate color space)");
     goto err3;
   }
@@ -2802,7 +2932,7 @@ GfxColorSpace *GfxDeviceNColorSpace::copy() {
 }
 
 //~ handle the 'None' colorant
-GfxColorSpace *GfxDeviceNColorSpace::parse(Array *arr, OutputDev *out, int recursion) {
+GfxColorSpace *GfxDeviceNColorSpace::parse(Array *arr, OutputDev *out, GfxState *state, int recursion) {
   GfxDeviceNColorSpace *cs;
   int nCompsA;
   GooString *namesA[gfxColorMaxComps];
@@ -2837,7 +2967,7 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(Array *arr, OutputDev *out, int recur
   }
   obj1.free();
   arr->get(2, &obj1);
-  if (!(altA = GfxColorSpace::parse(&obj1, out, recursion + 1))) {
+  if (!(altA = GfxColorSpace::parse(&obj1, out, state, recursion + 1))) {
     error(errSyntaxWarning, -1, "Bad DeviceN color space (alternate color space)");
     goto err3;
   }
@@ -2860,7 +2990,7 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(Array *arr, OutputDev *out, int recur
         Object obj3;
         colorants->getVal(i, &obj3);
         if (obj3.isArray()) {
-          separationList->append(GfxSeparationColorSpace::parse(obj3.getArray(), out, recursion));
+          separationList->append(GfxSeparationColorSpace::parse(obj3.getArray(), out, state, recursion));
         } else {
           obj3.free();
           obj2.free();
@@ -3068,7 +3198,7 @@ GfxColorSpace *GfxPatternColorSpace::copy() {
 				          (GfxColorSpace *)NULL);
 }
 
-GfxColorSpace *GfxPatternColorSpace::parse(Array *arr, OutputDev *out, int recursion) {
+GfxColorSpace *GfxPatternColorSpace::parse(Array *arr, OutputDev *out, GfxState *state, int recursion) {
   GfxPatternColorSpace *cs;
   GfxColorSpace *underA;
   Object obj1;
@@ -3080,7 +3210,7 @@ GfxColorSpace *GfxPatternColorSpace::parse(Array *arr, OutputDev *out, int recur
   underA = NULL;
   if (arr->getLength() == 2) {
     arr->get(1, &obj1);
-    if (!(underA = GfxColorSpace::parse(&obj1, out, recursion + 1))) {
+    if (!(underA = GfxColorSpace::parse(&obj1, out, state, recursion + 1))) {
       error(errSyntaxWarning, -1, "Bad Pattern color space (underlying color space)");
       obj1.free();
       return NULL;
@@ -3125,7 +3255,7 @@ GfxPattern::GfxPattern(int typeA) {
 GfxPattern::~GfxPattern() {
 }
 
-GfxPattern *GfxPattern::parse(Object *obj, OutputDev *out) {
+GfxPattern *GfxPattern::parse(Object *obj, OutputDev *out, GfxState *state) {
   GfxPattern *pattern;
   Object obj1;
 
@@ -3140,7 +3270,7 @@ GfxPattern *GfxPattern::parse(Object *obj, OutputDev *out) {
   if (obj1.isInt() && obj1.getInt() == 1) {
     pattern = GfxTilingPattern::parse(obj);
   } else if (obj1.isInt() && obj1.getInt() == 2) {
-    pattern = GfxShadingPattern::parse(obj, out);
+    pattern = GfxShadingPattern::parse(obj, out, state);
   }
   obj1.free();
   return pattern;
@@ -3268,7 +3398,7 @@ GfxPattern *GfxTilingPattern::copy() {
 // GfxShadingPattern
 //------------------------------------------------------------------------
 
-GfxShadingPattern *GfxShadingPattern::parse(Object *patObj, OutputDev *out) {
+GfxShadingPattern *GfxShadingPattern::parse(Object *patObj, OutputDev *out, GfxState *state) {
   Dict *dict;
   GfxShading *shadingA;
   double matrixA[6];
@@ -3281,7 +3411,7 @@ GfxShadingPattern *GfxShadingPattern::parse(Object *patObj, OutputDev *out) {
   dict = patObj->getDict();
 
   dict->lookup("Shading", &obj1);
-  shadingA = GfxShading::parse(&obj1, out);
+  shadingA = GfxShading::parse(&obj1, out, state);
   obj1.free();
   if (!shadingA) {
     return NULL;
@@ -3354,7 +3484,7 @@ GfxShading::~GfxShading() {
   }
 }
 
-GfxShading *GfxShading::parse(Object *obj, OutputDev *out) {
+GfxShading *GfxShading::parse(Object *obj, OutputDev *out, GfxState *state) {
   GfxShading *shading;
   Dict *dict;
   int typeA;
@@ -3378,17 +3508,17 @@ GfxShading *GfxShading::parse(Object *obj, OutputDev *out) {
 
   switch (typeA) {
   case 1:
-    shading = GfxFunctionShading::parse(dict, out);
+    shading = GfxFunctionShading::parse(dict, out, state);
     break;
   case 2:
-    shading = GfxAxialShading::parse(dict, out);
+    shading = GfxAxialShading::parse(dict, out, state);
     break;
   case 3:
-    shading = GfxRadialShading::parse(dict, out);
+    shading = GfxRadialShading::parse(dict, out, state);
     break;
   case 4:
     if (obj->isStream()) {
-      shading = GfxGouraudTriangleShading::parse(4, dict, obj->getStream(), out);
+      shading = GfxGouraudTriangleShading::parse(4, dict, obj->getStream(), out, state);
     } else {
       error(errSyntaxWarning, -1, "Invalid Type 4 shading object");
       goto err1;
@@ -3396,7 +3526,7 @@ GfxShading *GfxShading::parse(Object *obj, OutputDev *out) {
     break;
   case 5:
     if (obj->isStream()) {
-      shading = GfxGouraudTriangleShading::parse(5, dict, obj->getStream(), out);
+      shading = GfxGouraudTriangleShading::parse(5, dict, obj->getStream(), out, state);
     } else {
       error(errSyntaxWarning, -1, "Invalid Type 5 shading object");
       goto err1;
@@ -3404,7 +3534,7 @@ GfxShading *GfxShading::parse(Object *obj, OutputDev *out) {
     break;
   case 6:
     if (obj->isStream()) {
-      shading = GfxPatchMeshShading::parse(6, dict, obj->getStream(), out);
+      shading = GfxPatchMeshShading::parse(6, dict, obj->getStream(), out, state);
     } else {
       error(errSyntaxWarning, -1, "Invalid Type 6 shading object");
       goto err1;
@@ -3412,7 +3542,7 @@ GfxShading *GfxShading::parse(Object *obj, OutputDev *out) {
     break;
   case 7:
     if (obj->isStream()) {
-      shading = GfxPatchMeshShading::parse(7, dict, obj->getStream(), out);
+      shading = GfxPatchMeshShading::parse(7, dict, obj->getStream(), out, state);
     } else {
       error(errSyntaxWarning, -1, "Invalid Type 7 shading object");
       goto err1;
@@ -3429,12 +3559,12 @@ GfxShading *GfxShading::parse(Object *obj, OutputDev *out) {
   return NULL;
 }
 
-GBool GfxShading::init(Dict *dict, OutputDev *out) {
+GBool GfxShading::init(Dict *dict, OutputDev *out, GfxState *state) {
   Object obj1, obj2;
   int i;
 
   dict->lookup("ColorSpace", &obj1);
-  if (!(colorSpace = GfxColorSpace::parse(&obj1, out))) {
+  if (!(colorSpace = GfxColorSpace::parse(&obj1, out, state))) {
     error(errSyntaxWarning, -1, "Bad color space in shading dictionary");
     obj1.free();
     return gFalse;
@@ -3541,7 +3671,7 @@ GfxFunctionShading::~GfxFunctionShading() {
   }
 }
 
-GfxFunctionShading *GfxFunctionShading::parse(Dict *dict, OutputDev *out) {
+GfxFunctionShading *GfxFunctionShading::parse(Dict *dict, OutputDev *out, GfxState *state) {
   GfxFunctionShading *shading;
   double x0A, y0A, x1A, y1A;
   double matrixA[6];
@@ -3609,7 +3739,7 @@ GfxFunctionShading *GfxFunctionShading::parse(Dict *dict, OutputDev *out) {
 
   shading = new GfxFunctionShading(x0A, y0A, x1A, y1A, matrixA,
 				   funcsA, nFuncsA);
-  if (!shading->init(dict, out)) {
+  if (!shading->init(dict, out, state)) {
     delete shading;
     return NULL;
   }
@@ -3860,7 +3990,7 @@ GfxAxialShading::GfxAxialShading(GfxAxialShading *shading):
 GfxAxialShading::~GfxAxialShading() {
 }
 
-GfxAxialShading *GfxAxialShading::parse(Dict *dict, OutputDev *out) {
+GfxAxialShading *GfxAxialShading::parse(Dict *dict, OutputDev *out, GfxState *state) {
   GfxAxialShading *shading;
   double x0A, y0A, x1A, y1A;
   double t0A, t1A;
@@ -3957,7 +4087,7 @@ GfxAxialShading *GfxAxialShading::parse(Dict *dict, OutputDev *out) {
 
   shading = new GfxAxialShading(x0A, y0A, x1A, y1A, t0A, t1A,
 				funcsA, nFuncsA, extend0A, extend1A);
-  if (!shading->init(dict, out)) {
+  if (!shading->init(dict, out, state)) {
     delete shading;
     return NULL;
   }
@@ -4068,7 +4198,7 @@ GfxRadialShading::GfxRadialShading(GfxRadialShading *shading):
 GfxRadialShading::~GfxRadialShading() {
 }
 
-GfxRadialShading *GfxRadialShading::parse(Dict *dict, OutputDev *out) {
+GfxRadialShading *GfxRadialShading::parse(Dict *dict, OutputDev *out, GfxState *state) {
   GfxRadialShading *shading;
   double x0A, y0A, r0A, x1A, y1A, r1A;
   double t0A, t1A;
@@ -4147,7 +4277,7 @@ GfxRadialShading *GfxRadialShading::parse(Dict *dict, OutputDev *out) {
 
   shading = new GfxRadialShading(x0A, y0A, r0A, x1A, y1A, r1A, t0A, t1A,
 				 funcsA, nFuncsA, extend0A, extend1A);
-  if (!shading->init(dict, out)) {
+  if (!shading->init(dict, out, state)) {
     delete shading;
     return NULL;
   }
@@ -4591,7 +4721,7 @@ GfxGouraudTriangleShading::~GfxGouraudTriangleShading() {
 GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(int typeA,
 							    Dict *dict,
 							    Stream *str,
-							    OutputDev *out) {
+							    OutputDev *out, GfxState *gfxState) {
   GfxGouraudTriangleShading *shading;
   Function *funcsA[gfxColorMaxComps];
   int nFuncsA;
@@ -4787,7 +4917,7 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(int typeA,
   shading = new GfxGouraudTriangleShading(typeA, verticesA, nVerticesA,
 					  trianglesA, nTrianglesA,
 					  funcsA, nFuncsA);
-  if (!shading->init(dict, out)) {
+  if (!shading->init(dict, out, gfxState)) {
     delete shading;
     return NULL;
   }
@@ -4934,7 +5064,7 @@ GfxPatchMeshShading::~GfxPatchMeshShading() {
 }
 
 GfxPatchMeshShading *GfxPatchMeshShading::parse(int typeA, Dict *dict,
-						Stream *str, OutputDev *out) {
+						Stream *str, OutputDev *out, GfxState *state) {
   GfxPatchMeshShading *shading;
   Function *funcsA[gfxColorMaxComps];
   int nFuncsA;
@@ -5458,7 +5588,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(int typeA, Dict *dict,
 
   shading = new GfxPatchMeshShading(typeA, patchesA, nPatchesA,
 				    funcsA, nFuncsA);
-  if (!shading->init(dict, out)) {
+  if (!shading->init(dict, out, state)) {
     delete shading;
     return NULL;
   }
@@ -6394,9 +6524,17 @@ GfxState::GfxState(double hDPIA, double vDPIA, PDFRectangle *pageBox,
   clipXMax = pageWidth;
   clipYMax = pageHeight;
 
+  renderingIntent[0] = 0;
+
   saved = NULL;
 #ifdef USE_CMS
   GfxColorSpace::setupColorProfiles();
+  XYZ2DisplayTransformRelCol = NULL;
+  XYZ2DisplayTransformAbsCol = NULL;
+  XYZ2DisplayTransformSat = NULL;
+  XYZ2DisplayTransformPerc = NULL;
+  localDisplayProfile = NULL;
+  displayProfileRef = 0;
 #endif
 }
 
@@ -6428,6 +6566,27 @@ GfxState::~GfxState() {
   if (font) {
     font->decRefCnt();
   }
+#ifdef USE_CMS
+  if (XYZ2DisplayTransformRelCol) {
+    if (XYZ2DisplayTransformRelCol->unref() == 0)
+      delete XYZ2DisplayTransformRelCol;
+  }
+  if (XYZ2DisplayTransformAbsCol) {
+    if (XYZ2DisplayTransformAbsCol->unref() == 0)
+      delete XYZ2DisplayTransformAbsCol;
+  }
+  if (XYZ2DisplayTransformSat) {
+    if (XYZ2DisplayTransformSat->unref() == 0)
+      delete XYZ2DisplayTransformSat;
+  }
+  if (XYZ2DisplayTransformPerc) {
+    if (XYZ2DisplayTransformPerc->unref() == 0)
+      delete XYZ2DisplayTransformPerc;
+  }
+  if (--displayProfileRef == 0 && localDisplayProfile != NULL) {
+    cmsCloseProfile(localDisplayProfile);
+  }
+#endif
 }
 
 // Used for copy();
@@ -6463,7 +6622,101 @@ GfxState::GfxState(GfxState *state, GBool copyPath) {
     path = state->path->copy();
   }
   saved = NULL;
+#ifdef USE_CMS
+  if (XYZ2DisplayTransformRelCol) {
+    XYZ2DisplayTransformRelCol->ref();
+  }
+  if (XYZ2DisplayTransformAbsCol) {
+    XYZ2DisplayTransformAbsCol->ref();
+  }
+  if (XYZ2DisplayTransformSat) {
+    XYZ2DisplayTransformSat->ref();
+  }
+  if (XYZ2DisplayTransformPerc) {
+    XYZ2DisplayTransformPerc->ref();
+  }
+  if (localDisplayProfile) {
+    displayProfileRef++;
+  }
+#endif
 }
+
+#ifdef USE_CMS
+void GfxState::setDisplayProfile(cmsHPROFILE localDisplayProfileA) {
+  if (localDisplayProfile != NULL) {
+    cmsCloseProfile(localDisplayProfile);
+  }
+  localDisplayProfile = localDisplayProfileA;
+  if (localDisplayProfileA != NULL) {
+    cmsHTRANSFORM transform;
+    unsigned int nChannels;
+    unsigned int localDisplayPixelType;
+
+    localDisplayPixelType = getCMSColorSpaceType(cmsGetColorSpace(localDisplayProfile));
+    nChannels = getCMSNChannels(cmsGetColorSpace(localDisplayProfile));
+    displayProfileRef = 1;
+    // create transform from XYZ
+    cmsHPROFILE XYZProfile = cmsCreateXYZProfile();
+    if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
+	   localDisplayProfile,
+	   COLORSPACE_SH(localDisplayPixelType) |
+	     CHANNELS_SH(nChannels) | BYTES_SH(1),
+	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == 0) {
+      error(errSyntaxWarning, -1, "Can't create Lab transform");
+    } else {
+      XYZ2DisplayTransformRelCol = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, localDisplayPixelType);
+    }
+    if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
+	   localDisplayProfile,
+	   COLORSPACE_SH(localDisplayPixelType) |
+	     CHANNELS_SH(nChannels) | BYTES_SH(1),
+	  INTENT_ABSOLUTE_COLORIMETRIC,LCMS_FLAGS)) == 0) {
+      error(errSyntaxWarning, -1, "Can't create Lab transform");
+    } else {
+      XYZ2DisplayTransformAbsCol = new GfxColorTransform(transform, INTENT_ABSOLUTE_COLORIMETRIC, localDisplayPixelType);
+    }
+    if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
+	   localDisplayProfile,
+	   COLORSPACE_SH(localDisplayPixelType) |
+	     CHANNELS_SH(nChannels) | BYTES_SH(1),
+	  INTENT_SATURATION,LCMS_FLAGS)) == 0) {
+      error(errSyntaxWarning, -1, "Can't create Lab transform");
+    } else {
+      XYZ2DisplayTransformSat = new GfxColorTransform(transform, INTENT_SATURATION, localDisplayPixelType);
+    }
+    if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
+	   localDisplayProfile,
+	   COLORSPACE_SH(localDisplayPixelType) |
+	     CHANNELS_SH(nChannels) | BYTES_SH(1),
+	  INTENT_PERCEPTUAL,LCMS_FLAGS)) == 0) {
+      error(errSyntaxWarning, -1, "Can't create Lab transform");
+    } else {
+      XYZ2DisplayTransformPerc = new GfxColorTransform(transform, INTENT_PERCEPTUAL, localDisplayPixelType);
+    }
+    cmsCloseProfile(XYZProfile);
+  }
+}
+
+GfxColorTransform *GfxState::getXYZ2DisplayTransform() {
+  GfxColorTransform *transform;
+
+  transform = XYZ2DisplayTransformRelCol;
+  if (renderingIntent != NULL) {
+    if (strcmp(renderingIntent, "AbsoluteColorimetric") == 0) {
+      transform = XYZ2DisplayTransformAbsCol;
+    } else if (strcmp(renderingIntent, "Saturation") == 0) {
+      transform = XYZ2DisplayTransformSat;
+    } else if (strcmp(renderingIntent, "Perceptual") == 0) {
+      transform = XYZ2DisplayTransformPerc;
+    }
+  }
+  if (transform == NULL) {
+    transform = XYZ2DisplayTransform;
+  }
+  return transform;
+}
+
+#endif
 
 void GfxState::setPath(GfxPath *pathA) {
   delete path;
