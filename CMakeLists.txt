@@ -321,6 +321,8 @@ set(poppler_SRCS
   poppler/PreScanOutputDev.cc
   poppler/PSTokenizer.cc
   poppler/Stream.cc
+  poppler/StructTreeRoot.cc
+  poppler/StructElement.cc
   poppler/strtok_r.cpp
   poppler/UnicodeMap.cc
   poppler/UnicodeTypeTable.cc
@@ -481,6 +483,8 @@ if(ENABLE_XPDF_HEADERS)
     poppler/Rendition.h
     poppler/Stream-CCITT.h
     poppler/Stream.h
+    poppler/StructElement.h
+    poppler/StructTreeRoot.h
     poppler/UnicodeMap.h
     poppler/UnicodeMapTables.h
     poppler/UnicodeTypeTable.h
