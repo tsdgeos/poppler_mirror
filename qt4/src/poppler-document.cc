@@ -269,6 +269,8 @@ namespace Poppler {
 	    return QString();
 
 	QScopedPointer<XRef> xref(m_doc->doc->getXRef()->copy());
+	if (!xref)
+		return QString();
 	xref->getDocInfo(&info);
 	if ( !info.isDict() )
 	    return QString();
@@ -300,6 +302,8 @@ namespace Poppler {
 	    return QStringList();
 
 	QScopedPointer<XRef> xref(m_doc->doc->getXRef()->copy());
+	if (!xref)
+		return QStringList();
 	xref->getDocInfo(&info);
 	if ( !info.isDict() )
 	    return QStringList();
@@ -323,6 +327,8 @@ namespace Poppler {
 
 	Object info;
 	QScopedPointer<XRef> xref(m_doc->doc->getXRef()->copy());
+	if (!xref)
+		return QDateTime();
 	xref->getDocInfo(&info);
 	if ( !info.isDict() ) {
 	    info.free();
