@@ -21,6 +21,7 @@
 #include "PDFDoc.h"
 #include "ErrorCodes.h"
 #include "GlobalParams.h"
+#include <ctype.h>
 
 static int firstPage = 0;
 static int lastPage = 0;
@@ -55,6 +56,12 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
     return false;
   }
 
+  // destFileName can have multiple %% and one %d
+  // We use auxDestFileName to replace all the valid % appearances
+  // by 'A' (random char that is not %), if at the end of replacing
+  // any of the valid appearances there is still any % around, the
+  // pattern is wrong
+  char *auxDestFileName = strdup(destFileName);
   if (firstPage == 0 && lastPage == 0) {
     firstPage = 1;
     lastPage = doc->getNumPages();
@@ -63,25 +70,46 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
     lastPage = doc->getNumPages();
   if (firstPage == 0)
     firstPage = 1;
-  if (firstPage != lastPage) {
-    bool foundmatch = false;
-    if (strstr(destFileName, "%d") != NULL) {
-      foundmatch = true;
-    } else {
-      char pattern[5];
-      for (int i = 2; i < 10; i++) {
-        sprintf(pattern, "%%0%dd", i);
-        if (strstr(destFileName, pattern) != NULL) {
-          foundmatch = true;
-          break;
-        }
+  bool foundmatch = false;
+  char *p = strstr(auxDestFileName, "%d");
+  if (p != NULL) {
+    foundmatch = true;
+    *p = 'A';
+  } else {
+    char pattern[5];
+    for (int i = 2; i < 10; i++) {
+      sprintf(pattern, "%%0%dd", i);
+      p = strstr(auxDestFileName, pattern);
+      if (p != NULL) {
+       foundmatch = true;
+       *p = 'A';
+       break;
       }
     }
-    if (!foundmatch) {
-      error(errSyntaxError, -1, "'{0:s}' must contain '%%d' if more than one page should be extracted", destFileName);
-      return false;
-    }
   }
+  if (!foundmatch && firstPage != lastPage) {
+    error(errSyntaxError, -1, "'{0:s}' must contain '%%d' if more than one page should be extracted", destFileName);
+    free(auxDestFileName);
+    return false;
+  }
+
+  // at this point auxDestFileName can only contain %%
+  p = strstr(auxDestFileName, "%%");
+  while (p != NULL) {
+    *p = 'A';
+    *(p + 1) = 'A';
+    p = strstr(p, "%%"); 
+  }
+
+  // at this point any other % is wrong
+  p = strstr(auxDestFileName, "%");
+  if (p != NULL) {
+    error(errSyntaxError, -1, "'{0:s}' can only contain one '%d' pattern", destFileName);
+    free(auxDestFileName);
+    return false;
+  }
+  free(auxDestFileName);
+  
   for (int pageNo = firstPage; pageNo <= lastPage; pageNo++) {
     snprintf (pathName, sizeof (pathName) - 1, destFileName, pageNo);
     GooString *gpageName = new GooString (pathName);
