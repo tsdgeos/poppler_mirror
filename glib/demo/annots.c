@@ -851,6 +851,12 @@ pgd_annots_add_annot (PgdAnnotsDemo *demo)
                                              &start, &end);
         }
             break;
+        case POPPLER_ANNOT_SQUARE:
+            annot = poppler_annot_square_new (demo->doc, &rect);
+            break;
+        case POPPLER_ANNOT_CIRCLE:
+            annot = poppler_annot_circle_new (demo->doc, &rect);
+            break;
         default:
             g_assert_not_reached ();
     }
@@ -1113,6 +1119,19 @@ pgd_annots_create_widget (PopplerDocument *document)
                         SELECTED_TYPE_COLUMN, POPPLER_ANNOT_LINE,
                         SELECTED_LABEL_COLUMN, "Line",
                         -1);
+
+    gtk_list_store_append (model, &iter);
+    gtk_list_store_set (model, &iter,
+                        SELECTED_TYPE_COLUMN, POPPLER_ANNOT_SQUARE,
+                        SELECTED_LABEL_COLUMN, "Square",
+                        -1);
+
+    gtk_list_store_append (model, &iter);
+    gtk_list_store_set (model, &iter,
+                        SELECTED_TYPE_COLUMN, POPPLER_ANNOT_CIRCLE,
+                        SELECTED_LABEL_COLUMN, "Circle",
+                        -1);
+
     demo->type_selector = gtk_combo_box_new_with_model (GTK_TREE_MODEL (model));
     g_object_unref (model);
 
