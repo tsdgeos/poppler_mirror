@@ -23,10 +23,6 @@
 #include "utils.h"
 
 enum {
-    ANNOTS_X1_COLUMN,
-    ANNOTS_Y1_COLUMN,
-    ANNOTS_X2_COLUMN,
-    ANNOTS_Y2_COLUMN,
     ANNOTS_TYPE_COLUMN,
     ANNOTS_COLOR_COLUMN,
     ANNOTS_FLAG_INVISIBLE_COLUMN,
@@ -575,6 +571,7 @@ pgd_annot_view_set_annot (PgdAnnotsDemo *demo,
     gint        row = 0;
     gchar      *text;
     time_t      timet;
+    PopplerRectangle rect;
 
     alignment = gtk_bin_get_child (GTK_BIN (demo->annot_view));
     if (alignment) {
@@ -582,7 +579,7 @@ pgd_annot_view_set_annot (PgdAnnotsDemo *demo,
     }
 
     alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
-    gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 5, 5, 12, 5);
+    gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 5, 5, 8, 5);
     gtk_container_add (GTK_CONTAINER (demo->annot_view), alignment);
     gtk_widget_show (alignment);
 
@@ -609,12 +606,9 @@ pgd_annot_view_set_annot (PgdAnnotsDemo *demo,
     pgd_table_add_property (GTK_GRID (table), "<b>Modified:</b>", text, &row);
     g_free (text);
 
-    text = g_strdup_printf ("%d", poppler_annot_get_flags (annot));
-    pgd_table_add_property (GTK_GRID (table), "<b>Flags:</b>", text, &row);
-    g_free (text);
-
-    text = g_strdup_printf ("%d", poppler_annot_get_page_index (annot));
-    pgd_table_add_property (GTK_GRID (table), "<b>Page:</b>", text, &row);
+    poppler_annot_get_rectangle (annot, &rect);
+    text = g_strdup_printf ("(%.2f;%.2f) (%.2f;%.2f)", rect.x1, rect.y1, rect.x2, rect.y2);
+    pgd_table_add_property (GTK_GRID (table), "<b>Coords:</b>", text, &row);
     g_free (text);
 
     if (POPPLER_IS_ANNOT_MARKUP (annot))
@@ -654,22 +648,12 @@ pgd_annots_add_annot_to_model (PgdAnnotsDemo *demo,
     GtkTreeIter      iter;
     GdkPixbuf        *pixbuf;
     PopplerAnnotFlag  flags;
-    gchar            *x1, *y1, *x2, *y2;
-
-    x1 = g_strdup_printf ("%.2f", area.x1);
-    y1 = g_strdup_printf ("%.2f", area.y1);
-    x2 = g_strdup_printf ("%.2f", area.x2);
-    y2 = g_strdup_printf ("%.2f", area.y2);
 
     pixbuf = get_annot_color (annot);
     flags = poppler_annot_get_flags (annot);
 
     gtk_list_store_append (demo->model, &iter);
     gtk_list_store_set (demo->model, &iter,
-                        ANNOTS_X1_COLUMN, x1,
-                        ANNOTS_Y1_COLUMN, y1,
-                        ANNOTS_X2_COLUMN, x2,
-                        ANNOTS_Y2_COLUMN, y2,
                         ANNOTS_TYPE_COLUMN, get_annot_type (annot),
                         ANNOTS_COLOR_COLUMN, pixbuf,
                         ANNOTS_FLAG_INVISIBLE_COLUMN, (flags & POPPLER_ANNOT_FLAG_INVISIBLE),
@@ -688,11 +672,6 @@ pgd_annots_add_annot_to_model (PgdAnnotsDemo *demo,
 
     if (pixbuf)
         g_object_unref (pixbuf);
-
-    g_free (x1);
-    g_free (y1);
-    g_free (x2);
-    g_free (y2);
 }
 
 static void
@@ -1083,7 +1062,7 @@ pgd_annots_create_widget (PopplerDocument *document)
     n_pages = poppler_document_get_n_pages (document);
 
     vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
-    vbox2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+    vbox2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 6);
 
     hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
@@ -1178,38 +1157,11 @@ pgd_annots_create_widget (PopplerDocument *document)
                                     GTK_POLICY_AUTOMATIC);
 
     demo->model = gtk_list_store_new (N_COLUMNS, G_TYPE_STRING,
-                                      G_TYPE_STRING, G_TYPE_STRING,
-                                      G_TYPE_STRING, G_TYPE_STRING,
                                       GDK_TYPE_PIXBUF, G_TYPE_BOOLEAN,
 				      G_TYPE_BOOLEAN, G_TYPE_BOOLEAN,
 				      G_TYPE_OBJECT);
     treeview = gtk_tree_view_new_with_model (GTK_TREE_MODEL (demo->model));
     demo->tree_view = treeview;
-
-    renderer = gtk_cell_renderer_text_new ();
-    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (treeview),
-                                                 ANNOTS_X1_COLUMN, "X1",
-                                                 renderer,
-                                                 "text", ANNOTS_X1_COLUMN,
-                                                 NULL);
-    renderer = gtk_cell_renderer_text_new ();
-    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (treeview),
-                                                 ANNOTS_Y1_COLUMN, "Y1",
-                                                 renderer,
-                                                 "text", ANNOTS_Y1_COLUMN,
-                                                 NULL);
-    renderer = gtk_cell_renderer_text_new ();
-    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (treeview),
-                                                 ANNOTS_X2_COLUMN, "X2",
-                                                 renderer,
-                                                 "text", ANNOTS_X2_COLUMN,
-                                                 NULL);
-    renderer = gtk_cell_renderer_text_new ();
-    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (treeview),
-                                                 ANNOTS_Y2_COLUMN, "Y2",
-                                                 renderer,
-                                                 "text", ANNOTS_Y2_COLUMN,
-                                                 NULL);
 
     column = gtk_tree_view_column_new ();
     gtk_tree_view_column_set_title (column, "Type");
@@ -1266,8 +1218,16 @@ pgd_annots_create_widget (PopplerDocument *document)
     gtk_widget_show (swindow);
 
     /* Annotation Properties */
-    gtk_box_pack_start (GTK_BOX (vbox2), demo->annot_view, FALSE, FALSE, 6);
+    swindow = gtk_scrolled_window_new (NULL, NULL);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (swindow),
+                                    GTK_POLICY_AUTOMATIC,
+                                    GTK_POLICY_AUTOMATIC);
+    gtk_container_add (GTK_CONTAINER (swindow), demo->annot_view);
     gtk_widget_show (demo->annot_view);
+    gtk_widget_show (swindow);
+
+    gtk_box_pack_start (GTK_BOX (vbox2), swindow, TRUE, TRUE, 6);
+    gtk_widget_show (swindow);
 
     gtk_paned_add1 (GTK_PANED (hpaned), vbox2);
     gtk_widget_show (vbox2);
