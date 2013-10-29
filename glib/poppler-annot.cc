@@ -37,6 +37,8 @@ typedef struct _PopplerAnnotFileAttachmentClass PopplerAnnotFileAttachmentClass;
 typedef struct _PopplerAnnotMovieClass          PopplerAnnotMovieClass;
 typedef struct _PopplerAnnotScreenClass         PopplerAnnotScreenClass;
 typedef struct _PopplerAnnotLineClass           PopplerAnnotLineClass;
+typedef struct _PopplerAnnotCircleClass         PopplerAnnotCircleClass;
+typedef struct _PopplerAnnotSquareClass         PopplerAnnotSquareClass;
 
 struct _PopplerAnnotClass
 {
@@ -117,6 +119,26 @@ struct _PopplerAnnotLineClass
   PopplerAnnotMarkupClass parent_class;
 };
 
+struct _PopplerAnnotCircle
+{
+  PopplerAnnotMarkup parent_instance;
+};
+
+struct _PopplerAnnotCircleClass
+{
+  PopplerAnnotMarkupClass parent_class;
+};
+
+struct _PopplerAnnotSquare
+{
+  PopplerAnnotMarkup parent_instance;
+};
+
+struct _PopplerAnnotSquareClass
+{
+  PopplerAnnotMarkupClass parent_class;
+};
+
 G_DEFINE_TYPE (PopplerAnnot, poppler_annot, G_TYPE_OBJECT)
 G_DEFINE_TYPE (PopplerAnnotMarkup, poppler_annot_markup, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE (PopplerAnnotText, poppler_annot_text, POPPLER_TYPE_ANNOT_MARKUP)
@@ -125,6 +147,8 @@ G_DEFINE_TYPE (PopplerAnnotFileAttachment, poppler_annot_file_attachment, POPPLE
 G_DEFINE_TYPE (PopplerAnnotMovie, poppler_annot_movie, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE (PopplerAnnotScreen, poppler_annot_screen, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE (PopplerAnnotLine, poppler_annot_line, POPPLER_TYPE_ANNOT_MARKUP)
+G_DEFINE_TYPE (PopplerAnnotCircle, poppler_annot_circle, POPPLER_TYPE_ANNOT_MARKUP)
+G_DEFINE_TYPE (PopplerAnnotSquare, poppler_annot_square, POPPLER_TYPE_ANNOT_MARKUP)
 
 static PopplerAnnot *
 _poppler_create_annot (GType annot_type, Annot *annot)
@@ -378,6 +402,89 @@ poppler_annot_line_new (PopplerDocument  *doc,
   return _poppler_annot_line_new (annot);
 }
 
+PopplerAnnot *
+_poppler_annot_circle_new (Annot *annot)
+{
+  return _poppler_create_annot (POPPLER_TYPE_ANNOT_CIRCLE, annot);
+}
+
+static void
+poppler_annot_circle_init (PopplerAnnotCircle *poppler_annot)
+{
+}
+
+static void
+poppler_annot_circle_class_init (PopplerAnnotCircleClass *klass)
+{
+}
+
+/**
+ * poppler_annot_circle_new:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ *
+ * Creates a new Circle annotation that will be
+ * located on @rect when added to a page. See
+ * poppler_page_add_annot()
+ *
+ * Return value: a newly created #PopplerAnnotCircle annotation
+ *
+ * Since: 0.26
+ **/
+PopplerAnnot *
+poppler_annot_circle_new (PopplerDocument  *doc,
+			  PopplerRectangle *rect)
+{
+  Annot *annot;
+  PDFRectangle pdf_rect(rect->x1, rect->y1,
+			rect->x2, rect->y2);
+
+  annot = new AnnotGeometry (doc->doc, &pdf_rect, Annot::typeCircle);
+
+  return _poppler_annot_circle_new (annot);
+}
+
+PopplerAnnot *
+_poppler_annot_square_new (Annot *annot)
+{
+  return _poppler_create_annot (POPPLER_TYPE_ANNOT_SQUARE, annot);
+}
+
+static void
+poppler_annot_square_init (PopplerAnnotSquare *poppler_annot)
+{
+}
+
+static void
+poppler_annot_square_class_init (PopplerAnnotSquareClass *klass)
+{
+}
+
+/**
+ * poppler_annot_square_new:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ *
+ * Creates a new Square annotation that will be
+ * located on @rect when added to a page. See
+ * poppler_page_add_annot()
+ *
+ * Return value: a newly created #PopplerAnnotSquare annotation
+ *
+ * Since: 0.26
+**/
+PopplerAnnot *
+poppler_annot_square_new (PopplerDocument  *doc,
+			  PopplerRectangle *rect)
+{
+  Annot *annot;
+  PDFRectangle pdf_rect(rect->x1, rect->y1,
+			rect->x2, rect->y2);
+
+  annot = new AnnotGeometry (doc->doc, &pdf_rect, Annot::typeSquare);
+
+  return _poppler_annot_square_new (annot);
+}
 
 /* Public methods */
 /**
@@ -582,25 +689,10 @@ poppler_annot_set_flags (PopplerAnnot *poppler_annot, PopplerAnnotFlag flags)
   poppler_annot->annot->setFlags ((guint) flags);
 }
 
-
-/**
- * poppler_annot_get_color:
- * @poppler_annot: a #PopplerAnnot
- *
- * Retrieves the color of @poppler_annot.
- *
- * Return value: a new allocated #PopplerColor with the color values of
- *               @poppler_annot, or %NULL. It must be freed with g_free() when done.
- **/
-PopplerColor *
-poppler_annot_get_color (PopplerAnnot *poppler_annot)
+static PopplerColor *
+create_poppler_color_from_annot_color (AnnotColor *color)
 {
-  AnnotColor *color;
   PopplerColor *poppler_color = NULL;
-
-  g_return_val_if_fail (POPPLER_IS_ANNOT (poppler_annot), NULL);
-
-  color = poppler_annot->annot->getColor ();
 
   if (color) {
     const double *values = color->getValues ();
@@ -633,6 +725,34 @@ poppler_annot_get_color (PopplerAnnot *poppler_annot)
   return poppler_color;
 }
 
+static AnnotColor *
+create_annot_color_from_poppler_color (PopplerColor *poppler_color)
+{
+  if (!poppler_color)
+    return NULL;
+
+  return new AnnotColor ((double)poppler_color->red / 65535,
+                         (double)poppler_color->green / 65535,
+                         (double)poppler_color->blue / 65535);
+}
+
+/**
+ * poppler_annot_get_color:
+ * @poppler_annot: a #PopplerAnnot
+ *
+ * Retrieves the color of @poppler_annot.
+ *
+ * Return value: a new allocated #PopplerColor with the color values of
+ *               @poppler_annot, or %NULL. It must be freed with g_free() when done.
+ **/
+PopplerColor *
+poppler_annot_get_color (PopplerAnnot *poppler_annot)
+{
+  g_return_val_if_fail (POPPLER_IS_ANNOT (poppler_annot), NULL);
+
+  return create_poppler_color_from_annot_color (poppler_annot->annot->getColor ());
+}
+
 /**
  * poppler_annot_set_color:
  * @poppler_annot: a #PopplerAnnot
@@ -646,16 +766,8 @@ void
 poppler_annot_set_color (PopplerAnnot *poppler_annot,
 			 PopplerColor *poppler_color)
 {
-  AnnotColor *color = NULL;
-
-  if (poppler_color) {
-    color = new AnnotColor ((double)poppler_color->red / 65535,
-			    (double)poppler_color->green / 65535,
-			    (double)poppler_color->blue / 65535);
-  }
-
   /* Annot takes ownership of the color */
-  poppler_annot->annot->setColor (color);
+  poppler_annot->annot->setColor (create_annot_color_from_poppler_color (poppler_color));
 }
 
 /**
@@ -1510,4 +1622,103 @@ poppler_annot_line_set_vertices (PopplerAnnotLine *poppler_annot,
 
   annot = static_cast<AnnotLine *>(POPPLER_ANNOT (poppler_annot)->annot);
   annot->setVertices (start->x, start->y, end->x, end->y);
+}
+
+/* PopplerAnnotCircle and PopplerAnnotSquare helpers */
+static PopplerColor *
+poppler_annot_geometry_get_interior_color (PopplerAnnot *poppler_annot)
+{
+  AnnotGeometry *annot;
+
+  annot = static_cast<AnnotGeometry *>(POPPLER_ANNOT (poppler_annot)->annot);
+
+  return create_poppler_color_from_annot_color (annot->getInteriorColor ());
+}
+
+static void
+poppler_annot_geometry_set_interior_color (PopplerAnnot *poppler_annot,
+					    PopplerColor *poppler_color)
+{
+  AnnotGeometry *annot;
+
+  annot = static_cast<AnnotGeometry *>(POPPLER_ANNOT (poppler_annot)->annot);
+
+  /* Annot takes ownership of the color */
+  annot->setInteriorColor (create_annot_color_from_poppler_color (poppler_color));
+}
+
+/* PopplerAnnotCircle */
+/**
+ * poppler_annot_circle_get_interior_color:
+ * @poppler_annot: a #PopplerAnnotCircle
+ *
+ * Retrieves the interior color of @poppler_annot.
+ *
+ * Return value: a new allocated #PopplerColor with the color values of
+ *               @poppler_annot, or %NULL. It must be freed with g_free() when done.
+ *
+ * Since: 0.26
+ */
+PopplerColor *
+poppler_annot_circle_get_interior_color (PopplerAnnotCircle *poppler_annot)
+{
+  g_return_val_if_fail (POPPLER_IS_ANNOT_CIRCLE (poppler_annot), NULL);
+
+  return poppler_annot_geometry_get_interior_color (POPPLER_ANNOT (poppler_annot));
+}
+
+/**
+ * poppler_annot_circle_set_interior_color:
+ * @poppler_annot: a #PopplerAnnotCircle
+ * @poppler_color: (allow-none): a #PopplerColor, or %NULL
+ *
+ * Sets the interior color of @poppler_annot.
+ *
+ * Since: 0.26
+ */
+void
+poppler_annot_circle_set_interior_color (PopplerAnnotCircle *poppler_annot,
+					 PopplerColor       *poppler_color)
+{
+  g_return_if_fail (POPPLER_IS_ANNOT_CIRCLE (poppler_annot));
+
+  poppler_annot_geometry_set_interior_color (POPPLER_ANNOT (poppler_annot), poppler_color);
+}
+
+/* PopplerAnnotSquare */
+/**
+ * poppler_annot_square_get_interior_color:
+ * @poppler_annot: a #PopplerAnnotSquare
+ *
+ * Retrieves the interior color of @poppler_annot.
+ *
+ * Return value: a new allocated #PopplerColor with the color values of
+ *               @poppler_annot, or %NULL. It must be freed with g_free() when done.
+ *
+ * Since: 0.26
+ */
+PopplerColor *
+poppler_annot_square_get_interior_color (PopplerAnnotSquare *poppler_annot)
+{
+  g_return_val_if_fail (POPPLER_IS_ANNOT_SQUARE (poppler_annot), NULL);
+
+  return poppler_annot_geometry_get_interior_color (POPPLER_ANNOT (poppler_annot));
+}
+
+/**
+ * poppler_annot_square_set_interior_color:
+ * @poppler_annot: a #PopplerAnnotSquare
+ * @poppler_color: (allow-none): a #PopplerColor, or %NULL
+ *
+ * Sets the interior color of @poppler_annot.
+ *
+ * Since: 0.26
+ */
+void
+poppler_annot_square_set_interior_color (PopplerAnnotSquare *poppler_annot,
+					 PopplerColor       *poppler_color)
+{
+  g_return_if_fail (POPPLER_IS_ANNOT_SQUARE (poppler_annot));
+
+  poppler_annot_geometry_set_interior_color (POPPLER_ANNOT (poppler_annot), poppler_color);
 }

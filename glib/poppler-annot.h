@@ -60,6 +60,13 @@ G_BEGIN_DECLS
 
 #define POPPLER_TYPE_ANNOT_CALLOUT_LINE      (poppler_annot_callout_line_get_type ())
 
+#define POPPLER_TYPE_ANNOT_CIRCLE            (poppler_annot_circle_get_type ())
+#define POPPLER_ANNOT_CIRCLE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ANNOT_CIRCLE, PopplerAnnotCircle))
+#define POPPLER_IS_ANNOT_CIRCLE(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_ANNOT_CIRCLE))
+
+#define POPPLER_TYPE_ANNOT_SQUARE            (poppler_annot_square_get_type ())
+#define POPPLER_ANNOT_SQUARE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ANNOT_SQUARE, PopplerAnnotSquare))
+#define POPPLER_IS_ANNOT_SQUARE(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_ANNOT_SQUARE))
 
 typedef enum
 {
@@ -242,6 +249,22 @@ GType                         poppler_annot_callout_line_get_type              (
 PopplerAnnotCalloutLine      *poppler_annot_callout_line_new                   (void);
 PopplerAnnotCalloutLine      *poppler_annot_callout_line_copy                  (PopplerAnnotCalloutLine *callout);
 void                          poppler_annot_callout_line_free                  (PopplerAnnotCalloutLine *callout);
+
+/* PopplerAnnotCircle */
+GType                         poppler_annot_circle_get_type                    (void) G_GNUC_CONST;
+PopplerAnnot                 *poppler_annot_circle_new                         (PopplerDocument    *doc,
+                                                                                PopplerRectangle   *rect);
+void                          poppler_annot_circle_set_interior_color          (PopplerAnnotCircle *poppler_annot,
+										PopplerColor       *poppler_color);
+PopplerColor                 *poppler_annot_circle_get_interior_color          (PopplerAnnotCircle *poppler_annot);
+
+/* PopplerAnnotGeometry */
+GType                         poppler_annot_square_get_type                    (void) G_GNUC_CONST;
+PopplerAnnot                 *poppler_annot_square_new                         (PopplerDocument    *doc,
+                                                                                PopplerRectangle   *rect);
+void                          poppler_annot_square_set_interior_color          (PopplerAnnotSquare *poppler_annot,
+										PopplerColor       *poppler_color);
+PopplerColor                 *poppler_annot_square_get_interior_color          (PopplerAnnotSquare *poppler_annot);
 
 G_END_DECLS
 
