@@ -2063,8 +2063,8 @@ poppler_page_get_text_layout (PopplerPage       *page,
       n_rects += line_words->getLength() - 1;
       for (j = 0; j < line_words->getLength(); j++)
         {
-          TextWord *word = (TextWord *)line_words->get(j);
-          n_rects += word->getLength();
+          TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j);
+          n_rects += word_sel->getEnd() - word_sel->getBegin();
         }
     }
 
@@ -2076,8 +2076,11 @@ poppler_page_get_text_layout (PopplerPage       *page,
       GooList *line_words = word_list[i];
       for (j = 0; j < line_words->getLength(); j++)
         {
-          TextWord *word = (TextWord *)line_words->get(j);
-          for (k = 0; k < word->getLength(); k++)
+          TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j);
+          TextWord *word = word_sel->getWord();
+          int end = word_sel->getEnd();
+
+          for (k = word_sel->getBegin(); k < end; k++)
             {
               rect = *rectangles + offset;
               word->getCharBBox (k,
@@ -2093,9 +2096,9 @@ poppler_page_get_text_layout (PopplerPage       *page,
 
           if (j < line_words->getLength() - 1)
             {
-              TextWord *next_word = (TextWord *)line_words->get(j + 1);
+              TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j + 1);
 
-              next_word->getBBox(&x3, &y3, &x4, &y4);
+              word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
 	      // space is from one word to other and with the same height as
 	      // first word.
 	      rect->x1 = x2;
@@ -2205,9 +2208,12 @@ poppler_page_get_text_attributes (PopplerPage *page)
       GooList *line_words = word_list[i];
       for (j = 0; j < line_words->getLength(); j++)
         {
-          word = (TextWord *)line_words->get(j);
+          TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j);
+          int end = word_sel->getEnd();
 
-          for (word_i = 0; word_i < word->getLength (); word_i++)
+          word = word_sel->getWord();
+
+          for (word_i = word_sel->getBegin(); word_i < end; word_i++)
             {
               if (!prev_word || !word_text_attributes_equal (word, word_i, prev_word, prev_word_i))
                 {

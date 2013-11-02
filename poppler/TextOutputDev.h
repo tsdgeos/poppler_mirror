@@ -478,6 +478,26 @@ private:
 
 #endif // TEXTOUT_WORD_LIST
 
+class TextWordSelection {
+public:
+  TextWordSelection(TextWord *word, int begin, int end)
+    : word(word), begin(begin), end(end)
+  {
+  }
+
+  TextWord * getWord() const { return word; }
+  int getBegin() const { return begin; }
+  int getEnd() const { return end; }
+
+private:
+  TextWord *word;
+  int begin;
+  int end;
+
+  friend class TextSelectionPainter;
+  friend class TextSelectionDumper;
+};
+
 //------------------------------------------------------------------------
 // TextPage
 //------------------------------------------------------------------------
