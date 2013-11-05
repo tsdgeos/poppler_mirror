@@ -355,7 +355,7 @@ gint main (gint argc, gchar **argv)
 	gtk_accel_group_connect (gtk_accel, gdk_keyval_from_name ("q"),
 				 GDK_CONTROL_MASK, 0, closure);
 	g_closure_unref (closure);
-	gtk_window_add_accel_group (GTK_WINDOW(win), gtk_accel);
+	gtk_window_add_accel_group (GTK_WINDOW (win), gtk_accel);
 
 	hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
