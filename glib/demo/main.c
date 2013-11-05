@@ -123,7 +123,7 @@ pgd_demo_list_create (void)
 }
 
 static GtkWidget *
-pdg_demo_notebook_create (PopplerDocument *document)
+pgd_demo_notebook_create (PopplerDocument *document)
 {
 	GtkWidget *notebook;
 	gint       i;
@@ -362,8 +362,8 @@ gint main (gint argc, gchar **argv)
 	treeview = pgd_demo_list_create ();
 	gtk_box_pack_start (GTK_BOX (hbox), treeview, FALSE, TRUE, 0);
 	gtk_widget_show (treeview);
-	
-	notebook = pdg_demo_notebook_create (document);
+
+	notebook = pgd_demo_notebook_create (document);
 	gtk_box_pack_start (GTK_BOX (hbox), notebook, TRUE, TRUE, 0);
 	gtk_widget_show (notebook);
 
