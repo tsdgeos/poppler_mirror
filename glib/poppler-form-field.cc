@@ -196,6 +196,63 @@ poppler_form_field_get_action (PopplerFormField *field)
   return field->action;
 }
 
+/**
+ * poppler_form_field_get_additional_action:
+ * @field: a #PopplerFormField
+ * @type: the type of additional action
+ *
+ * Retrieves the action (#PopplerAction) that shall be performed when
+ * an additional action is triggered on @field, or %NULL.
+ *
+ * Return value: (transfer none): the action to perform. The returned
+ *               object is owned by @field and should not be freed.
+ *
+ *
+ * Since: 0.71
+ */
+PopplerAction *
+poppler_form_field_get_additional_action (PopplerFormField           *field,
+					  PopplerAdditionalActionType type)
+{
+  Annot::FormAdditionalActionsType form_action;
+  LinkAction *link_action;
+  PopplerAction **action;
+
+  switch (type)
+  {
+    case POPPLER_ADDITIONAL_ACTION_FIELD_MODIFIED:
+      form_action = Annot::actionFieldModified;
+      action = &field->field_modified_action;
+      break;
+    case POPPLER_ADDITIONAL_ACTION_FORMAT_FIELD:
+      form_action = Annot::actionFormatField;
+      action = &field->format_field_action;
+      break;
+    case POPPLER_ADDITIONAL_ACTION_VALIDATE_FIELD:
+      form_action = Annot::actionValidateField;
+      action = &field->validate_field_action;
+      break;
+    case POPPLER_ADDITIONAL_ACTION_CALCULATE_FIELD:
+      form_action = Annot::actionCalculateField;
+      action = &field->calculate_field_action;
+      break;
+    default:
+      g_return_val_if_reached (nullptr);
+      return nullptr;
+  }
+
+  if (*action)
+    return *action;
+
+  link_action = field->widget->getAdditionalAction (form_action);
+  if (!link_action)
+    return NULL;
+
+  *action = _poppler_action_new (NULL, link_action, NULL);
+
+  return *action;
+}
+
 /* Button Field */
 /**
  * poppler_form_field_button_get_button_type:
