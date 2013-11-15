@@ -57,7 +57,7 @@ public:
 
   // Get the next object from the input stream.
   Object *getObj(Object *obj, int objNum = -1);
-  Object *getObj(Object *obj, const char *cmdA);
+  Object *getObj(Object *obj, const char *cmdA, int objNum);
 
   // Skip to the beginning of the next line in the input stream.
   void skipToNextLine();

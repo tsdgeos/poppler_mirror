@@ -581,7 +581,7 @@ Object *Lexer::getObj(Object *obj, int objNum) {
   return obj;
 }
 
-Object *Lexer::getObj(Object *obj, const char *cmdA) {
+Object *Lexer::getObj(Object *obj, const char *cmdA, int objNum) {
   char *p;
   int c;
   GBool comment;
@@ -591,7 +591,7 @@ Object *Lexer::getObj(Object *obj, const char *cmdA) {
   comment = gFalse;
   const char *cmd1 = tokBuf;
   *tokBuf = 0;
-  while (strcmp(cmdA, cmd1)) {
+  while (strcmp(cmdA, cmd1) && (objNum < 0 || xref->getNumEntry(getPos()) == objNum)) {
     while (1) {
       if ((c = getChar()) == EOF) {
         return obj->initEOF();

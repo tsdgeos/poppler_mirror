@@ -75,7 +75,7 @@ private:
 		     int objNum, int objGen, int recursion,
 		     GBool strict);
   void shift(int objNum = -1);
-  void shift(const char *cmdA);
+  void shift(const char *cmdA, int objNum);
 };
 
 #endif
