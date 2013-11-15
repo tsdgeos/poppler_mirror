@@ -22,6 +22,7 @@
 // Copyright (C) 2010 Jakob Voss <jakob.voss@gbv.de>
 // Copyright (C) 2012, 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Fischer <fischer@unix-ag.uni-kl.de>
+// Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -316,7 +317,7 @@ void ImageOutputDev::writeRawImage(Stream *str, const char *ext) {
 void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const char *ext,
                                     Stream *str, int width, int height, GfxImageColorMap *colorMap) {
   FILE *f;
-  ImageStream *imgStr;
+  ImageStream *imgStr = NULL;
   unsigned char *row;
   unsigned char *rowp;
   Guchar *p;
