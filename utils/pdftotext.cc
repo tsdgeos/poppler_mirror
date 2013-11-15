@@ -341,7 +341,7 @@ int main(int argc, char *argv[]) {
   }
 
   // write text file
-  if (bbox) {
+  if (htmlMeta && bbox) { // htmlMeta && is superfluous but makes gcc happier
     textOut = new TextOutputDev(NULL, physLayout, fixedPitch, rawOrder, htmlMeta);
 
     if (textOut->isOk()) {
