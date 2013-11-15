@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012, 2013 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -3657,7 +3657,8 @@ void LinkAnnotation::store( QDomNode & node, QDomDocument & document ) const
                 Poppler::LinkGoto * go = static_cast< Poppler::LinkGoto * >( linkDestination() );
                 hyperlinkElement.setAttribute( "type", "GoTo" );
                 hyperlinkElement.setAttribute( "filename", go->fileName() );
-                hyperlinkElement.setAttribute( "destionation", go->destination().toString() );
+                hyperlinkElement.setAttribute( "destionation", go->destination().toString() ); // TODO Remove for poppler 0.28
+                hyperlinkElement.setAttribute( "destination", go->destination().toString() );
                 break;
             }
             case Poppler::Link::Execute:

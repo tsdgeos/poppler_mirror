@@ -3644,7 +3644,8 @@ void LinkAnnotation::store( QDomNode & node, QDomDocument & document ) const
                 Poppler::LinkGoto * go = static_cast< Poppler::LinkGoto * >( linkDestination() );
                 hyperlinkElement.setAttribute( "type", "GoTo" );
                 hyperlinkElement.setAttribute( "filename", go->fileName() );
-                hyperlinkElement.setAttribute( "destionation", go->destination().toString() );
+                hyperlinkElement.setAttribute( "destionation", go->destination().toString() ); // TODO remove for poppler 0.28
+                hyperlinkElement.setAttribute( "destination", go->destination().toString() );
                 break;
             }
             case Poppler::Link::Execute:
