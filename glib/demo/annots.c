@@ -67,6 +67,7 @@ typedef struct {
     ModeType         mode;
 
     cairo_surface_t *surface;
+    GdkRGBA          annot_color;
 
     GdkPoint         start;
     GdkPoint         stop;
@@ -430,6 +431,18 @@ pgd_annot_view_set_annot_text (GtkWidget        *table,
     g_free (text);
 
     pgd_table_add_property (GTK_GRID (table), "<b>State:</b>", get_text_state (annot), row);
+}
+
+static void
+pgd_annot_color_changed (GtkButton     *button,
+                         GParamSpec    *pspec,
+                         PgdAnnotsDemo *demo)
+{
+#if GTK_CHECK_VERSION(3,4,0)
+    gtk_color_chooser_get_rgba (GTK_COLOR_CHOOSER (button), &demo->annot_color);
+#else
+    gtk_color_button_get_rgba (GTK_COLOR_BUTTON (button), &demo->annot_color);
+#endif
 }
 
 static void
@@ -807,6 +820,7 @@ static void
 pgd_annots_add_annot (PgdAnnotsDemo *demo)
 {
     PopplerRectangle  rect;
+    PopplerColor      color;
     PopplerAnnot     *annot;
     gdouble           height;
 
@@ -819,6 +833,10 @@ pgd_annots_add_annot (PgdAnnotsDemo *demo)
     rect.x2 = demo->stop.x;
     rect.y2 = height - demo->stop.y;
 
+    color.red = CLAMP ((guint) (demo->annot_color.red * 65535), 0, 65535);
+    color.green = CLAMP ((guint) (demo->annot_color.green * 65535), 0, 65535);
+    color.blue = CLAMP ((guint) (demo->annot_color.blue * 65535), 0, 65535);
+
     switch (demo->annot_type) {
         case POPPLER_ANNOT_TEXT:
             annot = poppler_annot_text_new (demo->doc, &rect);
@@ -828,6 +846,7 @@ pgd_annots_add_annot (PgdAnnotsDemo *demo)
             g_assert_not_reached ();
     }
 
+    poppler_annot_set_color (annot, &color);
     poppler_page_add_annot (demo->page, annot);
     pgd_annots_add_annot_to_model (demo, annot, rect);
     g_object_unref (annot);
@@ -1034,6 +1053,7 @@ pgd_annots_create_widget (PopplerDocument *document)
                         SELECTED_TYPE_COLUMN, POPPLER_ANNOT_TEXT,
                         SELECTED_LABEL_COLUMN, "Text",
                         -1);
+
     demo->type_selector = gtk_combo_box_new_with_model (GTK_TREE_MODEL (model));
     g_object_unref (model);
 
@@ -1045,6 +1065,20 @@ pgd_annots_create_widget (PopplerDocument *document)
     gtk_combo_box_set_active (GTK_COMBO_BOX (demo->type_selector), 0);
     gtk_box_pack_end (GTK_BOX (hbox), demo->type_selector, FALSE, FALSE, 0);
     gtk_widget_show (demo->type_selector);
+
+    button = gtk_color_button_new ();
+    demo->annot_color.red = 65535;
+    demo->annot_color.alpha = 1.0;
+#if GTK_CHECK_VERSION(3,4,0)
+    gtk_color_chooser_set_rgba (GTK_COLOR_CHOOSER (button), &demo->annot_color);
+#else
+    gtk_color_button_set_rgba (GTK_COLOR_BUTTON (button), &demo->annot_color);
+#endif
+    g_signal_connect (button, "notify::color",
+                      G_CALLBACK (pgd_annot_color_changed),
+                      (gpointer)demo);
+    gtk_box_pack_end (GTK_BOX (hbox), button, FALSE, TRUE, 0);
+    gtk_widget_show (button);
 
     gtk_widget_show (hbox);
 
