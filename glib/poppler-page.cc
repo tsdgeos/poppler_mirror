@@ -1527,6 +1527,60 @@ poppler_rectangle_free (PopplerRectangle *rectangle)
   g_slice_free (PopplerRectangle, rectangle);
 }
 
+/* PopplerPoint type */
+
+POPPLER_DEFINE_BOXED_TYPE (PopplerPoint, poppler_point,
+                           poppler_point_copy,
+                           poppler_point_free)
+
+/**
+ * poppler_point_new:
+ *
+ * Creates a new #PopplerPoint. It must be freed with poppler_point_free() after use.
+ *
+ * Returns: a new #PopplerPoint
+ *
+ * Since: 0.26
+ **/
+PopplerPoint *
+poppler_point_new (void)
+{
+  return g_slice_new0 (PopplerPoint);
+}
+
+/**
+ * poppler_point_copy:
+ * @point: a #PopplerPoint to copy
+ *
+ * Creates a copy of @point. The copy must be freed with poppler_point_free()
+ * after use.
+ *
+ * Returns: a new allocated copy of @point
+ *
+ * Since: 0.26
+ **/
+PopplerPoint *
+poppler_point_copy (PopplerPoint *point)
+{
+  g_return_val_if_fail (point != NULL, NULL);
+
+  return g_slice_dup (PopplerPoint, point);
+}
+
+/**
+ * poppler_point_free:
+ * @point: a #PopplerPoint
+ *
+ * Frees the memory used by @point
+ *
+ * Since: 0.26
+ **/
+void
+poppler_point_free (PopplerPoint *point)
+{
+  g_slice_free (PopplerPoint, point);
+}
+
 /* PopplerTextAttributes type */
 
 POPPLER_DEFINE_BOXED_TYPE (PopplerTextAttributes, poppler_text_attributes,

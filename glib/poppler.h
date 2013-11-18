@@ -175,6 +175,7 @@ typedef struct _PopplerDocument            PopplerDocument;
 typedef struct _PopplerIndexIter           PopplerIndexIter;
 typedef struct _PopplerFontsIter           PopplerFontsIter;
 typedef struct _PopplerLayersIter          PopplerLayersIter;
+typedef struct _PopplerPoint               PopplerPoint;
 typedef struct _PopplerRectangle           PopplerRectangle;
 typedef struct _PopplerTextAttributes      PopplerTextAttributes;
 typedef struct _PopplerColor               PopplerColor;

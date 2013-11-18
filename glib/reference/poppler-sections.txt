@@ -381,6 +381,7 @@ PopplerAnnotMarkupReplyType
 PopplerAnnotTextState
 PopplerAnnotCalloutLine
 PopplerAnnotFreeTextQuadding
+PopplerPoint
 poppler_annot_get_annot_type
 poppler_annot_get_flags
 poppler_annot_get_name
@@ -430,6 +431,10 @@ poppler_annot_movie_get_title
 poppler_annot_callout_line_new
 poppler_annot_callout_line_copy
 poppler_annot_callout_line_free
+poppler_point_copy
+poppler_point_free
+poppler_point_get_type
+poppler_point_new
 
 <SUBSECTION Standard>
 POPPLER_ANNOT
