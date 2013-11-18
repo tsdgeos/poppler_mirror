@@ -24,6 +24,7 @@
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Adrian Perez de Castro <aperez@igalia.com>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013 José Aliste <jaliste@src.gnome.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -80,6 +81,7 @@ private:
     GooString name;
     Object value;
     void free();
+    static int cmpEntry(const void *voidEntry, const void *voidOtherEntry);
     static int cmp(const void *key, const void *entry);
   };
 

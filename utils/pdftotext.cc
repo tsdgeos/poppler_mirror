@@ -439,7 +439,7 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key,
   GooString *s1;
   GBool isUnicode;
   Unicode u;
-  char buf[8];
+  char buf[9];
   int i, n;
 
   if (infoDict->lookup(key, &obj)->isString()) {
@@ -463,7 +463,9 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key,
 	++i;
       }
       n = uMap->mapUnicode(u, buf, sizeof(buf));
-      fwrite(buf, 1, n, f);
+      buf[n] = '\0';
+      const std::string myString = myXmlTokenReplace(buf);
+      fputs(myString.c_str(), f);
     }
     fputs(text2, f);
   }
