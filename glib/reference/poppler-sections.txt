@@ -372,6 +372,7 @@ PopplerAnnotMarkup
 PopplerAnnotText
 PopplerAnnotFreeText
 PopplerAnnotFileAttachment
+PopplerAnnotLine
 PopplerAnnotMovie
 PopplerAnnotScreen
 PopplerAnnotType
@@ -431,6 +432,8 @@ poppler_annot_movie_get_title
 poppler_annot_callout_line_new
 poppler_annot_callout_line_copy
 poppler_annot_callout_line_free
+poppler_annot_line_new
+poppler_annot_line_set_vertices
 poppler_point_copy
 poppler_point_free
 poppler_point_get_type
@@ -446,6 +449,9 @@ POPPLER_TYPE_ANNOT_FILE_ATTACHMENT
 POPPLER_ANNOT_FREE_TEXT
 POPPLER_IS_ANNOT_FREE_TEXT
 POPPLER_TYPE_ANNOT_FREE_TEXT
+POPPLER_ANNOT_LINE
+POPPLER_IS_ANNOT_LINE
+POPPLER_TYPE_ANNOT_LINE
 POPPLER_ANNOT_MARKUP
 POPPLER_IS_ANNOT_MARKUP
 POPPLER_TYPE_ANNOT_MARKUP
@@ -481,6 +487,7 @@ poppler_annot_markup_reply_type_get_type
 poppler_annot_callout_line_get_type
 poppler_annot_text_state_get_type
 poppler_annot_free_text_quadding_get_type
+poppler_annot_line_get_type
 </SECTION>
 
 <SECTION>

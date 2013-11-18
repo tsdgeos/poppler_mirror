@@ -1375,6 +1375,9 @@ poppler_page_get_annot_mapping (PopplerPage *page)
       case Annot::typeScreen:
         mapping->annot = _poppler_annot_screen_new (annot);
 	break;
+      case Annot::typeLine:
+        mapping->annot = _poppler_annot_line_new (annot);
+	break;
       default:
         mapping->annot = _poppler_annot_new (annot);
 	break;

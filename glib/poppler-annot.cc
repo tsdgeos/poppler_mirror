@@ -36,6 +36,7 @@ typedef struct _PopplerAnnotTextClass           PopplerAnnotTextClass;
 typedef struct _PopplerAnnotFileAttachmentClass PopplerAnnotFileAttachmentClass;
 typedef struct _PopplerAnnotMovieClass          PopplerAnnotMovieClass;
 typedef struct _PopplerAnnotScreenClass         PopplerAnnotScreenClass;
+typedef struct _PopplerAnnotLineClass           PopplerAnnotLineClass;
 
 struct _PopplerAnnotClass
 {
@@ -106,6 +107,15 @@ struct _PopplerAnnotScreenClass
   PopplerAnnotClass parent_class;
 };
 
+struct _PopplerAnnotLine
+{
+  PopplerAnnotMarkup parent_instance;
+};
+
+struct _PopplerAnnotLineClass
+{
+  PopplerAnnotMarkupClass parent_class;
+};
 
 G_DEFINE_TYPE (PopplerAnnot, poppler_annot, G_TYPE_OBJECT)
 G_DEFINE_TYPE (PopplerAnnotMarkup, poppler_annot_markup, POPPLER_TYPE_ANNOT)
@@ -114,6 +124,7 @@ G_DEFINE_TYPE (PopplerAnnotFreeText, poppler_annot_free_text, POPPLER_TYPE_ANNOT
 G_DEFINE_TYPE (PopplerAnnotFileAttachment, poppler_annot_file_attachment, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE (PopplerAnnotMovie, poppler_annot_movie, POPPLER_TYPE_ANNOT)
 G_DEFINE_TYPE (PopplerAnnotScreen, poppler_annot_screen, POPPLER_TYPE_ANNOT)
+G_DEFINE_TYPE (PopplerAnnotLine, poppler_annot_line, POPPLER_TYPE_ANNOT_MARKUP)
 
 static PopplerAnnot *
 _poppler_create_annot (GType annot_type, Annot *annot)
@@ -323,6 +334,48 @@ _poppler_annot_screen_new (Annot *annot)
     POPPLER_ANNOT_SCREEN (poppler_annot)->action = _poppler_action_new (NULL, action, NULL);
 
   return poppler_annot;
+}
+
+PopplerAnnot *
+_poppler_annot_line_new (Annot *annot)
+{
+  return _poppler_create_annot (POPPLER_TYPE_ANNOT_LINE, annot);
+}
+
+static void
+poppler_annot_line_init (PopplerAnnotLine *poppler_annot)
+{
+}
+
+static void
+poppler_annot_line_class_init (PopplerAnnotLineClass *klass)
+{
+}
+
+/**
+ * poppler_annot_line_new:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ *
+ * Creates a new Line annotation that will be
+ * located on @rect when added to a page. See
+ * poppler_page_add_annot()
+ *
+ * Return value: A newly created #PopplerAnnotLine annotation
+ *
+ * Since: 0.26
+ */
+PopplerAnnot *
+poppler_annot_line_new (PopplerDocument  *doc,
+			PopplerRectangle *rect)
+{
+  Annot *annot;
+  PDFRectangle pdf_rect(rect->x1, rect->y1,
+			rect->x2, rect->y2);
+
+  annot = new AnnotLine (doc->doc, &pdf_rect);
+
+  return _poppler_annot_line_new (annot);
 }
 
 
@@ -1431,4 +1484,30 @@ PopplerAction *
 poppler_annot_screen_get_action (PopplerAnnotScreen *poppler_annot)
 {
   return poppler_annot->action;
+}
+
+/* PopplerAnnotLine */
+/**
+ * poppler_annot_line_set_vertices:
+ * @poppler_annot: a #PopplerAnnotLine
+ * @start: a #PopplerPoint of the starting vertice
+ * @end: a #PopplerPoint of the ending vertice
+ *
+ * Set the coordinate points where the @poppler_annot starts and ends.
+ *
+ * Since: 0.26
+ */
+void
+poppler_annot_line_set_vertices (PopplerAnnotLine *poppler_annot,
+				 PopplerPoint     *start,
+				 PopplerPoint     *end)
+{
+  AnnotLine *annot;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_LINE (poppler_annot));
+  g_return_if_fail (start != NULL);
+  g_return_if_fail (end != NULL);
+
+  annot = static_cast<AnnotLine *>(POPPLER_ANNOT (poppler_annot)->annot);
+  annot->setVertices (start->x, start->y, end->x, end->y);
 }
