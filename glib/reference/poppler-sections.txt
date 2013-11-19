@@ -388,6 +388,7 @@ PopplerAnnotCalloutLine
 PopplerAnnotFreeTextQuadding
 PopplerAnnotSquare
 PopplerPoint
+PopplerQuadrilateral
 poppler_annot_get_annot_type
 poppler_annot_get_flags
 poppler_annot_get_name
@@ -449,6 +450,10 @@ poppler_point_copy
 poppler_point_free
 poppler_point_get_type
 poppler_point_new
+poppler_quadrilateral_copy
+poppler_quadrilateral_free
+poppler_quadrilateral_get_type
+poppler_quadrilateral_new
 
 <SUBSECTION Standard>
 POPPLER_ANNOT
@@ -488,6 +493,7 @@ POPPLER_TYPE_ANNOT_MARKUP_REPLY_TYPE
 POPPLER_TYPE_ANNOT_TEXT_STATE
 POPPLER_TYPE_ANNOT_FREE_TEXT_QUADDING
 POPPLER_TYPE_ANNOT_TYPE
+POPPLER_TYPE_QUADRILATERAL
 
 <SUBSECTION Private>
 poppler_annot_get_type

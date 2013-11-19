@@ -1612,6 +1612,59 @@ poppler_point_free (PopplerPoint *point)
   g_slice_free (PopplerPoint, point);
 }
 
+/* PopplerQuadrilateral type */
+
+POPPLER_DEFINE_BOXED_TYPE (PopplerQuadrilateral, poppler_quadrilateral,
+                           poppler_quadrilateral_copy,
+                           poppler_quadrilateral_free)
+
+/**
+ * poppler_quadrilateral_new:
+ *
+ * Creates a new #PopplerQuadrilateral. It must be freed with poppler_quadrilateral_free() after use.
+ *
+ * Returns: a new #PopplerQuadrilateral.
+ *
+ * Since: 0.26
+ **/
+PopplerQuadrilateral *
+poppler_quadrilateral_new (void)
+{
+  return g_slice_new0 (PopplerQuadrilateral);
+}
+
+/**
+ * poppler_quadrilateral_copy:
+ * @quad: a #PopplerQuadrilateral to copy
+ *
+ * Creates a copy of @quad. The copy must be freed with poppler_quadrilateral_free() after use.
+ *
+ * Returns: a new allocated copy of @quad
+ *
+ * Since: 0.26
+ **/
+PopplerQuadrilateral *
+poppler_quadrilateral_copy (PopplerQuadrilateral *quad)
+{
+  g_return_val_if_fail (quad != NULL, NULL);
+
+  return g_slice_dup (PopplerQuadrilateral, quad);
+}
+
+/**
+ * poppler_quadrilateral_free:
+ * @quad: a #PopplerQuadrilateral
+ *
+ * Frees the memory used by @quad
+ *
+ * Since: 0.26
+ **/
+void
+poppler_quadrilateral_free (PopplerQuadrilateral *quad)
+{
+  g_slice_free (PopplerQuadrilateral, quad);
+}
+
 /* PopplerTextAttributes type */
 
 POPPLER_DEFINE_BOXED_TYPE (PopplerTextAttributes, poppler_text_attributes,
