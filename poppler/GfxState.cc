@@ -25,6 +25,7 @@
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
+// Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -156,7 +157,7 @@ static const char *gfxColorSpaceModeNames[] = {
 
 #ifdef USE_CMS
 
-static const int CMSCACHE_LIMIT = 2048;
+static const std::map<unsigned int, unsigned int>::size_type CMSCACHE_LIMIT = 2048;
 
 #ifdef USE_LCMS1
 #include <lcms.h>
