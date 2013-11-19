@@ -38,6 +38,11 @@ G_BEGIN_DECLS
 #define POPPLER_ANNOT_TEXT(obj)              (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ANNOT_TEXT, PopplerAnnotText))
 #define POPPLER_IS_ANNOT_TEXT(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_ANNOT_TEXT))
 
+#define POPPLER_TYPE_ANNOT_TEXT_MARKUP       (poppler_annot_text_markup_get_type ())
+#define POPPLER_ANNOT_TEXT_MARKUP(obj)       (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ANNOT_TEXT_MARKUP, PopplerAnnotTextMarkup))
+#define POPPLER_IS_ANNOT_TEXT_MARKUP(obj)    (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_ANNOT_TEXT_MARKUP))
+
+
 #define POPPLER_TYPE_ANNOT_FREE_TEXT         (poppler_annot_free_text_get_type ())
 #define POPPLER_ANNOT_FREE_TEXT(obj)         (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_ANNOT_FREE_TEXT, PopplerAnnotFreeText))
 #define POPPLER_IS_ANNOT_FREE_TEXT(obj)      (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_ANNOT_FREE_TEXT))
@@ -216,6 +221,24 @@ gchar                        *poppler_annot_text_get_icon                      (
 void                          poppler_annot_text_set_icon                      (PopplerAnnotText *poppler_annot,
 										const gchar      *icon);
 PopplerAnnotTextState         poppler_annot_text_get_state                     (PopplerAnnotText *poppler_annot);
+
+/* PopplerAnnotTextMarkup */
+GType                         poppler_annot_text_markup_get_type               (void) G_GNUC_CONST;
+PopplerAnnot                 *poppler_annot_text_markup_new_highlight          (PopplerDocument  *doc,
+                                                                                PopplerRectangle *rect,
+                                                                                GArray           *quadrilaterals);
+PopplerAnnot                 *poppler_annot_text_markup_new_squiggly           (PopplerDocument  *doc,
+                                                                                PopplerRectangle *rect,
+                                                                                GArray           *quadrilaterals);
+PopplerAnnot                 *poppler_annot_text_markup_new_strikeout          (PopplerDocument  *doc,
+                                                                                PopplerRectangle *rect,
+                                                                                GArray           *quadrilaterals);
+PopplerAnnot                 *poppler_annot_text_markup_new_underline          (PopplerDocument  *doc,
+                                                                                PopplerRectangle *rect,
+                                                                                GArray           *quadrilaterals);
+void                          poppler_annot_text_markup_set_quadrilaterals     (PopplerAnnotTextMarkup *poppler_annot,
+										GArray                 *quadrilaterals);
+GArray                       *poppler_annot_text_markup_get_quadrilaterals     (PopplerAnnotTextMarkup *poppler_annot);
 
 /* PopplerAnnotFreeText */
 GType                         poppler_annot_free_text_get_type                 (void) G_GNUC_CONST;

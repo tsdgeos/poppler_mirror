@@ -33,6 +33,7 @@ typedef struct _PopplerAnnotClass               PopplerAnnotClass;
 typedef struct _PopplerAnnotMarkupClass         PopplerAnnotMarkupClass;
 typedef struct _PopplerAnnotFreeTextClass       PopplerAnnotFreeTextClass;
 typedef struct _PopplerAnnotTextClass           PopplerAnnotTextClass;
+typedef struct _PopplerAnnotTextMarkupClass     PopplerAnnotTextMarkupClass;
 typedef struct _PopplerAnnotFileAttachmentClass PopplerAnnotFileAttachmentClass;
 typedef struct _PopplerAnnotMovieClass          PopplerAnnotMovieClass;
 typedef struct _PopplerAnnotScreenClass         PopplerAnnotScreenClass;
@@ -61,6 +62,16 @@ struct _PopplerAnnotText
 };
 
 struct _PopplerAnnotTextClass
+{
+  PopplerAnnotMarkupClass parent_class;
+};
+
+struct _PopplerAnnotTextMarkup
+{
+  PopplerAnnotMarkup parent_instance;
+};
+
+struct _PopplerAnnotTextMarkupClass
 {
   PopplerAnnotMarkupClass parent_class;
 };
@@ -141,6 +152,7 @@ struct _PopplerAnnotSquareClass
 
 G_DEFINE_TYPE (PopplerAnnot, poppler_annot, G_TYPE_OBJECT)
 G_DEFINE_TYPE (PopplerAnnotMarkup, poppler_annot_markup, POPPLER_TYPE_ANNOT)
+G_DEFINE_TYPE (PopplerAnnotTextMarkup, poppler_annot_text_markup, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE (PopplerAnnotText, poppler_annot_text, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE (PopplerAnnotFreeText, poppler_annot_free_text, POPPLER_TYPE_ANNOT_MARKUP)
 G_DEFINE_TYPE (PopplerAnnotFileAttachment, poppler_annot_file_attachment, POPPLER_TYPE_ANNOT_MARKUP)
@@ -244,6 +256,208 @@ poppler_annot_text_new (PopplerDocument  *doc,
   annot = new AnnotText (doc->doc, &pdf_rect);
 
   return _poppler_annot_text_new (annot);
+}
+
+PopplerAnnot *
+_poppler_annot_text_markup_new (Annot *annot)
+{
+  return _poppler_create_annot (POPPLER_TYPE_ANNOT_TEXT_MARKUP, annot);
+}
+
+static AnnotQuadrilaterals *
+create_annot_quads_from_poppler_quads (GArray *quads)
+{
+  AnnotQuadrilaterals::AnnotQuadrilateral **quads_array;
+
+  g_assert (quads->len > 0);
+
+  quads_array = (AnnotQuadrilaterals::AnnotQuadrilateral **) g_malloc0_n (
+    sizeof (AnnotQuadrilaterals::AnnotQuadrilateral *),
+    quads->len);
+
+  for (guint i = 0; i < quads->len; i++) {
+    PopplerQuadrilateral *quadrilateral = &g_array_index (quads, PopplerQuadrilateral, i);
+
+    quads_array[i] = new AnnotQuadrilaterals::AnnotQuadrilateral (
+      quadrilateral->p1.x, quadrilateral->p1.y,
+      quadrilateral->p2.x, quadrilateral->p2.y,
+      quadrilateral->p3.x, quadrilateral->p3.y,
+      quadrilateral->p4.x, quadrilateral->p4.y);
+  }
+
+  return new AnnotQuadrilaterals (quads_array, quads->len);
+}
+
+static GArray *
+create_poppler_quads_from_annot_quads (AnnotQuadrilaterals *quads_array)
+{
+  GArray *quads;
+  guint   quads_len;
+
+  quads_len = quads_array->getQuadrilateralsLength();
+  quads = g_array_sized_new (FALSE, FALSE,
+                             sizeof (PopplerQuadrilateral),
+                             quads_len);
+  g_array_set_size (quads, quads_len);
+
+  for (guint i = 0; i < quads_len; ++i) {
+    PopplerQuadrilateral *quadrilateral = &g_array_index (quads, PopplerQuadrilateral, i);
+
+    quadrilateral->p1.x = quads_array->getX1(i);
+    quadrilateral->p1.y = quads_array->getX1(i);
+    quadrilateral->p2.x = quads_array->getX2(i);
+    quadrilateral->p2.y = quads_array->getY2(i);
+    quadrilateral->p3.x = quads_array->getX3(i);
+    quadrilateral->p3.y = quads_array->getY3(i);
+    quadrilateral->p4.x = quads_array->getX4(i);
+    quadrilateral->p4.y = quads_array->getY4(i);
+  }
+
+  return quads;
+}
+
+static void
+poppler_annot_text_markup_init (PopplerAnnotTextMarkup *poppler_annot)
+{
+}
+
+static void
+poppler_annot_text_markup_class_init (PopplerAnnotTextMarkupClass *klass)
+{
+}
+
+/**
+ * poppler_annot_text_markup_new_highlight:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ * @quadrilaterals: (element-type PopplerQuadrilateral): A #GArray of
+ *   #PopplerQuadrilateral<!-- -->s
+ *
+ * Creates a new Highlight Text annotation that will be
+ * located on @rect when added to a page. See poppler_page_add_annot()
+ *
+ * Return value: (transfer full): A newly created #PopplerAnnotTextMarkup annotation
+ *
+ * Since: 0.26
+ */
+PopplerAnnot *
+poppler_annot_text_markup_new_highlight (PopplerDocument  *doc,
+                                         PopplerRectangle *rect,
+                                         GArray           *quadrilaterals)
+{
+  PopplerAnnot *poppler_annot;
+  AnnotTextMarkup *annot;
+  PDFRectangle pdf_rect(rect->x1, rect->y1,
+			rect->x2, rect->y2);
+
+  annot = new AnnotTextMarkup (doc->doc, &pdf_rect, Annot::typeHighlight);
+
+  poppler_annot = _poppler_annot_text_markup_new (annot);
+  poppler_annot_text_markup_set_quadrilaterals (POPPLER_ANNOT_TEXT_MARKUP (poppler_annot),
+                                                quadrilaterals);
+  return poppler_annot;
+}
+
+/**
+ * poppler_annot_text_markup_new_squiggly:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ * @quadrilaterals: (element-type PopplerQuadrilateral): A #GArray of
+ *   #PopplerQuadrilateral<!-- -->s
+ *
+ * Creates a new Squiggly Text annotation that will be
+ * located on @rect when added to a page. See poppler_page_add_annot()
+ *
+ * Return value: (transfer full): A newly created #PopplerAnnotTextMarkup annotation
+ *
+ * Since: 0.26
+ */
+PopplerAnnot *
+poppler_annot_text_markup_new_squiggly (PopplerDocument  *doc,
+                                        PopplerRectangle *rect,
+                                        GArray           *quadrilaterals)
+{
+  PopplerAnnot *poppler_annot;
+  AnnotTextMarkup *annot;
+  PDFRectangle pdf_rect(rect->x1, rect->y1,
+			rect->x2, rect->y2);
+
+  g_return_val_if_fail (quadrilaterals != NULL && quadrilaterals->len > 0, NULL);
+
+  annot = new AnnotTextMarkup (doc->doc, &pdf_rect, Annot::typeSquiggly);
+
+  poppler_annot = _poppler_annot_text_markup_new (annot);
+  poppler_annot_text_markup_set_quadrilaterals (POPPLER_ANNOT_TEXT_MARKUP (poppler_annot),
+                                                quadrilaterals);
+  return poppler_annot;
+}
+
+/**
+ * poppler_annot_text_markup_new_strikeout:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ * @quadrilaterals: (element-type PopplerQuadrilateral): A #GArray of
+ *   #PopplerQuadrilateral<!-- -->s
+ *
+ * Creates a new Strike Out Text annotation that will be
+ * located on @rect when added to a page. See poppler_page_add_annot()
+ *
+ * Return value: (transfer full): A newly created #PopplerAnnotTextMarkup annotation
+ *
+ * Since: 0.26
+ */
+PopplerAnnot *
+poppler_annot_text_markup_new_strikeout (PopplerDocument  *doc,
+                                         PopplerRectangle *rect,
+                                         GArray           *quadrilaterals)
+{
+  PopplerAnnot *poppler_annot;
+  AnnotTextMarkup *annot;
+  PDFRectangle pdf_rect(rect->x1, rect->y1,
+			rect->x2, rect->y2);
+
+  g_return_val_if_fail (quadrilaterals != NULL && quadrilaterals->len > 0, NULL);
+
+  annot = new AnnotTextMarkup (doc->doc, &pdf_rect, Annot::typeStrikeOut);
+
+  poppler_annot = _poppler_annot_text_markup_new (annot);
+  poppler_annot_text_markup_set_quadrilaterals (POPPLER_ANNOT_TEXT_MARKUP (poppler_annot),
+                                                quadrilaterals);
+  return poppler_annot;
+}
+
+/**
+ * poppler_annot_text_markup_new_underline:
+ * @doc: a #PopplerDocument
+ * @rect: a #PopplerRectangle
+ * @quadrilaterals: (element-type PopplerQuadrilateral): A #GArray of
+ *   #PopplerQuadrilateral<!-- -->s
+ *
+ * Creates a new Underline Text annotation that will be
+ * located on @rect when added to a page. See poppler_page_add_annot()
+ *
+ * Return value: (transfer full): A newly created #PopplerAnnotTextMarkup annotation
+ *
+ * Since: 0.26
+ */
+PopplerAnnot *
+poppler_annot_text_markup_new_underline (PopplerDocument  *doc,
+                                         PopplerRectangle *rect,
+                                         GArray           *quadrilaterals)
+{
+  PopplerAnnot *poppler_annot;
+  AnnotTextMarkup *annot;
+  PDFRectangle pdf_rect(rect->x1, rect->y1,
+			rect->x2, rect->y2);
+
+  g_return_val_if_fail (quadrilaterals != NULL && quadrilaterals->len > 0, NULL);
+
+  annot = new AnnotTextMarkup (doc->doc, &pdf_rect, Annot::typeUnderline);
+
+  poppler_annot = _poppler_annot_text_markup_new (annot);
+  poppler_annot_text_markup_set_quadrilaterals (POPPLER_ANNOT_TEXT_MARKUP (poppler_annot),
+                                                quadrilaterals);
+  return poppler_annot;
 }
 
 static void
@@ -1351,6 +1565,56 @@ poppler_annot_text_get_state (PopplerAnnotText *poppler_annot)
     }
 
   return POPPLER_ANNOT_TEXT_STATE_UNKNOWN;
+}
+
+/* PopplerAnnotTextMarkup */
+/**
+ * poppler_annot_text_markup_set_quadrilaterals:
+ * @poppler_annot: A #PopplerAnnotTextMarkup
+ * @quadrilaterals: (element-type PopplerQuadrilateral): A #GArray of
+ *   #PopplerQuadrilateral<!-- -->s
+ *
+ * Set the regions (Quadrilaterals) to apply the text markup in @poppler_annot.
+ *
+ * Since: 0.26
+ **/
+void
+poppler_annot_text_markup_set_quadrilaterals (PopplerAnnotTextMarkup *poppler_annot,
+                                              GArray                 *quadrilaterals)
+{
+  AnnotTextMarkup *annot;
+
+  g_return_if_fail (POPPLER_IS_ANNOT_TEXT_MARKUP (poppler_annot));
+  g_return_if_fail (quadrilaterals != NULL && quadrilaterals->len > 0);
+
+  annot = static_cast<AnnotTextMarkup *>(POPPLER_ANNOT (poppler_annot)->annot);
+  AnnotQuadrilaterals *quads = create_annot_quads_from_poppler_quads (quadrilaterals);
+  annot->setQuadrilaterals (quads);
+  delete quads;
+}
+
+/**
+ * poppler_annot_text_markup_get_quadrilaterals:
+ * @poppler_annot: A #PopplerAnnotTextMarkup
+ *
+ * Returns a #GArray of #PopplerQuadrilateral items that map from a
+ * location on @page to a #PopplerAnnotTextMarkup.  This array must be freed
+ * when done.
+ *
+ * Return value: (element-type PopplerQuadrilateral) (transfer full): A #GArray of #PopplerQuadrilateral
+ *
+ * Since: 0.26
+ **/
+GArray *
+poppler_annot_text_markup_get_quadrilaterals (PopplerAnnotTextMarkup *poppler_annot)
+{
+  AnnotTextMarkup *annot;
+
+  g_return_val_if_fail (POPPLER_IS_ANNOT_TEXT_MARKUP (poppler_annot), NULL);
+
+  annot = static_cast<AnnotTextMarkup *>(POPPLER_ANNOT (poppler_annot)->annot);
+
+  return create_poppler_quads_from_annot_quads (annot->getQuadrilaterals());
 }
 
 /* PopplerAnnotFreeText */

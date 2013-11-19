@@ -1406,6 +1406,12 @@ poppler_page_get_annot_mapping (PopplerPage *page)
       case Annot::typeCircle:
         mapping->annot = _poppler_annot_circle_new (annot);
 	break;
+      case Annot::typeHighlight:
+      case Annot::typeUnderline:
+      case Annot::typeSquiggly:
+      case Annot::typeStrikeOut:
+        mapping->annot = _poppler_annot_text_markup_new (annot);
+        break;
       default:
         mapping->annot = _poppler_annot_new (annot);
 	break;

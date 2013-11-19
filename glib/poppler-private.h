@@ -117,6 +117,7 @@ PopplerMedia      *_poppler_media_new (MediaRendition *media);
 PopplerAnnot      *_poppler_annot_new           (Annot *annot);
 PopplerAnnot      *_poppler_annot_text_new      (Annot *annot);
 PopplerAnnot      *_poppler_annot_free_text_new (Annot *annot);
+PopplerAnnot      *_poppler_annot_text_markup_new     (Annot *annot);
 PopplerAnnot      *_poppler_annot_file_attachment_new (Annot *annot);
 PopplerAnnot      *_poppler_annot_movie_new (Annot *annot);
 PopplerAnnot      *_poppler_annot_screen_new (Annot *annot);

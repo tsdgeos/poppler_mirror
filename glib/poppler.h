@@ -198,6 +198,7 @@ typedef struct _PopplerMedia               PopplerMedia;
 typedef struct _PopplerAnnot               PopplerAnnot;
 typedef struct _PopplerAnnotMarkup         PopplerAnnotMarkup;
 typedef struct _PopplerAnnotText           PopplerAnnotText;
+typedef struct _PopplerAnnotTextMarkup     PopplerAnnotTextMarkup;
 typedef struct _PopplerAnnotFreeText       PopplerAnnotFreeText;
 typedef struct _PopplerAnnotFileAttachment PopplerAnnotFileAttachment;
 typedef struct _PopplerAnnotMovie          PopplerAnnotMovie;
