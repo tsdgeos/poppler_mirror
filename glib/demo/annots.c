@@ -38,6 +38,23 @@ enum {
     SELECTED_N_COLUMNS
 };
 
+typedef struct
+{
+  const guint  type;
+  const gchar *label;
+} Annotations;
+
+static Annotations supported_annots[] = {
+    { POPPLER_ANNOT_TEXT,       "Text" },
+    { POPPLER_ANNOT_LINE,       "Line" },
+    { POPPLER_ANNOT_SQUARE,     "Square" },
+    { POPPLER_ANNOT_CIRCLE,     "Circle" },
+    { POPPLER_ANNOT_HIGHLIGHT,  "Highlight" },
+    { POPPLER_ANNOT_UNDERLINE,  "Underline" },
+    { POPPLER_ANNOT_SQUIGGLY,   "Squiggly" },
+    { POPPLER_ANNOT_STRIKE_OUT, "Strike Out" },
+};
+
 typedef enum {
     MODE_NORMAL,  /* Regular use as pointer in the page */
     MODE_ADD,     /* To add simple annotations */
@@ -449,6 +466,42 @@ pgd_annot_color_changed (GtkButton     *button,
 }
 
 static void
+pgd_annot_view_set_annot_text_markup (GtkWidget              *table,
+                                      PopplerAnnotTextMarkup *annot,
+                                      gint                   *row)
+{
+    gint                  i;
+    gchar                *text = NULL;
+    gchar                *prev_text = NULL;
+    GArray               *quads_array = NULL;
+    PopplerQuadrilateral  quadrilateral;
+
+    quads_array = poppler_annot_text_markup_get_quadrilaterals (annot);
+
+    prev_text = g_strdup ("");
+    for (i = 0; i < quads_array->len; i++) {
+        quadrilateral = g_array_index (quads_array, PopplerQuadrilateral, i);
+
+        text = g_strdup_printf ("%s%2d:(%.2f,%.2f) (%.2f,%.2f)\n"
+                                "    (%.2f,%.2f) (%.2f,%.2f)\n",
+                                prev_text, i+1,
+                                quadrilateral.p1.x, quadrilateral.p1.y,
+                                quadrilateral.p2.x, quadrilateral.p2.y,
+                                quadrilateral.p3.x, quadrilateral.p3.y,
+                                quadrilateral.p4.x, quadrilateral.p4.y);
+        g_free (prev_text);
+        prev_text = text;
+    }
+
+    text = g_strchomp (text);
+    pgd_table_add_property (GTK_GRID (table), "<b>Quadrilaterals:</b>", text, row);
+
+    g_array_free (quads_array, TRUE);
+    g_free (text);
+}
+
+
+static void
 pgd_annot_view_set_annot_free_text (GtkWidget            *table,
                                     PopplerAnnotFreeText *annot,
                                     gint                 *row)
@@ -618,6 +671,12 @@ pgd_annot_view_set_annot (PgdAnnotsDemo *demo,
     {
         case POPPLER_ANNOT_TEXT:
           pgd_annot_view_set_annot_text (table, POPPLER_ANNOT_TEXT (annot), &row);
+          break;
+        case POPPLER_ANNOT_HIGHLIGHT:
+        case POPPLER_ANNOT_UNDERLINE:
+        case POPPLER_ANNOT_SQUIGGLY:
+        case POPPLER_ANNOT_STRIKE_OUT:
+          pgd_annot_view_set_annot_text_markup (table, POPPLER_ANNOT_TEXT_MARKUP (annot), &row);
           break;
         case POPPLER_ANNOT_FREE_TEXT:
           pgd_annot_view_set_annot_free_text (table, POPPLER_ANNOT_FREE_TEXT (annot), &row);
@@ -812,13 +871,44 @@ pgd_annots_invisible_flag_toggled (GtkCellRendererToggle *renderer,
     pgd_annots_flags_toggled (renderer, path_str, demo, ANNOTS_FLAG_INVISIBLE_COLUMN, POPPLER_ANNOT_FLAG_INVISIBLE);
 }
 
+static inline void
+pgd_annots_set_poppler_quad_from_rectangle (PopplerQuadrilateral *quad,
+                                            PopplerRectangle     *rect)
+{
+    quad->p1.x = rect->x1;
+    quad->p1.y = rect->y1;
+    quad->p2.x = rect->x2;
+    quad->p2.y = rect->y1;
+    quad->p3.x = rect->x1;
+    quad->p3.y = rect->y2;
+    quad->p4.x = rect->x2;
+    quad->p4.y = rect->y2;
+}
+
+static GArray *
+pgd_annots_create_quads_array_for_rectangle (PopplerRectangle *rect)
+{
+    GArray               *quads_array;
+    PopplerQuadrilateral *quad;
+
+    quads_array = g_array_sized_new (FALSE, FALSE,
+                                     sizeof (PopplerQuadrilateral),
+                                     1);
+    g_array_set_size (quads_array, 1);
+
+    quad = &g_array_index (quads_array, PopplerQuadrilateral, 0);
+    pgd_annots_set_poppler_quad_from_rectangle (quad, rect);
+
+    return quads_array;
+}
+
 static void
 pgd_annots_add_annot (PgdAnnotsDemo *demo)
 {
-    PopplerRectangle  rect;
-    PopplerColor      color;
-    PopplerAnnot     *annot;
-    gdouble           height;
+    PopplerRectangle rect;
+    PopplerColor     color;
+    PopplerAnnot    *annot;
+    gdouble          height;
 
     g_assert (demo->mode == MODE_ADD);
 
@@ -857,6 +947,38 @@ pgd_annots_add_annot (PgdAnnotsDemo *demo)
         case POPPLER_ANNOT_CIRCLE:
             annot = poppler_annot_circle_new (demo->doc, &rect);
             break;
+        case POPPLER_ANNOT_HIGHLIGHT: {
+            GArray *quads_array;
+
+            quads_array = pgd_annots_create_quads_array_for_rectangle (&rect);
+            annot = poppler_annot_text_markup_new_highlight (demo->doc, &rect, quads_array);
+            g_array_free (quads_array, TRUE);
+        }
+            break;
+        case POPPLER_ANNOT_UNDERLINE: {
+            GArray *quads_array;
+
+            quads_array = pgd_annots_create_quads_array_for_rectangle (&rect);
+            annot = poppler_annot_text_markup_new_underline (demo->doc, &rect, quads_array);
+            g_array_free (quads_array, TRUE);
+        }
+            break;
+        case POPPLER_ANNOT_SQUIGGLY: {
+            GArray *quads_array;
+
+            quads_array = pgd_annots_create_quads_array_for_rectangle (&rect);
+            annot = poppler_annot_text_markup_new_squiggly (demo->doc, &rect, quads_array);
+            g_array_free (quads_array, TRUE);
+        }
+            break;
+        case POPPLER_ANNOT_STRIKE_OUT: {
+            GArray *quads_array;
+
+            quads_array = pgd_annots_create_quads_array_for_rectangle (&rect);
+            annot = poppler_annot_text_markup_new_strikeout (demo->doc, &rect, quads_array);
+            g_array_free (quads_array, TRUE);
+        }
+            break;
         default:
             g_assert_not_reached ();
     }
@@ -880,6 +1002,76 @@ pgd_annots_finish_add_annot (PgdAnnotsDemo *demo)
     pgd_annots_viewer_queue_redraw (demo);
 
     gtk_label_set_text (GTK_LABEL (demo->timer_label), NULL);
+}
+
+static void
+pgd_annots_update_selected_text (PgdAnnotsDemo *demo)
+{
+    PopplerRectangle      doc_area, *rects = NULL, *r = NULL;
+    gdouble               width, height;
+    GArray               *quads_array = NULL;
+    guint                 n_rects;
+    gint                  i, lines = 1;
+    GList                 *l_rects = NULL, *list;
+
+    poppler_page_get_size (demo->page, &width, &height);
+
+    doc_area.x1 = demo->start.x;
+    doc_area.y1 = demo->start.y;
+    doc_area.x2 = demo->stop.x;
+    doc_area.y2 = demo->stop.y;
+
+    if (! poppler_page_get_text_layout_for_area (demo->page, &doc_area,
+                                                 &rects, &n_rects))
+        return;
+
+    r = g_slice_new (PopplerRectangle);
+    r->x1 = G_MAXDOUBLE; r->y1 = G_MAXDOUBLE;
+    r->x2 = G_MINDOUBLE; r->y2 = G_MINDOUBLE;
+
+    for (i = 0; i < n_rects; i++) {
+        /* Check if the rectangle belongs to the same line.
+           On a new line, start a new target rectangle.
+           On the same line, make an union of rectangles at
+           the same line */
+        if (ABS(r->y2 - rects[i].y2) > 0.0001) {
+            if (i > 0)
+                l_rects = g_list_append (l_rects, r);
+            r = g_slice_new (PopplerRectangle);
+            r->x1 = rects[i].x1;
+            r->y1 = height - rects[i].y1;
+            r->x2 = rects[i].x2;
+            r->y2 = height - rects[i].y2;
+            lines++;
+        } else {
+            r->x1 = MIN(r->x1, rects[i].x1);
+            r->y1 = height - MIN(r->y1, rects[i].y1);
+            r->x2 = MAX(r->x2, rects[i].x2);
+            r->y2 = height - MAX(r->y2, rects[i].y2);
+        }
+    }
+
+    l_rects = g_list_append (l_rects, r);
+    l_rects = g_list_reverse (l_rects);
+
+    quads_array = g_array_sized_new (TRUE, TRUE,
+                                     sizeof (PopplerQuadrilateral),
+                                     lines);
+    g_array_set_size (quads_array, lines);
+
+    for (list = l_rects, i = 0; list; list = list->next, i++) {
+        PopplerQuadrilateral *quad;
+
+        quad = &g_array_index (quads_array, PopplerQuadrilateral, i);
+        r = (PopplerRectangle *)list->data;
+        pgd_annots_set_poppler_quad_from_rectangle (quad, r);
+        g_slice_free (PopplerRectangle, r);
+    }
+
+    poppler_annot_text_markup_set_quadrilaterals (POPPLER_ANNOT_TEXT_MARKUP (demo->active_annot), quads_array);
+    g_array_free (quads_array, TRUE);
+    g_free (rects);
+    g_list_free (l_rects);
 }
 
 /* Render area */
@@ -1021,6 +1213,9 @@ pgd_annots_drawing_area_motion_notify (GtkWidget      *area,
         poppler_annot_line_set_vertices (POPPLER_ANNOT_LINE (demo->active_annot),
                                          &start, &end);
 
+    if (POPPLER_IS_ANNOT_TEXT_MARKUP (demo->active_annot))
+        pgd_annots_update_selected_text (demo);
+
     pgd_annot_view_set_annot (demo, demo->active_annot);
     pgd_annots_viewer_queue_redraw (demo);
 
@@ -1108,29 +1303,14 @@ pgd_annots_create_widget (PopplerDocument *document)
 
     model = gtk_list_store_new(SELECTED_N_COLUMNS,
                                G_TYPE_INT, G_TYPE_STRING);
-    gtk_list_store_append (model, &iter);
-    gtk_list_store_set (model, &iter,
-                        SELECTED_TYPE_COLUMN, POPPLER_ANNOT_TEXT,
-                        SELECTED_LABEL_COLUMN, "Text",
-                        -1);
 
-    gtk_list_store_append (model, &iter);
-    gtk_list_store_set (model, &iter,
-                        SELECTED_TYPE_COLUMN, POPPLER_ANNOT_LINE,
-                        SELECTED_LABEL_COLUMN, "Line",
-                        -1);
-
-    gtk_list_store_append (model, &iter);
-    gtk_list_store_set (model, &iter,
-                        SELECTED_TYPE_COLUMN, POPPLER_ANNOT_SQUARE,
-                        SELECTED_LABEL_COLUMN, "Square",
-                        -1);
-
-    gtk_list_store_append (model, &iter);
-    gtk_list_store_set (model, &iter,
-                        SELECTED_TYPE_COLUMN, POPPLER_ANNOT_CIRCLE,
-                        SELECTED_LABEL_COLUMN, "Circle",
-                        -1);
+    for (gint i = 0; i < G_N_ELEMENTS (supported_annots); i++) {
+        gtk_list_store_append (model, &iter);
+        gtk_list_store_set (model, &iter,
+                            SELECTED_TYPE_COLUMN, supported_annots[i].type,
+                            SELECTED_LABEL_COLUMN, supported_annots[i].label,
+                            -1);
+    }
 
     demo->type_selector = gtk_combo_box_new_with_model (GTK_TREE_MODEL (model));
     g_object_unref (model);
