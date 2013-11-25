@@ -68,6 +68,8 @@ GList     	      *poppler_page_find_text            (PopplerPage        *page,
 void                   poppler_page_render_to_ps         (PopplerPage        *page,
 							  PopplerPSFile      *ps_file);
 char                  *poppler_page_get_text             (PopplerPage        *page);
+char                  *poppler_page_get_text_for_area    (PopplerPage        *page,
+                                                          PopplerRectangle   *area);
 char                  *poppler_page_get_selected_text    (PopplerPage        *page,
 							  PopplerSelectionStyle style,
 							  PopplerRectangle   *selection);
@@ -99,8 +101,14 @@ void 		      poppler_page_get_crop_box 	 (PopplerPage        *page,
 gboolean               poppler_page_get_text_layout      (PopplerPage        *page,
                                                           PopplerRectangle  **rectangles,
                                                           guint              *n_rectangles);
+gboolean           poppler_page_get_text_layout_for_area (PopplerPage        *page,
+                                                          PopplerRectangle   *area,
+                                                          PopplerRectangle  **rectangles,
+                                                          guint              *n_rectangles);
 GList                 *poppler_page_get_text_attributes  (PopplerPage        *page);
 void                   poppler_page_free_text_attributes (GList              *list);
+GList *        poppler_page_get_text_attributes_for_area (PopplerPage        *page,
+                                                          PopplerRectangle   *area);
 
 /* A rectangle on a page, with coordinates in PDF points. */
 #define POPPLER_TYPE_RECTANGLE             (poppler_rectangle_get_type ())
