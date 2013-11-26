@@ -1292,18 +1292,14 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   }
 
   //----- parse the border style
-  if (dict->lookup("BS", &obj1)->isDict()) {
-    border = new AnnotBorderBS(obj1.getDict());
-  } else {
-    obj1.free();
-
-    if (dict->lookup("Border", &obj1)->isArray())
-      border = new AnnotBorderArray(obj1.getArray());
-    else
-      // Adobe draws no border at all if the last element is of
-      // the wrong type.
-      border = NULL;
-  }
+  // According to the spec if neither the Border nor the BS entry is present,
+  // the border shall be drawn as a solid line with a width of 1 point. But acroread
+  // seems to ignore the Border entry for annots that can't have a BS entry. So, we only
+  // follow this rule for annots tha can have a BS entry.
+  if (dict->lookup("Border", &obj1)->isArray())
+    border = new AnnotBorderArray(obj1.getArray());
+  else
+    border = NULL;
   obj1.free();
 
   if (dict->lookup("C", &obj1)->isArray()) {
@@ -2620,6 +2616,14 @@ void AnnotLink::initialize(PDFDoc *docA, Dict *dict) {
     quadrilaterals = NULL;
   }
   obj1.free();
+
+  if (dict->lookup("BS", &obj1)->isDict()) {
+    delete border;
+    border = new AnnotBorderBS(obj1.getDict());
+  } else if (!border) {
+    border = new AnnotBorderBS();
+  }
+  obj1.free();
 }
 
 void AnnotLink::draw(Gfx *gfx, GBool printing) {
@@ -2744,6 +2748,14 @@ void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict) {
     }
   } else {
     intent = intentFreeText;
+  }
+  obj1.free();
+
+  if (dict->lookup("BS", &obj1)->isDict()) {
+    delete border;
+    border = new AnnotBorderBS(obj1.getDict());
+  } else if (!border) {
+    border = new AnnotBorderBS();
   }
   obj1.free();
 
@@ -2946,7 +2958,7 @@ void AnnotFreeText::generateFreeTextAppearance()
   appearBuf = new GooString ();
   appearBuf->append ("q\n");
 
-  borderWidth = border ? border->getWidth() : 0;
+  borderWidth = border->getWidth();
   if (borderWidth > 0)
     setLineStyleForBorder(border);
 
@@ -3234,6 +3246,14 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict) {
     captionTextHorizontal = captionTextVertical = 0;
   }
   obj1.free();
+
+  if (dict->lookup("BS", &obj1)->isDict()) {
+    delete border;
+    border = new AnnotBorderBS(obj1.getDict());
+  } else if (!border) {
+    border = new AnnotBorderBS();
+  }
+  obj1.free();
 }
 
 void AnnotLine::setContents(GooString *new_content) {
@@ -3332,7 +3352,7 @@ void AnnotLine::setIntent(AnnotLineIntent new_intent) {
 
 void AnnotLine::generateLineAppearance()
 {
-  double borderWidth = 0, ca = opacity;
+  double borderWidth, ca = opacity;
 
   appearBBox = new AnnotAppearanceBBox(rect);
   appearBuf = new GooString ();
@@ -3341,10 +3361,8 @@ void AnnotLine::generateLineAppearance()
     setColor(color, gFalse);
   }
 
-  if (border) {
-    setLineStyleForBorder(border);
-    borderWidth = border->getWidth();
-  }
+  setLineStyleForBorder(border);
+  borderWidth = border->getWidth();
   appearBBox->setBorderWidth(std::max(1., borderWidth));
 
   const double x1 = coord1->getX();
@@ -3903,6 +3921,12 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
     parent = NULL;
   } else {
     parent = NULL;
+  }
+  obj1.free();
+
+  if (dict->lookup("BS", &obj1)->isDict()) {
+    delete border;
+    border = new AnnotBorderBS(obj1.getDict());
   }
   obj1.free();
 
@@ -5426,6 +5450,14 @@ void AnnotGeometry::initialize(PDFDoc *docA, Dict* dict) {
   }
   obj1.free();
 
+  if (dict->lookup("BS", &obj1)->isDict()) {
+    delete border;
+    border = new AnnotBorderBS(obj1.getDict());
+  } else if (!border) {
+    border = new AnnotBorderBS();
+  }
+  obj1.free();
+
   if (dict->lookup("BE", &obj1)->isDict()) {
     borderEffect = new AnnotBorderEffect(obj1.getDict());
   } else {
@@ -5490,73 +5522,70 @@ void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
     if (color)
       setColor(color, gFalse);
 
-    if (border) {
-      double borderWidth = border->getWidth();
+    double borderWidth = border->getWidth();
+    setLineStyleForBorder(border);
 
-      setLineStyleForBorder(border);
+    if (interiorColor)
+      setColor(interiorColor, gTrue);
 
-      if (interiorColor)
-        setColor(interiorColor, gTrue);
+    if (type == typeSquare) {
+      appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re\n",
+                          borderWidth / 2.0, borderWidth / 2.0,
+                          (rect->x2 - rect->x1) - borderWidth,
+                          (rect->y2 - rect->y1) - borderWidth);
+    } else {
+      double width, height;
+      double b;
+      double x1, y1, x2, y2, x3, y3;
 
-      if (type == typeSquare) {
-        appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re\n",
-			    borderWidth / 2.0, borderWidth / 2.0,
-			    (rect->x2 - rect->x1) - borderWidth,
-			    (rect->y2 - rect->y1) - borderWidth);
-      } else {
-        double width, height;
-	double b;
-	double x1, y1, x2, y2, x3, y3;
+      width = rect->x2 - rect->x1;
+      height = rect->y2 - rect->y1;
+      b = borderWidth / 2.0;
 
-	width = rect->x2 - rect->x1;
-	height = rect->y2 - rect->y1;
-	b = borderWidth / 2.0;
+      x1 = b;
+      y1 = height / 2.0;
+      appearBuf->appendf ("{0:.2f} {1:.2f} m\n", x1, y1);
 
-	x1 = b;
-	y1 = height / 2.0;
-	appearBuf->appendf ("{0:.2f} {1:.2f} m\n", x1, y1);
+      y1 += height / 4.0;
+      x2 = width / 4.0;
+      y2 = height - b;
+      x3 = width / 2.0;
+      y3 = y2;
+      appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
+                          x1, y1, x2, y2, x3, y3);
+      x2 = width - b;
+      y2 = y1;
+      x1 = x3 + (width / 4.0);
+      y1 = y3;
+      x3 = x2;
+      y3 = height / 2.0;
+      appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
+                          x1, y1, x2, y2, x3, y3);
 
-	y1 += height / 4.0;
-	x2 = width / 4.0;
-	y2 = height - b;
-	x3 = width / 2.0;
-	y3 = y2;
-	appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
-			    x1, y1, x2, y2, x3, y3);
-	x2 = width - b;
-	y2 = y1;
-	x1 = x3 + (width / 4.0);
-	y1 = y3;
-	x3 = x2;
-	y3 = height / 2.0;
-	appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
-			    x1, y1, x2, y2, x3, y3);
+      x2 = x1;
+      y2 = b;
+      x1 = x3;
+      y1 = height / 4.0;
+      x3 = width / 2.0;
+      y3 = b;
+      appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
+                          x1, y1, x2, y2, x3, y3);
 
-	x2 = x1;
-	y2 = b;
-	x1 = x3;
-	y1 = height / 4.0;
-	x3 = width / 2.0;
-	y3 = b;
-	appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
-			    x1, y1, x2, y2, x3, y3);
-
-	x2 = b;
-	y2 = y1;
-	x1 = width / 4.0;
-	y1 = b;
-	x3 = b;
-	y3 = height / 2.0;
-	appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
-			    x1, y1, x2, y2, x3, y3);
-
-      }
-
-      if (interiorColor && interiorColor->getSpace() != AnnotColor::colorTransparent)
-        appearBuf->append ("b\n");
-      else
-        appearBuf->append ("S\n");
+      x2 = b;
+      y2 = y1;
+      x1 = width / 4.0;
+      y1 = b;
+      x3 = b;
+      y3 = height / 2.0;
+      appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
+                          x1, y1, x2, y2, x3, y3);
     }
+
+    if (interiorColor && interiorColor->getSpace() != AnnotColor::colorTransparent)
+      appearBuf->append ("b\n");
+    else
+      appearBuf->append ("S\n");
+
     appearBuf->append ("Q\n");
 
     double bbox[4];
@@ -5680,6 +5709,14 @@ void AnnotPolygon::initialize(PDFDoc *docA, Dict* dict) {
   }
   obj1.free();
 
+  if (dict->lookup("BS", &obj1)->isDict()) {
+    delete border;
+    border = new AnnotBorderBS(obj1.getDict());
+  } else if (!border) {
+    border = new AnnotBorderBS();
+  }
+  obj1.free();
+
   if (dict->lookup("BE", &obj1)->isDict()) {
     borderEffect = new AnnotBorderEffect(obj1.getDict());
   } else {
@@ -5799,10 +5836,8 @@ void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
       setColor(color, gFalse);
     }
 
-    if (border) {
-      setLineStyleForBorder(border);
-      appearBBox->setBorderWidth(std::max(1., border->getWidth()));
-    }
+    setLineStyleForBorder(border);
+    appearBBox->setBorderWidth(std::max(1., border->getWidth()));
 
     if (interiorColor) {
       setColor(interiorColor, gTrue);
@@ -5959,6 +5994,14 @@ void AnnotInk::initialize(PDFDoc *docA, Dict* dict) {
     ok = gFalse;
   }
   obj1.free();
+
+  if (dict->lookup("BS", &obj1)->isDict()) {
+    delete border;
+    border = new AnnotBorderBS(obj1.getDict());
+  } else if (!border) {
+    border = new AnnotBorderBS();
+  }
+  obj1.free();
 }
 
 void AnnotInk::writeInkList(AnnotPath **paths, int n_paths, Array *dest_array) {
@@ -6026,10 +6069,8 @@ void AnnotInk::draw(Gfx *gfx, GBool printing) {
       setColor(color, gFalse);
     }
 
-    if (border) {
-      setLineStyleForBorder(border);
-      appearBBox->setBorderWidth(std::max(1., border->getWidth()));
-    }
+    setLineStyleForBorder(border);
+    appearBBox->setBorderWidth(std::max(1., border->getWidth()));
 
     for (int i = 0; i < inkListLength; ++i) {
       const AnnotPath * path = inkList[i];
@@ -6290,7 +6331,7 @@ void AnnotFileAttachment::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   appearance.fetch(gfx->getXRef(), &obj);
-  gfx->drawAnnot(&obj, border, color,
+  gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
   obj.free();
 }
@@ -6452,7 +6493,7 @@ void AnnotSound::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   appearance.fetch(gfx->getXRef(), &obj);
-  gfx->drawAnnot(&obj, border, color,
+  gfx->drawAnnot(&obj, (AnnotBorder *)NULL, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
   obj.free();
 }
