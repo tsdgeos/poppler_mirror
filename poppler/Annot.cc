@@ -520,7 +520,6 @@ AnnotQuadrilaterals::AnnotQuadrilateral::AnnotQuadrilateral(double x1, double y1
 // AnnotBorder
 //------------------------------------------------------------------------
 AnnotBorder::AnnotBorder() {
-  type = typeUnknown;
   width = 1;
   dashLength = 0;
   dash = NULL;
@@ -565,7 +564,6 @@ AnnotBorder::~AnnotBorder() {
 //------------------------------------------------------------------------
 
 AnnotBorderArray::AnnotBorderArray() {
-  type = typeArray;
   horizontalCorner = 0;
   verticalCorner = 0;
 }
@@ -627,7 +625,6 @@ void AnnotBorderArray::writeToObject(XRef *xref, Object *obj1) const {
 //------------------------------------------------------------------------
 
 AnnotBorderBS::AnnotBorderBS() {
-  type = typeBS;
 }
 
 AnnotBorderBS::AnnotBorderBS(Dict *dict) {

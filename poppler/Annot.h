@@ -216,7 +216,6 @@ protected:
 class AnnotBorder {
 public:
   enum AnnotBorderType {
-    typeUnknown,
     typeArray,
     typeBS
   };
@@ -229,18 +228,19 @@ public:
     borderUnderlined  // Underlined
   };
 
-  AnnotBorder();
   virtual ~AnnotBorder();
 
   virtual void setWidth(double new_width) { width = new_width; }
 
-  virtual AnnotBorderType getType() const { return type; }
+  virtual AnnotBorderType getType() const = 0;
   virtual double getWidth() const { return width; }
   virtual int getDashLength() const { return dashLength; }
   virtual double *getDash() const { return dash; }
   virtual AnnotBorderStyle getStyle() const { return style; }
 
 protected:
+  AnnotBorder();
+
   GBool parseDashArray(Object *dashObj);
 
   AnnotBorderType type;
@@ -268,7 +268,9 @@ public:
   double getHorizontalCorner() const { return horizontalCorner; }
   double getVerticalCorner() const { return verticalCorner; }
 
-protected:
+private:
+  virtual AnnotBorderType getType() const { return typeArray; }
+
   double horizontalCorner;          // (Default 0)
   double verticalCorner;            // (Default 0)
   // double width;                  // (Default 1)  (inherited from AnnotBorder)
@@ -285,6 +287,8 @@ public:
   AnnotBorderBS(Dict *dict);
 
 private:
+  virtual AnnotBorderType getType() const { return typeBS; }
+
   // double width;           // W  (Default 1)   (inherited from AnnotBorder)
   // AnnotBorderStyle style; // S  (Default S)   (inherited from AnnotBorder)
   // double *dash;           // D  (Default [3]) (inherited from AnnotBorder)
