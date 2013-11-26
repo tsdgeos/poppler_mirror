@@ -238,6 +238,8 @@ public:
   virtual double *getDash() const { return dash; }
   virtual AnnotBorderStyle getStyle() const { return style; }
 
+  virtual void writeToObject(XRef *xref, Object *obj1) const = 0;
+
 protected:
   AnnotBorder();
 
@@ -260,8 +262,6 @@ public:
   AnnotBorderArray();
   AnnotBorderArray(Array *array);
 
-  void writeToObject(XRef *xref, Object *dest) const;
-
   void setHorizontalCorner(double hc) { horizontalCorner = hc; }
   void setVerticalCorner(double vc) { verticalCorner = vc; }
 
@@ -270,6 +270,7 @@ public:
 
 private:
   virtual AnnotBorderType getType() const { return typeArray; }
+  virtual void writeToObject(XRef *xref, Object *obj1) const;
 
   double horizontalCorner;          // (Default 0)
   double verticalCorner;            // (Default 0)
@@ -288,6 +289,9 @@ public:
 
 private:
   virtual AnnotBorderType getType() const { return typeBS; }
+  virtual void writeToObject(XRef *xref, Object *obj1) const;
+
+  const char *getStyleName() const;
 
   // double width;           // W  (Default 1)   (inherited from AnnotBorder)
   // AnnotBorderStyle style; // S  (Default S)   (inherited from AnnotBorder)
@@ -580,7 +584,7 @@ public:
   void setModified(GooString *new_date);
   void setFlags(Guint new_flags);
 
-  void setBorder(AnnotBorderArray *new_border); // Takes ownership
+  void setBorder(AnnotBorder *new_border); // Takes ownership
 
   // The annotation takes the ownership of
   // new_color. 

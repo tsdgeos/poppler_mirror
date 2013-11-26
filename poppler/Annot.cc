@@ -614,10 +614,17 @@ void AnnotBorderArray::writeToObject(XRef *xref, Object *obj1) const {
   Object obj2;
 
   obj1->initArray(xref);
-  obj1->arrayAdd(obj2.initReal( horizontalCorner ));
-  obj1->arrayAdd(obj2.initReal( verticalCorner ));
-  obj1->arrayAdd(obj2.initReal( width ));
-  // TODO: Dash array
+  obj1->arrayAdd(obj2.initReal(horizontalCorner));
+  obj1->arrayAdd(obj2.initReal(verticalCorner));
+  obj1->arrayAdd(obj2.initReal(width));
+
+  if (dashLength > 0) {
+    Object obj3;
+
+    obj1->arrayAdd(obj3.initArray(xref));
+    for (int i = 0; i < dashLength; i++)
+      obj3.arrayAdd(obj2.initReal(dash[i]));
+  }
 }
 
 //------------------------------------------------------------------------
@@ -672,6 +679,38 @@ AnnotBorderBS::AnnotBorderBS(Dict *dict) {
       dash = (double *) gmallocn (dashLength, sizeof (double));
       dash[0] = 3;
     }
+  }
+}
+
+const char *AnnotBorderBS::getStyleName() const {
+  switch (style) {
+  case borderSolid:
+    return "S";
+  case borderDashed:
+    return "D";
+  case borderBeveled:
+    return "B";
+  case borderInset:
+    return "I";
+  case borderUnderlined:
+    return "U";
+  }
+
+  return "S";
+}
+
+void AnnotBorderBS::writeToObject(XRef *xref, Object *obj1) const {
+  Object obj2;
+
+  obj1->initDict(xref);
+  obj1->dictSet("W", obj2.initReal(width));
+  obj1->dictSet("S", obj2.initName(getStyleName()));
+  if (style == borderDashed && dashLength > 0) {
+    Object obj3;
+
+    obj1->dictSet("D", obj3.initArray(xref));
+    for (int i = 0; i < dashLength; i++)
+      obj3.arrayAdd(obj2.initReal(dash[i]));
   }
 }
 
@@ -1441,14 +1480,14 @@ void Annot::setFlags(Guint new_flags) {
   update ("F", &obj1);
 }
 
-void Annot::setBorder(AnnotBorderArray *new_border) {
+void Annot::setBorder(AnnotBorder *new_border) {
   annotLocker();
   delete border;
 
   if (new_border) {
     Object obj1;
     new_border->writeToObject(xref, &obj1);
-    update ("Border", &obj1);
+    update(new_border->getType() == AnnotBorder::typeArray ? "Border" : "BS", &obj1);
     border = new_border;
   } else {
     border = NULL;
