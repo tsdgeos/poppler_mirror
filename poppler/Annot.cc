@@ -1660,6 +1660,26 @@ void Annot::setColor(AnnotColor *color, GBool fill) {
   }
 }
 
+void Annot::setLineStyleForBorder(AnnotBorder *border) {
+  int i, dashLength;
+  double *dash;
+
+  switch (border->getStyle()) {
+  case AnnotBorder::borderDashed:
+    appearBuf->append("[");
+    dashLength = border->getDashLength();
+    dash = border->getDash();
+    for (i = 0; i < dashLength; ++i)
+      appearBuf->appendf(" {0:.2f}", dash[i]);
+    appearBuf->append(" ] 0 d\n");
+    break;
+  default:
+    appearBuf->append("[] 0 d\n");
+    break;
+  }
+  appearBuf->appendf("{0:.2f} w\n", border->getWidth());
+}
+
 // Draw an (approximate) circle of radius <r> centered at (<cx>, <cy>).
 // If <fill> is true, the circle is filled; otherwise it is stroked.
 void Annot::drawCircle(double cx, double cy, double r, GBool fill) {
@@ -2925,29 +2945,10 @@ void AnnotFreeText::generateFreeTextAppearance()
 
   appearBuf = new GooString ();
   appearBuf->append ("q\n");
-  
-  if (border) {
-    int i, dashLength;
-    double *dash;
-    borderWidth = border->getWidth();
 
-    switch (border->getStyle()) {
-    case AnnotBorder::borderDashed:
-      appearBuf->append("[");
-      dashLength = border->getDashLength();
-      dash = border->getDash();
-      for (i = 0; i < dashLength; ++i)
-        appearBuf->appendf(" {0:.2f}", dash[i]);
-      appearBuf->append(" ] 0 d\n");
-      break;
-    default:
-      appearBuf->append("[] 0 d\n");
-      break;
-    }
-    appearBuf->appendf("{0:.2f} w\n", borderWidth);
-  } else {
-    borderWidth = 0; // No border
-  }
+  borderWidth = border ? border->getWidth() : 0;
+  if (borderWidth > 0)
+    setLineStyleForBorder(border);
 
   // Box size
   const double width = rect->x2 - rect->x1;
@@ -3331,7 +3332,7 @@ void AnnotLine::setIntent(AnnotLineIntent new_intent) {
 
 void AnnotLine::generateLineAppearance()
 {
-  double borderWidth, ca = opacity;
+  double borderWidth = 0, ca = opacity;
 
   appearBBox = new AnnotAppearanceBBox(rect);
   appearBuf = new GooString ();
@@ -3341,28 +3342,10 @@ void AnnotLine::generateLineAppearance()
   }
 
   if (border) {
-    int i, dashLength;
-    double *dash;
-
-    switch (border->getStyle()) {
-    case AnnotBorder::borderDashed:
-      appearBuf->append("[");
-      dashLength = border->getDashLength();
-      dash = border->getDash();
-      for (i = 0; i < dashLength; ++i)
-        appearBuf->appendf(" {0:.2f}", dash[i]);
-      appearBuf->append(" ] 0 d\n");
-      break;
-    default:
-      appearBuf->append("[] 0 d\n");
-      break;
-    }
+    setLineStyleForBorder(border);
     borderWidth = border->getWidth();
-    appearBuf->appendf("{0:.2f} w\n", borderWidth);
-    appearBBox->setBorderWidth(borderWidth);
-  } else {
-    borderWidth = 0;
   }
+  appearBBox->setBorderWidth(std::max(1., borderWidth));
 
   const double x1 = coord1->getX();
   const double y1 = coord1->getY();
@@ -5508,24 +5491,9 @@ void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
       setColor(color, gFalse);
 
     if (border) {
-      int i, dashLength;
-      double *dash;
       double borderWidth = border->getWidth();
 
-      switch (border->getStyle()) {
-      case AnnotBorder::borderDashed:
-        appearBuf->append("[");
-	dashLength = border->getDashLength();
-	dash = border->getDash();
-	for (i = 0; i < dashLength; ++i)
-	  appearBuf->appendf(" {0:.2f}", dash[i]);
-	appearBuf->append(" ] 0 d\n");
-	break;
-      default:
-        appearBuf->append("[] 0 d\n");
-        break;
-      }
-      appearBuf->appendf("{0:.2f} w\n", borderWidth);
+      setLineStyleForBorder(border);
 
       if (interiorColor)
         setColor(interiorColor, gTrue);
@@ -5832,24 +5800,8 @@ void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
     }
 
     if (border) {
-      int i, dashLength;
-      double *dash;
-
-      switch (border->getStyle()) {
-      case AnnotBorder::borderDashed:
-        appearBuf->append("[");
-        dashLength = border->getDashLength();
-        dash = border->getDash();
-        for (i = 0; i < dashLength; ++i)
-          appearBuf->appendf(" {0:.2f}", dash[i]);
-        appearBuf->append(" ] 0 d\n");
-        break;
-      default:
-        appearBuf->append("[] 0 d\n");
-        break;
-      }
-      appearBuf->appendf("{0:.2f} w\n", border->getWidth());
-      appearBBox->setBorderWidth(border->getWidth());
+      setLineStyleForBorder(border);
+      appearBBox->setBorderWidth(std::max(1., border->getWidth()));
     }
 
     if (interiorColor) {
@@ -6075,8 +6027,8 @@ void AnnotInk::draw(Gfx *gfx, GBool printing) {
     }
 
     if (border) {
-      appearBuf->appendf("{0:.2f} w\n", border->getWidth());
-      appearBBox->setBorderWidth(border->getWidth());
+      setLineStyleForBorder(border);
+      appearBBox->setBorderWidth(std::max(1., border->getWidth()));
     }
 
     for (int i = 0; i < inkListLength; ++i) {
