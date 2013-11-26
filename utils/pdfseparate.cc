@@ -7,6 +7,7 @@
 // Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012, 2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
+// Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 //
 //========================================================================
 #include "config.h"
@@ -63,6 +64,12 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
     lastPage = doc->getNumPages();
   if (firstPage == 0)
     firstPage = 1;
+  if (lastPage < firstPage) {
+    error(errCommandLine, -1,
+          "Wrong page range given: the first page ({0:d}) can not be after the last page ({1:d}).",
+          firstPage, lastPage);
+    return false;
+  }
   if (firstPage != lastPage && strstr(destFileName, "%d") == NULL) {
     error(errSyntaxError, -1, "'{0:s}' must contain '%d' if more than one page should be extracted", destFileName);
     return false;
