@@ -47,6 +47,7 @@ class TestRun:
         self._failed_status_error = []
         self._stderr = []
         self._skipped = []
+        self._new = []
 
         self._queue = Queue()
         self._lock = RLock()
@@ -72,7 +73,7 @@ class TestRun:
         ref_is_failed = backend.is_failed(refs_path)
         if not ref_has_md5 and not ref_is_crashed and not ref_is_failed:
             with self._lock:
-                self._skipped.append("%s (%s)" % (doc_path, backend.get_name()))
+                self._new.append("%s (%s)" % (doc_path, backend.get_name()))
                 self._n_tests += 1
             self.printer.print_default("Reference files not found, skipping '%s' for %s backend" % (doc_path, backend.get_name()))
             return
@@ -153,7 +154,7 @@ class TestRun:
 
         if not os.path.isdir(refs_path):
             with self._lock:
-                self._skipped.append("%s" % (doc_path))
+                self._new.append("%s" % (doc_path))
                 self._n_tests += len(backends)
             self.printer.print_default("Reference dir not found for %s, skipping" % (doc_path))
             return
@@ -190,24 +191,29 @@ class TestRun:
         self._queue.join()
 
     def summary(self):
-        if not self._n_run:
-            self.printer.printout_ln("No tests run")
-            return
+        self.printer.printout_ln()
 
-        self.printer.printout_ln()
-        self.printer.printout_ln("%d tests passed (%.2f%%)" % (self._n_passed, (self._n_passed * 100.) / self._n_run))
-        self.printer.printout_ln()
-        def report_tests(test_list, test_type):
-            n_tests = len(test_list)
-            if not n_tests:
-                return
-            self.printer.printout_ln("%d tests %s (%.2f%%): %s" % (n_tests, test_type, (n_tests * 100.) / self._n_run, ", ".join(test_list)))
+        if self._n_run:
+            self.printer.printout_ln("%d tests passed (%.2f%%)" % (self._n_passed, (self._n_passed * 100.) / self._n_run))
             self.printer.printout_ln()
+            def report_tests(test_list, test_type):
+                n_tests = len(test_list)
+                if not n_tests:
+                    return
+                self.printer.printout_ln("%d tests %s (%.2f%%): %s" % (n_tests, test_type, (n_tests * 100.) / self._n_run, ", ".join(test_list)))
+                self.printer.printout_ln()
 
-        report_tests(self._failed, "failed")
-        report_tests(self._crashed, "crashed")
-        report_tests(self._failed_status_error, "failed to run")
-        report_tests(self._stderr, "have stderr output")
+            report_tests(self._failed, "failed")
+            report_tests(self._crashed, "crashed")
+            report_tests(self._failed_status_error, "failed to run")
+            report_tests(self._stderr, "have stderr output")
+        else:
+            self.printer.printout_ln("No tests run")
+
         if self._skipped:
             self.printer.printout_ln("%d tests skipped: %s" % (len(self._skipped), ", ".join(self._skipped)))
+            self.printer.printout_ln()
+
+        if self._new:
+            self.printer.printout_ln("%d new documents: %s\nUse create-refs command to add reference results for them" % (len(self._new), ", ".join(self._new)))
             self.printer.printout_ln()
