@@ -24,7 +24,7 @@ from Printer import get_printer
 from Utils import get_document_paths_from_dir, get_skipped_tests
 
 from Queue import Queue
-from threading import Thread
+from threading import Thread, RLock
 
 class TestReferences:
 
@@ -34,8 +34,11 @@ class TestReferences:
         self._skipped = get_skipped_tests(docsdir)
         self.config = Config()
         self.printer = get_printer()
+        self._total_tests = 1
+        self._n_tests = 0
 
         self._queue = Queue()
+        self._lock = RLock()
 
         try:
             os.makedirs(self._refsdir)
@@ -45,9 +48,19 @@ class TestReferences:
         except:
             raise
 
-    def create_refs_for_file(self, filename, n_doc = 1, total_docs = 1):
+    def _get_backends(self):
+        if self.config.backends:
+            return [get_backend(name) for name in self.config.backends]
+
+        return get_all_backends()
+
+    def create_refs_for_file(self, filename):
+        backends = self._get_backends()
+
         if filename in self._skipped:
-            self.printer.print_default("Skipping test '%s' (%d/%d)" % (os.path.join(self._docsdir, filename), n_doc, total_docs))
+            with self._lock:
+                self._n_tests += len(backends)
+            self.printer.print_default("Skipping test '%s'" % (os.path.join(self._docsdir, filename)))
             return
 
         refs_path = os.path.join(self._refsdir, filename)
@@ -60,38 +73,43 @@ class TestReferences:
             raise
         doc_path = os.path.join(self._docsdir, filename)
 
-        if self.config.backends:
-            backends = [get_backend(name) for name in self.config.backends]
-        else:
-            backends = get_all_backends()
-
         for backend in backends:
             if not self.config.force and backend.has_results(refs_path):
-                self.printer.print_default("Results found, skipping '%s' for %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs))
+                with self._lock:
+                    self._n_tests += 1
+                self.printer.print_default("Results found, skipping '%s' for %s backend" % (doc_path, backend.get_name()))
                 continue
-            self.printer.printout_ln("Creating refs for '%s' using %s backend (%d/%d)" % (doc_path, backend.get_name(), n_doc, total_docs))
+
             if backend.create_refs(doc_path, refs_path):
                 backend.create_checksums(refs_path, self.config.checksums_only)
+            with self._lock:
+                self._n_tests += 1
+                self.printer.printout_ln("[%d/%d] %s (%s): done" % (self._n_tests, self._total_tests, doc_path, backend.get_name()))
 
     def _worker_thread(self):
         while True:
-            doc, n_doc, total_docs = self._queue.get()
-            self.create_refs_for_file(doc, n_doc, total_docs)
+            doc = self._queue.get()
+            self.create_refs_for_file(doc)
             self._queue.task_done()
 
     def create_refs(self):
         docs, total_docs = get_document_paths_from_dir(self._docsdir)
+        backends = self._get_backends()
+        self._total_tests = total_docs * len(backends)
 
-        self.printer.printout_ln('Process %d is spawning %d worker threads...' % (os.getpid(), self.config.threads))
+        self.printer.printout_ln('Found %d documents' % (total_docs))
+        self.printer.printout_ln('Backends: %s' % ', '.join([backend.get_name() for backend in backends]))
+        self.printer.printout_ln('Process %d using %d worker threads' % (os.getpid(), self.config.threads))
+        self.printer.printout_ln()
+
+        self.printer.printout('Spawning %d workers...' % (self.config.threads))
 
         for n_thread in range(self.config.threads):
             thread = Thread(target=self._worker_thread)
             thread.daemon = True
             thread.start()
 
-        n_doc = 0
         for doc in docs:
-            n_doc += 1
-            self._queue.put( (doc, n_doc, total_docs) )
+            self._queue.put(doc)
 
         self._queue.join()
