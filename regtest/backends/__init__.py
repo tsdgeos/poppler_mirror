@@ -220,26 +220,6 @@ class Backend:
 
         return True
 
-    def _check_exit_status2(self, p1, p2, out_path):
-        p1_stderr = p1.stderr.read()
-        status1 = p1.wait()
-        p2_stderr = p2.stderr.read()
-        status2 = p2.wait()
-
-        if p1_stderr or p2_stderr:
-            self.__create_stderr_file(p1_stderr + p2_stderr, out_path)
-
-        if not os.WIFEXITED(status1) or not os.WIFEXITED(status2):
-            open(out_path + '.crashed', 'w').close()
-            return False
-
-        if self.__create_failed_file_if_needed(status1, out_path):
-            return False
-        if self.__create_failed_file_if_needed(status2, out_path):
-            return False
-
-        return True
-
     def _diff_png(self, ref_path, result_path):
         try:
             import Image, ImageChops
