@@ -32,19 +32,19 @@ class Printer:
         self._verbose = Config().verbose
         self._stream = sys.stdout
         self._rewrite = self._stream.isatty() and not self._verbose
-        self._current_line = None
+        self._current_line_len = 0
 
         self._lock = RLock()
 
         Printer.__single = self
 
     def _erase_current_line(self):
-        if self._current_line is None:
+        if not self._current_line_len:
             return
 
-        line_len = len(self._current_line)
+        line_len = self._current_line_len
         self._stream.write('\b' * line_len + ' ' * line_len + '\b' * line_len)
-        self._current_line = None
+        self._current_line_len = 0
 
     def _ensure_new_line(self, msg):
         if not msg.endswith('\n'):
@@ -62,7 +62,7 @@ class Printer:
         with self._lock:
             self._erase_current_line()
             self._print(msg)
-            self._current_line = msg[msg.rfind('\n') + 1:]
+            self._current_line_len = len(msg[msg.rfind('\n') + 1:])
 
     def printout_ln(self, msg=''):
         with self._lock:
