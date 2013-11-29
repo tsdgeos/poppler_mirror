@@ -18,6 +18,7 @@
 
 import hashlib
 import os
+import select
 import shutil
 import errno
 from Config import Config
@@ -193,13 +194,6 @@ class Backend:
             return False
         return os.path.exists(test_result + self._diff_ext)
 
-    def __create_stderr_file(self, stderr, out_path):
-        if not stderr:
-            return
-        stderr_file = open(out_path + '.stderr', 'wb')
-        stderr_file.write(stderr)
-        stderr_file.close()
-
     def __create_failed_file_if_needed(self, status, out_path):
         if os.WIFEXITED(status) or os.WEXITSTATUS(status) == 0:
             return False
@@ -210,10 +204,36 @@ class Backend:
 
         return True
 
-    def _check_exit_status(self, p, out_path):
-        stderr = p.stderr.read()
-        self.__create_stderr_file(stderr, out_path)
+    def __redirect_stderr_to_file(self, fd, out_path):
+        stderr_file = None
+        read_set = [fd]
+        while read_set:
+            try:
+                rlist, wlist, xlist = select.select(read_set, [], [])
+            except select.error as e:
+                continue
 
+            if fd in rlist:
+                try:
+                    chunk = os.read(fd, 1024)
+                except OSError as e:
+                    if e.errno == errno.EIO:
+                        # Child process finished.
+                        chunk = ''
+                    else:
+                        raise e
+                if chunk:
+                    if stderr_file is None:
+                        stderr_file = open(out_path + '.stderr', 'wb')
+                    stderr_file.write(chunk)
+                else:
+                    read_set.remove(fd)
+
+        if stderr_file is not None:
+            stderr_file.close()
+
+    def _check_exit_status(self, p, out_path):
+        self.__redirect_stderr_to_file(p.stderr.fileno(), out_path)
         status = p.wait()
 
         if not os.WIFEXITED(status):
