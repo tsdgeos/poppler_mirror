@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from hashlib import md5
+import hashlib
 import os
 import shutil
 import errno
@@ -47,6 +47,14 @@ class Backend:
     def get_diff_ext(self):
         return self._diff_ext
 
+    def __md5sum(self, ref_path):
+        md5 = hashlib.md5()
+        with open(ref_path,'rb') as f:
+            for chunk in iter(lambda: f.read(128 * md5.block_size), b''):
+                md5.update(chunk)
+
+        return md5.hexdigest()
+
     def __should_have_checksum(self, entry):
         if not entry.startswith(self._name):
             return False
@@ -62,9 +70,7 @@ class Backend:
             if not self.__should_have_checksum(entry):
                 continue
             ref_path = os.path.join(refs_path, entry)
-            f = open(ref_path, 'rb')
-            md5_file.write("%s %s\n" % (md5(f.read()).hexdigest(), ref_path))
-            f.close()
+            md5_file.write("%s %s\n" % (self.__md5sum(ref_path), ref_path))
             if delete_refs:
                 os.remove(ref_path)
 
@@ -90,10 +96,9 @@ class Backend:
                 continue
 
             result_path = os.path.join(out_path, basename)
-            f = open(result_path, 'rb')
-            result_md5sum = md5(f.read()).hexdigest()
+
+            result_md5sum = self.__md5sum(result_path);
             matched = md5sum == result_md5sum
-            f.close()
 
             if update_refs:
                 result_md5.append("%s %s\n" % (result_md5sum, ref_path))
