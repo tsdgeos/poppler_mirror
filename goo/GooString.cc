@@ -23,6 +23,7 @@
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Pino Toscano <pino@kde.org>
+// Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -891,6 +892,15 @@ int GooString::cmpN(const char *sA, int n) const {
     return -1;
   }
   return 0;
+}
+
+GBool GooString::endsWith(const char *suffix) const {
+  int suffixLen = strlen(suffix);
+
+  if (length < suffixLen)
+    return gFalse;
+
+  return strcmp(s + length - suffixLen, suffix) == 0;
 }
 
 GBool GooString::hasUnicodeMarker(void)

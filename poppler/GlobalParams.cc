@@ -34,6 +34,7 @@
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Peter Breitenlohner <peb@mppmu.mpg.de>
+// Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -576,7 +577,8 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
 #ifdef _WIN32
   substFiles = new GooHash(gTrue);
 #endif
-  nameToUnicode = new NameToCharCode();
+  nameToUnicodeZapfDingbats = new NameToCharCode();
+  nameToUnicodeText = new NameToCharCode();
   cidToUnicodes = new GooHash(gTrue);
   unicodeToUnicodes = new GooHash(gTrue);
   residentUnicodeMaps = new GooHash();
@@ -648,9 +650,13 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   securityHandlers = new GooList();
 #endif
 
-  // set up the initial nameToUnicode table
-  for (i = 0; nameToUnicodeTab[i].name; ++i) {
-    nameToUnicode->add(nameToUnicodeTab[i].name, nameToUnicodeTab[i].u);
+  // set up the initial nameToUnicode tables
+  for (i = 0; nameToUnicodeZapfDingbatsTab[i].name; ++i) {
+    nameToUnicodeZapfDingbats->add(nameToUnicodeZapfDingbatsTab[i].name, nameToUnicodeZapfDingbatsTab[i].u);
+  }
+
+  for (i = 0; nameToUnicodeTextTab[i].name; ++i) {
+    nameToUnicodeText->add(nameToUnicodeTextTab[i].name, nameToUnicodeTextTab[i].u);
   }
 
   // set up the residentUnicodeMaps table
@@ -740,7 +746,7 @@ void GlobalParams::parseNameToUnicode(GooString *name) {
     tok2 = strtok_r(NULL, " \t\r\n", &tokptr);
     if (tok1 && tok2) {
       sscanf(tok1, "%x", &u);
-      nameToUnicode->add(tok2, u);
+      nameToUnicodeText->add(tok2, u);
     } else {
       error(errConfig, -1, "Bad line in 'nameToUnicode' file ({0:t}:{1:d})",
 	    name, line);
@@ -796,7 +802,8 @@ GlobalParams::~GlobalParams() {
 
   delete macRomanReverseMap;
 
-  delete nameToUnicode;
+  delete nameToUnicodeZapfDingbats;
+  delete nameToUnicodeText;
   deleteGooHash(cidToUnicodes, GooString);
   deleteGooHash(unicodeToUnicodes, GooString);
   deleteGooHash(residentUnicodeMaps, UnicodeMap);
@@ -853,9 +860,17 @@ CharCode GlobalParams::getMacRomanCharCode(char *charName) {
   return macRomanReverseMap->lookup(charName);
 }
 
-Unicode GlobalParams::mapNameToUnicode(const char *charName) {
-  // no need to lock - nameToUnicode is constant
-  return nameToUnicode->lookup(charName);
+Unicode GlobalParams::mapNameToUnicodeAll(const char *charName) {
+  // no need to lock - nameToUnicodeZapfDingbats and nameToUnicodeText are constant
+  Unicode u = nameToUnicodeZapfDingbats->lookup(charName);
+  if (!u)
+    u = nameToUnicodeText->lookup(charName);
+  return u;
+}
+
+Unicode GlobalParams::mapNameToUnicodeText(const char *charName) {
+  // no need to lock - nameToUnicodeText is constant
+  return nameToUnicodeText->lookup(charName);
 }
 
 UnicodeMap *GlobalParams::getResidentUnicodeMap(GooString *encodingName) {

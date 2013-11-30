@@ -30,6 +30,7 @@
 // Copyright (C) 2012 Yi Yang <ahyangyi@gmail.com>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1221,10 +1222,16 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
 
   // pass 1: use the name-to-Unicode mapping table
   missing = hex = gFalse;
+  GBool isZapfDingbats = name && name->endsWith("ZapfDingbats");
   for (code = 0; code < 256; ++code) {
     if ((charName = enc[code])) {
-      if (!(toUnicode[code] = globalParams->mapNameToUnicode(charName)) &&
-	  strcmp(charName, ".notdef")) {
+      if (isZapfDingbats) {
+	// include ZapfDingbats names
+	toUnicode[code] = globalParams->mapNameToUnicodeAll(charName);
+      } else {
+	toUnicode[code] = globalParams->mapNameToUnicodeText(charName);
+      }
+      if (!toUnicode[code] && strcmp(charName, ".notdef")) {
 	// if it wasn't in the name-to-Unicode table, check for a
 	// name that looks like 'Axx' or 'xx', where 'A' is any letter
 	// and 'xx' is two hex digits
@@ -1485,7 +1492,7 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen,
   // corresponding character in that list.
   // 3.2. otherwise, if the component is in the Adobe Glyph List, then map it
   // to the corresponding character in that list.
-  if (names && (uBuf[0] = globalParams->mapNameToUnicode(charName))) {
+  if (names && (uBuf[0] = globalParams->mapNameToUnicodeText(charName))) {
     return 1;
   }
   if (numeric) {
@@ -1674,7 +1681,7 @@ int *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff) {
   } else if (useUnicode) {
     Unicode *uAux;
     for (i = 0; i < 256; ++i) {
-      if (((charName = enc[i]) && (u = globalParams->mapNameToUnicode(charName))))
+      if (((charName = enc[i]) && (u = globalParams->mapNameToUnicodeAll(charName))))
 	map[i] = ff->mapCodeToGID(cmap, u);
       else
       {

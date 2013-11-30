@@ -19,6 +19,7 @@
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2008-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -139,6 +140,9 @@ public:
   int cmpN(GooString *str, int n) const;
   int cmp(const char *sA) const;
   int cmpN(const char *sA, int n) const;
+
+  // Return true if string ends with suffix
+  GBool endsWith(const char *suffix) const;
 
   GBool hasUnicodeMarker(void);
 
