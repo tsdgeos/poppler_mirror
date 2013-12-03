@@ -123,8 +123,8 @@ pgd_text_get_text (GtkWidget   *button,
                 demo->text_attrs = poppler_page_get_text_attributes_for_area (page, &demo->area);
                 g_timer_stop (timer);
 
-		str = g_strdup_printf ("<i>got text in %.4f seconds, text layout in %.4f seconds, text attrs in %.4f seconds</i>",
-				       text_elapsed, layout_elapsed, g_timer_elapsed (timer, NULL));
+		str = g_strdup_printf ("<i>got %ld chars in %.4f seconds, %u layout units in %.4f seconds, text attrs in %.4f seconds</i>",
+				       g_utf8_strlen(text, -1), text_elapsed, n_recs, layout_elapsed, g_timer_elapsed (timer, NULL));
 		gtk_label_set_markup (GTK_LABEL (demo->timer_label), str);
 		g_free (str);
 	} else {
