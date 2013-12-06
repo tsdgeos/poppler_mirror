@@ -345,7 +345,7 @@ gint main (gint argc, gchar **argv)
 
 	/* Main window */
 	win = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_default_size (GTK_WINDOW (win), 600, 600);
+	gtk_window_set_default_size (GTK_WINDOW (win), 1024, 768);
 	gtk_window_set_title (GTK_WINDOW (win), "Poppler GLib Demo");
 	g_signal_connect (G_OBJECT (win), "delete-event",
 			  G_CALLBACK (gtk_main_quit), NULL);
