@@ -45,6 +45,8 @@ class TestRun:
         self._failed = {}
         self._crashed = {}
         self._failed_status_error = {}
+        self._did_not_crash = {}
+        self._did_not_fail_status_error = {}
         self._stderr = {}
         self._skipped = []
         self._new = []
@@ -103,8 +105,10 @@ class TestRun:
             if test_has_md5:
                 if ref_is_crashed:
                     self.printer.print_test_result_ln(doc_path, backend.get_name(), self._n_tests, self._total_tests, "DOES NOT CRASH")
+                    self._did_not_crash.setdefault(backend.get_name(), []).append(doc_path)
                 elif ref_is_failed:
                     self.printer.print_test_result_ln(doc_path, backend.get_name(), self._n_tests, self._total_tests, "DOES NOT FAIL")
+                    self._did_not_fail_status_error.setdefault(backend.get_name(), []).append(doc_path)
                 return
 
             test_is_crashed = backend.is_crashed(test_path)
@@ -221,7 +225,9 @@ class TestRun:
             test_results = [(self._failed, "unexpected failures"),
                             (self._crashed, "unexpected crashes"),
                             (self._failed_status_error, "unexpected failures (test program returned with an exit error status)"),
-                            (self._stderr, "tests have stderr output")]
+                            (self._stderr, "tests have stderr output"),
+                            (self._did_not_crash, "expected to crash, but didn't crash"),
+                            (self._did_not_fail_status_error, "expected to fail to run, but didn't fail")]
 
             for test_dict, test_msg in test_results:
                 n_tests, tests = result_tests(test_dict)
