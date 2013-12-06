@@ -206,7 +206,9 @@ class Backend:
 
     def __redirect_stderr_to_file(self, fd, out_path):
         stderr_file = None
+        max_size = 1024 * 1024
         read_set = [fd]
+
         while read_set:
             try:
                 rlist, wlist, xlist = select.select(read_set, [], [])
@@ -225,7 +227,9 @@ class Backend:
                 if chunk:
                     if stderr_file is None:
                         stderr_file = open(out_path + '.stderr', 'wb')
-                    stderr_file.write(chunk)
+                    if max_size > 0:
+                        stderr_file.write(chunk)
+                        max_size -= len(chunk)
                 else:
                     read_set.remove(fd)
 
