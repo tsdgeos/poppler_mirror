@@ -42,10 +42,10 @@ class TestRun:
         self._n_tests = 0
         self._n_run = 0
         self._n_passed = 0
-        self._failed = []
-        self._crashed = []
-        self._failed_status_error = []
-        self._stderr = []
+        self._failed = {}
+        self._crashed = {}
+        self._failed_status_error = {}
+        self._stderr = {}
         self._skipped = []
         self._new = []
 
@@ -88,7 +88,7 @@ class TestRun:
             self._n_run += 1
 
             if backend.has_stderr(test_path):
-                self._stderr.append("%s (%s)" % (doc_path, backend.get_name()))
+                self._stderr.setdefault(backend.get_name(), []).append(doc_path)
 
             if ref_has_md5 and test_has_md5:
                 if test_passed:
@@ -97,7 +97,7 @@ class TestRun:
                     self._n_passed += 1
                 else:
                     self.printer.print_test_result_ln(doc_path, backend.get_name(), self._n_tests, self._total_tests, "FAIL")
-                    self._failed.append("%s (%s)" % (doc_path, backend.get_name()))
+                    self._failed.setdefault(backend.get_name(), []).append(doc_path)
                 return
 
             if test_has_md5:
@@ -122,12 +122,12 @@ class TestRun:
 
             if test_is_crashed:
                 self.printer.print_test_result_ln(doc_path, backend.get_name(), self._n_tests, self._total_tests, "CRASH")
-                self._crashed.append("%s (%s)" % (doc_path, backend.get_name()))
+                self._crashed.setdefault(backend.get_name(), []).append(doc_path)
                 return
 
             if test_is_failed:
                 self.printer.print_test_result_ln(doc_path, backend.get_name(), self._n_tests, self._total_tests, "FAIL (status error %d)" % (test_is_failed))
-                self._failed_status_error("%s (%s)" % (doc_path, backend.get_name()))
+                self._failed_status_error.setdefault(backend.get_name(), []).append(doc_path)
                 return
 
     def run_test(self, filename):
@@ -196,24 +196,51 @@ class TestRun:
         if self._n_run:
             self.printer.printout_ln("%d tests passed (%.2f%%)" % (self._n_passed, (self._n_passed * 100.) / self._n_run))
             self.printer.printout_ln()
-            def report_tests(test_list, test_type):
-                n_tests = len(test_list)
-                if not n_tests:
-                    return
-                self.printer.printout_ln("%d tests %s (%.2f%%): %s" % (n_tests, test_type, (n_tests * 100.) / self._n_run, ", ".join(test_list)))
-                self.printer.printout_ln()
 
-            report_tests(self._failed, "failed")
-            report_tests(self._crashed, "crashed")
-            report_tests(self._failed_status_error, "failed to run")
-            report_tests(self._stderr, "have stderr output")
+            def result_tests(test_dict):
+                if not test_dict:
+                    return 0, None
+
+                n_tests = 0
+                tests = ""
+                for backend in test_dict:
+                    backend_docs = test_dict[backend]
+                    n_tests += len(backend_docs)
+                    tests += "\n".join(["  %s (%s)" % (doc_path, backend) for doc_path in backend_docs])
+                    tests += "\n"
+
+                return n_tests, tests
+
+            def backends_summary(test_dict, n_tests):
+                percs = []
+                for backend in test_dict:
+                    n_docs = len(test_dict[backend])
+                    percs.append("%d %s (%.2f%%)" % (n_docs, backend, (n_docs * 100.) / n_tests))
+                return ", ".join(percs)
+
+            test_results = [(self._failed, "unexpected failures"),
+                            (self._crashed, "unexpected crashes"),
+                            (self._failed_status_error, "unexpected failures (test program returned with an exit error status)"),
+                            (self._stderr, "tests have stderr output")]
+
+            for test_dict, test_msg in test_results:
+                n_tests, tests = result_tests(test_dict)
+                if n_tests == 0:
+                    continue
+
+                self.printer.printout_ln("%d %s (%.2f%%) [%s]" % (n_tests, test_msg, (n_tests * 100.) / self._n_run, backends_summary(test_dict, n_tests)))
+                self.printer.printout_ln(tests)
+                self.printer.printout_ln()
         else:
             self.printer.printout_ln("No tests run")
 
         if self._skipped:
-            self.printer.printout_ln("%d tests skipped: %s" % (len(self._skipped), ", ".join(self._skipped)))
+            self.printer.printout_ln("%d tests skipped" % len(self._skipped))
+            self.printer.printout_ln("\n".join(["  %s" % skipped for skipped in self._skipped]))
             self.printer.printout_ln()
 
         if self._new:
-            self.printer.printout_ln("%d new documents: %s\nUse create-refs command to add reference results for them" % (len(self._new), ", ".join(self._new)))
+            self.printer.printout_ln("%d new documents" % len(self._new))
+            self.printer.printout_ln("\n".join(["  %s" % new for new in self._new]))
+            self.printer.printout_ln("Use create-refs command to add reference results for them")
             self.printer.printout_ln()
