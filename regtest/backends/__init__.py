@@ -67,7 +67,7 @@ class Backend:
         path = os.path.join(refs_path, self._name)
         md5_file = open(path + '.md5', 'w')
 
-        for entry in os.listdir(refs_path):
+        for entry in sorted(os.listdir(refs_path)):
             if not self.__should_have_checksum(entry):
                 continue
             ref_path = os.path.join(refs_path, entry)
