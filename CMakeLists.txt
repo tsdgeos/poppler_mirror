@@ -305,6 +305,7 @@ set(poppler_SRCS
   poppler/Link.cc
   poppler/Linearization.cc
   poppler/LocalPDFDocBuilder.cc
+  poppler/MarkedContentOutputDev.cc
   poppler/NameToCharCode.cc
   poppler/Object.cc
   poppler/OptionalContent.cc
@@ -463,6 +464,7 @@ if(ENABLE_XPDF_HEADERS)
     poppler/Link.h
     poppler/Linearization.h
     poppler/LocalPDFDocBuilder.h
+    poppler/MarkedContentOutputDev.h
     poppler/Movie.h
     poppler/NameToCharCode.h
     poppler/Object.h
