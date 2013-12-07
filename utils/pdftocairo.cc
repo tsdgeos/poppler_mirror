@@ -27,6 +27,7 @@
 // Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
+// Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -964,6 +965,12 @@ int main(int argc, char *argv[]) {
   if (lastPage < 1 || lastPage > doc->getNumPages())
     lastPage = doc->getNumPages();
 
+  if (lastPage < firstPage) {
+    fprintf(stderr,
+            "Wrong page range given: the first page (%d) can not be after the last page (%d).\n",
+            firstPage, lastPage);
+    exit(99);
+  }
   if (eps && firstPage != lastPage) {
     fprintf(stderr, "EPS files can only contain one page.\n");
     exit(99);

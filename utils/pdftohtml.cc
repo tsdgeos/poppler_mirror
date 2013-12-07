@@ -326,6 +326,12 @@ int main(int argc, char *argv[]) {
     firstPage = 1;
   if (lastPage < 1 || lastPage > doc->getNumPages())
     lastPage = doc->getNumPages();
+  if (lastPage < firstPage) {
+    error(errCommandLine, -1,
+          "Wrong page range given: the first page ({0:d}) can not be after the last page ({1:d}).",
+          firstPage, lastPage);
+    goto error;
+  }
 
   doc->getDocInfo(&info);
   if (info.isDict()) {
