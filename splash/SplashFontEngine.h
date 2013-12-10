@@ -15,6 +15,7 @@
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2009, 2011 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -89,6 +90,10 @@ public:
   // Note that the Splash y axis points downward.
   SplashFont *getFont(SplashFontFile *fontFile,
 		      SplashCoord *textMat, SplashCoord *ctm);
+#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
+  GBool getAA();
+  void setAA(GBool aa);
+#endif
 
 private:
 

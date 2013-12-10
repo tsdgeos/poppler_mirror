@@ -16,6 +16,7 @@
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
+// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -287,6 +288,18 @@ SplashFontFile *SplashFontEngine::loadTrueTypeFont(SplashFontFileID *idA,
 
   return fontFile;
 }
+
+#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
+GBool SplashFontEngine::getAA() {
+  return (ftEngine == NULL) ? gFalse : ftEngine->getAA();
+}
+
+void SplashFontEngine::setAA(GBool aa) {
+  if (ftEngine != NULL) {
+    ftEngine->setAA(aa);
+  }
+}
+#endif
 
 SplashFont *SplashFontEngine::getFont(SplashFontFile *fontFile,
 				      SplashCoord *textMat,
