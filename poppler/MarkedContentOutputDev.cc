@@ -2,6 +2,8 @@
 //
 // MarkedContentOutputDev.cc
 //
+// This file is licensed under the GPLv2 or later
+//
 // Copyright 2013 Igalia S.L.
 //
 //========================================================================
