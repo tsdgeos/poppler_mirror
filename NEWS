@@ -1,3 +1,26 @@
+Release 0.25.0
+        core:
+         * Annotation improvements
+         * Tagged PDF work
+         * Improve speed on some files using ICC color space
+         * Use ICC profile in OutputIntents. Bug #34053
+         * Limit use of ZapfDingbats character names. Bug #60243
+         * Splash: correction for knockout transparency groups
+         * regression test improvements
+
+        utils:
+         * pdftoppm: Added thinlinemode option setting
+         * pdfinfo: Indicate if pdf contains javascript
+         * pdfinfo: Add option to print out javascript
+         * pdfimages: Print size, ratio, and ppi
+         * pdfimages: More image output format support
+         * pdfseparate: allow zero-padded pagespecs
+
+        glib:
+         * Annotation improvements
+         * Add API to get text, text layout and text attributes for a given area
+         * demo improvements
+
 Release 0.24.4
         core:
          * Fix regression in broken endstream detection. Bug #70854
