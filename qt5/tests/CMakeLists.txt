@@ -47,6 +47,7 @@ endmacro(QT5_ADD_QTEST)
 
 qt5_add_simpletest(test-poppler-qt5 test-poppler-qt5.cpp)
 qt5_add_simpletest(test-password-qt5 test-password-qt5.cpp)
+qt5_add_simpletest(test-render-to-file test-render-to-file.cpp)
 qt5_add_simpletest(poppler-forms poppler-forms.cpp)
 qt5_add_simpletest(poppler-fonts poppler-fonts.cpp)
 qt5_add_simpletest(poppler_attachments poppler-attachments.cpp)

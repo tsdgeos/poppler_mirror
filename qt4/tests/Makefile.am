@@ -20,13 +20,19 @@ SUFFIXES: .moc
 noinst_PROGRAMS = test-poppler-qt4 stress-poppler-qt4 \
 	poppler-fonts test-password-qt4 stress-poppler-dir \
 	poppler-attachments poppler-texts poppler-forms \
-	stress-threads-qt4
+	stress-threads-qt4 test-render-to-file
 
 
 test_poppler_qt4_SOURCES =			\
        test-poppler-qt4.cpp
 
 test_poppler_qt4_LDADD = $(LDADDS)
+
+
+test_render_to_file_SOURCES =			\
+       test-render-to-file.cpp
+
+test_render_to_file_LDADD = $(LDADDS)
 
 
 test_password_qt4_SOURCES =			\
