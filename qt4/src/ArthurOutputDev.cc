@@ -21,6 +21,7 @@
 // Copyright (C) 2010 Matthias Fauconneau <matthias.fauconneau@gmail.com>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013 Dominik Haumann <dhaumann@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -593,10 +594,15 @@ void ArthurOutputDev::drawChar(GfxState *state, double x, double y,
       QPainterPath qPath;
       qPath.setFillRule(Qt::WindingFill);
       for (int i = 0; i < fontPath->length; ++i) {
+        // SplashPath.flags: bitwise or allowed
+        if (fontPath->flags[i] & splashPathLast || fontPath->flags[i] & splashPathClosed) {
+            qPath.closeSubpath();
+        }
         if (fontPath->flags[i] & splashPathFirst) {
             state->transform(fontPath->pts[i].x+x, -fontPath->pts[i].y+y, &x1, &y1);
             qPath.moveTo(x1,y1);
-        } else if (fontPath->flags[i] & splashPathCurve) {
+        }
+        if (fontPath->flags[i] & splashPathCurve) {
             state->transform(fontPath->pts[i].x+x, -fontPath->pts[i].y+y, &x1, &y1);
             state->transform(fontPath->pts[i+1].x+x, -fontPath->pts[i+1].y+y, &x2, &y2);
             qPath.quadTo(x1,y1,x2,y2);
@@ -610,20 +616,14 @@ void ArthurOutputDev::drawChar(GfxState *state, double x, double y,
             state->transform(fontPath->pts[i].x+x, -fontPath->pts[i].y+y, &x1, &y1);
             qPath.lineTo(x1,y1);
         }
-        if (fontPath->flags[i] & splashPathLast) {
-            qPath.closeSubpath();
-        }
       }
       GfxRGB rgb;
       QColor brushColour = m_currentBrush.color();
       state->getFillRGB(&rgb);
       brushColour.setRgbF(colToDbl(rgb.r), colToDbl(rgb.g), colToDbl(rgb.b), state->getFillOpacity());
       m_painter->setBrush(brushColour);
-      QColor penColour = m_currentPen.color();
-      state->getStrokeRGB(&rgb);
-      penColour.setRgbF(colToDbl(rgb.r), colToDbl(rgb.g), colToDbl(rgb.b), state->getStrokeOpacity());
-      m_painter->setPen(penColour);
-      m_painter->drawPath( qPath );
+      m_painter->setPen(Qt::NoPen);
+      m_painter->drawPath(qPath);
       delete fontPath;
     }
   }
