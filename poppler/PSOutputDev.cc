@@ -1432,6 +1432,7 @@ void PSOutputDev::writeHeader(int firstPage, int lastPage,
 
   switch (mode) {
   case psModePSOrigPageSizes:
+    paperMatch = gTrue;
     prevWidth = 0;
     prevHeight = 0;
   case psModePS:
@@ -3550,34 +3551,6 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   switch (mode) {
 
   case psModePSOrigPageSizes:
-    x1 = (int)floor(state->getX1());
-    y1 = (int)floor(state->getY1());
-    x2 = (int)ceil(state->getX2());
-    y2 = (int)ceil(state->getY2());
-    width = x2 - x1;
-    height = y2 - y1;
-    if (width > height) {
-      landscape = gTrue;
-    } else {
-      landscape = gFalse;
-    }
-    writePSFmt("%%PageBoundingBox: {0:d} {1:d} {2:d} {3:d}\n", x1, y1, x2 - x1, y2 - y1);
-    writePS("%%BeginPageSetup\n");
-    writePSFmt("%%PageOrientation: {0:s}\n",
-	       landscape ? "Landscape" : "Portrait");
-    if ((width != prevWidth) || (height != prevHeight)) {
-      // Set page size only when it actually changes, as otherwise Duplex
-      // printing does not work
-      writePSFmt("<</PageSize [{0:d} {1:d}]>> setpagedevice\n", width, height);
-      prevWidth = width;
-      prevHeight = height;
-    }
-    writePS("pdfStartPage\n");
-    writePSFmt("{0:d} {1:d} {2:d} {3:d} re W\n", x1, y1, x2 - x1, y2 - y1);
-    writePS("%%EndPageSetup\n");
-    ++seqPage;
-    break;
-
   case psModePS:
     // rotate, translate, and scale page
     imgWidth = imgURX - imgLLX;
@@ -3620,6 +3593,25 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
 	       landscape ? "Landscape" : "Portrait");
     if (paperMatch) {
       writePSFmt("{0:d} {1:d} pdfSetupPaper\n", imgURX, imgURY);
+      if (mode == psModePSOrigPageSizes) {
+	// Set page size only when it actually changes, as otherwise Duplex
+	// printing does not work
+	if (rotate == 0 || rotate == 180) {
+	  if ((width != prevWidth) || (height != prevHeight)) {
+	    writePSFmt("<</PageSize [{0:d} {1:d}]>> setpagedevice\n",
+		       width, height);
+	    prevWidth = width;
+	    prevHeight = height;
+	  }
+	} else {
+	  if ((height != prevWidth) || (width != prevHeight)) {
+	    writePSFmt("<</PageSize [{0:d} {1:d}]>> setpagedevice\n",
+		       height, width);
+	    prevWidth = height;
+	    prevHeight = width;
+	  }
+	}
+      }
     }
     writePS("pdfStartPage\n");
     if (rotate == 0) {
