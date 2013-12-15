@@ -63,4 +63,6 @@ class CreateRefs(Command):
             refs.create_refs_for_file(os.path.basename(doc))
         get_printer().printout_ln("Refs created in %s" % (t.elapsed_str()))
 
+        return 0
+
 register_command('create-refs', CreateRefs)

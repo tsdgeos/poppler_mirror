@@ -65,10 +65,12 @@ class RunTests(Command):
 
         tests = TestRun(docs_dir, options['refs_dir'], options['out_dir'])
         if doc == docs_dir:
-            tests.run_tests()
+            status = tests.run_tests()
         else:
-            tests.run_test(os.path.basename(doc))
+            status = tests.run_test(os.path.basename(doc))
         tests.summary()
         get_printer().printout_ln("Tests run in %s" % (t.elapsed_str()))
+
+        return status
 
 register_command('run-tests', RunTests)

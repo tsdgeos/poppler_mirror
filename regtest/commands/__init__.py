@@ -44,7 +44,7 @@ class Command:
 
     def execute(self, args):
         ns = self._parser.parse_args(args)
-        self.run(vars(ns))
+        return self.run(vars(ns))
 
     def run(self, options):
         raise NotImplementedError
@@ -68,7 +68,7 @@ def _get_command(command_name):
 def run(args):
     command_class = _get_command(args[0])
     command = command_class()
-    command.execute(args[1:])
+    return command.execute(args[1:])
 
 def print_help():
     import os

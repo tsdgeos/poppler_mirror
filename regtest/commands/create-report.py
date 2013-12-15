@@ -55,4 +55,6 @@ class CreateReport(Command):
         report = HTMLReport(docs_dir, options['refs_dir'], options['out_dir'])
         report.create()
 
+        return 0
+
 register_command('create-report', CreateReport)

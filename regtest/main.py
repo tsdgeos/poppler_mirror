@@ -80,16 +80,16 @@ def main(args):
         c.threads = n_cpus - c.threads
 
     try:
-        commands.run(args)
+        return commands.run(args)
     except commands.UnknownCommandError:
         sys.stderr.write("Unknown command: %s\n" % (args[0]))
         commands.print_help()
-        sys.exit(1)
+        return 1
     except backends.UnknownBackendError as e:
         sys.stderr.write(str(e) + "\n")
         sys.stdout.write("Backends are: %s\n" % (", ".join([backend.get_name() for backend in backends.get_all_backends()])))
-        sys.exit(1)
+        return 1
 
 if __name__ == '__main__':
     import sys
-    main(sys.argv[1:])
+    sys.exit(main(sys.argv[1:]))

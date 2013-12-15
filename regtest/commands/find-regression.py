@@ -68,11 +68,13 @@ class FindRegression(Command):
         doc = options['test']
         if not os.path.isfile(doc):
             get_printer().printerr("Invalid test %s: not a regulat file" % (doc))
-            return
+            return 1
 
         t = Timer()
         bisect = Bisect(options['test'], options['refs_dir'], options['out_dir'])
         bisect.run()
         get_printer().printout_ln("Tests run in %s" % (t.elapsed_str()))
+
+        return 0
 
 register_command('find-regression', FindRegression)

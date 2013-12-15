@@ -194,6 +194,8 @@ class TestRun:
 
         self._queue.join()
 
+        return int(self._n_passed != self._n_run)
+
     def summary(self):
         self.printer.printout_ln()
 
