@@ -944,7 +944,9 @@ struct PSOutImgClipRect {
 //------------------------------------------------------------------------
 
 struct PSOutPaperSize {
-  PSOutPaperSize(int wA, int hA) { w = wA; h = hA; }
+  PSOutPaperSize(GooString *nameA, int wA, int hA) { name = nameA; w = wA; h = hA; }
+  ~PSOutPaperSize() { delete name; }
+  GooString *name;
   int w, h;
 };
 
@@ -1052,7 +1054,8 @@ static void outputToFile(void *stream, const char *data, int len) {
 PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc,
 			 char *psTitle,
 			 int firstPage, int lastPage, PSOutMode modeA,
-			 int paperWidthA, int paperHeightA, GBool duplexA,
+			 int paperWidthA, int paperHeightA,
+                         GBool noCropA, GBool duplexA,
 			 int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
 			 GBool forceRasterizeA,
 			 GBool manualCtrlA,
@@ -1114,14 +1117,15 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc,
   init(outputToFile, f, fileTypeA, psTitle,
        doc, firstPage, lastPage, modeA,
        imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA,
-       paperWidthA, paperHeightA, duplexA);
+       paperWidthA, paperHeightA, noCropA, duplexA);
 }
 
 PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
 			 char *psTitle,
 			 PDFDoc *doc,
 			 int firstPage, int lastPage, PSOutMode modeA,
-			 int paperWidthA, int paperHeightA, GBool duplexA,
+			 int paperWidthA, int paperHeightA,
+                         GBool noCropA, GBool duplexA,
 			 int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
 			 GBool forceRasterizeA,
 			 GBool manualCtrlA,
@@ -1151,7 +1155,40 @@ PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
   init(outputFuncA, outputStreamA, psGeneric, psTitle,
        doc, firstPage, lastPage, modeA,
        imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA,
-       paperWidthA, paperHeightA, duplexA);
+       paperWidthA, paperHeightA, noCropA, duplexA);
+}
+
+struct StandardMedia {
+    const char *name;
+    int width;
+    int height;
+};
+
+static const StandardMedia standardMedia[] =
+{
+    { "A0",       2384, 3371 },
+    { "A1",       1685, 2384 },
+    { "A2",       1190, 1684 },
+    { "A3",        842, 1190 },
+    { "A4",        595,  842 },
+    { "A5",        420,  595 },
+    { "B4",        729, 1032 },
+    { "B5",        516,  729 },
+    { "Letter",    612,  792 },
+    { "Tabloid",   792, 1224 },
+    { "Ledger",   1224,  792 },
+    { "Legal",     612, 1008 },
+    { "Statement", 396,  612 },
+    { "Executive", 540,  720 },
+    { "Folio",     612,  936 },
+    { "Quarto",    610,  780 },
+    { "10x14",     720, 1008 },
+    { NULL,          0,    0 }
+};
+
+/* PLRM specifies a tolerance of 5 points when matching page sizes */
+static bool pageDimensionEqual(int a, int b) {
+  return (abs (a - b) < 5);
 }
 
 void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
@@ -1159,7 +1196,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
 		       int firstPage, int lastPage, PSOutMode modeA,
 		       int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
 		       GBool manualCtrlA, int paperWidthA, int paperHeightA,
-		       GBool duplexA) {
+		       GBool noCropA, GBool duplexA) {
   Catalog *catalog;
   PDFRectangle *box;
   PSOutPaperSize *size;
@@ -1184,46 +1221,63 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   imgURX = imgURXA;
   imgURY = imgURYA;
   if (paperWidth < 0 || paperHeight < 0) {
-    Page *page;
     paperMatch = gTrue;
-    paperSizes = new GooList();
-    paperWidth = paperHeight = 1; // in case the document has zero pages
-    for (pg = (firstPage >= 1) ? firstPage : 1;
-	 pg <= lastPage && pg <= catalog->getNumPages();
-	 ++pg) {
-      page = catalog->getPage(pg);
-      if (page == NULL) {
-        paperMatch = gFalse;
-        break;
-      }
-      w = (int)ceil(page->getMediaWidth());
-      h = (int)ceil(page->getMediaHeight());
-      for (i = 0; i < paperSizes->getLength(); ++i) {
-	size = (PSOutPaperSize *)paperSizes->get(i);
-	if (size->w == w && size->h == h) {
-	  break;
-	}
-      }
-      if (i == paperSizes->getLength()) {
-	paperSizes->append(new PSOutPaperSize(w, h));
-      }
-      if (w > paperWidth) {
-	paperWidth = w;
-      }
-      if (h > paperHeight) {
-	paperHeight = h;
-      }
-    }
-    // NB: img{LLX,LLY,URX,URY} will be set by startPage()
   } else {
     paperMatch = gFalse;
   }
-  preload = globalParams->getPSPreload();
-  if (imgLLX == 0 && imgURX == 0 && imgLLY == 0 && imgURY == 0) {
-    imgLLX = imgLLY = 0;
-    imgURX = paperWidth;
-    imgURY = paperHeight;
+  Page *page;
+  paperSizes = new GooList();
+  for (pg = (firstPage >= 1) ? firstPage : 1;
+       pg <= lastPage && pg <= catalog->getNumPages();
+       ++pg) {
+    page = catalog->getPage(pg);
+    if (page == NULL)
+      paperMatch = gFalse;
+    if (!paperMatch) {
+      w = paperWidth;
+      h = paperHeight;
+    } else if (noCropA) {
+      w = (int)ceil(page->getMediaWidth());
+      h = (int)ceil(page->getMediaHeight());
+    } else {
+      w = (int)ceil(page->getCropWidth());
+      h = (int)ceil(page->getCropHeight());
+    }
+    if (paperMatch) {
+      int rotate = page->getRotate();
+      if (rotate == 90 || rotate == 270)
+        std::swap(w, h);
+    }
+    if (w  > paperWidth)
+      paperWidth = w;
+    if (h  > paperHeight)
+      paperHeight = h;
+    for (i = 0; i < paperSizes->getLength(); ++i) {
+      size = (PSOutPaperSize *)paperSizes->get(i);
+      if (pageDimensionEqual(w, size->w) && pageDimensionEqual(h, size->h))
+        break;
+    }
+    if (i == paperSizes->getLength()) {
+      const StandardMedia *media = standardMedia;
+      GooString *name = NULL;
+      while (media->name) {
+        if (pageDimensionEqual(w, media->width) && pageDimensionEqual(h, media->height)) {
+          name = new GooString(media->name);
+          w = media->width;
+          h = media->height;
+          break;
+        }
+        media++;
+      }
+      if (!name)
+        name = GooString::format("{0:d}x{1:d}mm", int(w*25.4/72), int(h*25.4/72));
+      paperSizes->append(new PSOutPaperSize(name, w, h));
+    }
+    pagePaperSize.insert(std::pair<int,int>(pg, i));
+    if (!paperMatch)
+      break; // we only need one entry when all pages are the same size
   }
+  preload = globalParams->getPSPreload();
   if (imgLLX == 0 && imgURX == 0 && imgLLY == 0 && imgURY == 0) {
     imgLLX = imgLLY = 0;
     imgURX = paperWidth;
@@ -1436,22 +1490,18 @@ void PSOutputDev::writeHeader(int firstPage, int lastPage,
     prevWidth = 0;
     prevHeight = 0;
   case psModePS:
-    if (paperMatch) {      
-      for (i = 0; i < paperSizes->getLength(); ++i) {
-	size = (PSOutPaperSize *)paperSizes->get(i);
-	writePSFmt("%%{0:s} {1:d}x{2:d} {1:d} {2:d} 0 () ()\n",
-		   i==0 ? "DocumentMedia:" : "+", size->w, size->h);
-      }
-    } else {
-      writePSFmt("%%DocumentMedia: plain {0:d} {1:d} 0 () ()\n",
-		 paperWidth, paperHeight);
+    for (i = 0; i < paperSizes->getLength(); ++i) {
+      size = (PSOutPaperSize *)paperSizes->get(i);
+      writePSFmt("%%{0:s} {1:t} {2:d} {3:d} 0 () ()\n",
+                 i==0 ? "DocumentMedia:" : "+", size->name, size->w, size->h);
     }
     writePSFmt("%%BoundingBox: 0 0 {0:d} {1:d}\n", paperWidth, paperHeight);
     writePSFmt("%%Pages: {0:d}\n", lastPage - firstPage + 1);
     writePS("%%EndComments\n");
     if (!paperMatch) {
+      size = (PSOutPaperSize *)paperSizes->get(0);
       writePS("%%BeginDefaults\n");
-      writePS("%%PageMedia: plain\n");
+      writePSFmt("%%PageMedia: {0:t}\n", size->name);
       writePS("%%EndDefaults\n");
     }
     break;
@@ -3504,6 +3554,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   int imgWidth, imgHeight, imgWidth2, imgHeight2;
   GBool landscape;
   GooString *s;
+  PSOutPaperSize *paperSize;
 
   xref = xrefA;
   if (mode == psModePS || mode == psModePSOrigPageSizes) {
@@ -3532,11 +3583,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
 	imgURX = imgURY;
 	imgURY = t;
       }
-      writePSFmt("%%PageMedia: {0:d}x{1:d}\n", imgURX, imgURY);
-      writePSFmt("%%PageBoundingBox: 0 0 {0:d} {1:d}\n", imgURX, imgURY);
     }
-    if (mode != psModePSOrigPageSizes)
-      writePS("%%BeginPageSetup\n");
   }
 
   // underlays
@@ -3589,8 +3636,18 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
 	}
       }
     }
+    if (paperMatch) {
+      paperSize = (PSOutPaperSize *)paperSizes->get(pagePaperSize[pageNum]);
+      writePSFmt("%%PageMedia: {0:t}\n", paperSize->name);
+    }
+    if (rotate == 0 || rotate == 180) {
+      writePSFmt("%%PageBoundingBox: 0 0 {0:d} {1:d}\n", width, height);
+    } else {
+      writePSFmt("%%PageBoundingBox: 0 0 {0:d} {1:d}\n", height, width);
+    }
     writePSFmt("%%PageOrientation: {0:s}\n",
 	       landscape ? "Landscape" : "Portrait");
+    writePS("%%BeginPageSetup\n");
     if (paperMatch) {
       writePSFmt("{0:d} {1:d} pdfSetupPaper\n", imgURX, imgURY);
       if (mode == psModePSOrigPageSizes) {
@@ -3729,9 +3786,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
     }
   }
 
-  if (mode == psModePS) {
-    writePS("%%EndPageSetup\n");
-  }
+  writePS("%%EndPageSetup\n");
 }
 
 void PSOutputDev::endPage() {

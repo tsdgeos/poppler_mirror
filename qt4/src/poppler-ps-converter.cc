@@ -224,6 +224,7 @@ bool PSConverter::convert()
 	                                     d->paperWidth,
 	                                     d->paperHeight,
 	                                     gFalse,
+	                                     gFalse,
 	                                     d->marginLeft,
 	                                     d->marginBottom,
 	                                     d->paperWidth - d->marginRight,

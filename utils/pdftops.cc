@@ -399,6 +399,7 @@ int main(int argc, char *argv[]) {
 			  NULL, firstPage, lastPage, mode,
 			  paperWidth,
 			  paperHeight,
+                          noCrop,
 			  duplex);
   if (psOut->isOk()) {
     doc->displayPages(psOut, firstPage, lastPage, 72, 72,
