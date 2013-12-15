@@ -40,6 +40,9 @@ class CreateReport(Command):
         parser.add_argument('-p', '--pretty-diff',
                             action = 'store_true', dest = 'pretty_diff', default = False,
                             help = 'Include pretty diff output')
+        parser.add_argument('-n', '--no-browser',
+                            action = 'store_false', dest = 'launch_browser', default = True,
+                            help = 'Do not launch a web browser with the results')
         parser.add_argument('tests')
 
     def run(self, options):
@@ -53,7 +56,7 @@ class CreateReport(Command):
             docs_dir = os.path.dirname(doc)
 
         report = HTMLReport(docs_dir, options['refs_dir'], options['out_dir'])
-        report.create()
+        report.create(options['launch_browser'])
 
         return 0
 

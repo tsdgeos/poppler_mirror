@@ -263,7 +263,7 @@ class HTMLReport:
         except:
             raise
 
-    def create(self):
+    def create(self, launch_browser):
         html = "<html><body><a name='top'></a>"
         if self.config.backends:
             backends = [get_backend(name) for name in self.config.backends]
@@ -323,4 +323,5 @@ class HTMLReport:
         f.write(html)
         f.close()
 
-        subprocess.Popen(['xdg-open', report_index])
+        if launch_browser:
+            subprocess.Popen(['xdg-open', report_index])
