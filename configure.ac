@@ -661,20 +661,20 @@ if test x$enable_poppler_qt5 = xyes; then
   AC_CHECK_TOOL(MOCQT5, moc)
   AC_MSG_CHECKING([for Qt5 moc])
   mocversion=`$MOCQT5 -v 2>&1`
-  mocversiongrep=`echo $mocversion | grep "Qt 5"`
+  mocversiongrep=`echo $mocversion | grep "Qt\|moc 5"`
   if test x"$mocversiongrep" != x"$mocversion"; then
     AC_MSG_RESULT([no])
     # moc was not the qt5 one, try with moc-qt5
     AC_CHECK_TOOL(MOCQT52, moc-qt5)
     AC_MSG_CHECKING([for Qt5 moc-qt5])
     mocversion=`$MOCQT52 -v 2>&1`
-    mocversiongrep=`echo $mocversion | grep "Qt 5"`
+    mocversiongrep=`echo $mocversion | grep "Qt\|moc 5"`
     if test x"$mocversiongrep" != x"$mocversion"; then
       AC_CHECK_TOOL(QTCHOOSER, qtchooser)
       AC_MSG_CHECKING([for qtchooser])
       qt5tooldir=`QT_SELECT=qt5 qtchooser -print-env | grep QTTOOLDIR | cut -d '=' -f 2 | cut -d \" -f 2`
       mocversion=`$qt5tooldir/moc -v 2>&1`
-      mocversiongrep=`echo $mocversion | grep "Qt 5"`
+      mocversiongrep=`echo $mocversion | grep "Qt\|moc 5"`
       if test x"$mocversiongrep" != x"$mocversion"; then
         # no valid moc found
         enable_poppler_qt5=no;
