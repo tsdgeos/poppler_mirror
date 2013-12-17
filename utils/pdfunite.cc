@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
@@ -60,7 +60,7 @@ int main (int argc, char *argv[])
 
   exitCode = 99;
   const GBool ok = parseArgs (argDesc, &argc, argv);
-  if (!ok || argc <= 3 || printVersion || printHelp) {
+  if (!ok || argc < 3 || printVersion || printHelp) {
     fprintf(stderr, "pdfunite version %s\n", PACKAGE_VERSION);
     fprintf(stderr, "%s\n", popplerCopyright);
     fprintf(stderr, "%s\n", xpdfCopyright);
