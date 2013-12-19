@@ -3576,8 +3576,13 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
     if (paperMatch) {
       page = doc->getCatalog()->getPage(pageNum);
       imgLLX = imgLLY = 0;
-      imgURX = (int)ceil(page->getMediaWidth());
-      imgURY = (int)ceil(page->getMediaHeight());
+      if (noCrop) {
+        imgURX = (int)ceil(page->getMediaWidth());
+        imgURY = (int)ceil(page->getMediaHeight());
+      } else {
+        imgURX = (int)ceil(page->getCropWidth());
+        imgURY = (int)ceil(page->getCropHeight());
+      }
       if (state->getRotate() == 90 || state->getRotate() == 270) {
 	t = imgURX;
 	imgURX = imgURY;
@@ -3650,25 +3655,6 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
     writePS("%%BeginPageSetup\n");
     if (paperMatch) {
       writePSFmt("{0:d} {1:d} pdfSetupPaper\n", imgURX, imgURY);
-      if (mode == psModePSOrigPageSizes) {
-	// Set page size only when it actually changes, as otherwise Duplex
-	// printing does not work
-	if (rotate == 0 || rotate == 180) {
-	  if ((width != prevWidth) || (height != prevHeight)) {
-	    writePSFmt("<</PageSize [{0:d} {1:d}]>> setpagedevice\n",
-		       width, height);
-	    prevWidth = width;
-	    prevHeight = height;
-	  }
-	} else {
-	  if ((height != prevWidth) || (width != prevHeight)) {
-	    writePSFmt("<</PageSize [{0:d} {1:d}]>> setpagedevice\n",
-		       height, width);
-	    prevWidth = height;
-	    prevHeight = width;
-	  }
-	}
-      }
     }
     writePS("pdfStartPage\n");
     if (rotate == 0) {
