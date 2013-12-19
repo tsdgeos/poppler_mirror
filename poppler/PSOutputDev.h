@@ -68,8 +68,7 @@ class PSOutputDev;
 enum PSOutMode {
   psModePS,
   psModeEPS,
-  psModeForm,
-  psModePSOrigPageSizes
+  psModeForm
 };
 
 enum PSFileType {
@@ -411,6 +410,7 @@ private:
       imgURX, imgURY;
   GBool preload;		// load all images into memory, and
 				//   predefine forms
+  GBool noCrop;
 
   PSOutputFunc outputFunc;
   void *outputStream;

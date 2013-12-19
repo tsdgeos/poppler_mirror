@@ -1216,6 +1216,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   mode = modeA;
   paperWidth = paperWidthA;
   paperHeight = paperHeightA;
+  noCrop = noCropA;
   imgLLX = imgLLXA;
   imgLLY = imgLLYA;
   imgURX = imgURXA;
@@ -1443,7 +1444,6 @@ void PSOutputDev::writeHeader(int firstPage, int lastPage,
   int i;
 
   switch (mode) {
-  case psModePSOrigPageSizes:
   case psModePS:
     writePS("%!PS-Adobe-3.0\n");
     break;
@@ -1485,10 +1485,6 @@ void PSOutputDev::writeHeader(int firstPage, int lastPage,
   }
 
   switch (mode) {
-  case psModePSOrigPageSizes:
-    paperMatch = gTrue;
-    prevWidth = 0;
-    prevHeight = 0;
   case psModePS:
     for (i = 0; i < paperSizes->getLength(); ++i) {
       size = (PSOutPaperSize *)paperSizes->get(i);
@@ -3557,7 +3553,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   PSOutPaperSize *paperSize;
 
   xref = xrefA;
-  if (mode == psModePS || mode == psModePSOrigPageSizes) {
+  if (mode == psModePS) {
     GooString pageLabel;
     const GBool gotLabel = doc->getCatalog()->indexToLabel(pageNum -1, &pageLabel);
     if (gotLabel) {
@@ -3602,7 +3598,6 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   xScale = yScale = 1;
   switch (mode) {
 
-  case psModePSOrigPageSizes:
   case psModePS:
     // rotate, translate, and scale page
     imgWidth = imgURX - imgLLX;
