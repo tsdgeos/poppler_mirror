@@ -119,9 +119,15 @@ int main (int argc, char *argv[])
       Ref *refPage = docs[i]->getCatalog()->getPageRef(j);
       Object page;
       docs[i]->getXRef()->fetch(refPage->num, refPage->gen, &page);
+      Dict *pageDict = page.getDict();
+      Dict *resDict = docs[i]->getCatalog()->getPage(j)->getResourceDict();
+      if (resDict) {
+        Object *newResource = new Object();
+        newResource->initDict(resDict);
+        pageDict->set("Resources", newResource);
+      }
       pages.push_back(page);
       offsets.push_back(numOffset);
-      Dict *pageDict = page.getDict();
       docs[i]->markPageObjects(pageDict, yRef, countRef, numOffset);
     }
     objectsCount += docs[i]->writePageObjects(outStr, yRef, numOffset, gTrue);
