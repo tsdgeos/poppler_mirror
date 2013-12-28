@@ -674,7 +674,7 @@ static GooString *getImageFileName(GooString *outputFileName, int numDigits, int
   GooString *imageName = new GooString(outputFileName);
   if (!singleFile) {
     snprintf(buf, sizeof(buf), "-%0*d", numDigits, page);
-    imageName->appendf(buf);
+    imageName->append(buf);
   }
   if (png)
     imageName->append(".png");
