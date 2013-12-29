@@ -121,6 +121,10 @@ public:
   // text in Type 3 fonts will be drawn with drawChar/drawString.
   virtual GBool interpretType3Chars() { return gFalse; }
 
+  // Does this device need to clip pages to the crop box even when the
+  // box is the crop box?
+  virtual GBool needClipToCropBox() { return gTrue; }
+
   //----- initialization and control
 
   // Start a page.
