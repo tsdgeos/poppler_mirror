@@ -104,7 +104,7 @@ static GooString icc;
 
 static GBool level2 = gFalse;
 static GBool level3 = gFalse;
-static GBool doOrigPageSizes = gFalse;
+static GBool origPageSizes = gFalse;
 static char paperSize[15] = "";
 static int paperWidth = -1;
 static int paperHeight = -1;
@@ -203,7 +203,7 @@ static const ArgDesc argDesc[] = {
    "generate Level 2 PostScript (PS, EPS)"},
   {"-level3",     argFlag,     &level3,         0,
    "generate Level 3 PostScript (PS, EPS)"},
-  {"-origpagesizes",argFlag,   &doOrigPageSizes,0,
+  {"-origpagesizes",argFlag,   &origPageSizes,0,
    "conserve original page sizes (PS, PDF, SVG)"},
   {"-paper",      argString,   paperSize,       sizeof(paperSize),
    "paper size (letter, legal, A4, A3, match)"},
@@ -420,7 +420,7 @@ static void getOutputSize(double page_w, double page_h, double *width, double *h
 {
 
   if (printing) {
-    if (doOrigPageSizes) {
+    if (origPageSizes) {
       *width = page_w;
       *height = page_h;
     } else {
@@ -828,10 +828,11 @@ int main(int argc, char *argv[]) {
     checkInvalidPrintOption(transp, "-transp");
     checkInvalidPrintOption(icc.getCString()[0], "-icc");
     checkInvalidPrintOption(singleFile, "-singlefile");
+    checkInvalidPrintOption(useCropBox, "-cropbox");
   } else {
     checkInvalidImageOption(level2, "-level2");
     checkInvalidImageOption(level3, "-level3");
-    checkInvalidImageOption(doOrigPageSizes, "-origpagesizes");
+    checkInvalidImageOption(origPageSizes, "-origpagesizes");
     checkInvalidImageOption(paperSize[0], "-paper");
     checkInvalidImageOption(paperWidth > 0, "-paperw");
     checkInvalidImageOption(paperHeight > 0, "-paperh");
@@ -841,6 +842,9 @@ int main(int argc, char *argv[]) {
     checkInvalidImageOption(noCenter, "-nocenter");
     checkInvalidImageOption(duplex, "-duplex");
   }
+
+  if (printing)
+    useCropBox = !noCrop;
 
   if (icc.getCString()[0] && !png) {
     fprintf(stderr, "Error: -icc may only be used with png output.\n");
@@ -874,17 +878,23 @@ int main(int argc, char *argv[]) {
   if (!level2 && !level3)
     level3 = gTrue;
 
-  if (eps && (doOrigPageSizes || paperSize[0] || paperWidth > 0 || paperHeight > 0)) {
+  if (eps && (origPageSizes || paperSize[0] || paperWidth > 0 || paperHeight > 0)) {
     fprintf(stderr, "Error: page size options may not be used with eps output.\n");
     exit(99);
   }
 
   if (paperSize[0]) {
+    if (origPageSizes) {
+      fprintf(stderr, "Error: -origpagesizes and -paper may not be used together.\n");
+      exit(99);
+    }
     if (!setPSPaperSize(paperSize, paperWidth, paperHeight)) {
       fprintf(stderr, "Invalid paper size\n");
       exit(99);
     }
   }
+  if (paperWidth < 0 || paperHeight < 0)
+    origPageSizes = gTrue;
 
   globalParams = new GlobalParams();
   if (quiet) {
