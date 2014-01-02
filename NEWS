@@ -1,3 +1,22 @@
+Release 0.25.1
+        core:
+         * GooString format: Added some tests + improved documentation
+         * GooString format: fixed bug with printing LLONG_MIN
+         * regression test improvements
+
+        qt4:
+         * Arthur backend font rendering improvements
+         * test program to save to file
+
+        qt5:
+         * Arthur backend font rendering improvements
+         * Improve detection of Qt5 moc. Bug #72744
+         * test program to save to file
+
+        utils:
+         * pdfunite: Work even if there's a single file given
+         * pdfunite: do not lose fonts when merging some files
+
 Release 0.25.0
         core:
          * Annotation improvements
