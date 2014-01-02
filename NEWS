@@ -1,3 +1,7 @@
+Release 0.24.5
+        core:
+         * Fix crash due to wrong formatting of error message. KDE Bug #328511
+
 Release 0.24.4
         core:
          * Fix regression in broken endstream detection. Bug #70854
