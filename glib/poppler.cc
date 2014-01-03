@@ -19,6 +19,10 @@
 #include <config.h>
 #include "poppler.h"
 
+#ifndef __GI_SCANNER__
+#include <Error.h>
+#endif
+
 GQuark poppler_error_quark (void)
 {
   static GQuark q = 0;
@@ -56,3 +60,46 @@ poppler_get_version (void)
 {
   return poppler_version;
 }
+
+#if  __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+
+/* We want to install an error callback so that PDF syntax warnings etc
+ * can be redirected through the GLib logging API instead of always just
+ * going to stderr.
+ */
+
+static void
+error_cb (void *data G_GNUC_UNUSED,
+          ErrorCategory category,
+          Goffset pos,
+          char *message)
+{
+  static const char * const cat_str[] = {
+    "Syntax warning",
+    "Syntax error",
+    NULL,
+    NULL,
+    "IO error",
+    NULL,
+    "Unimplemented feature",
+    "Internal error"
+  };
+
+  /* The following will never occur in poppler-glib */
+  if (category == errConfig ||
+      category == errCommandLine ||
+      category == errNotAllowed)
+    return;
+
+  g_log (G_LOG_DOMAIN, G_LOG_LEVEL_INFO,
+         "%s at position %" G_GOFFSET_FORMAT ": %s",
+         cat_str[category], (goffset) pos, message);
+}
+
+static void __attribute__((__constructor__))
+poppler_constructor (void)
+{
+  setErrorCallback (error_cb, NULL);
+}
+
+#endif /* GNUC */
