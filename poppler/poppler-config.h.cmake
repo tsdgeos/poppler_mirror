@@ -117,7 +117,7 @@
 //------------------------------------------------------------------------
 
 // copyright notice
-#define popplerCopyright "Copyright 2005-2013 The Poppler Developers - http://poppler.freedesktop.org"
+#define popplerCopyright "Copyright 2005-2014 The Poppler Developers - http://poppler.freedesktop.org"
 #define xpdfCopyright "Copyright 1996-2011 Glyph & Cog, LLC"
 
 //------------------------------------------------------------------------
