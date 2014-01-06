@@ -248,7 +248,7 @@ Stream *Parser::makeStream(Object *dict, Guchar *fileKey,
   } else {
     error(errSyntaxError, getPos(), "Missing 'endstream' or incorrect stream length");
     if (strict) return NULL;
-    if (xref) {
+    if (xref && lexer->getStream()) {
       // shift until we find the proper endstream or we change to another object or reach eof
       length = lexer->getPos() - pos;
       if (buf1.isCmd("endstream")) {
