@@ -32,7 +32,7 @@ typedef struct {
 	gint             rotate;
 	GdkRectangle     slice;
 	gboolean         printing;
-	
+
 	GtkWidget       *swindow;
 	GtkWidget       *darea;
 	GtkWidget       *slice_x;
@@ -174,7 +174,7 @@ pgd_render_slice_selector_setup (PgdRenderDemo *demo)
 		return;
 
 	poppler_page_get_size (page, &width, &height);
-	
+
 	gtk_spin_button_set_range (GTK_SPIN_BUTTON (demo->slice_x), 0, width);
 	gtk_spin_button_set_range (GTK_SPIN_BUTTON (demo->slice_y), 0, height);
 	gtk_spin_button_set_range (GTK_SPIN_BUTTON (demo->slice_w), 0, width);
