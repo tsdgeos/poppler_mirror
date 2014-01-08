@@ -428,7 +428,7 @@ pgd_render_create_widget (PopplerDocument *document)
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (demo->swindow),
 					GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 #if GTK_CHECK_VERSION(3, 7, 8)
-	gtk_container_add(GTK_CONTAINER(demo->swindow), demo->darea);
+	gtk_container_add (GTK_CONTAINER (demo->swindow), demo->darea);
 #else
 	gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (demo->swindow),
 					       demo->darea);
