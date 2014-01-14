@@ -25,21 +25,6 @@ AC_PROG_CC_STDC
 #  CXX="gcc"
 #fi
 AC_PROG_CXX
-if test "x$GXX" = "xyes"; then
-  case "$host_os" in
-    cygwin* | mingw*)
-    ;;
-    *)
-      case "${CXXFLAGS}" in
-      *-std=*)
-        ;;
-      *)
-        CXXFLAGS="$CXXFLAGS -ansi"
-        ;;
-      esac
-    ;;
-  esac
-fi
 AC_PROG_INSTALL
 
 dnl ##### Check for pkgconfig

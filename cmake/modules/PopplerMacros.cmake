@@ -116,11 +116,6 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_C_FLAGS_DEBUGFULL        "-g3 -fno-inline")
   set(CMAKE_C_FLAGS_PROFILE          "-g3 -fno-inline -ftest-coverage -fprofile-arcs")
 
-  if(CMAKE_SYSTEM_NAME MATCHES Linux)
-    set(DEFAULT_COMPILE_WARNINGS_YES "${DEFAULT_COMPILE_WARNINGS_YES} -ansi")
-    set(DEFAULT_COMPILE_WARNINGS_KDE "${DEFAULT_COMPILE_WARNINGS_KDE} -ansi")
-  endif(CMAKE_SYSTEM_NAME MATCHES Linux)
-
   poppler_check_link_flag("-Wl,--as-needed" GCC_HAS_AS_NEEDED)
   if(GCC_HAS_AS_NEEDED)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--as-needed")
