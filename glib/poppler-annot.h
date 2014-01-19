@@ -262,7 +262,9 @@ PopplerAction                *poppler_annot_screen_get_action                  (
 /* PopplerAnnotLine */
 GType                         poppler_annot_line_get_type                      (void) G_GNUC_CONST;
 PopplerAnnot                 *poppler_annot_line_new                           (PopplerDocument  *doc,
-                                                                                PopplerRectangle *rect);
+                                                                                PopplerRectangle *rect,
+                                                                                PopplerPoint     *start,
+                                                                                PopplerPoint     *end);
 void                          poppler_annot_line_set_vertices                  (PopplerAnnotLine *poppler_annot,
 										PopplerPoint     *start,
 										PopplerPoint     *end);

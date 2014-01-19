@@ -594,6 +594,8 @@ poppler_annot_line_class_init (PopplerAnnotLineClass *klass)
  * poppler_annot_line_new:
  * @doc: a #PopplerDocument
  * @rect: a #PopplerRectangle
+ * @start: a #PopplerPoint of the starting vertice
+ * @end: a #PopplerPoint of the ending vertice
  *
  * Creates a new Line annotation that will be
  * located on @rect when added to a page. See
@@ -605,15 +607,21 @@ poppler_annot_line_class_init (PopplerAnnotLineClass *klass)
  */
 PopplerAnnot *
 poppler_annot_line_new (PopplerDocument  *doc,
-			PopplerRectangle *rect)
+			PopplerRectangle *rect,
+                        PopplerPoint     *start,
+                        PopplerPoint     *end)
 {
+  PopplerAnnot *poppler_annot;
   Annot *annot;
   PDFRectangle pdf_rect(rect->x1, rect->y1,
 			rect->x2, rect->y2);
 
   annot = new AnnotLine (doc->doc, &pdf_rect);
 
-  return _poppler_annot_line_new (annot);
+  poppler_annot = _poppler_annot_line_new (annot);
+  poppler_annot_line_set_vertices (POPPLER_ANNOT_LINE (poppler_annot),
+                                   start, end);
+  return poppler_annot;
 }
 
 PopplerAnnot *

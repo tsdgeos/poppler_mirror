@@ -936,9 +936,7 @@ pgd_annots_add_annot (PgdAnnotsDemo *demo)
             end.x = rect.x2;
             end.y = rect.y2;
 
-            annot = poppler_annot_line_new (demo->doc, &rect);
-            poppler_annot_line_set_vertices (POPPLER_ANNOT_LINE (annot),
-                                             &start, &end);
+            annot = poppler_annot_line_new (demo->doc, &rect, &start, &end);
         }
             break;
         case POPPLER_ANNOT_SQUARE:
