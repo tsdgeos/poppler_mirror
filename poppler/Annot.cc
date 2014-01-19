@@ -3706,6 +3706,7 @@ void AnnotTextMarkup::setQuadrilaterals(AnnotQuadrilaterals *quadPoints) {
     obj1.arrayAdd (obj2.initReal (quadPoints->getY4(i)));
   }
 
+  delete quadrilaterals;
   quadrilaterals = new AnnotQuadrilaterals(obj1.getArray(), rect);
 
   annotObj.dictSet ("QuadPoints", &obj1);
