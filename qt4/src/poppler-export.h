@@ -3,15 +3,15 @@
 * This is needed for setting the visibility on windows, it will have no effect on other platforms.
 */
 #if defined(_WIN32)
-# define LIB_EXPORT __declspec(dllexport)
-# define LIB_IMPORT __declspec(dllimport)
+# define _POPPLER_QT4_LIB_EXPORT __declspec(dllexport)
+# define _POPPLER_QT4_LIB_IMPORT __declspec(dllimport)
 #else
-# define LIB_EXPORT
-# define LIB_IMPORT
+# define _POPPLER_QT4_LIB_EXPORT
+# define _POPPLER_QT4_LIB_IMPORT
 #endif
 
 #ifdef poppler_qt4_EXPORTS
-# define POPPLER_QT4_EXPORT LIB_EXPORT
+# define POPPLER_QT4_EXPORT _POPPLER_QT4_LIB_EXPORT
 #else
-# define POPPLER_QT4_EXPORT LIB_IMPORT
+# define POPPLER_QT4_EXPORT _POPPLER_QT4_LIB_IMPORT
 #endif
