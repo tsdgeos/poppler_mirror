@@ -5,6 +5,9 @@
 #if defined(_WIN32)
 # define _POPPLER_QT5_LIB_EXPORT __declspec(dllexport)
 # define _POPPLER_QT5_LIB_IMPORT __declspec(dllimport)
+#elif defined(__GNUC__)
+# define _POPPLER_QT5_LIB_EXPORT __attribute__((visibility("default")))
+# define _POPPLER_QT5_LIB_IMPORT
 #else
 # define _POPPLER_QT5_LIB_EXPORT
 # define _POPPLER_QT5_LIB_IMPORT
