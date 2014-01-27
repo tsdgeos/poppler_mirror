@@ -30,6 +30,7 @@
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
+// Copyright (C) 2014 Bogdan Cristea <cristeab@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -50,9 +51,6 @@
 #include <stddef.h>
 #include <string.h>
 #include <time.h>
-#ifdef _WIN32
-#  include <windows.h>
-#endif
 #include <sys/stat.h>
 #include "goo/gstrtod.h"
 #include "goo/GooString.h"

@@ -20,6 +20,7 @@
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2014 Bogdan Cristea <cristeab@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -39,6 +40,7 @@ extern "C" {
 #  ifdef FPTEX
 #    include <win32lib.h>
 #  else
+  #define NOMINMAX
 #    include <windows.h>
 #  endif
 #elif defined(ACORN)

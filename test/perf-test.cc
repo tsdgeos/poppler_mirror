@@ -469,7 +469,6 @@ struct FindFileState {
 };
 
 #ifdef _WIN32
-#include <windows.h>
 #include <sys/timeb.h>
 #include <direct.h>
 

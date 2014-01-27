@@ -1,5 +1,10 @@
 
+#ifndef _WIN32
 #include <unistd.h>
+#else
+#include <Windows.h>
+#define sleep Sleep
+#endif
 #include <time.h>
 
 #include <poppler-qt4.h>

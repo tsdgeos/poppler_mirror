@@ -12,6 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2014 Bogdan Cristea <cristeab@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -22,6 +23,7 @@
 #define XPDFPLUGINAPI_H
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
 #else
 #define Object XtObject

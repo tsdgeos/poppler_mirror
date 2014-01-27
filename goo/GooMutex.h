@@ -19,6 +19,7 @@
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
+// Copyright (C) 2014 Bogdan Cristea <cristeab@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -40,7 +41,7 @@
 // gDestroyMutex(&m);
 
 #ifdef _WIN32
-
+#define NOMINMAX
 #include <windows.h>
 
 typedef CRITICAL_SECTION GooMutex;
