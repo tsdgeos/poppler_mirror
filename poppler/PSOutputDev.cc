@@ -1257,6 +1257,13 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
     if (!paperMatch) {
       w = paperWidth;
       h = paperHeight;
+      if (w < 0 || h < 0) {
+        // Unable to obtain a paper size from the document and no page size
+        // specified. In this case use A4 as the page size to ensure the PS output is
+        // valid. This will only occur if the PDF is very broken.
+        w = 595;
+        h = 842;
+      }
     } else if (noCropA) {
       w = (int)ceil(page->getMediaWidth());
       h = (int)ceil(page->getMediaHeight());
