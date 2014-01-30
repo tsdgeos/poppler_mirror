@@ -1009,7 +1009,7 @@ pgd_annots_update_selected_text (PgdAnnotsDemo *demo)
     gdouble               width, height;
     GArray               *quads_array = NULL;
     guint                 n_rects;
-    gint                  i, lines = 1;
+    gint                  i, lines = 0;
     GList                 *l_rects = NULL, *list;
 
     poppler_page_get_size (demo->page, &width, &height);
@@ -1037,15 +1037,15 @@ pgd_annots_update_selected_text (PgdAnnotsDemo *demo)
                 l_rects = g_list_append (l_rects, r);
             r = g_slice_new (PopplerRectangle);
             r->x1 = rects[i].x1;
-            r->y1 = height - rects[i].y1;
+            r->y1 = rects[i].y1;
             r->x2 = rects[i].x2;
-            r->y2 = height - rects[i].y2;
+            r->y2 = rects[i].y2;
             lines++;
         } else {
             r->x1 = MIN(r->x1, rects[i].x1);
-            r->y1 = height - MIN(r->y1, rects[i].y1);
+            r->y1 = MIN(r->y1, rects[i].y1);
             r->x2 = MAX(r->x2, rects[i].x2);
-            r->y2 = height - MAX(r->y2, rects[i].y2);
+            r->y2 = MAX(r->y2, rects[i].y2);
         }
     }
 
@@ -1062,7 +1062,14 @@ pgd_annots_update_selected_text (PgdAnnotsDemo *demo)
 
         quad = &g_array_index (quads_array, PopplerQuadrilateral, i);
         r = (PopplerRectangle *)list->data;
-        pgd_annots_set_poppler_quad_from_rectangle (quad, r);
+        quad->p1.x = r->x1;
+        quad->p1.y = height - r->y1;
+        quad->p2.x = r->x2;
+        quad->p2.y = height - r->y1;
+        quad->p3.x = r->x1;
+        quad->p3.y = height - r->y2;
+        quad->p4.x = r->x2;
+        quad->p4.y = height - r->y2;
         g_slice_free (PopplerRectangle, r);
     }
 
