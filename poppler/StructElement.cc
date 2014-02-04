@@ -552,7 +552,7 @@ static const struct TypeMapEntry {
   { StructElement::L,          "L",          elementTypeBlock,     attributeMapList         },
   { StructElement::LI,         "LI",         elementTypeBlock,     attributeMapBlock        },
   { StructElement::Lbl,        "Lbl",        elementTypeBlock,     attributeMapBlock        },
-  { StructElement::LBody,      "LBody",      elementTypeUndefined, attributeMapBlock        },
+  { StructElement::LBody,      "LBody",      elementTypeBlock,     attributeMapBlock        },
   { StructElement::Table,      "Table",      elementTypeBlock,     attributeMapTable        },
   { StructElement::TR,         "TR",         elementTypeUndefined, attributeMapShared       },
   { StructElement::TH,         "TH",         elementTypeUndefined, attributeMapTableCell    },
