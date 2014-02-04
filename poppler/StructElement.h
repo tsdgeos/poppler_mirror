@@ -153,6 +153,7 @@ public:
   GBool isOk() const { return type != Unknown; }
   GBool isBlock() const;
   GBool isInline() const;
+  GBool isGrouping() const;
 
   inline GBool isContent() const { return (type == MCID) || isObjectRef(); }
   inline GBool isObjectRef() const { return (type == OBJR && c->ref.num != -1 && c->ref.gen != -1); }

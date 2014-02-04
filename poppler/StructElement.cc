@@ -506,6 +506,7 @@ static GBool ownerHasMorePriority(Attribute::Owner a, Attribute::Owner b)
 
 enum ElementType {
   elementTypeUndefined,
+  elementTypeGrouping,
   elementTypeInline,
   elementTypeBlock,
 };
@@ -516,16 +517,16 @@ static const struct TypeMapEntry {
   ElementType               elementType;
   const AttributeMapEntry **attributes;
 } typeMap[] = {
-  { StructElement::Document,   "Document",   elementTypeInline,    attributeMapShared       },
-  { StructElement::Part,       "Part",       elementTypeInline,    attributeMapShared       },
-  { StructElement::Art,        "Art",        elementTypeInline,    attributeMapColumns      },
-  { StructElement::Sect,       "Sect",       elementTypeInline,    attributeMapColumns      },
-  { StructElement::Div,        "Div",        elementTypeInline,    attributeMapColumns      },
-  { StructElement::BlockQuote, "BlockQuote", elementTypeInline,    attributeMapInline       },
-  { StructElement::Caption,    "Caption",    elementTypeInline,    attributeMapInline       },
-  { StructElement::NonStruct,  "NonStruct",  elementTypeInline,    attributeMapInline       },
-  { StructElement::Index,      "Index",      elementTypeInline,    attributeMapInline       },
-  { StructElement::Private,    "Private",    elementTypeInline,    attributeMapInline       },
+  { StructElement::Document,   "Document",   elementTypeGrouping,  attributeMapShared       },
+  { StructElement::Part,       "Part",       elementTypeGrouping,  attributeMapShared       },
+  { StructElement::Art,        "Art",        elementTypeGrouping,  attributeMapColumns      },
+  { StructElement::Sect,       "Sect",       elementTypeGrouping,  attributeMapColumns      },
+  { StructElement::Div,        "Div",        elementTypeGrouping,  attributeMapColumns      },
+  { StructElement::BlockQuote, "BlockQuote", elementTypeGrouping,  attributeMapInline       },
+  { StructElement::Caption,    "Caption",    elementTypeGrouping,  attributeMapInline       },
+  { StructElement::NonStruct,  "NonStruct",  elementTypeGrouping,  attributeMapInline       },
+  { StructElement::Index,      "Index",      elementTypeGrouping,  attributeMapInline       },
+  { StructElement::Private,    "Private",    elementTypeGrouping,  attributeMapInline       },
   { StructElement::Span,       "Span",       elementTypeInline,    attributeMapInline       },
   { StructElement::Quote,      "Quote",      elementTypeInline,    attributeMapInline       },
   { StructElement::Note,       "Note",       elementTypeInline,    attributeMapInline       },
@@ -563,8 +564,8 @@ static const struct TypeMapEntry {
   { StructElement::Figure,     "Figure",     elementTypeUndefined, attributeMapIllustration },
   { StructElement::Formula,    "Formula",    elementTypeUndefined, attributeMapIllustration },
   { StructElement::Form,       "Form",       elementTypeUndefined, attributeMapIllustration },
-  { StructElement::TOC,        "TOC",        elementTypeUndefined, attributeMapShared       },
-  { StructElement::TOCI,       "TOCI",       elementTypeUndefined, attributeMapShared       },
+  { StructElement::TOC,        "TOC",        elementTypeGrouping,  attributeMapShared       },
+  { StructElement::TOCI,       "TOCI",       elementTypeGrouping,  attributeMapShared       },
 };
 
 
@@ -911,6 +912,12 @@ GBool StructElement::isInline() const
 {
   const TypeMapEntry *entry = getTypeMapEntry(type);
   return entry ? (entry->elementType == elementTypeInline) : gFalse;
+}
+
+GBool StructElement::isGrouping() const
+{
+  const TypeMapEntry *entry = getTypeMapEntry(type);
+  return entry ? (entry->elementType == elementTypeGrouping) : gFalse;
 }
 
 GBool StructElement::hasPageRef() const
