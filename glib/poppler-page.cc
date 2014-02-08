@@ -572,8 +572,8 @@ poppler_page_render_selection (PopplerPage           *page,
 /**
  * poppler_page_get_thumbnail_size:
  * @page: A #PopplerPage
- * @width: (out) return location for width
- * @height: (out) return location for height
+ * @width: (out): return location for width
+ * @height: (out): return location for height
  *
  * Returns %TRUE if @page has a thumbnail associated with it.  It also
  * fills in @width and @height with the width and height of the
