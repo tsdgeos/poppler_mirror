@@ -303,6 +303,26 @@ poppler_structure_element_is_block (PopplerStructureElement *poppler_structure_e
 }
 
 /**
+ * poppler_structure_element_is_grouping:
+ * @poppler_structure_element: A #PopplerStructureElement
+ *
+ * Checks whether an element is a grouping element.
+ *
+ * Return value: %TRUE if the element is a grouping element, %FALSE
+ *    otherwise.
+ *
+ * Since: 0.26
+ */
+gboolean
+poppler_structure_element_is_grouping (PopplerStructureElement *poppler_structure_element)
+{
+    g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), FALSE);
+    g_return_val_if_fail (poppler_structure_element->elem != NULL, FALSE);
+
+    return poppler_structure_element->elem->isGrouping ();
+}
+
+/**
  * poppler_structure_element_get_id:
  * @poppler_structure_element: A #PopplerStructureElement
  *

@@ -93,6 +93,7 @@ gint                         poppler_structure_element_get_page                 
 gboolean                     poppler_structure_element_is_content                 (PopplerStructureElement  *poppler_structure_element);
 gboolean                     poppler_structure_element_is_inline                  (PopplerStructureElement  *poppler_structure_element);
 gboolean                     poppler_structure_element_is_block                   (PopplerStructureElement  *poppler_structure_element);
+gboolean                     poppler_structure_element_is_grouping                (PopplerStructureElement  *poppler_structure_element);
 gchar                       *poppler_structure_element_get_id                     (PopplerStructureElement  *poppler_structure_element);
 gchar                       *poppler_structure_element_get_title                  (PopplerStructureElement  *poppler_structure_element);
 gchar                       *poppler_structure_element_get_abbreviation           (PopplerStructureElement  *poppler_structure_element);
