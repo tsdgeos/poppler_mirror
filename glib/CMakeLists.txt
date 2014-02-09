@@ -30,6 +30,7 @@ set(poppler_glib_public_headers
   poppler-movie.h
   poppler-media.h
   poppler.h
+  poppler-structure-element.h
 )
 
 find_program(GLIB2_MKENUMS glib-mkenums)
@@ -71,6 +72,7 @@ set(poppler_glib_SRCS
   poppler.cc
   poppler-cached-file-loader.cc
   poppler-input-stream.cc
+  poppler-structure-element.cc
 )
 set(poppler_glib_generated_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.c
