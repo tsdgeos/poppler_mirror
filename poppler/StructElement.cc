@@ -1158,7 +1158,7 @@ void StructElement::parse(Dict *element)
     for (int i = 0; i < obj.arrayGetLength(); i++) {
       if (obj.arrayGet(i, &iobj)->isDict()) {
         attrIndex = getNumAttributes();
-        parseAttributes(obj.getDict());
+        parseAttributes(iobj.getDict());
       } else if (iobj.isInt()) {
         const int revision = iobj.getInt();
         // Set revision numbers for the elements previously created.
