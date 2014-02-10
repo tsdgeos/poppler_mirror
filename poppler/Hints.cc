@@ -176,6 +176,11 @@ void Hints::readPageOffsetTable(Stream *str)
   inputBits = 0; // reset on byte boundary.
 
   nObjectLeast = readBits(32, str);
+  if (nObjectLeast < 1) {
+    error(errSyntaxWarning, -1, "Invalid least number of objects reading page offset hints table");
+    nPages = 0;
+    return;
+  }
 
   objectOffsetFirst = readBits(32, str);
   if (objectOffsetFirst >= hintsOffset) objectOffsetFirst += hintsLength;
