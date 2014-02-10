@@ -15,7 +15,7 @@ include(FindPackageHandleStandardArgs)
 if (NOT WIN32)
   find_package(PkgConfig REQUIRED)
 
-  pkg_check_modules(GTK3 "gtk+-3.0>=3.0" "gdk-pixbuf-2.0")
+  pkg_check_modules(GTK3 "gtk+-3.0>=3.8" "gdk-pixbuf-2.0")
 
   find_package_handle_standard_args(GTK DEFAULT_MSG GTK3_LIBRARIES GTK3_CFLAGS)
 
