@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2005-2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2010-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2010-2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011-2013 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012 Markus Trippelsdorf <markus@trippelsdorf.de>
@@ -584,6 +584,13 @@ void Splash::pipeRun(SplashPipe *pipe) {
     //----- blend function
 
     if (state->blendFunc) {
+#ifdef SPLASH_CMYK
+      if (bitmap->mode == splashModeDeviceN8) {
+        for (int k = 4; k < 4 + SPOT_NCOMPS; k++) {
+          cBlend[k] = 0;
+        }
+      }
+#endif
       (*state->blendFunc)(cSrc, cDest, cBlend, bitmap->mode);
     }
 
