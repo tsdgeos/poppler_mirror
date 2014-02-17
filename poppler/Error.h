@@ -17,6 +17,7 @@
 // Copyright (C) 2005 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -33,6 +34,7 @@
 #include <stdarg.h>
 #include "poppler-config.h"
 #include "goo/gtypes.h"
+#include "goo/GooString.h"
 
 enum ErrorCategory {
   errSyntaxWarning,    // PDF syntax error which can be worked around;
@@ -53,6 +55,6 @@ extern void setErrorCallback(void (*cbk)(void *data, ErrorCategory category,
 					 Goffset pos, char *msg),
 			     void *data);
 
-extern void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...);
+extern void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...) GOOSTRING_FORMAT;
 
 #endif

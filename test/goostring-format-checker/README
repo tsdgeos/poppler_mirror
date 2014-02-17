@@ -1,0 +1,16 @@
+== Clang++ compiler plugin that checks usage of GooString::format-like functions ==
+
+1) Compile the plugin with:
+	clang++ -shared -o goostring-format-checker.so goostring-format-checker.cc -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS
+
+2) Compile poppler and pass the following options to the clang++ compiler:
+	-Xclang -load -Xclang goostring-format-checker.so -Xclang -plugin -Xclang goostring-format-check
+
+Example:
+$ clang++ -shared -o goostring-format-checker.so goostring-format-checker.cc -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS
+$ export CXX=clang++
+$ export CXXFLAGS="-Xclang -load -Xclang $PWD/goostring-format-checker.so -Xclang -add-plugin -Xclang goostring-format-checker"
+$ mkdir build
+$ cd build
+$ cmake ../../..
+$ make
