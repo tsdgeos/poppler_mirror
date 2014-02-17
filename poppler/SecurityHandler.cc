@@ -15,6 +15,7 @@
 //
 // Copyright (C) 2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -295,7 +296,7 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
 	ok = gTrue;
       } else if (!(encVersion == -1 && encRevision == -1)) {
 	error(errUnimplemented, -1,
-	      "Unsupported version/revision (%d/%d) of Standard security handler",
+	      "Unsupported version/revision ({0:d}/{1:d}) of Standard security handler",
 	      encVersion, encRevision);
       }
     } else {

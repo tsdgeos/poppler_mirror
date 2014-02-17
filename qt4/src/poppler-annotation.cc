@@ -2,7 +2,7 @@
  * Copyright (C) 2006, 2009, 2012, 2013 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
- * Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -383,7 +383,7 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
         Annot * ann = annots->getAnnot( j );
         if ( !ann )
         {
-            error(errInternal, -1, "Annot %u is null", j);
+            error(errInternal, -1, "Annot {0:ud} is null", j);
             continue;
         }
 
@@ -536,7 +536,7 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
                     CASE_FOR_TYPE( TrapNet )
                     CASE_FOR_TYPE( Watermark )
                     CASE_FOR_TYPE( 3D )
-                    default: error(errUnimplemented, -1, "Annotation %u not supported", subType);
+                    default: error(errUnimplemented, -1, "Annotation {0:d} not supported", subType);
                 }
                 continue;
 #undef CASE_FOR_TYPE

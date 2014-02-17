@@ -37,6 +37,7 @@
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 // Copyright (C) 2013 Johannes Brandstätter <jbrandstaetter@gmail.com>
+// Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1327,7 +1328,7 @@ void HtmlOutputDev::drawJpegImage(GfxState *state, Stream *str)
   // open the image file
   GooString *fName=createImageFileName("jpg");
   if (!(f1 = fopen(fName->getCString(), "wb"))) {
-    error(errIO, -1, "Couldn't open image file '%s'", fName->getCString());
+    error(errIO, -1, "Couldn't open image file '{0:t}'", fName);
     delete fName;
     return;
   }
@@ -1361,7 +1362,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
   // open the image file
   GooString *fName=createImageFileName("png");
   if (!(f1 = fopen(fName->getCString(), "wb"))) {
-    error(errIO, -1, "Couldn't open image file '%s'", fName->getCString());
+    error(errIO, -1, "Couldn't open image file '{0:t}'", fName);
     delete fName;
     return;
   }
@@ -1369,7 +1370,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
   PNGWriter *writer = new PNGWriter( isMask ? PNGWriter::MONOCHROME : PNGWriter::RGB );
   // TODO can we calculate the resolution of the image?
   if (!writer->init(f1, width, height, 72, 72)) {
-    error(errInternal, -1, "Can't init PNG for image '%s'", fName->getCString());
+    error(errInternal, -1, "Can't init PNG for image '{0:t}'", fName);
     delete writer;
     fclose(f1);
     return;
@@ -1401,7 +1402,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
       }
 
       if (!writer->writeRow(row_pointer)) {
-        error(errIO, -1, "Failed to write into PNG '%s'", fName->getCString());
+        error(errIO, -1, "Failed to write into PNG '{0:t}'", fName);
         delete writer;
         delete imgStr;
         fclose(f1);
@@ -1438,7 +1439,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
 
       if (!writer->writeRow( &png_row ))
       {
-        error(errIO, -1, "Failed to write into PNG '%s'", fName->getCString());
+        error(errIO, -1, "Failed to write into PNG '{0:t}'", fName);
         delete writer;
         fclose(f1);
         gfree(png_row);

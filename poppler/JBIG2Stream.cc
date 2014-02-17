@@ -21,7 +21,7 @@
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2013, 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1840,7 +1840,7 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
 	  }
 	  refBitmap = bitmaps[symID];
 	  if (unlikely(refBitmap == NULL)) {
-	    error(errSyntaxError, curStr->getPos(), "Invalid ref bitmap for symbol ID {0:d} in JBIG2 symbol dictionary", symID);
+	    error(errSyntaxError, curStr->getPos(), "Invalid ref bitmap for symbol ID {0:ud} in JBIG2 symbol dictionary", symID);
 	    goto syntaxError;
 	  }
 	  bitmaps[numInputSyms + i] =

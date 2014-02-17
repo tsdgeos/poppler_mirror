@@ -26,7 +26,7 @@
 // Copyright (C) 2009, 2011, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009-2011, 2013 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2012, 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Lu Wang <coolwanglu@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -2508,7 +2508,7 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font,
       gfree(codeToGID);
     } else {
       error(errSyntaxError, -1,
-	    "TrueType font '%s' does not allow embedding",
+	    "TrueType font '{0:s}' does not allow embedding",
 	    font->getName() ? font->getName()->getCString() : "(unnamed)");
 	    
     }

@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2013 Igalia S.L.
+// Copyright 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 //========================================================================
 
@@ -94,7 +95,7 @@ void StructTreeRoot::parse(Dict *root)
           index.free();
         }
       } else {
-        error(errSyntaxError, -1, "Nums array length is not a even ({0:i})", nums.arrayGetLength());
+        error(errSyntaxError, -1, "Nums array length is not a even ({0:d})", nums.arrayGetLength());
       }
     } else {
       error(errSyntaxError, -1, "Nums object is wrong type ({0:s})", nums.getTypeName());
