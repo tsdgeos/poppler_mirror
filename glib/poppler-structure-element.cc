@@ -119,6 +119,8 @@ poppler_structure_element_get_kind (PopplerStructureElement *poppler_structure_e
         return POPPLER_STRUCTURE_ELEMENT_DOCUMENT;
       case StructElement::Part:
         return POPPLER_STRUCTURE_ELEMENT_PART;
+      case StructElement::Art:
+        return POPPLER_STRUCTURE_ELEMENT_ARTICLE;
       case StructElement::Sect:
         return POPPLER_STRUCTURE_ELEMENT_SECTION;
       case StructElement::Div:
@@ -139,10 +141,6 @@ poppler_structure_element_get_kind (PopplerStructureElement *poppler_structure_e
         return POPPLER_STRUCTURE_ELEMENT_LINK;
       case StructElement::Annot:
         return POPPLER_STRUCTURE_ELEMENT_ANNOT;
-      case StructElement::Ruby:
-        return POPPLER_STRUCTURE_ELEMENT_RUBY;
-      case StructElement::Warichu:
-        return POPPLER_STRUCTURE_ELEMENT_WARICHU;
       case StructElement::BlockQuote:
         return POPPLER_STRUCTURE_ELEMENT_BLOCKQUOTE;
       case StructElement::Caption:
@@ -195,15 +193,30 @@ poppler_structure_element_get_kind (PopplerStructureElement *poppler_structure_e
         return POPPLER_STRUCTURE_ELEMENT_TABLE_FOOTER;
       case StructElement::TBody:
         return POPPLER_STRUCTURE_ELEMENT_TABLE_BODY;
+      case StructElement::Ruby:
+        return POPPLER_STRUCTURE_ELEMENT_RUBY;
+      case StructElement::RB:
+        return POPPLER_STRUCTURE_ELEMENT_RUBY_BASE_TEXT;
+      case StructElement::RT:
+        return POPPLER_STRUCTURE_ELEMENT_RUBY_ANNOT_TEXT;
+      case StructElement::RP:
+        return POPPLER_STRUCTURE_ELEMENT_RUBY_PUNCTUATION;
+      case StructElement::Warichu:
+        return POPPLER_STRUCTURE_ELEMENT_WARICHU;
+      case StructElement::WT:
+        return POPPLER_STRUCTURE_ELEMENT_WARICHU_TEXT;
+      case StructElement::WP:
+        return POPPLER_STRUCTURE_ELEMENT_WARICHU_PUNCTUATION;
       case StructElement::Figure:
         return POPPLER_STRUCTURE_ELEMENT_FIGURE;
       case StructElement::Formula:
         return POPPLER_STRUCTURE_ELEMENT_FORMULA;
       case StructElement::Form:
         return POPPLER_STRUCTURE_ELEMENT_FORM;
-      default:
-        g_assert_not_reached ();
     }
+
+  g_assert_not_reached ();
+  return POPPLER_STRUCTURE_ELEMENT_UNKNOWN;
 }
 
 /**
