@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -219,7 +219,7 @@ public:
 
 
   // Is this document linearized?
-  GBool isLinearized();
+  GBool isLinearized(GBool tryingToReconstruct = gFalse);
 
   // Return the document's Info dictionary (if any).
   Object *getDocInfo(Object *obj) { return xref->getDocInfo(obj); }
@@ -301,10 +301,10 @@ private:
   void checkHeader();
   GBool checkEncryption(GooString *ownerPassword, GooString *userPassword);
   // Get the offset of the start xref table.
-  Goffset getStartXRef();
+  Goffset getStartXRef(GBool tryingToReconstruct = gFalse);
   // Get the offset of the entries in the main XRef table of a
   // linearized document (0 for non linearized documents).
-  Goffset getMainXRefEntriesOffset();
+  Goffset getMainXRefEntriesOffset(GBool tryingToReconstruct = gFalse);
   long long strToLongLong(char *s);
 
   GooString *fileName;
