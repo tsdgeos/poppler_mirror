@@ -104,13 +104,11 @@ poppler_structure_element_class_init (PopplerStructureElementClass *klass)
 PopplerStructureElementKind
 poppler_structure_element_get_kind (PopplerStructureElement *poppler_structure_element)
 {
-  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), POPPLER_STRUCTURE_ELEMENT_UNKNOWN);
-  g_return_val_if_fail (poppler_structure_element->elem != NULL, POPPLER_STRUCTURE_ELEMENT_UNKNOWN);
+  g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), POPPLER_STRUCTURE_ELEMENT_CONTENT);
+  g_return_val_if_fail (poppler_structure_element->elem != NULL, POPPLER_STRUCTURE_ELEMENT_CONTENT);
 
   switch (poppler_structure_element->elem->getType ())
     {
-      case StructElement::Unknown:
-        return POPPLER_STRUCTURE_ELEMENT_UNKNOWN;
       case StructElement::MCID:
         return POPPLER_STRUCTURE_ELEMENT_CONTENT;
       case StructElement::OBJR:
@@ -213,10 +211,14 @@ poppler_structure_element_get_kind (PopplerStructureElement *poppler_structure_e
         return POPPLER_STRUCTURE_ELEMENT_FORMULA;
       case StructElement::Form:
         return POPPLER_STRUCTURE_ELEMENT_FORM;
+
+      /* There should never be elements of type StructElement::Unknown */
+      case StructElement::Unknown:
+        g_assert_not_reached ();
     }
 
   g_assert_not_reached ();
-  return POPPLER_STRUCTURE_ELEMENT_UNKNOWN;
+  return POPPLER_STRUCTURE_ELEMENT_CONTENT;
 }
 
 /**
