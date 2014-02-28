@@ -39,9 +39,9 @@
  *
  * Instances of #PopplerStructureElement are used to describe the structure
  * of a #PopplerDocument. To access the elements in the structure of the
- * document, first use poppler_document_get_structure() to obtain its
- * #PopplerStructure, and then use poppler_structure_get_n_children()
- * and poppler_structure_get_child() to enumerate the top level elements.
+ * document, use poppler_structure_element_iter_new() to obtain an iterator
+ * for the top-level #PopplerStructure, and then use the
+ * #PopplerStructureElementIter methods to traverse the structure tree.
  */
 
 typedef struct _PopplerStructureElementClass
