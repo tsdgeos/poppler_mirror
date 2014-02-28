@@ -120,7 +120,6 @@ void                         poppler_text_span_free                             
 gboolean                     poppler_text_span_is_fixed_width_font                (PopplerTextSpan *poppler_text_span);
 gboolean                     poppler_text_span_is_serif_font                      (PopplerTextSpan *poppler_text_span);
 gboolean                     poppler_text_span_is_bold_font                       (PopplerTextSpan *poppler_text_span);
-gboolean                     poppler_text_span_is_link                            (PopplerTextSpan *poppler_text_span);
 void                         poppler_text_span_get_color                          (PopplerTextSpan *poppler_text_span,
                                                                                    PopplerColor    *color);
 const gchar                 *poppler_text_span_get_text                           (PopplerTextSpan *poppler_text_span);
