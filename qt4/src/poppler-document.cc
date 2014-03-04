@@ -7,6 +7,7 @@
  * Copyright (C) 2012 Koji Otani <sho@bbr.jp>
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2014 Adam Reichold <adamreichold@myopera.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +33,7 @@
 #include <PDFDoc.h>
 #include <Stream.h>
 #include <Catalog.h>
+#include <ViewerPreferences.h>
 #include <DateInfo.h>
 #include <GfxState.h>
 
@@ -191,6 +193,21 @@ namespace Poppler {
 	default:
 	    return NoLayout;
 	}
+    }
+
+    Qt::LayoutDirection Document::textDirection() const
+    {
+        if (!m_doc->doc->getCatalog()->getViewerPreferences())
+            return Qt::LayoutDirectionAuto;
+
+        switch (m_doc->doc->getCatalog()->getViewerPreferences()->getDirection()) {
+        case ViewerPreferences::directionL2R:
+            return Qt::LeftToRight;
+        case ViewerPreferences::directionR2L:
+            return Qt::RightToLeft;
+        default:
+            return Qt::LayoutDirectionAuto;
+        }
     }
 
     int Document::numPages() const

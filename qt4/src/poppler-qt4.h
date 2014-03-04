@@ -12,7 +12,7 @@
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012, Tobias Koenig <tobias.koenig@kdab.com>
- * Copyright (C) 2012 Adam Reichold <adamreichold@myopera.com>
+ * Copyright (C) 2012, 2014 Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -988,6 +988,14 @@ delete it;
 	   shown relative to each other.
 	*/
 	PageLayout pageLayout() const;
+
+	/**
+	   The predominant reading order for text as supplied by
+	   the document's viewer preferences.
+
+	   \since 0.26
+	*/
+	Qt::LayoutDirection textDirection() const;
 
 	/**
 	   Provide the passwords required to unlock the document
