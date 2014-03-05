@@ -191,11 +191,11 @@ public:
   const GooString *getExpandedAbbr() const { return isContent() ? NULL : s->expandedAbbr; }
   GooString *getExpandedAbbr() { return isContent() ? NULL : s->expandedAbbr; }
 
-  unsigned getNumElements() const { return isContent() ? 0 : s->elements.size(); }
-  const StructElement *getElement(int i) const { return isContent() ? NULL : s->elements.at(i); }
-  StructElement *getElement(int i) { return isContent() ? NULL : s->elements.at(i); }
+  unsigned getNumChildren() const { return isContent() ? 0 : s->elements.size(); }
+  const StructElement *getChild(int i) const { return isContent() ? NULL : s->elements.at(i); }
+  StructElement *getChild(int i) { return isContent() ? NULL : s->elements.at(i); }
 
-  void appendElement(StructElement *element) {
+  void appendChild(StructElement *element) {
     if (!isContent() && element && element->isOk()) {
       s->elements.push_back(element);
     }

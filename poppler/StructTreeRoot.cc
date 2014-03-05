@@ -128,7 +128,7 @@ void StructTreeRoot::parse(Dict *root)
                           child->getType() == StructElement::Div)) {
             error(errSyntaxWarning, -1, "StructTreeRoot element of tagged PDF is wrong type ({0:s})", child->getTypeName());
           }
-          appendElement(child);
+          appendChild(child);
           if (ref.isRef()) {
             parentTreeAdd(ref.getRef(), child);
           }
@@ -148,7 +148,7 @@ void StructTreeRoot::parse(Dict *root)
     }
     StructElement *child = new StructElement(kids.getDict(), this, NULL, seenElements);
     if (child->isOk()) {
-      appendElement(child);
+      appendChild(child);
       Object ref;
       if (root->lookupNF("K", &ref)->isRef())
         parentTreeAdd(ref.getRef(), child);

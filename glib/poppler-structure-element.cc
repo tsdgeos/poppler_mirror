@@ -798,7 +798,7 @@ poppler_structure_element_iter_new (PopplerDocument *poppler_document)
   if (root == NULL)
     return NULL;
 
-  if (root->getNumElements () == 0)
+  if (root->getNumChildren () == 0)
     return NULL;
 
   iter = g_slice_new0 (PopplerStructureElementIter);
@@ -829,8 +829,8 @@ poppler_structure_element_iter_next (PopplerStructureElementIter *iter)
   g_return_val_if_fail (iter != NULL, FALSE);
 
   elements = iter->is_root
-    ? iter->root->getNumElements ()
-    : iter->elem->getNumElements ();
+    ? iter->root->getNumChildren ()
+    : iter->elem->getNumChildren ();
 
   return ++iter->index < elements;
 }
@@ -853,8 +853,8 @@ poppler_structure_element_iter_get_element (PopplerStructureElementIter *iter)
   g_return_val_if_fail (iter != NULL, NULL);
 
   elem = iter->is_root
-    ? iter->root->getElement (iter->index)
-    : iter->elem->getElement (iter->index);
+    ? iter->root->getChild (iter->index)
+    : iter->elem->getChild (iter->index);
 
   return _poppler_structure_element_new (iter->document, elem);
 }
@@ -879,10 +879,10 @@ poppler_structure_element_iter_get_child (PopplerStructureElementIter *parent)
   g_return_val_if_fail (parent != NULL, NULL);
 
   elem = parent->is_root
-    ? parent->root->getElement (parent->index)
-    : parent->elem->getElement (parent->index);
+    ? parent->root->getChild (parent->index)
+    : parent->elem->getChild (parent->index);
 
-  if (elem->getNumElements () > 0)
+  if (elem->getNumChildren () > 0)
     {
       PopplerStructureElementIter *child = g_slice_new0 (PopplerStructureElementIter);
       child->document = (PopplerDocument *) g_object_ref (parent->document);
