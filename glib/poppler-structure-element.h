@@ -87,6 +87,18 @@ typedef enum {
 } PopplerStructureElementKind;
 
 /**
+ * PopplerStructureGetTextFlags:
+ * @POPPLER_STRUCTURE_GET_TEXT_NONE: No flags.
+ * @POPPLER_STRUCTURE_GET_TEXT_RECURSIVE: For non-leaf, non-content
+ *    elements, recursively obtain the text from all the elements
+ *    enclosed in the subtree.
+ */
+typedef enum {
+  POPPLER_STRUCTURE_GET_TEXT_NONE      = 0,
+  POPPLER_STRUCTURE_GET_TEXT_RECURSIVE = (1 << 0),
+} PopplerStructureGetTextFlags;
+
+/**
  * PopplerStructurePlacement:
  */
 typedef enum {
@@ -253,7 +265,7 @@ gchar                           *poppler_structure_element_get_title            
 gchar                           *poppler_structure_element_get_abbreviation       (PopplerStructureElement     *poppler_structure_element);
 gchar                           *poppler_structure_element_get_language           (PopplerStructureElement     *poppler_structure_element);
 gchar                           *poppler_structure_element_get_text               (PopplerStructureElement     *poppler_structure_element,
-                                                                                   gboolean                     recursive);
+                                                                                   PopplerStructureGetTextFlags flags);
 gchar                           *poppler_structure_element_get_alt_text           (PopplerStructureElement     *poppler_structure_element);
 gchar                           *poppler_structure_element_get_actual_text        (PopplerStructureElement     *poppler_structure_element);
 PopplerTextSpan                **poppler_structure_element_get_text_spans         (PopplerStructureElement     *poppler_structure_element,

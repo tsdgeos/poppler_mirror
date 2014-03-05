@@ -666,8 +666,8 @@ poppler_structure_element_get_actual_text (PopplerStructureElement *poppler_stru
 /**
  * poppler_structure_element_get_text:
  * @poppler_structure_element: A #PopplerStructureElement
- * @recursive: If %TRUE, the text of child elements is gathered recursively
- *   in logical order and returned as part of the result.
+ * @flags: A #PopplerStructureGetTextFlags value, or
+ *    %POPPLER_STRUCTURE_GET_TEXT_NONE to disable all the flags.
  *
  * Obtains the text enclosed by an element, or the text enclosed by the
  * elements in the subtree (including the element itself).
@@ -677,13 +677,15 @@ poppler_structure_element_get_actual_text (PopplerStructureElement *poppler_stru
  * Since: 0.26
  */
 gchar *
-poppler_structure_element_get_text (PopplerStructureElement *poppler_structure_element,
-                                    gboolean                 recursive)
+poppler_structure_element_get_text (PopplerStructureElement     *poppler_structure_element,
+                                    PopplerStructureGetTextFlags flags)
 {
   g_return_val_if_fail (POPPLER_IS_STRUCTURE_ELEMENT (poppler_structure_element), NULL);
   g_return_val_if_fail (poppler_structure_element->elem != NULL, NULL);
 
-  GooString *string = poppler_structure_element->elem->getText (recursive);
+
+  GooString *string =
+      poppler_structure_element->elem->getText (flags & POPPLER_STRUCTURE_GET_TEXT_RECURSIVE);
   gchar *result = string ? _poppler_goo_string_to_utf8 (string) : NULL;
   delete string;
   return result;
