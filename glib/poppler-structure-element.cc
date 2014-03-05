@@ -365,11 +365,11 @@ ENUM_VALUES (PopplerStructureFormState, checked)
   { NULL }
 };
 
-ENUM_VALUES (PopplerStructureScope, Scope)
+ENUM_VALUES (PopplerStructureTableScope, Scope)
 {
-  { "Row",    POPPLER_STRUCTURE_SCOPE_ROW    },
-  { "Column", POPPLER_STRUCTURE_SCOPE_COLUMN },
-  { "Both",   POPPLER_STRUCTURE_SCOPE_BOTH   },
+  { "Row",    POPPLER_STRUCTURE_TABLE_SCOPE_ROW    },
+  { "Column", POPPLER_STRUCTURE_TABLE_SCOPE_COLUMN },
+  { "Both",   POPPLER_STRUCTURE_TABLE_SCOPE_BOTH   },
   { NULL }
 };
 
@@ -2199,12 +2199,12 @@ poppler_structure_element_get_table_headers (PopplerStructureElement *poppler_st
  *
  * Since: 0.26
  */
-PopplerStructureScope
+PopplerStructureTableScope
 poppler_structure_element_get_table_scope (PopplerStructureElement *poppler_structure_element)
 {
   g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_TABLE,
-                        EnumNameValue<PopplerStructureScope>::values[0].value);
-  return attr_to_enum<PopplerStructureScope> (poppler_structure_element);
+                        EnumNameValue<PopplerStructureTableScope>::values[0].value);
+  return attr_to_enum<PopplerStructureTableScope> (poppler_structure_element);
 }
 
 /**

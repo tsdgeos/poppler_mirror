@@ -229,13 +229,13 @@ typedef enum {
 } PopplerStructureFormState;
 
 /**
- * PopplerStructureScope:
+ * PopplerStructureTableScope:
  */
 typedef enum {
-  POPPLER_STRUCTURE_SCOPE_ROW,
-  POPPLER_STRUCTURE_SCOPE_COLUMN,
-  POPPLER_STRUCTURE_SCOPE_BOTH,
-} PopplerStructureScope;
+  POPPLER_STRUCTURE_TABLE_SCOPE_ROW,
+  POPPLER_STRUCTURE_TABLE_SCOPE_COLUMN,
+  POPPLER_STRUCTURE_TABLE_SCOPE_BOTH,
+} PopplerStructureTableScope;
 
 
 typedef struct _PopplerTextSpan PopplerTextSpan;
@@ -319,7 +319,7 @@ gchar                           *poppler_structure_element_get_form_description 
 guint                            poppler_structure_element_get_table_row_span     (PopplerStructureElement     *poppler_structure_element);
 guint                            poppler_structure_element_get_table_column_span  (PopplerStructureElement     *poppler_structure_element);
 gchar                          **poppler_structure_element_get_table_headers      (PopplerStructureElement     *poppler_structure_element);
-PopplerStructureScope            poppler_structure_element_get_table_scope        (PopplerStructureElement     *poppler_structure_element);
+PopplerStructureTableScope       poppler_structure_element_get_table_scope        (PopplerStructureElement     *poppler_structure_element);
 gchar                           *poppler_structure_element_get_table_summary      (PopplerStructureElement     *poppler_structure_element);
 
 #define POPPLER_TYPE_STRUCTURE_ELEMENT_ITER                                       (poppler_structure_element_iter_get_type ())
