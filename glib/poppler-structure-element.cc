@@ -2061,7 +2061,7 @@ poppler_structure_element_get_form_role (PopplerStructureElement *poppler_struct
  * Since: 0.26
  */
 PopplerStructureFormState
-poppler_structure_element_get_formstate (PopplerStructureElement *poppler_structure_element)
+poppler_structure_element_get_form_state (PopplerStructureElement *poppler_structure_element)
 {
   g_return_val_if_fail (poppler_structure_element_get_kind (poppler_structure_element) == POPPLER_STRUCTURE_ELEMENT_FORM,
                         EnumNameValue<PopplerStructureFormState>::values[0].value);
