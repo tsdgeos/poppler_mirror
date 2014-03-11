@@ -8,6 +8,7 @@
 // Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Pino Toscano <pino@kde.org>
+// Copyright (C) 2014 Steven Lee <roc.sky@gmail.com>
 //
 //========================================================================
 
@@ -16,6 +17,10 @@
 #if ENABLE_LIBTIFF
 
 #include <string.h>
+
+#ifdef _WIN32
+#include <io.h>
+#endif
 
 extern "C" {
 #include <tiffio.h>
@@ -151,7 +156,13 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, int hDPI, int vDP
     return false;
   }
 
+#ifdef _WIN32
+  //Convert C Library handle to Win32 Handle
+  priv->f = TIFFFdOpen(_get_osfhandle(fileno(openedFile)), "-", "w");
+#else
   priv->f = TIFFFdOpen(fileno(openedFile), "-", "w");
+#endif
+
 
   if (!priv->f) {
     return false;
