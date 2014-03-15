@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010, 2011 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2011 William Bader <williambader@hotmail.com>
+// Copyright (C) 2011, 2014 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
 //
@@ -87,7 +87,14 @@ GBool PreScanOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *ca
 					int x0, int y0, int x1, int y1,
 					double xStep, double yStep) {
   if (paintType == 1) {
+    GBool tilingNeeded = (x1 - x0 != 1 || y1 - y0 != 1);
+    if (tilingNeeded) {
+        inTilingPatternFill++;
+    }
     gfx->drawForm(str, resDict, mat, bbox);
+    if (tilingNeeded) {
+        inTilingPatternFill--;
+    }
   } else {
     check(state->getFillColorSpace(), state->getFillColor(),
 	  state->getFillOpacity(), state->getBlendMode());
@@ -200,7 +207,7 @@ void PreScanOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *
 	state->getFillOpacity(), state->getBlendMode());
   gdi = gFalse;
   if ((level == psLevel1 || level == psLevel1Sep) &&
-      state->getFillColorSpace()->getMode() == csPattern) {
+      (state->getFillColorSpace()->getMode() == csPattern || inTilingPatternFill > 0)) {
     patternImgMask = gTrue;
   }
 
@@ -238,6 +245,10 @@ void PreScanOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str,
     transparency = gTrue;
   }
   gdi = gFalse;
+  if ((level == psLevel1 || level == psLevel1Sep) &&
+      inTilingPatternFill > 0) {
+    patternImgMask = gTrue;
+  }
 
   if (inlineImg) {
     str->reset();
@@ -354,4 +365,5 @@ void PreScanOutputDev::clearStats() {
   transparency = gFalse;
   gdi = gTrue;
   patternImgMask = gFalse;
+  inTilingPatternFill = 0;
 }
