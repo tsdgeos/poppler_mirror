@@ -2192,10 +2192,12 @@ void TextPage::updateFont(GfxState *state) {
     mCode = letterCode = anyCode = -1;
     for (code = 0; code < 256; ++code) {
       name = ((Gfx8BitFont *)gfxFont)->getCharName(code);
-      if (name && name[0] == 'm' && name[1] == '\0') {
+      int nameLen = name ? strlen(name) : 0;
+      GBool nameOneChar = nameLen == 1 || (nameLen > 1 && name[1] == '\0');
+      if (nameOneChar && name[0] == 'm') {
 	mCode = code;
       }
-      if (letterCode < 0 && name && name[1] == '\0' &&
+      if (letterCode < 0 && nameOneChar &&
 	  ((name[0] >= 'A' && name[0] <= 'Z') ||
 	   (name[0] >= 'a' && name[0] <= 'z'))) {
 	letterCode = code;
