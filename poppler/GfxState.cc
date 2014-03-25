@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2006-2013 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009, 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Christian Persch <chpe@gnome.org>
@@ -2503,7 +2503,7 @@ GfxColor *GfxIndexedColorSpace::mapColorToBase(GfxColor *color,
   n = base->getNComps();
   base->getDefaultRanges(low, range, indexHigh);
   const int idx = (int)(colToDbl(color->c[0]) + 0.5) * n;
-  if (likely(idx + n < (indexHigh + 1) * base->getNComps())) {
+  if (likely((idx + n < (indexHigh + 1) * base->getNComps()) && idx >= 0)) {
     p = &lookup[idx];
     for (i = 0; i < n; ++i) {
       baseColor->c[i] = dblToCol(low[i] + (p[i] / 255.0) * range[i]);
