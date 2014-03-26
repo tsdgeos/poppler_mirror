@@ -3608,8 +3608,9 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(GBool mmr, int w, int h,
 
 	if (atx[0] >= -8 && atx[0] <= 8) {
 	  // set up the adaptive context
-	  if (y + aty[0] >= 0) {
-	    atP0 = bitmap->getDataPtr() + (y + aty[0]) * bitmap->getLineSize();
+	  const int atY = y + aty[0];
+	  if ((atY >= 0) && (atY < bitmap->getHeight())) {
+	    atP0 = bitmap->getDataPtr() + atY * bitmap->getLineSize();
 	    atBuf0 = *atP0++ << 8;
 	  } else {
 	    atP0 = NULL;
