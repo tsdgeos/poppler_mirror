@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2008-2010, 2013 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008-2010, 2013, 2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
@@ -1060,8 +1060,12 @@ public:
       return;
     }
     --sp;
-    if (sp + i + 1 >= psStackSize) {
+    if (unlikely(sp + i + 1 >= psStackSize)) {
       error(errSyntaxError, -1, "Stack underflow in PostScript function");
+      return;
+    }
+    if (unlikely(sp + i + 1 < 0)) {
+      error(errSyntaxError, -1, "Stack overflow in PostScript function");
       return;
     }
     stack[sp] = stack[sp + 1 + i];
