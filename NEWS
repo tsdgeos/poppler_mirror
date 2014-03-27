@@ -1,3 +1,51 @@
+Release 0.25.2
+        core:
+         * Tagged-PDF support
+         * Open some broken files. Bug #75232
+         * Fix crashes on broken files
+         * Fix regression parsing some broken files. KDE Bug #329600
+         * Improve compilation under Win 8 with Visual Studio 2012. Bug #73111
+         * PSOutputDev: Ensure paper size takes into account rotation. Bug #72312
+         * PSOutputDev: Fix DocumentMedia/Page/Media/PageBBox DSC comments
+         * PSOutputDev: Use crop box as page size
+         * PSOutputDev: Remove origpagesizes mode and make -origpagesizes an alias for -paper match
+         * PSOutputDev: Only change paper size when different to previous size
+         * PSOutputDev: Ensure there is always a page size in the output
+         * PSOutputDev: Fix regression when creating level1 PS. Bug #75241 
+         * CairoOutputDev: Clip to crop box. Gnome Bug #649886
+         * Splash: Blend usage in PDF with spot colors casue random output. Bug #74883
+         * Splash: Fix off by one that caused crash in a file. Bug #76387
+         * Make sure number of least objects in hints table is valid. Bug #74741
+         * Limit numeric parsing of character names. Bug #38456
+
+        glib:
+         * Tagged-PDF support
+         * Annotation improvements
+         * Install error callback. Bug #73269
+         * Fix gobject-introspection warnings
+         * demo: Fix performance in text markup annotations
+         * Increase gtk3 dependency
+
+        qt4:
+         * Improve naming of internal export/import macros
+         * Add GCC visibility export attributes
+         * Expose document-supplied text direction
+
+        qt5:
+         * Improve naming of internal export/import macros
+         * Add GCC visibility export attributes
+         * Expose document-supplied text direction
+
+        utils: 
+         * pdftocairo: Ensure page size and crop box works the same as pdftops
+         * Fix TIFF writting in Windows. Bug #75969 
+
+        buildsystem:
+         * Learn about automake 1.14
+         * Do not define -ansi. Bug #72499
+         * cmake: Install JpegWriter.h depending on libjpeg
+         * cmake: Use c99 for the c compiler
+
 Release 0.25.1
         core:
          * GooString format: Added some tests + improved documentation
