@@ -410,7 +410,7 @@ SplashPath *SplashFTFont::getGlyphPath(int c) {
   ff->face->size = sizeObj;
   FT_Set_Transform(ff->face, &textMatrix, NULL);
   slot = ff->face->glyph;
-  if (ff->codeToGID && c < ff->codeToGIDLen) {
+  if (ff->codeToGID && c < ff->codeToGIDLen && c >= 0) {
     gid = ff->codeToGID[c];
   } else {
     gid = (FT_UInt)c;
