@@ -4875,6 +4875,9 @@ void Splash::scaleImageYuXuBilinear(SplashImageSource src, void *srcData,
   Guchar *destPtr0, *destPtr, *destAlphaPtr0, *destAlphaPtr;
   int i;
 
+  if (srcWidth < 1 || srcHeight < 1)
+    return;
+
   // allocate buffers
   srcBuf = (Guchar *)gmallocn(srcWidth+1, nComps); // + 1 pixel of padding
   lineBuf1 = (Guchar *)gmallocn(scaledWidth, nComps);
