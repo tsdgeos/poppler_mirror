@@ -171,8 +171,7 @@ namespace Poppler
       QMapIterator<QString, OptContentItem*> i(m_optContentItems);
       while ( i.hasNext() ) {
 	i.next();
-	qDebug() << "iterator" << i.key() << ":" << i.value();
-	addChild( i.value(), m_rootNode );
+	addChild( m_rootNode, i.value() );
       }
     } else {
       parseOrderArray( m_rootNode, optContent->getOrderArray() );
