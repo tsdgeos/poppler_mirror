@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2012, 2013 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012-2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
 // Copyright (C) 2013 Daniel Kahn Gillmor <dkg@fifthhorseman.net>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -62,7 +62,6 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
   // by 'A' (random char that is not %), if at the end of replacing
   // any of the valid appearances there is still any % around, the
   // pattern is wrong
-  char *auxDestFileName = strdup(destFileName);
   if (firstPage == 0 && lastPage == 0) {
     firstPage = 1;
     lastPage = doc->getNumPages();
@@ -78,6 +77,7 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
     return false;
   }
   bool foundmatch = false;
+  char *auxDestFileName = strdup(destFileName);
   char *p = strstr(auxDestFileName, "%d");
   if (p != NULL) {
     foundmatch = true;
