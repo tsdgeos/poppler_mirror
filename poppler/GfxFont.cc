@@ -764,8 +764,8 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, GBool ps) {
     }
     substName = new GooString(base14SubstFonts[substIdx]);
     if (ps) {
-      error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:t}'",
-	    base14SubstFonts[substIdx], name ? name : new GooString("null"));
+      error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:s}'",
+	    base14SubstFonts[substIdx], name ? name->getCString() : "null");
       fontLoc = new GfxFontLoc();
       fontLoc->locType = gfxFontLocResident;
       fontLoc->fontType = fontType1;
@@ -777,8 +777,8 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, GBool ps) {
       delete substName;
       if (path) {
 	if ((fontLoc = getExternalFont(path, gFalse))) {
-	  error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:t}'",
-		  base14SubstFonts[substIdx], (name == NULL) ? new GooString("") : name);
+	  error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:s}'",
+		  base14SubstFonts[substIdx], name ? name->getCString() : "");
 	  name = new GooString(base14SubstFonts[substIdx]);
 	  fontLoc->substIdx = substIdx;
 	  return fontLoc;
