@@ -2511,6 +2511,8 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
     delta = (yMinI == yMaxI) ? yMaxFP - yMinFP : xMaxFP - xMinFP;
     if (delta < 0.2) {
       opClipRes = splashClipAllOutside;
+      delete scanner;
+      delete xPath;
       return splashOk;
     }
   }
