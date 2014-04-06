@@ -2290,7 +2290,7 @@ void JBIG2Stream::readTextRegionSeg(Guint segNum, GBool imm,
 
  codeTableError:
   error(errSyntaxError, curStr->getPos(), "Missing code table in JBIG2 text region");
-  gfree(codeTables);
+  delete codeTables;
   gfree(syms);
   return;
 
