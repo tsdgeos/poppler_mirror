@@ -228,7 +228,6 @@ namespace Debug {
         qDeleteAll(m_embeddedFiles);
         delete (OptContentModel *)m_optContentModel;
         delete doc;
-        delete m_fontInfoIterator;
     
         count --;
         if ( count == 0 )
@@ -240,7 +239,6 @@ namespace Debug {
     
     void DocumentData::init()
     {
-        m_fontInfoIterator = 0;
         m_backend = Document::SplashBackend;
         paperColor = Qt::white;
         m_hints = 0;

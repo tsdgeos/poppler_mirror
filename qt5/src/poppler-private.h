@@ -125,7 +125,6 @@ namespace Poppler {
 	
 	void fillMembers()
 	{
-		m_fontInfoIterator = new FontIterator(0, this);
 		int numEmb = doc->getCatalog()->numEmbeddedFiles();
 		if (!(0 == numEmb)) {
 			// we have some embedded documents, build the list
@@ -142,7 +141,6 @@ namespace Poppler {
 	QString m_filePath;
 	QByteArray fileContents;
 	bool locked;
-	FontIterator *m_fontInfoIterator;
 	Document::RenderBackend m_backend;
 	QList<EmbeddedFile*> m_embeddedFiles;
 	QPointer<OptContentModel> m_optContentModel;
