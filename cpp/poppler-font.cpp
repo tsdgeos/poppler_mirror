@@ -37,7 +37,6 @@ public:
         : type((font_info::type_enum)fi->getType())
         , is_embedded(fi->getEmbedded())
         , is_subset(fi->getSubset())
-        , emb_ref(fi->getEmbRef())
     {
         if (fi->getName()) {
             font_name = fi->getName()->getCString();
@@ -52,7 +51,6 @@ public:
     font_info::type_enum type : 5;
     bool is_embedded : 1;
     bool is_subset : 1;
-    Ref emb_ref;
 };
 
 
