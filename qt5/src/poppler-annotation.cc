@@ -2049,7 +2049,7 @@ void TextAnnotation::setInplaceIntent( TextAnnotation::InplaceIntent intent )
 {
     Q_D( TextAnnotation );
 
-    if (d->pdfAnnot)
+    if (!d->pdfAnnot)
     {
         d->inplaceIntent = intent;
         return;
