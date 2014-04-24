@@ -1,3 +1,16 @@
+Release 0.26.0
+        qt4:
+         * Fix mismatched boolean logic in TextAnnotation::setInplaceIntent
+
+        qt5:
+         * Fix mismatched boolean logic in TextAnnotation::setInplaceIntent
+
+        core:
+         * Very small code cleanup
+
+        cpp:
+         * Very small code cleanup
+
 Release 0.25.3
         core:
          * Fix crashes on broken files
