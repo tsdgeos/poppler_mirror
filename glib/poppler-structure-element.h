@@ -250,9 +250,6 @@ typedef enum {
 } PopplerStructureTableScope;
 
 
-typedef struct _PopplerTextSpan PopplerTextSpan;
-
-
 GType                            poppler_structure_element_get_type               (void) G_GNUC_CONST;
 PopplerStructureElementKind      poppler_structure_element_get_kind               (PopplerStructureElement     *poppler_structure_element);
 gint                             poppler_structure_element_get_page               (PopplerStructureElement     *poppler_structure_element);
