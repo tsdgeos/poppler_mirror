@@ -173,7 +173,10 @@ if test x$enable_libopenjpeg = xyes; then
   AC_DEFINE(ENABLE_LIBOPENJPEG)
   PKG_CHECK_EXISTS(libopenjpeg >= 1.5,
       [AC_DEFINE(WITH_OPENJPEG_IGNORE_PCLR_CMAP_CDEF_FLAG, 1, [OpenJPEG with the OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG flag.])],
-      [])
+      [PKG_CHECK_EXISTS(libopenjpeg1 >= 1.5,
+       [AC_DEFINE(WITH_OPENJPEG_IGNORE_PCLR_CMAP_CDEF_FLAG, 1, [OpenJPEG with the OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG flag.])],
+       [])
+      ])
 fi
 
 AM_CONDITIONAL(BUILD_LIBOPENJPEG, test x$enable_libopenjpeg = xyes)
