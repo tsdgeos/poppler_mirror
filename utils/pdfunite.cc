@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011-2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
@@ -12,6 +12,7 @@
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 //
 //========================================================================
+
 #include <PDFDoc.h>
 #include <GlobalParams.h>
 #include "parseargs.h"
@@ -129,6 +130,12 @@ int main (int argc, char *argv[])
       pages.push_back(page);
       offsets.push_back(numOffset);
       docs[i]->markPageObjects(pageDict, yRef, countRef, numOffset);
+      Object annotsObj;
+      pageDict->lookupNF("Annots", &annotsObj);
+      if (!annotsObj.isNull()) {
+        docs[i]->markAnnotations(&annotsObj, yRef, countRef, numOffset, refPage->num, refPage->num);
+        annotsObj.free();
+      }
     }
     objectsCount += docs[i]->writePageObjects(outStr, yRef, numOffset, gTrue);
     numOffset = yRef->getNumObjects() + 1;
