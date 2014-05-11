@@ -366,7 +366,7 @@ AnnotPath * AnnotationPrivate::toAnnotPath(const QLinkedList<QPointF> &list) con
     return new AnnotPath(ac, count);
 }
 
-QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentData *doc, int parentID)
+QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentData *doc, const QSet<Annotation::SubType> &subtypes, int parentID)
 {
     Annots* annots = pdfPage->getAnnots();
     const uint numAnnotations = annots->getNumAnnots();
@@ -374,6 +374,20 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
     {
         return QList<Annotation*>();
     }
+
+    const bool wantTextAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AText);
+    const bool wantLineAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::ALine);
+    const bool wantGeomAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AGeom);
+    const bool wantHighlightAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AHighlight);
+    const bool wantStampAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AStamp);
+    const bool wantInkAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AInk);
+    const bool wantLinkAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::ALink);
+    const bool wantCaretAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::ACaret);
+    const bool wantFileAttachmentAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AFileAttachment);
+    const bool wantSoundAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::ASound);
+    const bool wantMovieAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AMovie);
+    const bool wantScreenAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AScreen);
+    const bool wantWidgetAnnotations = subtypes.isEmpty() || subtypes.contains(Annotation::AWidget);
 
     // Create Annotation objects and tie to their native Annot
     QList<Annotation*> res;
@@ -405,36 +419,54 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
         switch ( subType )
         {
             case Annot::typeText:
+                if (!wantTextAnnotations)
+                    continue;
                 annotation = new TextAnnotation(TextAnnotation::Linked);
                 break;
             case Annot::typeFreeText:
+                if (!wantTextAnnotations)
+                    continue;
                 annotation = new TextAnnotation(TextAnnotation::InPlace);
                 break;
             case Annot::typeLine:
+                if (!wantLineAnnotations)
+                    continue;
                 annotation = new LineAnnotation(LineAnnotation::StraightLine);
                 break;
             case Annot::typePolygon:
             case Annot::typePolyLine:
+                if (!wantLineAnnotations)
+                    continue;
                 annotation = new LineAnnotation(LineAnnotation::Polyline);
                 break;
             case Annot::typeSquare:
             case Annot::typeCircle:
+                if (!wantGeomAnnotations)
+                    continue;
                 annotation = new GeomAnnotation();
                 break;
             case Annot::typeHighlight:
             case Annot::typeUnderline:
             case Annot::typeSquiggly:
             case Annot::typeStrikeOut:
+                if (!wantHighlightAnnotations)
+                    continue;
                 annotation = new HighlightAnnotation();
                 break;
             case Annot::typeStamp:
+                if (!wantStampAnnotations)
+                    continue;
                 annotation = new StampAnnotation();
                 break;
             case Annot::typeInk:
+                if (!wantInkAnnotations)
+                    continue;
                 annotation = new InkAnnotation();
                 break;
             case Annot::typeLink: /* TODO: Move logic to getters */
             {
+                if (!wantLinkAnnotations)
+                    continue;
                 // parse Link params
                 AnnotLink * linkann = static_cast< AnnotLink * >( ann );
                 LinkAnnotation * l = new LinkAnnotation();
@@ -458,10 +490,14 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
                 break;
             }
             case Annot::typeCaret:
+                if (!wantCaretAnnotations)
+                    continue;
                 annotation = new CaretAnnotation();
                 break;
             case Annot::typeFileAttachment: /* TODO: Move logic to getters */
             {
+                if (!wantFileAttachmentAnnotations)
+                    continue;
                 AnnotFileAttachment * attachann = static_cast< AnnotFileAttachment * >( ann );
                 FileAttachmentAnnotation * f = new FileAttachmentAnnotation();
                 annotation = f;
@@ -474,6 +510,8 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
             }
             case Annot::typeSound: /* TODO: Move logic to getters */
             {
+                if (!wantSoundAnnotations)
+                    continue;
                 AnnotSound * soundann = static_cast< AnnotSound * >( ann );
                 SoundAnnotation * s = new SoundAnnotation();
                 annotation = s;
@@ -486,6 +524,8 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
             }
             case Annot::typeMovie: /* TODO: Move logic to getters */
             {
+                if (!wantMovieAnnotations)
+                    continue;
                 AnnotMovie * movieann = static_cast< AnnotMovie * >( ann );
                 MovieAnnotation * m = new MovieAnnotation();
                 annotation = m;
@@ -501,6 +541,8 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
             }
             case Annot::typeScreen:
             {
+                if (!wantScreenAnnotations)
+                    continue;
                 AnnotScreen * screenann = static_cast< AnnotScreen * >( ann );
                 if (!screenann->getAction())
                   continue;
@@ -522,6 +564,8 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
             case Annot::typeUnknown:
                 continue; // special case for ignoring unknown annotations
             case Annot::typeWidget:
+                if (!wantWidgetAnnotations)
+                    continue;
                 annotation = new WidgetAnnotation();
                 break;
             default:
@@ -1604,7 +1648,7 @@ QList<Annotation*> Annotation::revisions() const
     if ( !d->pdfAnnot->getHasRef() )
         return QList<Annotation*>();
 
-    return AnnotationPrivate::findAnnotations( d->pdfPage, d->parentDoc, d->pdfAnnot->getId() );
+    return AnnotationPrivate::findAnnotations( d->pdfPage, d->parentDoc, QSet<Annotation::SubType>(), d->pdfAnnot->getId() );
 }
 
 //END Annotation implementation

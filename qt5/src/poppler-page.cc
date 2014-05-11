@@ -653,7 +653,12 @@ QList<Link*> Page::links() const
 
 QList<Annotation*> Page::annotations() const
 {
-  return AnnotationPrivate::findAnnotations(m_page->page, m_page->parentDoc);
+  return AnnotationPrivate::findAnnotations(m_page->page, m_page->parentDoc, QSet<Annotation::SubType>());
+}
+
+QList<Annotation*> Page::annotations(const QSet<Annotation::SubType> &subtypes) const
+{
+  return AnnotationPrivate::findAnnotations(m_page->page, m_page->parentDoc, subtypes);
 }
 
 void Page::addAnnotation( const Annotation *ann )

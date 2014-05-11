@@ -701,6 +701,20 @@ delete it;
 	QList<Annotation*> annotations() const;
 
 	/**
+		Returns the annotations of the page
+
+		\param subtypes the subtypes of annotations you are interested in
+
+		\note If you call this method twice, you get different objects
+		      pointing to the same annotations (see Annotation).
+		      The caller owns the returned objects and they should be deleted
+		      when no longer required.
+
+		\since 0.28
+	*/
+	QList<Annotation*> annotations(const QSet<Annotation::SubType> &subtypes) const;
+
+	/**
 	 Adds an annotation to the page
 
 	 \note Ownership of the annotation object stays with the caller, who can
