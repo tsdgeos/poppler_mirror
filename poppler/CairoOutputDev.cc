@@ -842,11 +842,13 @@ GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
   cairo_pattern_t *pattern;
   cairo_surface_t *surface;
   cairo_matrix_t matrix;
+  cairo_matrix_t pattern_matrix;
   cairo_t *old_cairo;
   double xMin, yMin, xMax, yMax;
   double width, height;
   int surface_width, surface_height;
   StrokePathClip *strokePathTmp;
+  GBool adjusted_stroke_width_tmp;
 
   width = bbox[2] - bbox[0];
   height = bbox[3] - bbox[1];
@@ -855,8 +857,18 @@ GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     return gFalse;
   /* TODO: implement the other cases here too */
 
-  surface_width = (int) ceil (width);
-  surface_height = (int) ceil (height);
+  // Find the width and height of the transformed pattern
+  cairo_get_matrix (cairo, &matrix);
+  cairo_matrix_init (&pattern_matrix, mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
+  cairo_matrix_multiply (&matrix, &matrix, &pattern_matrix);
+
+  double widthX = width, widthY = 0;
+  cairo_matrix_transform_distance (&matrix, &widthX, &widthY);
+  surface_width = ceil (sqrt (widthX * widthX + widthY * widthY));
+
+  double heightX = 0, heightY = height;
+  cairo_matrix_transform_distance (&matrix, &heightX, &heightY);
+  surface_height = ceil (sqrt (heightX * heightX + heightY * heightY));
 
   surface = cairo_surface_create_similar (cairo_get_target (cairo),
 					  CAIRO_CONTENT_COLOR_ALPHA,
@@ -867,11 +879,13 @@ GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
   old_cairo = cairo;
   cairo = cairo_create (surface);
   cairo_surface_destroy (surface);
+  cairo_scale (cairo, surface_width / width, surface_height / height);
 
   box.x1 = bbox[0]; box.y1 = bbox[1];
   box.x2 = bbox[2]; box.y2 = bbox[3];
   strokePathTmp = strokePathClip;
   strokePathClip = NULL;
+  adjusted_stroke_width_tmp = adjusted_stroke_width;
   gfx = new Gfx(doc, this, resDict, &box, NULL, NULL, NULL, gfxA->getXRef());
   if (paintType == 2)
     inUncoloredPattern = gTrue;
@@ -880,6 +894,7 @@ GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     inUncoloredPattern = gFalse;
   delete gfx;
   strokePathClip = strokePathTmp;
+  adjusted_stroke_width = adjusted_stroke_width_tmp;
 
   pattern = cairo_pattern_create_for_surface (cairo_get_target (cairo));
   cairo_destroy (cairo);
@@ -893,8 +908,7 @@ GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
   cairo_matrix_init_scale (&matrix, surface_width / width, surface_height / height);
   cairo_pattern_set_matrix (pattern, &matrix);
 
-  cairo_matrix_init (&matrix, mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
-  cairo_transform (cairo, &matrix);
+  cairo_transform (cairo, &pattern_matrix);
   cairo_set_source (cairo, pattern);
   cairo_pattern_set_extend (pattern, CAIRO_EXTEND_REPEAT);
   if (strokePathClip) {
