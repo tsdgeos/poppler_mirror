@@ -23,6 +23,8 @@
 #ifndef POPPLER_CONFIG_H
 #define POPPLER_CONFIG_H
 
+#include <stdio.h>
+
 // We duplicate some of the config.h #define's here since they are
 // used in some of the header files we install.  The #ifndef/#endif
 // around #undef look odd, but it's to silence warnings about
