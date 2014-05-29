@@ -2,7 +2,7 @@
 #ifndef _WIN32
 #include <unistd.h>
 #else
-#include <Windows.h>
+#include <windows.h>
 #define sleep Sleep
 #endif
 #include <time.h>
