@@ -249,8 +249,8 @@ public:
   // rewrite pageDict with MediaBox, CropBox and new page CTM
   void replacePageDict(int pageNo, int rotate, PDFRectangle *mediaBox, PDFRectangle *cropBox, Object *pageCTM);
   void markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset);
-  GBool markAnnotations(Object *annots, XRef *xRef, XRef *countRef, Guint numOffset, Guint oldPageNum, Guint newPageNum);
-  void markAcroForm(Object *acrpForm, XRef *xRef, XRef *countRef, Guint numOffset, Guint oldPageNum, Guint newPageNum);
+  GBool markAnnotations(Object *annots, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum);
+  void markAcroForm(Object *acrpForm, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum);
   // write all objects used by pageDict to outStr
   Guint writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, GBool combine = gFalse);
   static void writeObject (Object *obj, OutStream* outStr, XRef *xref, Guint numOffset, Guchar *fileKey,

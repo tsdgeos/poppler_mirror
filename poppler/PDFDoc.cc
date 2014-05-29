@@ -1589,7 +1589,7 @@ void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint n
   }
 }
 
-GBool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, Guint numOffset, Guint oldPageNum, Guint newPageNum) {
+GBool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum) {
   Object annots;
   GBool modified = gFalse;
   annotsObj->fetch(getXRef(), &annots);
@@ -1681,7 +1681,7 @@ GBool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, Gui
   return modified;
 }
 
-void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, Guint numOffset, Guint oldPageNum, Guint newPageNum) {
+void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum) {
   Object acroform;
   GBool modified = gFalse;
   afObj->fetch(getXRef(), &acroform);
