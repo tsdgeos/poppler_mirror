@@ -20,6 +20,7 @@ poppler-cpp.pc
 poppler-glib.pc
 poppler-qt.pc
 poppler-qt4.pc
+poppler-qt5.pc
 poppler-splash.pc
 poppler.pc
 stamp-h1
@@ -30,5 +31,6 @@ poppler-cpp-uninstalled.pc
 poppler-glib-uninstalled.pc
 poppler-qt-uninstalled.pc
 poppler-qt4-uninstalled.pc
+poppler-qt5-uninstalled.pc
 poppler-splash-uninstalled.pc
 poppler-uninstalled.pc
