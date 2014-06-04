@@ -12,6 +12,9 @@ test-password-qt4
 poppler-attachments
 poppler-fonts
 poppler-texts
+poppler-forms
+stress-threads-qt4
+test-render-to-file
 check_actualtext
 check_attachments
 check_dateConversion
