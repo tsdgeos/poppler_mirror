@@ -15,6 +15,7 @@ install-sh
 libtool
 ltmain.sh
 missing
+test-driver
 poppler-cairo.pc
 poppler-cpp.pc
 poppler-glib.pc
