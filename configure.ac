@@ -229,7 +229,7 @@ if test x$enable_libtiff = xyes; then
   if test x"$LIBTIFF_LIBS" = x; then
     LIBTIFF_LIBS="-ltiff"
   fi
-  AC_SUBST(LIBTIFF_CFLAGSS)
+  AC_SUBST(LIBTIFF_CFLAGS)
   AC_SUBST(LIBTIFF_LIBS)
   AC_DEFINE(ENABLE_LIBTIFF)
 fi
