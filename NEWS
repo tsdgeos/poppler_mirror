@@ -1,3 +1,15 @@
+Release 0.26.1
+        core:
+         * Use field value V for radio buttons. Bug #75979
+         * Fix extraction of text in some files. Bug #78145
+         * Only add annotations of the current page when splitting. Bug #77549
+
+        build system:
+         * autoconf: Fix libopenjpeg 1.5 detection on some systems. Bug #78389
+
+        glib:
+         * Fix multiple definition of PopplerTextSpan
+
 Release 0.26.0
         qt4:
          * Fix mismatched boolean logic in TextAnnotation::setInplaceIntent

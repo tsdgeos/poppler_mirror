@@ -200,7 +200,7 @@ int main(int argc, char *argv[]) {
     if (!printVersion) {
       printUsage("pdftohtml", "<PDF-file> [<html-file> <xml-file>]", argDesc);
     }
-    exit(1);
+    exit(printHelp || printVersion ? 0 : 1);
   }
  
   // init error file
