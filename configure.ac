@@ -6,7 +6,7 @@ m4_define([poppler_version],[poppler_version_major.poppler_version_minor.poppler
 AC_PREREQ(2.59)
 AC_INIT([poppler],[poppler_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=poppler])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([1.7 foreign])
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 AC_CONFIG_HEADERS([config.h poppler/poppler-config.h])
 AC_C_BIGENDIAN
