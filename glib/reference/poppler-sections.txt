@@ -339,15 +339,11 @@ poppler_form_text_type_get_type
 POPPLER_ERROR
 PopplerError
 PopplerOrientation
-PopplerBackend
 PopplerPrintFlags
 PopplerFindFlags
-poppler_get_backend
-poppler_get_version
 poppler_date_parse
 
 <SUBSECTION Standard>
-POPPLER_TYPE_BACKEND
 POPPLER_TYPE_ERROR
 POPPLER_TYPE_ORIENTATION
 POPPLER_TYPE_PRINT_FLAGS
@@ -356,8 +352,6 @@ POPPLER_TYPE_PRINT_FLAGS
 POPPLER_DEFINE_BOXED_TYPE
 poppler_error_get_type
 poppler_error_quark
-poppler_backend_get_type
-poppler_orientation_get_type
 poppler_print_flags_get_type
 </SECTION>
 
@@ -738,4 +732,13 @@ POPPLER_MAJOR_VERSION
 POPPLER_MINOR_VERSION
 POPPLER_MICRO_VERSION
 POPPLER_CHECK_VERSION
+PopplerBackend
+poppler_get_version
+poppler_get_backend
+
+<SUBSECTION Standard>
+POPPLER_TYPE_BACKEND
+
+<SUBSECTION Private>
+poppler_backend_get_type
 </SECTION>
