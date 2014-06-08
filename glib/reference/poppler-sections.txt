@@ -340,18 +340,13 @@ POPPLER_ERROR
 PopplerError
 PopplerOrientation
 PopplerBackend
-PopplerColor
 PopplerPrintFlags
 PopplerFindFlags
 poppler_get_backend
 poppler_get_version
 poppler_date_parse
-poppler_color_new
-poppler_color_copy
-poppler_color_free
 
 <SUBSECTION Standard>
-POPPLER_TYPE_COLOR
 POPPLER_TYPE_BACKEND
 POPPLER_TYPE_ERROR
 POPPLER_TYPE_ORIENTATION
@@ -362,7 +357,6 @@ POPPLER_DEFINE_BOXED_TYPE
 poppler_error_get_type
 poppler_error_quark
 poppler_backend_get_type
-poppler_color_get_type
 poppler_orientation_get_type
 poppler_print_flags_get_type
 </SECTION>
@@ -720,6 +714,21 @@ poppler_structure_form_state_get_type
 poppler_structure_form_role_get_type
 poppler_structure_scope_get_type
 poppler_text_span_get_type
+</SECTION>
+
+<SECTION>
+<FILE>poppler-color</FILE>
+<TITLE>PopplerColor</TITLE>
+PopplerColor
+poppler_color_new
+poppler_color_copy
+poppler_color_free
+
+<SUBSECTION Standard>
+POPPLER_TYPE_COLOR
+
+<SUBSECTION Private>
+poppler_color_get_type
 </SECTION>
 
 <SECTION>

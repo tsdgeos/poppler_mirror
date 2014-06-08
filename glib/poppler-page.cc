@@ -1772,6 +1772,12 @@ poppler_text_attributes_free (PopplerTextAttributes *text_attrs)
   g_slice_free (PopplerTextAttributes, text_attrs);
 }
 
+/**
+ * SECTION:poppler-color
+ * @short_description: Colors
+ * @title: PopplerColor
+ */
+
 /* PopplerColor type */
 POPPLER_DEFINE_BOXED_TYPE (PopplerColor, poppler_color, poppler_color_copy, poppler_color_free)
 
