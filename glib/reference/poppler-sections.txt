@@ -444,14 +444,12 @@ poppler_annot_line_set_vertices
 poppler_annot_square_new
 poppler_annot_square_get_interior_color
 poppler_annot_square_set_interior_color
+poppler_point_new
 poppler_point_copy
 poppler_point_free
-poppler_point_get_type
-poppler_point_new
+poppler_quadrilateral_new
 poppler_quadrilateral_copy
 poppler_quadrilateral_free
-poppler_quadrilateral_get_type
-poppler_quadrilateral_new
 
 <SUBSECTION Standard>
 POPPLER_ANNOT
@@ -494,6 +492,7 @@ POPPLER_TYPE_ANNOT_TEXT_STATE
 POPPLER_TYPE_ANNOT_TEXT_MARKUP
 POPPLER_TYPE_ANNOT_FREE_TEXT_QUADDING
 POPPLER_TYPE_ANNOT_TYPE
+POPPLER_TYPE_POINT
 POPPLER_TYPE_QUADRILATERAL
 
 <SUBSECTION Private>
@@ -515,6 +514,8 @@ poppler_annot_free_text_quadding_get_type
 poppler_annot_line_get_type
 poppler_annot_circle_get_type
 poppler_annot_square_get_type
+poppler_point_get_type
+poppler_quadrilateral_get_type
 </SECTION>
 
 <SECTION>
