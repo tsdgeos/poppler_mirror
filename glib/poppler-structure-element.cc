@@ -641,7 +641,7 @@ poppler_structure_element_get_alt_text (PopplerStructureElement *poppler_structu
  *
  * Obtains the actual text enclosed by the element (and its child elements).
  * The actual text is mostly used for non-text elements like images and
- * figures which <em>do</em> have the graphical appearance of text, like
+ * figures which <emphasis>do</emphasis> have the graphical appearance of text, like
  * a logo. For those the actual text is the equivalent text to those
  * graphical elements which look like text when rendered.
  *
