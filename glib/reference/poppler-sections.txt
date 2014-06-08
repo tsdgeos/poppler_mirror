@@ -709,7 +709,7 @@ poppler_structure_glyph_orientation_get_type
 poppler_structure_list_numbering_get_type
 poppler_structure_form_state_get_type
 poppler_structure_form_role_get_type
-poppler_structure_scope_get_type
+poppler_structure_table_scope_get_type
 poppler_text_span_get_type
 </SECTION>
 
