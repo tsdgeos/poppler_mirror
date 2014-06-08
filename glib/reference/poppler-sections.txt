@@ -15,6 +15,7 @@ PopplerPageTransitionAlignment
 PopplerPageTransitionDirection
 PopplerSelectionStyle
 PopplerTextAttributes
+PopplerPrintFlags
 poppler_page_get_index
 poppler_page_get_label
 poppler_page_get_size
@@ -89,6 +90,7 @@ POPPLER_TYPE_PAGE_TRANSITION_ALIGNMENT
 POPPLER_TYPE_PAGE_TRANSITION_DIRECTION
 POPPLER_TYPE_PAGE_TRANSITION_TYPE
 POPPLER_TYPE_SELECTION_STYLE
+POPPLER_TYPE_PRINT_FLAGS
 <SUBSECTION Private>
 poppler_page_get_type
 poppler_rectangle_get_type
@@ -102,6 +104,7 @@ poppler_page_transition_direction_get_type
 poppler_page_transition_type_get_type
 poppler_selection_style_get_type
 poppler_text_attributes_get_type
+poppler_print_flags_get_type
 </SECTION>
 
 <SECTION>
@@ -339,20 +342,17 @@ poppler_form_text_type_get_type
 POPPLER_ERROR
 PopplerError
 PopplerOrientation
-PopplerPrintFlags
 PopplerFindFlags
 poppler_date_parse
 
 <SUBSECTION Standard>
 POPPLER_TYPE_ERROR
 POPPLER_TYPE_ORIENTATION
-POPPLER_TYPE_PRINT_FLAGS
 
 <SUBSECTION Private>
 POPPLER_DEFINE_BOXED_TYPE
 poppler_error_get_type
 poppler_error_quark
-poppler_print_flags_get_type
 </SECTION>
 
 <SECTION>
