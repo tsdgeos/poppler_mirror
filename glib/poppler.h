@@ -155,6 +155,7 @@ typedef enum /*< flags >*/
 
 /**
  * PopplerFindFlags:
+ * @POPPLER_FIND_DEFAULT: use default search settings
  * @POPPLER_FIND_CASE_SENSITIVE: do case sensitive search
  * @POPPLER_FIND_BACKWARDS: search backwards
  * @POPPLER_FIND_WHOLE_WORDS_ONLY: search only whole words
