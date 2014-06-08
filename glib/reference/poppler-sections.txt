@@ -345,7 +345,6 @@ poppler_form_text_type_get_type
 POPPLER_ERROR
 PopplerError
 PopplerOrientation
-poppler_date_parse
 
 <SUBSECTION Standard>
 POPPLER_TYPE_ERROR
@@ -727,6 +726,12 @@ POPPLER_TYPE_COLOR
 
 <SUBSECTION Private>
 poppler_color_get_type
+</SECTION>
+
+<SECTION>
+<FILE>poppler-pdf-utility-functions</FILE>
+<TITLE>PDF Utility functions</TITLE>
+poppler_date_parse
 </SECTION>
 
 <SECTION>
