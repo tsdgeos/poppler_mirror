@@ -23,6 +23,21 @@
 #include <Error.h>
 #endif
 
+/**
+ * SECTION: poppler-errors
+ * @title: Error handling
+ * @short_description: Error domain and codes
+ *
+ */
+
+/**
+ * POPPLER_ERROR:
+ *
+ * Error domain for poppler operations. Errors in this domain will
+ * be from the #PopplerError enumeration. See #GError for information
+ * on error domains.
+ */
+
 GQuark poppler_error_quark (void)
 {
   static GQuark q = 0;

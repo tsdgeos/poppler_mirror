@@ -342,17 +342,12 @@ poppler_form_text_type_get_type
 
 <SECTION>
 <FILE>poppler</FILE>
-POPPLER_ERROR
-PopplerError
 PopplerOrientation
 
 <SUBSECTION Standard>
-POPPLER_TYPE_ERROR
 POPPLER_TYPE_ORIENTATION
 
 <SUBSECTION Private>
-poppler_error_get_type
-poppler_error_quark
 poppler_orientation_get_type
 </SECTION>
 
@@ -751,4 +746,17 @@ POPPLER_TYPE_BACKEND
 
 <SUBSECTION Private>
 poppler_backend_get_type
+</SECTION>
+
+<SECTION>
+<FILE>poppler-errors</FILE>
+POPPLER_ERROR
+PopplerError
+
+<SUBSECTION Standard>
+POPPLER_TYPE_ERROR
+
+<SUBSECTION Private>
+poppler_error_get_type
+poppler_error_quark
 </SECTION>
