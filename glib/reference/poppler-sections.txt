@@ -353,6 +353,7 @@ POPPLER_TYPE_ORIENTATION
 <SUBSECTION Private>
 poppler_error_get_type
 poppler_error_quark
+poppler_orientation_get_type
 </SECTION>
 
 <SECTION>
