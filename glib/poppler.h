@@ -46,14 +46,6 @@ typedef enum
   POPPLER_ERROR_DAMAGED
 } PopplerError;
 
-typedef enum
-{
-  POPPLER_ORIENTATION_PORTRAIT,
-  POPPLER_ORIENTATION_LANDSCAPE,
-  POPPLER_ORIENTATION_UPSIDEDOWN,
-  POPPLER_ORIENTATION_SEASCAPE
-} PopplerOrientation;
-
 /**
  * PopplerPageTransitionType:
  * @POPPLER_PAGE_TRANSITION_REPLACE: the new page replace the old one

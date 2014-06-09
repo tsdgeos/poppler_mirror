@@ -341,17 +341,6 @@ poppler_form_text_type_get_type
 </SECTION>
 
 <SECTION>
-<FILE>poppler</FILE>
-PopplerOrientation
-
-<SUBSECTION Standard>
-POPPLER_TYPE_ORIENTATION
-
-<SUBSECTION Private>
-poppler_orientation_get_type
-</SECTION>
-
-<SECTION>
 <FILE>poppler-annot</FILE>
 <TITLE>PopplerAnnot</TITLE>
 PopplerAnnot
