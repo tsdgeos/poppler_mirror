@@ -47,7 +47,11 @@ CFILE_GLOB=$(top_srcdir)/glib/*.cc
 
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
-IGNORE_HFILES=demo
+IGNORE_HFILES=				\
+	poppler-private.h		\
+	poppler-input-stream.h		\
+	poppler-cached-file-loader.h	\
+	demo
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
