@@ -591,7 +591,7 @@ Object *Lexer::getObj(Object *obj, const char *cmdA, int objNum) {
   comment = gFalse;
   const char *cmd1 = tokBuf;
   *tokBuf = 0;
-  while (strcmp(cmdA, cmd1) && (objNum < 0 || xref->getNumEntry(getPos()) == objNum)) {
+  while (strcmp(cmdA, cmd1) && (objNum < 0 || (xref && xref->getNumEntry(getPos()) == objNum))) {
     while (1) {
       if ((c = getChar()) == EOF) {
         return obj->initEOF();
