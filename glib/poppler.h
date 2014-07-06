@@ -29,7 +29,7 @@ GQuark poppler_error_quark (void);
 
 /**
  * PopplerError:
- * @POPPLER_ERROR_INVALID: Generic error when a document opration fails
+ * @POPPLER_ERROR_INVALID: Generic error when a document operation fails
  * @POPPLER_ERROR_ENCRYPTED: Document is encrypted
  * @POPPLER_ERROR_OPEN_FILE: File could not be opened for writing when saving document
  * @POPPLER_ERROR_BAD_CATALOG: Failed to read the document catalog
