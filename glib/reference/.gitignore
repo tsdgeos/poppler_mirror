@@ -2,6 +2,7 @@ Makefile
 Makefile.in
 poppler-decl-list.txt
 poppler-decl.txt
+poppler-undeclared.txt
 poppler-undocumented.txt
 poppler-unused.txt
 poppler.args

@@ -9,3 +9,5 @@ poppler-enums.h
 poppler-features.h
 stamp-*
 test-poppler-glib
+*.gir
+*.typelib
