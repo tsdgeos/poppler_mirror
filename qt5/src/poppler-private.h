@@ -8,6 +8,7 @@
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2013 Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2014 Bogdan Cristea <cristeab@gmail.com>
+ * Copyright (C) 2014 Aki Koskinen <freedesktop@akikoskinen.info>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -86,11 +87,7 @@ namespace Poppler {
 		m_filePath = filePath;	
 
 #ifdef _WIN32
-		wchar_t *fileName = new WCHAR[filePath.length()];
-		std::wstring wstr = (const wchar_t *)filePath.utf16();
-		int length = wstr._Copy_s(fileName, filePath.length(), filePath.length());
-		doc = new PDFDoc(fileName, length, ownerPassword, userPassword);
-		delete[] fileName;
+		doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword);
 #else
 		GooString *fileName = new GooString(QFile::encodeName(filePath));
 		doc = new PDFDoc(fileName, ownerPassword, userPassword);
