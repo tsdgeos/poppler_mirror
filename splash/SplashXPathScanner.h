@@ -85,7 +85,7 @@ public:
 private:
 
   void computeIntersections();
-  void addIntersection(double segYMin, double segYMax,
+  GBool addIntersection(double segYMin, double segYMax,
 		       Guint segFlags,
 		       int y, int x0, int x1);
 
