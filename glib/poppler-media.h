@@ -29,7 +29,7 @@ G_BEGIN_DECLS
 #define POPPLER_MEDIA(obj)                   (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_MEDIA, PopplerMedia))
 #define POPPLER_IS_MEDIA(obj)                (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_MEDIA))
 
-// FIXME: this should be generic (PopplerSaveToCallbackFunc)
+/* FIXME: this should be generic (PopplerSaveToCallbackFunc) */
 
 /**
  * PopplerMediaSaveFunc:
