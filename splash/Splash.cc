@@ -361,9 +361,29 @@ void Splash::pipeRun(SplashPipe *pipe) {
   // dynamic pattern
   if (pipe->pattern) {
     if (!pipe->pattern->getColor(pipe->x, pipe->y, pipe->cSrcVal)) {
-		pipeIncX(pipe);
-		return;
+      pipeIncX(pipe);
+      return;
     }
+#if SPLASH_CMYK
+    if (bitmap->mode == splashModeCMYK8 || bitmap->mode == splashModeDeviceN8) {
+      if (state->fillOverprint && state->overprintMode && pipe->pattern->isCMYK()) {
+        Guint mask = 15;
+        if (pipe->cSrcVal[0] == 0) {
+          mask &= ~1;
+        }
+        if (pipe->cSrcVal[1] == 0) {
+          mask &= ~2;
+        }
+        if (pipe->cSrcVal[2] == 0) {
+          mask &= ~4;
+        }
+        if (pipe->cSrcVal[3] == 0) {
+          mask &= ~8;
+        }
+        state->overprintMask = mask;
+      }
+    }
+#endif
   }
 
   if (pipe->noTransparency && !state->blendFunc) {

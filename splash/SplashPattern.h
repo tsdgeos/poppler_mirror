@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2010, 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2010, 2011, 2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -52,6 +52,8 @@ public:
   // value for all pixels.
   virtual GBool isStatic() = 0;
 
+  // Returns true if this pattern colorspace is CMYK.
+  virtual GBool isCMYK() = 0;
 private:
 };
 
@@ -73,6 +75,8 @@ public:
   virtual GBool testPosition(int x, int y) { return gFalse; }
 
   virtual GBool isStatic() { return gTrue; }
+
+  virtual GBool isCMYK() { return gFalse; }
 
 private:
 

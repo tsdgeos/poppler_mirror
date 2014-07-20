@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
@@ -75,12 +75,15 @@ public:
 
   virtual GfxUnivariateShading *getShading() { return shading; }
 
+  virtual GBool isCMYK() { return gfxMode == csDeviceCMYK; }
+
 protected:
   Matrix ictm;
   double t0, t1, dt;
   GfxUnivariateShading *shading;
   GfxState *state;
   SplashColorMode colorMode;
+  GfxColorSpaceMode gfxMode;
 };
 
 class SplashAxialPattern: public SplashUnivariatePattern {
@@ -115,6 +118,8 @@ public:
 
   virtual GBool isStatic() { return gFalse; }
 
+  virtual GBool isCMYK() { return gfxMode == csDeviceCMYK; }
+
   virtual GBool isParameterized() { return shading->isParameterized(); }
   virtual int getNTriangles() { return shading->getNTriangles(); }
   virtual  void getTriangle(int i, double *x0, double *y0, double *color0,
@@ -129,6 +134,7 @@ private:
   GfxState *state;
   GBool bDirectColorTranslation;
   SplashColorMode mode;
+  GfxColorSpaceMode gfxMode;
 };
 
 // see GfxState.h, GfxRadialShading

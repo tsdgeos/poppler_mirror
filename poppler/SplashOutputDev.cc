@@ -20,7 +20,7 @@
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
-// Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Patrick Spendrin <ps_ml@gmx.de>
@@ -150,6 +150,7 @@ SplashGouraudPattern::SplashGouraudPattern(GBool bDirectColorTranslationA,
   bDirectColorTranslation = bDirectColorTranslationA;
   shadingA->getColorSpace()->getDefaultColor(&srcColor);
   convertGfxColor(defaultColor, mode, shadingA->getColorSpace(), &srcColor);
+  gfxMode = shadingA->getColorSpace()->getMode();
 }
 
 SplashGouraudPattern::~SplashGouraudPattern() {
@@ -198,6 +199,7 @@ SplashUnivariatePattern::SplashUnivariatePattern(SplashColorMode colorModeA, Gfx
 
   stateA->getUserClipBBox(&xMin, &yMin, &xMax, &yMax);
   shadingA->setupCache(&ctm, xMin, yMin, xMax, yMax);
+  gfxMode = shadingA->getColorSpace()->getMode();
 }
 
 SplashUnivariatePattern::~SplashUnivariatePattern() {
@@ -4405,7 +4407,7 @@ GBool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePat
   pattern->getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
 #endif
   setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(),
-		   state->getOverprintMode(), state->getFillColor());
+		   state->getOverprintMode(), NULL);
   retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern) == splashOk);
   state->clearPath();
   setVectorAntialias(vaa);
