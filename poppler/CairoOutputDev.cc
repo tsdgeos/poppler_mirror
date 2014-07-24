@@ -1880,45 +1880,43 @@ void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stre
     delete imgStr;
 
     invert_bit = invert ? 1 : 0;
-    if (pix ^ invert_bit)
-      return;
-
-    cairo_save (cairo);
-    cairo_rectangle (cairo, 0., 0., width, height);
-    cairo_fill (cairo);
-    cairo_restore (cairo);
-    if (cairo_shape) {
-      cairo_save (cairo_shape);
-      cairo_rectangle (cairo_shape, 0., 0., width, height);
-      cairo_fill (cairo_shape);
-      cairo_restore (cairo_shape);
+    if (!(pix ^ invert_bit)) {
+      cairo_save (cairo);
+      cairo_rectangle (cairo, 0., 0., width, height);
+      cairo_fill (cairo);
+      cairo_restore (cairo);
+      if (cairo_shape) {
+        cairo_save (cairo_shape);
+        cairo_rectangle (cairo_shape, 0., 0., width, height);
+        cairo_fill (cairo_shape);
+        cairo_restore (cairo_shape);
+      }
     }
-    return;
-  }
-
-  cairo_push_group_with_content (cairo, CAIRO_CONTENT_ALPHA);
-
-  /* shape is 1.0 for painted areas, 0.0 for unpainted ones */
-
-  cairo_matrix_t matrix;
-  cairo_get_matrix (cairo, &matrix);
-  //XXX: it is possible that we should only do sub pixel positioning if 
-  // we are rendering fonts */
-  if (!printing && prescaleImages && matrix.xy == 0.0 && matrix.yx == 0.0) {
-    drawImageMaskPrescaled(state, ref, str, width, height, invert, gFalse, inlineImg);
   } else {
-    drawImageMaskRegular(state, ref, str, width, height, invert, gFalse, inlineImg);
-  }
+    cairo_push_group_with_content (cairo, CAIRO_CONTENT_ALPHA);
 
-  if (state->getFillColorSpace()->getMode() == csPattern) {
-    cairo_set_source_rgb (cairo, 1, 1, 1);
-    cairo_set_matrix (cairo, &mask_matrix);
-    cairo_mask (cairo, mask);
-  }
+    /* shape is 1.0 for painted areas, 0.0 for unpainted ones */
 
-  if (mask)
-    cairo_pattern_destroy (mask);
-  mask = cairo_pop_group (cairo);
+    cairo_matrix_t matrix;
+    cairo_get_matrix (cairo, &matrix);
+    //XXX: it is possible that we should only do sub pixel positioning if 
+    // we are rendering fonts */
+    if (!printing && prescaleImages && matrix.xy == 0.0 && matrix.yx == 0.0) {
+      drawImageMaskPrescaled(state, ref, str, width, height, invert, gFalse, inlineImg);
+    } else {
+      drawImageMaskRegular(state, ref, str, width, height, invert, gFalse, inlineImg);
+    }
+
+    if (state->getFillColorSpace()->getMode() == csPattern) {
+      cairo_set_source_rgb (cairo, 1, 1, 1);
+      cairo_set_matrix (cairo, &mask_matrix);
+      cairo_mask (cairo, mask);
+    }
+
+    if (mask)
+      cairo_pattern_destroy (mask);
+    mask = cairo_pop_group (cairo);
+  }
 
   saveState(state);
   double bbox[4] = {0,0,1,1}; // dummy
