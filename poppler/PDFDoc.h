@@ -248,7 +248,7 @@ public:
 
   // rewrite pageDict with MediaBox, CropBox and new page CTM
   void replacePageDict(int pageNo, int rotate, PDFRectangle *mediaBox, PDFRectangle *cropBox, Object *pageCTM);
-  void markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset);
+  void markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum);
   GBool markAnnotations(Object *annots, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum);
   void markAcroForm(Object *acrpForm, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum);
   // write all objects used by pageDict to outStr
@@ -267,8 +267,8 @@ public:
 
 private:
   // insert referenced objects in XRef
-  void markDictionnary (Dict* dict, XRef *xRef, XRef *countRef, Guint numOffset);
-  void markObject (Object *obj, XRef *xRef, XRef *countRef, Guint numOffset);
+  void markDictionnary (Dict* dict, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum);
+  void markObject (Object *obj, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum);
   static void writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint numOffset, Guchar *fileKey,
                                 CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
 

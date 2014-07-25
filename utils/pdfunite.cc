@@ -129,7 +129,7 @@ int main (int argc, char *argv[])
       }
       pages.push_back(page);
       offsets.push_back(numOffset);
-      docs[i]->markPageObjects(pageDict, yRef, countRef, numOffset);
+      docs[i]->markPageObjects(pageDict, yRef, countRef, numOffset, refPage->num, refPage->num);
       Object annotsObj;
       pageDict->lookupNF("Annots", &annotsObj);
       if (!annotsObj.isNull()) {

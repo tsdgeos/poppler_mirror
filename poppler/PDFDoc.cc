@@ -659,7 +659,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   countRef = new XRef();
   Object *trailerObj = getXRef()->getTrailerDict();
   if (trailerObj->isDict()) {
-    markPageObjects(trailerObj->getDict(), yRef, countRef, 0);
+    markPageObjects(trailerObj->getDict(), yRef, countRef, 0, refPage->num, rootNum + 2);
   }
   yRef->add(0, 65535, 0, gFalse);
   writeHeader(outStr, getPDFMajorVersion(), getPDFMinorVersion());
@@ -669,7 +669,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   getXRef()->getDocInfo(&infoObj);
   if (infoObj.isDict()) {
     Dict *infoDict = infoObj.getDict();
-    markPageObjects(infoDict, yRef, countRef, 0);
+    markPageObjects(infoDict, yRef, countRef, 0, refPage->num, rootNum + 2);
     if (trailerObj->isDict()) {
       Dict *trailerDict = trailerObj->getDict();
       Object ref;
@@ -698,11 +698,11 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   Dict *pagesDict = pagesObj.getDict();
   pagesDict->lookup("Resources", &resourcesObj);
   if (resourcesObj.isDict())
-    markPageObjects(resourcesObj.getDict(), yRef, countRef, 0);
-  markPageObjects(catDict, yRef, countRef, 0);
+    markPageObjects(resourcesObj.getDict(), yRef, countRef, 0, refPage->num, rootNum + 2);
+  markPageObjects(catDict, yRef, countRef, 0, refPage->num, rootNum + 2);
 
   Dict *pageDict = page.getDict();
-  markPageObjects(pageDict, yRef, countRef, 0);
+  markPageObjects(pageDict, yRef, countRef, 0, refPage->num, rootNum + 2);
   pageDict->lookupNF("Annots", &annotsObj);
   if (!annotsObj.isNull()) {
     markAnnotations(&annotsObj, yRef, countRef, 0, refPage->num, rootNum + 2);
@@ -1426,16 +1426,26 @@ void PDFDoc::writeHeader(OutStream *outStr, int major, int minor)
    outStr->printf("%%\xE2\xE3\xCF\xD3\n");
 }
 
-void PDFDoc::markDictionnary (Dict* dict, XRef * xRef, XRef *countRef, Guint numOffset)
+void PDFDoc::markDictionnary (Dict* dict, XRef * xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum)
 {
   Object obj1;
   for (int i=0; i<dict->getLength(); i++) {
-    markObject(dict->getValNF(i, &obj1), xRef, countRef, numOffset);
+    const char *key = dict->getKey(i);
+    if (strcmp(key, "Annots") != 0) {
+      markObject(dict->getValNF(i, &obj1), xRef, countRef, numOffset, oldRefNum, newRefNum);
+    } else {
+      Object annotsObj;
+      dict->getValNF(i, &annotsObj);
+      if (!annotsObj.isNull()) {
+        markAnnotations(&annotsObj, xRef, countRef, 0, oldRefNum, newRefNum);
+        annotsObj.free();
+      }
+    }
     obj1.free();
   }
 }
 
-void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, Guint numOffset)
+void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum)
 {
   Array *array;
   Object obj1;
@@ -1444,17 +1454,17 @@ void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, Guint numOffse
     case objArray:
       array = obj->getArray();
       for (int i=0; i<array->getLength(); i++) {
-        markObject(array->getNF(i, &obj1), xRef, countRef, numOffset);
+        markObject(array->getNF(i, &obj1), xRef, countRef, numOffset, oldRefNum, newRefNum);
         obj1.free();
       }
       break;
     case objDict:
-      markDictionnary (obj->getDict(), xRef, countRef, numOffset);
+      markDictionnary (obj->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum);
       break;
     case objStream: 
       {
         Stream *stream = obj->getStream();
-        markDictionnary (stream->getDict(), xRef, countRef, numOffset);
+        markDictionnary (stream->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum);
       }
       break;
     case objRef:
@@ -1480,7 +1490,7 @@ void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, Guint numOffse
         } 
         Object obj1;
         getXRef()->fetch(obj->getRef().num, obj->getRef().gen, &obj1);
-        markObject(&obj1, xRef, countRef, numOffset);
+        markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum);
         obj1.free();
       }
       break;
@@ -1567,7 +1577,7 @@ void PDFDoc::replacePageDict(int pageNo, int rotate,
   page.free();
 }
 
-void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset) 
+void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum) 
 {
   pageDict->remove("Names");
   pageDict->remove("OpenAction");
@@ -1583,7 +1593,7 @@ void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint n
 	      strcmp(key, "Annots") != 0 &&
 	      strcmp(key, "P") != 0 &&
         strcmp(key, "Root") != 0) {
-      markObject(&value, xRef, countRef, numOffset);
+      markObject(&value, xRef, countRef, numOffset, oldRefNum, newRefNum);
     }
     value.free();
   }
@@ -1631,7 +1641,7 @@ GBool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, Gui
             obj2.free();
           }
           type.free();
-          markPageObjects(dict, xRef, countRef, numOffset);
+          markPageObjects(dict, xRef, countRef, numOffset, oldPageNum, newPageNum);
         }
         obj1.free();
         array->getNF(i, &obj1);
@@ -1681,7 +1691,7 @@ GBool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, Gui
   return modified;
 }
 
-void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum) {
+void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum) {
   Object acroform;
   GBool modified = gFalse;
   afObj->fetch(getXRef(), &acroform);
@@ -1690,11 +1700,11 @@ void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, Guint numOf
       for (int i=0; i < dict->getLength(); i++) {
         if (strcmp(dict->getKey(i), "Fields") == 0) {
           Object fields;
-          modified = markAnnotations(dict->getValNF(i, &fields), xRef, countRef, numOffset, oldPageNum, newPageNum);
+          modified = markAnnotations(dict->getValNF(i, &fields), xRef, countRef, numOffset, oldRefNum, newRefNum);
           fields.free();
         } else {
           Object obj;
-          markObject(dict->getValNF(i, &obj), xRef, countRef, numOffset);
+          markObject(dict->getValNF(i, &obj), xRef, countRef, numOffset, oldRefNum, newRefNum);
           obj.free();
         }
       }
