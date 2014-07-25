@@ -2233,6 +2233,8 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
 	      rect->y2 = y2;
 	      offset++;
             }
+
+          delete word_sel;
         }
 
       if (i < n_lines - 1 && offset > 0)
@@ -2394,6 +2396,8 @@ poppler_page_get_text_attributes_for_area (PopplerPage      *page,
               attrs->end_index = offset;
               offset++;
             }
+
+          delete word_sel;
         }
 
       if (i < n_lines - 1)
