@@ -169,7 +169,7 @@ static GtkDialog *
 pgd_demo_get_auth_dialog (GFile *uri_file)
 {
 	GtkDialog *dialog;
-	GtkWidget *content_area, *action_area;
+	GtkWidget *content_area;
 	GtkWidget *entry_container;
 	GtkWidget *password_entry;
 	GtkWidget *hbox, *main_vbox, *vbox, *icon;
@@ -179,13 +179,10 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 
 	dialog = GTK_DIALOG (gtk_dialog_new ());
 	content_area = gtk_dialog_get_content_area (dialog);
-	action_area = gtk_dialog_get_action_area (dialog);
 
 	/* Set the dialog up with HIG properties */
 	gtk_container_set_border_width (GTK_CONTAINER (dialog), 5);
 	gtk_box_set_spacing (GTK_BOX (content_area), 2); /* 2 * 5 + 2 = 12 */
-	gtk_container_set_border_width (GTK_CONTAINER (action_area), 5);
-	gtk_box_set_spacing (GTK_BOX (action_area), 6);
 
 	gtk_window_set_title (GTK_WINDOW (dialog), "Enter password");
 	gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
