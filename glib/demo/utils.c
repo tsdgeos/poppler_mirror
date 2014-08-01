@@ -394,7 +394,7 @@ pgd_action_view_set_action (GtkWidget     *action_view,
 							&row);
 			}
 
-			button = gtk_button_new_from_stock (GTK_STOCK_MEDIA_PLAY);
+			button = gtk_button_new_with_mnemonic ("_Play");
 			g_signal_connect (button, "clicked",
 					  G_CALLBACK (pgd_action_view_play_rendition),
 					  action->rendition.media);
@@ -572,7 +572,7 @@ pgd_movie_view_set_movie (GtkWidget    *movie_view,
 	pgd_table_add_property (GTK_GRID (table), "<b>Need Poster:</b>", poppler_movie_need_poster (movie) ? "Yes" : "No", &row);
 	pgd_table_add_property (GTK_GRID (table), "<b>Show Controls:</b>", poppler_movie_show_controls (movie) ? "Yes" : "No", &row);
 
-	button = gtk_button_new_from_stock (GTK_STOCK_MEDIA_PLAY);
+	button = gtk_button_new_with_mnemonic ("_Play");
 	g_signal_connect (button, "clicked",
 			  G_CALLBACK (pgd_movie_view_play_movie),
 			  movie);

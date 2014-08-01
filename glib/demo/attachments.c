@@ -168,8 +168,8 @@ pgd_attachments_save_button_clicked (GtkButton   *button,
 	file_chooser = gtk_file_chooser_dialog_new ("Save attachment",
 						    GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (treeview))),
 						    GTK_FILE_CHOOSER_ACTION_SAVE,
-						    GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-						    GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+						    "_Cancel", GTK_RESPONSE_CANCEL,
+						    "_Save", GTK_RESPONSE_ACCEPT,
 						    NULL);
 	gtk_file_chooser_set_current_name (GTK_FILE_CHOOSER (file_chooser), attachment->name);
 	g_signal_connect (G_OBJECT (file_chooser), "response",

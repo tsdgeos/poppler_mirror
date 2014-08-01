@@ -184,9 +184,9 @@ pgd_page_set_page (PgdPageDemo *demo,
 		gtk_label_set_markup (GTK_LABEL (demo->thumbnail_size), str);
 		g_free (str);
 
-		gtk_image_set_from_stock (GTK_IMAGE (demo->thumbnail),
-					  GTK_STOCK_MISSING_IMAGE,
-					  GTK_ICON_SIZE_DIALOG);
+		gtk_image_set_from_icon_name (GTK_IMAGE (demo->thumbnail),
+					      "image-missing",
+					      GTK_ICON_SIZE_DIALOG);
 	}
 }
 

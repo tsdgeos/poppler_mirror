@@ -186,11 +186,11 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 
 	gtk_window_set_title (GTK_WINDOW (dialog), "Enter password");
 	gtk_window_set_resizable (GTK_WINDOW (dialog), FALSE);
-	gtk_window_set_icon_name (GTK_WINDOW (dialog), GTK_STOCK_DIALOG_AUTHENTICATION);
+	gtk_window_set_icon_name (GTK_WINDOW (dialog), "dialog-password");
 	gtk_window_set_modal (GTK_WINDOW (dialog), TRUE);
 
 	gtk_dialog_add_buttons (dialog,
-				GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+				"_Cancel", GTK_RESPONSE_CANCEL,
 				"_Unlock Document", GTK_RESPONSE_OK,
 				NULL);
 	gtk_dialog_set_default_response (dialog, GTK_RESPONSE_OK);
@@ -207,7 +207,7 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 	gtk_box_pack_start (GTK_BOX (content_area), hbox, TRUE, TRUE, 0);
 	gtk_widget_show (hbox);
 
-	icon = gtk_image_new_from_stock (GTK_STOCK_DIALOG_AUTHENTICATION,
+	icon = gtk_image_new_from_icon_name ("dialog-password",
 					 GTK_ICON_SIZE_DIALOG);
 
 	gtk_misc_set_alignment (GTK_MISC (icon), 0.5, 0.0);
