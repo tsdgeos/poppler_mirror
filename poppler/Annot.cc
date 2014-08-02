@@ -4087,7 +4087,7 @@ void Annot::layoutText(GooString *text, GooString *outBuf, int *i,
         // This assumes an identity CMap.
         outBuf->append((uChar >> 8) & 0xff);
         outBuf->append(uChar & 0xff);
-      } else if (ccToUnicode->mapToCharCode(&uChar, &c, 1)) {
+      } else if (ccToUnicode->mapToCharCode(&uChar, &c, 2)) {
         ccToUnicode->decRefCnt();
         if (font->isCIDFont()) {
           // TODO: This assumes an identity CMap.  It should be extended to

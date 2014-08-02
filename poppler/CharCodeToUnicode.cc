@@ -633,7 +633,7 @@ int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode **u) {
 
 int CharCodeToUnicode::mapToCharCode(Unicode* u, CharCode *c, int usize) {
   //look for charcode in map
-  if (usize == 1) {
+  if (usize == 1 || (usize > 1 && !(*u & ~0xff))) {
     if (isIdentity) {
       *c = (CharCode) *u;
       return 1;
