@@ -169,7 +169,7 @@
 #define PACKAGE_VERSION "${POPPLER_VERSION}"
 
 /* Poppler data dir */
-#define POPPLER_DATADIR "${CMAKE_INSTALL_PREFIX}/share/poppler"
+#define POPPLER_DATADIR "${POPPLER_DATADIR}"
 
 /* Support for curl based doc builder is compiled in. */
 #cmakedefine POPPLER_HAS_CURL_SUPPORT 1

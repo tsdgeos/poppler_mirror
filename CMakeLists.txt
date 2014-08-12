@@ -232,6 +232,22 @@ if(LCMS2_FOUND)
   include_directories(${LCMS2_INCLUDE_DIR})
 endif(LCMS2_FOUND)
 
+# Recent versions of poppler-data install a .pc file.
+# Use it to determine the encoding data path, if available.
+# Default to the same prefix otherwise.
+pkg_check_modules(POPPLER_DATA poppler-data)
+if(POPPLER_DATA_FOUND)
+  execute_process(COMMAND "${PKG_CONFIG_EXECUTABLE}" --variable=poppler_datadir poppler-data
+                  RESULT_VARIABLE _result_var
+                  OUTPUT_VARIABLE _output_var OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(_result_var STREQUAL "0" AND NOT _output_var STREQUAL "")
+    set(POPPLER_DATADIR "${_output_var}")
+  endif(_result_var STREQUAL "0" AND NOT _output_var STREQUAL "")
+endif(POPPLER_DATA_FOUND)
+if(NOT DEFINED POPPLER_DATADIR)
+  set(POPPLER_DATADIR "${CMAKE_INSTALL_PREFIX}/share/poppler")
+endif(NOT DEFINED POPPLER_DATADIR)
+
 if(DEFINED COMPILE_WARNINGS)
 else(DEFINED COMPILE_WARNINGS)
   set(COMPILE_WARNINGS "yes")

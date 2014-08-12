@@ -105,7 +105,12 @@ if test x$enable_relocatable = xyes; then
     fi
 fi
 
-AC_DEFINE_DIR(POPPLER_DATADIR, "{datarootdir}/poppler", [Poppler data dir])
+dnl ##### Check for installed poppler-data. Use the same datarootdir as default otherwise.
+PKG_CHECK_EXISTS(poppler-data,
+                 [POPPLER_DATADIR=`$PKG_CONFIG --variable=poppler_datadir poppler-data`
+                  AC_DEFINE_DIR(POPPLER_DATADIR, "{POPPLER_DATADIR}", [Poppler data dir])],
+                 [AC_DEFINE_DIR(POPPLER_DATADIR, "{datarootdir}/poppler", [Poppler data dir])]
+                 )
 
 dnl ##### Checks for header files.
 AC_PATH_XTRA
