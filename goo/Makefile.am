@@ -24,29 +24,6 @@ poppler_goo_include_HEADERS =			\
 
 endif
 
-if BUILD_LIBJPEG
-libjpeg_includes = $(LIBJPEG_CFLAGS)
-endif
-
-if BUILD_LIBTIFF
-libtiff_includes = $(LIBTIFF_CFLAGS)
-endif
-
-if BUILD_LIBOPENJPEG
-libjpeg2000_includes = $(LIBOPENJPEG_CFLAGS)
-endif
-
-if BUILD_LIBPNG
-libpng_includes = $(LIBPNG_CFLAGS)
-endif
-
-INCLUDES =					\
-	-I$(top_srcdir)				\
-	$(libjpeg_includes)                     \
-	$(libtiff_includes)                     \
-	$(libjpeg2000_includes)                 \
-	$(libpng_includes)
-
 libgoo_la_SOURCES =				\
 	gfile.cc				\
 	gmempp.cc				\
@@ -64,3 +41,26 @@ libgoo_la_SOURCES =				\
 	gtypes_p.h				\
 	gstrtod.cc				\
 	grandom.cc
+
+if BUILD_LIBJPEG
+libjpeg_includes = $(LIBJPEG_CFLAGS)
+endif
+
+if BUILD_LIBTIFF
+libtiff_includes = $(LIBTIFF_CFLAGS)
+endif
+
+if BUILD_LIBOPENJPEG
+libjpeg2000_includes = $(LIBOPENJPEG_CFLAGS)
+endif
+
+if BUILD_LIBPNG
+libpng_includes = $(LIBPNG_CFLAGS)
+endif
+
+libgoo_la_CPPFLAGS =				\
+	-I$(top_srcdir)				\
+	$(libjpeg_includes)                     \
+	$(libtiff_includes)                     \
+	$(libjpeg2000_includes)                 \
+	$(libpng_includes)

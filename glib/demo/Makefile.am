@@ -1,17 +1,10 @@
-INCLUDES = 					\
-	-I$(top_srcdir)/glib			\
-	-I$(top_builddir)/glib			\
-	$(GTK_TEST_CFLAGS)			\
-	$(POPPLER_GLIB_DISABLE_DEPRECATED)	\
-	$(POPPLER_GLIB_DISABLE_SINGLE_INCLUDES)
-
 AM_LDFLAGS = @auto_import_flags@
 
 if BUILD_GTK_TEST
 bin_PROGRAMS = poppler-glib-demo
 endif
 
-poppler_glib_demo_SOURCES = 			\
+poppler_glib_demo_SOURCES =			\
 	main.c					\
 	annots.h				\
 	annots.c				\
@@ -50,7 +43,14 @@ poppler_glib_demo_SOURCES = 			\
 	utils.h					\
 	utils.c
 
-LDADD =						\
+poppler_glib_demo_CPPFLAGS =			\
+	-I$(top_srcdir)/glib			\
+	-I$(top_builddir)/glib			\
+	$(GTK_TEST_CFLAGS)			\
+	$(POPPLER_GLIB_DISABLE_DEPRECATED)	\
+	$(POPPLER_GLIB_DISABLE_SINGLE_INCLUDES)
+
+poppler_glib_demo_LDADD =			\
 	$(top_builddir)/glib/libpoppler-glib.la	\
 	$(top_builddir)/poppler/libpoppler.la	\
 	$(GTK_TEST_LIBS)

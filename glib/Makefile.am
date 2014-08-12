@@ -1,14 +1,8 @@
 AM_LDFLAGS = @auto_import_flags@
 
 SUBDIRS = . reference demo
-INCLUDES =					\
-	-DG_LOG_DOMAIN=\"Poppler\"		\
-	-I$(top_srcdir)				\
-	-I$(top_srcdir)/poppler			\
-	$(POPPLER_GLIB_CFLAGS)			\
-	$(FREETYPE_CFLAGS)			\
-	$(POPPLER_GLIB_DISABLE_DEPRECATED)	\
-	$(POPPLER_GLIB_DISABLE_SINGLE_INCLUDES)
+
+lib_LTLIBRARIES = libpoppler-glib.la
 
 stamp_files = stamp-poppler-enums.h
 
@@ -26,8 +20,8 @@ poppler-enums.c: poppler-enums.c.template $(poppler_glib_public_headers)
 	&& (cmp -s xgen-etbc poppler-enums.c || cp xgen-etbc poppler-enums.c ) \
 	&& rm -f xgen-etbc
 
-EXTRA_DIST = \
-	poppler-enums.h.template	\
+EXTRA_DIST =					\
+	poppler-enums.h.template		\
 	poppler-enums.c.template
 
 poppler_glib_public_headers =			\
@@ -51,7 +45,6 @@ poppler_glib_include_HEADERS =			\
 	poppler-enums.h
 nodist_poppler_glib_include_HEADERS = poppler-features.h
 
-lib_LTLIBRARIES = libpoppler-glib.la
 libpoppler_glib_la_SOURCES =			\
 	$(BUILT_SOURCES)			\
 	poppler-action.cc			\
@@ -72,13 +65,25 @@ libpoppler_glib_la_SOURCES =			\
 	poppler.cc				\
 	poppler-private.h
 
+libpoppler_glib_la_CPPFLAGS =			\
+	-DG_LOG_DOMAIN=\"Poppler\"		\
+	-I$(top_srcdir)				\
+	-I$(top_srcdir)/poppler			\
+	$(POPPLER_GLIB_CFLAGS)			\
+	$(FREETYPE_CFLAGS)			\
+	$(POPPLER_GLIB_DISABLE_DEPRECATED)	\
+	$(POPPLER_GLIB_DISABLE_SINGLE_INCLUDES)
+
 libpoppler_glib_la_LIBADD =				\
 	$(top_builddir)/poppler/libpoppler.la		\
 	$(top_builddir)/poppler/libpoppler-cairo.la	\
 	$(POPPLER_GLIB_LIBS)				\
 	$(FREETYPE_LIBS)
 
-libpoppler_glib_la_LDFLAGS = -version-info 14:0:6 @create_shared_lib@ @auto_import_flags@
+libpoppler_glib_la_LDFLAGS =			\
+	-version-info 14:0:6			\
+	@create_shared_lib@			\
+	@auto_import_flags@
 
 BUILT_SOURCES =					\
 	poppler-enums.c				\

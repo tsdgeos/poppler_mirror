@@ -465,6 +465,7 @@ fi
 
 CAIRO_VERSION="1.10.0"
 AC_SUBST(CAIRO_VERSION)
+CAIRO_DEPS="cairo >= $CAIRO_VERSION cairo-ft >= $CAIRO_VERSION)"
 AC_ARG_ENABLE(cairo-output,
               AC_HELP_STRING([--disable-cairo-output],
                              [Don't build the cairo graphics backend.]),
@@ -472,9 +473,9 @@ AC_ARG_ENABLE(cairo-output,
               enable_cairo_output="try")
 use_cairo=""
 if test x$enable_cairo_output = xyes; then
-  PKG_CHECK_MODULES(CAIRO, cairo >= $CAIRO_VERSION cairo-ft >= $CAIRO_VERSION)
+  PKG_CHECK_MODULES(CAIRO, $CAIRO_DEPS)
 elif test x$enable_cairo_output = xtry; then
-  PKG_CHECK_MODULES(CAIRO, cairo >= $CAIRO_VERSION cairo-ft >= $CAIRO_VERSION,
+  PKG_CHECK_MODULES(CAIRO, $CAIRO_DEPS,
                     [enable_cairo_output="yes"],
                     [enable_cairo_output="no"
 		     use_cairo="no (requires cairo >= $CAIRO_VERSION)"])
@@ -699,15 +700,19 @@ fi
 AM_CONDITIONAL(BUILD_POPPLER_CPP, test "x$enable_poppler_cpp" = "xyes")
 
 
+GTK_TEST_DEPS='gtk+-3.0 >= 3.8 gdk-pixbuf-2.0'
+if test x$enable_cairo_output = xyes; then
+  GTK_TEST_DEPS="$GTK_TEST_DEPS $CAIRO_DEPS"
+fi
 AC_ARG_ENABLE(gtk-test,
               AC_HELP_STRING([--disable-gtk-test],
 	                     [Don't compile GTK+ test program.]),
               enable_gtk_test=$enableval,
               enable_gtk_test="try")
 if test x$enable_gtk_test = xyes; then
-  PKG_CHECK_MODULES(GTK_TEST, gtk+-3.0 >= 3.8 gdk-pixbuf-2.0)
+  PKG_CHECK_MODULES(GTK_TEST, $GTK_TEST_DEPS)
 elif test x$enable_gtk_test = xtry; then
-  PKG_CHECK_MODULES(GTK_TEST, gtk+-3.0 >= 3.8 gdk-pixbuf-2.0,
+  PKG_CHECK_MODULES(GTK_TEST, $GTK_TEST_DEPS,
                     [enable_gtk_test="yes"],
                     [enable_gtk_test="no"])
 fi

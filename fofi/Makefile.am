@@ -1,6 +1,3 @@
-INCLUDES =					\
-	-I$(top_srcdir)
-
 noinst_LTLIBRARIES = libfofi.la
 
 if ENABLE_XPDF_HEADERS
@@ -26,3 +23,6 @@ libfofi_la_SOURCES =		\
 	FoFiType1C.cc		\
 	FoFiIdentifier.cc	\
 	FoFiType1C.h
+
+libfofi_la_CPPFLAGS =		\
+	-I$(top_srcdir)
