@@ -110,7 +110,7 @@ fi
 
 if test x$NOCONFIGURE = x; then
     printbold "Running $srcdir/configure $@ ..."
-    $srcdir/configure $@
+    $srcdir/configure "$@"
 else
     printbold "Skipping configure process."
 fi
