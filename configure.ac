@@ -822,7 +822,17 @@ case "$enable_compile_warnings" in
 		-Wmissing-format-attribute -fno-exceptions -fno-check-new \
 		-fno-common $CXXFLAGS" ;;
 esac
-CXXFLAGS="-fPIC $CXXFLAGS";
+
+case "$host_os" in
+  mingw*)
+    # mingw prints "warning: -fPIC ignored for target (all code is position independent)"
+    # for every file
+    ;;
+  *)
+    CXXFLAGS="-fPIC $CXXFLAGS";
+    ;;
+esac
+
 
 case `$PKG_CONFIG --version` in
   0.?|0.1[0-7])
