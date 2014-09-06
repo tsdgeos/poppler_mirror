@@ -48,7 +48,7 @@ is not used, the output filename will be derived from the
 .IR PDF-file
 filename.
 .PP
-Not all options are valid with all output formats. One (and only one) of the output format options (\-png, \-jpeg, \-tiff, \-pdf, \-ps, \-eps, or \-svg) must be used.
+Not all options are valid with all output formats. One (and only one) of the output format options (\-png, \-jpeg, \-tiff, \-pdf, \-print, \-ps, \-eps, or \-svg) must be used.
 .PP
 The resolution options (\-r, \-rx, \-ry) set the resolution of the
 image output formats. The image dimensions will depend on the PDF page
@@ -79,6 +79,9 @@ Generates a TIFF file(s)
 .TP
 .BI \-pdf
 Generates a PDF file
+.TP
+.BI \-print
+(Windows only) Prints to a system printer. See also \-printer and \-printeropt.
 .TP
 .BI \-ps
 Generate a PS file
@@ -205,6 +208,14 @@ lower-left corner of the paper instead (PS,PDF,SVG only).
 Adds the %%IncludeFeature: *Duplex DuplexNoTumble DSC comment to the
 PostScript file (PS only).  This tells the print manager to enable duplexing.
 .TP
+.BI \-printer " printer-name"
+(Windows only). When used with \-print, specifies the name of the printer to be used, instead of the system default.
+.TP
+.BI \-printopt " printer-options"
+(Windows only). When used with \-print, takes a list of options to be used to configure the printer. See
+.B WINDOWS PRINTER OPTIONS
+for the available options.
+.TP
 .BI \-opw " password"
 Specify the owner password for the PDF file.  Providing this will
 bypass all security restrictions.
@@ -244,6 +255,16 @@ Error related to ICC profile.
 .TP
 99
 Other error.
+.SH WINDOWS PRINTER OPTIONS
+In Windows, you can use the \-print option to print directly to a system printer. Additionally, you can use the \-printopt 
+option to configure the printer. It takes a string of the form "<opt>=<val>[,<opt>=<val>]". Currently the available options are:
+.TP
+.BI source
+Selects the source paper tray to be used (bin). The possible values are "upper", "onlyone", "lower", "middle", "manual", "envelope",
+"envmanual", "auto", "tractor", "smallfmt", "largefmt", "largecapacity", "formsource", or a numeric value to choose a driver specific source.
+.TP
+.BI duplex
+Sets the duplex mode of the printer. It can be "simplex", "horizontal" or "vertical". General option \-duplex is a synonym of "duplex=horizontal". If both are specified, the \-printopt one has priority.
 .SH AUTHOR
 The pdftocairo software and documentation are copyright 1996-2004 Glyph
 & Cog, LLC and copyright 2005-2011 The Poppler Developers.

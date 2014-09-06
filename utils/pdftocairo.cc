@@ -77,6 +77,7 @@ static GBool jpeg = gFalse;
 static GBool ps = gFalse;
 static GBool eps = gFalse;
 static GBool pdf = gFalse;
+static GBool print = gFalse;
 static GBool svg = gFalse;
 static GBool tiff = gFalse;
 
@@ -121,6 +122,11 @@ static GBool quiet = gFalse;
 static GBool printVersion = gFalse;
 static GBool printHelp = gFalse;
 
+#ifdef CAIRO_HAS_WIN32_SURFACE
+static GooString printer;
+static GooString printOpt;
+#endif
+
 static const ArgDesc argDesc[] = {
 #if ENABLE_LIBPNG
   {"-png",    argFlag,     &png,           0,
@@ -149,6 +155,14 @@ static const ArgDesc argDesc[] = {
 #if CAIRO_HAS_SVG_SURFACE
   {"-svg",    argFlag,     &svg,           0,
    "generate a Scalable Vector Graphics (SVG) file"},
+#endif
+#ifdef CAIRO_HAS_WIN32_SURFACE
+  {"-print",    argFlag,     &print,       0,
+   "print to a Windows printer"},
+  {"-printer",  argGooString, &printer,    0,
+   "printer name or use default if this option is not specified"},
+  {"-printopt",  argGooString, &printOpt,    0,
+   "printer options, with format <opt1>=<val1>[,<optN>=<valN>]*"},
 #endif
 
   {"-f",      argInt,      &firstPage,     0,
@@ -253,6 +267,9 @@ static int icc_data_size;
 static cmsHPROFILE profile;
 #endif
 
+#ifdef CAIRO_HAS_WIN32_SURFACE
+#include "pdftocairo-win32.cc"
+#endif
 
 void writePageImage(GooString *filename)
 {
@@ -468,6 +485,9 @@ static void getFitToPageTransform(double page_w, double page_h,
       // shrink to fit
       cairo_matrix_scale (m, scale, scale);
     }
+#ifdef CAIRO_HAS_WIN32_SURFACE
+  win32GetFitToPageTransform(m);
+#endif
 }
 
 static cairo_status_t writeStream(void *closure, const unsigned char *data, unsigned int length)
@@ -483,14 +503,16 @@ static cairo_status_t writeStream(void *closure, const unsigned char *data, unsi
 static void beginDocument(GooString *outputFileName, double w, double h)
 {
   if (printing) {
-    if (outputFileName->cmp("fd://0") == 0)
-      output_file = stdout;
-    else
-    {
-      output_file = fopen(outputFileName->getCString(), "wb");
-      if (!output_file) {
-        fprintf(stderr, "Error opening output file %s\n", outputFileName->getCString());
-        exit(2);
+    if (!print) {
+      if (outputFileName->cmp("fd://0") == 0)
+        output_file = stdout;
+      else
+      {
+        output_file = fopen(outputFileName->getCString(), "wb");
+        if (!output_file) {
+          fprintf(stderr, "Error opening output file %s\n", outputFileName->getCString());
+          exit(2);
+        }
       }
     }
 
@@ -518,6 +540,9 @@ static void beginDocument(GooString *outputFileName, double w, double h)
       cairo_svg_surface_restrict_to_version (surface, CAIRO_SVG_VERSION_1_2);
 #endif
     }
+#ifdef CAIRO_HAS_WIN32_SURFACE
+    win32BeginDocument(outputFileName, w, h);
+#endif
   }
 }
 
@@ -539,6 +564,9 @@ static void beginPage(double w, double h)
 #if CAIRO_HAS_PDF_SURFACE
     if (pdf)
       cairo_pdf_surface_set_size (surface, w, h);
+#endif
+#ifdef CAIRO_HAS_WIN32_SURFACE
+    win32BeginPage(w, h);
 #endif
 
     cairo_surface_set_fallback_resolution (surface, x_resolution, y_resolution);
@@ -610,6 +638,9 @@ static void endPage(GooString *imageFileName)
 
   if (printing) {
     cairo_surface_show_page(surface);
+#ifdef CAIRO_HAS_WIN32_SURFACE
+    win32EndPage(imageFileName);
+#endif
   } else {
     writePageImage(imageFileName);
     cairo_surface_finish(surface);
@@ -626,12 +657,16 @@ static void endDocument()
   cairo_status_t status;
 
   if (printing) {
+#ifdef CAIRO_HAS_WIN32_SURFACE
+    win32EndDocument();
+#endif
     cairo_surface_finish(surface);
     status = cairo_surface_status(surface);
     if (status)
       error(errInternal, -1, "cairo error: {0:s}\n", cairo_status_to_string(status));
     cairo_surface_destroy(surface);
-    fclose(output_file);
+    if (output_file)
+      fclose(output_file);
   }
 }
 
@@ -704,6 +739,9 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
     }
     return new GooString(outputName);
   }
+
+  if (print)
+    return fileName; //it will be used as the job name
 
   if (fileName->cmp("fd://0") == 0) {
     fprintf(stderr, "Error: an output filename or '-' must be supplied when the PDF file is stdin.\n");
@@ -808,13 +846,14 @@ int main(int argc, char *argv[]) {
                 (ps ? 1 : 0) +
                 (eps ? 1 : 0) +
                 (pdf ? 1 : 0) +
+                (print ? 1 : 0) +
                 (svg ? 1 : 0);
   if (num_outputs == 0) {
-    fprintf(stderr, "Error: one of the output format options (-png, -jpeg, -ps, -eps, -pdf, -svg) must be used.\n");
+    fprintf(stderr, "Error: one of the output format options (-png, -jpeg, -ps, -eps, -pdf, -print, -svg) must be used.\n");
     exit(99);
   }
   if (num_outputs > 1) {
-    fprintf(stderr, "Error: use only one of the output format options (-png, -jpeg, -ps, -eps, -pdf, -svg).\n");
+    fprintf(stderr, "Error: use only one of the output format options (-png, -jpeg, -ps, -eps, -pdf, -print, -svg).\n");
     exit(99);
   }
   if (png || jpeg || tiff)

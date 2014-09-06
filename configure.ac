@@ -48,7 +48,7 @@ case "$host_os" in
   ;;
   mingw*)
     os_win32=yes
-    win32_libs="-lgdi32"
+    win32_libs="-lgdi32 -lwinspool"
     create_shared_lib="-no-undefined"
     auto_import_flags="-Wl,--enable-auto-import"
 
