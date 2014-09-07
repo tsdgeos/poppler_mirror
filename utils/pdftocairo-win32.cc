@@ -136,7 +136,7 @@ static void fillPrinterOptions(DEVMODEA *devmode)
   }
 }
 
-static void win32BeginDocument(GooString *outputFileName, double w, double h)
+static void win32BeginDocument(GooString *inputFileName, GooString *outputFileName, double w, double h)
 {
   if (!print)
     return;
@@ -182,10 +182,14 @@ static void win32BeginDocument(GooString *outputFileName, double w, double h)
   DOCINFOA docinfo;
   memset(&docinfo, 0, sizeof(docinfo));
   docinfo.cbSize = sizeof(docinfo);
-  if (outputFileName->cmp("fd://0") == 0)
+  if (inputFileName->cmp("fd://0") == 0) {
     docinfo.lpszDocName = "pdftocairo <stdin>";
-  else
-    docinfo.lpszDocName = outputFileName->getCString();
+  } else {
+    docinfo.lpszDocName = inputFileName->getCString();
+  }
+  if (outputFileName) {
+    docinfo.lpszOutput = outputFileName->getCString();
+  }
   if (StartDocA(hdc, &docinfo) <=0) {
     fprintf(stderr, "Error: StartDoc failed");
     exit(99);

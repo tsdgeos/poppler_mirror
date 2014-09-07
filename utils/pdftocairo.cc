@@ -500,7 +500,7 @@ static cairo_status_t writeStream(void *closure, const unsigned char *data, unsi
     return CAIRO_STATUS_WRITE_ERROR;
 }
 
-static void beginDocument(GooString *outputFileName, double w, double h)
+static void beginDocument(GooString *inputFileName, GooString *outputFileName, double w, double h)
 {
   if (printing) {
     if (!print) {
@@ -541,7 +541,7 @@ static void beginDocument(GooString *outputFileName, double w, double h)
 #endif
     }
 #ifdef CAIRO_HAS_WIN32_SURFACE
-    win32BeginDocument(outputFileName, w, h);
+    win32BeginDocument(inputFileName, outputFileName, w, h);
 #endif
   }
 }
@@ -731,7 +731,7 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
 
   if (outputName) {
     if (outputName->cmp("-") == 0) {
-      if (!printing && !singleFile) {
+      if (print || (!printing && !singleFile)) {
 	fprintf(stderr, "Error: stdout may only be used with the ps, eps, pdf, svg output options or if -singlefile is used.\n");
 	exit(99);
       }
@@ -740,8 +740,9 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
     return new GooString(outputName);
   }
 
-  if (print)
-    return fileName; //it will be used as the job name
+  if (print) {
+    return NULL; // No output file means print to printer
+  }
 
   if (fileName->cmp("fd://0") == 0) {
     fprintf(stderr, "Error: an output filename or '-' must be supplied when the PDF file is stdin.\n");
@@ -1090,7 +1091,7 @@ int main(int argc, char *argv[]) {
     getOutputSize(pg_w, pg_h, &output_w, &output_h);
 
     if (pg == firstPage)
-      beginDocument(outputFileName, output_w, output_h);
+      beginDocument(fileName, outputFileName, output_w, output_h);
     beginPage(output_w, output_h);
     renderPage(doc, cairoOut, pg, pg_w, pg_h, output_w, output_h);
     endPage(imageFileName);

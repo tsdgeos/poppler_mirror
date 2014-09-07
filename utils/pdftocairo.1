@@ -23,6 +23,8 @@ PostScript (PS)
 Encapsulated PostScript (EPS)
 .IP \(bu
 Scalable Vector Graphics (SVG)
+.IP \(bu
+Windows Printer
 .PP
 .B pdftocairo
 reads the PDF file,
@@ -82,6 +84,8 @@ Generates a PDF file
 .TP
 .BI \-print
 (Windows only) Prints to a system printer. See also \-printer and \-printeropt.
+ If an output file is not specified, the output will be sent to the printer.
+ The output file '-' can not be used with this option.
 .TP
 .BI \-ps
 Generate a PS file
