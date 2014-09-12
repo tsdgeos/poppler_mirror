@@ -31,6 +31,8 @@ PopplerInputStream::PopplerInputStream(GInputStream *inputStreamA, GCancellable 
   length = lengthA;
   bufPtr = bufEnd = buf;
   bufPos = start;
+  savePos = 0;
+  saved = gFalse;
 }
 
 PopplerInputStream::~PopplerInputStream()
@@ -77,6 +79,7 @@ void PopplerInputStream::setPos(Goffset pos, int dir)
 
   if (dir >= 0) {
     g_seekable_seek(seekable, pos, G_SEEK_SET, cancellable, NULL);
+    bufPos = pos;
   } else {
     g_seekable_seek(seekable, 0, G_SEEK_END, cancellable, NULL);
     size = (Guint)g_seekable_tell(seekable);
@@ -110,7 +113,7 @@ GBool PopplerInputStream::fillBuf()
   if (limited && bufPos + inputStreamBufSize > start + length) {
     n = start + length - bufPos;
   } else {
-    n = inputStreamBufSize;
+    n = inputStreamBufSize - (bufPos % inputStreamBufSize);
   }
 
   n = g_input_stream_read(inputStream, buf, n, cancellable, NULL);
