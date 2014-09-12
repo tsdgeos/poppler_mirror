@@ -107,7 +107,8 @@ pdftoppm_SOURCES =				\
 	pdftoppm.cc
 
 pdftocairo_SOURCES =				\
-	pdftocairo.cc
+	pdftocairo.cc				\
+	pdftocairo-win32.cc
 
 if BUILD_CAIRO_OUTPUT
 if USE_CMS

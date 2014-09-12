@@ -1,11 +1,15 @@
+#include <cairo.h>
+#ifdef CAIRO_HAS_WIN32_SURFACE
+
 #include <cairo-win32.h>
 
-static void win32GetFitToPageTransform(cairo_matrix_t *m)
-{
-  if (!print)
-    return;
+#include "parseargs.h"
+#include "pdftocairo-win32.h"
 
-  HDC hdc = cairo_win32_surface_get_dc(surface);
+static HDC hdc;
+
+void win32GetFitToPageTransform(cairo_matrix_t *m)
+{
   int logx = GetDeviceCaps(hdc, LOGPIXELSX);
   int logy = GetDeviceCaps(hdc, LOGPIXELSY);
   cairo_matrix_scale (m, logx / 72.0, logy / 72.0);
@@ -68,9 +72,6 @@ static const Win32Option win32DuplexMode[] =
 
 static void parseDuplex(DEVMODEA *devmode, GooString *mode)
 {
-  if (duplex)
-    fprintf(stderr, "Warning: duplex mode is specified both as standalone and printer options\n");
-
   int win32Duplex;
   const Win32Option *option = win32DuplexMode;
   while (option->name) {
@@ -88,7 +89,7 @@ static void parseDuplex(DEVMODEA *devmode, GooString *mode)
   devmode->dmFields |= DM_DUPLEX;
 }
 
-static void fillCommonPrinterOptions(DEVMODEA *devmode, double w, double h)
+static void fillCommonPrinterOptions(DEVMODEA *devmode, double w, double h, GBool duplex)
 {
   devmode->dmPaperWidth = w * 254.0 / 72.0;
   devmode->dmPaperLength = h * 254.0 / 72.0;
@@ -100,10 +101,10 @@ static void fillCommonPrinterOptions(DEVMODEA *devmode, double w, double h)
   }
 }
 
-static void fillPrinterOptions(DEVMODEA *devmode)
+static void fillPrinterOptions(DEVMODEA *devmode, GBool duplex, GooString *printOpt)
 {
   //printOpt format is: <opt1>=<val1>,<opt2>=<val2>,...
-  const char *nextOpt = printOpt.getCString();
+  const char *nextOpt = printOpt->getCString();
   while (nextOpt && *nextOpt)
   {
     const char *comma = strchr(nextOpt, ',');
@@ -129,28 +130,33 @@ static void fillPrinterOptions(DEVMODEA *devmode)
     if (opt.cmp("source") == 0) {
       parseSource(devmode, &value);
     } else if (opt.cmp("duplex") == 0) {
-      parseDuplex(devmode, &value);
+      if (duplex) {
+	fprintf(stderr, "Warning: duplex mode is specified both as standalone and printer options\n");
+      } else {
+	parseDuplex(devmode, &value);
+      }
     } else {
       fprintf(stderr, "Warning: unknown printer option \"%s\"\n", opt.getCString());
     }
   }
 }
 
-static void win32BeginDocument(GooString *inputFileName, GooString *outputFileName, double w, double h)
+cairo_surface_t *win32BeginDocument(GooString *inputFileName, GooString *outputFileName,
+				    double w, double h,
+				    GooString *printer,
+				    GooString *printOpt,
+				    GBool duplex)
 {
-  if (!print)
-    return;
-
-  if (printer.getCString()[0] == 0)
+  if (printer->getCString()[0] == 0)
   {
     DWORD szName = 0;
     GetDefaultPrinterA(NULL, &szName);
     char *devname = (char*)gmalloc(szName);
     GetDefaultPrinterA(devname, &szName);
-    printer.Set(devname);
+    printer->Set(devname);
     gfree(devname);
   }
-  char *cPrinter = printer.getCString();
+  char *cPrinter = printer->getCString();
 
   //Query the size of the DEVMODE struct
   LONG szProp = DocumentPropertiesA(NULL, NULL, cPrinter, NULL, NULL, 0);
@@ -169,9 +175,9 @@ static void win32BeginDocument(GooString *inputFileName, GooString *outputFileNa
     fprintf(stderr, "Error: Printer \"%s\" not found", cPrinter);
     exit(99);
   }
-  fillCommonPrinterOptions(devmode, w, h);
-  fillPrinterOptions(devmode);
-  HDC hdc = CreateDCA(NULL, cPrinter, NULL, devmode);
+  fillCommonPrinterOptions(devmode, w, h, duplex);
+  fillPrinterOptions(devmode, duplex, printOpt);
+  hdc = CreateDCA(NULL, cPrinter, NULL, devmode);
   gfree(devmode);
   if (!hdc)
   {
@@ -194,30 +200,24 @@ static void win32BeginDocument(GooString *inputFileName, GooString *outputFileNa
     fprintf(stderr, "Error: StartDoc failed");
     exit(99);
   }
-    
-  surface = cairo_win32_printing_surface_create(hdc);
+
+  return cairo_win32_printing_surface_create(hdc);
 }
 
-static void win32BeginPage(double w, double h)
+void win32BeginPage(double w, double h)
 {
-  if (!print)
-    return;
-  StartPage(cairo_win32_surface_get_dc(surface));
+  StartPage(hdc);
 }
 
-static void win32EndPage(GooString *imageFileName)
+void win32EndPage(GooString *imageFileName)
 {
-  if (!print)
-    return;
-  EndPage(cairo_win32_surface_get_dc(surface));
+  EndPage(hdc);
 }
 
-static void win32EndDocument()
+void win32EndDocument()
 {
-  if (!print)
-    return;
-
-  HDC hdc = cairo_win32_surface_get_dc(surface);
   EndDoc(hdc);
   DeleteDC(hdc);
 }
+
+#endif // CAIRO_HAS_WIN32_SURFACE

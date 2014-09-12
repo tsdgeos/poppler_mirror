@@ -71,6 +71,8 @@
 #include <cairo-svg.h>
 #endif
 
+#include "pdftocairo-win32.h"
+
 
 static GBool png = gFalse;
 static GBool jpeg = gFalse;
@@ -265,10 +267,6 @@ static  FILE *output_file;
 static unsigned char *icc_data;
 static int icc_data_size;
 static cmsHPROFILE profile;
-#endif
-
-#ifdef CAIRO_HAS_WIN32_SURFACE
-#include "pdftocairo-win32.cc"
 #endif
 
 void writePageImage(GooString *filename)
@@ -486,7 +484,8 @@ static void getFitToPageTransform(double page_w, double page_h,
       cairo_matrix_scale (m, scale, scale);
     }
 #ifdef CAIRO_HAS_WIN32_SURFACE
-  win32GetFitToPageTransform(m);
+  if (print)
+    win32GetFitToPageTransform(m);
 #endif
 }
 
@@ -541,7 +540,8 @@ static void beginDocument(GooString *inputFileName, GooString *outputFileName, d
 #endif
     }
 #ifdef CAIRO_HAS_WIN32_SURFACE
-    win32BeginDocument(inputFileName, outputFileName, w, h);
+    if (print)
+      surface = win32BeginDocument(inputFileName, outputFileName, w, h, &printer, &printOpt, duplex);
 #endif
   }
 }
@@ -565,8 +565,10 @@ static void beginPage(double w, double h)
     if (pdf)
       cairo_pdf_surface_set_size (surface, w, h);
 #endif
+
 #ifdef CAIRO_HAS_WIN32_SURFACE
-    win32BeginPage(w, h);
+    if (print)
+      win32BeginPage(w, h);
 #endif
 
     cairo_surface_set_fallback_resolution (surface, x_resolution, y_resolution);
@@ -638,9 +640,12 @@ static void endPage(GooString *imageFileName)
 
   if (printing) {
     cairo_surface_show_page(surface);
+
 #ifdef CAIRO_HAS_WIN32_SURFACE
-    win32EndPage(imageFileName);
+    if (print)
+      win32EndPage(imageFileName);
 #endif
+
   } else {
     writePageImage(imageFileName);
     cairo_surface_finish(surface);
@@ -658,7 +663,8 @@ static void endDocument()
 
   if (printing) {
 #ifdef CAIRO_HAS_WIN32_SURFACE
-    win32EndDocument();
+    if (print)
+      win32EndDocument();
 #endif
     cairo_surface_finish(surface);
     status = cairo_surface_status(surface);
