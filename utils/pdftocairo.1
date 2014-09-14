@@ -268,7 +268,10 @@ Selects the source paper tray to be used (bin). The possible values are "upper",
 "envmanual", "auto", "tractor", "smallfmt", "largefmt", "largecapacity", "formsource", or a numeric value to choose a driver specific source.
 .TP
 .BI duplex
-Sets the duplex mode of the printer. It can be "simplex", "horizontal" or "vertical". General option \-duplex is a synonym of "duplex=horizontal". If both are specified, the \-printopt one has priority.
+Sets the duplex mode of the printer. The possible values are "off", "short" or "long",
+indicating no duplexing, short-edge binding, or long-edge binding, respectively.
+General option \-duplex is a synonym of "duplex=long". If both options are specified,
+\-printopt has priority.
 .SH AUTHOR
 The pdftocairo software and documentation are copyright 1996-2004 Glyph
 & Cog, LLC and copyright 2005-2011 The Poppler Developers.

@@ -7,13 +7,8 @@
 #include "pdftocairo-win32.h"
 
 static HDC hdc;
-
-void win32GetFitToPageTransform(cairo_matrix_t *m)
-{
-  int logx = GetDeviceCaps(hdc, LOGPIXELSX);
-  int logy = GetDeviceCaps(hdc, LOGPIXELSY);
-  cairo_matrix_scale (m, logx / 72.0, logy / 72.0);
-}
+static DEVMODEA *devmode;
+static char *printerName;
 
 struct Win32Option
 {
@@ -39,69 +34,69 @@ static const Win32Option win32PaperSource[] =
   {NULL, 0}
 };
 
-static void parseSource(DEVMODEA *devmode, GooString *source)
+static void parseSource(GooString *source)
 {
-  int src;
   const Win32Option *option = win32PaperSource;
   while (option->name) {
     if (source->cmp(option->name) == 0) {
-      src = option->value;
-      break;
-    }
-  }
-  if (!option->name) {
-    if (isInt(source->getCString())) {
-      src = atoi(source->getCString());
-    } else {
-      fprintf(stderr, "Warning: Unknown paper source \"%s\"\n", source->getCString());
+      devmode->dmDefaultSource = option->value;
+      devmode->dmFields |= DM_DEFAULTSOURCE;
       return;
     }
+    option++;
   }
-
-  devmode->dmDefaultSource = src;
-  devmode->dmFields |= DM_DEFAULTSOURCE;
+  fprintf(stderr, "Warning: Unknown paper source \"%s\"\n", source->getCString());
 }
 
 static const Win32Option win32DuplexMode[] =
 {
-  {"simplex", DMDUP_SIMPLEX},
-  {"horizontal", DMDUP_HORIZONTAL},
-  {"vertical", DMDUP_VERTICAL},
+  {"off", DMDUP_SIMPLEX},
+  {"short", DMDUP_HORIZONTAL},
+  {"long", DMDUP_VERTICAL},
   {NULL, 0}
 };
 
-static void parseDuplex(DEVMODEA *devmode, GooString *mode)
+static void parseDuplex(GooString *mode)
 {
-  int win32Duplex;
   const Win32Option *option = win32DuplexMode;
   while (option->name) {
     if (mode->cmp(option->name) == 0) {
-      win32Duplex = option->value;
-      break;
+      devmode->dmDuplex = option->value;
+      devmode->dmFields |= DM_DUPLEX;
+      return;
     }
+    option++;
   }
-  if (!option->name) {
-    fprintf(stderr, "Warning: Unknown duplex mode \"%s\"\n", mode->getCString());
-    return;
-  }
-
-  devmode->dmDuplex = win32Duplex;
-  devmode->dmFields |= DM_DUPLEX;
+  fprintf(stderr, "Warning: Unknown duplex mode \"%s\"\n", mode->getCString());
 }
 
-static void fillCommonPrinterOptions(DEVMODEA *devmode, double w, double h, GBool duplex)
+static void fillCommonPrinterOptions(double w, double h, GBool duplex)
 {
-  devmode->dmPaperWidth = w * 254.0 / 72.0;
-  devmode->dmPaperLength = h * 254.0 / 72.0;
-  printf("PAPER %d, %d\n", devmode->dmPaperWidth, devmode->dmPaperLength);
-  devmode->dmFields |= DM_PAPERWIDTH | DM_PAPERLENGTH;
   if (duplex) {
     devmode->dmDuplex = DMDUP_HORIZONTAL;
     devmode->dmFields |= DM_DUPLEX;
   }
 }
 
-static void fillPrinterOptions(DEVMODEA *devmode, GBool duplex, GooString *printOpt)
+static void fillPagePrinterOptions(double w, double h)
+{
+  w *= 254.0 / 72.0; // units are 0.1mm
+  h *= 254.0 / 72.0;
+  if (w > h) {
+    devmode->dmOrientation = DMORIENT_LANDSCAPE;
+    devmode->dmPaperWidth = h;
+    devmode->dmPaperLength = w;
+  } else {
+    devmode->dmOrientation = DMORIENT_PORTRAIT;
+    devmode->dmPaperWidth = w;
+    devmode->dmPaperLength = h;
+  }
+  devmode->dmPaperSize = 0;
+  devmode->dmFields |= DM_ORIENTATION | DM_PAPERWIDTH | DM_PAPERLENGTH;
+}
+
+
+static void fillPrinterOptions(GBool duplex, GooString *printOpt)
 {
   //printOpt format is: <opt1>=<val1>,<opt2>=<val2>,...
   const char *nextOpt = printOpt->getCString();
@@ -128,13 +123,12 @@ static void fillPrinterOptions(DEVMODEA *devmode, GBool duplex, GooString *print
     //here opt is "<optN>" and value is "<valN>"
 
     if (opt.cmp("source") == 0) {
-      parseSource(devmode, &value);
+      parseSource(&value);
     } else if (opt.cmp("duplex") == 0) {
-      if (duplex) {
+      if (duplex)
 	fprintf(stderr, "Warning: duplex mode is specified both as standalone and printer options\n");
-      } else {
-	parseDuplex(devmode, &value);
-      }
+      else
+	parseDuplex( &value);
     } else {
       fprintf(stderr, "Warning: unknown printer option \"%s\"\n", opt.getCString());
     }
@@ -147,65 +141,96 @@ cairo_surface_t *win32BeginDocument(GooString *inputFileName, GooString *outputF
 				    GooString *printOpt,
 				    GBool duplex)
 {
-  if (printer->getCString()[0] == 0)
-  {
-    DWORD szName = 0;
-    GetDefaultPrinterA(NULL, &szName);
-    char *devname = (char*)gmalloc(szName);
-    GetDefaultPrinterA(devname, &szName);
-    printer->Set(devname);
-    gfree(devname);
+  if (printer->getCString()[0] == 0) {
+    DWORD size = 0;
+    GetDefaultPrinterA(NULL, &size);
+    printerName = (char*)gmalloc(size);
+    GetDefaultPrinterA(printerName, &size);
+  } else {
+    printerName = gstrndup(printer->getCString(), printer->getLength());
   }
-  char *cPrinter = printer->getCString();
 
   //Query the size of the DEVMODE struct
-  LONG szProp = DocumentPropertiesA(NULL, NULL, cPrinter, NULL, NULL, 0);
-  if (szProp < 0)
-  {
-    fprintf(stderr, "Error: Printer \"%s\" not found", cPrinter);
+  LONG szProp = DocumentPropertiesA(NULL, NULL, printerName, NULL, NULL, 0);
+  if (szProp < 0) {
+    fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
     exit(99);
   }
-  DEVMODEA *devmode = (DEVMODEA*)gmalloc(szProp);
+  devmode = (DEVMODEA*)gmalloc(szProp);
   memset(devmode, 0, szProp);
   devmode->dmSize = sizeof(DEVMODEA);
   devmode->dmSpecVersion = DM_SPECVERSION;
   //Load the current default configuration for the printer into devmode
-  if (DocumentPropertiesA(NULL, NULL, cPrinter, devmode, NULL, DM_OUT_BUFFER) < 0)
-  {
-    fprintf(stderr, "Error: Printer \"%s\" not found", cPrinter);
+  if (DocumentPropertiesA(NULL, NULL, printerName, devmode, devmode, DM_OUT_BUFFER) < 0) {
+    fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
     exit(99);
   }
-  fillCommonPrinterOptions(devmode, w, h, duplex);
-  fillPrinterOptions(devmode, duplex, printOpt);
-  hdc = CreateDCA(NULL, cPrinter, NULL, devmode);
-  gfree(devmode);
-  if (!hdc)
-  {
-    fprintf(stderr, "Error: Printer \"%s\" not found", cPrinter);
+  fillCommonPrinterOptions(w, h, duplex);
+  fillPrinterOptions(duplex, printOpt);
+  if (DocumentPropertiesA(NULL, NULL, printerName, devmode, devmode, DM_IN_BUFFER | DM_OUT_BUFFER) < 0) {
+    fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
+    exit(99);
+  }
+  hdc = CreateDCA(NULL, printerName, NULL, devmode);
+  if (!hdc) {
+    fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
     exit(99);
   }
 
   DOCINFOA docinfo;
   memset(&docinfo, 0, sizeof(docinfo));
   docinfo.cbSize = sizeof(docinfo);
-  if (inputFileName->cmp("fd://0") == 0) {
+  if (inputFileName->cmp("fd://0") == 0)
     docinfo.lpszDocName = "pdftocairo <stdin>";
-  } else {
+  else
     docinfo.lpszDocName = inputFileName->getCString();
-  }
-  if (outputFileName) {
+  if (outputFileName)
     docinfo.lpszOutput = outputFileName->getCString();
-  }
   if (StartDocA(hdc, &docinfo) <=0) {
-    fprintf(stderr, "Error: StartDoc failed");
+    fprintf(stderr, "Error: StartDoc failed\n");
     exit(99);
   }
 
   return cairo_win32_printing_surface_create(hdc);
 }
 
-void win32BeginPage(double w, double h)
+void win32BeginPage(double *w, double *h, GBool useFullPage)
 {
+  fillPagePrinterOptions(*w, *h);
+  if (DocumentPropertiesA(NULL, NULL, printerName, devmode, devmode, DM_IN_BUFFER | DM_OUT_BUFFER) < 0) {
+    fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
+    exit(99);
+  }
+  ResetDCA(hdc, devmode);
+
+  // Get actual paper size or if useFullPage is false the printable area.
+  // Transform the hdc scale to points to be consistent with other cairo backends
+  int x_dpi = GetDeviceCaps (hdc, LOGPIXELSX);
+  int y_dpi = GetDeviceCaps (hdc, LOGPIXELSY);
+  int x_off = GetDeviceCaps (hdc, PHYSICALOFFSETX);
+  int y_off = GetDeviceCaps (hdc, PHYSICALOFFSETY);
+  if (useFullPage) {
+    *w = GetDeviceCaps (hdc, PHYSICALWIDTH)*72.0/x_dpi;
+    *h = GetDeviceCaps (hdc, PHYSICALHEIGHT)*72.0/y_dpi;
+  } else {
+    *w = GetDeviceCaps (hdc, HORZRES)*72.0/x_dpi;
+    *h = GetDeviceCaps (hdc, VERTRES)*72.0/y_dpi;
+  }
+  XFORM xform;
+  xform.eM11 = x_dpi/72.0;
+  xform.eM12 = 0;
+  xform.eM21 = 0;
+  xform.eM22 = y_dpi/72.0;
+  if (useFullPage) {
+    xform.eDx = -x_off;
+    xform.eDy = -y_off;
+  } else {
+    xform.eDx = 0;
+    xform.eDy = 0;
+  }
+  SetGraphicsMode (hdc, GM_ADVANCED);
+  SetWorldTransform (hdc, &xform);
+
   StartPage(hdc);
 }
 
@@ -218,6 +243,8 @@ void win32EndDocument()
 {
   EndDoc(hdc);
   DeleteDC(hdc);
+  gfree(devmode);
+  gfree(printerName);
 }
 
 #endif // CAIRO_HAS_WIN32_SURFACE
