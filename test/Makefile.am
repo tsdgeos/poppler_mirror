@@ -55,11 +55,11 @@ perf_test_LDADD =				\
 	$(FREETYPE_LIBS)					\
 	$(X_EXTRA_LIBS)
 
-pdf_fullrewrite_SOURCES = \
-	pdf-fullrewrite.cc		\
-	../utils/parseargs.cc
+pdf_fullrewrite_SOURCES =				\
+	pdf-fullrewrite.cc
 
-pdf_fullrewrite_LDADD = \
+pdf_fullrewrite_LDADD =					\
+	$(top_builddir)/utils/libparseargs.la		\
 	$(top_builddir)/poppler/libpoppler.la
 
 EXTRA_DIST =					\

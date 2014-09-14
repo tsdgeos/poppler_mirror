@@ -8,6 +8,7 @@ AM_CPPFLAGS =					\
 	$(UTILS_CFLAGS)
 
 LDADD =						\
+	libparseargs.la				\
 	$(top_builddir)/poppler/libpoppler.la	\
 	$(UTILS_LIBS)
 
@@ -49,41 +50,33 @@ if BUILD_CAIRO_OUTPUT
 dist_man1_MANS += pdftocairo.1
 endif
 
-common = parseargs.cc parseargs.h
-
 pdfdetach_SOURCES =				\
-	pdfdetach.cc				\
-	$(common)
+	pdfdetach.cc
 
 pdffonts_SOURCES =				\
-	pdffonts.cc				\
-	$(common)
+	pdffonts.cc
 
 pdfimages_SOURCES =				\
 	pdfimages.cc				\
 	ImageOutputDev.cc			\
 	ImageOutputDev.h			\
 	JSInfo.cc				\
-	JSInfo.h				\
-	$(common)
+	JSInfo.h
 
 pdfinfo_SOURCES =				\
 	pdfinfo.cc				\
 	printencodings.cc			\
 	printencodings.h			\
 	JSInfo.cc				\
-	JSInfo.h				\
-	$(common)
+	JSInfo.h
 
 pdftops_SOURCES =				\
-	pdftops.cc				\
-	$(common)
+	pdftops.cc
 
 pdftotext_SOURCES =				\
 	pdftotext.cc				\
 	printencodings.cc			\
-	printencodings.h			\
-	$(common)
+	printencodings.h
 
 pdftohtml_SOURCES =				\
 	pdftohtml.cc				\
@@ -93,8 +86,7 @@ pdftohtml_SOURCES =				\
 	HtmlLinks.h				\
 	HtmlOutputDev.cc			\
 	HtmlOutputDev.h				\
-	HtmlUtils.h				\
-	$(common)
+	HtmlUtils.h
 
 # HtmlOutputDev uses goo/PNGWriter.h that may depend on libpng header
 if BUILD_LIBPNG
@@ -102,20 +94,16 @@ pdftohtml_CXXFLAGS = $(AM_CXXFLAGS) $(LIBPNG_CFLAGS)
 endif
 
 pdfseparate_SOURCES =				\
-	pdfseparate.cc				\
-	$(common)
+	pdfseparate.cc
 
 pdfunite_SOURCES =				\
-	pdfunite.cc				\
-	$(common)
+	pdfunite.cc
 
 pdftoppm_SOURCES =				\
-	pdftoppm.cc				\
-	$(common)
+	pdftoppm.cc
 
 pdftocairo_SOURCES =				\
-	pdftocairo.cc				\
-	$(common)
+	pdftocairo.cc
 
 if BUILD_CAIRO_OUTPUT
 if USE_CMS
@@ -133,6 +121,12 @@ pdftocairo_LDADD =					\
 pdftocairo_CPPFLAGS =				\
 	$(AM_CPPFLAGS)				\
 	$(PDFTOCAIRO_CFLAGS)
+
+noinst_LTLIBRARIES = libparseargs.la
+
+libparseargs_la_SOURCES =			\
+	parseargs.cc				\
+	parseargs.h
 
 # Yay, automake!  It should be able to figure out that it has to dist
 # pdftoppm.1, but nooo.  So we just add it here.

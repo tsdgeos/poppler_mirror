@@ -6,6 +6,7 @@ AM_CPPFLAGS =					\
 	-I$(top_srcdir)/cpp
 
 LDADD =						\
+	$(top_builddir)/utils/libparseargs.la	\
 	$(top_builddir)/poppler/libpoppler.la	\
 	$(top_builddir)/cpp/libpoppler-cpp.la
 
@@ -14,9 +15,7 @@ noinst_PROGRAMS =				\
 	poppler-render
 
 poppler_dump_SOURCES =				\
-	$(top_srcdir)/utils/parseargs.cc	\
 	poppler-dump.cpp
 
 poppler_render_SOURCES =			\
-	$(top_srcdir)/utils/parseargs.cc	\
 	poppler-render.cpp
