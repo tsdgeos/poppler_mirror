@@ -2575,7 +2575,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
 
   cairo_surface_mark_dirty (image);
 
-  setMimeData(str, ref, image);
+  setMimeData(state, str, ref, image);
 
   pattern = cairo_pattern_create_for_surface (image);
   cairo_surface_destroy (image);
@@ -2678,22 +2678,45 @@ GBool CairoOutputDev::getStreamData (Stream *str, char **buffer, int *length)
   return gTrue;
 }
 
-void CairoOutputDev::setMimeData(Stream *str, Object *ref, cairo_surface_t *image)
+void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, cairo_surface_t *image)
 {
   char *strBuffer;
   int len;
   Object obj;
+  GfxColorSpace *colorSpace;
 
   if (!printing || !(str->getKind() == strDCT || str->getKind() == strJPX))
     return;
 
+  str->getDict()->lookup("ColorSpace", &obj);
+  colorSpace = GfxColorSpace::parse(&obj, this, state);
+  obj.free();
+
   // colorspace in stream dict may be different from colorspace in jpx
   // data
-  if (str->getKind() == strJPX) {
-    GBool hasColorSpace = !str->getDict()->lookup("ColorSpace", &obj)->isNull();
-    obj.free();
-    if (hasColorSpace)
-      return;
+  if (str->getKind() == strJPX && colorSpace)
+    return;
+
+  // only embed mime data for gray, rgb, and cmyk colorspaces.
+  if (colorSpace) {
+    GfxColorSpaceMode mode = colorSpace->getMode();
+    delete colorSpace;
+    switch (mode) {
+      case csDeviceGray:
+      case csCalGray:
+      case csDeviceRGB:
+      case csCalRGB:
+      case csDeviceCMYK:
+      case csICCBased:
+	break;
+
+      case csLab:
+      case csIndexed:
+      case csSeparation:
+      case csDeviceN:
+      case csPattern:
+	return;
+    }
   }
 
   if (getStreamData (str->getNextStream(), &strBuffer, &len)) {
@@ -2913,7 +2936,7 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     filter = getFilterForSurface (image, interpolate);
 
   if (!inlineImg) /* don't read stream twice if it is an inline image */
-    setMimeData(str, ref, image);
+    setMimeData(state, str, ref, image);
 
   pattern = cairo_pattern_create_for_surface (image);
   cairo_surface_destroy (image);
