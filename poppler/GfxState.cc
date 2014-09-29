@@ -18,7 +18,7 @@
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2006-2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2012 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009, 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009, 2011-2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Christian Persch <chpe@gnome.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -2189,7 +2189,7 @@ void GfxICCBasedColorSpace::getCMYKLine(Guchar *in, Guchar *out, int length) {
 #ifdef USE_CMS
   if (lineTransform != NULL && lineTransform->getTransformPixelType() == PT_CMYK) {
     transform->doTransform(in,out,length);
-  } else if (lineTransform != NULL) {
+  } else if (lineTransform != NULL && nComps != 4) {
     GfxColorComp c, m, y, k;
     Guchar* tmp = (Guchar *)gmallocn(3 * length, sizeof(Guchar));
     getRGBLine(in, tmp, length);
@@ -2232,7 +2232,7 @@ void GfxICCBasedColorSpace::getDeviceNLine(Guchar *in, Guchar *out, int length) 
         *out++ = 0;
     }
     gfree(tmp);
-  } else if (lineTransform != NULL) {
+  } else if (lineTransform != NULL && nComps != 4) {
     GfxColorComp c, m, y, k;
     Guchar* tmp = (Guchar *)gmallocn(3 * length, sizeof(Guchar));
     getRGBLine(in, tmp, length);
@@ -2302,7 +2302,7 @@ void GfxICCBasedColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
       unsigned int value = (out[0] << 24) + (out[1] << 16) + (out[2] << 8) + out[3];
       cmsCache.insert(std::pair<unsigned int, unsigned int>(key, value));
     }
-  } else {
+  } else if (nComps != 4 && transform != NULL && transform->getTransformPixelType() == PT_RGB) {
     GfxRGB rgb;
     GfxColorComp c, m, y, k;
 
@@ -2321,6 +2321,8 @@ void GfxICCBasedColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
     cmyk->m = m - k;
     cmyk->y = y - k;
     cmyk->k = k;
+  } else {
+    alt->getCMYK(color, cmyk);
   }
 #else
   alt->getCMYK(color, cmyk);
