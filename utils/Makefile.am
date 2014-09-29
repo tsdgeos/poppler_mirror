@@ -12,6 +12,8 @@ LDADD =						\
 	$(top_builddir)/poppler/libpoppler.la	\
 	$(UTILS_LIBS)
 
+if BUILD_UTILS
+
 bin_PROGRAMS =					\
 	pdfdetach				\
 	pdffonts				\
@@ -49,6 +51,8 @@ endif
 if BUILD_CAIRO_OUTPUT
 dist_man1_MANS += pdftocairo.1
 endif
+
+endif # if BUILD_UTILS
 
 pdfdetach_SOURCES =				\
 	pdfdetach.cc
