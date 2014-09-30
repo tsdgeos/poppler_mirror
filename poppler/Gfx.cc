@@ -980,7 +980,10 @@ void Gfx::opSetDash(Object args[], int numArgs) {
   } else {
     dash = (double *)gmallocn(length, sizeof(double));
     for (i = 0; i < length; ++i) {
-      dash[i] = a->get(i, &obj)->getNum();
+      a->get(i, &obj);
+      if (obj.isNum()) {
+	dash[i] = obj.getNum();
+      }
       obj.free();
     }
   }
