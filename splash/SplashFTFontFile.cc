@@ -12,6 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
+// Copyright (C) 2014 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -28,6 +29,7 @@
 
 #include "goo/gmem.h"
 #include "goo/GooString.h"
+#include "poppler/GfxFont.h"
 #include "SplashFTFontEngine.h"
 #include "SplashFTFont.h"
 #include "SplashFTFontFile.h"
@@ -57,6 +59,12 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA,
     codeToGIDA[i] = 0;
     if ((name = encA[i])) {
       codeToGIDA[i] = (int)FT_Get_Name_Index(faceA, (char *)name);
+      if (codeToGIDA[i] == 0) {
+	name = GfxFont::getAlternateName(name);
+	if (name) {
+	  codeToGIDA[i] = FT_Get_Name_Index(faceA, (char *)name);
+	}
+      }
     }
   }
 

@@ -26,7 +26,7 @@
 // Copyright (C) 2009 Peter Kerzum <kerzum@yandex-team.ru>
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
-// Copyright (C) 2011, 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2011, 2012, 2014 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Yi Yang <ahyangyi@gmail.com>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -911,6 +911,33 @@ char *GfxFont::readEmbFontFile(XRef *xref, int *len) {
   obj1.free();
 
   return buf;
+}
+
+
+struct AlternateNameMap {
+  const char *name;
+  const char *alt;
+};
+
+static const AlternateNameMap alternateNameMap[] =
+{
+  { "fi", "f_i" },
+  { "fl", "f_l" },
+  { "ff", "f_f" },
+  { "ffi", "f_f_i" },
+  { "ffl", "f_f_l" },
+  { 0,    0 }
+};
+
+const char *GfxFont::getAlternateName(const char *name) {
+  const AlternateNameMap *map = alternateNameMap;
+  while (map->name) {
+    if (strcmp(name, map->name) == 0) {
+      return map->alt;
+    }
+    map++;
+  }
+  return 0;
 }
 
 //------------------------------------------------------------------------
