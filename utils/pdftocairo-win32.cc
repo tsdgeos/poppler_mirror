@@ -139,6 +139,7 @@ cairo_surface_t *win32BeginDocument(GooString *inputFileName, GooString *outputF
 				    double w, double h,
 				    GooString *printer,
 				    GooString *printOpt,
+				    GBool setupdlg,
 				    GBool duplex)
 {
   if (printer->getCString()[0] == 0) {
@@ -165,12 +166,26 @@ cairo_surface_t *win32BeginDocument(GooString *inputFileName, GooString *outputF
     fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
     exit(99);
   }
+
+  // Update devmode with selected print options
   fillCommonPrinterOptions(w, h, duplex);
   fillPrinterOptions(duplex, printOpt);
-  if (DocumentPropertiesA(NULL, NULL, printerName, devmode, devmode, DM_IN_BUFFER | DM_OUT_BUFFER) < 0) {
+
+  // Call DocumentProperties again so the driver can update its private data
+  // with the modified print options. This will also display the printer
+  // properties dialog if setupdlg is true.
+  int ret;
+  DWORD mode = DM_IN_BUFFER | DM_OUT_BUFFER;
+  if (setupdlg)
+    mode |= DM_IN_PROMPT;
+  ret = DocumentPropertiesA(NULL, NULL, printerName, devmode, devmode, mode);
+  if (ret < 0) {
     fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
     exit(99);
   }
+  if (setupdlg && ret == IDCANCEL)
+    exit(0);
+
   hdc = CreateDCA(NULL, printerName, NULL, devmode);
   if (!hdc) {
     fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
@@ -194,9 +209,10 @@ cairo_surface_t *win32BeginDocument(GooString *inputFileName, GooString *outputF
   return cairo_win32_printing_surface_create(hdc);
 }
 
-void win32BeginPage(double *w, double *h, GBool useFullPage)
+void win32BeginPage(double *w, double *h, GBool changePageSize, GBool useFullPage)
 {
-  fillPagePrinterOptions(*w, *h);
+  if (changePageSize)
+    fillPagePrinterOptions(*w, *h);
   if (DocumentPropertiesA(NULL, NULL, printerName, devmode, devmode, DM_IN_BUFFER | DM_OUT_BUFFER) < 0) {
     fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
     exit(99);

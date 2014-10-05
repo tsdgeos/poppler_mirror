@@ -220,6 +220,11 @@ PostScript file (PS only).  This tells the print manager to enable duplexing.
 .B WINDOWS PRINTER OPTIONS
 for the available options.
 .TP
+.BI \-setupdlg
+(Windows only). When used with \-print, the printer properties dialog is displayed
+allowing the print settings to be modified before printing. The paper size selected
+in the print properties dialog will be used except when -origpagesizes is specified.
+.TP
 .BI \-opw " password"
 Specify the owner password for the PDF file.  Providing this will
 bypass all security restrictions.

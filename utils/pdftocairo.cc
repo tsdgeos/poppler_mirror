@@ -124,10 +124,9 @@ static GBool quiet = gFalse;
 static GBool printVersion = gFalse;
 static GBool printHelp = gFalse;
 
-#ifdef CAIRO_HAS_WIN32_SURFACE
 static GooString printer;
 static GooString printOpt;
-#endif
+static GBool setupdlg = gFalse;
 
 static const ArgDesc argDesc[] = {
 #if ENABLE_LIBPNG
@@ -165,6 +164,8 @@ static const ArgDesc argDesc[] = {
    "printer name or use default if this option is not specified"},
   {"-printopt",  argGooString, &printOpt,    0,
    "printer options, with format <opt1>=<val1>[,<optN>=<valN>]*"},
+  {"-setupdlg",    argFlag,     &setupdlg,       0,
+   "show printer setup dialog before printing"},
 #endif
 
   {"-f",      argInt,      &firstPage,     0,
@@ -262,6 +263,7 @@ static const ArgDesc argDesc[] = {
 static  cairo_surface_t *surface;
 static  GBool printing;
 static  FILE *output_file;
+static GBool usePDFPageSize;
 
 #if USE_CMS
 static unsigned char *icc_data;
@@ -435,7 +437,7 @@ static void getOutputSize(double page_w, double page_h, double *width, double *h
 {
 
   if (printing) {
-    if (origPageSizes) {
+    if (usePDFPageSize) {
       *width = page_w;
       *height = page_h;
     } else {
@@ -539,7 +541,7 @@ static void beginDocument(GooString *inputFileName, GooString *outputFileName, d
     }
 #ifdef CAIRO_HAS_WIN32_SURFACE
     if (printToWin32)
-      surface = win32BeginDocument(inputFileName, outputFileName, w, h, &printer, &printOpt, duplex);
+      surface = win32BeginDocument(inputFileName, outputFileName, w, h, &printer, &printOpt, setupdlg, duplex);
 #endif
   }
 }
@@ -565,8 +567,12 @@ static void beginPage(double *w, double *h)
 #endif
 
 #ifdef CAIRO_HAS_WIN32_SURFACE
-    if (printToWin32)
-      win32BeginPage(w, h, noShrink); // w,h will be changed to actual size used
+    if (printToWin32) {
+      GBool changePageSize = gTrue;
+      if (setupdlg && !origPageSizes)
+	changePageSize = gFalse;
+      win32BeginPage(w, h, changePageSize, noShrink); // w,h will be changed to actual size used
+    }
 #endif
 
     cairo_surface_set_fallback_resolution (surface, x_resolution, y_resolution);
@@ -936,8 +942,10 @@ int main(int argc, char *argv[]) {
       exit(99);
     }
   }
-  if (paperWidth < 0 || paperHeight < 0)
-    origPageSizes = gTrue;
+  if (origPageSizes || paperWidth < 0 || paperHeight < 0)
+    usePDFPageSize = gTrue;
+  else
+    usePDFPageSize = gFalse;
 
   globalParams = new GlobalParams();
   if (quiet) {

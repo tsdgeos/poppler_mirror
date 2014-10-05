@@ -14,8 +14,9 @@ cairo_surface_t *win32BeginDocument(GooString *inputFileName, GooString *outputF
 				    double w, double h,
 				    GooString *printer,
 				    GooString *printOpt,
+				    GBool setupdlg,
 				    GBool duplex);
-void win32BeginPage(double *w, double *h, GBool useFullPage);
+void win32BeginPage(double *w, double *h, GBool changePageSize, GBool useFullPage);
 void win32EndPage(GooString *imageFileName);
 void win32EndDocument();
 
