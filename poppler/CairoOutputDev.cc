@@ -2575,7 +2575,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
 
   cairo_surface_mark_dirty (image);
 
-  setMimeData(state, str, ref, image);
+  setMimeData(state, str, ref, colorMap, image);
 
   pattern = cairo_pattern_create_for_surface (image);
   cairo_surface_destroy (image);
@@ -2678,7 +2678,17 @@ GBool CairoOutputDev::getStreamData (Stream *str, char **buffer, int *length)
   return gTrue;
 }
 
-void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, cairo_surface_t *image)
+static GBool colorMapHasIdentityDecodeMap(GfxImageColorMap *colorMap)
+{
+  for (int i = 0; i < colorMap->getNumPixelComps(); i++) {
+    if (colorMap->getDecodeLow(i) != 0.0 || colorMap->getDecodeHigh(i) != 1.0)
+      return gFalse;
+  }
+  return gTrue;
+}
+
+void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref,
+				 GfxImageColorMap *colorMap, cairo_surface_t *image)
 {
   char *strBuffer;
   int len;
@@ -2718,6 +2728,9 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref, cair
 	return;
     }
   }
+
+  if (!colorMapHasIdentityDecodeMap(colorMap))
+    return;
 
   if (getStreamData (str->getNextStream(), &strBuffer, &len)) {
     cairo_status_t st;
@@ -2936,7 +2949,7 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     filter = getFilterForSurface (image, interpolate);
 
   if (!inlineImg) /* don't read stream twice if it is an inline image */
-    setMimeData(state, str, ref, image);
+    setMimeData(state, str, ref, colorMap, image);
 
   pattern = cairo_pattern_create_for_surface (image);
   cairo_surface_destroy (image);
