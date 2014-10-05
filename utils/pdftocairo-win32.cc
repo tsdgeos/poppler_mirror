@@ -6,7 +6,13 @@
 #include "parseargs.h"
 #include "pdftocairo-win32.h"
 
+#include <dlgs.h>
+#include <commctrl.h>
+#include <windowsx.h>
+
 static HDC hdc;
+static HGLOBAL hDevmode = 0;
+static HGLOBAL hDevnames = 0;
 static DEVMODEA *devmode;
 static char *printerName;
 
@@ -70,7 +76,7 @@ static void parseDuplex(GooString *mode)
   fprintf(stderr, "Warning: Unknown duplex mode \"%s\"\n", mode->getCString());
 }
 
-static void fillCommonPrinterOptions(double w, double h, GBool duplex)
+static void fillCommonPrinterOptions(GBool duplex)
 {
   if (duplex) {
     devmode->dmDuplex = DMDUP_HORIZONTAL;
@@ -135,12 +141,214 @@ static void fillPrinterOptions(GBool duplex, GooString *printOpt)
   }
 }
 
-cairo_surface_t *win32BeginDocument(GooString *inputFileName, GooString *outputFileName,
-				    double w, double h,
-				    GooString *printer,
-				    GooString *printOpt,
-				    GBool setupdlg,
-				    GBool duplex)
+static void getLocalPos(HWND wind, HWND dlg, RECT *rect)
+{
+  GetClientRect(wind, rect);
+  MapWindowPoints(wind, dlg, (LPPOINT)rect, 2);
+}
+
+static HWND createGroupBox(HWND parent, HINSTANCE hInstance, int id, const char *label, RECT *rect)
+{
+  HWND hwnd = CreateWindowA(WC_BUTTONA,
+			    label,
+			    WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+			    rect->left, rect->top,
+			    rect->right - rect->left,
+			    rect->bottom - rect->top,
+			    parent, (HMENU)id,
+			    hInstance, NULL);
+  HFONT hFont = (HFONT)SendMessage(parent, WM_GETFONT, (WPARAM)0, (LPARAM)0);
+  if (hFont)
+    SendMessage(hwnd, WM_SETFONT, (WPARAM) hFont, (LPARAM)0);
+  return hwnd;
+}
+
+static HWND createCheckBox(HWND parent, HINSTANCE hInstance, int id, const char *label, RECT *rect)
+{
+  HWND hwnd = CreateWindowA(WC_BUTTONA,
+			    label,
+			    WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX | WS_TABSTOP,
+			    rect->left, rect->top,
+			    rect->right - rect->left,
+			    rect->bottom - rect->top,
+			    parent, (HMENU)id,
+			    hInstance, NULL);
+  HFONT hFont = (HFONT)SendMessage(parent, WM_GETFONT, (WPARAM)0, (LPARAM)0);
+  if (hFont)
+    SendMessage(hwnd, WM_SETFONT, (WPARAM) hFont, (LPARAM)0);
+  return hwnd;
+}
+
+static HWND createStaticText(HWND parent, HINSTANCE hinstance, int id, const char *text, RECT *rect)
+{
+  HWND hwnd = CreateWindowA(WC_STATICA,
+			    text,
+			    WS_CHILD | WS_VISIBLE | SS_LEFT,
+			    rect->left, rect->top,
+			    rect->right - rect->left,
+			    rect->bottom - rect->top,
+			    parent, (HMENU)id,
+			    hinstance, NULL);
+  HFONT hFont = (HFONT)SendMessage(parent, WM_GETFONT, (WPARAM)0, (LPARAM)0);
+  if (hFont)
+    SendMessage(hwnd, WM_SETFONT, (WPARAM) hFont, (LPARAM)0);
+  return hwnd;
+}
+
+HWND createPageScaleComboBox(HWND parent, HINSTANCE hinstance, int id, RECT *rect)
+{
+  HWND hwnd = CreateWindowA(WC_COMBOBOX,
+			    "",
+			    WS_CHILD | WS_VISIBLE | WS_GROUP | WS_TABSTOP |
+			    CBS_DROPDOWNLIST,
+			    rect->left, rect->top,
+			    rect->right - rect->left,
+			    rect->bottom - rect->top,
+			    parent, (HMENU)id,
+			    hinstance, NULL);
+  HFONT hFont = (HFONT)SendMessage(parent, WM_GETFONT, (WPARAM)0, (LPARAM)0);
+  if (hFont)
+    SendMessage(hwnd, WM_SETFONT, (WPARAM) hFont, (LPARAM)0);
+  ComboBox_AddString(hwnd, "None");
+  ComboBox_AddString(hwnd, "Shrink to Printable Area");
+  ComboBox_AddString(hwnd, "Fit to Printable Area");
+  return hwnd;
+}
+
+enum PageScale { NONE = 0, SHRINK = 1, FIT = 2 };
+
+// used to set/get option values in printDialogHookProc
+static PageScale pageScale;
+static GBool centerPage;
+static GBool useOrigPageSize;
+
+// PrintDlg callback to customize the print dialog with additional controls.
+static UINT_PTR CALLBACK printDialogHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
+{
+  if (uiMsg == WM_INITDIALOG) {
+    // Get the extant controls. See dlgs.h and prnsetup.dlg for the PrintDlg control ids.
+    HWND printerGroupWind = GetDlgItem(hdlg, grp4);
+    HWND printerComboWind = GetDlgItem(hdlg, cmb4);
+    HWND nameLabelWind = GetDlgItem(hdlg, stc6);
+    HWND statusLabelWind = GetDlgItem(hdlg, stc8);
+    HWND printRangeGroupWind = GetDlgItem(hdlg, grp1);
+    HWND radio1Wind = GetDlgItem(hdlg, rad1);
+    HWND radio2Wind = GetDlgItem(hdlg, rad3);
+    HWND copiesGroupWind = GetDlgItem(hdlg, grp2);
+    HWND okWind = GetDlgItem(hdlg, IDOK);
+    HWND cancelWind = GetDlgItem(hdlg, IDCANCEL);
+    if (!printerGroupWind || !printerComboWind || !nameLabelWind || !statusLabelWind ||
+	!printRangeGroupWind || !radio1Wind || !radio2Wind || !copiesGroupWind ||
+	!okWind || !cancelWind)
+      return 0;
+
+    // Get the size and position of the above controls relative to the
+    // print dialog window
+    RECT printerGroupRect;
+    RECT printerComboRect;
+    RECT nameLabelRect;
+    RECT statusLabelRect;
+    RECT printRangeGroupRect;
+    RECT radio1Rect, radio2Rect;
+    RECT copiesGroupRect;
+    RECT okRect, cancelRect;
+    getLocalPos(printerGroupWind, hdlg, &printerGroupRect);
+    getLocalPos(printerComboWind, hdlg, &printerComboRect);
+    getLocalPos(nameLabelWind, hdlg, &nameLabelRect);
+    getLocalPos(statusLabelWind, hdlg, &statusLabelRect);
+    getLocalPos(printRangeGroupWind, hdlg, &printRangeGroupRect);
+    getLocalPos(radio1Wind, hdlg, &radio1Rect);
+    getLocalPos(radio2Wind, hdlg, &radio2Rect);
+    getLocalPos(copiesGroupWind, hdlg, &copiesGroupRect);
+    getLocalPos(okWind, hdlg, &okRect);
+    getLocalPos(cancelWind, hdlg, &cancelRect);
+
+    // Calc space required for new group
+    int interGroupSpace = printRangeGroupRect.top - printerGroupRect.bottom;
+    int groupHeight = statusLabelRect.top - printerGroupRect.top +
+      printRangeGroupRect.bottom - radio1Rect.bottom;
+
+    // Increase dialog size
+    RECT dlgRect;
+    GetWindowRect(hdlg, &dlgRect);
+    SetWindowPos(hdlg, NULL,
+		 dlgRect.left, dlgRect.top,
+		 dlgRect.right - dlgRect.left,
+		 dlgRect.bottom - dlgRect.top + interGroupSpace + groupHeight,
+		 SWP_NOMOVE|SWP_NOREDRAW|SWP_NOZORDER);
+
+    // Add new group and controls
+    HINSTANCE hinstance = (HINSTANCE)GetWindowLongPtr(hdlg, GWLP_HINSTANCE);
+    RECT pdfGroupBoxRect;
+    pdfGroupBoxRect.left = printRangeGroupRect.left;
+    pdfGroupBoxRect.right = copiesGroupRect.right;
+    pdfGroupBoxRect.top = printRangeGroupRect.bottom + interGroupSpace;
+    pdfGroupBoxRect.bottom = pdfGroupBoxRect.top + groupHeight;
+    createGroupBox(hdlg, hinstance, grp3, "PDF Print Options", &pdfGroupBoxRect);
+
+    RECT textRect;
+    textRect.left = nameLabelRect.left;
+    textRect.right = nameLabelRect.left + 1.8*(printerComboRect.left - nameLabelRect.left);
+    textRect.top = pdfGroupBoxRect.top + nameLabelRect.top - printerGroupRect.top;
+    textRect.bottom = textRect.top + nameLabelRect.bottom - nameLabelRect.top;
+    createStaticText(hdlg, hinstance, stc1, "Page Scaling:", &textRect);
+
+    RECT comboBoxRect;
+    comboBoxRect.left = textRect.right;
+    comboBoxRect.right = comboBoxRect.left + printerComboRect.right - printerComboRect.left;;
+    comboBoxRect.top = pdfGroupBoxRect.top + printerComboRect.top - printerGroupRect.top;
+    comboBoxRect.bottom = textRect.top + 4*(printerComboRect.bottom - printerComboRect.top);
+    HWND comboBoxWind = createPageScaleComboBox(hdlg, hinstance, cmb1, &comboBoxRect);
+
+    RECT checkBox1Rect;
+    checkBox1Rect.left = radio1Rect.left;
+    checkBox1Rect.right = pdfGroupBoxRect.right - 10;
+    checkBox1Rect.top = pdfGroupBoxRect.top + statusLabelRect.top - printerGroupRect.top;
+    checkBox1Rect.bottom = checkBox1Rect.top + radio1Rect.bottom - radio1Rect.top;
+    HWND checkBox1Wind = createCheckBox(hdlg, hinstance, chx3, "Center", &checkBox1Rect);
+
+    RECT checkBox2Rect;
+    checkBox2Rect.left = radio1Rect.left;
+    checkBox2Rect.right = pdfGroupBoxRect.right - 10;
+    checkBox2Rect.top =  checkBox1Rect.top + radio2Rect.top - radio1Rect.top;
+    checkBox2Rect.bottom = checkBox2Rect.top + radio1Rect.bottom - radio1Rect.top;
+    HWND checkBox2Wind = createCheckBox(hdlg, hinstance, chx4, "Select page size using document page size", &checkBox2Rect);
+
+    // Move OK and Cancel buttons down ensuring they are last in the Z order
+    // so that the tab order is correct.
+    SetWindowPos(okWind,
+		 HWND_BOTTOM,
+		 okRect.left,
+		 okRect.top + interGroupSpace + groupHeight,
+		 0, 0,
+		 SWP_NOSIZE); // keep current size
+    SetWindowPos(cancelWind,
+		 HWND_BOTTOM,
+		 cancelRect.left,
+		 cancelRect.top + interGroupSpace + groupHeight,
+		 0, 0,
+		 SWP_NOSIZE); // keep current size
+
+    // Initialize control values
+    ComboBox_SetCurSel(comboBoxWind, pageScale);
+    Button_SetCheck(checkBox1Wind, centerPage ? BST_CHECKED : BST_UNCHECKED);
+    Button_SetCheck(checkBox2Wind, useOrigPageSize ? BST_CHECKED : BST_UNCHECKED);
+
+  } else if (uiMsg == WM_COMMAND) {
+    // Save settings
+    UINT id = LOWORD(wParam);
+    if (id == cmb1)
+      pageScale = (PageScale)ComboBox_GetCurSel(GetDlgItem(hdlg, cmb1));
+    if (id == chx3)
+      centerPage = IsDlgButtonChecked(hdlg, chx3);
+    if (id == chx4)
+      useOrigPageSize = IsDlgButtonChecked(hdlg, chx4);
+  }
+  return 0;
+}
+
+void win32SetupPrinter(GooString *printer, GooString *printOpt,
+		       GBool duplex, GBool setupdlg)
 {
   if (printer->getCString()[0] == 0) {
     DWORD size = 0;
@@ -168,7 +376,7 @@ cairo_surface_t *win32BeginDocument(GooString *inputFileName, GooString *outputF
   }
 
   // Update devmode with selected print options
-  fillCommonPrinterOptions(w, h, duplex);
+  fillCommonPrinterOptions(duplex);
   fillPrinterOptions(duplex, printOpt);
 
   // Call DocumentProperties again so the driver can update its private data
@@ -191,7 +399,72 @@ cairo_surface_t *win32BeginDocument(GooString *inputFileName, GooString *outputF
     fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
     exit(99);
   }
+}
 
+void win32ShowPrintDialog(GBool *expand, GBool *noShrink, GBool *noCenter,
+			  GBool *usePDFPageSize, GBool *allPages,
+			  int *firstPage, int *lastPage, int maxPages)
+{
+  PRINTDLG pd;
+  memset(&pd, 0, sizeof(PRINTDLG));
+  pd.lStructSize = sizeof(PRINTDLG);
+  pd.Flags = PD_NOSELECTION | PD_ENABLEPRINTHOOK | PD_USEDEVMODECOPIESANDCOLLATE | PD_RETURNDC;
+  if (*allPages) {
+    pd.nFromPage = 1;
+    pd.nToPage = maxPages;
+  } else {
+    pd.Flags |= PD_PAGENUMS;
+    pd.nFromPage = *firstPage;
+    pd.nToPage = *lastPage;
+  }
+  pd.nCopies = 1;
+  pd.nMinPage = 1;
+  pd.nMaxPage = maxPages;
+  pd.lpfnPrintHook = printDialogHookProc;
+  if (!*expand && *noShrink)
+    pageScale = NONE;
+  else if (!*expand && !*noShrink)
+    pageScale = SHRINK;
+  else
+    pageScale = FIT;
+  centerPage = !*noCenter;
+  useOrigPageSize = *usePDFPageSize;
+
+  if (PrintDlgA(&pd)) {
+    // Ok
+    hDevnames = pd.hDevNames;
+    DEVNAMES *devnames = (DEVNAMES*)GlobalLock(hDevnames);
+    printerName = (char*)devnames + devnames->wDeviceOffset;
+    hDevmode = pd.hDevMode;
+    devmode = (DEVMODEA*)GlobalLock(hDevmode);
+    hdc = pd.hDC;
+    if (pd.Flags & PD_PAGENUMS) {
+      *allPages = gFalse;
+      *firstPage = pd.nFromPage;
+      *lastPage = pd.nToPage;
+    } else {
+      *allPages = gTrue;
+    }
+    if (pageScale == NONE) {
+      *expand = gFalse;
+      *noShrink = gTrue;
+    } else if (pageScale == SHRINK) {
+      *expand = gFalse;
+      *noShrink = gFalse;
+    } else {
+      *expand = gTrue;
+      *noShrink = gFalse;
+    }
+    *noCenter = !centerPage;
+    *usePDFPageSize = useOrigPageSize;
+  } else {
+    // Cancel
+    exit(0);
+  }
+}
+
+cairo_surface_t *win32BeginDocument(GooString *inputFileName, GooString *outputFileName)
+{
   DOCINFOA docinfo;
   memset(&docinfo, 0, sizeof(docinfo));
   docinfo.cbSize = sizeof(docinfo);
@@ -259,8 +532,18 @@ void win32EndDocument()
 {
   EndDoc(hdc);
   DeleteDC(hdc);
-  gfree(devmode);
-  gfree(printerName);
+  if (hDevmode) {
+    GlobalUnlock(hDevmode);
+    GlobalFree(hDevmode);
+  } else {
+    gfree(devmode);
+  }
+  if (hDevnames) {
+    GlobalUnlock(hDevnames);
+    GlobalFree(hDevnames);
+  } else {
+    gfree(printerName);
+  }
 }
 
 #endif // CAIRO_HAS_WIN32_SURFACE

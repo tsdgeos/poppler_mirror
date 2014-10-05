@@ -80,6 +80,7 @@ static GBool ps = gFalse;
 static GBool eps = gFalse;
 static GBool pdf = gFalse;
 static GBool printToWin32 = gFalse;
+static GBool printdlg = gFalse;
 static GBool svg = gFalse;
 static GBool tiff = gFalse;
 
@@ -160,6 +161,8 @@ static const ArgDesc argDesc[] = {
 #ifdef CAIRO_HAS_WIN32_SURFACE
   {"-print",    argFlag,     &printToWin32,       0,
    "print to a Windows printer"},
+  {"-printdlg",    argFlag,     &printdlg, 0,
+   "show Windows print dialog and print"},
   {"-printer",  argGooString, &printer,    0,
    "printer name or use default if this option is not specified"},
   {"-printopt",  argGooString, &printOpt,    0,
@@ -541,7 +544,7 @@ static void beginDocument(GooString *inputFileName, GooString *outputFileName, d
     }
 #ifdef CAIRO_HAS_WIN32_SURFACE
     if (printToWin32)
-      surface = win32BeginDocument(inputFileName, outputFileName, w, h, &printer, &printOpt, setupdlg, duplex);
+      surface = win32BeginDocument(inputFileName, outputFileName);
 #endif
   }
 }
@@ -857,13 +860,14 @@ int main(int argc, char *argv[]) {
                 (eps ? 1 : 0) +
                 (pdf ? 1 : 0) +
                 (printToWin32 ? 1 : 0) +
+                (printdlg ? 1 : 0) +
                 (svg ? 1 : 0);
   if (num_outputs == 0) {
-    fprintf(stderr, "Error: one of the output format options (-png, -jpeg, -ps, -eps, -pdf, -print, -svg) must be used.\n");
+    fprintf(stderr, "Error: one of the output format options (-png, -jpeg, -ps, -eps, -pdf, -print, -printdlg, -svg) must be used.\n");
     exit(99);
   }
   if (num_outputs > 1) {
-    fprintf(stderr, "Error: use only one of the output format options (-png, -jpeg, -ps, -eps, -pdf, -print, -svg).\n");
+    fprintf(stderr, "Error: use only one of the output format options (-png, -jpeg, -ps, -eps, -pdf, -printdlg, -print, -svg).\n");
     exit(99);
   }
   if (png || jpeg || tiff)
@@ -946,6 +950,9 @@ int main(int argc, char *argv[]) {
     usePDFPageSize = gTrue;
   else
     usePDFPageSize = gFalse;
+
+  if (printdlg)
+    printToWin32 = gTrue;
 
   globalParams = new GlobalParams();
   if (quiet) {
@@ -1045,6 +1052,24 @@ int main(int argc, char *argv[]) {
     }
     lastPage = firstPage;
   }
+
+#ifdef CAIRO_HAS_WIN32_SURFACE
+    if (printdlg) {
+      GBool allPages = gFalse;
+      if (firstPage == 1 && lastPage == doc->getNumPages())
+	allPages = gTrue;
+      win32ShowPrintDialog(&expand, &noShrink, &noCenter,
+			   &usePDFPageSize, &allPages,
+			   &firstPage, &lastPage, doc->getNumPages());
+      if (allPages) {
+	firstPage = 1;
+	lastPage = doc->getNumPages();
+      }
+    } else if (printToWin32) {
+      win32SetupPrinter(&printer, &printOpt,
+			duplex, setupdlg);
+    }
+#endif
 
   // Make sure firstPage is always used so that beginDocument() is called
   if ((printOnlyEven && firstPage % 2 == 0) || (printOnlyOdd && firstPage % 2 == 1))

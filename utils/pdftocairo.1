@@ -82,11 +82,6 @@ Generates a TIFF file(s)
 .BI \-pdf
 Generates a PDF file
 .TP
-.BI \-print
-(Windows only) Prints to a system printer. See also \-printer and \-printeropt.
- If an output file is not specified, the output will be sent to the printer.
- The output file '-' can not be used with this option.
-.TP
 .BI \-ps
 Generate a PS file
 .TP
@@ -98,6 +93,15 @@ to specify a single page.  The page size options (\-origpagesizes,
 .TP
 .BI \-svg
 Generate a SVG (Scalable Vector Graphics) file
+.TP
+.BI \-print
+(Windows only) Prints to a system printer. See also \-printer and \-printeropt.
+ If an output file is not specified, the output will be sent to the printer.
+ The output file '-' can not be used with this option.
+.TP
+.BI \-printdlg
+(Windows only) Prints to a system printer. Displays the print dialog to allow
+the print options to be modified before printing.
 .TP
 .BI \-f " number"
 Specifies the first page to convert.
