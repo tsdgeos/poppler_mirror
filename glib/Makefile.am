@@ -104,7 +104,7 @@ introspection_files = $(filter-out poppler-private.h poppler-input-stream.h, $(l
 Poppler-0.18.gir: libpoppler-glib.la
 Poppler_0_18_gir_INCLUDES = GObject-2.0 Gio-2.0 cairo-1.0
 Poppler_0_18_gir_CFLAGS = $(INCLUDES) -I$(top_builddir)
-Poppler_0_18_gir_LIBS = libpoppler-glib.la
+Poppler_0_18_gir_LIBS = libpoppler-glib.la $(top_builddir)/poppler/libpoppler.la $(top_builddir)/poppler/libpoppler-cairo.la
 Poppler_0_18_gir_FILES = $(introspection_files)
 Poppler_0_18_gir_SCANNERFLAGS = --c-include poppler.h
 Poppler_0_18_gir_EXPORT_PACKAGES = poppler-glib
