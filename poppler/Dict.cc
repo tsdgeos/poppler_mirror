@@ -16,10 +16,11 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2008, 2010, 2013 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2013, 2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2014 Scott West <scott.gregory.west@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -198,6 +199,8 @@ void Dict::remove(const char *key) {
     const int pos = binarySearch(key, entries, length);
     if (pos != -1) {
       length -= 1;
+      gfree(entries[pos].key);
+      entries[pos].val.free();
       if (pos != length) {
         memmove(&entries[pos], &entries[pos + 1], (length - pos) * sizeof(DictEntry));
       }
@@ -220,6 +223,8 @@ void Dict::remove(const char *key) {
       return;
     }
     //replace the deleted entry with the last entry
+    gfree(entries[i].key);
+    entries[i].val.free();
     length -= 1;
     tmp = entries[length];
     if (i!=length) //don't copy the last entry if it is deleted 
