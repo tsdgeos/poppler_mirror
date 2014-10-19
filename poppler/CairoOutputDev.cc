@@ -1624,7 +1624,7 @@ void CairoOutputDev::setSoftMask(GfxState * state, double * bbox, GBool alpha,
     cairo_t *maskCtx = cairo_create(source);
 
     //XXX: hopefully this uses the correct color space */
-    if (!alpha) {
+    if (!alpha && groupColorSpaceStack->cs) {
       GfxRGB backdropColorRGB;
       groupColorSpaceStack->cs->getRGB(backdropColor, &backdropColorRGB);
       /* paint the backdrop */
