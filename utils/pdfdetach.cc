@@ -163,6 +163,8 @@ int main(int argc, char *argv[]) {
   nPages = doc->getCatalog()->getNumPages();
   for (i = 0; i < nPages; ++i) {
     page = doc->getCatalog()->getPage(i + 1);
+    if (!page)
+      continue;
     annots = page->getAnnots();
     if (!annots)
       break;
