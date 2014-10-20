@@ -626,7 +626,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   int keyLength;
   xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
 
-  if (pageNo < 1 || pageNo > getNumPages()) {
+  if (pageNo < 1 || pageNo > getNumPages() || !getCatalog()->getPage(pageNo)) {
     error(errInternal, -1, "Illegal pageNo: {0:d}({1:d})", pageNo, getNumPages() );
     return errOpenFile;
   }
