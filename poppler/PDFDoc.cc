@@ -1039,6 +1039,10 @@ void PDFDoc::writeRawStream (Stream* str, OutStream* outStr)
   str->unfilteredReset();
   for (Goffset i = 0; i < length; i++) {
     int c = str->getUnfilteredChar();
+    if (unlikely(c == EOF)) {
+      error (errSyntaxError, -1, "PDFDoc::writeRawStream: EOF reading stream");
+      break;
+    }
     outStr->printf("%c", c);  
   }
   str->reset();
