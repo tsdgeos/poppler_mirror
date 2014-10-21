@@ -263,7 +263,7 @@ void FoFiType1::parse() {
 	    } else {
 	      break;
 	    }
-	    for (; *p >= '0' && *p < '0' + base; ++p) {
+	    for (; *p >= '0' && *p < '0' + base && code < INT_MAX / (base + (*p - '0')); ++p) {
 	      code = code * base + (*p - '0');
 	    }
 	    for (; *p == ' ' || *p == '\t'; ++p) ;
