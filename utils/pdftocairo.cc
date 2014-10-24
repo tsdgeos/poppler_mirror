@@ -127,7 +127,9 @@ static GBool printHelp = gFalse;
 
 static GooString printer;
 static GooString printOpt;
+#ifdef CAIRO_HAS_WIN32_SURFACE
 static GBool setupdlg = gFalse;
+#endif
 
 static const ArgDesc argDesc[] = {
 #if ENABLE_LIBPNG
