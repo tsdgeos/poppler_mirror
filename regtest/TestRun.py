@@ -172,8 +172,30 @@ class TestRun:
             self.run_test(doc)
             self._queue.task_done()
 
-    def run_tests(self):
-        docs, total_docs = get_document_paths_from_dir(self._docsdir)
+    def run_tests(self, tests = []):
+        if not tests:
+            docs, total_docs = get_document_paths_from_dir(self._docsdir)
+        else:
+            docs = []
+            total_docs = 0
+            for test in tests:
+                if os.path.isdir(test):
+                    test_dir = test
+                elif os.path.isdir(os.path.join(self._docsdir, test)):
+                    test_dir = os.path.join(self._docsdir, test)
+                else:
+                    test_dir = None
+
+                if test_dir is not None:
+                    dir_docs, dir_n_docs = get_document_paths_from_dir(test_dir, self._docsdir)
+                    docs.extend(dir_docs)
+                    total_docs += dir_n_docs
+                else:
+                    if test.startswith(self._docsdir):
+                        test = test[len(self._docsdir):].lstrip(os.path.sep)
+                    docs.append(test)
+                    total_docs += 1
+
         backends = self._get_backends()
         self._total_tests = total_docs * len(backends)
 

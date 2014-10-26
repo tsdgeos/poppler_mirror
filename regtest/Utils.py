@@ -18,7 +18,10 @@
 
 import os
 
-def get_document_paths_from_dir(docsdir):
+def get_document_paths_from_dir(docsdir, basedir = None):
+    if basedir is None:
+        basedir = docsdir
+
     paths = []
     n_paths = 0
     for root, dirs, files in os.walk(docsdir, False):
@@ -26,7 +29,7 @@ def get_document_paths_from_dir(docsdir):
             if not entry.lower().endswith('.pdf'):
                 continue
 
-            test_path = os.path.join(root[len(docsdir):], entry)
+            test_path = os.path.join(root[len(basedir):], entry)
             paths.append(test_path.lstrip(os.path.sep))
             n_paths += 1
     paths.sort()

@@ -39,6 +39,9 @@ class RunTests(Command):
         parser.add_argument('-o', '--out-dir',
                             action = 'store', dest = 'out_dir', default = os.path.join(tempfile.gettempdir(), 'out'),
                             help = 'Directory where test results will be created')
+        parser.add_argument('--docs-dir',
+                            action = 'store', dest = 'docs_dir',
+                            help = 'Base documents directory')
         parser.add_argument('--keep-results',
                             action = 'store_true', dest = 'keep_results', default = False,
                             help = 'Do not remove result files for passing tests')
@@ -48,7 +51,8 @@ class RunTests(Command):
         parser.add_argument('--update-refs',
                             action = 'store_true', dest = 'update_refs', default = False,
                             help = 'Update references for failed tests')
-        parser.add_argument('tests')
+        parser.add_argument('tests', metavar = 'TEST', nargs = '+',
+                            help = 'Tests directory or individual test to run')
 
     def run(self, options):
         config = Config()
@@ -57,17 +61,24 @@ class RunTests(Command):
         config.update_refs = options['update_refs']
 
         t = Timer()
-        doc = options['tests']
-        if os.path.isdir(doc):
-            docs_dir = doc
+        docs = options['tests']
+        docs_dir = options['docs_dir']
+
+        if len(docs) == 1:
+            if os.path.isdir(docs[0]):
+                if docs_dir is None:
+                    docs_dir = docs[0]
+                if docs_dir == docs[0]:
+                    docs = []
+            else:
+                if docs_dir is None:
+                    docs_dir = os.path.dirname(docs[0])
         else:
-            docs_dir = os.path.dirname(doc)
+            if docs_dir is None:
+                docs_dir = os.path.commonprefix(docs).rpartition(os.path.sep)[0]
 
         tests = TestRun(docs_dir, options['refs_dir'], options['out_dir'])
-        if doc == docs_dir:
-            status = tests.run_tests()
-        else:
-            status = tests.run_test(os.path.basename(doc))
+        status = tests.run_tests(docs)
         tests.summary()
         get_printer().printout_ln("Tests run in %s" % (t.elapsed_str()))
 
