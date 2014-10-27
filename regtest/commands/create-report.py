@@ -43,11 +43,15 @@ class CreateReport(Command):
         parser.add_argument('-n', '--no-browser',
                             action = 'store_false', dest = 'launch_browser', default = True,
                             help = 'Do not launch a web browser with the results')
+        parser.add_argument('--no-absolute-paths',
+                            action = 'store_false', dest = 'use_abs_paths', default = True,
+                            help = 'Do use absolute paths in the generated HTML')
         parser.add_argument('tests')
 
     def run(self, options):
         config = Config()
         config.pretty_diff = options['pretty_diff']
+        config.abs_paths = options['use_abs_paths']
 
         doc = options['tests']
         if os.path.isdir(doc):

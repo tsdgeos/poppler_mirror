@@ -161,11 +161,15 @@ class BackendTestResult:
     def get_failed_html(self):
         html = ""
         for result in self._results:
-            actual = os.path.abspath(os.path.join(self._outdir, self._test, result))
-            expected = os.path.abspath(os.path.join(self._refsdir, self._test, result))
+            actual = os.path.join(self._outdir, self._test, result)
+            if self.config.abs_paths:
+                actual = os.path.abspath(actual)
+            expected = os.path.join(self._refsdir, self._test, result)
+            if self.config.abs_paths:
+                expected = os.path.abspath(expected)
             html += "<li><a href='%s'>actual</a> <a href='%s'>expected</a> " % (actual, expected)
             if self._backend.has_diff(actual):
-                diff = os.path.abspath(actual + self._backend.get_diff_ext())
+                diff = actual + self._backend.get_diff_ext()
                 html += "<a href='%s'>diff</a> " % (diff)
                 if self.config.pretty_diff:
                     pretty_diff = create_pretty_diff(self._backend)
@@ -183,6 +187,7 @@ class TestResult:
     def __init__(self, docsdir, refsdir, outdir, resultdir, results, backends):
         self._refsdir = refsdir
         self._outdir = outdir
+        self.config = Config()
 
         self._test = resultdir[len(self._outdir):].lstrip('/')
         self._doc = os.path.join(docsdir, self._test)
@@ -214,7 +219,9 @@ class TestResult:
             html += "<li>%s " % (backend.get_name())
             stderr = self._results[backend].get_stderr()
             if os.path.exists(stderr):
-                html += "<a href='%s'>stderr</a>" % (os.path.abspath(stderr))
+                if self.config.abs_paths:
+                    stderr = os.path.abspath(stderr)
+                html += "<a href='%s'>stderr</a>" % (stderr)
             html += "</li>\n%s" % (backend_html)
 
         if html:
