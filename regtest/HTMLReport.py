@@ -24,7 +24,7 @@ import subprocess
 
 class HTMLPrettyDiff:
 
-    def write(self, test, outdir, actual, expected, diff):
+    def write(self, test, outdir, actual, expected, diff, abs_paths):
         raise NotImplementedError
 
     def _create_diff_for_test(self, outdir, test):
@@ -40,7 +40,7 @@ class HTMLPrettyDiff:
 
 class HTMLPrettyDiffImage(HTMLPrettyDiff):
 
-    def write(self, test, outdir, result, actual, expected, diff):
+    def write(self, test, outdir, result, actual, expected, diff, abs_paths):
         html = """
 <html>
 <head>
@@ -92,7 +92,9 @@ Difference between images: <a href="%s">diff</a><br>
 """ % (test, diff, actual, expected)
 
         diffdir = self._create_diff_for_test(outdir, test)
-        pretty_diff = os.path.abspath(os.path.join(diffdir, result + '-pretty-diff.html'))
+        pretty_diff = os.path.join(diffdir, result + '-pretty-diff.html')
+        if abs_paths:
+            pretty_diff = os.path.abspath(pretty_diff)
         f = open(pretty_diff, 'w')
         f.write(html)
         f.close()
@@ -100,7 +102,7 @@ Difference between images: <a href="%s">diff</a><br>
         return pretty_diff
 
 class HTMLPrettyDiffText(HTMLPrettyDiff):
-    def write(self, test, outdir, result, actual, expected, diff):
+    def write(self, test, outdir, result, actual, expected, diff, abs_paths):
         import difflib
 
         actual_file = open(actual, 'r')
@@ -112,7 +114,9 @@ class HTMLPrettyDiffText(HTMLPrettyDiff):
         expected_file.close()
 
         diffdir = self._create_diff_for_test(outdir, test)
-        pretty_diff = os.path.abspath(os.path.join(diffdir, result + '-pretty-diff.html'))
+        pretty_diff = os.path.join(diffdir, result + '-pretty-diff.html')
+        if abs_paths:
+            pretty_diff = os.path.abspath(pretty_diff)
         f = open(pretty_diff, 'w')
         f.write(html)
         f.close()
@@ -174,7 +178,7 @@ class BackendTestResult:
                 if self.config.pretty_diff:
                     pretty_diff = create_pretty_diff(self._backend)
                     if pretty_diff:
-                        html += "<a href='%s'>pretty diff</a> " % (pretty_diff.write (self._test, self._outdir, result, actual, expected, diff))
+                        html += "<a href='%s'>pretty diff</a> " % (pretty_diff.write (self._test, self._outdir, result, actual, expected, diff, self.config.abs_paths))
             html += "</li>\n"
 
         if html:
