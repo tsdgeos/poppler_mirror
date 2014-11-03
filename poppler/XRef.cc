@@ -1568,7 +1568,7 @@ GBool XRef::parseEntry(Goffset offset, XRefEntry *entry)
 void XRef::readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum)
 {
   std::vector<Goffset> followedPrev;
-  while (prevXRefOffset && (untilEntryNum == -1 || entries[untilEntryNum].type == xrefEntryNone)) {
+  while (prevXRefOffset && (untilEntryNum == -1 || (untilEntryNum < size && entries[untilEntryNum].type == xrefEntryNone))) {
     bool followed = false;
     for (size_t j = 0; j < followedPrev.size(); j++) {
       if (followedPrev.at(j) == prevXRefOffset) {
@@ -1606,7 +1606,7 @@ void XRef::readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum)
 
 XRefEntry *XRef::getEntry(int i, GBool complainIfMissing)
 {
-  if (entries[i].type == xrefEntryNone) {
+  if (i >= size || entries[i].type == xrefEntryNone) {
 
     if ((!xRefStream) && mainXRefEntriesOffset) {
       if (!parseEntry(mainXRefEntriesOffset + 20*i, &entries[i])) {
