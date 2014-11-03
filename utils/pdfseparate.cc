@@ -54,6 +54,7 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
 
   if (!doc->isOk()) {
     error(errSyntaxError, -1, "Could not extract page(s) from damaged file ('{0:s}')", srcFileName);
+    delete doc;
     return false;
   }
 
@@ -74,6 +75,7 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
     error(errCommandLine, -1,
           "Wrong page range given: the first page ({0:d}) can not be after the last page ({1:d}).",
           firstPage, lastPage);
+    delete doc;
     return false;
   }
   bool foundmatch = false;
@@ -97,6 +99,7 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
   if (!foundmatch && firstPage != lastPage) {
     error(errSyntaxError, -1, "'{0:s}' must contain '%%d' if more than one page should be extracted", destFileName);
     free(auxDestFileName);
+    delete doc;
     return false;
   }
 
@@ -113,6 +116,7 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
   if (p != NULL) {
     error(errSyntaxError, -1, "'{0:s}' can only contain one '%d' pattern", destFileName);
     free(auxDestFileName);
+    delete doc;
     return false;
   }
   free(auxDestFileName);
@@ -123,12 +127,12 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
     int errCode = doc->savePageAs(gpageName, pageNo);
     if ( errCode != errNone) {
       delete gpageName;
-      delete gfileName;
+      delete doc;
       return false;
     }
     delete gpageName;
   }
-  delete gfileName;
+  delete doc;
   return true;
 }
 

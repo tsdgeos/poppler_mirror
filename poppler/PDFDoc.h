@@ -247,7 +247,7 @@ public:
   void *getGUIData() { return guiData; }
 
   // rewrite pageDict with MediaBox, CropBox and new page CTM
-  void replacePageDict(int pageNo, int rotate, PDFRectangle *mediaBox, PDFRectangle *cropBox, Object *pageCTM);
+  void replacePageDict(int pageNo, int rotate, PDFRectangle *mediaBox, PDFRectangle *cropBox);
   void markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum);
   GBool markAnnotations(Object *annots, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum);
   void markAcroForm(Object *acrpForm, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum);

@@ -637,7 +637,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   replacePageDict(pageNo, 
     getCatalog()->getPage(pageNo)->getRotate(),
     getCatalog()->getPage(pageNo)->getMediaBox(),
-    cropBox, NULL);
+    cropBox);
   Ref *refPage = getCatalog()->getPageRef(pageNo);
   Object page;
   getXRef()->fetch(refPage->num, refPage->gen, &page);
@@ -649,8 +649,6 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   outStr = new FileOutStream(f,0);
 
   yRef = new XRef(getXRef()->getTrailerDict());
-  Object encrypt;
-  getXRef()->getTrailerDict()->dictLookup("Encrypt", &encrypt);
 
   if (secHdlr != NULL && !secHdlr->isUnencrypted()) {
     yRef->setEncryption(secHdlr->getPermissionFlags(), 
@@ -777,6 +775,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   fclose(f);
   delete yRef;
   delete countRef;
+  delete outStr;
 
   return errNone;
 }
@@ -1505,78 +1504,59 @@ void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, Guint numOffse
 
 void PDFDoc::replacePageDict(int pageNo, int rotate,
                              PDFRectangle *mediaBox, 
-                             PDFRectangle *cropBox, Object *pageCTM)
+                             PDFRectangle *cropBox)
 {
   Ref *refPage = getCatalog()->getPageRef(pageNo);
   Object page;
   getXRef()->fetch(refPage->num, refPage->gen, &page);
   Dict *pageDict = page.getDict();
+  pageDict->remove("MediaBoxssdf");
   pageDict->remove("MediaBox");
   pageDict->remove("CropBox");
   pageDict->remove("ArtBox");
   pageDict->remove("BleedBox");
   pageDict->remove("TrimBox");
   pageDict->remove("Rotate");
-  Object *mediaBoxObj = new Object();
-  mediaBoxObj->initArray(getXRef());
-  Object *murx = new Object();
-  murx->initReal(mediaBox->x1);
-  Object *mury = new Object();
-  mury->initReal(mediaBox->y1);
-  Object *mllx = new Object();
-  mllx->initReal(mediaBox->x2);
-  Object *mlly = new Object();
-  mlly->initReal(mediaBox->y2);
-  mediaBoxObj->arrayAdd(murx);
-  mediaBoxObj->arrayAdd(mury);
-  mediaBoxObj->arrayAdd(mllx);
-  mediaBoxObj->arrayAdd(mlly);
-  pageDict->add(copyString("MediaBox"), mediaBoxObj);
+  Object mediaBoxObj;
+  mediaBoxObj.initArray(getXRef());
+  Object murx;
+  murx.initReal(mediaBox->x1);
+  Object mury;
+  mury.initReal(mediaBox->y1);
+  Object mllx;
+  mllx.initReal(mediaBox->x2);
+  Object mlly;
+  mlly.initReal(mediaBox->y2);
+  mediaBoxObj.arrayAdd(&murx);
+  mediaBoxObj.arrayAdd(&mury);
+  mediaBoxObj.arrayAdd(&mllx);
+  mediaBoxObj.arrayAdd(&mlly);
+  pageDict->add(copyString("MediaBox"), &mediaBoxObj);
   if (cropBox != NULL) {
-    Object *cropBoxObj = new Object();
-    cropBoxObj->initArray(getXRef());
-    Object *curx = new Object();
-    curx->initReal(cropBox->x1);
-    Object *cury = new Object();
-    cury->initReal(cropBox->y1);
-    Object *cllx = new Object();
-    cllx->initReal(cropBox->x2);
-    Object *clly = new Object();
-    clly->initReal(cropBox->y2);
-    cropBoxObj->arrayAdd(curx);
-    cropBoxObj->arrayAdd(cury);
-    cropBoxObj->arrayAdd(cllx);
-    cropBoxObj->arrayAdd(clly);
-    pageDict->add(copyString("CropBox"), cropBoxObj);
-    pageDict->add(copyString("TrimBox"), cropBoxObj);
+    Object cropBoxObj;
+    cropBoxObj.initArray(getXRef());
+    Object curx;
+    curx.initReal(cropBox->x1);
+    Object cury;
+    cury.initReal(cropBox->y1);
+    Object cllx;
+    cllx.initReal(cropBox->x2);
+    Object clly;
+    clly.initReal(cropBox->y2);
+    cropBoxObj.arrayAdd(&curx);
+    cropBoxObj.arrayAdd(&cury);
+    cropBoxObj.arrayAdd(&cllx);
+    cropBoxObj.arrayAdd(&clly);
+    pageDict->add(copyString("CropBox"), &cropBoxObj);
+    cropBoxObj.getArray()->incRef();
+    pageDict->add(copyString("TrimBox"), &cropBoxObj);
   } else {
-    pageDict->add(copyString("TrimBox"), mediaBoxObj);
+    mediaBoxObj.getArray()->incRef();
+    pageDict->add(copyString("TrimBox"), &mediaBoxObj);
   }
-  Object *rotateObj = new Object();
-  rotateObj->initInt(rotate);
-  pageDict->add(copyString("Rotate"), rotateObj);
-  if (pageCTM != NULL) {
-    Object *contents = new Object();
-    Ref cmRef = getXRef()->addIndirectObject(pageCTM);
-    Object *ref = new Object();
-    ref->initRef(cmRef.num, cmRef.gen);
-    pageDict->lookupNF("Contents", contents);
-    Object *newContents = new Object();
-    newContents->initArray(getXRef());
-    if (contents->getType() == objRef) {
-      newContents->arrayAdd(ref);
-      newContents->arrayAdd(contents);
-    } else {
-      newContents->arrayAdd(ref);
-      for (int i = 0; i < contents->arrayGetLength(); i++) {
-        Object *contentEle = new Object();
-        contents->arrayGetNF(i, contentEle);
-        newContents->arrayAdd(contentEle);
-      }
-    }
-    pageDict->remove("Contents");
-    pageDict->add(copyString("Contents"), newContents);
-  }
+  Object rotateObj;
+  rotateObj.initInt(rotate);
+  pageDict->add(copyString("Rotate"), &rotateObj);
   getXRef()->setModifiedObject(&page, *refPage);
   page.free();
 }

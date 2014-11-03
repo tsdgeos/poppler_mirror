@@ -7,7 +7,7 @@
 // Copyright (C) 2011-2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 //
@@ -116,7 +116,7 @@ int main (int argc, char *argv[])
         cropBox = docs[i]->getCatalog()->getPage(j)->getCropBox();
       docs[i]->replacePageDict(j,
 	    docs[i]->getCatalog()->getPage(j)->getRotate(),
-	    docs[i]->getCatalog()->getPage(j)->getMediaBox(), cropBox, NULL);
+	    docs[i]->getCatalog()->getPage(j)->getMediaBox(), cropBox);
       Ref *refPage = docs[i]->getCatalog()->getPageRef(j);
       Object page;
       docs[i]->getXRef()->fetch(refPage->num, refPage->gen, &page);
