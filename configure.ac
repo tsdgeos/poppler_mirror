@@ -470,7 +470,7 @@ fi
 
 CAIRO_VERSION="1.10.0"
 AC_SUBST(CAIRO_VERSION)
-CAIRO_DEPS="cairo >= $CAIRO_VERSION cairo-ft >= $CAIRO_VERSION)"
+CAIRO_DEPS="cairo >= $CAIRO_VERSION cairo-ft >= $CAIRO_VERSION"
 AC_ARG_ENABLE(cairo-output,
               AC_HELP_STRING([--disable-cairo-output],
                              [Don't build the cairo graphics backend.]),
