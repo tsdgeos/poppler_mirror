@@ -1,3 +1,46 @@
+Release 0.28.0
+        core:
+         * Fix rendering of file with a wrong embedded font. Bug #84270
+         * Use alt colorspace to get CMYK values for an ICC based CMYK colorspace. Bug #79019
+         * Map Standard/Expert encoding ligatures to AGLFN names. Bug #80093
+         * Make Attribute::getName() work when UTF-16BE is used. Bug #84722
+         * Fix memory leak in Dict::remove. Bug #84607
+         * Fix crashes in broken files
+         * SplashOutputDev: Improve Overprintmode and shadings. Bug #80998
+         * CairoOutputDev: fix crash when no group color space. Bug #85137
+         * CairoOutputDev: Don't render text when text matrix is not invertable. Bug #78042
+         * CairoOutputDev: Only embed mime data for gray/rgb/cmyk colorspaces. Bug #80719
+         * CairoOutputDev: Only embed mime data if image decode map is identity
+         * cairo: Use matrix to determine pattern size. Bug #33364
+         * Fix compile warnings
+         * regression test improvements
+
+        glib:
+         * Fix use of uninitialized members in PopplerInputStream. Bug #82630
+         * Documentation improvements
+         * Do not dist gir_DATA
+         * Remove use of GTK deprecated functions. Bug #82384. Bug #82385
+         * Build introspection linking to the uninstalled libraries. Big #84526
+
+        qt4:
+         * Add a new Page::annotations() that let's you specify subtypes
+
+        qt5:
+         * Add a new Page::annotations() that let's you specify subtypes
+
+        utils:
+         * pdfseparate: additonal handling for annotations. Bug #77549
+         * pdfdetach: fix crash when getPage() returns null. Bug #85145
+         * pdftocairo: Add support for printing to a Windows printer. Bug #79936
+
+        build system:
+         * Move automake version check from autogen.sh to configure.ac. Bug #79797
+         * Makefile.am cleanups. Bug #79411
+         * Use poppler-data pkg-config
+         * Make autogen.sh work with variables with spaces
+         * Don't use -fPIC on mingw
+         * Fix build with --disable-utils. Bug #84448
+
 Release 0.26.4
         core:
          * CairoOutputDev: Make sure we always push a transparency group in setSoftMaskFromImageMask(). Bug #81624
