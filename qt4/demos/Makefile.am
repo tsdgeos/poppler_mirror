@@ -17,7 +17,6 @@ BUILT_SOURCES =					\
 	viewer.moc
 
 poppler_qt4viewer_SOURCES =			\
-	$(BUILT_SOURCES)			\
 	abstractinfodock.cpp			\
 	abstractinfodock.h			\
 	documentobserver.cpp			\
