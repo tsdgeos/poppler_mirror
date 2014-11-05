@@ -1258,6 +1258,7 @@ pgd_annots_create_widget (PopplerDocument *document)
     GtkTreeIter       iter;
     gchar            *str;
     gint              n_pages;
+    gint              i;
 
     demo = g_new0 (PgdAnnotsDemo, 1);
 
@@ -1309,7 +1310,7 @@ pgd_annots_create_widget (PopplerDocument *document)
     model = gtk_list_store_new(SELECTED_N_COLUMNS,
                                G_TYPE_INT, G_TYPE_STRING);
 
-    for (gint i = 0; i < G_N_ELEMENTS (supported_annots); i++) {
+    for (i = 0; i < G_N_ELEMENTS (supported_annots); i++) {
         gtk_list_store_append (model, &iter);
         gtk_list_store_set (model, &iter,
                             SELECTED_TYPE_COLUMN, supported_annots[i].type,
