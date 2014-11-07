@@ -84,6 +84,8 @@ class TestRun:
         test_passed = False
         if ref_has_md5 and test_has_md5:
             test_passed = backend.compare_checksums(refs_path, test_path, not self.config.keep_results, self.config.create_diffs, self.config.update_refs)
+        elif self.config.update_refs:
+            backend.update_results(refs_path, test_path)
 
         with self._lock:
             self._n_tests += 1

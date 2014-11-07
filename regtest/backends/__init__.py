@@ -145,6 +145,30 @@ class Backend:
 
         return retval
 
+    def update_results(self, refs_path, out_path):
+        if not self.has_md5(refs_path):
+            path = os.path.join(refs_path, self._name)
+            md5_file = open(path + '.md5', 'w')
+
+            for entry in sorted(os.listdir(out_path)):
+                if not self.__should_have_checksum(entry):
+                    continue
+                result_path = os.path.join(out_path, entry)
+                ref_path = os.path.join(refs_path, entry)
+                md5_file.write("%s %s\n" % (self.__md5sum(result_path), ref_path))
+                shutil.copyfile(result_path, ref_path)
+
+            md5_file.close()
+
+        for ref in ('.crashed', '.failed', '.stderr'):
+            result_path = os.path.join(out_path, self._name + ref)
+            ref_path = os.path.join(refs_path, self._name + ref)
+
+            if os.path.exists(result_path):
+                shutil.copyfile(result_path, ref_path)
+            elif os.path.exists(ref_path):
+                os.remove(ref_path)
+
     def get_ref_names(self, refs_path):
         retval = []
         md5_path = os.path.join(refs_path, self._name)
