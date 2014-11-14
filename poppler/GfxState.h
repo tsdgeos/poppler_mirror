@@ -20,7 +20,7 @@
 // Copyright (C) 2009-2011, 2013 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
-// Copyright (C) 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011-2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -53,6 +53,7 @@ class PopplerCache;
 class GooList;
 class OutputDev;
 class GfxState;
+class GfxResources;
 
 class Matrix {
 public:
@@ -205,7 +206,7 @@ public:
   virtual GfxColorSpaceMode getMode() = 0;
 
   // Construct a color space.  Returns NULL if unsuccessful.
-  static GfxColorSpace *parse(Object *csObj, OutputDev *out, GfxState *state, int recursion = 0);
+  static GfxColorSpace *parse(GfxResources *res, Object *csObj, OutputDev *out, GfxState *state, int recursion = 0);
 
   // Convert to gray, RGB, or CMYK.
   virtual void getGray(GfxColor *color, GfxGray *gray) = 0;
@@ -578,7 +579,7 @@ public:
   virtual GfxColorSpaceMode getMode() { return csIndexed; }
 
   // Construct an Indexed color space.  Returns NULL if unsuccessful.
-  static GfxColorSpace *parse(Array *arr, OutputDev *out, GfxState *state, int recursion);
+  static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
@@ -631,7 +632,7 @@ public:
   virtual GfxColorSpaceMode getMode() { return csSeparation; }
 
   // Construct a Separation color space.  Returns NULL if unsuccessful.
-  static GfxColorSpace *parse(Array *arr, OutputDev *out, GfxState *state, int recursion);
+  static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
@@ -676,7 +677,7 @@ public:
   virtual GfxColorSpaceMode getMode() { return csDeviceN; }
 
   // Construct a DeviceN color space.  Returns NULL if unsuccessful.
-  static GfxColorSpace *parse(Array *arr, OutputDev *out, GfxState *state, int recursion);
+  static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
@@ -723,7 +724,7 @@ public:
   virtual GfxColorSpaceMode getMode() { return csPattern; }
 
   // Construct a Pattern color space.  Returns NULL if unsuccessful.
-  static GfxColorSpace *parse(Array *arr, OutputDev *out, GfxState *state, int recursion);
+  static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
   virtual void getGray(GfxColor *color, GfxGray *gray);
   virtual void getRGB(GfxColor *color, GfxRGB *rgb);
@@ -752,7 +753,7 @@ public:
   GfxPattern(int typeA);
   virtual ~GfxPattern();
 
-  static GfxPattern *parse(Object *obj, OutputDev *out, GfxState *state);
+  static GfxPattern *parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state);
 
   virtual GfxPattern *copy() = 0;
 
@@ -808,7 +809,7 @@ private:
 class GfxShadingPattern: public GfxPattern {
 public:
 
-  static GfxShadingPattern *parse(Object *patObj, OutputDev *out, GfxState *state);
+  static GfxShadingPattern *parse(GfxResources *res, Object *patObj, OutputDev *out, GfxState *state);
   virtual ~GfxShadingPattern();
 
   virtual GfxPattern *copy();
@@ -835,7 +836,7 @@ public:
   GfxShading(GfxShading *shading);
   virtual ~GfxShading();
 
-  static GfxShading *parse(Object *obj, OutputDev *out, GfxState *state);
+  static GfxShading *parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state);
 
   virtual GfxShading *copy() = 0;
 
@@ -849,7 +850,7 @@ public:
 
 protected:
 
-  GBool init(Dict *dict, OutputDev *out, GfxState *state);
+  GBool init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
   int type;
   GfxColorSpace *colorSpace;
@@ -918,7 +919,7 @@ public:
   GfxFunctionShading(GfxFunctionShading *shading);
   virtual ~GfxFunctionShading();
 
-  static GfxFunctionShading *parse(Dict *dict, OutputDev *out, GfxState *state);
+  static GfxFunctionShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
   virtual GfxShading *copy();
 
@@ -952,7 +953,7 @@ public:
   GfxAxialShading(GfxAxialShading *shading);
   virtual ~GfxAxialShading();
 
-  static GfxAxialShading *parse(Dict *dict, OutputDev *out, GfxState *state);
+  static GfxAxialShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
   virtual GfxShading *copy();
 
@@ -985,7 +986,7 @@ public:
   GfxRadialShading(GfxRadialShading *shading);
   virtual ~GfxRadialShading();
 
-  static GfxRadialShading *parse(Dict *dict, OutputDev *out, GfxState *state);
+  static GfxRadialShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
   virtual GfxShading *copy();
 
@@ -1023,7 +1024,7 @@ public:
   GfxGouraudTriangleShading(GfxGouraudTriangleShading *shading);
   virtual ~GfxGouraudTriangleShading();
 
-  static GfxGouraudTriangleShading *parse(int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
+  static GfxGouraudTriangleShading *parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
 
   virtual GfxShading *copy();
 
@@ -1109,7 +1110,7 @@ public:
   GfxPatchMeshShading(GfxPatchMeshShading *shading);
   virtual ~GfxPatchMeshShading();
 
-  static GfxPatchMeshShading *parse(int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
+  static GfxPatchMeshShading *parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
 
   virtual GfxShading *copy();
 
