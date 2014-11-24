@@ -762,6 +762,8 @@ if test x$lcms1 = xyes || test x$lcms2 = xyes; then
     lcms1=yes;
     AC_DEFINE(USE_LCMS1, 1, [Defines if use lcms1])
   fi
+else
+  enable_cms=no
 fi
 
 AM_CONDITIONAL(USE_CMS, test x$enable_cms = xyes)
