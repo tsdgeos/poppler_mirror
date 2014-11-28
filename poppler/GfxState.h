@@ -183,9 +183,10 @@ class GfxColorTransform {
 public:
   void doTransform(void *in, void *out, unsigned int size);
   // transformA should be a cmsHTRANSFORM
-  GfxColorTransform(void *transformA, int cmsIntent, unsigned int transformPixelType);
+  GfxColorTransform(void *transformA, int cmsIntent, unsigned int inputPixelType, unsigned int transformPixelType);
   ~GfxColorTransform();
   int getIntent() { return cmsIntent; }
+  int getInputPixelType() { return inputPixelType; }
   int getTransformPixelType() { return transformPixelType; }
   void ref();
   unsigned int unref();
@@ -194,6 +195,7 @@ private:
   void *transform;
   unsigned int refCount;
   int cmsIntent;
+  unsigned int inputPixelType;
   unsigned int transformPixelType;
 };
 

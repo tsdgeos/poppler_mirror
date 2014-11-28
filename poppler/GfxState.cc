@@ -203,10 +203,11 @@ void GfxColorTransform::doTransform(void *in, void *out, unsigned int size) {
 }
 
 // transformA should be a cmsHTRANSFORM
-GfxColorTransform::GfxColorTransform(void *transformA, int cmsIntentA, unsigned int transformPixelTypeA) {
+GfxColorTransform::GfxColorTransform(void *transformA, int cmsIntentA, unsigned int inputPixelTypeA, unsigned int transformPixelTypeA) {
   transform = transformA;
   refCount = 1;
   cmsIntent = cmsIntentA;
+  inputPixelType = inputPixelTypeA;
   transformPixelType = transformPixelTypeA;
 }
 
@@ -250,7 +251,7 @@ void GfxColorSpace::setDisplayProfile(void *displayProfileA) {
 	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == 0) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransform = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, displayPixelType);
+      XYZ2DisplayTransform = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, displayPixelType);
     }
     cmsCloseProfile(XYZProfile);
   }
@@ -551,7 +552,7 @@ int GfxColorSpace::setupColorProfiles()
 	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == 0) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransform = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, displayPixelType);
+      XYZ2DisplayTransform = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, displayPixelType);
     }
     cmsCloseProfile(XYZProfile);
   }
@@ -2049,7 +2050,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
       error(errSyntaxWarning, -1, "Can't create transform");
       cs->transform = NULL;
     } else {
-      cs->transform = new GfxColorTransform(transform, cmsIntent, dcst);
+      cs->transform = new GfxColorTransform(transform, cmsIntent, cst, dcst);
     }
     if (dcst == PT_RGB || dcst == PT_CMYK) {
        // create line transform only when the display is RGB type color space 
@@ -2059,7 +2060,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
 	error(errSyntaxWarning, -1, "Can't create transform");
 	cs->lineTransform = NULL;
       } else {
-	cs->lineTransform = new GfxColorTransform(transform, cmsIntent, dcst);
+	cs->lineTransform = new GfxColorTransform(transform, cmsIntent, cst, dcst);
       }
     }
     cmsCloseProfile(hp);
@@ -2081,8 +2082,14 @@ void GfxICCBasedColorSpace::getGray(GfxColor *color, GfxGray *gray) {
     Guchar in[gfxColorMaxComps];
     Guchar out[gfxColorMaxComps];
     
-    for (int i = 0;i < nComps;i++) {
+    if (nComps == 3 && transform->getInputPixelType() == PT_Lab) {
+      in[0] = colToByte(dblToCol(colToDbl(color->c[0]) / 100.0));
+      in[1] = colToByte(dblToCol((colToDbl(color->c[1]) + 128.0) / 255.0));
+      in[2] = colToByte(dblToCol((colToDbl(color->c[2]) + 128.0) / 255.0));
+    } else {
+      for (int i = 0;i < nComps;i++) {
 	in[i] = colToByte(color->c[i]);
+      }
     }
     if (nComps <= 4) {
       unsigned int key = 0;
@@ -2124,8 +2131,14 @@ void GfxICCBasedColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
     Guchar in[gfxColorMaxComps];
     Guchar out[gfxColorMaxComps];
     
-    for (int i = 0;i < nComps;i++) {
+    if (nComps == 3 && transform->getInputPixelType() == PT_Lab) {
+      in[0] = colToByte(dblToCol(colToDbl(color->c[0]) / 100.0));
+      in[1] = colToByte(dblToCol((colToDbl(color->c[1]) + 128.0) / 255.0));
+      in[2] = colToByte(dblToCol((colToDbl(color->c[2]) + 128.0) / 255.0));
+    } else {
+      for (int i = 0;i < nComps;i++) {
 	in[i] = colToByte(color->c[i]);
+      }
     }
     if (nComps <= 4) {
       unsigned int key = 0;
@@ -2158,8 +2171,14 @@ void GfxICCBasedColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
     Guchar out[gfxColorMaxComps];
     double c, m, y, k, c1, m1, y1, k1, r, g, b;
 
-    for (int i = 0;i < nComps;i++) {
+    if (nComps == 3 && transform->getInputPixelType() == PT_Lab) {
+      in[0] = colToByte(dblToCol(colToDbl(color->c[0]) / 100.0));
+      in[1] = colToByte(dblToCol((colToDbl(color->c[1]) + 128.0) / 255.0));
+      in[2] = colToByte(dblToCol((colToDbl(color->c[2]) + 128.0) / 255.0));
+    } else {
+      for (int i = 0;i < nComps;i++) {
 	in[i] = colToByte(color->c[i]);
+      }
     }
     if (nComps <= 4) {
       unsigned int key = 0;
@@ -2370,8 +2389,14 @@ void GfxICCBasedColorSpace::getCMYK(GfxColor *color, GfxCMYK *cmyk) {
     Guchar in[gfxColorMaxComps];
     Guchar out[gfxColorMaxComps];
     
-    for (int i = 0;i < nComps;i++) {
+    if (nComps == 3 && transform->getInputPixelType() == PT_Lab) {
+      in[0] = colToByte(dblToCol(colToDbl(color->c[0]) / 100.0));
+      in[1] = colToByte(dblToCol((colToDbl(color->c[1]) + 128.0) / 255.0));
+      in[2] = colToByte(dblToCol((colToDbl(color->c[2]) + 128.0) / 255.0));
+    } else {
+      for (int i = 0;i < nComps;i++) {
 	in[i] = colToByte(color->c[i]);
+      }
     }
     if (nComps <= 4) {
       unsigned int key = 0;
@@ -6767,7 +6792,7 @@ void GfxState::setDisplayProfile(cmsHPROFILE localDisplayProfileA) {
 	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == 0) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransformRelCol = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, localDisplayPixelType);
+      XYZ2DisplayTransformRelCol = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
     }
     if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
 	   localDisplayProfile,
@@ -6776,7 +6801,7 @@ void GfxState::setDisplayProfile(cmsHPROFILE localDisplayProfileA) {
 	  INTENT_ABSOLUTE_COLORIMETRIC,LCMS_FLAGS)) == 0) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransformAbsCol = new GfxColorTransform(transform, INTENT_ABSOLUTE_COLORIMETRIC, localDisplayPixelType);
+      XYZ2DisplayTransformAbsCol = new GfxColorTransform(transform, INTENT_ABSOLUTE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
     }
     if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
 	   localDisplayProfile,
@@ -6785,7 +6810,7 @@ void GfxState::setDisplayProfile(cmsHPROFILE localDisplayProfileA) {
 	  INTENT_SATURATION,LCMS_FLAGS)) == 0) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransformSat = new GfxColorTransform(transform, INTENT_SATURATION, localDisplayPixelType);
+      XYZ2DisplayTransformSat = new GfxColorTransform(transform, INTENT_SATURATION, PT_XYZ, localDisplayPixelType);
     }
     if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
 	   localDisplayProfile,
@@ -6794,7 +6819,7 @@ void GfxState::setDisplayProfile(cmsHPROFILE localDisplayProfileA) {
 	  INTENT_PERCEPTUAL,LCMS_FLAGS)) == 0) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransformPerc = new GfxColorTransform(transform, INTENT_PERCEPTUAL, localDisplayPixelType);
+      XYZ2DisplayTransformPerc = new GfxColorTransform(transform, INTENT_PERCEPTUAL, PT_XYZ, localDisplayPixelType);
     }
     cmsCloseProfile(XYZProfile);
   }
