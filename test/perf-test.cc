@@ -20,6 +20,8 @@
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif
 
+#include <config.h>
+
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -33,7 +35,6 @@
 //#define COPY_FILE 1
 
 #include <assert.h>
-#include <config.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <ctype.h>
