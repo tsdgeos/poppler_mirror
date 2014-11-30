@@ -33,6 +33,7 @@
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
 // Copyright (C) 2013 Li Junling <lijunling@sina.com>
 // Copyright (C) 2014 Ed Porras <ed@moto-research.com>
+// Copyright (C) 2014 Richard PALO <richard@netbsd.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -85,7 +86,9 @@ extern "C" int unlink(char *filename);
 
 #ifdef __sun
 #include <ieeefp.h>
+#ifndef isfinite
 #define isfinite(x) finite(x)
+#endif
 #endif
 
 static inline void convertGfxColor(SplashColorPtr dest,
