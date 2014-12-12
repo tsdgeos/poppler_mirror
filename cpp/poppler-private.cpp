@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+ * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,16 +30,24 @@
 
 using namespace poppler;
 
+static void stderr_debug_function(const std::string &msg, void * /*data*/)
+{
+    std::cerr << "poppler/" << msg;
+}
+
+debug_func detail::user_debug_function = stderr_debug_function;
+void *detail::debug_closure = 0;
+
 void detail::error_function(void * /*data*/, ErrorCategory /*category*/, Goffset pos, char *msg)
 {
     std::ostringstream oss;
     if (pos >= 0) {
-        oss << "poppler/error (" << pos << "): ";
+        oss << "error (" << pos << "): ";
     } else {
-        oss << "poppler/error: ";
+        oss << "error: ";
     }
     oss << msg;
-    std::cerr << oss.str();
+    detail::user_debug_function(oss.str(), detail::debug_closure);
 }
 
 rectf detail::pdfrectangle_to_rectf(const PDFRectangle &pdfrect)

@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, Hib Eris <hib@hiberis.nl>
+ * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -333,4 +334,32 @@ std::ostream& poppler::operator<<(std::ostream& stream, const byte_array &array)
     }
     stream << "]";
     return stream;
+}
+
+/**
+ \typedef poppler::debug_func
+
+ Debug/error function.
+
+ This function type is used for debugging & error output;
+ the first parameter is the actual message, the second is the unaltered
+ closure argument which was passed to the set_debug_error_function() call.
+
+ \since 0.30.0
+ */
+
+/**
+ Set a new debug/error output function.
+
+ If not set, by default error and debug messages will be sent to stderr.
+
+ \param debug_function the new debug function
+ \param closure user data which will be passed as-is to the debug function
+
+ \since 0.30.0
+ */
+void poppler::set_debug_error_function(debug_func debug_function, void *closure)
+{
+    poppler::detail::user_debug_function = debug_function;
+    poppler::detail::debug_closure = closure;
 }
