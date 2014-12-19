@@ -4072,6 +4072,11 @@ void TextSelectionDumper::startLine()
 
 void TextSelectionDumper::finishLine()
 {
+  if (nLines == linesSize) {
+    linesSize *= 2;
+    lines = (GooList **)grealloc(lines, linesSize * sizeof(GooList *));
+  }
+
   if (words && words->getLength() > 0)
     lines[nLines++] = words;
   else if (words)
@@ -4087,11 +4092,6 @@ void TextSelectionDumper::visitLine (TextLine *line,
 				     PDFRectangle *selection)
 {
   TextLineFrag frag;
-
-  if (nLines == linesSize) {
-    linesSize *= 2;
-    lines = (GooList **)grealloc(lines, linesSize * sizeof(GooList *));
-  }
 
   frag.init(line, edge_begin, edge_end - edge_begin);
 
