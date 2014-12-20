@@ -5278,6 +5278,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor,
         obj1.free();
       } else {
         obj1.free();
+        bboxObj.free();
         error(errSyntaxError, getPos(), "Bad form bounding box value");
         return;
       }
