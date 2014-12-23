@@ -109,6 +109,96 @@ int main (int argc, char *argv[])
   yRef->add(0, 65535, 0, gFalse);
   PDFDoc::writeHeader(outStr, majorVersion, minorVersion);
 
+  // handle OutputIntents, AcroForm & OCProperties
+  Object intents;
+  Object afObj;
+  Object ocObj;
+  if (docs.size() >= 1) {
+    Object catObj;
+    docs[0]->getXRef()->getCatalog(&catObj);
+    Dict *catDict = catObj.getDict();
+    catDict->lookup("OutputIntents", &intents);
+    catDict->lookupNF("AcroForm", &afObj);
+    Ref *refPage = docs[0]->getCatalog()->getPageRef(1);
+    if (!afObj.isNull()) {
+      docs[0]->markAcroForm(&afObj, yRef, countRef, 0, refPage->num, refPage->num);
+    }
+    catDict->lookupNF("OCProperties", &ocObj);
+    if (!ocObj.isNull() && ocObj.isDict()) {
+      docs[0]->markPageObjects(ocObj.getDict(), yRef, countRef, 0, refPage->num, refPage->num);
+    }
+    if (intents.isArray() && intents.arrayGetLength() > 0) {
+      for (i = 1; i < (int) docs.size(); i++) {
+        Object pagecatObj, pageintents;
+        docs[i]->getXRef()->getCatalog(&pagecatObj);
+        Dict *pagecatDict = pagecatObj.getDict();
+        pagecatDict->lookup("OutputIntents", &pageintents);
+        if (pageintents.isArray() && pageintents.arrayGetLength() > 0) {
+          for (j = intents.arrayGetLength() - 1; j >= 0; j--) {
+            Object intent;
+            intents.arrayGet(j, &intent, 0);
+            if (intent.isDict()) {
+              Object idf;
+              intent.dictLookup("OutputConditionIdentifier", &idf);
+              if (idf.isString()) {
+                GooString *gidf = idf.getString();
+                GBool removeIntent = gTrue;
+                for (int k = 0; k < pageintents.arrayGetLength(); k++) {
+                  Object pgintent;
+                  pageintents.arrayGet(k, &pgintent, 0);
+                  if (pgintent.isDict()) {
+                    Object pgidf;
+                    pgintent.dictLookup("OutputConditionIdentifier", &pgidf);
+                    if (pgidf.isString()) {
+                      GooString *gpgidf = pgidf.getString();
+                      if (gpgidf->cmp(gidf) == 0) {
+                        pgidf.free();
+                        removeIntent = gFalse;
+                        break;
+                      }
+                    }
+                    pgidf.free();
+                  }
+                }
+                if (removeIntent) {
+                  intents.arrayRemove(j);
+                  error(errSyntaxWarning, -1, "Output intent {0:s} missing in pdf {1:s}, removed",
+                   gidf->getCString(), docs[i]->getFileName()->getCString());
+                }
+              } else {
+                intents.arrayRemove(j);
+                error(errSyntaxWarning, -1, "Invalid output intent dict, missing required OutputConditionIdentifier");
+              }
+              idf.free();
+            } else {
+              intents.arrayRemove(j);
+            }
+            intent.free();
+          }
+        } else {
+          error(errSyntaxWarning, -1, "Output intents differs, remove them all");
+          intents.free();
+          break;
+        }
+        pagecatObj.free();
+        pageintents.free();
+      }
+    }
+    if (intents.isArray() && intents.arrayGetLength() > 0) {
+      for (j = intents.arrayGetLength() - 1; j >= 0; j--) {
+        Object intent;
+        intents.arrayGet(j, &intent, 0);
+        if (intent.isDict()) {
+          docs[0]->markPageObjects(intent.getDict(), yRef, countRef, numOffset, 0, 0);
+        } else {
+          intents.arrayRemove(j);
+        }
+        intent.free();
+      }
+    }
+    catObj.free();
+  }
+
   for (i = 0; i < (int) docs.size(); i++) {
     for (j = 1; j <= docs[i]->getNumPages(); j++) {
       PDFRectangle *cropBox = NULL;
@@ -145,6 +235,32 @@ int main (int argc, char *argv[])
   yRef->add(rootNum, 0, outStr->getPos(), gTrue);
   outStr->printf("%d 0 obj\n", rootNum);
   outStr->printf("<< /Type /Catalog /Pages %d 0 R", rootNum + 1);
+  // insert OutputIntents
+  if (intents.isArray() && intents.arrayGetLength() > 0) {
+    outStr->printf(" /OutputIntents [");
+    for (j = 0; j < intents.arrayGetLength(); j++) {
+      Object intent;
+      intents.arrayGet(j, &intent, 0);
+      if (intent.isDict()) {
+        PDFDoc::writeObject(&intent, outStr, yRef, 0, NULL, cryptRC4, 0, 0, 0);
+      }
+      intent.free();
+    }
+    outStr->printf("]");
+  }
+  intents.free();
+  // insert AcroForm
+  if (!afObj.isNull()) {
+    outStr->printf(" /AcroForm ");
+    PDFDoc::writeObject(&afObj, outStr, yRef, 0, NULL, cryptRC4, 0, 0, 0);
+    afObj.free();
+  }
+  // insert OCProperties
+  if (!ocObj.isNull() && ocObj.isDict()) {
+    outStr->printf(" /OCProperties ");
+    PDFDoc::writeObject(&ocObj, outStr, yRef, 0, NULL, cryptRC4, 0, 0, 0);
+    ocObj.free();
+  }
   outStr->printf(">>\nendobj\n");
   objectsCount++;
 
