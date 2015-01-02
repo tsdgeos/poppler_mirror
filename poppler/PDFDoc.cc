@@ -1820,26 +1820,32 @@ Goffset PDFDoc::getStartXRef(GBool tryingToReconstruct)
       int c, n, i;
 
       // read last xrefSearchSize bytes
-      str->setPos(xrefSearchSize, -1);
-      for (n = 0; n < xrefSearchSize; ++n) {
-        if ((c = str->getChar()) == EOF) {
-          break;
+      int segnum = 0;
+      int maxXRefSearch = 24576;
+      if (str->getLength() < maxXRefSearch) maxXRefSearch = str->getLength();
+      for (; (xrefSearchSize - 16) * segnum < maxXRefSearch; segnum++) {
+        str->setPos((xrefSearchSize - 16) * segnum + xrefSearchSize, -1);
+        for (n = 0; n < xrefSearchSize; ++n) {
+          if ((c = str->getChar()) == EOF) {
+            break;
+          }
+          buf[n] = c;
         }
-        buf[n] = c;
-      }
-      buf[n] = '\0';
+        buf[n] = '\0';
 
-      // find startxref
-      for (i = n - 9; i >= 0; --i) {
-        if (!strncmp(&buf[i], "startxref", 9)) {
+        // find startxref
+        for (i = n - 9; i >= 0; --i) {
+          if (!strncmp(&buf[i], "startxref", 9)) {
+            break;
+          }
+        }
+        if (i < 0) {
+          startXRefPos = 0;
+        } else {
+          for (p = &buf[i + 9]; isspace(*p); ++p);
+          startXRefPos = strToLongLong(p);
           break;
         }
-      }
-      if (i < 0) {
-        startXRefPos = 0;
-      } else {
-        for (p = &buf[i+9]; isspace(*p); ++p) ;
-        startXRefPos =  strToLongLong(p);
       }
     }
 
