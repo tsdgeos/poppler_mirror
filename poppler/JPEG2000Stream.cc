@@ -6,6 +6,7 @@
 //
 // Copyright 2008-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright 2011 Daniel Glöckner <daniel-gl@gmx.net>
+// Copyright 2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright 2013,2014 Adrian Johnson <ajohnson@redneon.com>
 //
 // Licensed under GPLv2 or later
@@ -44,7 +45,7 @@ struct JPXStreamPrivate {
   void init2(unsigned char *buf, int bufLen, OPJ_CODEC_FORMAT format);
 #endif
 #ifdef USE_OPENJPEG2
-  void init2(opj_stream_t *stream, OPJ_CODEC_FORMAT format);
+  void init2(OPJ_CODEC_FORMAT format, unsigned char *data, int length);
 #endif
 };
 
@@ -140,6 +141,8 @@ void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMo
   *bitsPerComponent = 8;
   if (priv->image && priv->image->numcomps == 3)
     *csMode = streamCSDeviceRGB;
+  else if (priv->image && priv->image->numcomps == 4)
+    *csMode = streamCSDeviceCMYK;
   else
     *csMode = streamCSDeviceGray;
 }
@@ -225,7 +228,6 @@ void JPXStreamPrivate::init2(unsigned char *buf, int bufLen, OPJ_CODEC_FORMAT fo
   /* Get the decoder handle of the format */
   dinfo = opj_create_decompress(format);
   if (dinfo == NULL) goto error;
-
   /* Catch events using our callbacks */
   opj_set_event_mgr((opj_common_ptr)dinfo, &event_mgr, NULL);
 
@@ -260,35 +262,64 @@ error:
 
 
 #ifdef USE_OPENJPEG2
-static OPJ_SIZE_T readStream_callback(void *buffer, OPJ_SIZE_T nBytes, void *userData)
+typedef struct JPXData_s
 {
-  int len;
-  JPXStream *p = (JPXStream *)userData;
+  unsigned char *data;
+  int size;
+  int pos;
+} JPXData;
 
-  len = p->readStream(nBytes, (Guchar*)buffer);
+#define BUFFER_INITIAL_SIZE 4096
+
+static OPJ_SIZE_T jpxRead_callback(void * p_buffer, OPJ_SIZE_T p_nb_bytes, void * p_user_data)
+{
+  JPXData *jpxData = (JPXData *)p_user_data;
+  int len;
+
+  len = jpxData->size - jpxData->pos;
+  if (len < 0)
+    len = 0;
   if (len == 0)
-    return (OPJ_SIZE_T)-1;
-  else
-    return len;
+    return (OPJ_SIZE_T)-1;  /* End of file! */
+  if ((OPJ_SIZE_T)len > p_nb_bytes)
+    len = p_nb_bytes;
+  memcpy(p_buffer, jpxData->data + jpxData->pos, len);
+  jpxData->pos += len;
+  return len;
+}
+
+static OPJ_OFF_T jpxSkip_callback(OPJ_OFF_T skip, void * p_user_data)
+{
+  JPXData *jpxData = (JPXData *)p_user_data;
+
+  jpxData->pos += (skip > jpxData->size - jpxData->pos) ? jpxData->size - jpxData->pos : skip;
+  /* Always return input value to avoid "Problem with skipping JPEG2000 box, stream error" */
+  return skip;
+}
+
+static OPJ_BOOL jpxSeek_callback(OPJ_OFF_T seek_pos, void * p_user_data)
+{
+  JPXData *jpxData = (JPXData *)p_user_data;
+
+  if (seek_pos > jpxData->size)
+    return OPJ_FALSE;
+  jpxData->pos = seek_pos;
+  return OPJ_TRUE;
 }
 
 void JPXStream::init()
 {
-  opj_stream_t *stream;
+  Object oLen;
+  if (getDict()) getDict()->lookup("Length", &oLen);
 
-  str->reset();
-  stream = opj_stream_default_create(OPJ_TRUE);
+  int bufSize = BUFFER_INITIAL_SIZE;
+  if (oLen.isInt()) bufSize = oLen.getInt();
+  oLen.free();
 
-#if OPENJPEG_VERSION >= OPENJPEG_VERSION_ENCODE(2, 1, 0)
-  opj_stream_set_user_data (stream, this, NULL);
-#else
-  opj_stream_set_user_data (stream, this);
-#endif
-
-  opj_stream_set_read_function(stream, readStream_callback);
-  priv->init2(stream, OPJ_CODEC_JP2);
-
-  opj_stream_destroy(stream);
+  int length = 0;
+  unsigned char *buf = str->toUnsignedChars(&length, bufSize);
+  priv->init2(OPJ_CODEC_JP2, buf, length);
+  gfree(buf);
 
   if (priv->image) {
     priv->npixels = priv->image->comps[0].w * priv->image->comps[0].h;
@@ -325,8 +356,30 @@ void JPXStream::init()
   priv->inited = gTrue;
 }
 
-void JPXStreamPrivate::init2(opj_stream_t *stream, OPJ_CODEC_FORMAT format)
+void JPXStreamPrivate::init2(OPJ_CODEC_FORMAT format, unsigned char *buf, int length)
 {
+  JPXData jpxData;
+
+  jpxData.data = buf;
+  jpxData.pos = 0;
+  jpxData.size = length;
+
+  opj_stream_t *stream;
+
+  stream = opj_stream_default_create(OPJ_TRUE);
+
+#if OPENJPEG_VERSION >= OPENJPEG_VERSION_ENCODE(2, 1, 0)
+  opj_stream_set_user_data (stream, &jpxData, NULL);
+#else
+  opj_stream_set_user_data (stream, &jpxData);
+#endif
+
+  opj_stream_set_read_function(stream, jpxRead_callback);
+  opj_stream_set_skip_function(stream, jpxSkip_callback);
+  opj_stream_set_seek_function(stream, jpxSeek_callback);
+  /* Set the length to avoid an assert */
+  opj_stream_set_user_data_length(stream, length);
+
   opj_codec_t *decoder;
 
   /* Use default decompression parameters */
@@ -372,17 +425,19 @@ void JPXStreamPrivate::init2(opj_stream_t *stream, OPJ_CODEC_FORMAT format)
   }
 
   opj_destroy_codec(decoder);
+  opj_stream_destroy(stream);
 
   if (image != NULL)
     return;
 
 error:
+  opj_destroy_codec(decoder);
   if (format == OPJ_CODEC_JP2) {
     error(errSyntaxWarning, -1, "Did no succeed opening JPX Stream as JP2, trying as J2K.");
-    init2(stream, OPJ_CODEC_J2K);
+    init2(OPJ_CODEC_J2K, buf, length);
   } else if (format == OPJ_CODEC_J2K) {
     error(errSyntaxWarning, -1, "Did no succeed opening JPX Stream as J2K, trying as JPT.");
-    init2(stream, OPJ_CODEC_JPT);
+    init2(OPJ_CODEC_JPT, buf, length);
   } else {
     error(errSyntaxError, -1, "Did no succeed opening JPX Stream.");
   }
