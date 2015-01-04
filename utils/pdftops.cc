@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2007-2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2015 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Sanjoy Mahajan <sanjoy@mit.edu>
 // Copyright (C) 2009, 2011, 2012 William Bader <williambader@hotmail.com>
@@ -206,6 +206,7 @@ int main(int argc, char *argv[]) {
   GBool ok;
   char *p;
   int exitCode;
+  std::vector<int> pages;
 
   exitCode = 99;
 
@@ -400,16 +401,22 @@ int main(int argc, char *argv[]) {
     goto err2;
   }
 
+  for (int i = firstPage; i <= lastPage; ++i) {
+    pages.push_back(i);
+  }
+
   // write PostScript file
   psOut = new PSOutputDev(psFileName->getCString(), doc,
-			  NULL, firstPage, lastPage, mode,
+			  NULL, pages, mode,
 			  paperWidth,
 			  paperHeight,
                           noCrop,
 			  duplex);
   if (psOut->isOk()) {
-    doc->displayPages(psOut, firstPage, lastPage, 72, 72,
-		      0, noCrop, !noCrop, gTrue);
+    for (int i = firstPage; i <= lastPage; ++i) {
+      doc->displayPage(psOut, i, 72, 72,
+			0, noCrop, !noCrop, gTrue);
+    }
   } else {
     delete psOut;
     exitCode = 2;
