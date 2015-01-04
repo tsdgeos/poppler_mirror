@@ -147,32 +147,57 @@ then
 fi
 
 
-dnl Test for libopenjpeg. Versions prior to 1.4 do not provide a pkgconfig file.
+dnl ##### Test for libopenjpeg. Versions prior to 1.4 do not provide a pkgconfig file.
+openjpeg1="no"
+openjpeg2="no"
 AC_ARG_ENABLE(libopenjpeg,
-	      AC_HELP_STRING([--disable-libopenjpeg],
-	                     [Don't build against libopenjpeg.]),
-              enable_libopenjpeg=$enableval,
-              enable_libopenjpeg="try")
-if test x$enable_libopenjpeg = xyes; then
+	      AC_HELP_STRING([--enable-libopenjpeg=@<:@auto/openjpeg1/openjpeg2/none@:>@],
+                             [Use openjpeg for JPEG2000 images. 'auto' prefers openjpeg1 over openjpeg2 if both are available due to regressions in openjpeg2 [[default=auto]]]),
+              [enable_libopenjpeg=$enableval],
+              [enable_libopenjpeg="auto"])
+
+openjpeg_header=yes
+
+dnl test for libopenjpeg1
+if test x$enable_libopenjpeg = xopenjpeg1 || test x$enable_libopenjpeg = xauto; then
   PKG_CHECK_MODULES(LIBOPENJPEG, libopenjpeg,
-  		    [],
-    		    [AC_CHECK_LIB([openjpeg], [opj_cio_open],
-  			LIBOPENJPEG_LIBS="-lopenjpeg",
-		        AC_MSG_ERROR("*** libopenjpeg library not found ***"))
-		     AC_CHECK_HEADERS([openjpeg.h],,
-		     	AC_MSG_ERROR("*** libopenjpeg headers not found ***"))])
-elif test x$enable_libopenjpeg = xtry; then
-  PKG_CHECK_MODULES(LIBOPENJPEG, libopenjpeg,
-                    [enable_libopenjpeg="yes"],
-  		    [AC_CHECK_LIB([openjpeg], [opj_cio_open],
-		        [enable_libopenjpeg="yes"
-  			 LIBOPENJPEG_LIBS="-lopenjpeg"],
-	                [enable_libopenjpeg="no"])
-		     AC_CHECK_HEADERS([openjpeg.h],,
-		         [enable_libopenjpeg="no"])])
+    [openjpeg1="yes"],
+    [AC_CHECK_LIB([openjpeg], [opj_cio_open],
+      [openjpeg1="yes"
+       LIBOPENJPEG_LIBS="-lopenjpeg"],[openjpeg_header=no])
+     AC_CHECK_HEADERS([openjpeg.h],,
+		      [openjpeg="no"])])
 fi
 
-if test x$enable_libopenjpeg = xyes; then
+dnl test for libopenjpeg2
+if test x$openjpeg1 = xno; then
+  if test x$enable_libopenjpeg = xopenjpeg2 || test x$enable_libopenjpeg = xauto; then
+    PKG_CHECK_MODULES(LIBOPENJPEG, libopenjp2,
+                      [openjpeg2=yes],[])
+  fi
+fi
+
+if test x$enable_libopenjpeg = xopenjpeg1 && test x$openjpeg1 = xno; then
+  if test x$openjpeg_header = xno; then
+    AC_MSG_ERROR("*** libopenjpeg headers not found ***")
+  else
+    AC_MSG_ERROR("*** libopenjpeg library not found ***")
+  fi
+fi
+
+if test x$enable_libopenjpeg = xopenjpeg2 && test x$openjpeg2 = xno; then
+  AC_MSG_ERROR("*** libopenjp2 library not found ***")
+fi
+
+if test x$openjpeg1 = xyes || test x$openjpeg2 = xyes; then
+  enable_libopenjpeg=yes
+  if test x$openjpeg1 = xyes; then
+    AC_DEFINE(USE_OPENJPEG1, 1, [Defined if using openjpeg1])
+  fi
+  if test x$openjpeg2 = xyes; then
+    AC_DEFINE(USE_OPENJPEG2, 1, [Defined if using openjpeg2])
+  fi
+
   AC_SUBST(LIBOPENJPEG_CFLAGS)
   AC_SUBST(LIBOPENJPEG_LIBS)
   AC_DEFINE(ENABLE_LIBOPENJPEG)
@@ -182,9 +207,11 @@ if test x$enable_libopenjpeg = xyes; then
        [AC_DEFINE(WITH_OPENJPEG_IGNORE_PCLR_CMAP_CDEF_FLAG, 1, [OpenJPEG with the OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG flag.])],
        [])
       ])
+else
+  enable_libopenjpeg=no
 fi
 
-AM_CONDITIONAL(BUILD_LIBOPENJPEG, test x$enable_libopenjpeg = xyes)
+AM_CONDITIONAL(BUILD_LIBOPENJPEG, test x$openjpeg1 = xyes || test x$openjpeg2 = xyes)
 AH_TEMPLATE([ENABLE_LIBOPENJPEG],
 	    [Use libopenjpeg instead of builtin jpeg2000 decoder.])
 
@@ -924,6 +951,13 @@ echo "  use libtiff:        $enable_libtiff"
 echo "  use zlib:           $enable_zlib"
 echo "  use libcurl:        $enable_libcurl"
 echo "  use libopenjpeg:    $enable_libopenjpeg"
+if test x$enable_libopenjpeg = xyes;then
+    if test x$openjpeg1 = xyes;then
+        echo "      with openjpeg1"
+    else
+        echo "      with openjpeg2"
+    fi
+fi
 echo "  use cms:            $enable_cms"
 if test x$enable_cms = xyes;then
     if test x$lcms1 = xyes;then
