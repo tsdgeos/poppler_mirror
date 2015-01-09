@@ -3050,7 +3050,7 @@ GfxColorSpace *GfxDeviceNColorSpace::copy() {
   GooList *sepsCSA = new GooList(sepsCS->getLength());
   for (i = 0; i < sepsCS->getLength(); i++) {
     GfxSeparationColorSpace *scs = (GfxSeparationColorSpace *) sepsCS->get(i);
-    if (likely(scs)) {
+    if (likely(scs != NULL)) {
       sepsCSA->append(scs->copy());
     }
   }
