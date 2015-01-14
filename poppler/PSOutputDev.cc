@@ -23,7 +23,7 @@
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2011, 2012 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2012, 2014, 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009-2011, 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012, 2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -1230,6 +1230,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   }
 
   // initialize
+  rasterAntialias = gFalse;
   displayText = gTrue;
   ok = gTrue;
   outputFunc = outputFuncA;
@@ -3202,24 +3203,23 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     numComps = 1;
     paperColor[0] = 0xff;
     splashOut = new SplashOutputDev(splashModeMono8, 1, gFalse,
-				    paperColor, gFalse,
-				    globalParams->getAntialiasPrinting());
+				    paperColor, gFalse);
 #if SPLASH_CMYK
   } else if (level == psLevel1Sep || level == psLevel2Sep ||
 	     level == psLevel3Sep || globalParams->getOverprintPreview()) {
     numComps = 4;
     paperColor[0] = paperColor[1] = paperColor[2] = paperColor[3] = 0;
     splashOut = new SplashOutputDev(splashModeCMYK8, 1, gFalse,
-				    paperColor, gFalse,
-				    globalParams->getAntialiasPrinting());
+				    paperColor, gFalse);
 #endif
   } else {
     numComps = 3;
     paperColor[0] = paperColor[1] = paperColor[2] = 0xff;
     splashOut = new SplashOutputDev(splashModeRGB8, 1, gFalse,
-				    paperColor, gFalse,
-				    globalParams->getAntialiasPrinting());
+				    paperColor, gFalse);
   }
+  splashOut->setFontAntialias(rasterAntialias);
+  splashOut->setVectorAntialias(rasterAntialias);
   splashOut->startDoc(doc);
 
   // break the page into stripes

@@ -20,7 +20,7 @@
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2011 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011, 2014 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -308,6 +308,8 @@ public:
     { overlayCbk = cbk; overlayCbkData = data; }
   void setDisplayText(GBool display) { displayText = display; }
 
+  void setRasterAntialias(GBool a) { rasterAntialias = a; }
+
 private:
 
   void init(PSOutputFunc outputFuncA, void *outputStreamA,
@@ -488,6 +490,7 @@ private:
   GBool t3NeedsRestore;		// set if a 'q' operator was issued
   GBool forceRasterize;		// forces the page to be rasterized into a image before printing
   GBool displayText;		// displayText
+  GBool rasterAntialias;	// antialias on rasterize
 
 #if OPI_SUPPORT
   int opi13Nest;		// nesting level of OPI 1.3 objects

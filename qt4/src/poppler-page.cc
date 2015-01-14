@@ -1,7 +1,7 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2014, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2015, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -14,6 +14,7 @@
  * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012 Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+ * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -293,7 +294,6 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
         bgColor[2] = m_page->parentDoc->paperColor.red();
       }
  
-      GBool AA = m_page->parentDoc->m_hints & Document::TextAntialiasing ? gTrue : gFalse;
       SplashThinLineMode thinLineMode = splashThinLineDefault;
       if (m_page->parentDoc->m_hints & Document::ThinLineShape) thinLineMode = splashThinLineShape;
       if (m_page->parentDoc->m_hints & Document::ThinLineSolid) thinLineMode = splashThinLineSolid;
@@ -304,8 +304,9 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 #else
                       splashModeXBGR8,
 #endif 
-                      4, gFalse, bgColor, gTrue, AA, thinLineMode, overprint);
+                      4, gFalse, bgColor, gTrue, thinLineMode, overprint);
 
+      splash_output->setFontAntialias(m_page->parentDoc->m_hints & Document::TextAntialiasing ? gTrue : gFalse);
       splash_output->setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? gTrue : gFalse);
       splash_output->setFreeTypeHinting(m_page->parentDoc->m_hints & Document::TextHinting ? gTrue : gFalse, 
                                         m_page->parentDoc->m_hints & Document::TextSlightHinting ? gTrue : gFalse);

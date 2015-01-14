@@ -19,7 +19,7 @@
 // Copyright (C) 2007-2008, 2010, 2015 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Sanjoy Mahajan <sanjoy@mit.edu>
-// Copyright (C) 2009, 2011, 2012 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2012, 2014, 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -95,6 +95,7 @@ static GBool noEmbedTTFonts = gFalse;
 static GBool noEmbedCIDPSFonts = gFalse;
 static GBool noEmbedCIDTTFonts = gFalse;
 static GBool fontPassthrough = gFalse;
+static char rasterAntialiasStr[16] = "";
 static GBool preload = gFalse;
 static char paperSize[15] = "";
 static int paperWidth = -1;
@@ -154,6 +155,8 @@ static const ArgDesc argDesc[] = {
    "don't embed CID TrueType fonts"},
   {"-passfonts",  argFlag,        &fontPassthrough,0,
    "don't substitute missing fonts"},
+  {"-aaRaster",   argString,   rasterAntialiasStr, sizeof(rasterAntialiasStr),
+   "enable anti-aliasing on rasterization: yes, no"},
   {"-preload",    argFlag,     &preload,        0,
    "preload images and forms"},
   {"-paper",      argString,   paperSize,       sizeof(paperSize),
@@ -206,6 +209,7 @@ int main(int argc, char *argv[]) {
   GBool ok;
   char *p;
   int exitCode;
+  GBool rasterAntialias = gFalse;
   std::vector<int> pages;
 
   exitCode = 99;
@@ -412,6 +416,14 @@ int main(int argc, char *argv[]) {
 			  paperHeight,
                           noCrop,
 			  duplex);
+
+  if (rasterAntialiasStr[0]) {
+    if (!GlobalParams::parseYesNo2(rasterAntialiasStr, &rasterAntialias)) {
+      fprintf(stderr, "Bad '-aaRaster' value on command line\n");
+    }
+  }
+
+  psOut->setRasterAntialias(rasterAntialias);
   if (psOut->isOk()) {
     for (int i = firstPage; i <= lastPage; ++i) {
       doc->displayPage(psOut, i, 72, 72,

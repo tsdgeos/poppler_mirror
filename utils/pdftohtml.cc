@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2012, 2015 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Mike Slegeir <tehpola@yahoo.com>
 // Copyright (C) 2010, 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -23,6 +23,7 @@
 // Copyright (C) 2012 Ihar Filipau <thephilips@gmail.com>
 // Copyright (C) 2012 Luis Parravicini <lparravi@gmail.com>
 // Copyright (C) 2014 Pino Toscano <pino@kde.org>
+// Copyright (C) 2015 William Bader <williambader@hotmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -155,10 +156,8 @@ class SplashOutputDevNoText : public SplashOutputDev {
 public:
   SplashOutputDevNoText(SplashColorMode colorModeA, int bitmapRowPadA,
         GBool reverseVideoA, SplashColorPtr paperColorA,
-        GBool bitmapTopDownA = gTrue,
-        GBool allowAntialiasA = gTrue) : SplashOutputDev(colorModeA,
-            bitmapRowPadA, reverseVideoA, paperColorA, bitmapTopDownA,
-            allowAntialiasA) { }
+        GBool bitmapTopDownA = gTrue) : SplashOutputDev(colorModeA,
+            bitmapRowPadA, reverseVideoA, paperColorA, bitmapTopDownA) { }
   virtual ~SplashOutputDevNoText() { }
   
   void drawChar(GfxState *state, double x, double y,

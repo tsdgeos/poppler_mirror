@@ -18,7 +18,7 @@
 // Copyright (C) 2009 Michael K. Johnson <a1237@danlj.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
-// Copyright (C) 2009-2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2015 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010, 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
@@ -26,6 +26,7 @@
 // Copyright (C) 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+// Copyright (C) 2015 William Bader <williambader@hotmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -268,6 +269,20 @@ static std::deque<PageJob> pageJobQueue;
 static pthread_mutex_t pageJobMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void processPageJobs() {
+  GBool fontAntialias = gTrue;
+  GBool vectorAntialias = gTrue;
+
+  if (antialiasStr[0]) {
+    if (!GlobalParams::parseYesNo2(antialiasStr, &fontAntialias)) {
+      fprintf(stderr, "Bad '-aa' value on command line\n");
+    }
+  }
+  if (vectorAntialiasStr[0]) {
+    if (!GlobalParams::parseYesNo2(vectorAntialiasStr, &vectorAntialias)) {
+      fprintf(stderr, "Bad '-aaVector' value on command line\n");
+    }
+  }
+
   while(true) {
     // pop the next job or exit if queue is empty
     pthread_mutex_lock(&pageJobMutex);
@@ -288,7 +303,9 @@ static void processPageJobs() {
 #if SPLASH_CMYK
         			    (jpegcmyk || overprint) ? splashModeDeviceN8 :
 #endif
-		              splashModeRGB8, 4, gFalse, *pageJob.paperColor, gTrue, gTrue, thinLineMode);
+		              splashModeRGB8, 4, gFalse, *pageJob.paperColor, gTrue, thinLineMode);
+    splashOut->setFontAntialias(fontAntialias);
+    splashOut->setVectorAntialias(vectorAntialias);
     splashOut->startDoc(pageJob.doc);
     
     savePageSlice(pageJob.doc, splashOut, pageJob.pg, x, y, w, h, pageJob.pg_w, pageJob.pg_h, pageJob.ppmFile);
@@ -328,6 +345,8 @@ int main(int argc, char *argv[]) {
   int exitCode;
   int pg, pg_num_len;
   double pg_w, pg_h, tmp;
+  GBool fontAntialias = gTrue;
+  GBool vectorAntialias = gTrue;
 
   exitCode = 99;
 
@@ -361,16 +380,6 @@ int main(int argc, char *argv[]) {
   if (enableFreeTypeStr[0]) {
     if (!globalParams->setEnableFreeType(enableFreeTypeStr)) {
       fprintf(stderr, "Bad '-freetype' value on command line\n");
-    }
-  }
-  if (antialiasStr[0]) {
-    if (!globalParams->setAntialias(antialiasStr)) {
-      fprintf(stderr, "Bad '-aa' value on command line\n");
-    }
-  }
-  if (vectorAntialiasStr[0]) {
-    if (!globalParams->setVectorAntialias(vectorAntialiasStr)) {
-      fprintf(stderr, "Bad '-aaVector' value on command line\n");
     }
   }
   if (thinLineModeStr[0]) {
@@ -464,7 +473,21 @@ int main(int argc, char *argv[]) {
 				    (jpegcmyk || overprint) ? splashModeDeviceN8 :
 #endif
 				             splashModeRGB8, 4,
-				  gFalse, paperColor, gTrue, gTrue, thinLineMode);
+				  gFalse, paperColor, gTrue, thinLineMode);
+
+  if (antialiasStr[0]) {
+    if (!GlobalParams::parseYesNo2(antialiasStr, &fontAntialias)) {
+      fprintf(stderr, "Bad '-aa' value on command line\n");
+    }
+  }
+  if (vectorAntialiasStr[0]) {
+    if (!GlobalParams::parseYesNo2(vectorAntialiasStr, &vectorAntialias)) {
+      fprintf(stderr, "Bad '-aaVector' value on command line\n");
+    }
+  }
+
+  splashOut->setFontAntialias(fontAntialias);
+  splashOut->setVectorAntialias(vectorAntialias);
   splashOut->startDoc(doc);
   
 #endif // UTILS_USE_PTHREADS

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -171,8 +172,8 @@ image page_renderer::render_page(const page *p,
     bgColor[0] = d->paper_color & 0xff;
     bgColor[1] = (d->paper_color >> 8) & 0xff;
     bgColor[2] = (d->paper_color >> 16) & 0xff;
-    const GBool text_AA = d->hints & text_antialiasing ? gTrue : gFalse;
-    SplashOutputDev splashOutputDev(splashModeXBGR8, 4, gFalse, bgColor, gTrue, text_AA);
+    SplashOutputDev splashOutputDev(splashModeXBGR8, 4, gFalse, bgColor, gTrue);
+    splashOutputDev.setFontAntialias(d->hints & text_antialiasing ? gTrue : gFalse);
     splashOutputDev.setVectorAntialias(d->hints & antialiasing ? gTrue : gFalse);
     splashOutputDev.setFreeTypeHinting(d->hints & text_hinting ? gTrue : gFalse, gFalse);
     splashOutputDev.startDoc(pdfdoc);

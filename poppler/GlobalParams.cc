@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007-2010, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
@@ -23,7 +23,7 @@
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007, 2009 Jonathan Kew <jonathan_kew@sil.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
-// Copyright (C) 2009, 2011, 2012 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2012, 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2010, 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Patrick Spendrin <ps_ml@gmx.de>
@@ -620,9 +620,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   textPageBreaks = gTrue;
   textKeepTinyChars = gFalse;
   enableFreeType = gTrue;
-  antialias = gTrue;
-  vectorAntialias = gTrue;
-  antialiasPrinting = gFalse;
   strokeAdjust = gTrue;
   screenType = screenUnset;
   screenSize = -1;
@@ -1701,33 +1698,6 @@ GBool GlobalParams::getEnableFreeType() {
   return f;
 }
 
-GBool GlobalParams::getAntialias() {
-  GBool f;
-
-  lockGlobalParams;
-  f = antialias;
-  unlockGlobalParams;
-  return f;
-}
-
-GBool GlobalParams::getVectorAntialias() {
-  GBool f;
-
-  lockGlobalParams;
-  f = vectorAntialias;
-  unlockGlobalParams;
-  return f;
-}
-
-GBool GlobalParams::getAntialiasPrinting() {
-  GBool f;
-
-  lockGlobalParams;
-  f = antialiasPrinting;
-  unlockGlobalParams;
-  return f;
-}
-
 GBool GlobalParams::getStrokeAdjust() {
   GBool f;
 
@@ -2096,30 +2066,6 @@ GBool GlobalParams::setDisableFreeTypeHinting(char *s) {
   ok = parseYesNo2(s, &disableFreeTypeHinting);
   unlockGlobalParams;
   return ok;
-}
-
-GBool GlobalParams::setAntialias(char *s) {
-  GBool ok;
-
-  lockGlobalParams;
-  ok = parseYesNo2(s, &antialias);
-  unlockGlobalParams;
-  return ok;
-}
-
-GBool GlobalParams::setVectorAntialias(char *s) {
-  GBool ok;
-
-  lockGlobalParams;
-  ok = parseYesNo2(s, &vectorAntialias);
-  unlockGlobalParams;
-  return ok;
-}
-
-void GlobalParams::setAntialiasPrinting(GBool anti) {
-  lockGlobalParams;
-  antialiasPrinting = anti;
-  unlockGlobalParams;
 }
 
 void GlobalParams::setStrokeAdjust(GBool adjust)
