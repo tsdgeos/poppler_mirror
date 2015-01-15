@@ -112,7 +112,7 @@ public:
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
   virtual GBool useShadedFills(int type) { return type <= 7; }
 #else
-  virtual GBool useShadedFills(int type) { return type < 4; }
+  virtual GBool useShadedFills(int type) { return type > 1 && type < 4; }
 #endif
 
   // Does this device use FillColorStop()?
@@ -169,6 +169,9 @@ public:
 				  double *mat, double *bbox,
 				  int x0, int y0, int x1, int y1,
 				  double xStep, double yStep);
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
+  virtual GBool functionShadedFill(GfxState *state, GfxFunctionShading *shading);
+#endif
   virtual GBool axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax);
   virtual GBool axialShadedSupportExtend(GfxState *state, GfxAxialShading *shading);
   virtual GBool radialShadedFill(GfxState *state, GfxRadialShading *shading, double sMin, double sMax);
