@@ -24,7 +24,7 @@
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
+// Copyright (C) 2013, 2015 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2015 William Bader <williambader@hotmail.com>
 //
@@ -93,6 +93,8 @@ static GBool overprint = gFalse;
 static char enableFreeTypeStr[16] = "";
 static char antialiasStr[16] = "";
 static char vectorAntialiasStr[16] = "";
+static GBool fontAntialias = gTrue;
+static GBool vectorAntialias = gTrue;
 static char ownerPassword[33] = "";
 static char userPassword[33] = "";
 static char TiffCompressionStr[16] = "";
@@ -269,20 +271,6 @@ static std::deque<PageJob> pageJobQueue;
 static pthread_mutex_t pageJobMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static void processPageJobs() {
-  GBool fontAntialias = gTrue;
-  GBool vectorAntialias = gTrue;
-
-  if (antialiasStr[0]) {
-    if (!GlobalParams::parseYesNo2(antialiasStr, &fontAntialias)) {
-      fprintf(stderr, "Bad '-aa' value on command line\n");
-    }
-  }
-  if (vectorAntialiasStr[0]) {
-    if (!GlobalParams::parseYesNo2(vectorAntialiasStr, &vectorAntialias)) {
-      fprintf(stderr, "Bad '-aaVector' value on command line\n");
-    }
-  }
-
   while(true) {
     // pop the next job or exit if queue is empty
     pthread_mutex_lock(&pageJobMutex);
@@ -345,8 +333,6 @@ int main(int argc, char *argv[]) {
   int exitCode;
   int pg, pg_num_len;
   double pg_w, pg_h, tmp;
-  GBool fontAntialias = gTrue;
-  GBool vectorAntialias = gTrue;
 
   exitCode = 99;
 
@@ -374,6 +360,17 @@ int main(int argc, char *argv[]) {
   }
   if (argc > 1) fileName = new GooString(argv[1]);
   if (argc == 3) ppmRoot = argv[2];
+
+  if (antialiasStr[0]) {
+    if (!GlobalParams::parseYesNo2(antialiasStr, &fontAntialias)) {
+      fprintf(stderr, "Bad '-aa' value on command line\n");
+    }
+  }
+  if (vectorAntialiasStr[0]) {
+    if (!GlobalParams::parseYesNo2(vectorAntialiasStr, &vectorAntialias)) {
+      fprintf(stderr, "Bad '-aaVector' value on command line\n");
+    }
+  }
 
   // read config file
   globalParams = new GlobalParams();
@@ -475,16 +472,7 @@ int main(int argc, char *argv[]) {
 				             splashModeRGB8, 4,
 				  gFalse, paperColor, gTrue, thinLineMode);
 
-  if (antialiasStr[0]) {
-    if (!GlobalParams::parseYesNo2(antialiasStr, &fontAntialias)) {
-      fprintf(stderr, "Bad '-aa' value on command line\n");
-    }
-  }
-  if (vectorAntialiasStr[0]) {
-    if (!GlobalParams::parseYesNo2(vectorAntialiasStr, &vectorAntialias)) {
-      fprintf(stderr, "Bad '-aaVector' value on command line\n");
-    }
-  }
+
 
   splashOut->setFontAntialias(fontAntialias);
   splashOut->setVectorAntialias(vectorAntialias);
