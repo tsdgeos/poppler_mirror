@@ -197,7 +197,6 @@ public:
   GBool getPrintCommands();
   GBool getProfileCommands();
   GBool getErrQuiet();
-  double getSplashResolution();
 
   CharCodeToUnicode *getCIDToUnicode(GooString *collection);
   CharCodeToUnicode *getUnicodeToUnicode(GooString *fontName);
