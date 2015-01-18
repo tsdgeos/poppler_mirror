@@ -175,7 +175,6 @@ public:
   GBool getPSOPI();
   GBool getPSASCIIHex();
   GBool getPSBinary();
-  GBool getPSRasterMono();
   GooString *getTextEncodingName();
   EndOfLineKind getTextEOL();
   GBool getTextPageBreaks();
