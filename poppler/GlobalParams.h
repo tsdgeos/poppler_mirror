@@ -175,7 +175,6 @@ public:
   GBool getPSOPI();
   GBool getPSASCIIHex();
   GBool getPSBinary();
-  double getPSRasterResolution();
   GBool getPSRasterMono();
   GooString *getTextEncodingName();
   EndOfLineKind getTextEOL();
@@ -224,8 +223,6 @@ public:
   void setPSOPI(GBool opi);
   void setPSASCIIHex(GBool hex);
   void setPSBinary(GBool binary);
-  void setPSRasterResolution(double res);
-  void setPSRasterMono(GBool mono);
   void setTextEncoding(char *encodingName);
   GBool setTextEOL(char *s);
   void setTextPageBreaks(GBool pageBreaks);
@@ -321,10 +318,6 @@ private:
   GBool psOPI;			// generate PostScript OPI comments?
   GBool psASCIIHex;		// use ASCIIHex instead of ASCII85?
   GBool psBinary;		// use binary instead of hex
-  double psRasterResolution;	// PostScript rasterization resolution (dpi)
-  GBool psRasterMono;		// true to do PostScript rasterization
-				//   in monochrome (gray); false to do it
-				//   in color (RGB/CMYK)
   GooString *textEncoding;	// encoding (unicodeMap) to use for text
 				//   output
   EndOfLineKind textEOL;	// type of EOL marker to use for text

@@ -297,9 +297,6 @@ int main(int argc, char *argv[]) {
   if (level1 || level1Sep || level2 || level2Sep || level3 || level3Sep) {
     globalParams->setPSLevel(level);
   }
-  if (splashResolution > 0) {
-    globalParams->setPSRasterResolution(splashResolution);
-  }
   if (noEmbedT1Fonts) {
     globalParams->setPSEmbedType1(!noEmbedT1Fonts);
   }
@@ -421,6 +418,10 @@ int main(int argc, char *argv[]) {
     if (!GlobalParams::parseYesNo2(rasterAntialiasStr, &rasterAntialias)) {
       fprintf(stderr, "Bad '-aaRaster' value on command line\n");
     }
+  }
+
+  if (splashResolution > 0) {
+    psOut->setRasterResolution(splashResolution);
   }
 
   psOut->setRasterAntialias(rasterAntialias);

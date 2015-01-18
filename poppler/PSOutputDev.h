@@ -309,6 +309,8 @@ public:
   void setDisplayText(GBool display) { displayText = display; }
 
   void setRasterAntialias(GBool a) { rasterAntialias = a; }
+  void setRasterResolution(double r) { rasterResolution = r; }
+  void setRasterMono(GBool b) { rasterMono = b; }
   void setUncompressPreloadedImages(GBool b) { uncompressPreloadedImages = b; }
 
 private:
@@ -493,6 +495,10 @@ private:
   GBool displayText;		// displayText
   GBool rasterAntialias;	// antialias on rasterize
   GBool uncompressPreloadedImages;
+  double rasterResolution;	// PostScript rasterization resolution (dpi)
+  GBool rasterMono;		// true to do PostScript rasterization
+				//   in monochrome (gray); false to do it
+				//   in color (RGB/CMYK)
 
 #if OPI_SUPPORT
   int opi13Nest;		// nesting level of OPI 1.3 objects

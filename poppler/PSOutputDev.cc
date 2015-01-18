@@ -1230,6 +1230,8 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   }
 
   // initialize
+  rasterMono = gFalse;
+  rasterResolution = 300;
   uncompressPreloadedImages = gFalse;
   rasterAntialias = gFalse;
   displayText = gTrue;
@@ -3144,8 +3146,6 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   PreScanOutputDev *scan;
   GBool rasterize;
 #if HAVE_SPLASH
-  GBool mono;
-  double dpi;
   SplashOutputDev *splashOut;
   SplashColor paperColor;
   PDFRectangle box;
@@ -3182,12 +3182,8 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   }
 
 #if HAVE_SPLASH
-  // get the rasterization parameters
-  dpi = globalParams->getPSRasterResolution();
-  mono = globalParams->getPSRasterMono();
-
   // start the PS page
-  page->makeBox(dpi, dpi, rotateA, useMediaBox, gFalse,
+  page->makeBox(rasterResolution, rasterResolution, rotateA, useMediaBox, gFalse,
 		sliceX, sliceY, sliceW, sliceH, &box, &crop);
   rotateA += page->getRotate();
   if (rotateA >= 360) {
@@ -3195,12 +3191,12 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   } else if (rotateA < 0) {
     rotateA += 360;
   }
-  state = new GfxState(dpi, dpi, &box, rotateA, gFalse);
+  state = new GfxState(rasterResolution, rasterResolution, &box, rotateA, gFalse);
   startPage(page->getNum(), state, xref);
   delete state;
 
   // set up the SplashOutputDev
-  if (mono || level == psLevel1) {
+  if (rasterMono || level == psLevel1) {
     numComps = 1;
     paperColor[0] = 0xff;
     splashOut = new SplashOutputDev(splashModeMono8, 1, gFalse,
@@ -3224,8 +3220,8 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   splashOut->startDoc(doc);
 
   // break the page into stripes
-  hDPI2 = xScale * dpi;
-  vDPI2 = yScale * dpi;
+  hDPI2 = xScale * rasterResolution;
+  vDPI2 = yScale * rasterResolution;
   if (sliceW < 0 || sliceH < 0) {
     if (useMediaBox) {
       box = *page->getMediaBox();
