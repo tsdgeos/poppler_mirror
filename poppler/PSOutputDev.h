@@ -309,6 +309,7 @@ public:
   void setDisplayText(GBool display) { displayText = display; }
 
   void setRasterAntialias(GBool a) { rasterAntialias = a; }
+  void setUncompressPreloadedImages(GBool b) { uncompressPreloadedImages = b; }
 
 private:
 
@@ -491,6 +492,7 @@ private:
   GBool forceRasterize;		// forces the page to be rasterized into a image before printing
   GBool displayText;		// displayText
   GBool rasterAntialias;	// antialias on rasterize
+  GBool uncompressPreloadedImages;
 
 #if OPI_SUPPORT
   int opi13Nest;		// nesting level of OPI 1.3 objects

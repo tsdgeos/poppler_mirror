@@ -175,7 +175,6 @@ public:
   GBool getPSOPI();
   GBool getPSASCIIHex();
   GBool getPSBinary();
-  GBool getPSUncompressPreloadedImages();
   double getPSRasterResolution();
   GBool getPSRasterMono();
   GooString *getTextEncodingName();
@@ -225,7 +224,6 @@ public:
   void setPSOPI(GBool opi);
   void setPSASCIIHex(GBool hex);
   void setPSBinary(GBool binary);
-  void setPSUncompressPreloadedImages(GBool uncomp);
   void setPSRasterResolution(double res);
   void setPSRasterMono(GBool mono);
   void setTextEncoding(char *encodingName);
@@ -323,7 +321,6 @@ private:
   GBool psOPI;			// generate PostScript OPI comments?
   GBool psASCIIHex;		// use ASCIIHex instead of ASCII85?
   GBool psBinary;		// use binary instead of hex
-  GBool psUncompressPreloadedImages;  // uncompress all preloaded images
   double psRasterResolution;	// PostScript rasterization resolution (dpi)
   GBool psRasterMono;		// true to do PostScript rasterization
 				//   in monochrome (gray); false to do it

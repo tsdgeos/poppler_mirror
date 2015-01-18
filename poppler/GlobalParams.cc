@@ -606,7 +606,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   psOPI = gFalse;
   psASCIIHex = gFalse;
   psBinary = gFalse;
-  psUncompressPreloadedImages = gFalse;
   psRasterResolution = 300;
   psRasterMono = gFalse;
   textEncoding = new GooString("UTF-8");
@@ -1626,15 +1625,6 @@ GBool GlobalParams::getPSBinary() {
   return binary;
 }
 
-GBool GlobalParams::getPSUncompressPreloadedImages() {
-  GBool ah;
-
-  lockGlobalParams;
-  ah = psUncompressPreloadedImages;
-  unlockGlobalParams;
-  return ah;
-}
-
 double GlobalParams::getPSRasterResolution() {
   double res;
 
@@ -1994,12 +1984,6 @@ void GlobalParams::setPSASCIIHex(GBool hex) {
 void GlobalParams::setPSBinary(GBool binary) {
   lockGlobalParams;
   psBinary = binary;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSUncompressPreloadedImages(GBool uncomp) {
-  lockGlobalParams;
-  psUncompressPreloadedImages = uncomp;
   unlockGlobalParams;
 }
 

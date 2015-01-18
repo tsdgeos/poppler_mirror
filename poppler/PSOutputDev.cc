@@ -1230,6 +1230,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   }
 
   // initialize
+  uncompressPreloadedImages = gFalse;
   rasterAntialias = gFalse;
   displayText = gTrue;
   ok = gTrue;
@@ -2879,7 +2880,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
     useCompressed = gFalse;
     useASCIIHex = gTrue;
   } else {
-    if (globalParams->getPSUncompressPreloadedImages()) {
+    if (uncompressPreloadedImages) {
       useRLE = gFalse;
       useCompressed = gFalse;
     } else {
@@ -5834,7 +5835,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
 
   // filters
   if ((mode == psModeForm || inType3Char || preload) &&
-      globalParams->getPSUncompressPreloadedImages()) {
+      uncompressPreloadedImages) {
     s = NULL;
     useRLE = gFalse;
     useCompressed = gFalse;
@@ -6007,7 +6008,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
 
     // mask data source
     if ((mode == psModeForm || inType3Char || preload) &&
-      globalParams->getPSUncompressPreloadedImages()) {
+      uncompressPreloadedImages) {
       s = NULL;
       maskUseRLE = gFalse;
       maskUseCompressed = gFalse;
@@ -6216,7 +6217,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
 
   // filters
   if ((mode == psModeForm || inType3Char || preload) &&
-      globalParams->getPSUncompressPreloadedImages()) {
+      uncompressPreloadedImages) {
     s = NULL;
     useRLE = gFalse;
     useCompressed = gFalse;
