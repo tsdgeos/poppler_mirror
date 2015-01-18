@@ -297,32 +297,6 @@ int main(int argc, char *argv[]) {
   if (level1 || level1Sep || level2 || level2Sep || level3 || level3Sep) {
     globalParams->setPSLevel(level);
   }
-  if (noEmbedT1Fonts) {
-    globalParams->setPSEmbedType1(!noEmbedT1Fonts);
-  }
-  if (noEmbedTTFonts) {
-    globalParams->setPSEmbedTrueType(!noEmbedTTFonts);
-  }
-  if (noEmbedCIDPSFonts) {
-    globalParams->setPSEmbedCIDPostScript(!noEmbedCIDPSFonts);
-  }
-  if (noEmbedCIDTTFonts) {
-    globalParams->setPSEmbedCIDTrueType(!noEmbedCIDTTFonts);
-  }
-  if (fontPassthrough) {
-    globalParams->setPSFontPassthrough(fontPassthrough);
-  }
-  if (preload) {
-    globalParams->setPSPreload(preload);
-  }
-#if OPI_SUPPORT
-  if (doOPI) {
-    globalParams->setPSOPI(doOPI);
-  }
-#endif
-  if (psBinary) {
-    globalParams->setPSBinary(psBinary);
-  }
   if (quiet) {
     globalParams->setErrQuiet(quiet);
   }
@@ -423,6 +397,16 @@ int main(int argc, char *argv[]) {
   if (splashResolution > 0) {
     psOut->setRasterResolution(splashResolution);
   }
+  psOut->setEmbedType1(!noEmbedT1Fonts);
+  psOut->setEmbedTrueType(!noEmbedTTFonts);
+  psOut->setEmbedCIDPostScript(!noEmbedCIDPSFonts);
+  psOut->setEmbedCIDTrueType(!noEmbedCIDTTFonts);
+  psOut->setFontPassthrough(fontPassthrough);
+  psOut->setPreloadImagesForms(preload);
+#if OPI_SUPPORT
+  psOut->setGenerateOPI(doOPI);
+#endif
+  psOut->setUseBinary(psBinary);
 
   psOut->setRasterAntialias(rasterAntialias);
   if (psOut->isOk()) {

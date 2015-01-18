@@ -166,15 +166,6 @@ public:
   GooList *getPSResidentFonts();
   PSFontParam16 *getPSResidentFont16(GooString *fontName, int wMode);
   PSFontParam16 *getPSResidentFontCC(GooString *collection, int wMode);
-  GBool getPSEmbedType1();
-  GBool getPSEmbedTrueType();
-  GBool getPSEmbedCIDPostScript();
-  GBool getPSEmbedCIDTrueType();
-  GBool getPSFontPassthrough();
-  GBool getPSPreload();
-  GBool getPSOPI();
-  GBool getPSASCIIHex();
-  GBool getPSBinary();
   GooString *getTextEncodingName();
   EndOfLineKind getTextEOL();
   GBool getTextPageBreaks();
@@ -213,15 +204,6 @@ public:
   void setPSShrinkLarger(GBool shrink);
   void setPSCenter(GBool center);
   void setPSLevel(PSLevel level);
-  void setPSEmbedType1(GBool embed);
-  void setPSEmbedTrueType(GBool embed);
-  void setPSEmbedCIDPostScript(GBool embed);
-  void setPSEmbedCIDTrueType(GBool embed);
-  void setPSFontPassthrough(GBool passthrough);
-  void setPSPreload(GBool preload);
-  void setPSOPI(GBool opi);
-  void setPSASCIIHex(GBool hex);
-  void setPSBinary(GBool binary);
   void setTextEncoding(char *encodingName);
   GBool setTextEOL(char *s);
   void setTextPageBreaks(GBool pageBreaks);
@@ -307,16 +289,6 @@ private:
   GooList *psResidentFontsCC;	// 16-bit character collection fonts
 				//   resident in printer: collection name
 				//   mapped to font info [PSFontParam16]
-  GBool psEmbedType1;		// embed Type 1 fonts?
-  GBool psEmbedTrueType;	// embed TrueType fonts?
-  GBool psEmbedCIDPostScript;	// embed CID PostScript fonts?
-  GBool psEmbedCIDTrueType;	// embed CID TrueType fonts?
-  GBool psFontPassthrough;	// pass all fonts through as-is?
-  GBool psPreload;		// preload PostScript images and forms into
-				//   memory
-  GBool psOPI;			// generate PostScript OPI comments?
-  GBool psASCIIHex;		// use ASCIIHex instead of ASCII85?
-  GBool psBinary;		// use binary instead of hex
   GooString *textEncoding;	// encoding (unicodeMap) to use for text
 				//   output
   EndOfLineKind textEOL;	// type of EOL marker to use for text

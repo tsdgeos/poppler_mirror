@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005-2009, 2011, 2012, 2014 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2009, 2011, 2012, 2014, 2015 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
@@ -309,7 +309,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
 
   } else {
 
-    if (!(fontLoc = gfxFont->locateFont(xref, gFalse))) {
+    if (!(fontLoc = gfxFont->locateFont(xref, NULL))) {
       error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'",
 	    gfxFont->getName() ? gfxFont->getName()->getCString()
 	                       : "(unnamed)");

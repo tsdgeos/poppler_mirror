@@ -1230,6 +1230,15 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   }
 
   // initialize
+  embedType1 = gTrue;
+  embedTrueType = gTrue;
+  embedCIDPostScript = gTrue;
+  embedCIDTrueType = gTrue;
+  fontPassthrough = gFalse;
+  preloadImagesForms = gFalse;
+  generateOPI = gFalse;
+  useASCIIHex = gFalse;
+  useBinary = gFalse;
   rasterMono = gFalse;
   rasterResolution = 300;
   uncompressPreloadedImages = gFalse;
@@ -1314,7 +1323,6 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
     if (!paperMatch)
       break; // we only need one entry when all pages are the same size
   }
-  preload = globalParams->getPSPreload();
   if (imgLLX == 0 && imgURX == 0 && imgLLY == 0 && imgURY == 0) {
     imgLLX = imgLLY = 0;
     imgURX = paperWidth;
@@ -1519,7 +1527,7 @@ void PSOutputDev::writeHeader(const std::vector<int> &pages,
     writePS("%%DocumentCustomColors: (atend)\n");
   }
   writePS("%%DocumentSuppliedResources: (atend)\n");
-  if ((level == psLevel1 || level == psLevel1Sep) && globalParams->getPSBinary()) {
+  if ((level == psLevel1 || level == psLevel1Sep) && useBinary) {
     writePS("%%DocumentData: Binary\n");
   }
 
@@ -1675,7 +1683,7 @@ void PSOutputDev::writeDocSetup(PDFDoc *doc, Catalog *catalog,
       }
     }
 #if OPI_SUPPORT
-    if (globalParams->getPSOPI()) {
+    if (generateOPI) {
       writePS("/opiMatrix matrix currentmatrix def\n");
     }
 #endif
@@ -1884,7 +1892,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
 			     font->getID()->num, font->getID()->gen);
     setupType3Font(font, psName, parentResDict);
   } else {
-    fontLoc = font->locateFont(xref, gTrue);
+    fontLoc = font->locateFont(xref, this);
     if (fontLoc != NULL) {
       switch (fontLoc->locType) {
       case gfxFontLocEmbedded:
@@ -2816,7 +2824,7 @@ void PSOutputDev::setupImages(Dict *resDict) {
   Ref imgID;
   int i, j;
 
-  if (!(mode == psModeForm || inType3Char || preload)) {
+  if (!(mode == psModeForm || inType3Char || preloadImagesForms)) {
     return;
   }
 
@@ -2868,7 +2876,7 @@ void PSOutputDev::setupImages(Dict *resDict) {
 }
 
 void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
-  GBool useRLE, useCompressed, useASCIIHex;
+  GBool useRLE, useCompressed, doUseASCIIHex;
   GooString *s;
   int c;
   int size, line, col, i;
@@ -2880,7 +2888,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
   if (level < psLevel2) {
     useRLE = gFalse;
     useCompressed = gFalse;
-    useASCIIHex = gTrue;
+    doUseASCIIHex = gTrue;
   } else {
     if (uncompressPreloadedImages) {
       useRLE = gFalse;
@@ -2896,7 +2904,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
 	useCompressed = gFalse;
       }
     }
-    useASCIIHex = globalParams->getPSASCIIHex();
+    doUseASCIIHex = useASCIIHex;
   }
   if (useCompressed) {
     str = str->getUndecodedStream();
@@ -2904,7 +2912,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
   if (useRLE) {
     str = new RunLengthEncoder(str);
   }
-  if (useASCIIHex) {
+  if (doUseASCIIHex) {
     str = new ASCIIHexEncoder(str);
   } else {
     str = new ASCII85Encoder(str);
@@ -2917,23 +2925,23 @@ void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
     do {
       c = str->getChar();
     } while (c == '\n' || c == '\r');
-    if (c == (useASCIIHex ? '>' : '~') || c == EOF) {
+    if (c == (doUseASCIIHex ? '>' : '~') || c == EOF) {
       break;
     }
     if (c == 'z') {
       ++col;
     } else {
       ++col;
-      for (i = 1; i <= (useASCIIHex ? 1 : 4); ++i) {
+      for (i = 1; i <= (doUseASCIIHex ? 1 : 4); ++i) {
 	do {
 	  c = str->getChar();
 	} while (c == '\n' || c == '\r');
-	if (c == (useASCIIHex ? '>' : '~') || c == EOF) {
+	if (c == (doUseASCIIHex ? '>' : '~') || c == EOF) {
 	  break;
 	}
 	++col;
       }
-      if (c == (useASCIIHex ? '>' : '~') || c == EOF) {
+      if (c == (doUseASCIIHex ? '>' : '~') || c == EOF) {
 	break;
       }
     }
@@ -2941,7 +2949,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
       ++size;
       col = 0;
     }
-  } while (c != (useASCIIHex ? '>' : '~') && c != EOF);
+  } while (c != (doUseASCIIHex ? '>' : '~') && c != EOF);
   // add one entry for the final line of data; add another entry
   // because the RunLengthDecode filter may read past the end
   ++size;
@@ -2963,12 +2971,12 @@ void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
     writePSFmt("{0:d} array 1 index {1:d} 2 index put\n",
 	       innerSize, outer);
     line = col = 0;
-    writePS((char *)(useASCIIHex ? "dup 0 <" : "dup 0 <~"));
+    writePS((char *)(doUseASCIIHex ? "dup 0 <" : "dup 0 <~"));
     for (;;) {
       do {
 	c = str->getChar();
       } while (c == '\n' || c == '\r');
-      if (c == (useASCIIHex ? '>' : '~') || c == EOF) {
+      if (c == (doUseASCIIHex ? '>' : '~') || c == EOF) {
 	break;
       }
       if (c == 'z') {
@@ -2977,18 +2985,18 @@ void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
       } else {
 	writePSChar(c);
 	++col;
-	for (i = 1; i <= (useASCIIHex ? 1 : 4); ++i) {
+	for (i = 1; i <= (doUseASCIIHex ? 1 : 4); ++i) {
 	  do {
 	    c = str->getChar();
 	  } while (c == '\n' || c == '\r');
-	  if (c == (useASCIIHex ? '>' : '~') || c == EOF) {
+	  if (c == (doUseASCIIHex ? '>' : '~') || c == EOF) {
 	    break;
 	  }
 	  writePSChar(c);
 	  ++col;
 	}
       }
-      if (c == (useASCIIHex ? '>' : '~') || c == EOF) {
+      if (c == (doUseASCIIHex ? '>' : '~') || c == EOF) {
 	break;
       }
       // each line is: "dup nnnnn <~...data...~> put<eol>"
@@ -2996,15 +3004,15 @@ void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
       // chunks are 1 or 4 bytes each, so we have to stop at 232
       // but make it 225 just to be safe
       if (col > 225) {
-	writePS((char *)(useASCIIHex ? "> put\n" : "~> put\n"));
+	writePS((char *)(doUseASCIIHex ? "> put\n" : "~> put\n"));
 	++line;
 	if (line >= innerSize) break;
-	writePSFmt((char *)(useASCIIHex ? "dup {0:d} <" : "dup {0:d} <~"), line);
+	writePSFmt((char *)(doUseASCIIHex ? "dup {0:d} <" : "dup {0:d} <~"), line);
 	col = 0;
       }
     }
-    if (c == (useASCIIHex ? '>' : '~') || c == EOF) {
-      writePS((char *)(useASCIIHex ? "> put\n" : "~> put\n"));
+    if (c == (doUseASCIIHex ? '>' : '~') || c == EOF) {
+      writePS((char *)(doUseASCIIHex ? "> put\n" : "~> put\n"));
       if (useRLE) {
 	++line;
 	writePSFmt("{0:d} <> put\n", line);
@@ -3026,7 +3034,7 @@ void PSOutputDev::setupForms(Dict *resDict) {
   Object xObjDict, xObj, xObjRef, subtypeObj;
   int i;
 
-  if (!preload) {
+  if (!preloadImagesForms) {
     return;
   }
 
@@ -3163,7 +3171,6 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 #endif
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   Guchar digit;
-  GBool useBinary;
   GBool isGray;
 
   if (forceRasterize) {
@@ -3265,7 +3272,6 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 	       m0, m1, m2, m3, m4, m5);
     switch (level) {
     case psLevel1:
-      useBinary = globalParams->getPSBinary();
       writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1{5:s}\n",
 		 w, h, w, -h, h,
 		 useBinary ? "Bin" : "");
@@ -3304,7 +3310,6 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
       }
       break;
     case psLevel1Sep:
-      useBinary = globalParams->getPSBinary();
       p = bitmap->getDataPtr();
       // Check for an all gray image
       isGray = gTrue;
@@ -3517,10 +3522,9 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 	writePS("  /Decode [0 1 0 1 0 1 0 1]\n");
       }
       writePS("  /DataSource currentfile\n");
-      useBinary = globalParams->getPSBinary();
       if (useBinary) {
 	/* nothing to do */;
-      } else if (globalParams->getPSASCIIHex()) {
+      } else if (useASCIIHex) {
 	writePS("    /ASCIIHexDecode filter\n");
       } else {
 	writePS("    /ASCII85Decode filter\n");
@@ -3529,7 +3533,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
       writePS(">>\n");
       if (useBinary) {
 	/* nothing to do */;
-      } else if (globalParams->getPSASCIIHex()) {
+      } else if (useASCIIHex) {
 	str = new ASCIIHexEncoder(str);
       } else {
 	str = new ASCII85Encoder(str);
@@ -5140,14 +5144,13 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
   int col, x, y, c, i;
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   Guchar digit, grayValue;
-  const GBool useBinary = globalParams->getPSBinary();
 
   // explicit masking
   if (maskStr && !(maskColors && colorMap)) {
     maskToClippingPath(maskStr, maskWidth, maskHeight, maskInvert);
   }
 
-  if ((inType3Char || preload) && !colorMap) {
+  if ((inType3Char || preloadImagesForms) && !colorMap) {
     if (inlineImg) {
       // create an array
       str = new FixedLengthEncoder(str, len);
@@ -5186,7 +5189,7 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
   }
 
   // image/imagemask command
-  if ((inType3Char || preload) && !colorMap) {
+  if ((inType3Char || preloadImagesForms) && !colorMap) {
     writePSFmt("{0:d} {1:d} {2:s} [{3:d} 0 0 {4:d} 0 {5:d}] pdfImM1a\n",
 	       width, height, invert ? "true" : "false",
 	       width, -height, height);
@@ -5203,7 +5206,7 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
   }
 
   // image data
-  if (!((inType3Char || preload) && !colorMap)) {
+  if (!((inType3Char || preloadImagesForms) && !colorMap)) {
 
     if (colorMap) {
 
@@ -5299,7 +5302,6 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
   GBool checkProcessColor;
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   Guchar digit;
-  const GBool useBinary = globalParams->getPSBinary();
 
   // explicit masking
   if (maskStr && !(maskColors && colorMap)) {
@@ -5526,7 +5528,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
   GBool emitRect, addRect, extendRect;
   GooString *s;
   int n, numComps;
-  GBool useRLE, useASCII, useASCIIHex, useCompressed;
+  GBool useRLE, useASCII, useCompressed;
   GfxSeparationColorSpace *sepCS;
   GfxColor color;
   GfxCMYK cmyk;
@@ -5705,10 +5707,8 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
     writePS(" setcolorspace\n");
   }
 
-  useASCIIHex = globalParams->getPSASCIIHex();
-
   // set up the image data
-  if (mode == psModeForm || inType3Char || preload) {
+  if (mode == psModeForm || inType3Char || preloadImagesForms) {
     if (inlineImg) {
       // create an array
       str2 = new FixedLengthEncoder(str, len);
@@ -5818,7 +5818,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
   }
 
   // data source
-  if (mode == psModeForm || inType3Char || preload) {
+  if (mode == psModeForm || inType3Char || preloadImagesForms) {
     if (inlineImg) {
       writePS("  /DataSource { pdfImStr }\n");
     } else {
@@ -5830,7 +5830,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
   }
 
   // filters
-  if ((mode == psModeForm || inType3Char || preload) &&
+  if ((mode == psModeForm || inType3Char || preloadImagesForms) &&
       uncompressPreloadedImages) {
     s = NULL;
     useRLE = gFalse;
@@ -5842,12 +5842,12 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
     if ((colorMap && colorMap->getColorSpace()->getMode() == csDeviceN) ||
 	inlineImg || !s) {
       useRLE = gTrue;
-      useASCII = !(mode == psModeForm || inType3Char || preload);
+      useASCII = !(mode == psModeForm || inType3Char || preloadImagesForms);
       useCompressed = gFalse;
     } else {
       useRLE = gFalse;
       useASCII = str->isBinary() &&
-	         !(mode == psModeForm || inType3Char || preload);
+	         !(mode == psModeForm || inType3Char || preloadImagesForms);
       useCompressed = gTrue;
     }
   }
@@ -5865,7 +5865,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
     delete s;
   }
 
-  if (mode == psModeForm || inType3Char || preload) {
+  if (mode == psModeForm || inType3Char || preloadImagesForms) {
 
     // end of image dictionary
     writePSFmt(">>\n{0:s}\n", colorMap ? "image" : "imagemask");
@@ -5985,7 +5985,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
   Stream *str2;
   GooString *s;
   int n, numComps;
-  GBool useRLE, useASCII, useASCIIHex, useCompressed;
+  GBool useRLE, useASCII, useCompressed;
   GBool maskUseRLE, maskUseASCII, maskUseCompressed;
   GooString *maskFilters;
   GfxSeparationColorSpace *sepCS;
@@ -5994,7 +5994,6 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
   int c;
   int col, i;
 
-  useASCIIHex = globalParams->getPSASCIIHex();
   useRLE = useASCII = useCompressed = gFalse; // make gcc happy
   maskUseRLE = maskUseASCII = maskUseCompressed = gFalse; // make gcc happy
   maskFilters = NULL; // make gcc happy
@@ -6003,7 +6002,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
   if (maskStr) {
 
     // mask data source
-    if ((mode == psModeForm || inType3Char || preload) &&
+    if ((mode == psModeForm || inType3Char || preloadImagesForms) &&
       uncompressPreloadedImages) {
       s = NULL;
       maskUseRLE = gFalse;
@@ -6013,12 +6012,12 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
       s = maskStr->getPSFilter(3, "  ");
       if (!s) {
 	maskUseRLE = gTrue;
-	maskUseASCII = !(mode == psModeForm || inType3Char || preload);
+	maskUseASCII = !(mode == psModeForm || inType3Char || preloadImagesForms);
 	maskUseCompressed = gFalse;
       } else {
 	maskUseRLE = gFalse;
 	maskUseASCII = maskStr->isBinary() &&
-	               !(mode == psModeForm || inType3Char || preload);
+	               !(mode == psModeForm || inType3Char || preloadImagesForms);
 	maskUseCompressed = gTrue;
       }
     }
@@ -6036,7 +6035,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
     if (s) {
       delete s;
     }
-    if (mode == psModeForm || inType3Char || preload) {
+    if (mode == psModeForm || inType3Char || preloadImagesForms) {
       writePSFmt("MaskData_{0:d}_{1:d} pdfMaskInit\n",
 		 ref->getRefNum(), ref->getRefGen());
     } else {
@@ -6082,7 +6081,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
   }
 
   // set up the image data
-  if (mode == psModeForm || inType3Char || preload) {
+  if (mode == psModeForm || inType3Char || preloadImagesForms) {
     if (inlineImg) {
       // create an array
       str2 = new FixedLengthEncoder(str, len);
@@ -6200,7 +6199,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
   }
 
   // data source
-  if (mode == psModeForm || inType3Char || preload) {
+  if (mode == psModeForm || inType3Char || preloadImagesForms) {
     if (inlineImg) {
   writePS("  /DataSource { pdfImStr }\n");
     } else {
@@ -6212,7 +6211,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
   }
 
   // filters
-  if ((mode == psModeForm || inType3Char || preload) &&
+  if ((mode == psModeForm || inType3Char || preloadImagesForms) &&
       uncompressPreloadedImages) {
     s = NULL;
     useRLE = gFalse;
@@ -6224,12 +6223,12 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
     if ((colorMap && colorMap->getColorSpace()->getMode() == csDeviceN) ||
 	inlineImg || !s) {
       useRLE = gTrue;
-      useASCII = !(mode == psModeForm || inType3Char || preload);
+      useASCII = !(mode == psModeForm || inType3Char || preloadImagesForms);
       useCompressed = gFalse;
     } else {
       useRLE = gFalse;
       useASCII = str->isBinary() &&
-                 !(mode == psModeForm || inType3Char || preload);
+                 !(mode == psModeForm || inType3Char || preloadImagesForms);
       useCompressed = gTrue;
     }
   }
@@ -6264,7 +6263,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
 	       maskInvert ? 1 : 0, maskInvert ? 0 : 1);
 
     // mask data source
-    if (mode == psModeForm || inType3Char || preload) {
+    if (mode == psModeForm || inType3Char || preloadImagesForms) {
       writePS("  /DataSource {pdfMaskSrc}\n");
       writePS(maskFilters->getCString());
     } else {
@@ -6276,7 +6275,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
     writePS(">>\n");
   }
 
-  if (mode == psModeForm || inType3Char || preload) {
+  if (mode == psModeForm || inType3Char || preloadImagesForms) {
 
     // image command
     writePSFmt("{0:s}\n", colorMap ? "image" : "imagemask");
@@ -6299,7 +6298,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
   }
 
   // get rid of the array and index
-  if (mode == psModeForm || inType3Char || preload) {
+  if (mode == psModeForm || inType3Char || preloadImagesForms) {
     if (!inlineImg) writePS("pop ");
     writePS("pop pop\n");
 
@@ -6344,7 +6343,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
 
   // close the mask stream
   if (maskStr) {
-    if (!(mode == psModeForm || inType3Char || preload)) {
+    if (!(mode == psModeForm || inType3Char || preloadImagesForms)) {
       writePS("pdfMaskEnd\n");
     }
   }
@@ -6626,7 +6625,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
 void PSOutputDev::opiBegin(GfxState *state, Dict *opiDict) {
   Object dict;
 
-  if (globalParams->getPSOPI()) {
+  if (generateOPI) {
     opiDict->lookup("2.0", &dict);
     if (dict.isDict()) {
       opiBegin20(state, dict.getDict());
@@ -6999,7 +6998,7 @@ void PSOutputDev::opiTransform(GfxState *state, double x0, double y0,
 void PSOutputDev::opiEnd(GfxState *state, Dict *opiDict) {
   Object dict;
 
-  if (globalParams->getPSOPI()) {
+  if (generateOPI) {
     opiDict->lookup("2.0", &dict);
     if (dict.isDict()) {
       writePS("%%EndIncludedImage\n");

@@ -597,15 +597,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   psResidentFonts = new GooHash(gTrue);
   psResidentFonts16 = new GooList();
   psResidentFontsCC = new GooList();
-  psEmbedType1 = gTrue;
-  psEmbedTrueType = gTrue;
-  psEmbedCIDPostScript = gTrue;
-  psEmbedCIDTrueType = gTrue;
-  psFontPassthrough = gFalse;
-  psPreload = gFalse;
-  psOPI = gFalse;
-  psASCIIHex = gFalse;
-  psBinary = gFalse;
   textEncoding = new GooString("UTF-8");
 #if defined(_WIN32)
   textEOL = eolDOS;
@@ -1542,87 +1533,6 @@ PSFontParam16 *GlobalParams::getPSResidentFontCC(GooString *collection,
   return p;
 }
 
-GBool GlobalParams::getPSEmbedType1() {
-  GBool e;
-
-  lockGlobalParams;
-  e = psEmbedType1;
-  unlockGlobalParams;
-  return e;
-}
-
-GBool GlobalParams::getPSEmbedTrueType() {
-  GBool e;
-
-  lockGlobalParams;
-  e = psEmbedTrueType;
-  unlockGlobalParams;
-  return e;
-}
-
-GBool GlobalParams::getPSEmbedCIDPostScript() {
-  GBool e;
-
-  lockGlobalParams;
-  e = psEmbedCIDPostScript;
-  unlockGlobalParams;
-  return e;
-}
-
-GBool GlobalParams::getPSEmbedCIDTrueType() {
-  GBool e;
-
-  lockGlobalParams;
-  e = psEmbedCIDTrueType;
-  unlockGlobalParams;
-  return e;
-}
-
-GBool GlobalParams::getPSFontPassthrough() {
-  GBool e;
-
-  lockGlobalParams;
-  e = psFontPassthrough;
-  unlockGlobalParams;
-  return e;
-}
-
-GBool GlobalParams::getPSPreload() {
-  GBool preload;
-
-  lockGlobalParams;
-  preload = psPreload;
-  unlockGlobalParams;
-  return preload;
-}
-
-GBool GlobalParams::getPSOPI() {
-  GBool opi;
-
-  lockGlobalParams;
-  opi = psOPI;
-  unlockGlobalParams;
-  return opi;
-}
-
-GBool GlobalParams::getPSASCIIHex() {
-  GBool ah;
-
-  lockGlobalParams;
-  ah = psASCIIHex;
-  unlockGlobalParams;
-  return ah;
-}
-
-GBool GlobalParams::getPSBinary() {
-  GBool binary;
-
-  lockGlobalParams;
-  binary = psBinary;
-  unlockGlobalParams;
-  return binary;
-}
-
 GooString *GlobalParams::getTextEncodingName() {
   GooString *s;
 
@@ -1910,60 +1820,6 @@ void GlobalParams::setPSCenter(GBool center) {
 void GlobalParams::setPSLevel(PSLevel level) {
   lockGlobalParams;
   psLevel = level;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSEmbedType1(GBool embed) {
-  lockGlobalParams;
-  psEmbedType1 = embed;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSEmbedTrueType(GBool embed) {
-  lockGlobalParams;
-  psEmbedTrueType = embed;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSEmbedCIDPostScript(GBool embed) {
-  lockGlobalParams;
-  psEmbedCIDPostScript = embed;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSEmbedCIDTrueType(GBool embed) {
-  lockGlobalParams;
-  psEmbedCIDTrueType = embed;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSFontPassthrough(GBool passthrough) {
-  lockGlobalParams;
-  psFontPassthrough = passthrough;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSPreload(GBool preload) {
-  lockGlobalParams;
-  psPreload = preload;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSOPI(GBool opi) {
-  lockGlobalParams;
-  psOPI = opi;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSASCIIHex(GBool hex) {
-  lockGlobalParams;
-  psASCIIHex = hex;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSBinary(GBool binary) {
-  lockGlobalParams;
-  psBinary = binary;
   unlockGlobalParams;
 }
 

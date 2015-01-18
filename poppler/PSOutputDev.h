@@ -45,6 +45,7 @@
 #include "OutputDev.h"
 #include <set>
 #include <map>
+#include <vector>
 
 class GHooash;
 class PDFDoc;
@@ -151,7 +152,7 @@ public:
 
   // Does this device use drawForm()?  If this returns false,
   // form-type XObjects will be interpreted (i.e., unrolled).
-  virtual GBool useDrawForm() { return preload; }
+  virtual GBool useDrawForm() { return preloadImagesForms; }
 
   // Does this device use beginType3Char/endType3Char?  Otherwise,
   // text in Type 3 fonts will be drawn with drawChar/drawString.
@@ -313,6 +314,21 @@ public:
   void setRasterMono(GBool b) { rasterMono = b; }
   void setUncompressPreloadedImages(GBool b) { uncompressPreloadedImages = b; }
 
+  GBool getEmbedType1() const { return embedType1; }
+  GBool getEmbedTrueType() const { return embedTrueType; }
+  GBool getEmbedCIDPostScript() const { return embedCIDPostScript; }
+  GBool getEmbedCIDTrueType() const { return embedCIDTrueType; }
+  GBool getFontPassthrough() const { return fontPassthrough; }
+  void setEmbedType1(GBool b) { embedType1 = b; }
+  void setEmbedTrueType(GBool b) { embedTrueType = b; }
+  void setEmbedCIDPostScript(GBool b) { embedCIDPostScript = b; }
+  void setEmbedCIDTrueType(GBool b) { embedCIDTrueType = b; }
+  void setFontPassthrough(GBool b) { fontPassthrough = b; }
+  void setPreloadImagesForms(GBool b) { preloadImagesForms = b; }
+  void setGenerateOPI(GBool b) { generateOPI = b; }
+  void setUseASCIIHex(GBool b) { useASCIIHex = b; }
+  void setUseBinary(GBool b) { useBinary = b; }
+
 private:
 
   void init(PSOutputFunc outputFuncA, void *outputStreamA,
@@ -415,8 +431,6 @@ private:
                                 // (only psModePSOrigPageSizes output mode)
   int imgLLX, imgLLY,		// imageable area, in pts
       imgURX, imgURY;
-  GBool preload;		// load all images into memory, and
-				//   predefine forms
   GBool noCrop;
 
   PSOutputFunc outputFunc;
@@ -499,6 +513,16 @@ private:
   GBool rasterMono;		// true to do PostScript rasterization
 				//   in monochrome (gray); false to do it
 				//   in color (RGB/CMYK)
+  GBool embedType1;		// embed Type 1 fonts?
+  GBool embedTrueType;		// embed TrueType fonts?
+  GBool embedCIDPostScript;	// embed CID PostScript fonts?
+  GBool embedCIDTrueType;	// embed CID TrueType fonts?
+  GBool fontPassthrough;	// pass all fonts through as-is?
+  GBool preloadImagesForms;	// preload PostScript images and forms into
+				//   memory
+  GBool generateOPI;		// generate PostScript OPI comments?
+  GBool useASCIIHex;		// use ASCIIHex instead of ASCII85?
+  GBool useBinary;		// use binary instead of hex
 
 #if OPI_SUPPORT
   int opi13Nest;		// nesting level of OPI 1.3 objects

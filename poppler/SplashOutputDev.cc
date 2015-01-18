@@ -1893,7 +1893,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 
   } else {
 
-    if (!(fontLoc = gfxFont->locateFont((xref) ? xref : doc->getXRef(), gFalse))) {
+    if (!(fontLoc = gfxFont->locateFont((xref) ? xref : doc->getXRef(), NULL))) {
       error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'",
 	    gfxFont->getName() ? gfxFont->getName()->getCString()
 	                       : "(unnamed)");
