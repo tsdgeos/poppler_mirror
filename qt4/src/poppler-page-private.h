@@ -2,6 +2,7 @@
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2007, 2012, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2015 Adam Reichold <adamreichold@myopera.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +47,9 @@ public:
 
   static Link* convertLinkActionToLink(::LinkAction * a, DocumentData *parentDoc, const QRectF &linkArea);
   
-  TextPage *prepareTextSearch(const QString &text, Page::SearchMode caseSensitive, Page::Rotation rotate, GBool *sCase, QVector<Unicode> *u);
+  TextPage *prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u);
+  GBool performSingleTextSearch(TextPage* textPage, QVector<Unicode> &u, double &sLeft, double &sTop, double &sRight, double &sBottom, Page::SearchDirection direction, GBool sCase, GBool sWords);
+  QList<QRectF> performMultipleTextSearch(TextPage* textPage, QVector<Unicode> &u, GBool sCase, GBool sWords);
 };
 
 }
