@@ -280,6 +280,9 @@ protected:
 		   GfxImageColorMap *colorMap, cairo_surface_t *image);
   void fillToStrokePathClip(GfxState *state);
   void alignStrokeCoords(GfxSubpath *subpath, int i, double *x, double *y);
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
+  GBool setMimeDataForJBIG2Globals (Stream *str, cairo_surface_t *image);
+#endif
 
   GfxRGB fill_color, stroke_color;
   cairo_pattern_t *fill_pattern, *stroke_pattern;

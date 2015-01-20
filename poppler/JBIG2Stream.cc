@@ -1168,7 +1168,7 @@ JBIG2CodeTable::~JBIG2CodeTable() {
 // JBIG2Stream
 //------------------------------------------------------------------------
 
-JBIG2Stream::JBIG2Stream(Stream *strA, Object *globalsStreamA):
+JBIG2Stream::JBIG2Stream(Stream *strA, Object *globalsStreamA, Object *globalsStreamRefA):
   FilterStream(strA)
 {
   pageBitmap = NULL;
@@ -1193,7 +1193,12 @@ JBIG2Stream::JBIG2Stream(Stream *strA, Object *globalsStreamA):
   huffDecoder = new JBIG2HuffmanDecoder();
   mmrDecoder = new JBIG2MMRDecoder();
 
-  globalsStreamA->copy(&globalsStream);
+  if (globalsStreamA->isStream()) {
+    globalsStreamA->copy(&globalsStream);
+    if (globalsStreamRefA->isRef())
+      globalsStreamRef = globalsStreamRefA->getRef();
+  }
+
   segments = globalSegments = NULL;
   curStr = NULL;
   dataPtr = dataEnd = NULL;
