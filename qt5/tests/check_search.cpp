@@ -151,8 +151,8 @@ void TestSearch::testWholeWordsOnly()
 
     const Poppler::Page::SearchFlags mode0 = 0;
     const Poppler::Page::SearchFlags mode1 = Poppler::Page::IgnoreCase;
-    const Poppler::Page::SearchFlags mode2 = Poppler::Page::WholeWorlds;
-    const Poppler::Page::SearchFlags mode3 = Poppler::Page::IgnoreCase | Poppler::Page::WholeWorlds;
+    const Poppler::Page::SearchFlags mode2 = Poppler::Page::WholeWords;
+    const Poppler::Page::SearchFlags mode3 = Poppler::Page::IgnoreCase | Poppler::Page::WholeWords;
 
     double left, top, right, bottom;
 

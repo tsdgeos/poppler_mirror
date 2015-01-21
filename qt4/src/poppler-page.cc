@@ -508,7 +508,7 @@ bool Page::search(const QString &text, double &sLeft, double &sTop, double &sRig
 bool Page::search(const QString &text, double &sLeft, double &sTop, double &sRight, double &sBottom, SearchDirection direction, SearchFlags flags, Rotation rotate) const
 {
   const GBool sCase = flags.testFlag(IgnoreCase) ? gFalse : gTrue;
-  const GBool sWords = flags.testFlag(WholeWorlds) ? gTrue : gFalse;
+  const GBool sWords = flags.testFlag(WholeWords) ? gTrue : gFalse;
 
   QVector<Unicode> u;
   TextPage *textPage = m_page->prepareTextSearch(text, rotate, &u);
@@ -555,7 +555,7 @@ QList<QRectF> Page::search(const QString &text, SearchMode caseSensitive, Rotati
 QList<QRectF> Page::search(const QString &text, SearchFlags flags, Rotation rotate) const
 {
   const GBool sCase = flags.testFlag(IgnoreCase) ? gFalse : gTrue;
-  const GBool sWords = flags.testFlag(WholeWorlds) ? gTrue : gFalse;
+  const GBool sWords = flags.testFlag(WholeWords) ? gTrue : gFalse;
 
   QVector<Unicode> u;
   TextPage *textPage = m_page->prepareTextSearch(text, rotate, &u);

@@ -587,7 +587,7 @@ delete it;
         enum SearchFlag
         {
             IgnoreCase = 0x00000001,    ///< Case differences are ignored
-            WholeWorlds = 0x00000002    ///< Only whole words are matched
+            WholeWords = 0x00000002    ///< Only whole words are matched
         };
         Q_DECLARE_FLAGS( SearchFlags, SearchFlag )
 	
