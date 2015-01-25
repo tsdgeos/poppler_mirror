@@ -208,8 +208,8 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 
 	icon = gtk_image_new_from_icon_name ("dialog-password",
 					 GTK_ICON_SIZE_DIALOG);
-
-	gtk_misc_set_alignment (GTK_MISC (icon), 0.5, 0.0);
+	gtk_widget_set_halign (icon, GTK_ALIGN_CENTER);
+	gtk_widget_set_valign (icon, GTK_ALIGN_START);
 	gtk_box_pack_start (GTK_BOX (hbox), icon, FALSE, FALSE, 0);
 	gtk_widget_show (icon);
 
@@ -218,7 +218,8 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 	gtk_widget_show (main_vbox);
 
 	label = gtk_label_new (NULL);
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+        gtk_widget_set_halign (label, GTK_ALIGN_START);
+        gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 	gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
 	file_name = g_file_get_basename (uri_file);
 	format = g_strdup_printf ("<span size=\"larger\" weight=\"bold\">%s</span>\n\n%s",
@@ -245,7 +246,8 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 	gtk_widget_show (table);
 
 	label = gtk_label_new_with_mnemonic ("_Password:");
-	gtk_misc_set_alignment (GTK_MISC (label), 0.0, 0.5);
+        gtk_widget_set_halign (label, GTK_ALIGN_START);
+        gtk_widget_set_valign (label, GTK_ALIGN_CENTER);
 
 	password_entry = gtk_entry_new ();
 	gtk_entry_set_visibility (GTK_ENTRY (password_entry), FALSE);
