@@ -453,7 +453,6 @@ pgd_find_create_widget (PopplerDocument *document)
 	treeview = gtk_tree_view_new_with_model (model);
         g_object_unref (model);
         demo->treeview = treeview;
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (treeview), TRUE);
         selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview));
 	gtk_tree_selection_set_mode (selection, GTK_SELECTION_SINGLE);
         g_signal_connect (selection, "changed",

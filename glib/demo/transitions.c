@@ -207,7 +207,6 @@ pgd_transitions_create_list (GtkTreeModel *model)
 	
 	treeview = gtk_tree_view_new_with_model (GTK_TREE_MODEL (model));
 	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (treeview), TRUE);
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (treeview), TRUE);
 	gtk_tree_selection_set_mode (gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview)),
 				     GTK_SELECTION_NONE);
 

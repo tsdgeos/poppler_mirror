@@ -255,7 +255,6 @@ pgd_fonts_create_widget (PopplerDocument *document)
 	model = gtk_list_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
 	demo->treeview = gtk_tree_view_new_with_model (GTK_TREE_MODEL (model));
 	gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (demo->treeview), FALSE);
-	gtk_tree_view_set_rules_hint (GTK_TREE_VIEW (demo->treeview), TRUE);
 	gtk_tree_selection_set_mode (gtk_tree_view_get_selection (GTK_TREE_VIEW (demo->treeview)),
 				     GTK_SELECTION_NONE);
 	g_object_unref (model);
