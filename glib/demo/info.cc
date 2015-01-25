@@ -143,7 +143,7 @@ pgd_info_create_widget (PopplerDocument *document)
 {
 	GtkWidget *vbox;
 	GtkWidget *label;
-	GtkWidget *frame, *alignment, *table;
+	GtkWidget *frame, *table;
 	gchar     *str;
 	gchar     *title, *format, *author, *subject;
 	gchar     *keywords, *creator, *producer;
@@ -196,13 +196,17 @@ pgd_info_create_widget (PopplerDocument *document)
 	gtk_label_set_markup (GTK_LABEL (label), "<b>Document properties</b>");
 	gtk_frame_set_label_widget (GTK_FRAME (frame), label);
 	gtk_widget_show (label);
-	
-	alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
-	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 5, 5, 12, 5);
-	gtk_container_add (GTK_CONTAINER (frame), alignment);
-	gtk_widget_show (alignment);
 
 	table = gtk_grid_new ();
+	gtk_widget_set_margin_top (table, 5);
+	gtk_widget_set_margin_bottom (table, 5);
+#if GTK_CHECK_VERSION(3, 12, 0)
+	gtk_widget_set_margin_start (table, 12);
+	gtk_widget_set_margin_end (table, 5);
+#else
+	gtk_widget_set_margin_left (table, 12);
+	gtk_widget_set_margin_right (table, 5);
+#endif
 	gtk_grid_set_column_spacing (GTK_GRID (table), 6);
 	gtk_grid_set_row_spacing (GTK_GRID (table), 6);
 
@@ -261,7 +265,7 @@ pgd_info_create_widget (PopplerDocument *document)
 
 	/* TODO: view_prefs */
 
-	gtk_container_add (GTK_CONTAINER (alignment), table);
+	gtk_container_add (GTK_CONTAINER (frame), table);
 	gtk_widget_show (table);
 
 	gtk_box_pack_start (GTK_BOX (vbox), frame, TRUE, TRUE, 0);

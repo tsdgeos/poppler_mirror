@@ -330,7 +330,7 @@ pgd_text_create_widget (PopplerDocument *document)
 	GtkWidget        *button;
 	GtkWidget        *swindow, *textview, *treeview;
 	GtkTreeSelection *selection;
-        GtkWidget        *frame, *alignment, *table;
+        GtkWidget        *frame, *table;
 	GtkWidget        *hpaned;
 	GtkCellRenderer  *renderer;
 	gchar            *str;
@@ -515,12 +515,16 @@ pgd_text_create_widget (PopplerDocument *document)
         gtk_frame_set_label_widget (GTK_FRAME (frame), label);
         gtk_widget_show (label);
 
-        alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
-        gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 5, 5, 12, 5);
-        gtk_container_add (GTK_CONTAINER (frame), alignment);
-        gtk_widget_show (alignment);
-
         table = gtk_grid_new ();
+        gtk_widget_set_margin_top (table, 5);
+        gtk_widget_set_margin_bottom (table, 5);
+#if GTK_CHECK_VERSION(3, 12, 0)
+        gtk_widget_set_margin_start (table, 12);
+        gtk_widget_set_margin_end (table, 5);
+#else
+        gtk_widget_set_margin_left (table, 12);
+        gtk_widget_set_margin_right (table, 5);
+#endif
         gtk_grid_set_column_spacing (GTK_GRID (table), 6);
         gtk_grid_set_row_spacing (GTK_GRID (table), 6);
 
@@ -533,7 +537,7 @@ pgd_text_create_widget (PopplerDocument *document)
         demo->text_color = gtk_image_new ();
         pgd_table_add_property_with_custom_widget (GTK_GRID (table), "<b>Color:</b>", demo->text_color, &row);
 
-        gtk_container_add (GTK_CONTAINER (alignment), table);
+        gtk_container_add (GTK_CONTAINER (frame), table);
         gtk_widget_show (table);
 
 	gtk_box_pack_start (GTK_BOX (vbox2), frame, FALSE, FALSE, 12);

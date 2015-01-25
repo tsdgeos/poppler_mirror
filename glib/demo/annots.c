@@ -619,27 +619,30 @@ static void
 pgd_annot_view_set_annot (PgdAnnotsDemo *demo,
                           PopplerAnnot  *annot)
 {
-    GtkWidget  *alignment;
     GtkWidget  *table;
     gint        row = 0;
     gchar      *text;
     time_t      timet;
     PopplerRectangle rect;
 
-    alignment = gtk_bin_get_child (GTK_BIN (demo->annot_view));
-    if (alignment) {
-        gtk_container_remove (GTK_CONTAINER (demo->annot_view), alignment);
+    table = gtk_bin_get_child (GTK_BIN (demo->annot_view));
+    if (table) {
+        gtk_container_remove (GTK_CONTAINER (demo->annot_view), table);
     }
-
-    alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
-    gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 5, 5, 8, 5);
-    gtk_container_add (GTK_CONTAINER (demo->annot_view), alignment);
-    gtk_widget_show (alignment);
 
     if (!annot)
         return;
 
     table = gtk_grid_new ();
+    gtk_widget_set_margin_top (table, 5);
+    gtk_widget_set_margin_bottom (table, 5);
+#if GTK_CHECK_VERSION(3, 12, 0)
+    gtk_widget_set_margin_start (table, 8);
+    gtk_widget_set_margin_end (table, 5);
+#else
+    gtk_widget_set_margin_left (table, 8);
+    gtk_widget_set_margin_right (table, 5);
+#endif
     gtk_grid_set_column_spacing (GTK_GRID (table), 6);
     gtk_grid_set_row_spacing (GTK_GRID (table), 6);
 
@@ -694,7 +697,7 @@ pgd_annot_view_set_annot (PgdAnnotsDemo *demo,
           break;
     }
 
-    gtk_container_add (GTK_CONTAINER (alignment), table);
+    gtk_container_add (GTK_CONTAINER (demo->annot_view), table);
     gtk_widget_show (table);
 }
 

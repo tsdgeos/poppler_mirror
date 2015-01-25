@@ -158,23 +158,27 @@ pgd_action_view_add_destination (GtkWidget   *action_view,
 
 			new_dest = poppler_document_find_dest (document, dest->named_dest);
 			if (new_dest) {
-				GtkWidget *new_table, *alignment;
+				GtkWidget *new_table;
 				gint       new_row = 0;
 
-				alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
-				gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 5, 5, 12, 5);
-				
 				new_table = gtk_grid_new ();
+				gtk_widget_set_margin_top (new_table, 5);
+				gtk_widget_set_margin_bottom (new_table, 5);
+#if GTK_CHECK_VERSION(3, 12, 0)
+				gtk_widget_set_margin_start (new_table, 12);
+				gtk_widget_set_margin_end (new_table, 5);
+#else
+				gtk_widget_set_margin_left (new_table, 12);
+				gtk_widget_set_margin_right (new_table, 5);
+#endif
 				gtk_grid_set_column_spacing (GTK_GRID (new_table), 6);
 				gtk_grid_set_row_spacing (GTK_GRID (new_table), 6);
-				gtk_grid_attach (GTK_GRID(table), alignment, 0, *row, 1, 1);
-				gtk_widget_show (alignment);
 				
 				pgd_action_view_add_destination (action_view, GTK_GRID (new_table),
 								 new_dest, FALSE, &new_row);
 				poppler_dest_free (new_dest);
 
-				gtk_container_add (GTK_CONTAINER (alignment), new_table);
+				gtk_grid_attach (GTK_GRID(table), new_table, 0, *row, 1, 1);
 				gtk_widget_show (new_table);
 
 				*row += 1;
@@ -311,24 +315,27 @@ void
 pgd_action_view_set_action (GtkWidget     *action_view,
 			    PopplerAction *action)
 {
-	GtkWidget  *alignment;
 	GtkWidget  *table;
 	gint        row = 0;
 
-	alignment = gtk_bin_get_child (GTK_BIN (action_view));
-	if (alignment) {
-		gtk_container_remove (GTK_CONTAINER (action_view), alignment);
+	table = gtk_bin_get_child (GTK_BIN (action_view));
+	if (table) {
+		gtk_container_remove (GTK_CONTAINER (action_view), table);
 	}
-	
-	alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
-	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 5, 5, 12, 5);
-	gtk_container_add (GTK_CONTAINER (action_view), alignment);
-	gtk_widget_show (alignment);
 
 	if (!action)
 		return;
 
 	table = gtk_grid_new ();
+	gtk_widget_set_margin_top (table, 5);
+	gtk_widget_set_margin_bottom (table, 5);
+#if GTK_CHECK_VERSION(3, 12, 0)
+	gtk_widget_set_margin_start (table, 12);
+	gtk_widget_set_margin_end (table, 5);
+#else
+	gtk_widget_set_margin_left (table, 12);
+	gtk_widget_set_margin_right (table, 5);
+#endif
 	gtk_grid_set_column_spacing (GTK_GRID (table), 6);
 	gtk_grid_set_row_spacing (GTK_GRID (table), 6);
 
@@ -466,7 +473,7 @@ pgd_action_view_set_action (GtkWidget     *action_view,
 		g_assert_not_reached ();
 	}
 
-	gtk_container_add (GTK_CONTAINER (alignment), table);
+	gtk_container_add (GTK_CONTAINER (action_view), table);
 	gtk_widget_show (table);
 }
 
@@ -546,25 +553,28 @@ void
 pgd_movie_view_set_movie (GtkWidget    *movie_view,
 			  PopplerMovie *movie)
 {
-	GtkWidget  *alignment;
 	GtkWidget  *table;
 	GtkWidget  *button;
 	gint        row = 0;
 
-	alignment = gtk_bin_get_child (GTK_BIN (movie_view));
-	if (alignment) {
-		gtk_container_remove (GTK_CONTAINER (movie_view), alignment);
+	table = gtk_bin_get_child (GTK_BIN (movie_view));
+	if (table) {
+		gtk_container_remove (GTK_CONTAINER (movie_view), table);
 	}
-
-	alignment = gtk_alignment_new (0.5, 0.5, 1, 1);
-	gtk_alignment_set_padding (GTK_ALIGNMENT (alignment), 5, 5, 12, 5);
-	gtk_container_add (GTK_CONTAINER (movie_view), alignment);
-	gtk_widget_show (alignment);
 
 	if (!movie)
 		return;
 
 	table = gtk_grid_new ();
+	gtk_widget_set_margin_top (table, 5);
+	gtk_widget_set_margin_bottom (table, 5);
+#if GTK_CHECK_VERSION(3, 12, 0)
+	gtk_widget_set_margin_start (table, 12);
+	gtk_widget_set_margin_end (table, 5);
+#else
+	gtk_widget_set_margin_left (table, 12);
+	gtk_widget_set_margin_right (table, 5);
+#endif
 	gtk_grid_set_column_spacing (GTK_GRID (table), 6);
 	gtk_grid_set_row_spacing (GTK_GRID (table), 6);
 
@@ -579,7 +589,7 @@ pgd_movie_view_set_movie (GtkWidget    *movie_view,
 	pgd_table_add_property_with_custom_widget (GTK_GRID (table), NULL, button, &row);
 	gtk_widget_show (button);
 
-	gtk_container_add (GTK_CONTAINER (alignment), table);
+	gtk_container_add (GTK_CONTAINER (movie_view), table);
 	gtk_widget_show (table);
 }
 

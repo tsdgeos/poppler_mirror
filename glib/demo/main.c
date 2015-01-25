@@ -170,7 +170,6 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 {
 	GtkDialog *dialog;
 	GtkWidget *content_area;
-	GtkWidget *entry_container;
 	GtkWidget *password_entry;
 	GtkWidget *hbox, *main_vbox, *vbox, *icon;
 	GtkWidget *table;
@@ -239,19 +238,10 @@ pgd_demo_get_auth_dialog (GFile *uri_file)
 	gtk_widget_show (vbox);
 
 	/* The table that holds the entries */
-	entry_container = gtk_alignment_new (0.0, 0.0, 1.0, 1.0);
-
-	gtk_alignment_set_padding (GTK_ALIGNMENT (entry_container),
-				   0, 0, 0, 0);
-
-	gtk_box_pack_start (GTK_BOX (vbox), entry_container,
-			    FALSE, FALSE, 0);
-	gtk_widget_show (entry_container);
-
 	table = gtk_grid_new ();
 	gtk_grid_set_column_spacing (GTK_GRID (table), 12);
 	gtk_grid_set_row_spacing (GTK_GRID (table), 6);
-	gtk_container_add (GTK_CONTAINER (entry_container), table);
+	gtk_box_pack_start (GTK_BOX (vbox), table, FALSE, FALSE, 0);
 	gtk_widget_show (table);
 
 	label = gtk_label_new_with_mnemonic ("_Password:");
