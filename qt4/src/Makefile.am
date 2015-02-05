@@ -60,7 +60,7 @@ libpoppler_qt4_la_LIBADD =			\
 	$(POPPLER_QT4_LIBS)
 
 libpoppler_qt4_la_LDFLAGS =			\
-	-version-info 9:0:5			\
+	-version-info 10:0:6			\
 	@create_shared_lib@			\
 	@auto_import_flags@
 
