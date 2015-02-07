@@ -128,6 +128,14 @@ substituted with the closest "Helvetica", "Times-Roman", or "Courier" font.
 This option passes references to non-embedded fonts
 through to the PostScript file.
 .TP
+.B \-optimizecolorspace
+By default, bitmap images in the PDF pass through to the output PostScript
+in their original color space, which produces predictable results.
+This option converts RGB and CMYK images into Gray images
+if every pixel of the image has equal components.
+This can fix problems when doing color separations of PDFs
+that contain embedded black and white images encoded as RGB.
+.TP
 .B \-preload
 preload images and forms
 .TP
@@ -135,7 +143,7 @@ preload images and forms
 Set the paper size to one of "letter", "legal", "A4", or "A3".  This
 can also be set to "match", which will set the paper size of each page to match the
 size specified in the PDF file. If none the \-paper, \-paperw, or \-paperh
-options are spoecified the default is to match the paper size.
+options are specified the default is to match the paper size.
 .TP
 .BI \-paperw " size"
 Set the paper width, in points.

@@ -95,6 +95,7 @@ static GBool noEmbedTTFonts = gFalse;
 static GBool noEmbedCIDPSFonts = gFalse;
 static GBool noEmbedCIDTTFonts = gFalse;
 static GBool fontPassthrough = gFalse;
+static GBool optimizeColorSpace = gFalse;
 static char rasterAntialiasStr[16] = "";
 static GBool preload = gFalse;
 static char paperSize[15] = "";
@@ -157,6 +158,8 @@ static const ArgDesc argDesc[] = {
    "don't substitute missing fonts"},
   {"-aaRaster",   argString,   rasterAntialiasStr, sizeof(rasterAntialiasStr),
    "enable anti-aliasing on rasterization: yes, no"},
+  {"-optimizecolorspace",  argFlag,        &optimizeColorSpace,0,
+   "convert gray RGB images to gray color space"},
   {"-preload",    argFlag,     &preload,        0,
    "preload images and forms"},
   {"-paper",      argString,   paperSize,       sizeof(paperSize),
@@ -403,6 +406,7 @@ int main(int argc, char *argv[]) {
   psOut->setEmbedCIDTrueType(!noEmbedCIDTTFonts);
   psOut->setFontPassthrough(fontPassthrough);
   psOut->setPreloadImagesForms(preload);
+  psOut->setOptimizeColorSpace(optimizeColorSpace);
 #if OPI_SUPPORT
   psOut->setGenerateOPI(doOPI);
 #endif
