@@ -16,6 +16,11 @@ test_big_endian(WORDS_BIGENDIAN)
 include(CheckFileOffsetBits)
 CHECK_FILE_OFFSET_BITS()
 
+find_package (ECM 1.6.0 QUIET NO_MODULE)
+if (ECM_FOUND)
+    include("${ECM_MODULE_DIR}/ECMEnableSanitizers.cmake")
+endif()
+
 set(POPPLER_MAJOR_VERSION "0")
 set(POPPLER_MINOR_VERSION "31")
 set(POPPLER_MICRO_VERSION "0")
