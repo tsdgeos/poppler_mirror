@@ -1900,7 +1900,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
 	switch (fontLoc->fontType) {
 	case fontType1:
 	  // this assumes that the PS font name matches the PDF font name
-	  psName = font->getEmbeddedFontName()->copy();
+	  psName = font->getEmbeddedFontName() ? font->getEmbeddedFontName()->copy() : new GooString();
 	  setupEmbeddedType1Font(&fontLoc->embFontID, psName);
 	  break;
 	case fontType1C:
