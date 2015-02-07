@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2014 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2015 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2010-2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -5214,6 +5214,10 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
     return splashErrModeMismatch;
   }
 
+  if (unlikely(!bitmap->data)) {
+    return splashErrZeroImage;
+  }
+
   if(src->getSeparationList()->getLength() > bitmap->getSeparationList()->getLength()) {
     for (x = bitmap->getSeparationList()->getLength(); x < src->getSeparationList()->getLength(); x++)
       bitmap->getSeparationList()->append(((GfxSeparationColorSpace *)src->getSeparationList()->get(x))->copy());
@@ -5781,6 +5785,10 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
 
   if (src->mode != bitmap->mode) {
     return splashErrModeMismatch;
+  }
+
+  if (unlikely(!bitmap->data)) {
+    return splashErrZeroImage;
   }
 
   switch (bitmap->mode) {

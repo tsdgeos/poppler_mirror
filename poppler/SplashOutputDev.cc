@@ -4048,8 +4048,8 @@ void SplashOutputDev::setSoftMask(GfxState *state, double *bbox,
   p = softMask->getDataPtr() + ty * softMask->getRowSize() + tx;
   int xMax = tBitmap->getWidth();
   int yMax = tBitmap->getHeight();
-  if (xMax + tx > bitmap->getWidth()) xMax = bitmap->getWidth() - tx;
-  if (yMax + ty > bitmap->getHeight()) yMax = bitmap->getHeight() - ty;
+  if (xMax > bitmap->getWidth() - tx) xMax = bitmap->getWidth() - tx;
+  if (yMax > bitmap->getHeight() - ty) yMax = bitmap->getHeight() - ty;
   for (y = 0; y < yMax; ++y) {
     for (x = 0; x < xMax; ++x) {
       if (alpha) {
