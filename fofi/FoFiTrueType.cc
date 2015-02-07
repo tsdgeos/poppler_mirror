@@ -21,6 +21,7 @@
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2014 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2015 Aleksei Volkov <Aleksei Volkov>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1366,7 +1367,6 @@ void FoFiTrueType::parse() {
   if (seekTable("head") < 0 ||
       seekTable("hhea") < 0 ||
       seekTable("maxp") < 0 ||
-      seekTable("hmtx") < 0 ||
       (!openTypeCFF && seekTable("loca") < 0) ||
       (!openTypeCFF && seekTable("glyf") < 0) ||
       (openTypeCFF && seekTable("CFF ") < 0)) {
