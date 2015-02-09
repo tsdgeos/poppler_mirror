@@ -128,6 +128,12 @@ substituted with the closest "Helvetica", "Times-Roman", or "Courier" font.
 This option passes references to non-embedded fonts
 through to the PostScript file.
 .TP
+.BI \-aaRaster " yes | no"
+Enable or disable raster anti-aliasing.  This defaults to "no".
+pdftops may need to rasterize transparencies and pattern image masks in the PDF.
+If the PostScript will be printed, leave \-aaRaster disabled and set \-r to the resolution of the printer.
+If the PostScript will be viewed, enabling \-aaRaster may make rasterized text easier to read.
+.TP
 .B \-optimizecolorspace
 By default, bitmap images in the PDF pass through to the output PostScript
 in their original color space, which produces predictable results.
@@ -181,6 +187,9 @@ bypass all security restrictions.
 .TP
 .BI \-upw " password"
 Specify the user password for the PDF file.
+.TP
+.B \-overprint
+Enable overprinting.
 .TP
 .B \-q
 Don't print any messages or errors.
