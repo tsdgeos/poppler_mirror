@@ -22,6 +22,7 @@
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2015 Aleksei Volkov <Aleksei Volkov>
+// Copyright (C) 2015 William Bader <williambader@hotmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1222,15 +1223,15 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
 	  dumpString(file + tables[j].offset, tables[j].len,
 		     outputFunc, outputStream);
 	} else if (needVerticalMetrics && i == t42VheaTable) {
-	  if (unlikely(length >= (int)sizeof(vheaTab))) {
+	  if (unlikely(length > (int)sizeof(vheaTab))) {
 	    error(errSyntaxWarning, -1, "length bigger than vheaTab size");
-	    length = sizeof(vheaTab) - 1;
+	    length = sizeof(vheaTab);
 	  }
 	  dumpString(vheaTab, length, outputFunc, outputStream);
 	} else if (needVerticalMetrics && i == t42VmtxTable) {
-	  if (unlikely(length >= vmtxTabLength)) {
+	  if (unlikely(length > vmtxTabLength)) {
 	    error(errSyntaxWarning, -1, "length bigger than vmtxTab size");
-	    length = vmtxTabLength - 1;
+	    length = vmtxTabLength;
 	  }
 	  dumpString(vmtxTab, length, outputFunc, outputStream);
 	}
