@@ -442,8 +442,17 @@ void Page::addAnnot(Annot *annot) {
     obj1.free();
   }
 
-  annots->appendAnnot(annot);
+  if (annot->getType() != Annot::typePopup) {
+    annots->appendAnnot(annot);
+  }
   annot->setPage(num, gTrue);
+
+  AnnotMarkup *annotMarkup = dynamic_cast<AnnotMarkup*>(annot);
+  if (annotMarkup) {
+    AnnotPopup *annotPopup = annotMarkup->getPopup();
+    if (annotPopup)
+      addAnnot(annotPopup);
+  }
 }
 
 void Page::removeAnnot(Annot *annot) {
