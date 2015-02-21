@@ -396,7 +396,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	    argsSize *= 2;
 	    if (args == argsBuf) {
 	      args = (GooStringFormatArg *)gmallocn(argsSize, sizeof(GooStringFormatArg));
-	      memcpy(args, argsBuf, argsLen);
+	      memcpy(args, argsBuf, argsLen * sizeof(GooStringFormatArg));
 	    } else {
 	      args = (GooStringFormatArg *)greallocn(args, argsSize,
 						 sizeof(GooStringFormatArg));
