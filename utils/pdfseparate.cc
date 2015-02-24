@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2011, 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012-2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
 // Copyright (C) 2013 Daniel Kahn Gillmor <dkg@fifthhorseman.net>
@@ -124,12 +124,15 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
   for (int pageNo = firstPage; pageNo <= lastPage; pageNo++) {
     snprintf (pathName, sizeof (pathName) - 1, destFileName, pageNo);
     GooString *gpageName = new GooString (pathName);
-    int errCode = doc->savePageAs(gpageName, pageNo);
+    PDFDoc *pagedoc = new PDFDoc (new GooString (srcFileName), NULL, NULL, NULL);
+    int errCode = pagedoc->savePageAs(gpageName, pageNo);
     if ( errCode != errNone) {
       delete gpageName;
       delete doc;
+      delete pagedoc;
       return false;
     }
+    delete pagedoc;
     delete gpageName;
   }
   delete doc;
