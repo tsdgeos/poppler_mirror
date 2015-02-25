@@ -15,7 +15,7 @@
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2010-2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
-// Copyright (C) 2011-2013 William Bader <williambader@hotmail.com>
+// Copyright (C) 2011-2013, 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012 Markus Trippelsdorf <markus@trippelsdorf.de>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Matthias Kramm <kramm@quiss.org>
@@ -467,7 +467,7 @@ void Splash::pipeRun(SplashPipe *pipe) {
     //----- read destination pixel
 
     Guchar *destColorPtr;
-    if (pipe->shape && state->blendFunc && pipe->knockout && alpha0Bitmap != NULL) {
+    if (pipe->usesShape && state->blendFunc && pipe->knockout && alpha0Bitmap != NULL) {
       destColorPtr = alpha0Bitmap->data + (alpha0Y+pipe->y)*alpha0Bitmap->rowSize;
       switch (bitmap->mode) {
         case splashModeMono1:
