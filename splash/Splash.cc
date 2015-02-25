@@ -271,6 +271,7 @@ inline void Splash::pipeInit(SplashPipe *pipe, int x, int y,
   // source alpha
   pipe->aInput = aInput;
   pipe->usesShape = usesShape;
+  pipe->shape = 0;
 
   // knockout
   pipe->knockout = knockout;
@@ -467,7 +468,7 @@ void Splash::pipeRun(SplashPipe *pipe) {
     //----- read destination pixel
 
     Guchar *destColorPtr;
-    if (pipe->usesShape && state->blendFunc && pipe->knockout && alpha0Bitmap != NULL) {
+    if (pipe->shape && state->blendFunc && pipe->knockout && alpha0Bitmap != NULL) {
       destColorPtr = alpha0Bitmap->data + (alpha0Y+pipe->y)*alpha0Bitmap->rowSize;
       switch (bitmap->mode) {
         case splashModeMono1:
