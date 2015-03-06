@@ -4364,7 +4364,7 @@ GBool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTria
 #if SPLASH_CMYK
     case splashModeCMYK8:
     case splashModeDeviceN8:
-      bDirectColorTranslation = (shadingMode == csDeviceCMYK || shadingMode == csDeviceN);
+      bDirectColorTranslation = (shadingMode == csDeviceCMYK);
     break;
 #endif
     default:
