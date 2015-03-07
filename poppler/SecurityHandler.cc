@@ -288,12 +288,16 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
 	ok = gTrue;
       } else if (encVersion == 5 && encRevision == 5) {
 	fileID = new GooString(); // unused for V=R=5
-	ownerEnc = ownerEncObj.getString()->copy();
-	userEnc = userEncObj.getString()->copy();
-	if (fileKeyLength > 32 || fileKeyLength < 0) {
-	  fileKeyLength = 32;
+	if (ownerEncObj.isString() && userEncObj.isString()) {
+	  ownerEnc = ownerEncObj.getString()->copy();
+	  userEnc = userEncObj.getString()->copy();
+	  if (fileKeyLength > 32 || fileKeyLength < 0) {
+	    fileKeyLength = 32;
+	  }
+	  ok = gTrue;
+	} else {
+	  error(errSyntaxError, -1, "Weird encryption owner/user info");
 	}
-	ok = gTrue;
       } else if (!(encVersion == -1 && encRevision == -1)) {
 	error(errUnimplemented, -1,
 	      "Unsupported version/revision ({0:d}/{1:d}) of Standard security handler",
