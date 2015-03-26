@@ -2831,15 +2831,26 @@ GBool SplashOutputDev::imageSrc(void *data, SplashColorPtr colorLine,
 #endif
   int nComps, x;
 
-  nComps = imgData->colorMap->getNumPixelComps();
   if (imgData->y == imgData->height) {
     return gFalse;
   }
   if (!(p = imgData->imgStr->getLine())) {
-    memset(colorLine, 0, imgData->width * nComps);
+    int destComps = 1;
+    if (imgData->colorMode == splashModeRGB8 || imgData->colorMode == splashModeBGR8)
+        destComps = 3;
+    else if (imgData->colorMode == splashModeXBGR8)
+        destComps = 4;
+#if SPLASH_CMYK
+    else if (imgData->colorMode == splashModeCMYK8)
+        destComps = 4;
+    else if (imgData->colorMode == splashModeDeviceN8)
+        destComps = SPOT_NCOMPS + 4;
+#endif
+    memset(colorLine, 0, imgData->width * destComps);
     return gFalse;
   }
 
+  nComps = imgData->colorMap->getNumPixelComps();
 
   if (imgData->lookup) {
     switch (imgData->colorMode) {
