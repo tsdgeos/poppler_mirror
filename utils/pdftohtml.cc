@@ -189,6 +189,7 @@ int main(int argc, char *argv[]) {
   char *p;
   GooString *ownerPW, *userPW;
   Object info;
+  int exit_status = EXIT_FAILURE;
 
   // parse args
   ok = parseArgs(argDesc, &argc, argv);
@@ -434,6 +435,8 @@ int main(int argc, char *argv[]) {
   
   delete htmlOut;
 
+  exit_status = EXIT_SUCCESS;
+
   // clean up
  error:
   if(doc) delete doc;
@@ -447,7 +450,7 @@ int main(int argc, char *argv[]) {
   Object::memCheck(stderr);
   gMemReport(stderr);
 
-  return 0;
+  return exit_status;
 }
 
 static GooString* getInfoString(Dict *infoDict, const char *key) {
