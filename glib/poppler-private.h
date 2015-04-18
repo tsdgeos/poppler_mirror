@@ -130,7 +130,7 @@ PopplerAnnot      *_poppler_annot_free_text_new (Annot *annot);
 PopplerAnnot      *_poppler_annot_text_markup_new     (Annot *annot);
 PopplerAnnot      *_poppler_annot_file_attachment_new (Annot *annot);
 PopplerAnnot      *_poppler_annot_movie_new (Annot *annot);
-PopplerAnnot      *_poppler_annot_screen_new (Annot *annot);
+PopplerAnnot      *_poppler_annot_screen_new (PopplerDocument *doc, Annot *annot);
 PopplerAnnot      *_poppler_annot_line_new (Annot *annot);
 PopplerAnnot      *_poppler_annot_circle_new (Annot *annot);
 PopplerAnnot      *_poppler_annot_square_new (Annot *annot);

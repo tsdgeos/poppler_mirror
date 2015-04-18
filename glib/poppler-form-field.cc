@@ -188,7 +188,7 @@ poppler_form_field_get_action (PopplerFormField *field)
   if (!action)
     return NULL;
 
-  field->action = _poppler_action_new (NULL, action, NULL);
+  field->action = _poppler_action_new (field->document, action, NULL);
 
   return field->action;
 }

@@ -1399,7 +1399,7 @@ poppler_page_get_annot_mapping (PopplerPage *page)
         mapping->annot = _poppler_annot_movie_new (annot);
 	break;
       case Annot::typeScreen:
-        mapping->annot = _poppler_annot_screen_new (annot);
+        mapping->annot = _poppler_annot_screen_new (page->document, annot);
 	break;
       case Annot::typeLine:
         mapping->annot = _poppler_annot_line_new (annot);

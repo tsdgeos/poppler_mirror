@@ -559,7 +559,7 @@ poppler_annot_screen_class_init (PopplerAnnotScreenClass *klass)
 }
 
 PopplerAnnot *
-_poppler_annot_screen_new (Annot *annot)
+_poppler_annot_screen_new (PopplerDocument *doc, Annot *annot)
 {
   PopplerAnnot *poppler_annot;
   AnnotScreen  *annot_screen;
@@ -569,7 +569,7 @@ _poppler_annot_screen_new (Annot *annot)
   annot_screen = static_cast<AnnotScreen *>(poppler_annot->annot);
   action = annot_screen->getAction();
   if (action)
-    POPPLER_ANNOT_SCREEN (poppler_annot)->action = _poppler_action_new (NULL, action, NULL);
+    POPPLER_ANNOT_SCREEN (poppler_annot)->action = _poppler_action_new (doc, action, NULL);
 
   return poppler_annot;
 }
