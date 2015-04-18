@@ -697,7 +697,7 @@ public:
   ~AnnotPopup();
 
   Object *getParent(Object *obj) { return parent.fetch (xref, obj); }
-  Object *getParentNF(Object *obj) { return &parent; }
+  Object *getParentNF() { return &parent; }
   void setParent(Object *parentA);
   void setParent(Annot *parentA);
   GBool getOpen() const { return open; }

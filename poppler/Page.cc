@@ -442,7 +442,11 @@ void Page::addAnnot(Annot *annot) {
     obj1.free();
   }
 
-  if (annot->getType() != Annot::typePopup) {
+  // Popup annots are already handled by markup annots,
+  // so add to the list only Popup annots without a
+  // markup annotation associated.
+  if (annot->getType() != Annot::typePopup ||
+      static_cast<AnnotPopup*>(annot)->getParentNF()->isNull()) {
     annots->appendAnnot(annot);
   }
   annot->setPage(num, gTrue);
