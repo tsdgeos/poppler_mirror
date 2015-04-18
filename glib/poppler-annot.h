@@ -202,6 +202,8 @@ void                          poppler_annot_markup_set_popup_is_open           (
 										gboolean            is_open);
 gboolean                      poppler_annot_markup_get_popup_rectangle         (PopplerAnnotMarkup *poppler_annot,
 										PopplerRectangle   *poppler_rect);
+void                          poppler_annot_markup_set_popup_rectangle         (PopplerAnnotMarkup *poppler_annot,
+                                                                                PopplerRectangle   *poppler_rect);
 gdouble                       poppler_annot_markup_get_opacity                 (PopplerAnnotMarkup *poppler_annot);
 void                          poppler_annot_markup_set_opacity                 (PopplerAnnotMarkup *poppler_annot,
 										gdouble             opacity);
