@@ -231,7 +231,7 @@ CPPFLAGS="$CPPFLAGS $LIBTIFF_CFLAGS"
 CXXFLAGS="$CXXFLAGS $LIBTIFF_CFLAGS"
 LIBS="$LIBS $LIBTIFF_LIBS"
 if test x$enable_libtiff = xyes; then
-  if test x"$LIBTIFF_LIBS" != ; then
+  if test x"$LIBTIFF_LIBS" != x; then
     AC_CHECK_FUNC([TIFFOpen],,
 		  AC_MSG_ERROR("*** libtiff library not found ***"))
   else
