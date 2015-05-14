@@ -33,6 +33,7 @@
 // Copyright (C) 2014 Jiri Slaby <jirislaby@gmail.com>
 // Copyright (C) 2014 Anuj Khare <khareanuj18@gmail.com>
 // Copyright (C) 2015 Petr Gajdos <pgajdos@suse.cz>
+// Copyright (C) 2015 Philipp Reinkemeier <philipp.reinkemeier@offis.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
