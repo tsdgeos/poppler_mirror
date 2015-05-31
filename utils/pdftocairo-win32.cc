@@ -159,7 +159,7 @@ static void getLocalPos(HWND wind, HWND dlg, RECT *rect)
   MapWindowPoints(wind, dlg, (LPPOINT)rect, 2);
 }
 
-static HWND createGroupBox(HWND parent, HINSTANCE hInstance, int id, const char *label, RECT *rect)
+static HWND createGroupBox(HWND parent, HINSTANCE hInstance, HMENU id, const char *label, RECT *rect)
 {
   HWND hwnd = CreateWindowA(WC_BUTTONA,
 			    label,
@@ -167,7 +167,7 @@ static HWND createGroupBox(HWND parent, HINSTANCE hInstance, int id, const char 
 			    rect->left, rect->top,
 			    rect->right - rect->left,
 			    rect->bottom - rect->top,
-			    parent, (HMENU)id,
+			    parent, id,
 			    hInstance, NULL);
   HFONT hFont = (HFONT)SendMessage(parent, WM_GETFONT, (WPARAM)0, (LPARAM)0);
   if (hFont)
@@ -175,7 +175,7 @@ static HWND createGroupBox(HWND parent, HINSTANCE hInstance, int id, const char 
   return hwnd;
 }
 
-static HWND createCheckBox(HWND parent, HINSTANCE hInstance, int id, const char *label, RECT *rect)
+static HWND createCheckBox(HWND parent, HINSTANCE hInstance, HMENU id, const char *label, RECT *rect)
 {
   HWND hwnd = CreateWindowA(WC_BUTTONA,
 			    label,
@@ -183,7 +183,7 @@ static HWND createCheckBox(HWND parent, HINSTANCE hInstance, int id, const char 
 			    rect->left, rect->top,
 			    rect->right - rect->left,
 			    rect->bottom - rect->top,
-			    parent, (HMENU)id,
+			    parent, id,
 			    hInstance, NULL);
   HFONT hFont = (HFONT)SendMessage(parent, WM_GETFONT, (WPARAM)0, (LPARAM)0);
   if (hFont)
@@ -191,7 +191,7 @@ static HWND createCheckBox(HWND parent, HINSTANCE hInstance, int id, const char 
   return hwnd;
 }
 
-static HWND createStaticText(HWND parent, HINSTANCE hinstance, int id, const char *text, RECT *rect)
+static HWND createStaticText(HWND parent, HINSTANCE hinstance, HMENU id, const char *text, RECT *rect)
 {
   HWND hwnd = CreateWindowA(WC_STATICA,
 			    text,
@@ -199,7 +199,7 @@ static HWND createStaticText(HWND parent, HINSTANCE hinstance, int id, const cha
 			    rect->left, rect->top,
 			    rect->right - rect->left,
 			    rect->bottom - rect->top,
-			    parent, (HMENU)id,
+			    parent, id,
 			    hinstance, NULL);
   HFONT hFont = (HFONT)SendMessage(parent, WM_GETFONT, (WPARAM)0, (LPARAM)0);
   if (hFont)
@@ -207,7 +207,7 @@ static HWND createStaticText(HWND parent, HINSTANCE hinstance, int id, const cha
   return hwnd;
 }
 
-HWND createPageScaleComboBox(HWND parent, HINSTANCE hinstance, int id, RECT *rect)
+HWND createPageScaleComboBox(HWND parent, HINSTANCE hinstance, HMENU id, RECT *rect)
 {
   HWND hwnd = CreateWindowA(WC_COMBOBOX,
 			    "",
@@ -216,7 +216,7 @@ HWND createPageScaleComboBox(HWND parent, HINSTANCE hinstance, int id, RECT *rec
 			    rect->left, rect->top,
 			    rect->right - rect->left,
 			    rect->bottom - rect->top,
-			    parent, (HMENU)id,
+			    parent, id,
 			    hinstance, NULL);
   HFONT hFont = (HFONT)SendMessage(parent, WM_GETFONT, (WPARAM)0, (LPARAM)0);
   if (hFont)
@@ -296,35 +296,35 @@ static UINT_PTR CALLBACK printDialogHookProc(HWND hdlg, UINT uiMsg, WPARAM wPara
     pdfGroupBoxRect.right = copiesGroupRect.right;
     pdfGroupBoxRect.top = printRangeGroupRect.bottom + interGroupSpace;
     pdfGroupBoxRect.bottom = pdfGroupBoxRect.top + groupHeight;
-    createGroupBox(hdlg, hinstance, grp3, "PDF Print Options", &pdfGroupBoxRect);
+    createGroupBox(hdlg, hinstance, (HMENU)grp3, "PDF Print Options", &pdfGroupBoxRect);
 
     RECT textRect;
     textRect.left = nameLabelRect.left;
     textRect.right = nameLabelRect.left + 1.8*(printerComboRect.left - nameLabelRect.left);
     textRect.top = pdfGroupBoxRect.top + nameLabelRect.top - printerGroupRect.top;
     textRect.bottom = textRect.top + nameLabelRect.bottom - nameLabelRect.top;
-    createStaticText(hdlg, hinstance, stc1, "Page Scaling:", &textRect);
+    createStaticText(hdlg, hinstance, (HMENU)stc1, "Page Scaling:", &textRect);
 
     RECT comboBoxRect;
     comboBoxRect.left = textRect.right;
     comboBoxRect.right = comboBoxRect.left + printerComboRect.right - printerComboRect.left;;
     comboBoxRect.top = pdfGroupBoxRect.top + printerComboRect.top - printerGroupRect.top;
     comboBoxRect.bottom = textRect.top + 4*(printerComboRect.bottom - printerComboRect.top);
-    HWND comboBoxWind = createPageScaleComboBox(hdlg, hinstance, cmb1, &comboBoxRect);
+    HWND comboBoxWind = createPageScaleComboBox(hdlg, hinstance, (HMENU)cmb1, &comboBoxRect);
 
     RECT checkBox1Rect;
     checkBox1Rect.left = radio1Rect.left;
     checkBox1Rect.right = pdfGroupBoxRect.right - 10;
     checkBox1Rect.top = pdfGroupBoxRect.top + statusLabelRect.top - printerGroupRect.top;
     checkBox1Rect.bottom = checkBox1Rect.top + radio1Rect.bottom - radio1Rect.top;
-    HWND checkBox1Wind = createCheckBox(hdlg, hinstance, chx3, "Center", &checkBox1Rect);
+    HWND checkBox1Wind = createCheckBox(hdlg, hinstance, (HMENU)chx3, "Center", &checkBox1Rect);
 
     RECT checkBox2Rect;
     checkBox2Rect.left = radio1Rect.left;
     checkBox2Rect.right = pdfGroupBoxRect.right - 10;
     checkBox2Rect.top =  checkBox1Rect.top + radio2Rect.top - radio1Rect.top;
     checkBox2Rect.bottom = checkBox2Rect.top + radio1Rect.bottom - radio1Rect.top;
-    HWND checkBox2Wind = createCheckBox(hdlg, hinstance, chx4, "Select page size using document page size", &checkBox2Rect);
+    HWND checkBox2Wind = createCheckBox(hdlg, hinstance, (HMENU)chx4, "Select page size using document page size", &checkBox2Rect);
 
     // Move OK and Cancel buttons down ensuring they are last in the Z order
     // so that the tab order is correct.
