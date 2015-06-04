@@ -127,8 +127,11 @@ class HTMLPrettyDiffText(HTMLPrettyDiff):
 def create_pretty_diff(backend):
     if backend.get_diff_ext() == '.diff.png':
         return HTMLPrettyDiffImage()
-    if backend.get_diff_ext() == '.diff':
-        return HTMLPrettyDiffText()
+    # Disable pretty diff for Text files for now, since HtmlDiff().make_file() is
+    # entering in an infinite loop with some files. We need to either fix that somehow or
+    # find a different way to generate pretty diffs of text files.
+    #if backend.get_diff_ext() == '.diff':
+    #    return HTMLPrettyDiffText()
     return None
 
 class BackendTestResult:
