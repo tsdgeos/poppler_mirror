@@ -358,7 +358,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 
       if (bitmap->convertToXBGR(keepAlphaChannel))
       {
-        SplashColorPtr dataPtr = bitmap->getDataPtr();
+        SplashColorPtr dataPtr = bitmap->takeData();
 
         if (QSysInfo::BigEndian == QSysInfo::ByteOrder)
         {
@@ -376,9 +376,8 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
             }
         }
 
-        // construct a qimage SHARING the raw bitmap data in memory
-        QImage tmpimg( dataPtr, bw, bh, QImage::Format_ARGB32 );
-        img = tmpimg.copy();
+        // Construct a Qt image holding (and also owning) the raw bitmap data.
+        img = QImage(dataPtr, bw, bh, QImage::Format_ARGB32, gfree, dataPtr);
       }
       delete splash_output;
 #endif
