@@ -460,7 +460,7 @@ void SplashBitmap::getRGBLine(int yl, SplashColorPtr line) {
   }
 }
 
-void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line) {
+void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, bool useAlpha) {
   SplashColor col;
   double c, m, y, k, c1, m1, y1, k1, r, g, b;
 
@@ -503,20 +503,37 @@ void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line) {
     *line++ = dblToByte(clip01(b));
     *line++ = dblToByte(clip01(g));
     *line++ = dblToByte(clip01(r));
-    *line++ = 255;
+    *line++ = useAlpha ? getAlpha(x, yl) : 255;
   }
 }
 
-GBool SplashBitmap::convertToXBGR() {
-  if (mode == splashModeXBGR8)
+GBool SplashBitmap::convertToXBGR(bool useAlpha) {
+  if (mode == splashModeXBGR8) {
+    if (useAlpha) {
+      // Copy the alpha channel into the fourth component so that XBGR becomes ABGR.
+      const SplashColorPtr dbegin = data;
+      const SplashColorPtr dend = data + rowSize * height;
+
+      Guchar *const abegin = alpha;
+      Guchar *const aend = alpha + width * height;
+
+      SplashColorPtr d = dbegin + 3;
+      Guchar *a = abegin;
+
+      for(; d < dend && a < aend; d += 4, a += 1) {
+        *d = *a;
+      }
+    }
+
     return gTrue;
+  }
   
   int newrowSize = width * 4;
   SplashColorPtr newdata = (SplashColorPtr)gmallocn_checkoverflow(newrowSize, height);
   if (newdata != NULL) {
     for (int y = 0; y < height; y++) {
       unsigned char *row = newdata + y * newrowSize;
-      getXBGRLine(y, row);
+      getXBGRLine(y, row, useAlpha);
     }
     if (rowSize < 0) {
       gfree(data + (height - 1) * rowSize);
