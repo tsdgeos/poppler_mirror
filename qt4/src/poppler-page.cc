@@ -294,10 +294,10 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
     {
 #if defined(HAVE_SPLASH)
       SplashColor bgColor;
-      GBool overprint = gFalse;
+      GBool overprintPreview = gFalse;
 #if defined(SPLASH_CMYK)
-      overprint = m_page->parentDoc->m_hints & Document::OverprintPreview ? gTrue : gFalse;
-      if (overprint)
+      overprintPreview = m_page->parentDoc->m_hints & Document::OverprintPreview ? gTrue : gFalse;
+      if (overprintPreview)
       {
         Guchar c, m, y, k;
 
@@ -326,61 +326,84 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
         bgColor[1] = m_page->parentDoc->paperColor.green();
         bgColor[2] = m_page->parentDoc->paperColor.red();
       }
+
+      SplashColorMode colorMode = splashModeRGB8;
+
+      const bool keepAlphaChannel = m_page->parentDoc->m_hints & Document::KeepAlphaChannel;
+      if (keepAlphaChannel) colorMode = splashModeXBGR8;
+
+#if defined(SPLASH_CMYK)
+      if (overprintPreview) colorMode = splashModeDeviceN8;
+#endif
  
       SplashThinLineMode thinLineMode = splashThinLineDefault;
       if (m_page->parentDoc->m_hints & Document::ThinLineShape) thinLineMode = splashThinLineShape;
       if (m_page->parentDoc->m_hints & Document::ThinLineSolid) thinLineMode = splashThinLineSolid;
 
-      const bool keepAlphaChannel = m_page->parentDoc->m_hints & Document::KeepAlphaChannel;
+      SplashOutputDev splash_output(
+                  colorMode, 4,
+                  gFalse,
+                  keepAlphaChannel ? NULL : bgColor,
+                  gTrue,
+                  thinLineMode,
+                  overprintPreview);
 
-      SplashOutputDev * splash_output = new SplashOutputDev(
-#if defined(SPLASH_CMYK)
-                      (overprint) ? splashModeDeviceN8 : splashModeXBGR8,
-#else
-                      splashModeXBGR8,
-#endif 
-                      4, gFalse, keepAlphaChannel ? NULL : bgColor, gTrue, thinLineMode, overprint);
-
-      splash_output->setFontAntialias(m_page->parentDoc->m_hints & Document::TextAntialiasing ? gTrue : gFalse);
-      splash_output->setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? gTrue : gFalse);
-      splash_output->setFreeTypeHinting(m_page->parentDoc->m_hints & Document::TextHinting ? gTrue : gFalse, 
+      splash_output.setFontAntialias(m_page->parentDoc->m_hints & Document::TextAntialiasing ? gTrue : gFalse);
+      splash_output.setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? gTrue : gFalse);
+      splash_output.setFreeTypeHinting(m_page->parentDoc->m_hints & Document::TextHinting ? gTrue : gFalse,
                                         m_page->parentDoc->m_hints & Document::TextSlightHinting ? gTrue : gFalse);
 
-      splash_output->startDoc(m_page->parentDoc->doc);      
+      splash_output.startDoc(m_page->parentDoc->doc);
 
-      m_page->parentDoc->doc->displayPageSlice(splash_output, m_page->index + 1, xres, yres,
+      m_page->parentDoc->doc->displayPageSlice(&splash_output, m_page->index + 1, xres, yres,
                                                rotation, false, true, false, x, y, w, h,
                                                NULL, NULL, NULL, NULL, gTrue);
 
-      SplashBitmap *bitmap = splash_output->getBitmap();
-      int bw = bitmap->getWidth();
-      int bh = bitmap->getHeight();
+      SplashBitmap *bitmap = splash_output.getBitmap();
 
-      if (bitmap->convertToXBGR(keepAlphaChannel))
-      {
-        SplashColorPtr dataPtr = bitmap->getDataPtr();
+      const int bw = bitmap->getWidth();
+      const int bh = bitmap->getHeight();
+      const int brs = bitmap->getRowSize();
 
-        if (QSysInfo::BigEndian == QSysInfo::ByteOrder)
-        {
-            uchar c;
-            int count = bw * bh * 4;
-            for (int k = 0; k < count; k += 4)
-            {
-            c = dataPtr[k];
-            dataPtr[k] = dataPtr[k+3];
-            dataPtr[k+3] = c;
+      // If we use DeviceN8, convert to XBGR8.
+      // If requested, also transfer Splash's internal alpha channel.
+      if (overprintPreview || keepAlphaChannel) {
+          if (bitmap->convertToXBGR(keepAlphaChannel)) {
+              SplashColorPtr data = bitmap->getDataPtr();
 
-            c = dataPtr[k+1];
-            dataPtr[k+1] = dataPtr[k+2];
-            dataPtr[k+2] = c;
-            }
-        }
+              if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
+                  // Convert byte order from RGBX to XBGR.
+                  for (int i = 0; i < bh; ++i) {
+                      for (int j = 0; j < bw; ++j) {
+                          SplashColorPtr pixel = &data[i * brs + j];
 
-        // construct a qimage SHARING the raw bitmap data in memory
-        QImage tmpimg( dataPtr, bw, bh, QImage::Format_ARGB32 );
-        img = tmpimg.copy();
+                          qSwap(pixel[0], pixel[3]);
+                          qSwap(pixel[1], pixel[2]);
+                      }
+                  }
+              }
+
+              // Construct a Qt image sharing the raw bitmap data.
+              img = QImage(data, bw, bh, brs, QImage::Format_ARGB32).copy();
+          }
       }
-      delete splash_output;
+      else {
+          SplashColorPtr data = bitmap->getDataPtr();
+
+          if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
+              // Convert byte order from BGR to RGB.
+              for (int i = 0; i < bh; ++i) {
+                  for (int j = 0; j < bw; ++j) {
+                      SplashColorPtr pixel = &data[i * brs + j];
+
+                      qSwap(pixel[0], pixel[2]);
+                  }
+              }
+          }
+
+          // Construct a Qt image sharing the raw bitmap data.
+          img = QImage(data, bw, bh, brs, QImage::Format_RGB888).copy();
+      }
 #endif
       break;
     }
