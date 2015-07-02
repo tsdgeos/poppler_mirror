@@ -891,7 +891,8 @@ delete it;
 	    TextSlightHinting = 0x00000008, ///< Lighter hinting for text when combined with TextHinting \since 0.18
 	    OverprintPreview = 0x00000010,  ///< Overprint preview \since 0.22
 	    ThinLineSolid = 0x00000020,     ///< Enhance thin lines solid \since 0.24
-	    ThinLineShape = 0x00000040      ///< Enhance thin lines shape. Wins over ThinLineSolid \since 0.24
+            ThinLineShape = 0x00000040,     ///< Enhance thin lines shape. Wins over ThinLineSolid \since 0.24
+            KeepAlphaChannel = 0x00000080   ///< Do not compose with the paper color \since 0.34
 	};
 	Q_DECLARE_FLAGS( RenderHints, RenderHint )
 

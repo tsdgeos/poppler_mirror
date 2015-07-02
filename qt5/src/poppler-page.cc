@@ -331,13 +331,15 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       if (m_page->parentDoc->m_hints & Document::ThinLineShape) thinLineMode = splashThinLineShape;
       if (m_page->parentDoc->m_hints & Document::ThinLineSolid) thinLineMode = splashThinLineSolid;
 
+      const bool keepAlphaChannel = m_page->parentDoc->m_hints & Document::KeepAlphaChannel;
+
       SplashOutputDev * splash_output = new SplashOutputDev(
 #if defined(SPLASH_CMYK)
                       (overprint) ? splashModeDeviceN8 : splashModeXBGR8,
 #else
                       splashModeXBGR8,
 #endif 
-                      4, gFalse, bgColor, gTrue, thinLineMode, overprint);
+                      4, gFalse, keepAlphaChannel ? NULL : bgColor, gTrue, thinLineMode, overprint);
 
       splash_output->setFontAntialias(m_page->parentDoc->m_hints & Document::TextAntialiasing ? gTrue : gFalse);
       splash_output->setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? gTrue : gFalse);
@@ -354,7 +356,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       int bw = bitmap->getWidth();
       int bh = bitmap->getHeight();
 
-      if (bitmap->convertToXBGR())
+      if (bitmap->convertToXBGR(keepAlphaChannel))
       {
         SplashColorPtr dataPtr = bitmap->getDataPtr();
 
