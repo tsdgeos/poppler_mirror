@@ -34,6 +34,7 @@
 // Copyright (C) 2013 Li Junling <lijunling@sina.com>
 // Copyright (C) 2014 Ed Porras <ed@moto-research.com>
 // Copyright (C) 2014 Richard PALO <richard@netbsd.org>
+// Copyright (C) 2015 Tamas Szekeres <szekerest@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -72,6 +73,7 @@
 #include "splash/SplashFontFileID.h"
 #include "splash/Splash.h"
 #include "SplashOutputDev.h"
+#include <algorithm>
 
 #ifdef VMS
 #if (__VMS_VER < 70000000)

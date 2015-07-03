@@ -2,6 +2,7 @@
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
+ * Copyright (C) 2015, Tamas Szekeres <szekerest@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +22,8 @@
 #include "poppler-global.h"
 
 #include "poppler-private.h"
+
+#include <algorithm>
 
 #include <cerrno>
 #include <cstring>

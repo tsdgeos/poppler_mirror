@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2015, Tamas Szekeres <szekerest@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +22,8 @@
 #include "poppler-document-private.h"
 
 #include "FontInfo.h"
+
+#include <algorithm>
 
 using namespace poppler;
 
