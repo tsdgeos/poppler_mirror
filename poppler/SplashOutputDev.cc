@@ -1229,6 +1229,7 @@ struct T3GlyphStack {
 struct SplashTransparencyGroup {
   int tx, ty;			// translation coordinates
   SplashBitmap *tBitmap;	// bitmap for transparency group
+  SplashBitmap *softmask;	// bitmap for softmasks
   GfxColorSpace *blendingColorSpace;
   GBool isolated;
 
@@ -2780,8 +2781,8 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state,
   imgMaskData.height = height;
   imgMaskData.y = 0;
 
-  maskBitmap = new SplashBitmap(bitmap->getWidth(), bitmap->getHeight(), 1, splashModeMono8, gFalse);
-  maskSplash = new Splash(maskBitmap, vectorAntialias);
+  transpGroupStack->softmask = new SplashBitmap(bitmap->getWidth(), bitmap->getHeight(), 1, splashModeMono8, gFalse);
+  maskSplash = new Splash(transpGroupStack->softmask, vectorAntialias);
   maskColor[0] = 0;
   maskSplash->clear(maskColor);
   maskColor[0] = 0xff;
@@ -2798,13 +2799,15 @@ void SplashOutputDev::unsetSoftMaskFromImageMask(GfxState *state, double *baseMa
   /* transfer mask to alpha channel! */
   // memcpy(maskBitmap->getAlphaPtr(), maskBitmap->getDataPtr(), bitmap->getRowSize() * bitmap->getHeight());
   // memset(maskBitmap->getDataPtr(), 0, bitmap->getRowSize() * bitmap->getHeight());
-  Guchar *dest = bitmap->getAlphaPtr();
-  Guchar *src = maskBitmap->getDataPtr();
-  for (int c= 0; c < maskBitmap->getRowSize() * maskBitmap->getHeight(); c++) {
-    dest[c] = src[c];
+  if (transpGroupStack->softmask != NULL) {
+    Guchar *dest = bitmap->getAlphaPtr();
+    Guchar *src = transpGroupStack->softmask->getDataPtr();
+    for (int c= 0; c < transpGroupStack->softmask->getRowSize() * transpGroupStack->softmask->getHeight(); c++) {
+      dest[c] = src[c];
+    }
+    delete transpGroupStack->softmask;
+    transpGroupStack->softmask = NULL;
   }
-  delete maskBitmap;
-  maskBitmap = NULL;
   endTransparencyGroup(state);
   baseMatrix[4] += transpGroupStack->tx;
   baseMatrix[5] += transpGroupStack->ty;
@@ -3986,6 +3989,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
 
   // push a new stack entry
   transpGroup = new SplashTransparencyGroup();
+  transpGroup->softmask = NULL;
   transpGroup->tx = tx;
   transpGroup->ty = ty;
   transpGroup->blendingColorSpace = blendingColorSpace;
