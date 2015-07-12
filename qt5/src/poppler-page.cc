@@ -329,8 +329,8 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 
       SplashColorMode colorMode = splashModeRGB8;
  
-      const bool keepAlphaChannel = m_page->parentDoc->m_hints & Document::KeepAlphaChannel;
-      if (keepAlphaChannel) colorMode = splashModeXBGR8;
+      const bool ignorePaperColor = m_page->parentDoc->m_hints & Document::IgnorePaperColor;
+      if (ignorePaperColor) colorMode = splashModeXBGR8;
 
 #if defined(SPLASH_CMYK)
       if (overprintPreview) colorMode = splashModeDeviceN8;
@@ -343,7 +343,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       SplashOutputDev splash_output(
                   colorMode, 4,
                   gFalse,
-                  keepAlphaChannel ? NULL : bgColor,
+                  ignorePaperColor ? NULL : bgColor,
                   gTrue,
                   thinLineMode,
                   overprintPreview);
@@ -367,8 +367,8 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 
       // If we use DeviceN8, convert to XBGR8.
       // If requested, also transfer Splash's internal alpha channel.
-      if (overprintPreview || keepAlphaChannel) {
-          if (bitmap->convertToXBGR(keepAlphaChannel)) {
+      if (overprintPreview || ignorePaperColor) {
+          if (bitmap->convertToXBGR(ignorePaperColor)) {
               SplashColorPtr data = bitmap->takeData();
 
               if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
@@ -386,8 +386,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
               // Construct a Qt image holding (and also owning) the raw bitmap data.
               img = QImage(data, bw, bh, brs, QImage::Format_ARGB32, gfree, data);
           }
-      }
-      else {
+      } else {
           SplashColorPtr data = bitmap->takeData();
 
           if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
