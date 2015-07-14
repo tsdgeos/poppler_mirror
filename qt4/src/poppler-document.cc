@@ -8,6 +8,7 @@
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2014 Adam Reichold <adamreichold@myopera.com>
+ * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -691,7 +692,7 @@ namespace Poppler {
     }
 
     bool isOverprintPreviewAvailable() {
-#if defined(SPLASH_CMYK)
+#if SPLASH_CMYK
         return true;
 #else
         return false;

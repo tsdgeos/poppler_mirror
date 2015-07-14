@@ -79,6 +79,10 @@ AC_ARG_ENABLE(fixedpoint,
 [  --enable-fixedpoint     use fixed point (instead of double precision) arithmetic in the Splash backend],
 AC_DEFINE(USE_FIXEDPOINT, [1], [Use fixed point arithmetic in the Splash backend]))
 
+AC_ARG_ENABLE(cmyk,
+[  --enable-cmyk           Include support for CMYK rasterization],
+AC_DEFINE(SPLASH_CMYK, [1], [Include support for CMYK rasterization]))
+
 dnl Relocation support
 AC_ARG_ENABLE(relocatable,
     AC_HELP_STRING([--disable-relocatable],
@@ -938,6 +942,9 @@ echo ""
 echo "Building poppler with support for:"
 echo "  font configuration: $with_font_configuration"
 echo "  splash output:      $enable_splash_output"
+if test x$enable_cmyk = xyes;then
+        echo "      with CMYK support"
+fi
 echo "  cairo output:       $use_cairo"
 echo "  qt4 wrapper:        $enable_poppler_qt4"
 echo "  qt5 wrapper:        $enable_poppler_qt5"

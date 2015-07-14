@@ -888,7 +888,7 @@ static void setSat(Guchar rIn, Guchar gIn, Guchar bIn, int sat,
 static void splashOutBlendHue(SplashColorPtr src, SplashColorPtr dest,
 			      SplashColorPtr blend, SplashColorMode cm) {
   Guchar r0, g0, b0;
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
   Guchar r1, g1, b1;
   int i;
   SplashColor src2, dest2;
@@ -938,7 +938,7 @@ static void splashOutBlendSaturation(SplashColorPtr src, SplashColorPtr dest,
 				     SplashColorPtr blend,
 				     SplashColorMode cm) {
   Guchar r0, g0, b0;
-#ifdef SPLASH_CMYK
+#if SPLASH_CMYK
   Guchar r1, g1, b1;
   int i;
   SplashColor src2, dest2;
