@@ -825,7 +825,7 @@ int Catalog::getNumPages()
 	Object pageRootRef;
 	catDict.dictLookupNF("Pages", &pageRootRef);
 
-	error(errSyntaxError, -1, "Pages top-level is a single Page. The document is mal-formed, trying to recover...");
+	error(errSyntaxError, -1, "Pages top-level is a single Page. The document is malformed, trying to recover...");
 
 	Dict *pageDict = pagesDict.getDict();
 	if (pageRootRef.isRef()) {
