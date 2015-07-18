@@ -71,6 +71,55 @@ AC_ARG_ENABLE(xpdf-headers,
               enable_xpdf_headers="no")
 AM_CONDITIONAL(ENABLE_XPDF_HEADERS, test x$enable_xpdf_headers = xyes)
 
+dnl ##### Emulate cmake -DCMAKE_BUILD_TYPE=Release using options from cmake/modules/PopplerMacros.cmake
+
+AC_ARG_ENABLE(build-type,
+              AC_HELP_STRING([--enable-build-type=@<:@relwithdebinfo/release/debug/debugfull/profile@:>@],
+                             [Build with options similar to 'cmake -DCMAKE_BUILD_TYPE=' values.]),
+              [enable_build_type=no;
+              case "$enableval" in
+              relwithdebinfo|release|debug|debugfull|profile) enable_build_type="$enableval" ;;
+              *) AC_MSG_ERROR([bad value $enableval for --enable-build-type option.
+                               Options are relwithdebinfo, release, debug, debugfull, and profile.]) ;;
+              esac],
+              enable_build_type=no)
+
+if test "x$GCC" = "xyes"; then
+    case "$enable_build_type" in
+    relwithdebinfo)
+        CFLAGS="-O2 -g $CFLAGS"
+        CXXFLAGS="-O2 -g $CXXFLAGS"
+        ;;
+    release)
+        CFLAGS="-O2 $CFLAGS -g0 -DNDEBUG"
+        CXXFLAGS="-O2 $CXXFLAGS -g0 -DNDEBUG"
+        ;;
+    debug)
+        CFLAGS="-O2 -g $CFLAGS -fno-reorder-blocks -fno-schedule-insns -fno-inline"
+        CXXFLAGS="-O2 -g $CXXFLAGS -fno-reorder-blocks -fno-schedule-insns -fno-inline"
+        ;;
+    debugfull)
+        CFLAGS="$CFLAGS -g3 -fno-inline"
+        CXXFLAGS="$CXXFLAGS -g3 -fno-inline"
+        ;;
+    profile)
+        CFLAGS="$CFLAGS -g3 -fno-inline -ftest-coverage -fprofile-arcs"
+        CXXFLAGS="$CXXFLAGS -g3 -fno-inline -ftest-coverage -fprofile-arcs"
+        LDFLAGS="$LDFLAGS -fprofile-arcs -ftest-coverage -lgcov"
+        ;;
+    *)
+        enable_build_type=no
+        ;;
+    esac
+else
+    case "$enable_build_type" in
+    relwithdebinfo|release|debug|debugfull|profile)
+        echo "  Warning: --enable-build-type ignored for non-gcc compiler."
+        ;;
+    esac
+    enable_build_type=no
+fi
+
 AC_ARG_ENABLE(single-precision,
 [  --enable-single-precision     use single precision arithmetic (instead of double precision) in the Splash backend],
 AC_DEFINE(USE_FLOAT,      [1], [Use single precision arithmetic in the Splash backend]))
@@ -972,6 +1021,9 @@ if test x$enable_cms = xyes;then
     else
         echo "      with lcms2"
     fi
+fi
+if test x$enable_build_type != xno;then
+        echo "  build type:         $enable_build_type"
 fi
 echo "  command line utils: $enable_utils"
 echo "  test data dir:      $TESTDATADIR"
