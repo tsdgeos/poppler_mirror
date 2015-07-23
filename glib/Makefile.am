@@ -77,6 +77,7 @@ libpoppler_glib_la_CPPFLAGS =			\
 libpoppler_glib_la_LIBADD =				\
 	$(top_builddir)/poppler/libpoppler.la		\
 	$(top_builddir)/poppler/libpoppler-cairo.la	\
+	$(PTHREAD_LIBS)					\
 	$(POPPLER_GLIB_LIBS)				\
 	$(FREETYPE_LIBS)
 
