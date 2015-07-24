@@ -336,17 +336,9 @@ pgd_selections_drawing_area_realize (GtkWidget         *area,
 	g_object_set (area, "has-tooltip", TRUE, NULL);
 
         gtk_style_context_get_color (style_context, GTK_STATE_FLAG_SELECTED, &rgba);
-#if GTK_CHECK_VERSION(3,4,0)
 	gtk_color_chooser_set_rgba (GTK_COLOR_CHOOSER (demo->fg_color_button), &rgba);
-#else
-        gtk_color_button_set_rgba (GTK_COLOR_BUTTON (demo->fg_color_button), &rgba);
-#endif
         gtk_style_context_get_background_color (style_context, GTK_STATE_FLAG_SELECTED, &rgba);
-#if GTK_CHECK_VERSION(3,4,0)
 	gtk_color_chooser_set_rgba (GTK_COLOR_CHOOSER (demo->bg_color_button), &rgba);
-#else
-        gtk_color_button_set_rgba (GTK_COLOR_BUTTON (demo->bg_color_button), &rgba);
-#endif
 }
 
 static gboolean
@@ -465,11 +457,7 @@ pgd_selections_fg_color_changed (GtkColorButton    *button,
 {
 	GdkRGBA color;
 
-#if GTK_CHECK_VERSION(3,4,0)
 	gtk_color_chooser_get_rgba (GTK_COLOR_CHOOSER (button), &color);
-#else
-	gtk_color_button_get_rgba (GTK_COLOR_BUTTON (button), &color);
-#endif
 	demo->glyph_color.red = CLAMP ((guint) (color.red * 65535), 0, 65535);
 	demo->glyph_color.green = CLAMP ((guint) (color.green * 65535), 0, 65535);
 	demo->glyph_color.blue = CLAMP ((guint) (color.blue * 65535), 0, 65535);
@@ -482,11 +470,7 @@ pgd_selections_bg_color_changed (GtkColorButton    *button,
 {
 	GdkRGBA color;
 
-#if GTK_CHECK_VERSION(3,4,0)
 	gtk_color_chooser_get_rgba (GTK_COLOR_CHOOSER (button), &color);
-#else
-	gtk_color_button_get_rgba (GTK_COLOR_BUTTON (button), &color);
-#endif
 	demo->background_color.red = CLAMP ((guint) (color.red * 65535), 0, 65535);
 	demo->background_color.green = CLAMP ((guint) (color.green * 65535), 0, 65535);
 	demo->background_color.blue = CLAMP ((guint) (color.blue * 65535), 0, 65535);

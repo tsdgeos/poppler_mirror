@@ -458,11 +458,7 @@ pgd_annot_color_changed (GtkButton     *button,
                          GParamSpec    *pspec,
                          PgdAnnotsDemo *demo)
 {
-#if GTK_CHECK_VERSION(3,4,0)
     gtk_color_chooser_get_rgba (GTK_COLOR_CHOOSER (button), &demo->annot_color);
-#else
-    gtk_color_button_get_rgba (GTK_COLOR_BUTTON (button), &demo->annot_color);
-#endif
 }
 
 static void
@@ -1336,11 +1332,7 @@ pgd_annots_create_widget (PopplerDocument *document)
     button = gtk_color_button_new ();
     demo->annot_color.red = 65535;
     demo->annot_color.alpha = 1.0;
-#if GTK_CHECK_VERSION(3,4,0)
     gtk_color_chooser_set_rgba (GTK_COLOR_CHOOSER (button), &demo->annot_color);
-#else
-    gtk_color_button_set_rgba (GTK_COLOR_BUTTON (button), &demo->annot_color);
-#endif
     g_signal_connect (button, "notify::color",
                       G_CALLBACK (pgd_annot_color_changed),
                       (gpointer)demo);
