@@ -6696,6 +6696,408 @@ Annot3D::Activation::Activation(Dict *dict) {
 }
 
 //------------------------------------------------------------------------
+// AnnotRichMedia
+//------------------------------------------------------------------------
+AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, PDFRectangle *rect) :
+    Annot(docA, rect) {
+  Object obj1;
+
+  type = typeRichMedia;
+
+  annotObj.dictSet ("Subtype", obj1.initName ("RichMedia"));
+
+  initialize(docA, annotObj.getDict());
+}
+
+AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, Dict *dict, Object *obj) :
+  Annot(docA, dict, obj) {
+  type = typeRichMedia;
+  initialize(docA, dict);
+}
+
+AnnotRichMedia::~AnnotRichMedia() {
+  delete content;
+  delete settings;
+}
+
+void AnnotRichMedia::initialize(PDFDoc *docA, Dict* dict) {
+  Object obj1;
+
+  if (dict->lookup("RichMediaContent", &obj1)->isDict()) {
+    content = new AnnotRichMedia::Content(obj1.getDict());
+  } else {
+    content = NULL;
+  }
+  obj1.free();
+
+  if (dict->lookup("RichMediaSettings", &obj1)->isDict()) {
+    settings = new AnnotRichMedia::Settings(obj1.getDict());
+  } else {
+    settings = NULL;
+  }
+  obj1.free();
+}
+
+AnnotRichMedia::Content* AnnotRichMedia::getContent() const {
+  return content;
+}
+
+AnnotRichMedia::Settings* AnnotRichMedia::getSettings() const {
+  return settings;
+}
+
+AnnotRichMedia::Settings::Settings(Dict *dict) {
+  Object obj1;
+
+  if (dict->lookup("Activation", &obj1)->isDict()) {
+    activation = new AnnotRichMedia::Activation(obj1.getDict());
+  } else {
+    activation = NULL;
+  }
+  obj1.free();
+
+  if (dict->lookup("Deactivation", &obj1)->isDict()) {
+    deactivation = new AnnotRichMedia::Deactivation(obj1.getDict());
+  } else {
+    deactivation = NULL;
+  }
+  obj1.free();
+}
+
+AnnotRichMedia::Settings::~Settings() {
+  delete activation;
+  delete deactivation;
+}
+
+AnnotRichMedia::Activation* AnnotRichMedia::Settings::getActivation() const {
+  return activation;
+}
+
+AnnotRichMedia::Deactivation* AnnotRichMedia::Settings::getDeactivation() const {
+  return deactivation;
+}
+
+AnnotRichMedia::Activation::Activation(Dict *dict) {
+  Object obj1;
+
+  if (dict->lookup("Condition", &obj1)->isName()) {
+    const char *name = obj1.getName();
+
+    if (!strcmp(name, "PO")) {
+      condition = conditionPageOpened;
+    } else if (!strcmp(name, "PV")) {
+      condition = conditionPageVisible;
+    } else if (!strcmp(name, "XA")) {
+      condition = conditionUserAction;
+    } else {
+      condition = conditionUserAction;
+    }
+  } else {
+    condition = conditionUserAction;
+  }
+  obj1.free();
+}
+
+AnnotRichMedia::Activation::Condition AnnotRichMedia::Activation::getCondition() const {
+  return condition;
+}
+
+AnnotRichMedia::Deactivation::Deactivation(Dict *dict) {
+  Object obj1;
+
+  if (dict->lookup("Condition", &obj1)->isName()) {
+    const char *name = obj1.getName();
+
+    if (!strcmp(name, "PC")) {
+      condition = conditionPageClosed;
+    } else if (!strcmp(name, "PI")) {
+      condition = conditionPageInvisible;
+    } else if (!strcmp(name, "XD")) {
+      condition = conditionUserAction;
+    } else {
+      condition = conditionUserAction;
+    }
+  } else {
+    condition = conditionUserAction;
+  }
+  obj1.free();
+}
+
+AnnotRichMedia::Deactivation::Condition AnnotRichMedia::Deactivation::getCondition() const {
+  return condition;
+}
+
+AnnotRichMedia::Content::Content(Dict *dict) {
+  Object obj1;
+
+  if (dict->lookup("Configurations", &obj1)->isArray()) {
+    nConfigurations = obj1.arrayGetLength();
+
+    configurations = (Configuration **)gmallocn(nConfigurations, sizeof(Configuration *));
+
+    for (int i = 0; i < nConfigurations; ++i) {
+      Object obj2;
+
+      if (obj1.arrayGet(i, &obj2)->isDict()) {
+        configurations[i] = new AnnotRichMedia::Configuration(obj2.getDict());
+      } else {
+        configurations[i] = NULL;
+      }
+      obj2.free();
+    }
+  } else {
+    configurations = NULL;
+  }
+  obj1.free();
+
+  if (dict->lookup("Assets", &obj1)->isDict()) {
+    Object obj2;
+
+    if (obj1.getDict()->lookup("Names", &obj2)->isArray()) {
+      nAssets = obj2.arrayGetLength() / 2;
+
+      assets = (Asset **)gmallocn(nAssets, sizeof(Asset *));
+
+      int counter = 0;
+      for (int i = 0; i < obj2.arrayGetLength(); i += 2) {
+        Object objKey;
+
+        assets[counter] = new AnnotRichMedia::Asset;
+
+        obj2.arrayGet(i, &objKey);
+        obj2.arrayGet(i + 1, &assets[counter]->fileSpec);
+
+        assets[counter]->name = new GooString( objKey.getString() );
+        ++counter;
+
+        objKey.free();
+      }
+    }
+    obj2.free();
+
+  } else {
+    assets = NULL;
+  }
+  obj1.free();
+}
+
+AnnotRichMedia::Content::~Content() {
+  if (configurations) {
+    for (int i = 0; i < nConfigurations; ++i)
+      delete configurations[i];
+    gfree(configurations);
+  }
+
+  if (assets) {
+    for (int i = 0; i < nAssets; ++i)
+      delete assets[i];
+    gfree(assets);
+  }
+}
+
+int AnnotRichMedia::Content::getConfigurationsCount() const {
+  return nConfigurations;
+}
+
+AnnotRichMedia::Configuration* AnnotRichMedia::Content::getConfiguration(int index) const {
+  if (index < 0 || index >= nConfigurations)
+    return NULL;
+
+  return configurations[index];
+}
+
+int AnnotRichMedia::Content::getAssetsCount() const {
+  return nAssets;
+}
+
+AnnotRichMedia::Asset* AnnotRichMedia::Content::getAsset(int index) const {
+  if (index < 0 || index >= nAssets)
+    return NULL;
+
+  return assets[index];
+}
+
+AnnotRichMedia::Asset::Asset()
+  : name(NULL)
+{
+}
+
+AnnotRichMedia::Asset::~Asset()
+{
+  delete name;
+  fileSpec.free();
+}
+
+GooString* AnnotRichMedia::Asset::getName() const {
+  return name;
+}
+
+Object* AnnotRichMedia::Asset::getFileSpec() const {
+  return const_cast<Object*>(&fileSpec);
+}
+
+AnnotRichMedia::Configuration::Configuration(Dict *dict)
+{
+  Object obj1;
+
+  if (dict->lookup("Instances", &obj1)->isArray()) {
+    nInstances = obj1.arrayGetLength();
+
+    instances = (Instance **)gmallocn(nInstances, sizeof(Instance *));
+
+    for (int i = 0; i < nInstances; ++i) {
+      Object obj2;
+
+      if (obj1.arrayGet(i, &obj2)->isDict()) {
+        instances[i] = new AnnotRichMedia::Instance(obj2.getDict());
+      } else {
+        instances[i] = NULL;
+      }
+      obj2.free();
+    }
+  } else {
+    instances = NULL;
+  }
+  obj1.free();
+
+  if (dict->lookup("Name", &obj1)->isString()) {
+    name = new GooString(obj1.getString());
+  } else {
+    name = NULL;
+  }
+  obj1.free();
+
+  if (dict->lookup("Subtype", &obj1)->isName()) {
+    const char *name = obj1.getName();
+
+    if (!strcmp(name, "3D")) {
+      type = type3D;
+    } else if (!strcmp(name, "Flash")) {
+      type = typeFlash;
+    } else if (!strcmp(name, "Sound")) {
+      type = typeSound;
+    } else if (!strcmp(name, "Video")) {
+      type = typeVideo;
+    } else {
+      // determine from first instance
+      if (instances && nInstances > 0) {
+        AnnotRichMedia::Instance *instance = instances[0];
+        switch (instance->getType()) {
+          case AnnotRichMedia::Instance::type3D:
+            type = type3D;
+            break;
+          case AnnotRichMedia::Instance::typeFlash:
+            type = typeFlash;
+            break;
+          case AnnotRichMedia::Instance::typeSound:
+            type = typeSound;
+            break;
+          case AnnotRichMedia::Instance::typeVideo:
+            type = typeVideo;
+            break;
+          default:
+            type = typeFlash;
+            break;
+        }
+      }
+    }
+  }
+  obj1.free();
+}
+
+AnnotRichMedia::Configuration::~Configuration()
+{
+  if (instances) {
+    for (int i = 0; i < nInstances; ++i)
+      delete instances[i];
+    gfree(instances);
+  }
+
+  delete name;
+}
+
+int AnnotRichMedia::Configuration::getInstancesCount() const {
+  return nInstances;
+}
+
+AnnotRichMedia::Instance* AnnotRichMedia::Configuration::getInstance(int index) const {
+  if (index < 0 || index >= nInstances)
+    return NULL;
+
+  return instances[index];
+}
+
+GooString* AnnotRichMedia::Configuration::getName() const {
+  return name;
+}
+
+AnnotRichMedia::Configuration::Type AnnotRichMedia::Configuration::getType() const {
+  return type;
+}
+
+AnnotRichMedia::Instance::Instance(Dict *dict)
+{
+  Object obj1;
+
+  if (dict->lookup("Subtype", &obj1)->isName()) {
+    const char *name = obj1.getName();
+
+    if (!strcmp(name, "3D")) {
+      type = type3D;
+    } else if (!strcmp(name, "Flash")) {
+      type = typeFlash;
+    } else if (!strcmp(name, "Sound")) {
+      type = typeSound;
+    } else if (!strcmp(name, "Video")) {
+      type = typeVideo;
+    } else {
+      type = typeFlash;
+    }
+  }
+  obj1.free();
+
+  if (dict->lookup("Params", &obj1)->isDict()) {
+    params = new AnnotRichMedia::Params(obj1.getDict());
+  } else {
+    params = NULL;
+  }
+}
+
+AnnotRichMedia::Instance::~Instance()
+{
+  delete params;
+}
+
+AnnotRichMedia::Instance::Type AnnotRichMedia::Instance::getType() const {
+  return type;
+}
+
+AnnotRichMedia::Params* AnnotRichMedia::Instance::getParams() const {
+  return params;
+}
+
+AnnotRichMedia::Params::Params(Dict *dict)
+{
+  Object obj1;
+
+  if (dict->lookup("FlashVars", &obj1)->isString()) {
+    flashVars = new GooString(obj1.getString());
+  } else {
+    flashVars = NULL;
+  }
+  obj1.free();
+}
+
+AnnotRichMedia::Params::~Params()
+{
+  delete flashVars;
+}
+
+GooString* AnnotRichMedia::Params::getFlashVars() const {
+  return flashVars;
+}
+
+//------------------------------------------------------------------------
 // Annots
 //------------------------------------------------------------------------
 
@@ -6828,6 +7230,8 @@ Annot *Annots::createAnnot(Dict* dict, Object *obj) {
       annot = new Annot(doc, dict, obj);
     } else if (!strcmp(typeName, "3D")) {
       annot = new Annot3D(doc, dict, obj);
+    } else if (!strcmp(typeName, "RichMedia")) {
+      annot = new AnnotRichMedia(doc, dict, obj);
     } else if (!strcmp(typeName, "Popup")) {
       /* Popup annots are already handled by markup annots
        * Here we only care about popup annots without a
