@@ -327,11 +327,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
         bgColor[2] = m_page->parentDoc->paperColor.red();
       }
 
-      SplashColorMode colorMode = splashModeRGB8;
-
-      const bool ignorePaperColor = m_page->parentDoc->m_hints & Document::IgnorePaperColor;
-      if (ignorePaperColor) colorMode = splashModeXBGR8;
-
+      SplashColorMode colorMode = splashModeXBGR8;
 #if SPLASH_CMYK
       if (overprintPreview) colorMode = splashModeDeviceN8;
 #endif
@@ -339,6 +335,8 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       SplashThinLineMode thinLineMode = splashThinLineDefault;
       if (m_page->parentDoc->m_hints & Document::ThinLineShape) thinLineMode = splashThinLineShape;
       if (m_page->parentDoc->m_hints & Document::ThinLineSolid) thinLineMode = splashThinLineSolid;
+
+      const bool ignorePaperColor = m_page->parentDoc->m_hints & Document::IgnorePaperColor;
 
       SplashOutputDev splash_output(
                   colorMode, 4,
@@ -367,45 +365,31 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 
       // If we use DeviceN8, convert to XBGR8.
       // If requested, also transfer Splash's internal alpha channel.
-      if (overprintPreview || ignorePaperColor) {
-          const SplashBitmap::ConversionMode mode = ignorePaperColor
-                  ? SplashBitmap::conversionAlpha
-                  : SplashBitmap::conversionOpaque;
+      const SplashBitmap::ConversionMode mode = ignorePaperColor
+              ? SplashBitmap::conversionAlphaPremultiplied
+              : SplashBitmap::conversionOpaque;
 
-          if (bitmap->convertToXBGR(mode)) {
-              SplashColorPtr data = bitmap->getDataPtr();
+      const QImage::Format format = ignorePaperColor
+              ? QImage::Format_ARGB32_Premultiplied
+              : QImage::Format_RGB32;
 
-              if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
-                  // Convert byte order from RGBX to XBGR.
-                  for (int i = 0; i < bh; ++i) {
-                      for (int j = 0; j < bw; ++j) {
-                          SplashColorPtr pixel = &data[i * brs + j];
-
-                          qSwap(pixel[0], pixel[3]);
-                          qSwap(pixel[1], pixel[2]);
-                      }
-                  }
-              }
-
-              // Construct a Qt image sharing the raw bitmap data.
-              img = QImage(data, bw, bh, brs, QImage::Format_ARGB32).copy();
-          }
-      } else {
+      if (bitmap->convertToXBGR(mode)) {
           SplashColorPtr data = bitmap->getDataPtr();
 
           if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
-              // Convert byte order from BGR to RGB.
+              // Convert byte order from RGBX to XBGR.
               for (int i = 0; i < bh; ++i) {
                   for (int j = 0; j < bw; ++j) {
                       SplashColorPtr pixel = &data[i * brs + j];
 
-                      qSwap(pixel[0], pixel[2]);
+                      qSwap(pixel[0], pixel[3]);
+                      qSwap(pixel[1], pixel[2]);
                   }
               }
           }
 
           // Construct a Qt image sharing the raw bitmap data.
-          img = QImage(data, bw, bh, brs, QImage::Format_RGB888).copy();
+          img = QImage(data, bw, bh, brs, format).copy();
       }
 #endif
       break;
