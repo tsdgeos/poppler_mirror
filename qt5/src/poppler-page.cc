@@ -368,7 +368,11 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       // If we use DeviceN8, convert to XBGR8.
       // If requested, also transfer Splash's internal alpha channel.
       if (overprintPreview || ignorePaperColor) {
-          if (bitmap->convertToXBGR(ignorePaperColor)) {
+          const SplashBitmap::ConversionMode mode = ignorePaperColor
+                  ? SplashBitmap::conversionAlpha
+                  : SplashBitmap::conversionOpaque;
+
+          if (bitmap->convertToXBGR(mode)) {
               SplashColorPtr data = bitmap->takeData();
 
               if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {

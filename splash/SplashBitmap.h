@@ -76,11 +76,18 @@ public:
   SplashError writeImgFile(SplashImageFileFormat format, FILE *f, int hDPI, int vDPI, const char *compressionString = "");
   SplashError writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int vDPI);
 
-  GBool convertToXBGR(bool useAlpha = false);
+  enum ConversionMode
+  {
+      conversionOpaque,
+      conversionAlpha,
+      conversionAlphaPremultiplied
+  };
+
+  GBool convertToXBGR(ConversionMode conversionMode = conversionOpaque);
 
   void getPixel(int x, int y, SplashColorPtr pixel);
   void getRGBLine(int y, SplashColorPtr line);
-  void getXBGRLine(int y, SplashColorPtr line, bool useAlpha = false);
+  void getXBGRLine(int y, SplashColorPtr line, ConversionMode conversionMode = conversionOpaque);
 #if SPLASH_CMYK
   void getCMYKLine(int y, SplashColorPtr line);
 #endif

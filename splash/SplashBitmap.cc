@@ -461,7 +461,7 @@ void SplashBitmap::getRGBLine(int yl, SplashColorPtr line) {
   }
 }
 
-void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, bool useAlpha) {
+void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, ConversionMode conversionMode) {
   SplashColor col;
   double c, m, y, k, c1, m1, y1, k1, r, g, b;
 
@@ -501,16 +501,34 @@ void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, bool useAlpha) {
     y1 = 1 - y;
     k1 = 1 - k;
     cmykToRGBMatrixMultiplication(c, m, y, k, c1, m1, y1, k1, r, g, b);
-    *line++ = dblToByte(clip01(b));
-    *line++ = dblToByte(clip01(g));
-    *line++ = dblToByte(clip01(r));
-    *line++ = useAlpha ? getAlpha(x, yl) : 255;
+
+    if (conversionMode == conversionAlphaPremultiplied) {
+        const double a = getAlpha(x, yl) / 255.0;
+
+        *line++ = dblToByte(clip01(b * a));
+        *line++ = dblToByte(clip01(g * a));
+        *line++ = dblToByte(clip01(r * a));
+    } else {
+        *line++ = dblToByte(clip01(b));
+        *line++ = dblToByte(clip01(g));
+        *line++ = dblToByte(clip01(r));
+    }
+
+    if (conversionMode != conversionOpaque) {
+        *line++ = getAlpha(x, yl);
+    } else {
+        *line++ = 255;
+    }
   }
 }
 
-GBool SplashBitmap::convertToXBGR(bool useAlpha) {
+static inline Guchar div255(int x) {
+  return (Guchar)((x + (x >> 8) + 0x80) >> 8);
+}
+
+GBool SplashBitmap::convertToXBGR(ConversionMode conversionMode) {
   if (mode == splashModeXBGR8) {
-    if (useAlpha) {
+    if (conversionMode != conversionOpaque) {
       // Copy the alpha channel into the fourth component so that XBGR becomes ABGR.
       const SplashColorPtr dbegin = data;
       const SplashColorPtr dend = data + rowSize * height;
@@ -518,11 +536,20 @@ GBool SplashBitmap::convertToXBGR(bool useAlpha) {
       Guchar *const abegin = alpha;
       Guchar *const aend = alpha + width * height;
 
-      SplashColorPtr d = dbegin + 3;
+      SplashColorPtr d = dbegin;
       Guchar *a = abegin;
 
-      for(; d < dend && a < aend; d += 4, a += 1) {
-        *d = *a;
+      if (conversionMode == conversionAlphaPremultiplied) {
+          for (; d < dend && a < aend; d += 4, a += 1) {
+              d[0] = div255(d[0] * *a);
+              d[1] = div255(d[1] * *a);
+              d[2] = div255(d[2] * *a);
+              d[3] = *a;
+          }
+      } else {
+          for (d += 3; d < dend && a < aend; d += 4, a += 1) {
+              *d = *a;
+          }
       }
     }
 
@@ -534,7 +561,7 @@ GBool SplashBitmap::convertToXBGR(bool useAlpha) {
   if (newdata != NULL) {
     for (int y = 0; y < height; y++) {
       unsigned char *row = newdata + y * newrowSize;
-      getXBGRLine(y, row, useAlpha);
+      getXBGRLine(y, row, conversionMode);
     }
     if (rowSize < 0) {
       gfree(data + (height - 1) * rowSize);
