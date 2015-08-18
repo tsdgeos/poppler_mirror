@@ -1433,29 +1433,15 @@ static inline int splashFloor(SplashCoord x) {
 static
 cairo_surface_t *cairo_surface_create_similar_clip (cairo_t *cairo, cairo_content_t content)
 {
-  double x1, y1, x2, y2;
-  int width, height;
-  cairo_clip_extents (cairo, &x1, &y1, &x2, &y2);
-  cairo_matrix_t matrix;
-  cairo_get_matrix (cairo, &matrix);
-  //cairo_matrix_transform_point(&matrix, &x1, &y1);
-  //cairo_matrix_transform_point(&matrix, &x2, &y2);*/
-  cairo_user_to_device(cairo, &x1, &y1);
-  cairo_user_to_device(cairo, &x2, &y2);
-  width = splashCeil(x2) - splashFloor(x1);
-  //XXX: negative matrix
-  ////height = splashCeil(y2) - splashFloor(y1);
-  height = splashFloor(y1) - splashCeil(y2);
-  cairo_surface_t *target = cairo_get_target (cairo);
-  cairo_surface_t *result;
+  cairo_pattern_t *pattern;
+  cairo_surface_t *surface = NULL;
 
-  result = cairo_surface_create_similar (target, content, width, height);
-  double x_offset, y_offset;
-    cairo_surface_get_device_offset(target, &x_offset, &y_offset);
-    cairo_surface_set_device_offset(result, x_offset, y_offset);
-
- 
-  return result;
+  cairo_push_group_with_content (cairo, content);
+  pattern = cairo_pop_group (cairo);
+  cairo_pattern_get_surface (pattern, &surface);
+  cairo_surface_reference (surface);
+  cairo_pattern_destroy (pattern);
+  return surface;
 }
 
 
