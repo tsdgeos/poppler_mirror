@@ -3208,6 +3208,8 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData,
 			         ((SplashCoord)y + 0.5 - section[i].yb0) *
 			           section[i].dxdyb,
 			       glyphMode);
+      if (unlikely(xa < 0))
+        xa = 0;
       // make sure narrow images cover at least one pixel
       if (xa == xb) {
 	++xb;
