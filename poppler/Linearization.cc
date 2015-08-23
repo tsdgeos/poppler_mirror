@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010, 2012 Hib Eris <hib@hiberis.nl>
+// Copyright 2015 Jason Crain <jason@aquaticape.us>
 //
 //========================================================================
 
@@ -211,7 +212,7 @@ int Linearization::getPageFirst()
     linDict.getDict()->lookupInt("P", NULL, &pageFirst);
   }
 
-  if ((pageFirst < 0) || (pageFirst > getNumPages())) {
+  if ((pageFirst < 0) || (pageFirst >= getNumPages())) {
     error(errSyntaxWarning, -1, "First page in linearization table is invalid");
     return 0;
   }
