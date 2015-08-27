@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, Hib Eris <hib@hiberis.nl>
- * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
+ * Copyright (C) 2014, 2015 Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2015, Tamas Szekeres <szekerest@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -225,9 +225,9 @@ byte_array ustring::to_utf8() const
         return byte_array();
     }
     const value_type *me_data = data();
-    byte_array str(size());
+    byte_array str(size()*sizeof(value_type));
     char *str_data = &str[0];
-    size_t me_len_char = size();
+    size_t me_len_char = size()*sizeof(value_type);
     size_t str_len_left = str.size();
     size_t ir = iconv(ic, (ICONV_CONST char **)&me_data, &me_len_char, &str_data, &str_len_left);
     if ((ir == (size_t)-1) && (errno == E2BIG)) {
@@ -273,23 +273,24 @@ ustring ustring::from_utf8(const char *str, int len)
         return ustring();
     }
 
-    ustring ret(len * 2, 0);
+    // +1, because iconv inserts byte order marks
+    ustring ret(len+1, 0);
     char *ret_data = reinterpret_cast<char *>(&ret[0]);
     char *str_data = const_cast<char *>(str);
     size_t str_len_char = len;
-    size_t ret_len_left = ret.size();
+    size_t ret_len_left = ret.size() * sizeof(ustring::value_type);
     size_t ir = iconv(ic, (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left);
     if ((ir == (size_t)-1) && (errno == E2BIG)) {
         const size_t delta = ret_data - reinterpret_cast<char *>(&ret[0]);
-        ret_len_left += ret.size();
+        ret_len_left += ret.size()*sizeof(ustring::value_type);
         ret.resize(ret.size() * 2);
-        ret_data = reinterpret_cast<char *>(&ret[delta]);
+        ret_data = reinterpret_cast<char *>(&ret[0]) + delta;
         ir = iconv(ic, (ICONV_CONST char **)&str_data, &str_len_char, &ret_data, &ret_len_left);
         if (ir == (size_t)-1) {
             return ustring();
         }
     }
-    ret.resize(ret.size() - ret_len_left);
+    ret.resize(ret.size() - ret_len_left/sizeof(ustring::value_type));
 
     return ret;
 }
