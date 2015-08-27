@@ -1561,7 +1561,6 @@ void PDFDoc::replacePageDict(int pageNo, int rotate,
 
 void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum) 
 {
-  pageDict->remove("Names");
   pageDict->remove("OpenAction");
   pageDict->remove("Outlines");
   pageDict->remove("StructTreeRoot");
