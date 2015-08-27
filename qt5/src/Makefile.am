@@ -53,7 +53,7 @@ libpoppler_qt5_la_CPPFLAGS =			\
 	$(LCMS_CFLAGS)
 
 libpoppler_qt5_la_CXXFLAGS =			\
-	-Dpoppler_qt5_EXPORTS -fPIC
+	-Dpoppler_qt5_EXPORTS
 
 libpoppler_qt5_la_LIBADD =			\
 	$(top_builddir)/poppler/libpoppler.la	\
