@@ -10,6 +10,7 @@
 // Copyright (C) 2012, 2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2015 Arthur Stavisky <vovodroid@gmail.com>
 //
 //========================================================================
 
@@ -451,7 +452,7 @@ int main (int argc, char *argv[])
   ref.gen = 0;
   Dict *trailerDict = PDFDoc::createTrailerDict(objectsCount, gFalse, 0, &ref, yRef,
                                                 fileName, outStr->getPos());
-  PDFDoc::writeXRefTableTrailer(trailerDict, yRef, gFalse /* do not write unnecessary entries */,
+  PDFDoc::writeXRefTableTrailer(trailerDict, yRef, gTrue, // write all entries according to ISO 32000-1, 7.5.4 Cross-Reference Table: "For a file that has never been incrementally updated, the cross-reference section shall contain only one subsection, whose object numbering begins at 0."
                                 uxrefOffset, outStr, yRef);
   delete trailerDict;
 
