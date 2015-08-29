@@ -2125,7 +2125,7 @@ Release 0.7.0 (0.8 Beta 1)
 Release 0.6.4
 
 	Qt4 frontend:
-	 * Fix crash on links that point to a non existant page
+	 * Fix crash on links that point to a non existent page
 	 * Make Document::renderHints return the correct render hints
 	 * Fix infinite loop when parsing LineAnnotation
 

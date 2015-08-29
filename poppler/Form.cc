@@ -1445,7 +1445,7 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
       }
 
       if (!obj2.isDict()) {
-        error(errSyntaxWarning, -1, "Reference in Fields array to an invalid or non existant object");
+        error(errSyntaxWarning, -1, "Reference in Fields array to an invalid or non existent object");
 	obj2.free();
 	oref.free();
 	continue;
