@@ -24,6 +24,7 @@
 // Copyright (C) 2011 Steven Murdoch <Steven.Murdoch@cl.cam.ac.uk>
 // Copyright (C) 2013 Yury G. Kudryashov <urkud.urkud@gmail.com>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+// Copyright (C) 2015 Jeremy Echols <jechols@uoregon.edu>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -56,10 +57,14 @@
 #include "PDFDocEncoding.h"
 #include "Error.h"
 #include <string>
+#include <sstream>
+#include <iomanip>
 
 static void printInfoString(FILE *f, Dict *infoDict, const char *key,
 			    const char *text1, const char *text2, UnicodeMap *uMap);
 static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *fmt);
+void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last);
+void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last);
 
 static int firstPage = 1;
 static int lastPage = 0;
@@ -69,6 +74,7 @@ static int y = 0;
 static int w = 0;
 static int h = 0;
 static GBool bbox = gFalse;
+static GBool bboxLayout = gFalse;
 static GBool physLayout = gFalse;
 static double fixedPitch = 0;
 static GBool rawOrder = gFalse;
@@ -116,6 +122,8 @@ static const ArgDesc argDesc[] = {
    "don't insert page breaks between pages"},
   {"-bbox", argFlag,     &bbox,  0,
    "output bounding box for each word and page size to html.  Sets -htmlmeta"},
+  {"-bbox-layout", argFlag,     &bboxLayout,  0,
+   "like -bbox but with extra layout bounding box data.  Sets -htmlmeta"},
   {"-opw",     argString,   ownerPassword,  sizeof(ownerPassword),
    "owner password (for encrypted files)"},
   {"-upw",     argString,   userPassword,   sizeof(userPassword),
@@ -176,6 +184,9 @@ int main(int argc, char *argv[]) {
 
   // parse args
   ok = parseArgs(argDesc, &argc, argv);
+  if (bboxLayout) {
+    bbox = gTrue;
+  }
   if (bbox) {
     htmlMeta = gTrue;
   }
@@ -352,27 +363,12 @@ int main(int argc, char *argv[]) {
     textOut = new TextOutputDev(NULL, physLayout, fixedPitch, rawOrder, htmlMeta);
 
     if (textOut->isOk()) {
-      fprintf(f, "<doc>\n");
-      for (int page = firstPage; page <= lastPage; ++page) {
-        fprintf(f, "  <page width=\"%f\" height=\"%f\">\n",doc->getPageMediaWidth(page), doc->getPageMediaHeight(page));
-        doc->displayPage(textOut, page, resolution, resolution, 0, gTrue, gFalse, gFalse);
-        TextWordList *wordlist = textOut->makeWordList();
-        const int word_length = wordlist != NULL ? wordlist->getLength() : 0;
-        TextWord *word;
-        double xMinA, yMinA, xMaxA, yMaxA;
-        if (word_length == 0)
-          fprintf(stderr, "no word list\n");
-
-        for (int i = 0; i < word_length; ++i) {
-          word = wordlist->get(i);
-          word->getBBox(&xMinA, &yMinA, &xMaxA, &yMaxA);
-          const std::string myString = myXmlTokenReplace(word->getText()->getCString());
-          fprintf(f,"    <word xMin=\"%f\" yMin=\"%f\" xMax=\"%f\" yMax=\"%f\">%s</word>\n", xMinA, yMinA, xMaxA, yMaxA, myString.c_str());
-        }
-        fprintf(f, "  </page>\n");
-        delete wordlist;
+      if (bboxLayout) {
+        printDocBBox(f, doc, textOut, firstPage, lastPage);
       }
-      fprintf(f, "</doc>\n");
+      else {
+        printWordBBox(f, doc, textOut, firstPage, lastPage);
+      }
     }
     if (f != stdout) {
       fclose(f);
@@ -491,4 +487,83 @@ static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *
     fprintf(f, fmt, s);
   }
   obj.free();
+}
+
+void printLine(FILE *f, TextLine *line) {
+  double xMin, yMin, xMax, yMax;
+  double lineXMin = 0, lineYMin = 0, lineXMax = 0, lineYMax = 0;
+  TextWord *word;
+  std::stringstream wordXML;
+  wordXML << std::fixed << std::setprecision(6);
+
+  for (word = line->getWords(); word; word = word->getNext()) {
+    word->getBBox(&xMin, &yMin, &xMax, &yMax);
+
+    if (lineXMin == 0 || lineXMin > xMin) lineXMin = xMin;
+    if (lineYMin == 0 || lineYMin > yMin) lineYMin = yMin;
+    if (lineXMax < xMax) lineXMax = xMax;
+    if (lineYMax < yMax) lineYMax = yMax;
+
+    const std::string myString = myXmlTokenReplace(word->getText()->getCString());
+    wordXML << "          <word xMin=\"" << xMin << "\" yMin=\"" << yMin << "\" xMax=\"" <<
+            xMax << "\" yMax=\"" << yMax << "\">" << myString << "</word>\n";
+  }
+  fprintf(f, "        <line xMin=\"%f\" yMin=\"%f\" xMax=\"%f\" yMax=\"%f\">\n",
+          lineXMin, lineYMin, lineXMax, lineYMax);
+  fputs(wordXML.str().c_str(), f);
+  fputs("        </line>\n", f);
+}
+
+void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last) {
+  double xMin, yMin, xMax, yMax;
+  TextPage *textPage;
+  TextFlow *flow;
+  TextBlock *blk;
+  TextLine *line;
+
+  fprintf(f, "<doc>\n");
+  for (int page = first; page <= last; ++page) {
+    fprintf(f, "  <page width=\"%f\" height=\"%f\">\n",doc->getPageMediaWidth(page), doc->getPageMediaHeight(page));
+    doc->displayPage(textOut, page, resolution, resolution, 0, gTrue, gFalse, gFalse);
+    textPage = textOut->takeText();
+    for (flow = textPage->getFlows(); flow; flow = flow->getNext()) {
+      fprintf(f, "    <flow>\n");
+      for (blk = flow->getBlocks(); blk; blk = blk->getNext()) {
+        blk->getBBox(&xMin, &yMin, &xMax, &yMax);
+        fprintf(f, "      <block xMin=\"%f\" yMin=\"%f\" xMax=\"%f\" yMax=\"%f\">\n", xMin, yMin, xMax, yMax);
+        for (line = blk->getLines(); line; line = line->getNext()) {
+          printLine(f, line);
+        }
+        fprintf(f, "      </block>\n");
+      }
+      fprintf(f, "    </flow>\n");
+    }
+    fprintf(f, "  </page>\n");
+    textPage->decRefCnt();
+  }
+  fprintf(f, "</doc>\n");
+}
+
+void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last) {
+  fprintf(f, "<doc>\n");
+  for (int page = first; page <= last; ++page) {
+    fprintf(f, "  <page width=\"%f\" height=\"%f\">\n",doc->getPageMediaWidth(page), doc->getPageMediaHeight(page));
+    doc->displayPage(textOut, page, resolution, resolution, 0, gTrue, gFalse, gFalse);
+    TextWordList *wordlist = textOut->makeWordList();
+    const int word_length = wordlist != NULL ? wordlist->getLength() : 0;
+    TextWord *word;
+    double xMinA, yMinA, xMaxA, yMaxA;
+    if (word_length == 0)
+      fprintf(stderr, "no word list\n");
+
+    for (int i = 0; i < word_length; ++i) {
+      word = wordlist->get(i);
+      word->getBBox(&xMinA, &yMinA, &xMaxA, &yMaxA);
+      const std::string myString = myXmlTokenReplace(word->getText()->getCString());
+      fprintf(f,"    <word xMin=\"%f\" yMin=\"%f\" xMax=\"%f\" yMax=\"%f\">%s</word>\n", xMinA, yMinA, xMaxA, yMaxA, myString.c_str());
+    }
+    fprintf(f, "  </page>\n");
+    delete wordlist;
+  }
+  fprintf(f, "</doc>\n");
 }
