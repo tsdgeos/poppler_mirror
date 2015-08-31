@@ -1629,7 +1629,9 @@ height = dummy.height();
               Options for the PDF export.
              */
             enum PDFOption {
-                WithChanges = 0x00000001        ///< The changes done to the document are saved as well
+                WithChanges = 0x00000001,       ///< The changes done to the document are saved as well
+                ForceRewrite = 0x00000002,      ///< The document is rewritten instead of update incrementally (only applicable if WithChanges is also set) \since 0.36
+                StripEncryption = 0x00000004    ///< The document is saved without encryption (only applicable if WithChanges is also set and implies ForceRewrite) \since 0.36
             };
             Q_DECLARE_FLAGS( PDFOptions, PDFOption )
 

@@ -25,7 +25,7 @@
 // Copyright (C) 2011, 2013, 2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
+// Copyright (C) 2013, 2015 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013 Adrian Perez de Castro <aperez@igalia.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -66,7 +66,8 @@ class StructTreeRoot;
 enum PDFWriteMode {
   writeStandard,
   writeForceRewrite,
-  writeForceIncremental
+  writeForceIncremental,
+  writeStripEncryption
 };
 
 //------------------------------------------------------------------------
@@ -258,7 +259,7 @@ public:
   static void writeHeader(OutStream *outStr, int major, int minor);
 
   // Ownership goes to the caller
-  static Dict *createTrailerDict (int uxrefSize, GBool incrUpdate, Goffset startxRef,
+  static Dict *createTrailerDict (int uxrefSize, GBool incrUpdate, GBool stripEncryption, Goffset startxRef,
                                   Ref *root, XRef *xRef, const char *fileName, Goffset fileSize);
   static void writeXRefTableTrailer (Dict *trailerDict, XRef *uxref, GBool writeAllEntries,
                                      Goffset uxrefOffset, OutStream* outStr, XRef *xRef);
@@ -285,11 +286,11 @@ private:
   static void writeStream (Stream* str, OutStream* outStr);
   static void writeRawStream (Stream* str, OutStream* outStr);
   void writeXRefTableTrailer (Goffset uxrefOffset, XRef *uxref, GBool writeAllEntries,
-                              int uxrefSize, OutStream* outStr, GBool incrUpdate);
+                              int uxrefSize, OutStream* outStr, GBool incrUpdate, GBool stripEncryption);
   static void writeString (GooString* s, OutStream* outStr, Guchar *fileKey,
                            CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
   void saveIncrementalUpdate (OutStream* outStr);
-  void saveCompleteRewrite (OutStream* outStr);
+  void saveCompleteRewrite (OutStream* outStr, GBool stripEncryption);
 
   Page *parsePage(int page);
 

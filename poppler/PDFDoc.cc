@@ -29,7 +29,7 @@
 // Copyright (C) 2011-2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
+// Copyright (C) 2013, 2015 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2014 Bogdan Cristea <cristeab@gmail.com>
 // Copyright (C) 2015 Li Junling <lijunling@sina.com>
 //
@@ -763,7 +763,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   Ref ref;
   ref.num = rootNum;
   ref.gen = 0;
-  Dict *trailerDict = createTrailerDict(rootNum + 3, gFalse, 0, &ref, getXRef(),
+  Dict *trailerDict = createTrailerDict(rootNum + 3, gFalse, gFalse, 0, &ref, getXRef(),
                                         name->getCString(), uxrefOffset);
   writeXRefTableTrailer(trailerDict, yRef, gFalse /* do not write unnecessary entries */,
                         uxrefOffset, outStr, getXRef());
@@ -809,7 +809,10 @@ int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode) {
     // simply copy the original file
     saveWithoutChangesAs (outStr);
   } else if (mode == writeForceRewrite) {
-    saveCompleteRewrite(outStr);
+    saveCompleteRewrite(outStr, false);
+  } else if (mode == writeStripEncryption) {
+    // do a complete rewrite ignoring the original encryption parameters
+    saveCompleteRewrite(outStr, true);
   } else {
     saveIncrementalUpdate(outStr);
   }
@@ -916,7 +919,7 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
     uxref->add(uxrefStreamRef.num, uxrefStreamRef.gen, uxrefOffset, gTrue);
   }
 
-  Dict *trailerDict = createTrailerDict(numobjects, gTrue, getStartXRef(), &rootRef, getXRef(), fileNameA, uxrefOffset);
+  Dict *trailerDict = createTrailerDict(numobjects, gTrue, gFalse, getStartXRef(), &rootRef, getXRef(), fileNameA, uxrefOffset);
   if (xRefStream) {
     writeXRefStreamTrailer(trailerDict, uxref, &uxrefStreamRef, uxrefOffset, outStr, getXRef());
   } else {
@@ -927,16 +930,18 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
   delete uxref;
 }
 
-void PDFDoc::saveCompleteRewrite (OutStream* outStr)
+void PDFDoc::saveCompleteRewrite (OutStream* outStr, GBool stripEncryption)
 {
   // Make sure that special flags are set, because we are going to read
   // all objects, including Unencrypted ones.
   xref->scanSpecialFlags();
 
-  Guchar *fileKey;
-  CryptAlgorithm encAlgorithm;
-  int keyLength;
-  xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
+  Guchar *fileKey = NULL;
+  CryptAlgorithm encAlgorithm = cryptRC4;
+  int keyLength = 0;
+
+  if (!stripEncryption)
+    xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
 
   outStr->printf("%%PDF-%d.%d\r\n",pdfMajorVersion,pdfMinorVersion);
   XRef *uxref = new XRef();
@@ -986,7 +991,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
   xref->unlock();
   Goffset uxrefOffset = outStr->getPos();
   writeXRefTableTrailer(uxrefOffset, uxref, gTrue /* write all entries */,
-                        uxref->getNumObjects(), outStr, gFalse /* complete rewrite */);
+                        uxref->getNumObjects(), outStr, gFalse /* complete rewrite */, stripEncryption);
   delete uxref;
 }
 
@@ -1269,7 +1274,7 @@ void PDFDoc::writeObjectFooter (OutStream* outStr)
   outStr->printf("endobj\r\n");
 }
 
-Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Goffset startxRef,
+Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, GBool stripEncryption, Goffset startxRef,
                                 Ref *root, XRef *xRef, const char *fileName, Goffset fileSize)
 {
   Dict *trailerDict = new Dict(xRef);
@@ -1308,7 +1313,7 @@ Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Goffset startxR
   obj1.free();
 
   GBool hasEncrypt = gFalse;
-  if (!xRef->getTrailerDict()->isNone()) {
+  if (!stripEncryption && !xRef->getTrailerDict()->isNone()) {
     Object obj2;
     xRef->getTrailerDict()->dictLookupNF("Encrypt", &obj2);
     if (!obj2.isNull()) {
@@ -1401,7 +1406,7 @@ void PDFDoc::writeXRefStreamTrailer (Dict *trailerDict, XRef *uxref, Ref *uxrefS
 }
 
 void PDFDoc::writeXRefTableTrailer(Goffset uxrefOffset, XRef *uxref, GBool writeAllEntries,
-                                   int uxrefSize, OutStream* outStr, GBool incrUpdate)
+                                   int uxrefSize, OutStream* outStr, GBool incrUpdate, GBool stripEncryption)
 {
   const char *fileNameA = fileName ? fileName->getCString() : NULL;
   // file size (doesn't include the trailer)
@@ -1415,7 +1420,7 @@ void PDFDoc::writeXRefTableTrailer(Goffset uxrefOffset, XRef *uxref, GBool write
   Ref ref;
   ref.num = getXRef()->getRootNum();
   ref.gen = getXRef()->getRootGen();
-  Dict * trailerDict = createTrailerDict(uxrefSize, incrUpdate, getStartXRef(), &ref,
+  Dict * trailerDict = createTrailerDict(uxrefSize, incrUpdate, stripEncryption, getStartXRef(), &ref,
                                          getXRef(), fileNameA, fileSize);
   writeXRefTableTrailer(trailerDict, uxref, writeAllEntries, uxrefOffset, outStr, getXRef());
   delete trailerDict;
