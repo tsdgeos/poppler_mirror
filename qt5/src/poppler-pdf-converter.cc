@@ -1,7 +1,6 @@
 /* poppler-pdf-converter.cc: qt interface to poppler
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008, 2009, Albert Astals Cid <aacid@kde.org>
- * Copyright (C) 2015 Adam Reichold <adamreichold@myopera.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,18 +92,7 @@ bool PDFConverter::convert()
 	QIODeviceOutStream stream(dev);
 	if (d->opts & WithChanges)
 	{
-		PDFWriteMode mode = writeStandard;
-
-		if (d->opts & StripEncryption)
-		{
-			mode = writeStripEncryption;
-		}
-		else if (d->opts & ForceRewrite)
-		{
-			mode = writeForceRewrite;
-		}
-
-		errorCode = d->document->doc->saveAs(&stream, mode);
+		errorCode = d->document->doc->saveAs(&stream);
 	}
 	else
 	{
