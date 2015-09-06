@@ -31,6 +31,7 @@
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+// Copyright (C) 2015 Jason Crain <jason@aquaticape.us>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -340,13 +341,8 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursio
   } else if (!strcmp(name, "JBIG2Decode")) {
     if (params->isDict()) {
       XRef *xref = params->getDict()->getXRef();
-      params->dictLookupNF("JBIG2Globals", &globals);
-      while (globals.isRef()) {
-        obj.free();
-        globals.copy(&obj);
-        globals.free();
-        obj.fetch(xref, &globals);
-      }
+      params->dictLookupNF("JBIG2Globals", &obj);
+      obj.fetch(xref, &globals, recursion);
     }
     str = new JBIG2Stream(str, &globals, &obj);
     globals.free();
