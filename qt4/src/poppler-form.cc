@@ -1,6 +1,6 @@
 /* poppler-form.h: qt4 interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  *
@@ -342,6 +342,7 @@ QStringList FormFieldChoice::choices() const
   FormWidgetChoice* fwc = static_cast<FormWidgetChoice*>(m_formData->fm);
   QStringList ret;
   int num = fwc->getNumChoices();
+  ret.reserve(num);
   for (int i = 0; i < num; ++i)
   {
     ret.append(UnicodeParsedString(fwc->getChoice(i)));

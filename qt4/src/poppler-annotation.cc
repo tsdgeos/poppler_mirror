@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012-2014 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012-2015 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -3106,6 +3106,7 @@ QList< HighlightAnnotation::Quad > HighlightAnnotationPrivate::fromQuadrilateral
     double MTX[6];
     fillTransformationMTX(MTX);
 
+    quads.reserve(quadsCount);
     for (int q = 0; q < quadsCount; ++q)
     {
         HighlightAnnotation::Quad quad;
@@ -3638,6 +3639,7 @@ QList< QLinkedList<QPointF> > InkAnnotation::inkPaths() const
 
     const int pathsNumber = inkann->getInkListLength();
     QList< QLinkedList<QPointF> > inkPaths;
+    inkPaths.reserve(pathsNumber);
     for (int m = 0; m < pathsNumber; ++m)
     {
         // transform each path in a list of normalized points ..
