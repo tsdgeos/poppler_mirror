@@ -17,7 +17,7 @@
 // Copyright (C) 2006 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2007, 2008, 2011, 2013 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2015 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Brian Ewins <brian.ewins@gmail.com>
 // Copyright (C) 2012, 2013, 2015 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -132,7 +132,7 @@ public:
   // Add a character to the word.
   void addChar(GfxState *state, TextFontInfo *fontA, double x, double y,
 	       double dx, double dy, int charPosA, int charLen,
-	       CharCode c, Unicode u, Matrix textMatA);
+	       CharCode c, Unicode u, const Matrix &textMatA);
 
   // Attempt to add a character to the word as a combining character.
   // Either character u or the last character in the word must be an
@@ -140,7 +140,7 @@ public:
   // the character was added.
   GBool addCombining(GfxState *state, TextFontInfo *fontA, double fontSizeA, double x, double y,
 		     double dx, double dy, int charPosA, int charLen,
-		     CharCode c, Unicode u, Matrix textMatA);
+		     CharCode c, Unicode u, const Matrix &textMatA);
 
   // Merge <word> onto the end of <this>.
   void merge(TextWord *word);

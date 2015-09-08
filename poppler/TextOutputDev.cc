@@ -298,7 +298,7 @@ TextWord::~TextWord() {
 
 void TextWord::addChar(GfxState *state, TextFontInfo *fontA, double x, double y,
 		       double dx, double dy, int charPosA, int charLen,
-		       CharCode c, Unicode u, Matrix textMatA) {
+		       CharCode c, Unicode u, const Matrix &textMatA) {
   ensureCapacity(len+1);
   text[len] = u;
   charcode[len] = c;
@@ -486,7 +486,7 @@ Unicode getCombiningChar(Unicode u) {
 
 GBool TextWord::addCombining(GfxState *state, TextFontInfo *fontA, double fontSizeA, double x, double y,
 			     double dx, double dy, int charPosA, int charLen,
-			     CharCode c, Unicode u, Matrix textMatA) {
+			     CharCode c, Unicode u, const Matrix &textMatA) {
   if (len == 0 || wMode != 0 || fontA->getWMode() != 0)
     return gFalse;
 
