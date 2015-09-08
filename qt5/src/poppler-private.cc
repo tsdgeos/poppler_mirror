@@ -62,11 +62,11 @@ namespace Debug {
 
         if (pos >= 0)
         {
-            emsg = QString::fromLatin1("Error (%1): ").arg(pos);
+            emsg = QStringLiteral("Error (%1): ").arg(pos);
         }
         else
         {
-            emsg = QString::fromLatin1("Error: ");
+            emsg = QStringLiteral("Error: ");
         }
         emsg += QString::fromLatin1(msg);
         (*Debug::debugFunction)(emsg, Debug::debugClosure);
@@ -174,13 +174,13 @@ namespace Debug {
                     QChar *charArray = new QChar[s->getLength()];
                     for (int i = 0; i < s->getLength(); ++i) charArray[i] = QChar(s->getCString()[i]);
                     QString aux(charArray, s->getLength());
-                    e->setAttribute( "DestinationName", aux );
+                    e->setAttribute( QStringLiteral("DestinationName"), aux );
                     delete[] charArray;
                 }
                 else if ( destination && destination->isOk() )
                 {
                     LinkDestinationData ldd(destination, NULL, doc, false);
-                    e->setAttribute( "Destination", LinkDestination(ldd).toString() );
+                    e->setAttribute( QStringLiteral("Destination"), LinkDestination(ldd).toString() );
                 }
                 break;
             }
@@ -198,21 +198,21 @@ namespace Debug {
                     QChar *charArray = new QChar[s->getLength()];
                     for (int i = 0; i < s->getLength(); ++i) charArray[i] = QChar(s->getCString()[i]);
                     QString aux(charArray, s->getLength());
-                    e->setAttribute( "DestinationName", aux );
+                    e->setAttribute( QStringLiteral("DestinationName"), aux );
                     delete[] charArray;
                 }
                 else if ( destination && destination->isOk() )
                 {
                     LinkDestinationData ldd(destination, NULL, doc, g->getFileName() != 0);
-                    e->setAttribute( "Destination", LinkDestination(ldd).toString() );
+                    e->setAttribute( QStringLiteral("Destination"), LinkDestination(ldd).toString() );
                 }
-                e->setAttribute( "ExternalFileName", g->getFileName()->getCString() );
+                e->setAttribute( QStringLiteral("ExternalFileName"), g->getFileName()->getCString() );
                 break;
             }
             case actionURI:
             {
                 LinkURI * u = static_cast< LinkURI * >( a );
-                e->setAttribute( "DestinationURI", u->getURI()->getCString() );
+                e->setAttribute( QStringLiteral("DestinationURI"), u->getURI()->getCString() );
             }
             default: ;
         }
@@ -272,7 +272,7 @@ namespace Debug {
             ::LinkAction * a = outlineItem->getAction();
             linkActionToTocItem( a, this, &item );
 
-            item.setAttribute( "Open", QVariant( (bool)outlineItem->isOpen() ).toString() );
+            item.setAttribute( QStringLiteral("Open"), QVariant( (bool)outlineItem->isOpen() ).toString() );
 
             // 3. recursively descend over children
             outlineItem->open();

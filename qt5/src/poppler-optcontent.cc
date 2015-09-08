@@ -3,6 +3,7 @@
  * Copyright (C) 2007, Brad Hards <bradh@kde.org>
  * Copyright (C) 2008, 2014, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008, Carlos Garcia Campos <carlosgc@gnome.org>
+ * Copyright (C) 2015, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +36,7 @@ namespace Poppler
 
   RadioButtonGroup::RadioButtonGroup( OptContentModelPrivate *ocModel, Array *rbarray )
   {
+    itemsInGroup.reserve(rbarray->getLength());
     for (int i = 0; i < rbarray->getLength(); ++i) {
       Object ref;
       rbarray->getNF( i, &ref );

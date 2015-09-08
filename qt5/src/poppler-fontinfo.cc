@@ -2,7 +2,7 @@
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, Tobias Koening <tokoe@kde.org>
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2008, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2008, 2015, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, 2009, Pino Toscano <pino@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -129,6 +129,7 @@ QList<FontInfo> FontIterator::next()
 	GooList *items = d->fontInfoScanner.scan( 1 );
 	if ( !items )
 		return fonts;
+	fonts.reserve( items->getLength() );
 	for ( int i = 0; i < items->getLength(); ++i ) {
 		fonts.append( FontInfo( FontInfoData( ( ::FontInfo* )items->get( i ) ) ) );
 	}

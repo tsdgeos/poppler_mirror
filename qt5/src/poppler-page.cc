@@ -584,6 +584,7 @@ QList<TextBox*> Page::textList(Rotation rotate) const
   
   QHash<TextWord *, TextBox*> wordBoxMap;
   
+  output_list.reserve(word_list->getLength());
   for (int i = 0; i < word_list->getLength(); i++) {
     TextWord *word = word_list->get(i);
     GooString *gooWord = word->getText();
