@@ -27,7 +27,7 @@
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011-2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Patrick Pfeifer <p2000@mailinator.com>
-// Copyright (C) 2012 Jason Crain <jason@aquaticape.us>
+// Copyright (C) 2012, 2015 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 //
 // To see a description of the changes please see the Changelog file that
