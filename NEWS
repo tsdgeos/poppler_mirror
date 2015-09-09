@@ -18,7 +18,7 @@ Release 0.36.0
         qt5:
          * Basic support for RichMedia annotations
          * Change default image format
-         * Minor optimizationsHEADmaster
+         * Minor optimizations
 
         cpp:
          * Fix utf8/utf16 conversion. Bug #91644
@@ -26,9 +26,6 @@ Release 0.36.0
         build system:
          * Do not hardcode -fPIC in Makefile.am
          * cmake: Allow configuring SHARE_INSTALL_DIR. Bug #90293
-
-        glib:
-         *
 
         utils:
          * pdfunite: Insert embedded files in result pdf. Bug #90066
