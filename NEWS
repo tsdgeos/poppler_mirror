@@ -1,3 +1,39 @@
+Release 0.36.0
+        core:
+         * Patch to support RichMedia annotations
+         * Splash: Fix wrong memory access. Bug #91686
+         * Cairo: fix size of transparency group surface. Bug #66229
+         * Fix bounds check in Linearization::getPageFirst. Bug #91200
+         * File Saving improvements
+         * Add premultiplied alpha channel to SplashBitmap
+         * Fix for xref table creation. Bug #90790
+         * Fix JBIG2Decode infinite loop and stack overflow. Bug #91186
+         * Minor optimization in text extraction
+
+        qt4:
+         * Basic support for RichMedia annotations
+         * Change default image format
+         * Minor optimizations
+
+        qt5:
+         * Basic support for RichMedia annotations
+         * Change default image format
+         * Minor optimizationsHEADmaster
+
+        cpp:
+         * Fix utf8/utf16 conversion. Bug #91644
+
+        build system:
+         * Do not hardcode -fPIC in Makefile.am
+         * cmake: Allow configuring SHARE_INSTALL_DIR. Bug #90293
+
+        glib:
+         *
+
+        utils:
+         * pdfunite: Insert embedded files in result pdf. Bug #90066
+         * pdftotext: Add -bbox-layout option. Bug #89941
+
 Release 0.35.0
         core:
          * Fix assert in broken file. Bug #91344
