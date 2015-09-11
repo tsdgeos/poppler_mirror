@@ -172,8 +172,8 @@ Catalog::~Catalog() {
       }
     }
     gfree(pages);
-    gfree(pageRefs);
   }
+  gfree(pageRefs);
   names.free();
   dests.free();
   delete destNameTree;
@@ -306,8 +306,14 @@ GBool Catalog::cachePageTree(int page)
     }
 
     pagesSize = getNumPages();
-    pages = (Page **)gmallocn(pagesSize, sizeof(Page *));
-    pageRefs = (Ref *)gmallocn(pagesSize, sizeof(Ref));
+    pages = (Page **)gmallocn_checkoverflow(pagesSize, sizeof(Page *));
+    pageRefs = (Ref *)gmallocn_checkoverflow(pagesSize, sizeof(Ref));
+    if (pages == NULL || pageRefs == NULL ) {
+      error(errSyntaxError, -1, "Cannot allocate page cache");
+      pagesDict->decRef();
+      pagesSize = 0;
+      return gFalse;
+    }
     for (int i = 0; i < pagesSize; ++i) {
       pages[i] = NULL;
       pageRefs[i].num = -1;
