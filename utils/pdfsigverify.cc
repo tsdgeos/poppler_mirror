@@ -6,6 +6,7 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
+// Copyright 2015 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -165,10 +166,8 @@ int main(int argc, char *argv[])
 
 end:
   delete globalParams;
-  if (fileName)
-    delete fileName;
-  if (doc)
-    delete doc;
+  delete fileName;
+  delete doc;
 
   return exitCode;
 }
