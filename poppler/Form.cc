@@ -1476,7 +1476,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
 
   SignatureHandler signature_handler(signature, signature_len);
 
-  sig_val_state = signature_handler.ValidateSignature(to_check, signed_data_len);
+  sig_val_state = signature_handler.validateSignature(to_check, signed_data_len);
   signature_info->setSignatureValStatus(SignatureHandler::NSS_SigTranslate(sig_val_state));
   signature_info->setSignerName(signature_handler.getSignerName());
 
@@ -1491,7 +1491,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     return signature_info;
   }
 
-  cert_val_state = signature_handler.ValidateCertificate();
+  cert_val_state = signature_handler.validateCertificate();
   signature_info->setCertificateValStatus(SignatureHandler::NSS_CertTranslate(cert_val_state));
 
   return signature_info;

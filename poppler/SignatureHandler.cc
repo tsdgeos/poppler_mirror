@@ -6,6 +6,7 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
+// Copyright 2015 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -194,7 +195,7 @@ NSSCMSSignerInfo *SignatureHandler::CMS_SignerInfoCreate(NSSCMSSignedData * cms_
   }
 }
 
-NSSCMSVerificationStatus SignatureHandler::ValidateSignature(unsigned char *signed_data, int signed_data_len)
+NSSCMSVerificationStatus SignatureHandler::validateSignature(unsigned char *signed_data, int signed_data_len)
 {
   unsigned char *digest_buffer = NULL;
 
@@ -224,7 +225,7 @@ NSSCMSVerificationStatus SignatureHandler::ValidateSignature(unsigned char *sign
   }
 }
 
-SECErrorCodes SignatureHandler::ValidateCertificate()
+SECErrorCodes SignatureHandler::validateCertificate()
 {
   SECErrorCodes retVal;
   CERTCertificate *cert;

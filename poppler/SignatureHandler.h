@@ -6,6 +6,7 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
+// Copyright 2015 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -40,8 +41,8 @@ public:
   time_t getSigningTime();
   char * getSignerName();
   void setSignature(unsigned char *, int);
-  NSSCMSVerificationStatus ValidateSignature(unsigned char *signed_data, int signed_data_len);
-  SECErrorCodes ValidateCertificate();
+  NSSCMSVerificationStatus validateSignature(unsigned char *signed_data, int signed_data_len);
+  SECErrorCodes validateCertificate();
   //Translate NSS error codes
   static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_code);
   static CertificateValidationStatus NSS_CertTranslate(SECErrorCodes nss_code);
