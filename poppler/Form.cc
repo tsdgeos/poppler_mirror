@@ -1433,7 +1433,7 @@ void FormFieldSignature::parseInfo()
 
   // check if subfilter is supported for signature validation, only detached signatures work for now
   sig_dict.dictLookup("SubFilter", &subfilterName);
-  if (subfilterName.isName() && strcmp(subfilterName.getName(), "adbe.pkcs7.detached") == 0) {
+  if (subfilterName.isName("adbe.pkcs7.detached")) {
     signature_info->setSubFilterSupport(true);
   }
 
