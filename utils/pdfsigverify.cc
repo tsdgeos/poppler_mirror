@@ -134,7 +134,8 @@ int main(int argc, char *argv[])
     goto end;
   }
 
-  sigCount = doc->countSignatures();
+  sig_widgets = doc->getSignatureWidgets();
+  sigCount = sig_widgets.size();
 
   if (sigCount >= 1) {
     printf("Digital Signature Info of: %s\n", fileName->getCString());
@@ -144,11 +145,7 @@ int main(int argc, char *argv[])
     goto end;
   }
 
-  sig_widgets = doc->getSignatureWidgets();
-  if (sig_widgets.size() == 0)
-    goto end;
-
-  for(unsigned int i = 0; i < sigCount; i++) {
+  for (unsigned int i = 0; i < sigCount; i++) {
     sig_info = sig_widgets.at(i)->validateSignature(!dontVerifyCert, false);
     printf("Signature #%d:\n", i+1);
     printf("  - Signer Certificate Common Name: %s\n", sig_info->getSignerName());
