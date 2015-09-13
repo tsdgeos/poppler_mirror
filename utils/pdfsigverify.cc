@@ -130,8 +130,8 @@ int main(int argc, char *argv[])
   doc = PDFDocFactory().createPDFDoc(*fileName, NULL, NULL);
 
   if (!doc->isOk()) {
-    goto end;
     exitCode = 1;
+    goto end;
   }
 
   sigCount = doc->countSignatures();
