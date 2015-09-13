@@ -264,6 +264,8 @@ else
   enable_libopenjpeg=no
 fi
 
+PKG_CHECK_MODULES(NSS3, nss, [], [])
+
 AM_CONDITIONAL(BUILD_LIBOPENJPEG, test x$openjpeg1 = xyes || test x$openjpeg2 = xyes)
 AH_TEMPLATE([ENABLE_LIBOPENJPEG],
 	    [Use libopenjpeg instead of builtin jpeg2000 decoder.])

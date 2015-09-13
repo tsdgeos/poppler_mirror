@@ -11,6 +11,8 @@
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
+// Copyright 2015 André Esser <bepandre@hotmail.com>
 //
 //========================================================================
 
@@ -35,6 +37,8 @@ class Annots;
 class LinkAction;
 class GfxResources;
 class PDFDoc;
+class SignatureInfo;
+class SignatureHandler;
 
 enum FormFieldType {
   formButton,
@@ -245,6 +249,9 @@ class FormWidgetSignature: public FormWidget {
 public:
   FormWidgetSignature(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
   void updateWidgetAppearance();
+
+  SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation);
+
 protected:
   FormFieldSignature *parent;
 };
@@ -487,7 +494,16 @@ class FormFieldSignature: public FormField {
 public:
   FormFieldSignature(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
 
+  SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation);
+
   virtual ~FormFieldSignature();
+
+private:
+  void parseInfo();
+  Object *byte_range;
+  unsigned char *signature;
+  unsigned int signature_len;
+  SignatureInfo *signature_info;
 
 #ifdef DEBUG_FORMS
   void print(int indent = 0);

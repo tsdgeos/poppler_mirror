@@ -32,6 +32,8 @@
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2014 Bogdan Cristea <cristeab@gmail.com>
 // Copyright (C) 2015 Li Junling <lijunling@sina.com>
+// Copyright (C) 2015 André Guerreiro <aguerreiro1985@gmail.com>
+// Copyright (C) 2015 André Esser <bepandre@hotmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -76,6 +78,8 @@
 #endif
 #include "PDFDoc.h"
 #include "Hints.h"
+#include "DateInfo.h"
+#include "SignatureHandler.h"
 
 #if MULTITHREADED
 #  define pdfdocLocker()   MutexLocker locker(&mutex)
@@ -450,6 +454,29 @@ GBool PDFDoc::checkEncryption(GooString *ownerPassword, GooString *userPassword)
   }
   encrypt.free();
   return ret;
+}
+
+unsigned int PDFDoc::countSignatures()
+{
+  return getSignatureWidgets().size();
+}
+
+std::vector<FormWidgetSignature*> PDFDoc::getSignatureWidgets()
+{
+  int num_pages = getNumPages();
+  FormPageWidgets *page_widgets = NULL;
+  std::vector<FormWidgetSignature*> widget_vector;
+
+  for (int i = 1; i <= num_pages; i++) {
+    page_widgets = getCatalog()->getPage(i)->getFormWidgets();
+    for (int j = 0; page_widgets != NULL && j < page_widgets->getNumWidgets(); j++) {
+      if (page_widgets->getWidget(j)->getType() == formSignature) {
+          widget_vector.push_back(static_cast<FormWidgetSignature*>(page_widgets->getWidget(j)));
+      }
+    }
+    delete page_widgets;
+  }
+  return widget_vector;
 }
 
 void PDFDoc::displayPage(OutputDev *out, int page,

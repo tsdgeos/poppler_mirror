@@ -105,6 +105,7 @@ endif(WITH_FONTCONFIGURATION_FONTCONFIG)
 macro_optional_find_package(JPEG)
 macro_optional_find_package(PNG)
 macro_optional_find_package(TIFF)
+find_package(NSS3 REQUIRED)
 if(JPEG_FOUND)
   set(ENABLE_LIBJPEG ${JPEG_FOUND})
 endif(JPEG_FOUND)
@@ -201,6 +202,9 @@ if(ENABLE_LIBCURL)
   include_directories(${CURL_INCLUDE_DIR})
   set(POPPLER_HAS_CURL_SUPPORT ON)
 endif(ENABLE_LIBCURL)
+if (NSS3_FOUND)
+  add_definitions(${NSS3_CFLAGS})
+endif(NSS3_FOUND)
 
 add_definitions(-DHAVE_CONFIG_H=1)
 if(MINGW)
@@ -364,6 +368,8 @@ set(poppler_SRCS
   poppler/ProfileData.cc
   poppler/PreScanOutputDev.cc
   poppler/PSTokenizer.cc
+  poppler/SignatureHandler.cc
+  poppler/SignatureInfo.cc
   poppler/Stream.cc
   poppler/StructTreeRoot.cc
   poppler/StructElement.cc
@@ -412,6 +418,9 @@ endif(ENABLE_SPLASH)
 if(FONTCONFIG_FOUND)
   set(poppler_LIBS ${poppler_LIBS} ${FONTCONFIG_LIBRARIES})
 endif(FONTCONFIG_FOUND)
+if (NSS3_FOUND)
+  set(poppler_LIBS ${poppler_LIBS} ${NSS3_LIBRARIES})
+endif(NSS3_FOUND)
 if(JPEG_FOUND)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/DCTStream.cc

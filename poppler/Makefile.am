@@ -166,6 +166,8 @@ poppler_include_HEADERS =	\
 	PreScanOutputDev.h	\
 	PSTokenizer.h		\
 	Rendition.h		\
+	SignatureHandler.h	\
+	SignatureInfo.h	\
 	StdinCachedFile.h	\
 	StdinPDFDocBuilder.h	\
 	Stream-CCITT.h		\
@@ -247,6 +249,8 @@ libpoppler_la_SOURCES =		\
 	PreScanOutputDev.cc \
 	PSTokenizer.cc		\
 	Rendition.cc		\
+	SignatureHandler.cc	\
+	SignatureInfo.cc \
 	StdinCachedFile.cc	\
 	StdinPDFDocBuilder.cc	\
 	Stream.cc 		\
@@ -275,6 +279,7 @@ libpoppler_la_CPPFLAGS =			\
 	$(libjpeg2000_includes)			\
 	$(libpng_includes)			\
 	$(libcurl_includes)			\
+	$(NSS3_CFLAGS)				\
 	$(FREETYPE_CFLAGS)			\
 	$(FONTCONFIG_CFLAGS)			\
 	$(AM_CPPFLAGS)
@@ -290,6 +295,7 @@ libpoppler_la_LIBADD =				\
 	$(zlib_libs)				\
 	$(libcurl_libs)				\
 	$(libjpeg2000_libs)			\
+	$(NSS3_LIBS)				\
 	$(FREETYPE_LIBS)			\
 	$(FONTCONFIG_LIBS)			\
 	$(PTHREAD_LIBS)				\

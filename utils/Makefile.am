@@ -23,6 +23,7 @@ bin_PROGRAMS =					\
 	pdftotext				\
 	pdftohtml				\
 	pdfseparate				\
+	pdfsigverify				\
 	pdfunite
 
 if BUILD_SPLASH_OUTPUT
@@ -59,6 +60,9 @@ pdfdetach_SOURCES =				\
 
 pdffonts_SOURCES =				\
 	pdffonts.cc
+
+pdfsigverify_SOURCES =				\
+	pdfsigverify.cc
 
 pdfimages_SOURCES =				\
 	pdfimages.cc				\
