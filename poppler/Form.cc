@@ -1379,6 +1379,7 @@ GooString *FormFieldChoice::getSelectedChoice() {
 FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents)
   : FormField(docA, dict, ref, parent, usedParents, formSignature)
 {
+  byte_range = NULL;
   signature = NULL;
   signature_info = new SignatureInfo();
   parseInfo();
@@ -1394,44 +1395,49 @@ FormFieldSignature::~FormFieldSignature()
 
 void FormFieldSignature::parseInfo()
 {
-  if (obj.isDict()) {
-    Object sig_dict, contents_obj, byterange_obj, time_of_signing, subfilterName;
+  if (!obj.isDict())
+    return;
 
-    // retrieve PKCS#7
-    obj.dictLookup("V", &sig_dict);
-    sig_dict.dictLookup("Contents", &contents_obj);
-    if (contents_obj.isString()) {
-      GooString *str = contents_obj.getString();
-      signature_len = str->getLength();
-      signature = (unsigned char *)gmalloc(signature_len);
-      memcpy(signature, str->getCString(), signature_len);
-    }
-    contents_obj.free();
+  Object sig_dict, contents_obj, byterange_obj, time_of_signing, subfilterName;
 
-    sig_dict.dictLookup("ByteRange", &byterange_obj);
-
-    if (byterange_obj.isArray()) {
-      byte_range = new Object(byterange_obj);
-    }
-
-    // retrieve SigningTime
-    sig_dict.dictLookup("M", &time_of_signing);
-    if (!time_of_signing.isNull()) {
-      GooString *time_str = time_of_signing.getString();
-      signature_info->setSigningTime(pdfTimeToInteger(time_str)); // Put this information directly in SignatureInfo object
-      time_of_signing.free();
-    }
-
-    // check if subfilter is supported for signature validation, only detached signatures work for now
-    sig_dict.dictLookup("SubFilter", &subfilterName);
-    if (subfilterName.isName() && strcmp(subfilterName.getName(), "adbe.pkcs7.detached") == 0) {
-      signature_info->setSubFilterSupport(true);
-    }
-
-    subfilterName.free();
+  // retrieve PKCS#7
+  obj.dictLookup("V", &sig_dict);
+  if (!sig_dict.isDict()) {
     sig_dict.free();
+    return;
   }
 
+  sig_dict.dictLookup("Contents", &contents_obj);
+  if (contents_obj.isString()) {
+    GooString *str = contents_obj.getString();
+    signature_len = str->getLength();
+    signature = (unsigned char *)gmalloc(signature_len);
+    memcpy(signature, str->getCString(), signature_len);
+  }
+  contents_obj.free();
+
+  sig_dict.dictLookup("ByteRange", &byterange_obj);
+
+  if (byterange_obj.isArray()) {
+    byte_range = new Object(byterange_obj);
+  }
+
+  // retrieve SigningTime
+  sig_dict.dictLookup("M", &time_of_signing);
+  if (!time_of_signing.isNull()) {
+    GooString *time_str = time_of_signing.getString();
+    signature_info->setSigningTime(pdfTimeToInteger(time_str)); // Put this information directly in SignatureInfo object
+    time_of_signing.free();
+  }
+
+  // check if subfilter is supported for signature validation, only detached signatures work for now
+  sig_dict.dictLookup("SubFilter", &subfilterName);
+  if (subfilterName.isName() && strcmp(subfilterName.getName(), "adbe.pkcs7.detached") == 0) {
+    signature_info->setSubFilterSupport(true);
+  }
+
+  subfilterName.free();
+  sig_dict.free();
 }
 
 SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool forceRevalidation)
