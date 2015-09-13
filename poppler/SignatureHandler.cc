@@ -109,6 +109,10 @@ void SignatureHandler::init_nss()
 
 
 SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length)
+ : CMSMessage(NULL),
+   CMSSignedData(NULL),
+   CMSSignerInfo(NULL),
+   temp_certs(NULL)
 {
   init_nss();
   CMSitem.data = p7;

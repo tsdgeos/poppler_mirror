@@ -57,10 +57,10 @@ private:
   void digestFile(unsigned char *digest_buffer, unsigned char *input_data, int input_data_len, SECOidTag hashOIDTag);
 
   SECItem CMSitem;
-  NSSCMSMessage *CMSMessage = NULL;
-  NSSCMSSignedData *CMSSignedData = NULL;
-  NSSCMSSignerInfo *CMSSignerInfo = NULL;
-  CERTCertificate **temp_certs = NULL;
+  NSSCMSMessage *CMSMessage;
+  NSSCMSSignedData *CMSSignedData;
+  NSSCMSSignerInfo *CMSSignerInfo;
+  CERTCertificate **temp_certs;
 };
 
 #endif
