@@ -202,9 +202,8 @@ if(ENABLE_LIBCURL)
   include_directories(${CURL_INCLUDE_DIR})
   set(POPPLER_HAS_CURL_SUPPORT ON)
 endif(ENABLE_LIBCURL)
-if (NSS3_FOUND)
-  add_definitions(${NSS3_CFLAGS})
-endif(NSS3_FOUND)
+
+add_definitions(${NSS3_CFLAGS})
 
 add_definitions(-DHAVE_CONFIG_H=1)
 if(MINGW)
@@ -418,9 +417,7 @@ endif(ENABLE_SPLASH)
 if(FONTCONFIG_FOUND)
   set(poppler_LIBS ${poppler_LIBS} ${FONTCONFIG_LIBRARIES})
 endif(FONTCONFIG_FOUND)
-if (NSS3_FOUND)
-  set(poppler_LIBS ${poppler_LIBS} ${NSS3_LIBRARIES})
-endif(NSS3_FOUND)
+set(poppler_LIBS ${poppler_LIBS} ${NSS3_LIBRARIES})
 if(JPEG_FOUND)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/DCTStream.cc
