@@ -1391,6 +1391,7 @@ FormFieldSignature::~FormFieldSignature()
     byte_range->free();
     delete byte_range;
   }
+  delete signature_info;
 }
 
 void FormFieldSignature::parseInfo()

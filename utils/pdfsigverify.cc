@@ -151,12 +151,11 @@ int main(int argc, char *argv[])
     printf("  - Signer Certificate Common Name: %s\n", sig_info->getSignerName());
     printf("  - Signing Time: %s\n", time_str = getReadableTime(sig_info->getSigningTime()));
     printf("  - Signature Validation: %s\n", getReadableSigState(sig_info->getSignatureValStatus()));
+    gfree(time_str);
     if (sig_info->getSignatureValStatus() != SIGNATURE_VALID || dontVerifyCert) {
       continue;
     }
     printf("  - Certificate Validation: %s\n", getReadableCertState(sig_info->getCertificateValStatus()));
-    gfree(time_str);
-    delete sig_info;
   }
 
   exitCode = 0;
