@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2006-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright 2007-2012 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2012, 2015 Albert Astals Cid <aacid@kde.org>
 // Copyright 2007-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2007, 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2007 Iñigo Martínez <inigomartinez@gmail.com>
@@ -1478,6 +1478,8 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     signature_info->setSigningTime(signature_handler.getSigningTime());
   }
 
+  free(to_check);
+
   if (sig_val_state != NSSCMSVS_GoodSignature || !doVerifyCert) {
     return signature_info;
   }
@@ -1485,7 +1487,6 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
   cert_val_state = signature_handler.ValidateCertificate();
   signature_info->setCertificateValStatus(SignatureHandler::NSS_CertTranslate(cert_val_state));
 
-  free(to_check);
   return signature_info;
 }
 
