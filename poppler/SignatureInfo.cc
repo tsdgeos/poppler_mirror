@@ -77,6 +77,7 @@ void SignatureInfo::setCertificateValStatus(enum CertificateValidationStatus cer
 
 void SignatureInfo::setSignerName(char *signerName)
 {
+  free(signer_name);
   signer_name = signerName;
 }
 
