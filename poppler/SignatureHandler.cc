@@ -74,8 +74,9 @@ GooString *SignatureHandler::getDefaultFirefoxCertDB_Linux()
   homePath = homePath->append("/.mozilla/firefox/");
 
   if ((toSearchIn = opendir(homePath->getCString())) == NULL) {
-	error(errInternal, 0, "couldn't find default Firefox Folder");
-	return NULL;
+    error(errInternal, 0, "couldn't find default Firefox Folder");
+    delete homePath;
+    return NULL;
   }
   do {
     if ((subFolder = readdir(toSearchIn)) != NULL) {
@@ -87,6 +88,7 @@ GooString *SignatureHandler::getDefaultFirefoxCertDB_Linux()
     }
   } while (subFolder != NULL);
 
+  closedir(toSearchIn);
   return NULL;
 }
 
@@ -102,9 +104,7 @@ void SignatureHandler::init_nss()
     NSS_Init(certDBPath->getCString());
   }
 
-  if (certDBPath) {
-    delete certDBPath;
-  }
+  delete certDBPath;
 }
 
 
