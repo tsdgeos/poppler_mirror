@@ -25,6 +25,7 @@
 #include "PDFDocFactory.h"
 #include "Error.h"
 #include "GlobalParams.h"
+#include "SignatureInfo.h"
 
 
 const char * getReadableSigState(SignatureValidationStatus sig_vs)

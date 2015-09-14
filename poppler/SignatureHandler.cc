@@ -13,7 +13,6 @@
 #include <config.h>
 
 #include "SignatureHandler.h"
-#include "goo/GooString.h"
 #include "goo/gmem.h"
 
 #include <dirent.h>

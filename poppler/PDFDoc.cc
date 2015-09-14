@@ -78,8 +78,6 @@
 #endif
 #include "PDFDoc.h"
 #include "Hints.h"
-#include "DateInfo.h"
-#include "SignatureHandler.h"
 
 #if MULTITHREADED
 #  define pdfdocLocker()   MutexLocker locker(&mutex)

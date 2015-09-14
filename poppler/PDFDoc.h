@@ -52,8 +52,6 @@
 #include "Form.h"
 #include "OptionalContent.h"
 #include "Stream.h"
-#include "poppler-config.h"
-#include "SignatureInfo.h"
 
 class GooString;
 class GooFile;
@@ -67,7 +65,6 @@ class Linearization;
 class SecurityHandler;
 class Hints;
 class StructTreeRoot;
-class SignatureHandler;
 
 enum PDFWriteMode {
   writeStandard,
