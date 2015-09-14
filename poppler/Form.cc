@@ -1379,7 +1379,6 @@ GooString *FormFieldChoice::getSelectedChoice() {
 FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents)
   : FormField(docA, dict, ref, parent, usedParents, formSignature)
 {
-  byte_range = NULL;
   signature = NULL;
   signature_info = new SignatureInfo();
   parseInfo();
@@ -1387,10 +1386,7 @@ FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object *dict, const Ref& re
 
 FormFieldSignature::~FormFieldSignature()
 {
-  if (byte_range) {
-    byte_range->free();
-    delete byte_range;
-  }
+  byte_range.free();
   delete signature_info;
   delete signature;
 }
@@ -1400,7 +1396,7 @@ void FormFieldSignature::parseInfo()
   if (!obj.isDict())
     return;
 
-  Object sig_dict, contents_obj, byterange_obj, time_of_signing, subfilterName;
+  Object sig_dict, contents_obj, time_of_signing, subfilterName;
 
   // retrieve PKCS#7
   obj.dictLookup("V", &sig_dict);
@@ -1415,11 +1411,7 @@ void FormFieldSignature::parseInfo()
   }
   contents_obj.free();
 
-  sig_dict.dictLookup("ByteRange", &byterange_obj);
-
-  if (byterange_obj.isArray()) {
-    byte_range = new Object(byterange_obj);
-  }
+  sig_dict.dictLookup("ByteRange", &byte_range);
 
   // retrieve SigningTime
   sig_dict.dictLookup("M", &time_of_signing);
@@ -1451,7 +1443,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     return signature_info;
   }
 
-  if (byte_range == NULL || !byte_range->isArray() || signature == NULL) {
+  if (!byte_range.isArray() || signature == NULL) {
     return signature_info;
   }
 
@@ -1459,9 +1451,9 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
   NSSCMSVerificationStatus sig_val_state;
   SECErrorCodes cert_val_state;
 
-  byte_range->arrayGet(1, &r2);
-  byte_range->arrayGet(2, &r3);
-  byte_range->arrayGet(3, &r4);
+  byte_range.arrayGet(1, &r2);
+  byte_range.arrayGet(2, &r3);
+  byte_range.arrayGet(3, &r4);
 
   unsigned int signed_data_len = r2.getInt()+r4.getInt();
   unsigned char *to_check = (unsigned char *)gmalloc(signed_data_len);

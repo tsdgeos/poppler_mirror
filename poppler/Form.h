@@ -500,7 +500,7 @@ public:
 
 private:
   void parseInfo();
-  Object *byte_range;
+  Object byte_range;
   GooString *signature;
   SignatureInfo *signature_info;
 
