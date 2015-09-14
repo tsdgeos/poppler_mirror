@@ -56,6 +56,9 @@ public:
   void setSubFilterSupport(bool isSupported) { sig_subfilter_supported = isSupported; }
 
 private:
+  SignatureInfo(const SignatureInfo &);
+  SignatureInfo& operator=(const SignatureInfo &);
+
   SignatureValidationStatus sig_status;
   CertificateValidationStatus cert_status;
   char *signer_name;

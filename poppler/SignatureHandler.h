@@ -48,6 +48,9 @@ public:
   static CertificateValidationStatus NSS_CertTranslate(SECErrorCodes nss_code);
 
 private:
+  SignatureHandler(const SignatureHandler &);
+  SignatureHandler& operator=(const SignatureHandler &);
+
   void init_nss();
   GooString * getDefaultFirefoxCertDB_Linux();
   unsigned int digestLength(SECOidTag digestAlgId);
