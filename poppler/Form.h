@@ -6,7 +6,7 @@
 //
 // Copyright 2006 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright 2007, 2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2007-2010, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2010, 2012, 2015 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -501,8 +501,7 @@ public:
 private:
   void parseInfo();
   Object *byte_range;
-  unsigned char *signature;
-  unsigned int signature_len;
+  GooString *signature;
   SignatureInfo *signature_info;
 
 #ifdef DEBUG_FORMS

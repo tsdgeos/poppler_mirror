@@ -1392,6 +1392,7 @@ FormFieldSignature::~FormFieldSignature()
     delete byte_range;
   }
   delete signature_info;
+  delete signature;
 }
 
 void FormFieldSignature::parseInfo()
@@ -1410,10 +1411,7 @@ void FormFieldSignature::parseInfo()
 
   sig_dict.dictLookup("Contents", &contents_obj);
   if (contents_obj.isString()) {
-    GooString *str = contents_obj.getString();
-    signature_len = str->getLength();
-    signature = (unsigned char *)gmalloc(signature_len);
-    memcpy(signature, str->getCString(), signature_len);
+    signature = contents_obj.getString()->copy();
   }
   contents_obj.free();
 
@@ -1474,7 +1472,10 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
   doc->getBaseStream()->setPos(r3.getInt());
   doc->getBaseStream()->doGetChars(r4.getInt(), to_check+r2.getInt());
 
-  SignatureHandler signature_handler(signature, signature_len);
+  const int signature_len = signature->getLength();
+  unsigned char *signatureuchar = (unsigned char *)gmalloc(signature_len);
+  memcpy(signatureuchar, signature->getCString(), signature_len);
+  SignatureHandler signature_handler(signatureuchar, signature_len);
 
   sig_val_state = signature_handler.validateSignature(to_check, signed_data_len);
   signature_info->setSignatureValStatus(SignatureHandler::NSS_SigTranslate(sig_val_state));
