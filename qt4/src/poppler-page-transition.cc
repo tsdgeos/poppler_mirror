@@ -1,5 +1,6 @@
 /* PageTransition.cc
  * Copyright (C) 2005, Net Integration Technologies, Inc.
+ * Copyright (C) 2015, Arseniy Lartsev <arseniy@alumni.chalmers.se>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,6 +65,11 @@ PageTransition::Type PageTransition::type() const
 }
 
 int PageTransition::duration() const
+{
+  return data->pt->getDuration();
+}
+
+double PageTransition::durationReal() const
 {
   return data->pt->getDuration();
 }
