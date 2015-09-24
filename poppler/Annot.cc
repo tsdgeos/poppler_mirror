@@ -4052,6 +4052,9 @@ void Annot::layoutText(GooString *text, GooString *outBuf, int *i,
   double w = 0.0;
   int uLen, n;
   double dx, dy, ox, oy;
+  if (!text) {
+    return;
+  }
   GBool unicode = text->hasUnicodeMarker();
   GBool spacePrev;              // previous character was a space
 
