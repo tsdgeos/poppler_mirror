@@ -3684,6 +3684,11 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
     imgMaskData.height = maskHeight;
     imgMaskData.y = 0;
     maskBitmap = new SplashBitmap(width, height, 1, splashModeMono1, gFalse);
+    if (!maskBitmap->getDataPtr()) {
+      delete maskBitmap;
+      width = height = 1;
+      maskBitmap = new SplashBitmap(width, height, 1, splashModeMono1, gFalse);
+    }
     maskSplash = new Splash(maskBitmap, gFalse);
     maskColor[0] = 0;
     maskSplash->clear(maskColor);
@@ -4094,8 +4099,8 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
   if (!bitmap->getDataPtr()) {
     delete bitmap;
     w = h = 1;
-    bitmap = new SplashBitmap(w, h, bitmapRowPad, colorMode,
-                              colorMode != splashModeMono1, bitmapTopDown);
+    bitmap = new SplashBitmap(w, h, bitmapRowPad, colorMode, gTrue,
+			      bitmapTopDown, bitmap->getSeparationList());
   }
   splash = new Splash(bitmap, vectorAntialias,
 		      transpGroup->origSplash->getScreen());
