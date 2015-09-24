@@ -1455,7 +1455,18 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
   byte_range.arrayGet(2, &r3);
   byte_range.arrayGet(3, &r4);
 
-  unsigned int signed_data_len = r2.getInt()+r4.getInt();
+  unsigned int signed_data_len = 0;
+
+  Goffset fileLength = doc->getBaseStream()->getLength();
+
+  if (r2.getInt() <= 0 || r3.getInt() <= 0 || r4.getInt() <= 0 || r3.getInt() <= r2.getInt() ||
+    r3.getInt() + r4.getInt() > fileLength)
+  {
+      error(errSyntaxError, 0, "Illegal values in ByteRange array");
+      return signature_info;
+  }
+
+  signed_data_len = r2.getInt() + r4.getInt();
   unsigned char *to_check = (unsigned char *)gmalloc(signed_data_len);
 
   //Read the 2 slices of data that are signed
