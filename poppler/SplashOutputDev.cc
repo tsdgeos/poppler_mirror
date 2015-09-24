@@ -4099,8 +4099,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
   if (!bitmap->getDataPtr()) {
     delete bitmap;
     w = h = 1;
-    bitmap = new SplashBitmap(w, h, bitmapRowPad, colorMode, gTrue,
-			      bitmapTopDown, bitmap->getSeparationList());
+    bitmap = new SplashBitmap(w, h, bitmapRowPad, colorMode, gTrue, bitmapTopDown);
   }
   splash = new Splash(bitmap, vectorAntialias,
 		      transpGroup->origSplash->getScreen());
