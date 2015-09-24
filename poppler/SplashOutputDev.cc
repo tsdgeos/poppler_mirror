@@ -4091,6 +4091,12 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
   // create the temporary bitmap
   bitmap = new SplashBitmap(w, h, bitmapRowPad, colorMode, gTrue,
 			    bitmapTopDown, bitmap->getSeparationList());
+  if (!bitmap->getDataPtr()) {
+    delete bitmap;
+    w = h = 1;
+    bitmap = new SplashBitmap(w, h, bitmapRowPad, colorMode,
+                              colorMode != splashModeMono1, bitmapTopDown);
+  }
   splash = new Splash(bitmap, vectorAntialias,
 		      transpGroup->origSplash->getScreen());
   if (transpGroup->next != NULL && transpGroup->next->knockout) {
