@@ -1907,7 +1907,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
   GfxFont *gfxFont;
   GfxFontLoc *fontLoc;
   GfxFontType fontType;
-  SplashOutFontFileID *id;
+  SplashOutFontFileID *id = NULL;
   SplashFontFile *fontFile;
   SplashFontSrc *fontsrc = NULL;
   FoFiTrueType *ff;
@@ -1947,6 +1947,11 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 
   // check the font file cache
 reload:
+  delete id;
+  delete fontLoc;
+  if (fontsrc && !fontsrc->isFile)
+      fontsrc->unref();
+
   id = new SplashOutFontFileID(gfxFont->getID());
   if ((fontFile = fontEngine->getFontFile(id))) {
     delete id;
