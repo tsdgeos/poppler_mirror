@@ -219,14 +219,14 @@ if test x$enable_libopenjpeg = xopenjpeg1 || test x$enable_libopenjpeg = xauto; 
       [openjpeg1="yes"
        LIBOPENJPEG_LIBS="-lopenjpeg"],[openjpeg_header=no])
      AC_CHECK_HEADERS([openjpeg.h],,
-		      [openjpeg="no"])])
+		      [openjpeg_header="no"])])
 fi
 
 dnl test for libopenjpeg2
 if test x$openjpeg1 = xno; then
   if test x$enable_libopenjpeg = xopenjpeg2 || test x$enable_libopenjpeg = xauto; then
     PKG_CHECK_MODULES(LIBOPENJPEG, libopenjp2,
-                      [openjpeg2=yes],[])
+                      [openjpeg2=yes],[openjpeg2=no])
   fi
 fi
 
