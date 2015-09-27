@@ -1946,6 +1946,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
   }
 
   // check the font file cache
+reload:
   id = new SplashOutFontFileID(gfxFont->getID());
   if ((fontFile = fontEngine->getFontFile(id))) {
     delete id;
@@ -1989,6 +1990,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
+	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
       }
       break;
@@ -2000,6 +2002,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
+	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
       }
       break;
@@ -2011,6 +2014,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
+	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
       }
       break;
@@ -2046,6 +2050,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
+	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
       }
       break;
@@ -2057,6 +2062,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
+	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
       }
       break;
@@ -2077,6 +2083,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
+	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
       }
       break;
@@ -2113,6 +2120,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->getCString()
 	                         : "(unnamed)");
+	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
       }
       break;
