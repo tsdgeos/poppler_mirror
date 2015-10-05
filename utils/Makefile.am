@@ -23,8 +23,11 @@ bin_PROGRAMS =					\
 	pdftotext				\
 	pdftohtml				\
 	pdfseparate				\
-	pdfsigverify				\
 	pdfunite
+
+if BUILD_NSS
+bin_PROGRAMS += pdfsigverify
+endif
 
 if BUILD_SPLASH_OUTPUT
 bin_PROGRAMS += pdftoppm

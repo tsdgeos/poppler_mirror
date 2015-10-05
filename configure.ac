@@ -264,11 +264,28 @@ else
   enable_libopenjpeg=no
 fi
 
-PKG_CHECK_MODULES(NSS3, nss, [], [])
+dnl Test for NSS
+AC_ARG_ENABLE(libnss,
+        AC_HELP_STRING([--disable-nss],
+                       [Do not build against libnss3.]),
+              enable_libnss=$enableval,
+              enable_libnss="try")
+
+if test x$enable_libnss != xno; then
+  PKG_CHECK_MODULES(NSS3, nss, [enable_nss="yes"],
+      [enable_nss="no"])
+fi
+
+if test x$enable_nss = xyes; then
+  AC_DEFINE(ENABLE_NSS3, 1, [Build against NSS.])
+fi
 
 AM_CONDITIONAL(BUILD_LIBOPENJPEG, test x$openjpeg1 = xyes || test x$openjpeg2 = xyes)
 AH_TEMPLATE([ENABLE_LIBOPENJPEG],
 	    [Use libopenjpeg instead of builtin jpeg2000 decoder.])
+
+AM_CONDITIONAL(BUILD_NSS, test x$enable_nss = xyes)
+AH_TEMPLATE([ENABLE_NSS3], [Build Poppler against NSS for digital signature support.])
 
 dnl ##### Test for libtiff
 AC_ARG_ENABLE(libtiff,
@@ -1007,6 +1024,7 @@ echo "  use libjpeg:        $enable_libjpeg"
 echo "  use libpng:         $enable_libpng"
 echo "  use libtiff:        $enable_libtiff"
 echo "  use zlib:           $enable_zlib"
+echo "  use nss             $enable_nss"
 echo "  use libcurl:        $enable_libcurl"
 echo "  use libopenjpeg:    $enable_libopenjpeg"
 if test x$enable_libopenjpeg = xyes;then

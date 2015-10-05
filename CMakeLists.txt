@@ -105,7 +105,7 @@ endif(WITH_FONTCONFIGURATION_FONTCONFIG)
 macro_optional_find_package(JPEG)
 macro_optional_find_package(PNG)
 macro_optional_find_package(TIFF)
-find_package(NSS3 REQUIRED)
+macro_optional_find_package(NSS3)
 if(JPEG_FOUND)
   set(ENABLE_LIBJPEG ${JPEG_FOUND})
 endif(JPEG_FOUND)
@@ -203,8 +203,6 @@ if(ENABLE_LIBCURL)
   set(POPPLER_HAS_CURL_SUPPORT ON)
 endif(ENABLE_LIBCURL)
 
-add_definitions(${NSS3_CFLAGS})
-
 add_definitions(-DHAVE_CONFIG_H=1)
 if(MINGW)
   # Use mingw's ansi stdio extensions
@@ -237,6 +235,11 @@ endif(CMAKE_USE_PTHREADS_INIT)
 if(ENABLE_ZLIB)
   include_directories(${ZLIB_INCLUDE_DIR})
 endif(ENABLE_ZLIB)
+
+if (NSS3_FOUND)
+  add_definitions(${NSS3_CFLAGS})
+  set(ENABLE_NSS3 ON)
+endif(NSS3_FOUND)
 if(JPEG_FOUND)
   include_directories(${JPEG_INCLUDE_DIR})
   set(ENABLE_LIBJPEG ON)
@@ -367,7 +370,6 @@ set(poppler_SRCS
   poppler/ProfileData.cc
   poppler/PreScanOutputDev.cc
   poppler/PSTokenizer.cc
-  poppler/SignatureHandler.cc
   poppler/SignatureInfo.cc
   poppler/Stream.cc
   poppler/StructTreeRoot.cc
@@ -417,7 +419,7 @@ endif(ENABLE_SPLASH)
 if(FONTCONFIG_FOUND)
   set(poppler_LIBS ${poppler_LIBS} ${FONTCONFIG_LIBRARIES})
 endif(FONTCONFIG_FOUND)
-set(poppler_LIBS ${poppler_LIBS} ${NSS3_LIBRARIES})
+
 if(JPEG_FOUND)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/DCTStream.cc
@@ -437,6 +439,12 @@ if(ENABLE_LIBCURL)
   )
   set(poppler_LIBS ${poppler_LIBS} ${CURL_LIBRARIES})
 endif(ENABLE_LIBCURL)
+if (ENABLE_NSS3)
+  set(poppler_SRCS ${poppler_SRCS}
+    poppler/SignatureHandler.cc
+  )
+  set(poppler_LIBS ${poppler_LIBS} ${NSS3_LIBRARIES})
+endif(ENABLE_NSS3)  
 if(LIBOPENJPEG_FOUND)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/JPEG2000Stream.cc
@@ -725,6 +733,7 @@ show_end_message_yesno("use libjpeg" ENABLE_LIBJPEG)
 show_end_message_yesno("use libpng" ENABLE_LIBPNG)
 show_end_message_yesno("use libtiff" ENABLE_LIBTIFF)
 show_end_message_yesno("use zlib" ENABLE_ZLIB)
+show_end_message_yesno("use nss3" ENABLE_NSS3)
 show_end_message_yesno("use curl" ENABLE_LIBCURL)
 show_end_message_yesno("use libopenjpeg" WITH_OPENJPEG)
 if(USE_OPENJPEG1)

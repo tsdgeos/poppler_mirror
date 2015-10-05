@@ -39,7 +39,10 @@
 #include "Form.h"
 #include "PDFDoc.h"
 #include "DateInfo.h"
+#ifdef ENABLE_NSS3
 #include "SignatureHandler.h"
+#endif
+#include "SignatureInfo.h"
 #include "XRef.h"
 #include "PDFDocEncoding.h"
 #include "Annot.h"
@@ -1380,6 +1383,7 @@ FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object *dict, const Ref& re
   : FormField(docA, dict, ref, parent, usedParents, formSignature)
 {
   signature = NULL;
+
   signature_info = new SignatureInfo();
   parseInfo();
 }
@@ -1433,7 +1437,7 @@ void FormFieldSignature::parseInfo()
 
 SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool forceRevalidation)
 {
-
+#ifdef ENABLE_NSS3
   if (!signature_info->isSubfilterSupported()) {
     error(errUnimplemented, 0, "Unable to validate this type of signature");
     return signature_info;
@@ -1498,6 +1502,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
   cert_val_state = signature_handler.validateCertificate();
   signature_info->setCertificateValStatus(SignatureHandler::NSS_CertTranslate(cert_val_state));
 
+#endif
   return signature_info;
 }
 
