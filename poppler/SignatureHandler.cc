@@ -219,10 +219,33 @@ NSSCMSVerificationStatus SignatureHandler::validateSignature(unsigned char *sign
   if ((NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB())) == NULL)
     CMSSignerInfo->verificationStatus = NSSCMSVS_SigningCertNotFound;
 
-  if (NSS_CMSSignerInfo_Verify(CMSSignerInfo, &digest, NULL) != SECSuccess) {
+  if (CMSSignedData->contentInfo.content.data != NULL)
+  {
+    /*
+      This means it's not a detached type signature
+      so the digest is contained in SignedData->contentInfo
+    */
+    if(memcmp(digest.data, CMSSignedData->contentInfo.content.data->data, hash_length) == 0
+        && digest.len == CMSSignedData->contentInfo.content.data->len)
+    {
+      PORT_Free(digest_buffer);
+      return NSSCMSVS_GoodSignature;
+    }
+    else
+    {
+      PORT_Free(digest_buffer);
+      return NSSCMSVS_DigestMismatch;
+    }
+
+  }
+  else if (NSS_CMSSignerInfo_Verify(CMSSignerInfo, &digest, NULL) != SECSuccess)
+  {
+
     PORT_Free(digest_buffer);
     return CMSSignerInfo->verificationStatus;
-  } else {
+  }
+  else
+  {
     PORT_Free(digest_buffer);
     return NSSCMSVS_GoodSignature;
   }
