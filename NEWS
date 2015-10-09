@@ -1,3 +1,16 @@
+Release 0.37.0
+        core:
+         * CairoOutputDev: Use mask for even-odd fill. Bug #84527
+         * SplashOuputDev: Protect calls to set/getAA with the proper #if guards. Bug #92006
+         * SplashOuputDev: Try to use an external font if the internal one is invalid
+         * PageTransition D is a number not an int. Bug #92040
+         * Catalog::getNumPages(): validate page count
+         * Catalog::cachePageTree(): recover from out of memory condition
+         * Fix crashes in malformed documents
+
+        build system:
+         * configure: fix openjpeg detection
+
 Release 0.36.0
         core:
          * Patch to support RichMedia annotations
