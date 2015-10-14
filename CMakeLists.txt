@@ -737,6 +737,22 @@ endif(LCMS2_FOUND)
 show_end_message_yesno("command line utils" ENABLE_UTILS)
 show_end_message("test data dir" ${TESTDATADIR})
 
+if(NOT ENABLE_SPLASH AND NOT CAIRO_FOUND)
+  message("Warning: There is no rendering backend enabled")
+endif(NOT ENABLE_SPLASH AND NOT CAIRO_FOUND)
+
 if(USE_FIXEDPOINT AND USE_FLOAT)
   message("Warning: Single precision and fixed point options should not be enabled at the same time")
 endif(USE_FIXEDPOINT AND USE_FLOAT)
+
+if(NOT ENABLE_LIBJPEG)
+  message("Warning: Using libjpeg is recommended. The internal DCT decoder is unmaintained.")
+endif(NOT ENABLE_LIBJPEG)
+
+if(ENABLE_ZLIB)
+  message("Warning: Using zlib is not totally safe")
+endif(ENABLE_ZLIB)
+
+if(NOT WITH_OPENJPEG)
+  message("Warning: Using libopenjpeg is recommended. The internal JPX decoder is unmaintained.")
+endif(NOT WITH_OPENJPEG)
