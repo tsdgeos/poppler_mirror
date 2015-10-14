@@ -41,8 +41,10 @@ public:
   time_t getSigningTime();
   char * getSignerName();
   void setSignature(unsigned char *, int);
-  NSSCMSVerificationStatus validateSignature(unsigned char *signed_data, int signed_data_len);
+  void updateHash(unsigned char * data_block, int data_len);
+  NSSCMSVerificationStatus validateSignature();
   SECErrorCodes validateCertificate();
+
   //Translate NSS error codes
   static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_code);
   static CertificateValidationStatus NSS_CertTranslate(SECErrorCodes nss_code);
@@ -52,14 +54,17 @@ private:
   SignatureHandler& operator=(const SignatureHandler &);
 
   void init_nss();
+
   GooString * getDefaultFirefoxCertDB_Linux();
   unsigned int digestLength(SECOidTag digestAlgId);
   NSSCMSMessage *CMS_MessageCreate(SECItem * cms_item);
   NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage * cms_msg);
   NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData * cms_sig_data);
-  void digestFile(unsigned char *digest_buffer, unsigned char *input_data, int input_data_len, SECOidTag hashOIDTag);
+  HASHContext * initHashContext();
 
+  unsigned int hash_length;
   SECItem CMSitem;
+  HASHContext *hash_context;
   NSSCMSMessage *CMSMessage;
   NSSCMSSignedData *CMSSignedData;
   NSSCMSSignerInfo *CMSSignerInfo;

@@ -500,6 +500,7 @@ public:
 
 private:
   void parseInfo();
+  void hashSignedDataBlock(SignatureHandler *handler, Goffset block_len);
   Object byte_range;
   GooString *signature;
   SignatureInfo *signature_info;

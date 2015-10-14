@@ -18,14 +18,6 @@
 #include <dirent.h>
 #include <Error.h>
 
-void SignatureHandler::digestFile(unsigned char *digest_buffer, unsigned char *input_data, int input_data_len, SECOidTag hashOIDTag)
-{
-  HASH_HashType hashType;
-  hashType    = HASH_GetHashTypeByOidTag(hashOIDTag);
-  HASH_HashBuf(hashType, digest_buffer, input_data, input_data_len);
-
-}
-
 unsigned int SignatureHandler::digestLength(SECOidTag digestAlgId)
 {
   switch(digestAlgId){
@@ -119,8 +111,23 @@ SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length)
   CMSMessage = CMS_MessageCreate(&CMSitem);
   CMSSignedData = CMS_SignedDataCreate(CMSMessage);
   CMSSignerInfo = CMS_SignerInfoCreate(CMSSignedData);
+  hash_context = initHashContext();
 }
 
+HASHContext * SignatureHandler::initHashContext()
+{
+
+  SECItem usedAlgorithm = NSS_CMSSignedData_GetDigestAlgs(CMSSignedData)[0]->algorithm;
+  hash_length = digestLength(SECOID_FindOIDTag(&usedAlgorithm));
+  HASH_HashType hashType;
+  hashType    = HASH_GetHashTypeByOidTag(SECOID_FindOIDTag(&usedAlgorithm));
+  return HASH_Create(hashType);
+}
+
+void SignatureHandler::updateHash(unsigned char * data_block, int data_len)
+{
+  HASH_Update(hash_context, data_block, data_len);
+}
 
 SignatureHandler::~SignatureHandler()
 {
@@ -131,6 +138,9 @@ SignatureHandler::~SignatureHandler()
     NSS_CMSSignedData_Destroy(CMSSignedData);
   if (CMSMessage)
     NSS_CMSMessage_Destroy(CMSMessage);
+
+  if (hash_context)
+    HASH_Destroy(hash_context);
 
   free(temp_certs);
 
@@ -198,19 +208,17 @@ NSSCMSSignerInfo *SignatureHandler::CMS_SignerInfoCreate(NSSCMSSignedData * cms_
   }
 }
 
-NSSCMSVerificationStatus SignatureHandler::validateSignature(unsigned char *signed_data, int signed_data_len)
+NSSCMSVerificationStatus SignatureHandler::validateSignature()
 {
   unsigned char *digest_buffer = NULL;
 
   if (!CMSSignedData)
     return NSSCMSVS_MalformedSignature;
 
-  SECItem usedAlgorithm = NSS_CMSSignedData_GetDigestAlgs(CMSSignedData)[0]->algorithm;
-  unsigned int hash_length = digestLength(SECOID_FindOIDTag(&usedAlgorithm));
-
   digest_buffer = (unsigned char *)PORT_Alloc(hash_length);
+  unsigned int result_len = 0;
 
-  digestFile(digest_buffer, signed_data, signed_data_len, SECOID_FindOIDTag(&usedAlgorithm));
+  HASH_End(hash_context, digest_buffer, &result_len, hash_length);
 
   SECItem digest;
   digest.data = digest_buffer;

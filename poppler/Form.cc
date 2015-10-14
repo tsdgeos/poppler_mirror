@@ -1435,6 +1435,32 @@ void FormFieldSignature::parseInfo()
   sig_dict.free();
 }
 
+void FormFieldSignature::hashSignedDataBlock(SignatureHandler *handler, Goffset block_len)
+{
+  const int BLOCK_SIZE = 4096;
+  unsigned char signed_data_buffer[BLOCK_SIZE];
+
+  Goffset i = 0;
+  while(i < block_len)
+  {
+    Goffset bytes_left = block_len - i;
+    if (bytes_left < BLOCK_SIZE)
+    {
+      doc->getBaseStream()->doGetChars(bytes_left, signed_data_buffer);
+      handler->updateHash(signed_data_buffer, bytes_left);
+      i = block_len;
+    }
+    else
+    {
+      doc->getBaseStream()->doGetChars(BLOCK_SIZE, signed_data_buffer);
+      handler->updateHash(signed_data_buffer, BLOCK_SIZE);
+      i += BLOCK_SIZE;
+    }
+  }
+
+}
+
+
 SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool forceRevalidation)
 {
 #ifdef ENABLE_NSS3
@@ -1459,32 +1485,38 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
   byte_range.arrayGet(2, &r3);
   byte_range.arrayGet(3, &r4);
 
-  unsigned int signed_data_len = 0;
-
   Goffset fileLength = doc->getBaseStream()->getLength();
+  Goffset r_values[3];
 
-  if (r2.getInt() <= 0 || r3.getInt() <= 0 || r4.getInt() <= 0 || r3.getInt() <= r2.getInt() ||
-    r3.getInt() + r4.getInt() > fileLength)
+  r_values[0] = r2.isInt64() ? r2.getInt64() : r2.getInt();
+  r_values[1] = r3.isInt64() ? r3.getInt64() : r3.getInt();
+  r_values[2] = r4.isInt64() ? r4.getInt64() : r4.getInt();
+
+  if (r_values[0] <= 0 || r_values[1] <= 0 || r_values[2] <= 0 || r_values[1] <= r_values[0] ||
+    r_values[1] + r_values[2] > fileLength)
   {
       error(errSyntaxError, 0, "Illegal values in ByteRange array");
       return signature_info;
   }
 
-  signed_data_len = r2.getInt() + r4.getInt();
-  unsigned char *to_check = (unsigned char *)gmalloc(signed_data_len);
-
-  //Read the 2 slices of data that are signed
-  doc->getBaseStream()->setPos(0);
-  doc->getBaseStream()->doGetChars(r2.getInt(), to_check);
-  doc->getBaseStream()->setPos(r3.getInt());
-  doc->getBaseStream()->doGetChars(r4.getInt(), to_check+r2.getInt());
-
   const int signature_len = signature->getLength();
+
   unsigned char *signatureuchar = (unsigned char *)gmalloc(signature_len);
   memcpy(signatureuchar, signature->getCString(), signature_len);
   SignatureHandler signature_handler(signatureuchar, signature_len);
 
-  sig_val_state = signature_handler.validateSignature(to_check, signed_data_len);
+  //Read the 2 slices of data that are signed
+  doc->getBaseStream()->setPos(0);
+  Goffset block_len = r_values[0];
+
+  hashSignedDataBlock(&signature_handler, block_len);
+
+  doc->getBaseStream()->setPos(r_values[1]);
+  block_len = r_values[2];
+
+  hashSignedDataBlock(&signature_handler, block_len);
+
+  sig_val_state = signature_handler.validateSignature();
   signature_info->setSignatureValStatus(SignatureHandler::NSS_SigTranslate(sig_val_state));
   signature_info->setSignerName(signature_handler.getSignerName());
 
@@ -1492,8 +1524,6 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
   if (signature_handler.getSigningTime() != 0) {
     signature_info->setSigningTime(signature_handler.getSigningTime());
   }
-
-  free(to_check);
 
   if (sig_val_state != NSSCMSVS_GoodSignature || !doVerifyCert) {
     return signature_info;
@@ -1504,6 +1534,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
 
 #endif
   return signature_info;
+
 }
 
 #ifdef DEBUG_FORMS
