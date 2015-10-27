@@ -80,6 +80,22 @@ GBool Matrix::invertTo(Matrix *other) const
   return gTrue;
 }
 
+void Matrix::translate(double tx, double ty)
+{
+  double x0 = tx*m[0] + ty*m[2] + m[4];
+  double y0 = tx*m[1] + ty*m[3] + m[5];
+  m[4] = x0;
+  m[5] = y0;
+}
+
+void Matrix::scale(double sx, double sy)
+{
+  m[0] *= sx;
+  m[1] *= sx;
+  m[2] *= sy;
+  m[3] *= sy;
+}
+
 void Matrix::transform(double x, double y, double *tx, double *ty) const
 {
   double temp_x, temp_y;

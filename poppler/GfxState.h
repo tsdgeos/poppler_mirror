@@ -59,7 +59,12 @@ class Matrix {
 public:
   double m[6];
 
+  void init(double xx, double yx, double xy, double yy, double x0, double y0) {
+    m[0] = xx; m[1] = yx; m[2] = xy; m[3] = yy; m[4] = x0; m[5] = y0;
+  }
   GBool invertTo(Matrix *other) const;
+  void translate(double tx, double ty);
+  void scale(double sx, double sy);
   void transform(double x, double y, double *tx, double *ty) const;
   double determinant() const { return m[0] * m[3] - m[1] * m[2]; }
   double norm() const;
