@@ -6,6 +6,7 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
+// Copyright 2015 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -28,7 +29,8 @@ enum SignatureValidationStatus
 enum CertificateValidationStatus
 {
   CERTIFICATE_TRUSTED,
-  CERTIFICATE_UNTRUSTED,
+  CERTIFICATE_UNTRUSTED_ISSUER,
+  CERTIFICATE_UNKNOWN_ISSUER,
   CERTIFICATE_REVOKED,
   CERTIFICATE_EXPIRED,
   CERTIFICATE_GENERIC_ERROR,

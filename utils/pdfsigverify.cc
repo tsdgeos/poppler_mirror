@@ -57,8 +57,11 @@ const char * getReadableCertState(CertificateValidationStatus cert_vs)
     case CERTIFICATE_TRUSTED:
       return "Certificate is Trusted.";
 
-    case CERTIFICATE_UNTRUSTED:
-      return "Certificate isn't Trusted.";
+    case CERTIFICATE_UNTRUSTED_ISSUER:
+      return "Certificate issuer isn't Trusted.";
+
+    case CERTIFICATE_UNKNOWN_ISSUER:
+      return "Certificate issuer is unknown.";
 
     case CERTIFICATE_REVOKED:
       return "Certificate has been Revoked.";

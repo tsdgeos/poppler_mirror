@@ -323,8 +323,10 @@ CertificateValidationStatus SignatureHandler::NSS_CertTranslate(SECErrorCodes ns
   switch(nss_code)
   {
     case SEC_ERROR_UNKNOWN_ISSUER:
+      return CERTIFICATE_UNKNOWN_ISSUER;
+
     case SEC_ERROR_UNTRUSTED_ISSUER:
-      return CERTIFICATE_UNTRUSTED;
+      return CERTIFICATE_UNTRUSTED_ISSUER;
 
     case SEC_ERROR_REVOKED_CERTIFICATE:
       return CERTIFICATE_REVOKED;
