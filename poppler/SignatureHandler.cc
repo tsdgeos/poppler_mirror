@@ -7,6 +7,7 @@
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2015 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015 Markus Kilås <digital@markuspage.com>
 //
 //========================================================================
 
@@ -322,6 +323,7 @@ CertificateValidationStatus SignatureHandler::NSS_CertTranslate(SECErrorCodes ns
   switch(nss_code)
   {
     case SEC_ERROR_UNKNOWN_ISSUER:
+    case SEC_ERROR_UNTRUSTED_ISSUER:
       return CERTIFICATE_UNTRUSTED;
 
     case SEC_ERROR_REVOKED_CERTIFICATE:
