@@ -26,7 +26,7 @@ bin_PROGRAMS =					\
 	pdfunite
 
 if BUILD_NSS
-bin_PROGRAMS += pdfsigverify
+bin_PROGRAMS += pdfsig
 endif
 
 if BUILD_SPLASH_OUTPUT
@@ -64,8 +64,8 @@ pdfdetach_SOURCES =				\
 pdffonts_SOURCES =				\
 	pdffonts.cc
 
-pdfsigverify_SOURCES =				\
-	pdfsigverify.cc
+pdfsig_SOURCES =				\
+	pdfsig.cc
 
 pdfimages_SOURCES =				\
 	pdfimages.cc				\

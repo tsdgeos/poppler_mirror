@@ -90,13 +90,13 @@ install(TARGETS pdfinfo DESTINATION bin)
 install(FILES pdfinfo.1 DESTINATION ${SHARE_INSTALL_DIR}/man/man1)
 
 if (ENABLE_NSS3)
-  # pdfsigverify
-  set(pdfsigverify_SOURCES ${common_srcs}
-    pdfsigverify.cc
+  # pdfsig
+  set(pdfsig_SOURCES ${common_srcs}
+    pdfsig.cc
   )
-  add_executable(pdfsigverify ${pdfsigverify_SOURCES})
-  target_link_libraries(pdfsigverify ${common_libs})
-  install(TARGETS pdfsigverify DESTINATION bin)
+  add_executable(pdfsig ${pdfsig_SOURCES})
+  target_link_libraries(pdfsig ${common_libs})
+  install(TARGETS pdfsig DESTINATION bin)
 endif (ENABLE_NSS3)
 
 # pdftops

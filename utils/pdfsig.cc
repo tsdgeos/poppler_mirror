@@ -1,6 +1,6 @@
 //========================================================================
 //
-// pdfsigverify.cc
+// pdfsig.cc
 //
 // This file is licensed under the GPLv2 or later
 //
@@ -117,11 +117,11 @@ int main(int argc, char *argv[])
   ok = parseArgs(argDesc, &argc, argv);
 
   if (!ok || argc != 2 || printVersion || printHelp) {
-    fprintf(stderr, "pdfsigverify version %s\n", PACKAGE_VERSION);
+    fprintf(stderr, "pdfsig version %s\n", PACKAGE_VERSION);
     fprintf(stderr, "%s\n", popplerCopyright);
     fprintf(stderr, "%s\n", xpdfCopyright);
     if (!printVersion) {
-      printUsage("pdfsigverify", "<PDF-file>", argDesc);
+      printUsage("pdfsig", "<PDF-file>", argDesc);
     }
     if (printVersion || printHelp)
       exitCode = 0;
