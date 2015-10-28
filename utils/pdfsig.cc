@@ -89,14 +89,17 @@ static GBool printHelp = gFalse;
 static GBool dontVerifyCert = gFalse;
 
 static const ArgDesc argDesc[] = {
+  {"-nocert", argFlag,     &dontVerifyCert,     0,
+   "don't perform certificate validation"},
+
   {"-v",      argFlag,     &printVersion,  0,
    "print copyright and version info"},
   {"-h",      argFlag,     &printHelp,     0,
    "print usage information"},
   {"-help",   argFlag,     &printHelp,     0,
    "print usage information"},
-  {"-c",      argFlag,     &dontVerifyCert,     0,
-   "don't perform certificate validation"},
+  {"-?",      argFlag,     &printHelp,     0,
+   "print usage information"},
   {NULL}
 };
 
