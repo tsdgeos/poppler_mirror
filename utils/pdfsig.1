@@ -1,16 +1,17 @@
 .\" Copyright 2011 The Poppler Developers - http://poppler.freedesktop.org
 .TH pdfsig 1 "28 October 2015"
 .SH NAME
-pdfsig \- Portable Document Format (PDF) digitial signatures tool
+pdfsig \- Portable Document Format (PDF) digital signatures tool
 .SH SYNOPSIS
 .B pdfsig
 [options]
 .RI [ PDF-file ]
 .SH DESCRIPTION
 .B pdfsig
-verifies the digital signature in a PDF document.
+verifies the digital signatures in a PDF document.
+It also displays the identity of each signer (commonName field of the signer certificate) and the time and date of the signature.
 .PP
-Certificates are searched for in the following locations:
+The signer certificate validation uses the trusted certificates stored in the following locations:
 .IP \(bu
 The NSS Certificate database in the default Firefox profile.
 .IP \(bu
