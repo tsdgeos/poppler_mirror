@@ -447,8 +447,13 @@ static void getOutputSize(double page_w, double page_h, double *width, double *h
       *width = page_w;
       *height = page_h;
     } else {
-      *width = paperWidth;
-      *height = paperHeight;
+      if (page_w > page_h) {
+	*width = paperHeight;
+	*height = paperWidth;
+      } else {
+	*width = paperWidth;
+	*height = paperHeight;
+      }
     }
   } else {
     getCropSize(page_w * (x_resolution / 72.0),
@@ -470,27 +475,20 @@ static void getFitToPageTransform(double page_w, double page_h,
   else
     scale = y_scale;
 
+  if (scale > 1.0 && !expand)
+    scale = 1.0;
+  if (scale < 1.0 && noShrink)
+    scale = 1.0;
+
   cairo_matrix_init_identity (m);
-  if (scale > 1.0) {
-    // page is smaller than paper
-    if (expand) {
-      // expand to fit
-      cairo_matrix_scale (m, scale, scale);
-    } else if (!noCenter) {
-      // centre page
-      cairo_matrix_translate (m, (paper_w - page_w)/2, (paper_h - page_h)/2);
-    } else {
-      if (!svg) {
-	// move to PostScript origin
-	cairo_matrix_translate (m, 0, (paper_h - page_h));
-      }
-    }
-  } else if (scale < 1.0)
-    // page is larger than paper
-    if (!noShrink) {
-      // shrink to fit
-      cairo_matrix_scale (m, scale, scale);
-    }
+  if (!noCenter) {
+    // centre page
+    cairo_matrix_translate (m, (paper_w - page_w*scale)/2, (paper_h - page_h*scale)/2);
+  } else if (!svg) {
+    // move to PostScript origin
+    cairo_matrix_translate (m, 0, (paper_h - page_h*scale));
+  }
+  cairo_matrix_scale (m, scale, scale);
 }
 
 static cairo_status_t writeStream(void *closure, const unsigned char *data, unsigned int length)
