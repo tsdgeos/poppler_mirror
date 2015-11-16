@@ -1,3 +1,15 @@
+Release 0.38.0
+        core:
+         * Splash: Multiply opacity in case of pattern colorspace. Bug #92592
+         * Small form improvements on non ascii character rendering
+         * Clarify README
+
+        build system:
+         * Clarify internal DCT and JPX are only provided as deprecated fallbacks
+
+        utils:
+         * pdftocairo: fix fit to page transformation
+
 Release 0.37.0
         core:
          * CairoOutputDev: Use mask for even-odd fill. Bug #84527
