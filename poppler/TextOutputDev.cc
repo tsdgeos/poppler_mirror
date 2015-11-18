@@ -178,6 +178,94 @@
 #define combMaxMidDelta 0.3
 #define combMaxBaseDelta 0.4
 
+static int reorderText(Unicode *text, int len, UnicodeMap *uMap, GBool primaryLR, GooString *s, Unicode* u) {
+  char lre[8], rle[8], popdf[8], buf[8];
+  int lreLen = 0, rleLen = 0, popdfLen = 0, n;
+  int nCols, i, j, k;
+
+  nCols = 0;
+
+  if (s) {
+    lreLen = uMap->mapUnicode(0x202a, lre, sizeof(lre));
+    rleLen = uMap->mapUnicode(0x202b, rle, sizeof(rle));
+    popdfLen = uMap->mapUnicode(0x202c, popdf, sizeof(popdf));
+  }
+
+  if (primaryLR) {
+    i = 0;
+    while (i < len) {
+      // output a left-to-right section
+      for (j = i; j < len && !unicodeTypeR(text[j]); ++j) ;
+      for (k = i; k < j; ++k) {
+        if (s) {
+          n = uMap->mapUnicode(text[k], buf, sizeof(buf));
+          s->append(buf, n);
+        }
+        if (u) u[nCols] = text[k];
+        ++nCols;
+      }
+      i = j;
+      // output a right-to-left section
+      for (j = i;
+         j < len && !(unicodeTypeL(text[j]) || unicodeTypeNum(text[j]));
+         ++j) ;
+      if (j > i) {
+        if (s) s->append(rle, rleLen);
+        for (k = j - 1; k >= i; --k) {
+          if (s) {
+            n = uMap->mapUnicode(text[k], buf, sizeof(buf));
+            s->append(buf, n);
+          }
+          if (u) u[nCols] = text[k];
+          ++nCols;
+        }
+        if (s) s->append(popdf, popdfLen);
+        i = j;
+      }
+    }
+  } else {
+    // Note: This code treats numeric characters (European and
+    // Arabic/Indic) as left-to-right, which isn't strictly correct
+    // (incurs extra LRE/POPDF pairs), but does produce correct
+    // visual formatting.
+    if (s) s->append(rle, rleLen);
+    i = len - 1;
+    while (i >= 0) {
+      // output a right-to-left section
+      for (j = i;
+         j >= 0 && !(unicodeTypeL(text[j]) || unicodeTypeNum(text[j]));
+         --j) ;
+      for (k = i; k > j; --k) {
+        if (s) {
+          n = uMap->mapUnicode(text[k], buf, sizeof(buf));
+          s->append(buf, n);
+        }
+        if (u) u[nCols] = text[k];
+        ++nCols;
+      }
+      i = j;
+      // output a left-to-right section
+      for (j = i; j >= 0 && !unicodeTypeR(text[j]); --j) ;
+      if (j < i) {
+        if (s) s->append(lre, lreLen);
+        for (k = j + 1; k <= i; ++k) {
+          if (s) {
+            n = uMap->mapUnicode(text[k], buf, sizeof(buf));
+            s->append(buf, n);
+          }
+          if (u) u[nCols] = text[k];
+          ++nCols;
+        }
+        if (s) s->append(popdf, popdfLen);
+        i = j;
+      }
+    }
+    if (s) s->append(popdf, popdfLen);
+  }
+
+  return nCols;
+}
+
 //------------------------------------------------------------------------
 // TextUnderline
 //------------------------------------------------------------------------
@@ -3720,7 +3808,7 @@ GBool TextPage::findText(Unicode *s, int len,
 			 double *xMax, double *yMax) {
   TextBlock *blk;
   TextLine *line;
-  Unicode *s2, *txt;
+  Unicode *s2, *txt, *reordered;
   Unicode *p;
   int txtSize, m, i, j, k;
   double xStart, yStart, xStop, yStop;
@@ -3728,20 +3816,23 @@ GBool TextPage::findText(Unicode *s, int len,
   double xMin1, yMin1, xMax1, yMax1;
   GBool found;
 
-  //~ needs to handle right-to-left text
 
   if (rawOrder) {
     return gFalse;
   }
 
+  // handle right-to-left text
+  reordered = (Unicode*)gmallocn(len, sizeof(Unicode));
+  reorderText(s, len, NULL, primaryLR, NULL, reordered);
+
+  // normalize the search string
+  s2 = unicodeNormalizeNFKC(reordered, len, &len, NULL);
+
   // convert the search string to uppercase
   if (!caseSensitive) {
-    s2 = unicodeNormalizeNFKC(s, len, &len, NULL);
     for (i = 0; i < len; ++i) {
       s2[i] = unicodeToUpper(s2[i]);
     }
-  } else {
-    s2 = unicodeNormalizeNFKC(s, len, &len, NULL);
   }
 
   txt = NULL;
@@ -3915,6 +4006,7 @@ GBool TextPage::findText(Unicode *s, int len,
   }
 
   gfree(s2);
+  gfree(reordered);
   if (!caseSensitive) {
     gfree(txt);
   }
@@ -5330,91 +5422,22 @@ void TextPage::assignColumns(TextLineFrag *frags, int nFrags, GBool oneRot) {
 
 int TextPage::dumpFragment(Unicode *text, int len, UnicodeMap *uMap,
 			   GooString *s) {
-  char lre[8], rle[8], popdf[8], buf[8];
-  int lreLen, rleLen, popdfLen, n;
-  int nCols, i, j, k;
-
-  nCols = 0;
-
   if (uMap->isUnicode()) {
-
-    lreLen = uMap->mapUnicode(0x202a, lre, sizeof(lre));
-    rleLen = uMap->mapUnicode(0x202b, rle, sizeof(rle));
-    popdfLen = uMap->mapUnicode(0x202c, popdf, sizeof(popdf));
-
-    if (primaryLR) {
-
-      i = 0;
-      while (i < len) {
-	// output a left-to-right section
-	for (j = i; j < len && !unicodeTypeR(text[j]); ++j) ;
-	for (k = i; k < j; ++k) {
-	  n = uMap->mapUnicode(text[k], buf, sizeof(buf));
-	  s->append(buf, n);
-	  ++nCols;
-	}
-	i = j;
-	// output a right-to-left section
-	for (j = i;
-	     j < len && !(unicodeTypeL(text[j]) || unicodeTypeNum(text[j]));
-	     ++j) ;
-	if (j > i) {
-	  s->append(rle, rleLen);
-	  for (k = j - 1; k >= i; --k) {
-	    n = uMap->mapUnicode(text[k], buf, sizeof(buf));
-	    s->append(buf, n);
-	    ++nCols;
-	  }
-	  s->append(popdf, popdfLen);
-	  i = j;
-	}
-      }
-
-    } else {
-
-      // Note: This code treats numeric characters (European and
-      // Arabic/Indic) as left-to-right, which isn't strictly correct
-      // (incurs extra LRE/POPDF pairs), but does produce correct
-      // visual formatting.
-      s->append(rle, rleLen);
-      i = len - 1;
-      while (i >= 0) {
-	// output a right-to-left section
-	for (j = i;
-	     j >= 0 && !(unicodeTypeL(text[j]) || unicodeTypeNum(text[j]));
-	     --j) ;
-	for (k = i; k > j; --k) {
-	  n = uMap->mapUnicode(text[k], buf, sizeof(buf));
-	  s->append(buf, n);
-	  ++nCols;
-	}
-	i = j;
-	// output a left-to-right section
-	for (j = i; j >= 0 && !unicodeTypeR(text[j]); --j) ;
-	if (j < i) {
-	  s->append(lre, lreLen);
-	  for (k = j + 1; k <= i; ++k) {
-	    n = uMap->mapUnicode(text[k], buf, sizeof(buf));
-	    s->append(buf, n);
-	    ++nCols;
-	  }
-	  s->append(popdf, popdfLen);
-	  i = j;
-	}
-      }
-      s->append(popdf, popdfLen);
-
-    }
-
+    return reorderText(text, len, uMap, primaryLR, s, NULL);
   } else {
-    for (i = 0; i < len; ++i) {
-      n = uMap->mapUnicode(text[i], buf, sizeof(buf));
-      s->append(buf, n);
-      nCols += n;
-    }
-  }
+    int nCols = 0;
 
-  return nCols;
+    char buf[8];
+    int buflen = 0;
+
+    for (int i = 0; i < len; ++i) {
+      buflen = uMap->mapUnicode(text[i], buf, sizeof(buf));
+      s->append(buf, buflen);
+      nCols += buflen;
+    }
+
+    return nCols;
+  }
 }
 
 #if TEXTOUT_WORD_LIST
