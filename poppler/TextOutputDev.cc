@@ -35,6 +35,7 @@
 // Copyright (C) 2013 José Aliste <jaliste@src.gnome.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Ed Catmur <ed@catmur.co.uk>
+// Copyright (C) 2016 Khaled Hosny <khaledhosny@eglug.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -3900,7 +3901,8 @@ GBool TextPage::findText(Unicode *s, int len,
       if (!line->normalized)
 	line->normalized = unicodeNormalizeNFKC(line->text, line->len, 
 						&line->normalized_len, 
-						&line->normalized_idx);
+						&line->normalized_idx,
+						true);
       // convert the line to uppercase
       m = line->normalized_len;
       if (!caseSensitive) {
