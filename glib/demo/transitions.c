@@ -153,7 +153,7 @@ pgd_transitions_fill_model (PgdTransitionsDemo *demo)
 			gchar      *scale;
 
 			npage = g_strdup_printf ("%d", i + 1);
-			duration = g_strdup_printf ("%d", transition->duration);
+			duration = g_strdup_printf ("%.2f", transition->duration_real);
 			angle = g_strdup_printf ("%d", transition->angle);
 			scale = g_strdup_printf ("%.2f", transition->scale);
 			
