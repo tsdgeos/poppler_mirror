@@ -249,6 +249,7 @@ poppler_page_get_transition (PopplerPage *page)
 	  POPPLER_PAGE_TRANSITION_OUTWARD;
 
   transition->duration = trans->getDuration();
+  transition->duration_real = trans->getDuration();
   transition->angle = trans->getAngle();
   transition->scale = trans->getScale();
   transition->rectangular = trans->isRectangular();

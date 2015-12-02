@@ -299,6 +299,7 @@ struct _PopplerPageTransition
   gint angle;
   gdouble scale;
   gboolean rectangular;
+  gdouble duration_real;
 };
 
 GType                  poppler_page_transition_get_type (void) G_GNUC_CONST;
