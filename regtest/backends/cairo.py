@@ -26,9 +26,12 @@ class Cairo(Backend):
         Backend.__init__(self, name, '.diff.png')
         self._pdftocairo = os.path.join(self._utilsdir, 'pdftocairo');
 
-    def create_refs(self, doc_path, refs_path):
+    def create_refs(self, doc_path, refs_path, password = None):
         out_path = os.path.join(refs_path, 'cairo')
-        p = subprocess.Popen([self._pdftocairo, '-cropbox', '-r', '72', '-png', doc_path, out_path], stderr = subprocess.PIPE)
+        cmd = [self._pdftocairo, '-cropbox', '-r', '72', '-png', doc_path, out_path]
+        if password is not None:
+            cmd.extend(['-opw', password])
+        p = subprocess.Popen(cmd, stderr = subprocess.PIPE)
         return self._check_exit_status(p, out_path)
 
     def _create_diff(self, ref_path, result_path):

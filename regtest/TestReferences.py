@@ -21,7 +21,7 @@ import errno
 from backends import get_backend, get_all_backends
 from Config import Config
 from Printer import get_printer
-from Utils import get_document_paths_from_dir, get_skipped_tests
+from Utils import get_document_paths_from_dir, get_skipped_tests, get_passwords
 
 from Queue import Queue
 from threading import Thread, RLock
@@ -32,6 +32,7 @@ class TestReferences:
         self._docsdir = docsdir
         self._refsdir = refsdir
         self._skipped = get_skipped_tests(docsdir)
+        self._passwords = get_passwords(docsdir)
         self.config = Config()
         self.printer = get_printer()
         self._total_tests = 1
@@ -73,6 +74,8 @@ class TestReferences:
             raise
         doc_path = os.path.join(self._docsdir, filename)
 
+        password = self._passwords.get(filename)
+
         for backend in backends:
             if not self.config.force and backend.has_results(refs_path):
                 with self._lock:
@@ -80,7 +83,7 @@ class TestReferences:
                 self.printer.print_default("Results found, skipping '%s' for %s backend" % (doc_path, backend.get_name()))
                 continue
 
-            if backend.create_refs(doc_path, refs_path):
+            if backend.create_refs(doc_path, refs_path, password):
                 backend.create_checksums(refs_path, self.config.checksums_only)
             with self._lock:
                 self._n_tests += 1

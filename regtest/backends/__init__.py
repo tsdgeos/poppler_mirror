@@ -287,7 +287,7 @@ class Backend:
     def _create_diff(self, ref_path, result_path):
         raise NotImplementedError
 
-    def create_refs(self, doc_path, refs_path):
+    def create_refs(self, doc_path, refs_path, password = None):
         raise NotImplementedError
 
 _backends = {}

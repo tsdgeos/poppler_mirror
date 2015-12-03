@@ -18,7 +18,7 @@
 
 from backends import get_backend, get_all_backends
 from Config import Config
-from Utils import get_document_paths_from_dir, get_skipped_tests
+from Utils import get_document_paths_from_dir, get_skipped_tests, get_passwords
 from Printer import get_printer
 import sys
 import os
@@ -34,6 +34,7 @@ class TestRun:
         self._refsdir = refsdir
         self._outdir = outdir
         self._skip = get_skipped_tests(docsdir)
+        self._passwords = get_passwords(docsdir)
         self.config = Config()
         self.printer = get_printer()
         self._total_tests = 1
@@ -68,7 +69,7 @@ class TestRun:
 
         return get_all_backends()
 
-    def test(self, refs_path, doc_path, test_path, backend):
+    def test(self, refs_path, doc_path, test_path, backend, password):
         # First check whether there are test results for the backend
         ref_has_md5 = backend.has_md5(refs_path)
         ref_is_crashed = backend.is_crashed(refs_path)
@@ -80,7 +81,7 @@ class TestRun:
             self.printer.print_default("Reference files not found, skipping '%s' for %s backend" % (doc_path, backend.get_name()))
             return
 
-        test_has_md5 = backend.create_refs(doc_path, test_path)
+        test_has_md5 = backend.create_refs(doc_path, test_path, password)
         test_passed = False
         if ref_has_md5 and test_has_md5:
             test_passed = backend.compare_checksums(refs_path, test_path, not self.config.keep_results, self.config.create_diffs, self.config.update_refs)
@@ -165,8 +166,10 @@ class TestRun:
             self.printer.print_default("Reference dir not found for %s, skipping" % (doc_path))
             return
 
+        password = self._passwords.get(filename)
+
         for backend in backends:
-            self.test(refs_path, doc_path, out_path, backend)
+            self.test(refs_path, doc_path, out_path, backend, password)
 
     def _worker_thread(self):
         while True:

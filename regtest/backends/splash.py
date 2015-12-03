@@ -26,9 +26,12 @@ class Splash(Backend):
         Backend.__init__(self, name, '.diff.png')
         self._pdftoppm = os.path.join(self._utilsdir, 'pdftoppm');
 
-    def create_refs(self, doc_path, refs_path):
+    def create_refs(self, doc_path, refs_path, password = None):
         out_path = os.path.join(refs_path, 'splash')
-        p = subprocess.Popen([self._pdftoppm, '-cropbox', '-r', '72', '-png', doc_path, out_path], stderr = subprocess.PIPE)
+        cmd = [self._pdftoppm, '-cropbox', '-r', '72', '-png', doc_path, out_path]
+        if password is not None:
+            cmd.extend(['-opw', password])
+        p = subprocess.Popen(cmd, stderr = subprocess.PIPE)
         return self._check_exit_status(p, out_path)
 
     def _create_diff(self, ref_path, result_path):

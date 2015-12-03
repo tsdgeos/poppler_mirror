@@ -65,6 +65,9 @@ def main(args):
     parser.add_argument('--skip', metavar = 'FILE',
                         action = 'store', dest = 'skipped_file',
                         help = 'File containing tests to skip')
+    parser.add_argument('-p', '--passwords', metavar = 'FILE',
+                        action = 'store', dest = 'passwords_file',
+                        help = 'File containing the documents passwords')
     parser.add_argument('-t', '--threads',
                         action = 'store', dest = 'threads', type = int, default = n_cpus,
                         help = 'Number of worker threads (Default: %d)' % n_cpus)
