@@ -31,7 +31,7 @@ class Text(Backend):
         cmd = [self._pdftotext, doc_path, out_path + '.txt']
         if password is not None:
             cmd.extend(['-opw', password])
-        p = subprocess.Popen([cmd, stderr = subprocess.PIPE)
+        p = subprocess.Popen(cmd, stderr = subprocess.PIPE)
         return self._check_exit_status(p, out_path)
 
     def _create_diff(self, ref_path, result_path):
