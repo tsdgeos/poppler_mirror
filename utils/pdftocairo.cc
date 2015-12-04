@@ -1150,7 +1150,7 @@ int main(int argc, char *argv[]) {
   if (ownerPW)
     delete ownerPW;
   if (userPW)
-    delete ownerPW;
+    delete userPW;
 
 #if USE_CMS
   cmsCloseProfile(profile);
