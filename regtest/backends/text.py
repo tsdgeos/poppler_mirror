@@ -30,7 +30,7 @@ class Text(Backend):
         out_path = os.path.join(refs_path, 'text')
         cmd = [self._pdftotext, doc_path, out_path + '.txt']
         if password is not None:
-            cmd.extend(['-opw', password])
+            cmd.extend(['-opw', password, '-upw', password])
         p = subprocess.Popen(cmd, stderr = subprocess.PIPE)
         return self._check_exit_status(p, out_path)
 

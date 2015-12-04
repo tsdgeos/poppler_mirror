@@ -30,7 +30,7 @@ class Splash(Backend):
         out_path = os.path.join(refs_path, 'splash')
         cmd = [self._pdftoppm, '-cropbox', '-r', '72', '-png', doc_path, out_path]
         if password is not None:
-            cmd.extend(['-opw', password])
+            cmd.extend(['-opw', password, '-upw', password])
         p = subprocess.Popen(cmd, stderr = subprocess.PIPE)
         return self._check_exit_status(p, out_path)
 
