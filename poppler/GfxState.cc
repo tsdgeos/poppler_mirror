@@ -27,6 +27,7 @@
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2015 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

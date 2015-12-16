@@ -24,7 +24,7 @@
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2011, 2015 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
