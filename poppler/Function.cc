@@ -577,6 +577,10 @@ ExponentialFunction::ExponentialFunction(Object *funcObj, Dict *dict) {
       goto err2;
     }
     n = obj1.arrayGetLength();
+    if (unlikely(n > funcMaxOutputs)) {
+      error(errSyntaxError, -1, "Function's C0 array is wrong length");
+      n = funcMaxOutputs;
+    }
     for (i = 0; i < n; ++i) {
       obj1.arrayGet(i, &obj2);
       if (!obj2.isNum()) {
