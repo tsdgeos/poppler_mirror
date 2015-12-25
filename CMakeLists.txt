@@ -442,7 +442,6 @@ elseif (LIBOPENJPEG2_FOUND)
     poppler/JPEG2000Stream.cc
   )
   add_definitions(-DUSE_OPENJPEG2)
-MESSAGE(${LIBOPENJPEG2_LIBRARIES})
   set(poppler_LIBS ${poppler_LIBS} ${LIBOPENJPEG2_LIBRARIES})
 else ()
   set(poppler_SRCS ${poppler_SRCS}
