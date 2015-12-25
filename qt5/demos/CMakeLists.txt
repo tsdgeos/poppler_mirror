@@ -1,5 +1,3 @@
-set(CMAKE_AUTOMOC ON)
-
 add_definitions(${QT5_DEFINITIONS})
 add_definitions(${Qt5Core_DEFINITIONS})
 add_definitions(${Qt5Gui_DEFINITIONS})

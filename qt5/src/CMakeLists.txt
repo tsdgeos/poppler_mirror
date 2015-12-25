@@ -1,8 +1,6 @@
 add_definitions(${QT5_DEFINITIONS})
 add_definitions(${Qt5Core_DEFINITIONS})
 
-set(CMAKE_AUTOMOC ON)
-
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${Qt5Core_INCLUDE_DIRS}
