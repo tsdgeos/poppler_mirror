@@ -23,7 +23,7 @@ from Config import Config
 from Printer import get_printer
 from Utils import get_document_paths_from_dir, get_skipped_tests, get_passwords
 
-from Queue import Queue
+from InterruptibleQueue import InterruptibleQueue
 from threading import Thread, RLock
 
 class TestReferences:
@@ -38,7 +38,7 @@ class TestReferences:
         self._total_tests = 1
         self._n_tests = 0
 
-        self._queue = Queue()
+        self._queue = InterruptibleQueue()
         self._lock = RLock()
 
         try:

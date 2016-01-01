@@ -24,7 +24,7 @@ import sys
 import os
 import errno
 
-from Queue import Queue
+from InterruptibleQueue import InterruptibleQueue
 from threading import Thread, RLock
 
 class TestRun:
@@ -52,7 +52,7 @@ class TestRun:
         self._skipped = []
         self._new = []
 
-        self._queue = Queue()
+        self._queue = InterruptibleQueue()
         self._lock = RLock()
 
         try:
