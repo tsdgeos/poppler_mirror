@@ -87,7 +87,7 @@ class TestReferences:
                 backend.create_checksums(refs_path, self.config.checksums_only)
             with self._lock:
                 self._n_tests += 1
-                self.printer.printout_ln("[%d/%d] %s (%s): done" % (self._n_tests, self._total_tests, doc_path, backend.get_name()))
+            self.printer.printout_ln("[%d/%d] %s (%s): done" % (self._n_tests, self._total_tests, doc_path, backend.get_name()))
 
     def _worker_thread(self):
         while True:
