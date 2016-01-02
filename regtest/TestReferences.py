@@ -100,19 +100,28 @@ class TestReferences:
         backends = self._get_backends()
         self._total_tests = total_docs * len(backends)
 
+        if total_docs == 1:
+            n_workers = 0
+        else:
+            n_workers = min(self.config.threads, total_docs)
+
         self.printer.printout_ln('Found %d documents' % (total_docs))
         self.printer.printout_ln('Backends: %s' % ', '.join([backend.get_name() for backend in backends]))
-        self.printer.printout_ln('Process %d using %d worker threads' % (os.getpid(), self.config.threads))
+        self.printer.printout_ln('Process %d using %d worker threads' % (os.getpid(), n_workers))
         self.printer.printout_ln()
 
-        self.printer.printout('Spawning %d workers...' % (self.config.threads))
+        if n_workers > 0:
+            self.printer.printout('Spawning %d workers...' % (n_workers))
 
-        for n_thread in range(self.config.threads):
-            thread = Thread(target=self._worker_thread)
-            thread.daemon = True
-            thread.start()
+            for n_thread in range(n_workers):
+                thread = Thread(target=self._worker_thread)
+                thread.daemon = True
+                thread.start()
 
-        for doc in docs:
-            self._queue.put(doc)
+            for doc in docs:
+                self._queue.put(doc)
 
-        self._queue.join()
+            self._queue.join()
+        else:
+            for doc in docs:
+                self.create_refs_for_file(doc)
