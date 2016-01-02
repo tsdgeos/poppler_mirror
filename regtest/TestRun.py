@@ -215,7 +215,7 @@ class TestRun:
         self.printer.printout_ln()
 
         if n_workers > 0:
-            self.printer.printout('Spawning %d workers...' % (self.config.threads))
+            self.printer.printout('Spawning %d workers...' % (n_workers))
 
             for n_thread in range(n_workers):
                 thread = Thread(target=self._worker_thread)
