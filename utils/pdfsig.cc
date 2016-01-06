@@ -7,6 +7,7 @@
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2015 Albert Astals Cid <aacid@kde.org>
+// Copyright 2016 Markus Kilås <digital@markuspage.com>
 //
 //========================================================================
 
@@ -154,7 +155,7 @@ int main(int argc, char *argv[])
 
   for (unsigned int i = 0; i < sigCount; i++) {
     sig_info = sig_widgets.at(i)->validateSignature(!dontVerifyCert, false);
-    printf("Signature #%d:\n", i+1);
+    printf("Signature #%u:\n", i+1);
     printf("  - Signer Certificate Common Name: %s\n", sig_info->getSignerName());
     printf("  - Signing Time: %s\n", time_str = getReadableTime(sig_info->getSigningTime()));
     printf("  - Signature Validation: %s\n", getReadableSigState(sig_info->getSignatureValStatus()));
