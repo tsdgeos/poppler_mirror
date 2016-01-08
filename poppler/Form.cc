@@ -1473,48 +1473,51 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     return signature_info;
   }
 
-  if (!byte_range.isArray() || signature == NULL) {
+  if (signature == NULL) {
+    error(errSyntaxError, 0, "Invalid or missing Signature string");
     return signature_info;
   }
 
-  Object r2, r3, r4;
-  NSSCMSVerificationStatus sig_val_state;
-  SECErrorCodes cert_val_state;
-
-  byte_range.arrayGet(1, &r2);
-  byte_range.arrayGet(2, &r3);
-  byte_range.arrayGet(3, &r4);
-
-  Goffset fileLength = doc->getBaseStream()->getLength();
-  Goffset r_values[3];
-
-  r_values[0] = r2.isInt64() ? r2.getInt64() : r2.getInt();
-  r_values[1] = r3.isInt64() ? r3.getInt64() : r3.getInt();
-  r_values[2] = r4.isInt64() ? r4.getInt64() : r4.getInt();
-
-  if (r_values[0] <= 0 || r_values[1] <= 0 || r_values[2] <= 0 || r_values[1] <= r_values[0] ||
-    r_values[1] + r_values[2] > fileLength)
-  {
-      error(errSyntaxError, 0, "Illegal values in ByteRange array");
-      return signature_info;
+  if (!byte_range.isArray()) {
+    error(errSyntaxError, 0, "Invalid or missing ByteRange array");
+    return signature_info;
   }
 
-  const int signature_len = signature->getLength();
+  int arrayLen = byte_range.arrayGetLength();
+  if (arrayLen < 2) {
+    error(errSyntaxError, 0, "Too few elements in ByteRange array");
+    return signature_info;
+  }
 
+  NSSCMSVerificationStatus sig_val_state;
+  SECErrorCodes cert_val_state;
+  const int signature_len = signature->getLength();
   unsigned char *signatureuchar = (unsigned char *)gmalloc(signature_len);
   memcpy(signatureuchar, signature->getCString(), signature_len);
   SignatureHandler signature_handler(signatureuchar, signature_len);
 
-  //Read the 2 slices of data that are signed
-  doc->getBaseStream()->setPos(0);
-  Goffset block_len = r_values[0];
+  Goffset fileLength = doc->getBaseStream()->getLength();
+  for (int i = 0; i < arrayLen/2; i++) {
+    Object offsetObj, lenObj;
+    byte_range.arrayGet(i*2, &offsetObj);
+    byte_range.arrayGet(i*2+1, &lenObj);
 
-  hashSignedDataBlock(&signature_handler, block_len);
+    if (!offsetObj.isIntOrInt64() || !lenObj.isIntOrInt64()) {
+      error(errSyntaxError, 0, "Illegal values in ByteRange array");
+      return signature_info;
+    }
 
-  doc->getBaseStream()->setPos(r_values[1]);
-  block_len = r_values[2];
+    Goffset offset = offsetObj.getIntOrInt64();
+    Goffset len = lenObj.getIntOrInt64();
 
-  hashSignedDataBlock(&signature_handler, block_len);
+    if (offset < 0 || offset >= fileLength || len < 0 || len > fileLength || offset + len > fileLength) {
+      error(errSyntaxError, 0, "Illegal values in ByteRange array");
+      return signature_info;
+    }
+
+    doc->getBaseStream()->setPos(offset);
+    hashSignedDataBlock(&signature_handler, len);
+  }
 
   sig_val_state = signature_handler.validateSignature();
   signature_info->setSignatureValStatus(SignatureHandler::NSS_SigTranslate(sig_val_state));
@@ -1534,7 +1537,6 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
 
 #endif
   return signature_info;
-
 }
 
 #ifdef DEBUG_FORMS
