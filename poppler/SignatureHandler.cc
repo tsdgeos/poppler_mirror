@@ -228,14 +228,15 @@ NSSCMSVerificationStatus SignatureHandler::validateSignature()
   if ((NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB())) == NULL)
     CMSSignerInfo->verificationStatus = NSSCMSVS_SigningCertNotFound;
 
-  if (CMSSignedData->contentInfo.content.data != NULL)
+  SECItem * content_info_data = CMSSignedData->contentInfo.content.data;
+  if (content_info_data != NULL && content_info_data->data != NULL)
   {
     /*
       This means it's not a detached type signature
       so the digest is contained in SignedData->contentInfo
     */
-    if(memcmp(digest.data, CMSSignedData->contentInfo.content.data->data, hash_length) == 0
-        && digest.len == CMSSignedData->contentInfo.content.data->len)
+    if (memcmp(digest.data, content_info_data->data, hash_length) == 0
+        && digest.len == content_info_data->len)
     {
       PORT_Free(digest_buffer);
       return NSSCMSVS_GoodSignature;
@@ -276,15 +277,10 @@ SECErrorCodes SignatureHandler::validateCertificate()
   inParams[0].value.pointer.revocation = CERT_GetClassicOCSPEnabledSoftFailurePolicy();
   inParams[1].type = cert_pi_end;
 
-  if (CERT_PKIXVerifyCert(cert, certificateUsageEmailSigner, inParams, NULL, 
-                CMSSignerInfo->cmsg->pwfn_arg) != SECSuccess) {
-    retVal = (SECErrorCodes) PORT_GetError();
-  } else {
-    // PORT_GetError() will return 0 if everything was fine, 
-    // there are other possible outcomes even if the previous return was SECSuccess.
-    retVal = (SECErrorCodes) PORT_GetError();
-  }
+  CERT_PKIXVerifyCert(cert, certificateUsageEmailSigner, inParams, NULL,
+                CMSSignerInfo->cmsg->pwfn_arg);
 
+  retVal = (SECErrorCodes) PORT_GetError();
 
   if (cert)
     CERT_DestroyCertificate(cert);
