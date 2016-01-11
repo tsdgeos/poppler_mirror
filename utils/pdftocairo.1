@@ -1,4 +1,4 @@
-.TH pdftoppm 1
+.TH pdftocairo 1
 .SH NAME
 pdftocairo \- Portable Document Format (PDF) to PNG/JPEG/TIFF/PDF/PS/EPS/SVG using cairo
 .SH SYNOPSIS
@@ -32,9 +32,10 @@ reads the PDF file,
 and writes to
 .IR output-file .
 The image formats (PNG, JPEG, and TIFF) generate one file per page with the page number and file type appended to
-.IR output-file
-(except when \-singlefile is used).
-When the output format is a vector format (PDF, PS, EPS, and SVG) or when \-singlefile is used,
+.IR output-file .
+qWhen \-singlefile is used with the image formats, the file type is appended to
+.IR output-file .
+When the output format is a vector format (PDF, PS, EPS, and SVG),
 .IR output-file
 is the full filename.
 
