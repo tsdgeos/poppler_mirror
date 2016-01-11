@@ -725,12 +725,14 @@ static GooString *getImageFileName(GooString *outputFileName, int numDigits, int
     snprintf(buf, sizeof(buf), "-%0*d", numDigits, page);
     imageName->append(buf);
   }
-  if (png)
-    imageName->append(".png");
-  else if (jpeg)
-    imageName->append(".jpg");
-  else if (tiff)
-    imageName->append(".tif");
+  if (outputFileName->cmp("fd://0") != 0) {
+    if (png)
+      imageName->append(".png");
+    else if (jpeg)
+      imageName->append(".jpg");
+    else if (tiff)
+      imageName->append(".tif");
+  }
 
   return imageName;
 }
