@@ -835,8 +835,10 @@ int main(int argc, char *argv[]) {
   int num_outputs;
 
   // parse args
-  if (!parseArgs(argDesc, &argc, argv))
+  if (!parseArgs(argDesc, &argc, argv)) {
+    printUsage("pdftocairo", 0, argDesc);
     exit(99);
+  }
 
   if ( resolution != 0.0 &&
        (x_resolution == 150.0 ||
@@ -886,6 +888,9 @@ int main(int argc, char *argv[]) {
     checkInvalidPrintOption(icc.getCString()[0], "-icc");
     checkInvalidPrintOption(singleFile, "-singlefile");
     checkInvalidPrintOption(useCropBox, "-cropbox");
+    checkInvalidPrintOption(scaleTo != 0, "-scale-to");
+    checkInvalidPrintOption(x_scaleTo != 0, "-scale-to-x");
+    checkInvalidPrintOption(y_scaleTo != 0, "-scale-to-y");
   } else {
     checkInvalidImageOption(level2, "-level2");
     checkInvalidImageOption(level3, "-level3");
@@ -937,6 +942,11 @@ int main(int argc, char *argv[]) {
 
   if (eps && (origPageSizes || paperSize[0] || paperWidth > 0 || paperHeight > 0)) {
     fprintf(stderr, "Error: page size options may not be used with eps output.\n");
+    exit(99);
+  }
+
+  if ((paperWidth > 0 && paperHeight <= 0) || (paperWidth <= 0 && paperHeight > 0)) {
+    fprintf(stderr, "Error: both -paperw and -paperh must be specified.\n");
     exit(99);
   }
 
