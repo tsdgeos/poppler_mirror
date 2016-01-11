@@ -351,6 +351,7 @@ void writePageImage(GooString *filename)
   height = cairo_image_surface_get_height(surface);
   width = cairo_image_surface_get_width(surface);
   stride = cairo_image_surface_get_stride(surface);
+  cairo_surface_flush(surface);
   data = cairo_image_surface_get_data(surface);
 
   if (!writer->init(file, width, height, x_resolution, y_resolution)) {
