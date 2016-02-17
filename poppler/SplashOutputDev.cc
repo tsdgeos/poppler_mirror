@@ -4516,7 +4516,7 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *ca
   matc[2] = ctm[2];
   matc[3] = ctm[3];
 
-  if (surface_width == 0 || surface_height == 0) {
+  if (surface_width == 0 || surface_height == 0 || repeatX * repeatY <= 4) {
     state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
     return gFalse;
   }
