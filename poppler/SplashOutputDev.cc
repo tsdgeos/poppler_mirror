@@ -2160,7 +2160,7 @@ reload:
   // for substituted fonts: adjust the font matrix -- compare the
   // width of 'm' in the original font and the substituted font
   if (fontFile->doAdjustMatrix && !gfxFont->isCIDFont()) {
-    double w1, w2;
+    double w1, w2, w3;
     CharCode code;
     char *name;
     for (code = 0; code < 256; ++code) {
@@ -2172,7 +2172,8 @@ reload:
     if (code < 256) {
       w1 = ((Gfx8BitFont *)gfxFont)->getWidth(code);
       w2 = font->getGlyphAdvance(code);
-      if (!gfxFont->isSymbolic() && w2 > 0) {
+      w3 = ((Gfx8BitFont *)gfxFont)->getWidth(0);
+      if (!gfxFont->isSymbolic() && w2 > 0 && w1 > w3) {
         // if real font is substantially narrower than substituted
         // font, reduce the font size accordingly
         if (w1 > 0.01 && w1 < 0.9 * w2) {
