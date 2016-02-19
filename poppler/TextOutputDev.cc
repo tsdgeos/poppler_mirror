@@ -54,6 +54,7 @@
 #include <math.h>
 #include <float.h>
 #include <ctype.h>
+#include <algorithm>
 #ifdef _WIN32
 #include <fcntl.h> // for O_BINARY
 #include <io.h>    // for setmode
@@ -2064,7 +2065,8 @@ GBool TextBlock::isBeforeByRule2(TextBlock *blk1) {
 // http://en.wikipedia.org/wiki/Topological_sorting
 int TextBlock::visitDepthFirst(TextBlock *blkList, int pos1,
 			       TextBlock **sorted, int sortPos,
-			       GBool* visited) {
+			       GBool* visited,
+			       TextBlock **cache, int cacheSize) {
   int pos2;
   TextBlock *blk1, *blk2, *blk3;
   GBool before;
@@ -2119,14 +2121,28 @@ int TextBlock::visitDepthFirst(TextBlock *blkList, int pos1,
         //          such that blk1 is before blk3 by rule 1,
         //          and blk3 is before blk2 by rule 1.
         before = gTrue;
-        for (blk3 = blkList; blk3; blk3 = blk3->next) {
-	  if (blk3 == blk2 || blk3 == blk1) {
-	    continue;
-	  }
-	  if (blk1->isBeforeByRule1(blk3) &&
-	      blk3->isBeforeByRule1(blk2)) {
+	for (int i = 0; i < cacheSize && cache[i]; ++i) {
+	  if (blk1->isBeforeByRule1(cache[i]) &&
+	      cache[i]->isBeforeByRule1(blk2)) {
 	    before = gFalse;
+	    std::rotate(cache, cache + i, cache + i + 1);
 	    break;
+	  }
+	}
+
+	if (before) {
+	  for (blk3 = blkList; blk3; blk3 = blk3->next) {
+	    if (blk3 == blk2 || blk3 == blk1) {
+	      continue;
+	    }
+	    if (blk1->isBeforeByRule1(blk3) &&
+		blk3->isBeforeByRule1(blk2)) {
+	      before = gFalse;
+	      std::copy_backward(cache, cache + cacheSize - 1,
+				 cache + cacheSize);
+	      cache[0] = blk3;
+	      break;
+	    }
 	  }
         }
 #if 0 // for debugging
@@ -2141,7 +2157,7 @@ int TextBlock::visitDepthFirst(TextBlock *blkList, int pos1,
     if (before) {
       // blk2 is before blk1, so it needs to be visited
       // before we can add blk1 to the sorted list.
-      sortPos = blk2->visitDepthFirst(blkList, pos2, sorted, sortPos, visited);
+      sortPos = blk2->visitDepthFirst(blkList, pos2, sorted, sortPos, visited, cache, cacheSize);
     }
   }
 #if 0 // for debugging
@@ -2150,6 +2166,16 @@ int TextBlock::visitDepthFirst(TextBlock *blkList, int pos1,
 #endif
   sorted[sortPos++] = blk1;
   return sortPos;
+}
+
+int TextBlock::visitDepthFirst(TextBlock *blkList, int pos1,
+			       TextBlock **sorted, int sortPos,
+			       GBool* visited) {
+  const int blockCacheSize = 4;
+  TextBlock *blockCache[blockCacheSize];
+  std::fill(blockCache, blockCache + blockCacheSize, (TextBlock*)NULL);
+  return visitDepthFirst(blkList, pos1, sorted, sortPos, visited, blockCache,
+			 blockCacheSize);
 }
 
 //------------------------------------------------------------------------

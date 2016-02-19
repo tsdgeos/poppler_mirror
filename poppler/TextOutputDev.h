@@ -396,6 +396,10 @@ private:
   int visitDepthFirst(TextBlock *blkList, int pos1,
 		      TextBlock **sorted, int sortPos,
 		      GBool* visited);
+  int visitDepthFirst(TextBlock *blkList, int pos1,
+		      TextBlock **sorted, int sortPos,
+		      GBool* visited,
+		      TextBlock **cache, int cacheSize);
 
   TextPage *page;		// the parent page
   int rot;			// text rotation
