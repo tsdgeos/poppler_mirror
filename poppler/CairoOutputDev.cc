@@ -882,6 +882,7 @@ GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
   int surface_width, surface_height;
   StrokePathClip *strokePathTmp;
   GBool adjusted_stroke_width_tmp;
+  cairo_pattern_t *maskTmp;
 
   width = bbox[2] - bbox[0];
   height = bbox[3] - bbox[1];
@@ -919,6 +920,8 @@ GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
   strokePathTmp = strokePathClip;
   strokePathClip = NULL;
   adjusted_stroke_width_tmp = adjusted_stroke_width;
+  maskTmp = mask;
+  mask = NULL;
   gfx = new Gfx(doc, this, resDict, &box, NULL, NULL, NULL, gfxA->getXRef());
   if (paintType == 2)
     inUncoloredPattern = gTrue;
@@ -928,6 +931,7 @@ GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
   delete gfx;
   strokePathClip = strokePathTmp;
   adjusted_stroke_width = adjusted_stroke_width_tmp;
+  mask = maskTmp;
 
   pattern = cairo_pattern_create_for_surface (cairo_get_target (cairo));
   cairo_destroy (cairo);
@@ -2413,7 +2417,6 @@ void CairoOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream
    * images with CAIRO_FILTER_NEAREST to look really bad */
   cairo_pattern_set_filter (pattern,
 			    interpolate ? CAIRO_FILTER_BEST : CAIRO_FILTER_FAST);
-  cairo_pattern_set_extend (pattern, CAIRO_EXTEND_PAD);
 
   if (state->getFillColorSpace()->getMode() == csPattern) {
     cairo_matrix_init_translate (&matrix, 0, scaledHeight);
