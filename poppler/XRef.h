@@ -150,6 +150,13 @@ public:
   Object *getDocInfo(Object *obj);
   Object *getDocInfoNF(Object *obj);
 
+  // Create and return the document's Info dictionary if none exists.
+  // Otherwise return the existing one.
+  Object *createDocInfoIfNoneExists(Object *obj);
+
+  // Remove the document's Info dictionary and update the trailer dictionary.
+  void removeDocInfo();
+
   // Return the number of objects in the xref table.
   int getNumObjects() { return size; }
 

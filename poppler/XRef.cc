@@ -1292,6 +1292,40 @@ Object *XRef::getDocInfoNF(Object *obj) {
   return trailerDict.dictLookupNF("Info", obj);
 }
 
+Object *XRef::createDocInfoIfNoneExists(Object *obj) {
+  getDocInfo(obj);
+
+  if (!obj->isNull()) {
+    return obj;
+  }
+
+  obj->initDict(this);
+
+  Ref ref = addIndirectObject(obj);
+
+  Object objRef;
+  objRef.initRef(ref.num, ref.gen);
+
+  trailerDict.dictSet("Info", &objRef);
+
+  objRef.free();
+
+  return obj;
+}
+
+void XRef::removeDocInfo() {
+  Object infoObjRef;
+  getDocInfoNF(&infoObjRef);
+  if (infoObjRef.isNull()) {
+    return;
+  }
+
+  trailerDict.dictRemove("Info");
+
+  removeIndirectObject(infoObjRef.getRef());
+  infoObjRef.free();
+}
+
 GBool XRef::getStreamEnd(Goffset streamStart, Goffset *streamEnd) {
   int a, b, m;
 
