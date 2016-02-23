@@ -22,6 +22,7 @@
 
 #include <config.h>
 
+#include "glibc.h"
 #include "DateInfo.h"
 
 #include <stdio.h>
@@ -81,13 +82,9 @@ GooString *timeToDateString(time_t *timet) {
   struct tm *gt;
   size_t len;
   time_t timep = timet ? *timet : time(NULL);
-  
-#ifdef HAVE_GMTIME_R
   struct tm t;
+
   gt = gmtime_r (&timep, &t);
-#else
-  gt = gmtime (&timep);
-#endif
 
   dateString = new GooString ("D:");
 

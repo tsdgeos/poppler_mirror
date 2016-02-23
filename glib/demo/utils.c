@@ -484,15 +484,9 @@ pgd_format_date (time_t utime)
 	char s[256];
 	const char *fmt_hack = "%c";
 	size_t len;
-#ifdef HAVE_LOCALTIME_R
 	struct tm t;
 	if (time == 0 || !localtime_r (&time, &t)) return NULL;
 	len = strftime (s, sizeof (s), fmt_hack, &t);
-#else
-	struct tm *t;
-	if (time == 0 || !(t = localtime (&time)) ) return NULL;
-	len = strftime (s, sizeof (s), fmt_hack, t);
-#endif
 
 	if (len == 0 || s[0] == '\0') return NULL;
 

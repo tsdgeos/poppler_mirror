@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include <goo/glibc.h>
 #include <poppler-document.h>
 #include <poppler-embedded-file.h>
 #include <poppler-font.h>
@@ -94,13 +95,9 @@ std::ostream& operator<<(std::ostream& stream, const poppler::ustring &str)
 static std::string out_date(std::time_t date)
 {
     if (date != std::time_t(-1)) {
-#ifdef HAVE_GMTIME_R
         struct tm time;
         gmtime_r(&date, &time);
         struct tm *t = &time;
-#else
-        struct tm *t = gmtime(&date);
-#endif
         char buf[32];
         strftime(buf, sizeof(buf) - 1, "%d/%m/%Y %H:%M:%S", t);
         return std::string(buf);

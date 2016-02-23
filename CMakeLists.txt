@@ -325,6 +325,7 @@ set(poppler_SRCS
   goo/ImgWriter.cc
   goo/gstrtod.cc
   goo/grandom.cc
+  goo/glibc.cc
   fofi/FoFiBase.cc
   fofi/FoFiEncodings.cc
   fofi/FoFiTrueType.cc
