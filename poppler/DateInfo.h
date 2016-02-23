@@ -33,6 +33,10 @@ GBool parseDateString(const char *string, int *year, int *month, int *day, int *
  * If timet is NULL, current time is used.
  */
 GooString *timeToDateString(time_t *timet);
-time_t pdfTimeToInteger(GooString *time_str);
+
+/* Convert PDF date string to time.
+ * Returns -1 if conversion fails.
+ */
+time_t dateStringToTime(GooString *dateString);
 
 #endif

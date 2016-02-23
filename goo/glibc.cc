@@ -32,3 +32,27 @@ struct tm *localtime_r(const time_t *timep, struct tm *result)
   return lt;
 }
 #endif
+
+#ifndef HAVE_TIMEGM
+// Get offset of local time from UTC in seconds. DST is ignored.
+static time_t getLocalTimeZoneOffset()
+{
+  time_t utc, local;
+  struct tm tm_utc;
+  time (&utc);
+  gmtime_r(&utc, &tm_utc);
+  local = mktime(&tm_utc);
+  return difftime(utc, local);
+}
+
+time_t timegm(struct tm *tm)
+{
+  tm->tm_isdst = 0;
+  time_t t = mktime(tm);
+  if (t == -1)
+    return t;
+
+  t += getLocalTimeZoneOffset();
+  return t;
+}
+#endif

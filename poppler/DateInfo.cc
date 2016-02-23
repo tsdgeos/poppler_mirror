@@ -75,7 +75,7 @@ GBool parseDateString(const char *dateString, int *year, int *month, int *day, i
    return gFalse;
 }
 
-
+// Convert time to PDF date string
 GooString *timeToDateString(time_t *timet) {
   GooString *dateString;
   char s[5];
@@ -115,27 +115,35 @@ GooString *timeToDateString(time_t *timet) {
   return dateString;
 }
 
-time_t pdfTimeToInteger(GooString *time_str)
-{
+// Convert PDF date string to time. Returns -1 if conversion fails.
+time_t dateStringToTime(GooString *dateString) {
   int year, mon, day, hour, min, sec, tz_hour, tz_minute;
   char tz;
-  struct tm time_struct;
+  struct tm tm;
+  time_t time;
 
-  if (!parseDateString (time_str->getCString(), &year,
-        &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute))
-    return 0;
+  if (!parseDateString (dateString->getCString(), &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute))
+    return -1;
 
-  time_struct.tm_year = year - 1900;
-  time_struct.tm_mon = mon - 1;
-  time_struct.tm_mday = day;
-  time_struct.tm_hour = hour;
-  time_struct.tm_min = min;
-  time_struct.tm_sec = sec;
-  time_struct.tm_wday = -1;
-  time_struct.tm_yday = -1;
-  time_struct.tm_isdst = -1;
+  tm.tm_year = year - 1900;
+  tm.tm_mon = mon - 1;
+  tm.tm_mday = day;
+  tm.tm_hour = hour;
+  tm.tm_min = min;
+  tm.tm_sec = sec;
+  tm.tm_wday = -1;
+  tm.tm_yday = -1;
+  tm.tm_isdst = -1; /* 0 = DST off, 1 = DST on, -1 = don't know */
 
-  time_t unix_time = mktime(&time_struct);
+  /* compute tm_wday and tm_yday and check date */
+  time = timegm (&tm);
+  if (time == (time_t)-1)
+    return time;
 
-  return unix_time;
+  time_t offset = (tz_hour*60 + tz_minute)*60;
+  if (tz == '-')
+    offset *= -1;
+  time -= offset;
+
+  return time;
 }

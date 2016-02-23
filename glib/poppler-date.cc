@@ -17,6 +17,7 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include <goo/glibc.h>
 #include <DateInfo.h>
 
 #include "poppler-date.h"
@@ -37,32 +38,12 @@ gboolean
 poppler_date_parse (const gchar *date,
 		    time_t      *timet)
 {
-  gint year, mon, day, hour, min, sec, tz_hour, tz_minute;
-  gchar tz;
-  struct tm time;
-  time_t retval;
-  
-  /* See PDF Reference 1.3, Section 3.8.2 for PDF Date representation */
-  // TODO do something with the timezone information
-  if (!parseDateString (date, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute))
+  time_t t;
+  GooString dateString(date);
+  t = dateStringToTime(&dateString);
+  if (t == (time_t)-1)
     return FALSE;
-	
-  time.tm_year = year - 1900;
-  time.tm_mon = mon - 1;
-  time.tm_mday = day;
-  time.tm_hour = hour;
-  time.tm_min = min;
-  time.tm_sec = sec;
-  time.tm_wday = -1;
-  time.tm_yday = -1;
-  time.tm_isdst = -1; /* 0 = DST off, 1 = DST on, -1 = don't know */
- 
-  /* compute tm_wday and tm_yday and check date */
-  retval = mktime (&time);
-  if (retval == (time_t) - 1)
-    return FALSE;
-    
-  *timet = retval;
 
-  return TRUE;	
+  *timet = t;
+  return TRUE;
 }

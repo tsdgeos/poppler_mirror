@@ -1421,7 +1421,7 @@ void FormFieldSignature::parseInfo()
   sig_dict.dictLookup("M", &time_of_signing);
   if (time_of_signing.isString()) {
     GooString *time_str = time_of_signing.getString();
-    signature_info->setSigningTime(pdfTimeToInteger(time_str)); // Put this information directly in SignatureInfo object
+    signature_info->setSigningTime(dateStringToTime(time_str)); // Put this information directly in SignatureInfo object
     time_of_signing.free();
   }
 

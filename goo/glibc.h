@@ -27,6 +27,10 @@ struct tm *gmtime_r(const time_t *timep, struct tm *result);
 struct tm *localtime_r(const time_t *timep, struct tm *result);
 #endif
 
+#ifndef HAVE_TIMEGM
+time_t timegm(struct tm *tm);
+#endif
+
 };
 
 #endif // GLIBC_H
