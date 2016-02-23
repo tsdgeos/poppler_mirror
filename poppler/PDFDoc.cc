@@ -865,17 +865,7 @@ int PDFDoc::saveAs(GooString *name, PDFWriteMode mode) {
 }
 
 int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode) {
-
-  // find if we have updated objects
-  GBool updated = gFalse;
-  for(int i=0; i<xref->getNumObjects(); i++) {
-    if (xref->getEntry(i)->getFlag(XRefEntry::Updated)) {
-      updated = gTrue;
-      break;
-    }
-  }
-
-  if (!updated && mode == writeStandard) {
+  if (!xref->isModified() && mode == writeStandard) {
     // simply copy the original file
     saveWithoutChangesAs (outStr);
   } else if (mode == writeForceRewrite) {
