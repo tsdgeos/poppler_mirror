@@ -63,6 +63,7 @@
 static void printInfoString(Dict *infoDict, const char *key, const char *text,
 			    UnicodeMap *uMap);
 static void printInfoDate(Dict *infoDict, const char *key, const char *text);
+static void printISODate(Dict *infoDict, const char *key, const char *text);
 static void printBox(const char *text, PDFRectangle *box);
 static void printStruct(const StructElement *element, unsigned indent = 0);
 static void printIndent(unsigned level);
@@ -72,6 +73,7 @@ static int lastPage = 0;
 static GBool printBoxes = gFalse;
 static GBool printMetadata = gFalse;
 static GBool printJS = gFalse;
+static GBool isoDates = gFalse;
 static GBool rawDates = gFalse;
 static char textEncName[128] = "";
 static char ownerPassword[33] = "\001";
@@ -97,6 +99,8 @@ static const ArgDesc argDesc[] = {
    "print the logical document structure (for tagged files)"},
   {"-struct-text", argFlag, &printStructureText, 0,
    "print text contents along with document structure (for tagged files)"},
+  {"-isodates", argFlag,   &isoDates,         0,
+   "print the dates in ISO-8601 format"},
   {"-rawdates", argFlag,   &rawDates,         0,
    "print the undecoded date strings directly from the PDF file"},
   {"-enc",    argString,   textEncName,    sizeof(textEncName),
@@ -238,7 +242,10 @@ int main(int argc, char *argv[]) {
     printInfoString(info.getDict(), "Author",       "Author:         ", uMap);
     printInfoString(info.getDict(), "Creator",      "Creator:        ", uMap);
     printInfoString(info.getDict(), "Producer",     "Producer:       ", uMap);
-    if (rawDates) {
+    if (isoDates) {
+      printISODate(info.getDict(),   "CreationDate", "CreationDate:   ");
+      printISODate(info.getDict(),   "ModDate",      "ModDate:        ");
+    } else if (rawDates) {
       printInfoString(info.getDict(), "CreationDate", "CreationDate:   ",
 		      uMap);
       printInfoString(info.getDict(), "ModDate",      "ModDate:        ",
@@ -499,6 +506,33 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text) {
 	fputs(buf, stdout);
       } else {
 	fputs(s, stdout);
+      }
+    } else {
+      fputs(s, stdout);
+    }
+    fputc('\n', stdout);
+  }
+  obj.free();
+}
+
+void printISODate(Dict *infoDict, const char *key, const char *text)
+{
+  Object obj;
+  char *s;
+  int year, mon, day, hour, min, sec, tz_hour, tz_minute;
+  char tz;
+
+  if (infoDict->lookup(key, &obj)->isString()) {
+    fputs(text, stdout);
+    s = obj.getString()->getCString();
+    if ( parseDateString( s, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute ) ) {
+      fprintf(stdout, "%04d-%02d-%02dT%02d:%02d:%02d", year, mon, day, hour, min, sec);
+      if (tz_hour == 0 && tz_minute == 0) {
+	fprintf(stdout, "Z");
+      } else {
+	fprintf(stdout, "%c%02d", tz, tz_hour);
+	if (tz_minute)
+	  fprintf(stdout, ":%02d", tz_minute);
       }
     } else {
       fputs(s, stdout);
