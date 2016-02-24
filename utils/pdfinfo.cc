@@ -470,6 +470,7 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text) {
   int year, mon, day, hour, min, sec, tz_hour, tz_minute;
   char tz;
   struct tm tmStruct;
+  time_t time;
   char buf[256];
 
   if (infoDict->lookup(key, &obj)->isString()) {
@@ -487,8 +488,14 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text) {
       tmStruct.tm_yday = -1;
       tmStruct.tm_isdst = -1;
       // compute the tm_wday and tm_yday fields
-      if (mktime(&tmStruct) != (time_t)-1 &&
-	  strftime(buf, sizeof(buf), "%c", &tmStruct)) {
+      time = timegm(&tmStruct);
+      if (time != (time_t)-1) {
+	int offset = (tz_hour*60 + tz_minute)*60;
+	if (tz == '-')
+	  offset *= -1;
+	time -= offset;
+	localtime_r(&time, &tmStruct);
+	strftime(buf, sizeof(buf), "%c %Z", &tmStruct);
 	fputs(buf, stdout);
       } else {
 	fputs(s, stdout);
