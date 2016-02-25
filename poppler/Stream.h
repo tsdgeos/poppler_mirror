@@ -1198,6 +1198,44 @@ private:
 };
 
 //------------------------------------------------------------------------
+// LZWEncoder
+//------------------------------------------------------------------------
+
+struct LZWEncoderNode {
+  int byte;
+  LZWEncoderNode *next;		// next sibling
+  LZWEncoderNode *children;	// first child
+};
+
+class LZWEncoder: public FilterStream {
+public:
+
+  LZWEncoder(Stream *strA);
+  virtual ~LZWEncoder();
+  virtual StreamKind getKind() { return strWeird; }
+  virtual void reset();
+  virtual int getChar();
+  virtual int lookChar();
+  virtual GooString *getPSFilter(int psLevel, const char *indent)
+    { return NULL; }
+  virtual GBool isBinary(GBool last = gTrue) { return gTrue; }
+  virtual GBool isEncoder() { return gTrue; }
+
+private:
+
+  LZWEncoderNode table[4096];
+  int nextSeq;
+  int codeLen;
+  Guchar inBuf[4096];
+  int inBufLen;
+  int outBuf;
+  int outBufLen;
+  GBool needEOD;
+
+  void fillBuf();
+};
+
+//------------------------------------------------------------------------
 // CMYKGrayEncoder
 //------------------------------------------------------------------------
 

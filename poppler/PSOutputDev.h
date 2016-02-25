@@ -320,6 +320,7 @@ public:
   GBool getEmbedCIDTrueType() const { return embedCIDTrueType; }
   GBool getFontPassthrough() const { return fontPassthrough; }
   GBool getOptimizeColorSpace() const { return optimizeColorSpace; }
+  GBool getEnableLZW() const { return enableLZW; };
   void setEmbedType1(GBool b) { embedType1 = b; }
   void setEmbedTrueType(GBool b) { embedTrueType = b; }
   void setEmbedCIDPostScript(GBool b) { embedCIDPostScript = b; }
@@ -330,6 +331,7 @@ public:
   void setGenerateOPI(GBool b) { generateOPI = b; }
   void setUseASCIIHex(GBool b) { useASCIIHex = b; }
   void setUseBinary(GBool b) { useBinary = b; }
+  void setEnableLZW(GBool b) { enableLZW = b; }
 
 private:
 
@@ -532,6 +534,7 @@ private:
   GBool generateOPI;		// generate PostScript OPI comments?
   GBool useASCIIHex;		// use ASCIIHex instead of ASCII85?
   GBool useBinary;		// use binary instead of hex
+  GBool enableLZW;		// enable LZW compression
 
 #if OPI_SUPPORT
   int opi13Nest;		// nesting level of OPI 1.3 objects

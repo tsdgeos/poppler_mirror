@@ -5302,6 +5302,151 @@ GBool RunLengthEncoder::fillBuf() {
 }
 
 //------------------------------------------------------------------------
+// LZWEncoder
+//------------------------------------------------------------------------
+
+LZWEncoder::LZWEncoder(Stream *strA):
+  FilterStream(strA)
+{
+  inBufLen = 0;
+  outBufLen = 0;
+}
+
+LZWEncoder::~LZWEncoder() {
+  if (str->isEncoder()) {
+    delete str;
+  }
+}
+
+void LZWEncoder::reset() {
+  int i;
+
+  str->reset();
+
+  // initialize code table
+  for (i = 0; i < 256; ++i) {
+    table[i].byte = i;
+    table[i].next = NULL;
+    table[i].children = NULL;
+  }
+  nextSeq = 258;
+  codeLen = 9;
+
+  // initialize input buffer
+  inBufLen = str->doGetChars(sizeof(inBuf), inBuf);
+
+  // initialize output buffer with a clear-table code
+  outBuf = 256;
+  outBufLen = 9;
+  needEOD = gFalse;
+}
+
+int LZWEncoder::getChar() {
+  int ret;
+
+  if (inBufLen == 0 && !needEOD && outBufLen == 0) {
+    return EOF;
+  }
+  if (outBufLen < 8 && (inBufLen > 0 || needEOD)) {
+    fillBuf();
+  }
+  if (outBufLen >= 8) {
+    ret = (outBuf >> (outBufLen - 8)) & 0xff;
+    outBufLen -= 8;
+  } else {
+    ret = (outBuf << (8 - outBufLen)) & 0xff;
+    outBufLen = 0;
+  }
+  return ret;
+}
+
+int LZWEncoder::lookChar() {
+  if (inBufLen == 0 && !needEOD && outBufLen == 0) {
+    return EOF;
+  }
+  if (outBufLen < 8 && (inBufLen > 0 || needEOD)) {
+    fillBuf();
+  }
+  if (outBufLen >= 8) {
+    return (outBuf >> (outBufLen - 8)) & 0xff;
+  } else {
+    return (outBuf << (8 - outBufLen)) & 0xff;
+  }
+}
+
+// On input, outBufLen < 8.
+// This function generates, at most, 2 12-bit codes
+//   --> outBufLen < 8 + 12 + 12 = 32
+void LZWEncoder::fillBuf() {
+  LZWEncoderNode *p0, *p1;
+  int seqLen, code, i;
+
+  if (needEOD) {
+    outBuf = (outBuf << codeLen) | 257;
+    outBufLen += codeLen;
+    needEOD = gFalse;
+    return;
+  }
+
+  // find longest matching sequence (if any)
+  p0 = table + inBuf[0];
+  seqLen = 1;
+  while (inBufLen > seqLen) {
+    for (p1 = p0->children; p1; p1 = p1->next) {
+      if (p1->byte == inBuf[seqLen]) {
+	break;
+      }
+    }
+    if (!p1) {
+      break;
+    }
+    p0 = p1;
+    ++seqLen;
+  }
+  code = (int)(p0 - table);
+
+  // generate an output code
+  outBuf = (outBuf << codeLen) | code;
+  outBufLen += codeLen;
+
+  // update the table
+  table[nextSeq].byte = seqLen < inBufLen ? inBuf[seqLen] : 0;
+  table[nextSeq].children = NULL;
+  if (table[code].children) {
+    table[nextSeq].next = table[code].children;
+  } else {
+    table[nextSeq].next = NULL;
+  }
+  table[code].children = table + nextSeq;
+  ++nextSeq;
+
+  // update the input buffer
+  memmove(inBuf, inBuf + seqLen, inBufLen - seqLen);
+  inBufLen -= seqLen;
+  inBufLen += str->doGetChars(sizeof(inBuf) - inBufLen, inBuf + inBufLen);
+
+  // increment codeLen; generate clear-table code
+  if (nextSeq == (1 << codeLen)) {
+    ++codeLen;
+    if (codeLen == 13) {
+      outBuf = (outBuf << 12) | 256;
+      outBufLen += 12;
+      for (i = 0; i < 256; ++i) {
+	table[i].next = NULL;
+	table[i].children = NULL;
+      }
+      nextSeq = 258;
+      codeLen = 9;
+    }
+  }
+
+  // generate EOD next time
+  if (inBufLen == 0) {
+    needEOD = gTrue;
+  }
+}
+
+//------------------------------------------------------------------------
 // CMYKGrayEncoder
 //------------------------------------------------------------------------
 
