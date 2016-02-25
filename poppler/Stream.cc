@@ -70,7 +70,7 @@
 #include "DCTStream.h"
 #endif
 
-#ifdef ENABLE_ZLIB
+#ifdef ENABLE_ZLIB_UNCOMPRESS
 #include "FlateStream.h"
 #endif
 
@@ -3865,7 +3865,7 @@ GBool DCTStream::isBinary(GBool last) {
 
 #endif
 
-#ifndef ENABLE_ZLIB
+#ifndef ENABLE_ZLIB_UNCOMPRESS
 //------------------------------------------------------------------------
 // FlateStream
 //------------------------------------------------------------------------

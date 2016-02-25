@@ -23,7 +23,7 @@
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2011, 2012, 2014, 2015 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2012, 2014-2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009-2011, 2013-2015 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012, 2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -65,6 +65,12 @@
 #include "Catalog.h"
 #include "Page.h"
 #include "Stream.h"
+#if ENABLE_ZLIB
+#  include "FlateEncoder.h"
+#endif
+#if ENABLE_ZLIB_UNCOMPRESS
+#  include "FlateStream.h"
+#endif
 #include "Annot.h"
 #include "XRef.h"
 #include "PreScanOutputDev.h"
@@ -1244,6 +1250,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   useASCIIHex = gFalse;
   useBinary = gFalse;
   enableLZW = gTrue;
+  enableFlate = gTrue;
   rasterMono = gFalse;
   rasterResolution = 300;
   uncompressPreloadedImages = gFalse;
@@ -2954,7 +2961,7 @@ void PSOutputDev::setupImages(Dict *resDict) {
 }
 
 void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
-  GBool useLZW, useRLE, useCompressed, doUseASCIIHex;
+  GBool useFlate, useLZW, useRLE, useCompressed, doUseASCIIHex;
   GooString *s;
   int c;
   int size, line, col, i;
@@ -2963,29 +2970,29 @@ void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
   // filters
   //~ this does not correctly handle the DeviceN color space
   //~   -- need to use DeviceNRecoder
+
+  useFlate = useLZW = useRLE = gFalse;
+  useCompressed = gFalse;
+  doUseASCIIHex = gFalse;
+
   if (level < psLevel2) {
-    useLZW = useRLE = gFalse;
-    useCompressed = gFalse;
     doUseASCIIHex = gTrue;
   } else {
     if (uncompressPreloadedImages) {
-      useLZW = useRLE = gFalse;
-      useCompressed = gFalse;
+      /* nothing to do */;
     } else {
       s = str->getPSFilter(level < psLevel3 ? 2 : 3, "");
       if (s) {
-	useLZW = useRLE = gFalse;
 	useCompressed = gTrue;
 	delete s;
       } else {
-	if (getEnableLZW()) {
+	if (level >= psLevel3 && getEnableFlate()) {
+	  useFlate = gTrue;
+	} else if (getEnableLZW()) {
 	  useLZW = gTrue;
-	  useRLE = gFalse;
 	} else {
 	  useRLE = gTrue;
-	  useLZW = gFalse;
 	}
-	useCompressed = gFalse;
       }
     }
     doUseASCIIHex = useASCIIHex;
@@ -2993,6 +3000,11 @@ void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
   if (useCompressed) {
     str = str->getUndecodedStream();
   }
+#if ENABLE_ZLIB
+  if (useFlate) {
+    str = new FlateEncoder(str);
+  } else
+#endif
   if (useLZW) {
     str = new LZWEncoder(str);
   } else if (useRLE) {
@@ -3240,7 +3252,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   PreScanOutputDev *scan;
   GBool rasterize;
 #if HAVE_SPLASH
-  GBool useLZW;
+  GBool useFlate, useLZW;
   SplashOutputDev *splashOut;
   SplashColor paperColor;
   PDFRectangle box;
@@ -3280,6 +3292,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 
 #if HAVE_SPLASH
   // get the rasterization parameters
+  useFlate = getEnableFlate() && level >= psLevel3;
   useLZW = getEnableLZW();
   // start the PS page
   page->makeBox(rasterResolution, rasterResolution, rotateA, useMediaBox, gFalse,
@@ -3591,6 +3604,19 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
         isGray = gFalse;
       }
       str0->reset();
+#if ENABLE_ZLIB
+      if (useFlate) {
+        if (isGray && numComps == 4) {
+	  str = new FlateEncoder(new CMYKGrayEncoder(str0));
+	  numComps = 1;
+        } else if (isGray && numComps == 3) {
+	  str = new FlateEncoder(new RGBGrayEncoder(str0));
+	  numComps = 1;
+        } else {
+	  str = new FlateEncoder(str0);
+        }
+      } else
+#endif
       if (useLZW) {
         if (isGray && numComps == 4) {
 	  str = new LZWEncoder(new CMYKGrayEncoder(str0));
@@ -3639,7 +3665,9 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
       } else {
 	writePS("    /ASCII85Decode filter\n");
       }
-      if (useLZW) {
+      if (useFlate) {
+	writePS("    /FlateDecode filter\n");
+      } else if (useLZW) {
 	writePS("    /LZWDecode filter\n");
       } else {
 	writePS("    /RunLengthDecode filter\n");
@@ -6150,8 +6178,8 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
   Stream *str2;
   GooString *s;
   int n, numComps;
-  GBool useLZW, useRLE, useASCII, useCompressed;
-  GBool maskUseLZW, maskUseRLE, maskUseASCII, maskUseCompressed;
+  GBool useFlate, useLZW, useRLE, useASCII, useCompressed;
+  GBool maskUseFlate, maskUseLZW, maskUseRLE, maskUseASCII, maskUseCompressed;
   GooString *maskFilters;
   GfxSeparationColorSpace *sepCS;
   GfxColor color;
@@ -6159,8 +6187,8 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
   int c;
   int col, i;
 
-  useLZW = useRLE = useASCII = useCompressed = gFalse; // make gcc happy
-  maskUseLZW = maskUseRLE = maskUseASCII = maskUseCompressed = gFalse; // make gcc happy
+  useFlate = useLZW = useRLE = useASCII = useCompressed = gFalse;
+  maskUseFlate = maskUseLZW = maskUseRLE = maskUseASCII = maskUseCompressed = gFalse;
   maskFilters = NULL; // make gcc happy
 
   // explicit masking
@@ -6170,23 +6198,18 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
     if ((mode == psModeForm || inType3Char || preloadImagesForms) &&
       uncompressPreloadedImages) {
       s = NULL;
-      maskUseLZW = maskUseRLE = gFalse;
-      maskUseCompressed = gFalse;
-      maskUseASCII = gFalse;
     } else {
       s = maskStr->getPSFilter(3, "  ");
       if (!s) {
-	if (getEnableLZW()) {
+	if (getEnableFlate()) {
+	  maskUseFlate = gTrue;
+	} else if (getEnableLZW()) {
 	  maskUseLZW = gTrue;
-	  maskUseRLE = gFalse;
 	} else {
 	  maskUseRLE = gTrue;
-	  maskUseLZW = gFalse;
 	}
 	maskUseASCII = !(mode == psModeForm || inType3Char || preloadImagesForms);
-	maskUseCompressed = gFalse;
       } else {
-	maskUseLZW = maskUseRLE = gFalse;
 	maskUseASCII = maskStr->isBinary() &&
 	               !(mode == psModeForm || inType3Char || preloadImagesForms);
 	maskUseCompressed = gTrue;
@@ -6197,7 +6220,9 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
       maskFilters->appendf("  /ASCII{0:s}Decode filter\n",
 			   useASCIIHex ? "Hex" : "85");
     }
-    if (maskUseLZW) {
+    if (maskUseFlate) {
+      maskFilters->append("  /FlateDecode filter\n");
+    } else if (maskUseLZW) {
       maskFilters->append("  /LZWDecode filter\n");
     } else if (maskUseRLE) {
       maskFilters->append("  /RunLengthDecode filter\n");
@@ -6216,10 +6241,15 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
       writePS(maskFilters->getCString());
       writePS("pdfMask\n");
 
-      // add LZWEncode/RunLengthEncode and ASCIIHex/85 encode filters
+      // add FlateEncode/LZWEncode/RunLengthEncode and ASCIIHex/85 encode filters
       if (maskUseCompressed) {
 	maskStr = maskStr->getUndecodedStream();
       }
+#if ENABLE_ZLIB
+      if (maskUseFlate) {
+	maskStr = new FlateEncoder(maskStr);
+      } else
+#endif
       if (maskUseLZW) {
 	maskStr = new LZWEncoder(maskStr);
       } else if (maskUseRLE) {
@@ -6243,7 +6273,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
       writePS("%-EOD-\n");
       
       // delete encoders
-      if (maskUseLZW || maskUseRLE || maskUseASCII) {
+      if (maskUseFlate || maskUseLZW || maskUseRLE || maskUseASCII) {
 	delete maskStr;
       }
     }
@@ -6260,6 +6290,11 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
     if (inlineImg) {
       // create an array
       str2 = new FixedLengthEncoder(str, len);
+#if ENABLE_ZLIB
+      if (getEnableFlate()) {
+	str2 = new FlateEncoder(str2);
+      } else
+#endif
       if (getEnableLZW()) {
 	str2 = new LZWEncoder(str2);
       } else {
@@ -6307,7 +6342,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
 	}
       } while (c != (useASCIIHex ? '>' : '~') && c != EOF);
       writePS((char *)(useASCIIHex ? ">\n" : "~>\n"));
-      // add an extra entry because the LZWDecode/RunLengthDecode filter may
+      // add an extra entry because the FlateEncode/LZWDecode/RunLengthDecode filter may
       // read past the end
       writePS("<>]\n");
       writePS("0\n");
@@ -6390,28 +6425,28 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
   }
 
   // filters
+
+  useFlate = useLZW = useRLE = gFalse;
+  useCompressed = gFalse;
+  useASCII = gFalse;
+
   if ((mode == psModeForm || inType3Char || preloadImagesForms) &&
       uncompressPreloadedImages) {
     s = NULL;
-    useLZW = useRLE = gFalse;
-    useCompressed = gFalse;
-    useASCII = gFalse;
   } else {
     s = str->getPSFilter(level < psLevel2 ? 1 : level < psLevel3 ? 2 : 3,
 			 "    ");
     if ((colorMap && colorMap->getColorSpace()->getMode() == csDeviceN) ||
 	inlineImg || !s) {
-      if (getEnableLZW()) {
+      if (getEnableFlate()) {
+	useFlate = gTrue;
+      } else if (getEnableLZW()) {
 	useLZW = gTrue;
-	useRLE = gFalse;
       } else {
 	useRLE = gTrue;
-	useLZW = gFalse;
       }
       useASCII = !(mode == psModeForm || inType3Char || preloadImagesForms);
-      useCompressed = gFalse;
     } else {
-      useLZW = useRLE = gFalse;
       useASCII = str->isBinary() &&
                  !(mode == psModeForm || inType3Char || preloadImagesForms);
       useCompressed = gTrue;
@@ -6421,7 +6456,9 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
     writePSFmt("    /ASCII{0:s}Decode filter\n",
 	       useASCIIHex ? "Hex" : "85");
   }
-  if (useLZW) {
+  if (useFlate) {
+    writePS("    /FlateDecode filter\n");
+  } else if (useLZW) {
     writePS("    /LZWDecode filter\n");
   } else if (useRLE) {
     writePS("    /RunLengthDecode filter\n");
@@ -6499,7 +6536,12 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
       str = str->getUndecodedStream();
     }
 
-    // add LZWEncode/RunLengthEncode and ASCIIHex/85 encode filters
+    // add FlateEncode/LZWEncode/RunLengthEncode and ASCIIHex/85 encode filters
+#if ENABLE_ZLIB
+    if (useFlate) {
+      str = new FlateEncoder(str);
+    } else
+#endif
     if (useLZW) {
       str = new LZWEncoder(str);
     } else if (useRLE) {
@@ -6525,7 +6567,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
     writePS("%-EOD-\n");
 
     // delete encoders
-    if (useLZW || useRLE || useASCII || inlineImg) {
+    if (useFlate || useLZW || useRLE || useASCII || inlineImg) {
       delete str;
     }
   }

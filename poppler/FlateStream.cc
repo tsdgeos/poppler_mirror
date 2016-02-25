@@ -8,7 +8,19 @@
 // This file is under the GPLv2 or later license
 //
 //========================================================================
+
+#include <config.h>
+
+#ifdef USE_GCC_PRAGMAS
+#pragma implementation
+#endif
+
+#include "poppler-config.h"
+
+#if ENABLE_ZLIB_UNCOMPRESS
+
 #include "FlateStream.h"
+
 FlateStream::FlateStream(Stream *strA, int predictor, int columns, int colors, int bits) :
   FilterStream(strA)
 {
@@ -126,3 +138,5 @@ GooString *FlateStream::getPSFilter(int psLevel, const char *indent) {
 GBool FlateStream::isBinary(GBool last) {
   return str->isBinary(gTrue);
 }
+
+#endif

@@ -82,11 +82,19 @@ endif
 if BUILD_ZLIB
 
 zlib_sources =					\
-	FlateStream.h				\
-	FlateStream.cc
+	FlateEncoder.h				\
+	FlateEncoder.cc
 
 zlib_libs = 					\
 	$(ZLIB_LIBS)
+
+endif
+
+if BUILD_ZLIB_UNCOMPRESS
+
+zlib_uncompress_sources =			\
+	FlateStream.h				\
+	FlateStream.cc
 
 endif
 
@@ -200,6 +208,7 @@ libpoppler_la_SOURCES =		\
 	$(splash_sources)	\
 	$(libjpeg_sources)	\
 	$(zlib_sources)		\
+	$(zlib_uncompress_sources) \
 	$(libjpeg2000_sources)	\
 	$(curl_sources)		\
 	Annot.cc		\
