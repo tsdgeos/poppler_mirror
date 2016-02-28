@@ -278,6 +278,9 @@ void CairoOutputDev::saveState(GfxState *state) {
   ms->mask_matrix = mask_matrix;
   ms->next = maskStack;
   maskStack = ms;
+
+  if (strokePathClip)
+    strokePathClip->ref_count++;
 }
 
 void CairoOutputDev::restoreState(GfxState *state) {
@@ -304,6 +307,14 @@ void CairoOutputDev::restoreState(GfxState *state) {
     mask_matrix = ms->mask_matrix;
     maskStack = ms->next;
     delete ms;
+  }
+
+  if (strokePathClip && --strokePathClip->ref_count == 0) {
+    delete strokePathClip->path;
+    if (strokePathClip->dashes)
+      gfree (strokePathClip->dashes);
+    gfree (strokePathClip);
+    strokePathClip = NULL;
   }
 }
 
@@ -780,7 +791,14 @@ void CairoOutputDev::stroke(GfxState *state) {
   align_stroke_coords = gFalse;
   cairo_set_source (cairo, stroke_pattern);
   LOG(printf ("stroke\n"));
-  cairo_stroke (cairo);
+  if (strokePathClip) {
+    cairo_push_group (cairo);
+    cairo_stroke (cairo);
+    cairo_pop_group_to_source (cairo);
+    fillToStrokePathClip (state);
+  } else {
+    cairo_stroke (cairo);
+  }
   if (cairo_shape) {
     doPath (cairo_shape, state, state->getPath());
     cairo_stroke (cairo_shape);
@@ -803,6 +821,11 @@ void CairoOutputDev::fill(GfxState *state) {
   if (mask) {
     cairo_save (cairo);
     cairo_clip (cairo);
+    if (strokePathClip) {
+      cairo_push_group (cairo);
+      fillToStrokePathClip (state);
+      cairo_pop_group_to_source (cairo);
+    }
     cairo_set_matrix (cairo, &mask_matrix);
     cairo_mask (cairo, mask);
     cairo_restore (cairo);
@@ -1296,6 +1319,7 @@ void CairoOutputDev::clipToStrokePath(GfxState *state) {
   strokePathClip->cap = cairo_get_line_cap (cairo);
   strokePathClip->join = cairo_get_line_join (cairo);
   strokePathClip->miter = cairo_get_miter_limit (cairo);
+  strokePathClip->ref_count = 1;
 }
 
 void CairoOutputDev::fillToStrokePathClip(GfxState *state) {
@@ -1303,7 +1327,6 @@ void CairoOutputDev::fillToStrokePathClip(GfxState *state) {
 
   cairo_set_matrix (cairo, &strokePathClip->ctm);
   cairo_set_line_width (cairo, strokePathClip->line_width);
-  strokePathClip->dash_count = cairo_get_dash_count (cairo);
   cairo_set_dash (cairo, strokePathClip->dashes, strokePathClip->dash_count, strokePathClip->dash_offset);
   cairo_set_line_cap (cairo, strokePathClip->cap);
   cairo_set_line_join (cairo, strokePathClip->join);
@@ -1312,12 +1335,6 @@ void CairoOutputDev::fillToStrokePathClip(GfxState *state) {
   cairo_stroke (cairo);
 
   cairo_restore (cairo);
-
-  delete strokePathClip->path;
-  if (strokePathClip->dashes)
-    gfree (strokePathClip->dashes);
-  gfree (strokePathClip);
-  strokePathClip = NULL;
 }
 
 void CairoOutputDev::beginString(GfxState *state, GooString *s)
@@ -2425,6 +2442,11 @@ void CairoOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream
 
     cairo_rectangle (cairo, 0., 0., scaledWidth, scaledHeight);
     cairo_clip (cairo);
+    if (strokePathClip) {
+      cairo_push_group (cairo);
+      fillToStrokePathClip (state);
+      cairo_pop_group_to_source (cairo);
+    }
     cairo_mask (cairo, pattern);
 
     //cairo_get_matrix(cairo, &matrix);

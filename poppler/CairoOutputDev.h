@@ -308,6 +308,7 @@ protected:
     cairo_line_cap_t cap;
     cairo_line_join_t join;
     double miter;
+    int ref_count;
   } *strokePathClip;
 
   PDFDoc *doc;			// the current document
