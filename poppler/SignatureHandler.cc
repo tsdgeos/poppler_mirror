@@ -15,6 +15,7 @@
 
 #include "SignatureHandler.h"
 #include "goo/gmem.h"
+#include <nss/secmod.h>
 
 #include <dirent.h>
 #include <Error.h>
@@ -95,6 +96,8 @@ void SignatureHandler::init_nss()
   } else {
     NSS_Init(certDBPath->getCString());
   }
+  //Make sure NSS root certificates module is loaded
+  SECMOD_AddNewModule("Root Certs", "libnssckbi.so", 0, 0);
 
   delete certDBPath;
 }
