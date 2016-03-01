@@ -25,6 +25,10 @@ bin_PROGRAMS =					\
 	pdfseparate				\
 	pdfunite
 
+if BUILD_NSS
+bin_PROGRAMS += pdfsig
+endif
+
 if BUILD_SPLASH_OUTPUT
 bin_PROGRAMS += pdftoppm
 endif
@@ -59,6 +63,9 @@ pdfdetach_SOURCES =				\
 
 pdffonts_SOURCES =				\
 	pdffonts.cc
+
+pdfsig_SOURCES =				\
+	pdfsig.cc
 
 pdfimages_SOURCES =				\
 	pdfimages.cc				\

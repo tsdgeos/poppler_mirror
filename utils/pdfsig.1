@@ -1,0 +1,47 @@
+.\" Copyright 2011 The Poppler Developers - http://poppler.freedesktop.org
+.TH pdfsig 1 "28 October 2015"
+.SH NAME
+pdfsig \- Portable Document Format (PDF) digital signatures tool
+.SH SYNOPSIS
+.B pdfsig
+[options]
+.RI [ PDF-file ]
+.SH DESCRIPTION
+.B pdfsig
+verifies the digital signatures in a PDF document.
+It also displays the identity of each signer (commonName field of the signer certificate) and the time and date of the signature.
+.PP
+The signer certificate validation uses the trusted certificates stored in the following locations:
+.IP \(bu
+The NSS Certificate database in the default Firefox profile.
+.IP \(bu
+The NSS Certificate database in /etc/pki/nssdb.
+.SH OPTIONS
+.TP
+.B \-nocert
+Do not validate the certificate.
+.TP
+.B \-v
+Print copyright and version information.
+.TP
+.B \-h
+Print usage information.
+.RB ( \-help
+and
+.B \-\-help
+are equivalent.)
+.SH AUTHOR
+The pdfsig software and documentation are copyright 1996-2004 Glyph & Cog, LLC
+and copyright 2005-2015 The Poppler Developers - http://poppler.freedesktop.org
+.SH "SEE ALSO"
+.BR pdfdetach (1),
+.BR pdffonts (1),
+.BR pdfimages (1),
+.BR pdfinfo (1),
+.BR pdftocairo (1),
+.BR pdftohtml (1),
+.BR pdftoppm (1),
+.BR pdftops (1),
+.BR pdftotext (1)
+.BR pdfseparate (1),
+.BR pdfunite (1)

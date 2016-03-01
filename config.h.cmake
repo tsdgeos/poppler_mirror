@@ -24,6 +24,9 @@
 /* Use zlib instead of builtin zlib decoder to uncompress flate streams. */
 #cmakedefine ENABLE_ZLIB_UNCOMPRESS 1
 
+/* Build against libnss3 for digital signature validation */
+#cmakedefine ENABLE_NSS3 1
+
 /* Use cairo for rendering. */
 #cmakedefine HAVE_CAIRO 1
 
