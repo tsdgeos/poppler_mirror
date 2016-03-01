@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2006-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright 2007-2012, 2015 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2012, 2015, 2016 Albert Astals Cid <aacid@kde.org>
 // Copyright 2007-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2007, 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2007 Iñigo Martínez <inigomartinez@gmail.com>
@@ -1437,6 +1437,7 @@ void FormFieldSignature::parseInfo()
 
 void FormFieldSignature::hashSignedDataBlock(SignatureHandler *handler, Goffset block_len)
 {
+#ifdef ENABLE_NSS3
   const int BLOCK_SIZE = 4096;
   unsigned char signed_data_buffer[BLOCK_SIZE];
 
@@ -1457,7 +1458,7 @@ void FormFieldSignature::hashSignedDataBlock(SignatureHandler *handler, Goffset 
       i += BLOCK_SIZE;
     }
   }
-
+#endif
 }
 
 
