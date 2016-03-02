@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
-// Copyright (C) 2005-2013, 2015 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015, 2016 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -4570,7 +4570,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
       }
       // handle the Matte entry
       maskDict->lookup("Matte", &obj1);
-      if (obj1.isArray()) { // && maskStr->getKind() != strDCT) {
+      if (obj1.isArray()) {
         if (obj1.getArray()->getLength() != colorSpace->getNComps()) {
           error(errSyntaxError, -1, "Matte entry should have {0:d} components but has {1:d}",
             colorSpace->getNComps(), obj1.getArray()->getLength());
@@ -4595,6 +4595,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
           }
         }
       }
+      obj1.free();
       haveSoftMask = gTrue;
     } else if (maskObj.isArray()) {
       // color key mask
