@@ -1760,6 +1760,51 @@ SplashPattern *SplashOutputDev::getColor(GfxColor *deviceN) {
 }
 #endif
 
+void SplashOutputDev::getMatteColor(SplashColorMode colorMode, GfxImageColorMap *colorMap, GfxColor *matteColorIn, SplashColor matteColor) {
+  GfxGray gray;
+  GfxRGB rgb;
+#if SPLASH_CMYK
+  GfxCMYK cmyk;
+  GfxColor deviceN;
+#endif
+
+  switch (colorMode) {
+    case splashModeMono1:
+    case splashModeMono8:
+      colorMap->getColorSpace()->getGray(matteColorIn, &gray);
+      matteColor[0] = colToByte(gray);
+      break;
+    case splashModeRGB8:
+    case splashModeBGR8:
+      colorMap->getColorSpace()->getRGB(matteColorIn, &rgb);
+      matteColor[0] = colToByte(rgb.r);
+      matteColor[1] = colToByte(rgb.g);
+      matteColor[2] = colToByte(rgb.b);
+      break;
+    case splashModeXBGR8:
+      colorMap->getColorSpace()->getRGB(matteColorIn, &rgb);
+      matteColor[0] = colToByte(rgb.r);
+      matteColor[1] = colToByte(rgb.g);
+      matteColor[2] = colToByte(rgb.b);
+      matteColor[3] = 255;
+      break;
+#if SPLASH_CMYK
+    case splashModeCMYK8:
+      colorMap->getColorSpace()->getCMYK(matteColorIn, &cmyk);
+      matteColor[0] = colToByte(cmyk.c);
+      matteColor[1] = colToByte(cmyk.m);
+      matteColor[2] = colToByte(cmyk.y);
+      matteColor[3] = colToByte(cmyk.k);
+      break;
+    case splashModeDeviceN8:
+      colorMap->getColorSpace()->getDeviceN(matteColorIn, &deviceN);
+      for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
+        matteColor[cp] = colToByte(deviceN.c[cp]);
+      break;
+#endif
+  }
+}
+
 void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace,
 				       GBool overprintFlag,
 				       int overprintMode,
@@ -2899,6 +2944,9 @@ struct SplashOutImageData {
   int *maskColors;
   SplashColorMode colorMode;
   int width, height, y;
+  ImageStream *maskStr;
+  GfxImageColorMap *maskColorMap;
+  SplashColor matteColor;
 };
 
 #ifdef USE_CMS
@@ -2931,6 +2979,11 @@ GBool SplashOutputDev::useIccImageSrc(void *data) {
   return gFalse;
 }
 #endif
+
+// Clip x to lie in [0, 255].
+static inline Guchar clip255(int x) {
+  return x < 0 ? 0 : x > 255 ? 255 : x;
+}
 
 GBool SplashOutputDev::imageSrc(void *data, SplashColorPtr colorLine,
 				Guchar * /*alphaLine*/) {
@@ -3075,6 +3128,16 @@ GBool SplashOutputDev::imageSrc(void *data, SplashColorPtr colorLine,
     }
   }
 
+  if (imgData->maskStr != NULL && (p = imgData->maskStr->getLine()) != NULL) {
+    int destComps = splashColorModeNComps[imgData->colorMode];
+    int convComps = (imgData->colorMode == splashModeXBGR8) ? 3 : destComps;
+    imgData->maskColorMap->getGrayLine(p, p, imgData->width);
+    for (x = 0, q = colorLine; x < imgData->width; ++x, p++, q += destComps) {
+      for (int cp = 0; cp < convComps; cp++) {
+        q[cp] = (*p) ? clip255(imgData->matteColor[cp] + (int) (q[cp] - imgData->matteColor[cp]) * 255 / *p) : imgData->matteColor[cp];
+      }
+    }
+  }
   ++imgData->y;
   return gTrue;
 }
@@ -3415,6 +3478,8 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   imgData.colorMode = colorMode;
   imgData.width = width;
   imgData.height = height;
+  imgData.maskStr = NULL;
+  imgData.maskColorMap = NULL;
   imgData.y = 0;
 
   // special case for one-channel (monochrome/gray/separation) images:
@@ -3879,6 +3944,8 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
   imgMaskData.width = maskWidth;
   imgMaskData.height = maskHeight;
   imgMaskData.y = 0;
+  imgMaskData.maskStr = NULL;
+  imgMaskData.maskColorMap = NULL;
   n = 1 << maskColorMap->getBits();
   imgMaskData.lookup = (SplashColorPtr)gmalloc(n);
   for (i = 0; i < n; ++i) {
@@ -3894,7 +3961,6 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
   maskSplash->drawImage(&imageSrc, NULL, &imgMaskData, splashModeMono8, gFalse,
 			maskWidth, maskHeight, mat, maskInterpolate);
   delete imgMaskData.imgStr;
-  maskStr->close();
   gfree(imgMaskData.lookup);
   delete maskSplash;
   splash->setSoftMask(maskBitmap);
@@ -3910,6 +3976,16 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
   imgData.colorMode = colorMode;
   imgData.width = width;
   imgData.height = height;
+  imgData.maskStr = NULL;
+  imgData.maskColorMap = NULL;
+  if (maskColorMap->getMatteColor() != NULL) {
+    getMatteColor(colorMode, colorMap, maskColorMap->getMatteColor(), imgData.matteColor);
+    imgData.maskColorMap = maskColorMap;
+    imgData.maskStr = new ImageStream(maskStr, maskWidth,
+				       maskColorMap->getNumPixelComps(),
+				       maskColorMap->getBits());
+    imgData.maskStr->reset();
+  }
   imgData.y = 0;
 
   // special case for one-channel (monochrome/gray/separation) images:
@@ -3982,7 +4058,9 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
   splash->drawImage(&imageSrc, NULL, &imgData, srcMode, gFalse, width, height, mat, interpolate);
   splash->setSoftMask(NULL);
   gfree(imgData.lookup);
+  delete imgData.maskStr;
   delete imgData.imgStr;
+  maskStr->close();
   str->close();
 }
 

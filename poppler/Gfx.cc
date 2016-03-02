@@ -28,7 +28,7 @@
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2008 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009 M Joonas Pihlaja <jpihlaja@cc.helsinki.fi>
-// Copyright (C) 2009-2015 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2009-2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009, 2010 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2010 Nils Höglund <nils.hoglund@gmail.com>
@@ -4568,7 +4568,33 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
 	delete maskColorMap;
 	goto err1;
       }
-      //~ handle the Matte entry
+      // handle the Matte entry
+      maskDict->lookup("Matte", &obj1);
+      if (obj1.isArray()) { // && maskStr->getKind() != strDCT) {
+        if (obj1.getArray()->getLength() != colorSpace->getNComps()) {
+          error(errSyntaxError, -1, "Matte entry should have {0:d} components but has {1:d}",
+            colorSpace->getNComps(), obj1.getArray()->getLength());
+        } else if (maskWidth != width || maskHeight != height) {
+          error(errSyntaxError, -1, "Softmask with matte entry {0:d} x {1:d} must have same geometry as the image {2:d} x {3:d}",
+            maskWidth, maskHeight, width, height);
+        } else {
+          GfxColor matteColor;
+          for (i = 0; i < colorSpace->getNComps(); i++) {
+            obj1.getArray()->get(i, &obj2);
+            if (!obj2.isNum()) {
+              obj2.free();
+              error(errSyntaxError, -1, "Matte entry {0:d} should be a number but it's of type {1:d}", i, obj2.getType());
+
+              break;
+            }
+            matteColor.c[i] = dblToCol(obj2.getNum());
+            obj2.free();
+          }
+          if (i == colorSpace->getNComps()) {
+            maskColorMap->setMatteColor(&matteColor);
+          }
+        }
+      }
       haveSoftMask = gTrue;
     } else if (maskObj.isArray()) {
       // color key mask
