@@ -15,7 +15,7 @@
 
 #include "SignatureHandler.h"
 #include "goo/gmem.h"
-#include <nss/secmod.h>
+#include <secmod.h>
 
 #include <dirent.h>
 #include <Error.h>

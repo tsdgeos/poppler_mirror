@@ -17,21 +17,17 @@
 #include "SignatureInfo.h"
 
 /* NSPR Headers */
-#include <nspr/prprf.h>
-#include <nspr/prtypes.h>
-#include <nspr/plgetopt.h>
-#include <nspr/prio.h>
-#include <nspr/prerror.h>
+#include <nspr.h>
 
 /* NSS headers */
-#include <nss/cms.h>
-#include <nss/nss.h>
-#include <nss/cert.h>
-#include <nss/cryptohi.h>
-#include <nss/secerr.h>
-#include <nss/secoid.h>
-#include <nss/secmodt.h>
-#include <nss/sechash.h>
+#include <cms.h>
+#include <nss.h>
+#include <cert.h>
+#include <cryptohi.h>
+#include <secerr.h>
+#include <secoid.h>
+#include <secmodt.h>
+#include <sechash.h>
 
 class SignatureHandler
 {
