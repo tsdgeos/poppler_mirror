@@ -290,20 +290,22 @@ class LinkMoviePrivate : public LinkPrivate
 		
 		int leftAux = 0, topAux = 0, rightAux = 0, bottomAux = 0;
 		
-		::Page *page;
-		if (d->pageNum > 0 &&
-		    d->pageNum <= data.doc->doc->getNumPages() &&
-		    (page = data.doc->doc->getPage( d->pageNum )))
-		{
-			cvtUserToDev( page, left, top, &leftAux, &topAux );
-			cvtUserToDev( page, right, bottom, &rightAux, &bottomAux );
-			
-			d->left = leftAux / (double)page->getCropWidth();
-			d->top = topAux / (double)page->getCropHeight();
-			d->right = rightAux/ (double)page->getCropWidth();
-			d->bottom = bottomAux / (double)page->getCropHeight();
+		if (!data.externalDest) {
+			::Page *page;
+			if (d->pageNum > 0 &&
+				d->pageNum <= data.doc->doc->getNumPages() &&
+				(page = data.doc->doc->getPage( d->pageNum )))
+			{
+				cvtUserToDev( page, left, top, &leftAux, &topAux );
+				cvtUserToDev( page, right, bottom, &rightAux, &bottomAux );
+
+				d->left = leftAux / (double)page->getCropWidth();
+				d->top = topAux / (double)page->getCropHeight();
+				d->right = rightAux/ (double)page->getCropWidth();
+				d->bottom = bottomAux / (double)page->getCropHeight();
+			}
+			else d->pageNum = 0;
 		}
-		else d->pageNum = 0;
 		
 		if (deleteDest) delete ld;
 	}
