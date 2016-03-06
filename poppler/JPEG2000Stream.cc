@@ -6,7 +6,7 @@
 //
 // Copyright 2008-2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright 2011 Daniel Glöckner <daniel-gl@gmx.net>
-// Copyright 2014 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright 2014, 2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2015 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2015 Jakub Wilk <jwilk@jwilk.net>
@@ -188,6 +188,7 @@ void JPXStream::init()
       }
       unsigned char *cdata = (unsigned char *)priv->image->comps[component].data;
       int adjust = 0;
+      int depth = priv->image->comps[component].prec;
       if (priv->image->comps[component].prec > 8)
 	adjust = priv->image->comps[component].prec - 8;
       int sgndcorr = 0;
@@ -201,6 +202,8 @@ void JPXStream::init()
 	  if (unlikely(r > 255))
 	    r = 255;
         }
+        if (depth < 8)
+          r = r << (8 - depth);
 	*(cdata++) = r;
       }
     }
@@ -335,6 +338,7 @@ void JPXStream::init()
       }
       unsigned char *cdata = (unsigned char *)priv->image->comps[component].data;
       int adjust = 0;
+      int depth = priv->image->comps[component].prec;
       if (priv->image->comps[component].prec > 8)
 	adjust = priv->image->comps[component].prec - 8;
       int sgndcorr = 0;
@@ -348,6 +352,8 @@ void JPXStream::init()
 	  if (unlikely(r > 255))
 	    r = 255;
         }
+        if (depth < 8)
+          r = r << (8 - depth);
 	*(cdata++) = r;
       }
     }
