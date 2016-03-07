@@ -41,6 +41,7 @@ struct JPXStreamPrivate {
   int ccounter;
   int npixels;
   int ncomps;
+  GBool indexed;
   GBool inited;
 #ifdef USE_OPENJPEG1
   opj_dinfo_t *dinfo;
@@ -50,6 +51,20 @@ struct JPXStreamPrivate {
   void init2(OPJ_CODEC_FORMAT format, unsigned char *data, int length);
 #endif
 };
+
+static inline Guchar adjustComp(int r, int adjust, int depth, int sgndcorr, GBool indexed) {
+  if (!indexed) {
+    r += sgndcorr;
+    if (adjust) {
+      r = (r >> adjust)+((r >> (adjust-1))%2);
+    } else if (depth < 8) {
+      r = r << (8 - depth);
+    }
+  }
+  if (unlikely(r > 255))
+    r = 255;
+  return r;  
+}
 
 static inline int doLookChar(JPXStreamPrivate* priv) {
   if (unlikely(priv->counter >= priv->npixels))
@@ -73,6 +88,7 @@ JPXStream::JPXStream(Stream *strA) : FilterStream(strA) {
   priv->image = NULL;
   priv->npixels = 0;
   priv->ncomps = 0;
+  priv->indexed = gFalse;
 #ifdef USE_OPENJPEG1
   priv->dinfo = NULL;
 #endif
@@ -166,12 +182,21 @@ static void libopenjpeg_warning_callback(const char *msg, void * /*client_data*/
 
 void JPXStream::init()
 {
-  Object oLen;
+  Object oLen, cspace;
   if (getDict()) getDict()->lookup("Length", &oLen);
+  if (getDict()) getDict()->lookup("ColorSpace", &cspace);
 
   int bufSize = BUFFER_INITIAL_SIZE;
   if (oLen.isInt()) bufSize = oLen.getInt();
   oLen.free();
+
+  if (cspace.isArray() && cspace.arrayGetLength() > 0) {
+    Object cstype;
+    cspace.arrayGet(0, &cstype);
+    if (cstype.isName("Indexed")) priv->indexed = gTrue;
+    cstype.free();
+  }
+  cspace.free();
 
   int length = 0;
   unsigned char *buf = str->toUnsignedChars(&length, bufSize);
@@ -196,15 +221,7 @@ void JPXStream::init()
 	sgndcorr = 1 << (priv->image->comps[0].prec - 1);
       for (int i = 0; i < priv->npixels; i++) {
 	int r = priv->image->comps[component].data[i];
-	r += sgndcorr;
-	if (adjust) {
-	  r = (r >> adjust)+((r >> (adjust-1))%2);
-	  if (unlikely(r > 255))
-	    r = 255;
-        }
-        if (depth < 8)
-          r = r << (8 - depth);
-	*(cdata++) = r;
+	*(cdata++) = adjustComp(r, adjust, depth, sgndcorr, priv->indexed);
       }
     }
   } else
@@ -316,12 +333,21 @@ static OPJ_BOOL jpxSeek_callback(OPJ_OFF_T seek_pos, void * p_user_data)
 
 void JPXStream::init()
 {
-  Object oLen;
+  Object oLen, cspace;
   if (getDict()) getDict()->lookup("Length", &oLen);
+  if (getDict()) getDict()->lookup("ColorSpace", &cspace);
 
   int bufSize = BUFFER_INITIAL_SIZE;
   if (oLen.isInt()) bufSize = oLen.getInt();
   oLen.free();
+
+  if (cspace.isArray() && cspace.arrayGetLength() > 0) {
+    Object cstype;
+    cspace.arrayGet(0, &cstype);
+    if (cstype.isName("Indexed")) priv->indexed = gTrue;
+    cstype.free();
+  }
+  cspace.free();
 
   int length = 0;
   unsigned char *buf = str->toUnsignedChars(&length, bufSize);
@@ -346,15 +372,7 @@ void JPXStream::init()
 	sgndcorr = 1 << (priv->image->comps[0].prec - 1);
       for (int i = 0; i < priv->npixels; i++) {
 	int r = priv->image->comps[component].data[i];
-	r += sgndcorr;
-	if (adjust) {
-	  r = (r >> adjust)+((r >> (adjust-1))%2);
-	  if (unlikely(r > 255))
-	    r = 255;
-        }
-        if (depth < 8)
-          r = r << (8 - depth);
-	*(cdata++) = r;
+	*(cdata++) = adjustComp(r, adjust, depth, sgndcorr, priv->indexed);
       }
     }
   } else {
