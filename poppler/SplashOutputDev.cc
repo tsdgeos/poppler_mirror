@@ -2396,6 +2396,9 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y,
   doClip = render & 4;
 
   path = NULL;
+  SplashCoord lineWidth = splash->getLineWidth();
+  if (doStroke && lineWidth == 0.0)
+    splash->setLineWidth(1 / state->getVDPI());
   if (doStroke || doClip) {
     if ((path = font->getGlyphPath(code))) {
       path->offset((SplashCoord)x, (SplashCoord)y);
@@ -2440,6 +2443,7 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y,
       splash->stroke(path);
     }
   }
+  splash->setLineWidth(lineWidth);
 
   // clip
   if (doClip) {
