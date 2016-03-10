@@ -240,6 +240,56 @@ void SplashGouraudPattern::getParameterizedColor(double colorinterp, SplashColor
 }
 
 //------------------------------------------------------------------------
+// SplashFunctionPattern
+//------------------------------------------------------------------------
+
+SplashFunctionPattern::SplashFunctionPattern(SplashColorMode colorModeA, GfxState *stateA, GfxFunctionShading *shadingA)
+{
+  Matrix ctm;
+  SplashColor defaultColor;
+  GfxColor srcColor;
+  double *matrix = shadingA->getMatrix();
+
+  shading = shadingA;
+  state = stateA;
+  colorMode = colorModeA;
+
+  state->getCTM(&ctm);
+
+  double a1 = ctm.m[0];
+  double b1 = ctm.m[1];
+  double c1 = ctm.m[2];
+  double d1 = ctm.m[3];
+
+  ctm.m[0] = matrix[0] * a1 + matrix[1] * c1;
+  ctm.m[1] = matrix[0] * b1 + matrix[1] * d1;
+  ctm.m[2] = matrix[2] * a1 + matrix[3] * c1;
+  ctm.m[3] = matrix[2] * b1 + matrix[3] * d1;
+  ctm.m[4] = matrix[4] * a1 + matrix[5] * c1 + ctm.m[4];
+  ctm.m[5] = matrix[4] * b1 + matrix[5] * d1 + ctm.m[5];
+  ctm.invertTo(&ictm);
+
+  gfxMode = shadingA->getColorSpace()->getMode();
+  shadingA->getColorSpace()->getDefaultColor(&srcColor);
+  shadingA->getDomain(&xMin, &yMin, &xMax, &yMax);
+  convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), &srcColor);
+}
+
+SplashFunctionPattern::~SplashFunctionPattern() {
+}
+
+GBool SplashFunctionPattern::getColor(int x, int y, SplashColorPtr c) {
+  GfxColor gfxColor;
+  double xc, yc;
+
+  ictm.transform(x, y, &xc, &yc);
+  if (xc < xMin || xc > xMax || yc < yMin || yc > yMax) return gFalse;
+  shading->getColor(xc, yc, &gfxColor);
+  convertGfxColor(c, colorMode, shading->getColorSpace(), &gfxColor);
+  return gTrue;
+}
+
+//------------------------------------------------------------------------
 // SplashUnivariatePattern
 //------------------------------------------------------------------------
 
@@ -4777,6 +4827,73 @@ GBool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePat
   state->clearPath();
   setVectorAntialias(vaa);
   delete path;
+
+  return retVal;
+}
+
+GBool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *shading) {
+  SplashFunctionPattern *pattern = new SplashFunctionPattern(colorMode, state, shading);
+  double xMin, yMin, xMax, yMax;
+  SplashPath *path;
+  GBool vaa = getVectorAntialias();
+  // restore vector antialias because we support it here
+  setVectorAntialias(gTrue);
+
+  GBool retVal = gFalse;
+  // get the clip region bbox
+  if (pattern->getShading()->getHasBBox()) {
+    pattern->getShading()->getBBox(&xMin, &yMin, &xMax, &yMax);
+  } else {
+    state->getClipBBox(&xMin, &yMin, &xMax, &yMax);
+
+    xMin = floor (xMin);
+    yMin = floor (yMin);
+    xMax = ceil (xMax);
+    yMax = ceil (yMax);
+
+    {
+      Matrix ctm, ictm;
+      double x[4], y[4];
+      int i;
+
+      state->getCTM(&ctm);
+      ctm.invertTo(&ictm);
+
+      ictm.transform(xMin, yMin, &x[0], &y[0]);
+      ictm.transform(xMax, yMin, &x[1], &y[1]);
+      ictm.transform(xMin, yMax, &x[2], &y[2]);
+      ictm.transform(xMax, yMax, &x[3], &y[3]);
+
+      xMin = xMax = x[0];
+      yMin = yMax = y[0];
+      for (i = 1; i < 4; i++) {
+        xMin = std::min<double>(xMin, x[i]);
+        yMin = std::min<double>(yMin, y[i]);
+        xMax = std::max<double>(xMax, x[i]);
+        yMax = std::max<double>(yMax, y[i]);
+      }
+    }
+  }
+
+  // fill the region
+  state->moveTo(xMin, yMin);
+  state->lineTo(xMax, yMin);
+  state->lineTo(xMax, yMax);
+  state->lineTo(xMin, yMax);
+  state->closePath();
+  path = convertPath(state, state->getPath(), gTrue);
+
+#if SPLASH_CMYK
+  pattern->getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
+#endif
+  setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(),
+		   state->getOverprintMode(), NULL);
+  retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern) == splashOk);
+  state->clearPath();
+  setVectorAntialias(vaa);
+  delete path;
+
+  delete pattern;
 
   return retVal;
 }

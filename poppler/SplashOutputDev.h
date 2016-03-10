@@ -59,6 +59,34 @@ struct SplashTransparencyGroup;
 // Splash dynamic pattern
 //------------------------------------------------------------------------
 
+class SplashFunctionPattern: public SplashPattern {
+public:
+
+  SplashFunctionPattern(SplashColorMode colorMode, GfxState *state, GfxFunctionShading *shading);
+
+  virtual SplashPattern *copy() { return new SplashFunctionPattern(colorMode, state, (GfxFunctionShading *) shading); }
+
+  virtual ~SplashFunctionPattern();
+
+  virtual GBool testPosition(int x, int y) { return gTrue; }
+
+  virtual GBool isStatic() { return gFalse; }
+
+  virtual GBool getColor(int x, int y, SplashColorPtr c);
+
+  virtual GfxFunctionShading *getShading() { return shading; }
+
+  virtual GBool isCMYK() { return gfxMode == csDeviceCMYK; }
+
+protected:
+  Matrix ictm;
+  double xMin, yMin, xMax, yMax;
+  GfxFunctionShading *shading;
+  GfxState *state;
+  SplashColorMode colorMode;
+  GfxColorSpaceMode gfxMode;
+};
+
 class SplashUnivariatePattern: public SplashPattern {
 public:
 
@@ -188,7 +216,7 @@ public:
   // radialShadedFill()?  If this returns false, these shaded fills
   // will be reduced to a series of other drawing operations.
   virtual GBool useShadedFills(int type)
-  { return (type >= 2 && type <= 5) ? gTrue : gFalse; }
+  { return (type >= 1 && type <= 5) ? gTrue : gFalse; }
 
   // Does this device use upside-down coordinates?
   // (Upside-down means (0,0) is the top left corner of the page.)
@@ -250,6 +278,7 @@ public:
 				  double *mat, double *bbox,
 				  int x0, int y0, int x1, int y1,
 				  double xStep, double yStep);
+  virtual GBool functionShadedFill(GfxState *state, GfxFunctionShading *shading);
   virtual GBool axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax);
   virtual GBool radialShadedFill(GfxState *state, GfxRadialShading *shading, double tMin, double tMax);
   virtual GBool gouraudTriangleShadedFill(GfxState *state, GfxGouraudTriangleShading *shading);
