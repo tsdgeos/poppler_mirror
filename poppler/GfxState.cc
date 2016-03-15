@@ -809,6 +809,9 @@ GfxColorSpace *GfxCalGrayColorSpace::copy() {
   cs->blackY = blackY;
   cs->blackZ = blackZ;
   cs->gamma = gamma;
+  cs->kr = kr;
+  cs->kg = kg;
+  cs->kb = kb;
 #ifdef USE_CMS
   cs->transform = transform;
   if (transform != NULL) transform->ref();
@@ -1190,6 +1193,9 @@ GfxColorSpace *GfxCalRGBColorSpace::copy() {
   cs->gammaR = gammaR;
   cs->gammaG = gammaG;
   cs->gammaB = gammaB;
+  cs->kr = kr;
+  cs->kg = kg;
+  cs->kb = kb;
   for (i = 0; i < 9; ++i) {
     cs->mat[i] = mat[i];
   }
