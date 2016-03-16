@@ -1,4 +1,4 @@
-Release 0.41.0
+Release 0.42.0
         core:
          * Add the support for version 5 + revision 6 documents. Bug #85368
          * Add initial support for Signature handling
