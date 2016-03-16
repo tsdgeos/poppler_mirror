@@ -89,7 +89,7 @@ nss_libs =                      \
 nss_includes =                  \
 	$(NSS3_CFLAGS)
 
-nss_headers =
+nss_headers =                   \
 	SignatureHandler.h
 
 endif	
@@ -327,7 +327,7 @@ libpoppler_la_LIBADD =				\
 	$(win32_libs)
 
 libpoppler_la_LDFLAGS =				\
-	-version-info 58:0:0			\
+	-version-info 59:0:0			\
 	@create_shared_lib@			\
 	@auto_import_flags@
 
