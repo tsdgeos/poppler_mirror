@@ -21,7 +21,7 @@
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012, 2015 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2015 William Bader <williambader@hotmail.com>
+// Copyright (C) 2015, 2016 William Bader <williambader@hotmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

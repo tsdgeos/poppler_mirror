@@ -4,6 +4,7 @@
 //
 // Copyright (C) 2005, Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2010, Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, William Bader <williambader@hotmail.com>
 //
 // This file is under the GPLv2 or later license
 //
