@@ -1112,6 +1112,11 @@ int main(int argc, char *argv[]) {
       }
     }
 
+    if ((doc->getPageRotate(pg) == 90) || (doc->getPageRotate(pg) == 270)) {
+      tmp = pg_w;
+      pg_w = pg_h;
+      pg_h = tmp;
+    }
     if (scaleTo != 0) {
       resolution = (72.0 * scaleTo) / (pg_w > pg_h ? pg_w : pg_h);
       x_resolution = y_resolution = resolution;
@@ -1126,11 +1131,6 @@ int main(int argc, char *argv[]) {
         if (x_scaleTo == -1)
           x_resolution = y_resolution;
       }
-    }
-    if ((doc->getPageRotate(pg) == 90) || (doc->getPageRotate(pg) == 270)) {
-      tmp = pg_w;
-      pg_w = pg_h;
-      pg_h = tmp;
     }
     if (imageFileName) {
       delete imageFileName;
