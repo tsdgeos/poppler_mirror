@@ -167,6 +167,32 @@ Generate a monochrome file (PNG and TIFF only).
 .B \-gray
 Generate a grayscale file (PNG, JPEG, and TIFF only).
 .TP
+.B \-antialias
+Set the cairo antialias option used for text and drawing in image files (or rasterized regions in vector output). The options are:
+.RS
+.TP
+.B default
+Use the default antialiasing for the target device. This is the default setting if \-antialias is not used.
+.TP
+.B none
+Antialiasing is disabled.
+.TP
+.B gray
+Perform single-color antialiasing using shades of gray.
+.TP
+.B subpixel
+Perform antialiasing by taking advantage of the order of subpixel elements on devices such as LCD.
+.TP
+.B fast
+Hint that the backend should perform some antialiasing but prefer speed over quality.
+.TP
+.B good
+The backend should balance quality against performance.
+.TP
+.B best
+Hint that the backend should render at the highest quality, sacrificing speed if necessary.
+.RE
+.TP
 .B \-transp
 Use a transparent page color instead of white (PNG and TIFF only).
 .TP

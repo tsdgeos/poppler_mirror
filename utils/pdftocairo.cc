@@ -106,6 +106,7 @@ static GBool useCropBox = gFalse;
 static GBool mono = gFalse;
 static GBool gray = gFalse;
 static GBool transp = gFalse;
+static GooString antialias;
 static GooString icc;
 
 static GBool level2 = gFalse;
@@ -218,6 +219,8 @@ static const ArgDesc argDesc[] = {
    "generate a grayscale image file (PNG, JPEG)"},
   {"-transp",   argFlag,     &transp,          0,
    "use a transparent background instead of white (PNG)"},
+  {"-antialias",   argGooString,     &antialias,          0,
+   "set cairo antialias option"},
 #if USE_CMS
   {"-icc",   argGooString,     &icc,          0,
    "ICC color profile to use"},
@@ -271,6 +274,7 @@ static  cairo_surface_t *surface;
 static  GBool printing;
 static  FILE *output_file;
 static GBool usePDFPageSize;
+static cairo_antialias_t antialiasEnum = CAIRO_ANTIALIAS_DEFAULT;
 
 #if USE_CMS
 static unsigned char *icc_data;
@@ -278,7 +282,46 @@ static int icc_data_size;
 static cmsHPROFILE profile;
 #endif
 
-void writePageImage(GooString *filename)
+struct AntiliasOption
+{
+  const char *name;
+  cairo_antialias_t value;
+};
+
+static const AntiliasOption antialiasOptions[] =
+{
+  { "default",  CAIRO_ANTIALIAS_DEFAULT },
+  { "none",     CAIRO_ANTIALIAS_NONE },
+  { "gray",     CAIRO_ANTIALIAS_GRAY },
+  { "subpixel", CAIRO_ANTIALIAS_SUBPIXEL },
+  { "fast",     CAIRO_ANTIALIAS_FAST },
+  { "good",     CAIRO_ANTIALIAS_GOOD },
+  { "best",     CAIRO_ANTIALIAS_BEST },
+  { NULL,       CAIRO_ANTIALIAS_DEFAULT },
+};
+
+static GBool parseAntialiasOption(GooString *antialias, cairo_antialias_t *antialiasEnum)
+{
+  const AntiliasOption *option = antialiasOptions;
+  while (option->name) {
+    if (antialias->cmp(option->name) == 0) {
+      *antialiasEnum = option->value;
+      return gTrue;
+    }
+    option++;
+  }
+
+  fprintf(stderr, "Error: Invalid antialias option \"%s\"\n", antialias->getCString());
+  fprintf(stderr, "Valid options are:\n");
+  option = antialiasOptions;
+  while (option->name) {
+    fprintf(stderr, "  %s\n", option->name);
+    option++;
+  }
+  return gFalse;
+}
+
+static void writePageImage(GooString *filename)
 {
   ImgWriter *writer = 0;
   FILE *file;
@@ -597,8 +640,16 @@ static void renderPage(PDFDoc *doc, CairoOutputDev *cairoOut, int pg,
   cairo_matrix_t m;
 
   cr = cairo_create(surface);
+
+  if (!printing && !transp) {
+    cairo_set_source_rgb (cr, 1,1,1);
+    cairo_paint (cr);
+    cairo_push_group_with_content (cr, CAIRO_CONTENT_COLOR_ALPHA);
+  }
+
   cairoOut->setCairo(cr);
   cairoOut->setPrinting(printing);
+  cairoOut->setAntialias(antialiasEnum);
 
   cairo_save(cr);
   if (ps && output_w > output_h) {
@@ -629,13 +680,9 @@ static void renderPage(PDFDoc *doc, CairoOutputDev *cairoOut, int pg,
   cairo_restore(cr);
   cairoOut->setCairo(NULL);
 
-  // Blend onto white page
   if (!printing && !transp) {
-    cairo_save(cr);
-    cairo_set_operator(cr, CAIRO_OPERATOR_DEST_OVER);
-    cairo_set_source_rgb(cr, 1, 1, 1);
-    cairo_paint(cr);
-    cairo_restore(cr);
+    cairo_pop_group_to_source (cr);
+    cairo_paint (cr);
   }
 
   status = cairo_status(cr);
@@ -912,6 +959,11 @@ int main(int argc, char *argv[]) {
   if (icc.getCString()[0] && !png) {
     fprintf(stderr, "Error: -icc may only be used with png output.\n");
     exit(99);
+  }
+
+  if (antialias.getLength() > 0) {
+    if (!parseAntialiasOption(&antialias, &antialiasEnum))
+      exit(99);
   }
 
   if (transp && !(png || tiff)) {
