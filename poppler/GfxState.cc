@@ -5547,7 +5547,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
 	p->x[1][0] = x[7];
 	p->y[1][0] = y[7];
 	for (j = 0; j < nComps; ++j) {
-	  p->color[0][1].c[j] = patchesA[nPatchesA-1].color[1][0].c[j];
+	  p->color[0][0].c[j] = patchesA[nPatchesA-1].color[1][0].c[j];
 	  p->color[0][1].c[j] = patchesA[nPatchesA-1].color[0][0].c[j];
 	  p->color[1][1].c[j] = c[0][j];
 	  p->color[1][0].c[j] = c[1][j];
