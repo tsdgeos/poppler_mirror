@@ -2,6 +2,7 @@
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
+ * Copyright (C) 2016 Jakub Kucharski <jakubkucharski97@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +21,6 @@
 
 #include "poppler-private.h"
 
-#include "DateInfo.h"
 #include "GooString.h"
 #include "Page.h"
 
@@ -114,27 +114,4 @@ GooString* detail::ustring_to_unicode_GooString(const ustring &str)
     }
     GooString *goo = new GooString(&ba[0]);
     return goo;
-}
-
-time_type detail::convert_date(const char *date)
-{
-    int year, mon, day, hour, min, sec, tzHours, tzMins;
-    char tz;
-
-    if (!parseDateString(date, &year, &mon, &day, &hour, &min, &sec,
-                               &tz, &tzHours, &tzMins)) {
-        return time_type(-1);
-    }
-
-    struct tm time;
-    time.tm_sec = sec;
-    time.tm_min = min;
-    time.tm_hour = hour;
-    time.tm_mday = day;
-    time.tm_mon = mon - 1;
-    time.tm_year = year - 1900;
-    time.tm_wday = -1;
-    time.tm_yday = -1;
-    time.tm_isdst = -1;
-    return mktime(&time);
 }

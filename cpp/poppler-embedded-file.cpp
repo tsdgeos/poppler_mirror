@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2016 Jakub Kucharski <jakubkucharski97@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +26,7 @@
 #include "Stream.h"
 #include "Catalog.h"
 #include "FileSpec.h"
+#include "DateInfo.h"
 
 using namespace poppler;
 
@@ -107,7 +109,7 @@ int embedded_file::size() const
 time_type embedded_file::modification_date() const
 {
     GooString *goo = d->file_spec->getEmbeddedFile()->modDate();
-    return goo ? detail::convert_date(goo->getCString()) : time_type(-1);
+    return goo ? dateStringToTime(goo) : time_type(-1);
 }
 
 /**
@@ -117,7 +119,7 @@ time_type embedded_file::modification_date() const
 time_type embedded_file::creation_date() const
 {
     GooString *goo = d->file_spec->getEmbeddedFile()->createDate();
-    return goo ? detail::convert_date(goo->getCString()) : time_type(-1);
+    return goo ? dateStringToTime(goo) : time_type(-1);
 }
 
 /**

@@ -2,6 +2,7 @@
  * Copyright (C) 2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
+ * Copyright (C) 2016 Jakub Kucharski <jakubkucharski97@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,8 +50,6 @@ rectf pdfrectangle_to_rectf(const PDFRectangle &pdfrect);
 ustring unicode_GooString_to_ustring(GooString *str);
 ustring unicode_to_ustring(const Unicode *u, int length);
 GooString* ustring_to_unicode_GooString(const ustring &str);
-
-time_type convert_date(const char *date);
 
 }
 

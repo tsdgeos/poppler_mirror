@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2016 Jakub Kucharski <jakubkucharski97@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +28,7 @@
 #include "poppler-toc-private.h"
 
 #include "Catalog.h"
+#include "DateInfo.h"
 #include "ErrorCodes.h"
 #include "GlobalParams.h"
 #include "Outline.h"
@@ -379,7 +381,7 @@ time_type document::info_date(const std::string &key) const
     Object obj;
     time_type result = time_type(-1);
     if (info_dict->lookup(PSTR(key.c_str()), &obj)->isString()) {
-        result = detail::convert_date(obj.getString()->getCString());
+        result = dateStringToTime(obj.getString());
     }
     obj.free();
     info.free();
