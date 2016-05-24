@@ -183,7 +183,7 @@ Stream *Stream::addFilters(Object *dict, int recursion) {
   dict->dictLookup("DecodeParms", &params, recursion);
   if (params.isNull()) {
     params.free();
-    dict->dictLookup("DP", &params);
+    dict->dictLookup("DP", &params, recursion);
   }
   if (obj.isName()) {
     str = makeFilter(obj.getName(), str, &params, recursion, dict);
