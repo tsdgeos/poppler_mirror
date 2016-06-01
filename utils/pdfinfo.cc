@@ -458,6 +458,7 @@ static void printInfoString(Dict *infoDict, const char *key, const char *text,
       n = uMap->mapUnicode(u[i], buf, sizeof(buf));
       fwrite(buf, 1, n, stdout);
     }
+    gfree(u);
     fputc('\n', stdout);
   }
   obj.free();
