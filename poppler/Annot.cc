@@ -7066,6 +7066,7 @@ AnnotRichMedia::Instance::Instance(Dict *dict)
   } else {
     params = NULL;
   }
+  obj1.free();
 }
 
 AnnotRichMedia::Instance::~Instance()
