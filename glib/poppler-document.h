@@ -1,6 +1,8 @@
 /* poppler-document.h: glib interface to poppler
  * Copyright (C) 2004, Red Hat, Inc.
  *
+ * Copyright (C) 2016 Jakub Kucharski <jakubkucharski97@gmail.com>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
@@ -201,13 +203,29 @@ void               poppler_document_get_pdf_version        (PopplerDocument *doc
 							    guint           *major_version,
 							    guint           *minor_version);
 gchar             *poppler_document_get_title              (PopplerDocument *document);
+void               poppler_document_set_title              (PopplerDocument *document,
+							    const gchar     *title);
 gchar             *poppler_document_get_author             (PopplerDocument *document);
+void               poppler_document_set_author             (PopplerDocument *document,
+							    const gchar     *author);
 gchar             *poppler_document_get_subject            (PopplerDocument *document);
+void               poppler_document_set_subject            (PopplerDocument *document,
+							    const gchar     *subject);
 gchar             *poppler_document_get_keywords           (PopplerDocument *document);
+void               poppler_document_set_keywords           (PopplerDocument *document,
+                                                            const gchar     *keywords);
 gchar             *poppler_document_get_creator            (PopplerDocument *document);
+void               poppler_document_set_creator            (PopplerDocument *document,
+                                                            const gchar     *creator);
 gchar             *poppler_document_get_producer           (PopplerDocument *document);
+void               poppler_document_set_producer           (PopplerDocument *document,
+                                                            const gchar     *producer);
 time_t             poppler_document_get_creation_date      (PopplerDocument *document);
+void               poppler_document_set_creation_date      (PopplerDocument *document,
+                                                            time_t           creation_date);
 time_t             poppler_document_get_modification_date  (PopplerDocument *document);
+void               poppler_document_set_modification_date  (PopplerDocument *document,
+                                                            time_t           modification_date);
 gboolean           poppler_document_is_linearized          (PopplerDocument *document);
 PopplerPageLayout  poppler_document_get_page_layout        (PopplerDocument *document);
 PopplerPageMode    poppler_document_get_page_mode          (PopplerDocument *document);
