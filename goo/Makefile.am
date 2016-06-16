@@ -65,3 +65,5 @@ libgoo_la_CPPFLAGS =				\
 	$(libtiff_includes)                     \
 	$(libjpeg2000_includes)                 \
 	$(libpng_includes)
+
+EXTRA_DIST = glibc.h
