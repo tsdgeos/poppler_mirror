@@ -289,7 +289,7 @@ protected:
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
   GBool setMimeDataForJBIG2Globals (Stream *str, cairo_surface_t *image);
 #endif
-  void setAntialias(cairo_t *cr, cairo_antialias_t antialias);
+  static void setContextAntialias(cairo_t *cr, cairo_antialias_t antialias);
 
   GfxRGB fill_color, stroke_color;
   cairo_pattern_t *fill_pattern, *stroke_pattern;
