@@ -641,12 +641,6 @@ static void renderPage(PDFDoc *doc, CairoOutputDev *cairoOut, int pg,
 
   cr = cairo_create(surface);
 
-  if (!printing && !transp) {
-    cairo_set_source_rgb (cr, 1,1,1);
-    cairo_paint (cr);
-    cairo_push_group_with_content (cr, CAIRO_CONTENT_COLOR_ALPHA);
-  }
-
   cairoOut->setCairo(cr);
   cairoOut->setPrinting(printing);
   cairoOut->setAntialias(antialiasEnum);
@@ -680,9 +674,13 @@ static void renderPage(PDFDoc *doc, CairoOutputDev *cairoOut, int pg,
   cairo_restore(cr);
   cairoOut->setCairo(NULL);
 
+  // Blend onto white page
   if (!printing && !transp) {
-    cairo_pop_group_to_source (cr);
-    cairo_paint (cr);
+    cairo_save(cr);
+    cairo_set_operator(cr, CAIRO_OPERATOR_DEST_OVER);
+    cairo_set_source_rgb(cr, 1, 1, 1);
+    cairo_paint(cr);
+    cairo_restore(cr);
   }
 
   status = cairo_status(cr);
