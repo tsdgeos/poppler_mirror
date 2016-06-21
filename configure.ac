@@ -957,8 +957,8 @@ case "$enable_compile_warnings" in
 esac
 
 case "$host_os" in
-  mingw*)
-    # mingw prints "warning: -fPIC ignored for target (all code is position independent)"
+  mingw*|cygwin*)
+    # mingw and cygwin print "warning: -fPIC ignored for target (all code is position independent)"
     # for every file
     ;;
   *)
