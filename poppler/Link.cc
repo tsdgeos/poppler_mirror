@@ -231,10 +231,6 @@ LinkDest::LinkDest(Array *a) {
 
   // Fit link
   } else if (obj1.isName("Fit")) {
-    if (a->getLength() < 2) {
-      error(errSyntaxWarning, -1, "Annotation destination array is too short");
-      goto err2;
-    }
     kind = destFit;
 
   // FitH link
@@ -313,10 +309,6 @@ LinkDest::LinkDest(Array *a) {
 
   // FitB link
   } else if (obj1.isName("FitB")) {
-    if (a->getLength() < 2) {
-      error(errSyntaxWarning, -1, "Annotation destination array is too short");
-      goto err2;
-    }
     kind = destFitB;
 
   // FitBH link
