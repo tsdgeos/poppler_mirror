@@ -235,22 +235,22 @@ LinkDest::LinkDest(Array *a) {
 
   // FitH link
   } else if (obj1.isName("FitH")) {
-    if (a->getLength() < 3) {
-      error(errSyntaxWarning, -1, "Annotation destination array is too short");
-      goto err2;
-    }
     kind = destFitH;
-    a->get(2, &obj2);
-    if (obj2.isNull()) {
+    if (a->getLength() < 3) {
       changeTop = gFalse;
-    } else if (obj2.isNum()) {
-      changeTop = gTrue;
-      top = obj2.getNum();
     } else {
-      error(errSyntaxWarning, -1, "Bad annotation destination position");
-      kind = destFit;
+      a->get(2, &obj2);
+      if (obj2.isNull()) {
+	changeTop = gFalse;
+      } else if (obj2.isNum()) {
+	changeTop = gTrue;
+	top = obj2.getNum();
+      } else {
+	error(errSyntaxWarning, -1, "Bad annotation destination position");
+	kind = destFit;
+      }
+      obj2.free();
     }
-    obj2.free();
 
   // FitV link
   } else if (obj1.isName("FitV")) {
