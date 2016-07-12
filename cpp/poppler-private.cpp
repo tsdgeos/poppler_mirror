@@ -112,6 +112,6 @@ GooString* detail::ustring_to_unicode_GooString(const ustring &str)
         ba[i * 2 + 2] = ((*me >> 8) & 0xff);
         ba[i * 2 + 3] = (*me & 0xff);
     }
-    GooString *goo = new GooString(&ba[0]);
+    GooString *goo = new GooString(&ba[0], len);
     return goo;
 }
