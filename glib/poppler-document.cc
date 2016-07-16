@@ -1460,12 +1460,52 @@ poppler_document_get_property (GObject    *object,
 }
 
 static void
+poppler_document_set_property (GObject      *object,
+			       guint         prop_id,
+			       const GValue *value,
+			       GParamSpec   *pspec)
+{
+  PopplerDocument *document = POPPLER_DOCUMENT (object);
+
+  switch (prop_id)
+    {
+    case PROP_TITLE:
+      poppler_document_set_title (document, g_value_get_string (value));
+      break;
+    case PROP_AUTHOR:
+      poppler_document_set_author (document, g_value_get_string (value));
+      break;
+    case PROP_SUBJECT:
+      poppler_document_set_subject (document, g_value_get_string (value));
+      break;
+    case PROP_KEYWORDS:
+      poppler_document_set_keywords (document, g_value_get_string (value));
+      break;
+    case PROP_CREATOR:
+      poppler_document_set_creator (document, g_value_get_string (value));
+      break;
+    case PROP_PRODUCER:
+      poppler_document_set_producer (document, g_value_get_string (value));
+      break;
+    case PROP_CREATION_DATE:
+      poppler_document_set_creation_date (document, g_value_get_int (value));
+      break;
+    case PROP_MOD_DATE:
+      poppler_document_set_modification_date (document, g_value_get_int (value));
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
+
+static void
 poppler_document_class_init (PopplerDocumentClass *klass)
 {
   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
   gobject_class->finalize = poppler_document_finalize;
   gobject_class->get_property = poppler_document_get_property;
+  gobject_class->set_property = poppler_document_set_property;
 
   /**
    * PopplerDocument:title:
@@ -1478,7 +1518,7 @@ poppler_document_class_init (PopplerDocumentClass *klass)
 							"Document Title",
 							"The title of the document",
 							NULL,
-							G_PARAM_READABLE));
+							G_PARAM_READWRITE));
 
   /**
    * PopplerDocument:format:
@@ -1530,7 +1570,7 @@ poppler_document_class_init (PopplerDocumentClass *klass)
 							"Author",
 							"The author of the document",
 							NULL,
-							G_PARAM_READABLE));
+							G_PARAM_READWRITE));
 
   /**
    * PopplerDocument:subject:
@@ -1543,7 +1583,7 @@ poppler_document_class_init (PopplerDocumentClass *klass)
 							"Subject",
 							"Subjects the document touches",
 							NULL,
-							G_PARAM_READABLE));
+							G_PARAM_READWRITE));
 
   /**
    * PopplerDocument:keywords:
@@ -1556,7 +1596,7 @@ poppler_document_class_init (PopplerDocumentClass *klass)
 							"Keywords",
 							"Keywords",
 							NULL,
-							G_PARAM_READABLE));
+							G_PARAM_READWRITE));
 
   /**
    * PopplerDocument:creator:
@@ -1569,7 +1609,7 @@ poppler_document_class_init (PopplerDocumentClass *klass)
 							"Creator",
 							"The software that created the document",
 							NULL,
-							G_PARAM_READABLE));
+							G_PARAM_READWRITE));
 
   /**
    * PopplerDocument:producer:
@@ -1582,7 +1622,7 @@ poppler_document_class_init (PopplerDocumentClass *klass)
 							"Producer",
 							"The software that converted the document",
 							NULL,
-							G_PARAM_READABLE));
+							G_PARAM_READWRITE));
 
   /**
    * PopplerDocument:creation-date:
@@ -1595,7 +1635,7 @@ poppler_document_class_init (PopplerDocumentClass *klass)
 						     "Creation Date",
 						     "The date and time the document was created",
 						     -1, G_MAXINT, -1,
-						     G_PARAM_READABLE));
+						     G_PARAM_READWRITE));
 
   /**
    * PopplerDocument:mod-date:
@@ -1608,7 +1648,7 @@ poppler_document_class_init (PopplerDocumentClass *klass)
 						     "Modification Date",
 						     "The date and time the document was modified",
 						     -1, G_MAXINT, -1,
-						     G_PARAM_READABLE));
+						     G_PARAM_READWRITE));
 
   /**
    * PopplerDocument:linearized:
