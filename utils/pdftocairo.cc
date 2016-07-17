@@ -685,7 +685,7 @@ static void renderPage(PDFDoc *doc, CairoOutputDev *cairoOut, int pg,
 
   status = cairo_status(cr);
   if (status)
-      error(errInternal, -1, "cairo error: {0:s}\n", cairo_status_to_string(status));
+    fprintf(stderr, "cairo error: %s\n", cairo_status_to_string(status));
   cairo_destroy (cr);
 }
 
@@ -706,7 +706,7 @@ static void endPage(GooString *imageFileName)
     cairo_surface_finish(surface);
     status = cairo_surface_status(surface);
     if (status)
-      error(errInternal, -1, "cairo error: {0:s}\n", cairo_status_to_string(status));
+      fprintf(stderr, "cairo error: %s\n", cairo_status_to_string(status));
     cairo_surface_destroy(surface);
   }
 
@@ -720,7 +720,7 @@ static void endDocument()
     cairo_surface_finish(surface);
     status = cairo_surface_status(surface);
     if (status)
-      error(errInternal, -1, "cairo error: {0:s}\n", cairo_status_to_string(status));
+      fprintf(stderr, "cairo error: %s\n", cairo_status_to_string(status));
     cairo_surface_destroy(surface);
 #ifdef CAIRO_HAS_WIN32_SURFACE
     if (printToWin32)
