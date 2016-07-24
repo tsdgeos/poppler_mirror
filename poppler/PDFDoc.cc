@@ -703,8 +703,8 @@ GBool PDFDoc::getID(GooString *permanent_id, GooString *update_id) {
     Object obj2;
 
     if (permanent_id) {
-      if (obj.arrayGet(0, &obj2)->isString()) {
-        if (!get_id (obj2.getString(), permanent_id)) {
+      if (obj.arrayGet(0, &obj2)->isHexString()) {
+        if (!get_id (obj2.getHexString(), permanent_id)) {
 	  obj2.free();
 	  return gFalse;
 	}
@@ -717,8 +717,8 @@ GBool PDFDoc::getID(GooString *permanent_id, GooString *update_id) {
     }
 
     if (update_id) {
-      if (obj.arrayGet(1, &obj2)->isString()) {
-        if (!get_id (obj2.getString(), update_id)) {
+      if (obj.arrayGet(1, &obj2)->isHexString()) {
+        if (!get_id (obj2.getHexString(), update_id)) {
 	  obj2.free();
 	  return gFalse;
 	}
@@ -1467,7 +1467,7 @@ Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Goffset startxR
   //calculate md5 digest
   Guchar digest[16];
   md5((Guchar*)message.getCString(), message.getLength(), digest);
-  obj1.initString(new GooString((const char*)digest, 16));
+  obj1.initHexString(new GooString((const char*)digest, 16));
 
   //create ID array
   Object obj2,obj3,obj5;
@@ -1492,7 +1492,7 @@ Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Goffset startxR
   } else {
     //new file => same values for the two identifiers
     obj2.arrayAdd(&obj1);
-    obj1.initString(new GooString((const char*)digest, 16));
+    obj1.initHexString(new GooString((const char*)digest, 16));
     obj2.arrayAdd(&obj1);
     trailerDict->set("ID", &obj2);
   }

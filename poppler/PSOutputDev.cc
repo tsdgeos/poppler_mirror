@@ -31,6 +31,7 @@
 // Copyright (C) 2014 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2015 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2016 Caolán McNamara <caolanm@redhat.com>
+// Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -7100,8 +7101,8 @@ void PSOutputDev::opiBegin13(GfxState *state, Dict *dict) {
   obj1.free();
 
   dict->lookup("ID", &obj1);
-  if (obj1.isString()) {
-    writePSFmt("%ALDImageID: {0:t}\n", obj1.getString());
+  if (obj1.isHexString()) {
+    writePSFmt("%ALDImageID: {0:t}\n", obj1.getHexString());
   }
   obj1.free();
 

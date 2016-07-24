@@ -8,6 +8,7 @@
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
 // Copyright 2014 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Dmytro Morgun <lztoad@gmail.com>
+// Copyright 2016 Jakub Alba <jakubalba@gmail.com>
 //
 //========================================================================
 
@@ -1122,8 +1123,8 @@ void StructElement::parse(Dict *element)
   obj.free();
 
   // Object ID (optional), to be looked at the IDTree in the tree root.
-  if (element->lookup("ID", &obj)->isString()) {
-    s->id = obj.takeString();
+  if (element->lookup("ID", &obj)->isHexString()) {
+    s->id = obj.takeHexString();
   }
   obj.free();
 
