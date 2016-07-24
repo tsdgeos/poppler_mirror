@@ -15,6 +15,7 @@
 //
 // Copyright (C) 2008, 2010, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -54,12 +55,13 @@ static const char *objTypeNames[numObjTypes] = {
   "error",
   "eof",
   "none",
-  "integer64"
+  "integer64",
+  "hexstring"
 };
 
 #ifdef DEBUG_MEM
 int Object::numAlloc[numObjTypes] =
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
 
 Object *Object::initArray(XRef *xref) {
@@ -91,6 +93,7 @@ Object *Object::copy(Object *obj) {
   *obj = *this;
   switch (type) {
   case objString:
+  case objHexString:
     obj->string = string->copy();
     break;
   case objName:
@@ -125,6 +128,7 @@ Object *Object::fetch(XRef *xref, Object *obj, int recursion) {
 void Object::free() {
   switch (type) {
   case objString:
+  case objHexString:
     delete string;
     break;
   case objName:
@@ -179,6 +183,13 @@ void Object::print(FILE *f) {
     fprintf(f, "(");
     fwrite(string->getCString(), 1, string->getLength(), f);
     fprintf(f, ")");
+    break;
+  case objHexString:
+    fprintf(f, "<");
+    for (i = 0; i < string->getLength(); i++) {
+      fprintf(f, "%02x", string->getChar(i) & 0xff);
+    }
+    fprintf(f, ">");
     break;
   case objName:
     fprintf(f, "/%s", name);
