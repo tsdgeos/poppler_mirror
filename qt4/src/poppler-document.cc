@@ -483,7 +483,8 @@ namespace Poppler {
 	    return QDateTime();
 	}
 
-	QString str = UnicodeParsedString(m_doc->doc->getDocInfoCreatDate());
+	QScopedPointer<GooString> goo(m_doc->doc->getDocInfoCreatDate());
+	QString str = UnicodeParsedString(goo.data());
 	return Poppler::convertDate(str.toLatin1().data());
     }
 
@@ -503,7 +504,8 @@ namespace Poppler {
 	    return QDateTime();
 	}
 
-	QString str = UnicodeParsedString(m_doc->doc->getDocInfoModDate());
+	QScopedPointer<GooString> goo(m_doc->doc->getDocInfoModDate());
+	QString str = UnicodeParsedString(goo.data());
 	return Poppler::convertDate(str.toLatin1().data());
     }
 
