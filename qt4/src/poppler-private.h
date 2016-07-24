@@ -7,6 +7,7 @@
  * Copyright (C) 2011 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
+ * Copyright (C) 2016 Jakub Kucharski <jakubkucharski97@gmail.com>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -60,6 +61,8 @@ namespace Poppler {
     GooString *QStringToUnicodeGooString(const QString &s);
 
     GooString *QStringToGooString(const QString &s);
+
+    GooString *QDateTimeToUnicodeGooString(const QDateTime &dt);
 
     void qt4ErrorFunction(int pos, char *msg, va_list args);
 
