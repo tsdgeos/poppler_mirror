@@ -341,21 +341,36 @@ ustring document::info_key(const std::string &key) const
         return ustring();
     }
 
-    Object info;
-    if (!d->doc->getDocInfo(&info)->isDict()) {
-        info.free();
+    std::auto_ptr<GooString> goo_value(d->doc->getDocInfoStringEntry(key.c_str()));
+    if (!goo_value.get()) {
         return ustring();
     }
 
-    Dict *info_dict = info.getDict();
-    Object obj;
-    ustring result;
-    if (info_dict->lookup(PSTR(key.c_str()), &obj)->isString()) {
-        result = detail::unicode_GooString_to_ustring(obj.getString());
+    return detail::unicode_GooString_to_ustring(goo_value.get());
+}
+
+/**
+ Sets the value of the specified \p key of the %document information to \p val.
+ If \p val is empty, the entry specified by \p key is removed.
+
+ \returns true on success, false on failure
+ */
+bool document::set_info_key(const std::string &key, const ustring &val)
+{
+    if (d->is_locked) {
+        return false;
     }
-    obj.free();
-    info.free();
-    return result;
+
+    GooString *goo_val;
+
+    if (val.empty()) {
+        goo_val = NULL;
+    } else {
+        goo_val = detail::ustring_to_unicode_GooString(val);
+    }
+
+    d->doc->setDocInfoStringEntry(key.c_str(), goo_val);
+    return true;
 }
 
 /**
@@ -371,21 +386,407 @@ time_type document::info_date(const std::string &key) const
         return time_type(-1);
     }
 
-    Object info;
-    if (!d->doc->getDocInfo(&info)->isDict()) {
-        info.free();
+    std::auto_ptr<GooString> goo_date(d->doc->getDocInfoStringEntry(key.c_str()));
+    if (!goo_date.get()) {
         return time_type(-1);
     }
 
-    Dict *info_dict = info.getDict();
-    Object obj;
-    time_type result = time_type(-1);
-    if (info_dict->lookup(PSTR(key.c_str()), &obj)->isString()) {
-        result = dateStringToTime(obj.getString());
+    return dateStringToTime(goo_date.get());
+}
+
+/**
+ Sets the time_type value of the specified \p key of the %document information
+ to \p val.
+ If \p val == time_type(-1), the entry specified by \p key is removed.
+
+ \returns true on success, false on failure
+ */
+bool document::set_info_date(const std::string &key, time_type val)
+{
+    if (d->is_locked) {
+        return false;
     }
-    obj.free();
-    info.free();
-    return result;
+
+    GooString *goo_date;
+
+    if (val == time_type(-1)) {
+        goo_date = NULL;
+    } else {
+        time_t t = static_cast<time_t> (val);
+        goo_date = timeToDateString(&t);
+    }
+
+    d->doc->setDocInfoStringEntry(key.c_str(), goo_date);
+    return true;
+}
+
+/**
+ Gets the %document's title.
+
+ \returns the document's title, or an empty string if not available
+ \see set_title, info_key
+ */
+ustring document::get_title() const
+{
+    if (d->is_locked) {
+        return ustring();
+    }
+
+    std::auto_ptr<GooString> goo_title(d->doc->getDocInfoTitle());
+    if (!goo_title.get()) {
+        return ustring();
+    }
+
+    return detail::unicode_GooString_to_ustring(goo_title.get());
+}
+
+/**
+ Sets the %document's title to \p title.
+ If \p title is empty, the %document's title is removed.
+
+ \returns true on success, false on failure
+ */
+bool document::set_title(const ustring &title)
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    GooString *goo_title;
+
+    if (title.empty()) {
+        goo_title = NULL;
+    } else {
+        goo_title = detail::ustring_to_unicode_GooString(title);
+    }
+
+    d->doc->setDocInfoTitle(goo_title);
+    return true;
+}
+
+/**
+ Gets the document's author.
+
+ \returns the document's author, or an empty string if not available
+ \see set_author, info_key
+ */
+ustring document::get_author() const
+{
+    if (d->is_locked) {
+        return ustring();
+    }
+
+    std::auto_ptr<GooString> goo_author(d->doc->getDocInfoAuthor());
+    if (!goo_author.get()) {
+        return ustring();
+    }
+
+    return detail::unicode_GooString_to_ustring(goo_author.get());
+}
+
+/**
+ Sets the %document's author to \p author.
+ If \p author is empty, the %document's author is removed.
+
+ \returns true on success, false on failure
+ */
+bool document::set_author(const ustring &author)
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    GooString *goo_author;
+
+    if (author.empty()) {
+        goo_author = NULL;
+    } else {
+        goo_author = detail::ustring_to_unicode_GooString(author);
+    }
+
+    d->doc->setDocInfoAuthor(goo_author);
+    return true;
+}
+
+/**
+ Gets the document's subject.
+
+ \returns the document's subject, or an empty string if not available
+ \see set_subject, info_key
+ */
+ustring document::get_subject() const
+{
+    if (d->is_locked) {
+        return ustring();
+    }
+
+    std::auto_ptr<GooString> goo_subject(d->doc->getDocInfoSubject());
+    if (!goo_subject.get()) {
+        return ustring();
+    }
+
+    return detail::unicode_GooString_to_ustring(goo_subject.get());
+}
+
+/**
+ Sets the %document's subject to \p subject.
+ If \p subject is empty, the %document's subject is removed.
+
+ \returns true on success, false on failure
+ */
+bool document::set_subject(const ustring &subject)
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    GooString *goo_subject;
+
+    if (subject.empty()) {
+        goo_subject = NULL;
+    } else {
+        goo_subject = detail::ustring_to_unicode_GooString(subject);
+    }
+
+    d->doc->setDocInfoSubject(goo_subject);
+    return true;
+}
+
+/**
+ Gets the document's keywords.
+
+ \returns the document's keywords, or an empty string if not available
+ \see set_keywords, info_key
+ */
+ustring document::get_keywords() const
+{
+    if (d->is_locked) {
+        return ustring();
+    }
+
+    std::auto_ptr<GooString> goo_keywords(d->doc->getDocInfoKeywords());
+    if (!goo_keywords.get()) {
+        return ustring();
+    }
+
+    return detail::unicode_GooString_to_ustring(goo_keywords.get());
+}
+
+/**
+ Sets the %document's keywords to \p keywords.
+ If \p keywords is empty, the %document's keywords are removed.
+
+ \returns true on success, false on failure
+ */
+bool document::set_keywords(const ustring &keywords)
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    GooString *goo_keywords;
+
+    if (keywords.empty()) {
+        goo_keywords = NULL;
+    } else {
+        goo_keywords = detail::ustring_to_unicode_GooString(keywords);
+    }
+
+    d->doc->setDocInfoKeywords(goo_keywords);
+    return true;
+}
+
+/**
+ Gets the document's creator.
+
+ \returns the document's creator, or an empty string if not available
+ \see set_creator, info_key
+ */
+ustring document::get_creator() const
+{
+    if (d->is_locked) {
+        return ustring();
+    }
+
+    std::auto_ptr<GooString> goo_creator(d->doc->getDocInfoCreator());
+    if (!goo_creator.get()) {
+        return ustring();
+    }
+
+    return detail::unicode_GooString_to_ustring(goo_creator.get());
+}
+
+/**
+ Sets the %document's creator to \p creator.
+ If \p creator is empty, the %document's creator is removed.
+
+ \returns true on success, false on failure
+ */
+bool document::set_creator(const ustring &creator)
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    GooString *goo_creator;
+
+    if (creator.empty()) {
+        goo_creator = NULL;
+    } else {
+        goo_creator = detail::ustring_to_unicode_GooString(creator);
+    }
+
+    d->doc->setDocInfoCreator(goo_creator);
+    return true;
+}
+
+/**
+ Gets the document's producer.
+
+ \returns the document's producer, or an empty string if not available
+ \see set_producer, info_key
+ */
+ustring document::get_producer() const
+{
+    if (d->is_locked) {
+        return ustring();
+    }
+
+    std::auto_ptr<GooString> goo_producer(d->doc->getDocInfoProducer());
+    if (!goo_producer.get()) {
+        return ustring();
+    }
+
+    return detail::unicode_GooString_to_ustring(goo_producer.get());
+}
+
+/**
+ Sets the %document's producer to \p producer.
+ If \p producer is empty, the %document's producer is removed.
+
+ \returns true on success, false on failure
+ */
+bool document::set_producer(const ustring &producer)
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    GooString *goo_producer;
+
+    if (producer.empty()) {
+        goo_producer = NULL;
+    } else {
+        goo_producer = detail::ustring_to_unicode_GooString(producer);
+    }
+
+    d->doc->setDocInfoProducer(goo_producer);
+    return true;
+}
+
+/**
+ Gets the document's creation date as a time_type value.
+
+ \returns the document's creation date as a time_type value
+ \see set_creation_date, info_date
+ */
+time_type document::get_creation_date() const
+{
+    if (d->is_locked) {
+        return time_type(-1);
+    }
+
+    std::auto_ptr<GooString> goo_creation_date(d->doc->getDocInfoCreatDate());
+    if (!goo_creation_date.get()) {
+        return time_type(-1);
+    }
+
+    return dateStringToTime(goo_creation_date.get());
+}
+
+/**
+ Sets the %document's creation date to \p creation_date.
+ If \p creation_date == time_type(-1), the %document's creation date is removed.
+
+ \returns true on success, false on failure
+ */
+bool document::set_creation_date(time_type creation_date)
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    GooString *goo_creation_date;
+
+    if (creation_date == time_type(-1)) {
+        goo_creation_date = NULL;
+    } else {
+        time_t t = static_cast<time_t> (creation_date);
+        goo_creation_date = timeToDateString(&t);
+    }
+
+    d->doc->setDocInfoCreatDate(goo_creation_date);
+    return true;
+}
+
+/**
+ Gets the document's modification date as a time_type value.
+
+ \returns the document's modification date as a time_type value
+ \see set_modification_date, info_date
+ */
+time_type document::get_modification_date() const
+{
+    if (d->is_locked) {
+        return time_type(-1);
+    }
+
+    std::auto_ptr<GooString> goo_modification_date(d->doc->getDocInfoModDate());
+    if (!goo_modification_date.get()) {
+        return time_type(-1);
+    }
+
+    return dateStringToTime(goo_modification_date.get());
+}
+
+/**
+ Sets the %document's modification date to \p mod_date.
+ If \p mod_date == time_type(-1), the %document's modification date is removed.
+
+ \returns true on success, false on failure
+ */
+bool document::set_modification_date(time_type mod_date)
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    GooString *goo_mod_date;
+
+    if (mod_date == time_type(-1)) {
+        goo_mod_date = NULL;
+    } else {
+        time_t t = static_cast<time_t> (mod_date);
+        goo_mod_date = timeToDateString(&t);
+    }
+
+    d->doc->setDocInfoModDate(goo_mod_date);
+    return true;
+}
+
+/**
+ Removes the %document's Info dictionary.
+
+ \returns true on success, false on failure
+ */
+bool document::remove_info()
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    d->doc->removeDocInfo();
+    return true;
 }
 
 /**
