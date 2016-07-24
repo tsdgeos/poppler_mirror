@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2016 Jakub Kucharski <jakubkucharski97@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,6 +81,9 @@ public:
 
     bool has_embedded_files() const;
     std::vector<embedded_file *> embedded_files() const;
+
+    bool save(const std::string &filename) const;
+    bool save_a_copy(const std::string &filename) const;
 
     static document* load_from_file(const std::string &file_name,
                                     const std::string &owner_password = std::string(),

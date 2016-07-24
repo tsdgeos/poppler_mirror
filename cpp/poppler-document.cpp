@@ -597,6 +597,36 @@ std::vector<embedded_file *> document::embedded_files() const
 }
 
 /**
+ Saves the %document to file \p file_name.
+
+ \returns true on success, false on failure
+ */
+bool document::save(const std::string &file_name) const
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    GooString fname(file_name.c_str());
+    return d->doc->saveAs(&fname) == errNone;
+}
+
+/**
+ Saves the original version of the %document to file \p file_name.
+
+ \returns true on success, false on failure
+ */
+bool document::save_a_copy(const std::string &file_name) const
+{
+    if (d->is_locked) {
+        return false;
+    }
+
+    GooString fname(file_name.c_str());
+    return d->doc->saveWithoutChangesAs(&fname) == errNone;
+}
+
+/**
  Tries to load a PDF %document from the specified file.
 
  \param file_name the file to open
