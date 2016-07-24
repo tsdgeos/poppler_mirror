@@ -69,6 +69,6 @@ libpoppler_cpp_la_LIBADD =			\
 	$(LIBICONV)
 
 libpoppler_cpp_la_LDFLAGS =			\
-	-version-info 2:1:2			\
+	-version-info 3:0:3			\
 	@create_shared_lib@			\
 	@auto_import_flags@
