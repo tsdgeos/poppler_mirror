@@ -2611,6 +2611,10 @@ void TextPage::addChar(GfxState *state, double x, double y,
     charPos += nBytes;
     endWord();
     return;
+  } else if (uLen == 1 && u[0] == (Unicode)0x0) {
+    // ignore null characters
+    charPos += nBytes;
+    return;
   }
 
   state->getFontTransMat(&mat.m[0], &mat.m[1], &mat.m[2], &mat.m[3]);
