@@ -612,6 +612,9 @@ void PDFDoc::setDocInfoModified(Object *infoObj)
 void PDFDoc::setDocInfoStringEntry(const char *key, GooString *value)
 {
   GBool removeEntry = !value || value->getLength() == 0;
+  if (removeEntry) {
+    delete value;
+  }
 
   Object infoObj;
   getDocInfo(&infoObj);
