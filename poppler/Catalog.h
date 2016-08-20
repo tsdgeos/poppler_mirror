@@ -25,6 +25,7 @@
 // Copyright (C) 2013 Adrian Perez de Castro <aperez@igalia.com>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 José Aliste <jaliste@src.gnome.org>
+// Copyright (C) 2016 Masamichi Hosoda <trueroad@trueroad.jp>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -263,6 +264,7 @@ private:
   NameTree *getDestNameTree();
   NameTree *getEmbeddedFileNameTree();
   NameTree *getJSNameTree();
+  LinkDest *createLinkDest(Object *obj);
 #if MULTITHREADED
   GooMutex mutex;
 #endif
