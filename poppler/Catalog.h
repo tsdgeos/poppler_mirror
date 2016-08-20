@@ -151,6 +151,15 @@ public:
 
   Object *getDests();
 
+  // Get the number of named destinations in name-tree
+  int numDestNameTree() { return getDestNameTree()->numEntries(); }
+
+  // Get the i'th named destination name in name-tree
+  GooString *getDestNameTreeName(int i) { return getDestNameTree()->getName(i); }
+
+  // Get the i'th named destination link destination in name-tree
+  LinkDest *getDestNameTreeDest(int i);
+
   // Get the number of embedded files
   int numEmbeddedFiles() { return getEmbeddedFileNameTree()->numEntries(); }
 

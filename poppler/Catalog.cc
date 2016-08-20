@@ -504,6 +504,19 @@ LinkDest *Catalog::createLinkDest(Object *obj)
   return dest;
 }
 
+LinkDest *Catalog::getDestNameTreeDest(int i)
+{
+  LinkDest *dest;
+  Object obj;
+
+  catalogLocker();
+  getDestNameTree()->getValue(i).fetch(xref, &obj);
+  dest = createLinkDest(&obj);
+  obj.free();
+
+  return dest;
+}
+
 FileSpec *Catalog::embeddedFile(int i)
 {
     Object efDict;
