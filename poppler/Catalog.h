@@ -151,6 +151,15 @@ public:
 
   Object *getDests();
 
+  // Get the number of named destinations in name-dict
+  int numDests();
+
+  // Get the i'th named destination name in name-dict
+  char *getDestsName(int i);
+
+  // Get the i'th named destination link destination in name-dict
+  LinkDest *getDestsDest(int i);
+
   // Get the number of named destinations in name-tree
   int numDestNameTree() { return getDestNameTree()->numEntries(); }
 

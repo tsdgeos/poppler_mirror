@@ -504,6 +504,44 @@ LinkDest *Catalog::createLinkDest(Object *obj)
   return dest;
 }
 
+int Catalog::numDests()
+{
+  Object *obj;
+
+  obj= getDests();
+  if (!obj->isDict()) {
+    return 0;
+  }
+  return obj->dictGetLength();
+}
+
+char *Catalog::getDestsName(int i)
+{
+  Object *obj;
+
+  obj= getDests();
+  if (!obj->isDict()) {
+    return NULL;
+  }
+  return obj->dictGetKey(i);
+}
+
+LinkDest *Catalog::getDestsDest(int i)
+{
+  LinkDest *dest;
+  Object *obj, obj1;
+
+  obj= getDests();
+  if (!obj->isDict()) {
+    return NULL;
+  }
+  obj->dictGetVal(i, &obj1);
+  dest = createLinkDest(&obj1);
+  obj1.free();
+
+  return dest;
+}
+
 LinkDest *Catalog::getDestNameTreeDest(int i)
 {
   LinkDest *dest;
