@@ -160,7 +160,8 @@ public:
   // Return true if string ends with suffix
   GBool endsWith(const char *suffix) const;
 
-  GBool hasUnicodeMarker(void);
+  GBool hasUnicodeMarker(void) const;
+  GBool hasJustUnicodeMarker(void) const { return length == 2 && hasUnicodeMarker(); }
 
   // Sanitizes the string so that it does
   // not contain any ( ) < > [ ] { } / %

@@ -912,7 +912,7 @@ GBool GooString::endsWith(const char *suffix) const {
   return strcmp(s + length - suffixLen, suffix) == 0;
 }
 
-GBool GooString::hasUnicodeMarker(void)
+GBool GooString::hasUnicodeMarker(void) const
 {
   return length > 1 && (s[0] & 0xff) == 0xfe && (s[1] & 0xff) == 0xff;
 }
