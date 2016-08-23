@@ -615,7 +615,7 @@ void PDFDoc::setDocInfoModified(Object *infoObj)
 
 void PDFDoc::setDocInfoStringEntry(const char *key, GooString *value)
 {
-  GBool removeEntry = !value || value->getLength() == 0;
+  GBool removeEntry = !value || value->getLength() == 0 || value->hasJustUnicodeMarker();
   if (removeEntry) {
     delete value;
   }
