@@ -200,6 +200,10 @@ GooString::GooString() {
   s = NULL;
   length = 0;
   Set(NULL);
+
+#if __cplusplus >= 201103L
+  static_assert(sizeof(GooString) == GooString::STR_FINAL_SIZE, "You should check memory alignment or STR_STATIC_SIZE calculation.");
+#endif
 }
 
 GooString::GooString(const char *sA) {
