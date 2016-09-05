@@ -1359,8 +1359,11 @@ void FoFiTrueType::parse() {
     tables[j].checksum = getU32BE(pos + 4, &parsedOk);
     tables[j].offset = (int)getU32BE(pos + 8, &parsedOk);
     tables[j].len = (int)getU32BE(pos + 12, &parsedOk);
-    if (tables[j].offset + tables[j].len >= tables[j].offset &&
-	tables[j].offset + tables[j].len <= len) {
+    if (unlikely((tables[j].offset < 0) ||
+                 (tables[j].len < 0) ||
+                 (tables[j].offset < INT_MAX - tables[j].len) ||
+                 (tables[j].len > INT_MAX - tables[j].offset) ||
+                 (tables[j].offset + tables[j].len >= tables[j].offset && tables[j].offset + tables[j].len <= len))) {
       // ignore any bogus entries in the table directory
       ++j;
     }
