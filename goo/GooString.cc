@@ -163,7 +163,7 @@ void inline GooString::resize(int newLength) {
       // assert(s != s1) the roundedSize condition ensures this
       if (newLength < length) {
 	memcpy(s1, s, newLength);
-      } else {
+      } else if (length > 0) {
 	memcpy(s1, s, length);
       }
       if (s != sStatic)
