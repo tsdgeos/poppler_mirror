@@ -85,6 +85,7 @@ AC_ARG_ENABLE(build-type,
               enable_build_type=no)
 
 if test "x$GCC" = "xyes"; then
+    CXXFLAGS="-std=c++11 $CXXFLAGS"
     case "$enable_build_type" in
     relwithdebinfo)
         CFLAGS="-O2 -g $CFLAGS"

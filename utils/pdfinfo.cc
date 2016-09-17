@@ -36,6 +36,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <map>
 #include "parseargs.h"
 #include "printencodings.h"
 #include "goo/GooString.h"
@@ -77,6 +78,7 @@ static GBool printHelp = gFalse;
 static GBool printEnc = gFalse;
 static GBool printStructure = gFalse;
 static GBool printStructureText = gFalse;
+static GBool printDests = gFalse;
 
 static const ArgDesc argDesc[] = {
   {"-f",      argInt,      &firstPage,        0,
@@ -97,6 +99,8 @@ static const ArgDesc argDesc[] = {
    "print the dates in ISO-8601 format"},
   {"-rawdates", argFlag,   &rawDates,         0,
    "print the undecoded date strings directly from the PDF file"},
+  {"-dests",     argFlag,  &printDests,       0,
+   "print all named destinations in the PDF"},
   {"-enc",    argString,   textEncName,    sizeof(textEncName),
    "output text encoding name"},
   {"-listenc",argFlag,     &printEnc,      0,
@@ -286,6 +290,135 @@ static void printStruct(const StructElement *element, unsigned indent) {
       for (unsigned i = 0; i < element->getNumChildren(); i++) {
           printStruct(element->getChild(i), indent + 1);
       }
+  }
+}
+
+struct RefCompare {
+  bool operator() (const Ref& lhs, const Ref& rhs) const {
+    return lhs.num < rhs.num;
+  }
+};
+
+struct GooStringCompare {
+  bool operator() (GooString* lhs, GooString* rhs) const {
+    return lhs->cmp(const_cast<GooString*>(rhs)) < 0;
+  }
+};
+
+static void printLinkDest(LinkDest *dest) {
+  char buf[100];
+
+  switch (dest->getKind()) {
+    case destXYZ:
+      sprintf(buf, "[ XYZ ");
+      if (dest->getChangeLeft()) {
+	sprintf(buf+strlen(buf), "%4.f ", dest->getLeft());
+      } else {
+	strcat(buf, "null ");
+      }
+      if (dest->getChangeTop()) {
+	sprintf(buf+strlen(buf), "%4.f ", dest->getTop());
+      } else {
+	strcat(buf, "null ");
+      }
+      if (dest->getChangeZoom()) {
+	sprintf(buf+strlen(buf), "%4.2f ", dest->getZoom());
+      } else {
+	strcat(buf, "null ");
+      }
+      break;
+    case destFit:
+      sprintf(buf, "[ Fit ");
+      break;
+    case destFitH:
+      if (dest->getChangeTop()) {
+	sprintf(buf, "[ FitH %4.f ", dest->getTop());
+      } else {
+	sprintf(buf, "[ FitH null ");
+      }
+      break;
+    case destFitV:
+      if (dest->getChangeLeft()) {
+	sprintf(buf, "[ FitV %4.f ", dest->getLeft());
+      } else {
+	strcat(buf, "[ FitV null ");
+      }
+      break;
+    case destFitR:
+      sprintf(buf, "[ FitR %4.f %4.f %4.f %4.f ",
+	      dest->getLeft(),
+	      dest->getBottom(),
+	      dest->getRight(),
+	      dest->getTop());
+      break;
+    case destFitB:
+      sprintf(buf, "[ FitB ");
+      break;
+    case destFitBH:
+      if (dest->getChangeTop()) {
+	sprintf(buf, "[ FitBH %4.f ", dest->getTop());
+      } else {
+	sprintf(buf, "[ FitBH null ");
+      }
+      break;
+    case destFitBV:
+      if (dest->getChangeLeft()) {
+	sprintf(buf, "[ FitBV %4.f ", dest->getLeft());
+      } else {
+	strcat(buf, "[ FitBV null ");
+      }
+      break;
+  }
+
+  strcat(buf, "                                ");
+  buf[26] = ']';
+  buf[27] = 0;
+  printf(buf);
+}
+
+static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
+  std::map<Ref,std::map<GooString*,LinkDest*,GooStringCompare>, RefCompare > map;
+
+  int numDests = doc->getCatalog()->numDestNameTree();
+  for (int i = 0; i < numDests; i++) {
+    GooString *name = doc->getCatalog()->getDestNameTreeName(i);
+    LinkDest *dest = doc->getCatalog()->getDestNameTreeDest(i);
+    if (dest->isPageRef()) {
+      map[dest->getPageRef()].insert(std::make_pair(name, dest));
+    }
+  }
+
+  numDests = doc->getCatalog()->numDests();
+  for (int i = 0; i < numDests; i++) {
+    GooString *name = new GooString(doc->getCatalog()->getDestsName(i));
+    LinkDest *dest = doc->getCatalog()->getDestsDest(i);
+    if (dest->isPageRef()) {
+      map[dest->getPageRef()].insert(std::make_pair(name, dest));
+    }
+  }
+
+  printf("Page  Destination                 Name\n");
+  for (int i = firstPage; i <= lastPage; i++) {
+    Ref *ref = doc->getCatalog()->getPageRef(i);
+    auto pageDests = map.find(*ref);
+    if (pageDests != map.end()) {
+      for (auto& it: pageDests->second) {
+	it.first->getCString()[4] = 0;
+	printf("%4d ", i);
+	printLinkDest(it.second);
+	printf(" \"");
+	Unicode *u;
+	char buf[8];
+	int n, len;
+	len = TextStringToUCS4(it.first, &u);
+	for (int i = 0; i < len; i++) {
+	  n = uMap->mapUnicode(u[i], buf, sizeof(buf));
+	  fwrite(buf, 1, n, stdout);
+	}
+	gfree(u);
+	printf("\"\n");
+      }
+    }
   }
 }
 
@@ -554,7 +687,6 @@ int main(int argc, char *argv[]) {
   }
   if (lastPage == 0) {
     multiPage = gFalse;
-    lastPage = 1;
   } else {
     multiPage = gTrue;
   }
@@ -588,6 +720,8 @@ int main(int argc, char *argv[]) {
 	printStruct(structTree->getChild(i), 0);
       }
     }
+  } else if (printDests) {
+    printDestinations(doc, uMap);
   } else {
     // print info
     long long filesize = 0;
@@ -602,6 +736,10 @@ int main(int argc, char *argv[]) {
       filesize = Gftell(f);
       fclose(f);
     }
+
+    if (multiPage == gFalse)
+      lastPage = 1;
+
     printInfo(doc, uMap, filesize, multiPage);
   }
   exitCode = 0;
