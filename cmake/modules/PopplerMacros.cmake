@@ -104,7 +104,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   set(DEFAULT_COMPILE_WARNINGS_YES "-Wall -Wcast-align -fno-exceptions -fno-check-new -fno-common")
   set(DEFAULT_COMPILE_WARNINGS_KDE "-Wno-long-long -Wundef -D_XOPEN_SOURCE=600 -D_BSD_SOURCE -Wcast-align -Wconversion -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security -Wmissing-format-attribute -fno-exceptions -fno-check-new -fno-common")
 
-  set(CMAKE_CXX_FLAGS                "-std=c++11 -Wnon-virtual-dtor -Woverloaded-virtual ${CMAKE_CXX_FLAGS}")
+  set(CMAKE_CXX_FLAGS                "-Wnon-virtual-dtor -Woverloaded-virtual ${CMAKE_CXX_FLAGS}")
   set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
   set(CMAKE_CXX_FLAGS_RELEASE        "-O2 -DNDEBUG")
   set(CMAKE_CXX_FLAGS_DEBUG          "-g -O2 -fno-reorder-blocks -fno-schedule-insns -fno-inline")
