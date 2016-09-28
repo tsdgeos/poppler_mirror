@@ -639,7 +639,7 @@ if test x$enable_cairo_output = xyes; then
   POPPLER_GLIB_DISABLE_DEPRECATED=""
   POPPLER_GLIB_DISABLE_SINGLE_INCLUDES=""
 
-  GLIB_REQUIRED=2.18
+  GLIB_REQUIRED=2.41
   AC_SUBST(GLIB_REQUIRED)
   AC_ARG_ENABLE(poppler-glib,
 	        AC_HELP_STRING([--disable-poppler-glib],

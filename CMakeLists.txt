@@ -96,7 +96,7 @@ set(TEXTOUT_WORD_LIST ON)
 # setting the minimum required versions for some components
 set(QT4_MIN_VERSION "4.7.0")
 set(CAIRO_VERSION "1.10.0")
-set(GLIB_REQUIRED "2.18")
+set(GLIB_REQUIRED "2.41")
 
 macro_bool_to_01(ENABLE_SPLASH HAVE_SPLASH)
 find_package(Freetype REQUIRED)
