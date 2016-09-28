@@ -35,5 +35,7 @@ int TextStringToUCS4(GooString *textStr, Unicode **ucs4);
 // check if UCS-4 character is valid
 bool UnicodeIsValid(Unicode ucs4);
 
+// is a unicode whitespace character
+bool UnicodeIsWhitespace(Unicode ucs4);
 
 #endif

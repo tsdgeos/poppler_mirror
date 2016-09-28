@@ -26,6 +26,7 @@
 #include "goo/gmem.h"
 #include "PDFDocEncoding.h"
 #include "UTF.h"
+#include <algorithm>
 
 bool UnicodeIsValid(Unicode ucs4)
 {
@@ -116,4 +117,15 @@ int TextStringToUCS4(GooString *textStr, Unicode **ucs4)
   }
   *ucs4 = u;
   return len;
+}
+
+bool UnicodeIsWhitespace(Unicode ucs4)
+{
+  static Unicode const spaces[] = { 0x0009, 0x000A, 0x000B, 0x000C, 0x000D,
+    0x0020, 0x0085, 0x00A0, 0x2000, 0x2001, 0x2002, 0x2003, 0x2004, 0x2005,
+    0x2006, 0x2007, 0x2008, 0x2009, 0x200A, 0x2028, 0x2029, 0x202F, 0x205F,
+    0x3000 };
+  Unicode const *end = spaces + sizeof(spaces) / sizeof(spaces[0]);
+  Unicode const *i = std::lower_bound(spaces, end, ucs4);
+  return (i != end && *i == ucs4);
 }
