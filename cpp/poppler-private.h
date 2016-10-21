@@ -2,7 +2,7 @@
  * Copyright (C) 2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
- * Copyright (C) 2016 Jakub Kucharski <jakubkucharski97@gmail.com>
+ * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

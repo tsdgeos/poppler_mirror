@@ -21,7 +21,7 @@
 // Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2016 Jakub Kucharski <jakubkucharski97@gmail.com>
+// Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

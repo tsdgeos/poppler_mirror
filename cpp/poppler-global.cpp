@@ -3,7 +3,7 @@
  * Copyright (C) 2010, Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2014, 2015 Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2015, Tamas Szekeres <szekerest@gmail.com>
- * Copyright (C) 2016 Jakub Kucharski <jakubkucharski97@gmail.com>
+ * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

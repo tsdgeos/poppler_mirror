@@ -1,7 +1,7 @@
 /* poppler-document.cc: glib wrapper for poppler
  * Copyright (C) 2005, Red Hat, Inc.
  *
- * Copyright (C) 2016 Jakub Kucharski <jakubkucharski97@gmail.com>
+ * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
