@@ -4762,17 +4762,17 @@ GBool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTria
     default:
     break;
   }
-  SplashGouraudColor *splashShading = new SplashGouraudPattern(bDirectColorTranslation, state, shading, colorMode);
   // restore vector antialias because we support it here
   if (shading->isParameterized()) {
+    SplashGouraudColor *splashShading = new SplashGouraudPattern(bDirectColorTranslation, state, shading, colorMode);
     GBool vaa = getVectorAntialias();
     GBool retVal = gFalse;
     setVectorAntialias(gTrue);
     retVal = splash->gouraudTriangleShadedFill(splashShading);
     setVectorAntialias(vaa);
+    delete splashShading;
     return retVal;
   }
-  delete splashShading;
   return gFalse;
 }
 
