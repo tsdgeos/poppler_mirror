@@ -262,7 +262,7 @@ fi
 
 dnl Test for NSS
 AC_ARG_ENABLE(libnss,
-        AC_HELP_STRING([--disable-nss],
+        AC_HELP_STRING([--disable-libnss],
                        [Do not build against libnss3.]),
               enable_libnss=$enableval,
               enable_libnss="try")
