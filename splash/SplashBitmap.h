@@ -109,6 +109,7 @@ private:
   Guchar *alpha;		// pointer to row zero of the alpha data
 				//   (always top-down)
   GooList *separationList; // list of spot colorants and their mapping functions
+  SplashColorMode imageWriterFormat; // input format of ImgWriter
 
   friend class Splash;
 };
