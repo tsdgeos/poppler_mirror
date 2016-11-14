@@ -6,7 +6,7 @@
 //
 // Copyright (C) 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012-2014 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2013 Pino Toscano <pino@kde.org>
+// Copyright (C) 2013, 2016 Pino Toscano <pino@kde.org>
 // Copyright (C) 2013 Daniel Kahn Gillmor <dkg@fifthhorseman.net>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 //
