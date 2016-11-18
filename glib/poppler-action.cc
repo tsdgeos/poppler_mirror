@@ -593,7 +593,7 @@ build_ocg_state (PopplerDocument *document,
 
 	for (i = 0; i < st_list->getLength(); ++i) {
 		LinkOCGState::StateList *list = (LinkOCGState::StateList *)st_list->get(i);
-		PopplerActionLayer *action_layer = g_new0 (PopplerActionLayer, 1);
+		PopplerActionLayer *action_layer = g_slice_new0 (PopplerActionLayer);
 
 		switch (list->st) {
 		case LinkOCGState::On:
