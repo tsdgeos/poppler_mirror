@@ -1,5 +1,5 @@
 /* poppler-link.h: qt interface to poppler
- * Copyright (C) 2006, 2013, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2013, 2016, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2008, 2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, 2012, Guillermo Amaral <gamaral@kdab.com>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
@@ -31,6 +31,8 @@
 
 struct Ref;
 class MediaRendition;
+class MovieAnnotation;
+class ScreenAnnotation;
 
 namespace Poppler {
 
@@ -45,6 +47,7 @@ class LinkMoviePrivate;
 class LinkDestinationData;
 class LinkDestinationPrivate;
 class LinkRenditionPrivate;
+class LinkOCGStatePrivate;
 class MediaRendition;
 class SoundObject;
 
@@ -170,6 +173,8 @@ class POPPLER_QT4_EXPORT LinkDestination
  */
 class POPPLER_QT4_EXPORT Link
 {
+	friend class OptContentModel;
+
 	public:
 		/// \cond PRIVATE
 		Link( const QRectF &linkArea );
@@ -190,7 +195,8 @@ class POPPLER_QT4_EXPORT Link
 		    Sound,    ///< A link representing a sound to be played
 		    Movie,    ///< An action to be executed on a movie
 		    Rendition,    ///< A rendition link \since 0.20
-		    JavaScript    ///< A JavaScript code to be interpreted \since 0.10
+		    JavaScript,   ///< A JavaScript code to be interpreted \since 0.10
+		    OCGState      ///< An Optional Content Group state change \since 0.50
 		};
 
 		/**
@@ -604,6 +610,30 @@ class POPPLER_QT4_EXPORT LinkMovie : public Link
 	private:
 		Q_DECLARE_PRIVATE( LinkMovie )
 		Q_DISABLE_COPY( LinkMovie )
+};
+
+/**
+ * OCGState: an optional content group state change.
+ *
+ * \since 0.50
+ */
+class POPPLER_QT4_EXPORT LinkOCGState : public Link
+{
+	public:
+		/**
+		 * Create a new OCGState link. This is only used by Poppler::Page.
+		 */
+		LinkOCGState( LinkOCGStatePrivate *ocgp );
+		/**
+		 * Destructor.
+		 */
+		~LinkOCGState();
+
+		LinkType linkType() const;
+
+	private:
+		Q_DECLARE_PRIVATE( LinkOCGState )
+		Q_DISABLE_COPY( LinkOCGState )
 };
 
 }
