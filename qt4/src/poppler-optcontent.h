@@ -68,7 +68,7 @@ namespace Poppler
     virtual QVariant headerData( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
 
     /**
-     * Applies the Optional Contentn Changes specified by that link.
+     * Applies the Optional Content Changes specified by that link.
      * \since 0.50
      */
     void applyLink( LinkOCGState *link );
