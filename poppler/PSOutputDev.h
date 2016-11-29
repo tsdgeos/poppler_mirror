@@ -320,6 +320,7 @@ public:
   GBool getEmbedCIDTrueType() const { return embedCIDTrueType; }
   GBool getFontPassthrough() const { return fontPassthrough; }
   GBool getOptimizeColorSpace() const { return optimizeColorSpace; }
+  GBool getPassLevel1CustomColor() const { return passLevel1CustomColor; }
   GBool getEnableLZW() const { return enableLZW; };
   GBool getEnableFlate() const
 #if ENABLE_ZLIB
@@ -333,6 +334,7 @@ public:
   void setEmbedCIDTrueType(GBool b) { embedCIDTrueType = b; }
   void setFontPassthrough(GBool b) { fontPassthrough = b; }
   void setOptimizeColorSpace(GBool b) { optimizeColorSpace = b; }
+  void setPassLevel1CustomColor(GBool b) { passLevel1CustomColor = b; }
   void setPreloadImagesForms(GBool b) { preloadImagesForms = b; }
   void setGenerateOPI(GBool b) { generateOPI = b; }
   void setUseASCIIHex(GBool b) { useASCIIHex = b; }
@@ -536,6 +538,9 @@ private:
   GBool fontPassthrough;	// pass all fonts through as-is?
   GBool optimizeColorSpace;	// false to keep gray RGB images in their original color space
 				// true to optimize gray images to DeviceGray color space
+  GBool passLevel1CustomColor;	// false to convert all custom colors to CMYK
+				// true to pass custom colors
+				// has effect only when doing a level1sep
   GBool preloadImagesForms;	// preload PostScript images and forms into
 				//   memory
   GBool generateOPI;		// generate PostScript OPI comments?

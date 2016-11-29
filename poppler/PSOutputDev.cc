@@ -1248,6 +1248,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   embedCIDTrueType = gTrue;
   fontPassthrough = gFalse;
   optimizeColorSpace = gFalse;
+  passLevel1CustomColor = gFalse;
   preloadImagesForms = gFalse;
   generateOPI = gFalse;
   useASCIIHex = gFalse;
@@ -1650,6 +1651,7 @@ void PSOutputDev::writeXpdfProcset() {
       }
     } else if ((level == psLevel1 && lev1 && nonSep) ||
 	       (level == psLevel1Sep && lev1 && sep) ||
+	       (level == psLevel1Sep && lev2 && sep && getPassLevel1CustomColor()) ||
 	       (level == psLevel2 && lev2 && nonSep) ||
 	       (level == psLevel2Sep && lev2 && sep) ||
 	       (level == psLevel3 && lev3 && nonSep) ||
@@ -4124,15 +4126,6 @@ void PSOutputDev::updateFillColor(GfxState *state) {
     state->getFillGray(&gray);
     writePSFmt("{0:.4g} g\n", colToDbl(gray));
     break;
-  case psLevel1Sep:
-    state->getFillCMYK(&cmyk);
-    c = colToDbl(cmyk.c);
-    m = colToDbl(cmyk.m);
-    y = colToDbl(cmyk.y);
-    k = colToDbl(cmyk.k);
-    writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} k\n", c, m, y, k);
-    addProcessColor(c, m, y, k);
-    break;
   case psLevel2:
   case psLevel3:
     if (state->getFillColorSpace()->getMode() != csPattern) {
@@ -4147,9 +4140,10 @@ void PSOutputDev::updateFillColor(GfxState *state) {
       writePS("] sc\n");
     }
     break;
+  case psLevel1Sep:
   case psLevel2Sep:
   case psLevel3Sep:
-    if (state->getFillColorSpace()->getMode() == csSeparation) {
+    if (state->getFillColorSpace()->getMode() == csSeparation && (level > psLevel1Sep || getPassLevel1CustomColor())) {
       sepCS = (GfxSeparationColorSpace *)state->getFillColorSpace();
       color.c[0] = gfxColorComp1;
       sepCS->getCMYK(&color, &cmyk);
@@ -4190,15 +4184,6 @@ void PSOutputDev::updateStrokeColor(GfxState *state) {
     state->getStrokeGray(&gray);
     writePSFmt("{0:.4g} G\n", colToDbl(gray));
     break;
-  case psLevel1Sep:
-    state->getStrokeCMYK(&cmyk);
-    c = colToDbl(cmyk.c);
-    m = colToDbl(cmyk.m);
-    y = colToDbl(cmyk.y);
-    k = colToDbl(cmyk.k);
-    writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} K\n", c, m, y, k);
-    addProcessColor(c, m, y, k);
-    break;
   case psLevel2:
   case psLevel3:
     if (state->getStrokeColorSpace()->getMode() != csPattern) {
@@ -4213,9 +4198,10 @@ void PSOutputDev::updateStrokeColor(GfxState *state) {
       writePS("] SC\n");
     }
     break;
+  case psLevel1Sep:
   case psLevel2Sep:
   case psLevel3Sep:
-    if (state->getStrokeColorSpace()->getMode() == csSeparation) {
+    if (state->getStrokeColorSpace()->getMode() == csSeparation && (level > psLevel1Sep || getPassLevel1CustomColor())) {
       sepCS = (GfxSeparationColorSpace *)state->getStrokeColorSpace();
       color.c[0] = gfxColorComp1;
       sepCS->getCMYK(&color, &cmyk);
@@ -5889,7 +5875,11 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
 
   // color space
   if (colorMap) {
-    dumpColorSpaceL2(colorMap->getColorSpace(), gFalse, gTrue, gFalse);
+    // Do not update the process color list for custom colors
+    GBool isCustomColor =
+      (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep) &&
+      colorMap->getColorSpace()->getMode() == csDeviceN;
+    dumpColorSpaceL2(colorMap->getColorSpace(), gFalse, !isCustomColor, gFalse);
     writePS(" setcolorspace\n");
   }
 
@@ -6288,7 +6278,11 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
 
   // color space
   if (colorMap) {
-    dumpColorSpaceL2(colorMap->getColorSpace(), gFalse, gTrue, gFalse);
+    // Do not update the process color list for custom colors
+    GBool isCustomColor =
+      (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep) &&
+      colorMap->getColorSpace()->getMode() == csDeviceN;
+    dumpColorSpaceL2(colorMap->getColorSpace(), gFalse, !isCustomColor, gFalse);
     writePS(" setcolorspace\n");
   }
 
