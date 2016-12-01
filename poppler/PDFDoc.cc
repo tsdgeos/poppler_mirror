@@ -1272,16 +1272,6 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numO
     case objString:
       writeString(obj->getString(), outStr, fileKey, encAlgorithm, keyLength, objNum, objGen);
       break;
-    case objHexString:
-    {
-      GooString *s = obj->getHexString();
-      outStr->printf("<");
-      for (int i = 0; i < s->getLength(); i++) {
-        outStr->printf("%02x", s->getChar(i) & 0xff);
-      }
-      outStr->printf(">");
-      break;
-    }
     case objName:
     {
       GooString name(obj->getName());

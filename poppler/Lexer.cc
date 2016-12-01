@@ -18,7 +18,6 @@
 // Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012, 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -527,7 +526,7 @@ Object *Lexer::getObj(Object *obj, int objNum) {
 	s->append(tokBuf, n);
       if (m == 1)
 	s->append((char)(c2 << 4));
-      obj->initHexString(s);
+      obj->initString(s);
     }
     break;
 

@@ -105,12 +105,10 @@ enum ObjType {
   objNone,			// uninitialized object
 
   // poppler-only objects
-  objInt64,			// integer with at least 64-bits
-
-  objHexString			// hex string
+  objInt64			// integer with at least 64-bits
 };
 
-#define numObjTypes 16		// total number of object types
+#define numObjTypes 15		// total number of object types
 
 //------------------------------------------------------------------------
 // Object
@@ -140,8 +138,6 @@ public:
     { initObj(objReal); real = realA; return this; }
   Object *initString(GooString *stringA)
     { initObj(objString); string = stringA; return this; }
-  Object *initHexString(GooString *hexA)
-    { initObj(objHexString); string = hexA; return this; }
   Object *initName(const char *nameA)
     { initObj(objName); name = copyString(nameA); return this; }
   Object *initNull()
@@ -182,7 +178,6 @@ public:
   GBool isReal() { return type == objReal; }
   GBool isNum() { return type == objInt || type == objReal || type == objInt64; }
   GBool isString() { return type == objString; }
-  GBool isHexString() { return type == objHexString; }
   GBool isName() { return type == objName; }
   GBool isNull() { return type == objNull; }
   GBool isArray() { return type == objArray; }
@@ -218,11 +213,6 @@ public:
   // because the object it's not expected to have a NULL string.
   GooString *takeString() {
     OBJECT_TYPE_CHECK(objString); GooString *s = string; string = NULL; return s; }
-  GooString *getHexString() { OBJECT_TYPE_CHECK(objHexString); return string; }
-  // After takeHexString() the only method that should be called for the object is free()
-  // because the object it's not expected to have a NULL hex string.
-  GooString *takeHexString() {
-    OBJECT_TYPE_CHECK(objHexString); GooString *s = string; string = NULL; return s; }
   char *getName() { OBJECT_TYPE_CHECK(objName); return name; }
   Array *getArray() { OBJECT_TYPE_CHECK(objArray); return array; }
   Dict *getDict() { OBJECT_TYPE_CHECK(objDict); return dict; }
@@ -281,7 +271,7 @@ private:
     int intg;			//   integer
     long long int64g;           //   64-bit integer
     double real;		//   real
-    GooString *string;		//   (hex) string
+    GooString *string;		//   string
     char *name;			//   name
     Array *array;		//   array
     Dict *dict;			//   dictionary
