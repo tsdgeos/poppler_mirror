@@ -9,6 +9,7 @@
 // Copyright 2010, 2013 Pino Toscano <pino@kde.org>
 // Copyright 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2014 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright 2016 Jeffrey Morlan <jmmorlan@sonic.net>
 //
 //========================================================================
 
@@ -372,6 +373,11 @@ GBool Hints::readSharedObjectsTable(Stream *str)
   }
   if ((!nSharedGroupsFirst) || (nSharedGroupsFirst > nSharedGroups)) {
      error(errSyntaxWarning, -1, "Invalid number of first page shared object groups");
+     nSharedGroups = 0;
+     return gFalse;
+  }
+  if (nBitsNumObjects > 32 || nBitsDiffGroupLength > 32) {
+     error(errSyntaxWarning, -1, "Invalid shared object groups bit length");
      nSharedGroups = 0;
      return gFalse;
   }
