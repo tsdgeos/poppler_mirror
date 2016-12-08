@@ -1103,6 +1103,7 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc,
 
   fontIDs = NULL;
   fontNames = new GooHash(gTrue);
+  fontMaxValidGlyph = new GooHash(gTrue);
   t1FontNames = NULL;
   font8Info = NULL;
   font16Enc = NULL;
@@ -1171,6 +1172,7 @@ PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
 
   fontIDs = NULL;
   fontNames = new GooHash(gTrue);
+  fontMaxValidGlyph = new GooHash(gTrue);
   t1FontNames = NULL;
   font8Info = NULL;
   font16Enc = NULL;
@@ -1497,6 +1499,7 @@ PSOutputDev::~PSOutputDev() {
     gfree(fontIDs);
   }
   delete fontNames;
+  delete fontMaxValidGlyph;
   if (t1FontNames) {
     for (i = 0; i < t1FontNameLen; ++i) {
       delete t1FontNames[i].psName;
@@ -2610,10 +2613,15 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font,
 		outputFunc, outputStream);
       } else {
 	// otherwise: use a non-CID composite font
+	int maxValidGlyph = -1;
 	ffTT->convertToType0(psName->getCString(),
 		codeToGID, codeToGIDLen,
 		needVerticalMetrics,
+		&maxValidGlyph,
 		outputFunc, outputStream);
+	if (maxValidGlyph >= 0 && font->getName()) {
+	  fontMaxValidGlyph->replace(font->getName()->copy(), maxValidGlyph);
+	}
       }
       gfree(codeToGID);
     } else {
@@ -2706,11 +2714,16 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id,
 				outputFunc, outputStream);
       } else {
 	// otherwise: use a non-CID composite font
+	int maxValidGlyph = -1;
 	ffTT->convertToType0(psName->getCString(),
 			     ((GfxCIDFont *)font)->getCIDToGID(),
 			     ((GfxCIDFont *)font)->getCIDToGIDLen(),
 			     needVerticalMetrics,
+			     &maxValidGlyph,
 			     outputFunc, outputStream);
+	if (maxValidGlyph > 0 && font->getName()) {
+	  fontMaxValidGlyph->replace(font->getName()->copy(), maxValidGlyph);
+	}
       }
       delete ffTT;
     }
@@ -5051,6 +5064,8 @@ void PSOutputDev::drawString(GfxState *state, GooString *s) {
   char buf[8];
   double *dxdy;
   int dxdySize, len, nChars, uLen, n, m, i, j;
+  int maxGlyphInt;
+  CharCode maxGlyph;
 
   // for pdftohtml, output PS without text
   if( displayText == gFalse )
@@ -5070,6 +5085,9 @@ void PSOutputDev::drawString(GfxState *state, GooString *s) {
   if (!(font = state->getFont())) {
     return;
   }
+  maxGlyphInt = (font->getName()? fontMaxValidGlyph->lookupInt(font->getName()): 0);
+  if (maxGlyphInt < 0) maxGlyphInt = 0;
+  maxGlyph = (CharCode) maxGlyphInt;
   wMode = font->getWMode();
 
   // check for a subtitute 16-bit font
@@ -5143,6 +5161,14 @@ void PSOutputDev::drawString(GfxState *state, GooString *s) {
 	  dxdy[2 * nChars] = dx;
 	  dxdy[2 * nChars + 1] = dy;
 	  ++nChars;
+	}
+      } else if (maxGlyph > 0 && code > maxGlyph) {
+	// Ignore this code.
+	// Using it will exceed the number of glyphs in the font and generate
+	// /rangecheck in --xyshow--
+	if (nChars > 0) {
+	  dxdy[2 * (nChars-1) ] += dx;
+	  dxdy[2 * (nChars-1) + 1 ] += dy;
 	}
       } else {
 	if (nChars + 1 > dxdySize) {
