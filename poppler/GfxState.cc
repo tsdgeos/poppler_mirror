@@ -2050,9 +2050,13 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
   if (hp == 0) {
     error(errSyntaxWarning, -1, "read ICCBased color space profile error");
   } else {
-    GfxColorSpace::setupColorProfiles();
     cmsHPROFILE dhp = (state != NULL && state->getDisplayProfile() != NULL) ? state->getDisplayProfile() : displayProfile;
-    if (dhp == NULL) dhp = RGBProfile;
+    if (dhp == NULL) {
+      if (unlikely(RGBProfile == NULL)) {
+        GfxColorSpace::setupColorProfiles();
+      }
+      dhp = RGBProfile;
+    }
     unsigned int cst = getCMSColorSpaceType(cmsGetColorSpace(hp));
     unsigned int dNChannels = getCMSNChannels(cmsGetColorSpace(dhp));
     unsigned int dcst = getCMSColorSpaceType(cmsGetColorSpace(dhp));
