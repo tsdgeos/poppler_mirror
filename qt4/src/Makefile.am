@@ -4,6 +4,7 @@ libpoppler_qt4_includedir = $(includedir)/poppler/qt4
 libpoppler_qt4_include_HEADERS =		\
 	poppler-qt4.h				\
 	poppler-link.h				\
+	poppler-link-private.h			\
 	poppler-annotation.h			\
 	poppler-form.h				\
 	poppler-optcontent.h			\
@@ -60,7 +61,7 @@ libpoppler_qt4_la_LIBADD =			\
 	$(POPPLER_QT4_LIBS)
 
 libpoppler_qt4_la_LDFLAGS =			\
-	-version-info 14:0:10			\
+	-version-info 15:0:11			\
 	@create_shared_lib@			\
 	@auto_import_flags@
 
