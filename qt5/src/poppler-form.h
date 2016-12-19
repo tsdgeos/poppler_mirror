@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2016, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -74,9 +74,15 @@ namespace Poppler {
 	int id() const;
 
 	/**
-	  The internal name of the field.
+	  The internal name (T) of the field.
 	 */
 	QString name() const;
+
+        /**
+	  Sets the internal name (T) of the field.
+	  \since 0.51
+	 */
+	void setName(const QString &name) const;
 	
 	/**
 	  The internal fully qualified name of the field.

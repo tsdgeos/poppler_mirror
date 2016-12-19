@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015, 2016 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  *
@@ -109,6 +109,13 @@ QString FormField::name() const
     name = QString::fromLatin1(goo->getCString());
   }
   return name;
+}
+
+void FormField::setName(const QString &name) const
+{
+  GooString * goo = QStringToGooString( name );
+  m_formData->fm->setPartialName(*goo);
+  delete goo;
 }
 
 QString FormField::fullyQualifiedName() const
