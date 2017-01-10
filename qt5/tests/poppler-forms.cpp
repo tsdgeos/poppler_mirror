@@ -1,4 +1,5 @@
 #include <QtCore/QCoreApplication>
+#include <QtCore/QDateTime>
 #include <QtCore/QDebug>
 
 #include <iostream>
@@ -42,6 +43,34 @@ std::ostream& operator<< (std::ostream &out, Poppler::FormFieldChoice::ChoiceTyp
     switch (type) {
         case Poppler::FormFieldChoice::ComboBox:      out << "ComboBox";    break;
         case Poppler::FormFieldChoice::ListBox:       out << "ListBox";     break;
+    }
+    return out;
+}
+
+std::ostream& operator<< (std::ostream &out, Poppler::SignatureValidationInfo::SignatureStatus status)
+{
+    switch (status) {
+        case Poppler::SignatureValidationInfo::SignatureValid:          out << "Valid";          break;
+        case Poppler::SignatureValidationInfo::SignatureInvalid:        out << "Invalid";        break;
+        case Poppler::SignatureValidationInfo::SignatureDigestMismatch: out << "DigestMismatch"; break;
+        case Poppler::SignatureValidationInfo::SignatureDecodingError:  out << "DecodingError";  break;
+        case Poppler::SignatureValidationInfo::SignatureGenericError:   out << "GenericError";   break;
+        case Poppler::SignatureValidationInfo::SignatureNotFound:       out << "NotFound";       break;
+        case Poppler::SignatureValidationInfo::SignatureNotVerified:    out << "NotVerifiedYet"; break;
+    }
+    return out;
+}
+
+std::ostream& operator<< (std::ostream &out, Poppler::SignatureValidationInfo::CertificateStatus status)
+{
+    switch (status) {
+        case Poppler::SignatureValidationInfo::CertificateTrusted:         out << "Trusted";         break;
+        case Poppler::SignatureValidationInfo::CertificateUntrustedIssuer: out << "UntrustedIssuer"; break;
+        case Poppler::SignatureValidationInfo::CertificateUnknownIssuer:   out << "UnknownIssuer";   break;
+        case Poppler::SignatureValidationInfo::CertificateRevoked:         out << "Revoked";         break;
+        case Poppler::SignatureValidationInfo::CertificateExpired:         out << "Expired";         break;
+        case Poppler::SignatureValidationInfo::CertificateGenericError:    out << "GenericError";    break;
+        case Poppler::SignatureValidationInfo::CertificateNotVerified:     out << "NotVerifiedYet";  break;
     }
     return out;
 }
@@ -155,7 +184,23 @@ int main( int argc, char **argv )
                     }
                     break;
 
-                    case Poppler::FormField::FormSignature:
+                    case Poppler::FormField::FormSignature: {
+                        const Poppler::FormFieldSignature *signatureForm = static_cast<const Poppler::FormFieldSignature *>(form);
+                        QScopedPointer<Poppler::SignatureValidationInfo> svi;
+                        signatureForm->validate(Poppler::FormFieldSignature::ValidateVerifyCertificate, svi);
+                        std::cout << "\t\t\tSignatureStatus: " << svi->signatureStatus() << std::endl;
+                        std::cout << "\t\t\tCertificateStatus: " << svi->certificateStatus() << std::endl;
+                        if (svi->signerName().isEmpty() == false)
+                          std::cout << "\t\t\tSignerName: " << svi->signerName() << std::endl;
+                        else
+                          std::cout << "\t\t\tSignerName: " << "(null)" << std::endl;
+                        // http://doc.qt.io/qt-5/qdatetime.html#fromTime_t-1
+                        // Requires Qt 5.2 -> configure.ac update
+                        // QDateTime::fromTime_t(svi->signingTime(), Qt::UTC).toString();
+                        QDateTime sviTime;
+                        sviTime.setTime_t(svi->signingTime());
+                        std::cout << "\t\t\tSigningTime: " << sviTime.toString() << std::endl;
+                    }
                     break;
                 }
             }
