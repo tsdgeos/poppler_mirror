@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2016, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2016, 2017, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  *
@@ -24,7 +24,7 @@
 
 #include <QtCore/QRectF>
 #include <QtCore/QStringList>
-#include <QtCore/QScopedPointer>
+#include <QtCore/QSharedPointer>
 #include "poppler-export.h"
 
 class Page;
@@ -390,29 +390,30 @@ namespace Poppler {
 	/**
 	  The signature status of the signature.
 	 */
-	const SignatureStatus signatureStatus() const;
+	SignatureStatus signatureStatus() const;
 
 	/**
 	  The certificate status of the signature.
 	 */
-	const CertificateStatus certificateStatus() const;
+	CertificateStatus certificateStatus() const;
 
 	/**
 	  The signer name associated with the signature.
 	 */
-	const QString signerName() const;
+	QString signerName() const;
 
 	/**
 	  The signing time associated with the signature.
 	 */
-	const time_t signingTime() const;
+	time_t signingTime() const;
+
+	SignatureValidationInfo(const SignatureValidationInfo &other);
+	SignatureValidationInfo &operator=(const SignatureValidationInfo &other);
 
 	private:
-	Q_DISABLE_COPY(SignatureValidationInfo)
 	Q_DECLARE_PRIVATE(SignatureValidationInfo)
 
-	private:
-	QScopedPointer<SignatureValidationInfoPrivate> d_ptr;
+	QSharedPointer<SignatureValidationInfoPrivate> d_ptr;
     };
 
     /**
@@ -443,8 +444,7 @@ namespace Poppler {
 
 	  Reset signature validatation info of scoped instance.
 	 */
-	void validate(ValidateOptions opt,
-		QScopedPointer<SignatureValidationInfo>& svi) const;
+	SignatureValidationInfo validate(ValidateOptions opt) const;
 
 	private:
 	Q_DISABLE_COPY(FormFieldSignature)

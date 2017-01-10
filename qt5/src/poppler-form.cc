@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015, 2016 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015-2017 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
@@ -438,34 +438,46 @@ SignatureValidationInfo::SignatureValidationInfo(SignatureValidationInfoPrivate*
 {
 }
 
+SignatureValidationInfo::SignatureValidationInfo(const SignatureValidationInfo &other)
+ : d_ptr( other.d_ptr )
+{
+}
+
 SignatureValidationInfo::~SignatureValidationInfo()
 {
 }
 
-const SignatureValidationInfo::SignatureStatus SignatureValidationInfo::signatureStatus() const
+SignatureValidationInfo::SignatureStatus SignatureValidationInfo::signatureStatus() const
 {
   Q_D(const SignatureValidationInfo);
   return d->signature_status;
 }
 
-const SignatureValidationInfo::CertificateStatus SignatureValidationInfo::certificateStatus() const
+SignatureValidationInfo::CertificateStatus SignatureValidationInfo::certificateStatus() const
 {
   Q_D(const SignatureValidationInfo);
   return d->certificate_status;
 }
 
-const QString SignatureValidationInfo::signerName() const
+QString SignatureValidationInfo::signerName() const
 {
   Q_D(const SignatureValidationInfo);
   return d->signer_name;
 }
 
-const time_t SignatureValidationInfo::signingTime() const
+time_t SignatureValidationInfo::signingTime() const
 {
   Q_D(const SignatureValidationInfo);
   return d->signing_time;
 }
 
+SignatureValidationInfo &SignatureValidationInfo::operator=(const SignatureValidationInfo &other)
+{
+  if ( this != &other )
+    d_ptr = other.d_ptr;
+
+  return *this;
+}
 
 FormFieldSignature::FormFieldSignature(DocumentData *doc, ::Page *p, ::FormWidgetSignature *w)
   : FormField(*new FormFieldData(doc, p, w))
@@ -481,13 +493,11 @@ FormField::FormType FormFieldSignature::type() const
   return FormField::FormSignature;
 }
 
-void FormFieldSignature::validate(ValidateOptions opt,
-  QScopedPointer<SignatureValidationInfo>& svi) const
+SignatureValidationInfo FormFieldSignature::validate(ValidateOptions opt) const
 {
   FormWidgetSignature* fws = static_cast<FormWidgetSignature*>(m_formData->fm);
-  SignatureInfo* si = fws->validateSignature(
-    opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation);
-  SignatureValidationInfoPrivate* priv(new SignatureValidationInfoPrivate);
+  SignatureInfo* si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation);
+  SignatureValidationInfoPrivate* priv = new SignatureValidationInfoPrivate;
   switch (si->getSignatureValStatus()) {
     case SIGNATURE_VALID:
       priv->signature_status = SignatureValidationInfo::SignatureValid;
@@ -539,7 +549,7 @@ void FormFieldSignature::validate(ValidateOptions opt,
   priv->signer_name = si->getSignerName();
   priv->signing_time = si->getSigningTime();
 
-  svi.reset(new SignatureValidationInfo(priv));
+  return SignatureValidationInfo(priv);
 }
 
 }
