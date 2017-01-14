@@ -350,7 +350,7 @@ namespace Poppler {
     /**
       A signature validation info helper class.
 
-      \since xy.z
+      \since 0.51
      */
     class SignatureValidationInfoPrivate;
     class POPPLER_QT5_EXPORT SignatureValidationInfo {
@@ -419,7 +419,7 @@ namespace Poppler {
     /**
       A form field that represents a signature.
 
-      \since xy.z
+      \since 0.51
      */
     class POPPLER_QT5_EXPORT FormFieldSignature : public FormField {
     public:
