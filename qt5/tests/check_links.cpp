@@ -68,6 +68,8 @@ void TestLinks::checkDests_xr01()
     QCOMPARE( dest.destinationName(), QString::fromLatin1("section.2") );
     }
 
+    qDeleteAll(links);
+    delete page;
     delete doc;
 }
 
