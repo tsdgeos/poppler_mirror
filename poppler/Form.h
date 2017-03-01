@@ -540,6 +540,9 @@ public:
   FormWidget* findWidgetByRef (Ref aref);
 
   void postWidgetsLoad();
+
+  const std::vector<Ref> &getCalculateOrder() const { return calculateOrder; }
+
 private:
   FormField** rootFields;
   int numFields;
@@ -550,6 +553,7 @@ private:
   GBool needAppearances;
   GfxResources *defaultResources;
   Object resDict;
+  std::vector<Ref> calculateOrder;
 
   // Variable Text
   GooString *defaultAppearance;

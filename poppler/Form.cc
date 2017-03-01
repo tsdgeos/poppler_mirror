@@ -1640,6 +1640,25 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
   }
   obj1.free ();
 
+  acroForm->dictLookup("CO", &obj1);
+  if (obj1.isArray()) {
+    Array *array = obj1.getArray();
+    calculateOrder.reserve(array->getLength());
+    for(int i=0; i<array->getLength(); i++) {
+      Object oref;
+      array->getNF(i, &oref);
+      if (!oref.isRef()) {
+        error(errSyntaxWarning, -1, "Direct object in CO");
+        oref.free();
+        continue;
+      }
+      calculateOrder.push_back(oref.getRef());
+
+      oref.free();
+    }
+  }
+  obj1.free ();
+
 #ifdef DEBUG_FORMS
   for (int i = 0; i < numFields; i++)
     rootFields[i]->printTree();
