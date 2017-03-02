@@ -116,6 +116,25 @@ namespace Poppler {
 	 */
 	Link* activationAction() const;
 
+        /**
+	  * Describes the flags from the form 'AA' dictionary.
+	  *
+	  * \since 0.53
+	 */
+	enum AdditionalActionType
+	{
+	    FieldModified,   ///< A JavaScript action to be performed when the user modifies the field
+	    FormatField,     ///< A JavaScript action to be performed before the field is formatted to display its value
+	    ValidateField,   ///< A JavaScript action to be performed when the field value changes
+	    CalculateField,  ///< A JavaScript action to be performed when the field needs to be recalculated
+	};
+	/**
+	  * Returns a given form additional action
+	  *
+	  * \since 0.53
+	 */
+	Link* additionalAction(AdditionalActionType type) const;
+
     protected:
 	/// \cond PRIVATE
 	FormField(FormFieldData &dd);

@@ -160,6 +160,26 @@ Link* FormField::activationAction() const
   return action;
 }
 
+Link *FormField::additionalAction(AdditionalActionType type) const
+{
+  Annot::FormAdditionalActionsType actionType = Annot::actionFieldModified;
+  switch ( type )
+  {
+      case FieldModified:  actionType = Annot::actionFieldModified; break;
+      case FormatField:    actionType = Annot::actionFormatField; break;
+      case ValidateField:  actionType = Annot::actionValidateField; break;
+      case CalculateField: actionType = Annot::actionCalculateField; break;
+
+  }
+
+  Link* action = 0;
+  if (::LinkAction *act = m_formData->fm->getAdditionalAction(actionType))
+  {
+    action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
+  }
+  return action;
+}
+
 
 FormFieldButton::FormFieldButton(DocumentData *doc, ::Page *p, ::FormWidgetButton *w)
   : FormField(*new FormFieldData(doc, p, w))
