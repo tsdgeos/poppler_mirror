@@ -55,6 +55,7 @@ public:
   };
   enum ImageFormat {
     imgRGB,
+    imgRGB48,
     imgGray,
     imgMonochrome,
     imgCMYK

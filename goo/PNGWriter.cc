@@ -117,6 +117,10 @@ bool PNGWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
       bit_depth = 8;
       color_type = PNG_COLOR_TYPE_RGB;
       break;
+    case RGB48:
+      bit_depth = 16;
+      color_type = PNG_COLOR_TYPE_RGB;
+      break;
     case RGBA:
       bit_depth = 8;
       color_type = PNG_COLOR_TYPE_RGB_ALPHA;

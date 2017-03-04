@@ -32,8 +32,9 @@ public:
    * RGBA       - 4 bytes/pixel
    * GRAY       - 1 byte/pixel
    * MONOCHROME - 8 pixels/byte
+   * RGB48      - 6 bytes/pixel
    */
-  enum Format { RGB, RGBA, GRAY, MONOCHROME };
+  enum Format { RGB, RGBA, GRAY, MONOCHROME, RGB48 };
 
   PNGWriter(Format format = RGB);
   ~PNGWriter();

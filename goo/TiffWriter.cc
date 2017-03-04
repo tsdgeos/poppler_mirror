@@ -147,6 +147,12 @@ bool TiffWriter::init(FILE *openedFile, int width, int height, int hDPI, int vDP
       samplesperpixel = 4;
       photometric = PHOTOMETRIC_SEPARATED;
       break;
+
+    case RGB48:
+      samplesperpixel = 3;
+      bitspersample = 16;
+      photometric = PHOTOMETRIC_RGB;
+      break;
   }
 
   // Open the file
