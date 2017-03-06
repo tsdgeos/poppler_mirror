@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2016 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2017 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -111,7 +111,9 @@ void JSInfo::scan(int nPages) {
     if (print) {
       for (int i = 0; i < numNames; i++) {
 	fprintf(file, "Name Dictionary \"%s\":\n", doc->getCatalog()->getJSName(i)->getCString());
-	printJS(doc->getCatalog()->getJS(i));
+	GooString *js = doc->getCatalog()->getJS(i);
+	printJS(js);
+	delete js;
 	fputs("\n\n", file);
       }
     }
