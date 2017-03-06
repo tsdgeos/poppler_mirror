@@ -34,7 +34,7 @@ JSInfo::~JSInfo() {
 }
 
 void JSInfo::printJS(GooString *js) {
-  Unicode *u;
+  Unicode *u =  NULL;
   char buf[8];
   int i, n, len;
 
@@ -46,6 +46,7 @@ void JSInfo::printJS(GooString *js) {
     n = uniMap->mapUnicode(u[i], buf, sizeof(buf));
     fwrite(buf, 1, n, file);
   }
+  gfree(u);
 }
 
 void JSInfo::scanLinkAction(LinkAction *link, const char *action, bool deleteLink) {
