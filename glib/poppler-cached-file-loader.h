@@ -28,8 +28,8 @@ class PopplerCachedFileLoader: public CachedFileLoader {
 public:
   PopplerCachedFileLoader(GInputStream* inputStreamA, GCancellable *cancellableA, goffset lengthA = -1);
   ~PopplerCachedFileLoader();
-  size_t init(GooString *url, CachedFile* cachedFile);
-  int load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer);
+  size_t init(GooString *url, CachedFile* cachedFile) override;
+  int load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer) override;
 
 private:
   GInputStream *inputStream;

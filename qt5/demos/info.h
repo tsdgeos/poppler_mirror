@@ -31,10 +31,10 @@ public:
     InfoDock(QWidget *parent = 0);
     ~InfoDock();
 
-    /*virtual*/ void documentClosed();
+    void documentClosed() override;
 
 protected:
-    /*virtual*/ void fillInfo();
+    void fillInfo() override;
 
 private:
     QTableWidget *m_table;

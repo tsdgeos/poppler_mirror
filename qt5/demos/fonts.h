@@ -31,10 +31,10 @@ public:
     FontsDock(QWidget *parent = 0);
     ~FontsDock();
 
-    /*virtual*/ void documentClosed();
+    void documentClosed() override;
 
 protected:
-    /*virtual*/ void fillInfo();
+    void fillInfo() override;
 
 private:
     QTableWidget *m_table;

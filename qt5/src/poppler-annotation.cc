@@ -1823,8 +1823,8 @@ class TextAnnotationPrivate : public AnnotationPrivate
 {
     public:
         TextAnnotationPrivate();
-        Annotation * makeAlias();
-        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+        Annotation * makeAlias() override;
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
         // data fields
         TextAnnotation::TextType textType;
@@ -2276,8 +2276,8 @@ class LineAnnotationPrivate : public AnnotationPrivate
 {
     public:
         LineAnnotationPrivate();
-        Annotation * makeAlias();
-        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+        Annotation * makeAlias() override;
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
         // data fields (note uses border for rendering style)
         QLinkedList<QPointF> linePoints;
@@ -2882,8 +2882,8 @@ class GeomAnnotationPrivate : public AnnotationPrivate
 {
     public:
         GeomAnnotationPrivate();
-        Annotation * makeAlias();
-        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+        Annotation * makeAlias() override;
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
         // data fields (note uses border for rendering style)
         GeomAnnotation::GeomType geomType;
@@ -3044,8 +3044,8 @@ class HighlightAnnotationPrivate : public AnnotationPrivate
 {
     public:
         HighlightAnnotationPrivate();
-        Annotation * makeAlias();
-        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+        Annotation * makeAlias() override;
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
         // data fields
         HighlightAnnotation::HighlightType highlightType;
@@ -3333,8 +3333,8 @@ class StampAnnotationPrivate : public AnnotationPrivate
 {
     public:
         StampAnnotationPrivate();
-        Annotation * makeAlias();
-        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+        Annotation * makeAlias() override;
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
         // data fields
         QString stampIconName;
@@ -3457,8 +3457,8 @@ class InkAnnotationPrivate : public AnnotationPrivate
 {
     public:
         InkAnnotationPrivate();
-        Annotation * makeAlias();
-        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+        Annotation * makeAlias() override;
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
         // data fields
         QList< QLinkedList<QPointF> > inkPaths;
@@ -3672,8 +3672,8 @@ class LinkAnnotationPrivate : public AnnotationPrivate
     public:
         LinkAnnotationPrivate();
         ~LinkAnnotationPrivate();
-        Annotation * makeAlias();
-        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+        Annotation * makeAlias() override;
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
         // data fields
         Link * linkDestination;
@@ -3995,8 +3995,8 @@ class CaretAnnotationPrivate : public AnnotationPrivate
 {
     public:
         CaretAnnotationPrivate();
-        Annotation * makeAlias();
-        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+        Annotation * makeAlias() override;
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
         // data fields
         CaretAnnotation::CaretSymbol symbol;
@@ -4139,8 +4139,8 @@ class FileAttachmentAnnotationPrivate : public AnnotationPrivate
     public:
         FileAttachmentAnnotationPrivate();
         ~FileAttachmentAnnotationPrivate();
-        Annotation * makeAlias();
-        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+        Annotation * makeAlias() override;
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
         // data fields
         QString icon;
@@ -4243,8 +4243,8 @@ class SoundAnnotationPrivate : public AnnotationPrivate
     public:
         SoundAnnotationPrivate();
         ~SoundAnnotationPrivate();
-        Annotation * makeAlias();
-        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+        Annotation * makeAlias() override;
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
         // data fields
         QString icon;
@@ -4347,8 +4347,8 @@ class MovieAnnotationPrivate : public AnnotationPrivate
     public:
         MovieAnnotationPrivate();
         ~MovieAnnotationPrivate();
-        Annotation * makeAlias();
-        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+        Annotation * makeAlias() override;
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
         // data fields
         MovieObject *movie;
@@ -4451,8 +4451,8 @@ class ScreenAnnotationPrivate : public AnnotationPrivate
     public:
         ScreenAnnotationPrivate();
         ~ScreenAnnotationPrivate();
-        Annotation * makeAlias();
-        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+        Annotation * makeAlias() override;
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 
         // data fields
         LinkRendition *action;
@@ -4541,8 +4541,8 @@ Link* ScreenAnnotation::additionalAction( AdditionalActionType type ) const
 class WidgetAnnotationPrivate : public AnnotationPrivate
 {
     public:
-        Annotation * makeAlias();
-        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc);
+        Annotation * makeAlias() override;
+        Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
 };
 
 Annotation * WidgetAnnotationPrivate::makeAlias()
@@ -4945,12 +4945,12 @@ class RichMediaAnnotationPrivate : public AnnotationPrivate
             delete content;
         }
 
-        Annotation * makeAlias()
+        Annotation * makeAlias() override
         {
             return new RichMediaAnnotation( *this );
         }
 
-        Annot* createNativeAnnot( ::Page *destPage, DocumentData *doc )
+        Annot* createNativeAnnot( ::Page *destPage, DocumentData *doc ) override
         {
             Q_UNUSED( destPage );
             Q_UNUSED( doc );

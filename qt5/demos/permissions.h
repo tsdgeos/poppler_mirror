@@ -31,10 +31,10 @@ public:
     PermissionsDock(QWidget *parent = 0);
     ~PermissionsDock();
 
-    /*virtual*/ void documentClosed();
+    void documentClosed() override;
 
 protected:
-    /*virtual*/ void fillInfo();
+    void fillInfo() override;
 
 private:
     QListWidget *m_table;

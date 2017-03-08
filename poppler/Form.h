@@ -165,7 +165,7 @@ public:
 
   char* getOnStr();
   void setAppearanceState(const char *state);
-  void updateWidgetAppearance();
+  void updateWidgetAppearance() override;
 
 protected:
   FormFieldButton *parent() const;
@@ -187,7 +187,7 @@ public:
   //except a UTF16BE string
   void setContent(GooString* new_content);
 
-  void updateWidgetAppearance();
+  void updateWidgetAppearance() override;
 
   bool isMultiline () const; 
   bool isPassword () const; 
@@ -228,7 +228,7 @@ public:
 
   GooString* getEditChoice ();
 
-  void updateWidgetAppearance();
+  void updateWidgetAppearance() override;
   bool isSelected (int i);
 
   bool isCombo () const; 
@@ -249,7 +249,7 @@ protected:
 class FormWidgetSignature: public FormWidget {
 public:
   FormWidgetSignature(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
-  void updateWidgetAppearance();
+  void updateWidgetAppearance() override;
 
   SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation);
 };
@@ -350,7 +350,7 @@ public:
 
   char *getAppearanceState() { return appearanceState.isName() ? appearanceState.getName() : NULL; }
 
-  void fillChildrenSiblingsID ();
+  void fillChildrenSiblingsID () override;
   
   void setNumSiblings (int num);
   void setSibling (int i, FormFieldButton *id) { siblings[i] = id; }
@@ -363,7 +363,7 @@ public:
   void print(int indent = 0);
 #endif
 
-  virtual ~FormFieldButton();
+  ~FormFieldButton();
 protected:
   void updateState(char *state);
 
@@ -389,7 +389,7 @@ public:
   GooString* getContent () { return content; }
   GooString* getContentCopy ();
   void setContentCopy (GooString* new_content);
-  virtual ~FormFieldText();
+  ~FormFieldText();
 
   bool isMultiline () const { return multiline; }
   bool isPassword () const { return password; }
@@ -424,7 +424,7 @@ class FormFieldChoice: public FormField {
 public:
   FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents);
 
-  virtual ~FormFieldChoice();
+  ~FormFieldChoice();
 
   int getNumChoices() { return numChoices; }
   GooString* getChoice(int i) { return choices ? choices[i].optionName : NULL; }
@@ -495,7 +495,7 @@ public:
 
   SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation);
 
-  virtual ~FormFieldSignature();
+  ~FormFieldSignature();
 
 private:
   void parseInfo();

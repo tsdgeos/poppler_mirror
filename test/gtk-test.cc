@@ -55,13 +55,13 @@ public:
   //----- initialization and control
 
   // End a page.
-  virtual void endPage();
+  void endPage() override;
 
   // Dump page contents to display.
-  virtual void dump();
+  void dump() override;
 
   //----- update text state
-  virtual void updateFont(GfxState *state);
+  void updateFont(GfxState *state) override;
 
   //----- special access
 

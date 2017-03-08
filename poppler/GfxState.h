@@ -292,28 +292,28 @@ class GfxDeviceGrayColorSpace: public GfxColorSpace {
 public:
 
   GfxDeviceGrayColorSpace();
-  virtual ~GfxDeviceGrayColorSpace();
-  virtual GfxColorSpace *copy();
-  virtual GfxColorSpaceMode getMode() { return csDeviceGray; }
+  ~GfxDeviceGrayColorSpace();
+  GfxColorSpace *copy() override;
+  GfxColorSpaceMode getMode() override { return csDeviceGray; }
 
-  virtual void getGray(GfxColor *color, GfxGray *gray);
-  virtual void getRGB(GfxColor *color, GfxRGB *rgb);
-  virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
-  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
-  virtual void getGrayLine(Guchar *in, Guchar *out, int length);
-  virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
-  virtual void getRGBLine(Guchar *in, Guchar *out, int length);
-  virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
-  virtual void getCMYKLine(Guchar *in, Guchar *out, int length);
-  virtual void getDeviceNLine(Guchar *in, Guchar *out, int length);
+  void getGray(GfxColor *color, GfxGray *gray) override;
+  void getRGB(GfxColor *color, GfxRGB *rgb) override;
+  void getCMYK(GfxColor *color, GfxCMYK *cmyk) override;
+  void getDeviceN(GfxColor *color, GfxColor *deviceN) override;
+  void getGrayLine(Guchar *in, Guchar *out, int length) override;
+  void getRGBLine(Guchar *in, unsigned int *out, int length) override;
+  void getRGBLine(Guchar *in, Guchar *out, int length) override;
+  void getRGBXLine(Guchar *in, Guchar *out, int length) override;
+  void getCMYKLine(Guchar *in, Guchar *out, int length) override;
+  void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
 
-  virtual GBool useGetRGBLine() { return gTrue; }
-  virtual GBool useGetGrayLine() { return gTrue; }
-  virtual GBool useGetCMYKLine() { return gTrue; }
-  virtual GBool useGetDeviceNLine() { return gTrue; }
+  GBool useGetRGBLine() override { return gTrue; }
+  GBool useGetGrayLine() override { return gTrue; }
+  GBool useGetCMYKLine() override { return gTrue; }
+  GBool useGetDeviceNLine() override { return gTrue; }
 
-  virtual int getNComps() { return 1; }
-  virtual void getDefaultColor(GfxColor *color);
+  int getNComps() override { return 1; }
+  void getDefaultColor(GfxColor *color) override;
 
 private:
 };
@@ -326,20 +326,20 @@ class GfxCalGrayColorSpace: public GfxColorSpace {
 public:
 
   GfxCalGrayColorSpace();
-  virtual ~GfxCalGrayColorSpace();
-  virtual GfxColorSpace *copy();
-  virtual GfxColorSpaceMode getMode() { return csCalGray; }
+  ~GfxCalGrayColorSpace();
+  GfxColorSpace *copy() override;
+  GfxColorSpaceMode getMode() override { return csCalGray; }
 
   // Construct a CalGray color space.  Returns NULL if unsuccessful.
   static GfxColorSpace *parse(Array *arr, GfxState *state);
 
-  virtual void getGray(GfxColor *color, GfxGray *gray);
-  virtual void getRGB(GfxColor *color, GfxRGB *rgb);
-  virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
-  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
+  void getGray(GfxColor *color, GfxGray *gray) override;
+  void getRGB(GfxColor *color, GfxRGB *rgb) override;
+  void getCMYK(GfxColor *color, GfxCMYK *cmyk) override;
+  void getDeviceN(GfxColor *color, GfxColor *deviceN) override;
 
-  virtual int getNComps() { return 1; }
-  virtual void getDefaultColor(GfxColor *color);
+  int getNComps() override { return 1; }
+  void getDefaultColor(GfxColor *color) override;
 
   // CalGray-specific access.
   double getWhiteX() { return whiteX; }
@@ -370,28 +370,28 @@ class GfxDeviceRGBColorSpace: public GfxColorSpace {
 public:
 
   GfxDeviceRGBColorSpace();
-  virtual ~GfxDeviceRGBColorSpace();
-  virtual GfxColorSpace *copy();
-  virtual GfxColorSpaceMode getMode() { return csDeviceRGB; }
+  ~GfxDeviceRGBColorSpace();
+  GfxColorSpace *copy() override;
+  GfxColorSpaceMode getMode() override { return csDeviceRGB; }
 
-  virtual void getGray(GfxColor *color, GfxGray *gray);
-  virtual void getRGB(GfxColor *color, GfxRGB *rgb);
-  virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
-  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
-  virtual void getGrayLine(Guchar *in, Guchar *out, int length);
-  virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
-  virtual void getRGBLine(Guchar *in, Guchar *out, int length);
-  virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
-  virtual void getCMYKLine(Guchar *in, Guchar *out, int length);
-  virtual void getDeviceNLine(Guchar *in, Guchar *out, int length);
+  void getGray(GfxColor *color, GfxGray *gray) override;
+  void getRGB(GfxColor *color, GfxRGB *rgb) override;
+  void getCMYK(GfxColor *color, GfxCMYK *cmyk) override;
+  void getDeviceN(GfxColor *color, GfxColor *deviceN) override;
+  void getGrayLine(Guchar *in, Guchar *out, int length) override;
+  void getRGBLine(Guchar *in, unsigned int *out, int length) override;
+  void getRGBLine(Guchar *in, Guchar *out, int length) override;
+  void getRGBXLine(Guchar *in, Guchar *out, int length) override;
+  void getCMYKLine(Guchar *in, Guchar *out, int length) override;
+  void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
 
-  virtual GBool useGetRGBLine() { return gTrue; }
-  virtual GBool useGetGrayLine() { return gTrue; }
-  virtual GBool useGetCMYKLine() { return gTrue; }
-  virtual GBool useGetDeviceNLine() { return gTrue; }
+  GBool useGetRGBLine() override { return gTrue; }
+  GBool useGetGrayLine() override { return gTrue; }
+  GBool useGetCMYKLine() override { return gTrue; }
+  GBool useGetDeviceNLine() override { return gTrue; }
 
-  virtual int getNComps() { return 3; }
-  virtual void getDefaultColor(GfxColor *color);
+  int getNComps() override { return 3; }
+  void getDefaultColor(GfxColor *color) override;
 
 private:
 };
@@ -404,20 +404,20 @@ class GfxCalRGBColorSpace: public GfxColorSpace {
 public:
 
   GfxCalRGBColorSpace();
-  virtual ~GfxCalRGBColorSpace();
-  virtual GfxColorSpace *copy();
-  virtual GfxColorSpaceMode getMode() { return csCalRGB; }
+  ~GfxCalRGBColorSpace();
+  GfxColorSpace *copy() override;
+  GfxColorSpaceMode getMode() override { return csCalRGB; }
 
   // Construct a CalRGB color space.  Returns NULL if unsuccessful.
   static GfxColorSpace *parse(Array *arr, GfxState *state);
 
-  virtual void getGray(GfxColor *color, GfxGray *gray);
-  virtual void getRGB(GfxColor *color, GfxRGB *rgb);
-  virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
-  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
+  void getGray(GfxColor *color, GfxGray *gray) override;
+  void getRGB(GfxColor *color, GfxRGB *rgb) override;
+  void getCMYK(GfxColor *color, GfxCMYK *cmyk) override;
+  void getDeviceN(GfxColor *color, GfxColor *deviceN) override;
 
-  virtual int getNComps() { return 3; }
-  virtual void getDefaultColor(GfxColor *color);
+  int getNComps() override { return 3; }
+  void getDefaultColor(GfxColor *color) override;
 
   // CalRGB-specific access.
   double getWhiteX() { return whiteX; }
@@ -452,25 +452,25 @@ class GfxDeviceCMYKColorSpace: public GfxColorSpace {
 public:
 
   GfxDeviceCMYKColorSpace();
-  virtual ~GfxDeviceCMYKColorSpace();
-  virtual GfxColorSpace *copy();
-  virtual GfxColorSpaceMode getMode() { return csDeviceCMYK; }
+  ~GfxDeviceCMYKColorSpace();
+  GfxColorSpace *copy() override;
+  GfxColorSpaceMode getMode() override { return csDeviceCMYK; }
 
-  virtual void getGray(GfxColor *color, GfxGray *gray);
-  virtual void getRGB(GfxColor *color, GfxRGB *rgb);
-  virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
-  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
-  virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
-  virtual void getRGBLine(Guchar *, Guchar *out, int length);
-  virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
-  virtual void getCMYKLine(Guchar *in, Guchar *out, int length);
-  virtual void getDeviceNLine(Guchar *in, Guchar *out, int length);
-  virtual GBool useGetRGBLine() { return gTrue; }
-  virtual GBool useGetCMYKLine() { return gTrue; }
-  virtual GBool useGetDeviceNLine() { return gTrue; }
+  void getGray(GfxColor *color, GfxGray *gray) override;
+  void getRGB(GfxColor *color, GfxRGB *rgb) override;
+  void getCMYK(GfxColor *color, GfxCMYK *cmyk) override;
+  void getDeviceN(GfxColor *color, GfxColor *deviceN) override;
+  void getRGBLine(Guchar *in, unsigned int *out, int length) override;
+  void getRGBLine(Guchar *, Guchar *out, int length) override;
+  void getRGBXLine(Guchar *in, Guchar *out, int length) override;
+  void getCMYKLine(Guchar *in, Guchar *out, int length) override;
+  void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
+  GBool useGetRGBLine() override { return gTrue; }
+  GBool useGetCMYKLine() override { return gTrue; }
+  GBool useGetDeviceNLine() override { return gTrue; }
 
-  virtual int getNComps() { return 4; }
-  virtual void getDefaultColor(GfxColor *color);
+  int getNComps() override { return 4; }
+  void getDefaultColor(GfxColor *color) override;
 
 private:
 };
@@ -483,23 +483,23 @@ class GfxLabColorSpace: public GfxColorSpace {
 public:
 
   GfxLabColorSpace();
-  virtual ~GfxLabColorSpace();
-  virtual GfxColorSpace *copy();
-  virtual GfxColorSpaceMode getMode() { return csLab; }
+  ~GfxLabColorSpace();
+  GfxColorSpace *copy() override;
+  GfxColorSpaceMode getMode() override { return csLab; }
 
   // Construct a Lab color space.  Returns NULL if unsuccessful.
   static GfxColorSpace *parse(Array *arr, GfxState *state);
 
-  virtual void getGray(GfxColor *color, GfxGray *gray);
-  virtual void getRGB(GfxColor *color, GfxRGB *rgb);
-  virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
-  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
+  void getGray(GfxColor *color, GfxGray *gray) override;
+  void getRGB(GfxColor *color, GfxRGB *rgb) override;
+  void getCMYK(GfxColor *color, GfxCMYK *cmyk) override;
+  void getDeviceN(GfxColor *color, GfxColor *deviceN) override;
 
-  virtual int getNComps() { return 3; }
-  virtual void getDefaultColor(GfxColor *color);
+  int getNComps() override { return 3; }
+  void getDefaultColor(GfxColor *color) override;
 
-  virtual void getDefaultRanges(double *decodeLow, double *decodeRange,
-				int maxImgPixel);
+  void getDefaultRanges(double *decodeLow, double *decodeRange,
+				int maxImgPixel) override;
 
   // Lab-specific access.
   double getWhiteX() { return whiteX; }
@@ -534,32 +534,32 @@ public:
 
   GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA,
 			Ref *iccProfileStreamA);
-  virtual ~GfxICCBasedColorSpace();
-  virtual GfxColorSpace *copy();
-  virtual GfxColorSpaceMode getMode() { return csICCBased; }
+  ~GfxICCBasedColorSpace();
+  GfxColorSpace *copy() override;
+  GfxColorSpaceMode getMode() override { return csICCBased; }
 
   // Construct an ICCBased color space.  Returns NULL if unsuccessful.
   static GfxColorSpace *parse(Array *arr, OutputDev *out, GfxState *state, int recursion);
 
-  virtual void getGray(GfxColor *color, GfxGray *gray);
-  virtual void getRGB(GfxColor *color, GfxRGB *rgb);
-  virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
-  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
-  virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
-  virtual void getRGBLine(Guchar *in, Guchar *out, int length);
-  virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
-  virtual void getCMYKLine(Guchar *in, Guchar *out, int length);
-  virtual void getDeviceNLine(Guchar *in, Guchar *out, int length);
+  void getGray(GfxColor *color, GfxGray *gray) override;
+  void getRGB(GfxColor *color, GfxRGB *rgb) override;
+  void getCMYK(GfxColor *color, GfxCMYK *cmyk) override;
+  void getDeviceN(GfxColor *color, GfxColor *deviceN) override;
+  void getRGBLine(Guchar *in, unsigned int *out, int length) override;
+  void getRGBLine(Guchar *in, Guchar *out, int length) override;
+  void getRGBXLine(Guchar *in, Guchar *out, int length) override;
+  void getCMYKLine(Guchar *in, Guchar *out, int length) override;
+  void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
 
-  virtual GBool useGetRGBLine();
-  virtual GBool useGetCMYKLine();
-  virtual GBool useGetDeviceNLine();
+  GBool useGetRGBLine() override;
+  GBool useGetCMYKLine() override;
+  GBool useGetDeviceNLine() override;
 
-  virtual int getNComps() { return nComps; }
-  virtual void getDefaultColor(GfxColor *color);
+  int getNComps() override { return nComps; }
+  void getDefaultColor(GfxColor *color) override;
 
-  virtual void getDefaultRanges(double *decodeLow, double *decodeRange,
-				int maxImgPixel);
+  void getDefaultRanges(double *decodeLow, double *decodeRange,
+				int maxImgPixel) override;
 
   // ICCBased-specific access.
   GfxColorSpace *getAlt() { return alt; }
@@ -586,32 +586,32 @@ class GfxIndexedColorSpace: public GfxColorSpace {
 public:
 
   GfxIndexedColorSpace(GfxColorSpace *baseA, int indexHighA);
-  virtual ~GfxIndexedColorSpace();
-  virtual GfxColorSpace *copy();
-  virtual GfxColorSpaceMode getMode() { return csIndexed; }
+  ~GfxIndexedColorSpace();
+  GfxColorSpace *copy() override;
+  GfxColorSpaceMode getMode() override { return csIndexed; }
 
   // Construct an Indexed color space.  Returns NULL if unsuccessful.
   static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
-  virtual void getGray(GfxColor *color, GfxGray *gray);
-  virtual void getRGB(GfxColor *color, GfxRGB *rgb);
-  virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
-  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
-  virtual void getRGBLine(Guchar *in, unsigned int *out, int length);
-  virtual void getRGBLine(Guchar *in, Guchar *out, int length);
-  virtual void getRGBXLine(Guchar *in, Guchar *out, int length);
-  virtual void getCMYKLine(Guchar *in, Guchar *out, int length);
-  virtual void getDeviceNLine(Guchar *in, Guchar *out, int length);
+  void getGray(GfxColor *color, GfxGray *gray) override;
+  void getRGB(GfxColor *color, GfxRGB *rgb) override;
+  void getCMYK(GfxColor *color, GfxCMYK *cmyk) override;
+  void getDeviceN(GfxColor *color, GfxColor *deviceN) override;
+  void getRGBLine(Guchar *in, unsigned int *out, int length) override;
+  void getRGBLine(Guchar *in, Guchar *out, int length) override;
+  void getRGBXLine(Guchar *in, Guchar *out, int length) override;
+  void getCMYKLine(Guchar *in, Guchar *out, int length) override;
+  void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
 
-  virtual GBool useGetRGBLine() { return gTrue; }
-  virtual GBool useGetCMYKLine() { return gTrue; }
-  virtual GBool useGetDeviceNLine() { return gTrue; }
+  GBool useGetRGBLine() override { return gTrue; }
+  GBool useGetCMYKLine() override { return gTrue; }
+  GBool useGetDeviceNLine() override { return gTrue; }
 
-  virtual int getNComps() { return 1; }
-  virtual void getDefaultColor(GfxColor *color);
+  int getNComps() override { return 1; }
+  void getDefaultColor(GfxColor *color) override;
 
-  virtual void getDefaultRanges(double *decodeLow, double *decodeRange,
-				int maxImgPixel);
+  void getDefaultRanges(double *decodeLow, double *decodeRange,
+				int maxImgPixel) override;
 
   // Indexed-specific access.
   GfxColorSpace *getBase() { return base; }
@@ -619,7 +619,7 @@ public:
   Guchar *getLookup() { return lookup; }
   GfxColor *mapColorToBase(GfxColor *color, GfxColor *baseColor);
   Guint getOverprintMask() { return base->getOverprintMask(); }
-  virtual void createMapping(GooList *separationList, int maxSepComps)
+  void createMapping(GooList *separationList, int maxSepComps) override
     { base->createMapping(separationList, maxSepComps); }
 
 
@@ -639,24 +639,24 @@ public:
 
   GfxSeparationColorSpace(GooString *nameA, GfxColorSpace *altA,
 			  Function *funcA);
-  virtual ~GfxSeparationColorSpace();
-  virtual GfxColorSpace *copy();
-  virtual GfxColorSpaceMode getMode() { return csSeparation; }
+  ~GfxSeparationColorSpace();
+  GfxColorSpace *copy() override;
+  GfxColorSpaceMode getMode() override { return csSeparation; }
 
   // Construct a Separation color space.  Returns NULL if unsuccessful.
   static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
-  virtual void getGray(GfxColor *color, GfxGray *gray);
-  virtual void getRGB(GfxColor *color, GfxRGB *rgb);
-  virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
-  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
+  void getGray(GfxColor *color, GfxGray *gray) override;
+  void getRGB(GfxColor *color, GfxRGB *rgb) override;
+  void getCMYK(GfxColor *color, GfxCMYK *cmyk) override;
+  void getDeviceN(GfxColor *color, GfxColor *deviceN) override;
 
-  virtual void createMapping(GooList *separationList, int maxSepComps);
+  void createMapping(GooList *separationList, int maxSepComps) override;
 
-  virtual int getNComps() { return 1; }
-  virtual void getDefaultColor(GfxColor *color);
+  int getNComps() override { return 1; }
+  void getDefaultColor(GfxColor *color) override;
 
-  virtual GBool isNonMarking() { return nonMarking; }
+  GBool isNonMarking() override { return nonMarking; }
 
   // Separation-specific access.
   GooString *getName() { return name; }
@@ -684,24 +684,24 @@ public:
 
   GfxDeviceNColorSpace(int nCompsA, GooString **namesA,
 		       GfxColorSpace *alt, Function *func, GooList *sepsCS);
-  virtual ~GfxDeviceNColorSpace();
-  virtual GfxColorSpace *copy();
-  virtual GfxColorSpaceMode getMode() { return csDeviceN; }
+  ~GfxDeviceNColorSpace();
+  GfxColorSpace *copy() override;
+  GfxColorSpaceMode getMode() override { return csDeviceN; }
 
   // Construct a DeviceN color space.  Returns NULL if unsuccessful.
   static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
-  virtual void getGray(GfxColor *color, GfxGray *gray);
-  virtual void getRGB(GfxColor *color, GfxRGB *rgb);
-  virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
-  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
+  void getGray(GfxColor *color, GfxGray *gray) override;
+  void getRGB(GfxColor *color, GfxRGB *rgb) override;
+  void getCMYK(GfxColor *color, GfxCMYK *cmyk) override;
+  void getDeviceN(GfxColor *color, GfxColor *deviceN) override;
 
-  virtual void createMapping(GooList *separationList, int maxSepComps);
+  void createMapping(GooList *separationList, int maxSepComps) override;
 
-  virtual int getNComps() { return nComps; }
-  virtual void getDefaultColor(GfxColor *color);
+  int getNComps() override { return nComps; }
+  void getDefaultColor(GfxColor *color) override;
 
-  virtual GBool isNonMarking() { return nonMarking; }
+  GBool isNonMarking() override { return nonMarking; }
 
   // DeviceN-specific access.
   GooString *getColorantName(int i) { return names[i]; }
@@ -731,20 +731,20 @@ class GfxPatternColorSpace: public GfxColorSpace {
 public:
 
   GfxPatternColorSpace(GfxColorSpace *underA);
-  virtual ~GfxPatternColorSpace();
-  virtual GfxColorSpace *copy();
-  virtual GfxColorSpaceMode getMode() { return csPattern; }
+  ~GfxPatternColorSpace();
+  GfxColorSpace *copy() override;
+  GfxColorSpaceMode getMode() override { return csPattern; }
 
   // Construct a Pattern color space.  Returns NULL if unsuccessful.
   static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
-  virtual void getGray(GfxColor *color, GfxGray *gray);
-  virtual void getRGB(GfxColor *color, GfxRGB *rgb);
-  virtual void getCMYK(GfxColor *color, GfxCMYK *cmyk);
-  virtual void getDeviceN(GfxColor *color, GfxColor *deviceN);
+  void getGray(GfxColor *color, GfxGray *gray) override;
+  void getRGB(GfxColor *color, GfxRGB *rgb) override;
+  void getCMYK(GfxColor *color, GfxCMYK *cmyk) override;
+  void getDeviceN(GfxColor *color, GfxColor *deviceN) override;
 
-  virtual int getNComps() { return 0; }
-  virtual void getDefaultColor(GfxColor *color);
+  int getNComps() override { return 0; }
+  void getDefaultColor(GfxColor *color) override;
 
   // Pattern-specific access.
   GfxColorSpace *getUnder() { return under; }
@@ -784,9 +784,9 @@ class GfxTilingPattern: public GfxPattern {
 public:
 
   static GfxTilingPattern *parse(Object *patObj);
-  virtual ~GfxTilingPattern();
+  ~GfxTilingPattern();
 
-  virtual GfxPattern *copy();
+  GfxPattern *copy() override;
 
   int getPaintType() { return paintType; }
   int getTilingType() { return tilingType; }
@@ -822,9 +822,9 @@ class GfxShadingPattern: public GfxPattern {
 public:
 
   static GfxShadingPattern *parse(GfxResources *res, Object *patObj, OutputDev *out, GfxState *state);
-  virtual ~GfxShadingPattern();
+  ~GfxShadingPattern();
 
-  virtual GfxPattern *copy();
+  GfxPattern *copy() override;
 
   GfxShading *getShading() { return shading; }
   double *getMatrix() { return matrix; }
@@ -884,7 +884,7 @@ public:
 		       Function **funcsA, int nFuncsA,
 		       GBool extend0A, GBool extend1A);
   GfxUnivariateShading(GfxUnivariateShading *shading);
-  virtual ~GfxUnivariateShading();
+  ~GfxUnivariateShading();
 
   double getDomain0() { return t0; }
   double getDomain1() { return t1; }
@@ -929,11 +929,11 @@ public:
 		     double *matrixA,
 		     Function **funcsA, int nFuncsA);
   GfxFunctionShading(GfxFunctionShading *shading);
-  virtual ~GfxFunctionShading();
+  ~GfxFunctionShading();
 
   static GfxFunctionShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-  virtual GfxShading *copy();
+  GfxShading *copy() override;
 
   void getDomain(double *x0A, double *y0A, double *x1A, double *y1A)
     { *x0A = x0; *y0A = y0; *x1A = x1; *y1A = y1; }
@@ -963,20 +963,20 @@ public:
 		  Function **funcsA, int nFuncsA,
 		  GBool extend0A, GBool extend1A);
   GfxAxialShading(GfxAxialShading *shading);
-  virtual ~GfxAxialShading();
+  ~GfxAxialShading();
 
   static GfxAxialShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-  virtual GfxShading *copy();
+  GfxShading *copy() override;
 
   void getCoords(double *x0A, double *y0A, double *x1A, double *y1A)
     { *x0A = x0; *y0A = y0; *x1A = x1; *y1A = y1; }
 
-  virtual void getParameterRange(double *lower, double *upper,
+  void getParameterRange(double *lower, double *upper,
 				 double xMin, double yMin,
-				 double xMax, double yMax);
+				 double xMax, double yMax) override;
 
-  virtual double getDistance(double tMin, double tMax);
+  double getDistance(double tMin, double tMax) override;
 
 private:
 
@@ -996,21 +996,21 @@ public:
 		   Function **funcsA, int nFuncsA,
 		   GBool extend0A, GBool extend1A);
   GfxRadialShading(GfxRadialShading *shading);
-  virtual ~GfxRadialShading();
+  ~GfxRadialShading();
 
   static GfxRadialShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-  virtual GfxShading *copy();
+  GfxShading *copy() override;
 
   void getCoords(double *x0A, double *y0A, double *r0A,
 		 double *x1A, double *y1A, double *r1A)
     { *x0A = x0; *y0A = y0; *r0A = r0; *x1A = x1; *y1A = y1; *r1A = r1; }
 
-  virtual void getParameterRange(double *lower, double *upper,
+  void getParameterRange(double *lower, double *upper,
 				 double xMin, double yMin,
-				 double xMax, double yMax);
+				 double xMax, double yMax) override;
 
-  virtual double getDistance(double tMin, double tMax);
+  double getDistance(double tMin, double tMax) override;
 
 private:
 
@@ -1034,11 +1034,11 @@ public:
 			    int (*trianglesA)[3], int nTrianglesA,
 			    Function **funcsA, int nFuncsA);
   GfxGouraudTriangleShading(GfxGouraudTriangleShading *shading);
-  virtual ~GfxGouraudTriangleShading();
+  ~GfxGouraudTriangleShading();
 
   static GfxGouraudTriangleShading *parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
 
-  virtual GfxShading *copy();
+  GfxShading *copy() override;
 
   int getNTriangles() { return nTriangles; }
 
@@ -1120,11 +1120,11 @@ public:
   GfxPatchMeshShading(int typeA, GfxPatch *patchesA, int nPatchesA,
 		      Function **funcsA, int nFuncsA);
   GfxPatchMeshShading(GfxPatchMeshShading *shading);
-  virtual ~GfxPatchMeshShading();
+  ~GfxPatchMeshShading();
 
   static GfxPatchMeshShading *parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
 
-  virtual GfxShading *copy();
+  GfxShading *copy() override;
 
   int getNPatches() { return nPatches; }
   GfxPatch *getPatch(int i) { return &patches[i]; }

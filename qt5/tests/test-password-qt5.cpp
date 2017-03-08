@@ -13,8 +13,8 @@ public:
     PDFDisplay( Poppler::Document *d );
     ~PDFDisplay();
 protected:
-    void paintEvent( QPaintEvent * );
-    void keyPressEvent( QKeyEvent * );
+    void paintEvent( QPaintEvent * ) override;
+    void keyPressEvent( QKeyEvent * ) override;
 private:
     void display();
     int m_currentPage;

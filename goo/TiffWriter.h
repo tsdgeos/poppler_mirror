@@ -40,14 +40,14 @@ public:
 
   void setCompressionString(const char *compressionStringArg);
 
-  bool init(FILE *openedFile, int width, int height, int hDPI, int vDPI);
+  bool init(FILE *openedFile, int width, int height, int hDPI, int vDPI) override;
 
-  bool writePointers(unsigned char **rowPointers, int rowCount);
-  bool writeRow(unsigned char **rowData);
+  bool writePointers(unsigned char **rowPointers, int rowCount) override;
+  bool writeRow(unsigned char **rowData) override;
 
-  bool supportCMYK() { return true; }
+  bool supportCMYK() override { return true; }
 
-  bool close();
+  bool close() override;
 
 private:
   TiffWriter(const TiffWriter &other);

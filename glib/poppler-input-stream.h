@@ -32,31 +32,31 @@ public:
 
   PopplerInputStream(GInputStream *inputStream, GCancellable *cancellableA,
                      Goffset startA, GBool limitedA, Goffset lengthA, Object *dictA);
-  virtual ~PopplerInputStream();
-  virtual BaseStream *copy();
-  virtual Stream *makeSubStream(Goffset start, GBool limited,
-                                Goffset lengthA, Object *dictA);
-  virtual StreamKind getKind() { return strWeird; }
-  virtual void reset();
-  virtual void close();
-  virtual int getChar()
+  ~PopplerInputStream();
+  BaseStream *copy() override;
+  Stream *makeSubStream(Goffset start, GBool limited,
+                        Goffset lengthA, Object *dictA) override;
+  StreamKind getKind() override { return strWeird; }
+  void reset() override;
+  void close() override;
+  int getChar() override
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
-  virtual int lookChar()
+  int lookChar() override
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-  virtual Goffset getPos() { return bufPos + (bufPtr - buf); }
-  virtual void setPos(Goffset pos, int dir = 0);
-  virtual Goffset getStart() { return start; }
-  virtual void moveStart(Goffset delta);
+  Goffset getPos() override { return bufPos + (bufPtr - buf); }
+  void setPos(Goffset pos, int dir = 0) override;
+  Goffset getStart() override { return start; }
+  void moveStart(Goffset delta) override;
 
-  virtual int getUnfilteredChar() { return getChar(); }
-  virtual void unfilteredReset() { reset(); }
+  int getUnfilteredChar() override { return getChar(); }
+  void unfilteredReset() override { reset(); }
 
 private:
 
   GBool fillBuf();
 
-  virtual GBool hasGetChars() { return true; }
-  virtual int getChars(int nChars, Guchar *buffer);
+  GBool hasGetChars() override { return true; }
+  int getChars(int nChars, Guchar *buffer) override;
 
   GInputStream *inputStream;
   GCancellable *cancellable;

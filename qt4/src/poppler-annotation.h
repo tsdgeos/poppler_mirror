@@ -456,8 +456,8 @@ class POPPLER_QT4_EXPORT TextAnnotation : public Annotation
     enum InplaceIntent { Unknown, Callout, TypeWriter };
 
     TextAnnotation( TextType type );
-    virtual ~TextAnnotation();
-    virtual SubType subType() const;
+    ~TextAnnotation();
+    SubType subType() const override;
 
     /**
        The type of text annotation represented by this object
@@ -542,8 +542,8 @@ class POPPLER_QT4_EXPORT LineAnnotation : public Annotation
 
     /// \since 0.20
     LineAnnotation( LineType type );
-    virtual ~LineAnnotation();
-    virtual SubType subType() const;
+    ~LineAnnotation();
+    SubType subType() const override;
 
     /// \since 0.20
     LineType lineType() const;

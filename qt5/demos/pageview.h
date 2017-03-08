@@ -34,9 +34,9 @@ public:
     PageView(QWidget *parent = 0);
     ~PageView();
 
-    /*virtual*/ void documentLoaded();
-    /*virtual*/ void documentClosed();
-    /*virtual*/ void pageChanged(int page);
+    void documentLoaded() override;
+    void documentClosed() override;
+    void pageChanged(int page) override;
 
 private Q_SLOTS:
     void slotZoomChanged(qreal value);

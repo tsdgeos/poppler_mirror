@@ -39,7 +39,7 @@ public:
     PdfViewer();
     ~PdfViewer();
 
-    /*virtual*/ QSize sizeHint() const;
+    QSize sizeHint() const override;
 
     void loadDocument(const QString &file);
     void closeDocument();

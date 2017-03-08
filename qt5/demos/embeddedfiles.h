@@ -31,11 +31,11 @@ public:
     EmbeddedFilesDock(QWidget *parent = 0);
     ~EmbeddedFilesDock();
 
-    virtual void documentLoaded();
-    /*virtual*/ void documentClosed();
+    void documentLoaded() override;
+    void documentClosed() override;
 
 protected:
-    /*virtual*/ void fillInfo();
+    void fillInfo() override;
 
 private:
     QTableWidget *m_table;

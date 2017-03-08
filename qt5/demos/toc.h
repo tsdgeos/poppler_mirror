@@ -31,10 +31,10 @@ public:
     TocDock(QWidget *parent = 0);
     ~TocDock();
 
-    /*virtual*/ void documentClosed();
+    void documentClosed() override;
 
 protected:
-    /*virtual*/ void fillInfo();
+    void fillInfo() override;
 
 private:
     QTreeWidget *m_tree;

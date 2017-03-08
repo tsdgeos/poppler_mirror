@@ -99,6 +99,10 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
+   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0.0")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override" )
+   endif()
+
   # set the default compile warnings
   set(DEFAULT_COMPILE_WARNINGS_NO)
   set(DEFAULT_COMPILE_WARNINGS_YES "-Wall -Wcast-align -fno-exceptions -fno-check-new -fno-common")

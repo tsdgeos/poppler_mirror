@@ -21,7 +21,7 @@ class SillyThread : public QThread
 public:
     SillyThread(Poppler::Document* document, QObject* parent = 0);
 
-    void run();
+    void run() override;
 
 private:
     Poppler::Document* m_document;
@@ -34,7 +34,7 @@ class CrazyThread : public QThread
 public:
     CrazyThread(uint seed, Poppler::Document* document, QMutex* annotationMutex, QObject* parent = 0);
 
-    void run();
+    void run() override;
 
 private:
     uint m_seed;

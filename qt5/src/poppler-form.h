@@ -167,9 +167,9 @@ namespace Poppler {
 	/// \cond PRIVATE
 	FormFieldButton(DocumentData *doc, ::Page *p, ::FormWidgetButton *w);
 	/// \endcond
-	virtual ~FormFieldButton();
+	~FormFieldButton();
 
-	virtual FormType type() const;
+	FormType type() const override;
 
 	/**
 	  The particular type of the button field.
@@ -223,9 +223,9 @@ namespace Poppler {
 	/// \cond PRIVATE
 	FormFieldText(DocumentData *doc, ::Page *p, ::FormWidgetText *w);
 	/// \endcond
-	virtual ~FormFieldText();
+	~FormFieldText();
 
-	virtual FormType type() const;
+	FormType type() const override;
 
 	/**
 	  The text type of the text field.
@@ -295,9 +295,9 @@ namespace Poppler {
 	/// \cond PRIVATE
 	FormFieldChoice(DocumentData *doc, ::Page *p, ::FormWidgetChoice *w);
 	/// \endcond
-	virtual ~FormFieldChoice();
+	~FormFieldChoice();
 
-	virtual FormType type() const;
+	FormType type() const override;
 
 	/**
 	  The choice type of the choice field.
@@ -454,9 +454,9 @@ namespace Poppler {
 	/// \cond PRIVATE
 	FormFieldSignature(DocumentData *doc, ::Page *p, ::FormWidgetSignature *w);
 	/// \endcond
-	virtual ~FormFieldSignature();
+	~FormFieldSignature();
 
-	virtual FormType type() const;
+	FormType type() const override;
 
 	/**
 	  Validate the signature.

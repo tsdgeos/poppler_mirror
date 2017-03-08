@@ -31,10 +31,10 @@ public:
     MetadataDock(QWidget *parent = 0);
     ~MetadataDock();
 
-    /*virtual*/ void documentClosed();
+    void documentClosed() override;
 
 protected:
-    /*virtual*/ void fillInfo();
+    void fillInfo() override;
 
 private:
     QTextEdit *m_edit;

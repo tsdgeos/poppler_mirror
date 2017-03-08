@@ -1732,7 +1732,7 @@ height = dummy.height();
              */
             void setPageConvertedCallback(void (* callback)(int page, void *payload), void *payload);
 
-            bool convert();
+            bool convert() override;
 
         private:
             Q_DECLARE_PRIVATE(PSConverter)
@@ -1761,7 +1761,7 @@ height = dummy.height();
             /**
               Destructor.
             */
-            virtual ~PDFConverter();
+            ~PDFConverter();
 
             /**
               Sets the options for the PDF export.
@@ -1772,7 +1772,7 @@ height = dummy.height();
              */
             PDFOptions pdfOptions() const;
 
-            bool convert();
+            bool convert() override;
 
         private:
             Q_DECLARE_PRIVATE(PDFConverter)

@@ -35,9 +35,9 @@ public:
     NavigationToolBar(QWidget *parent = 0);
     ~NavigationToolBar();
 
-    /*virtual*/ void documentLoaded();
-    /*virtual*/ void documentClosed();
-    /*virtual*/ void pageChanged(int page);
+    void documentLoaded() override;
+    void documentClosed() override;
+    void pageChanged(int page) override;
 
 Q_SIGNALS:
     void zoomChanged(qreal value);

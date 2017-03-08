@@ -19,9 +19,9 @@ public:
     void setShowTextRects(bool show);
     void display();
 protected:
-    void paintEvent( QPaintEvent * );
-    void keyPressEvent( QKeyEvent * );
-    void mousePressEvent( QMouseEvent * );
+    void paintEvent( QPaintEvent * ) override;
+    void keyPressEvent( QKeyEvent * ) override;
+    void mousePressEvent( QMouseEvent * ) override;
 private:
     int m_currentPage;
     QImage image;

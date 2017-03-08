@@ -268,7 +268,7 @@ class POPPLER_QT4_EXPORT LinkGoto : public Link
 		 * The destination to reach.
 		 */
 		LinkDestination destination() const;
-		LinkType linkType() const;
+		LinkType linkType() const override;
 
 	private:
 		Q_DECLARE_PRIVATE( LinkGoto )
