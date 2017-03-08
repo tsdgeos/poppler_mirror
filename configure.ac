@@ -26,6 +26,7 @@ AC_PROG_CC_STDC
 #fi
 AC_PROG_CXX
 AC_PROG_INSTALL
+CXXFLAGS="$CXXFLAGS -std=c++11"
 
 dnl ##### Check for pkgconfig
 PKG_PROG_PKG_CONFIG
