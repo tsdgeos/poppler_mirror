@@ -6,7 +6,7 @@
 //
 // Copyright (C) 2010, 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Pino Toscano <pino@kde.org>
 // Copyright (C) 2014 Steven Lee <roc.sky@gmail.com>
 //
