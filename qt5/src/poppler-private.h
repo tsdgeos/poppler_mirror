@@ -92,7 +92,7 @@ namespace Poppler {
 #ifdef _WIN32
 		doc = new PDFDoc((wchar_t *)filePath.utf16(), filePath.length(), ownerPassword, userPassword);
 #else
-		GooString *fileName = new GooString(QFile::encodeName(filePath));
+		GooString *fileName = new GooString(QFile::encodeName(filePath).constData());
 		doc = new PDFDoc(fileName, ownerPassword, userPassword);
 #endif
 
