@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2008 Hugo Mercier <hmercier31[@]gmail.com>
+ * Copyright (C) 2017 Francesco Poli <invernomuto@paranoici.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +37,7 @@ struct _PopplerMovie
   gchar   *filename;
   gboolean need_poster;
   gboolean show_controls;
+  PopplerMoviePlayMode mode;
 };
 
 struct _PopplerMovieClass
@@ -90,6 +92,21 @@ _poppler_movie_new (Movie *poppler_movie)
   }
 
   movie->show_controls = poppler_movie->getActivationParameters()->showControls;
+
+  switch (poppler_movie->getActivationParameters()->repeatMode) {
+  case MovieActivationParameters::repeatModeOnce:
+    movie->mode = POPPLER_MOVIE_PLAY_MODE_ONCE;
+    break;
+  case MovieActivationParameters::repeatModeOpen:
+    movie->mode = POPPLER_MOVIE_PLAY_MODE_OPEN;
+    break;
+  case MovieActivationParameters::repeatModeRepeat:
+    movie->mode = POPPLER_MOVIE_PLAY_MODE_REPEAT;
+    break;
+  case MovieActivationParameters::repeatModePalindrome:
+    movie->mode = POPPLER_MOVIE_PLAY_MODE_PALINDROME;
+    break;
+  }
 
   return movie;
 }
@@ -149,4 +166,22 @@ poppler_movie_show_controls (PopplerMovie *poppler_movie)
   g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), FALSE);
 
   return poppler_movie->show_controls;
+}
+
+/**
+ * poppler_movie_get_play_mode:
+ * @poppler_movie: a #PopplerMovie
+ *
+ * Returns the play mode of @poppler_movie.
+ *
+ * Return value: a #PopplerMovieRepeatMode.
+ *
+ * Since: 0.54
+ */
+PopplerMoviePlayMode
+poppler_movie_get_play_mode (PopplerMovie *poppler_movie)
+{
+  g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), POPPLER_MOVIE_PLAY_MODE_ONCE);
+
+  return poppler_movie->mode;
 }

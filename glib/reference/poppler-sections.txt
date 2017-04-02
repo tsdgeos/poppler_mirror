@@ -555,16 +555,20 @@ poppler_media_get_type
 <FILE>poppler-movie</FILE>
 <TITLE>PopplerMovie</TITLE>
 PopplerMovie
+PopplerMoviePlayMode
 poppler_movie_get_filename
 poppler_movie_need_poster
 poppler_movie_show_controls
+poppler_movie_get_play_mode
 
 <SUBSECTION Standard>
 POPPLER_MOVIE
 POPPLER_IS_MOVIE
 POPPLER_TYPE_MOVIE
+POPPLER_TYPE_MOVIE_PLAY_MODE
 <SUBSECTION Private>
 poppler_movie_get_type
+poppler_movie_play_mode_get_type
 
 </SECTION>
 

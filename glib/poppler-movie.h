@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2008 Hugo Mercier <hmercier31[@]gmail.com>
+ * Copyright (C) 2017 Francesco Poli <invernomuto@paranoici.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +31,31 @@ G_BEGIN_DECLS
 #define POPPLER_MOVIE(obj)                   (G_TYPE_CHECK_INSTANCE_CAST ((obj), POPPLER_TYPE_MOVIE, PopplerMovie))
 #define POPPLER_IS_MOVIE(obj)                (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_MOVIE))
 
+/**
+ * PopplerMoviePlayMode:
+ * @POPPLER_MOVIE_PLAY_MODE_ONCE: the movie should be played once and controls should be closed at the end.
+ * @POPPLER_MOVIE_PLAY_MODE_OPEN: the movie should be played once, but controls should be left open.
+ * @POPPLER_MOVIE_PLAY_MODE_REPEAT: the movie should be played in loop, until manually stopped.
+ * @POPPLER_MOVIE_PLAY_MODE_PALINDROME: the movie should be played forward and backward, forward and backward,
+ *   and so forth, until manually stopped.
+ *
+ * Play mode enum values.
+ *
+ * Since: 0.54
+ */
+typedef enum
+{
+  POPPLER_MOVIE_PLAY_MODE_ONCE,
+  POPPLER_MOVIE_PLAY_MODE_OPEN,
+  POPPLER_MOVIE_PLAY_MODE_REPEAT,
+  POPPLER_MOVIE_PLAY_MODE_PALINDROME
+} PopplerMoviePlayMode;
 
-GType        poppler_movie_get_type      (void) G_GNUC_CONST;
-const gchar *poppler_movie_get_filename  (PopplerMovie *poppler_movie);
-gboolean     poppler_movie_need_poster   (PopplerMovie *poppler_movie);
-gboolean     poppler_movie_show_controls (PopplerMovie *poppler_movie);
+GType                poppler_movie_get_type      (void) G_GNUC_CONST;
+const gchar         *poppler_movie_get_filename  (PopplerMovie *poppler_movie);
+gboolean             poppler_movie_need_poster   (PopplerMovie *poppler_movie);
+gboolean             poppler_movie_show_controls (PopplerMovie *poppler_movie);
+PopplerMoviePlayMode poppler_movie_get_play_mode (PopplerMovie *poppler_movie);
 
 G_END_DECLS
 
