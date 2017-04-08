@@ -174,7 +174,7 @@ poppler_movie_show_controls (PopplerMovie *poppler_movie)
  *
  * Returns the play mode of @poppler_movie.
  *
- * Return value: a #PopplerMovieRepeatMode.
+ * Return value: a #PopplerMoviePlayMode.
  *
  * Since: 0.54
  */
