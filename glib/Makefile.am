@@ -82,7 +82,7 @@ libpoppler_glib_la_LIBADD =				\
 	$(FREETYPE_LIBS)
 
 libpoppler_glib_la_LDFLAGS =			\
-	-version-info 16:0:8			\
+	-version-info 17:0:9			\
 	@create_shared_lib@			\
 	@auto_import_flags@
 

@@ -1,3 +1,17 @@
+Release 0.54.0
+        core:
+         * Make XRef reconstruction a bit better. Bug #100509
+
+        glib:
+         * Expose movie play mode. Bug #99625
+         * demo: Show play mode in movie properties view
+
+        qt5:
+         * Compile with -DQT_NO_CAST_FROM_BYTEARRAY. Bug #100311
+
+        utils:
+         * pdfimages: don't fail listing if inline image data contains 'EI'. Bug #100737
+
 Release 0.53.0
         core:
          * Form support improvements
