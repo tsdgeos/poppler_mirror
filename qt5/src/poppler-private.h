@@ -10,6 +10,7 @@
  * Copyright (C) 2014 Bogdan Cristea <cristeab@gmail.com>
  * Copyright (C) 2014 Aki Koskinen <freedesktop@akikoskinen.info>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+ * Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
