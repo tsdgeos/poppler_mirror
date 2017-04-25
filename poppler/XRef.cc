@@ -1144,13 +1144,16 @@ GBool XRef::okToAssemble(GBool ignoreOwnerPW) {
 }
 
 Object *XRef::getCatalog(Object *catalog) {
-  Object *obj = fetch(rootNum, rootGen, catalog);
-  if (obj->isDict()) {
-    return obj;
+  fetch(rootNum, rootGen, catalog);
+  if (catalog->isDict()) {
+    return catalog;
   }
   GBool wasReconstructed = false;
-  GBool ok = constructXRef(&wasReconstructed, gTrue);
-  return (ok) ? fetch(rootNum, rootGen, catalog) : obj;
+  if (constructXRef(&wasReconstructed, gTrue)) {
+    catalog->free();
+    fetch(rootNum, rootGen, catalog);
+  }
+  return catalog;
 }
 
 Object *XRef::fetch(int num, int gen, Object *obj, int recursion) {
