@@ -1606,8 +1606,7 @@ GBool XRef::parseEntry(Goffset offset, XRefEntry *entry)
      str->makeSubStream(offset, gFalse, 20, &obj)), gTrue);
 
   Object obj1, obj2, obj3;
-  if (((parser.getObj(&obj1)->isInt()) ||
-       parser.getObj(&obj1)->isInt64()) &&
+  if (((parser.getObj(&obj1)->isInt()) || obj1.isInt64()) &&
       (parser.getObj(&obj2)->isInt()) &&
       (parser.getObj(&obj3)->isCmd("n") || obj3.isCmd("f"))) {
     if (obj1.isInt64())
