@@ -4407,6 +4407,9 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
       }
     }
   } else {
+    if (bits == 0) {
+      goto err1;
+    }
 
     // get color space and color map
     dict->lookup("ColorSpace", &obj1);
@@ -4478,10 +4481,6 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
     if (obj1.isNull()) {
       obj1.free();
       dict->lookup("D", &obj1);
-    }
-    if (bits == 0) {
-      delete colorSpace;
-      goto err2;
     }
     colorMap = new GfxImageColorMap(bits, &obj1, colorSpace);
     obj1.free();
