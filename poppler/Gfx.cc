@@ -4264,7 +4264,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
   GBool mask;
   GBool invert;
   GfxColorSpace *colorSpace, *maskColorSpace;
-  GfxImageColorMap *colorMap, *maskColorMap;
+  GfxImageColorMap *maskColorMap;
   Object maskObj, smaskObj;
   GBool haveColorKeyMask, haveExplicitMask, haveSoftMask;
   int maskColors[2*gfxColorMaxComps];
@@ -4482,10 +4482,9 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
       obj1.free();
       dict->lookup("D", &obj1);
     }
-    colorMap = new GfxImageColorMap(bits, &obj1, colorSpace);
+    GfxImageColorMap colorMap(bits, &obj1, colorSpace);
     obj1.free();
-    if (!colorMap->isOk()) {
-      delete colorMap;
+    if (!colorMap.isOk()) {
       goto err1;
     }
 
@@ -4692,8 +4691,8 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
     // if drawing is disabled, skip over inline image data
     if (!ocState || !out->needNonText()) {
       str->reset();
-      n = height * ((width * colorMap->getNumPixelComps() *
-		     colorMap->getBits() + 7) / 8);
+      n = height * ((width * colorMap.getNumPixelComps() *
+		     colorMap.getBits() + 7) / 8);
       for (i = 0; i < n; ++i) {
 	str->getChar();
       }
@@ -4702,18 +4701,17 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
     // draw it
     } else {
       if (haveSoftMask) {
-	out->drawSoftMaskedImage(state, ref, str, width, height, colorMap, interpolate,
+	out->drawSoftMaskedImage(state, ref, str, width, height, &colorMap, interpolate,
 				 maskStr, maskWidth, maskHeight, maskColorMap, maskInterpolate);
 	delete maskColorMap;
       } else if (haveExplicitMask) {
-	out->drawMaskedImage(state, ref, str, width, height, colorMap, interpolate,
+	out->drawMaskedImage(state, ref, str, width, height, &colorMap, interpolate,
 			     maskStr, maskWidth, maskHeight, maskInvert, maskInterpolate);
       } else {
-	out->drawImage(state, ref, str, width, height, colorMap, interpolate,
+	out->drawImage(state, ref, str, width, height, &colorMap, interpolate,
 		       haveColorKeyMask ? maskColors : (int *)NULL, inlineImg);
       }
     }
-    delete colorMap;
 
     maskObj.free();
     smaskObj.free();
