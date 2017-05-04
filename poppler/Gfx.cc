@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
-// Copyright (C) 2005-2013, 2015, 2016 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015-2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -757,13 +757,17 @@ void Gfx::go(GBool topLevel) {
 	printf("\n");
 	fflush(stdout);
       }
-      GooTimer timer;
+      GooTimer *timer = nullptr;
+
+      if (unlikely(profileCommands)) {
+          timer = new GooTimer();
+      }
 
       // Run the operation
       execOp(&obj, args, numArgs);
 
       // Update the profile information
-      if (profileCommands) {
+      if (unlikely(profileCommands)) {
 	GooHash *hash;
 
 	hash = out->getProfileHash ();
@@ -778,8 +782,9 @@ void Gfx::go(GBool topLevel) {
 	    hash->add (cmd_g, data_p);
 	  }
 	  
-	  data_p->addElement(timer.getElapsed ());
+	  data_p->addElement(timer->getElapsed ());
 	}
+	delete timer;
       }
       obj.free();
       for (i = 0; i < numArgs; ++i)
