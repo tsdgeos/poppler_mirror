@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -333,7 +334,7 @@ int main(int argc, char *argv[])
 
     std::string file_name(argv[1]);
 
-    std::auto_ptr<poppler::document> doc(poppler::document::load_from_file(file_name));
+    std::unique_ptr<poppler::document> doc(poppler::document::load_from_file(file_name));
     if (!doc.get()) {
         error("loading error");
     }
@@ -363,7 +364,7 @@ int main(int argc, char *argv[])
         print_metadata(doc.get());
     }
     if (show_toc) {
-        std::auto_ptr<poppler::toc> doctoc(doc->create_toc());
+        std::unique_ptr<poppler::toc> doctoc(doc->create_toc());
         print_toc(doctoc.get());
     }
     if (show_fonts) {
@@ -376,7 +377,7 @@ int main(int argc, char *argv[])
         const int pages = doc->pages();
         for (int i = 0; i < pages; ++i) {
             std::cout << "Page " << (i + 1) << "/" << pages << ":" << std::endl;
-            std::auto_ptr<poppler::page> p(doc->create_page(i));
+            std::unique_ptr<poppler::page> p(doc->create_page(i));
             print_page(p.get());
         }
     }
@@ -384,7 +385,7 @@ int main(int argc, char *argv[])
         const int pages = doc->pages();
         for (int i = 0; i < pages; ++i) {
             std::cout << "Page " << (i + 1) << "/" << pages << ":" << std::endl;
-            std::auto_ptr<poppler::page> p(doc->create_page(i));
+            std::unique_ptr<poppler::page> p(doc->create_page(i));
             print_page_text(p.get());
         }
     }

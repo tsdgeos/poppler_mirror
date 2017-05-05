@@ -30,7 +30,7 @@ void TestLinks::checkDocumentWithNoDests()
     doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithAttachments.pdf");
     QVERIFY( doc );
 
-    std::auto_ptr< Poppler::LinkDestination > dest;
+    std::unique_ptr< Poppler::LinkDestination > dest;
     dest.reset( doc->linkDestination("no.dests.in.this.document") );
     QVERIFY( !isDestinationValid_pageNumber( dest.get(), doc ) );
     QVERIFY( isDestinationValid_name( dest.get() ) );
@@ -79,7 +79,7 @@ void TestLinks::checkDests_xr02()
     doc = Poppler::Document::load(TESTDATADIR "/unittestcases/xr02.pdf");
     QVERIFY( doc );
 
-    std::auto_ptr< Poppler::LinkDestination > dest;
+    std::unique_ptr< Poppler::LinkDestination > dest;
     dest.reset( doc->linkDestination("section.1") );
     QVERIFY( isDestinationValid_pageNumber( dest.get(), doc ) );
     QVERIFY( !isDestinationValid_name( dest.get() ) );

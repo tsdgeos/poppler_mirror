@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,7 +81,7 @@ int main(int argc, char *argv[])
 
     const std::string file_name(argv[1]);
 
-    std::auto_ptr<poppler::document> doc(poppler::document::load_from_file(file_name));
+    std::unique_ptr<poppler::document> doc(poppler::document::load_from_file(file_name));
     if (!doc.get()) {
         error("loading error");
     }
@@ -91,7 +92,7 @@ int main(int argc, char *argv[])
     if (doc_page < 0 || doc_page >= doc->pages()) {
         error("specified page number out of page count");
     }
-    std::auto_ptr<poppler::page> p(doc->create_page(doc_page));
+    std::unique_ptr<poppler::page> p(doc->create_page(doc_page));
     if (!p.get()) {
         error("NULL page");
     }

@@ -23,7 +23,7 @@ static QList<Poppler::FontInfo> loadFontsViaIterator( Poppler::Document *doc, in
 {
     int num = count == -1 ? doc->numPages() - from : count;
     QList<Poppler::FontInfo> list;
-    std::auto_ptr< Poppler::FontIterator > it( doc->newFontIterator( from ) );
+    std::unique_ptr< Poppler::FontIterator > it( doc->newFontIterator( from ) );
     while ( it->hasNext() && num )
     {
         list += it->next();
@@ -142,7 +142,7 @@ void TestFontsData::checkFontIterator()
     Poppler::Document *doc6 = Poppler::Document::load(TESTDATADIR "/tests/cropbox.pdf");
     QVERIFY( doc6 );
 
-    std::auto_ptr< Poppler::FontIterator > it;
+    std::unique_ptr< Poppler::FontIterator > it;
 
     // some tests with the 1-page document:
     // - check a default iterator

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -265,7 +266,7 @@ ustring page::text(const rectf &r) const
  */
 ustring page::text(const rectf &r, text_layout_enum layout_mode) const
 {
-    std::auto_ptr<GooString> s;
+    std::unique_ptr<GooString> s;
     const GBool use_raw_order = (layout_mode == raw_order_layout);
     TextOutputDev td(0, gFalse, 0, use_raw_order, gFalse);
     d->doc->doc->displayPage(&td, d->index + 1, 72, 72, 0, false, true, false);
