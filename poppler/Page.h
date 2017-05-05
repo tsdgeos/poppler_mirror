@@ -20,7 +20,7 @@
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 //
@@ -107,8 +107,8 @@ public:
 	? separationInfo.getDict() : (Dict *)NULL; }
   Dict *getResourceDict()
     { return resources.isDict() ? resources.getDict() : (Dict *)NULL; }
-  void replaceResource(Object obj1) 
-  {  resources.free(); obj1.copy(&resources); }
+  void replaceResource(Object *obj1)
+  {  obj1->shallowCopy(&resources); }
 
   // Clip all other boxes to the MediaBox.
   void clipBoxes();

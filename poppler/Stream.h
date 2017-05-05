@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010, 2011, 2016 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2011, 2016, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
@@ -226,13 +226,13 @@ public:
 
   // Add filters to this stream according to the parameters in <dict>.
   // Returns the new stream.
-  Stream *addFilters(Object *dict, int recursion = 0);
+  Stream *addFilters(Dict *dict, int recursion = 0);
 
 private:
   virtual GBool hasGetChars() { return false; }
   virtual int getChars(int nChars, Guchar *buffer);
 
-  Stream *makeFilter(char *name, Stream *str, Object *params, int recursion = 0, Object *dict = NULL);
+  Stream *makeFilter(char *name, Stream *str, Object *params, int recursion = 0, Dict *dict = nullptr);
 
   int ref;			// reference count
 #if MULTITHREADED
@@ -868,7 +868,7 @@ struct DCTHuffTable {
 class DCTStream: public FilterStream {
 public:
 
-  DCTStream(Stream *strA, int colorXformA, Object *dict, int recursion);
+  DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion);
   virtual ~DCTStream();
   virtual StreamKind getKind() { return strDCT; }
   virtual void reset();

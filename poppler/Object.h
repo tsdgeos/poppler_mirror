@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Kees Cook <kees@outflux.net>
-// Copyright (C) 2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jakub Wilk <jwilk@jwilk.net>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -65,6 +65,12 @@
         abort(); \
     }
 
+#define CHECK_NOT_DEAD \
+  if (unlikely(type == objDead)) { \
+        error(errInternal, 0, "Call to dead object"); \
+        abort(); \
+    }
+
 class XRef;
 class Array;
 class Dict;
@@ -105,19 +111,20 @@ enum ObjType {
   objNone,			// uninitialized object
 
   // poppler-only objects
-  objInt64			// integer with at least 64-bits
+  objInt64,			// integer with at least 64-bits
+  objDead			// and object after shallowCopy
 };
 
-#define numObjTypes 15		// total number of object types
+#define numObjTypes 16		// total number of object types
 
 //------------------------------------------------------------------------
 // Object
 //------------------------------------------------------------------------
 
 #ifdef DEBUG_MEM
-#define initObj(t) zeroUnion(); ++numAlloc[type = t]
+#define initObj(t) free(); zeroUnion(); ++numAlloc[type = t]
 #else
-#define initObj(t) zeroUnion(); type = t
+#define initObj(t) free(); zeroUnion(); type = t
 #endif
 
 class Object {
@@ -128,6 +135,13 @@ public:
   // Default constructor.
   Object():
     type(objNone) { zeroUnion(); }
+  ~Object();
+
+  Object(Object&& other);
+  Object& operator=(Object&& other);
+
+  Object &operator=(const Object &other) = delete;
+  Object(const Object &other) = delete;
 
   // Initialize an object.
   Object *initBool(GBool boolnA)
@@ -142,6 +156,14 @@ public:
     { initObj(objName); name = copyString(nameA); return this; }
   Object *initNull()
     { initObj(objNull); return this; }
+  Object *initNullNoFree()
+    {
+      type = objNull;
+#ifdef DEBUG_MEM
+#define initObj(t) ++numAlloc[objNull]
+#endif
+      return this;
+    }
   Object *initArray(XRef *xref);
   Object *initDict(XRef *xref);
   Object *initDict(Dict *dictA);
@@ -157,12 +179,11 @@ public:
   Object *initInt64(long long int64gA)
     { initObj(objInt64); int64g = int64gA; return this; }
 
-  // Copy an object.
-  Object *copy(Object *obj);
-  Object *shallowCopy(Object *obj) {
-    *obj = *this;
-    return obj;
-  }
+  // Copy this to obj
+  Object *copy(Object *obj) const;
+
+  // Copy this to obj. This becomes a none object
+  Object *shallowCopy(Object *obj);
 
   // If object is a Ref, fetch and return the referenced object.
   // Otherwise, return a copy of the object.
@@ -172,24 +193,24 @@ public:
   void free();
 
   // Type checking.
-  ObjType getType() { return type; }
-  GBool isBool() { return type == objBool; }
-  GBool isInt() { return type == objInt; }
-  GBool isReal() { return type == objReal; }
-  GBool isNum() { return type == objInt || type == objReal || type == objInt64; }
-  GBool isString() { return type == objString; }
-  GBool isName() { return type == objName; }
-  GBool isNull() { return type == objNull; }
-  GBool isArray() { return type == objArray; }
-  GBool isDict() { return type == objDict; }
-  GBool isStream() { return type == objStream; }
-  GBool isRef() { return type == objRef; }
-  GBool isCmd() { return type == objCmd; }
-  GBool isError() { return type == objError; }
-  GBool isEOF() { return type == objEOF; }
-  GBool isNone() { return type == objNone; }
-  GBool isInt64() { return type == objInt64; }
-  GBool isIntOrInt64() { return type == objInt || type == objInt64; }
+  ObjType getType() { CHECK_NOT_DEAD; return type; }
+  GBool isBool() { CHECK_NOT_DEAD; return type == objBool; }
+  GBool isInt() { CHECK_NOT_DEAD; return type == objInt; }
+  GBool isReal() { CHECK_NOT_DEAD; return type == objReal; }
+  GBool isNum() { CHECK_NOT_DEAD; return type == objInt || type == objReal || type == objInt64; }
+  GBool isString() { CHECK_NOT_DEAD; return type == objString; }
+  GBool isName() { CHECK_NOT_DEAD; return type == objName; }
+  GBool isNull() { CHECK_NOT_DEAD; return type == objNull; }
+  GBool isArray() { CHECK_NOT_DEAD; return type == objArray; }
+  GBool isDict() { CHECK_NOT_DEAD; return type == objDict; }
+  GBool isStream() { CHECK_NOT_DEAD; return type == objStream; }
+  GBool isRef() { CHECK_NOT_DEAD; return type == objRef; }
+  GBool isCmd() { CHECK_NOT_DEAD; return type == objCmd; }
+  GBool isError() { CHECK_NOT_DEAD; return type == objError; }
+  GBool isEOF() { CHECK_NOT_DEAD; return type == objEOF; }
+  GBool isNone() { CHECK_NOT_DEAD; return type == objNone; }
+  GBool isInt64() { CHECK_NOT_DEAD; return type == objInt64; }
+  GBool isIntOrInt64() { CHECK_NOT_DEAD; return type == objInt || type == objInt64; }
 
   // Special type checking.
   GBool isName(const char *nameA)

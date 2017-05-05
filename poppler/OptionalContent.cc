@@ -64,7 +64,7 @@ OCGs::OCGs(Object *ocgObject, XRef *xref) :
     ocg.free();
     ocgList.arrayGetNF(i, &ocg);
     if (!ocg.isRef()) {
-      ocg.free();
+      delete thisOptionalContentGroup;
       break;
     }
     // TODO: we should create a lookup map from Ref to the OptionalContentGroup

@@ -7,7 +7,7 @@
 // Copyright (C) 2011-2015, 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012, 2014 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2014, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2015 Arthur Stavisky <vovodroid@gmail.com>
@@ -370,7 +370,7 @@ int main (int argc, char *argv[])
         pageDict->set("Resources", newResource);
         delete newResource;
       }
-      pages.push_back(page);
+      pages.push_back(std::move(page));
       offsets.push_back(numOffset);
       docs[i]->markPageObjects(pageDict, yRef, countRef, numOffset, refPage->num, refPage->num);
       Object annotsObj;

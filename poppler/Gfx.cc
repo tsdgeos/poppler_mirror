@@ -817,8 +817,7 @@ void Gfx::go(GBool topLevel) {
 
     // got an argument - save it
     } else if (numArgs < maxArgs) {
-      args[numArgs++] = obj;
-
+      obj.shallowCopy(&args[numArgs++]);
     // too many arguments - something is wrong
     } else {
       error(errSyntaxError, getPos(), "Too many args in content stream");
@@ -4272,7 +4271,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
   GBool maskInvert;
   GBool maskInterpolate;
   Stream *maskStr;
-  Object obj1, obj2;
+  Object obj1;
   int i, n;
 
   // get info from the stream
@@ -4378,12 +4377,12 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
       dict->lookup("D", &obj1);
     }
     if (obj1.isArray()) {
+      Object obj2;
       obj1.arrayGet(0, &obj2);
       // Table 4.39 says /Decode must be [1 0] or [0 1]. Adobe
       // accepts [1.0 0.0] as well.
       if (obj2.isNum() && obj2.getNum() >= 0.9)
 	invert = gTrue;
-      obj2.free();
     } else if (!obj1.isNull()) {
       goto err2;
     }
@@ -4418,12 +4417,10 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
       dict->lookup("CS", &obj1);
     }
     if (obj1.isName() && inlineImg) {
+      Object obj2;
       res->lookupColorSpace(obj1.getName(), &obj2);
       if (!obj2.isNull()) {
-	obj1.free();
-	obj1 = obj2;
-      } else {
-	obj2.free();
+	obj2.shallowCopy(&obj1);
       }
     }
     if (!obj1.isNull()) {
@@ -4549,12 +4546,10 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
 	maskDict->lookup("CS", &obj1);
       }
       if (obj1.isName()) {
+	Object obj2;
 	res->lookupColorSpace(obj1.getName(), &obj2);
 	if (!obj2.isNull()) {
-	  obj1.free();
-	  obj1 = obj2;
-	} else {
-	  obj2.free();
+	  obj2.shallowCopy(&obj1);
 	}
       }
       maskColorSpace = GfxColorSpace::parse(NULL, &obj1, out, state);
@@ -4584,6 +4579,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
             maskWidth, maskHeight, width, height);
         } else {
           GfxColor matteColor;
+          Object obj2;
           for (i = 0; i < colorSpace->getNComps(); i++) {
             obj1.getArray()->get(i, &obj2);
             if (!obj2.isNum()) {
@@ -4593,7 +4589,6 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
               break;
             }
             matteColor.c[i] = dblToCol(obj2.getNum());
-            obj2.free();
           }
           if (i == colorSpace->getNComps()) {
             maskColorMap->setMatteColor(&matteColor);
@@ -4674,13 +4669,13 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
 	maskDict->lookup("D", &obj1);
       }
       if (obj1.isArray()) {
+	Object obj2;
 	obj1.arrayGet(0, &obj2);
 	// Table 4.39 says /Decode must be [1 0] or [0 1]. Adobe
 	// accepts [1.0 0.0] as well.
 	if (obj2.isNum() && obj2.getNum() >= 0.9) {
 	  maskInvert = gTrue;
 	}
-	obj2.free();
       } else if (!obj1.isNull()) {
 	goto err2;
       }
@@ -5081,7 +5076,7 @@ Stream *Gfx::buildImageStream() {
   // make stream
   if (parser->getStream()) {
     str = new EmbedStream(parser->getStream(), &dict, gFalse, 0);
-    str = str->addFilters(&dict);
+    str = str->addFilters(str->getDict());
   } else {
     str = NULL;
     dict.free();

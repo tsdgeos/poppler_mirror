@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2013 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2013, 2017 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -97,7 +97,8 @@ void Array::add(Object *elem) {
     }
     elems = (Object *)greallocn(elems, size, sizeof(Object));
   }
-  elems[length] = *elem;
+  elems[length].initNullNoFree();
+  elem->shallowCopy(&elems[length]);
   ++length;
 }
 

@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2008, 2010, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2012, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -54,13 +54,35 @@ static const char *objTypeNames[numObjTypes] = {
   "error",
   "eof",
   "none",
-  "integer64"
+  "integer64",
+  "dead"
 };
 
 #ifdef DEBUG_MEM
 int Object::numAlloc[numObjTypes] =
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
+
+Object::Object(Object&& other)
+{
+  type = other.type;
+  real = other.real; // this is the biggest of the union so it's enough
+  other.type = objDead;
+}
+
+Object& Object::operator=(Object&& other)
+{
+  free();
+  type = other.type;
+  real = other.real; // this is the biggest of the union so it's enough
+  other.type = objDead;
+  return *this;
+}
+
+Object::~Object()
+{
+  free();
+}
 
 Object *Object::initArray(XRef *xref) {
   initObj(objArray);
@@ -87,8 +109,11 @@ Object *Object::initStream(Stream *streamA) {
   return this;
 }
 
-Object *Object::copy(Object *obj) {
-  *obj = *this;
+Object *Object::copy(Object *obj) const {
+  CHECK_NOT_DEAD;
+
+  obj->type = type;
+  obj->real = real; // this is the biggest of the union so it's enough
   switch (type) {
   case objString:
     obj->string = string->copy();
@@ -117,7 +142,20 @@ Object *Object::copy(Object *obj) {
   return obj;
 }
 
+Object *Object::shallowCopy(Object *obj)
+{
+  CHECK_NOT_DEAD;
+
+  obj->free();
+  obj->type = type;
+  obj->real = real; // this is the biggest of the union so it's enough
+  type = objDead;
+  return obj;
+}
+
 Object *Object::fetch(XRef *xref, Object *obj, int recursion) {
+  CHECK_NOT_DEAD;
+
   return (type == objRef && xref) ?
          xref->fetch(ref.num, ref.gen, obj, recursion) : copy(obj);
 }
@@ -224,6 +262,9 @@ void Object::print(FILE *f) {
     break;
   case objNone:
     fprintf(f, "<none>");
+    break;
+    case objDead:
+    fprintf(f, "<dead>");
     break;
   case objInt64:
     fprintf(f, "%lld", int64g);

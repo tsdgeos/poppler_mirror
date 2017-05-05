@@ -6,7 +6,7 @@
 // Hugo Mercier <hmercier31[at]gmail.com> (c) 2008
 // Pino Toscano <pino@kde.org> (c) 2008
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
-// Albert Astals Cid <aacid@kde.org> (c) 2010
+// Albert Astals Cid <aacid@kde.org> (c) 2010, 2017
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -265,6 +265,23 @@ Movie::Movie(Object *movieDict, Object *aDict) {
   }
 }
 
+Movie::Movie(const Movie &other)
+{
+  ok = other.ok;
+  rotationAngle = other.rotationAngle;
+  width = other.width;
+  height = other.height;
+  showPoster = other.showPoster;
+  MA = other.MA;
+
+  other.poster.copy(&poster);
+
+  if (other.fileName)
+    fileName = other.fileName->copy();
+  else
+    fileName = nullptr;
+}
+
 void Movie::getFloatingWindowSize(int *widthA, int *heightA)
 {
   *widthA = int(width * double(MA.znum) / MA.zdenum);
@@ -272,14 +289,5 @@ void Movie::getFloatingWindowSize(int *widthA, int *heightA)
 }
 
 Movie* Movie::copy() {
-
-  // call default copy constructor
-  Movie* new_movie = new Movie(*this);
-
-  if (fileName)
-    new_movie->fileName = fileName->copy();
-
-  poster.copy(&new_movie->poster);
-
-  return new_movie;
+  return new Movie(*this);
 }

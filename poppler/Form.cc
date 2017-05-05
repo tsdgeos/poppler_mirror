@@ -689,7 +689,6 @@ void FormField::_createWidget (Object *obj, Ref aref)
   default:
     error(errSyntaxWarning, -1, "SubType on non-terminal field, invalid document?");
     numChildren--;
-    terminal = false;
   }
 }
 

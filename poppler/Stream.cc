@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2006-2010, 2012-2014, 2016 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012-2014, 2016, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -168,22 +168,22 @@ GooString *Stream::getPSFilter(int psLevel, const char *indent) {
   return new GooString();
 }
 
-Stream *Stream::addFilters(Object *dict, int recursion) {
+Stream *Stream::addFilters(Dict *dict, int recursion) {
   Object obj, obj2;
   Object params, params2;
   Stream *str;
   int i;
 
   str = this;
-  dict->dictLookup("Filter", &obj, recursion);
+  dict->lookup("Filter", &obj, recursion);
   if (obj.isNull()) {
     obj.free();
-    dict->dictLookup("F", &obj, recursion);
+    dict->lookup("F", &obj, recursion);
   }
-  dict->dictLookup("DecodeParms", &params, recursion);
+  dict->lookup("DecodeParms", &params, recursion);
   if (params.isNull()) {
     params.free();
-    dict->dictLookup("DP", &params, recursion);
+    dict->lookup("DP", &params, recursion);
   }
   if (obj.isName()) {
     str = makeFilter(obj.getName(), str, &params, recursion, dict);
@@ -212,7 +212,7 @@ Stream *Stream::addFilters(Object *dict, int recursion) {
   return str;
 }
 
-Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursion, Object *dict) {
+Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursion, Dict *dict) {
   int pred;			// parameters
   int colors;
   int bits;
@@ -417,7 +417,7 @@ void FileOutStream::printf(const char *format, ...)
 //------------------------------------------------------------------------
 
 BaseStream::BaseStream(Object *dictA, Goffset lengthA) {
-  dict = *dictA;
+  dictA->shallowCopy(&dict);
   length = lengthA;
 }
 
@@ -788,7 +788,11 @@ FileStream::~FileStream() {
 }
 
 BaseStream *FileStream::copy() {
-  return new FileStream(file, start, limited, length, &dict);
+  Object dictRef;
+  if (dict.isDict()) {
+    dictRef.initDict(dict.getDict());
+  }
+  return new FileStream(file, start, limited, length, &dictRef);
 }
 
 Stream *FileStream::makeSubStream(Goffset startA, GBool limitedA,
@@ -882,8 +886,13 @@ CachedFileStream::~CachedFileStream()
 }
 
 BaseStream *CachedFileStream::copy() {
+  Object dictRef;
+  if (dict.isDict()) {
+    dictRef.initDict(dict.getDict());
+  }
+
   cc->incRefCnt();
-  return new CachedFileStream(cc, start, limited, length, &dict);
+  return new CachedFileStream(cc, start, limited, length, &dictRef);
 }
 
 Stream *CachedFileStream::makeSubStream(Goffset startA, GBool limitedA,
@@ -982,7 +991,12 @@ MemStream::~MemStream() {
 }
 
 BaseStream *MemStream::copy() {
-  return new MemStream(buf, start, length, &dict);
+  Object dictRef;
+  if (dict.isDict()) {
+    dictRef.initDict(dict.getDict());
+  }
+
+  return new MemStream(buf, start, length, &dictRef);
 }
 
 Stream *MemStream::makeSubStream(Goffset startA, GBool limited,

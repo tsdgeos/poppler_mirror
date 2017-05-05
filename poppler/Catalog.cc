@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2013, 2015 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
@@ -548,7 +548,10 @@ LinkDest *Catalog::getDestNameTreeDest(int i)
   Object obj;
 
   catalogLocker();
-  getDestNameTree()->getValue(i).fetch(xref, &obj);
+  Object *aux = getDestNameTree()->getValue(i);
+  if (aux) {
+    aux->fetch(xref, &obj);
+  }
   dest = createLinkDest(&obj);
   obj.free();
 
@@ -558,16 +561,15 @@ LinkDest *Catalog::getDestNameTreeDest(int i)
 FileSpec *Catalog::embeddedFile(int i)
 {
     Object efDict;
-    Object obj;
     catalogLocker();
-    obj = getEmbeddedFileNameTree()->getValue(i);
+    Object *obj = getEmbeddedFileNameTree()->getValue(i);
     FileSpec *embeddedFile = 0;
-    if (obj.isRef()) {
+    if (obj->isRef()) {
       Object fsDict;
-      embeddedFile = new FileSpec(obj.fetch(xref, &fsDict));
+      embeddedFile = new FileSpec(obj->fetch(xref, &fsDict));
       fsDict.free();
-    } else if (obj.isDict()) {
-      embeddedFile = new FileSpec(&obj);
+    } else if (obj->isDict()) {
+      embeddedFile = new FileSpec(obj);
     } else {
       Object null;
       embeddedFile = new FileSpec(&null);
@@ -581,7 +583,10 @@ GooString *Catalog::getJS(int i)
   // getJSNameTree()->getValue(i) returns a shallow copy of the object so we
   // do not need to free it
   catalogLocker();
-  getJSNameTree()->getValue(i).fetch(xref, &obj);
+  Object *aux = getJSNameTree()->getValue(i);
+  if (aux) {
+    aux->fetch(xref, &obj);
+  }
 
   if (!obj.isDict()) {
     obj.free();
@@ -806,12 +811,12 @@ GBool NameTree::lookup(GooString *name, Object *obj)
   }
 }
 
-Object NameTree::getValue(int index)
+Object *NameTree::getValue(int index)
 {
   if (index < length) {
-    return entries[index]->value;
+    return &entries[index]->value;
   } else {
-    return Object();
+    return nullptr;
   }
 }
 

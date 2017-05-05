@@ -16,6 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2017 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -58,7 +59,8 @@ public:
   // Copy array with new xref
   Object *copy(XRef *xrefA, Object *obj);
 
-  // Add an element.
+  // Add an element
+  // elem becomes a dead object after this call
   void add(Object *elem);
 
   // Remove an element by position

@@ -495,7 +495,7 @@ int XRef::resize(int newSize)
     for (int i = size; i < newSize; ++i) {
       entries[i].offset = -1;
       entries[i].type = xrefEntryNone;
-      entries[i].obj.initNull ();
+      entries[i].obj.initNullNoFree ();
       entries[i].flags = 0;
       entries[i].gen = 0;
     }
@@ -625,7 +625,6 @@ GBool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fo
 	goto err1;
       }
       entry.gen = obj.getInt();
-      entry.obj.initNull ();
       entry.flags = 0;
       obj.free();
       parser->getObj(&obj, gTrue);
@@ -638,7 +637,12 @@ GBool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fo
       }
       obj.free();
       if (entries[i].offset == -1) {
-	entries[i] = entry;
+	entries[i].offset = entry.offset;
+	entries[i].gen = entry.gen;
+	entries[i].type = entry.type;
+	entries[i].flags = entry.flags;
+	entries[i].obj.initNull();
+
 	// PDF files of patents from the IBM Intellectual Property
 	// Network have a bug: the xref table claims to start at 1
 	// instead of 0.
@@ -646,7 +650,12 @@ GBool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fo
 	    entries[1].offset == 0 && entries[1].gen == 65535 &&
 	    entries[1].type == xrefEntryFree) {
 	  i = first = 0;
-	  entries[0] = entries[1];
+	  entries[0].offset = 0;
+	  entries[0].gen = 65535;
+	  entries[0].type = xrefEntryFree;
+	  entries[0].flags = entries[1].flags;
+	  entries[1].obj.shallowCopy(&entries[0].obj);
+
 	  entries[1].offset = -1;
 	}
       }
@@ -1605,7 +1614,7 @@ GBool XRef::parseEntry(Goffset offset, XRefEntry *entry)
 
   Object obj;
   obj.initNull();
-  Parser parser = Parser(NULL, new Lexer(NULL,
+  Parser parser(NULL, new Lexer(NULL,
      str->makeSubStream(offset, gFalse, 20, &obj)), gTrue);
 
   Object obj1, obj2, obj3;

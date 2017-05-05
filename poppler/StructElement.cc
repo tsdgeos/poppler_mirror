@@ -6,7 +6,7 @@
 //
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
-// Copyright 2014 Albert Astals Cid <aacid@kde.org>
+// Copyright 2014, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Dmytro Morgun <lztoad@gmail.com>
 //
 //========================================================================
@@ -1256,9 +1256,7 @@ StructElement *StructElement::parseChild(Object *ref,
     mcidObj.free();
 
     if (childObj->dictLookupNF("Pg", &pageRefObj)->isRef()) {
-      child->pageRef = pageRefObj;
-    } else {
-      pageRefObj.free();
+      pageRefObj.shallowCopy(&child->pageRef);
     }
   } else if (childObj->isDict("OBJR")) {
     Object refObj;
@@ -1269,9 +1267,7 @@ StructElement *StructElement::parseChild(Object *ref,
       child = new StructElement(refObj.getRef(), treeRoot, this);
 
       if (childObj->dictLookupNF("Pg", &pageRefObj)->isRef()) {
-        child->pageRef = pageRefObj;
-      } else {
-        pageRefObj.free();
+        pageRefObj.shallowCopy(&child->pageRef);
       }
     } else {
       error(errSyntaxError, -1, "Obj object is wrong type ({0:s})", refObj.getTypeName());

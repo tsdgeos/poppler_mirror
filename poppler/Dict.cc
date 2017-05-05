@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2008, 2010, 2013, 2014 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2013, 2014, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -108,12 +108,9 @@ Dict *Dict::copy(XRef *xrefA) {
   dictA->xref = xrefA;
   for (int i=0; i<length; i++) {
     if (dictA->entries[i].val.getType() == objDict) {
-       Dict *dict = dictA->entries[i].val.getDict();
-       Object obj;
-       obj.initDict(dict->copy(xrefA));
-       dictA->entries[i].val.free();
-       dictA->entries[i].val = obj;
-       obj.free();
+       Dict *copy = dictA->entries[i].val.getDict()->copy(xrefA);
+       dictA->entries[i].val.initDict(copy);
+       copy->decRef();
     }
   }
   return dictA;
@@ -161,7 +158,8 @@ void Dict::add(char *key, Object *val) {
     entries = (DictEntry *)greallocn(entries, size, sizeof(DictEntry));
   }
   entries[length].key = key;
-  entries[length].val = *val;
+  entries[length].val.initNullNoFree();
+  val->shallowCopy(&entries[length].val);
   ++length;
 }
 
@@ -169,8 +167,8 @@ inline DictEntry *Dict::find(const char *key) {
   if (!sorted && length >= SORT_LENGTH_LOWER_LIMIT)
   {
       dictLocker();
-      sorted = gTrue;
-      std::sort(entries, entries+length, cmpDictEntries);
+// TODO      sorted = gTrue;
+//       std::sort(entries, entries+length, cmpDictEntries);
   }
 
   if (sorted) {
@@ -208,7 +206,6 @@ void Dict::remove(const char *key) {
   } else {
     int i; 
     bool found = false;
-    DictEntry tmp;
     if(length == 0) {
       return;
     }
@@ -226,9 +223,11 @@ void Dict::remove(const char *key) {
     gfree(entries[i].key);
     entries[i].val.free();
     length -= 1;
-    tmp = entries[length];
-    if (i!=length) //don't copy the last entry if it is deleted 
-      entries[i] = tmp;
+    if (i!=length) {
+      //don't copy the last entry if it is deleted
+      entries[i].key = entries[length].key;
+      entries[length].val.shallowCopy(&entries[i].val);
+    }
   }
 }
 
@@ -242,7 +241,7 @@ void Dict::set(const char *key, Object *val) {
   if (e) {
     dictLocker();
     e->val.free();
-    e->val = *val;
+    val->shallowCopy(&e->val);
   } else {
     add (copyString(key), val);
   }

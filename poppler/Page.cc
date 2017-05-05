@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005-2013, 2016 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006-2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2006 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
@@ -393,7 +393,7 @@ void Page::replaceXRef(XRef *xrefA) {
   pageDict->lookupNF("AA", &actions);
   pageDict->lookup("Resources", &obj1);
   if (obj1.isDict()) {
-    attrs->replaceResource(obj1);
+    attrs->replaceResource(&obj1);
   }
   obj1.free();
   delete pageDict;

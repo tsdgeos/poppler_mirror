@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
@@ -64,9 +64,11 @@ public:
   int getLength() { return length; }
 
   // Add an entry.  NB: does not copy key.
+  // val becomes a dead object after the call
   void add(char *key, Object *val);
 
   // Update the value of an existing entry, otherwise create it
+  // val becomes a dead object after the call
   void set(const char *key, Object *val);
   // Remove an entry. This invalidate indexes
   void remove(const char *key);

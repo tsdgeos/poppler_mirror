@@ -2971,9 +2971,10 @@ static GfxFont * createAnnotDrawFont(XRef * xref, Object *fontResDict)
   fontsDictObj.initDict(fontsDict);
 
   Dict *dict = new Dict(xref);
+  dict->decRef();
   dict->add(copyString("Font"), &fontsDictObj);
-
   fontResDict->initDict(dict);
+
   return GfxFont::makeFont(xref, "AnnotDrawFont", dummyRef, fontDict);
 }
 
