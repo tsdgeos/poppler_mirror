@@ -213,6 +213,7 @@ public:
 
   // Get the dictionary associated with this stream.
   virtual Dict *getDict() = 0;
+  virtual Object *getDictObject() = 0;
 
   // Is this an encoding filter?
   virtual GBool isEncoder() { return gFalse; }
@@ -306,16 +307,18 @@ private:
 class BaseStream: public Stream {
 public:
 
-  BaseStream(Object *dictA, Goffset lengthA);
+    // TODO Mirar si puedo hacer que dictA sea un puntero
+  BaseStream(Object &&dictA, Goffset lengthA);
   ~BaseStream();
   virtual BaseStream *copy() = 0;
   virtual Stream *makeSubStream(Goffset start, GBool limited,
-				Goffset length, Object *dict) = 0;
+				Goffset length, Object &&dict) = 0;
   void setPos(Goffset pos, int dir = 0) override = 0;
   GBool isBinary(GBool last = gTrue) override { return last; }
   BaseStream *getBaseStream() override { return this; }
   Stream *getUndecodedStream() override { return this; }
   Dict *getDict() override { return dict.getDict(); }
+  Object *getDictObject() override { return &dict; }
   virtual GooString *getFileName() { return NULL; }
   virtual Goffset getLength() { return length; }
 
@@ -346,6 +349,7 @@ public:
   BaseStream *getBaseStream() override { return str->getBaseStream(); }
   Stream *getUndecodedStream() override { return str->getUndecodedStream(); }
   Dict *getDict() override { return str->getDict(); }
+  Object *getDictObject() override { return str->getDictObject(); }
   Stream *getNextStream() override { return str; }
 
   int getUnfilteredChar () override { return str->getUnfilteredChar(); }
@@ -447,11 +451,11 @@ class FileStream: public BaseStream {
 public:
 
   FileStream(GooFile* fileA, Goffset startA, GBool limitedA,
-	     Goffset lengthA, Object *dictA);
+	     Goffset lengthA, Object &&dictA);
   ~FileStream();
   BaseStream *copy() override;
   Stream *makeSubStream(Goffset startA, GBool limitedA,
-				Goffset lengthA, Object *dictA) override;
+				Goffset lengthA, Object &&dictA) override;
   StreamKind getKind() override { return strFile; }
   void reset() override;
   void close() override;
@@ -517,11 +521,11 @@ class CachedFileStream: public BaseStream {
 public:
 
   CachedFileStream(CachedFile *ccA, Goffset startA, GBool limitedA,
-	     Goffset lengthA, Object *dictA);
+	     Goffset lengthA, Object &&dictA);
   ~CachedFileStream();
   BaseStream *copy() override;
   Stream *makeSubStream(Goffset startA, GBool limitedA,
-				Goffset lengthA, Object *dictA) override;
+				Goffset lengthA, Object &&dictA) override;
   StreamKind getKind() override { return strCachedFile; }
   void reset() override;
   void close() override;
@@ -560,11 +564,11 @@ private:
 class MemStream: public BaseStream {
 public:
 
-  MemStream(char *bufA, Goffset startA, Goffset lengthA, Object *dictA);
+  MemStream(char *bufA, Goffset startA, Goffset lengthA, Object &&dictA);
   ~MemStream();
   BaseStream *copy() override;
   Stream *makeSubStream(Goffset start, GBool limited,
-				Goffset lengthA, Object *dictA) override;
+				Goffset lengthA, Object &&dictA) override;
   StreamKind getKind() override { return strWeird; }
   void reset() override;
   void close() override;
@@ -609,11 +613,11 @@ private:
 class EmbedStream: public BaseStream {
 public:
 
-  EmbedStream(Stream *strA, Object *dictA, GBool limitedA, Goffset lengthA);
+  EmbedStream(Stream *strA, Object &&dictA, GBool limitedA, Goffset lengthA);
   ~EmbedStream();
   BaseStream *copy() override;
   Stream *makeSubStream(Goffset start, GBool limitedA,
-				Goffset lengthA, Object *dictA) override;
+				Goffset lengthA, Object &&dictA) override;
   StreamKind getKind() override { return str->getKind(); }
   void reset() override {}
   int getChar() override;

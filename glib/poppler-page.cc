@@ -184,12 +184,11 @@ poppler_page_get_transition (PopplerPage *page)
 {
   PageTransition *trans;
   PopplerPageTransition *transition;
-  Object obj;
-  
+
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
 
-  trans = new PageTransition (page->page->getTrans (&obj));
-  obj.free ();
+  Object obj = page->page->getTrans ();
+  trans = new PageTransition (&obj);
 
   if (!trans->isOk ()) {
     delete trans;
@@ -588,7 +587,6 @@ poppler_page_get_thumbnail_size (PopplerPage *page,
 				 int         *width,
 				 int         *height)
 {
-  Object thumb;
   Dict *dict;
   gboolean retval = FALSE;
 
@@ -596,10 +594,9 @@ poppler_page_get_thumbnail_size (PopplerPage *page,
   g_return_val_if_fail (width != NULL, FALSE);
   g_return_val_if_fail (height != NULL, FALSE);
 
-  page->page->getThumb (&thumb);
+  Object thumb = page->page->getThumb ();
   if (!thumb.isStream ())
     {
-      thumb.free ();
       return FALSE;
     }
 
@@ -610,8 +607,6 @@ poppler_page_get_thumbnail_size (PopplerPage *page,
   if (dict->lookupInt ("Width", "W", width)  &&
       dict->lookupInt ("Height", "H", height))
     retval = TRUE;
-
-  thumb.free ();
 
   return retval;
 }

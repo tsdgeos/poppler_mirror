@@ -522,7 +522,7 @@ public:
   ~Form();
 
   // Look up an inheritable field dictionary entry.
-  static Object *fieldLookup(Dict *field, const char *key, Object *obj);
+  static Object fieldLookup(Dict *field, const char *key);
   
   /* Creates a new Field of the type specified in obj's dict.
      used in Form::Form and FormField::FormField */

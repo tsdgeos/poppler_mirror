@@ -69,7 +69,7 @@ public:
   NameTree();
   ~NameTree();
   void init(XRef *xref, Object *tree);
-  GBool lookup(GooString *name, Object *obj);
+  Object lookup(GooString *name);
   int numEntries() { return length; };
   // iterator accessor, note it returns a pointer to the internal object, do not free nor delete it
   Object *getValue(int i);

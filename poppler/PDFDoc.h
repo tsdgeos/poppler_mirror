@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2009, 2014, 2015 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2014, 2015, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -229,12 +229,12 @@ public:
   GBool isLinearized(GBool tryingToReconstruct = gFalse);
 
   // Return the document's Info dictionary (if any).
-  Object *getDocInfo(Object *obj) { return xref->getDocInfo(obj); }
-  Object *getDocInfoNF(Object *obj) { return xref->getDocInfoNF(obj); }
+  Object getDocInfo() { return xref->getDocInfo(); }
+  Object getDocInfoNF() { return xref->getDocInfoNF(); }
 
   // Create and return the document's Info dictionary if none exists.
   // Otherwise return the existing one.
-  Object *createDocInfoIfNoneExists(Object *obj) { return xref->createDocInfoIfNoneExists(obj); }
+  Object createDocInfoIfNoneExists() { return xref->createDocInfoIfNoneExists(); }
 
   // Remove the document's Info dictionary and update the trailer dictionary.
   void removeDocInfo() { xref->removeDocInfo(); }

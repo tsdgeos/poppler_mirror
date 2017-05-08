@@ -64,14 +64,10 @@ DCTStream::DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion) :
   FilterStream(strA) {
   colorXform = colorXformA;
   if (dict != NULL) {
-    Object obj;
-
-    dict->lookup("Width", &obj, recursion);
+    Object obj = dict->lookup("Width", recursion);
     err.width = (obj.isInt() && obj.getInt() <= JPEG_MAX_DIMENSION) ? obj.getInt() : 0;
-    obj.free();
-    dict->lookup("Height", &obj, recursion);
+    obj = dict->lookup("Height", recursion);
     err.height = (obj.isInt() && obj.getInt() <= JPEG_MAX_DIMENSION) ? obj.getInt() : 0;
-    obj.free();
   } else
     err.height = err.width = 0;
   init();

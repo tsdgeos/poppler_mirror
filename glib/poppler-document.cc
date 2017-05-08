@@ -230,7 +230,6 @@ poppler_document_new_from_data (char        *data,
                                 const char  *password,
                                 GError     **error)
 {
-  Object obj;
   PDFDoc *newDoc;
   MemStream *str;
   GooString *password_g;
@@ -240,8 +239,7 @@ poppler_document_new_from_data (char        *data,
   }
   
   // create stream
-  obj.initNull();
-  str = new MemStream(data, 0, length, &obj);
+  str = new MemStream(data, 0, length, Object(objNull));
 
   password_g = poppler_password_to_latin1(password);
   newDoc = new PDFDoc(str, password_g, password_g);
@@ -282,7 +280,6 @@ poppler_document_new_from_stream (GInputStream *stream,
                                   GCancellable *cancellable,
                                   GError      **error)
 {
-  Object obj;
   PDFDoc *newDoc;
   BaseStream *str;
   GooString *password_g;
@@ -300,12 +297,11 @@ poppler_document_new_from_stream (GInputStream *stream,
     return NULL;
   }
 
-  obj.initNull();
   if (stream_is_memory_buffer_or_local_file(stream)) {
-    str = new PopplerInputStream(stream, cancellable, 0, gFalse, 0, &obj);
+    str = new PopplerInputStream(stream, cancellable, 0, gFalse, 0, Object(objNull));
   } else {
     CachedFile *cachedFile = new CachedFile(new PopplerCachedFileLoader(stream, cancellable, length), new GooString());
-    str = new CachedFileStream(cachedFile, 0, gFalse, cachedFile->getLength(), &obj);
+    str = new CachedFileStream(cachedFile, 0, gFalse, cachedFile->getLength(), Object(objNull));
   }
 
   password_g = poppler_password_to_latin1(password);
@@ -2410,32 +2406,26 @@ get_optional_content_rbgroups (OCGs *ocg)
     int i, j;
 
     for (i = 0; i < rb->getLength (); ++i) {
-      Object obj;
       Array *rb_array;
       GList *group = NULL;
 
-      rb->get (i, &obj);
+      Object obj = rb->get (i);
       if (!obj.isArray ()) {
-        obj.free ();
 	continue;
       }
 
       rb_array = obj.getArray ();
       for (j = 0; j < rb_array->getLength (); ++j) {
-        Object ref;
 	OptionalContentGroup *oc;
 
-	rb_array->getNF (j, &ref);
+        Object ref = rb_array->getNF (j);
 	if (!ref.isRef ()) {
-	  ref.free ();
 	  continue;
 	}
 
 	oc = ocg->findOcgByRef (ref.getRef ());
 	group = g_list_prepend (group, oc);
-	ref.free ();
       }
-      obj.free ();
 
       groups = g_list_prepend (groups, group);
     }
@@ -2468,14 +2458,10 @@ get_optional_content_items_sorted (OCGs *ocg, Layer *parent, Array *order)
   int i;
 
   for (i = 0; i < order->getLength (); ++i) {
-    Object orderItem;
-      
-    order->get (i, &orderItem);
+    Object orderItem = order->get (i);
 
     if (orderItem.isDict ()) {
-      Object ref;
-      
-      order->getNF (i, &ref);
+      Object ref = order->getNF (i);
       if (ref.isRef ()) {
         OptionalContentGroup *oc = ocg->findOcgByRef (ref.getRef ());
 	Layer *layer = layer_new (oc);
@@ -2483,7 +2469,6 @@ get_optional_content_items_sorted (OCGs *ocg, Layer *parent, Array *order)
 	items = g_list_prepend (items, layer);
 	last_item = layer;
       }
-      ref.free ();
     } else if (orderItem.isArray () && orderItem.arrayGetLength () > 0) {
       if (!last_item) {
         last_item = layer_new (NULL);
@@ -2494,7 +2479,6 @@ get_optional_content_items_sorted (OCGs *ocg, Layer *parent, Array *order)
     } else if (orderItem.isString ()) {
       last_item->label = _poppler_goo_string_to_utf8 (orderItem.getString ());
     }
-    orderItem.free ();
   }
   
   return g_list_reverse (items);

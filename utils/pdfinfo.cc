@@ -15,7 +15,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dom Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2010, 2012, 2016 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2010, 2012, 2016, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Vittal Aithal <vittal.aithal@cognidox.com>
 // Copyright (C) 2012, 2013, 2016 Adrian Johnson <ajohnson@redneon.com>
@@ -120,13 +120,13 @@ static const ArgDesc argDesc[] = {
 
 static void printInfoString(Dict *infoDict, const char *key, const char *text,
 			    UnicodeMap *uMap) {
-  Object obj;
   GooString *s1;
   Unicode *u;
   char buf[8];
   int i, n, len;
 
-  if (infoDict->lookup(key, &obj)->isString()) {
+  Object obj = infoDict->lookup(key);
+  if (obj.isString()) {
     fputs(text, stdout);
     s1 = obj.getString();
     len = TextStringToUCS4(s1, &u);
@@ -137,11 +137,9 @@ static void printInfoString(Dict *infoDict, const char *key, const char *text,
     gfree(u);
     fputc('\n', stdout);
   }
-  obj.free();
 }
 
 static void printInfoDate(Dict *infoDict, const char *key, const char *text) {
-  Object obj;
   char *s;
   int year, mon, day, hour, min, sec, tz_hour, tz_minute;
   char tz;
@@ -149,7 +147,8 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text) {
   time_t time;
   char buf[256];
 
-  if (infoDict->lookup(key, &obj)->isString()) {
+  Object obj = infoDict->lookup(key);
+  if (obj.isString()) {
     fputs(text, stdout);
     s = obj.getString()->getCString();
     // TODO do something with the timezone info
@@ -181,17 +180,16 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text) {
     }
     fputc('\n', stdout);
   }
-  obj.free();
 }
 
 void printISODate(Dict *infoDict, const char *key, const char *text)
 {
-  Object obj;
   char *s;
   int year, mon, day, hour, min, sec, tz_hour, tz_minute;
   char tz;
 
-  if (infoDict->lookup(key, &obj)->isString()) {
+  Object obj = infoDict->lookup(key);
+  if (obj.isString()) {
     fputs(text, stdout);
     s = obj.getString()->getCString();
     if ( parseDateString( s, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute ) ) {
@@ -208,7 +206,6 @@ void printISODate(Dict *infoDict, const char *key, const char *text)
     }
     fputc('\n', stdout);
   }
-  obj.free();
 }
 
 static void printBox(const char *text, PDFRectangle *box) {
@@ -291,14 +288,13 @@ static void printStruct(const StructElement *element, unsigned indent) {
 
 void printInfo(PDFDoc *doc, UnicodeMap *uMap, long long filesize, GBool multiPage) {
   Page *page;
-  Object info;
   char buf[256];
   double w, h, wISO, hISO;
   int pg, i;
   int r;
 
   // print doc info
-  doc->getDocInfo(&info);
+  Object info = doc->getDocInfo();
   if (info.isDict()) {
     printInfoString(info.getDict(), "Title",        "Title:          ", uMap);
     printInfoString(info.getDict(), "Subject",      "Subject:        ", uMap);
@@ -319,7 +315,6 @@ void printInfo(PDFDoc *doc, UnicodeMap *uMap, long long filesize, GBool multiPag
       printInfoDate(info.getDict(),   "ModDate",      "ModDate:        ");
     }
   }
-  info.free();
 
   // print tagging info
    printf("Tagged:         %s\n",

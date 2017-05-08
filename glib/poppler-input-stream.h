@@ -31,11 +31,11 @@ class PopplerInputStream: public BaseStream {
 public:
 
   PopplerInputStream(GInputStream *inputStream, GCancellable *cancellableA,
-                     Goffset startA, GBool limitedA, Goffset lengthA, Object *dictA);
+                     Goffset startA, GBool limitedA, Goffset lengthA, Object &&dictA);
   ~PopplerInputStream();
   BaseStream *copy() override;
   Stream *makeSubStream(Goffset start, GBool limited,
-                        Goffset lengthA, Object *dictA) override;
+                        Goffset lengthA, Object &&dictA) override;
   StreamKind getKind() override { return strWeird; }
   void reset() override;
   void close() override;

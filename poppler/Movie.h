@@ -83,7 +83,7 @@ class Movie {
   Gushort getRotationAngle() { return rotationAngle; }
   void getAspect (int *widthA, int *heightA) { *widthA = width; *heightA = height; }
 
-  Object *getPoster(Object *obj) { return poster.copy(obj); }
+  Object getPoster() { return poster.copy(); }
   GBool getShowPoster() { return showPoster; }
 
   GBool getUseFloatingWindow() { return MA.floatingWindow; }

@@ -1,7 +1,7 @@
 /* poppler-document.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2010, 2012, 2013, 2015, 2016, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2010, 2012, 2013, 2015-2017, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, 2011 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012 Koji Otani <sho@bbr.jp>
@@ -257,12 +257,10 @@ namespace Poppler {
 	QByteArray result;
 	if (fi.isEmbedded())
 	{
-		Object refObj, strObj;
 		XRef *xref = m_doc->doc->getXRef()->copy();
 
-		refObj.initRef(fi.m_data->embRef.num, fi.m_data->embRef.gen);
-		refObj.fetch(xref, &strObj);
-		refObj.free();
+		Object refObj(fi.m_data->embRef.num, fi.m_data->embRef.gen);
+		Object strObj = refObj.fetch(xref);
 		if (strObj.isStream())
 		{
 			int c;
@@ -273,7 +271,6 @@ namespace Poppler {
 			}
 			strObj.streamClose();
 		}
-		strObj.free();
 		delete xref;
 	}
 	return result;
@@ -434,14 +431,13 @@ namespace Poppler {
     {
 	QStringList keys;
 
-	Object info;
 	if ( m_doc->locked )
 	    return QStringList();
 
 	QScopedPointer<XRef> xref(m_doc->doc->getXRef()->copy());
 	if (!xref)
 		return QStringList();
-	xref->getDocInfo(&info);
+	Object info = xref->getDocInfo();
 	if ( !info.isDict() )
 	    return QStringList();
 
@@ -452,7 +448,6 @@ namespace Poppler {
 	    keys.append( QString::fromAscii(infoDict->getKey(i)) );
 	}
 
-	info.free();
 	return keys;
     }
 

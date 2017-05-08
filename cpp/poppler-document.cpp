@@ -85,10 +85,8 @@ document_private::document_private(byte_array *file_data,
     , raw_doc_data_length(0)
     , is_locked(false)
 {
-    Object obj;
-    obj.initNull();
     file_data->swap(doc_data);
-    MemStream *memstr = new MemStream(&doc_data[0], 0, doc_data.size(), &obj);
+    MemStream *memstr = new MemStream(&doc_data[0], 0, doc_data.size(), Object(objNull));
     GooString goo_owner_password(owner_password.c_str());
     GooString goo_user_password(user_password.c_str());
     doc = new PDFDoc(memstr, &goo_owner_password, &goo_user_password);
@@ -103,9 +101,7 @@ document_private::document_private(const char *file_data, int file_data_length,
     , raw_doc_data_length(file_data_length)
     , is_locked(false)
 {
-    Object obj;
-    obj.initNull();
-    MemStream *memstr = new MemStream(const_cast<char *>(raw_doc_data), 0, raw_doc_data_length, &obj);
+    MemStream *memstr = new MemStream(const_cast<char *>(raw_doc_data), 0, raw_doc_data_length, Object(objNull));
     GooString goo_owner_password(owner_password.c_str());
     GooString goo_user_password(user_password.c_str());
     doc = new PDFDoc(memstr, &goo_owner_password, &goo_user_password);
@@ -314,9 +310,8 @@ std::vector<std::string> document::info_keys() const
         return std::vector<std::string>();
     }
 
-    Object info;
-    if (!d->doc->getDocInfo(&info)->isDict()) {
-        info.free();
+    Object info = d->doc->getDocInfo();
+    if (!info.isDict()) {
         return std::vector<std::string>();
     }
 
@@ -326,7 +321,6 @@ std::vector<std::string> document::info_keys() const
         keys[i] = std::string(info_dict->getKey(i));
     }
 
-    info.free();
     return keys;
 }
 

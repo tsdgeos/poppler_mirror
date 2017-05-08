@@ -1,7 +1,7 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2016, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2017, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -650,11 +650,10 @@ QList<TextBox*> Page::textList(Rotation rotate) const
 PageTransition *Page::transition() const
 {
   if (!m_page->transition) {
-    Object o;
     PageTransitionParams params;
-    params.dictObj = m_page->page->getTrans(&o);
-    if (params.dictObj->isDict()) m_page->transition = new PageTransition(params);
-    o.free();
+    Object o = m_page->page->getTrans();
+    params.dictObj = &o;
+    if (o.isDict()) m_page->transition = new PageTransition(params);
   }
   return m_page->transition;
 }
@@ -663,20 +662,15 @@ Link *Page::action( PageAction act ) const
 {
   if ( act == Page::Opening || act == Page::Closing )
   {
-    Object o;
-    m_page->page->getActions(&o);
+    Object o = m_page->page->getActions();
     if (!o.isDict())
     {
-      o.free();
       return 0;
     }
     Dict *dict = o.getDict();
-    Object o2;
     const char *key = act == Page::Opening ? "O" : "C";
-    dict->lookup((char*)key, &o2);
+    Object o2 = dict->lookup((char*)key);
     ::LinkAction *lact = ::LinkAction::parseAction(&o2, m_page->parentDoc->doc->getCatalog()->getBaseURI() );
-    o2.free();
-    o.free();
     Link *popplerLink = NULL;
     if (lact != NULL)
     {

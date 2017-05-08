@@ -3797,7 +3797,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
 				      int maskHeight, GBool maskInvert,
 				      GBool maskInterpolate) {
   GfxImageColorMap *maskColorMap;
-  Object maskDecode, decodeLow, decodeHigh;
+  Object decodeLow, decodeHigh;
   double *ctm;
   SplashCoord mat[6];
   SplashOutMaskedImageData imgData;
@@ -3824,14 +3824,11 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
   // If the mask is higher resolution than the image, use
   // drawSoftMaskedImage() instead.
   if (maskWidth > width || maskHeight > height) {
-    decodeLow.initInt(maskInvert ? 0 : 1);
-    decodeHigh.initInt(maskInvert ? 1 : 0);
-    maskDecode.initArray((xref) ? xref : doc->getXRef());
-    maskDecode.arrayAdd(&decodeLow);
-    maskDecode.arrayAdd(&decodeHigh);
+    Object maskDecode(new Array((xref) ? xref : doc->getXRef()));
+    maskDecode.arrayAdd(Object(maskInvert ? 0 : 1));
+    maskDecode.arrayAdd(Object(maskInvert ? 1 : 0));
     maskColorMap = new GfxImageColorMap(1, &maskDecode,
 					new GfxDeviceGrayColorSpace());
-    maskDecode.free();
     drawSoftMaskedImage(state, ref, str, width, height, colorMap, interpolate,
 			maskStr, maskWidth, maskHeight, maskColorMap, maskInterpolate);
     delete maskColorMap;
@@ -4020,9 +4017,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
     maskStr->reset();
     maskStr->doGetChars(maskWidth * maskHeight, data);
     maskStr->close();
-    Object maskDict;
-    maskDict.initDict(maskStr->getDict());
-    maskStr = new MemStream((char *)data, 0, maskWidth * maskHeight, &maskDict);
+    maskStr = new MemStream((char *)data, 0, maskWidth * maskHeight, maskStr->getDictObject()->copy());
     ((MemStream *) maskStr)->setNeedFree(gTrue);
   }
   imgMaskData.imgStr = new ImageStream(maskStr, maskWidth,

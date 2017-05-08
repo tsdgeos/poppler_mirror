@@ -1,6 +1,6 @@
 /* poppler-form.h: qt4 interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015, 2017, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  *
@@ -191,8 +191,8 @@ QString FormFieldButton::caption() const
   if (fwb->getButtonType() == formButtonPush)
   {
     Dict *dict = m_formData->fm->getObj()->getDict();
-    Object obj1;
-    if (dict->lookup("MK", &obj1)->isDict())
+    Object obj1 = dict->lookup("MK");
+    if (obj1.isDict())
     {
       AnnotAppearanceCharacs appearCharacs(obj1.getDict());
       if (appearCharacs.getNormalCaption())
@@ -200,7 +200,6 @@ QString FormFieldButton::caption() const
         ret = UnicodeParsedString(appearCharacs.getNormalCaption());
       }
     }
-    obj1.free();
   }
   else
   {

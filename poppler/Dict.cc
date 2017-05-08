@@ -98,7 +98,8 @@ Dict::Dict(Dict* dictA) {
   entries = (DictEntry *)gmallocn(size, sizeof(DictEntry));
   for (int i=0; i<length; i++) {
     entries[i].key = copyString(dictA->entries[i].key);
-    dictA->entries[i].val.copy(&entries[i].val);
+    entries[i].val.initNullAfterMalloc();
+    entries[i].val = dictA->entries[i].val.copy();
   }
 }
 
@@ -109,8 +110,7 @@ Dict *Dict::copy(XRef *xrefA) {
   for (int i=0; i<length; i++) {
     if (dictA->entries[i].val.getType() == objDict) {
        Dict *copy = dictA->entries[i].val.getDict()->copy(xrefA);
-       dictA->entries[i].val.initDict(copy);
-       copy->decRef();
+       dictA->entries[i].val = Object(copy);
     }
   }
   return dictA;
@@ -141,7 +141,7 @@ int Dict::decRef() {
   return ref;
 }
 
-void Dict::add(char *key, Object *val) {
+void Dict::add(char *key, Object &&val) {
   dictLocker();
   if (sorted) {
     // We use add on very few occasions so
@@ -158,8 +158,8 @@ void Dict::add(char *key, Object *val) {
     entries = (DictEntry *)greallocn(entries, size, sizeof(DictEntry));
   }
   entries[length].key = key;
-  entries[length].val.initNullNoFree();
-  val->shallowCopy(&entries[length].val);
+  entries[length].val.initNullAfterMalloc();
+  entries[length].val = std::move(val);
   ++length;
 }
 
@@ -167,8 +167,8 @@ inline DictEntry *Dict::find(const char *key) {
   if (!sorted && length >= SORT_LENGTH_LOWER_LIMIT)
   {
       dictLocker();
-// TODO      sorted = gTrue;
-//       std::sort(entries, entries+length, cmpDictEntries);
+      sorted = gTrue;
+      std::sort(entries, entries+length, cmpDictEntries);
   }
 
   if (sorted) {
@@ -226,24 +226,23 @@ void Dict::remove(const char *key) {
     if (i!=length) {
       //don't copy the last entry if it is deleted
       entries[i].key = entries[length].key;
-      entries[length].val.shallowCopy(&entries[i].val);
+      entries[i].val = std::move(entries[length].val);
     }
   }
 }
 
-void Dict::set(const char *key, Object *val) {
+void Dict::set(const char *key, Object &&val) {
   DictEntry *e;
-  if (val->isNull()) {
+  if (val.isNull()) {
     remove(key);
     return;
   }
   e = find (key);
   if (e) {
     dictLocker();
-    e->val.free();
-    val->shallowCopy(&e->val);
+    e->val = std::move(val);
   } else {
-    add (copyString(key), val);
+    add (copyString(key), std::move(val));
   }
 }
 
@@ -254,27 +253,25 @@ GBool Dict::is(const char *type) {
   return (e = find("Type")) && e->val.isName(type);
 }
 
-Object *Dict::lookup(const char *key, Object *obj, int recursion) {
+Object Dict::lookup(const char *key, int recursion) {
   DictEntry *e;
 
-  return (e = find(key)) ? e->val.fetch(xref, obj, recursion) : obj->initNull();
+  return (e = find(key)) ? e->val.fetch(xref, recursion) : Object(objNull);
 }
 
-Object *Dict::lookupNF(const char *key, Object *obj) {
+Object Dict::lookupNF(const char *key) {
   DictEntry *e;
 
-  return (e = find(key)) ? e->val.copy(obj) : obj->initNull();
+  return (e = find(key)) ? e->val.copy() : Object(objNull);
 }
 
 GBool Dict::lookupInt(const char *key, const char *alt_key, int *value)
 {
-  Object obj1;
   GBool success = gFalse;
-  
-  lookup ((char *) key, &obj1);
+  Object obj1 = lookup ((char *) key);
   if (obj1.isNull () && alt_key != NULL) {
     obj1.free ();
-    lookup ((char *) alt_key, &obj1);
+    obj1 = lookup ((char *) alt_key);
   }
   if (obj1.isInt ()) {
     *value = obj1.getInt ();
@@ -290,10 +287,10 @@ char *Dict::getKey(int i) {
   return entries[i].key;
 }
 
-Object *Dict::getVal(int i, Object *obj) {
-  return entries[i].val.fetch(xref, obj);
+Object Dict::getVal(int i) {
+  return entries[i].val.fetch(xref);
 }
 
-Object *Dict::getValNF(int i, Object *obj) {
-  return entries[i].val.copy(obj);
+Object Dict::getValNF(int i) {
+  return entries[i].val.copy();
 }

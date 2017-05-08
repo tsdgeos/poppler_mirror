@@ -84,11 +84,8 @@ _poppler_movie_new (Movie *poppler_movie)
 
   movie->filename = g_strdup (poppler_movie->getFileName()->getCString());
   if (poppler_movie->getShowPoster()) {
-    Object tmp;
-
-    poppler_movie->getPoster(&tmp);
+    Object tmp = poppler_movie->getPoster();
     movie->need_poster = (!tmp.isRef() && !tmp.isStream());
-    tmp.free();
   }
 
   movie->show_controls = poppler_movie->getActivationParameters()->showControls;

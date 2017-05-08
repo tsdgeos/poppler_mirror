@@ -172,11 +172,10 @@ ustring page::label() const
 page_transition* page::transition() const
 {
     if (!d->transition) {
-        Object o;
-        if (d->page->getTrans(&o)->isDict()) {
+        Object o = d->page->getTrans();
+        if (o.isDict()) {
             d->transition = new page_transition(&o);
         }
-        o.free();
     }
     return d->transition;
 }

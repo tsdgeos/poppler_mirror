@@ -67,7 +67,6 @@ poppler_attachment_dispose (GObject *obj)
 
   if (priv->obj_stream)
     {
-      priv->obj_stream->free();
       delete priv->obj_stream;
       priv->obj_stream = NULL;
     }
@@ -127,8 +126,7 @@ _poppler_attachment_new (FileSpec *emb_file)
   if (embFile->checksum () && embFile->checksum ()->getLength () > 0)
     attachment->checksum = g_string_new_len (embFile->checksum ()->getCString (),
                                              embFile->checksum ()->getLength ());
-  priv->obj_stream = new Object();
-  priv->obj_stream->initStream(embFile->stream());
+  priv->obj_stream = new Object(embFile->stream());
   // Copy the stream
   embFile->stream()->incRef();
 

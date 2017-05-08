@@ -57,18 +57,18 @@ public:
   int getLength() { return length; }
 
   // Copy array with new xref
-  Object *copy(XRef *xrefA, Object *obj);
+  Object copy(XRef *xrefA);
 
   // Add an element
   // elem becomes a dead object after this call
-  void add(Object *elem);
+  void add(Object &&elem);
 
   // Remove an element by position
   void remove(int i);
 
   // Accessors.
-  Object *get(int i, Object *obj, int resursion = 0);
-  Object *getNF(int i, Object *obj);
+  Object get(int i, int resursion = 0);
+  Object getNF(int i);
   GBool getString(int i, GooString *string);
 
 private:

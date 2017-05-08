@@ -21,8 +21,8 @@
 #include "poppler-input-stream.h"
 
 PopplerInputStream::PopplerInputStream(GInputStream *inputStreamA, GCancellable *cancellableA,
-                                       Goffset startA, GBool limitedA, Goffset lengthA, Object *dictA)
-  : BaseStream(dictA, lengthA)
+                                       Goffset startA, GBool limitedA, Goffset lengthA, Object &&dictA)
+  : BaseStream(std::move(dictA), lengthA)
 {
   inputStream = (GInputStream *)g_object_ref(inputStreamA);
   cancellable = cancellableA ? (GCancellable *)g_object_ref(cancellableA) : NULL;
@@ -44,13 +44,13 @@ PopplerInputStream::~PopplerInputStream()
 }
 
 BaseStream *PopplerInputStream::copy() {
-  return new PopplerInputStream(inputStream, cancellable, start, limited, length, &dict);
+  return new PopplerInputStream(inputStream, cancellable, start, limited, length, dict.copy());
 }
 
 Stream *PopplerInputStream::makeSubStream(Goffset startA, GBool limitedA,
-                                          Goffset lengthA, Object *dictA)
+                                          Goffset lengthA, Object &&dictA)
 {
-  return new PopplerInputStream(inputStream, cancellable, startA, limitedA, lengthA, dictA);
+  return new PopplerInputStream(inputStream, cancellable, startA, limitedA, lengthA, std::move(dictA));
 }
 
 void PopplerInputStream::reset()

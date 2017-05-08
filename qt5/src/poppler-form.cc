@@ -220,8 +220,8 @@ QString FormFieldButton::caption() const
   if (fwb->getButtonType() == formButtonPush)
   {
     Dict *dict = m_formData->fm->getObj()->getDict();
-    Object obj1;
-    if (dict->lookup("MK", &obj1)->isDict())
+    Object obj1 = dict->lookup("MK");
+    if (obj1.isDict())
     {
       AnnotAppearanceCharacs appearCharacs(obj1.getDict());
       if (appearCharacs.getNormalCaption())
@@ -229,7 +229,6 @@ QString FormFieldButton::caption() const
         ret = UnicodeParsedString(appearCharacs.getNormalCaption());
       }
     }
-    obj1.free();
   }
   else
   {

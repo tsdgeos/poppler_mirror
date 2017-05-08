@@ -6,6 +6,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2017 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -70,7 +71,7 @@ private:
   GooString *desc;             // Desc
 };
 
-GBool getFileSpecName (Object *fileSpec, Object *fileName);
-GBool getFileSpecNameForPlatform (Object *fileSpec, Object *fileName);
+Object getFileSpecName (Object *fileSpec);
+Object getFileSpecNameForPlatform (Object *fileSpec);
 
 #endif /* FILE_SPEC_H */

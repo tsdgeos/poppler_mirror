@@ -84,42 +84,18 @@ Object::~Object()
   free();
 }
 
-Object *Object::initArray(XRef *xref) {
-  initObj(objArray);
-  array = new Array(xref);
-  return this;
-}
-
-Object *Object::initDict(XRef *xref) {
-  initObj(objDict);
-  dict = new Dict(xref);
-  return this;
-}
-
-Object *Object::initDict(Dict *dictA) {
-  initObj(objDict);
-  dict = dictA;
-  dict->incRef();
-  return this;
-}
-
-Object *Object::initStream(Stream *streamA) {
-  initObj(objStream);
-  stream = streamA;
-  return this;
-}
-
-Object *Object::copy(Object *obj) const {
+Object Object::copy() const {
   CHECK_NOT_DEAD;
 
-  obj->type = type;
-  obj->real = real; // this is the biggest of the union so it's enough
+  Object obj;
+  obj.type = type;
+  obj.real = real; // this is the biggest of the union so it's enough
   switch (type) {
   case objString:
-    obj->string = string->copy();
+    obj.string = string->copy();
     break;
   case objName:
-    obj->name = copyString(name);
+    obj.cString = copyString(cString);
     break;
   case objArray:
     array->incRef();
@@ -131,7 +107,7 @@ Object *Object::copy(Object *obj) const {
     stream->incRef();
     break;
   case objCmd:
-    obj->cmd = copyString(cmd);
+    obj.cString = copyString(cString);
     break;
   default:
     break;
@@ -142,22 +118,11 @@ Object *Object::copy(Object *obj) const {
   return obj;
 }
 
-Object *Object::shallowCopy(Object *obj)
-{
-  CHECK_NOT_DEAD;
-
-  obj->free();
-  obj->type = type;
-  obj->real = real; // this is the biggest of the union so it's enough
-  type = objDead;
-  return obj;
-}
-
-Object *Object::fetch(XRef *xref, Object *obj, int recursion) {
+Object Object::fetch(XRef *xref, int recursion) const {
   CHECK_NOT_DEAD;
 
   return (type == objRef && xref) ?
-         xref->fetch(ref.num, ref.gen, obj, recursion) : copy(obj);
+         xref->fetch(ref.num, ref.gen, recursion) : copy();
 }
 
 void Object::free() {
@@ -166,7 +131,7 @@ void Object::free() {
     delete string;
     break;
   case objName:
-    gfree(name);
+    gfree(cString);
     break;
   case objArray:
     if (!array->decRef()) {
@@ -184,7 +149,7 @@ void Object::free() {
     }
     break;
   case objCmd:
-    gfree(cmd);
+    gfree(cString);
     break;
   default:
     break;
@@ -219,7 +184,7 @@ void Object::print(FILE *f) {
     fprintf(f, ")");
     break;
   case objName:
-    fprintf(f, "/%s", name);
+    fprintf(f, "/%s", cString);
     break;
   case objNull:
     fprintf(f, "null");
@@ -229,9 +194,8 @@ void Object::print(FILE *f) {
     for (i = 0; i < arrayGetLength(); ++i) {
       if (i > 0)
 	fprintf(f, " ");
-      arrayGetNF(i, &obj);
+      obj = arrayGetNF(i);
       obj.print(f);
-      obj.free();
     }
     fprintf(f, "]");
     break;
@@ -239,9 +203,8 @@ void Object::print(FILE *f) {
     fprintf(f, "<<");
     for (i = 0; i < dictGetLength(); ++i) {
       fprintf(f, " /%s ", dictGetKey(i));
-      dictGetValNF(i, &obj);
+      obj = dictGetValNF(i);
       obj.print(f);
-      obj.free();
     }
     fprintf(f, " >>");
     break;
@@ -252,7 +215,7 @@ void Object::print(FILE *f) {
     fprintf(f, "%d %d R", ref.num, ref.gen);
     break;
   case objCmd:
-    fprintf(f, "%s", cmd);
+    fprintf(f, "%s", cString);
     break;
   case objError:
     fprintf(f, "<error>");

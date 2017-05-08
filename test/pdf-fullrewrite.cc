@@ -124,14 +124,11 @@ static GBool compareDictionaries(Dict *dictA, Dict *dictB)
    * contain the same number of entries, we don't need to check that every key
    * in dictB is also contained in dictA */
   for (int i = 0; i < length; ++i) {
-    Object valA, valB;
     const char *key = dictA->getKey(i);
-    dictA->getValNF(i, &valA);
-    dictB->lookupNF(key, &valB);
+    Object valA = dictA->getValNF(i);
+    Object valB = dictB->lookupNF(key);
     if (!compareObjects(&valA, &valB))
       return gFalse;
-    valA.free();
-    valB.free();
   }
 
   return gTrue;
@@ -200,14 +197,11 @@ static GBool compareObjects(Object *objA, Object *objB)
           return gFalse;
         } else {
           for (int i = 0; i < length; ++i) {
-            Object elemA, elemB;
-            arrayA->getNF(i, &elemA);
-            arrayB->getNF(i, &elemB);
+            Object elemA = arrayA->getNF(i);
+            Object elemB = arrayB->getNF(i);
             if (!compareObjects(&elemA, &elemB)) {
               return gFalse;
             }
-            elemA.free();
-            elemB.free();
           }
           return gTrue;
         }
@@ -348,15 +342,12 @@ static GBool compareDocuments(PDFDoc *origDoc, PDFDoc *newDoc)
     }
 
     // Compare contents
-    Object origObj, newObj;
-    origXRef->fetch(i, origGenNum, &origObj);
-    newXRef->fetch(i, newGenNum, &newObj);
+    Object origObj = origXRef->fetch(i, origGenNum);
+    Object newObj = newXRef->fetch(i, newGenNum);
     if (!compareObjects(&origObj, &newObj)) {
       fprintf(stderr, "XRef entry %u: contents differ\n", i);
       result = gFalse;
     }
-    origObj.free();
-    newObj.free();
   }
 
   return result;

@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Raj Kumar <rkumar@archive.org>
 // Copyright (C) 2006 Paul Walmsley <paul@booyaka.com>
-// Copyright (C) 2006-2010, 2012, 2014-2016 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012, 2014-2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Edward Jiang <ejiang@google.com>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -1197,7 +1197,7 @@ JBIG2Stream::JBIG2Stream(Stream *strA, Object *globalsStreamA, Object *globalsSt
   mmrDecoder = new JBIG2MMRDecoder();
 
   if (globalsStreamA->isStream()) {
-    globalsStreamA->copy(&globalsStream);
+    globalsStream = globalsStreamA->copy();
     if (globalsStreamRefA->isRef())
       globalsStreamRef = globalsStreamRefA->getRef();
   }
@@ -1209,7 +1209,6 @@ JBIG2Stream::JBIG2Stream(Stream *strA, Object *globalsStreamA, Object *globalsSt
 
 JBIG2Stream::~JBIG2Stream() {
   close();
-  globalsStream.free();
   delete arithDecoder;
   delete genericRegionStats;
   delete refinementRegionStats;

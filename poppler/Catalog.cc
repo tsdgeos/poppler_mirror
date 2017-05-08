@@ -74,10 +74,6 @@
 //------------------------------------------------------------------------
 
 Catalog::Catalog(PDFDoc *docA) {
-  Object catDict, pagesDict, pagesDictRef;
-  Object obj, obj2;
-  Object optContentProps;
-
 #if MULTITHREADED
   gInitMutex(&mutex);
 #endif
@@ -107,44 +103,39 @@ Catalog::Catalog(PDFDoc *docA) {
   lastCachedPage = 0;
   markInfo = markInfoNull;
 
-  xref->getCatalog(&catDict);
+  Object catDict = xref->getCatalog();
   if (!catDict.isDict()) {
     error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
-    goto err1;
+    ok = gFalse;
+    return;
   }
   // get the AcroForm dictionary
-  catDict.dictLookup("AcroForm", &acroForm);
+  acroForm = catDict.dictLookup("AcroForm");
 
   // read base URI
-  if (catDict.dictLookup("URI", &obj)->isDict()) {
-    if (obj.dictLookup("Base", &obj2)->isString()) {
+  Object obj = catDict.dictLookup("URI");
+  if (obj.isDict()) {
+    Object obj2 = obj.dictLookup("Base");
+    if (obj2.isString()) {
       baseURI = obj2.getString()->copy();
     }
-    obj2.free();
   }
-  obj.free();
 
   // get the Optional Content dictionary
-  if (catDict.dictLookup("OCProperties", &optContentProps)->isDict()) {
+  Object optContentProps = catDict.dictLookup("OCProperties");
+  if (optContentProps.isDict()) {
     optContent = new OCGs(&optContentProps, xref);
     if (!optContent->isOk ()) {
       delete optContent;
       optContent = NULL;
     }
   }
-  optContentProps.free();
 
   // actions
-  catDict.dictLookupNF("AA", &additionalActions);
+  additionalActions = catDict.dictLookupNF("AA");
 
   // get the ViewerPreferences dictionary
-  catDict.dictLookup("ViewerPreferences", &viewerPreferences);
-  catDict.free();
-  return;
-
- err1:
-  catDict.free();
-  ok = gFalse;
+  viewerPreferences = catDict.dictLookup("ViewerPreferences");
 }
 
 Catalog::~Catalog() {
@@ -175,8 +166,6 @@ Catalog::~Catalog() {
     gfree(pages);
   }
   gfree(pageRefs);
-  names.free();
-  dests.free();
   delete destNameTree;
   delete embeddedFileNameTree;
   delete jsNameTree;
@@ -188,45 +177,32 @@ Catalog::~Catalog() {
   delete optContent;
   delete viewerPrefs;
   delete structTreeRoot;
-  metadata.free();
-  outline.free();
-  acroForm.free();
-  viewerPreferences.free();
-  additionalActions.free();
 #if MULTITHREADED
   gDestroyMutex(&mutex);
 #endif
 }
 
 GooString *Catalog::readMetadata() {
-  GooString *s;
-  Dict *dict;
-  Object obj;
-
   catalogLocker();
   if (metadata.isNone()) {
-    Object catDict;
-
-    xref->getCatalog(&catDict);
+    Object catDict = xref->getCatalog();
     if (catDict.isDict()) {
-      catDict.dictLookup("Metadata", &metadata);
+      metadata = catDict.dictLookup("Metadata");
     } else {
       error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
-      metadata.initNull();
+      metadata.setToNull();
     }
-    catDict.free();
   }
 
   if (!metadata.isStream()) {
-    return NULL;
+    return nullptr;
   }
-  dict = metadata.streamGetDict();
-  if (!dict->lookup("Subtype", &obj)->isName("XML")) {
+  Object obj = metadata.streamGetDict()->lookup("Subtype");
+  if (!obj.isName("XML")) {
     error(errSyntaxWarning, -1, "Unknown Metadata type: '{0:s}'",
 	  obj.isName() ? obj.getName() : "???");
   }
-  obj.free();
-  s = new GooString();
+  GooString *s = new GooString();
   metadata.getStream()->fillGooString(s);
   metadata.streamClose();
   return s;
@@ -266,43 +242,33 @@ GBool Catalog::cachePageTree(int page)
 
   if (pagesList == NULL) {
 
-    Object catDict;
     Ref pagesRef;
 
-    xref->getCatalog(&catDict);
+    Object catDict = xref->getCatalog();
 
     if (catDict.isDict()) {
-      Object pagesDictRef;
-      if (catDict.dictLookupNF("Pages", &pagesDictRef)->isRef() &&
+      Object pagesDictRef = catDict.dictLookupNF("Pages");
+      if (pagesDictRef.isRef() &&
           pagesDictRef.getRefNum() >= 0 &&
           pagesDictRef.getRefNum() < xref->getNumObjects()) {
         pagesRef = pagesDictRef.getRef();
-        pagesDictRef.free();
       } else {
         error(errSyntaxError, -1, "Catalog dictionary does not contain a valid \"Pages\" entry");
-        pagesDictRef.free();
-        catDict.free();
         return gFalse;
       }
     } else {
       error(errSyntaxError, -1, "Could not find catalog dictionary");
-      catDict.free();
       return gFalse;
     }
 
-    Object obj;
-    catDict.dictLookup("Pages", &obj);
-    catDict.free();
+    Object obj = catDict.dictLookup("Pages");
     // This should really be isDict("Pages"), but I've seen at least one
     // PDF file where the /Type entry is missing.
     if (obj.isDict()) {
       obj.getDict()->incRef();
       pagesDict = obj.getDict();
-      obj.free();
-    }
-    else {
+    } else {
       error(errSyntaxError, -1, "Top-level pages object is wrong type ({0:s})", obj.getTypeName());
-      obj.free();
       return gFalse;
     }
 
@@ -340,12 +306,10 @@ GBool Catalog::cachePageTree(int page)
     if (pagesList->empty()) return gFalse;
 
     pagesDict = pagesList->back();
-    Object kids;
-    pagesDict->lookup("Kids", &kids);
+    Object kids = pagesDict->lookup("Kids");
     if (!kids.isArray()) {
       error(errSyntaxError, -1, "Kids object (page {0:d}) is wrong type ({1:s})",
             lastCachedPage+1, kids.getTypeName());
-      kids.free();
       return gFalse;
     }
 
@@ -360,17 +324,13 @@ GBool Catalog::cachePageTree(int page)
        attrsList->pop_back();
        kidsIdxList->pop_back();
        if (!kidsIdxList->empty()) kidsIdxList->back()++;
-       kids.free();
        continue;
     }
 
-    Object kidRef;
-    kids.arrayGetNF(kidsIdx, &kidRef);
+    Object kidRef = kids.arrayGetNF(kidsIdx);
     if (!kidRef.isRef()) {
       error(errSyntaxError, -1, "Kid object (page {0:d}) is not an indirect reference ({1:s})",
             lastCachedPage+1, kidRef.getTypeName());
-      kidRef.free();
-      kids.free();
       return gFalse;
     }
 
@@ -383,15 +343,11 @@ GBool Catalog::cachePageTree(int page)
     }
     if (loop) {
       error(errSyntaxError, -1, "Loop in Pages tree");
-      kidRef.free();
-      kids.free();
       kidsIdxList->back()++;
       continue;
     }
 
-    Object kid;
-    kids.arrayGet(kidsIdx, &kid);
-    kids.free();
+    Object kid = kids.arrayGet(kidsIdx);
     if (kid.isDict("Page") || (kid.isDict() && !kid.getDict()->hasKey("Kids"))) {
       PageAttrs *attrs = new PageAttrs(attrsList->back(), kid.getDict());
       Page *p = new Page(doc, lastCachedPage+1, kid.getDict(),
@@ -399,15 +355,11 @@ GBool Catalog::cachePageTree(int page)
       if (!p->isOk()) {
         error(errSyntaxError, -1, "Failed to create page (page {0:d})", lastCachedPage+1);
         delete p;
-        kidRef.free();
-        kid.free();
         return gFalse;
       }
 
       if (lastCachedPage >= numPages) {
         error(errSyntaxError, -1, "Page count in top-level pages object is incorrect");
-        kidRef.free();
-        kid.free();
         return gFalse;
       }
 
@@ -431,9 +383,6 @@ GBool Catalog::cachePageTree(int page)
             lastCachedPage+1, kid.getTypeName());
       kidsIdxList->back()++;
     }
-    kidRef.free();
-    kid.free();
-
   }
 
   return gFalse;
@@ -451,48 +400,28 @@ int Catalog::findPage(int num, int gen) {
 }
 
 LinkDest *Catalog::findDest(GooString *name) {
-  LinkDest *dest;
-  Object obj1;
-  GBool found;
-
   // try named destination dictionary then name tree
-  found = gFalse;
   if (getDests()->isDict()) {
-    if (!getDests()->dictLookup(name->getCString(), &obj1)->isNull())
-      found = gTrue;
-    else
-      obj1.free();
+    Object obj1 = getDests()->dictLookup(name->getCString());
+    return createLinkDest(&obj1);
   }
-  if (!found) {
-    catalogLocker();
-    if (getDestNameTree()->lookup(name, &obj1))
-      found = gTrue;
-    else
-      obj1.free();
-  }
-  if (!found)
-    return NULL;
 
-  dest = createLinkDest(&obj1);
-  obj1.free();
-
-  return dest;
+  catalogLocker();
+  Object obj2 = getDestNameTree()->lookup(name);
+  return createLinkDest(&obj2);
 }
 
 LinkDest *Catalog::createLinkDest(Object *obj)
 {
-  LinkDest *dest;
-  Object obj2;
-
-  dest = NULL;
+  LinkDest *dest = nullptr;
   if (obj->isArray()) {
     dest = new LinkDest(obj->getArray());
   } else if (obj->isDict()) {
-    if (obj->dictLookup("D", &obj2)->isArray())
+    Object obj2 = obj->dictLookup("D");
+    if (obj2.isArray())
       dest = new LinkDest(obj2.getArray());
     else
       error(errSyntaxWarning, -1, "Bad named destination value");
-    obj2.free();
   } else {
     error(errSyntaxWarning, -1, "Bad named destination value");
   }
@@ -528,34 +457,24 @@ char *Catalog::getDestsName(int i)
 
 LinkDest *Catalog::getDestsDest(int i)
 {
-  LinkDest *dest;
-  Object *obj, obj1;
-
-  obj= getDests();
+  Object *obj = getDests();
   if (!obj->isDict()) {
     return NULL;
   }
-  obj->dictGetVal(i, &obj1);
-  dest = createLinkDest(&obj1);
-  obj1.free();
-
-  return dest;
+  Object obj1 = obj->dictGetVal(i);
+  return createLinkDest(&obj1);
 }
 
 LinkDest *Catalog::getDestNameTreeDest(int i)
 {
-  LinkDest *dest;
   Object obj;
 
   catalogLocker();
   Object *aux = getDestNameTree()->getValue(i);
   if (aux) {
-    aux->fetch(xref, &obj);
+    obj = aux->fetch(xref);
   }
-  dest = createLinkDest(&obj);
-  obj.free();
-
-  return dest;
+  return createLinkDest(&obj);
 }
 
 FileSpec *Catalog::embeddedFile(int i)
@@ -565,9 +484,8 @@ FileSpec *Catalog::embeddedFile(int i)
     Object *obj = getEmbeddedFileNameTree()->getValue(i);
     FileSpec *embeddedFile = 0;
     if (obj->isRef()) {
-      Object fsDict;
-      embeddedFile = new FileSpec(obj->fetch(xref, &fsDict));
-      fsDict.free();
+      Object fsDict = obj->fetch(xref);
+      embeddedFile = new FileSpec(&fsDict);
     } else if (obj->isDict()) {
       embeddedFile = new FileSpec(obj);
     } else {
@@ -585,27 +503,21 @@ GooString *Catalog::getJS(int i)
   catalogLocker();
   Object *aux = getJSNameTree()->getValue(i);
   if (aux) {
-    aux->fetch(xref, &obj);
+    obj = aux->fetch(xref);
   }
 
   if (!obj.isDict()) {
-    obj.free();
-    return 0;
+    return nullptr;
   }
-  Object obj2;
-  if (!obj.dictLookup("S", &obj2)->isName()) {
-    obj2.free();
-    obj.free();
-    return 0;
+  Object obj2 = obj.dictLookup("S");
+  if (!obj2.isName()) {
+    return nullptr;
   }
   if (strcmp(obj2.getName(), "JavaScript")) {
-    obj2.free();
-    obj.free();
-    return 0;
+    return nullptr;
   }
-  obj2.free();
-  obj.dictLookup("JS", &obj2);
-  GooString *js = 0;
+  obj2 = obj.dictLookup("JS");
+  GooString *js = nullptr;
   if (obj2.isString()) {
     js = new GooString(obj2.getString());
   }
@@ -614,8 +526,6 @@ GooString *Catalog::getJS(int i)
     js = new GooString();
     stream->fillGooString(js);
   }
-  obj2.free();
-  obj.free();
   return js;
 }
 
@@ -624,18 +534,16 @@ Catalog::PageMode Catalog::getPageMode() {
   catalogLocker();
   if (pageMode == pageModeNull) {
 
-    Object catDict, obj;
-
     pageMode = pageModeNone;
 
-    xref->getCatalog(&catDict);
+    Object catDict = xref->getCatalog();
     if (!catDict.isDict()) {
       error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
-      catDict.free();
       return pageMode;
     }
 
-    if (catDict.dictLookup("PageMode", &obj)->isName()) {
+    Object obj = catDict.dictLookup("PageMode");
+    if (obj.isName()) {
       if (obj.isName("UseNone"))
         pageMode = pageModeNone;
       else if (obj.isName("UseOutlines"))
@@ -649,8 +557,6 @@ Catalog::PageMode Catalog::getPageMode() {
       else if (obj.isName("UseAttachments"))
         pageMode = pageModeAttach;
     }
-    obj.free();
-    catDict.free();
   }
   return pageMode;
 }
@@ -660,19 +566,17 @@ Catalog::PageLayout Catalog::getPageLayout() {
   catalogLocker();
   if (pageLayout == pageLayoutNull) {
 
-    Object catDict, obj;
-
     pageLayout = pageLayoutNone;
 
-    xref->getCatalog(&catDict);
+    Object catDict = xref->getCatalog();
     if (!catDict.isDict()) {
       error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
-      catDict.free();
       return pageLayout;
     }
 
     pageLayout = pageLayoutNone;
-    if (catDict.dictLookup("PageLayout", &obj)->isName()) {
+    Object obj = catDict.dictLookup("PageLayout");
+    if (obj.isName()) {
       if (obj.isName("SinglePage"))
         pageLayout = pageLayoutSinglePage;
       if (obj.isName("OneColumn"))
@@ -686,8 +590,6 @@ Catalog::PageLayout Catalog::getPageLayout() {
       if (obj.isName("TwoPageRight"))
         pageLayout = pageLayoutTwoPageRight;
     }
-    obj.free();
-    catDict.free();
   }
   return pageLayout;
 }
@@ -710,20 +612,19 @@ NameTree::~NameTree()
 }
 
 NameTree::Entry::Entry(Array *array, int index) {
-    if (!array->getString(index, &name) || !array->getNF(index + 1, &value)) {
-      Object aux;
-      array->get(index, &aux);
-      if (aux.isString() && array->getNF(index + 1, &value) )
-      {
-        name.append(aux.getString());
-      }
-      else
-        error(errSyntaxError, -1, "Invalid page tree");
+  if (!array->getString(index, &name)) {
+    Object aux = array->get(index);
+    if (aux.isString())
+    {
+      name.append(aux.getString());
     }
+    else
+      error(errSyntaxError, -1, "Invalid page tree");
+  }
+  value = array->getNF(index + 1);
 }
 
 NameTree::Entry::~Entry() {
-  value.free();
 }
 
 void NameTree::addEntry(Entry *entry)
@@ -758,33 +659,29 @@ void NameTree::init(XRef *xrefA, Object *tree) {
 }
 
 void NameTree::parse(Object *tree) {
-  Object names;
-  Object kids, kid;
-  int i;
-
   if (!tree->isDict())
     return;
 
   // leaf node
-  if (tree->dictLookup("Names", &names)->isArray()) {
-    for (i = 0; i < names.arrayGetLength(); i += 2) {
+  Object names = tree->dictLookup("Names");
+  if (names.isArray()) {
+    for (int i = 0; i < names.arrayGetLength(); i += 2) {
       NameTree::Entry *entry;
 
       entry = new Entry(names.getArray(), i);
       addEntry(entry);
     }
   }
-  names.free();
 
   // root or intermediate node
-  if (tree->dictLookup("Kids", &kids)->isArray()) {
-    for (i = 0; i < kids.arrayGetLength(); ++i) {
-      if (kids.arrayGet(i, &kid)->isDict())
+  Object kids = tree->dictLookup("Kids");
+  if (kids.isArray()) {
+    for (int i = 0; i < kids.arrayGetLength(); ++i) {
+      Object kid = kids.arrayGet(i);
+      if (kid.isDict())
 	parse(&kid);
-      kid.free();
     }
   }
-  kids.free();
 }
 
 int NameTree::Entry::cmp(const void *voidKey, const void *voidEntry)
@@ -795,19 +692,17 @@ int NameTree::Entry::cmp(const void *voidKey, const void *voidEntry)
   return key->cmp(&entry->name);
 }
 
-GBool NameTree::lookup(GooString *name, Object *obj)
+Object NameTree::lookup(GooString *name)
 {
   Entry **entry;
 
   entry = (Entry **) bsearch(name, entries,
 			     length, sizeof(Entry *), Entry::cmp);
   if (entry != NULL) {
-    (*entry)->value.fetch(xref, obj);
-    return gTrue;
+    return (*entry)->value.fetch(xref);
   } else {
     error(errSyntaxError, -1, "failed to look up ({0:s})", name->getCString());
-    obj->initNull();
-    return gFalse;
+    return Object(objNull);
   }
 }
 
@@ -871,32 +766,26 @@ int Catalog::getNumPages()
   catalogLocker();
   if (numPages == -1)
   {
-    Object catDict, pagesDict, obj;
-
-    xref->getCatalog(&catDict);
+    Object catDict = xref->getCatalog();
     if (!catDict.isDict()) {
       error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
-      catDict.free();
       return 0;
     }
-    catDict.dictLookup("Pages", &pagesDict);
+    Object pagesDict = catDict.dictLookup("Pages");
 
     // This should really be isDict("Pages"), but I've seen at least one
     // PDF file where the /Type entry is missing.
     if (!pagesDict.isDict()) {
       error(errSyntaxError, -1, "Top-level pages object is wrong type ({0:s})",
           pagesDict.getTypeName());
-      pagesDict.free();
-      catDict.free();
       return 0;
     }
 
-    pagesDict.dictLookup("Count", &obj);
+    Object obj = pagesDict.dictLookup("Count");
     // some PDF files actually use real numbers here ("/Count 9.0")
     if (!obj.isNum()) {
       if (pagesDict.dictIs("Page")) {
-	Object pageRootRef;
-	catDict.dictLookupNF("Pages", &pageRootRef);
+	Object pageRootRef = catDict.dictLookupNF("Pages");
 
 	error(errSyntaxError, -1, "Pages top-level is a single Page. The document is malformed, trying to recover...");
 
@@ -941,10 +830,6 @@ int Catalog::getNumPages()
       }
 
     }
-
-    catDict.free();
-    obj.free();
-    pagesDict.free();
   }
 
   return numPages;
@@ -954,21 +839,16 @@ PageLabelInfo *Catalog::getPageLabelInfo()
 {
   catalogLocker();
   if (!pageLabelInfo) {
-    Object catDict;
-    Object obj;
-
-    xref->getCatalog(&catDict);
+    Object catDict = xref->getCatalog();
     if (!catDict.isDict()) {
       error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
-      catDict.free();
-      return NULL;
+      return nullptr;
     }
 
-    if (catDict.dictLookup("PageLabels", &obj)->isDict()) {
+    Object obj = catDict.dictLookup("PageLabels");
+    if (obj.isDict()) {
       pageLabelInfo = new PageLabelInfo(&obj, getNumPages());
     }
-    obj.free();
-    catDict.free();
   }
 
   return pageLabelInfo;
@@ -978,22 +858,16 @@ StructTreeRoot *Catalog::getStructTreeRoot()
 {
   catalogLocker();
   if (!structTreeRoot) {
-    Object catalog;
-    Object root;
-
-    xref->getCatalog(&catalog);
+    Object catalog = xref->getCatalog();
     if (!catalog.isDict()) {
       error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catalog.getTypeName());
-      catalog.free();
       return NULL;
     }
 
-    if (catalog.dictLookup("StructTreeRoot", &root)->isDict("StructTreeRoot")) {
+    Object root = catalog.dictLookup("StructTreeRoot");
+    if (root.isDict("StructTreeRoot")) {
       structTreeRoot = new StructTreeRoot(doc, root.getDict());
     }
-
-    root.free();
-    catalog.free();
   }
   return structTreeRoot;
 }
@@ -1003,41 +877,35 @@ Guint Catalog::getMarkInfo()
   if (markInfo == markInfoNull) {
     markInfo = 0;
 
-    Object catDict;
     catalogLocker();
-    xref->getCatalog(&catDict);
+    Object catDict = xref->getCatalog();
 
     if (catDict.isDict()) {
-      Object markInfoDict;
-      catDict.dictLookup("MarkInfo", &markInfoDict);
+      Object markInfoDict = catDict.dictLookup("MarkInfo");
       if (markInfoDict.isDict()) {
-        Object value;
-
-        if (markInfoDict.dictLookup("Marked", &value)->isBool() && value.getBool())
+        Object value = markInfoDict.dictLookup("Marked");
+        if (value.isBool() && value.getBool())
           markInfo |= markInfoMarked;
         else if (!value.isNull())
           error(errSyntaxError, -1, "Marked object is wrong type ({0:s})", value.getTypeName());
-        value.free();
 
-        if (markInfoDict.dictLookup("Suspects", &value)->isBool() && value.getBool())
+        value = markInfoDict.dictLookup("Suspects");
+        if (value.isBool() && value.getBool())
           markInfo |= markInfoSuspects;
         else if (!value.isNull())
           error(errSyntaxError, -1, "Suspects object is wrong type ({0:s})", value.getTypeName());
-        value.free();
 
-        if (markInfoDict.dictLookup("UserProperties", &value)->isBool() && value.getBool())
+        value = markInfoDict.dictLookup("UserProperties");
+        if (value.isBool() && value.getBool())
           markInfo |= markInfoUserProperties;
         else if (!value.isNull())
           error(errSyntaxError, -1, "UserProperties object is wrong type ({0:s})", value.getTypeName());
-        value.free();
       } else if (!markInfoDict.isNull()) {
         error(errSyntaxError, -1, "MarkInfo object is wrong type ({0:s})", markInfoDict.getTypeName());
       }
-      markInfoDict.free();
     } else {
       error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
     }
-    catDict.free();
   }
   return markInfo;
 }
@@ -1047,16 +915,13 @@ Object *Catalog::getOutline()
   catalogLocker();
   if (outline.isNone())
   {
-     Object catDict;
-
-     xref->getCatalog(&catDict);
+     Object catDict = xref->getCatalog();
      if (catDict.isDict()) {
-       catDict.dictLookup("Outlines", &outline);
+       outline = catDict.dictLookup("Outlines");
      } else {
        error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
-       outline.initNull();
+       outline.setToNull();
      }
-     catDict.free();
   }
 
   return &outline;
@@ -1067,16 +932,13 @@ Object *Catalog::getDests()
   catalogLocker();
   if (dests.isNone())
   {
-     Object catDict;
-
-     xref->getCatalog(&catDict);
+     Object catDict = xref->getCatalog();
      if (catDict.isDict()) {
-       catDict.dictLookup("Dests", &dests);
+       dests = catDict.dictLookup("Dests");
      } else {
        error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
-       dests.initNull();
+       dests.setToNull();
      }
-     catDict.free();
   }
 
   return &dests;
@@ -1088,13 +950,12 @@ Catalog::FormType Catalog::getFormType()
   FormType res = NoForm;
 
   if (acroForm.isDict()) {
-    acroForm.dictLookup("XFA", &xfa);
+    xfa = acroForm.dictLookup("XFA");
     if (xfa.isStream() || xfa.isArray()) {
       res = XfaForm;
     } else {
       res = AcroForm;
     }
-    xfa.free();
   }
 
   return res;
@@ -1130,16 +991,13 @@ Object *Catalog::getNames()
 {
   if (names.isNone())
   {
-     Object catDict;
-
-     xref->getCatalog(&catDict);
+     Object catDict = xref->getCatalog();
      if (catDict.isDict()) {
-       catDict.dictLookup("Names", &names);
+       names = catDict.dictLookup("Names");
      } else {
        error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
-       names.initNull();
+       names.setToNull();
      }
-     catDict.free();
   }
 
   return &names;
@@ -1152,11 +1010,8 @@ NameTree *Catalog::getDestNameTree()
     destNameTree = new NameTree();
 
     if (getNames()->isDict()) {
-       Object obj;
-
-       getNames()->dictLookup("Dests", &obj);
+       Object obj = getNames()->dictLookup("Dests");
        destNameTree->init(xref, &obj);
-       obj.free();
     }
 
   }
@@ -1171,11 +1026,8 @@ NameTree *Catalog::getEmbeddedFileNameTree()
     embeddedFileNameTree = new NameTree();
 
     if (getNames()->isDict()) {
-       Object obj;
-
-       getNames()->dictLookup("EmbeddedFiles", &obj);
+       Object obj = getNames()->dictLookup("EmbeddedFiles");
        embeddedFileNameTree->init(xref, &obj);
-       obj.free();
     }
 
   }
@@ -1190,11 +1042,8 @@ NameTree *Catalog::getJSNameTree()
     jsNameTree = new NameTree();
 
     if (getNames()->isDict()) {
-       Object obj;
-
-       getNames()->dictLookup("JavaScript", &obj);
+       Object obj = getNames()->dictLookup("JavaScript");
        jsNameTree->init(xref, &obj);
-       obj.free();
     }
 
   }
@@ -1203,24 +1052,18 @@ NameTree *Catalog::getJSNameTree()
 }
 
 LinkAction* Catalog::getAdditionalAction(DocumentAdditionalActionsType type) {
-  Object additionalActionsObject;
-  LinkAction *linkAction = NULL;
-
-  if (additionalActions.fetch(doc->getXRef(), &additionalActionsObject)->isDict()) {
+  LinkAction *linkAction = nullptr;
+  Object additionalActionsObject = additionalActions.fetch(doc->getXRef());
+  if (additionalActionsObject.isDict()) {
     const char *key = (type == actionCloseDocument ?       "WC" :
                        type == actionSaveDocumentStart ?   "WS" :
                        type == actionSaveDocumentFinish ?  "DS" :
                        type == actionPrintDocumentStart ?  "WP" :
                        type == actionPrintDocumentFinish ? "DP" : NULL);
 
-    Object actionObject;
-
-    if (additionalActionsObject.dictLookup(key, &actionObject)->isDict())
+    Object actionObject = additionalActionsObject.dictLookup(key);
+    if (actionObject.isDict())
       linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
-    actionObject.free();
   }
-
-  additionalActionsObject.free();
-
   return linkAction;
 }

@@ -21,7 +21,7 @@
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
-// Copyright (C) 2009-2011, 2013, 2016 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012, 2015 Tobias Koenig <tokoe@kdab.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -239,7 +239,7 @@ public:
   virtual double *getDash() const { return dash; }
   virtual AnnotBorderStyle getStyle() const { return style; }
 
-  virtual void writeToObject(XRef *xref, Object *obj1) const = 0;
+  virtual Object writeToObject(XRef *xref) const = 0;
 
 protected:
   AnnotBorder();
@@ -271,7 +271,7 @@ public:
 
 private:
   AnnotBorderType getType() const override { return typeArray; }
-  void writeToObject(XRef *xref, Object *obj1) const override;
+  Object writeToObject(XRef *xref) const override;
 
   double horizontalCorner;          // (Default 0)
   double verticalCorner;            // (Default 0)
@@ -290,7 +290,7 @@ public:
 
 private:
   AnnotBorderType getType() const override { return typeBS; }
-  void writeToObject(XRef *xref, Object *obj1) const override;
+  Object writeToObject(XRef *xref) const override;
 
   const char *getStyleName() const;
 
@@ -324,7 +324,7 @@ public:
   AnnotColorSpace getSpace() const { return (AnnotColorSpace) length; }
   const double *getValues() const { return values; }
 
-  void writeToObject(XRef *xref, Object *dest) const;
+  Object writeToObject(XRef *xref) const;
 
 private:
 
@@ -385,7 +385,7 @@ public:
   ~AnnotAppearance();
 
   // State is ignored if no subdictionary is present
-  void getAppearanceStream(AnnotAppearanceType type, const char *state, Object *dest);
+  Object getAppearanceStream(AnnotAppearanceType type, const char *state);
 
   // Access keys in normal appearance subdictionary (N)
   GooString * getStateKey(int i);
@@ -564,7 +564,7 @@ public:
 
   virtual void draw(Gfx *gfx, GBool printing);
   // Get the resource dict of the appearance stream
-  virtual Object *getAppearanceResDict(Object *dest);
+  virtual Object getAppearanceResDict();
 
   GBool match(Ref *refA)
     { return ref.num == refA->num && ref.gen == refA->gen; }
@@ -638,15 +638,15 @@ protected:
 		  double *width, double widthLimit, int *charCount,
 		  GBool noReencode);
   void writeString(GooString *str, GooString *appearBuf);
-  void createForm(double *bbox, GBool transparencyGroup, Object *resDict, Object *aStream);
-  void createResourcesDict(const char *formName, Object *formStream, const char *stateName,
-			   double opacity, const char *blendMode, Object *resDict);
+  Object createForm(double *bbox, GBool transparencyGroup, Dict *resDict);
+  Dict *createResourcesDict(const char *formName, Object &&formStream, const char *stateName,
+			   double opacity, const char *blendMode);
   GBool isVisible(GBool printing);
   int getRotation() const;
 
   // Updates the field key of the annotation dictionary
   // and sets M to the current time
-  void update(const char *key, Object *value);
+  void update(const char *key, Object &&value);
 
   // Delete appearance streams and reset appearance state
   void invalidateAppearance();
@@ -698,7 +698,6 @@ public:
   AnnotPopup(PDFDoc *docA, Dict *dict, Object *obj);
   ~AnnotPopup();
 
-  Object *getParent(Object *obj) { return parent.fetch (xref, obj); }
   Object *getParentNF() { return &parent; }
   void setParent(Object *parentA);
   void setParent(Annot *parentA);
@@ -923,7 +922,7 @@ public:
   ~AnnotFreeText();
 
   void draw(Gfx *gfx, GBool printing) override;
-  Object *getAppearanceResDict(Object *dest) override;
+  Object getAppearanceResDict() override;
   void setContents(GooString *new_content) override;
 
   void setAppearanceString(GooString *new_string);
@@ -987,7 +986,7 @@ public:
   ~AnnotLine();
 
   void draw(Gfx *gfx, GBool printing) override;
-  Object *getAppearanceResDict(Object *dest) override;
+  Object getAppearanceResDict() override;
   void setContents(GooString *new_content) override;
 
   void setVertices(double x1, double y1, double x2, double y2);

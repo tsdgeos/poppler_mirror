@@ -65,11 +65,11 @@ public:
 
   // Add an entry.  NB: does not copy key.
   // val becomes a dead object after the call
-  void add(char *key, Object *val);
+  void add(char *key, Object &&val);
 
   // Update the value of an existing entry, otherwise create it
   // val becomes a dead object after the call
-  void set(const char *key, Object *val);
+  void set(const char *key, Object &&val);
   // Remove an entry. This invalidate indexes
   void remove(const char *key);
 
@@ -78,14 +78,14 @@ public:
 
   // Look up an entry and return the value.  Returns a null object
   // if <key> is not in the dictionary.
-  Object *lookup(const char *key, Object *obj, int recursion = 0);
-  Object *lookupNF(const char *key, Object *obj);
+  Object lookup(const char *key, int recursion = 0);
+  Object lookupNF(const char *key);
   GBool lookupInt(const char *key, const char *alt_key, int *value);
 
   // Iterative accessors.
   char *getKey(int i);
-  Object *getVal(int i, Object *obj);
-  Object *getValNF(int i, Object *obj);
+  Object getVal(int i);
+  Object getValNF(int i);
 
   // Set the xref pointer.  This is only used in one special case: the
   // trailer dictionary, which is read before the xref table is
