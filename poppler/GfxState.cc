@@ -3048,7 +3048,6 @@ GfxColorSpace *GfxDeviceNColorSpace::copy() {
 
 //~ handle the 'None' colorant
 GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion) {
-  GfxDeviceNColorSpace *cs;
   int nCompsA;
   GooString *namesA[gfxColorMaxComps];
   GfxColorSpace *altA;
@@ -3093,7 +3092,7 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
     obj1 = arr->get(4);
     if (!obj1.isDict()) {
       error(errSyntaxWarning, -1, "Bad DeviceN color space (attributes)");
-      goto err4;
+      goto err5;
     }
     Dict *attribs = obj1.getDict();
     Object obj2 = attribs->lookup("Colorants");
@@ -3105,14 +3104,15 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
           separationList->append(GfxSeparationColorSpace::parse(res, obj3.getArray(), out, state, recursion));
         } else {
           error(errSyntaxWarning, -1, "Bad DeviceN color space (colorant value entry is not an Array)");
-          goto err4;
+          goto err5;
         }
       }
     }
   }
-  cs = new GfxDeviceNColorSpace(nCompsA, namesA, altA, funcA, separationList);
-  return cs;
+  return new GfxDeviceNColorSpace(nCompsA, namesA, altA, funcA, separationList);
 
+ err5:
+  delete funcA;
  err4:
   delete altA;
  err3:
