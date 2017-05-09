@@ -276,6 +276,7 @@ void FoFiType1::parse() {
 	    if (code >= 0 && code < 256) {
 	      c = *p2;
 	      *p2 = '\0';
+	      gfree(encoding[code]);
 	      encoding[code] = copyString(p);
 	      *p2 = c;
 	    }
