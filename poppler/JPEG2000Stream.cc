@@ -501,6 +501,7 @@ void JPXStreamPrivate::init2(OPJ_CODEC_FORMAT format, unsigned char *buf, int le
     return;
 
 error:
+  opj_stream_destroy(stream);
   opj_destroy_codec(decoder);
   if (format == OPJ_CODEC_JP2) {
     error(errSyntaxWarning, -1, "Did no succeed opening JPX Stream as JP2, trying as J2K.");
