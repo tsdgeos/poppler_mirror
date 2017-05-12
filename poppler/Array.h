@@ -49,10 +49,6 @@ public:
   // Destructor.
   ~Array();
 
-  // Reference counting.
-  int incRef();
-  int decRef();
-
   // Get number of elements.
   int getLength() { return length; }
 
@@ -72,6 +68,11 @@ public:
   GBool getString(int i, GooString *string);
 
 private:
+  friend class Object; // for incRef/decRef
+
+  // Reference counting.
+  int incRef();
+  int decRef();
 
   XRef *xref;			// the xref table for this PDF file
   Object *elems;		// array of elements
