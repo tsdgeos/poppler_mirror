@@ -6157,10 +6157,7 @@ AnnotSound::AnnotSound(PDFDoc *docA, PDFRectangle *rect, Sound *soundA) :
   type = typeSound;
 
   annotObj.dictSet ("Subtype", Object(objName, "Sound"));
-
-  Stream *str = soundA->getStream();
-  str->incRef();
-  annotObj.dictSet ("Sound", Object(str));
+  annotObj.dictSet ("Sound", soundA->getObject()->copy());
 
   initialize(docA, annotObj.getDict());
 }
