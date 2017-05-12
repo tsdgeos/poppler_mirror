@@ -40,7 +40,7 @@ struct _PopplerMedia
   gchar  *filename;
 
   gchar  *mime_type;
-  Stream *stream;
+  Object stream;
 };
 
 struct _PopplerMediaClass
@@ -65,10 +65,7 @@ poppler_media_finalize (GObject *object)
     media->mime_type = NULL;
   }
 
-  if (media->stream) {
-    media->stream->decRef();
-    media->stream = NULL;
-  }
+  media->stream = Object();
 
   G_OBJECT_CLASS (poppler_media_parent_class)->finalize (object);
 }
@@ -98,7 +95,7 @@ _poppler_media_new (MediaRendition *poppler_media)
   if (poppler_media->getIsEmbedded()) {
     GooString* mime_type;
 
-    media->stream = poppler_media->getEmbbededStream();
+    media->stream = poppler_media->getEmbbededStreamObject()->copy();
     mime_type = poppler_media->getContentType();
     if (mime_type)
       media->mime_type = g_strdup (mime_type->getCString());
@@ -124,7 +121,7 @@ const gchar *
 poppler_media_get_filename (PopplerMedia *poppler_media)
 {
   g_return_val_if_fail (POPPLER_IS_MEDIA (poppler_media), NULL);
-  g_return_val_if_fail (poppler_media->stream == NULL, NULL);
+  g_return_val_if_fail (!poppler_media->stream.isStream(), NULL);
 
   return poppler_media->filename;
 }
@@ -147,7 +144,7 @@ poppler_media_is_embedded (PopplerMedia *poppler_media)
 {
   g_return_val_if_fail (POPPLER_IS_MEDIA (poppler_media), FALSE);
 
-  return poppler_media->stream != NULL;
+  return poppler_media->stream.isStream();
 }
 
 /**
@@ -215,7 +212,7 @@ poppler_media_save (PopplerMedia *poppler_media,
   FILE *f;
 
   g_return_val_if_fail (POPPLER_IS_MEDIA (poppler_media), FALSE);
-  g_return_val_if_fail (poppler_media->stream != NULL, FALSE);
+  g_return_val_if_fail (poppler_media->stream.isStream(), FALSE);
 
   f = g_fopen (filename, "wb");
 
@@ -281,9 +278,9 @@ poppler_media_save_to_callback (PopplerMedia        *poppler_media,
   gboolean eof_reached = FALSE;
 
   g_return_val_if_fail (POPPLER_IS_MEDIA (poppler_media), FALSE);
-  g_return_val_if_fail (poppler_media->stream != NULL, FALSE);
+  g_return_val_if_fail (poppler_media->stream.isStream(), FALSE);
 
-  stream = poppler_media->stream;
+  stream = poppler_media->stream.getStream();
   stream->reset();
 
   do

@@ -35,7 +35,7 @@
 typedef struct _PopplerAttachmentPrivate PopplerAttachmentPrivate;
 struct _PopplerAttachmentPrivate
 {
-  Object *obj_stream;
+  Object obj_stream;
 };
 
 #define POPPLER_ATTACHMENT_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), POPPLER_TYPE_ATTACHMENT, PopplerAttachmentPrivate))
@@ -64,12 +64,7 @@ poppler_attachment_dispose (GObject *obj)
   PopplerAttachmentPrivate *priv;
 
   priv = POPPLER_ATTACHMENT_GET_PRIVATE (obj);
-
-  if (priv->obj_stream)
-    {
-      delete priv->obj_stream;
-      priv->obj_stream = NULL;
-    }
+  priv->obj_stream = Object();
 
   G_OBJECT_CLASS (poppler_attachment_parent_class)->dispose (obj);
 }
@@ -126,9 +121,7 @@ _poppler_attachment_new (FileSpec *emb_file)
   if (embFile->checksum () && embFile->checksum ()->getLength () > 0)
     attachment->checksum = g_string_new_len (embFile->checksum ()->getCString (),
                                              embFile->checksum ()->getLength ());
-  priv->obj_stream = new Object(embFile->stream());
-  // Copy the stream
-  embFile->stream()->incRef();
+  priv->obj_stream = embFile->streamObject()->copy();
 
   return attachment;
 }
@@ -241,7 +234,7 @@ poppler_attachment_save_to_callback (PopplerAttachment          *attachment,
 
   g_return_val_if_fail (POPPLER_IS_ATTACHMENT (attachment), FALSE);
 
-  stream = POPPLER_ATTACHMENT_GET_PRIVATE (attachment)->obj_stream->getStream();
+  stream = POPPLER_ATTACHMENT_GET_PRIVATE (attachment)->obj_stream.getStream();
   stream->reset();
 
   do

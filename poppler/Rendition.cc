@@ -246,14 +246,8 @@ void MediaParameters::parseMediaScreenParameters(Object* obj) {
 }
 
 MediaRendition::~MediaRendition() {
-  if (fileName)
-    delete fileName;
-  if (contentType)
-    delete contentType;
-
-  if (embeddedStream && (!embeddedStream->decRef())) {
-    delete embeddedStream;
-  }
+  delete fileName;
+  delete contentType;
 }
 
 MediaRendition::MediaRendition(Object* obj) {
@@ -263,7 +257,6 @@ MediaRendition::MediaRendition(Object* obj) {
   fileName = NULL;
   contentType = NULL;
   isEmbedded = gFalse;
-  embeddedStream = NULL;
 
   //
   // Parse media clip data
@@ -285,9 +278,7 @@ MediaRendition::MediaRendition(Object* obj) {
 	    Object embedded = obj2.dictLookup("F");
 	    if (embedded.isStream()) {
 	      isEmbedded = gTrue;
-	      embeddedStream = embedded.getStream();
-	      // "copy" stream
-	      embeddedStream->incRef();
+	      embeddedStreamObject = embedded.copy();
 	    }
 	  }
 
@@ -346,14 +337,32 @@ MediaRendition::MediaRendition(Object* obj) {
   }
 }
 
+MediaRendition::MediaRendition(const MediaRendition &other) {
+  ok = other.ok;
+  MH = other.MH;
+  BE = other.BE;
+  isEmbedded = other.isEmbedded;
+  embeddedStreamObject = other.embeddedStreamObject.copy();
+
+  if (other.contentType)
+    contentType = other.contentType->copy();
+  else
+    contentType = nullptr;
+
+  if (other.fileName)
+    fileName = other.fileName->copy();
+  else
+    fileName = nullptr;
+}
+
 void MediaRendition::outputToFile(FILE* fp) {
   if (!isEmbedded)
     return;
 
-  embeddedStream->reset();
+  embeddedStreamObject.streamReset();
 
   while (1) {
-    int c = embeddedStream->getChar();
+    int c = embeddedStreamObject.streamGetChar();
     if (c == EOF)
       break;
     
@@ -362,19 +371,9 @@ void MediaRendition::outputToFile(FILE* fp) {
   
 }
 
-MediaRendition *MediaRendition::copy() {
-  // call default copy constructor
-  MediaRendition* new_media = new MediaRendition(*this);
-
-  if (contentType)
-    new_media->contentType = contentType->copy();
-  if (fileName)
-    new_media->fileName = fileName->copy();
-
-  if (new_media->embeddedStream)
-    new_media->embeddedStream->incRef();
-
-  return new_media;
+MediaRendition* MediaRendition::copy()
+{
+  return new MediaRendition(*this);
 }
 
 // TODO: SelectorRendition

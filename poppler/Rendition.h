@@ -118,6 +118,7 @@ struct MediaParameters {
 class MediaRendition {
  public:
   MediaRendition(Object *obj);
+  MediaRendition(const MediaRendition &other);
   ~MediaRendition();
 
   GBool isOk () { return ok; }
@@ -129,7 +130,8 @@ class MediaRendition {
   GooString* getFileName() { return fileName; }
 
   GBool getIsEmbedded() { return isEmbedded; }
-  Stream* getEmbbededStream() { return embeddedStream; }
+  Stream* getEmbbededStream() { return isEmbedded ? embeddedStreamObject.getStream() : nullptr; }
+  Object* getEmbbededStreamObject() { return isEmbedded ? &embeddedStreamObject : nullptr; }
   // write embedded stream to file
   void outputToFile(FILE*);
 
@@ -148,7 +150,7 @@ class MediaRendition {
   GooString* contentType;
 
   // if it's embedded
-  Stream* embeddedStream;
+  Object embeddedStreamObject;
 
   // if it's not embedded
   GooString* fileName;

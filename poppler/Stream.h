@@ -105,10 +105,6 @@ public:
   // Destructor.
   virtual ~Stream();
 
-  // Reference counting.
-  int incRef();
-  int decRef();
-
   // Get kind of stream.
   virtual StreamKind getKind() = 0;
 
@@ -230,6 +226,12 @@ public:
   Stream *addFilters(Dict *dict, int recursion = 0);
 
 private:
+  friend class Object; // for incRef/decRef
+
+  // Reference counting.
+  int incRef();
+  int decRef();
+
   virtual GBool hasGetChars() { return false; }
   virtual int getChars(int nChars, Guchar *buffer);
 
@@ -255,10 +257,6 @@ public:
   // Desctructor.
   virtual ~OutStream ();
 
-  // Reference counting.
-  int incRef() { return ++ref; }
-  int decRef() { return --ref; }
-
   // Close the stream
   virtual void close() = 0;
 
@@ -269,10 +267,6 @@ public:
   virtual void put (char c) = 0;
 
   virtual void printf (const char *format, ...) GCC_PRINTF_FORMAT(2,3) = 0;
-
-private:
-  int ref; // reference count
-    
 };
 
 //------------------------------------------------------------------------

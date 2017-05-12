@@ -32,6 +32,7 @@ public:
   GooString *createDate() { return m_createDate; }
   GooString *checksum() { return m_checksum; }
   GooString *mimeType() { return m_mimetype; }
+  Object *streamObject() { return &m_objStr; }
   Stream *stream() { return isOk() ? m_objStr.getStream() : NULL; }
   GBool isOk() { return m_objStr.isStream(); }
   GBool save(const char *path);

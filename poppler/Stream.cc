@@ -343,7 +343,6 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursio
 //------------------------------------------------------------------------
 OutStream::OutStream ()
 {
-  ref = 1;
 }
 
 OutStream::~OutStream ()
