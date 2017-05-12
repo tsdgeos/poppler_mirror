@@ -148,15 +148,7 @@ Catalog::~Catalog() {
     delete attrsList;
   }
   delete pagesRefList;
-  if (pagesList) {
-    std::vector<Dict *>::iterator it;
-    for (it = pagesList->begin() ; it != pagesList->end(); ++it ) {
-      if (!(*it)->decRef()) {
-         delete *it;
-      }
-    }
-    delete pagesList;
-  }
+  delete pagesList;
   if (pages) {
     for (int i = 0; i < pagesSize; ++i) {
       if (pages[i]) {
@@ -238,8 +230,6 @@ Ref *Catalog::getPageRef(int i)
 
 GBool Catalog::cachePageTree(int page)
 {
-  Dict *pagesDict;
-
   if (pagesList == NULL) {
 
     Ref pagesRef;
@@ -264,10 +254,7 @@ GBool Catalog::cachePageTree(int page)
     Object obj = catDict.dictLookup("Pages");
     // This should really be isDict("Pages"), but I've seen at least one
     // PDF file where the /Type entry is missing.
-    if (obj.isDict()) {
-      obj.getDict()->incRef();
-      pagesDict = obj.getDict();
-    } else {
+    if (!obj.isDict()) {
       error(errSyntaxError, -1, "Top-level pages object is wrong type ({0:s})", obj.getTypeName());
       return gFalse;
     }
@@ -277,7 +264,6 @@ GBool Catalog::cachePageTree(int page)
     pageRefs = (Ref *)gmallocn_checkoverflow(pagesSize, sizeof(Ref));
     if (pages == NULL || pageRefs == NULL ) {
       error(errSyntaxError, -1, "Cannot allocate page cache");
-      pagesDict->decRef();
       pagesSize = 0;
       return gFalse;
     }
@@ -287,12 +273,12 @@ GBool Catalog::cachePageTree(int page)
       pageRefs[i].gen = -1;
     }
 
-    pagesList = new std::vector<Dict *>();
-    pagesList->push_back(pagesDict);
+    attrsList = new std::vector<PageAttrs *>();
+    attrsList->push_back(new PageAttrs(NULL, obj.getDict()));
+    pagesList = new std::vector<Object>();
+    pagesList->push_back(std::move(obj));
     pagesRefList = new std::vector<Ref>();
     pagesRefList->push_back(pagesRef);
-    attrsList = new std::vector<PageAttrs *>();
-    attrsList->push_back(new PageAttrs(NULL, pagesDict));
     kidsIdxList = new std::vector<int>();
     kidsIdxList->push_back(0);
     lastCachedPage = 0;
@@ -305,8 +291,8 @@ GBool Catalog::cachePageTree(int page)
 
     if (pagesList->empty()) return gFalse;
 
-    pagesDict = pagesList->back();
-    Object kids = pagesDict->lookup("Kids");
+    Object pagesDict = pagesList->back().copy();
+    Object kids = pagesDict.dictLookup("Kids");
     if (!kids.isArray()) {
       error(errSyntaxError, -1, "Kids object (page {0:d}) is wrong type ({1:s})",
             lastCachedPage+1, kids.getTypeName());
@@ -315,9 +301,6 @@ GBool Catalog::cachePageTree(int page)
 
     int kidsIdx = kidsIdxList->back();
     if (kidsIdx >= kids.arrayGetLength()) {
-       if (!pagesList->back()->decRef()) {
-         delete pagesList->back();
-       }
        pagesList->pop_back();
        pagesRefList->pop_back();
        delete attrsList->back();
@@ -350,7 +333,7 @@ GBool Catalog::cachePageTree(int page)
     Object kid = kids.arrayGet(kidsIdx);
     if (kid.isDict("Page") || (kid.isDict() && !kid.getDict()->hasKey("Kids"))) {
       PageAttrs *attrs = new PageAttrs(attrsList->back(), kid.getDict());
-      Page *p = new Page(doc, lastCachedPage+1, kid.getDict(),
+      Page *p = new Page(doc, lastCachedPage+1, &kid,
                      kidRef.getRef(), attrs, form);
       if (!p->isOk()) {
         error(errSyntaxError, -1, "Failed to create page (page {0:d})", lastCachedPage+1);
@@ -375,8 +358,7 @@ GBool Catalog::cachePageTree(int page)
     } else if (kid.isDict()) {
       attrsList->push_back(new PageAttrs(attrsList->back(), kid.getDict()));
       pagesRefList->push_back(kidRef.getRef());
-      kid.getDict()->incRef();
-      pagesList->push_back(kid.getDict());
+      pagesList->push_back(std::move(kid));
       kidsIdxList->push_back(0);
     } else {
       error(errSyntaxError, -1, "Kid object (page {0:d}) is wrong type ({1:s})",
@@ -792,7 +774,7 @@ int Catalog::getNumPages()
 	Dict *pageDict = pagesDict.getDict();
 	if (pageRootRef.isRef()) {
 	  const Ref pageRef = pageRootRef.getRef();
-	  Page *p = new Page(doc, 1, pageDict, pageRef, new PageAttrs(NULL, pageDict), form);
+	  Page *p = new Page(doc, 1, &pagesDict, pageRef, new PageAttrs(NULL, pageDict), form);
 	  if (p->isOk()) {
 	    pages = (Page **)gmallocn(1, sizeof(Page *));
 	    pageRefs = (Ref *)gmallocn(1, sizeof(Ref));

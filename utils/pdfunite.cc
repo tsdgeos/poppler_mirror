@@ -283,10 +283,9 @@ int main (int argc, char *argv[])
       Ref *refPage = docs[i]->getCatalog()->getPageRef(j);
       Object page = docs[i]->getXRef()->fetch(refPage->num, refPage->gen);
       Dict *pageDict = page.getDict();
-      Dict *resDict = docs[i]->getCatalog()->getPage(j)->getResourceDict();
-      if (resDict) {
-        resDict->incRef();
-        pageDict->set("Resources", Object(resDict));
+      Object *resDict = docs[i]->getCatalog()->getPage(j)->getResourceDictObject();
+      if (resDict->isDict()) {
+        pageDict->set("Resources", resDict->copy());
       }
       pages.push_back(std::move(page));
       offsets.push_back(numOffset);
@@ -382,11 +381,10 @@ int main (int argc, char *argv[])
   Ref ref;
   ref.num = rootNum;
   ref.gen = 0;
-  Dict *trailerDict = PDFDoc::createTrailerDict(objectsCount, gFalse, 0, &ref, yRef,
+  Object trailerDict = PDFDoc::createTrailerDict(objectsCount, gFalse, 0, &ref, yRef,
                                                 fileName, outStr->getPos());
-  PDFDoc::writeXRefTableTrailer(trailerDict, yRef, gTrue, // write all entries according to ISO 32000-1, 7.5.4 Cross-Reference Table: "For a file that has never been incrementally updated, the cross-reference section shall contain only one subsection, whose object numbering begins at 0."
+  PDFDoc::writeXRefTableTrailer(std::move(trailerDict), yRef, gTrue, // write all entries according to ISO 32000-1, 7.5.4 Cross-Reference Table: "For a file that has never been incrementally updated, the cross-reference section shall contain only one subsection, whose object numbering begins at 0."
                                 uxrefOffset, outStr, yRef);
-  delete trailerDict;
 
   outStr->close();
   delete outStr;

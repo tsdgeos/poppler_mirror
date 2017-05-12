@@ -56,10 +56,6 @@ public:
   // Destructor.
   ~Dict();
 
-  // Reference counting.
-  int incRef();
-  int decRef();
-
   // Get number of entries.
   int getLength() { return length; }
 
@@ -97,6 +93,11 @@ public:
   GBool hasKey(const char *key);
 
 private:
+  friend class Object; // for incRef/decRef
+
+  // Reference counting.
+  int incRef();
+  int decRef();
 
   GBool sorted;
   XRef *xref;			// the xref table for this PDF file

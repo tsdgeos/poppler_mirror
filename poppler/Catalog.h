@@ -248,7 +248,7 @@ private:
   Page **pages;			// array of pages
   Ref *pageRefs;		// object ID for each page
   int lastCachedPage;
-  std::vector<Dict *> *pagesList;
+  std::vector<Object> *pagesList;
   std::vector<Ref> *pagesRefList;
   std::vector<PageAttrs *> *attrsList;
   std::vector<int> *kidsIdxList;

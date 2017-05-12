@@ -301,12 +301,11 @@ public:
                            CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
   static void writeHeader(OutStream *outStr, int major, int minor);
 
-  // Ownership goes to the caller
-  static Dict *createTrailerDict (int uxrefSize, GBool incrUpdate, Goffset startxRef,
+  static Object createTrailerDict (int uxrefSize, GBool incrUpdate, Goffset startxRef,
                                   Ref *root, XRef *xRef, const char *fileName, Goffset fileSize);
-  static void writeXRefTableTrailer (Dict *trailerDict, XRef *uxref, GBool writeAllEntries,
+  static void writeXRefTableTrailer (Object &&trailerDict, XRef *uxref, GBool writeAllEntries,
                                      Goffset uxrefOffset, OutStream* outStr, XRef *xRef);
-  static void writeXRefStreamTrailer (Dict *trailerDict, XRef *uxref, Ref *uxrefStreamRef,
+  static void writeXRefStreamTrailer (Object &&trailerDict, XRef *uxref, Ref *uxrefStreamRef,
                                       Goffset uxrefOffset, OutStream* outStr, XRef *xRef);
 
 private:

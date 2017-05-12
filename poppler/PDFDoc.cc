@@ -861,11 +861,10 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   Ref ref;
   ref.num = rootNum;
   ref.gen = 0;
-  Dict *trailerDict = createTrailerDict(rootNum + 3, gFalse, 0, &ref, getXRef(),
+  Object trailerDict = createTrailerDict(rootNum + 3, gFalse, 0, &ref, getXRef(),
                                         name->getCString(), uxrefOffset);
-  writeXRefTableTrailer(trailerDict, yRef, gFalse /* do not write unnecessary entries */,
+  writeXRefTableTrailer(std::move(trailerDict), yRef, gFalse /* do not write unnecessary entries */,
                         uxrefOffset, outStr, getXRef());
-  delete trailerDict;
 
   outStr->close();
   fclose(f);
@@ -1004,14 +1003,13 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
     uxref->add(uxrefStreamRef.num, uxrefStreamRef.gen, uxrefOffset, gTrue);
   }
 
-  Dict *trailerDict = createTrailerDict(numobjects, gTrue, getStartXRef(), &rootRef, getXRef(), fileNameA, uxrefOffset);
+  Object trailerDict = createTrailerDict(numobjects, gTrue, getStartXRef(), &rootRef, getXRef(), fileNameA, uxrefOffset);
   if (xRefStream) {
-    writeXRefStreamTrailer(trailerDict, uxref, &uxrefStreamRef, uxrefOffset, outStr, getXRef());
+    writeXRefStreamTrailer(std::move(trailerDict), uxref, &uxrefStreamRef, uxrefOffset, outStr, getXRef());
   } else {
-    writeXRefTableTrailer(trailerDict, uxref, gFalse, uxrefOffset, outStr, getXRef());
+    writeXRefTableTrailer(std::move(trailerDict), uxref, gFalse, uxrefOffset, outStr, getXRef());
   }
 
-  delete trailerDict;
   delete uxref;
 }
 
@@ -1340,7 +1338,7 @@ void PDFDoc::writeObjectFooter (OutStream* outStr)
   outStr->printf("endobj\r\n");
 }
 
-Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Goffset startxRef,
+Object PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Goffset startxRef,
                                 Ref *root, XRef *xRef, const char *fileName, Goffset fileSize)
 {
   Dict *trailerDict = new Dict(xRef);
@@ -1421,29 +1419,28 @@ Dict *PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Goffset startxR
     }
   }
 
-  return trailerDict;
+  return Object(trailerDict);
 }
 
-void PDFDoc::writeXRefTableTrailer(Dict *trailerDict, XRef *uxref, GBool writeAllEntries, Goffset uxrefOffset, OutStream* outStr, XRef *xRef)
+void PDFDoc::writeXRefTableTrailer(Object &&trailerDict, XRef *uxref, GBool writeAllEntries, Goffset uxrefOffset, OutStream* outStr, XRef *xRef)
 {
   uxref->writeTableToFile( outStr, writeAllEntries );
   outStr->printf( "trailer\r\n");
-  writeDictionnary(trailerDict, outStr, xRef, 0, NULL, cryptRC4, 0, 0, 0);
+  writeDictionnary(trailerDict.getDict(), outStr, xRef, 0, NULL, cryptRC4, 0, 0, 0);
   outStr->printf( "\r\nstartxref\r\n");
   outStr->printf( "%lli\r\n", uxrefOffset);
   outStr->printf( "%%%%EOF\r\n");
 }
 
-void PDFDoc::writeXRefStreamTrailer (Dict *trailerDict, XRef *uxref, Ref *uxrefStreamRef, Goffset uxrefOffset, OutStream* outStr, XRef *xRef)
+void PDFDoc::writeXRefStreamTrailer (Object &&trailerDict, XRef *uxref, Ref *uxrefStreamRef, Goffset uxrefOffset, OutStream* outStr, XRef *xRef)
 {
   GooString stmData;
 
   // Fill stmData and some trailerDict fields
-  uxref->writeStreamToBuffer(&stmData, trailerDict, xRef);
+  uxref->writeStreamToBuffer(&stmData, trailerDict.getDict(), xRef);
 
   // Create XRef stream object and write it
-  trailerDict->incRef();
-  MemStream *mStream = new MemStream( stmData.getCString(), 0, stmData.getLength(), Object(trailerDict) );
+  MemStream *mStream = new MemStream( stmData.getCString(), 0, stmData.getLength(), std::move(trailerDict) );
   writeObjectHeader(uxrefStreamRef, outStr);
   Object obj1(static_cast<Stream*>(mStream));
   writeObject(&obj1, outStr, xRef, 0, NULL, cryptRC4, 0, 0, 0);
@@ -1469,10 +1466,9 @@ void PDFDoc::writeXRefTableTrailer(Goffset uxrefOffset, XRef *uxref, GBool write
   Ref ref;
   ref.num = getXRef()->getRootNum();
   ref.gen = getXRef()->getRootGen();
-  Dict * trailerDict = createTrailerDict(uxrefSize, incrUpdate, getStartXRef(), &ref,
+  Object trailerDict = createTrailerDict(uxrefSize, incrUpdate, getStartXRef(), &ref,
                                          getXRef(), fileNameA, fileSize);
-  writeXRefTableTrailer(trailerDict, uxref, writeAllEntries, uxrefOffset, outStr, getXRef());
-  delete trailerDict;
+  writeXRefTableTrailer(std::move(trailerDict), uxref, writeAllEntries, uxrefOffset, outStr, getXRef());
 }
 
 void PDFDoc::writeHeader(OutStream *outStr, int major, int minor)
@@ -1890,7 +1886,6 @@ int PDFDoc::getNumPages()
 Page *PDFDoc::parsePage(int page)
 {
   Ref pageRef;
-  Dict *pageDict;
 
   pageRef.num = getHints()->getPageObjectNum(page);
   if (!pageRef.num) {
@@ -1910,9 +1905,9 @@ Page *PDFDoc::parsePage(int page)
     error(errSyntaxWarning, -1, "Object ({0:d} {1:d}) is not a pageDict", pageRef.num, pageRef.gen);
     return NULL;
   }
-  pageDict = obj.getDict();
+  Dict *pageDict = obj.getDict();
 
-  return new Page(this, page, pageDict, pageRef,
+  return new Page(this, page, &obj, pageRef,
                new PageAttrs(NULL, pageDict), catalog->getForm());
 }
 
