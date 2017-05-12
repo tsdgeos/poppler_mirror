@@ -1168,17 +1168,16 @@ Annot::Annot(PDFDoc *docA, PDFRectangle *rectA) {
   initialize (docA, annotObj.getDict());
 }
 
-Annot::Annot(PDFDoc *docA, Dict *dict) {
+Annot::Annot(PDFDoc *docA, Object *dictObject) {
   refCnt = 1;
   hasRef = false;
   flags = flagUnknown;
   type = typeUnknown;
-  dict->incRef();
-  annotObj = Object(dict);
-  initialize (docA, dict);
+  annotObj = dictObject->copy();
+  initialize (docA, dictObject->getDict());
 }
 
-Annot::Annot(PDFDoc *docA, Dict *dict, Object *obj) {
+Annot::Annot(PDFDoc *docA, Object *dictObject, Object *obj) {
   refCnt = 1;
   if (obj->isRef()) {
     hasRef = gTrue;
@@ -1188,9 +1187,8 @@ Annot::Annot(PDFDoc *docA, Dict *dict, Object *obj) {
   }
   flags = flagUnknown;
   type = typeUnknown;
-  dict->incRef();
-  annotObj = Object(dict);
-  initialize (docA, dict);
+  annotObj = dictObject->copy();
+  initialize (docA, dictObject->getDict());
 }
 
 void Annot::initialize(PDFDoc *docA, Dict *dict) {
@@ -1847,10 +1845,10 @@ AnnotPopup::AnnotPopup(PDFDoc *docA, PDFRectangle *rect) :
   initialize (docA, annotObj.getDict());
 }
 
-AnnotPopup::AnnotPopup(PDFDoc *docA, Dict *dict, Object *obj) :
-    Annot(docA, dict, obj) {
+AnnotPopup::AnnotPopup(PDFDoc *docA, Object *dictObject, Object *obj) :
+    Annot(docA, dictObject, obj) {
   type = typePopup;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotPopup::~AnnotPopup() {
@@ -1892,9 +1890,9 @@ AnnotMarkup::AnnotMarkup(PDFDoc *docA, PDFRectangle *rect) :
   initialize(docA, annotObj.getDict(), &annotObj);
 }
 
-AnnotMarkup::AnnotMarkup(PDFDoc *docA, Dict *dict, Object *obj) :
-    Annot(docA, dict, obj) {
-  initialize(docA, dict, obj);
+AnnotMarkup::AnnotMarkup(PDFDoc *docA, Object *dictObject, Object *obj) :
+    Annot(docA, dictObject, obj) {
+  initialize(docA, dictObject->getDict(), obj);
 }
 
 AnnotMarkup::~AnnotMarkup() {
@@ -1924,7 +1922,7 @@ void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict, Object *obj) {
   obj1 = dict->lookup("Popup");
   obj2 = dict->lookupNF("Popup");
   if (obj1.isDict() && obj2.isRef()) {
-    popup = new AnnotPopup(docA, obj1.getDict(), &obj2);
+    popup = new AnnotPopup(docA, &obj1, &obj2);
   } else {
     popup = NULL;
   }
@@ -2073,12 +2071,12 @@ AnnotText::AnnotText(PDFDoc *docA, PDFRectangle *rect) :
   initialize (docA, annotObj.getDict());
 }
 
-AnnotText::AnnotText(PDFDoc *docA, Dict *dict, Object *obj) :
-    AnnotMarkup(docA, dict, obj) {
+AnnotText::AnnotText(PDFDoc *docA, Object *dictObject, Object *obj) :
+    AnnotMarkup(docA, dictObject, obj) {
 
   type = typeText;
   flags |= flagNoZoom | flagNoRotate;
-  initialize (docA, dict);
+  initialize (docA, dictObject->getDict());
 }
 
 AnnotText::~AnnotText() {
@@ -2512,11 +2510,11 @@ AnnotLink::AnnotLink(PDFDoc *docA, PDFRectangle *rect) :
   initialize (docA, annotObj.getDict());
 }
 
-AnnotLink::AnnotLink(PDFDoc *docA, Dict *dict, Object *obj) :
-    Annot(docA, dict, obj) {
+AnnotLink::AnnotLink(PDFDoc *docA, Object *dictObject, Object *obj) :
+    Annot(docA, dictObject, obj) {
 
   type = typeLink;
-  initialize (docA, dict);
+  initialize (docA, dictObject->getDict());
 }
 
 AnnotLink::~AnnotLink() {
@@ -2615,10 +2613,10 @@ AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, GooString *da) :
   initialize (docA, annotObj.getDict());
 }
 
-AnnotFreeText::AnnotFreeText(PDFDoc *docA, Dict *dict, Object *obj) :
-    AnnotMarkup(docA, dict, obj) {
+AnnotFreeText::AnnotFreeText(PDFDoc *docA, Object *dictObject, Object *obj) :
+    AnnotMarkup(docA, dictObject, obj) {
   type = typeFreeText;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotFreeText::~AnnotFreeText() {
@@ -3023,10 +3021,10 @@ AnnotLine::AnnotLine(PDFDoc *docA, PDFRectangle *rect) :
   initialize (docA, annotObj.getDict());
 }
 
-AnnotLine::AnnotLine(PDFDoc *docA, Dict *dict, Object *obj) :
-    AnnotMarkup(docA, dict, obj) {
+AnnotLine::AnnotLine(PDFDoc *docA, Object *dictObject, Object *obj) :
+    AnnotMarkup(docA, dictObject, obj) {
   type = typeLine;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotLine::~AnnotLine() {
@@ -3490,11 +3488,11 @@ AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype 
   initialize(docA, annotObj.getDict());
 }
 
-AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, Dict *dict, Object *obj) :
-  AnnotMarkup(docA, dict, obj) {
+AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, Object *dictObject, Object *obj) :
+  AnnotMarkup(docA, dictObject, obj) {
   // the real type will be read in initialize()
   type = typeHighlight;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 void AnnotTextMarkup::initialize(PDFDoc *docA, Dict *dict) {
@@ -3749,18 +3747,18 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
 // AnnotWidget
 //------------------------------------------------------------------------
 
-AnnotWidget::AnnotWidget(PDFDoc *docA, Dict *dict, Object *obj) :
-    Annot(docA, dict, obj) {
+AnnotWidget::AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj) :
+    Annot(docA, dictObject, obj) {
   type = typeWidget;
   field = NULL;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
-AnnotWidget::AnnotWidget(PDFDoc *docA, Dict *dict, Object *obj, FormField *fieldA) :
-    Annot(docA, dict, obj) {
+AnnotWidget::AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormField *fieldA) :
+    Annot(docA, dictObject, obj) {
   type = typeWidget;
   field = fieldA;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotWidget::~AnnotWidget() {
@@ -5021,10 +5019,10 @@ AnnotMovie::AnnotMovie(PDFDoc *docA, PDFRectangle *rect, Movie *movieA) :
   initialize(docA, annotObj.getDict());
 }
 
-AnnotMovie::AnnotMovie(PDFDoc *docA, Dict *dict, Object *obj) :
-  Annot(docA, dict, obj) {
+AnnotMovie::AnnotMovie(PDFDoc *docA, Object *dictObject, Object *obj) :
+  Annot(docA, dictObject, obj) {
   type = typeMovie;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotMovie::~AnnotMovie() {
@@ -5154,10 +5152,10 @@ AnnotScreen::AnnotScreen(PDFDoc *docA, PDFRectangle *rect) :
   initialize(docA, annotObj.getDict());
 }
 
-AnnotScreen::AnnotScreen(PDFDoc *docA, Dict *dict, Object *obj) :
-  Annot(docA, dict, obj) {
+AnnotScreen::AnnotScreen(PDFDoc *docA, Object *dictObject, Object *obj) :
+  Annot(docA, dictObject, obj) {
   type = typeScreen;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotScreen::~AnnotScreen() {
@@ -5216,10 +5214,10 @@ AnnotStamp::AnnotStamp(PDFDoc *docA, PDFRectangle *rect) :
   initialize(docA, annotObj.getDict());
 }
 
-AnnotStamp::AnnotStamp(PDFDoc *docA, Dict *dict, Object *obj) :
-  AnnotMarkup(docA, dict, obj) {
+AnnotStamp::AnnotStamp(PDFDoc *docA, Object *dictObject, Object *obj) :
+  AnnotMarkup(docA, dictObject, obj) {
   type = typeStamp;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotStamp::~AnnotStamp() {
@@ -5270,11 +5268,11 @@ AnnotGeometry::AnnotGeometry(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subT
   initialize(docA, annotObj.getDict());
 }
 
-AnnotGeometry::AnnotGeometry(PDFDoc *docA, Dict *dict, Object *obj) :
-  AnnotMarkup(docA, dict, obj) {
+AnnotGeometry::AnnotGeometry(PDFDoc *docA, Object *dictObject, Object *obj) :
+  AnnotMarkup(docA, dictObject, obj) {
   // the real type will be read in initialize()
   type = typeSquare;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotGeometry::~AnnotGeometry() {
@@ -5488,11 +5486,11 @@ AnnotPolygon::AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subTyp
   initialize(docA, annotObj.getDict());
 }
 
-AnnotPolygon::AnnotPolygon(PDFDoc *docA, Dict *dict, Object *obj) :
-  AnnotMarkup(docA, dict, obj) {
+AnnotPolygon::AnnotPolygon(PDFDoc *docA, Object *dictObject, Object *obj) :
+  AnnotMarkup(docA, dictObject, obj) {
   // the real type will be read in initialize()
   type = typePolygon;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotPolygon::~AnnotPolygon() {
@@ -5743,10 +5741,10 @@ AnnotCaret::AnnotCaret(PDFDoc *docA, PDFRectangle *rect) :
   initialize(docA, annotObj.getDict());
 }
 
-AnnotCaret::AnnotCaret(PDFDoc *docA, Dict *dict, Object *obj) :
-  AnnotMarkup(docA, dict, obj) {
+AnnotCaret::AnnotCaret(PDFDoc *docA, Object *dictObject, Object *obj) :
+  AnnotMarkup(docA, dictObject, obj) {
   type = typeCaret;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotCaret::~AnnotCaret() {
@@ -5804,10 +5802,10 @@ AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rect) :
   initialize(docA, annotObj.getDict());
 }
 
-AnnotInk::AnnotInk(PDFDoc *docA, Dict *dict, Object *obj) :
-  AnnotMarkup(docA, dict, obj) {
+AnnotInk::AnnotInk(PDFDoc *docA, Object *dictObject, Object *obj) :
+  AnnotMarkup(docA, dictObject, obj) {
   type = typeInk;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotInk::~AnnotInk() {
@@ -5959,10 +5957,10 @@ AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rect, GooSt
   initialize(docA, annotObj.getDict());
 }
 
-AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, Dict *dict, Object *obj) :
-  AnnotMarkup(docA, dict, obj) {
+AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, Object *dictObject, Object *obj) :
+  AnnotMarkup(docA, dictObject, obj) {
   type = typeFileAttachment;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotFileAttachment::~AnnotFileAttachment() {
@@ -6167,10 +6165,10 @@ AnnotSound::AnnotSound(PDFDoc *docA, PDFRectangle *rect, Sound *soundA) :
   initialize(docA, annotObj.getDict());
 }
 
-AnnotSound::AnnotSound(PDFDoc *docA, Dict *dict, Object *obj) :
-  AnnotMarkup(docA, dict, obj) {
+AnnotSound::AnnotSound(PDFDoc *docA, Object *dictObject, Object *obj) :
+  AnnotMarkup(docA, dictObject, obj) {
   type = typeSound;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotSound::~AnnotSound() {
@@ -6319,10 +6317,10 @@ Annot3D::Annot3D(PDFDoc *docA, PDFRectangle *rect) :
   initialize(docA, annotObj.getDict());
 }
 
-Annot3D::Annot3D(PDFDoc *docA, Dict *dict, Object *obj) :
-  Annot(docA, dict, obj) {
+Annot3D::Annot3D(PDFDoc *docA, Object *dictObject, Object *obj) :
+  Annot(docA, dictObject, obj) {
   type = type3D;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 Annot3D::~Annot3D() {
@@ -6437,10 +6435,10 @@ AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, PDFRectangle *rect) :
   initialize(docA, annotObj.getDict());
 }
 
-AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, Dict *dict, Object *obj) :
-  Annot(docA, dict, obj) {
+AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, Object *dictObject, Object *obj) :
+  Annot(docA, dictObject, obj) {
   type = typeRichMedia;
-  initialize(docA, dict);
+  initialize(docA, dictObject->getDict());
 }
 
 AnnotRichMedia::~AnnotRichMedia() {
@@ -6819,7 +6817,7 @@ Annots::Annots(PDFDoc *docA, int page, Object *annotsObj) {
       Object obj1 = annotsObj->arrayGet(i);
       if (obj1.isDict()) {
 	Object obj2 = annotsObj->arrayGetNF(i);
-        annot = createAnnot (obj1.getDict(), &obj2);
+        annot = createAnnot (&obj1, &obj2);
         if (annot) {
           if (annot->isOk()) {
             annot->setPage(page, gFalse); // Don't change /P
@@ -6861,48 +6859,48 @@ GBool Annots::removeAnnot(Annot *annot) {
   }
 }
 
-Annot *Annots::createAnnot(Dict* dict, Object *obj) {
+Annot *Annots::createAnnot(Object* dictObject, Object *obj) {
   Annot *annot = nullptr;
-  Object obj1 = dict->lookup("Subtype");
+  Object obj1 = dictObject->dictLookup("Subtype");
   if (obj1.isName()) {
     const char *typeName = obj1.getName();
 
     if (!strcmp(typeName, "Text")) {
-      annot = new AnnotText(doc, dict, obj);
+      annot = new AnnotText(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Link")) {
-      annot = new AnnotLink(doc, dict, obj);
+      annot = new AnnotLink(doc, dictObject, obj);
     } else if (!strcmp(typeName, "FreeText")) {
-      annot = new AnnotFreeText(doc, dict, obj);
+      annot = new AnnotFreeText(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Line")) {
-      annot = new AnnotLine(doc, dict, obj);
+      annot = new AnnotLine(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Square")) {
-      annot = new AnnotGeometry(doc, dict, obj);
+      annot = new AnnotGeometry(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Circle")) {
-      annot = new AnnotGeometry(doc, dict, obj);
+      annot = new AnnotGeometry(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Polygon")) {
-      annot = new AnnotPolygon(doc, dict, obj);
+      annot = new AnnotPolygon(doc, dictObject, obj);
     } else if (!strcmp(typeName, "PolyLine")) {
-      annot = new AnnotPolygon(doc, dict, obj);
+      annot = new AnnotPolygon(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Highlight")) {
-      annot = new AnnotTextMarkup(doc, dict, obj);
+      annot = new AnnotTextMarkup(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Underline")) {
-      annot = new AnnotTextMarkup(doc, dict, obj);
+      annot = new AnnotTextMarkup(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Squiggly")) {
-      annot = new AnnotTextMarkup(doc, dict, obj);
+      annot = new AnnotTextMarkup(doc, dictObject, obj);
     } else if (!strcmp(typeName, "StrikeOut")) {
-      annot = new AnnotTextMarkup(doc, dict, obj);
+      annot = new AnnotTextMarkup(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Stamp")) {
-      annot = new AnnotStamp(doc, dict, obj);
+      annot = new AnnotStamp(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Caret")) {
-      annot = new AnnotCaret(doc, dict, obj);
+      annot = new AnnotCaret(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Ink")) {
-      annot = new AnnotInk(doc, dict, obj);
+      annot = new AnnotInk(doc, dictObject, obj);
     } else if (!strcmp(typeName, "FileAttachment")) {
-      annot = new AnnotFileAttachment(doc, dict, obj);
+      annot = new AnnotFileAttachment(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Sound")) {
-      annot = new AnnotSound(doc, dict, obj);
+      annot = new AnnotSound(doc, dictObject, obj);
     } else if(!strcmp(typeName, "Movie")) {
-      annot = new AnnotMovie(doc, dict, obj);
+      annot = new AnnotMovie(doc, dictObject, obj);
     } else if(!strcmp(typeName, "Widget")) {
       // Find the annot in forms
       if (obj->isRef()) {
@@ -6916,31 +6914,31 @@ Annot *Annots::createAnnot(Dict* dict, Object *obj) {
         }
       }
       if (!annot)
-        annot = new AnnotWidget(doc, dict, obj);
+        annot = new AnnotWidget(doc, dictObject, obj);
     } else if(!strcmp(typeName, "Screen")) {
-      annot = new AnnotScreen(doc, dict, obj);
+      annot = new AnnotScreen(doc, dictObject, obj);
     } else if(!strcmp(typeName, "PrinterMark")) {
-      annot = new Annot(doc, dict, obj);
+      annot = new Annot(doc, dictObject, obj);
     } else if (!strcmp(typeName, "TrapNet")) {
-      annot = new Annot(doc, dict, obj);
+      annot = new Annot(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Watermark")) {
-      annot = new Annot(doc, dict, obj);
+      annot = new Annot(doc, dictObject, obj);
     } else if (!strcmp(typeName, "3D")) {
-      annot = new Annot3D(doc, dict, obj);
+      annot = new Annot3D(doc, dictObject, obj);
     } else if (!strcmp(typeName, "RichMedia")) {
-      annot = new AnnotRichMedia(doc, dict, obj);
+      annot = new AnnotRichMedia(doc, dictObject, obj);
     } else if (!strcmp(typeName, "Popup")) {
       /* Popup annots are already handled by markup annots
        * Here we only care about popup annots without a
        * markup annotation associated
        */
-      Object obj2 = dict->lookup("Parent");
+      Object obj2 = dictObject->dictLookup("Parent");
       if (obj2.isNull())
-        annot = new AnnotPopup(doc, dict, obj);
+        annot = new AnnotPopup(doc, dictObject, obj);
       else
         annot = NULL;
     } else {
-      annot = new Annot(doc, dict, obj);
+      annot = new Annot(doc, dictObject, obj);
     }
   }
 

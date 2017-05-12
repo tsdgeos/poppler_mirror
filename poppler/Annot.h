@@ -555,8 +555,8 @@ public:
   };
 
   Annot(PDFDoc *docA, PDFRectangle *rectA);
-  Annot(PDFDoc *docA, Dict *dict);
-  Annot(PDFDoc *docA, Dict *dict, Object *obj);
+  Annot(PDFDoc *docA, Object *dictObject);
+  Annot(PDFDoc *docA, Object *dictObject, Object *obj);
   GBool isOk() { return ok; }
 
   void incRefCnt();
@@ -695,7 +695,7 @@ protected:
 class AnnotPopup: public Annot {
 public:
   AnnotPopup(PDFDoc *docA, PDFRectangle *rect);
-  AnnotPopup(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotPopup(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotPopup();
 
   Object *getParentNF() { return &parent; }
@@ -723,7 +723,7 @@ public:
   };
 
   AnnotMarkup(PDFDoc *docA, PDFRectangle *rect);
-  AnnotMarkup(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotMarkup(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotMarkup();
 
   // getters
@@ -783,7 +783,7 @@ public:
   };
 
   AnnotText(PDFDoc *docA, PDFRectangle *rect);
-  AnnotText(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotText(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotText();
 
   void draw(Gfx *gfx, GBool printing) override;
@@ -816,7 +816,7 @@ private:
 class AnnotMovie: public Annot {
  public:
   AnnotMovie(PDFDoc *docA, PDFRectangle *rect, Movie *movieA);
-  AnnotMovie(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotMovie(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotMovie();
 
   void draw(Gfx *gfx, GBool printing) override;
@@ -840,7 +840,7 @@ class AnnotScreen: public Annot {
  public:
 
   AnnotScreen(PDFDoc *docA, PDFRectangle *rect);
-  AnnotScreen(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotScreen(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotScreen();
 
   GooString* getTitle() { return title; }
@@ -876,7 +876,7 @@ public:
   };
 
   AnnotLink(PDFDoc *docA, PDFRectangle *rect);
-  AnnotLink(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotLink(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotLink();
 
   void draw(Gfx *gfx, GBool printing) override;
@@ -918,7 +918,7 @@ public:
   };
 
   AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, GooString *da);
-  AnnotFreeText(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotFreeText(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotFreeText();
 
   void draw(Gfx *gfx, GBool printing) override;
@@ -982,7 +982,7 @@ public:
   };
 
   AnnotLine(PDFDoc *docA, PDFRectangle *rect);
-  AnnotLine(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotLine(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotLine();
 
   void draw(Gfx *gfx, GBool printing) override;
@@ -1048,7 +1048,7 @@ class AnnotTextMarkup: public AnnotMarkup {
 public:
 
   AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
-  AnnotTextMarkup(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotTextMarkup(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotTextMarkup();
 
   void draw(Gfx *gfx, GBool printing) override;
@@ -1075,7 +1075,7 @@ class AnnotStamp: public AnnotMarkup {
 public:
 
   AnnotStamp(PDFDoc *docA, PDFRectangle *rect);
-  AnnotStamp(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotStamp(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotStamp();
 
   void setIcon(GooString *new_icon);
@@ -1098,7 +1098,7 @@ class AnnotGeometry: public AnnotMarkup {
 public:
 
   AnnotGeometry(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
-  AnnotGeometry(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotGeometry(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotGeometry();
 
   void draw(Gfx *gfx, GBool printing) override;
@@ -1134,7 +1134,7 @@ public:
   };
 
   AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
-  AnnotPolygon(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotPolygon(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotPolygon();
 
   void draw(Gfx *gfx, GBool printing) override;
@@ -1184,7 +1184,7 @@ public:
   };
 
   AnnotCaret(PDFDoc *docA, PDFRectangle *rect);
-  AnnotCaret(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotCaret(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotCaret();
 
   void setSymbol(AnnotCaretSymbol new_symbol);
@@ -1209,7 +1209,7 @@ class AnnotInk: public AnnotMarkup {
 public:
 
   AnnotInk(PDFDoc *docA, PDFRectangle *rect);
-  AnnotInk(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotInk(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotInk();
 
   void draw(Gfx *gfx, GBool printing) override;
@@ -1244,7 +1244,7 @@ class AnnotFileAttachment: public AnnotMarkup {
 public:
 
   AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rect, GooString *filename);
-  AnnotFileAttachment(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotFileAttachment(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotFileAttachment();
 
   void draw(Gfx *gfx, GBool printing) override;
@@ -1272,7 +1272,7 @@ class AnnotSound: public AnnotMarkup {
 public:
 
   AnnotSound(PDFDoc *docA, PDFRectangle *rect, Sound *soundA);
-  AnnotSound(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotSound(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotSound();
 
   void draw(Gfx *gfx, GBool printing) override;
@@ -1306,8 +1306,8 @@ public:
     highlightModePush     // P,T
   };
 
-  AnnotWidget(PDFDoc *docA, Dict *dict, Object *obj);
-  AnnotWidget(PDFDoc *docA, Dict *dict, Object *obj, FormField *fieldA);
+  AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj);
+  AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormField *fieldA);
   ~AnnotWidget();
 
   void draw(Gfx *gfx, GBool printing) override;
@@ -1397,7 +1397,7 @@ class Annot3D: public Annot {
 public:
 
   Annot3D(PDFDoc *docA, PDFRectangle *rect);
-  Annot3D(PDFDoc *docA, Dict *dict, Object *obj);
+  Annot3D(PDFDoc *docA, Object *dictObject, Object *obj);
   ~Annot3D();
 
   // getters
@@ -1559,7 +1559,7 @@ public:
   };
 
   AnnotRichMedia(PDFDoc *docA, PDFRectangle *rect);
-  AnnotRichMedia(PDFDoc *docA, Dict *dict, Object *obj);
+  AnnotRichMedia(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotRichMedia();
 
   Content* getContent() const;
@@ -1596,7 +1596,7 @@ public:
   GBool removeAnnot(Annot *annot);
 
 private:
-  Annot* createAnnot(Dict* dict, Object *obj);
+  Annot* createAnnot(Object* dictObject, Object *obj);
   Annot *findAnnot(Ref *ref);
 
   PDFDoc *doc;

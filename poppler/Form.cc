@@ -108,7 +108,7 @@ void FormWidget::createWidgetAnnotation() {
     return;
 
   Object obj1(ref.num, ref.gen);
-  widget = new AnnotWidget(doc, obj.getDict(), &obj1, field);
+  widget = new AnnotWidget(doc, &obj, &obj1, field);
 }
 
 GBool FormWidget::inRect(double x, double y) const {
