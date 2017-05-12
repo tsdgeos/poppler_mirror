@@ -1322,7 +1322,7 @@ void XRef::add(int num, int gen, Goffset offs, GBool used) {
     for (int i = size; i < num + 1; ++i) {
       entries[i].offset = -1;
       entries[i].type = xrefEntryFree;
-      entries[i].obj.setToNull();
+      entries[i].obj.initNullAfterMalloc();
       entries[i].flags = 0;
       entries[i].gen = 0;
     }
