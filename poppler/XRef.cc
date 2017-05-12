@@ -865,6 +865,7 @@ GBool XRef::constructXRef(GBool *wasReconstructed, GBool needCatalogDict) {
   bool oneCycle = true;
   int offset = 0;
 
+  resize(0); // free entries properly
   gfree(entries);
   capacity = 0;
   size = 0;
