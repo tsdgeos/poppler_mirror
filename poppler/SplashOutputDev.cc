@@ -2075,8 +2075,10 @@ reload:
   delete id;
   delete fontLoc;
   fontLoc = NULL;
-  if (fontsrc && !fontsrc->isFile)
+  if (fontsrc && !fontsrc->isFile) {
       fontsrc->unref();
+      fontsrc = nullptr;
+  }
 
   id = new SplashOutFontFileID(gfxFont->getID());
   if ((fontFile = fontEngine->getFontFile(id))) {
