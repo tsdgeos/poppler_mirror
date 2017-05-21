@@ -267,25 +267,20 @@ _poppler_annot_text_markup_new (Annot *annot)
 static AnnotQuadrilaterals *
 create_annot_quads_from_poppler_quads (GArray *quads)
 {
-  AnnotQuadrilaterals::AnnotQuadrilateral **quads_array;
-
   g_assert (quads->len > 0);
 
-  quads_array = (AnnotQuadrilaterals::AnnotQuadrilateral **) g_malloc0_n (
-    sizeof (AnnotQuadrilaterals::AnnotQuadrilateral *),
-    quads->len);
-
+  auto quads_array = std::make_unique<AnnotQuadrilaterals::AnnotQuadrilateral[]>(quads->len);
   for (guint i = 0; i < quads->len; i++) {
     PopplerQuadrilateral *quadrilateral = &g_array_index (quads, PopplerQuadrilateral, i);
 
-    quads_array[i] = new AnnotQuadrilaterals::AnnotQuadrilateral (
+    quads_array[i] = AnnotQuadrilaterals::AnnotQuadrilateral (
       quadrilateral->p1.x, quadrilateral->p1.y,
       quadrilateral->p2.x, quadrilateral->p2.y,
       quadrilateral->p3.x, quadrilateral->p3.y,
       quadrilateral->p4.x, quadrilateral->p4.y);
   }
 
-  return new AnnotQuadrilaterals (quads_array, quads->len);
+  return new AnnotQuadrilaterals (std::move(quads_array), quads->len);
 }
 
 static GArray *
@@ -947,15 +942,15 @@ create_poppler_color_from_annot_color (AnnotColor *color)
   return poppler_color;
 }
 
-static AnnotColor *
+static std::unique_ptr<AnnotColor>
 create_annot_color_from_poppler_color (PopplerColor *poppler_color)
 {
   if (!poppler_color)
     return nullptr;
 
-  return new AnnotColor ((double)poppler_color->red / 65535,
-                         (double)poppler_color->green / 65535,
-                         (double)poppler_color->blue / 65535);
+  return std::make_unique<AnnotColor>((double)poppler_color->red / 65535,
+                                      (double)poppler_color->green / 65535,
+                                      (double)poppler_color->blue / 65535);
 }
 
 /**
@@ -988,7 +983,6 @@ void
 poppler_annot_set_color (PopplerAnnot *poppler_annot,
 			 PopplerColor *poppler_color)
 {
-  /* Annot takes ownership of the color */
   poppler_annot->annot->setColor (create_annot_color_from_poppler_color (poppler_color));
 }
 
@@ -1150,15 +1144,13 @@ poppler_annot_markup_set_popup (PopplerAnnotMarkup *poppler_annot,
 				PopplerRectangle   *popup_rect)
 {
   AnnotMarkup *annot;
-  AnnotPopup  *popup;
   PDFRectangle pdf_rect(popup_rect->x1, popup_rect->y1,
 			popup_rect->x2, popup_rect->y2);
 
   g_return_if_fail (POPPLER_IS_ANNOT_MARKUP (poppler_annot));
 
   annot = static_cast<AnnotMarkup *>(POPPLER_ANNOT (poppler_annot)->annot);
-  popup = new AnnotPopup (annot->getDoc(), &pdf_rect);
-  annot->setPopup (popup);
+  annot->setPopup (std::make_unique<AnnotPopup>(annot->getDoc(), &pdf_rect));
 }
 
 /**
@@ -1946,7 +1938,6 @@ poppler_annot_geometry_set_interior_color (PopplerAnnot *poppler_annot,
 
   annot = static_cast<AnnotGeometry *>(POPPLER_ANNOT (poppler_annot)->annot);
 
-  /* Annot takes ownership of the color */
   annot->setInteriorColor (create_annot_color_from_poppler_color (poppler_color));
 }
 
