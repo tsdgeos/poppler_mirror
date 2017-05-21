@@ -425,14 +425,15 @@ fi
 
 AM_CONDITIONAL(BUILD_LIBCURL, test x$enable_libcurl = xyes)
 
-dnl Test for libjpeg
-AC_ARG_ENABLE(libjpeg,
-	      AC_HELP_STRING([--disable-libjpeg],
-	                     [Don't build against libjpeg.]),
-              enable_libjpeg=$enableval,
-              enable_libjpeg="try")
+dnl Test for dct decoder
+AC_ARG_ENABLE(dctdecoder,
+	      AC_HELP_STRING([--enable-dctdecoder=@<:@libjpeg/unmaintained/none@:>@],
+                             [Decides which DCT decoder to use. 'libjpeg' will use libjpeg if available or fail if not. 'unmaintained' gives you the internal unmaintained decoder. Use at your own risk. 'none' compiles no DCT decoder at all. [[default=libjpeg]]]),
+              [dctdecoder=$enableval],
+              [dctdecoder="libjpeg"])
+
 AC_ARG_VAR([LIBJPEG_CFLAGS], [C compiler flags for LIBJPEG])
-if test x$enable_libjpeg != xno; then
+if test x$dctdecoder = x"libjpeg"; then
 
   dnl
   dnl POPPLER_FIND_JPEG uses "USER_INCLUDES" and "USER_LIBS"
@@ -488,11 +489,28 @@ if test x$enable_libjpeg != xno; then
   AC_SUBST(LIBJPEG_CFLAGS)
   USER_INCLUDES="$ac_save_USER_INCLUDES"
   USER_LDFLAGS="$ac_save_USER_LDFLAGS"
+
+  if test x$enable_libjpeg != x"yes"; then
+    AC_MSG_ERROR([Install libjpeg before trying to build poppler. You can also decide to use the internal unmaintained DCT decoder or none at all. See --help.])
+  fi
+  have_dct_decoder="yes"
+  AC_DEFINE(HAVE_DCT_DECODER)
+elif test x$dctdecoder = x"unmaintained"; then
+  enable_libjpeg="no"
+  have_dct_decoder="yes"
+  AC_DEFINE(HAVE_DCT_DECODER)
+elif test x$dctdecoder = x"none"; then
+  enable_libjpeg="no"
+  have_dct_decoder="no"
+else
+    AC_MSG_ERROR([Invalid --enable-dctdecoder value. See --help.])
 fi
+
+AH_TEMPLATE([HAVE_DCT_DECODER], [Do we have any DCT decoder?.])
 
 AM_CONDITIONAL(BUILD_LIBJPEG, test x$enable_libjpeg = xyes)
 AH_TEMPLATE([ENABLE_LIBJPEG],
-            [Use libjpeg instead of builtin jpeg decoder.])
+            [Use libjpeg instead of builtin unmaintained jpeg decoder.])
 
 dnl Test for libpng
 AC_ARG_ENABLE(libpng,
@@ -1078,8 +1096,12 @@ if test x$enable_single_precision = xyes -a x$enable_fixedpoint = xyes; then
 	echo "  Warning: Single precision and fixed point options should not be enabled at the same time"
 fi
 
-if test x$enable_libjpeg != xyes; then
+if test x$enable_libjpeg != xyes -a x$have_dct_decoder = xyes; then
 	echo "  Warning: Using libjpeg is recommended. The internal DCT decoder is unmaintained."
+fi
+
+if test x$have_dct_decoder = xno; then
+	echo "  Warning: You're not compiling any DCT decoder. Some files will fail to display properly."
 fi
 
 if test x$enable_zlib_uncompress != xno; then
