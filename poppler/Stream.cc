@@ -353,7 +353,12 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursio
     globals.free();
     obj.free();
   } else if (!strcmp(name, "JPXDecode")) {
+#ifdef HAVE_JPX_DECODER
     str = new JPXStream(str);
+#else
+    error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
+    str = new EOFStream(str);
+#endif
   } else if (!strcmp(name, "Crypt")) {
     if (str->getKind() == strCrypt) {
       str = str->getBaseStream();

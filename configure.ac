@@ -201,8 +201,8 @@ dnl ##### Test for libopenjpeg. Versions prior to 1.4 do not provide a pkgconfig
 openjpeg1="no"
 openjpeg2="no"
 AC_ARG_ENABLE(libopenjpeg,
-	      AC_HELP_STRING([--enable-libopenjpeg=@<:@auto/openjpeg1/openjpeg2/none@:>@],
-                             [Use openjpeg for JPEG2000 images. 'auto' prefers openjpeg2 over openjpeg1 if both are available [[default=auto]]]),
+	      AC_HELP_STRING([--enable-libopenjpeg=@<:@auto/openjpeg1/openjpeg2/unmaintained/none@:>@],
+                             [Use openjpeg for JPEG2000 images. 'auto' prefers openjpeg2 over openjpeg1 if both are available. 'unmaintained' gives you the internal unmaintained decoder. Use at your own risk. 'none' compiles no JPX decoder at all. [[default=auto]]]),
               [enable_libopenjpeg=$enableval],
               [enable_libopenjpeg="auto"])
 
@@ -258,9 +258,26 @@ if test x$openjpeg1 = xyes || test x$openjpeg2 = xyes; then
        [AC_DEFINE(WITH_OPENJPEG_IGNORE_PCLR_CMAP_CDEF_FLAG, 1, [OpenJPEG with the OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG flag.])],
        [])
       ])
+  have_jpx_decoder=yes
+  AC_DEFINE(HAVE_JPX_DECODER)
 else
-  enable_libopenjpeg=no
+  if test x$enable_libopenjpeg = xunmaintained; then
+    enable_libopenjpeg=no
+    have_jpx_decoder=yes
+    AC_DEFINE(HAVE_JPX_DECODER)
+  elif test x$enable_libopenjpeg = xnone; then
+    enable_libopenjpeg=no
+    have_jpx_decoder=no
+  else
+    if test x$enable_libopenjpeg = xopenjpeg2 || test x$enable_libopenjpeg = xopenjpeg1 || test x$enable_libopenjpeg = xauto; then
+      AC_MSG_ERROR([Install libopenjpeg2 or libopenjpeg1 before trying to build poppler. You can also decide to use the internal unmaintained JPX decoder or none at all. See --help.])
+    else
+      AC_MSG_ERROR([Invalid --enable-libopenjpeg value. See --help.])
+    fi
+  fi
 fi
+
+AH_TEMPLATE([HAVE_JPX_DECODER], [Do we have any JPX decoder?.])
 
 dnl Test for NSS
 AC_ARG_ENABLE(libnss,
@@ -1108,6 +1125,10 @@ if test x$enable_zlib_uncompress != xno; then
 	echo "  Warning: Using zlib for decompression is not totally safe"
 fi
 
-if test x$enable_libopenjpeg != xyes; then
+if test x$enable_libopenjpeg != xyes -a x$have_jpx_decoder = xyes; then
 	echo "  Warning: Using libopenjpeg2 is recommended. The internal JPX decoder is unmaintained."
+fi
+
+if test x$have_jpx_decoder = xno; then
+	echo "  Warning: You're not compiling any JPX decoder. Some files will fail to display properly."
 fi
