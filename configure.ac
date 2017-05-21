@@ -202,7 +202,7 @@ openjpeg1="no"
 openjpeg2="no"
 AC_ARG_ENABLE(libopenjpeg,
 	      AC_HELP_STRING([--enable-libopenjpeg=@<:@auto/openjpeg1/openjpeg2/none@:>@],
-                             [Use openjpeg for JPEG2000 images. 'auto' prefers openjpeg1 over openjpeg2 if both are available due to regressions in openjpeg2 [[default=auto]]]),
+                             [Use openjpeg for JPEG2000 images. 'auto' prefers openjpeg2 over openjpeg1 if both are available [[default=auto]]]),
               [enable_libopenjpeg=$enableval],
               [enable_libopenjpeg="auto"])
 
