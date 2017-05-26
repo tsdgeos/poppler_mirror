@@ -7,7 +7,7 @@
 // Copyright (C) 2011-2015, 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012, 2014 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2014, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2015 Arthur Stavisky <vovodroid@gmail.com>
@@ -268,15 +268,15 @@ int main (int argc, char *argv[])
     catDict->lookup("OutputIntents", &intents);
     catDict->lookupNF("AcroForm", &afObj);
     Ref *refPage = docs[0]->getCatalog()->getPageRef(1);
-    if (!afObj.isNull()) {
+    if (!afObj.isNull() && refPage) {
       docs[0]->markAcroForm(&afObj, yRef, countRef, 0, refPage->num, refPage->num);
     }
     catDict->lookupNF("OCProperties", &ocObj);
-    if (!ocObj.isNull() && ocObj.isDict()) {
+    if (!ocObj.isNull() && ocObj.isDict() && refPage) {
       docs[0]->markPageObjects(ocObj.getDict(), yRef, countRef, 0, refPage->num, refPage->num);
     }
     catDict->lookup("Names", &names);
-    if (!names.isNull() && names.isDict()) {
+    if (!names.isNull() && names.isDict() && refPage) {
       docs[0]->markPageObjects(names.getDict(), yRef, countRef, 0, refPage->num, refPage->num);
     }
     if (intents.isArray() && intents.arrayGetLength() > 0) {
@@ -353,6 +353,10 @@ int main (int argc, char *argv[])
 
   for (i = 0; i < (int) docs.size(); i++) {
     for (j = 1; j <= docs[i]->getNumPages(); j++) {
+      if (!docs[i]->getCatalog()->getPage(j)) {
+        continue;
+      }
+
       PDFRectangle *cropBox = NULL;
       if (docs[i]->getCatalog()->getPage(j)->isCropped())
         cropBox = docs[i]->getCatalog()->getPage(j)->getCropBox();
