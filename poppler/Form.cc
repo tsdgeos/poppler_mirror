@@ -17,6 +17,7 @@
 // Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
+// Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 //
 //========================================================================
 
@@ -903,11 +904,6 @@ void FormFieldButton::fillChildrenSiblingsID()
 
 GBool FormFieldButton::setState(char *state)
 {
-  if (readOnly) {
-    error(errInternal, -1, "FormFieldButton::setState called on a readOnly field\n");
-    return gFalse;
-  }
-
   // A check button could behave as a radio button
   // when it's in a set of more than 1 buttons
   if (btype != formButtonRadio && btype != formButtonCheck)
