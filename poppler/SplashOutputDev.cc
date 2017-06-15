@@ -37,6 +37,7 @@
 // Copyright (C) 2015 Tamas Szekeres <szekerest@gmail.com>
 // Copyright (C) 2015 Kenji Uno <ku@digitaldolphins.jp>
 // Copyright (C) 2016 Takahiro Hashimoto <kenya888.en@gmail.com>
+// Copyright (C) 2017 Even Rouault <even.rouault@spatialys.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2725,7 +2726,7 @@ void SplashOutputDev::type3D1(GfxState *state, double wx, double wy,
   int i, j;
 
   // ignore multiple d0/d1 operators
-  if (t3GlyphStack->haveDx) {
+  if (!t3GlyphStack || t3GlyphStack->haveDx) {
     return;
   }
   t3GlyphStack->haveDx = gTrue;
