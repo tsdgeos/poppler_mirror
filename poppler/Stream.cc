@@ -295,7 +295,12 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursio
 	colorXform = obj.getInt();
       }
     }
+#ifdef HAVE_DCT_DECODER
     str = new DCTStream(str, colorXform, dict, recursion);
+#else
+    error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
+    str = new EOFStream(str);
+#endif
   } else if (!strcmp(name, "FlateDecode") || !strcmp(name, "Fl")) {
     pred = 1;
     columns = 1;
@@ -324,7 +329,12 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursio
     }
     str = new JBIG2Stream(str, &globals, &obj);
   } else if (!strcmp(name, "JPXDecode")) {
+#ifdef HAVE_JPX_DECODER
     str = new JPXStream(str);
+#else
+    error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);
+    str = new EOFStream(str);
+#endif
   } else if (!strcmp(name, "Crypt")) {
     if (str->getKind() == strCrypt) {
       str = str->getBaseStream();

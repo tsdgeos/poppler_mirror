@@ -204,15 +204,15 @@ int main (int argc, char *argv[])
     intents = catDict->lookup("OutputIntents");
     afObj = catDict->lookupNF("AcroForm");
     Ref *refPage = docs[0]->getCatalog()->getPageRef(1);
-    if (!afObj.isNull()) {
+    if (!afObj.isNull() && refPage) {
       docs[0]->markAcroForm(&afObj, yRef, countRef, 0, refPage->num, refPage->num);
     }
     ocObj = catDict->lookupNF("OCProperties");
-    if (!ocObj.isNull() && ocObj.isDict()) {
+    if (!ocObj.isNull() && ocObj.isDict() && refPage) {
       docs[0]->markPageObjects(ocObj.getDict(), yRef, countRef, 0, refPage->num, refPage->num);
     }
     names = catDict->lookup("Names");
-    if (!names.isNull() && names.isDict()) {
+    if (!names.isNull() && names.isDict() && refPage) {
       docs[0]->markPageObjects(names.getDict(), yRef, countRef, 0, refPage->num, refPage->num);
     }
     if (intents.isArray() && intents.arrayGetLength() > 0) {
@@ -274,6 +274,10 @@ int main (int argc, char *argv[])
 
   for (i = 0; i < (int) docs.size(); i++) {
     for (j = 1; j <= docs[i]->getNumPages(); j++) {
+      if (!docs[i]->getCatalog()->getPage(j)) {
+        continue;
+      }
+
       PDFRectangle *cropBox = NULL;
       if (docs[i]->getCatalog()->getPage(j)->isCropped())
         cropBox = docs[i]->getCatalog()->getPage(j)->getCropBox();

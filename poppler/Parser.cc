@@ -82,8 +82,12 @@ Object Parser::getObj(GBool simpleOnly,
     inlineImg = 0;
   }
 
+  if (unlikely(recursion >= recursionLimit)) {
+    return Object(objError);
+  }
+
   // array
-  if (!simpleOnly && likely(recursion < recursionLimit) && buf1.isCmd("[")) {
+  if (!simpleOnly && buf1.isCmd("[")) {
     shift();
     obj = Object(new Array(xref));
     while (!buf1.isCmd("]") && !buf1.isEOF()) {
@@ -97,7 +101,7 @@ Object Parser::getObj(GBool simpleOnly,
     shift();
 
   // dictionary or stream
-  } else if (!simpleOnly && likely(recursion < recursionLimit) && buf1.isCmd("<<")) {
+  } else if (!simpleOnly && buf1.isCmd("<<")) {
     shift(objNum);
     obj = Object(new Dict(xref));
     while (!buf1.isCmd(">>") && !buf1.isEOF()) {
@@ -115,6 +119,9 @@ Object Parser::getObj(GBool simpleOnly,
 	  break;
 	}
 	Object obj2 = getObj(gFalse, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1);
+	if (unlikely(obj2.isError() && recursion + 1 >= recursionLimit)) {
+	  break;
+	}
 	obj.dictAdd(key, std::move(obj2));
       }
     }

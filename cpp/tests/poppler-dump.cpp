@@ -301,16 +301,24 @@ static void print_embedded_files(poppler::document *doc)
 
 static void print_page(poppler::page *p)
 {
-    std::cout << std::setw(out_width) << "Rect" << ": " << p->page_rect() << std::endl;
-    std::cout << std::setw(out_width) << "Label" << ": " << p->label() << std::endl;
-    std::cout << std::setw(out_width) << "Duration" << ": " << p->duration() << std::endl;
-    std::cout << std::setw(out_width) << "Orientation" << ": " << out_page_orientation(p->orientation()) << std::endl;
+    if (p) {
+        std::cout << std::setw(out_width) << "Rect" << ": " << p->page_rect() << std::endl;
+        std::cout << std::setw(out_width) << "Label" << ": " << p->label() << std::endl;
+        std::cout << std::setw(out_width) << "Duration" << ": " << p->duration() << std::endl;
+        std::cout << std::setw(out_width) << "Orientation" << ": " << out_page_orientation(p->orientation()) << std::endl;
+    } else {
+        std::cout << std::setw(out_width) << "Broken Page. Could not be parsed" << std::endl;
+    }
     std::cout << std::endl;
 }
 
 static void print_page_text(poppler::page *p)
 {
-    std::cout << p->text(p->page_rect(), show_text_layout) << std::endl;
+    if (p) {
+        std::cout << p->text(p->page_rect(), show_text_layout) << std::endl;
+    } else {
+        std::cout << std::setw(out_width) << "Broken Page. Could not be parsed" << std::endl;
+    }
     std::cout << std::endl;
 }
 

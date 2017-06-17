@@ -1,3 +1,19 @@
+Release 0.55.0
+        core:
+         * Fix abort in files with broken Decode arrays. KDE bug #379835
+         * Fix memory leak (and probably logic bug) parsing broken XRef entries. Bug #100775
+         * Fix memory leak when reconstructing broken files. Bug #100776
+         * Minor optimization
+         * Fix regression in GfxIndexedColorSpace::mapColorToBase. Bug #100931
+         * Fix memory leak in error condition
+
+        cpp:
+         * Return nullptr if the page at index can't be fetched. Bug #100981
+
+        build system:
+         * Fail by default if libjpeg is not available
+         * Fail by default if libopenjpeg2/1 is not available
+
 Release 0.54.0
         core:
          * Make XRef reconstruction a bit better. Bug #100509

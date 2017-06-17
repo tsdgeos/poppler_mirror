@@ -25,6 +25,7 @@
 
 #include "poppler-document-private.h"
 #include "poppler-embedded-file-private.h"
+#include "poppler-page-private.h"
 #include "poppler-private.h"
 #include "poppler-toc-private.h"
 
@@ -910,7 +911,17 @@ page* document::create_page(const ustring &label) const
  */
 page* document::create_page(int index) const
 {
-    return index >= 0 && index < d->doc->getNumPages() ? new page(d, index) : 0;
+    if (index >= 0 && index < d->doc->getNumPages()) {
+        page *p = new page(d, index);
+        if (p->d->page) {
+            return p;
+        } else {
+            delete p;
+            return nullptr;
+        }
+    } else {
+        return nullptr;
+    }
 }
 
 /**

@@ -156,6 +156,7 @@ HtmlFont::HtmlFont(GfxFont *font, int _size, GfxRGB rgb){
     pos = font_num; 
   if (!DefaultFont) DefaultFont=new GooString(fonts[font_num].name);
 
+  rotSkewMat[0] = rotSkewMat[1] = rotSkewMat[2] = rotSkewMat[3] = 0;
 }
  
 HtmlFont::HtmlFont(const HtmlFont& x){
