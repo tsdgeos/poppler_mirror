@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2009, 201, 2010, 2013, 2014 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2009, 201, 2010, 2013, 2014, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
@@ -87,8 +87,14 @@ Object *Parser::getObj(Object *obj, GBool simpleOnly,
     inlineImg = 0;
   }
 
+  if (unlikely(recursion >= recursionLimit)) {
+    obj->free();
+    obj->initError();
+    return obj;
+  }
+
   // array
-  if (!simpleOnly && likely(recursion < recursionLimit) && buf1.isCmd("[")) {
+  if (!simpleOnly && buf1.isCmd("[")) {
     shift();
     obj->initArray(xref);
     while (!buf1.isCmd("]") && !buf1.isEOF())
@@ -101,7 +107,7 @@ Object *Parser::getObj(Object *obj, GBool simpleOnly,
     shift();
 
   // dictionary or stream
-  } else if (!simpleOnly && likely(recursion < recursionLimit) && buf1.isCmd("<<")) {
+  } else if (!simpleOnly && buf1.isCmd("<<")) {
     shift(objNum);
     obj->initDict(xref);
     while (!buf1.isCmd(">>") && !buf1.isEOF()) {
@@ -119,6 +125,9 @@ Object *Parser::getObj(Object *obj, GBool simpleOnly,
 	  break;
 	}
 	obj->dictAdd(key, getObj(&obj2, gFalse, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1));
+	if (unlikely(obj2.isError() && recursion + 1 >= recursionLimit)) {
+	  break;
+	}
       }
     }
     if (buf1.isEOF()) {
