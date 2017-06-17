@@ -5401,7 +5401,7 @@ void AnnotScreen::initialize(PDFDoc *docA, Dict* dict) {
   action = NULL;
   if (dict->lookup("A", &obj1)->isDict()) {
     action = LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI());
-    if (action->getKind() == actionRendition && page == 0) {
+    if (action && action->getKind() == actionRendition && page == 0) {
       error (errSyntaxError, -1, "Invalid Rendition action: associated screen annotation without P");
       delete action;
       action = NULL;
