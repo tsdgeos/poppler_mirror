@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2008-2010, 2013-2015 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008-2010, 2013-2015, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
@@ -1623,7 +1623,9 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) {
       case psOpIdiv:
 	i2 = stack->popInt();
 	i1 = stack->popInt();
-	stack->pushInt(i1 / i2);
+	if (likely(i2 != 0)) {
+	  stack->pushInt(i1 / i2);
+	}
 	break;
       case psOpIndex:
 	stack->index(stack->popInt());
@@ -1659,7 +1661,9 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) {
       case psOpMod:
 	i2 = stack->popInt();
 	i1 = stack->popInt();
-	stack->pushInt(i1 % i2);
+	if (likely(i2 != 0)) {
+	  stack->pushInt(i1 % i2);
+	}
 	break;
       case psOpMul:
 	if (stack->topTwoAreInts()) {
