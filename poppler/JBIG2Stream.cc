@@ -760,6 +760,10 @@ JBIG2Bitmap *JBIG2Bitmap::getSlice(Guint x, Guint y, Guint wA, Guint hA) {
   JBIG2Bitmap *slice;
   Guint xx, yy;
 
+  if (!data) {
+      return nullptr;
+  }
+
   slice = new JBIG2Bitmap(0, wA, hA);
   if (slice->isOk()) {
     slice->clearToZero();
@@ -3826,6 +3830,10 @@ JBIG2Bitmap *JBIG2Stream::readGenericRefinementRegion(int w, int h,
   JBIG2BitmapPtr tpgrCXPtr1 = {0};
   JBIG2BitmapPtr tpgrCXPtr2 = {0};
   int x, y, pix;
+
+  if (!refBitmap) {
+      return nullptr;
+  }
 
   bitmap = new JBIG2Bitmap(0, w, h);
   if (!bitmap->isOk())
