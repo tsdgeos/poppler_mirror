@@ -468,7 +468,7 @@ ImageStream::ImageStream(Stream *strA, int widthA, int nCompsA, int nBitsA) {
 
   nVals = width * nComps;
   inputLineSize = (nVals * nBits + 7) >> 3;
-  if (nBits <= 0 || nVals > INT_MAX / nBits - 7 || width > INT_MAX / nComps) {
+  if (nComps <= 0 || nBits <= 0 || nVals > INT_MAX / nBits - 7 || width > INT_MAX / nComps) {
     inputLineSize = -1;
   }
   inputLine = (Guchar *)gmallocn_checkoverflow(inputLineSize, sizeof(char));
