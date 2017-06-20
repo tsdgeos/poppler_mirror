@@ -4034,17 +4034,17 @@ GfxUnivariateShading::~GfxUnivariateShading() {
 
 void GfxUnivariateShading::getColor(double t, GfxColor *color) {
   double out[gfxColorMaxComps];
-  int i, nComps;
+  int i;
 
-  if (unlikely(nFuncs < 1)) {
+  // NB: there can be one function with n outputs or n functions with
+  // one output each (where n = number of color components)
+  const int nComps = nFuncs * funcs[0]->getOutputSize();
+
+  if (unlikely(nFuncs < 1 || nComps > gfxColorMaxComps)) {
     for (int i = 0; i < gfxColorMaxComps; i++)
         color->c[i] = 0;
     return;
   }
-
-  // NB: there can be one function with n outputs or n functions with
-  // one output each (where n = number of color components)
-  nComps = nFuncs * funcs[0]->getOutputSize();
 
   if (cacheSize > 0) {
     double x, ix, *l, *u, *upper;
