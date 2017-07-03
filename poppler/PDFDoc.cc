@@ -1127,8 +1127,22 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
 }
 
 void PDFDoc::writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint numOffset, Guchar *fileKey,
-                               CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
+                               CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict*> *alreadyWrittenDicts)
 {
+  bool deleteSet = false;
+  if (!alreadyWrittenDicts) {
+    alreadyWrittenDicts = new std::set<Dict*>;
+    deleteSet = true;
+  }
+
+  if (alreadyWrittenDicts->find(dict) != alreadyWrittenDicts->end()) {
+    error(errSyntaxWarning, -1, "PDFDoc::writeDictionnary: Found recursive dicts");
+    if (deleteSet) delete alreadyWrittenDicts;
+    return;
+  } else {
+    alreadyWrittenDicts->insert(dict);
+  }
+
   Object obj1;
   outStr->printf("<<");
   for (int i=0; i<dict->getLength(); i++) {
@@ -1136,10 +1150,14 @@ void PDFDoc::writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint 
     GooString *keyNameToPrint = keyName.sanitizedName(gFalse /* non ps mode */);
     outStr->printf("/%s ", keyNameToPrint->getCString());
     delete keyNameToPrint;
-    writeObject(dict->getValNF(i, &obj1), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen);
+    writeObject(dict->getValNF(i, &obj1), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen, alreadyWrittenDicts);
     obj1.free();
   }
   outStr->printf(">> ");
+
+  if (deleteSet) {
+    delete alreadyWrittenDicts;
+  }
 }
 
 void PDFDoc::writeStream (Stream* str, OutStream* outStr)
@@ -1246,7 +1264,7 @@ Goffset PDFDoc::writeObjectHeader (Ref *ref, OutStream* outStr)
 }
 
 void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numOffset, Guchar *fileKey,
-                          CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
+                          CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict*> *alreadyWrittenDicts)
 {
   Array *array;
   Object obj1;
@@ -1293,7 +1311,7 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numO
       outStr->printf("] ");
       break;
     case objDict:
-      writeDictionnary (obj->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen);
+      writeDictionnary (obj->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen, alreadyWrittenDicts);
       break;
     case objStream: 
       {
@@ -1356,7 +1374,7 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numO
           }
           stream->getDict()->remove("DecodeParms");
 
-          writeDictionnary (stream->getDict(),outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen);
+          writeDictionnary (stream->getDict(),outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen, alreadyWrittenDicts);
           writeStream (stream,outStr);
           delete encStream;
           obj1.free();
@@ -1374,7 +1392,7 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numO
                 }
               }
           }
-          writeDictionnary (stream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen);
+          writeDictionnary (stream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen, alreadyWrittenDicts);
           writeRawStream (stream, outStr);
         }
         break;
@@ -1509,7 +1527,7 @@ void PDFDoc::writeXRefTableTrailer(Dict *trailerDict, XRef *uxref, GBool writeAl
 {
   uxref->writeTableToFile( outStr, writeAllEntries );
   outStr->printf( "trailer\r\n");
-  writeDictionnary(trailerDict, outStr, xRef, 0, NULL, cryptRC4, 0, 0, 0);
+  writeDictionnary(trailerDict, outStr, xRef, 0, NULL, cryptRC4, 0, 0, 0, nullptr);
   outStr->printf( "\r\nstartxref\r\n");
   outStr->printf( "%lli\r\n", uxrefOffset);
   outStr->printf( "%%%%EOF\r\n");
@@ -1563,26 +1581,44 @@ void PDFDoc::writeHeader(OutStream *outStr, int major, int minor)
    outStr->printf("%%\xE2\xE3\xCF\xD3\n");
 }
 
-void PDFDoc::markDictionnary (Dict* dict, XRef * xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum)
+void PDFDoc::markDictionnary (Dict* dict, XRef * xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts)
 {
+  bool deleteSet = false;
+  if (!alreadyMarkedDicts) {
+    alreadyMarkedDicts = new std::set<Dict*>;
+    deleteSet = true;
+  }
+
+  if (alreadyMarkedDicts->find(dict) != alreadyMarkedDicts->end()) {
+    error(errSyntaxWarning, -1, "PDFDoc::markDictionnary: Found recursive dicts");
+    if (deleteSet) delete alreadyMarkedDicts;
+    return;
+  } else {
+    alreadyMarkedDicts->insert(dict);
+  }
+
   Object obj1;
   for (int i=0; i<dict->getLength(); i++) {
     const char *key = dict->getKey(i);
     if (strcmp(key, "Annots") != 0) {
-      markObject(dict->getValNF(i, &obj1), xRef, countRef, numOffset, oldRefNum, newRefNum);
+      markObject(dict->getValNF(i, &obj1), xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
     } else {
       Object annotsObj;
       dict->getValNF(i, &annotsObj);
       if (!annotsObj.isNull()) {
-        markAnnotations(&annotsObj, xRef, countRef, 0, oldRefNum, newRefNum);
+        markAnnotations(&annotsObj, xRef, countRef, 0, oldRefNum, newRefNum, alreadyMarkedDicts);
         annotsObj.free();
       }
     }
     obj1.free();
   }
+
+  if (deleteSet) {
+    delete alreadyMarkedDicts;
+  }
 }
 
-void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum)
+void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts)
 {
   Array *array;
   Object obj1;
@@ -1596,12 +1632,12 @@ void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, Guint numOffse
       }
       break;
     case objDict:
-      markDictionnary (obj->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum);
+      markDictionnary (obj->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
       break;
     case objStream: 
       {
         Stream *stream = obj->getStream();
-        markDictionnary (stream->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum);
+        markDictionnary (stream->getDict(), xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
       }
       break;
     case objRef:
@@ -1695,7 +1731,7 @@ void PDFDoc::replacePageDict(int pageNo, int rotate,
   page.free();
 }
 
-void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum) 
+void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts)
 {
   pageDict->remove("OpenAction");
   pageDict->remove("Outlines");
@@ -1710,13 +1746,13 @@ void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint n
 	      strcmp(key, "Annots") != 0 &&
 	      strcmp(key, "P") != 0 &&
         strcmp(key, "Root") != 0) {
-      markObject(&value, xRef, countRef, numOffset, oldRefNum, newRefNum);
+      markObject(&value, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
     }
     value.free();
   }
 }
 
-GBool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum) {
+GBool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum, std::set<Dict*> *alreadyMarkedDicts) {
   Object annots;
   GBool modified = gFalse;
   annotsObj->fetch(getXRef(), &annots);
@@ -1775,7 +1811,7 @@ GBool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, Gui
             obj2.free();
           }
           type.free();
-          markPageObjects(dict, xRef, countRef, numOffset, oldPageNum, newPageNum);
+          markPageObjects(dict, xRef, countRef, numOffset, oldPageNum, newPageNum, alreadyMarkedDicts);
         }
         obj1.free();
         array->getNF(i, &obj1);
