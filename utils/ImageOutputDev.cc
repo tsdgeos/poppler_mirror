@@ -23,6 +23,7 @@
 // Copyright (C) 2012, 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Fischer <fischer@unix-ag.uni-kl.de>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2017 Caolán McNamara <caolanm@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -344,7 +345,7 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
   GfxRGB rgb;
   GfxCMYK cmyk;
   GfxGray gray;
-  Guchar zero = 0;
+  Guchar zero[gfxColorMaxComps];
   int invert_bits;
 
   if (writer) {
@@ -383,7 +384,8 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
   // the mask we leave the data unchanged.
   invert_bits = 0xff;
   if (colorMap) {
-    colorMap->getGray(&zero, &gray);
+    memset(zero, 0, sizeof(zero));
+    colorMap->getGray(zero, &gray);
     if (colToByte(gray) == 0)
       invert_bits = 0x00;
   }
