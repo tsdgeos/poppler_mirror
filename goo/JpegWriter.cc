@@ -64,6 +64,16 @@ JpegWriter::~JpegWriter()
   delete priv;
 }
 
+void JpegWriter::setQuality(int quality)
+{
+  priv->quality = quality;
+}
+
+void JpegWriter::setProgressive(bool progressive)
+{
+  priv->progressive = progressive;
+}
+
 bool JpegWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
 {
   // Setup error handler

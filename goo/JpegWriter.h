@@ -39,6 +39,8 @@ public:
   JpegWriter(Format format = RGB);
   ~JpegWriter();
 
+  void setQuality(int quality);
+  void setProgressive(bool progressive);
   bool init(FILE *f, int width, int height, int hDPI, int vDPI) override;
 
   bool writePointers(unsigned char **rowPointers, int rowCount) override;
