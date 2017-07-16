@@ -72,9 +72,16 @@ public:
   SplashError writePNMFile(char *fileName);
   SplashError writePNMFile(FILE *f);
   SplashError writeAlphaPGMFile(char *fileName);
-  
-  SplashError writeImgFile(SplashImageFileFormat format, char *fileName, int hDPI, int vDPI, const char *compressionString = "");
-  SplashError writeImgFile(SplashImageFileFormat format, FILE *f, int hDPI, int vDPI, const char *compressionString = "");
+
+  struct WriteImgParams
+  {
+    int jpegQuality = -1;
+    GBool jpegProgressive = gFalse;
+    GooString tiffCompression;
+  };
+
+  SplashError writeImgFile(SplashImageFileFormat format, char *fileName, int hDPI, int vDPI, WriteImgParams* params = nullptr);
+  SplashError writeImgFile(SplashImageFileFormat format, FILE *f, int hDPI, int vDPI, WriteImgParams* params = nullptr);
   SplashError writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int vDPI, SplashColorMode imageWriterFormat);
 
   enum ConversionMode
@@ -112,6 +119,8 @@ private:
   GooList *separationList; // list of spot colorants and their mapping functions
 
   friend class Splash;
+
+  void setJpegParams(ImgWriter *writer, WriteImgParams* params);
 };
 
 #endif
