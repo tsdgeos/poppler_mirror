@@ -26,6 +26,7 @@
 // Copyright (C) 2012 Igor Slepchin <igor.slepchin@gmail.com>
 // Copyright (C) 2012 Luis Parravicini <lparravi@gmail.com>
 // Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
+// Copyright (C) 2017 Jason Crain <jason@inspiresomeone.us>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -252,6 +253,11 @@ GooString* HtmlFont::HtmlFilter(Unicode* u, int uLen) {
   }
 
   for (int i = 0; i < uLen; ++i) {
+    // skip control characters.  W3C disallows them and they cause a warning
+    // with PHP.
+    if (u[i] <= 31)
+      continue;
+
     switch (u[i])
       { 
 	case '"': tmp->append("&#34;");  break;
