@@ -55,6 +55,8 @@ endif(WIN32)
 set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)")
 set(SHARE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share" CACHE STRING "Share directory name")
 
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 set(TESTDATADIR "${CMAKE_SOURCE_DIR}/../test" CACHE STRING "Specify test data dir.")
 if(NOT (EXISTS ${TESTDATADIR} AND EXISTS ${TESTDATADIR}/test-poppler.c))
   message(WARNING "
