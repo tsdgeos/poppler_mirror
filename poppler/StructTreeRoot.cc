@@ -67,13 +67,13 @@ void StructTreeRoot::parse(Dict *root)
             index.free();
             continue;
           }
-          if (index.getInt() < 0) {
-            error(errSyntaxError, -1, "Nums item at position {0:d} is invalid value ({1:d})", i, index.getInt());
+          const unsigned idx = index.getInt();
+          if (idx < 0 || idx >= parentTree.size()) {
+            error(errSyntaxError, -1, "Nums item at position {0:d} is invalid value ({1:d}): [0..{2:d}]", i, idx, parentTree.size() - 1);
             index.free();
             continue;
           }
 
-          const unsigned idx = index.getInt();
           if (nums.arrayGetNF(i + 1, &value)->isRef()) {
             parentTree[idx].resize(1);
             parentTree[idx][0].ref = value.getRef();
