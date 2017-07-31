@@ -2420,7 +2420,7 @@ static const int dctZigZag[64] = {
   63
 };
 
-DCTStream::DCTStream(Stream *strA, int colorXformA, Object *dict, int recursion):
+DCTStream::DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion):
     FilterStream(strA) {
   int i, j;
 
