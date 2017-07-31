@@ -215,7 +215,6 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursio
   int encoding;
   GBool endOfLine, byteAlign, endOfBlock, black;
   int columns, rows;
-  int colorXform;
   Object globals, obj;
 
   if (!strcmp(name, "ASCIIHexDecode") || !strcmp(name, "AHx")) {
@@ -289,14 +288,14 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursio
     str = new CCITTFaxStream(str, encoding, endOfLine, byteAlign,
 			     columns, rows, endOfBlock, black);
   } else if (!strcmp(name, "DCTDecode") || !strcmp(name, "DCT")) {
-    colorXform = -1;
+#if HAVE_DCT_DECODER
+    int colorXform = -1;
     if (params->isDict()) {
       obj = params->dictLookup("ColorTransform", recursion);
       if (obj.isInt()) {
 	colorXform = obj.getInt();
       }
     }
-#ifdef HAVE_DCT_DECODER
     str = new DCTStream(str, colorXform, dict, recursion);
 #else
     error(errSyntaxError, getPos(), "Unknown filter '{0:s}'", name);

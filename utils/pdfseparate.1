@@ -13,10 +13,11 @@ extract single pages from a Portable Document Format (PDF).
 pdfseparate reads the PDF file
 .IR PDF-file ,
 extracts one or more pages, and writes one PDF file for each page to
-.IR PDF-page-pattern ,
+.IR PDF-page-pattern.
+.PP
 PDF-page-pattern should contain
-.BR %d .
-%d is replaced by the page number.
+.BR %d
+(or any variant respecting printf format), since %d is replaced by the page number.
 .TP
 The PDF-file should not be encrypted.
 .SH OPTIONS

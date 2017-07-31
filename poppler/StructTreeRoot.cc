@@ -6,6 +6,7 @@
 //
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright 2017 Jan-Erik S <janerik234678@gmail.com>
 // Copyright 2017 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
