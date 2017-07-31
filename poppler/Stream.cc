@@ -32,6 +32,7 @@
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2015 Jason Crain <jason@aquaticape.us>
+// Copyright (C) 2017 Jose Aliste <jaliste@src.gnome.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -442,7 +443,7 @@ ImageStream::ImageStream(Stream *strA, int widthA, int nCompsA, int nBitsA) {
 
   nVals = width * nComps;
   inputLineSize = (nVals * nBits + 7) >> 3;
-  if (nBits <= 0 || nVals > INT_MAX / nBits - 7 || width > INT_MAX / nComps) {
+  if (nComps <= 0 || nBits <= 0 || nVals > INT_MAX / nBits - 7 || width > INT_MAX / nComps) {
     inputLineSize = -1;
   }
   inputLine = (Guchar *)gmallocn_checkoverflow(inputLineSize, sizeof(char));
@@ -3559,6 +3560,12 @@ GBool DCTStream::readProgressiveSOF() {
   height = read16();
   width = read16();
   numComps = str->getChar();
+
+  if (numComps <= 0 || numComps > 4) {
+    error(errSyntaxError, getPos(), "Bad number of components in DCT stream");
+    numComps = 0;
+    return gFalse;
+  }
   if (prec != 8) {
     error(errSyntaxError, getPos(), "Bad DCT precision {0:d}", prec);
     return gFalse;

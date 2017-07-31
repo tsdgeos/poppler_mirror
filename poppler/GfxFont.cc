@@ -2290,7 +2290,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
   Ref embID;
 
   *mapsizep = 0;
-  if (!ctu) return NULL;
+  if (!ctu || !getCollection()) return NULL;
   if (getCollection()->cmp("Adobe-Identity") == 0) return NULL;
   if (getEmbeddedFontID(&embID)) {
    /* if this font is embedded font, 

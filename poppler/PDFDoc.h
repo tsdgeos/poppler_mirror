@@ -292,13 +292,13 @@ public:
 
   // rewrite pageDict with MediaBox, CropBox and new page CTM
   void replacePageDict(int pageNo, int rotate, PDFRectangle *mediaBox, PDFRectangle *cropBox);
-  void markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum);
-  GBool markAnnotations(Object *annots, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum);
+  void markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts = nullptr);
+  GBool markAnnotations(Object *annots, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum, std::set<Dict*> *alreadyMarkedDicts = nullptr);
   void markAcroForm(Object *acrpForm, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum);
   // write all objects used by pageDict to outStr
   Guint writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, GBool combine = gFalse);
   static void writeObject (Object *obj, OutStream* outStr, XRef *xref, Guint numOffset, Guchar *fileKey,
-                           CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
+                           CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict*> *alreadyWrittenDicts = nullptr);
   static void writeHeader(OutStream *outStr, int major, int minor);
 
   static Object createTrailerDict (int uxrefSize, GBool incrUpdate, Goffset startxRef,
@@ -310,21 +310,18 @@ public:
 
 private:
   // insert referenced objects in XRef
-  void markDictionnary (Dict* dict, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum);
-  void markObject (Object *obj, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum);
+  void markDictionnary (Dict* dict, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts);
+  void markObject (Object *obj, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts = nullptr);
   static void writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint numOffset, Guchar *fileKey,
-                                CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
+                                CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict*> *alreadyWrittenDicts);
 
   // Write object header to current file stream and return its offset
   static Goffset writeObjectHeader (Ref *ref, OutStream* outStr);
   static void writeObjectFooter (OutStream* outStr);
 
   void writeObject (Object *obj, OutStream* outStr, Guchar *fileKey, CryptAlgorithm encAlgorithm,
-                    int keyLength, int objNum, int objGen)
-  { writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, objNum, objGen); }
-  void writeDictionnary (Dict* dict, OutStream* outStr, Guchar *fileKey, CryptAlgorithm encAlgorithm,
-                         int keyLength, int objNum, int objGen)
-  { writeDictionnary(dict, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, objNum, objGen); }
+                    int keyLength, int objNum, int objGen, std::set<Dict*> *alreadyWrittenDicts = nullptr)
+  { writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, objNum, objGen, alreadyWrittenDicts); }
   static void writeStream (Stream* str, OutStream* outStr);
   static void writeRawStream (Stream* str, OutStream* outStr);
   void writeXRefTableTrailer (Goffset uxrefOffset, XRef *uxref, GBool writeAllEntries,

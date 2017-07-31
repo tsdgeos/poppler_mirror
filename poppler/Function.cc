@@ -1576,7 +1576,9 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) {
       case psOpIdiv:
 	i2 = stack->popInt();
 	i1 = stack->popInt();
-	stack->pushInt(i1 / i2);
+	if (likely(i2 != 0)) {
+	  stack->pushInt(i1 / i2);
+	}
 	break;
       case psOpIndex:
 	stack->index(stack->popInt());
@@ -1612,7 +1614,9 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) {
       case psOpMod:
 	i2 = stack->popInt();
 	i1 = stack->popInt();
-	stack->pushInt(i1 % i2);
+	if (likely(i2 != 0)) {
+	  stack->pushInt(i1 % i2);
+	}
 	break;
       case psOpMul:
 	if (stack->topTwoAreInts()) {

@@ -3902,11 +3902,17 @@ GfxUnivariateShading::~GfxUnivariateShading() {
 
 void GfxUnivariateShading::getColor(double t, GfxColor *color) {
   double out[gfxColorMaxComps];
-  int i, nComps;
+  int i;
 
   // NB: there can be one function with n outputs or n functions with
   // one output each (where n = number of color components)
-  nComps = nFuncs * funcs[0]->getOutputSize();
+  const int nComps = nFuncs * funcs[0]->getOutputSize();
+
+  if (unlikely(nFuncs < 1 || nComps > gfxColorMaxComps)) {
+    for (int i = 0; i < gfxColorMaxComps; i++)
+        color->c[i] = 0;
+    return;
+  }
 
   if (cacheSize > 0) {
     double x, ix, *l, *u, *upper;
@@ -3956,6 +3962,9 @@ void GfxUnivariateShading::setupCache(const Matrix *ctm,
   gfree (cacheBounds);
   cacheBounds = NULL;
   cacheSize = 0;
+
+  if (unlikely(nFuncs < 1))
+    return;
 
   // NB: there can be one function with n outputs or n functions with
   // one output each (where n = number of color components)

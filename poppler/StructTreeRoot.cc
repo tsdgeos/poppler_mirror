@@ -65,13 +65,13 @@ void StructTreeRoot::parse(Dict *root)
             error(errSyntaxError, -1, "Nums item at position {0:d} is wrong type ({1:s})", i, index.getTypeName());
             continue;
           }
-          if (index.getInt() < 0) {
-            error(errSyntaxError, -1, "Nums item at position {0:d} is invalid value ({1:d})", i, index.getInt());
+          const unsigned idx = index.getInt();
+          if (idx < 0 || idx >= parentTree.size()) {
+            error(errSyntaxError, -1, "Nums item at position {0:d} is invalid value ({1:d}): [0..{2:d}]", i, idx, parentTree.size() - 1);
             continue;
           }
 
-          const unsigned idx = index.getInt();
-	  Object value = nums.arrayGetNF(i + 1);
+          Object value = nums.arrayGetNF(i + 1);
           if (value.isRef()) {
             parentTree[idx].resize(1);
             parentTree[idx][0].ref = value.getRef();

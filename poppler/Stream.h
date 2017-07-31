@@ -868,15 +868,15 @@ public:
 
   DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion);
   virtual ~DCTStream();
-  virtual StreamKind getKind() { return strDCT; }
-  virtual void reset();
-  virtual void close();
-  virtual int getChar();
-  virtual int lookChar();
-  virtual GooString *getPSFilter(int psLevel, const char *indent);
-  virtual GBool isBinary(GBool last = gTrue);
+  StreamKind getKind() override { return strDCT; }
+  void reset() override;
+  void close() override;
+  int getChar() override;
+  int lookChar() override;
+  GooString *getPSFilter(int psLevel, const char *indent) override;
+  GBool isBinary(GBool last = gTrue) override;
 
-  virtual void unfilteredReset();
+  void unfilteredReset() override;
 
 private:
 

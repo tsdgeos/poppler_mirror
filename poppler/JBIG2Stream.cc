@@ -760,6 +760,10 @@ JBIG2Bitmap *JBIG2Bitmap::getSlice(Guint x, Guint y, Guint wA, Guint hA) {
   JBIG2Bitmap *slice;
   Guint xx, yy;
 
+  if (!data) {
+      return nullptr;
+  }
+
   slice = new JBIG2Bitmap(0, wA, hA);
   if (slice->isOk()) {
     slice->clearToZero();
@@ -892,7 +896,7 @@ void JBIG2Bitmap::combine(JBIG2Bitmap *bitmap, int x, int y,
   oneByte = x0 == ((x1 - 1) & ~7);
 
   for (yy = y0; yy < y1; ++yy) {
-    if (unlikely(y + yy) >= h)
+    if (unlikely((y + yy >= h) || (y + yy < 0)))
       continue;
 
     // one byte per line -- need to mask both left and right side
@@ -1303,7 +1307,7 @@ Goffset JBIG2Stream::getPos() {
 int JBIG2Stream::getChars(int nChars, Guchar *buffer) {
   int n, i;
 
-  if (nChars <= 0) {
+  if (nChars <= 0 || !dataPtr) {
     return 0;
   }
   if (dataEnd - dataPtr < nChars) {
@@ -3825,6 +3829,10 @@ JBIG2Bitmap *JBIG2Stream::readGenericRefinementRegion(int w, int h,
   JBIG2BitmapPtr tpgrCXPtr1 = {0};
   JBIG2BitmapPtr tpgrCXPtr2 = {0};
   int x, y, pix;
+
+  if (!refBitmap) {
+      return nullptr;
+  }
 
   bitmap = new JBIG2Bitmap(0, w, h);
   if (!bitmap->isOk())
