@@ -3284,10 +3284,10 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   int nStripes, stripeH, stripeY;
   int c, w, h, x, y, comp, i;
   int numComps, initialNumComps;
-#endif
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   Guchar digit;
   GBool isGray;
+#endif
 
   if (!postInitDone) {
     postInit();
