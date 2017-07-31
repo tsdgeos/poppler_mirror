@@ -55,6 +55,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <math.h>
+#include <memory>
 #include "goo/gmem.h"
 #include "goo/GooTimer.h"
 #include "goo/GooHash.h"
@@ -4175,7 +4176,6 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
   GBool mask;
   GBool invert;
   GfxColorSpace *colorSpace, *maskColorSpace;
-  GfxImageColorMap *maskColorMap;
   GBool haveColorKeyMask, haveExplicitMask, haveSoftMask;
   int maskColors[2*gfxColorMaxComps];
   int maskWidth, maskHeight;
@@ -4374,7 +4374,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
     maskStr = NULL; // make gcc happy
     maskWidth = maskHeight = 0; // make gcc happy
     maskInvert = gFalse; // make gcc happy
-    maskColorMap = NULL; // make gcc happy
+    std::unique_ptr<GfxImageColorMap> maskColorMap;
     Object maskObj = dict->lookup("Mask");
     Object smaskObj = dict->lookup("SMask");
     if (smaskObj.isStream()) {
@@ -4434,9 +4434,8 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
       if (obj1.isNull()) {
 	obj1 = maskDict->lookup("D");
       }
-      maskColorMap = new GfxImageColorMap(maskBits, &obj1, maskColorSpace);
+      maskColorMap.reset(new GfxImageColorMap(maskBits, &obj1, maskColorSpace));
       if (!maskColorMap->isOk()) {
-	delete maskColorMap;
 	goto err1;
       }
       // handle the Matte entry
@@ -4552,8 +4551,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
     } else {
       if (haveSoftMask) {
 	out->drawSoftMaskedImage(state, ref, str, width, height, &colorMap, interpolate,
-				 maskStr, maskWidth, maskHeight, maskColorMap, maskInterpolate);
-	delete maskColorMap;
+				 maskStr, maskWidth, maskHeight, maskColorMap.get(), maskInterpolate);
       } else if (haveExplicitMask) {
 	out->drawMaskedImage(state, ref, str, width, height, &colorMap, interpolate,
 			     maskStr, maskWidth, maskHeight, maskInvert, maskInterpolate);
