@@ -97,7 +97,7 @@ bool extractPages (const char *srcFileName, const char *destFileName) {
     }
   }
   if (!foundmatch && firstPage != lastPage) {
-    error(errSyntaxError, -1, "'{0:s}' must contain '%d' if more than one page should be extracted", destFileName);
+    error(errSyntaxError, -1, "'{0:s}' must contain '%d' (or any variant respecting printf format) if more than one page should be extracted, in order to print the page number", destFileName);
     free(auxDestFileName);
     delete doc;
     return false;
