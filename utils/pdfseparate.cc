@@ -9,6 +9,7 @@
 // Copyright (C) 2013, 2016 Pino Toscano <pino@kde.org>
 // Copyright (C) 2013 Daniel Kahn Gillmor <dkg@fifthhorseman.net>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+// Copyright (C) 2017 Léonard Michelet <leonard.michelet@smile.fr>
 //
 //========================================================================
 #include "config.h"
