@@ -1,3 +1,17 @@
+Release 0.57.0
+        core:
+         * Fix parsing of Type 1 fonts with newlines in encoding sequences. Bug #101728
+         * Fix crash in broken documents
+
+        utils:
+         * pdfunite: Fix crash with broken documents. Bug #101208
+         * pdftohtml: skip control characters Bug #101770
+         * pdfseparate: minor improvement to the documentation. Bug #101800
+
+        build system:
+         * cmake: Set RUNPATH for poppler shared libs. Bug #101945
+         * configure: fix --disable-FEATURE actually enabling the feature
+
 Release 0.56.0
         core:
          * FormFieldButton::setState() shouldn't check the field is readOnly
