@@ -69,7 +69,6 @@ Object Parser::getObj(GBool simpleOnly,
 		       int objNum, int objGen, int recursion,
 		       GBool strict) {
   Object obj;
-  char *key;
   Stream *str;
   DecryptStream *decrypt;
   GooString *s, *s2;
@@ -111,7 +110,7 @@ Object Parser::getObj(GBool simpleOnly,
 	shift();
       } else {
 	// buf1 might go away in shift(), so construct the key
-	key = copyString(buf1.getName());
+	char *key = copyString(buf1.getName());
 	shift();
 	if (buf1.isEOF() || buf1.isError()) {
 	  gfree(key);
@@ -120,6 +119,7 @@ Object Parser::getObj(GBool simpleOnly,
 	}
 	Object obj2 = getObj(gFalse, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1);
 	if (unlikely(obj2.isError() && recursion + 1 >= recursionLimit)) {
+	  gfree(key);
 	  break;
 	}
 	obj.dictAdd(key, std::move(obj2));
