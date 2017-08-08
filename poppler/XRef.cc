@@ -423,7 +423,7 @@ XRef *XRef::copy() {
   for (int i = 0; i < size; ++i) {
     xref->entries[i].offset = entries[i].offset;
     xref->entries[i].type = entries[i].type;
-    xref->entries[i].obj.setToNull();
+    xref->entries[i].obj.initNullAfterMalloc();
     xref->entries[i].flags = entries[i].flags;
     xref->entries[i].gen = entries[i].gen;
   }
