@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -315,7 +316,7 @@ static void print_page(poppler::page *p)
 static void print_page_text(poppler::page *p)
 {
     if (p) {
-        std::cout << p->text(p->page_rect(), show_text_layout) << std::endl;
+        std::cout << p->text(poppler::rectf(), show_text_layout) << std::endl;
     } else {
         std::cout << std::setw(out_width) << "Broken Page. Could not be parsed" << std::endl;
     }

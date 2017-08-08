@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +27,9 @@
 
 #include "TextOutputDev.h"
 
+#include <algorithm>
 #include <memory>
+#include <utility>
 
 using namespace poppler;
 
@@ -270,7 +273,12 @@ ustring page::text(const rectf &r, text_layout_enum layout_mode) const
     TextOutputDev td(0, gFalse, 0, use_raw_order, gFalse);
     d->doc->doc->displayPage(&td, d->index + 1, 72, 72, 0, false, true, false);
     if (r.is_empty()) {
-        const PDFRectangle *rect = d->page->getCropBox();
+        PDFRectangle *rect = d->page->getCropBox();
+        const int rotate = d->page->getRotate();
+        if (rotate == 90 || rotate == 270) {
+            std::swap(rect->x1, rect->y1);
+            std::swap(rect->x2, rect->y2);
+        }
         s.reset(td.getText(rect->x1, rect->y1, rect->x2, rect->y2));
     } else {
         s.reset(td.getText(r.left(), r.top(), r.right(), r.bottom()));
