@@ -17,6 +17,7 @@
  * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  * Copyright (C) 2016 Arseniy Lartsev <arseniy@alumni.chalmers.se>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
+ * Copyright (C) 2017, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -409,6 +410,13 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
     {
       QSize size = pageSize();
       QImage tmpimg(w == -1 ? qRound( size.width() * xres / 72.0 ) : w, h == -1 ? qRound( size.height() * yres / 72.0 ) : h, QImage::Format_ARGB32);
+
+      QColor bgColor(m_page->parentDoc->paperColor.red(),
+                     m_page->parentDoc->paperColor.green(),
+                     m_page->parentDoc->paperColor.blue(),
+                     m_page->parentDoc->paperColor.alpha());
+
+      tmpimg.fill(bgColor);
 
       QPainter painter(&tmpimg);
       renderToPainter(&painter, xres, yres, x, y, w, h, rotate, DontSaveAndRestore);
