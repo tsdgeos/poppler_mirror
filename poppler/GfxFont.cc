@@ -29,7 +29,7 @@
 // Copyright (C) 2011, 2012, 2014 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Yi Yang <ahyangyi@gmail.com>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
-// Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012, 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013-2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2014 Olly Betts <olly@survex.com>
 //
@@ -1639,14 +1639,13 @@ int *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff) {
   // To match up with the Adobe-defined behaviour, we choose a cmap
   // like this:
   // 1. If the PDF font has an encoding:
-  //    1a. If the PDF font specified MacRomanEncoding and the
+  //    1a. If the TrueType font has a Microsoft Unicode
+  //        cmap or a non-Microsoft Unicode cmap, use it, and use the
+  //        Unicode indexes, not the char codes.
+  //    1b. If the PDF font specified MacRomanEncoding and the
   //        TrueType font has a Macintosh Roman cmap, use it, and
   //        reverse map the char names through MacRomanEncoding to
   //        get char codes.
-  //    1b. If the PDF font is not symbolic or the PDF font is not
-  //        embedded, and the TrueType font has a Microsoft Unicode
-  //        cmap or a non-Microsoft Unicode cmap, use it, and use the
-  //        Unicode indexes, not the char codes.
   //    1c. If the PDF font is symbolic and the TrueType font has a
   //        Microsoft Symbol cmap, use it, and use char codes
   //        directly (possibly with an offset of 0xf000).
@@ -1679,13 +1678,12 @@ int *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff) {
   useMacRoman = gFalse;
   useUnicode = gFalse;
   if (hasEncoding || type == fontType1) {
-    if (usesMacRomanEnc && macRomanCmap >= 0) {
-      cmap = macRomanCmap;
-      useMacRoman = gTrue;
-    } else if ((!(flags & fontSymbolic) || embFontID.num < 0) &&
-	       unicodeCmap >= 0) {
+    if (unicodeCmap >= 0) {
       cmap = unicodeCmap;
       useUnicode = gTrue;
+    } else if (usesMacRomanEnc && macRomanCmap >= 0) {
+      cmap = macRomanCmap;
+      useMacRoman = gTrue;
     } else if ((flags & fontSymbolic) && msSymbolCmap >= 0) {
       cmap = msSymbolCmap;
     } else if ((flags & fontSymbolic) && macRomanCmap >= 0) {
