@@ -48,7 +48,7 @@ class SplashFontEngine;
 struct SplashGlyphBitmap;
 
 //------------------------------------------------------------------------
-// ArthurOutputDev - Qt 4 QPainter renderer
+// ArthurOutputDev - Qt 5 QPainter renderer
 //------------------------------------------------------------------------
 
 class ArthurOutputDev: public OutputDev {
