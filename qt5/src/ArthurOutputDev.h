@@ -114,6 +114,7 @@ public:
   void updateLineWidth(GfxState *state) override;
   void updateFillColor(GfxState *state) override;
   void updateStrokeColor(GfxState *state) override;
+  void updateBlendMode(GfxState *state) override;
   void updateFillOpacity(GfxState *state) override;
   void updateStrokeOpacity(GfxState *state) override;
 

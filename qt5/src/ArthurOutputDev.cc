@@ -294,6 +294,58 @@ void ArthurOutputDev::updateStrokeColor(GfxState *state)
   m_painter->setPen(m_currentPen);
 }
 
+void ArthurOutputDev::updateBlendMode(GfxState * state)
+{
+  GfxBlendMode blendMode = state->getBlendMode();
+
+  // missing composition modes in QPainter:
+  // - CompositionMode_Hue
+  // - CompositionMode_Color
+  // - CompositionMode_Luminosity
+  // - CompositionMode_Saturation
+
+  switch(blendMode){
+  case gfxBlendMultiply:
+    m_painter->setCompositionMode(QPainter::CompositionMode_Multiply);
+    break;
+  case gfxBlendScreen:
+    m_painter->setCompositionMode(QPainter::CompositionMode_Screen);
+    break;
+  case gfxBlendDarken:
+    m_painter->setCompositionMode(QPainter::CompositionMode_Darken);
+    break;
+  case gfxBlendLighten:
+    m_painter->setCompositionMode(QPainter::CompositionMode_Lighten);
+    break;
+  case gfxBlendColorDodge:
+    m_painter->setCompositionMode(QPainter::CompositionMode_ColorDodge);
+    break;
+  case gfxBlendColorBurn:
+    m_painter->setCompositionMode(QPainter::CompositionMode_ColorBurn);
+    break;
+  case gfxBlendHardLight:
+    m_painter->setCompositionMode(QPainter::CompositionMode_HardLight);
+    break;
+  case gfxBlendSoftLight:
+    m_painter->setCompositionMode(QPainter::CompositionMode_SoftLight);
+    break;
+  case gfxBlendDifference:
+    m_painter->setCompositionMode(QPainter::CompositionMode_Difference);
+    break;
+  case gfxBlendExclusion:
+    m_painter->setCompositionMode(QPainter::CompositionMode_Exclusion);
+    break;
+  case gfxBlendColor:
+    m_painter->setCompositionMode(QPainter::CompositionMode_Plus);
+    break;
+  default:
+    qDebug() << "Unsupported blend mode, falling back to CompositionMode_SourceOver";
+  case gfxBlendNormal:
+    m_painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
+    break;
+  }
+}
+
 void ArthurOutputDev::updateFillOpacity(GfxState *state)
 {
   QColor brushColour= m_currentBrush.color();
