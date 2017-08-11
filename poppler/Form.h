@@ -13,6 +13,7 @@
 // Copyright 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
+// Copyright 2017 Roland Hieber <r.hieber@pengutronix.de>
 //
 //========================================================================
 
@@ -27,6 +28,7 @@
 #include "Annot.h"
 
 #include <set>
+#include <vector>
 
 class GooString;
 class Array;
