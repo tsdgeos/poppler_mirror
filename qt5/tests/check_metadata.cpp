@@ -33,7 +33,7 @@ void TestMetaData::checkStrings_data()
     QTest::newRow( "Title" ) << "Title" << "Two pages";
     QTest::newRow( "Subject" ) << "Subject"
 			       << "A two page layout for poppler testing";
-    QTest::newRow( "Keywords" ) << "Keywords" << "Qt5 bindings";
+    QTest::newRow( "Keywords" ) << "Keywords" << "Qt4 bindings";
     QTest::newRow( "Creator" ) << "Creator" << "iText: cgpdftops CUPS filter";
     QTest::newRow( "Producer" ) << "Producer" << "Acrobat Distiller 7.0 for Macintosh";
 }
