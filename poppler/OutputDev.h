@@ -23,6 +23,7 @@
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
+// Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -167,6 +168,12 @@ public:
 
   //----- update graphics state
   virtual void updateAll(GfxState *state);
+
+  // Update the Current Transformation Matrix (CTM), i.e., the new matrix
+  // given in m11, ..., m32 is combined with the current value of the CTM.
+  // At the same time, when this method is called, state->getCTM() already
+  // contains the correct new CTM, so one may as well replace the
+  // CTM of the renderer with that.
   virtual void updateCTM(GfxState * /*state*/, double /*m11*/, double /*m12*/,
 			 double /*m21*/, double /*m22*/, double /*m31*/, double /*m32*/) {}
   virtual void updateLineDash(GfxState * /*state*/) {}
