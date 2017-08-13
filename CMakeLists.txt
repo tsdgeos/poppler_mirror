@@ -519,6 +519,8 @@ if(USE_CMS)
   endif(LCMS2_FOUND)
 endif(USE_CMS)
 if(WIN32)
+  # use clean APIs
+  add_definitions(-DWIN32_LEAN_AND_MEAN)
   # gdi32 is needed under win32
   set(poppler_LIBS ${poppler_LIBS} gdi32)
 endif(WIN32)
