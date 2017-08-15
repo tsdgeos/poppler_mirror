@@ -129,6 +129,10 @@ PDFTOCAIRO_LIBS += $(LCMS_LIBS)
 endif
 endif
 
+if BUILD_NSS
+pdfsig_CXXFLAGS = $(NSS3_CFLAGS)
+endif
+
 pdftocairo_LDADD =					\
 	$(top_builddir)/poppler/libpoppler-cairo.la	\
 	$(LDADD)					\
