@@ -33,7 +33,6 @@
 #include <string.h>
 #include "goo/gmem.h"
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "Error.h"
 #include "Object.h"
 #include "Array.h"
@@ -439,7 +438,6 @@ FormWidgetSignature::FormWidgetSignature(PDFDoc *docA, Object *aobj, unsigned nu
 	FormWidget(docA, aobj, num, ref, p)
 {
   type = formSignature;
-  file_size = 0;
 }
 
 SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime)
@@ -451,7 +449,7 @@ std::vector<Goffset> FormWidgetSignature::getSignedRangeBounds()
 {
   Object* obj = static_cast<FormFieldSignature*>(field)->getByteRange();
   std::vector<Goffset> range_vec;
-  if (obj && obj->isArray())
+  if (obj->isArray())
   {
     if (obj->arrayGetLength() == 4)
     {
@@ -472,7 +470,7 @@ std::vector<Goffset> FormWidgetSignature::getSignedRangeBounds()
   return range_vec;
 }
 
-GooString* FormWidgetSignature::getCheckedSignature()
+GooString* FormWidgetSignature::getCheckedSignature(Goffset *checkedFileSize)
 {
   Goffset start = 0;
   Goffset end = 0;
@@ -485,7 +483,7 @@ GooString* FormWidgetSignature::getCheckedSignature()
   if (end >= start+6)
   {
     BaseStream* stream = doc->getBaseStream();
-    file_size = stream->getLength();
+    *checkedFileSize = stream->getLength();
     Goffset len = end-start;
     stream->setPos(end-1);
     int c2 = stream->lookChar();
@@ -498,7 +496,7 @@ GooString* FormWidgetSignature::getCheckedSignature()
     // encoding or (0x80 + n) for ASN1 DER definite length encoding
     // where n is the number of subsequent "length bytes" which big-endian
     // encode the length of the content of the SEQUENCE following them.
-    if (len <= std::numeric_limits<int>::max() && file_size > end && c1 == '<' && c2 == '>')
+    if (len <= std::numeric_limits<int>::max() && *checkedFileSize > end && c1 == '<' && c2 == '>')
     {
       GooString gstr;
       ++start;
@@ -1488,7 +1486,7 @@ GooString *FormFieldChoice::getSelectedChoice() {
 //------------------------------------------------------------------------
 FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents)
   : FormField(docA, dict, ref, parent, usedParents, formSignature),
-    signature_type(adbe_pkcs7_detached), byte_range(),
+    signature_type(adbe_pkcs7_detached),
     signature(nullptr), signature_info(nullptr)
 {
   signature = NULL;
@@ -1573,11 +1571,6 @@ void FormFieldSignature::hashSignedDataBlock(SignatureHandler *handler, Goffset 
 FormSignatureType FormWidgetSignature::signatureType()
 {
   return static_cast<FormFieldSignature*>(field)->signature_type;
-}
-
-void FormWidgetSignature::setFormSignatureType(FormSignatureType type)
-{
-  static_cast<FormFieldSignature*>(field)->signature_type = type;
 }
 
 SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime)

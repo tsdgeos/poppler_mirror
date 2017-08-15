@@ -405,19 +405,19 @@ namespace Poppler {
 	};
 
 	/**
-	 * The hash algorithme of the signature
+	    The hash algorithm of the signature
+	    \since 0.58
 	 */
 	enum HashAlgorithm
 	{
-	    HashAlgNULL = 0,
-	    HashAlgMD2 = 1,
-	    HashAlgMD5 = 2,
-	    HashAlgSHA1 = 3,
-	    HashAlgSHA256 = 4,
-	    HashAlgSHA384 = 5,
-	    HashAlgSHA512 = 6,
-	    HashAlgSHA224 = 7,
-	    HashAlgTOTAL
+	    HashAlgorithmUnknown,
+	    HashAlgorithmMd2,
+	    HashAlgorithmMd5,
+	    HashAlgorithmSha1,
+	    HashAlgorithmSha256,
+	    HashAlgorithmSha384,
+	    HashAlgorithmSha512,
+	    HashAlgorithmSha224
 	};
 
 	/// \cond PRIVATE
@@ -442,11 +442,13 @@ namespace Poppler {
 
 	/**
 	  The signer subject distinguished name associated with the signature.
+	  \since 0.58
 	 */
 	QString signerSubjectDN() const;
 
 	/**
 	  The the hash algorithm used for the signature.
+	  \since 0.58
 	 */
 	HashAlgorithm hashAlgorithm() const;
 
@@ -454,21 +456,23 @@ namespace Poppler {
 	  The signing time associated with the signature.
 	 */
 	time_t signingTime() const;
-	QDateTime signingDateTime() const;
 
 	/**
 	  Get the signature binary data.
+	  \since 0.58
 	 */
         QByteArray signature() const;
 
 	/**
 	  Get the bounds of the ranges of the document which are signed.
+	  \since 0.58
 	 */
         QList<qint64> signedRangeBounds() const;
 
 	/**
 	  Checks whether the signature authenticates the total document
           except for the signature itself.
+          \since 0.58
 	 */
         bool signsTotalDocument() const;
 
@@ -489,14 +493,15 @@ namespace Poppler {
     class POPPLER_QT5_EXPORT FormFieldSignature : public FormField {
     public:
 
-        /**
-           The types of signature fields.
-         */
-        enum SignatureType {
-            AdbePkcs7sha1,
-            AdbePkcs7detached,
-            EtsiCAdESdetached
-        };
+	/**
+	    The types of signature fields.
+	    \since 0.58
+	*/
+	enum SignatureType {
+	    AdbePkcs7sha1,
+	    AdbePkcs7detached,
+	    EtsiCAdESdetached
+	};
 
 	/**
 	   The validation options of this signature.
@@ -513,14 +518,26 @@ namespace Poppler {
 
 	FormType type() const override;
 
-        SignatureType signatureType() const;
+	/**
+	    The signature type
+	    \since 0.58
+	*/
+	SignatureType signatureType() const;
 
 	/**
-	  Validate the signature.
+	  Validate the signature with now as validation time.
 
 	  Reset signature validatation info of scoped instance.
 	 */
 	SignatureValidationInfo validate(ValidateOptions opt) const;
+
+	/**
+	  Validate the signature with @p validationTime as validation time.
+
+	  Reset signature validatation info of scoped instance.
+
+	  \since 0.58
+	 */
 	SignatureValidationInfo validate(int opt, const QDateTime& validationTime) const;
 
 	private:

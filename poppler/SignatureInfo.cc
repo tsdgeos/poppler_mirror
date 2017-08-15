@@ -7,6 +7,7 @@
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+// Copyright 2017 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -17,7 +18,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <hasht.h>
+#ifdef ENABLE_NSS3
+    #include <hasht.h>
+#else
+    static const int HASH_AlgNULL = -1;
+#endif
 
 /* Constructor & Destructor */
 

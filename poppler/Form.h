@@ -28,11 +28,9 @@
 #include "Object.h"
 #include "Annot.h"
 
-#include <list>
 #include <set>
 #include <vector>
 
-class GooList;
 class GooString;
 class Array;
 class Dict;
@@ -263,22 +261,17 @@ public:
   void updateWidgetAppearance() override;
 
   FormSignatureType signatureType();
-  void setFormSignatureType(FormSignatureType type);
-  SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime = -1);
+  // Use -1 for now as validationTime
+  SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime);
 
   // returns a list with the boundaries of the signed ranges
   // the elements of the list are of type Goffset
   std::vector<Goffset> getSignedRangeBounds();
 
   // checks the length encoding of the signature and returns the hex encoded signature
-  // if the check passed otherwise a nullptr is returned
-  GooString* getCheckedSignature();
-
-  // this method only gives the correct file size if getCheckedSignature()
-  // has been called before
-  Goffset getCheckedFileSize() const { return file_size; }
-protected:
-  Goffset file_size;
+  // if the check passed (and the checked file size as output parameter in checkedFileSize)
+  // otherwise a nullptr is returned
+  GooString* getCheckedSignature(Goffset *checkedFileSize);
 };
 
 //------------------------------------------------------------------------
@@ -521,7 +514,8 @@ class FormFieldSignature: public FormField {
 public:
   FormFieldSignature(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
 
-  SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime = -1);
+  // Use -1 for now as validationTime
+  SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime);
 
   ~FormFieldSignature();
   Object* getByteRange() { return &byte_range; }

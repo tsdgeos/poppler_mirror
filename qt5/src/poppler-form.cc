@@ -38,18 +38,9 @@
 #include <math.h>
 #include <ctype.h>
 
-enum HASH_HashType
-{
-    HASH_AlgNULL = 0,
-    HASH_AlgMD2 = 1,
-    HASH_AlgMD5 = 2,
-    HASH_AlgSHA1 = 3,
-    HASH_AlgSHA256 = 4,
-    HASH_AlgSHA384 = 5,
-    HASH_AlgSHA512 = 6,
-    HASH_AlgSHA224 = 7,
-    HASH_AlgTOTAL
-};
+#ifdef ENABLE_NSS3
+  #include <hasht.h>
+#endif
 
 namespace {
 
@@ -513,18 +504,33 @@ QString SignatureValidationInfo::signerSubjectDN() const
 SignatureValidationInfo::HashAlgorithm SignatureValidationInfo::hashAlgorithm() const
 {
   Q_D(const SignatureValidationInfo);
-  return static_cast<HashAlgorithm>(d->hash_algorithm);
+
+#ifdef ENABLE_NSS3
+  switch (d->hash_algorithm)
+  {
+    case HASH_AlgMD2:
+      return HashAlgorithmMd2;
+    case HASH_AlgMD5:
+      return HashAlgorithmMd5;
+    case HASH_AlgSHA1:
+      return HashAlgorithmSha1;
+    case HASH_AlgSHA256:
+      return HashAlgorithmSha256;
+    case HASH_AlgSHA384:
+      return HashAlgorithmSha384;
+    case HASH_AlgSHA512:
+      return HashAlgorithmSha512;
+    case HASH_AlgSHA224:
+      return HashAlgorithmSha224;
+  }
+#endif
+  return HashAlgorithmUnknown;
 }
 
 time_t SignatureValidationInfo::signingTime() const
 {
   Q_D(const SignatureValidationInfo);
   return d->signing_time;
-}
-
-QDateTime SignatureValidationInfo::signingDateTime() const
-{
-  return QDateTime::fromTime_t(signingTime());
 }
 
 QByteArray SignatureValidationInfo::signature() const
@@ -581,7 +587,7 @@ FormField::FormType FormFieldSignature::type() const
 {
   return FormField::FormSignature;
 }
- 
+
 FormFieldSignature::SignatureType FormFieldSignature::signatureType() const
 {
   SignatureType sigType = AdbePkcs7detached;
@@ -609,7 +615,8 @@ SignatureValidationInfo FormFieldSignature::validate(ValidateOptions opt) const
 SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& validationTime) const
 {
   FormWidgetSignature* fws = static_cast<FormWidgetSignature*>(m_formData->fm);
-  SignatureInfo* si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation);
+  const time_t validationTimeT = validationTime.isValid() ? validationTime.toTime_t() : -1;
+  SignatureInfo* si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT);
   SignatureValidationInfoPrivate* priv = new SignatureValidationInfoPrivate;
   switch (si->getSignatureValStatus()) {
     case SIGNATURE_VALID:
@@ -664,7 +671,7 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
   priv->hash_algorithm = si->getHashAlgorithm();
 
   priv->signing_time = si->getSigningTime();
-  std::vector<Goffset> ranges = fws->getSignedRangeBounds();
+  const std::vector<Goffset> ranges = fws->getSignedRangeBounds();
   if (!ranges.empty())
   {
     for (Goffset bound : ranges)
@@ -672,11 +679,10 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
       priv->range_bounds.append(bound);
     }
   }
-  GooString* checkedSignature = fws->getCheckedSignature();
+  GooString* checkedSignature = fws->getCheckedSignature(&priv->docLength);
   if (priv->range_bounds.size() == 4 && checkedSignature)
   {
     priv->signature = QByteArray::fromHex(checkedSignature->getCString());
-    priv->docLength = fws->getCheckedFileSize();
   }
   delete checkedSignature;
 
