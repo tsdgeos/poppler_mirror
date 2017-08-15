@@ -3,6 +3,7 @@
  * Copyright (C) 2008, 2011, 2016, 2017, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
+ * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +23,8 @@
 #ifndef _POPPLER_QT5_FORM_H_
 #define _POPPLER_QT5_FORM_H_
 
+#include <QtCore/QDateTime>
+#include <QtCore/QList>
 #include <QtCore/QRectF>
 #include <QtCore/QStringList>
 #include <QtCore/QSharedPointer>
@@ -401,6 +404,22 @@ namespace Poppler {
 	    CertificateNotVerified      ///< The certificate is not yet verified.
 	};
 
+	/**
+	 * The hash algorithme of the signature
+	 */
+	enum HashAlgorithm
+	{
+	    HashAlgNULL = 0,
+	    HashAlgMD2 = 1,
+	    HashAlgMD5 = 2,
+	    HashAlgSHA1 = 3,
+	    HashAlgSHA256 = 4,
+	    HashAlgSHA384 = 5,
+	    HashAlgSHA512 = 6,
+	    HashAlgSHA224 = 7,
+	    HashAlgTOTAL
+	};
+
 	/// \cond PRIVATE
 	SignatureValidationInfo(SignatureValidationInfoPrivate *priv);
 	/// \endcond
@@ -422,9 +441,36 @@ namespace Poppler {
 	QString signerName() const;
 
 	/**
+	  The signer subject distinguished name associated with the signature.
+	 */
+	QString signerSubjectDN() const;
+
+	/**
+	  The the hash algorithm used for the signature.
+	 */
+	HashAlgorithm hashAlgorithm() const;
+
+	/**
 	  The signing time associated with the signature.
 	 */
 	time_t signingTime() const;
+	QDateTime signingDateTime() const;
+
+	/**
+	  Get the signature binary data.
+	 */
+        QByteArray signature() const;
+
+	/**
+	  Get the bounds of the ranges of the document which are signed.
+	 */
+        QList<qint64> signedRangeBounds() const;
+
+	/**
+	  Checks whether the signature authenticates the total document
+          except for the signature itself.
+	 */
+        bool signsTotalDocument() const;
 
 	SignatureValidationInfo(const SignatureValidationInfo &other);
 	SignatureValidationInfo &operator=(const SignatureValidationInfo &other);
@@ -443,6 +489,15 @@ namespace Poppler {
     class POPPLER_QT5_EXPORT FormFieldSignature : public FormField {
     public:
 
+        /**
+           The types of signature fields.
+         */
+        enum SignatureType {
+            AdbePkcs7sha1,
+            AdbePkcs7detached,
+            EtsiCAdESdetached
+        };
+
 	/**
 	   The validation options of this signature.
 	*/
@@ -458,12 +513,15 @@ namespace Poppler {
 
 	FormType type() const override;
 
+        SignatureType signatureType() const;
+
 	/**
 	  Validate the signature.
 
 	  Reset signature validatation info of scoped instance.
 	 */
 	SignatureValidationInfo validate(ValidateOptions opt) const;
+	SignatureValidationInfo validate(int opt, const QDateTime& validationTime) const;
 
 	private:
 	Q_DISABLE_COPY(FormFieldSignature)

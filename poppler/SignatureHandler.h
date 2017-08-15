@@ -7,6 +7,7 @@
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2015 Albert Astals Cid <aacid@kde.org>
+// Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 //
 //========================================================================
 
@@ -36,10 +37,12 @@ public:
   ~SignatureHandler();
   time_t getSigningTime();
   char * getSignerName();
+  const char * getSignerSubjectDN();
+  HASH_HashType getHashAlgorithm();
   void setSignature(unsigned char *, int);
   void updateHash(unsigned char * data_block, int data_len);
   NSSCMSVerificationStatus validateSignature();
-  SECErrorCodes validateCertificate();
+  SECErrorCodes validateCertificate(time_t validation_time = -1);
 
   //Translate NSS error codes
   static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_code);

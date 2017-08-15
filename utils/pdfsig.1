@@ -9,7 +9,11 @@ pdfsig \- Portable Document Format (PDF) digital signatures tool
 .SH DESCRIPTION
 .B pdfsig
 verifies the digital signatures in a PDF document.
-It also displays the identity of each signer (commonName field of the signer certificate) and the time and date of the signature.
+It also displays the identity of each signer
+(commonName field and full distinguished name of the signer certificate),
+the time and date of the signature, the hash algorithm used for signing,
+the type of the signature as stated in the PDF and
+the signed ranges with a statement wether the total document is signed.
 .PP
 The signer certificate validation uses the trusted certificates stored in the following locations:
 .IP \(bu

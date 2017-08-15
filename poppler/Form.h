@@ -14,6 +14,7 @@
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2017 Roland Hieber <r.hieber@pengutronix.de>
+// Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 //
 //========================================================================
 
@@ -27,9 +28,11 @@
 #include "Object.h"
 #include "Annot.h"
 
+#include <list>
 #include <set>
 #include <vector>
 
+class GooList;
 class GooString;
 class Array;
 class Dict;
@@ -60,6 +63,12 @@ enum VariableTextQuadding {
   quaddingLeftJustified,
   quaddingCentered,
   quaddingRightJustified
+};
+
+enum FormSignatureType {
+  adbe_pkcs7_sha1,
+  adbe_pkcs7_detached,
+  ETSI_CAdES_detached
 };
 
 class Form;
@@ -253,7 +262,23 @@ public:
   FormWidgetSignature(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
   void updateWidgetAppearance() override;
 
-  SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation);
+  FormSignatureType signatureType();
+  void setFormSignatureType(FormSignatureType type);
+  SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime = -1);
+
+  // returns a list with the boundaries of the signed ranges
+  // the elements of the list are of type Goffset
+  std::vector<Goffset> getSignedRangeBounds();
+
+  // checks the length encoding of the signature and returns the hex encoded signature
+  // if the check passed otherwise a nullptr is returned
+  GooString* getCheckedSignature();
+
+  // this method only gives the correct file size if getCheckedSignature()
+  // has been called before
+  Goffset getCheckedFileSize() const { return file_size; }
+protected:
+  Goffset file_size;
 };
 
 //------------------------------------------------------------------------
@@ -492,16 +517,21 @@ protected:
 //------------------------------------------------------------------------
 
 class FormFieldSignature: public FormField {
+  friend class FormWidgetSignature;
 public:
   FormFieldSignature(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
 
-  SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation);
+  SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime = -1);
 
   ~FormFieldSignature();
+  Object* getByteRange() { return &byte_range; }
+  GooString* getSignature() { return signature; }
 
 private:
   void parseInfo();
   void hashSignedDataBlock(SignatureHandler *handler, Goffset block_len);
+
+  FormSignatureType signature_type;
   Object byte_range;
   GooString *signature;
   SignatureInfo *signature_info;

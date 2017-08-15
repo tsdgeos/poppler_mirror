@@ -4,6 +4,7 @@
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
+ * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +36,20 @@
 #include "poppler-annotation-helper.h"
 
 #include <math.h>
+#include <ctype.h>
+
+enum HASH_HashType
+{
+    HASH_AlgNULL = 0,
+    HASH_AlgMD2 = 1,
+    HASH_AlgMD5 = 2,
+    HASH_AlgSHA1 = 3,
+    HASH_AlgSHA256 = 4,
+    HASH_AlgSHA384 = 5,
+    HASH_AlgSHA512 = 6,
+    HASH_AlgSHA224 = 7,
+    HASH_AlgTOTAL
+};
 
 namespace {
 
@@ -447,8 +462,13 @@ struct SignatureValidationInfoPrivate {
 	SignatureValidationInfo::SignatureStatus signature_status;
 	SignatureValidationInfo::CertificateStatus certificate_status;
 
+	QByteArray signature;
 	QString signer_name;
+	QString signer_subject_dn;
+	int hash_algorithm;
 	time_t signing_time;
+	QList<qint64> range_bounds;
+	qint64 docLength;
 };
 
 
@@ -484,10 +504,60 @@ QString SignatureValidationInfo::signerName() const
   return d->signer_name;
 }
 
+QString SignatureValidationInfo::signerSubjectDN() const
+{
+  Q_D(const SignatureValidationInfo);
+  return d->signer_subject_dn;
+}
+
+SignatureValidationInfo::HashAlgorithm SignatureValidationInfo::hashAlgorithm() const
+{
+  Q_D(const SignatureValidationInfo);
+  return static_cast<HashAlgorithm>(d->hash_algorithm);
+}
+
 time_t SignatureValidationInfo::signingTime() const
 {
   Q_D(const SignatureValidationInfo);
   return d->signing_time;
+}
+
+QDateTime SignatureValidationInfo::signingDateTime() const
+{
+  return QDateTime::fromTime_t(signingTime());
+}
+
+QByteArray SignatureValidationInfo::signature() const
+{
+  Q_D(const SignatureValidationInfo);
+  return d->signature;
+}
+
+QList<qint64> SignatureValidationInfo::signedRangeBounds() const
+{
+  Q_D(const SignatureValidationInfo);
+  return d->range_bounds;
+}
+
+bool SignatureValidationInfo::signsTotalDocument() const
+{
+  Q_D(const SignatureValidationInfo);
+  if (d->range_bounds.size() == 4 && d->range_bounds.value(0) == 0 &&
+      d->range_bounds.value(1) >= 0 &&
+      d->range_bounds.value(2) > d->range_bounds.value(1) &&
+      d->range_bounds.value(3) >= d->range_bounds.value(2))
+  {
+    // The range from d->range_bounds.value(1) to d->range_bounds.value(2) is
+    // not authenticated by the signature and should only contain the signature
+    // itself padded with 0 bytes. This has been checked in readSignature().
+    // If it failed, d->signature is empty.
+    // A potential range after d->range_bounds.value(3) would be also not
+    // authenticated. Therefore d->range_bounds.value(3) should coincide with
+    // the end of the document.
+    if (d->docLength == d->range_bounds.value(3) && !d->signature.isEmpty())
+      return true;
+  }
+  return false;
 }
 
 SignatureValidationInfo &SignatureValidationInfo::operator=(const SignatureValidationInfo &other)
@@ -511,8 +581,32 @@ FormField::FormType FormFieldSignature::type() const
 {
   return FormField::FormSignature;
 }
+ 
+FormFieldSignature::SignatureType FormFieldSignature::signatureType() const
+{
+  SignatureType sigType = AdbePkcs7detached;
+  FormWidgetSignature* fws = static_cast<FormWidgetSignature*>(m_formData->fm);
+  switch (fws->signatureType())
+  {
+    case adbe_pkcs7_sha1:
+      sigType = AdbePkcs7sha1;
+      break;
+    case adbe_pkcs7_detached:
+      sigType = AdbePkcs7detached;
+      break;
+    case ETSI_CAdES_detached:
+      sigType = EtsiCAdESdetached;
+      break;
+  }
+  return sigType;
+}
 
 SignatureValidationInfo FormFieldSignature::validate(ValidateOptions opt) const
+{
+  return validate(opt, QDateTime());
+}
+
+SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& validationTime) const
 {
   FormWidgetSignature* fws = static_cast<FormWidgetSignature*>(m_formData->fm);
   SignatureInfo* si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation);
@@ -566,7 +660,25 @@ SignatureValidationInfo FormFieldSignature::validate(ValidateOptions opt) const
       break;
   }
   priv->signer_name = si->getSignerName();
+  priv->signer_subject_dn = si->getSubjectDN();
+  priv->hash_algorithm = si->getHashAlgorithm();
+
   priv->signing_time = si->getSigningTime();
+  std::vector<Goffset> ranges = fws->getSignedRangeBounds();
+  if (!ranges.empty())
+  {
+    for (Goffset bound : ranges)
+    {
+      priv->range_bounds.append(bound);
+    }
+  }
+  GooString* checkedSignature = fws->getCheckedSignature();
+  if (priv->range_bounds.size() == 4 && checkedSignature)
+  {
+    priv->signature = QByteArray::fromHex(checkedSignature->getCString());
+    priv->docLength = fws->getCheckedFileSize();
+  }
+  delete checkedSignature;
 
   return SignatureValidationInfo(priv);
 }

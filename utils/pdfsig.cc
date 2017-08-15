@@ -8,6 +8,7 @@
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2015 Albert Astals Cid <aacid@kde.org>
 // Copyright 2016 Markus Kilås <digital@markuspage.com>
+// Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 //
 //========================================================================
 
@@ -18,6 +19,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <time.h>
+#include "goo/GooList.h"
 #include "parseargs.h"
 #include "Object.h"
 #include "Array.h"
@@ -28,6 +30,19 @@
 #include "GlobalParams.h"
 #include "SignatureInfo.h"
 
+
+enum HASH_HashType
+{
+    HASH_AlgNULL = 0,
+    HASH_AlgMD2 = 1,
+    HASH_AlgMD5 = 2,
+    HASH_AlgSHA1 = 3,
+    HASH_AlgSHA256 = 4,
+    HASH_AlgSHA384 = 5,
+    HASH_AlgSHA512 = 6,
+    HASH_AlgSHA224 = 7,
+    HASH_AlgTOTAL
+};
 
 const char * getReadableSigState(SignatureValidationStatus sig_vs)
 {
@@ -157,7 +172,65 @@ int main(int argc, char *argv[])
     sig_info = sig_widgets.at(i)->validateSignature(!dontVerifyCert, false);
     printf("Signature #%u:\n", i+1);
     printf("  - Signer Certificate Common Name: %s\n", sig_info->getSignerName());
+    printf("  - Signer full Distinguished Name: %s\n", sig_info->getSubjectDN());
     printf("  - Signing Time: %s\n", time_str = getReadableTime(sig_info->getSigningTime()));
+    printf("  - Signing Hash Algorithm: ");
+    switch (sig_info->getHashAlgorithm())
+    {
+      case HASH_AlgMD2:
+        printf("MD2\n");
+        break;
+      case HASH_AlgMD5:
+        printf("MD5\n");
+        break;
+      case HASH_AlgSHA1:
+        printf("SHA1\n");
+        break;
+      case HASH_AlgSHA256:
+        printf("SHA-256\n");
+        break;
+      case HASH_AlgSHA384:
+        printf("SHA-384\n");
+        break;
+      case HASH_AlgSHA512:
+        printf("SHA-512\n");
+        break;
+      case HASH_AlgSHA224:
+        printf("SHA-224\n");
+        break;
+      default:
+        printf("unknown\n");
+    }
+    printf("  - Signature Type: ");
+    switch (sig_widgets.at(i)->signatureType())
+    {
+      case adbe_pkcs7_sha1:
+        printf("adbe.pkcs7.sha1\n");
+        break;
+      case adbe_pkcs7_detached:
+        printf("adbe.pkcs7.detached\n");
+        break;
+      case ETSI_CAdES_detached:
+        printf("ETSI.CAdES.detached\n");
+        break;
+      default:
+        printf("unknown\n");
+    }
+    std::vector<Goffset> ranges = sig_widgets.at(i)->getSignedRangeBounds();
+    if (ranges.size() == 4)
+    {
+      int i = 0;
+      printf("  - Signed Ranges: [%lld - %lld], [%lld - %lld]\n",
+             ranges[0], ranges[1], ranges[2], ranges[3]);
+      GooString* signature = sig_widgets.at(i)->getCheckedSignature();
+      if (signature && sig_widgets.at(i)->getCheckedFileSize() == ranges[3])
+      {
+        printf("  - Total document signed\n");
+        delete signature;
+      }
+      else
+        printf("  - Not total document signed\n");
+    }
     printf("  - Signature Validation: %s\n", getReadableSigState(sig_info->getSignatureValStatus()));
     gfree(time_str);
     if (sig_info->getSignatureValStatus() != SIGNATURE_VALID || dontVerifyCert) {
