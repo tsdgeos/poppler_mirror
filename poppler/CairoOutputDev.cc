@@ -143,7 +143,11 @@ CairoOutputDev::CairoOutputDev() {
   strokePathClip = NULL;
   cairo = NULL;
   currentFont = NULL;
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
+  prescaleImages = gFalse;
+#else
   prescaleImages = gTrue;
+#endif
   printing = gTrue;
   use_show_text_glyphs = gFalse;
   inUncoloredPattern = gFalse;
@@ -1961,7 +1965,7 @@ CairoOutputDev::getFilterForSurface(cairo_surface_t *image,
 				    GBool interpolate)
 {
   if (interpolate)
-    return CAIRO_FILTER_BILINEAR;
+    return CAIRO_FILTER_BEST;
 
   int orig_width = cairo_image_surface_get_width (image);
   int orig_height = cairo_image_surface_get_height (image);
@@ -1981,7 +1985,7 @@ CairoOutputDev::getFilterForSurface(cairo_surface_t *image,
   if (scaled_width / orig_width >= 4 || scaled_height / orig_height >= 4)
 	  return CAIRO_FILTER_NEAREST;
 
-  return CAIRO_FILTER_BILINEAR;
+  return CAIRO_FILTER_BEST;
 }
 
 void CairoOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
