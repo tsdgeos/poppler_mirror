@@ -180,29 +180,29 @@ static struct {
 static void GetWindowsFontDir(char *winFontDir, int cbWinFontDirLen)
 {
     BOOL (__stdcall *SHGetSpecialFolderPathFunc)(HWND  hwndOwner,
-                                                  LPTSTR lpszPath,
+                                                  LPSTR lpszPath,
                                                   int    nFolder,
                                                   BOOL  fCreate);
     HRESULT (__stdcall *SHGetFolderPathFunc)(HWND  hwndOwner,
                                               int    nFolder,
                                               HANDLE hToken,
                                               DWORD  dwFlags,
-                                              LPTSTR pszPath);
+                                              LPSTR pszPath);
 
     // SHGetSpecialFolderPath isn't available in older versions of shell32.dll (Win95 and
     // WinNT4), so do a dynamic load of ANSI versions.
     winFontDir[0] = '\0';
 
-    HMODULE hLib = LoadLibrary("shell32.dll");
+    HMODULE hLib = LoadLibraryA("shell32.dll");
     if (hLib) {
-        SHGetFolderPathFunc = (HRESULT (__stdcall *)(HWND, int, HANDLE, DWORD, LPTSTR)) 
+        SHGetFolderPathFunc = (HRESULT (__stdcall *)(HWND, int, HANDLE, DWORD, LPSTR))
                               GetProcAddress(hLib, "SHGetFolderPathA");
         if (SHGetFolderPathFunc)
             (*SHGetFolderPathFunc)(NULL, CSIDL_FONTS, NULL, SHGFP_TYPE_CURRENT, winFontDir);
 
         if (!winFontDir[0]) {
             // Try an older function
-            SHGetSpecialFolderPathFunc = (BOOL (__stdcall *)(HWND, LPTSTR, int, BOOL))
+            SHGetSpecialFolderPathFunc = (BOOL (__stdcall *)(HWND, LPSTR, int, BOOL))
                                           GetProcAddress(hLib, "SHGetSpecialFolderPathA");
             if (SHGetSpecialFolderPathFunc)
                 (*SHGetSpecialFolderPathFunc)(NULL, winFontDir, CSIDL_FONTS, FALSE);
@@ -213,9 +213,9 @@ static void GetWindowsFontDir(char *winFontDir, int cbWinFontDirLen)
         return;
 
     // Try older DLL
-    hLib = LoadLibrary("SHFolder.dll");
+    hLib = LoadLibraryA("SHFolder.dll");
     if (hLib) {
-        SHGetFolderPathFunc = (HRESULT (__stdcall *)(HWND, int, HANDLE, DWORD, LPTSTR))
+        SHGetFolderPathFunc = (HRESULT (__stdcall *)(HWND, int, HANDLE, DWORD, LPSTR))
                               GetProcAddress(hLib, "SHGetFolderPathA");
         if (SHGetFolderPathFunc)
             (*SHGetFolderPathFunc)(NULL, CSIDL_FONTS, NULL, SHGFP_TYPE_CURRENT, winFontDir);
@@ -225,7 +225,7 @@ static void GetWindowsFontDir(char *winFontDir, int cbWinFontDirLen)
         return;
 
     // Everything else failed so the standard fonts directory.
-    GetWindowsDirectory(winFontDir, cbWinFontDirLen);                                                       
+    GetWindowsDirectoryA(winFontDir, cbWinFontDirLen);
     if (winFontDir[0]) {
         strncat(winFontDir, FONTS_SUBDIR, cbWinFontDirLen);
         winFontDir[cbWinFontDirLen-1] = 0;
@@ -259,14 +259,14 @@ void SysFontList::scanWindowsFonts(GooString *winFontDir) {
   } else {
     path = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Fonts\\";
   }
-  if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, path, 0,
+  if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, path, 0,
 		   KEY_QUERY_VALUE | KEY_ENUMERATE_SUB_KEYS,
 		   &regKey) == ERROR_SUCCESS) {
     idx = 0;
     while (1) {
       valNameLen = sizeof(valName) - 1;
       dataLen = sizeof(data) - 1;
-      if (RegEnumValue(regKey, idx, valName, &valNameLen, NULL,
+      if (RegEnumValueA(regKey, idx, valName, &valNameLen, NULL,
 		       &type, (LPBYTE)data, &dataLen) != ERROR_SUCCESS) {
 	break;
       }

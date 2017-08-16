@@ -178,7 +178,7 @@ get_poppler_datadir (void)
   if (beenhere)
     return retval;
 
-  if (!GetModuleFileName (hmodule, (CHAR *) retval, sizeof(retval) - 20))
+  if (!GetModuleFileNameA (hmodule, (CHAR *) retval, sizeof(retval) - 20))
     return POPPLER_DATADIR;
 
   p = _mbsrchr ((unsigned char *) retval, '\\');
