@@ -246,7 +246,9 @@ void ImageOutputDev::listImage(GfxState *state, Object *ref, Stream *str,
     printf("%5.0f ", yppi);
 
   Goffset embedSize = -1;
-  if (!inlineImg)
+  if (inlineImg)
+    embedSize = getInlineImageLength(str, width, height, colorMap);
+  else
     embedSize = str->getBaseStream()->getLength();
 
   long long imageSize = 0;
@@ -309,6 +311,43 @@ void ImageOutputDev::listImage(GfxState *state, Object *ref, Stream *str,
     }
     writeImageFile(NULL, format, "", str, width, height, colorMap);
   }
+}
+
+long ImageOutputDev::getInlineImageLength(Stream *str, int width, int height,
+                                          GfxImageColorMap *colorMap) {
+  long len;
+
+  if (colorMap) {
+    ImageStream *imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(),
+                                          colorMap->getBits());
+    imgStr->reset();
+    for (int y = 0; y < height; y++)
+      imgStr->getLine();
+
+    imgStr->close();
+    delete imgStr;
+  } else {
+    str->reset();
+    for (int y = 0; y < height; y++) {
+      int size = (width + 7)/8;
+      for (int x = 0; x < size; x++)
+        str->getChar();
+    }
+  }
+
+  EmbedStream *embedStr = (EmbedStream *) (str->getBaseStream());
+  embedStr->rewind();
+  if (str->getKind() == strDCT || str->getKind() == strCCITTFax)
+    str = str->getNextStream();
+  len = 0;
+  str->reset();
+  while (str->getChar() != EOF)
+    len++;
+
+  embedStr->restore();
+
+
+  return len;
 }
 
 void ImageOutputDev::writeRawImage(Stream *str, const char *ext) {
@@ -498,14 +537,20 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
 				int width, int height,
 				GfxImageColorMap *colorMap, GBool inlineImg) {
   ImageFormat format;
+  EmbedStream *embedStr;
 
-  if (dumpJPEG && str->getKind() == strDCT &&
-      (colorMap->getNumPixelComps() == 1 ||
-       colorMap->getNumPixelComps() == 3) &&
-      !inlineImg) {
+  if (dumpJPEG && str->getKind() == strDCT) {
+    if (inlineImg) {
+      embedStr = (EmbedStream *) (str->getBaseStream());
+      getInlineImageLength(str, width, height, colorMap); // record the strean
+      embedStr->rewind();
+    }
 
     // dump JPEG file
     writeRawImage(str, "jpg");
+
+    if (inlineImg)
+      embedStr->restore();
 
   } else if (dumpJP2 && str->getKind() == strJPX && !inlineImg) {
     // dump JPEG2000 file
@@ -535,7 +580,7 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
     // dump JBIG2 embedded file
     writeRawImage(str, "jb2e");
 
-  } else if (dumpCCITT && str->getKind() == strCCITTFax && !inlineImg) {
+  } else if (dumpCCITT && str->getKind() == strCCITTFax) {
     // write CCITT parameters
     CCITTFaxStream *ccittStr = static_cast<CCITTFaxStream *>(str);
     FILE *f;
@@ -567,14 +612,22 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
 
     fclose(f);
 
+    if (inlineImg) {
+      embedStr = (EmbedStream *) (str->getBaseStream());
+      getInlineImageLength(str, width, height, colorMap); // record the strean
+      embedStr->rewind();
+    }
+
     // dump CCITT file
     writeRawImage(str, "ccitt");
+
+    if (inlineImg)
+      embedStr->restore();
 
   } else if (outputPNG && !(outputTiff && colorMap &&
                             (colorMap->getColorSpace()->getMode() == csDeviceCMYK ||
                              (colorMap->getColorSpace()->getMode() == csICCBased &&
                               colorMap->getNumPixelComps() == 4)))) {
-
     // output in PNG format
 
 #if ENABLE_LIBPNG

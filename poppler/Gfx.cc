@@ -4901,7 +4901,7 @@ Stream *Gfx::buildImageStream() {
 
   // make stream
   if (parser->getStream()) {
-    str = new EmbedStream(parser->getStream(), std::move(dict), gFalse, 0);
+    str = new EmbedStream(parser->getStream(), std::move(dict), gFalse, 0, gTrue);
     str = str->addFilters(str->getDict());
   } else {
     str = NULL;

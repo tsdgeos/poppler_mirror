@@ -1033,14 +1033,25 @@ void MemStream::moveStart(Goffset delta) {
 //------------------------------------------------------------------------
 
 EmbedStream::EmbedStream(Stream *strA, Object &&dictA,
-			 GBool limitedA, Goffset lengthA):
+			 GBool limitedA, Goffset lengthA, GBool reusableA):
     BaseStream(std::move(dictA), lengthA) {
   str = strA;
   limited = limitedA;
   length = lengthA;
+  reusable = reusableA;
+  record = gFalse;
+  replay = gFalse;
+  if (reusable) {
+    bufData = (unsigned char*)gmalloc(16384);
+    bufMax = 16384;
+    bufLen = 0;
+    record = gTrue;
+  }
 }
 
 EmbedStream::~EmbedStream() {
+  if (reusable)
+    gfree(bufData);
 }
 
 BaseStream *EmbedStream::copy() {
@@ -1054,30 +1065,93 @@ Stream *EmbedStream::makeSubStream(Goffset start, GBool limitedA,
   return NULL;
 }
 
+void EmbedStream::rewind() {
+  record = gFalse;
+  replay = gTrue;
+  bufPos = 0;
+}
+
+void EmbedStream::restore() {
+  replay = gFalse;
+}
+
+Goffset EmbedStream::getPos() {
+  if (replay)
+    return bufPos;
+  else
+    return str->getPos();
+}
+
 int EmbedStream::getChar() {
-  if (limited && !length) {
-    return EOF;
+  if (replay) {
+    if (bufPos < bufLen)
+      return bufData[bufPos++];
+    else
+      return EOF;
+  } else {
+    if (limited && !length) {
+      return EOF;
+    }
+    int c = str->getChar();
+    --length;
+    if (record) {
+      bufData[bufLen] = c;
+      bufLen++;
+      if (bufLen >= bufMax) {
+        bufMax *= 2;
+        bufData = (unsigned char *)grealloc(bufData, bufMax);
+      }
+    }
+    return c;
   }
-  --length;
-  return str->getChar();
 }
 
 int EmbedStream::lookChar() {
-  if (limited && !length) {
-    return EOF;
+  if (replay) {
+    if (bufPos < bufLen)
+      return bufData[bufPos];
+    else
+      return EOF;
+  } else {
+    if (limited && !length) {
+      return EOF;
+    }
+    return str->lookChar();
   }
-  return str->lookChar();
 }
 
 int EmbedStream::getChars(int nChars, Guchar *buffer) {
+  int len;
+
   if (nChars <= 0) {
     return 0;
   }
-  if (limited && length < nChars) {
-    nChars = length;
+  if (replay) {
+    if (bufPos >= bufLen)
+      return EOF;
+    len = bufLen - bufPos;
+    if (nChars > len)
+      nChars = len;
+    memcpy(buffer, bufData, len);
+    return len;
+  } else {
+    if (limited && length < nChars) {
+      nChars = length;
+    }
+    len = str->doGetChars(nChars, buffer);
+    if (record) {
+      if (bufLen + len >= bufMax) {
+        while (bufLen + len >= bufMax)
+          bufMax *= 2;
+        bufData = (unsigned char *)grealloc(bufData, bufMax);
+      }
+      memcpy(bufData+bufLen, buffer, len);
+      bufLen += len;
+    }
   }
-  return str->doGetChars(nChars, buffer);
+  return len;
 }
+
 
 void EmbedStream::setPos(Goffset pos, int dir) {
   error(errInternal, -1, "Internal: called setPos() on EmbedStream");

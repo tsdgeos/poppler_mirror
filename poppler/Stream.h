@@ -607,7 +607,7 @@ private:
 class EmbedStream: public BaseStream {
 public:
 
-  EmbedStream(Stream *strA, Object &&dictA, GBool limitedA, Goffset lengthA);
+  EmbedStream(Stream *strA, Object &&dictA, GBool limitedA, Goffset lengthA, GBool reusableA = gFalse);
   ~EmbedStream();
   BaseStream *copy() override;
   Stream *makeSubStream(Goffset start, GBool limitedA,
@@ -616,7 +616,7 @@ public:
   void reset() override {}
   int getChar() override;
   int lookChar() override;
-  Goffset getPos() override { return str->getPos(); }
+  Goffset getPos() override;
   void setPos(Goffset pos, int dir = 0) override;
   Goffset getStart() override;
   void moveStart(Goffset delta) override;
@@ -624,6 +624,8 @@ public:
   int getUnfilteredChar () override { return str->getUnfilteredChar(); }
   void unfilteredReset () override { str->unfilteredReset(); }
 
+  void rewind();
+  void restore();
 
 private:
 
@@ -632,6 +634,14 @@ private:
 
   Stream *str;
   GBool limited;
+  GBool reusable;
+  GBool record;
+  GBool replay;
+  unsigned char *bufData;
+  long bufMax;
+  long bufLen;
+  long bufPos;
+
 };
 
 //------------------------------------------------------------------------
