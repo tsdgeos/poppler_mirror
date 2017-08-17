@@ -9,6 +9,7 @@
  * Copyright (C) 2018, Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
  * Copyright (C) 2018, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
+ * Copyright (C) 2019, Adrian Johnson <ajohnson@redneon.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +39,7 @@
 #include "poppler-export.h"
 #include "poppler-annotation.h"
 
+class Object;
 class Page;
 class FormWidget;
 class FormWidgetButton;
@@ -768,6 +770,14 @@ public:
         ValidateForceRevalidation = 2, ///< Force revalidation of the certificate.
     };
 
+    enum DigestAlgorithm
+    {
+        SHA1 = 1,
+        SHA256 = 2,
+        SHA384 = 3,
+        SHA512 = 4,
+    };
+
     /// \cond PRIVATE
     FormFieldSignature(DocumentData *doc, ::Page *p, ::FormWidgetSignature *w);
     /// \endcond
@@ -780,6 +790,19 @@ public:
         \since 0.58
     */
     SignatureType signatureType() const;
+
+    void setSignatureType(SignatureType type);
+
+    /**
+        Sign the whole document in this signature field.
+
+        @param certNickname nickname of the signing certificate in the mozilla database
+        @param password     password to unlock the private key
+                            (may be empty if no password is set)
+        @param digestAlg    digest algorithm to be used in the signature
+        @param reason       a reason for the signature written to the signature field
+      */
+    bool sign(const QString &saveFilename, const QString &certNickname, const QString &password, DigestAlgorithm digestAlg = SHA256, const QString &reason = QString());
 
     /**
       Validate the signature with now as validation time.

@@ -27,6 +27,7 @@
 // Copyright (C) 2019 Christophe Fergeau <cfergeau@redhat.com>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -235,6 +236,7 @@ public:
     bool hasUnicodeMarkerLE() const { return hasUnicodeMarkerLE(*this); }
     static bool hasUnicodeMarkerLE(const std::string &s) { return s.size() >= 2 && s[0] == '\xff' && s[1] == '\xfe'; }
     bool hasJustUnicodeMarker() const { return size() == 2 && hasUnicodeMarker(); }
+    bool hasASN1Marker() const { return size() > 1 && (data()[0] & 0xff) == 0x30 && (data()[1] & 0xf0) == 0x80; }
 
     void prependUnicodeMarker();
 

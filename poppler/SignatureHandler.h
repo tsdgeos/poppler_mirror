@@ -37,6 +37,7 @@ class SignatureHandler
 {
 public:
     SignatureHandler(unsigned char *p7, int p7_length);
+    SignatureHandler(const char *certNickname, SECOidTag digestAlgTag);
     ~SignatureHandler();
     time_t getSigningTime();
     char *getSignerName();
@@ -44,10 +45,14 @@ public:
     HASH_HashType getHashAlgorithm();
     void setSignature(unsigned char *, int);
     void updateHash(unsigned char *data_block, int data_len);
+    void restartHash();
     SignatureValidationStatus validateSignature();
     // Use -1 as validation_time for now
     CertificateValidationStatus validateCertificate(time_t validation_time);
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
+    GooString *signDetached(const char *password);
+
+    static SECOidTag getHashOidTag(const char *digestName);
 
     // Initializes the NSS dir with the custom given directory
     // calling it with an empty string means use the default firefox db, /etc/pki/nssdb, ~/.pki/nssdb
@@ -56,6 +61,18 @@ public:
     static void setNSSDir(const GooString &nssDir);
 
 private:
+    typedef struct
+    {
+        enum
+        {
+            PW_NONE = 0,
+            PW_FROMFILE = 1,
+            PW_PLAINTEXT = 2,
+            PW_EXTERNAL = 3
+        } source;
+        const char *data;
+    } PWData;
+
     SignatureHandler(const SignatureHandler &);
     SignatureHandler &operator=(const SignatureHandler &);
 
@@ -65,13 +82,16 @@ private:
     NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data);
     HASHContext *initHashContext();
     X509CertificateInfo::EntityInfo getEntityInfo(CERTName *entityName) const;
+    static void outputCallback(void *arg, const char *buf, unsigned long len);
 
     unsigned int hash_length;
+    SECOidTag digest_alg_tag;
     SECItem CMSitem;
     HASHContext *hash_context;
     NSSCMSMessage *CMSMessage;
     NSSCMSSignedData *CMSSignedData;
     NSSCMSSignerInfo *CMSSignerInfo;
+    CERTCertificate *signing_cert;
     CERTCertificate **temp_certs;
 };
 

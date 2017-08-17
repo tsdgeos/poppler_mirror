@@ -892,6 +892,58 @@ FormFieldSignature::SignatureType FormFieldSignature::signatureType() const
     return sigType;
 }
 
+void FormFieldSignature::setSignatureType(SignatureType type)
+{
+    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
+    switch (type) {
+    case UnknownSignatureType:
+        fws->setSignatureType(unknown_signature_type);
+        break;
+    case AdbePkcs7sha1:
+        fws->setSignatureType(adbe_pkcs7_sha1);
+        break;
+    case AdbePkcs7detached:
+        fws->setSignatureType(adbe_pkcs7_detached);
+        break;
+    case EtsiCAdESdetached:
+        fws->setSignatureType(ETSI_CAdES_detached);
+        break;
+    }
+}
+
+bool FormFieldSignature::sign(const QString &saveFilename, const QString &certNickname, const QString &password, DigestAlgorithm digestAlg, const QString &reason)
+{
+    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
+    const char *digest = nullptr;
+    const char *rs = nullptr;
+    char *pw = password.isEmpty() ? nullptr : strdup(password.toUtf8().constData());
+    char *name = strdup(certNickname.toUtf8().constData());
+    char *filename = strdup(saveFilename.toUtf8().constData());
+    switch (digestAlg) {
+    case SHA1:
+        digest = "SHA1";
+        break;
+    case SHA256:
+        digest = "SHA256";
+        break;
+    case SHA384:
+        digest = "SHA384";
+        break;
+    case SHA512:
+        digest = "SHA512";
+        break;
+    default:
+        digest = "SHA256";
+        break;
+    }
+    if (!reason.isEmpty())
+        rs = reason.toUtf8().constData();
+    bool ok = fws->signDocument(filename, name, digest, pw, rs);
+    free(name);
+    free(pw);
+    return ok;
+}
+
 SignatureValidationInfo FormFieldSignature::validate(ValidateOptions opt) const
 {
     return validate(opt, QDateTime());

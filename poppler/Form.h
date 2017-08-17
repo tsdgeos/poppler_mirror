@@ -287,6 +287,8 @@ public:
     void updateWidgetAppearance() override;
 
     FormSignatureType signatureType() const;
+    void setSignatureType(FormSignatureType fst);
+
     // Use -1 for now as validationTime
     SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime);
 
@@ -294,12 +296,27 @@ public:
     // the elements of the list are of type Goffset
     std::vector<Goffset> getSignedRangeBounds() const;
 
+    // creates or replaces the dictionary name "V" in the signature dictionary and
+    // fills it with the fields of the signature; the field "Contents" is the signature
+    // in PKCS#7 format, which is calculated over the byte range encompassing the whole
+    // document except for the signature itself; this byte range is specified in the
+    // field "ByteRange" in the dictionary "V"
+    // return success
+    bool signDocument(const char *filename, const char *certNickname, const char *digestName, const char *password, const char *reason = nullptr);
+
     // checks the length encoding of the signature and returns the hex encoded signature
     // if the check passed (and the checked file size as output parameter in checkedFileSize)
     // otherwise a nullptr is returned
     GooString *getCheckedSignature(Goffset *checkedFileSize);
 
     const GooString *getSignature() const;
+
+private:
+    bool createSignature(Object &vObj, const GooString &name, const GooString &reason, const GooString *signature);
+    bool getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd);
+    bool updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize);
+
+    bool updateSignature(FILE *f, Goffset sigStart, Goffset sigEnd, const GooString *signature);
 };
 
 //------------------------------------------------------------------------
@@ -586,7 +603,9 @@ public:
     ~FormFieldSignature() override;
     Object *getByteRange() { return &byte_range; }
     const GooString *getSignature() const { return signature; }
+    void setSignature(const GooString &sig);
     FormSignatureType getSignatureType() const { return signature_type; }
+    void setSignatureType(FormSignatureType t) { signature_type = t; }
 
 private:
     void parseInfo();

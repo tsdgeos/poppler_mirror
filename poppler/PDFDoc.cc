@@ -1306,6 +1306,15 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
             outStr->printf("%c", unescaped);
         }
         outStr->printf(") ");
+    } else if (s->hasASN1Marker()) {
+        // format ASN1 strings hex encoded and enclosed in <>
+        const char *c = s->c_str();
+        outStr->printf("<");
+        for (int i = 0; i < s->getLength(); i++) {
+            unsigned char value = *(c + i) & 0x000000ff;
+            outStr->printf("%2.2x", value);
+        }
+        outStr->printf("> ");
     } else {
         const char *c = s->c_str();
         outStr->printf("(");

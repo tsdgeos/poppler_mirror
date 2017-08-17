@@ -26,6 +26,17 @@
 #include <dirent.h>
 #include <Error.h>
 
+/* NSS headers */
+#include <secpkcs7.h>
+
+void SignatureHandler::outputCallback(void *arg, const char *buf, unsigned long len)
+{
+    if (arg && buf) {
+        GooString *gSignature = reinterpret_cast<GooString *>(arg);
+        gSignature->append(buf, len);
+    }
+}
+
 static void shutdownNss()
 {
     if (NSS_Shutdown() != SECSuccess) {
@@ -50,28 +61,47 @@ unsigned int SignatureHandler::digestLength(SECOidTag digestAlgId)
     }
 }
 
+SECOidTag SignatureHandler::getHashOidTag(const char *digestName)
+{
+    SECOidTag tag = SEC_OID_UNKNOWN;
+    if (strcmp(digestName, "SHA1") == 0) {
+        tag = SEC_OID_SHA1;
+    } else if (strcmp(digestName, "SHA256") == 0) {
+        tag = SEC_OID_SHA256;
+    } else if (strcmp(digestName, "SHA384") == 0) {
+        tag = SEC_OID_SHA384;
+    } else if (strcmp(digestName, "SHA512") == 0) {
+        tag = SEC_OID_SHA512;
+    }
+    return tag;
+}
+
 char *SignatureHandler::getSignerName()
 {
     if (!CMSSignerInfo || !NSS_IsInitialized())
         return nullptr;
 
-    CERTCertificate *cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+    if (!signing_cert)
+        signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
 
-    if (!cert)
+    if (!signing_cert)
         return nullptr;
 
-    return CERT_GetCommonName(&cert->subject);
+    return CERT_GetCommonName(&signing_cert->subject);
 }
 
 const char *SignatureHandler::getSignerSubjectDN()
 {
-    if (!CMSSignerInfo)
+    if (!signing_cert && !CMSSignerInfo)
         return nullptr;
 
-    CERTCertificate *cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
-    if (!cert)
+    if (!signing_cert)
+        signing_cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+
+    if (!signing_cert)
         return nullptr;
-    return cert->subjectName;
+
+    return signing_cert->subjectName;
 }
 
 HASH_HashType SignatureHandler::getHashAlgorithm()
@@ -268,7 +298,7 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
     }
 }
 
-SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), temp_certs(nullptr)
+SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
 {
     setNSSDir({});
     CMSitem.data = p7;
@@ -279,6 +309,15 @@ SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length) : hash_cont
         CMSSignerInfo = CMS_SignerInfoCreate(CMSSignedData);
         hash_context = initHashContext();
     }
+}
+
+SignatureHandler::SignatureHandler(const char *certNickname, SECOidTag digestAlgTag)
+    : hash_length(digestLength(digestAlgTag)), digest_alg_tag(digestAlgTag), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
+{
+    setNSSDir({});
+    CMSMessage = NSS_CMSMessage_Create(nullptr);
+    signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname);
+    hash_context = HASH_Create(HASH_GetHashTypeByOidTag(digestAlgTag));
 }
 
 HASHContext *SignatureHandler::initHashContext()
@@ -298,12 +337,21 @@ void SignatureHandler::updateHash(unsigned char *data_block, int data_len)
     }
 }
 
+void SignatureHandler::restartHash()
+{
+    if (hash_context)
+        HASH_Destroy(hash_context);
+    hash_context = HASH_Create(HASH_GetHashTypeByOidTag(digest_alg_tag));
+}
+
 SignatureHandler::~SignatureHandler()
 {
     SECITEM_FreeItem(&CMSitem, PR_FALSE);
     if (CMSMessage)
         NSS_CMSMessage_Destroy(CMSMessage);
 
+    if (signing_cert)
+        CERT_DestroyCertificate(signing_cert);
     if (hash_context)
         HASH_Destroy(hash_context);
 
@@ -481,4 +529,44 @@ CertificateValidationStatus SignatureHandler::validateCertificate(time_t validat
     }
 
     return CERTIFICATE_GENERIC_ERROR;
+}
+
+GooString *SignatureHandler::signDetached(const char *password)
+{
+    if (!hash_context)
+        return nullptr;
+    unsigned char *digest_buffer = reinterpret_cast<unsigned char *>(PORT_Alloc(hash_length));
+    unsigned int result_len = 0;
+    HASH_End(hash_context, digest_buffer, &result_len, hash_length);
+    SECItem digest;
+    digest.data = digest_buffer;
+    digest.len = result_len;
+    SEC_PKCS7ContentInfo *p7_info = SEC_PKCS7CreateSignedData(signing_cert, certUsageEmailSigner, CERT_GetDefaultCertDB(), digest_alg_tag, &digest, nullptr, nullptr);
+    if (!p7_info) {
+        PORT_Free(reinterpret_cast<void *>(digest_buffer));
+        return nullptr;
+    }
+    SEC_PKCS7SignerInfo **signerinfos = p7_info->content.signedData->signerInfos;
+    if (!signerinfos) {
+        PORT_Free(reinterpret_cast<void *>(digest_buffer));
+        SEC_PKCS7DestroyContentInfo(p7_info);
+        return nullptr;
+    }
+    for (SEC_PKCS7SignerInfo *si = *signerinfos; si; si = *++signerinfos) {
+        if (si->cert) {
+            si->certList = CERT_CertChainFromCert(si->cert, certUsageEmailSigner, PR_TRUE);
+        }
+    }
+    SEC_PKCS7AddSigningTime(p7_info);
+    GooString *signature = new GooString;
+    PWData pwdata = { password ? PWData::PW_PLAINTEXT : PWData::PW_NONE, password };
+
+    if (SEC_PKCS7Encode(p7_info, outputCallback, reinterpret_cast<void *>(signature), nullptr, nullptr, &pwdata) != SECSuccess) {
+        PORT_Free(reinterpret_cast<void *>(digest_buffer));
+        delete signature;
+        signature = nullptr;
+    }
+    SEC_PKCS7DestroyContentInfo(p7_info);
+    PORT_Free(reinterpret_cast<void *>(digest_buffer));
+    return signature;
 }
