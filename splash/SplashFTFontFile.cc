@@ -145,4 +145,8 @@ SplashFont *SplashFTFontFile::makeFont(SplashCoord *mat,
   return font;
 }
 
+int *SplashFTFontFile::getCodeToGID() {
+  return codeToGID;
+}
+
 #endif // HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
