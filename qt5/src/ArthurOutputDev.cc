@@ -205,7 +205,10 @@ void ArthurOutputDev::updateLineJoin(GfxState *state)
 {
   switch (state->getLineJoin()) {
   case 0:
-    m_currentPen.setJoinStyle(Qt::MiterJoin);
+    // The correct style here is Qt::SvgMiterJoin, *not* Qt::MiterJoin.
+    // The two differ in what to do if the miter limit is exceeded.
+    // See https://bugs.freedesktop.org/show_bug.cgi?id=102356
+    m_currentPen.setJoinStyle(Qt::SvgMiterJoin);
     break;
   case 1:
     m_currentPen.setJoinStyle(Qt::RoundJoin);
