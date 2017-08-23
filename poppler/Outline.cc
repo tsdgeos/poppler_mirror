@@ -66,6 +66,7 @@ OutlineItem::OutlineItem(Dict *dict, XRef *xrefA) {
   kids = NULL;
 
 
+  obj1 = dict->lookup("Title");
   if (obj1.isString()) {
     GooString *s = obj1.getString();
     titleLen = TextStringToUCS4(s, &title);
