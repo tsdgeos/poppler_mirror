@@ -171,7 +171,6 @@ PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
 PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
 	       GooString *userPassword, void *guiDataA) {
   OSVERSIONINFO version;
-  Object obj;
   int i;
 
   init();
@@ -203,8 +202,7 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
   }
 
   // create stream
-  obj.initNull();
-  str = new FileStream(file, 0, gFalse, file->size(), &obj);
+  str = new FileStream(file, 0, gFalse, file->size(), Object(objNull));
 
   ok = setup(ownerPassword, userPassword);
 }

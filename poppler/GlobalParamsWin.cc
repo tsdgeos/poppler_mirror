@@ -462,37 +462,28 @@ void GlobalParams::setupBaseFonts(char * dir)
 
     if (file != NULL) {
       Parser *parser;
-      Object obj1, obj2;
-
-      obj1.initNull();
       parser = new Parser(NULL,
 	      new Lexer(NULL,
-	      new FileStream(file, 0, gFalse, file->size(), &obj1)),
+	      new FileStream(file, 0, gFalse, file->size(), Object(objNull))),
 	      gTrue);
-      obj1.free();
-      parser->getObj(&obj1);
+      Object obj1 = parser->getObj();
       while (!obj1.isEOF()) {
-	    parser->getObj(&obj2);
+	    Object obj2 = parser->getObj();
 	    if (obj1.isName()) {
 	      // Substitutions
 	      if (obj2.isDict()) {
-	        Object obj3;
-	        obj2.getDict()->lookup("Path", &obj3);
+	        Object obj3 = obj2.getDict()->lookup("Path");
 	        if (obj3.isString())
 	          addFontFile(new GooString(obj1.getName()), obj3.getString()->copy());
-	        obj3.free();
 	      // Aliases
 	      } else if (obj2.isName()) {
 	        substFiles->add(new GooString(obj1.getName()), new GooString(obj2.getName()));
 	      }
 	    }
-	    obj2.free();
-	    obj1.free();
-	    parser->getObj(&obj1);
+	    obj1 = parser->getObj();
 	    // skip trailing ';'
 	    while (obj1.isCmd(";")) {
-	      obj1.free();
-	      parser->getObj(&obj1);
+	      obj1 = parser->getObj();
 	    }
       }
       delete file;

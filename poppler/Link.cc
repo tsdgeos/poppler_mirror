@@ -455,21 +455,12 @@ LinkLaunch::LinkLaunch(Object *actionObj) {
       }
     } else {
 #ifdef _WIN32
-      if (actionObj->dictLookup("Win", &obj1)->isDict()) {
-	obj1.dictLookup("F", &obj2);
-	if (getFileSpecNameForPlatform (&obj2, &obj3)) {
-	  fileName = obj3.getString()->copy();
-	}
-	if (obj1.dictLookup("P", &obj2)->isString()) {
-	  params = obj2.getString()->copy();
-	}
-      } else {
-	error(errSyntaxWarning, -1, "Bad launch-type link action");
-      }
+      obj1 = actionObj->dictLookup("Win");
 #else
       //~ This hasn't been defined by Adobe yet, so assume it looks
       //~ just like the Win dictionary until they say otherwise.
       obj1 = actionObj->dictLookup("Unix");
+#endif
       if (obj1.isDict()) {
 	Object obj2 = obj1.dictLookup("F");
 	Object obj3 = getFileSpecNameForPlatform (&obj2);
@@ -483,7 +474,6 @@ LinkLaunch::LinkLaunch(Object *actionObj) {
       } else {
 	error(errSyntaxWarning, -1, "Bad launch-type link action");
       }
-#endif
     }
   }
 }
