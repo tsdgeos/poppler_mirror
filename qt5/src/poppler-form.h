@@ -4,6 +4,7 @@
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+ * Copyright (C) 2017, Tobias C. Berner <tcberner@freebsd.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +24,7 @@
 #ifndef _POPPLER_QT5_FORM_H_
 #define _POPPLER_QT5_FORM_H_
 
+#include <time.h>
 #include <QtCore/QDateTime>
 #include <QtCore/QList>
 #include <QtCore/QRectF>
