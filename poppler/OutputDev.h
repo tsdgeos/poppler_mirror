@@ -249,6 +249,16 @@ public:
   virtual void endStringOp(GfxState * /*state*/) {}
   virtual void beginString(GfxState * /*state*/, GooString * /*s*/) {}
   virtual void endString(GfxState * /*state*/) {}
+
+  // Draw one glyph at a specified position
+  //
+  // Arguments are:
+  // CharCode code: This is the character code in the content stream. It needs to be mapped back to a glyph index.
+  // int nBytes: The text strings in the content stream can consists of either 8-bit or 16-bit
+  //             character codes depending on the font. nBytes is the number of bytes in the character code.
+  // Unicode *u: The UCS-4 mapping used for text extraction (TextOutputDev).
+  // int uLen: The number of unicode entries in u.  Usually '1', for a single character,
+  //           but it may also have larger values, for example for ligatures.
   virtual void drawChar(GfxState * /*state*/, double /*x*/, double /*y*/,
 			double /*dx*/, double /*dy*/,
 			double /*originX*/, double /*originY*/,
