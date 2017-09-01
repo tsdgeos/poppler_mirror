@@ -893,7 +893,8 @@ delete it;
 	    OverprintPreview = 0x00000010,  ///< Overprint preview \since 0.22
 	    ThinLineSolid = 0x00000020,     ///< Enhance thin lines solid \since 0.24
 	    ThinLineShape = 0x00000040,     ///< Enhance thin lines shape. Wins over ThinLineSolid \since 0.24
-	    IgnorePaperColor = 0x00000080   ///< Do not compose with the paper color \since 0.35
+	    IgnorePaperColor = 0x00000080,  ///< Do not compose with the paper color \since 0.35
+	    HideAnnotations = 0x00000100    ///< Do not render annotations \since 0.60
 	};
 	Q_DECLARE_FLAGS( RenderHints, RenderHint )
 
