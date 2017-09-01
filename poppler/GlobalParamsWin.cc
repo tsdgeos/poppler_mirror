@@ -8,6 +8,8 @@
    // Copyright (C) 2012 Mark Brand <mabrand@mabrand.nl>
    // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
    // Copyright (C) 2013 Dmytro Morgun <lztoad@gmail.com>
+   // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
+   // Copyright (C) 2017 Albert Astals Cid <aacid@kde.org>
 
 TODO: instead of a fixed mapping defined in displayFontTab, it could
 scan the whole fonts directory, parse TTF files and build font
