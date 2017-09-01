@@ -1,3 +1,33 @@
+Release 0.58.0
+        core:
+         * CairoOutputDev: cairo 1.14 now has high quality downscaling
+         * Signature related improvements. Bug #99271
+         * Tweak which cmap we use. Bug #101855
+         * Memory leak fixes
+         * Substantial rework of the internals
+         * win32: call ANSI functions directly. Bug #100312
+         * Add some documentation
+
+        qt5:
+         * Expose signature information.
+         * ArthurOutputDev: initialize the image with the paper color. Bug #102129
+         * Fix copy'n'paste bugs: Qt4 -> Qt5
+         * ArthurOutputDev: Properly set the QPainter transformation
+         * ArthurOutputDev: Use Qt::SvgMiterJoin instead of Qt::MiterJoin. Bug #102356
+
+        utils:
+         * pdfinfo: add -dests option to print named destinations. Bug #97262
+         * pdftocairo: add -jpegopt for setting jpeg compression parameters. Bug #45727
+         * pdftoppm: add -jpegopt for setting jpeg compression parameters. Bug #45727
+         * pdfimages: support listing/extracting inline images. Bug #25625
+
+        build system:
+         * cmake: Various Windows fixes
+         * cmake: Use -std=c++11 instead of -std=gnu++11
+
+        cpp:
+         * Fix page.text() not taking page orientation into account. Bug #94517
+
 Release 0.57.0
         core:
          * Fix parsing of Type 1 fonts with newlines in encoding sequences. Bug #101728
