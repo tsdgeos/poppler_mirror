@@ -376,7 +376,7 @@ void ImageOutputDev::writeRawImage(Stream *str, const char *ext) {
 
 void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const char *ext,
                                     Stream *str, int width, int height, GfxImageColorMap *colorMap) {
-  FILE *f;
+  FILE *f = nullptr; /* squelch bogus compiler warning */
   ImageStream *imgStr = NULL;
   unsigned char *row;
   unsigned char *rowp;
