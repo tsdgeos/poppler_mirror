@@ -403,25 +403,27 @@ static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
   printf("Page  Destination                 Name\n");
   for (int i = firstPage; i <= lastPage; i++) {
     Ref *ref = doc->getCatalog()->getPageRef(i);
-    auto pageDests = map.find(*ref);
-    if (pageDests != map.end()) {
-      for (auto& it: pageDests->second) {
-	it.first->getCString()[4] = 0;
-	printf("%4d ", i);
-	printLinkDest(it.second);
-	printf(" \"");
-	Unicode *u;
-	char buf[8];
-	int n, len;
-	len = TextStringToUCS4(it.first, &u);
-	for (int i = 0; i < len; i++) {
-	  n = uMap->mapUnicode(u[i], buf, sizeof(buf));
-	  fwrite(buf, 1, n, stdout);
+    if (ref) {
+      auto pageDests = map.find(*ref);
+      if (pageDests != map.end()) {
+	for (auto& it: pageDests->second) {
+	  it.first->getCString()[4] = 0;
+	  printf("%4d ", i);
+	  printLinkDest(it.second);
+	  printf(" \"");
+	  Unicode *u;
+	  char buf[8];
+	  int n, len;
+	  len = TextStringToUCS4(it.first, &u);
+	  for (int i = 0; i < len; i++) {
+	    n = uMap->mapUnicode(u[i], buf, sizeof(buf));
+	    fwrite(buf, 1, n, stdout);
+	  }
+	  gfree(u);
+	  printf("\"\n");
+	  delete it.first;
+	  delete it.second;
 	}
-	gfree(u);
-	printf("\"\n");
-	delete it.first;
-	delete it.second;
       }
     }
   }
