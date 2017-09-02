@@ -634,13 +634,14 @@ int NameTree::Entry::cmpEntry(const void *voidEntry, const void *voidOtherEntry)
 
 void NameTree::init(XRef *xrefA, Object *tree) {
   xref = xrefA;
-  parse(tree);
+  std::set<int> seen;
+  parse(tree, seen);
   if (entries && length > 0) {
     qsort(entries, length, sizeof(Entry *), Entry::cmpEntry);
   }
 }
 
-void NameTree::parse(Object *tree) {
+void NameTree::parse(Object *tree, std::set<int> &seen) {
   if (!tree->isDict())
     return;
 
@@ -659,9 +660,18 @@ void NameTree::parse(Object *tree) {
   Object kids = tree->dictLookup("Kids");
   if (kids.isArray()) {
     for (int i = 0; i < kids.arrayGetLength(); ++i) {
+      Object kidRef = kids.arrayGetNF(i);
+      if (kidRef.isRef()) {
+	const int numObj = kidRef.getRef().num;
+	if (seen.find(numObj) != seen.end()) {
+	  error(errSyntaxError, -1, "loop in NameTree (numObj: {0:d})", numObj);
+	  continue;
+	}
+	seen.insert(numObj);
+      }
       Object kid = kids.arrayGet(i);
       if (kid.isDict())
-	parse(&kid);
+	parse(&kid, seen);
     }
   }
 }

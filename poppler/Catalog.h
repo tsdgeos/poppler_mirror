@@ -86,7 +86,7 @@ private:
     static int cmp(const void *key, const void *entry);
   };
 
-  void parse(Object *tree);
+  void parse(Object *tree, std::set<int> &seen);
   void addEntry(Entry *entry);
 
   XRef *xref;
