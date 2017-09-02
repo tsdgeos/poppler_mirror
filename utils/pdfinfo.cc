@@ -378,10 +378,13 @@ static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
 
   int numDests = doc->getCatalog()->numDestNameTree();
   for (int i = 0; i < numDests; i++) {
-    GooString *name = doc->getCatalog()->getDestNameTreeName(i);
+    GooString *name = new GooString(doc->getCatalog()->getDestNameTreeName(i));
     LinkDest *dest = doc->getCatalog()->getDestNameTreeDest(i);
     if (dest && dest->isPageRef()) {
       map[dest->getPageRef()].insert(std::make_pair(name, dest));
+    } else {
+      delete name;
+      delete dest;
     }
   }
 
@@ -391,6 +394,9 @@ static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
     LinkDest *dest = doc->getCatalog()->getDestsDest(i);
     if (dest && dest->isPageRef()) {
       map[dest->getPageRef()].insert(std::make_pair(name, dest));
+    } else {
+      delete name;
+      delete dest;
     }
   }
 
@@ -414,6 +420,8 @@ static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
 	}
 	gfree(u);
 	printf("\"\n");
+	delete it.first;
+	delete it.second;
       }
     }
   }
