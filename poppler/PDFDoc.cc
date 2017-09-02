@@ -1377,12 +1377,14 @@ Object PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Goffset startx
   message.append(buffer);
 
   //info dict -- only use text string
-  Object docInfo = xRef->getDocInfo();
-  if (!xRef->getTrailerDict()->isNone() && docInfo.isDict()) {
-    for(int i=0; i<docInfo.getDict()->getLength(); i++) {
-      Object obj2 = docInfo.getDict()->getVal(i);
-      if (obj2.isString()) {
-        message.append(obj2.getString());
+  if (!xRef->getTrailerDict()->isNone()) {
+    Object docInfo = xRef->getDocInfo();
+    if (docInfo.isDict()) {
+      for(int i=0; i<docInfo.getDict()->getLength(); i++) {
+        Object obj2 = docInfo.getDict()->getVal(i);
+        if (obj2.isString()) {
+          message.append(obj2.getString());
+        }
       }
     }
   }
