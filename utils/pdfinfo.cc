@@ -303,74 +303,74 @@ struct GooStringCompare {
 };
 
 static void printLinkDest(LinkDest *dest) {
-  char buf[100];
+  GooString s;
 
   switch (dest->getKind()) {
     case destXYZ:
-      sprintf(buf, "[ XYZ ");
+      s.append("[ XYZ ");
       if (dest->getChangeLeft()) {
-	sprintf(buf+strlen(buf), "%4.f ", dest->getLeft());
+	s.appendf("{0:4.0g} ", dest->getLeft());
       } else {
-	strcat(buf, "null ");
+	s.append("null ");
       }
       if (dest->getChangeTop()) {
-	sprintf(buf+strlen(buf), "%4.f ", dest->getTop());
+	s.appendf("{0:4.0g} ", dest->getTop());
       } else {
-	strcat(buf, "null ");
+	s.append("null ");
       }
       if (dest->getChangeZoom()) {
-	sprintf(buf+strlen(buf), "%4.2f ", dest->getZoom());
+	s.appendf("{0:4.2f} ", dest->getZoom());
       } else {
-	strcat(buf, "null ");
+	s.append("null ");
       }
       break;
     case destFit:
-      sprintf(buf, "[ Fit ");
+      s.append("[ Fit ");
       break;
     case destFitH:
       if (dest->getChangeTop()) {
-	sprintf(buf, "[ FitH %4.f ", dest->getTop());
+	s.appendf("[ FitH {0:4.0g} ", dest->getTop());
       } else {
-	sprintf(buf, "[ FitH null ");
+	s.append("[ FitH null ");
       }
       break;
     case destFitV:
       if (dest->getChangeLeft()) {
-	sprintf(buf, "[ FitV %4.f ", dest->getLeft());
+	s.appendf("[ FitV {0:4.0g} ", dest->getLeft());
       } else {
-	strcat(buf, "[ FitV null ");
+	s.append("[ FitV null ");
       }
       break;
     case destFitR:
-      sprintf(buf, "[ FitR %4.f %4.f %4.f %4.f ",
+      s.appendf("[ FitR {0:4.0g} {1:4.0g} {2:4.0g} {3:4.0g} ",
 	      dest->getLeft(),
 	      dest->getBottom(),
 	      dest->getRight(),
 	      dest->getTop());
       break;
     case destFitB:
-      sprintf(buf, "[ FitB ");
+      s.append("[ FitB ");
       break;
     case destFitBH:
       if (dest->getChangeTop()) {
-	sprintf(buf, "[ FitBH %4.f ", dest->getTop());
+	s.appendf("[ FitBH {0:4.0g} ", dest->getTop());
       } else {
-	sprintf(buf, "[ FitBH null ");
+	s.append("[ FitBH null ");
       }
       break;
     case destFitBV:
       if (dest->getChangeLeft()) {
-	sprintf(buf, "[ FitBV %4.f ", dest->getLeft());
+	s.appendf("[ FitBV {0:4.0g} ", dest->getLeft());
       } else {
-	strcat(buf, "[ FitBV null ");
+	s.append("[ FitBV null ");
       }
       break;
   }
 
-  strcat(buf, "                                ");
-  buf[26] = ']';
-  buf[27] = 0;
-  printf(buf);
+  s.append("                                ");
+  s.setChar(26, ']');
+  s.setChar(27, '\0');
+  printf("%s", s.getCString());
 }
 
 static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
