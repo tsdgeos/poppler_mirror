@@ -1,0 +1,5 @@
+.gitattributes export-ignore
+.gitignore export-ignore
+*/.gitignore export-ignore
+*/*/.gitignore export-ignore
+regtest export-ignore

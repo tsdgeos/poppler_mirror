@@ -824,3 +824,12 @@ endif()
 if(NOT HAVE_JPX_DECODER)
   message("Warning: You're not compiling any JPX decoder. Some files will fail to display properly.")
 endif()
+
+set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${POPPLER_VERSION})
+add_custom_target(dist
+    COMMAND
+        COMMAND git log --stat | fmt --split-only > ${CMAKE_BINARY_DIR}/ChangeLog
+        COMMAND git archive --prefix=${ARCHIVE_NAME}/ HEAD > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar
+        COMMAND tar -C ${CMAKE_BINARY_DIR} -rf ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar ChangeLog --transform='s,,${ARCHIVE_NAME}/,'
+        COMMAND xz -9 ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
