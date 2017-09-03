@@ -1,3 +1,18 @@
+Release 0.59.0
+        core:
+         * Fix infinite recursion in NameTree parsing in broken files
+
+        utils:
+         * pdfunite: Fix API porting error that caused abort in some cases
+         * pdfinfo: Fix crashes and memory leaks when using -dests
+         * pdfinfo: use GooString.append instead of sprintf/strcat
+         * pdfimages: Fix warning when compiling with cygwin
+
+        build system:
+         * Fix cygwin 32-bit compile
+         * cmake tweaks
+
+
 Release 0.58.0
         core:
          * CairoOutputDev: cairo 1.14 now has high quality downscaling
