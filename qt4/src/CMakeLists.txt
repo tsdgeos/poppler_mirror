@@ -34,7 +34,7 @@ set_target_properties(poppler-qt4 PROPERTIES VERSION 4.11.0 SOVERSION 4)
 target_link_libraries(poppler-qt4 poppler ${QT4_QTCORE_LIBRARY} ${QT4_QTGUI_LIBRARY} ${QT4_QTXML_LIBRARY})
 if(MSVC)
 target_link_libraries(poppler-qt4 poppler ${poppler_LIBS})
-endif(MSVC)
+endif()
 install(TARGETS poppler-qt4 RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
 
 install(FILES

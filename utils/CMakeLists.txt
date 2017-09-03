@@ -15,7 +15,7 @@ if (ENABLE_SPLASH)
   target_link_libraries(pdftoppm ${common_libs})
   install(TARGETS pdftoppm DESTINATION bin)
   install(FILES pdftoppm.1 DESTINATION ${SHARE_INSTALL_DIR}/man/man1)
-endif (ENABLE_SPLASH)
+endif ()
 
 if (HAVE_CAIRO)
   # pdftocairo
@@ -36,16 +36,16 @@ if (HAVE_CAIRO)
   target_link_libraries(pdftocairo ${CAIRO_LIBRARIES} ${FREETYPE_LIBRARIES} ${common_libs})
   if(LCMS_FOUND)
     target_link_libraries(pdftocairo ${LCMS_LIBRARIES})
-  endif(LCMS_FOUND)
+  endif()
   if(HAVE_PTHREAD)
     target_link_libraries(pdftocairo ${CMAKE_THREAD_LIBS_INIT})
   endif()
   if(LCMS2_FOUND)
     target_link_libraries(pdftocairo ${LCMS2_LIBRARIES})
-  endif(LCMS2_FOUND)
+  endif()
   install(TARGETS pdftocairo DESTINATION bin)
   install(FILES pdftocairo.1 DESTINATION ${SHARE_INSTALL_DIR}/man/man1)
-endif (HAVE_CAIRO)
+endif ()
 
 # pdfdetach
 set(pdfdetach_SOURCES ${common_srcs}
@@ -97,7 +97,7 @@ if (ENABLE_NSS3)
   add_executable(pdfsig ${pdfsig_SOURCES})
   target_link_libraries(pdfsig ${common_libs})
   install(TARGETS pdfsig DESTINATION bin)
-endif (ENABLE_NSS3)
+endif ()
 
 # pdftops
 set(pdftops_SOURCES ${common_srcs}

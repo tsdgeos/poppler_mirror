@@ -16,7 +16,7 @@ configure_file(poppler-features.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/poppler-feat
 
 if (GTK_FOUND AND BUILD_GTK_TESTS)
   add_subdirectory(demo)
-endif (GTK_FOUND AND BUILD_GTK_TESTS)
+endif ()
 
 set(poppler_glib_public_headers
   poppler-action.h

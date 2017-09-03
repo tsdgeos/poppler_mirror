@@ -14,7 +14,7 @@ macro(CPP_ADD_SIMPLETEST exe)
   target_link_libraries(${exe} poppler-cpp)
   if(MSVC)
     target_link_libraries(${exe} poppler ${poppler_LIBS})
-  endif(MSVC)
+  endif()
 endmacro(CPP_ADD_SIMPLETEST)
 
 

@@ -34,7 +34,7 @@ set_target_properties(poppler-qt5 PROPERTIES VERSION 1.10.0 SOVERSION 1)
 target_link_libraries(poppler-qt5 poppler ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Xml_LIBRARIES})
 if(MSVC)
 target_link_libraries(poppler-qt5 poppler ${poppler_LIBS})
-endif(MSVC)
+endif()
 install(TARGETS poppler-qt5 RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
 
 install(FILES
