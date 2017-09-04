@@ -2,7 +2,7 @@ before_install:
   - eval "${MATRIX_EVAL}"
   - sudo add-apt-repository ppa:ricotz/testing -y
   - sudo apt-get -qq update
-  - sudo apt-get install -y libopenjpeg-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev
+  - sudo apt-get install -y libopenjpeg-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev xvfb
   - git clone git://git.freedesktop.org/git/poppler/test test-files
 
 language: cpp
@@ -11,4 +11,4 @@ compiler:
  - clang
  - gcc
 
-script: cmake . -DTESTDATADIR=`pwd`/test-files && make && make test
+script: cmake . -DTESTDATADIR=`pwd`/test-files && make && xvfb-run -a make test
