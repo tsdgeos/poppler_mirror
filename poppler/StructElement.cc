@@ -248,6 +248,8 @@ struct AttributeMapEntry {
 };
 
 struct AttributeDefaults {
+  AttributeDefaults() = default;
+
   Object Inline  = Object(objName, "Inline");
   Object LrTb = Object(objName, "LrTb");
   Object Normal = Object(objName, "Normal");
