@@ -248,7 +248,7 @@ struct AttributeMapEntry {
 };
 
 struct AttributeDefaults {
-  AttributeDefaults() = default;
+  AttributeDefaults() {}; // needed to support old clang
 
   Object Inline  = Object(objName, "Inline");
   Object LrTb = Object(objName, "LrTb");
