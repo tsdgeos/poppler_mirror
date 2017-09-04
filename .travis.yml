@@ -1,7 +1,7 @@
 before_install:
   - eval "${MATRIX_EVAL}"
   - sudo apt-get -qq update
-  - sudo apt-get install -y libopenjpeg-dev qtbase5-dev gobject-introspection
+  - sudo apt-get install -y libopenjpeg-dev qtbase5-dev gobject-introspection libglib2.0-dev
 
 language: cpp
 
