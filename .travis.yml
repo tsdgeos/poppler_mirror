@@ -1,4 +1,6 @@
-install: make libopenjp2-7-dev get-deps
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libopenjp2-7-dev
 language: cpp
 compiler:
  - clang
