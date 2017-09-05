@@ -26,4 +26,4 @@ set(poppler_glib_demo_SRCS
   taggedstruct.c
 )
 poppler_add_test(poppler-glib-demo BUILD_GTK_TESTS ${poppler_glib_demo_SRCS})
-target_link_libraries(poppler-glib-demo poppler-glib ${GTK3_LIBRARIES})
+target_link_libraries(poppler-glib-demo ${CAIRO_LIBRARIES} poppler-glib ${GTK3_LIBRARIES})
