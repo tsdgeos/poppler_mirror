@@ -30,6 +30,7 @@
 #include <set>
 #include <limits>
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 #include "goo/gmem.h"
 #include "goo/GooString.h"
@@ -49,6 +50,7 @@
 #include "PDFDocEncoding.h"
 #include "Annot.h"
 #include "Link.h"
+#include "Lexer.h"
 
 //return a newly allocated char* containing an UTF16BE string of size length
 char* pdfDocEncodingToUTF16 (GooString* orig, int* length)
@@ -310,6 +312,16 @@ bool FormWidgetText::isRichText () const
 int FormWidgetText::getMaxLen () const
 {
   return parent()->getMaxLen ();
+}
+
+double FormWidgetText::getTextFontSize()
+{
+  return parent()->getTextFontSize();
+}
+
+void FormWidgetText::setTextFontSize(int fontSize)
+{
+  parent()->setTextFontSize(fontSize);
 }
 
 void FormWidgetText::setContent(GooString* new_content)
@@ -1183,6 +1195,86 @@ void FormFieldText::setContentCopy (GooString* new_content)
 FormFieldText::~FormFieldText()
 {
   delete content;
+}
+
+double FormFieldText::getTextFontSize()
+{
+  GooList* daToks = new GooList();
+  int idx = parseDA(daToks);
+  double fontSize = -1;
+  if (idx >= 0) {
+    char* p = nullptr;
+    fontSize = strtod(static_cast<GooString*>(daToks->get(idx))->getCString(), &p);
+    if (!p || *p)
+      fontSize = -1;
+  }
+  deleteGooList(daToks, GooString);
+  return fontSize;
+}
+
+void FormFieldText::setTextFontSize(int fontSize)
+{
+  if (fontSize > 0 && obj.isDict()) {
+    GooList* daToks = new GooList();
+    int idx = parseDA(daToks);
+    if (idx == -1) {
+      error(errSyntaxError, -1, "FormFieldText:: invalid DA object\n");
+      return;
+    }
+    if (defaultAppearance)
+      delete defaultAppearance;
+    defaultAppearance = new GooString;
+    for (int i = 0; i < daToks->getLength(); ++i) {
+      if (i > 0)
+        defaultAppearance->append(' ');
+      if (i == idx) {
+        defaultAppearance->appendf("{0:d}", fontSize);
+      } else {
+        defaultAppearance->append(static_cast<GooString*>(daToks->get(i)));
+      }
+    }
+    deleteGooList(daToks, GooString);
+    obj.dictSet("DA", Object(defaultAppearance->copy()));
+    xref->setModifiedObject(&obj, ref);
+    updateChildrenAppearance();
+  }
+}
+
+int FormFieldText::tokenizeDA(GooString* da, GooList* daToks, const char* searchTok)
+{
+  int idx = -1;
+  if(da && daToks) {
+    int i = 0;
+    int j = 0;
+    while (i < da->getLength()) {
+      while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
+        ++i;
+      }
+      if (i < da->getLength()) {
+        for (j = i + 1; j < da->getLength() && !Lexer::isSpace(da->getChar(j)); ++j) {
+        }
+        GooString* tok = new GooString(da, i, j - i);
+        if (searchTok && !tok->cmp(searchTok))
+          idx = daToks->getLength();
+        daToks->append(tok);
+        i = j;
+      }
+    }
+  }
+  return idx;
+}
+
+int FormFieldText::parseDA(GooList* daToks)
+{
+  int idx = -1;
+  if (obj.isDict()) {
+    Object objDA(obj.dictLookup("DA"));
+    if (objDA.isString()) {
+      GooString* da = objDA.getString();
+      idx = tokenizeDA(da, daToks, "Tf") - 1;
+    }
+  }
+  return idx;
 }
 
 

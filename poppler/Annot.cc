@@ -35,6 +35,7 @@
 // Copyright (C) 2015 Petr Gajdos <pgajdos@suse.cz>
 // Copyright (C) 2015 Philipp Reinkemeier <philipp.reinkemeier@offis.de>
 // Copyright (C) 2015 Tamas Szekeres <szekerest@gmail.com>
+// Copyright (C) 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2839,29 +2840,14 @@ void AnnotFreeText::parseAppearanceString(GooString *da, double &fontsize, Annot
   fontcolor = NULL;
   if (da) {
     GooList * daToks = new GooList();
-    int j, i = 0;
+    int i = FormFieldText::tokenizeDA(da, daToks, "Tf");
 
-    // Tokenize
-    while (i < da->getLength()) {
-      while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
-        ++i;
-      }
-      if (i < da->getLength()) {
-        for (j = i + 1; j < da->getLength() && !Lexer::isSpace(da->getChar(j)); ++j) {
-        }
-        daToks->append(new GooString(da, i, j - i));
-        i = j;
-      }
+    if (i >= 1) {
+      fontsize = gatof(( (GooString *)daToks->get(i-1) )->getCString());
+      // TODO: Font name
     }
-
     // Scan backwards: we are looking for the last set value
     for (i = daToks->getLength()-1; i >= 0; --i) {
-      if (fontsize == -1) {
-        if (!((GooString *)daToks->get(i))->cmp("Tf") && i >= 2) {
-            // TODO: Font name
-            fontsize = gatof(( (GooString *)daToks->get(i-1) )->getCString());
-        }
-      }
       if (fontcolor == NULL) {
         if (!((GooString *)daToks->get(i))->cmp("g") && i >= 1) {
           fontcolor = new AnnotColor(gatof(( (GooString *)daToks->get(i-1) )->getCString()));
