@@ -2716,7 +2716,11 @@ void SplashOutputDev::endType3Char(GfxState *state) {
 }
 
 void SplashOutputDev::type3D0(GfxState *state, double wx, double wy) {
-  t3GlyphStack->haveDx = gTrue;
+  if (likely(t3GlyphStack != nullptr)) {
+    t3GlyphStack->haveDx = gTrue;
+  } else {
+    error(errSyntaxWarning, -1, "t3GlyphStack was null in SplashOutputDev::type3D0");
+  }
 }
 
 void SplashOutputDev::type3D1(GfxState *state, double wx, double wy,
