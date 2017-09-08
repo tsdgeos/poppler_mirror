@@ -185,9 +185,23 @@ void ArthurOutputDev::updateLineDash(GfxState *state)
   int dashLength;
   double dashStart;
   state->getLineDash(&dashPattern, &dashLength, &dashStart);
+
+  // Special handling for zero-length patterns, i.e., solid lines.
+  // Simply calling QPen::setDashPattern with an empty pattern does *not*
+  // result in a solid line.  Rather, the current pattern is unchanged.
+  // See the implementation of the setDashPattern method in the file qpen.cpp.
+  if (dashLength==0)
+  {
+    m_currentPen.setStyle(Qt::SolidLine);
+    m_painter->setPen(m_currentPen);
+    return;
+  }
+
   QVector<qreal> pattern(dashLength);
   for (int i = 0; i < dashLength; ++i) {
-    pattern[i] = dashPattern[i];
+    // pdf measures the dash pattern in dots, but Qt uses the
+    // line width as the unit.
+    pattern[i] = dashPattern[i] / state->getLineWidth();
   }
   m_currentPen.setDashPattern(pattern);
   m_currentPen.setDashOffset(dashStart);
@@ -244,6 +258,11 @@ void ArthurOutputDev::updateLineWidth(GfxState *state)
 {
   m_currentPen.setWidthF(state->getLineWidth());
   m_painter->setPen(m_currentPen);
+  // The updateLineDash method needs to know the line width, but it is sometimes
+  // called before the updateLineWidth method.  To make sure that the last call
+  // to updateLineDash before a drawing operation is always with the correct line
+  // width, we call it here, right after a change to the line width.
+  updateLineDash(state);
 }
 
 void ArthurOutputDev::updateFillColor(GfxState *state)
