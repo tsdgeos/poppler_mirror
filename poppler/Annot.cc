@@ -6559,11 +6559,11 @@ AnnotRichMedia::Content::Content(Dict *dict) {
       assets = (Asset **)gmallocn(nAssets, sizeof(Asset *));
 
       int counter = 0;
-      for (int i = 0; i < obj2.arrayGetLength(); i += 2) {
+      for (int i = 0; i < nAssets; ++i) {
         assets[counter] = new AnnotRichMedia::Asset;
 
-        Object objKey = obj2.arrayGet(i);
-        assets[counter]->fileSpec = obj2.arrayGet(i + 1);
+        Object objKey = obj2.arrayGet(i * 2);
+        assets[counter]->fileSpec = obj2.arrayGet(i * 2 + 1);
 
         assets[counter]->name = new GooString( objKey.getString() );
         ++counter;
