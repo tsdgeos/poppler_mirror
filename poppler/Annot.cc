@@ -6667,26 +6667,30 @@ AnnotRichMedia::Configuration::Configuration(Dict *dict)
     } else if (!strcmp(name, "Video")) {
       type = typeVideo;
     } else {
-      // determine from first instance
+      // determine from first non null instance
+      type = typeFlash; // default in case all instances are null
       if (instances && nInstances > 0) {
-        AnnotRichMedia::Instance *instance = instances[0];
-        switch (instance->getType()) {
-          case AnnotRichMedia::Instance::type3D:
-            type = type3D;
-            break;
-          case AnnotRichMedia::Instance::typeFlash:
-            type = typeFlash;
-            break;
-          case AnnotRichMedia::Instance::typeSound:
-            type = typeSound;
-            break;
-          case AnnotRichMedia::Instance::typeVideo:
-            type = typeVideo;
-            break;
-          default:
-            type = typeFlash;
-            break;
-        }
+	for (int i = 0; i < nInstances; ++i) {
+	  AnnotRichMedia::Instance *instance = instances[i];
+	  if (instance) {
+	    switch (instance->getType()) {
+	      case AnnotRichMedia::Instance::type3D:
+		type = type3D;
+		break;
+	      case AnnotRichMedia::Instance::typeFlash:
+		type = typeFlash;
+		break;
+	      case AnnotRichMedia::Instance::typeSound:
+		type = typeSound;
+		break;
+	      case AnnotRichMedia::Instance::typeVideo:
+		type = typeVideo;
+		break;
+	    }
+	    // break the loop since we found the first non null instance
+	    break;
+	  }
+	}
       }
     }
   }
