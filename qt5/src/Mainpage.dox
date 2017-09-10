@@ -10,7 +10,7 @@ internals.
 
 @section help Current Status
 
-The %Poppler Qt5 interface library is in developement.
+The %Poppler Qt5 interface library is quite stable and working.
 
 @section refimpl Example Programs
 
