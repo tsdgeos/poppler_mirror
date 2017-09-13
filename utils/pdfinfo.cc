@@ -407,7 +407,6 @@ static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
       auto pageDests = map.find(*ref);
       if (pageDests != map.end()) {
 	for (auto& it: pageDests->second) {
-	  it.first->getCString()[4] = 0;
 	  printf("%4d ", i);
 	  printLinkDest(it.second);
 	  printf(" \"");
