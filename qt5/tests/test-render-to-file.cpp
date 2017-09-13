@@ -14,7 +14,7 @@ int main( int argc, char **argv )
         argc > 3)
     {
         // use argument as file name
-        qWarning() << "usage: test-poppler-qt4 filename [-arthur]";
+        qWarning() << "usage: test-render-to-file-qt5 filename [-arthur]";
         exit(1);
     }
   
@@ -60,7 +60,7 @@ int main( int argc, char **argv )
             QTime t = QTime::currentTime();
             QImage image = page->renderToImage();
             qDebug() << "Rendering took" << t.msecsTo(QTime::currentTime()) << "msecs";
-            image.save(QString("test-rennder-to-file%1.ppm").arg(i));
+            image.save(QString("test-render-to-file%1.ppm").arg(i));
             delete page;
         }
     }
