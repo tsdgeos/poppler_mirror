@@ -1759,6 +1759,14 @@ Object Gfx8BitFont::getCharProc(int code) {
   }
 }
 
+Object Gfx8BitFont::getCharProcNF(int code) {
+  if (enc[code] && charProcs.isDict()) {
+    return charProcs.dictLookupNF(enc[code]);
+  } else {
+    return Object(objNull);
+  }
+}
+
 Dict *Gfx8BitFont::getResources() {
   return resources.isDict() ? resources.getDict() : (Dict *)NULL;
 }

@@ -4134,7 +4134,7 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
 static GBool isImageInterpolationRequired(int srcWidth, int srcHeight,
                                           int scaledWidth, int scaledHeight,
                                           GBool interpolate) {
-  if (interpolate)
+  if (interpolate || srcWidth == 0 || srcHeight == 0)
     return gTrue;
 
   /* When scale factor is >= 400% we don't interpolate. See bugs #25268, #9860 */
