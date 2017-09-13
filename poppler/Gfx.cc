@@ -3953,12 +3953,33 @@ void Gfx::doShowText(GooString *s) {
       state->transformDelta(dx, dy, &ddx, &ddy);
       if (!out->beginType3Char(state, curX + riseX, curY + riseY, ddx, ddy,
 			       code, u, uLen)) {
-	Object charProc = ((Gfx8BitFont *)font)->getCharProc(code);
+	Object charProc = ((Gfx8BitFont *)font)->getCharProcNF(code);
+	int refNum = -1;
+	if (charProc.isRef()) {
+	  refNum = charProc.getRef().num;
+	  charProc = charProc.fetch(((Gfx8BitFont *)font)->getCharProcs()->getXRef());
+	}
 	if ((resDict = ((Gfx8BitFont *)font)->getResources())) {
 	  pushResources(resDict);
 	}
 	if (charProc.isStream()) {
-	  display(&charProc, gFalse);
+	  std::set<int>::iterator charProcDrawingIt;
+	  bool displayCharProc = true;
+	  if (refNum != -1) {
+	    if (charProcDrawing.find(refNum) == charProcDrawing.end()) {
+	      charProcDrawingIt = charProcDrawing.insert(refNum).first;
+	    } else {
+	      displayCharProc = false;
+	      error(errSyntaxError, -1, "CharProc wants to draw a CharProc that is already beign drawn");
+	    }
+	  }
+	  if (displayCharProc) {
+	    display(&charProc, gFalse);
+
+	    if (refNum != -1) {
+	      charProcDrawing.erase(charProcDrawingIt);
+	    }
+	  }
 	} else {
 	  error(errSyntaxError, getPos(), "Missing or bad Type3 CharProc entry");
 	}
