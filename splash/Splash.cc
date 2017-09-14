@@ -4152,7 +4152,7 @@ SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData,
   SplashBitmap *dest;
 
   dest = new SplashBitmap(scaledWidth, scaledHeight, 1, srcMode, srcAlpha, gTrue, bitmap->getSeparationList());
-  if (dest->getDataPtr() != NULL) {
+  if (dest->getDataPtr() != NULL && srcHeight > 0 && srcWidth > 0) {
     if (scaledHeight < srcHeight) {
       if (scaledWidth < srcWidth) {
 	scaleImageYdXd(src, srcData, srcMode, nComps, srcAlpha,
