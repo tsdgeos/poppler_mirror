@@ -44,9 +44,6 @@
 #include <QtGui/QPainter>
 
 class GfxState;
-class GfxPath;
-class Gfx8BitFont;
-struct GfxRGB;
 
 class SplashFontEngine;
 
@@ -175,7 +172,6 @@ public:
 private:
   QPainter *m_painter;
   FontHinting m_fontHinting;
-  QFont m_currentFont;
   QPen m_currentPen;
   QBrush m_currentBrush;
   GBool m_needFontUpdate;		// set when the font needs to be updated
