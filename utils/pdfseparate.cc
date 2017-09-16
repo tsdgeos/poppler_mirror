@@ -48,7 +48,7 @@ static const ArgDesc argDesc[] = {
   {NULL}
 };
 
-bool extractPages (const char *srcFileName, const char *destFileName) {
+static bool extractPages (const char *srcFileName, const char *destFileName) {
   char pathName[4096];
   GooString *gfileName = new GooString (srcFileName);
   PDFDoc *doc = new PDFDoc (gfileName, NULL, NULL, NULL);

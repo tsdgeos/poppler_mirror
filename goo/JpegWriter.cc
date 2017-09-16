@@ -30,7 +30,7 @@ struct JpegWriterPrivate {
   struct jpeg_error_mgr jerr;
 };
 
-void outputMessage(j_common_ptr cinfo)
+static void outputMessage(j_common_ptr cinfo)
 {
   char buffer[JMSG_LENGTH_MAX];
 

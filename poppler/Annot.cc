@@ -113,7 +113,7 @@
 // = (4 * (sqrt(2) - 1) / 3) * r
 #define bezierCircle 0.55228475
 
-AnnotLineEndingStyle parseAnnotLineEndingStyle(GooString *string) {
+static AnnotLineEndingStyle parseAnnotLineEndingStyle(GooString *string) {
   if (string != NULL) {
     if (!string->cmp("Square")) {
       return annotLineEndingSquare;
@@ -141,7 +141,7 @@ AnnotLineEndingStyle parseAnnotLineEndingStyle(GooString *string) {
   }  
 }
 
-const char* convertAnnotLineEndingStyle(AnnotLineEndingStyle style) {
+static const char* convertAnnotLineEndingStyle(AnnotLineEndingStyle style) {
   switch (style) {
     case annotLineEndingSquare:
       return "Square";
@@ -185,7 +185,7 @@ static AnnotExternalDataType parseAnnotExternalData(Dict* dict) {
   return type;
 }
 
-PDFRectangle *parseDiffRectangle(Array *array, PDFRectangle *rect) {
+static PDFRectangle *parseDiffRectangle(Array *array, PDFRectangle *rect) {
   PDFRectangle *newRect = NULL;
   if (array->getLength() == 4) {
     // deltas

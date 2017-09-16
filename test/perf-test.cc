@@ -196,12 +196,12 @@ static bool gfLoadOnly = false;
   #define DIR_SEP_STR  "/"
 #endif
 
-void memzero(void *data, size_t len)
+static void memzero(void *data, size_t len)
 {
     memset(data, 0, len);
 }
 
-void *zmalloc(size_t len)
+static void *zmalloc(size_t len)
 {
     void *data = malloc(len);
     if (data)
@@ -211,7 +211,7 @@ void *zmalloc(size_t len)
 
 /* Concatenate 4 strings. Any string can be NULL.
    Caller needs to free() memory. */
-char *str_cat4(const char *str1, const char *str2, const char *str3, const char *str4)
+static char *str_cat4(const char *str1, const char *str2, const char *str3, const char *str4)
 {
     char *str;
     char *tmp;
@@ -252,12 +252,12 @@ char *str_cat4(const char *str1, const char *str2, const char *str3, const char 
     return str;
 }
 
-char *str_dup(const char *str)
+static char *str_dup(const char *str)
 {
     return str_cat4(str, NULL, NULL, NULL);
 }
 
-bool str_eq(const char *str1, const char *str2)
+static bool str_eq(const char *str1, const char *str2)
 {
     if (!str1 && !str2)
         return true;
@@ -268,7 +268,7 @@ bool str_eq(const char *str1, const char *str2)
     return false;
 }
 
-bool str_ieq(const char *str1, const char *str2)
+static bool str_ieq(const char *str1, const char *str2)
 {
     if (!str1 && !str2)
         return true;
@@ -279,7 +279,7 @@ bool str_ieq(const char *str1, const char *str2)
     return false;
 }
 
-bool str_endswith(const char *txt, const char *end)
+static bool str_endswith(const char *txt, const char *end)
 {
     size_t end_len;
     size_t txt_len;
@@ -298,7 +298,7 @@ bool str_endswith(const char *txt, const char *end)
 
 /* TODO: probably should move to some other file and change name to
    sleep_milliseconds */
-void sleep_milliseconds(int milliseconds)
+static void sleep_milliseconds(int milliseconds)
 {
 #ifdef _WIN32
     Sleep((DWORD)milliseconds);
@@ -327,7 +327,7 @@ void sleep_milliseconds(int milliseconds)
 }
 
 #ifndef HAVE_STRCPY_S
-void strcpy_s(char* dst, size_t dst_size, const char* src)
+static void strcpy_s(char* dst, size_t dst_size, const char* src)
 {
     size_t src_size = strlen(src) + 1;
     if (src_size <= dst_size)
@@ -342,7 +342,7 @@ void strcpy_s(char* dst, size_t dst_size, const char* src)
 #endif
 
 #ifndef HAVE_STRCAT_S
-void strcat_s(char *dst, size_t dst_size, const char* src)
+static void strcat_s(char *dst, size_t dst_size, const char* src)
 {
     size_t dst_len = strlen(dst);
     if (dst_len >= dst_size) {
@@ -390,7 +390,7 @@ static void splashColorSet(SplashColorPtr col, Guchar red, Guchar green, Guchar 
     }
 }
 
-void SplashColorsInit(void)
+static void SplashColorsInit(void)
 {
     splashColorSet(SPLASH_COL_RED_PTR, 0xff, 0, 0, 0);
     splashColorSet(SPLASH_COL_GREEN_PTR, 0, 0xff, 0, 0);
@@ -515,7 +515,7 @@ static void win_correct_path_for_FindFirstFile(char *path, int path_max_len)
 }
 #endif
 
-FindFileState *find_file_open(const char *path, const char *pattern)
+static FindFileState *find_file_open(const char *path, const char *pattern)
 {
     FindFileState *s;
 
@@ -544,7 +544,7 @@ void *StandardSecurityHandler::getAuthData()
 }
 #endif
 
-char *makepath(char *buf, int buf_size, const char *path,
+static char *makepath(char *buf, int buf_size, const char *path,
                const char *filename)
 {
     strcpy_s(buf, buf_size, path);
@@ -568,7 +568,7 @@ static int skip_matching_file(const char *filename)
 }
 #endif
 
-int find_file_next(FindFileState *s, char *filename, int filename_size_max)
+static int find_file_next(FindFileState *s, char *filename, int filename_size_max)
 {
 #ifdef _WIN32
     int    fFound;
@@ -635,7 +635,7 @@ CheckFile:
 #endif
 }
 
-void find_file_close(FindFileState *s)
+static void find_file_close(FindFileState *s)
 {
 #ifdef _WIN32
     if (INVALID_HANDLE_VALUE != s->dir)
@@ -647,7 +647,7 @@ void find_file_close(FindFileState *s)
     free(s);
 }
 
-int StrList_Len(StrList **root)
+static int StrList_Len(StrList **root)
 {
     int         len = 0;
     StrList *   cur;
@@ -662,7 +662,7 @@ int StrList_Len(StrList **root)
     return len;
 }
 
-int StrList_InsertAndOwn(StrList **root, char *txt)
+static int StrList_InsertAndOwn(StrList **root, char *txt)
 {
     StrList *   el;
     assert(root && txt);
@@ -678,7 +678,7 @@ int StrList_InsertAndOwn(StrList **root, char *txt)
     return true;
 }
 
-int StrList_Insert(StrList **root, char *txt)
+static int StrList_Insert(StrList **root, char *txt)
 {
     char *txtDup;
 
@@ -696,7 +696,7 @@ int StrList_Insert(StrList **root, char *txt)
     return true;
 }
 
-StrList* StrList_RemoveHead(StrList **root)
+static StrList* StrList_RemoveHead(StrList **root)
 {
     StrList *tmp;
     assert(root);
@@ -711,7 +711,7 @@ StrList* StrList_RemoveHead(StrList **root)
     return tmp;
 }
 
-void StrList_FreeElement(StrList *el)
+static void StrList_FreeElement(StrList *el)
 {
     if (!el)
         return;
@@ -719,7 +719,7 @@ void StrList_FreeElement(StrList *el)
     free((void*)el);
 }
 
-void StrList_Destroy(StrList **root)
+static void StrList_Destroy(StrList **root)
 {
     StrList *   cur;
     StrList *   next;
@@ -736,15 +736,15 @@ void StrList_Destroy(StrList **root)
 }
 
 #ifndef _WIN32
-void OutputDebugString(const char *txt)
+/*static void OutputDebugString(const char *txt)
 {
-    /* do nothing */
-}
+    // do nothing
+}*/
 #define _snprintf snprintf
 #define _vsnprintf vsnprintf
 #endif
 
-void my_error(void *, ErrorCategory, Goffset pos, char *msg) {
+static void my_error(void *, ErrorCategory, Goffset pos, char *msg) {
 #if 0
     char        buf[4096], *p = buf;
 
@@ -798,7 +798,7 @@ void my_error(void *, ErrorCategory, Goffset pos, char *msg) {
 #endif
 }
 
-void LogInfo(const char *fmt, ...)
+static void LogInfo(const char *fmt, ...)
 {
     va_list args;
     char        buf[4096], *p = buf;
@@ -1128,7 +1128,7 @@ Exit:
 #include <sys/types.h>
 #include <sys/stat.h>
 
-bool IsDirectoryName(char *path)
+static bool IsDirectoryName(char *path)
 {
     struct _stat    buf;
     int             result;
@@ -1143,7 +1143,7 @@ bool IsDirectoryName(char *path)
     return false;
 }
 
-bool IsFileName(char *path)
+static bool IsFileName(char *path)
 {
     struct _stat    buf;
     int             result;
@@ -1158,20 +1158,20 @@ bool IsFileName(char *path)
     return false;
 }
 #else
-bool IsDirectoryName(char *path)
+static bool IsDirectoryName(char *path)
 {
     /* TODO: implement me */
     return false;
 }
 
-bool IsFileName(char *path)
+static bool IsFileName(char *path)
 {
     /* TODO: implement me */
     return true;
 }
 #endif
 
-bool IsPdfFileName(char *path)
+static bool IsPdfFileName(char *path)
 {
     if (str_endswith(path, ".pdf"))
         return true;

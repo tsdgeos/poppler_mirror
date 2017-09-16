@@ -229,6 +229,7 @@ poppler_action_copy (PopplerAction *action)
 	return new_action;
 }
 
+static
 PopplerDest *
 dest_new_goto (PopplerDocument *document,
 	       LinkDest        *link_dest)

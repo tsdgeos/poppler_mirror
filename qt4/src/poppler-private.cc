@@ -39,7 +39,7 @@ namespace Poppler {
 
 namespace Debug {
 
-    void qDebugDebugFunction(const QString &message, const QVariant & /*closure*/)
+    static void qDebugDebugFunction(const QString &message, const QVariant & /*closure*/)
     {
         qDebug() << message;
     }
@@ -57,7 +57,7 @@ namespace Debug {
         Debug::debugClosure = closure;
     }
 
-    void qt4ErrorFunction(void * /*data*/, ErrorCategory /*category*/, Goffset pos, char *msg)
+    static void qt4ErrorFunction(void * /*data*/, ErrorCategory /*category*/, Goffset pos, char *msg)
     {
         QString emsg;
 
@@ -162,7 +162,7 @@ namespace Debug {
         return QStringToUnicodeGooString(dt.toUTC().toString("yyyyMMddhhmmss+00'00'"));
     }
 
-    void linkActionToTocItem( ::LinkAction * a, DocumentData * doc, QDomElement * e )
+    static void linkActionToTocItem( ::LinkAction * a, DocumentData * doc, QDomElement * e )
     {
         if ( !a || !e )
             return;
