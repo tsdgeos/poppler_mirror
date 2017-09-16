@@ -45,7 +45,7 @@ struct _PopplerMovieClass
   GObjectClass parent_class;
 };
 
-G_DEFINE_TYPE (PopplerMovie, poppler_movie, G_TYPE_OBJECT);
+G_DEFINE_TYPE (PopplerMovie, poppler_movie, G_TYPE_OBJECT)
 
 static void
 poppler_movie_finalize (GObject *object)

@@ -49,7 +49,7 @@ typedef struct _PopplerStructureElementClass
   GObjectClass parent_class;
 } PopplerStructureElementClass;
 
-G_DEFINE_TYPE (PopplerStructureElement, poppler_structure_element, G_TYPE_OBJECT);
+G_DEFINE_TYPE (PopplerStructureElement, poppler_structure_element, G_TYPE_OBJECT)
 
 static PopplerStructureElement *
 _poppler_structure_element_new (PopplerDocument *document, StructElement *element)
