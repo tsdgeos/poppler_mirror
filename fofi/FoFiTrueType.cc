@@ -1307,8 +1307,10 @@ Guint FoFiTrueType::computeTableChecksum(Guchar *data, int length) {
     switch (length & 3) {
     case 3:
       word |= (data[i+2] & 0xff) <<  8;
+      // fallthrough
     case 2:
       word |= (data[i+1] & 0xff) << 16;
+      // fallthrough
     case 1:
       word |= (data[i  ] & 0xff) << 24;
       break;

@@ -4681,7 +4681,7 @@ void AnnotWidget::drawBorder() {
         appearBuf->appendf(" {0:.2f}", dash[i]);
       }
       appearBuf->append("] 0 d\n");
-      // fall through to the solid case
+      // fallthrough
     case AnnotBorder::borderSolid:
     case AnnotBorder::borderUnderlined:
       appearBuf->appendf("{0:.2f} w\n", w);
@@ -4713,7 +4713,7 @@ void AnnotWidget::drawBorder() {
         appearBuf->appendf(" {0:.2f}", dash[i]);
       }
       appearBuf->append("] 0 d\n");
-      // fall through to the solid case
+      // fallthrough
     case AnnotBorder::borderSolid:
       appearBuf->appendf("{0:.2f} w\n", w);
       setColor(aColor, gFalse);
