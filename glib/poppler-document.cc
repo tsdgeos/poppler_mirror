@@ -758,8 +758,7 @@ _poppler_goo_string_from_utf8(const gchar *src)
   g_free (utf16);
 
   if (!result->hasUnicodeMarker()) {
-    result->insert(0, 0xff);
-    result->insert(0, 0xfe);
+    result->prependUnicodeMarker();
   }
 
   return result;

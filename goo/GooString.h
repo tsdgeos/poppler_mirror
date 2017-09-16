@@ -161,6 +161,7 @@ public:
   GBool endsWith(const char *suffix) const;
 
   GBool hasUnicodeMarker(void) const;
+  void prependUnicodeMarker();
   GBool hasJustUnicodeMarker(void) const { return length == 2 && hasUnicodeMarker(); }
 
   // Sanitizes the string so that it does

@@ -1345,7 +1345,7 @@ static inline Guint sha256sigma1(Guint x) {
   return rotr(x, 17) ^ rotr(x, 19) ^ (x >> 10);
 }
 
-void sha256HashBlock(Guchar *blk, Guint *H) {
+static void sha256HashBlock(Guchar *blk, Guint *H) {
   Guint W[64];
   Guint a, b, c, d, e, f, g, h;
   Guint T1, T2;

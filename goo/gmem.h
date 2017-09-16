@@ -44,7 +44,7 @@ extern void *gmalloc_checkoverflow(size_t size);
  * returns NULL.  If <p> is NULL, calls malloc instead of realloc().
  */
 extern void *grealloc(void *p, size_t size);
-extern void *grealloc_checkoverflow(size_t size);
+extern void *grealloc_checkoverflow(void *p, size_t size);
 
 /*
  * These are similar to gmalloc and grealloc, but take an object count

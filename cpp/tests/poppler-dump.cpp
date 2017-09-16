@@ -85,7 +85,7 @@ static void error(const std::string &msg)
     exit(1);
 }
 
-std::ostream& operator<<(std::ostream& stream, const poppler::ustring &str)
+static std::ostream& operator<<(std::ostream& stream, const poppler::ustring &str)
 {
     const poppler::byte_array ba = str.to_utf8();
     for (unsigned int i = 0; i < ba.size(); ++i) {

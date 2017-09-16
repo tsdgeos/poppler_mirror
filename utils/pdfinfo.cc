@@ -186,7 +186,7 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text) {
   }
 }
 
-void printISODate(Dict *infoDict, const char *key, const char *text)
+static void printISODate(Dict *infoDict, const char *key, const char *text)
 {
   char *s;
   int year, mon, day, hour, min, sec, tz_hour, tz_minute;
@@ -428,7 +428,7 @@ static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
   }
 }
 
-void printInfo(PDFDoc *doc, UnicodeMap *uMap, long long filesize, GBool multiPage) {
+static void printInfo(PDFDoc *doc, UnicodeMap *uMap, long long filesize, GBool multiPage) {
   Page *page;
   char buf[256];
   double w, h, wISO, hISO;

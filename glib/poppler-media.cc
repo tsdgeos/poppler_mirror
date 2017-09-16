@@ -48,7 +48,7 @@ struct _PopplerMediaClass
   GObjectClass parent_class;
 };
 
-G_DEFINE_TYPE (PopplerMedia, poppler_media, G_TYPE_OBJECT);
+G_DEFINE_TYPE (PopplerMedia, poppler_media, G_TYPE_OBJECT)
 
 static void
 poppler_media_finalize (GObject *object)

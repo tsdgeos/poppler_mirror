@@ -34,7 +34,7 @@
 #include "Link.h"
 #include "Rendition.h"
 
-bool operator==( const Ref &r1, const Ref &r2 )
+static bool operator==( const Ref &r1, const Ref &r2 )
 {
 	return r1.num == r2.num && r1.gen == r2.gen;
 }

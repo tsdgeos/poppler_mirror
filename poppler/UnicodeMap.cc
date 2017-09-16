@@ -55,7 +55,7 @@ UnicodeMap *UnicodeMap::parse(GooString *encodingNameA) {
   UnicodeMapExt *eMap;
   int size, eMapsSize;
   char buf[256];
-  int line, nBytes, i, x;
+  int line, nBytes, i;
   char *tok1, *tok2, *tok3;
   char *tokptr;
 
@@ -102,6 +102,7 @@ UnicodeMap *UnicodeMap::parse(GooString *encodingNameA) {
 	eMap = &map->eMaps[map->eMapsLen];
 	sscanf(tok1, "%x", &eMap->u);
 	for (i = 0; i < nBytes; ++i) {
+	  unsigned int x;
 	  sscanf(tok3 + i*2, "%2x", &x);
 	  eMap->code[i] = (char)x;
 	}

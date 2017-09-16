@@ -7,7 +7,7 @@
 #include <poppler-qt5.h>
 #include <poppler-form.h>
 
-std::ostream& operator<< (std::ostream &out, Poppler::FormField::FormType type)
+static std::ostream& operator<< (std::ostream &out, Poppler::FormField::FormType type)
 {
     switch (type) {
         case Poppler::FormField::FormButton:    out << "Button";    break;
@@ -18,7 +18,7 @@ std::ostream& operator<< (std::ostream &out, Poppler::FormField::FormType type)
     return out;
 }
 
-std::ostream& operator<< (std::ostream &out, Poppler::FormFieldButton::ButtonType type)
+static std::ostream& operator<< (std::ostream &out, Poppler::FormFieldButton::ButtonType type)
 {
     switch (type) {
         case Poppler::FormFieldButton::Push:        out << "Push";      break;
@@ -28,7 +28,7 @@ std::ostream& operator<< (std::ostream &out, Poppler::FormFieldButton::ButtonTyp
     return out;
 }
 
-std::ostream& operator<< (std::ostream &out, Poppler::FormFieldText::TextType type)
+static std::ostream& operator<< (std::ostream &out, Poppler::FormFieldText::TextType type)
 {
     switch (type) {
         case Poppler::FormFieldText::Normal:        out << "Normal";        break;
@@ -38,7 +38,7 @@ std::ostream& operator<< (std::ostream &out, Poppler::FormFieldText::TextType ty
     return out;
 }
 
-std::ostream& operator<< (std::ostream &out, Poppler::FormFieldChoice::ChoiceType type)
+static std::ostream& operator<< (std::ostream &out, Poppler::FormFieldChoice::ChoiceType type)
 {
     switch (type) {
         case Poppler::FormFieldChoice::ComboBox:      out << "ComboBox";    break;
@@ -47,7 +47,7 @@ std::ostream& operator<< (std::ostream &out, Poppler::FormFieldChoice::ChoiceTyp
     return out;
 }
 
-std::ostream& operator<< (std::ostream &out, Poppler::SignatureValidationInfo::SignatureStatus status)
+static std::ostream& operator<< (std::ostream &out, Poppler::SignatureValidationInfo::SignatureStatus status)
 {
     switch (status) {
         case Poppler::SignatureValidationInfo::SignatureValid:          out << "Valid";          break;
@@ -61,7 +61,7 @@ std::ostream& operator<< (std::ostream &out, Poppler::SignatureValidationInfo::S
     return out;
 }
 
-std::ostream& operator<< (std::ostream &out, Poppler::SignatureValidationInfo::CertificateStatus status)
+static std::ostream& operator<< (std::ostream &out, Poppler::SignatureValidationInfo::CertificateStatus status)
 {
     switch (status) {
         case Poppler::SignatureValidationInfo::CertificateTrusted:         out << "Trusted";         break;
@@ -75,7 +75,7 @@ std::ostream& operator<< (std::ostream &out, Poppler::SignatureValidationInfo::C
     return out;
 }
 
-std::ostream& operator<< (std::ostream &out, Qt::Alignment alignment)
+static std::ostream& operator<< (std::ostream &out, Qt::Alignment alignment)
 {
     switch (alignment) {
         case Qt::AlignLeft:     out << "Left";      break;
@@ -91,13 +91,13 @@ std::ostream& operator<< (std::ostream &out, Qt::Alignment alignment)
     return out;
 }
 
-std::ostream& operator<< (std::ostream &out, const QString &string)
+static std::ostream& operator<< (std::ostream &out, const QString &string)
 {
     out << string.toUtf8().constData();
     return out;
 }
 
-std::ostream& operator<< (std::ostream &out, const QRectF &rect)
+static std::ostream& operator<< (std::ostream &out, const QRectF &rect)
 {
     out << QString("top: %1 left: %2 width: %3 height: %4").arg(rect.x()).arg(rect.y()).arg(rect.width()).arg(rect.height());
     return out;
