@@ -60,8 +60,8 @@ char* pdfDocEncodingToUTF16 (GooString* orig, int* length)
   char *result = new char[(*length)];
   char *cstring = orig->getCString();
   //unicode marker
-  result[0] = 0xfe;
-  result[1] = 0xff;
+  result[0] = (char)0xfe;
+  result[1] = (char)0xff;
   //convert to utf16
   for(int i=2,j=0; i<(*length); i+=2,j++) {
     Unicode u = pdfDocEncoding[(unsigned int)((unsigned char)cstring[j])]&0xffff;
@@ -918,8 +918,7 @@ GooString* FormField::getFullyQualifiedName() {
   }
   
   if (unicode_encoded) {
-    full_name->insert(0, 0xff);
-    full_name->insert(0, 0xfe);
+    full_name->prependUnicodeMarker();
   }
 
   fullyQualifiedName = full_name;
@@ -1182,8 +1181,7 @@ void FormFieldText::setContentCopy (GooString* new_content)
 
     //append the unicode marker <FE FF> if needed
     if (!content->hasUnicodeMarker()) {
-      content->insert(0, 0xff);
-      content->insert(0, 0xfe);
+      content->prependUnicodeMarker();
     }
   }
 
@@ -1539,8 +1537,7 @@ void FormFieldChoice::setEditChoice (GooString* new_content)
 
     //append the unicode marker <FE FF> if needed
     if (!editedChoice->hasUnicodeMarker()) {
-      editedChoice->insert(0, 0xff);
-      editedChoice->insert(0, 0xfe);
+      editedChoice->prependUnicodeMarker();
     }
   }
   updateSelection();

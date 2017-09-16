@@ -1398,8 +1398,7 @@ void Annot::setContents(GooString *new_content) {
     contents = new GooString(new_content);
     //append the unicode marker <FE FF> if needed	
     if (!contents->hasUnicodeMarker()) {
-      contents->insert(0, 0xff);
-      contents->insert(0, 0xfe);
+      contents->prependUnicodeMarker();
     }
   } else {
     contents = new GooString();
@@ -1987,8 +1986,7 @@ void AnnotMarkup::setLabel(GooString *new_label) {
     label = new GooString(new_label);
     //append the unicode marker <FE FF> if needed
     if (!label->hasUnicodeMarker()) {
-      label->insert(0, 0xff);
-      label->insert(0, 0xfe);
+      label->prependUnicodeMarker();
     }
   } else {
     label = new GooString();
@@ -2764,8 +2762,7 @@ void AnnotFreeText::setStyleString(GooString *new_string) {
     styleString = new GooString(new_string);
     //append the unicode marker <FE FF> if needed
     if (!styleString->hasUnicodeMarker()) {
-      styleString->insert(0, 0xff);
-      styleString->insert(0, 0xfe);
+      styleString->prependUnicodeMarker();
     }
   } else {
     styleString = new GooString();

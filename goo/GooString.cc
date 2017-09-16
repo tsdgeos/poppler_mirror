@@ -917,6 +917,12 @@ GBool GooString::hasUnicodeMarker(void) const
   return length > 1 && (s[0] & 0xff) == 0xfe && (s[1] & 0xff) == 0xff;
 }
 
+void GooString::prependUnicodeMarker()
+{
+    insert(0, (char)0xff);
+    insert(0, (char)0xfe);
+}
+
 GooString *GooString::sanitizedName(GBool psmode)
 {
   GooString *name;
