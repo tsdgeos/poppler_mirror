@@ -798,6 +798,8 @@ static void my_error(void *, ErrorCategory, Goffset pos, char *msg) {
 #endif
 }
 
+static void LogInfo(const char *fmt, ...) GCC_PRINTF_FORMAT(1, 2);
+
 static void LogInfo(const char *fmt, ...)
 {
     va_list args;
