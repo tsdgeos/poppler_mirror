@@ -478,7 +478,7 @@ __inline char *getcwd(char *buffer, int maxlen)
     return _getcwd(buffer, maxlen);
 }
 
-int fnmatch(const char *pattern, const char *string, int flags)
+static int fnmatch(const char *pattern, const char *string, int flags)
 {
     int prefix_len;
     const char *star_pos = strchr(pattern, '*');
