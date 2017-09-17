@@ -478,7 +478,7 @@ __inline char *getcwd(char *buffer, int maxlen)
     return _getcwd(buffer, maxlen);
 }
 
-int fnmatch(const char *pattern, const char *string, int flags)
+static int fnmatch(const char *pattern, const char *string, int flags)
 {
     int prefix_len;
     const char *star_pos = strchr(pattern, '*');
@@ -797,6 +797,8 @@ static void my_error(void *, ErrorCategory, Goffset pos, char *msg) {
     va_end(args);
 #endif
 }
+
+static void LogInfo(const char *fmt, ...) GCC_PRINTF_FORMAT(1, 2);
 
 static void LogInfo(const char *fmt, ...)
 {
