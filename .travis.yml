@@ -11,4 +11,4 @@ compiler:
  - clang
  - gcc
 
-script: cmake . -DTESTDATADIR=`pwd`/test-files && make && make test
+script: cmake . -DTESTDATADIR=`pwd`/test-files && make -j2 && make test
