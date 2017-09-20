@@ -134,3 +134,7 @@ if (HAVE_INTROSPECTION)
 
   gir_add_introspections(INTROSPECTION_GIRS)
 endif ()
+
+if(ENABLE_GTK_DOC)
+  add_subdirectory(reference)
+endif()
