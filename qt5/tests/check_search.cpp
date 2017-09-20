@@ -169,6 +169,6 @@ void TestSearch::testWholeWordsOnly()
     QCOMPARE( page->search(QLatin1String("Own"), left, top, right, bottom, direction, mode3), false );
 }
 
-QTEST_MAIN(TestSearch)
+QTEST_GUILESS_MAIN(TestSearch)
 #include "check_search.moc"
 

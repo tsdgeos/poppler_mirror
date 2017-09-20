@@ -122,6 +122,6 @@ void TestGooString::testFormat()
     }
 }
 
-QTEST_MAIN(TestGooString)
+QTEST_GUILESS_MAIN(TestGooString)
 #include "check_goostring.moc"
 

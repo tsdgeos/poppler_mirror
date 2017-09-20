@@ -83,6 +83,6 @@ void TestPassword::password3()
     delete doc;
 }
 
-QTEST_MAIN(TestPassword)
+QTEST_GUILESS_MAIN(TestPassword)
 #include "check_password.moc"
 

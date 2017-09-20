@@ -39,6 +39,6 @@ void TestPermissions::permissions1()
     delete doc;
 }
 
-QTEST_MAIN(TestPermissions)
+QTEST_GUILESS_MAIN(TestPermissions)
 #include "check_permissions.moc"
 

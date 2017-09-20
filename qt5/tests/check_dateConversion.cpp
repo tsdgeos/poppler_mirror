@@ -137,6 +137,6 @@ void TestDateConv::checkInvalidDates()
     QCOMPARE(Poppler::convertDate(input.data()), QDateTime());
 }
 
-QTEST_MAIN(TestDateConv)
+QTEST_GUILESS_MAIN(TestDateConv)
 
 #include "check_dateConversion.moc"

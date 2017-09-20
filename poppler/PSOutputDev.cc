@@ -2544,6 +2544,14 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, GooString *fileName,
   writePS("%%EndResource\n");
 }
 
+void PSOutputDev::updateFontMaxValidGlyph(GfxFont *font, int maxValidGlyph) {
+  if (maxValidGlyph >= 0 && font->getName()) {
+    if (maxValidGlyph > fontMaxValidGlyph->lookupInt(font->getName())) {
+      fontMaxValidGlyph->replace(font->getName()->copy(), maxValidGlyph);
+    }
+  }
+}
+
 void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font,
 					       GooString *fileName,
 					       GooString *psName,
@@ -2594,9 +2602,7 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font,
 		needVerticalMetrics,
 		&maxValidGlyph,
 		outputFunc, outputStream);
-	if (maxValidGlyph >= 0 && font->getName()) {
-	  fontMaxValidGlyph->replace(font->getName()->copy(), maxValidGlyph);
-	}
+	updateFontMaxValidGlyph(font, maxValidGlyph);
       }
       gfree(codeToGID);
     } else {
@@ -2696,9 +2702,7 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id,
 			     needVerticalMetrics,
 			     &maxValidGlyph,
 			     outputFunc, outputStream);
-	if (maxValidGlyph > 0 && font->getName()) {
-	  fontMaxValidGlyph->replace(font->getName()->copy(), maxValidGlyph);
-	}
+	updateFontMaxValidGlyph(font, maxValidGlyph);
       }
       delete ffTT;
     }

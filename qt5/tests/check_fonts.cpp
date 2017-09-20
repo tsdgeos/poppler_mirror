@@ -232,6 +232,6 @@ void TestFontsData::checkIteratorFonts()
     delete doc;
 }
 
-QTEST_MAIN(TestFontsData)
+QTEST_GUILESS_MAIN(TestFontsData)
 #include "check_fonts.moc"
 
