@@ -69,4 +69,3 @@ void FontsDock::documentClosed()
     AbstractInfoDock::documentClosed();
 }
 
-#include "fonts.moc"

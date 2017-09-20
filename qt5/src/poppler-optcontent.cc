@@ -454,4 +454,3 @@ namespace Poppler
   }
 }
 
-#include "poppler-optcontent.moc"

@@ -69,4 +69,3 @@ void InfoDock::documentClosed()
     AbstractInfoDock::documentClosed();
 }
 
-#include "info.moc"
