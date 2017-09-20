@@ -52,7 +52,8 @@ libpoppler_qt5_la_CPPFLAGS =			\
 	-I$(top_srcdir)/poppler			\
 	$(POPPLER_QT5_CFLAGS)			\
 	$(NSS3_CFLAGS)                          \
-	$(LCMS_CFLAGS)
+	$(LCMS_CFLAGS)				\
+	$(FREETYPE_CFLAGS)
 
 libpoppler_qt5_la_CXXFLAGS =			\
 	-Dpoppler_qt5_EXPORTS

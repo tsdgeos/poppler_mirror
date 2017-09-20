@@ -141,4 +141,3 @@ void NavigationToolBar::slotRotationComboChanged(int idx)
     emit rotationChanged(idx * 90);
 }
 
-#include "navigationtoolbar.moc"
