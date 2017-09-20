@@ -44,6 +44,6 @@ void TestPageLayout::checkFacing()
     delete doc;
 }
 
-QTEST_MAIN(TestPageLayout)
+QTEST_GUILESS_MAIN(TestPageLayout)
 #include "check_pagelayout.moc"
 

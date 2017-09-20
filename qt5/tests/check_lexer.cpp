@@ -102,6 +102,6 @@ void TestLexer::testNumbers()
     delete lexer;
 }
 
-QTEST_MAIN(TestLexer)
+QTEST_GUILESS_MAIN(TestLexer)
 #include "check_lexer.moc"
 

@@ -152,6 +152,6 @@ void TestAttachments::checkAttach4()
 
 }
 
-QTEST_MAIN(TestAttachments)
+QTEST_GUILESS_MAIN(TestAttachments)
 #include "check_attachments.moc"
 

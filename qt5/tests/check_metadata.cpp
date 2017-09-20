@@ -269,6 +269,6 @@ void TestMetaData::checkNoPdfId()
     delete doc;
 }
 
-QTEST_MAIN(TestMetaData)
+QTEST_GUILESS_MAIN(TestMetaData)
 #include "check_metadata.moc"
 

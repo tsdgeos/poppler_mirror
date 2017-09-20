@@ -38,6 +38,6 @@ void TestPageLabelInfo::testFromLatin()
     QCOMPARE(fromLatin(latin.getCString()), 56);
 }
 
-QTEST_MAIN(TestPageLabelInfo)
+QTEST_GUILESS_MAIN(TestPageLabelInfo)
 #include "check_pagelabelinfo.moc"
 

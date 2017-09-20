@@ -440,7 +440,7 @@ void TestOptionalContent::checkRadioButtons()
     delete doc;
 }
 
-QTEST_MAIN(TestOptionalContent)
+QTEST_GUILESS_MAIN(TestOptionalContent)
 
 #include "check_optcontent.moc"
 

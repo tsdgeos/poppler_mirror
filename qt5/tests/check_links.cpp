@@ -93,6 +93,6 @@ void TestLinks::checkDests_xr02()
     delete doc;
 }
 
-QTEST_MAIN(TestLinks)
+QTEST_GUILESS_MAIN(TestLinks)
 
 #include "check_links.moc"

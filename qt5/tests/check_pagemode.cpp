@@ -68,6 +68,6 @@ void TestPageMode::checkOC()
     delete doc;
 }
 
-QTEST_MAIN(TestPageMode)
+QTEST_GUILESS_MAIN(TestPageMode)
 #include "check_pagemode.moc"
 

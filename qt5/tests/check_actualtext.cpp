@@ -27,7 +27,7 @@ void TestActualText::checkActualText1()
     delete doc;
 }
 
-QTEST_MAIN(TestActualText)
+QTEST_GUILESS_MAIN(TestActualText)
 
 #include "check_actualtext.moc"
 

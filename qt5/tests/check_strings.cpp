@@ -245,6 +245,6 @@ GooString* TestStrings::newGooString(const char *s, int l)
     return goo;
 }
 
-QTEST_MAIN(TestStrings)
+QTEST_GUILESS_MAIN(TestStrings)
 
 #include "check_strings.moc"
