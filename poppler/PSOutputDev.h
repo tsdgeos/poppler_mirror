@@ -355,6 +355,7 @@ private:
   void setupFonts(Dict *resDict);
   void setupFont(GfxFont *font, Dict *parentResDict);
   void setupEmbeddedType1Font(Ref *id, GooString *psName);
+  void updateFontMaxValidGlyph(GfxFont *font, int maxValidGlyph);
   void setupExternalType1Font(GooString *fileName, GooString *psName);
   void setupEmbeddedType1CFont(GfxFont *font, Ref *id, GooString *psName);
   void setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id, GooString *psName);
