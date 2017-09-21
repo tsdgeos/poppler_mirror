@@ -168,7 +168,7 @@ public:
   // not contain any ( ) < > [ ] { } / %
   // The postscript mode also has some more strict checks
   // The caller owns the return value
-  GooString *sanitizedName(GBool psmode);
+  GooString *sanitizedName(GBool psmode) const;
 
 private:
   GooString(const GooString &other);

@@ -39,6 +39,7 @@ option(ENABLE_SPLASH "Build the Splash graphics backend." ON)
 option(ENABLE_UTILS "Compile poppler command line utils." ON)
 option(ENABLE_CPP "Compile poppler cpp wrapper." ON)
 option(ENABLE_GLIB "Compile poppler glib wrapper." ON)
+option(ENABLE_GTK_DOC "Whether to generate glib API documentation." OFF)
 option(ENABLE_QT4 "Compile poppler qt4 wrapper." ON)
 option(ENABLE_QT5 "Compile poppler qt5 wrapper." ON)
 set(ENABLE_LIBOPENJPEG "auto" CACHE STRING "Use libopenjpeg for JPX streams. Possible values: auto, openjpeg1, openjpeg2, unmaintained, none. 'auto' prefers openjpeg2 over openjpeg1 if both are available. 'unmaintained' gives you the internal unmaintained decoder. Use at your own risk. 'none' compiles no JPX decoder at all. Default: auto")
@@ -779,8 +780,8 @@ show_end_message_yesno("qt4 wrapper" ENABLE_QT4)
 show_end_message_yesno("qt5 wrapper" ENABLE_QT5)
 show_end_message_yesno("glib wrapper" ENABLE_GLIB)
 show_end_message_yesno("  introspection" INTROSPECTION_FOUND)
+show_end_message_yesno("  gtk-doc" ENABLE_GTK_DOC)
 show_end_message_yesno("cpp wrapper" ENABLE_CPP)
-show_end_message("use gtk-doc" "not supported with this CMake build system")
 show_end_message_yesno("use libjpeg" ENABLE_LIBJPEG)
 show_end_message_yesno("use libpng" ENABLE_LIBPNG)
 show_end_message_yesno("use libtiff" ENABLE_LIBTIFF)
@@ -839,5 +840,6 @@ add_custom_target(dist
         COMMAND git log --stat | fmt --split-only > ${CMAKE_BINARY_DIR}/ChangeLog
         COMMAND git archive --prefix=${ARCHIVE_NAME}/ HEAD > ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar
         COMMAND tar -C ${CMAKE_BINARY_DIR} -rf ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar ChangeLog --transform='s,,${ARCHIVE_NAME}/,'
+        COMMAND tar -C ${CMAKE_BINARY_DIR} -rf ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar glib/reference/html --transform='s,,${ARCHIVE_NAME}/,'
         COMMAND xz -9 ${CMAKE_BINARY_DIR}/${ARCHIVE_NAME}.tar
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
