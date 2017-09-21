@@ -923,7 +923,7 @@ void GooString::prependUnicodeMarker()
     insert(0, (char)0xfe);
 }
 
-GooString *GooString::sanitizedName(GBool psmode)
+GooString *GooString::sanitizedName(GBool psmode) const
 {
   GooString *name;
   char buf[8];
