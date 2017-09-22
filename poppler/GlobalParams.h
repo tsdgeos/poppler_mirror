@@ -81,22 +81,6 @@ enum SysFontType {
 
 //------------------------------------------------------------------------
 
-class PSFontParam16 {
-public:
-
-  GooString *name;		// PDF font name for psResidentFont16;
-				//   char collection name for psResidentFontCC
-  int wMode;			// writing mode (0=horiz, 1=vert)
-  GooString *psFontName;		// PostScript font name
-  GooString *encoding;		// encoding
-
-  PSFontParam16(GooString *nameA, int wModeA,
-		GooString *psFontNameA, GooString *encodingA);
-  ~PSFontParam16();
-};
-
-//------------------------------------------------------------------------
-
 enum PSLevel {
   psLevel1,
   psLevel1Sep,
@@ -161,10 +145,6 @@ public:
   GBool getPSShrinkLarger();
   GBool getPSCenter();
   PSLevel getPSLevel();
-  GooString *getPSResidentFont(GooString *fontName);
-  GooList *getPSResidentFonts();
-  PSFontParam16 *getPSResidentFont16(GooString *fontName, int wMode);
-  PSFontParam16 *getPSResidentFontCC(GooString *collection, int wMode);
   GooString *getTextEncodingName();
   EndOfLineKind getTextEOL();
   GBool getTextPageBreaks();
@@ -279,15 +259,6 @@ private:
   GBool psShrinkLarger;		// shrink larger pages to fit paper
   GBool psCenter;		// center pages on the paper
   PSLevel psLevel;		// PostScript level to generate
-  GooHash *psResidentFonts;	// 8-bit fonts resident in printer:
-				//   PDF font name mapped to PS font name
-				//   [GString]
-  GooList *psResidentFonts16;	// 16-bit fonts resident in printer:
-				//   PDF font name mapped to font info
-				//   [PSFontParam16]
-  GooList *psResidentFontsCC;	// 16-bit character collection fonts
-				//   resident in printer: collection name
-				//   mapped to font info [PSFontParam16]
   GooString *textEncoding;	// encoding (unicodeMap) to use for text
 				//   output
   EndOfLineKind textEOL;	// type of EOL marker to use for text

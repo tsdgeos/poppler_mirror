@@ -127,24 +127,6 @@ extern XpdfPluginVecTable xpdfPluginVecTable;
 
 GlobalParams *globalParams = NULL;
 
-//------------------------------------------------------------------------
-// PSFontParam16
-//------------------------------------------------------------------------
-
-PSFontParam16::PSFontParam16(GooString *nameA, int wModeA,
-			     GooString *psFontNameA, GooString *encodingA) {
-  name = nameA;
-  wMode = wModeA;
-  psFontName = psFontNameA;
-  encoding = encodingA;
-}
-
-PSFontParam16::~PSFontParam16() {
-  delete name;
-  delete psFontName;
-  delete encoding;
-}
-
 #if ENABLE_RELOCATABLE && defined(_WIN32)
 
 /* search for data relative to where we are installed */
@@ -595,9 +577,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   psCenter = gTrue;
   psLevel = psLevel2;
   psFile = NULL;
-  psResidentFonts = new GooHash(gTrue);
-  psResidentFonts16 = new GooList();
-  psResidentFontsCC = new GooList();
   textEncoding = new GooString("UTF-8");
 #if defined(_WIN32)
   textEOL = eolDOS;
@@ -805,9 +784,6 @@ GlobalParams::~GlobalParams() {
   if (psFile) {
     delete psFile;
   }
-  deleteGooHash(psResidentFonts, GooString);
-  deleteGooList(psResidentFonts16, PSFontParam16);
-  deleteGooList(psResidentFontsCC, PSFontParam16);
   delete textEncoding;
 
   GooHashIter *iter;
@@ -1471,67 +1447,6 @@ PSLevel GlobalParams::getPSLevel() {
   level = psLevel;
   unlockGlobalParams;
   return level;
-}
-
-GooString *GlobalParams::getPSResidentFont(GooString *fontName) {
-  GooString *psName;
-
-  lockGlobalParams;
-  psName = (GooString *)psResidentFonts->lookup(fontName);
-  unlockGlobalParams;
-  return psName;
-}
-
-GooList *GlobalParams::getPSResidentFonts() {
-  GooList *names;
-  GooHashIter *iter;
-  GooString *name;
-  GooString *psName;
-
-  names = new GooList();
-  lockGlobalParams;
-  psResidentFonts->startIter(&iter);
-  while (psResidentFonts->getNext(&iter, &name, (void **)&psName)) {
-    names->append(psName->copy());
-  }
-  unlockGlobalParams;
-  return names;
-}
-
-PSFontParam16 *GlobalParams::getPSResidentFont16(GooString *fontName,
-						 int wMode) {
-  PSFontParam16 *p;
-  int i;
-
-  lockGlobalParams;
-  p = NULL;
-  for (i = 0; i < psResidentFonts16->getLength(); ++i) {
-    p = (PSFontParam16 *)psResidentFonts16->get(i);
-    if (!(p->name->cmp(fontName)) && p->wMode == wMode) {
-      break;
-    }
-    p = NULL;
-  }
-  unlockGlobalParams;
-  return p;
-}
-
-PSFontParam16 *GlobalParams::getPSResidentFontCC(GooString *collection,
-						 int wMode) {
-  PSFontParam16 *p;
-  int i;
-
-  lockGlobalParams;
-  p = NULL;
-  for (i = 0; i < psResidentFontsCC->getLength(); ++i) {
-    p = (PSFontParam16 *)psResidentFontsCC->get(i);
-    if (!(p->name->cmp(collection)) && p->wMode == wMode) {
-      break;
-    }
-    p = NULL;
-  }
-  unlockGlobalParams;
-  return p;
 }
 
 GooString *GlobalParams::getTextEncodingName() {
