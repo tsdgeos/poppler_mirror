@@ -177,7 +177,6 @@ public:
 
   //----- functions to set parameters
   void addFontFile(GooString *fontName, GooString *path);
-  void setPSFile(char *file);
   void setPSExpandSmaller(GBool expand);
   void setPSShrinkLarger(GBool shrink);
   void setPSCenter(GBool center);
@@ -250,7 +249,6 @@ private:
   GooHash *fontFiles;		// font files: font name mapped to path
 				//   [GString]
   SysFontList *sysFonts;	// system fonts
-  GooString *psFile;		// PostScript file or command (for xpdf)
   GBool psExpandSmaller;	// expand smaller pages to fill paper
   GBool psShrinkLarger;		// shrink larger pages to fit paper
   GBool psCenter;		// center pages on the paper

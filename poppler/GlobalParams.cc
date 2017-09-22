@@ -574,7 +574,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   psShrinkLarger = gTrue;
   psCenter = gTrue;
   psLevel = psLevel2;
-  psFile = NULL;
   textEncoding = new GooString("UTF-8");
 #if defined(_WIN32)
   textEOL = eolDOS;
@@ -777,9 +776,6 @@ GlobalParams::~GlobalParams() {
   deleteGooHash(substFiles, GooString);
 #endif
   delete sysFonts;
-  if (psFile) {
-    delete psFile;
-  }
   delete textEncoding;
 
   GooHashIter *iter;
@@ -1660,15 +1656,6 @@ GooList *GlobalParams::getEncodingNames()
 void GlobalParams::addFontFile(GooString *fontName, GooString *path) {
   lockGlobalParams;
   fontFiles->add(fontName, path);
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSFile(char *file) {
-  lockGlobalParams;
-  if (psFile) {
-    delete psFile;
-  }
-  psFile = new GooString(file);
   unlockGlobalParams;
 }
 
