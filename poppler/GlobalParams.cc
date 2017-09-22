@@ -569,7 +569,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   cMapDirs = new GooHash(gTrue);
   toUnicodeDirs = new GooList();
   fontFiles = new GooHash(gTrue);
-  fontDirs = new GooList();
   ccFontFiles = new GooHash(gTrue);
   sysFonts = new SysFontList();
   psExpandSmaller = gFalse;
@@ -775,7 +774,6 @@ GlobalParams::~GlobalParams() {
   deleteGooHash(unicodeMaps, GooString);
   deleteGooList(toUnicodeDirs, GooString);
   deleteGooHash(fontFiles, GooString);
-  deleteGooList(fontDirs, GooString);
   deleteGooHash(ccFontFiles, GooString);
 #ifdef _WIN32
   deleteGooHash(substFiles, GooString);
@@ -1081,14 +1079,7 @@ static FcPattern *buildFcPattern(GfxFont *font, GooString *base14Name)
 #endif
 
 GooString *GlobalParams::findFontFile(GooString *fontName) {
-  static const char *exts[] = { ".pfa", ".pfb", ".ttf", ".ttc", ".otf" };
-  GooString *path, *dir;
-#ifdef WIN32
-  GooString *fontNameU;
-#endif
-  const char *ext;
-  FILE *f;
-  int i, j;
+  GooString *path;
 
   setupBaseFonts(NULL);
   lockGlobalParams;
@@ -1096,26 +1087,6 @@ GooString *GlobalParams::findFontFile(GooString *fontName) {
     path = path->copy();
     unlockGlobalParams;
     return path;
-  }
-  for (i = 0; i < fontDirs->getLength(); ++i) {
-    dir = (GooString *)fontDirs->get(i);
-    for (j = 0; j < (int)(sizeof(exts) / sizeof(exts[0])); ++j) {
-      ext = exts[j];
-#ifdef WIN32
-      fontNameU = fileNameToUTF8(fontName->getCString());
-      path = appendToPath(dir->copy(), fontNameU->getCString());
-      delete fontNameU;
-#else
-      path = appendToPath(dir->copy(), fontName->getCString());
-#endif
-      path->append(ext);
-      if ((f = openFile(path->getCString(), "rb"))) {
-	fclose(f);
-	unlockGlobalParams;
-	return path;
-      }
-      delete path;
-    }
   }
   unlockGlobalParams;
   return NULL;

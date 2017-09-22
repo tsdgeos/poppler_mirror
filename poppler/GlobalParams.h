@@ -250,7 +250,6 @@ private:
 #endif
   GooHash *fontFiles;		// font files: font name mapped to path
 				//   [GString]
-  GooList *fontDirs;		// list of font dirs [GString]
   GooHash *ccFontFiles;	// character collection font files:
 				//   collection name  mapped to path [GString]
   SysFontList *sysFonts;	// system fonts
