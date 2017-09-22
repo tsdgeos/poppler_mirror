@@ -569,7 +569,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   cMapDirs = new GooHash(gTrue);
   toUnicodeDirs = new GooList();
   fontFiles = new GooHash(gTrue);
-  ccFontFiles = new GooHash(gTrue);
   sysFonts = new SysFontList();
   psExpandSmaller = gFalse;
   psShrinkLarger = gTrue;
@@ -774,7 +773,6 @@ GlobalParams::~GlobalParams() {
   deleteGooHash(unicodeMaps, GooString);
   deleteGooList(toUnicodeDirs, GooString);
   deleteGooHash(fontFiles, GooString);
-  deleteGooHash(ccFontFiles, GooString);
 #ifdef _WIN32
   deleteGooHash(substFiles, GooString);
 #endif
@@ -1371,18 +1369,6 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
   return path;
 }
 #endif
-
-GooString *GlobalParams::findCCFontFile(GooString *collection) {
-  GooString *path;
-
-  lockGlobalParams;
-  if ((path = (GooString *)ccFontFiles->lookup(collection))) {
-    path = path->copy();
-  }
-  unlockGlobalParams;
-  return path;
-}
-
 
 GBool GlobalParams::getPSExpandSmaller() {
   GBool f;

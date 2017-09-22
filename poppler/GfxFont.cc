@@ -756,16 +756,6 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, PSOutputDev *ps) {
     return NULL;
   }
 
-  //----- CID font substitution
-  if ((path = globalParams->findCCFontFile(
-				((GfxCIDFont *)this)->getCollection()))) {
-    if ((fontLoc = getExternalFont(path, gTrue))) {
-      error(errSyntaxWarning, -1, "Substituting font '{0:t}' for '{1:t}'",
-	    fontLoc->path, name);
-      return fontLoc;
-    }
-  }
-
   // failed to find a substitute font
   return NULL;
 }

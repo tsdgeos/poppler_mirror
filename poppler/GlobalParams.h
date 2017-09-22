@@ -140,7 +140,6 @@ public:
   GooString *findSystemFontFile(GfxFont *font, SysFontType *type,
 			      int *fontNum, GooString *substituteFontName = NULL, 
 		              GooString *base14Name = NULL);
-  GooString *findCCFontFile(GooString *collection);
   GBool getPSExpandSmaller();
   GBool getPSShrinkLarger();
   GBool getPSCenter();
@@ -250,8 +249,6 @@ private:
 #endif
   GooHash *fontFiles;		// font files: font name mapped to path
 				//   [GString]
-  GooHash *ccFontFiles;	// character collection font files:
-				//   collection name  mapped to path [GString]
   SysFontList *sysFonts;	// system fonts
   GooString *psFile;		// PostScript file or command (for xpdf)
   GBool psExpandSmaller;	// expand smaller pages to fill paper
