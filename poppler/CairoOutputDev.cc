@@ -2178,9 +2178,6 @@ void CairoOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *
 
   cairo_pattern_set_filter (pattern, filter);
 
-  if (!printing)
-    cairo_pattern_set_extend (pattern, CAIRO_EXTEND_PAD);
-
   cairo_matrix_init_translate (&matrix, 0, height);
   cairo_matrix_scale (&matrix, width, -height);
   cairo_pattern_set_matrix (pattern, &matrix);
@@ -2196,6 +2193,11 @@ void CairoOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *
     cairo_save (cairo);
     cairo_rectangle (cairo, 0., 0., 1., 1.);
     cairo_clip (cairo);
+    if (strokePathClip) {
+      cairo_push_group (cairo);
+      fillToStrokePathClip (state);
+      cairo_pop_group_to_source (cairo);
+    }
     cairo_mask (cairo, pattern);
     cairo_restore (cairo);
   } else {
