@@ -18,6 +18,7 @@
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+// Copyright 2017 Bernd Kuhls <berndkuhls@hotmail.com>
 //
 //========================================================================
 
@@ -32,6 +33,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "Error.h"
