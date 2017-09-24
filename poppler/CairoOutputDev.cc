@@ -3077,7 +3077,13 @@ public:
       }
     }
 
-    if (printing || scaledWidth >= width || scaledHeight >= height) {
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
+    bool needsCustomDownscaling = false;
+#else
+    bool needsCustomDownscaling = true;
+#endif
+
+    if (!needsCustomDownscaling || printing || scaledWidth >= width || scaledHeight >= height) {
       // No downscaling. Create cairo image containing the source image data.
       unsigned char *buffer;
       int stride;
@@ -3191,7 +3197,7 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   cairo_matrix_t matrix;
   int width, height;
   int scaledWidth, scaledHeight;
-  cairo_filter_t filter = CAIRO_FILTER_BILINEAR;
+  cairo_filter_t filter = CAIRO_FILTER_BEST;
   RescaleDrawImage rescale;
 
   LOG (printf ("drawImage %dx%d\n", widthA, heightA));
