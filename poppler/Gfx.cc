@@ -458,9 +458,15 @@ GfxPattern *GfxResources::lookupPattern(char *name, OutputDev *out, GfxState *st
 
   for (resPtr = this; resPtr; resPtr = resPtr->next) {
     if (resPtr->patternDict.isDict()) {
-      Object obj = resPtr->patternDict.dictLookup(name);
+      Object obj = resPtr->patternDict.dictLookupNF(name);
       if (!obj.isNull()) {
-	pattern = GfxPattern::parse(resPtr, &obj, out, state);
+	Ref patternRef = { -1, -1 };
+	if (obj.isRef()) {
+	  patternRef = obj.getRef();
+	  obj = obj.fetch(resPtr->patternDict.getDict()->getXRef());
+	}
+
+	pattern = GfxPattern::parse(resPtr, &obj, out, state, patternRef.num);
 	return pattern;
       }
     }
@@ -2224,18 +2230,34 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat,
 		       xi0, yi0, xi1, yi1, xstep, ystep)) {
     goto restore;
   } else {
-    out->updatePatternOpacity(state);
-    for (yi = yi0; yi < yi1; ++yi) {
-      for (xi = xi0; xi < xi1; ++xi) {
-        x = xi * xstep;
-        y = yi * ystep;
-        m1[4] = x * m[0] + y * m[2] + m[4];
-        m1[5] = x * m[1] + y * m[3] + m[5];
-        drawForm(tPat->getContentStream(), tPat->getResDict(),
-        	  m1, tPat->getBBox());
+    bool shouldDrawForm = gTrue;
+    std::set<int>::iterator patternRefIt;
+    const int patternRefNum = tPat->getPatternRefNum();
+    if (patternRefNum != -1) {
+      if (formsDrawing.find(patternRefNum) == formsDrawing.end()) {
+	patternRefIt = formsDrawing.insert(patternRefNum).first;
+      } else {
+	shouldDrawForm = gFalse;
       }
     }
-    out->clearPatternOpacity(state);
+
+    if (shouldDrawForm) {
+      out->updatePatternOpacity(state);
+      for (yi = yi0; yi < yi1; ++yi) {
+	for (xi = xi0; xi < xi1; ++xi) {
+	  x = xi * xstep;
+	  y = yi * ystep;
+	  m1[4] = x * m[0] + y * m[2] + m[4];
+	  m1[5] = x * m[1] + y * m[3] + m[5];
+	  drawForm(tPat->getContentStream(), tPat->getResDict(),
+		  m1, tPat->getBBox());
+	}
+      }
+      out->clearPatternOpacity(state);
+      if (patternRefNum != -1) {
+	formsDrawing.erase(patternRefIt);
+      }
+    }
   }
 
   // restore graphics state

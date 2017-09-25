@@ -1311,7 +1311,6 @@ void PSOutputDev::postInit()
   Catalog *catalog;
   PDFRectangle *box;
   PSOutPaperSize *size;
-  GooList *names;
   int w, h, i;
 
   if (postInitDone || !ok) {
@@ -1405,11 +1404,6 @@ void PSOutputDev::postInit()
   for (i = 0; i < 14; ++i) {
     fontNames->add(new GooString(psBase14SubstFonts[i].psName), 1);
   }
-  names = globalParams->getPSResidentFonts();
-  for (i = 0; i < names->getLength(); ++i) {
-    fontNames->add((GooString *)names->get(i), 1);
-  }
-  delete names;
   t1FontNameSize = 64;
   t1FontNameLen = 0;
   t1FontNames = (PST1FontName *)gmallocn(t1FontNameSize, sizeof(PST1FontName));

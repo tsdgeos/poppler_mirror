@@ -57,7 +57,7 @@ def main(args):
                         action = 'store_true', dest = 'verbose', default = False,
                         help = 'Run in verbose mode')
     parser.add_argument('--utils-dir',
-                        action = 'store', dest = 'utils_dir', default = os.path.abspath("../utils"),
+                        action = 'store', dest = 'utils_dir', default = os.path.abspath("../build/utils"),
                         help = 'Directory of poppler utils used for the tests')
     parser.add_argument('-b', '--backends',
                         action = ListAction, dest = 'backends',
