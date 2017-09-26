@@ -172,6 +172,7 @@ public:
   bool endsWith(const char *suffix) const;
 
   bool hasUnicodeMarker() const { return size() >= 2 && (*this)[0] == char(0xfe) && (*this)[1] == char(0xff); }
+  bool hasUnicodeMarkerLE() const { return size() >= 2 && (*this)[0] == char(0xff) && (*this)[1] == char(0xfe); }
   bool hasJustUnicodeMarker() const { return size() == 2 && hasUnicodeMarker(); }
 
   void prependUnicodeMarker();
