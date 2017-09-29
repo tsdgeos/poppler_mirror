@@ -849,3 +849,70 @@ void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   delete imgStr;
 
 }
+
+void ArthurOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str,
+                                          int width, int height,
+                                          GfxImageColorMap *colorMap,
+                                          GBool interpolate,
+                                          Stream *maskStr,
+                                          int maskWidth, int maskHeight,
+                                          GfxImageColorMap *maskColorMap,
+                                          GBool maskInterpolate)
+{
+  // Bail out if the image size doesn't match the mask size.  I don't know
+  // what to do in this case.
+  if (width!=maskWidth || height!=maskHeight)
+  {
+    qDebug() << "Soft mask size does not match image size!";
+    drawImage(state, ref, str, width, height, colorMap, interpolate, nullptr, gFalse);
+  }
+
+  // Bail out if the mask isn't a single channel.  I don't know
+  // what to do in this case.
+  if (maskColorMap->getColorSpace()->getNComps() != 1)
+  {
+    qDebug() << "Soft mask is not a single 8-bit channel!";
+    drawImage(state, ref, str, width, height, colorMap, interpolate, nullptr, gFalse);
+  }
+
+  /* TODO: Do we want to cache these? */
+  std::unique_ptr<ImageStream> imgStr(new ImageStream(str, width,
+                                                      colorMap->getNumPixelComps(),
+                                                      colorMap->getBits()));
+  imgStr->reset();
+
+  std::unique_ptr<ImageStream> maskImageStr(new ImageStream(maskStr, maskWidth,
+                                                            maskColorMap->getNumPixelComps(),
+                                                            maskColorMap->getBits()));
+  maskImageStr->reset();
+
+  QImage image(width, height, QImage::Format_ARGB32);
+  unsigned int *data = (unsigned int *)image.bits();
+  int stride = image.bytesPerLine()/4;
+
+  std::vector<Guchar> maskLine(maskWidth);
+
+  for (int y = 0; y < height; y++) {
+
+    Guchar *pix = imgStr->getLine();
+    Guchar *maskPix = maskImageStr->getLine();
+
+    // Invert the vertical coordinate: y is increasing from top to bottom
+    // on the page, but y is increasing bottom to top in the picture.
+    unsigned int* line = data+(height-1-y)*stride;
+    colorMap->getRGBLine(pix, line, width);
+
+    // Apply the mask values to the image alpha channel
+    maskColorMap->getGrayLine(maskPix, maskLine.data(), width);
+    for (int x = 0; x < width; x++)
+    {
+      *line = *line | (maskLine[x]<<24);
+      line++;
+    }
+  }
+
+  // At this point, the QPainter coordinate transformation (CTM) is such
+  // that QRect(0,0,1,1) is exactly the area of the image.
+  m_painter->drawImage( QRect(0,0,1,1), image );
+}
+
