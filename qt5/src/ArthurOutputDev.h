@@ -151,6 +151,15 @@ public:
 		 int width, int height, GfxImageColorMap *colorMap,
 		 GBool interpolate, int *maskColors, GBool inlineImg) override;
 
+  void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str,
+                           int width, int height,
+                           GfxImageColorMap *colorMap,
+                           GBool interpolate,
+                           Stream *maskStr,
+                           int maskWidth, int maskHeight,
+                           GfxImageColorMap *maskColorMap,
+                           GBool maskInterpolate) override;
+
   //----- Type 3 font operators
   void type3D0(GfxState *state, double wx, double wy) override;
   void type3D1(GfxState *state, double wx, double wy,

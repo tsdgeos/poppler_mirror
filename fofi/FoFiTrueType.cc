@@ -451,7 +451,7 @@ int FoFiTrueType::mapNameToGID(char *name) {
 GBool FoFiTrueType::getCFFBlock(char **start, int *length) {
   int i;
 
-  if (!openTypeCFF) {
+  if (!openTypeCFF || !tables) {
     return gFalse;
   }
   i = seekTable("CFF ");
