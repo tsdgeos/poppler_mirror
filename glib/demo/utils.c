@@ -274,8 +274,13 @@ pgd_action_view_play_rendition (GtkWidget    *button,
 		uri = g_file_get_uri (file);
 		g_object_unref (file);
 		if (uri) {
+#if GTK_CHECK_VERSION(3, 22, 0)
+			gtk_show_uri_on_window (GTK_WINDOW(gtk_widget_get_window (button)),
+				      uri, GDK_CURRENT_TIME, NULL);
+#else
 			gtk_show_uri (gtk_widget_get_screen (button),
 				      uri, GDK_CURRENT_TIME, NULL);
+#endif
 			g_free (uri);
 		}
 	}
@@ -537,9 +542,14 @@ pgd_movie_view_play_movie (GtkWidget    *button,
 	uri = g_file_get_uri (file);
 	g_object_unref (file);
 	if (uri) {
-		gtk_show_uri (gtk_widget_get_screen (button),
-			      uri, GDK_CURRENT_TIME, NULL);
-		g_free (uri);
+#if GTK_CHECK_VERSION(3, 22, 0)
+	    gtk_show_uri_on_window (GTK_WINDOW(gtk_widget_get_window (button)),
+				    uri, GDK_CURRENT_TIME, NULL);
+#else
+	    gtk_show_uri (gtk_widget_get_screen (button),
+			  uri, GDK_CURRENT_TIME, NULL);
+#endif
+	    g_free (uri);
 	}
 }
 
