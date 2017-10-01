@@ -38,13 +38,13 @@
 
 #include "config.h"
 #include <poppler-config.h>
+#include <cstdint>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include "parseargs.h"
 #include "goo/gmem.h"
 #include "goo/gtypes.h"
-#include "goo/gtypes_p.h"
 #include "goo/GooString.h"
 #include "goo/ImgWriter.h"
 #include "goo/JpegWriter.h"

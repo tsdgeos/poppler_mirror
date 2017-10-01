@@ -45,13 +45,13 @@
 #include <config.h>
 #endif
 
+#include <cstdint>
 #include <stdint.h>
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <math.h>
 #include "goo/gmem.h"
-#include "goo/gtypes_p.h"
 #include "CairoRescaleBox.h"
 
 

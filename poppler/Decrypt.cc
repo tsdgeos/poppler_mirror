@@ -33,10 +33,10 @@
 #pragma implementation
 #endif
 
+#include <cstdint>
 #include <string.h>
 #include "goo/gmem.h"
 #include "goo/grandom.h"
-#include "goo/gtypes_p.h"
 #include "Decrypt.h"
 #include "Error.h"
 

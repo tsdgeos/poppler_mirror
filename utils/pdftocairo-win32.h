@@ -10,10 +10,10 @@
 //
 //========================================================================
 
+#include <cstdint>
 #include <cairo.h>
 #include "goo/gmem.h"
 #include "goo/gtypes.h"
-#include "goo/gtypes_p.h"
 #include "goo/GooString.h"
 
 #ifdef CAIRO_HAS_WIN32_SURFACE
