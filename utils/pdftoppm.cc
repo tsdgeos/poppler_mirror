@@ -176,10 +176,8 @@ static const ArgDesc argDesc[] = {
   {"-tiffcompression", argString, TiffCompressionStr, sizeof(TiffCompressionStr),
    "set TIFF compression: none, packbits, jpeg, lzw, deflate"},
 #endif
-#if HAVE_FREETYPE_FREETYPE_H | HAVE_FREETYPE_H
   {"-freetype",   argString,      enableFreeTypeStr, sizeof(enableFreeTypeStr),
    "enable FreeType font rasterizer: yes, no"},
-#endif
   {"-thinlinemode", argString, thinLineModeStr, sizeof(thinLineModeStr),
    "set thin line mode: none, solid, shape. Default: none"},
   

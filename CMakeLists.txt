@@ -288,7 +288,6 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}/poppler
   ${FREETYPE_INCLUDE_DIRS}
 )
-set(HAVE_FREETYPE_H ON)
 if(CMAKE_USE_PTHREADS_INIT)
   set(HAVE_PTHREAD ON)
 endif()

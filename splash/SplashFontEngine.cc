@@ -61,11 +61,9 @@ extern "C" int unlink(char *filename);
 //------------------------------------------------------------------------
 
 SplashFontEngine::SplashFontEngine(
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
 				   GBool enableFreeType,
 				   GBool enableFreeTypeHinting,
 				   GBool enableSlightHinting,
-#endif
 				   GBool aa) {
   int i;
 
@@ -73,13 +71,11 @@ SplashFontEngine::SplashFontEngine(
     fontCache[i] = NULL;
   }
 
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   if (enableFreeType) {
     ftEngine = SplashFTFontEngine::init(aa, enableFreeTypeHinting, enableSlightHinting);
   } else {
     ftEngine = NULL;
   }
-#endif
 }
 
 SplashFontEngine::~SplashFontEngine() {
@@ -91,11 +87,9 @@ SplashFontEngine::~SplashFontEngine() {
     }
   }
 
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   if (ftEngine) {
     delete ftEngine;
   }
-#endif
 }
 
 SplashFontFile *SplashFontEngine::getFontFile(SplashFontFileID *id) {
@@ -119,11 +113,9 @@ SplashFontFile *SplashFontEngine::loadType1Font(SplashFontFileID *idA,
   SplashFontFile *fontFile;
 
   fontFile = NULL;
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   if (!fontFile && ftEngine) {
     fontFile = ftEngine->loadType1Font(idA, src, enc);
   }
-#endif
 
   // delete the (temporary) font file -- with Unix hard link
   // semantics, this will remove the last link; otherwise it will
@@ -141,11 +133,9 @@ SplashFontFile *SplashFontEngine::loadType1CFont(SplashFontFileID *idA,
   SplashFontFile *fontFile;
 
   fontFile = NULL;
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   if (!fontFile && ftEngine) {
     fontFile = ftEngine->loadType1CFont(idA, src, enc);
   }
-#endif
 
   // delete the (temporary) font file -- with Unix hard link
   // semantics, this will remove the last link; otherwise it will
@@ -163,11 +153,9 @@ SplashFontFile *SplashFontEngine::loadOpenTypeT1CFont(SplashFontFileID *idA,
   SplashFontFile *fontFile;
 
   fontFile = NULL;
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   if (!fontFile && ftEngine) {
     fontFile = ftEngine->loadOpenTypeT1CFont(idA, src, enc);
   }
-#endif
 
   // delete the (temporary) font file -- with Unix hard link
   // semantics, this will remove the last link; otherwise it will
@@ -184,11 +172,9 @@ SplashFontFile *SplashFontEngine::loadCIDFont(SplashFontFileID *idA,
   SplashFontFile *fontFile;
 
   fontFile = NULL;
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   if (!fontFile && ftEngine) {
     fontFile = ftEngine->loadCIDFont(idA, src);
   }
-#endif
 
   // delete the (temporary) font file -- with Unix hard link
   // semantics, this will remove the last link; otherwise it will
@@ -207,11 +193,9 @@ SplashFontFile *SplashFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA,
   SplashFontFile *fontFile;
 
   fontFile = NULL;
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   if (!fontFile && ftEngine) {
     fontFile = ftEngine->loadOpenTypeCFFFont(idA, src, codeToGID, codeToGIDLen);
   }
-#endif
 
   // delete the (temporary) font file -- with Unix hard link
   // semantics, this will remove the last link; otherwise it will
@@ -231,12 +215,10 @@ SplashFontFile *SplashFontEngine::loadTrueTypeFont(SplashFontFileID *idA,
   SplashFontFile *fontFile;
 
   fontFile = NULL;
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   if (!fontFile && ftEngine) {
     fontFile = ftEngine->loadTrueTypeFont(idA, src,
                                         codeToGID, codeToGIDLen, faceIndex);
   }
-#endif
 
   if (!fontFile) {
     gfree(codeToGID);
@@ -252,7 +234,6 @@ SplashFontFile *SplashFontEngine::loadTrueTypeFont(SplashFontFileID *idA,
   return fontFile;
 }
 
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
 GBool SplashFontEngine::getAA() {
   return (ftEngine == NULL) ? gFalse : ftEngine->getAA();
 }
@@ -262,7 +243,6 @@ void SplashFontEngine::setAA(GBool aa) {
     ftEngine->setAA(aa);
   }
 }
-#endif
 
 SplashFont *SplashFontEngine::getFont(SplashFontFile *fontFile,
 				      SplashCoord *textMat,

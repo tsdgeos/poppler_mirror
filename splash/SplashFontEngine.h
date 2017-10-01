@@ -54,11 +54,9 @@ public:
 
   // Create a font engine.
   SplashFontEngine(
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
 		   GBool enableFreeType,
 		   GBool enableFreeTypeHinting,
 		   GBool enableSlightHinting,
-#endif
 		   GBool aa);
 
   ~SplashFontEngine();
@@ -87,18 +85,14 @@ public:
   // Note that the Splash y axis points downward.
   SplashFont *getFont(SplashFontFile *fontFile,
 		      SplashCoord *textMat, SplashCoord *ctm);
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   GBool getAA();
   void setAA(GBool aa);
-#endif
 
 private:
 
   SplashFont *fontCache[splashFontCacheSize];
 
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   SplashFTFontEngine *ftEngine;
-#endif
 };
 
 #endif

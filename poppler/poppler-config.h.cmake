@@ -115,11 +115,6 @@
 #cmakedefine HAVE_SYS_NDIR_H 1
 #endif
 
-/* Have FreeType2 include files */
-#ifndef HAVE_FREETYPE_H
-#cmakedefine HAVE_FREETYPE_H 1
-#endif
-
 /* Defines if use cms */
 #ifndef USE_CMS
 #cmakedefine USE_CMS 1
@@ -128,7 +123,7 @@
 // Also, there are preprocessor symbols in the header files
 // that are used but never defined when building poppler using configure
 // or cmake: DISABLE_OUTLINE, DEBUG_MEM,
-// ENABLE_PLUGINS, DEBUG_FORMS, HAVE_FREETYPE_FREETYPE_H
+// ENABLE_PLUGINS, DEBUG_FORMS
 
 //------------------------------------------------------------------------
 // version
