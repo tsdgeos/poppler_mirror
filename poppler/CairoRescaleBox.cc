@@ -41,9 +41,7 @@
 
 /* This implements a box filter that supports non-integer box sizes */
 
-#ifdef HAVE_CONFIG_H
 #include <config.h>
-#endif
 
 #include <cstdint>
 #include <stdint.h>

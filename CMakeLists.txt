@@ -264,7 +264,6 @@ if(ENABLE_LIBCURL)
   endif()
 endif()
 
-add_definitions(-DHAVE_CONFIG_H=1)
 if(MINGW)
   # Use mingw's ansi stdio extensions
   add_definitions(-D__USE_MINGW_ANSI_STDIO=1)
