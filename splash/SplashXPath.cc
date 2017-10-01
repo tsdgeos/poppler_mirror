@@ -289,7 +289,7 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0,
   SplashCoord dx, dy, mx, my, d1, d2, flatness2;
   int p1, p2, p3;
 
-#if USE_FIXEDPOINT
+#ifdef USE_FIXEDPOINT
   flatness2 = flatness;
 #else
   flatness2 = flatness * flatness;
@@ -333,7 +333,7 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0,
     // line)
     mx = (xl0 + xr3) * 0.5;
     my = (yl0 + yr3) * 0.5;
-#if USE_FIXEDPOINT
+#ifdef USE_FIXEDPOINT
     d1 = splashDist(xx1, yy1, mx, my);
     d2 = splashDist(xx2, yy2, mx, my);
 #else
@@ -411,7 +411,7 @@ void SplashXPath::addSegment(SplashCoord x0, SplashCoord y0,
     segs[length].dxdy = segs[length].dydx = 0;
     segs[length].flags |= splashXPathVert;
   } else {
-#if USE_FIXEDPOINT
+#ifdef USE_FIXEDPOINT
     if (FixedPoint::divCheck(x1 - x0, y1 - y0, &segs[length].dxdy)) {
       segs[length].dydx = (SplashCoord)1 / segs[length].dxdy;
     } else {

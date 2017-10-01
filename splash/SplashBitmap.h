@@ -96,7 +96,7 @@ public:
   void getPixel(int x, int y, SplashColorPtr pixel);
   void getRGBLine(int y, SplashColorPtr line);
   void getXBGRLine(int y, SplashColorPtr line, ConversionMode conversionMode = conversionOpaque);
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   void getCMYKLine(int y, SplashColorPtr line);
 #endif
   Guchar getAlpha(int x, int y);

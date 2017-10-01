@@ -127,7 +127,7 @@ extern XpdfPluginVecTable xpdfPluginVecTable;
 
 GlobalParams *globalParams = NULL;
 
-#if ENABLE_RELOCATABLE && defined(_WIN32)
+#if defined(ENABLE_RELOCATABLE) && defined(_WIN32)
 
 /* search for data relative to where we are installed */
 

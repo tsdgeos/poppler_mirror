@@ -10,7 +10,7 @@
 
 #include <config.h>
 
-#if USE_FIXEDPOINT
+#ifdef USE_FIXEDPOINT
 
 #ifdef USE_GCC_PRAGMAS
 #pragma implementation

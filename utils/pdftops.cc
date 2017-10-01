@@ -112,7 +112,7 @@ static char userPassword[33] = "\001";
 static GBool quiet = gFalse;
 static GBool printVersion = gFalse;
 static GBool printHelp = gFalse;
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
 static GBool overprint = gFalse;
 #endif
 
@@ -185,7 +185,7 @@ static const ArgDesc argDesc[] = {
    "owner password (for encrypted files)"},
   {"-upw",        argString,   userPassword,    sizeof(userPassword),
    "user password (for encrypted files)"},
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   {"-overprint",argFlag,   &overprint,      0,
    "enable overprint"},
 #endif
@@ -286,7 +286,7 @@ int main(int argc, char *argv[]) {
       goto err0;
     }
   }
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   if (overprint) {
     globalParams->setOverprintPreview(gTrue);
   }

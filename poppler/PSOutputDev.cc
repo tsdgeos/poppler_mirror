@@ -67,10 +67,10 @@
 #include "Catalog.h"
 #include "Page.h"
 #include "Stream.h"
-#if ENABLE_ZLIB
+#ifdef ENABLE_ZLIB
 #  include "FlateEncoder.h"
 #endif
-#if ENABLE_ZLIB_UNCOMPRESS
+#ifdef ENABLE_ZLIB_UNCOMPRESS
 #  include "FlateStream.h"
 #endif
 #include "Annot.h"
@@ -78,7 +78,7 @@
 #include "PreScanOutputDev.h"
 #include "FileSpec.h"
 #include "CharCodeToUnicode.h"
-#if HAVE_SPLASH
+#ifdef HAVE_SPLASH
 #  include "splash/Splash.h"
 #  include "splash/SplashBitmap.h"
 #  include "SplashOutputDev.h"
@@ -3282,7 +3282,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     paperColor[0] = 0xff;
     splashOut = new SplashOutputDev(splashModeMono8, 1, gFalse,
 				    paperColor, gFalse);
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   } else if (level == psLevel1Sep || level == psLevel2Sep ||
 	     level == psLevel3Sep || globalParams->getOverprintPreview()) {
     numComps = 4;

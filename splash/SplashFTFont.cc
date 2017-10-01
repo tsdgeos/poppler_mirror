@@ -65,7 +65,7 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   FT_Face face;
   int div;
   int x, y;
-#if USE_FIXEDPOINT
+#ifdef USE_FIXEDPOINT
   SplashCoord scale;
 #endif
 
@@ -87,7 +87,7 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
 
   div = face->bbox.xMax > 20000 ? 65536 : 1;
 
-#if USE_FIXEDPOINT
+#ifdef USE_FIXEDPOINT
   scale = (SplashCoord)1 / (SplashCoord)face->units_per_EM;
 
   // transform the four corners of the font bounding box -- the min
@@ -204,7 +204,7 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   }
 
   // compute the transform matrix
-#if USE_FIXEDPOINT
+#ifdef USE_FIXEDPOINT
   matrix.xx = (FT_Fixed)((mat[0] / size).get16Dot16());
   matrix.yx = (FT_Fixed)((mat[1] / size).get16Dot16());
   matrix.xy = (FT_Fixed)((mat[2] / size).get16Dot16());
