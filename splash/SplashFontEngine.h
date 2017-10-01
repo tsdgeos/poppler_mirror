@@ -54,9 +54,6 @@ public:
 
   // Create a font engine.
   SplashFontEngine(
-#ifdef HAVE_T1LIB_H
-		   GBool enableT1lib,
-#endif
 #if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
 		   GBool enableFreeType,
 		   GBool enableFreeTypeHinting,
@@ -99,9 +96,6 @@ private:
 
   SplashFont *fontCache[splashFontCacheSize];
 
-#ifdef HAVE_T1LIB_H
-  SplashT1FontEngine *t1Engine;
-#endif
 #if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
   SplashFTFontEngine *ftEngine;
 #endif

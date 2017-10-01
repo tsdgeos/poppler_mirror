@@ -461,9 +461,6 @@ if(ENABLE_SPLASH)
     splash/SplashPattern.cc
     splash/SplashScreen.cc
     splash/SplashState.cc
-    splash/SplashT1Font.cc
-    splash/SplashT1FontEngine.cc
-    splash/SplashT1FontFile.cc
     splash/SplashXPath.cc
     splash/SplashXPathScanner.cc
   )
@@ -710,9 +707,6 @@ if(ENABLE_XPDF_HEADERS)
       splash/SplashPattern.h
       splash/SplashScreen.h
       splash/SplashState.h
-      splash/SplashT1Font.h
-      splash/SplashT1FontEngine.h
-      splash/SplashT1FontFile.h
       splash/SplashTypes.h
       splash/SplashXPath.h
       splash/SplashXPathScanner.h

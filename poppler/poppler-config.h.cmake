@@ -127,7 +127,7 @@
 
 // Also, there are preprocessor symbols in the header files
 // that are used but never defined when building poppler using configure
-// or cmake: DISABLE_OUTLINE, DEBUG_MEM, SPLASH_CMYK, HAVE_T1LIB_H,
+// or cmake: DISABLE_OUTLINE, DEBUG_MEM,
 // ENABLE_PLUGINS, DEBUG_FORMS, HAVE_FREETYPE_FREETYPE_H
 
 //------------------------------------------------------------------------
