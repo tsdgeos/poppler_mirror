@@ -105,7 +105,7 @@ extern time_t getModTime(char *fileName);
 // should be "w" or "wb".  Returns true on success.
 extern GBool openTempFile(GooString **name, FILE **f, const char *mode);
 
-#ifdef WIN32
+#ifdef _WIN32
 // Convert a file name from Latin-1 to UTF-8.
 extern GooString *fileNameToUTF8(char *path);
 

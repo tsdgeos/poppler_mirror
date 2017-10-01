@@ -423,7 +423,7 @@ GBool openTempFile(GooString **name, FILE **f, const char *mode) {
 #endif
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 GooString *fileNameToUTF8(char *path) {
   GooString *s;
   char *p;
@@ -462,7 +462,7 @@ GooString *fileNameToUTF8(wchar_t *path) {
 #endif
 
 FILE *openFile(const char *path, const char *mode) {
-#ifdef WIN32
+#ifdef _WIN32
   OSVERSIONINFO version;
   wchar_t wPath[_MAX_PATH + 1];
   char nPath[_MAX_PATH + 1];

@@ -253,7 +253,7 @@ public:
   ~SysFontList();
   SysFontInfo *find(GooString *name, GBool isFixedWidth, GBool exact);
 
-#ifdef WIN32
+#ifdef _WIN32
   void scanWindowsFonts(GooString *winFontDir);
 #endif
 #ifdef WITH_FONTCONFIGURATION_FONTCONFIG
@@ -261,7 +261,7 @@ public:
 #endif
 private:
 
-#ifdef WIN32
+#ifdef _WIN32
   SysFontInfo *makeWindowsFont(char *name, int fontNum,
 			       char *path);
 #endif
