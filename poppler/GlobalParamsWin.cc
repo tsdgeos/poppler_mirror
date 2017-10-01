@@ -54,7 +54,7 @@ description for all fonts available in Windows. That's how MuPDF works.
 #include "Lexer.h"
 #include "Parser.h"
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #  define lockGlobalParams            gLockMutex(&mutex)
 #  define lockUnicodeMapCache         gLockMutex(&unicodeMapCacheMutex)
 #  define lockCMapCache               gLockMutex(&cMapCacheMutex)

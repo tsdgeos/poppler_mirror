@@ -683,7 +683,7 @@ protected:
   GBool ok;
 
   bool hasRef;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   GooMutex mutex;
 #endif
 };

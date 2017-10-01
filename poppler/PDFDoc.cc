@@ -80,7 +80,7 @@
 #include "PDFDoc.h"
 #include "Hints.h"
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #  define pdfdocLocker()   MutexLocker locker(&mutex)
 #else
 #  define pdfdocLocker()
@@ -105,7 +105,7 @@
 
 void PDFDoc::init()
 {
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
 #endif
   ok = gFalse;
@@ -341,7 +341,7 @@ PDFDoc::~PDFDoc() {
     gfree(fileNameU);
   }
 #endif
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gDestroyMutex(&mutex);
 #endif
 }

@@ -78,7 +78,7 @@
 #include "GlobalParams.h"
 #include "GfxFont.h"
 
-#if WITH_FONTCONFIGURATION_FONTCONFIG
+#ifdef WITH_FONTCONFIGURATION_FONTCONFIG
 #include <fontconfig/fontconfig.h>
 #endif
 
@@ -88,7 +88,7 @@
 #  include <strings.h>
 #endif
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #  define lockGlobalParams            gLockMutex(&mutex)
 #  define lockUnicodeMapCache         gLockMutex(&unicodeMapCacheMutex)
 #  define lockCMapCache               gLockMutex(&cMapCacheMutex)
@@ -540,7 +540,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   UnicodeMap *map;
   int i;
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
   gInitMutex(&unicodeMapCacheMutex);
   gInitMutex(&cMapCacheMutex);
@@ -786,7 +786,7 @@ GlobalParams::~GlobalParams() {
   deleteGooList(plugins, Plugin);
 #endif
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gDestroyMutex(&mutex);
   gDestroyMutex(&unicodeMapCacheMutex);
   gDestroyMutex(&cMapCacheMutex);
@@ -887,7 +887,7 @@ FILE *GlobalParams::findToUnicodeFile(GooString *name) {
   return NULL;
 }
 
-#if WITH_FONTCONFIGURATION_FONTCONFIG
+#ifdef WITH_FONTCONFIGURATION_FONTCONFIG
 static GBool findModifier(const char *name, const char *modifier, const char **start)
 {
   const char *match;
@@ -1077,7 +1077,7 @@ GooString *GlobalParams::findFontFile(GooString *fontName) {
 /* if you can't or don't want to use Fontconfig, you need to implement
    this function for your platform. For Windows, it's in GlobalParamsWin.cc
 */
-#if WITH_FONTCONFIGURATION_FONTCONFIG
+#ifdef WITH_FONTCONFIGURATION_FONTCONFIG
 // not needed for fontconfig
 void GlobalParams::setupBaseFonts(char *dir) {
 }

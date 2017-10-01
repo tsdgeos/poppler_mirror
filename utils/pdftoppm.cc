@@ -152,11 +152,11 @@ static const ArgDesc argDesc[] = {
    "generate a monochrome PBM file"},
   {"-gray",   argFlag,     &gray,          0,
    "generate a grayscale PGM file"},
-#if ENABLE_LIBPNG
+#ifdef ENABLE_LIBPNG
   {"-png",    argFlag,     &png,           0,
    "generate a PNG file"},
 #endif
-#if ENABLE_LIBJPEG
+#ifdef ENABLE_LIBJPEG
   {"-jpeg",   argFlag,     &jpeg,           0,
    "generate a JPEG file"},
 #ifdef SPLASH_CMYK
@@ -170,7 +170,7 @@ static const ArgDesc argDesc[] = {
   {"-overprint",argFlag,   &overprint,      0,
    "enable overprint"},
 #endif
-#if ENABLE_LIBTIFF
+#ifdef ENABLE_LIBTIFF
   {"-tiff",    argFlag,     &tiff,           0,
    "generate a TIFF file"},
   {"-tiffcompression", argString, TiffCompressionStr, sizeof(TiffCompressionStr),

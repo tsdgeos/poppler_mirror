@@ -45,7 +45,7 @@
 #include "goo/gtypes.h"
 #include "CharTypes.h"
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #include "goo/GooMutex.h"
 #endif
 
@@ -240,7 +240,7 @@ private:
 				//   [XpdfSecurityHandler]
 #endif
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
   GooMutex mutex;
   GooMutex unicodeMapCacheMutex;
   GooMutex cMapCacheMutex;

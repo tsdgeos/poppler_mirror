@@ -1288,7 +1288,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   inUncoloredPattern = gFalse;
   t3FillColorOnly = gFalse;
 
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
   // initialize OPI nesting levels
   opi13Nest = 0;
   opi20Nest = 0;
@@ -1724,7 +1724,7 @@ void PSOutputDev::writeDocSetup(PDFDoc *doc, Catalog *catalog,
 	writePSFmt("{0:d} {1:d} pdfSetupPaper\n", paperWidth, paperHeight);
       }
     }
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
     if (generateOPI) {
       writePS("/opiMatrix matrix currentmatrix def\n");
     }
@@ -2986,7 +2986,7 @@ void PSOutputDev::setupImage(Ref id, Stream *str, GBool mask) {
   if (useCompressed) {
     str = str->getUndecodedStream();
   }
-#if ENABLE_ZLIB
+#ifdef ENABLE_ZLIB
   if (useFlate) {
     str = new FlateEncoder(str);
   } else
@@ -3221,7 +3221,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 				  void *annotDisplayDecideCbkData) {
   PreScanOutputDev *scan;
   GBool rasterize;
-#if HAVE_SPLASH
+#ifdef HAVE_SPLASH
   GBool useFlate, useLZW;
   SplashOutputDev *splashOut;
   SplashColor paperColor;
@@ -3259,7 +3259,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     return gTrue;
   }
 
-#if HAVE_SPLASH
+#ifdef HAVE_SPLASH
   // get the rasterization parameters
   useFlate = getEnableFlate() && level >= psLevel3;
   useLZW = getEnableLZW();
@@ -3576,7 +3576,7 @@ GBool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
         isGray = gFalse;
       }
       str0->reset();
-#if ENABLE_ZLIB
+#ifdef ENABLE_ZLIB
       if (useFlate) {
         if (isGray && numComps == 4) {
 	  str = new FlateEncoder(new CMYKGrayEncoder(str0));
@@ -6068,7 +6068,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
 
     // end of image dictionary
     writePS(">>\n");
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
     if (opi13Nest) {
       if (inlineImg) {
 	// this can't happen -- OPI dictionaries are in XObjects
@@ -6121,7 +6121,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
     // add newline and trailer to the end
     writePSChar('\n');
     writePS("%-EOD-\n");
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
     if (opi13Nest) {
       writePS("%%EndData\n");
     }
@@ -6218,7 +6218,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
       if (maskUseCompressed) {
 	maskStr = maskStr->getUndecodedStream();
       }
-#if ENABLE_ZLIB
+#ifdef ENABLE_ZLIB
       if (maskUseFlate) {
 	maskStr = new FlateEncoder(maskStr);
       } else
@@ -6267,7 +6267,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
     if (inlineImg) {
       // create an array
       str2 = new FixedLengthEncoder(str, len);
-#if ENABLE_ZLIB
+#ifdef ENABLE_ZLIB
       if (getEnableFlate()) {
 	str2 = new FlateEncoder(str2);
       } else
@@ -6514,7 +6514,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
     }
 
     // add FlateEncode/LZWEncode/RunLengthEncode and ASCIIHex/85 encode filters
-#if ENABLE_ZLIB
+#ifdef ENABLE_ZLIB
     if (useFlate) {
       str = new FlateEncoder(str);
     } else
@@ -6829,7 +6829,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
   }
 }
 
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
 void PSOutputDev::opiBegin(GfxState *state, Dict *opiDict) {
   if (generateOPI) {
     Object dict = opiDict->lookup("2.0");

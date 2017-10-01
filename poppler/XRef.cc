@@ -71,7 +71,7 @@
 #define permHighResPrint  (1<<11) // bit 12
 #define defPermFlags 0xfffc
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #  define xrefLocker()   MutexLocker locker(&mutex)
 #  define xrefCondLocker(X)  MutexLocker locker(&mutex, (X))
 #else
@@ -261,7 +261,7 @@ Object ObjectStream::getObject(int objIdx, int objNum) {
 //------------------------------------------------------------------------
 
 void XRef::init() {
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
 #endif
   ok = gTrue;
@@ -384,7 +384,7 @@ XRef::~XRef() {
   if (strOwner) {
     delete str;
   }
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gDestroyMutex(&mutex);
 #endif
 }
@@ -1221,13 +1221,13 @@ Object XRef::fetch(int num, int gen, int recursion) {
 }
 
 void XRef::lock() {
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gLockMutex(&mutex);
 #endif
 }
 
 void XRef::unlock() {
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gUnlockMutex(&mutex);
 #endif
 }

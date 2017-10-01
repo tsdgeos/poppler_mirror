@@ -64,7 +64,7 @@
 #include "FileSpec.h"
 #include "StructTreeRoot.h"
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #  define catalogLocker()   MutexLocker locker(&mutex)
 #else
 #  define catalogLocker()
@@ -74,7 +74,7 @@
 //------------------------------------------------------------------------
 
 Catalog::Catalog(PDFDoc *docA) {
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
 #endif
   ok = gTrue;
@@ -169,7 +169,7 @@ Catalog::~Catalog() {
   delete optContent;
   delete viewerPrefs;
   delete structTreeRoot;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gDestroyMutex(&mutex);
 #endif
 }

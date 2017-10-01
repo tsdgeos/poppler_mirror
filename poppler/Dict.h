@@ -105,7 +105,7 @@ private:
   int size;			// size of <entries> array
   int length;			// number of entries in dictionary
   int ref;			// reference count
-#if MULTITHREADED
+#ifdef MULTITHREADED
   mutable GooMutex mutex;
 #endif
 

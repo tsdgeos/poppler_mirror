@@ -93,7 +93,7 @@ static GBool setDJSYSFLAGS = gFalse;
 #endif
 #endif
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #  define streamLocker()   MutexLocker locker(&mutex)
 #else
 #  define streamLocker()
@@ -104,13 +104,13 @@ static GBool setDJSYSFLAGS = gFalse;
 
 Stream::Stream() {
   ref = 1;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
 #endif
 }
 
 Stream::~Stream() {
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gDestroyMutex(&mutex);
 #endif
 }
@@ -288,7 +288,7 @@ Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursio
     str = new CCITTFaxStream(str, encoding, endOfLine, byteAlign,
 			     columns, rows, endOfBlock, black);
   } else if (!strcmp(name, "DCTDecode") || !strcmp(name, "DCT")) {
-#if HAVE_DCT_DECODER
+#ifdef HAVE_DCT_DECODER
     int colorXform = -1;
     if (params->isDict()) {
       obj = params->dictLookup("ColorTransform", recursion);

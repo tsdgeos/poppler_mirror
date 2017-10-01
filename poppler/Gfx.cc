@@ -4160,7 +4160,7 @@ void Gfx::opXObject(Object args[], int numArgs) {
     return;
   }
 
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
   Object opiDict = obj1.streamGetDict()->lookup("OPI");
   if (opiDict.isDict()) {
     out->opiBegin(state, opiDict.getDict());
@@ -4203,7 +4203,7 @@ void Gfx::opXObject(Object args[], int numArgs) {
   } else {
     error(errSyntaxError, getPos(), "XObject subtype is missing or wrong type");
   }
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
   if (opiDict.isDict()) {
     out->opiEnd(state, opiDict.getDict());
   }

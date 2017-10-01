@@ -35,7 +35,7 @@
 #include "CharTypes.h"
 #include "goo/gtypes.h"
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #include "goo/GooMutex.h"
 #endif
 
@@ -116,7 +116,7 @@ private:
   int sMapLen, sMapSize;
   int refCnt;
   GBool isIdentity;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   GooMutex mutex;
 #endif
 };

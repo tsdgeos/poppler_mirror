@@ -85,7 +85,7 @@ static GBool level3Sep = gFalse;
 static GBool origPageSizes = gFalse;
 static GBool doEPS = gFalse;
 static GBool doForm = gFalse;
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
 static GBool doOPI = gFalse;
 #endif
 static int splashResolution = 0;
@@ -139,7 +139,7 @@ static const ArgDesc argDesc[] = {
    "generate Encapsulated PostScript (EPS)"},
   {"-form",       argFlag,     &doForm,         0,
    "generate a PostScript form"},
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
   {"-opi",        argFlag,     &doOPI,          0,
    "generate OPI comments"},
 #endif
@@ -411,7 +411,7 @@ int main(int argc, char *argv[]) {
   psOut->setPreloadImagesForms(preload);
   psOut->setOptimizeColorSpace(optimizeColorSpace);
   psOut->setPassLevel1CustomColor(passLevel1CustomColor);
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
   psOut->setGenerateOPI(doOPI);
 #endif
   psOut->setUseBinary(psBinary);

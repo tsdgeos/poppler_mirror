@@ -283,7 +283,7 @@ private:
   NameTree *getEmbeddedFileNameTree();
   NameTree *getJSNameTree();
   LinkDest *createLinkDest(Object *obj);
-#if MULTITHREADED
+#ifdef MULTITHREADED
   GooMutex mutex;
 #endif
 

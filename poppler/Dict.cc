@@ -41,7 +41,7 @@
 #include "XRef.h"
 #include "Dict.h"
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #  define dictLocker()   MutexLocker locker(&mutex)
 #else
 #  define dictLocker()
@@ -81,7 +81,7 @@ Dict::Dict(XRef *xrefA) {
   size = length = 0;
   ref = 1;
   sorted = gFalse;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
 #endif
 }
@@ -90,7 +90,7 @@ Dict::Dict(Dict* dictA) {
   xref = dictA->xref;
   size = length = dictA->length;
   ref = 1;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
 #endif
 
@@ -124,7 +124,7 @@ Dict::~Dict() {
     entries[i].val.free();
   }
   gfree(entries);
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gDestroyMutex(&mutex);
 #endif
 }

@@ -18,7 +18,7 @@
 #include "PDFDoc.h"
 #include "LocalPDFDocBuilder.h"
 #include "StdinPDFDocBuilder.h"
-#if ENABLE_LIBCURL
+#ifdef ENABLE_LIBCURL
 #include "CurlPDFDocBuilder.h"
 #endif
 #include "ErrorCodes.h"
@@ -34,7 +34,7 @@ PDFDocFactory::PDFDocFactory(GooList *pdfDocBuilders)
   } else {
     builders = new GooList();
   }
-#if ENABLE_LIBCURL
+#ifdef ENABLE_LIBCURL
   builders->insert(0, new CurlPDFDocBuilder());
 #endif
   builders->insert(0, new StdinPDFDocBuilder());

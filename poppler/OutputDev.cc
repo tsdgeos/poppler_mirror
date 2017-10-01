@@ -170,7 +170,7 @@ void OutputDev::markPoint(char *name, Dict *properties) {
 }
 
 
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
 void OutputDev::opiBegin(GfxState *state, Dict *opiDict) {
 }
 

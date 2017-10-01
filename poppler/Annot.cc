@@ -77,7 +77,7 @@
 #include <string.h>
 #include <algorithm>
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #  define annotLocker()   MutexLocker locker(&mutex)
 #  define annotCondLocker(X)  MutexLocker locker(&mutex, (X))
 #else
@@ -1328,7 +1328,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
 
   oc = dict->lookupNF("OC");
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
 #endif
 }
@@ -1567,17 +1567,17 @@ void Annot::incRefCnt() {
 }
 
 void Annot::decRefCnt() {
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gLockMutex(&mutex);
 #endif
   if (--refCnt == 0) {
-#if MULTITHREADED
+#ifdef MULTITHREADED
     gUnlockMutex(&mutex);
 #endif
     delete this;
     return;
   }
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gUnlockMutex(&mutex);
 #endif
 }
@@ -1604,7 +1604,7 @@ Annot::~Annot() {
   if (color)
     delete color;
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
     gDestroyMutex(&mutex);
 #endif
 }

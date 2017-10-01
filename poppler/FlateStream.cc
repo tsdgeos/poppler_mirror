@@ -18,7 +18,7 @@
 
 #include "poppler-config.h"
 
-#if ENABLE_ZLIB_UNCOMPRESS
+#ifdef ENABLE_ZLIB_UNCOMPRESS
 
 #include "FlateStream.h"
 

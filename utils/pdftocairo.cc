@@ -55,7 +55,7 @@
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
 #include "CairoOutputDev.h"
-#if USE_CMS
+#ifdef USE_CMS
 #ifdef USE_LCMS1
 #include <lcms.h>
 #else
@@ -63,13 +63,13 @@
 #endif
 #endif
 #include <cairo.h>
-#if CAIRO_HAS_PS_SURFACE
+#ifdef CAIRO_HAS_PS_SURFACE
 #include <cairo-ps.h>
 #endif
-#if CAIRO_HAS_PDF_SURFACE
+#ifdef CAIRO_HAS_PDF_SURFACE
 #include <cairo-pdf.h>
 #endif
-#if CAIRO_HAS_SVG_SURFACE
+#ifdef CAIRO_HAS_SVG_SURFACE
 #include <cairo-svg.h>
 #endif
 
@@ -139,33 +139,33 @@ static GBool setupdlg = gFalse;
 #endif
 
 static const ArgDesc argDesc[] = {
-#if ENABLE_LIBPNG
+#ifdef ENABLE_LIBPNG
   {"-png",    argFlag,     &png,           0,
    "generate a PNG file"},
 #endif
-#if ENABLE_LIBJPEG
+#ifdef ENABLE_LIBJPEG
   {"-jpeg",   argFlag,     &jpeg,           0,
    "generate a JPEG file"},
   {"-jpegopt",  argGooString, &jpegOpt,    0,
    "jpeg options, with format <opt1>=<val1>[,<optN>=<valN>]*"},
 #endif
-#if ENABLE_LIBTIFF
+#ifdef ENABLE_LIBTIFF
   {"-tiff",    argFlag,     &tiff,           0,
    "generate a TIFF file"},
   {"-tiffcompression", argString, tiffCompressionStr, sizeof(tiffCompressionStr),
    "set TIFF compression: none, packbits, jpeg, lzw, deflate"},
 #endif
-#if CAIRO_HAS_PS_SURFACE
+#ifdef CAIRO_HAS_PS_SURFACE
   {"-ps",     argFlag,     &ps,            0,
    "generate PostScript file"},
   {"-eps",        argFlag,     &eps,          0,
    "generate Encapsulated PostScript (EPS)"},
 #endif
-#if CAIRO_HAS_PDF_SURFACE
+#ifdef CAIRO_HAS_PDF_SURFACE
   {"-pdf",    argFlag,     &pdf,           0,
    "generate a PDF file"},
 #endif
-#if CAIRO_HAS_SVG_SURFACE
+#ifdef CAIRO_HAS_SVG_SURFACE
   {"-svg",    argFlag,     &svg,           0,
    "generate a Scalable Vector Graphics (SVG) file"},
 #endif
@@ -227,7 +227,7 @@ static const ArgDesc argDesc[] = {
    "use a transparent background instead of white (PNG)"},
   {"-antialias",   argGooString,     &antialias,          0,
    "set cairo antialias option"},
-#if USE_CMS
+#ifdef USE_CMS
   {"-icc",   argGooString,     &icc,          0,
    "ICC color profile to use"},
 #endif
@@ -282,7 +282,7 @@ static  FILE *output_file;
 static GBool usePDFPageSize;
 static cairo_antialias_t antialiasEnum = CAIRO_ANTIALIAS_DEFAULT;
 
-#if USE_CMS
+#ifdef USE_CMS
 static unsigned char *icc_data;
 static int icc_data_size;
 static cmsHPROFILE profile;
@@ -387,7 +387,7 @@ static void writePageImage(GooString *filename)
   unsigned char *data;
 
   if (png) {
-#if ENABLE_LIBPNG
+#ifdef ENABLE_LIBPNG
     if (transp)
       writer = new PNGWriter(PNGWriter::RGBA);
     else if (gray)
@@ -397,7 +397,7 @@ static void writePageImage(GooString *filename)
     else
       writer = new PNGWriter(PNGWriter::RGB);
 
-#if USE_CMS
+#ifdef USE_CMS
 #ifdef USE_LCMS1
     if (icc_data)
       static_cast<PNGWriter*>(writer)->setICCProfile(cmsTakeProductName(profile), icc_data, icc_data_size);
@@ -418,7 +418,7 @@ static void writePageImage(GooString *filename)
 #endif
 
   } else if (jpeg) {
-#if ENABLE_LIBJPEG
+#ifdef ENABLE_LIBJPEG
     if (gray)
       writer = new JpegWriter(JpegWriter::GRAY);
     else
@@ -429,7 +429,7 @@ static void writePageImage(GooString *filename)
       static_cast<JpegWriter*>(writer)->setQuality(jpegQuality);
 #endif
   } else if (tiff) {
-#if ENABLE_LIBTIFF
+#ifdef ENABLE_LIBTIFF
     if (transp)
       writer = new TiffWriter(TiffWriter::RGBA_PREMULTIPLIED);
     else if (gray)
@@ -627,7 +627,7 @@ static void beginDocument(GooString *inputFileName, GooString *outputFileName, d
     }
 
     if (ps || eps) {
-#if CAIRO_HAS_PS_SURFACE
+#ifdef CAIRO_HAS_PS_SURFACE
       surface = cairo_ps_surface_create_for_stream(writeStream, output_file, w, h);
       if (level2)
 	cairo_ps_surface_restrict_to_level (surface, CAIRO_PS_LEVEL_2);
@@ -641,11 +641,11 @@ static void beginDocument(GooString *inputFileName, GooString *outputFileName, d
       cairo_ps_surface_dsc_begin_page_setup (surface);
 #endif
     } else if (pdf) {
-#if CAIRO_HAS_PDF_SURFACE
+#ifdef CAIRO_HAS_PDF_SURFACE
       surface = cairo_pdf_surface_create_for_stream(writeStream, output_file, w, h);
 #endif
     } else if (svg) {
-#if CAIRO_HAS_SVG_SURFACE
+#ifdef CAIRO_HAS_SVG_SURFACE
       surface = cairo_svg_surface_create_for_stream(writeStream, output_file, w, h);
       cairo_svg_surface_restrict_to_version (surface, CAIRO_SVG_VERSION_1_2);
 #endif
@@ -661,7 +661,7 @@ static void beginPage(double *w, double *h)
 {
   if (printing) {
     if (ps || eps) {
-#if CAIRO_HAS_PS_SURFACE
+#ifdef CAIRO_HAS_PS_SURFACE
       if (*w > *h) {
 	cairo_ps_surface_dsc_comment (surface, "%%PageOrientation: Landscape");
 	cairo_ps_surface_set_size (surface, *h, *w);
@@ -672,7 +672,7 @@ static void beginPage(double *w, double *h)
 #endif
     }
 
-#if CAIRO_HAS_PDF_SURFACE
+#ifdef CAIRO_HAS_PDF_SURFACE
     if (pdf)
       cairo_pdf_surface_set_size (surface, *w, *h);
 #endif
@@ -1119,7 +1119,7 @@ int main(int argc, char *argv[]) {
 
   outputFileName = getOutputFileName(fileName, outputName);
 
-#if USE_CMS
+#ifdef USE_CMS
   icc_data = NULL;
   if (icc.getCString()[0]) {
     FILE *file = fopen(icc.getCString(), "rb");
@@ -1287,7 +1287,7 @@ int main(int argc, char *argv[]) {
   if (userPW)
     delete userPW;
 
-#if USE_CMS
+#ifdef USE_CMS
   cmsCloseProfile(profile);
   if (icc_data)
     gfree(icc_data);

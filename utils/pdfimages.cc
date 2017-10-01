@@ -70,11 +70,11 @@ static const ArgDesc argDesc[] = {
    "first page to convert"},
   {"-l",      argInt,      &lastPage,      0,
    "last page to convert"},
-#if ENABLE_LIBPNG
+#ifdef ENABLE_LIBPNG
   {"-png",      argFlag,     &enablePNG,      0,
    "change the default output format to PNG"},
 #endif
-#if ENABLE_LIBTIFF
+#ifdef ENABLE_LIBTIFF
   {"-tiff",      argFlag,     &enableTiff,      0,
    "change the default output format to TIFF"},
 #endif
