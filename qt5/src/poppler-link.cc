@@ -1,5 +1,5 @@
 /* poppler-link.cc: qt interface to poppler
- * Copyright (C) 2006-2007, 2013, 2016, Albert Astals Cid
+ * Copyright (C) 2006-2007, 2013, 2016, 2017, Albert Astals Cid
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>

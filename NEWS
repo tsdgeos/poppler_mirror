@@ -1,3 +1,31 @@
+Release 0.60.0
+        core:
+         * Enable libcurl support by default
+         * PSOutputDev: Fix wrong text generation. Bug #102760
+         * Added methods to get and set the font size of text fields. Bug #101692
+         * CairoOutputDev: Do not extend the pattern in drawImageMaskRegular
+         * CairoOutputDev: do not use the custom downscaling for rendering images when using cairo >= 1.14
+         * Fix build with old clang
+         * Fix various crashes in broken files
+         * Fix some warnings
+         * Add some constness to the basic classes
+         * Remove unused functions from GlobalParams
+
+        qt5:
+         * Added methods to get and set the font size of text fields. Bug #101692
+         * Add whether renderToImage shows annotations
+         * ArthurOutputDev: Replace Splash font rendering by Qt font rendering
+         * ArthurOutputDev: Implement the drawSoftMaskedImage method
+         * ArthurOutputDev: Fix several small bugs related to dash pattern handling
+         * Fix two minor typos
+
+        build system:
+         * cmake is now the default build system
+         * autotools based build system has been removed
+
+         utils:
+         * pdfinfo: don't truncate dest name
+
 Release 0.59.0
         core:
          * Fix infinite recursion in NameTree parsing in broken files
