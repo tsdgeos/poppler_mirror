@@ -102,8 +102,11 @@ else()
   message(FATAL_ERROR "Invalid font configuration setting: ${FONT_CONFIGURATION}")
 endif()
 
+if(CMAKE_USE_PTHREADS_INIT OR WIN32)
+  set(MULTITHREADED ON)
+endif()
+
 # Enable these unconditionally.
-set(MULTITHREADED ON)
 set(OPI_SUPPORT ON)
 set(TEXTOUT_WORD_LIST ON)
 
