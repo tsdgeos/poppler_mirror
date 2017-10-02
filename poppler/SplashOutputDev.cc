@@ -51,7 +51,7 @@
 #endif
 
 #include <string.h>
-#include <math.h>
+#include <cmath>
 #include "goo/gfile.h"
 #include "GlobalParams.h"
 #include "Error.h"
@@ -81,25 +81,6 @@
 #ifdef VMS
 #if (__VMS_VER < 70000000)
 extern "C" int unlink(char *filename);
-#endif
-#endif
-
-#ifdef _MSC_VER
-#include <float.h>
-#define isfinite(x) _finite(x)
-#endif
-
-#ifdef __sun
-#include <ieeefp.h>
-#ifndef isfinite
-#define isfinite(x) finite(x)
-#endif
-#endif
-
-#if __cplusplus > 199711L
-#include <cmath>
-#ifndef isfinite
-#define isfinite(x) std::isfinite(x)
 #endif
 #endif
 
