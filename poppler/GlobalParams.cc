@@ -134,20 +134,25 @@ GlobalParams *globalParams = NULL;
 static HMODULE hmodule;
 
 extern "C" {
-BOOL WINAPI
-DllMain (HINSTANCE hinstDLL,
-	 DWORD     fdwReason,
-	 LPVOID    lpvReserved)
-{
-  switch (fdwReason)
-    {
-    case DLL_PROCESS_ATTACH:
-      hmodule = hinstDLL;
-      break;
+  /* Provide declaration to squelch -Wmissing-declarations warning */
+  BOOL WINAPI
+  DllMain (HINSTANCE hinstDLL,
+	   DWORD     fdwReason,
+	   LPVOID    lpvReserved);
+
+  BOOL WINAPI
+  DllMain (HINSTANCE hinstDLL,
+	   DWORD     fdwReason,
+	   LPVOID    lpvReserved)
+  {
+    switch (fdwReason) {
+      case DLL_PROCESS_ATTACH:
+	hmodule = hinstDLL;
+	break;
     }
 
-  return TRUE;
-}
+    return TRUE;
+  }
 }
 
 static const char *

@@ -25,8 +25,6 @@
 #ifndef POPPLER_CONFIG_H
 #define POPPLER_CONFIG_H
 
-#include <stdio.h>
-
 // We duplicate some of the config.h #define's here since they are
 // used in some of the header files we install.  The #ifndef/#endif
 // around #undef look odd, but it's to silence warnings about
@@ -148,6 +146,7 @@
 //------------------------------------------------------------------------
 
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
+#include <stdio.h> // __MINGW_PRINTF_FORMAT is defined in the mingw stdio.h
 #ifdef __MINGW_PRINTF_FORMAT
 #define GCC_PRINTF_FORMAT(fmt_index, va_index) \
 	__attribute__((__format__(__MINGW_PRINTF_FORMAT, fmt_index, va_index)))

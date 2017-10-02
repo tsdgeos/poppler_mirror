@@ -3510,7 +3510,7 @@ AnnotTextMarkup::~AnnotTextMarkup() {
 }
 
 void AnnotTextMarkup::setType(AnnotSubtype new_type) {
-  const char *typeName;
+  const char *typeName = nullptr; /* squelch bogus compiler warning */
 
   switch (new_type) {
     case typeHighlight:
@@ -5307,7 +5307,7 @@ void AnnotGeometry::initialize(PDFDoc *docA, Dict* dict) {
 }
 
 void AnnotGeometry::setType(AnnotSubtype new_type) {
-  const char *typeName;
+  const char *typeName = nullptr; /* squelch bogus compiler warning */
 
   switch (new_type) {
     case typeSquare:
@@ -5565,7 +5565,7 @@ void AnnotPolygon::initialize(PDFDoc *docA, Dict* dict) {
 }
 
 void AnnotPolygon::setType(AnnotSubtype new_type) {
-  const char *typeName;
+  const char *typeName = nullptr; /* squelch bogus compiler warning */
 
   switch (new_type) {
     case typePolygon:
