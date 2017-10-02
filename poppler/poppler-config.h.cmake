@@ -134,21 +134,6 @@
 #define xpdfCopyright "Copyright 1996-2011 Glyph & Cog, LLC"
 
 //------------------------------------------------------------------------
-// popen
-//------------------------------------------------------------------------
-
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-#define popen _popen
-#define pclose _pclose
-#endif
-
-#if defined(VMS) || defined(VMCMS) || defined(DOS) || defined(OS2) || defined(__EMX__) || defined(_WIN32) || defined(__DJGPP__) || defined(MACOS)
-#define POPEN_READ_MODE "rb"
-#else
-#define POPEN_READ_MODE "r"
-#endif
-
-//------------------------------------------------------------------------
 // Win32 stuff
 //------------------------------------------------------------------------
 

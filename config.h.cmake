@@ -197,6 +197,14 @@
 #define snprintf _snprintf
 #endif
 
+//------------------------------------------------------------------------
+// popen
+//------------------------------------------------------------------------
+#if defined(_MSC_VER) || defined(__BORLANDC__)
+#define popen _popen
+#define pclose _pclose
+#endif
+
 /* Number of bits in a file offset, on hosts where this is settable. */
 #cmakedefine _FILE_OFFSET_BITS @_FILE_OFFSET_BITS@
 
