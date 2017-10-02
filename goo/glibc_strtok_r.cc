@@ -55,7 +55,8 @@
 //
 //========================================================================
 
-#if defined(__MINGW32__) && !defined(__WINPTHREADS_VERSION)
+#ifndef HAVE_STRTOK_R
+
 #include <string.h>
 
 #define __rawmemchr strchr
@@ -89,4 +90,5 @@ char * strtok_r (char *s, const char *delim, char **save_ptr)
     }
   return token;
 }
+
 #endif

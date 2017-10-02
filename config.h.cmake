@@ -94,6 +94,9 @@
 /* Define to 1 if you have the `strcat_s' function. */
 #cmakedefine HAVE_STRCAT_S 1
 
+/* Defines if strtok_r is available on your system */
+#cmakedefine HAVE_STRTOK_R 1
+
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #cmakedefine HAVE_NDIR_H 1
 

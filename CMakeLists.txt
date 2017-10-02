@@ -369,6 +369,7 @@ set(poppler_SRCS
   goo/gstrtod.cc
   goo/grandom.cc
   goo/glibc.cc
+  goo/glibc_strtok_r.cc
   fofi/FoFiBase.cc
   fofi/FoFiEncodings.cc
   fofi/FoFiTrueType.cc
@@ -423,7 +424,6 @@ set(poppler_SRCS
   poppler/Stream.cc
   poppler/StructTreeRoot.cc
   poppler/StructElement.cc
-  poppler/strtok_r.cpp
   poppler/UnicodeMap.cc
   poppler/UnicodeTypeTable.cc
   poppler/UTF.cc
