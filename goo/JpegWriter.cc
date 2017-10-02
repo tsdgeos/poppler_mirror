@@ -9,6 +9,7 @@
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Peter Breitenlohner <peb@mppmu.mpg.de>
+// Copyright (C) 2017 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 

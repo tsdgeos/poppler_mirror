@@ -16,6 +16,7 @@
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2013 Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+ * Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
