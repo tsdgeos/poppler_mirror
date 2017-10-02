@@ -159,10 +159,4 @@
 #define GCC_PRINTF_FORMAT(fmt_index, va_index)
 #endif
 
-#if defined(_MSC_VER) && _MSC_VER < 1800
-#define fmax(a, b) std::max(a, b)
-#define fmin(a, b) std::min(a, b)
-#endif
-
-
 #endif /* POPPLER_CONFIG_H */
