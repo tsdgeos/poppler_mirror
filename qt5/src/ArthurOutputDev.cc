@@ -137,12 +137,26 @@ void ArthurOutputDev::endPage() {
 
 void ArthurOutputDev::saveState(GfxState *state)
 {
+  m_currentPenStack.push(m_currentPen);
+  m_currentBrushStack.push(m_currentBrush);
+  m_rawFontStack.push(m_rawFont);
+  m_codeToGIDStack.push(m_codeToGID);
+
   m_painter->save();
 }
 
 void ArthurOutputDev::restoreState(GfxState *state)
 {
   m_painter->restore();
+
+  m_codeToGID = m_codeToGIDStack.top();
+  m_codeToGIDStack.pop();
+  m_rawFont = m_rawFontStack.top();
+  m_rawFontStack.pop();
+  m_currentBrush = m_currentBrushStack.top();
+  m_currentBrushStack.pop();
+  m_currentPen = m_currentPenStack.top();
+  m_currentPenStack.pop();
 }
 
 void ArthurOutputDev::updateAll(GfxState *state)
