@@ -1,3 +1,10 @@
+Release 0.60.1
+        qt5:
+         * ArthurOutputDev: Add missing 'return' in error paths
+
+        build system:
+         * FindLIBOPENJPEG.cmake: Add CheckCXXSourceCompiles
+
 Release 0.60.0
         core:
          * Enable libcurl support by default
