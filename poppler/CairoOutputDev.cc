@@ -2714,7 +2714,9 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
   for (y = 0; y < maskHeight; y++) {
     maskDest = (unsigned char *) (maskBuffer + y * row_stride);
     pix = maskImgStr->getLine();
-    maskColorMap->getGrayLine (pix, maskDest, maskWidth);
+    if (likely(pix != nullptr)) {
+        maskColorMap->getGrayLine (pix, maskDest, maskWidth);
+    }
   }
 
   maskImgStr->close();
