@@ -572,7 +572,6 @@ if(ENABLE_XPDF_HEADERS)
     poppler/FontEncodingTables.h
     poppler/FontInfo.h
     poppler/Form.h
-    poppler/Function.cc
     poppler/Function.h
     poppler/Gfx.h
     poppler/GfxFont.h
