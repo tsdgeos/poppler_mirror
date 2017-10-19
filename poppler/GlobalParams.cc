@@ -572,7 +572,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   sysFonts = new SysFontList();
   psExpandSmaller = gFalse;
   psShrinkLarger = gTrue;
-  psCenter = gTrue;
   psLevel = psLevel2;
   textEncoding = new GooString("UTF-8");
 #if defined(_WIN32)
@@ -1373,15 +1372,6 @@ GBool GlobalParams::getPSShrinkLarger() {
   return f;
 }
 
-GBool GlobalParams::getPSCenter() {
-  GBool f;
-
-  lockGlobalParams;
-  f = psCenter;
-  unlockGlobalParams;
-  return f;
-}
-
 PSLevel GlobalParams::getPSLevel() {
   PSLevel level;
 
@@ -1558,12 +1548,6 @@ void GlobalParams::setPSExpandSmaller(GBool expand) {
 void GlobalParams::setPSShrinkLarger(GBool shrink) {
   lockGlobalParams;
   psShrinkLarger = shrink;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setPSCenter(GBool center) {
-  lockGlobalParams;
-  psCenter = center;
   unlockGlobalParams;
 }
 

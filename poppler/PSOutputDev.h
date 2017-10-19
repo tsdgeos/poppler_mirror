@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2008, 2012, 2013, 2015 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Brad Hards <bradh@kde.org>
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
@@ -309,6 +309,7 @@ public:
     { overlayCbk = cbk; overlayCbkData = data; }
   void setDisplayText(GBool display) { displayText = display; }
 
+  void setPSCenter(GBool center) { psCenter = center; }
   void setRasterAntialias(GBool a) { rasterAntialias = a; }
   void setRasterResolution(double r) { rasterResolution = r; }
   void setRasterMono(GBool b) { rasterMono = b; }
@@ -527,6 +528,7 @@ private:
   GBool t3NeedsRestore;		// set if a 'q' operator was issued
   GBool forceRasterize;		// forces the page to be rasterized into a image before printing
   GBool displayText;		// displayText
+  GBool psCenter;		// center pages on the paper
   GBool rasterAntialias;	// antialias on rasterize
   GBool uncompressPreloadedImages;
   double rasterResolution;	// PostScript rasterization resolution (dpi)

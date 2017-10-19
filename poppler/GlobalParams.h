@@ -133,7 +133,6 @@ public:
 		              GooString *base14Name = NULL);
   GBool getPSExpandSmaller();
   GBool getPSShrinkLarger();
-  GBool getPSCenter();
   PSLevel getPSLevel();
   GooString *getTextEncodingName();
   EndOfLineKind getTextEOL();
@@ -159,7 +158,6 @@ public:
   void addFontFile(GooString *fontName, GooString *path);
   void setPSExpandSmaller(GBool expand);
   void setPSShrinkLarger(GBool shrink);
-  void setPSCenter(GBool center);
   void setPSLevel(PSLevel level);
   void setTextEncoding(char *encodingName);
   GBool setTextEOL(char *s);
@@ -219,7 +217,6 @@ private:
   SysFontList *sysFonts;	// system fonts
   GBool psExpandSmaller;	// expand smaller pages to fill paper
   GBool psShrinkLarger;		// shrink larger pages to fit paper
-  GBool psCenter;		// center pages on the paper
   PSLevel psLevel;		// PostScript level to generate
   GooString *textEncoding;	// encoding (unicodeMap) to use for text
 				//   output

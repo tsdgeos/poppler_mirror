@@ -1259,6 +1259,7 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA,
   rasterMono = gFalse;
   rasterResolution = 300;
   uncompressPreloadedImages = gFalse;
+  psCenter = gTrue;
   rasterAntialias = gFalse;
   displayText = gTrue;
   ok = gTrue;
@@ -3834,7 +3835,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
     if (tx0 >= 0 && ty0 >= 0) {
       tx += (rotate == 0 || rotate == 180) ? tx0 : ty0;
       ty += (rotate == 0 || rotate == 180) ? ty0 : -tx0;
-    } else if (globalParams->getPSCenter()) {
+    } else if (psCenter) {
       if (clipLLX0 < clipURX0 && clipLLY0 < clipURY0) {
 	tx += (imgWidth2 - xScale * (clipURX0 - clipLLX0)) / 2;
 	ty += (imgHeight2 - yScale * (clipURY0 - clipLLY0)) / 2;
