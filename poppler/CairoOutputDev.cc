@@ -169,7 +169,7 @@ CairoOutputDev::CairoOutputDev() {
 
   // the SA parameter supposedly defaults to false, but Acrobat
   // apparently hardwires it to true
-  stroke_adjust = globalParams->getStrokeAdjust();
+  stroke_adjust = gTrue;
   align_stroke_coords = gFalse;
   adjusted_stroke_width = gFalse;
   xref = NULL;

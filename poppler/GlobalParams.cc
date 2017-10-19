@@ -583,19 +583,8 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   textEOL = eolUnix;
 #endif
   textPageBreaks = gTrue;
-  textKeepTinyChars = gFalse;
   enableFreeType = gTrue;
-  strokeAdjust = gTrue;
-  screenType = screenUnset;
-  screenSize = -1;
-  screenDotRadius = -1;
-  screenGamma = 1.0;
-  screenBlackThreshold = 0.0;
-  screenWhiteThreshold = 1.0;
-  minLineWidth = 0.0;
   overprintPreview = gFalse;
-  mapNumericCharNames = gTrue;
-  mapUnknownCharNames = gTrue;
   printCommands = gFalse;
   profileCommands = gFalse;
   errQuiet = gFalse;
@@ -1429,15 +1418,6 @@ GBool GlobalParams::getTextPageBreaks() {
   return pageBreaks;
 }
 
-GBool GlobalParams::getTextKeepTinyChars() {
-  GBool tiny;
-
-  lockGlobalParams;
-  tiny = textKeepTinyChars;
-  unlockGlobalParams;
-  return tiny;
-}
-
 GBool GlobalParams::getEnableFreeType() {
   GBool f;
 
@@ -1445,96 +1425,6 @@ GBool GlobalParams::getEnableFreeType() {
   f = enableFreeType;
   unlockGlobalParams;
   return f;
-}
-
-GBool GlobalParams::getStrokeAdjust() {
-  GBool f;
-
-  lockGlobalParams;
-  f = strokeAdjust;
-  unlockGlobalParams;
-  return f;
-}
-
-ScreenType GlobalParams::getScreenType() {
-  ScreenType t;
-
-  lockGlobalParams;
-  t = screenType;
-  unlockGlobalParams;
-  return t;
-}
-
-int GlobalParams::getScreenSize() {
-  int size;
-
-  lockGlobalParams;
-  size = screenSize;
-  unlockGlobalParams;
-  return size;
-}
-
-int GlobalParams::getScreenDotRadius() {
-  int r;
-
-  lockGlobalParams;
-  r = screenDotRadius;
-  unlockGlobalParams;
-  return r;
-}
-
-double GlobalParams::getScreenGamma() {
-  double gamma;
-
-  lockGlobalParams;
-  gamma = screenGamma;
-  unlockGlobalParams;
-  return gamma;
-}
-
-double GlobalParams::getScreenBlackThreshold() {
-  double thresh;
-
-  lockGlobalParams;
-  thresh = screenBlackThreshold;
-  unlockGlobalParams;
-  return thresh;
-}
-
-double GlobalParams::getScreenWhiteThreshold() {
-  double thresh;
-
-  lockGlobalParams;
-  thresh = screenWhiteThreshold;
-  unlockGlobalParams;
-  return thresh;
-}
-
-double GlobalParams::getMinLineWidth() {
-  double minLineWidthA;
-
-  lockGlobalParams;
-  minLineWidthA = minLineWidth;
-  unlockGlobalParams;
-  return minLineWidthA;
-}
-
-GBool GlobalParams::getMapNumericCharNames() {
-  GBool map;
-
-  lockGlobalParams;
-  map = mapNumericCharNames;
-  unlockGlobalParams;
-  return map;
-}
-
-GBool GlobalParams::getMapUnknownCharNames() {
-  GBool map;
-
-  lockGlobalParams;
-  map = mapUnknownCharNames;
-  unlockGlobalParams;
-  return map;
 }
 
 GBool GlobalParams::getPrintCommands() {
@@ -1712,12 +1602,6 @@ void GlobalParams::setTextPageBreaks(GBool pageBreaks) {
   unlockGlobalParams;
 }
 
-void GlobalParams::setTextKeepTinyChars(GBool keep) {
-  lockGlobalParams;
-  textKeepTinyChars = keep;
-  unlockGlobalParams;
-}
-
 GBool GlobalParams::setEnableFreeType(char *s) {
   GBool ok;
 
@@ -1727,86 +1611,9 @@ GBool GlobalParams::setEnableFreeType(char *s) {
   return ok;
 }
 
-GBool GlobalParams::setDisableFreeTypeHinting(char *s) {
-  GBool ok;
-
-  lockGlobalParams;
-  ok = parseYesNo2(s, &disableFreeTypeHinting);
-  unlockGlobalParams;
-  return ok;
-}
-
-void GlobalParams::setStrokeAdjust(GBool adjust)
-{
-  lockGlobalParams;
-  strokeAdjust = adjust;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setScreenType(ScreenType st)
-{
-  lockGlobalParams;
-  screenType = st;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setScreenSize(int size)
-{
-  lockGlobalParams;
-  screenSize = size;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setScreenDotRadius(int radius)
-{
-  lockGlobalParams;
-  screenDotRadius = radius;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setScreenGamma(double gamma)
-{
-  lockGlobalParams;
-  screenGamma = gamma;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setScreenBlackThreshold(double blackThreshold)
-{
-  lockGlobalParams;
-  screenBlackThreshold = blackThreshold;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setScreenWhiteThreshold(double whiteThreshold)
-{
-  lockGlobalParams;
-  screenWhiteThreshold = whiteThreshold;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setMinLineWidth(double minLineWidthA)
-{
-  lockGlobalParams;
-  minLineWidth = minLineWidthA;
-  unlockGlobalParams;
-}
-
 void GlobalParams::setOverprintPreview(GBool overprintPreviewA) {
   lockGlobalParams;
   overprintPreview = overprintPreviewA;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setMapNumericCharNames(GBool map) {
-  lockGlobalParams;
-  mapNumericCharNames = map;
-  unlockGlobalParams;
-}
-
-void GlobalParams::setMapUnknownCharNames(GBool map) {
-  lockGlobalParams;
-  mapUnknownCharNames = map;
   unlockGlobalParams;
 }
 

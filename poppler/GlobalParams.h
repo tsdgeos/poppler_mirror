@@ -100,15 +100,6 @@ enum EndOfLineKind {
 
 //------------------------------------------------------------------------
 
-enum ScreenType {
-  screenUnset,
-  screenDispersed,
-  screenClustered,
-  screenStochasticClustered
-};
-
-//------------------------------------------------------------------------
-
 class GlobalParams {
 public:
 
@@ -147,19 +138,8 @@ public:
   GooString *getTextEncodingName();
   EndOfLineKind getTextEOL();
   GBool getTextPageBreaks();
-  GBool getTextKeepTinyChars();
   GBool getEnableFreeType();
-  GBool getStrokeAdjust();
-  ScreenType getScreenType();
-  int getScreenSize();
-  int getScreenDotRadius();
-  double getScreenGamma();
-  double getScreenBlackThreshold();
-  double getScreenWhiteThreshold();
-  double getMinLineWidth();
   GBool getOverprintPreview() { return overprintPreview; }
-  GBool getMapNumericCharNames();
-  GBool getMapUnknownCharNames();
   GBool getPrintCommands();
   GBool getProfileCommands();
   GBool getErrQuiet();
@@ -184,20 +164,8 @@ public:
   void setTextEncoding(char *encodingName);
   GBool setTextEOL(char *s);
   void setTextPageBreaks(GBool pageBreaks);
-  void setTextKeepTinyChars(GBool keep);
   GBool setEnableFreeType(char *s);
-  GBool setDisableFreeTypeHinting(char *s);
-  void setStrokeAdjust(GBool strokeAdjust);
-  void setScreenType(ScreenType st);
-  void setScreenSize(int size);
-  void setScreenDotRadius(int radius);
-  void setScreenGamma(double gamma);
-  void setScreenBlackThreshold(double blackThreshold);
-  void setScreenWhiteThreshold(double whiteThreshold);
-  void setMinLineWidth(double minLineWidth);
   void setOverprintPreview(GBool overprintPreviewA);
-  void setMapNumericCharNames(GBool map);
-  void setMapUnknownCharNames(GBool map);
   void setPrintCommands(GBool printCommandsA);
   void setProfileCommands(GBool profileCommandsA);
   void setErrQuiet(GBool errQuietA);
@@ -258,20 +226,8 @@ private:
   EndOfLineKind textEOL;	// type of EOL marker to use for text
 				//   output
   GBool textPageBreaks;		// insert end-of-page markers?
-  GBool textKeepTinyChars;	// keep all characters in text output
   GBool enableFreeType;		// FreeType enable flag
-  GBool disableFreeTypeHinting;	// FreeType disable hinting flag
-  GBool strokeAdjust;		// stroke adjustment enable flag
-  ScreenType screenType;	// halftone screen type
-  int screenSize;		// screen matrix size
-  int screenDotRadius;		// screen dot radius
-  double screenGamma;		// screen gamma correction
-  double screenBlackThreshold;	// screen black clamping threshold
-  double screenWhiteThreshold;	// screen white clamping threshold
-  double minLineWidth;		// minimum line width
   GBool overprintPreview;	// enable overprint preview
-  GBool mapNumericCharNames;	// map numeric char names (from font subsets)?
-  GBool mapUnknownCharNames;	// map unknown char names?
   GBool printCommands;		// print the drawing commands
   GBool profileCommands;	// profile the drawing commands
   GBool errQuiet;		// suppress error messages?

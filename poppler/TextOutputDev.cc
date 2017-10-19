@@ -2599,8 +2599,7 @@ void TextPage::addChar(GfxState *state, double x, double y,
   }
 
   // check the tiny chars limit
-  if (!globalParams->getTextKeepTinyChars() &&
-      fabs(w1) < 3 && fabs(h1) < 3) {
+  if (fabs(w1) < 3 && fabs(h1) < 3) {
     if (++nTinyChars > 50000) {
       charPos += nBytes;
       return;

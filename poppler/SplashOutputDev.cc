@@ -103,6 +103,8 @@ extern "C" int unlink(char *filename);
 #endif
 #endif
 
+static const double s_minLineWidth = 0.0;
+
 static inline void convertGfxColor(SplashColorPtr dest,
                                    SplashColorMode colorMode,
                                    GfxColorSpace *colorSpace,
@@ -1407,7 +1409,7 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
   bitmap = new SplashBitmap(1, 1, bitmapRowPad, colorMode,
 			    colorMode != splashModeMono1, bitmapTopDown);
   splash = new Splash(bitmap, vectorAntialias, &screenParams);
-  splash->setMinLineWidth(globalParams->getMinLineWidth());
+  splash->setMinLineWidth(s_minLineWidth);
   splash->setThinLineMode(thinLineMode);
   splash->clear(paperColor, 0);
 
@@ -1425,27 +1427,15 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
 }
 
 void SplashOutputDev::setupScreenParams(double hDPI, double vDPI) {
-  screenParams.size = globalParams->getScreenSize();
-  screenParams.dotRadius = globalParams->getScreenDotRadius();
-  screenParams.gamma = (SplashCoord)globalParams->getScreenGamma();
-  screenParams.blackThreshold =
-      (SplashCoord)globalParams->getScreenBlackThreshold();
-  screenParams.whiteThreshold =
-      (SplashCoord)globalParams->getScreenWhiteThreshold();
-  switch (globalParams->getScreenType()) {
-  case screenDispersed:
-    screenParams.type = splashScreenDispersed;
-    if (screenParams.size < 0) {
-      screenParams.size = 4;
-    }
-    break;
-  case screenClustered:
-    screenParams.type = splashScreenClustered;
-    if (screenParams.size < 0) {
-      screenParams.size = 10;
-    }
-    break;
-  case screenStochasticClustered:
+  screenParams.size = -1;
+  screenParams.dotRadius = -1;
+  screenParams.gamma = (SplashCoord)1.0;
+  screenParams.blackThreshold = (SplashCoord)0.0;
+  screenParams.whiteThreshold = (SplashCoord)1.0;
+
+  // use clustered dithering for resolution >= 300 dpi
+  // (compare to 299.9 to avoid floating point issues)
+  if (hDPI > 299.9 && vDPI > 299.9) {
     screenParams.type = splashScreenStochasticClustered;
     if (screenParams.size < 0) {
       screenParams.size = 64;
@@ -1453,24 +1443,10 @@ void SplashOutputDev::setupScreenParams(double hDPI, double vDPI) {
     if (screenParams.dotRadius < 0) {
       screenParams.dotRadius = 2;
     }
-    break;
-  case screenUnset:
-  default:
-    // use clustered dithering for resolution >= 300 dpi
-    // (compare to 299.9 to avoid floating point issues)
-    if (hDPI > 299.9 && vDPI > 299.9) {
-      screenParams.type = splashScreenStochasticClustered;
-      if (screenParams.size < 0) {
-	screenParams.size = 64;
-      }
-      if (screenParams.dotRadius < 0) {
-	screenParams.dotRadius = 2;
-      }
-    } else {
-      screenParams.type = splashScreenDispersed;
-      if (screenParams.size < 0) {
-	screenParams.size = 4;
-      }
+  } else {
+    screenParams.type = splashScreenDispersed;
+    if (screenParams.size < 0) {
+      screenParams.size = 4;
     }
   }
 }
@@ -1558,7 +1534,7 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   }
   splash = new Splash(bitmap, vectorAntialias, &screenParams);
   splash->setThinLineMode(thinLineMode);
-  splash->setMinLineWidth(globalParams->getMinLineWidth());
+  splash->setMinLineWidth(s_minLineWidth);
   if (state) {
     ctm = state->getCTM();
     mat[0] = (SplashCoord)ctm[0];
@@ -1600,7 +1576,7 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   splash->setFlatness(1);
   // the SA parameter supposedly defaults to false, but Acrobat
   // apparently hardwires it to true
-  splash->setStrokeAdjust(globalParams->getStrokeAdjust());
+  splash->setStrokeAdjust(gTrue);
   splash->clear(paperColor, 0);
 }
 
@@ -2854,7 +2830,7 @@ void SplashOutputDev::type3D1(GfxState *state, double wx, double wy,
     splash->clear(color);
     color[0] = 0xff;
   }
-  splash->setMinLineWidth(globalParams->getMinLineWidth());
+  splash->setMinLineWidth(s_minLineWidth);
   splash->setThinLineMode(splashThinLineDefault);
   splash->setFillPattern(new SplashSolidColor(color));
   splash->setStrokePattern(new SplashSolidColor(color));
@@ -4315,7 +4291,7 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
 #endif
   }
   splash->setThinLineMode(transpGroup->origSplash->getThinLineMode());
-  splash->setMinLineWidth(globalParams->getMinLineWidth());
+  splash->setMinLineWidth(s_minLineWidth);
   //~ Acrobat apparently copies at least the fill and stroke colors, and
   //~ maybe other state(?) -- but not the clipping path (and not sure
   //~ what else)
@@ -4731,7 +4707,7 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *ca
     splash->clear(paperColor, 0);
   }
   splash->setThinLineMode(formerSplash->getThinLineMode());
-  splash->setMinLineWidth(globalParams->getMinLineWidth());
+  splash->setMinLineWidth(s_minLineWidth);
 
   box.x1 = bbox[0]; box.y1 = bbox[1];
   box.x2 = bbox[2]; box.y2 = bbox[3];
