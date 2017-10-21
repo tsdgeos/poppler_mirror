@@ -794,7 +794,7 @@ public:
 
   CCITTFaxStream(Stream *strA, int encodingA, GBool endOfLineA,
 		 GBool byteAlignA, int columnsA, int rowsA,
-		 GBool endOfBlockA, GBool blackA);
+		 GBool endOfBlockA, GBool blackA, int damagedRowsBeforeErrorA);
   ~CCITTFaxStream();
   StreamKind getKind() override { return strCCITTFax; }
   void reset() override;
@@ -808,8 +808,11 @@ public:
 
   int getEncoding() { return encoding; }
   GBool getEndOfLine() { return endOfLine; }
+  GBool getEncodedByteAlign() { return byteAlign; }
+  GBool getEndOfBlock() { return endOfBlock; }
   int getColumns() { return columns; }
   GBool getBlackIs1() { return black; }
+  int getDamagedRowsBeforeError() { return damagedRowsBeforeError; }
 
 private:
 
@@ -821,6 +824,7 @@ private:
   int rows;			// 'Rows' parameter
   GBool endOfBlock;		// 'EndOfBlock' parameter
   GBool black;			// 'BlackIs1' parameter
+  int damagedRowsBeforeError;   // 'DamagedRowsBeforeError' parameter
   GBool eof;			// true if at eof
   GBool nextLine2D;		// true if next line uses 2D encoding
   int row;			// current row

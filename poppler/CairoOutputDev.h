@@ -283,11 +283,14 @@ protected:
 				     GBool interpolate);
   GBool getStreamData (Stream *str, char **buffer, int *length);
   void setMimeData(GfxState *state, Stream *str, Object *ref,
-		   GfxImageColorMap *colorMap, cairo_surface_t *image);
+		   GfxImageColorMap *colorMap, cairo_surface_t *image, int height);
   void fillToStrokePathClip(GfxState *state);
   void alignStrokeCoords(GfxSubpath *subpath, int i, double *x, double *y);
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
   GBool setMimeDataForJBIG2Globals (Stream *str, cairo_surface_t *image);
+#endif
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 15, 10)
+  GBool setMimeDataForCCITTParams(Stream  *str, cairo_surface_t *image, int height);
 #endif
   static void setContextAntialias(cairo_t *cr, cairo_antialias_t antialias);
 
