@@ -69,6 +69,11 @@
 
 // #define LOG_CAIRO
 
+// To limit memory usage and improve performance when printing, limit
+// cairo images to this size. 8192 is sufficient for an A2 sized
+// 300ppi image.
+#define MAX_PRINT_IMAGE_SIZE 8192
+
 #ifdef LOG_CAIRO
 #define LOG(x) (x)
 #else
@@ -3125,7 +3130,22 @@ public:
     bool needsCustomDownscaling = true;
 #endif
 
-    if (!needsCustomDownscaling || printing || scaledWidth >= width || scaledHeight >= height) {
+    if (printing) {
+      if (width > MAX_PRINT_IMAGE_SIZE || height > MAX_PRINT_IMAGE_SIZE) {
+	if (width > height) {
+	  scaledWidth = MAX_PRINT_IMAGE_SIZE;
+	  scaledHeight = MAX_PRINT_IMAGE_SIZE * (double)height/width;
+	} else {
+	  scaledHeight = MAX_PRINT_IMAGE_SIZE;
+	  scaledWidth = MAX_PRINT_IMAGE_SIZE * (double)width/height;
+	}
+	needsCustomDownscaling = true;
+      } else {
+	needsCustomDownscaling = false;
+      }
+    }
+
+    if (!needsCustomDownscaling || scaledWidth >= width || scaledHeight >= height) {
       // No downscaling. Create cairo image containing the source image data.
       unsigned char *buffer;
       ptrdiff_t stride;
@@ -3255,8 +3275,17 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   if (width == widthA && height == heightA)
     filter = getFilterForSurface (image, interpolate);
 
-  if (!inlineImg) /* don't read stream twice if it is an inline image */
-    setMimeData(state, str, ref, colorMap, image, heightA);
+  if (!inlineImg) { /* don't read stream twice if it is an inline image */
+    // cairo 1.15.10 allows mime image data to have different size to cairo image
+    // mime image size will be scaled to same size as cairo image
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 15, 10)
+    bool requireSameSize = false;
+#else
+    bool requireSameSize = true;
+#endif
+    if (!requireSameSize || (width == widthA && height == heightA))
+      setMimeData(state, str, ref, colorMap, image, heightA);
+  }
 
   pattern = cairo_pattern_create_for_surface (image);
   cairo_surface_destroy (image);
