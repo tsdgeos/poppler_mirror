@@ -2884,7 +2884,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 
   ctm = state->getCTM();
   for (int i = 0; i < 6; ++i) {
-    if (!isfinite(ctm[i])) return;
+    if (!std::isfinite(ctm[i])) return;
   }
   mat[0] = ctm[0];
   mat[1] = ctm[1];
@@ -2930,7 +2930,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state,
 
   ctm = state->getCTM();
   for (int i = 0; i < 6; ++i) {
-    if (!isfinite(ctm[i])) return;
+    if (!std::isfinite(ctm[i])) return;
   }
   
   beginTransparencyGroup(state, bbox, NULL, gFalse, gFalse, gFalse);
@@ -3507,7 +3507,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 
   ctm = state->getCTM();
   for (i = 0; i < 6; ++i) {
-    if (!isfinite(ctm[i])) return;
+    if (!std::isfinite(ctm[i])) return;
   }
   mat[0] = ctm[0];
   mat[1] = ctm[1];
@@ -3835,7 +3835,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
 
     ctm = state->getCTM();
     for (i = 0; i < 6; ++i) {
-      if (!isfinite(ctm[i])) {
+      if (!std::isfinite(ctm[i])) {
         delete maskBitmap;
         return;
       }
@@ -3967,7 +3967,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
 
   ctm = state->getCTM();
   for (i = 0; i < 6; ++i) {
-    if (!isfinite(ctm[i])) return;
+    if (!std::isfinite(ctm[i])) return;
   }
   mat[0] = ctm[0];
   mat[1] = ctm[1];
@@ -4568,7 +4568,7 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *ca
   state->concatCTM(1, 0, 0, 1, bbox[0], bbox[1]);
   ctm = state->getCTM();
   for (i = 0; i < 6; ++i) {
-    if (!isfinite(ctm[i])) {
+    if (!std::isfinite(ctm[i])) {
       state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
       return gFalse;
     }
