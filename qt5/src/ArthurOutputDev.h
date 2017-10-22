@@ -36,6 +36,7 @@
 
 #include <memory>
 #include <map>
+#include <stack>
 
 #include "goo/gtypes.h"
 #include "OutputDev.h"
@@ -44,9 +45,6 @@
 #include <QtGui/QPainter>
 
 class GfxState;
-class GfxPath;
-class Gfx8BitFont;
-struct GfxRGB;
 
 class SplashFontEngine;
 
@@ -175,15 +173,21 @@ public:
 private:
   QPainter *m_painter;
   FontHinting m_fontHinting;
-  QFont m_currentFont;
+
   QPen m_currentPen;
+  // The various stacks are used to implement the 'saveState' and 'restoreState' methods
+  std::stack<QPen> m_currentPenStack;
+
   QBrush m_currentBrush;
+  std::stack<QBrush> m_currentBrushStack;
+
   GBool m_needFontUpdate;		// set when the font needs to be updated
   SplashFontEngine *m_fontEngine;
   XRef *xref;			// xref table for current document
 
   // The current font in use
   QRawFont* m_rawFont;
+  std::stack<QRawFont*> m_rawFontStack;
 
   // Identify a font by its 'Ref' and its font size
   struct ArthurFontID
@@ -203,6 +207,7 @@ private:
 
   // The table that maps character codes to glyph indexes
   int* m_codeToGID;
+  std::stack<int*> m_codeToGIDStack;
 };
 
 #endif
