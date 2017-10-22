@@ -127,7 +127,6 @@ GBool FlateEncoder::fillBuf() {
     zlib_status = deflate(&zlib_stream, (inBufEof? Z_FINISH: Z_NO_FLUSH));
 
     if (zlib_status == Z_STREAM_ERROR ||
-        zlib_stream.avail_out < 0 ||
         zlib_stream.avail_out > starting_avail_out) {
       /* Unrecoverable error */
       inBufEof = outBufEof = gTrue;

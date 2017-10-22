@@ -404,7 +404,7 @@ private:
   void setupScreenParams(double hDPI, double vDPI);
   SplashPattern *getColor(GfxGray gray);
   SplashPattern *getColor(GfxRGB *rgb);
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   SplashPattern *getColor(GfxCMYK *cmyk);
   SplashPattern *getColor(GfxColor *deviceN);
 #endif

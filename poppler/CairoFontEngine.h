@@ -121,7 +121,7 @@ private:
   CairoFont *fontCache[cairoFontCacheSize];
   FT_Library lib;
   GBool useCIDs;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   GooMutex mutex;
 #endif
 };

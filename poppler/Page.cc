@@ -61,7 +61,7 @@
 #include "Catalog.h"
 #include "Form.h"
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #  define pageLocker()   MutexLocker locker(&mutex)
 #else
 #  define pageLocker()
@@ -249,7 +249,7 @@ GBool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box) {
 //------------------------------------------------------------------------
 
 Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form) {
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
 #endif
   ok = gTrue;
@@ -328,7 +328,7 @@ Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *at
 Page::~Page() {
   delete attrs;
   delete annots;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gDestroyMutex(&mutex);
 #endif
 }

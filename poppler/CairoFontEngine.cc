@@ -49,7 +49,7 @@
 #include "Gfx.h"
 #include "Page.h"
 
-#if HAVE_FCNTL_H && HAVE_SYS_MMAN_H && HAVE_SYS_STAT_H
+#if defined(HAVE_FCNTL_H) && defined(HAVE_SYS_MMAN_H) && defined(HAVE_SYS_STAT_H)
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -60,7 +60,7 @@
 #pragma implementation
 #endif
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #  define fontEngineLocker()   MutexLocker locker(&mutex)
 #else
 #  define fontEngineLocker()
@@ -207,7 +207,7 @@ _ft_new_face_uncached (FT_Library lib,
   return gTrue;
 }
 
-#if CAN_CHECK_OPEN_FACES
+#ifdef CAN_CHECK_OPEN_FACES
 static struct _ft_face_data {
   struct _ft_face_data *prev, *next, **head;
 
@@ -817,7 +817,7 @@ CairoFontEngine::CairoFontEngine(FT_Library libA) {
   FT_Library_Version(lib, &major, &minor, &patch);
   useCIDs = major > 2 ||
             (major == 2 && (minor > 1 || (minor == 1 && patch > 7)));
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
 #endif
 }
@@ -829,7 +829,7 @@ CairoFontEngine::~CairoFontEngine() {
     if (fontCache[i])
       delete fontCache[i];
   }
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gDestroyMutex(&mutex);
 #endif
 }

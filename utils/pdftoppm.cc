@@ -90,7 +90,7 @@ static GBool tiff = gFalse;
 static GooString jpegOpt;
 static int jpegQuality = -1;
 static bool jpegProgressive = false;
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
 static GBool overprint = gFalse;
 #endif
 static char enableFreeTypeStr[16] = "";
@@ -152,34 +152,32 @@ static const ArgDesc argDesc[] = {
    "generate a monochrome PBM file"},
   {"-gray",   argFlag,     &gray,          0,
    "generate a grayscale PGM file"},
-#if ENABLE_LIBPNG
+#ifdef ENABLE_LIBPNG
   {"-png",    argFlag,     &png,           0,
    "generate a PNG file"},
 #endif
-#if ENABLE_LIBJPEG
+#ifdef ENABLE_LIBJPEG
   {"-jpeg",   argFlag,     &jpeg,           0,
    "generate a JPEG file"},
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   {"-jpegcmyk",argFlag,    &jpegcmyk,       0,
    "generate a CMYK JPEG file"},
 #endif
   {"-jpegopt",  argGooString, &jpegOpt,    0,
    "jpeg options, with format <opt1>=<val1>[,<optN>=<valN>]*"},
 #endif
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   {"-overprint",argFlag,   &overprint,      0,
    "enable overprint"},
 #endif
-#if ENABLE_LIBTIFF
+#ifdef ENABLE_LIBTIFF
   {"-tiff",    argFlag,     &tiff,           0,
    "generate a TIFF file"},
   {"-tiffcompression", argString, TiffCompressionStr, sizeof(TiffCompressionStr),
    "set TIFF compression: none, packbits, jpeg, lzw, deflate"},
 #endif
-#if HAVE_FREETYPE_FREETYPE_H | HAVE_FREETYPE_H
   {"-freetype",   argString,      enableFreeTypeStr, sizeof(enableFreeTypeStr),
    "enable FreeType font rasterizer: yes, no"},
-#endif
   {"-thinlinemode", argString, thinLineModeStr, sizeof(thinLineModeStr),
    "set thin line mode: none, solid, shape. Default: none"},
   
@@ -350,7 +348,7 @@ static void processPageJobs() {
     // process the job    
     SplashOutputDev *splashOut = new SplashOutputDev(mono ? splashModeMono1 :
                   gray ? splashModeMono8 :
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
         			    (jpegcmyk || overprint) ? splashModeDeviceN8 :
 #endif
 		              splashModeRGB8, 4, gFalse, *pageJob.paperColor, gTrue, thinLineMode);
@@ -517,7 +515,7 @@ int main(int argc, char *argv[]) {
   }
 
   // write PPM files
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   if (jpegcmyk || overprint) {
     globalParams->setOverprintPreview(gTrue);
     for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
@@ -534,7 +532,7 @@ int main(int argc, char *argv[]) {
 
   splashOut = new SplashOutputDev(mono ? splashModeMono1 :
 				    gray ? splashModeMono8 :
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
 				    (jpegcmyk || overprint) ? splashModeDeviceN8 :
 #endif
 				             splashModeRGB8, 4,

@@ -382,7 +382,7 @@ private:
   int fopenErrno;
 
   Goffset startXRefPos;		// offset of last xref table
-#if MULTITHREADED
+#ifdef MULTITHREADED
   GooMutex mutex;
 #endif
 };

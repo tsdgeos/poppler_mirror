@@ -79,7 +79,7 @@ private:
   int size;			// size of <elems> array
   int length;			// number of elements in array
   int ref;			// reference count
-#if MULTITHREADED
+#ifdef MULTITHREADED
   mutable GooMutex mutex;
 #endif
 };

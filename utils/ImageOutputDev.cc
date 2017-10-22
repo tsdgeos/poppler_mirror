@@ -630,7 +630,7 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
                               colorMap->getNumPixelComps() == 4)))) {
     // output in PNG format
 
-#if ENABLE_LIBPNG
+#ifdef ENABLE_LIBPNG
     ImgWriter *writer;
 
     if (!colorMap || (colorMap->getNumPixelComps() == 1 && colorMap->getBits() == 1)) {
@@ -657,7 +657,7 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
   } else if (outputTiff) {
     // output in TIFF format
 
-#if ENABLE_LIBTIFF
+#ifdef ENABLE_LIBTIFF
     ImgWriter *writer;
 
     if (!colorMap || (colorMap->getNumPixelComps() == 1 && colorMap->getBits() == 1)) {

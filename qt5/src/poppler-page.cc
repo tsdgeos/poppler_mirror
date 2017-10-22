@@ -307,7 +307,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 #if defined(HAVE_SPLASH)
       SplashColor bgColor;
       GBool overprintPreview = gFalse;
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
       overprintPreview = m_page->parentDoc->m_hints & Document::OverprintPreview ? gTrue : gFalse;
       if (overprintPreview)
       {
@@ -340,7 +340,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       }
 
       SplashColorMode colorMode = splashModeXBGR8;
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
       if (overprintPreview) colorMode = splashModeDeviceN8;
 #endif
 

@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2007-2008, 2010, 2015 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2015, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Sanjoy Mahajan <sanjoy@mit.edu>
 // Copyright (C) 2009, 2011, 2012, 2014-2016 William Bader <williambader@hotmail.com>
@@ -85,7 +85,7 @@ static GBool level3Sep = gFalse;
 static GBool origPageSizes = gFalse;
 static GBool doEPS = gFalse;
 static GBool doForm = gFalse;
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
 static GBool doOPI = gFalse;
 #endif
 static int splashResolution = 0;
@@ -112,7 +112,7 @@ static char userPassword[33] = "\001";
 static GBool quiet = gFalse;
 static GBool printVersion = gFalse;
 static GBool printHelp = gFalse;
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
 static GBool overprint = gFalse;
 #endif
 
@@ -139,7 +139,7 @@ static const ArgDesc argDesc[] = {
    "generate Encapsulated PostScript (EPS)"},
   {"-form",       argFlag,     &doForm,         0,
    "generate a PostScript form"},
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
   {"-opi",        argFlag,     &doOPI,          0,
    "generate OPI comments"},
 #endif
@@ -185,7 +185,7 @@ static const ArgDesc argDesc[] = {
    "owner password (for encrypted files)"},
   {"-upw",        argString,   userPassword,    sizeof(userPassword),
    "user password (for encrypted files)"},
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   {"-overprint",argFlag,   &overprint,      0,
    "enable overprint"},
 #endif
@@ -286,7 +286,7 @@ int main(int argc, char *argv[]) {
       goto err0;
     }
   }
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   if (overprint) {
     globalParams->setOverprintPreview(gTrue);
   }
@@ -296,9 +296,6 @@ int main(int argc, char *argv[]) {
   }
   if (noShrink) {
     globalParams->setPSShrinkLarger(gFalse);
-  }
-  if (noCenter) {
-    globalParams->setPSCenter(gFalse);
   }
   if (level1 || level1Sep || level2 || level2Sep || level3 || level3Sep) {
     globalParams->setPSLevel(level);
@@ -393,6 +390,9 @@ int main(int argc, char *argv[]) {
 			  paperHeight,
                           noCrop,
 			  duplex);
+  if (noCenter) {
+    psOut->setPSCenter(gFalse);
+  }
 
   if (rasterAntialiasStr[0]) {
     if (!GlobalParams::parseYesNo2(rasterAntialiasStr, &rasterAntialias)) {
@@ -411,7 +411,7 @@ int main(int argc, char *argv[]) {
   psOut->setPreloadImagesForms(preload);
   psOut->setOptimizeColorSpace(optimizeColorSpace);
   psOut->setPassLevel1CustomColor(passLevel1CustomColor);
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
   psOut->setGenerateOPI(doOPI);
 #endif
   psOut->setUseBinary(psBinary);

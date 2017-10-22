@@ -22,8 +22,6 @@
 
 #include <config.h>
 
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
-
 #ifdef USE_GCC_PRAGMAS
 #pragma implementation
 #endif
@@ -149,5 +147,3 @@ SplashFont *SplashFTFontFile::makeFont(SplashCoord *mat,
 int *SplashFTFontFile::getCodeToGID() {
   return codeToGID;
 }
-
-#endif // HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H

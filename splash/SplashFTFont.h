@@ -25,8 +25,6 @@
 
 #include "poppler-config.h"
 
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
-
 #ifdef USE_GCC_PRAGMAS
 #pragma interface
 #endif
@@ -74,7 +72,5 @@ private:
   GBool enableFreeTypeHinting;
   GBool enableSlightHinting;
 };
-
-#endif // HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
 
 #endif

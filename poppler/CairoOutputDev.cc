@@ -41,13 +41,13 @@
 #pragma implementation
 #endif
 
+#include <cstdint>
 #include <string.h>
 #include <math.h>
 #include <assert.h>
 #include <cairo.h>
 
 #include "goo/gfile.h"
-#include "goo/gtypes_p.h"
 #include "GlobalParams.h"
 #include "Error.h"
 #include "Object.h"
@@ -169,7 +169,7 @@ CairoOutputDev::CairoOutputDev() {
 
   // the SA parameter supposedly defaults to false, but Acrobat
   // apparently hardwires it to true
-  stroke_adjust = globalParams->getStrokeAdjust();
+  stroke_adjust = gTrue;
   align_stroke_coords = gFalse;
   adjusted_stroke_width = gFalse;
   xref = NULL;

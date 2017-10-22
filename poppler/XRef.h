@@ -235,7 +235,7 @@ private:
   Goffset mainXRefOffset;	// position of the main XRef table/stream
   GBool scannedSpecialFlags;	// true if scanSpecialFlags has been called
   GBool strOwner;     // true if str is owned by the instance
-#if MULTITHREADED
+#ifdef MULTITHREADED
   GooMutex mutex;
 #endif
 

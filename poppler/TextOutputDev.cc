@@ -51,7 +51,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
-#include <math.h>
+#include <cmath>
 #include <float.h>
 #include <ctype.h>
 #include <algorithm>
@@ -306,7 +306,7 @@ TextFontInfo::TextFontInfo(GfxState *state) {
   gfxFont = state->getFont();
   if (gfxFont)
     gfxFont->incRefCnt();
-#if TEXTOUT_WORD_LIST
+#ifdef TEXTOUT_WORD_LIST
   fontName = (gfxFont && gfxFont->getName()) ? gfxFont->getName()->copy()
                                              : (GooString *)NULL;
   flags = gfxFont ? gfxFont->getFlags() : 0;
@@ -316,7 +316,7 @@ TextFontInfo::TextFontInfo(GfxState *state) {
 TextFontInfo::~TextFontInfo() {
   if (gfxFont)
     gfxFont->decRefCnt();
-#if TEXTOUT_WORD_LIST
+#ifdef TEXTOUT_WORD_LIST
   if (fontName) {
     delete fontName;
   }
@@ -360,7 +360,7 @@ TextWord::TextWord(GfxState *state, int rotA, double fontSizeA) {
   spaceAfter = gFalse;
   next = NULL;
 
-#if TEXTOUT_WORD_LIST
+#ifdef TEXTOUT_WORD_LIST
   GfxRGB rgb;
 
   if ((state->getRender() & 3) == 1) {
@@ -790,7 +790,7 @@ int TextWord::cmpYX(const void *p1, const void *p2) {
   return cmp < 0 ? -1 : cmp > 0 ? 1 : 0;
 }
 
-#if TEXTOUT_WORD_LIST
+#ifdef TEXTOUT_WORD_LIST
 
 GooString *TextWord::getText() {
   GooString *s;
@@ -2252,7 +2252,7 @@ GBool TextFlow::blockFits(TextBlock *blk, TextBlock *prevBlk) {
   return fits;
 }
 
-#if TEXTOUT_WORD_LIST
+#ifdef TEXTOUT_WORD_LIST
 
 //------------------------------------------------------------------------
 // TextWordList
@@ -2599,8 +2599,7 @@ void TextPage::addChar(GfxState *state, double x, double y,
   }
 
   // check the tiny chars limit
-  if (!globalParams->getTextKeepTinyChars() &&
-      fabs(w1) < 3 && fabs(h1) < 3) {
+  if (fabs(w1) < 3 && fabs(h1) < 3) {
     if (++nTinyChars > 50000) {
       charPos += nBytes;
       return;
@@ -5473,7 +5472,7 @@ int TextPage::dumpFragment(Unicode *text, int len, UnicodeMap *uMap,
   }
 }
 
-#if TEXTOUT_WORD_LIST
+#ifdef TEXTOUT_WORD_LIST
 TextWordList *TextPage::makeWordList(GBool physLayout) {
   return new TextWordList(this, physLayout);
 }
@@ -5859,7 +5858,7 @@ void TextOutputDev::setMergeCombining(GBool merge) {
   text->setMergeCombining(merge);
 }
 
-#if TEXTOUT_WORD_LIST
+#ifdef TEXTOUT_WORD_LIST
 TextWordList *TextOutputDev::makeWordList() {
   return text->makeWordList(physLayout);
 }

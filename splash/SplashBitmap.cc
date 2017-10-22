@@ -90,7 +90,7 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
       rowSize = -1;
     }
     break;
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   case splashModeCMYK8:
     if (width > 0 && width <= INT_MAX / 4) {
       rowSize = width * 4;
@@ -247,7 +247,7 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
     }
     break;
 
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   case splashModeCMYK8:
   case splashModeDeviceN8:
     // PNM doesn't support CMYK
@@ -308,7 +308,7 @@ void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel) {
     pixel[1] = p[1];
     pixel[2] = p[0];
     break;
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   case splashModeCMYK8:
     p = &data[y * rowSize + 4 * x];
     pixel[0] = p[0];
@@ -376,7 +376,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
     #endif
 
     #ifdef ENABLE_LIBJPEG
-    #if SPLASH_CMYK
+    #ifdef SPLASH_CMYK
     case splashFormatJpegCMYK:
       writer = new JpegWriter(JpegWriter::CMYK);
       setJpegParams(writer, params);
@@ -403,7 +403,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
       case splashModeBGR8:
         writer = new TiffWriter(TiffWriter::RGB);
         break;
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
       case splashModeCMYK8:
       case splashModeDeviceN8:
         writer = new TiffWriter(TiffWriter::CMYK);
@@ -443,7 +443,7 @@ void SplashBitmap::getRGBLine(int yl, SplashColorPtr line) {
     m = byteToDbl(col[1]);
     y = byteToDbl(col[2]);
     k = byteToDbl(col[3]);
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
     if (separationList->getLength() > 0) {
       for (int i = 0; i < separationList->getLength(); i++) {
         if (col[i+4] > 0) {
@@ -489,7 +489,7 @@ void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, ConversionMode conve
     m = byteToDbl(col[1]);
     y = byteToDbl(col[2]);
     k = byteToDbl(col[3]);
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
     if (separationList->getLength() > 0) {
       for (int i = 0; i < separationList->getLength(); i++) {
         if (col[i+4] > 0) {
@@ -593,7 +593,7 @@ GBool SplashBitmap::convertToXBGR(ConversionMode conversionMode) {
   return newdata != NULL;
 }
 
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
 void SplashBitmap::getCMYKLine(int yl, SplashColorPtr line) {
   SplashColor col;
 
@@ -637,7 +637,7 @@ void SplashBitmap::getCMYKLine(int yl, SplashColorPtr line) {
 
 SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int vDPI, SplashColorMode imageWriterFormat) {
   if (mode != splashModeRGB8 && mode != splashModeMono8 && mode != splashModeMono1 && mode != splashModeXBGR8 && mode != splashModeBGR8
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
       && mode != splashModeCMYK8 && mode != splashModeDeviceN8
 #endif
      ) {
@@ -650,7 +650,7 @@ SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int
   }
 
   switch (mode) {
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
     case splashModeCMYK8:
       if (writer->supportCMYK()) {
         SplashColorPtr row;

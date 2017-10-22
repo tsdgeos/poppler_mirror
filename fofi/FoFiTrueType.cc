@@ -37,6 +37,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <algorithm>
 #include "goo/gtypes.h"
 #include "goo/gmem.h"

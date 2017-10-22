@@ -33,7 +33,7 @@
 #include "goo/gtypes.h"
 #include "CharTypes.h"
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #include "goo/GooMutex.h"
 #endif
 
@@ -114,7 +114,7 @@ private:
   CMapVectorEntry *vector;	// vector for first byte (NULL for
 				//   identity CMap)
   int refCnt;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   GooMutex mutex;
 #endif
 };

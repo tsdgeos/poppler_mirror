@@ -23,8 +23,6 @@
 
 #include <config.h>
 
-#if HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H
-
 #ifdef USE_GCC_PRAGMAS
 #pragma implementation
 #endif
@@ -176,5 +174,3 @@ SplashFontFile *SplashFTFontEngine::loadTrueTypeFont(SplashFontFileID *idA,
 					   faceIndex);
   return ret;
 }
-
-#endif // HAVE_FREETYPE_FREETYPE_H || HAVE_FREETYPE_H

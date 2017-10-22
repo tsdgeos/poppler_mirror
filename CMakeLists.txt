@@ -10,7 +10,13 @@ include(MacroOptionalFindPackage)
 find_package(PkgConfig)
 include(MacroEnsureVersion)
 include(MacroBoolTo01)
-find_package(Threads)
+if (WIN32)
+  message("-- Using win32 threads")
+else()
+  set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+  set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+  find_package(Threads)
+endif()
 include(TestBigEndian)
 test_big_endian(WORDS_BIGENDIAN)
 include(CheckFileOffsetBits)
@@ -100,8 +106,11 @@ else()
   message(FATAL_ERROR "Invalid font configuration setting: ${FONT_CONFIGURATION}")
 endif()
 
+if(CMAKE_USE_PTHREADS_INIT OR WIN32)
+  set(MULTITHREADED ON)
+endif()
+
 # Enable these unconditionally.
-set(MULTITHREADED ON)
 set(OPI_SUPPORT ON)
 set(TEXTOUT_WORD_LIST ON)
 
@@ -187,9 +196,6 @@ if(ENABLE_CPP)
 endif()
 if(ENABLE_ZLIB)
   find_package(ZLIB)
-  if(ZLIB_FOUND)
-    set(HAVE_LIBZ ${ZLIB_FOUND})
-  endif()
   set(ENABLE_ZLIB ${ZLIB_FOUND})
 endif()
 if(ENABLE_ZLIB_UNCOMPRESS AND NOT ENABLE_ZLIB)
@@ -264,7 +270,6 @@ if(ENABLE_LIBCURL)
   endif()
 endif()
 
-add_definitions(-DHAVE_CONFIG_H=1)
 if(MINGW)
   # Use mingw's ansi stdio extensions
   add_definitions(-D__USE_MINGW_ANSI_STDIO=1)
@@ -288,10 +293,6 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}/poppler
   ${FREETYPE_INCLUDE_DIRS}
 )
-set(HAVE_FREETYPE_H ON)
-if(CMAKE_USE_PTHREADS_INIT)
-  set(HAVE_PTHREAD ON)
-endif()
 
 if(ENABLE_ZLIB)
   include_directories(${ZLIB_INCLUDE_DIR})
@@ -372,6 +373,7 @@ set(poppler_SRCS
   goo/gstrtod.cc
   goo/grandom.cc
   goo/glibc.cc
+  goo/glibc_strtok_r.cc
   fofi/FoFiBase.cc
   fofi/FoFiEncodings.cc
   fofi/FoFiTrueType.cc
@@ -426,7 +428,6 @@ set(poppler_SRCS
   poppler/Stream.cc
   poppler/StructTreeRoot.cc
   poppler/StructElement.cc
-  poppler/strtok_r.cpp
   poppler/UnicodeMap.cc
   poppler/UnicodeTypeTable.cc
   poppler/UTF.cc
@@ -461,9 +462,6 @@ if(ENABLE_SPLASH)
     splash/SplashPattern.cc
     splash/SplashScreen.cc
     splash/SplashState.cc
-    splash/SplashT1Font.cc
-    splash/SplashT1FontEngine.cc
-    splash/SplashT1FontFile.cc
     splash/SplashXPath.cc
     splash/SplashXPathScanner.cc
   )
@@ -539,9 +537,6 @@ endif()
 if(TIFF_FOUND)
   set(poppler_LIBS ${poppler_LIBS} ${TIFF_LIBRARIES})
 endif()
-if(HAVE_PTHREAD)
-  set(poppler_LIBS ${poppler_LIBS} ${CMAKE_THREAD_LIBS_INIT})
-endif()
 
 if(MSVC)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
@@ -552,6 +547,9 @@ add_library(poppler ${poppler_SRCS})
 endif()
 set_target_properties(poppler PROPERTIES VERSION 71.0.0 SOVERSION 71)
 target_link_libraries(poppler LINK_PRIVATE ${poppler_LIBS})
+if(CMAKE_USE_PTHREADS_INIT)
+   target_link_libraries(poppler LINK_PRIVATE Threads::Threads)
+endif()
 install(TARGETS poppler RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
 
 if(ENABLE_XPDF_HEADERS)
@@ -710,9 +708,6 @@ if(ENABLE_XPDF_HEADERS)
       splash/SplashPattern.h
       splash/SplashScreen.h
       splash/SplashState.h
-      splash/SplashT1Font.h
-      splash/SplashT1FontEngine.h
-      splash/SplashT1FontFile.h
       splash/SplashTypes.h
       splash/SplashXPath.h
       splash/SplashXPathScanner.h

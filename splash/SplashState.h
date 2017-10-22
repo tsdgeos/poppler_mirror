@@ -124,7 +124,7 @@ private:
          rgbTransferG[256],
          rgbTransferB[256];
   Guchar grayTransfer[256];
-#if SPLASH_CMYK
+#ifdef SPLASH_CMYK
   Guchar cmykTransferC[256],
          cmykTransferM[256],
          cmykTransferY[256],

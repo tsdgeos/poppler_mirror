@@ -312,7 +312,7 @@ CMap::CMap(GooString *collectionA, GooString *cMapNameA) {
     vector[i].cid = 0;
   }
   refCnt = 1;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
 #endif
 }
@@ -324,7 +324,7 @@ CMap::CMap(GooString *collectionA, GooString *cMapNameA, int wModeA) {
   wMode = wModeA;
   vector = NULL;
   refCnt = 1;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
 #endif
 }
@@ -432,7 +432,7 @@ CMap::~CMap() {
   if (vector) {
     freeCMapVector(vector);
   }
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gDestroyMutex(&mutex);
 #endif
 }
@@ -449,11 +449,11 @@ void CMap::freeCMapVector(CMapVectorEntry *vec) {
 }
 
 void CMap::incRefCnt() {
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gLockMutex(&mutex);
 #endif
   ++refCnt;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gUnlockMutex(&mutex);
 #endif
 }
@@ -461,11 +461,11 @@ void CMap::incRefCnt() {
 void CMap::decRefCnt() {
   GBool done;
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gLockMutex(&mutex);
 #endif
   done = --refCnt == 0;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gUnlockMutex(&mutex);
 #endif
   if (done) {

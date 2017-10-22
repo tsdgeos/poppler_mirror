@@ -282,7 +282,7 @@ private:
   Object actions;		// page additional actions
   double duration;              // page duration
   GBool ok;			// true if page is valid
-#if MULTITHREADED
+#ifdef MULTITHREADED
   GooMutex mutex;
 #endif
 };

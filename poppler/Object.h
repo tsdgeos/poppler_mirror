@@ -38,6 +38,7 @@
 #include <set>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 #include "goo/gtypes.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"

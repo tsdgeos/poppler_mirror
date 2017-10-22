@@ -77,7 +77,7 @@
 #include <string.h>
 #include <algorithm>
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #  define annotLocker()   MutexLocker locker(&mutex)
 #  define annotCondLocker(X)  MutexLocker locker(&mutex, (X))
 #else
@@ -1328,7 +1328,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
 
   oc = dict->lookupNF("OC");
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
 #endif
 }
@@ -1567,17 +1567,17 @@ void Annot::incRefCnt() {
 }
 
 void Annot::decRefCnt() {
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gLockMutex(&mutex);
 #endif
   if (--refCnt == 0) {
-#if MULTITHREADED
+#ifdef MULTITHREADED
     gUnlockMutex(&mutex);
 #endif
     delete this;
     return;
   }
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gUnlockMutex(&mutex);
 #endif
 }
@@ -1604,7 +1604,7 @@ Annot::~Annot() {
   if (color)
     delete color;
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
     gDestroyMutex(&mutex);
 #endif
 }
@@ -3510,7 +3510,7 @@ AnnotTextMarkup::~AnnotTextMarkup() {
 }
 
 void AnnotTextMarkup::setType(AnnotSubtype new_type) {
-  const char *typeName;
+  const char *typeName = nullptr; /* squelch bogus compiler warning */
 
   switch (new_type) {
     case typeHighlight:
@@ -5307,7 +5307,7 @@ void AnnotGeometry::initialize(PDFDoc *docA, Dict* dict) {
 }
 
 void AnnotGeometry::setType(AnnotSubtype new_type) {
-  const char *typeName;
+  const char *typeName = nullptr; /* squelch bogus compiler warning */
 
   switch (new_type) {
     case typeSquare:
@@ -5565,7 +5565,7 @@ void AnnotPolygon::initialize(PDFDoc *docA, Dict* dict) {
 }
 
 void AnnotPolygon::setType(AnnotSubtype new_type) {
-  const char *typeName;
+  const char *typeName = nullptr; /* squelch bogus compiler warning */
 
   switch (new_type) {
     case typePolygon:

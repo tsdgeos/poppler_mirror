@@ -30,6 +30,8 @@
 #ifndef GMUTEX_H
 #define GMUTEX_H
 
+#ifdef MULTITHREADED
+
 // Usage:
 //
 // GooMutex m;
@@ -82,4 +84,6 @@ private:
   GooMutex *mutex;
 };
 
-#endif
+#endif // MULTITHREADED
+
+#endif // GMUTEX_H

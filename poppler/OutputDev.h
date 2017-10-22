@@ -309,7 +309,7 @@ public:
 
 
 
-#if OPI_SUPPORT
+#ifdef OPI_SUPPORT
   //----- OPI functions
   virtual void opiBegin(GfxState *state, Dict *opiDict);
   virtual void opiEnd(GfxState *state, Dict *opiDict);

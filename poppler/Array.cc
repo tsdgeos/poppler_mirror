@@ -35,7 +35,7 @@
 #include "Object.h"
 #include "Array.h"
 
-#if MULTITHREADED
+#ifdef MULTITHREADED
 #  define arrayLocker()   MutexLocker locker(&mutex)
 #else
 #  define arrayLocker()
@@ -49,7 +49,7 @@ Array::Array(XRef *xrefA) {
   elems = NULL;
   size = length = 0;
   ref = 1;
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gInitMutex(&mutex);
 #endif
 }
@@ -60,7 +60,7 @@ Array::~Array() {
   for (i = 0; i < length; ++i)
     elems[i].free();
   gfree(elems);
-#if MULTITHREADED
+#ifdef MULTITHREADED
   gDestroyMutex(&mutex);
 #endif
 }
