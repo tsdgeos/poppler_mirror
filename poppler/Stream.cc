@@ -33,6 +33,7 @@
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2015 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2017 Jose Aliste <jaliste@src.gnome.org>
+// Copyright (C) 2017 Kay Dohmann <k.dohmann@gmx.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1461,11 +1462,6 @@ GBool LZWStream::processNextCode() {
     clearTable();
     goto start;
   }
-  if (nextCode >= 4097) {
-    error(errSyntaxError, getPos(),
-	  "Bad LZW stream - expected clear-table code");
-    clearTable();
-  }
 
   // process the next code
   nextLength = seqLength + 1;
@@ -1491,10 +1487,12 @@ GBool LZWStream::processNextCode() {
   if (first) {
     first = gFalse;
   } else {
-    table[nextCode].length = nextLength;
-    table[nextCode].head = prevCode;
-    table[nextCode].tail = newChar;
-    ++nextCode;
+    if (nextCode < 4097) {
+      table[nextCode].length = nextLength;
+      table[nextCode].head = prevCode;
+      table[nextCode].tail = newChar;
+      ++nextCode;
+    }
     if (nextCode + early == 512)
       nextBits = 10;
     else if (nextCode + early == 1024)
