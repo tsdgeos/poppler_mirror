@@ -55,6 +55,8 @@
 #include <QRawFont>
 #include <QGlyphRun>
 #include <QtGui/QPainterPath>
+#include <QPicture>
+
 //------------------------------------------------------------------------
 
 #ifdef HAVE_SPLASH
@@ -89,6 +91,7 @@ private:
 //------------------------------------------------------------------------
 
 ArthurOutputDev::ArthurOutputDev(QPainter *painter):
+  m_lastTransparencyGroupPicture(nullptr),
   m_fontHinting(NoHinting)
 {
   m_painter.push(painter);
@@ -988,5 +991,48 @@ void ArthurOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *
   // At this point, the QPainter coordinate transformation (CTM) is such
   // that QRect(0,0,1,1) is exactly the area of the image.
   m_painter.top()->drawImage( QRect(0,0,1,1), image );
+}
+
+void ArthurOutputDev::beginTransparencyGroup(GfxState * /*state*/, double * /*bbox*/,
+                                             GfxColorSpace * /*blendingColorSpace*/,
+                                             GBool /*isolated*/, GBool /*knockout*/,
+                                             GBool /*forSoftMask*/)
+{
+  // The entire transparency group will be painted into a
+  // freshly created QPicture object.  Since an existing painter
+  // cannot change its paint device, we need to construct a
+  // new QPainter object as well.
+  m_qpictures.push(new QPicture);
+  m_painter.push(new QPainter(m_qpictures.top()));
+}
+
+void ArthurOutputDev::endTransparencyGroup(GfxState * /*state*/)
+{
+  // Stop painting into the group
+  m_painter.top()->end();
+
+  // Kill the painter that has been used for the transparency group
+  delete(m_painter.top());
+  m_painter.pop();
+
+  // Store the QPicture object that holds the result of the transparency group
+  // painting.  It will be painted and deleted in the method paintTransparencyGroup.
+  if (m_lastTransparencyGroupPicture)
+  {
+    qDebug() << "Found a transparency group that has not been painted";
+    delete(m_lastTransparencyGroupPicture);
+  }
+  m_lastTransparencyGroupPicture = m_qpictures.top();
+  m_qpictures.pop();
+}
+
+void ArthurOutputDev::paintTransparencyGroup(GfxState * /*state*/, double * /*bbox*/)
+{
+  // Actually draw the transparency group
+  m_painter.top()->drawPicture(0,0,*m_lastTransparencyGroupPicture);
+
+  // And delete it
+  delete(m_lastTransparencyGroupPicture);
+  m_lastTransparencyGroupPicture = nullptr;
 }
 

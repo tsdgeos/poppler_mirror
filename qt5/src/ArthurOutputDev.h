@@ -164,6 +164,14 @@ public:
   void type3D1(GfxState *state, double wx, double wy,
 	       double llx, double lly, double urx, double ury) override;
 
+  //----- transparency groups and soft masks
+  virtual void beginTransparencyGroup(GfxState *state, double *bbox,
+                                      GfxColorSpace *blendingColorSpace,
+                                      GBool isolated, GBool knockout,
+                                      GBool forSoftMask) override;
+  virtual void endTransparencyGroup(GfxState *state) override;
+  virtual void paintTransparencyGroup(GfxState *state, double *bbox) override;
+
   //----- special access
 
   // Called to indicate that a new PDF document has been loaded.
@@ -177,6 +185,13 @@ private:
   // is opened, annew Painter that paints onto a QPicture is pushed onto the stack.
   // It is popped again when the transparency group ends.
   std::stack<QPainter*> m_painter;
+
+  // This is the corresponding stack of QPicture objects
+  std::stack<QPicture*> m_qpictures;
+
+  // endTransparencyGroup removes a QPicture from the stack, but stores
+  // it here for later use in paintTransparencyGroup.
+  QPicture* m_lastTransparencyGroupPicture;
 
   FontHinting m_fontHinting;
 
