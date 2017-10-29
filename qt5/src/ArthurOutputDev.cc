@@ -341,6 +341,9 @@ void ArthurOutputDev::updateFont(GfxState *state)
 
         m_rawFont = new QRawFont(QByteArray(fontData, fontDataLen), fontSize);
         m_rawFontCache.insert(std::make_pair(fontID,std::unique_ptr<QRawFont>(m_rawFont)));
+
+        // Free the font data, it was copied in the QByteArray constructor
+        free((char*)fontData);
         break;
       }
       case gfxFontLocExternal:{ // font is in an external font file
