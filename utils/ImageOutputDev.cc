@@ -20,7 +20,7 @@
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Jakob Voss <jakob.voss@gbv.de>
-// Copyright (C) 2012, 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2013, 2017, 2018 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Fischer <fischer@unix-ag.uni-kl.de>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2017 Caolán McNamara <caolanm@redhat.com>
@@ -292,25 +292,6 @@ void ImageOutputDev::listImage(GfxState *state, Object *ref, Stream *str,
 
   ++imgNum;
 
-  if (inlineImg) {
-    // For inline images we need to advance the stream position to the end of the image
-    // as Gfx needs to continue reading content after the image data.
-    ImageFormat format;
-    if (!colorMap || (colorMap->getNumPixelComps() == 1 && colorMap->getBits() == 1)) {
-      format = imgMonochrome;
-    } else if (colorMap->getColorSpace()->getMode() == csDeviceGray ||
-               colorMap->getColorSpace()->getMode() == csCalGray) {
-      format = imgGray;
-    } else if ((colorMap->getColorSpace()->getMode() == csDeviceRGB ||
-		colorMap->getColorSpace()->getMode() == csCalRGB ||
-		(colorMap->getColorSpace()->getMode() == csICCBased && colorMap->getNumPixelComps() == 3)) &&
-	       colorMap->getBits() > 8) {
-      format = imgRGB48;
-    } else {
-      format = imgRGB;
-    }
-    writeImageFile(NULL, format, "", str, width, height, colorMap);
-  }
 }
 
 long ImageOutputDev::getInlineImageLength(Stream *str, int width, int height,
@@ -337,15 +318,11 @@ long ImageOutputDev::getInlineImageLength(Stream *str, int width, int height,
 
   EmbedStream *embedStr = (EmbedStream *) (str->getBaseStream());
   embedStr->rewind();
-  if (str->getKind() == strDCT || str->getKind() == strCCITTFax)
-    str = str->getNextStream();
   len = 0;
-  str->reset();
-  while (str->getChar() != EOF)
+  while (embedStr->getChar() != EOF)
     len++;
 
   embedStr->restore();
-
 
   return len;
 }
@@ -539,18 +516,17 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
   ImageFormat format;
   EmbedStream *embedStr;
 
-  if (dumpJPEG && str->getKind() == strDCT) {
-    if (inlineImg) {
+  if (inlineImg) {
       embedStr = (EmbedStream *) (str->getBaseStream());
-      getInlineImageLength(str, width, height, colorMap); // record the strean
+      // Record the stream. This determines the size.
+      getInlineImageLength(str, width, height, colorMap);
+      // Reading the stream again will return EOF at end of recording.
       embedStr->rewind();
-    }
+  }
 
+  if (dumpJPEG && str->getKind() == strDCT) {
     // dump JPEG file
     writeRawImage(str, "jpg");
-
-    if (inlineImg)
-      embedStr->restore();
 
   } else if (dumpJP2 && str->getKind() == strJPX && !inlineImg) {
     // dump JPEG2000 file
@@ -612,17 +588,8 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
 
     fclose(f);
 
-    if (inlineImg) {
-      embedStr = (EmbedStream *) (str->getBaseStream());
-      getInlineImageLength(str, width, height, colorMap); // record the strean
-      embedStr->rewind();
-    }
-
     // dump CCITT file
     writeRawImage(str, "ccitt");
-
-    if (inlineImg)
-      embedStr->restore();
 
   } else if (outputPNG && !(outputTiff && colorMap &&
                             (colorMap->getColorSpace()->getMode() == csDeviceCMYK ||
@@ -653,6 +620,7 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
 
     writeImageFile(writer, format, "png", str, width, height, colorMap);
 #endif
+    delete writer;
 
   } else if (outputTiff) {
     // output in TIFF format
@@ -684,6 +652,7 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
 
     writeImageFile(writer, format, "tif", str, width, height, colorMap);
 #endif
+    delete writer;
 
   } else {
     // output in PPM/PBM format
@@ -703,6 +672,9 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
 
     delete writer;
   }
+
+  if (inlineImg)
+      embedStr->restore();
 }
 
 GBool ImageOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
