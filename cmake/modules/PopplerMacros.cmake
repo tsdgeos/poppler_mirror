@@ -43,10 +43,10 @@ macro(POPPLER_ADD_UNITTEST exe build_flag)
 endmacro(POPPLER_ADD_UNITTEST)
 
 macro(POPPLER_CREATE_INSTALL_PKGCONFIG generated_file install_location)
-  if(NOT WIN32)
+  if(NOT MSVC)
     configure_file(${generated_file}.cmake ${CMAKE_CURRENT_BINARY_DIR}/${generated_file} @ONLY)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${generated_file} DESTINATION ${install_location})
-  endif(NOT WIN32)
+  endif(NOT MSVC)
 endmacro(POPPLER_CREATE_INSTALL_PKGCONFIG)
 
 macro(SHOW_END_MESSAGE what value)
