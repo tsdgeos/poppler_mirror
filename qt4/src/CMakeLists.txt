@@ -35,7 +35,7 @@ target_link_libraries(poppler-qt4 poppler ${QT4_QTCORE_LIBRARY} ${QT4_QTGUI_LIBR
 if(MSVC)
 target_link_libraries(poppler-qt4 poppler ${poppler_LIBS})
 endif()
-install(TARGETS poppler-qt4 RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
+install(TARGETS poppler-qt4 RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES
   poppler-qt4.h

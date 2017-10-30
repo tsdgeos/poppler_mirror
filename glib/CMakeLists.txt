@@ -86,7 +86,7 @@ target_link_libraries(poppler-glib poppler ${GLIB2_LIBRARIES} ${CAIRO_LIBRARIES}
 if(CMAKE_USE_PTHREADS_INIT)
    target_link_libraries(poppler-glib Threads::Threads)
 endif()
-install(TARGETS poppler-glib RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
+install(TARGETS poppler-glib RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES
   ${poppler_glib_public_headers}

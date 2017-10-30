@@ -1,7 +1,6 @@
 prefix=@CMAKE_INSTALL_PREFIX@
-exec_prefix=${prefix}
-libdir=${exec_prefix}/lib@LIB_SUFFIX@
-includedir=${prefix}/include
+libdir=@CMAKE_INSTALL_LIBDIR@
+includedir=@CMAKE_INSTALL_INCLUDEDIR@
 
 Name: poppler-cpp
 Description: cpp backend for Poppler PDF rendering library

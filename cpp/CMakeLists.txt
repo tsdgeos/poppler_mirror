@@ -25,7 +25,7 @@ set(poppler_cpp_SRCS
 add_library(poppler-cpp SHARED ${poppler_cpp_SRCS})
 set_target_properties(poppler-cpp PROPERTIES VERSION 0.3.0 SOVERSION 0)
 target_link_libraries(poppler-cpp poppler ${ICONV_LIBRARIES})
-install(TARGETS poppler-cpp RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
+install(TARGETS poppler-cpp RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES
   poppler-document.h

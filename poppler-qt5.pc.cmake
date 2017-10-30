@@ -1,7 +1,6 @@
 prefix=@CMAKE_INSTALL_PREFIX@
-exec_prefix=${prefix}
-libdir=${exec_prefix}/lib@LIB_SUFFIX@
-includedir=${prefix}/include
+libdir=CMAKE_INSTALL_LIBDIR@
+includedir=@CMAKE_INSTALL_INCLUDEDIR@
 
 Name: poppler-qt5
 Description: Qt5 bindings for poppler

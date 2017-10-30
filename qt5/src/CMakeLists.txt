@@ -35,7 +35,7 @@ target_link_libraries(poppler-qt5 poppler ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIE
 if(MSVC)
 target_link_libraries(poppler-qt5 poppler ${poppler_LIBS})
 endif()
-install(TARGETS poppler-qt5 RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
+install(TARGETS poppler-qt5 RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES
   poppler-qt5.h
