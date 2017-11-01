@@ -81,12 +81,15 @@ set(poppler_glib_generated_SRCS
   ${CMAKE_SOURCE_DIR}/poppler/CairoRescaleBox.cc
 )
 add_library(poppler-glib SHARED ${poppler_glib_SRCS} ${poppler_glib_generated_SRCS})
+add_library(poppler-glib_static STATIC ${poppler_glib_SRCS} ${poppler_glib_generated_SRCS})
+set_target_properties(poppler-glib_static PROPERTIES OUTPUT_NAME poppler-glib)
+
 set_target_properties(poppler-glib PROPERTIES VERSION 8.9.0 SOVERSION 8)
 target_link_libraries(poppler-glib poppler ${GLIB2_LIBRARIES} ${CAIRO_LIBRARIES} ${FREETYPE_LIBRARIES})
 if(CMAKE_USE_PTHREADS_INIT)
    target_link_libraries(poppler-glib Threads::Threads)
 endif()
-install(TARGETS poppler-glib RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
+install(TARGETS poppler-glib poppler-glib_static RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
 
 install(FILES
   ${poppler_glib_public_headers}
