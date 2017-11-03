@@ -1,3 +1,23 @@
+Release 0.61.0
+        core:
+         * Fix crashes in broken files
+         * Cleanup unused functions from GlobalParams
+         * Tweak LZWStream::processNextCode error handling. Bug #103174
+         * Warning fixes
+         * Remove t1lib code
+
+        qt5:
+         * Clean up the remaining Splash code in Arthur backend. Bug #103117
+         * ArthurOutputDev: Properly implement saveState/restoreState. Bug #103118
+         * Fix leak in ArthurOutputDev::updateFont. Bug #103508
+
+        build system:
+         * Use GNUInstallDirs. Bug #103211
+         * mingw: Install pkg-config files
+         * mingw: change library names to include the soversion. Bug #103157
+         * Fix installing a .cc file as header
+         * Use -pthread flag instead of -lpthread
+
 Release 0.60.1
         qt5:
          * ArthurOutputDev: Add missing 'return' in error paths
