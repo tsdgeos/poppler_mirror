@@ -16,6 +16,7 @@
 // Copyright (C) 2014 Bogdan Cristea <cristeab@gmail.com>
 // Copyright (C) 2014 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2016 Tor Lillqvist <tml@collabora.com>
+// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

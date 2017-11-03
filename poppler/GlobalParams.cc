@@ -31,7 +31,7 @@
 // Copyright (C) 2011 Pino Toscano <pino@kde.org>
 // Copyright (C) 2011 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2012 Yi Yang <ahyangyi@gmail.com>
-// Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Peter Breitenlohner <peb@mppmu.mpg.de>
 // Copyright (C) 2013, 2014 Jason Crain <jason@aquaticape.us>

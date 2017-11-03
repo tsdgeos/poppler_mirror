@@ -3,6 +3,7 @@
 // FlateEncoder.cc
 //
 // Copyright (C) 2016, William Bader <williambader@hotmail.com>
+// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
 // This file is under the GPLv2 or later license
 //

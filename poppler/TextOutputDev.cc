@@ -18,7 +18,7 @@
 // Copyright (C) 2006-2008, 2011-2013 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2006, 2007, 2013 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2007, 2008, 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2007, 2008, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008, 2010-2012, 2014-2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
