@@ -2,6 +2,7 @@
  * Copyright (C) 2010-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017, Jeroen Ooms <jeroenooms@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -371,7 +372,7 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
     if (!w.get()) {
         return false;
     }
-    FILE *f = fopen(file_name.c_str(), "w");
+    FILE *f = fopen(file_name.c_str(), "wb");
     if (!f) {
         return false;
     }
