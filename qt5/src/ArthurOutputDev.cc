@@ -24,6 +24,7 @@
 // Copyright (C) 2013 Dominik Haumann <dhaumann@kde.org>
 // Copyright (C) 2013 Mihai Niculescu <q.quark@gmail.com>
 // Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -341,6 +342,9 @@ void ArthurOutputDev::updateFont(GfxState *state)
 
         m_rawFont = new QRawFont(QByteArray(fontData, fontDataLen), fontSize);
         m_rawFontCache.insert(std::make_pair(fontID,std::unique_ptr<QRawFont>(m_rawFont)));
+
+        // Free the font data, it was copied in the QByteArray constructor
+        free((char*)fontData);
         break;
       }
       case gfxFontLocExternal:{ // font is in an external font file

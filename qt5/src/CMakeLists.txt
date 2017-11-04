@@ -31,11 +31,15 @@ set(poppler_qt5_SRCS
 )
 add_library(poppler-qt5 SHARED ${poppler_qt5_SRCS})
 set_target_properties(poppler-qt5 PROPERTIES VERSION 1.11.0 SOVERSION 1)
+if(MINGW)
+    get_target_property(POPPLER_QT5_SOVERSION poppler-qt5 SOVERSION)
+    set_target_properties(poppler-qt5 PROPERTIES SUFFIX "-${POPPLER_QT5_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif()
 target_link_libraries(poppler-qt5 poppler ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Xml_LIBRARIES})
 if(MSVC)
 target_link_libraries(poppler-qt5 poppler ${poppler_LIBS})
 endif()
-install(TARGETS poppler-qt5 RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
+install(TARGETS poppler-qt5 RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES
   poppler-qt5.h

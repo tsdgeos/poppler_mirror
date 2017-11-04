@@ -16,7 +16,7 @@
 // Copyright (C) 2005-2007 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2007, 2008, 2011, 2013 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2007 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2007, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008, 2010, 2015, 2016 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Brian Ewins <brian.ewins@gmail.com>
 // Copyright (C) 2012, 2013, 2015, 2016 Jason Crain <jason@aquaticape.us>

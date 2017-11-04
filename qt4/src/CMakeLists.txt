@@ -31,11 +31,15 @@ set(poppler_qt4_SRCS
 qt4_automoc(${poppler_qt4_SRCS})
 add_library(poppler-qt4 SHARED ${poppler_qt4_SRCS})
 set_target_properties(poppler-qt4 PROPERTIES VERSION 4.11.0 SOVERSION 4)
+if(MINGW)
+    get_target_property(POPPLER_QT4_SOVERSION poppler-qt4 SOVERSION)
+    set_target_properties(poppler-qt4 PROPERTIES SUFFIX "-${POPPLER_QT4_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+endif()
 target_link_libraries(poppler-qt4 poppler ${QT4_QTCORE_LIBRARY} ${QT4_QTGUI_LIBRARY} ${QT4_QTXML_LIBRARY})
 if(MSVC)
 target_link_libraries(poppler-qt4 poppler ${poppler_LIBS})
 endif()
-install(TARGETS poppler-qt4 RUNTIME DESTINATION bin LIBRARY DESTINATION lib${LIB_SUFFIX} ARCHIVE DESTINATION lib${LIB_SUFFIX})
+install(TARGETS poppler-qt4 RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES
   poppler-qt4.h

@@ -275,8 +275,11 @@ pgd_action_view_play_rendition (GtkWidget    *button,
 		g_object_unref (file);
 		if (uri) {
 #if GTK_CHECK_VERSION(3, 22, 0)
-			gtk_show_uri_on_window (GTK_WINDOW(gtk_widget_get_window (button)),
-				      uri, GDK_CURRENT_TIME, NULL);
+			GtkWidget *toplevel;
+
+			toplevel = gtk_widget_get_toplevel (button);
+			gtk_show_uri_on_window (gtk_widget_is_toplevel (toplevel) ? GTK_WINDOW (toplevel) : NULL,
+						uri, GDK_CURRENT_TIME, NULL);
 #else
 			gtk_show_uri (gtk_widget_get_screen (button),
 				      uri, GDK_CURRENT_TIME, NULL);
@@ -543,13 +546,16 @@ pgd_movie_view_play_movie (GtkWidget    *button,
 	g_object_unref (file);
 	if (uri) {
 #if GTK_CHECK_VERSION(3, 22, 0)
-	    gtk_show_uri_on_window (GTK_WINDOW(gtk_widget_get_window (button)),
-				    uri, GDK_CURRENT_TIME, NULL);
+		GtkWidget *toplevel;
+
+		toplevel = gtk_widget_get_toplevel (button);
+		gtk_show_uri_on_window (gtk_widget_is_toplevel (toplevel) ? GTK_WINDOW (toplevel) : NULL,
+		uri, GDK_CURRENT_TIME, NULL);
 #else
-	    gtk_show_uri (gtk_widget_get_screen (button),
-			  uri, GDK_CURRENT_TIME, NULL);
+		gtk_show_uri (gtk_widget_get_screen (button),
+			      uri, GDK_CURRENT_TIME, NULL);
 #endif
-	    g_free (uri);
+		g_free (uri);
 	}
 }
 

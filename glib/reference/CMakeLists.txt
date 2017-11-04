@@ -8,5 +8,5 @@ add_custom_command(
 add_custom_target(glib-docs ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/glib-docs-build.stamp)
 
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/
-  DESTINATION "${SHARE_INSTALL_DIR}/gtk-doc/html/poppler"
+  DESTINATION "${CMAKE_INSTALL_DATADIR}/gtk-doc/html/poppler"
 )

@@ -3,7 +3,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2014 Rodrigo Rivas Costa <rodrigorivascosta@gmail.com>
-// Copyright (C) 2014 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2017 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that

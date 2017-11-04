@@ -22,6 +22,7 @@
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

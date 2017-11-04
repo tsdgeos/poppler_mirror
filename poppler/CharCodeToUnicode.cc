@@ -21,7 +21,7 @@
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Jakub Wilk <jwilk@jwilk.net>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2014 Jiri Slaby <jirislaby@gmail.com>
 // Copyright (C) 2015 Marek Kasik <mkasik@redhat.com>
 //

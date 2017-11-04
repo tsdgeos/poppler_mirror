@@ -16,6 +16,7 @@
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008, 2009, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
