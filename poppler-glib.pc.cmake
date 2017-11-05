@@ -1,6 +1,6 @@
 prefix=@CMAKE_INSTALL_PREFIX@
-libdir=@CMAKE_INSTALL_LIBDIR@
-includedir=@CMAKE_INSTALL_INCLUDEDIR@
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
 
 Name: poppler-glib
 Description: GLib wrapper for poppler
