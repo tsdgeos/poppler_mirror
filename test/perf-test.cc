@@ -735,15 +735,6 @@ static void StrList_Destroy(StrList **root)
     *root = NULL;
 }
 
-#ifndef _WIN32
-/*static void OutputDebugString(const char *txt)
-{
-    // do nothing
-}*/
-#define _snprintf snprintf
-#define _vsnprintf vsnprintf
-#endif
-
 static void my_error(void *, ErrorCategory, Goffset pos, char *msg) {
 #if 0
     char        buf[4096], *p = buf;
@@ -762,7 +753,7 @@ static void my_error(void *, ErrorCategory, Goffset pos, char *msg) {
     }
 
     p = buf;
-    p += _vsnprintf(p, sizeof(buf) - 1, msg, args);
+    p += vsnprintf(p, sizeof(buf) - 1, msg, args);
     while ( p > buf  &&  isspace(p[-1]) )
             *--p = '\0';
     *p++ = '\r';
@@ -785,7 +776,7 @@ static void my_error(void *, ErrorCategory, Goffset pos, char *msg) {
 #if 0
     p = buf;
     va_start(args, msg);
-    p += _vsnprintf(p, sizeof(buf) - 3, msg, args);
+    p += vsnprintf(p, sizeof(buf) - 3, msg, args);
     while ( p > buf  &&  isspace(p[-1]) )
             *--p = '\0';
     *p++ = '\r';
@@ -807,7 +798,7 @@ static void LogInfo(const char *fmt, ...)
 
     p = buf;
     va_start(args, fmt);
-    p += _vsnprintf(p, sizeof(buf) - 1, fmt, args);
+    p += vsnprintf(p, sizeof(buf) - 1, fmt, args);
     *p   = '\0';
     fprintf(gOutFile, "%s", buf);
     va_end(args);

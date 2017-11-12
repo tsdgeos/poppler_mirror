@@ -82,7 +82,7 @@
 #include <fontconfig/fontconfig.h>
 #endif
 
-#ifdef _WIN32
+#ifdef _MSVC
 #  define strcasecmp stricmp
 #else
 #  include <strings.h>
