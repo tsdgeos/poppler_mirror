@@ -18,6 +18,7 @@
 
 #include "parseargs.h"
 #include "pdftocairo-win32.h"
+#include "Win32Console.h"
 
 #include <dlgs.h>
 #include <commctrl.h>

@@ -29,6 +29,7 @@
 #include "Error.h"
 #include "GlobalParams.h"
 #include "SignatureInfo.h"
+#include "Win32Console.h"
 
 static const char * getReadableSigState(SignatureValidationStatus sig_vs)
 {
@@ -116,6 +117,7 @@ int main(int argc, char *argv[])
   std::vector<FormWidgetSignature*> sig_widgets;
   globalParams = new GlobalParams();
 
+  Win32Console win32Console(&argc, &argv);
   int exitCode = 99;
   GBool ok;
 

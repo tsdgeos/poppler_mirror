@@ -1,6 +1,7 @@
 
 set(common_srcs
   parseargs.cc
+  Win32Console.cc
 )
 set(common_libs
   poppler

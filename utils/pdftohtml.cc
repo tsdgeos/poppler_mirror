@@ -63,6 +63,7 @@
 #include "Error.h"
 #include "DateInfo.h"
 #include "goo/gfile.h"
+#include "Win32Console.h"
 
 static int firstPage = 1;
 static int lastPage = 0;
@@ -190,6 +191,7 @@ int main(int argc, char *argv[]) {
   Object info;
   int exit_status = EXIT_FAILURE;
 
+  Win32Console win32Console(&argc, &argv);
   // parse args
   ok = parseArgs(argDesc, &argc, argv);
   if (!ok || argc < 2 || argc > 3 || printHelp || printVersion) {

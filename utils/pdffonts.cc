@@ -39,6 +39,7 @@
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
 #include "FontInfo.h"
+#include "Win32Console.h"
 
 static const char *fontTypeNames[] = {
   "unknown",
@@ -94,6 +95,7 @@ int main(int argc, char *argv[]) {
   GBool ok;
   int exitCode;
 
+  Win32Console win32Console(&argc, &argv);
   exitCode = 99;
 
   // parse args

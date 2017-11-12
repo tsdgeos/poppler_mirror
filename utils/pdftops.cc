@@ -51,6 +51,7 @@
 #include "PDFDocFactory.h"
 #include "PSOutputDev.h"
 #include "Error.h"
+#include "Win32Console.h"
 
 static GBool setPSPaperSize(char *size, int &psPaperWidth, int &psPaperHeight) {
   if (!strcmp(size, "match")) {
@@ -218,6 +219,7 @@ int main(int argc, char *argv[]) {
   GBool rasterAntialias = gFalse;
   std::vector<int> pages;
 
+  Win32Console win32Console(&argc, &argv);
   exitCode = 99;
 
   // parse args
