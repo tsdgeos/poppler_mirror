@@ -610,6 +610,7 @@ if(ENABLE_XPDF_HEADERS)
     poppler/StructElement.h
     poppler/StructTreeRoot.h
     poppler/UnicodeMap.h
+    poppler/UnicodeMapFuncs.h
     poppler/UnicodeMapTables.h
     poppler/UnicodeTypeTable.h
     poppler/UnicodeCClassTables.h
@@ -627,7 +628,6 @@ if(ENABLE_XPDF_HEADERS)
     poppler/StdinCachedFile.h
     poppler/StdinPDFDocBuilder.h
     poppler/UTF.h
-    poppler/UTF8.h
     poppler/XpdfPluginAPI.h
     poppler/Sound.h
     ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h

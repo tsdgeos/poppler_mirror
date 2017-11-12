@@ -110,7 +110,7 @@
 
 #include "NameToUnicodeTable.h"
 #include "UnicodeMapTables.h"
-#include "UTF8.h"
+#include "UnicodeMapFuncs.h"
 
 #ifdef ENABLE_PLUGINS
 #  ifdef _WIN32
@@ -629,7 +629,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   residentUnicodeMaps->add(map->getEncodingName(), map);
   map = new UnicodeMap("UTF-8", gTrue, &mapUTF8);
   residentUnicodeMaps->add(map->getEncodingName(), map);
-  map = new UnicodeMap("UCS-2", gTrue, &mapUCS2);
+  map = new UnicodeMap("UTF-16", gTrue, &mapUTF16);
   residentUnicodeMaps->add(map->getEncodingName(), map);
 
   scanEncodingDirs();
