@@ -1,3 +1,14 @@
+Release 0.61.1
+        core:
+         * CairoOutputDev: don't overflow y * stride when accessing image data
+
+        cpp:
+         * Fix for corrupted image files on Windows. Bug #102494
+
+        build system:
+         * Fix incorrect paths in .pc files. Bug #103578
+         * add the custom buildtests target only once. Bug #103003
+
 Release 0.61.0
         core:
          * Fix crashes in broken files
