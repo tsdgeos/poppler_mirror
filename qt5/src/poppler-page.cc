@@ -19,6 +19,7 @@
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  * Copyright (C) 2017, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+ * Copyright (C) 2017 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,6 +69,120 @@
 #include "poppler-media.h"
 
 namespace Poppler {
+
+class Qt5SplashOutputDev : public SplashOutputDev
+{
+public:
+  Qt5SplashOutputDev(SplashColorMode colorMode, int bitmapRowPad,
+                      GBool reverseVideo, bool ignorePaperColorA, SplashColorPtr paperColor,
+                      GBool bitmapTopDown, SplashThinLineMode thinLineMode,
+                      GBool overprintPreview)
+    : SplashOutputDev(colorMode, bitmapRowPad, reverseVideo, paperColor, bitmapTopDown, thinLineMode, overprintPreview)
+    , partialUpdateCallback(nullptr)
+    , shouldDoPartialUpdateCallback(nullptr)
+    , ignorePaperColor(ignorePaperColorA)
+  {
+  }
+
+  void setPartialUpdateCallbackData(Page::RenderToImagePartialUpdateFunc callback, Page::ShouldRenderToImagePartialQueryFunc shouldDoCallback, const QVariant &payloadA)
+  {
+    partialUpdateCallback = callback;
+    shouldDoPartialUpdateCallback = shouldDoCallback;
+    payload = payloadA;
+  }
+
+  void dump() override
+  {
+    if (partialUpdateCallback && shouldDoPartialUpdateCallback && shouldDoPartialUpdateCallback(payload)) {
+      partialUpdateCallback(getXBGRImage( false /* takeImageData */), payload);
+    }
+  }
+
+  QImage getXBGRImage(bool takeImageData)
+  {
+    SplashBitmap *bitmap = getBitmap();
+
+    const int bw = bitmap->getWidth();
+    const int bh = bitmap->getHeight();
+    const int brs = bitmap->getRowSize();
+
+    // If we use DeviceN8, convert to XBGR8.
+    // If requested, also transfer Splash's internal alpha channel.
+    const SplashBitmap::ConversionMode mode = ignorePaperColor
+            ? SplashBitmap::conversionAlphaPremultiplied
+            : SplashBitmap::conversionOpaque;
+
+    const QImage::Format format = ignorePaperColor
+            ? QImage::Format_ARGB32_Premultiplied
+            : QImage::Format_RGB32;
+
+    if (bitmap->convertToXBGR(mode)) {
+      SplashColorPtr data = takeImageData ? bitmap->takeData() : bitmap->getDataPtr();
+
+      if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
+        // Convert byte order from RGBX to XBGR.
+        for (int i = 0; i < bh; ++i) {
+          for (int j = 0; j < bw; ++j) {
+            SplashColorPtr pixel = &data[i * brs + j];
+
+            qSwap(pixel[0], pixel[3]);
+            qSwap(pixel[1], pixel[2]);
+          }
+        }
+      }
+
+      if (takeImageData) {
+        // Construct a Qt image holding (and also owning) the raw bitmap data.
+        return QImage(data, bw, bh, brs, format, gfree, data);
+      } else {
+        return QImage(data, bw, bh, brs, format).copy();
+      }
+    }
+
+    return QImage();
+  }
+
+private:
+  Page::RenderToImagePartialUpdateFunc partialUpdateCallback;
+  Page::ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback;
+  QVariant payload;
+  bool ignorePaperColor;
+};
+
+
+class QImageDumpingArthurOutputDev : public ArthurOutputDev
+{
+public:
+  QImageDumpingArthurOutputDev(QPainter *painter, QImage *i)
+    : ArthurOutputDev(painter)
+    , partialUpdateCallback(nullptr)
+    , shouldDoPartialUpdateCallback(nullptr)
+    , image(i)
+  {
+  }
+
+  void setPartialUpdateCallbackData(Page::RenderToImagePartialUpdateFunc callback, Page::ShouldRenderToImagePartialQueryFunc shouldDoCallback, const QVariant &payloadA)
+  {
+    partialUpdateCallback = callback;
+    shouldDoPartialUpdateCallback = shouldDoCallback;
+    payload = payloadA;
+  }
+
+  void dump() override
+  {
+    if (partialUpdateCallback && shouldDoPartialUpdateCallback && shouldDoPartialUpdateCallback(payload)) {
+      partialUpdateCallback(*image, payload);
+    }
+  }
+
+private:
+  Page::RenderToImagePartialUpdateFunc partialUpdateCallback;
+  Page::ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback;
+  QVariant payload;
+  QImage *image;
+};
+
+
 
 Link* PageData::convertLinkActionToLink(::LinkAction * a, const QRectF &linkArea)
 {
@@ -297,7 +412,58 @@ Page::~Page()
   delete m_page;
 }
 
+static bool renderToArthur(ArthurOutputDev *arthur_output, QPainter *painter, PageData *page, double xres, double yres, int x, int y, int w, int h, Page::Rotation rotate, Page::PainterFlags flags)
+{
+  const bool savePainter = !(flags & Page:: DontSaveAndRestore);
+  if (savePainter)
+    painter->save();
+  if (page->parentDoc->m_hints & Document::Antialiasing)
+    painter->setRenderHint(QPainter::Antialiasing);
+  if (page->parentDoc->m_hints & Document::TextAntialiasing)
+    painter->setRenderHint(QPainter::TextAntialiasing);
+  painter->translate(x == -1 ? 0 : -x, y == -1 ? 0 : -y);
+
+  arthur_output->startDoc(page->parentDoc->doc->getXRef());
+
+  const GBool hideAnnotations = page->parentDoc->m_hints & Document::HideAnnotations;
+
+  // Callback that filters out everything but form fields
+  auto annotDisplayDecideCbk = [](Annot *annot, void *user_data)
+  {
+    // Hide everything but forms
+    return (annot->getType() == Annot::typeWidget);
+  };
+
+  // A nullptr, but with the type of a function pointer
+  // Needed to make the ternary operator below happy.
+  GBool (*nullCallBack)(Annot *annot, void *user_data) = nullptr;
+
+  page->parentDoc->doc->displayPageSlice(arthur_output,
+                                          page->index + 1,
+                                          xres,
+                                          yres,
+                                          (int)rotate * 90,
+                                          false,
+                                          true,
+                                          false,
+                                          x,
+                                          y,
+                                          w,
+                                          h,
+                                          nullptr,
+                                          nullptr,
+                                          (hideAnnotations) ? annotDisplayDecideCbk : nullCallBack);
+  if (savePainter)
+    painter->restore();
+  return true;
+}
+
 QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h, Rotation rotate) const
+{
+  return renderToImage(xres, yres, x, y, w, h, rotate, nullptr, nullptr, QVariant());
+}
+
+QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h, Rotation rotate, RenderToImagePartialUpdateFunc partialUpdateCallback, ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback, const QVariant &payload) const
 {
   int rotation = (int)rotate * 90;
   QImage img;
@@ -351,13 +517,16 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 
       const bool ignorePaperColor = m_page->parentDoc->m_hints & Document::IgnorePaperColor;
 
-      SplashOutputDev splash_output(
+      Qt5SplashOutputDev splash_output(
                   colorMode, 4,
                   gFalse,
+                  ignorePaperColor,
                   ignorePaperColor ? NULL : bgColor,
                   gTrue,
                   thinLineMode,
                   overprintPreview);
+
+      splash_output.setPartialUpdateCallbackData(partialUpdateCallback, shouldDoPartialUpdateCallback, payload);
 
       splash_output.setFontAntialias(m_page->parentDoc->m_hints & Document::TextAntialiasing ? gTrue : gFalse);
       splash_output.setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? gTrue : gFalse);
@@ -385,40 +554,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
                                                (hideAnnotations) ? annotDisplayDecideCbk : nullCallBack,
                                                nullptr, gTrue);
 
-      SplashBitmap *bitmap = splash_output.getBitmap();
-
-      const int bw = bitmap->getWidth();
-      const int bh = bitmap->getHeight();
-      const int brs = bitmap->getRowSize();
-
-      // If we use DeviceN8, convert to XBGR8.
-      // If requested, also transfer Splash's internal alpha channel.
-      const SplashBitmap::ConversionMode mode = ignorePaperColor
-              ? SplashBitmap::conversionAlphaPremultiplied
-              : SplashBitmap::conversionOpaque;
-
-      const QImage::Format format = ignorePaperColor
-              ? QImage::Format_ARGB32_Premultiplied
-              : QImage::Format_RGB32;
-
-      if (bitmap->convertToXBGR(mode)) {
-          SplashColorPtr data = bitmap->takeData();
-
-          if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
-              // Convert byte order from RGBX to XBGR.
-              for (int i = 0; i < bh; ++i) {
-                  for (int j = 0; j < bw; ++j) {
-                      SplashColorPtr pixel = &data[i * brs + j];
-
-                      qSwap(pixel[0], pixel[3]);
-                      qSwap(pixel[1], pixel[2]);
-                  }
-              }
-          }
-
-          // Construct a Qt image holding (and also owning) the raw bitmap data.
-          img = QImage(data, bw, bh, brs, format, gfree, data);
-      }
+      img = splash_output.getXBGRImage( true /* takeImageData */);
 #endif
       break;
     }
@@ -435,7 +571,9 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       tmpimg.fill(bgColor);
 
       QPainter painter(&tmpimg);
-      renderToPainter(&painter, xres, yres, x, y, w, h, rotate, DontSaveAndRestore);
+      QImageDumpingArthurOutputDev arthur_output(&painter, &tmpimg);
+      arthur_output.setPartialUpdateCallbackData(partialUpdateCallback, shouldDoPartialUpdateCallback, payload);
+      renderToArthur(&arthur_output, &painter, m_page, xres, yres, x, y, w, h, rotate, DontSaveAndRestore);
       painter.end();
       img = tmpimg;
       break;
@@ -456,48 +594,8 @@ bool Page::renderToPainter(QPainter* painter, double xres, double yres, int x, i
       return false;
     case Poppler::Document::ArthurBackend:
     {
-      const bool savePainter = !(flags & DontSaveAndRestore);
-      if (savePainter)
-         painter->save();
-      if (m_page->parentDoc->m_hints & Document::Antialiasing)
-          painter->setRenderHint(QPainter::Antialiasing);
-      if (m_page->parentDoc->m_hints & Document::TextAntialiasing)
-          painter->setRenderHint(QPainter::TextAntialiasing);
-      painter->translate(x == -1 ? 0 : -x, y == -1 ? 0 : -y);
-      ArthurOutputDev arthur_output(painter);
-      arthur_output.startDoc(m_page->parentDoc->doc->getXRef());
-
-      const GBool hideAnnotations = m_page->parentDoc->m_hints & Document::HideAnnotations;
-
-      // Callback that filters out everything but form fields
-      auto annotDisplayDecideCbk = [](Annot *annot, void *user_data)
-      {
-        // Hide everything but forms
-        return (annot->getType() == Annot::typeWidget);
-      };
-
-      // A nullptr, but with the type of a function pointer
-      // Needed to make the ternary operator below happy.
-      GBool (*nullCallBack)(Annot *annot, void *user_data) = nullptr;
-
-      m_page->parentDoc->doc->displayPageSlice(&arthur_output,
-                                               m_page->index + 1,
-                                               xres,
-                                               yres,
-                                               (int)rotate * 90,
-                                               false,
-                                               true,
-                                               false,
-                                               x,
-                                               y,
-                                               w,
-                                               h,
-                                               nullptr,
-                                               nullptr,
-                                               (hideAnnotations) ? annotDisplayDecideCbk : nullCallBack);
-      if (savePainter)
-         painter->restore();
-      return true;
+        ArthurOutputDev arthur_output(painter);
+        return renderToArthur(&arthur_output, painter, m_page, xres, yres, x, y, w, h, rotate, flags);
     }
   }
   return false;

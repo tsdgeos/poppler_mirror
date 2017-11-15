@@ -17,6 +17,7 @@
  * Copyright (C) 2013 Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2017 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -491,6 +492,83 @@ delete it;
 	   \since 0.6
         */
 	QImage renderToImage(double xres=72.0, double yres=72.0, int x=-1, int y=-1, int w=-1, int h=-1, Rotation rotate = Rotate0) const;
+
+	/**
+	    Partial Update renderToImage callback.
+
+	    This function type is used for doing partial rendering updates;
+	    the first parameter is the image as rendered up to now, the second is the unaltered
+	    closure argument which was passed to the renderToImage call.
+
+	    \since 0.62
+	*/
+	typedef void (*RenderToImagePartialUpdateFunc)(const QImage & /*image*/, const QVariant & /*closure*/);
+
+	/**
+	    Partial Update query renderToImage callback.
+
+	    This function type is used for query if the partial rendering update should happen;
+	    the parameter is the unaltered closure argument which was passed to the renderToImage call.
+
+	    \since 0.62
+	*/
+	typedef bool (*ShouldRenderToImagePartialQueryFunc)(const QVariant & /*closure*/);
+
+	/**
+	   Render the page to a QImage using the current
+	   \link Document::renderBackend() Document renderer\endlink.
+
+	   If \p x = \p y = \p w = \p h = -1, the method will automatically
+           compute the size of the image from the horizontal and vertical
+           resolutions specified in \p xres and \p yres. Otherwise, the
+           method renders only a part of the page, specified by the
+           parameters (\p x, \p y, \p w, \p h) in pixel coordinates. The returned
+           QImage then has size (\p w, \p h), independent of the page
+           size.
+
+	   \param x specifies the left x-coordinate of the box, in
+	   pixels.
+
+	   \param y specifies the top y-coordinate of the box, in
+	   pixels.
+
+	   \param w specifies the width of the box, in pixels.
+
+	   \param h specifies the height of the box, in pixels.
+
+	   \param xres horizontal resolution of the graphics device,
+	   in dots per inch
+
+	   \param yres vertical resolution of the graphics device, in
+	   dots per inch
+
+	   \param rotate how to rotate the page
+
+	   \param partialUpdateCallback callback that will be called to
+	   report a partial rendering update
+
+	   \param shouldDoPartialUpdateCallback callback that will be called
+	   to ask if a partial rendering update is wanted. This exists
+	   because doing a partial rendering update needs to copy the image
+	   buffer so if it is not wanted it is better skipped early.
+
+	   \param closure opaque structure that will be passed
+	   back to partialUpdateCallback and shouldDoPartialUpdateCallback.
+
+	   \warning The parameter (\p x, \p y, \p w, \p h) are not
+	   well-tested. Unusual or meaningless parameters may lead to
+	   rather unexpected results.
+
+	   \returns a QImage of the page, or a null image on failure.
+
+	   \since 0.62
+        */
+        QImage renderToImage(double xres, double yres,
+                             int x, int y, int w, int h, Rotation rotate,
+                             RenderToImagePartialUpdateFunc partialUpdateCallback,
+                             ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback,
+                             const QVariant &closure
+                            ) const;
 
         /**
            Render the page to the specified QPainter using the current
