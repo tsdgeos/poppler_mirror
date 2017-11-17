@@ -35,6 +35,7 @@
 // Copyright (C) 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright (C) 2015 André Esser <bepandre@hotmail.com>
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+// Copyright (C) 2017 Jean Ghali <jghali@libertysurf.fr>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -58,6 +59,7 @@
 #include <string.h>
 #include <time.h>
 #include <sys/stat.h>
+#include "goo/glibc.h"
 #include "goo/gstrtod.h"
 #include "goo/GooString.h"
 #include "goo/gfile.h"

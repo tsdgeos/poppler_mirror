@@ -36,6 +36,7 @@
 // Copyright (C) 2012 Peter Breitenlohner <peb@mppmu.mpg.de>
 // Copyright (C) 2013, 2014 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
+// Copyright (C) 2017 Jean Ghali <jghali@libertysurf.fr>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -60,6 +61,7 @@
 #  include <shlobj.h>
 #  include <mbstring.h>
 #endif
+#include "goo/glibc.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "goo/GooList.h"
