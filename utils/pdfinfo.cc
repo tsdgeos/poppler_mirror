@@ -291,12 +291,6 @@ static void printStruct(const StructElement *element, unsigned indent) {
   }
 }
 
-struct RefCompare {
-  bool operator() (const Ref& lhs, const Ref& rhs) const {
-    return lhs.num < rhs.num;
-  }
-};
-
 struct GooStringCompare {
   bool operator() (GooString* lhs, GooString* rhs) const {
     return lhs->cmp(const_cast<GooString*>(rhs)) < 0;

@@ -55,50 +55,7 @@ void StructTreeRoot::parse(Dict *root)
   // be filled-in later when parsing them.
   Object obj = root->lookup("ParentTree");
   if (obj.isDict()) {
-    Object nums = obj.dictLookup("Nums");
-    if (nums.isArray()) {
-      if (nums.arrayGetLength() % 2 == 0) {
-        parentTree.resize(nums.arrayGetLength() / 2);
-        // Index numbers in even positions, references in odd ones
-        for (int i = 0; i < nums.arrayGetLength(); i += 2) {
-          Object index = nums.arrayGet(i);
-
-          if (!index.isInt()) {
-            error(errSyntaxError, -1, "Nums item at position {0:d} is wrong type ({1:s})", i, index.getTypeName());
-            continue;
-          }
-          const int idx = index.getInt();
-          if (idx < 0 || idx >= (int)parentTree.size()) {
-            error(errSyntaxError, -1, "Nums item at position {0:d} is invalid value ({1:d}): [0..{2:d}]", i, idx, parentTree.size() - 1);
-            continue;
-          }
-
-          Object value = nums.arrayGetNF(i + 1);
-          if (value.isRef()) {
-            parentTree[idx].resize(1);
-            parentTree[idx][0].ref = value.getRef();
-          } else {
-	    value = nums.arrayGet(i + 1);
-	    if (value.isArray()) {
-	      parentTree[idx].resize(value.arrayGetLength());
-	      for (int j = 0; j < value.arrayGetLength(); j++) {
-		Object itemvalue = value.arrayGetNF(j);
-		if (itemvalue.isRef())
-		  parentTree[idx][j].ref = itemvalue.getRef();
-		else
-		  error(errSyntaxError, -1, "Nums array item at position {0:d}/{1:d} is invalid type ({2:s})", i, j, itemvalue.getTypeName());
-	      }
-	    } else {
-	      error(errSyntaxError, -1, "Nums item at position {0:d} is wrong type ({1:s})", i + 1, value.getTypeName());
-	    }
-	  }
-        }
-      } else {
-        error(errSyntaxError, -1, "Nums array length is not a even ({0:d})", nums.arrayGetLength());
-      }
-    } else {
-      error(errSyntaxError, -1, "Nums object is wrong type ({0:s})", nums.getTypeName());
-    }
+    parseNumberTreeNode(obj.getDict());
   }
 
   std::set<int> seenElements;
@@ -154,14 +111,80 @@ void StructTreeRoot::parse(Dict *root)
   } else if (!kids.isNull()) {
     error(errSyntaxWarning, -1, "K in StructTreeRoot is wrong type ({0:s})", kids.getTypeName());
   }
+
+  // refToParentMap is only used during parsing. Ensure all memory used by it is freed.
+  std::multimap<Ref, Parent*, RefCompare>().swap(refToParentMap);
 }
+
+void StructTreeRoot::parseNumberTreeNode(Dict *node)
+{
+  Object kids = node->lookup("Kids");
+  if (kids.isArray()) {
+    for (int i = 0; i < kids.arrayGetLength(); i++) {
+      Object obj = kids.arrayGet(i);
+      if (obj.isDict()) {
+	parseNumberTreeNode(obj.getDict());
+      } else {
+	error(errSyntaxError, -1, "Kids item at position {0:d} is wrong type ({1:s})", i, obj.getTypeName());
+      }
+    }
+    return;
+  } else if (!kids.isNull()) {
+    error(errSyntaxError, -1, "Kids object is wrong type ({0:s})", kids.getTypeName());
+  }
+
+  Object nums = node->lookup("Nums");
+  if (nums.isArray()) {
+    if (nums.arrayGetLength() % 2 == 0) {
+      // keys in even positions, references in odd ones
+      for (int i = 0; i < nums.arrayGetLength(); i += 2) {
+	Object key = nums.arrayGet(i);
+
+	if (!key.isInt()) {
+	  error(errSyntaxError, -1, "Nums item at position {0:d} is wrong type ({1:s})", i, key.getTypeName());
+	  continue;
+	}
+	int keyVal = key.getInt();
+	std::vector<Parent>& vec = parentTree[keyVal];
+
+	Object value = nums.arrayGet(i + 1);
+	if (value.isArray()) {
+	  vec.resize(value.arrayGetLength());
+	  memset(vec.data(), 0, vec.size()*sizeof(Parent*));
+	  for (int j = 0; j < value.arrayGetLength(); j++) {
+	    Object itemvalue = value.arrayGetNF(j);
+	    if (itemvalue.isRef()) {
+	      Ref ref = itemvalue.getRef();
+	      vec[j].ref = ref;
+	      refToParentMap.insert(std::pair<Ref, Parent*>(ref, &vec[j]));
+	    } else if (!itemvalue.isNull()) {
+	      error(errSyntaxError, -1, "Nums array item at position {0:d}/{1:d} is invalid type ({2:s})", i, j, itemvalue.getTypeName());
+	    }
+	  }
+	} else {
+	  value = nums.arrayGetNF(i + 1);
+	  if (value.isRef()) {
+	    Ref ref = value.getRef();
+	    vec.resize(1);
+	    vec[0].ref = ref;
+	    refToParentMap.insert(std::pair<Ref, Parent*>(ref, &vec[0]));
+	  } else {
+	    error(errSyntaxError, -1, "Nums item at position {0:d} is wrong type ({1:s})", i + 1, value.getTypeName());
+	  }
+	}
+      }
+    } else {
+      error(errSyntaxError, -1, "Nums array length is not a even ({0:d})", nums.arrayGetLength());
+    }
+  } else {
+    error(errSyntaxError, -1, "Nums object is wrong type ({0:s})", nums.getTypeName());
+  }
+}
+
 
 void StructTreeRoot::parentTreeAdd(const Ref &objectRef, StructElement *element)
 {
-  for (std::vector< std::vector<Parent> >::iterator i = parentTree.begin(); i != parentTree.end(); ++i) {
-    for (std::vector<Parent>::iterator j = i->begin(); j != i->end(); ++j) {
-      if (j->ref.num == objectRef.num && j->ref.gen == objectRef.gen)
-        j->element = element;
-    }
-  }
+  auto range = refToParentMap.equal_range(objectRef);
+  for (auto it = range.first; it !=range.second; ++it)
+    it->second->element = element;
 }
