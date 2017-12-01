@@ -1,8 +1,9 @@
 before_install:
   - eval "${MATRIX_EVAL}"
   - sudo add-apt-repository ppa:ricotz/testing -y
+  - sudo add-apt-repository ppa:aacid/openjp2trusty -y
   - sudo apt-get -qq update
-  - sudo apt-get install -y libopenjpeg-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev
+  - sudo apt-get install -y libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev
   - git clone git://git.freedesktop.org/git/poppler/test test-files
 
 language: cpp
