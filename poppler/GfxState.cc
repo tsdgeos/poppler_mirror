@@ -179,40 +179,8 @@ static const char *gfxColorSpaceModeNames[] = {
 
 static const std::map<unsigned int, unsigned int>::size_type CMSCACHE_LIMIT = 2048;
 
-#ifdef USE_LCMS1
-#include <lcms.h>
-#define cmsColorSpaceSignature icColorSpaceSignature
-#define cmsSetLogErrorHandler cmsSetErrorHandler
-#define cmsSigXYZData icSigXYZData
-#define cmsSigLuvData icSigLuvData
-#define cmsSigLabData icSigLabData
-#define cmsSigYCbCrData icSigYCbCrData
-#define cmsSigYxyData icSigYxyData
-#define cmsSigRgbData icSigRgbData
-#define cmsSigHsvData icSigHsvData
-#define cmsSigHlsData icSigHlsData
-#define cmsSigCmyData icSigCmyData
-#define cmsSig3colorData icSig3colorData
-#define cmsSigGrayData icSigGrayData
-#define cmsSigCmykData icSigCmykData
-#define cmsSig4colorData icSig4colorData
-#define cmsSig2colorData icSig2colorData
-#define cmsSig5colorData icSig5colorData
-#define cmsSig6colorData icSig6colorData
-#define cmsSig7colorData icSig7colorData
-#define cmsSig8colorData icSig8colorData
-#define cmsSig9colorData icSig9colorData
-#define cmsSig10colorData icSig10colorData
-#define cmsSig11colorData icSig11colorData
-#define cmsSig12colorData icSig12colorData
-#define cmsSig13colorData icSig13colorData
-#define cmsSig14colorData icSig14colorData
-#define cmsSig15colorData icSig15colorData
-#define LCMS_FLAGS 0
-#else
 #include <lcms2.h>
 #define LCMS_FLAGS cmsFLAGS_NOOPTIMIZE | cmsFLAGS_BLACKPOINTCOMPENSATION
-#endif
 
 #define COLOR_PROFILE_DIR "/ColorProfiles/"
 #define GLOBAL_COLOR_PROFILE_DIR POPPLER_DATADIR COLOR_PROFILE_DIR
@@ -498,18 +466,10 @@ cmsHPROFILE loadColorProfile(const char *fileName)
   return hp;
 }
 
-#ifdef USE_LCMS1
-static int CMSError(int ecode, const char *msg)
-{
-    error(errSyntaxWarning, -1, "{0:s}", msg);
-    return 1;
-}
-#else
 static void CMSError(cmsContext /*contextId*/, cmsUInt32Number /*ecode*/, const char *text)
 {
     error(errSyntaxWarning, -1, "{0:s}", text);
 }
-#endif
 
 int GfxColorSpace::setupColorProfiles()
 {

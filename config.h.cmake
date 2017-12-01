@@ -180,9 +180,6 @@
 /* Use single precision arithmetic in the Splash backend */
 #cmakedefine USE_FLOAT 1
 
-/* Defines if use lcms1 */
-#cmakedefine USE_LCMS1 1
-
 /* Version number of package */
 #define VERSION "${POPPLER_VERSION}"
 
