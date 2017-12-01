@@ -47,6 +47,7 @@
 #include "PDFDocFactory.h"
 #include "ImageOutputDev.h"
 #include "Error.h"
+#include "Win32Console.h"
 
 static int firstPage = 1;
 static int lastPage = 0;
@@ -120,6 +121,7 @@ int main(int argc, char *argv[]) {
   GBool ok;
   int exitCode;
 
+  Win32Console win32Console(&argc, &argv);
   exitCode = 99;
 
   // parse args

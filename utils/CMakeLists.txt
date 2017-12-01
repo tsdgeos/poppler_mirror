@@ -1,6 +1,7 @@
 
 set(common_srcs
   parseargs.cc
+  Win32Console.cc
 )
 set(common_libs
   poppler
@@ -97,6 +98,7 @@ if (ENABLE_NSS3)
   add_executable(pdfsig ${pdfsig_SOURCES})
   target_link_libraries(pdfsig ${common_libs})
   install(TARGETS pdfsig DESTINATION bin)
+  install(FILES pdfsig.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 endif ()
 
 # pdftops

@@ -40,6 +40,7 @@
 #include "UnicodeMap.h"
 #include "PDFDocEncoding.h"
 #include "Error.h"
+#include "Win32Console.h"
 
 static GBool doList = gFalse;
 static int saveNum = 0;
@@ -99,6 +100,7 @@ int main(int argc, char *argv[]) {
   Unicode u;
   GBool isUnicode;
 
+  Win32Console win32Console(&argc, &argv);
   exitCode = 99;
 
   // parse args

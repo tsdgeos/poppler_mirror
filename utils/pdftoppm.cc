@@ -51,6 +51,7 @@
 #include "splash/SplashBitmap.h"
 #include "splash/Splash.h"
 #include "SplashOutputDev.h"
+#include "Win32Console.h"
 
 // Uncomment to build pdftoppm with pthreads
 // You may also have to change the buildsystem to
@@ -394,6 +395,7 @@ int main(int argc, char *argv[]) {
   int pg, pg_num_len;
   double pg_w, pg_h, tmp;
 
+  Win32Console win32Console(&argc, &argv);
   exitCode = 99;
 
   // parse args

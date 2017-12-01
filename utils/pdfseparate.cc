@@ -23,6 +23,7 @@
 #include "PDFDoc.h"
 #include "ErrorCodes.h"
 #include "GlobalParams.h"
+#include "Win32Console.h"
 #include <ctype.h>
 
 static int firstPage = 0;
@@ -150,6 +151,7 @@ main (int argc, char *argv[])
   exitCode = 99;
 
   // parse args
+  Win32Console win32console(&argc, &argv);
   ok = parseArgs (argDesc, &argc, argv);
   if (!ok || argc != 3 || printVersion || printHelp)
     {

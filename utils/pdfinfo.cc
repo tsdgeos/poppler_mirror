@@ -61,6 +61,7 @@
 #include "JSInfo.h"
 #include "StructTreeRoot.h"
 #include "StructElement.h"
+#include "Win32Console.h"
 
 
 static int firstPage = 1;
@@ -616,6 +617,7 @@ int main(int argc, char *argv[]) {
   exitCode = 99;
 
   // parse args
+  Win32Console win32console(&argc, &argv);
   ok = parseArgs(argDesc, &argc, argv);
   if (!ok || (argc != 2 && !printEnc) || printVersion || printHelp) {
     fprintf(stderr, "pdfinfo version %s\n", PACKAGE_VERSION);

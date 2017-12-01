@@ -59,6 +59,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include "Win32Console.h"
 
 static void printInfoString(FILE *f, Dict *infoDict, const char *key,
 			    const char *text1, const char *text2, UnicodeMap *uMap);
@@ -180,6 +181,7 @@ int main(int argc, char *argv[]) {
   char *p;
   int exitCode;
 
+  Win32Console win32Console(&argc, &argv);
   exitCode = 99;
 
   // parse args

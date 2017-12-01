@@ -55,6 +55,7 @@
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
 #include "CairoOutputDev.h"
+#include "Win32Console.h"
 #ifdef USE_CMS
 #ifdef USE_LCMS1
 #include <lcms.h>
@@ -943,6 +944,7 @@ int main(int argc, char *argv[]) {
   int num_outputs;
 
   // parse args
+  Win32Console win32Console(&argc, &argv);
   if (!parseArgs(argDesc, &argc, argv)) {
     printUsage("pdftocairo", 0, argDesc);
     exit(99);
