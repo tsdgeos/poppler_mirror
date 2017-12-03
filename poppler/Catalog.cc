@@ -343,6 +343,7 @@ GBool Catalog::cachePageTree(int page)
 
       if (lastCachedPage >= numPages) {
         error(errSyntaxError, -1, "Page count in top-level pages object is incorrect");
+        delete p;
         return gFalse;
       }
 

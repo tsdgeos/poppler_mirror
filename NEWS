@@ -1,3 +1,29 @@
+Release 0.62.0
+        core:
+         * Stop supporting lcms1, you really want to use lcms2 :)
+         * Stop supporting openjpeg1, you really want to use openjpeg2 :)
+         * Open files that state 8 bits as third field of W. Bug #103469
+         * GfxLabColorSpace::parse: Fix crash in broken documents. Bug #103582
+         * Fix leak if parseDA fails
+         * Include glibc.h where needed
+         * Document the meaning of the 'type' integer of a shading
+         * Fix UTF test fail
+         * INSTALL: add debug options
+
+        qt5:
+         * Add API to let the rendering process callback to get a partial rendering. Bug #103372
+
+        qt4:
+         * Remove the Qt4 frontend
+
+        utils:
+         * Support unicode on windows console
+         * pdfsig: install man page
+         * sort encoding list
+
+        glib:
+         * demo: fix warning
+
 Release 0.61.1
         core:
          * CairoOutputDev: don't overflow y * stride when accessing image data
