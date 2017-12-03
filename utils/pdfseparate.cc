@@ -10,6 +10,7 @@
 // Copyright (C) 2013 Daniel Kahn Gillmor <dkg@fifthhorseman.net>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2017 Léonard Michelet <leonard.michelet@smile.fr>
+// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
 #include "config.h"

@@ -9,6 +9,7 @@
 // Copyright 2015, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright 2016 Markus Kilås <digital@markuspage.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
 

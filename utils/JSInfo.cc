@@ -24,7 +24,7 @@
 #include "Form.h"
 #include "UnicodeMap.h"
 #include "UTF.h"
-#include "Win32Console.h"
+// #include "Win32Console.h"
 
 JSInfo::JSInfo(PDFDoc *docA, int firstPage) {
   doc = docA;
