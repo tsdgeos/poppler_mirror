@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2009, 2011, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011, 2012, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -145,16 +145,22 @@ public:
   static GooFile *open(const wchar_t *fileName);
   
   ~GooFile() { CloseHandle(handle); }
+
+  // Asuming than on windows you can't change files that are already open
+  bool modificationTimeChangedSinceOpen() const { return false; };
   
 private:
   GooFile(HANDLE handleA): handle(handleA) {}
   HANDLE handle;
 #else
   ~GooFile() { close(fd); }
+
+  bool modificationTimeChangedSinceOpen() const;
     
 private:
-  GooFile(int fdA) : fd(fdA) {}
+  GooFile(int fdA);
   int fd;
+  struct timespec modifiedTimeOnOpen;
 #endif // _WIN32
 };
 
