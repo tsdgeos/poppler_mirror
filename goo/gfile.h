@@ -23,6 +23,7 @@
 // Copyright (C) 2014 Bogdan Cristea <cristeab@gmail.com>
 // Copyright (C) 2014 Peter Breitenlohner <peb@mppmu.mpg.de>
 // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
+// Copyright (C) 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -147,11 +148,12 @@ public:
   ~GooFile() { CloseHandle(handle); }
 
   // Asuming than on windows you can't change files that are already open
-  bool modificationTimeChangedSinceOpen() const { return false; };
+  bool modificationTimeChangedSinceOpen() const;
   
 private:
-  GooFile(HANDLE handleA): handle(handleA) {}
+  GooFile(HANDLE handleA);
   HANDLE handle;
+  struct _FILETIME modifiedTimeOnOpen;
 #else
   ~GooFile() { close(fd); }
 

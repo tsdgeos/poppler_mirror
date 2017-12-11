@@ -24,7 +24,7 @@
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Peter Breitenlohner <peb@mppmu.mpg.de>
-// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013, 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
@@ -599,6 +599,10 @@ Goffset GoffsetMax() {
 
 #ifdef _WIN32
 
+GooFile::GooFile(HANDLE handleA) : handle(handleA) {
+  GetFileTime(handleA, NULL, NULL, &modifiedTimeOnOpen);
+}
+
 int GooFile::read(char *buf, int n, Goffset offset) const {
   DWORD m;
   
@@ -640,6 +644,14 @@ GooFile* GooFile::open(const wchar_t *fileName) {
                               FILE_ATTRIBUTE_NORMAL, NULL);
   
   return handle == INVALID_HANDLE_VALUE ? NULL : new GooFile(handle);
+}
+
+bool GooFile::modificationTimeChangedSinceOpen() const
+{
+  struct _FILETIME lastModified;
+  GetFileTime(handle, NULL, NULL, &lastModified);
+
+  return modifiedTimeOnOpen.dwHighDateTime != lastModified.dwHighDateTime || modifiedTimeOnOpen.dwLowDateTime != lastModified.dwLowDateTime;
 }
 
 #else
