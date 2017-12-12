@@ -730,6 +730,11 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   FILE *f;
   OutStream *outStr;
   XRef *yRef, *countRef;
+
+  if (file && file->modificationTimeChangedSinceOpen())
+    return errFileChangedSinceOpen;
+
+
   int rootNum = getXRef()->getNumObjects() + 1;
 
   // Make sure that special flags are set, because we are going to read
@@ -901,6 +906,9 @@ int PDFDoc::saveAs(GooString *name, PDFWriteMode mode) {
 }
 
 int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode) {
+  if (file && file->modificationTimeChangedSinceOpen())
+    return errFileChangedSinceOpen;
+
   if (!xref->isModified() && mode == writeStandard) {
     // simply copy the original file
     saveWithoutChangesAs (outStr);
@@ -934,6 +942,9 @@ int PDFDoc::saveWithoutChangesAs(GooString *name) {
 
 int PDFDoc::saveWithoutChangesAs(OutStream *outStr) {
   int c;
+
+  if (file && file->modificationTimeChangedSinceOpen())
+    return errFileChangedSinceOpen;
   
   BaseStream *copyStr = str->copy();
   copyStr->reset();

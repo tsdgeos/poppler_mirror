@@ -69,6 +69,11 @@
 
 // #define LOG_CAIRO
 
+// To limit memory usage and improve performance when printing, limit
+// cairo images to this size. 8192 is sufficient for an A2 sized
+// 300ppi image.
+#define MAX_PRINT_IMAGE_SIZE 8192
+
 #ifdef LOG_CAIRO
 #define LOG(x) (x)
 #else
@@ -2761,7 +2766,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
 
   cairo_surface_mark_dirty (image);
 
-  setMimeData(state, str, ref, colorMap, image);
+  setMimeData(state, str, ref, colorMap, image, height);
 
   pattern = cairo_pattern_create_for_surface (image);
   cairo_surface_destroy (image);
@@ -2935,8 +2940,38 @@ GBool CairoOutputDev::setMimeDataForJBIG2Globals(Stream  *str,
 }
 #endif
 
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 15, 10)
+GBool CairoOutputDev::setMimeDataForCCITTParams(Stream  *str,
+						cairo_surface_t *image, int height)
+{
+  CCITTFaxStream *ccittStr = static_cast<CCITTFaxStream *>(str);
+
+  GooString params;
+  params.appendf("Columns={0:d}", ccittStr->getColumns());
+  params.appendf(" Rows={0:d}", height);
+  params.appendf(" K={0:d}", ccittStr->getEncoding());
+  params.appendf(" EndOfLine={0:d}", ccittStr->getEndOfLine() ? 1 : 0);
+  params.appendf(" EncodedByteAlign={0:d}", ccittStr->getEncodedByteAlign() ? 1 : 0);
+  params.appendf(" EndOfBlock={0:d}", ccittStr->getEndOfBlock() ? 1 : 0);
+  params.appendf(" BlackIs1={0:d}", ccittStr->getBlackIs1() ? 1 : 0);
+  params.appendf(" DamagedRowsBeforeError={0:d}", ccittStr->getDamagedRowsBeforeError());
+
+  char *p = strdup(params.getCString());
+  if (cairo_surface_set_mime_data (image, CAIRO_MIME_TYPE_CCITT_FAX_PARAMS,
+                                   (const unsigned char*)p,
+                                   params.getLength(),
+                                   gfree, (void*)p))
+  {
+    gfree (p);
+    return gFalse;
+  }
+
+  return gTrue;
+}
+#endif
+
 void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref,
-				 GfxImageColorMap *colorMap, cairo_surface_t *image)
+				 GfxImageColorMap *colorMap, cairo_surface_t *image, int height)
 {
   char *strBuffer;
   int len;
@@ -2958,6 +2993,11 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref,
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
     case strJBIG2:
       mime_type = CAIRO_MIME_TYPE_JBIG2;
+      break;
+#endif
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 15, 10)
+    case strCCITTFax:
+      mime_type = CAIRO_MIME_TYPE_CCITT_FAX;
       break;
 #endif
     default:
@@ -2999,6 +3039,11 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref,
 
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
   if (strKind == strJBIG2 && !setMimeDataForJBIG2Globals(str, image))
+    return;
+#endif
+
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 15, 10)
+  if (strKind == strCCITTFax && !setMimeDataForCCITTParams(str, image, height))
     return;
 #endif
 
@@ -3085,7 +3130,22 @@ public:
     bool needsCustomDownscaling = true;
 #endif
 
-    if (!needsCustomDownscaling || printing || scaledWidth >= width || scaledHeight >= height) {
+    if (printing) {
+      if (width > MAX_PRINT_IMAGE_SIZE || height > MAX_PRINT_IMAGE_SIZE) {
+	if (width > height) {
+	  scaledWidth = MAX_PRINT_IMAGE_SIZE;
+	  scaledHeight = MAX_PRINT_IMAGE_SIZE * (double)height/width;
+	} else {
+	  scaledHeight = MAX_PRINT_IMAGE_SIZE;
+	  scaledWidth = MAX_PRINT_IMAGE_SIZE * (double)width/height;
+	}
+	needsCustomDownscaling = true;
+      } else {
+	needsCustomDownscaling = false;
+      }
+    }
+
+    if (!needsCustomDownscaling || scaledWidth >= width || scaledHeight >= height) {
       // No downscaling. Create cairo image containing the source image data.
       unsigned char *buffer;
       ptrdiff_t stride;
@@ -3215,8 +3275,17 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   if (width == widthA && height == heightA)
     filter = getFilterForSurface (image, interpolate);
 
-  if (!inlineImg) /* don't read stream twice if it is an inline image */
-    setMimeData(state, str, ref, colorMap, image);
+  if (!inlineImg) { /* don't read stream twice if it is an inline image */
+    // cairo 1.15.10 allows mime image data to have different size to cairo image
+    // mime image size will be scaled to same size as cairo image
+#if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 15, 10)
+    bool requireSameSize = false;
+#else
+    bool requireSameSize = true;
+#endif
+    if (!requireSameSize || (width == widthA && height == heightA))
+      setMimeData(state, str, ref, colorMap, image, heightA);
+  }
 
   pattern = cairo_pattern_create_for_surface (image);
   cairo_surface_destroy (image);

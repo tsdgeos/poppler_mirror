@@ -19,12 +19,12 @@
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2008 Adam Batkin <adam@batkin.net>
 // Copyright (C) 2008, 2010, 2012, 2013 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2009, 2012, 2014 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2014, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Peter Breitenlohner <peb@mppmu.mpg.de>
-// Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2013, 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
@@ -599,6 +599,10 @@ Goffset GoffsetMax() {
 
 #ifdef _WIN32
 
+GooFile::GooFile(HANDLE handleA) : handle(handleA) {
+  GetFileTime(handleA, NULL, NULL, &modifiedTimeOnOpen);
+}
+
 int GooFile::read(char *buf, int n, Goffset offset) const {
   DWORD m;
   
@@ -642,6 +646,14 @@ GooFile* GooFile::open(const wchar_t *fileName) {
   return handle == INVALID_HANDLE_VALUE ? NULL : new GooFile(handle);
 }
 
+bool GooFile::modificationTimeChangedSinceOpen() const
+{
+  struct _FILETIME lastModified;
+  GetFileTime(handle, NULL, NULL, &lastModified);
+
+  return modifiedTimeOnOpen.dwHighDateTime != lastModified.dwHighDateTime || modifiedTimeOnOpen.dwLowDateTime != lastModified.dwLowDateTime;
+}
+
 #else
 
 int GooFile::read(char *buf, int n, Goffset offset) const {
@@ -668,6 +680,22 @@ GooFile* GooFile::open(const GooString *fileName) {
 #endif
   
   return fd < 0 ? NULL : new GooFile(fd);
+}
+
+GooFile::GooFile(int fdA)
+ : fd(fdA)
+{
+    struct stat statbuf;
+    fstat(fd, &statbuf);
+    modifiedTimeOnOpen = statbuf.st_mtim;
+}
+
+bool GooFile::modificationTimeChangedSinceOpen() const
+{
+    struct stat statbuf;
+    fstat(fd, &statbuf);
+
+    return modifiedTimeOnOpen.tv_sec != statbuf.st_mtim.tv_sec || modifiedTimeOnOpen.tv_nsec != statbuf.st_mtim.tv_nsec;
 }
 
 #endif // _WIN32
