@@ -116,8 +116,6 @@ protected:
 
   friend class SplashXPath;
   friend class Splash;
-  // this is a temporary hack, until we read FreeType paths directly
-  friend class ArthurOutputDev;
 };
 
 #endif

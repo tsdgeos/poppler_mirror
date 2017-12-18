@@ -36,6 +36,7 @@
 // Copyright (C) 2015 André Esser <bepandre@hotmail.com>
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2017 Jean Ghali <jghali@libertysurf.fr>
+// Copyright (C) 2017 Fredrik Fornwall <fredrik@fornwall.net>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1514,7 +1515,7 @@ void PDFDoc::writeXRefTableTrailer(Goffset uxrefOffset, XRef *uxref, GBool write
 void PDFDoc::writeHeader(OutStream *outStr, int major, int minor)
 {
    outStr->printf("%%PDF-%d.%d\n", major, minor);
-   outStr->printf("%%\xE2\xE3\xCF\xD3\n");
+   outStr->printf("%%%c%c%c%c\n", 0xE2, 0xE3, 0xCF, 0xD3);
 }
 
 void PDFDoc::markDictionnary (Dict* dict, XRef * xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts)

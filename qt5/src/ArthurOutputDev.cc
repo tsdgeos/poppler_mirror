@@ -635,12 +635,12 @@ void ArthurOutputDev::eoFill(GfxState *state)
 
 void ArthurOutputDev::clip(GfxState *state)
 {
-  m_painter->setClipPath(convertPath( state, state->getPath(), Qt::WindingFill ) );
+  m_painter->setClipPath(convertPath( state, state->getPath(), Qt::WindingFill ), Qt::IntersectClip );
 }
 
 void ArthurOutputDev::eoClip(GfxState *state)
 {
-  m_painter->setClipPath(convertPath( state, state->getPath(), Qt::OddEvenFill ) );
+  m_painter->setClipPath(convertPath( state, state->getPath(), Qt::OddEvenFill ), Qt::IntersectClip );
 }
 
 void ArthurOutputDev::drawChar(GfxState *state, double x, double y,
