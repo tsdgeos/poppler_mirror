@@ -278,6 +278,8 @@ class HTMLReport:
 
     def create(self, launch_browser):
         html = "<html><body><a name='top'></a>"
+        if os.path.exists(os.path.join(self._outdir, '.exited_early')):
+            html += "<p style='border: 3px solid red; font-weight: bold; display: inline-block; padding: 3px'>Testing exited early</p>"
         if self.config.backends:
             backends = [get_backend(name) for name in self.config.backends]
         else:

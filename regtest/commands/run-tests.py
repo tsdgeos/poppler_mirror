@@ -51,6 +51,9 @@ class RunTests(Command):
         parser.add_argument('--update-refs',
                             action = 'store_true', dest = 'update_refs', default = False,
                             help = 'Update references for failed tests')
+        parser.add_argument('--exit-after-n-failures',
+                            action = 'store', dest = 'max_failures', type=int, default = None,
+                            help = 'Exit after N failures. Ignored if --update-refs is present too')
         parser.add_argument('tests', metavar = 'TEST', nargs = '+',
                             help = 'Tests directory or individual test to run')
 
@@ -77,7 +80,10 @@ class RunTests(Command):
             if docs_dir is None:
                 docs_dir = os.path.commonprefix(docs).rpartition(os.path.sep)[0]
 
-        tests = TestRun(docs_dir, options['refs_dir'], options['out_dir'])
+        max_failures = None
+        if not config.update_refs:
+            max_failures = options['max_failures']
+        tests = TestRun(docs_dir, options['refs_dir'], options['out_dir'], max_failures)
         status = tests.run_tests(docs)
         tests.summary()
         get_printer().printout_ln("Tests run in %s" % (t.elapsed_str()))

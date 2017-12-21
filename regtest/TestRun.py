@@ -23,21 +23,24 @@ from Printer import get_printer
 import sys
 import os
 import errno
+import shutil
 
 from InterruptibleQueue import InterruptibleQueue
 from threading import Thread, RLock
 
 class TestRun:
 
-    def __init__(self, docsdir, refsdir, outdir):
+    def __init__(self, docsdir, refsdir, outdir, max_failures = None):
         self._docsdir = docsdir
         self._refsdir = refsdir
         self._outdir = outdir
+        self._max_failures = max_failures
         self._skip = get_skipped_tests(docsdir)
         self._passwords = get_passwords(docsdir)
         self.config = Config()
         self.printer = get_printer()
         self._total_tests = 1
+        self._exited_early = False
 
         # Results
         self._n_tests = 0
@@ -171,13 +174,42 @@ class TestRun:
         for backend in backends:
             self.test(refs_path, doc_path, out_path, backend, password)
 
+    def _should_exit_early(self):
+        if self._max_failures is None:
+            return False
+
+        def _len(tests):
+            retval = 0
+            for backend in tests:
+                retval += len(tests[backend])
+            return retval
+
+        with self._lock:
+            if _len(self._failed) + _len(self._crashed) + _len(self._failed_status_error) >= self._max_failures:
+                if not self._exited_early:
+                    self.printer.printout_ln('Exiting early after %d failures, waiting for running jobs to finish...' % self._max_failures)
+                    self.printer.block()
+                self._exited_early = True
+                return True
+        return False
+
     def _worker_thread(self):
         while True:
             doc = self._queue.get()
-            self.run_test(doc)
+            if not self._should_exit_early():
+                self.run_test(doc)
             self._queue.task_done()
 
     def run_tests(self, tests = []):
+        # Clean the output dir.
+        try:
+            shutil.rmtree(self._outdir)
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                raise
+        except:
+	    raise
+
         if not tests:
             docs, total_docs = get_document_paths_from_dir(self._docsdir)
         else:
@@ -229,6 +261,13 @@ class TestRun:
         else:
             for doc in docs:
                 self.run_test(doc)
+                if self._should_exit_early():
+                    break
+
+        if self._exited_early:
+            open(os.path.join(self._outdir, '.exited_early'), 'w').close()
+            self.printer.unblock()
+            return -self._max_failures
 
         return int(self._n_passed != self._n_run)
 
@@ -236,6 +275,9 @@ class TestRun:
         self.printer.printout_ln()
 
         if self._n_run:
+            if self._exited_early:
+                self.printer.printout_ln("Testing exited early")
+                self.printer.printout_ln()
             self.printer.printout_ln("%d tests passed (%.2f%%)" % (self._n_passed, (self._n_passed * 100.) / self._n_run))
             self.printer.printout_ln()
 
