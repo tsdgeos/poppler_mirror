@@ -27,7 +27,7 @@
 // Copyright (C) 2011, 2015 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
-// Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+// Copyright (C) 2013, 2017 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2014 Rodrigo Rivas Costa <rodrigorivascosta@gmail.com>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 //
@@ -57,11 +57,7 @@
 #include "CairoOutputDev.h"
 #include "Win32Console.h"
 #ifdef USE_CMS
-#ifdef USE_LCMS1
-#include <lcms.h>
-#else
 #include <lcms2.h>
-#endif
 #endif
 #include <cairo.h>
 #ifdef CAIRO_HAS_PS_SURFACE
