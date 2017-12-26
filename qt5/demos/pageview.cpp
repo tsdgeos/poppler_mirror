@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +27,7 @@
 #include <QtGui/QImage>
 #include <QtWidgets/QLabel>
 #include <QtGui/QPixmap>
+#include <QDebug>
 
 PageView::PageView(QWidget *parent)
     : QScrollArea(parent)
@@ -56,6 +58,11 @@ void PageView::documentClosed()
 void PageView::pageChanged(int page)
 {
     Poppler::Page *popplerPage = document()->page(page);
+
+    if (!popplerPage) {
+        qDebug() << "Page" << page << "is malformed";
+        return;
+    }
     const double resX = m_dpiX * m_zoom;
     const double resY = m_dpiY * m_zoom;
 
