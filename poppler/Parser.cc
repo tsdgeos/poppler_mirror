@@ -89,10 +89,11 @@ Object Parser::getObj(GBool simpleOnly,
   if (!simpleOnly && buf1.isCmd("[")) {
     shift();
     obj = Object(new Array(xref));
-    while (!buf1.isCmd("]") && !buf1.isEOF()) {
+    while (!buf1.isCmd("]") && !buf1.isEOF() && recursion + 1 < recursionLimit) {
       Object obj2 = getObj(gFalse, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1);
       obj.arrayAdd(std::move(obj2));
     }
+    if (recursion + 1 >= recursionLimit && strict) goto err;
     if (buf1.isEOF()) {
       error(errSyntaxError, getPos(), "End of file inside array");
       if (strict) goto err;

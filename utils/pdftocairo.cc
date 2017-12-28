@@ -18,7 +18,7 @@
 // Copyright (C) 2009 Michael K. Johnson <a1237@danlj.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
-// Copyright (C) 2009, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2010, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010, 2011-2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010, 2014 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
@@ -27,7 +27,7 @@
 // Copyright (C) 2011, 2015 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
-// Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+// Copyright (C) 2013, 2017 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2014 Rodrigo Rivas Costa <rodrigorivascosta@gmail.com>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 //
@@ -57,11 +57,7 @@
 #include "CairoOutputDev.h"
 #include "Win32Console.h"
 #ifdef USE_CMS
-#ifdef USE_LCMS1
-#include <lcms.h>
-#else
 #include <lcms2.h>
-#endif
 #endif
 #include <cairo.h>
 #ifdef CAIRO_HAS_PS_SURFACE
@@ -399,12 +395,6 @@ static void writePageImage(GooString *filename)
       writer = new PNGWriter(PNGWriter::RGB);
 
 #ifdef USE_CMS
-#ifdef USE_LCMS1
-    if (icc_data)
-      static_cast<PNGWriter*>(writer)->setICCProfile(cmsTakeProductName(profile), icc_data, icc_data_size);
-    else
-      static_cast<PNGWriter*>(writer)->setSRGBProfile();
-#else
     if (icc_data) {
       cmsUInt8Number profileID[17];
       profileID[16] = '\0';
@@ -414,7 +404,6 @@ static void writePageImage(GooString *filename)
     } else {
       static_cast<PNGWriter*>(writer)->setSRGBProfile();
     }
-#endif
 #endif
 #endif
 

@@ -55,6 +55,8 @@
 #include <QRawFont>
 #include <QGlyphRun>
 #include <QtGui/QPainterPath>
+#include <QPicture>
+
 //------------------------------------------------------------------------
 
 #ifdef HAVE_SPLASH
@@ -89,9 +91,10 @@ private:
 //------------------------------------------------------------------------
 
 ArthurOutputDev::ArthurOutputDev(QPainter *painter):
-  m_painter(painter),
+  m_lastTransparencyGroupPicture(nullptr),
   m_fontHinting(NoHinting)
 {
+  m_painter.push(painter);
   m_currentBrush = QBrush(Qt::SolidPattern);
   m_fontEngine = 0;
 }
@@ -115,7 +118,7 @@ void ArthurOutputDev::startDoc(XRef *xrefA) {
   globalParams->getEnableFreeType(),
   isHintingEnabled,
   isSlightHinting,
-  m_painter->testRenderHint(QPainter::TextAntialiasing));
+  m_painter.top()->testRenderHint(QPainter::TextAntialiasing));
 #endif
 }
 
@@ -126,11 +129,11 @@ void ArthurOutputDev::startPage(int pageNum, GfxState *state, XRef *xref)
   int h = static_cast<int>(state->getPageHeight());
   QColor fillColour(Qt::white);
   QBrush fill(fillColour);
-  m_painter->save();
-  m_painter->setPen(fillColour);
-  m_painter->setBrush(fill);
-  m_painter->drawRect(0, 0, w, h);
-  m_painter->restore();
+  m_painter.top()->save();
+  m_painter.top()->setPen(fillColour);
+  m_painter.top()->setBrush(fill);
+  m_painter.top()->drawRect(0, 0, w, h);
+  m_painter.top()->restore();
 }
 
 void ArthurOutputDev::endPage() {
@@ -143,12 +146,12 @@ void ArthurOutputDev::saveState(GfxState *state)
   m_rawFontStack.push(m_rawFont);
   m_codeToGIDStack.push(m_codeToGID);
 
-  m_painter->save();
+  m_painter.top()->save();
 }
 
 void ArthurOutputDev::restoreState(GfxState *state)
 {
-  m_painter->restore();
+  m_painter.top()->restore();
 
   m_codeToGID = m_codeToGIDStack.top();
   m_codeToGIDStack.pop();
@@ -169,7 +172,7 @@ void ArthurOutputDev::updateAll(GfxState *state)
 // Set CTM (Current Transformation Matrix) to a fixed matrix
 void ArthurOutputDev::setDefaultCTM(double *ctm)
 {
-  m_painter->setTransform(QTransform(ctm[0], ctm[1], ctm[2], ctm[3], ctm[4], ctm[5]));
+  m_painter.top()->setTransform(QTransform(ctm[0], ctm[1], ctm[2], ctm[3], ctm[4], ctm[5]));
 }
 
 // Update the CTM (Current Transformation Matrix), i.e., compose the old
@@ -186,7 +189,7 @@ void ArthurOutputDev::updateCTM(GfxState *state, double m11, double m12,
   QTransform update(m11, m12, m21, m22, m31, m32);
 
   // We could also set (rather than update) the painter transformation to state->getCMT();
-  m_painter->setTransform(update, true);
+  m_painter.top()->setTransform(update, true);
 }
 
 void ArthurOutputDev::updateLineDash(GfxState *state)
@@ -203,7 +206,7 @@ void ArthurOutputDev::updateLineDash(GfxState *state)
   if (dashLength==0)
   {
     m_currentPen.setStyle(Qt::SolidLine);
-    m_painter->setPen(m_currentPen);
+    m_painter.top()->setPen(m_currentPen);
     return;
   }
 
@@ -215,7 +218,7 @@ void ArthurOutputDev::updateLineDash(GfxState *state)
   }
   m_currentPen.setDashPattern(pattern);
   m_currentPen.setDashOffset(dashStart);
-  m_painter->setPen(m_currentPen);
+  m_painter.top()->setPen(m_currentPen);
 }
 
 void ArthurOutputDev::updateFlatness(GfxState *state)
@@ -239,7 +242,7 @@ void ArthurOutputDev::updateLineJoin(GfxState *state)
     m_currentPen.setJoinStyle(Qt::BevelJoin);
     break;
   }
-  m_painter->setPen(m_currentPen);
+  m_painter.top()->setPen(m_currentPen);
 }
 
 void ArthurOutputDev::updateLineCap(GfxState *state)
@@ -255,19 +258,19 @@ void ArthurOutputDev::updateLineCap(GfxState *state)
     m_currentPen.setCapStyle(Qt::SquareCap);
     break;
   }
-  m_painter->setPen(m_currentPen);
+  m_painter.top()->setPen(m_currentPen);
 }
 
 void ArthurOutputDev::updateMiterLimit(GfxState *state)
 {
   m_currentPen.setMiterLimit(state->getMiterLimit());
-  m_painter->setPen(m_currentPen);
+  m_painter.top()->setPen(m_currentPen);
 }
 
 void ArthurOutputDev::updateLineWidth(GfxState *state)
 {
   m_currentPen.setWidthF(state->getLineWidth());
-  m_painter->setPen(m_currentPen);
+  m_painter.top()->setPen(m_currentPen);
   // The updateLineDash method needs to know the line width, but it is sometimes
   // called before the updateLineWidth method.  To make sure that the last call
   // to updateLineDash before a drawing operation is always with the correct line
@@ -291,7 +294,59 @@ void ArthurOutputDev::updateStrokeColor(GfxState *state)
   state->getStrokeRGB(&rgb);
   penColour.setRgbF(colToDbl(rgb.r), colToDbl(rgb.g), colToDbl(rgb.b), penColour.alphaF());
   m_currentPen.setColor(penColour);
-  m_painter->setPen(m_currentPen);
+  m_painter.top()->setPen(m_currentPen);
+}
+
+void ArthurOutputDev::updateBlendMode(GfxState * state)
+{
+  GfxBlendMode blendMode = state->getBlendMode();
+
+  // missing composition modes in QPainter:
+  // - CompositionMode_Hue
+  // - CompositionMode_Color
+  // - CompositionMode_Luminosity
+  // - CompositionMode_Saturation
+
+  switch(blendMode){
+  case gfxBlendMultiply:
+    m_painter.top()->setCompositionMode(QPainter::CompositionMode_Multiply);
+    break;
+  case gfxBlendScreen:
+    m_painter.top()->setCompositionMode(QPainter::CompositionMode_Screen);
+    break;
+  case gfxBlendDarken:
+    m_painter.top()->setCompositionMode(QPainter::CompositionMode_Darken);
+    break;
+  case gfxBlendLighten:
+    m_painter.top()->setCompositionMode(QPainter::CompositionMode_Lighten);
+    break;
+  case gfxBlendColorDodge:
+    m_painter.top()->setCompositionMode(QPainter::CompositionMode_ColorDodge);
+    break;
+  case gfxBlendColorBurn:
+    m_painter.top()->setCompositionMode(QPainter::CompositionMode_ColorBurn);
+    break;
+  case gfxBlendHardLight:
+    m_painter.top()->setCompositionMode(QPainter::CompositionMode_HardLight);
+    break;
+  case gfxBlendSoftLight:
+    m_painter.top()->setCompositionMode(QPainter::CompositionMode_SoftLight);
+    break;
+  case gfxBlendDifference:
+    m_painter.top()->setCompositionMode(QPainter::CompositionMode_Difference);
+    break;
+  case gfxBlendExclusion:
+    m_painter.top()->setCompositionMode(QPainter::CompositionMode_Exclusion);
+    break;
+  case gfxBlendColor:
+    m_painter.top()->setCompositionMode(QPainter::CompositionMode_Plus);
+    break;
+  default:
+    qDebug() << "Unsupported blend mode, falling back to CompositionMode_SourceOver";
+  case gfxBlendNormal:
+    m_painter.top()->setCompositionMode(QPainter::CompositionMode_SourceOver);
+    break;
+  }
 }
 
 void ArthurOutputDev::updateFillOpacity(GfxState *state)
@@ -306,7 +361,7 @@ void ArthurOutputDev::updateStrokeOpacity(GfxState *state)
   QColor penColour= m_currentPen.color();
   penColour.setAlphaF(state->getStrokeOpacity());
   m_currentPen.setColor(penColour);
-  m_painter->setPen(m_currentPen);
+  m_painter.top()->setPen(m_currentPen);
 }
 
 void ArthurOutputDev::updateFont(GfxState *state)
@@ -620,27 +675,27 @@ static QPainterPath convertPath(GfxState *state, GfxPath *path, Qt::FillRule fil
 
 void ArthurOutputDev::stroke(GfxState *state)
 {
-  m_painter->strokePath( convertPath( state, state->getPath(), Qt::OddEvenFill ), m_currentPen );
+  m_painter.top()->strokePath( convertPath( state, state->getPath(), Qt::OddEvenFill ), m_currentPen );
 }
 
 void ArthurOutputDev::fill(GfxState *state)
 {
-  m_painter->fillPath( convertPath( state, state->getPath(), Qt::WindingFill ), m_currentBrush );
+  m_painter.top()->fillPath( convertPath( state, state->getPath(), Qt::WindingFill ), m_currentBrush );
 }
 
 void ArthurOutputDev::eoFill(GfxState *state)
 {
-  m_painter->fillPath( convertPath( state, state->getPath(), Qt::OddEvenFill ), m_currentBrush );
+  m_painter.top()->fillPath( convertPath( state, state->getPath(), Qt::OddEvenFill ), m_currentBrush );
 }
 
 void ArthurOutputDev::clip(GfxState *state)
 {
-  m_painter->setClipPath(convertPath( state, state->getPath(), Qt::WindingFill ), Qt::IntersectClip );
+  m_painter.top()->setClipPath(convertPath( state, state->getPath(), Qt::WindingFill ), Qt::IntersectClip );
 }
 
 void ArthurOutputDev::eoClip(GfxState *state)
 {
-  m_painter->setClipPath(convertPath( state, state->getPath(), Qt::OddEvenFill ), Qt::IntersectClip );
+  m_painter.top()->setClipPath(convertPath( state, state->getPath(), Qt::OddEvenFill ), Qt::IntersectClip );
 }
 
 void ArthurOutputDev::drawChar(GfxState *state, double x, double y,
@@ -671,7 +726,7 @@ void ArthurOutputDev::drawChar(GfxState *state, double x, double y,
     glyphRun.setRawFont(*m_rawFont);
 
     // Store the QPainter state; we need to modify it temporarily
-    m_painter->save();
+    m_painter.top()->save();
 
     // Apply the text matrix to the glyph.  The glyph is not scaled by the font size,
     // because the font in m_rawFont already has the correct size.
@@ -682,7 +737,7 @@ void ArthurOutputDev::drawChar(GfxState *state, double x, double y,
     // Make the glyph position the coordinate origin -- that's our center of scaling
     const double *textMat = state->getTextMat();
 
-    m_painter->translate(QPointF(glyphPosition.x(),glyphPosition.y()));
+    m_painter.top()->translate(QPointF(glyphPosition.x(),glyphPosition.y()));
 
     QTransform textTransform(textMat[0] * state->getHorizScaling(),
                              textMat[1] * state->getHorizScaling(),
@@ -691,7 +746,7 @@ void ArthurOutputDev::drawChar(GfxState *state, double x, double y,
                              0,
                              0);
 
-    m_painter->setTransform(textTransform,true);
+    m_painter.top()->setTransform(textTransform,true);
 
     // We are painting a filled glyph here.  But QPainter uses the pen to draw even filled text,
     // not the brush.  (see, e.g.,  http://doc.qt.io/qt-5/qpainter.html#setPen )
@@ -704,13 +759,13 @@ void ArthurOutputDev::drawChar(GfxState *state, double x, double y,
     state->getFillRGB(&rgb);
     QColor fontColor;
     fontColor.setRgbF(colToDbl(rgb.r), colToDbl(rgb.g), colToDbl(rgb.b), state->getFillOpacity());
-    m_painter->setPen(fontColor);
+    m_painter.top()->setPen(fontColor);
 
     // Actually draw the glyph
-    m_painter->drawGlyphRun(QPointF(-glyphPosition.x(),-glyphPosition.y()), glyphRun);
+    m_painter.top()->drawGlyphRun(QPointF(-glyphPosition.x(),-glyphPosition.y()), glyphRun);
 
     // Restore transformation and pen color
-    m_painter->restore();
+    m_painter.top()->restore();
   }
 }
 
@@ -865,7 +920,7 @@ void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 
   // At this point, the QPainter coordinate transformation (CTM) is such
   // that QRect(0,0,1,1) is exactly the area of the image.
-  m_painter->drawImage( QRect(0,0,1,1), image );
+  m_painter.top()->drawImage( QRect(0,0,1,1), image );
   delete imgStr;
 
 }
@@ -935,6 +990,49 @@ void ArthurOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *
 
   // At this point, the QPainter coordinate transformation (CTM) is such
   // that QRect(0,0,1,1) is exactly the area of the image.
-  m_painter->drawImage( QRect(0,0,1,1), image );
+  m_painter.top()->drawImage( QRect(0,0,1,1), image );
+}
+
+void ArthurOutputDev::beginTransparencyGroup(GfxState * /*state*/, double * /*bbox*/,
+                                             GfxColorSpace * /*blendingColorSpace*/,
+                                             GBool /*isolated*/, GBool /*knockout*/,
+                                             GBool /*forSoftMask*/)
+{
+  // The entire transparency group will be painted into a
+  // freshly created QPicture object.  Since an existing painter
+  // cannot change its paint device, we need to construct a
+  // new QPainter object as well.
+  m_qpictures.push(new QPicture);
+  m_painter.push(new QPainter(m_qpictures.top()));
+}
+
+void ArthurOutputDev::endTransparencyGroup(GfxState * /*state*/)
+{
+  // Stop painting into the group
+  m_painter.top()->end();
+
+  // Kill the painter that has been used for the transparency group
+  delete(m_painter.top());
+  m_painter.pop();
+
+  // Store the QPicture object that holds the result of the transparency group
+  // painting.  It will be painted and deleted in the method paintTransparencyGroup.
+  if (m_lastTransparencyGroupPicture)
+  {
+    qDebug() << "Found a transparency group that has not been painted";
+    delete(m_lastTransparencyGroupPicture);
+  }
+  m_lastTransparencyGroupPicture = m_qpictures.top();
+  m_qpictures.pop();
+}
+
+void ArthurOutputDev::paintTransparencyGroup(GfxState * /*state*/, double * /*bbox*/)
+{
+  // Actually draw the transparency group
+  m_painter.top()->drawPicture(0,0,*m_lastTransparencyGroupPicture);
+
+  // And delete it
+  delete(m_lastTransparencyGroupPicture);
+  m_lastTransparencyGroupPicture = nullptr;
 }
 

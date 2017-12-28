@@ -33,6 +33,7 @@ class Printer:
         self._stream = sys.stdout
         self._rewrite = self._stream.isatty() and not self._verbose
         self._current_line_len = 0
+        self._blocked = 0
 
         self._lock = RLock()
 
@@ -60,17 +61,23 @@ class Printer:
             self.printout_ln(msg)
 
         with self._lock:
+            if self._blocked > 0:
+                return
             self._erase_current_line()
             self._print(msg)
             self._current_line_len = len(msg[msg.rfind('\n') + 1:])
 
     def printout_ln(self, msg=''):
         with self._lock:
+            if self._blocked > 0:
+                return
             self._erase_current_line()
             self._print(self._ensure_new_line(msg))
 
     def printerr(self, msg):
         with self._lock:
+            if self._blocked > 0:
+                return
             self.stderr.write(self._ensure_new_line(msg))
             self.stderr.flush()
 
@@ -83,6 +90,14 @@ class Printer:
     def print_default(self, msg):
         if self._verbose:
             self.printout_ln(msg)
+
+    def block(self):
+        with self._lock:
+            self._blocked += 1
+
+    def unblock(self):
+        with self._lock:
+            self._blocked -= 1
 
 def get_printer():
     try:

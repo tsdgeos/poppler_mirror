@@ -57,10 +57,10 @@ private:
 class OutlineItem {
 public:
 
-  OutlineItem(Dict *dict, XRef *xrefA);
+  OutlineItem(Dict *dict, int refNumA, OutlineItem *parentA, XRef *xrefA);
   ~OutlineItem();
 
-  static GooList *readItemList(Object *firstItemRef, XRef *xrefA);
+  static GooList *readItemList(OutlineItem *parent, Object *firstItemRef, XRef *xrefA);
 
   void open();
   void close();
@@ -74,6 +74,8 @@ public:
 
 private:
 
+  int refNum;
+  OutlineItem *parent;
   XRef *xref;
   Unicode *title;
   int titleLen;

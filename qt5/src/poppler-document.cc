@@ -11,6 +11,7 @@
  * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+ * Copyright (C) 2017 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,11 +49,7 @@
 #include "poppler-page-private.h"
 
 #if defined(USE_CMS)
-#if defined(USE_LCMS1)
-#include <lcms.h>
-#else
 #include <lcms2.h>
-#endif
 #endif
 
 namespace Poppler {

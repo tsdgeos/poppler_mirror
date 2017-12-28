@@ -114,6 +114,7 @@ public:
   void updateLineWidth(GfxState *state) override;
   void updateFillColor(GfxState *state) override;
   void updateStrokeColor(GfxState *state) override;
+  void updateBlendMode(GfxState *state) override;
   void updateFillOpacity(GfxState *state) override;
   void updateStrokeOpacity(GfxState *state) override;
 
@@ -163,6 +164,14 @@ public:
   void type3D1(GfxState *state, double wx, double wy,
 	       double llx, double lly, double urx, double ury) override;
 
+  //----- transparency groups and soft masks
+  virtual void beginTransparencyGroup(GfxState *state, double *bbox,
+                                      GfxColorSpace *blendingColorSpace,
+                                      GBool isolated, GBool knockout,
+                                      GBool forSoftMask) override;
+  virtual void endTransparencyGroup(GfxState *state) override;
+  virtual void paintTransparencyGroup(GfxState *state, double *bbox) override;
+
   //----- special access
 
   // Called to indicate that a new PDF document has been loaded.
@@ -171,7 +180,19 @@ public:
   GBool isReverseVideo() { return gFalse; }
   
 private:
-  QPainter *m_painter;
+
+  // The stack of QPainters is used to implement transparency groups.  When such a group
+  // is opened, annew Painter that paints onto a QPicture is pushed onto the stack.
+  // It is popped again when the transparency group ends.
+  std::stack<QPainter*> m_painter;
+
+  // This is the corresponding stack of QPicture objects
+  std::stack<QPicture*> m_qpictures;
+
+  // endTransparencyGroup removes a QPicture from the stack, but stores
+  // it here for later use in paintTransparencyGroup.
+  QPicture* m_lastTransparencyGroupPicture;
+
   FontHinting m_fontHinting;
 
   QPen m_currentPen;
