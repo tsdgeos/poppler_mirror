@@ -172,7 +172,12 @@ public:
   GBool isReverseVideo() { return gFalse; }
   
 private:
-  QPainter *m_painter;
+
+  // The stack of QPainters is used to implement transparency groups.  When such a group
+  // is opened, annew Painter that paints onto a QPicture is pushed onto the stack.
+  // It is popped again when the transparency group ends.
+  std::stack<QPainter*> m_painter;
+
   FontHinting m_fontHinting;
 
   QPen m_currentPen;
