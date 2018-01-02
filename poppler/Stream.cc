@@ -27,7 +27,7 @@
 // Copyright (C) 2012 Oliver Sander <sander@mi.fu-berlin.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
-// Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2013, 2017, 2018 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -1137,7 +1137,7 @@ int EmbedStream::getChars(int nChars, Guchar *buffer) {
     len = bufLen - bufPos;
     if (nChars > len)
       nChars = len;
-    memcpy(buffer, bufData, len);
+    memcpy(buffer, bufData, nChars);
     return len;
   } else {
     if (limited && length < nChars) {
