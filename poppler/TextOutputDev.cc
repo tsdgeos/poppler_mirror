@@ -20,7 +20,7 @@
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2010-2012, 2014-2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010-2012, 2014-2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009 Ross Moore <ross@maths.mq.edu.au>
@@ -3358,7 +3358,9 @@ void TextPage::coalesce(GBool physLayout, double fixedPitch, GBool doHTML) {
     for (blk = blkList, i = 0; blk; blk = blk->next, ++i) {
       blocks[i] = blk;
     }
-    qsort(blocks, nBlocks, sizeof(TextBlock *), &TextBlock::cmpXYPrimaryRot);
+    if (blocks) {
+      qsort(blocks, nBlocks, sizeof(TextBlock *), &TextBlock::cmpXYPrimaryRot);
+    }
 
     // column assignment
     for (i = 0; i < nBlocks; ++i) {
