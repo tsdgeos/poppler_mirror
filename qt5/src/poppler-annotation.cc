@@ -551,7 +551,11 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
 
                 // -> screen
                 Link * popplerLink = PageData::convertLinkActionToLink( screenann->getAction(), doc, QRectF() );
-                s->setAction( static_cast<Poppler::LinkRendition *>(popplerLink) );
+                // TODO Support other link types than Link::Rendition in ScreenAnnotation
+                if (popplerLink->linkType() == Link::Rendition)
+                    s->setAction( static_cast<Poppler::LinkRendition *>(popplerLink) );
+                else
+                    delete popplerLink;
 
                 // -> screenTitle
                 GooString * screentitle = screenann->getTitle();
