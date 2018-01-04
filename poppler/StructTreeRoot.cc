@@ -95,9 +95,6 @@ void StructTreeRoot::parse(Dict *root)
       }
     }
   } else if (kids.isDict()) {
-    if (marked) {
-      error(errSyntaxWarning, -1, "K has a child of wrong type for a tagged PDF ({0:s})", kids.getTypeName());
-    }
     StructElement *child = new StructElement(kids.getDict(), this, NULL, seenElements);
     if (child->isOk()) {
       appendChild(child);
