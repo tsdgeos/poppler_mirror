@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +35,9 @@ class page_private
 public:
     page_private(document_private *doc, int index);
     ~page_private();
+
+    page_private(const page_private &) = delete;
+    page_private& operator=(const page_private &) = delete;
 
     document_private *doc;
     Page *page;

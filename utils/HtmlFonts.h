@@ -18,7 +18,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
-// Copyright (C) 2010, 2012, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2012, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Steven Murdoch <Steven.Murdoch@cl.cam.ac.uk>
 // Copyright (C) 2011 Joshua Richardson <jric@chegg.com>
 // Copyright (C) 2012 Igor Slepchin <igor.slepchin@gmail.com>
@@ -105,6 +105,8 @@ private:
 public:
   HtmlFontAccu();
   ~HtmlFontAccu();
+  HtmlFontAccu(const HtmlFontAccu &) = delete;
+  HtmlFontAccu& operator=(const HtmlFontAccu &) = delete;
   int AddFont(const HtmlFont& font);
   HtmlFont *Get(int i){
     return &(*accu)[i];

@@ -1,5 +1,6 @@
 /* Copyright Krzysztof Kowalczyk 2006-2007
    Copyright Hib Eris <hib@hiberis.nl> 2008, 2013
+   Copyright 2018 Albert Astals Cid <aacid@kde.org> 2018
    License: GPLv2 */
 /*
   A tool to stress-test poppler rendering and measure rendering times for
@@ -81,6 +82,9 @@ class PdfEnginePoppler {
 public:
     PdfEnginePoppler();
     ~PdfEnginePoppler();
+
+    PdfEnginePoppler(const PdfEnginePoppler &) = delete;
+    PdfEnginePoppler& operator=(const PdfEnginePoppler &) = delete;
 
     const char *fileName(void) const { return _fileName; };
 

@@ -4620,6 +4620,8 @@ public:
 
   GfxShadingBitBuf(Stream *strA);
   ~GfxShadingBitBuf();
+  GfxShadingBitBuf(const GfxShadingBitBuf &) = delete;
+  GfxShadingBitBuf& operator=(const GfxShadingBitBuf &) = delete;
   GBool getBits(int n, Guint *val);
   void flushBits();
 

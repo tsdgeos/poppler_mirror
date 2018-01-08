@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Raj Kumar <rkumar@archive.org>
 // Copyright (C) 2006 Paul Walmsley <paul@booyaka.com>
-// Copyright (C) 2006-2010, 2012, 2014-2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012, 2014-2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Edward Jiang <ejiang@google.com>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -651,6 +651,8 @@ public:
 
   JBIG2Segment(Guint segNumA) { segNum = segNumA; }
   virtual ~JBIG2Segment() {}
+  JBIG2Segment(const JBIG2Segment &) = delete;
+  JBIG2Segment& operator=(const JBIG2Segment &) = delete;
   void setSegNum(Guint segNumA) { segNum = segNumA; }
   Guint getSegNum() { return segNum; }
   virtual JBIG2SegmentType getType() = 0;

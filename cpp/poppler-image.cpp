@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2010-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
- * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017, 2018, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jeroen Ooms <jeroenooms@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -49,6 +49,8 @@ struct FileCloser {
         : f(ff) {}
     inline ~FileCloser()
     { (void)close(); }
+    FileCloser(const FileCloser &) = delete;
+    FileCloser& operator=(const FileCloser &) = delete;
     inline bool close()
     { if (f) { const int c = fclose(f); f = 0; return c == 0; } return true; }
 

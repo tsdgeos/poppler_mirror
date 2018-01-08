@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
-// Copyright (C) 2009, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2011, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -61,6 +61,9 @@ public:
 		   GBool aa);
 
   ~SplashFontEngine();
+
+  SplashFontEngine(const SplashFontEngine &) = delete;
+  SplashFontEngine& operator=(const SplashFontEngine &) = delete;
 
   // Get a font file from the cache.  Returns NULL if there is no
   // matching entry in the cache.

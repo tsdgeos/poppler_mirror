@@ -2,7 +2,7 @@
  * Copyright (C) 2007, Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
- * Copyright (C) 2012, 2014, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2012, 2014, 2018, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,9 @@ class AnnotationPrivate : public QSharedData
     public:
         AnnotationPrivate();
         virtual ~AnnotationPrivate();
+
+        AnnotationPrivate(const AnnotationPrivate &) = delete;
+        AnnotationPrivate& operator=(const AnnotationPrivate &) = delete;
 
         void addRevision(Annotation *ann, Annotation::RevScope scope, Annotation::RevType type);
 

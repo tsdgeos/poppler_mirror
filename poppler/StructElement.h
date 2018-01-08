@@ -6,7 +6,7 @@
 //
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
-// Copyright 2014 Albert Astals Cid <aacid@kde.org>
+// Copyright 2014, 2018 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -270,6 +270,9 @@ private:
 
     StructData();
     ~StructData();
+
+    StructData(const StructData &) = delete;
+    StructData& operator=(const StructData &) = delete;
   };
 
   // Data in content elements (MCID, MCR)

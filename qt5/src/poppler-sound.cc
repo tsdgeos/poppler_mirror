@@ -1,6 +1,6 @@
 /* poppler-sound.cc: qt interface to poppler
  * Copyright (C) 2006-2007, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2018, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,9 @@ public:
 	{
 		delete m_soundObj;
 	}
+
+	SoundData(const SoundData &) = delete;
+	SoundData& operator=(const SoundData &) = delete;
 
 	SoundObject::SoundType m_type;
 	Sound *m_soundObj;

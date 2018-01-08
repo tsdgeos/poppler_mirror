@@ -4303,6 +4303,8 @@ class TextSelectionVisitor {
 public:
   TextSelectionVisitor (TextPage *page);
   virtual ~TextSelectionVisitor () { }
+  TextSelectionVisitor(const TextSelectionVisitor &) = delete;
+  TextSelectionVisitor& operator=(const TextSelectionVisitor &) = delete;
   virtual void visitBlock (TextBlock *block,
 			   TextLine *begin,
 			   TextLine *end,

@@ -1,5 +1,5 @@
 /* poppler-link-private.h: qt interface to poppler
- * Copyright (C) 2016, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2016, 2018, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,9 @@ public:
     virtual ~LinkPrivate()
     {
     }
+
+    LinkPrivate(const LinkPrivate &) = delete;
+    LinkPrivate& operator=(const LinkPrivate &) = delete;
 
     QRectF linkArea;
 };

@@ -1,6 +1,6 @@
 /* poppler-sound.cc: qt interface to poppler
  * Copyright (C) 2008, 2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2018, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2010, Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Tobias Koenig <tobias.koenig@kdab.com>
  *
@@ -42,6 +42,9 @@ public:
 	{
 		delete m_movieObj;
 	}
+
+	MovieData(const MovieData &) = delete;
+	MovieData& operator=(const MovieData &) = delete;
 
 	Movie *m_movieObj;
 	QSize m_size;

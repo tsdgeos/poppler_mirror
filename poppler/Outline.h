@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2016 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -44,6 +44,9 @@ public:
   Outline(Object *outlineObj, XRef *xref);
   ~Outline();
 
+  Outline(const Outline &) = delete;
+  Outline& operator=(const Outline &) = delete;
+
   GooList *getItems() { return items; }
 
 private:
@@ -59,6 +62,9 @@ public:
 
   OutlineItem(Dict *dict, int refNumA, OutlineItem *parentA, XRef *xrefA);
   ~OutlineItem();
+
+  OutlineItem(const OutlineItem &) = delete;
+  OutlineItem& operator=(const OutlineItem &) = delete;
 
   static GooList *readItemList(OutlineItem *parent, Object *firstItemRef, XRef *xrefA);
 

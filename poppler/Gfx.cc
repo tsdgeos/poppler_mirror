@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
-// Copyright (C) 2005-2013, 2015-2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015-2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -5114,6 +5114,9 @@ struct GfxStackStateSaver {
   ~GfxStackStateSaver() {
     gfx->restoreState();
   }
+
+  GfxStackStateSaver(const GfxStackStateSaver &) = delete;
+  GfxStackStateSaver& operator=(const GfxStackStateSaver &) = delete;
 
   Gfx * const gfx;
 };

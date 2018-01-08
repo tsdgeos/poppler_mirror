@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2009, 2011-2013, 2015-2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2009, 2011-2013, 2015-2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
@@ -946,6 +946,9 @@ public:
 		   double yA, double kA, GooString *nameA);
   ~PSOutCustomColor();
 
+  PSOutCustomColor(const PSOutCustomColor &) = delete;
+  PSOutCustomColor& operator=(const PSOutCustomColor &) = delete;
+
   double c, m, y, k;
   GooString *name;
   PSOutCustomColor *next;
@@ -976,6 +979,8 @@ struct PSOutImgClipRect {
 struct PSOutPaperSize {
   PSOutPaperSize(GooString *nameA, int wA, int hA) { name = nameA; w = wA; h = hA; }
   ~PSOutPaperSize() { delete name; }
+  PSOutPaperSize(const PSOutPaperSize &) = delete;
+  PSOutPaperSize& operator=(const PSOutPaperSize &) = delete;
   GooString *name;
   int w, h;
 };

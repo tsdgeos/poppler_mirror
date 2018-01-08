@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2007, Brad Hards <bradh@kde.org>
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2016, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2016, 2018, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Hubert Figuière <hub@figuiere.net>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -93,6 +93,9 @@ namespace Poppler
     public:
     OptContentModelPrivate( OptContentModel *qq, OCGs *optContent );
     ~OptContentModelPrivate();
+
+    OptContentModelPrivate(const OptContentModelPrivate &) = delete;
+    OptContentModelPrivate& operator=(const OptContentModelPrivate &) = delete;
 
     void parseRBGroupsArray( Array *rBGroupArray );
     OptContentItem *nodeFromIndex(const QModelIndex &index, bool canBeNull = false) const;

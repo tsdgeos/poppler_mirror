@@ -13,6 +13,7 @@
 //
 // Copyright (C) 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -66,6 +67,9 @@ public:
   SplashState *copy() { return new SplashState(this); }
 
   ~SplashState();
+
+  SplashState(const SplashState&) = delete;
+  SplashState& operator=(const SplashState&) = delete;
 
   // Set the stroke pattern.  This does not copy <strokePatternA>.
   void setStrokePattern(SplashPattern *strokePatternA);

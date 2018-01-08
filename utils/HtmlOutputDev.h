@@ -14,7 +14,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2007, 2009, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2007, 2009, 2012, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008, 2009 Warren Toomey <wkt@tuhs.org>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
@@ -84,6 +84,9 @@ public:
   // Destructor.
   ~HtmlString();
 
+  HtmlString(const HtmlString &) = delete;
+  HtmlString& operator=(const HtmlString &) = delete;
+
   // Add a character to the string.
   void addChar(GfxState *state, double x, double y,
 	       double dx, double dy,
@@ -128,6 +131,9 @@ public:
 
   // Destructor.
   ~HtmlPage();
+
+  HtmlPage(const HtmlPage &) = delete;
+  HtmlPage& operator=(const HtmlPage &) = delete;
 
   // Begin a new string.
   void beginString(GfxState *state, GooString *s);
@@ -210,7 +216,10 @@ public:
     HtmlMetaVar(const char *_name, const char *_content);
     ~HtmlMetaVar();    
     
-    GooString* toString();	
+    HtmlMetaVar(const HtmlMetaVar &) = delete;
+    HtmlMetaVar& operator=(const HtmlMetaVar &) = delete;
+
+    GooString* toString();
 
 private:
 
