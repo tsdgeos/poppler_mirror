@@ -97,12 +97,14 @@ Lexer::Lexer(XRef *xrefA, Object *obj) {
   strPtr = 0;
   if (streams->getLength() > 0) {
     curStr = streams->get(strPtr);
-    curStr.streamReset();
+    if (curStr.isStream()) {
+      curStr.streamReset();
+    }
   }
 }
 
 Lexer::~Lexer() {
-  if (!curStr.isNone()) {
+  if (curStr.isStream()) {
     curStr.streamClose();
   }
   if (freeArray) {
@@ -120,7 +122,7 @@ int Lexer::getChar(GBool comesFromLook) {
   }
 
   c = EOF;
-  while (!curStr.isNone() && (c = curStr.streamGetChar()) == EOF) {
+  while (curStr.isStream() && (c = curStr.streamGetChar()) == EOF) {
     if (comesFromLook == gTrue) {
       return EOF;
     } else {
@@ -128,8 +130,10 @@ int Lexer::getChar(GBool comesFromLook) {
       curStr = Object();
       ++strPtr;
       if (strPtr < streams->getLength()) {
-        curStr = streams->get(strPtr);
-        curStr.streamReset();
+	curStr = streams->get(strPtr);
+	if (curStr.isStream()) {
+	  curStr.streamReset();
+	}
       }
     }
   }
