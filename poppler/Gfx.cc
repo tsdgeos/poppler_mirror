@@ -5025,18 +5025,19 @@ void Gfx::opBeginMarkedContent(Object args[], int numArgs) {
   char* name0 = args[0].getName();
   if ( strncmp( name0, "OC", 2) == 0 && contentConfig) {
     if ( numArgs >= 2 ) {
-      if (!args[1].isName()) {
-	error(errSyntaxError, getPos(), "Unexpected MC Type: {0:d}", args[1].getType());
-      }
-      char* name1 = args[1].getName();
-      MarkedContentStack *mc = mcStack;
-      mc->kind = gfxMCOptionalContent;
-      Object markedContent = res->lookupMarkedContentNF( name1 );
-      if (!markedContent.isNull()) {
-        bool visible = contentConfig->optContentIsVisible(&markedContent);
-        mc->ocSuppressed = !(visible);
+      if (args[1].isName()) {
+        char* name1 = args[1].getName();
+        MarkedContentStack *mc = mcStack;
+        mc->kind = gfxMCOptionalContent;
+        Object markedContent = res->lookupMarkedContentNF( name1 );
+        if (!markedContent.isNull()) {
+          bool visible = contentConfig->optContentIsVisible(&markedContent);
+          mc->ocSuppressed = !(visible);
+        } else {
+          error(errSyntaxError, getPos(), "DID NOT find {0:s}", name1);
+        }
       } else {
-	error(errSyntaxError, getPos(), "DID NOT find {0:s}", name1);
+	error(errSyntaxError, getPos(), "Unexpected MC Type: {0:d}", args[1].getType());
       }
     } else {
       error(errSyntaxError, getPos(), "insufficient arguments for Marked Content");
