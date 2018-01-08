@@ -627,6 +627,7 @@ GBool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fo
 	  entries[0].obj = std::move(entries[1].obj);
 
 	  entries[1].offset = -1;
+	  entries[1].obj.setToNull();
 	}
       }
     }
