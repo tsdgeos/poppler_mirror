@@ -37,6 +37,7 @@
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2017 Jean Ghali <jghali@libertysurf.fr>
 // Copyright (C) 2017 Fredrik Fornwall <fredrik@fornwall.net>
+// Copyright (C) 2018 Ben Timby <btimby@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -401,11 +402,16 @@ void PDFDoc::checkHeader() {
   char *p;
   char *tokptr;
   int i;
+  int c;
 
   pdfMajorVersion = 0;
   pdfMinorVersion = 0;
   for (i = 0; i < headerSearchSize; ++i) {
-    hdrBuf[i] = str->getChar();
+    if ((c = str->getChar()) == EOF) {
+      error(errSyntaxWarning, -1, "EOF while reading header (continuing anyway)");
+      return;
+    }
+    hdrBuf[i] = c;
   }
   hdrBuf[headerSearchSize] = '\0';
   for (i = 0; i < headerSearchSize - 5; ++i) {
