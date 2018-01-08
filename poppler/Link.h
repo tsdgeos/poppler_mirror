@@ -434,7 +434,7 @@ public:
 
   enum State { On, Off, Toggle};
   struct StateList {
-    StateList() { list = NULL; }
+    StateList() { list = nullptr; }
     ~StateList();
     StateList(const StateList &) = delete;
     StateList& operator=(const StateList &) = delete;
