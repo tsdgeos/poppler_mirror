@@ -145,7 +145,7 @@ enum ObjType {
 class Object {
 public:
   // clear the anonymous union as best we can -- clear at least a pointer
-  void zeroUnion() { this->cString = NULL; }
+  void zeroUnion() { this->cString = nullptr; }
 
   // Default constructor.
   Object():
@@ -240,7 +240,7 @@ public:
   // After takeString() the only method that should be called for the object is free()
   // because the object it's not expected to have a NULL string.
   GooString *takeString() {
-    OBJECT_TYPE_CHECK(objString); GooString *s = string; string = NULL; return s; }
+    OBJECT_TYPE_CHECK(objString); GooString *s = string; string = nullptr; return s; }
   char *getName() const { OBJECT_TYPE_CHECK(objName); return cString; }
   Array *getArray() const { OBJECT_TYPE_CHECK(objArray); return array; }
   Dict *getDict() const { OBJECT_TYPE_CHECK(objDict); return dict; }
