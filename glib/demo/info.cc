@@ -30,7 +30,7 @@ pgd_info_add_permissions (GtkGrid            *table,
 	GtkWidget *label, *hbox, *vbox;
 	GtkWidget *checkbox;
 
-	label = gtk_label_new (NULL);
+	label = gtk_label_new (nullptr);
 	g_object_set (G_OBJECT (label), "xalign", 0.0, NULL);
 	gtk_label_set_markup (GTK_LABEL (label), "<b>Permissions:</b>");
 	gtk_grid_attach (GTK_GRID (table), label, 0, *row, 1, 1);
@@ -110,13 +110,13 @@ pgd_info_add_metadata (GtkGrid     *table,
 	GtkWidget     *textview, *swindow;
 	GtkTextBuffer *buffer;
 
-	label = gtk_label_new (NULL);
+	label = gtk_label_new (nullptr);
 	g_object_set (G_OBJECT (label), "xalign", 0.0, NULL);
 	gtk_label_set_markup (GTK_LABEL (label), "<b>Metadata:</b>");
 	gtk_grid_attach (GTK_GRID (table), label, 0, *row, 1, 1);
 	gtk_widget_show (label);
 
-	swindow = gtk_scrolled_window_new (NULL, NULL);
+	swindow = gtk_scrolled_window_new (nullptr, nullptr);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (swindow),
 					GTK_POLICY_AUTOMATIC,
 					GTK_POLICY_AUTOMATIC);
@@ -184,15 +184,15 @@ pgd_info_create_widget (PopplerDocument *document)
 	enum_value = g_enum_get_value ((GEnumClass *) g_type_class_ref (POPPLER_TYPE_BACKEND), backend);
 	str = g_strdup_printf ("<span weight='bold' size='larger'>Poppler %s (%s)</span>",
 			       poppler_get_version (), enum_value->value_name);
-	label = gtk_label_new (NULL);
+	label = gtk_label_new (nullptr);
 	gtk_label_set_markup (GTK_LABEL (label), str);
 	g_free (str);
 	gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, TRUE, 12);
 	gtk_widget_show (label);
 
-	frame = gtk_frame_new (NULL);
+	frame = gtk_frame_new (nullptr);
 	gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_NONE);
-	label = gtk_label_new (NULL);
+	label = gtk_label_new (nullptr);
 	gtk_label_set_markup (GTK_LABEL (label), "<b>Document properties</b>");
 	gtk_frame_set_label_widget (GTK_FRAME (frame), label);
 	gtk_widget_show (label);

@@ -357,7 +357,7 @@ GBool openTempFile(GooString **name, FILE **f, const char *mode) {
   }
   s->appendf("x_{0:d}_{1:d}_",
 	     (int)GetCurrentProcessId(), (int)GetCurrentThreadId());
-  t = (int)time(NULL);
+  t = (int)time(nullptr);
   for (i = 0; i < 1000; ++i) {
     s2 = s->copy()->appendf("{0:d}", t + i);
     if (!(f2 = fopen(s2->getCString(), "r"))) {
@@ -416,7 +416,7 @@ GBool openTempFile(GooString **name, FILE **f, const char *mode) {
 #endif // HAVE_MKSTEMP
   if (fd < 0 || !(*f = fdopen(fd, mode))) {
     delete *name;
-    *name = NULL;
+    *name = nullptr;
     return gFalse;
   }
   return gTrue;
@@ -548,7 +548,7 @@ char *getLine(char *buf, int size, FILE *f) {
   }
   buf[i] = '\0';
   if (i == 0) {
-    return NULL;
+    return nullptr;
   }
   return buf;
 }
@@ -600,7 +600,7 @@ Goffset GoffsetMax() {
 #ifdef _WIN32
 
 GooFile::GooFile(HANDLE handleA) : handle(handleA) {
-  GetFileTime(handleA, NULL, NULL, &modifiedTimeOnOpen);
+  GetFileTime(handleA, nullptr, nullptr, &modifiedTimeOnOpen);
 }
 
 int GooFile::read(char *buf, int n, Goffset offset) const {
@@ -628,28 +628,28 @@ GooFile* GooFile::open(const GooString *fileName) {
   HANDLE handle = CreateFileA(fileName->getCString(),
                               GENERIC_READ,
                               FILE_SHARE_READ | FILE_SHARE_WRITE,
-                              NULL,
+                              nullptr,
                               OPEN_EXISTING,
-                              FILE_ATTRIBUTE_NORMAL, NULL);
+                              FILE_ATTRIBUTE_NORMAL, nullptr);
   
-  return handle == INVALID_HANDLE_VALUE ? NULL : new GooFile(handle);
+  return handle == INVALID_HANDLE_VALUE ? nullptr : new GooFile(handle);
 }
 
 GooFile* GooFile::open(const wchar_t *fileName) {
   HANDLE handle = CreateFileW(fileName,
                               GENERIC_READ,
                               FILE_SHARE_READ | FILE_SHARE_WRITE,
-                              NULL,
+                              nullptr,
                               OPEN_EXISTING,
-                              FILE_ATTRIBUTE_NORMAL, NULL);
+                              FILE_ATTRIBUTE_NORMAL, nullptr);
   
-  return handle == INVALID_HANDLE_VALUE ? NULL : new GooFile(handle);
+  return handle == INVALID_HANDLE_VALUE ? nullptr : new GooFile(handle);
 }
 
 bool GooFile::modificationTimeChangedSinceOpen() const
 {
   struct _FILETIME lastModified;
-  GetFileTime(handle, NULL, NULL, &lastModified);
+  GetFileTime(handle, nullptr, nullptr, &lastModified);
 
   return modifiedTimeOnOpen.dwHighDateTime != lastModified.dwHighDateTime || modifiedTimeOnOpen.dwLowDateTime != lastModified.dwLowDateTime;
 }
@@ -679,7 +679,7 @@ GooFile* GooFile::open(const GooString *fileName) {
   int fd = ::open(fileName->getCString(), O_RDONLY);
 #endif
   
-  return fd < 0 ? NULL : new GooFile(fd);
+  return fd < 0 ? nullptr : new GooFile(fd);
 }
 
 GooFile::GooFile(int fdA)
@@ -777,7 +777,7 @@ GDir::~GDir() {
 }
 
 GDirEntry *GDir::getNextEntry() {
-  GDirEntry *e = NULL;
+  GDirEntry *e = nullptr;
 
 #if defined(_WIN32)
   if (hnd != INVALID_HANDLE_VALUE) {

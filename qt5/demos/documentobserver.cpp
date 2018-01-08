@@ -21,7 +21,7 @@
 #include "viewer.h"
 
 DocumentObserver::DocumentObserver()
-    : m_viewer(0)
+    : m_viewer(nullptr)
 {
 }
 

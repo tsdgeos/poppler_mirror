@@ -112,7 +112,7 @@ static const ArgDesc *findArg(const ArgDesc *args, char *arg) {
     if (p->kind < argFlagDummy && !strcmp(p->arg, arg))
       return p;
   }
-  return NULL;
+  return nullptr;
 }
 
 static GBool grabArg(const ArgDesc *arg, int i, int *argc, char *argv[]) {

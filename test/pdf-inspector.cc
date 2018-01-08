@@ -69,7 +69,7 @@ private:
 PdfInspector::PdfInspector(void)
 {
   GtkWidget *widget;
-  GError* error = NULL;
+  GError* error = nullptr;
   
   builder = gtk_builder_new ();
 
@@ -129,12 +129,12 @@ PdfInspector::PdfInspector(void)
       column = gtk_tree_view_get_column (GTK_TREE_VIEW (widget), i);
       gtk_tree_view_column_set_sort_column_id (column, i);
     }
-  doc = NULL;
+  doc = nullptr;
   output = new CairoOutputDev();
   output->setPrinting (gFalse);
 
   // set up initial widgets
-  load (NULL);
+  load (nullptr);
 }
     
 void
@@ -165,7 +165,7 @@ PdfInspector::on_selection_changed (GtkTreeSelection *selection, PdfInspector *i
   size_t i;
   GtkTreeModel *model;
   GtkTreeIter iter;
-  gchar *op = NULL;
+  gchar *op = nullptr;
 
   label = GTK_WIDGET (gtk_builder_get_object (inspector->builder, "description_label"));
   gtk_label_set_markup (GTK_LABEL (label), "<i>No Description</i>");
@@ -178,7 +178,7 @@ PdfInspector::on_selection_changed (GtkTreeSelection *selection, PdfInspector *i
 
     }
 
-  if (op == NULL)
+  if (op == nullptr)
     return;
 
   for (i = 0; i < G_N_ELEMENTS (op_mapping); i++)
@@ -237,7 +237,7 @@ PdfInspector::analyze_page (int page)
   output->setCairo (cr);
   cairo_destroy (cr);
   doc->displayPage (output, page + 1, 72, 72, 0, gFalse, gTrue, gFalse);
-  output->setCairo (NULL);
+  output->setCairo (nullptr);
 
   // Total time;
   text = g_strdup_printf ("%g", timer.getElapsed ());
@@ -273,10 +273,10 @@ PdfInspector::load(const char *file_name)
   GtkWidget *label;
 
   // kill the old PDF file
-  if (doc != NULL)
+  if (doc != nullptr)
     {
       delete doc;
-      doc = NULL;
+      doc = nullptr;
     }
 
   // load the new file
@@ -285,14 +285,14 @@ PdfInspector::load(const char *file_name)
       GooString *filename_g;
 
       filename_g = new GooString (file_name);
-      doc = new PDFDoc(filename_g, 0, 0);
+      doc = new PDFDoc(filename_g, nullptr, nullptr);
     }
   
   if (doc && !doc->isOk())
     {
       this->error_dialog ("Failed to load file.");
       delete doc;
-      doc = NULL;
+      doc = nullptr;
     }
 
   spin = GTK_WIDGET (gtk_builder_get_object (builder, "pdf_spin"));
@@ -339,7 +339,7 @@ PdfInspector::run()
 int
 main (int argc, char *argv [])
 {
-  const char *file_name = NULL;
+  const char *file_name = nullptr;
   PdfInspector *inspector;
   
   gtk_init (&argc, &argv);

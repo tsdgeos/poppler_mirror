@@ -73,7 +73,7 @@ SplashScreen::SplashScreen(SplashScreenParams *params) {
   }
   
   screenParams = params;
-  mat = NULL;
+  mat = nullptr;
   size = 0;
   maxVal = 0;
   minVal = 0;
@@ -378,7 +378,7 @@ SplashScreen::SplashScreen(SplashScreen *screen) {
   sizeM1 = screen->sizeM1;
   log2Size = screen->log2Size;
   mat = (Guchar *)gmallocn(size * size, sizeof(Guchar));
-  if (likely(mat != NULL)) {
+  if (likely(mat != nullptr)) {
     memcpy(mat, screen->mat, size * size * sizeof(Guchar));
   }
   minVal = screen->minVal;

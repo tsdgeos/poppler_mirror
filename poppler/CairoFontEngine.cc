@@ -181,7 +181,7 @@ _ft_new_face_uncached (FT_Library lib,
   FT_Face face;
   cairo_font_face_t *font_face;
 
-  if (font_data == NULL) {
+  if (font_data == nullptr) {
     if (FT_New_Face (lib, filename, 0, &face))
       return gFalse;
   } else {
@@ -287,7 +287,7 @@ _ft_new_face (FT_Library lib,
 
   tmpl.fd = -1;
 
-  if (font_data == NULL) {
+  if (font_data == nullptr) {
     /* if we fail to mmap the file, just pass it to FreeType instead */
     tmpl.fd = open (filename, O_RDONLY);
     if (tmpl.fd == -1)
@@ -298,7 +298,7 @@ _ft_new_face (FT_Library lib,
       return _ft_new_face_uncached (lib, filename, font_data, font_data_len, face_out, font_face_out);
     }
 
-    tmpl.bytes = (unsigned char *) mmap (NULL, st.st_size,
+    tmpl.bytes = (unsigned char *) mmap (nullptr, st.st_size,
 					 PROT_READ, MAP_PRIVATE,
 					 tmpl.fd, 0);
     if (tmpl.bytes == MAP_FAILED) {
@@ -352,7 +352,7 @@ _ft_new_face (FT_Library lib,
 
   l = (struct _ft_face_data *) gmallocn (1, sizeof (struct _ft_face_data));
   *l = tmpl;
-  l->prev = NULL;
+  l->prev = nullptr;
   l->next = _ft_open_faces;
   if (_ft_open_faces)
     _ft_open_faces->prev = l;
@@ -413,19 +413,19 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
   int *codeToGID;
   Guint codeToGIDLen;
   
-  codeToGID = NULL;
+  codeToGID = nullptr;
   codeToGIDLen = 0;
-  font_data = NULL;
+  font_data = nullptr;
   font_data_len = 0;
-  fileName = NULL;
-  fileNameC = NULL;
+  fileName = nullptr;
+  fileNameC = nullptr;
 
   GBool substitute = gFalse;
   
   ref = *gfxFont->getID();
   fontType = gfxFont->getType();
 
-  if (!(fontLoc = gfxFont->locateFont(xref, NULL))) {
+  if (!(fontLoc = gfxFont->locateFont(xref, nullptr))) {
     error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'",
     	gfxFont->getName() ? gfxFont->getName()->getCString()
 	                       : "(unnamed)");
@@ -435,7 +435,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
   // embedded font
   if (fontLoc->locType == gfxFontLocEmbedded) {
     font_data = gfxFont->readEmbFontFile(xref, &font_data_len);
-    if (NULL == font_data)
+    if (nullptr == font_data)
       goto err2;
 
   // external font
@@ -445,7 +445,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
     substitute = gTrue;
   }
 
-  if (fileName != NULL) {
+  if (fileName != nullptr) {
     fileNameC = fileName->getCString();
   }
 
@@ -482,7 +482,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
     break;
   case fontCIDType2:
   case fontCIDType2OT:
-    codeToGID = NULL;
+    codeToGID = nullptr;
     n = 0;
     if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
       n = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
@@ -492,7 +492,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
 		n * sizeof(int));
       }
     } else {
-      if (font_data != NULL) {
+      if (font_data != nullptr) {
         ff = FoFiTrueType::make(font_data, font_data_len);
       } else {
         ff = FoFiTrueType::load(fileNameC);
@@ -506,7 +506,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
     /* Fall through */
   case fontTrueType:
   case fontTrueTypeOT:
-    if (font_data != NULL) {
+    if (font_data != nullptr) {
       ff = FoFiTrueType::make(font_data, font_data_len);
     } else {
       ff = FoFiTrueType::load(fileNameC);
@@ -530,12 +530,12 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
   case fontCIDType0:
   case fontCIDType0C:
 
-    codeToGID = NULL;
+    codeToGID = nullptr;
     codeToGIDLen = 0;
 
     if (!useCIDs)
     {
-      if (font_data != NULL) {
+      if (font_data != nullptr) {
         ff1c = FoFiType1C::make(font_data, font_data_len);
       } else {
         ff1c = FoFiType1C::load(fileNameC);
@@ -553,7 +553,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
     break;
 
   case fontCIDType0COT:
-    codeToGID = NULL;
+    codeToGID = nullptr;
     n = 0;
     if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
       n = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
@@ -567,7 +567,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
 
     if (!codeToGID) {
       if (!useCIDs) {
-	if (font_data != NULL) {
+	if (font_data != nullptr) {
 	  ff = FoFiTrueType::make(font_data, font_data_len);
 	} else {
 	  ff = FoFiTrueType::load(fileNameC);
@@ -604,7 +604,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
   gfree (codeToGID);
   gfree (font_data);
   fprintf (stderr, "some font thing failed\n");
-  return NULL;
+  return nullptr;
 }
 
 //------------------------------------------------------------------------
@@ -704,7 +704,7 @@ _render_type3_glyph (cairo_scaled_font_t  *scaled_font,
   box.y1 = mat[1];
   box.x2 = mat[2];
   box.y2 = mat[3];
-  gfx = new Gfx(info->doc, output_dev, resDict, &box, NULL);
+  gfx = new Gfx(info->doc, output_dev, resDict, &box, nullptr);
   output_dev->startDoc(info->doc, info->fontEngine);
   output_dev->startPage (1, gfx->getState(), gfx->getXRef());
   output_dev->setInType3Char(gTrue);
@@ -809,7 +809,7 @@ CairoFontEngine::CairoFontEngine(FT_Library libA) {
 
   lib = libA;
   for (i = 0; i < cairoFontCacheSize; ++i) {
-    fontCache[i] = NULL;
+    fontCache[i] = nullptr;
   }
   
   FT_Int major, minor, patch;

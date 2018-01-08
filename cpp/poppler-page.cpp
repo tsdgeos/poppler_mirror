@@ -37,7 +37,7 @@ page_private::page_private(document_private *_doc, int _index)
     : doc(_doc)
     , page(doc->doc->getCatalog()->getPage(_index + 1))
     , index(_index)
-    , transition(0)
+    , transition(nullptr)
 {
 }
 
@@ -127,7 +127,7 @@ double page::duration() const
  */
 rectf page::page_rect(page_box_enum box) const
 {
-    PDFRectangle *r = 0;
+    PDFRectangle *r = nullptr;
     switch (box) {
     case media_box:
         r = d->page->getMediaBox();
@@ -211,7 +211,7 @@ bool page::search(const ustring &text, rectf &r, search_direction_enum direction
     double rect_right = r.right();
     double rect_bottom = r.bottom();
 
-    TextOutputDev td(NULL, gTrue, 0, gFalse, gFalse);
+    TextOutputDev td(nullptr, gTrue, 0, gFalse, gFalse);
     d->doc->doc->displayPage(&td, d->index + 1, 72, 72, rotation_value, false, true, false);
     TextPage *text_page = td.takeText();
 
@@ -270,7 +270,7 @@ ustring page::text(const rectf &r, text_layout_enum layout_mode) const
 {
     std::unique_ptr<GooString> s;
     const GBool use_raw_order = (layout_mode == raw_order_layout);
-    TextOutputDev td(0, gFalse, 0, use_raw_order, gFalse);
+    TextOutputDev td(nullptr, gFalse, 0, use_raw_order, gFalse);
     d->doc->doc->displayPage(&td, d->index + 1, 72, 72, 0, false, true, false);
     if (r.is_empty()) {
         PDFRectangle *rect = d->page->getCropBox();

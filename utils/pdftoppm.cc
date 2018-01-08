@@ -209,7 +209,7 @@ static const ArgDesc argDesc[] = {
    "print usage information"},
   {"-?",      argFlag,     &printHelp,     0,
    "print usage information"},
-  {NULL}
+  {nullptr}
 };
 
 static GBool parseJpegOptions()
@@ -225,7 +225,7 @@ static GBool parseJpegOptions()
       nextOpt = comma + 1;
     } else {
       opt.Set(nextOpt);
-      nextOpt = NULL;
+      nextOpt = nullptr;
     }
     //here opt is "<optN>=<valN> "
     const char *equal = strchr(opt.getCString(), '=');
@@ -287,7 +287,7 @@ static void savePageSlice(PDFDoc *doc,
   params.jpegProgressive = jpegProgressive;
   params.tiffCompression.Set(TiffCompressionStr);
 
-  if (ppmFile != NULL) {
+  if (ppmFile != nullptr) {
     if (png) {
       bitmap->writeImgFile(splashFormatPng, ppmFile, x_resolution, y_resolution);
     } else if (jpeg) {
@@ -380,8 +380,8 @@ static int numberOfCharacters(unsigned int n)
 
 int main(int argc, char *argv[]) {
   PDFDoc *doc;
-  GooString *fileName = NULL;
-  char *ppmRoot = NULL;
+  GooString *fileName = nullptr;
+  char *ppmRoot = nullptr;
   char *ppmFile;
   GooString *ownerPW, *userPW;
   SplashColor paperColor;
@@ -464,15 +464,15 @@ int main(int argc, char *argv[]) {
   if (ownerPassword[0]) {
     ownerPW = new GooString(ownerPassword);
   } else {
-    ownerPW = NULL;
+    ownerPW = nullptr;
   }
   if (userPassword[0]) {
     userPW = new GooString(userPassword);
   } else {
-    userPW = NULL;
+    userPW = nullptr;
   }
 
-  if (fileName == NULL) {
+  if (fileName == nullptr) {
     fileName = new GooString("fd://0");
   }
   if (fileName->cmp("-") == 0) {
@@ -583,7 +583,7 @@ int main(int argc, char *argv[]) {
       pg_w = pg_h;
       pg_h = tmp;
     }
-    if (ppmRoot != NULL) {
+    if (ppmRoot != nullptr) {
       const char *ext = png ? "png" : (jpeg || jpegcmyk) ? "jpg" : tiff ? "tif" : mono ? "pbm" : gray ? "pgm" : "ppm";
       if (singleFile) {
         ppmFile = new char[strlen(ppmRoot) + 1 + strlen(ext) + 1];
@@ -593,7 +593,7 @@ int main(int argc, char *argv[]) {
         sprintf(ppmFile, "%s-%0*d.%s", ppmRoot, pg_num_len, pg, ext);
       }
     } else {
-      ppmFile = NULL;
+      ppmFile = nullptr;
     }
 #ifndef UTILS_USE_PTHREADS
     // process job in main thread

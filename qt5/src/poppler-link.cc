@@ -139,7 +139,7 @@ class LinkSoundPrivate : public LinkPrivate
 };
 
 	LinkSoundPrivate::LinkSoundPrivate( const QRectF &area )
-		: LinkPrivate( area ), sound( 0 )
+		: LinkPrivate( area ), sound( nullptr )
 	{
 	}
 
@@ -162,7 +162,7 @@ class LinkRenditionPrivate : public LinkPrivate
 
 	LinkRenditionPrivate::LinkRenditionPrivate( const QRectF &area, ::MediaRendition *r, ::LinkRendition::RenditionOperation operation, const QString &javaScript, const Ref &ref )
 		: LinkPrivate( area )
-		, rendition( r ? new MediaRendition( r ) : 0 )
+		, rendition( r ? new MediaRendition( r ) : nullptr )
 		, action( LinkRendition::PlayRendition )
 		, script( javaScript )
 		, annotationReference( ref )

@@ -57,7 +57,7 @@ void OptContentDock::fillInfo()
 
 void OptContentDock::documentClosed()
 {
-    m_view->setModel(0);
+    m_view->setModel(nullptr);
     AbstractInfoDock::documentClosed();
 }
 

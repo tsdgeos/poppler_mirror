@@ -442,6 +442,7 @@ delete it;
            \since 0.16
         */
         enum PainterFlag {
+            NoPainterFlags = 0x00000000, ///< \since 0.63
             /**
                Do not save/restore the caller-owned painter.
 
@@ -613,7 +614,7 @@ delete it;
            \since 0.16
         */
         bool renderToPainter(QPainter* painter, double xres=72.0, double yres=72.0, int x=-1, int y=-1, int w=-1, int h=-1,
-                             Rotation rotate = Rotate0, PainterFlags flags = 0) const;
+                             Rotation rotate = Rotate0, PainterFlags flags = NoPainterFlags) const;
 
 	/**
 	   Get the page thumbnail if it exists.
@@ -666,6 +667,7 @@ delete it;
         */
         enum SearchFlag
         {
+            NoSearchFlags = 0x00000000, ///< since 0.63
             IgnoreCase = 0x00000001,    ///< Case differences are ignored
             WholeWords = 0x00000002    ///< Only whole words are matched
         };
@@ -696,7 +698,7 @@ delete it;
 
            \since 0.31
         **/
-        bool search(const QString &text, double &rectLeft, double &rectTop, double &rectRight, double &rectBottom, SearchDirection direction, SearchFlags flags = 0, Rotation rotate = Rotate0) const;
+        bool search(const QString &text, double &rectLeft, double &rectTop, double &rectRight, double &rectBottom, SearchDirection direction, SearchFlags flags = NoSearchFlags, Rotation rotate = Rotate0) const;
 
 	/**
 	   Returns a list of all occurrences of the specified text on the page.
@@ -722,7 +724,7 @@ delete it;
 
            \since 0.31
         **/
-        QList<QRectF> search(const QString &text, SearchFlags flags = 0, Rotation rotate = Rotate0) const;
+        QList<QRectF> search(const QString &text, SearchFlags flags = NoSearchFlags, Rotation rotate = Rotate0) const;
 
 	/**
 	   Returns a list of text of the page

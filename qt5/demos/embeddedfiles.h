@@ -28,7 +28,7 @@ class EmbeddedFilesDock : public AbstractInfoDock
     Q_OBJECT
 
 public:
-    EmbeddedFilesDock(QWidget *parent = 0);
+    EmbeddedFilesDock(QWidget *parent = nullptr);
     ~EmbeddedFilesDock();
 
     void documentLoaded() override;

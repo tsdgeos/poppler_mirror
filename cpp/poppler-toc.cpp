@@ -37,12 +37,12 @@ toc_private::~toc_private()
 toc* toc_private::load_from_outline(Outline *outline)
 {
     if (!outline) {
-        return 0;
+        return nullptr;
     }
 
     GooList *items = outline->getItems();
     if (!items || items->getLength() < 1) {
-        return 0;
+        return nullptr;
     }
 
     toc *newtoc = new toc();

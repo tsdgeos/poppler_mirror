@@ -114,15 +114,15 @@ HtmlFont::HtmlFont(GfxFont *font, int _size, GfxRGB rgb){
   GooString* ftname=font->getName();
   if (!ftname) ftname = getDefaultFont();
 
-  GooString *fontname = NULL;
+  GooString *fontname = nullptr;
 
   if( ftname ){
     fontname = new GooString(ftname);
     FontName=new GooString(ftname);
   }
   else {
-    fontname = NULL;
-    FontName = NULL;
+    fontname = nullptr;
+    FontName = nullptr;
   }
   
   lineSize = -1;
@@ -192,7 +192,7 @@ HtmlFont& HtmlFont::operator=(const HtmlFont& x){
 
 void HtmlFont::clear(){
   if(DefaultFont) delete DefaultFont;
-  DefaultFont = NULL;
+  DefaultFont = nullptr;
 }
 
 

@@ -149,7 +149,7 @@ static const ArgDesc argDesc[] = {
    "word break threshold (default 10 percent)"},
   {"-fontfullname", argFlag, &fontFullName, 0,
    "outputs font full name"},   
-  {NULL}
+  {nullptr}
 };
 
 #ifdef HAVE_SPLASH
@@ -176,14 +176,14 @@ public:
 #endif
 
 int main(int argc, char *argv[]) {
-  PDFDoc *doc = NULL;
-  GooString *fileName = NULL;
-  GooString *docTitle = NULL;
-  GooString *author = NULL, *keywords = NULL, *subject = NULL, *date = NULL;
-  GooString *htmlFileName = NULL;
-  HtmlOutputDev *htmlOut = NULL;
+  PDFDoc *doc = nullptr;
+  GooString *fileName = nullptr;
+  GooString *docTitle = nullptr;
+  GooString *author = nullptr, *keywords = nullptr, *subject = nullptr, *date = nullptr;
+  GooString *htmlFileName = nullptr;
+  HtmlOutputDev *htmlOut = nullptr;
 #ifdef HAVE_SPLASH
-  SplashOutputDev *splashOut = NULL;
+  SplashOutputDev *splashOut = nullptr;
 #endif
   GBool doOutline;
   GBool ok;
@@ -231,12 +231,12 @@ int main(int argc, char *argv[]) {
   if (ownerPassword[0]) {
     ownerPW = new GooString(ownerPassword);
   } else {
-    ownerPW = NULL;
+    ownerPW = nullptr;
   }
   if (userPassword[0]) {
     userPW = new GooString(userPassword);
   } else {
-    userPW = NULL;
+    userPW = nullptr;
   }
 
   fileName = new GooString(argv[1]);
@@ -356,15 +356,15 @@ int main(int argc, char *argv[]) {
 #ifdef DISABLE_OUTLINE
   doOutline = gFalse;
 #else
-  doOutline = doc->getOutline()->getItems() != NULL;
+  doOutline = doc->getOutline()->getItems() != nullptr;
 #endif
   // write text file
   htmlOut = new HtmlOutputDev(doc->getCatalog(), htmlFileName->getCString(), 
 	  docTitle->getCString(), 
-	  author ? author->getCString() : NULL,
-	  keywords ? keywords->getCString() : NULL, 
-          subject ? subject->getCString() : NULL, 
-	  date ? date->getCString() : NULL,
+	  author ? author->getCString() : nullptr,
+	  keywords ? keywords->getCString() : nullptr, 
+          subject ? subject->getCString() : nullptr, 
+	  date ? date->getCString() : nullptr,
 	  extension,
 	  rawOrder, 
 	  firstPage,
@@ -396,7 +396,7 @@ int main(int argc, char *argv[]) {
   
   if ((complexMode || singleHtml) && !xml && !ignore) {
 #ifdef HAVE_SPLASH
-    GooString *imgFileName = NULL;
+    GooString *imgFileName = nullptr;
     // White paper color
     SplashColor color;
     color[0] = color[1] = color[2] = 255;
@@ -462,7 +462,7 @@ static GooString* getInfoString(Dict *infoDict, const char *key) {
   Unicode *unicodeString;
   int unicodeLength;
   // Value HTML escaped and converted to desired encoding
-  GooString *encodedString = NULL;
+  GooString *encodedString = nullptr;
   // Is rawString UCS2 (as opposed to pdfDocEncoding)
   GBool isUnicode;
 
@@ -503,7 +503,7 @@ static GooString* getInfoDate(Dict *infoDict, const char *key) {
   int year, mon, day, hour, min, sec, tz_hour, tz_minute;
   char tz;
   struct tm tmStruct;
-  GooString *result = NULL;
+  GooString *result = nullptr;
   char buf[256];
 
   obj = infoDict->lookup(key);

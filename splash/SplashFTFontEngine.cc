@@ -70,7 +70,7 @@ SplashFTFontEngine *SplashFTFontEngine::init(GBool aaA, GBool enableFreeTypeHint
   FT_Library libA;
 
   if (FT_Init_FreeType(&libA)) {
-    return NULL;
+    return nullptr;
   }
   return new SplashFTFontEngine(aaA, enableFreeTypeHintingA, enableSlightHintingA, libA);
 }
@@ -106,7 +106,7 @@ SplashFontFile *SplashFTFontEngine::loadCIDFont(SplashFontFileID *idA,
 
   // check for a CFF font
   if (useCIDs) {
-    cidToGIDMap = NULL;
+    cidToGIDMap = nullptr;
     nCIDs = 0;
   } else {
     if (src->isFile) {
@@ -118,7 +118,7 @@ SplashFontFile *SplashFTFontEngine::loadCIDFont(SplashFontFileID *idA,
       cidToGIDMap = ff->getCIDToGIDMap(&nCIDs);
       delete ff;
     } else {
-      cidToGIDMap = NULL;
+      cidToGIDMap = nullptr;
       nCIDs = 0;
     }
   }
@@ -138,7 +138,7 @@ SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA,
   int nCIDs;
   SplashFontFile *ret;
 
-  cidToGIDMap = NULL;
+  cidToGIDMap = nullptr;
   nCIDs = 0;
   if (!codeToGID) {
     if (!useCIDs) {

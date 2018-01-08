@@ -47,13 +47,13 @@ static const ArgDesc argDesc[] = {
    "print usage information"},
   {"-?", argFlag, &printHelp, 0,
    "print usage information"},
-  {NULL}
+  {nullptr}
 };
 
 static bool extractPages (const char *srcFileName, const char *destFileName) {
   char pathName[4096];
   GooString *gfileName = new GooString (srcFileName);
-  PDFDoc *doc = new PDFDoc (gfileName, NULL, NULL, NULL);
+  PDFDoc *doc = new PDFDoc (gfileName, nullptr, nullptr, nullptr);
 
   if (!doc->isOk()) {
     error(errSyntaxError, -1, "Could not extract page(s) from damaged file ('{0:s}')", srcFileName);
@@ -84,7 +84,7 @@ static bool extractPages (const char *srcFileName, const char *destFileName) {
   bool foundmatch = false;
   char *auxDestFileName = strdup(destFileName);
   char *p = strstr(auxDestFileName, "%d");
-  if (p != NULL) {
+  if (p != nullptr) {
     foundmatch = true;
     *p = 'A';
   } else {
@@ -92,7 +92,7 @@ static bool extractPages (const char *srcFileName, const char *destFileName) {
     for (int i = 2; i < 10; i++) {
       sprintf(pattern, "%%0%dd", i);
       p = strstr(auxDestFileName, pattern);
-      if (p != NULL) {
+      if (p != nullptr) {
        foundmatch = true;
        *p = 'A';
        break;
@@ -108,7 +108,7 @@ static bool extractPages (const char *srcFileName, const char *destFileName) {
 
   // at this point auxDestFileName can only contain %%
   p = strstr(auxDestFileName, "%%");
-  while (p != NULL) {
+  while (p != nullptr) {
     *p = 'A';
     *(p + 1) = 'A';
     p = strstr(p, "%%"); 
@@ -116,7 +116,7 @@ static bool extractPages (const char *srcFileName, const char *destFileName) {
 
   // at this point any other % is wrong
   p = strstr(auxDestFileName, "%");
-  if (p != NULL) {
+  if (p != nullptr) {
     error(errSyntaxError, -1, "'{0:s}' can only contain one '%d' pattern", destFileName);
     free(auxDestFileName);
     delete doc;
@@ -127,7 +127,7 @@ static bool extractPages (const char *srcFileName, const char *destFileName) {
   for (int pageNo = firstPage; pageNo <= lastPage; pageNo++) {
     snprintf (pathName, sizeof (pathName) - 1, destFileName, pageNo);
     GooString *gpageName = new GooString (pathName);
-    PDFDoc *pagedoc = new PDFDoc (new GooString (srcFileName), NULL, NULL, NULL);
+    PDFDoc *pagedoc = new PDFDoc (new GooString (srcFileName), nullptr, nullptr, nullptr);
     int errCode = pagedoc->savePageAs(gpageName, pageNo);
     if ( errCode != errNone) {
       delete gpageName;

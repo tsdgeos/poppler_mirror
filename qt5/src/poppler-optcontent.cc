@@ -77,7 +77,7 @@ namespace Poppler
   OptContentItem::OptContentItem( OptionalContentGroup *group )
   {
     m_group = group;
-    m_parent = 0;
+    m_parent = nullptr;
     m_name = UnicodeParsedString( group->getName() );
     if ( group->getState() == OptionalContentGroup::On ) {
       m_state = OptContentItem::On;
@@ -90,16 +90,16 @@ namespace Poppler
 
   OptContentItem::OptContentItem( const QString &label )
   {
-    m_parent = 0;
+    m_parent = nullptr;
     m_name = label;
-    m_group = 0;
+    m_group = nullptr;
     m_state = OptContentItem::HeadingOnly;
     m_stateBackup = m_state;
     m_enabled = true;
   }
 
   OptContentItem::OptContentItem() :
-    m_parent( 0 ), m_enabled(true)
+    m_parent( nullptr ), m_enabled(true)
   {
   }
 
@@ -172,7 +172,7 @@ namespace Poppler
       m_optContentItems.insert( QString::number(ocg->getRef().num), node);
     }
 
-    if ( optContent->getOrderArray() == 0 ) {
+    if ( optContent->getOrderArray() == nullptr ) {
       // no Order array, so drop them all at the top level
       QMapIterator<QString, OptContentItem*> i(m_optContentItems);
       while ( i.hasNext() ) {
@@ -202,7 +202,7 @@ namespace Poppler
       if ( orderItem.isDict() ) {
 	Object item = orderArray->getNF(i);
 	if (item.isRef() ) {
-          OptContentItem *ocItem = m_optContentItems.value(QString::number(item.getRefNum()), 0);
+          OptContentItem *ocItem = m_optContentItems.value(QString::number(item.getRefNum()));
 	  if (ocItem) {
 	    addChild( parentNode, ocItem );
 	    lastItem = ocItem;
@@ -441,7 +441,7 @@ namespace Poppler
 
   OptContentItem* OptContentModelPrivate::itemFromRef( const QString &ref ) const
   {
-    return m_optContentItems.value(ref, 0);
+    return m_optContentItems.value(ref);
   }
 
   OptContentItem* OptContentModelPrivate::nodeFromIndex(const QModelIndex &index, bool canBeNull) const
@@ -449,7 +449,7 @@ namespace Poppler
     if (index.isValid()) {
       return static_cast<OptContentItem *>(index.internalPointer());
     } else {
-      return canBeNull ? 0 : m_rootNode;
+      return canBeNull ? nullptr : m_rootNode;
     }
   }
 }

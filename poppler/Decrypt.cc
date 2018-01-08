@@ -143,7 +143,7 @@ GBool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
       if(encRevision == 6) {
 	// test contains the initial SHA-256 hash input K.
 	// user key is not used in checking user password.
-	revision6Hash(userPassword, test, NULL);
+	revision6Hash(userPassword, test, nullptr);
       }
       if (!memcmp(test, userKey->getCString(), 32)) {
 
@@ -154,7 +154,7 @@ GBool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
 	if(encRevision == 6) {
 	  //test contains the initial SHA-256 hash input K.
 	  //user key is not used in computing intermediate user key.
-	  revision6Hash(userPassword, test, NULL);
+	  revision6Hash(userPassword, test, nullptr);
 	}
 	aes256KeyExpansion(&state, test, 32, gTrue);
 	for (i = 0; i < 16; ++i) {

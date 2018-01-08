@@ -28,7 +28,7 @@ class FontsDock : public AbstractInfoDock
     Q_OBJECT
 
 public:
-    FontsDock(QWidget *parent = 0);
+    FontsDock(QWidget *parent = nullptr);
     ~FontsDock();
 
     void documentClosed() override;

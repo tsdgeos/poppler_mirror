@@ -28,7 +28,7 @@ class MetadataDock : public AbstractInfoDock
     Q_OBJECT
 
 public:
-    MetadataDock(QWidget *parent = 0);
+    MetadataDock(QWidget *parent = nullptr);
     ~MetadataDock();
 
     void documentClosed() override;

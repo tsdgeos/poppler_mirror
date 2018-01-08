@@ -52,7 +52,7 @@ struct FileCloser {
     FileCloser(const FileCloser &) = delete;
     FileCloser& operator=(const FileCloser &) = delete;
     inline bool close()
-    { if (f) { const int c = fclose(f); f = 0; return c == 0; } return true; }
+    { if (f) { const int c = fclose(f); f = nullptr; return c == 0; } return true; }
 
     FILE *f;
 };
@@ -91,7 +91,7 @@ using namespace poppler;
 
 image_private::image_private(int iwidth, int iheight, image::format_enum iformat)
     : ref(1)
-    , data(0)
+    , data(nullptr)
     , width(iwidth)
     , height(iheight)
     , bytes_per_row(0)
@@ -111,19 +111,19 @@ image_private::~image_private()
 image_private *image_private::create_data(int width, int height, image::format_enum format)
 {
     if (width <= 0 || height <= 0) {
-        return 0;
+        return nullptr;
     }
 
     int bpr = calc_bytes_per_row(width, format);
     if (bpr <= 0) {
-        return 0;
+        return nullptr;
     }
 
     std::unique_ptr<image_private> d(new image_private(width, height, format));
     d->bytes_num = bpr * height;
     d->data = reinterpret_cast<char *>(std::malloc(d->bytes_num));
     if (!d->data) {
-        return 0;
+        return nullptr;
     }
     d->own_data = true;
     d->bytes_per_row = bpr;
@@ -134,12 +134,12 @@ image_private *image_private::create_data(int width, int height, image::format_e
 image_private *image_private::create_data(char *data, int width, int height, image::format_enum format)
 {
     if (width <= 0 || height <= 0 || !data) {
-        return 0;
+        return nullptr;
     }
 
     int bpr = calc_bytes_per_row(width, format);
     if (bpr <= 0) {
-        return 0;
+        return nullptr;
     }
 
     image_private *d = new image_private(width, height, format);
@@ -175,7 +175,7 @@ image_private *image_private::create_data(char *data, int width, int height, ima
  Construct an invalid image.
  */
 image::image()
-    : d(0)
+    : d(nullptr)
 {
 }
 
@@ -283,7 +283,7 @@ int image::bytes_per_row() const
 char *image::data()
 {
     if (!d) {
-        return 0;
+        return nullptr;
     }
 
     detach();
@@ -299,7 +299,7 @@ char *image::data()
  */
 const char *image::const_data() const
 {
-    return d ? d->data : 0;
+    return d ? d->data : nullptr;
 }
 
 /**

@@ -30,7 +30,7 @@ class SoundData
 {
 public:
 	SoundData()
-	  : m_soundObj( 0 )
+	  : m_soundObj( nullptr )
 	{
 	}
 

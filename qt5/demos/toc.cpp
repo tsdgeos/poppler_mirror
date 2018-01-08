@@ -25,7 +25,7 @@
 
 static void fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem)
 {
-    QTreeWidgetItem *newitem = 0;
+    QTreeWidgetItem *newitem = nullptr;
     for (QDomNode node = parent.firstChild(); !node.isNull(); node = node.nextSibling()) {
         QDomElement e = node.toElement();
 
@@ -70,7 +70,7 @@ void TocDock::fillInfo()
 {
     const QDomDocument *toc = document()->toc();
     if (toc) {
-        fillToc(*toc, m_tree, 0);
+        fillToc(*toc, m_tree, nullptr);
     } else {
         QTreeWidgetItem *item = new QTreeWidgetItem();
         item->setText(0, tr("No TOC"));

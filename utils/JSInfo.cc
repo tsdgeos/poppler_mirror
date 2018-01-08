@@ -35,7 +35,7 @@ JSInfo::~JSInfo() {
 }
 
 void JSInfo::printJS(GooString *js) {
-  Unicode *u =  NULL;
+  Unicode *u =  nullptr;
   char buf[8];
   int i, n, len;
 
@@ -87,7 +87,7 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action, bool deleteLin
 
 void JSInfo::scanJS(int nPages) {
   print = gFalse;
-  file = NULL;
+  file = nullptr;
   scan(nPages);
 }
 

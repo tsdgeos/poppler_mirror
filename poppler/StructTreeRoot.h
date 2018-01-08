@@ -67,7 +67,7 @@ private:
     Ref            ref;
     StructElement *element;
 
-    Parent(): element(NULL) { ref.num = ref.gen = -1; }
+    Parent(): element(nullptr) { ref.num = ref.gen = -1; }
     Parent(const Parent &p): element(p.element) {
       ref.num = p.ref.num;
       ref.gen = p.ref.gen;

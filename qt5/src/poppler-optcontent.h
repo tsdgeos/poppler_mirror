@@ -75,7 +75,7 @@ namespace Poppler
     void applyLink( LinkOCGState *link );
 
     private:
-    OptContentModel( OCGs *optContent, QObject *parent = 0);
+    OptContentModel( OCGs *optContent, QObject *parent = nullptr);
 
     friend class OptContentModelPrivate;
     OptContentModelPrivate *d;

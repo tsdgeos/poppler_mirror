@@ -77,7 +77,7 @@ static ArgDesc argDesc[] = {
    "print usage information"},
   {"-?",      argFlag,     &printHelp,     0,
    "print usage information"},
-  {NULL}
+  {nullptr}
 };
 
 int main(int argc, char *argv[]) {
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
   char *p;
   GBool ok;
   int exitCode;
-  GooList *embeddedFiles = NULL;
+  GooList *embeddedFiles = nullptr;
   int nFiles, nPages, n, i, j;
   FileSpec *fileSpec;
   Page *page;
@@ -138,12 +138,12 @@ int main(int argc, char *argv[]) {
   if (ownerPassword[0] != '\001') {
     ownerPW = new GooString(ownerPassword);
   } else {
-    ownerPW = NULL;
+    ownerPW = nullptr;
   }
   if (userPassword[0] != '\001') {
     userPW = new GooString(userPassword);
   } else {
-    userPW = NULL;
+    userPW = nullptr;
   }
 
   doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);

@@ -34,7 +34,7 @@ class MovieData
 {
 public:
 	MovieData()
-	  : m_movieObj( 0 )
+	  : m_movieObj( nullptr )
 	{
 	}
 

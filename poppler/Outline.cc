@@ -64,9 +64,9 @@ OutlineItem::OutlineItem(Dict *dict, int refNumA, OutlineItem *parentA, XRef *xr
   refNum = refNumA;
   parent = parentA;
   xref = xrefA;
-  title = NULL;
-  action = NULL;
-  kids = NULL;
+  title = nullptr;
+  action = nullptr;
+  kids = nullptr;
 
 
   obj1 = dict->lookup("Title");
@@ -141,7 +141,7 @@ GooList *OutlineItem::readItemList(OutlineItem *parent, Object *firstItemRef, XR
 
   if (!items->getLength()) {
     delete items;
-    items = NULL;
+    items = nullptr;
   }
 
   return items;
@@ -156,6 +156,6 @@ void OutlineItem::open() {
 void OutlineItem::close() {
   if (kids) {
     deleteGooList(kids, OutlineItem);
-    kids = NULL;
+    kids = nullptr;
   }
 }

@@ -114,7 +114,7 @@ extern GBool noMerge;
 extern double wordBreakThreshold;
 
 static GBool debug = gFalse;
-static GooString *gstr_buff0 = NULL; // a workspace in which I format strings
+static GooString *gstr_buff0 = nullptr; // a workspace in which I format strings
 
 static GooString* basename(GooString* str){
   
@@ -147,7 +147,7 @@ static const char *print_matrix(const double *mat) {
 }
 
 static const char *print_uni_str(const Unicode *u, const unsigned uLen) {
-  GooString *gstr_buff1 = NULL;
+  GooString *gstr_buff1 = nullptr;
 
   delete gstr_buff0;
 
@@ -220,12 +220,12 @@ HtmlString::HtmlString(GfxState *state, double fontSize, HtmlFontAccu* _fonts) :
     yMax = y + 1;
   }
   col = 0;
-  text = NULL;
-  xRight = NULL;
-  link = NULL;
+  text = nullptr;
+  xRight = nullptr;
+  link = nullptr;
   len = size = 0;
-  yxNext = NULL;
-  xyNext = NULL;
+  yxNext = nullptr;
+  xyNext = nullptr;
   htext=new GooString();
   dir = textDirUnknown;
 }
@@ -278,17 +278,17 @@ void HtmlString::endString()
 
 HtmlPage::HtmlPage(GBool rawOrder, char *imgExtVal) {
   this->rawOrder = rawOrder;
-  curStr = NULL;
-  yxStrings = NULL;
-  xyStrings = NULL;
-  yxCur1 = yxCur2 = NULL;
+  curStr = nullptr;
+  yxStrings = nullptr;
+  xyStrings = nullptr;
+  yxCur1 = yxCur2 = nullptr;
   fonts=new HtmlFontAccu();
   links=new HtmlLinks();
   imgList=new GooList();
   pageWidth=0;
   pageHeight=0;
   fontsPageMarker = 0;
-  DocName=NULL;
+  DocName=nullptr;
   firstPage = -1;
   imgExt = new GooString(imgExtVal);
 }
@@ -401,7 +401,7 @@ void HtmlPage::addChar(GfxState *state, double x, double y,
       !rot_matrices_equal(curStr->getFont().getRotMat(), state->getTextMat()))
   {
     endString();
-    beginString(state, NULL);
+    beginString(state, nullptr);
   }
   state->textTransformDelta(state->getCharSpace() * state->getHorizScaling(),
 			    0, &dx2, &dy2);
@@ -425,7 +425,7 @@ void HtmlPage::endString() {
   // values, and they're useless anyway
   if (curStr->len == 0) {
     delete curStr;
-    curStr = NULL;
+    curStr = nullptr;
     return;
   }
 
@@ -445,7 +445,7 @@ void HtmlPage::endString() {
   y2 = curStr->yMin + 0.8 * h;
   if (rawOrder) {
     p1 = yxCur1;
-    p2 = NULL;
+    p2 = nullptr;
   } else if ((!yxCur1 ||
               (y1 >= yxCur1->yMin &&
                (y2 >= yxCur1->yMax || curStr->xMax >= yxCur1->xMin))) &&
@@ -455,7 +455,7 @@ void HtmlPage::endString() {
     p1 = yxCur1;
     p2 = yxCur2;
   } else {
-    for (p1 = NULL, p2 = yxStrings; p2; p1 = p2, p2 = p2->yxNext) {
+    for (p1 = nullptr, p2 = yxStrings; p2; p1 = p2, p2 = p2->yxNext) {
       if (y1 < p2->yMin || (y2 < p2->yMax && curStr->xMax < p2->xMin))
         break;
     }
@@ -467,13 +467,13 @@ void HtmlPage::endString() {
   else
     yxStrings = curStr;
   curStr->yxNext = p2;
-  curStr = NULL;
+  curStr = nullptr;
 }
 
 static const char *strrstr( const char *s, const char *ss )
 {
   const char *p = strstr( s, ss );
-  for( const char *pp = p; pp != NULL; pp = strstr( p+1, ss ) ){
+  for( const char *pp = p; pp != nullptr; pp = strstr( p+1, ss ) ){
     p = pp;
   }
   return p;
@@ -481,9 +481,9 @@ static const char *strrstr( const char *s, const char *ss )
 
 static void CloseTags( GooString *htext, GBool &finish_a, GBool &finish_italic, GBool &finish_bold )
 {
-  const char *last_italic = finish_italic && ( finish_bold   || finish_a    ) ? strrstr( htext->getCString(), "<i>" ) : NULL;
-  const char *last_bold   = finish_bold   && ( finish_italic || finish_a    ) ? strrstr( htext->getCString(), "<b>" ) : NULL;
-  const char *last_a      = finish_a      && ( finish_italic || finish_bold ) ? strrstr( htext->getCString(), "<a " ) : NULL;
+  const char *last_italic = finish_italic && ( finish_bold   || finish_a    ) ? strrstr( htext->getCString(), "<i>" ) : nullptr;
+  const char *last_bold   = finish_bold   && ( finish_italic || finish_a    ) ? strrstr( htext->getCString(), "<b>" ) : nullptr;
+  const char *last_a      = finish_a      && ( finish_italic || finish_bold ) ? strrstr( htext->getCString(), "<a " ) : nullptr;
   if( finish_a && ( finish_italic || finish_bold ) && last_a > ( last_italic > last_bold ? last_italic : last_bold ) ){
     htext->append("</a>", 4);
     finish_a = false;
@@ -572,7 +572,7 @@ void HtmlPage::coalesce() {
     str1->htext->insert(0,"<b>",3);
   if( hfont1->isItalic() )
     str1->htext->insert(0,"<i>",3);
-  if( str1->getLink() != NULL ) {
+  if( str1->getLink() != nullptr ) {
     GooString *ls = str1->getLink()->getLinkStart();
     str1->htext->insert(0, ls);
     delete ls;
@@ -678,11 +678,11 @@ void HtmlPage::coalesce() {
       HtmlLink *hlink1 = str1->getLink();
       HtmlLink *hlink2 = str2->getLink();
       bool switch_links = !hlink1 || !hlink2 || !hlink1->isEqualDest(*hlink2);
-      GBool finish_a = switch_links && hlink1 != NULL;
+      GBool finish_a = switch_links && hlink1 != nullptr;
       GBool finish_italic = hfont1->isItalic() && ( !hfont2->isItalic() || finish_a );
       GBool finish_bold   = hfont1->isBold()   && ( !hfont2->isBold()   || finish_a || finish_italic );
       CloseTags( str1->htext, finish_a, finish_italic, finish_bold );
-      if( switch_links && hlink2 != NULL ) {
+      if( switch_links && hlink2 != nullptr ) {
         GooString *ls = hlink2->getLinkStart();
         str1->htext->append(ls);
         delete ls;
@@ -707,7 +707,7 @@ void HtmlPage::coalesce() {
       delete str2;
     } else { // keep strings separate
 //      printf("no\n"); 
-      GBool finish_a = str1->getLink() != NULL;
+      GBool finish_a = str1->getLink() != nullptr;
       GBool finish_bold   = hfont1->isBold();
       GBool finish_italic = hfont1->isItalic();
       CloseTags( str1->htext, finish_a, finish_italic, finish_bold );
@@ -720,7 +720,7 @@ void HtmlPage::coalesce() {
 	str1->htext->insert(0,"<b>",3);
       if( hfont1->isItalic() )
 	str1->htext->insert(0,"<i>",3);
-      if( str1->getLink() != NULL ) {
+      if( str1->getLink() != nullptr ) {
 	GooString *ls = str1->getLink()->getLinkStart();
 	str1->htext->insert(0, ls);
 	delete ls;
@@ -731,7 +731,7 @@ void HtmlPage::coalesce() {
 
   GBool finish_bold   = hfont1->isBold();
   GBool finish_italic = hfont1->isItalic();
-  GBool finish_a = str1->getLink() != NULL;
+  GBool finish_a = str1->getLink() != nullptr;
   CloseTags( str1->htext, finish_a, finish_italic, finish_bold );
 
 #if 0 //~ for debugging
@@ -972,15 +972,15 @@ void HtmlPage::clear() {
 
   if (curStr) {
     delete curStr;
-    curStr = NULL;
+    curStr = nullptr;
   }
   for (p1 = yxStrings; p1; p1 = p2) {
     p2 = p1->yxNext;
     delete p1;
   }
-  yxStrings = NULL;
-  xyStrings = NULL;
-  yxCur1 = yxCur2 = NULL;
+  yxStrings = nullptr;
+  xyStrings = nullptr;
+  yxCur1 = yxCur2 = nullptr;
 
   if( !noframes )
   {
@@ -1040,13 +1040,13 @@ GooString* HtmlMetaVar::toString()
 
 static const char* HtmlEncodings[][2] = {
     {"Latin1", "ISO-8859-1"},
-    {NULL, NULL}
+    {nullptr, nullptr}
 };
 
 GooString* HtmlOutputDev::mapEncodingToHtml(GooString* encoding)
 {
   GooString* enc = encoding;
-  for(int i = 0; HtmlEncodings[i][0] != NULL; i++)
+  for(int i = 0; HtmlEncodings[i][0] != nullptr; i++)
   {
     if( enc->cmp(HtmlEncodings[i][0]) == 0 )
     {
@@ -1100,9 +1100,9 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, char *fileName, char *title,
 	GBool rawOrder, int firstPage, GBool outline) 
 {
   catalog = catalogA;
-  fContentsFrame = NULL;
+  fContentsFrame = nullptr;
   docTitle = new GooString(title);
-  pages = NULL;
+  pages = nullptr;
   dumpJPEG=gTrue;
   //write = gTrue;
   this->rawOrder = rawOrder;
@@ -1222,7 +1222,7 @@ HtmlOutputDev::~HtmlOutputDev() {
       fputs("</body>\n</html>\n",fContentsFrame);  
       fclose(fContentsFrame);
     }
-    if (page != NULL) {
+    if (page != nullptr) {
       if (xml) {
         fputs("</pdf2xml>\n",page);  
         fclose(page);
@@ -1505,7 +1505,7 @@ void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
   }
   else {
 #ifdef ENABLE_LIBPNG
-    drawPngImage(state, str, width, height, NULL, gTrue);
+    drawPngImage(state, str, width, height, nullptr, gTrue);
 #else
     OutputDev::drawImageMask(state, ref, str, width, height, invert, interpolate, inlineImg);
 #endif
@@ -1568,10 +1568,10 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 	  GooString* file=basename(Docname);
 	  int page=1;
 	  LinkGoTo *ha=(LinkGoTo *)link->getAction();
-	  LinkDest *dest=NULL;
-	  if (ha->getDest()!=NULL)
+	  LinkDest *dest=nullptr;
+	  if (ha->getDest()!=nullptr)
 	      dest=ha->getDest()->copy();
-	  else if (ha->getNamedDest()!=NULL)
+	  else if (ha->getNamedDest()!=nullptr)
 	      dest=catalog->findDest(ha->getNamedDest());
 	      
 	  if (dest){ 
@@ -1622,14 +1622,14 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
       case actionGoToR:
 	  {
 	  LinkGoToR *ha=(LinkGoToR *) link->getAction();
-	  LinkDest *dest=NULL;
+	  LinkDest *dest=nullptr;
 	  int page=1;
 	  GooString *file=new GooString();
 	  if (ha->getFileName()){
 	      delete file;
 	      file=new GooString(ha->getFileName()->getCString());
 	  }
-	  if (ha->getDest()!=NULL)  dest=ha->getDest()->copy();
+	  if (ha->getDest()!=nullptr)  dest=ha->getDest()->copy();
 	  if (dest&&file){
 	      if (!(dest->isPageRef()))  page=dest->getPageNum();
 	      delete dest;
@@ -1695,7 +1695,7 @@ GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 #ifdef DISABLE_OUTLINE
 	return gFalse;
 #else
-	FILE * output = NULL;
+	FILE * output = nullptr;
 	GBool bClose = gFalse;
 	Catalog *catalog = doc->getCatalog();
 
@@ -1727,7 +1727,7 @@ GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 			str->append("-outline.html");
 			output = fopen(str->getCString(), "w");
 			delete str;
-			if (output == NULL)
+			if (output == nullptr)
 				return gFalse;
 			bClose = gTrue;
 
@@ -1784,7 +1784,7 @@ GBool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, GooList *outlines, Catalo
 		GooString *titleStr = HtmlFont::HtmlFilter(item->getTitle(),
 							   item->getTitleLength());
 
-		GooString *linkName = NULL;;
+		GooString *linkName = nullptr;;
         int page = getOutlinePageNum(item);
         if (page > 0)
         {
@@ -1874,8 +1874,8 @@ void HtmlOutputDev::newXmlOutlineLevel(FILE *output, GooList *outlines, Catalog*
 int HtmlOutputDev::getOutlinePageNum(OutlineItem *item)
 {
     LinkAction *action   = item->getAction();
-    LinkGoTo   *link     = NULL;
-    LinkDest   *linkdest = NULL;
+    LinkGoTo   *link     = nullptr;
+    LinkDest   *linkdest = nullptr;
     int         pagenum  = -1;
 
     if (!action || action->getKind() != actionGoTo)

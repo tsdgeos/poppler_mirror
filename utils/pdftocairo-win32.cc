@@ -27,8 +27,8 @@
 #include <winspool.h>
 
 static HDC hdc;
-static HGLOBAL hDevmode = 0;
-static HGLOBAL hDevnames = 0;
+static HGLOBAL hDevmode = nullptr;
+static HGLOBAL hDevnames = nullptr;
 static DEVMODEA *devmode;
 static char *printerName;
 
@@ -53,7 +53,7 @@ static const Win32Option win32PaperSource[] =
   {"largefmt", DMBIN_LARGEFMT},
   {"largecapacity", DMBIN_LARGECAPACITY},
   {"formsource", DMBIN_FORMSOURCE},
-  {NULL, 0}
+  {nullptr, 0}
 };
 
 static void parseSource(GooString *source)
@@ -75,7 +75,7 @@ static const Win32Option win32DuplexMode[] =
   {"off", DMDUP_SIMPLEX},
   {"short", DMDUP_HORIZONTAL},
   {"long", DMDUP_VERTICAL},
-  {NULL, 0}
+  {nullptr, 0}
 };
 
 static void parseDuplex(GooString *mode)
@@ -287,7 +287,7 @@ static UINT_PTR CALLBACK printDialogHookProc(HWND hdlg, UINT uiMsg, WPARAM wPara
     // Increase dialog size
     RECT dlgRect;
     GetWindowRect(hdlg, &dlgRect);
-    SetWindowPos(hdlg, NULL,
+    SetWindowPos(hdlg, nullptr,
 		 dlgRect.left, dlgRect.top,
 		 dlgRect.right - dlgRect.left,
 		 dlgRect.bottom - dlgRect.top + interGroupSpace + groupHeight,
@@ -368,7 +368,7 @@ void win32SetupPrinter(GooString *printer, GooString *printOpt,
 {
   if (printer->getCString()[0] == 0) {
     DWORD size = 0;
-    GetDefaultPrinterA(NULL, &size);
+    GetDefaultPrinterA(nullptr, &size);
     printerName = (char*)gmalloc(size);
     GetDefaultPrinterA(printerName, &size);
   } else {
@@ -376,7 +376,7 @@ void win32SetupPrinter(GooString *printer, GooString *printOpt,
   }
 
   //Query the size of the DEVMODE struct
-  LONG szProp = DocumentPropertiesA(NULL, NULL, printerName, NULL, NULL, 0);
+  LONG szProp = DocumentPropertiesA(nullptr, nullptr, printerName, nullptr, nullptr, 0);
   if (szProp < 0) {
     fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
     exit(99);
@@ -386,7 +386,7 @@ void win32SetupPrinter(GooString *printer, GooString *printOpt,
   devmode->dmSize = sizeof(DEVMODEA);
   devmode->dmSpecVersion = DM_SPECVERSION;
   //Load the current default configuration for the printer into devmode
-  if (DocumentPropertiesA(NULL, NULL, printerName, devmode, devmode, DM_OUT_BUFFER) < 0) {
+  if (DocumentPropertiesA(nullptr, nullptr, printerName, devmode, devmode, DM_OUT_BUFFER) < 0) {
     fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
     exit(99);
   }
@@ -402,7 +402,7 @@ void win32SetupPrinter(GooString *printer, GooString *printOpt,
   DWORD mode = DM_IN_BUFFER | DM_OUT_BUFFER;
   if (setupdlg)
     mode |= DM_IN_PROMPT;
-  ret = DocumentPropertiesA(NULL, NULL, printerName, devmode, devmode, mode);
+  ret = DocumentPropertiesA(nullptr, nullptr, printerName, devmode, devmode, mode);
   if (ret < 0) {
     fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
     exit(99);
@@ -410,7 +410,7 @@ void win32SetupPrinter(GooString *printer, GooString *printOpt,
   if (setupdlg && ret == IDCANCEL)
     exit(0);
 
-  hdc = CreateDCA(NULL, printerName, NULL, devmode);
+  hdc = CreateDCA(nullptr, printerName, nullptr, devmode);
   if (!hdc) {
     fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
     exit(99);
@@ -502,7 +502,7 @@ void win32BeginPage(double *w, double *h, GBool changePageSize, GBool useFullPag
 {
   if (changePageSize)
     fillPagePrinterOptions(*w, *h);
-  if (DocumentPropertiesA(NULL, NULL, printerName, devmode, devmode, DM_IN_BUFFER | DM_OUT_BUFFER) < 0) {
+  if (DocumentPropertiesA(nullptr, nullptr, printerName, devmode, devmode, DM_IN_BUFFER | DM_OUT_BUFFER) < 0) {
     fprintf(stderr, "Error: Printer \"%s\" not found\n", printerName);
     exit(99);
   }

@@ -91,7 +91,7 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
       hint = &path->hints[i];
       if (hint->ctrl0 + 1 >= path->length || hint->ctrl1 + 1 >= path->length) {
 	gfree(adjusts);
-	adjusts = NULL;
+	adjusts = nullptr;
 	break;
       }
       x0 = pts[hint->ctrl0    ].x;    y0 = pts[hint->ctrl0    ].y;
@@ -108,7 +108,7 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
 	adj1 = y2;
       } else {
 	gfree(adjusts);
-	adjusts = NULL;
+	adjusts = nullptr;
 	break;
       }
       if (adj0 > adj1) {
@@ -148,7 +148,7 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
     }
 
   } else {
-    adjusts = NULL;
+    adjusts = nullptr;
   }
 
   // perform stroke adjustment
@@ -161,7 +161,7 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
     gfree(adjusts);
   }
 
-  segs = NULL;
+  segs = nullptr;
   length = size = 0;
 
   x0 = y0 = xsp = ysp = 0; // make gcc happy

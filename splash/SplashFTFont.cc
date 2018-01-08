@@ -407,7 +407,7 @@ SplashPath *SplashFTFont::getGlyphPath(int c) {
 
   ff = (SplashFTFontFile *)fontFile;
   ff->face->size = sizeObj;
-  FT_Set_Transform(ff->face, &textMatrix, NULL);
+  FT_Set_Transform(ff->face, &textMatrix, nullptr);
   slot = ff->face->glyph;
   if (ff->codeToGID && c < ff->codeToGIDLen && c >= 0) {
     gid = ff->codeToGID[c];
@@ -415,13 +415,13 @@ SplashPath *SplashFTFont::getGlyphPath(int c) {
     gid = (FT_UInt)c;
   }
   if (FT_Load_Glyph(ff->face, gid, getFTLoadFlags(ff->type1, ff->trueType, aa, enableFreeTypeHinting, enableSlightHinting))) {
-    return NULL;
+    return nullptr;
   }
   if (FT_Get_Glyph(slot, &glyph)) {
-    return NULL;
+    return nullptr;
   }
   if (FT_Outline_Check(&((FT_OutlineGlyph)glyph)->outline)) {
-    return NULL;
+    return nullptr;
   }
   path.path = new SplashPath();
   path.textScale = textScale;

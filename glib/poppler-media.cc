@@ -57,12 +57,12 @@ poppler_media_finalize (GObject *object)
 
   if (media->filename) {
     g_free (media->filename);
-    media->filename = NULL;
+    media->filename = nullptr;
   }
 
   if (media->mime_type) {
     g_free (media->mime_type);
-    media->mime_type = NULL;
+    media->mime_type = nullptr;
   }
 
   media->stream = Object();
@@ -88,9 +88,9 @@ _poppler_media_new (MediaRendition *poppler_media)
 {
   PopplerMedia *media;
 
-  g_assert (poppler_media != NULL);
+  g_assert (poppler_media != nullptr);
 
-  media = POPPLER_MEDIA (g_object_new (POPPLER_TYPE_MEDIA, NULL));
+  media = POPPLER_MEDIA (g_object_new (POPPLER_TYPE_MEDIA, nullptr));
 
   if (poppler_media->getIsEmbedded()) {
     GooString* mime_type;
@@ -216,7 +216,7 @@ poppler_media_save (PopplerMedia *poppler_media,
 
   f = g_fopen (filename, "wb");
 
-  if (f == NULL)
+  if (f == nullptr)
     {
       gchar *display_name = g_filename_display_name (filename);
       g_set_error (error,

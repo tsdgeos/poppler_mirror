@@ -269,7 +269,7 @@ static const ArgDesc argDesc[] = {
    "print usage information"},
   {"-?",      argFlag,     &printHelp,     0,
    "print usage information"},
-  {NULL}
+  {nullptr}
 };
 
 
@@ -300,7 +300,7 @@ static const AntiliasOption antialiasOptions[] =
   { "fast",     CAIRO_ANTIALIAS_FAST },
   { "good",     CAIRO_ANTIALIAS_GOOD },
   { "best",     CAIRO_ANTIALIAS_BEST },
-  { NULL,       CAIRO_ANTIALIAS_DEFAULT },
+  { nullptr,       CAIRO_ANTIALIAS_DEFAULT },
 };
 
 static GBool parseAntialiasOption(GooString *antialias, cairo_antialias_t *antialiasEnum)
@@ -337,7 +337,7 @@ static GBool parseJpegOptions()
       nextOpt = comma + 1;
     } else {
       opt.Set(nextOpt);
-      nextOpt = NULL;
+      nextOpt = nullptr;
     }
     //here opt is "<optN>=<valN> "
     const char *equal = strchr(opt.getCString(), '=');
@@ -378,7 +378,7 @@ static GBool parseJpegOptions()
 
 static void writePageImage(GooString *filename)
 {
-  ImgWriter *writer = 0;
+  ImgWriter *writer = nullptr;
   FILE *file;
   int height, width, stride;
   unsigned char *data;
@@ -602,7 +602,7 @@ static void beginDocument(GooString *inputFileName, GooString *outputFileName, d
 {
   if (printing) {
     if (printToWin32) {
-      output_file = NULL;
+      output_file = nullptr;
     } else {
       if (outputFileName->cmp("fd://0") == 0)
         output_file = stdout;
@@ -724,7 +724,7 @@ static void renderPage(PDFDoc *doc, CairoOutputDev *cairoOut, int pg,
 			printing,
 			-1, -1, -1, -1);
   cairo_restore(cr);
-  cairoOut->setCairo(NULL);
+  cairoOut->setCairo(nullptr);
 
   // Blend onto white page
   if (!printing && !transp) {
@@ -856,7 +856,7 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
   }
 
   if (printToWin32)
-    return NULL; // No output file means print to printer
+    return nullptr; // No output file means print to printer
 
   if (fileName->cmp("fd://0") == 0) {
     fprintf(stderr, "Error: an output filename or '-' must be supplied when the PDF file is stdin.\n");
@@ -922,10 +922,10 @@ static void checkInvalidImageOption(GBool option, const char *option_name)
 
 int main(int argc, char *argv[]) {
   PDFDoc *doc;
-  GooString *fileName = NULL;
-  GooString *outputName = NULL;
-  GooString *outputFileName = NULL;
-  GooString *imageFileName = NULL;
+  GooString *fileName = nullptr;
+  GooString *outputName = nullptr;
+  GooString *outputFileName = nullptr;
+  GooString *imageFileName = nullptr;
   GooString *ownerPW, *userPW;
   CairoOutputDev *cairoOut;
   int pg, pg_num_len;
@@ -935,7 +935,7 @@ int main(int argc, char *argv[]) {
   // parse args
   Win32Console win32Console(&argc, &argv);
   if (!parseArgs(argDesc, &argc, argv)) {
-    printUsage("pdftocairo", 0, argDesc);
+    printUsage("pdftocairo", nullptr, argDesc);
     exit(99);
   }
 
@@ -1090,12 +1090,12 @@ int main(int argc, char *argv[]) {
   if (ownerPassword[0]) {
     ownerPW = new GooString(ownerPassword);
   } else {
-    ownerPW = NULL;
+    ownerPW = nullptr;
   }
   if (userPassword[0]) {
     userPW = new GooString(userPassword);
   } else {
-    userPW = NULL;
+    userPW = nullptr;
   }
 
   fileName = new GooString(argv[1]);
@@ -1106,12 +1106,12 @@ int main(int argc, char *argv[]) {
   if (argc == 3)
     outputName = new GooString(argv[2]);
   else
-    outputName = NULL;
+    outputName = nullptr;
 
   outputFileName = getOutputFileName(fileName, outputName);
 
 #ifdef USE_CMS
-  icc_data = NULL;
+  icc_data = nullptr;
   if (icc.getCString()[0]) {
     FILE *file = fopen(icc.getCString(), "rb");
     if (!file) {
@@ -1247,7 +1247,7 @@ int main(int argc, char *argv[]) {
     }
     if (imageFileName) {
       delete imageFileName;
-      imageFileName = NULL;
+      imageFileName = nullptr;
     }
     if (!printing)
       imageFileName = getImageFileName(outputFileName, pg_num_len, pg);

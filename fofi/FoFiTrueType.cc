@@ -277,7 +277,7 @@ FoFiTrueType *FoFiTrueType::make(char *fileA, int lenA, int faceIndexA) {
   ff = new FoFiTrueType(fileA, lenA, gFalse, faceIndexA);
   if (!ff->parsedOk) {
     delete ff;
-    return NULL;
+    return nullptr;
   }
   return ff;
 }
@@ -288,12 +288,12 @@ FoFiTrueType *FoFiTrueType::load(char *fileName, int faceIndexA) {
   int lenA;
 
   if (!(fileA = FoFiBase::readFile(fileName, &lenA))) {
-    return NULL;
+    return nullptr;
   }
   ff = new FoFiTrueType(fileA, lenA, gTrue, faceIndexA);
   if (!ff->parsedOk) {
     delete ff;
-    return NULL;
+    return nullptr;
   }
   return ff;
 }
@@ -301,11 +301,11 @@ FoFiTrueType *FoFiTrueType::load(char *fileName, int faceIndexA) {
 FoFiTrueType::FoFiTrueType(char *fileA, int lenA, GBool freeFileDataA, int faceIndexA):
   FoFiBase(fileA, lenA, freeFileDataA)
 {
-  tables = NULL;
+  tables = nullptr;
   nTables = 0;
-  cmaps = NULL;
+  cmaps = nullptr;
   nCmaps = 0;
-  nameToGID = NULL;
+  nameToGID = nullptr;
   parsedOk = gFalse;
   faceIndex = faceIndexA;
   gsubFeatureTable = 0;
@@ -472,10 +472,10 @@ int *FoFiTrueType::getCIDToGIDMap(int *nCIDs) {
 
   *nCIDs = 0;
   if (!getCFFBlock(&start, &length)) {
-    return NULL;
+    return nullptr;
   }
   if (!(ff = FoFiType1C::make(start, length))) {
-    return NULL;
+    return nullptr;
   }
   map = ff->getCIDToGIDMap(nCIDs);
   delete ff;
@@ -556,7 +556,7 @@ void FoFiTrueType::convertToType42(char *psName, char **encoding,
   // write the guts of the dictionary
   cvtEncoding(encoding, outputFunc, outputStream);
   cvtCharStrings(encoding, codeToGID, outputFunc, outputStream);
-  cvtSfnts(outputFunc, outputStream, NULL, gFalse, &maxUsedGlyph);
+  cvtSfnts(outputFunc, outputStream, nullptr, gFalse, &maxUsedGlyph);
 
   // end the dictionary and define the font
   (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
@@ -701,7 +701,7 @@ void FoFiTrueType::convertToCIDType2(char *psName,
   (*outputFunc)(outputStream, "  end readonly def\n", 19);
 
   // write the guts of the dictionary
-  cvtSfnts(outputFunc, outputStream, NULL, needVerticalMetrics, &maxUsedGlyph);
+  cvtSfnts(outputFunc, outputStream, nullptr, needVerticalMetrics, &maxUsedGlyph);
 
   // end the dictionary and define the font
   (*outputFunc)(outputStream,
@@ -1061,7 +1061,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
       ++nNewTables;
     }
   }
-  vmtxTab = NULL; // make gcc happy
+  vmtxTab = nullptr; // make gcc happy
   vmtxTabLength = 0;
   advance = 0; // make gcc happy
   if (needVerticalMetrics) {
@@ -1387,7 +1387,7 @@ void FoFiTrueType::parse() {
     nTables = j;
     tables = (TrueTypeTable *)greallocn_checkoverflow(tables, nTables, sizeof(TrueTypeTable));
   }
-  if (!parsedOk || tables == NULL) {
+  if (!parsedOk || tables == nullptr) {
     return;
   }
 
@@ -1526,7 +1526,7 @@ void FoFiTrueType::readPostTable() {
  err:
   if (nameToGID) {
     delete nameToGID;
-    nameToGID = NULL;
+    nameToGID = nullptr;
   }
 }
 
@@ -1570,7 +1570,7 @@ Guint FoFiTrueType::charToTag(const char *tagName)
 */
 int FoFiTrueType::setupGSUB(const char *scriptName)
 {
-  return setupGSUB(scriptName, NULL);
+  return setupGSUB(scriptName, nullptr);
 }
 
 /*
@@ -1595,7 +1595,7 @@ int FoFiTrueType::setupGSUB(const char *scriptName,
   int x;
   Guint pos;
 
-  if (scriptName == 0) {
+  if (scriptName == nullptr) {
     gsubFeatureTable = 0;
     return 0;
   }
