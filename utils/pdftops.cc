@@ -202,7 +202,7 @@ static const ArgDesc argDesc[] = {
    "print usage information"},
   {"-?",          argFlag,     &printHelp,      0,
    "print usage information"},
-  {NULL}
+  {nullptr}
 };
 
 int main(int argc, char *argv[]) {
@@ -310,12 +310,12 @@ int main(int argc, char *argv[]) {
   if (ownerPassword[0] != '\001') {
     ownerPW = new GooString(ownerPassword);
   } else {
-    ownerPW = NULL;
+    ownerPW = nullptr;
   }
   if (userPassword[0] != '\001') {
     userPW = new GooString(userPassword);
   } else {
-    userPW = NULL;
+    userPW = nullptr;
   }
   if (fileName->cmp("-") == 0) {
       delete fileName;
@@ -387,7 +387,7 @@ int main(int argc, char *argv[]) {
 
   // write PostScript file
   psOut = new PSOutputDev(psFileName->getCString(), doc,
-			  NULL, pages, mode,
+			  nullptr, pages, mode,
 			  paperWidth,
 			  paperHeight,
                           noCrop,

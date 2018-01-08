@@ -75,7 +75,7 @@ static const ArgDesc the_args[] = {
       "print usage information" },
     { "--help",                argFlag,  &show_help,           0,
       "print usage information" },
-    { NULL, argFlag, 0, 0, NULL }
+    { nullptr, argFlag, nullptr, 0, nullptr }
 };
 
 static void error(const std::string &msg)

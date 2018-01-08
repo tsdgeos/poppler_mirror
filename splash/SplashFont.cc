@@ -59,8 +59,8 @@ SplashFont::SplashFont(SplashFontFile *fontFileA, SplashCoord *matA,
   textMat[3] = textMatA[3];
   aa = aaA;
 
-  cache = NULL;
-  cacheTags = NULL;
+  cache = nullptr;
+  cacheTags = nullptr;
 
   xMin = yMin = xMax = yMax = 0;
 }
@@ -98,7 +98,7 @@ void SplashFont::initCache() {
     cacheSets = 1;
   }
   cache = (Guchar *)gmallocn_checkoverflow(cacheSets* cacheAssoc, glyphSize);
-  if (cache != NULL) {
+  if (cache != nullptr) {
     cacheTags = (SplashFontCacheTag *)gmallocn(cacheSets * cacheAssoc,
 					     sizeof(SplashFontCacheTag));
     for (i = 0; i < cacheSets * cacheAssoc; ++i) {
@@ -189,7 +189,7 @@ GBool SplashFont::getGlyph(int c, int xFrac, int yFrac,
   } else {
     size = ((bitmap2.w + 7) >> 3) * bitmap2.h;
   }
-  p = NULL; // make gcc happy
+  p = nullptr; // make gcc happy
   if (cacheAssoc == 0)
   {
     // we had problems on the malloc of the cache, so ignore it

@@ -24,16 +24,16 @@
 static int page = 0;
 static gboolean cairo_output = FALSE;
 static gboolean splash_output = FALSE;
-static const char **file_arguments = NULL;
+static const char **file_arguments = nullptr;
 static const GOptionEntry options[] = {
-  { "cairo", 'c', 0, G_OPTION_ARG_NONE, &cairo_output, "Cairo Output Device", NULL},
-  { "splash", 's', 0, G_OPTION_ARG_NONE, &splash_output, "Splash Output Device", NULL},
+  { "cairo", 'c', 0, G_OPTION_ARG_NONE, &cairo_output, "Cairo Output Device", nullptr},
+  { "splash", 's', 0, G_OPTION_ARG_NONE, &splash_output, "Splash Output Device", nullptr},
   { "page", 'p', 0, G_OPTION_ARG_INT, &page, "Page number", "PAGE" },
-  { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &file_arguments, NULL, "PDF-FILES…" },
-  { NULL }
+  { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &file_arguments, nullptr, "PDF-FILES…" },
+  { nullptr }
 };
 
-static GList *view_list = NULL;
+static GList *view_list = nullptr;
 
 //------------------------------------------------------------------------
 
@@ -115,8 +115,8 @@ GDKSplashOutputDev::~GDKSplashOutputDev() {
 }
 
 void GDKSplashOutputDev::clear() {
-  startDoc(NULL);
-  startPage(0, NULL, NULL);
+  startDoc(nullptr);
+  startPage(0, nullptr, nullptr);
 }
 
 void GDKSplashOutputDev::endPage() {
@@ -147,7 +147,7 @@ void GDKSplashOutputDev::redraw(int srcX, int srcY,
   pixbuf = gdk_pixbuf_new_from_data (getBitmap()->getDataPtr() + srcY * gdk_rowstride + srcX * 3,
                                      GDK_COLORSPACE_RGB, FALSE, 8,
                                      width, height, gdk_rowstride,
-                                     NULL, NULL);
+                                     nullptr, nullptr);
 
   gdk_cairo_set_source_pixbuf (cr, pixbuf, 0, 0);
   cairo_paint (cr);
@@ -302,7 +302,7 @@ view_new (PopplerDocument *doc)
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
 
   view->drawing_area = gtk_drawing_area_new ();
-  sw = gtk_scrolled_window_new (NULL, NULL);
+  sw = gtk_scrolled_window_new (nullptr, nullptr);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
                                   GTK_POLICY_AUTOMATIC,
                                   GTK_POLICY_AUTOMATIC);
@@ -366,9 +366,9 @@ main (int argc, char *argv [])
     return -1;
   }
 
-  ctx = g_option_context_new (NULL);
+  ctx = g_option_context_new (nullptr);
   g_option_context_add_main_entries (ctx, options, "main");
-  g_option_context_parse (ctx, &argc, &argv, NULL);
+  g_option_context_parse (ctx, &argc, &argv, nullptr);
   g_option_context_free (ctx);
 
   gtk_init (&argc, &argv);
@@ -379,10 +379,10 @@ main (int argc, char *argv [])
     View            *view;
     GFile           *file;
     PopplerDocument *doc;
-    GError          *error = NULL;
+    GError          *error = nullptr;
 
     file = g_file_new_for_commandline_arg (file_arguments[i]);
-    doc = poppler_document_new_from_gfile (file, NULL, NULL, &error);
+    doc = poppler_document_new_from_gfile (file, nullptr, nullptr, &error);
     if (!doc) {
       gchar *uri;
 

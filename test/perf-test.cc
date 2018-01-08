@@ -118,7 +118,7 @@ typedef struct StrList {
      - names of a file with a list of PDF files
      - names of directories with PDF files
 */
-static StrList *gArgsListRoot = NULL;
+static StrList *gArgsListRoot = nullptr;
 
 /* Names of all command-line switches we recognize */
 #define TIMINGS_ARG         "-timings"
@@ -143,13 +143,13 @@ static int  gResolutionY = 0;
 /* If NULL, we output the log info to stdout. If not NULL, should be a name
    of the file to which we output log info.
    Controled by -out command-line argument. */
-static char *   gOutFileName = NULL;
+static char *   gOutFileName = nullptr;
 /* FILE * correspondig to gOutFileName or stdout if gOutFileName is NULL or
    was invalid name */
-static FILE *   gOutFile = NULL;
+static FILE *   gOutFile = nullptr;
 /* FILE * correspondig to gOutFileName or stderr if gOutFileName is NULL or
    was invalid name */
-static FILE *   gErrFile = NULL;
+static FILE *   gErrFile = nullptr;
 
 /* If True and a directory is given as a command-line argument, we'll process
    pdf files in sub-directories as well.
@@ -235,7 +235,7 @@ static char *str_cat4(const char *str1, const char *str2, const char *str3, cons
 
     str = (char*)zmalloc(str1_len + str2_len + str3_len + str4_len + 1);
     if (!str)
-        return NULL;
+        return nullptr;
 
     tmp = str;
     if (str1) {
@@ -258,7 +258,7 @@ static char *str_cat4(const char *str1, const char *str2, const char *str3, cons
 
 static char *str_dup(const char *str)
 {
-    return str_cat4(str, NULL, NULL, NULL);
+    return str_cat4(str, nullptr, nullptr, nullptr);
 }
 
 static bool str_eq(const char *str1, const char *str2)
@@ -404,10 +404,10 @@ static void SplashColorsInit(void)
 }
 
 PdfEnginePoppler::PdfEnginePoppler() : 
-   _fileName(0)
+   _fileName(nullptr)
    , _pageCount(INVALID_PAGE_NO) 
-   , _pdfDoc(NULL)
-   , _outputDev(NULL)
+   , _pdfDoc(nullptr)
+   , _outputDev(nullptr)
 {
 }
 
@@ -425,7 +425,7 @@ bool PdfEnginePoppler::load(const char *fileName)
     GooString *fileNameStr = new GooString(fileName);
     if (!fileNameStr) return false;
 
-    _pdfDoc = new PDFDoc(fileNameStr, NULL, NULL, (void*)NULL);
+    _pdfDoc = new PDFDoc(fileNameStr, nullptr, nullptr, (void*)nullptr);
     if (!_pdfDoc->isOk()) {
         return false;
     }
@@ -446,7 +446,7 @@ SplashOutputDev * PdfEnginePoppler::outputDevice() {
 SplashBitmap *PdfEnginePoppler::renderBitmap(int pageNo, double zoomReal, int rotation)
 {
     assert(outputDevice());
-    if (!outputDevice()) return NULL;
+    if (!outputDevice()) return nullptr;
 
     double hDPI = (double)PDF_FILE_DPI * zoomReal * 0.01;
     double vDPI = (double)PDF_FILE_DPI * zoomReal * 0.01;
@@ -454,7 +454,7 @@ SplashBitmap *PdfEnginePoppler::renderBitmap(int pageNo, double zoomReal, int ro
     GBool  crop        = gTrue;
     GBool  doLinks     = gTrue;
     _pdfDoc->displayPage(_outputDev, pageNo, hDPI, vDPI, rotation, useMediaBox, 
-        crop, doLinks, NULL, NULL);
+        crop, doLinks, nullptr, nullptr);
 
     SplashBitmap* bmp = _outputDev->takeBitmap();
     return bmp;
@@ -525,7 +525,7 @@ static FindFileState *find_file_open(const char *path, const char *pattern)
 
     s = (FindFileState*)malloc(sizeof(FindFileState));
     if (!s)
-        return NULL;
+        return nullptr;
     strcpy_s(s->path, sizeof(s->path), path);
     strcpy_s(s->dirpath, sizeof(s->path), path);
 #ifdef _WIN32
@@ -536,7 +536,7 @@ static FindFileState *find_file_open(const char *path, const char *pattern)
 #ifdef _WIN32
     s->dir = INVALID_HANDLE_VALUE;
 #else
-    s->dir = NULL;
+    s->dir = nullptr;
 #endif
     return s;
 }
@@ -600,16 +600,16 @@ CheckFile:
     const char *p;
     char *q;
 
-    if (s->dir == NULL)
+    if (s->dir == nullptr)
         goto redo;
 
     for (;;) {
         dirent = readdir(s->dir);
-        if (dirent == NULL) {
+        if (dirent == nullptr) {
         redo:
             if (s->dir) {
                 closedir(s->dir);
-                s->dir = NULL;
+                s->dir = nullptr;
             }
             p = s->bufptr;
             if (*p == '\0')
@@ -705,13 +705,13 @@ static StrList* StrList_RemoveHead(StrList **root)
     StrList *tmp;
     assert(root);
     if (!root)
-        return NULL;
+        return nullptr;
 
     if (!*root)
-        return NULL;
+        return nullptr;
     tmp = *root;
     *root = tmp->next;
-    tmp->next = NULL;
+    tmp->next = nullptr;
     return tmp;
 }
 
@@ -736,7 +736,7 @@ static void StrList_Destroy(StrList **root)
         StrList_FreeElement(cur);
         cur = next;
     }
-    *root = NULL;
+    *root = nullptr;
 }
 
 static void my_error(void *, ErrorCategory, Goffset pos, char *msg) {
@@ -827,9 +827,9 @@ static bool ShowPreview(void)
 
 static void RenderPdfAsText(const char *fileName)
 {
-    GooString *         fileNameStr = NULL;
-    PDFDoc *            pdfDoc = NULL;
-    GooString *         txt = NULL;
+    GooString *         fileNameStr = nullptr;
+    PDFDoc *            pdfDoc = nullptr;
+    GooString *         txt = nullptr;
     int                 pageCount;
     double              timeInMs;
 
@@ -839,7 +839,7 @@ static void RenderPdfAsText(const char *fileName)
 
     LogInfo("started: %s\n", fileName);
 
-    TextOutputDev * textOut = new TextOutputDev(NULL, gTrue, 0, gFalse, gFalse);
+    TextOutputDev * textOut = new TextOutputDev(nullptr, gTrue, 0, gFalse, gFalse);
     if (!textOut->isOk()) {
         delete textOut;
         return;
@@ -851,7 +851,7 @@ static void RenderPdfAsText(const char *fileName)
     if (!fileNameStr)
         goto Exit;
 
-    pdfDoc = new PDFDoc(fileNameStr, NULL, NULL, NULL);
+    pdfDoc = new PDFDoc(fileNameStr, nullptr, nullptr, nullptr);
     if (!pdfDoc->isOk()) {
         error(errIO, -1, "RenderPdfFile(): failed to open PDF file {0:s}\n", fileName);
         goto Exit;
@@ -881,7 +881,7 @@ static void RenderPdfAsText(const char *fileName)
             LogInfo("page %d: %.2f ms\n", curPage, timeInMs);
         printf("%s\n", txt->getCString());
         delete txt;
-        txt = NULL;
+        txt = nullptr;
     }
 
 Exit:
@@ -898,8 +898,8 @@ Exit:
 
 static void RenderPdf(const char *fileName)
 {
-    const char *        fileNameSplash = NULL;
-    PdfEnginePoppler *  engineSplash = NULL;
+    const char *        fileNameSplash = nullptr;
+    PdfEnginePoppler *  engineSplash = nullptr;
     int                 pageCount;
     double              timeInMs;
 
@@ -932,7 +932,7 @@ static void RenderPdf(const char *fileName)
         if ((gPageNo != PAGE_NO_NOT_GIVEN) && (gPageNo != curPage))
             continue;
 
-        SplashBitmap *bmpSplash = NULL;
+        SplashBitmap *bmpSplash = nullptr;
 
         GooTimer msTimer;
         bmpSplash = engineSplash->renderBitmap(curPage, 100.0, 0);
@@ -1179,7 +1179,7 @@ static void RenderDirectory(char *path)
 {
     FindFileState * ffs;
     char            filename[MAX_FILENAME_SIZE];
-    StrList *       dirList = NULL;
+    StrList *       dirList = nullptr;
     StrList *       el;
 
     StrList_Insert(&dirList, path);
@@ -1230,7 +1230,7 @@ static void RenderCmdLineArg(char *cmdLineArg)
 
 int main(int argc, char **argv)
 {
-    setErrorCallback(my_error, NULL);
+    setErrorCallback(my_error, nullptr);
     ParseCommandLine(argc, argv);
     if (0 == StrList_Len(&gArgsListRoot))
         PrintUsageAndExit(argc, argv);
@@ -1242,7 +1242,7 @@ int main(int argc, char **argv)
         return 1;
     globalParams->setErrQuiet(gFalse);
 
-    FILE * outFile = NULL;
+    FILE * outFile = nullptr;
     if (gOutFileName) {
         outFile = fopen(gOutFileName, "wb");
         if (!outFile) {

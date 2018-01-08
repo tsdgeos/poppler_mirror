@@ -32,7 +32,7 @@ class NavigationToolBar : public QToolBar, public DocumentObserver
     Q_OBJECT
 
 public:
-    NavigationToolBar(QWidget *parent = 0);
+    NavigationToolBar(QWidget *parent = nullptr);
     ~NavigationToolBar();
 
     void documentLoaded() override;

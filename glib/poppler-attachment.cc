@@ -78,15 +78,15 @@ poppler_attachment_finalize (GObject *obj)
 
   if (attachment->name)
     g_free (attachment->name);
-  attachment->name = NULL;
+  attachment->name = nullptr;
 
   if (attachment->description)
     g_free (attachment->description);
-  attachment->description = NULL;
+  attachment->description = nullptr;
   
   if (attachment->checksum)
     g_string_free (attachment->checksum, TRUE);
-  attachment->checksum = NULL;
+  attachment->checksum = nullptr;
   
   G_OBJECT_CLASS (poppler_attachment_parent_class)->finalize (obj);
 }
@@ -100,9 +100,9 @@ _poppler_attachment_new (FileSpec *emb_file)
   PopplerAttachmentPrivate *priv;
   EmbFile *embFile;
 
-  g_assert (emb_file != NULL);
+  g_assert (emb_file != nullptr);
 
-  attachment = (PopplerAttachment *) g_object_new (POPPLER_TYPE_ATTACHMENT, NULL);
+  attachment = (PopplerAttachment *) g_object_new (POPPLER_TYPE_ATTACHMENT, nullptr);
   priv = POPPLER_ATTACHMENT_GET_PRIVATE (attachment);
 
   if (emb_file->getFileName ())
@@ -173,7 +173,7 @@ poppler_attachment_save (PopplerAttachment  *attachment,
 
   f = g_fopen (filename, "wb");
 
-  if (f == NULL)
+  if (f == nullptr)
     {
       gchar *display_name = g_filename_display_name (filename);
       g_set_error (error,

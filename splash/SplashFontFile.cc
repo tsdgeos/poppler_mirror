@@ -72,8 +72,8 @@ void SplashFontFile::decRefCnt() {
 SplashFontSrc::SplashFontSrc() {
   isFile = gFalse;
   deleteSrc = gFalse;
-  fileName = NULL;
-  buf = NULL;
+  fileName = nullptr;
+  buf = nullptr;
   refcnt = 1;
 }
 

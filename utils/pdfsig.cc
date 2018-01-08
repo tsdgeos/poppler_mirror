@@ -104,17 +104,17 @@ static const ArgDesc argDesc[] = {
    "print usage information"},
   {"-?",      argFlag,     &printHelp,     0,
    "print usage information"},
-  {NULL}
+  {nullptr}
 };
 
 
 int main(int argc, char *argv[])
 {
-  PDFDoc *doc = NULL;
+  PDFDoc *doc = nullptr;
   unsigned int sigCount;
-  GooString * fileName = NULL;
-  SignatureInfo *sig_info = NULL;
-  char *time_str = NULL;
+  GooString * fileName = nullptr;
+  SignatureInfo *sig_info = nullptr;
+  char *time_str = nullptr;
   std::vector<FormWidgetSignature*> sig_widgets;
   globalParams = new GlobalParams();
 
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
   fileName = new GooString(argv[argc - 1]);
 
   // open PDF file
-  doc = PDFDocFactory().createPDFDoc(*fileName, NULL, NULL);
+  doc = PDFDocFactory().createPDFDoc(*fileName, nullptr, nullptr);
 
   if (!doc->isOk()) {
     exitCode = 1;

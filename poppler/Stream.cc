@@ -150,7 +150,7 @@ char *Stream::getLine(char *buf, int size) {
   int c;
 
   if (lookChar() == EOF || size < 0)
-    return NULL;
+    return nullptr;
   for (i = 0; i < size - 1; ++i) {
     c = getChar();
     if (c == EOF || c == '\n')
@@ -505,8 +505,8 @@ Guchar *ImageStream::getLine() {
   int i;
   Guchar *p;
   
-  if (unlikely(inputLine == NULL)) {
-      return NULL;
+  if (unlikely(inputLine == nullptr)) {
+      return nullptr;
   }
  
   int readChars = str->doGetChars(inputLineSize, inputLine);
@@ -568,7 +568,7 @@ StreamPredictor::StreamPredictor(Stream *strA, int predictorA,
   width = widthA;
   nComps = nCompsA;
   nBits = nBitsA;
-  predLine = NULL;
+  predLine = nullptr;
   ok = gFalse;
 
   nVals = width * nComps;
@@ -1061,13 +1061,13 @@ EmbedStream::~EmbedStream() {
 
 BaseStream *EmbedStream::copy() {
   error(errInternal, -1, "Called copy() on EmbedStream");
-  return NULL;
+  return nullptr;
 }
 
 Stream *EmbedStream::makeSubStream(Goffset start, GBool limitedA,
 				   Goffset lengthA, Object &&dictA) {
   error(errInternal, -1, "Called makeSubStream() on EmbedStream");
-  return NULL;
+  return nullptr;
 }
 
 void EmbedStream::rewind() {
@@ -1250,10 +1250,10 @@ GooString *ASCIIHexStream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 2) {
-    return NULL;
+    return nullptr;
   }
   if (!(s = str->getPSFilter(psLevel, indent))) {
-    return NULL;
+    return nullptr;
   }
   s->append(indent)->append("/ASCIIHexDecode filter\n");
   return s;
@@ -1331,10 +1331,10 @@ GooString *ASCII85Stream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 2) {
-    return NULL;
+    return nullptr;
   }
   if (!(s = str->getPSFilter(psLevel, indent))) {
-    return NULL;
+    return nullptr;
   }
   s->append(indent)->append("/ASCII85Decode filter\n");
   return s;
@@ -1355,10 +1355,10 @@ LZWStream::LZWStream(Stream *strA, int predictor, int columns, int colors,
     pred = new StreamPredictor(this, predictor, columns, colors, bits);
     if (!pred->isOk()) {
       delete pred;
-      pred = NULL;
+      pred = nullptr;
     }
   } else {
-    pred = NULL;
+    pred = nullptr;
   }
   early = earlyA;
   eof = gFalse;
@@ -1539,10 +1539,10 @@ GooString *LZWStream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 2 || pred) {
-    return NULL;
+    return nullptr;
   }
   if (!(s = str->getPSFilter(psLevel, indent))) {
-    return NULL;
+    return nullptr;
   }
   s->append(indent)->append("<< ");
   if (!early) {
@@ -1601,10 +1601,10 @@ GooString *RunLengthStream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 2) {
-    return NULL;
+    return nullptr;
   }
   if (!(s = str->getPSFilter(psLevel, indent))) {
-    return NULL;
+    return nullptr;
   }
   s->append(indent)->append("/RunLengthDecode filter\n");
   return s;
@@ -1668,7 +1668,7 @@ CCITTFaxStream::CCITTFaxStream(Stream *strA, int encodingA, GBool endOfLineA,
   codingLine = (int *)gmallocn_checkoverflow(columns + 1, sizeof(int));
   refLine = (int *)gmallocn_checkoverflow(columns + 2, sizeof(int));
 
-  if (codingLine != NULL && refLine != NULL) {
+  if (codingLine != nullptr && refLine != nullptr) {
     eof = gFalse;
     codingLine[0] = columns;
   } else {
@@ -1712,7 +1712,7 @@ void CCITTFaxStream::reset() {
 
   ccittReset(gFalse);
 
-  if (codingLine != NULL && refLine != NULL) {
+  if (codingLine != nullptr && refLine != nullptr) {
     eof = gFalse;
     codingLine[0] = columns;
   } else {
@@ -2413,10 +2413,10 @@ GooString *CCITTFaxStream::getPSFilter(int psLevel, const char *indent) {
   char s1[50];
 
   if (psLevel < 2) {
-    return NULL;
+    return nullptr;
   }
   if (!(s = str->getPSFilter(psLevel, indent))) {
-    return NULL;
+    return nullptr;
   }
   s->append(indent)->append("<< ");
   if (encoding != 0) {
@@ -4573,13 +4573,13 @@ FlateStream::FlateStream(Stream *strA, int predictor, int columns,
     pred = new StreamPredictor(this, predictor, columns, colors, bits);
     if (!pred->isOk()) {
       delete pred;
-      pred = NULL;
+      pred = nullptr;
     }
   } else {
-    pred = NULL;
+    pred = nullptr;
   }
-  litCodeTab.codes = NULL;
-  distCodeTab.codes = NULL;
+  litCodeTab.codes = nullptr;
+  distCodeTab.codes = nullptr;
   memset(buf, 0, flateWindow);
 }
 
@@ -4691,10 +4691,10 @@ GooString *FlateStream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 3 || pred) {
-    return NULL;
+    return nullptr;
   }
   if (!(s = str->getPSFilter(psLevel, indent))) {
-    return NULL;
+    return nullptr;
   }
   s->append(indent)->append("<< >> /FlateDecode filter\n");
   return s;
@@ -4778,11 +4778,11 @@ GBool FlateStream::startBlock() {
   if (litCodeTab.codes != fixedLitCodeTab.codes) {
     gfree(litCodeTab.codes);
   }
-  litCodeTab.codes = NULL;
+  litCodeTab.codes = nullptr;
   if (distCodeTab.codes != fixedDistCodeTab.codes) {
     gfree(distCodeTab.codes);
   }
-  distCodeTab.codes = NULL;
+  distCodeTab.codes = nullptr;
 
   // read block header
   blockHdr = getCodeWord(3);
@@ -4852,7 +4852,7 @@ GBool FlateStream::readDynamicCodes() {
   int len, repeat, code;
   int i;
 
-  codeLenCodeTab.codes = NULL;
+  codeLenCodeTab.codes = nullptr;
 
   // read lengths
   if ((numLitCodes = getCodeWord(5)) == EOF) {
@@ -5393,8 +5393,8 @@ void LZWEncoder::reset() {
   // initialize code table
   for (i = 0; i < 256; ++i) {
     table[i].byte = i;
-    table[i].next = NULL;
-    table[i].children = NULL;
+    table[i].next = nullptr;
+    table[i].children = nullptr;
   }
   nextSeq = 258;
   codeLen = 9;
@@ -5478,11 +5478,11 @@ void LZWEncoder::fillBuf() {
 
   // update the table
   table[nextSeq].byte = seqLen < inBufLen ? inBuf[seqLen] : 0;
-  table[nextSeq].children = NULL;
+  table[nextSeq].children = nullptr;
   if (table[code].children) {
     table[nextSeq].next = table[code].children;
   } else {
-    table[nextSeq].next = NULL;
+    table[nextSeq].next = nullptr;
   }
   table[code].children = table + nextSeq;
   ++nextSeq;
@@ -5499,8 +5499,8 @@ void LZWEncoder::fillBuf() {
       outBuf = (outBuf << 12) | 256;
       outBufLen += 12;
       for (i = 0; i < 256; ++i) {
-	table[i].next = NULL;
-	table[i].children = NULL;
+	table[i].next = nullptr;
+	table[i].children = nullptr;
       }
       nextSeq = 258;
       codeLen = 9;

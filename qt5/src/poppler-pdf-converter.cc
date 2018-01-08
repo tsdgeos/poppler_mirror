@@ -38,7 +38,7 @@ class PDFConverterPrivate : public BaseConverterPrivate
 };
 
 PDFConverterPrivate::PDFConverterPrivate()
-	: BaseConverterPrivate(), opts(0)
+	: BaseConverterPrivate(), opts(nullptr)
 {
 }
 

@@ -192,9 +192,9 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, const QRectF &linkArea
 Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDoc, const QRectF &linkArea)
 {
   if ( !a )
-    return NULL;
+    return nullptr;
 
-  Link * popplerLink = NULL;
+  Link * popplerLink = nullptr;
   switch ( a->getKind() )
   {
     case actionGoTo:
@@ -221,7 +221,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
     {
       LinkLaunch * e = (LinkLaunch *)a;
       GooString * p = e->getParams();
-      popplerLink = new LinkExecute( linkArea, e->getFileName()->getCString(), p ? p->getCString() : 0 );
+      popplerLink = new LinkExecute( linkArea, e->getFileName()->getCString(), p ? p->getCString() : nullptr );
     }
     break;
 
@@ -325,7 +325,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
       if ( lrn->hasScreenAnnot() )
         reference = lrn->getScreenAnnot();
 
-      popplerLink = new LinkRendition( linkArea, lrn->getMedia() ? lrn->getMedia()->copy() : NULL, lrn->getOperation(), UnicodeParsedString( lrn->getScript() ), reference );
+      popplerLink = new LinkRendition( linkArea, lrn->getMedia() ? lrn->getMedia()->copy() : nullptr, lrn->getOperation(), UnicodeParsedString( lrn->getScript() ), reference );
     }
     break;
 
@@ -354,9 +354,9 @@ inline TextPage *PageData::prepareTextSearch(const QString &text, Page::Rotation
   const int rotation = (int)rotate * 90;
 
   // fetch ourselves a textpage
-  TextOutputDev td(NULL, gTrue, 0, gFalse, gFalse);
+  TextOutputDev td(nullptr, gTrue, 0, gFalse, gFalse);
   parentDoc->doc->displayPage( &td, index + 1, 72, 72, rotation, false, true, false,
-    NULL, NULL, NULL, NULL, gTrue);
+    nullptr, nullptr, nullptr, nullptr, gTrue);
   TextPage *textPage=td.takeText();
 
   return textPage;
@@ -403,7 +403,7 @@ Page::Page(DocumentData *doc, int index) {
   m_page->index = index;
   m_page->parentDoc = doc;
   m_page->page = doc->doc->getPage(m_page->index + 1);
-  m_page->transition = 0;
+  m_page->transition = nullptr;
 }
 
 Page::~Page()
@@ -521,7 +521,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
                   colorMode, 4,
                   gFalse,
                   ignorePaperColor,
-                  ignorePaperColor ? NULL : bgColor,
+                  ignorePaperColor ? nullptr : bgColor,
                   gTrue,
                   thinLineMode,
                   overprintPreview);
@@ -603,7 +603,7 @@ bool Page::renderToPainter(QPainter* painter, double xres, double yres, int x, i
 
 QImage Page::thumbnail() const
 {
-  unsigned char* data = 0;
+  unsigned char* data = nullptr;
   int w = 0;
   int h = 0;
   int rowstride = 0;
@@ -627,10 +627,10 @@ QString Page::text(const QRectF &r, TextLayout textLayout) const
   QString result;
   
   const GBool rawOrder = textLayout == RawOrderLayout;
-  output_dev = new TextOutputDev(0, gFalse, 0, rawOrder, gFalse);
+  output_dev = new TextOutputDev(nullptr, gFalse, 0, rawOrder, gFalse);
   m_page->parentDoc->doc->displayPageSlice(output_dev, m_page->index + 1, 72, 72,
       0, false, true, false, -1, -1, -1, -1,
-      NULL, NULL, NULL, NULL, gTrue);
+      nullptr, nullptr, nullptr, nullptr, gTrue);
   if (r.isNull())
   {
     rect = m_page->page->getCropBox();
@@ -717,13 +717,13 @@ QList<TextBox*> Page::textList(Rotation rotate) const
   
   QList<TextBox*> output_list;
   
-  output_dev = new TextOutputDev(0, gFalse, 0, gFalse, gFalse);
+  output_dev = new TextOutputDev(nullptr, gFalse, 0, gFalse, gFalse);
   
   int rotation = (int)rotate * 90;
 
   m_page->parentDoc->doc->displayPageSlice(output_dev, m_page->index + 1, 72, 72,
       rotation, false, false, false, -1, -1, -1, -1,
-      NULL, NULL, NULL, NULL, gTrue);
+      nullptr, nullptr, nullptr, nullptr, gTrue);
 
   TextWordList *word_list = output_dev->makeWordList();
   
@@ -787,21 +787,21 @@ Link *Page::action( PageAction act ) const
     Object o = m_page->page->getActions();
     if (!o.isDict())
     {
-      return 0;
+      return nullptr;
     }
     Dict *dict = o.getDict();
     const char *key = act == Page::Opening ? "O" : "C";
     Object o2 = dict->lookup((char*)key);
     ::LinkAction *lact = ::LinkAction::parseAction(&o2, m_page->parentDoc->doc->getCatalog()->getBaseURI() );
-    Link *popplerLink = NULL;
-    if (lact != NULL)
+    Link *popplerLink = nullptr;
+    if (lact != nullptr)
     {
       popplerLink = m_page->convertLinkActionToLink(lact, QRectF());
       delete lact;
     }
     return popplerLink;
   }
-  return 0;
+  return nullptr;
 }
 
 QSizeF Page::pageSizeF() const
@@ -880,7 +880,7 @@ QList<FormField*> Page::formFields() const
   for (int i = 0; i < formcount; ++i)
   {
     ::FormWidget *fm = form->getWidget(i);
-    FormField * ff = NULL;
+    FormField * ff = nullptr;
     switch (fm->getType())
     {
       case formButton:

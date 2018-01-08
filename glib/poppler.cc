@@ -92,10 +92,10 @@ error_cb (void *data G_GNUC_UNUSED,
   static const char * const cat_str[] = {
     "Syntax warning",
     "Syntax error",
-    NULL,
-    NULL,
+    nullptr,
+    nullptr,
     "IO error",
-    NULL,
+    nullptr,
     "Unimplemented feature",
     "Internal error"
   };
@@ -114,7 +114,7 @@ error_cb (void *data G_GNUC_UNUSED,
 static void __attribute__((__constructor__))
 poppler_constructor (void)
 {
-  setErrorCallback (error_cb, NULL);
+  setErrorCallback (error_cb, nullptr);
 }
 
 #endif /* GNUC */

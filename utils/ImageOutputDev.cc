@@ -354,7 +354,7 @@ void ImageOutputDev::writeRawImage(Stream *str, const char *ext) {
 void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const char *ext,
                                     Stream *str, int width, int height, GfxImageColorMap *colorMap) {
   FILE *f = nullptr; /* squelch bogus compiler warning */
-  ImageStream *imgStr = NULL;
+  ImageStream *imgStr = nullptr;
   unsigned char *row;
   unsigned char *rowp;
   Guchar *p;
@@ -690,9 +690,9 @@ void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 				   int width, int height, GBool invert,
 				   GBool interpolate, GBool inlineImg) {
   if (listImages)
-    listImage(state, ref, str, width, height, NULL, interpolate, inlineImg, imgStencil);
+    listImage(state, ref, str, width, height, nullptr, interpolate, inlineImg, imgStencil);
   else
-    writeImage(state, ref, str, width, height, NULL, inlineImg);
+    writeImage(state, ref, str, width, height, nullptr, inlineImg);
 }
 
 void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
@@ -711,10 +711,10 @@ void ImageOutputDev::drawMaskedImage(
   Stream *maskStr, int maskWidth, int maskHeight, GBool maskInvert, GBool maskInterpolate) {
   if (listImages) {
     listImage(state, ref, str, width, height, colorMap, interpolate, gFalse, imgImage);
-    listImage(state, ref, str, maskWidth, maskHeight, NULL, maskInterpolate, gFalse, imgMask);
+    listImage(state, ref, str, maskWidth, maskHeight, nullptr, maskInterpolate, gFalse, imgMask);
   } else {
     writeImage(state, ref, str, width, height, colorMap, gFalse);
-    writeImage(state, ref, maskStr, maskWidth, maskHeight, NULL, gFalse);
+    writeImage(state, ref, maskStr, maskWidth, maskHeight, nullptr, gFalse);
   }
 }
 

@@ -17,7 +17,10 @@ endif ()
 
 if (GTK_FOUND)
 
-  add_definitions(${GTK3_CFLAGS})
+  include_directories(
+    SYSTEM
+    ${GTK3_INCLUDE_DIRS}
+  )
 
   include_directories(
     ${CMAKE_SOURCE_DIR}/glib

@@ -41,17 +41,17 @@ static const ArgDesc argDesc[] = {
    "print usage information"},
   {"-?",      argFlag,     &printHelp,       0,
    "print usage information"},
-  {NULL}
+  {nullptr}
 };
 
 int main (int argc, char *argv[])
 {
-  PDFDoc *doc = NULL;
-  PDFDoc *docOut = NULL;
-  GooString *inputName = NULL;
-  GooString *outputName = NULL;
-  GooString *ownerPW = NULL;
-  GooString *userPW = NULL;
+  PDFDoc *doc = nullptr;
+  PDFDoc *docOut = nullptr;
+  GooString *inputName = nullptr;
+  GooString *outputName = nullptr;
+  GooString *ownerPW = nullptr;
+  GooString *userPW = nullptr;
   int res = 0;
 
   // parse args

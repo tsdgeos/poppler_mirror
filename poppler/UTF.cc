@@ -52,7 +52,7 @@ int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4)
     }
     len++;
   }
-  if (ucs4 == NULL)
+  if (ucs4 == nullptr)
     return len;
 
   u = (Unicode*)gmallocn(len, sizeof(Unicode));
@@ -94,7 +94,7 @@ int TextStringToUCS4(GooString *textStr, Unicode **ucs4)
   len = textStr->getLength();
   s = textStr->getCString();
   if (len == 0) {
-    *ucs4 = 0;
+    *ucs4 = nullptr;
     return 0;
   }
 
@@ -109,7 +109,7 @@ int TextStringToUCS4(GooString *textStr, Unicode **ucs4)
       len = UTF16toUCS4(utf16, len, &u);
       delete[] utf16;
     } else {
-      u = NULL;
+      u = nullptr;
     }
   } else {
     u = (Unicode*)gmallocn(len, sizeof(Unicode));

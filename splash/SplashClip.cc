@@ -67,9 +67,9 @@ SplashClip::SplashClip(SplashCoord x0, SplashCoord y0,
   yMinI = splashFloor(yMin);
   xMaxI = splashCeil(xMax) - 1;
   yMaxI = splashCeil(yMax) - 1;
-  paths = NULL;
-  flags = NULL;
-  scanners = NULL;
+  paths = nullptr;
+  flags = nullptr;
+  scanners = nullptr;
   length = size = 0;
 }
 
@@ -145,9 +145,9 @@ void SplashClip::resetToRect(SplashCoord x0, SplashCoord y0,
   gfree(paths);
   gfree(flags);
   gfree(scanners);
-  paths = NULL;
-  flags = NULL;
-  scanners = NULL;
+  paths = nullptr;
+  flags = nullptr;
+  scanners = nullptr;
   length = size = 0;
 
   if (x0 < x1) {

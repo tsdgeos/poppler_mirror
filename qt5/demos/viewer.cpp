@@ -44,7 +44,7 @@
 #include <QtWidgets/QMessageBox>
 
 PdfViewer::PdfViewer()
-    : QMainWindow(), m_currentPage(0), m_doc(0)
+    : QMainWindow(), m_currentPage(0), m_doc(nullptr)
 {
     setWindowTitle(tr("Poppler-Qt5 Demo"));
 
@@ -216,7 +216,7 @@ void PdfViewer::closeDocument()
 
     m_currentPage = 0;
     delete m_doc;
-    m_doc = 0;
+    m_doc = nullptr;
 
     m_fileSaveCopyAct->setEnabled(false);
 }

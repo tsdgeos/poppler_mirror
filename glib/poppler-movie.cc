@@ -54,7 +54,7 @@ poppler_movie_finalize (GObject *object)
 
   if (movie->filename) {
     g_free (movie->filename);
-    movie->filename = NULL;
+    movie->filename = nullptr;
   }
 
   G_OBJECT_CLASS (poppler_movie_parent_class)->finalize (object);
@@ -78,9 +78,9 @@ _poppler_movie_new (Movie *poppler_movie)
 {
   PopplerMovie *movie;
 
-  g_assert (poppler_movie != NULL);
+  g_assert (poppler_movie != nullptr);
 
-  movie = POPPLER_MOVIE (g_object_new (POPPLER_TYPE_MOVIE, NULL));
+  movie = POPPLER_MOVIE (g_object_new (POPPLER_TYPE_MOVIE, nullptr));
 
   movie->filename = g_strdup (poppler_movie->getFileName()->getCString());
   if (poppler_movie->getShowPoster()) {

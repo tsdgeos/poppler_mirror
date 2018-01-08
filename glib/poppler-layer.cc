@@ -42,16 +42,16 @@ poppler_layer_finalize (GObject *object)
   if (poppler_layer->document)
     {
       g_object_unref (poppler_layer->document);
-      poppler_layer->document = NULL;
+      poppler_layer->document = nullptr;
     }
 
   if (poppler_layer->title)
     {
       g_free (poppler_layer->title);
-      poppler_layer->title = NULL;
+      poppler_layer->title = nullptr;
     }
-  poppler_layer->layer = NULL;
-  poppler_layer->rbgroup = NULL;
+  poppler_layer->layer = nullptr;
+  poppler_layer->rbgroup = nullptr;
 
   G_OBJECT_CLASS (poppler_layer_parent_class)->finalize (object);
 }
@@ -78,15 +78,15 @@ _poppler_layer_new (PopplerDocument *document,
   GooString    *layer_name;
 
   g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), NULL);
-  g_return_val_if_fail (layer != NULL, NULL);
+  g_return_val_if_fail (layer != nullptr, NULL);
 
-  poppler_layer = POPPLER_LAYER (g_object_new (POPPLER_TYPE_LAYER, NULL));
+  poppler_layer = POPPLER_LAYER (g_object_new (POPPLER_TYPE_LAYER, nullptr));
 
   poppler_layer->document = (PopplerDocument *)g_object_ref (document);
   poppler_layer->layer = layer;
   poppler_layer->rbgroup = rbgroup;
   layer_name = layer->oc->getName ();
-  poppler_layer->title = layer_name ? _poppler_goo_string_to_utf8 (layer_name) : NULL;
+  poppler_layer->title = layer_name ? _poppler_goo_string_to_utf8 (layer_name) : nullptr;
   
   return poppler_layer;
 }
@@ -200,7 +200,7 @@ poppler_layer_is_parent (PopplerLayer *poppler_layer)
 {
   g_return_val_if_fail (POPPLER_IS_LAYER (poppler_layer), FALSE);
 
-  return poppler_layer->layer->kids != NULL;
+  return poppler_layer->layer->kids != nullptr;
 }
 
 /**

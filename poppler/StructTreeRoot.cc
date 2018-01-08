@@ -74,7 +74,7 @@ void StructTreeRoot::parse(Dict *root)
       }
       Object obj = kids.arrayGet(i);
       if (obj.isDict()) {
-        StructElement *child = new StructElement(obj.getDict(), this, NULL, seenElements);
+        StructElement *child = new StructElement(obj.getDict(), this, nullptr, seenElements);
         if (child->isOk()) {
           if (marked && !(child->getType() == StructElement::Document ||
                           child->getType() == StructElement::Part ||
@@ -95,7 +95,7 @@ void StructTreeRoot::parse(Dict *root)
       }
     }
   } else if (kids.isDict()) {
-    StructElement *child = new StructElement(kids.getDict(), this, NULL, seenElements);
+    StructElement *child = new StructElement(kids.getDict(), this, nullptr, seenElements);
     if (child->isOk()) {
       appendChild(child);
       Object ref = root->lookupNF("K");

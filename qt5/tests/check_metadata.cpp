@@ -232,18 +232,18 @@ void TestMetaData::checkPdfId()
 
     {
     // no IDs wanted, just existance check
-    QVERIFY( doc->getPdfId( 0, 0 ) );
+    QVERIFY( doc->getPdfId( nullptr, nullptr ) );
     }
     {
     // only permanent ID
     QByteArray permanentId;
-    QVERIFY( doc->getPdfId( &permanentId, 0 ) );
+    QVERIFY( doc->getPdfId( &permanentId, nullptr ) );
     QCOMPARE( permanentId.toUpper(), referencePermanentId );
     }
     {
     // only update ID
     QByteArray updateId;
-    QVERIFY( doc->getPdfId( 0, &updateId ) );
+    QVERIFY( doc->getPdfId( nullptr, &updateId ) );
     QCOMPARE( updateId.toUpper(), referenceUpdateId );
     }
     {
@@ -264,7 +264,7 @@ void TestMetaData::checkNoPdfId()
     doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithActualText.pdf");
     QVERIFY( doc );
 
-    QVERIFY( !doc->getPdfId( 0, 0 ) );
+    QVERIFY( !doc->getPdfId( nullptr, nullptr ) );
 
     delete doc;
 }

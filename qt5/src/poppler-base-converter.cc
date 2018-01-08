@@ -26,7 +26,7 @@
 namespace Poppler {
 
 BaseConverterPrivate::BaseConverterPrivate()
-	: document(0), iodev(0), ownIodev(true)
+	: document(nullptr), iodev(nullptr), ownIodev(true)
 {
 }
 
@@ -51,11 +51,11 @@ QIODevice* BaseConverterPrivate::openDevice()
 			if (ownIodev)
 			{
 				delete iodev;
-				iodev = 0;
+				iodev = nullptr;
 			}
 			else
 			{
-				return 0;
+				return nullptr;
 			}
 		}
 	}
@@ -68,7 +68,7 @@ void BaseConverterPrivate::closeDevice()
 	{
 		iodev->close();
 		delete iodev;
-		iodev = 0;
+		iodev = nullptr;
 	}
 }
 

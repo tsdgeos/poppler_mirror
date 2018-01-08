@@ -57,7 +57,7 @@ SplashState::SplashState(int width, int height, GBool vectorAntialias,
   strokePattern = new SplashSolidColor(color);
   fillPattern = new SplashSolidColor(color);
   screen = new SplashScreen(screenParams);
-  blendFunc = NULL;
+  blendFunc = nullptr;
   strokeAlpha = 1;
   fillAlpha = 1;
   multiplyPatternAlpha = gFalse;
@@ -68,12 +68,12 @@ SplashState::SplashState(int width, int height, GBool vectorAntialias,
   lineJoin = splashLineJoinMiter;
   miterLimit = 10;
   flatness = 1;
-  lineDash = NULL;
+  lineDash = nullptr;
   lineDashLength = 0;
   lineDashPhase = 0;
   strokeAdjust = gFalse;
   clip = new SplashClip(0, 0, width - 0.001, height - 0.001, vectorAntialias);
-  softMask = NULL;
+  softMask = nullptr;
   deleteSoftMask = gFalse;
   inNonIsolatedGroup = gFalse;
   fillOverprint = gFalse;
@@ -95,7 +95,7 @@ SplashState::SplashState(int width, int height, GBool vectorAntialias,
   }
   overprintMask = 0xffffffff;
   overprintAdditive = gFalse;
-  next = NULL;
+  next = nullptr;
 }
 
 SplashState::SplashState(int width, int height, GBool vectorAntialias,
@@ -110,7 +110,7 @@ SplashState::SplashState(int width, int height, GBool vectorAntialias,
   strokePattern = new SplashSolidColor(color);
   fillPattern = new SplashSolidColor(color);
   screen = screenA->copy();
-  blendFunc = NULL;
+  blendFunc = nullptr;
   strokeAlpha = 1;
   fillAlpha = 1;
   multiplyPatternAlpha = gFalse;
@@ -121,12 +121,12 @@ SplashState::SplashState(int width, int height, GBool vectorAntialias,
   lineJoin = splashLineJoinMiter;
   miterLimit = 10;
   flatness = 1;
-  lineDash = NULL;
+  lineDash = nullptr;
   lineDashLength = 0;
   lineDashPhase = 0;
   strokeAdjust = gFalse;
   clip = new SplashClip(0, 0, width - 0.001, height - 0.001, vectorAntialias);
-  softMask = NULL;
+  softMask = nullptr;
   deleteSoftMask = gFalse;
   inNonIsolatedGroup = gFalse;
   fillOverprint = gFalse;
@@ -148,7 +148,7 @@ SplashState::SplashState(int width, int height, GBool vectorAntialias,
   }
   overprintMask = 0xffffffff;
   overprintAdditive = gFalse;
-  next = NULL;
+  next = nullptr;
 }
 
 SplashState::SplashState(SplashState *state) {
@@ -172,7 +172,7 @@ SplashState::SplashState(SplashState *state) {
     lineDash = (SplashCoord *)gmallocn(lineDashLength, sizeof(SplashCoord));
     memcpy(lineDash, state->lineDash, lineDashLength * sizeof(SplashCoord));
   } else {
-    lineDash = NULL;
+    lineDash = nullptr;
     lineDashLength = 0;
   }
   lineDashPhase = state->lineDashPhase;
@@ -198,7 +198,7 @@ SplashState::SplashState(SplashState *state) {
 #endif
   overprintMask = state->overprintMask;
   overprintAdditive = state->overprintAdditive;
-  next = NULL;
+  next = nullptr;
 }
 
 SplashState::~SplashState() {
@@ -235,7 +235,7 @@ void SplashState::setLineDash(SplashCoord *lineDashA, int lineDashLengthA,
     lineDash = (SplashCoord *)gmallocn(lineDashLength, sizeof(SplashCoord));
     memcpy(lineDash, lineDashA, lineDashLength * sizeof(SplashCoord));
   } else {
-    lineDash = NULL;
+    lineDash = nullptr;
   }
   lineDashPhase = lineDashPhaseA;
 }

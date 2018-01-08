@@ -73,9 +73,9 @@ GBool HtmlLink::inLink(double xmin,double ymin,double xmax,double ymax) const {
   
 static GooString* EscapeSpecialChars( GooString* s )
 {
-    GooString* tmp = NULL;
+    GooString* tmp = nullptr;
     for( int i = 0, j = 0; i < s->getLength(); i++, j++ ){
-        const char *replace = NULL;
+        const char *replace = nullptr;
         switch ( s->getChar(i) ){
 	        case '"': replace = "&quot;";  break;
 	        case '&': replace = "&amp;";  break;
@@ -124,7 +124,7 @@ HtmlLinks::HtmlLinks(){
 
 HtmlLinks::~HtmlLinks(){
   delete accu;
-  accu=NULL; 
+  accu=nullptr; 
 }
 
 GBool HtmlLinks::inLink(double xmin,double ymin,double xmax,double ymax,int& p)const {

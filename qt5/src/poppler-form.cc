@@ -96,7 +96,7 @@ FormField::FormField(FormFieldData &dd)
 FormField::~FormField()
 {
   delete m_formData;
-  m_formData = 0;
+  m_formData = nullptr;
 }
 
 QRectF FormField::rect() const
@@ -158,7 +158,7 @@ bool FormField::isVisible() const
 
 Link* FormField::activationAction() const
 {
-  Link* action = 0;
+  Link* action = nullptr;
   if (::LinkAction *act = m_formData->fm->getActivationAction())
   {
     action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
@@ -178,7 +178,7 @@ Link *FormField::additionalAction(AdditionalActionType type) const
 
   }
 
-  Link* action = 0;
+  Link* action = nullptr;
   if (::LinkAction *act = m_formData->fm->getAdditionalAction(actionType))
   {
     action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());

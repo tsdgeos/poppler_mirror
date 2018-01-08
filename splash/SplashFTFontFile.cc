@@ -48,10 +48,10 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA,
 
   if (src->isFile) {
     if (FT_New_Face(engineA->lib, src->fileName->getCString(), 0, &faceA))
-      return NULL;
+      return nullptr;
   } else {
     if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf, src->bufLen, 0, &faceA))
-      return NULL;
+      return nullptr;
   }
   codeToGIDA = (int *)gmallocn(256, sizeof(int));
   for (i = 0; i < 256; ++i) {
@@ -80,10 +80,10 @@ SplashFontFile *SplashFTFontFile::loadCIDFont(SplashFTFontEngine *engineA,
 
   if (src->isFile) {
     if (FT_New_Face(engineA->lib, src->fileName->getCString(), 0, &faceA))
-      return NULL;
+      return nullptr;
   } else {
     if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf, src->bufLen, 0, &faceA))
-      return NULL;
+      return nullptr;
   }
 
   return new SplashFTFontFile(engineA, idA, src,
@@ -100,10 +100,10 @@ SplashFontFile *SplashFTFontFile::loadTrueTypeFont(SplashFTFontEngine *engineA,
 
   if (src->isFile) {
     if (FT_New_Face(engineA->lib, src->fileName->getCString(), faceIndexA, &faceA))
-      return NULL;
+      return nullptr;
   } else {
     if (FT_New_Memory_Face(engineA->lib, (const FT_Byte *)src->buf, src->bufLen, faceIndexA, &faceA))
-      return NULL;
+      return nullptr;
   }
 
   return new SplashFTFontFile(engineA, idA, src,

@@ -205,7 +205,7 @@ namespace Poppler {
     {
 	public:
 		TextBoxData()
-		  : nextWord(0), hasSpaceAfter(false)
+		  : nextWord(nullptr), hasSpaceAfter(false)
 		{
 		}
 

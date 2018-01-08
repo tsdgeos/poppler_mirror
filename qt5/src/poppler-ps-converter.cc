@@ -61,8 +61,8 @@ PSConverterPrivate::PSConverterPrivate()
 	: BaseConverterPrivate(),
 	hDPI(72), vDPI(72), rotate(0), paperWidth(-1), paperHeight(-1),
 	marginRight(0), marginBottom(0), marginLeft(0), marginTop(0),
-	opts(PSConverter::Printing), pageConvertedCallback(0),
-	pageConvertedPayload(0)
+	opts(PSConverter::Printing), pageConvertedCallback(nullptr),
+	pageConvertedPayload(nullptr)
 {
 }
 
@@ -214,7 +214,7 @@ bool PSConverter::convert()
 	QByteArray pstitle8Bit = d->title.toLocal8Bit();
 	char* pstitlechar;
 	if (!d->title.isEmpty()) pstitlechar = pstitle8Bit.data();
-	else pstitlechar = 0;
+	else pstitlechar = nullptr;
 	
 	std::vector<int> pages;
 	foreach(int page, d->pageList)
@@ -258,8 +258,8 @@ bool PSConverter::convert()
 			                              gFalse,
 			                              gTrue,
 			                              isPrinting,
-			                              NULL,
-			                              NULL,
+			                              nullptr,
+			                              nullptr,
 			                              annotDisplayDecideCbk,
 			                              &showAnnotations, gTrue);
 			if (d->pageConvertedCallback)

@@ -35,7 +35,7 @@ static const ArgDesc argDesc[] = {
    "print usage information"},
   {"-?", argFlag, &printHelp, 0,
    "print usage information"},
-  {NULL}
+  {nullptr}
 };
 
 static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldRefNum, int newRefNum, Dict *srcNameTree, Dict *mergeNameTree, int numOffset) {
@@ -162,7 +162,7 @@ int main (int argc, char *argv[])
 
   for (i = 1; i < argc - 1; i++) {
     GooString *gfileName = new GooString(argv[i]);
-    PDFDoc *doc = new PDFDoc(gfileName, NULL, NULL, NULL);
+    PDFDoc *doc = new PDFDoc(gfileName, nullptr, nullptr, nullptr);
     if (doc->isOk() && !doc->isEncrypted()) {
       docs.push_back(doc);
       if (doc->getPDFMajorVersion() > majorVersion) {
@@ -278,7 +278,7 @@ int main (int argc, char *argv[])
         continue;
       }
 
-      PDFRectangle *cropBox = NULL;
+      PDFRectangle *cropBox = nullptr;
       if (docs[i]->getCatalog()->getPage(j)->isCropped())
         cropBox = docs[i]->getCatalog()->getPage(j)->getCropBox();
       docs[i]->replacePageDict(j,
@@ -330,7 +330,7 @@ int main (int argc, char *argv[])
     for (j = 0; j < intents.arrayGetLength(); j++) {
       Object intent = intents.arrayGet(j, 0);
       if (intent.isDict()) {
-        PDFDoc::writeObject(&intent, outStr, yRef, 0, NULL, cryptRC4, 0, 0, 0);
+        PDFDoc::writeObject(&intent, outStr, yRef, 0, nullptr, cryptRC4, 0, 0, 0);
       }
     }
     outStr->printf("]");
@@ -338,17 +338,17 @@ int main (int argc, char *argv[])
   // insert AcroForm
   if (!afObj.isNull()) {
     outStr->printf(" /AcroForm ");
-    PDFDoc::writeObject(&afObj, outStr, yRef, 0, NULL, cryptRC4, 0, 0, 0);
+    PDFDoc::writeObject(&afObj, outStr, yRef, 0, nullptr, cryptRC4, 0, 0, 0);
   }
   // insert OCProperties
   if (!ocObj.isNull() && ocObj.isDict()) {
     outStr->printf(" /OCProperties ");
-    PDFDoc::writeObject(&ocObj, outStr, yRef, 0, NULL, cryptRC4, 0, 0, 0);
+    PDFDoc::writeObject(&ocObj, outStr, yRef, 0, nullptr, cryptRC4, 0, 0, 0);
   }
   // insert Names
   if (!names.isNull() && names.isDict()) {
     outStr->printf(" /Names ");
-    PDFDoc::writeObject(&names, outStr, yRef, 0, NULL, cryptRC4, 0, 0, 0);
+    PDFDoc::writeObject(&names, outStr, yRef, 0, nullptr, cryptRC4, 0, 0, 0);
   }
   outStr->printf(">>\nendobj\n");
   objectsCount++;
@@ -375,7 +375,7 @@ int main (int argc, char *argv[])
         outStr->printf("/Parent %d 0 R", rootNum + 1);
       } else {
         outStr->printf("/%s ", key);
-        PDFDoc::writeObject(&value, outStr, yRef, offsets[i], NULL, cryptRC4, 0, 0, 0);
+        PDFDoc::writeObject(&value, outStr, yRef, offsets[i], nullptr, cryptRC4, 0, 0, 0);
       }
     }
     outStr->printf(" >>\nendobj\n");

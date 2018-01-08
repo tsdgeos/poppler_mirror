@@ -43,14 +43,14 @@ poppler_form_field_finalize (GObject *object)
   if (field->document)
     {
       g_object_unref (field->document);
-      field->document = NULL;
+      field->document = nullptr;
     }
   if (field->action)
     {
       poppler_action_free (field->action);
-      field->action = NULL;
+      field->action = nullptr;
     }
-  field->widget = NULL;
+  field->widget = nullptr;
 
   G_OBJECT_CLASS (poppler_form_field_parent_class)->finalize (object);
 }
@@ -75,9 +75,9 @@ _poppler_form_field_new (PopplerDocument *document,
   PopplerFormField *poppler_field;
 
   g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), NULL);
-  g_return_val_if_fail (field != NULL, NULL);
+  g_return_val_if_fail (field != nullptr, NULL);
 
-  poppler_field = POPPLER_FORM_FIELD (g_object_new (POPPLER_TYPE_FORM_FIELD, NULL));
+  poppler_field = POPPLER_FORM_FIELD (g_object_new (POPPLER_TYPE_FORM_FIELD, nullptr));
 
   poppler_field->document = (PopplerDocument *)g_object_ref (document);
   poppler_field->widget = field;
@@ -186,9 +186,9 @@ poppler_form_field_get_action (PopplerFormField *field)
 
   action = field->widget->getActivationAction();
   if (!action)
-    return NULL;
+    return nullptr;
 
-  field->action = _poppler_action_new (field->document, action, NULL);
+  field->action = _poppler_action_new (field->document, action, nullptr);
 
   return field->action;
 }
@@ -273,7 +273,7 @@ poppler_form_field_get_partial_name (PopplerFormField *field)
 
   tmp = field->widget->getPartialName();
 
-  return tmp ? _poppler_goo_string_to_utf8 (tmp) : NULL;
+  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
 }
 
 /**
@@ -296,7 +296,7 @@ poppler_form_field_get_mapping_name (PopplerFormField *field)
 
   tmp = field->widget->getMappingName();
 
-  return tmp ? _poppler_goo_string_to_utf8 (tmp) : NULL;
+  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
 }
 
 /**
@@ -319,7 +319,7 @@ poppler_form_field_get_name (PopplerFormField *field)
 
   tmp = field->widget->getFullyQualifiedName();
 
-  return tmp ? _poppler_goo_string_to_utf8 (tmp) : NULL;
+  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
 }
 
 /* Text Field */
@@ -367,7 +367,7 @@ poppler_form_field_text_get_text (PopplerFormField *field)
   text_field = static_cast<FormWidgetText*>(field->widget);
   tmp = text_field->getContent ();
 
-  return tmp ? _poppler_goo_string_to_utf8 (tmp) : NULL;
+  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
 }
 
 /**
@@ -387,7 +387,7 @@ poppler_form_field_text_set_text (PopplerFormField *field,
 	
   g_return_if_fail (field->widget->getType () == formText);
 
-  tmp = text ? g_convert (text, -1, "UTF-16BE", "UTF-8", NULL, &length, NULL) : NULL;
+  tmp = text ? g_convert (text, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
   goo_tmp = new GooString (tmp, length);
   g_free (tmp);
   static_cast<FormWidgetText*>(field->widget)->setContent (goo_tmp);
@@ -577,7 +577,7 @@ poppler_form_field_choice_get_item (PopplerFormField *field,
   g_return_val_if_fail (index >= 0 && index < poppler_form_field_choice_get_n_items (field), NULL);
 
   tmp = static_cast<FormWidgetChoice*>(field->widget)->getChoice (index);
-  return tmp ? _poppler_goo_string_to_utf8 (tmp) : NULL;
+  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
 }
 
 /**
@@ -664,7 +664,7 @@ poppler_form_field_choice_set_text (PopplerFormField *field,
 
   g_return_if_fail (field->widget->getType () == formChoice);
 
-  tmp = text ? g_convert (text, -1, "UTF-16BE", "UTF-8", NULL, &length, NULL) : NULL;
+  tmp = text ? g_convert (text, -1, "UTF-16BE", "UTF-8", nullptr, &length, nullptr) : nullptr;
   goo_tmp = new GooString (tmp, length);
   g_free (tmp);
   static_cast<FormWidgetChoice*>(field->widget)->setEditChoice (goo_tmp);
@@ -687,5 +687,5 @@ poppler_form_field_choice_get_text (PopplerFormField *field)
   g_return_val_if_fail (field->widget->getType () == formChoice, NULL);
 
   tmp = static_cast<FormWidgetChoice*>(field->widget)->getEditChoice ();
-  return tmp ? _poppler_goo_string_to_utf8 (tmp) : NULL;
+  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
 }

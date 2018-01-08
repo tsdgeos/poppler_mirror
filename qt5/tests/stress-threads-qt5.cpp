@@ -19,7 +19,7 @@
 class SillyThread : public QThread
 {
 public:
-    SillyThread(Poppler::Document* document, QObject* parent = 0);
+    SillyThread(Poppler::Document* document, QObject* parent = nullptr);
 
     void run() override;
 
@@ -32,7 +32,7 @@ private:
 class CrazyThread : public QThread
 {
 public:
-    CrazyThread(uint seed, Poppler::Document* document, QMutex* annotationMutex, QObject* parent = 0);
+    CrazyThread(uint seed, Poppler::Document* document, QMutex* annotationMutex, QObject* parent = nullptr);
 
     void run() override;
 
@@ -47,7 +47,7 @@ static Poppler::Page* loadPage(Poppler::Document* document, int index)
 {
     Poppler::Page* page = document->page(index);
 
-    if(page == 0)
+    if(page == nullptr)
     {
         qDebug() << "!Document::page";
         
@@ -169,7 +169,7 @@ void CrazyThread::run()
 
             PagePointer page(loadRandomPage(m_document));
 
-            Poppler::Annotation* annotation = 0;
+            Poppler::Annotation* annotation = nullptr;
 
             switch(qrand() % 3)
             {
@@ -271,14 +271,14 @@ int main(int argc, char** argv)
     const int sillyCount = atoi(argv[2]);
     const int crazyCount = atoi(argv[3]);
     
-    qsrand(time(0));
+    qsrand(time(nullptr));
 
     for(int argi = 4; argi < argc; ++argi)
     {
         const QString file = QFile::decodeName(argv[argi]);
         Poppler::Document* document = Poppler::Document::load(file);
 
-        if(document == 0)
+        if(document == nullptr)
         {
             qDebug() << "Could not load" << file;            
             continue;

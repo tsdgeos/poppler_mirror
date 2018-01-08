@@ -31,11 +31,11 @@
 //    [curSubpath < length - 1]
 
 SplashPath::SplashPath() {
-  pts = NULL;
-  flags = NULL;
+  pts = nullptr;
+  flags = nullptr;
   length = size = 0;
   curSubpath = 0;
-  hints = NULL;
+  hints = nullptr;
   hintsLength = hintsSize = 0;
 }
 
@@ -52,7 +52,7 @@ SplashPath::SplashPath(SplashPath *path) {
     hints = (SplashPathHint *)gmallocn(hintsSize, sizeof(SplashPathHint));
     memcpy(hints, path->hints, hintsLength * sizeof(SplashPathHint));
   } else {
-    hints = NULL;
+    hints = nullptr;
   }
 }
 

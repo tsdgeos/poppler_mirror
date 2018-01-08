@@ -25,7 +25,7 @@ PopplerInputStream::PopplerInputStream(GInputStream *inputStreamA, GCancellable 
   : BaseStream(std::move(dictA), lengthA)
 {
   inputStream = (GInputStream *)g_object_ref(inputStreamA);
-  cancellable = cancellableA ? (GCancellable *)g_object_ref(cancellableA) : NULL;
+  cancellable = cancellableA ? (GCancellable *)g_object_ref(cancellableA) : nullptr;
   start = startA;
   limited = limitedA;
   length = lengthA;
@@ -58,7 +58,7 @@ void PopplerInputStream::reset()
   GSeekable *seekable = G_SEEKABLE(inputStream);
 
   savePos = (Guint)g_seekable_tell(seekable);
-  g_seekable_seek(seekable, start, G_SEEK_SET, cancellable, NULL);
+  g_seekable_seek(seekable, start, G_SEEK_SET, cancellable, nullptr);
   saved = gTrue;
   bufPtr = bufEnd = buf;
   bufPos = start;
@@ -68,7 +68,7 @@ void PopplerInputStream::close()
 {
   if (!saved)
     return;
-  g_seekable_seek(G_SEEKABLE(inputStream), savePos, G_SEEK_SET, cancellable, NULL);
+  g_seekable_seek(G_SEEKABLE(inputStream), savePos, G_SEEK_SET, cancellable, nullptr);
   saved = gFalse;
 }
 
@@ -78,16 +78,16 @@ void PopplerInputStream::setPos(Goffset pos, int dir)
   GSeekable *seekable = G_SEEKABLE(inputStream);
 
   if (dir >= 0) {
-    g_seekable_seek(seekable, pos, G_SEEK_SET, cancellable, NULL);
+    g_seekable_seek(seekable, pos, G_SEEK_SET, cancellable, nullptr);
     bufPos = pos;
   } else {
-    g_seekable_seek(seekable, 0, G_SEEK_END, cancellable, NULL);
+    g_seekable_seek(seekable, 0, G_SEEK_END, cancellable, nullptr);
     size = (Guint)g_seekable_tell(seekable);
 
     if (pos > size)
       pos = size;
 
-    g_seekable_seek(seekable, -(goffset)pos, G_SEEK_END, cancellable, NULL);
+    g_seekable_seek(seekable, -(goffset)pos, G_SEEK_END, cancellable, nullptr);
     bufPos = (Guint)g_seekable_tell(seekable);
   }
   bufPtr = bufEnd = buf;
@@ -116,7 +116,7 @@ GBool PopplerInputStream::fillBuf()
     n = inputStreamBufSize - (bufPos % inputStreamBufSize);
   }
 
-  n = g_input_stream_read(inputStream, buf, n, cancellable, NULL);
+  n = g_input_stream_read(inputStream, buf, n, cancellable, nullptr);
   bufEnd = buf + n;
   if (bufPtr >= bufEnd) {
     return gFalse;

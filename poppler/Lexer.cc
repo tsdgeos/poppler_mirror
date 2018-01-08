@@ -279,7 +279,7 @@ Object Lexer::getObj(int objNum) {
     n = 0;
     numParen = 1;
     done = gFalse;
-    s = NULL;
+    s = nullptr;
     do {
       c2 = EOF;
       switch (c = getChar()) {
@@ -376,7 +376,7 @@ Object Lexer::getObj(int objNum) {
 	  n = 0;
 	  
 	  // we are growing see if the document is not malformed and we are growing too much
-	  if (objNum > 0 && xref != NULL)
+	  if (objNum > 0 && xref != nullptr)
 	  {
 	    int newObjNum = xref->getNumEntry(curStr.streamGetPos());
 	    if (newObjNum != objNum)
@@ -407,7 +407,7 @@ Object Lexer::getObj(int objNum) {
   case '/':
     p = tokBuf;
     n = 0;
-    s = NULL;
+    s = nullptr;
     while ((c = lookChar()) != EOF && !specialChars[c]) {
       getChar();
       if (c == '#') {
@@ -483,7 +483,7 @@ Object Lexer::getObj(int objNum) {
       p = tokBuf;
       m = n = 0;
       c2 = 0;
-      s = NULL;
+      s = nullptr;
       while (1) {
 	c = getChar();
 	if (c == '>') {

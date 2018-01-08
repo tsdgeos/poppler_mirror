@@ -57,7 +57,7 @@ GooList *FontInfoScanner::scan(int nPages) {
   int lastPage;
 
   if (currentPage > doc->getNumPages()) {
-    return NULL;
+    return nullptr;
   }
  
   result = new GooList();
@@ -97,7 +97,7 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList) 
   GfxFont *font;
 
   // scan the fonts in this resource dictionary
-  gfxFontDict = NULL;
+  gfxFontDict = nullptr;
   Object obj1 = resDict->lookupNF("Font");
   if (obj1.isRef()) {
     Object obj2 = obj1.fetch(xrefA);
@@ -106,7 +106,7 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList) 
       gfxFontDict = new GfxFontDict(xrefA, &r, obj2.getDict());
     }
   } else if (obj1.isDict()) {
-    gfxFontDict = new GfxFontDict(xrefA, NULL, obj1.getDict());
+    gfxFontDict = new GfxFontDict(xrefA, nullptr, obj1.getDict());
   }
   if (gfxFontDict) {
     for (int i = 0; i < gfxFontDict->getNumFonts(); ++i) {
@@ -160,10 +160,10 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref) {
 
   // font name
   origName = font->getName();
-  if (origName != NULL) {
+  if (origName != nullptr) {
     name = font->getName()->copy();
   } else {
-    name = NULL;
+    name = nullptr;
   }
 
   // font type
@@ -176,8 +176,8 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref) {
     emb = font->getEmbeddedFontID(&embRef);
   }
 
-  file = NULL;
-  substituteName = NULL;
+  file = nullptr;
+  substituteName = nullptr;
   if (!emb)
   {
     SysFontType dummy;
@@ -211,10 +211,10 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref) {
 }
 
 FontInfo::FontInfo(FontInfo& f) {
-  name = f.name ? f.name->copy() : NULL;
-  file = f.file ? f.file->copy() : NULL;
-  encoding = f.encoding ? f.encoding->copy() : NULL;
-  substituteName = f.substituteName ? f.substituteName->copy() : NULL;
+  name = f.name ? f.name->copy() : nullptr;
+  file = f.file ? f.file->copy() : nullptr;
+  encoding = f.encoding ? f.encoding->copy() : nullptr;
+  substituteName = f.substituteName ? f.substituteName->copy() : nullptr;
   type = f.type;
   emb = f.emb;
   subset = f.subset;

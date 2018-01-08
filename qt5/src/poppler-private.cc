@@ -49,7 +49,7 @@ namespace Debug {
 
 }
 
-    static UnicodeMap *utf8Map = 0;
+    static UnicodeMap *utf8Map = nullptr;
 
     void setDebugErrorFunction(PopplerDebugFunc function, const QVariant &closure)
     {
@@ -156,7 +156,7 @@ namespace Debug {
 
     GooString *QDateTimeToUnicodeGooString(const QDateTime &dt) {
         if (!dt.isValid()) {
-            return NULL;
+            return nullptr;
         }
 
         return QStringToUnicodeGooString(dt.toUTC().toString("yyyyMMddhhmmss+00'00'"));
@@ -188,7 +188,7 @@ namespace Debug {
                 }
                 else if ( destination && destination->isOk() )
                 {
-                    LinkDestinationData ldd(destination, NULL, doc, false);
+                    LinkDestinationData ldd(destination, nullptr, doc, false);
                     e->setAttribute( QStringLiteral("Destination"), LinkDestination(ldd).toString() );
                 }
                 break;
@@ -212,7 +212,7 @@ namespace Debug {
                 }
                 else if ( destination && destination->isOk() )
                 {
-                    LinkDestinationData ldd(destination, NULL, doc, g->getFileName() != 0);
+                    LinkDestinationData ldd(destination, nullptr, doc, g->getFileName() != nullptr);
                     e->setAttribute( QStringLiteral("Destination"), LinkDestination(ldd).toString() );
                 }
                 e->setAttribute( QStringLiteral("ExternalFileName"), g->getFileName()->getCString() );
@@ -236,7 +236,7 @@ namespace Debug {
         count --;
         if ( count == 0 )
         {
-            utf8Map = 0;
+            utf8Map = nullptr;
             delete globalParams;
         }
       }
@@ -246,13 +246,13 @@ namespace Debug {
         m_backend = Document::SplashBackend;
         paperColor = Qt::white;
         m_hints = 0;
-        m_optContentModel = 0;
+        m_optContentModel = nullptr;
       
         if ( count == 0 )
         {
-            utf8Map = 0;
+            utf8Map = nullptr;
             globalParams = new GlobalParams();
-            setErrorCallback(qt5ErrorFunction, NULL);
+            setErrorCallback(qt5ErrorFunction, nullptr);
         }
         count ++;
     }

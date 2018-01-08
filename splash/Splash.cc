@@ -254,7 +254,7 @@ inline void Splash::pipeInit(SplashPipe *pipe, int x, int y,
 			     GBool nonIsolatedGroup,
 			     GBool knockout, Guchar knockoutOpacity) {
   pipeSetXY(pipe, x, y);
-  pipe->pattern = NULL;
+  pipe->pattern = nullptr;
 
   // source color
   if (pattern) {
@@ -468,7 +468,7 @@ void Splash::pipeRun(SplashPipe *pipe) {
     //----- read destination pixel
 
     Guchar *destColorPtr;
-    if (pipe->shape && state->blendFunc && pipe->knockout && alpha0Bitmap != NULL) {
+    if (pipe->shape && state->blendFunc && pipe->knockout && alpha0Bitmap != nullptr) {
       destColorPtr = alpha0Bitmap->data + (alpha0Y+pipe->y)*alpha0Bitmap->rowSize;
       switch (bitmap->mode) {
         case splashModeMono1:
@@ -1357,14 +1357,14 @@ inline void Splash::pipeSetXY(SplashPipe *pipe, int x, int y) {
   if (bitmap->alpha) {
     pipe->destAlphaPtr = &bitmap->alpha[y * bitmap->width + x];
   } else {
-    pipe->destAlphaPtr = NULL;
+    pipe->destAlphaPtr = nullptr;
   }
   if (state->inNonIsolatedGroup && alpha0Bitmap->alpha) {
     pipe->alpha0Ptr =
         &alpha0Bitmap->alpha[(alpha0Y + y) * alpha0Bitmap->width +
 			     (alpha0X + x)];
   } else {
-    pipe->alpha0Ptr = NULL;
+    pipe->alpha0Ptr = nullptr;
   }
 }
 
@@ -1602,13 +1602,13 @@ Splash::Splash(SplashBitmap *bitmapA, GBool vectorAntialiasA,
 				 splashAAGamma) * 255);
     }
   } else {
-    aaBuf = NULL;
+    aaBuf = nullptr;
   }
   minLineWidth = 0;
   thinLineMode = splashThinLineDefault;
   clearModRegion();
   debugMode = gFalse;
-  alpha0Bitmap = NULL;
+  alpha0Bitmap = nullptr;
 }
 
 Splash::Splash(SplashBitmap *bitmapA, GBool vectorAntialiasA,
@@ -1630,13 +1630,13 @@ Splash::Splash(SplashBitmap *bitmapA, GBool vectorAntialiasA,
 				 splashAAGamma) * 255);
     }
   } else {
-    aaBuf = NULL;
+    aaBuf = nullptr;
   }
   minLineWidth = 0;
   thinLineMode = splashThinLineDefault;
   clearModRegion();
   debugMode = gFalse;
-  alpha0Bitmap = NULL;
+  alpha0Bitmap = nullptr;
 }
 
 Splash::~Splash() {
@@ -2088,7 +2088,7 @@ void Splash::strokeNarrow(SplashPath *path) {
 
   xPath = new SplashXPath(path, state->matrix, state->flatness, gFalse);
 
-  pipeInit(&pipe, 0, 0, state->strokePattern, NULL,
+  pipeInit(&pipe, 0, 0, state->strokePattern, nullptr,
 	   (Guchar)splashRound(state->strokeAlpha * 255),
 	   gFalse, gFalse);
 
@@ -2557,7 +2557,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
       clipRes = splashClipPartial;
     }
 
-    pipeInit(&pipe, 0, yMinI, pattern, NULL, (Guchar)splashRound(alpha * 255),
+    pipeInit(&pipe, 0, yMinI, pattern, nullptr, (Guchar)splashRound(alpha * 255),
 	     vectorAntialias && !inShading, gFalse);
 
     // draw the spans
@@ -2701,7 +2701,7 @@ SplashError Splash::xorFill(SplashPath *path, GBool eo) {
 
     origBlendFunc = state->blendFunc;
     state->blendFunc = &blendXor;
-    pipeInit(&pipe, 0, yMinI, state->fillPattern, NULL, 255, gFalse, gFalse);
+    pipeInit(&pipe, 0, yMinI, state->fillPattern, nullptr, 255, gFalse, gFalse);
 
     // draw the spans
     for (y = yMinI; y <= yMaxI; ++y) {
@@ -2816,7 +2816,7 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
   if (noClip) {
     if (glyph->aa) {
       pipeInit(&pipe, xStart, yStart,
-               state->fillPattern, NULL, (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
+               state->fillPattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
       for (yy = 0, y1 = yStart; yy < yyLimit; ++yy, ++y1) {
         pipeSetXY(&pipe, xStart, y1);
         for (xx = 0, x1 = xStart; xx < xxLimit; ++xx, ++x1) {
@@ -2836,7 +2836,7 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
       const int widthEight = splashCeil(glyph->w / 8.0);
 
       pipeInit(&pipe, xStart, yStart,
-               state->fillPattern, NULL, (Guchar)splashRound(state->fillAlpha * 255), gFalse, gFalse);
+               state->fillPattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), gFalse, gFalse);
       for (yy = 0, y1 = yStart; yy < yyLimit; ++yy, ++y1) {
         pipeSetXY(&pipe, xStart, y1);
         for (xx = 0, x1 = xStart; xx < xxLimit; xx += 8) {
@@ -2858,7 +2858,7 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
   } else {
     if (glyph->aa) {
       pipeInit(&pipe, xStart, yStart,
-               state->fillPattern, NULL, (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
+               state->fillPattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
       for (yy = 0, y1 = yStart; yy < yyLimit; ++yy, ++y1) {
         pipeSetXY(&pipe, xStart, y1);
         for (xx = 0, x1 = xStart; xx < xxLimit; ++xx, ++x1) {
@@ -2882,7 +2882,7 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
       const int widthEight = splashCeil(glyph->w / 8.0);
 
       pipeInit(&pipe, xStart, yStart,
-               state->fillPattern, NULL, (Guchar)splashRound(state->fillAlpha * 255), gFalse, gFalse);
+               state->fillPattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), gFalse, gFalse);
       for (yy = 0, y1 = yStart; yy < yyLimit; ++yy, ++y1) {
         pipeSetXY(&pipe, xStart, y1);
         for (xx = 0, x1 = xStart; xx < xxLimit; xx += 8) {
@@ -3100,7 +3100,7 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData,
   // scale the input image
   scaledMask = scaleMask(src, srcData, srcWidth, srcHeight,
 			 scaledWidth, scaledHeight);
-  if (scaledMask->data == NULL) {
+  if (scaledMask->data == nullptr) {
     error(errInternal, -1, "scaledMask->data is NULL in Splash::arbitraryTransformMask");
     delete scaledMask;
     return;
@@ -3190,7 +3190,7 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData,
   }
 
   // initialize the pixel pipe
-  pipeInit(&pipe, 0, 0, state->fillPattern, NULL,
+  pipeInit(&pipe, 0, 0, state->fillPattern, nullptr,
 	   (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
   if (vectorAntialias) {
     drawAAPixelInit();
@@ -3383,7 +3383,7 @@ void Splash::scaleMaskYdXu(SplashImageMaskSource src, void *srcData,
   int i, j;
   
   destPtr = dest->data;
-  if (destPtr == NULL) {
+  if (destPtr == nullptr) {
     error(errInternal, -1, "dest->data is NULL in Splash::scaleMaskYdXu");
     return;
   }
@@ -3463,7 +3463,7 @@ void Splash::scaleMaskYuXd(SplashImageMaskSource src, void *srcData,
   int i;
   
   destPtr0 = dest->data;
-  if (destPtr0 == NULL) {
+  if (destPtr0 == nullptr) {
     error(errInternal, -1, "dest->data is NULL in Splash::scaleMaskYuXd");
     return;
   }
@@ -3545,7 +3545,7 @@ void Splash::scaleMaskYuXu(SplashImageMaskSource src, void *srcData,
   int i, j;
 
   destPtr0 = dest->data;
-  if (destPtr0 == NULL) {
+  if (destPtr0 == nullptr) {
     error(errInternal, -1, "dest->data is NULL in Splash::scaleMaskYuXu");
     return;
   }
@@ -3620,12 +3620,12 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
   w = src->getWidth();
   h = src->getHeight();
   p = src->getDataPtr();
-  if (p == NULL) {
+  if (p == nullptr) {
     error(errInternal, -1, "src->getDataPtr() is NULL in Splash::blitMask");
     return;    
   }
   if (vectorAntialias && clipRes != splashClipAllInside) {
-    pipeInit(&pipe, xDest, yDest, state->fillPattern, NULL,
+    pipeInit(&pipe, xDest, yDest, state->fillPattern, nullptr,
 	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
     drawAAPixelInit();
     for (y = 0; y < h; ++y) {
@@ -3635,7 +3635,7 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
       }
     }
   } else {
-    pipeInit(&pipe, xDest, yDest, state->fillPattern, NULL,
+    pipeInit(&pipe, xDest, yDest, state->fillPattern, nullptr,
 	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
     if (clipRes == splashClipAllInside) {
       for (y = 0; y < h; ++y) {
@@ -3761,10 +3761,10 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
       }
       scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h,
 			     scaledWidth, scaledHeight, interpolate, tilingPattern);
-      if (scaledImg == NULL) {
+      if (scaledImg == nullptr) {
         return splashErrBadArg;
       }
-      if  (tf != NULL) {
+      if  (tf != nullptr) {
 	(*tf)(srcData, scaledImg);
       }
       blitImage(scaledImg, srcAlpha, x0, y0, clipRes);
@@ -3802,10 +3802,10 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
       }
       scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha, w, h,
 			     scaledWidth, scaledHeight, interpolate, tilingPattern);
-      if (scaledImg == NULL) {
+      if (scaledImg == nullptr) {
         return splashErrBadArg;
       }
-      if  (tf != NULL) {
+      if  (tf != nullptr) {
 	(*tf)(srcData, scaledImg);
       }
       vertFlipImage(scaledImg, scaledWidth, scaledHeight, nComps);
@@ -3953,11 +3953,11 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
   scaledImg = scaleImage(src, srcData, srcMode, nComps, srcAlpha,
 			 srcWidth, srcHeight, scaledWidth, scaledHeight, interpolate);
 
-  if (scaledImg == NULL) {
+  if (scaledImg == nullptr) {
     return splashErrBadArg;
   }
 
-  if  (tf != NULL) {
+  if  (tf != nullptr) {
     (*tf)(srcData, scaledImg);
   }
   // construct the three sections
@@ -4053,7 +4053,7 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
   }
 
   // initialize the pixel pipe
-  pipeInit(&pipe, 0, 0, NULL, pixel,
+  pipeInit(&pipe, 0, 0, nullptr, pixel,
 	   (Guchar)splashRound(state->fillAlpha * 255),
 	   srcAlpha || (vectorAntialias && clipRes != splashClipAllInside),
 	   gFalse);
@@ -4154,7 +4154,7 @@ SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData,
   SplashBitmap *dest;
 
   dest = new SplashBitmap(scaledWidth, scaledHeight, 1, srcMode, srcAlpha, gTrue, bitmap->getSeparationList());
-  if (dest->getDataPtr() != NULL && srcHeight > 0 && srcWidth > 0) {
+  if (dest->getDataPtr() != nullptr && srcHeight > 0 && srcWidth > 0) {
     if (scaledHeight < srcHeight) {
       if (scaledWidth < srcWidth) {
 	scaleImageYdXd(src, srcData, srcMode, nComps, srcAlpha,
@@ -4179,7 +4179,7 @@ SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData,
     }
   } else {
     delete dest;
-    dest = NULL;
+    dest = nullptr;
   }
   return dest;
 }
@@ -4216,8 +4216,8 @@ void Splash::scaleImageYdXd(SplashImageSource src, void *srcData,
     alphaLineBuf = (Guchar *)gmalloc(srcWidth);
     alphaPixBuf = (Guint *)gmallocn(srcWidth, sizeof(int));
   } else {
-    alphaLineBuf = NULL;
-    alphaPixBuf = NULL;
+    alphaLineBuf = nullptr;
+    alphaPixBuf = nullptr;
   }
 
   // init y scale Bresenham
@@ -4448,8 +4448,8 @@ void Splash::scaleImageYdXu(SplashImageSource src, void *srcData,
     alphaLineBuf = (Guchar *)gmalloc(srcWidth);
     alphaPixBuf = (Guint *)gmallocn(srcWidth, sizeof(int));
   } else {
-    alphaLineBuf = NULL;
-    alphaPixBuf = NULL;
+    alphaLineBuf = nullptr;
+    alphaPixBuf = nullptr;
   }
 
   // init y scale Bresenham
@@ -4597,7 +4597,7 @@ void Splash::scaleImageYuXd(SplashImageSource src, void *srcData,
   if (srcAlpha) {
     alphaLineBuf = (Guchar *)gmalloc(srcWidth);
   } else {
-    alphaLineBuf = NULL;
+    alphaLineBuf = nullptr;
   }
 
   // init y scale Bresenham
@@ -4755,7 +4755,7 @@ void Splash::scaleImageYuXu(SplashImageSource src, void *srcData,
   if (srcAlpha) {
     alphaLineBuf = (Guchar *)gmalloc(srcWidth);
   } else {
-    alphaLineBuf = NULL;
+    alphaLineBuf = nullptr;
   }
 
   // init y scale Bresenham
@@ -4933,9 +4933,9 @@ void Splash::scaleImageYuXuBilinear(SplashImageSource src, void *srcData,
     alphaLineBuf1 = (Guchar *)gmalloc(scaledWidth);
     alphaLineBuf2 = (Guchar *)gmalloc(scaledWidth);
   } else {
-    alphaSrcBuf = NULL;
-    alphaLineBuf1 = NULL;
-    alphaLineBuf2 = NULL;
+    alphaSrcBuf = nullptr;
+    alphaLineBuf1 = nullptr;
+    alphaLineBuf2 = nullptr;
   }
 
   double ySrc = 0.0;
@@ -5037,7 +5037,7 @@ void Splash::vertFlipImage(SplashBitmap *img, int width, int height,
   Guchar *p0, *p1;
   int w;
   
-  if (unlikely(img->data == NULL)) {
+  if (unlikely(img->data == nullptr)) {
     error(errInternal, -1, "img->data is NULL in Splash::vertFlipImage");
     return;
   }
@@ -5113,7 +5113,7 @@ void Splash::blitImage(SplashBitmap *src, GBool srcAlpha, int xDest, int yDest,
 
   // draw the unclipped region
   if (x0 < w && y0 < h && x0 < x1 && y0 < y1) {
-    pipeInit(&pipe, xDest + x0, yDest + y0, NULL, pixel,
+    pipeInit(&pipe, xDest + x0, yDest + y0, nullptr, pixel,
 	     (Guchar)splashRound(state->fillAlpha * 255), srcAlpha, gFalse);
     if (srcAlpha) {
       for (y = y0; y < y1; ++y) {
@@ -5165,7 +5165,7 @@ void Splash::blitImageClipped(SplashBitmap *src, GBool srcAlpha,
   int x, y;
 
   if (vectorAntialias) {
-    pipeInit(&pipe, xDest, yDest, NULL, pixel,
+    pipeInit(&pipe, xDest, yDest, nullptr, pixel,
 	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
     drawAAPixelInit();
     if (srcAlpha) {
@@ -5187,7 +5187,7 @@ void Splash::blitImageClipped(SplashBitmap *src, GBool srcAlpha,
       }
     }
   } else {
-    pipeInit(&pipe, xDest, yDest, NULL, pixel,
+    pipeInit(&pipe, xDest, yDest, nullptr, pixel,
 	     (Guchar)splashRound(state->fillAlpha * 255), srcAlpha, gFalse);
     if (srcAlpha) {
       for (y = 0; y < h; ++y) {
@@ -5247,7 +5247,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
       bitmap->getSeparationList()->append(((GfxSeparationColorSpace *)src->getSeparationList()->get(x))->copy());
   }
   if (src->alpha) {
-    pipeInit(&pipe, xDest, yDest, NULL, pixel,
+    pipeInit(&pipe, xDest, yDest, nullptr, pixel,
 	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, nonIsolated,
 	     knockout, (Guchar)splashRound(knockoutOpacity * 255));
     if (noClip) {
@@ -5288,7 +5288,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
       }
     }
   } else {
-    pipeInit(&pipe, xDest, yDest, NULL, pixel,
+    pipeInit(&pipe, xDest, yDest, nullptr, pixel,
 	     (Guchar)splashRound(state->fillAlpha * 255), gFalse, nonIsolated);
     if (noClip) {
       for (y = 0; y < h; ++y) {
@@ -5332,7 +5332,7 @@ void Splash::compositeBackground(SplashColorPtr color) {
 #endif
   int x, y, mask;
 
-  if (unlikely(bitmap->alpha == NULL)) {
+  if (unlikely(bitmap->alpha == nullptr)) {
     error(errInternal, -1, "bitmap->alpha is NULL in Splash::compositeBackground");
     return;
   }
@@ -5516,10 +5516,10 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
   SplashColorPtr bitmapData = bitmap->getDataPtr();
   int bitmapOffLimit = bitmap->getHeight() * bitmap->getRowSize();
   SplashColorPtr bitmapAlpha = bitmap->getAlphaPtr();
-  SplashColorPtr cur = NULL;
+  SplashColorPtr cur = nullptr;
   SplashCoord* userToCanvasMatrix = getMatrix();
   SplashColorMode bitmapMode = bitmap->getMode();
-  GBool hasAlpha = (bitmapAlpha != NULL);
+  GBool hasAlpha = (bitmapAlpha != nullptr);
   int rowSize = bitmap->getRowSize();
   int colorComps = 0;
   switch (bitmapMode) {
@@ -5550,10 +5550,10 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
   SplashPipe pipe;
   SplashColor cSrcVal;
 
-  pipeInit(&pipe, 0, 0, NULL, cSrcVal, (Guchar)splashRound(state->strokeAlpha * 255), gFalse, gFalse);
+  pipeInit(&pipe, 0, 0, nullptr, cSrcVal, (Guchar)splashRound(state->strokeAlpha * 255), gFalse, gFalse);
 
   if (vectorAntialias) {
-    if (aaBuf == NULL)
+    if (aaBuf == nullptr)
       return gFalse; // fall back to old behaviour
     drawAAPixelInit();
   }
@@ -5800,7 +5800,7 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
     }
 
     delete blitTarget;
-    blitTarget = NULL;
+    blitTarget = nullptr;
   }
 
   return gTrue;
@@ -6354,7 +6354,7 @@ SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
   int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
   SplashClipResult clipRes;
 
-  if (vectorAntialias && aaBuf == NULL) { // should not happen, but to be secure
+  if (vectorAntialias && aaBuf == nullptr) { // should not happen, but to be secure
     return splashErrGeneric;
   }
   if (path->length == 0) {
@@ -6390,7 +6390,7 @@ SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
       yMaxI = state->clip->getYMaxI();
     }
 
-    pipeInit(&pipe, 0, yMinI, pattern, NULL, (Guchar)splashRound(state->fillAlpha * 255), vectorAntialias && !hasBBox, gFalse);
+    pipeInit(&pipe, 0, yMinI, pattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), vectorAntialias && !hasBBox, gFalse);
 
     // draw the spans
     if (vectorAntialias) {

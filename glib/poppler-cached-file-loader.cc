@@ -23,10 +23,10 @@
 PopplerCachedFileLoader::PopplerCachedFileLoader(GInputStream *inputStreamA, GCancellable *cancellableA, goffset lengthA)
 {
   inputStream = (GInputStream *)g_object_ref(inputStreamA);
-  cancellable = cancellableA ? (GCancellable *)g_object_ref(cancellableA) : NULL;
+  cancellable = cancellableA ? (GCancellable *)g_object_ref(cancellableA) : nullptr;
   length = lengthA;
-  url = NULL;
-  cachedFile = NULL;
+  url = nullptr;
+  cachedFile = nullptr;
 }
 
 PopplerCachedFileLoader::~PopplerCachedFileLoader()
@@ -51,7 +51,7 @@ size_t PopplerCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
   if (G_IS_FILE_INPUT_STREAM(inputStream)) {
     GFileInfo *info;
 
-    info = g_file_input_stream_query_info(G_FILE_INPUT_STREAM (inputStream), G_FILE_ATTRIBUTE_STANDARD_SIZE, cancellable, NULL);
+    info = g_file_input_stream_query_info(G_FILE_INPUT_STREAM (inputStream), G_FILE_ATTRIBUTE_STANDARD_SIZE, cancellable, nullptr);
     if (!info) {
       error(errInternal, -1, "Failed to get size of '{0:t}'.", urlA);
       return (size_t)-1;
@@ -64,10 +64,10 @@ size_t PopplerCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
   }
 
   // Unknown stream length, read the whole stream and return the size.
-  CachedFileWriter writer = CachedFileWriter(cachedFile, NULL);
+  CachedFileWriter writer = CachedFileWriter(cachedFile, nullptr);
   size = 0;
   do {
-    bytesRead = g_input_stream_read(inputStream, buf, CachedFileChunkSize, cancellable, NULL);
+    bytesRead = g_input_stream_read(inputStream, buf, CachedFileChunkSize, cancellable, nullptr);
     if (bytesRead == -1)
       break;
 
@@ -91,9 +91,9 @@ int PopplerCachedFileLoader::load(const std::vector<ByteRange> &ranges, CachedFi
   for (size_t i = 0; i < ranges.size(); i++) {
     bytesToRead = MIN(CachedFileChunkSize, ranges[i].length);
     rangeBytesRead = 0;
-    g_seekable_seek(G_SEEKABLE(inputStream), ranges[i].offset, G_SEEK_SET, cancellable, NULL);
+    g_seekable_seek(G_SEEKABLE(inputStream), ranges[i].offset, G_SEEK_SET, cancellable, nullptr);
     do {
-      bytesRead = g_input_stream_read(inputStream, buf, bytesToRead, cancellable, NULL);
+      bytesRead = g_input_stream_read(inputStream, buf, bytesToRead, cancellable, nullptr);
       if (bytesRead == -1)
         return -1;
 

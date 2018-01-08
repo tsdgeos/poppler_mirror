@@ -119,8 +119,8 @@ SplashXPathScanner::SplashXPathScanner(SplashXPath *xPathA, GBool eoA,
     }
   }
 
-  allInter = NULL;
-  inter = NULL;
+  allInter = nullptr;
+  inter = nullptr;
   computeIntersections();
   interY = yMin - 1;
 }

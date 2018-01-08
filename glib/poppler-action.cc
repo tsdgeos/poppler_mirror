@@ -74,9 +74,9 @@ poppler_action_layer_free (PopplerActionLayer *action_layer)
 		return;
 
 	if (action_layer->layers) {
-		g_list_foreach (action_layer->layers, (GFunc)g_object_unref, NULL);
+		g_list_foreach (action_layer->layers, (GFunc)g_object_unref, nullptr);
 		g_list_free (action_layer->layers);
-		action_layer->layers = NULL;
+		action_layer->layers = nullptr;
 	}
 
 	g_slice_free (PopplerActionLayer, action_layer);
@@ -88,7 +88,7 @@ poppler_action_layer_copy (PopplerActionLayer *action_layer)
 	PopplerActionLayer *retval = g_slice_dup (PopplerActionLayer, action_layer);
 
 	retval->layers = g_list_copy (action_layer->layers);
-	g_list_foreach (action_layer->layers, (GFunc)g_object_ref, NULL);
+	g_list_foreach (action_layer->layers, (GFunc)g_object_ref, nullptr);
 
 	return retval;
 }
@@ -104,7 +104,7 @@ POPPLER_DEFINE_BOXED_TYPE (PopplerAction, poppler_action, poppler_action_copy, p
 void
 poppler_action_free (PopplerAction *action)
 {
-	if (action == NULL)
+	if (action == nullptr)
 		return;
 
 	/* Action specific stuff */
@@ -136,7 +136,7 @@ poppler_action_free (PopplerAction *action)
 		break;
 	case POPPLER_ACTION_OCG_STATE:
 		if (action->ocg_state.state_list) {
-			g_list_foreach (action->ocg_state.state_list, (GFunc)poppler_action_layer_free, NULL);
+			g_list_foreach (action->ocg_state.state_list, (GFunc)poppler_action_layer_free, nullptr);
 			g_list_free (action->ocg_state.state_list);
 		}
 		break;
@@ -165,12 +165,12 @@ poppler_action_copy (PopplerAction *action)
 {
 	PopplerAction *new_action;
 
-	g_return_val_if_fail (action != NULL, NULL);
+	g_return_val_if_fail (action != nullptr, NULL);
 
 	/* Do a straight copy of the memory */
 	new_action = g_slice_dup (PopplerAction, action);
 
-	if (action->any.title != NULL)
+	if (action->any.title != nullptr)
 		new_action->any.title = g_strdup (action->any.title);
 
 	switch (action->type) {
@@ -207,7 +207,7 @@ poppler_action_copy (PopplerAction *action)
 	case POPPLER_ACTION_OCG_STATE:
 		if (action->ocg_state.state_list) {
 			GList *l;
-			GList *new_list = NULL;
+			GList *new_list = nullptr;
 
 			for (l = action->ocg_state.state_list; l; l = g_list_next (l)) {
 				PopplerActionLayer *alayer = (PopplerActionLayer *)l->data;
@@ -238,7 +238,7 @@ dest_new_goto (PopplerDocument *document,
 
 	dest = g_slice_new0 (PopplerDest);
 
-	if (link_dest == NULL) {
+	if (link_dest == nullptr) {
 		dest->type = POPPLER_DEST_UNKNOWN;
 		return dest;
 	}
@@ -323,7 +323,7 @@ dest_new_named (GooString *named_dest)
 
 	dest = g_slice_new0 (PopplerDest);
 
-	if (named_dest == NULL) {
+	if (named_dest == nullptr) {
 		dest->type = POPPLER_DEST_UNKNOWN;
 		return dest;
 	}
@@ -344,19 +344,19 @@ build_goto_dest (PopplerDocument *document,
 
 	/* Return if it isn't OK */
 	if (! link->isOk ()) {
-		action->goto_dest.dest = dest_new_goto (NULL, NULL);
+		action->goto_dest.dest = dest_new_goto (nullptr, nullptr);
 		return;
 	}
 	
 	link_dest = link->getDest ();
 	named_dest = link->getNamedDest ();
 
-	if (link_dest != NULL) {
+	if (link_dest != nullptr) {
 		action->goto_dest.dest = dest_new_goto (document, link_dest);
-	} else if (named_dest != NULL) {
+	} else if (named_dest != nullptr) {
 		action->goto_dest.dest = dest_new_named (named_dest);
 	} else {
-		action->goto_dest.dest = dest_new_goto (document, NULL);
+		action->goto_dest.dest = dest_new_goto (document, nullptr);
 	}
 }
 
@@ -369,7 +369,7 @@ build_goto_remote (PopplerAction *action,
 	
 	/* Return if it isn't OK */
 	if (! link->isOk ()) {
-		action->goto_remote.dest = dest_new_goto (NULL, NULL);
+		action->goto_remote.dest = dest_new_goto (nullptr, nullptr);
 		return;
 	}
 
@@ -378,12 +378,12 @@ build_goto_remote (PopplerAction *action,
 	link_dest = link->getDest ();
 	named_dest = link->getNamedDest ();
 	
-	if (link_dest != NULL) {
-		action->goto_remote.dest = dest_new_goto (NULL, link_dest);
-	} else if (named_dest != NULL) {
+	if (link_dest != nullptr) {
+		action->goto_remote.dest = dest_new_goto (nullptr, link_dest);
+	} else if (named_dest != nullptr) {
 		action->goto_remote.dest = dest_new_named (named_dest);
 	} else {
-		action->goto_remote.dest = dest_new_goto (NULL, NULL);
+		action->goto_remote.dest = dest_new_goto (nullptr, nullptr);
 	}
 }
 
@@ -406,7 +406,7 @@ build_uri (PopplerAction *action,
 	gchar *uri;
 
 	uri = link->getURI()->getCString ();
-	if (uri != NULL)
+	if (uri != nullptr)
 		action->uri.uri = g_strdup (uri);
 }
 
@@ -417,7 +417,7 @@ build_named (PopplerAction *action,
 	gchar *name;
 
 	name = link->getName ()->getCString ();
-	if (name != NULL)
+	if (name != nullptr)
 		action->named.named_dest = g_strdup (name);
 }
 
@@ -425,7 +425,7 @@ static AnnotMovie *
 find_annot_movie_for_action (PopplerDocument *document,
 			     LinkMovie       *link)
 {
-  AnnotMovie *annot = NULL;
+  AnnotMovie *annot = nullptr;
   XRef *xref = document->doc->getXRef ();
   Object annotObj;
 
@@ -480,7 +480,7 @@ find_annot_movie_for_action (PopplerDocument *document,
     annot = new AnnotMovie (document->doc, &annotObj, &tmp);
     if (!annot->isOk ()) {
       delete annot;
-      annot = NULL;
+      annot = nullptr;
     }
   }
 
@@ -554,7 +554,7 @@ get_layer_for_ref (PopplerDocument *document,
 			Ref ocgRef = layer->oc->getRef();
 
 			if (ref->num == ocgRef.num && ref->gen == ocgRef.gen) {
-				GList *rb_group = NULL;
+				GList *rb_group = nullptr;
 
 				if (preserve_rb)
 					rb_group = _poppler_document_get_layer_rbgroup (document, layer);
@@ -569,7 +569,7 @@ get_layer_for_ref (PopplerDocument *document,
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 static void
@@ -580,7 +580,7 @@ build_ocg_state (PopplerDocument *document,
 	GooList *st_list = ocg_state->getStateList();
 	GBool    preserve_rb = ocg_state->getPreserveRB();
 	gint     i, j;
-	GList   *layer_state = NULL;
+	GList   *layer_state = nullptr;
 
 	if (!document->layers) {
 		if (!_poppler_document_get_layers (document))
@@ -628,7 +628,7 @@ _poppler_action_new (PopplerDocument *document,
 	if (title)
 		action->any.title = g_strdup (title);
 
-	if (link == NULL) {
+	if (link == nullptr) {
 		action->type = POPPLER_ACTION_NONE;
 		return action;
 	}

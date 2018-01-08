@@ -28,7 +28,7 @@ class OptContentDock : public AbstractInfoDock
     Q_OBJECT
 
 public:
-    OptContentDock(QWidget *parent = 0);
+    OptContentDock(QWidget *parent = nullptr);
     ~OptContentDock();
 
     void documentLoaded() override;

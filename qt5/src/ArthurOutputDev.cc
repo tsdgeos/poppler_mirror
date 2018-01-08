@@ -96,7 +96,7 @@ ArthurOutputDev::ArthurOutputDev(QPainter *painter):
 {
   m_painter.push(painter);
   m_currentBrush = QBrush(Qt::SolidPattern);
-  m_fontEngine = 0;
+  m_fontEngine = nullptr;
 }
 
 ArthurOutputDev::~ArthurOutputDev()

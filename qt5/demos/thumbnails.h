@@ -30,7 +30,7 @@ class ThumbnailsDock : public AbstractInfoDock
     Q_OBJECT
 
 public:
-    ThumbnailsDock(QWidget *parent = 0);
+    ThumbnailsDock(QWidget *parent = nullptr);
     ~ThumbnailsDock();
 
     void documentClosed() override;

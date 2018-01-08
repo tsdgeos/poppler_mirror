@@ -62,14 +62,14 @@ SecurityHandler *SecurityHandler::make(PDFDoc *docA, Object *encryptDictA) {
 #endif
       error(errSyntaxError, -1, "Couldn't find the '{0:s}' security handler",
 	    filterObj.getName());
-      secHdlr = NULL;
+      secHdlr = nullptr;
 #ifdef ENABLE_PLUGINS
     }
 #endif
   } else {
     error(errSyntaxError, -1,
 	  "Missing or invalid 'Filter' entry in encryption dictionary");
-    secHdlr = NULL;
+    secHdlr = nullptr;
   }
   return secHdlr;
 }
@@ -90,7 +90,7 @@ GBool SecurityHandler::checkEncryption(GooString *ownerPassword,
   if (ownerPassword || userPassword) {
     authData = makeAuthData(ownerPassword, userPassword);
   } else {
-    authData = NULL;
+    authData = nullptr;
   }
   ok = authorize(authData);
   if (authData) {
@@ -149,11 +149,11 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
   SecurityHandler(docA)
 {
   ok = gFalse;
-  fileID = NULL;
-  ownerKey = NULL;
-  userKey = NULL;
-  ownerEnc = NULL;
-  userEnc = NULL;
+  fileID = nullptr;
+  ownerKey = nullptr;
+  userKey = nullptr;
+  ownerEnc = nullptr;
+  userEnc = nullptr;
   fileKeyLength = 0;
 
   Object versionObj = encryptDictA->dictLookup("V");
@@ -321,13 +321,13 @@ GBool StandardSecurityHandler::isUnencrypted() {
 void *StandardSecurityHandler::makeAuthData(GooString *ownerPassword,
 					    GooString *userPassword) {
   return new StandardAuthData(ownerPassword ? ownerPassword->copy()
-			                    : (GooString *)NULL,
+			                    : (GooString *)nullptr,
 			      userPassword ? userPassword->copy()
-			                   : (GooString *)NULL);
+			                   : (GooString *)nullptr);
 }
 
 void *StandardSecurityHandler::getAuthData() {
-  return NULL;
+  return nullptr;
 }
 
 void StandardSecurityHandler::freeAuthData(void *authData) {
@@ -344,8 +344,8 @@ GBool StandardSecurityHandler::authorize(void *authData) {
     ownerPassword = ((StandardAuthData *)authData)->ownerPassword;
     userPassword = ((StandardAuthData *)authData)->userPassword;
   } else {
-    ownerPassword = NULL;
-    userPassword = NULL;
+    ownerPassword = nullptr;
+    userPassword = nullptr;
   }
   if (!Decrypt::makeFileKey(encVersion, encRevision, fileKeyLength,
 			    ownerKey, userKey, ownerEnc, userEnc,

@@ -190,7 +190,7 @@ FileReader *FileReader::make(char *fileName) {
   FILE *fA;
 
   if (!(fA = fopen(fileName, "rb"))) {
-    return NULL;
+    return nullptr;
   }
   return new FileReader(fA);
 }

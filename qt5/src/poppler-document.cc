@@ -94,7 +94,7 @@ namespace Poppler {
 	{
 		delete doc;
 	}
-	return NULL;
+	return nullptr;
     }
 
     Document::Document(DocumentData *dataA)
@@ -110,9 +110,9 @@ namespace Poppler {
     Page *Document::page(int index) const
     {
 	Page *page = new Page(m_doc, index);
-	if (page->m_page->page == NULL) {
+	if (page->m_page->page == nullptr) {
 	  delete page;
-	  return NULL;
+	  return nullptr;
 	}
 
 	return page;
@@ -567,7 +567,7 @@ namespace Poppler {
 	int index;
 
 	if (!m_doc->doc->getCatalog()->labelToIndex (&label_g, &index))
-	    return NULL;
+	    return nullptr;
 
 	return page(index);
     }
@@ -581,11 +581,11 @@ namespace Poppler {
     {
         Outline * outline = m_doc->doc->getOutline();
         if ( !outline )
-            return NULL;
+            return nullptr;
 
         GooList * items = outline->getItems();
         if ( !items || items->getLength() < 1 )
-            return NULL;
+            return nullptr;
 
         QDomDocument *toc = new QDomDocument();
         if ( items->getLength() > 0 )
@@ -597,7 +597,7 @@ namespace Poppler {
     LinkDestination *Document::linkDestination( const QString &name )
     {
         GooString * namedDest = QStringToGooString( name );
-        LinkDestinationData ldd(NULL, namedDest, m_doc, false);
+        LinkDestinationData ldd(nullptr, namedDest, m_doc, false);
         LinkDestination *ld = new LinkDestination(ldd);
         delete namedDest;
         return ld;
@@ -726,7 +726,7 @@ namespace Poppler {
     OptContentModel *Document::optionalContentModel()
     {
         if (m_doc->m_optContentModel.isNull()) {
-	    m_doc->m_optContentModel = new OptContentModel(m_doc->doc->getOptContentConfig(), 0);
+	    m_doc->m_optContentModel = new OptContentModel(m_doc->doc->getOptContentConfig(), nullptr);
 	}
         return (OptContentModel *)m_doc->m_optContentModel;
     }
@@ -751,7 +751,7 @@ namespace Poppler {
         GooString gooPermanentId;
         GooString gooUpdateId;
 
-        if (!m_doc->doc->getID(permanentId ? &gooPermanentId : 0, updateId ? &gooUpdateId : 0))
+        if (!m_doc->doc->getID(permanentId ? &gooPermanentId : nullptr, updateId ? &gooUpdateId : nullptr))
             return false;
 
         if (permanentId)

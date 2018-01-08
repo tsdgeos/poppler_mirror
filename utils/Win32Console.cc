@@ -28,7 +28,7 @@ static char buf[BUF_SIZE];
 static wchar_t wbuf[BUF_SIZE];
 static bool stdoutIsConsole = true;
 static bool stderrIsConsole = true;
-static HANDLE consoleHandle = 0;
+static HANDLE consoleHandle = nullptr;
 
 // If all = true, flush all characters to console.
 // If all = false, flush up to and including last newline.

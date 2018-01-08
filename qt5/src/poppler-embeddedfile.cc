@@ -46,12 +46,12 @@ EmbeddedFileData::~EmbeddedFileData()
 
 EmbFile *EmbeddedFileData::embFile() const
 {
-	return filespec->isOk() ? filespec->getEmbeddedFile() : NULL;
+	return filespec->isOk() ? filespec->getEmbeddedFile() : nullptr;
 }
 
 
 EmbeddedFile::EmbeddedFile(EmbFile *embfile)
-	: m_embeddedFile(0)
+	: m_embeddedFile(nullptr)
 {
 	assert(!"You must not use this private constructor!");
 }
@@ -85,25 +85,25 @@ int EmbeddedFile::size() const
 
 QDateTime EmbeddedFile::modDate() const
 {
-	GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->modDate() : NULL;
+	GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->modDate() : nullptr;
 	return goo ? convertDate(goo->getCString()) : QDateTime();
 }
 
 QDateTime EmbeddedFile::createDate() const
 {
-	GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->createDate() : NULL;
+	GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->createDate() : nullptr;
 	return goo ? convertDate(goo->getCString()) : QDateTime();
 }
 
 QByteArray EmbeddedFile::checksum() const
 {
-	GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->checksum() : NULL;
+	GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->checksum() : nullptr;
 	return goo ? QByteArray::fromRawData(goo->getCString(), goo->getLength()) : QByteArray();
 }
 
 QString EmbeddedFile::mimeType() const
 {
-	GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->mimeType() : NULL;
+	GooString *goo = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->mimeType() : nullptr;
 	return goo ? QString(goo->getCString()) : QString();
 }
 
@@ -111,7 +111,7 @@ QByteArray EmbeddedFile::data()
 {
 	if (!isValid())
 		return QByteArray();
-	Stream *stream = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->stream() : NULL;
+	Stream *stream = m_embeddedFile->embFile() ? m_embeddedFile->embFile()->stream() : nullptr;
 	if (!stream)
 		return QByteArray();
 	

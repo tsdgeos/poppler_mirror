@@ -267,7 +267,7 @@ static const AttributeDefaults attributeDefaults;
 
 
 #define ATTR_LIST_END \
-  { Attribute::Unknown, NULL, NULL, gFalse, NULL }
+  { Attribute::Unknown, nullptr, nullptr, gFalse, nullptr }
 
 #define ATTR_WITH_DEFAULT(name, inherit, check, defval) \
   { Attribute::name,           \
@@ -279,7 +279,7 @@ static const AttributeDefaults attributeDefaults;
 #define ATTR(name, inherit, check) \
   { Attribute::name,           \
     #name,                     \
-    NULL,                      \
+    nullptr,                   \
     inherit,                   \
     check }
 
@@ -382,24 +382,24 @@ static const AttributeMapEntry *attributeMapAll[] = {
   attributeMapCommonPrintField,
   attributeMapCommonTable,
   attributeMapCommonTableCell,
-  NULL,
+  nullptr,
 };
 
 static const AttributeMapEntry *attributeMapShared[] = {
   attributeMapCommonShared,
-  NULL,
+  nullptr,
 };
 
 static const AttributeMapEntry *attributeMapBlock[] = {
   attributeMapCommonShared,
   attributeMapCommonBlock,
-  NULL,
+  nullptr,
 };
 
 static const AttributeMapEntry *attributeMapInline[] = {
   attributeMapCommonShared,
   attributeMapCommonInline,
-  NULL,
+  nullptr,
 };
 
 static const AttributeMapEntry *attributeMapTableCell[] = {
@@ -407,34 +407,34 @@ static const AttributeMapEntry *attributeMapTableCell[] = {
   attributeMapCommonBlock,
   attributeMapCommonTable,
   attributeMapCommonTableCell,
-  NULL,
+  nullptr,
 };
 
 static const AttributeMapEntry *attributeMapRubyText[] = {
   attributeMapCommonShared,
   attributeMapCommonInline,
   attributeMapCommonRubyText,
-  NULL,
+  nullptr,
 };
 
 static const AttributeMapEntry *attributeMapColumns[] = {
   attributeMapCommonShared,
   attributeMapCommonInline,
   attributeMapCommonColumns,
-  NULL,
+  nullptr,
 };
 
 static const AttributeMapEntry *attributeMapList[] = {
   attributeMapCommonShared,
   attributeMapCommonList,
-  NULL,
+  nullptr,
 };
 
 static const AttributeMapEntry *attributeMapTable[] = {
   attributeMapCommonShared,
   attributeMapCommonBlock,
   attributeMapCommonTable,
-  NULL,
+  nullptr,
 };
 
 static const AttributeMapEntry *attributeMapIllustration[] = {
@@ -444,7 +444,7 @@ static const AttributeMapEntry *attributeMapIllustration[] = {
   attributeMapCommonShared,
   attributeMapCommonBlock,
   attributeMapCommonInline,
-  NULL,
+  nullptr,
 };
 
 // Table mapping owners of attributes to their names.
@@ -571,7 +571,7 @@ getAttributeMapEntry(const AttributeMapEntry **entryList, Attribute::Type type)
     }
     entryList++;
   }
-  return NULL;
+  return nullptr;
 }
 
 static inline const AttributeMapEntry *
@@ -588,7 +588,7 @@ getAttributeMapEntry(const AttributeMapEntry **entryList, const char *name)
     }
     entryList++;
   }
-  return NULL;
+  return nullptr;
 }
 
 static inline const OwnerMapEntry *getOwnerMapEntry(Attribute::Owner owner)
@@ -597,7 +597,7 @@ static inline const OwnerMapEntry *getOwnerMapEntry(Attribute::Owner owner)
     if (owner == ownerMap[i].owner)
       return &ownerMap[i];
   }
-  return NULL;
+  return nullptr;
 }
 
 static inline const OwnerMapEntry *getOwnerMapEntry(const char *name)
@@ -606,7 +606,7 @@ static inline const OwnerMapEntry *getOwnerMapEntry(const char *name)
     if (strcmp(name, ownerMap[i].name) == 0)
       return &ownerMap[i];
   }
-  return NULL;
+  return nullptr;
 }
 
 static const char *ownerToName(Attribute::Owner owner)
@@ -627,7 +627,7 @@ static inline const TypeMapEntry *getTypeMapEntry(StructElement::Type type)
     if (type == typeMap[i].type)
       return &typeMap[i];
   }
-  return NULL;
+  return nullptr;
 }
 
 static inline const TypeMapEntry *getTypeMapEntry(const char *name)
@@ -636,7 +636,7 @@ static inline const TypeMapEntry *getTypeMapEntry(const char *name)
     if (strcmp(name, typeMap[i].name) == 0)
       return &typeMap[i];
   }
-  return NULL;
+  return nullptr;
 }
 
 static const char *typeToName(StructElement::Type type)
@@ -668,7 +668,7 @@ Attribute::Attribute(const char *nameA, int nameLenA, Object *valueA):
   name(nameA, nameLenA),
   value(),
   hidden(gFalse),
-  formatted(NULL)
+  formatted(nullptr)
 {
   assert(valueA);
   value = valueA->copy();
@@ -681,7 +681,7 @@ Attribute::Attribute(Type type, Object *valueA):
   name(),
   value(),
   hidden(gFalse),
-  formatted(NULL)
+  formatted(nullptr)
 {
   assert(valueA);
 
@@ -716,7 +716,7 @@ const char *Attribute::getOwnerName() const
 Object *Attribute::getDefaultValue(Attribute::Type type)
 {
   const AttributeMapEntry *entry = getAttributeMapEntry(attributeMapAll, type);
-  return entry ? const_cast<Object*>(entry->defval) : NULL;
+  return entry ? const_cast<Object*>(entry->defval) : nullptr;
 }
 
 void Attribute::setFormattedValue(const char *formattedA)
@@ -728,7 +728,7 @@ void Attribute::setFormattedValue(const char *formattedA)
       formatted = new GooString(formattedA);
   } else {
     delete formatted;
-    formatted = NULL;
+    formatted = nullptr;
   }
 }
 
@@ -816,12 +816,12 @@ Attribute *Attribute::parseUserProperty(Dict *property)
 //------------------------------------------------------------------------
 
 StructElement::StructData::StructData():
-  altText(0),
-  actualText(0),
-  id(0),
-  title(0),
-  expandedAbbr(0),
-  language(0),
+  altText(nullptr),
+  actualText(nullptr),
+  id(nullptr),
+  title(nullptr),
+  expandedAbbr(nullptr),
+  language(nullptr),
   revision(0)
 {
 }
@@ -930,9 +930,9 @@ const Attribute *StructElement::findAttribute(Attribute::Type attributeType, GBo
     return parent->findAttribute(attributeType, inherit, attributeOwner);
 
   if (attributeType == Attribute::Unknown || attributeType == Attribute::UserProperty)
-    return NULL;
+    return nullptr;
 
-  const Attribute *result = NULL;
+  const Attribute *result = nullptr;
 
   if (attributeOwner == Attribute::UnknownOwner) {
     // Search for the attribute, no matter who the owner is
@@ -967,7 +967,7 @@ const Attribute *StructElement::findAttribute(Attribute::Type attributeType, GBo
       return parent->findAttribute(attributeType, inherit, attributeOwner);
   }
 
-  return NULL;
+  return nullptr;
 }
 
 GooString* StructElement::appendSubTreeText(GooString *string, GBool recursive) const
@@ -986,7 +986,7 @@ GooString* StructElement::appendSubTreeText(GooString *string, GBool recursive) 
   }
 
   if (!recursive)
-    return NULL;
+    return nullptr;
 
   // Do a depth-first traversal, to get elements in logical order
   if (!string)
@@ -1065,7 +1065,7 @@ void StructElement::parse(Dict *element)
 
   // Type name may not be standard, resolve through RoleMap first.
   if (treeRoot->getRoleMap()) {
-    type = roleMapResolve(treeRoot->getRoleMap(), obj.getName(), NULL);
+    type = roleMapResolve(treeRoot->getRoleMap(), obj.getName(), nullptr);
   }
 
   // Resolving through RoleMap may leave type as Unknown, e.g. for types
@@ -1188,7 +1188,7 @@ StructElement *StructElement::parseChild(Object *ref,
   assert(childObj);
   assert(ref);
 
-  StructElement *child = NULL;
+  StructElement *child = nullptr;
 
   if (childObj->isInt()) {
     child = new StructElement(childObj->getInt(), treeRoot, this);
@@ -1200,7 +1200,7 @@ StructElement *StructElement::parseChild(Object *ref,
     Object mcidObj = childObj->dictLookup("MCID");
     if (!mcidObj.isInt()) {
       error(errSyntaxError, -1, "MCID object is wrong type ({0:s})", mcidObj.getTypeName());
-      return NULL;
+      return nullptr;
     }
 
     child = new StructElement(mcidObj.getInt(), treeRoot, this);
@@ -1246,7 +1246,7 @@ StructElement *StructElement::parseChild(Object *ref,
         treeRoot->parentTreeAdd(ref->getRef(), child);
     } else {
       delete child;
-      child = NULL;
+      child = nullptr;
     }
   }
 
