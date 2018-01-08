@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2007, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007, 2011, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010-2013, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -97,6 +97,9 @@ public:
 	 SplashScreen *screenA);
 
   ~Splash();
+
+  Splash(const Splash &) = delete;
+  Splash& operator=(const Splash &) = delete;
 
   //----- state read
 

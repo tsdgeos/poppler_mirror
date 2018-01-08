@@ -12,6 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2010, 2011, 2014 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -41,6 +42,9 @@ public:
   virtual SplashPattern *copy() = 0;
 
   virtual ~SplashPattern();
+
+  SplashPattern(const SplashPattern &) = delete;
+  SplashPattern& operator=(const SplashPattern &) = delete;
 
   // Return the color value for a specific pixel.
   virtual GBool getColor(int x, int y, SplashColorPtr c) = 0;

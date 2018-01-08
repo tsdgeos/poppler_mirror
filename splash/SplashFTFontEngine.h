@@ -13,7 +13,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
-// Copyright (C) 2009 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -48,6 +48,9 @@ public:
   static SplashFTFontEngine *init(GBool aaA, GBool enableFreeTypeHintingA, GBool enableSlightHinting);
 
   ~SplashFTFontEngine();
+
+  SplashFTFontEngine(const SplashFTFontEngine&) = delete;
+  SplashFTFontEngine& operator=(const SplashFTFontEngine&) = delete;
 
   // Load fonts.
   SplashFontFile *loadType1Font(SplashFontFileID *idA, SplashFontSrc *src,  const char **enc);

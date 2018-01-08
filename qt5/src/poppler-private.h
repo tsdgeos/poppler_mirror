@@ -1,7 +1,7 @@
 /* poppler-private.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2008, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2006-2009, 2011, 2012, 2017 by Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2009, 2011, 2012, 2017, 2018 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2009, 2011, 2014 by Pino Toscano <pino@kde.org>
  * Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
  * Copyright (C) 2011 Hib Eris <hib@hiberis.nl>
@@ -114,6 +114,9 @@ namespace Poppler {
 	void init();
 	
 	~DocumentData();
+
+	DocumentData(const DocumentData &) = delete;
+	DocumentData& operator=(const DocumentData &) = delete;
 	
 	void addTocChildren( QDomDocument * docSyn, QDomNode * parent, GooList * items );
 	
@@ -158,16 +161,6 @@ namespace Poppler {
 			type = FontInfo::unknown;
 		}
 		
-		FontInfoData( const FontInfoData &fid )
-		{
-			fontName = fid.fontName;
-			fontFile = fid.fontFile;
-			isEmbedded = fid.isEmbedded;
-			isSubset = fid.isSubset;
-			type = fid.type;
-			embRef = fid.embRef;
-		}
-		
 		FontInfoData( ::FontInfo* fi )
 		{
 			if (fi->getName()) fontName = fi->getName()->getCString();
@@ -177,6 +170,9 @@ namespace Poppler {
 			type = (Poppler::FontInfo::Type)fi->getType();
 			embRef = fi->getEmbRef();
 		}
+
+		FontInfoData( const FontInfoData &fid ) = default;
+		FontInfoData& operator=(const FontInfoData &) = default;
 
 		QString fontName;
 		QString fontFile;

@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2008, 2015, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2008, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -114,6 +114,9 @@ public:
   GfxFontLoc();
   ~GfxFontLoc();
 
+  GfxFontLoc(const GfxFontLoc &) = delete;
+  GfxFontLoc& operator=(const GfxFontLoc &) = delete;
+
   GfxFontLocType locType;
   GfxFontType fontType;
   Ref embFontID;		// embedded stream obj ID
@@ -175,6 +178,9 @@ public:
 
   GfxFont(const char *tagA, Ref idA, GooString *nameA,
 	  GfxFontType typeA, Ref embFontIDA);
+
+  GfxFont(const GfxFont &) = delete;
+  GfxFont& operator=(const GfxFont &other) = delete;
 
   GBool isOk() { return ok; }
 
@@ -439,6 +445,9 @@ public:
 
   // Destructor.
   ~GfxFontDict();
+
+  GfxFontDict(const GfxFontDict &) = delete;
+  GfxFontDict& operator=(const GfxFontDict &) = delete;
 
   // Get the specified font.
   GfxFont *lookup(char *tag);

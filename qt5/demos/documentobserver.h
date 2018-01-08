@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +31,8 @@ friend class PdfViewer;
 
 public:
     virtual ~DocumentObserver();
+    DocumentObserver(const DocumentObserver &) = delete;
+    DocumentObserver& operator=(const DocumentObserver &) = delete;
 
     virtual void documentLoaded() = 0;
     virtual void documentClosed() = 0;

@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2006-2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009, 2011-2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Christian Persch <chpe@gnome.org>
@@ -4240,12 +4240,13 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
   obj1 = dict->lookup("Coords");
   if (obj1.isArray() && obj1.arrayGetLength() == 6) {
     Object obj2;
-    x0A = (obj2 = obj1.arrayGet(0), obj2.getNum());
-    y0A = (obj2 = obj1.arrayGet(1), obj2.getNum());
-    r0A = (obj2 = obj1.arrayGet(2), obj2.getNum());
-    x1A = (obj2 = obj1.arrayGet(3), obj2.getNum());
-    y1A = (obj2 = obj1.arrayGet(4), obj2.getNum());
-    r1A = (obj2 = obj1.arrayGet(5), obj2.getNum());
+    bool dummy; // just so that we can use the getNum that returns 0 on obj2 not being a num instead of aborting
+    x0A = (obj2 = obj1.arrayGet(0), obj2.getNum(&dummy));
+    y0A = (obj2 = obj1.arrayGet(1), obj2.getNum(&dummy));
+    r0A = (obj2 = obj1.arrayGet(2), obj2.getNum(&dummy));
+    x1A = (obj2 = obj1.arrayGet(3), obj2.getNum(&dummy));
+    y1A = (obj2 = obj1.arrayGet(4), obj2.getNum(&dummy));
+    r1A = (obj2 = obj1.arrayGet(5), obj2.getNum(&dummy));
   } else {
     error(errSyntaxWarning, -1, "Missing or invalid Coords in shading dictionary");
     return nullptr;
@@ -4256,8 +4257,8 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
   obj1 = dict->lookup("Domain");
   if (obj1.isArray() && obj1.arrayGetLength() == 2) {
     Object obj2;
-    t0A = (obj2 = obj1.arrayGet(0), obj2.getNum());
-    t1A = (obj2 = obj1.arrayGet(1), obj2.getNum());
+    t0A = (obj2 = obj1.arrayGet(0), obj2.isNum() ? obj2.getNum() : 0);
+    t1A = (obj2 = obj1.arrayGet(1), obj2.isNum() ? obj2.getNum() : 1);
   }
 
   obj1 = dict->lookup("Function");
@@ -4284,8 +4285,8 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
   obj1 = dict->lookup("Extend");
   if (obj1.isArray() && obj1.arrayGetLength() == 2) {
     Object obj2;
-    extend0A = (obj2 = obj1.arrayGet(0), obj2.getBool());
-    extend1A = (obj2 = obj1.arrayGet(1), obj2.getBool());
+    extend0A = (obj2 = obj1.arrayGet(0), obj2.isBool() ? obj2.getBool() : gFalse);
+    extend1A = (obj2 = obj1.arrayGet(1), obj2.isBool() ? obj2.getBool() : gFalse);
   }
 
   shading = new GfxRadialShading(x0A, y0A, r0A, x1A, y1A, r1A, t0A, t1A,
@@ -4619,6 +4620,8 @@ public:
 
   GfxShadingBitBuf(Stream *strA);
   ~GfxShadingBitBuf();
+  GfxShadingBitBuf(const GfxShadingBitBuf &) = delete;
+  GfxShadingBitBuf& operator=(const GfxShadingBitBuf &) = delete;
   GBool getBits(int n, Guint *val);
   void flushBits();
 

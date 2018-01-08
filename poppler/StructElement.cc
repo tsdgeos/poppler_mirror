@@ -1198,7 +1198,7 @@ StructElement *StructElement::parseChild(Object *ref,
      *      page will be always scanned when calling StructElement::getText().
      */
     Object mcidObj = childObj->dictLookup("MCID");
-    if (mcidObj.isInt()) {
+    if (!mcidObj.isInt()) {
       error(errSyntaxError, -1, "MCID object is wrong type ({0:s})", mcidObj.getTypeName());
       return NULL;
     }

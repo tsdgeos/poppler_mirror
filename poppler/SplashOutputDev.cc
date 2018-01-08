@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -1232,6 +1232,8 @@ public:
 	      int glyphXA, int glyphYA, int glyphWA, int glyphHA,
 	      GBool aa, GBool validBBoxA);
   ~T3FontCache();
+  T3FontCache(const T3FontCache &) = delete;
+  T3FontCache& operator=(const T3FontCache &) = delete;
   GBool matches(Ref *idA, double m11A, double m12A,
 		double m21A, double m22A)
     { return fontID.num == idA->num && fontID.gen == idA->gen &&

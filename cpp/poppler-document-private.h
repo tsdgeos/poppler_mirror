@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +39,9 @@ class initer
 public:
     initer();
     ~initer();
+
+    initer(const initer &) = delete;
+    initer& operator=(const initer &) = delete;
 
 private:
     static unsigned int count;

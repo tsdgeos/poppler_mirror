@@ -12,6 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2013, 2014 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -43,6 +44,9 @@ public:
 		     int clipYMin, int clipYMax);
 
   ~SplashXPathScanner();
+
+  SplashXPathScanner(const SplashXPathScanner&) = delete;
+  SplashXPathScanner& operator=(const SplashXPathScanner&) = delete;
 
   // Return the path's bounding box.
   void getBBox(int *xMinA, int *yMinA, int *xMaxA, int *yMaxA)

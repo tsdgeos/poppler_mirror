@@ -4,6 +4,7 @@
  * Copyright (C) 2014, 2015 Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2015, Tamas Szekeres <szekerest@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+ * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +48,8 @@ struct MiniIconv
     {}
     ~MiniIconv()
     { if (is_valid()) iconv_close(i_); }
+    MiniIconv(const MiniIconv &) = delete;
+    MiniIconv& operator=(const MiniIconv &) = delete;
     bool is_valid() const
     { return i_ != (iconv_t)-1; }
     operator iconv_t() const

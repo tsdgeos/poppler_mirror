@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -58,6 +58,9 @@ public:
   SplashClip *copy() { return new SplashClip(this); }
 
   ~SplashClip();
+
+  SplashClip(const SplashClip &) = delete;
+  SplashClip& operator=(const SplashClip &) = delete;
 
   // Reset the clip to a rectangle.
   void resetToRect(SplashCoord x0, SplashCoord y0,

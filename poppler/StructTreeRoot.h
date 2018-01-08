@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2013, 2014 Igalia S.L.
+// Copyright 2018 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -18,6 +19,7 @@
 #include "goo/gtypes.h"
 #include "Object.h"
 #include "StructElement.h"
+#include <map>
 #include <vector>
 
 class Dict;
@@ -29,6 +31,9 @@ class StructTreeRoot
 public:
   StructTreeRoot(PDFDoc *docA, Dict *rootDict);
   ~StructTreeRoot();
+
+  StructTreeRoot& operator=(const StructTreeRoot &) = delete;
+  StructTreeRoot(const StructTreeRoot &) = delete;
 
   PDFDoc *getDoc() { return doc; }
   Dict *getRoleMap() { return roleMap.isDict() ? roleMap.getDict() : NULL; }
@@ -43,9 +48,12 @@ public:
     }
   }
 
-  const StructElement *findParentElement(unsigned index) const {
-    if (index < parentTree.size() && parentTree[index].size() == 1) {
-      return parentTree[index][0].element;
+  const StructElement *findParentElement(int key, unsigned mcid = 0) const {
+    auto it = parentTree.find(key);
+    if (it != parentTree.end()) {
+      if (mcid < it->second.size()) {
+	return it->second[mcid].element;
+      }
     }
     return NULL;
   }
@@ -71,9 +79,11 @@ private:
   Object roleMap;
   Object classMap;
   ElemPtrArray elements;
-  std::vector< std::vector<Parent> > parentTree;
+  std::map<int, std::vector<Parent> > parentTree;
+  std::multimap<Ref, Parent*, RefCompare> refToParentMap;
 
   void parse(Dict *rootDict);
+  void parseNumberTreeNode(Dict *node);
   void parentTreeAdd(const Ref &objectRef, StructElement *element);
 
   friend class StructElement;

@@ -86,6 +86,14 @@ struct Ref {
   int gen;			// generation number
 };
 
+struct RefCompare {
+  bool operator() (const Ref& lhs, const Ref& rhs) const {
+    if (lhs.num != rhs.num)
+      return lhs.num < rhs.num;
+    return lhs.gen < rhs.gen;
+  }
+};
+
 //------------------------------------------------------------------------
 // object types
 //------------------------------------------------------------------------

@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2013, 2016, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Kjartan Maraas <kmaraas@gnome.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Haruyuki Kawabe <Haruyuki.Kawabe@unisys.co.jp>
@@ -89,6 +89,8 @@ public:
     state->transform(1, 1, &xMax, &yMin);
   }
  ~HtmlImage() { delete fName; }
+  HtmlImage(const HtmlImage &) = delete;
+  HtmlImage& operator=(const HtmlImage &) = delete;
 
   double xMin, xMax;		// image x coordinates
   double yMin, yMax;		// image y coordinates

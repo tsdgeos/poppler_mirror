@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +30,9 @@ class image_private
 public:
     image_private(int iwidth, int iheight, image::format_enum iformat);
     ~image_private();
+
+    image_private(const image_private &) = delete;
+    image_private& operator=(const image_private &) = delete;
 
     static image_private *create_data(int width, int height, image::format_enum format);
     static image_private *create_data(char *data, int width, int height, image::format_enum format);

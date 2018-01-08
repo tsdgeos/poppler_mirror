@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009, 2011, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +30,9 @@ class embedded_file_private
 public:
     embedded_file_private(FileSpec *fs);
     ~embedded_file_private();
+
+    embedded_file_private(const embedded_file_private &) = delete;
+    embedded_file_private& operator=(const embedded_file_private &) = delete;
 
     static embedded_file* create(FileSpec *fs);
 

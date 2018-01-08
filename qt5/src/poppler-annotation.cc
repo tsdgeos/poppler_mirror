@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012-2015 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012-2015, 2018 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -544,7 +544,8 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
                 if (!wantScreenAnnotations)
                     continue;
                 AnnotScreen * screenann = static_cast< AnnotScreen * >( ann );
-                if (!screenann->getAction())
+                // TODO Support other link types than Link::Rendition in ScreenAnnotation
+                if (!screenann->getAction() || screenann->getAction()->getKind() != actionRendition)
                   continue;
                 ScreenAnnotation * s = new ScreenAnnotation();
                 annotation = s;
@@ -4631,6 +4632,9 @@ class RichMediaAnnotation::Instance::Private
             delete params;
         }
 
+        Private(const Private &) = delete;
+        Private& operator=(const Private &) = delete;
+
         RichMediaAnnotation::Instance::Type type;
         RichMediaAnnotation::Params *params;
 };
@@ -4675,6 +4679,9 @@ class RichMediaAnnotation::Configuration::Private
             qDeleteAll( instances );
             instances.clear();
         }
+
+        Private(const Private &) = delete;
+        Private& operator=(const Private &) = delete;
 
         RichMediaAnnotation::Configuration::Type type;
         QString name;
@@ -4737,6 +4744,9 @@ class RichMediaAnnotation::Asset::Private
             delete embeddedFile;
         }
 
+        Private(const Private &) = delete;
+        Private& operator=(const Private &) = delete;
+
         QString name;
         EmbeddedFile *embeddedFile;
 };
@@ -4784,6 +4794,9 @@ class RichMediaAnnotation::Content::Private
             qDeleteAll( assets );
             assets.clear();
         }
+
+        Private(const Private &) = delete;
+        Private& operator=(const Private &) = delete;
 
         QList< RichMediaAnnotation::Configuration* > configurations;
         QList< RichMediaAnnotation::Asset* > assets;
