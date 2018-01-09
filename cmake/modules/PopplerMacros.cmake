@@ -101,7 +101,7 @@ endif(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 if(CMAKE_COMPILER_IS_GNUCXX)
   # set the default compile warnings
   set(_warn "-Wall -Wextra -Wpedantic")
-  set(_warn "${_warn} -Wno-unused-parameter -Wno-missing-field-initializers")
+  set(_warn "${_warn} -Wno-unused-parameter")
   set(_warn "${_warn} -Wcast-align")
   set(_warn "${_warn} -Wformat-security")
   set(_warn "${_warn} -Wframe-larger-than=65536")

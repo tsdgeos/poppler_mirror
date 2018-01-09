@@ -30,7 +30,7 @@ static const GOptionEntry options[] = {
   { "splash", 's', 0, G_OPTION_ARG_NONE, &splash_output, "Splash Output Device", nullptr},
   { "page", 'p', 0, G_OPTION_ARG_INT, &page, "Page number", "PAGE" },
   { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &file_arguments, nullptr, "PDF-FILES…" },
-  { nullptr }
+  { }
 };
 
 static GList *view_list = nullptr;
