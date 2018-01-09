@@ -41,7 +41,7 @@ static const ArgDesc argDesc[] = {
    "print usage information"},
   {"-?",      argFlag,     &printHelp,       0,
    "print usage information"},
-  {nullptr}
+  { }
 };
 
 int main (int argc, char *argv[])

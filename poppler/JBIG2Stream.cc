@@ -3820,16 +3820,16 @@ JBIG2Bitmap *JBIG2Stream::readGenericRefinementRegion(int w, int h,
   JBIG2Bitmap *bitmap;
   GBool ltp;
   Guint ltpCX, cx, cx0, cx2, cx3, cx4, tpgrCX0, tpgrCX1, tpgrCX2;
-  JBIG2BitmapPtr cxPtr0 = {nullptr};
-  JBIG2BitmapPtr cxPtr1 = {nullptr};
-  JBIG2BitmapPtr cxPtr2 = {nullptr};
-  JBIG2BitmapPtr cxPtr3 = {nullptr};
-  JBIG2BitmapPtr cxPtr4 = {nullptr};
-  JBIG2BitmapPtr cxPtr5 = {nullptr};
-  JBIG2BitmapPtr cxPtr6 = {nullptr};
-  JBIG2BitmapPtr tpgrCXPtr0 = {nullptr};
-  JBIG2BitmapPtr tpgrCXPtr1 = {nullptr};
-  JBIG2BitmapPtr tpgrCXPtr2 = {nullptr};
+  JBIG2BitmapPtr cxPtr0 = {nullptr, 0, 0};
+  JBIG2BitmapPtr cxPtr1 = {nullptr, 0, 0};
+  JBIG2BitmapPtr cxPtr2 = {nullptr, 0, 0};
+  JBIG2BitmapPtr cxPtr3 = {nullptr, 0, 0};
+  JBIG2BitmapPtr cxPtr4 = {nullptr, 0, 0};
+  JBIG2BitmapPtr cxPtr5 = {nullptr, 0, 0};
+  JBIG2BitmapPtr cxPtr6 = {nullptr, 0, 0};
+  JBIG2BitmapPtr tpgrCXPtr0 = {nullptr, 0, 0};
+  JBIG2BitmapPtr tpgrCXPtr1 = {nullptr, 0, 0};
+  JBIG2BitmapPtr tpgrCXPtr2 = {nullptr, 0, 0};
   int x, y, pix;
 
   if (!refBitmap) {

@@ -1,6 +1,7 @@
 /* poppler-structure.cc: glib interface to poppler
  *
  * Copyright (C) 2013 Igalia S.L.
+ * Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -242,7 +243,7 @@ ENUM_VALUES (PopplerStructurePlacement, Placement)
   { "Before", POPPLER_STRUCTURE_PLACEMENT_BEFORE },
   { "Start",  POPPLER_STRUCTURE_PLACEMENT_START  },
   { "End",    POPPLER_STRUCTURE_PLACEMENT_END    },
-  { nullptr }
+  { }
 };
 
 ENUM_VALUES (PopplerStructureWritingMode, WritingMode)
@@ -250,7 +251,7 @@ ENUM_VALUES (PopplerStructureWritingMode, WritingMode)
   { "LrTb", POPPLER_STRUCTURE_WRITING_MODE_LR_TB },
   { "RlTb", POPPLER_STRUCTURE_WRITING_MODE_RL_TB },
   { "TbRl", POPPLER_STRUCTURE_WRITING_MODE_TB_RL },
-  { nullptr }
+  { }
 };
 
 ENUM_VALUES (PopplerStructureBorderStyle, BorderStyle)
@@ -264,7 +265,7 @@ ENUM_VALUES (PopplerStructureBorderStyle, BorderStyle)
   { "Groove", POPPLER_STRUCTURE_BORDER_STYLE_GROOVE },
   { "Inset",  POPPLER_STRUCTURE_BORDER_STYLE_INSET  },
   { "Outset", POPPLER_STRUCTURE_BORDER_STYLE_OUTSET },
-  { nullptr }
+  { }
 };
 
 ENUM_VALUES (PopplerStructureTextAlign, TextAlign)
@@ -273,7 +274,7 @@ ENUM_VALUES (PopplerStructureTextAlign, TextAlign)
   { "Center",  POPPLER_STRUCTURE_TEXT_ALIGN_CENTER  },
   { "End",     POPPLER_STRUCTURE_TEXT_ALIGN_END     },
   { "Justify", POPPLER_STRUCTURE_TEXT_ALIGN_JUSTIFY },
-  { nullptr }
+  { }
 };
 
 ENUM_VALUES (PopplerStructureBlockAlign, BlockAlign)
@@ -282,7 +283,7 @@ ENUM_VALUES (PopplerStructureBlockAlign, BlockAlign)
   { "Middle",  POPPLER_STRUCTURE_BLOCK_ALIGN_MIDDLE  },
   { "After",   POPPLER_STRUCTURE_BLOCK_ALIGN_AFTER   },
   { "Justify", POPPLER_STRUCTURE_BLOCK_ALIGN_JUSTIFY },
-  { nullptr }
+  { }
 };
 
 ENUM_VALUES (PopplerStructureInlineAlign, InlineAlign)
@@ -290,7 +291,7 @@ ENUM_VALUES (PopplerStructureInlineAlign, InlineAlign)
   { "Start",  POPPLER_STRUCTURE_INLINE_ALIGN_START  },
   { "Center", POPPLER_STRUCTURE_INLINE_ALIGN_CENTER },
   { "End",    POPPLER_STRUCTURE_INLINE_ALIGN_END    },
-  { nullptr }
+  { }
 };
 
 ENUM_VALUES (PopplerStructureTextDecoration, TextDecorationType)
@@ -299,7 +300,7 @@ ENUM_VALUES (PopplerStructureTextDecoration, TextDecorationType)
   { "Underline",   POPPLER_STRUCTURE_TEXT_DECORATION_UNDERLINE   },
   { "Overline",    POPPLER_STRUCTURE_TEXT_DECORATION_OVERLINE    },
   { "LineThrough", POPPLER_STRUCTURE_TEXT_DECORATION_LINETHROUGH },
-  { nullptr }
+  { }
 };
 
 ENUM_VALUES (PopplerStructureRubyAlign, RubyAlign)
@@ -309,7 +310,7 @@ ENUM_VALUES (PopplerStructureRubyAlign, RubyAlign)
   { "End",        POPPLER_STRUCTURE_RUBY_ALIGN_END        },
   { "Justify",    POPPLER_STRUCTURE_RUBY_ALIGN_JUSTIFY    },
   { "Distribute", POPPLER_STRUCTURE_RUBY_ALIGN_DISTRIBUTE },
-  { nullptr }
+  { }
 };
 
 ENUM_VALUES (PopplerStructureRubyPosition, RubyPosition)
@@ -318,7 +319,7 @@ ENUM_VALUES (PopplerStructureRubyPosition, RubyPosition)
   { "After",   POPPLER_STRUCTURE_RUBY_POSITION_AFTER   },
   { "Warichu", POPPLER_STRUCTURE_RUBY_POSITION_WARICHU },
   { "Inline",  POPPLER_STRUCTURE_RUBY_POSITION_INLINE  },
-  { nullptr }
+  { }
 };
 
 ENUM_VALUES (PopplerStructureGlyphOrientation, GlyphOrientationVertical)
@@ -330,7 +331,7 @@ ENUM_VALUES (PopplerStructureGlyphOrientation, GlyphOrientationVertical)
   { "360",  POPPLER_STRUCTURE_GLYPH_ORIENTATION_0    },
   { "-90",  POPPLER_STRUCTURE_GLYPH_ORIENTATION_270  },
   { "-180", POPPLER_STRUCTURE_GLYPH_ORIENTATION_180  },
-  { nullptr }
+  { }
 };
 
 ENUM_VALUES (PopplerStructureListNumbering, ListNumbering)
@@ -344,7 +345,7 @@ ENUM_VALUES (PopplerStructureListNumbering, ListNumbering)
   { "LowerRoman", POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ROMAN },
   { "UpperAlpha", POPPLER_STRUCTURE_LIST_NUMBERING_UPPER_ALPHA },
   { "LowerAlpha", POPPLER_STRUCTURE_LIST_NUMBERING_LOWER_ALPHA },
-  { nullptr }
+  { }
 };
 
 ENUM_VALUES (PopplerStructureFormRole, Role)
@@ -353,7 +354,7 @@ ENUM_VALUES (PopplerStructureFormRole, Role)
   { "cb", POPPLER_STRUCTURE_FORM_ROLE_CHECKBOX     },
   { "pb", POPPLER_STRUCTURE_FORM_ROLE_PUSH_BUTTON  },
   { "tv", POPPLER_STRUCTURE_FORM_ROLE_TEXT_VALUE   },
-  { nullptr }
+  { }
 };
 
 ENUM_VALUES (PopplerStructureFormState, checked)
@@ -361,7 +362,7 @@ ENUM_VALUES (PopplerStructureFormState, checked)
   { "on",      POPPLER_STRUCTURE_FORM_STATE_ON      },
   { "off",     POPPLER_STRUCTURE_FORM_STATE_OFF     },
   { "neutral", POPPLER_STRUCTURE_FORM_STATE_NEUTRAL },
-  { nullptr }
+  { }
 };
 
 ENUM_VALUES (PopplerStructureTableScope, Scope)
@@ -369,7 +370,7 @@ ENUM_VALUES (PopplerStructureTableScope, Scope)
   { "Row",    POPPLER_STRUCTURE_TABLE_SCOPE_ROW    },
   { "Column", POPPLER_STRUCTURE_TABLE_SCOPE_COLUMN },
   { "Both",   POPPLER_STRUCTURE_TABLE_SCOPE_BOTH   },
-  { nullptr }
+  { }
 };
 
 #undef ENUM_VALUES
