@@ -331,7 +331,7 @@ inline uint32_t decodeUtf16(uint32_t* state, uint32_t* codePoint, uint16_t codeU
 // UTF-8 (excluding terminating NULL).
 int utf16CountUtf8Bytes(const uint16_t *utf16)
 {
-    uint32_t codepoint;
+    uint32_t codepoint = 0;
     uint32_t state = 0;
     int count = 0;
 
