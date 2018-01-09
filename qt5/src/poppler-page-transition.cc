@@ -62,6 +62,16 @@ PageTransition::~PageTransition()
   delete data;
 }
 
+PageTransition& PageTransition::operator=(const PageTransition &other)
+{
+  if ( this != &other ) {
+    delete data;
+    data = new PageTransitionData(*other.data);
+  }
+
+  return *this;
+}
+
 PageTransition::Type PageTransition::type() const
 {
   return (Poppler::PageTransition::Type)data->pt->getType();
