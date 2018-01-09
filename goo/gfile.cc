@@ -19,7 +19,7 @@
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2008 Adam Batkin <adam@batkin.net>
 // Copyright (C) 2008, 2010, 2012, 2013 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2009, 2012, 2014, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2014, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -606,10 +606,10 @@ GooFile::GooFile(HANDLE handleA) : handle(handleA) {
 int GooFile::read(char *buf, int n, Goffset offset) const {
   DWORD m;
   
-  LARGE_INTEGER largeInteger = {0};
+  LARGE_INTEGER largeInteger = {};
   largeInteger.QuadPart = offset;
   
-  OVERLAPPED overlapped = {0};
+  OVERLAPPED overlapped = {};
   overlapped.Offset = largeInteger.LowPart;
   overlapped.OffsetHigh = largeInteger.HighPart;
 

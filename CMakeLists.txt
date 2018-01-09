@@ -378,6 +378,7 @@ set(poppler_SRCS
   poppler/StructTreeRoot.cc
   poppler/StructElement.cc
   poppler/UnicodeMap.cc
+  poppler/UnicodeMapFuncs.cc
   poppler/UnicodeTypeTable.cc
   poppler/UTF.cc
   poppler/XRef.cc

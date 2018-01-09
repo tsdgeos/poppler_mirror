@@ -9,7 +9,7 @@
    // Copyright (C) 2013 Adam Reichold <adamreichold@myopera.com>
    // Copyright (C) 2013 Dmytro Morgun <lztoad@gmail.com>
    // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
-   // Copyright (C) 2017 Albert Astals Cid <aacid@kde.org>
+   // Copyright (C) 2017, 2018 Albert Astals Cid <aacid@kde.org>
 
 TODO: instead of a fixed mapping defined in displayFontTab, it could
 scan the whole fonts directory, parse TTF files and build font
@@ -174,7 +174,7 @@ static const struct {
     {"MS-Mincho", nullptr, "msmincho.ttf", gFalse},
     {"Batang", nullptr, "batang.ttf", gFalse},
     {"ArialUnicode", nullptr, "arialuni.ttf", gTrue},
-    {nullptr}
+    { }
 };
 
 #define FONTS_SUBDIR "\\fonts"

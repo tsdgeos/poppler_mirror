@@ -16,7 +16,7 @@
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2016 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 //
 // To see a description of the changes please see the Changelog file that
@@ -331,7 +331,7 @@ inline uint32_t decodeUtf16(uint32_t* state, uint32_t* codePoint, uint16_t codeU
 // UTF-8 (excluding terminating NULL).
 int utf16CountUtf8Bytes(const uint16_t *utf16)
 {
-    uint32_t codepoint;
+    uint32_t codepoint = 0;
     uint32_t state = 0;
     int count = 0;
 

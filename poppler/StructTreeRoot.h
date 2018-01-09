@@ -68,10 +68,8 @@ private:
     StructElement *element;
 
     Parent(): element(nullptr) { ref.num = ref.gen = -1; }
-    Parent(const Parent &p): element(p.element) {
-      ref.num = p.ref.num;
-      ref.gen = p.ref.gen;
-    }
+    Parent(const Parent &p) = default;
+    Parent& operator=(const Parent &) = default;
     ~Parent() {}
   };
 
