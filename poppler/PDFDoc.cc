@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2007-2009, 2011-2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2009, 2011-2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -251,6 +251,13 @@ PDFDoc::PDFDoc(BaseStream *strA, GooString *ownerPassword,
 
 GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
   pdfdocLocker();
+
+  if (str->getLength() <= 0)
+  {
+    error(errSyntaxError, -1, "Document stream is empty");
+    return gFalse;
+  }
+
   str->setPos(0, -1);
   if (str->getPos() < 0)
   {

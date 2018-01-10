@@ -4787,18 +4787,24 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
   obj1 = dict->lookup("Decode");
   if (obj1.isArray() && obj1.arrayGetLength() >= 6) {
     Object obj2;
-    xMin = (obj2 = obj1.arrayGet(0), obj2.getNum());
-    xMax = (obj2 = obj1.arrayGet(1), obj2.getNum());
+    bool decodeOk = true;
+    xMin = (obj2 = obj1.arrayGet(0), obj2.getNum(&decodeOk));
+    xMax = (obj2 = obj1.arrayGet(1), obj2.getNum(&decodeOk));
     xMul = (xMax - xMin) / (pow(2.0, coordBits) - 1);
-    yMin = (obj2 = obj1.arrayGet(2), obj2.getNum());
-    yMax = (obj2 = obj1.arrayGet(3), obj2.getNum());
+    yMin = (obj2 = obj1.arrayGet(2), obj2.getNum(&decodeOk));
+    yMax = (obj2 = obj1.arrayGet(3), obj2.getNum(&decodeOk));
     yMul = (yMax - yMin) / (pow(2.0, coordBits) - 1);
     for (i = 0; 5 + 2*i < obj1.arrayGetLength() && i < gfxColorMaxComps; ++i) {
-      cMin[i] = (obj2 = obj1.arrayGet(4 + 2*i), obj2.getNum());
-      cMax[i] = (obj2 = obj1.arrayGet(5 + 2*i), obj2.getNum());
+      cMin[i] = (obj2 = obj1.arrayGet(4 + 2*i), obj2.getNum(&decodeOk));
+      cMax[i] = (obj2 = obj1.arrayGet(5 + 2*i), obj2.getNum(&decodeOk));
       cMul[i] = (cMax[i] - cMin[i]) / (double)((1 << compBits) - 1);
     }
     nComps = i;
+
+    if (!decodeOk) {
+      error(errSyntaxWarning, -1, "Missing or invalid Decode array in shading dictionary");
+      return nullptr;
+    }
   } else {
     error(errSyntaxWarning, -1, "Missing or invalid Decode array in shading dictionary");
     return nullptr;
