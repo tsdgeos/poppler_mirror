@@ -3742,11 +3742,17 @@ GfxFunctionShading *GfxFunctionShading::parse(GfxResources *res, Dict *dict, Out
   x1A = y1A = 1;
   obj1 = dict->lookup("Domain");
   if (obj1.isArray() && obj1.arrayGetLength() == 4) {
+    bool decodeOk = true;
     Object obj2;
-    x0A = (obj2 = obj1.arrayGet(0), obj2.getNum());
-    x1A = (obj2 = obj1.arrayGet(1), obj2.getNum());
-    y0A = (obj2 = obj1.arrayGet(2), obj2.getNum());
-    y1A = (obj2 = obj1.arrayGet(3), obj2.getNum());
+    x0A = (obj2 = obj1.arrayGet(0), obj2.getNum(&decodeOk));
+    x1A = (obj2 = obj1.arrayGet(1), obj2.getNum(&decodeOk));
+    y0A = (obj2 = obj1.arrayGet(2), obj2.getNum(&decodeOk));
+    y1A = (obj2 = obj1.arrayGet(3), obj2.getNum(&decodeOk));
+
+    if (!decodeOk) {
+      error(errSyntaxWarning, -1, "Invalid Domain array in function shading dictionary");
+      return nullptr;
+    }
   }
 
   matrixA[0] = 1; matrixA[1] = 0;
@@ -3754,13 +3760,19 @@ GfxFunctionShading *GfxFunctionShading::parse(GfxResources *res, Dict *dict, Out
   matrixA[4] = 0; matrixA[5] = 0;
   obj1 = dict->lookup("Matrix");
   if (obj1.isArray() && obj1.arrayGetLength() == 6) {
+    bool decodeOk = true;
     Object obj2;
-    matrixA[0] = (obj2 = obj1.arrayGet(0), obj2.getNum());
-    matrixA[1] = (obj2 = obj1.arrayGet(1), obj2.getNum());
-    matrixA[2] = (obj2 = obj1.arrayGet(2), obj2.getNum());
-    matrixA[3] = (obj2 = obj1.arrayGet(3), obj2.getNum());
-    matrixA[4] = (obj2 = obj1.arrayGet(4), obj2.getNum());
-    matrixA[5] = (obj2 = obj1.arrayGet(5), obj2.getNum());
+    matrixA[0] = (obj2 = obj1.arrayGet(0), obj2.getNum(&decodeOk));
+    matrixA[1] = (obj2 = obj1.arrayGet(1), obj2.getNum(&decodeOk));
+    matrixA[2] = (obj2 = obj1.arrayGet(2), obj2.getNum(&decodeOk));
+    matrixA[3] = (obj2 = obj1.arrayGet(3), obj2.getNum(&decodeOk));
+    matrixA[4] = (obj2 = obj1.arrayGet(4), obj2.getNum(&decodeOk));
+    matrixA[5] = (obj2 = obj1.arrayGet(5), obj2.getNum(&decodeOk));
+
+    if (!decodeOk) {
+      error(errSyntaxWarning, -1, "Invalid Matrix array in function shading dictionary");
+      return nullptr;
+    }
   }
 
   obj1 = dict->lookup("Function");
