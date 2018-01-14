@@ -1998,7 +1998,6 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
   SplashFontFile *fontFile;
   SplashFontSrc *fontsrc = nullptr;
   FoFiTrueType *ff;
-  Object refObj, strObj;
   GooString *fileName;
   char *tmpBuf;
   int tmpBufLen;
@@ -3765,7 +3764,6 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
 				      int maskHeight, GBool maskInvert,
 				      GBool maskInterpolate) {
   GfxImageColorMap *maskColorMap;
-  Object decodeLow, decodeHigh;
   double *ctm;
   SplashCoord mat[6];
   SplashOutMaskedImageData imgData;

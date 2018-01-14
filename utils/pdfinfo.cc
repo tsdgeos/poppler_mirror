@@ -602,7 +602,6 @@ int main(int argc, char *argv[]) {
   GooString *fileName;
   GooString *ownerPW, *userPW;
   UnicodeMap *uMap;
-  Object info;
   FILE *f;
   GBool ok;
   int exitCode;

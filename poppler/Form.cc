@@ -1433,7 +1433,7 @@ void FormFieldChoice::print(int indent)
 #endif
 
 void FormFieldChoice::updateSelection() {
-  Object objV, obj1;
+  Object objV;
   Object objI(objNull);
 
   if (edit && editedChoice) {

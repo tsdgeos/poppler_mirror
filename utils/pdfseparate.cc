@@ -145,7 +145,6 @@ static bool extractPages (const char *srcFileName, const char *destFileName) {
 int
 main (int argc, char *argv[])
 {
-  Object info;
   GBool ok;
   int exitCode;
 
