@@ -29,7 +29,7 @@ set(poppler_qt5_SRCS
   poppler-media.cc
   ArthurOutputDev.cc
 )
-add_library(poppler-qt5 SHARED ${poppler_qt5_SRCS})
+add_library(poppler-qt5 ${poppler_qt5_SRCS})
 set_target_properties(poppler-qt5 PROPERTIES VERSION 1.12.0 SOVERSION 1)
 if(MINGW)
     get_target_property(POPPLER_QT5_SOVERSION poppler-qt5 SOVERSION)

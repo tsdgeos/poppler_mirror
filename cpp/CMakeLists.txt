@@ -22,7 +22,7 @@ set(poppler_cpp_SRCS
   poppler-version.cpp
 )
 
-add_library(poppler-cpp SHARED ${poppler_cpp_SRCS})
+add_library(poppler-cpp ${poppler_cpp_SRCS})
 set_target_properties(poppler-cpp PROPERTIES VERSION 0.3.0 SOVERSION 0)
 if(MINGW)
     get_target_property(POPPLER_CPP_SOVERSION poppler-cpp SOVERSION)
