@@ -48,6 +48,7 @@ class FoFiTrueType;
 class PSOutputDev;
 struct GfxFontCIDWidths;
 struct Base14FontMapEntry;
+class FNVHash;
 
 //------------------------------------------------------------------------
 // GfxFontType
@@ -457,6 +458,9 @@ public:
   GfxFont *getFont(int i) { return fonts[i]; }
 
 private:
+
+  int hashFontObject(Object *obj);
+  void hashFontObject1(Object *obj, FNVHash *h);
 
   GfxFont **fonts;		// list of fonts
   int numFonts;			// number of fonts

@@ -2443,16 +2443,16 @@ GfxFontDict::GfxFontDict(XRef *xref, Ref *fontDictRef, Dict *fontDict) {
     if (obj2.isDict()) {
       if (obj1.isRef()) {
 	r = obj1.getRef();
-      } else {
-	// no indirect reference for this font, so invent a unique one
-	// (legal generation numbers are five digits, so any 6-digit
-	// number would be safe)
+      } else if (fontDictRef) {
+	// legal generation numbers are five digits, so we use a
+	// 6-digit number here
+	r.gen = 100000 + fontDictRef->num;
 	r.num = i;
-	if (fontDictRef) {
-	  r.gen = 100000 + fontDictRef->num;
-	} else {
-	  r.gen = 999999;
-	}
+      } else {
+	// no indirect reference for this font, or for the containing
+	// font dict, so hash the font and use that
+	r.gen = 100000;
+	r.num = hashFontObject(&obj2);
       }
       fonts[i] = GfxFont::makeFont(xref, fontDict->getKey(i),
 				   r, obj2.getDict());
@@ -2491,4 +2491,111 @@ GfxFont *GfxFontDict::lookup(char *tag) {
     }
   }
   return nullptr;
+}
+
+// FNV-1a hash
+class FNVHash {
+public:
+
+  FNVHash() {
+    h = 2166136261U;
+  }
+
+  void hash(char c) {
+    h ^= c & 0xff;
+    h *= 16777619;
+  }
+
+  void hash(char *p, int n) {
+    int i;
+    for (i = 0; i < n; ++i) {
+      hash(p[i]);
+    }
+  }
+
+  int get31() {
+    return (h ^ (h >> 31)) & 0x7fffffff;
+  }
+
+private:
+
+  Guint h;
+};
+
+int GfxFontDict::hashFontObject(Object *obj) {
+  FNVHash h;
+
+  hashFontObject1(obj, &h);
+  return h.get31();
+}
+
+void GfxFontDict::hashFontObject1(Object *obj, FNVHash *h) {
+  Object obj2;
+  GooString *s;
+  char *p;
+  double r;
+  int n, i;
+
+  switch (obj->getType()) {
+  case objBool:
+    h->hash('b');
+    h->hash(obj->getBool() ? 1 : 0);
+    break;
+  case objInt:
+    h->hash('i');
+    n = obj->getInt();
+    h->hash((char *)&n, sizeof(int));
+    break;
+  case objReal:
+    h->hash('r');
+    r = obj->getReal();
+    h->hash((char *)&r, sizeof(double));
+    break;
+  case objString:
+    h->hash('s');
+    s = obj->getString();
+    h->hash(s->getCString(), s->getLength());
+    break;
+  case objName:
+    h->hash('n');
+    p = obj->getName();
+    h->hash(p, (int)strlen(p));
+    break;
+  case objNull:
+    h->hash('z');
+    break;
+  case objArray:
+    h->hash('a');
+    n = obj->arrayGetLength();
+    h->hash((char *)&n, sizeof(int));
+    for (i = 0; i < n; ++i) {
+      obj2 = obj->arrayGetNF(i);
+      hashFontObject1(&obj2, h);
+    }
+    break;
+  case objDict:
+    h->hash('d');
+    n = obj->dictGetLength();
+    h->hash((char *)&n, sizeof(int));
+    for (i = 0; i < n; ++i) {
+      p = obj->dictGetKey(i);
+      h->hash(p, (int)strlen(p));
+      obj2 = obj->dictGetValNF(i);
+      hashFontObject1(&obj2, h);
+    }
+    break;
+  case objStream:
+    // this should never happen - streams must be indirect refs
+    break;
+  case objRef:
+    h->hash('f');
+    n = obj->getRefNum();
+    h->hash((char *)&n, sizeof(int));
+    n = obj->getRefGen();
+    h->hash((char *)&n, sizeof(int));
+    break;
+  default:
+    h->hash('u');
+    break;
+  }
 }
