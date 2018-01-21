@@ -1837,8 +1837,6 @@ void Annot::draw(Gfx *gfx, GBool printing) {
 
 AnnotPopup::AnnotPopup(PDFDoc *docA, PDFRectangle *rect) :
     Annot(docA, rect) {
-  Object obj1;
-
   type = typePopup;
 
   annotObj.dictSet ("Subtype", Object(objName, "Popup"));
@@ -2163,8 +2161,6 @@ void AnnotText::initialize(PDFDoc *docA, Dict *dict) {
 }
 
 void AnnotText::setOpen(GBool openA) {
-  Object obj1;
-
   open = openA;
   update ("Open", Object(open));
 }
@@ -2502,8 +2498,6 @@ void AnnotText::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 AnnotLink::AnnotLink(PDFDoc *docA, PDFRectangle *rect) :
     Annot(docA, rect) {
-  Object obj1;
-
   type = typeLink;
   annotObj.dictSet ("Subtype", Object(objName, "Link"));
   initialize (docA, annotObj.getDict());
@@ -2602,8 +2596,6 @@ void AnnotLink::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, GooString *da) :
     AnnotMarkup(docA, rect) {
-  Object obj1;
-
   type = typeFreeText;
 
   annotObj.dictSet ("Subtype", Object(objName, "FreeText"));
@@ -2749,7 +2741,6 @@ void AnnotFreeText::setAppearanceString(GooString *new_string) {
 }
 
 void AnnotFreeText::setQuadding(AnnotFreeTextQuadding new_quadding) {
-  Object obj1;
   quadding = new_quadding;
   update ("Q", Object((int)quadding));
   invalidateAppearance();
@@ -2996,8 +2987,6 @@ Object AnnotFreeText::getAppearanceResDict() {
 
 AnnotLine::AnnotLine(PDFDoc *docA, PDFRectangle *rect) :
     AnnotMarkup(docA, rect) {
-  Object obj1;
-
   type = typeLine;
   annotObj.dictSet ("Subtype", Object(objName, "Line"));
 
@@ -3442,8 +3431,6 @@ Object AnnotLine::getAppearanceResDict() {
 //------------------------------------------------------------------------
 AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType) :
     AnnotMarkup(docA, rect) {
-  Object obj1;
-
   switch (subType) {
     case typeHighlight:
       annotObj.dictSet ("Subtype", Object(objName, "Highlight"));
@@ -4991,8 +4978,6 @@ void AnnotWidget::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 AnnotMovie::AnnotMovie(PDFDoc *docA, PDFRectangle *rect, Movie *movieA) :
     Annot(docA, rect) {
-  Object obj1;
-
   type = typeMovie;
   annotObj.dictSet ("Subtype", Object(objName, "Movie"));
 
@@ -5127,8 +5112,6 @@ void AnnotMovie::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 AnnotScreen::AnnotScreen(PDFDoc *docA, PDFRectangle *rect) :
     Annot(docA, rect) {
-  Object obj1;
-
   type = typeScreen;
 
   annotObj.dictSet ("Subtype", Object(objName, "Screen"));
@@ -5190,8 +5173,6 @@ LinkAction* AnnotScreen::getAdditionalAction(AdditionalActionsType type)
 //------------------------------------------------------------------------
 AnnotStamp::AnnotStamp(PDFDoc *docA, PDFRectangle *rect) :
   AnnotMarkup(docA, rect) {
-  Object obj1;
-
   type = typeStamp;
   annotObj.dictSet ("Subtype", Object(objName, "Stamp"));
   initialize(docA, annotObj.getDict());
@@ -5235,8 +5216,6 @@ void AnnotStamp::setIcon(GooString *new_icon) {
 //------------------------------------------------------------------------
 AnnotGeometry::AnnotGeometry(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType) :
     AnnotMarkup(docA, rect) {
-  Object obj1;
-
   switch (subType) {
     case typeSquare:
       annotObj.dictSet ("Subtype", Object(objName, "Square"));
@@ -5447,8 +5426,6 @@ void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 AnnotPolygon::AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType) :
     AnnotMarkup(docA, rect) {
-  Object obj1;
-
   switch (subType) {
     case typePolygon:
       annotObj.dictSet ("Subtype", Object(objName, "Polygon"));
@@ -5716,8 +5693,6 @@ void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 AnnotCaret::AnnotCaret(PDFDoc *docA, PDFRectangle *rect) :
     AnnotMarkup(docA, rect) {
-  Object obj1;
-
   type = typeCaret;
 
   annotObj.dictSet ("Subtype", Object(objName, "Caret"));
@@ -5767,14 +5742,11 @@ void AnnotCaret::setSymbol(AnnotCaretSymbol new_symbol) {
 //------------------------------------------------------------------------
 AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rect) :
     AnnotMarkup(docA, rect) {
-  Object obj1;
-
   type = typeInk;
 
   annotObj.dictSet ("Subtype", Object(objName, "Ink"));
 
   // Store dummy path with one null vertex only
-  Object obj3, obj4;
   Array *inkList = new Array(doc->getXRef());
   Array *vList = new Array(doc->getXRef());
   vList->add(Object(0.));
@@ -5930,8 +5902,6 @@ void AnnotInk::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rect, GooString *filename) :
     AnnotMarkup(docA, rect) {
-  Object obj1;
-
   type = typeFileAttachment;
 
   annotObj.dictSet("Subtype", Object(objName, "FileAttachment"));
@@ -6135,8 +6105,6 @@ void AnnotFileAttachment::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 AnnotSound::AnnotSound(PDFDoc *docA, PDFRectangle *rect, Sound *soundA) :
     AnnotMarkup(docA, rect) {
-  Object obj1;
-
   type = typeSound;
 
   annotObj.dictSet ("Subtype", Object(objName, "Sound"));
@@ -6288,8 +6256,6 @@ void AnnotSound::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 Annot3D::Annot3D(PDFDoc *docA, PDFRectangle *rect) :
     Annot(docA, rect) {
-  Object obj1;
-
   type = type3D;
 
   annotObj.dictSet ("Subtype", Object(objName, "3D"));
@@ -6406,8 +6372,6 @@ Annot3D::Activation::Activation(Dict *dict) {
 //------------------------------------------------------------------------
 AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, PDFRectangle *rect) :
     Annot(docA, rect) {
-  Object obj1;
-
   type = typeRichMedia;
 
   annotObj.dictSet ("Subtype", Object(objName, "RichMedia"));

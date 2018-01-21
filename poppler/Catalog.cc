@@ -462,7 +462,6 @@ LinkDest *Catalog::getDestNameTreeDest(int i)
 
 FileSpec *Catalog::embeddedFile(int i)
 {
-    Object efDict;
     catalogLocker();
     Object *obj = getEmbeddedFileNameTree()->getValue(i);
     FileSpec *embeddedFile = nullptr;

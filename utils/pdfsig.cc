@@ -208,7 +208,6 @@ int main(int argc, char *argv[])
     std::vector<Goffset> ranges = sig_widgets.at(i)->getSignedRangeBounds();
     if (ranges.size() == 4)
     {
-      int i = 0;
       printf("  - Signed Ranges: [%lld - %lld], [%lld - %lld]\n",
              ranges[0], ranges[1], ranges[2], ranges[3]);
       Goffset checked_file_size;

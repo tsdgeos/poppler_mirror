@@ -101,7 +101,6 @@ void JSInfo::scanJS(int nPages, FILE *fout, UnicodeMap *uMap) {
 void JSInfo::scan(int nPages) {
   Page *page;
   Annots *annots;
-  Object obj1, obj2;
   int lastPage;
 
   hasJS = gFalse;

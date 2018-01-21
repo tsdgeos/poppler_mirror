@@ -1547,7 +1547,6 @@ void PDFDoc::markDictionnary (Dict* dict, XRef * xRef, XRef *countRef, Guint num
     alreadyMarkedDicts->insert(dict);
   }
 
-  Object obj1;
   for (int i=0; i<dict->getLength(); i++) {
     const char *key = dict->getKey(i);
     if (strcmp(key, "Annots") != 0) {

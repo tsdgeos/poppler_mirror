@@ -671,8 +671,6 @@ LinkRendition::LinkRendition(Object *obj) {
       if (!js && (operationCode < 0 || operationCode > 4)) {
         error(errSyntaxWarning, -1, "Invalid Rendition Action: unrecognized operation valued: {0:d}", operationCode);
       } else {
-        Object obj1;
-
         // retrieve rendition object
         renditionObj = obj->dictLookup("R");
         if (renditionObj.isDict()) {

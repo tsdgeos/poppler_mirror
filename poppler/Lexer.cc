@@ -86,7 +86,6 @@ Lexer::Lexer(XRef *xrefA, Object *obj) {
   xref = xrefA;
 
   if (obj->isStream()) {
-    Object obj2;
     streams = new Array(xref);
     freeArray = gTrue;
     streams->add(obj->copy());

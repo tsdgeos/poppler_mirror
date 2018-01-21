@@ -439,7 +439,6 @@ void ArthurOutputDev::updateFont(GfxState *state)
   SplashFontFile *fontFile;
   SplashFontSrc *fontsrc = nullptr;
   FoFiTrueType *ff;
-  Object refObj, strObj;
   GooString *fileName;
   char *tmpBuf;
   int tmpBufLen = 0;

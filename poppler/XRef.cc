@@ -1722,7 +1722,6 @@ void XRef::scanSpecialFlags() {
   }
 
   // Mark objects referred from the Encrypt dict as Unencrypted
-  Object obj = trailerDict.dictLookupNF("Encrypt");
   markUnencrypted();
 }
 
