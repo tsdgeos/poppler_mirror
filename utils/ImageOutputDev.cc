@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2011, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Rainer Keller <class321@gmx.de>
 // Copyright (C) 2008 Timothy Lee <timothy.lee@siriushk.com>
 // Copyright (C) 2008 Vasile Gaburici <gaburici@cs.umd.edu>
@@ -24,6 +24,7 @@
 // Copyright (C) 2013 Thomas Fischer <fischer@unix-ag.uni-kl.de>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2017 Caolán McNamara <caolanm@redhat.com>
+// Copyright (C) 2018 Andreas Gruenbacher <agruenba@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -619,9 +620,9 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
     }
 
     writeImageFile(writer, format, "png", str, width, height, colorMap);
-#endif
-    delete writer;
 
+    delete writer;
+#endif
   } else if (outputTiff) {
     // output in TIFF format
 
@@ -651,9 +652,9 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
     }
 
     writeImageFile(writer, format, "tif", str, width, height, colorMap);
-#endif
-    delete writer;
 
+    delete writer;
+#endif
   } else {
     // output in PPM/PBM format
     ImgWriter *writer;
