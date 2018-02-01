@@ -17,7 +17,7 @@
  * Copyright (C) 2013 Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
- * Copyright (C) 2017 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+ * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -571,6 +571,76 @@ delete it;
                              const QVariant &closure
                             ) const;
 
+	/**
+	    Abort query function callback.
+
+	    This function type is used for query if the current rendering/text extraction should be cancelled.
+
+	    \since 0.63
+	*/
+	typedef bool (*ShouldAbortQueryFunc)(const QVariant & /*closure*/);
+
+		/**
+	   Render the page to a QImage using the current
+	   \link Document::renderBackend() Document renderer\endlink.
+
+	   If \p x = \p y = \p w = \p h = -1, the method will automatically
+           compute the size of the image from the horizontal and vertical
+           resolutions specified in \p xres and \p yres. Otherwise, the
+           method renders only a part of the page, specified by the
+           parameters (\p x, \p y, \p w, \p h) in pixel coordinates. The returned
+           QImage then has size (\p w, \p h), independent of the page
+           size.
+
+	   \param x specifies the left x-coordinate of the box, in
+	   pixels.
+
+	   \param y specifies the top y-coordinate of the box, in
+	   pixels.
+
+	   \param w specifies the width of the box, in pixels.
+
+	   \param h specifies the height of the box, in pixels.
+
+	   \param xres horizontal resolution of the graphics device,
+	   in dots per inch
+
+	   \param yres vertical resolution of the graphics device, in
+	   dots per inch
+
+	   \param rotate how to rotate the page
+
+	   \param partialUpdateCallback callback that will be called to
+	   report a partial rendering update
+
+	   \param shouldDoPartialUpdateCallback callback that will be called
+	   to ask if a partial rendering update is wanted. This exists
+	   because doing a partial rendering update needs to copy the image
+	   buffer so if it is not wanted it is better skipped early.
+
+	   \param shouldAbortRenderCallback callback that will be called
+	   to ask if the rendering should be cancelled.
+
+	   \param closure opaque structure that will be passed
+	   back to partialUpdateCallback, shouldDoPartialUpdateCallback
+	   and shouldAbortRenderCallback.
+
+	   \warning The parameter (\p x, \p y, \p w, \p h) are not
+	   well-tested. Unusual or meaningless parameters may lead to
+	   rather unexpected results.
+
+	   \returns a QImage of the page, or a null image on failure.
+
+	   \since 0.63
+        */
+        QImage renderToImage(double xres, double yres,
+                             int x, int y, int w, int h, Rotation rotate,
+                             RenderToImagePartialUpdateFunc partialUpdateCallback,
+                             ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback,
+                             ShouldAbortQueryFunc shouldAbortRenderCallback,
+                             const QVariant &closure
+                            ) const;
+
         /**
            Render the page to the specified QPainter using the current
            \link Document::renderBackend() Document renderer\endlink.
@@ -743,6 +813,32 @@ delete it;
 	   \warning This method is not tested with Asian scripts
 	*/
 	QList<TextBox*> textList(Rotation rotate = Rotate0) const;
+
+	/**
+	   Returns a list of text of the page
+
+	   This method returns a QList of TextBoxes that contain all
+	   the text of the page, with roughly one text word of text
+	   per TextBox item.
+
+	   For text written in western languages (left-to-right and
+	   up-to-down), the QList contains the text in the proper
+	   order.
+
+	   \param shouldAbortExtractionCallback callback that will be called
+	   to ask if the text extraction should be cancelled.
+
+	   \param closure opaque structure that will be passed
+	   back to shouldAbortExtractionCallback.
+
+	   \note The caller owns the text boxes and they should
+	         be deleted when no longer required.
+
+	   \warning This method is not tested with Asian scripts
+
+	   // \since 0.63
+	*/
+	QList<TextBox*> textList(Rotation rotate, ShouldAbortQueryFunc shouldAbortExtractionCallback, const QVariant &closure) const;
 
 	/**
 	   \return The dimensions (cropbox) of the page, in points (i.e. 1/72th of an inch)

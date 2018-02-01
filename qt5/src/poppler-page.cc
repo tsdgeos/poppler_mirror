@@ -19,7 +19,7 @@
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  * Copyright (C) 2017, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
- * Copyright (C) 2017 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+ * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,37 @@
 
 namespace Poppler {
 
-class Qt5SplashOutputDev : public SplashOutputDev
+class TextExtractionAbortHelper
+{
+public:
+  TextExtractionAbortHelper(Page::ShouldAbortQueryFunc shouldAbortCallback, const QVariant &payloadA)
+  {
+    shouldAbortExtractionCallback = shouldAbortCallback;
+    payload = payloadA;
+  }
+
+  Page::ShouldAbortQueryFunc shouldAbortExtractionCallback = nullptr;
+  QVariant payload;
+};
+
+class OutputDevCallbackHelper
+{
+public:
+  void setCallbacks(Page::RenderToImagePartialUpdateFunc callback, Page::ShouldRenderToImagePartialQueryFunc shouldDoCallback, Page::ShouldAbortQueryFunc shouldAbortCallback, const QVariant &payloadA)
+  {
+    partialUpdateCallback = callback;
+    shouldDoPartialUpdateCallback = shouldDoCallback;
+    shouldAbortRenderCallback = shouldAbortCallback;
+    payload = payloadA;
+  }
+
+  Page::RenderToImagePartialUpdateFunc partialUpdateCallback = nullptr;
+  Page::ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback = nullptr;
+  Page::ShouldAbortQueryFunc shouldAbortRenderCallback = nullptr;
+  QVariant payload;
+};
+
+class Qt5SplashOutputDev : public SplashOutputDev, public OutputDevCallbackHelper
 {
 public:
   Qt5SplashOutputDev(SplashColorMode colorMode, int bitmapRowPad,
@@ -78,17 +108,8 @@ public:
                       GBool bitmapTopDown, SplashThinLineMode thinLineMode,
                       GBool overprintPreview)
     : SplashOutputDev(colorMode, bitmapRowPad, reverseVideo, paperColor, bitmapTopDown, thinLineMode, overprintPreview)
-    , partialUpdateCallback(nullptr)
-    , shouldDoPartialUpdateCallback(nullptr)
     , ignorePaperColor(ignorePaperColorA)
   {
-  }
-
-  void setPartialUpdateCallbackData(Page::RenderToImagePartialUpdateFunc callback, Page::ShouldRenderToImagePartialQueryFunc shouldDoCallback, const QVariant &payloadA)
-  {
-    partialUpdateCallback = callback;
-    shouldDoPartialUpdateCallback = shouldDoCallback;
-    payload = payloadA;
   }
 
   void dump() override
@@ -143,29 +164,17 @@ public:
   }
 
 private:
-  Page::RenderToImagePartialUpdateFunc partialUpdateCallback;
-  Page::ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback;
-  QVariant payload;
   bool ignorePaperColor;
 };
 
 
-class QImageDumpingArthurOutputDev : public ArthurOutputDev
+class QImageDumpingArthurOutputDev : public ArthurOutputDev, public OutputDevCallbackHelper
 {
 public:
   QImageDumpingArthurOutputDev(QPainter *painter, QImage *i)
     : ArthurOutputDev(painter)
-    , partialUpdateCallback(nullptr)
-    , shouldDoPartialUpdateCallback(nullptr)
     , image(i)
   {
-  }
-
-  void setPartialUpdateCallbackData(Page::RenderToImagePartialUpdateFunc callback, Page::ShouldRenderToImagePartialQueryFunc shouldDoCallback, const QVariant &payloadA)
-  {
-    partialUpdateCallback = callback;
-    shouldDoPartialUpdateCallback = shouldDoCallback;
-    payload = payloadA;
   }
 
   void dump() override
@@ -176,9 +185,6 @@ public:
   }
 
 private:
-  Page::RenderToImagePartialUpdateFunc partialUpdateCallback;
-  Page::ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback;
-  QVariant payload;
   QImage *image;
 };
 
@@ -412,7 +418,34 @@ Page::~Page()
   delete m_page;
 }
 
-static bool renderToArthur(ArthurOutputDev *arthur_output, QPainter *painter, PageData *page, double xres, double yres, int x, int y, int w, int h, Page::Rotation rotate, Page::PainterFlags flags)
+// Callback that filters out everything but form fields
+static auto annotDisplayDecideCbk = [](Annot *annot, void *user_data)
+{
+  // Hide everything but forms
+  return (annot->getType() == Annot::typeWidget);
+};
+
+// A nullptr, but with the type of a function pointer
+// Needed to make the ternary operator happy.
+static GBool (*nullAnnotCallBack)(Annot *annot, void *user_data) = nullptr;
+
+static auto shouldAbortRenderInternalCallback = [](void *user_data)
+{
+  OutputDevCallbackHelper *helper = reinterpret_cast<OutputDevCallbackHelper*>(user_data);
+  return helper->shouldAbortRenderCallback(helper->payload);
+};
+
+static auto shouldAbortExtractionInternalCallback = [](void *user_data)
+{
+  TextExtractionAbortHelper *helper = reinterpret_cast<TextExtractionAbortHelper*>(user_data);
+  return helper->shouldAbortExtractionCallback(helper->payload);
+};
+
+// A nullptr, but with the type of a function pointer
+// Needed to make the ternary operator happy.
+static GBool (*nullAbortCallBack)(void *user_data) = nullptr;
+
+static bool renderToArthur(QImageDumpingArthurOutputDev *arthur_output, QPainter *painter, PageData *page, double xres, double yres, int x, int y, int w, int h, Page::Rotation rotate, Page::PainterFlags flags)
 {
   const bool savePainter = !(flags & Page:: DontSaveAndRestore);
   if (savePainter)
@@ -427,17 +460,7 @@ static bool renderToArthur(ArthurOutputDev *arthur_output, QPainter *painter, Pa
 
   const GBool hideAnnotations = page->parentDoc->m_hints & Document::HideAnnotations;
 
-  // Callback that filters out everything but form fields
-  auto annotDisplayDecideCbk = [](Annot *annot, void *user_data)
-  {
-    // Hide everything but forms
-    return (annot->getType() == Annot::typeWidget);
-  };
-
-  // A nullptr, but with the type of a function pointer
-  // Needed to make the ternary operator below happy.
-  GBool (*nullCallBack)(Annot *annot, void *user_data) = nullptr;
-
+  OutputDevCallbackHelper *abortHelper = arthur_output;
   page->parentDoc->doc->displayPageSlice(arthur_output,
                                           page->index + 1,
                                           xres,
@@ -450,9 +473,9 @@ static bool renderToArthur(ArthurOutputDev *arthur_output, QPainter *painter, Pa
                                           y,
                                           w,
                                           h,
-                                          nullptr,
-                                          nullptr,
-                                          (hideAnnotations) ? annotDisplayDecideCbk : nullCallBack);
+                                          abortHelper->shouldAbortRenderCallback ? shouldAbortRenderInternalCallback : nullAbortCallBack,
+                                          abortHelper,
+                                          (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack);
   if (savePainter)
     painter->restore();
   return true;
@@ -464,6 +487,11 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 }
 
 QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h, Rotation rotate, RenderToImagePartialUpdateFunc partialUpdateCallback, ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback, const QVariant &payload) const
+{
+  return renderToImage(xres, yres, x, y, w, h, rotate, partialUpdateCallback, shouldDoPartialUpdateCallback, nullptr, payload);
+}
+
+QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h, Rotation rotate, RenderToImagePartialUpdateFunc partialUpdateCallback, ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback, ShouldAbortQueryFunc shouldAbortRenderCallback, const QVariant &payload) const
 {
   int rotation = (int)rotate * 90;
   QImage img;
@@ -526,7 +554,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
                   thinLineMode,
                   overprintPreview);
 
-      splash_output.setPartialUpdateCallbackData(partialUpdateCallback, shouldDoPartialUpdateCallback, payload);
+      splash_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
 
       splash_output.setFontAntialias(m_page->parentDoc->m_hints & Document::TextAntialiasing ? gTrue : gFalse);
       splash_output.setVectorAntialias(m_page->parentDoc->m_hints & Document::Antialiasing ? gTrue : gFalse);
@@ -537,21 +565,11 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 
       const GBool hideAnnotations = m_page->parentDoc->m_hints & Document::HideAnnotations;
 
-      // Callback that filters out everything but form fields
-      auto annotDisplayDecideCbk = [](Annot *annot, void *user_data)
-      {
-        // Hide everything but forms
-        return (annot->getType() == Annot::typeWidget);
-      };
-
-      // A nullptr, but with the type of a function pointer
-      // Needed to make the ternary operator below happy.
-      GBool (*nullCallBack)(Annot *annot, void *user_data) = nullptr;
-
+      OutputDevCallbackHelper *abortHelper = &splash_output;
       m_page->parentDoc->doc->displayPageSlice(&splash_output, m_page->index + 1, xres, yres,
                                                rotation, false, true, false, x, y, w, h,
-                                               nullptr, nullptr,
-                                               (hideAnnotations) ? annotDisplayDecideCbk : nullCallBack,
+                                               shouldAbortRenderCallback ? shouldAbortRenderInternalCallback : nullAbortCallBack, abortHelper,
+                                               (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack,
                                                nullptr, gTrue);
 
       img = splash_output.getXBGRImage( true /* takeImageData */);
@@ -572,13 +590,16 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 
       QPainter painter(&tmpimg);
       QImageDumpingArthurOutputDev arthur_output(&painter, &tmpimg);
-      arthur_output.setPartialUpdateCallbackData(partialUpdateCallback, shouldDoPartialUpdateCallback, payload);
+      arthur_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
       renderToArthur(&arthur_output, &painter, m_page, xres, yres, x, y, w, h, rotate, DontSaveAndRestore);
       painter.end();
       img = tmpimg;
       break;
     }
   }
+
+  if (shouldAbortRenderCallback && shouldAbortRenderCallback(payload))
+      return QImage();
 
   return img;
 }
@@ -594,7 +615,7 @@ bool Page::renderToPainter(QPainter* painter, double xres, double yres, int x, i
       return false;
     case Poppler::Document::ArthurBackend:
     {
-        ArthurOutputDev arthur_output(painter);
+        QImageDumpingArthurOutputDev arthur_output(painter, nullptr);
         return renderToArthur(&arthur_output, painter, m_page, xres, yres, x, y, w, h, rotate, flags);
     }
   }
@@ -713,6 +734,11 @@ QList<QRectF> Page::search(const QString &text, SearchFlags flags, Rotation rota
 
 QList<TextBox*> Page::textList(Rotation rotate) const
 {
+    return textList(rotate, nullptr, QVariant());
+}
+
+QList<TextBox*> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbortExtractionCallback, const QVariant &closure) const
+{
   TextOutputDev *output_dev;
   
   QList<TextBox*> output_list;
@@ -721,13 +747,15 @@ QList<TextBox*> Page::textList(Rotation rotate) const
   
   int rotation = (int)rotate * 90;
 
+  TextExtractionAbortHelper abortHelper(shouldAbortExtractionCallback, closure);
   m_page->parentDoc->doc->displayPageSlice(output_dev, m_page->index + 1, 72, 72,
       rotation, false, false, false, -1, -1, -1, -1,
-      nullptr, nullptr, nullptr, nullptr, gTrue);
+      shouldAbortExtractionCallback ? shouldAbortExtractionInternalCallback : nullAbortCallBack, &abortHelper,
+      nullptr, nullptr, gTrue);
 
   TextWordList *word_list = output_dev->makeWordList();
   
-  if (!word_list) {
+  if (!word_list || (shouldAbortExtractionCallback && shouldAbortExtractionCallback(closure))) {
     delete output_dev;
     return output_list;
   }
