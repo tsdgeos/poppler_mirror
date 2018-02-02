@@ -335,7 +335,6 @@ protected:
   GBool printing;
   GBool use_show_text_glyphs;
   GBool text_matrix_valid;
-  cairo_surface_t *surface;
   cairo_glyph_t *glyphs;
   int glyphCount;
   cairo_text_cluster_t *clusters;
@@ -359,7 +358,6 @@ protected:
   cairo_pattern_t *shape;
   cairo_pattern_t *mask;
   cairo_matrix_t mask_matrix;
-  cairo_surface_t *cairo_shape_surface;
   cairo_t *cairo_shape;
   int knockoutCount;
   struct ColorSpaceStack {
