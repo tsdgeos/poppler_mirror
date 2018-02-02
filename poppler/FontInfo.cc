@@ -3,7 +3,7 @@
 // FontInfo.cc
 //
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2008, 2010, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2008, 2010, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2006 Kouhei Sutou <kou@cozmixng.org>
 // Copyright (C) 2009 Pino Toscano <pino@kde.org>
@@ -92,7 +92,6 @@ GooList *FontInfoScanner::scan(int nPages) {
 }
 
 void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList) {
-  Ref r;
   GfxFontDict *gfxFontDict;
   GfxFont *font;
 
@@ -102,7 +101,7 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList) 
   if (obj1.isRef()) {
     Object obj2 = obj1.fetch(xrefA);
     if (obj2.isDict()) {
-      r = obj1.getRef();
+      Ref r = obj1.getRef();
       gfxFontDict = new GfxFontDict(xrefA, &r, obj2.getDict());
     }
   } else if (obj1.isDict()) {

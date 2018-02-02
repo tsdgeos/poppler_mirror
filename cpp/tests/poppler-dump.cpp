@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017, 2018, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -271,7 +271,7 @@ static void print_embedded_files(poppler::document *doc)
     std::vector<poppler::embedded_file *> ef = doc->embedded_files();
     if (!ef.empty()) {
         std::vector<poppler::embedded_file *>::const_iterator it = ef.begin(), it_end = ef.end();
-        const std::ios_base::fmtflags f = std::cout.flags();
+        const std::ios_base::fmtflags flags = std::cout.flags();
         std::left(std::cout);
         for (; it != it_end; ++it) {
             poppler::embedded_file *f = *it;
@@ -293,7 +293,7 @@ static void print_embedded_files(poppler::document *doc)
                 << " " << (f->mime_type().empty() ? std::string("<no mime type>") : f->mime_type())
                 << std::endl;
         }
-        std::cout.flags(f);
+        std::cout.flags(flags);
     } else {
         std::cout << "<no embedded files>" << std::endl;
     }

@@ -17,7 +17,7 @@
 // Copyright (C) 2005-2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
-// Copyright (C) 2005, 2009, 2012, 2013, 2015, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2012, 2013, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006, 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
@@ -70,17 +70,17 @@
 // CairoFont
 //------------------------------------------------------------------------
 
-CairoFont::CairoFont(Ref ref,
-		     cairo_font_face_t *cairo_font_face,
-		     int *codeToGID,
-		     Guint codeToGIDLen,
-		     GBool substitute,
-		     GBool printing) : ref(ref),
-				       cairo_font_face(cairo_font_face),
-				       codeToGID(codeToGID),
-				       codeToGIDLen(codeToGIDLen),
-				       substitute(substitute),
-				       printing(printing)      { }
+CairoFont::CairoFont(Ref refA,
+		     cairo_font_face_t *cairo_font_faceA,
+		     int *codeToGIDA,
+		     Guint codeToGIDLenA,
+		     GBool substituteA,
+		     GBool printingA) : ref(refA),
+				       cairo_font_face(cairo_font_faceA),
+				       codeToGID(codeToGIDA),
+				       codeToGIDLen(codeToGIDLenA),
+				       substitute(substituteA),
+				       printing(printingA)      { }
 
 CairoFont::~CairoFont() {
   cairo_font_face_destroy (cairo_font_face);
@@ -379,15 +379,15 @@ _ft_new_face (FT_Library lib,
 #define _ft_new_face _ft_new_face_uncached
 #endif
 
-CairoFreeTypeFont::CairoFreeTypeFont(Ref ref,
-				     cairo_font_face_t *cairo_font_face,
-				     int *codeToGID,
-				     Guint codeToGIDLen,
-				     GBool substitute) : CairoFont(ref,
-								   cairo_font_face,
-								   codeToGID,
-								   codeToGIDLen,
-								   substitute,
+CairoFreeTypeFont::CairoFreeTypeFont(Ref refA,
+				     cairo_font_face_t *cairo_font_faceA,
+				     int *codeToGIDA,
+				     Guint codeToGIDLenA,
+				     GBool substituteA) : CairoFont(refA,
+								   cairo_font_faceA,
+								   codeToGIDA,
+								   codeToGIDLenA,
+								   substituteA,
 								   gTrue) { }
 
 CairoFreeTypeFont::~CairoFreeTypeFont() { }
@@ -777,18 +777,18 @@ CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, PDFDoc *doc,
   return new CairoType3Font(ref, doc, font_face, codeToGID, codeToGIDLen, printing, xref);
 }
 
-CairoType3Font::CairoType3Font(Ref ref,
-			       PDFDoc *doc,
-			       cairo_font_face_t *cairo_font_face,
-			       int *codeToGID,
-			       Guint codeToGIDLen,
-			       GBool printing, XRef *xref) : CairoFont(ref,
-							   cairo_font_face,
-							   codeToGID,
-							   codeToGIDLen,
+CairoType3Font::CairoType3Font(Ref refA,
+			       PDFDoc *docA,
+			       cairo_font_face_t *cairo_font_faceA,
+			       int *codeToGIDA,
+			       Guint codeToGIDLenA,
+			       GBool printingA, XRef *xref) : CairoFont(refA,
+							   cairo_font_faceA,
+							   codeToGIDA,
+							   codeToGIDLenA,
 							   gFalse,
-							   printing),
-						 doc(doc) { }
+							   printingA),
+						 doc(docA) { }
 
 CairoType3Font::~CairoType3Font() { }
 

@@ -34,8 +34,8 @@ class MediaRenditionPrivate
 {
 public:
 
-  MediaRenditionPrivate(::MediaRendition *rendition)
-  : rendition(rendition)
+  MediaRenditionPrivate(::MediaRendition *renditionA)
+  : rendition(renditionA)
   {
   }
   

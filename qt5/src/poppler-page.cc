@@ -1,7 +1,7 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2018, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -103,11 +103,11 @@ public:
 class Qt5SplashOutputDev : public SplashOutputDev, public OutputDevCallbackHelper
 {
 public:
-  Qt5SplashOutputDev(SplashColorMode colorMode, int bitmapRowPad,
-                      GBool reverseVideo, bool ignorePaperColorA, SplashColorPtr paperColor,
-                      GBool bitmapTopDown, SplashThinLineMode thinLineMode,
-                      GBool overprintPreview)
-    : SplashOutputDev(colorMode, bitmapRowPad, reverseVideo, paperColor, bitmapTopDown, thinLineMode, overprintPreview)
+  Qt5SplashOutputDev(SplashColorMode colorModeA, int bitmapRowPadA,
+                      GBool reverseVideoA, bool ignorePaperColorA, SplashColorPtr paperColorA,
+                      GBool bitmapTopDownA, SplashThinLineMode thinLineMode,
+                      GBool overprintPreviewA)
+    : SplashOutputDev(colorModeA, bitmapRowPadA, reverseVideoA, paperColorA, bitmapTopDownA, thinLineMode, overprintPreviewA)
     , ignorePaperColor(ignorePaperColorA)
   {
   }
@@ -121,11 +121,11 @@ public:
 
   QImage getXBGRImage(bool takeImageData)
   {
-    SplashBitmap *bitmap = getBitmap();
+    SplashBitmap *b = getBitmap();
 
-    const int bw = bitmap->getWidth();
-    const int bh = bitmap->getHeight();
-    const int brs = bitmap->getRowSize();
+    const int bw = b->getWidth();
+    const int bh = b->getHeight();
+    const int brs = b->getRowSize();
 
     // If we use DeviceN8, convert to XBGR8.
     // If requested, also transfer Splash's internal alpha channel.
@@ -137,8 +137,8 @@ public:
             ? QImage::Format_ARGB32_Premultiplied
             : QImage::Format_RGB32;
 
-    if (bitmap->convertToXBGR(mode)) {
-      SplashColorPtr data = takeImageData ? bitmap->takeData() : bitmap->getDataPtr();
+    if (b->convertToXBGR(mode)) {
+      SplashColorPtr data = takeImageData ? b->takeData() : b->getDataPtr();
 
       if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
         // Convert byte order from RGBX to XBGR.

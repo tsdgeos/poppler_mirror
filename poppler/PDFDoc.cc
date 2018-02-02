@@ -1697,8 +1697,8 @@ GBool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, Gui
               } else {
                 Object page  = getXRef()->fetch(obj2.getRef().num, obj2.getRef().gen);
                 if (page.isDict()) {
-                  Dict *dict = page.getDict();
-                  Object pagetype = dict->lookup("Type");
+                  Dict *pageDict = page.getDict();
+                  Object pagetype = pageDict->lookup("Type");
                   if (!pagetype.isName() || strcmp(pagetype.getName(), "Page") != 0) {
                     continue;
                   }

@@ -303,18 +303,18 @@ static const AntiliasOption antialiasOptions[] =
   { nullptr,       CAIRO_ANTIALIAS_DEFAULT },
 };
 
-static GBool parseAntialiasOption(GooString *antialias, cairo_antialias_t *antialiasEnum)
+static GBool parseAntialiasOption()
 {
   const AntiliasOption *option = antialiasOptions;
   while (option->name) {
-    if (antialias->cmp(option->name) == 0) {
-      *antialiasEnum = option->value;
+    if (antialias.cmp(option->name) == 0) {
+      antialiasEnum = option->value;
       return gTrue;
     }
     option++;
   }
 
-  fprintf(stderr, "Error: Invalid antialias option \"%s\"\n", antialias->getCString());
+  fprintf(stderr, "Error: Invalid antialias option \"%s\"\n", antialias.getCString());
   fprintf(stderr, "Valid options are:\n");
   option = antialiasOptions;
   while (option->name) {
@@ -487,15 +487,15 @@ static void writePageImage(GooString *filename)
 	// convert to gray
         // The PDF Reference specifies the DeviceRGB to DeviceGray conversion as
 	// gray = 0.3*red + 0.59*green + 0.11*blue
-	int r = (*pixel & 0x00ff0000) >> 16;
-	int g = (*pixel & 0x0000ff00) >>  8;
-	int b = (*pixel & 0x000000ff) >>  0;
+	const int r = (*pixel & 0x00ff0000) >> 16;
+	const int g = (*pixel & 0x0000ff00) >>  8;
+	const int b = (*pixel & 0x000000ff) >>  0;
 	// an arbitrary integer approximation of .3*r + .59*g + .11*b
-	int y = (r*19661+g*38666+b*7209 + 32829)>>16;
+	const int grayValue = (r*19661+g*38666+b*7209 + 32829)>>16;
         if (mono) {
           if (bit == 7)
             *rowp = 0;
-          if (y > 127)
+          if (grayValue > 127)
             *rowp |= (1 << bit);
           bit--;
           if (bit < 0) {
@@ -503,7 +503,7 @@ static void writePageImage(GooString *filename)
             rowp++;
           }
         } else {
-          *rowp++ = y;
+          *rowp++ = grayValue;
         }
       } else {
 	// copy into RGB format
@@ -1013,7 +1013,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (antialias.getLength() > 0) {
-    if (!parseAntialiasOption(&antialias, &antialiasEnum))
+    if (!parseAntialiasOption())
       exit(99);
   }
 

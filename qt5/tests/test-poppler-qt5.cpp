@@ -204,11 +204,13 @@ int main( int argc, char **argv )
         return 0;
     }
 
-    Poppler::Page *page = doc->page(0);
-    if (page)
     {
-        qDebug() << "Page 1 size: " << page->pageSize().width()/72 << "inches x " << page->pageSize().height()/72 << "inches";
-        delete page;
+        Poppler::Page *page = doc->page(0);
+        if (page)
+        {
+            qDebug() << "Page 1 size: " << page->pageSize().width()/72 << "inches x " << page->pageSize().height()/72 << "inches";
+            delete page;
+        }
     }
 
     if (argc == 2 || (argc == 3 && strcmp(argv[2], "-arthur") == 0) || (argc == 3 && strcmp(argv[2], "-textRects") == 0))

@@ -306,7 +306,7 @@ QRectF AnnotationPrivate::fromPdfRectangle(const PDFRectangle &r) const
 // the transformation produced by fillTransformationMTX, but we can't use
 // fillTransformationMTX here because it relies on the native annotation
 // object's boundary rect to be already set up.
-PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int flags) const
+PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFlags) const
 {
     Q_ASSERT ( pdfPage );
 
@@ -333,7 +333,7 @@ PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int flag
         br_y = swp;
     }
 
-    const int rotationFixUp = ( flags & Annotation::FixedRotation ) ? pageRotate : 0;
+    const int rotationFixUp = ( rFlags & Annotation::FixedRotation ) ? pageRotate : 0;
     const double width = br_x - tl_x;
     const double height = br_y - tl_y;
 
@@ -391,13 +391,13 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
 
     // Create Annotation objects and tie to their native Annot
     QList<Annotation*> res;
-    for ( uint j = 0; j < numAnnotations; j++ )
+    for ( uint k = 0; k < numAnnotations; k++ )
     {
         // get the j-th annotation
-        Annot * ann = annots->getAnnot( j );
+        Annot * ann = annots->getAnnot( k );
         if ( !ann )
         {
-            error(errInternal, -1, "Annot {0:ud} is null", j);
+            error(errInternal, -1, "Annot {0:ud} is null", k);
             continue;
         }
 
@@ -3465,7 +3465,7 @@ class InkAnnotationPrivate : public AnnotationPrivate
         QList< QLinkedList<QPointF> > inkPaths;
 
         // helper
-        AnnotPath **toAnnotPaths(const QList< QLinkedList<QPointF> > &inkPaths);
+        AnnotPath **toAnnotPaths(const QList< QLinkedList<QPointF> > &paths);
 };
 
 InkAnnotationPrivate::InkAnnotationPrivate()
@@ -3479,12 +3479,12 @@ Annotation * InkAnnotationPrivate::makeAlias()
 }
 
 // Note: Caller is required to delete array elements and the array itself after use
-AnnotPath **InkAnnotationPrivate::toAnnotPaths(const QList< QLinkedList<QPointF> > &inkPaths)
+AnnotPath **InkAnnotationPrivate::toAnnotPaths(const QList< QLinkedList<QPointF> > &paths)
 {
-    const int pathsNumber = inkPaths.size();
+    const int pathsNumber = paths.size();
     AnnotPath **res = new AnnotPath*[pathsNumber];
     for (int i = 0; i < pathsNumber; ++i)
-        res[i] = toAnnotPath( inkPaths[i] );
+        res[i] = toAnnotPath( paths[i] );
     return res;
 }
 

@@ -7,7 +7,7 @@
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright 2017 Jan-Erik S <janerik234678@gmail.com>
-// Copyright 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
@@ -53,9 +53,9 @@ void StructTreeRoot::parse(Dict *root)
   // corresponsing structure element. Here only the references are
   // loaded into the array, the pointers to the StructElements will
   // be filled-in later when parsing them.
-  Object obj = root->lookup("ParentTree");
-  if (obj.isDict()) {
-    parseNumberTreeNode(obj.getDict());
+  const Object parentTreeObj = root->lookup("ParentTree");
+  if (parentTreeObj.isDict()) {
+    parseNumberTreeNode(parentTreeObj.getDict());
   }
 
   std::set<int> seenElements;
