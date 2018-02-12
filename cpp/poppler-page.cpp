@@ -3,6 +3,7 @@
  * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+ * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -290,6 +291,8 @@ ustring page::text(const rectf &r, text_layout_enum layout_mode) const
 /*
  * text_box object for page::text_list()
  */
+text_box_data::~text_box_data() = default;
+
 text_box::~text_box() = default;
 
 text_box::text_box(text_box_data *data) : m_data{data}
