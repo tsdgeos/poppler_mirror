@@ -135,9 +135,9 @@ private:
 class SplashGouraudPattern: public SplashGouraudColor {
 public:
 
-  SplashGouraudPattern(GBool bDirectColorTranslation, GfxState *state, GfxGouraudTriangleShading *shading, SplashColorMode mode);
+  SplashGouraudPattern(GBool bDirectColorTranslation, GfxState *state, GfxGouraudTriangleShading *shading);
 
-  SplashPattern *copy() override { return new SplashGouraudPattern(bDirectColorTranslation, state, shading, mode); }
+  SplashPattern *copy() override { return new SplashGouraudPattern(bDirectColorTranslation, state, shading); }
 
   ~SplashGouraudPattern();
 
@@ -162,7 +162,6 @@ private:
   GfxGouraudTriangleShading *shading;
   GfxState *state;
   GBool bDirectColorTranslation;
-  SplashColorMode mode;
   GfxColorSpaceMode gfxMode;
 };
 
