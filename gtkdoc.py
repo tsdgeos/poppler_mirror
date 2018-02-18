@@ -326,9 +326,9 @@ class GTKDoc(object):
             ldflags = ' "-L%s" %s ' % (self.library_path, additional_ldflags) + ldflags
             current_ld_library_path = env.get('LD_LIBRARY_PATH')
             if current_ld_library_path:
-                env['RUN'] = 'LD_LIBRARY_PATH="%s:%s" ' % (self.library_path, current_ld_library_path)
+                env['LD_LIBRARY_PATH'] = '%s:%s' % (self.library_path, current_ld_library_path)
             else:
-                env['RUN'] = 'LD_LIBRARY_PATH="%s" ' % self.library_path
+                env['LD_LIBRARY_PATH'] = self.library_path
 
         if ldflags:
             env['LDFLAGS'] = '%s %s' % (ldflags, env.get('LDFLAGS', ''))
