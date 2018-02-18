@@ -21,6 +21,7 @@ import os.path
 import subprocess
 import sys
 
+PY2 = sys.version_info[0] == 2
 
 class GTKDoc(object):
 
@@ -194,14 +195,20 @@ class GTKDoc(object):
 
         if print_output:
             if stdout:
-                try:
-                    sys.stdout.write(stdout.encode("utf-8"))
-                except UnicodeDecodeError:
+                if PY2:
+                    try:
+                        sys.stdout.write(stdout.encode("utf-8"))
+                    except UnicodeDecodeError:
+                        sys.stdout.write(stdout)
+                else:
                     sys.stdout.write(stdout)
             if stderr:
-                try:
-                    sys.stderr.write(stderr.encode("utf-8"))
-                except UnicodeDecodeError:
+                if PY2:
+                    try:
+                        sys.stderr.write(stderr.encode("utf-8"))
+                    except UnicodeDecodeError:
+                        sys.stderr.write(stderr)
+                else:
                     sys.stderr.write(stderr)
 
         if process.returncode != 0:
