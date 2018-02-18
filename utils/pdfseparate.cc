@@ -11,6 +11,7 @@
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2017 Léonard Michelet <leonard.michelet@smile.fr>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
 #include "config.h"
@@ -88,7 +89,7 @@ static bool extractPages (const char *srcFileName, const char *destFileName) {
     foundmatch = true;
     *p = 'A';
   } else {
-    char pattern[5];
+    char pattern[6];
     for (int i = 2; i < 10; i++) {
       sprintf(pattern, "%%0%dd", i);
       p = strstr(auxDestFileName, pattern);
