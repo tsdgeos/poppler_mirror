@@ -4,6 +4,7 @@
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012, 2015, Tobias Koenig <tobias.koenig@kdab.com>
+ * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -3799,13 +3800,10 @@ LinkAnnotation::LinkAnnotation( const QDomNode & node )
                         setLinkDestination(action);
                     }
                 }
-#if 0
-                else if ( type == "Movie" )
+                else
                 {
-                    Poppler::LinkMovie * movie = new Poppler::LinkMovie( QRect() );
-                    setLinkDestination(movie);
+                    qWarning("Loading annotations of type %s from DOM nodes is not yet implemented.", type.toLocal8Bit().constData());
                 }
-#endif
             }
         }
 
@@ -3934,7 +3932,17 @@ void LinkAnnotation::store( QDomNode & node, QDomDocument & document ) const
             }
             case Poppler::Link::Sound:
             {
-                // FIXME: implement me
+                hyperlinkElement.setAttribute( QStringLiteral("type"), QStringLiteral("Sound") );
+                break;
+            }
+            case Poppler::Link::JavaScript:
+            {
+                hyperlinkElement.setAttribute( QStringLiteral("type"), QStringLiteral("JavaScript") );
+                break;
+            }
+            case Poppler::Link::OCGState:
+            {
+                hyperlinkElement.setAttribute( QStringLiteral("type"), QStringLiteral("OCGState") );
                 break;
             }
             case Poppler::Link::None:
