@@ -48,8 +48,10 @@
 #include <set>
 #include <map>
 #include <vector>
+#include <unordered_set>
+#include <unordered_map>
+#include <string>
 
-class GooHash;
 class PDFDoc;
 class XRef;
 class Function;
@@ -476,8 +478,8 @@ private:
   int fontIDLen;		// number of entries in fontIDs array
   int fontIDSize;		// size of fontIDs array
   std::set<int> resourceIDs;	// list of object IDs of objects containing Resources we've already set up
-  GooHash *fontNames;		// all used font names
-  GooHash *fontMaxValidGlyph;	// max valid glyph of each font
+  std::unordered_set<std::string> fontNames; // all used font names
+  std::unordered_map<std::string, int> fontMaxValidGlyph; // max valid glyph of each font
   PST1FontName *t1FontNames;	// font names for Type 1/1C fonts
   int t1FontNameLen;		// number of entries in t1FontNames array
   int t1FontNameSize;		// size of t1FontNames array
