@@ -316,7 +316,6 @@ configure_file(poppler/poppler-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/popple
 set(poppler_SRCS
   goo/gfile.cc
   goo/gmempp.cc
-  goo/GooHash.cc
   goo/GooList.cc
   goo/GooTimer.cc
   goo/GooString.cc
@@ -580,7 +579,6 @@ if(ENABLE_XPDF_HEADERS)
     ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h
     DESTINATION include/poppler)
   install(FILES
-    goo/GooHash.h
     goo/GooList.h
     goo/GooTimer.h
     goo/GooMutex.h
