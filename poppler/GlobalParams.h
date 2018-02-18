@@ -215,7 +215,8 @@ private:
   GooList *toUnicodeDirs;		// list of ToUnicode CMap dirs [GooString]
   GBool baseFontsInitialized;
 #ifdef _WIN32
-  GooHash *substFiles;	// windows font substitutes (for CID fonts)
+  // windows font substitutes (for CID fonts)
+  std::unordered_map<std::string, std::string> substFiles;
 #endif
   // font files: font name mapped to path
   std::unordered_map<std::string, std::string> fontFiles;

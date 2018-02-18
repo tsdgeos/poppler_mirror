@@ -566,9 +566,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
     }
   }
 
-#ifdef _WIN32
-  substFiles = new GooHash(gTrue);
-#endif
   nameToUnicodeZapfDingbats = new NameToCharCode();
   nameToUnicodeText = new NameToCharCode();
   toUnicodeDirs = new GooList();
@@ -748,9 +745,6 @@ GlobalParams::~GlobalParams() {
   delete nameToUnicodeZapfDingbats;
   delete nameToUnicodeText;
   deleteGooList(toUnicodeDirs, GooString);
-#ifdef _WIN32
-  deleteGooHash(substFiles, GooString);
-#endif
   delete sysFonts;
   delete textEncoding;
 
