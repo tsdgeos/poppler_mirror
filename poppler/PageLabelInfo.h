@@ -15,20 +15,21 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <assert.h>
+#include <string>
+#include <vector>
 
 #include "goo/gtypes.h"
-#include "goo/GooList.h"
-#include "goo/GooString.h"
 #include "Object.h"
 
 class PageLabelInfo {
 public:
   PageLabelInfo(Object *tree, int numPages);
-  ~PageLabelInfo();
+
   PageLabelInfo(const PageLabelInfo &) = delete;
   PageLabelInfo& operator=(const PageLabelInfo &) = delete;
-  GBool labelToIndex(GooString *label, int *index);
-  GBool indexToLabel(int index, GooString *label);
+
+  GBool labelToIndex(GooString *label, int *index) const;
+  GBool indexToLabel(int index, GooString *label) const;
 
 private:
   void parse(Object *tree);
@@ -36,10 +37,8 @@ private:
 private:
   struct Interval {
     Interval(Object *dict, int baseA);
-    ~Interval();
-    Interval(const Interval &) = delete;
-    Interval& operator=(const Interval &) = delete;
-    GooString *prefix;
+
+    std::string prefix;
     enum NumberStyle {
       None,
       Arabic,
@@ -51,5 +50,5 @@ private:
     int first, base, length;
   };
 
-  GooList intervals;
+  std::vector<Interval> intervals;
 };
