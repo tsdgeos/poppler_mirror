@@ -540,17 +540,17 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
     if (globals->isStream()) {
       FILE *f;
       int c;
-      Stream *str = globals->getStream();
+      Stream *globalsStr = globals->getStream();
 
       setFilename("jb2g");
       if (!(f = fopen(fileName, "wb"))) {
         error(errIO, -1, "Couldn't open image file '{0:s}'", fileName);
         return;
       }
-      str->reset();
-      while ((c = str->getChar()) != EOF)
+      globalsStr->reset();
+      while ((c = globalsStr->getChar()) != EOF)
         fputc(c, f);
-      str->close();
+      globalsStr->close();
       fclose(f);
     }
 

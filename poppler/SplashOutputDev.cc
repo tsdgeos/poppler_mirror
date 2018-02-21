@@ -197,15 +197,10 @@ static inline void convertGfxShortColor(SplashColorPtr dest,
 // SplashGouraudPattern
 //------------------------------------------------------------------------
 SplashGouraudPattern::SplashGouraudPattern(GBool bDirectColorTranslationA,
-                                           GfxState *stateA, GfxGouraudTriangleShading *shadingA, SplashColorMode modeA) {
-  SplashColor defaultColor;
-  GfxColor srcColor;
+                                           GfxState *stateA, GfxGouraudTriangleShading *shadingA) {
   state = stateA;
   shading = shadingA;
-  mode = modeA;
   bDirectColorTranslation = bDirectColorTranslationA;
-  shadingA->getColorSpace()->getDefaultColor(&srcColor);
-  convertGfxColor(defaultColor, mode, shadingA->getColorSpace(), &srcColor);
   gfxMode = shadingA->getColorSpace()->getMode();
 }
 
@@ -4754,7 +4749,7 @@ GBool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTria
   }
   // restore vector antialias because we support it here
   if (shading->isParameterized()) {
-    SplashGouraudColor *splashShading = new SplashGouraudPattern(bDirectColorTranslation, state, shading, colorMode);
+    SplashGouraudColor *splashShading = new SplashGouraudPattern(bDirectColorTranslation, state, shading);
     GBool vaa = getVectorAntialias();
     GBool retVal = gFalse;
     setVectorAntialias(gTrue);

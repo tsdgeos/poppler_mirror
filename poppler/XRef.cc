@@ -558,7 +558,7 @@ GBool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fo
   GBool more;
   Object obj, obj2;
   Goffset pos2;
-  int first, n, i;
+  int first, n;
 
   while (1) {
     obj = parser->getObj(gTrue);
@@ -583,7 +583,7 @@ GBool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fo
         goto err0;
       }
     }
-    for (i = first; i < first + n; ++i) {
+    for (int i = first; i < first + n; ++i) {
       obj = parser->getObj(gTrue);
       if (obj.isInt()) {
 	entry.offset = obj.getInt();

@@ -1337,7 +1337,6 @@ void JBIG2Stream::readSegments() {
   Guint *refSegs;
   Goffset segDataPos;
   int c1, c2, c3;
-  Guint i;
 
   while (readULong(&segNum)) {
 
@@ -1360,7 +1359,7 @@ void JBIG2Stream::readSegments() {
       }
       refFlags = (refFlags << 24) | (c1 << 16) | (c2 << 8) | c3;
       nRefSegs = refFlags & 0x1fffffff;
-      for (i = 0; i < (nRefSegs + 9) >> 3; ++i) {
+      for (Guint i = 0; i < (nRefSegs + 9) >> 3; ++i) {
 	if ((c1 = curStr->getChar()) == EOF) {
 	  goto eofError1;
 	}
@@ -1370,19 +1369,19 @@ void JBIG2Stream::readSegments() {
     // referred-to segment numbers
     refSegs = (Guint *)gmallocn(nRefSegs, sizeof(Guint));
     if (segNum <= 256) {
-      for (i = 0; i < nRefSegs; ++i) {
+      for (Guint i = 0; i < nRefSegs; ++i) {
 	if (!readUByte(&refSegs[i])) {
 	  goto eofError2;
 	}
       }
     } else if (segNum <= 65536) {
-      for (i = 0; i < nRefSegs; ++i) {
+      for (Guint i = 0; i < nRefSegs; ++i) {
 	if (!readUWord(&refSegs[i])) {
 	  goto eofError2;
 	}
       }
     } else {
-      for (i = 0; i < nRefSegs; ++i) {
+      for (Guint i = 0; i < nRefSegs; ++i) {
 	if (!readULong(&refSegs[i])) {
 	  goto eofError2;
 	}
@@ -1484,7 +1483,7 @@ void JBIG2Stream::readSegments() {
       break;
     default:
       error(errSyntaxError, curStr->getPos(), "Unknown segment type in JBIG2 stream");
-      for (i = 0; i < segLength; ++i) {
+      for (Guint i = 0; i < segLength; ++i) {
 	if ((c1 = curStr->getChar()) == EOF) {
 	  goto eofError2;
 	}

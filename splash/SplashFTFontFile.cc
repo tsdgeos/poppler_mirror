@@ -14,6 +14,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -112,11 +113,11 @@ SplashFontFile *SplashFTFontFile::loadTrueTypeFont(SplashFTFontEngine *engineA,
 
 SplashFTFontFile::SplashFTFontFile(SplashFTFontEngine *engineA,
 				   SplashFontFileID *idA,
-				   SplashFontSrc *src,
+				   SplashFontSrc *srcA,
 				   FT_Face faceA,
 				   int *codeToGIDA, int codeToGIDLenA,
 				   GBool trueTypeA, GBool type1A):
-  SplashFontFile(idA, src)
+  SplashFontFile(idA, srcA)
 {
   engine = engineA;
   face = faceA;

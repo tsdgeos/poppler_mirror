@@ -269,10 +269,10 @@ public:
   
   void setCairo (cairo_t *cr);
   void setTextPage (TextPage *text);
-  void setPrinting (GBool printing) { this->printing = printing; needFontUpdate = gTrue; }
+  void setPrinting (GBool printingA) { printing = printingA; needFontUpdate = gTrue; }
   void setAntialias(cairo_antialias_t antialias);
 
-  void setInType3Char(GBool inType3Char) { this->inType3Char = inType3Char; }
+  void setInType3Char(GBool inType3CharA) { inType3Char = inType3CharA; }
   void getType3GlyphWidth (double *wx, double *wy) { *wx = t3_glyph_wx; *wy = t3_glyph_wy; }
   GBool hasType3GlyphBBox () { return t3_glyph_has_bbox; }
   double *getType3GlyphBBox () { return t3_glyph_bbox; }
@@ -335,7 +335,6 @@ protected:
   GBool printing;
   GBool use_show_text_glyphs;
   GBool text_matrix_valid;
-  cairo_surface_t *surface;
   cairo_glyph_t *glyphs;
   int glyphCount;
   cairo_text_cluster_t *clusters;
@@ -359,7 +358,6 @@ protected:
   cairo_pattern_t *shape;
   cairo_pattern_t *mask;
   cairo_matrix_t mask_matrix;
-  cairo_surface_t *cairo_shape_surface;
   cairo_t *cairo_shape;
   int knockoutCount;
   struct ColorSpaceStack {

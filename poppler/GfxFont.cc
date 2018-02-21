@@ -1748,7 +1748,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
   CharCode c;
   Unicode *uBuf;
   int c1, c2;
-  int excepsSize, i, j, k, n;
+  int excepsSize, j, k, n;
 
   refCnt = 1;
   ascent = 0.95;
@@ -1876,7 +1876,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
     obj1 = desFontDict->lookup("CIDToGIDMap");
     if (obj1.isStream()) {
       cidToGIDLen = 0;
-      i = 64;
+      int i = 64;
       cidToGID = (int *)gmallocn(i, sizeof(int));
       obj1.streamReset();
       while ((c1 = obj1.streamGetChar()) != EOF &&
@@ -1904,7 +1904,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
   obj1 = desFontDict->lookup("W");
   if (obj1.isArray()) {
     excepsSize = 0;
-    i = 0;
+    int i = 0;
     while (i + 1 < obj1.arrayGetLength()) {
       obj2 = obj1.arrayGet(i);
       obj3 = obj1.arrayGet(i + 1);
@@ -1973,7 +1973,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
   obj1 = desFontDict->lookup("W2");
   if (obj1.isArray()) {
     excepsSize = 0;
-    i = 0;
+    int i = 0;
     while (i + 1 < obj1.arrayGetLength()) {
       obj2 = obj1.arrayGet(i);
       obj3 = obj1.arrayGet(i+ 1);
@@ -2055,7 +2055,7 @@ int GfxCIDFont::getNextChar(char *s, int len, CharCode *code,
 			    Unicode **u, int *uLen,
 			    double *dx, double *dy, double *ox, double *oy) {
   CID cid;
-  CharCode c;
+  CharCode dummy;
   double w, h, vx, vy;
   int n, a, b, m;
 
@@ -2066,7 +2066,7 @@ int GfxCIDFont::getNextChar(char *s, int len, CharCode *code,
     return 1;
   }
 
-  *code = (CharCode)(cid = cMap->getCID(s, len, &c, &n));
+  *code = (CharCode)(cid = cMap->getCID(s, len, &dummy, &n));
   if (ctu) {
     if (hasToUnicode) {
       int i = 0, c = 0;

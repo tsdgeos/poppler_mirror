@@ -524,8 +524,8 @@ private:
 
 class TextWordSelection {
 public:
-  TextWordSelection(TextWord *word, int begin, int end)
-    : word(word), begin(begin), end(end)
+  TextWordSelection(TextWord *wordA, int beginA, int endA)
+    : word(wordA), begin(beginA), end(endA)
   {
   }
 

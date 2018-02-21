@@ -1628,7 +1628,6 @@ void GfxLabColorSpace::getXYZ(GfxColor *color,
 
 void GfxLabColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
   double X, Y, Z;
-  double r, g, b;
 
   getXYZ(color, &X, &Y, &Z);
 #ifdef USE_CMS
@@ -1672,9 +1671,9 @@ void GfxLabColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
   Y *= whiteY;
   Z *= whiteZ;
   // convert XYZ to RGB, including gamut mapping and gamma correction
-  r = xyzrgb[0][0] * X + xyzrgb[0][1] * Y + xyzrgb[0][2] * Z;
-  g = xyzrgb[1][0] * X + xyzrgb[1][1] * Y + xyzrgb[1][2] * Z;
-  b = xyzrgb[2][0] * X + xyzrgb[2][1] * Y + xyzrgb[2][2] * Z;
+  const double r = xyzrgb[0][0] * X + xyzrgb[0][1] * Y + xyzrgb[0][2] * Z;
+  const double g = xyzrgb[1][0] * X + xyzrgb[1][1] * Y + xyzrgb[1][2] * Z;
+  const double b = xyzrgb[2][0] * X + xyzrgb[2][1] * Y + xyzrgb[2][2] * Z;
   rgb->r = dblToCol(sqrt(clip01(r * kr)));
   rgb->g = dblToCol(sqrt(clip01(g * kg)));
   rgb->b = dblToCol(sqrt(clip01(b * kb)));
@@ -3888,7 +3887,6 @@ GfxUnivariateShading::~GfxUnivariateShading() {
 
 void GfxUnivariateShading::getColor(double t, GfxColor *color) {
   double out[gfxColorMaxComps];
-  int i;
 
   // NB: there can be one function with n outputs or n functions with
   // one output each (where n = number of color components)
@@ -3918,14 +3916,14 @@ void GfxUnivariateShading::getColor(double t, GfxColor *color) {
     u = cacheValues + lastMatch * nComps;
     l = u - nComps;
 
-    for (i = 0; i < nComps; ++i) {
+    for (int i = 0; i < nComps; ++i) {
       out[i] = ix * l[i] + x * u[i];
     }
   } else {
-    for (i = 0; i < nComps; ++i) {
+    for (int i = 0; i < nComps; ++i) {
       out[i] = 0;
     }
-    for (i = 0; i < nFuncs; ++i) {
+    for (int i = 0; i < nFuncs; ++i) {
       if (funcs[i]->getInputSize() != 1) {
         error(errSyntaxWarning, -1, "Invalid shading function (input != 1)");
         break;
@@ -3934,7 +3932,7 @@ void GfxUnivariateShading::getColor(double t, GfxColor *color) {
     }
   }
 
-  for (i = 0; i < nComps; ++i) {
+  for (int i = 0; i < nComps; ++i) {
     color->c[i] = dblToCol(out[i]);
   }
 }
@@ -6111,14 +6109,13 @@ void GfxImageColorMap::getCMYKLine(Guchar *in, Guchar *out, int length) {
 }
 
 void GfxImageColorMap::getDeviceNLine(Guchar *in, Guchar *out, int length) {
-  int i, j;
   Guchar *inp, *tmp_line;
 
   if (!useDeviceNLine()) {
     GfxColor deviceN;
 
     inp = in;
-    for (i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++) {
       getDeviceN (inp, &deviceN);
       for (int j = 0; j < SPOT_NCOMPS+4; j++)
         *out++ = deviceN.c[j];
@@ -6131,8 +6128,8 @@ void GfxImageColorMap::getDeviceNLine(Guchar *in, Guchar *out, int length) {
   case csIndexed:
   case csSeparation:
     tmp_line = (Guchar *) gmallocn (length, nComps2);
-    for (i = 0; i < length; i++) {
-      for (j = 0; j < nComps2; j++) {
+    for (int i = 0; i < length; i++) {
+      for (int j = 0; j < nComps2; j++) {
 	tmp_line[i * nComps2 + j] = byte_lookup[in[i] * nComps2 + j];
       }
     }
@@ -6142,8 +6139,8 @@ void GfxImageColorMap::getDeviceNLine(Guchar *in, Guchar *out, int length) {
 
   default:
     inp = in;
-    for (j = 0; j < length; j++)
-      for (i = 0; i < nComps; i++) {
+    for (int j = 0; j < length; j++)
+      for (int i = 0; i < nComps; i++) {
 	*inp = byte_lookup[*inp * nComps + i];
 	inp++;
       }
@@ -6396,8 +6393,8 @@ void GfxPath::offset(double dx, double dy) {
 //------------------------------------------------------------------------
 //
 //------------------------------------------------------------------------
-GfxState::ReusablePathIterator::ReusablePathIterator(GfxPath *path)
- : path(path),
+GfxState::ReusablePathIterator::ReusablePathIterator(GfxPath *pathA)
+ : path(pathA),
    subPathOff(0),
    coordOff(0),
    numCoords(0),

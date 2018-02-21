@@ -407,10 +407,9 @@ static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
 	  printf(" \"");
 	  Unicode *u;
 	  char buf[8];
-	  int n, len;
-	  len = TextStringToUCS4(it.first, &u);
-	  for (int i = 0; i < len; i++) {
-	    n = uMap->mapUnicode(u[i], buf, sizeof(buf));
+	  const int len = TextStringToUCS4(it.first, &u);
+	  for (int j = 0; j < len; j++) {
+	    const int n = uMap->mapUnicode(u[j], buf, sizeof(buf));
 	    fwrite(buf, 1, n, stdout);
 	  }
 	  gfree(u);

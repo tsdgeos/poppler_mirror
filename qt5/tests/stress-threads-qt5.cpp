@@ -114,11 +114,11 @@ void CrazyThread::run()
 
             PagePointer page(loadRandomPage(m_document));
 
-            page->search("c", Poppler::Page::CaseInsensitive);
-            page->search("r", Poppler::Page::CaseSensitive);
-            page->search("a", Poppler::Page::CaseInsensitive);
-            page->search("z", Poppler::Page::CaseSensitive);
-            page->search("y", Poppler::Page::CaseInsensitive);
+            page->search("c", Poppler::Page::IgnoreCase);
+            page->search("r");
+            page->search("a", Poppler::Page::IgnoreCase);
+            page->search("z");
+            page->search("y", Poppler::Page::IgnoreCase);
         }
 
         if(qrand() % 2 == 0)

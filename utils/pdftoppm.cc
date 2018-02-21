@@ -76,10 +76,10 @@ static double y_resolution = 150.0;
 static int scaleTo = 0;
 static int x_scaleTo = 0;
 static int y_scaleTo = 0;
-static int x = 0;
-static int y = 0;
-static int w = 0;
-static int h = 0;
+static int param_x = 0;
+static int param_y = 0;
+static int param_w = 0;
+static int param_h = 0;
 static int sz = 0;
 static GBool useCropBox = gFalse;
 static GBool mono = gFalse;
@@ -136,13 +136,13 @@ static const ArgDesc argDesc[] = {
   {"-scale-to-y",      argInt,       &y_scaleTo,    0,
    "scales each page vertically to fit in scale-to-y pixels"},
 
-  {"-x",      argInt,      &x,             0,
+  {"-x",      argInt,      &param_x,             0,
    "x-coordinate of the crop area top left corner"},
-  {"-y",      argInt,      &y,             0,
+  {"-y",      argInt,      &param_y,             0,
    "y-coordinate of the crop area top left corner"},
-  {"-W",      argInt,      &w,             0,
+  {"-W",      argInt,      &param_w,             0,
    "width of crop area in pixels (default is 0)"},
-  {"-H",      argInt,      &h,             0,
+  {"-H",      argInt,      &param_h,             0,
    "height of crop area in pixels (default is 0)"},
   {"-sz",     argInt,      &sz,            0,
    "size of crop square in pixels (sets W and H)"},
@@ -548,7 +548,7 @@ int main(int argc, char *argv[]) {
   
 #endif // UTILS_USE_PTHREADS
   
-  if (sz != 0) w = h = sz;
+  if (sz != 0) param_w = param_h = sz;
   pg_num_len = numberOfCharacters(doc->getNumPages());
   for (pg = firstPage; pg <= lastPage; ++pg) {
     if (printOnlyEven && pg % 2 == 0) continue;
@@ -597,7 +597,7 @@ int main(int argc, char *argv[]) {
     }
 #ifndef UTILS_USE_PTHREADS
     // process job in main thread
-    savePageSlice(doc, splashOut, pg, x, y, w, h, pg_w, pg_h, ppmFile);
+    savePageSlice(doc, splashOut, pg, param_x, param_y, param_w, param_h, pg_w, pg_h, ppmFile);
     
     delete[] ppmFile;
 #else

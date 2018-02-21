@@ -6,7 +6,7 @@
 //
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
-// Copyright 2014, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2014, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Dmytro Morgun <lztoad@gmail.com>
 //
 //========================================================================
@@ -674,8 +674,8 @@ Attribute::Attribute(const char *nameA, int nameLenA, Object *valueA):
   value = valueA->copy();
 }
 
-Attribute::Attribute(Type type, Object *valueA):
-  type(type),
+Attribute::Attribute(Type typeA, Object *valueA):
+  type(typeA),
   owner(UserProperties), // TODO: Determine corresponding owner from Type
   revision(0),
   name(),
