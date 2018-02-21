@@ -610,30 +610,19 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   }
 
   // set up the residentUnicodeMaps table
-
-  const auto emplaceRangeMap = [&](const char* encodingName, GBool unicodeOut, UnicodeMapRange* ranges, int len) {
-    residentUnicodeMaps.emplace(
-      std::piecewise_construct,
-      std::forward_as_tuple(encodingName),
-      std::forward_as_tuple(encodingName, unicodeOut, ranges, len)
-    );
-  };
-
-  const auto emplaceFuncMap = [&](const char* encodingName, GBool unicodeOut, UnicodeMapFunc func) {
-    residentUnicodeMaps.emplace(
-      std::piecewise_construct,
-      std::forward_as_tuple(encodingName),
-      std::forward_as_tuple(encodingName, unicodeOut, func)
-    );
-  };
-
   residentUnicodeMaps.reserve(6);
-  emplaceRangeMap("Latin1", gFalse, latin1UnicodeMapRanges, latin1UnicodeMapLen);
-  emplaceRangeMap("ASCII7", gFalse, ascii7UnicodeMapRanges, ascii7UnicodeMapLen);
-  emplaceRangeMap("Symbol", gFalse, symbolUnicodeMapRanges, symbolUnicodeMapLen);
-  emplaceRangeMap("ZapfDingbats", gFalse, zapfDingbatsUnicodeMapRanges, zapfDingbatsUnicodeMapLen);
-  emplaceFuncMap("UTF-8", gTrue, &mapUTF8);
-  emplaceFuncMap("UTF-16", gTrue, &mapUTF16);
+  UnicodeMap map = {"Latin1", gFalse, latin1UnicodeMapRanges, latin1UnicodeMapLen};
+  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  map = {"ASCII7", gFalse, ascii7UnicodeMapRanges, ascii7UnicodeMapLen};
+  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  map = {"Symbol", gFalse, symbolUnicodeMapRanges, symbolUnicodeMapLen};
+  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  map = {"ZapfDingbats", gFalse, zapfDingbatsUnicodeMapRanges, zapfDingbatsUnicodeMapLen};
+  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  map = {"UTF-8", gTrue, &mapUTF8};
+  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  map = {"UTF-16", gTrue, &mapUTF16};
+  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
 
   scanEncodingDirs();
 }
