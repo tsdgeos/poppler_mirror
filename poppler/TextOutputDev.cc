@@ -2618,6 +2618,8 @@ void TextPage::addChar(GfxState *state, double x, double y,
   }
 
   state->getFontTransMat(&mat.m[0], &mat.m[1], &mat.m[2], &mat.m[3]);
+  mat.m[0] *= state->getHorizScaling();
+  mat.m[1] *= state->getHorizScaling();
   mat.m[4] = x1;
   mat.m[5] = y1;
 
