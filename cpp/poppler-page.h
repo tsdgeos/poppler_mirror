@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +23,44 @@
 #include "poppler-global.h"
 #include "poppler-rectangle.h"
 
+#include <memory>
+
 namespace poppler
 {
+
+struct text_box_data;
+class POPPLER_CPP_EXPORT text_box
+{
+    friend class page;
+public:
+    text_box(text_box&&) = default;
+    text_box& operator=(text_box&&) = default;
+
+    ~text_box();
+
+    ustring   text() const;
+    rectf     bbox() const;
+
+    /**
+       Get a bbox for the i-th glyph
+
+       This method returns a rectf of the bounding box for
+       the i-th glyph in the text_box.
+
+       \note The text_box object owns the rectf objects,
+       the caller is not needed to free them.
+
+       \warning For too large glyph index, rectf(0,0,0,0)
+       is returned. The number of the glyphs and ustring
+       codepoints might be different in some complex scripts.
+     */
+    rectf     char_bbox(size_t i) const;
+    bool      has_space_after() const;
+private:
+    text_box(text_box_data *data);
+
+    std::unique_ptr<text_box_data> m_data;
+};
 
 class document;
 class document_private;
@@ -62,6 +99,24 @@ public:
                 case_sensitivity_enum case_sensitivity, rotation_enum rotation = rotate_0) const;
     ustring text(const rectf &rect = rectf()) const;
     ustring text(const rectf &rect, text_layout_enum layout_mode) const;
+
+    /**
+       Returns a list of text of the page
+
+       This method returns a std::vector of text_box that contain all
+       the text of the page, with roughly one text word of text
+       per text_box item.
+
+       For text written in western languages (left-to-right and
+       up-to-down), the std::vector contains the text in the proper
+       order.
+
+       \note The page object owns the text_box objects as unique_ptr,
+             the caller is not needed to free them.
+
+       \warning This method is not tested with Asian scripts
+    */
+    std::vector<text_box> text_list() const;
 
 private:
     page(document_private *doc, int index);
