@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+ * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,6 +111,8 @@ public:
        For text written in western languages (left-to-right and
        up-to-down), the std::vector contains the text in the proper
        order.
+
+       \since 0.63
 
        \note The page object owns the text_box objects as unique_ptr,
              the caller is not needed to free them.
