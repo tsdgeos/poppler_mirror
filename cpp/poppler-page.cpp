@@ -2,6 +2,7 @@
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
+ * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -284,4 +285,94 @@ ustring page::text(const rectf &r, text_layout_enum layout_mode) const
         s.reset(td.getText(r.left(), r.top(), r.right(), r.bottom()));
     }
     return ustring::from_utf8(s->getCString());
+}
+
+/*
+ * text_box object for page::text_list()
+ */
+text_box::~text_box() = default;
+
+text_box::text_box(text_box_data *data) : m_data{data}
+{
+}
+
+ustring text_box::text() const
+{
+    return m_data->text;
+}
+
+rectf text_box::bbox() const
+{
+    return m_data->bbox;
+}
+
+rectf text_box::char_bbox(size_t i) const
+{
+    if (i < m_data->char_bboxes.size())
+        return m_data->char_bboxes[i];
+    return rectf(0, 0, 0, 0);
+}
+
+bool text_box::has_space_after() const
+{
+    return m_data->has_space_after;
+}
+
+std::vector<text_box> page::text_list() const
+{
+    std::vector<text_box>  output_list;
+
+    /* config values are same with Qt5 Page::TextList() */
+    std::unique_ptr<TextOutputDev> output_dev{
+        new TextOutputDev(nullptr,    /* char* fileName */
+                          gFalse,  /* GBool physLayoutA */
+                          0,       /* double fixedPitchA */
+                          gFalse,  /* GBool rawOrderA */
+                          gFalse)  /* GBool append */
+    };
+
+    /*
+     * config values are same with Qt5 Page::TextList(),
+     * but rotation is fixed to zero.
+     * Few people use non-zero values.
+     */
+    d->doc->doc->displayPageSlice(output_dev.get(),
+                                  d->index + 1,           /* page */
+                                  72, 72, 0,              /* hDPI, vDPI, rot */
+                                  gFalse, gFalse, gFalse, /* useMediaBox, crop, printing */
+                                  -1, -1, -1, -1,         /* sliceX, sliceY, sliceW, sliceH */
+                                  nullptr, nullptr,       /* abortCheckCbk(), abortCheckCbkData */
+                                  nullptr, nullptr,       /* annotDisplayDecideCbk(), annotDisplayDecideCbkData */
+                                  gTrue);                 /* copyXRef */
+
+    if (std::unique_ptr< TextWordList > word_list{output_dev->makeWordList()}) {
+
+        output_list.reserve(word_list->getLength());
+        for (int i = 0; i < word_list->getLength(); i ++) {
+            TextWord *word = word_list->get(i);
+
+            std::unique_ptr<GooString> gooWord{word->getText()};
+            ustring ustr = detail::unicode_GooString_to_ustring(gooWord.get());
+
+            double xMin, yMin, xMax, yMax;
+            word->getBBox(&xMin, &yMin, &xMax, &yMax);
+
+            text_box tb{new text_box_data{
+                ustr,
+                {xMin, yMin, xMax-xMin, yMax-yMin},
+                {},
+                word->hasSpaceAfter() == gTrue
+            }};
+
+            tb.m_data->char_bboxes.reserve(word->getLength());
+            for (int j = 0; j < word->getLength(); j ++) {
+                word->getCharBBox(j, &xMin, &yMin, &xMax, &yMax);
+                tb.m_data->char_bboxes.push_back({xMin, yMin, xMax-xMin, yMax-yMin});
+            }
+
+            output_list.push_back(std::move(tb));
+        }
+    }
+
+    return output_list;
 }
