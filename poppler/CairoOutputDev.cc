@@ -1970,7 +1970,7 @@ CairoOutputDev::getFilterForSurface(cairo_surface_t *image,
 				    GBool interpolate)
 {
   if (interpolate)
-    return CAIRO_FILTER_BEST;
+    return CAIRO_FILTER_GOOD;
 
   int orig_width = cairo_image_surface_get_width (image);
   int orig_height = cairo_image_surface_get_height (image);
@@ -1990,7 +1990,7 @@ CairoOutputDev::getFilterForSurface(cairo_surface_t *image,
   if (scaled_width / orig_width >= 4 || scaled_height / orig_height >= 4)
 	  return CAIRO_FILTER_NEAREST;
 
-  return CAIRO_FILTER_BEST;
+  return CAIRO_FILTER_GOOD;
 }
 
 void CairoOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
@@ -2458,7 +2458,7 @@ void CairoOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream
    * cairo doesn't yet do minifaction filtering causing scaled down
    * images with CAIRO_FILTER_NEAREST to look really bad */
   cairo_pattern_set_filter (pattern,
-			    interpolate ? CAIRO_FILTER_BEST : CAIRO_FILTER_FAST);
+			    interpolate ? CAIRO_FILTER_GOOD : CAIRO_FILTER_FAST);
 
   if (state->getFillColorSpace()->getMode() == csPattern) {
     cairo_matrix_init_translate (&matrix, 0, scaledHeight);
@@ -3258,7 +3258,7 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   cairo_matrix_t matrix;
   int width, height;
   int scaledWidth, scaledHeight;
-  cairo_filter_t filter = CAIRO_FILTER_BEST;
+  cairo_filter_t filter = CAIRO_FILTER_GOOD;
   RescaleDrawImage rescale;
 
   LOG (printf ("drawImage %dx%d\n", widthA, heightA));
