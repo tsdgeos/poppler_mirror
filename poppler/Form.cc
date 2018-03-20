@@ -19,6 +19,7 @@
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2017 Bernd Kuhls <berndkuhls@hotmail.com>
+// Copyright 2018 Andre Heinecke <aheinecke@intevation.de>
 //
 //========================================================================
 
@@ -133,6 +134,11 @@ double FormWidget::getFontSize() const {
 bool FormWidget::isReadOnly() const
 {
   return field->isReadOnly();
+}
+
+void FormWidget::setReadOnly(bool value)
+{
+  return field->setReadOnly(value);
 }
 
 int FormWidget::encodeID (unsigned pageNum, unsigned fieldNum)
@@ -937,6 +943,32 @@ void FormField::updateChildrenAppearance()
     for (int i = 0; i < numChildren; i++)
       children[i]->updateChildrenAppearance();
   }
+}
+
+void FormField::setReadOnly (bool value)
+{
+  if (value == readOnly) {
+    return;
+  }
+
+  readOnly = value;
+
+  Dict* dict = obj.getDict();
+
+  const Object obj1 = Form::fieldLookup(dict, "Ff");
+  int flags = 0;
+  if (obj1.isInt()) {
+    flags = obj1.getInt();
+  }
+  if (value) {
+    flags |= 1;
+  } else {
+    flags &= ~1;
+  }
+
+  dict->set("Ff", Object(flags));
+  xref->setModifiedObject(&obj, ref);
+  updateChildrenAppearance();
 }
 
 //------------------------------------------------------------------------

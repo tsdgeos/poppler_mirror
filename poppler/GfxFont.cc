@@ -30,7 +30,7 @@
 // Copyright (C) 2012 Yi Yang <ahyangyi@gmail.com>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2012, 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2013-2016 Jason Crain <jason@aquaticape.us>
+// Copyright (C) 2013-2016, 2018 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2014 Olly Betts <olly@survex.com>
 //
 // To see a description of the changes please see the Changelog file that

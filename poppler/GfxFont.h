@@ -21,7 +21,7 @@
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2011 Axel Strübing <axel.struebing@freenet.de>
 // Copyright (C) 2011, 2012, 2014 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2015 Jason Crain <jason@aquaticape.us>
+// Copyright (C) 2015, 2018 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that

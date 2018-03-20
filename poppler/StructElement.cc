@@ -8,6 +8,7 @@
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
 // Copyright 2014, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Dmytro Morgun <lztoad@gmail.com>
+// Copyright 2018 Adrian Johnson <ajohnson@redneon.com>
 //
 //========================================================================
 
