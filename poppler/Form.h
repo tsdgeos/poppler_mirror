@@ -15,6 +15,7 @@
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2017 Roland Hieber <r.hieber@pengutronix.de>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+// Copyright 2018 Andre Heinecke <aheinecke@intevation.de>
 //
 //========================================================================
 
@@ -118,6 +119,7 @@ public:
   GBool isModified () const;
 
   bool isReadOnly() const;
+  void setReadOnly(bool value);
 
   LinkAction *getActivationAction(); // The caller should not delete the result
   LinkAction *getAdditionalAction(Annot::FormAdditionalActionsType type); // The caller should delete the result
@@ -300,7 +302,7 @@ public:
   Object* getObj() { return &obj; }
   Ref getRef() { return ref; }
 
-  void setReadOnly (bool b) { readOnly = b; }
+  void setReadOnly (bool b);
   bool isReadOnly () const { return readOnly; }
 
   GooString* getDefaultAppearance() const { return defaultAppearance; }

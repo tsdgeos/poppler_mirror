@@ -5,6 +5,7 @@
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+ * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -149,6 +150,11 @@ QString FormField::uiName() const
 bool FormField::isReadOnly() const
 {
   return m_formData->fm->isReadOnly();
+}
+
+void FormField::setReadOnly(bool value)
+{
+  m_formData->fm->setReadOnly(value);
 }
 
 bool FormField::isVisible() const

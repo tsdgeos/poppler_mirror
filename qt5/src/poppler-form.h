@@ -5,6 +5,7 @@
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
  * Copyright (C) 2017, Tobias C. Berner <tcberner@freebsd.org>
+ * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,6 +109,12 @@ namespace Poppler {
 	  Whether this form field is read-only.
 	 */
 	bool isReadOnly() const;
+
+	/**
+	  Set whether this form field is read-only.
+	  \since 0.64
+	 */
+	void setReadOnly(bool value);
 
 	/**
 	  Whether this form field is visible.
