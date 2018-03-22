@@ -163,6 +163,17 @@ bool FormField::isVisible() const
   return !(m_formData->fm->getWidgetAnnotation()->getFlags() & Annot::flagHidden);
 }
 
+void FormField::setVisible(bool value)
+{
+  Guint flags = m_formData->fm->getWidgetAnnotation()->getFlags();
+  if (value) {
+    flags &= ~Annot::flagHidden;
+  } else {
+    flags |= Annot::flagHidden;
+  }
+  m_formData->fm->getWidgetAnnotation()->setFlags(flags);
+}
+
 Link* FormField::activationAction() const
 {
   Link* action = nullptr;

@@ -122,6 +122,12 @@ namespace Poppler {
 	bool isVisible() const;
 
 	/**
+	  Set whether this form field is visible.
+	  \since 0.64
+	 */
+	void setVisible(bool value);
+
+	/**
 	  The activation action of this form field.
 
 	  \note It may be null.
