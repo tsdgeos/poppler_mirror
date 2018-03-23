@@ -1535,7 +1535,6 @@ void PSOutputDev::writeHeader(const std::vector<int> &pages,
 			      int pageRotate, char *psTitle) {
   PSOutPaperSize *size;
   double x1, y1, x2, y2;
-  int i;
 
   switch (mode) {
   case psModePS:
@@ -1581,7 +1580,7 @@ void PSOutputDev::writeHeader(const std::vector<int> &pages,
 
   switch (mode) {
   case psModePS:
-    for (i = 0; i < paperSizes->getLength(); ++i) {
+    for (int i = 0; i < paperSizes->getLength(); ++i) {
       size = (PSOutPaperSize *)paperSizes->get(i);
       writePSFmt("%%{0:s} {1:t} {2:d} {3:d} 0 () ()\n",
                  i==0 ? "DocumentMedia:" : "+", size->name, size->w, size->h);
