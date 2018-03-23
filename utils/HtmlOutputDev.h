@@ -330,8 +330,8 @@ private:
   GooString* getLinkDest(AnnotLink *link);
   void dumpMetaVars(FILE *);
   void doFrame(int firstPage);
-  GBool newHtmlOutlineLevel(FILE *output, GooList *outlines, Catalog* catalog, int level = 1);
-  void newXmlOutlineLevel(FILE *output, GooList *outlines, Catalog* catalog);
+  GBool newHtmlOutlineLevel(FILE *output, GooList *outlines, int level = 1);
+  void newXmlOutlineLevel(FILE *output, GooList *outlines);
 #ifndef DISABLE_OUTLINE
   int getOutlinePageNum(OutlineItem *item);
 #endif
