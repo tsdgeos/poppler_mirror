@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007, 2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2007-2013, 2015-2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2013, 2015-2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2013 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
@@ -1609,10 +1609,10 @@ Annot::~Annot() {
 #endif
 }
 
-void Annot::setColor(AnnotColor *color, GBool fill) {
-  const double *values = color->getValues();
+void Annot::setDrawColor(AnnotColor *drawColor, GBool fill) {
+  const double *values = drawColor->getValues();
 
-  switch (color->getSpace()) {
+  switch (drawColor->getSpace()) {
   case AnnotColor::colorCMYK:
     appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:c}\n",
 		       values[0], values[1], values[2], values[3],
@@ -2439,7 +2439,7 @@ void AnnotText::draw(Gfx *gfx, GBool printing) {
 
     appearBuf->append ("q\n");
     if (color)
-      setColor(color, gTrue);
+      setDrawColor(color, gTrue);
     else
       appearBuf->append ("1 1 1 rg\n");
     if (!icon->cmp("Note"))
@@ -2887,11 +2887,11 @@ void AnnotFreeText::generateFreeTextAppearance()
   GBool doStroke = (borderWidth != 0);
   if (doFill || doStroke) {
     if (doStroke) {
-      setColor(fontcolor, gFalse); // Border color: same as font color
+      setDrawColor(fontcolor, gFalse); // Border color: same as font color
     }
     appearBuf->appendf ("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re\n", borderWidth/2, width-borderWidth, height-borderWidth);
     if (doFill) {
-      setColor(color, gTrue);
+      setDrawColor(color, gTrue);
       appearBuf->append(doStroke ? "B\n" : "f\n");
     } else {
       appearBuf->append("S\n");
@@ -2907,7 +2907,7 @@ void AnnotFreeText::generateFreeTextAppearance()
   GfxFont *font = createAnnotDrawFont(xref, fontResDict);
 
   // Set font state
-  setColor(fontcolor, gTrue);
+  setDrawColor(fontcolor, gTrue);
   appearBuf->appendf ("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin - fontsize * font->getDescent());
   appearBuf->appendf ("/AnnotDrawFont {0:.2f} Tf\n", fontsize);
 
@@ -3236,7 +3236,7 @@ void AnnotLine::generateLineAppearance()
   appearBuf = new GooString ();
   appearBuf->append ("q\n");
   if (color) {
-    setColor(color, gFalse);
+    setDrawColor(color, gFalse);
   }
 
   setLineStyleForBorder(border);
@@ -3570,7 +3570,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
     switch (type) {
     case typeUnderline:
       if (color) {
-        setColor(color, gFalse);
+        setDrawColor(color, gFalse);
       }
       appearBuf->append ("[] 0 d 1 w\n");
 
@@ -3589,7 +3589,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
       break;
     case typeStrikeOut:
       if (color) {
-        setColor(color, gFalse);
+        setDrawColor(color, gFalse);
       }
       blendMultiply = gFalse;
       appearBuf->append ("[] 0 d 1 w\n");
@@ -3615,7 +3615,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
       break;
     case typeSquiggly:
       if (color) {
-        setColor(color, gFalse);
+        setDrawColor(color, gFalse);
       }
       appearBuf->append ("[] 0 d 1 w\n");
 
@@ -3642,7 +3642,7 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
     default:
     case typeHighlight:
       if (color)
-        setColor(color, gTrue);
+        setDrawColor(color, gTrue);
 
       double biggestBorder = 0;
       for (i = 0; i < quadrilaterals->getQuadrilateralsLength(); ++i) {
@@ -4672,21 +4672,21 @@ void AnnotWidget::drawBorder() {
     case AnnotBorder::borderSolid:
     case AnnotBorder::borderUnderlined:
       appearBuf->appendf("{0:.2f} w\n", w);
-      setColor(aColor, gFalse);
+      setDrawColor(aColor, gFalse);
       drawCircle(0.5 * dx, 0.5 * dy, r - 0.5 * w, gFalse);
       break;
     case AnnotBorder::borderBeveled:
     case AnnotBorder::borderInset:
       appearBuf->appendf("{0:.2f} w\n", 0.5 * w);
-      setColor(aColor, gFalse);
+      setDrawColor(aColor, gFalse);
       drawCircle(0.5 * dx, 0.5 * dy, r - 0.25 * w, gFalse);
       adjustedColor = AnnotColor(*aColor);
       adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
-      setColor(&adjustedColor, gFalse);
+      setDrawColor(&adjustedColor, gFalse);
       drawCircleTopLeft(0.5 * dx, 0.5 * dy, r - 0.75 * w);
       adjustedColor = AnnotColor(*aColor);
       adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
-      setColor(&adjustedColor, gFalse);
+      setDrawColor(&adjustedColor, gFalse);
       drawCircleBottomRight(0.5 * dx, 0.5 * dy, r - 0.75 * w);
       break;
     }
@@ -4703,7 +4703,7 @@ void AnnotWidget::drawBorder() {
       // fallthrough
     case AnnotBorder::borderSolid:
       appearBuf->appendf("{0:.2f} w\n", w);
-      setColor(aColor, gFalse);
+      setDrawColor(aColor, gFalse);
       appearBuf->appendf("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re s\n",
                          0.5 * w, dx - w, dy - w);
       break;
@@ -4711,7 +4711,7 @@ void AnnotWidget::drawBorder() {
     case AnnotBorder::borderInset:
       adjustedColor = AnnotColor(*aColor);
       adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? 1 : -1);
-      setColor(&adjustedColor, gTrue);
+      setDrawColor(&adjustedColor, gTrue);
       appearBuf->append("0 0 m\n");
       appearBuf->appendf("0 {0:.2f} l\n", dy);
       appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx, dy);
@@ -4721,7 +4721,7 @@ void AnnotWidget::drawBorder() {
       appearBuf->append("f\n");
       adjustedColor = AnnotColor(*aColor);
       adjustedColor.adjustColor(border->getStyle() == AnnotBorder::borderBeveled ? -1 : 1);
-      setColor(&adjustedColor, gTrue);
+      setDrawColor(&adjustedColor, gTrue);
       appearBuf->append("0 0 m\n");
       appearBuf->appendf("{0:.2f} 0 l\n", dx);
       appearBuf->appendf("{0:.2f} {1:.2f} l\n", dx, dy);
@@ -4732,7 +4732,7 @@ void AnnotWidget::drawBorder() {
       break;
     case AnnotBorder::borderUnderlined:
       appearBuf->appendf("{0:.2f} w\n", w);
-      setColor(aColor, gFalse);
+      setDrawColor(aColor, gFalse);
       appearBuf->appendf("0 0 m {0:.2f} 0 l s\n", dx);
       break;
     }
@@ -4761,7 +4761,7 @@ void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
         if (aColor) {
           double dx = rect->x2 - rect->x1;
           double dy = rect->y2 - rect->y1;
-          setColor(aColor, gTrue);
+          setDrawColor(aColor, gTrue);
           drawCircle(0.5 * dx, 0.5 * dy, 0.2 * (dx < dy ? dx : dy), gTrue);
         }
       }
@@ -4832,7 +4832,7 @@ void AnnotWidget::generateFieldAppearance() {
   if (appearCharacs) {
     AnnotColor *aColor = appearCharacs->getBackColor();
     if (aColor) {
-      setColor(aColor, gTrue);
+      setDrawColor(aColor, gTrue);
       appearBuf->appendf("0 0 {0:.2f} {1:.2f} re f\n",
                          rect->x2 - rect->x1, rect->y2 - rect->y1);
     }
@@ -5330,13 +5330,13 @@ void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
     appearBuf = new GooString ();
     appearBuf->append ("q\n");
     if (color)
-      setColor(color, gFalse);
+      setDrawColor(color, gFalse);
 
     double borderWidth = border->getWidth();
     setLineStyleForBorder(border);
 
     if (interiorColor)
-      setColor(interiorColor, gTrue);
+      setDrawColor(interiorColor, gTrue);
 
     if (type == typeSquare) {
       appearBuf->appendf ("{0:.2f} {1:.2f} {2:.2f} {3:.2f} re\n",
@@ -5628,14 +5628,14 @@ void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
     appearBuf->append ("q\n");
 
     if (color) {
-      setColor(color, gFalse);
+      setDrawColor(color, gFalse);
     }
 
     setLineStyleForBorder(border);
     appearBBox->setBorderWidth(std::max(1., border->getWidth()));
 
     if (interiorColor) {
-      setColor(interiorColor, gTrue);
+      setDrawColor(interiorColor, gTrue);
     }
 
     if (vertices->getCoordsLength() != 0) {
@@ -5846,7 +5846,7 @@ void AnnotInk::draw(Gfx *gfx, GBool printing) {
     appearBuf->append ("q\n");
 
     if (color) {
-      setColor(color, gFalse);
+      setDrawColor(color, gFalse);
     }
 
     setLineStyleForBorder(border);
@@ -6065,7 +6065,7 @@ void AnnotFileAttachment::draw(Gfx *gfx, GBool printing) {
 
     appearBuf->append ("q\n");
     if (color)
-      setColor(color, gTrue);
+      setDrawColor(color, gTrue);
     else
       appearBuf->append ("1 1 1 rg\n");
     if (!name->cmp("PushPin"))
@@ -6220,7 +6220,7 @@ void AnnotSound::draw(Gfx *gfx, GBool printing) {
 
     appearBuf->append ("q\n");
     if (color)
-      setColor(color, gTrue);
+      setDrawColor(color, gTrue);
     else
       appearBuf->append ("1 1 1 rg\n");
     if (!name->cmp("Speaker"))
