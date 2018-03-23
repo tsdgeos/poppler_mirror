@@ -138,6 +138,9 @@ poppler_form_field_get_id (PopplerFormField *field)
  *
  * Gets the font size of @field
  *
+ * WARNING: This function always returns 0. Contact the poppler
+ * mailing list if you're interested in implementing it properly
+ *
  * Return value: the font size of @field
  **/
 gdouble
@@ -145,7 +148,7 @@ poppler_form_field_get_font_size (PopplerFormField *field)
 {
   g_return_val_if_fail (POPPLER_IS_FORM_FIELD (field), 0);
   
-  return field->widget->getFontSize ();
+  return 0;
 }
 
 /**
