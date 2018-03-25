@@ -124,18 +124,7 @@ void ArthurOutputDev::startDoc(XRef *xrefA) {
 }
 
 void ArthurOutputDev::startPage(int pageNum, GfxState *state, XRef *)
-{
-  // fill page with white background.
-  int w = static_cast<int>(state->getPageWidth());
-  int h = static_cast<int>(state->getPageHeight());
-  QColor fillColour(Qt::white);
-  QBrush fill(fillColour);
-  m_painter.top()->save();
-  m_painter.top()->setPen(fillColour);
-  m_painter.top()->setBrush(fill);
-  m_painter.top()->drawRect(0, 0, w, h);
-  m_painter.top()->restore();
-}
+{}
 
 void ArthurOutputDev::endPage() {
 }
