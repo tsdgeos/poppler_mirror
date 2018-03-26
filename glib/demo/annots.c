@@ -350,7 +350,7 @@ pgd_annots_update_cursor (PgdAnnotsDemo *demo,
      demo->cursor = cursor_type;
 
      gdk_window_set_cursor (gtk_widget_get_window (demo->main_box), cursor);
-     gdk_flush ();
+     gdk_display_flush (gtk_widget_get_display (demo->main_box));
      if (cursor)
          g_object_unref (cursor);
 }

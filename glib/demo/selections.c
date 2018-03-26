@@ -168,7 +168,7 @@ pgd_selections_update_cursor (PgdSelectionsDemo *demo,
 	demo->cursor = cursor_type;
 
 	gdk_window_set_cursor (window, cursor);
-	gdk_flush ();
+	gdk_display_flush (gtk_widget_get_display (demo->darea));
 	if (cursor)
 		g_object_unref (cursor);
 }
