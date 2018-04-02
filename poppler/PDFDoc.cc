@@ -38,6 +38,7 @@
 // Copyright (C) 2017 Jean Ghali <jghali@libertysurf.fr>
 // Copyright (C) 2017 Fredrik Fornwall <fredrik@fornwall.net>
 // Copyright (C) 2018 Ben Timby <btimby@gmail.com>
+// Copyright (C) 2018 Evangelos Foutras <evangelos@foutrelis.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -409,24 +410,30 @@ void PDFDoc::checkHeader() {
   char *p;
   char *tokptr;
   int i;
-  int c;
+  int bytesRead;
 
   pdfMajorVersion = 0;
   pdfMinorVersion = 0;
+
+  // read up to headerSearchSize bytes from the beginning of the document
   for (i = 0; i < headerSearchSize; ++i) {
-    if ((c = str->getChar()) == EOF) {
-      error(errSyntaxWarning, -1, "EOF while reading header (continuing anyway)");
-      return;
-    }
+    const int c = str->getChar();
+    if (c == EOF)
+      break;
     hdrBuf[i] = c;
   }
-  hdrBuf[headerSearchSize] = '\0';
-  for (i = 0; i < headerSearchSize - 5; ++i) {
+  bytesRead = i;
+  hdrBuf[bytesRead] = '\0';
+
+  // find the start of the PDF header if it exists and parse the version
+  bool headerFound = false;
+  for (i = 0; i < bytesRead - 5; ++i) {
     if (!strncmp(&hdrBuf[i], "%PDF-", 5)) {
+      headerFound = true;
       break;
     }
   }
-  if (i >= headerSearchSize - 5) {
+  if (!headerFound) {
     error(errSyntaxWarning, -1, "May not be a PDF file (continuing anyway)");
     return;
   }
