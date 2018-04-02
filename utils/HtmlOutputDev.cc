@@ -1697,7 +1697,6 @@ GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 #else
 	FILE * output = nullptr;
 	GBool bClose = gFalse;
-	Catalog *catalog = doc->getCatalog();
 
 	if (!ok)
                 return gFalse;
@@ -1747,7 +1746,7 @@ GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
  
 	if (!xml)
 	{
-		GBool done = newHtmlOutlineLevel(output, outlines, catalog);
+		GBool done = newHtmlOutlineLevel(output, outlines);
 		if (done && !complexMode)
 			fputs("<hr/>\n", output);
 	
@@ -1758,13 +1757,13 @@ GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 		}
 	}
 	else
-		newXmlOutlineLevel(output, outlines, catalog);
+		newXmlOutlineLevel(output, outlines);
 
 	return gTrue;
 #endif
 }
 
-GBool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, GooList *outlines, Catalog* catalog, int level)
+GBool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, GooList *outlines, int level)
 {
 #ifdef DISABLE_OUTLINE
 	return gFalse;
@@ -1825,7 +1824,7 @@ GBool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, GooList *outlines, Catalo
 		if (item->hasKids() && item->getKids())
 		{
 			fputs("\n",output);
-			newHtmlOutlineLevel(output, item->getKids(), catalog, level+1);
+			newHtmlOutlineLevel(output, item->getKids(), level+1);
 		}
 		item->close();
 		fputs("</li>\n",output);
@@ -1836,7 +1835,7 @@ GBool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, GooList *outlines, Catalo
 #endif
 }
 
-void HtmlOutputDev::newXmlOutlineLevel(FILE *output, GooList *outlines, Catalog* catalog)
+void HtmlOutputDev::newXmlOutlineLevel(FILE *output, GooList *outlines)
 {
 #ifndef DISABLE_OUTLINE
     fputs("<outline>\n", output);
@@ -1861,7 +1860,7 @@ void HtmlOutputDev::newXmlOutlineLevel(FILE *output, GooList *outlines, Catalog*
         item->open();
         if (item->hasKids() && item->getKids())
         {
-            newXmlOutlineLevel(output, item->getKids(), catalog);
+            newXmlOutlineLevel(output, item->getKids());
         }
         item->close();
     }    

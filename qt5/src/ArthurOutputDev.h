@@ -20,7 +20,7 @@
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Mihai Niculescu <q.quark@gmail.com>
-// Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2017, 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -83,6 +83,12 @@ public:
   // Does this device use drawChar() or drawString()?
   GBool useDrawChar() override { return gTrue; }
 
+  // Does this device implement shaded fills (aka gradients) natively?
+  // If this returns false, these shaded fills
+  // will be reduced to a series of other drawing operations.
+  // type==2 is 'axial shading'
+  GBool useShadedFills(int type) override { return type == 2; }
+
   // Does this device use beginType3Char/endType3Char?  Otherwise,
   // text in Type 3 fonts will be drawn with drawChar/drawString.
   GBool interpretType3Chars() override { return gTrue; }
@@ -125,6 +131,7 @@ public:
   void stroke(GfxState *state) override;
   void fill(GfxState *state) override;
   void eoFill(GfxState *state) override;
+  GBool axialShadedFill(GfxState * state, GfxAxialShading *shading, double tMin, double tMax) override;
 
   //----- path clipping
   void clip(GfxState *state) override;

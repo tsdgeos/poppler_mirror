@@ -23,7 +23,7 @@
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Dominik Haumann <dhaumann@kde.org>
 // Copyright (C) 2013 Mihai Niculescu <q.quark@gmail.com>
-// Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2017, 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -685,6 +685,132 @@ void ArthurOutputDev::fill(GfxState *state)
 void ArthurOutputDev::eoFill(GfxState *state)
 {
   m_painter.top()->fillPath( convertPath( state, state->getPath(), Qt::OddEvenFill ), m_currentBrush );
+}
+
+GBool ArthurOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax)
+{
+  double x0, y0, x1, y1;
+  shading->getCoords(&x0, &y0, &x1, &y1);
+
+  // get the clip region bbox
+  double xMin, yMin, xMax, yMax;
+  state->getUserClipBBox(&xMin, &yMin, &xMax, &yMax);
+
+  // get the function domain
+  double t0 = shading->getDomain0();
+  double t1 = shading->getDomain1();
+
+  // Max number of splits along the t axis
+  constexpr int maxSplits = 256;
+
+  // Max delta allowed in any color component
+  const double colorDelta = (dblToCol(1 / 256.0));
+
+  // Number of color space components
+  auto nComps = shading->getColorSpace()->getNComps();
+
+  // Helper function to test two color objects for 'almost-equality'
+  auto isSameGfxColor = [&nComps,&colorDelta](const GfxColor &colorA, const GfxColor &colorB)
+                        {
+                          for (int k = 0; k < nComps; ++k) {
+                            if (abs(colorA.c[k] - colorB.c[k]) > colorDelta) {
+                              return false;
+                            }
+                          }
+                          return true;
+                        };
+
+  // Helper function: project a number into an interval
+  // With C++17 this is part of the standard library
+  auto clamp = [](double v, double lo, double hi)
+                  { return std::min(std::max(v,lo), hi); };
+
+  // ta stores all parameter values where we evaluate the input shading function.
+  // In between, QLinearGradient will interpolate linearly.
+  // We set up the array with three values.
+  std::array<double, maxSplits+1> ta;
+  ta[0] = tMin;
+  std::array<int, maxSplits+1> next;
+  next[0] = maxSplits / 2;
+  ta[maxSplits / 2] = 0.5 * (tMin + tMax);
+  next[maxSplits / 2] = maxSplits;
+  ta[maxSplits] = tMax;
+
+  // compute the color at t = tMin
+  double tt = clamp(t0 + (t1 - t0) * tMin, t0, t1);
+
+  GfxColor color0, color1;
+  shading->getColor(tt, &color0);
+
+  // Construct a gradient object and set its color at one parameter end
+  QLinearGradient gradient(QPointF(x0 + tMin * (x1 - x0), y0 + tMin * (y1 - y0)),
+                           QPointF(x0 + tMax * (x1 - x0), y0 + tMax * (y1 - y0)));
+
+  GfxRGB rgb;
+  shading->getColorSpace()->getRGB(&color0, &rgb);
+  QColor qColor(colToByte(rgb.r), colToByte(rgb.g), colToByte(rgb.b));
+  gradient.setColorAt(0,qColor);
+
+  // Look for more relevant parameter values by bisection
+  int i = 0;
+  while (i < maxSplits) {
+
+    int j = next[i];
+    while (j > i + 1) {
+
+      // Next parameter value to try
+      tt = clamp(t0 + (t1 - t0) * ta[j], t0, t1);
+      shading->getColor(tt, &color1);
+
+      // j is a good next color stop if the input shading can be approximated well
+      // on the interval (ta[i], ta[j]) by a linear interpolation.
+      // We test this by comparing the real color in the middle between ta[i] and ta[j]
+      // with the linear interpolant there.
+      auto midPoint = 0.5 * (ta[i] + ta[j]);
+      GfxColor colorAtMidPoint;
+      shading->getColor(midPoint, &colorAtMidPoint);
+
+      GfxColor linearlyInterpolatedColor;
+      for (int ii=0; ii<nComps; ii++)
+        linearlyInterpolatedColor.c[ii] = 0.5 * (color0.c[ii] + color1.c[ii]);
+
+      // If the two colors are equal, ta[j] is a good place for the next color stop; take it!
+      if (isSameGfxColor(colorAtMidPoint, linearlyInterpolatedColor))
+        break;
+
+      // Otherwise: bisect further
+      int k = (i + j) / 2;
+      ta[k] = midPoint;
+      next[i] = k;
+      next[k] = j;
+      j = k;
+    }
+
+    // set the color
+    GfxRGB rgb;
+    shading->getColorSpace()->getRGB(&color1, &rgb);
+    qColor.setRgb(colToByte(rgb.r), colToByte(rgb.g), colToByte(rgb.b));
+    gradient.setColorAt((ta[j] - tMin)/(tMax - tMin), qColor);
+
+    // Move to the next parameter region
+    color0 = color1;
+    i = next[i];
+  }
+
+  state->moveTo(xMin, yMin);
+  state->lineTo(xMin, yMax);
+  state->lineTo(xMax, yMax);
+  state->lineTo(xMax, yMin);
+  state->closePath();
+
+  // Actually paint the shaded region
+  QBrush newBrush(gradient);
+  m_painter.top()->fillPath( convertPath( state, state->getPath(), Qt::WindingFill ), newBrush );
+
+  state->clearPath();
+
+  // True means: The shaded region has been painted
+  return gTrue;
 }
 
 void ArthurOutputDev::clip(GfxState *state)
