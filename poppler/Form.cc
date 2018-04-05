@@ -20,6 +20,7 @@
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2017 Bernd Kuhls <berndkuhls@hotmail.com>
 // Copyright 2018 Andre Heinecke <aheinecke@intevation.de>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 //========================================================================
 
@@ -56,12 +57,12 @@
 #include "Lexer.h"
 
 //return a newly allocated char* containing an UTF16BE string of size length
-char* pdfDocEncodingToUTF16 (GooString* orig, int* length)
+char* pdfDocEncodingToUTF16 (const GooString* orig, int* length)
 {
   //double size, a unicode char takes 2 char, add 2 for the unicode marker
   *length = 2+2*orig->getLength();
   char *result = new char[(*length)];
-  char *cstring = orig->getCString();
+  const char *cstring = orig->getCString();
   //unicode marker
   result[0] = (char)0xfe;
   result[1] = (char)0xff;

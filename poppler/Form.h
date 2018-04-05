@@ -16,6 +16,7 @@
 // Copyright 2017 Roland Hieber <r.hieber@pengutronix.de>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2018 Andre Heinecke <aheinecke@intevation.de>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 //========================================================================
 
