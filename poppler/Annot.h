@@ -26,6 +26,7 @@
 // Copyright (C) 2012, 2015 Tobias Koenig <tokoe@kdab.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -649,7 +650,7 @@ protected:
   void drawCircle(double cx, double cy, double r, GBool fill);
   void drawCircleTopLeft(double cx, double cy, double r);
   void drawCircleBottomRight(double cx, double cy, double r);
-  void layoutText(GooString *text, GooString *outBuf, int *i, GfxFont *font,
+  void layoutText(const GooString *text, GooString *outBuf, int *i, GfxFont *font,
 		  double *width, double widthLimit, int *charCount,
 		  GBool noReencode);
   void writeString(GooString *str, GooString *appearBuf);
@@ -1345,7 +1346,7 @@ private:
 
   void initialize(PDFDoc *docA, Dict *dict);
 
-  void drawText(GooString *text, GooString *da, GfxResources *resources,
+  void drawText(const GooString *text, GooString *da, GfxResources *resources,
 		GBool multiline, int comb, int quadding,
 		GBool txField, GBool forceZapfDingbats,
 		GBool password=false);

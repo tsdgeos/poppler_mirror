@@ -3830,7 +3830,7 @@ LinkAction* AnnotWidget::getFormAdditionalAction(FormAdditionalActionsType type)
 // TODO: Handle surrogate pairs in UTF-16.
 //       Should be able to generate output for any CID-keyed font.
 //       Doesn't handle vertical fonts--should it?
-void Annot::layoutText(GooString *text, GooString *outBuf, int *i,
+void Annot::layoutText(const GooString *text, GooString *outBuf, int *i,
                              GfxFont *font, double *width, double widthLimit,
                              int *charCount, GBool noReencode)
 {
@@ -4047,7 +4047,7 @@ void Annot::writeString(GooString *str, GooString *appearBuf)
 }
 
 // Draw the variable text or caption for a field.
-void AnnotWidget::drawText(GooString *text, GooString *da, GfxResources *resources,
+void AnnotWidget::drawText(const GooString *text, GooString *da, GfxResources *resources,
     GBool multiline, int comb, int quadding,
     GBool txField, GBool forceZapfDingbats,
     GBool password) {
@@ -4151,9 +4151,10 @@ void AnnotWidget::drawText(GooString *text, GooString *da, GfxResources *resourc
     else
       len = text->getLength();
 
-    text = new GooString;
+    GooString *newText = new GooString;
     for (i = 0; i < len; ++i)
-      text->append('*');
+      newText->append('*');
+    text = newText;
     freeText = gTrue;
   }
 
