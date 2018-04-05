@@ -190,7 +190,7 @@ public:
   void decRefCnt();
 
   // Get font tag.
-  GooString *getTag() { return tag; }
+  const GooString *getTag() const { return tag; }
 
   // Get font dictionary ID.
   Ref *getID() { return &id; }
@@ -213,7 +213,7 @@ public:
 
   // Get font type.
   GfxFontType getType() { return type; }
-  virtual GBool isCIDFont() { return gFalse; }
+  virtual GBool isCIDFont() const { return gFalse; }
 
   // Get embedded font ID, i.e., a ref for the font file stream.
   // Returns false if there is no embedded font.
@@ -276,7 +276,7 @@ public:
   // the char code.
   virtual int getNextChar(char *s, int len, CharCode *code,
 			  Unicode **u, int *uLen,
-			  double *dx, double *dy, double *ox, double *oy) = 0;
+			  double *dx, double *dy, double *ox, double *oy) const = 0;
 
   // Does this font have a toUnicode map?
   GBool hasToUnicodeCMap() { return hasToUnicode; }
@@ -332,7 +332,7 @@ public:
 
   int getNextChar(char *s, int len, CharCode *code,
 			  Unicode **u, int *uLen,
-			  double *dx, double *dy, double *ox, double *oy) override;
+			  double *dx, double *dy, double *ox, double *oy) const override;
 
   // Return the encoding.
   char **getEncoding() { return enc; }
@@ -393,11 +393,11 @@ public:
   GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
 	     GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
 
-  GBool isCIDFont() override { return gTrue; }
+  GBool isCIDFont() const override { return gTrue; }
 
   int getNextChar(char *s, int len, CharCode *code,
 			  Unicode **u, int *uLen,
-			  double *dx, double *dy, double *ox, double *oy) override;
+			  double *dx, double *dy, double *ox, double *oy) const override;
 
   // Return the writing mode (0=horizontal, 1=vertical).
   int getWMode() override;
@@ -415,14 +415,14 @@ public:
 
   int *getCodeToGIDMap(FoFiTrueType *ff, int *length);
 
-  double getWidth(char* s, int len);
+  double getWidth(char* s, int len) const;
 
 private:
   ~GfxCIDFont();
 
   int mapCodeToGID(FoFiTrueType *ff, int cmapi,
     Unicode unicode, GBool wmode);
-  double getWidth(CID cid);	// Get width of a character.
+  double getWidth(CID cid) const;	// Get width of a character.
 
   GooString *collection;		// collection name
   CMap *cMap;			// char code --> CID

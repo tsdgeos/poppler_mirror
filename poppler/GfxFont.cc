@@ -1556,7 +1556,7 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen,
 
 int Gfx8BitFont::getNextChar(char *s, int len, CharCode *code,
 			     Unicode **u, int *uLen,
-			     double *dx, double *dy, double *ox, double *oy) {
+			     double *dx, double *dy, double *ox, double *oy) const {
   CharCode c;
 
   *code = c = (CharCode)(*s & 0xff);
@@ -2053,7 +2053,7 @@ GfxCIDFont::~GfxCIDFont() {
 
 int GfxCIDFont::getNextChar(char *s, int len, CharCode *code,
 			    Unicode **u, int *uLen,
-			    double *dx, double *dy, double *ox, double *oy) {
+			    double *dx, double *dy, double *ox, double *oy) const {
   CID cid;
   CharCode dummy;
   double w, h, vx, vy;
@@ -2391,7 +2391,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
   return codeToGID;
 }
 
-double GfxCIDFont::getWidth(CID cid) {
+double GfxCIDFont::getWidth(CID cid) const {
   double w;
   int a, b, m;
 
@@ -2415,7 +2415,7 @@ double GfxCIDFont::getWidth(CID cid) {
   return w;
 }
 
-double GfxCIDFont::getWidth (char* s, int len) {
+double GfxCIDFont::getWidth (char* s, int len) const {
   int nUsed;
   CharCode c;
 
