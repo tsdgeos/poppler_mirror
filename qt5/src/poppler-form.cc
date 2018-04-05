@@ -114,7 +114,7 @@ int FormField::id() const
 QString FormField::name() const
 {
   QString name;
-  if (GooString *goo = m_formData->fm->getPartialName())
+  if (const GooString *goo = m_formData->fm->getPartialName())
   {
     name = QString::fromLatin1(goo->getCString());
   }
@@ -141,7 +141,7 @@ QString FormField::fullyQualifiedName() const
 QString FormField::uiName() const
 {
   QString name;
-  if (GooString *goo = m_formData->fm->getAlternateUiName())
+  if (const GooString *goo = m_formData->fm->getAlternateUiName())
   {
     name = QString::fromLatin1(goo->getCString());
   }

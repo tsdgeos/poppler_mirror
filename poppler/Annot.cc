@@ -1610,7 +1610,7 @@ Annot::~Annot() {
 #endif
 }
 
-void Annot::setDrawColor(AnnotColor *drawColor, GBool fill) {
+void Annot::setDrawColor(const AnnotColor *drawColor, GBool fill) {
   const double *values = drawColor->getValues();
 
   switch (drawColor->getSpace()) {
@@ -4645,7 +4645,7 @@ void AnnotWidget::drawBorder() {
   AnnotColor adjustedColor;
   double w = border->getWidth();
 
-  AnnotColor *aColor = appearCharacs->getBorderColor();
+  const AnnotColor *aColor = appearCharacs->getBorderColor();
   if (!aColor)
     aColor = appearCharacs->getBackColor();
   if (!aColor)
@@ -4744,7 +4744,7 @@ void AnnotWidget::drawBorder() {
 }
 
 void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
-  GooString *caption = nullptr;
+  const GooString *caption = nullptr;
   if (appearCharacs)
     caption = appearCharacs->getNormalCaption();
 
@@ -4757,7 +4757,7 @@ void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
         drawText(caption, da, resources, gFalse, 0, fieldQuadCenter,
                  gFalse, gTrue);
       } else if (appearCharacs) {
-        AnnotColor *aColor = appearCharacs->getBorderColor();
+        const AnnotColor *aColor = appearCharacs->getBorderColor();
         if (aColor) {
           double dx = rect->x2 - rect->x1;
           double dy = rect->y2 - rect->y1;
@@ -4830,7 +4830,7 @@ void AnnotWidget::generateFieldAppearance() {
 
   // draw the background
   if (appearCharacs) {
-    AnnotColor *aColor = appearCharacs->getBackColor();
+    const AnnotColor *aColor = appearCharacs->getBackColor();
     if (aColor) {
       setDrawColor(aColor, gTrue);
       appearBuf->appendf("0 0 {0:.2f} {1:.2f} re f\n",
@@ -6580,7 +6580,7 @@ AnnotRichMedia::Asset::~Asset()
   delete name;
 }
 
-GooString* AnnotRichMedia::Asset::getName() const {
+const GooString* AnnotRichMedia::Asset::getName() const {
   return name;
 }
 
@@ -6679,7 +6679,7 @@ AnnotRichMedia::Instance* AnnotRichMedia::Configuration::getInstance(int index) 
   return instances[index];
 }
 
-GooString* AnnotRichMedia::Configuration::getName() const {
+const GooString* AnnotRichMedia::Configuration::getName() const {
   return name;
 }
 
@@ -6740,7 +6740,7 @@ AnnotRichMedia::Params::~Params()
   delete flashVars;
 }
 
-GooString* AnnotRichMedia::Params::getFlashVars() const {
+const GooString* AnnotRichMedia::Params::getFlashVars() const {
   return flashVars;
 }
 

@@ -226,7 +226,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
     case actionLaunch:
     {
       LinkLaunch * e = (LinkLaunch *)a;
-      GooString * p = e->getParams();
+      const GooString * p = e->getParams();
       popplerLink = new LinkExecute( linkArea, e->getFileName()->getCString(), p ? p->getCString() : nullptr );
     }
     break;

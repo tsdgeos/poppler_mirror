@@ -111,10 +111,10 @@ public:
 
   double getFontSize() const;
 
-  GooString *getPartialName() const;
+  const GooString *getPartialName() const;
   void setPartialName(const GooString &name);
-  GooString *getAlternateUiName() const;
-  GooString *getMappingName() const;
+  const GooString *getAlternateUiName() const;
+  const GooString *getMappingName() const;
   GooString *getFullyQualifiedName();
 
   GBool isModified () const;

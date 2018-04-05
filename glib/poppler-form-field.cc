@@ -267,7 +267,7 @@ poppler_form_field_button_set_state (PopplerFormField *field,
 gchar*
 poppler_form_field_get_partial_name (PopplerFormField *field)
 {
-  GooString *tmp;
+  const GooString *tmp;
 
   g_return_val_if_fail (POPPLER_IS_FORM_FIELD (field), NULL);
 
@@ -290,7 +290,7 @@ poppler_form_field_get_partial_name (PopplerFormField *field)
 gchar*
 poppler_form_field_get_mapping_name (PopplerFormField *field)
 {
-  GooString *tmp;
+  const GooString *tmp;
 
   g_return_val_if_fail (POPPLER_IS_FORM_FIELD (field), NULL);
 

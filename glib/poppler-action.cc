@@ -317,7 +317,7 @@ dest_new_goto (PopplerDocument *document,
 }
 
 static PopplerDest *
-dest_new_named (GooString *named_dest)
+dest_new_named (const GooString *named_dest)
 {
 	PopplerDest *dest;
 
@@ -340,7 +340,7 @@ build_goto_dest (PopplerDocument *document,
 		 LinkGoTo        *link)
 {
 	LinkDest *link_dest;
-	GooString *named_dest;
+	const GooString *named_dest;
 
 	/* Return if it isn't OK */
 	if (! link->isOk ()) {
@@ -365,7 +365,7 @@ build_goto_remote (PopplerAction *action,
 		   LinkGoToR     *link)
 {
 	LinkDest *link_dest;
-	GooString *named_dest;
+	const GooString *named_dest;
 	
 	/* Return if it isn't OK */
 	if (! link->isOk ()) {
@@ -403,7 +403,7 @@ static void
 build_uri (PopplerAction *action,
 	   LinkURI       *link)
 {
-	gchar *uri;
+	const gchar *uri;
 
 	uri = link->getURI()->getCString ();
 	if (uri != nullptr)
@@ -414,7 +414,7 @@ static void
 build_named (PopplerAction *action,
 	     LinkNamed     *link)
 {
-	gchar *name;
+	const gchar *name;
 
 	name = link->getName ()->getCString ();
 	if (name != nullptr)
@@ -434,7 +434,7 @@ find_annot_movie_for_action (PopplerDocument *document,
 
     annotObj = xref->fetch (ref->num, ref->gen);
   } else if (link->hasAnnotTitle ()) {
-    GooString *title = link->getAnnotTitle ();
+    const GooString *title = link->getAnnotTitle ();
     int i;
 
     for (i = 1; i <= document->doc->getNumPages (); ++i) {
@@ -521,7 +521,7 @@ static void
 build_javascript (PopplerAction *action,
 		  LinkJavaScript *link)
 {
-	GooString *script;
+	const GooString *script;
 
 	script = link->getScript();
 	if (script)

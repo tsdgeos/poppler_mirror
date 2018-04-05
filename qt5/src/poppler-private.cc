@@ -180,7 +180,7 @@ namespace Debug {
                     // no 'destination' but an internal 'named reference'. we could
                     // get the destination for the page now, but it's VERY time consuming,
                     // so better storing the reference and provide the viewport on demand
-                    GooString *s = g->getNamedDest();
+                    const GooString *s = g->getNamedDest();
                     QChar *charArray = new QChar[s->getLength()];
                     for (int i = 0; i < s->getLength(); ++i) charArray[i] = QChar(s->getCString()[i]);
                     QString aux(charArray, s->getLength());
@@ -204,7 +204,7 @@ namespace Debug {
                     // no 'destination' but an internal 'named reference'. we could
                     // get the destination for the page now, but it's VERY time consuming,
                     // so better storing the reference and provide the viewport on demand
-                    GooString *s = g->getNamedDest();
+                    const GooString *s = g->getNamedDest();
                     QChar *charArray = new QChar[s->getLength()];
                     for (int i = 0; i < s->getLength(); ++i) charArray[i] = QChar(s->getCString()[i]);
                     QString aux(charArray, s->getLength());

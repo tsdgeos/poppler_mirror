@@ -12,6 +12,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2017 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+ * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -793,7 +794,7 @@ namespace Poppler {
         return result;
     }
 
-    QDateTime convertDate( char *dateString )
+    QDateTime convertDate( const char *dateString )
     {
         int year, mon, day, hour, min, sec, tzHours, tzMins;
         char tz;
@@ -823,6 +824,12 @@ namespace Poppler {
         }
         return QDateTime();
     }
+
+    QDateTime convertDate( char *dateString )
+    {
+        return convertDate( (const char *) dateString );
+    }
+
 
     bool isCmsAvailable()
     {

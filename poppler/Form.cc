@@ -153,7 +153,7 @@ void FormWidget::decodeID (unsigned id, unsigned* pageNum, unsigned* fieldNum)
   *fieldNum = (id << 4*sizeof(unsigned)) >> 4*sizeof(unsigned);
 }
 
-GooString *FormWidget::getPartialName() const {
+const GooString *FormWidget::getPartialName() const {
   return field->getPartialName();
 }
 
@@ -162,11 +162,11 @@ void FormWidget::setPartialName(const GooString &name)
   field->setPartialName(name);
 }
 
-GooString *FormWidget::getAlternateUiName() const {
+const GooString *FormWidget::getAlternateUiName() const {
   return field->getAlternateUiName();
 }
 
-GooString *FormWidget::getMappingName() const {
+const GooString *FormWidget::getMappingName() const {
   return field->getMappingName();
 }
 

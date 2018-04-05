@@ -793,7 +793,7 @@ poppler_annot_get_annot_type (PopplerAnnot *poppler_annot)
 gchar *
 poppler_annot_get_contents (PopplerAnnot *poppler_annot)
 {
-  GooString *contents;
+  const GooString *contents;
 
   g_return_val_if_fail (POPPLER_IS_ANNOT (poppler_annot), NULL);
 
@@ -841,7 +841,7 @@ poppler_annot_set_contents (PopplerAnnot *poppler_annot,
 gchar *
 poppler_annot_get_name (PopplerAnnot *poppler_annot)
 {
-  GooString *name;
+  const GooString *name;
 
   g_return_val_if_fail (POPPLER_IS_ANNOT (poppler_annot), NULL);
 
@@ -864,7 +864,7 @@ poppler_annot_get_name (PopplerAnnot *poppler_annot)
 gchar *
 poppler_annot_get_modified (PopplerAnnot *poppler_annot)
 {
-  GooString *text;
+  const GooString *text;
 
   g_return_val_if_fail (POPPLER_IS_ANNOT (poppler_annot), NULL);
 
@@ -1073,7 +1073,7 @@ gchar *
 poppler_annot_markup_get_label (PopplerAnnotMarkup *poppler_annot)
 {
   AnnotMarkup *annot;
-  GooString *text;
+  const GooString *text;
 
   g_return_val_if_fail (POPPLER_IS_ANNOT_MARKUP (poppler_annot), NULL);
 
@@ -1338,7 +1338,7 @@ GDate *
 poppler_annot_markup_get_date (PopplerAnnotMarkup *poppler_annot)
 {
   AnnotMarkup *annot;
-  GooString *annot_date;
+  const GooString *annot_date;
   time_t timet;
 
   g_return_val_if_fail (POPPLER_IS_ANNOT_MARKUP (poppler_annot), NULL);
@@ -1372,7 +1372,7 @@ gchar *
 poppler_annot_markup_get_subject (PopplerAnnotMarkup *poppler_annot)
 {
   AnnotMarkup *annot;
-  GooString *text;
+  const GooString *text;
 
   g_return_val_if_fail (POPPLER_IS_ANNOT_MARKUP (poppler_annot), NULL);
 
@@ -1498,7 +1498,7 @@ gchar *
 poppler_annot_text_get_icon (PopplerAnnotText *poppler_annot)
 {
   AnnotText *annot;
-  GooString *text;
+  const GooString *text;
 
   g_return_val_if_fail (POPPLER_IS_ANNOT_TEXT (poppler_annot), NULL);
 
@@ -1776,7 +1776,7 @@ gchar *
 poppler_annot_file_attachment_get_name (PopplerAnnotFileAttachment *poppler_annot)
 {
   AnnotFileAttachment *annot;
-  GooString *name;
+  const GooString *name;
 
   g_return_val_if_fail (POPPLER_IS_ANNOT_FILE_ATTACHMENT (poppler_annot), NULL);
 
@@ -1855,7 +1855,7 @@ gchar *
 poppler_annot_movie_get_title (PopplerAnnotMovie *poppler_annot)
 {
   AnnotMovie *annot;
-  GooString *title;
+  const GooString *title;
 
   g_return_val_if_fail (POPPLER_IS_ANNOT_MOVIE (poppler_annot), NULL);
 

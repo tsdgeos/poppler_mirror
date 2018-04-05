@@ -73,13 +73,13 @@ namespace Poppler {
     class LinkDestinationData
     {
         public:
-            LinkDestinationData( LinkDest *l, GooString *nd, Poppler::DocumentData *pdfdoc, bool external )
+            LinkDestinationData( LinkDest *l, const GooString *nd, Poppler::DocumentData *pdfdoc, bool external )
              : ld(l), namedDest(nd), doc(pdfdoc), externalDest(external)
             {
             }
 
             LinkDest *ld;
-            GooString *namedDest;
+            const GooString *namedDest;
             Poppler::DocumentData *doc;
             bool externalDest;
     };

@@ -445,14 +445,14 @@ public:
   AnnotAppearanceCharacs(const AnnotAppearanceCharacs &) = delete;
   AnnotAppearanceCharacs& operator=(const AnnotAppearanceCharacs &) = delete;
 
-  int getRotation() { return rotation; }
-  AnnotColor *getBorderColor() { return borderColor; }
-  AnnotColor *getBackColor() { return backColor; }
-  GooString *getNormalCaption() { return normalCaption; }
-  GooString *getRolloverCaption() { return rolloverCaption; }
-  GooString *getAlternateCaption() { return alternateCaption; }
-  AnnotIconFit *getIconFit() { return iconFit; }
-  AnnotAppearanceCharacsTextPos getPosition() { return position; }
+  int getRotation() const { return rotation; }
+  const AnnotColor *getBorderColor() const { return borderColor; }
+  const AnnotColor *getBackColor() const { return backColor; }
+  const GooString *getNormalCaption() const { return normalCaption; }
+  const GooString *getRolloverCaption() const { return rolloverCaption; }
+  const GooString *getAlternateCaption() const { return alternateCaption; }
+  const AnnotIconFit *getIconFit() const { return iconFit; }
+  AnnotAppearanceCharacsTextPos getPosition() const { return position; }
 
 protected:
 
@@ -618,13 +618,13 @@ public:
   AnnotSubtype getType() const { return type; }
   PDFRectangle *getRect() const { return rect; }
   void getRect(double *x1, double *y1, double *x2, double *y2) const;
-  GooString *getContents() const { return contents; }
+  const GooString *getContents() const { return contents; }
   int getPageNum() const { return page; }
-  GooString *getName() const { return name; }
-  GooString *getModified() const { return modified; }
+  const GooString *getName() const { return name; }
+  const GooString *getModified() const { return modified; }
   Guint getFlags() const { return flags; }
   AnnotAppearance *getAppearStreams() const { return appearStreams; }
-  GooString *getAppearState() const { return appearState; }
+  const GooString *getAppearState() const { return appearState; }
   AnnotBorder *getBorder() const { return border; }
   AnnotColor *getColor() const { return color; }
   int getTreeKey() const { return treeKey; }
@@ -645,7 +645,7 @@ private:
 protected:
   virtual ~Annot();
   virtual void removeReferencedObjects(); // Called by Page::removeAnnot
-  void setDrawColor(AnnotColor *color, GBool fill);
+  void setDrawColor(const AnnotColor *color, GBool fill);
   void setLineStyleForBorder(AnnotBorder *border);
   void drawCircle(double cx, double cy, double r, GBool fill);
   void drawCircleTopLeft(double cx, double cy, double r);
@@ -743,13 +743,13 @@ public:
   ~AnnotMarkup();
 
   // getters
-  GooString *getLabel() const { return label; }
+  const GooString *getLabel() const { return label; }
   AnnotPopup *getPopup() const { return popup; }
   double getOpacity() const { return opacity; }
   // getRC
-  GooString *getDate() const { return date; }
+  const GooString *getDate() const { return date; }
   int getInReplyToID() const { return inReplyTo.num; }
-  GooString *getSubject() const { return subject; }
+  const GooString *getSubject() const { return subject; }
   AnnotMarkupReplyType getReplyTo() const { return replyTo; }
   AnnotExternalDataType getExData() const { return exData; }
 
@@ -806,7 +806,7 @@ public:
 
   // getters
   GBool getOpen() const { return open; }
-  GooString *getIcon() const { return icon; }
+  const GooString *getIcon() const { return icon; }
   AnnotTextState getState() const { return state; }
 
   void setOpen(GBool openA);
@@ -837,7 +837,7 @@ class AnnotMovie: public Annot {
 
   void draw(Gfx *gfx, GBool printing) override;
 
-  GooString* getTitle() { return title; }
+  const GooString* getTitle() const { return title; }
   Movie* getMovie() { return movie; }
 
  private:
@@ -859,7 +859,7 @@ class AnnotScreen: public Annot {
   AnnotScreen(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotScreen();
 
-  GooString* getTitle() { return title; }
+  const GooString* getTitle() const { return title; }
 
   AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs; }
   LinkAction* getAction() { return action; } // The caller should now delete the result
@@ -948,10 +948,10 @@ public:
   void setIntent(AnnotFreeTextIntent new_intent);
 
   // getters
-  GooString *getAppearanceString() const { return appearanceString; }
+  const GooString *getAppearanceString() const { return appearanceString; }
   AnnotFreeTextQuadding getQuadding() const { return quadding; }
   // return rc
-  GooString *getStyleString() const { return styleString; }
+  const GooString *getStyleString() const { return styleString; }
   AnnotCalloutLine *getCalloutLine() const {  return calloutLine; }
   AnnotFreeTextIntent getIntent() const { return intent; }
   AnnotBorderEffect *getBorderEffect() const { return borderEffect; }
@@ -1097,7 +1097,7 @@ public:
   void setIcon(GooString *new_icon);
 
   // getters
-  GooString *getIcon() const { return icon; }
+  const GooString *getIcon() const { return icon; }
 
 private:
 
@@ -1267,7 +1267,7 @@ public:
 
   // getters
   Object *getFile() { return &file; }
-  GooString *getName() const { return name; }
+  const GooString *getName() const { return name; }
 
 private:
 
@@ -1295,7 +1295,7 @@ public:
 
   // getters
   Sound *getSound() { return sound; }
-  GooString *getName() const { return name; }
+  const GooString *getName() const { return name; }
 
 private:
 
@@ -1439,7 +1439,7 @@ public:
     Params(const Params &) = delete;
     Params& operator=(const Params &) = delete;
 
-    GooString* getFlashVars() const;
+    const GooString* getFlashVars() const;
 
   private:
     // optional
@@ -1486,7 +1486,7 @@ public:
     Configuration& operator=(const Configuration &) = delete;
 
     Type getType() const;
-    GooString* getName() const;
+    const GooString* getName() const;
     int getInstancesCount() const;
     Instance* getInstance(int index) const;
 
@@ -1508,7 +1508,7 @@ public:
     Asset(const Asset &) = delete;
     Asset& operator=(const Asset &) = delete;
 
-    GooString* getName() const;
+    const GooString* getName() const;
     Object* getFileSpec() const;
 
   private:
