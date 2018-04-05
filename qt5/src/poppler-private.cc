@@ -5,6 +5,7 @@
  * Copyright (C) 2013 by Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+ * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -98,11 +99,11 @@ namespace Debug {
         return QString::fromUtf8(convertedStr.getCString(), convertedStr.getLength());
     }
 
-    QString UnicodeParsedString(GooString *s1) {
+    QString UnicodeParsedString(const GooString *s1) {
         if ( !s1 || s1->getLength() == 0 )
             return QString();
 
-        char *cString;
+        const char *cString;
         int stringLength;
         bool deleteCString;
         if ( ( s1->getChar(0) & 0xff ) == 0xfe && ( s1->getLength() > 1 && ( s1->getChar(1) & 0xff ) == 0xff ) )
