@@ -27,6 +27,7 @@
 // Copyright (C) 2012 Luis Parravicini <lparravi@gmail.com>
 // Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 // Copyright (C) 2017 Jason Crain <jason@inspiresomeone.us>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -111,7 +112,7 @@ HtmlFont::HtmlFont(GfxFont *font, int _size, GfxRGB rgb){
   //if (col) color=HtmlFontColor(col); 
   //else color=HtmlFontColor();
   color=HtmlFontColor(rgb);
-  GooString* ftname=font->getName();
+  const GooString* ftname=font->getName();
   if (!ftname) ftname = getDefaultFont();
 
   GooString *fontname = nullptr;

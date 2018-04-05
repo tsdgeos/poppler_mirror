@@ -209,7 +209,7 @@ public:
 
   // Get the original font name (ignornig any munging that might have
   // been done to map to a canonical Base-14 font name).
-  GooString *getName() { return name; }
+  const GooString *getName() const { return name; }
 
   // Get font type.
   GfxFontType getType() { return type; }

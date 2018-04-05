@@ -263,7 +263,7 @@ public:
   ~SysFontList();
   SysFontList(const SysFontList &) = delete;
   SysFontList& operator=(const SysFontList &) = delete;
-  SysFontInfo *find(GooString *name, GBool isFixedWidth, GBool exact);
+  SysFontInfo *find(const GooString *name, GBool isFixedWidth, GBool exact);
 
 #ifdef _WIN32
   void scanWindowsFonts(GooString *winFontDir);
@@ -289,7 +289,7 @@ SysFontList::~SysFontList() {
   deleteGooList(fonts, SysFontInfo);
 }
 
-SysFontInfo *SysFontList::find(GooString *name, GBool fixedWidth, GBool exact) {
+SysFontInfo *SysFontList::find(const GooString *name, GBool fixedWidth, GBool exact) {
   GooString *name2;
   GBool bold, italic, oblique;
   SysFontInfo *fi;
@@ -1108,7 +1108,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
   SysFontInfo *fi = nullptr;
   FcPattern *p=nullptr;
   GooString *path = nullptr;
-  GooString *fontName = font->getName();
+  const GooString *fontName = font->getName();
   GooString substituteName;
   if (!fontName) return nullptr;
   lockGlobalParams;
