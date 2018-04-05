@@ -37,6 +37,7 @@
 // Copyright (C) 2013, 2014 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
 // Copyright (C) 2017 Jean Ghali <jghali@libertysurf.fr>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -953,7 +954,7 @@ static const char *getFontLang(GfxFont *font)
   return lang;
 }
 
-static FcPattern *buildFcPattern(GfxFont *font, GooString *base14Name)
+static FcPattern *buildFcPattern(GfxFont *font, const GooString *base14Name)
 {
   int weight = -1,
       slant = -1,
@@ -965,12 +966,13 @@ static FcPattern *buildFcPattern(GfxFont *font, GooString *base14Name)
   FcPattern *p;
 
   // this is all heuristics will be overwritten if font had proper info
-  name = (base14Name == nullptr) ? font->getName()->getCString() : base14Name->getCString();
-  
+  GooString copiedNameGooString(((base14Name == nullptr) ? font->getName() : base14Name)->getCString());
+  name = copiedNameGooString.getCString();
+
   modifiers = strchr (name, ',');
   if (modifiers == nullptr)
     modifiers = strchr (name, '-');
-  
+
   // remove the - from the names, for some reason, Fontconfig does not
   // understand "MS-Mincho" but does with "MS Mincho"
   int len = strlen(name);
