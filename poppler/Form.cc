@@ -267,7 +267,7 @@ FormWidgetText::FormWidgetText (PDFDoc *docA, Object *aobj, unsigned num, Ref re
   type = formText;
 }
 
-GooString* FormWidgetText::getContent ()
+const GooString* FormWidgetText::getContent () const
 {
   return parent()->getContent();
 }
@@ -353,7 +353,7 @@ FormWidgetChoice::~FormWidgetChoice()
 {
 }
 
-bool FormWidgetChoice::_checkRange (int i)
+bool FormWidgetChoice::_checkRange (int i) const
 {
   if (i < 0 || i >= parent()->getNumChoices()) {
     error(errInternal, -1, "FormWidgetChoice::_checkRange i out of range : {0:d}", i);
@@ -379,7 +379,7 @@ void FormWidgetChoice::deselectAll ()
   parent()->deselectAll();
 }
 
-GooString* FormWidgetChoice::getEditChoice ()
+const GooString* FormWidgetChoice::getEditChoice () const
 {
   if (!hasEdit()) {
     error(errInternal, -1, "FormFieldChoice::getEditChoice called on a non-editable choice\n");
@@ -394,7 +394,7 @@ void FormWidgetChoice::updateWidgetAppearance()
     widget->updateAppearanceStream();
 }
 
-bool FormWidgetChoice::isSelected (int i)
+bool FormWidgetChoice::isSelected (int i) const
 {
   if (!_checkRange(i)) return false;
   return parent()->isSelected(i);
@@ -410,12 +410,12 @@ void FormWidgetChoice::setEditChoice (GooString* new_content)
   parent()->setEditChoice(new_content);
 }
 
-int FormWidgetChoice::getNumChoices() 
+int FormWidgetChoice::getNumChoices() const
 { 
   return parent()->getNumChoices();
 }
 
-GooString* FormWidgetChoice::getChoice(int i) 
+const GooString* FormWidgetChoice::getChoice(int i) const
 { 
   return parent()->getChoice(i);
 }
@@ -1122,7 +1122,7 @@ GBool FormFieldButton::setState(char *state)
   return gTrue;
 }
 
-GBool FormFieldButton::getState(char *state) {
+GBool FormFieldButton::getState(const char *state) const {
   if (appearanceState.isName(state))
     return gTrue;
 
@@ -1579,7 +1579,7 @@ void FormFieldChoice::setEditChoice (GooString* new_content)
   updateSelection();
 }
 
-GooString* FormFieldChoice::getEditChoice ()
+const GooString* FormFieldChoice::getEditChoice () const
 {
   return editedChoice;
 }
@@ -1594,7 +1594,7 @@ int FormFieldChoice::getNumSelected ()
   return cnt;
 }
 
-GooString *FormFieldChoice::getSelectedChoice() {
+const GooString *FormFieldChoice::getSelectedChoice() const {
   if (edit && editedChoice)
     return editedChoice;
 

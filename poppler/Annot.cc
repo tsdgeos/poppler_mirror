@@ -4787,7 +4787,7 @@ void AnnotWidget::drawFormFieldButton(GfxResources *resources, GooString *da) {
 
 void AnnotWidget::drawFormFieldText(GfxResources *resources, GooString *da) {
   VariableTextQuadding quadding;
-  GooString *contents;
+  const GooString *contents;
   FormFieldText *fieldText = static_cast<FormFieldText *>(field);
 
   contents = fieldText->getContent();
@@ -4804,7 +4804,7 @@ void AnnotWidget::drawFormFieldText(GfxResources *resources, GooString *da) {
 }
 
 void AnnotWidget::drawFormFieldChoice(GfxResources *resources, GooString *da) {
-  GooString *selected;
+  const GooString *selected;
   VariableTextQuadding quadding;
   FormFieldChoice *fieldChoice = static_cast<FormFieldChoice *>(field);
 
