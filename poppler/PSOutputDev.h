@@ -24,6 +24,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011, 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -372,7 +373,7 @@ private:
 				    GBool needVerticalMetrics);
   void setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString *psName);
   void setupType3Font(GfxFont *font, GooString *psName, Dict *parentResDict);
-  GooString *makePSFontName(GfxFont *font, Ref *id);
+  GooString *makePSFontName(GfxFont *font, const Ref *id);
   void setupImages(Dict *resDict);
   void setupImage(Ref id, Stream *str, GBool mask);
   void setupForms(Dict *resDict);
@@ -422,7 +423,7 @@ private:
 		    double *x1, double *y1);
 #endif
   void cvtFunction(Function *func, GBool invertPSFunction = gFalse);
-  GooString *filterPSName(GooString *name);
+  GooString *filterPSName(const GooString *name);
 
   // Write the document-level setup.
   void writeDocSetup(PDFDoc *doc, Catalog *catalog, const std::vector<int> &pages, GBool duplexA);

@@ -1965,6 +1965,13 @@ height = dummy.height();
     POPPLER_QT5_EXPORT QDateTime convertDate( char *dateString );
 
     /**
+       Conversion from PDF date string format to QDateTime
+
+       \since 0.64
+    */
+    POPPLER_QT5_EXPORT QDateTime convertDate( const char *dateString );
+
+    /**
        Whether the color management functions are available.
 
        \since 0.12

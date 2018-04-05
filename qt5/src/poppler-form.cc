@@ -6,6 +6,7 @@
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
  * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
+ * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,7 +114,7 @@ int FormField::id() const
 QString FormField::name() const
 {
   QString name;
-  if (GooString *goo = m_formData->fm->getPartialName())
+  if (const GooString *goo = m_formData->fm->getPartialName())
   {
     name = QString::fromLatin1(goo->getCString());
   }
@@ -140,7 +141,7 @@ QString FormField::fullyQualifiedName() const
 QString FormField::uiName() const
 {
   QString name;
-  if (GooString *goo = m_formData->fm->getAlternateUiName())
+  if (const GooString *goo = m_formData->fm->getAlternateUiName())
   {
     name = QString::fromLatin1(goo->getCString());
   }
@@ -311,7 +312,7 @@ FormFieldText::TextType FormFieldText::textType() const
 
 QString FormFieldText::text() const
 {
-  GooString *goo = static_cast<FormWidgetText*>(m_formData->fm)->getContent();
+  const GooString *goo = static_cast<FormWidgetText*>(m_formData->fm)->getContent();
   return UnicodeParsedString(goo);
 }
 

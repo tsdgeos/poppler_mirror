@@ -930,7 +930,7 @@ text_span_poppler_text_span (const TextSpan& span)
       {
         // GfxFont sometimes does not have a family name but there
         // is always a font name that can be used as fallback.
-        GooString *font_name = span.getFont ()->getFamily ();
+        const GooString *font_name = span.getFont ()->getFamily ();
         if (font_name == nullptr)
           font_name = span.getFont ()->getName ();
 

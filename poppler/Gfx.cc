@@ -375,9 +375,10 @@ GfxResources::~GfxResources() {
   delete fonts;
 }
 
-GfxFont *GfxResources::lookupFont(char *name) {
+GfxFont *GfxResources::doLookupFont(const char *name) const
+{
   GfxFont *font;
-  GfxResources *resPtr;
+  const GfxResources *resPtr;
 
   for (resPtr = this; resPtr; resPtr = resPtr->next) {
     if (resPtr->fonts) {
@@ -387,6 +388,14 @@ GfxFont *GfxResources::lookupFont(char *name) {
   }
   error(errSyntaxError, -1, "Unknown font tag '{0:s}'", name);
   return nullptr;
+}
+
+GfxFont *GfxResources::lookupFont(const char *name) {
+  return doLookupFont(name);
+}
+
+const GfxFont *GfxResources::lookupFont(const char *name) const {
+  return doLookupFont(name);
 }
 
 Object GfxResources::lookupXObject(char *name) {

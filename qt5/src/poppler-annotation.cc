@@ -5,6 +5,7 @@
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012, 2015, Tobias Koenig <tobias.koenig@kdab.com>
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -535,7 +536,7 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
                 MovieObject *movie = new MovieObject( movieann );
                 m->setMovie( movie );
                 // -> movieTitle
-                GooString * movietitle = movieann->getTitle();
+                const GooString * movietitle = movieann->getTitle();
                 if ( movietitle )
                     m->setMovieTitle( QString::fromLatin1( movietitle->getCString() ) );
                 break;
@@ -556,7 +557,7 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
                 s->setAction( static_cast<Poppler::LinkRendition *>(popplerLink) );
 
                 // -> screenTitle
-                GooString * screentitle = screenann->getTitle();
+                const GooString * screentitle = screenann->getTitle();
                 if ( screentitle )
                     s->setScreenTitle( UnicodeParsedString( screentitle ) );
                 break;

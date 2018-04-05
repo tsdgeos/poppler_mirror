@@ -31,6 +31,7 @@
 // Copyright (C) 2014 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2015 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2016 Caolán McNamara <caolanm@redhat.com>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2865,8 +2866,9 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName,
 
 // Make a unique PS font name, based on the names given in the PDF
 // font object, and an object ID (font file object for 
-GooString *PSOutputDev::makePSFontName(GfxFont *font, Ref *id) {
-  GooString *psName, *s;
+GooString *PSOutputDev::makePSFontName(GfxFont *font, const Ref *id) {
+  GooString *psName;
+  const GooString *s;
 
   if ((s = font->getEmbeddedFontName())) {
     psName = filterPSName(s);
@@ -7478,7 +7480,7 @@ void PSOutputDev::writePSName(const char *s) {
   }
 }
 
-GooString *PSOutputDev::filterPSName(GooString *name) {
+GooString *PSOutputDev::filterPSName(const GooString *name) {
   GooString *name2;
   char buf[8];
   int i;

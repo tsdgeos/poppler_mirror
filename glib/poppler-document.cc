@@ -708,7 +708,7 @@ poppler_document_find_dest (PopplerDocument *document,
 	return dest;
 }
 
-char *_poppler_goo_string_to_utf8(GooString *s)
+char *_poppler_goo_string_to_utf8(const GooString *s)
 {
   if (s == nullptr) {
     return nullptr;
@@ -2891,7 +2891,7 @@ poppler_document_get_form_field (PopplerDocument *document,
 }
 
 gboolean
-_poppler_convert_pdf_date_to_gtime (GooString *date,
+_poppler_convert_pdf_date_to_gtime (const GooString *date,
 				    time_t    *gdate) 
 {
   gchar *date_string;

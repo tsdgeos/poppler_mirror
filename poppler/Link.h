@@ -18,6 +18,7 @@
 // Copyright (C) 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
 // Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -163,7 +164,7 @@ public:
   // Accessors.
   LinkActionKind getKind() override { return actionGoTo; }
   LinkDest *getDest() { return dest; }
-  GooString *getNamedDest() { return namedDest; }
+  const GooString *getNamedDest() const { return namedDest; }
 
 private:
 
@@ -192,9 +193,9 @@ public:
 
   // Accessors.
   LinkActionKind getKind() override { return actionGoToR; }
-  GooString *getFileName() { return fileName; }
+  const GooString *getFileName() const { return fileName; }
   LinkDest *getDest() { return dest; }
-  GooString *getNamedDest() { return namedDest; }
+  const GooString *getNamedDest() const { return namedDest; }
 
 private:
 
@@ -223,8 +224,8 @@ public:
 
   // Accessors.
   LinkActionKind getKind() override { return actionLaunch; }
-  GooString *getFileName() { return fileName; }
-  GooString *getParams() { return params; }
+  const GooString *getFileName() const { return fileName; }
+  const GooString *getParams() const { return params; }
 
 private:
 
@@ -250,7 +251,7 @@ public:
 
   // Accessors.
   LinkActionKind getKind() override { return actionURI; }
-  GooString *getURI() { return uri; }
+  const GooString *getURI() const { return uri; }
 
 private:
 
@@ -272,7 +273,7 @@ public:
   GBool isOk() override { return name != NULL; }
 
   LinkActionKind getKind() override { return actionNamed; }
-  GooString *getName() { return name; }
+  const GooString *getName() const { return name; }
 
 private:
 
@@ -306,7 +307,7 @@ public:
   GBool hasAnnotRef() { return annotRef.num >= 0; }
   GBool hasAnnotTitle() { return annotTitle != NULL; }
   Ref *getAnnotRef() { return &annotRef; }
-  GooString *getAnnotTitle() { return annotTitle; }
+  const GooString *getAnnotTitle() const { return annotTitle; }
 
   OperationType getOperation() { return operation; }
 
@@ -354,7 +355,7 @@ public:
 
   MediaRendition* getMedia() { return media; }
 
-  GooString *getScript() { return js; }
+  const GooString *getScript() const { return js; }
 
 private:
 
@@ -412,7 +413,7 @@ public:
   GBool isOk() override { return js != NULL; }
 
   LinkActionKind getKind() override { return actionJavaScript; }
-  GooString *getScript() { return js; }
+  const GooString *getScript() const { return js; }
 
 private:
 
@@ -468,7 +469,7 @@ public:
 
   // Accessors.
   LinkActionKind getKind() override { return actionUnknown; }
-  GooString *getAction() { return action; }
+  const GooString *getAction() const { return action; }
 
 private:
 

@@ -6,6 +6,7 @@
 //
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -34,7 +35,7 @@ JSInfo::JSInfo(PDFDoc *docA, int firstPage) {
 JSInfo::~JSInfo() {
 }
 
-void JSInfo::printJS(GooString *js) {
+void JSInfo::printJS(const GooString *js) {
   Unicode *u =  nullptr;
   char buf[8];
   int i, n, len;
@@ -58,7 +59,7 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action, bool deleteLin
     hasJS = gTrue;
     if (print) {
       LinkJavaScript *linkjs = static_cast<LinkJavaScript *>(link);
-      GooString *s = linkjs->getScript();
+      const GooString *s = linkjs->getScript();
       if (s && s->getCString()) {
 	fprintf(file, "%s:\n", action);
 	printJS(s);
@@ -72,7 +73,7 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action, bool deleteLin
     if (linkr->getScript()) {
       hasJS = gTrue;
       if (print) {
-        GooString *s = linkr->getScript();
+        const GooString *s = linkr->getScript();
         if (s && s->getCString()) {
           fprintf(file, "%s (Rendition):\n", action);
           printJS(s);
