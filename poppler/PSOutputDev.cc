@@ -2866,7 +2866,7 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName,
 
 // Make a unique PS font name, based on the names given in the PDF
 // font object, and an object ID (font file object for 
-GooString *PSOutputDev::makePSFontName(GfxFont *font, Ref *id) {
+GooString *PSOutputDev::makePSFontName(GfxFont *font, const Ref *id) {
   GooString *psName;
   const GooString *s;
 

@@ -193,26 +193,26 @@ public:
   const GooString *getTag() const { return tag; }
 
   // Get font dictionary ID.
-  Ref *getID() { return &id; }
+  const Ref *getID() const { return &id; }
 
   // Does this font match the tag?
-  GBool matches(char *tagA) { return !tag->cmp(tagA); }
+  GBool matches(const char *tagA) const { return !tag->cmp(tagA); }
 
   // Get font family name.
   GooString *getFamily() { return family; }
   
   // Get font stretch.
-  Stretch getStretch() { return stretch; }
+  Stretch getStretch() const { return stretch; }
   
   // Get font weight.
-  Weight getWeight() { return weight; }
+  Weight getWeight() const { return weight; }
 
   // Get the original font name (ignornig any munging that might have
   // been done to map to a canonical Base-14 font name).
   const GooString *getName() const { return name; }
 
   // Get font type.
-  GfxFontType getType() { return type; }
+  GfxFontType getType() const { return type; }
   virtual GBool isCIDFont() const { return gFalse; }
 
   // Get embedded font ID, i.e., a ref for the font file stream.

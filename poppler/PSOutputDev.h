@@ -373,7 +373,7 @@ private:
 				    GBool needVerticalMetrics);
   void setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString *psName);
   void setupType3Font(GfxFont *font, GooString *psName, Dict *parentResDict);
-  GooString *makePSFontName(GfxFont *font, Ref *id);
+  GooString *makePSFontName(GfxFont *font, const Ref *id);
   void setupImages(Dict *resDict);
   void setupImage(Ref id, Stream *str, GBool mask);
   void setupForms(Dict *resDict);
