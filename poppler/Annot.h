@@ -52,6 +52,8 @@ class PDFDoc;
 class Form;
 class FormWidget;
 class FormField;
+class FormFieldButton;
+class FormFieldText;
 class FormFieldChoice;
 class PDFRectangle;
 class Movie;
@@ -496,6 +498,47 @@ private:
 };
 
 //------------------------------------------------------------------------
+// AnnotAppearanceBuilder
+//------------------------------------------------------------------------
+
+class AnnotAppearanceBuilder {
+public:
+  AnnotAppearanceBuilder();
+  ~AnnotAppearanceBuilder();
+
+  AnnotAppearanceBuilder(const AnnotAppearanceBuilder &) = delete;
+  AnnotAppearanceBuilder& operator=(const AnnotAppearanceBuilder &) = delete;
+
+  void setDrawColor(const AnnotColor *color, GBool fill);
+  void setLineStyleForBorder(const AnnotBorder *border);
+  void drawCircle(double cx, double cy, double r, GBool fill);
+  void drawCircleTopLeft(double cx, double cy, double r);
+  void drawCircleBottomRight(double cx, double cy, double r);
+  void drawText(const GooString *text, const GooString *da, const GfxResources *resources,
+		const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
+		GBool multiline, int comb, int quadding,
+		GBool txField, GBool forceZapfDingbats,
+		XRef *xref, bool *addedDingbatsResource, // xref and addedDingbatsResource both must not be null if forceZapfDingbats is passed
+		GBool password);
+  void drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect,
+		   const GooString *da, const GfxResources *resources, int quadding);
+  void drawFieldBorder(const FormField *field, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
+  void drawFormFieldButton(const FormFieldButton *field, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const GooString *appearState, XRef *xref, bool *addedDingbatsResource);
+  void drawFormFieldText(const FormFieldText *fieldText, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
+  void drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
+
+  void writeString(const GooString &str);
+
+  void append(const char *text);
+  void appendf(const char *fmt, ...) GOOSTRING_FORMAT;
+
+  const GooString *buffer() const;
+
+private:
+  GooString *appearBuf;
+};
+
+//------------------------------------------------------------------------
 // Annot
 //------------------------------------------------------------------------
 
@@ -634,6 +677,10 @@ public:
   // Check if point is inside the annot rectangle.
   GBool inRect(double x, double y) const;
 
+  static void layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont *font,
+		  double *width, double widthLimit, int *charCount,
+		  GBool noReencode);
+
 private:
   void readArrayNum(Object *pdfArray, int key, double *value);
   // write vStr[i:j[ in appearBuf
@@ -645,16 +692,7 @@ private:
 protected:
   virtual ~Annot();
   virtual void removeReferencedObjects(); // Called by Page::removeAnnot
-  void setDrawColor(const AnnotColor *color, GBool fill);
-  void setLineStyleForBorder(AnnotBorder *border);
-  void drawCircle(double cx, double cy, double r, GBool fill);
-  void drawCircleTopLeft(double cx, double cy, double r);
-  void drawCircleBottomRight(double cx, double cy, double r);
-  void layoutText(const GooString *text, GooString *outBuf, int *i, GfxFont *font,
-		  double *width, double widthLimit, int *charCount,
-		  GBool noReencode);
-  void writeString(GooString *str, GooString *appearBuf);
-  Object createForm(double *bbox, GBool transparencyGroup, Dict *resDict);
+  Object createForm(const GooString *appearBuf, double *bbox, GBool transparencyGroup, Dict *resDict);
   Dict *createResourcesDict(const char *formName, Object &&formStream, const char *stateName,
 			   double opacity, const char *blendMode);
   GBool isVisible(GBool printing);
@@ -692,7 +730,6 @@ protected:
   PDFDoc *doc;
   XRef *xref;			// the xref table for this PDF file
   Ref ref;                      // object ref identifying this annotation
-  GooString *appearBuf;
   AnnotBorder *border;          // Border, BS
   AnnotColor *color;            // C
   double fontSize; 
@@ -1328,11 +1365,7 @@ public:
 
   void draw(Gfx *gfx, GBool printing) override;
 
-  void drawBorder();
-  void drawFormFieldButton(GfxResources *resources, GooString *da);
-  void drawFormFieldText(GfxResources *resources, GooString *da);
-  void drawFormFieldChoice(GfxResources *resources, GooString *da);
-  void generateFieldAppearance ();
+  void generateFieldAppearance (bool *addDingbatsResource);
   void updateAppearanceStream ();
 
   AnnotWidgetHighlightMode getMode() { return mode; }
@@ -1346,13 +1379,6 @@ private:
 
   void initialize(PDFDoc *docA, Dict *dict);
 
-  void drawText(const GooString *text, GooString *da, GfxResources *resources,
-		GBool multiline, int comb, int quadding,
-		GBool txField, GBool forceZapfDingbats,
-		GBool password=false);
-  void drawListBox(FormFieldChoice *fieldChoice,
-		   GooString *da, GfxResources *resources, int quadding);
-
   Form *form;
   FormField *field;                       // FormField object for this annotation
   AnnotWidgetHighlightMode mode;          // H  (Default I)
@@ -1362,7 +1388,6 @@ private:
   // inherited  from Annot
   // AnnotBorderBS border;                // BS
   Dict *parent;                           // Parent
-  GBool addDingbatsResource;
   Ref updatedAppearanceStream; // {-1,-1} if updateAppearanceStream has never been called
 };
 
