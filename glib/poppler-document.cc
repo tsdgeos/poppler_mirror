@@ -708,7 +708,7 @@ poppler_document_find_dest (PopplerDocument *document,
 	return dest;
 }
 
-char *_poppler_goo_string_to_utf8(GooString *s)
+char *_poppler_goo_string_to_utf8(const GooString *s)
 {
   if (s == nullptr) {
     return nullptr;
