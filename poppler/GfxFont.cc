@@ -32,6 +32,7 @@
 // Copyright (C) 2012, 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013-2016, 2018 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2014 Olly Betts <olly@survex.com>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1565,8 +1566,7 @@ int Gfx8BitFont::getNextChar(char *s, int len, CharCode *code,
   return 1;
 }
 
-CharCodeToUnicode *Gfx8BitFont::getToUnicode() {
-  ctu->incRefCnt();
+const CharCodeToUnicode *Gfx8BitFont::getToUnicode() const {
   return ctu;
 }
 
@@ -2125,10 +2125,7 @@ int GfxCIDFont::getWMode() {
   return cMap ? cMap->getWMode() : 0;
 }
 
-CharCodeToUnicode *GfxCIDFont::getToUnicode() {
-  if (ctu) {
-    ctu->incRefCnt();
-  }
+const CharCodeToUnicode *GfxCIDFont::getToUnicode() const {
   return ctu;
 }
 
@@ -2324,7 +2321,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
   } else {
     error(errSyntaxError, -1, "Unknown character collection {0:t}\n",
       getCollection());
-    if ((ctu = getToUnicode()) != nullptr) {
+    if (ctu) {
       CharCode cid;
       for (cid = 0;cid < n ;cid++) {
 	Unicode *ucode;
@@ -2337,7 +2334,6 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
 	    humap[cid*N_UCS_CANDIDATES+i] = 0;
 	}
       }
-      ctu->decRefCnt();
     }
   }
   // map CID -> Unicode -> GID

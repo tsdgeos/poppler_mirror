@@ -23,6 +23,7 @@
 // Copyright (C) 2011, 2012, 2014 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2015, 2018 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -242,7 +243,7 @@ public:
   GBool isBold() { return flags & fontBold; }
 
   // Return the Unicode map.
-  virtual CharCodeToUnicode *getToUnicode() = 0;
+  virtual const CharCodeToUnicode *getToUnicode() const = 0;
 
   // Return the font matrix.
   double *getFontMatrix() { return fontMat; }
@@ -337,7 +338,7 @@ public:
   char **getEncoding() { return enc; }
 
   // Return the Unicode map.
-  CharCodeToUnicode *getToUnicode() override;
+  const CharCodeToUnicode *getToUnicode() const override;
 
   // Return the character name associated with <code>.
   char *getCharName(int code) { return enc[code]; }
@@ -402,7 +403,7 @@ public:
   int getWMode() override;
 
   // Return the Unicode map.
-  CharCodeToUnicode *getToUnicode() override;
+  const CharCodeToUnicode *getToUnicode() const override;
 
   // Get the collection name (<registry>-<ordering>).
   GooString *getCollection();
