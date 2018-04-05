@@ -2478,7 +2478,7 @@ GfxFontDict::~GfxFontDict() {
   gfree(fonts);
 }
 
-GfxFont *GfxFontDict::lookup(char *tag) {
+GfxFont *GfxFontDict::lookup(const char *tag) {
   int i;
 
   for (i = 0; i < numFonts; ++i) {

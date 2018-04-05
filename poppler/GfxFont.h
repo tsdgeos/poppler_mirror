@@ -452,7 +452,7 @@ public:
   GfxFontDict& operator=(const GfxFontDict &) = delete;
 
   // Get the specified font.
-  GfxFont *lookup(char *tag);
+  GfxFont *lookup(const char *tag);
 
   // Iterative access.
   int getNumFonts() { return numFonts; }
