@@ -5008,13 +5008,13 @@ void PSOutputDev::doPath(GfxPath *path) {
   }
 }
 
-void PSOutputDev::drawString(GfxState *state, GooString *s) {
+void PSOutputDev::drawString(GfxState *state, const GooString *s) {
   GfxFont *font;
   int wMode;
   int *codeToGID;
   GooString *s2;
   double dx, dy, originX, originY;
-  char *p;
+  const char *p;
   UnicodeMap *uMap;
   CharCode code;
   Unicode *u;

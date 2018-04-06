@@ -24,6 +24,7 @@
 // Copyright (C) 2012 Igor Slepchin <igor.redhat@gmail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -136,7 +137,7 @@ public:
   HtmlPage& operator=(const HtmlPage &) = delete;
 
   // Begin a new string.
-  void beginString(GfxState *state, GooString *s);
+  void beginString(GfxState *state, const GooString *s);
 
   // Add a character to the current string.
   void addChar(GfxState *state, double x, double y,
@@ -298,7 +299,7 @@ public:
   void updateFont(GfxState *state) override;
 
   //----- text drawing
-  void beginString(GfxState *state, GooString *s) override;
+  void beginString(GfxState *state, const GooString *s) override;
   void endString(GfxState *state) override;
   void drawChar(GfxState *state, double x, double y,
 		double dx, double dy,

@@ -253,7 +253,7 @@ public:
   void clipToStrokePath(GfxState *state) override;
 
   //----- text drawing
-  void drawString(GfxState *state, GooString *s) override;
+  void drawString(GfxState *state, const GooString *s) override;
   void beginTextObject(GfxState *state) override;
   void endTextObject(GfxState *state) override;
 
