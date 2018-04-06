@@ -3,7 +3,7 @@
  * Copyright (C) 2007, Brad Hards <bradh@kde.org>
  * Copyright (C) 2008, 2014, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008, Carlos Garcia Campos <carlosgc@gnome.org>
- * Copyright (C) 2015-2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2015-2018, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Hubert Figuière <hub@figuiere.net>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  *
@@ -398,7 +398,7 @@ namespace Poppler
 
     QSet<OptContentItem *> changedItems;
 
-    GooList *statesList = popplerLinkOCGState->getStateList();
+    const GooList *statesList = popplerLinkOCGState->getStateList();
     for (int i = 0; i < statesList->getLength(); ++i) {
         ::LinkOCGState::StateList *stateList = (::LinkOCGState::StateList*)statesList->get(i);
 

@@ -74,7 +74,7 @@ poppler_movie_init (PopplerMovie *movie)
 }
 
 PopplerMovie *
-_poppler_movie_new (Movie *poppler_movie)
+_poppler_movie_new (const Movie *poppler_movie)
 {
   PopplerMovie *movie;
 

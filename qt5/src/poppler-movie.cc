@@ -60,7 +60,7 @@ MovieObject::MovieObject( AnnotMovie *ann )
 	m_movieData->m_movieObj = ann->getMovie()->copy();
 	//TODO: copy poster image
 
-	MovieActivationParameters *mp = m_movieData->m_movieObj->getActivationParameters();
+	const MovieActivationParameters *mp = m_movieData->m_movieObj->getActivationParameters();
 	int width, height;
 	m_movieData->m_movieObj->getFloatingWindowSize(&width, &height);
 	m_movieData->m_size = QSize(width, height);
@@ -76,7 +76,7 @@ MovieObject::~MovieObject()
 
 QString MovieObject::url() const
 {
-	GooString * goo = m_movieData->m_movieObj->getFileName();
+	const GooString * goo = m_movieData->m_movieObj->getFileName();
 	return goo ? QString( goo->getCString() ) : QString();
 }
 

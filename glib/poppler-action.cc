@@ -232,7 +232,7 @@ poppler_action_copy (PopplerAction *action)
 static
 PopplerDest *
 dest_new_goto (PopplerDocument *document,
-	       LinkDest        *link_dest)
+	       const LinkDest        *link_dest)
 {
 	PopplerDest *dest;
 
@@ -337,9 +337,9 @@ dest_new_named (const GooString *named_dest)
 static void
 build_goto_dest (PopplerDocument *document,
 		 PopplerAction   *action,
-		 LinkGoTo        *link)
+		 const LinkGoTo        *link)
 {
-	LinkDest *link_dest;
+	const LinkDest *link_dest;
 	const GooString *named_dest;
 
 	/* Return if it isn't OK */
@@ -362,9 +362,9 @@ build_goto_dest (PopplerDocument *document,
 
 static void
 build_goto_remote (PopplerAction *action,
-		   LinkGoToR     *link)
+		   const LinkGoToR     *link)
 {
-	LinkDest *link_dest;
+	const LinkDest *link_dest;
 	const GooString *named_dest;
 	
 	/* Return if it isn't OK */
@@ -389,7 +389,7 @@ build_goto_remote (PopplerAction *action,
 
 static void
 build_launch (PopplerAction *action,
-	      LinkLaunch    *link)
+	      const LinkLaunch    *link)
 {
 	if (link->getFileName()) {
 		action->launch.file_name = g_strdup (link->getFileName()->getCString ());
@@ -401,7 +401,7 @@ build_launch (PopplerAction *action,
 
 static void
 build_uri (PopplerAction *action,
-	   LinkURI       *link)
+	   const LinkURI       *link)
 {
 	const gchar *uri;
 
@@ -412,7 +412,7 @@ build_uri (PopplerAction *action,
 
 static void
 build_named (PopplerAction *action,
-	     LinkNamed     *link)
+	     const LinkNamed     *link)
 {
 	const gchar *name;
 
@@ -423,14 +423,14 @@ build_named (PopplerAction *action,
 
 static AnnotMovie *
 find_annot_movie_for_action (PopplerDocument *document,
-			     LinkMovie       *link)
+			     const LinkMovie       *link)
 {
   AnnotMovie *annot = nullptr;
   XRef *xref = document->doc->getXRef ();
   Object annotObj;
 
   if (link->hasAnnotRef ()) {
-    Ref *ref = link->getAnnotRef ();
+    const Ref *ref = link->getAnnotRef ();
 
     annotObj = xref->fetch (ref->num, ref->gen);
   } else if (link->hasAnnotTitle ()) {
@@ -490,7 +490,7 @@ find_annot_movie_for_action (PopplerDocument *document,
 static void
 build_movie (PopplerDocument *document,
 	     PopplerAction   *action,
-	     LinkMovie       *link)
+	     const LinkMovie       *link)
 {
 	AnnotMovie *annot;
 
@@ -519,7 +519,7 @@ build_movie (PopplerDocument *document,
 
 static void
 build_javascript (PopplerAction *action,
-		  LinkJavaScript *link)
+		  const LinkJavaScript *link)
 {
 	const GooString *script;
 
@@ -531,7 +531,7 @@ build_javascript (PopplerAction *action,
 
 static void
 build_rendition (PopplerAction *action,
-		 LinkRendition *link)
+		 const LinkRendition *link)
 {
 	action->rendition.op = link->getOperation();
 	if (link->hasRenditionObject())
@@ -575,9 +575,9 @@ get_layer_for_ref (PopplerDocument *document,
 static void
 build_ocg_state (PopplerDocument *document,
 		 PopplerAction   *action,
-		 LinkOCGState    *ocg_state)
+		 const LinkOCGState    *ocg_state)
 {
-	GooList *st_list = ocg_state->getStateList();
+	const GooList *st_list = ocg_state->getStateList();
 	GBool    preserve_rb = ocg_state->getPreserveRB();
 	gint     i, j;
 	GList   *layer_state = nullptr;
@@ -618,7 +618,7 @@ build_ocg_state (PopplerDocument *document,
 
 PopplerAction *
 _poppler_action_new (PopplerDocument *document,
-		     LinkAction      *link,
+		     const LinkAction      *link,
 		     const gchar     *title)
 {
 	PopplerAction *action;
@@ -636,39 +636,39 @@ _poppler_action_new (PopplerDocument *document,
 	switch (link->getKind ()) {
 	case actionGoTo:
 		action->type = POPPLER_ACTION_GOTO_DEST;
-		build_goto_dest (document, action, dynamic_cast <LinkGoTo *> (link));
+		build_goto_dest (document, action, dynamic_cast <const LinkGoTo *> (link));
 		break;
 	case actionGoToR:
 		action->type = POPPLER_ACTION_GOTO_REMOTE;
-		build_goto_remote (action, dynamic_cast <LinkGoToR *> (link));
+		build_goto_remote (action, dynamic_cast <const LinkGoToR *> (link));
 		break;
 	case actionLaunch:
 		action->type = POPPLER_ACTION_LAUNCH;
-		build_launch (action, dynamic_cast <LinkLaunch *> (link));
+		build_launch (action, dynamic_cast <const LinkLaunch *> (link));
 		break;
 	case actionURI:
 		action->type = POPPLER_ACTION_URI;
-		build_uri (action, dynamic_cast <LinkURI *> (link));
+		build_uri (action, dynamic_cast <const LinkURI *> (link));
 		break;
 	case actionNamed:
 		action->type = POPPLER_ACTION_NAMED;
-		build_named (action, dynamic_cast <LinkNamed *> (link));
+		build_named (action, dynamic_cast <const LinkNamed *> (link));
 		break;
 	case actionMovie:
 		action->type = POPPLER_ACTION_MOVIE;
-		build_movie (document, action, dynamic_cast<LinkMovie*> (link));
+		build_movie (document, action, dynamic_cast<const LinkMovie*> (link));
 		break;
 	case actionRendition:
 		action->type = POPPLER_ACTION_RENDITION;
-		build_rendition (action, dynamic_cast<LinkRendition*> (link));
+		build_rendition (action, dynamic_cast<const LinkRendition*> (link));
 		break;
 	case actionOCGState:
 		action->type = POPPLER_ACTION_OCG_STATE;
-		build_ocg_state (document, action, dynamic_cast<LinkOCGState*> (link));
+		build_ocg_state (document, action, dynamic_cast<const LinkOCGState*> (link));
 		break;
 	case actionJavaScript:
 		action->type = POPPLER_ACTION_JAVASCRIPT;
-		build_javascript (action, dynamic_cast<LinkJavaScript*> (link));
+		build_javascript (action, dynamic_cast<const LinkJavaScript*> (link));
 		break;
 	case actionUnknown:
 	default:

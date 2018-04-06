@@ -154,7 +154,7 @@ QSize
 MediaRendition::size() const
 {
   Q_D( const MediaRendition );
-  MediaParameters *mp = nullptr;
+  const MediaParameters *mp = nullptr;
 
   if (d->rendition->getBEParameters())
     mp = d->rendition->getBEParameters();

@@ -1,6 +1,6 @@
 /* poppler-private.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
- * Copyright (C) 2006, 2011, 2015, 2017 by Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2011, 2015, 2017, 2018 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, 2010, 2011, 2014 by Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 by Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
@@ -74,7 +74,7 @@ namespace Debug {
         (*Debug::debugFunction)(emsg, Debug::debugClosure);
     }
 
-    QString unicodeToQString(Unicode* u, int len) {
+    QString unicodeToQString(const Unicode* u, int len) {
         if (!utf8Map)
         {
                 GooString enc("UTF-8");
@@ -163,7 +163,7 @@ namespace Debug {
         return QStringToUnicodeGooString(dt.toUTC().toString("yyyyMMddhhmmss+00'00'"));
     }
 
-    static void linkActionToTocItem( ::LinkAction * a, DocumentData * doc, QDomElement * e )
+    static void linkActionToTocItem( const ::LinkAction * a, DocumentData * doc, QDomElement * e )
     {
         if ( !a || !e )
             return;
@@ -173,8 +173,8 @@ namespace Debug {
             case actionGoTo:
             {
                 // page number is contained/referenced in a LinkGoTo
-                LinkGoTo * g = static_cast< LinkGoTo * >( a );
-                LinkDest * destination = g->getDest();
+                const LinkGoTo * g = static_cast< const LinkGoTo * >( a );
+                const LinkDest * destination = g->getDest();
                 if ( !destination && g->getNamedDest() )
                 {
                     // no 'destination' but an internal 'named reference'. we could
@@ -197,8 +197,8 @@ namespace Debug {
             case actionGoToR:
             {
                 // page number is contained/referenced in a LinkGoToR
-                LinkGoToR * g = static_cast< LinkGoToR * >( a );
-                LinkDest * destination = g->getDest();
+                const LinkGoToR * g = static_cast< const LinkGoToR * >( a );
+                const LinkDest * destination = g->getDest();
                 if ( !destination && g->getNamedDest() )
                 {
                     // no 'destination' but an internal 'named reference'. we could
@@ -221,7 +221,7 @@ namespace Debug {
             }
             case actionURI:
             {
-                LinkURI * u = static_cast< LinkURI * >( a );
+                const LinkURI * u = static_cast< const LinkURI * >( a );
                 e->setAttribute( QStringLiteral("DestinationURI"), u->getURI()->getCString() );
             }
             default: ;
@@ -259,7 +259,7 @@ namespace Debug {
     }
 
 
-    void DocumentData::addTocChildren( QDomDocument * docSyn, QDomNode * parent, GooList * items )
+    void DocumentData::addTocChildren( QDomDocument * docSyn, QDomNode * parent, const GooList * items )
     {
         int numItems = items->getLength();
         for ( int i = 0; i < numItems; ++i )
@@ -269,7 +269,7 @@ namespace Debug {
 
             // 1. create element using outlineItem's title as tagName
             QString name;
-            Unicode * uniChar = outlineItem->getTitle();
+            const Unicode * uniChar = outlineItem->getTitle();
             int titleLength = outlineItem->getTitleLength();
             name = unicodeToQString(uniChar, titleLength);
             if ( name.isEmpty() )
@@ -279,14 +279,14 @@ namespace Debug {
             parent->appendChild( item );
 
             // 2. find the page the link refers to
-            ::LinkAction * a = outlineItem->getAction();
+            const ::LinkAction * a = outlineItem->getAction();
             linkActionToTocItem( a, this, &item );
 
             item.setAttribute( QStringLiteral("Open"), QVariant( (bool)outlineItem->isOpen() ).toString() );
 
             // 3. recursively descend over children
             outlineItem->open();
-            GooList * children = outlineItem->getKids();
+            const GooList * children = outlineItem->getKids();
             if ( children )
                 addTocChildren( docSyn, &item, children );
         }

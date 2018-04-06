@@ -3,7 +3,7 @@
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2017 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017, 2018 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ rectf detail::pdfrectangle_to_rectf(const PDFRectangle &pdfrect)
     return rectf(pdfrect.x1, pdfrect.y1, pdfrect.x2 - pdfrect.x1, pdfrect.y2 - pdfrect.y1);
 }
 
-ustring detail::unicode_GooString_to_ustring(GooString *str)
+ustring detail::unicode_GooString_to_ustring(const GooString *str)
 {
     const char *data = str->getCString();
     const int len = str->getLength();

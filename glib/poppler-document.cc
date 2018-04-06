@@ -1735,7 +1735,7 @@ poppler_document_init (PopplerDocument *document)
 struct _PopplerIndexIter
 {
 	PopplerDocument *document;
-	GooList *items;
+	const GooList *items;
 	int index;
 };
 
@@ -1810,7 +1810,7 @@ poppler_index_iter_new (PopplerDocument *document)
 {
 	PopplerIndexIter *iter;
 	Outline *outline;
-	GooList *items;
+	const GooList *items;
 
 	outline = document->doc->getOutline();
 	if (outline == nullptr)
@@ -1860,7 +1860,7 @@ poppler_index_iter_get_child (PopplerIndexIter *parent)
 }
 
 static gchar *
-unicode_to_char (Unicode *unicode,
+unicode_to_char (const Unicode *unicode,
 		 int      len)
 {
 	static UnicodeMap *uMap = nullptr;
@@ -1916,7 +1916,7 @@ PopplerAction *
 poppler_index_iter_get_action (PopplerIndexIter  *iter)
 {
 	OutlineItem *item;
-	LinkAction *link_action;
+	const LinkAction *link_action;
 	PopplerAction *action;
 	gchar *title;
 

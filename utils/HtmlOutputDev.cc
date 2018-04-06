@@ -1706,7 +1706,7 @@ GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 	if (!outline)
 		return gFalse;
 
-	GooList *outlines = outline->getItems();
+	const GooList *outlines = outline->getItems();
 	if (!outlines)
 		return gFalse;
   
@@ -1764,7 +1764,7 @@ GBool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 #endif
 }
 
-GBool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, GooList *outlines, int level)
+GBool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, const GooList *outlines, int level)
 {
 #ifdef DISABLE_OUTLINE
 	return gFalse;
@@ -1836,7 +1836,7 @@ GBool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, GooList *outlines, int le
 #endif
 }
 
-void HtmlOutputDev::newXmlOutlineLevel(FILE *output, GooList *outlines)
+void HtmlOutputDev::newXmlOutlineLevel(FILE *output, const GooList *outlines)
 {
 #ifndef DISABLE_OUTLINE
     fputs("<outline>\n", output);
@@ -1873,15 +1873,15 @@ void HtmlOutputDev::newXmlOutlineLevel(FILE *output, GooList *outlines)
 #ifndef DISABLE_OUTLINE
 int HtmlOutputDev::getOutlinePageNum(OutlineItem *item)
 {
-    LinkAction *action   = item->getAction();
-    LinkGoTo   *link     = nullptr;
+    const LinkAction *action   = item->getAction();
+    const LinkGoTo   *link     = nullptr;
     LinkDest   *linkdest = nullptr;
     int         pagenum  = -1;
 
     if (!action || action->getKind() != actionGoTo)
         return pagenum;
 
-    link = dynamic_cast<LinkGoTo*>(action);
+    link = dynamic_cast<const LinkGoTo*>(action);
 
     if (!link || !link->isOk())
         return pagenum;

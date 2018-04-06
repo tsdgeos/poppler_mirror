@@ -5,6 +5,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +50,7 @@ void error_function(void *data, ErrorCategory category, Goffset pos, char *msg);
 
 rectf pdfrectangle_to_rectf(const PDFRectangle &pdfrect);
 
-ustring unicode_GooString_to_ustring(GooString *str);
+ustring unicode_GooString_to_ustring(const GooString *str);
 ustring unicode_to_ustring(const Unicode *u, int length);
 GooString* ustring_to_unicode_GooString(const ustring &str);
 
