@@ -7434,7 +7434,7 @@ void PSOutputDev::writePSFmt(const char *fmt, ...) {
   va_end(args);
 }
 
-void PSOutputDev::writePSString(GooString *s) {
+void PSOutputDev::writePSString(const GooString *s) {
   Guchar *p;
   int n, line;
   char buf[8];
@@ -7579,7 +7579,7 @@ GooString* PSOutputDev::filterPSLabel(GooString *label, GBool *needParens) {
 }
 
 // Write a DSC-compliant <textline>.
-void PSOutputDev::writePSTextLine(GooString *s) {
+void PSOutputDev::writePSTextLine(const GooString *s) {
   int i, j, step;
   int c;
 
