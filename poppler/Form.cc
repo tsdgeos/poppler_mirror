@@ -1274,7 +1274,7 @@ void FormFieldText::setTextFontSize(int fontSize)
   }
 }
 
-int FormFieldText::tokenizeDA(GooString* da, GooList* daToks, const char* searchTok)
+int FormFieldText::tokenizeDA(const GooString* da, GooList* daToks, const char* searchTok)
 {
   int idx = -1;
   if(da && daToks) {
