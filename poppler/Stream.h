@@ -238,7 +238,7 @@ private:
   virtual GBool hasGetChars() { return false; }
   virtual int getChars(int nChars, Guchar *buffer);
 
-  Stream *makeFilter(char *name, Stream *str, Object *params, int recursion = 0, Dict *dict = nullptr);
+  Stream *makeFilter(const char *name, Stream *str, Object *params, int recursion = 0, Dict *dict = nullptr);
 
   int ref;			// reference count
 #ifdef MULTITHREADED

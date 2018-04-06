@@ -118,14 +118,14 @@ public:
 
   GfxFont *lookupFont(const char *name);
   const GfxFont *lookupFont(const char *name) const;
-  Object lookupXObject(char *name);
-  Object lookupXObjectNF(char *name);
-  Object lookupMarkedContentNF(char *name);
+  Object lookupXObject(const char *name);
+  Object lookupXObjectNF(const char *name);
+  Object lookupMarkedContentNF(const char *name);
   Object lookupColorSpace(const char *name);
-  GfxPattern *lookupPattern(char *name, OutputDev *out, GfxState *state);
-  GfxShading *lookupShading(char *name, OutputDev *out, GfxState *state);
-  Object lookupGState(char *name);
-  Object lookupGStateNF(char *name);
+  GfxPattern *lookupPattern(const char *name, OutputDev *out, GfxState *state);
+  GfxShading *lookupShading(const char *name, OutputDev *out, GfxState *state);
+  Object lookupGState(const char *name);
+  Object lookupGStateNF(const char *name);
 
   GfxResources *getNext() { return next; }
 

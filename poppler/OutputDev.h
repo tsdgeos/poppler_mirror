@@ -309,9 +309,9 @@ public:
   //----- grouping operators
 
   virtual void endMarkedContent(GfxState *state);
-  virtual void beginMarkedContent(char *name, Dict *properties);
-  virtual void markPoint(char *name);
-  virtual void markPoint(char *name, Dict *properties);
+  virtual void beginMarkedContent(const char *name, Dict *properties);
+  virtual void markPoint(const char *name);
+  virtual void markPoint(const char *name, Dict *properties);
 
 
 

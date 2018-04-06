@@ -382,7 +382,7 @@ public:
   GBool setState (char *state);
   GBool getState(const char *state) const;
 
-  char *getAppearanceState() { return appearanceState.isName() ? appearanceState.getName() : NULL; }
+  const char *getAppearanceState() const { return appearanceState.isName() ? appearanceState.getName() : nullptr; }
 
   void fillChildrenSiblingsID () override;
   

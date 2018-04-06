@@ -125,7 +125,7 @@ void MovieActivationParameters::parseMovieActivation(const Object* aDict) {
 
   obj1 = aDict->dictLookup("Mode");
   if (obj1.isName()) {
-    char* name = obj1.getName();
+    const char* name = obj1.getName();
     if (!strcmp(name, "Once")) {
       repeatMode = repeatModeOnce;
     } else if (!strcmp(name, "Open")) {

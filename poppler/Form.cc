@@ -1089,7 +1089,7 @@ GBool FormFieldButton::setState(char *state)
   if (!isOn && noAllOff)
     return gFalse; // Don't allow to set all radio to off
 
-  char *current = getAppearanceState();
+  const char *current = getAppearanceState();
   GBool currentFound = gFalse, newFound = gFalse;
 
   for (int i = 0; i < numChildren; i++) {
