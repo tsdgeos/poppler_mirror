@@ -75,7 +75,7 @@ _poppler_layer_new (PopplerDocument *document,
 		    GList           *rbgroup)
 {
   PopplerLayer *poppler_layer;
-  GooString    *layer_name;
+  const GooString    *layer_name;
 
   g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), NULL);
   g_return_val_if_fail (layer != nullptr, NULL);

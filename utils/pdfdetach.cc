@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
   Page *page;
   Annots *annots;
   Annot *annot;
-  GooString *s1;
+  const GooString *s1;
   Unicode u;
   GBool isUnicode;
 

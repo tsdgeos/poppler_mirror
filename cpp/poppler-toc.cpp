@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +41,7 @@ toc* toc_private::load_from_outline(Outline *outline)
         return nullptr;
     }
 
-    GooList *items = outline->getItems();
+    const GooList *items = outline->getItems();
     if (!items || items->getLength() < 1) {
         return nullptr;
     }
@@ -62,7 +63,7 @@ toc_item_private::~toc_item_private()
     delete_all(children);
 }
 
-void toc_item_private::load(OutlineItem *item)
+void toc_item_private::load(const OutlineItem *item)
 {
     const Unicode *title_unicode = item->getTitle();
     const int title_length = item->getTitleLength();
@@ -70,7 +71,7 @@ void toc_item_private::load(OutlineItem *item)
     is_open = item->isOpen();
 }
 
-void toc_item_private::load_children(GooList *items)
+void toc_item_private::load_children(const GooList *items)
 {
     const int num_items = items->getLength();
     children.resize(num_items);
@@ -82,7 +83,7 @@ void toc_item_private::load_children(GooList *items)
         children[i] = new_item;
 
         item->open();
-        GooList *item_children = item->getKids();
+        const GooList *item_children = item->getKids();
         if (item_children) {
             new_item->d->load_children(item_children);
         }

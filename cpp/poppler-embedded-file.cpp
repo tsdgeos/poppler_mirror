@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+ * Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,7 +79,7 @@ bool embedded_file::is_valid() const
  */
 std::string embedded_file::name() const
 {
-    GooString *goo = d->file_spec->getFileName();
+    const GooString *goo = d->file_spec->getFileName();
     return goo ? std::string(goo->getCString()) : std::string();
 }
 
@@ -87,7 +88,7 @@ std::string embedded_file::name() const
  */
 ustring embedded_file::description() const
 {
-    GooString *goo = d->file_spec->getDescription();
+    const GooString *goo = d->file_spec->getDescription();
     return goo ? detail::unicode_GooString_to_ustring(goo) : ustring();
 }
 
@@ -108,7 +109,7 @@ int embedded_file::size() const
  */
 time_type embedded_file::modification_date() const
 {
-    GooString *goo = d->file_spec->getEmbeddedFile()->modDate();
+    const GooString *goo = d->file_spec->getEmbeddedFile()->modDate();
     return goo ? dateStringToTime(goo) : time_type(-1);
 }
 
@@ -118,7 +119,7 @@ time_type embedded_file::modification_date() const
  */
 time_type embedded_file::creation_date() const
 {
-    GooString *goo = d->file_spec->getEmbeddedFile()->createDate();
+    const GooString *goo = d->file_spec->getEmbeddedFile()->createDate();
     return goo ? dateStringToTime(goo) : time_type(-1);
 }
 
@@ -127,7 +128,7 @@ time_type embedded_file::creation_date() const
  */
 byte_array embedded_file::checksum() const
 {
-    GooString *cs = d->file_spec->getEmbeddedFile()->checksum();
+    const GooString *cs = d->file_spec->getEmbeddedFile()->checksum();
     if (!cs) {
         return byte_array();
     }
@@ -144,7 +145,7 @@ byte_array embedded_file::checksum() const
  */
 std::string embedded_file::mime_type() const
 {
-    GooString *goo = d->file_spec->getEmbeddedFile()->mimeType();
+    const GooString *goo = d->file_spec->getEmbeddedFile()->mimeType();
     return goo ? std::string(goo->getCString()) : std::string();
 }
 

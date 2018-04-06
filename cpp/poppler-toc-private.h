@@ -53,8 +53,8 @@ public:
     toc_item_private(const toc_item_private &) = delete;
     toc_item_private& operator=(const toc_item_private &) = delete;
 
-    void load(OutlineItem *item);
-    void load_children(GooList *items);
+    void load(const OutlineItem *item);
+    void load_children(const GooList *items);
 
     std::vector<toc_item*> children;
     ustring title;

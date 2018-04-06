@@ -84,7 +84,7 @@ poppler_media_init (PopplerMedia *media)
 }
 
 PopplerMedia *
-_poppler_media_new (MediaRendition *poppler_media)
+_poppler_media_new (const MediaRendition *poppler_media)
 {
   PopplerMedia *media;
 
@@ -93,7 +93,7 @@ _poppler_media_new (MediaRendition *poppler_media)
   media = POPPLER_MEDIA (g_object_new (POPPLER_TYPE_MEDIA, nullptr));
 
   if (poppler_media->getIsEmbedded()) {
-    GooString* mime_type;
+    const GooString* mime_type;
 
     media->stream = poppler_media->getEmbbededStreamObject()->copy();
     mime_type = poppler_media->getContentType();

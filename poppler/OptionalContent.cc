@@ -133,7 +133,7 @@ OCGs::~OCGs()
 }
 
 
-bool OCGs::hasOCGs()
+bool OCGs::hasOCGs() const
 {
   return ( optionalContentGroups->getLength() > 0 );
 }
@@ -374,7 +374,7 @@ OptionalContentGroup::OptionalContentGroup(GooString *label)
   m_state = On;
 }
 
-GooString* OptionalContentGroup::getName() const
+const GooString* OptionalContentGroup::getName() const
 {
   return m_name;
 }
@@ -489,13 +489,13 @@ OCDisplayNode::~OCDisplayNode() {
   }
 }
 
-int OCDisplayNode::getNumChildren() {
+int OCDisplayNode::getNumChildren() const {
   if (!children) {
     return 0;
   }
   return children->getLength();
 }
 
-OCDisplayNode *OCDisplayNode::getChild(int idx) {
+OCDisplayNode *OCDisplayNode::getChild(int idx) const {
   return (OCDisplayNode *)children->get(idx);
 }

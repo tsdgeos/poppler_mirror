@@ -58,7 +58,7 @@ class FormWidget;
 namespace Poppler {
 
     /* borrowed from kpdf */
-    QString unicodeToQString(Unicode* u, int len);
+    QString unicodeToQString(const Unicode* u, int len);
 
     QString UnicodeParsedString(const GooString *s1);
 
@@ -73,12 +73,12 @@ namespace Poppler {
     class LinkDestinationData
     {
         public:
-            LinkDestinationData( LinkDest *l, const GooString *nd, Poppler::DocumentData *pdfdoc, bool external )
+            LinkDestinationData( const LinkDest *l, const GooString *nd, Poppler::DocumentData *pdfdoc, bool external )
              : ld(l), namedDest(nd), doc(pdfdoc), externalDest(external)
             {
             }
 
-            LinkDest *ld;
+            const LinkDest *ld;
             const GooString *namedDest;
             Poppler::DocumentData *doc;
             bool externalDest;
@@ -119,7 +119,7 @@ namespace Poppler {
 	DocumentData(const DocumentData &) = delete;
 	DocumentData& operator=(const DocumentData &) = delete;
 	
-	void addTocChildren( QDomDocument * docSyn, QDomNode * parent, GooList * items );
+	void addTocChildren( QDomDocument * docSyn, QDomNode * parent, const GooList * items );
 	
 	void setPaperColor(const QColor &color)
 	{

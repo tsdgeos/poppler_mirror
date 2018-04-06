@@ -91,7 +91,7 @@ public:
    GooString* getFontName();
    static GooString* getDefaultFont();
    static void setDefaultFont(GooString* defaultFont);
-   static GooString* HtmlFilter(Unicode* u, int uLen); //char* s);
+   static GooString* HtmlFilter(const Unicode* u, int uLen); //char* s);
    GBool isEqual(const HtmlFont& x) const;
    GBool isEqualIgnoreBold(const HtmlFont& x) const;
    static GooString* simple(HtmlFont *font, Unicode *content, int uLen);

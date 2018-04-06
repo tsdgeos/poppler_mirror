@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2008, 2016, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2016-2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Nick Jones <nick.jones@network-box.com>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -42,7 +42,7 @@
 
 //------------------------------------------------------------------------
 
-Outline::Outline(Object *outlineObj, XRef *xref) {
+Outline::Outline(const Object *outlineObj, XRef *xref) {
   items = nullptr;
   if (!outlineObj->isDict()) {
     return;
@@ -59,7 +59,7 @@ Outline::~Outline() {
 
 //------------------------------------------------------------------------
 
-OutlineItem::OutlineItem(Dict *dict, int refNumA, OutlineItem *parentA, XRef *xrefA) {
+OutlineItem::OutlineItem(const Dict *dict, int refNumA, OutlineItem *parentA, XRef *xrefA) {
   Object obj1;
 
   refNum = refNumA;
@@ -111,7 +111,7 @@ OutlineItem::~OutlineItem() {
   }
 }
 
-GooList *OutlineItem::readItemList(OutlineItem *parent, Object *firstItemRef, XRef *xrefA) {
+GooList *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA) {
   GooList *items = new GooList();
 
   char* alreadyRead = (char *)gmalloc(xrefA->getNumObjects());
@@ -123,7 +123,7 @@ GooList *OutlineItem::readItemList(OutlineItem *parent, Object *firstItemRef, XR
     parentO = parentO->parent;
   }
 
-  Object *p = firstItemRef;
+  const Object *p = firstItemRef;
   while (p->isRef() && 
 	 (p->getRefNum() >= 0) && 
          (p->getRefNum() < xrefA->getNumObjects()) &&
