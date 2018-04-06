@@ -330,7 +330,7 @@ private:
   static void writeRawStream (Stream* str, OutStream* outStr);
   void writeXRefTableTrailer (Goffset uxrefOffset, XRef *uxref, GBool writeAllEntries,
                               int uxrefSize, OutStream* outStr, GBool incrUpdate);
-  static void writeString (GooString* s, OutStream* outStr, Guchar *fileKey,
+  static void writeString (const GooString* s, OutStream* outStr, Guchar *fileKey,
                            CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
   void saveIncrementalUpdate (OutStream* outStr);
   void saveCompleteRewrite (OutStream* outStr);

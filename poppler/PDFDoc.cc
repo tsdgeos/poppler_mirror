@@ -1185,7 +1185,7 @@ void PDFDoc::writeRawStream (Stream* str, OutStream* outStr)
   outStr->printf("\r\nendstream\r\n");
 }
 
-void PDFDoc::writeString (GooString* s, OutStream* outStr, Guchar *fileKey,
+void PDFDoc::writeString (const GooString* s, OutStream* outStr, Guchar *fileKey,
                           CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
 {
   // Encrypt string if encryption is enabled
