@@ -1554,7 +1554,7 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen,
   return 0;
 }
 
-int Gfx8BitFont::getNextChar(char *s, int len, CharCode *code,
+int Gfx8BitFont::getNextChar(const char *s, int len, CharCode *code,
 			     Unicode **u, int *uLen,
 			     double *dx, double *dy, double *ox, double *oy) const {
   CharCode c;
@@ -2051,7 +2051,7 @@ GfxCIDFont::~GfxCIDFont() {
   }
 }
 
-int GfxCIDFont::getNextChar(char *s, int len, CharCode *code,
+int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code,
 			    Unicode **u, int *uLen,
 			    double *dx, double *dy, double *ox, double *oy) const {
   CID cid;
