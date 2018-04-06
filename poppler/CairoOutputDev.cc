@@ -973,6 +973,26 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
   if (cairo_pattern_status (pattern))
     return false;
 
+  // Cairo can fail if the pattern translation is too large. Fix by making the
+  // translation smaller.
+  const double det = pmat[0] * pmat[3] - pmat[1] * pmat[2];
+
+  // Find the number of repetitions of pattern we need to shift by. Transform
+  // the translation component of pmat (pmat[4] and pmat[5]) into the pattern's
+  // coordinate system by multiplying by inverse of pmat, then divide by
+  // pattern size (xStep and yStep).
+  const double xoffset = round ((pmat[3] * pmat[4] - pmat[2] * pmat[5]) / (xStep * det));
+  const double yoffset = - round ((pmat[1] * pmat[4] - pmat[0] * pmat[5]) / (yStep * det));
+
+  if (!std::isfinite(xoffset) || !std::isfinite(yoffset)) {
+    error(errSyntaxWarning, -1, "CairoOutputDev: Singular matrix in tilingPatternFill");
+    return false;
+  }
+
+  // Shift pattern_matrix by multiples of the pattern size.
+  pattern_matrix.x0 -= xoffset * pattern_matrix.xx * xStep + yoffset * pattern_matrix.xy * yStep;
+  pattern_matrix.y0 -= xoffset * pattern_matrix.yx * xStep + yoffset * pattern_matrix.yy * yStep;
+
   state->getUserClipBBox(&xMin, &yMin, &xMax, &yMax);
   cairo_rectangle (cairo, xMin, yMin, xMax - xMin, yMax - yMin);
 
