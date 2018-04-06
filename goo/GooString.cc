@@ -740,7 +740,7 @@ GooString *GooString::insert(int i, char c) {
   return insert(i, (const char*)&c, 1);
 }
 
-GooString *GooString::insert(int i, GooString *str) {
+GooString *GooString::insert(int i, const GooString *str) {
   return insert(i, str->getCString(), str->getLength());
 }
 
