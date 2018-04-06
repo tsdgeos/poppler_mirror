@@ -570,34 +570,105 @@ private:
 class MemStream: public BaseStream {
 public:
 
-  MemStream(char *bufA, Goffset startA, Goffset lengthA, Object &&dictA);
-  ~MemStream();
-  BaseStream *copy() override;
-  Stream *makeSubStream(Goffset start, GBool limited,
-				Goffset lengthA, Object &&dictA) override;
+  MemStream(char *bufA, Goffset startA, Goffset lengthA, Object &&dictA) : BaseStream(std::move(dictA), lengthA) {
+    buf = bufA;
+    start = startA;
+    length = lengthA;
+    bufEnd = buf + start + length;
+    bufPtr = buf + start;
+    needFree = gFalse;
+  }
+
+  ~MemStream() {
+    if (needFree) {
+      gfree(buf);
+    }
+  }
+
+  BaseStream *copy() override {
+    return new MemStream(buf, start, length, dict.copy());
+  }
+
+  Stream *makeSubStream(Goffset startA, GBool limited, Goffset lengthA, Object &&dictA) override {
+    MemStream *subStr;
+    Goffset newLength;
+
+    if (!limited || startA + lengthA > start + length) {
+      newLength = start + length - startA;
+    } else {
+      newLength = lengthA;
+    }
+    subStr = new MemStream(buf, startA, newLength, std::move(dictA));
+    return subStr;
+  }
+
   StreamKind getKind() override { return strWeird; }
-  void reset() override;
-  void close() override;
+
+  void reset() override {
+    bufPtr = buf + start;
+  }
+
+  void close() override { }
+
   int getChar() override
     { return (bufPtr < bufEnd) ? (*bufPtr++ & 0xff) : EOF; }
+
   int lookChar() override
     { return (bufPtr < bufEnd) ? (*bufPtr & 0xff) : EOF; }
+
   Goffset getPos() override { return (int)(bufPtr - buf); }
-  void setPos(Goffset pos, int dir = 0) override;
+
+  void setPos(Goffset pos, int dir = 0) override {
+    Guint i;
+
+    if (dir >= 0) {
+      i = pos;
+    } else {
+      i = start + length - pos;
+    }
+    if (i < start) {
+      i = start;
+    } else if (i > start + length) {
+      i = start + length;
+    }
+    bufPtr = buf + i;
+  }
+
   Goffset getStart() override { return start; }
-  void moveStart(Goffset delta) override;
+
+  void moveStart(Goffset delta) override {
+    start += delta;
+    length -= delta;
+    bufPtr = buf + start;
+  }
 
   //if needFree = true, the stream will delete buf when it is destroyed
   //otherwise it will not touch it. Default value is false
   virtual void setNeedFree (GBool val) { needFree = val; }
 
   int getUnfilteredChar () override { return getChar(); }
+
   void unfilteredReset () override { reset (); } 
 
 private:
 
   GBool hasGetChars() override { return true; }
-  int getChars(int nChars, Guchar *buffer) override;
+
+  int getChars(int nChars, Guchar *buffer) override {
+    int n;
+
+    if (nChars <= 0) {
+      return 0;
+    }
+    if (bufEnd - bufPtr < nChars) {
+      n = (int)(bufEnd - bufPtr);
+    } else {
+      n = nChars;
+    }
+    memcpy(buffer, bufPtr, n);
+    bufPtr += n;
+    return n;
+  }
 
   char *buf;
   Goffset start;
