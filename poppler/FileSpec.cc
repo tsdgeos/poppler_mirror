@@ -9,6 +9,7 @@
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2012, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -234,7 +235,7 @@ Object getFileSpecNameForPlatform (Object *fileSpec)
   // system-dependent path manipulation
 #ifdef _WIN32
   int i, j;
-  GooString *name = fileName.getString();
+  GooString *name = fileName.getString()->copy();
   // "//...."             --> "\...."
   // "/x/...."            --> "x:\...."
   // "/server/share/...." --> "\\server\share\...."
@@ -274,6 +275,7 @@ Object getFileSpecNameForPlatform (Object *fileSpec)
       name->del(i);
     }
   }
+  fileName = Object(name);
 #endif /* _WIN32 */
 
   return fileName;

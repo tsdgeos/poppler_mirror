@@ -854,7 +854,7 @@ FormWidget* FormField::findWidgetByRef (Ref aref)
 GooString* FormField::getFullyQualifiedName() {
   Object obj1;
   Object parent;
-  GooString *parent_name;
+  const GooString *parent_name;
   GooString *full_name;
   GBool unicode_encoded = gFalse;
 
@@ -1274,7 +1274,7 @@ void FormFieldText::setTextFontSize(int fontSize)
   }
 }
 
-int FormFieldText::tokenizeDA(GooString* da, GooList* daToks, const char* searchTok)
+int FormFieldText::tokenizeDA(const GooString* da, GooList* daToks, const char* searchTok)
 {
   int idx = -1;
   if(da && daToks) {
@@ -1304,7 +1304,7 @@ int FormFieldText::parseDA(GooList* daToks)
   if (obj.isDict()) {
     Object objDA(obj.dictLookup("DA"));
     if (objDA.isString()) {
-      GooString* da = objDA.getString();
+      const GooString* da = objDA.getString();
       idx = tokenizeDA(da, daToks, "Tf") - 1;
     }
   }
@@ -1647,7 +1647,7 @@ void FormFieldSignature::parseInfo()
   // retrieve SigningTime
   Object time_of_signing = sig_dict.dictLookup("M");
   if (time_of_signing.isString()) {
-    GooString *time_str = time_of_signing.getString();
+    const GooString *time_str = time_of_signing.getString();
     signature_info->setSigningTime(dateStringToTime(time_str)); // Put this information directly in SignatureInfo object
   }
 

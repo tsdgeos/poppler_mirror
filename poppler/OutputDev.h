@@ -24,6 +24,7 @@
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
 // Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -247,7 +248,7 @@ public:
   //----- text drawing
   virtual void beginStringOp(GfxState * /*state*/) {}
   virtual void endStringOp(GfxState * /*state*/) {}
-  virtual void beginString(GfxState * /*state*/, GooString * /*s*/) {}
+  virtual void beginString(GfxState * /*state*/, const GooString * /*s*/) {}
   virtual void endString(GfxState * /*state*/) {}
 
   // Draw one glyph at a specified position
@@ -263,7 +264,7 @@ public:
 			double /*dx*/, double /*dy*/,
 			double /*originX*/, double /*originY*/,
 			CharCode /*code*/, int /*nBytes*/, Unicode * /*u*/, int /*uLen*/) {}
-  virtual void drawString(GfxState * /*state*/, GooString * /*s*/) {}
+  virtual void drawString(GfxState * /*state*/, const GooString * /*s*/) {}
   virtual GBool beginType3Char(GfxState * /*state*/, double /*x*/, double /*y*/,
 			       double /*dx*/, double /*dy*/,
 			       CharCode /*code*/, Unicode * /*u*/, int /*uLen*/);
@@ -271,7 +272,7 @@ public:
   virtual void beginTextObject(GfxState * /*state*/) {}
   virtual void endTextObject(GfxState * /*state*/) {}
   virtual void incCharCount(int /*nChars*/) {}
-  virtual void beginActualText(GfxState * /*state*/, GooString * /*text*/ ) {}
+  virtual void beginActualText(GfxState * /*state*/, const GooString * /*text*/ ) {}
   virtual void endActualText(GfxState * /*state*/) {}
 
   //----- image drawing

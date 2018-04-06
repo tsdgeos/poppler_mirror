@@ -134,7 +134,7 @@ public:
 
 private:
 
-  OCDisplayNode(GooString *nameA);
+  OCDisplayNode(const GooString *nameA);
   OCDisplayNode(OptionalContentGroup *ocgA);
   void addChild(OCDisplayNode *child);
   void addChildren(GooList *childrenA);

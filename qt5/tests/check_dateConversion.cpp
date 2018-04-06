@@ -102,7 +102,7 @@ void TestDateConv::checkDates()
     QFETCH(QDate, day);
     QFETCH(QTime, time);
 
-    QCOMPARE( Poppler::convertDate(input.data()), QDateTime(day, time, Qt::UTC) );
+    QCOMPARE( Poppler::convertDate(input.constData()), QDateTime(day, time, Qt::UTC) );
 }
 
 void TestDateConv::checkInvalidDates_data()
@@ -134,7 +134,7 @@ void TestDateConv::checkInvalidDates()
 {
     QFETCH(QByteArray, input);
 
-    QCOMPARE(Poppler::convertDate(input.data()), QDateTime());
+    QCOMPARE(Poppler::convertDate(input.constData()), QDateTime());
 }
 
 QTEST_GUILESS_MAIN(TestDateConv)

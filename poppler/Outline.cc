@@ -18,6 +18,7 @@
 // Copyright (C) 2009 Nick Jones <nick.jones@network-box.com>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -71,7 +72,7 @@ OutlineItem::OutlineItem(Dict *dict, int refNumA, OutlineItem *parentA, XRef *xr
 
   obj1 = dict->lookup("Title");
   if (obj1.isString()) {
-    GooString *s = obj1.getString();
+    const GooString *s = obj1.getString();
     titleLen = TextStringToUCS4(s, &title);
   } else {
     titleLen = 0;

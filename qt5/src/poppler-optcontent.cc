@@ -5,6 +5,7 @@
  * Copyright (C) 2008, Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2015-2017, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Hubert Figuière <hub@figuiere.net>
+ * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -213,7 +214,7 @@ namespace Poppler
       } else if ( (orderItem.isArray()) && (orderItem.arrayGetLength() > 0) ) {
 	parseOrderArray(lastItem, orderItem.getArray());
       } else if ( orderItem.isString() ) {
-	GooString *label = orderItem.getString();
+	const GooString *label = orderItem.getString();
 	OptContentItem *header = new OptContentItem ( UnicodeParsedString ( label ) );
 	m_headerOptContentItems.append( header );
 	addChild( parentNode, header );

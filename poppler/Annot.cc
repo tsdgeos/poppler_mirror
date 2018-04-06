@@ -114,7 +114,7 @@
 // = (4 * (sqrt(2) - 1) / 3) * r
 #define bezierCircle 0.55228475
 
-static AnnotLineEndingStyle parseAnnotLineEndingStyle(GooString *string) {
+static AnnotLineEndingStyle parseAnnotLineEndingStyle(const GooString *string) {
   if (string != nullptr) {
     if (!string->cmp("Square")) {
       return annotLineEndingSquare;
@@ -1747,10 +1747,9 @@ Object Annot::createForm(const GooString *appearBuf, double *bbox, GBool transpa
   if (resDict)
     appearDict->set("Resources", Object(resDict));
 
-  MemStream *mStream = new MemStream(copyString(appearBuf->getCString()), 0,
+  Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->getCString()), 0,
 				     appearBuf->getLength(), Object(appearDict));
-  mStream->setNeedFree(gTrue);
-  return Object(static_cast<Stream*>(mStream));
+  return Object(mStream);
 }
 
 Dict *Annot::createResourcesDict(const char *formName, Object &&formStream,
@@ -2098,11 +2097,11 @@ void AnnotText::initialize(PDFDoc *docA, Dict *dict) {
 
   obj1 = dict->lookup("StateModel");
   if (obj1.isString()) {
-    GooString *modelName = obj1.getString();
+    const GooString *modelName = obj1.getString();
 
     Object obj2 = dict->lookup("State");
     if (obj2.isString()) {
-      GooString *stateName = obj2.getString();
+      const GooString *stateName = obj2.getString();
 
       if (!stateName->cmp("Marked")) {
         state = stateMarked;
@@ -4035,7 +4034,7 @@ void AnnotAppearanceBuilder::writeString(const GooString &str)
 }
 
 // Draw the variable text or caption for a field.
-void AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources,
+bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da, const GfxResources *resources,
     const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
     GBool multiline, int comb, int quadding,
     GBool txField, GBool forceZapfDingbats,
@@ -4131,7 +4130,7 @@ void AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     if (daToks) {
       deleteGooList(daToks, GooString);
     }
-    return;
+    return false;
   }
 
   // get the border width
@@ -4448,10 +4447,12 @@ void AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
   if (fontToFree) {
     fontToFree->decRefCnt();
   }
+
+  return true;
 }
 
 // Draw the variable text or caption for a field.
-void AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect,
+bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect,
 			      const GooString *da, const GfxResources *resources, int quadding) {
   GooList *daToks;
   GooString *tok, *convertedText;
@@ -4512,7 +4513,7 @@ void AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     if (daToks) {
       deleteGooList(daToks, GooString);
     }
-    return;
+    return false;
   }
 
   convertedText = new GooString;
@@ -4531,7 +4532,7 @@ void AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
           deleteGooList(daToks, GooString);
         }
         delete convertedText;
-        return;
+        return false;
       }
       Annot::layoutText(fieldChoice->getChoice(i), convertedText, &j, font, &w, 0.0, nullptr, gFalse);
       if (w > wMax) {
@@ -4630,6 +4631,8 @@ void AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
   }
 
   delete convertedText;
+
+  return true;
 }
 
 void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect) {
@@ -4736,7 +4739,31 @@ void AnnotAppearanceBuilder::drawFieldBorder(const FormField *field, const Annot
   }
 }
 
-void AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const GooString *appearState, XRef *xref, bool *addedDingbatsResource) {
+bool AnnotAppearanceBuilder::drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const GooString *appearState, XRef *xref, bool *addedDingbatsResource)
+{
+  // draw the field contents
+  switch (field->getType()) {
+  case formButton:
+    return drawFormFieldButton(static_cast<const FormFieldButton *>(field), resources, da, border, appearCharacs, rect, appearState, xref, addedDingbatsResource);
+    break;
+  case formText:
+    return drawFormFieldText(static_cast<const FormFieldText *>(field), form, resources, da, border, appearCharacs, rect);
+  case formChoice:
+    return drawFormFieldChoice(static_cast<const FormFieldChoice *>(field), form, resources, da, border, appearCharacs, rect);
+    break;
+  case formSignature:
+    //~unimp
+    break;
+  case formUndef:
+  default:
+    error(errSyntaxError, -1, "Unknown field type");
+  }
+
+  return false;
+}
+
+
+bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const GooString *appearState, XRef *xref, bool *addedDingbatsResource) {
   const GooString *caption = nullptr;
   if (appearCharacs)
     caption = appearCharacs->getNormalCaption();
@@ -4747,7 +4774,7 @@ void AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
     if (appearState && appearState->cmp("Off") != 0 &&
         field->getState(appearState->getCString())) {
       if (caption) {
-        drawText(caption, da, resources, border, appearCharacs, rect, gFalse, 0, fieldQuadCenter, gFalse, gTrue, xref, addedDingbatsResource, gFalse);
+        return drawText(caption, da, resources, border, appearCharacs, rect, gFalse, 0, fieldQuadCenter, gFalse, gTrue, xref, addedDingbatsResource, gFalse);
       } else if (appearCharacs) {
         const AnnotColor *aColor = appearCharacs->getBorderColor();
         if (aColor) {
@@ -4756,28 +4783,31 @@ void AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
           setDrawColor(aColor, gTrue);
           drawCircle(0.5 * dx, 0.5 * dy, 0.2 * (dx < dy ? dx : dy), gTrue);
         }
+        return true;
       }
     }
   }
     break;
   case formButtonPush:
     if (caption)
-      drawText(caption, da, resources, border, appearCharacs, rect, gFalse, 0, fieldQuadCenter, gFalse, gFalse, xref, addedDingbatsResource, gFalse);
+      return drawText(caption, da, resources, border, appearCharacs, rect, gFalse, 0, fieldQuadCenter, gFalse, gFalse, xref, addedDingbatsResource, gFalse);
     break;
   case formButtonCheck:
     if (appearState && appearState->cmp("Off") != 0) {
       if (!caption) {
         GooString checkMark("3");
-        drawText(&checkMark, da, resources, border, appearCharacs, rect, gFalse, 0, fieldQuadCenter, gFalse, gTrue, xref, addedDingbatsResource, gFalse);
+        return drawText(&checkMark, da, resources, border, appearCharacs, rect, gFalse, 0, fieldQuadCenter, gFalse, gTrue, xref, addedDingbatsResource, gFalse);
       } else {
-        drawText(caption, da, resources, border, appearCharacs, rect, gFalse, 0, fieldQuadCenter, gFalse, gTrue, xref, addedDingbatsResource, gFalse);
+        return drawText(caption, da, resources, border, appearCharacs, rect, gFalse, 0, fieldQuadCenter, gFalse, gTrue, xref, addedDingbatsResource, gFalse);
       }
     }
     break;
   }
+
+  return true;
 }
 
-void AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect) {
+bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect) {
   VariableTextQuadding quadding;
   const GooString *contents;
 
@@ -4789,12 +4819,14 @@ void AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
     if (fieldText->isComb())
       comb = fieldText->getMaxLen();
 
-    drawText(contents, da, resources, border, appearCharacs, rect,
+    return drawText(contents, da, resources, border, appearCharacs, rect,
              fieldText->isMultiline(), comb, quadding, gTrue, gFalse, nullptr, nullptr, fieldText->isPassword());
   }
+
+  return true;
 }
 
-void AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect) {
+bool AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect) {
   const GooString *selected;
   VariableTextQuadding quadding;
 
@@ -4803,18 +4835,20 @@ void AnnotAppearanceBuilder::drawFormFieldChoice(const FormFieldChoice *fieldCho
   if (fieldChoice->isCombo()) {
     selected = fieldChoice->getSelectedChoice();
     if (selected) {
-      drawText(selected, da, resources, border, appearCharacs, rect, gFalse, 0, quadding, gTrue, gFalse, nullptr, nullptr, gFalse);
+      return drawText(selected, da, resources, border, appearCharacs, rect, gFalse, 0, quadding, gTrue, gFalse, nullptr, nullptr, gFalse);
       //~ Acrobat draws a popup icon on the right side
     }
   // list box
   } else {
-    drawListBox(fieldChoice, border, rect, da, resources, quadding);
+    return drawListBox(fieldChoice, border, rect, da, resources, quadding);
   }
+
+  return true;
 }
 
 void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource) {
   GfxResources *resources;
-  GooString *da;
+  const GooString *da;
 
   AnnotAppearanceBuilder appearBuilder;
 
@@ -4838,23 +4872,10 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource) {
 
   resources = form->getDefaultResources();
 
-  // draw the field contents
-  switch (field->getType()) {
-  case formButton:
-    appearBuilder.drawFormFieldButton(static_cast<FormFieldButton *>(field), resources, da, border, appearCharacs, rect, appearState, xref, addedDingbatsResource);
-    break;
-  case formText:
-    appearBuilder.drawFormFieldText(static_cast<FormFieldText *>(field), form, resources, da, border, appearCharacs, rect);
-    break;
-  case formChoice:
-    appearBuilder.drawFormFieldChoice(static_cast<FormFieldChoice *>(field), form, resources, da, border, appearCharacs, rect);
-    break;
-  case formSignature:
-    //~unimp
-    break;
-  case formUndef:
-  default:
-    error(errSyntaxError, -1, "Unknown field type");
+  const bool success = appearBuilder.drawFormField(field, form, resources, da, border, appearCharacs, rect, appearState, xref, addedDingbatsResource);
+  if (!success && da != form->getDefaultAppearance()) {
+    da = form->getDefaultAppearance();
+    appearBuilder.drawFormField(field, form, resources, da, border, appearCharacs, rect, appearState, xref, addedDingbatsResource);
   }
 
   const GooString *appearBuf = appearBuilder.buffer();
@@ -4876,11 +4897,9 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource) {
   }
 
   // build the appearance stream
-  MemStream *appearStream = new MemStream(copyString(appearBuf->getCString()), 0,
+  Stream *appearStream = new AutoFreeMemStream(copyString(appearBuf->getCString()), 0,
       appearBuf->getLength(), Object(appearDict));
-  appearance = Object(static_cast<Stream*>(appearStream));
-
-  appearStream->setNeedFree(gTrue);
+  appearance = Object(appearStream);
 }
 
 void AnnotWidget::updateAppearanceStream()
@@ -5063,13 +5082,12 @@ void AnnotMovie::draw(Gfx *gfx, GBool printing) {
       formDict->set("Matrix", Object(matrix));
       formDict->set("Resources", Object(resDict));
 
-      MemStream *mStream = new MemStream(copyString(appearBuf->getCString()), 0,
+      Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->getCString()), 0,
 			      appearBuf->getLength(), Object(formDict));
-      mStream->setNeedFree(gTrue);
       delete appearBuf;
 
       Dict *dict = new Dict(gfx->getXRef());
-      dict->set("FRM", Object(static_cast<Stream*>(mStream)));
+      dict->set("FRM", Object(mStream));
 
       Dict *resDict2 = new Dict(gfx->getXRef());
       resDict2->set("XObject", Object(dict));

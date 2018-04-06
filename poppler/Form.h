@@ -441,7 +441,7 @@ public:
   void print(int indent = 0);
 #endif
 
-  static int tokenizeDA(GooString* daString, GooList* daToks, const char* searchTok);
+  static int tokenizeDA(const GooString* daString, GooList* daToks, const char* searchTok);
 
 protected:
   int parseDA(GooList* daToks);

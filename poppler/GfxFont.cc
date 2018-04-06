@@ -1554,7 +1554,7 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen,
   return 0;
 }
 
-int Gfx8BitFont::getNextChar(char *s, int len, CharCode *code,
+int Gfx8BitFont::getNextChar(const char *s, int len, CharCode *code,
 			     Unicode **u, int *uLen,
 			     double *dx, double *dy, double *ox, double *oy) const {
   CharCode c;
@@ -2051,7 +2051,7 @@ GfxCIDFont::~GfxCIDFont() {
   }
 }
 
-int GfxCIDFont::getNextChar(char *s, int len, CharCode *code,
+int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code,
 			    Unicode **u, int *uLen,
 			    double *dx, double *dy, double *ox, double *oy) const {
   CID cid;
@@ -2502,7 +2502,7 @@ public:
     h *= 16777619;
   }
 
-  void hash(char *p, int n) {
+  void hash(const char *p, int n) {
     int i;
     for (i = 0; i < n; ++i) {
       hash(p[i]);
@@ -2527,7 +2527,7 @@ int GfxFontDict::hashFontObject(Object *obj) {
 
 void GfxFontDict::hashFontObject1(Object *obj, FNVHash *h) {
   Object obj2;
-  GooString *s;
+  const GooString *s;
   char *p;
   double r;
   int n, i;

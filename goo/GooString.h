@@ -142,7 +142,7 @@ public:
 
   // Insert a character or string.
   GooString *insert(int i, char c);
-  GooString *insert(int i, GooString *str);
+  GooString *insert(int i, const GooString *str);
   GooString *insert(int i, const char *str, int lengthA=CALC_STRING_LEN);
 
   // Delete a character or range of characters.

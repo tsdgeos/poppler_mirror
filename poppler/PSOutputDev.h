@@ -253,7 +253,7 @@ public:
   void clipToStrokePath(GfxState *state) override;
 
   //----- text drawing
-  void drawString(GfxState *state, GooString *s) override;
+  void drawString(GfxState *state, const GooString *s) override;
   void beginTextObject(GfxState *state) override;
   void endTextObject(GfxState *state) override;
 
@@ -432,10 +432,10 @@ private:
   void writePS(const char *s);
   void writePSBuf(const char *s, int len);
   void writePSFmt(const char *fmt, ...);
-  void writePSString(GooString *s);
+  void writePSString(const GooString *s);
   void writePSName(const char *s);
   GooString *filterPSLabel(GooString *label, GBool *needParens=nullptr);
-  void writePSTextLine(GooString *s);
+  void writePSTextLine(const GooString *s);
 
   PSLevel level;		// PostScript level (1, 2, separation)
   PSOutMode mode;		// PostScript mode (PS, EPS, form)

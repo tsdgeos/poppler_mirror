@@ -30,6 +30,7 @@
 // Copyright (C) 2015 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2481,7 +2482,7 @@ GfxColorSpace *GfxIndexedColorSpace::parse(GfxResources *res, Array *arr, Output
   GfxColorSpace *baseA;
   int indexHighA;
   Object obj1;
-  char *s;
+  const char *s;
   int i, j;
 
   if (arr->getLength() != 4) {

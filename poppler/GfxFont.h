@@ -274,7 +274,7 @@ public:
   // is the number of entries available in <u>, and <uLen> is set to
   // the number actually used.  Returns the number of bytes used by
   // the char code.
-  virtual int getNextChar(char *s, int len, CharCode *code,
+  virtual int getNextChar(const char *s, int len, CharCode *code,
 			  Unicode **u, int *uLen,
 			  double *dx, double *dy, double *ox, double *oy) const = 0;
 
@@ -330,7 +330,7 @@ public:
   Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
 	      GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
 
-  int getNextChar(char *s, int len, CharCode *code,
+  int getNextChar(const char *s, int len, CharCode *code,
 			  Unicode **u, int *uLen,
 			  double *dx, double *dy, double *ox, double *oy) const override;
 
@@ -395,7 +395,7 @@ public:
 
   GBool isCIDFont() const override { return gTrue; }
 
-  int getNextChar(char *s, int len, CharCode *code,
+  int getNextChar(const char *s, int len, CharCode *code,
 			  Unicode **u, int *uLen,
 			  double *dx, double *dy, double *ox, double *oy) const override;
 

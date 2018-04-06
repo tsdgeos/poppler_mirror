@@ -40,6 +40,7 @@
 // Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2016 Vincent Le Garrec <legarrec.vincent@gmail.com>
 // Copyright (C) 2017 Caolán McNamara <caolanm@redhat.com>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -338,7 +339,7 @@ void HtmlPage::updateFont(GfxState *state) {
   }
 }
 
-void HtmlPage::beginString(GfxState *state, GooString *s) {
+void HtmlPage::beginString(GfxState *state, const GooString *s) {
   curStr = new HtmlString(state, fontSize, fonts);
 }
 
@@ -1305,7 +1306,7 @@ void HtmlOutputDev::updateFont(GfxState *state) {
   pages->updateFont(state);
 }
 
-void HtmlOutputDev::beginString(GfxState *state, GooString *s) {
+void HtmlOutputDev::beginString(GfxState *state, const GooString *s) {
   pages->beginString(state, s);
 }
 

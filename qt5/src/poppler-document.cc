@@ -444,7 +444,7 @@ namespace Poppler {
 
 	QScopedPointer<GooString> goo(m_doc->doc->getDocInfoStringEntry(type.toLatin1().constData()));
 	QString str = UnicodeParsedString(goo.data());
-	return Poppler::convertDate(str.toLatin1().data());
+	return Poppler::convertDate(str.toLatin1().constData());
     }
 
     bool Document::setDate( const QString & key, const QDateTime & val )
@@ -465,7 +465,7 @@ namespace Poppler {
 
 	QScopedPointer<GooString> goo(m_doc->doc->getDocInfoCreatDate());
 	QString str = UnicodeParsedString(goo.data());
-	return Poppler::convertDate(str.toLatin1().data());
+	return Poppler::convertDate(str.toLatin1().constData());
     }
 
     bool Document::setCreationDate( const QDateTime & val )
@@ -486,7 +486,7 @@ namespace Poppler {
 
 	QScopedPointer<GooString> goo(m_doc->doc->getDocInfoModDate());
 	QString str = UnicodeParsedString(goo.data());
-	return Poppler::convertDate(str.toLatin1().data());
+	return Poppler::convertDate(str.toLatin1().constData());
     }
 
     bool Document::setModificationDate( const QDateTime & val )

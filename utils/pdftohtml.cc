@@ -25,6 +25,7 @@
 // Copyright (C) 2014 Pino Toscano <pino@kde.org>
 // Copyright (C) 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -457,7 +458,7 @@ int main(int argc, char *argv[]) {
 static GooString* getInfoString(Dict *infoDict, const char *key) {
   Object obj;
   // Raw value as read from PDF (may be in pdfDocEncoding or UCS2)
-  GooString *rawString;
+  const GooString *rawString;
   // Value converted to unicode
   Unicode *unicodeString;
   int unicodeLength;
@@ -499,7 +500,7 @@ static GooString* getInfoString(Dict *infoDict, const char *key) {
 
 static GooString* getInfoDate(Dict *infoDict, const char *key) {
   Object obj;
-  char *s;
+  const char *s;
   int year, mon, day, hour, min, sec, tz_hour, tz_minute;
   char tz;
   struct tm tmStruct;
