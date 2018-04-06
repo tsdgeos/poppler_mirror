@@ -1747,10 +1747,9 @@ Object Annot::createForm(const GooString *appearBuf, double *bbox, GBool transpa
   if (resDict)
     appearDict->set("Resources", Object(resDict));
 
-  MemStream *mStream = new MemStream(copyString(appearBuf->getCString()), 0,
+  Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->getCString()), 0,
 				     appearBuf->getLength(), Object(appearDict));
-  mStream->setNeedFree(gTrue);
-  return Object(static_cast<Stream*>(mStream));
+  return Object(mStream);
 }
 
 Dict *Annot::createResourcesDict(const char *formName, Object &&formStream,
@@ -4898,11 +4897,9 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource) {
   }
 
   // build the appearance stream
-  MemStream *appearStream = new MemStream(copyString(appearBuf->getCString()), 0,
+  Stream *appearStream = new AutoFreeMemStream(copyString(appearBuf->getCString()), 0,
       appearBuf->getLength(), Object(appearDict));
-  appearance = Object(static_cast<Stream*>(appearStream));
-
-  appearStream->setNeedFree(gTrue);
+  appearance = Object(appearStream);
 }
 
 void AnnotWidget::updateAppearanceStream()
@@ -5085,13 +5082,12 @@ void AnnotMovie::draw(Gfx *gfx, GBool printing) {
       formDict->set("Matrix", Object(matrix));
       formDict->set("Resources", Object(resDict));
 
-      MemStream *mStream = new MemStream(copyString(appearBuf->getCString()), 0,
+      Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->getCString()), 0,
 			      appearBuf->getLength(), Object(formDict));
-      mStream->setNeedFree(gTrue);
       delete appearBuf;
 
       Dict *dict = new Dict(gfx->getXRef());
-      dict->set("FRM", Object(static_cast<Stream*>(mStream)));
+      dict->set("FRM", Object(mStream));
 
       Dict *resDict2 = new Dict(gfx->getXRef());
       resDict2->set("XObject", Object(dict));

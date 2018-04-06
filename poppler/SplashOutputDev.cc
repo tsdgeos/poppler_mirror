@@ -3979,8 +3979,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
     maskStr->reset();
     maskStr->doGetChars(maskWidth * maskHeight, data);
     maskStr->close();
-    maskStr = new MemStream((char *)data, 0, maskWidth * maskHeight, maskStr->getDictObject()->copy());
-    ((MemStream *) maskStr)->setNeedFree(gTrue);
+    maskStr = new AutoFreeMemStream((char *)data, 0, maskWidth * maskHeight, maskStr->getDictObject()->copy());
   }
   imgMaskData.imgStr = new ImageStream(maskStr, maskWidth,
 				       maskColorMap->getNumPixelComps(),

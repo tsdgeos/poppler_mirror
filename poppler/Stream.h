@@ -567,30 +567,23 @@ private:
 // MemStream
 //------------------------------------------------------------------------
 
-class MemStream: public BaseStream {
+template<typename T>
+class BaseMemStream: public BaseStream {
 public:
 
-  MemStream(char *bufA, Goffset startA, Goffset lengthA, Object &&dictA) : BaseStream(std::move(dictA), lengthA) {
+  BaseMemStream(T *bufA, Goffset startA, Goffset lengthA, Object &&dictA) : BaseStream(std::move(dictA), lengthA) {
     buf = bufA;
     start = startA;
     length = lengthA;
     bufEnd = buf + start + length;
     bufPtr = buf + start;
-    needFree = gFalse;
-  }
-
-  ~MemStream() {
-    if (needFree) {
-      gfree(buf);
-    }
   }
 
   BaseStream *copy() override {
-    return new MemStream(buf, start, length, dict.copy());
+    return new BaseMemStream(buf, start, length, dict.copy());
   }
 
   Stream *makeSubStream(Goffset startA, GBool limited, Goffset lengthA, Object &&dictA) override {
-    MemStream *subStr;
     Goffset newLength;
 
     if (!limited || startA + lengthA > start + length) {
@@ -598,8 +591,7 @@ public:
     } else {
       newLength = lengthA;
     }
-    subStr = new MemStream(buf, startA, newLength, std::move(dictA));
-    return subStr;
+    return new BaseMemStream(buf, startA, newLength, std::move(dictA));
   }
 
   StreamKind getKind() override { return strWeird; }
@@ -642,13 +634,12 @@ public:
     bufPtr = buf + start;
   }
 
-  //if needFree = true, the stream will delete buf when it is destroyed
-  //otherwise it will not touch it. Default value is false
-  virtual void setNeedFree (GBool val) { needFree = val; }
-
   int getUnfilteredChar () override { return getChar(); }
 
   void unfilteredReset () override { reset (); } 
+
+protected:
+  T *buf;
 
 private:
 
@@ -670,12 +661,30 @@ private:
     return n;
   }
 
-  char *buf;
   Goffset start;
-  char *bufEnd;
-  char *bufPtr;
-  GBool needFree;
+  T *bufEnd;
+  T *bufPtr;
 };
+
+class MemStream : public BaseMemStream<const char>
+{
+public:
+  MemStream(const char *bufA, Goffset startA, Goffset lengthA, Object &&dictA)
+   : BaseMemStream(bufA, startA, lengthA, std::move(dictA))
+   { }
+};
+
+class AutoFreeMemStream : public BaseMemStream<char>
+{
+public:
+  AutoFreeMemStream(char *bufA, Goffset startA, Goffset lengthA, Object &&dictA)
+   : BaseMemStream(bufA, startA, lengthA, std::move(dictA))
+   { }
+
+  ~AutoFreeMemStream()
+    { gfree(buf); }
+};
+
 
 //------------------------------------------------------------------------
 // EmbedStream
