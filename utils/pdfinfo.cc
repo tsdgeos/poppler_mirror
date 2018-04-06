@@ -22,6 +22,7 @@
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Adrian Perez de Castro <aperez@igalia.com>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -125,7 +126,7 @@ static const ArgDesc argDesc[] = {
 
 static void printInfoString(Dict *infoDict, const char *key, const char *text,
 			    UnicodeMap *uMap) {
-  GooString *s1;
+  const GooString *s1;
   Unicode *u;
   char buf[8];
   int i, n, len;
@@ -145,7 +146,7 @@ static void printInfoString(Dict *infoDict, const char *key, const char *text,
 }
 
 static void printInfoDate(Dict *infoDict, const char *key, const char *text) {
-  char *s;
+  const char *s;
   int year, mon, day, hour, min, sec, tz_hour, tz_minute;
   char tz;
   struct tm tmStruct;
@@ -189,7 +190,7 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text) {
 
 static void printISODate(Dict *infoDict, const char *key, const char *text)
 {
-  char *s;
+  const char *s;
   int year, mon, day, hour, min, sec, tz_hour, tz_minute;
   char tz;
 

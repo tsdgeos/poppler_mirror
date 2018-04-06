@@ -114,7 +114,7 @@
 // = (4 * (sqrt(2) - 1) / 3) * r
 #define bezierCircle 0.55228475
 
-static AnnotLineEndingStyle parseAnnotLineEndingStyle(GooString *string) {
+static AnnotLineEndingStyle parseAnnotLineEndingStyle(const GooString *string) {
   if (string != nullptr) {
     if (!string->cmp("Square")) {
       return annotLineEndingSquare;
@@ -2097,11 +2097,11 @@ void AnnotText::initialize(PDFDoc *docA, Dict *dict) {
 
   obj1 = dict->lookup("StateModel");
   if (obj1.isString()) {
-    GooString *modelName = obj1.getString();
+    const GooString *modelName = obj1.getString();
 
     Object obj2 = dict->lookup("State");
     if (obj2.isString()) {
-      GooString *stateName = obj2.getString();
+      const GooString *stateName = obj2.getString();
 
       if (!stateName->cmp("Marked")) {
         state = stateMarked;

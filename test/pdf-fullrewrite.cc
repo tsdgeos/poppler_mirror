@@ -162,8 +162,8 @@ static GBool compareObjects(Object *objA, Object *objB)
       if (objB->getType() != objString) {
         return gFalse;
       } else {
-        GooString *strA = objA->getString();
-        GooString *strB = objB->getString();
+        const GooString *strA = objA->getString();
+        const GooString *strB = objB->getString();
         return (strA->cmp(strB) == 0);
       }
     }

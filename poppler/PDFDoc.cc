@@ -39,6 +39,7 @@
 // Copyright (C) 2017 Fredrik Fornwall <fredrik@fornwall.net>
 // Copyright (C) 2018 Ben Timby <btimby@gmail.com>
 // Copyright (C) 2018 Evangelos Foutras <evangelos@foutrelis.com>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -683,7 +684,7 @@ GooString *PDFDoc::getDocInfoStringEntry(const char *key) {
 }
 
 static GBool
-get_id (GooString *encodedidstring, GooString *id) {
+get_id (const GooString *encodedidstring, GooString *id) {
   const char *encodedid = encodedidstring->getCString();
   char pdfid[pdfIdLength + 1];
   int n;

@@ -11,6 +11,7 @@
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2015 Arthur Stavisky <vovodroid@gmail.com>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 //========================================================================
 
@@ -226,14 +227,14 @@ int main (int argc, char *argv[])
             if (intent.isDict()) {
               Object idf = intent.dictLookup("OutputConditionIdentifier");
               if (idf.isString()) {
-                GooString *gidf = idf.getString();
+                const GooString *gidf = idf.getString();
                 GBool removeIntent = gTrue;
                 for (int k = 0; k < pageintents.arrayGetLength(); k++) {
                   Object pgintent = pageintents.arrayGet(k, 0);
                   if (pgintent.isDict()) {
                     Object pgidf = pgintent.dictLookup("OutputConditionIdentifier");
                     if (pgidf.isString()) {
-                      GooString *gpgidf = pgidf.getString();
+                      const GooString *gpgidf = pgidf.getString();
                       if (gpgidf->cmp(gidf) == 0) {
                         removeIntent = gFalse;
                         break;

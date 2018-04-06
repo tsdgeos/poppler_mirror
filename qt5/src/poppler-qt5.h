@@ -1962,7 +1962,7 @@ height = dummy.height();
     /**
        Conversion from PDF date string format to QDateTime
     */
-    POPPLER_QT5_EXPORT QDateTime convertDate( char *dateString );
+    POPPLER_QT5_EXPORT Q_DECL_DEPRECATED QDateTime convertDate( char *dateString );
 
     /**
        Conversion from PDF date string format to QDateTime

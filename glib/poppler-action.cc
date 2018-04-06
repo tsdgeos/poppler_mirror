@@ -456,7 +456,7 @@ find_annot_movie_for_action (PopplerDocument *document,
 
 	    obj1 = annotObj.dictLookup ("T");
 	    if (obj1.isString()) {
-	      GooString *t = obj1.getString ();
+	      const GooString *t = obj1.getString ();
 
 	      if (title->cmp(t) == 0)
 	        found = gTrue;

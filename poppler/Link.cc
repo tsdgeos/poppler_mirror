@@ -20,6 +20,7 @@
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -490,7 +491,7 @@ LinkLaunch::~LinkLaunch() {
 //------------------------------------------------------------------------
 
 LinkURI::LinkURI(Object *uriObj, GooString *baseURI) {
-  GooString *uri2;
+  const GooString *uri2;
   int n;
   char c;
 

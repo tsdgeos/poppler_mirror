@@ -26,6 +26,7 @@
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2015 Jeremy Echols <jechols@uoregon.edu>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -439,7 +440,7 @@ int main(int argc, char *argv[]) {
 
 static void printInfoString(FILE *f, Dict *infoDict, const char *key,
 			    const char *text1, const char *text2, UnicodeMap *uMap) {
-  GooString *s1;
+  const GooString *s1;
   GBool isUnicode;
   Unicode u;
   char buf[9];
@@ -478,7 +479,7 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key,
 static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *fmt) {
   Object obj = infoDict->lookup(key);
   if (obj.isString()) {
-    char *s = obj.getString()->getCString();
+    const char *s = obj.getString()->getCString();
     if (s[0] == 'D' && s[1] == ':') {
       s += 2;
     }
