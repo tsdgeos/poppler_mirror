@@ -836,6 +836,11 @@ void ArthurOutputDev::drawChar(GfxState *state, double x, double y,
     return;
   }
 
+  // Don't do anything for type3 fonts -- they are not yet supported
+  if (state->getFont()->getType() == fontType3) {
+    return;
+  }
+
   if (!(render & 1))
   {
     quint32 glyphIndex = (m_codeToGID) ? m_codeToGID[code] : code;
@@ -924,76 +929,38 @@ void ArthurOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 				    int width, int height, GBool invert,
 				    GBool interpolate, GBool inlineImg)
 {
-  qDebug() << "drawImageMask";
-#if 0
-  unsigned char *buffer;
-  unsigned char *dest;
-  cairo_surface_t *image;
-  cairo_pattern_t *pattern;
-  int x, y;
-  ImageStream *imgStr;
-  Guchar *pix;
-  double *ctm;
-  cairo_matrix_t matrix;
-  int invert_bit;
-  int row_stride;
-
-  row_stride = (width + 3) & ~3;
-  buffer = (unsigned char *) malloc (height * row_stride);
-  if (buffer == nullptr) {
-    error(-1, "Unable to allocate memory for image.");
-    return;
-  }
-
-  /* TODO: Do we want to cache these? */
-  imgStr = new ImageStream(str, width, 1, 1);
+  std::unique_ptr<ImageStream> imgStr(new ImageStream(str, width,
+                                                      1,    // numPixelComps
+                                                      1));  // getBits
   imgStr->reset();
 
-  invert_bit = invert ? 1 : 0;
+  // TODO: Would using QImage::Format_Mono be more efficient here?
+  QImage image(width, height, QImage::Format_ARGB32);
+  unsigned int *data = (unsigned int *)image.bits();
+  int stride = image.bytesPerLine()/4;
 
-  for (y = 0; y < height; y++) {
-    pix = imgStr->getLine();
-    dest = buffer + y * row_stride;
-    for (x = 0; x < width; x++) {
+  QRgb fillColor = m_currentBrush.color().rgb();
 
-      if (pix[x] ^ invert_bit)
-	*dest++ = 0;
-      else
-	*dest++ = 255;
+  for (int y = 0; y < height; y++) {
+
+    Guchar *pix = imgStr->getLine();
+
+    // Invert the vertical coordinate: y is increasing from top to bottom
+    // on the page, but y is increasing bottom to top in the picture.
+    unsigned int* dest = data + (height-1-y) * stride;
+
+    for (int x = 0; x < width; x++) {
+
+      bool opaque = ((bool)pix[x]) == invert;
+      dest[x] = (opaque) ? fillColor : 0;
+
     }
   }
 
-  image = cairo_image_surface_create_for_data (buffer, CAIRO_FORMAT_A8,
-					  width, height, row_stride);
-  if (image == nullptr)
-    return;
-  pattern = cairo_pattern_create_for_surface (image);
-  if (pattern == nullptr)
-    return;
-
-  ctm = state->getCTM();
-  LOG (printf ("drawImageMask %dx%d, matrix: %f, %f, %f, %f, %f, %f\n",
-	       width, height, ctm[0], ctm[1], ctm[2], ctm[3], ctm[4], ctm[5]));
-  matrix.xx = ctm[0] / width;
-  matrix.xy = -ctm[2] / height;
-  matrix.yx = ctm[1] / width;
-  matrix.yy = -ctm[3] / height;
-  matrix.x0 = ctm[2] + ctm[4];
-  matrix.y0 = ctm[3] + ctm[5];
-  cairo_matrix_invert (&matrix);
-  cairo_pattern_set_matrix (pattern, &matrix);
-
-  cairo_pattern_set_filter (pattern, CAIRO_FILTER_BEST);
-  /* FIXME: Doesn't the image mask support any colorspace? */
-  cairo_set_source_rgb (cairo, fill_color.r, fill_color.g, fill_color.b);
-  cairo_mask (cairo, pattern);
-
-  cairo_pattern_destroy (pattern);
-  cairo_surface_destroy (image);
-  free (buffer);
+  // At this point, the QPainter coordinate transformation (CTM) is such
+  // that QRect(0,0,1,1) is exactly the area of the image.
+  m_painter.top()->drawImage( QRect(0,0,1,1), image );
   imgStr->close ();
-  delete imgStr;
-#endif
 }
 
 //TODO: lots more work here.
