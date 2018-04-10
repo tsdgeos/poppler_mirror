@@ -44,6 +44,7 @@
 #endif
 
 #include <algorithm>
+#include <memory>
 #include <stddef.h>
 #include <math.h>
 #include <string.h>
@@ -5105,7 +5106,6 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
   Guint xi, yi;
   double c[4][gfxColorMaxComps];
   Guint ci;
-  GfxShadingBitBuf *bitBuf;
   Object obj1;
   int i, j;
 
@@ -5183,7 +5183,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
   nPatchesA = 0;
   patchesA = nullptr;
   patchesSize = 0;
-  bitBuf = new GfxShadingBitBuf(str);
+  std::unique_ptr<GfxShadingBitBuf> bitBuf(new GfxShadingBitBuf(str));
   while (1) {
     if (!bitBuf->getBits(flagBits, &flag)) {
       break;
@@ -5279,6 +5279,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
 	break;
       case 1:
 	if (nPatchesA == 0) {
+          gfree(patchesA);
 	  return nullptr;
 	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[0][3];
@@ -5314,6 +5315,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
 	break;
       case 2:
 	if (nPatchesA == 0) {
+          gfree(patchesA);
 	  return nullptr;
 	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[3][3];
@@ -5349,6 +5351,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
 	break;
       case 3:
 	if (nPatchesA == 0) {
+          gfree(patchesA);
 	  return nullptr;
 	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[3][0];
@@ -5427,6 +5430,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
 	break;
       case 1:
 	if (nPatchesA == 0) {
+          gfree(patchesA);
 	  return nullptr;
 	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[0][3];
@@ -5470,6 +5474,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
 	break;
       case 2:
 	if (nPatchesA == 0) {
+          gfree(patchesA);
 	  return nullptr;
 	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[3][3];
@@ -5513,6 +5518,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
 	break;
       case 3:
 	if (nPatchesA == 0) {
+          gfree(patchesA);
 	  return nullptr;
 	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[3][0];
@@ -5559,7 +5565,6 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
     ++nPatchesA;
     bitBuf->flushBits();
   }
-  delete bitBuf;
 
   if (typeA == 6) {
     for (i = 0; i < nPatchesA; ++i) {
