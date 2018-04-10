@@ -4918,7 +4918,11 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
   if (typeA == 5 && nVerticesA > 0) {
     nRows = nVerticesA / vertsPerRow;
     nTrianglesA = (nRows - 1) * 2 * (vertsPerRow - 1);
-    trianglesA = (int (*)[3])gmallocn(nTrianglesA * 3, sizeof(int));
+    trianglesA = (int (*)[3])gmallocn_checkoverflow(nTrianglesA * 3, sizeof(int));
+    if (unlikely(!trianglesA)) {
+      gfree(verticesA);
+      return nullptr;
+    }
     k = 0;
     for (i = 0; i < nRows - 1; ++i) {
       for (j = 0; j < vertsPerRow - 1; ++j) {
