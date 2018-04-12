@@ -45,10 +45,13 @@
 #include <QtGui/QPainter>
 
 class GfxState;
+class PDFDoc;
 
 class SplashFontEngine;
 
 class QRawFont;
+
+class ArthurType3Font;
 
 //------------------------------------------------------------------------
 // ArthurOutputDev - Qt 5 QPainter renderer
@@ -91,7 +94,7 @@ public:
 
   // Does this device use beginType3Char/endType3Char?  Otherwise,
   // text in Type 3 fonts will be drawn with drawChar/drawString.
-  GBool interpretType3Chars() override { return gTrue; }
+  GBool interpretType3Chars() override { return gFalse; }
 
   //----- initialization and control
 
@@ -143,10 +146,6 @@ public:
 		double dx, double dy,
 		double originX, double originY,
 		CharCode code, int nBytes, Unicode *u, int uLen) override;
-  GBool beginType3Char(GfxState *state, double x, double y,
-		       double dx, double dy,
-		       CharCode code, Unicode *u, int uLen) override;
-  void endType3Char(GfxState *state) override;
   void endTextObject(GfxState *state) override;
 
   //----- image drawing
@@ -182,8 +181,8 @@ public:
   //----- special access
 
   // Called to indicate that a new PDF document has been loaded.
-  void startDoc(XRef *xrefA);
- 
+  void startDoc(PDFDoc* doc);
+
   GBool isReverseVideo() { return gFalse; }
   
 private:
@@ -211,11 +210,15 @@ private:
 
   GBool m_needFontUpdate;		// set when the font needs to be updated
   SplashFontEngine *m_fontEngine;
+  PDFDoc* m_doc;
   XRef *xref;			// xref table for current document
 
   // The current font in use
   QRawFont* m_rawFont;
   std::stack<QRawFont*> m_rawFontStack;
+
+  ArthurType3Font* m_currentType3Font;
+  std::stack<ArthurType3Font*> m_type3FontStack;
 
   // Identify a font by its 'Ref' and its font size
   struct ArthurFontID
@@ -232,6 +235,7 @@ private:
 
   // Cache all fonts
   std::map<ArthurFontID,std::unique_ptr<QRawFont> > m_rawFontCache;
+  std::map<ArthurFontID,std::unique_ptr<ArthurType3Font> > m_type3FontCache;
 
   // The table that maps character codes to glyph indexes
   int* m_codeToGID;
