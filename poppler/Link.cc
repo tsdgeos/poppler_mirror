@@ -52,6 +52,12 @@
 //------------------------------------------------------------------------
 // LinkAction
 //------------------------------------------------------------------------
+LinkAction::LinkAction() : nextActionList(nullptr) {
+}
+
+LinkAction::~LinkAction() {
+  delete nextActionList;
+}
 
 LinkAction *LinkAction::parseDest(const Object *obj) {
   LinkAction *action;
@@ -64,7 +70,8 @@ LinkAction *LinkAction::parseDest(const Object *obj) {
   return action;
 }
 
-LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI) {
+LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
+                                    const std::set<int> *seenNextActions) {
   LinkAction *action;
 
   if (!obj->isDict()) {
@@ -140,7 +147,70 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI)
     delete action;
     return nullptr;
   }
+
+  if (!action) {
+    return nullptr;
+  }
+
+  // parse the next actions
+  const Object nextObj = obj->dictLookup("Next");
+  GooList *actionList = nullptr;
+  if (nextObj.isDict()) {
+
+    // Prevent circles in the tree by checking the ref against used refs in
+    // our current tree branch.
+    const Object nextRefObj = obj->dictLookupNF("Next");
+    std::set<int> seenNextActionsAux = seenNextActions ? *seenNextActions : std::set<int> ();
+    if (nextRefObj.isRef()) {
+        const Ref ref = nextRefObj.getRef();
+        if (seenNextActionsAux.find(ref.num) != seenNextActionsAux.end()) {
+            error(errSyntaxWarning, -1, "parseAction: Circular next actions detected.");
+            return action;
+        }
+        seenNextActionsAux.insert(ref.num);
+    }
+
+    actionList = new GooList(1);
+    actionList->append(parseAction(&nextObj, nullptr, &seenNextActionsAux));
+  } else if (nextObj.isArray()) {
+    const Array *a = nextObj.getArray();
+    const int n = a->getLength();
+    actionList = new GooList(n);
+    for (int i = 0; i < n; ++i) {
+      const Object obj3 = a->get(i);
+      if (!obj3.isDict()) {
+        error(errSyntaxWarning, -1, "parseAction: Next array does not contain only dicts");
+        continue;
+      }
+
+      // Similar circle check as above.
+      std::set<int> seenNextActionsAux = seenNextActions ? *seenNextActions : std::set<int> ();
+      const Object obj3Ref = a->getNF(i);
+      if (obj3Ref.isRef()) {
+          const Ref ref = obj3Ref.getRef();
+          if (seenNextActionsAux.find(ref.num) != seenNextActionsAux.end()) {
+              error(errSyntaxWarning, -1, "parseAction: Circular next actions detected in array.");
+              return action;
+          }
+          seenNextActionsAux.insert(ref.num);
+      }
+
+      actionList->append(parseAction(&obj3, nullptr, &seenNextActionsAux));
+    }
+  }
+
+  action->setNextActions(actionList);
+
   return action;
+}
+
+const GooList *LinkAction::nextActions() const {
+  return nextActionList;
+}
+
+void LinkAction::setNextActions(GooList *actions) {
+  delete nextActionList;
+  nextActionList = actions;
 }
 
 //------------------------------------------------------------------------

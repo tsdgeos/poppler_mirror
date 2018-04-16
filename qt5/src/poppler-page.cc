@@ -358,6 +358,20 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
     break;
   }
 
+  if ( popplerLink )
+  {
+    const GooList *nextActions = a->nextActions();
+    if ( nextActions )
+    {
+      QVector<Link *> links;
+      for ( int i = 0; i < nextActions->getLength(); ++i )
+      {
+        links << convertLinkActionToLink( static_cast< ::LinkAction * >( nextActions->get( i ) ), parentDoc, linkArea );
+      }
+      LinkPrivate::get(popplerLink)->nextLinks = links;
+    }
+  }
+
   return popplerLink;
 }
 

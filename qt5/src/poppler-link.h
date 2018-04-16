@@ -29,6 +29,7 @@
 #include <QtCore/QString>
 #include <QtCore/QRectF>
 #include <QtCore/QSharedDataPointer>
+#include <QtCore/QVector>
 #include "poppler-export.h"
 
 struct Ref;
@@ -177,6 +178,7 @@ class POPPLER_QT5_EXPORT LinkDestination
 class POPPLER_QT5_EXPORT Link
 {
 	friend class OptContentModel;
+	friend class LinkPrivate;
 
 	public:
 		/// \cond PRIVATE
@@ -220,7 +222,14 @@ class POPPLER_QT5_EXPORT Link
 		 * a general action. The area is given in 0..1 range
 		 */
 		QRectF linkArea() const;
-		
+
+		/**
+		 * Get the next links to be activiated / executed after this link.
+		 *
+		 * \since 0.64
+		 */
+		QVector<Link *> nextLinks() const;
+
 	protected:
 		/// \cond PRIVATE
 		Link( LinkPrivate &dd );

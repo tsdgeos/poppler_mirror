@@ -427,7 +427,12 @@ class LinkMoviePrivate : public LinkPrivate
 		Q_D( const Link );
 		return d->linkArea;
 	}
-	
+
+	QVector< Link * > Link::nextLinks() const
+	{
+		return d_ptr->nextLinks;
+	}
+
 	// LinkGoto
 	LinkGoto::LinkGoto( const QRectF &linkArea, QString extFileName, const LinkDestination & destination )
 		: Link( *new LinkGotoPrivate( linkArea, destination ) )

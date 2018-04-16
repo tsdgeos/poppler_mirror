@@ -34,6 +34,7 @@
 #endif
 
 #include "Object.h"
+#include <set>
 
 class GooString;
 class GooList;
@@ -66,12 +67,12 @@ enum LinkActionKind {
 class LinkAction {
 public:
 
-  LinkAction() = default;
+  LinkAction();
   LinkAction(const LinkAction &) = delete;
   LinkAction& operator=(const LinkAction &other) = delete;
 
   // Destructor.
-  virtual ~LinkAction() {}
+  virtual ~LinkAction();
 
   // Was the LinkAction created successfully?
   virtual GBool isOk() const = 0;
@@ -83,7 +84,18 @@ public:
   static LinkAction *parseDest(const Object *obj);
 
   // Parse an action dictionary.
-  static LinkAction *parseAction(const Object *obj, const GooString *baseURI = NULL);
+  static LinkAction *parseAction(const Object *obj, const GooString *baseURI = nullptr,
+                                 const std::set<int> *seenNextActions = nullptr);
+
+  // A List of the next actions to execute in order.
+  // The list contains pointer to LinkAction objects.
+  const GooList *nextActions() const;
+
+  // Sets the next action list. Takes ownership of the actions.
+  void setNextActions(GooList *actions);
+
+private:
+  GooList *nextActionList;
 };
 
 //------------------------------------------------------------------------

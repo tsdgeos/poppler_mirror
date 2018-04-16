@@ -24,6 +24,8 @@ class LinkOCGState;
 
 namespace Poppler {
 
+class Link;
+
 class LinkPrivate
 {
 public:
@@ -34,12 +36,19 @@ public:
 
     virtual ~LinkPrivate()
     {
+        qDeleteAll(nextLinks);
+    }
+
+    static LinkPrivate *get( Link *link )
+    {
+        return link->d_ptr;
     }
 
     LinkPrivate(const LinkPrivate &) = delete;
     LinkPrivate& operator=(const LinkPrivate &) = delete;
 
     QRectF linkArea;
+    QVector <Link *> nextLinks;
 };
 
 
