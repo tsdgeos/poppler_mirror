@@ -21,6 +21,7 @@
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -119,6 +120,10 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI)
   // Set-OCG-State action
   } else if (obj2.isName("SetOCGState")) {
     action = new LinkOCGState(obj);
+
+  // Hide action
+  } else if (obj2.isName("Hide")) {
+    action = new LinkHide(obj);
 
   // unknown action
   } else if (obj2.isName()) {
@@ -808,6 +813,30 @@ LinkOCGState::~LinkOCGState() {
 LinkOCGState::StateList::~StateList() {
   if (list)
     deleteGooList(list, Ref);
+}
+
+//------------------------------------------------------------------------
+// LinkHide
+//------------------------------------------------------------------------
+
+LinkHide::LinkHide(const Object *hideObj) {
+  targetName = nullptr;
+  show = false; // Default
+
+  if (hideObj->isDict()) {
+      const Object targetObj = hideObj->dictLookup("T");
+      if (targetObj.isString()) {
+	targetName = targetObj.getString()->copy();
+      }
+      const Object shouldHide = hideObj->dictLookup("H");
+      if (shouldHide.isBool()) {
+	show = !shouldHide.getBool();
+      }
+  }
+}
+
+LinkHide::~LinkHide() {
+  delete targetName;
 }
 
 //------------------------------------------------------------------------

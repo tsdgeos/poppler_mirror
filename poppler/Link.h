@@ -19,6 +19,7 @@
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
 // Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -58,6 +59,7 @@ enum LinkActionKind {
   actionSound,			// sound action
   actionJavaScript,		// JavaScript action
   actionOCGState,               // Set-OCG-State action
+  actionHide,			// Hide action
   actionUnknown			// anything else
 };
 
@@ -449,6 +451,39 @@ public:
 private:
   GooList *stateList;
   GBool preserveRB;
+};
+
+//------------------------------------------------------------------------
+// LinkHide
+//------------------------------------------------------------------------
+
+class LinkHide: public LinkAction {
+public:
+  LinkHide(const Object *hideObj);
+
+  ~LinkHide();
+
+  GBool isOk() const override { return targetName != nullptr; }
+  LinkActionKind getKind() const override { return actionHide; }
+
+  // According to spec the target can be either:
+  // a) A text string containing the fully qualified name of the target
+  //    field.
+  // b) An indirect reference to an annotation dictionary.
+  // c) An array of "such dictionaries or text strings".
+  //
+  // While b / c appear to be very uncommon and can't easily be
+  // created with Adobe Acrobat DC. So only support hide
+  // actions with named targets (yet).
+  GBool hasTargetName() const { return targetName != nullptr; }
+  const GooString *getTargetName() const { return targetName; }
+
+  // Should this action show or hide.
+  GBool isShowAction() const { return show; }
+
+private:
+  GooString *targetName;
+  GBool show;
 };
 
 //------------------------------------------------------------------------

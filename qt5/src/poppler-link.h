@@ -4,6 +4,7 @@
  * Copyright (C) 2010, 2012, Guillermo Amaral <gamaral@kdab.com>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Copyright (C) 2013, Anthony Granger <grangeranthony@gmail.com>
+ * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -49,6 +50,7 @@ class LinkDestinationData;
 class LinkDestinationPrivate;
 class LinkRenditionPrivate;
 class LinkOCGStatePrivate;
+class LinkHidePrivate;
 class MediaRendition;
 class SoundObject;
 
@@ -197,7 +199,8 @@ class POPPLER_QT5_EXPORT Link
 		    Movie,    ///< An action to be executed on a movie
 		    Rendition,    ///< A rendition link \since 0.20
 		    JavaScript,   ///< A JavaScript code to be interpreted \since 0.10
-		    OCGState      ///< An Optional Content Group state change \since 0.50
+		    OCGState,      ///< An Optional Content Group state change \since 0.50
+		    Hide,     ///< An action to hide a field \since 0.64
 		};
 
 		/**
@@ -625,6 +628,40 @@ class POPPLER_QT5_EXPORT LinkOCGState : public Link
 	private:
 		Q_DECLARE_PRIVATE( LinkOCGState )
 		Q_DISABLE_COPY( LinkOCGState )
+};
+
+/**
+ * Hide: an action to show / hide a field.
+ *
+ * \since 0.64
+ */
+class POPPLER_QT5_EXPORT LinkHide: public Link
+{
+	public:
+		/**
+		 * Create a new Hide link. This is only used by Poppler::Page.
+		 */
+		LinkHide( LinkHidePrivate *lhidep );
+		/**
+		 * Destructor.
+		 */
+		~LinkHide();
+
+		LinkType linkType() const override;
+
+		/**
+		 * The fully qualified target names of the action.
+		 */
+		QVector< QString > targets() const;
+
+		/**
+		 * Should this action change the visibility of the target to true.
+		 */
+		bool isShowAction() const;
+
+	private:
+		Q_DECLARE_PRIVATE( LinkHide )
+		Q_DISABLE_COPY( LinkHide )
 };
 
 }
