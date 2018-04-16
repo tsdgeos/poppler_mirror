@@ -85,8 +85,9 @@ public:
   static LinkAction *parseDest(const Object *obj);
 
   // Parse an action dictionary.
-  static LinkAction *parseAction(const Object *obj, const GooString *baseURI = nullptr,
-                                 std::unique_ptr<std::set<int>> seenNextActions = nullptr);
+  static LinkAction *parseAction(const Object *obj, const GooString *baseURI = nullptr);
+  static LinkAction *parseAction(const Object *obj, const GooString *baseURI,
+                                 std::set<int> *seenNextActions);
 
   // A List of the next actions to execute in order.
   // The list contains pointer to LinkAction objects.
