@@ -20,6 +20,7 @@
  * Copyright (C) 2017, 2018, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+ * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -342,9 +343,33 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
       LinkOCGStatePrivate *locgp = new LinkOCGStatePrivate( linkArea, plocg );
       popplerLink = new LinkOCGState( locgp );
     }
+    break;
+
+    case actionHide:
+    {
+      ::LinkHide *lh = (::LinkHide *)a;
+
+      LinkHidePrivate *lhp = new LinkHidePrivate( linkArea, lh->hasTargetName() ? UnicodeParsedString( lh->getTargetName() ) : QString(), lh->isShowAction() );
+      popplerLink = new LinkHide( lhp );
+    }
+    break;
 
     case actionUnknown:
     break;
+  }
+
+  if ( popplerLink )
+  {
+    const GooList *nextActions = a->nextActions();
+    if ( nextActions )
+    {
+      QVector<Link *> links;
+      for ( int i = 0; i < nextActions->getLength(); ++i )
+      {
+        links << convertLinkActionToLink( static_cast< ::LinkAction * >( nextActions->get( i ) ), parentDoc, linkArea );
+      }
+      LinkPrivate::get(popplerLink)->nextLinks = links;
+    }
   }
 
   return popplerLink;

@@ -19,6 +19,7 @@
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
 // Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -33,6 +34,8 @@
 #endif
 
 #include "Object.h"
+#include <memory>
+#include <set>
 
 class GooString;
 class GooList;
@@ -58,18 +61,19 @@ enum LinkActionKind {
   actionSound,			// sound action
   actionJavaScript,		// JavaScript action
   actionOCGState,               // Set-OCG-State action
+  actionHide,			// Hide action
   actionUnknown			// anything else
 };
 
 class LinkAction {
 public:
 
-  LinkAction() = default;
+  LinkAction();
   LinkAction(const LinkAction &) = delete;
   LinkAction& operator=(const LinkAction &other) = delete;
 
   // Destructor.
-  virtual ~LinkAction() {}
+  virtual ~LinkAction();
 
   // Was the LinkAction created successfully?
   virtual GBool isOk() const = 0;
@@ -81,7 +85,19 @@ public:
   static LinkAction *parseDest(const Object *obj);
 
   // Parse an action dictionary.
-  static LinkAction *parseAction(const Object *obj, const GooString *baseURI = NULL);
+  static LinkAction *parseAction(const Object *obj, const GooString *baseURI = nullptr);
+  static LinkAction *parseAction(const Object *obj, const GooString *baseURI,
+                                 std::set<int> *seenNextActions);
+
+  // A List of the next actions to execute in order.
+  // The list contains pointer to LinkAction objects.
+  const GooList *nextActions() const;
+
+  // Sets the next action list. Takes ownership of the actions.
+  void setNextActions(GooList *actions);
+
+private:
+  GooList *nextActionList;
 };
 
 //------------------------------------------------------------------------
@@ -449,6 +465,39 @@ public:
 private:
   GooList *stateList;
   GBool preserveRB;
+};
+
+//------------------------------------------------------------------------
+// LinkHide
+//------------------------------------------------------------------------
+
+class LinkHide: public LinkAction {
+public:
+  LinkHide(const Object *hideObj);
+
+  ~LinkHide();
+
+  GBool isOk() const override { return targetName != nullptr; }
+  LinkActionKind getKind() const override { return actionHide; }
+
+  // According to spec the target can be either:
+  // a) A text string containing the fully qualified name of the target
+  //    field.
+  // b) An indirect reference to an annotation dictionary.
+  // c) An array of "such dictionaries or text strings".
+  //
+  // While b / c appear to be very uncommon and can't easily be
+  // created with Adobe Acrobat DC. So only support hide
+  // actions with named targets (yet).
+  GBool hasTargetName() const { return targetName != nullptr; }
+  const GooString *getTargetName() const { return targetName; }
+
+  // Should this action show or hide.
+  GBool isShowAction() const { return show; }
+
+private:
+  GooString *targetName;
+  GBool show;
 };
 
 //------------------------------------------------------------------------

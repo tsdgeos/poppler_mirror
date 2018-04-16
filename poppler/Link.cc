@@ -21,6 +21,7 @@
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -51,6 +52,12 @@
 //------------------------------------------------------------------------
 // LinkAction
 //------------------------------------------------------------------------
+LinkAction::LinkAction() : nextActionList(nullptr) {
+}
+
+LinkAction::~LinkAction() {
+  delete nextActionList;
+}
 
 LinkAction *LinkAction::parseDest(const Object *obj) {
   LinkAction *action;
@@ -63,7 +70,14 @@ LinkAction *LinkAction::parseDest(const Object *obj) {
   return action;
 }
 
-LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI) {
+LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI)
+{
+    std::set<int> seenNextActions;
+    return parseAction(obj, baseURI, &seenNextActions);
+}
+
+LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
+                                    std::set<int> *seenNextActions) {
   LinkAction *action;
 
   if (!obj->isDict()) {
@@ -120,6 +134,10 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI)
   } else if (obj2.isName("SetOCGState")) {
     action = new LinkOCGState(obj);
 
+  // Hide action
+  } else if (obj2.isName("Hide")) {
+    action = new LinkHide(obj);
+
   // unknown action
   } else if (obj2.isName()) {
     action = new LinkUnknown(obj2.getName());
@@ -135,7 +153,66 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI)
     delete action;
     return nullptr;
   }
+
+  if (!action) {
+    return nullptr;
+  }
+
+  // parse the next actions
+  const Object nextObj = obj->dictLookup("Next");
+  GooList *actionList = nullptr;
+  if (nextObj.isDict()) {
+
+    // Prevent circles in the tree by checking the ref against used refs in
+    // our current tree branch.
+    const Object nextRefObj = obj->dictLookupNF("Next");
+    if (nextRefObj.isRef()) {
+        const Ref ref = nextRefObj.getRef();
+        if (!seenNextActions->insert(ref.num).second) {
+            error(errSyntaxWarning, -1, "parseAction: Circular next actions detected.");
+            return action;
+        }
+    }
+
+    actionList = new GooList(1);
+    actionList->append(parseAction(&nextObj, nullptr, seenNextActions));
+  } else if (nextObj.isArray()) {
+    const Array *a = nextObj.getArray();
+    const int n = a->getLength();
+    actionList = new GooList(n);
+    for (int i = 0; i < n; ++i) {
+      const Object obj3 = a->get(i);
+      if (!obj3.isDict()) {
+        error(errSyntaxWarning, -1, "parseAction: Next array does not contain only dicts");
+        continue;
+      }
+
+      // Similar circle check as above.
+      const Object obj3Ref = a->getNF(i);
+      if (obj3Ref.isRef()) {
+          const Ref ref = obj3Ref.getRef();
+          if (!seenNextActions->insert(ref.num).second) {
+              error(errSyntaxWarning, -1, "parseAction: Circular next actions detected in array.");
+              return action;
+          }
+      }
+
+      actionList->append(parseAction(&obj3, nullptr, seenNextActions));
+    }
+  }
+
+  action->setNextActions(actionList);
+
   return action;
+}
+
+const GooList *LinkAction::nextActions() const {
+  return nextActionList;
+}
+
+void LinkAction::setNextActions(GooList *actions) {
+  delete nextActionList;
+  nextActionList = actions;
 }
 
 //------------------------------------------------------------------------
@@ -808,6 +885,30 @@ LinkOCGState::~LinkOCGState() {
 LinkOCGState::StateList::~StateList() {
   if (list)
     deleteGooList(list, Ref);
+}
+
+//------------------------------------------------------------------------
+// LinkHide
+//------------------------------------------------------------------------
+
+LinkHide::LinkHide(const Object *hideObj) {
+  targetName = nullptr;
+  show = false; // Default
+
+  if (hideObj->isDict()) {
+      const Object targetObj = hideObj->dictLookup("T");
+      if (targetObj.isString()) {
+	targetName = targetObj.getString()->copy();
+      }
+      const Object shouldHide = hideObj->dictLookup("H");
+      if (shouldHide.isBool()) {
+	show = !shouldHide.getBool();
+      }
+  }
+}
+
+LinkHide::~LinkHide() {
+  delete targetName;
 }
 
 //------------------------------------------------------------------------

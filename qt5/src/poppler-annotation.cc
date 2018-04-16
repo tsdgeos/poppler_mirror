@@ -6,6 +6,7 @@
  * Copyright (C) 2012, 2015, Tobias Koenig <tobias.koenig@kdab.com>
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+ * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -3944,6 +3945,11 @@ void LinkAnnotation::store( QDomNode & node, QDomDocument & document ) const
             case Poppler::Link::OCGState:
             {
                 hyperlinkElement.setAttribute( QStringLiteral("type"), QStringLiteral("OCGState") );
+                break;
+            }
+            case Poppler::Link::Hide:
+            {
+                hyperlinkElement.setAttribute( QStringLiteral("type"), QStringLiteral("Hide") );
                 break;
             }
             case Poppler::Link::None:
