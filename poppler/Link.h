@@ -34,6 +34,7 @@
 #endif
 
 #include "Object.h"
+#include <memory>
 #include <set>
 
 class GooString;
@@ -85,7 +86,7 @@ public:
 
   // Parse an action dictionary.
   static LinkAction *parseAction(const Object *obj, const GooString *baseURI = nullptr,
-                                 const std::set<int> *seenNextActions = nullptr);
+                                 std::unique_ptr<std::set<int>> seenNextActions = nullptr);
 
   // A List of the next actions to execute in order.
   // The list contains pointer to LinkAction objects.

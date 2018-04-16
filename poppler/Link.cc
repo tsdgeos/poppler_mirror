@@ -71,7 +71,7 @@ LinkAction *LinkAction::parseDest(const Object *obj) {
 }
 
 LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
-                                    const std::set<int> *seenNextActions) {
+                                    std::unique_ptr<std::set<int>> seenNextActions) {
   LinkAction *action;
 
   if (!obj->isDict()) {
@@ -160,18 +160,19 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
     // Prevent circles in the tree by checking the ref against used refs in
     // our current tree branch.
     const Object nextRefObj = obj->dictLookupNF("Next");
-    std::set<int> seenNextActionsAux = seenNextActions ? *seenNextActions : std::set<int> ();
+    if (!seenNextActions)
+        seenNextActions.reset(new std::set<int>);
     if (nextRefObj.isRef()) {
         const Ref ref = nextRefObj.getRef();
-        if (seenNextActionsAux.find(ref.num) != seenNextActionsAux.end()) {
+        if (seenNextActions->find(ref.num) != seenNextActions->end()) {
             error(errSyntaxWarning, -1, "parseAction: Circular next actions detected.");
             return action;
         }
-        seenNextActionsAux.insert(ref.num);
+        seenNextActions->insert(ref.num);
     }
 
     actionList = new GooList(1);
-    actionList->append(parseAction(&nextObj, nullptr, &seenNextActionsAux));
+    actionList->append(parseAction(&nextObj, nullptr, std::move(seenNextActions)));
   } else if (nextObj.isArray()) {
     const Array *a = nextObj.getArray();
     const int n = a->getLength();
@@ -184,18 +185,19 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
       }
 
       // Similar circle check as above.
-      std::set<int> seenNextActionsAux = seenNextActions ? *seenNextActions : std::set<int> ();
+      if (!seenNextActions)
+        seenNextActions.reset(new std::set<int>);
       const Object obj3Ref = a->getNF(i);
       if (obj3Ref.isRef()) {
           const Ref ref = obj3Ref.getRef();
-          if (seenNextActionsAux.find(ref.num) != seenNextActionsAux.end()) {
+          if (seenNextActions->find(ref.num) != seenNextActions->end()) {
               error(errSyntaxWarning, -1, "parseAction: Circular next actions detected in array.");
               return action;
           }
-          seenNextActionsAux.insert(ref.num);
+          seenNextActions->insert(ref.num);
       }
 
-      actionList->append(parseAction(&obj3, nullptr, &seenNextActionsAux));
+      actionList->append(parseAction(&obj3, nullptr, std::move(seenNextActions)));
     }
   }
 
