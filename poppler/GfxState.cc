@@ -4922,6 +4922,9 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
     trianglesA = (int (*)[3])gmallocn_checkoverflow(nTrianglesA * 3, sizeof(int));
     if (unlikely(!trianglesA)) {
       gfree(verticesA);
+      for (i = 0; i < nFuncsA; ++i) {
+	delete funcsA[i];
+      }
       return nullptr;
     }
     k = 0;
