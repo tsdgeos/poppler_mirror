@@ -33,6 +33,7 @@
 #include "GlobalParams.h"
 #include "SignatureInfo.h"
 #include "Win32Console.h"
+#include "numberofcharacters.h"
 
 static const char * getReadableSigState(SignatureValidationStatus sig_vs)
 {
@@ -90,7 +91,7 @@ static char *getReadableTime(time_t unix_time)
   return time_str;
 }
 
-static void dumpSignature(int sig_num, FormWidgetSignature *sig_widget, const char *filename)
+static void dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_widget, const char *filename)
 {
     const GooString *signature = sig_widget->getSignature();
     if (!signature) {
@@ -98,12 +99,18 @@ static void dumpSignature(int sig_num, FormWidgetSignature *sig_widget, const ch
         return;
     }
 
-    char buf[1024];
-    snprintf(buf, sizeof buf, "%s.sig%02u", basename(filename), sig_num);
-    printf("Signature #%d (%u bytes) => %s\n", sig_num, signature->getLength(), buf);
-    std::ofstream outfile(buf, std::ofstream::binary);
+    const int sigCountLength = numberOfCharacters(sigCount);
+    // We want format to be {0:s}.sig{1:Xd} where X is sigCountLength
+    // since { is the magic character to replace things we need to put it twice where
+    // we don't want it to be replaced
+    GooString *format = GooString::format("{{0:s}}.sig{{1:{0:d}d}}", sigCountLength);
+    GooString *path = GooString::format(format->getCString(), basename(filename), sig_num);
+    printf("Signature #%d (%u bytes) => %s\n", sig_num, signature->getLength(), path->getCString());
+    std::ofstream outfile(path->getCString(), std::ofstream::binary);
     outfile.write(signature->getCString(), signature->getLength());
     outfile.close();
+    delete format;
+    delete path;
 }
 
 static GBool printVersion = gFalse;
@@ -174,7 +181,7 @@ int main(int argc, char *argv[])
     if (dumpSignatures) {
       printf("Dumping Signatures: %u\n", sigCount);
       for (unsigned int i = 0; i < sigCount; i++) {
-        dumpSignature(i, sig_widgets.at(i), fileName->getCString());
+        dumpSignature(i, sigCount, sig_widgets.at(i), fileName->getCString());
       }
       goto end;
     } else {
