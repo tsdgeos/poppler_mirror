@@ -177,7 +177,7 @@ void MediaParameters::parseMediaPlayParameters(Object* obj) {
   if (tmp.isDict()) {
     Object oname = tmp.dictLookup("S");
     if (oname.isName()) {
-      char* name = oname.getName();
+      const char* name = oname.getName();
       if (!strcmp(name, "F"))
 	duration = -1; // infinity
       else if (!strcmp(name, "T")) {

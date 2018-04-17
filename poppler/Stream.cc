@@ -208,7 +208,7 @@ Stream *Stream::addFilters(Dict *dict, int recursion) {
   return str;
 }
 
-Stream *Stream::makeFilter(char *name, Stream *str, Object *params, int recursion, Dict *dict) {
+Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int recursion, Dict *dict) {
   int pred;			// parameters
   int colors;
   int bits;

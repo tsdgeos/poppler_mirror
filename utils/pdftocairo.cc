@@ -56,6 +56,7 @@
 #include "PDFDocFactory.h"
 #include "CairoOutputDev.h"
 #include "Win32Console.h"
+#include "numberofcharacters.h"
 #ifdef USE_CMS
 #include <lcms2.h>
 #endif
@@ -802,18 +803,6 @@ static GBool setPSPaperSize(char *size, int &psPaperWidth, int &psPaperHeight) {
     return gFalse;
   }
   return gTrue;
-}
-
-static int numberOfCharacters(unsigned int n)
-{
-  int charNum = 0;
-  while (n >= 10)
-  {
-    n = n / 10;
-    charNum++;
-  }
-  charNum++;
-  return charNum;
 }
 
 static GooString *getImageFileName(GooString *outputFileName, int numDigits, int page)

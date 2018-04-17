@@ -16,7 +16,8 @@
 // Copyright 2017 Roland Hieber <r.hieber@pengutronix.de>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2018 Andre Heinecke <aheinecke@intevation.de>
-// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 //
 //========================================================================
 
@@ -283,6 +284,8 @@ public:
   // if the check passed (and the checked file size as output parameter in checkedFileSize)
   // otherwise a nullptr is returned
   GooString* getCheckedSignature(Goffset *checkedFileSize);
+
+  const GooString *getSignature() const;
 };
 
 //------------------------------------------------------------------------
@@ -379,7 +382,7 @@ public:
   GBool setState (char *state);
   GBool getState(const char *state) const;
 
-  char *getAppearanceState() { return appearanceState.isName() ? appearanceState.getName() : NULL; }
+  const char *getAppearanceState() const { return appearanceState.isName() ? appearanceState.getName() : nullptr; }
 
   void fillChildrenSiblingsID () override;
   
@@ -540,7 +543,7 @@ public:
 
   ~FormFieldSignature();
   Object* getByteRange() { return &byte_range; }
-  GooString* getSignature() { return signature; }
+  const GooString* getSignature() const { return signature; }
 
 private:
   void parseInfo();

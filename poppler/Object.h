@@ -242,7 +242,7 @@ public:
   // because the object it's not expected to have a NULL string.
   GooString *takeString() {
     OBJECT_TYPE_CHECK(objString); GooString *s = string; string = nullptr; return s; }
-  char *getName() const { OBJECT_TYPE_CHECK(objName); return cString; }
+  const char *getName() const { OBJECT_TYPE_CHECK(objName); return cString; }
   Array *getArray() const { OBJECT_TYPE_CHECK(objArray); return array; }
   Dict *getDict() const { OBJECT_TYPE_CHECK(objDict); return dict; }
   Stream *getStream() const { OBJECT_TYPE_CHECK(objStream); return stream; }

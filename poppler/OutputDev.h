@@ -23,7 +23,7 @@
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
-// Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2017, 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
@@ -276,6 +276,11 @@ public:
   virtual void endActualText(GfxState * /*state*/) {}
 
   //----- image drawing
+  // Draw an image mask.  An image mask is a one-bit-per-pixel image, where each pixel
+  // can only be 'fill color' or 'transparent'.
+  //
+  // If 'invert' is false, a sample value of 0 marks the page with the current color,
+  // and a 1 leaves the previous contents unchanged. If 'invert' is true, these meanings are reversed.
   virtual void drawImageMask(GfxState *state, Object *ref, Stream *str,
 			     int width, int height, GBool invert, GBool interpolate,
 			     GBool inlineImg);
@@ -304,9 +309,9 @@ public:
   //----- grouping operators
 
   virtual void endMarkedContent(GfxState *state);
-  virtual void beginMarkedContent(char *name, Dict *properties);
-  virtual void markPoint(char *name);
-  virtual void markPoint(char *name, Dict *properties);
+  virtual void beginMarkedContent(const char *name, Dict *properties);
+  virtual void markPoint(const char *name);
+  virtual void markPoint(const char *name, Dict *properties);
 
 
 

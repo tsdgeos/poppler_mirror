@@ -9,7 +9,8 @@
 // Copyright 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright 2016 Markus Kilås <digital@markuspage.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
-// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 //
 //========================================================================
 
@@ -21,6 +22,7 @@
 #include <string.h>
 #include <time.h>
 #include <hasht.h>
+#include <fstream>
 #include "parseargs.h"
 #include "Object.h"
 #include "Array.h"
@@ -31,6 +33,7 @@
 #include "GlobalParams.h"
 #include "SignatureInfo.h"
 #include "Win32Console.h"
+#include "numberofcharacters.h"
 
 static const char * getReadableSigState(SignatureValidationStatus sig_vs)
 {
@@ -88,13 +91,38 @@ static char *getReadableTime(time_t unix_time)
   return time_str;
 }
 
+static void dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_widget, const char *filename)
+{
+    const GooString *signature = sig_widget->getSignature();
+    if (!signature) {
+        printf("Cannot dump signature #%d\n", sig_num);
+        return;
+    }
+
+    const int sigCountLength = numberOfCharacters(sigCount);
+    // We want format to be {0:s}.sig{1:Xd} where X is sigCountLength
+    // since { is the magic character to replace things we need to put it twice where
+    // we don't want it to be replaced
+    GooString *format = GooString::format("{{0:s}}.sig{{1:{0:d}d}}", sigCountLength);
+    GooString *path = GooString::format(format->getCString(), basename(filename), sig_num);
+    printf("Signature #%d (%u bytes) => %s\n", sig_num, signature->getLength(), path->getCString());
+    std::ofstream outfile(path->getCString(), std::ofstream::binary);
+    outfile.write(signature->getCString(), signature->getLength());
+    outfile.close();
+    delete format;
+    delete path;
+}
+
 static GBool printVersion = gFalse;
 static GBool printHelp = gFalse;
 static GBool dontVerifyCert = gFalse;
+static GBool dumpSignatures = gFalse;
 
 static const ArgDesc argDesc[] = {
   {"-nocert", argFlag,     &dontVerifyCert,     0,
    "don't perform certificate validation"},
+  {"-dump",   argFlag,     &dumpSignatures,     0,
+   "dump all signatures into current directory"},
 
   {"-v",      argFlag,     &printVersion,  0,
    "print copyright and version info"},
@@ -150,7 +178,15 @@ int main(int argc, char *argv[])
   sigCount = sig_widgets.size();
 
   if (sigCount >= 1) {
-    printf("Digital Signature Info of: %s\n", fileName->getCString());
+    if (dumpSignatures) {
+      printf("Dumping Signatures: %u\n", sigCount);
+      for (unsigned int i = 0; i < sigCount; i++) {
+        dumpSignature(i, sigCount, sig_widgets.at(i), fileName->getCString());
+      }
+      goto end;
+    } else {
+      printf("Digital Signature Info of: %s\n", fileName->getCString());
+    }
   } else {
     printf("File '%s' does not contain any signatures\n", fileName->getCString());
     exitCode = 2;

@@ -86,8 +86,6 @@ public:
 
   // Parse an action dictionary.
   static LinkAction *parseAction(const Object *obj, const GooString *baseURI = nullptr);
-  static LinkAction *parseAction(const Object *obj, const GooString *baseURI,
-                                 std::set<int> *seenNextActions);
 
   // A List of the next actions to execute in order.
   // The list contains pointer to LinkAction objects.
@@ -97,6 +95,8 @@ public:
   void setNextActions(GooList *actions);
 
 private:
+  static LinkAction *parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions);
+
   GooList *nextActionList;
 };
 
@@ -508,7 +508,7 @@ class LinkUnknown: public LinkAction {
 public:
 
   // Build a LinkUnknown with the specified action type.
-  LinkUnknown(char *actionA);
+  LinkUnknown(const char *actionA);
 
   // Destructor.
   ~LinkUnknown();

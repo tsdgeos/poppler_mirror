@@ -871,7 +871,7 @@ const char *GfxFont::getAlternateName(const char *name) {
 // Parse character names of the form 'Axx', 'xx', 'Ann', 'ABnn', or
 // 'nn', where 'A' and 'B' are any letters, 'xx' is two hex digits,
 // and 'nn' is decimal digits.
-static GBool parseNumericName(char *s, GBool hex, unsigned int *u) {
+static GBool parseNumericName(const char *s, GBool hex, unsigned int *u) {
   char *endptr;
 
   // Strip leading alpha characters.
@@ -2528,7 +2528,7 @@ int GfxFontDict::hashFontObject(Object *obj) {
 void GfxFontDict::hashFontObject1(Object *obj, FNVHash *h) {
   Object obj2;
   const GooString *s;
-  char *p;
+  const char *p;
   double r;
   int n, i;
 

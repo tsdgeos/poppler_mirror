@@ -20,7 +20,8 @@
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2017 Bernd Kuhls <berndkuhls@hotmail.com>
 // Copyright 2018 Andre Heinecke <aheinecke@intevation.de>
-// Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 //
 //========================================================================
 
@@ -459,6 +460,11 @@ FormWidgetSignature::FormWidgetSignature(PDFDoc *docA, Object *aobj, unsigned nu
 	FormWidget(docA, aobj, num, ref, p)
 {
   type = formSignature;
+}
+
+const GooString *FormWidgetSignature::getSignature() const
+{
+    return static_cast<FormFieldSignature*>(field)->getSignature();
 }
 
 SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime)
@@ -1083,7 +1089,7 @@ GBool FormFieldButton::setState(char *state)
   if (!isOn && noAllOff)
     return gFalse; // Don't allow to set all radio to off
 
-  char *current = getAppearanceState();
+  const char *current = getAppearanceState();
   GBool currentFound = gFalse, newFound = gFalse;
 
   for (int i = 0; i < numChildren; i++) {
