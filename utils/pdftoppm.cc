@@ -52,6 +52,7 @@
 #include "splash/Splash.h"
 #include "SplashOutputDev.h"
 #include "Win32Console.h"
+#include "numberofcharacters.h"
 
 // Uncomment to build pdftoppm with pthreads
 // You may also have to change the buildsystem to
@@ -365,18 +366,6 @@ static void processPageJobs() {
 }
 
 #endif // UTILS_USE_PTHREADS
-
-static int numberOfCharacters(unsigned int n)
-{
-  int charNum = 0;
-  while (n >= 10)
-  {
-    n = n / 10;
-    charNum++;
-  }
-  charNum++;
-  return charNum;
-}
 
 int main(int argc, char *argv[]) {
   PDFDoc *doc;
