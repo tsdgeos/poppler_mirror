@@ -9,7 +9,8 @@
 // Copyright 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright 2016 Markus Kilås <digital@markuspage.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
-// Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 //
 //========================================================================
 
@@ -21,6 +22,7 @@
 #include <string.h>
 #include <time.h>
 #include <hasht.h>
+#include <fstream>
 #include "parseargs.h"
 #include "Object.h"
 #include "Array.h"
@@ -88,13 +90,32 @@ static char *getReadableTime(time_t unix_time)
   return time_str;
 }
 
+static void dumpSignature(int sig_num, FormWidgetSignature *sig_widget, const char *filename)
+{
+    const GooString *signature = sig_widget->getSignature();
+    if (!signature) {
+        printf("Cannot dump signature #%d\n", sig_num);
+        return;
+    }
+
+    char buf[1024];
+    snprintf(buf, sizeof buf, "%s.sig%02u", basename(filename), sig_num);
+    printf("Signature #%d (%u bytes) => %s\n", sig_num, signature->getLength(), buf);
+    std::ofstream outfile(buf, std::ofstream::binary);
+    outfile.write(signature->getCString(), signature->getLength());
+    outfile.close();
+}
+
 static GBool printVersion = gFalse;
 static GBool printHelp = gFalse;
 static GBool dontVerifyCert = gFalse;
+static GBool dumpSignatures = gFalse;
 
 static const ArgDesc argDesc[] = {
   {"-nocert", argFlag,     &dontVerifyCert,     0,
    "don't perform certificate validation"},
+  {"-dump",   argFlag,     &dumpSignatures,     0,
+   "dump all signatures into current directory"},
 
   {"-v",      argFlag,     &printVersion,  0,
    "print copyright and version info"},
@@ -150,7 +171,15 @@ int main(int argc, char *argv[])
   sigCount = sig_widgets.size();
 
   if (sigCount >= 1) {
-    printf("Digital Signature Info of: %s\n", fileName->getCString());
+    if (dumpSignatures) {
+      printf("Dumping Signatures: %u\n", sigCount);
+      for (unsigned int i = 0; i < sigCount; i++) {
+        dumpSignature(i, sig_widgets.at(i), fileName->getCString());
+      }
+      goto end;
+    } else {
+      printf("Digital Signature Info of: %s\n", fileName->getCString());
+    }
   } else {
     printf("File '%s' does not contain any signatures\n", fileName->getCString());
     exitCode = 2;
