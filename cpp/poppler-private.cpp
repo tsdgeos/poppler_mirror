@@ -33,7 +33,7 @@ using namespace poppler;
 
 static void stderr_debug_function(const std::string &msg, void * /*data*/)
 {
-    std::cerr << "poppler/" << msg;
+    std::cerr << "poppler/" << msg << std::endl;
 }
 
 debug_func detail::user_debug_function = stderr_debug_function;
