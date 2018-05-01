@@ -41,6 +41,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <array>
+
 #include "goo/gfile.h"
 #include "GlobalParams.h"
 #include "Error.h"
