@@ -204,6 +204,37 @@ Link *FormField::additionalAction(AdditionalActionType type) const
   return action;
 }
 
+Link *FormField::additionalAction(Annotation::AdditionalActionType type) const
+{
+  ::AnnotWidget *w = m_formData->fm->getWidgetAnnotation();
+  if (!w)
+  {
+    return nullptr;
+  }
+
+  Annot::AdditionalActionsType actionType = Annot::actionMouseReleased;
+  switch (type)
+  {
+      case Annotation::CursorEnteringAction: actionType = Annot::actionCursorEntering; break;
+      case Annotation::CursorLeavingAction:  actionType = Annot::actionCursorLeaving; break;
+      case Annotation::MousePressedAction:   actionType = Annot::actionMousePressed; break;
+      case Annotation::MouseReleasedAction:  actionType = Annot::actionMouseReleased; break;
+      case Annotation::FocusInAction:        actionType = Annot::actionFocusIn; break;
+      case Annotation::FocusOutAction:       actionType = Annot::actionFocusOut; break;
+      case Annotation::PageOpeningAction:    actionType = Annot::actionPageOpening; break;
+      case Annotation::PageClosingAction:    actionType = Annot::actionPageClosing; break;
+      case Annotation::PageVisibleAction:    actionType = Annot::actionPageVisible; break;
+      case Annotation::PageInvisibleAction:  actionType = Annot::actionPageInvisible; break;
+  }
+
+  Link* action = nullptr;
+  if (::LinkAction *act = w->getAdditionalAction(actionType))
+  {
+    action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
+  }
+  return action;
+}
+
 FormFieldButton::FormFieldButton(DocumentData *doc, ::Page *p, ::FormWidgetButton *w)
   : FormField(*new FormFieldData(doc, p, w))
 {
