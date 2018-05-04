@@ -3,6 +3,7 @@
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2017, 2018, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jeroen Ooms <jeroenooms@gmail.com>
+ * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,8 +65,11 @@ int calc_bytes_per_row(int width, poppler::image::format_enum format)
         return 0;
     case poppler::image::format_mono:
         return (width + 7) >> 3;
+    case poppler::image::format_gray8:
+        return (width + 3) >> 2 << 2;
     case poppler::image::format_rgb24:
-        return width * 3;
+    case poppler::image::format_bgr24:
+        return (width * 3 + 3) >> 2 << 2;
     case poppler::image::format_argb32:
         return width * 4;
     }
@@ -78,7 +82,9 @@ NetPBMWriter::Format pnm_format(poppler::image::format_enum format)
     case poppler::image::format_invalid: // unused, anyway
     case poppler::image::format_mono:
         return NetPBMWriter::MONOCHROME;
+    case poppler::image::format_gray8:
     case poppler::image::format_rgb24:
+    case poppler::image::format_bgr24:
     case poppler::image::format_argb32:
         return NetPBMWriter::RGB;
     }
@@ -168,6 +174,8 @@ image_private *image_private::create_data(char *data, int width, int height, ima
  \enum poppler::image::format_enum
 
  The possible formats for an image.
+
+ format_gray8 and format_bgr24 were introduced in poppler 0.65.
 */
 
 
@@ -387,6 +395,42 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
         return false;
     case format_mono:
         return false;
+    case format_gray8: {
+        std::vector<unsigned char> row(3 * d->width);
+        char *hptr = d->data;
+        for (int y = 0; y < d->height; ++y) {
+            unsigned char *rowptr = &row[0];
+            for (int x = 0; x < d->width; ++x, rowptr += 3) {
+                rowptr[0] = *reinterpret_cast<unsigned char *>(hptr + x);
+                rowptr[1] = *reinterpret_cast<unsigned char *>(hptr + x);
+                rowptr[2] = *reinterpret_cast<unsigned char *>(hptr + x);
+            }
+            rowptr = &row[0];
+            if (!w->writeRow(&rowptr)) {
+                return false;
+            }
+            hptr += d->bytes_per_row;
+        }
+        break;
+    }
+    case format_bgr24: {
+        std::vector<unsigned char> row(3 * d->width);
+        char *hptr = d->data;
+        for (int y = 0; y < d->height; ++y) {
+            unsigned char *rowptr = &row[0];
+            for (int x = 0; x < d->width; ++x, rowptr += 3) {
+                rowptr[0] = *reinterpret_cast<unsigned char *>(hptr + x * 3 + 2);
+                rowptr[1] = *reinterpret_cast<unsigned char *>(hptr + x * 3 + 1);
+                rowptr[2] = *reinterpret_cast<unsigned char *>(hptr + x * 3);
+            }
+            rowptr = &row[0];
+            if (!w->writeRow(&rowptr)) {
+                return false;
+            }
+            hptr += d->bytes_per_row;
+        }
+        break;
+    }
     case format_rgb24: {
         char *hptr = d->data;
         for (int y = 0; y < d->height; ++y) {

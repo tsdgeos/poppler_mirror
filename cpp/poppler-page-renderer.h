@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +40,12 @@ public:
         text_hinting = 0x00000004
     };
 
+    enum line_mode_enum {
+        line_default,
+        line_solid,
+        line_shape
+    };
+
     page_renderer();
     ~page_renderer();
 
@@ -48,6 +55,12 @@ public:
     unsigned int render_hints() const;
     void set_render_hint(render_hint hint, bool on = true);
     void set_render_hints(unsigned int hints);
+
+    image::format_enum image_format() const;
+    void set_image_format(image::format_enum format);
+
+    line_mode_enum line_mode() const;
+    void set_line_mode(line_mode_enum mode);
 
     image render_page(const page *p,
                       double xres = 72.0, double yres = 72.0,

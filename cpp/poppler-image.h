@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +35,9 @@ public:
         format_invalid,
         format_mono,
         format_rgb24,
-        format_argb32
+        format_argb32,
+        format_gray8,
+        format_bgr24
     };
 
     image();
