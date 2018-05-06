@@ -3,6 +3,7 @@
 // pdf-inspector.cc
 //
 // Copyright 2005 Jonathan Blandford <jrb@redhat.com>
+// Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
 
@@ -13,7 +14,6 @@
 #endif
 
 #include <goo/gmem.h>
-#include <goo/GooHash.h>
 #include <goo/GooTimer.h>
 #include <splash/SplashTypes.h>
 #include <splash/SplashBitmap.h>
@@ -214,10 +214,6 @@ PdfInspector::on_analyze_clicked (GtkWidget *widget, PdfInspector *inspector)
 void
 PdfInspector::analyze_page (int page)
 {
-  GooHashIter *iter;
-  GooHash *hash;
-  GooString *key;
-  void *p;
   GtkWidget *label;
   char *text;
   cairo_t *cr;
@@ -245,24 +241,21 @@ PdfInspector::analyze_page (int page)
   g_free (text);
 
   // Individual times;
-  hash = output->endProfile ();
-  hash->startIter(&iter);
-  while (hash->getNext(&iter, &key, &p))
+  auto hash = output->endProfile ();
+  for (const auto& kvp : *hash)
     {
       GtkTreeIter tree_iter;
-      ProfileData *data_p = (ProfileData *) p;
+      const auto* const data_p = &kvp.second;
 
       gtk_list_store_append (GTK_LIST_STORE (model), &tree_iter);
       gtk_list_store_set (GTK_LIST_STORE (model), &tree_iter,
-			  OP_STRING, key->getCString(),
+			  OP_STRING, kvp.first.c_str (),
 			  OP_COUNT, data_p->getCount (),
 			  OP_TOTAL, data_p->getTotal (),
 			  OP_MIN, data_p->getMin (),
 			  OP_MAX, data_p->getMax (),
 			  -1);
     }
-  hash->killIter(&iter);
-  deleteGooHash (hash, ProfileData);
 }
  
 void
