@@ -149,7 +149,6 @@ public:
   GBool getErrQuiet();
 
   CharCodeToUnicode *getCIDToUnicode(GooString *collection);
-  CharCodeToUnicode *getUnicodeToUnicode(GooString *) { return nullptr; }
   UnicodeMap *getUnicodeMap(GooString *encodingName);
   CMap *getCMap(GooString *collection, GooString *cMapName, Stream *stream = NULL);
   UnicodeMap *getTextEncoding();
