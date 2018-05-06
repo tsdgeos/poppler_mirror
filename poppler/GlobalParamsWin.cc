@@ -422,9 +422,10 @@ void GlobalParams::setupBaseFonts(char * dir)
     GetWindowsFontDir(winFontDir, sizeof(winFontDir));
 
     for (int i = 0; displayFontTab[i].name; ++i) {
-        GooString  *fontName = new GooString(displayFontTab[i].name);
-        if (fontFiles->lookup(fontName))
+        if (fontFiles.count(displayFontTab[i].name) > 0)
             continue;
+
+        GooString  *fontName = new GooString(displayFontTab[i].name);
 
         if (dir) {
             GooString *fontPath = appendToPath(new GooString(dir), displayFontTab[i].t1FileName);
@@ -573,7 +574,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
                                                                 substFiles,
                                                                 fontName->getCString()));
     error(errSyntaxError, -1, "Couldn't find a font for '{0:t}', subst is '{1:t}'", fontName, substFontName);
-    const auto fontFile = fontFiles.find(substFontName);
+    const auto fontFile = fontFiles.find(substFontName->toStr());
     if (fontFile != fontFiles.end()) {
       path = new GooString(fontFile->second.c_str());
       if (substituteFontName)
