@@ -1254,7 +1254,7 @@ void GlobalParams::setupBaseFonts(char *dir) {
   int i, j;
 
   for (i = 0; displayFontTab[i].name; ++i) {
-    if (fontFiles->lookup(displayFontTab[i].name)) {
+    if (fontFiles.count(displayFontTab[i].name) > 0) {
       continue;
     }
     fontName = new GooString(displayFontTab[i].name);
