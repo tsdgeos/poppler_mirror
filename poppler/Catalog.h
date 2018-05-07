@@ -163,7 +163,7 @@ public:
   int numDests();
 
   // Get the i'th named destination name in name-dict
-  char *getDestsName(int i);
+  const char *getDestsName(int i);
 
   // Get the i'th named destination link destination in name-dict
   LinkDest *getDestsDest(int i);

@@ -269,7 +269,7 @@ public:
   GBool dictIs(const char *dictType) const;
   Object dictLookup(const char *key, int recursion = 0) const;
   Object dictLookupNF(const char *key) const;
-  char *dictGetKey(int i) const;
+  const char *dictGetKey(int i) const;
   Object dictGetVal(int i) const;
   Object dictGetValNF(int i) const;
 
@@ -374,7 +374,7 @@ inline Object Object::dictLookup(const char *key, int recursion) const
 inline Object Object::dictLookupNF(const char *key) const
   { OBJECT_TYPE_CHECK(objDict); return dict->lookupNF(key); }
 
-inline char *Object::dictGetKey(int i) const
+inline const char *Object::dictGetKey(int i) const
   { OBJECT_TYPE_CHECK(objDict); return dict->getKey(i); }
 
 inline Object Object::dictGetVal(int i) const

@@ -193,7 +193,7 @@ FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Re
     Object obj2 = obj1.dictLookup("N");
     if (obj2.isDict()) {
       for (int i = 0; i < obj2.dictGetLength(); i++) {
-        char *key = obj2.dictGetKey(i);
+        const char *key = obj2.dictGetKey(i);
         if (strcmp (key, "Off") != 0) {
           onStr = new GooString (key);
           break;

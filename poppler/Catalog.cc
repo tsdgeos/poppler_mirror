@@ -428,7 +428,7 @@ int Catalog::numDests()
   return obj->dictGetLength();
 }
 
-char *Catalog::getDestsName(int i)
+const char *Catalog::getDestsName(int i)
 {
   Object *obj;
 
