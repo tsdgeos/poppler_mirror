@@ -94,7 +94,7 @@ public:
   
   XRef *getXRef() const { return xref; }
   
-  GBool hasKey(const char *key) const { return find(key) != nullptr; }
+  GBool hasKey(const char *key) const;
 
 private:
   friend class Object; // for incRef/decRef

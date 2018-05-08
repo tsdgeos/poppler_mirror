@@ -200,3 +200,7 @@ GBool Dict::lookupInt(const char *key, const char *alt_key, int *value) const
   }
   return gFalse;
 }
+
+GBool Dict::hasKey(const char *key) const {
+  return find(key) != nullptr;
+}
