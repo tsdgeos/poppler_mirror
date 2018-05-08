@@ -2810,14 +2810,14 @@ static GfxFont * createAnnotDrawFont(XRef * xref, Dict *fontResDict)
   const Ref dummyRef = { -1, -1 };
 
   Dict *fontDict = new Dict(xref);
-  fontDict->add(copyString("BaseFont"), Object(objName, "Helvetica"));
-  fontDict->add(copyString("Subtype"), Object(objName, "Type0"));
-  fontDict->add(copyString("Encoding"), Object(objName, "WinAnsiEncoding"));
+  fontDict->add("BaseFont", Object(objName, "Helvetica"));
+  fontDict->add("Subtype", Object(objName, "Type0"));
+  fontDict->add("Encoding", Object(objName, "WinAnsiEncoding"));
 
   Dict *fontsDict = new Dict(xref);
-  fontsDict->add(copyString("AnnotDrawFont"), Object(fontDict));
+  fontsDict->add("AnnotDrawFont", Object(fontDict));
 
-  fontResDict->add(copyString("Font"), Object(fontsDict));
+  fontResDict->add("Font", Object(fontsDict));
 
   return GfxFont::makeFont(xref, "AnnotDrawFont", dummyRef, fontDict);
 }
@@ -4883,19 +4883,19 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource) {
   const GooString *appearBuf = appearBuilder.buffer();
   // build the appearance stream dictionary
   Dict *appearDict = new Dict(xref);
-  appearDict->add(copyString("Length"), Object(appearBuf->getLength()));
-  appearDict->add(copyString("Subtype"), Object(objName, "Form"));
+  appearDict->add("Length", Object(appearBuf->getLength()));
+  appearDict->add("Subtype", Object(objName, "Form"));
   Array *bbox = new Array(xref);
   bbox->add(Object(0));
   bbox->add(Object(0));
   bbox->add(Object(rect->x2 - rect->x1));
   bbox->add(Object(rect->y2 - rect->y1));
-  appearDict->add(copyString("BBox"), Object(bbox));
+  appearDict->add("BBox", Object(bbox));
 
   // set the resource dictionary
   Object *resDict = form->getDefaultResourcesObj();
   if (resDict->isDict()) {
-    appearDict->add(copyString("Resources"), resDict->copy());
+    appearDict->add("Resources", resDict->copy());
   }
 
   // build the appearance stream
@@ -4934,7 +4934,7 @@ void AnnotWidget::updateAppearanceStream()
 
     // Write the AP dictionary
     obj1 = Object(new Dict(xref));
-    obj1.dictAdd(copyString("N"), Object(updatedAppearanceStream.num, updatedAppearanceStream.gen));
+    obj1.dictAdd("N", Object(updatedAppearanceStream.num, updatedAppearanceStream.gen));
 
     // Update our internal pointers to the appearance dictionary
     appearStreams = new AnnotAppearance(doc, &obj1);
@@ -4967,14 +4967,14 @@ void AnnotWidget::draw(Gfx *gfx, GBool printing) {
     // We are forcing ZaDb but the font does not exist
     // so create a fake one
     Dict *fontDict = new Dict(gfx->getXRef());
-    fontDict->add(copyString("BaseFont"), Object(objName, "ZapfDingbats"));
-    fontDict->add(copyString("Subtype"), Object(objName, "Type1"));
+    fontDict->add("BaseFont", Object(objName, "ZapfDingbats"));
+    fontDict->add("Subtype", Object(objName, "Type1"));
 
     Dict *fontsDict = new Dict(gfx->getXRef());
-    fontsDict->add(copyString("ZaDb"), Object(fontDict));
+    fontsDict->add("ZaDb", Object(fontDict));
 
     Dict *dict = new Dict(gfx->getXRef());
-    dict->add(copyString("Font"), Object(fontsDict));
+    dict->add("Font", Object(fontsDict));
     gfx->pushResources(dict);
     delete dict;
   }

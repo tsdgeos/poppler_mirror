@@ -263,7 +263,7 @@ public:
 
   // Dict accessors.
   int dictGetLength() const;
-  void dictAdd(char *key, Object &&val);
+  void dictAdd(const char *key, Object &&val);
   void dictSet(const char *key, Object &&val);
   void dictRemove(const char *key);
   GBool dictIs(const char *dictType) const;
@@ -353,7 +353,7 @@ inline Object Object::arrayGetNF(int i) const
 inline int Object::dictGetLength() const
   { OBJECT_TYPE_CHECK(objDict); return dict->getLength(); }
 
-inline void Object::dictAdd(char *key, Object &&val)
+inline void Object::dictAdd(const char *key, Object &&val)
   { OBJECT_TYPE_CHECK(objDict); dict->add(key, std::move(val)); }
 
 inline void Object::dictSet(const char *key, Object &&val)

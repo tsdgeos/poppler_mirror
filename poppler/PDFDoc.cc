@@ -1645,7 +1645,7 @@ void PDFDoc::replacePageDict(int pageNo, int rotate,
   mediaBoxArray->add(Object(mediaBox->y2));
   Object mediaBoxObject(mediaBoxArray);
   Object trimBoxObject = mediaBoxObject.copy();
-  pageDict->add(copyString("MediaBox"), std::move(mediaBoxObject));
+  pageDict->add("MediaBox", std::move(mediaBoxObject));
   if (cropBox != nullptr) {
     Array *cropBoxArray = new Array(getXRef());
     cropBoxArray->add(Object(cropBox->x1));
@@ -1654,10 +1654,10 @@ void PDFDoc::replacePageDict(int pageNo, int rotate,
     cropBoxArray->add(Object(cropBox->y2));
     Object cropBoxObject(cropBoxArray);
     trimBoxObject = cropBoxObject.copy();
-    pageDict->add(copyString("CropBox"), std::move(cropBoxObject));
+    pageDict->add("CropBox", std::move(cropBoxObject));
   }
-  pageDict->add(copyString("TrimBox"), std::move(trimBoxObject));
-  pageDict->add(copyString("Rotate"), Object(rotate));
+  pageDict->add("TrimBox", std::move(trimBoxObject));
+  pageDict->add("Rotate", Object(rotate));
   getXRef()->setModifiedObject(&page, *refPage);
 }
 
