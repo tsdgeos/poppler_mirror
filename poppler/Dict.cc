@@ -144,7 +144,12 @@ inline Dict::DictEntry *Dict::find(const char *key) {
 void Dict::remove(const char *key) {
   dictLocker();
   if (auto *entry = find(key)) {
-    entries.erase(std::vector<DictEntry>::iterator{entry});
+    if (sorted) {
+      entries.erase(std::vector<DictEntry>::iterator{entry});
+    } else {
+      swap(*entry, entries.back());
+      entries.pop_back();
+    }
   }
 }
 
