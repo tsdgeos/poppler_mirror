@@ -31,10 +31,8 @@
 #pragma implementation
 #endif
 
-#include <stdlib.h>
-#include <stddef.h>
 #include <cassert>
-#include "goo/gmem.h"
+
 #include "Object.h"
 #include "Array.h"
 
@@ -46,62 +44,45 @@
 
 Array::Array(XRef *xrefA) {
   xref = xrefA;
-  elems = nullptr;
-  size = length = 0;
   ref = 1;
 }
 
 Array::~Array() {
-  int i;
-
-  for (i = 0; i < length; ++i)
-    elems[i].free();
-  gfree(elems);
 }
 
 Object Array::copy(XRef *xrefA) const {
   arrayLocker();
   Array *a = new Array(xrefA);
-  for (int i = 0; i < length; ++i) {
-    a->add(elems[i].copy());
+  a->elems.reserve(elems.size());
+  for (const auto& elem : elems) {
+    a->elems.push_back(elem.copy());
   }
   return Object(a);
 }
 
 void Array::add(Object &&elem) {
   arrayLocker();
-  if (length == size) {
-    if (length == 0) {
-      size = 8;
-    } else {
-      size *= 2;
-    }
-    elems = (Object *)greallocn(elems, size, sizeof(Object));
-  }
-  elems[length].initNullAfterMalloc();
-  elems[length] = std::move(elem);
-  ++length;
+  elems.push_back(std::move(elem));
 }
 
 void Array::remove(int i) {
   arrayLocker();
-  if (i < 0 || i >= length) {
-    assert(i >= 0 && i < length);
+  if (i < 0 || std::size_t(i) >= elems.size()) {
+    assert(i >= 0 && std::size_t(i) < elems.size());
     return;
   }
-  --length;
-  memmove( static_cast<void*>(elems + i), elems + i + 1, sizeof(elems[0]) * (length - i) );
+  elems.erase(elems.begin() + i);
 }
 
 Object Array::get(int i, int recursion) const {
-  if (i < 0 || i >= length) {
+  if (i < 0 || std::size_t(i) >= elems.size()) {
     return Object(objNull);
   }
   return elems[i].fetch(xref, recursion);
 }
 
 Object Array::getNF(int i) const {
-  if (i < 0 || i >= length) {
+  if (i < 0 || std::size_t(i) >= elems.size()) {
     return Object(objNull);
   }
   return elems[i].copy();
