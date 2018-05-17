@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015-2017 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015-2018 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
@@ -212,20 +212,7 @@ Link *FormField::additionalAction(Annotation::AdditionalActionType type) const
     return nullptr;
   }
 
-  Annot::AdditionalActionsType actionType = Annot::actionMouseReleased;
-  switch (type)
-  {
-      case Annotation::CursorEnteringAction: actionType = Annot::actionCursorEntering; break;
-      case Annotation::CursorLeavingAction:  actionType = Annot::actionCursorLeaving; break;
-      case Annotation::MousePressedAction:   actionType = Annot::actionMousePressed; break;
-      case Annotation::MouseReleasedAction:  actionType = Annot::actionMouseReleased; break;
-      case Annotation::FocusInAction:        actionType = Annot::actionFocusIn; break;
-      case Annotation::FocusOutAction:       actionType = Annot::actionFocusOut; break;
-      case Annotation::PageOpeningAction:    actionType = Annot::actionPageOpening; break;
-      case Annotation::PageClosingAction:    actionType = Annot::actionPageClosing; break;
-      case Annotation::PageVisibleAction:    actionType = Annot::actionPageVisible; break;
-      case Annotation::PageInvisibleAction:  actionType = Annot::actionPageInvisible; break;
-  }
+  const Annot::AdditionalActionsType actionType = toPopplerAdditionalActionType(type);
 
   Link* action = nullptr;
   if (::LinkAction *act = w->getAdditionalAction(actionType))

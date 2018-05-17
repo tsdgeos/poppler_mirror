@@ -70,6 +70,8 @@ namespace Poppler {
 
     void qt5ErrorFunction(int pos, char *msg, va_list args);
 
+    Annot::AdditionalActionsType toPopplerAdditionalActionType(Annotation::AdditionalActionType type);
+
     class LinkDestinationData
     {
         public:

@@ -778,20 +778,7 @@ Link* AnnotationPrivate::additionalAction( Annotation::AdditionalActionType type
     if ( pdfAnnot->getType() != Annot::typeScreen && pdfAnnot->getType() != Annot::typeWidget )
         return nullptr;
 
-    Annot::AdditionalActionsType actionType = Annot::actionCursorEntering;
-    switch ( type )
-    {
-        case Annotation::CursorEnteringAction: actionType = Annot::actionCursorEntering; break;
-        case Annotation::CursorLeavingAction: actionType = Annot::actionCursorLeaving; break;
-        case Annotation::MousePressedAction: actionType = Annot::actionMousePressed; break;
-        case Annotation::MouseReleasedAction: actionType = Annot::actionMouseReleased; break;
-        case Annotation::FocusInAction: actionType = Annot::actionFocusIn; break;
-        case Annotation::FocusOutAction: actionType = Annot::actionFocusOut; break;
-        case Annotation::PageOpeningAction: actionType = Annot::actionPageOpening; break;
-        case Annotation::PageClosingAction: actionType = Annot::actionPageClosing; break;
-        case Annotation::PageVisibleAction: actionType = Annot::actionPageVisible; break;
-        case Annotation::PageInvisibleAction: actionType = Annot::actionPageInvisible; break;
-    }
+    const Annot::AdditionalActionsType actionType = toPopplerAdditionalActionType(type);
 
     ::LinkAction *linkAction = nullptr;
     if ( pdfAnnot->getType() == Annot::typeScreen )
