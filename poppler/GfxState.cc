@@ -72,9 +72,13 @@
 
 GBool Matrix::invertTo(Matrix *other) const
 {
-  double det;
+  const double det_denominator = determinant();
+  if (unlikely(det_denominator == 0)) {
+      *other = {1, 0, 0, 1, 0, 0};
+      return gFalse;
+  }
 
-  det = 1 / determinant();
+  const double det = 1 / det_denominator;
   other->m[0] = m[3] * det;
   other->m[1] = -m[1] * det;
   other->m[2] = -m[2] * det;
@@ -4172,7 +4176,13 @@ void GfxAxialShading::getParameterRange(double *lower, double *upper,
 
   pdx = x1 - x0;
   pdy = y1 - y0;
-  invsqnorm = 1.0 / (pdx * pdx + pdy * pdy);
+  const double invsqnorm_denominator = (pdx * pdx + pdy * pdy);
+  if (unlikely(invsqnorm_denominator == 0)) {
+    *lower = 0;
+    *upper = 0;
+    return;
+  }
+  invsqnorm = 1.0 / invsqnorm_denominator;
   pdx *= invsqnorm;
   pdy *= invsqnorm;
 
@@ -6745,10 +6755,18 @@ void GfxState::setPath(GfxPath *pathA) {
 void GfxState::getUserClipBBox(double *xMin, double *yMin,
 			       double *xMax, double *yMax) {
   double ictm[6];
-  double xMin1, yMin1, xMax1, yMax1, det, tx, ty;
+  double xMin1, yMin1, xMax1, yMax1, tx, ty;
 
   // invert the CTM
-  det = 1 / (ctm[0] * ctm[3] - ctm[1] * ctm[2]);
+  const double det_denominator = (ctm[0] * ctm[3] - ctm[1] * ctm[2]);
+  if (unlikely(det_denominator == 0)) {
+      *xMin = 0;
+      *yMin = 0;
+      *xMax = 0;
+      *yMax = 0;
+      return;
+  }
+  const double det = 1 / det_denominator;
   ictm[0] = ctm[3] * det;
   ictm[1] = -ctm[1] * det;
   ictm[2] = -ctm[2] * det;

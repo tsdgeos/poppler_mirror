@@ -32,6 +32,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QSharedPointer>
 #include "poppler-export.h"
+#include "poppler-annotation.h"
 
 class Page;
 class FormWidget;
@@ -152,6 +153,13 @@ namespace Poppler {
 	  * \since 0.53
 	 */
 	Link* additionalAction(AdditionalActionType type) const;
+
+	/**
+	  * Returns a given widget annotation additional action
+	  *
+	  * \since 0.65
+	 */
+	Link* additionalAction(Annotation::AdditionalActionType type) const;
 
     protected:
 	/// \cond PRIVATE

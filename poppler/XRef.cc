@@ -866,7 +866,6 @@ GBool XRef::constructXRef(GBool *wasReconstructed, GBool needCatalogDict) {
   char buf[256];
   Goffset pos;
   int num, gen;
-  int newSize;
   int streamEndsSize;
   char *p;
   GBool gotRoot;
@@ -961,7 +960,11 @@ GBool XRef::constructXRef(GBool *wasReconstructed, GBool needCatalogDict) {
 	      while (*p && isspace(*p & 0xff)) ++p;
 	      if (!strncmp(p, "obj", 3)) {
 		if (num >= size) {
-		  newSize = (num + 1 + 255) & ~255;
+		  if (unlikely(num >= INT_MAX - 1 - 255)) {
+		    error(errSyntaxError, -1, "Bad object number");
+		    return gFalse;
+		  }
+		  const int newSize = (num + 1 + 255) & ~255;
 		  if (newSize < 0) {
 		    error(errSyntaxError, -1, "Bad object number");
 		    return gFalse;

@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2009, 201, 2010, 2013, 2014, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2009, 201, 2010, 2013, 2014, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
@@ -234,6 +234,9 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
       // take into account the fact that we've cached one value
       pos = pos - 1;
       lexer->lookCharLastValueCached = Lexer::LOOK_VALUE_NOT_CACHED;
+  }
+  if (unlikely(pos > LONG_LONG_MAX - length)) {
+      return nullptr;
   }
   lexer->setPos(pos + length);
 

@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015-2017 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015-2018 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
@@ -198,6 +198,24 @@ Link *FormField::additionalAction(AdditionalActionType type) const
 
   Link* action = nullptr;
   if (::LinkAction *act = m_formData->fm->getAdditionalAction(actionType))
+  {
+    action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
+  }
+  return action;
+}
+
+Link *FormField::additionalAction(Annotation::AdditionalActionType type) const
+{
+  ::AnnotWidget *w = m_formData->fm->getWidgetAnnotation();
+  if (!w)
+  {
+    return nullptr;
+  }
+
+  const Annot::AdditionalActionsType actionType = toPopplerAdditionalActionType(type);
+
+  Link* action = nullptr;
+  if (::LinkAction *act = w->getAdditionalAction(actionType))
   {
     action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
   }

@@ -1254,7 +1254,7 @@ void GlobalParams::setupBaseFonts(char *dir) {
   int i, j;
 
   for (i = 0; displayFontTab[i].name; ++i) {
-    if (fontFiles->lookup(displayFontTab[i].name)) {
+    if (fontFiles.count(displayFontTab[i].name) > 0) {
       continue;
     }
     fontName = new GooString(displayFontTab[i].name);
@@ -1296,9 +1296,12 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
   SysFontInfo *fi;
   GooString *path;
 
+  const GooString *fontName = font->getName();
+  if (!fontName) return nullptr;
+
   path = NULL;
   lockGlobalParams;
-  if ((fi = sysFonts->find(font->getName(), font->isFixedWidth(), gFalse))) {
+  if ((fi = sysFonts->find(fontName, font->isFixedWidth(), gFalse))) {
     path = fi->path->copy();
     *type = fi->type;
     *fontNum = fi->fontNum;

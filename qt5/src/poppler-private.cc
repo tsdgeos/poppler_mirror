@@ -163,6 +163,24 @@ namespace Debug {
         return QStringToUnicodeGooString(dt.toUTC().toString("yyyyMMddhhmmss+00'00'"));
     }
 
+    Annot::AdditionalActionsType toPopplerAdditionalActionType(Annotation::AdditionalActionType type) {
+        switch ( type )
+        {
+            case Annotation::CursorEnteringAction:  return Annot::actionCursorEntering;
+            case Annotation::CursorLeavingAction:   return Annot::actionCursorLeaving;
+            case Annotation::MousePressedAction:    return Annot::actionMousePressed;
+            case Annotation::MouseReleasedAction:   return Annot::actionMouseReleased;
+            case Annotation::FocusInAction:         return Annot::actionFocusIn;
+            case Annotation::FocusOutAction:        return Annot::actionFocusOut;
+            case Annotation::PageOpeningAction:     return Annot::actionPageOpening;
+            case Annotation::PageClosingAction:     return Annot::actionPageClosing;
+            case Annotation::PageVisibleAction:     return Annot::actionPageVisible;
+            case Annotation::PageInvisibleAction:   return Annot::actionPageInvisible;
+        }
+
+        return Annot::actionCursorEntering;
+    }
+
     static void linkActionToTocItem( const ::LinkAction * a, DocumentData * doc, QDomElement * e )
     {
         if ( !a || !e )

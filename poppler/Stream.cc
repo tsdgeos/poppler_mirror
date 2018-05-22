@@ -1435,6 +1435,7 @@ void LZWStream::clearTable() {
   nextBits = 9;
   seqIndex = seqLength = 0;
   first = gTrue;
+  newChar = 0;
 }
 
 int LZWStream::getCode() {
@@ -1444,7 +1445,9 @@ int LZWStream::getCode() {
   while (inputBits < nextBits) {
     if ((c = str->getChar()) == EOF)
       return EOF;
-    inputBuf = (inputBuf << 8) | (c & 0xff);
+    if (likely(inputBuf >= 0)) {
+        inputBuf = (inputBuf << 8) | (c & 0xff);
+    }
     inputBits += 8;
   }
   code = (inputBuf >> (inputBits - nextBits)) & ((1 << nextBits) - 1);
