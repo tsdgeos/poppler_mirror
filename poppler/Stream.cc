@@ -1435,6 +1435,7 @@ void LZWStream::clearTable() {
   nextBits = 9;
   seqIndex = seqLength = 0;
   first = gTrue;
+  newChar = 0;
 }
 
 int LZWStream::getCode() {
