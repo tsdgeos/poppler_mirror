@@ -453,7 +453,12 @@ SplashAxialPattern::SplashAxialPattern(SplashColorMode colorModeA, GfxState *sta
   shadingA->getCoords(&x0, &y0, &x1, &y1);
   dx = x1 - x0;
   dy = y1 - y0;
-  mul = 1 / (dx * dx + dy * dy);
+  const double mul_denominator = (dx * dx + dy * dy);
+  if (unlikely(mul_denominator == 0)) {
+    mul = 0;
+  } else {
+    mul = 1 / mul_denominator;
+  }
   shadingA->getColorSpace()->getDefaultColor(&srcColor);
   convertGfxColor(defaultColor, colorModeA, shadingA->getColorSpace(), &srcColor);
 }
