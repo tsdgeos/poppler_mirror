@@ -235,6 +235,9 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
       pos = pos - 1;
       lexer->lookCharLastValueCached = Lexer::LOOK_VALUE_NOT_CACHED;
   }
+  if (unlikely(length < 0)) {
+      return nullptr;
+  }
   if (unlikely(pos > LONG_LONG_MAX - length)) {
       return nullptr;
   }
