@@ -321,7 +321,7 @@ BaseCryptStream::BaseCryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm a
   }
   switch (algo) {
   case cryptRC4:
-    if (likely(keyLength < (sizeof(objKey) - 4))) {
+    if (likely(keyLength < static_cast<int>(sizeof(objKey) - 4))) {
       objKey[keyLength] = objNum & 0xff;
       objKey[keyLength + 1] = (objNum >> 8) & 0xff;
       objKey[keyLength + 2] = (objNum >> 16) & 0xff;
