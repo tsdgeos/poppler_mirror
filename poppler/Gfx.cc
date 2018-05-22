@@ -4455,6 +4455,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
       }
       maskColorSpace = GfxColorSpace::parse(nullptr, &obj1, out, state);
       if (!maskColorSpace || maskColorSpace->getMode() != csDeviceGray) {
+	delete maskColorSpace;
 	goto err1;
       }
       obj1 = maskDict->lookup("Decode");
