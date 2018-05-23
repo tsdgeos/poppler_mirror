@@ -5293,6 +5293,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
       case 1:
 	if (nPatchesA == 0) {
           gfree(patchesA);
+	  for (int k = 0; k < nFuncsA; ++k) delete funcsA[k];
 	  return nullptr;
 	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[0][3];
@@ -5329,6 +5330,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
       case 2:
 	if (nPatchesA == 0) {
           gfree(patchesA);
+	  for (int k = 0; k < nFuncsA; ++k) delete funcsA[k];
 	  return nullptr;
 	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[3][3];
@@ -5365,6 +5367,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
       case 3:
 	if (nPatchesA == 0) {
           gfree(patchesA);
+	  for (int k = 0; k < nFuncsA; ++k) delete funcsA[k];
 	  return nullptr;
 	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[3][0];
@@ -5444,6 +5447,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
       case 1:
 	if (nPatchesA == 0) {
           gfree(patchesA);
+	  for (int k = 0; k < nFuncsA; ++k) delete funcsA[k];
 	  return nullptr;
 	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[0][3];
@@ -5488,6 +5492,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
       case 2:
 	if (nPatchesA == 0) {
           gfree(patchesA);
+	  for (int k = 0; k < nFuncsA; ++k) delete funcsA[k];
 	  return nullptr;
 	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[3][3];
@@ -5532,6 +5537,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
       case 3:
 	if (nPatchesA == 0) {
           gfree(patchesA);
+	  for (int k = 0; k < nFuncsA; ++k) delete funcsA[k];
 	  return nullptr;
 	}
 	p->x[0][0] = patchesA[nPatchesA-1].x[3][0];
