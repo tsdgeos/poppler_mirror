@@ -219,15 +219,12 @@ void *gmallocn3_checkoverflow(int a, int b, int c) {
 }
 
 inline static void *greallocn(void *p, int nObjs, int objSize, bool checkoverflow) {
-  int n;
-
   if (nObjs == 0) {
     if (p) {
       gfree(p);
     }
     return nullptr;
   }
-  n = nObjs * objSize;
   if (objSize <= 0 || nObjs < 0 || nObjs >= INT_MAX / objSize) {
     fprintf(stderr, "Bogus memory allocation size\n");
     if (checkoverflow) {
@@ -237,6 +234,7 @@ inline static void *greallocn(void *p, int nObjs, int objSize, bool checkoverflo
       exit(1);
     }
   }
+  const int n = nObjs * objSize;
   return grealloc(p, n, checkoverflow);
 }
 
