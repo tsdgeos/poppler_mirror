@@ -989,7 +989,6 @@ void Gfx::opSetExtGState(Object args[], int numArgs) {
   Function *funcs[4];
   GfxColor backdropColor;
   GBool haveBackdropColor;
-  GfxColorSpace *blendingColorSpace;
   GBool alpha, isolated, knockout;
   double opac;
   int i;
@@ -1196,7 +1195,7 @@ void Gfx::opSetExtGState(Object args[], int numArgs) {
       if (obj3.isStream()) {
 	Object obj4 = obj3.streamGetDict()->lookup("Group");
 	if (obj4.isDict()) {
-	  blendingColorSpace = nullptr;
+	  GfxColorSpace *blendingColorSpace = nullptr;
 	  isolated = knockout = gFalse;
 	  Object obj5 = obj4.dictLookup("CS");
 	  if (!obj5.isNull()) {
@@ -1222,6 +1221,7 @@ void Gfx::opSetExtGState(Object args[], int numArgs) {
 	  }
 	  doSoftMask(&obj3, alpha, blendingColorSpace,
 		     isolated, knockout, funcs[0], &backdropColor);
+	  delete blendingColorSpace;
 	} else {
 	  error(errSyntaxError, getPos(), "Invalid soft mask in ExtGState - missing group");
 	}
@@ -1354,10 +1354,6 @@ void Gfx::doSoftMask(Object *str, GBool alpha,
 	  blendingColorSpace, isolated, knockout,
 	  alpha, transferFunc, backdropColor);
   --formDepth;
-
-  if (blendingColorSpace) {
-    delete blendingColorSpace;
-  }
 }
 
 void Gfx::opSetRenderingIntent(Object args[], int numArgs) {
