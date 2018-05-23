@@ -5697,6 +5697,9 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
   }
   byte_lookup = nullptr;
 
+  if (unlikely(bits <= 0))
+    goto err1;
+
   // get decode map
   if (decode->isNull()) {
     nComps = colorSpace->getNComps();
