@@ -4023,6 +4023,7 @@ void JBIG2Stream::readPageInfoSeg(Guint length) {
   } else {
     curPageH = pageH;
   }
+  delete pageBitmap;
   pageBitmap = new JBIG2Bitmap(0, pageW, curPageH);
 
   if (!pageBitmap->isOk()) {
