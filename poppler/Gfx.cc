@@ -2938,7 +2938,12 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
     xz = x0 + sz * (x1 - x0);
     yz = y0 + sz * (y1 - y0);
     enclosed = (xz - x0) * (xz - x0) + (yz - y0) * (yz - y0) <= r0 * r0;
-    theta = asin(r0 / sqrt((x0 - xz) * (x0 - xz) + (y0 - yz) * (y0 - yz)));
+    const double theta_aux = sqrt((x0 - xz) * (x0 - xz) + (y0 - yz) * (y0 - yz));
+    if (likely(theta_aux != 0)) {
+      theta = asin(r0 / theta_aux);
+    } else {
+      theta = 0;
+    }
     if (r0 > r1) {
       theta = -theta;
     }
