@@ -5129,6 +5129,10 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
     error(errSyntaxWarning, -1, "Missing or invalid BitsPerCoordinate in shading dictionary");
     return nullptr;
   }
+  if (unlikely(coordBits <= 0)) {
+    error(errSyntaxWarning, -1, "Invalid BitsPerCoordinate in shading dictionary");
+    return nullptr;
+  }
   obj1 = dict->lookup("BitsPerComponent");
   if (obj1.isInt()) {
     compBits = obj1.getInt();
