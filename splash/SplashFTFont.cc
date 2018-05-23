@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2011, 2014 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2011, 2014, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Kristian Høgsberg <krh@bitplanet.net>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -41,6 +41,8 @@
 #include "SplashFTFontEngine.h"
 #include "SplashFTFontFile.h"
 #include "SplashFTFont.h"
+
+#include "goo/GooLikely.h"
 
 //------------------------------------------------------------------------
 
@@ -83,6 +85,10 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   // if the textMat values are too small, FreeType's fixed point
   // arithmetic doesn't work so well
   textScale = splashDist(0, 0, textMat[2], textMat[3]) / size;
+
+  if (unlikely(textScale == 0)) {
+    return;
+  }
 
   div = face->bbox.xMax > 20000 ? 65536 : 1;
 
