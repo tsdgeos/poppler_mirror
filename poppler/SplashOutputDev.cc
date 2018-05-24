@@ -1450,6 +1450,7 @@ SplashOutputDev::~SplashOutputDev() {
   if (bitmap) {
     delete bitmap;
   }
+  delete textClipPath;
 }
 
 void SplashOutputDev::startDoc(PDFDoc *docA) {
