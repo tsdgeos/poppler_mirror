@@ -277,6 +277,10 @@ GBool SplashFTFont::makeGlyph(int c, int xFrac, int yFrac,
   Guchar *p, *q;
   int i;
 
+  if (unlikely(textScale == 0)) {
+    return gFalse;
+  }
+
   ff = (SplashFTFontFile *)fontFile;
 
   ff->face->size = sizeObj;
