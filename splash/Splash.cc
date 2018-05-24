@@ -3573,6 +3573,7 @@ void Splash::scaleMaskYuXu(SplashImageMaskSource src, void *srcData,
 
   if (unlikely(srcWidth <= 0 || srcHeight <= 0)) {
     error(errSyntaxError, -1, "srcWidth <= 0 || srcHeight <= 0 in Splash::scaleMaskYuXu");
+    gfree(dest->takeData());
     return;
   }
 
