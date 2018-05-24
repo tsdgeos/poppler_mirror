@@ -1930,6 +1930,8 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
   // exported symbol list
   i = j = 0;
   ex = gFalse;
+  run = 0; // initialize it once in case the first decodeInt fails
+           // we do not want to use uninitialized memory
   while (i < numInputSyms + numNewSyms) {
     if (huff) {
       huffDecoder->decodeInt(&run, huffTableA);
