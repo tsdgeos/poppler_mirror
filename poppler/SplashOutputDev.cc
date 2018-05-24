@@ -3988,11 +3988,15 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
   //----- set up the soft mask
 
   if (maskColorMap->getMatteColor() != nullptr) {
-    Guchar *data = (Guchar *) gmalloc(maskWidth * maskHeight);
+    const int maskChars = maskWidth * maskHeight;
+    Guchar *data = (Guchar *) gmalloc(maskChars);
     maskStr->reset();
-    maskStr->doGetChars(maskWidth * maskHeight, data);
+    const int readChars = maskStr->doGetChars(maskChars, data);
+    if (unlikely(readChars < maskChars)) {
+      memset(&data[readChars], 0, maskChars - readChars);
+    }
     maskStr->close();
-    maskStr = new AutoFreeMemStream((char *)data, 0, maskWidth * maskHeight, maskStr->getDictObject()->copy());
+    maskStr = new AutoFreeMemStream((char *)data, 0, maskChars, maskStr->getDictObject()->copy());
   }
   imgMaskData.imgStr = new ImageStream(maskStr, maskWidth,
 				       maskColorMap->getNumPixelComps(),
