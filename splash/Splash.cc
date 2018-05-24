@@ -5187,7 +5187,7 @@ void Splash::blitImageClipped(SplashBitmap *src, GBool srcAlpha,
 			      int xSrc, int ySrc, int xDest, int yDest,
 			      int w, int h) {
   SplashPipe pipe;
-  SplashColor pixel;
+  SplashColor pixel = {};
   Guchar *ap;
   int x, y;
 
