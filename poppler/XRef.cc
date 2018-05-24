@@ -789,6 +789,9 @@ GBool XRef::readXRefStreamSection(Stream *xrefStr, int *w, int first, int n) {
   unsigned long long offset, gen;
   int type, c, i, j;
 
+  if (first > INT_MAX - n) {
+    return gFalse;
+  }
   if (first + n < 0) {
     return gFalse;
   }
