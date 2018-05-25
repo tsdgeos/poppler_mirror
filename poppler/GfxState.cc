@@ -5145,6 +5145,10 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
     error(errSyntaxWarning, -1, "Missing or invalid BitsPerComponent in shading dictionary");
     return nullptr;
   }
+  if (unlikely(compBits <= 0 || compBits > 31)) {
+    error(errSyntaxWarning, -1, "Invalid BitsPerComponent in shading dictionary");
+    return nullptr;
+  }
   obj1 = dict->lookup("BitsPerFlag");
   if (obj1.isInt()) {
     flagBits = obj1.getInt();
