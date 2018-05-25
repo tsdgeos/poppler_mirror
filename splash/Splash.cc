@@ -4619,8 +4619,10 @@ void Splash::scaleImageYuXd(SplashImageSource src, void *srcData,
 
   // allocate buffers
   lineBuf = (Guchar *)gmallocn_checkoverflow(srcWidth, nComps);
-  if (unlikely(!lineBuf))
+  if (unlikely(!lineBuf)) {
+    gfree(dest->takeData());
     return;
+  }
   if (srcAlpha) {
     alphaLineBuf = (Guchar *)gmalloc(srcWidth);
   } else {
@@ -5100,7 +5102,7 @@ void Splash::blitImage(SplashBitmap *src, GBool srcAlpha, int xDest, int yDest) 
 void Splash::blitImage(SplashBitmap *src, GBool srcAlpha, int xDest, int yDest,
 		       SplashClipResult clipRes) {
   SplashPipe pipe;
-  SplashColor pixel;
+  SplashColor pixel = {};
   Guchar *ap;
   int w, h, x0, y0, x1, y1, x, y;
 
