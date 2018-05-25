@@ -315,7 +315,11 @@ GBool SplashUnivariatePattern::getColor(int x, int y, SplashColorPtr c) {
   if (! getParameter (xc, yc, &t))
       return gFalse;
 
-  shading->getColor(t, &gfxColor);
+  const int filled = shading->getColor(t, &gfxColor);
+  if (unlikely(filled < shading->getColorSpace()->getNComps())) {
+    for (int i = filled; i < shading->getColorSpace()->getNComps(); ++i)
+      gfxColor.c[i] = 0;
+  }
   convertGfxColor(c, colorMode, shading->getColorSpace(), &gfxColor);
   return gTrue;
 }

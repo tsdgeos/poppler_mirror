@@ -3891,7 +3891,7 @@ GfxUnivariateShading::~GfxUnivariateShading() {
   gfree (cacheBounds);
 }
 
-void GfxUnivariateShading::getColor(double t, GfxColor *color) {
+int GfxUnivariateShading::getColor(double t, GfxColor *color) {
   double out[gfxColorMaxComps];
 
   // NB: there can be one function with n outputs or n functions with
@@ -3901,7 +3901,7 @@ void GfxUnivariateShading::getColor(double t, GfxColor *color) {
   if (unlikely(nFuncs < 1 || nComps > gfxColorMaxComps)) {
     for (int i = 0; i < gfxColorMaxComps; i++)
         color->c[i] = 0;
-    return;
+    return gfxColorMaxComps;
   }
 
   if (cacheSize > 0) {
@@ -3941,6 +3941,7 @@ void GfxUnivariateShading::getColor(double t, GfxColor *color) {
   for (int i = 0; i < nComps; ++i) {
     color->c[i] = dblToCol(out[i]);
   }
+  return nComps;
 }
 
 void GfxUnivariateShading::setupCache(const Matrix *ctm,
