@@ -2603,7 +2603,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading) {
   double t0, t1, tt;
   double ta[axialMaxSplits + 1];
   int next[axialMaxSplits + 1];
-  GfxColor color0, color1;
+  GfxColor color0 = {}, color1;
   int nComps;
   int i, j, k;
   GBool needExtend = gTrue;
