@@ -415,6 +415,10 @@ SplashPath *SplashFTFont::getGlyphPath(int c) {
   FT_UInt gid;
   FT_Glyph glyph;
 
+  if (unlikely(textScale == 0)) {
+    return nullptr;
+  }
+
   ff = (SplashFTFontFile *)fontFile;
   ff->face->size = sizeObj;
   FT_Set_Transform(ff->face, &textMatrix, nullptr);
