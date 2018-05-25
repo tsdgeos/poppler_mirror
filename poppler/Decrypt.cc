@@ -1150,7 +1150,7 @@ static inline Gulong md5Round4(Gulong a, Gulong b, Gulong c, Gulong d,
 }
 
 void md5(Guchar *msg, int msgLen, Guchar *digest) {
-  Gulong x[16];
+  Gulong x[16] = {};
   Gulong a, b, c, d, aa, bb, cc, dd;
   int n64;
   int i, j, k;
