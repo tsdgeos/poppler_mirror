@@ -574,7 +574,7 @@ GBool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fo
       goto err0;
     }
     n = obj.getInt();
-    if (first < 0 || n < 0 || first + n < 0) {
+    if (first < 0 || n < 0 || first > INT_MAX - n) {
       goto err0;
     }
     if (first + n > size) {
