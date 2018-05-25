@@ -311,14 +311,16 @@ BaseCryptStream::BaseCryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm a
 				 int keyLength, int objNum, int objGen):
   FilterStream(strA)
 {
-  int i;
-
   algo = algoA;
 
   // construct object key
-  for (i = 0; i < keyLength; ++i) {
+  for (int i = 0; i < keyLength; ++i) {
     objKey[i] = fileKey[i];
   }
+  for (std::size_t i = keyLength; i < sizeof(objKey); ++i) {
+    objKey[i] = 0;
+  }
+
   switch (algo) {
   case cryptRC4:
     if (likely(keyLength < static_cast<int>(sizeof(objKey) - 4))) {
