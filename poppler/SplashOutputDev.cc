@@ -1256,7 +1256,6 @@ T3FontCache::T3FontCache(const Ref *fontIDA, double m11A, double m12A,
 			 double m21A, double m22A,
 			 int glyphXA, int glyphYA, int glyphWA, int glyphHA,
 			 GBool validBBoxA, GBool aa) {
-  int i;
 
   fontID = *fontIDA;
   m11 = m11A;
@@ -1270,8 +1269,7 @@ T3FontCache::T3FontCache(const Ref *fontIDA, double m11A, double m12A,
   validBBox = validBBoxA;
   // sanity check for excessively large glyphs (which most likely
   // indicate an incorrect BBox)
-  i = glyphW * glyphH;
-  if (i > 100000 || glyphW > INT_MAX / glyphH || glyphW <= 0 || glyphH <= 0) {
+  if (glyphW > INT_MAX / glyphH || glyphW <= 0 || glyphH <= 0 || glyphW * glyphH > 100000) {
     glyphW = glyphH = 100;
     validBBox = gFalse;
   }
@@ -1298,7 +1296,7 @@ T3FontCache::T3FontCache(const Ref *fontIDA, double m11A, double m12A,
   {
     cacheTags = (T3FontCacheTag *)gmallocn(cacheSets * cacheAssoc,
 					 sizeof(T3FontCacheTag));
-    for (i = 0; i < cacheSets * cacheAssoc; ++i) {
+    for (int i = 0; i < cacheSets * cacheAssoc; ++i) {
       cacheTags[i].mru = i & (cacheAssoc - 1);
     }
   }
