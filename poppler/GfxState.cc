@@ -4793,6 +4793,10 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
     error(errSyntaxWarning, -1, "Missing or invalid BitsPerComponent in shading dictionary");
     return nullptr;
   }
+  if (unlikely(compBits <= 0 || compBits > 31)) {
+    error(errSyntaxWarning, -1, "Invalid BitsPerComponent in shading dictionary");
+    return nullptr;
+  }
   flagBits = vertsPerRow = 0; // make gcc happy
   if (typeA == 4) {
     obj1 = dict->lookup("BitsPerFlag");
