@@ -39,6 +39,7 @@
 // Copyright (C) 2016 Takahiro Hashimoto <kenya888.en@gmail.com>
 // Copyright (C) 2017 Even Rouault <even.rouault@spatialys.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2368,6 +2369,7 @@ SplashPath *SplashOutputDev::convertPath(GfxState *state, GfxPath *path,
   for (i = 0; i < path->getNumSubpaths(); ++i) {
     subpath = path->getSubpath(i);
     if (subpath->getNumPoints() > n) {
+      sPath->reserve(subpath->getNumPoints() + 1);
       sPath->moveTo((SplashCoord)subpath->getX(0),
 		    (SplashCoord)subpath->getY(0));
       j = 1;
