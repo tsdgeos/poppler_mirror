@@ -122,7 +122,6 @@ SplashXPathScanner::SplashXPathScanner(SplashXPath *xPathA, GBool eoA,
   allInter = nullptr;
   inter = nullptr;
   computeIntersections();
-  interY = yMin - 1;
 }
 
 SplashXPathScanner::~SplashXPathScanner() {
@@ -213,18 +212,9 @@ GBool SplashXPathScanner::testSpan(int x0, int x1, int y) {
   return gTrue;
 }
 
-GBool SplashXPathScanner::getNextSpan(int y, int *x0, int *x1) {
-  int interEnd, xx0, xx1;
+GBool SplashXPathScanIterator::getNextSpan(int *x0, int *x1) {
+  int xx0, xx1;
 
-  if (y < yMin || y > yMax) {
-    return gFalse;
-  }
-  if (interY != y) {
-    interY = y;
-    interIdx = inter[y - yMin];
-    interCount = 0;
-  }
-  interEnd = inter[y - yMin + 1];
   if (interIdx >= interEnd) {
     return gFalse;
   }
@@ -244,6 +234,24 @@ GBool SplashXPathScanner::getNextSpan(int y, int *x0, int *x1) {
   *x0 = xx0;
   *x1 = xx1;
   return gTrue;
+}
+
+SplashXPathScanIterator::SplashXPathScanIterator(const SplashXPathScanner &scanner, int y) {
+  allInter(nullptr),
+  interIdx(0),
+  interEnd(0),
+  interCount(0),
+  eo(scanner.eo)
+{
+  if (y < scanner.yMin || y > scanner.yMax) {
+    return;
+  }
+
+  allInter = scanner.allInter;
+  interIdx = scanner.inter[y - scanner.yMin];
+  // no special handling for last row needed,
+  // last inter entry contains sentinel value, allInterLen
+  interEnd = scanner.inter[y - scanner.yMin + 1];
 }
 
 void SplashXPathScanner::computeIntersections() {
@@ -378,7 +386,7 @@ GBool SplashXPathScanner::addIntersection(double segYMin, double segYMax,
 
 void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf,
 				      int *x0, int *x1, int y, GBool adjustVertLine) {
-  int xx0, xx1, xx, xxMin, xxMax, yy, interEnd;
+  int xx0, xx1, xx, xxMin, xxMax, yy, interEnd, interIdx, interCount;
   Guchar mask;
   SplashColorPtr p;
 
@@ -460,7 +468,7 @@ void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf,
 
 void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf,
 				    int *x0, int *x1, int y) {
-  int xx0, xx1, xx, yy, interEnd;
+  int xx0, xx1, xx, yy, interEnd, interIdx, interCount;
   Guchar mask;
   SplashColorPtr p;
 
