@@ -1141,7 +1141,7 @@ Object XRef::fetch(int num, int gen, int recursion) {
 
   case xrefEntryUncompressed:
   {
-    if (e->gen != gen) {
+    if (e->gen != gen || e->offset < 0) {
       goto err;
     }
     parser = new Parser(this,
