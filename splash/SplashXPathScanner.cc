@@ -286,27 +286,33 @@ void SplashXPathScanner::computeIntersections() {
       if (y1 > yMax) {
 	y1 = yMax;
       }
-      // this loop could just add seg->dxdy to xx1 on each iteration,
-      // but that introduces numerical accuracy problems
-      xx1 = seg->x0 + ((SplashCoord)y0 - seg->y0) * seg->dxdy;
       int count = eo || (seg->flags & splashXPathFlip) ? 1 : -1;
+      // Calculate the projected intersection of the segment with the
+      // X-Axis.
+      SplashCoord xbase = seg->x0 - (seg->y0 * seg->dxdy);
+      xx0 = xbase + ((SplashCoord)y0) * seg->dxdy;
+      // the segment may not actually extend to the top and/or bottom edges
+      if (xx0 < segXMin) {
+	xx0 = segXMin;
+      } else if (xx0 > segXMax) {
+	xx0 = segXMax;
+      }
+      int x0 = splashFloor(xx0);
+
       for (y = y0; y <= y1; ++y) {
-	xx0 = xx1;
-	xx1 = seg->x0 + ((SplashCoord)(y + 1) - seg->y0) * seg->dxdy;
-	// the segment may not actually extend to the top and/or bottom edges
-	if (xx0 < segXMin) {
-	  xx0 = segXMin;
-	} else if (xx0 > segXMax) {
-	  xx0 = segXMax;
-	}
+	xx1 = xbase + ((SplashCoord)(y + 1) * seg->dxdy);
+
 	if (xx1 < segXMin) {
 	  xx1 = segXMin;
 	} else if (xx1 > segXMax) {
 	  xx1 = segXMax;
 	}
-	if (!addIntersection(segYMin, segYMax, y, splashFloor(xx0),
-                             splashFloor(xx1), count))
-          break;
+	int x1 = splashFloor(xx1);
+	if (!addIntersection(segYMin, segYMax, y, x0, x1, count))
+	  break;
+
+	xx0 = xx1;
+	x0 = x1;
       }
     }
   }
