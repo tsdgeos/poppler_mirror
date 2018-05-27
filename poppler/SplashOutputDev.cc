@@ -315,7 +315,11 @@ GBool SplashUnivariatePattern::getColor(int x, int y, SplashColorPtr c) {
   if (! getParameter (xc, yc, &t))
       return gFalse;
 
-  shading->getColor(t, &gfxColor);
+  const int filled = shading->getColor(t, &gfxColor);
+  if (unlikely(filled < shading->getColorSpace()->getNComps())) {
+    for (int i = filled; i < shading->getColorSpace()->getNComps(); ++i)
+      gfxColor.c[i] = 0;
+  }
   convertGfxColor(c, colorMode, shading->getColorSpace(), &gfxColor);
   return gTrue;
 }
@@ -1256,7 +1260,6 @@ T3FontCache::T3FontCache(const Ref *fontIDA, double m11A, double m12A,
 			 double m21A, double m22A,
 			 int glyphXA, int glyphYA, int glyphWA, int glyphHA,
 			 GBool validBBoxA, GBool aa) {
-  int i;
 
   fontID = *fontIDA;
   m11 = m11A;
@@ -1270,8 +1273,7 @@ T3FontCache::T3FontCache(const Ref *fontIDA, double m11A, double m12A,
   validBBox = validBBoxA;
   // sanity check for excessively large glyphs (which most likely
   // indicate an incorrect BBox)
-  i = glyphW * glyphH;
-  if (i > 100000 || glyphW > INT_MAX / glyphH || glyphW <= 0 || glyphH <= 0) {
+  if (glyphW > INT_MAX / glyphH || glyphW <= 0 || glyphH <= 0 || glyphW * glyphH > 100000) {
     glyphW = glyphH = 100;
     validBBox = gFalse;
   }
@@ -1298,7 +1300,7 @@ T3FontCache::T3FontCache(const Ref *fontIDA, double m11A, double m12A,
   {
     cacheTags = (T3FontCacheTag *)gmallocn(cacheSets * cacheAssoc,
 					 sizeof(T3FontCacheTag));
-    for (i = 0; i < cacheSets * cacheAssoc; ++i) {
+    for (int i = 0; i < cacheSets * cacheAssoc; ++i) {
       cacheTags[i].mru = i & (cacheAssoc - 1);
     }
   }
@@ -1450,6 +1452,7 @@ SplashOutputDev::~SplashOutputDev() {
   if (bitmap) {
     delete bitmap;
   }
+  delete textClipPath;
 }
 
 void SplashOutputDev::startDoc(PDFDoc *docA) {
@@ -3987,11 +3990,15 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
   //----- set up the soft mask
 
   if (maskColorMap->getMatteColor() != nullptr) {
-    Guchar *data = (Guchar *) gmalloc(maskWidth * maskHeight);
+    const int maskChars = maskWidth * maskHeight;
+    Guchar *data = (Guchar *) gmalloc(maskChars);
     maskStr->reset();
-    maskStr->doGetChars(maskWidth * maskHeight, data);
+    const int readChars = maskStr->doGetChars(maskChars, data);
+    if (unlikely(readChars < maskChars)) {
+      memset(&data[readChars], 0, maskChars - readChars);
+    }
     maskStr->close();
-    maskStr = new AutoFreeMemStream((char *)data, 0, maskWidth * maskHeight, maskStr->getDictObject()->copy());
+    maskStr = new AutoFreeMemStream((char *)data, 0, maskChars, maskStr->getDictObject()->copy());
   }
   imgMaskData.imgStr = new ImageStream(maskStr, maskWidth,
 				       maskColorMap->getNumPixelComps(),
