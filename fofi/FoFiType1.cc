@@ -340,8 +340,10 @@ void FoFiType1::parse() {
     } else if (!gotMatrix &&
 	       (line + 11 <= (char*)file + len) &&
 	       !strncmp(line, "/FontMatrix", 11)) {
-      strncpy(buf, line + 11, 255);
-      buf[255] = '\0';
+      const auto availableFile = (char*)file + len - (line + 11);
+      const int bufLen = availableFile < 255 ? availableFile : 255;
+      strncpy(buf, line + 11, bufLen);
+      buf[bufLen] = '\0';
       if ((p = strchr(buf, '['))) {
 	++p;
 	if ((p2 = strchr(p, ']'))) {
