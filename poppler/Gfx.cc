@@ -2903,7 +2903,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
   double xMin, yMin, xMax, yMax;
   double x0, y0, r0, x1, y1, r1, t0, t1;
   int nComps;
-  GfxColor colorA, colorB;
+  GfxColor colorA = {}, colorB = {}, colorC = {};
   double xa, ya, xb, yb, ra, rb;
   double ta, tb, sa, sb;
   double sz, xz, yz, sMin, sMax;
@@ -3079,7 +3079,6 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
         // same color does not mean all the areas in between have the same color too
         int ic = ia + 1;
         for (; ic <= ib; ic++) {
-          GfxColor colorC;
           const double sc = sMin + ((double)ic / (double)radialMaxSplits) * (sMax - sMin);
           const double tc = t0 + sc * (t1 - t0);
           getShadingColorRadialHelper(t0, t1, tc, shading, &colorC);
