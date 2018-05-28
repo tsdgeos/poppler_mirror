@@ -2816,8 +2816,14 @@ void GfxSeparationColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
   } else {
     x = colToDbl(color->c[0]);
     func->transform(&x, c);
-    for (i = 0; i < alt->getNComps(); ++i) {
+    const int altNComps = alt->getNComps();
+    for (i = 0; i < altNComps; ++i) {
       color2.c[i] = dblToCol(c[i]);
+    }
+    if (unlikely(altNComps > func->getOutputSize())) {
+      for (i = func->getOutputSize(); i < altNComps; ++i) {
+	color2.c[i] = 0;
+      }
     }
     alt->getRGB(&color2, rgb);
   }
