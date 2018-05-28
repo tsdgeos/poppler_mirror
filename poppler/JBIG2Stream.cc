@@ -2337,7 +2337,7 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(GBool huff, GBool refine,
   JBIG2Bitmap *bitmap;
   JBIG2Bitmap *symbolBitmap;
   Guint strips;
-  int t = 0, dt = 0, tt, s, ds, sFirst, j;
+  int t = 0, dt = 0, tt, s, ds = 0, sFirst, j;
   int rdw, rdh, rdx, rdy, ri = 0, refDX, refDY, bmSize;
   Guint symID, inst, bw, bh;
 
