@@ -4828,7 +4828,7 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
     for (i = 0; 5 + 2*i < obj1.arrayGetLength() && i < gfxColorMaxComps; ++i) {
       cMin[i] = (obj2 = obj1.arrayGet(4 + 2*i), obj2.getNum(&decodeOk));
       cMax[i] = (obj2 = obj1.arrayGet(5 + 2*i), obj2.getNum(&decodeOk));
-      cMul[i] = (cMax[i] - cMin[i]) / (double)((1 << compBits) - 1);
+      cMul[i] = (cMax[i] - cMin[i]) / (double)((1u << compBits) - 1);
     }
     nComps = i;
 
@@ -5173,7 +5173,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
     for (i = 0; 5 + 2*i < obj1.arrayGetLength() && i < gfxColorMaxComps; ++i) {
       cMin[i] = (obj2 = obj1.arrayGet(4 + 2*i), obj2.getNum(&decodeOk));
       cMax[i] = (obj2 = obj1.arrayGet(5 + 2*i), obj2.getNum(&decodeOk));
-      cMul[i] = (cMax[i] - cMin[i]) / (double)((1 << compBits) - 1);
+      cMul[i] = (cMax[i] - cMin[i]) / (double)((1u << compBits) - 1);
     }
     nComps = i;
 
