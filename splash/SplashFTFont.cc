@@ -87,7 +87,7 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   // arithmetic doesn't work so well
   textScale = splashDist(0, 0, textMat[2], textMat[3]) / size;
 
-  if (unlikely(textScale == 0)) {
+  if (unlikely(textScale == 0 || face->units_per_EM == 0)) {
     return;
   }
 
