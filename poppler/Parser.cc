@@ -238,7 +238,7 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
   if (unlikely(length < 0)) {
       return nullptr;
   }
-  if (unlikely(pos > LONG_LONG_MAX - length)) {
+  if (unlikely(pos > LLONG_MAX - length)) {
       return nullptr;
   }
   lexer->setPos(pos + length);
@@ -261,7 +261,7 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
       // When building the xref we can't use it so use this
       // kludge for broken PDF files: just add 5k to the length, and
       // hope its enough
-      if (length < LONG_LONG_MAX - 5000)
+      if (length < LLONG_MAX - 5000)
         length += 5000;
     }
   }
