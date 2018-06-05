@@ -1896,6 +1896,7 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
 	}
 	for (k = 0; k < (Guint)bmSize; ++k) {
 	  if ((c = curStr->getChar()) == EOF) {
+	    memset(p, 0, bmSize - k);
 	    break;
 	  }
 	  *p++ = (Guchar)c;
