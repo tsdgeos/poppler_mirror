@@ -1562,7 +1562,7 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
   JBIG2Bitmap *collBitmap, *refBitmap;
   Guint *symWidths;
   Guint symHeight, symWidth, totalWidth, x, symID;
-  int dh, dw, refAggNum, refDX = 0, refDY = 0, bmSize;
+  int dh = 0, dw, refAggNum, refDX = 0, refDY = 0, bmSize;
   GBool ex;
   int run, cnt, c;
   Guint i, j, k;
