@@ -4070,7 +4070,6 @@ GfxAxialShading *GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev
   int nFuncsA;
   GBool extend0A, extend1A;
   Object obj1;
-  int i;
 
   x0A = y0A = x1A = y1A = 0;
   obj1 = dict->lookup("Coords");
@@ -4109,9 +4108,11 @@ GfxAxialShading *GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev
       error(errSyntaxWarning, -1, "Invalid Function array in shading dictionary");
       return nullptr;
     }
-    for (i = 0; i < nFuncsA; ++i) {
+    for (int i = 0; i < nFuncsA; ++i) {
       Object obj2 = obj1.arrayGet(i);
       if (!(funcsA[i] = Function::parse(&obj2))) {
+	for (int j = 0; j < i; ++j)
+	  delete funcsA[j];
 	return nullptr;
       }
     }
