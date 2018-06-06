@@ -295,6 +295,10 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
     return;
   }
   sampleBits = obj1.getInt();
+  if (unlikely(sampleBits < 1 || sampleBits > 32)) {
+    error(errSyntaxError, -1, "Function invalid BitsPerSample");
+    return;
+  }
   sampleMul = 1.0 / (pow(2.0, (double)sampleBits) - 1);
 
   //----- Encode
