@@ -5691,7 +5691,7 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
   Guchar *indexedLookup;
   Function *sepFunc;
   double x[gfxColorMaxComps];
-  double y[gfxColorMaxComps];
+  double y[gfxColorMaxComps] = {};
   int i, j, k;
   double mapped;
   GBool useByteLookup;
