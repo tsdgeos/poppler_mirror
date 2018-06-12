@@ -572,7 +572,6 @@ StreamPredictor::StreamPredictor(Stream *strA, int predictorA,
   ok = gFalse;
 
   nVals = width * nComps;
-  pixBytes = (nComps * nBits + 7) >> 3;
   if (width <= 0 || nComps <= 0 || nBits <= 0 ||
       nComps > gfxColorMaxComps ||
       nBits > 16 ||
@@ -580,6 +579,7 @@ StreamPredictor::StreamPredictor(Stream *strA, int predictorA,
       nVals >= (INT_MAX - 7) / nBits) { // check for overflow in rowBytes
     return;
   }
+  pixBytes = (nComps * nBits + 7) >> 3;
   rowBytes = ((nVals * nBits + 7) >> 3) + pixBytes;
   predLine = (Guchar *)gmalloc(rowBytes);
   memset(predLine, 0, rowBytes);
