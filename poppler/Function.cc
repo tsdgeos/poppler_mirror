@@ -1303,6 +1303,7 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
       if (!tok->cmp("{")) {
 	elsePtr = *codePtr;
 	if (!parseCode(str, codePtr)) {
+	  delete tok;
 	  return gFalse;
 	}
 	delete tok;
