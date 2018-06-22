@@ -3057,7 +3057,8 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
     Object obj2 = obj1.arrayGet(i);
     if (!obj2.isName()) {
       error(errSyntaxWarning, -1, "Bad DeviceN color space (names)");
-      goto err1;
+      nCompsA = i;
+      goto err3;
     }
     namesA[i] = new GooString(obj2.getName());
   }
