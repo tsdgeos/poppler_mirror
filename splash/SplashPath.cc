@@ -4,6 +4,20 @@
 //
 //========================================================================
 
+//========================================================================
+//
+// Modified under the Poppler project - http://poppler.freedesktop.org
+//
+// All changes made under the Poppler project to this file are licensed
+// under GPL version 2 or later
+//
+// Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+//
+// To see a description of the changes please see the Changelog file that
+// came with your tarball or type make ChangeLog if you are building from git
+//
+//========================================================================
+
 #include <config.h>
 
 #ifdef USE_GCC_PRAGMAS
@@ -60,6 +74,10 @@ SplashPath::~SplashPath() {
   gfree(pts);
   gfree(flags);
   gfree(hints);
+}
+
+void  SplashPath::reserve(int nPts) {
+  grow(nPts - size);
 }
 
 // Add space for <nPts> more points.

@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2009, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2009, 2011, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -72,6 +72,7 @@ private:
   int size;
   GBool enableFreeTypeHinting;
   GBool enableSlightHinting;
+  GBool isOk;
 };
 
 #endif

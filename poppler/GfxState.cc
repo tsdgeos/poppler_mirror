@@ -2816,8 +2816,14 @@ void GfxSeparationColorSpace::getRGB(GfxColor *color, GfxRGB *rgb) {
   } else {
     x = colToDbl(color->c[0]);
     func->transform(&x, c);
-    for (i = 0; i < alt->getNComps(); ++i) {
+    const int altNComps = alt->getNComps();
+    for (i = 0; i < altNComps; ++i) {
       color2.c[i] = dblToCol(c[i]);
+    }
+    if (unlikely(altNComps > func->getOutputSize())) {
+      for (i = func->getOutputSize(); i < altNComps; ++i) {
+	color2.c[i] = 0;
+      }
     }
     alt->getRGB(&color2, rgb);
   }
@@ -4064,7 +4070,6 @@ GfxAxialShading *GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev
   int nFuncsA;
   GBool extend0A, extend1A;
   Object obj1;
-  int i;
 
   x0A = y0A = x1A = y1A = 0;
   obj1 = dict->lookup("Coords");
@@ -4103,9 +4108,11 @@ GfxAxialShading *GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev
       error(errSyntaxWarning, -1, "Invalid Function array in shading dictionary");
       return nullptr;
     }
-    for (i = 0; i < nFuncsA; ++i) {
+    for (int i = 0; i < nFuncsA; ++i) {
       Object obj2 = obj1.arrayGet(i);
       if (!(funcsA[i] = Function::parse(&obj2))) {
+	for (int j = 0; j < i; ++j)
+	  delete funcsA[j];
 	return nullptr;
       }
     }
@@ -4828,7 +4835,7 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
     for (i = 0; 5 + 2*i < obj1.arrayGetLength() && i < gfxColorMaxComps; ++i) {
       cMin[i] = (obj2 = obj1.arrayGet(4 + 2*i), obj2.getNum(&decodeOk));
       cMax[i] = (obj2 = obj1.arrayGet(5 + 2*i), obj2.getNum(&decodeOk));
-      cMul[i] = (cMax[i] - cMin[i]) / (double)((1 << compBits) - 1);
+      cMul[i] = (cMax[i] - cMin[i]) / (double)((1u << compBits) - 1);
     }
     nComps = i;
 
@@ -5173,7 +5180,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
     for (i = 0; 5 + 2*i < obj1.arrayGetLength() && i < gfxColorMaxComps; ++i) {
       cMin[i] = (obj2 = obj1.arrayGet(4 + 2*i), obj2.getNum(&decodeOk));
       cMax[i] = (obj2 = obj1.arrayGet(5 + 2*i), obj2.getNum(&decodeOk));
-      cMul[i] = (cMax[i] - cMin[i]) / (double)((1 << compBits) - 1);
+      cMul[i] = (cMax[i] - cMin[i]) / (double)((1u << compBits) - 1);
     }
     nComps = i;
 
@@ -5684,7 +5691,7 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
   Guchar *indexedLookup;
   Function *sepFunc;
   double x[gfxColorMaxComps];
-  double y[gfxColorMaxComps];
+  double y[gfxColorMaxComps] = {};
   int i, j, k;
   double mapped;
   GBool useByteLookup;

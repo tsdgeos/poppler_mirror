@@ -12,6 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -114,6 +115,9 @@ public:
 
   // Get the current point.
   GBool getCurPt(SplashCoord *x, SplashCoord *y);
+
+  // Reserve space for at least n points
+  void reserve(int n);
 
 protected:
 

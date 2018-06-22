@@ -60,8 +60,10 @@ static int glyphPathCubicTo(const FT_Vector *ctrl1, const FT_Vector *ctrl2,
 SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
 			   SplashCoord *textMatA):
   SplashFont(fontFileA, matA, textMatA, fontFileA->engine->aa), 
+  textScale(0),
   enableFreeTypeHinting(fontFileA->engine->enableFreeTypeHinting),
-  enableSlightHinting(fontFileA->engine->enableSlightHinting)
+  enableSlightHinting(fontFileA->engine->enableSlightHinting),
+  isOk(false)
 {
   FT_Face face;
   int div;
@@ -86,7 +88,7 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   // arithmetic doesn't work so well
   textScale = splashDist(0, 0, textMat[2], textMat[3]) / size;
 
-  if (unlikely(textScale == 0)) {
+  if (unlikely(textScale == 0 || face->units_per_EM == 0)) {
     return;
   }
 
@@ -228,6 +230,8 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   textMatrix.xy = (FT_Fixed)((textMat[2] / (textScale * size)) * 65536);
   textMatrix.yy = (FT_Fixed)((textMat[3] / (textScale * size)) * 65536);
 #endif
+
+  isOk = true;
 }
 
 SplashFTFont::~SplashFTFont() {
@@ -277,7 +281,7 @@ GBool SplashFTFont::makeGlyph(int c, int xFrac, int yFrac,
   Guchar *p, *q;
   int i;
 
-  if (unlikely(textScale == 0)) {
+  if (unlikely(!isOk)) {
     return gFalse;
   }
 

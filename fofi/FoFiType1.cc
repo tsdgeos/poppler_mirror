@@ -229,8 +229,10 @@ void FoFiType1::parse() {
     if (!name &&
 	(line + 9 <= (char*)file + len) &&
 	!strncmp(line, "/FontName", 9)) {
-      strncpy(buf, line, 255);
-      buf[255] = '\0';
+      const auto availableFile = (char*)file + len - line;
+      const int lineLen = availableFile < 255 ? availableFile : 255;
+      strncpy(buf, line, lineLen);
+      buf[lineLen] = '\0';
       if ((p = strchr(buf+9, '/')) &&
 	  (p = strtok_r(p+1, " \t\n\r", &tokptr))) {
 	name = copyString(p);
@@ -338,8 +340,10 @@ void FoFiType1::parse() {
     } else if (!gotMatrix &&
 	       (line + 11 <= (char*)file + len) &&
 	       !strncmp(line, "/FontMatrix", 11)) {
-      strncpy(buf, line + 11, 255);
-      buf[255] = '\0';
+      const auto availableFile = (char*)file + len - (line + 11);
+      const int bufLen = availableFile < 255 ? availableFile : 255;
+      strncpy(buf, line + 11, bufLen);
+      buf[bufLen] = '\0';
       if ((p = strchr(buf, '['))) {
 	++p;
 	if ((p2 = strchr(p, ']'))) {

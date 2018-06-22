@@ -589,12 +589,18 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
 Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict,
 	 PDFRectangle *box, PDFRectangle *cropBox,
 	 GBool (*abortCheckCbkA)(void *data),
-	 void *abortCheckCbkDataA, XRef *xrefA)
+	 void *abortCheckCbkDataA, Gfx *gfxA)
 {
   int i;
 
   doc = docA;
-  xref = (xrefA == nullptr) ? doc->getXRef() : xrefA;
+  if (gfxA) {
+    xref = gfxA->getXRef();
+    formsDrawing = gfxA->formsDrawing;
+    charProcDrawing = gfxA->charProcDrawing;
+  } else {
+    xref = doc->getXRef();
+  }
   catalog = doc->getCatalog();
   subPage = gTrue;
   printCommands = globalParams->getPrintCommands();
@@ -2202,37 +2208,38 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat,
   }
   m1[4] = m[4];
   m1[5] = m[5];
-  if (out->useTilingPatternFill() &&
-	out->tilingPatternFill(state, this, catalog, tPat->getContentStream(),
-		       tPat->getMatrix(), tPat->getPaintType(), tPat->getTilingType(),
-		       tPat->getResDict(), m1, tPat->getBBox(),
-		       xi0, yi0, xi1, yi1, xstep, ystep)) {
-    goto restore;
-  } else {
-    bool shouldDrawForm = gTrue;
+  {
+    bool shouldDrawPattern = gTrue;
     std::set<int>::iterator patternRefIt;
     const int patternRefNum = tPat->getPatternRefNum();
     if (patternRefNum != -1) {
       if (formsDrawing.find(patternRefNum) == formsDrawing.end()) {
 	patternRefIt = formsDrawing.insert(patternRefNum).first;
       } else {
-	shouldDrawForm = gFalse;
+	shouldDrawPattern = gFalse;
       }
     }
-
-    if (shouldDrawForm) {
-      out->updatePatternOpacity(state);
-      for (yi = yi0; yi < yi1; ++yi) {
-	for (xi = xi0; xi < xi1; ++xi) {
-	  x = xi * xstep;
-	  y = yi * ystep;
-	  m1[4] = x * m[0] + y * m[2] + m[4];
-	  m1[5] = x * m[1] + y * m[3] + m[5];
-	  drawForm(tPat->getContentStream(), tPat->getResDict(),
-		  m1, tPat->getBBox());
+    if (shouldDrawPattern) {
+      if (out->useTilingPatternFill() &&
+	  out->tilingPatternFill(state, this, catalog, tPat->getContentStream(),
+			tPat->getMatrix(), tPat->getPaintType(), tPat->getTilingType(),
+			tPat->getResDict(), m1, tPat->getBBox(),
+			xi0, yi0, xi1, yi1, xstep, ystep)) {
+	// do nothing
+      } else {
+	out->updatePatternOpacity(state);
+	for (yi = yi0; yi < yi1; ++yi) {
+	  for (xi = xi0; xi < xi1; ++xi) {
+	    x = xi * xstep;
+	    y = yi * ystep;
+	    m1[4] = x * m[0] + y * m[2] + m[4];
+	    m1[5] = x * m[1] + y * m[3] + m[5];
+	    drawForm(tPat->getContentStream(), tPat->getResDict(),
+		    m1, tPat->getBBox());
+	  }
 	}
+	out->clearPatternOpacity(state);
       }
-      out->clearPatternOpacity(state);
       if (patternRefNum != -1) {
 	formsDrawing.erase(patternRefIt);
       }
@@ -2603,7 +2610,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading) {
   double t0, t1, tt;
   double ta[axialMaxSplits + 1];
   int next[axialMaxSplits + 1];
-  GfxColor color0 = {}, color1;
+  GfxColor color0 = {}, color1 = {};
   int nComps;
   int i, j, k;
   GBool needExtend = gTrue;
@@ -2903,7 +2910,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
   double xMin, yMin, xMax, yMax;
   double x0, y0, r0, x1, y1, r1, t0, t1;
   int nComps;
-  GfxColor colorA, colorB;
+  GfxColor colorA = {}, colorB = {}, colorC = {};
   double xa, ya, xb, yb, ra, rb;
   double ta, tb, sa, sb;
   double sz, xz, yz, sMin, sMax;
@@ -3079,7 +3086,6 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
         // same color does not mean all the areas in between have the same color too
         int ic = ia + 1;
         for (; ic <= ib; ic++) {
-          GfxColor colorC;
           const double sc = sMin + ((double)ic / (double)radialMaxSplits) * (sMax - sMin);
           const double tc = t0 + sc * (t1 - t0);
           getShadingColorRadialHelper(t0, t1, tc, shading, &colorC);
