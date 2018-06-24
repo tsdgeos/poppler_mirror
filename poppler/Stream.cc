@@ -504,7 +504,7 @@ Guchar *ImageStream::getLine() {
   int c;
   int i;
   Guchar *p;
-  
+
   if (unlikely(inputLine == nullptr)) {
       return nullptr;
   }
@@ -542,7 +542,7 @@ Guchar *ImageStream::getLine() {
     bits = 0;
     p = inputLine;
     for (i = 0; i < nVals; ++i) {
-      if (bits < nBits) {
+      while (bits < nBits) {
 	buf = (buf << 8) | (*p++ & 0xff);
 	bits += 8;
       }
