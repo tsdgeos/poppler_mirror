@@ -23,6 +23,7 @@
 #include <time.h>
 #include <hasht.h>
 #include <fstream>
+#include <libgen.h>
 #include "parseargs.h"
 #include "Object.h"
 #include "Array.h"
@@ -104,7 +105,9 @@ static void dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_wi
     // since { is the magic character to replace things we need to put it twice where
     // we don't want it to be replaced
     GooString *format = GooString::format("{{0:s}}.sig{{1:{0:d}d}}", sigCountLength);
-    GooString *path = GooString::format(format->getCString(), basename(filename), sig_num);
+    char *filenameCopy = strdup(filename);
+    GooString *path = GooString::format(format->getCString(), basename(filenameCopy), sig_num);
+    free(filenameCopy);
     printf("Signature #%d (%u bytes) => %s\n", sig_num, signature->getLength(), path->getCString());
     std::ofstream outfile(path->getCString(), std::ofstream::binary);
     outfile.write(signature->getCString(), signature->getLength());
