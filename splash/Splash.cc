@@ -3858,7 +3858,7 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
   SplashBitmap *scaledImg;
   SplashClipResult clipRes, clipRes2;
   SplashPipe pipe;
-  SplashColor pixel;
+  SplashColor pixel = {};
   int scaledWidth, scaledHeight, t0, t1, th;
   SplashCoord r00, r01, r10, r11, det, ir00, ir01, ir10, ir11;
   SplashCoord vx[4], vy[4];
