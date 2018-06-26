@@ -198,8 +198,8 @@ public:
   //return a copy of the field's content (UTF16BE)
   GooString* getContentCopy();
 
-  //except a UTF16BE string
-  void setContent(GooString* new_content);
+  //expects a UTF16BE string
+  void setContent(const GooString* new_content);
 
   void updateWidgetAppearance() override;
 
@@ -243,7 +243,7 @@ public:
 
   //except a UTF16BE string
   //only work for editable combo box, set the user-entered text as the current choice
-  void setEditChoice(GooString* new_content);
+  void setEditChoice(const GooString* new_content);
 
   const GooString* getEditChoice () const;
 
@@ -311,10 +311,10 @@ public:
   GBool hasTextQuadding() const { return hasQuadding; }
   VariableTextQuadding getTextQuadding() const { return quadding; }
 
-  GooString *getPartialName() const { return partialName; }
+  const GooString *getPartialName() const { return partialName; }
   void setPartialName(const GooString &name);
-  GooString *getAlternateUiName() const { return alternateUiName; }
-  GooString *getMappingName() const { return mappingName; }
+  const GooString *getAlternateUiName() const { return alternateUiName; }
+  const GooString *getMappingName() const { return mappingName; }
   GooString *getFullyQualifiedName();
 
   FormWidget* findWidgetByRef (Ref aref);
@@ -420,7 +420,7 @@ public:
   
   const GooString* getContent () const { return content; }
   GooString* getContentCopy ();
-  void setContentCopy (GooString* new_content);
+  void setContentCopy (const GooString* new_content);
   ~FormFieldText();
 
   bool isMultiline () const { return multiline; }
@@ -484,7 +484,7 @@ public:
   void deselectAll ();
 
   //only work for editable combo box, set the user-entered text as the current choice
-  void setEditChoice(GooString* new_content);
+  void setEditChoice(const GooString* new_content);
 
   const GooString* getEditChoice () const;
 
@@ -583,7 +583,7 @@ public:
   GBool getNeedAppearances () const { return needAppearances; }
   int getNumFields() const { return numFields; }
   FormField* getRootField(int i) const { return rootFields[i]; }
-  GooString* getDefaultAppearance() const { return defaultAppearance; }
+  const GooString* getDefaultAppearance() const { return defaultAppearance; }
   VariableTextQuadding getTextQuadding() const { return quadding; }
   GfxResources* getDefaultResources() const { return defaultResources; }
   Object* getDefaultResourcesObj() { return &resDict; }
