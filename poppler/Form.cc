@@ -269,11 +269,6 @@ const GooString* FormWidgetText::getContent () const
   return parent()->getContent();
 }
 
-GooString* FormWidgetText::getContentCopy ()
-{
-  return parent()->getContentCopy();
-}
-
 void FormWidgetText::updateWidgetAppearance()
 {
   if (widget)
@@ -1201,12 +1196,6 @@ void FormFieldText::print(int indent)
           terminal ? "Yes" : "No", numChildren);
 }
 #endif
-
-GooString* FormFieldText::getContentCopy ()
-{
-  if (!content) return nullptr;
-  return new GooString(content);
-}
 
 void FormFieldText::setContentCopy (const GooString* new_content)
 {

@@ -195,8 +195,6 @@ public:
   FormWidgetText(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
   //return the field's content (UTF16BE)
   const GooString* getContent() const;
-  //return a copy of the field's content (UTF16BE)
-  GooString* getContentCopy();
 
   //expects a UTF16BE string
   void setContent(const GooString* new_content);
@@ -419,7 +417,6 @@ public:
   FormFieldText(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
   
   const GooString* getContent () const { return content; }
-  GooString* getContentCopy ();
   void setContentCopy (const GooString* new_content);
   ~FormFieldText();
 
