@@ -136,7 +136,7 @@ bool FormWidget::isReadOnly() const
 
 void FormWidget::setReadOnly(bool value)
 {
-  return field->setReadOnly(value);
+  field->setReadOnly(value);
 }
 
 int FormWidget::encodeID (unsigned pageNum, unsigned fieldNum)
