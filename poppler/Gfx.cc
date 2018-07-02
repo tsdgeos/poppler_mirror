@@ -3048,7 +3048,11 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
   if (t < 1) {
     n = 3;
   } else {
-    n = (int)(M_PI / acos(1 - 0.1 / t));
+    const double tmp = 1 - 0.1 / t;
+    if (unlikely(tmp == 1))
+      n = 200;
+    else
+      n = (int)(M_PI / acos(tmp));
     if (n < 3) {
       n = 3;
     } else if (n > 200) {
