@@ -3900,10 +3900,13 @@ GfxUnivariateShading::~GfxUnivariateShading() {
 
 int GfxUnivariateShading::getColor(double t, GfxColor *color) {
   double out[gfxColorMaxComps];
+  int nComps;
 
-  // NB: there can be one function with n outputs or n functions with
-  // one output each (where n = number of color components)
-  const int nComps = nFuncs * funcs[0]->getOutputSize();
+  if (likely(nFuncs >= 1)) {
+    // NB: there can be one function with n outputs or n functions with
+    // one output each (where n = number of color components)
+    nComps = nFuncs * funcs[0]->getOutputSize();
+  }
 
   if (unlikely(nFuncs < 1 || nComps > gfxColorMaxComps)) {
     for (int i = 0; i < gfxColorMaxComps; i++)
