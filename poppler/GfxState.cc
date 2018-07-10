@@ -5669,7 +5669,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
 }
 
 void GfxPatchMeshShading::getParameterizedColor(double t, GfxColor *color) {
-  double out[gfxColorMaxComps];
+  double out[gfxColorMaxComps] = {};
 
   for (int j = 0; j < nFuncs; ++j) {
     funcs[j]->transform(&t, &out[j]);
