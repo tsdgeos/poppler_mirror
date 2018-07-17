@@ -10,6 +10,7 @@
 // Copyright 2015 Markus Kilås <digital@markuspage.com>
 // Copyright 2017 Sebastian Rasmussen <sebras@gmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+// Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 //
 //========================================================================
 
@@ -18,6 +19,8 @@
 #include "SignatureHandler.h"
 #include "goo/gmem.h"
 #include <secmod.h>
+#include <keyhi.h>
+#include <secder.h>
 
 #include <dirent.h>
 #include <Error.h>
@@ -78,6 +81,104 @@ time_t SignatureHandler::getSigningTime()
   return static_cast<time_t>(sTime/1000000);
 }
 
+void SignatureHandler::getEntityInfo(X509CertificateInfo::EntityInfo *info, CERTName *entityName)
+{
+  if (!info || !entityName)
+    return;
+
+  memset(info, 0, sizeof *info);
+
+  char *dn = CERT_NameToAscii(entityName);
+  if (dn) {
+      info->distinguishedName = copyString(dn);
+      PORT_Free(dn);
+  }
+
+  char *cn = CERT_GetCommonName(entityName);
+  if (cn) {
+    info->commonName = copyString(cn);
+    PORT_Free(cn);
+  }
+
+  char *email = CERT_GetCertEmailAddress(entityName);
+  if (email) {
+    info->email = copyString(email);
+    PORT_Free(email);
+  }
+
+  char *org = CERT_GetOrgName(entityName);
+  if (org) {
+    info->organization = copyString(org);
+    PORT_Free(org);
+  }
+}
+
+X509CertificateInfo *SignatureHandler::getCertificateInfo()
+{
+  if (!CMSSignerInfo)
+    return nullptr;
+
+  CERTCertificate *cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+  if (!cert)
+    return nullptr;
+
+  X509CertificateInfo *certInfo = new X509CertificateInfo;
+  if (!certInfo)
+    return nullptr;
+
+  certInfo->setVersion(DER_GetInteger(&cert->version) + 1);
+  certInfo->setSerialNumber(SECItemToGooString(cert->serialNumber));
+
+  //issuer info
+  X509CertificateInfo::EntityInfo issuerInfo;
+  getEntityInfo(&issuerInfo, &cert->issuer);
+  certInfo->setIssuerInfo(issuerInfo);
+
+  //validity
+  PRTime notBefore, notAfter;
+  CERT_GetCertTimes(cert, &notBefore, &notAfter);
+  X509CertificateInfo::Validity certValidity;
+  certValidity.notBefore = static_cast<time_t>(notBefore/1000000);
+  certValidity.notAfter = static_cast<time_t>(notAfter/1000000);
+  certInfo->setValidity(certValidity);
+
+  //subject info
+  X509CertificateInfo::EntityInfo subjectInfo;
+  getEntityInfo(&subjectInfo, &cert->subject);
+  certInfo->setSubjectInfo(subjectInfo);
+
+  //public key info
+  X509CertificateInfo::PublicKeyInfo pkInfo;
+  SECKEYPublicKey *pk = CERT_ExtractPublicKey(cert);
+  switch (pk->keyType)
+  {
+    case rsaKey:
+      pkInfo.publicKey = SECItemToGooString(pk->u.rsa.modulus);
+      pkInfo.publicKeyType = RSAKEY;
+      break;
+    case dsaKey:
+      pkInfo.publicKey = SECItemToGooString(pk->u.dsa.publicValue);
+      pkInfo.publicKeyType = DSAKEY;
+      break;
+    case ecKey:
+      pkInfo.publicKey = SECItemToGooString(pk->u.ec.publicValue);
+      pkInfo.publicKeyType = ECKEY;
+      break;
+    default:
+      pkInfo.publicKey = SECItemToGooString(cert->subjectPublicKeyInfo.subjectPublicKey);
+      pkInfo.publicKeyType = OTHERKEY;
+      break;
+  }
+  pkInfo.publicKeyStrength = SECKEY_PublicKeyStrengthInBits(pk);
+  certInfo->setPublicKeyInfo(pkInfo);
+
+  certInfo->setKeyUsageExtensions(cert->keyUsage);
+  certInfo->setCertificateDER(SECItemToGooString(cert->derCert));
+  certInfo->setIsSelfSigned(CERT_CompareName(&cert->subject, &cert->issuer) == SECEqual);
+
+  return certInfo;
+}
+
 
 GooString *SignatureHandler::getDefaultFirefoxCertDB_Linux()
 {
@@ -96,9 +197,9 @@ GooString *SignatureHandler::getDefaultFirefoxCertDB_Linux()
   do {
     if ((subFolder = readdir(toSearchIn)) != nullptr) {
       if (strstr(subFolder->d_name, "default") != nullptr) {
-	finalPath = homePath->append(subFolder->d_name);
-	closedir(toSearchIn);
-	return finalPath;
+        finalPath = homePath->append(subFolder->d_name);
+        closedir(toSearchIn);
+        return finalPath;
       }
     }
   } while (subFolder != nullptr);
@@ -111,7 +212,7 @@ GooString *SignatureHandler::getDefaultFirefoxCertDB_Linux()
 /**
  * Initialise NSS
  */
-void SignatureHandler::init_nss() 
+void SignatureHandler::init_nss()
 {
   GooString *certDBPath = getDefaultFirefoxCertDB_Linux();
   bool initSuccess = false;
@@ -371,4 +472,9 @@ CertificateValidationStatus SignatureHandler::NSS_CertTranslate(SECErrorCodes ns
     default:
       return CERTIFICATE_GENERIC_ERROR;
   }
+}
+
+GooString *SignatureHandler::SECItemToGooString(SECItem secItem)
+{
+  return new GooString((const char *)secItem.data, secItem.len);
 }

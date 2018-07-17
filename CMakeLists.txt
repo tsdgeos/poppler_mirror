@@ -395,6 +395,7 @@ set(poppler_SRCS
   poppler/ViewerPreferences.cc
   poppler/Movie.cc
   poppler/Rendition.cc
+  poppler/CertificateInfo.cc
 )
 set(poppler_LIBS ${FREETYPE_LIBRARIES})
 if(ENABLE_SPLASH)

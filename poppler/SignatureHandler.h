@@ -16,6 +16,7 @@
 
 #include "goo/GooString.h"
 #include "SignatureInfo.h"
+#include "CertificateInfo.h"
 
 /* NSPR Headers */
 #include <nspr.h>
@@ -44,10 +45,13 @@ public:
   NSSCMSVerificationStatus validateSignature();
   // Use -1 as validation_time for now
   SECErrorCodes validateCertificate(time_t validation_time);
+  X509CertificateInfo *getCertificateInfo();
 
   //Translate NSS error codes
   static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_code);
   static CertificateValidationStatus NSS_CertTranslate(SECErrorCodes nss_code);
+
+  static GooString *SECItemToGooString(SECItem secItem);
 
 private:
   SignatureHandler(const SignatureHandler &);
@@ -61,6 +65,7 @@ private:
   NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage * cms_msg);
   NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData * cms_sig_data);
   HASHContext * initHashContext();
+  void getEntityInfo(X509CertificateInfo::EntityInfo *info, CERTName *entityName);
 
   unsigned int hash_length;
   SECItem CMSitem;
