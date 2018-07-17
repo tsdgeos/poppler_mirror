@@ -404,6 +404,132 @@ namespace Poppler {
     };
 
     /**
+      A helper class to store x509 certificate information.
+
+      \since 0.73
+     */
+    class CertificateInfoPrivate;
+    class POPPLER_QT5_EXPORT CertificateInfo {
+    public:
+
+        /**
+          The algorithm of public key.
+         */
+        enum PublicKeyType
+        {
+            RsaKey,
+            DsaKey,
+            EcKey,
+            OtherKey
+        };
+
+        /**
+          Certificate key usage extensions.
+         */
+        enum KeyUsageExtension
+        {
+            KuDigitalSignature = 0x80,
+            KuNonRepudiation   = 0x40,
+            KuKeyEncipherment  = 0x20,
+            KuDataEncipherment = 0x10,
+            KuKeyAgreement     = 0x08,
+            KuKeyCertSign      = 0x04,
+            KuClrSign          = 0x02,
+            KuEncipherOnly     = 0x01,
+            KuNone             = 0x00
+        };
+        Q_DECLARE_FLAGS(KeyUsageExtensions, KeyUsageExtension)
+
+        /**
+          Predefined keys for elements in an entity's distinguished name.
+         */
+        enum EntityInfoKey
+        {
+          CommonName,
+          DistinguishedName,
+          EmailAddress,
+          Organization,
+        };
+
+        CertificateInfo(CertificateInfoPrivate *priv);
+        ~CertificateInfo();
+
+        /**
+          Returns true if certificate has no contents; otherwise returns false
+         */
+        bool isNull() const;
+
+        /**
+          The certificate version string.
+         */
+        int version() const;
+
+        /**
+          The certificate serial number.
+         */
+        QByteArray serialNumber() const;
+
+        /**
+          Information about the issuer.
+         */
+        QString issuerInfo(EntityInfoKey key) const;
+
+        /**
+          Information about the subject
+         */
+        QString subjectInfo(EntityInfoKey key) const;
+
+        /**
+          The date-time when certificate becomes valid.
+         */
+        QDateTime validityStart() const;
+
+        /**
+          The date-time when certificate expires.
+         */
+        QDateTime validityEnd() const;
+
+        /**
+          The uses allowed for the certificate.
+         */
+        KeyUsageExtensions keyUsageExtensions() const;
+
+        /**
+          The public key value.
+         */
+        QByteArray publicKey() const;
+
+        /**
+          The public key type.
+         */
+        PublicKeyType publicKeyType() const;
+
+        /**
+          The strength of public key in bits.
+         */
+        int publicKeyStrength() const;
+
+        /**
+          Returns true if certificate is self-signed otherwise returns false.
+         */
+        bool isSelfSigned() const;
+
+        /**
+          The DER encoded certificate.
+         */
+        QByteArray certificateData() const;
+
+        CertificateInfo(const CertificateInfo &other);
+        CertificateInfo &operator=(const CertificateInfo &other);
+
+        private:
+        Q_DECLARE_PRIVATE(CertificateInfo)
+
+        QSharedPointer<CertificateInfoPrivate> d_ptr;
+    };
+    Q_DECLARE_OPERATORS_FOR_FLAGS(CertificateInfo::KeyUsageExtensions)
+
+    /**
       A signature validation info helper class.
 
       \since 0.51
@@ -521,6 +647,13 @@ namespace Poppler {
           \since 0.58
 	 */
         bool signsTotalDocument() const;
+
+        /**
+          The signer certificate info
+
+          \since 0.73
+         */
+        CertificateInfo certificateInfo() const;
 
 	SignatureValidationInfo(const SignatureValidationInfo &other);
 	SignatureValidationInfo &operator=(const SignatureValidationInfo &other);
