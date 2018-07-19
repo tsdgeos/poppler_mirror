@@ -3270,15 +3270,19 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData,
 			 ((SplashCoord)y + 0.5 - mat[5]) * ir11);
 	// xx should always be within bounds, but floating point
 	// inaccuracy can cause problems
-	if (xx < 0) {
+	if (unlikely(xx < 0)) {
 	  xx = 0;
-	} else if (xx >= scaledWidth) {
+	  clipRes2 = splashClipPartial;
+	} else if (unlikely(xx >= scaledWidth)) {
 	  xx = scaledWidth - 1;
+	  clipRes2 = splashClipPartial;
 	}
-	if (yy < 0) {
+	if (unlikely(yy < 0)) {
 	  yy = 0;
-	} else if (yy >= scaledHeight) {
+	  clipRes2 = splashClipPartial;
+	} else if (unlikely(yy >= scaledHeight)) {
 	  yy = scaledHeight - 1;
+	  clipRes2 = splashClipPartial;
 	}
 	pipe.shape = scaledMask->data[yy * scaledWidth + xx];
 	if (vectorAntialias && clipRes2 != splashClipAllInside) {
