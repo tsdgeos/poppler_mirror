@@ -23,6 +23,7 @@
 // Copyright (C) 2012 Anthony Wesley <awesley@smartnetworks.com.au>
 // Copyright (C) 2015 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2016 Kenji Uno <ku@digitaldolphins.jp>
+// Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -356,6 +357,7 @@ void SplashBitmap::setJpegParams(ImgWriter *writer, WriteImgParams* params)
 #ifdef ENABLE_LIBJPEG
   if (params) {
     static_cast<JpegWriter*>(writer)->setProgressive(params->jpegProgressive);
+    static_cast<JpegWriter*>(writer)->setOptimize(params->jpegOptimize);
     if (params->jpegQuality >= 0)
       static_cast<JpegWriter*>(writer)->setQuality(params->jpegQuality);
   }

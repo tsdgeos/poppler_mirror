@@ -22,6 +22,7 @@
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2015 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2016 Kenji Uno <ku@digitaldolphins.jp>
+// Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -81,6 +82,7 @@ public:
     int jpegQuality = -1;
     GBool jpegProgressive = gFalse;
     GooString tiffCompression;
+    GBool jpegOptimize = gFalse;
   };
 
   SplashError writeImgFile(SplashImageFileFormat format, char *fileName, int hDPI, int vDPI, WriteImgParams* params = nullptr);

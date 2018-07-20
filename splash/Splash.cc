@@ -1191,25 +1191,35 @@ void Splash::pipeRunAABGR8(SplashPipe *pipe) {
   SplashColor cDest;
   Guchar cResult0, cResult1, cResult2;
 
-  //----- read destination pixel
-  cDest[0] = pipe->destColorPtr[2];
-  cDest[1] = pipe->destColorPtr[1];
-  cDest[2] = pipe->destColorPtr[0];
+  //----- read destination alpha
   aDest = *pipe->destAlphaPtr;
 
   //----- source alpha
   aSrc = div255(pipe->aInput * pipe->shape);
 
-  //----- result alpha and non-isolated group element correction
-  aResult = aSrc + aDest - div255(aSrc * aDest);
-  alpha2 = aResult;
-
   //----- result color
-  if (alpha2 == 0) {
+  if (aSrc == 255) {
+    cResult0 = state->rgbTransferR[pipe->cSrc[0]];
+    cResult1 = state->rgbTransferG[pipe->cSrc[1]];
+    cResult2 = state->rgbTransferB[pipe->cSrc[2]];
+    aResult = 255;
+
+  } else if (aSrc == 0 && aDest == 0) {
     cResult0 = 0;
     cResult1 = 0;
     cResult2 = 0;
+    aResult = 0;
+
   } else {
+    //----- read destination color
+    cDest[0] = pipe->destColorPtr[2];
+    cDest[1] = pipe->destColorPtr[1];
+    cDest[2] = pipe->destColorPtr[0];
+
+    //----- result alpha and non-isolated group element correction
+    aResult = aSrc + aDest - div255(aSrc * aDest);
+    alpha2 = aResult;
+
     cResult0 = state->rgbTransferR[(Guchar)(((alpha2 - aSrc) * cDest[0] +
 					     aSrc * pipe->cSrc[0]) / alpha2)];
     cResult1 = state->rgbTransferG[(Guchar)(((alpha2 - aSrc) * cDest[1] +
@@ -3260,15 +3270,19 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData,
 			 ((SplashCoord)y + 0.5 - mat[5]) * ir11);
 	// xx should always be within bounds, but floating point
 	// inaccuracy can cause problems
-	if (xx < 0) {
+	if (unlikely(xx < 0)) {
 	  xx = 0;
-	} else if (xx >= scaledWidth) {
+	  clipRes2 = splashClipPartial;
+	} else if (unlikely(xx >= scaledWidth)) {
 	  xx = scaledWidth - 1;
+	  clipRes2 = splashClipPartial;
 	}
-	if (yy < 0) {
+	if (unlikely(yy < 0)) {
 	  yy = 0;
-	} else if (yy >= scaledHeight) {
+	  clipRes2 = splashClipPartial;
+	} else if (unlikely(yy >= scaledHeight)) {
 	  yy = scaledHeight - 1;
+	  clipRes2 = splashClipPartial;
 	}
 	pipe.shape = scaledMask->data[yy * scaledWidth + xx];
 	if (vectorAntialias && clipRes2 != splashClipAllInside) {
@@ -3858,7 +3872,7 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
   SplashBitmap *scaledImg;
   SplashClipResult clipRes, clipRes2;
   SplashPipe pipe;
-  SplashColor pixel;
+  SplashColor pixel = {};
   int scaledWidth, scaledHeight, t0, t1, th;
   SplashCoord r00, r01, r10, r11, det, ir00, ir01, ir10, ir11;
   SplashCoord vx[4], vy[4];
