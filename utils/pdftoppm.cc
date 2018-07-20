@@ -27,6 +27,7 @@
 // Copyright (C) 2013, 2015 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2015 William Bader <williambader@hotmail.com>
+// Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -92,6 +93,7 @@ static GBool tiff = gFalse;
 static GooString jpegOpt;
 static int jpegQuality = -1;
 static bool jpegProgressive = false;
+static bool jpegOptimize = false;
 #ifdef SPLASH_CMYK
 static GBool overprint = gFalse;
 #endif
@@ -257,6 +259,14 @@ static GBool parseJpegOptions()
 	fprintf(stderr, "jpeg progressive option must be \"y\" or \"n\"\n");
 	return gFalse;
       }
+    } else if (opt.cmp("optimize") == 0 || opt.cmp("optimise") == 0) {
+      jpegOptimize = gFalse;
+      if (value.cmp("y") == 0) {
+	jpegOptimize = gTrue;
+      } else if (value.cmp("n") != 0) {
+	fprintf(stderr, "jpeg optimize option must be \"y\" or \"n\"\n");
+	return gFalse;
+      }
     } else {
       fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.getCString());
       return gFalse;
@@ -286,6 +296,7 @@ static void savePageSlice(PDFDoc *doc,
   SplashBitmap::WriteImgParams params;
   params.jpegQuality = jpegQuality;
   params.jpegProgressive = jpegProgressive;
+  params.jpegOptimize = jpegOptimize;
   params.tiffCompression.Set(TiffCompressionStr);
 
   if (ppmFile != nullptr) {

@@ -30,6 +30,7 @@
 // Copyright (C) 2013, 2017 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2014 Rodrigo Rivas Costa <rodrigorivascosta@gmail.com>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
+// Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -129,6 +130,7 @@ static GBool printHelp = gFalse;
 static GooString jpegOpt;
 static int jpegQuality = -1;
 static bool jpegProgressive = false;
+static bool jpegOptimize = false;
 
 static GooString printer;
 static GooString printOpt;
@@ -369,6 +371,14 @@ static GBool parseJpegOptions()
 	fprintf(stderr, "jpeg progressive option must be \"y\" or \"n\"\n");
 	return gFalse;
       }
+    } else if (opt.cmp("optimize") == 0 || opt.cmp("optimise") == 0) {
+      jpegOptimize = gFalse;
+      if (value.cmp("y") == 0) {
+	jpegOptimize = gTrue;
+      } else if (value.cmp("n") != 0) {
+	fprintf(stderr, "jpeg optimize option must be \"y\" or \"n\"\n");
+	return gFalse;
+      }
     } else {
       fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.getCString());
       return gFalse;
@@ -415,6 +425,7 @@ static void writePageImage(GooString *filename)
     else
       writer = new JpegWriter(JpegWriter::RGB);
 
+    static_cast<JpegWriter*>(writer)->setOptimize(jpegOptimize);
     static_cast<JpegWriter*>(writer)->setProgressive(jpegProgressive);
     if (jpegQuality >= 0)
       static_cast<JpegWriter*>(writer)->setQuality(jpegQuality);

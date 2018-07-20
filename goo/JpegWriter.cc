@@ -10,6 +10,7 @@
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Peter Breitenlohner <peb@mppmu.mpg.de>
 // Copyright (C) 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 //
 //========================================================================
 
@@ -25,6 +26,7 @@ extern "C" {
 
 struct JpegWriterPrivate {
   bool progressive;
+  bool optimize;
   int quality;
   JpegWriter::Format format;
   struct jpeg_compress_struct cinfo;
@@ -46,6 +48,7 @@ JpegWriter::JpegWriter(int q, bool p, Format formatA)
 {
   priv = new JpegWriterPrivate;
   priv->progressive = p;
+  priv->optimize = false;
   priv->quality = q;
   priv->format = formatA;
 }
@@ -54,6 +57,7 @@ JpegWriter::JpegWriter(Format formatA)
 {
   priv = new JpegWriterPrivate;
   priv->progressive = false;
+  priv->optimize = false;
   priv->quality = -1;
   priv->format = formatA;
 }
@@ -73,6 +77,11 @@ void JpegWriter::setQuality(int quality)
 void JpegWriter::setProgressive(bool progressive)
 {
   priv->progressive = progressive;
+}
+
+void JpegWriter::setOptimize(bool optimize)
+{
+  priv->optimize = optimize;
 }
 
 bool JpegWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
@@ -136,6 +145,9 @@ bool JpegWriter::init(FILE *f, int width, int height, int hDPI, int vDPI)
   if (priv->progressive) {
     jpeg_simple_progression(&priv->cinfo);
   }
+
+  // Set whether to compute optimal Huffman coding tables
+  priv->cinfo.optimize_coding = priv->optimize;
 
   // Get ready for data
   jpeg_start_compress(&priv->cinfo, TRUE);
