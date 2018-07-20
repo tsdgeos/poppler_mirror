@@ -26,6 +26,7 @@
 // Copyright (C) 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2018 Thibaut Brard <thibaut.brard@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -81,6 +82,7 @@ static double scale=1.5;
 GBool noframes=gFalse;
 GBool stout=gFalse;
 GBool xml=gFalse;
+GBool noRoundedCoordinates = gFalse;
 static GBool errQuiet=gFalse;
 static GBool noDrm=gFalse;
 double wordBreakThreshold=10;  // 10%, below converted into a coefficient - 0.1
@@ -130,6 +132,8 @@ static const ArgDesc argDesc[] = {
    "zoom the pdf document (default 1.5)"},
   {"-xml",    argFlag,    &xml,         0,
    "output for XML post-processing"},
+  {"-noroundcoord", argFlag, &noRoundedCoordinates, 0,
+    "do not round coordinates (with XML output only)"},
   {"-hidden", argFlag,   &showHidden,   0,
    "output hidden text"},
   {"-nomerge", argFlag, &noMerge, 0,

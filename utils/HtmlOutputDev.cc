@@ -41,6 +41,7 @@
 // Copyright (C) 2016 Vincent Le Garrec <legarrec.vincent@gmail.com>
 // Copyright (C) 2017 Caolán McNamara <caolanm@redhat.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2018 Thibaut Brard <thibaut.brard@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -109,6 +110,7 @@ extern GBool printHtml;
 extern GBool noframes;
 extern GBool stout;
 extern GBool xml;
+extern GBool noRoundedCoordinates;
 extern GBool showHidden;
 extern GBool noMerge;
 
@@ -760,16 +762,28 @@ void HtmlPage::dumpAsXML(FILE* f,int page){
   int listlen=imgList->getLength();
   for (int i = 0; i < listlen; i++) {
     HtmlImage *img = (HtmlImage*)imgList->del(0);
-    fprintf(f,"<image top=\"%d\" left=\"%d\" ",xoutRound(img->yMin),xoutRound(img->xMin));
-    fprintf(f,"width=\"%d\" height=\"%d\" ",xoutRound(img->xMax-img->xMin),xoutRound(img->yMax-img->yMin));
+    if (!noRoundedCoordinates) {
+      fprintf(f, "<image top=\"%d\" left=\"%d\" ", xoutRound(img->yMin), xoutRound(img->xMin));
+      fprintf(f, "width=\"%d\" height=\"%d\" ", xoutRound(img->xMax - img->xMin), xoutRound(img->yMax - img->yMin));
+    }
+    else {
+      fprintf(f, "<image top=\"%f\" left=\"%f\" ", img->yMin, img->xMin);
+      fprintf(f, "width=\"%f\" height=\"%f\" ", img->xMax - img->xMin, img->yMax - img->yMin);
+    }
     fprintf(f,"src=\"%s\"/>\n",img->fName->getCString());
     delete img;
   }
 
   for(HtmlString *tmp=yxStrings;tmp;tmp=tmp->yxNext){
     if (tmp->htext){
-      fprintf(f,"<text top=\"%d\" left=\"%d\" ",xoutRound(tmp->yMin),xoutRound(tmp->xMin));
-      fprintf(f,"width=\"%d\" height=\"%d\" ",xoutRound(tmp->xMax-tmp->xMin),xoutRound(tmp->yMax-tmp->yMin));
+      if (!noRoundedCoordinates) {
+        fprintf(f, "<text top=\"%d\" left=\"%d\" ", xoutRound(tmp->yMin), xoutRound(tmp->xMin));
+        fprintf(f, "width=\"%d\" height=\"%d\" ", xoutRound(tmp->xMax - tmp->xMin), xoutRound(tmp->yMax - tmp->yMin));
+      }
+      else {
+        fprintf(f, "<text top=\"%f\" left=\"%f\" ", tmp->yMin, tmp->xMin);
+        fprintf(f, "width=\"%f\" height=\"%f\" ", tmp->xMax - tmp->xMin, tmp->yMax - tmp->yMin);
+      }
       fprintf(f,"font=\"%d\">", tmp->fontpos);
       fputs(tmp->htext->getCString(),f);
       fputs("</text>\n",f);
