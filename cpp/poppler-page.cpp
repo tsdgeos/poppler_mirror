@@ -4,6 +4,7 @@
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -309,6 +310,11 @@ rectf text_box::bbox() const
     return m_data->bbox;
 }
 
+int text_box::rotation() const
+{
+    return m_data->rotation;
+}
+
 rectf text_box::char_bbox(size_t i) const
 {
     if (i < m_data->char_bboxes.size())
@@ -363,6 +369,7 @@ std::vector<text_box> page::text_list() const
             text_box tb{new text_box_data{
                 ustr,
                 {xMin, yMin, xMax-xMin, yMax-yMin},
+                word->getRotation(),
                 {},
                 word->hasSpaceAfter() == gTrue
             }};
