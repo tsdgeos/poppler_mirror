@@ -164,10 +164,6 @@ void SignatureHandler::updateHash(unsigned char * data_block, int data_len)
 SignatureHandler::~SignatureHandler()
 {
   SECITEM_FreeItem(&CMSitem, PR_FALSE);
-  if (CMSSignerInfo)
-    NSS_CMSSignerInfo_Destroy(CMSSignerInfo);
-  if (CMSSignedData)
-    NSS_CMSSignedData_Destroy(CMSSignedData);
   if (CMSMessage)
     NSS_CMSMessage_Destroy(CMSMessage);
 
