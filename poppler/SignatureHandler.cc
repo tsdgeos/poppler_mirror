@@ -318,9 +318,6 @@ SECErrorCodes SignatureHandler::validateCertificate(time_t validation_time)
 
   retVal = (SECErrorCodes) PORT_GetError();
 
-  if (cert)
-    CERT_DestroyCertificate(cert);
-
   return retVal;
 }
 
