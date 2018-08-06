@@ -24,6 +24,7 @@
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2018 Evangelos Rigas <erigas@rnd2.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -424,6 +425,241 @@ static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
   }
 }
 
+static void printPdfSubtype(PDFDoc *doc, UnicodeMap *uMap) {
+  const Object info = doc->getDocInfo();
+  if (info.isDict()) {
+    const PDFSubtype pdftype = doc->getPDFSubtype();
+
+    if ((pdftype == subtypeNull) | (pdftype == subtypeNone)) {
+      return;
+    }
+
+    std::unique_ptr<GooString> part;
+    std::unique_ptr<GooString> abbr;
+    std::unique_ptr<GooString> standard;
+    std::unique_ptr<GooString> typeExp;
+    std::unique_ptr<GooString> confExp;
+
+    // Form title from PDFSubtype
+    switch (pdftype)
+    {
+      case subtypePDFA:
+        printInfoString(info.getDict(), "GTS_PDFA1Version", "PDF subtype:    ", uMap);
+        typeExp.reset( new GooString("ISO 19005 - Electronic document file format for long-term preservation (PDF/A)") );
+        standard.reset(  new GooString("ISO 19005") );
+        abbr.reset( new GooString("PDF/A") );
+        break;
+      case subtypePDFE:
+        printInfoString(info.getDict(), "GTS_PDFEVersion", "PDF subtype:    ", uMap);
+        typeExp.reset( new GooString("ISO 24517 - Engineering document format using PDF (PDF/E)") );
+        standard.reset( new GooString("ISO 24517") );
+        abbr.reset( new GooString("PDF/E") );
+        break;
+      case subtypePDFUA:
+        printInfoString(info.getDict(), "GTS_PDFUAVersion", "PDF subtype:    ", uMap);
+        typeExp.reset( new GooString("ISO 14289 - Electronic document file format enhancement for accessibility (PDF/UA)") );
+        standard.reset( new GooString("ISO 14289") );
+        abbr.reset( new GooString("PDF/UA") );
+        break;
+      case subtypePDFVT:
+        printInfoString(info.getDict(), "GTS_PDFVTVersion", "PDF subtype:    ", uMap);
+        typeExp.reset( new GooString("ISO 16612 - Electronic document file format for variable data exchange (PDF/VT)") );
+        standard.reset( new GooString("ISO 16612") );
+        abbr.reset( new GooString("PDF/VT") );
+        break;
+      case subtypePDFX:
+        printInfoString(info.getDict(), "GTS_PDFXVersion", "PDF subtype:    ", uMap);
+        typeExp.reset( new GooString("ISO 15930 - Electronic document file format for prepress digital data exchange (PDF/X)") );
+        standard.reset( new GooString("ISO 15930") );
+        abbr.reset( new GooString("PDF/X") );
+        break;
+      case subtypeNone:
+      case subtypeNull:
+      default:
+        return;
+    }
+
+    // Form the abbreviation from PDFSubtypePart and PDFSubtype
+    const PDFSubtypePart subpart = doc->getPDFSubtypePart();
+    switch (pdftype) {
+      case subtypePDFX:
+        switch (subpart) {
+          case subtypePart1:
+            abbr->append("-1:2001");
+            break;
+          case subtypePart2:
+            abbr->append("-2");
+            break;
+          case subtypePart3:
+            abbr->append("-3:2002");
+            break;
+          case subtypePart4:
+            abbr->append("-1:2003");
+            break;
+          case subtypePart5:
+            abbr->append("-2");
+            break;
+          case subtypePart6:
+            abbr->append("-3:2003");
+            break;
+          case subtypePart7:
+            abbr->append("-4");
+            break;
+          case subtypePart8:
+            abbr->append("-5");
+            break;
+          default:
+            break;
+        }
+        break;
+      case subtypeNone:
+      case subtypeNull:
+        break;
+      default:
+        abbr->appendf("-{0:d}", subpart);
+        break;
+    }
+
+    // Form standard from PDFSubtypePart
+    switch (subpart) {
+      case subtypePartNone:
+      case subtypePartNull:
+        break;
+      default:
+        standard->appendf("-{0:d}", subpart);
+        break;
+    }
+
+    // Form the subtitle from PDFSubtypePart and PDFSubtype
+    switch (pdftype) {
+      case subtypePDFA:
+          switch (subpart) {
+          case subtypePart1:
+            part.reset( new GooString("Use of PDF 1.4") );
+            break;
+          case subtypePart2:
+            part.reset( new GooString("Use of ISO 32000-1") );
+            break;
+          case subtypePart3:
+            part.reset( new GooString("Use of ISO 32000-1 with support for embedded files") );
+            break;
+          default:
+            break;
+          }
+          break;
+      case subtypePDFE:
+        switch (subpart) {
+          case subtypePart1:
+            part.reset( new GooString("Use of PDF 1.6") );
+            break;
+          default:
+            break;
+          }
+          break;
+      case subtypePDFUA:
+        switch (subpart) {
+          case subtypePart1:
+            part.reset( new GooString("Use of ISO 32000-1") );
+            break;
+          case subtypePart2:
+            part.reset( new GooString("Use of ISO 32000-2") );
+            break;
+          case subtypePart3:
+            part.reset( new GooString("Use of ISO 32000-1 with support for embedded files") );
+            break;
+          default:
+            break;
+          }
+          break;
+      case subtypePDFVT:
+        switch (subpart) {
+          case subtypePart1:
+            part.reset( new GooString("Using PPML 2.1 and PDF 1.4") );
+            break;
+          case subtypePart2:
+            part.reset( new GooString("Using PDF/X-4 and PDF/X-5 (PDF/VT-1 and PDF/VT-2)") );
+            break;
+          case subtypePart3:
+            part.reset( new GooString("Using PDF/X-6 (PDF/VT-3)") );
+            break;
+          default:
+            break;
+          }
+          break;
+      case subtypePDFX:
+        switch (subpart) {
+          case subtypePart1:
+            part.reset( new GooString("Complete exchange using CMYK data (PDF/X-1 and PDF/X-1a)") );
+            break;
+          case subtypePart3:
+            part.reset( new GooString("Complete exchange suitable for colour-managed workflows (PDF/X-3)") );
+            break;
+          case subtypePart4:
+            part.reset( new GooString("Complete exchange of CMYK and spot colour printing data using PDF 1.4 (PDF/X-1a)") );
+            break;
+          case subtypePart5:
+            part.reset( new GooString("Partial exchange of printing data using PDF 1.4 (PDF/X-2) [Withdrawn]") );
+            break;
+          case subtypePart6:
+            part.reset( new GooString("Complete exchange of printing data suitable for colour-managed workflows using PDF 1.4 (PDF/X-3)") );
+            break;
+          case subtypePart7:
+            part.reset( new GooString("Complete exchange of printing data (PDF/X-4) and partial exchange of printing data with external profile reference (PDF/X-4p) using PDF 1.6") );
+            break;
+          case subtypePart8:
+            part.reset( new GooString("Partial exchange of printing data using PDF 1.6 (PDF/X-5)") );
+            break;
+          default:
+            break;
+          }
+          break;
+      default:
+        break;
+    }
+
+    // Form Conformance explanation from PDFSubtypeConformance
+    switch (doc->getPDFSubtypeConformance())
+    {
+      case subtypeConfA:
+        confExp.reset( new GooString("Level A, Accessible") );
+        break;
+      case subtypeConfB:
+        confExp.reset( new GooString("Level B, Basic") );
+        break;
+      case subtypeConfG:
+        confExp.reset( new GooString("Level G, External graphical content") );
+        break;
+      case subtypeConfN:
+        confExp.reset( new GooString("Level N, External ICC profile") );
+        break;
+      case subtypeConfP:
+        confExp.reset( new GooString("Level P, Embedded ICC profile") );
+        break;
+      case subtypeConfPG:
+        confExp.reset( new GooString("Level PG, Embedded ICC profile and external graphical content") );
+        break;
+      case subtypeConfU:
+        confExp.reset( new GooString("Level U, Unicode support") );
+        break;
+      case subtypeConfNone:
+      case subtypeConfNull:
+      default:
+        confExp.reset();
+        break;
+    }
+
+    printf("    Title:         %s\n",typeExp->getCString());
+    printf("    Abbreviation:  %s\n", abbr->getCString());
+    if (part.get())
+      printf("    Subtitle:      Part %d: %s\n", subpart, part->getCString());
+    else
+      printf("    Subtitle:      Part %d\n", subpart);
+    printf("    Standard:      %s-%d\n", typeExp->toStr().substr(0,9).c_str(), subpart);
+    if (confExp.get())
+      printf("    Conformance:   %s\n", confExp->getCString());
+  }
+}
+
 static void printInfo(PDFDoc *doc, UnicodeMap *uMap, long long filesize, GBool multiPage) {
   Page *page;
   char buf[256];
@@ -596,6 +832,8 @@ static void printInfo(PDFDoc *doc, UnicodeMap *uMap, long long filesize, GBool m
 
   // print PDF version
   printf("PDF version:    %d.%d\n", doc->getPDFMajorVersion(), doc->getPDFMinorVersion());
+
+  printPdfSubtype(doc, uMap);
 }
 
 int main(int argc, char *argv[]) {
