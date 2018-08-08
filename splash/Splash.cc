@@ -135,7 +135,7 @@ struct SplashPipe {
   Guchar aInput;
   GBool usesShape;
   SplashColorPtr cSrc;
-  SplashColor cSrcVal;
+  SplashColor cSrcVal = {};
 
   // non-isolated group alpha0
   Guchar *alpha0Ptr;

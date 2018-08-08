@@ -7,7 +7,7 @@
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
-// Copyright 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2017, 2018 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -51,6 +51,7 @@ SignatureInfo::SignatureInfo(SignatureValidationStatus sig_val_status, Certifica
 SignatureInfo::~SignatureInfo()
 {
   free(signer_name);
+  free(subject_dn);
 }
 
 /* GETTERS */
@@ -105,7 +106,8 @@ void SignatureInfo::setSignerName(char *signerName)
 
 void SignatureInfo::setSubjectDN(const char *subjectDN)
 {
-  subject_dn = subjectDN;
+  free(subject_dn);
+  subject_dn = strdup(subjectDN);
 }
 
 void SignatureInfo::setHashAlgorithm(int type)

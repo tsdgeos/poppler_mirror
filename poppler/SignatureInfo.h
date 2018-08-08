@@ -6,7 +6,7 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 //
 //========================================================================
@@ -69,7 +69,7 @@ private:
   SignatureValidationStatus sig_status;
   CertificateValidationStatus cert_status;
   char *signer_name;
-  const char *subject_dn;
+  char *subject_dn;
   int hash_type;
   time_t signing_time;
   bool sig_subfilter_supported;

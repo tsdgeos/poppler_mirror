@@ -2,6 +2,7 @@
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +42,11 @@ public:
 
     ustring   text() const;
     rectf     bbox() const;
+
+    /**
+      \since 0.68
+    */
+    int       rotation() const;
 
     /**
        Get a bbox for the i-th glyph

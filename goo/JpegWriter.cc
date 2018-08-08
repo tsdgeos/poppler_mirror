@@ -9,7 +9,7 @@
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
 // Copyright (C) 2011 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Peter Breitenlohner <peb@mppmu.mpg.de>
-// Copyright (C) 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 //
 //========================================================================
@@ -54,12 +54,8 @@ JpegWriter::JpegWriter(int q, bool p, Format formatA)
 }
 
 JpegWriter::JpegWriter(Format formatA)
+ : JpegWriter(-1, false, formatA)
 {
-  priv = new JpegWriterPrivate;
-  priv->progressive = false;
-  priv->optimize = false;
-  priv->quality = -1;
-  priv->format = formatA;
 }
 
 JpegWriter::~JpegWriter()
