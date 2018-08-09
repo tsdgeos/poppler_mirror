@@ -85,12 +85,12 @@ const char *SignatureInfo::getSubjectDN()
 
 const char *SignatureInfo::getLocation() const
 {
-    return location;
+  return location;
 }
 
 const char *SignatureInfo::getReason() const
 {
-    return reason;
+  return reason;
 }
 
 int SignatureInfo::getHashAlgorithm()
@@ -129,14 +129,14 @@ void SignatureInfo::setSubjectDN(const char *subjectDN)
 
 void SignatureInfo::setLocation(char *loc)
 {
-    free(location);
-    location = loc;
+  free(location);
+  location = loc;
 }
 
 void SignatureInfo::setReason(char *signingReason)
 {
-    free(reason);
-    reason = signingReason;
+  free(reason);
+  reason = signingReason;
 }
 
 void SignatureInfo::setHashAlgorithm(int type)
