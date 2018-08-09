@@ -7,6 +7,7 @@
  * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
  * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+ * Copyright (C) 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -502,6 +503,8 @@ struct SignatureValidationInfoPrivate {
 	QByteArray signature;
 	QString signer_name;
 	QString signer_subject_dn;
+	QString location;
+	QString reason;
 	int hash_algorithm;
 	time_t signing_time;
 	QList<qint64> range_bounds;
@@ -545,6 +548,18 @@ QString SignatureValidationInfo::signerSubjectDN() const
 {
   Q_D(const SignatureValidationInfo);
   return d->signer_subject_dn;
+}
+
+QString SignatureValidationInfo::location() const
+{
+  Q_D(const SignatureValidationInfo);
+  return d->location;
+}
+
+QString SignatureValidationInfo::reason() const
+{
+  Q_D(const SignatureValidationInfo);
+  return d->reason;
 }
 
 SignatureValidationInfo::HashAlgorithm SignatureValidationInfo::hashAlgorithm() const
@@ -715,6 +730,8 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
   priv->signer_name = si->getSignerName();
   priv->signer_subject_dn = si->getSubjectDN();
   priv->hash_algorithm = si->getHashAlgorithm();
+  priv->location = si->getLocation();
+  priv->reason = si->getReason();
 
   priv->signing_time = si->getSigningTime();
   const std::vector<Goffset> ranges = fws->getSignedRangeBounds();

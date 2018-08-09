@@ -6,6 +6,7 @@
  * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
  * Copyright (C) 2017, Tobias C. Berner <tcberner@freebsd.org>
  * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
+ * Copyright (C) 2018, Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -478,6 +479,18 @@ namespace Poppler {
 	  \since 0.58
 	 */
 	QString signerSubjectDN() const;
+
+	/**
+	  Get signing location.
+	  \since 0.68
+	*/
+	QString location() const;
+
+	/**
+	  Get signing reason.
+	  \since 0.68
+	*/
+	QString reason() const;
 
 	/**
 	  The the hash algorithm used for the signature.
