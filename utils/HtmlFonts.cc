@@ -168,7 +168,7 @@ HtmlFont::HtmlFont(const HtmlFont& x){
    bold=x.bold;
    pos=x.pos;
    color=x.color;
-   if (x.FontName) FontName=new GooString(x.FontName);
+   FontName = (x.FontName) ? new GooString(x.FontName) : nullptr;
    rotOrSkewed = x.rotOrSkewed;
    memcpy(rotSkewMat, x.rotSkewMat, sizeof(rotSkewMat));
  }
@@ -187,7 +187,7 @@ HtmlFont& HtmlFont::operator=(const HtmlFont& x){
    pos=x.pos;
    color=x.color;
    if (FontName) delete FontName;
-   if (x.FontName) FontName=new GooString(x.FontName);
+   FontName = (x.FontName) ? new GooString(x.FontName) : nullptr;
    return *this;
 }
 
