@@ -509,7 +509,7 @@ GBool XRef::readXRef(Goffset *pos, std::vector<Goffset> *followedXRefStm, std::v
   Object obj;
   GBool more;
 
-  if (unlikely(start > (LONG_LONG_MAX - *pos))) {
+  if (unlikely(start > (LLONG_MAX - *pos))) {
     ok = gFalse;
     return gFalse;
   }
