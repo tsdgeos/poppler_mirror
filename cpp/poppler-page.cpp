@@ -5,6 +5,7 @@
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
+ * Copyright (C) 2018, Aleksey Nikolaev <nae202@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -295,6 +296,9 @@ ustring page::text(const rectf &r, text_layout_enum layout_mode) const
 text_box_data::~text_box_data() = default;
 
 text_box::~text_box() = default;
+
+text_box& text_box::operator=(text_box&& a) = default;
+text_box::text_box(text_box&& a) = default;
 
 text_box::text_box(text_box_data *data) : m_data{data}
 {

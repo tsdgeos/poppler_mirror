@@ -3,6 +3,7 @@
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
+ * Copyright (C) 2018, Aleksey Nikolaev <nae202@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,8 +36,8 @@ class POPPLER_CPP_EXPORT text_box
 {
     friend class page;
 public:
-    text_box(text_box&&) = default;
-    text_box& operator=(text_box&&) = default;
+    text_box(text_box&&);
+    text_box& operator=(text_box&&);
 
     ~text_box();
 
