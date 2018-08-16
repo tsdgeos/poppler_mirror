@@ -14,7 +14,7 @@ install:
 - ps: |
     #use cmd to silence powershell behaviour for stderr
     & cmd /C "git clone -q --depth=1 git://anongit.kde.org/craftmaster.git C:\CraftMaster\CraftMaster 2>&1"
-    & cmd /C "git clone git://anongit.freedesktop.org/poppler/test $env:APPVEYOR_BUILD_FOLDER/test 2>&1"
+    & cmd /C "git clone git://anongit.freedesktop.org/poppler/test $env:APPVEYOR_BUILD_FOLDER/../test 2>&1"
     craft craft
     craft --install-deps poppler
 
