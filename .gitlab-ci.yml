@@ -1,0 +1,18 @@
+image: debian:stable
+
+before_script:
+  - echo 'deb-src http://deb.debian.org/debian stable main' >> /etc/apt/sources.list
+  - apt update
+  - apt build-dep --yes poppler
+  - apt install --yes cmake ninja-build
+
+build:
+  stage: build
+  script:
+    - mkdir build && cd build
+    - cmake -G Ninja ..
+    - ninja
+    - ctest
+  cache:
+    paths:
+      - build/
