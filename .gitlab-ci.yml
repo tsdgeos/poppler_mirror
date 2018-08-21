@@ -1,10 +1,17 @@
-image: debian:stable
+image: debian:unstable
 
 before_script:
-  - echo 'deb-src http://deb.debian.org/debian stable main' >> /etc/apt/sources.list
-  - apt update
-  - apt build-dep --yes poppler
-  - apt install --yes cmake ninja-build curl
+  - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
+  - apt-get update
+  - apt-get build-dep --yes poppler
+  - apt-get install --yes ninja-build curl ca-certificates locales
+  - echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
+  - locale-gen
+
+variables:
+  LANG: en_US.UTF-8
+  LANGUAGE: en_US:en
+  LC_ALL: en_US.UTF-8
 
 build:
   stage: build
