@@ -352,7 +352,6 @@ void HtmlPage::conv(){
   HtmlFont* h;
   for(tmp=yxStrings;tmp;tmp=tmp->yxNext){
      int pos=tmp->fontpos;
-     //  printf("%d\n",pos);
      h=fonts->Get(pos);
 
      if (tmp->htext) delete tmp->htext; 
@@ -360,9 +359,6 @@ void HtmlPage::conv(){
 
      if (links->inLink(tmp->xMin,tmp->yMin,tmp->xMax,tmp->yMax, linkIndex)){
        tmp->link = links->getLink(linkIndex);
-       /*GooString *t=tmp->htext;
-       tmp->htext=links->getLink(k)->Link(tmp->htext);
-       delete t;*/
      }
   }
 
@@ -1225,8 +1221,6 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
 }
 
 HtmlOutputDev::~HtmlOutputDev() {
-    HtmlFont::clear(); 
-    
     delete Docname;
     delete docTitle;
 
