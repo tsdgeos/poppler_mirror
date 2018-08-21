@@ -1,0 +1,26 @@
+image: debian:unstable
+
+before_script:
+  - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
+  - apt-get update
+  - apt-get build-dep --yes poppler
+  - apt-get install --yes ninja-build curl ca-certificates locales
+  - echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
+  - locale-gen
+
+variables:
+  LANG: en_US.UTF-8
+  LANGUAGE: en_US:en
+  LC_ALL: en_US.UTF-8
+
+build:
+  stage: build
+  script:
+    - mkdir -p build && cd build
+    - curl https://gitlab.freedesktop.org/poppler/test/-/archive/master/test-master.tar.gz | tar xz
+    - cmake -G Ninja -DTESTDATADIR=$PWD/test-master ..
+    - ninja
+    - ctest
+  cache:
+    paths:
+      - build/
