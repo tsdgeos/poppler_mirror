@@ -4214,7 +4214,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
   GBool invert;
   GfxColorSpace *colorSpace, *maskColorSpace;
   GBool haveColorKeyMask, haveExplicitMask, haveSoftMask;
-  int maskColors[2*gfxColorMaxComps];
+  int maskColors[2*gfxColorMaxComps] = {};
   int maskWidth, maskHeight;
   GBool maskInvert;
   GBool maskInterpolate;
