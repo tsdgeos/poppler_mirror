@@ -63,9 +63,12 @@ public:
   // Get number of entries.
   int getLength() const { return static_cast<int>(entries.size()); }
 
-  // Add an entry.
+  // Add an entry. (Copies key into Dict.)
   // val becomes a dead object after the call
   void add(const char *key, Object &&val);
+
+  // Add an entry. (Takes ownership of key.)
+  void add(char *key, Object &&val) = delete;
 
   // Update the value of an existing entry, otherwise create it
   // val becomes a dead object after the call
