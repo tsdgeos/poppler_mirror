@@ -33,6 +33,11 @@
 #pragma interface
 #endif
 
+#include <atomic>
+#include <string>
+#include <vector>
+#include <utility>
+
 #include "poppler-config.h"
 #include "Object.h"
 #include "goo/GooMutex.h"
@@ -41,18 +46,13 @@
 // Dict
 //------------------------------------------------------------------------
 
-struct DictEntry {
-  char *key;
-  Object val;
-};
-
 class Dict {
 public:
 
   // Constructor.
   Dict(XRef *xrefA);
-  Dict(Dict* dictA);
-  Dict *copy(XRef *xrefA);
+  Dict(const Dict *dictA);
+  Dict *copy(XRef *xrefA) const;
 
   // Destructor.
   ~Dict();
@@ -61,11 +61,14 @@ public:
   Dict& operator=(const Dict &) = delete;
 
   // Get number of entries.
-  int getLength() const { return length; }
+  int getLength() const { return static_cast<int>(entries.size()); }
 
-  // Add an entry.  NB: does not copy key.
+  // Add an entry. (Copies key into Dict.)
   // val becomes a dead object after the call
-  void add(char *key, Object &&val);
+  void add(const char *key, Object &&val);
+
+  // Add an entry. (Takes ownership of key.)
+  void add(char *key, Object &&val) = delete;
 
   // Update the value of an existing entry, otherwise create it
   // val becomes a dead object after the call
@@ -83,9 +86,9 @@ public:
   GBool lookupInt(const char *key, const char *alt_key, int *value) const;
 
   // Iterative accessors.
-  char *getKey(int i) const;
-  Object getVal(int i) const;
-  Object getValNF(int i) const;
+  const char *getKey(int i) const { return entries[i].first.c_str(); }
+  Object getVal(int i) const { return entries[i].second.fetch(xref); }
+  Object getValNF(int i) const { return entries[i].second.copy(); }
 
   // Set the xref pointer.  This is only used in one special case: the
   // trailer dictionary, which is read before the xref table is
@@ -100,20 +103,22 @@ private:
   friend class Object; // for incRef/decRef
 
   // Reference counting.
-  int incRef();
-  int decRef();
+  int incRef() { return ++ref; }
+  int decRef() { return --ref; }
 
-  mutable GBool sorted;
+  using DictEntry = std::pair<std::string, Object>;
+  struct CmpDictEntry;
+
+  bool sorted;
   XRef *xref;			// the xref table for this PDF file
-  DictEntry *entries;		// array of entries
-  int size;			// size of <entries> array
-  int length;			// number of entries in dictionary
-  int ref;			// reference count
+  std::vector<DictEntry> entries;
+  std::atomic_int ref;			// reference count
 #ifdef MULTITHREADED
   mutable GooMutex mutex;
 #endif
 
-  DictEntry *find(const char *key) const;
+  const DictEntry *find(const char *key) const;
+  DictEntry *find(const char *key);
 };
 
 #endif

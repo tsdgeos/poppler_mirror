@@ -91,7 +91,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
         newNameArray->add(Object(value.getRef().num + numOffset, value.getRef().gen));
       }
     }
-    srcNameTree->add(copyString("Names"), Object(newNameArray));
+    srcNameTree->add("Names", Object(newNameArray));
     doc->markPageObjects(mergeNameTree, srcXRef, countRef, numOffset, oldRefNum, newRefNum);
   }
 }
@@ -106,7 +106,7 @@ static void doMergeNameDict(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
     } else if (srcNameTree.isNull() && mergeNameTree.isDict()) {
       Object newNameTree(new Dict(srcXRef));
       doMergeNameTree(doc, srcXRef, countRef, oldRefNum, newRefNum, newNameTree.getDict(), mergeNameTree.getDict(), numOffset);
-      srcNameDict->add(copyString(key), std::move(newNameTree));
+      srcNameDict->add(key, std::move(newNameTree));
     }
   }
 }

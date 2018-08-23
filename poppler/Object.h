@@ -263,13 +263,13 @@ public:
 
   // Dict accessors.
   int dictGetLength() const;
-  void dictAdd(char *key, Object &&val);
+  void dictAdd(const char *key, Object &&val);
   void dictSet(const char *key, Object &&val);
   void dictRemove(const char *key);
   GBool dictIs(const char *dictType) const;
   Object dictLookup(const char *key, int recursion = 0) const;
   Object dictLookupNF(const char *key) const;
-  char *dictGetKey(int i) const;
+  const char *dictGetKey(int i) const;
   Object dictGetVal(int i) const;
   Object dictGetValNF(int i) const;
 
@@ -353,7 +353,7 @@ inline Object Object::arrayGetNF(int i) const
 inline int Object::dictGetLength() const
   { OBJECT_TYPE_CHECK(objDict); return dict->getLength(); }
 
-inline void Object::dictAdd(char *key, Object &&val)
+inline void Object::dictAdd(const char *key, Object &&val)
   { OBJECT_TYPE_CHECK(objDict); dict->add(key, std::move(val)); }
 
 inline void Object::dictSet(const char *key, Object &&val)
@@ -374,7 +374,7 @@ inline Object Object::dictLookup(const char *key, int recursion) const
 inline Object Object::dictLookupNF(const char *key) const
   { OBJECT_TYPE_CHECK(objDict); return dict->lookupNF(key); }
 
-inline char *Object::dictGetKey(int i) const
+inline const char *Object::dictGetKey(int i) const
   { OBJECT_TYPE_CHECK(objDict); return dict->getKey(i); }
 
 inline Object Object::dictGetVal(int i) const

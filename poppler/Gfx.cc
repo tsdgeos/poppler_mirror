@@ -4912,7 +4912,6 @@ void Gfx::opBeginImage(Object args[], int numArgs) {
 }
 
 Stream *Gfx::buildImageStream() {
-  char *key;
   Stream *str;
 
   // build dictionary
@@ -4922,13 +4921,11 @@ Stream *Gfx::buildImageStream() {
     if (!obj.isName()) {
       error(errSyntaxError, getPos(), "Inline image dictionary key must be a name object");
     } else {
-      key = copyString(obj.getName());
-      obj = parser->getObj();
-      if (obj.isEOF() || obj.isError()) {
-	gfree(key);
+      auto val = parser->getObj();
+      if (val.isEOF() || val.isError()) {
 	break;
       }
-      dict.dictAdd(key, std::move(obj));
+      dict.dictAdd(obj.getName(), std::move(val));
     }
     obj = parser->getObj();
   }

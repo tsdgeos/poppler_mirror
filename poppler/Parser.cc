@@ -112,20 +112,18 @@ Object Parser::getObj(GBool simpleOnly,
 	if (strict) goto err;
 	shift();
       } else {
-	// buf1 might go away in shift(), so construct the key
-	char *key = copyString(buf1.getName());
+	// buf1 will go away in shift(), so keep the key
+	const auto key = std::move(buf1);
 	shift();
 	if (buf1.isEOF() || buf1.isError()) {
-	  gfree(key);
 	  if (strict && buf1.isError()) goto err;
 	  break;
 	}
 	Object obj2 = getObj(gFalse, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1);
 	if (unlikely(obj2.isError() && recursion + 1 >= recursionLimit)) {
-	  gfree(key);
 	  break;
 	}
-	obj.dictAdd(key, std::move(obj2));
+	obj.dictAdd(key.getName(), std::move(obj2));
       }
     }
     if (buf1.isEOF()) {
