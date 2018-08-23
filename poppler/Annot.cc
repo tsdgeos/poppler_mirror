@@ -793,6 +793,21 @@ Object AnnotColor::writeToObject(XRef *xref) const {
 }
 
 //------------------------------------------------------------------------
+// DefaultAppearance
+//------------------------------------------------------------------------
+
+DefaultAppearance::DefaultAppearance(const GooString &fontTag, int fontPtSize, AnnotColor *fontColor)
+ : fontPtSize(fontPtSize), fontColor(fontColor) {
+  DefaultAppearance::fontTag = fontTag.copy();
+}
+
+DefaultAppearance::~DefaultAppearance() {
+  delete fontTag;
+  if (fontColor) {
+    delete fontColor;
+  }
+}
+//------------------------------------------------------------------------
 // AnnotIconFit
 //------------------------------------------------------------------------
 
@@ -2594,12 +2609,13 @@ void AnnotLink::draw(Gfx *gfx, GBool printing) {
 //------------------------------------------------------------------------
 // AnnotFreeText
 //------------------------------------------------------------------------
-AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, GooString *da) :
+AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da) :
     AnnotMarkup(docA, rect) {
   type = typeFreeText;
 
+  GooString *daStr = constructAppearanceString(da.getFontTag(), da.getFontPtSize(), da.getFontColor());
   annotObj.dictSet ("Subtype", Object(objName, "FreeText"));
-  annotObj.dictSet("DA", Object(da->copy()));
+  annotObj.dictSet("DA", Object(daStr));
 
   initialize (docA, annotObj.getDict());
 }
@@ -2727,14 +2743,10 @@ void AnnotFreeText::setContents(GooString *new_content) {
   invalidateAppearance();
 }
 
-void AnnotFreeText::setAppearanceString(GooString *new_string) {
+void AnnotFreeText::setAppearanceString(const DefaultAppearance &da) {
   delete appearanceString;
 
-  if (new_string) {
-    appearanceString = new GooString(new_string);
-  } else {
-    appearanceString = new GooString();
-  }
+  appearanceString = constructAppearanceString(da.getFontTag(), da.getFontPtSize(), da.getFontColor());
 
   update ("DA", Object(appearanceString->copy()));
   invalidateAppearance();
@@ -2806,7 +2818,17 @@ void AnnotFreeText::setIntent(AnnotFreeTextIntent new_intent) {
   update ("IT", Object(objName, intentName));
 }
 
-static GfxFont * createAnnotDrawFont(XRef * xref, Dict *fontResDict)
+DefaultAppearance *AnnotFreeText::getDefaultAppearance() const {
+  double fontSize;
+  AnnotColor *fontColor;
+  GooString *fontTag;
+  parseAppearanceString(appearanceString, fontSize, fontColor, fontTag);
+  DefaultAppearance *da = new DefaultAppearance(*fontTag, fontSize, fontColor);
+  delete fontTag;
+  return da;
+}
+
+static GfxFont *createAnnotDrawFont(XRef * xref, Dict *fontResDict)
 {
   const Ref dummyRef = { -1, -1 };
 
@@ -2823,16 +2845,41 @@ static GfxFont * createAnnotDrawFont(XRef * xref, Dict *fontResDict)
   return GfxFont::makeFont(xref, "AnnotDrawFont", dummyRef, fontDict);
 }
 
-void AnnotFreeText::parseAppearanceString(GooString *da, double &fontsize, AnnotColor* &fontcolor) {
+GooString *AnnotFreeText::constructAppearanceString(const GooString &fontTag, double fontSize, const AnnotColor *fontColor) {
+  const double *colorData = fontColor->getValues();
+  GooString * cstr = nullptr;
+  switch(fontColor->getSpace())
+  {
+    case AnnotColor::AnnotColorSpace::colorTransparent: // =0
+      cstr = new GooString();
+      break;
+    case AnnotColor::AnnotColorSpace::colorGray: //=1
+      cstr = GooString::format("{0:.2f} g ", colorData[0]);
+      break;
+    case AnnotColor::AnnotColorSpace::colorRGB: //=3
+      cstr = GooString::format("{0:.2f} {1:.2f} {2:.2f} rg ", colorData[0], colorData[1], colorData[2]);
+      break;
+    case AnnotColor::AnnotColorSpace::colorCMYK: //=4
+      cstr = GooString::format("{0:.2f} {1:.2f} {2:.2f} {3:.2f} k ", colorData[0], colorData[1], colorData[2], colorData[3]);
+      break;
+  }
+  const GooString * str = GooString::format("/{0:s} {1:.2f} Tf", &fontTag, fontSize);
+  return cstr->append( str );
+}
+
+void AnnotFreeText::parseAppearanceString(GooString *da, double &fontsize, AnnotColor* &fontcolor, GooString* &fontTag) {
   fontsize = -1;
   fontcolor = nullptr;
+  fontTag = nullptr;
   if (da) {
     GooList * daToks = new GooList();
     int i = FormFieldText::tokenizeDA(da, daToks, "Tf");
 
     if (i >= 1) {
       fontsize = gatof(( (GooString *)daToks->get(i-1) )->getCString());
-      // TODO: Font name
+    }
+    if (i >= 2) {
+      fontTag = new GooString(( (GooString *)daToks->get(i-2) )->getCString());
     }
     // Scan backwards: we are looking for the last set value
     for (i = daToks->getLength()-1; i >= 0; --i) {
@@ -2873,7 +2920,9 @@ void AnnotFreeText::generateFreeTextAppearance()
   // Parse some properties from the appearance string
   double fontsize;
   AnnotColor *fontcolor;
-  parseAppearanceString(appearanceString, fontsize, fontcolor);
+  GooString *fontTag = nullptr;
+  parseAppearanceString(appearanceString, fontsize, fontcolor, fontTag);
+  delete fontTag;
   // Default values
   if (fontsize <= 0)
     fontsize = 10;

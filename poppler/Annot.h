@@ -348,6 +348,26 @@ private:
 };
 
 //------------------------------------------------------------------------
+// DefaultAppearance
+//------------------------------------------------------------------------
+
+class DefaultAppearance {
+public:
+
+  DefaultAppearance(const GooString &fontTag, int fontPtSize, AnnotColor *fontColor = nullptr);
+  const GooString &getFontTag() const { return *fontTag; }
+  int getFontPtSize() const { return fontPtSize; }
+  const AnnotColor *getFontColor() const { return fontColor; }
+  ~DefaultAppearance();
+  DefaultAppearance(DefaultAppearance &ger) = delete;
+private:
+
+  GooString *fontTag;
+  int fontPtSize;
+  AnnotColor *fontColor;
+};
+
+//------------------------------------------------------------------------
 // AnnotIconFit
 //------------------------------------------------------------------------
 
@@ -969,7 +989,7 @@ public:
     intentFreeTextTypeWriter  // FreeTextTypeWriter
   };
 
-  AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, GooString *da);
+  AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da);
   AnnotFreeText(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotFreeText();
 
@@ -977,14 +997,14 @@ public:
   Object getAppearanceResDict() override;
   void setContents(GooString *new_content) override;
 
-  void setAppearanceString(GooString *new_string);
+  void setAppearanceString(const DefaultAppearance &da);
   void setQuadding(AnnotFreeTextQuadding new_quadding);
   void setStyleString(GooString *new_string);
   void setCalloutLine(AnnotCalloutLine *line);
   void setIntent(AnnotFreeTextIntent new_intent);
 
   // getters
-  const GooString *getAppearanceString() const { return appearanceString; }
+  DefaultAppearance *getDefaultAppearance() const;
   AnnotFreeTextQuadding getQuadding() const { return quadding; }
   // return rc
   const GooString *getStyleString() const { return styleString; }
@@ -997,7 +1017,8 @@ public:
 protected:
 
   void initialize(PDFDoc *docA, Dict *dict);
-  static void parseAppearanceString(GooString *da, double &fontsize, AnnotColor* &fontcolor);
+  static GooString *constructAppearanceString(const GooString &fontTag, double fontSize, const AnnotColor *fontColor);
+  static void parseAppearanceString(GooString *da, double &fontSize, AnnotColor* &fontColor, GooString* &fontTag);
   void generateFreeTextAppearance();
 
   // required

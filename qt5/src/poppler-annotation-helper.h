@@ -175,7 +175,7 @@ void XPDFReader::invTransform( double * M, const QPointF &p, double &x, double &
     y = invM[1] * xt + invM[3] * yt;
 }
 
-QColor convertAnnotColor( AnnotColor *color );
+QColor convertAnnotColor( const AnnotColor *color );
 AnnotColor* convertQColor( const QColor &color );
 
 }

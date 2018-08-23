@@ -484,6 +484,10 @@ class POPPLER_QT5_EXPORT TextAnnotation : public Annotation
 
     QFont textFont() const;
     void setTextFont( const QFont &font );
+    /// \since 0.69
+    QColor textColor() const;
+    /// \since 0.69
+    void setTextColor( const QColor &color );
 
     int inplaceAlign() const;
     void setInplaceAlign( int align );
