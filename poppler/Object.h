@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Kees Cook <kees@outflux.net>
-// Copyright (C) 2008, 2010, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jakub Wilk <jwilk@jwilk.net>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -264,6 +264,7 @@ public:
 
   // Dict accessors.
   int dictGetLength() const;
+  void dictAdd(char *key, Object &&val) = delete;
   void dictAdd(const char *key, Object &&val);
   void dictSet(const char *key, Object &&val);
   void dictRemove(const char *key);
