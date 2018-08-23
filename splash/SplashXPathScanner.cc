@@ -386,7 +386,7 @@ GBool SplashXPathScanner::addIntersection(double segYMin, double segYMax,
 
 void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf,
 				      int *x0, int *x1, int y, GBool adjustVertLine) {
-  int xx0, xx1, xx, xxMin, xxMax, yy, interEnd, interIdx, interCount;
+  int xx0, xx1, xx, xxMin, xxMax, yy, yyMax, interEnd, interIdx, interCount;
   Guchar mask;
   SplashColorPtr p;
 
@@ -394,21 +394,19 @@ void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf,
   xxMin = aaBuf->getWidth();
   xxMax = -1;
   if (yMin <= yMax) {
-    if (splashAASize * y < yMin) {
-      interIdx = inter[0];
-    } else if (splashAASize * y > yMax) {
-      interIdx = inter[yMax - yMin + 1];
-    } else {
-      interIdx = inter[splashAASize * y - yMin];
+    yy = 0;
+    yyMax = splashAASize - 1;
+    // clamp start and end position
+    if (yMin > splashAASize * y) {
+      yy = yMin - splashAASize * y;
     }
-    for (yy = 0; yy < splashAASize; ++yy) {
-      if (splashAASize * y + yy < yMin) {
-	interEnd = inter[0];
-      } else if (splashAASize * y + yy > yMax) {
-	interEnd = inter[yMax - yMin + 1];
-      } else {
-	interEnd = inter[splashAASize * y + yy - yMin + 1];
-      }
+    if (yyMax + splashAASize * y > yMax) {
+      yyMax = yMax - splashAASize * y;
+    }
+    interIdx = inter[splashAASize * y + yy - yMin];
+
+    for (; yy <= yyMax; ++yy) {
+      interEnd = inter[splashAASize * y + yy - yMin + 1];
       interCount = 0;
       while (interIdx < interEnd) {
 	xx0 = allInter[interIdx].x0;
@@ -468,25 +466,24 @@ void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf,
 
 void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf,
 				    int *x0, int *x1, int y) {
-  int xx0, xx1, xx, yy, interEnd, interIdx, interCount;
+  int xx0, xx1, xx, yy, yyMin, yyMax, interEnd, interIdx, interCount;
   Guchar mask;
   SplashColorPtr p;
 
+  yyMin = 0;
+  yyMax = splashAASize - 1;
+  // clamp start and end position
+  if (yMin > splashAASize * y) {
+    yyMin = yMin - splashAASize * y;
+  }
+  if (yyMax + splashAASize * y > yMax) {
+    yyMax = yMax - splashAASize * y;
+  }
   for (yy = 0; yy < splashAASize; ++yy) {
     xx = *x0 * splashAASize;
-    if (yMin <= yMax) {
-      if (splashAASize * y + yy < yMin) {
-	interIdx = interEnd = inter[0];
-      } else if (splashAASize * y + yy > yMax) {
-	interIdx = interEnd = inter[yMax - yMin + 1];
-      } else {
-	interIdx = inter[splashAASize * y + yy - yMin];
-	if (splashAASize * y + yy > yMax) {
-	  interEnd = inter[yMax - yMin + 1];
-	} else {
-	  interEnd = inter[splashAASize * y + yy - yMin + 1];
-	}
-      }
+    if (yy >= yyMin && yy <= yyMax) {
+      interIdx = inter[splashAASize * y + yy - yMin];
+      interEnd = inter[splashAASize * y + yy - yMin + 1];
       interCount = 0;
       while (interIdx < interEnd && xx < (*x1 + 1) * splashAASize) {
 	xx0 = allInter[interIdx].x0;
