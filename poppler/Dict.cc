@@ -146,7 +146,8 @@ void Dict::remove(const char *key) {
   dictLocker();
   if (auto *entry = find(key)) {
     if (sorted) {
-      entries.erase(std::vector<DictEntry>::iterator{entry});
+      const auto index = entry - &entries.front();
+      entries.erase(entries.begin() + index);
     } else {
       swap(*entry, entries.back());
       entries.pop_back();
