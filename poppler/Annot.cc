@@ -1652,6 +1652,11 @@ void AnnotAppearanceBuilder::setDrawColor(const AnnotColor *drawColor, GBool fil
   }
 }
 
+void AnnotAppearanceBuilder::setTextFont(const GooString &fontTag, double fontSize) {
+  if (fontTag.getLength() > 0)
+    appearBuf->appendf("/{0:s} {1:.2f} Tf", &fontTag, fontSize);
+}
+
 void AnnotAppearanceBuilder::setLineStyleForBorder(const AnnotBorder *border) {
   int i, dashLength;
   double *dash;
@@ -2743,7 +2748,7 @@ void AnnotFreeText::setContents(GooString *new_content) {
   invalidateAppearance();
 }
 
-void AnnotFreeText::setAppearanceString(const DefaultAppearance &da) {
+void AnnotFreeText::setDefaultAppearance(const DefaultAppearance &da) {
   delete appearanceString;
 
   appearanceString = constructAppearanceString(da.getFontTag(), da.getFontPtSize(), da.getFontColor());
@@ -2822,7 +2827,7 @@ DefaultAppearance *AnnotFreeText::getDefaultAppearance() const {
   double fontSize;
   AnnotColor *fontColor;
   GooString *fontTag;
-  parseAppearanceString(appearanceString, fontSize, fontColor, fontTag);
+  parseAppearanceString(appearanceString, fontSize, fontColor, &fontTag);
   DefaultAppearance *da = new DefaultAppearance(*fontTag, fontSize, fontColor);
   delete fontTag;
   return da;
@@ -2846,31 +2851,19 @@ static GfxFont *createAnnotDrawFont(XRef * xref, Dict *fontResDict)
 }
 
 GooString *AnnotFreeText::constructAppearanceString(const GooString &fontTag, double fontSize, const AnnotColor *fontColor) {
-  const double *colorData = fontColor->getValues();
-  GooString * cstr = nullptr;
-  switch(fontColor->getSpace())
-  {
-    case AnnotColor::AnnotColorSpace::colorTransparent: // =0
-      cstr = new GooString();
-      break;
-    case AnnotColor::AnnotColorSpace::colorGray: //=1
-      cstr = GooString::format("{0:.2f} g ", colorData[0]);
-      break;
-    case AnnotColor::AnnotColorSpace::colorRGB: //=3
-      cstr = GooString::format("{0:.2f} {1:.2f} {2:.2f} rg ", colorData[0], colorData[1], colorData[2]);
-      break;
-    case AnnotColor::AnnotColorSpace::colorCMYK: //=4
-      cstr = GooString::format("{0:.2f} {1:.2f} {2:.2f} {3:.2f} k ", colorData[0], colorData[1], colorData[2], colorData[3]);
-      break;
+  AnnotAppearanceBuilder appearBuilder;
+  if (fontColor) {
+    appearBuilder.setDrawColor(fontColor, gFalse);
   }
-  const GooString * str = GooString::format("/{0:s} {1:.2f} Tf", &fontTag, fontSize);
-  return cstr->append( str );
+  appearBuilder.setTextFont(fontTag, fontSize);
+  return appearBuilder.buffer()->copy();
 }
 
-void AnnotFreeText::parseAppearanceString(GooString *da, double &fontsize, AnnotColor* &fontcolor, GooString* &fontTag) {
+void AnnotFreeText::parseAppearanceString(GooString *da, double &fontsize, AnnotColor* &fontcolor, GooString **fontTag) {
   fontsize = -1;
   fontcolor = nullptr;
-  fontTag = nullptr;
+  if (fontTag)
+    *fontTag = nullptr;
   if (da) {
     GooList * daToks = new GooList();
     int i = FormFieldText::tokenizeDA(da, daToks, "Tf");
@@ -2878,8 +2871,8 @@ void AnnotFreeText::parseAppearanceString(GooString *da, double &fontsize, Annot
     if (i >= 1) {
       fontsize = gatof(( (GooString *)daToks->get(i-1) )->getCString());
     }
-    if (i >= 2) {
-      fontTag = new GooString(( (GooString *)daToks->get(i-2) )->getCString());
+    if (fontTag && i >= 2) {
+      *fontTag = new GooString(( (GooString *)daToks->get(i-2) )->getCString());
     }
     // Scan backwards: we are looking for the last set value
     for (i = daToks->getLength()-1; i >= 0; --i) {
@@ -2920,9 +2913,7 @@ void AnnotFreeText::generateFreeTextAppearance()
   // Parse some properties from the appearance string
   double fontsize;
   AnnotColor *fontcolor;
-  GooString *fontTag = nullptr;
-  parseAppearanceString(appearanceString, fontsize, fontcolor, fontTag);
-  delete fontTag;
+  parseAppearanceString(appearanceString, fontsize, fontcolor, nullptr);
   // Default values
   if (fontsize <= 0)
     fontsize = 10;

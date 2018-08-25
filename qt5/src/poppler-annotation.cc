@@ -1879,7 +1879,7 @@ void TextAnnotationPrivate::setDefaultAppearanceToNative()
         AnnotFreeText * ftextann = static_cast<AnnotFreeText*>(pdfAnnot);
         AnnotColor *color = convertQColor(textColor);
         DefaultAppearance da(GooString("Invalid_font"), textFont.pointSize(), color);
-        ftextann->setAppearanceString(da);
+        ftextann->setDefaultAppearance(da);
     }
 }
 

@@ -359,7 +359,8 @@ public:
   int getFontPtSize() const { return fontPtSize; }
   const AnnotColor *getFontColor() const { return fontColor; }
   ~DefaultAppearance();
-  DefaultAppearance(DefaultAppearance &ger) = delete;
+  DefaultAppearance(DefaultAppearance &) = delete;
+  DefaultAppearance& operator=(const DefaultAppearance&) = delete;
 private:
 
   GooString *fontTag;
@@ -531,6 +532,7 @@ public:
 
   void setDrawColor(const AnnotColor *color, GBool fill);
   void setLineStyleForBorder(const AnnotBorder *border);
+  void setTextFont(const GooString &fontTag, double fontSize);
   void drawCircle(double cx, double cy, double r, GBool fill);
   void drawCircleTopLeft(double cx, double cy, double r);
   void drawCircleBottomRight(double cx, double cy, double r);
@@ -997,7 +999,7 @@ public:
   Object getAppearanceResDict() override;
   void setContents(GooString *new_content) override;
 
-  void setAppearanceString(const DefaultAppearance &da);
+  void setDefaultAppearance(const DefaultAppearance &da);
   void setQuadding(AnnotFreeTextQuadding new_quadding);
   void setStyleString(GooString *new_string);
   void setCalloutLine(AnnotCalloutLine *line);
@@ -1018,7 +1020,7 @@ protected:
 
   void initialize(PDFDoc *docA, Dict *dict);
   static GooString *constructAppearanceString(const GooString &fontTag, double fontSize, const AnnotColor *fontColor);
-  static void parseAppearanceString(GooString *da, double &fontSize, AnnotColor* &fontColor, GooString* &fontTag);
+  static void parseAppearanceString(GooString *da, double &fontSize, AnnotColor* &fontColor, GooString **fontTag);
   void generateFreeTextAppearance();
 
   // required
