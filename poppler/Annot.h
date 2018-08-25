@@ -40,6 +40,7 @@
 #pragma interface
 #endif
 
+#include <memory>
 #include "Object.h"
 
 class XRef;
@@ -354,18 +355,24 @@ private:
 class DefaultAppearance {
 public:
 
-  DefaultAppearance(const GooString &fontTag, int fontPtSize, AnnotColor *fontColor = nullptr);
-  const GooString &getFontTag() const { return *fontTag; }
-  int getFontPtSize() const { return fontPtSize; }
-  const AnnotColor *getFontColor() const { return fontColor; }
-  ~DefaultAppearance();
+  DefaultAppearance(Object &&fontName, double fontPtSize, std::unique_ptr<AnnotColor> fontColor);
+  DefaultAppearance(GooString *da);
+  void setFontName(Object &&fontNameA);
+  const Object &getFontName() const { return fontName; }
+  void setFontPtSize(double fontPtSizeA);
+  double getFontPtSize() const { return fontPtSize; }
+  void setFontColor(std::unique_ptr<AnnotColor> fontColorA);
+  const AnnotColor *getFontColor() const { return fontColor.get(); }
+  GooString *toAppearanceString() const;
+
   DefaultAppearance(DefaultAppearance &) = delete;
   DefaultAppearance& operator=(const DefaultAppearance&) = delete;
+
 private:
 
-  GooString *fontTag;
-  int fontPtSize;
-  AnnotColor *fontColor;
+  Object fontName;
+  double fontPtSize;
+  std::unique_ptr<AnnotColor> fontColor;
 };
 
 //------------------------------------------------------------------------
@@ -532,7 +539,7 @@ public:
 
   void setDrawColor(const AnnotColor *color, GBool fill);
   void setLineStyleForBorder(const AnnotBorder *border);
-  void setTextFont(const GooString &fontTag, double fontSize);
+  void setTextFont(const Object &fontName, double fontSize);
   void drawCircle(double cx, double cy, double r, GBool fill);
   void drawCircleTopLeft(double cx, double cy, double r);
   void drawCircleBottomRight(double cx, double cy, double r);
@@ -1006,7 +1013,7 @@ public:
   void setIntent(AnnotFreeTextIntent new_intent);
 
   // getters
-  DefaultAppearance *getDefaultAppearance() const;
+  std::unique_ptr<DefaultAppearance> getDefaultAppearance() const;
   AnnotFreeTextQuadding getQuadding() const { return quadding; }
   // return rc
   const GooString *getStyleString() const { return styleString; }
@@ -1019,8 +1026,6 @@ public:
 protected:
 
   void initialize(PDFDoc *docA, Dict *dict);
-  static GooString *constructAppearanceString(const GooString &fontTag, double fontSize, const AnnotColor *fontColor);
-  static void parseAppearanceString(GooString *da, double &fontSize, AnnotColor* &fontColor, GooString **fontTag);
   void generateFreeTextAppearance();
 
   // required
