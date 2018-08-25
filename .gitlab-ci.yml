@@ -20,7 +20,7 @@ build:
     - curl https://gitlab.freedesktop.org/poppler/test/-/archive/master/test-master.tar.gz | tar xz
     - cmake -G Ninja -DTESTDATADIR=$PWD/test-master ..
     - ninja
-    - ctest
+    - ctest --output-on-failure
   cache:
     paths:
       - build/
