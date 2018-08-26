@@ -1274,7 +1274,7 @@ int FormFieldText::tokenizeDA(const GooString* da, GooList* daToks, const char* 
         GooString* tok = new GooString(da, i, j - i);
         if (searchTok && !tok->cmp(searchTok))
           idx = daToks->getLength();
-        daToks->append(tok);
+	daToks->push_back(tok);
         i = j;
       }
     }

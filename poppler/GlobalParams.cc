@@ -240,7 +240,7 @@ public:
   void scanWindowsFonts(GooString *winFontDir);
 #endif
 #ifdef WITH_FONTCONFIGURATION_FONTCONFIG
-  void addFcFont(SysFontInfo *si) {fonts->append(si);}
+  void addFcFont(SysFontInfo *si) {fonts->push_back(si);}
 #endif
 private:
 
@@ -491,7 +491,7 @@ void GlobalParams::scanEncodingDirs() {
   dir = new GDir(dataPathBuffer, gFalse);
   while (entry = dir->getNextEntry(), entry != nullptr) {
     addCMapDir(entry->getName(), entry->getFullPath());
-    toUnicodeDirs->append(entry->getFullPath()->copy());
+    toUnicodeDirs->push_back(entry->getFullPath()->copy());
     delete entry;
   }
   delete dir;
@@ -1217,10 +1217,10 @@ GooList *GlobalParams::getEncodingNames()
 {
   auto* const result = new GooList;
   for (const auto& unicodeMap : residentUnicodeMaps) {
-    result->append(new GooString(unicodeMap.first));
+    result->push_back(new GooString(unicodeMap.first));
   }
   for (const auto& unicodeMap : unicodeMaps) {
-    result->append(new GooString(unicodeMap.first));
+    result->push_back(new GooString(unicodeMap.first));
   }
   return result;
 }

@@ -67,7 +67,7 @@ PDFDocFactory::createPDFDoc(const GooString &uri, GooString *ownerPassword,
 
 void PDFDocFactory::registerPDFDocBuilder(PDFDocBuilder *pdfDocBuilder)
 {
-  builders->append(pdfDocBuilder);
+  builders->push_back(pdfDocBuilder);
 }
 
 

@@ -115,7 +115,7 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList) 
 
         // add this font to the list if not already found
         if (fonts.find(fontRef.num) == fonts.end()) {
-          fontsList->append(new FontInfo(font, xrefA));
+	  fontsList->push_back(new FontInfo(font, xrefA));
           fonts.insert(fontRef.num);
         }
       }

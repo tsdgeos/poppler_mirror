@@ -176,7 +176,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
     }
 
     actionList = new GooList(1);
-    actionList->append(parseAction(&nextObj, nullptr, seenNextActions));
+    actionList->push_back(parseAction(&nextObj, nullptr, seenNextActions));
   } else if (nextObj.isArray()) {
     const Array *a = nextObj.getArray();
     const int n = a->getLength();
@@ -198,7 +198,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
           }
       }
 
-      actionList->append(parseAction(&obj3, nullptr, seenNextActions));
+      actionList->push_back(parseAction(&obj3, nullptr, seenNextActions));
     }
   }
 
@@ -833,7 +833,7 @@ LinkOCGState::LinkOCGState(const Object *obj) {
       Object obj2 = obj1.arrayGetNF(i);
       if (obj2.isName()) {
         if (stList)
-	  stateList->append(stList);
+	  stateList->push_back(stList);
 
 	const char *name = obj2.getName();
 	stList = new StateList();
@@ -855,7 +855,7 @@ LinkOCGState::LinkOCGState(const Object *obj) {
 	  Ref *item = new Ref();
 	  item->num = ocgRef.num;
 	  item->gen = ocgRef.gen;
-	  stList->list->append(item);
+	  stList->list->push_back(item);
 	} else {
 	  error(errSyntaxWarning, -1, "Invalid OCG Action State array, expected name instead of ref");
 	}
@@ -865,7 +865,7 @@ LinkOCGState::LinkOCGState(const Object *obj) {
     }
     // Add the last group
     if (stList)
-      stateList->append(stList);
+      stateList->push_back(stList);
   } else {
     error(errSyntaxWarning, -1, "Invalid OCGState action");
     delete stateList;

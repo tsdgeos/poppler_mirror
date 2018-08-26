@@ -2211,7 +2211,7 @@ poppler_fonts_iter_copy (PopplerFontsIter *iter)
 	new_iter->items = new GooList ();
 	for (int i = 0; i < iter->items->getLength(); i++) {
 		FontInfo *info = (FontInfo *)iter->items->get(i);
-		new_iter->items->append (new FontInfo (*info));
+		new_iter->items->push_back (new FontInfo (*info));
 	}
 
 	return new_iter;

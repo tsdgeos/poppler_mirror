@@ -4130,7 +4130,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         for (j = i + 1;
             j < da->getLength() && !Lexer::isSpace(da->getChar(j));
             ++j) ;
-        daToks->append(new GooString(da, i, j - i));
+	daToks->push_back(new GooString(da, i, j - i));
         i = j;
       }
     }
@@ -4540,7 +4540,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 	for (j = i + 1;
 	     j < da->getLength() && !Lexer::isSpace(da->getChar(j));
 	     ++j) ;
-	daToks->append(new GooString(da, i, j - i));
+	daToks->push_back(new GooString(da, i, j - i));
 	i = j;
       }
     }

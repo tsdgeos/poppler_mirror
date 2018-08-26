@@ -134,7 +134,7 @@ GooList *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemR
     }
     alreadyRead[p->getRefNum()] = 1;
     OutlineItem *item = new OutlineItem(obj.getDict(), p->getRefNum(), parent, xrefA);
-    items->append(item);
+    items->push_back(item);
     p = &item->nextRef;
   }
 

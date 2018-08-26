@@ -1019,7 +1019,7 @@ void HtmlPage::setDocName(const char *fname){
 
 void HtmlPage::addImage(GooString *fname, GfxState *state) {
   HtmlImage *img = new HtmlImage(fname, state);
-  imgList->append(img);
+  imgList->push_back(img);
 }
 
 //------------------------------------------------------------------------
@@ -1129,11 +1129,11 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
   pages = new HtmlPage(rawOrder, extension);
   
   glMetaVars = new GooList();
-  glMetaVars->append(new HtmlMetaVar("generator", "pdftohtml 0.36"));  
-  if( author ) glMetaVars->append(new HtmlMetaVar("author", author));  
-  if( keywords ) glMetaVars->append(new HtmlMetaVar("keywords", keywords));  
-  if( date ) glMetaVars->append(new HtmlMetaVar("date", date));  
-  if( subject ) glMetaVars->append(new HtmlMetaVar("subject", subject));
+  glMetaVars->push_back(new HtmlMetaVar("generator", "pdftohtml 0.36"));
+  if( author ) glMetaVars->push_back(new HtmlMetaVar("author", author));
+  if( keywords ) glMetaVars->push_back(new HtmlMetaVar("keywords", keywords));
+  if( date ) glMetaVars->push_back(new HtmlMetaVar("date", date));
+  if( subject ) glMetaVars->push_back(new HtmlMetaVar("subject", subject));
  
   maxPageWidth = 0;
   maxPageHeight = 0;

@@ -48,27 +48,12 @@ struct GooList : public std::vector<void *> {
   explicit GooList(const std::vector<void *>& vec) : std::vector<void *>(vec) {}
   explicit GooList(std::vector<void *>&& vec) : std::vector<void *>(std::move(vec)) {}
 
-  //----- general
-
   // Get the number of elements.
   int getLength() const { return size(); }
-
-  //----- ordered list support
 
   // Return the <i>th element.
   // Assumes 0 <= i < length.
   void *get(int i) const { return (*this)[i]; }
-
-  // Append an element to the end of the list.
-  void append(void *p) {
-    push_back(p);
-  }
-
-  // Append another list to the end of this one.
-  void append(GooList *list) {
-    reserve(size() + list->size());
-    static_cast<std::vector<void *>&>(*this).insert(end(), list->begin(), list->end());
-  }
 };
 
 template<typename T>

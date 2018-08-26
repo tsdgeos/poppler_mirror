@@ -1384,7 +1384,7 @@ void PSOutputDev::postInit()
       }
       if (!name)
         name = GooString::format("{0:d}x{1:d}mm", int(w*25.4/72), int(h*25.4/72));
-      paperSizes->append(new PSOutPaperSize(name, w, h));
+      paperSizes->push_back(new PSOutPaperSize(name, w, h));
     }
     pagePaperSize.insert(std::pair<int,int>(pg, i));
     if (!paperMatch)

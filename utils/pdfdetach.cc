@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
 
   embeddedFiles = new GooList();
   for (i = 0; i < doc->getCatalog()->numEmbeddedFiles(); ++i)
-    embeddedFiles->append(doc->getCatalog()->embeddedFile(i));
+    embeddedFiles->push_back(doc->getCatalog()->embeddedFile(i));
 
   nPages = doc->getCatalog()->getNumPages();
   for (i = 0; i < nPages; ++i) {
@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
       annot = annots->getAnnot(j);
       if (annot->getType() != Annot::typeFileAttachment)
         continue;
-      embeddedFiles->append(new FileSpec(static_cast<AnnotFileAttachment *>(annot)->getFile()));
+      embeddedFiles->push_back(new FileSpec(static_cast<AnnotFileAttachment *>(annot)->getFile()));
     }
   }
 

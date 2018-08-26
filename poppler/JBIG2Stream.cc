@@ -1639,7 +1639,7 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
 	}
 	numInputSyms += j;
       } else if (seg->getType() == jbig2SegCodeTable) {
-        codeTables->append(seg);
+	codeTables->push_back(seg);
       }
     } else {
       delete codeTables;
@@ -1980,7 +1980,7 @@ GBool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
   }
 
   // store the new symbol dict
-  segments->append(symbolDict);
+  segments->push_back(symbolDict);
 
   return gTrue;
 
@@ -2086,7 +2086,7 @@ void JBIG2Stream::readTextRegionSeg(Guint segNum, GBool imm,
       if (seg->getType() == jbig2SegSymbolDict) {
 	numSyms += ((JBIG2SymbolDict *)seg)->getSize();
       } else if (seg->getType() == jbig2SegCodeTable) {
-	codeTables->append(seg);
+	codeTables->push_back(seg);
       }
     } else {
       error(errSyntaxError, curStr->getPos(), "Invalid segment reference in JBIG2 text region");
@@ -2293,7 +2293,7 @@ void JBIG2Stream::readTextRegionSeg(Guint segNum, GBool imm,
     // store the region bitmap
     } else {
       bitmap->setSegNum(segNum);
-      segments->append(bitmap);
+      segments->push_back(bitmap);
     }
   }
 
@@ -2632,7 +2632,7 @@ void JBIG2Stream::readPatternDictSeg(Guint segNum, Guint length) {
   delete bitmap;
 
   // store the new pattern dict
-  segments->append(patternDict);
+  segments->push_back(patternDict);
 
   return;
 
@@ -2809,7 +2809,7 @@ void JBIG2Stream::readHalftoneRegionSeg(Guint segNum, GBool imm,
 
   // store the region bitmap
   } else {
-    segments->append(bitmap);
+    segments->push_back(bitmap);
   }
 
   return;
@@ -2885,7 +2885,7 @@ void JBIG2Stream::readGenericRegionSeg(Guint segNum, GBool imm,
   // store the region bitmap
   } else {
     bitmap->setSegNum(segNum);
-    segments->append(bitmap);
+    segments->push_back(bitmap);
   }
 
   // immediate generic segments can have an unspecified length, in
@@ -3798,7 +3798,7 @@ void JBIG2Stream::readGenericRefinementRegionSeg(Guint segNum, GBool imm,
   } else {
     if (bitmap) {
       bitmap->setSegNum(segNum);
-      segments->append(bitmap);
+      segments->push_back(bitmap);
     } else {
       error(errSyntaxError, curStr->getPos(), "readGenericRefinementRegionSeg with null bitmap");
     }
@@ -4136,7 +4136,7 @@ void JBIG2Stream::readCodeTableSeg(Guint segNum, Guint length) {
   huffDecoder->buildTable(huffTab, i);
 
   // create and store the new table segment
-  segments->append(new JBIG2CodeTable(segNum, huffTab));
+  segments->push_back(new JBIG2CodeTable(segNum, huffTab));
 
   return;
 
