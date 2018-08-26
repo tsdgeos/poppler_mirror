@@ -52,9 +52,6 @@ struct GooList : public std::vector<void *> {
   // Get the number of elements.
   int getLength() const { return size(); }
 
-  // Returns a (shallow) copy of this list.
-  GooList *copy() const { return new GooList(static_cast<const std::vector<void *>&>(*this)); }
-
   //----- ordered list support
 
   // Return the <i>th element.
