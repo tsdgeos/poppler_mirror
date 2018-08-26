@@ -81,15 +81,6 @@ struct GooList : public std::vector<void *> {
   void insert(int i, void *p) {
     static_cast<std::vector<void *>&>(*this).insert(begin() + i, p);
   }
-
-  // Deletes and returns the element at index <i>.
-  // Assumes 0 <= i < length.
-  void *del(int i) {
-    auto iter = begin() + i;
-    auto tmp = *iter;
-    erase(iter);
-    return tmp;
-  }
 };
 
 #define deleteGooList(list, T)                        \

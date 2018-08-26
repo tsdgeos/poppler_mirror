@@ -4177,20 +4177,17 @@ JBIG2Segment *JBIG2Stream::findSegment(Guint segNum) {
 }
 
 void JBIG2Stream::discardSegment(Guint segNum) {
-  JBIG2Segment *seg;
-  int i;
-
-  for (i = 0; i < globalSegments->getLength(); ++i) {
-    seg = (JBIG2Segment *)globalSegments->get(i);
+  for (auto it = globalSegments->begin(); it != globalSegments->end(); ++it) {
+    auto seg = static_cast<JBIG2Segment *>(*it);
     if (seg->getSegNum() == segNum) {
-      globalSegments->del(i);
+      globalSegments->erase(it);
       return;
     }
   }
-  for (i = 0; i < segments->getLength(); ++i) {
-    seg = (JBIG2Segment *)segments->get(i);
+  for (auto it = segments->begin(); it != segments->end(); ++it) {
+    auto seg = static_cast<JBIG2Segment *>(*it);
     if (seg->getSegNum() == segNum) {
-      segments->del(i);
+      segments->erase(it);
       return;
     }
   }
