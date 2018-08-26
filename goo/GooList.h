@@ -72,12 +72,6 @@ struct GooList : public std::vector<void *> {
     reserve(size() + list->size());
     static_cast<std::vector<void *>&>(*this).insert(end(), list->begin(), list->end());
   }
-
-  // Insert an element at index <i>.
-  // Assumes 0 <= i <= length.
-  void insert(int i, void *p) {
-    static_cast<std::vector<void *>&>(*this).insert(begin() + i, p);
-  }
 };
 
 #define deleteGooList(list, T)                        \

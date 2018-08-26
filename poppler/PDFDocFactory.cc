@@ -35,11 +35,11 @@ PDFDocFactory::PDFDocFactory(GooList *pdfDocBuilders)
   } else {
     builders = new GooList();
   }
+  builders->push_back(new LocalPDFDocBuilder());
+  builders->push_back(new StdinPDFDocBuilder());
 #ifdef ENABLE_LIBCURL
-  builders->insert(0, new CurlPDFDocBuilder());
+  builders->push_back(new CurlPDFDocBuilder());
 #endif
-  builders->insert(0, new StdinPDFDocBuilder());
-  builders->insert(0, new LocalPDFDocBuilder());
 }
 
 PDFDocFactory::~PDFDocFactory()
