@@ -59,10 +59,6 @@ struct GooList : public std::vector<void *> {
   // Assumes 0 <= i < length.
   void *get(int i) const { return (*this)[i]; }
 
-  // Replace the <i>th element.
-  // Assumes 0 <= i < length.
-  void put(int i, void *p) { (*this)[i] = p; }
-
   // Append an element to the end of the list.
   void append(void *p) {
     push_back(p);
