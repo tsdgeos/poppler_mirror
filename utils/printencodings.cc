@@ -23,22 +23,19 @@
 #include "goo/GooList.h"
 #include "goo/GooString.h"
 
-
-static int cmpGooString(const void *ptr1, const void *ptr2)
-{
-  GooString *s1 = *((GooString **)ptr1);
-  GooString *s2 = *((GooString **)ptr2);
-  return s1->cmp(s2);
-}
-
 void printEncodings()
 {
   GooList *encNames = globalParams->getEncodingNames();
-  encNames->sort(cmpGooString);
+
+  std::sort(encNames->begin(), encNames->end(), [](void *lhs, void *rhs) {
+    return static_cast<GooString *>(lhs)->cmp(static_cast<GooString *>(rhs)) < 0;
+  });
+
   printf("Available encodings are:\n");
   for (int i = 0; i < encNames->getLength(); ++i) {
     GooString *enc = (GooString*)encNames->get(i);
     printf("%s\n", enc->getCString());
   }
+
   delete encNames;
 }
