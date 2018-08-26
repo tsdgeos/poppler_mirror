@@ -53,7 +53,7 @@ Outline::Outline(const Object *outlineObj, XRef *xref) {
 
 Outline::~Outline() {
   if (items) {
-    deleteGooList(items, OutlineItem);
+    deleteGooList<OutlineItem>(items);
   }
 }
 
@@ -156,7 +156,7 @@ void OutlineItem::open() {
 
 void OutlineItem::close() {
   if (kids) {
-    deleteGooList(kids, OutlineItem);
+    deleteGooList<OutlineItem>(kids);
     kids = nullptr;
   }
 }

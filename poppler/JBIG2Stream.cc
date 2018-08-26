@@ -1275,11 +1275,11 @@ void JBIG2Stream::close() {
     pageBitmap = nullptr;
   }
   if (segments) {
-    deleteGooList(segments, JBIG2Segment);
+    deleteGooList<JBIG2Segment>(segments);
     segments = nullptr;
   }
   if (globalSegments) {
-    deleteGooList(globalSegments, JBIG2Segment);
+    deleteGooList<JBIG2Segment>(globalSegments);
     globalSegments = nullptr;
   }
   dataPtr = dataEnd = nullptr;

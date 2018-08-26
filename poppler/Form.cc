@@ -1225,7 +1225,7 @@ double FormFieldText::getTextFontSize()
     if (!p || *p)
       fontSize = -1;
   }
-  deleteGooList(daToks, GooString);
+  deleteGooList<GooString>(daToks);
   return fontSize;
 }
 
@@ -1236,7 +1236,7 @@ void FormFieldText::setTextFontSize(int fontSize)
     int idx = parseDA(daToks);
     if (idx == -1) {
       error(errSyntaxError, -1, "FormFieldText:: invalid DA object\n");
-      deleteGooList(daToks, GooString);
+      deleteGooList<GooString>(daToks);
       return;
     }
     if (defaultAppearance)
@@ -1251,7 +1251,7 @@ void FormFieldText::setTextFontSize(int fontSize)
         defaultAppearance->append(static_cast<GooString*>(daToks->get(i)));
       }
     }
-    deleteGooList(daToks, GooString);
+    deleteGooList<GooString>(daToks);
     obj.dictSet("DA", Object(defaultAppearance->copy()));
     xref->setModifiedObject(&obj, ref);
     updateChildrenAppearance();

@@ -2378,8 +2378,8 @@ TextPage::~TextPage() {
     }
   }
   delete fonts;
-  deleteGooList(underlines, TextUnderline);
-  deleteGooList(links, TextLink);
+  deleteGooList<TextUnderline>(underlines);
+  deleteGooList<TextLink>(links);
 }
 
 void TextPage::incRefCnt() {
@@ -2433,9 +2433,9 @@ void TextPage::clear() {
     }
     gfree(blocks);
   }
-  deleteGooList(fonts, TextFontInfo);
-  deleteGooList(underlines, TextUnderline);
-  deleteGooList(links, TextLink);
+  deleteGooList<TextFontInfo>(fonts);
+  deleteGooList<TextUnderline>(underlines);
+  deleteGooList<TextLink>(links);
 
   curWord = nullptr;
   charPos = 0;
@@ -4381,7 +4381,7 @@ TextSelectionDumper::TextSelectionDumper(TextPage *page)
 TextSelectionDumper::~TextSelectionDumper()
 {
   for (int i = 0; i < nLines; i++)
-    deleteGooList(lines[i], TextWordSelection);
+    deleteGooList<TextWordSelection>(lines[i]);
   gfree(lines);
 }
 
@@ -4617,7 +4617,7 @@ TextSelectionPainter::TextSelectionPainter(TextPage *page,
 
 TextSelectionPainter::~TextSelectionPainter()
 {
-  deleteGooList(selectionList, TextWordSelection);
+  deleteGooList<TextWordSelection>(selectionList);
   delete state;
 }
 

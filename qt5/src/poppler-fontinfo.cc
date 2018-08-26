@@ -133,7 +133,7 @@ QList<FontInfo> FontIterator::next()
 	for ( int i = 0; i < items->getLength(); ++i ) {
 		fonts.append( FontInfo( FontInfoData( ( ::FontInfo* )items->get( i ) ) ) );
 	}
-	deleteGooList( items, ::FontInfo );
+	deleteGooList<::FontInfo>( items );
 	return fonts;
 }
 

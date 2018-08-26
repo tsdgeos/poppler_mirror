@@ -308,7 +308,7 @@ int main(int argc, char *argv[]) {
   // clean up
  err2:
   if (embeddedFiles)
-    deleteGooList(embeddedFiles, FileSpec);
+    deleteGooList<FileSpec>(embeddedFiles);
   uMap->decRefCnt();
   delete doc;
  err1:

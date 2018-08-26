@@ -829,7 +829,7 @@ DefaultAppearance::DefaultAppearance(GooString *da) {
         }
       }
     }
-    deleteGooList(daToks, GooString);
+    deleteGooList<GooString>(daToks);
   }
 }
 
@@ -4191,7 +4191,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
   }
   if (!font) {
     if (daToks) {
-      deleteGooList(daToks, GooString);
+      deleteGooList<GooString>(daToks);
     }
     return false;
   }
@@ -4501,7 +4501,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     appearBuf->append("EMC\n");
   }
   if (daToks) {
-    deleteGooList(daToks, GooString);
+    deleteGooList<GooString>(daToks);
   }
   if (freeText) {
     delete text;
@@ -4574,7 +4574,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
   }
   if (!font) {
     if (daToks) {
-      deleteGooList(daToks, GooString);
+      deleteGooList<GooString>(daToks);
     }
     return false;
   }
@@ -4592,7 +4592,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
       if (fieldChoice->getChoice(i) == nullptr) {
         error(errSyntaxError, -1, "Invalid annotation listbox");
         if (daToks) {
-          deleteGooList(daToks, GooString);
+	  deleteGooList<GooString>(daToks);
         }
         delete convertedText;
         return false;
@@ -4690,7 +4690,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
   }
 
   if (daToks) {
-    deleteGooList(daToks, GooString);
+    deleteGooList<GooString>(daToks);
   }
 
   delete convertedText;

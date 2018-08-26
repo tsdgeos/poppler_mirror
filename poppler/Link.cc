@@ -57,7 +57,7 @@ LinkAction::LinkAction() : nextActionList(nullptr) {
 
 LinkAction::~LinkAction() {
   if (nextActionList)
-    deleteGooList(nextActionList, LinkAction);
+    deleteGooList<LinkAction>(nextActionList);
 }
 
 LinkAction *LinkAction::parseDest(const Object *obj) {
@@ -880,12 +880,12 @@ LinkOCGState::LinkOCGState(const Object *obj) {
 
 LinkOCGState::~LinkOCGState() {
   if (stateList)
-    deleteGooList(stateList, StateList);
+    deleteGooList<StateList>(stateList);
 }
 
 LinkOCGState::StateList::~StateList() {
   if (list)
-    deleteGooList(list, Ref);
+    deleteGooList<Ref>(list);
 }
 
 //------------------------------------------------------------------------

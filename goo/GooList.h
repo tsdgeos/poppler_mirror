@@ -44,6 +44,7 @@ struct GooList : public std::vector<void *> {
   GooList(const GooList &other) = delete;
   GooList& operator=(const GooList &other) = delete;
 
+  // Zero cost conversion from std::vector
   explicit GooList(const std::vector<void *>& vec) : std::vector<void *>(vec) {}
   explicit GooList(std::vector<void *>&& vec) : std::vector<void *>(std::move(vec)) {}
 
@@ -74,14 +75,10 @@ struct GooList : public std::vector<void *> {
   }
 };
 
-#define deleteGooList(list, T)                        \
-  do {                                              \
-    GooList *_list = (list);                          \
-    {                                               \
-      int _i;                                       \
-      for (_i = 0; _i < _list->getLength(); ++_i) { \
-        delete (T*)_list->get(_i);                  \
-      }                                             \
-      delete _list;                                 \
-    }                                               \
-  } while (0)
+template<typename T>
+inline void deleteGooList(GooList* list) {
+  for (auto ptr : *list) {
+    delete static_cast<T *>(ptr);
+  }
+  delete list;
+}

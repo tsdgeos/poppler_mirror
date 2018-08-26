@@ -161,7 +161,7 @@ SplashBitmap::~SplashBitmap() {
     }
   }
   gfree(alpha);
-  deleteGooList(separationList, GfxSeparationColorSpace);
+  deleteGooList<GfxSeparationColorSpace>(separationList);
 }
 
 

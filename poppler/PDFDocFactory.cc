@@ -45,7 +45,7 @@ PDFDocFactory::PDFDocFactory(GooList *pdfDocBuilders)
 PDFDocFactory::~PDFDocFactory()
 {
   if (builders) {
-    deleteGooList(builders, PDFDocBuilder);
+    deleteGooList<PDFDocBuilder>(builders);
   }
 }
 

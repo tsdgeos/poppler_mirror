@@ -302,7 +302,7 @@ HtmlPage::~HtmlPage() {
   delete fonts;
   delete links;
   delete imgExt;
-  deleteGooList(imgList, HtmlImage);
+  deleteGooList<HtmlImage>(imgList);
 }
 
 void HtmlPage::updateFont(GfxState *state) {
@@ -1230,7 +1230,7 @@ HtmlOutputDev::~HtmlOutputDev() {
     delete Docname;
     delete docTitle;
 
-    deleteGooList(glMetaVars, HtmlMetaVar);
+    deleteGooList<HtmlMetaVar>(glMetaVars);
 
     if (fContentsFrame){
       fputs("</body>\n</html>\n",fContentsFrame);  
