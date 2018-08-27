@@ -315,7 +315,6 @@ configure_file(poppler/poppler-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/popple
 
 set(poppler_SRCS
   goo/gfile.cc
-  goo/gmempp.cc
   goo/GooList.cc
   goo/GooTimer.cc
   goo/GooString.cc
