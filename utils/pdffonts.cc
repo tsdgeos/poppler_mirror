@@ -225,7 +225,6 @@ int main(int argc, char *argv[]) {
 
   // check for memory leaks
   Object::memCheck(stderr);
-  gMemReport(stderr);
 
   return exitCode;
 }

@@ -66,15 +66,6 @@ extern void *greallocn_checkoverflow(void *p, int nObjs, int objSize);
  */
 extern void gfree(void *p);
 
-#ifdef DEBUG_MEM
-/*
- * Report on unfreed memory.
- */
-extern void gMemReport(FILE *f);
-#else
-#define gMemReport(f)
-#endif
-
 /*
  * Allocate memory and copy a string into it.
  */
