@@ -451,9 +451,6 @@ int main(int argc, char *argv[]) {
 
   if(htmlFileName) delete htmlFileName;
   HtmlFont::clear();
-  
-  // check for memory leaks
-  Object::memCheck(stderr);
 
   return exit_status;
 }
