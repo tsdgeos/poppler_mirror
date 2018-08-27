@@ -344,9 +344,11 @@ bool SplashXPathScanner::addIntersection(double segYMin, double segYMax,
   }
 
   auto& line = allIntersections[y - yMin];
+#ifndef USE_BOOST_HEADERS
   if (line.empty()) {
       line.reserve(4);
   }
+#endif
   line.push_back(intersect);
 
   return true;
