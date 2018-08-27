@@ -94,12 +94,16 @@ inline void *grealloc_checkoverflow(void *p, size_t size) {
  */
 
 inline bool checkedMultiply(int x, int y, int *z) {
+#if __GNUC__ >= 5
+  return __builtin_smul_overflow(x, y, z);
+#else
   if (x != 0 && INT_MAX / x < y) {
     return true;
   }
 
   *z = x * y;
   return false;
+#endif
 }
 
 inline void *gmallocn(int count, int size, bool checkoverflow = false) {
