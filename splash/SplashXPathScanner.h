@@ -28,9 +28,16 @@
 
 #include "SplashTypes.h"
 
+#include <vector>
+
 class SplashXPath;
 class SplashBitmap;
-struct SplashIntersect;
+
+struct SplashIntersect {
+  int y;
+  int x0, x1;			// intersection of segment with [y, y+1)
+  int count;			// EO/NZWN counter increment
+};
 
 //------------------------------------------------------------------------
 // SplashXPathScanner
@@ -91,10 +98,8 @@ private:
   int xMin, yMin, xMax, yMax;
   GBool partialClip;
 
-  SplashIntersect *allInter;	// array of intersections
-  int allInterLen;		// number of intersections in <allInter>
-  int allInterSize;		// size of the <allInter> array
-  int *inter;			// indexes into <allInter> for each y value
+  typedef std::vector<SplashIntersect> IntersectionLine;
+  std::vector<IntersectionLine> allIntersections;
 
   friend class SplashXPathScanIterator;
 };
@@ -108,9 +113,10 @@ public:
   GBool getNextSpan(int *x0, int *x1);
 
 private:
-  const SplashIntersect *allInter;
-  int interIdx;  	// current index into <allInter>
-  int interEnd;  	// last index into <allInter>, noninclusive
+  typedef std::vector<SplashIntersect> IntersectionLine;
+  const IntersectionLine &line;
+
+  size_t interIdx;	// current index into <line>
   int interCount;	// current EO/NZWN counter
   const GBool eo;
 };
