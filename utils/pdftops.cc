@@ -442,9 +442,5 @@ int main(int argc, char *argv[]) {
  err0:
   delete globalParams;
 
-  // check for memory leaks
-  Object::memCheck(stderr);
-  gMemReport(stderr);
-
   return exitCode;
 }

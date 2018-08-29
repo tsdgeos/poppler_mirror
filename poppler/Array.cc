@@ -32,6 +32,7 @@
 
 #include <stdlib.h>
 #include <stddef.h>
+#include <cassert>
 #include "goo/gmem.h"
 #include "Object.h"
 #include "Array.h"
@@ -105,11 +106,8 @@ void Array::add(Object &&elem) {
 void Array::remove(int i) {
   arrayLocker();
   if (i < 0 || i >= length) {
-#ifdef DEBUG_MEM
-    abort();
-#else
+    assert(i >= 0 && i < length);
     return;
-#endif
   }
   --length;
   memmove( static_cast<void*>(elems + i), elems + i + 1, sizeof(elems[0]) * (length - i) );
@@ -117,22 +115,16 @@ void Array::remove(int i) {
 
 Object Array::get(int i, int recursion) const {
   if (i < 0 || i >= length) {
-#ifdef DEBUG_MEM
-    abort();
-#else
+    assert(i >= 0 && i < length);
     return Object(objNull);
-#endif
   }
   return elems[i].fetch(xref, recursion);
 }
 
 Object Array::getNF(int i) const {
   if (i < 0 || i >= length) {
-#ifdef DEBUG_MEM
-    abort();
-#else
+    assert(i >= 0 && i < length);
     return Object(objNull);
-#endif
   }
   return elems[i].copy();
 }

@@ -58,11 +58,6 @@ static const char *objTypeNames[numObjTypes] = {
   "dead"
 };
 
-#ifdef DEBUG_MEM
-int Object::numAlloc[numObjTypes] =
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-#endif
-
 Object::Object(Object&& other)
 {
   type = other.type;
@@ -112,9 +107,6 @@ Object Object::copy() const {
   default:
     break;
   }
-#ifdef DEBUG_MEM
-  ++numAlloc[type];
-#endif
   return obj;
 }
 
@@ -154,9 +146,6 @@ void Object::free() {
   default:
     break;
   }
-#ifdef DEBUG_MEM
-  --numAlloc[type];
-#endif
   type = objNone;
 }
 
@@ -233,24 +222,4 @@ void Object::print(FILE *f) const {
     fprintf(f, "%lld", int64g);
     break;
   }
-}
-
-void Object::memCheck(FILE *f) {
-#ifdef DEBUG_MEM
-  int i;
-  int t;
-
-  t = 0;
-  for (i = 0; i < numObjTypes; ++i)
-    t += numAlloc[i];
-  if (t > 0) {
-    fprintf(f, "Allocated objects:\n");
-    for (i = 0; i < numObjTypes; ++i) {
-      if (numAlloc[i] > 0)
-	fprintf(f, "  %-20s: %6d\n", objTypeNames[i], numAlloc[i]);
-    }
-  }
-#else
-  (void)f;
-#endif
 }
