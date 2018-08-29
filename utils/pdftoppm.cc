@@ -24,7 +24,7 @@
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
 // Copyright (C) 2010 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2013, 2015 Adam Reichold <adamreichold@myopera.com>
+// Copyright (C) 2013, 2015, 2018 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
