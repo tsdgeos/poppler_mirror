@@ -111,9 +111,9 @@ protected:
 
 class AnnotPath {
 public:
-  AnnotPath();
+  AnnotPath() = default;
   AnnotPath(Array *array);
-  AnnotPath(std::unique_ptr<AnnotCoord[]> &&coords, int coordsLength);
+  AnnotPath(std::vector<AnnotCoord> &&coords);
   ~AnnotPath() = default;
 
   AnnotPath(const AnnotPath &) = delete;
@@ -121,11 +121,10 @@ public:
 
   double getX(int coord) const;
   double getY(int coord) const;
-  AnnotCoord *getCoord(int coord) const;
-  int getCoordsLength() const { return coordsLength; }
+  AnnotCoord *getCoord(int coord);
+  int getCoordsLength() const { return coords.size(); }
 protected:
-  std::unique_ptr<AnnotCoord[]> coords;
-  int coordsLength;
+  std::vector<AnnotCoord> coords;
 
   void parsePathArray(Array *array);
 };

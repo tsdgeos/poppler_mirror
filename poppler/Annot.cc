@@ -281,48 +281,41 @@ AnnotBorderEffect::AnnotBorderEffect(Dict *dict) {
 // AnnotPath
 //------------------------------------------------------------------------
 
-AnnotPath::AnnotPath() {
-  coordsLength = 0;
-}
-
 AnnotPath::AnnotPath(Array *array) {
-  coordsLength = 0;
   parsePathArray(array);
 }
 
-AnnotPath::AnnotPath(std::unique_ptr<AnnotCoord[]> &&coords, int coordsLength) {
+AnnotPath::AnnotPath(std::vector<AnnotCoord> &&coords) {
   this->coords = std::move(coords);
-  this->coordsLength = coordsLength;
 }
 
 double AnnotPath::getX(int coord) const {
-  if (coord >= 0 && coord < coordsLength)
+  if (coord >= 0 && coord < getCoordsLength())
     return coords[coord].getX();
   return 0;
 }
 
 double AnnotPath::getY(int coord) const {
-  if (coord >= 0 && coord < coordsLength)
+  if (coord >= 0 && coord < getCoordsLength())
     return coords[coord].getY();
   return 0;
 }
 
-AnnotCoord *AnnotPath::getCoord(int coord) const {
-  if (coord >= 0 && coord < coordsLength)
+AnnotCoord *AnnotPath::getCoord(int coord) {
+  if (coord >= 0 && coord < getCoordsLength())
     return &coords[coord];
   return nullptr;
 }
 
 void AnnotPath::parsePathArray(Array *array) {
-  int tempLength;
-
   if (array->getLength() % 2) {
     error(errSyntaxError, -1, "Bad Annot Path");
     return;
   }
 
-  tempLength = array->getLength() / 2;
-  auto tempCoords = std::make_unique<AnnotCoord[]>(tempLength);
+  const auto tempLength = array->getLength() / 2;
+  std::vector<AnnotCoord> tempCoords;
+  tempCoords.reserve(tempLength);
   for (int i = 0; i < tempLength; i++) {
     double x = 0, y = 0;
 
@@ -340,11 +333,10 @@ void AnnotPath::parsePathArray(Array *array) {
       return;
     }
 
-    tempCoords[i] = { x, y };
+    tempCoords.emplace_back(x, y);
   }
 
   coords = std::move(tempCoords);
-  coordsLength = tempLength;
 }
 
 //------------------------------------------------------------------------

@@ -355,20 +355,20 @@ PDFRectangle AnnotationPrivate::boundaryToPdfRectangle(const QRectF &r, int rFla
 AnnotPath * AnnotationPrivate::toAnnotPath(const QLinkedList<QPointF> &list) const
 {
     const int count = list.size();
-    auto ac = std::make_unique<AnnotCoord[]>(count);
+    std::vector<AnnotCoord> ac;
+    ac.reserve(count);
 
     double MTX[6];
     fillTransformationMTX(MTX);
 
-    int pos = 0;
     foreach (const QPointF &p, list)
     {
         double x, y;
         XPDFReader::invTransform( MTX, p, x, y );
-        ac[pos++] = AnnotCoord(x, y);
+	ac.emplace_back(x, y);
     }
 
-    return new AnnotPath(std::move(ac), count);
+    return new AnnotPath(std::move(ac));
 }
 
 QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentData *doc, const QSet<Annotation::SubType> &subtypes, int parentID)
