@@ -4942,7 +4942,6 @@ void AnnotMovie::draw(Gfx *gfx, GBool printing) {
       bbox[2] = width;
       bbox[3] = height;
       appearance = createForm(appearBuf.get(), bbox, gFalse, resDict2);
-      appearBuf = nullptr;
     }
   }
 
