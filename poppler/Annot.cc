@@ -41,7 +41,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
 // Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
-// Copyright (C) Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -6816,9 +6816,6 @@ Annots::Annots(PDFDoc *docA, int page, Object *annotsObj) {
   int i;
 
   doc = docA;
-  annots = nullptr;
-  size = 0;
-  nAnnots = 0;
 
   if (annotsObj->isArray()) {
     for (i = 0; i < annotsObj->arrayGetLength(); ++i) {
@@ -6843,30 +6840,20 @@ Annots::Annots(PDFDoc *docA, int page, Object *annotsObj) {
 
 void Annots::appendAnnot(Annot *annot) {
   if (annot && annot->isOk()) {
-    if (nAnnots >= size) {
-      size += 16;
-      annots = (Annot **)greallocn(annots, size, sizeof(Annot *));
-    }
-    annots[nAnnots++] = annot;
+    annots.push_back(annot);
     annot->incRefCnt();
   }
 }
 
 GBool Annots::removeAnnot(Annot *annot) {
-  int idx = -1;
-  // Search annot and determine its index
-  for (int i = 0; idx == -1 && i < nAnnots; i++) {
-    if (annots[i] == annot) {
-      idx = i;
-    }
-  }
-  if (idx == -1) {
-    return gFalse;
+  auto idx = std::find(annots.begin(), annots.end(), annot);
+
+  if (idx == annots.end()) {
+    return false;
   } else {
-    --nAnnots;
-    memmove( annots + idx, annots + idx + 1, sizeof(annots[0]) * (nAnnots - idx) );
     annot->decRefCnt();
-    return gTrue;
+    annots.erase(idx);
+    return true;
   }
 }
 
@@ -6957,11 +6944,9 @@ Annot *Annots::createAnnot(Object* dictObject, Object *obj) {
 }
 
 Annot *Annots::findAnnot(Ref *ref) {
-  int i;
-
-  for (i = 0; i < nAnnots; ++i) {
-    if (annots[i]->match(ref)) {
-      return annots[i];
+  for (auto* annot : annots) {
+    if (annot->match(ref)) {
+      return annot;
     }
   }
   return nullptr;
@@ -6969,12 +6954,9 @@ Annot *Annots::findAnnot(Ref *ref) {
 
 
 Annots::~Annots() {
-  int i;
-
-  for (i = 0; i < nAnnots; ++i) {
-    annots[i]->decRefCnt();
+  for (auto* annot : annots) {
+    annot->decRefCnt();
   }
-  gfree(annots);
 }
 
 
