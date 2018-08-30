@@ -2966,17 +2966,19 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(GBool mmr, int w, int h,
   if (mmr) {
 
     mmrDecoder->reset();
-    if (w > INT_MAX - 2) {
-      error(errSyntaxError, curStr->getPos(), "Bad width in JBIG2 generic bitmap");
-      delete bitmap;
-      return nullptr;
-    }
     // 0 <= codingLine[0] < codingLine[1] < ... < codingLine[n] = w
     // ---> max codingLine size = w + 1
     // refLine has one extra guard entry at the end
     // ---> max refLine size = w + 2
-    codingLine = (int *)gmallocn(w + 1, sizeof(int));
-    refLine = (int *)gmallocn(w + 2, sizeof(int));
+    codingLine = (int *)gmallocn_checkoverflow(w + 1, sizeof(int));
+    refLine = (int *)gmallocn_checkoverflow(w + 2, sizeof(int));
+
+    if (unlikely(!codingLine || !refLine)) {
+      error(errSyntaxError, curStr->getPos(), "Bad width in JBIG2 generic bitmap");
+      delete bitmap;
+      return nullptr;
+    }
+
     memset(refLine, 0, (w + 2) * sizeof(int));
     for (i = 0; i < w + 1; ++i) codingLine[i] = w;
 

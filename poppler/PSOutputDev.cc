@@ -53,6 +53,7 @@
 #include <math.h>
 #include <limits.h>
 #include <algorithm>
+#include <array>
 #include "goo/GooString.h"
 #include "goo/GooList.h"
 #include "poppler-config.h"
