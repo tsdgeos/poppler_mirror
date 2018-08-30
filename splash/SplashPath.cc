@@ -116,7 +116,7 @@ SplashError SplashPath::moveTo(SplashCoord x, SplashCoord y) {
     return splashErrBogusPath;
   }
   grow(1);
-  if (unlikely(length == 0))
+  if (unlikely(size == 0))
     return splashErrBogusPath;
   pts[length].x = x;
   pts[length].y = y;
