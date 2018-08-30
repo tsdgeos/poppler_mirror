@@ -12,6 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -26,6 +27,7 @@
 
 #include <string.h>
 #include "goo/gmem.h"
+#include "goo/GooLikely.h"
 #include "SplashErrorCodes.h"
 #include "SplashPath.h"
 
@@ -89,8 +91,11 @@ void SplashPath::grow(int nPts) {
     while (size < length + nPts) {
       size *= 2;
     }
-    pts = (SplashPathPoint *)greallocn(pts, size, sizeof(SplashPathPoint));
-    flags = (Guchar *)greallocn(flags, size, sizeof(Guchar));
+    pts = (SplashPathPoint *)greallocn_checkoverflow(pts, size, sizeof(SplashPathPoint));
+    flags = (Guchar *)greallocn_checkoverflow(flags, size, sizeof(Guchar));
+    if (unlikely(!pts || !flags)) {
+      length = size = 0;
+    }
   }
 }
 
@@ -111,6 +116,8 @@ SplashError SplashPath::moveTo(SplashCoord x, SplashCoord y) {
     return splashErrBogusPath;
   }
   grow(1);
+  if (unlikely(length == 0))
+    return splashErrBogusPath;
   pts[length].x = x;
   pts[length].y = y;
   flags[length] = splashPathFirst | splashPathLast;
