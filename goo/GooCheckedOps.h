@@ -13,8 +13,12 @@ inline bool checkedAssign(long long lz, int *z) {
   return false;
 }
 
+#ifndef __has_builtin
+  #define __has_builtin(x) 0
+#endif
+
 inline bool checkedAdd(int x, int y, int *z) {
-#if __GNUC__ >= 5
+#if __GNUC__ >= 5 || __has_builtin(__builtin_sadd_overflow)
   return __builtin_sadd_overflow(x, y, z);
 #else
   const auto lz = static_cast<long long>(x) + static_cast<long long>(y);
@@ -23,7 +27,7 @@ inline bool checkedAdd(int x, int y, int *z) {
 }
 
 inline bool checkedMultiply(int x, int y, int *z) {
-#if __GNUC__ >= 5
+#if __GNUC__ >= 5 || __has_builtin(__builtin_smul_overflow)
   return __builtin_smul_overflow(x, y, z);
 #else
   const auto lz = static_cast<long long>(x) * static_cast<long long>(y);
