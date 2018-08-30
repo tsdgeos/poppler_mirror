@@ -107,7 +107,6 @@ void Array::add(Object &&elem) {
 void Array::remove(int i) {
   arrayLocker();
   if (i < 0 || i >= length) {
-    assert(i >= 0 && i < length);
     return;
   }
   --length;
@@ -116,7 +115,6 @@ void Array::remove(int i) {
 
 Object Array::get(int i, int recursion) const {
   if (i < 0 || i >= length) {
-    assert(i >= 0 && i < length);
     return Object(objNull);
   }
   return elems[i].fetch(xref, recursion);
@@ -124,7 +122,6 @@ Object Array::get(int i, int recursion) const {
 
 Object Array::getNF(int i) const {
   if (i < 0 || i >= length) {
-    assert(i >= 0 && i < length);
     return Object(objNull);
   }
   return elems[i].copy();
