@@ -23,7 +23,8 @@
 //
 //========================================================================
 
-#pragma once
+#ifndef GMEM_H
+#define GMEM_H
 
 #include <cstring>
 #include <cstdlib>
@@ -175,3 +176,5 @@ inline char *copyString(const char *s, size_t n) {
   r[n] = '\0';
   return std::strncpy(r, s, n);
 }
+
+#endif // GMEM_H

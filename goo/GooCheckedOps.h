@@ -1,4 +1,15 @@
-#pragma once
+//========================================================================
+//
+// GooCheckedOps.h
+//
+// This file is licensed under the GPLv2 or later
+//
+// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+//
+//========================================================================
+
+#ifndef GOO_CHECKED_OPS_H
+#define GOO_CHECKED_OPS_H
 
 #include <climits>
 
@@ -34,3 +45,5 @@ inline bool checkedMultiply(int x, int y, int *z) {
   return checkedAssign(lz, z);
 #endif
 }
+
+#endif // GOO_CHECKED_OPS_H
