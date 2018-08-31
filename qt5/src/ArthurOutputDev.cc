@@ -149,13 +149,15 @@ const QPicture& ArthurType3Font::getGlyph(int gid) const
     Dict* resDict = m_font->getResources();
 
     QPainter glyphPainter;
-    glyphs[gid] = std::unique_ptr<QPicture>(new QPicture);
+    glyphs[gid] = std::make_unique<QPicture>();
     glyphPainter.begin(glyphs[gid].get());
-    std::unique_ptr<ArthurOutputDev> output_dev(new ArthurOutputDev(&glyphPainter));
+    auto output_dev = std::make_unique<ArthurOutputDev>(&glyphPainter);
 
-    std::unique_ptr<Gfx> gfx(new Gfx(m_doc, output_dev.get(), resDict,
-                                     &box,  // pagebox
-                                     nullptr));  // cropBox
+    auto gfx = std::make_unique<Gfx>(
+	  m_doc, output_dev.get(), resDict,
+	  &box,  // pagebox
+	  nullptr  // cropBox
+    );
 
     output_dev->startDoc(m_doc);
 
@@ -1059,9 +1061,11 @@ void ArthurOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 				    int width, int height, GBool invert,
 				    GBool interpolate, GBool inlineImg)
 {
-  std::unique_ptr<ImageStream> imgStr(new ImageStream(str, width,
-                                                      1,    // numPixelComps
-                                                      1));  // getBits
+  auto imgStr = std::make_unique<ImageStream>(
+	str, width,
+	1,  // numPixelComps
+	1  // getBits
+  );
   imgStr->reset();
 
   // TODO: Would using QImage::Format_Mono be more efficient here?
@@ -1102,16 +1106,17 @@ void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   unsigned int *data;
   unsigned int *line;
   int x, y;
-  ImageStream *imgStr;
   Guchar *pix;
   int i;
   QImage image;
   int stride;
   
   /* TODO: Do we want to cache these? */
-  imgStr = new ImageStream(str, width,
-			   colorMap->getNumPixelComps(),
-			   colorMap->getBits());
+  auto imgStr = std::make_unique<ImageStream>(
+	str, width,
+	colorMap->getNumPixelComps(),
+	colorMap->getBits()
+  );
   imgStr->reset();
   
   image = QImage(width, height, QImage::Format_ARGB32);
@@ -1144,7 +1149,6 @@ void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   // At this point, the QPainter coordinate transformation (CTM) is such
   // that QRect(0,0,1,1) is exactly the area of the image.
   m_painter.top()->drawImage( QRect(0,0,1,1), image );
-  delete imgStr;
 
 }
 
@@ -1176,14 +1180,18 @@ void ArthurOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *
   }
 
   /* TODO: Do we want to cache these? */
-  std::unique_ptr<ImageStream> imgStr(new ImageStream(str, width,
-                                                      colorMap->getNumPixelComps(),
-                                                      colorMap->getBits()));
+  auto imgStr = std::make_unique<ImageStream>(
+	str, width,
+	colorMap->getNumPixelComps(),
+	colorMap->getBits()
+  );
   imgStr->reset();
 
-  std::unique_ptr<ImageStream> maskImageStr(new ImageStream(maskStr, maskWidth,
-                                                            maskColorMap->getNumPixelComps(),
-                                                            maskColorMap->getBits()));
+  auto maskImageStr = std::make_unique<ImageStream>(
+	maskStr, maskWidth,
+	maskColorMap->getNumPixelComps(),
+	maskColorMap->getBits()
+  );
   maskImageStr->reset();
 
   QImage image(width, height, QImage::Format_ARGB32);
