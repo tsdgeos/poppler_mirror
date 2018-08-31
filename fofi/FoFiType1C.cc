@@ -2665,6 +2665,9 @@ int FoFiType1C::getDeltaIntArray(int *arr, int maxLen) {
   x = 0;
   for (i = 0; i < n; ++i) {
     int y;
+    if (unlikely(isinf(ops[i].num))) {
+      return i;
+    }
     if (checkedAdd(x, (int)ops[i].num, &y)) {
       return i;
     }
