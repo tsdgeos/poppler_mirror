@@ -2663,7 +2663,11 @@ int FoFiType1C::getDeltaIntArray(int *arr, int maxLen) {
   }
   x = 0;
   for (i = 0; i < n; ++i) {
-    x += (int)ops[i].num;
+    int y;
+    if (checkedAdd(x, (int)ops[i].num, &y)) {
+      return i;
+    }
+    x = y;
     arr[i] = x;
   }
   return n;

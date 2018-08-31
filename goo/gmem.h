@@ -23,12 +23,14 @@
 //
 //========================================================================
 
-#pragma once
+#ifndef GMEM_H
+#define GMEM_H
 
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
-#include <climits>
+
+#include "GooCheckedOps.h"
 
 /// Same as malloc, but prints error message and exits if malloc() returns NULL.
 inline void *gmalloc(size_t size, bool checkoverflow = false) {
@@ -93,19 +95,6 @@ inline void *grealloc_checkoverflow(void *p, size_t size) {
  * The gmallocn_checkoverflow variant returns NULL instead of exiting
  * the application if a overflow is detected.
  */
-
-inline bool checkedMultiply(int x, int y, int *z) {
-#if __GNUC__ >= 5
-  return __builtin_smul_overflow(x, y, z);
-#else
-  if (x != 0 && INT_MAX / x < y) {
-    return true;
-  }
-
-  *z = x * y;
-  return false;
-#endif
-}
 
 inline void *gmallocn(int count, int size, bool checkoverflow = false) {
   if (count == 0) {
@@ -187,3 +176,5 @@ inline char *copyString(const char *s, size_t n) {
   r[n] = '\0';
   return std::strncpy(r, s, n);
 }
+
+#endif // GMEM_H
