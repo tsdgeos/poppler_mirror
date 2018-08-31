@@ -8,63 +8,35 @@
  * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
  */
 
-#include <config.h>
 #include "grandom.h"
-#include "gtypes.h"
 
-#ifdef HAVE_RAND_R // rand_r backend (POSIX)
+#include <random>
 
-static GBool initialized = gFalse;
+namespace
+{
 
-#include <stdlib.h>
-#include <time.h>
-static unsigned int seed;
+auto& grandom_engine()
+{
+  static thread_local std::independent_bits_engine<std::default_random_engine, std::numeric_limits<Guchar>::digits, Guchar> engine{
+    std::default_random_engine{
+      std::random_device{}()
+    }
+  };
+  return engine;
+}
 
-static void initialize() {
-  if (!initialized) {
-    seed = time(nullptr);
-    initialized = gTrue;
-  }
 }
 
 void grandom_fill(Guchar *buff, int size)
 {
-  initialize();
-  while (size--)
-    *buff++ = rand_r(&seed) % 256;
-}
-
-double grandom_double()
-{
-  initialize();
-  return rand_r(&seed) / (1 + (double)RAND_MAX);
-}
-
-#else // srand+rand backend (unsafe, because it may interfere with the application)
-
-static GBool initialized = gFalse;
-
-#include <stdlib.h>
-#include <time.h>
-
-static void initialize() {
-  if (!initialized) {
-    srand(time(nullptr));
-    initialized = gTrue;
+  auto& engine = grandom_engine();
+  for (int index = 0; index < size; ++index) {
+    buff[index] = engine();
   }
 }
 
-void grandom_fill(Guchar *buff, int size)
-{
-  initialize();
-  while (size--)
-    *buff++ = rand() % 256;
-}
-
 double grandom_double()
 {
-  initialize();
-  return rand() / (1 + (double)RAND_MAX);
+  auto& engine = grandom_engine();
+  return std::generate_canonical<double, std::numeric_limits<double>::digits>(engine);
 }
-
-#endif
