@@ -79,6 +79,7 @@ public:
 
   SplashPath(const SplashPath&) = delete;
   SplashPath& operator=(const SplashPath&) = delete;
+  SplashPath(SplashPath&& path);
 
   // Append <path> to <this>.
   void append(SplashPath *path);

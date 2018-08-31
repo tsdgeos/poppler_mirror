@@ -2294,88 +2294,71 @@ reload:
 }
 
 void SplashOutputDev::stroke(GfxState *state) {
-  SplashPath *path;
-
   if (state->getStrokeColorSpace()->isNonMarking()) {
     return;
   }
   setOverprintMask(state->getStrokeColorSpace(), state->getStrokeOverprint(),
 		   state->getOverprintMode(), state->getStrokeColor());
-  path = convertPath(state, state->getPath(), gFalse);
-  splash->stroke(path);
-  delete path;
+  SplashPath path = convertPath(state, state->getPath(), gFalse);
+  splash->stroke(&path);
 }
 
 void SplashOutputDev::fill(GfxState *state) {
-  SplashPath *path;
-
   if (state->getFillColorSpace()->isNonMarking()) {
     return;
   }
   setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(),
 		   state->getOverprintMode(), state->getFillColor());
-  path = convertPath(state, state->getPath(), gTrue);
-  splash->fill(path, gFalse);
-  delete path;
+  SplashPath path = convertPath(state, state->getPath(), gTrue);
+  splash->fill(&path, gFalse);
 }
 
 void SplashOutputDev::eoFill(GfxState *state) {
-  SplashPath *path;
-
   if (state->getFillColorSpace()->isNonMarking()) {
     return;
   }
   setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(),
 		   state->getOverprintMode(), state->getFillColor());
-  path = convertPath(state, state->getPath(), gTrue);
-  splash->fill(path, gTrue);
-  delete path;
+  SplashPath path = convertPath(state, state->getPath(), gTrue);
+  splash->fill(&path, gTrue);
 }
 
 void SplashOutputDev::clip(GfxState *state) {
-  SplashPath *path;
-
-  path = convertPath(state, state->getPath(), gTrue);
-  splash->clipToPath(path, gFalse);
-  delete path;
+  SplashPath path = convertPath(state, state->getPath(), gTrue);
+  splash->clipToPath(&path, gFalse);
 }
 
 void SplashOutputDev::eoClip(GfxState *state) {
-  SplashPath *path;
-
-  path = convertPath(state, state->getPath(), gTrue);
-  splash->clipToPath(path, gTrue);
-  delete path;
+  SplashPath path = convertPath(state, state->getPath(), gTrue);
+  splash->clipToPath(&path, gTrue);
 }
 
 void SplashOutputDev::clipToStrokePath(GfxState *state) {
-  SplashPath *path, *path2;
+  SplashPath *path2;
 
-  path = convertPath(state, state->getPath(), gFalse);
-  path2 = splash->makeStrokePath(path, state->getLineWidth());
-  delete path;
+  SplashPath path = convertPath(state, state->getPath(), gFalse);
+  path2 = splash->makeStrokePath(&path, state->getLineWidth());
   splash->clipToPath(path2, gFalse);
   delete path2;
 }
 
-SplashPath *SplashOutputDev::convertPath(GfxState *state, GfxPath *path,
+SplashPath SplashOutputDev::convertPath(GfxState *state, GfxPath *path,
 					 GBool dropEmptySubpaths) {
-  SplashPath *sPath;
+  SplashPath sPath;
   GfxSubpath *subpath;
   int n, i, j;
 
   n = dropEmptySubpaths ? 1 : 0;
-  sPath = new SplashPath();
   for (i = 0; i < path->getNumSubpaths(); ++i) {
     subpath = path->getSubpath(i);
     if (subpath->getNumPoints() > n) {
-      sPath->reserve(subpath->getNumPoints() + 1);
-      sPath->moveTo((SplashCoord)subpath->getX(0),
+      sPath.reserve(subpath->getNumPoints() + 1);
+      sPath.moveTo((SplashCoord)subpath->getX(0),
 		    (SplashCoord)subpath->getY(0));
       j = 1;
       while (j < subpath->getNumPoints()) {
 	if (subpath->getCurve(j)) {
-	  sPath->curveTo((SplashCoord)subpath->getX(j),
+	  sPath.curveTo((SplashCoord)subpath->getX(j),
 			 (SplashCoord)subpath->getY(j),
 			 (SplashCoord)subpath->getX(j+1),
 			 (SplashCoord)subpath->getY(j+1),
@@ -2383,13 +2366,13 @@ SplashPath *SplashOutputDev::convertPath(GfxState *state, GfxPath *path,
 			 (SplashCoord)subpath->getY(j+2));
 	  j += 3;
 	} else {
-	  sPath->lineTo((SplashCoord)subpath->getX(j),
+	  sPath.lineTo((SplashCoord)subpath->getX(j),
 			(SplashCoord)subpath->getY(j));
 	  ++j;
 	}
       }
       if (subpath->isClosed()) {
-	sPath->close();
+	sPath.close();
       }
     }
   }
@@ -4784,7 +4767,6 @@ GBool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTria
 
 GBool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePattern *pattern, double tMin, double tMax) {
   double xMin, yMin, xMax, yMax;
-  SplashPath *path;
   GBool vaa = getVectorAntialias();
   // restore vector antialias because we support it here
   setVectorAntialias(gTrue);
@@ -4831,17 +4813,16 @@ GBool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePat
   state->lineTo(xMax, yMax);
   state->lineTo(xMin, yMax);
   state->closePath();
-  path = convertPath(state, state->getPath(), gTrue);
+  SplashPath path = convertPath(state, state->getPath(), gTrue);
 
 #ifdef SPLASH_CMYK
   pattern->getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
 #endif
   setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(),
 		   state->getOverprintMode(), nullptr);
-  retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern) == splashOk);
+  retVal = (splash->shadedFill(&path, pattern->getShading()->getHasBBox(), pattern) == splashOk);
   state->clearPath();
   setVectorAntialias(vaa);
-  delete path;
 
   return retVal;
 }
@@ -4849,7 +4830,6 @@ GBool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePat
 GBool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *shading) {
   SplashFunctionPattern *pattern = new SplashFunctionPattern(colorMode, state, shading);
   double xMin, yMin, xMax, yMax;
-  SplashPath *path;
   GBool vaa = getVectorAntialias();
   // restore vector antialias because we support it here
   setVectorAntialias(gTrue);
@@ -4896,17 +4876,16 @@ GBool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *s
   state->lineTo(xMax, yMax);
   state->lineTo(xMin, yMax);
   state->closePath();
-  path = convertPath(state, state->getPath(), gTrue);
+  SplashPath path = convertPath(state, state->getPath(), gTrue);
 
 #ifdef SPLASH_CMYK
   pattern->getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
 #endif
   setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(),
 		   state->getOverprintMode(), nullptr);
-  retVal = (splash->shadedFill(path, pattern->getShading()->getHasBBox(), pattern) == splashOk);
+  retVal = (splash->shadedFill(&path, pattern->getShading()->getHasBBox(), pattern) == splashOk);
   state->clearPath();
   setVectorAntialias(vaa);
-  delete path;
 
   delete pattern;
 

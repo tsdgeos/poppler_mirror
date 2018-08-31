@@ -72,6 +72,23 @@ SplashPath::SplashPath(SplashPath *path) {
   }
 }
 
+SplashPath::SplashPath(SplashPath&& path) {
+  length = path.length;
+  size = path.size;
+  pts = path.pts;
+  flags = path.flags;
+  curSubpath = path.curSubpath;
+
+  hints = path.hints;
+  hintsLength = hintsSize = path.hintsLength;
+
+  path.pts = nullptr;
+  path.flags = nullptr;
+  path.length = path.size = 0;
+  path.hints = nullptr;
+  path.hintsLength = path.hintsSize = 0;
+}
+
 SplashPath::~SplashPath() {
   gfree(pts);
   gfree(flags);

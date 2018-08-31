@@ -125,7 +125,7 @@ image_private *image_private::create_data(int width, int height, image::format_e
         return nullptr;
     }
 
-    std::unique_ptr<image_private> d(new image_private(width, height, format));
+    auto d = std::make_unique<image_private>(width, height, format);
     d->bytes_num = bpr * height;
     d->data = reinterpret_cast<char *>(std::malloc(d->bytes_num));
     if (!d->data) {

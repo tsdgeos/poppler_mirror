@@ -2107,7 +2107,6 @@ SplashError Splash::stroke(SplashPath *path) {
 
 void Splash::strokeNarrow(SplashPath *path) {
   SplashPipe pipe;
-  SplashXPath *xPath;
   SplashXPathSeg *seg;
   int x0, x1, y0, y1, xa, xb, y;
   SplashCoord dxdy;
@@ -2117,13 +2116,13 @@ void Splash::strokeNarrow(SplashPath *path) {
 
   nClipRes[0] = nClipRes[1] = nClipRes[2] = 0;
 
-  xPath = new SplashXPath(path, state->matrix, state->flatness, gFalse);
+  SplashXPath xPath(path, state->matrix, state->flatness, gFalse);
 
   pipeInit(&pipe, 0, 0, state->strokePattern, nullptr,
 	   (Guchar)splashRound(state->strokeAlpha * 255),
 	   gFalse, gFalse);
 
-  for (i = 0, seg = xPath->segs; i < xPath->length; ++i, ++seg) {
+  for (i = 0, seg = xPath.segs; i < xPath.length; ++i, ++seg) {
     if (seg->y0 <= seg->y1) {
       y0 = splashFloor(seg->y0);
       y1 = splashFloor(seg->y1);
@@ -2199,8 +2198,6 @@ void Splash::strokeNarrow(SplashPath *path) {
   } else {
     opClipRes = splashClipAllOutside;
   }
-
-  delete xPath;
 }
 
 void Splash::strokeWide(SplashPath *path, SplashCoord w) {
@@ -2494,7 +2491,6 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
 				    SplashPattern *pattern,
 				    SplashCoord alpha) {
   SplashPipe pipe = {};
-  SplashXPath *xPath;
   SplashXPathScanner *scanner;
   int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
   SplashClipResult clipRes, clipRes2;
@@ -2548,19 +2544,19 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
     }
   }
 
-  xPath = new SplashXPath(path, state->matrix, state->flatness, gTrue, 
+  SplashXPath xPath(path, state->matrix, state->flatness, gTrue,
     adjustLine, linePosI);
   if (vectorAntialias && !inShading) {
-    xPath->aaScale();
+    xPath.aaScale();
   }
-  xPath->sort();
+  xPath.sort();
   yMinI = state->clip->getYMinI();
   yMaxI = state->clip->getYMaxI();
   if (vectorAntialias && !inShading) {
     yMinI = yMinI * splashAASize;
     yMaxI = (yMaxI + 1) * splashAASize - 1;
   }
-  scanner = new SplashXPathScanner(xPath, eo, yMinI, yMaxI);
+  scanner = new SplashXPathScanner(&xPath, eo, yMinI, yMaxI);
 
   // get the min and max x and y values
   if (vectorAntialias && !inShading) {
@@ -2576,7 +2572,6 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
     if (delta < 0.2) {
       opClipRes = splashClipAllOutside;
       delete scanner;
-      delete xPath;
       return splashOk;
     }
   }
@@ -2633,7 +2628,6 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
   opClipRes = clipRes;
 
   delete scanner;
-  delete xPath;
   return splashOk;
 }
 
@@ -2706,7 +2700,6 @@ GBool Splash::pathAllOutside(SplashPath *path) {
 
 SplashError Splash::xorFill(SplashPath *path, GBool eo) {
   SplashPipe pipe;
-  SplashXPath *xPath;
   SplashXPathScanner *scanner;
   int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
   SplashClipResult clipRes, clipRes2;
@@ -2715,9 +2708,9 @@ SplashError Splash::xorFill(SplashPath *path, GBool eo) {
   if (path->length == 0) {
     return splashErrEmptyPath;
   }
-  xPath = new SplashXPath(path, state->matrix, state->flatness, gTrue);
-  xPath->sort();
-  scanner = new SplashXPathScanner(xPath, eo, state->clip->getYMinI(),
+  SplashXPath xPath(path, state->matrix, state->flatness, gTrue);
+  xPath.sort();
+  scanner = new SplashXPathScanner(&xPath, eo, state->clip->getYMinI(),
 				   state->clip->getYMaxI());
 
   // get the min and max x and y values
@@ -2757,7 +2750,6 @@ SplashError Splash::xorFill(SplashPath *path, GBool eo) {
   opClipRes = clipRes;
 
   delete scanner;
-  delete xPath;
   return splashOk;
 }
 
@@ -6392,7 +6384,6 @@ void Splash::dumpXPath(SplashXPath *path) {
 SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
                                SplashPattern *pattern) {
   SplashPipe pipe;
-  SplashXPath *xPath;
   SplashXPathScanner *scanner;
   int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
   SplashClipResult clipRes;
@@ -6403,18 +6394,18 @@ SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
   if (path->length == 0) {
     return splashErrEmptyPath;
   }
-  xPath = new SplashXPath(path, state->matrix, state->flatness, gTrue);
+  SplashXPath xPath(path, state->matrix, state->flatness, gTrue);
   if (vectorAntialias) {
-    xPath->aaScale();
+    xPath.aaScale();
   }
-  xPath->sort();
+  xPath.sort();
   yMinI = state->clip->getYMinI();
   yMaxI = state->clip->getYMaxI();
   if (vectorAntialias && !inShading) {
     yMinI = yMinI * splashAASize;
     yMaxI = (yMaxI + 1) * splashAASize - 1;
   }
-  scanner = new SplashXPathScanner(xPath, gFalse, yMinI, yMaxI);
+  scanner = new SplashXPathScanner(&xPath, gFalse, yMinI, yMaxI);
 
   // get the min and max x and y values
   if (vectorAntialias) {
@@ -6517,6 +6508,5 @@ SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
   opClipRes = clipRes;
 
   delete scanner;
-  delete xPath;
   return splashOk;
 }

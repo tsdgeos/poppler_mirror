@@ -5225,7 +5225,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
   nPatchesA = 0;
   patchesA = nullptr;
   patchesSize = 0;
-  std::unique_ptr<GfxShadingBitBuf> bitBuf(new GfxShadingBitBuf(str));
+  auto bitBuf = std::make_unique<GfxShadingBitBuf>(str);
   while (1) {
     if (!bitBuf->getBits(flagBits, &flag)) {
       break;

@@ -4,7 +4,7 @@ before_script:
   - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
   - apt-get update
   - apt-get build-dep --yes --no-install-recommends poppler
-  - apt-get install --yes --no-install-recommends ninja-build libcurl4-openssl-dev curl ca-certificates locales
+  - apt-get install --yes --no-install-recommends ninja-build libcurl4-openssl-dev curl ca-certificates locales libc++-dev libc++abi-dev clang
   - echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
   - locale-gen
 
@@ -24,3 +24,15 @@ build:
   cache:
     paths:
       - build/
+
+build_clang_libcpp:
+  stage: build
+  script:
+    - mkdir -p build_clang && cd build_clang
+    - curl https://gitlab.freedesktop.org/poppler/test/-/archive/master/test-master.tar.gz | tar xz
+    - CXX=clang++ cmake -G Ninja -DCMAKE_CXX_FLAGS=-stdlib=libc++ -DTESTDATADIR=$PWD/test-master ..
+    - ninja
+    - ctest --output-on-failure
+  cache:
+    paths:
+      - build_clang/

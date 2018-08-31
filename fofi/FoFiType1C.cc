@@ -15,6 +15,7 @@
 //
 // Copyright (C) 2009, 2010, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2664,6 +2665,9 @@ int FoFiType1C::getDeltaIntArray(int *arr, int maxLen) {
   x = 0;
   for (i = 0; i < n; ++i) {
     int y;
+    if (unlikely(isinf(ops[i].num))) {
+      return i;
+    }
     if (checkedAdd(x, (int)ops[i].num, &y)) {
       return i;
     }

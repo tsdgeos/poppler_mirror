@@ -336,13 +336,13 @@ std::vector<text_box> page::text_list() const
     std::vector<text_box>  output_list;
 
     /* config values are same with Qt5 Page::TextList() */
-    std::unique_ptr<TextOutputDev> output_dev{
-        new TextOutputDev(nullptr,    /* char* fileName */
-                          gFalse,  /* GBool physLayoutA */
-                          0,       /* double fixedPitchA */
-                          gFalse,  /* GBool rawOrderA */
-                          gFalse)  /* GBool append */
-    };
+    auto output_dev = std::make_unique<TextOutputDev>(
+	nullptr,    /* char* fileName */
+	gFalse,  /* GBool physLayoutA */
+	0,       /* double fixedPitchA */
+	gFalse,  /* GBool rawOrderA */
+	gFalse  /* GBool append */
+    );
 
     /*
      * config values are same with Qt5 Page::TextList(),
