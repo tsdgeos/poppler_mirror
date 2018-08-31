@@ -107,6 +107,7 @@ void Array::add(Object &&elem) {
 void Array::remove(int i) {
   arrayLocker();
   if (i < 0 || i >= length) {
+    assert(i >= 0 && i < length);
     return;
   }
   --length;
