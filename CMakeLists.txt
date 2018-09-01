@@ -585,6 +585,7 @@ if(ENABLE_XPDF_HEADERS)
     goo/gfile.h
     goo/FixedPoint.h
     goo/ImgWriter.h
+    goo/GooCheckedOps.h
     goo/GooLikely.h
     goo/gstrtod.h
     goo/grandom.h

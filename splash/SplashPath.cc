@@ -13,6 +13,7 @@
 //
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -111,7 +112,7 @@ void SplashPath::grow(int nPts) {
     pts = (SplashPathPoint *)greallocn_checkoverflow(pts, size, sizeof(SplashPathPoint));
     flags = (Guchar *)greallocn_checkoverflow(flags, size, sizeof(Guchar));
     if (unlikely(!pts || !flags)) {
-      length = size = 0;
+      length = size = curSubpath = 0;
     }
   }
 }
@@ -119,8 +120,11 @@ void SplashPath::grow(int nPts) {
 void SplashPath::append(SplashPath *path) {
   int i;
 
-  curSubpath = length + path->curSubpath;
   grow(path->length);
+  if (unlikely(size == 0))
+    return;
+
+  curSubpath = length + path->curSubpath;
   for (i = 0; i < path->length; ++i) {
     pts[length] = path->pts[i];
     flags[length] = path->flags[i];
@@ -148,6 +152,8 @@ SplashError SplashPath::lineTo(SplashCoord x, SplashCoord y) {
   }
   flags[length-1] &= ~splashPathLast;
   grow(1);
+  if (unlikely(size == 0))
+    return splashErrBogusPath;
   pts[length].x = x;
   pts[length].y = y;
   flags[length] = splashPathLast;
@@ -163,6 +169,8 @@ SplashError SplashPath::curveTo(SplashCoord x1, SplashCoord y1,
   }
   flags[length-1] &= ~splashPathLast;
   grow(3);
+  if (unlikely(size == 0))
+    return splashErrBogusPath;
   pts[length].x = x1;
   pts[length].y = y1;
   flags[length] = splashPathCurve;
