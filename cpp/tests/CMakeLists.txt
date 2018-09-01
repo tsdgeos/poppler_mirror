@@ -11,15 +11,15 @@ macro(CPP_ADD_SIMPLETEST exe)
     ${ARGN}
   )
   poppler_add_test(${exe} BUILD_CPP_TESTS ${${test_name}_SOURCES})
-  target_link_libraries(${exe} poppler-cpp)
+  target_link_libraries(${exe} poppler-cpp poppler)
   if(MSVC)
     target_link_libraries(${exe} poppler ${poppler_LIBS})
   endif()
 endmacro(CPP_ADD_SIMPLETEST)
 
-
 cpp_add_simpletest(poppler-dump poppler-dump.cpp ${CMAKE_SOURCE_DIR}/utils/parseargs.cc)
-target_link_libraries(poppler-dump poppler)
-
 cpp_add_simpletest(poppler-render poppler-render.cpp ${CMAKE_SOURCE_DIR}/utils/parseargs.cc)
-target_link_libraries(poppler-render poppler)
+
+if(ENABLE_FUZZER)
+  cpp_add_simpletest(pdf_fuzzer pdf_fuzzer.cc)
+endif()
