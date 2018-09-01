@@ -67,7 +67,7 @@
 #include "StructTreeRoot.h"
 
 #ifdef MULTITHREADED
-#  define catalogLocker()   MutexLocker locker(&mutex)
+#  define catalogLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 #else
 #  define catalogLocker()
 #endif
@@ -76,9 +76,6 @@
 //------------------------------------------------------------------------
 
 Catalog::Catalog(PDFDoc *docA) {
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
   ok = gTrue;
   doc = docA;
   xref = doc->getXRef();
@@ -171,9 +168,6 @@ Catalog::~Catalog() {
   delete optContent;
   delete viewerPrefs;
   delete structTreeRoot;
-#ifdef MULTITHREADED
-  gDestroyMutex(&mutex);
-#endif
 }
 
 GooString *Catalog::readMetadata() {

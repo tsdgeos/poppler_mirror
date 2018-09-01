@@ -93,12 +93,12 @@
 #endif
 
 #ifdef MULTITHREADED
-#  define lockGlobalParams            gLockMutex(&mutex)
-#  define lockUnicodeMapCache         gLockMutex(&unicodeMapCacheMutex)
-#  define lockCMapCache               gLockMutex(&cMapCacheMutex)
-#  define unlockGlobalParams          gUnlockMutex(&mutex)
-#  define unlockUnicodeMapCache       gUnlockMutex(&unicodeMapCacheMutex)
-#  define unlockCMapCache             gUnlockMutex(&cMapCacheMutex)
+#  define lockGlobalParams            mutex.lock()
+#  define lockUnicodeMapCache         unicodeMapCacheMutex.lock()
+#  define lockCMapCache               cMapCacheMutex.lock()
+#  define unlockGlobalParams          mutex.unlock()
+#  define unlockUnicodeMapCache       unicodeMapCacheMutex.unlock()
+#  define unlockCMapCache             cMapCacheMutex.unlock()
 #else
 #  define lockGlobalParams
 #  define lockUnicodeMapCache
@@ -550,12 +550,6 @@ Plugin::~Plugin() {
 GlobalParams::GlobalParams(const char *customPopplerDataDir)
   : popplerDataDir(customPopplerDataDir)
 {
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-  gInitMutex(&unicodeMapCacheMutex);
-  gInitMutex(&cMapCacheMutex);
-#endif
-
   initBuiltinFontTables();
 
   // scan the encoding in reverse because we want the lowest-numbered
@@ -746,12 +740,6 @@ GlobalParams::~GlobalParams() {
 #ifdef ENABLE_PLUGINS
   delete securityHandlers;
   deleteGooList(plugins, Plugin);
-#endif
-
-#ifdef MULTITHREADED
-  gDestroyMutex(&mutex);
-  gDestroyMutex(&unicodeMapCacheMutex);
-  gDestroyMutex(&cMapCacheMutex);
 #endif
 }
 

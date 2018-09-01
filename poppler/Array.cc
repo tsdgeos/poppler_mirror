@@ -39,7 +39,7 @@
 #include "Array.h"
 
 #ifdef MULTITHREADED
-#  define arrayLocker()   MutexLocker locker(&mutex)
+#  define arrayLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 #else
 #  define arrayLocker()
 #endif
@@ -52,9 +52,6 @@ Array::Array(XRef *xrefA) {
   elems = nullptr;
   size = length = 0;
   ref = 1;
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
 }
 
 Array::~Array() {
@@ -63,9 +60,6 @@ Array::~Array() {
   for (i = 0; i < length; ++i)
     elems[i].free();
   gfree(elems);
-#ifdef MULTITHREADED
-  gDestroyMutex(&mutex);
-#endif
 }
 
 Object Array::copy(XRef *xrefA) const {
@@ -75,18 +69,6 @@ Object Array::copy(XRef *xrefA) const {
     a->add(elems[i].copy());
   }
   return Object(a);
-}
-
-int Array::incRef() {
-  arrayLocker();
-  ++ref;
-  return ref;
-}
-
-int Array::decRef() {
-  arrayLocker();
-  --ref;
-  return ref;
 }
 
 void Array::add(Object &&elem) {

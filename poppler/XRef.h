@@ -38,7 +38,6 @@
 
 #include "poppler-config.h"
 #include "goo/gtypes.h"
-#include "goo/GooMutex.h"
 #include "Object.h"
 #include "Stream.h"
 
@@ -239,7 +238,7 @@ private:
   GBool scannedSpecialFlags;	// true if scanSpecialFlags has been called
   GBool strOwner;     // true if str is owned by the instance
 #ifdef MULTITHREADED
-  GooMutex mutex;
+  mutable std::recursive_mutex mutex;
 #endif
 
   void init();

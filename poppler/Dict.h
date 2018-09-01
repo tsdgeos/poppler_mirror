@@ -35,13 +35,13 @@
 #endif
 
 #include <atomic>
+#include <mutex>
 #include <string>
 #include <vector>
 #include <utility>
 
 #include "poppler-config.h"
 #include "Object.h"
-#include "goo/GooMutex.h"
 
 //------------------------------------------------------------------------
 // Dict
@@ -54,9 +54,6 @@ public:
   Dict(XRef *xrefA);
   Dict(const Dict *dictA);
   Dict *copy(XRef *xrefA) const;
-
-  // Destructor.
-  ~Dict();
 
   Dict(const Dict &) = delete;
   Dict& operator=(const Dict &) = delete;
@@ -115,7 +112,7 @@ private:
   std::vector<DictEntry> entries;
   std::atomic_int ref;			// reference count
 #ifdef MULTITHREADED
-  mutable GooMutex mutex;
+  mutable std::recursive_mutex mutex;
 #endif
 
   const DictEntry *find(const char *key) const;

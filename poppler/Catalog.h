@@ -43,7 +43,6 @@
 
 #include "poppler-config.h"
 #include "Object.h"
-#include "goo/GooMutex.h"
 
 #include <vector>
 
@@ -293,7 +292,7 @@ private:
   NameTree *getJSNameTree();
   LinkDest *createLinkDest(Object *obj);
 #ifdef MULTITHREADED
-  GooMutex mutex;
+  mutable std::recursive_mutex mutex;
 #endif
 
 };

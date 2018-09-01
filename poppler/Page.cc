@@ -62,7 +62,7 @@
 #include "Form.h"
 
 #ifdef MULTITHREADED
-#  define pageLocker()   MutexLocker locker(&mutex)
+#  define pageLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 #else
 #  define pageLocker()
 #endif
@@ -249,9 +249,6 @@ GBool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box) {
 //------------------------------------------------------------------------
 
 Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form) {
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
   ok = gTrue;
   doc = docA;
   xref = doc->getXRef();
@@ -328,9 +325,6 @@ Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *at
 Page::~Page() {
   delete attrs;
   delete annots;
-#ifdef MULTITHREADED
-  gDestroyMutex(&mutex);
-#endif
 }
 
 Dict *Page::getResourceDict() { 

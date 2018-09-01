@@ -73,11 +73,9 @@
 #define defPermFlags 0xfffc
 
 #ifdef MULTITHREADED
-#  define xrefLocker()   MutexLocker locker(&mutex)
-#  define xrefCondLocker(X)  MutexLocker locker(&mutex, (X))
+#  define xrefLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 #else
 #  define xrefLocker()
-#  define xrefCondLocker(X)
 #endif
 
 //------------------------------------------------------------------------
@@ -265,9 +263,6 @@ Object ObjectStream::getObject(int objIdx, int objNum) {
 //------------------------------------------------------------------------
 
 void XRef::init() {
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
   ok = gTrue;
   errCode = errNone;
   entries = nullptr;
@@ -388,9 +383,6 @@ XRef::~XRef() {
   if (strOwner) {
     delete str;
   }
-#ifdef MULTITHREADED
-  gDestroyMutex(&mutex);
-#endif
 }
 
 XRef *XRef::copy() const {
@@ -1242,13 +1234,13 @@ Object XRef::fetch(int num, int gen, int recursion) {
 
 void XRef::lock() {
 #ifdef MULTITHREADED
-  gLockMutex(&mutex);
+  mutex.lock();
 #endif
 }
 
 void XRef::unlock() {
 #ifdef MULTITHREADED
-  gUnlockMutex(&mutex);
+  mutex.unlock();
 #endif
 }
 

@@ -578,7 +578,6 @@ if(ENABLE_XPDF_HEADERS)
   install(FILES
     goo/GooList.h
     goo/GooTimer.h
-    goo/GooMutex.h
     goo/GooString.h
     goo/gtypes.h
     goo/gmem.h

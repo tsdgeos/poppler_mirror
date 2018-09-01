@@ -36,9 +36,10 @@
 #pragma interface
 #endif
 
+#include <mutex>
+
 #include "poppler-config.h"
 #include "Object.h"
-#include "goo/GooMutex.h"
 
 class Dict;
 class PDFDoc;
@@ -286,7 +287,7 @@ private:
   double duration;              // page duration
   GBool ok;			// true if page is valid
 #ifdef MULTITHREADED
-  GooMutex mutex;
+  mutable std::recursive_mutex mutex;
 #endif
 };
 

@@ -92,7 +92,7 @@
 #include "UTF.h"
 
 #ifdef MULTITHREADED
-#  define pdfdocLocker()   MutexLocker locker(&mutex)
+#  define pdfdocLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 #else
 #  define pdfdocLocker()
 #endif
@@ -116,9 +116,6 @@
 
 void PDFDoc::init()
 {
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
   ok = gFalse;
   errCode = errNone;
   fileName = nullptr;
@@ -367,9 +364,6 @@ PDFDoc::~PDFDoc() {
   if (fileNameU) {
     gfree(fileNameU);
   }
-#endif
-#ifdef MULTITHREADED
-  gDestroyMutex(&mutex);
 #endif
 }
 

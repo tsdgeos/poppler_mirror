@@ -41,7 +41,7 @@
 #include "Dict.h"
 
 #ifdef MULTITHREADED
-#  define dictLocker()   MutexLocker locker(&mutex)
+#  define dictLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 #else
 #  define dictLocker()
 #endif
@@ -66,9 +66,6 @@ struct Dict::CmpDictEntry {
 Dict::Dict(XRef *xrefA) {
   xref = xrefA;
   ref = 1;
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
 
   sorted = false;
 }
@@ -76,9 +73,6 @@ Dict::Dict(XRef *xrefA) {
 Dict::Dict(const Dict* dictA) {
   xref = dictA->xref;
   ref = 1;
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
 
   entries.reserve(dictA->entries.size());
   for (const auto& entry : dictA->entries) {
@@ -98,12 +92,6 @@ Dict *Dict::copy(XRef *xrefA) const {
     }
   }
   return dictA;
-}
-
-Dict::~Dict() {
-#ifdef MULTITHREADED
-  gDestroyMutex(&mutex);
-#endif
 }
 
 void Dict::add(const char *key, Object &&val) {

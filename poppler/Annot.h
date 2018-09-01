@@ -43,6 +43,9 @@
 #endif
 
 #include <memory>
+#include <atomic>
+#include <mutex>
+
 #include "Object.h"
 
 class XRef;
@@ -738,7 +741,7 @@ protected:
 
   Object annotObj;
 
-  int refCnt;
+  std::atomic_int refCnt;
   
   // required data
   AnnotSubtype type;                // Annotation type
@@ -767,7 +770,7 @@ protected:
 
   bool hasRef;
 #ifdef MULTITHREADED
-  GooMutex mutex;
+  mutable std::recursive_mutex mutex;
 #endif
 };
 

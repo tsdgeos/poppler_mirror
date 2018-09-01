@@ -83,11 +83,9 @@
 #include <algorithm>
 
 #ifdef MULTITHREADED
-#  define annotLocker()   MutexLocker locker(&mutex)
-#  define annotCondLocker(X)  MutexLocker locker(&mutex, (X))
+#  define annotLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 #else
 #  define annotLocker()
-#  define annotCondLocker(X)
 #endif
 
 #define fieldFlagReadOnly           0x00000001
@@ -1399,10 +1397,6 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   }
 
   oc = dict->lookupNF("OC");
-
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
 }
 
 void Annot::getRect(double *x1, double *y1, double *x2, double *y2) const {
@@ -1634,24 +1628,13 @@ void Annot::removeReferencedObjects() {
 }
 
 void Annot::incRefCnt() {
-  annotLocker();
   refCnt++;
 }
 
 void Annot::decRefCnt() {
-#ifdef MULTITHREADED
-  gLockMutex(&mutex);
-#endif
   if (--refCnt == 0) {
-#ifdef MULTITHREADED
-    gUnlockMutex(&mutex);
-#endif
     delete this;
-    return;
   }
-#ifdef MULTITHREADED
-  gUnlockMutex(&mutex);
-#endif
 }
 
 Annot::~Annot() {
@@ -1675,10 +1658,6 @@ Annot::~Annot() {
 
   if (color)
     delete color;
-
-#ifdef MULTITHREADED
-    gDestroyMutex(&mutex);
-#endif
 }
 
 void AnnotAppearanceBuilder::setDrawColor(const AnnotColor *drawColor, GBool fill) {

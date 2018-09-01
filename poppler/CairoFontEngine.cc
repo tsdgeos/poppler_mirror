@@ -61,7 +61,7 @@
 #endif
 
 #ifdef MULTITHREADED
-#  define fontEngineLocker()   MutexLocker locker(&mutex)
+#  define fontEngineLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 #else
 #  define fontEngineLocker()
 #endif
@@ -815,9 +815,6 @@ CairoFontEngine::CairoFontEngine(FT_Library libA) {
   FT_Library_Version(lib, &major, &minor, &patch);
   useCIDs = major > 2 ||
             (major == 2 && (minor > 1 || (minor == 1 && patch > 7)));
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
 }
 
 CairoFontEngine::~CairoFontEngine() {
@@ -827,9 +824,6 @@ CairoFontEngine::~CairoFontEngine() {
     if (fontCache[i])
       delete fontCache[i];
   }
-#ifdef MULTITHREADED
-  gDestroyMutex(&mutex);
-#endif
 }
 
 CairoFont *
