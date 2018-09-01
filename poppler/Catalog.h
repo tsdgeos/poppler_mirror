@@ -45,6 +45,7 @@
 #include "Object.h"
 
 #include <vector>
+#include <memory>
 
 class PDFDoc;
 class XRef;
@@ -253,9 +254,7 @@ private:
 
   PDFDoc *doc;
   XRef *xref;			// the xref table for this PDF file
-  Page **pages;			// array of pages
-  Ref *pageRefs;		// object ID for each page
-  int lastCachedPage;
+  std::vector<std::pair<std::unique_ptr<Page>, Ref>> pages;
   std::vector<Object> *pagesList;
   std::vector<Ref> *pagesRefList;
   std::vector<PageAttrs *> *attrsList;
@@ -263,7 +262,6 @@ private:
   Form *form;
   ViewerPreferences *viewerPrefs;
   int numPages;			// number of pages
-  int pagesSize;		// size of pages array
   Object dests;			// named destination dictionary
   Object names;			// named names dictionary
   NameTree *destNameTree;	// named destination name-tree
