@@ -37,6 +37,7 @@
 #pragma interface
 #endif
 
+#include <cassert>
 #include <set>
 #include <stdio.h>
 #include <string.h>
@@ -156,15 +157,15 @@ public:
   explicit Object(GooString *stringA)
     { constructObj(objString); string = stringA; }
   Object(ObjType typeA, const char *stringA)
-    { constructObj(typeA); cString = copyString(stringA); }
+    { assert(typeA == objName || typeA == objCmd); assert(stringA); constructObj(typeA); cString = copyString(stringA); }
   explicit Object(long long int64gA)
     { constructObj(objInt64); int64g = int64gA; }
   explicit Object(Array *arrayA)
-    { constructObj(objArray); array = arrayA; }
+    { assert(arrayA); constructObj(objArray); array = arrayA; }
   explicit Object(Dict *dictA)
-    { constructObj(objDict); dict = dictA; }
+    { assert(dictA); constructObj(objDict); dict = dictA; }
   explicit Object(Stream *streamA)
-    { constructObj(objStream); stream = streamA; }
+    { assert(streamA); constructObj(objStream); stream = streamA; }
   Object(int numA, int genA)
     { constructObj(objRef); ref.num = numA; ref.gen = genA; }
   template<typename T> Object(T) = delete;
