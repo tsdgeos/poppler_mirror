@@ -155,7 +155,7 @@ public:
   explicit Object(double realA)
     { constructObj(objReal); real = realA; }
   explicit Object(GooString *stringA)
-    { constructObj(objString); string = stringA; }
+    { assert(stringA); constructObj(objString); string = stringA; }
   Object(ObjType typeA, const char *stringA)
     { assert(typeA == objName || typeA == objCmd); assert(stringA); constructObj(typeA); cString = copyString(stringA); }
   explicit Object(long long int64gA)
@@ -231,10 +231,8 @@ public:
     return type == objInt ? (double)intg : type == objInt64 ? (double)int64g : real;
   }
   const GooString *getString() const { OBJECT_TYPE_CHECK(objString); return string; }
-  // After takeString() the only method that should be called for the object is free()
-  // because the object it's not expected to have a NULL string.
-  GooString *takeString() {
-    OBJECT_TYPE_CHECK(objString); GooString *s = string; string = nullptr; return s; }
+  // After takeString() the only method that should be called for the object is free().
+  GooString *takeString() { OBJECT_TYPE_CHECK(objString); type = objDead; return string; }
   const char *getName() const { OBJECT_TYPE_CHECK(objName); return cString; }
   Array *getArray() const { OBJECT_TYPE_CHECK(objArray); return array; }
   Dict *getDict() const { OBJECT_TYPE_CHECK(objDict); return dict; }
