@@ -7,6 +7,8 @@
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
+ * Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
+ * Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -1816,17 +1818,17 @@ class TextAnnotationPrivate : public AnnotationPrivate
         TextAnnotationPrivate();
         Annotation * makeAlias() override;
         Annot* createNativeAnnot(::Page *destPage, DocumentData *doc) override;
+        void setDefaultAppearanceToNative();
+        std::unique_ptr<DefaultAppearance> getDefaultAppearanceFromNative() const;
 
         // data fields
         TextAnnotation::TextType textType;
         QString textIcon;
         QFont textFont;
+        QColor textColor;
         int inplaceAlign; // 0:left, 1:center, 2:right
         QVector<QPointF> inplaceCallout;
         TextAnnotation::InplaceIntent inplaceIntent;
-
-        // Helper
-        static GooString * toAppearanceString(const QFont &font);
 };
 
 TextAnnotationPrivate::TextAnnotationPrivate()
@@ -1839,13 +1841,6 @@ TextAnnotationPrivate::TextAnnotationPrivate()
 Annotation * TextAnnotationPrivate::makeAlias()
 {
     return new TextAnnotation(*this);
-}
-
-GooString * TextAnnotationPrivate::toAppearanceString(const QFont &font)
-{
-    GooString * s = GooString::format("/Invalid_font {0:d} Tf", font.pointSize());
-    // TODO: Font family, style (bold, italic, ...) and pointSize as float
-    return s;
 }
 
 Annot* TextAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
@@ -1861,13 +1856,12 @@ Annot* TextAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
     if (textType == TextAnnotation::Linked)
     {
-        pdfAnnot = new AnnotText(destPage->getDoc(), &rect);
+        pdfAnnot = new AnnotText{ destPage->getDoc(), &rect };
     }
     else
     {
-        GooString * da = toAppearanceString(textFont);
-        pdfAnnot = new AnnotFreeText(destPage->getDoc(), &rect, da);
-        delete da;
+        DefaultAppearance da{ { objName, "Invalid_font" }, static_cast<double>( textFont.pointSize() ), std::unique_ptr<AnnotColor>{ convertQColor( textColor ) } };
+        pdfAnnot = new AnnotFreeText{ destPage->getDoc(), &rect, da };
     }
 
     // Set properties
@@ -1882,6 +1876,29 @@ Annot* TextAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *
     inplaceCallout.clear(); // Free up memory
 
     return pdfAnnot;
+}
+
+void TextAnnotationPrivate::setDefaultAppearanceToNative()
+{
+    if ( pdfAnnot && pdfAnnot->getType() == Annot::typeFreeText )
+    {
+        AnnotFreeText * ftextann = static_cast<AnnotFreeText*>( pdfAnnot );
+        DefaultAppearance da{ { objName, "Invalid_font" }, static_cast<double>( textFont.pointSize() ), std::unique_ptr<AnnotColor>{ convertQColor( textColor ) } };
+        ftextann->setDefaultAppearance( da );
+    }
+}
+
+std::unique_ptr<DefaultAppearance> TextAnnotationPrivate::getDefaultAppearanceFromNative() const
+{
+    if ( pdfAnnot && pdfAnnot->getType() == Annot::typeFreeText )
+    {
+        AnnotFreeText * ftextann = static_cast<AnnotFreeText*>( pdfAnnot );
+        return ftextann->getDefaultAppearance();
+    }
+    else
+    {
+        return {};
+    }
 }
 
 TextAnnotation::TextAnnotation( TextAnnotation::TextType type )
@@ -1916,6 +1933,11 @@ TextAnnotation::TextAnnotation( const QDomNode & node )
             QFont font;
             font.fromString( e.attribute( QStringLiteral("font") ) );
             setTextFont(font);
+            if ( e.hasAttribute( QStringLiteral("fontColor") ) )
+            {
+                const QColor color = QColor(e.attribute( QStringLiteral("fontColor") ) );
+                setTextColor(color);
+            }
         }
         if ( e.hasAttribute( QStringLiteral("align") ) )
             setInplaceAlign(e.attribute( QStringLiteral("align") ).toInt());
@@ -1975,6 +1997,7 @@ void TextAnnotation::store( QDomNode & node, QDomDocument & document ) const
         textElement.setAttribute( QStringLiteral("intent"), (int)inplaceIntent() );
 
     textElement.setAttribute( QStringLiteral("font"), textFont().toString() );
+    textElement.setAttribute( QStringLiteral("fontColor"), textColor().name() );
 
     // Sub-Node-1 - escapedText
     if ( !contents().isEmpty() )
@@ -2067,23 +2090,15 @@ QFont TextAnnotation::textFont() const
 {
     Q_D( const TextAnnotation );
 
-    if (!d->pdfAnnot)
+    if ( !d->pdfAnnot )
         return d->textFont;
 
     QFont font;
-
-    if (d->pdfAnnot->getType() == Annot::typeFreeText)
+    if ( d->pdfAnnot->getType() == Annot::typeFreeText )
     {
-        const AnnotFreeText * ftextann = static_cast<const AnnotFreeText*>(d->pdfAnnot);
-        const GooString * da = ftextann->getAppearanceString();
-        if (da)
+        if ( std::unique_ptr<DefaultAppearance> da{ d->getDefaultAppearanceFromNative() } )
         {
-            // At the moment, only font size is parsed
-            QString style = QString::fromLatin1( da->getCString() );
-            QRegExp rx(QStringLiteral("(\\d+)(\\.\\d*)? Tf"));
-            if (rx.indexIn(style) != -1)
-                font.setPointSize( rx.cap(1).toInt() );
-            // TODO: Other properties
+            font.setPointSize( da->getFontPtSize() );
         }
     }
 
@@ -2093,20 +2108,33 @@ QFont TextAnnotation::textFont() const
 void TextAnnotation::setTextFont( const QFont &font )
 {
     Q_D( TextAnnotation );
+    d->textFont = font;
+    d->textColor = Qt::black;
 
-    if (!d->pdfAnnot)
+    d->setDefaultAppearanceToNative();
+}
+
+QColor TextAnnotation::textColor() const
+{
+    Q_D( const TextAnnotation );
+
+    if ( !d->pdfAnnot )
+        return d->textColor;
+
+    if ( std::unique_ptr<DefaultAppearance> da{ d->getDefaultAppearanceFromNative() } )
     {
-        d->textFont = font;
-        return;
+        return convertAnnotColor( da->getFontColor() );
     }
 
-    if (d->pdfAnnot->getType() != Annot::typeFreeText)
-        return;
+    return {};
+}
 
-    AnnotFreeText * ftextann = static_cast<AnnotFreeText*>(d->pdfAnnot);
-    GooString * da = TextAnnotationPrivate::toAppearanceString(font);
-    ftextann->setAppearanceString(da);
-    delete da;
+void TextAnnotation::setTextColor( const QColor &color )
+{
+    Q_D( TextAnnotation );
+    d->textColor = color;
+
+    d->setDefaultAppearanceToNative();
 }
 
 int TextAnnotation::inplaceAlign() const
@@ -5055,7 +5083,7 @@ RichMediaAnnotation::Content* RichMediaAnnotation::content() const
 
 
 //BEGIN utility annotation functions
-QColor convertAnnotColor( AnnotColor *color )
+QColor convertAnnotColor( const AnnotColor *color )
 {
     if ( !color )
         return QColor();
@@ -5082,10 +5110,26 @@ QColor convertAnnotColor( AnnotColor *color )
 
 AnnotColor* convertQColor( const QColor &c )
 {
-    if (!c.isValid() || c.alpha() == 0)
+    if ( c.alpha() == 0 )
         return new AnnotColor(); // Transparent
-    else
-        return new AnnotColor(c.redF(), c.greenF(), c.blueF());
+
+    AnnotColor *newcolor;
+    switch ( c.spec() )
+    {
+        case QColor::Rgb:
+        case QColor::Hsl:
+        case QColor::Hsv:
+            newcolor = new AnnotColor( c.redF(), c.greenF(), c.blueF() );
+            break;
+        case QColor::Cmyk:
+            newcolor = new AnnotColor( c.cyanF(), c.magentaF(), c.yellowF(), c.blackF() );
+            break;
+        case QColor::Invalid:
+        default:
+            newcolor = new AnnotColor();
+            break;
+    }
+    return newcolor;
 }
 //END utility annotation functions
 
