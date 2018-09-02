@@ -28,6 +28,7 @@
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -499,9 +500,11 @@ static void printLine(FILE *f, TextLine *line) {
     if (lineXMax < xMax) lineXMax = xMax;
     if (lineYMax < yMax) lineYMax = yMax;
 
-    const std::string myString = myXmlTokenReplace(word->getText()->getCString());
+    GooString *wordText = word->getText();
+    const std::string myString = myXmlTokenReplace(wordText->getCString());
     wordXML << "          <word xMin=\"" << xMin << "\" yMin=\"" << yMin << "\" xMax=\"" <<
             xMax << "\" yMax=\"" << yMax << "\">" << myString << "</word>\n";
+    delete wordText;
   }
   fprintf(f, "        <line xMin=\"%f\" yMin=\"%f\" xMax=\"%f\" yMax=\"%f\">\n",
           lineXMin, lineYMin, lineXMax, lineYMax);
@@ -511,7 +514,6 @@ static void printLine(FILE *f, TextLine *line) {
 
 void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last) {
   double xMin, yMin, xMax, yMax;
-  TextPage *textPage;
   TextFlow *flow;
   TextBlock *blk;
   TextLine *line;
@@ -520,8 +522,7 @@ void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
   for (int page = first; page <= last; ++page) {
     fprintf(f, "  <page width=\"%f\" height=\"%f\">\n",doc->getPageMediaWidth(page), doc->getPageMediaHeight(page));
     doc->displayPage(textOut, page, resolution, resolution, 0, gTrue, gFalse, gFalse);
-    textPage = textOut->takeText();
-    for (flow = textPage->getFlows(); flow; flow = flow->getNext()) {
+    for (flow = textOut->getFlows(); flow; flow = flow->getNext()) {
       fprintf(f, "    <flow>\n");
       for (blk = flow->getBlocks(); blk; blk = blk->getNext()) {
         blk->getBBox(&xMin, &yMin, &xMax, &yMax);
@@ -534,7 +535,6 @@ void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
       fprintf(f, "    </flow>\n");
     }
     fprintf(f, "  </page>\n");
-    textPage->decRefCnt();
   }
   fprintf(f, "</doc>\n");
 }
