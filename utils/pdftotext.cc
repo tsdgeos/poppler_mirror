@@ -500,9 +500,11 @@ static void printLine(FILE *f, TextLine *line) {
     if (lineXMax < xMax) lineXMax = xMax;
     if (lineYMax < yMax) lineYMax = yMax;
 
-    const std::string myString = myXmlTokenReplace(word->getText()->getCString());
+    GooString *wordText = word->getText();
+    const std::string myString = myXmlTokenReplace(wordText->getCString());
     wordXML << "          <word xMin=\"" << xMin << "\" yMin=\"" << yMin << "\" xMax=\"" <<
             xMax << "\" yMax=\"" << yMax << "\">" << myString << "</word>\n";
+    delete wordText;
   }
   fprintf(f, "        <line xMin=\"%f\" yMin=\"%f\" xMax=\"%f\" yMax=\"%f\">\n",
           lineXMin, lineYMin, lineXMax, lineYMax);
