@@ -49,12 +49,12 @@ void TestAnnotations::checkFontSizeAndColor()
     std::unique_ptr<Poppler::Document> doc{
       Poppler::Document::load(TESTDATADIR "/unittestcases/UseNone.pdf")
     };
-    QVERIFY(doc);
+    QVERIFY(doc.get());
 
     std::unique_ptr<Poppler::Page> page{
       doc->page(0)
     };
-    QVERIFY(page);
+    QVERIFY(page.get());
 
     for (const auto& color : testColors) {
       auto annot = std::make_unique<Poppler::TextAnnotation>(Poppler::TextAnnotation::InPlace);
@@ -66,7 +66,7 @@ void TestAnnotations::checkFontSizeAndColor()
     }
 
     std::unique_ptr<Poppler::PDFConverter> conv(doc->pdfConverter());
-    QVERIFY(conv);
+    QVERIFY(conv.get());
     conv->setOutputFileName(tempFile.fileName());
     conv->setPDFOptions(Poppler::PDFConverter::WithChanges);
     QVERIFY(conv->convert());
@@ -76,12 +76,12 @@ void TestAnnotations::checkFontSizeAndColor()
     std::unique_ptr<Poppler::Document> doc{
       Poppler::Document::load(tempFile.fileName())
     };
-    QVERIFY(doc);
+    QVERIFY(doc.get());
 
     std::unique_ptr<Poppler::Page> page{
       doc->page(0)
     };
-    QVERIFY(page);
+    QVERIFY(page.get());
 
     auto annots = page->annotations();
     QCOMPARE(annots.size(), static_cast<int>(testColors.size()));
