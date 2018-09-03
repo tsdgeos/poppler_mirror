@@ -2575,9 +2575,7 @@ void AnnotFreeText::setContents(GooString *new_content) {
 }
 
 void AnnotFreeText::setDefaultAppearance(const DefaultAppearance &da) {
-  delete appearanceString;
-
-  appearanceString = da.toAppearanceString();
+  appearanceString = std::unique_ptr<GooString>(da.toAppearanceString());
 
   update ("DA", Object(appearanceString->copy()));
   invalidateAppearance();
@@ -2646,7 +2644,7 @@ void AnnotFreeText::setIntent(AnnotFreeTextIntent new_intent) {
 }
 
 std::unique_ptr<DefaultAppearance> AnnotFreeText::getDefaultAppearance() const {
-  return std::make_unique<DefaultAppearance>(appearanceString);
+  return std::make_unique<DefaultAppearance>(appearanceString.get());
 }
 
 static GfxFont * createAnnotDrawFont(XRef * xref, Dict *fontResDict, const char* resourceName = "AnnotDrawFont", const char* fontname = "Helvetica")
@@ -2715,7 +2713,7 @@ void AnnotFreeText::generateFreeTextAppearance()
   const double height = rect->y2 - rect->y1;
 
   // Parse some properties from the appearance string
-  DefaultAppearance da{appearanceString};
+  DefaultAppearance da{appearanceString.get()};
 
   // Default values
   if (!da.getFontName().isName())
@@ -2798,7 +2796,7 @@ void AnnotFreeText::generateFreeTextAppearance()
   while (i < contents->getLength()) {
     GooString out;
     double linewidth, xpos;
-    layoutText(contents, &out, &i, font, &linewidth, textwidth/da.getFontPtSize(), nullptr, gFalse);
+    layoutText(contents.get(), &out, &i, font, &linewidth, textwidth/da.getFontPtSize(), nullptr, gFalse);
     linewidth *= da.getFontPtSize();
     switch (quadding) {
     case quaddingCentered:
