@@ -582,6 +582,7 @@ if(ENABLE_XPDF_HEADERS)
     goo/GooString.h
     goo/gtypes.h
     goo/gmem.h
+    goo/gdir.h
     goo/gfile.h
     goo/FixedPoint.h
     goo/ImgWriter.h
