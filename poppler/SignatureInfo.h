@@ -39,6 +39,8 @@ enum CertificateValidationStatus
   CERTIFICATE_NOT_VERIFIED
 };
 
+class X509CertificateInfo;
+
 class SignatureInfo {
 public:
   SignatureInfo();
@@ -55,6 +57,7 @@ public:
   int getHashAlgorithm(); // Returns a NSS3 HASH_HashType or -1 if compiled without NSS3
   time_t getSigningTime();
   bool isSubfilterSupported() { return sig_subfilter_supported; }
+  const X509CertificateInfo *getCertificateInfo() const;
 
   /* SETTERS */
   void setSignatureValStatus(enum SignatureValidationStatus );
@@ -66,6 +69,7 @@ public:
   void setHashAlgorithm(int);
   void setSigningTime(time_t);
   void setSubFilterSupport(bool isSupported) { sig_subfilter_supported = isSupported; }
+  void setCertificateInfo(X509CertificateInfo *);
 
 private:
   SignatureInfo(const SignatureInfo &);
@@ -73,6 +77,7 @@ private:
 
   SignatureValidationStatus sig_status;
   CertificateValidationStatus cert_status;
+  X509CertificateInfo *cert_info;
   char *signer_name;
   char *subject_dn;
   char *location;

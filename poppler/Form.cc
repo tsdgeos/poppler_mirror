@@ -1774,6 +1774,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
 
   cert_val_state = signature_handler.validateCertificate(validationTime);
   signature_info->setCertificateValStatus(SignatureHandler::NSS_CertTranslate(cert_val_state));
+  signature_info->setCertificateInfo(signature_handler.getCertificateInfo());
 
 #endif
   return signature_info;

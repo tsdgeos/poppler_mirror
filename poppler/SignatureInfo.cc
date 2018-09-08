@@ -15,6 +15,7 @@
 #include <config.h>
 
 #include "SignatureInfo.h"
+#include "CertificateInfo.h"
 #include "goo/gmem.h"
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +32,7 @@ SignatureInfo::SignatureInfo()
 {
   sig_status = SIGNATURE_NOT_VERIFIED;
   cert_status = CERTIFICATE_NOT_VERIFIED;
+  cert_info = nullptr;
   signer_name = nullptr;
   subject_dn = nullptr;
   location = nullptr;
@@ -44,6 +46,7 @@ SignatureInfo::SignatureInfo(SignatureValidationStatus sig_val_status, Certifica
 {
   sig_status = sig_val_status;
   cert_status = cert_val_status;
+  cert_info = nullptr;
   signer_name = nullptr;
   subject_dn = nullptr;
   location = nullptr;
@@ -59,6 +62,7 @@ SignatureInfo::~SignatureInfo()
   free(reason);
   free(signer_name);
   free(subject_dn);
+  delete cert_info;
 }
 
 /* GETTERS */
@@ -101,6 +105,11 @@ int SignatureInfo::getHashAlgorithm()
 time_t SignatureInfo::getSigningTime()
 {
   return signing_time;
+}
+
+const X509CertificateInfo *SignatureInfo::getCertificateInfo() const
+{
+  return cert_info;
 }
 
 /* SETTERS */
@@ -147,4 +156,10 @@ void SignatureInfo::setHashAlgorithm(int type)
 void SignatureInfo::setSigningTime(time_t signingTime)
 {
   signing_time = signingTime;
+}
+
+void SignatureInfo::setCertificateInfo(X509CertificateInfo *certInfo)
+{
+  delete cert_info;
+  cert_info = certInfo;
 }
