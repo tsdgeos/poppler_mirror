@@ -32,6 +32,7 @@
 #include <Object.h>
 #include <Link.h>
 #include <SignatureInfo.h>
+#include <CertificateInfo.h>
 
 #include "poppler-form.h"
 #include "poppler-page-private.h"
@@ -465,7 +466,7 @@ void FormFieldChoice::setCurrentChoices( const QList<int> &choice )
 QString FormFieldChoice::editChoice() const
 {
   FormWidgetChoice* fwc = static_cast<FormWidgetChoice*>(m_formData->fm);
-  
+
   if ( fwc->isCombo() && fwc->hasEdit() )
     return UnicodeParsedString(fwc->getEditChoice());
   else
@@ -475,7 +476,7 @@ QString FormFieldChoice::editChoice() const
 void FormFieldChoice::setEditChoice(const QString& text)
 {
   FormWidgetChoice* fwc = static_cast<FormWidgetChoice*>(m_formData->fm);
-  
+
   if ( fwc->isCombo() && fwc->hasEdit() )
   {
     GooString* goo = QStringToUnicodeGooString( text );
@@ -496,9 +497,193 @@ bool FormFieldChoice::canBeSpellChecked() const
 }
 
 
+struct CertificateInfoPrivate
+{
+  struct EntityInfo
+  {
+      QString common_name;
+      QString email_address;
+      QString org_name;
+      QString distinguished_name;
+  };
+
+  EntityInfo issuer_info;
+  EntityInfo subject_info;
+  QByteArray certificate_der;
+  QByteArray serial_number;
+  QByteArray public_key;
+  QDateTime validity_start;
+  QDateTime validity_end;
+  int public_key_type;
+  int public_key_strength;
+  int ku_extensions;
+  int version;
+  bool is_self_signed;
+  bool is_null;
+};
+
+CertificateInfo::CertificateInfo()
+  : d_ptr( nullptr )
+{
+}
+
+CertificateInfo::CertificateInfo(CertificateInfoPrivate* priv)
+  : d_ptr( priv )
+{
+}
+
+CertificateInfo::CertificateInfo(const CertificateInfo &other)
+ : d_ptr( other.d_ptr )
+{
+}
+
+CertificateInfo::~CertificateInfo()
+{
+}
+
+CertificateInfo &CertificateInfo::operator=(const CertificateInfo &other)
+{
+  if ( this != &other )
+    d_ptr = other.d_ptr;
+
+  return *this;
+}
+
+bool CertificateInfo::isNull() const
+{
+  Q_D(const CertificateInfo);
+  return d->is_null;
+}
+
+int CertificateInfo::version() const
+{
+  Q_D(const CertificateInfo);
+  return d->version;
+}
+
+QByteArray CertificateInfo::serialNumber() const
+{
+  Q_D(const CertificateInfo);
+  return d->serial_number;
+}
+
+QString CertificateInfo::issuerInfo(EntityInfoKey key) const
+{
+  Q_D(const CertificateInfo);
+  switch (key)
+  {
+    case CommonName:
+      return d->issuer_info.common_name;
+    case DistinguishedName:
+      return d->issuer_info.distinguished_name;
+    case EmailAddress:
+      return d->issuer_info.email_address;
+    case Organization:
+      return d->issuer_info.org_name;
+    default:
+      return QString();
+  }
+}
+
+QString CertificateInfo::subjectInfo(EntityInfoKey key) const
+{
+  Q_D(const CertificateInfo);
+  switch (key)
+  {
+    case CommonName:
+      return d->subject_info.common_name;
+    case DistinguishedName:
+      return d->subject_info.distinguished_name;
+    case EmailAddress:
+      return d->subject_info.email_address;
+    case Organization:
+      return d->subject_info.org_name;
+    default:
+      return QString();
+  }
+}
+
+QDateTime CertificateInfo::validityStart() const
+{
+  Q_D(const CertificateInfo);
+  return d->validity_start;
+}
+
+QDateTime CertificateInfo::validityEnd() const
+{
+  Q_D(const CertificateInfo);
+  return d->validity_end;
+}
+
+CertificateInfo::KeyUsageExtensions CertificateInfo::keyUsageExtensions() const
+{
+  Q_D(const CertificateInfo);
+
+  KeyUsageExtensions kuExtensions = KuNone;
+  if (d->ku_extensions & KU_DIGITAL_SIGNATURE)
+    kuExtensions |= KuDigitalSignature;
+  if (d->ku_extensions & KU_NON_REPUDIATION)
+    kuExtensions |= KuNonRepudiation;
+  if (d->ku_extensions & KU_KEY_ENCIPHERMENT)
+    kuExtensions |= KuKeyEncipherment;
+  if (d->ku_extensions & KU_DATA_ENCIPHERMENT)
+    kuExtensions |= KuDataEncipherment;
+  if (d->ku_extensions & KU_KEY_AGREEMENT)
+    kuExtensions |= KuKeyAgreement;
+  if (d->ku_extensions & KU_KEY_CERT_SIGN)
+    kuExtensions |= KuKeyCertSign;
+  if (d->ku_extensions & KU_CRL_SIGN)
+    kuExtensions |= KuClrSign;
+  if (d->ku_extensions & KU_ENCIPHER_ONLY)
+    kuExtensions |= KuEncipherOnly;
+
+  return kuExtensions;
+}
+
+QByteArray CertificateInfo::publicKey() const
+{
+  Q_D(const CertificateInfo);
+  return d->public_key;
+}
+
+CertificateInfo::PublicKeyType CertificateInfo::publicKeyType() const
+{
+  Q_D(const CertificateInfo);
+  switch (d->public_key_type)
+  {
+    case RSAKEY:
+      return RsaKey;
+    case DSAKEY:
+      return DsaKey;
+    case ECKEY:
+      return EcKey;
+    default:
+      return OtherKey;
+  }
+}
+
+int CertificateInfo::publicKeyStrength() const
+{
+  Q_D(const CertificateInfo);
+  return d->public_key_strength;
+}
+
+bool CertificateInfo::isSelfSigned() const
+{
+  Q_D(const CertificateInfo);
+  return d->is_self_signed;
+}
+
+QByteArray CertificateInfo::certificateData() const
+{
+  Q_D(const CertificateInfo);
+  return d->certificate_der;
+}
+
 struct SignatureValidationInfoPrivate {
-	SignatureValidationInfo::SignatureStatus signature_status;
-	SignatureValidationInfo::CertificateStatus certificate_status;
+        SignatureValidationInfo::SignatureStatus signature_status;
+        SignatureValidationInfo::CertificateStatus certificate_status;
+        CertificateInfo cert_info;
 
 	QByteArray signature;
 	QString signer_name;
@@ -627,6 +812,12 @@ bool SignatureValidationInfo::signsTotalDocument() const
   return false;
 }
 
+CertificateInfo SignatureValidationInfo::certificateInfo() const
+{
+  Q_D(const SignatureValidationInfo);
+  return d->cert_info;
+}
+
 SignatureValidationInfo &SignatureValidationInfo::operator=(const SignatureValidationInfo &other)
 {
   if ( this != &other )
@@ -748,6 +939,46 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
     priv->signature = QByteArray::fromHex(checkedSignature->getCString());
   }
   delete checkedSignature;
+
+  // set certificate info
+  const X509CertificateInfo *ci = si->getCertificateInfo();
+  CertificateInfoPrivate* certPriv = new CertificateInfoPrivate;
+  certPriv->is_null = true;
+  if (ci)
+  {
+    certPriv->version = ci->getVersion();
+    certPriv->ku_extensions = ci->getKeyUsageExtensions();
+
+    const GooString &certSerial = ci->getSerialNumber();
+    certPriv->serial_number = QByteArray(certSerial.getCString(), certSerial.getLength());
+
+    const X509CertificateInfo::EntityInfo &issuerInfo = ci->getIssuerInfo();
+    certPriv->issuer_info.common_name = issuerInfo.commonName;
+    certPriv->issuer_info.distinguished_name = issuerInfo.distinguishedName;
+    certPriv->issuer_info.email_address = issuerInfo.email;
+    certPriv->issuer_info.org_name = issuerInfo.organization;
+
+    const X509CertificateInfo::EntityInfo &subjectInfo = ci->getSubjectInfo();
+    certPriv->subject_info.common_name = subjectInfo.commonName;
+    certPriv->subject_info.distinguished_name = subjectInfo.distinguishedName;
+    certPriv->subject_info.email_address = subjectInfo.email;
+    certPriv->subject_info.org_name = subjectInfo.organization;
+
+    X509CertificateInfo::Validity certValidity = ci->getValidity();
+    certPriv->validity_start = QDateTime::fromTime_t(certValidity.notBefore, Qt::UTC);
+    certPriv->validity_end = QDateTime::fromTime_t(certValidity.notAfter, Qt::UTC);
+
+    const X509CertificateInfo::PublicKeyInfo &pkInfo = ci->getPublicKeyInfo();
+    certPriv->public_key = QByteArray(pkInfo.publicKey->getCString(), pkInfo.publicKey->getLength());
+    certPriv->public_key_type = static_cast<int>(pkInfo.publicKeyType);
+    certPriv->public_key_strength = pkInfo.publicKeyStrength;
+
+    const GooString &certDer = ci->getCertificateDER();
+    certPriv->certificate_der = QByteArray(certDer.getCString(), certDer.getLength());
+
+    certPriv->is_null = false;
+  }
+  priv->cert_info = CertificateInfo(certPriv);
 
   return SignatureValidationInfo(priv);
 }
