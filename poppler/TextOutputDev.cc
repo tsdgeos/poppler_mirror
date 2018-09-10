@@ -179,6 +179,14 @@
 #define combMaxMidDelta 0.3
 #define combMaxBaseDelta 0.4
 
+namespace {
+
+inline bool isAscii7 (Unicode uchar) {
+  return !(uchar & 0x80);
+}
+
+}
+
 static int reorderText(Unicode *text, int len, UnicodeMap *uMap, bool primaryLR, GooString *s, Unicode* u) {
   char lre[8], rle[8], popdf[8], buf[8];
   int lreLen = 0, rleLen = 0, popdfLen = 0, n;
@@ -965,6 +973,9 @@ TextLine::TextLine(TextBlock *blkA, int rotA, double baseA) {
   normalized = nullptr;
   normalized_len = 0;
   normalized_idx = nullptr;
+  ascii_translation = nullptr;
+  ascii_len = 0;
+  ascii_idx = nullptr;
 }
 
 TextLine::~TextLine() {
@@ -981,6 +992,10 @@ TextLine::~TextLine() {
   if (normalized) {
     gfree(normalized);
     gfree(normalized_idx);
+  }
+  if (ascii_translation) {
+    gfree(ascii_translation);
+    gfree(ascii_idx);
   }
 }
 
@@ -3840,6 +3855,18 @@ bool TextPage::findText(Unicode *s, int len,
 			 bool wholeWord,
 			 double *xMin, double *yMin,
 			 double *xMax, double *yMax) {
+  return findText(s, len, startAtTop, stopAtBottom, startAtLast, stopAtLast,
+		  caseSensitive, false, backward, wholeWord,
+		  xMin, yMin, xMax, yMax);
+}
+
+bool TextPage::findText(Unicode *s, int len,
+			 bool startAtTop, bool stopAtBottom,
+			 bool startAtLast, bool stopAtLast,
+			 bool caseSensitive, bool ignoreDiacritics,
+			 bool backward, bool wholeWord,
+			 double *xMin, double *yMin,
+			 double *xMax, double *yMax) {
   TextBlock *blk;
   TextLine *line;
   Unicode *s2, *txt, *reordered;
@@ -3849,7 +3876,6 @@ bool TextPage::findText(Unicode *s, int len,
   double xMin0, yMin0, xMax0, yMax0;
   double xMin1, yMin1, xMax1, yMax1;
   bool found;
-
 
   if (rawOrder) {
     return false;
@@ -3862,10 +3888,21 @@ bool TextPage::findText(Unicode *s, int len,
   // normalize the search string
   s2 = unicodeNormalizeNFKC(reordered, len, &len, nullptr);
 
-  // convert the search string to uppercase
+  // if search string is not pure ascii then don't
+  // use ignoreDiacritics (as they won't match)
   if (!caseSensitive) {
+    // convert the search string to uppercase
     for (i = 0; i < len; ++i) {
       s2[i] = unicodeToUpper(s2[i]);
+      if (ignoreDiacritics && !isAscii7(s2[i]))
+        ignoreDiacritics = false;
+    }
+  } else if (ignoreDiacritics) {
+    for (i = 0; i < len; ++i) {
+      if (!isAscii7(s2[i])) {
+        ignoreDiacritics = false;
+        break;
+      }
     }
   }
 
@@ -3938,16 +3975,36 @@ bool TextPage::findText(Unicode *s, int len,
 						true);
       // convert the line to uppercase
       m = line->normalized_len;
+
+      if (ignoreDiacritics) {
+        if (!line->ascii_translation)
+          unicodeToAscii7(line->normalized,
+                          line->normalized_len,
+                          &line->ascii_translation,
+                          &line->ascii_len,
+                          line->normalized_idx,
+                          &line->ascii_idx);
+        if (line->ascii_len)
+          m = line->ascii_len;
+        else
+          ignoreDiacritics = false;
+      }
       if (!caseSensitive) {
 	if (m > txtSize) {
 	  txt = (Unicode *)greallocn(txt, m, sizeof(Unicode));
 	  txtSize = m;
 	}
 	for (k = 0; k < m; ++k) {
-	  txt[k] = unicodeToUpper(line->normalized[k]);
-	  }
+          if (ignoreDiacritics)
+            txt[k] = unicodeToUpper(line->ascii_translation[k]);
+          else
+            txt[k] = unicodeToUpper(line->normalized[k]);
+	}
       } else {
-	txt = line->normalized;
+        if (ignoreDiacritics)
+          txt = line->ascii_translation;
+        else
+          txt = line->normalized;
       }
 
       // search each position in this line
@@ -3970,8 +4027,14 @@ bool TextPage::findText(Unicode *s, int len,
             // where s2 matches a subsequence of a compatibility equivalence
             // decomposition, highlight the entire glyph, since we don't know
             // the internal layout of subglyph components
-            int normStart = line->normalized_idx[j];
-            int normAfterEnd = line->normalized_idx[j + len - 1] + 1;
+            int normStart, normAfterEnd;
+            if (ignoreDiacritics) {
+              normStart = line->ascii_idx[j];
+              normAfterEnd = line->ascii_idx[j + len - 1] + 1;
+            } else {
+              normStart = line->normalized_idx[j];
+              normAfterEnd = line->normalized_idx[j + len - 1] + 1;
+            }
             switch (line->rot) {
             case 0:
               xMin1 = line->edge[normStart];

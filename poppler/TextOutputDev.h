@@ -340,6 +340,9 @@ private:
   Unicode *normalized;		// normalized form of Unicode text
   int normalized_len;		// number of normalized Unicode chars
   int *normalized_idx;		// indices of normalized chars into Unicode text
+  Unicode *ascii_translation;	// ascii translation from the normalized text
+  int ascii_len;		// length of ascii translation text
+  int *ascii_idx;		// indices of ascii chars into Unicode text of line
 
   friend class TextLineFrag;
   friend class TextBlock;
@@ -602,6 +605,18 @@ public:
 		 bool startAtLast, bool stopAtLast,
 		 bool caseSensitive, bool backward,
 		 bool wholeWord,
+		 double *xMin, double *yMin,
+		 double *xMax, double *yMax);
+
+  // Adds new parameter ignoreDiacritics, which will do diacritics
+  // insensitive search, i.e. ignore accents, umlauts, diaeresis,etc.
+  // while matching. This option will be ignored if <s> contains characters
+  // which are not pure ascii.
+  bool findText(Unicode *s, int len,
+		 bool startAtTop, bool stopAtBottom,
+		 bool startAtLast, bool stopAtLast,
+		 bool caseSensitive, bool ignoreDiacritics,
+		 bool backward, bool wholeWord,
 		 double *xMin, double *yMin,
 		 double *xMax, double *yMax);
 

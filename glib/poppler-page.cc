@@ -915,6 +915,7 @@ poppler_page_find_text_with_options (PopplerPage     *page,
                              start_at_last,
                              false, //stopAtLast
                              options & POPPLER_FIND_CASE_SENSITIVE,
+                             options & POPPLER_FIND_IGNORE_DIACRITICS,
                              backwards,
                              options & POPPLER_FIND_WHOLE_WORDS_ONLY,
                              &xMin, &yMin, &xMax, &yMax))

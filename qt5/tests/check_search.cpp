@@ -11,6 +11,7 @@ private slots:
     void bug7063();
     void testNextAndPrevious();
     void testWholeWordsOnly();
+    void testIgnoreDiacritics();
 };
 
 void TestSearch::bug7063()
@@ -169,6 +170,63 @@ void TestSearch::testWholeWordsOnly()
 
     QCOMPARE( page->search(QStringLiteral("brOwn"), left, top, right, bottom, direction, mode3), true );
     QCOMPARE( page->search(QStringLiteral("Own"), left, top, right, bottom, direction, mode3), false );
+}
+
+void TestSearch::testIgnoreDiacritics()
+{
+    QScopedPointer< Poppler::Document > document(Poppler::Document::load(TESTDATADIR "/unittestcases/Issue637.pdf"));
+    QVERIFY( document );
+
+    QScopedPointer< Poppler::Page > page(document->page(0));
+    QVERIFY( page );
+
+    const Poppler::Page::SearchDirection direction = Poppler::Page::FromTop;
+
+    const Poppler::Page::SearchFlags mode0 = nullptr;
+    const Poppler::Page::SearchFlags mode1 = Poppler::Page::IgnoreDiacritics;
+    const Poppler::Page::SearchFlags mode2 = Poppler::Page::IgnoreDiacritics | Poppler::Page::IgnoreCase;
+    const Poppler::Page::SearchFlags mode3 = Poppler::Page::IgnoreDiacritics | Poppler::Page::IgnoreCase | Poppler::Page::WholeWords;
+    const Poppler::Page::SearchFlags mode4 = Poppler::Page::IgnoreCase | Poppler::Page::WholeWords;
+
+    double left, top, right, bottom;
+
+    // Test pdf (Issue637.pdf) just contains the following three lines:
+    // La cigüeña voló sobre nuestras cabezas.
+    // La cigogne a survolé nos têtes.
+    // Der Storch flog über unsere Köpfe hinweg.
+
+    QCOMPARE( page->search(QStringLiteral("ciguena"), left, top, right, bottom, direction, mode0), false );
+    QCOMPARE( page->search(QStringLiteral("Ciguena"), left, top, right, bottom, direction, mode1), false );
+    QCOMPARE( page->search(QStringLiteral("ciguena"), left, top, right, bottom, direction, mode1), true );
+    QCOMPARE( page->search(QString::fromUtf8("cigüeña"), left, top, right, bottom, direction, mode1), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("cigüena"), left, top, right, bottom, direction, mode1), false ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("Cigüeña"), left, top, right, bottom, direction, mode1), false ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QStringLiteral("Ciguena"), left, top, right, bottom, direction, mode2), true );
+    QCOMPARE( page->search(QStringLiteral("ciguena"), left, top, right, bottom, direction, mode2), true );
+    QCOMPARE( page->search(QStringLiteral("Ciguena"), left, top, right, bottom, direction, mode3), true );
+    QCOMPARE( page->search(QStringLiteral("ciguena"), left, top, right, bottom, direction, mode3), true );
+
+    QCOMPARE( page->search(QString::fromUtf8("cigüeña"), left, top, right, bottom, direction, mode4), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("Cigüeña"), left, top, right, bottom, direction, mode4), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("cigüena"), left, top, right, bottom, direction, mode4), false ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QStringLiteral("Ciguena"), left, top, right, bottom, direction, mode4), false );
+
+    QCOMPARE( page->search(QStringLiteral("kopfe"), left, top, right, bottom, direction, mode2), true );
+    QCOMPARE( page->search(QStringLiteral("kopfe"), left, top, right, bottom, direction, mode3), true );
+    QCOMPARE( page->search(QStringLiteral("uber"), left, top, right, bottom, direction, mode0), false );
+    QCOMPARE( page->search(QStringLiteral("uber"), left, top, right, bottom, direction, mode1), true );
+    QCOMPARE( page->search(QStringLiteral("uber"), left, top, right, bottom, direction, mode2), true );
+    QCOMPARE( page->search(QStringLiteral("uber"), left, top, right, bottom, direction, mode3), true );
+
+    QCOMPARE( page->search(QStringLiteral("vole"), left, top, right, bottom, direction, mode2), true );
+    QCOMPARE( page->search(QStringLiteral("vole"), left, top, right, bottom, direction, mode3), false );
+    QCOMPARE( page->search(QStringLiteral("survole"), left, top, right, bottom, direction, mode3), true );
+    QCOMPARE( page->search(QStringLiteral("tete"), left, top, right, bottom, direction, mode3), false );
+    QCOMPARE( page->search(QStringLiteral("tete"), left, top, right, bottom, direction, mode2), true );
+
+    QCOMPARE( page->search(QStringLiteral("La Ciguena Volo"), left, top, right, bottom, direction, mode2), true );
+    QCOMPARE( page->search(QStringLiteral("Survole Nos Tetes"), left, top, right, bottom, direction, mode2), true );
+    QCOMPARE( page->search(QStringLiteral("Uber Unsere Kopfe"), left, top, right, bottom, direction, mode2), true );
 }
 
 QTEST_GUILESS_MAIN(TestSearch)

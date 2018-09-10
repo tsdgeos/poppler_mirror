@@ -27,6 +27,8 @@
 
 #include "goo/gmem.h"
 #include "PDFDocEncoding.h"
+#include "GlobalParams.h"
+#include "UnicodeMap.h"
 #include "UTF.h"
 #include "UnicodeMapFuncs.h"
 #include <algorithm>
@@ -415,4 +417,61 @@ char *utf16ToUtf8(const uint16_t *utf16, int *len)
   char *utf8 = (char*)gmalloc(n + 1);
   utf16ToUtf8(utf16, utf8);
   return utf8;
+}
+
+struct Ascii7Map
+{
+  UnicodeMap *d;
+  Ascii7Map()
+  {
+    GooString enc("ASCII7");
+    d = globalParams->getUnicodeMap(&enc);
+  }
+};
+
+void unicodeToAscii7(Unicode *in, int len, Unicode **ucs4_out,
+                     int *out_len, int *in_idx, int **indices)
+{
+  static Ascii7Map uMap;
+  int *idx = nullptr;
+
+  if (!len) {
+    *ucs4_out = nullptr;
+    *out_len = 0;
+    return;
+  }
+
+  if (indices) {
+    if (!in_idx)
+      indices = nullptr;
+    else
+      idx = (int *) gmallocn(len * 2 + 1, sizeof(int));
+  }
+
+  GooString gstr;
+
+  char buf[8]; // 8 is enough for mapping an unicode char to a string
+  int i, n, k;
+
+  for (i = k = 0; i < len; ++i) {
+     n = uMap.d->mapUnicode(in[i], buf, sizeof(buf));
+     if (!n) {
+       // the Unicode char could not be converted to ascii7 counterpart
+       // so just fill with a non-printable ascii char
+       buf[0] = 31;
+       n = 1;
+     }
+     gstr.append(buf, n);
+     if (indices) {
+       for (; n > 0; n--)
+         idx[k++] = in_idx[i];
+     }
+  }
+
+  *out_len = TextStringToUCS4(&gstr, ucs4_out);
+
+  if (indices) {
+    idx[k] = in_idx[len];
+    *indices = idx;
+  }
 }

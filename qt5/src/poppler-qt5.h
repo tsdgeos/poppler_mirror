@@ -739,7 +739,10 @@ delete it;
         {
             NoSearchFlags = 0x00000000, ///< since 0.63
             IgnoreCase = 0x00000001,    ///< Case differences are ignored
-            WholeWords = 0x00000002    ///< Only whole words are matched
+            WholeWords = 0x00000002,    ///< Only whole words are matched
+            IgnoreDiacritics = 0x00000004    ///< Diacritic differences (eg. accents, umlauts, diaeresis) are ignored. \since 0.73
+                                             ///< This option will have no effect if the search term contains characters which
+                                             ///< are not pure ascii.
         };
         Q_DECLARE_FLAGS( SearchFlags, SearchFlag )
 	
