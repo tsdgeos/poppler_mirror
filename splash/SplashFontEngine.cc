@@ -111,10 +111,9 @@ SplashFontFile *SplashFontEngine::getFontFile(SplashFontFileID *id) {
 SplashFontFile *SplashFontEngine::loadType1Font(SplashFontFileID *idA,
 						SplashFontSrc *src,
 						const char **enc) {
-  SplashFontFile *fontFile;
+  SplashFontFile *fontFile = nullptr;
 
-  fontFile = nullptr;
-  if (!fontFile && ftEngine) {
+  if (ftEngine) {
     fontFile = ftEngine->loadType1Font(idA, src, enc);
   }
 
@@ -131,10 +130,9 @@ SplashFontFile *SplashFontEngine::loadType1Font(SplashFontFileID *idA,
 SplashFontFile *SplashFontEngine::loadType1CFont(SplashFontFileID *idA,
 						 SplashFontSrc *src,
 						 const char **enc) {
-  SplashFontFile *fontFile;
+  SplashFontFile *fontFile = nullptr;
 
-  fontFile = nullptr;
-  if (!fontFile && ftEngine) {
+  if (ftEngine) {
     fontFile = ftEngine->loadType1CFont(idA, src, enc);
   }
 
@@ -151,10 +149,9 @@ SplashFontFile *SplashFontEngine::loadType1CFont(SplashFontFileID *idA,
 SplashFontFile *SplashFontEngine::loadOpenTypeT1CFont(SplashFontFileID *idA,
 						      SplashFontSrc *src,
 						      const char **enc) {
-  SplashFontFile *fontFile;
+  SplashFontFile *fontFile = nullptr;
 
-  fontFile = nullptr;
-  if (!fontFile && ftEngine) {
+  if (ftEngine) {
     fontFile = ftEngine->loadOpenTypeT1CFont(idA, src, enc);
   }
 
@@ -170,10 +167,9 @@ SplashFontFile *SplashFontEngine::loadOpenTypeT1CFont(SplashFontFileID *idA,
 
 SplashFontFile *SplashFontEngine::loadCIDFont(SplashFontFileID *idA,
 					      SplashFontSrc *src) {
-  SplashFontFile *fontFile;
+  SplashFontFile *fontFile = nullptr;
 
-  fontFile = nullptr;
-  if (!fontFile && ftEngine) {
+  if (ftEngine) {
     fontFile = ftEngine->loadCIDFont(idA, src);
   }
 
@@ -191,10 +187,9 @@ SplashFontFile *SplashFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA,
 						      SplashFontSrc *src,
                                                       int *codeToGID,
                                                       int codeToGIDLen) {
-  SplashFontFile *fontFile;
+  SplashFontFile *fontFile = nullptr;
 
-  fontFile = nullptr;
-  if (!fontFile && ftEngine) {
+  if (ftEngine) {
     fontFile = ftEngine->loadOpenTypeCFFFont(idA, src, codeToGID, codeToGIDLen);
   }
 
@@ -213,10 +208,9 @@ SplashFontFile *SplashFontEngine::loadTrueTypeFont(SplashFontFileID *idA,
 						   int *codeToGID,
 						   int codeToGIDLen,
 						   int faceIndex) {
-  SplashFontFile *fontFile;
+  SplashFontFile *fontFile = nullptr;
 
-  fontFile = nullptr;
-  if (!fontFile && ftEngine) {
+  if (ftEngine) {
     fontFile = ftEngine->loadTrueTypeFont(idA, src,
                                         codeToGID, codeToGIDLen, faceIndex);
   }
