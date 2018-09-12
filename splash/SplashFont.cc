@@ -46,7 +46,7 @@ struct SplashFontCacheTag {
 //------------------------------------------------------------------------
 
 SplashFont::SplashFont(SplashFontFile *fontFileA, SplashCoord *matA,
-		       SplashCoord *textMatA, GBool aaA) {
+		       const SplashCoord *textMatA, GBool aaA) {
   fontFile = fontFileA;
   fontFile->incRefCnt();
   mat[0] = matA[0];

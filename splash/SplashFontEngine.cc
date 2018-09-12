@@ -240,8 +240,8 @@ void SplashFontEngine::setAA(GBool aa) {
 }
 
 SplashFont *SplashFontEngine::getFont(SplashFontFile *fontFile,
-				      SplashCoord *textMat,
-				      SplashCoord *ctm) {
+				      const SplashCoord *textMat,
+				      const SplashCoord *ctm) {
   SplashCoord mat[4];
   SplashFont *font;
   int i, j;

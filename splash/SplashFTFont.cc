@@ -58,7 +58,7 @@ static int glyphPathCubicTo(const FT_Vector *ctrl1, const FT_Vector *ctrl2,
 //------------------------------------------------------------------------
 
 SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
-			   SplashCoord *textMatA):
+			   const SplashCoord *textMatA):
   SplashFont(fontFileA, matA, textMatA, fontFileA->engine->aa), 
   textScale(0),
   enableFreeTypeHinting(fontFileA->engine->enableFreeTypeHinting),

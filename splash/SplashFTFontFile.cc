@@ -137,7 +137,7 @@ SplashFTFontFile::~SplashFTFontFile() {
 }
 
 SplashFont *SplashFTFontFile::makeFont(SplashCoord *mat,
-				       SplashCoord *textMat) {
+				       const SplashCoord *textMat) {
   SplashFont *font;
 
   font = new SplashFTFont(this, mat, textMat);
