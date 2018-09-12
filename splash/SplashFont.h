@@ -66,7 +66,7 @@ public:
 
   // Return true if <this> matches the specified font file and matrix.
   GBool matches(SplashFontFile *fontFileA, SplashCoord *matA,
-		const SplashCoord *textMatA) {
+		const SplashCoord *textMatA) const {
     return fontFileA == fontFile &&
            matA[0] == mat[0] && matA[1] == mat[1] &&
            matA[2] == mat[2] && matA[3] == mat[3] &&
