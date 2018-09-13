@@ -30,6 +30,8 @@
 #pragma interface
 #endif
 
+#include <array>
+
 #include "goo/gtypes.h"
 #include "SplashTypes.h"
 
@@ -94,7 +96,7 @@ public:
 
 private:
 
-  SplashFont *fontCache[splashFontCacheSize];
+  std::array<SplashFont*,splashFontCacheSize> fontCache;
 
   SplashFTFontEngine *ftEngine;
 };
