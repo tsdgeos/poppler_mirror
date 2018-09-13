@@ -45,10 +45,6 @@ class SplashFont;
 class SplashFontSrc;
 
 //------------------------------------------------------------------------
-
-#define splashFontCacheSize 16
-
-//------------------------------------------------------------------------
 // SplashFontEngine
 //------------------------------------------------------------------------
 
@@ -96,7 +92,7 @@ public:
 
 private:
 
-  std::array<SplashFont*,splashFontCacheSize> fontCache;
+  std::array<SplashFont*,16> fontCache;
 
   SplashFTFontEngine *ftEngine;
 };
