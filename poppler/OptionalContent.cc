@@ -7,6 +7,7 @@
 // Copyright 2008, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2008, 2010, 2011, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright 2008 Mark Kaplan <mkaplan@finjan.com>
+// Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 // Released under the GPL (version 2, or later, at your option)
 //
@@ -22,7 +23,6 @@
 #include "goo/GooString.h"
 #include "goo/GooList.h"
 #include "Error.h"
-// #include "PDFDocEncoding.h"
 #include "OptionalContent.h"
 
 // Max depth of nested visibility expressions.  This is used to catch
@@ -184,7 +184,6 @@ bool OCGs::optContentIsVisible( Object *dictRef )
     return result;
   }
   dict = dictObj.getDict();
-  // printf("checking if optContent is visible\n");
   Object dictType = dict->lookup("Type");
   if (dictType.isName("OCMD")) {
     Object ve = dict->lookup("VE");
@@ -213,13 +212,12 @@ bool OCGs::optContentIsVisible( Object *dictRef )
         }
       }
     }
-  } else if ( dictType.isName("OCG") ) {
+  } else if ( dictType.isName("OCG") && dictRef->isRef() ) {
     OptionalContentGroup* oc = findOcgByRef( dictRef->getRef() );
     if ( oc && oc->getState() == OptionalContentGroup::Off ) {
       result=false;
     }
   }
-  // printf("visibility: %s\n", result? "on" : "off");
   return result;
 }
 
