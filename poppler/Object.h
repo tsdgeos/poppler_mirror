@@ -89,13 +89,32 @@ struct Ref {
   int gen;			// generation number
 };
 
-struct RefCompare {
-  bool operator() (const Ref& lhs, const Ref& rhs) const {
-    if (lhs.num != rhs.num)
-      return lhs.num < rhs.num;
-    return lhs.gen < rhs.gen;
-  }
+inline bool operator== (const Ref& lhs, const Ref& rhs) noexcept {
+  return lhs.num == rhs.num && lhs.gen == rhs.gen;
+}
+
+inline bool operator< (const Ref& lhs, const Ref& rhs) noexcept {
+  if (lhs.num != rhs.num)
+    return lhs.num < rhs.num;
+  return lhs.gen < rhs.gen;
+}
+
+namespace std
+{
+
+template<>
+struct hash<Ref>
+{
+    using argument_type = Ref;
+    using result_type = size_t;
+
+    result_type operator() (const argument_type &ref) const noexcept
+    {
+	return std::hash<int>{}(ref.num) ^ (std::hash<int>{}(ref.gen) << 1);
+    }
 };
+
+}
 
 //------------------------------------------------------------------------
 // object types

@@ -2494,15 +2494,11 @@ get_optional_content_items (OCGs *ocg)
   if (order) {
     items = get_optional_content_items_sorted (ocg, nullptr, order);
   } else {
-    GooList *ocgs;
-    int i;
+    const auto &ocgs = ocg->getOCGs ();
 
-    ocgs = ocg->getOCGs ();
-    
-    for (i = 0; i < ocgs->getLength (); ++i) {
-      OptionalContentGroup *oc = (OptionalContentGroup *) ocgs->get (i);
-      Layer *layer = layer_new (oc);
-      
+    for (const auto &oc : ocgs) {
+      Layer *layer = layer_new (oc.second.get());
+
       items = g_list_prepend (items, layer);
     }
     

@@ -79,7 +79,7 @@ private:
   Object classMap;
   ElemPtrArray elements;
   std::map<int, std::vector<Parent> > parentTree;
-  std::multimap<Ref, Parent*, RefCompare> refToParentMap;
+  std::multimap<Ref, Parent*> refToParentMap;
 
   void parse(Dict *rootDict);
   void parseNumberTreeNode(Dict *node);
