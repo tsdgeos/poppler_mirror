@@ -37,12 +37,13 @@
 #include "OutputDev.h"
 #include "GfxState.h"
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include <QtGui/QPainter>
 
 class GfxState;
 class PDFDoc;
-
-class SplashFontEngine;
 
 class QRawFont;
 
@@ -204,7 +205,6 @@ private:
   std::stack<QBrush> m_currentBrushStack;
 
   bool m_needFontUpdate;		// set when the font needs to be updated
-  SplashFontEngine *m_fontEngine;
   PDFDoc* m_doc;
   XRef *xref;			// xref table for current document
 
@@ -219,10 +219,15 @@ private:
   using ArthurFontID = std::pair<Ref,double>;
   std::map<ArthurFontID,std::unique_ptr<QRawFont> > m_rawFontCache;
   std::map<ArthurFontID,std::unique_ptr<ArthurType3Font> > m_type3FontCache;
+  std::map<Ref,const int*> m_codeToGIDCache;
 
   // The table that maps character codes to glyph indexes
-  int* m_codeToGID;
-  std::stack<int*> m_codeToGIDStack;
+  const int* m_codeToGID;
+  std::stack<const int*> m_codeToGIDStack;
+
+  FT_Library m_ftLibrary;
+  // as of FT 2.1.8, CID fonts are indexed by CID instead of GID
+  bool m_useCIDs;
 };
 
 #endif
