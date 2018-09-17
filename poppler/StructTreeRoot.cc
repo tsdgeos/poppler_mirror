@@ -110,7 +110,7 @@ void StructTreeRoot::parse(Dict *root)
   }
 
   // refToParentMap is only used during parsing. Ensure all memory used by it is freed.
-  std::multimap<Ref, Parent*, RefCompare>().swap(refToParentMap);
+  std::multimap<Ref, Parent*>().swap(refToParentMap);
 }
 
 void StructTreeRoot::parseNumberTreeNode(Dict *node)

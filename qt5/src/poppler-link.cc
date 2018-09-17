@@ -35,11 +35,6 @@
 #include "Link.h"
 #include "Rendition.h"
 
-static bool operator==( const Ref &r1, const Ref &r2 )
-{
-	return r1.num == r2.num && r1.gen == r2.gen;
-}
-
 namespace Poppler {
 
 class LinkDestinationPrivate : public QSharedData

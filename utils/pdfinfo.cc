@@ -372,7 +372,7 @@ static void printLinkDest(LinkDest *dest) {
 }
 
 static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
-  std::map<Ref,std::map<GooString*,LinkDest*,GooStringCompare>, RefCompare > map;
+  std::map<Ref,std::map<GooString*,LinkDest*,GooStringCompare> > map;
 
   int numDests = doc->getCatalog()->numDestNameTree();
   for (int i = 0; i < numDests; i++) {

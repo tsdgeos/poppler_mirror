@@ -165,12 +165,11 @@ namespace Poppler
     : q(qq)
   {
     m_rootNode = new OptContentItem();
-    GooList *ocgs = optContent->getOCGs();
+    const auto &ocgs = optContent->getOCGs();
 
-    for (int i = 0; i < ocgs->getLength(); ++i) {
-      OptionalContentGroup *ocg = static_cast<OptionalContentGroup*>(ocgs->get(i));
-      OptContentItem *node = new OptContentItem( ocg );
-      m_optContentItems.insert( QString::number(ocg->getRef().num), node);
+    for (const auto& ocg : ocgs) {
+      OptContentItem *node = new OptContentItem( ocg.second.get() );
+      m_optContentItems.insert( QString::number( ocg.first.num ), node );
     }
 
     if ( optContent->getOrderArray() == nullptr ) {
