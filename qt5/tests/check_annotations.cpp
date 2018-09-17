@@ -94,7 +94,7 @@ void TestAnnotations::checkFontSizeAndColor()
       QCOMPARE(textAnnot->textFont().pointSize(), testFont.pointSize());
       QCOMPARE(static_cast<int>(textAnnot->textColor().spec()), static_cast<int>(color.spec()));
       QCOMPARE(textAnnot->textColor(), color);
-      if (annot != annots.end())
+      if (annot != annots.constEnd())
           ++annot;
     }
   }

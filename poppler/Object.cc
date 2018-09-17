@@ -91,6 +91,7 @@ Object Object::copy() const {
     obj.string = string->copy();
     break;
   case objName:
+  case objCmd:
     obj.cString = copyString(cString);
     break;
   case objArray:
@@ -101,9 +102,6 @@ Object Object::copy() const {
     break;
   case objStream:
     stream->incRef();
-    break;
-  case objCmd:
-    obj.cString = copyString(cString);
     break;
   default:
     break;
@@ -124,6 +122,7 @@ void Object::free() {
     delete string;
     break;
   case objName:
+  case objCmd:
     gfree(cString);
     break;
   case objArray:
@@ -140,9 +139,6 @@ void Object::free() {
     if (!stream->decRef()) {
       delete stream;
     }
-    break;
-  case objCmd:
-    gfree(cString);
     break;
   default:
     break;

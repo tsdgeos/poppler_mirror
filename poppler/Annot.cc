@@ -1708,7 +1708,7 @@ void AnnotAppearanceBuilder::setDrawColor(const AnnotColor *drawColor, GBool fil
 
 void AnnotAppearanceBuilder::setTextFont(const Object &fontName, double fontSize) {
   if (fontName.isName() && strlen(fontName.getName()) > 0)
-    appearBuf->appendf("/{0:s} {1:.2f} Tf", fontName.getName(), fontSize);
+    appearBuf->appendf("/{0:s} {1:.2f} Tf\n", fontName.getName(), fontSize);
 }
 
 void AnnotAppearanceBuilder::setLineStyleForBorder(const AnnotBorder *border) {

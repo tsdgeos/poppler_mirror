@@ -37,6 +37,7 @@
 #pragma interface
 #endif
 
+#include <cassert>
 #include <set>
 #include <stdio.h>
 #include <string.h>
@@ -154,17 +155,17 @@ public:
   explicit Object(double realA)
     { constructObj(objReal); real = realA; }
   explicit Object(GooString *stringA)
-    { constructObj(objString); string = stringA; }
+    { assert(stringA); constructObj(objString); string = stringA; }
   Object(ObjType typeA, const char *stringA)
-    { constructObj(typeA); cString = copyString(stringA); }
+    { assert(typeA == objName || typeA == objCmd); assert(stringA); constructObj(typeA); cString = copyString(stringA); }
   explicit Object(long long int64gA)
     { constructObj(objInt64); int64g = int64gA; }
   explicit Object(Array *arrayA)
-    { constructObj(objArray); array = arrayA; }
+    { assert(arrayA); constructObj(objArray); array = arrayA; }
   explicit Object(Dict *dictA)
-    { constructObj(objDict); dict = dictA; }
+    { assert(dictA); constructObj(objDict); dict = dictA; }
   explicit Object(Stream *streamA)
-    { constructObj(objStream); stream = streamA; }
+    { assert(streamA); constructObj(objStream); stream = streamA; }
   Object(int numA, int genA)
     { constructObj(objRef); ref.num = numA; ref.gen = genA; }
   template<typename T> Object(T) = delete;
@@ -230,10 +231,8 @@ public:
     return type == objInt ? (double)intg : type == objInt64 ? (double)int64g : real;
   }
   const GooString *getString() const { OBJECT_TYPE_CHECK(objString); return string; }
-  // After takeString() the only method that should be called for the object is free()
-  // because the object it's not expected to have a NULL string.
-  GooString *takeString() {
-    OBJECT_TYPE_CHECK(objString); GooString *s = string; string = nullptr; return s; }
+  // After takeString() the only method that should be called for the object is free().
+  GooString *takeString() { OBJECT_TYPE_CHECK(objString); type = objDead; return string; }
   const char *getName() const { OBJECT_TYPE_CHECK(objName); return cString; }
   Array *getArray() const { OBJECT_TYPE_CHECK(objArray); return array; }
   Dict *getDict() const { OBJECT_TYPE_CHECK(objDict); return dict; }
