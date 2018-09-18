@@ -54,16 +54,15 @@ OCGs::OCGs(Object *ocgObject, XRef *xref) :
     if (!ocg.isDict()) {
       break;
     }
-    OptionalContentGroup *thisOptionalContentGroup = new OptionalContentGroup(ocg.getDict());
+    auto thisOptionalContentGroup = std::make_unique<OptionalContentGroup>(ocg.getDict());
     ocg = ocgList.arrayGetNF(i);
     if (!ocg.isRef()) {
-      delete thisOptionalContentGroup;
       break;
     }
     thisOptionalContentGroup->setRef( ocg.getRef() );
     // the default is ON - we change state later, depending on BaseState, ON and OFF
     thisOptionalContentGroup->setState(OptionalContentGroup::On);
-    optionalContentGroups.emplace(ocg.getRef(), thisOptionalContentGroup);
+    optionalContentGroups.emplace(ocg.getRef(), std::move(thisOptionalContentGroup));
   }
 
   Object defaultOcgConfig = ocgObject->dictLookup("D");

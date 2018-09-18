@@ -220,20 +220,8 @@ private:
   ArthurType3Font* m_currentType3Font;
   std::stack<ArthurType3Font*> m_type3FontStack;
 
-  // Identify a font by its 'Ref' and its font size
-  struct ArthurFontID
-  {
-    Ref ref;
-    double fontSize;
-
-    bool operator<(const ArthurFontID& other) const
-    {
-      return (ref.num < other.ref.num)
-             ||  ((ref.num == other.ref.num) && (fontSize < other.fontSize));
-    }
-  };
-
-  // Cache all fonts
+  // Cache all fonts by their Ref and font size
+  using ArthurFontID = std::pair<Ref,double>;
   std::map<ArthurFontID,std::unique_ptr<QRawFont> > m_rawFontCache;
   std::map<ArthurFontID,std::unique_ptr<ArthurType3Font> > m_type3FontCache;
 
