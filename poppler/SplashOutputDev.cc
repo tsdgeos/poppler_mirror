@@ -4069,14 +4069,16 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
       }
       break;
     case splashModeXBGR8:
-      imgData.lookup = (SplashColorPtr)gmallocn(n, 4);
-      for (i = 0; i < n; ++i) {
-	pix = (Guchar)i;
-	colorMap->getRGB(&pix, &rgb);
-	imgData.lookup[4*i] = colToByte(rgb.r);
-	imgData.lookup[4*i+1] = colToByte(rgb.g);
-	imgData.lookup[4*i+2] = colToByte(rgb.b);
-	imgData.lookup[4*i+3] = 255;
+      imgData.lookup = (SplashColorPtr)gmallocn_checkoverflow(n, 4);
+      if (imgData.lookup) {
+	for (i = 0; i < n; ++i) {
+	  pix = (Guchar)i;
+	  colorMap->getRGB(&pix, &rgb);
+	  imgData.lookup[4*i] = colToByte(rgb.r);
+	  imgData.lookup[4*i+1] = colToByte(rgb.g);
+	  imgData.lookup[4*i+2] = colToByte(rgb.b);
+	  imgData.lookup[4*i+3] = 255;
+	}
       }
       break;
 #ifdef SPLASH_CMYK
