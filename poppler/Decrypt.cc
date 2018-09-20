@@ -762,55 +762,119 @@ static inline void invShiftRows(unsigned char *state) {
 }
 
 // {02} \cdot s
-static inline unsigned char mul02(unsigned char s) {
-  return (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
-}
+struct Mul02Table
+{
+  constexpr Mul02Table() : values()
+  {
+    for(int s = 0; s < 256; s++) {
+      values[s] = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
+    }
+  }
+
+  constexpr unsigned char operator[](int i) const { return values[i]; }
+
+  unsigned char values[256];
+};
+
+static constexpr Mul02Table mul02;
 
 // {03} \cdot s
-static inline unsigned char mul03(unsigned char s) {
-  unsigned char s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
-  return s ^ s2;
-}
+struct Mul03Table
+{
+  constexpr Mul03Table() : values()
+  {
+    for(int s=0; s<256; s++) {
+      const unsigned char s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
+      values[s] = s ^ s2;
+    }
+  }
+
+  constexpr unsigned char operator[](int i) const { return values[i]; }
+
+  unsigned char values[256];
+};
+
+static constexpr Mul03Table mul03;
 
 // {09} \cdot s
-static inline unsigned char mul09(unsigned char s) {
-  unsigned char s2, s4, s8;
+struct Mul09Table
+{
+  constexpr Mul09Table() : values()
+  {
+    for(int s=0; s<256; s++) {
+      const unsigned char s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
+      const unsigned char s4 = (s2 & 0x80) ? ((s2 << 1) ^ 0x1b) : (s2 << 1);
+      const unsigned char s8 = (s4 & 0x80) ? ((s4 << 1) ^ 0x1b) : (s4 << 1);
+      values[s] = s ^ s8;
+    }
+  }
 
-  s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
-  s4 = (s2 & 0x80) ? ((s2 << 1) ^ 0x1b) : (s2 << 1);
-  s8 = (s4 & 0x80) ? ((s4 << 1) ^ 0x1b) : (s4 << 1);
-  return s ^ s8;
-}
+  constexpr unsigned char operator[](int i) const { return values[i]; }
+
+  unsigned char values[256];
+};
+
+static constexpr Mul09Table mul09;
 
 // {0b} \cdot s
-static inline unsigned char mul0b(unsigned char s) {
-  unsigned char s2, s4, s8;
+struct Mul0bTable
+{
+  constexpr Mul0bTable() : values()
+  {
+    for(int s=0; s<256; s++) {
+      const unsigned char s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
+      const unsigned char s4 = (s2 & 0x80) ? ((s2 << 1) ^ 0x1b) : (s2 << 1);
+      const unsigned char s8 = (s4 & 0x80) ? ((s4 << 1) ^ 0x1b) : (s4 << 1);
+      values[s] = s ^ s2 ^ s8;
+    }
+  }
 
-  s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
-  s4 = (s2 & 0x80) ? ((s2 << 1) ^ 0x1b) : (s2 << 1);
-  s8 = (s4 & 0x80) ? ((s4 << 1) ^ 0x1b) : (s4 << 1);
-  return s ^ s2 ^ s8;
-}
+  constexpr unsigned char operator[](int i) const { return values[i]; }
+
+  unsigned char values[256];
+};
+
+static constexpr Mul0bTable mul0b;
 
 // {0d} \cdot s
-static inline unsigned char mul0d(unsigned char s) {
-  unsigned char s2, s4, s8;
+struct Mul0dTable
+{
+  constexpr Mul0dTable() : values()
+  {
+    for(int s=0; s<256; s++) {
+      const unsigned char s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
+      const unsigned char s4 = (s2 & 0x80) ? ((s2 << 1) ^ 0x1b) : (s2 << 1);
+      const unsigned char s8 = (s4 & 0x80) ? ((s4 << 1) ^ 0x1b) : (s4 << 1);
+      values[s] = s ^ s4 ^ s8;
+    }
+  }
 
-  s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
-  s4 = (s2 & 0x80) ? ((s2 << 1) ^ 0x1b) : (s2 << 1);
-  s8 = (s4 & 0x80) ? ((s4 << 1) ^ 0x1b) : (s4 << 1);
-  return s ^ s4 ^ s8;
-}
+  constexpr unsigned char operator[](int i) const { return values[i]; }
+
+  unsigned char values[256];
+};
+
+static constexpr Mul0dTable mul0d;
 
 // {0e} \cdot s
-static inline unsigned char mul0e(unsigned char s) {
-  unsigned char s2, s4, s8;
+struct Mul0eTable
+{
+  constexpr Mul0eTable() : values()
+  {
+    for(int s=0; s<256; s++) {
+      const unsigned char s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
+      const unsigned char s4 = (s2 & 0x80) ? ((s2 << 1) ^ 0x1b) : (s2 << 1);
+      const unsigned char s8 = (s4 & 0x80) ? ((s4 << 1) ^ 0x1b) : (s4 << 1);
+      values[s] = s2 ^ s4 ^ s8;
+    }
+  }
 
-  s2 = (s & 0x80) ? ((s << 1) ^ 0x1b) : (s << 1);
-  s4 = (s2 & 0x80) ? ((s2 << 1) ^ 0x1b) : (s2 << 1);
-  s8 = (s4 & 0x80) ? ((s4 << 1) ^ 0x1b) : (s4 << 1);
-  return s2 ^ s4 ^ s8;
-}
+  constexpr unsigned char operator[](int i) const { return values[i]; }
+
+  unsigned char values[256];
+};
+
+static constexpr Mul0eTable mul0e;
 
 static inline void mixColumns(unsigned char *state) {
   int c;
@@ -821,10 +885,10 @@ static inline void mixColumns(unsigned char *state) {
     s1 = state[4+c];
     s2 = state[8+c];
     s3 = state[12+c];
-    state[c] =    mul02(s0) ^ mul03(s1) ^ s2 ^ s3;
-    state[4+c] =  s0 ^ mul02(s1) ^ mul03(s2) ^ s3;
-    state[8+c] =  s0 ^ s1 ^ mul02(s2) ^ mul03(s3);
-    state[12+c] = mul03(s0) ^ s1 ^ s2 ^ mul02(s3);
+    state[c] =    mul02[s0] ^ mul03[s1] ^ s2 ^ s3;
+    state[4+c] =  s0 ^ mul02[s1] ^ mul03[s2] ^ s3;
+    state[8+c] =  s0 ^ s1 ^ mul02[s2] ^ mul03[s3];
+    state[12+c] = mul03[s0] ^ s1 ^ s2 ^ mul02[s3];
   }
 }
 
@@ -837,10 +901,10 @@ static inline void invMixColumns(unsigned char *state) {
     s1 = state[4+c];
     s2 = state[8+c];
     s3 = state[12+c];
-    state[c] =    mul0e(s0) ^ mul0b(s1) ^ mul0d(s2) ^ mul09(s3);
-    state[4+c] =  mul09(s0) ^ mul0e(s1) ^ mul0b(s2) ^ mul0d(s3);
-    state[8+c] =  mul0d(s0) ^ mul09(s1) ^ mul0e(s2) ^ mul0b(s3);
-    state[12+c] = mul0b(s0) ^ mul0d(s1) ^ mul09(s2) ^ mul0e(s3);
+    state[c] =    mul0e[s0] ^ mul0b[s1] ^ mul0d[s2] ^ mul09[s3];
+    state[4+c] =  mul09[s0] ^ mul0e[s1] ^ mul0b[s2] ^ mul0d[s3];
+    state[8+c] =  mul0d[s0] ^ mul09[s1] ^ mul0e[s2] ^ mul0b[s3];
+    state[12+c] = mul0b[s0] ^ mul0d[s1] ^ mul09[s2] ^ mul0e[s3];
   }
 }
 
@@ -853,10 +917,10 @@ static inline void invMixColumnsW(unsigned int *w) {
     s1 = w[c] >> 16;
     s2 = w[c] >> 8;
     s3 = w[c];
-    w[c] = ((mul0e(s0) ^ mul0b(s1) ^ mul0d(s2) ^ mul09(s3)) << 24)
-           | ((mul09(s0) ^ mul0e(s1) ^ mul0b(s2) ^ mul0d(s3)) << 16)
-           | ((mul0d(s0) ^ mul09(s1) ^ mul0e(s2) ^ mul0b(s3)) << 8)
-           | (mul0b(s0) ^ mul0d(s1) ^ mul09(s2) ^ mul0e(s3));
+    w[c] = ((mul0e[s0] ^ mul0b[s1] ^ mul0d[s2] ^ mul09[s3]) << 24)
+           | ((mul09[s0] ^ mul0e[s1] ^ mul0b[s2] ^ mul0d[s3]) << 16)
+           | ((mul0d[s0] ^ mul09[s1] ^ mul0e[s2] ^ mul0b[s3]) << 8)
+           | (mul0b[s0] ^ mul0d[s1] ^ mul09[s2] ^ mul0e[s3]);
   }
 }
 
