@@ -3893,7 +3893,7 @@ void Gfx::doShowText(const GooString *s) {
   const char *p;
   int render;
   GBool patternFill;
-  int len, n, uLen, nChars, nSpaces, i;
+  int len, n, uLen, nChars, nSpaces;
 
   font = state->getFont();
   wMode = font->getWMode();
