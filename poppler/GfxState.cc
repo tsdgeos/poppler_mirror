@@ -4008,7 +4008,9 @@ void GfxUnivariateShading::setupCache(const Matrix *ctm,
     tMax = t0 + sMin * (t1 - t0);
   }
 
-  cacheBounds = (double *)gmallocn(maxSize, sizeof(double) * (nComps + 2));
+  cacheBounds = (double *)gmallocn_checkoverflow(maxSize, sizeof(double) * (nComps + 2));
+  if (unlikely(!cacheBounds))
+    return;
   cacheCoeff = cacheBounds + maxSize;
   cacheValues = cacheCoeff + maxSize;
 
