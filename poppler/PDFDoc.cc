@@ -91,12 +91,6 @@
 #include "Hints.h"
 #include "UTF.h"
 
-#ifdef MULTITHREADED
-#  define pdfdocLocker()   MutexLocker locker(&mutex)
-#else
-#  define pdfdocLocker()
-#endif
-
 //------------------------------------------------------------------------
 
 #define headerSearchSize 1024	// read this many bytes at beginning of
@@ -114,11 +108,10 @@
 // PDFDoc
 //------------------------------------------------------------------------
 
+#define pdfdocLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
+
 void PDFDoc::init()
 {
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
   ok = gFalse;
   errCode = errNone;
   fileName = nullptr;
@@ -367,9 +360,6 @@ PDFDoc::~PDFDoc() {
   if (fileNameU) {
     gfree(fileNameU);
   }
-#endif
-#ifdef MULTITHREADED
-  gDestroyMutex(&mutex);
 #endif
 }
 

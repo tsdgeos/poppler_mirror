@@ -5,6 +5,7 @@
 // Copyright 2007 Brad Hards <bradh@kde.org>
 // Copyright 2008 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2013, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 // Released under the GPL (version 2, or later, at your option)
 //

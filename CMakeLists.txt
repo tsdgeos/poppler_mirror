@@ -30,7 +30,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "0")
-set(POPPLER_MINOR_VERSION "68")
+set(POPPLER_MINOR_VERSION "69")
 set(POPPLER_MICRO_VERSION "0")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION}.${POPPLER_MICRO_VERSION}")
 
@@ -107,10 +107,6 @@ elseif(font_configuration STREQUAL "generic")
   message(STATUS "no fontconfig or win32 specific code")
 else()
   message(FATAL_ERROR "Invalid font configuration setting: ${FONT_CONFIGURATION}")
-endif()
-
-if(CMAKE_USE_PTHREADS_INIT OR WIN32)
-  set(MULTITHREADED ON)
 endif()
 
 # Enable these unconditionally.
@@ -487,7 +483,7 @@ add_library(poppler STATIC ${poppler_SRCS})
 else()
 add_library(poppler ${poppler_SRCS})
 endif()
-set_target_properties(poppler PROPERTIES VERSION 79.0.0 SOVERSION 79)
+set_target_properties(poppler PROPERTIES VERSION 80.0.0 SOVERSION 80)
 if(MINGW)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
     set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -578,7 +574,6 @@ if(ENABLE_XPDF_HEADERS)
   install(FILES
     goo/GooList.h
     goo/GooTimer.h
-    goo/GooMutex.h
     goo/GooString.h
     goo/gtypes.h
     goo/gmem.h

@@ -45,9 +45,10 @@
 #pragma interface
 #endif
 
+#include <mutex>
+
 #include "poppler-config.h"
 #include <stdio.h>
-#include "goo/GooMutex.h"
 #include "XRef.h"
 #include "Catalog.h"
 #include "Page.h"
@@ -432,9 +433,7 @@ private:
   int fopenErrno;
 
   Goffset startXRefPos;		// offset of last xref table
-#ifdef MULTITHREADED
-  GooMutex mutex;
-#endif
+  mutable std::recursive_mutex mutex;
 };
 
 #endif

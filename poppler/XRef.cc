@@ -72,14 +72,6 @@
 #define permHighResPrint  (1<<11) // bit 12
 #define defPermFlags 0xfffc
 
-#ifdef MULTITHREADED
-#  define xrefLocker()   MutexLocker locker(&mutex)
-#  define xrefCondLocker(X)  MutexLocker locker(&mutex, (X))
-#else
-#  define xrefLocker()
-#  define xrefCondLocker(X)
-#endif
-
 //------------------------------------------------------------------------
 // ObjectStream
 //------------------------------------------------------------------------
@@ -264,10 +256,9 @@ Object ObjectStream::getObject(int objIdx, int objNum) {
 // XRef
 //------------------------------------------------------------------------
 
+#define xrefLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
+
 void XRef::init() {
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
   ok = gTrue;
   errCode = errNone;
   entries = nullptr;
@@ -388,9 +379,6 @@ XRef::~XRef() {
   if (strOwner) {
     delete str;
   }
-#ifdef MULTITHREADED
-  gDestroyMutex(&mutex);
-#endif
 }
 
 XRef *XRef::copy() const {
@@ -773,10 +761,10 @@ GBool XRef::readXRefStream(Stream *xrefStr, Goffset *pos) {
   }
 
   obj = dict->lookupNF("Prev");
-  if (obj.isInt()) {
+  if (obj.isInt() && obj.getInt() >= 0) {
     *pos = obj.getInt();
     more = gTrue;
-  } else if (obj.isInt64()) {
+  } else if (obj.isInt64() && obj.getInt64() >= 0) {
     *pos = obj.getInt64();
     more = gTrue;
   } else {
@@ -1241,15 +1229,11 @@ Object XRef::fetch(int num, int gen, int recursion) {
 }
 
 void XRef::lock() {
-#ifdef MULTITHREADED
-  gLockMutex(&mutex);
-#endif
+  mutex.lock();
 }
 
 void XRef::unlock() {
-#ifdef MULTITHREADED
-  gUnlockMutex(&mutex);
-#endif
+  mutex.unlock();
 }
 
 Object XRef::getDocInfo() {

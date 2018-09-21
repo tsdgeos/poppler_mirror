@@ -34,13 +34,11 @@
 #pragma interface
 #endif
 
+#include <atomic>
+
 #include "poppler-config.h"
 #include "CharTypes.h"
 #include "goo/gtypes.h"
-
-#ifdef MULTITHREADED
-#include "goo/GooMutex.h"
-#endif
 
 struct CharCodeToUnicodeString;
 class GooString;
@@ -120,11 +118,8 @@ private:
   CharCode mapLen;
   CharCodeToUnicodeString *sMap;
   int sMapLen, sMapSize;
-  int refCnt;
+  std::atomic_int refCnt;
   GBool isIdentity;
-#ifdef MULTITHREADED
-  GooMutex mutex;
-#endif
 };
 
 //------------------------------------------------------------------------

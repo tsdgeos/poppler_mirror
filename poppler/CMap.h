@@ -29,13 +29,11 @@
 #pragma interface
 #endif
 
+#include <atomic>
+
 #include "poppler-config.h"
 #include "goo/gtypes.h"
 #include "CharTypes.h"
-
-#ifdef MULTITHREADED
-#include "goo/GooMutex.h"
-#endif
 
 class GooString;
 class Object;
@@ -116,10 +114,7 @@ private:
   int wMode;			// writing mode (0=horizontal, 1=vertical)
   CMapVectorEntry *vector;	// vector for first byte (NULL for
 				//   identity CMap)
-  int refCnt;
-#ifdef MULTITHREADED
-  GooMutex mutex;
-#endif
+  std::atomic_int refCnt;
 };
 
 //------------------------------------------------------------------------

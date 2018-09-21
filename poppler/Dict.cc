@@ -40,14 +40,11 @@
 #include "XRef.h"
 #include "Dict.h"
 
-#ifdef MULTITHREADED
-#  define dictLocker()   MutexLocker locker(&mutex)
-#else
-#  define dictLocker()
-#endif
 //------------------------------------------------------------------------
 // Dict
 //------------------------------------------------------------------------
+
+#define dictLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 
 constexpr int SORT_LENGTH_LOWER_LIMIT = 32;
 
@@ -66,9 +63,6 @@ struct Dict::CmpDictEntry {
 Dict::Dict(XRef *xrefA) {
   xref = xrefA;
   ref = 1;
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
 
   sorted = false;
 }
@@ -76,16 +70,13 @@ Dict::Dict(XRef *xrefA) {
 Dict::Dict(const Dict* dictA) {
   xref = dictA->xref;
   ref = 1;
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
 
   entries.reserve(dictA->entries.size());
   for (const auto& entry : dictA->entries) {
     entries.emplace_back(entry.first, entry.second.copy());
   }
 
-  sorted = dictA->sorted;
+  sorted = dictA->sorted.load();
 }
 
 Dict *Dict::copy(XRef *xrefA) const {
@@ -100,28 +91,26 @@ Dict *Dict::copy(XRef *xrefA) const {
   return dictA;
 }
 
-Dict::~Dict() {
-#ifdef MULTITHREADED
-  gDestroyMutex(&mutex);
-#endif
-}
-
 void Dict::add(const char *key, Object &&val) {
   dictLocker();
-  if (entries.size() >= SORT_LENGTH_LOWER_LIMIT) {
-    if (!sorted) {
-      std::sort(entries.begin(), entries.end(), CmpDictEntry{});
-      sorted = true;
-    }
-    const auto pos = std::upper_bound(entries.begin(), entries.end(), key, CmpDictEntry{});
-    entries.emplace(pos, key, std::move(val));
-  } else {
-    entries.emplace_back(key, std::move(val));
-    sorted = false;
-  }
+  entries.emplace_back(key, std::move(val));
+  sorted = false;
 }
 
 inline const Dict::DictEntry *Dict::find(const char *key) const {
+  if (entries.size() >= SORT_LENGTH_LOWER_LIMIT) {
+    if (!sorted) {
+      dictLocker();
+      if (!sorted) {
+	auto& entries = const_cast<std::vector<DictEntry>&>(this->entries);
+	auto& sorted = const_cast<std::atomic_bool&>(this->sorted);
+
+	std::sort(entries.begin(), entries.end(), CmpDictEntry{});
+	sorted = true;
+      }
+    }
+  }
+
   if (sorted) {
     const auto pos = std::lower_bound(entries.begin(), entries.end(), key, CmpDictEntry{});
     if (pos != entries.end() && pos->first == key) {

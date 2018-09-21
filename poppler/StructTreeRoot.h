@@ -7,6 +7,7 @@
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
 

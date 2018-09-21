@@ -488,9 +488,6 @@ CharCodeToUnicode::CharCodeToUnicode() {
   sMapLen = sMapSize = 0;
   refCnt = 1;
   isIdentity = gFalse;
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
 }
 
 CharCodeToUnicode::CharCodeToUnicode(GooString *tagA) {
@@ -506,9 +503,6 @@ CharCodeToUnicode::CharCodeToUnicode(GooString *tagA) {
   sMapLen = sMapSize = 0;
   refCnt = 1;
   isIdentity = gFalse;
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
 }
 
 CharCodeToUnicode::CharCodeToUnicode(GooString *tagA, Unicode *mapA,
@@ -528,9 +522,6 @@ CharCodeToUnicode::CharCodeToUnicode(GooString *tagA, Unicode *mapA,
   sMapSize = sMapSizeA;
   refCnt = 1;
   isIdentity = gFalse;
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
 }
 
 CharCodeToUnicode::~CharCodeToUnicode() {
@@ -542,32 +533,14 @@ CharCodeToUnicode::~CharCodeToUnicode() {
     for (int i = 0; i < sMapLen; ++i) gfree(sMap[i].u);
     gfree(sMap);
   }
-#ifdef MULTITHREADED
-  gDestroyMutex(&mutex);
-#endif
 }
 
 void CharCodeToUnicode::incRefCnt() {
-#ifdef MULTITHREADED
-  gLockMutex(&mutex);
-#endif
   ++refCnt;
-#ifdef MULTITHREADED
-  gUnlockMutex(&mutex);
-#endif
 }
 
 void CharCodeToUnicode::decRefCnt() {
-  GBool done;
-
-#ifdef MULTITHREADED
-  gLockMutex(&mutex);
-#endif
-  done = --refCnt == 0;
-#ifdef MULTITHREADED
-  gUnlockMutex(&mutex);
-#endif
-  if (done) {
+  if (--refCnt == 0) {
     delete this;
   }
 }

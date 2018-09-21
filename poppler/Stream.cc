@@ -94,39 +94,15 @@ static GBool setDJSYSFLAGS = gFalse;
 #endif
 #endif
 
-#ifdef MULTITHREADED
-#  define streamLocker()   MutexLocker locker(&mutex)
-#else
-#  define streamLocker()
-#endif
 //------------------------------------------------------------------------
 // Stream (base class)
 //------------------------------------------------------------------------
 
 Stream::Stream() {
   ref = 1;
-#ifdef MULTITHREADED
-  gInitMutex(&mutex);
-#endif
 }
 
-Stream::~Stream() {
-#ifdef MULTITHREADED
-  gDestroyMutex(&mutex);
-#endif
-}
-
-int Stream::incRef() {
-  streamLocker();
-  ++ref;
-  return ref;
-}
-
-int Stream::decRef() {
-  streamLocker();
-  --ref;
-  return ref;
-}
+Stream::~Stream() = default;
 
 void Stream::close() {
 }

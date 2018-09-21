@@ -48,10 +48,7 @@
 #include "UnicodeMap.h"
 #include <unordered_map>
 #include <string>
-
-#ifdef MULTITHREADED
-#include "goo/GooMutex.h"
-#endif
+#include <mutex>
 
 class GooString;
 class GooList;
@@ -245,11 +242,9 @@ private:
 				//   [XpdfSecurityHandler]
 #endif
 
-#ifdef MULTITHREADED
-  GooMutex mutex;
-  GooMutex unicodeMapCacheMutex;
-  GooMutex cMapCacheMutex;
-#endif
+  mutable std::recursive_mutex mutex;
+  mutable std::recursive_mutex unicodeMapCacheMutex;
+  mutable std::recursive_mutex cMapCacheMutex;
 
   const char *popplerDataDir;
 };

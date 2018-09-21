@@ -31,9 +31,11 @@
 #pragma interface
 #endif
 
+#include <atomic>
+#include <mutex>
+
 #include "poppler-config.h"
 #include "Object.h"
-#include "goo/GooMutex.h"
 
 class XRef;
 
@@ -75,17 +77,15 @@ private:
   friend class Object; // for incRef/decRef
 
   // Reference counting.
-  int incRef();
-  int decRef();
+  int incRef() { return ++ref; }
+  int decRef() { return --ref; }
 
   XRef *xref;			// the xref table for this PDF file
   Object *elems;		// array of elements
   int size;			// size of <elems> array
   int length;			// number of elements in array
-  int ref;			// reference count
-#ifdef MULTITHREADED
-  mutable GooMutex mutex;
-#endif
+  std::atomic_int ref;			// reference count
+  mutable std::recursive_mutex mutex;
 };
 
 #endif

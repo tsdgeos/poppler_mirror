@@ -39,11 +39,12 @@
 #pragma interface
 #endif
 
+#include <atomic>
+#include <cstdio>
+
 #include "poppler-config.h"
-#include <stdio.h>
 #include "goo/gtypes.h"
 #include "Object.h"
-#include "goo/GooMutex.h"
 
 class GooFile;
 class BaseStream;
@@ -232,18 +233,15 @@ private:
   friend class Object; // for incRef/decRef
 
   // Reference counting.
-  int incRef();
-  int decRef();
+  int incRef() { return ++ref; }
+  int decRef() { return --ref; }
 
   virtual GBool hasGetChars() { return false; }
   virtual int getChars(int nChars, Guchar *buffer);
 
   Stream *makeFilter(const char *name, Stream *str, Object *params, int recursion = 0, Dict *dict = nullptr);
 
-  int ref;			// reference count
-#ifdef MULTITHREADED
-  GooMutex mutex;
-#endif
+  std::atomic_int ref;			// reference count
 };
 
 

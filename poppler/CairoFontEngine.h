@@ -33,6 +33,8 @@
 #pragma interface
 #endif
 
+#include <mutex>
+
 #include "poppler-config.h"
 #include "goo/gtypes.h"
 #include <cairo-ft.h>
@@ -125,9 +127,7 @@ private:
   CairoFont *fontCache[cairoFontCacheSize];
   FT_Library lib;
   GBool useCIDs;
-#ifdef MULTITHREADED
-  GooMutex mutex;
-#endif
+  mutable std::recursive_mutex mutex;
 };
 
 #endif
