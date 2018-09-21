@@ -39,7 +39,6 @@ class Dict;
 class Stream;
 struct PSObject;
 class PSStack;
-class PopplerCache;
 
 //------------------------------------------------------------------------
 // Function

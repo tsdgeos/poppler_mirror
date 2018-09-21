@@ -106,37 +106,6 @@ private:
   GBool ok;
 };
 
-class ObjectStreamKey : public PopplerCacheKey
-{
-  public:
-    ObjectStreamKey(int num) : objStrNum(num)
-    {
-    }
-
-    bool operator==(const PopplerCacheKey &key) const override
-    {
-      const ObjectStreamKey *k = static_cast<const ObjectStreamKey*>(&key);
-      return objStrNum == k->objStrNum;
-    }
-
-    const int objStrNum;
-};
-
-class ObjectStreamItem : public PopplerCacheItem
-{
-  public:
-    ObjectStreamItem(ObjectStream *objStr) : objStream(objStr)
-    {
-    }
-
-    ~ObjectStreamItem()
-    {
-      delete objStream;
-    }
-
-    ObjectStream *objStream;
-};
-
 ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion) {
   Stream *str;
   Parser *parser;
@@ -267,7 +236,7 @@ void XRef::init() {
   modified = gFalse;
   streamEnds = nullptr;
   streamEndsLen = 0;
-  objStrs = new PopplerCache(5);
+  objStrs = new PopplerCache<Goffset, ObjectStream>(5);
   mainXRefEntriesOffset = 0;
   xRefStream = gFalse;
   scannedSpecialFlags = gFalse;
@@ -1189,14 +1158,7 @@ Object XRef::fetch(int num, int gen, int recursion) {
       goto err;
     }
 
-    ObjectStream *objStr = nullptr;
-    ObjectStreamKey key(e->offset);
-    PopplerCacheItem *item = objStrs->lookup(key);
-    if (item) {
-      ObjectStreamItem *it = static_cast<ObjectStreamItem *>(item);
-      objStr = it->objStream;
-    }
-
+    ObjectStream *objStr = objStrs->lookup(e->offset);
     if (!objStr) {
       objStr = new ObjectStream(this, e->offset, recursion + 1);
       if (!objStr->isOk()) {
@@ -1206,9 +1168,7 @@ Object XRef::fetch(int num, int gen, int recursion) {
       } else {
 	// XRef could be reconstructed in constructor of ObjectStream:
 	e = getEntry(num);
-	ObjectStreamKey *newkey = new ObjectStreamKey(e->offset);
-	ObjectStreamItem *newitem = new ObjectStreamItem(objStr);
-	objStrs->put(newkey, newitem);
+	objStrs->put(e->offset, objStr);
       }
     }
     return objStr->getObject(e->gen, num);

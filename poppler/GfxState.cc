@@ -1765,38 +1765,6 @@ void GfxLabColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange,
 // GfxICCBasedColorSpace
 //------------------------------------------------------------------------
 
-class GfxICCBasedColorSpaceKey : public PopplerCacheKey
-{
-  public:
-    GfxICCBasedColorSpaceKey(int numA, int genA) : num(numA), gen(genA)
-    {
-    }
-    
-    bool operator==(const PopplerCacheKey &key) const override
-    {
-      const GfxICCBasedColorSpaceKey *k = static_cast<const GfxICCBasedColorSpaceKey*>(&key);
-      return k->num == num && k->gen == gen;
-    }
-    
-    int num, gen;
-};
-
-class GfxICCBasedColorSpaceItem : public PopplerCacheItem
-{
-  public:
-    GfxICCBasedColorSpaceItem(GfxICCBasedColorSpace *csA)
-    {
-      cs = static_cast<GfxICCBasedColorSpace*>(csA->copy());
-    }
-    
-    ~GfxICCBasedColorSpaceItem()
-    {
-      delete cs;
-    }
-    
-    GfxICCBasedColorSpace *cs;
-};
-
 GfxICCBasedColorSpace::GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA,
 					     Ref *iccProfileStreamA) {
   nComps = nCompsA;
@@ -1863,11 +1831,8 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
 #ifdef USE_CMS
   // check cache
   if (out && iccProfileStreamA.num > 0) {
-    GfxICCBasedColorSpaceKey k(iccProfileStreamA.num, iccProfileStreamA.gen);
-    GfxICCBasedColorSpaceItem *item = static_cast<GfxICCBasedColorSpaceItem *>(out->getIccColorSpaceCache()->lookup(k));
-    if (item != nullptr)
-    {
-      cs = static_cast<GfxICCBasedColorSpace*>(item->cs->copy());
+    if (auto *item = out->getIccColorSpaceCache()->lookup(iccProfileStreamA)) {
+      cs = static_cast<GfxICCBasedColorSpace*>(item->copy());
       int transformIntent = cs->getIntent();
       int cmsIntent = INTENT_RELATIVE_COLORIMETRIC;
       if (state != nullptr) {
@@ -2007,9 +1972,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
   }
   // put this colorSpace into cache
   if (out && iccProfileStreamA.num > 0) {
-    GfxICCBasedColorSpaceKey *k = new GfxICCBasedColorSpaceKey(iccProfileStreamA.num, iccProfileStreamA.gen);
-    GfxICCBasedColorSpaceItem *item = new GfxICCBasedColorSpaceItem(cs);
-    out->getIccColorSpaceCache()->put(k, item);
+    out->getIccColorSpaceCache()->put(iccProfileStreamA, static_cast<GfxICCBasedColorSpace*>(cs->copy()));
   }
 #endif
   return cs;

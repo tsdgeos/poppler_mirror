@@ -46,7 +46,9 @@
 class Dict;
 class Stream;
 class Parser;
+template<typename Key, typename Item>
 class PopplerCache;
+class ObjectStream;
 
 //------------------------------------------------------------------------
 // XRef
@@ -222,7 +224,7 @@ private:
   Goffset *streamEnds;		// 'endstream' positions - only used in
 				//   damaged files
   int streamEndsLen;		// number of valid entries in streamEnds
-  PopplerCache *objStrs;	// cached object streams
+  PopplerCache<Goffset, ObjectStream> *objStrs;	// cached object streams
   GBool encrypted;		// true if file is encrypted
   int encRevision;		
   int encVersion;		// encryption algorithm

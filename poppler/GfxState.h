@@ -51,7 +51,6 @@ class Gfx;
 class GfxFont;
 class PDFRectangle;
 class GfxShading;
-class PopplerCache;
 class GooList;
 class OutputDev;
 class GfxState;
