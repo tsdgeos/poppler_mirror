@@ -15,9 +15,8 @@
 
 #include <algorithm>
 #include <memory>
-
-#include "Object.h"
-#include "XRef.h"
+#include <utility>
+#include <vector>
 
 template<typename Key, typename Item>
 class PopplerCache
@@ -58,30 +57,6 @@ public:
 
 private:
   std::vector<std::pair<Key, std::unique_ptr<Item>>> entries;
-};
-
-class PopplerObjectCache
-{
-public:
-  PopplerObjectCache(std::size_t cacheSizeA, XRef *xrefA) : cache{cacheSizeA}, xref{xrefA} {}
-
-  Object lookup(const Ref &ref) {
-    if (Object *item = cache.lookup(ref)) {
-      return item->copy();
-    } else {
-      return Object{objNull};
-    }
-  }
-
-  Object *put(const Ref &ref) {
-    Object *item = new Object{xref->fetch(ref.num, ref.gen)};
-    cache.put(ref, item);
-    return item;
-  }
-
-private:
-  PopplerCache<Ref, Object> cache;
-  XRef *xref;
 };
 
 #endif
