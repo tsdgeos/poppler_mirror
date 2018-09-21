@@ -126,9 +126,6 @@
 /* Define as const if the declaration of iconv() needs const. */
 #define ICONV_CONST ${ICONV_CONST}
 
-/* Enable multithreading support. */
-#cmakedefine MULTITHREADED 1
-
 /* Generate OPI comments in PS output. */
 #cmakedefine OPI_SUPPORT 1
 

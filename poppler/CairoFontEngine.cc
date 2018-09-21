@@ -60,12 +60,6 @@
 #pragma implementation
 #endif
 
-#ifdef MULTITHREADED
-#  define fontEngineLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
-#else
-#  define fontEngineLocker()
-#endif
-
 //------------------------------------------------------------------------
 // CairoFont
 //------------------------------------------------------------------------
@@ -801,6 +795,8 @@ CairoType3Font::matches(Ref &other, GBool printingA) {
 //------------------------------------------------------------------------
 // CairoFontEngine
 //------------------------------------------------------------------------
+
+#define fontEngineLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 
 CairoFontEngine::CairoFontEngine(FT_Library libA) {
   int i;

@@ -54,22 +54,6 @@ description for all fonts available in Windows. That's how MuPDF works.
 #include "Lexer.h"
 #include "Parser.h"
 
-#ifdef MULTITHREADED
-#  define lockGlobalParams            gLockMutex(&mutex)
-#  define lockUnicodeMapCache         gLockMutex(&unicodeMapCacheMutex)
-#  define lockCMapCache               gLockMutex(&cMapCacheMutex)
-#  define unlockGlobalParams          gUnlockMutex(&mutex)
-#  define unlockUnicodeMapCache       gUnlockMutex(&unicodeMapCacheMutex)
-#  define unlockCMapCache             gUnlockMutex(&cMapCacheMutex)
-#else
-#  define lockGlobalParams
-#  define lockUnicodeMapCache
-#  define lockCMapCache
-#  define unlockGlobalParams
-#  define unlockUnicodeMapCache
-#  define unlockCMapCache
-#endif
-
 #define DEFAULT_SUBSTITUTE_FONT "Helvetica"
 #define DEFAULT_CID_FONT_AC1_MSWIN "MingLiU"   /* Adobe-CNS1 for Taiwan, HongKong */
 #define DEFAULT_CID_FONT_AG1_MSWIN "SimSun"    /* Adobe-GB1 for PRC, Singapore */
@@ -556,7 +540,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
   GooString *path = nullptr;
   const GooString *fontName = font->getName();
   if (!fontName) return nullptr;
-  lockGlobalParams;
+  std::unique_lock<std::recursive_mutex> locker(mutex);
   setupBaseFonts(nullptr);
 
   // TODO: base14Name should be changed?
@@ -587,6 +571,6 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
       *fontNum = 0;
     }
   }
-  unlockGlobalParams;
+
   return path;
 }

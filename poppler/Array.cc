@@ -38,14 +38,11 @@
 #include "Object.h"
 #include "Array.h"
 
-#ifdef MULTITHREADED
-#  define arrayLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
-#else
-#  define arrayLocker()
-#endif
 //------------------------------------------------------------------------
 // Array
 //------------------------------------------------------------------------
+
+#define arrayLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 
 Array::Array(XRef *xrefA) {
   xref = xrefA;

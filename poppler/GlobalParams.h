@@ -242,11 +242,9 @@ private:
 				//   [XpdfSecurityHandler]
 #endif
 
-#ifdef MULTITHREADED
   mutable std::recursive_mutex mutex;
   mutable std::recursive_mutex unicodeMapCacheMutex;
   mutable std::recursive_mutex cMapCacheMutex;
-#endif
 
   const char *popplerDataDir;
 };

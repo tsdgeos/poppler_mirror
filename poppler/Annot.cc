@@ -82,12 +82,6 @@
 #include <string.h>
 #include <algorithm>
 
-#ifdef MULTITHREADED
-#  define annotLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
-#else
-#  define annotLocker()
-#endif
-
 #define fieldFlagReadOnly           0x00000001
 #define fieldFlagRequired           0x00000002
 #define fieldFlagNoExport           0x00000004
@@ -1219,6 +1213,8 @@ double AnnotAppearanceBBox::getPageYMax() const {
 //------------------------------------------------------------------------
 // Annot
 //------------------------------------------------------------------------
+
+#define annotLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 
 Annot::Annot(PDFDoc *docA, PDFRectangle *rectA) {
 

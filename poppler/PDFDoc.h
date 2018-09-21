@@ -433,9 +433,7 @@ private:
   int fopenErrno;
 
   Goffset startXRefPos;		// offset of last xref table
-#ifdef MULTITHREADED
   mutable std::recursive_mutex mutex;
-#endif
 };
 
 #endif

@@ -85,9 +85,7 @@ private:
   int size;			// size of <elems> array
   int length;			// number of elements in array
   std::atomic_int ref;			// reference count
-#ifdef MULTITHREADED
   mutable std::recursive_mutex mutex;
-#endif
 };
 
 #endif

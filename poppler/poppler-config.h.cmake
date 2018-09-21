@@ -37,11 +37,6 @@
 #define POPPLER_VERSION "${POPPLER_VERSION}"
 #endif
 
-/* Enable multithreading support. */
-#ifndef MULTITHREADED
-#cmakedefine MULTITHREADED 1
-#endif
-
 /* Use fixedpoint. */
 #ifndef USE_FIXEDPOINT
 #cmakedefine USE_FIXEDPOINT 1

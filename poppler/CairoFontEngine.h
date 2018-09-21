@@ -127,9 +127,7 @@ private:
   CairoFont *fontCache[cairoFontCacheSize];
   FT_Library lib;
   GBool useCIDs;
-#ifdef MULTITHREADED
   mutable std::recursive_mutex mutex;
-#endif
 };
 
 #endif

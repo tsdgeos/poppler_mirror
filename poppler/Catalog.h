@@ -291,10 +291,8 @@ private:
   NameTree *getEmbeddedFileNameTree();
   NameTree *getJSNameTree();
   LinkDest *createLinkDest(Object *obj);
-#ifdef MULTITHREADED
-  mutable std::recursive_mutex mutex;
-#endif
 
+  mutable std::recursive_mutex mutex;
 };
 
 #endif

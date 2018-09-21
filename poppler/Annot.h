@@ -769,9 +769,7 @@ protected:
   GBool ok;
 
   bool hasRef;
-#ifdef MULTITHREADED
   mutable std::recursive_mutex mutex;
-#endif
 };
 
 //------------------------------------------------------------------------

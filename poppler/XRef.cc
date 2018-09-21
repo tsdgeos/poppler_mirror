@@ -72,12 +72,6 @@
 #define permHighResPrint  (1<<11) // bit 12
 #define defPermFlags 0xfffc
 
-#ifdef MULTITHREADED
-#  define xrefLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
-#else
-#  define xrefLocker()
-#endif
-
 //------------------------------------------------------------------------
 // ObjectStream
 //------------------------------------------------------------------------
@@ -261,6 +255,8 @@ Object ObjectStream::getObject(int objIdx, int objNum) {
 //------------------------------------------------------------------------
 // XRef
 //------------------------------------------------------------------------
+
+#define xrefLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 
 void XRef::init() {
   ok = gTrue;
@@ -1233,15 +1229,11 @@ Object XRef::fetch(int num, int gen, int recursion) {
 }
 
 void XRef::lock() {
-#ifdef MULTITHREADED
   mutex.lock();
-#endif
 }
 
 void XRef::unlock() {
-#ifdef MULTITHREADED
   mutex.unlock();
-#endif
 }
 
 Object XRef::getDocInfo() {

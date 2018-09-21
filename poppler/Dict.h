@@ -111,9 +111,7 @@ private:
   XRef *xref;			// the xref table for this PDF file
   std::vector<DictEntry> entries;
   std::atomic_int ref;			// reference count
-#ifdef MULTITHREADED
   mutable std::recursive_mutex mutex;
-#endif
 
   const DictEntry *find(const char *key) const;
   DictEntry *find(const char *key);

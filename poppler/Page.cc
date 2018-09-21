@@ -61,11 +61,6 @@
 #include "Catalog.h"
 #include "Form.h"
 
-#ifdef MULTITHREADED
-#  define pageLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
-#else
-#  define pageLocker()
-#endif
 //------------------------------------------------------------------------
 // PDFRectangle
 //------------------------------------------------------------------------
@@ -247,6 +242,8 @@ GBool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box) {
 //------------------------------------------------------------------------
 // Page
 //------------------------------------------------------------------------
+
+#define pageLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 
 Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form) {
   ok = gTrue;

@@ -40,14 +40,11 @@
 #include "XRef.h"
 #include "Dict.h"
 
-#ifdef MULTITHREADED
-#  define dictLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
-#else
-#  define dictLocker()
-#endif
 //------------------------------------------------------------------------
 // Dict
 //------------------------------------------------------------------------
+
+#define dictLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 
 constexpr int SORT_LENGTH_LOWER_LIMIT = 32;
 

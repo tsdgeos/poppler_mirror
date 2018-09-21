@@ -66,14 +66,11 @@
 #include "FileSpec.h"
 #include "StructTreeRoot.h"
 
-#ifdef MULTITHREADED
-#  define catalogLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
-#else
-#  define catalogLocker()
-#endif
 //------------------------------------------------------------------------
 // Catalog
 //------------------------------------------------------------------------
+
+#define catalogLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 
 Catalog::Catalog(PDFDoc *docA) {
   ok = gTrue;

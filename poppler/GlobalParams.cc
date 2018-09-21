@@ -92,22 +92,6 @@
 #  include <strings.h>
 #endif
 
-#ifdef MULTITHREADED
-#  define lockGlobalParams            mutex.lock()
-#  define lockUnicodeMapCache         unicodeMapCacheMutex.lock()
-#  define lockCMapCache               cMapCacheMutex.lock()
-#  define unlockGlobalParams          mutex.unlock()
-#  define unlockUnicodeMapCache       unicodeMapCacheMutex.unlock()
-#  define unlockCMapCache             cMapCacheMutex.unlock()
-#else
-#  define lockGlobalParams
-#  define lockUnicodeMapCache
-#  define lockCMapCache
-#  define unlockGlobalParams
-#  define unlockUnicodeMapCache
-#  define unlockCMapCache
-#endif
-
 #ifndef FC_WEIGHT_BOOK
 #define FC_WEIGHT_BOOK 75
 #endif
@@ -543,6 +527,10 @@ Plugin::~Plugin() {
 
 #endif // ENABLE_PLUGINS
 
+#define globalParamsLocker()	std::unique_lock<std::recursive_mutex> locker(mutex)
+#define unicodeMapCacheLocker()	std::unique_lock<std::recursive_mutex> locker(unicodeMapCacheMutex)
+#define cMapCacheLocker()	std::unique_lock<std::recursive_mutex> locker(cMapCacheMutex)
+
 //------------------------------------------------------------------------
 // parsing
 //------------------------------------------------------------------------
@@ -768,13 +756,12 @@ Unicode GlobalParams::mapNameToUnicodeText(const char *charName) {
 UnicodeMap *GlobalParams::getResidentUnicodeMap(GooString *encodingName) {
   UnicodeMap *map = nullptr;
 
-  lockGlobalParams;
+  globalParamsLocker();
   const auto unicodeMap = residentUnicodeMaps.find(encodingName->toStr());
   if (unicodeMap != residentUnicodeMaps.end()) {
     map = &unicodeMap->second;
     map->incRefCnt();
   }
-  unlockGlobalParams;
 
   return map;
 }
@@ -782,12 +769,11 @@ UnicodeMap *GlobalParams::getResidentUnicodeMap(GooString *encodingName) {
 FILE *GlobalParams::getUnicodeMapFile(GooString *encodingName) {
   FILE *file = nullptr;
 
-  lockGlobalParams;
+  globalParamsLocker();
   const auto unicodeMap = unicodeMaps.find(encodingName->toStr());
   if (unicodeMap != unicodeMaps.end()) {
     file = openFile(unicodeMap->second.c_str(), "r");
   }
-  unlockGlobalParams;
 
   return file;
 }
@@ -795,7 +781,7 @@ FILE *GlobalParams::getUnicodeMapFile(GooString *encodingName) {
 FILE *GlobalParams::findCMapFile(GooString *collection, GooString *cMapName) {
   FILE *file = nullptr;
 
-  lockGlobalParams;
+  globalParamsLocker();
   const auto cMapDirs = this->cMapDirs.equal_range(collection->toStr());
   for (auto cMapDir = cMapDirs.first; cMapDir != cMapDirs.second; ++cMapDir) {
     auto* const path = new GooString(cMapDir->second);
@@ -806,7 +792,7 @@ FILE *GlobalParams::findCMapFile(GooString *collection, GooString *cMapName) {
       break;
     }
   }
-  unlockGlobalParams;
+
   return file;
 }
 
@@ -815,18 +801,16 @@ FILE *GlobalParams::findToUnicodeFile(GooString *name) {
   FILE *f;
   int i;
 
-  lockGlobalParams;
+  globalParamsLocker();
   for (i = 0; i < toUnicodeDirs->getLength(); ++i) {
     dir = (GooString *)toUnicodeDirs->get(i);
     fileName = appendToPath(dir->copy(), name->getCString());
     f = openFile(fileName->getCString(), "r");
     delete fileName;
     if (f) {
-      unlockGlobalParams;
       return f;
     }
   }
-  unlockGlobalParams;
   return nullptr;
 }
 
@@ -1008,12 +992,12 @@ GooString *GlobalParams::findFontFile(GooString *fontName) {
   GooString *path = nullptr;
 
   setupBaseFonts(nullptr);
-  lockGlobalParams;
+  globalParamsLocker();
   const auto fontFile = fontFiles.find(fontName->toStr());
   if (fontFile != fontFiles.end()) {
     path = new GooString(fontFile->second);
   }
-  unlockGlobalParams;
+
   return path;
 }
 
@@ -1041,7 +1025,8 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
   const GooString *fontName = font->getName();
   GooString substituteName;
   if (!fontName) return nullptr;
-  lockGlobalParams;
+
+  globalParamsLocker();
 
   if ((fi = sysFonts->find(fontName, font->isFixedWidth(), gTrue))) {
     path = fi->path->copy();
@@ -1190,7 +1175,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 fin:
   if (p)
     FcPatternDestroy(p);
-  unlockGlobalParams;
+
   return path;
 }
 
@@ -1289,96 +1274,60 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
   if (!fontName) return nullptr;
 
   path = NULL;
-  lockGlobalParams;
+  globalParamsLocker();
   if ((fi = sysFonts->find(fontName, font->isFixedWidth(), gFalse))) {
     path = fi->path->copy();
     *type = fi->type;
     *fontNum = fi->fontNum;
   }
-  unlockGlobalParams; 
+
   return path;
 }
 #endif
 
 GBool GlobalParams::getPSExpandSmaller() {
-  GBool f;
-
-  lockGlobalParams;
-  f = psExpandSmaller;
-  unlockGlobalParams;
-  return f;
+  globalParamsLocker();
+  return psExpandSmaller;
 }
 
 GBool GlobalParams::getPSShrinkLarger() {
-  GBool f;
-
-  lockGlobalParams;
-  f = psShrinkLarger;
-  unlockGlobalParams;
-  return f;
+  globalParamsLocker();
+  return psShrinkLarger;
 }
 
 PSLevel GlobalParams::getPSLevel() {
-  PSLevel level;
-
-  lockGlobalParams;
-  level = psLevel;
-  unlockGlobalParams;
-  return level;
+  globalParamsLocker();
+  return psLevel;
 }
 
 GooString *GlobalParams::getTextEncodingName() {
-  GooString *s;
-
-  lockGlobalParams;
-  s = textEncoding->copy();
-  unlockGlobalParams;
-  return s;
+  globalParamsLocker();
+  return textEncoding->copy();
 }
 
 EndOfLineKind GlobalParams::getTextEOL() {
-  EndOfLineKind eol;
-
-  lockGlobalParams;
-  eol = textEOL;
-  unlockGlobalParams;
-  return eol;
+  globalParamsLocker();
+  return textEOL;
 }
 
 GBool GlobalParams::getTextPageBreaks() {
-  GBool pageBreaks;
-
-  lockGlobalParams;
-  pageBreaks = textPageBreaks;
-  unlockGlobalParams;
-  return pageBreaks;
+  globalParamsLocker();
+  return textPageBreaks;
 }
 
 GBool GlobalParams::getEnableFreeType() {
-  GBool f;
-
-  lockGlobalParams;
-  f = enableFreeType;
-  unlockGlobalParams;
-  return f;
+  globalParamsLocker();
+  return enableFreeType;
 }
 
 GBool GlobalParams::getPrintCommands() {
-  GBool p;
-
-  lockGlobalParams;
-  p = printCommands;
-  unlockGlobalParams;
-  return p;
+  globalParamsLocker();
+  return printCommands;
 }
 
 GBool GlobalParams::getProfileCommands() {
-  GBool p;
-
-  lockGlobalParams;
-  p = profileCommands;
-  unlockGlobalParams;
-  return p;
+  globalParamsLocker();
+  return profileCommands;
 }
 
 GBool GlobalParams::getErrQuiet() {
@@ -1390,7 +1339,7 @@ GBool GlobalParams::getErrQuiet() {
 CharCodeToUnicode *GlobalParams::getCIDToUnicode(GooString *collection) {
   CharCodeToUnicode *ctu;
 
-  lockGlobalParams;
+  globalParamsLocker();
   if (!(ctu = cidToUnicodeCache->getCharCodeToUnicode(collection))) {
     const auto cidToUnicode = cidToUnicodes.find(collection->toStr());
     if (cidToUnicode != cidToUnicodes.end()) {
@@ -1399,7 +1348,7 @@ CharCodeToUnicode *GlobalParams::getCIDToUnicode(GooString *collection) {
       }
     }
   }
-  unlockGlobalParams;
+
   return ctu;
 }
 
@@ -1411,20 +1360,16 @@ UnicodeMap *GlobalParams::getUnicodeMap2(GooString *encodingName) {
   UnicodeMap *map;
 
   if (!(map = getResidentUnicodeMap(encodingName))) {
-    lockUnicodeMapCache;
+    unicodeMapCacheLocker();
     map = unicodeMapCache->getUnicodeMap(encodingName);
-    unlockUnicodeMapCache;
   }
+
   return map;
 }
 
 CMap *GlobalParams::getCMap(GooString *collection, GooString *cMapName, Stream *stream) {
-  CMap *cMap;
-
-  lockCMapCache;
-  cMap = cMapCache->getCMap(collection, cMapName, stream);
-  unlockCMapCache;
-  return cMap;
+  cMapCacheLocker();
+  return cMapCache->getCMap(collection, cMapName, stream);
 }
 
 UnicodeMap *GlobalParams::getTextEncoding() {
@@ -1448,38 +1393,33 @@ GooList *GlobalParams::getEncodingNames()
 //------------------------------------------------------------------------
 
 void GlobalParams::addFontFile(GooString *fontName, GooString *path) {
-  lockGlobalParams;
+  globalParamsLocker();
   fontFiles[fontName->toStr()] = path->toStr();
-  unlockGlobalParams;
 }
 
 void GlobalParams::setPSExpandSmaller(GBool expand) {
-  lockGlobalParams;
+  globalParamsLocker();
   psExpandSmaller = expand;
-  unlockGlobalParams;
 }
 
 void GlobalParams::setPSShrinkLarger(GBool shrink) {
-  lockGlobalParams;
+  globalParamsLocker();
   psShrinkLarger = shrink;
-  unlockGlobalParams;
 }
 
 void GlobalParams::setPSLevel(PSLevel level) {
-  lockGlobalParams;
+  globalParamsLocker();
   psLevel = level;
-  unlockGlobalParams;
 }
 
 void GlobalParams::setTextEncoding(char *encodingName) {
-  lockGlobalParams;
+  globalParamsLocker();
   delete textEncoding;
   textEncoding = new GooString(encodingName);
-  unlockGlobalParams;
 }
 
 GBool GlobalParams::setTextEOL(char *s) {
-  lockGlobalParams;
+  globalParamsLocker();
   if (!strcmp(s, "unix")) {
     textEOL = eolUnix;
   } else if (!strcmp(s, "dos")) {
@@ -1487,57 +1427,45 @@ GBool GlobalParams::setTextEOL(char *s) {
   } else if (!strcmp(s, "mac")) {
     textEOL = eolMac;
   } else {
-    unlockGlobalParams;
     return gFalse;
   }
-  unlockGlobalParams;
   return gTrue;
 }
 
 void GlobalParams::setTextPageBreaks(GBool pageBreaks) {
-  lockGlobalParams;
+  globalParamsLocker();
   textPageBreaks = pageBreaks;
-  unlockGlobalParams;
 }
 
 GBool GlobalParams::setEnableFreeType(char *s) {
-  GBool ok;
-
-  lockGlobalParams;
-  ok = parseYesNo2(s, &enableFreeType);
-  unlockGlobalParams;
-  return ok;
+  globalParamsLocker();
+  return parseYesNo2(s, &enableFreeType);
 }
 
 void GlobalParams::setOverprintPreview(GBool overprintPreviewA) {
-  lockGlobalParams;
+  globalParamsLocker();
   overprintPreview = overprintPreviewA;
-  unlockGlobalParams;
 }
 
 void GlobalParams::setPrintCommands(GBool printCommandsA) {
-  lockGlobalParams;
+  globalParamsLocker();
   printCommands = printCommandsA;
-  unlockGlobalParams;
 }
 
 void GlobalParams::setProfileCommands(GBool profileCommandsA) {
-  lockGlobalParams;
+  globalParamsLocker();
   profileCommands = profileCommandsA;
-  unlockGlobalParams;
 }
 
 void GlobalParams::setErrQuiet(GBool errQuietA) {
-  lockGlobalParams;
+  globalParamsLocker();
   errQuiet = errQuietA;
-  unlockGlobalParams;
 }
 
 void GlobalParams::addSecurityHandler(XpdfSecurityHandler *handler) {
 #ifdef ENABLE_PLUGINS
-  lockGlobalParams;
+  globalParamsLocker();
   securityHandlers->append(handler);
-  unlockGlobalParams;
 #endif
 }
 
@@ -1546,29 +1474,25 @@ XpdfSecurityHandler *GlobalParams::getSecurityHandler(char *name) {
   XpdfSecurityHandler *hdlr;
   int i;
 
-  lockGlobalParams;
+  globalParamsLocker();
   for (i = 0; i < securityHandlers->getLength(); ++i) {
     hdlr = (XpdfSecurityHandler *)securityHandlers->get(i);
     if (!strcasecmp(hdlr->name, name)) {
-      unlockGlobalParams;
       return hdlr;
     }
   }
-  unlockGlobalParams;
 
   if (!loadPlugin("security", name)) {
     return NULL;
   }
 
-  lockGlobalParams;
+  globalParamsLocker();
   for (i = 0; i < securityHandlers->getLength(); ++i) {
     hdlr = (XpdfSecurityHandler *)securityHandlers->get(i);
     if (!strcmp(hdlr->name, name)) {
-      unlockGlobalParams;
       return hdlr;
     }
   }
-  unlockGlobalParams;
 #else
   (void)name;
 #endif
@@ -1587,9 +1511,8 @@ GBool GlobalParams::loadPlugin(char *type, char *name) {
   if (!(plugin = Plugin::load(type, name))) {
     return gFalse;
   }
-  lockGlobalParams;
+  globalParamsLocker();
   plugins->append(plugin);
-  unlockGlobalParams;
   return gTrue;
 }
 
