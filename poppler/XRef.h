@@ -40,14 +40,11 @@
 #include "goo/gtypes.h"
 #include "Object.h"
 #include "Stream.h"
-
-#include <vector>
+#include "PopplerCache.h"
 
 class Dict;
 class Stream;
 class Parser;
-template<typename Key, typename Item>
-class PopplerCache;
 class ObjectStream;
 
 //------------------------------------------------------------------------
@@ -224,7 +221,7 @@ private:
   Goffset *streamEnds;		// 'endstream' positions - only used in
 				//   damaged files
   int streamEndsLen;		// number of valid entries in streamEnds
-  PopplerCache<Goffset, ObjectStream> *objStrs;	// cached object streams
+  PopplerCache<Goffset, ObjectStream> objStrs;	// cached object streams
   GBool encrypted;		// true if file is encrypted
   int encRevision;		
   int encVersion;		// encryption algorithm
@@ -241,7 +238,6 @@ private:
   GBool strOwner;     // true if str is owned by the instance
   mutable std::recursive_mutex mutex;
 
-  void init();
   int reserve(int newSize);
   int resize(int newSize);
   GBool readXRef(Goffset *pos, std::vector<Goffset> *followedXRefStm, std::vector<int> *xrefStreamObjsNum);

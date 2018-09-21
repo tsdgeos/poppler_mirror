@@ -55,7 +55,6 @@
 #include "Error.h"
 #include "ErrorCodes.h"
 #include "XRef.h"
-#include "PopplerCache.h"
 
 //------------------------------------------------------------------------
 // Permission bits
@@ -227,7 +226,7 @@ Object ObjectStream::getObject(int objIdx, int objNum) {
 
 #define xrefLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 
-void XRef::init() {
+XRef::XRef() : objStrs{5} {
   ok = gTrue;
   errCode = errNone;
   entries = nullptr;
@@ -236,7 +235,6 @@ void XRef::init() {
   modified = gFalse;
   streamEnds = nullptr;
   streamEndsLen = 0;
-  objStrs = new PopplerCache<Goffset, ObjectStream>(5);
   mainXRefEntriesOffset = 0;
   xRefStream = gFalse;
   scannedSpecialFlags = gFalse;
@@ -249,21 +247,14 @@ void XRef::init() {
   encAlgorithm = cryptNone;
 }
 
-XRef::XRef() {
-  init();
-}
-
-XRef::XRef(const Object *trailerDictA) {
-  init();
-
+XRef::XRef(const Object *trailerDictA) : XRef{} {
   if (trailerDictA->isDict())
     trailerDict = trailerDictA->copy();
 }
 
-XRef::XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA, GBool *wasReconstructed, GBool reconstruct) {
+XRef::XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA, GBool *wasReconstructed, GBool reconstruct) : XRef{} {
   Object obj;
 
-  init();
   mainXRefEntriesOffset = mainXRefEntriesOffsetA;
 
   // read the trailer
@@ -341,9 +332,6 @@ XRef::~XRef() {
 
   if (streamEnds) {
     gfree(streamEnds);
-  }
-  if (objStrs) {
-    delete objStrs;
   }
   if (strOwner) {
     delete str;
@@ -1158,7 +1146,7 @@ Object XRef::fetch(int num, int gen, int recursion) {
       goto err;
     }
 
-    ObjectStream *objStr = objStrs->lookup(e->offset);
+    ObjectStream *objStr = objStrs.lookup(e->offset);
     if (!objStr) {
       objStr = new ObjectStream(this, e->offset, recursion + 1);
       if (!objStr->isOk()) {
@@ -1168,7 +1156,7 @@ Object XRef::fetch(int num, int gen, int recursion) {
       } else {
 	// XRef could be reconstructed in constructor of ObjectStream:
 	e = getEntry(num);
-	objStrs->put(e->offset, objStr);
+	objStrs.put(e->offset, objStr);
       }
     }
     return objStr->getObject(e->gen, num);
