@@ -3932,7 +3932,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
   }
 }
 
-void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
+void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */,
 					  Stream *str, int width, int height,
 					  GfxImageColorMap *colorMap,
 					  GBool interpolate,
@@ -3978,7 +3978,10 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
 
   if (maskColorMap->getMatteColor() != nullptr) {
     const int maskChars = maskWidth * maskHeight;
-    Guchar *data = (Guchar *) gmalloc(maskChars);
+    Guchar *data = (Guchar *) gmalloc_checkoverflow(maskChars);
+    if (unlikely(data == nullptr)) {
+      return;
+    }
     maskStr->reset();
     const int readChars = maskStr->doGetChars(maskChars, data);
     if (unlikely(readChars < maskChars)) {
@@ -4000,7 +4003,11 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
   imgMaskData.maskStr = nullptr;
   imgMaskData.maskColorMap = nullptr;
   n = 1 << maskColorMap->getBits();
-  imgMaskData.lookup = (SplashColorPtr)gmalloc(n);
+  imgMaskData.lookup = (SplashColorPtr)gmalloc_checkoverflow(n);
+  if (unlikely(imgMaskData.lookup == nullptr)) {
+    delete imgMaskData.imgStr;
+    return;
+  }
   for (i = 0; i < n; ++i) {
     pix = (Guchar)i;
     maskColorMap->getGray(&pix, &gray);
@@ -4052,22 +4059,26 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
     switch (colorMode) {
     case splashModeMono1:
     case splashModeMono8:
-      imgData.lookup = (SplashColorPtr)gmalloc(n);
-      for (i = 0; i < n; ++i) {
-	pix = (Guchar)i;
-	colorMap->getGray(&pix, &gray);
-	imgData.lookup[i] = colToByte(gray);
+      imgData.lookup = (SplashColorPtr)gmalloc_checkoverflow(n);
+      if (likely(imgData.lookup != nullptr)) {
+	for (i = 0; i < n; ++i) {
+	  pix = (Guchar)i;
+	  colorMap->getGray(&pix, &gray);
+	  imgData.lookup[i] = colToByte(gray);
+	}
       }
       break;
     case splashModeRGB8:
     case splashModeBGR8:
       imgData.lookup = (SplashColorPtr)gmallocn(n, 3);
-      for (i = 0; i < n; ++i) {
-	pix = (Guchar)i;
-	colorMap->getRGB(&pix, &rgb);
-	imgData.lookup[3*i] = colToByte(rgb.r);
-	imgData.lookup[3*i+1] = colToByte(rgb.g);
-	imgData.lookup[3*i+2] = colToByte(rgb.b);
+      if (likely(imgData.lookup != nullptr)) {
+	for (i = 0; i < n; ++i) {
+	  pix = (Guchar)i;
+	  colorMap->getRGB(&pix, &rgb);
+	  imgData.lookup[3*i] = colToByte(rgb.r);
+	  imgData.lookup[3*i+1] = colToByte(rgb.g);
+	  imgData.lookup[3*i+2] = colToByte(rgb.b);
+	}
       }
       break;
     case splashModeXBGR8:
@@ -4085,23 +4096,27 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref,
       break;
 #ifdef SPLASH_CMYK
     case splashModeCMYK8:
-      imgData.lookup = (SplashColorPtr)gmallocn(n, 4);
-      for (i = 0; i < n; ++i) {
-	pix = (Guchar)i;
-	colorMap->getCMYK(&pix, &cmyk);
-	imgData.lookup[4*i] = colToByte(cmyk.c);
-	imgData.lookup[4*i+1] = colToByte(cmyk.m);
-	imgData.lookup[4*i+2] = colToByte(cmyk.y);
-	imgData.lookup[4*i+3] = colToByte(cmyk.k);
+      imgData.lookup = (SplashColorPtr)gmallocn_checkoverflow(n, 4);
+      if (likely(imgData.lookup != nullptr)) {
+	for (i = 0; i < n; ++i) {
+	  pix = (Guchar)i;
+	  colorMap->getCMYK(&pix, &cmyk);
+	  imgData.lookup[4*i] = colToByte(cmyk.c);
+	  imgData.lookup[4*i+1] = colToByte(cmyk.m);
+	  imgData.lookup[4*i+2] = colToByte(cmyk.y);
+	  imgData.lookup[4*i+3] = colToByte(cmyk.k);
+	}
       }
       break;
     case splashModeDeviceN8:
-      imgData.lookup = (SplashColorPtr)gmallocn(n, SPOT_NCOMPS+4);
-      for (i = 0; i < n; ++i) {
-	pix = (Guchar)i;
-	colorMap->getDeviceN(&pix, &deviceN);
-  for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
-    imgData.lookup[(SPOT_NCOMPS+4)*i + cp] = colToByte(deviceN.c[cp]);
+      imgData.lookup = (SplashColorPtr)gmallocn_checkoverflow(n, SPOT_NCOMPS+4);
+      if (likely(imgData.lookup != nullptr)) {
+	for (i = 0; i < n; ++i) {
+	  pix = (Guchar)i;
+	  colorMap->getDeviceN(&pix, &deviceN);
+	  for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
+	    imgData.lookup[(SPOT_NCOMPS+4)*i + cp] = colToByte(deviceN.c[cp]);
+	}
       }
       break;
 #endif
