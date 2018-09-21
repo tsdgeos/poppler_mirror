@@ -110,7 +110,7 @@ private:
   using DictEntry = std::pair<std::string, Object>;
   struct CmpDictEntry;
 
-  bool sorted;
+  std::atomic_bool sorted;
   XRef *xref;			// the xref table for this PDF file
   std::vector<DictEntry> entries;
   std::atomic_int ref;			// reference count

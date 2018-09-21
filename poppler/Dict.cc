@@ -85,7 +85,7 @@ Dict::Dict(const Dict* dictA) {
     entries.emplace_back(entry.first, entry.second.copy());
   }
 
-  sorted = dictA->sorted;
+  sorted = dictA->sorted.load();
 }
 
 Dict *Dict::copy(XRef *xrefA) const {
@@ -108,20 +108,24 @@ Dict::~Dict() {
 
 void Dict::add(const char *key, Object &&val) {
   dictLocker();
-  if (entries.size() >= SORT_LENGTH_LOWER_LIMIT) {
-    if (!sorted) {
-      std::sort(entries.begin(), entries.end(), CmpDictEntry{});
-      sorted = true;
-    }
-    const auto pos = std::upper_bound(entries.begin(), entries.end(), key, CmpDictEntry{});
-    entries.emplace(pos, key, std::move(val));
-  } else {
-    entries.emplace_back(key, std::move(val));
-    sorted = false;
-  }
+  entries.emplace_back(key, std::move(val));
+  sorted = false;
 }
 
 inline const Dict::DictEntry *Dict::find(const char *key) const {
+  if (entries.size() >= SORT_LENGTH_LOWER_LIMIT) {
+    if (!sorted) {
+      dictLocker();
+      if (!sorted) {
+	auto& entries = const_cast<std::vector<DictEntry>&>(this->entries);
+	auto& sorted = const_cast<std::atomic_bool&>(this->sorted);
+
+	std::sort(entries.begin(), entries.end(), CmpDictEntry{});
+	sorted = true;
+      }
+    }
+  }
+
   if (sorted) {
     const auto pos = std::lower_bound(entries.begin(), entries.end(), key, CmpDictEntry{});
     if (pos != entries.end() && pos->first == key) {
