@@ -395,9 +395,9 @@ void FoFiType1::undoPFB() {
     pos2 += segLen;
   }
   if (freeFileData) {
-    gfree(fileData);
+    gfree((char*)file);
   }
-  file = fileData = file2;
+  file = file2;
   freeFileData = gTrue;
   len = pos2;
 }

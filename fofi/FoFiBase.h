@@ -46,7 +46,7 @@ public:
 
 protected:
 
-  FoFiBase(char *fileA, int lenA, GBool freeFileDataA);
+  FoFiBase(const char *fileA, int lenA, GBool freeFileDataA);
   static char *readFile(const char *fileName, int *fileLen);
 
   // S = signed / U = unsigned
@@ -63,8 +63,7 @@ protected:
 
   GBool checkRegion(int pos, int size) const;
 
-  Guchar *fileData;
-  Guchar *file;
+  const Guchar *file;
   int len;
   GBool freeFileData;
 };

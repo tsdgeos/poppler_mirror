@@ -38,15 +38,15 @@
 // FoFiBase
 //------------------------------------------------------------------------
 
-FoFiBase::FoFiBase(char *fileA, int lenA, GBool freeFileDataA) {
-  fileData = file = (Guchar *)fileA;
+FoFiBase::FoFiBase(const char *fileA, int lenA, GBool freeFileDataA) {
+  file = (const Guchar *)fileA;
   len = lenA;
   freeFileData = freeFileDataA;
 }
 
 FoFiBase::~FoFiBase() {
   if (freeFileData) {
-    gfree(fileData);
+    gfree((char*)file);
   }
 }
 
