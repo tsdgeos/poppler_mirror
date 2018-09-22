@@ -3955,7 +3955,6 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */,
   GfxColor deviceN;
 #endif
   Guchar pix;
-  int n, i;
 
 #ifdef SPLASH_CMYK
   colorMap->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
@@ -3964,7 +3963,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */,
 		   state->getOverprintMode(), nullptr);
 
   ctm = state->getCTM();
-  for (i = 0; i < 6; ++i) {
+  for (int i = 0; i < 6; ++i) {
     if (!std::isfinite(ctm[i])) return;
   }
   mat[0] = ctm[0];
@@ -3977,11 +3976,11 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */,
   //----- set up the soft mask
 
   if (maskColorMap->getMatteColor() != nullptr) {
-    const int maskChars = maskWidth * maskHeight;
-    Guchar *data = (Guchar *) gmalloc_checkoverflow(maskChars);
-    if (unlikely(data == nullptr)) {
+    int maskChars;
+    if (checkedMultiply(maskWidth, maskHeight, &maskChars)) {
       return;
     }
+    Guchar *data = (Guchar *) gmalloc(maskChars);
     maskStr->reset();
     const int readChars = maskStr->doGetChars(maskChars, data);
     if (unlikely(readChars < maskChars)) {
@@ -4002,13 +4001,9 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */,
   imgMaskData.y = 0;
   imgMaskData.maskStr = nullptr;
   imgMaskData.maskColorMap = nullptr;
-  n = 1 << maskColorMap->getBits();
-  imgMaskData.lookup = (SplashColorPtr)gmalloc_checkoverflow(n);
-  if (unlikely(imgMaskData.lookup == nullptr)) {
-    delete imgMaskData.imgStr;
-    return;
-  }
-  for (i = 0; i < n; ++i) {
+  const unsigned n = 1 << maskColorMap->getBits();
+  imgMaskData.lookup = (SplashColorPtr)gmalloc(n);
+  for (unsigned i = 0; i < n; ++i) {
     pix = (Guchar)i;
     maskColorMap->getGray(&pix, &gray);
     imgMaskData.lookup[i] = colToByte(gray);
@@ -4055,24 +4050,22 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */,
   // build a lookup table here
   imgData.lookup = nullptr;
   if (colorMap->getNumPixelComps() == 1) {
-    n = 1 << colorMap->getBits();
+    const unsigned n = 1 << colorMap->getBits();
     switch (colorMode) {
     case splashModeMono1:
     case splashModeMono8:
-      imgData.lookup = (SplashColorPtr)gmalloc_checkoverflow(n);
-      if (likely(imgData.lookup != nullptr)) {
-	for (i = 0; i < n; ++i) {
-	  pix = (Guchar)i;
-	  colorMap->getGray(&pix, &gray);
-	  imgData.lookup[i] = colToByte(gray);
-	}
+      imgData.lookup = (SplashColorPtr)gmalloc(n);
+      for (unsigned i = 0; i < n; ++i) {
+	pix = (Guchar)i;
+	colorMap->getGray(&pix, &gray);
+	imgData.lookup[i] = colToByte(gray);
       }
       break;
     case splashModeRGB8:
     case splashModeBGR8:
-      imgData.lookup = (SplashColorPtr)gmallocn(n, 3);
+      imgData.lookup = (SplashColorPtr)gmallocn_checkoverflow(n, 3);
       if (likely(imgData.lookup != nullptr)) {
-	for (i = 0; i < n; ++i) {
+	for (unsigned i = 0; i < n; ++i) {
 	  pix = (Guchar)i;
 	  colorMap->getRGB(&pix, &rgb);
 	  imgData.lookup[3*i] = colToByte(rgb.r);
@@ -4084,7 +4077,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */,
     case splashModeXBGR8:
       imgData.lookup = (SplashColorPtr)gmallocn_checkoverflow(n, 4);
       if (likely(imgData.lookup != nullptr)) {
-	for (i = 0; i < n; ++i) {
+	for (unsigned i = 0; i < n; ++i) {
 	  pix = (Guchar)i;
 	  colorMap->getRGB(&pix, &rgb);
 	  imgData.lookup[4*i] = colToByte(rgb.r);
@@ -4098,7 +4091,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */,
     case splashModeCMYK8:
       imgData.lookup = (SplashColorPtr)gmallocn_checkoverflow(n, 4);
       if (likely(imgData.lookup != nullptr)) {
-	for (i = 0; i < n; ++i) {
+	for (unsigned i = 0; i < n; ++i) {
 	  pix = (Guchar)i;
 	  colorMap->getCMYK(&pix, &cmyk);
 	  imgData.lookup[4*i] = colToByte(cmyk.c);
@@ -4111,7 +4104,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */,
     case splashModeDeviceN8:
       imgData.lookup = (SplashColorPtr)gmallocn_checkoverflow(n, SPOT_NCOMPS+4);
       if (likely(imgData.lookup != nullptr)) {
-	for (i = 0; i < n; ++i) {
+	for (unsigned i = 0; i < n; ++i) {
 	  pix = (Guchar)i;
 	  colorMap->getDeviceN(&pix, &deviceN);
 	  for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
