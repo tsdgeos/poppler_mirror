@@ -72,7 +72,7 @@ public:
 class MemReader: public Reader {
 public:
 
-  static MemReader *make(char *bufA, int lenA);
+  static MemReader *make(const char *bufA, int lenA);
   ~MemReader();
   int getByte(int pos) override;
   GBool getU16BE(int pos, int *val) override;
@@ -83,17 +83,17 @@ public:
 
 private:
 
-  MemReader(char *bufA, int lenA);
+  MemReader(const char *bufA, int lenA);
 
-  char *buf;
+  const char *buf;
   int len;
 };
 
-MemReader *MemReader::make(char *bufA, int lenA) {
+MemReader *MemReader::make(const char *bufA, int lenA) {
   return new MemReader(bufA, lenA);
 }
 
-MemReader::MemReader(char *bufA, int lenA) {
+MemReader::MemReader(const char *bufA, int lenA) {
   buf = bufA;
   len = lenA;
 }
@@ -167,7 +167,7 @@ GBool MemReader::cmp(int pos, const char *s) {
 class FileReader: public Reader {
 public:
 
-  static FileReader *make(char *fileName);
+  static FileReader *make(const char *fileName);
   ~FileReader();
   int getByte(int pos) override;
   GBool getU16BE(int pos, int *val) override;
@@ -186,7 +186,7 @@ private:
   int bufPos, bufLen;
 };
 
-FileReader *FileReader::make(char *fileName) {
+FileReader *FileReader::make(const char *fileName) {
   FILE *fA;
 
   if (!(fA = fopen(fileName, "rb"))) {
@@ -440,7 +440,7 @@ static FoFiIdentifierType identify(Reader *reader);
 static FoFiIdentifierType identifyOpenType(Reader *reader);
 static FoFiIdentifierType identifyCFF(Reader *reader, int start);
 
-FoFiIdentifierType FoFiIdentifier::identifyMem(char *file, int len) {
+FoFiIdentifierType FoFiIdentifier::identifyMem(const char *file, int len) {
   MemReader *reader;
   FoFiIdentifierType type;
 
@@ -452,7 +452,7 @@ FoFiIdentifierType FoFiIdentifier::identifyMem(char *file, int len) {
   return type;
 }
 
-FoFiIdentifierType FoFiIdentifier::identifyFile(char *fileName) {
+FoFiIdentifierType FoFiIdentifier::identifyFile(const char *fileName) {
   FileReader *reader;
   FoFiIdentifierType type;
 
