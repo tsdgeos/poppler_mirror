@@ -1263,7 +1263,6 @@ void PostScriptFunction::transform(double *in, double *out) {
 
 GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
   GooString *tok;
-  char *p;
   GBool isReal;
   int opPtr, elsePtr;
   int a, b, mid, cmp;
@@ -1273,7 +1272,7 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
       error(errSyntaxError, -1, "Unexpected end of PostScript function stream");
       return gFalse;
     }
-    p = tok->getCString();
+    const char *p = tok->getCString();
     if (isdigit(*p) || *p == '.' || *p == '-') {
       isReal = gFalse;
       for (; *p; ++p) {
