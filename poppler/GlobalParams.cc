@@ -657,7 +657,7 @@ void GlobalParams::scanEncodingDirs() {
   delete[] dataPathBuffer;
 }
 
-void GlobalParams::parseNameToUnicode(GooString *name) {
+void GlobalParams::parseNameToUnicode(const GooString *name) {
   char *tok1, *tok2;
   FILE *f;
   char buf[256];
@@ -686,15 +686,15 @@ void GlobalParams::parseNameToUnicode(GooString *name) {
   fclose(f);
 }
 
-void GlobalParams::addCIDToUnicode(GooString *collection, GooString *fileName) {
+void GlobalParams::addCIDToUnicode(const GooString *collection, const GooString *fileName) {
   cidToUnicodes[collection->toStr()] = fileName->toStr();
 }
 
-void GlobalParams::addUnicodeMap(GooString *encodingName, GooString *fileName) {
+void GlobalParams::addUnicodeMap(const GooString *encodingName, const GooString *fileName) {
   unicodeMaps[encodingName->toStr()] = fileName->toStr();
 }
 
-void GlobalParams::addCMapDir(GooString *collection, GooString *dir) {
+void GlobalParams::addCMapDir(const GooString *collection, const GooString *dir) {
   cMapDirs.emplace(collection->toStr(), dir->toStr());
 }
 

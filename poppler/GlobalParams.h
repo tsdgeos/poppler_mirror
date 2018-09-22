@@ -178,13 +178,13 @@ public:
 
 private:
 
-  void parseNameToUnicode(GooString *name);
+  void parseNameToUnicode(const GooString *name);
   UnicodeMap *getUnicodeMap2(GooString *encodingName);
 
   void scanEncodingDirs();
-  void addCIDToUnicode(GooString *collection, GooString *fileName);
-  void addUnicodeMap(GooString *encodingName, GooString *fileName);
-  void addCMapDir(GooString *collection, GooString *dir);
+  void addCIDToUnicode(const GooString *collection, const GooString *fileName);
+  void addUnicodeMap(const GooString *encodingName, const GooString *fileName);
+  void addCMapDir(const GooString *collection, const GooString *dir);
 
   //----- static tables
 
