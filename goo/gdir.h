@@ -46,11 +46,11 @@ class GooString;
 class GDirEntry {
 public:
 
-  GDirEntry(char *dirPath, char *nameA, GBool doStat);
+  GDirEntry(const char *dirPath, const char *nameA, GBool doStat);
   ~GDirEntry();
-  GooString *getName() { return name; }
-  GooString *getFullPath() { return fullPath; }
-  GBool isDir() { return dir; }
+  const GooString *getName() const { return name; }
+  const GooString *getFullPath() const { return fullPath; }
+  GBool isDir() const { return dir; }
 
 private:
   GDirEntry(const GDirEntry &other);
@@ -64,7 +64,7 @@ private:
 class GDir {
 public:
 
-  GDir(char *name, GBool doStatA = gTrue);
+  GDir(const char *name, GBool doStatA = gTrue);
   ~GDir();
   GDirEntry *getNextEntry();
   void rewind();

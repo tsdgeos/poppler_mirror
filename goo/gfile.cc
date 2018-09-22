@@ -741,7 +741,7 @@ bool GooFile::modificationTimeChangedSinceOpen() const
 // GDir and GDirEntry
 //------------------------------------------------------------------------
 
-GDirEntry::GDirEntry(char *dirPath, char *nameA, GBool doStat) {
+GDirEntry::GDirEntry(const char *dirPath, const char *nameA, GBool doStat) {
 #ifdef VMS
   char *p;
 #elif defined(_WIN32)
@@ -778,7 +778,7 @@ GDirEntry::~GDirEntry() {
   delete name;
 }
 
-GDir::GDir(char *name, GBool doStatA) {
+GDir::GDir(const char *name, GBool doStatA) {
   path = new GooString(name);
   doStat = doStatA;
 #if defined(_WIN32)
