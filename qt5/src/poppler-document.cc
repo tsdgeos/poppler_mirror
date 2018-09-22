@@ -567,8 +567,12 @@ namespace Poppler {
 	GooString label_g(label.toLatin1().data());
 	int index;
 
-	if (!m_doc->doc->getCatalog()->labelToIndex (&label_g, &index))
-	    return nullptr;
+	if (!m_doc->doc->getCatalog()->labelToIndex (&label_g, &index)) {
+	    std::unique_ptr<GooString> label_ug(QStringToUnicodeGooString(label));
+	    if (!m_doc->doc->getCatalog()->labelToIndex (label_ug.get(), &index)) {
+	        return nullptr;
+	    }
+	}
 
 	return page(index);
     }

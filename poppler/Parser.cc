@@ -265,7 +265,7 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
       // When building the xref we can't use it so use this
       // kludge for broken PDF files: just add 5k to the length, and
       // hope its enough
-      if (length < LLONG_MAX - 5000)
+      if (length < LLONG_MAX - pos - 5000)
         length += 5000;
     }
   }

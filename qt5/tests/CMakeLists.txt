@@ -53,6 +53,7 @@ qt5_add_simpletest(stress-poppler-qt5 stress-poppler-qt5.cpp)
 qt5_add_simpletest(stress-poppler-dir-qt5 stress-poppler-dir.cpp)
 qt5_add_simpletest(stress-threads-qt5 stress-threads-qt5.cpp)
 qt5_add_simpletest(poppler-qt5-texts poppler-texts.cpp)
+qt5_add_simpletest(poppler-qt5-page-labels poppler-page-labels.cpp)
 
 qt5_add_qtest(check_qt5_attachments check_attachments.cpp)
 qt5_add_qtest(check_qt5_dateConversion check_dateConversion.cpp)

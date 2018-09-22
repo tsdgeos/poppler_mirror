@@ -2188,7 +2188,7 @@ void FoFiType1C::readTopDict() {
 // pointer, and reads the private dict.  It also pulls the FontMatrix
 // (if any) out of the FD.
 void FoFiType1C::readFD(int offset, int length, Type1CPrivateDict *pDict) {
-  int pos, pSize, pOffset;
+  int pSize, pOffset;
   double fontMatrix[6] = {0};
   GBool hasFontMatrix;
 
@@ -2196,9 +2196,15 @@ void FoFiType1C::readFD(int offset, int length, Type1CPrivateDict *pDict) {
   fontMatrix[0] = fontMatrix[1] = fontMatrix[2] = 0; // make gcc happy
   fontMatrix[3] = fontMatrix[4] = fontMatrix[5] = 0;
   pSize = pOffset = 0;
-  pos = offset;
+
+  int posEnd;
+  if (checkedAdd(offset, length, &posEnd)) {
+    return;
+  }
+
+  int pos = offset;
   nOps = 0;
-  while (pos < offset + length) {
+  while (pos < posEnd) {
     pos = getOp(pos, gFalse, &parsedOk);
     if (!parsedOk) {
       return;
@@ -2238,8 +2244,6 @@ void FoFiType1C::readFD(int offset, int length, Type1CPrivateDict *pDict) {
 
 void FoFiType1C::readPrivateDict(int offset, int length,
 				 Type1CPrivateDict *pDict) {
-  int pos;
-
   pDict->hasFontMatrix = gFalse;
   pDict->nBlueValues = 0;
   pDict->nOtherBlues = 0;
@@ -2268,9 +2272,14 @@ void FoFiType1C::readPrivateDict(int offset, int length,
     return;
   }
 
-  pos = offset;
+  int posEnd;
+  if (checkedAdd(offset, length, &posEnd)) {
+    return;
+  }
+
+  int pos = offset;
   nOps = 0;
-  while (pos < offset + length) {
+  while (pos < posEnd) {
     pos = getOp(pos, gFalse, &parsedOk);
     if (!parsedOk) {
       break;

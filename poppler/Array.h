@@ -33,6 +33,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <vector>
 
 #include "poppler-config.h"
 #include "Object.h"
@@ -56,7 +57,7 @@ public:
   Array& operator=(const Array &) = delete;
 
   // Get number of elements.
-  int getLength() const { return length; }
+  int getLength() const { return elems.size(); }
 
   // Copy array with new xref
   Object copy(XRef *xrefA) const;
@@ -81,9 +82,7 @@ private:
   int decRef() { return --ref; }
 
   XRef *xref;			// the xref table for this PDF file
-  Object *elems;		// array of elements
-  int size;			// size of <elems> array
-  int length;			// number of elements in array
+  std::vector<Object> elems;		// array of elements
   std::atomic_int ref;			// reference count
   mutable std::recursive_mutex mutex;
 };
