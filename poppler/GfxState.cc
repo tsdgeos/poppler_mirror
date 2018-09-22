@@ -5708,6 +5708,9 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
   useMatte = gFalse;
 
   // bits per component and color space
+  if (unlikely(bitsA <= 0 || bitsA > 30))
+    goto err1;
+
   bits = bitsA;
   maxPixel = (1 << bits) - 1;
   colorSpace = colorSpaceA;
@@ -5724,9 +5727,6 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
     lookup2[k] = nullptr;
   }
   byte_lookup = nullptr;
-
-  if (unlikely(bits <= 0))
-    goto err1;
 
   // get decode map
   if (decode->isNull()) {
