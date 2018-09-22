@@ -181,10 +181,10 @@ private:
 		void *outputStream, GooString *name,
 		GBool needVerticalMetrics,
                 int *maxUsedGlyph);
-  void dumpString(Guchar *s, int length,
+  void dumpString(const Guchar *s, int length,
 		  FoFiOutputFunc outputFunc,
 		  void *outputStream);
-  Guint computeTableChecksum(Guchar *data, int length);
+  Guint computeTableChecksum(const Guchar *data, int length);
   void parse();
   void readPostTable();
   int seekTable(const char *tag);

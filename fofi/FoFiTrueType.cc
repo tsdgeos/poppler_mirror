@@ -1258,7 +1258,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
   }
 }
 
-void FoFiTrueType::dumpString(Guchar *s, int length,
+void FoFiTrueType::dumpString(const Guchar *s, int length,
 			      FoFiOutputFunc outputFunc,
 			      void *outputStream) {
   GooString *buf;
@@ -1287,7 +1287,7 @@ void FoFiTrueType::dumpString(Guchar *s, int length,
   (*outputFunc)(outputStream, "00>\n", 4);
 }
 
-Guint FoFiTrueType::computeTableChecksum(Guchar *data, int length) {
+Guint FoFiTrueType::computeTableChecksum(const Guchar *data, int length) {
   Guint checksum, word;
   int i;
 
