@@ -191,7 +191,7 @@ public:
   //     font's internal CID-to-GID mapping is used
   // (3) is <codeMap> is NULL and this is an 8-bit CFF font, then
   //     the identity CID-to-GID mapping is used
-  void convertToCIDType0(char *psName, int *codeMap, int nCodes,
+  void convertToCIDType0(const char *psName, int *codeMap, int nCodes,
 			 FoFiOutputFunc outputFunc, void *outputStream);
 
   // Convert to a Type 0 (but non-CID) composite font, suitable for
@@ -203,7 +203,7 @@ public:
   //     font's internal CID-to-GID mapping is used
   // (3) is <codeMap> is NULL and this is an 8-bit CFF font, then
   //     the identity CID-to-GID mapping is used
-  void convertToType0(char *psName, int *codeMap, int nCodes,
+  void convertToType0(const char *psName, int *codeMap, int nCodes,
 		      FoFiOutputFunc outputFunc, void *outputStream);
 
 private:
