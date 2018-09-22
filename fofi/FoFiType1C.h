@@ -152,7 +152,7 @@ public:
   static FoFiType1C *make(char *fileA, int lenA);
 
   // Create a FoFiType1C object from a file on disk.
-  static FoFiType1C *load(char *fileName);
+  static FoFiType1C *load(const char *fileName);
 
   virtual ~FoFiType1C();
 

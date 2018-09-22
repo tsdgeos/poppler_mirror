@@ -58,7 +58,7 @@ FoFiType1C *FoFiType1C::make(char *fileA, int lenA) {
   return ff;
 }
 
-FoFiType1C *FoFiType1C::load(char *fileName) {
+FoFiType1C *FoFiType1C::load(const char *fileName) {
   FoFiType1C *ff;
   char *fileA;
   int lenA;

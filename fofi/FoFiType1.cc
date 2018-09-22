@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2008, 2010, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2010 Jakub Wilk <jwilk@jwilk.net>
 // Copyright (C) 2014 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -49,7 +49,7 @@ FoFiType1 *FoFiType1::make(char *fileA, int lenA) {
   return new FoFiType1(fileA, lenA, gFalse);
 }
 
-FoFiType1 *FoFiType1::load(char *fileName) {
+FoFiType1 *FoFiType1::load(const char *fileName) {
   char *fileA;
   int lenA;
 
