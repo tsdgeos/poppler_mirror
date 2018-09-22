@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2008-2010, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008-2010, 2012, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
@@ -103,7 +103,7 @@ static int hexCharVals[256] = {
 
 // Parse a <len>-byte hex string <s> into *<val>.  Returns false on
 // error.
-static GBool parseHex(char *s, int len, Guint *val) {
+static GBool parseHex(const char *s, int len, Guint *val) {
   int i, x;
 
   *val = 0;
@@ -269,10 +269,9 @@ CharCodeToUnicode *CharCodeToUnicode::make8BitToUnicode(Unicode *toUnicode) {
 
 CharCodeToUnicode *CharCodeToUnicode::parseCMap(GooString *buf, int nBits) {
   CharCodeToUnicode *ctu;
-  char *p;
 
   ctu = new CharCodeToUnicode(nullptr);
-  p = buf->getCString();
+  const char *p = buf->getCString();
   ctu->parseCMap1(&getCharFromString, &p, nBits);
   return ctu;
 }
@@ -294,9 +293,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseCMapFromFile(GooString *fileName,
 }
 
 void CharCodeToUnicode::mergeCMap(GooString *buf, int nBits) {
-  char *p;
-
-  p = buf->getCString();
+  const char *p = buf->getCString();
   parseCMap1(&getCharFromString, &p, nBits);
 }
 
