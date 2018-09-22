@@ -14,8 +14,38 @@
 
 /* http://mathworld.wolfram.com/RomanNumerals.html */
 
+#include <locale>
+#include <codecvt>
+
 #include "goo/GooString.h"
 #include "Error.h"
+
+static std::pair<int,bool> fromDecimal(const char *const begin, const char *const end, const bool unicode) {
+  if (!unicode) {
+    char *parsed;
+    const int number = std::strtol(begin, &parsed, 10);
+    if (parsed >= end) {
+      return std::make_pair(number, true);
+    }
+  } else {
+    std::wstring_convert<std::codecvt_utf16<wchar_t>> converter;
+    const auto str = converter.from_bytes(begin, end);
+
+    // Skip BOM since wcstol seems unable to handle it.
+    const wchar_t *c_str = str.c_str();
+    if (*c_str == wchar_t{0xfeff}) {
+      ++c_str;
+    }
+
+    wchar_t *parsed;
+    const int number = std::wcstol(c_str, &parsed, 10);
+    if (parsed >= str.data() + str.size()) {
+      return std::make_pair(number, true);
+    }
+  }
+
+  return std::make_pair(0, false);
+}
 
 static int fromRoman(const char *buffer) {
   int digit_value, prev_digit_value, value;
