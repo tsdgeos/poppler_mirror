@@ -1878,7 +1878,7 @@ void Annot::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   Object obj = appearance.fetch(gfx->getXRef());
-  gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+  gfx->drawAnnot(&obj, nullptr, color,
       rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
 }
 
@@ -2532,12 +2532,12 @@ void AnnotText::draw(Gfx *gfx, GBool printing) {
   // draw the appearance stream
   Object obj = appearance.fetch(gfx->getXRef());
   if (appearBBox) {
-    gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+    gfx->drawAnnot(&obj, nullptr, color,
                    appearBBox->getPageXMin(), appearBBox->getPageYMin(),
                    appearBBox->getPageXMax(), appearBBox->getPageYMax(),
                    getRotation());
   } else {
-    gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+    gfx->drawAnnot(&obj, nullptr, color,
                    rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
   }
 }
@@ -2982,7 +2982,7 @@ void AnnotFreeText::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   Object obj = appearance.fetch(gfx->getXRef());
-  gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+  gfx->drawAnnot(&obj, nullptr, color,
                  rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
 }
 
@@ -3419,12 +3419,12 @@ void AnnotLine::draw(Gfx *gfx, GBool printing) {
   // draw the appearance stream
   Object obj = appearance.fetch(gfx->getXRef());
   if (appearBBox) {
-    gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+    gfx->drawAnnot(&obj, nullptr, color,
                    appearBBox->getPageXMin(), appearBBox->getPageYMin(),
                    appearBBox->getPageXMax(), appearBBox->getPageYMax(),
                    getRotation());
   } else {
-    gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+    gfx->drawAnnot(&obj, nullptr, color,
                    rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
   }
 }
@@ -3710,12 +3710,12 @@ void AnnotTextMarkup::draw(Gfx *gfx, GBool printing) {
   // draw the appearance stream
   Object obj = appearance.fetch(gfx->getXRef());
   if (appearBBox) {
-    gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+    gfx->drawAnnot(&obj, nullptr, color,
                    appearBBox->getPageXMin(), appearBBox->getPageYMin(),
                    appearBBox->getPageXMax(), appearBBox->getPageYMax(),
                    getRotation());
   } else {
-    gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+    gfx->drawAnnot(&obj, nullptr, color,
                    rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
   }
 }
@@ -4995,7 +4995,7 @@ void AnnotWidget::draw(Gfx *gfx, GBool printing) {
     gfx->pushResources(dict);
     delete dict;
   }
-  gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+  gfx->drawAnnot(&obj, nullptr, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
   if (addDingbatsResource) {
     gfx->popResources();
@@ -5132,7 +5132,7 @@ void AnnotMovie::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   Object obj = appearance.fetch(gfx->getXRef());
-  gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+  gfx->drawAnnot(&obj, nullptr, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
 }
 
@@ -5444,7 +5444,7 @@ void AnnotGeometry::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   Object obj = appearance.fetch(gfx->getXRef());
-  gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+  gfx->drawAnnot(&obj, nullptr, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
 }
 
@@ -5703,12 +5703,12 @@ void AnnotPolygon::draw(Gfx *gfx, GBool printing) {
   // draw the appearance stream
   Object obj = appearance.fetch(gfx->getXRef());
   if (appearBBox) {
-    gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+    gfx->drawAnnot(&obj, nullptr, color,
                    appearBBox->getPageXMin(), appearBBox->getPageYMin(),
                    appearBBox->getPageXMax(), appearBBox->getPageYMax(),
                    getRotation());
   } else {
-    gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+    gfx->drawAnnot(&obj, nullptr, color,
                    rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
   }
 }
@@ -5910,12 +5910,12 @@ void AnnotInk::draw(Gfx *gfx, GBool printing) {
   // draw the appearance stream
   Object obj = appearance.fetch(gfx->getXRef());
   if (appearBBox) {
-    gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+    gfx->drawAnnot(&obj, nullptr, color,
                    appearBBox->getPageXMin(), appearBBox->getPageYMin(),
                    appearBBox->getPageXMax(), appearBBox->getPageYMax(),
                    getRotation());
   } else {
-    gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+    gfx->drawAnnot(&obj, nullptr, color,
                    rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
   }
 }
@@ -6117,7 +6117,7 @@ void AnnotFileAttachment::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   Object obj = appearance.fetch(gfx->getXRef());
-  gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+  gfx->drawAnnot(&obj, nullptr, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
 }
 
@@ -6266,7 +6266,7 @@ void AnnotSound::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   obj = appearance.fetch(gfx->getXRef());
-  gfx->drawAnnot(&obj, (AnnotBorder *)nullptr, color,
+  gfx->drawAnnot(&obj, nullptr, color,
 		 rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
 }
 

@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005-2013, 2016, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006-2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2006 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
@@ -508,7 +508,7 @@ Gfx *Page::createGfx(OutputDev *out, double hDPI, double vDPI,
     crop = (box == *cropBox) && out->needClipToCropBox();
   }
   gfx = new Gfx(doc, out, num, attrs->getResourceDict(),
-		hDPI, vDPI, &box, crop ? cropBox : (PDFRectangle *)nullptr,
+		hDPI, vDPI, &box, crop ? cropBox : nullptr,
 		rotate, abortCheckCbk, abortCheckCbkData, xrefA);
 
   return gfx;

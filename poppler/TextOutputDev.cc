@@ -310,7 +310,7 @@ TextFontInfo::TextFontInfo(GfxState *state) {
     gfxFont->incRefCnt();
 #ifdef TEXTOUT_WORD_LIST
   fontName = (gfxFont && gfxFont->getName()) ? gfxFont->getName()->copy()
-                                             : (GooString *)nullptr;
+                                             : nullptr;
   flags = gfxFont ? gfxFont->getFlags() : 0;
 #endif
 }
@@ -2176,7 +2176,7 @@ int TextBlock::visitDepthFirst(TextBlock *blkList, int pos1,
 			       GBool* visited) {
   const int blockCacheSize = 4;
   TextBlock *blockCache[blockCacheSize];
-  std::fill(blockCache, blockCache + blockCacheSize, (TextBlock*)nullptr);
+  std::fill(blockCache, blockCache + blockCacheSize, nullptr);
   return visitDepthFirst(blkList, pos1, sorted, sortPos, visited, blockCache,
 			 blockCacheSize);
 }

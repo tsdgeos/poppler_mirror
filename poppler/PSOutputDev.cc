@@ -2479,7 +2479,7 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id,
       ffTT->convertToType42(psName->getCString(),
 			    ((Gfx8BitFont *)font)->getHasEncoding()
 			      ? ((Gfx8BitFont *)font)->getEncoding()
-			      : (char **)nullptr,
+			      : nullptr,
 			    codeToGID, outputFunc, outputStream);
       if (codeToGID) {
 	if (font8InfoLen >= font8InfoSize) {
@@ -2518,7 +2518,7 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, GooString *fileName,
     ffTT->convertToType42(psName->getCString(),
 			  ((Gfx8BitFont *)font)->getHasEncoding()
 			    ? ((Gfx8BitFont *)font)->getEncoding()
-			    : (char **)nullptr,
+			    : nullptr,
 			  codeToGID, outputFunc, outputStream);
     if (codeToGID) {
       if (font8InfoLen >= font8InfoSize) {
@@ -3190,7 +3190,7 @@ void PSOutputDev::setupForm(Ref id, Object *strObj) {
 
   // get resources
   Object resObj = dict->lookup("Resources");
-  resDict = resObj.isDict() ? resObj.getDict() : (Dict *)nullptr;
+  resDict = resObj.isDict() ? resObj.getDict() : nullptr;
 
   writePSFmt("/f_{0:d}_{1:d} {{\n", id.num, id.gen);
   writePS("q\n");

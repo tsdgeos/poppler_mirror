@@ -349,7 +349,7 @@ void FoFiType1::parse() {
 	if ((p2 = strchr(p, ']'))) {
 	  *p2 = '\0';
 	  for (j = 0; j < 6; ++j) {
-	    if ((p = strtok(j == 0 ? p : (char *)nullptr, " \t\n\r"))) {
+	    if ((p = strtok(j == 0 ? p : nullptr, " \t\n\r"))) {
 	      fontMatrix[j] = atof(p);
 	    } else {
 	      break;

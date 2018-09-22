@@ -1353,7 +1353,7 @@ void Gfx::doSoftMask(Object *str, GBool alpha,
 
   // get resources
   obj1 = dict->lookup("Resources");
-  resDict = obj1.isDict() ? obj1.getDict() : (Dict *)nullptr;
+  resDict = obj1.isDict() ? obj1.getDict() : nullptr;
 
   // draw it
   ++formDepth;
@@ -4189,7 +4189,7 @@ void Gfx::opXObject(Object args[], int numArgs) {
   } else if (obj2.isName("PS")) {
     Object obj3 = obj1.streamGetDict()->lookup("Level1");
     out->psXObject(obj1.getStream(),
-		   obj3.isStream() ? obj3.getStream() : (Stream *)nullptr);
+		   obj3.isStream() ? obj3.getStream() : nullptr);
   } else if (obj2.isName()) {
     error(errSyntaxError, getPos(), "Unknown XObject subtype '{0:s}'", obj2.getName());
   } else {
@@ -4593,7 +4593,7 @@ void Gfx::doImage(Object *ref, Stream *str, GBool inlineImg) {
 			     maskStr, maskWidth, maskHeight, maskInvert, maskInterpolate);
       } else {
 	out->drawImage(state, ref, str, width, height, &colorMap, interpolate,
-		       haveColorKeyMask ? maskColors : (int *)nullptr, inlineImg);
+		       haveColorKeyMask ? maskColors : nullptr, inlineImg);
       }
     }
   }
@@ -4736,7 +4736,7 @@ void Gfx::doForm(Object *str) {
 
   // get resources
   Object resObj = dict->lookup("Resources");
-  resDict = resObj.isDict() ? resObj.getDict() : (Dict *)nullptr;
+  resDict = resObj.isDict() ? resObj.getDict() : nullptr;
 
   // check for a transparency group
   transpGroup = isolated = knockout = gFalse;
@@ -5278,7 +5278,7 @@ void Gfx::drawAnnot(Object *str, AnnotBorder *border, AnnotColor *aColor,
 
     // get the resources
     Object resObj = dict->lookup("Resources");
-    resDict = resObj.isDict() ? resObj.getDict() : (Dict *)nullptr;
+    resDict = resObj.isDict() ? resObj.getDict() : nullptr;
 
     // draw it
     drawForm(str, resDict, m, bbox);

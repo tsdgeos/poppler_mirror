@@ -324,9 +324,9 @@ GBool StandardSecurityHandler::isUnencrypted() {
 void *StandardSecurityHandler::makeAuthData(GooString *ownerPassword,
 					    GooString *userPassword) {
   return new StandardAuthData(ownerPassword ? ownerPassword->copy()
-			                    : (GooString *)nullptr,
+			                    : nullptr,
 			      userPassword ? userPassword->copy()
-			                   : (GooString *)nullptr);
+			                   : nullptr);
 }
 
 void *StandardSecurityHandler::getAuthData() {

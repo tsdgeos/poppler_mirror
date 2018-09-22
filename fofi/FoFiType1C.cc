@@ -114,7 +114,7 @@ FoFiType1C::~FoFiType1C() {
 }
 
 const char *FoFiType1C::getName() const {
-  return name ? name->getCString() : (char *)nullptr;
+  return name ? name->getCString() : nullptr;
 }
 
 char **FoFiType1C::getEncoding() const {
