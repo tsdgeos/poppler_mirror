@@ -4001,7 +4001,7 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i,
   // Compute the actual width and character count of the final string, based on
   // breakpoint, if this information is requested by the caller.
   if (width != nullptr || charCount != nullptr) {
-    char *s = outBuf->getCString();
+    const char *s = outBuf->getCString();
     int len = outBuf->getLength();
 
     if (width != nullptr)
@@ -4356,7 +4356,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
       }
 
       // write the text string
-      char *s = convertedText->getCString();
+      const char *s = convertedText->getCString();
       int len = convertedText->getLength();
       i = 0;
       xPrev = w;                // so that first character is placed properly
