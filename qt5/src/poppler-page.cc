@@ -986,5 +986,9 @@ QString Page::label() const
   return UnicodeParsedString(&goo);
 }
 
+int Page::index() const
+{
+  return m_page->index;
+}
 
 }
