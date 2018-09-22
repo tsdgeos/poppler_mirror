@@ -961,7 +961,7 @@ delete it;
 	QString label() const;
 	
 	/**
-	   Returns the index of the page, or a null string is the page has no label.
+	   Returns the index of the page.
 
 	 \since 0.70
 	**/
