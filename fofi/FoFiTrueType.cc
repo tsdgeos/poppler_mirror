@@ -518,7 +518,7 @@ void FoFiTrueType::getFontMatrix(double *mat) {
   delete ff;
 }
 
-void FoFiTrueType::convertToType42(char *psName, char **encoding,
+void FoFiTrueType::convertToType42(const char *psName, char **encoding,
 				   int *codeToGID,
 				   FoFiOutputFunc outputFunc,
 				   void *outputStream) {
@@ -559,7 +559,7 @@ void FoFiTrueType::convertToType42(char *psName, char **encoding,
   (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
 }
 
-void FoFiTrueType::convertToType1(char *psName, const char **newEncoding,
+void FoFiTrueType::convertToType1(const char *psName, const char **newEncoding,
 				  GBool ascii, FoFiOutputFunc outputFunc,
 				  void *outputStream) {
   char *start;
@@ -576,7 +576,7 @@ void FoFiTrueType::convertToType1(char *psName, const char **newEncoding,
   delete ff;
 }
 
-void FoFiTrueType::convertToCIDType2(char *psName,
+void FoFiTrueType::convertToCIDType2(const char *psName,
 				     int *cidMap, int nCIDs,
 				     GBool needVerticalMetrics,
 				     FoFiOutputFunc outputFunc,
@@ -706,7 +706,7 @@ void FoFiTrueType::convertToCIDType2(char *psName,
 		56);
 }
 
-void FoFiTrueType::convertToCIDType0(char *psName, int *cidMap, int nCIDs,
+void FoFiTrueType::convertToCIDType0(const char *psName, int *cidMap, int nCIDs,
 				     FoFiOutputFunc outputFunc,
 				     void *outputStream) {
   char *start;
@@ -723,7 +723,7 @@ void FoFiTrueType::convertToCIDType0(char *psName, int *cidMap, int nCIDs,
   delete ff;
 }
 
-void FoFiTrueType::convertToType0(char *psName, int *cidMap, int nCIDs,
+void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs,
 				  GBool needVerticalMetrics,
 				  int *maxValidGlyph,
 				  FoFiOutputFunc outputFunc,
@@ -838,7 +838,7 @@ void FoFiTrueType::convertToType0(char *psName, int *cidMap, int nCIDs,
   (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
 }
 
-void FoFiTrueType::convertToType0(char *psName, int *cidMap, int nCIDs,
+void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs,
 				  FoFiOutputFunc outputFunc,
 				  void *outputStream) {
   char *start;
