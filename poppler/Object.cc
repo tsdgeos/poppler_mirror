@@ -75,11 +75,6 @@ Object& Object::operator=(Object&& other)
   return *this;
 }
 
-Object::~Object()
-{
-  free();
-}
-
 Object Object::copy() const {
   CHECK_NOT_DEAD;
 

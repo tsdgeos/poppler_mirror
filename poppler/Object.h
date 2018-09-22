@@ -154,10 +154,8 @@ constexpr int numObjTypes = 16;		// total number of object types
 
 class Object {
 public:
-  // Default constructor.
-  Object():
-    type(objNone) {}
-  ~Object();
+  Object() : type(objNone) {}
+  ~Object() { free(); }
 
   explicit Object(GBool boolnA)
     { type = objBool; booln = boolnA; }
@@ -296,15 +294,8 @@ public:
   void print(FILE *f = stdout) const;
 
 private:
-  friend class Array; // Needs free and initNullAfterMalloc
-  friend class Dict; // Needs free and initNullAfterMalloc
-  friend class XRef; // Needs free and initNullAfterMalloc
-
   // Free object contents.
   void free();
-
-  // Only use if are mallocing Objects
-  void initNullAfterMalloc() { type = objNull; }
 
   ObjType type;			// object type
   union {			// value for each type:
