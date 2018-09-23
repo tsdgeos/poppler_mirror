@@ -149,9 +149,6 @@ public:
   UnicodeMap *getUnicodeMap(GooString *encodingName);
   CMap *getCMap(const GooString *collection, GooString *cMapName, Stream *stream = NULL);
   UnicodeMap *getTextEncoding();
-#ifdef ENABLE_PLUGINS
-  GBool loadPlugin(char *type, char *name);
-#endif
 
   GooList *getEncodingNames();
 
@@ -170,11 +167,6 @@ public:
   void setErrQuiet(GBool errQuietA);
 
   static GBool parseYesNo2(const char *token, GBool *flag);
-
-  //----- security handlers
-
-  void addSecurityHandler(XpdfSecurityHandler *handler);
-  XpdfSecurityHandler *getSecurityHandler(char *name);
 
 private:
 
@@ -236,12 +228,6 @@ private:
   UnicodeMapCache *unicodeMapCache;
   CMapCache *cMapCache;
   
-#ifdef ENABLE_PLUGINS
-  GooList *plugins;		// list of plugins [Plugin]
-  GooList *securityHandlers;	// list of loaded security handlers
-				//   [XpdfSecurityHandler]
-#endif
-
   mutable std::recursive_mutex mutex;
   mutable std::recursive_mutex unicodeMapCacheMutex;
   mutable std::recursive_mutex cMapCacheMutex;

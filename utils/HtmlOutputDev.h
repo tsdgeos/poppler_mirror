@@ -333,9 +333,7 @@ private:
   void doFrame(int firstPage);
   GBool newHtmlOutlineLevel(FILE *output, const GooList *outlines, int level = 1);
   void newXmlOutlineLevel(FILE *output, const GooList *outlines);
-#ifndef DISABLE_OUTLINE
   int getOutlinePageNum(OutlineItem *item);
-#endif
   void drawJpegImage(GfxState *state, Stream *str);
   void drawPngImage(GfxState *state, Stream *str, int width, int height,
                     GfxImageColorMap *colorMap, GBool isMask = gFalse);

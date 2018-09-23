@@ -102,7 +102,7 @@ struct _PopplerStructureElement
   /*< private >*/
   GObject parent_instance;
   PopplerDocument *document;
-  StructElement *elem;
+  const StructElement *elem;
 };
 
 GList         *_poppler_document_get_layers (PopplerDocument *document);

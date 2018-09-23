@@ -372,7 +372,7 @@ void win32SetupPrinter(GooString *printer, GooString *printOpt,
     printerName = (char*)gmalloc(size);
     GetDefaultPrinterA(printerName, &size);
   } else {
-    printerName = gstrndup(printer->getCString(), printer->getLength());
+    printerName = copyString(printer->getCString(), printer->getLength());
   }
 
   //Query the size of the DEVMODE struct

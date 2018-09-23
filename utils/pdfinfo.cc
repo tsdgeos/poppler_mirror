@@ -940,7 +940,7 @@ int main(int argc, char *argv[]) {
 
   if (printMetadata) {
     // print the metadata
-    GooString *metadata = doc->readMetadata();
+    const GooString *metadata = doc->readMetadata();
     if (metadata) {
       fputs(metadata->getCString(), stdout);
       fputc('\n', stdout);

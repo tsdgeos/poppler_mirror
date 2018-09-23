@@ -134,9 +134,7 @@ public:
 
   virtual void updateWidgetAppearance() = 0;
 
-#ifdef DEBUG_FORMS
   void print(int indent = 0);
-#endif
 
 protected:
   FormWidget(PDFDoc *docA, Object *aobj, unsigned num, Ref aref, FormField *fieldA);
@@ -324,11 +322,8 @@ public:
 
   void createWidgetAnnotations();
 
-#ifdef DEBUG_FORMS
   void printTree(int indent = 0);
   virtual void print(int indent = 0);
-#endif
-
 
  protected:
   void _createWidget (Object *obj, Ref aref);
@@ -389,9 +384,7 @@ public:
   FormFieldButton* getSibling (int i) const { return siblings[i]; }
   int getNumSiblings () const { return numSiblings; }
 
-#ifdef DEBUG_FORMS
-  void print(int indent = 0);
-#endif
+  void print(int indent) override;
 
   ~FormFieldButton();
 protected:
@@ -435,9 +428,7 @@ public:
   //set the font size of the field's text (currently only integer values)
   void setTextFontSize(int fontSize);
 
-#ifdef DEBUG_FORMS
-  void print(int indent = 0);
-#endif
+  void print(int indent) override;
 
   static int tokenizeDA(const GooString* daString, GooList* daToks, const char* searchTok);
 
@@ -498,9 +489,7 @@ public:
 
   int getTopIndex() const { return topIdx; }
 
-#ifdef DEBUG_FORMS
-  void print(int indent = 0);
-#endif
+  void print(int indent) override;
 
 protected:
   void unselectAll();
@@ -549,9 +538,7 @@ private:
   GooString *signature;
   SignatureInfo *signature_info;
 
-#ifdef DEBUG_FORMS
-  void print(int indent = 0);
-#endif
+  void print(int indent) override;
 };
 
 //------------------------------------------------------------------------

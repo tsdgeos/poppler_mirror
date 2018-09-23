@@ -107,11 +107,9 @@ FormWidget::~FormWidget()
     widget->decRefCnt();
 }
 
-#ifdef DEBUG_FORMS
 void FormWidget::print(int indent) {
   printf ("%*s+ (%d %d): [widget]\n", indent, "", ref.num, ref.gen);
 }
-#endif
 
 void FormWidget::createWidgetAnnotation() {
   if (widget)
@@ -768,7 +766,6 @@ FormField::~FormField()
   delete fullyQualifiedName;
 }
 
-#ifdef DEBUG_FORMS
 void FormField::print(int indent)
 {
   printf ("%*s- (%d %d): [container] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
@@ -786,7 +783,6 @@ void FormField::printTree(int indent)
       children[i]->printTree(indent + 4);
   }
 }
-#endif
 
 void FormField::fillChildrenSiblingsID()
 {
@@ -1008,8 +1004,7 @@ FormFieldButton::FormFieldButton(PDFDoc *docA, Object *aobj, const Ref& ref, For
   }
 }
 
-#ifdef DEBUG_FORMS
-static char *_getButtonType(FormButtonType type)
+static const char *_getButtonType(FormButtonType type)
 {
   switch (type) {
   case formButtonPush:
@@ -1029,7 +1024,6 @@ void FormFieldButton::print(int indent)
   printf ("%*s- (%d %d): [%s] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
           _getButtonType(btype), terminal ? "Yes" : "No", numChildren);
 }
-#endif
 
 void FormFieldButton::setNumSiblings (int num)
 { 
@@ -1190,13 +1184,11 @@ FormFieldText::FormFieldText(PDFDoc *docA, Object *aobj, const Ref& ref, FormFie
   }
 }
 
-#ifdef DEBUG_FORMS
 void FormFieldText::print(int indent)
 {
   printf ("%*s- (%d %d): [text] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
           terminal ? "Yes" : "No", numChildren);
 }
-#endif
 
 void FormFieldText::setContentCopy (const GooString* new_content)
 {
@@ -1449,13 +1441,11 @@ FormFieldChoice::~FormFieldChoice()
   delete editedChoice;
 }
 
-#ifdef DEBUG_FORMS
 void FormFieldChoice::print(int indent)
 {
   printf ("%*s- (%d %d): [choice] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
           terminal ? "Yes" : "No", numChildren);
 }
-#endif
 
 void FormFieldChoice::updateSelection() {
   Object objV;
@@ -1779,13 +1769,11 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
   return signature_info;
 }
 
-#ifdef DEBUG_FORMS
 void FormFieldSignature::print(int indent)
 {
   printf ("%*s- (%d %d): [signature] terminal: %s children: %d\n", indent, "", ref.num, ref.gen,
           terminal ? "Yes" : "No", numChildren);
 }
-#endif
 
 //------------------------------------------------------------------------
 // Form
@@ -1871,10 +1859,8 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
     }
   }
 
-#ifdef DEBUG_FORMS
-  for (int i = 0; i < numFields; i++)
-    rootFields[i]->printTree();
-#endif
+//   for (int i = 0; i < numFields; i++)
+//     rootFields[i]->printTree();
 }
 
 Form::~Form() {

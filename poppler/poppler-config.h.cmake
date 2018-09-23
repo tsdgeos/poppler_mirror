@@ -115,10 +115,6 @@
 #cmakedefine USE_CMS 1
 #endif
 
-// Also, there are preprocessor symbols in the header files
-// that are used but never defined when building poppler using configure
-// or cmake: DISABLE_OUTLINE, ENABLE_PLUGINS, DEBUG_FORMS
-
 //------------------------------------------------------------------------
 // version
 //------------------------------------------------------------------------

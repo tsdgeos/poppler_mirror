@@ -63,14 +63,14 @@ public:
   // document can be opened (if it's unencrypted, or if a correct
   // password is obtained); false otherwise (encrypted and no correct
   // password).
-  GBool checkEncryption(GooString *ownerPassword,
-			GooString *userPassword);
+  GBool checkEncryption(const GooString *ownerPassword,
+			const GooString *userPassword);
 
   // Create authorization data for the specified owner and user
   // passwords.  If the security handler doesn't support "batch" mode,
   // this function should return NULL.
-  virtual void *makeAuthData(GooString *ownerPassword,
-			     GooString *userPassword) = 0;
+  virtual void *makeAuthData(const GooString *ownerPassword,
+			     const GooString *userPassword) = 0;
 
   // Construct authorization data, typically by prompting the user for
   // a password.  Returns an authorization data object, or NULL to
@@ -113,8 +113,8 @@ public:
   ~StandardSecurityHandler();
 
   GBool isUnencrypted() override;
-  void *makeAuthData(GooString *ownerPassword,
-			     GooString *userPassword) override;
+  void *makeAuthData(const GooString *ownerPassword,
+			     const GooString *userPassword) override;
   void *getAuthData() override;
   void freeAuthData(void *authData) override;
   GBool authorize(void *authData) override;
@@ -142,45 +142,5 @@ private:
   GooString *fileID;
   GBool ok;
 };
-
-#ifdef ENABLE_PLUGINS
-//------------------------------------------------------------------------
-// ExternalSecurityHandler
-//------------------------------------------------------------------------
-
-class ExternalSecurityHandler: public SecurityHandler {
-public:
-
-  ExternalSecurityHandler(PDFDoc *docA, Object *encryptDictA,
-			  XpdfSecurityHandler *xshA);
-  virtual ~ExternalSecurityHandler();
-
-  virtual void *makeAuthData(GooString *ownerPassword,
-			     GooString *userPassword);
-  virtual void *getAuthData();
-  virtual void freeAuthData(void *authData);
-  virtual GBool authorize(void *authData);
-  virtual int getPermissionFlags() { return permFlags; }
-  virtual GBool getOwnerPasswordOk() { return gFalse; }
-  virtual Guchar *getFileKey() { return fileKey; }
-  virtual int getFileKeyLength() { return fileKeyLength; }
-  virtual int getEncVersion() { return encVersion; }
-  virtual int getEncRevision() { return encRevision; }
-  virtual CryptAlgorithm getEncAlgorithm() { return encAlgorithm; }
-
-private:
-
-  Object encryptDict;
-  XpdfSecurityHandler *xsh;
-  void *docData;
-  int permFlags;
-  Guchar fileKey[16];
-  int fileKeyLength;
-  int encVersion;
-  int encRevision;
-  CryptAlgorithm encAlgorithm;
-  GBool ok;
-};
-#endif // ENABLE_PLUGINS
 
 #endif

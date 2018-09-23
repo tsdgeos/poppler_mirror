@@ -84,9 +84,7 @@
 #include "Parser.h"
 #include "SecurityHandler.h"
 #include "Decrypt.h"
-#ifndef DISABLE_OUTLINE
 #include "Outline.h"
-#endif
 #include "PDFDoc.h"
 #include "Hints.h"
 #include "UTF.h"
@@ -121,9 +119,7 @@ void PDFDoc::init()
   linearization = nullptr;
   catalog = nullptr;
   hints = nullptr;
-#ifndef DISABLE_OUTLINE
   outline = nullptr;
-#endif
   startXRefPos = -1;
   secHdlr = nullptr;
   pageCache = nullptr;
@@ -134,8 +130,8 @@ PDFDoc::PDFDoc()
   init();
 }
 
-PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
-	       GooString *userPassword, void *guiDataA) {
+PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword,
+	       const GooString *userPassword, void *guiDataA) {
 #ifdef _WIN32
   int n, i;
 #endif
@@ -188,12 +184,13 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
   guiData = guiDataA;
 
   // save both Unicode and 8-bit copies of the file name
-  fileName = new GooString();
+  GooString *fileNameG = new GooString();
   fileNameU = (wchar_t *)gmallocn(fileNameLen + 1, sizeof(wchar_t));
   for (i = 0; i < fileNameLen; ++i) {
-    fileName->append((char)fileNameA[i]);
+    fileNameG->append((char)fileNameA[i]);
     fileNameU[i] = fileNameA[i];
   }
+  fileName = fileNameG;
   fileNameU[fileNameLen] = L'\0';
   
   // try to open file
@@ -218,8 +215,8 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
 }
 #endif
 
-PDFDoc::PDFDoc(BaseStream *strA, GooString *ownerPassword,
-	       GooString *userPassword, void *guiDataA) {
+PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword,
+	       const GooString *userPassword, void *guiDataA) {
 #ifdef _WIN32
   int n, i;
 #endif
@@ -246,7 +243,7 @@ PDFDoc::PDFDoc(BaseStream *strA, GooString *ownerPassword,
   ok = setup(ownerPassword, userPassword);
 }
 
-GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
+GBool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword) {
   pdfdocLocker();
 
   if (str->getLength() <= 0)
@@ -330,11 +327,9 @@ PDFDoc::~PDFDoc() {
     gfree(pageCache);
   }
   delete secHdlr;
-#ifndef DISABLE_OUTLINE
   if (outline) {
     delete outline;
   }
-#endif
   if (catalog) {
     delete catalog;
   }
@@ -442,7 +437,7 @@ void PDFDoc::checkHeader() {
   // We don't do the version check. Don't add it back in.
 }
 
-GBool PDFDoc::checkEncryption(GooString *ownerPassword, GooString *userPassword) {
+GBool PDFDoc::checkEncryption(const GooString *ownerPassword, const GooString *userPassword) {
   GBool encrypted;
   GBool ret;
 
@@ -1956,7 +1951,6 @@ Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, G
   return objectsCount;
 }
 
-#ifndef DISABLE_OUTLINE
 Outline *PDFDoc::getOutline()
 {
   if (!outline) {
@@ -1967,9 +1961,8 @@ Outline *PDFDoc::getOutline()
 
   return outline;
 }
-#endif
 
-PDFDoc *PDFDoc::ErrorPDFDoc(int errorCode, GooString *fileNameA)
+PDFDoc *PDFDoc::ErrorPDFDoc(int errorCode, const GooString *fileNameA)
 {
   PDFDoc *doc = new PDFDoc();
   doc->errCode = errorCode;

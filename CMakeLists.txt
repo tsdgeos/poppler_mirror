@@ -391,7 +391,6 @@ set(poppler_SRCS
   poppler/StdinPDFDocBuilder.cc
   poppler/Sound.cc
   poppler/ViewerPreferences.cc
-  poppler/XpdfPluginAPI.cc
   poppler/Movie.cc
   poppler/Rendition.cc
 )
@@ -567,7 +566,6 @@ if(ENABLE_XPDF_HEADERS)
     poppler/StdinCachedFile.h
     poppler/StdinPDFDocBuilder.h
     poppler/UTF.h
-    poppler/XpdfPluginAPI.h
     poppler/Sound.h
     ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h
     DESTINATION include/poppler)

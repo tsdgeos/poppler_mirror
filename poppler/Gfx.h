@@ -127,7 +127,7 @@ public:
   Object lookupGState(const char *name);
   Object lookupGStateNF(const char *name);
 
-  GfxResources *getNext() { return next; }
+  GfxResources *getNext() const { return next; }
 
 private:
   GfxFont *doLookupFont(const char *name) const;
