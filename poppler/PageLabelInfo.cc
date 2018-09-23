@@ -6,6 +6,7 @@
 // Copyright (C) 2005, 2009, 2013, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Simon Kellner <kellner@kit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
