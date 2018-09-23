@@ -1040,13 +1040,13 @@ static struct {
   {"Helvetica-Bold",        "n019004l.pfb", "arialbd.ttf"},
   {"Helvetica-BoldOblique", "n019024l.pfb", "arialbi.ttf"},
   {"Helvetica-Oblique",     "n019023l.pfb", "ariali.ttf"},
-  {"Symbol",                "s050000l.pfb", NULL},
+  {"Symbol",                "s050000l.pfb", nullptr},
   {"Times-Bold",            "n021004l.pfb", "timesbd.ttf"},
   {"Times-BoldItalic",      "n021024l.pfb", "timesbi.ttf"},
   {"Times-Italic",          "n021023l.pfb", "timesi.ttf"},
   {"Times-Roman",           "n021003l.pfb", "times.ttf"},
-  {"ZapfDingbats",          "d050000l.pfb", NULL},
-  {NULL}
+  {"ZapfDingbats",          "d050000l.pfb", nullptr},
+  {nullptr, nullptr, nullptr}
 };
 
 static const char *displayFontDirs[] = {
@@ -1055,7 +1055,7 @@ static const char *displayFontDirs[] = {
   "/usr/share/fonts/default/Type1",
   "/usr/share/fonts/default/ghostscript",
   "/usr/share/fonts/type1/gsfonts",
-  NULL
+  nullptr
 };
 
 void GlobalParams::setupBaseFonts(char *dir) {
@@ -1069,14 +1069,14 @@ void GlobalParams::setupBaseFonts(char *dir) {
       continue;
     }
     fontName = new GooString(displayFontTab[i].name);
-    fileName = NULL;
+    fileName = nullptr;
     if (dir) {
       fileName = appendToPath(new GooString(dir), displayFontTab[i].t1FileName);
       if ((f = fopen(fileName->getCString(), "rb"))) {
 	      fclose(f);
       } else {
 	      delete fileName;
-	      fileName = NULL;
+	      fileName = nullptr;
       }
     }
     for (j = 0; !fileName && displayFontDirs[j]; ++j) {
@@ -1086,7 +1086,7 @@ void GlobalParams::setupBaseFonts(char *dir) {
 	      fclose(f);
       } else {
 	      delete fileName;
-	      fileName = NULL;
+	      fileName = nullptr;
       }
     }
     if (!fileName) {
@@ -1110,7 +1110,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
   const GooString *fontName = font->getName();
   if (!fontName) return nullptr;
 
-  path = NULL;
+  path = nullptr;
   globalParamsLocker();
   if ((fi = sysFonts->find(fontName, font->isFixedWidth(), gFalse))) {
     path = fi->path->copy();
