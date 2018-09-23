@@ -358,11 +358,7 @@ int main(int argc, char *argv[]) {
   else
       rawOrder = singleHtml;
 
-#ifdef DISABLE_OUTLINE
-  doOutline = gFalse;
-#else
   doOutline = doc->getOutline()->getItems() != nullptr;
-#endif
   // write text file
   htmlOut = new HtmlOutputDev(doc->getCatalog(), htmlFileName->getCString(), 
 	  docTitle->getCString(), 

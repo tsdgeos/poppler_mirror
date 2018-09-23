@@ -116,7 +116,7 @@
 #endif
 
 // Also, there are preprocessor symbols in the header files
-// that are used but never defined when building poppler: DISABLE_OUTLINE, DEBUG_FORMS
+// that are used but never defined when building poppler: DEBUG_FORMS
 
 //------------------------------------------------------------------------
 // version

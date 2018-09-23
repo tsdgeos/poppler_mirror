@@ -84,9 +84,7 @@
 #include "Parser.h"
 #include "SecurityHandler.h"
 #include "Decrypt.h"
-#ifndef DISABLE_OUTLINE
 #include "Outline.h"
-#endif
 #include "PDFDoc.h"
 #include "Hints.h"
 #include "UTF.h"
@@ -121,9 +119,7 @@ void PDFDoc::init()
   linearization = nullptr;
   catalog = nullptr;
   hints = nullptr;
-#ifndef DISABLE_OUTLINE
   outline = nullptr;
-#endif
   startXRefPos = -1;
   secHdlr = nullptr;
   pageCache = nullptr;
@@ -330,11 +326,9 @@ PDFDoc::~PDFDoc() {
     gfree(pageCache);
   }
   delete secHdlr;
-#ifndef DISABLE_OUTLINE
   if (outline) {
     delete outline;
   }
-#endif
   if (catalog) {
     delete catalog;
   }
@@ -1956,7 +1950,6 @@ Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, G
   return objectsCount;
 }
 
-#ifndef DISABLE_OUTLINE
 Outline *PDFDoc::getOutline()
 {
   if (!outline) {
@@ -1967,7 +1960,6 @@ Outline *PDFDoc::getOutline()
 
   return outline;
 }
-#endif
 
 PDFDoc *PDFDoc::ErrorPDFDoc(int errorCode, const GooString *fileNameA)
 {

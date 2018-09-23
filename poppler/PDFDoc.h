@@ -236,11 +236,8 @@ public:
   // Process the links for a page.
   void processLinks(OutputDev *out, int page);
 
-
-#ifndef DISABLE_OUTLINE
   // Return the outline object.
   Outline *getOutline();
-#endif
 
   // Is the file encrypted?
   GBool isEncrypted() { return xref->isEncrypted(); }
@@ -421,9 +418,7 @@ private:
   SecurityHandler *secHdlr;
   Catalog *catalog;
   Hints *hints;
-#ifndef DISABLE_OUTLINE
   Outline *outline;
-#endif
   Page **pageCache;
 
   GBool ok;
