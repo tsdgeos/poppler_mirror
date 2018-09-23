@@ -48,24 +48,24 @@ public:
 
   // Parse a CMap from <obj>, which can be a name or a stream.  Sets
   // the initial reference count to 1.  Returns NULL on failure.
-  static CMap *parse(CMapCache *cache, GooString *collectionA, Object *obj);
+  static CMap *parse(CMapCache *cache, const GooString *collectionA, Object *obj);
 
   // Create the CMap specified by <collection> and <cMapName>.  Sets
   // the initial reference count to 1.  Returns NULL on failure.
-  static CMap *parse(CMapCache *cache, GooString *collectionA,
-		     GooString *cMapNameA);
+  static CMap *parse(CMapCache *cache, const GooString *collectionA,
+		     const GooString *cMapNameA);
 
   // Parse a CMap from <str>.  Sets the initial reference count to 1.
   // Returns NULL on failure.
-  static CMap *parse(CMapCache *cache, GooString *collectionA, Stream *str);
+  static CMap *parse(CMapCache *cache, const GooString *collectionA, Stream *str);
 
   // Create the CMap specified by <collection> and <cMapName>.  Sets
   // the initial reference count to 1.
   // Stream is a stream containing the CMap, can be NULL and 
   // this means the CMap will be searched in the CMap files
   // Returns NULL on failure.
-  static CMap *parse(CMapCache *cache, GooString *collectionA,
-		     GooString *cMapNameA, Stream *stream);
+  static CMap *parse(CMapCache *cache, const GooString *collectionA,
+		     const GooString *cMapNameA, Stream *stream);
 
   ~CMap();
 
@@ -82,7 +82,7 @@ public:
 
   // Return true if this CMap matches the specified <collectionA>, and
   // <cMapNameA>.
-  GBool match(GooString *collectionA, GooString *cMapNameA);
+  GBool match(const GooString *collectionA, const GooString *cMapNameA);
 
   // Return the CID corresponding to the character code starting at
   // <s>, which contains <len> bytes.  Sets *<c> to the char code, and
@@ -136,7 +136,7 @@ public:
   // Stream is a stream containing the CMap, can be NULL and 
   // this means the CMap will be searched in the CMap files
   // Returns NULL on failure.
-  CMap *getCMap(GooString *collection, GooString *cMapName, Stream *stream);
+  CMap *getCMap(const GooString *collection, const GooString *cMapName, Stream *stream);
 
 private:
 

@@ -888,7 +888,7 @@ void FoFiTrueType::cvtCharStrings(char **encoding,
 				  int *codeToGID,
 				  FoFiOutputFunc outputFunc,
 				  void *outputStream) const {
-  char *name;
+  const char *name;
   GooString *buf;
   char buf2[16];
   int i, k;

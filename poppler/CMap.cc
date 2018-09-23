@@ -64,7 +64,7 @@ static int getCharFromStream(void *data) {
 
 //------------------------------------------------------------------------
 
-CMap *CMap::parse(CMapCache *cache, GooString *collectionA, Object *obj) {
+CMap *CMap::parse(CMapCache *cache, const GooString *collectionA, Object *obj) {
   CMap *cMap;
   GooString *cMapNameA;
 
@@ -87,8 +87,8 @@ CMap *CMap::parse(CMapCache *cache, GooString *collectionA, Object *obj) {
   return cMap;
 }
 
-CMap *CMap::parse(CMapCache *cache, GooString *collectionA,
-		  GooString *cMapNameA) {
+CMap *CMap::parse(CMapCache *cache, const GooString *collectionA,
+		  const GooString *cMapNameA) {
   FILE *f;
   CMap *cMap;
 
@@ -116,7 +116,7 @@ CMap *CMap::parse(CMapCache *cache, GooString *collectionA,
   return cMap;
 }
 
-CMap *CMap::parse(CMapCache *cache, GooString *collectionA, Stream *str) {
+CMap *CMap::parse(CMapCache *cache, const GooString *collectionA, Stream *str) {
   CMap *cMap = new CMap(collectionA->copy(), nullptr);
   Object obj1 = str->getDict()->lookup("UseCMap");
   if (!obj1.isNull()) {
@@ -129,8 +129,8 @@ CMap *CMap::parse(CMapCache *cache, GooString *collectionA, Stream *str) {
   return cMap;
 }
 
-CMap *CMap::parse(CMapCache *cache, GooString *collectionA,
-		  GooString *cMapNameA, Stream *stream) {
+CMap *CMap::parse(CMapCache *cache, const GooString *collectionA,
+		  const GooString *cMapNameA, Stream *stream) {
   FILE *f = nullptr;
   CMap *cmap;
   PSTokenizer *pst;
@@ -450,7 +450,7 @@ void CMap::decRefCnt() {
   }
 }
 
-GBool CMap::match(GooString *collectionA, GooString *cMapNameA) {
+GBool CMap::match(const GooString *collectionA, const GooString *cMapNameA) {
   return !collection->cmp(collectionA) && !cMapName->cmp(cMapNameA);
 }
 
@@ -537,7 +537,7 @@ CMapCache::~CMapCache() {
   }
 }
 
-CMap *CMapCache::getCMap(GooString *collection, GooString *cMapName, Stream *stream) {
+CMap *CMapCache::getCMap(const GooString *collection, const GooString *cMapName, Stream *stream) {
   CMap *cmap;
   int i, j;
 

@@ -2087,7 +2087,7 @@ const CharCodeToUnicode *GfxCIDFont::getToUnicode() const {
   return ctu;
 }
 
-GooString *GfxCIDFont::getCollection() {
+const GooString *GfxCIDFont::getCollection() const {
   return cMap ? cMap->getCollection() : nullptr;
 }
 

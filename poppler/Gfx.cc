@@ -3885,7 +3885,7 @@ void Gfx::doShowText(const GooString *s) {
   double originX, originY, tOriginX, tOriginY;
   double x0, y0, x1, y1;
   double tmp[4], newCTM[6];
-  double *oldCTM, *mat;
+  const double *oldCTM, *mat;
   Dict *resDict;
   Parser *oldParser;
   GfxState *savedState;

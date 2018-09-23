@@ -124,15 +124,15 @@ public:
   // lookups or text extraction with ZapfDingbats fonts.
   Unicode mapNameToUnicodeAll(const char *charName);
 
-  UnicodeMap *getResidentUnicodeMap(GooString *encodingName);
-  FILE *getUnicodeMapFile(GooString *encodingName);
-  FILE *findCMapFile(GooString *collection, GooString *cMapName);
-  FILE *findToUnicodeFile(GooString *name);
-  GooString *findFontFile(GooString *fontName);
-  GooString *findBase14FontFile(GooString *base14Name, GfxFont *font);
+  UnicodeMap *getResidentUnicodeMap(const GooString *encodingName);
+  FILE *getUnicodeMapFile(const GooString *encodingName);
+  FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
+  FILE *findToUnicodeFile(const GooString *name);
+  GooString *findFontFile(const GooString *fontName);
+  GooString *findBase14FontFile(const GooString *base14Name, GfxFont *font);
   GooString *findSystemFontFile(GfxFont *font, SysFontType *type,
-			      int *fontNum, GooString *substituteFontName = NULL, 
-		              GooString *base14Name = NULL);
+			      int *fontNum, GooString *substituteFontName = NULL,
+		              const GooString *base14Name = NULL);
   GBool getPSExpandSmaller();
   GBool getPSShrinkLarger();
   PSLevel getPSLevel();
@@ -147,7 +147,7 @@ public:
 
   CharCodeToUnicode *getCIDToUnicode(GooString *collection);
   UnicodeMap *getUnicodeMap(GooString *encodingName);
-  CMap *getCMap(GooString *collection, GooString *cMapName, Stream *stream = NULL);
+  CMap *getCMap(const GooString *collection, GooString *cMapName, Stream *stream = NULL);
   UnicodeMap *getTextEncoding();
 #ifdef ENABLE_PLUGINS
   GBool loadPlugin(char *type, char *name);
