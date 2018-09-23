@@ -229,7 +229,7 @@ public:
   GBool isName(const char *nameA) const
     { return type == objName && !strcmp(cString, nameA); }
   GBool isDict(const char *dictType) const;
-  GBool isStream(char *dictType) const;
+  GBool isStream(const char *dictType) const;
   GBool isCmd(const char *cmdA) const
     { return type == objCmd && !strcmp(cString, cmdA); }
 
@@ -285,7 +285,7 @@ public:
   Object dictGetValNF(int i) const;
 
   // Stream accessors.
-  GBool streamIs(char *dictType) const;
+  GBool streamIs(const char *dictType) const;
   void streamReset();
   void streamClose();
   int streamGetChar() const;
@@ -392,10 +392,10 @@ inline Object Object::dictGetValNF(int i) const
 
 #include "Stream.h"
 
-inline GBool Object::streamIs(char *dictType) const
+inline GBool Object::streamIs(const char *dictType) const
   { OBJECT_TYPE_CHECK(objStream); return stream->getDict()->is(dictType); }
 
-inline GBool Object::isStream(char *dictType) const
+inline GBool Object::isStream(const char *dictType) const
   { return type == objStream && streamIs(dictType); }
 
 inline void Object::streamReset()
