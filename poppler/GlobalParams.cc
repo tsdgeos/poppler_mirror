@@ -245,8 +245,8 @@ public:
 private:
 
 #ifdef _WIN32
-  SysFontInfo *makeWindowsFont(char *name, int fontNum,
-			       char *path);
+  SysFontInfo *makeWindowsFont(const char *name, int fontNum,
+			       const char *path);
 #endif
 
   GooList *fonts;			// [SysFontInfo]
@@ -712,24 +712,22 @@ static FcPattern *buildFcPattern(GfxFont *font, const GooString *base14Name)
       slant = -1,
       width = -1,
       spacing = -1;
-  bool deleteFamily = false;
-  char *family, *name, *modifiers;
+  const char *family;
   const char *start;
   FcPattern *p;
 
   // this is all heuristics will be overwritten if font had proper info
-  GooString copiedNameGooString(((base14Name == nullptr) ? font->getName() : base14Name)->getCString());
-  name = copiedNameGooString.getCString();
+  char *fontName = strdup(((base14Name == nullptr) ? font->getName() : base14Name)->getCString());
 
-  modifiers = strchr (name, ',');
+  const char *modifiers = strchr (fontName, ',');
   if (modifiers == nullptr)
-    modifiers = strchr (name, '-');
+    modifiers = strchr (fontName, '-');
 
   // remove the - from the names, for some reason, Fontconfig does not
   // understand "MS-Mincho" but does with "MS Mincho"
-  int len = strlen(name);
+  const int len = strlen(fontName);
   for (int i = 0; i < len; i++)
-    name[i] = (name[i] == '-' ? ' ' : name[i]);
+    fontName[i] = (fontName[i] == '-' ? ' ' : fontName[i]);
 
   start = nullptr;
   findModifier(modifiers, "Regular", &start);
@@ -751,14 +749,13 @@ static FcPattern *buildFcPattern(GfxFont *font, const GooString *base14Name)
   if (start) {
     // There have been "modifiers" in the name, crop them to obtain
     // the family name
-    family = new char[len+1];
-    strcpy(family, name);
-    int pos = (modifiers - name);
-    family[pos] = '\0';
-    deleteFamily = true;
+    family = strndup(fontName, modifiers - fontName);
+    free(fontName);
+    fontName = nullptr;
   }
   else {
-    family = name;
+    family = fontName;
+    fontName = nullptr;
   }
   
   // use font flags
@@ -769,13 +766,12 @@ static FcPattern *buildFcPattern(GfxFont *font, const GooString *base14Name)
   if (font->isItalic())
     slant = FC_SLANT_ITALIC;
   
+  bool freeFamily = true;
   // if the FontDescriptor specified a family name use it
   if (font->getFamily()) {
-    if (deleteFamily) {
-      delete[] family;
-      deleteFamily = false;
-    }
+    free((char*)family);
     family = font->getFamily()->getCString();
+    freeFamily = false;
   }
   
   // if the FontDescriptor specified a weight use it
@@ -819,8 +815,8 @@ static FcPattern *buildFcPattern(GfxFont *font, const GooString *base14Name)
   if (width != -1) FcPatternAddInteger(p, FC_WIDTH, width);
   if (spacing != -1) FcPatternAddInteger(p, FC_SPACING, spacing);
 
-  if (deleteFamily)
-    delete[] family;
+  if (freeFamily)
+    free((char*)family);
   return p;
 }
 #endif

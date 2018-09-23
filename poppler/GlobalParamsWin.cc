@@ -295,8 +295,8 @@ void SysFontList::scanWindowsFonts(GooString *winFontDir) {
   }
 }
 
-SysFontInfo *SysFontList::makeWindowsFont(char *name, int fontNum,
-					  char *path) {
+SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum,
+					  const char *path) {
   int n;
   GBool bold, italic, oblique, fixedWidth;
   GooString *s;

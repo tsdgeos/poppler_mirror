@@ -120,7 +120,6 @@ public:
   int getLength() const { return length; }
 
   // Get C string.
-  char *getCString() { return s; }
   const char *getCString() const { return s; }
 
   // Get <i>th character.
