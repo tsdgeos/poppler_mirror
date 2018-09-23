@@ -216,7 +216,7 @@ static void printISODate(Dict *infoDict, const char *key, const char *text)
   }
 }
 
-static void printBox(const char *text, PDFRectangle *box) {
+static void printBox(const char *text, const PDFRectangle *box) {
   printf("%s%8.2f %8.2f %8.2f %8.2f\n",
 	 text, box->x1, box->y1, box->x2, box->y2);
 }

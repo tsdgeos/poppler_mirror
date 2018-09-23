@@ -199,7 +199,7 @@ IdentityFunction::IdentityFunction() {
 IdentityFunction::~IdentityFunction() {
 }
 
-void IdentityFunction::transform(double *in, double *out) {
+void IdentityFunction::transform(const double *in, double *out) const {
   int i;
 
   for (i = 0; i < funcMaxOutputs; ++i) {
@@ -440,7 +440,7 @@ SampledFunction::SampledFunction(const SampledFunction *func) : Function(func) {
   ok = func->ok;
 }
 
-void SampledFunction::transform(double *in, double *out) {
+void SampledFunction::transform(const double *in, double *out) const {
   double x;
   int e[funcMaxInputs];
   double efrac0[funcMaxInputs];
@@ -522,12 +522,12 @@ void SampledFunction::transform(double *in, double *out) {
   }
 }
 
-GBool SampledFunction::hasDifferentResultSet(Function *func) {
+GBool SampledFunction::hasDifferentResultSet(const Function *func) const {
   if (func->getType() == 0) {
     SampledFunction *compTo = (SampledFunction *) func;
     if (compTo->getSampleNumber() != nSamples)
       return gTrue;
-    double *compSamples = compTo->getSamples();
+    const double *compSamples = compTo->getSamples();
     for (int i = 0; i < nSamples; i++) {
       if (samples[i] != compSamples[i])
         return gTrue;
@@ -630,7 +630,7 @@ ExponentialFunction::ExponentialFunction(const ExponentialFunction *func) : Func
   ok = func->ok;
 }
 
-void ExponentialFunction::transform(double *in, double *out) {
+void ExponentialFunction::transform(const double *in, double *out) const {
   double x;
   int i;
 
@@ -798,7 +798,7 @@ StitchingFunction::~StitchingFunction() {
   gfree(scale);
 }
 
-void StitchingFunction::transform(double *in, double *out) {
+void StitchingFunction::transform(const double *in, double *out) const {
   double x;
   int i;
 
@@ -1215,7 +1215,7 @@ PostScriptFunction::~PostScriptFunction() {
   delete codeString;
 }
 
-void PostScriptFunction::transform(double *in, double *out) {
+void PostScriptFunction::transform(const double *in, double *out) const {
   PSStack stack;
   int i;
 
@@ -1441,7 +1441,7 @@ void PostScriptFunction::resizeCode(int newSize) {
   }
 }
 
-void PostScriptFunction::exec(PSStack *stack, int codePtr) {
+void PostScriptFunction::exec(PSStack *stack, int codePtr) const {
   int i1, i2;
   double r1, r2, result;
   GBool b1, b2;

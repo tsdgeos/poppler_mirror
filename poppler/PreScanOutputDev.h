@@ -86,8 +86,8 @@ public:
   void fill(GfxState *state) override;
   void eoFill(GfxState *state) override;
   GBool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
-			  double *pmat, int paintType, int tilingType, Dict *resDict,
-			  double *mat, double *bbox,
+			  const double *pmat, int paintType, int tilingType, Dict *resDict,
+			  const double *mat, const double *bbox,
 			  int x0, int y0, int x1, int y1,
 			  double xStep, double yStep) override;
   GBool functionShadedFill(GfxState *state,
@@ -130,12 +130,12 @@ public:
 			   GBool maskInterpolate) override;
 
   //----- transparency groups and soft masks
-  void beginTransparencyGroup(GfxState *state, double *bbox,
+  void beginTransparencyGroup(GfxState *state, const double *bbox,
 			      GfxColorSpace *blendingColorSpace,
 			      GBool isolated, GBool knockout,
 			      GBool forSoftMask) override;
-  void paintTransparencyGroup(GfxState *state, double *bbox) override;
-  void setSoftMask(GfxState *state, double *bbox, GBool alpha,
+  void paintTransparencyGroup(GfxState *state, const double *bbox) override;
+  void setSoftMask(GfxState *state, const double *bbox, GBool alpha,
 		   Function *transferFunc, GfxColor *backdropColor) override;
 
   //----- special access
@@ -166,7 +166,7 @@ public:
 
 private:
 
-  void check(GfxColorSpace *colorSpace, GfxColor *color,
+  void check(GfxColorSpace *colorSpace, const GfxColor *color,
 	     double opacity, GfxBlendMode blendMode);
 
   PDFDoc *doc;

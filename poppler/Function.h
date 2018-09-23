@@ -65,7 +65,7 @@ public:
   // Initialize the entries common to all function types.
   GBool init(Dict *dict);
 
-  virtual Function *copy() = 0;
+  virtual Function *copy() const = 0;
 
   // Return the function type:
   //   -1 : identity
@@ -73,23 +73,23 @@ public:
   //    2 : exponential
   //    3 : stitching
   //    4 : PostScript
-  virtual int getType() = 0;
+  virtual int getType() const = 0;
 
   // Return size of input and output tuples.
-  int getInputSize() { return m; }
-  int getOutputSize() { return n; }
+  int getInputSize() const { return m; }
+  int getOutputSize() const { return n; }
 
-  double getDomainMin(int i) { return domain[i][0]; }
-  double getDomainMax(int i) { return domain[i][1]; }
-  double getRangeMin(int i) { return range[i][0]; }
-  double getRangeMax(int i) { return range[i][1]; }
-  GBool getHasRange() { return hasRange; }
-  virtual GBool hasDifferentResultSet(Function *func) { return gFalse; }
+  double getDomainMin(int i) const { return domain[i][0]; }
+  double getDomainMax(int i) const { return domain[i][1]; }
+  double getRangeMin(int i) const { return range[i][0]; }
+  double getRangeMax(int i) const { return range[i][1]; }
+  GBool getHasRange() const { return hasRange; }
+  virtual GBool hasDifferentResultSet(const Function *func) const { return gFalse; }
 
   // Transform an input tuple into an output tuple.
-  virtual void transform(double *in, double *out) = 0;
+  virtual void transform(const double *in, double *out) const = 0;
 
-  virtual GBool isOk() = 0;
+  virtual GBool isOk() const = 0;
 
 protected:
   static Function *parse(Object *funcObj, std::set<int> *usedParents);
@@ -113,10 +113,10 @@ public:
 
   IdentityFunction();
   ~IdentityFunction();
-  Function *copy() override { return new IdentityFunction(); }
-  int getType() override { return -1; }
-  void transform(double *in, double *out) override;
-  GBool isOk() override { return gTrue; }
+  Function *copy() const override { return new IdentityFunction(); }
+  int getType() const override { return -1; }
+  void transform(const double *in, double *out) const override;
+  GBool isOk() const override { return gTrue; }
 
 private:
 };
@@ -130,19 +130,19 @@ public:
 
   SampledFunction(Object *funcObj, Dict *dict);
   ~SampledFunction();
-  Function *copy() override { return new SampledFunction(this); }
-  int getType() override { return 0; }
-  void transform(double *in, double *out) override;
-  GBool isOk() override { return ok; }
-  GBool hasDifferentResultSet(Function *func) override;
+  Function *copy() const override { return new SampledFunction(this); }
+  int getType() const override { return 0; }
+  void transform(const double *in, double *out) const override;
+  GBool isOk() const override { return ok; }
+  GBool hasDifferentResultSet(const Function *func) const override;
 
-  int getSampleSize(int i) { return sampleSize[i]; }
-  double getEncodeMin(int i) { return encode[i][0]; }
-  double getEncodeMax(int i) { return encode[i][1]; }
-  double getDecodeMin(int i) { return decode[i][0]; }
-  double getDecodeMax(int i) { return decode[i][1]; }
-  double *getSamples() { return samples; }
-  int getSampleNumber() { return nSamples; }
+  int getSampleSize(int i) const { return sampleSize[i]; }
+  double getEncodeMin(int i) const { return encode[i][0]; }
+  double getEncodeMax(int i) const { return encode[i][1]; }
+  double getDecodeMin(int i) const { return decode[i][0]; }
+  double getDecodeMax(int i) const { return decode[i][1]; }
+  const double *getSamples() const { return samples; }
+  int getSampleNumber() const { return nSamples; }
 
 private:
 
@@ -160,8 +160,8 @@ private:
   double *samples;		// the samples
   int nSamples;			// size of the samples array
   double *sBuf;			// buffer for the transform function
-  double cacheIn[funcMaxInputs];
-  double cacheOut[funcMaxOutputs];
+  mutable double cacheIn[funcMaxInputs];
+  mutable double cacheOut[funcMaxOutputs];
   GBool ok;
 };
 
@@ -174,14 +174,14 @@ public:
 
   ExponentialFunction(Object *funcObj, Dict *dict);
   ~ExponentialFunction();
-  Function *copy() override { return new ExponentialFunction(this); }
-  int getType() override { return 2; }
-  void transform(double *in, double *out) override;
-  GBool isOk() override { return ok; }
+  Function *copy() const override { return new ExponentialFunction(this); }
+  int getType() const override { return 2; }
+  void transform(const double *in, double *out) const override;
+  GBool isOk() const override { return ok; }
 
-  double *getC0() { return c0; }
-  double *getC1() { return c1; }
-  double getE() { return e; }
+  const double *getC0() const { return c0; }
+  const double *getC1() const { return c1; }
+  double getE() const { return e; }
 
 private:
 
@@ -203,16 +203,16 @@ public:
 
   StitchingFunction(Object *funcObj, Dict *dict, std::set<int> *usedParents);
   ~StitchingFunction();
-  Function *copy() override { return new StitchingFunction(this); }
-  int getType() override { return 3; }
-  void transform(double *in, double *out) override;
-  GBool isOk() override { return ok; }
+  Function *copy() const override { return new StitchingFunction(this); }
+  int getType() const override { return 3; }
+  void transform(const double *in, double *out) const override;
+  GBool isOk() const override { return ok; }
 
-  int getNumFuncs() { return k; }
-  Function *getFunc(int i) { return funcs[i]; }
-  double *getBounds() { return bounds; }
-  double *getEncode() { return encode; }
-  double *getScale() { return scale; }
+  int getNumFuncs() const { return k; }
+  const Function *getFunc(int i) const { return funcs[i]; }
+  const double *getBounds() const { return bounds; }
+  const double *getEncode() const { return encode; }
+  const double *getScale() const { return scale; }
 
 private:
 
@@ -235,10 +235,10 @@ public:
 
   PostScriptFunction(Object *funcObj, Dict *dict);
   ~PostScriptFunction();
-  Function *copy() override { return new PostScriptFunction(this); }
-  int getType() override { return 4; }
-  void transform(double *in, double *out) override;
-  GBool isOk() override { return ok; }
+  Function *copy() const override { return new PostScriptFunction(this); }
+  int getType() const override { return 4; }
+  void transform(const double *in, double *out) const override;
+  GBool isOk() const override { return ok; }
 
   const GooString *getCodeString() const { return codeString; }
 
@@ -248,13 +248,13 @@ private:
   GBool parseCode(Stream *str, int *codePtr);
   GooString *getToken(Stream *str);
   void resizeCode(int newSize);
-  void exec(PSStack *stack, int codePtr);
+  void exec(PSStack *stack, int codePtr) const;
 
   GooString *codeString;
   PSObject *code;
   int codeSize;
-  double cacheIn[funcMaxInputs];
-  double cacheOut[funcMaxOutputs];
+  mutable double cacheIn[funcMaxInputs];
+  mutable double cacheOut[funcMaxOutputs];
   GBool ok;
 };
 

@@ -252,7 +252,7 @@ void ArthurOutputDev::updateAll(GfxState *state)
 }
 
 // Set CTM (Current Transformation Matrix) to a fixed matrix
-void ArthurOutputDev::setDefaultCTM(double *ctm)
+void ArthurOutputDev::setDefaultCTM(const double *ctm)
 {
   m_painter.top()->setTransform(QTransform(ctm[0], ctm[1], ctm[2], ctm[3], ctm[4], ctm[5]));
 }
@@ -1225,7 +1225,7 @@ void ArthurOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *
   m_painter.top()->drawImage( QRect(0,0,1,1), image );
 }
 
-void ArthurOutputDev::beginTransparencyGroup(GfxState * /*state*/, double * /*bbox*/,
+void ArthurOutputDev::beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/,
                                              GfxColorSpace * /*blendingColorSpace*/,
                                              GBool /*isolated*/, GBool /*knockout*/,
                                              GBool /*forSoftMask*/)
@@ -1258,7 +1258,7 @@ void ArthurOutputDev::endTransparencyGroup(GfxState * /*state*/)
   m_qpictures.pop();
 }
 
-void ArthurOutputDev::paintTransparencyGroup(GfxState * /*state*/, double * /*bbox*/)
+void ArthurOutputDev::paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/)
 {
   // Actually draw the transparency group
   m_painter.top()->drawPicture(0,0,*m_lastTransparencyGroupPicture);

@@ -118,7 +118,7 @@ private:
 
   void endSpan();
   bool inMarkedContent() const { return mcidStack.size() > 0; }
-  bool needFontChange(GfxFont* font) const;
+  bool needFontChange(const GfxFont* font) const;
 
   GfxFont         *currentFont;
   GooString       *currentText;

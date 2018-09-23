@@ -212,7 +212,7 @@ void AnnotationPrivate::fillNormalizationMTX(double MTX[6], int pageRotation) co
 
     // build a normalized transform matrix for this page at 100% scale
     GfxState * gfxState = new GfxState( 72.0, 72.0, pdfPage->getCropBox(), pageRotation, gTrue );
-    double * gfxCTM = gfxState->getCTM();
+    const double * gfxCTM = gfxState->getCTM();
 
     double w = pdfPage->getCropWidth();
     double h = pdfPage->getCropHeight();

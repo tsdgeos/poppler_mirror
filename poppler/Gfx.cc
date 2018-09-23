@@ -532,8 +532,8 @@ Object GfxResources::lookupGStateNF(const char *name) {
 //------------------------------------------------------------------------
 
 Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
-	 double hDPI, double vDPI, PDFRectangle *box,
-	 PDFRectangle *cropBox, int rotate,
+	 double hDPI, double vDPI, const PDFRectangle *box,
+	 const PDFRectangle *cropBox, int rotate,
 	 GBool (*abortCheckCbkA)(void *data),
 	 void *abortCheckCbkDataA, XRef *xrefA)
 {
@@ -588,7 +588,7 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
 }
 
 Gfx::Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict,
-	 PDFRectangle *box, PDFRectangle *cropBox,
+	 const PDFRectangle *box, const PDFRectangle *cropBox,
 	 GBool (*abortCheckCbkA)(void *data),
 	 void *abortCheckCbkDataA, Gfx *gfxA)
 {
@@ -2033,7 +2033,7 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat,
   double xMin, yMin, xMax, yMax, x, y, x1, y1;
   double cxMin, cyMin, cxMax, cyMax;
   int xi0, yi0, xi1, yi1, xi, yi;
-  double *ctm, *btm, *ptm;
+  const double *ctm, *btm, *ptm;
   double m[6], ictm[6], m1[6], imb[6];
   double det;
   double xstep, ystep;
@@ -2255,7 +2255,7 @@ void Gfx::doShadingPatternFill(GfxShadingPattern *sPat,
 			       GBool stroke, GBool eoFill, GBool text) {
   GfxShading *shading;
   GfxState *savedState;
-  double *ctm, *btm, *ptm;
+  const double *ctm, *btm, *ptm;
   double m[6], ictm[6], m1[6];
   double xMin, yMin, xMax, yMax;
   double det;
@@ -2482,12 +2482,11 @@ void Gfx::doFunctionShFill1(GfxFunctionShading *shading,
   GfxColor fillColor;
   GfxColor color0M, color1M, colorM0, colorM1, colorMM;
   GfxColor colors2[4];
-  double *matrix;
   double xM, yM;
   int nComps, i, j;
 
   nComps = shading->getColorSpace()->getNComps();
-  matrix = shading->getMatrix();
+  const double *matrix = shading->getMatrix();
 
   // compare the four corner colors
   for (i = 0; i < 4; ++i) {
@@ -2916,7 +2915,6 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
   double sz, xz, yz, sMin, sMax;
   GBool enclosed;
   int ia, ib, k, n;
-  double *ctm;
   double theta, alpha, angle, t;
   GBool needExtend = gTrue;
 
@@ -3029,7 +3027,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
   // achieve a curve flatness of 0.1 pixel in device space for the
   // largest circle (note that "device space" is 72 dpi when generating
   // PostScript, hence the relatively small 0.1 pixel accuracy)
-  ctm = state->getCTM();
+  const double *ctm = state->getCTM();
   t = fabs(ctm[0]);
   if (fabs(ctm[1]) > t) {
     t = fabs(ctm[1]);
@@ -3478,7 +3476,7 @@ void Gfx::doPatchMeshShFill(GfxPatchMeshShading *shading) {
 }
 
 
-void Gfx::fillPatch(GfxPatch *patch, int colorComps, int patchColorComps, double refineColorThreshold, int depth, GfxPatchMeshShading *shading) {
+void Gfx::fillPatch(const GfxPatch *patch, int colorComps, int patchColorComps, double refineColorThreshold, int depth, const GfxPatchMeshShading *shading) {
   GfxPatch patch00, patch01, patch10, patch11;
   double xx[4][8], yy[4][8];
   double xxm, yym;
@@ -4773,7 +4771,7 @@ void Gfx::doForm(Object *str) {
   ocState = ocSaved;
 }
 
-void Gfx::drawForm(Object *str, Dict *resDict, double *matrix, double *bbox,
+void Gfx::drawForm(Object *str, Dict *resDict, const double *matrix, const double *bbox,
 		  GBool transpGroup, GBool softMask,
 		  GfxColorSpace *blendingColorSpace,
 		  GBool isolated, GBool knockout,

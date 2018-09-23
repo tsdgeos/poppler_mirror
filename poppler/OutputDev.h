@@ -132,7 +132,7 @@ public:
   //----- initialization and control
 
   // Set default transform matrix.
-  virtual void setDefaultCTM(double *ctm);
+  virtual void setDefaultCTM(const double *ctm);
 
   // Check to see if a page slice should be displayed.  If this
   // returns false, the page display is aborted.  Typically, an
@@ -163,8 +163,8 @@ public:
   virtual void cvtDevToUser(double dx, double dy, double *ux, double *uy);
   virtual void cvtUserToDev(double ux, double uy, int *dx, int *dy);
 
-  double *getDefCTM() { return defCTM; }
-  double *getDefICTM() { return defICTM; }
+  const double *getDefCTM() const { return defCTM; }
+  const double *getDefICTM() const { return defICTM; }
 
   //----- save/restore graphics state
   virtual void saveState(GfxState * /*state*/) {}
@@ -222,8 +222,8 @@ public:
   virtual void fill(GfxState * /*state*/) {}
   virtual void eoFill(GfxState * /*state*/) {}
   virtual GBool tilingPatternFill(GfxState * /*state*/, Gfx * /*gfx*/, Catalog * /*cat*/, Object * /*str*/,
-				  double * /*pmat*/, int /*paintType*/, int /*tilingType*/, Dict * /*resDict*/,
-				  double * /*mat*/, double * /*bbox*/,
+				  const double * /*pmat*/, int /*paintType*/, int /*tilingType*/, Dict * /*resDict*/,
+				  const double * /*mat*/, const double * /*bbox*/,
 				  int /*x0*/, int /*y0*/, int /*x1*/, int /*y1*/,
 				  double /*xStep*/, double /*yStep*/)
     { return gFalse; }
@@ -354,13 +354,13 @@ public:
 
   //----- transparency groups and soft masks
   virtual GBool checkTransparencyGroup(GfxState * /*state*/, GBool /*knockout*/) { return gTrue; }
-  virtual void beginTransparencyGroup(GfxState * /*state*/, double * /*bbox*/,
+  virtual void beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/,
 				      GfxColorSpace * /*blendingColorSpace*/,
 				      GBool /*isolated*/, GBool /*knockout*/,
 				      GBool /*forSoftMask*/) {}
   virtual void endTransparencyGroup(GfxState * /*state*/) {}
-  virtual void paintTransparencyGroup(GfxState * /*state*/, double * /*bbox*/) {}
-  virtual void setSoftMask(GfxState * /*state*/, double * /*bbox*/, GBool /*alpha*/,
+  virtual void paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/) {}
+  virtual void setSoftMask(GfxState * /*state*/, const double * /*bbox*/, GBool /*alpha*/,
 			   Function * /*transferFunc*/, GfxColor * /*backdropColor*/) {}
   virtual void clearSoftMask(GfxState * /*state*/) {}
 

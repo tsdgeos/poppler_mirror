@@ -169,7 +169,7 @@ public:
 
   // Write the document-level header.
   void writeHeader(const std::vector<int> &pages,
-		   PDFRectangle *mediaBox, PDFRectangle *cropBox,
+		   const PDFRectangle *mediaBox, const PDFRectangle *cropBox,
 		   int pageRotate, char *pstitle);
 
   // Write the Xpdf procset.
@@ -242,8 +242,8 @@ public:
   void fill(GfxState *state) override;
   void eoFill(GfxState *state) override;
   GBool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
-				  double *pmat, int paintType, int tilingType, Dict *resDict,
-				  double *mat, double *bbox,
+				  const double *pmat, int paintType, int tilingType, Dict *resDict,
+				  const double *mat, const double *bbox,
 				  int x0, int y0, int x1, int y1,
 				  double xStep, double yStep) override;
   GBool functionShadedFill(GfxState *state,
@@ -411,13 +411,13 @@ private:
 			GBool genXform, GBool updateColors,
 			GBool map01);
   GBool tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str,
-			    double *pmat, int paintType, int tilingType, Dict *resDict,
-			    double *mat, double *bbox,
+			    const double *pmat, int paintType, int tilingType, Dict *resDict,
+			    const double *mat, const double *bbox,
 			    int x0, int y0, int x1, int y1,
 			    double xStep, double yStep);
   GBool tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str,
-			    double *pmat, int paintType, int tilingType, Dict *resDict,
-			    double *mat, double *bbox,
+			    const double *pmat, int paintType, int tilingType, Dict *resDict,
+			    const double *mat, const double *bbox,
 			    int x0, int y0, int x1, int y1,
 			    double xStep, double yStep);
 
@@ -427,7 +427,7 @@ private:
   void opiTransform(GfxState *state, double x0, double y0,
 		    double *x1, double *y1);
 #endif
-  void cvtFunction(Function *func, GBool invertPSFunction = gFalse);
+  void cvtFunction(const Function *func, GBool invertPSFunction = gFalse);
   GooString *filterPSName(const GooString *name);
 
   // Write the document-level setup.

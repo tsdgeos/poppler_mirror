@@ -131,7 +131,7 @@ double page::duration() const
  */
 rectf page::page_rect(page_box_enum box) const
 {
-    PDFRectangle *r = nullptr;
+    const PDFRectangle *r = nullptr;
     switch (box) {
     case media_box:
         r = d->page->getMediaBox();
@@ -277,13 +277,13 @@ ustring page::text(const rectf &r, text_layout_enum layout_mode) const
     TextOutputDev td(nullptr, gFalse, 0, use_raw_order, gFalse);
     d->doc->doc->displayPage(&td, d->index + 1, 72, 72, 0, false, true, false);
     if (r.is_empty()) {
-        PDFRectangle *rect = d->page->getCropBox();
+        PDFRectangle rect = *d->page->getCropBox();
         const int rotate = d->page->getRotate();
         if (rotate == 90 || rotate == 270) {
-            std::swap(rect->x1, rect->y1);
-            std::swap(rect->x2, rect->y2);
+            std::swap(rect.x1, rect.y1);
+            std::swap(rect.x2, rect.y2);
         }
-        s.reset(td.getText(rect->x1, rect->y1, rect->x2, rect->y2));
+        s.reset(td.getText(rect.x1, rect.y1, rect.x2, rect.y2));
     } else {
         s.reset(td.getText(r.left(), r.top(), r.right(), r.bottom()));
     }

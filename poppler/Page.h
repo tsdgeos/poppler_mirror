@@ -85,13 +85,13 @@ public:
   ~PageAttrs();
 
   // Accessors.
-  PDFRectangle *getMediaBox() { return &mediaBox; }
-  PDFRectangle *getCropBox() { return &cropBox; }
-  GBool isCropped() { return haveCropBox; }
-  PDFRectangle *getBleedBox() { return &bleedBox; }
-  PDFRectangle *getTrimBox() { return &trimBox; }
-  PDFRectangle *getArtBox() { return &artBox; }
-  int getRotate() { return rotate; }
+  const PDFRectangle *getMediaBox() const { return &mediaBox; }
+  const PDFRectangle *getCropBox() const { return &cropBox; }
+  GBool isCropped() const { return haveCropBox; }
+  const PDFRectangle *getBleedBox() const { return &bleedBox; }
+  const PDFRectangle *getTrimBox() const { return &trimBox; }
+  const PDFRectangle *getArtBox() const { return &artBox; }
+  int getRotate() const { return rotate; }
   const GooString *getLastModified() const
     { return lastModified.isString()
 	? lastModified.getString() : nullptr; }
@@ -153,25 +153,25 @@ public:
   Page& operator=(const Page &) = delete;
 
   // Is page valid?
-  GBool isOk() { return ok; }
+  GBool isOk() const { return ok; }
 
   // Get page parameters.
-  int getNum() { return num; }
-  PDFRectangle *getMediaBox() { return attrs->getMediaBox(); }
-  PDFRectangle *getCropBox() { return attrs->getCropBox(); }
-  GBool isCropped() { return attrs->isCropped(); }
-  double getMediaWidth() 
+  int getNum() const { return num; }
+  const PDFRectangle *getMediaBox() const { return attrs->getMediaBox(); }
+  const PDFRectangle *getCropBox() const { return attrs->getCropBox(); }
+  GBool isCropped() const { return attrs->isCropped(); }
+  double getMediaWidth() const
     { return attrs->getMediaBox()->x2 - attrs->getMediaBox()->x1; }
-  double getMediaHeight()
+  double getMediaHeight() const
     { return attrs->getMediaBox()->y2 - attrs->getMediaBox()->y1; }
-  double getCropWidth() 
+  double getCropWidth() const
     { return attrs->getCropBox()->x2 - attrs->getCropBox()->x1; }
-  double getCropHeight()
+  double getCropHeight() const
     { return attrs->getCropBox()->y2 - attrs->getCropBox()->y1; }
-  PDFRectangle *getBleedBox() { return attrs->getBleedBox(); }
-  PDFRectangle *getTrimBox() { return attrs->getTrimBox(); }
-  PDFRectangle *getArtBox() { return attrs->getArtBox(); }
-  int getRotate() { return attrs->getRotate(); }
+  const PDFRectangle *getBleedBox() const { return attrs->getBleedBox(); }
+  const PDFRectangle *getTrimBox() const { return attrs->getTrimBox(); }
+  const PDFRectangle *getArtBox() const { return attrs->getArtBox(); }
+  int getRotate() const { return attrs->getRotate(); }
   const GooString *getLastModified() const { return attrs->getLastModified(); }
   Dict *getBoxColorInfo() { return attrs->getBoxColorInfo(); }
   Dict *getGroup() { return attrs->getGroup(); }

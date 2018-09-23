@@ -82,8 +82,8 @@ void PreScanOutputDev::eoFill(GfxState *state) {
 }
 
 GBool PreScanOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *catalog, Object *str,
-					  double *pmat, int paintType, int /*tilingType*/, Dict *resDict,
-					double *mat, double *bbox,
+					  const double *pmat, int paintType, int /*tilingType*/, Dict *resDict,
+					const double *mat, const double *bbox,
 					int x0, int y0, int x1, int y1,
 					double xStep, double yStep) {
   if (paintType == 1) {
@@ -153,7 +153,6 @@ void PreScanOutputDev::eoClip(GfxState * /*state*/) {
 
 void PreScanOutputDev::beginStringOp(GfxState *state) {
   int render;
-  GfxFont *font;
   double m11, m12, m21, m22;
   GBool simpleTTF;
 
@@ -167,7 +166,7 @@ void PreScanOutputDev::beginStringOp(GfxState *state) {
 	  state->getStrokeOpacity(), state->getBlendMode());
   }
 
-  font = state->getFont();
+  const GfxFont *font = state->getFont();
   state->getFontTransMat(&m11, &m12, &m21, &m22);
   //~ this should check for external fonts that are non-TrueType
   simpleTTF = fabs(m11 + m22) < 0.01 &&
@@ -315,26 +314,26 @@ void PreScanOutputDev::drawSoftMaskedImage(GfxState * /*state*/, Object * /*ref*
 }
 
 void PreScanOutputDev::beginTransparencyGroup(
-			   GfxState * /*state*/, double * /*bbox*/,
+			   GfxState * /*state*/, const double * /*bbox*/,
 			   GfxColorSpace * /*blendingColorSpace*/,
 			   GBool /*isolated*/, GBool /*knockout*/,
 			   GBool /*forSoftMask*/) {
   gdi = gFalse;
 }
 
-void PreScanOutputDev::paintTransparencyGroup(GfxState *state, double * /*bbox*/)
+void PreScanOutputDev::paintTransparencyGroup(GfxState *state, const double * /*bbox*/)
 {
   check(state->getFillColorSpace(), state->getFillColor(),
         state->getFillOpacity(), state->getBlendMode());
 }
 
-void PreScanOutputDev::setSoftMask(GfxState * /*state*/, double * /*bbox*/, GBool /*alpha*/,
+void PreScanOutputDev::setSoftMask(GfxState * /*state*/, const double * /*bbox*/, GBool /*alpha*/,
 			   Function * /*transferFunc*/, GfxColor * /*backdropColor*/)
 {
   transparency = gTrue;
 }
 
-void PreScanOutputDev::check(GfxColorSpace *colorSpace, GfxColor *color,
+void PreScanOutputDev::check(GfxColorSpace *colorSpace, const GfxColor *color,
 			     double opacity, GfxBlendMode blendMode) {
   GfxRGB rgb;
 

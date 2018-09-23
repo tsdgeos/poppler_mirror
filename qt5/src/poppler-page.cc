@@ -669,7 +669,6 @@ QString Page::text(const QRectF &r, TextLayout textLayout) const
 {
   TextOutputDev *output_dev;
   GooString *s;
-  PDFRectangle *rect;
   QString result;
   
   const GBool rawOrder = textLayout == RawOrderLayout;
@@ -679,7 +678,7 @@ QString Page::text(const QRectF &r, TextLayout textLayout) const
       nullptr, nullptr, nullptr, nullptr, gTrue);
   if (r.isNull())
   {
-    rect = m_page->page->getCropBox();
+    const PDFRectangle *rect = m_page->page->getCropBox();
     s = output_dev->getText(rect->x1, rect->y1, rect->x2, rect->y2);
   }
   else

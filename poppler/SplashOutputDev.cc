@@ -240,7 +240,7 @@ SplashFunctionPattern::SplashFunctionPattern(SplashColorMode colorModeA, GfxStat
   Matrix ctm;
   SplashColor defaultColor;
   GfxColor srcColor;
-  double *matrix = shadingA->getMatrix();
+  const double *matrix = shadingA->getMatrix();
 
   shading = shadingA;
   state = stateA;
@@ -1478,7 +1478,6 @@ void SplashOutputDev::startDoc(PDFDoc *docA) {
 
 void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   int w, h;
-  double *ctm;
   SplashCoord mat[6];
   SplashColor color;
 
@@ -1520,7 +1519,7 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   splash->setThinLineMode(thinLineMode);
   splash->setMinLineWidth(s_minLineWidth);
   if (state) {
-    ctm = state->getCTM();
+    const double *ctm = state->getCTM();
     mat[0] = (SplashCoord)ctm[0];
     mat[1] = (SplashCoord)ctm[1];
     mat[2] = (SplashCoord)ctm[2];
@@ -1607,10 +1606,9 @@ void SplashOutputDev::updateAll(GfxState *state) {
 void SplashOutputDev::updateCTM(GfxState *state, double m11, double m12,
 				double m21, double m22,
 				double m31, double m32) {
-  double *ctm;
   SplashCoord mat[6];
 
-  ctm = state->getCTM();
+  const double *ctm = state->getCTM();
   mat[0] = (SplashCoord)ctm[0];
   mat[1] = (SplashCoord)ctm[1];
   mat[2] = (SplashCoord)ctm[2];
@@ -1800,7 +1798,7 @@ SplashPattern *SplashOutputDev::getColor(GfxColor *deviceN) {
 }
 #endif
 
-void SplashOutputDev::getMatteColor(SplashColorMode colorMode, GfxImageColorMap *colorMap, GfxColor *matteColorIn, SplashColor matteColor) {
+void SplashOutputDev::getMatteColor(SplashColorMode colorMode, GfxImageColorMap *colorMap, const GfxColor *matteColorIn, SplashColor matteColor) {
   GfxGray gray;
   GfxRGB rgb;
 #ifdef SPLASH_CMYK
@@ -1848,7 +1846,7 @@ void SplashOutputDev::getMatteColor(SplashColorMode colorMode, GfxImageColorMap 
 void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace,
 				       GBool overprintFlag,
 				       int overprintMode,
-				       GfxColor *singleColor,
+				       const GfxColor *singleColor,
 				       GBool grayIndexed) {
 #ifdef SPLASH_CMYK
   Guint mask;
@@ -2008,7 +2006,7 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
   char *tmpBuf;
   int tmpBufLen;
   int *codeToGID;
-  double *textMat;
+  const double *textMat;
   double m11, m12, m21, m22, fontSize;
   int faceIndex = 0;
   SplashCoord mat[4];
@@ -2650,7 +2648,6 @@ GBool SplashOutputDev::beginType3Char(GfxState *state, double x, double y,
 
 void SplashOutputDev::endType3Char(GfxState *state) {
   T3GlyphStack *t3gs;
-  double *ctm;
 
   if (t3GlyphStack->cacheTag) {
     --nestCount;
@@ -2660,7 +2657,7 @@ void SplashOutputDev::endType3Char(GfxState *state) {
     delete splash;
     bitmap = t3GlyphStack->origBitmap;
     splash = t3GlyphStack->origSplash;
-    ctm = state->getCTM();
+    const double *ctm = state->getCTM();
     state->setCTM(ctm[0], ctm[1], ctm[2], ctm[3],
 		  t3GlyphStack->origCTM4, t3GlyphStack->origCTM5);
     updateCTM(state, 0, 0, 0, 0, 0, 0);
@@ -2682,7 +2679,6 @@ void SplashOutputDev::type3D0(GfxState *state, double wx, double wy) {
 
 void SplashOutputDev::type3D1(GfxState *state, double wx, double wy,
 			      double llx, double lly, double urx, double ury) {
-  double *ctm;
   T3FontCache *t3Font;
   SplashColor color;
   double xt, yt, xMin, xMax, yMin, yMax, x1, y1;
@@ -2782,7 +2778,7 @@ void SplashOutputDev::type3D1(GfxState *state, double wx, double wy,
   // save state
   t3GlyphStack->origBitmap = bitmap;
   t3GlyphStack->origSplash = splash;
-  ctm = state->getCTM();
+  const double *ctm = state->getCTM();
   t3GlyphStack->origCTM4 = ctm[4];
   t3GlyphStack->origCTM5 = ctm[5];
 
@@ -2870,7 +2866,6 @@ GBool SplashOutputDev::imageMaskSrc(void *data, SplashColorPtr line) {
 void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 				    int width, int height, GBool invert,
 				    GBool interpolate, GBool inlineImg) {
-  double *ctm;
   SplashCoord mat[6];
   SplashOutImageMaskData imgMaskData;
 
@@ -2880,7 +2875,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
   setOverprintMask(state->getFillColorSpace(), state->getFillOverprint(),
 		   state->getOverprintMode(), state->getFillColor());
 
-  ctm = state->getCTM();
+  const double *ctm = state->getCTM();
   for (int i = 0; i < 6; ++i) {
     if (!std::isfinite(ctm[i])) return;
   }
@@ -2915,7 +2910,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state,
 					       int width, int height,
 					       GBool invert,
 					       GBool inlineImg, double *baseMatrix) {
-  double *ctm;
+  const double *ctm;
   SplashCoord mat[6];
   SplashOutImageMaskData imgMaskData;
   Splash *maskSplash;
@@ -3487,7 +3482,6 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 				GfxImageColorMap *colorMap,
 				GBool interpolate,
 				int *maskColors, GBool inlineImg) {
-  double *ctm;
   SplashCoord mat[6];
   SplashOutImageData imgData;
   SplashColorMode srcMode;
@@ -3503,7 +3497,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   Guchar pix;
   int n, i;
 
-  ctm = state->getCTM();
+  const double *ctm = state->getCTM();
   for (i = 0; i < 6; ++i) {
     if (!std::isfinite(ctm[i])) return;
   }
@@ -3763,7 +3757,6 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
 				      int maskHeight, GBool maskInvert,
 				      GBool maskInterpolate) {
   GfxImageColorMap *maskColorMap;
-  double *ctm;
   SplashCoord mat[6];
   SplashOutMaskedImageData imgData;
   SplashOutImageMaskData imgMaskData;
@@ -3832,7 +3825,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
 
     //----- draw the source image
 
-    ctm = state->getCTM();
+    const double *ctm = state->getCTM();
     for (i = 0; i < 6; ++i) {
       if (!std::isfinite(ctm[i])) {
         delete maskBitmap;
@@ -3941,7 +3934,6 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */,
 					  int maskWidth, int maskHeight,
 					  GfxImageColorMap *maskColorMap,
 					  GBool maskInterpolate) {
-  double *ctm;
   SplashCoord mat[6];
   SplashOutImageData imgData;
   SplashOutImageData imgMaskData;
@@ -3963,7 +3955,7 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */,
   setOverprintMask(colorMap->getColorSpace(), state->getFillOverprint(),
 		   state->getOverprintMode(), nullptr);
 
-  ctm = state->getCTM();
+  const double *ctm = state->getCTM();
   for (int i = 0; i < 6; ++i) {
     if (!std::isfinite(ctm[i])) return;
   }
@@ -4145,7 +4137,7 @@ GBool SplashOutputDev::checkTransparencyGroup(GfxState *state, GBool knockout) {
   return transpGroupStack != nullptr && transpGroupStack->shape != nullptr;
 }
 
-void SplashOutputDev::beginTransparencyGroup(GfxState *state, double *bbox,
+void SplashOutputDev::beginTransparencyGroup(GfxState *state, const double *bbox,
 					     GfxColorSpace *blendingColorSpace,
 					     GBool isolated, GBool knockout,
 					     GBool forSoftMask) {
@@ -4316,7 +4308,7 @@ void SplashOutputDev::endTransparencyGroup(GfxState *state) {
   updateCTM(state, 0, 0, 0, 0, 0, 0);
 }
 
-void SplashOutputDev::paintTransparencyGroup(GfxState *state, double *bbox) {
+void SplashOutputDev::paintTransparencyGroup(GfxState *state, const double *bbox) {
   SplashBitmap *tBitmap;
   SplashTransparencyGroup *transpGroup;
   GBool isolated;
@@ -4354,7 +4346,7 @@ void SplashOutputDev::paintTransparencyGroup(GfxState *state, double *bbox) {
   delete tBitmap;
 }
 
-void SplashOutputDev::setSoftMask(GfxState *state, double *bbox,
+void SplashOutputDev::setSoftMask(GfxState *state, const double *bbox,
 				  GBool alpha, Function *transferFunc,
 				  GfxColor *backdropColor) {
   SplashBitmap *softMask, *tBitmap;
@@ -4547,8 +4539,8 @@ void SplashOutputDev::setFreeTypeHinting(GBool enable, GBool enableSlightHinting
 }
 
 GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *catalog, Object *str,
-					double *ptm, int paintType, int /*tilingType*/, Dict *resDict,
-					double *mat, double *bbox,
+					const double *ptm, int paintType, int /*tilingType*/, Dict *resDict,
+					const double *mat, const double *bbox,
 					int x0, int y0, int x1, int y1,
 					double xStep, double yStep)
 {
@@ -4561,7 +4553,8 @@ GBool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *ca
   int repeatX, repeatY;
   SplashCoord matc[6];
   Matrix m1;
-  double *ctm, savedCTM[6];
+  const double *ctm;
+  double savedCTM[6];
   double kx, ky, sx, sy;
   GBool retValue = gFalse;
 

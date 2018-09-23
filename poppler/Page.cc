@@ -480,7 +480,7 @@ Gfx *Page::createGfx(OutputDev *out, double hDPI, double vDPI,
 		     GBool printing,
 		     GBool (*abortCheckCbk)(void *data),
 		     void *abortCheckCbkData, XRef *xrefA) {
-  PDFRectangle *mediaBox, *cropBox;
+  const PDFRectangle *mediaBox, *cropBox;
   PDFRectangle box;
   Gfx *gfx;
 
@@ -692,7 +692,7 @@ void Page::makeBox(double hDPI, double vDPI, int rotate,
 		   GBool useMediaBox, GBool upsideDown,
 		   double sliceX, double sliceY, double sliceW, double sliceH,
 		   PDFRectangle *box, GBool *crop) {
-  PDFRectangle *mediaBox, *cropBox, *baseBox;
+  const PDFRectangle *mediaBox, *cropBox, *baseBox;
   double kx, ky;
 
   mediaBox = getMediaBox();

@@ -274,8 +274,8 @@ public:
   void fill(GfxState *state) override;
   void eoFill(GfxState *state) override;
   GBool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *catalog, Object *str,
-				  double *pmat, int paintType, int tilingType, Dict *resDict,
-				  double *mat, double *bbox,
+				  const double *pmat, int paintType, int tilingType, Dict *resDict,
+				  const double *mat, const double *bbox,
 				  int x0, int y0, int x1, int y1,
 				  double xStep, double yStep) override;
   GBool functionShadedFill(GfxState *state, GfxFunctionShading *shading) override;
@@ -334,13 +334,13 @@ public:
 
   //----- transparency groups and soft masks
   GBool checkTransparencyGroup(GfxState *state, GBool knockout) override;
-  void beginTransparencyGroup(GfxState *state, double *bbox,
+  void beginTransparencyGroup(GfxState *state, const double *bbox,
 				      GfxColorSpace *blendingColorSpace,
 				      GBool isolated, GBool knockout,
 				      GBool forSoftMask) override;
   void endTransparencyGroup(GfxState *state) override;
-  void paintTransparencyGroup(GfxState *state, double *bbox) override;
-  void setSoftMask(GfxState *state, double *bbox, GBool alpha,
+  void paintTransparencyGroup(GfxState *state, const double *bbox) override;
+  void setSoftMask(GfxState *state, const double *bbox, GBool alpha,
 			   Function *transferFunc, GfxColor *backdropColor) override;
   void clearSoftMask(GfxState *state) override;
 
@@ -408,9 +408,9 @@ private:
   SplashPattern *getColor(GfxCMYK *cmyk);
   SplashPattern *getColor(GfxColor *deviceN);
 #endif
-  static void getMatteColor( SplashColorMode colorMode, GfxImageColorMap *colorMap, GfxColor * matteColor, SplashColor splashMatteColor);
+  static void getMatteColor( SplashColorMode colorMode, GfxImageColorMap *colorMap, const GfxColor * matteColor, SplashColor splashMatteColor);
   void setOverprintMask(GfxColorSpace *colorSpace, GBool overprintFlag,
-			int overprintMode, GfxColor *singleColor, GBool grayIndexed = gFalse);
+			int overprintMode, const GfxColor *singleColor, GBool grayIndexed = gFalse);
   SplashPath convertPath(GfxState *state, GfxPath *path,
 			  GBool dropEmptySubpaths);
   void drawType3Glyph(GfxState *state, T3FontCache *t3Font,

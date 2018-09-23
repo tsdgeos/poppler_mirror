@@ -146,7 +146,7 @@ public:
 
   //----- update graphics state
   void updateAll(GfxState *state) override;
-  void setDefaultCTM(double *ctm) override;
+  void setDefaultCTM(const double *ctm) override;
   void updateCTM(GfxState *state, double m11, double m12,
 		 double m21, double m22, double m31, double m32) override;
   void updateLineDash(GfxState *state) override;
@@ -171,8 +171,8 @@ public:
   void eoFill(GfxState *state) override;
   void clipToStrokePath(GfxState *state) override;
   GBool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
-			  double *pmat, int paintType, int tilingType, Dict *resDict,
-			  double *mat, double *bbox,
+			  const double *pmat, int paintType, int tilingType, Dict *resDict,
+			  const double *mat, const double *bbox,
 			  int x0, int y0, int x1, int y1,
 			  double xStep, double yStep) override;
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 12, 0)
@@ -245,14 +245,14 @@ public:
 		       GBool maskInvert, GBool maskInterpolate) override;
 
   //----- transparency groups and soft masks
-  void beginTransparencyGroup(GfxState * /*state*/, double * /*bbox*/,
+  void beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/,
                                       GfxColorSpace * /*blendingColorSpace*/,
                                       GBool /*isolated*/, GBool /*knockout*/,
                                       GBool /*forSoftMask*/) override;
   void endTransparencyGroup(GfxState * /*state*/) override;
   void popTransparencyGroup();
-  void paintTransparencyGroup(GfxState * /*state*/, double * /*bbox*/) override;
-  void setSoftMask(GfxState * /*state*/, double * /*bbox*/, GBool /*alpha*/,
+  void paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/) override;
+  void setSoftMask(GfxState * /*state*/, const double * /*bbox*/, GBool /*alpha*/,
 		   Function * /*transferFunc*/, GfxColor * /*backdropColor*/) override;
   void clearSoftMask(GfxState * /*state*/) override;
 
@@ -429,7 +429,7 @@ public:
 
   //----- update graphics state
   void updateAll(GfxState *state) override { }
-  void setDefaultCTM(double *ctm) override { }
+  void setDefaultCTM(const double *ctm) override { }
   void updateCTM(GfxState *state, double m11, double m12,
 		 double m21, double m22, double m31, double m32) override { }
   void updateLineDash(GfxState *state) override { }
@@ -453,8 +453,8 @@ public:
   void eoFill(GfxState *state) override { }
   void clipToStrokePath(GfxState *state) override { }
   GBool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
-			  double *pmat, int paintType, int tilingType, Dict *resDict,
-			  double *mat, double *bbox,
+			  const double *pmat, int paintType, int tilingType, Dict *resDict,
+			  const double *mat, const double *bbox,
 			  int x0, int y0, int x1, int y1,
 			  double xStep, double yStep) override { return gTrue; }
   GBool axialShadedFill(GfxState *state,
@@ -497,13 +497,13 @@ public:
 
 
   //----- transparency groups and soft masks
-  void beginTransparencyGroup(GfxState * /*state*/, double * /*bbox*/,
+  void beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/,
 			      GfxColorSpace * /*blendingColorSpace*/,
 			      GBool /*isolated*/, GBool /*knockout*/,
 			      GBool /*forSoftMask*/) override {}
   void endTransparencyGroup(GfxState * /*state*/) override {}
-  void paintTransparencyGroup(GfxState * /*state*/, double * /*bbox*/) override {}
-  void setSoftMask(GfxState * /*state*/, double * /*bbox*/, GBool /*alpha*/,
+  void paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/) override {}
+  void setSoftMask(GfxState * /*state*/, const double * /*bbox*/, GBool /*alpha*/,
 		   Function * /*transferFunc*/, GfxColor * /*backdropColor*/) override {}
   void clearSoftMask(GfxState * /*state*/) override {}
 
