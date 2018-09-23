@@ -44,6 +44,10 @@
 #include "poppler-input-stream.h"
 #include "poppler-cached-file-loader.h"
 
+#ifdef G_OS_WIN32
+  #include <stringapiset.h>
+#endif
+
 /**
  * SECTION:poppler-document
  * @short_description: Information about a document
