@@ -23,4 +23,4 @@ compiler:
  - clang
  - gcc
 
-script: cmake . -DTESTDATADIR=`pwd`/test-files && make -j2 && make test
+script: cmake . -DFONT_CONFIGURATION=generic -DTESTDATADIR=`pwd`/test-files && make -j2 && make test
