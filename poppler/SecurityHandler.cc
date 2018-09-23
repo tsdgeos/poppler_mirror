@@ -34,9 +34,6 @@
 #include "Decrypt.h"
 #include "Error.h"
 #include "GlobalParams.h"
-#ifdef ENABLE_PLUGINS
-#  include "XpdfPluginAPI.h"
-#endif
 #include "SecurityHandler.h"
 
 #include <limits.h>
@@ -47,25 +44,13 @@
 
 SecurityHandler *SecurityHandler::make(PDFDoc *docA, Object *encryptDictA) {
   SecurityHandler *secHdlr;
-#ifdef ENABLE_PLUGINS
-  XpdfSecurityHandler *xsh;
-#endif
 
   Object filterObj = encryptDictA->dictLookup("Filter");
   if (filterObj.isName("Standard")) {
     secHdlr = new StandardSecurityHandler(docA, encryptDictA);
   } else if (filterObj.isName()) {
-#ifdef ENABLE_PLUGINS
-    if ((xsh = globalParams->getSecurityHandler(filterObj.getName()))) {
-      secHdlr = new ExternalSecurityHandler(docA, encryptDictA, xsh);
-    } else {
-#endif
-      error(errSyntaxError, -1, "Couldn't find the '{0:s}' security handler",
-	    filterObj.getName());
-      secHdlr = nullptr;
-#ifdef ENABLE_PLUGINS
-    }
-#endif
+    error(errSyntaxError, -1, "Couldn't find the '{0:s}' security handler", filterObj.getName());
+    secHdlr = nullptr;
   } else {
     error(errSyntaxError, -1,
 	  "Missing or invalid 'Filter' entry in encryption dictionary");
@@ -360,80 +345,3 @@ GBool StandardSecurityHandler::authorize(void *authData) {
   return gTrue;
 }
 
-#ifdef ENABLE_PLUGINS
-
-//------------------------------------------------------------------------
-// ExternalSecurityHandler
-//------------------------------------------------------------------------
-
-ExternalSecurityHandler::ExternalSecurityHandler(PDFDoc *docA,
-						 Object *encryptDictA,
-						 XpdfSecurityHandler *xshA):
-  SecurityHandler(docA)
-{
-  encryptDictA->copy(&encryptDict);
-  xsh = xshA;
-  encAlgorithm = cryptRC4; //~ this should be obtained via getKey
-  ok = gFalse;
-
-  if (!(*xsh->newDoc)(xsh->handlerData, (XpdfDoc)docA,
-		      (XpdfObject)encryptDictA, &docData)) {
-    return;
-  }
-
-  ok = gTrue;
-}
-
-ExternalSecurityHandler::~ExternalSecurityHandler() {
-  (*xsh->freeDoc)(xsh->handlerData, docData);
-}
-
-void *ExternalSecurityHandler::makeAuthData(GooString *ownerPassword,
-					    GooString *userPassword) {
-  char *opw, *upw;
-  void *authData;
-
-  opw = ownerPassword ? ownerPassword->getCString() : (char *)NULL;
-  upw = userPassword ? userPassword->getCString() : (char *)NULL;
-  if (!(*xsh->makeAuthData)(xsh->handlerData, docData, opw, upw, &authData)) {
-    return NULL;
-  }
-  return authData;
-}
-
-void *ExternalSecurityHandler::getAuthData() {
-  void *authData;
-
-  if (!(*xsh->getAuthData)(xsh->handlerData, docData, &authData)) {
-    return NULL;
-  }
-  return authData;
-}
-
-void ExternalSecurityHandler::freeAuthData(void *authData) {
-  (*xsh->freeAuthData)(xsh->handlerData, docData, authData);
-}
-
-GBool ExternalSecurityHandler::authorize(void *authData) {
-  char *key;
-  int length;
-
-  if (!ok) {
-    return gFalse;
-  }
-  permFlags = (*xsh->authorize)(xsh->handlerData, docData, authData);
-  if (!(permFlags & xpdfPermissionOpen)) {
-    return gFalse;
-  }
-  if (!(*xsh->getKey)(xsh->handlerData, docData, &key, &length, &encVersion, &encRevision)) {
-    return gFalse;
-  }
-  if ((fileKeyLength = length) > 16) {
-    fileKeyLength = 16;
-  }
-  memcpy(fileKey, key, fileKeyLength);
-  (*xsh->freeKey)(xsh->handlerData, docData, key, length);
-  return gTrue;
-}
-
-#endif // ENABLE_PLUGINS
