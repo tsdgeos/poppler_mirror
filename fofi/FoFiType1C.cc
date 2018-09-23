@@ -2742,6 +2742,7 @@ void FoFiType1C::getIndexVal(const Type1CIndex *idx, int i,
       pos1 <= idx->startPos || pos1 > idx->endPos ||
       pos1 < pos0) {
     *ok = gFalse;
+    return;
   }
   val->pos = pos0;
   val->len = pos1 - pos0;
