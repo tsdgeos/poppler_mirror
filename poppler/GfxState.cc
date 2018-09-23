@@ -3285,7 +3285,7 @@ GfxPatternColorSpace::~GfxPatternColorSpace() {
 
 GfxColorSpace *GfxPatternColorSpace::copy() {
   return new GfxPatternColorSpace(under ? under->copy() :
-				          (GfxColorSpace *)nullptr);
+				          nullptr);
 }
 
 GfxColorSpace *GfxPatternColorSpace::parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion) {
@@ -5707,19 +5707,7 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
   ok = gTrue;
   useMatte = gFalse;
 
-  // bits per component and color space
-  if (unlikely(bitsA <= 0 || bitsA > 30))
-    goto err1;
-
-  bits = bitsA;
-  maxPixel = (1 << bits) - 1;
   colorSpace = colorSpaceA;
-
-  // this is a hack to support 16 bits images, everywhere
-  // we assume a component fits in 8 bits, with this hack
-  // we treat 16 bit images as 8 bit ones until it's fixed correctly.
-  // The hack has another part on ImageStream::getLine
-  if (maxPixel > 255) maxPixel = 255;
 
   // initialize
   for (k = 0; k < gfxColorMaxComps; ++k) {
@@ -5727,6 +5715,19 @@ GfxImageColorMap::GfxImageColorMap(int bitsA, Object *decode,
     lookup2[k] = nullptr;
   }
   byte_lookup = nullptr;
+
+  // bits per component and color space
+  if (unlikely(bitsA <= 0 || bitsA > 30))
+    goto err1;
+
+  bits = bitsA;
+  maxPixel = (1 << bits) - 1;
+
+  // this is a hack to support 16 bits images, everywhere
+  // we assume a component fits in 8 bits, with this hack
+  // we treat 16 bit images as 8 bit ones until it's fixed correctly.
+  // The hack has another part on ImageStream::getLine
+  if (maxPixel > 255) maxPixel = 255;
 
   // get decode map
   if (decode->isNull()) {

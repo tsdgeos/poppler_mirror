@@ -104,24 +104,6 @@ inline const struct timespec& mtim(const struct stat& stbuf) {
 
 //------------------------------------------------------------------------
 
-GooString *getCurrentDir() {
-  char buf[PATH_MAX+1];
-
-#if defined(__EMX__)
-  if (_getcwd2(buf, sizeof(buf)))
-#elif defined(_WIN32)
-  if (GetCurrentDirectoryA(sizeof(buf), buf))
-#elif defined(ACORN)
-  if (strcpy(buf, "@"))
-#elif defined(MACOS)
-  if (strcpy(buf, ":"))
-#else
-  if (getcwd(buf, sizeof(buf)))
-#endif
-    return new GooString(buf);
-  return new GooString();
-}
-
 GooString *appendToPath(GooString *path, const char *fileName) {
 #if defined(VMS)
   //---------- VMS ----------
@@ -287,216 +269,6 @@ GooString *appendToPath(GooString *path, const char *fileName) {
   return path;
 #endif
 }
-
-GooString *grabPath(char *fileName) {
-#ifdef VMS
-  //---------- VMS ----------
-  char *p;
-
-  if ((p = strrchr(fileName, ']')))
-    return new GooString(fileName, p + 1 - fileName);
-  if ((p = strrchr(fileName, ':')))
-    return new GooString(fileName, p + 1 - fileName);
-  return new GooString();
-
-#elif defined(__EMX__) || defined(_WIN32)
-  //---------- OS/2+EMX and Win32 ----------
-  char *p;
-
-  if ((p = strrchr(fileName, '/')))
-    return new GooString(fileName, p - fileName);
-  if ((p = strrchr(fileName, '\\')))
-    return new GooString(fileName, p - fileName);
-  if ((p = strrchr(fileName, ':')))
-    return new GooString(fileName, p + 1 - fileName);
-  return new GooString();
-
-#elif defined(ACORN)
-  //---------- RISCOS ----------
-  char *p;
-
-  if ((p = strrchr(fileName, '.')))
-    return new GooString(fileName, p - fileName);
-  return new GooString();
-
-#elif defined(MACOS)
-  //---------- MacOS ----------
-  char *p;
-
-  if ((p = strrchr(fileName, ':')))
-    return new GooString(fileName, p - fileName);
-  return new GooString();
-
-#else
-  //---------- Unix ----------
-  char *p;
-
-  if ((p = strrchr(fileName, '/')))
-    return new GooString(fileName, p - fileName);
-  return new GooString();
-#endif
-}
-
-GBool isAbsolutePath(char *path) {
-#ifdef VMS
-  //---------- VMS ----------
-  return strchr(path, ':') ||
-	 (path[0] == '[' && path[1] != '.' && path[1] != '-');
-
-#elif defined(__EMX__) || defined(_WIN32)
-  //---------- OS/2+EMX and Win32 ----------
-  return path[0] == '/' || path[0] == '\\' || path[1] == ':';
-
-#elif defined(ACORN)
-  //---------- RISCOS ----------
-  return path[0] == '$';
-
-#elif defined(MACOS)
-  //---------- MacOS ----------
-  return path[0] != ':';
-
-#else
-  //---------- Unix ----------
-  return path[0] == '/';
-#endif
-}
-
-time_t getModTime(char *fileName) {
-#ifdef _WIN32
-  //~ should implement this, but it's (currently) only used in xpdf
-  return 0;
-#else
-  struct stat statBuf;
-
-  if (stat(fileName, &statBuf)) {
-    return 0;
-  }
-  return statBuf.st_mtime;
-#endif
-}
-
-GBool openTempFile(GooString **name, FILE **f, const char *mode) {
-#if defined(_WIN32)
-  //---------- Win32 ----------
-  char *tempDir;
-  GooString *s, *s2;
-  FILE *f2;
-  int t, i;
-
-  // this has the standard race condition problem, but I haven't found
-  // a better way to generate temp file names with extensions on
-  // Windows
-  if ((tempDir = getenv("TEMP"))) {
-    s = new GooString(tempDir);
-    s->append('\\');
-  } else {
-    s = new GooString();
-  }
-  s->appendf("x_{0:d}_{1:d}_",
-	     (int)GetCurrentProcessId(), (int)GetCurrentThreadId());
-  t = (int)time(nullptr);
-  for (i = 0; i < 1000; ++i) {
-    s2 = s->copy()->appendf("{0:d}", t + i);
-    if (!(f2 = fopen(s2->getCString(), "r"))) {
-      if (!(f2 = fopen(s2->getCString(), mode))) {
-	delete s2;
-	delete s;
-        return gFalse;
-      }
-      *name = s2;
-      *f = f2;
-      delete s;
-      return gTrue;
-    }
-    fclose(f2);
-    delete s2;
-  }
-  delete s;
-  return gFalse;
-#elif defined(VMS) || defined(__EMX__) || defined(ACORN) || defined(MACOS)
-  //---------- non-Unix ----------
-  char *s;
-
-  // There is a security hole here: an attacker can create a symlink
-  // with this file name after the tmpnam call and before the fopen
-  // call.  I will happily accept fixes to this function for non-Unix
-  // OSs.
-  if (!(s = tmpnam(NULL))) {
-    return gFalse;
-  }
-  *name = new GooString(s);
-  if (!(*f = fopen((*name)->getCString(), mode))) {
-    delete (*name);
-    *name = NULL;
-    return gFalse;
-  }
-  return gTrue;
-#else
-  //---------- Unix ----------
-  char *s;
-  int fd;
-
-#ifdef HAVE_MKSTEMP
-  if ((s = getenv("TMPDIR"))) {
-    *name = new GooString(s);
-  } else {
-    *name = new GooString("/tmp");
-  }
-  (*name)->append("/XXXXXX");
-  fd = mkstemp((*name)->getCString());
-#else // HAVE_MKSTEMP
-  if (!(s = tmpnam(NULL))) {
-    return gFalse;
-  }
-  *name = new GooString(s);
-  fd = open((*name)->getCString(), O_WRONLY | O_CREAT | O_EXCL, 0600);
-#endif // HAVE_MKSTEMP
-  if (fd < 0 || !(*f = fdopen(fd, mode))) {
-    delete *name;
-    *name = nullptr;
-    return gFalse;
-  }
-  return gTrue;
-#endif
-}
-
-#ifdef _WIN32
-GooString *fileNameToUTF8(char *path) {
-  GooString *s;
-  char *p;
-
-  s = new GooString();
-  for (p = path; *p; ++p) {
-    if (*p & 0x80) {
-      s->append((char)(0xc0 | ((*p >> 6) & 0x03)));
-      s->append((char)(0x80 | (*p & 0x3f)));
-    } else {
-      s->append(*p);
-    }
-  }
-  return s;
-}
-
-GooString *fileNameToUTF8(wchar_t *path) {
-  GooString *s;
-  wchar_t *p;
-
-  s = new GooString();
-  for (p = path; *p; ++p) {
-    if (*p < 0x80) {
-      s->append((char)*p);
-    } else if (*p < 0x800) {
-      s->append((char)(0xc0 | ((*p >> 6) & 0x1f)));
-      s->append((char)(0x80 | (*p & 0x3f)));
-    } else {
-      s->append((char)(0xe0 | ((*p >> 12) & 0x0f)));
-      s->append((char)(0x80 | ((*p >> 6) & 0x3f)));
-      s->append((char)(0x80 | (*p & 0x3f)));
-    }
-  }
-  return s;
-}
-#endif
 
 FILE *openFile(const char *path, const char *mode) {
 #ifdef _WIN32
@@ -741,7 +513,7 @@ bool GooFile::modificationTimeChangedSinceOpen() const
 // GDir and GDirEntry
 //------------------------------------------------------------------------
 
-GDirEntry::GDirEntry(char *dirPath, char *nameA, GBool doStat) {
+GDirEntry::GDirEntry(const char *dirPath, const char *nameA, GBool doStat) {
 #ifdef VMS
   char *p;
 #elif defined(_WIN32)
@@ -778,7 +550,7 @@ GDirEntry::~GDirEntry() {
   delete name;
 }
 
-GDir::GDir(char *name, GBool doStatA) {
+GDir::GDir(const char *name, GBool doStatA) {
   path = new GooString(name);
   doStat = doStatA;
 #if defined(_WIN32)

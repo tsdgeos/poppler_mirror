@@ -58,7 +58,7 @@ FoFiType1C *FoFiType1C::make(char *fileA, int lenA) {
   return ff;
 }
 
-FoFiType1C *FoFiType1C::load(char *fileName) {
+FoFiType1C *FoFiType1C::load(const char *fileName) {
   FoFiType1C *ff;
   char *fileA;
   int lenA;
@@ -113,15 +113,15 @@ FoFiType1C::~FoFiType1C() {
   }
 }
 
-char *FoFiType1C::getName() {
-  return name ? name->getCString() : (char *)nullptr;
+const char *FoFiType1C::getName() const {
+  return name ? name->getCString() : nullptr;
 }
 
-char **FoFiType1C::getEncoding() {
+char **FoFiType1C::getEncoding() const {
   return encoding;
 }
 
-GooString *FoFiType1C::getGlyphName(int gid) {
+GooString *FoFiType1C::getGlyphName(int gid) const {
   char buf[256];
   GBool ok;
 
@@ -135,7 +135,7 @@ GooString *FoFiType1C::getGlyphName(int gid) {
   return new GooString(buf);
 }
 
-int *FoFiType1C::getCIDToGIDMap(int *nCIDs) {
+int *FoFiType1C::getCIDToGIDMap(int *nCIDs) const {
   int *map;
   int n, i;
 
@@ -163,7 +163,7 @@ int *FoFiType1C::getCIDToGIDMap(int *nCIDs) {
   return map;
 }
 
-void FoFiType1C::getFontMatrix(double *mat) {
+void FoFiType1C::getFontMatrix(double *mat) const {
   int i;
 
   if (topDict.firstOp == 0x0c1e && privateDicts[0].hasFontMatrix) {
@@ -192,7 +192,7 @@ void FoFiType1C::getFontMatrix(double *mat) {
   }
 }
 
-void FoFiType1C::convertToType1(char *psName, const char **newEncoding, GBool ascii,
+void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, GBool ascii,
 				FoFiOutputFunc outputFunc,
 				void *outputStream) {
   int psNameLen;
@@ -492,7 +492,7 @@ void FoFiType1C::convertToType1(char *psName, const char **newEncoding, GBool as
   (*outputFunc)(outputStream, "cleartomark\n", 12);
 }
 
-void FoFiType1C::convertToCIDType0(char *psName, int *codeMap, int nCodes,
+void FoFiType1C::convertToCIDType0(const char *psName, int *codeMap, int nCodes,
 				   FoFiOutputFunc outputFunc,
 				   void *outputStream) {
   int *cidMap;
@@ -837,7 +837,7 @@ void FoFiType1C::convertToCIDType0(char *psName, int *codeMap, int nCodes,
   gfree(cidMap);
 }
 
-void FoFiType1C::convertToType0(char *psName, int *codeMap, int nCodes,
+void FoFiType1C::convertToType0(const char *psName, int *codeMap, int nCodes,
 				FoFiOutputFunc outputFunc,
 				void *outputStream) {
   int *cidMap;
@@ -2726,8 +2726,8 @@ void FoFiType1C::getIndex(int pos, Type1CIndex *idx, GBool *ok) {
   }
 }
 
-void FoFiType1C::getIndexVal(Type1CIndex *idx, int i,
-			     Type1CIndexVal *val, GBool *ok) {
+void FoFiType1C::getIndexVal(const Type1CIndex *idx, int i,
+			     Type1CIndexVal *val, GBool *ok) const {
   int pos0, pos1;
 
   if (i < 0 || i >= idx->len) {
@@ -2747,7 +2747,7 @@ void FoFiType1C::getIndexVal(Type1CIndex *idx, int i,
   val->len = pos1 - pos0;
 }
 
-char *FoFiType1C::getString(int sid, char *buf, GBool *ok) {
+char *FoFiType1C::getString(int sid, char *buf, GBool *ok) const {
   Type1CIndexVal val;
   int n;
 

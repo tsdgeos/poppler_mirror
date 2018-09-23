@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2011, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2011, 2012, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -53,7 +53,7 @@ public:
   static FoFiTrueType *make(char *fileA, int lenA, int faceIndexA=0);
 
   // Create a FoFiTrueType object from a file on disk.
-  static FoFiTrueType *load(char *fileName, int faceIndexA=0);
+  static FoFiTrueType *load(const char *fileName, int faceIndexA=0);
 
   ~FoFiTrueType();
 
@@ -111,7 +111,7 @@ public:
   // If <encoding> is NULL, the encoding is unknown or undefined.  The
   // <codeToGID> array specifies the mapping from char codes to GIDs.
   // (Not useful for OpenType CFF fonts.)
-  void convertToType42(char *psName, char **encoding,
+  void convertToType42(const char *psName, char **encoding,
 		       int *codeToGID,
 		       FoFiOutputFunc outputFunc, void *outputStream);
 
@@ -122,7 +122,7 @@ public:
   // otherwise it will be left as binary data.  If <psName> is
   // non-NULL, it will be used as the PostScript font name.  (Only
   // useful for OpenType CFF fonts.)
-  void convertToType1(char *psName, const char **newEncoding, GBool ascii,
+  void convertToType1(const char *psName, const char **newEncoding, GBool ascii,
 		      FoFiOutputFunc outputFunc, void *outputStream);
 
   // Convert to a Type 2 CIDFont, suitable for embedding in a
@@ -130,14 +130,14 @@ public:
   // name (so we don't need to depend on the 'name' table in the
   // font).  The <cidMap> array maps CIDs to GIDs; it has <nCIDs>
   // entries.  (Not useful for OpenType CFF fonts.)
-  void convertToCIDType2(char *psName, int *cidMap, int nCIDs,
+  void convertToCIDType2(const char *psName, int *cidMap, int nCIDs,
 			 GBool needVerticalMetrics,
 			 FoFiOutputFunc outputFunc, void *outputStream);
 
   // Convert to a Type 0 CIDFont, suitable for embedding in a
   // PostScript file.  <psName> will be used as the PostScript font
   // name.  (Only useful for OpenType CFF fonts.)
-  void convertToCIDType0(char *psName, int *cidMap, int nCIDs,
+  void convertToCIDType0(const char *psName, int *cidMap, int nCIDs,
 			 FoFiOutputFunc outputFunc, void *outputStream);
 
   // Convert to a Type 0 (but non-CID) composite font, suitable for
@@ -145,7 +145,7 @@ public:
   // PostScript font name (so we don't need to depend on the 'name'
   // table in the font).  The <cidMap> array maps CIDs to GIDs; it has
   // <nCIDs> entries.  (Not useful for OpenType CFF fonts.)
-  void convertToType0(char *psName, int *cidMap, int nCIDs,
+  void convertToType0(const char *psName, int *cidMap, int nCIDs,
 		      GBool needVerticalMetrics,
 		      int *maxValidGlyph,
 		      FoFiOutputFunc outputFunc, void *outputStream);
@@ -153,7 +153,7 @@ public:
   // Convert to a Type 0 (but non-CID) composite font, suitable for
   // embedding in a PostScript file.  <psName> will be used as the
   // PostScript font name.  (Only useful for OpenType CFF fonts.)
-  void convertToType0(char *psName, int *cidMap, int nCIDs,
+  void convertToType0(const char *psName, int *cidMap, int nCIDs,
 		      FoFiOutputFunc outputFunc, void *outputStream);
 
   // Returns a pointer to the CFF font embedded in this OpenType font.
@@ -181,10 +181,10 @@ private:
 		void *outputStream, GooString *name,
 		GBool needVerticalMetrics,
                 int *maxUsedGlyph);
-  void dumpString(Guchar *s, int length,
+  void dumpString(const Guchar *s, int length,
 		  FoFiOutputFunc outputFunc,
 		  void *outputStream);
-  Guint computeTableChecksum(Guchar *data, int length);
+  Guint computeTableChecksum(const Guchar *data, int length);
   void parse();
   void readPostTable();
   int seekTable(const char *tag);

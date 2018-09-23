@@ -1675,7 +1675,7 @@ int *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff) {
 }
 
 Dict *Gfx8BitFont::getCharProcs() {
-  return charProcs.isDict() ? charProcs.getDict() : (Dict *)nullptr;
+  return charProcs.isDict() ? charProcs.getDict() : nullptr;
 }
 
 Object Gfx8BitFont::getCharProc(int code) {
@@ -1695,7 +1695,7 @@ Object Gfx8BitFont::getCharProcNF(int code) {
 }
 
 Dict *Gfx8BitFont::getResources() {
-  return resources.isDict() ? resources.getDict() : (Dict *)nullptr;
+  return resources.isDict() ? resources.getDict() : nullptr;
 }
 
 //------------------------------------------------------------------------
@@ -2088,7 +2088,7 @@ const CharCodeToUnicode *GfxCIDFont::getToUnicode() const {
 }
 
 GooString *GfxCIDFont::getCollection() {
-  return cMap ? cMap->getCollection() : (GooString *)nullptr;
+  return cMap ? cMap->getCollection() : nullptr;
 }
 
 int GfxCIDFont::mapCodeToGID(FoFiTrueType *ff, int cmapi,

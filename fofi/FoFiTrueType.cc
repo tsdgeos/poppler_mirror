@@ -16,7 +16,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2008, 2009, 2012, 2014-2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2009, 2012, 2014-2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -282,7 +282,7 @@ FoFiTrueType *FoFiTrueType::make(char *fileA, int lenA, int faceIndexA) {
   return ff;
 }
 
-FoFiTrueType *FoFiTrueType::load(char *fileName, int faceIndexA) {
+FoFiTrueType *FoFiTrueType::load(const char *fileName, int faceIndexA) {
   FoFiTrueType *ff;
   char *fileA;
   int lenA;
@@ -518,7 +518,7 @@ void FoFiTrueType::getFontMatrix(double *mat) {
   delete ff;
 }
 
-void FoFiTrueType::convertToType42(char *psName, char **encoding,
+void FoFiTrueType::convertToType42(const char *psName, char **encoding,
 				   int *codeToGID,
 				   FoFiOutputFunc outputFunc,
 				   void *outputStream) {
@@ -559,7 +559,7 @@ void FoFiTrueType::convertToType42(char *psName, char **encoding,
   (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
 }
 
-void FoFiTrueType::convertToType1(char *psName, const char **newEncoding,
+void FoFiTrueType::convertToType1(const char *psName, const char **newEncoding,
 				  GBool ascii, FoFiOutputFunc outputFunc,
 				  void *outputStream) {
   char *start;
@@ -576,7 +576,7 @@ void FoFiTrueType::convertToType1(char *psName, const char **newEncoding,
   delete ff;
 }
 
-void FoFiTrueType::convertToCIDType2(char *psName,
+void FoFiTrueType::convertToCIDType2(const char *psName,
 				     int *cidMap, int nCIDs,
 				     GBool needVerticalMetrics,
 				     FoFiOutputFunc outputFunc,
@@ -706,7 +706,7 @@ void FoFiTrueType::convertToCIDType2(char *psName,
 		56);
 }
 
-void FoFiTrueType::convertToCIDType0(char *psName, int *cidMap, int nCIDs,
+void FoFiTrueType::convertToCIDType0(const char *psName, int *cidMap, int nCIDs,
 				     FoFiOutputFunc outputFunc,
 				     void *outputStream) {
   char *start;
@@ -723,7 +723,7 @@ void FoFiTrueType::convertToCIDType0(char *psName, int *cidMap, int nCIDs,
   delete ff;
 }
 
-void FoFiTrueType::convertToType0(char *psName, int *cidMap, int nCIDs,
+void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs,
 				  GBool needVerticalMetrics,
 				  int *maxValidGlyph,
 				  FoFiOutputFunc outputFunc,
@@ -838,7 +838,7 @@ void FoFiTrueType::convertToType0(char *psName, int *cidMap, int nCIDs,
   (*outputFunc)(outputStream, "FontName currentdict end definefont pop\n", 40);
 }
 
-void FoFiTrueType::convertToType0(char *psName, int *cidMap, int nCIDs,
+void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs,
 				  FoFiOutputFunc outputFunc,
 				  void *outputStream) {
   char *start;
@@ -1258,7 +1258,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
   }
 }
 
-void FoFiTrueType::dumpString(Guchar *s, int length,
+void FoFiTrueType::dumpString(const Guchar *s, int length,
 			      FoFiOutputFunc outputFunc,
 			      void *outputStream) {
   GooString *buf;
@@ -1287,7 +1287,7 @@ void FoFiTrueType::dumpString(Guchar *s, int length,
   (*outputFunc)(outputStream, "00>\n", 4);
 }
 
-Guint FoFiTrueType::computeTableChecksum(Guchar *data, int length) {
+Guint FoFiTrueType::computeTableChecksum(const Guchar *data, int length) {
   Guint checksum, word;
   int i;
 

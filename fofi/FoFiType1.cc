@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2008, 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2008, 2010, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2010 Jakub Wilk <jwilk@jwilk.net>
 // Copyright (C) 2014 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -49,7 +49,7 @@ FoFiType1 *FoFiType1::make(char *fileA, int lenA) {
   return new FoFiType1(fileA, lenA, gFalse);
 }
 
-FoFiType1 *FoFiType1::load(char *fileName) {
+FoFiType1 *FoFiType1::load(const char *fileName) {
   char *fileA;
   int lenA;
 
@@ -349,7 +349,7 @@ void FoFiType1::parse() {
 	if ((p2 = strchr(p, ']'))) {
 	  *p2 = '\0';
 	  for (j = 0; j < 6; ++j) {
-	    if ((p = strtok(j == 0 ? p : (char *)nullptr, " \t\n\r"))) {
+	    if ((p = strtok(j == 0 ? p : nullptr, " \t\n\r"))) {
 	      fontMatrix[j] = atof(p);
 	    } else {
 	      break;
@@ -395,9 +395,9 @@ void FoFiType1::undoPFB() {
     pos2 += segLen;
   }
   if (freeFileData) {
-    gfree(fileData);
+    gfree((char*)file);
   }
-  file = fileData = file2;
+  file = file2;
   freeFileData = gTrue;
   len = pos2;
 }

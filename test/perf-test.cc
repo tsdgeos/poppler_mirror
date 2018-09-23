@@ -425,7 +425,7 @@ bool PdfEnginePoppler::load(const char *fileName)
     GooString *fileNameStr = new GooString(fileName);
     if (!fileNameStr) return false;
 
-    _pdfDoc = new PDFDoc(fileNameStr, nullptr, nullptr, (void*)nullptr);
+    _pdfDoc = new PDFDoc(fileNameStr, nullptr, nullptr, nullptr);
     if (!_pdfDoc->isOk()) {
         return false;
     }

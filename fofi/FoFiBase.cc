@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2008 Ed Avis <eda@waniasset.com>
 // Copyright (C) 2011 Jim Meyering <jim@meyering.net>
-// Copyright (C) 2016 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -38,19 +38,19 @@
 // FoFiBase
 //------------------------------------------------------------------------
 
-FoFiBase::FoFiBase(char *fileA, int lenA, GBool freeFileDataA) {
-  fileData = file = (Guchar *)fileA;
+FoFiBase::FoFiBase(const char *fileA, int lenA, GBool freeFileDataA) {
+  file = (const Guchar *)fileA;
   len = lenA;
   freeFileData = freeFileDataA;
 }
 
 FoFiBase::~FoFiBase() {
   if (freeFileData) {
-    gfree(fileData);
+    gfree((char*)file);
   }
 }
 
-char *FoFiBase::readFile(char *fileName, int *fileLen) {
+char *FoFiBase::readFile(const char *fileName, int *fileLen) {
   FILE *f;
   char *buf;
   int n;
@@ -86,7 +86,7 @@ char *FoFiBase::readFile(char *fileName, int *fileLen) {
   return buf;
 }
 
-int FoFiBase::getS8(int pos, GBool *ok) {
+int FoFiBase::getS8(int pos, GBool *ok) const {
   int x;
 
   if (pos < 0 || pos >= len) {
@@ -100,7 +100,7 @@ int FoFiBase::getS8(int pos, GBool *ok) {
   return x;
 }
 
-int FoFiBase::getU8(int pos, GBool *ok) {
+int FoFiBase::getU8(int pos, GBool *ok) const {
   if (pos < 0 || pos >= len) {
     *ok = gFalse;
     return 0;
@@ -108,7 +108,7 @@ int FoFiBase::getU8(int pos, GBool *ok) {
   return file[pos];
 }
 
-int FoFiBase::getS16BE(int pos, GBool *ok) {
+int FoFiBase::getS16BE(int pos, GBool *ok) const {
   int x;
 
   if (pos < 0 || pos+1 >= len || pos > INT_MAX - 1) {
@@ -123,7 +123,7 @@ int FoFiBase::getS16BE(int pos, GBool *ok) {
   return x;
 }
 
-int FoFiBase::getU16BE(int pos, GBool *ok) {
+int FoFiBase::getU16BE(int pos, GBool *ok) const {
   int x;
 
   if (pos < 0 || pos+1 >= len || pos > INT_MAX - 1) {
@@ -135,7 +135,7 @@ int FoFiBase::getU16BE(int pos, GBool *ok) {
   return x;
 }
 
-int FoFiBase::getS32BE(int pos, GBool *ok) {
+int FoFiBase::getS32BE(int pos, GBool *ok) const {
   int x;
 
   if (pos < 0 || pos+3 >= len || pos > INT_MAX - 3) {
@@ -152,7 +152,7 @@ int FoFiBase::getS32BE(int pos, GBool *ok) {
   return x;
 }
 
-Guint FoFiBase::getU32BE(int pos, GBool *ok) {
+Guint FoFiBase::getU32BE(int pos, GBool *ok) const {
   Guint x;
 
   if (pos < 0 || pos+3 >= len || pos > INT_MAX - 3) {
@@ -166,7 +166,7 @@ Guint FoFiBase::getU32BE(int pos, GBool *ok) {
   return x;
 }
 
-Guint FoFiBase::getU32LE(int pos, GBool *ok) {
+Guint FoFiBase::getU32LE(int pos, GBool *ok) const {
   Guint x;
 
   if (pos < 0 || pos+3 >= len || pos > INT_MAX - 3) {
@@ -180,7 +180,7 @@ Guint FoFiBase::getU32LE(int pos, GBool *ok) {
   return x;
 }
 
-Guint FoFiBase::getUVarBE(int pos, int size, GBool *ok) {
+Guint FoFiBase::getUVarBE(int pos, int size, GBool *ok) const {
   Guint x;
   int i;
 
@@ -195,7 +195,7 @@ Guint FoFiBase::getUVarBE(int pos, int size, GBool *ok) {
   return x;
 }
 
-GBool FoFiBase::checkRegion(int pos, int size) {
+GBool FoFiBase::checkRegion(int pos, int size) const {
   return pos >= 0 &&
          pos < INT_MAX - size &&
          size < INT_MAX - pos &&

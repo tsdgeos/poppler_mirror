@@ -175,9 +175,9 @@ public:
   FormButtonType getButtonType() const;
   
   void setState (GBool state);
-  GBool getState ();
+  GBool getState () const;
 
-  char* getOnStr();
+  const char* getOnStr() const;
   void setAppearanceState(const char *state);
   void updateWidgetAppearance() override;
 
@@ -375,7 +375,7 @@ public:
   bool noToggleToOff () const { return noAllOff; }
 
   // returns gTrue if the state modification is accepted
-  GBool setState (char *state);
+  GBool setState (const char *state);
   GBool getState(const char *state) const;
 
   const char *getAppearanceState() const { return appearanceState.isName() ? appearanceState.getName() : nullptr; }
@@ -395,7 +395,7 @@ public:
 
   ~FormFieldButton();
 protected:
-  void updateState(char *state);
+  void updateState(const char *state);
 
   FormFieldButton** siblings; // IDs of dependent buttons (each button of a radio field has all the others buttons
                                // of the same field in this array)

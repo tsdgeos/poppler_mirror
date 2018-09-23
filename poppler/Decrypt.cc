@@ -57,7 +57,7 @@ static void sha256(Guchar *msg, int msgLen, Guchar *hash);
 static void sha384(Guchar *msg, int msgLen, Guchar *hash);
 static void sha512(Guchar *msg, int msgLen, Guchar *hash);
 
-static void revision6Hash(GooString *inputPassword, Guchar *K, char *userKey);
+static void revision6Hash(GooString *inputPassword, Guchar *K, const char *userKey);
 
 static const Guchar passwordPad[32] = {
   0x28, 0xbf, 0x4e, 0x5e, 0x4e, 0x75, 0x8a, 0x41,
@@ -1702,7 +1702,7 @@ static void sha384(Guchar *msg, int msgLen, Guchar *hash) {
 // Section 7.6.3.3 (Encryption Key algorithm) of ISO/DIS 32000-2
 // Algorithm 2.B:Computing a hash (for revision 6).
 //------------------------------------------------------------------------
-static void revision6Hash(GooString *inputPassword, Guchar *K, char *userKey) {
+static void revision6Hash(GooString *inputPassword, Guchar *K, const char *userKey) {
   Guchar K1[64*(127+64+48)];
   Guchar  E[64*(127+64+48)];
   DecryptAESState state;

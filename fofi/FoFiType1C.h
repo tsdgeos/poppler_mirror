@@ -152,27 +152,27 @@ public:
   static FoFiType1C *make(char *fileA, int lenA);
 
   // Create a FoFiType1C object from a file on disk.
-  static FoFiType1C *load(char *fileName);
+  static FoFiType1C *load(const char *fileName);
 
   virtual ~FoFiType1C();
 
   // Return the font name.
-  char *getName();
+  const char *getName() const;
 
   // Return the encoding, as an array of 256 names (any of which may
   // be NULL).  This is only useful with 8-bit fonts.
-  char **getEncoding();
+  char **getEncoding() const;
 
   // Get the glyph names.
-  int getNumGlyphs() { return nGlyphs; }
-  GooString *getGlyphName(int gid);
+  int getNumGlyphs() const { return nGlyphs; }
+  GooString *getGlyphName(int gid) const;
 
   // Return the mapping from CIDs to GIDs, and return the number of
   // CIDs in *<nCIDs>.  This is only useful for CID fonts.
-  int *getCIDToGIDMap(int *nCIDs);
+  int *getCIDToGIDMap(int *nCIDs) const;
 
   // Return the font matrix as an array of six numbers.
-  void getFontMatrix(double *mat);
+  void getFontMatrix(double *mat) const;
 
   // Convert to a Type 1 font, suitable for embedding in a PostScript
   // file.  This is only useful with 8-bit fonts.  If <newEncoding> is
@@ -180,7 +180,7 @@ public:
   // font.  If <ascii> is true the eexec section will be hex-encoded,
   // otherwise it will be left as binary data.  If <psName> is non-NULL,
   // it will be used as the PostScript font name.
-  void convertToType1(char *psName, const char **newEncoding, GBool ascii,
+  void convertToType1(const char *psName, const char **newEncoding, GBool ascii,
 		      FoFiOutputFunc outputFunc, void *outputStream);
 
   // Convert to a Type 0 CIDFont, suitable for embedding in a
@@ -191,7 +191,7 @@ public:
   //     font's internal CID-to-GID mapping is used
   // (3) is <codeMap> is NULL and this is an 8-bit CFF font, then
   //     the identity CID-to-GID mapping is used
-  void convertToCIDType0(char *psName, int *codeMap, int nCodes,
+  void convertToCIDType0(const char *psName, int *codeMap, int nCodes,
 			 FoFiOutputFunc outputFunc, void *outputStream);
 
   // Convert to a Type 0 (but non-CID) composite font, suitable for
@@ -203,7 +203,7 @@ public:
   //     font's internal CID-to-GID mapping is used
   // (3) is <codeMap> is NULL and this is an 8-bit CFF font, then
   //     the identity CID-to-GID mapping is used
-  void convertToType0(char *psName, int *codeMap, int nCodes,
+  void convertToType0(const char *psName, int *codeMap, int nCodes,
 		      FoFiOutputFunc outputFunc, void *outputStream);
 
 private:
@@ -233,8 +233,8 @@ private:
   int getDeltaIntArray(int *arr, int maxLen);
   int getDeltaFPArray(double *arr, int maxLen);
   void getIndex(int pos, Type1CIndex *idx, GBool *ok);
-  void getIndexVal(Type1CIndex *idx, int i, Type1CIndexVal *val, GBool *ok);
-  char *getString(int sid, char *buf, GBool *ok);
+  void getIndexVal(const Type1CIndex *idx, int i, Type1CIndexVal *val, GBool *ok) const;
+  char *getString(int sid, char *buf, GBool *ok) const;
 
   GooString *name;
   char **encoding;

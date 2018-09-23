@@ -204,13 +204,13 @@ FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Re
   }
 }
 
-char *FormWidgetButton::getOnStr() {
+const char *FormWidgetButton::getOnStr() const {
   if (onStr)
     return onStr->getCString();
 
   // 12.7.4.2.3 Check Boxes
   //  Yes should be used as the name for the on state
-  return parent()->getButtonType() == formButtonCheck ? (char *)"Yes" : nullptr;
+  return parent()->getButtonType() == formButtonCheck ? "Yes" : nullptr;
 }
 
 FormWidgetButton::~FormWidgetButton ()
@@ -248,7 +248,7 @@ void FormWidgetButton::setState (GBool astate)
   // Parent will call setAppearanceState()
 }
 
-GBool FormWidgetButton::getState ()
+GBool FormWidgetButton::getState () const
 {
   return onStr ? parent()->getState(onStr->getCString()) : gFalse;
 }
@@ -1061,7 +1061,7 @@ void FormFieldButton::fillChildrenSiblingsID()
   }
 }
 
-GBool FormFieldButton::setState(char *state)
+GBool FormFieldButton::setState(const char *state)
 {
   // A check button could behave as a radio button
   // when it's in a set of more than 1 buttons
@@ -1098,7 +1098,7 @@ GBool FormFieldButton::setState(char *state)
     if (!widget->getOnStr())
       continue;
 
-    char *onStr = widget->getOnStr();
+    const char *onStr = widget->getOnStr();
     if (current && strcmp(current, onStr) == 0) {
       widget->setAppearanceState("Off");
       if (!isOn)
@@ -1127,7 +1127,7 @@ GBool FormFieldButton::getState(const char *state) const {
   return (parent && parent->getType() == formButton) ? static_cast<FormFieldButton*>(parent)->getState(state) : gFalse;
 }
 
-void FormFieldButton::updateState(char *state) {
+void FormFieldButton::updateState(const char *state) {
   appearanceState = Object(objName, state);
   obj.getDict()->set("V", appearanceState.copy());
   xref->setModifiedObject(&obj, ref);
