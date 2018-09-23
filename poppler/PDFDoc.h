@@ -118,35 +118,35 @@ enum PDFSubtypeConformance {
 class PDFDoc {
 public:
 
-  PDFDoc(GooString *fileNameA, GooString *ownerPassword = NULL,
-	 GooString *userPassword = NULL, void *guiDataA = NULL);
+  PDFDoc(const GooString *fileNameA, const GooString *ownerPassword = NULL,
+	 const GooString *userPassword = NULL, void *guiDataA = NULL);
 
 #ifdef _WIN32
   PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword = NULL,
 	 GooString *userPassword = NULL, void *guiDataA = NULL);
 #endif
 
-  PDFDoc(BaseStream *strA, GooString *ownerPassword = NULL,
-	 GooString *userPassword = NULL, void *guiDataA = NULL);
+  PDFDoc(BaseStream *strA, const GooString *ownerPassword = NULL,
+	 const GooString *userPassword = NULL, void *guiDataA = NULL);
   ~PDFDoc();
 
   PDFDoc(const PDFDoc &) = delete;
   PDFDoc& operator=(const PDFDoc &) = delete;
 
-  static PDFDoc *ErrorPDFDoc(int errorCode, GooString *fileNameA = NULL);
+  static PDFDoc *ErrorPDFDoc(int errorCode, const GooString *fileNameA = NULL);
 
   // Was PDF document successfully opened?
-  GBool isOk() { return ok; }
+  GBool isOk() const { return ok; }
 
   // Get the error code (if isOk() returns false).
-  int getErrorCode() { return errCode; }
+  int getErrorCode() const { return errCode; }
 
   // Get the error code returned by fopen() (if getErrorCode() == 
   // errOpenFile).
-  int getFopenErrno() { return fopenErrno; }
+  int getFopenErrno() const { return fopenErrno; }
 
   // Get file name.
-  GooString *getFileName() { return fileName; }
+  const GooString *getFileName() const { return fileName; }
 #ifdef _WIN32
   wchar_t *getFileNameU() { return fileNameU; }
 #endif
@@ -156,16 +156,16 @@ public:
   GBool checkLinearization();
 
   // Get the xref table.
-  XRef *getXRef() { return xref; }
+  XRef *getXRef() const { return xref; }
 
   // Get catalog.
-  Catalog *getCatalog() { return catalog; }
+  Catalog *getCatalog() const { return catalog; }
 
   // Get optional content configuration
-  OCGs *getOptContentConfig() { return catalog->getOptContentConfig(); }
+  OCGs *getOptContentConfig() const { return catalog->getOptContentConfig(); }
 
   // Get base stream.
-  BaseStream *getBaseStream() { return str; }
+  BaseStream *getBaseStream() const { return str; }
 
   // Get page parameters.
   double getPageMediaWidth(int page)
@@ -184,10 +184,10 @@ public:
 
   // Return the contents of the metadata stream, or NULL if there is
   // no metadata.
-  GooString *readMetadata() { return catalog->readMetadata(); }
+  const GooString *readMetadata() const { return catalog->readMetadata(); }
 
   // Return the structure tree root object.
-  StructTreeRoot *getStructTreeRoot() { return catalog->getStructTreeRoot(); }
+  const StructTreeRoot *getStructTreeRoot() const { return catalog->getStructTreeRoot(); }
 
   // Get page.
   Page *getPage(int page);
@@ -384,10 +384,10 @@ private:
 
   PDFDoc();
   void init();
-  GBool setup(GooString *ownerPassword, GooString *userPassword);
+  GBool setup(const GooString *ownerPassword, const GooString *userPassword);
   GBool checkFooter();
   void checkHeader();
-  GBool checkEncryption(GooString *ownerPassword, GooString *userPassword);
+  GBool checkEncryption(const GooString *ownerPassword, const GooString *userPassword);
   void extractPDFSubtype();
 
   // Get the offset of the start xref table.
@@ -400,7 +400,7 @@ private:
   // Mark the document's Info dictionary as modified.
   void setDocInfoModified(Object *infoObj);
 
-  GooString *fileName;
+  const GooString *fileName;
 #ifdef _WIN32
   wchar_t *fileNameU;
 #endif

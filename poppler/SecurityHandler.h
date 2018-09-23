@@ -63,14 +63,14 @@ public:
   // document can be opened (if it's unencrypted, or if a correct
   // password is obtained); false otherwise (encrypted and no correct
   // password).
-  GBool checkEncryption(GooString *ownerPassword,
-			GooString *userPassword);
+  GBool checkEncryption(const GooString *ownerPassword,
+			const GooString *userPassword);
 
   // Create authorization data for the specified owner and user
   // passwords.  If the security handler doesn't support "batch" mode,
   // this function should return NULL.
-  virtual void *makeAuthData(GooString *ownerPassword,
-			     GooString *userPassword) = 0;
+  virtual void *makeAuthData(const GooString *ownerPassword,
+			     const GooString *userPassword) = 0;
 
   // Construct authorization data, typically by prompting the user for
   // a password.  Returns an authorization data object, or NULL to
@@ -113,8 +113,8 @@ public:
   ~StandardSecurityHandler();
 
   GBool isUnencrypted() override;
-  void *makeAuthData(GooString *ownerPassword,
-			     GooString *userPassword) override;
+  void *makeAuthData(const GooString *ownerPassword,
+			     const GooString *userPassword) override;
   void *getAuthData() override;
   void freeAuthData(void *authData) override;
   GBool authorize(void *authData) override;

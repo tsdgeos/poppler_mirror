@@ -81,8 +81,8 @@ SecurityHandler::SecurityHandler(PDFDoc *docA) {
 SecurityHandler::~SecurityHandler() {
 }
 
-GBool SecurityHandler::checkEncryption(GooString *ownerPassword,
-				       GooString *userPassword) {
+GBool SecurityHandler::checkEncryption(const GooString *ownerPassword,
+				       const GooString *userPassword) {
   void *authData;
   GBool ok;
   int i;
@@ -321,8 +321,8 @@ GBool StandardSecurityHandler::isUnencrypted() {
   return encVersion == -1 && encRevision == -1;
 }
 
-void *StandardSecurityHandler::makeAuthData(GooString *ownerPassword,
-					    GooString *userPassword) {
+void *StandardSecurityHandler::makeAuthData(const GooString *ownerPassword,
+					    const GooString *userPassword) {
   return new StandardAuthData(ownerPassword ? ownerPassword->copy()
 			                    : nullptr,
 			      userPassword ? userPassword->copy()

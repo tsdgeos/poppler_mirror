@@ -198,9 +198,9 @@ public:
   ~GfxColorTransform();
   GfxColorTransform(const GfxColorTransform &) = delete;
   GfxColorTransform& operator=(const GfxColorTransform &) = delete;
-  int getIntent() { return cmsIntent; }
-  int getInputPixelType() { return inputPixelType; }
-  int getTransformPixelType() { return transformPixelType; }
+  int getIntent() const { return cmsIntent; }
+  int getInputPixelType() const { return inputPixelType; }
+  int getTransformPixelType() const { return transformPixelType; }
   void ref();
   unsigned int unref();
 private:
@@ -267,7 +267,7 @@ public:
   virtual GBool isNonMarking() { return gFalse; }
 
   // Return the color space's overprint mask.
-  Guint getOverprintMask() { return overprintMask; }
+  Guint getOverprintMask() const { return overprintMask; }
 
   // Return the number of color space modes
   static int getNumColorSpaceModes();

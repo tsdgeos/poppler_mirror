@@ -134,8 +134,8 @@ PDFDoc::PDFDoc()
   init();
 }
 
-PDFDoc::PDFDoc(GooString *fileNameA, GooString *ownerPassword,
-	       GooString *userPassword, void *guiDataA) {
+PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword,
+	       const GooString *userPassword, void *guiDataA) {
 #ifdef _WIN32
   int n, i;
 #endif
@@ -218,8 +218,8 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
 }
 #endif
 
-PDFDoc::PDFDoc(BaseStream *strA, GooString *ownerPassword,
-	       GooString *userPassword, void *guiDataA) {
+PDFDoc::PDFDoc(BaseStream *strA, const GooString *ownerPassword,
+	       const GooString *userPassword, void *guiDataA) {
 #ifdef _WIN32
   int n, i;
 #endif
@@ -246,7 +246,7 @@ PDFDoc::PDFDoc(BaseStream *strA, GooString *ownerPassword,
   ok = setup(ownerPassword, userPassword);
 }
 
-GBool PDFDoc::setup(GooString *ownerPassword, GooString *userPassword) {
+GBool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword) {
   pdfdocLocker();
 
   if (str->getLength() <= 0)
@@ -442,7 +442,7 @@ void PDFDoc::checkHeader() {
   // We don't do the version check. Don't add it back in.
 }
 
-GBool PDFDoc::checkEncryption(GooString *ownerPassword, GooString *userPassword) {
+GBool PDFDoc::checkEncryption(const GooString *ownerPassword, const GooString *userPassword) {
   GBool encrypted;
   GBool ret;
 
@@ -1969,7 +1969,7 @@ Outline *PDFDoc::getOutline()
 }
 #endif
 
-PDFDoc *PDFDoc::ErrorPDFDoc(int errorCode, GooString *fileNameA)
+PDFDoc *PDFDoc::ErrorPDFDoc(int errorCode, const GooString *fileNameA)
 {
   PDFDoc *doc = new PDFDoc();
   doc->errCode = errorCode;
