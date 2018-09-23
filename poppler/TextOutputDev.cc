@@ -5558,7 +5558,7 @@ static void TextOutputDev_outputToFile(void *stream, const char *text, int len) 
   fwrite(text, 1, len, (FILE *)stream);
 }
 
-TextOutputDev::TextOutputDev(char *fileName, GBool physLayoutA,
+TextOutputDev::TextOutputDev(const char *fileName, GBool physLayoutA,
 			     double fixedPitchA, GBool rawOrderA,
 			     GBool append) {
   text = nullptr;
