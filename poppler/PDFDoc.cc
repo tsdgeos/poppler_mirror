@@ -184,12 +184,13 @@ PDFDoc::PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword,
   guiData = guiDataA;
 
   // save both Unicode and 8-bit copies of the file name
-  fileName = new GooString();
+  GooString *fileNameG = new GooString();
   fileNameU = (wchar_t *)gmallocn(fileNameLen + 1, sizeof(wchar_t));
   for (i = 0; i < fileNameLen; ++i) {
-    fileName->append((char)fileNameA[i]);
+    fileNameG->append((char)fileNameA[i]);
     fileNameU[i] = fileNameA[i];
   }
+  fileName = fileNameG;
   fileNameU[fileNameLen] = L'\0';
   
   // try to open file

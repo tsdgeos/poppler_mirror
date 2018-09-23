@@ -508,7 +508,7 @@ static const char *findSubstituteName(GfxFont *font, const std::unordered_map<st
     /* TODO: try to at least guess bold/italic/bolditalic from the name */
     delete name2;
     if (font->isCIDFont()) {
-      GooString *collection = ((GfxCIDFont *)font)->getCollection();
+      const GooString *collection = ((GfxCIDFont *)font)->getCollection();
 
       const char* name3 = nullptr;
       if ( !collection->cmp("Adobe-CNS1") )
