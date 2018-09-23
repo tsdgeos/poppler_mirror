@@ -1308,7 +1308,7 @@ void PDFDoc::writeRawStream (Stream* str, OutStream* outStr)
   outStr->printf("\r\nendstream\r\n");
 }
 
-void PDFDoc::writeString (const GooString* s, OutStream* outStr, Guchar *fileKey,
+void PDFDoc::writeString (const GooString* s, OutStream* outStr, const Guchar *fileKey,
                           CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
 {
   // Encrypt string if encryption is enabled
@@ -1978,9 +1978,9 @@ PDFDoc *PDFDoc::ErrorPDFDoc(int errorCode, GooString *fileNameA)
   return doc;
 }
 
-long long PDFDoc::strToLongLong(char *s) {
+long long PDFDoc::strToLongLong(const char *s) {
   long long x, d;
-  char *p;
+  const char *p;
 
   x = 0;
   for (p = s; *p && isdigit(*p & 0xff); ++p) {
@@ -2024,7 +2024,7 @@ Goffset PDFDoc::getStartXRef(GBool tryingToReconstruct)
       }
     } else {
       char buf[xrefSearchSize+1];
-      char *p;
+      const char *p;
       int c, n, i;
 
       // read last xrefSearchSize bytes

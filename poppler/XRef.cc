@@ -1152,7 +1152,7 @@ Object XRef::fetch(int num, int gen, int recursion) {
       if (obj1.isInt() && obj1.getInt() == num &&
 	  obj2.isInt() && obj2.getInt() == gen &&
 	  obj3.isCmd()) {
-	char *cmd = obj3.getCmd();
+	const char *cmd = obj3.getCmd();
 	if (strlen(cmd) > 3 &&
 	    cmd[0] == 'o' &&
 	    cmd[1] == 'b' &&

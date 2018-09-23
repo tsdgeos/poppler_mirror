@@ -535,7 +535,7 @@ static const char *findSubstituteName(GfxFont *font, const std::unordered_map<st
 GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 					  SysFontType *type,
 					  int *fontNum, GooString *substituteFontName,
-                                          GooString *base14Name) {
+                                          const GooString *base14Name) {
   SysFontInfo *fi;
   GooString *path = nullptr;
   const GooString *fontName = font->getName();

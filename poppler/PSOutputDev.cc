@@ -2772,7 +2772,7 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName,
   Dict *charProcs;
   Gfx *gfx;
   PDFRectangle box;
-  double *m;
+  const double *m;
   GooString *buf;
   int i;
 

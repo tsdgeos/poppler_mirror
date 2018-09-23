@@ -149,7 +149,7 @@ class FoFiType1C: public FoFiBase {
 public:
 
   // Create a FoFiType1C object from a memory buffer.
-  static FoFiType1C *make(char *fileA, int lenA);
+  static FoFiType1C *make(const char *fileA, int lenA);
 
   // Create a FoFiType1C object from a file on disk.
   static FoFiType1C *load(const char *fileName);
@@ -208,7 +208,7 @@ public:
 
 private:
 
-  FoFiType1C(char *fileA, int lenA, GBool freeFileDataA);
+  FoFiType1C(const char *fileA, int lenA, GBool freeFileDataA);
   void eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName,
 		     int offset, int nBytes,
 		     Type1CIndex *subrIdx,
@@ -218,10 +218,10 @@ private:
 		GBool top);
   void cvtGlyphWidth(GBool useOp, GooString *charBuf,
 		     Type1CPrivateDict *pDict);
-  void cvtNum(double x, GBool isFP, GooString *charBuf);
-  void eexecWrite(Type1CEexecBuf *eb, const char *s);
-  void eexecWriteCharstring(Type1CEexecBuf *eb, Guchar *s, int n);
-  void writePSString(char *s, FoFiOutputFunc outputFunc, void *outputStream);
+  void cvtNum(double x, GBool isFP, GooString *charBuf) const;
+  void eexecWrite(Type1CEexecBuf *eb, const char *s) const;
+  void eexecWriteCharstring(Type1CEexecBuf *eb, const Guchar *s, int n) const;
+  void writePSString(const char *s, FoFiOutputFunc outputFunc, void *outputStream) const;
   GBool parse();
   void readTopDict();
   void readFD(int offset, int length, Type1CPrivateDict *pDict);
@@ -230,9 +230,9 @@ private:
   void buildEncoding();
   GBool readCharset();
   int getOp(int pos, GBool charstring, GBool *ok);
-  int getDeltaIntArray(int *arr, int maxLen);
-  int getDeltaFPArray(double *arr, int maxLen);
-  void getIndex(int pos, Type1CIndex *idx, GBool *ok);
+  int getDeltaIntArray(int *arr, int maxLen) const;
+  int getDeltaFPArray(double *arr, int maxLen) const;
+  void getIndex(int pos, Type1CIndex *idx, GBool *ok) const;
   void getIndexVal(const Type1CIndex *idx, int i, Type1CIndexVal *val, GBool *ok) const;
   char *getString(int sid, char *buf, GBool *ok) const;
 

@@ -57,7 +57,7 @@ static void sha256(Guchar *msg, int msgLen, Guchar *hash);
 static void sha384(Guchar *msg, int msgLen, Guchar *hash);
 static void sha512(Guchar *msg, int msgLen, Guchar *hash);
 
-static void revision6Hash(GooString *inputPassword, Guchar *K, const char *userKey);
+static void revision6Hash(const GooString *inputPassword, Guchar *K, const char *userKey);
 
 static const Guchar passwordPad[32] = {
   0x28, 0xbf, 0x4e, 0x5e, 0x4e, 0x75, 0x8a, 0x41,
@@ -71,10 +71,10 @@ static const Guchar passwordPad[32] = {
 //------------------------------------------------------------------------
 
 GBool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
-			   GooString *ownerKey, GooString *userKey,
-			   GooString *ownerEnc, GooString *userEnc,
-			   int permissions, GooString *fileID,
-			   GooString *ownerPassword, GooString *userPassword,
+			   const GooString *ownerKey, const GooString *userKey,
+			   const GooString *ownerEnc, const GooString *userEnc,
+			   int permissions, const GooString *fileID,
+			   const GooString *ownerPassword, const GooString *userPassword,
 			   Guchar *fileKey, GBool encryptMetadata,
 			   GBool *ownerPasswordOk) {
   DecryptAES256State state;
@@ -226,9 +226,9 @@ GBool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
 }
 
 GBool Decrypt::makeFileKey2(int encVersion, int encRevision, int keyLength,
-			    GooString *ownerKey, GooString *userKey,
-			    int permissions, GooString *fileID,
-			    GooString *userPassword, Guchar *fileKey,
+			    const GooString *ownerKey, const GooString *userKey,
+			    int permissions, const GooString *fileID,
+			    const GooString *userPassword, Guchar *fileKey,
 			    GBool encryptMetadata) {
   Guchar *buf;
   Guchar test[32];
@@ -307,7 +307,7 @@ GBool Decrypt::makeFileKey2(int encVersion, int encRevision, int keyLength,
 // BaseCryptStream
 //------------------------------------------------------------------------
 
-BaseCryptStream::BaseCryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm algoA,
+BaseCryptStream::BaseCryptStream(Stream *strA, const Guchar *fileKey, CryptAlgorithm algoA,
 				 int keyLength, int objNum, int objGen):
   FilterStream(strA)
 {
@@ -399,7 +399,7 @@ void BaseCryptStream::setAutoDelete(GBool val) {
 // EncryptStream
 //------------------------------------------------------------------------
 
-EncryptStream::EncryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm algoA,
+EncryptStream::EncryptStream(Stream *strA, const Guchar *fileKey, CryptAlgorithm algoA,
 			     int keyLength, int objNum, int objGen):
   BaseCryptStream(strA, fileKey, algoA, keyLength, objNum, objGen)
 {
@@ -491,7 +491,7 @@ int EncryptStream::lookChar() {
 // DecryptStream
 //------------------------------------------------------------------------
 
-DecryptStream::DecryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm algoA,
+DecryptStream::DecryptStream(Stream *strA, const Guchar *fileKey, CryptAlgorithm algoA,
 			     int keyLength, int objNum, int objGen):
   BaseCryptStream(strA, fileKey, algoA, keyLength, objNum, objGen)
 {
@@ -1151,7 +1151,7 @@ static inline Gulong md5Round4(Gulong a, Gulong b, Gulong c, Gulong d,
   return b + rotateLeft((a + (c ^ (b | ~d)) + Xk + Ti), s);
 }
 
-void md5(Guchar *msg, int msgLen, Guchar *digest) {
+void md5(const Guchar *msg, int msgLen, Guchar *digest) {
   Gulong x[16] = {};
   Gulong a, b, c, d, aa, bb, cc, dd;
   int n64;
@@ -1702,7 +1702,7 @@ static void sha384(Guchar *msg, int msgLen, Guchar *hash) {
 // Section 7.6.3.3 (Encryption Key algorithm) of ISO/DIS 32000-2
 // Algorithm 2.B:Computing a hash (for revision 6).
 //------------------------------------------------------------------------
-static void revision6Hash(GooString *inputPassword, Guchar *K, const char *userKey) {
+static void revision6Hash(const GooString *inputPassword, Guchar *K, const char *userKey) {
   Guchar K1[64*(127+64+48)];
   Guchar  E[64*(127+64+48)];
   DecryptAESState state;

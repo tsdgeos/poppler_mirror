@@ -184,7 +184,7 @@ public:
   GfxFont(const GfxFont &) = delete;
   GfxFont& operator=(const GfxFont &other) = delete;
 
-  GBool isOk() { return ok; }
+  GBool isOk() const { return ok; }
 
   void incRefCnt();
   void decRefCnt();
@@ -199,7 +199,7 @@ public:
   GBool matches(const char *tagA) const { return !tag->cmp(tagA); }
 
   // Get font family name.
-  GooString *getFamily() { return family; }
+  GooString *getFamily() const { return family; }
   
   // Get font stretch.
   Stretch getStretch() const { return stretch; }
@@ -217,7 +217,7 @@ public:
 
   // Get embedded font ID, i.e., a ref for the font file stream.
   // Returns false if there is no embedded font.
-  GBool getEmbeddedFontID(Ref *embID)
+  GBool getEmbeddedFontID(Ref *embID) const
     { *embID = embFontID; return embFontID.num >= 0; }
 
   // Invalidate an embedded font
@@ -232,28 +232,28 @@ public:
 
   // Get the PostScript font name for the embedded font.  Returns
   // NULL if there is no embedded font.
-  GooString *getEmbeddedFontName() { return embFontName; }
+  const GooString *getEmbeddedFontName() const { return embFontName; }
 
   // Get font descriptor flags.
-  int getFlags() { return flags; }
-  GBool isFixedWidth() { return flags & fontFixedWidth; }
-  GBool isSerif() { return flags & fontSerif; }
-  GBool isSymbolic() { return flags & fontSymbolic; }
-  GBool isItalic() { return flags & fontItalic; }
-  GBool isBold() { return flags & fontBold; }
+  int getFlags() const { return flags; }
+  GBool isFixedWidth() const { return flags & fontFixedWidth; }
+  GBool isSerif() const { return flags & fontSerif; }
+  GBool isSymbolic() const { return flags & fontSymbolic; }
+  GBool isItalic() const { return flags & fontItalic; }
+  GBool isBold() const { return flags & fontBold; }
 
   // Return the Unicode map.
   virtual const CharCodeToUnicode *getToUnicode() const = 0;
 
   // Return the font matrix.
-  double *getFontMatrix() { return fontMat; }
+  const double *getFontMatrix() const { return fontMat; }
 
   // Return the font bounding box.
-  double *getFontBBox() { return fontBBox; }
+  const double *getFontBBox() const { return fontBBox; }
 
   // Return the ascent and descent values.
-  double getAscent() { return ascent; }
-  double getDescent() { return descent; }
+  double getAscent() const { return ascent; }
+  double getDescent() const { return descent; }
 
   // Return the writing mode (0=horizontal, 1=vertical).
   virtual int getWMode() { return 0; }
@@ -279,10 +279,10 @@ public:
 			  double *dx, double *dy, double *ox, double *oy) const = 0;
 
   // Does this font have a toUnicode map?
-  GBool hasToUnicodeCMap() { return hasToUnicode; }
+  GBool hasToUnicodeCMap() const { return hasToUnicode; }
 
   // Return the name of the encoding
-  GooString *getEncodingName() { return encodingName; }
+  GooString *getEncodingName() const { return encodingName; }
 
   // Return AGLFN names of ligatures in the Standard and Expert encodings
   // for use with fonts that are not compatible with the Standard 14 fonts.
@@ -341,16 +341,16 @@ public:
   const CharCodeToUnicode *getToUnicode() const override;
 
   // Return the character name associated with <code>.
-  char *getCharName(int code) { return enc[code]; }
+  const char *getCharName(int code) const { return enc[code]; }
 
   // Returns true if the PDF font specified an encoding.
-  GBool getHasEncoding() { return hasEncoding; }
+  GBool getHasEncoding() const { return hasEncoding; }
 
   // Returns true if the PDF font specified MacRomanEncoding.
-  GBool getUsesMacRomanEnc() { return usesMacRomanEnc; }
+  GBool getUsesMacRomanEnc() const { return usesMacRomanEnc; }
 
   // Get width of a character.
-  double getWidth(Guchar c) { return widths[c]; }
+  double getWidth(Guchar c) const { return widths[c]; }
 
   // Return a char code-to-GID mapping for the provided font file.
   // (This is only useful for TrueType fonts.)
@@ -406,12 +406,12 @@ public:
   const CharCodeToUnicode *getToUnicode() const override;
 
   // Get the collection name (<registry>-<ordering>).
-  GooString *getCollection();
+  const GooString *getCollection() const;
 
   // Return the CID-to-GID mapping table.  These should only be called
   // if type is fontCIDType2.
-  int *getCIDToGID() { return cidToGID; }
-  int getCIDToGIDLen() { return cidToGIDLen; }
+  int *getCIDToGID() const { return cidToGID; }
+  int getCIDToGIDLen() const { return cidToGIDLen; }
 
   int *getCodeToGIDMap(FoFiTrueType *ff, int *length);
 

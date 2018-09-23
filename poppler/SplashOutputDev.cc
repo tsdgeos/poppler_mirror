@@ -2249,7 +2249,7 @@ reload:
   if (fontFile->doAdjustMatrix && !gfxFont->isCIDFont()) {
     double w1, w2, w3;
     CharCode code;
-    char *name;
+    const char *name;
     for (code = 0; code < 256; ++code) {
       if ((name = ((Gfx8BitFont *)gfxFont)->getCharName(code)) &&
           name[0] == 'm' && name[1] == '\0') {
@@ -2497,7 +2497,7 @@ GBool SplashOutputDev::beginType3Char(GfxState *state, double x, double y,
 				      CharCode code, Unicode *u, int uLen) {
   GfxFont *gfxFont;
   const Ref *fontID;
-  double *ctm, *bbox;
+  const double *ctm, *bbox;
   T3FontCache *t3Font;
   T3GlyphStack *t3gs;
   GBool validBBox;

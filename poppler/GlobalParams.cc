@@ -753,7 +753,7 @@ Unicode GlobalParams::mapNameToUnicodeText(const char *charName) {
   return nameToUnicodeText->lookup(charName);
 }
 
-UnicodeMap *GlobalParams::getResidentUnicodeMap(GooString *encodingName) {
+UnicodeMap *GlobalParams::getResidentUnicodeMap(const GooString *encodingName) {
   UnicodeMap *map = nullptr;
 
   globalParamsLocker();
@@ -766,7 +766,7 @@ UnicodeMap *GlobalParams::getResidentUnicodeMap(GooString *encodingName) {
   return map;
 }
 
-FILE *GlobalParams::getUnicodeMapFile(GooString *encodingName) {
+FILE *GlobalParams::getUnicodeMapFile(const GooString *encodingName) {
   FILE *file = nullptr;
 
   globalParamsLocker();
@@ -778,7 +778,7 @@ FILE *GlobalParams::getUnicodeMapFile(GooString *encodingName) {
   return file;
 }
 
-FILE *GlobalParams::findCMapFile(GooString *collection, GooString *cMapName) {
+FILE *GlobalParams::findCMapFile(const GooString *collection, const GooString *cMapName) {
   FILE *file = nullptr;
 
   globalParamsLocker();
@@ -796,7 +796,7 @@ FILE *GlobalParams::findCMapFile(GooString *collection, GooString *cMapName) {
   return file;
 }
 
-FILE *GlobalParams::findToUnicodeFile(GooString *name) {
+FILE *GlobalParams::findToUnicodeFile(const GooString *name) {
   GooString *dir, *fileName;
   FILE *f;
   int i;
@@ -840,7 +840,7 @@ static const char *getFontLang(GfxFont *font)
   // find the language we want the font to support
   if (font->isCIDFont())
   {
-    GooString *collection = ((GfxCIDFont *)font)->getCollection();
+    const GooString *collection = ((GfxCIDFont *)font)->getCollection();
     if (collection)
     {
       if (strcmp(collection->getCString(), "Adobe-GB1") == 0)
@@ -988,7 +988,7 @@ static FcPattern *buildFcPattern(GfxFont *font, const GooString *base14Name)
 }
 #endif
 
-GooString *GlobalParams::findFontFile(GooString *fontName) {
+GooString *GlobalParams::findFontFile(const GooString *fontName) {
   GooString *path = nullptr;
 
   setupBaseFonts(nullptr);
@@ -1009,7 +1009,7 @@ GooString *GlobalParams::findFontFile(GooString *fontName) {
 void GlobalParams::setupBaseFonts(char *) {
 }
 
-GooString *GlobalParams::findBase14FontFile(GooString *base14Name, GfxFont *font) {
+GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, GfxFont *font) {
   SysFontType type;
   int fontNum;
   
@@ -1018,7 +1018,7 @@ GooString *GlobalParams::findBase14FontFile(GooString *base14Name, GfxFont *font
 
 GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 					  SysFontType *type,
-					  int *fontNum, GooString *substituteFontName, GooString *base14Name) {
+					  int *fontNum, GooString *substituteFontName, const GooString *base14Name) {
   SysFontInfo *fi = nullptr;
   FcPattern *p=nullptr;
   GooString *path = nullptr;
@@ -1182,11 +1182,11 @@ fin:
 #elif WITH_FONTCONFIGURATION_WIN32
 #include "GlobalParamsWin.cc"
 
-GooString *GlobalParams::findBase14FontFile(GooString *base14Name, GfxFont *font) {
+GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, GfxFont *font) {
   return findFontFile(base14Name);
 }
 #else
-GooString *GlobalParams::findBase14FontFile(GooString *base14Name, GfxFont *font) {
+GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, GfxFont *font) {
   return findFontFile(base14Name);
 }
 
@@ -1367,7 +1367,7 @@ UnicodeMap *GlobalParams::getUnicodeMap2(GooString *encodingName) {
   return map;
 }
 
-CMap *GlobalParams::getCMap(GooString *collection, GooString *cMapName, Stream *stream) {
+CMap *GlobalParams::getCMap(const GooString *collection, GooString *cMapName, Stream *stream) {
   cMapCacheLocker();
   return cMapCache->getCMap(collection, cMapName, stream);
 }

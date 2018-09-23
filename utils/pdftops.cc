@@ -215,7 +215,6 @@ int main(int argc, char *argv[]) {
   GooString *ownerPW, *userPW;
   PSOutputDev *psOut;
   GBool ok;
-  char *p;
   int exitCode;
   GBool rasterAntialias = gFalse;
   std::vector<int> pages;
@@ -352,7 +351,7 @@ int main(int argc, char *argv[]) {
     error(errCommandLine, -1, "You have to provide an output filename when reading form stdin.");
     goto err1;
   } else {
-    p = fileName->getCString() + fileName->getLength() - 4;
+    const char *p = fileName->getCString() + fileName->getLength() - 4;
     if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
       psFileName = new GooString(fileName->getCString(),
 			       fileName->getLength() - 4);

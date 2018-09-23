@@ -271,7 +271,7 @@ static const char *macGlyphNames[258] = {
 // FoFiTrueType
 //------------------------------------------------------------------------
 
-FoFiTrueType *FoFiTrueType::make(char *fileA, int lenA, int faceIndexA) {
+FoFiTrueType *FoFiTrueType::make(const char *fileA, int lenA, int faceIndexA) {
   FoFiTrueType *ff;
 
   ff = new FoFiTrueType(fileA, lenA, gFalse, faceIndexA);
@@ -298,7 +298,7 @@ FoFiTrueType *FoFiTrueType::load(const char *fileName, int faceIndexA) {
   return ff;
 }
 
-FoFiTrueType::FoFiTrueType(char *fileA, int lenA, GBool freeFileDataA, int faceIndexA):
+FoFiTrueType::FoFiTrueType(const char *fileA, int lenA, GBool freeFileDataA, int faceIndexA):
   FoFiBase(fileA, lenA, freeFileDataA)
 {
   tables = nullptr;
@@ -318,19 +318,19 @@ FoFiTrueType::~FoFiTrueType() {
   gfree(cmaps);
 }
 
-int FoFiTrueType::getNumCmaps() {
+int FoFiTrueType::getNumCmaps() const {
   return nCmaps;
 }
 
-int FoFiTrueType::getCmapPlatform(int i) {
+int FoFiTrueType::getCmapPlatform(int i) const {
   return cmaps[i].platform;
 }
 
-int FoFiTrueType::getCmapEncoding(int i) {
+int FoFiTrueType::getCmapEncoding(int i) const {
   return cmaps[i].encoding;
 }
 
-int FoFiTrueType::findCmap(int platform, int encoding) {
+int FoFiTrueType::findCmap(int platform, int encoding) const {
   int i;
 
   for (i = 0; i < nCmaps; ++i) {
@@ -341,7 +341,7 @@ int FoFiTrueType::findCmap(int platform, int encoding) {
   return -1;
 }
 
-int FoFiTrueType::mapCodeToGID(int i, Guint c) {
+int FoFiTrueType::mapCodeToGID(int i, Guint c) const {
   int gid;
   Guint segCnt, segEnd, segStart, segDelta, segOffset;
   Guint cmapFirst, cmapLen;
@@ -438,7 +438,7 @@ int FoFiTrueType::mapCodeToGID(int i, Guint c) {
   return gid;
 }
 
-int FoFiTrueType::mapNameToGID(char *name) const {
+int FoFiTrueType::mapNameToGID(const char *name) const {
   const auto gid = nameToGID.find(name);
   if (gid == nameToGID.end()) {
     return 0;
@@ -446,7 +446,7 @@ int FoFiTrueType::mapNameToGID(char *name) const {
   return gid->second;
 }
 
-GBool FoFiTrueType::getCFFBlock(char **start, int *length) {
+GBool FoFiTrueType::getCFFBlock(char **start, int *length) const {
   int i;
 
   if (!openTypeCFF || !tables) {
@@ -461,7 +461,7 @@ GBool FoFiTrueType::getCFFBlock(char **start, int *length) {
   return gTrue;
 }
 
-int *FoFiTrueType::getCIDToGIDMap(int *nCIDs) {
+int *FoFiTrueType::getCIDToGIDMap(int *nCIDs) const {
   char *start;
   int length;
   FoFiType1C *ff;
@@ -479,7 +479,7 @@ int *FoFiTrueType::getCIDToGIDMap(int *nCIDs) {
   return map;
 }
 
-int FoFiTrueType::getEmbeddingRights() {
+int FoFiTrueType::getEmbeddingRights() const {
   int i, fsType;
   GBool ok;
 
@@ -503,7 +503,7 @@ int FoFiTrueType::getEmbeddingRights() {
   return 3;
 }
 
-void FoFiTrueType::getFontMatrix(double *mat) {
+void FoFiTrueType::getFontMatrix(double *mat) const {
   char *start;
   int length;
   FoFiType1C *ff;
@@ -521,7 +521,7 @@ void FoFiTrueType::getFontMatrix(double *mat) {
 void FoFiTrueType::convertToType42(const char *psName, char **encoding,
 				   int *codeToGID,
 				   FoFiOutputFunc outputFunc,
-				   void *outputStream) {
+				   void *outputStream) const {
   GooString *buf;
   int maxUsedGlyph;
   GBool ok;
@@ -561,7 +561,7 @@ void FoFiTrueType::convertToType42(const char *psName, char **encoding,
 
 void FoFiTrueType::convertToType1(const char *psName, const char **newEncoding,
 				  GBool ascii, FoFiOutputFunc outputFunc,
-				  void *outputStream) {
+				  void *outputStream) const {
   char *start;
   int length;
   FoFiType1C *ff;
@@ -580,7 +580,7 @@ void FoFiTrueType::convertToCIDType2(const char *psName,
 				     int *cidMap, int nCIDs,
 				     GBool needVerticalMetrics,
 				     FoFiOutputFunc outputFunc,
-				     void *outputStream) {
+				     void *outputStream) const {
   GooString *buf;
   int cid, maxUsedGlyph;
   GBool ok;
@@ -708,7 +708,7 @@ void FoFiTrueType::convertToCIDType2(const char *psName,
 
 void FoFiTrueType::convertToCIDType0(const char *psName, int *cidMap, int nCIDs,
 				     FoFiOutputFunc outputFunc,
-				     void *outputStream) {
+				     void *outputStream) const {
   char *start;
   int length;
   FoFiType1C *ff;
@@ -727,7 +727,7 @@ void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs,
 				  GBool needVerticalMetrics,
 				  int *maxValidGlyph,
 				  FoFiOutputFunc outputFunc,
-				  void *outputStream) {
+				  void *outputStream) const {
   GooString *buf;
   GooString *sfntsName;
   int maxUsedGlyph, n, i, j;
@@ -840,7 +840,7 @@ void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs,
 
 void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs,
 				  FoFiOutputFunc outputFunc,
-				  void *outputStream) {
+				  void *outputStream) const {
   char *start;
   int length;
   FoFiType1C *ff;
@@ -857,7 +857,7 @@ void FoFiTrueType::convertToType0(const char *psName, int *cidMap, int nCIDs,
 
 void FoFiTrueType::cvtEncoding(char **encoding,
 			       FoFiOutputFunc outputFunc,
-			       void *outputStream) {
+			       void *outputStream) const {
   const char *name;
   GooString *buf;
   int i;
@@ -887,8 +887,8 @@ void FoFiTrueType::cvtEncoding(char **encoding,
 void FoFiTrueType::cvtCharStrings(char **encoding,
 				  int *codeToGID,
 				  FoFiOutputFunc outputFunc,
-				  void *outputStream) {
-  char *name;
+				  void *outputStream) const {
+  const char *name;
   GooString *buf;
   char buf2[16];
   int i, k;
@@ -939,7 +939,7 @@ void FoFiTrueType::cvtCharStrings(char **encoding,
 void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
 			    void *outputStream, GooString *name,
 			    GBool needVerticalMetrics,
-                            int *maxUsedGlyph) {
+                            int *maxUsedGlyph) const {
   Guchar headData[54];
   TrueTypeLoca *locaTable;
   Guchar *locaData;
@@ -1260,7 +1260,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
 
 void FoFiTrueType::dumpString(const Guchar *s, int length,
 			      FoFiOutputFunc outputFunc,
-			      void *outputStream) {
+			      void *outputStream) const {
   GooString *buf;
   int pad, i, j;
 
@@ -1287,7 +1287,7 @@ void FoFiTrueType::dumpString(const Guchar *s, int length,
   (*outputFunc)(outputStream, "00>\n", 4);
 }
 
-Guint FoFiTrueType::computeTableChecksum(const Guchar *data, int length) {
+Guint FoFiTrueType::computeTableChecksum(const Guchar *data, int length) const {
   Guint checksum, word;
   int i;
 
@@ -1521,7 +1521,7 @@ void FoFiTrueType::readPostTable() {
   nameToGID.clear();
 }
 
-int FoFiTrueType::seekTable(const char *tag) {
+int FoFiTrueType::seekTable(const char *tag) const {
   Guint tagI;
   int i;
 

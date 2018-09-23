@@ -2459,8 +2459,8 @@ void TextPage::clear() {
 
 void TextPage::updateFont(GfxState *state) {
   GfxFont *gfxFont;
-  double *fm;
-  char *name;
+  const double *fm;
+  const char *name;
   int code, mCode, letterCode, anyCode;
   double w;
   int i;
@@ -2529,7 +2529,7 @@ void TextPage::updateFont(GfxState *state) {
 
 void TextPage::beginWord(GfxState *state) {
   GfxFont *gfxFont;
-  double *fontm;
+  const double *fontm;
   double m[4], m2[4];
   int rot;
 
@@ -5558,7 +5558,7 @@ static void TextOutputDev_outputToFile(void *stream, const char *text, int len) 
   fwrite(text, 1, len, (FILE *)stream);
 }
 
-TextOutputDev::TextOutputDev(char *fileName, GBool physLayoutA,
+TextOutputDev::TextOutputDev(const char *fileName, GBool physLayoutA,
 			     double fixedPitchA, GBool rawOrderA,
 			     GBool append) {
   text = nullptr;

@@ -109,7 +109,7 @@ CairoFont::getSubstitutionCorrection(GfxFont *gfxFont)
 {
   double w1, w2, w3;
   CharCode code;
-  char *name;
+  const char *name;
 
   // for substituted fonts: adjust the font matrix -- compare the
   // width of 'm' in the original font and the substituted font
@@ -630,13 +630,12 @@ _init_type3_glyph (cairo_scaled_font_t  *scaled_font,
 {
   type3_font_info_t *info;
   GfxFont *font;
-  double *mat;
 
   info = (type3_font_info_t *)
     cairo_font_face_get_user_data (cairo_scaled_font_get_font_face (scaled_font),
 				   &type3_font_key);
   font = info->font;
-  mat = font->getFontBBox();
+  const double *mat = font->getFontBBox();
   extents->ascent = mat[3]; /* y2 */
   extents->descent = -mat[3]; /* -y1 */
   extents->height = extents->ascent + extents->descent;
@@ -656,7 +655,7 @@ _render_type3_glyph (cairo_scaled_font_t  *scaled_font,
   Object charProc;
   CairoOutputDev *output_dev;
   cairo_matrix_t matrix, invert_y_axis;
-  double *mat;
+  const double *mat;
   double wx, wy;
   PDFRectangle box;
   type3_font_info_t *info;

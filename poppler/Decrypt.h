@@ -17,7 +17,7 @@
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2013 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2013, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -50,19 +50,19 @@ public:
   // the owner password was correct.  Either or both of the passwords
   // may be NULL, which is treated as an empty string.
   static GBool makeFileKey(int encVersion, int encRevision, int keyLength,
-			   GooString *ownerKey, GooString *userKey,
-			   GooString *ownerEnc, GooString *userEnc,
-			   int permissions, GooString *fileID,
-			   GooString *ownerPassword, GooString *userPassword,
+			   const GooString *ownerKey, const GooString *userKey,
+			   const GooString *ownerEnc, const GooString *userEnc,
+			   int permissions, const GooString *fileID,
+			   const GooString *ownerPassword, const GooString *userPassword,
 			   Guchar *fileKey, GBool encryptMetadata,
 			   GBool *ownerPasswordOk);
 
 private:
 
   static GBool makeFileKey2(int encVersion, int encRevision, int keyLength,
-			    GooString *ownerKey, GooString *userKey,
-			    int permissions, GooString *fileID,
-			    GooString *userPassword, Guchar *fileKey,
+			    const GooString *ownerKey, const GooString *userKey,
+			    int permissions, const GooString *fileID,
+			    const GooString *userPassword, Guchar *fileKey,
 			    GBool encryptMetadata);
 };
 
@@ -103,7 +103,7 @@ struct DecryptAES256State {
 class BaseCryptStream : public FilterStream {
 public:
 
-  BaseCryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm algoA,
+  BaseCryptStream(Stream *strA, const Guchar *fileKey, CryptAlgorithm algoA,
                   int keyLength, int objNum, int objGen);
   ~BaseCryptStream();
   StreamKind getKind() override { return strCrypt; }
@@ -137,7 +137,7 @@ protected:
 class EncryptStream : public BaseCryptStream {
 public:
 
-  EncryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm algoA,
+  EncryptStream(Stream *strA, const Guchar *fileKey, CryptAlgorithm algoA,
                 int keyLength, int objNum, int objGen);
   ~EncryptStream();
   void reset() override;
@@ -147,7 +147,7 @@ public:
 class DecryptStream : public BaseCryptStream {
 public:
 
-  DecryptStream(Stream *strA, Guchar *fileKey, CryptAlgorithm algoA,
+  DecryptStream(Stream *strA, const Guchar *fileKey, CryptAlgorithm algoA,
                 int keyLength, int objNum, int objGen);
   ~DecryptStream();
   void reset() override;
@@ -156,6 +156,6 @@ public:
  
 //------------------------------------------------------------------------
 
-extern void md5(Guchar *msg, int msgLen, Guchar *digest);
+extern void md5(const Guchar *msg, int msgLen, Guchar *digest);
 
 #endif

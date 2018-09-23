@@ -47,7 +47,7 @@ static char hexChars[17] = "0123456789ABCDEF";
 // FoFiType1C
 //------------------------------------------------------------------------
 
-FoFiType1C *FoFiType1C::make(char *fileA, int lenA) {
+FoFiType1C *FoFiType1C::make(const char *fileA, int lenA) {
   FoFiType1C *ff;
 
   ff = new FoFiType1C(fileA, lenA, gFalse);
@@ -74,7 +74,7 @@ FoFiType1C *FoFiType1C::load(const char *fileName) {
   return ff;
 }
 
-FoFiType1C::FoFiType1C(char *fileA, int lenA, GBool freeFileDataA):
+FoFiType1C::FoFiType1C(const char *fileA, int lenA, GBool freeFileDataA):
   FoFiBase(fileA, lenA, freeFileDataA)
 {
   name = nullptr;
@@ -1851,7 +1851,7 @@ void FoFiType1C::cvtGlyphWidth(GBool useOp, GooString *charBuf,
   charBuf->append((char)13);
 }
 
-void FoFiType1C::cvtNum(double x, GBool isFP, GooString *charBuf) {
+void FoFiType1C::cvtNum(double x, GBool isFP, GooString *charBuf) const {
   Guchar buf[12];
   int y, n;
 
@@ -1902,7 +1902,7 @@ void FoFiType1C::cvtNum(double x, GBool isFP, GooString *charBuf) {
   charBuf->append((char *)buf, n);
 }
 
-void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s) {
+void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s) const {
   Guchar *p;
   Guchar x;
 
@@ -1924,7 +1924,7 @@ void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s) {
 }
 
 void FoFiType1C::eexecWriteCharstring(Type1CEexecBuf *eb,
-				      Guchar *s, int n) {
+				      const Guchar *s, int n) const {
   Guchar x;
   int i;
 
@@ -1946,10 +1946,10 @@ void FoFiType1C::eexecWriteCharstring(Type1CEexecBuf *eb,
   }
 }
 
-void FoFiType1C::writePSString(char *s, FoFiOutputFunc outputFunc,
-			       void *outputStream) {
+void FoFiType1C::writePSString(const char *s, FoFiOutputFunc outputFunc,
+			       void *outputStream) const {
   char buf[80];
-  char *p;
+  const char *p;
   int i, c;
 
   i = 0;
@@ -2664,7 +2664,7 @@ int FoFiType1C::getOp(int pos, GBool charstring, GBool *ok) {
 }
 
 // Convert the delta-encoded ops array to an array of ints.
-int FoFiType1C::getDeltaIntArray(int *arr, int maxLen) {
+int FoFiType1C::getDeltaIntArray(int *arr, int maxLen) const {
   int x;
   int n, i;
 
@@ -2687,7 +2687,7 @@ int FoFiType1C::getDeltaIntArray(int *arr, int maxLen) {
 }
 
 // Convert the delta-encoded ops array to an array of doubles.
-int FoFiType1C::getDeltaFPArray(double *arr, int maxLen) {
+int FoFiType1C::getDeltaFPArray(double *arr, int maxLen) const {
   double x;
   int n, i;
 
@@ -2702,7 +2702,7 @@ int FoFiType1C::getDeltaFPArray(double *arr, int maxLen) {
   return n;
 }
 
-void FoFiType1C::getIndex(int pos, Type1CIndex *idx, GBool *ok) {
+void FoFiType1C::getIndex(int pos, Type1CIndex *idx, GBool *ok) const {
   idx->pos = pos;
   idx->len = getU16BE(pos, ok);
   if (idx->len == 0) {

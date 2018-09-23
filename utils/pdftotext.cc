@@ -182,7 +182,6 @@ int main(int argc, char *argv[]) {
   UnicodeMap *uMap;
   Object info;
   GBool ok;
-  char *p;
   int exitCode;
 
   Win32Console win32Console(&argc, &argv);
@@ -291,7 +290,7 @@ int main(int argc, char *argv[]) {
      error(errCommandLine, -1, "You have to provide an output filename when reading form stdin.");
      goto err2;
   } else {
-    p = fileName->getCString() + fileName->getLength() - 4;
+    const char *p = fileName->getCString() + fileName->getLength() - 4;
     if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
       textFileName = new GooString(fileName->getCString(),
 				 fileName->getLength() - 4);

@@ -372,7 +372,7 @@ private:
   static void writeRawStream (Stream* str, OutStream* outStr);
   void writeXRefTableTrailer (Goffset uxrefOffset, XRef *uxref, GBool writeAllEntries,
                               int uxrefSize, OutStream* outStr, GBool incrUpdate);
-  static void writeString (const GooString* s, OutStream* outStr, Guchar *fileKey,
+  static void writeString (const GooString* s, OutStream* outStr, const Guchar *fileKey,
                            CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
   void saveIncrementalUpdate (OutStream* outStr);
   void saveCompleteRewrite (OutStream* outStr);
@@ -395,7 +395,7 @@ private:
   // Get the offset of the entries in the main XRef table of a
   // linearized document (0 for non linearized documents).
   Goffset getMainXRefEntriesOffset(GBool tryingToReconstruct = gFalse);
-  long long strToLongLong(char *s);
+  long long strToLongLong(const char *s);
 
   // Mark the document's Info dictionary as modified.
   void setDocInfoModified(Object *infoObj);

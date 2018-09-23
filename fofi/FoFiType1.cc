@@ -45,7 +45,7 @@
 // FoFiType1
 //------------------------------------------------------------------------
 
-FoFiType1 *FoFiType1::make(char *fileA, int lenA) {
+FoFiType1 *FoFiType1::make(const char *fileA, int lenA) {
   return new FoFiType1(fileA, lenA, gFalse);
 }
 
@@ -59,7 +59,7 @@ FoFiType1 *FoFiType1::load(const char *fileName) {
   return new FoFiType1(fileA, lenA, gTrue);
 }
 
-FoFiType1::FoFiType1(char *fileA, int lenA, GBool freeFileDataA):
+FoFiType1::FoFiType1(const char *fileA, int lenA, GBool freeFileDataA):
   FoFiBase(fileA, lenA, freeFileDataA)
 {
   name = nullptr;
@@ -88,7 +88,7 @@ FoFiType1::~FoFiType1() {
   }
 }
 
-char *FoFiType1::getName() {
+const char *FoFiType1::getName() {
   if (!parsed) {
     parse();
   }
@@ -114,7 +114,7 @@ void FoFiType1::getFontMatrix(double *mat) {
 }
 
 void FoFiType1::writeEncoded(const char **newEncoding,
-			     FoFiOutputFunc outputFunc, void *outputStream) {
+			     FoFiOutputFunc outputFunc, void *outputStream) const {
   char buf[512];
   char *line, *line2, *p;
   int i;
@@ -196,7 +196,7 @@ void FoFiType1::writeEncoded(const char **newEncoding,
   }
 }
 
-char *FoFiType1::getNextLine(char *line) {
+char *FoFiType1::getNextLine(char *line) const {
   while (line < (char *)file + len && *line != '\x0a' && *line != '\x0d') {
     ++line;
   }
