@@ -1103,7 +1103,7 @@ void GlobalParams::setupBaseFonts(char *dir) {
 GooString *GlobalParams::findSystemFontFile(GfxFont *font,
 					  SysFontType *type,
 					  int *fontNum, GooString * /*substituteFontName*/,
-					  GooString * /*base14Name*/) {
+					  const GooString * /*base14Name*/) {
   SysFontInfo *fi;
   GooString *path;
 
