@@ -128,7 +128,7 @@ class HtmlPage {
 public:
 
   // Constructor.
-  HtmlPage(GBool rawOrder, char *imgExtVal);
+  HtmlPage(GBool rawOrder, const char *imgExtVal);
 
   // Destructor.
   ~HtmlPage();
@@ -189,7 +189,7 @@ private:
   HtmlString *xyStrings;	// strings in x-major order
   HtmlString *yxCur1, *yxCur2;	// cursors for yxStrings list
   
-  void setDocName(char* fname);
+  void setDocName(const char* fname);
   void dumpAsXML(FILE* f,int page);
   void dumpComplex(FILE* f, int page);
   int dumpComplexHeaders(FILE * const file, FILE *& pageFile, int page);
@@ -241,12 +241,12 @@ public:
   // 8-bit ISO Latin-1.  <useASCII7> should also be set for Japanese
   // (EUC-JP) text.  If <rawOrder> is true, the text is kept in content
   // stream order.
-  HtmlOutputDev(Catalog *catalogA, char *fileName, char *title, 
-	  char *author,
-	  char *keywords,
-	  char *subject,
-	  char *date,
-	  char *extension,
+  HtmlOutputDev(Catalog *catalogA, const char *fileName, const char *title,
+	  const char *author,
+	  const char *keywords,
+	  const char *subject,
+	  const char *date,
+	  const char *extension,
 	  GBool rawOrder,
 	  int firstPage = 1,
 	  GBool outline = 0);

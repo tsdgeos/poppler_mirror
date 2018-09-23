@@ -121,7 +121,7 @@ static GooString *gstr_buff0 = nullptr; // a workspace in which I format strings
 
 static GooString* basename(GooString* str){
   
-  char *p=str->getCString();
+  const char *p=str->getCString();
   int len=str->getLength();
   for (int i=len-1;i>=0;i--)
     if (*(p+i)==SLASH) 
@@ -279,7 +279,7 @@ void HtmlString::endString()
 // HtmlPage
 //------------------------------------------------------------------------
 
-HtmlPage::HtmlPage(GBool rawOrder, char *imgExtVal) {
+HtmlPage::HtmlPage(GBool rawOrder, const char *imgExtVal) {
   this->rawOrder = rawOrder;
   curStr = nullptr;
   yxStrings = nullptr;
@@ -1014,7 +1014,7 @@ void HtmlPage::clear() {
 
 }
 
-void HtmlPage::setDocName(char *fname){
+void HtmlPage::setDocName(const char *fname){
   DocName=new GooString(fname);
 }
 
@@ -1109,9 +1109,9 @@ void HtmlOutputDev::doFrame(int firstPage){
   fclose(fContentsFrame);  
 }
 
-HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, char *fileName, char *title, 
-	char *author, char *keywords, char *subject, char *date,
-	char *extension,
+HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char *title,
+	const char *author, const char *keywords, const char *subject, const char *date,
+	const char *extension,
 	GBool rawOrder, int firstPage, GBool outline) 
 {
   catalog = catalogA;
@@ -1573,7 +1573,6 @@ void HtmlOutputDev::doProcessLink(AnnotLink* link){
 }
 
 GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
-  char *p;
   if (!link->getAction())
     return new GooString();
   switch(link->getAction()->getKind()) 
@@ -1651,7 +1650,7 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 
 	      if (printCommands) printf(" link to page %d ",page);
 	      if (printHtml){
-		  p=file->getCString()+file->getLength()-4;
+		  const char *p=file->getCString()+file->getLength()-4;
 		  if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")){
 		      file->del(file->getLength()-4,4);
 		      file->append(".html");
@@ -1676,7 +1675,7 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 	  if (printHtml) {
 	      LinkLaunch *ha=(LinkLaunch *) link->getAction();
 	      GooString* file=new GooString(ha->getFileName()->getCString());
-	      p=file->getCString()+file->getLength()-4;
+	      const char *p=file->getCString()+file->getLength()-4;
 	      if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")){
 		  file->del(file->getLength()-4,4);
 		  file->append(".html");
