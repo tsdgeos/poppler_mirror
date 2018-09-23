@@ -195,14 +195,14 @@ private:
   void resize(int newLength);
   static void formatInt(long long x, char *buf, int bufSize,
 			GBool zeroFill, int width, int base,
-			char **p, int *len, GBool upperCase = gFalse);
+			const char **p, int *len, GBool upperCase = gFalse);
   static void formatUInt(unsigned long long x, char *buf, int bufSize,
 			 GBool zeroFill, int width, int base,
-			 char **p, int *len, GBool upperCase = gFalse);
+			 const char **p, int *len, GBool upperCase = gFalse);
   static void formatDouble(double x, char *buf, int bufSize, int prec,
-			   GBool trim, char **p, int *len);
+			   GBool trim, const char **p, int *len);
   static void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec,
-				     GBool trim, char **p, int *len);
+				     GBool trim, const char **p, int *len);
 };
 
 #endif
