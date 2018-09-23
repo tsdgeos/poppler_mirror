@@ -85,7 +85,7 @@ public:
     GBool jpegOptimize = gFalse;
   };
 
-  SplashError writeImgFile(SplashImageFileFormat format, char *fileName, int hDPI, int vDPI, WriteImgParams* params = nullptr);
+  SplashError writeImgFile(SplashImageFileFormat format, const char *fileName, int hDPI, int vDPI, WriteImgParams* params = nullptr);
   SplashError writeImgFile(SplashImageFileFormat format, FILE *f, int hDPI, int vDPI, WriteImgParams* params = nullptr);
   SplashError writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int vDPI, SplashColorMode imageWriterFormat);
 
