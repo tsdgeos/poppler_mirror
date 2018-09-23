@@ -832,12 +832,11 @@ void Gfx::go(GBool topLevel) {
 
 void Gfx::execOp(Object *cmd, Object args[], int numArgs) {
   Operator *op;
-  char *name;
   Object *argPtr;
   int i;
 
   // find operator
-  name = cmd->getCmd();
+  const char *name = cmd->getCmd();
   if (!(op = findOp(name))) {
     if (ignoreUndef == 0)
       error(errSyntaxError, getPos(), "Unknown operator '{0:s}'", name);
@@ -879,7 +878,7 @@ void Gfx::execOp(Object *cmd, Object args[], int numArgs) {
   (this->*op->func)(argPtr, numArgs);
 }
 
-Operator *Gfx::findOp(char *name) {
+Operator *Gfx::findOp(const char *name) {
   int a, b, m, cmp;
 
   a = -1;

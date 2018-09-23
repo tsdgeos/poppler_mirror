@@ -259,7 +259,7 @@ public:
   Ref getRef() const { OBJECT_TYPE_CHECK(objRef); return ref; }
   int getRefNum() const { OBJECT_TYPE_CHECK(objRef); return ref.num; }
   int getRefGen() const { OBJECT_TYPE_CHECK(objRef); return ref.gen; }
-  char *getCmd() const { OBJECT_TYPE_CHECK(objCmd); return cString; }
+  const char *getCmd() const { OBJECT_TYPE_CHECK(objCmd); return cString; }
   long long getInt64() const { OBJECT_TYPE_CHECK(objInt64); return int64g; }
   long long getIntOrInt64() const { OBJECT_2TYPES_CHECK(objInt, objInt64);
     return type == objInt ? intg : int64g; }
