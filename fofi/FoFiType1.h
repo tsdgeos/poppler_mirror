@@ -38,7 +38,7 @@ class FoFiType1: public FoFiBase {
 public:
 
   // Create a FoFiType1 object from a memory buffer.
-  static FoFiType1 *make(char *fileA, int lenA);
+  static FoFiType1 *make(const char *fileA, int lenA);
 
   // Create a FoFiType1 object from a file on disk.
   static FoFiType1 *load(const char *fileName);
@@ -46,7 +46,7 @@ public:
   ~FoFiType1();
 
   // Return the font name.
-  char *getName();
+  const char *getName();
 
   // Return the encoding, as an array of 256 names (any of which may
   // be NULL).
@@ -57,13 +57,13 @@ public:
 
   // Write a version of the Type 1 font file with a new encoding.
   void writeEncoded(const char **newEncoding,
-		    FoFiOutputFunc outputFunc, void *outputStream);
+		    FoFiOutputFunc outputFunc, void *outputStream) const;
 
 private:
 
-  FoFiType1(char *fileA, int lenA, GBool freeFileDataA);
+  FoFiType1(const char *fileA, int lenA, GBool freeFileDataA);
 
-  char *getNextLine(char *line);
+  char *getNextLine(char *line) const;
   void parse();
   void undoPFB();
 
