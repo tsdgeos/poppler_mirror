@@ -78,8 +78,8 @@ extern void printUsage(const char *program, const char *otherArgs, const ArgDesc
 /*
  * Check if a string is a valid integer or floating point number.
  */
-extern GBool isInt(char *s);
-extern GBool isFP(char *s);
+extern GBool isInt(const char *s);
+extern GBool isFP(const char *s);
 
 #ifdef __cplusplus
 }

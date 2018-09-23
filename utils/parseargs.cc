@@ -177,7 +177,7 @@ static GBool grabArg(const ArgDesc *arg, int i, int *argc, char *argv[]) {
   return ok;
 }
 
-GBool isInt(char *s) {
+GBool isInt(const char *s) {
   if (*s == '-' || *s == '+')
     ++s;
   while (isdigit(*s))
@@ -187,7 +187,7 @@ GBool isInt(char *s) {
   return gTrue;
 }
 
-GBool isFP(char *s) {
+GBool isFP(const char *s) {
   int n;
 
   if (*s == '-' || *s == '+')
