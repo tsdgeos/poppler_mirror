@@ -15,7 +15,7 @@
  All changes made under the Poppler project to this file are licensed
  under GPL version 2 or later
 
- Copyright (C) 2008, 2009 Albert Astals Cid <aacid@kde.org>
+ Copyright (C) 2008, 2009, 2018 Albert Astals Cid <aacid@kde.org>
  Copyright (C) 2011, 2012 Adrian Johnson <ajohnson@redneon.com>
 
  To see a description of the changes please see the Changelog file that
@@ -177,7 +177,7 @@ static GBool grabArg(const ArgDesc *arg, int i, int *argc, char *argv[]) {
   return ok;
 }
 
-GBool isInt(char *s) {
+GBool isInt(const char *s) {
   if (*s == '-' || *s == '+')
     ++s;
   while (isdigit(*s))
@@ -187,7 +187,7 @@ GBool isInt(char *s) {
   return gTrue;
 }
 
-GBool isFP(char *s) {
+GBool isFP(const char *s) {
   int n;
 
   if (*s == '-' || *s == '+')

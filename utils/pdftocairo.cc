@@ -842,8 +842,6 @@ static GooString *getImageFileName(GooString *outputFileName, int numDigits, int
 static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
 {
   GooString *name;
-  char *s;
-  char *p;
 
   if (outputName) {
     if (outputName->cmp("-") == 0) {
@@ -871,8 +869,8 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
   }
 
   // strip everything up to last '/'
-  s = fileName->getCString();
-  p = strrchr(s, '/');
+  const char *s = fileName->getCString();
+  const char *p = strrchr(s, '/');
   if (p) {
     p++;
     if (*p == 0) {

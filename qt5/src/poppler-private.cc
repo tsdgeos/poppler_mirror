@@ -58,7 +58,7 @@ namespace Debug {
         Debug::debugClosure = closure;
     }
 
-    static void qt5ErrorFunction(void * /*data*/, ErrorCategory /*category*/, Goffset pos, char *msg)
+    static void qt5ErrorFunction(void * /*data*/, ErrorCategory /*category*/, Goffset pos, const char *msg)
     {
         QString emsg;
 

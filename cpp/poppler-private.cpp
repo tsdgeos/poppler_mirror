@@ -39,7 +39,7 @@ static void stderr_debug_function(const std::string &msg, void * /*data*/)
 debug_func detail::user_debug_function = stderr_debug_function;
 void *detail::debug_closure = nullptr;
 
-void detail::error_function(void * /*data*/, ErrorCategory /*category*/, Goffset pos, char *msg)
+void detail::error_function(void * /*data*/, ErrorCategory /*category*/, Goffset pos, const char *msg)
 {
     std::ostringstream oss;
     if (pos >= 0) {

@@ -17,7 +17,7 @@
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
-// Copyright (C) 2008-2010, 2012, 2014, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012, 2014, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015, 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -195,14 +195,14 @@ private:
   void resize(int newLength);
   static void formatInt(long long x, char *buf, int bufSize,
 			GBool zeroFill, int width, int base,
-			char **p, int *len, GBool upperCase = gFalse);
+			const char **p, int *len, GBool upperCase = gFalse);
   static void formatUInt(unsigned long long x, char *buf, int bufSize,
 			 GBool zeroFill, int width, int base,
-			 char **p, int *len, GBool upperCase = gFalse);
+			 const char **p, int *len, GBool upperCase = gFalse);
   static void formatDouble(double x, char *buf, int bufSize, int prec,
-			   GBool trim, char **p, int *len);
+			   GBool trim, const char **p, int *len);
   static void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec,
-				     GBool trim, char **p, int *len);
+				     GBool trim, const char **p, int *len);
 };
 
 #endif

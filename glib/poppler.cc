@@ -87,7 +87,7 @@ static void
 error_cb (void *data G_GNUC_UNUSED,
           ErrorCategory category,
           Goffset pos,
-          char *message)
+          const char *message)
 {
   static const char * const cat_str[] = {
     "Syntax warning",

@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2007 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2012 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -50,11 +50,11 @@ static const char *errorCategoryNames[] = {
 };
 
 static void (*errorCbk)(void *data, ErrorCategory category,
-			Goffset pos, char *msg) = nullptr;
+			Goffset pos, const char *msg) = nullptr;
 static void *errorCbkData = nullptr;
 
 void setErrorCallback(void (*cbk)(void *data, ErrorCategory category,
-				  Goffset pos, char *msg),
+				  Goffset pos, const char *msg),
 		      void *data) {
   errorCbk = cbk;
   errorCbkData = data;

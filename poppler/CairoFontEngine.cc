@@ -389,7 +389,7 @@ CairoFreeTypeFont::~CairoFreeTypeFont() { }
 CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
 					     FT_Library lib, GBool useCIDs) {
   GooString *fileName;
-  char *fileNameC;
+  const char *fileNameC;
   char *font_data;
   int font_data_len;
   int i, n;

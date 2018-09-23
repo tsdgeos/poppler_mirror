@@ -13,7 +13,7 @@
  All changes made under the Poppler project to this file are licensed
  under GPL version 2 or later
 
- Copyright (C) 2008 Albert Astals Cid <aacid@kde.org>
+ Copyright (C) 2008, 2018 Albert Astals Cid <aacid@kde.org>
  Copyright (C) 2011 Adrian Johnson <ajohnson@redneon.com>
 
  To see a description of the changes please see the Changelog file that
@@ -78,8 +78,8 @@ extern void printUsage(const char *program, const char *otherArgs, const ArgDesc
 /*
  * Check if a string is a valid integer or floating point number.
  */
-extern GBool isInt(char *s);
-extern GBool isFP(char *s);
+extern GBool isInt(const char *s);
+extern GBool isFP(const char *s);
 
 #ifdef __cplusplus
 }
