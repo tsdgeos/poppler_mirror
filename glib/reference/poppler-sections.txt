@@ -124,6 +124,9 @@ PopplerFontType
 PopplerPSFile
 PopplerViewerPreferences
 PopplerPermissions
+PopplerPDFSubtype
+PopplerPDFPart
+PopplerPDFConformance
 poppler_document_new_from_file
 poppler_document_new_from_data
 poppler_document_new_from_stream
@@ -152,6 +155,10 @@ poppler_document_set_modification_date
 poppler_document_get_page_layout
 poppler_document_get_page_mode
 poppler_document_get_permissions
+poppler_document_get_pdf_subtype_string
+poppler_document_get_pdf_subtype
+poppler_document_get_pdf_part
+poppler_document_get_pdf_conformance
 poppler_document_get_metadata
 poppler_document_is_linearized
 poppler_document_get_n_pages
@@ -213,6 +220,9 @@ POPPLER_TYPE_FONT_TYPE
 POPPLER_TYPE_PAGE_LAYOUT
 POPPLER_TYPE_PAGE_MODE
 POPPLER_TYPE_PERMISSIONS
+POPPLER_TYPE_PDF_SUBTYPE
+POPPLER_TYPE_PDF_PART
+POPPLER_TYPE_PDF_CONFORMANCE
 POPPLER_TYPE_VIEWER_PREFERENCES
 
 <SUBSECTION Private>
@@ -226,6 +236,9 @@ poppler_font_type_get_type
 poppler_page_layout_get_type
 poppler_page_mode_get_type
 poppler_permissions_get_type
+poppler_pdf_subtype_get_type
+poppler_pdf_part_get_type
+poppler_pdf_conformance_get_type
 poppler_viewer_preferences_get_type
 </SECTION>
 

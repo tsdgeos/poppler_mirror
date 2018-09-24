@@ -165,7 +165,90 @@ typedef enum /*< flags >*/
 
 } PopplerPermissions;
 
+/**
+ * PopplerPDFSubtype:
+ * @POPPLER_PDF_SUBTYPE_UNSET: Null
+ * @POPPLER_PDF_SUBTYPE_PDF_A: ISO 19005 - Document management -- Electronic document file format for long-term preservation (PDF/A)
+ * @POPPLER_PDF_SUBTYPE_PDF_E: ISO 24517 - Document management -- Engineering document format using PDF (PDF/E)
+ * @POPPLER_PDF_SUBTYPE_PDF_UA: ISO 14289 - Document management applications -- Electronic document file format enhancement for accessibility (PDF/UA)
+ * @POPPLER_PDF_SUBTYPE_PDF_VT: ISO 16612 - Graphic technology -- Variable data exchange (PDF/VT)
+ * @POPPLER_PDF_SUBTYPE_PDF_X: ISO 15930 - Graphic technology -- Prepress digital data exchange (PDF/X)
+ * @POPPLER_PDF_SUBTYPE_NONE: Not compliant with the above standards
+ *
+ * PDF Subtype
+ *
+ * Since: 0.70
+ */
+typedef enum
+{
+  POPPLER_PDF_SUBTYPE_UNSET,
+  POPPLER_PDF_SUBTYPE_PDF_A,
+  POPPLER_PDF_SUBTYPE_PDF_E,
+  POPPLER_PDF_SUBTYPE_PDF_UA,
+  POPPLER_PDF_SUBTYPE_PDF_VT,
+  POPPLER_PDF_SUBTYPE_PDF_X,
+  POPPLER_PDF_SUBTYPE_NONE
+} PopplerPDFSubtype;
 
+/**
+ * PopplerPDFPart:
+ * @POPPLER_PDF_SUBTYPE_PART_UNSET: Null
+ * @POPPLER_PDF_SUBTYPE_PART_1: 1
+ * @POPPLER_PDF_SUBTYPE_PART_2: 2
+ * @POPPLER_PDF_SUBTYPE_PART_3: 3
+ * @POPPLER_PDF_SUBTYPE_PART_4: 4
+ * @POPPLER_PDF_SUBTYPE_PART_5: 5
+ * @POPPLER_PDF_SUBTYPE_PART_6: 6
+ * @POPPLER_PDF_SUBTYPE_PART_7: 7
+ * @POPPLER_PDF_SUBTYPE_PART_8: 8
+ * @POPPLER_PDF_SUBTYPE_PART_NONE: No part available
+ *
+ * PDF Subtype Part
+ *
+ * Since: 0.70
+ */
+typedef enum
+{
+  POPPLER_PDF_SUBTYPE_PART_UNSET,
+  POPPLER_PDF_SUBTYPE_PART_1,
+  POPPLER_PDF_SUBTYPE_PART_2,
+  POPPLER_PDF_SUBTYPE_PART_3,
+  POPPLER_PDF_SUBTYPE_PART_4,
+  POPPLER_PDF_SUBTYPE_PART_5,
+  POPPLER_PDF_SUBTYPE_PART_6,
+  POPPLER_PDF_SUBTYPE_PART_7,
+  POPPLER_PDF_SUBTYPE_PART_8,
+  POPPLER_PDF_SUBTYPE_PART_NONE
+} PopplerPDFPart;
+
+/**
+ * PopplerPDFConformance:
+ * @POPPLER_PDF_SUBTYPE_CONF_UNSET: Null
+ * @POPPLER_PDF_SUBTYPE_CONF_A: Level A (accessible) conformance (PDF/A)
+ * @POPPLER_PDF_SUBTYPE_CONF_B: Level B (basic) conformance (PDF/A)
+ * @POPPLER_PDF_SUBTYPE_CONF_G: Level G (external graphical content) (PDF/X)
+ * @POPPLER_PDF_SUBTYPE_CONF_N: Level N (external ICC Profile) (PDF/X)
+ * @POPPLER_PDF_SUBTYPE_CONF_P: Level P (ICC Profile) (PDF/X)
+ * @POPPLER_PDF_SUBTYPE_CONF_PG: Level PG (conjuction of P and G) (PDF/X)
+ * @POPPLER_PDF_SUBTYPE_CONF_U: Level U (Unicode) conformance (PDF/A)
+ * @POPPLER_PDF_SUBTYPE_CONF_NONE: No conformance level available
+ *
+ * PDF Subtype Conformance
+ *
+ * Since: 0.70
+ */
+typedef enum
+{
+  POPPLER_PDF_SUBTYPE_CONF_UNSET,
+  POPPLER_PDF_SUBTYPE_CONF_A,
+  POPPLER_PDF_SUBTYPE_CONF_B,
+  POPPLER_PDF_SUBTYPE_CONF_G,
+  POPPLER_PDF_SUBTYPE_CONF_N,
+  POPPLER_PDF_SUBTYPE_CONF_P,
+  POPPLER_PDF_SUBTYPE_CONF_PG,
+  POPPLER_PDF_SUBTYPE_CONF_U,
+  POPPLER_PDF_SUBTYPE_CONF_NONE
+} PopplerPDFConformance;
 
 GType              poppler_document_get_type               (void) G_GNUC_CONST;
 PopplerDocument   *poppler_document_new_from_file          (const char      *uri,
@@ -230,6 +313,10 @@ gboolean           poppler_document_is_linearized          (PopplerDocument *doc
 PopplerPageLayout  poppler_document_get_page_layout        (PopplerDocument *document);
 PopplerPageMode    poppler_document_get_page_mode          (PopplerDocument *document);
 PopplerPermissions poppler_document_get_permissions        (PopplerDocument *document);
+gchar             *poppler_document_get_pdf_subtype_string (PopplerDocument *document);
+PopplerPDFSubtype  poppler_document_get_pdf_subtype        (PopplerDocument *document);
+PopplerPDFPart     poppler_document_get_pdf_part           (PopplerDocument *document);
+PopplerPDFConformance poppler_document_get_pdf_conformance (PopplerDocument *document);
 gchar             *poppler_document_get_metadata           (PopplerDocument *document);
 
 /* Attachments */
