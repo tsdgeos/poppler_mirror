@@ -84,28 +84,28 @@ public:
   TextFontInfo(const TextFontInfo &) = delete;
   TextFontInfo& operator=(const TextFontInfo &) = delete;
 
-  GBool matches(GfxState *state);
-  GBool matches(TextFontInfo *fontInfo);
+  GBool matches(GfxState *state) const;
+  GBool matches(const TextFontInfo *fontInfo) const;
 
   // Get the font ascent, or a default value if the font is not set
-  double getAscent();
+  double getAscent() const;
 
   // Get the font descent, or a default value if the font is not set
-  double getDescent();
+  double getDescent() const;
 
   // Get the writing mode (0 or 1), or 0 if the font is not set
-  int getWMode();
+  int getWMode() const;
 
 #ifdef TEXTOUT_WORD_LIST
   // Get the font name (which may be NULL).
-  GooString *getFontName() { return fontName; }
+  const GooString *getFontName() const { return fontName; }
 
   // Get font descriptor flags.
-  GBool isFixedWidth() { return flags & fontFixedWidth; }
-  GBool isSerif() { return flags & fontSerif; }
-  GBool isSymbolic() { return flags & fontSymbolic; }
-  GBool isItalic() { return flags & fontItalic; }
-  GBool isBold() { return flags & fontBold; }
+  GBool isFixedWidth() const { return flags & fontFixedWidth; }
+  GBool isSerif() const { return flags & fontSerif; }
+  GBool isSymbolic() const { return flags & fontSymbolic; }
+  GBool isItalic() const { return flags & fontItalic; }
+  GBool isBold() const { return flags & fontBold; }
 #endif
 
 private:
@@ -129,7 +129,7 @@ class TextWord {
 public:
 
   // Constructor.
-  TextWord(GfxState *state, int rotA, double fontSize);
+  TextWord(const GfxState *state, int rotA, double fontSize);
 
   // Destructor.
   ~TextWord();

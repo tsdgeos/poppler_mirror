@@ -382,7 +382,7 @@ void HtmlPage::addChar(GfxState *state, double x, double y,
   //if ((UnicodeMap::getDirection(u[0]) != curStr->dir) || 
   // XXX
   if (debug) {
-    double *text_mat = state->getTextMat();
+    const double *text_mat = state->getTextMat();
     // rotation is (cos q, sin q, -sin q, cos q, 0, 0)
     // sin q is zero iff there is no rotation, or 180 deg. rotation;
     // for 180 rotation, cos q will be negative

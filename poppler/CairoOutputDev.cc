@@ -367,7 +367,7 @@ void CairoOutputDev::updateAll(GfxState *state) {
     text->updateFont(state);
 }
 
-void CairoOutputDev::setDefaultCTM(double *ctm) {
+void CairoOutputDev::setDefaultCTM(const double *ctm) {
   cairo_matrix_t matrix;
   matrix.xx = ctm[0];
   matrix.yx = ctm[1];
@@ -683,7 +683,7 @@ void CairoOutputDev::updateFont(GfxState *state) {
     cairo_surface_has_show_text_glyphs (cairo_get_target (cairo));
  
   double fontSize = state->getFontSize();
-  double *m = state->getTextMat();
+  const double *m = state->getTextMat();
   /* NOTE: adjusting by a constant is hack. The correct solution
    * is probably to use user-fonts and compute the scale on a per
    * glyph basis instead of for the entire font */
@@ -897,8 +897,8 @@ void CairoOutputDev::eoFill(GfxState *state) {
 }
 
 GBool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Object *str,
-					double *pmat, int paintType, int /*tilingType*/, Dict *resDict,
-					double *mat, double *bbox,
+					const double *pmat, int paintType, int /*tilingType*/, Dict *resDict,
+					const double *mat, const double *bbox,
 					int x0, int y0, int x1, int y1,
 					double xStep, double yStep)
 {
@@ -1012,10 +1012,9 @@ GBool CairoOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sh
   double y_step;
   GfxColor color;
   GfxRGB rgb;
-  double *matrix;
   cairo_matrix_t mat;
 
-  matrix = shading->getMatrix();
+  const double *matrix = shading->getMatrix();
   mat.xx = matrix[0];
   mat.yx = matrix[1];
   mat.xy = matrix[2];
@@ -1238,7 +1237,7 @@ GBool CairoOutputDev::patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *
   fill_pattern = cairo_pattern_create_mesh ();
 
   for (i = 0; i < shading->getNPatches(); i++) {
-    GfxPatch *patch = shading->getPatch(i);
+    const GfxPatch *patch = shading->getPatch(i);
     GfxColor color;
     GfxRGB rgb;
 
@@ -1524,10 +1523,9 @@ GBool CairoOutputDev::beginType3Char(GfxState *state, double x, double y,
 				      CharCode code, Unicode *u, int uLen) {
 
   cairo_save (cairo);
-  double *ctm;
   cairo_matrix_t matrix;
 
-  ctm = state->getCTM();
+  const double *ctm = state->getCTM();
   matrix.xx = ctm[0];
   matrix.yx = ctm[1];
   matrix.xy = ctm[2];
@@ -1629,7 +1627,7 @@ cairo_surface_t *cairo_surface_create_similar_clip (cairo_t *cairo, cairo_conten
 
 
 
-void CairoOutputDev::beginTransparencyGroup(GfxState * /*state*/, double * /*bbox*/,
+void CairoOutputDev::beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/,
                                       GfxColorSpace * blendingColorSpace,
                                       GBool /*isolated*/, GBool knockout,
 				      GBool forSoftMask) {
@@ -1692,7 +1690,7 @@ void CairoOutputDev::endTransparencyGroup(GfxState * /*state*/) {
   }
 }
 
-void CairoOutputDev::paintTransparencyGroup(GfxState * /*state*/, double * /*bbox*/) {
+void CairoOutputDev::paintTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/) {
   LOG(printf ("paint transparency group\n"));
 
   cairo_save (cairo);
@@ -1758,7 +1756,7 @@ static int luminocity(uint32_t x)
 
 
 /* XXX: do we need to deal with shape here? */
-void CairoOutputDev::setSoftMask(GfxState * state, double * bbox, GBool alpha,
+void CairoOutputDev::setSoftMask(GfxState * state, const double * bbox, GBool alpha,
                                  Function * transferFunc, GfxColor * backdropColor) {
   cairo_pattern_destroy(mask);
 
@@ -3383,7 +3381,7 @@ void CairoImageOutputDev::saveImage(CairoImage *image)
 void CairoImageOutputDev::getBBox(GfxState *state, int width, int height,
                                   double *x1, double *y1, double *x2, double *y2)
 {
-  double *ctm = state->getCTM();
+  const double *ctm = state->getCTM();
   cairo_matrix_t matrix;
   cairo_matrix_init(&matrix,
                     ctm[0], ctm[1],

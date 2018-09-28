@@ -77,7 +77,7 @@ FormField::FormField(FormFieldData &dd)
   m_formData->fm->getRect(&left, &bottom, &right, &top);
   // build a normalized transform matrix for this page at 100% scale
   GfxState gfxState( 72.0, 72.0, m_formData->page->getCropBox(), rotation, gTrue );
-  double * gfxCTM = gfxState.getCTM();
+  const double * gfxCTM = gfxState.getCTM();
   double MTX[6];
   double pageWidth = m_formData->page->getCropWidth();
   double pageHeight = m_formData->page->getCropHeight();

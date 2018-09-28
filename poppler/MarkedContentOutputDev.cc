@@ -96,7 +96,7 @@ void MarkedContentOutputDev::endMarkedContent(GfxState *state)
 }
 
 
-bool MarkedContentOutputDev::needFontChange(GfxFont* font) const
+bool MarkedContentOutputDev::needFontChange(const GfxFont* font) const
 {
   if (currentFont == font)
     return gFalse;

@@ -29,6 +29,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
 // Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
+// Copyright (C) Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -727,6 +728,7 @@ protected:
   virtual ~Annot();
   virtual void removeReferencedObjects(); // Called by Page::removeAnnot
   Object createForm(const GooString *appearBuf, double *bbox, GBool transparencyGroup, Dict *resDict);
+  Object createForm(const GooString *appearBuf, double *bbox, GBool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
   Dict *createResourcesDict(const char *formName, Object &&formStream, const char *stateName,
 			   double opacity, const char *blendMode);
   GBool isVisible(GBool printing);

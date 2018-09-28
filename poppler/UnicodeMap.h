@@ -86,13 +86,13 @@ public:
   void incRefCnt();
   void decRefCnt();
 
-  GooString *getEncodingName() { return encodingName; }
+  const GooString *getEncodingName() const { return encodingName; }
 
-  GBool isUnicode() { return unicodeOut; }
+  GBool isUnicode() const { return unicodeOut; }
 
   // Return true if this UnicodeMap matches the specified
   // <encodingNameA>.
-  GBool match(GooString *encodingNameA);
+  GBool match(const GooString *encodingNameA) const;
 
   // Map Unicode to the target encoding.  Fills in <buf> with the
   // output and returns the number of bytes used.  Output will be

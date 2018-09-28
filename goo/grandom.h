@@ -13,22 +13,10 @@
 
 #include "gtypes.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/// Fills the given buffer with random bytes
+void grandom_fill(Guchar *buff, int size);
 
-/*
- * Fills the given buffer with random bytes
- */
-extern void grandom_fill(Guchar *buff, int size);
-
-/*
- * Returns a random number in [0,1)
- */
-extern double grandom_double();
-
-#ifdef __cplusplus
-}
-#endif
+/// Returns a random number in [0,1)
+double grandom_double();
 
 #endif

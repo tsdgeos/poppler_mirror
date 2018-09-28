@@ -152,14 +152,14 @@ public:
 
   // Constructor for regular output.
   Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
-      double hDPI, double vDPI, PDFRectangle *box,
-      PDFRectangle *cropBox, int rotate,
+      double hDPI, double vDPI, const PDFRectangle *box,
+      const PDFRectangle *cropBox, int rotate,
       GBool (*abortCheckCbkA)(void *data) = NULL,
       void *abortCheckCbkDataA = NULL, XRef *xrefA = NULL);
 
   // Constructor for a sub-page object.
   Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict,
-      PDFRectangle *box, PDFRectangle *cropBox,
+      const PDFRectangle *box, const PDFRectangle *cropBox,
       GBool (*abortCheckCbkA)(void *data) = NULL,
       void *abortCheckCbkDataA = NULL, Gfx *gfxA = NULL);
 #ifdef USE_CMS
@@ -197,7 +197,7 @@ public:
 
   GBool checkTransparencyGroup(Dict *resDict);
 
-  void drawForm(Object *str, Dict *resDict, double *matrix, double *bbox,
+  void drawForm(Object *str, Dict *resDict, const double *matrix, const double *bbox,
 	       GBool transpGroup = gFalse, GBool softMask = gFalse,
 	       GfxColorSpace *blendingColorSpace = NULL,
 	       GBool isolated = gFalse, GBool knockout = gFalse,
@@ -330,7 +330,7 @@ private:
 			   double x2, double y2, double color2,
 			   double refineColorThreshold, int depth, GfxGouraudTriangleShading *shading, GfxState::ReusablePathIterator *path);
   void doPatchMeshShFill(GfxPatchMeshShading *shading);
-  void fillPatch(GfxPatch *patch, int colorComps, int patchColorComps, double refineColorThreshold, int depth, GfxPatchMeshShading *shading);
+  void fillPatch(const GfxPatch *patch, int colorComps, int patchColorComps, double refineColorThreshold, int depth, const GfxPatchMeshShading *shading);
   void doEndPath();
 
   // path clipping operators

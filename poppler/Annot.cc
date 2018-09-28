@@ -41,6 +41,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
 // Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
+// Copyright (C) Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1781,6 +1782,10 @@ void AnnotAppearanceBuilder::drawCircleBottomRight(double cx, double cy, double 
 }
 
 Object Annot::createForm(const GooString *appearBuf, double *bbox, GBool transparencyGroup, Dict *resDict) {
+  return createForm(appearBuf, bbox, transparencyGroup, resDict ? Object(resDict) : Object());
+}
+
+Object Annot::createForm(const GooString *appearBuf, double *bbox, GBool transparencyGroup, Object &&resDictObject) {
   Dict *appearDict = new Dict(xref);
   appearDict->set("Length", Object(appearBuf->getLength()));
   appearDict->set("Subtype", Object(objName, "Form"));
@@ -1796,8 +1801,8 @@ Object Annot::createForm(const GooString *appearBuf, double *bbox, GBool transpa
     d->set("S", Object(objName, "Transparency"));
     appearDict->set("Group", Object(d));
   }
-  if (resDict)
-    appearDict->set("Resources", Object(resDict));
+  if (resDictObject.isDict())
+    appearDict->set("Resources", std::move(resDictObject));
 
   Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->getCString()), 0,
 				     appearBuf->getLength(), Object(appearDict));
@@ -2856,21 +2861,21 @@ std::unique_ptr<DefaultAppearance> AnnotFreeText::getDefaultAppearance() const {
   return std::make_unique<DefaultAppearance>(appearanceString);
 }
 
-static GfxFont *createAnnotDrawFont(XRef * xref, Dict *fontResDict)
+static GfxFont * createAnnotDrawFont(XRef * xref, Dict *fontResDict, const char* resourceName = "AnnotDrawFont", const char* fontname = "Helvetica")
 {
   const Ref dummyRef = { -1, -1 };
 
   Dict *fontDict = new Dict(xref);
-  fontDict->add("BaseFont", Object(objName, "Helvetica"));
+  fontDict->add("BaseFont", Object(objName, fontname));
   fontDict->add("Subtype", Object(objName, "Type0"));
   fontDict->add("Encoding", Object(objName, "WinAnsiEncoding"));
 
   Dict *fontsDict = new Dict(xref);
-  fontsDict->add("AnnotDrawFont", Object(fontDict));
+  fontsDict->add(resourceName, Object(fontDict));
 
   fontResDict->add("Font", Object(fontsDict));
 
-  return GfxFont::makeFont(xref, "AnnotDrawFont", dummyRef, fontDict);
+  return GfxFont::makeFont(xref, resourceName, dummyRef, fontDict);
 }
 
 void AnnotFreeText::generateFreeTextAppearance()
@@ -2892,6 +2897,8 @@ void AnnotFreeText::generateFreeTextAppearance()
   DefaultAppearance da{appearanceString};
 
   // Default values
+  if (!da.getFontName().isName())
+    da.setFontName(Object(objName, "AnnotDrawFont"));
   if (da.getFontPtSize() <= 0)
     da.setFontPtSize(10);
   if (!da.getFontColor())
@@ -2920,13 +2927,50 @@ void AnnotFreeText::generateFreeTextAppearance()
   const double textwidth = width - 2*textmargin;
   appearBuilder.appendf ("{0:.2f} {0:.2f} {1:.2f} {2:.2f} re W n\n", textmargin, textwidth, height - 2*textmargin);
 
-  Dict *fontResDict = new Dict(xref);
-  GfxFont *font = createAnnotDrawFont(xref, fontResDict);
+  GfxFont *font = nullptr;
+
+  // look for font name in default resources
+  Form *form = doc->getCatalog()->getForm(); // form is owned by catalog, no need to clean it up
+
+  Object resourceObj;
+  if (form && form->getDefaultResourcesObj() && form->getDefaultResourcesObj()->isDict()) {
+    resourceObj = form->getDefaultResourcesObj()->copy(); // No real copy, but increment refcount of /DR Dict
+
+    Dict *resDict = resourceObj.getDict();
+    Object fontResources = resDict->lookup("Font");  // The 'Font' subdictionary
+
+    if (!fontResources.isDict()) {
+      error(errSyntaxWarning, -1, "Font subdictionary is not a dictionary");
+    } else {
+      // Get the font dictionary for the actual requested font
+      Object fontDictionary = fontResources.getDict()->lookupNF(da.getFontName().getName());
+
+      // Resolve reference, if necessary
+      Ref fontReference = {-1, -1};
+      if (fontDictionary.isRef()) {
+        fontReference = fontDictionary.getRef();
+        fontDictionary = fontDictionary.fetch(xref);
+      }
+
+      if (fontDictionary.isDict()) {
+        font = GfxFont::makeFont(xref, da.getFontName().getName(), fontReference, fontDictionary.getDict());
+      } else {
+        error(errSyntaxWarning, -1, "Font dictionary is not a dictionary");
+      }
+    }
+  }
+
+  // if fontname is not in in default resources, create a Helvetica fake font
+  if (!font) {
+    Dict *fontResDict = new Dict(xref);
+    resourceObj = Object(fontResDict);
+    font = createAnnotDrawFont(xref, fontResDict, da.getFontName().getName());
+  }
 
   // Set font state
   appearBuilder.setDrawColor(da.getFontColor(), gTrue);
   appearBuilder.appendf ("BT 1 0 0 1 {0:.2f} {1:.2f} Tm\n", textmargin, height - textmargin - da.getFontPtSize() * font->getDescent());
-  appearBuilder.appendf ("/AnnotDrawFont {0:.2f} Tf\n", da.getFontPtSize());
+  appearBuilder.setTextFont(da.getFontName(), da.getFontPtSize());
 
   int i = 0;
   double xposPrev = 0;
@@ -2961,9 +3005,9 @@ void AnnotFreeText::generateFreeTextAppearance()
   bbox[3] = rect->y2 - rect->y1;
 
   if (ca == 1) {
-    appearance = createForm(appearBuilder.buffer(), bbox, gFalse, fontResDict);
+    appearance = createForm(appearBuilder.buffer(), bbox, gFalse, std::move(resourceObj));
   } else {
-    Object aStream = createForm(appearBuilder.buffer(), bbox, gTrue, fontResDict);
+    Object aStream = createForm(appearBuilder.buffer(), bbox, gTrue, std::move(resourceObj));
 
     GooString appearBuf("/GS0 gs\n/Fm0 Do");
     Dict *resDict = createResourcesDict("Fm0", std::move(aStream), "GS0", ca, nullptr);

@@ -99,7 +99,7 @@ public:
   //----- initialization and control
 
   // Set Current Transformation Matrix to a fixed matrix given in ctm[0],...,ctm[5]
-  void setDefaultCTM(double *ctm) override;
+  void setDefaultCTM(const double *ctm) override;
 
   // Start a page.
   void startPage(int pageNum, GfxState *state, XRef *xref) override;
@@ -171,12 +171,12 @@ public:
 	       double llx, double lly, double urx, double ury) override;
 
   //----- transparency groups and soft masks
-  virtual void beginTransparencyGroup(GfxState *state, double *bbox,
+  virtual void beginTransparencyGroup(GfxState *state, const double *bbox,
                                       GfxColorSpace *blendingColorSpace,
                                       GBool isolated, GBool knockout,
                                       GBool forSoftMask) override;
   virtual void endTransparencyGroup(GfxState *state) override;
-  virtual void paintTransparencyGroup(GfxState *state, double *bbox) override;
+  virtual void paintTransparencyGroup(GfxState *state, const double *bbox) override;
 
   //----- special access
 

@@ -889,7 +889,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
     error(errInternal, -1, "Illegal pageNo: {0:d}({1:d})", pageNo, getNumPages() );
     return errOpenFile;
   }
-  PDFRectangle *cropBox = nullptr;
+  const PDFRectangle *cropBox = nullptr;
   if (getCatalog()->getPage(pageNo)->isCropped()) {
     cropBox = getCatalog()->getPage(pageNo)->getCropBox();
   }
@@ -1742,8 +1742,8 @@ void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, Guint numOffse
 }
 
 void PDFDoc::replacePageDict(int pageNo, int rotate,
-                             PDFRectangle *mediaBox, 
-                             PDFRectangle *cropBox)
+                             const PDFRectangle *mediaBox,
+                             const PDFRectangle *cropBox)
 {
   Ref *refPage = getCatalog()->getPageRef(pageNo);
   Object page = getXRef()->fetch(refPage->num, refPage->gen);

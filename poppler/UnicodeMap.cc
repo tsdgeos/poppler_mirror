@@ -259,7 +259,7 @@ void UnicodeMap::decRefCnt() {
   }
 }
 
-GBool UnicodeMap::match(GooString *encodingNameA) {
+GBool UnicodeMap::match(const GooString *encodingNameA) const {
   return !encodingName->cmp(encodingNameA);
 }
 

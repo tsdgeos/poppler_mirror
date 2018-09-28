@@ -325,23 +325,23 @@ TextFontInfo::~TextFontInfo() {
 #endif
 }
 
-GBool TextFontInfo::matches(GfxState *state) {
+GBool TextFontInfo::matches(GfxState *state) const {
   return state->getFont() == gfxFont;
 }
 
-GBool TextFontInfo::matches(TextFontInfo *fontInfo) {
+GBool TextFontInfo::matches(const TextFontInfo *fontInfo) const {
   return gfxFont == fontInfo->gfxFont;
 }
 
-double TextFontInfo::getAscent() {
+double TextFontInfo::getAscent() const {
   return gfxFont ? gfxFont->getAscent() : 0.95;
 }
 
-double TextFontInfo::getDescent() {
+double TextFontInfo::getDescent() const {
   return gfxFont ? gfxFont->getDescent() : -0.35;
 }
 
-int TextFontInfo::getWMode() {
+int TextFontInfo::getWMode() const {
   return gfxFont ? gfxFont->getWMode() : 0;
 }
 
@@ -349,7 +349,7 @@ int TextFontInfo::getWMode() {
 // TextWord
 //------------------------------------------------------------------------
 
-TextWord::TextWord(GfxState *state, int rotA, double fontSizeA) {
+TextWord::TextWord(const GfxState *state, int rotA, double fontSizeA) {
   rot = rotA;
   fontSize = fontSizeA;
   text = nullptr;

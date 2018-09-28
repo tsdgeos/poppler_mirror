@@ -1528,7 +1528,7 @@ PSOutputDev::~PSOutputDev() {
 }
 
 void PSOutputDev::writeHeader(const std::vector<int> &pages,
-			      PDFRectangle *mediaBox, PDFRectangle *cropBox,
+			      const PDFRectangle *mediaBox, const PDFRectangle *cropBox,
 			      int pageRotate, char *psTitle) {
   PSOutPaperSize *size;
   double x1, y1, x2, y2;
@@ -4073,7 +4073,6 @@ void PSOutputDev::updateStrokeColorSpace(GfxState *state) {
 
 void PSOutputDev::updateFillColor(GfxState *state) {
   GfxColor color;
-  GfxColor *colorPtr;
   GfxGray gray;
   GfxCMYK cmyk;
   GfxSeparationColorSpace *sepCS;
@@ -4091,7 +4090,7 @@ void PSOutputDev::updateFillColor(GfxState *state) {
   case psLevel2:
   case psLevel3:
     if (state->getFillColorSpace()->getMode() != csPattern) {
-      colorPtr = state->getFillColor();
+      const GfxColor *colorPtr = state->getFillColor();
       writePS("[");
       for (i = 0; i < state->getFillColorSpace()->getNComps(); ++i) {
 	if (i > 0) {
@@ -4131,7 +4130,6 @@ void PSOutputDev::updateFillColor(GfxState *state) {
 
 void PSOutputDev::updateStrokeColor(GfxState *state) {
   GfxColor color;
-  GfxColor *colorPtr;
   GfxGray gray;
   GfxCMYK cmyk;
   GfxSeparationColorSpace *sepCS;
@@ -4149,7 +4147,7 @@ void PSOutputDev::updateStrokeColor(GfxState *state) {
   case psLevel2:
   case psLevel3:
     if (state->getStrokeColorSpace()->getMode() != csPattern) {
-      colorPtr = state->getStrokeColor();
+      const GfxColor *colorPtr = state->getStrokeColor();
       writePS("[");
       for (i = 0; i < state->getStrokeColorSpace()->getNComps(); ++i) {
 	if (i > 0) {
@@ -4292,9 +4290,7 @@ void PSOutputDev::updateFont(GfxState *state) {
 }
 
 void PSOutputDev::updateTextMat(GfxState *state) {
-  double *mat;
-
-  mat = state->getTextMat();
+  const double *mat = state->getTextMat();
   if (fabs(mat[0] * mat[3] - mat[1] * mat[2]) < 0.00001) {
     // avoid a singular (or close-to-singular) matrix
     writePSFmt("[0.00001 0 0 0.00001 {0:.6g} {1:.6g}] Tm\n", mat[4], mat[5]);
@@ -4379,8 +4375,8 @@ void PSOutputDev::eoFill(GfxState *state) {
 }
 
 GBool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str,
-				       double *pmat, int paintType, int tilingType, Dict *resDict,
-				       double *mat, double *bbox,
+				       const double *pmat, int paintType, int tilingType, Dict *resDict,
+				       const double *mat, const double *bbox,
 				       int x0, int y0, int x1, int y1,
 				       double xStep, double yStep) {
   PDFRectangle box;
@@ -4461,8 +4457,8 @@ GBool PSOutputDev::tilingPatternFillL1(GfxState *state, Catalog *cat, Object *st
 }
 
 GBool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str,
-				       double *pmat, int paintType, int tilingType, Dict *resDict,
-				       double *mat, double *bbox,
+				       const double *pmat, int paintType, int tilingType, Dict *resDict,
+				       const double *mat, const double *bbox,
 				       int x0, int y0, int x1, int y1,
 				       double xStep, double yStep) {
   PDFRectangle box;
@@ -4510,8 +4506,8 @@ GBool PSOutputDev::tilingPatternFillL2(GfxState *state, Catalog *cat, Object *st
 }
 
 GBool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Object *str,
-				     double *pmat, int paintType, int tilingType, Dict *resDict,
-				     double *mat, double *bbox,
+				     const double *pmat, int paintType, int tilingType, Dict *resDict,
+				     const double *mat, const double *bbox,
 				     int x0, int y0, int x1, int y1,
 				     double xStep, double yStep) {
   if (x1 - x0 == 1 && y1 - y0 == 1) {
@@ -4549,7 +4545,6 @@ GBool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, O
 GBool PSOutputDev::functionShadedFill(GfxState *state,
 				     GfxFunctionShading *shading) {
   double x0, y0, x1, y1;
-  double *mat;
   int i;
 
   if (level == psLevel2Sep || level == psLevel3Sep) {
@@ -4560,7 +4555,7 @@ GBool PSOutputDev::functionShadedFill(GfxState *state,
   }
 
   shading->getDomain(&x0, &y0, &x1, &y1);
-  mat = shading->getMatrix();
+  const double *mat = shading->getMatrix();
   writePSFmt("/mat [{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] def\n",
 	     mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
   writePSFmt("/n {0:d} def\n", shading->getColorSpace()->getNComps());
@@ -7248,11 +7243,11 @@ void PSOutputDev::psXObject(Stream *psStream, Stream *level1Stream) {
 
 //~ can nextFunc be reset to 0 -- maybe at the start of each page?
 //~   or maybe at the start of each color space / pattern?
-void PSOutputDev::cvtFunction(Function *func, GBool invertPSFunction) {
-  SampledFunction *func0;
-  ExponentialFunction *func2;
-  StitchingFunction *func3;
-  PostScriptFunction *func4;
+void PSOutputDev::cvtFunction(const Function *func, GBool invertPSFunction) {
+  const SampledFunction *func0;
+  const ExponentialFunction *func2;
+  const StitchingFunction *func3;
+  const PostScriptFunction *func4;
   int thisFunc, m, n, nSamples, i, j, k;
 
   switch (func->getType()) {
@@ -7262,7 +7257,7 @@ void PSOutputDev::cvtFunction(Function *func, GBool invertPSFunction) {
     break;
 
   case 0:			// sampled
-    func0 = (SampledFunction *)func;
+    func0 = (const SampledFunction *)func;
     thisFunc = nextFunc++;
     m = func0->getInputSize();
     n = func0->getOutputSize();
@@ -7349,7 +7344,7 @@ void PSOutputDev::cvtFunction(Function *func, GBool invertPSFunction) {
     break;
 
   case 2:			// exponential
-    func2 = (ExponentialFunction *)func;
+    func2 = (const ExponentialFunction *)func;
     n = func2->getOutputSize();
     writePSFmt("{{ dup {0:.6g} lt {{ pop {1:.6g} }} {{ dup {2:.6g} gt {{ pop {3:.6g} }} if }} ifelse\n",
 	       func2->getDomainMin(0), func2->getDomainMin(0),
@@ -7378,7 +7373,7 @@ void PSOutputDev::cvtFunction(Function *func, GBool invertPSFunction) {
     break;
 
   case 3:			// stitching
-    func3 = (StitchingFunction *)func;
+    func3 = (const StitchingFunction *)func;
     thisFunc = nextFunc++;
     for (i = 0; i < func3->getNumFuncs(); ++i) {
       cvtFunction(func3->getFunc(i));
@@ -7414,7 +7409,7 @@ void PSOutputDev::cvtFunction(Function *func, GBool invertPSFunction) {
     break;
 
   case 4:			// PostScript
-    func4 = (PostScriptFunction *)func;
+    func4 = (const PostScriptFunction *)func;
     if (invertPSFunction) {
       GooString *codeString = new GooString(func4->getCodeString());
       for (i = codeString->getLength() -1; i > 0; i--) {
