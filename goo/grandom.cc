@@ -17,11 +17,7 @@ namespace
 
 auto& grandom_engine()
 {
-  static thread_local std::independent_bits_engine<std::default_random_engine, std::numeric_limits<Guchar>::digits, Guchar> engine{
-    std::default_random_engine{
-      std::random_device{}()
-    }
-  };
+  static thread_local std::default_random_engine engine{std::random_device{}()};
   return engine;
 }
 
@@ -30,8 +26,9 @@ auto& grandom_engine()
 void grandom_fill(Guchar *buff, int size)
 {
   auto& engine = grandom_engine();
+  std::uniform_int_distribution<unsigned short> distribution{std::numeric_limits<Guchar>::min(), std::numeric_limits<Guchar>::max()};
   for (int index = 0; index < size; ++index) {
-    buff[index] = engine();
+    buff[index] = distribution(engine);
   }
 }
 
