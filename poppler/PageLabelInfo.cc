@@ -102,8 +102,9 @@ GBool PageLabelInfo::labelToIndex(GooString *label, int *index) const
 {
   const char *const str = label->getCString();
   const std::size_t strLen = label->getLength();
-  char *end;
+  const bool strUnicode = label->hasUnicodeMarker();
   int number;
+  bool ok;
 
   for (const auto& interval : intervals) {
     const std::size_t prefixLen = interval.prefix.size();
@@ -112,8 +113,8 @@ GBool PageLabelInfo::labelToIndex(GooString *label, int *index) const
 
     switch (interval.style) {
     case Interval::Arabic:
-      number = strtol(str + prefixLen, &end, 10);
-      if (*end == '\0' && number - interval.first < interval.length) {
+      std::tie(number, ok) = fromDecimal(str + prefixLen, str + strLen, strUnicode);
+      if (ok && number - interval.first < interval.length) {
     *index = interval.base + number - interval.first;
 	return gTrue;
       }

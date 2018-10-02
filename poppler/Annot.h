@@ -29,7 +29,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
 // Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
-// Copyright (C) Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -46,6 +46,7 @@
 #include <memory>
 #include <atomic>
 #include <mutex>
+#include <vector>
 
 #include "Object.h"
 
@@ -1684,7 +1685,7 @@ public:
   Annots& operator=(const Annots &) = delete;
 
   // Iterate through list of annotations.
-  int getNumAnnots() { return nAnnots; }
+  int getNumAnnots() const { return annots.size(); }
   Annot *getAnnot(int i) { return annots[i]; }
   void appendAnnot(Annot *annot);
   GBool removeAnnot(Annot *annot);
@@ -1694,9 +1695,7 @@ private:
   Annot *findAnnot(Ref *ref);
 
   PDFDoc *doc;
-  Annot **annots;
-  int nAnnots;
-  int size;
+  std::vector<Annot*> annots;
 };
 
 #endif
