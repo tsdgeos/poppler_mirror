@@ -59,22 +59,6 @@ static const char *objTypeNames[numObjTypes] = {
   "dead"
 };
 
-Object::Object(Object&& other)
-{
-  std::memcpy(reinterpret_cast<void*>(this), &other, sizeof(Object));
-  other.type = objDead;
-}
-
-Object& Object::operator=(Object&& other)
-{
-  free();
-
-  std::memcpy(reinterpret_cast<void*>(this), &other, sizeof(Object));
-  other.type = objDead;
-
-  return *this;
-}
-
 Object Object::copy() const {
   CHECK_NOT_DEAD;
 

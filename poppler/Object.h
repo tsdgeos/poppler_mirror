@@ -182,8 +182,21 @@ public:
 
   template<typename T> Object(T) = delete;
 
-  Object(Object&& other);
-  Object& operator=(Object&& other);
+  Object(Object&& other)
+  {
+    std::memcpy(reinterpret_cast<void*>(this), &other, sizeof(Object));
+    other.type = objDead;
+  }
+
+  Object& operator=(Object&& other)
+  {
+    free();
+
+    std::memcpy(reinterpret_cast<void*>(this), &other, sizeof(Object));
+    other.type = objDead;
+
+    return *this;
+  }
 
   Object &operator=(const Object &other) = delete;
   Object(const Object &other) = delete;
