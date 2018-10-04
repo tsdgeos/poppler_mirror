@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
-// Copyright (C) 2010, 2011 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2011, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
@@ -31,6 +31,7 @@
 #include <string.h>
 #include <algorithm>
 #include "goo/gmem.h"
+#include "goo/GooLikely.h"
 #include "SplashMath.h"
 #include "SplashPath.h"
 #include "SplashXPath.h"
@@ -272,7 +273,11 @@ void SplashXPath::grow(int nSegs) {
     while (size < length + nSegs) {
       size *= 2;
     }
-    segs = (SplashXPathSeg *)greallocn(segs, size, sizeof(SplashXPathSeg));
+    segs = (SplashXPathSeg *)greallocn_checkoverflow(segs, size, sizeof(SplashXPathSeg));
+    if (unlikely(!segs)) {
+	length = 0;
+	size = 0;
+    }
   }
 }
 
@@ -397,6 +402,8 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0,
 void SplashXPath::addSegment(SplashCoord x0, SplashCoord y0,
 			     SplashCoord x1, SplashCoord y1) {
   grow(1);
+  if (unlikely(!segs))
+      return;
   segs[length].x0 = x0;
   segs[length].y0 = y0;
   segs[length].x1 = x1;
