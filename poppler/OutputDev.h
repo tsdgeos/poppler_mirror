@@ -56,6 +56,9 @@ class GfxState;
 class Gfx;
 struct GfxColor;
 class GfxColorSpace;
+#ifdef USE_CMS
+class GfxICCBasedColorSpace;
+#endif
 class GfxImageColorMap;
 class GfxFunctionShading;
 class GfxAxialShading;
@@ -79,15 +82,10 @@ class OutputDev {
 public:
 
   // Constructor.
-  OutputDev() 
-#ifdef USE_CMS
- : iccColorSpaceCache(5)
-#endif
-  {
-  }
+  OutputDev();
 
   // Destructor.
-  virtual ~OutputDev() {}
+  virtual ~OutputDev();
 
   //----- get info about output device
 
@@ -373,7 +371,7 @@ public:
 #endif
 
 #ifdef USE_CMS
-  PopplerCache *getIccColorSpaceCache();
+  PopplerCache<Ref, GfxICCBasedColorSpace> *getIccColorSpaceCache() { return &iccColorSpaceCache; }
 #endif
 
 private:
@@ -383,7 +381,7 @@ private:
   std::unique_ptr<std::unordered_map<std::string, ProfileData>> profileHash;
 
 #ifdef USE_CMS
-  PopplerCache iccColorSpaceCache;
+  PopplerCache<Ref, GfxICCBasedColorSpace> iccColorSpaceCache;
 #endif
 };
 

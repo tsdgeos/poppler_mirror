@@ -319,8 +319,8 @@ static inline GBool isSameGfxColor(const GfxColor &colorA, const GfxColor &color
 // GfxResources
 //------------------------------------------------------------------------
 
-GfxResources::GfxResources(XRef *xref, Dict *resDictA, GfxResources *nextA) :
-    gStateCache(2, xref) {
+GfxResources::GfxResources(XRef *xrefA, Dict *resDictA, GfxResources *nextA) :
+    gStateCache(2), xref(xrefA) {
   Object obj1, obj2;
   Ref r;
 
@@ -504,12 +504,14 @@ Object GfxResources::lookupGState(const char *name) {
     return obj;
   
   const Ref ref = obj.getRef();
-  obj = gStateCache.lookup(ref);
-  if (!obj.isNull())
-    return obj;
 
-  obj = gStateCache.put(ref)->copy();
-  return obj;
+  if (auto *item = gStateCache.lookup(ref)) {
+    return item->copy();
+  }
+
+  auto *item = new Object{xref->fetch(ref.num, ref.gen)};
+  gStateCache.put(ref, item);
+  return item->copy();
 }
 
 Object GfxResources::lookupGStateNF(const char *name) {

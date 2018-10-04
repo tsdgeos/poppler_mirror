@@ -370,7 +370,6 @@ set(poppler_SRCS
   poppler/PDFDoc.cc
   poppler/PDFDocEncoding.cc
   poppler/PDFDocFactory.cc
-  poppler/PopplerCache.cc
   poppler/ProfileData.cc
   poppler/PreScanOutputDev.cc
   poppler/PSTokenizer.cc

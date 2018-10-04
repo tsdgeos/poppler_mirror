@@ -55,7 +55,6 @@
 #include "Error.h"
 #include "ErrorCodes.h"
 #include "XRef.h"
-#include "PopplerCache.h"
 
 //------------------------------------------------------------------------
 // Permission bits
@@ -104,37 +103,6 @@ private:
   Object *objs;			// the objects (length = nObjects)
   int *objNums;			// the object numbers (length = nObjects)
   GBool ok;
-};
-
-class ObjectStreamKey : public PopplerCacheKey
-{
-  public:
-    ObjectStreamKey(int num) : objStrNum(num)
-    {
-    }
-
-    bool operator==(const PopplerCacheKey &key) const override
-    {
-      const ObjectStreamKey *k = static_cast<const ObjectStreamKey*>(&key);
-      return objStrNum == k->objStrNum;
-    }
-
-    const int objStrNum;
-};
-
-class ObjectStreamItem : public PopplerCacheItem
-{
-  public:
-    ObjectStreamItem(ObjectStream *objStr) : objStream(objStr)
-    {
-    }
-
-    ~ObjectStreamItem()
-    {
-      delete objStream;
-    }
-
-    ObjectStream *objStream;
 };
 
 ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion) {
@@ -258,7 +226,7 @@ Object ObjectStream::getObject(int objIdx, int objNum) {
 
 #define xrefLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 
-void XRef::init() {
+XRef::XRef() : objStrs{5} {
   ok = gTrue;
   errCode = errNone;
   entries = nullptr;
@@ -267,7 +235,6 @@ void XRef::init() {
   modified = gFalse;
   streamEnds = nullptr;
   streamEndsLen = 0;
-  objStrs = new PopplerCache(5);
   mainXRefEntriesOffset = 0;
   xRefStream = gFalse;
   scannedSpecialFlags = gFalse;
@@ -280,21 +247,14 @@ void XRef::init() {
   encAlgorithm = cryptNone;
 }
 
-XRef::XRef() {
-  init();
-}
-
-XRef::XRef(const Object *trailerDictA) {
-  init();
-
+XRef::XRef(const Object *trailerDictA) : XRef{} {
   if (trailerDictA->isDict())
     trailerDict = trailerDictA->copy();
 }
 
-XRef::XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA, GBool *wasReconstructed, GBool reconstruct) {
+XRef::XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA, GBool *wasReconstructed, GBool reconstruct) : XRef{} {
   Object obj;
 
-  init();
   mainXRefEntriesOffset = mainXRefEntriesOffsetA;
 
   // read the trailer
@@ -372,9 +332,6 @@ XRef::~XRef() {
 
   if (streamEnds) {
     gfree(streamEnds);
-  }
-  if (objStrs) {
-    delete objStrs;
   }
   if (strOwner) {
     delete str;
@@ -1189,14 +1146,7 @@ Object XRef::fetch(int num, int gen, int recursion) {
       goto err;
     }
 
-    ObjectStream *objStr = nullptr;
-    ObjectStreamKey key(e->offset);
-    PopplerCacheItem *item = objStrs->lookup(key);
-    if (item) {
-      ObjectStreamItem *it = static_cast<ObjectStreamItem *>(item);
-      objStr = it->objStream;
-    }
-
+    ObjectStream *objStr = objStrs.lookup(e->offset);
     if (!objStr) {
       objStr = new ObjectStream(this, e->offset, recursion + 1);
       if (!objStr->isOk()) {
@@ -1206,9 +1156,7 @@ Object XRef::fetch(int num, int gen, int recursion) {
       } else {
 	// XRef could be reconstructed in constructor of ObjectStream:
 	e = getEntry(num);
-	ObjectStreamKey *newkey = new ObjectStreamKey(e->offset);
-	ObjectStreamItem *newitem = new ObjectStreamItem(objStr);
-	objStrs->put(newkey, newitem);
+	objStrs.put(e->offset, objStr);
       }
     }
     return objStr->getObject(e->gen, num);

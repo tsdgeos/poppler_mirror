@@ -138,7 +138,8 @@ private:
   Object patternDict;
   Object shadingDict;
   Object gStateDict;
-  PopplerObjectCache gStateCache;
+  PopplerCache<Ref, Object> gStateCache;
+  XRef *xref;
   Object propertiesDict;
   GfxResources *next;
 };

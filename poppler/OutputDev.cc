@@ -42,6 +42,14 @@
 // OutputDev
 //------------------------------------------------------------------------
 
+OutputDev::OutputDev()
+#ifdef USE_CMS
+ : iccColorSpaceCache(5)
+#endif
+ {}
+
+OutputDev::~OutputDev() = default;
+
 void OutputDev::setDefaultCTM(const double *ctm) {
   int i;
   double det;
@@ -185,10 +193,3 @@ void OutputDev::startProfile() {
 std::unique_ptr<std::unordered_map<std::string, ProfileData>> OutputDev::endProfile() {
   return std::move(profileHash);
 }
-
-#ifdef USE_CMS
-PopplerCache *OutputDev::getIccColorSpaceCache()
-{
-  return &iccColorSpaceCache;
-}
-#endif
