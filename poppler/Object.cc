@@ -59,33 +59,12 @@ static const char *objTypeNames[numObjTypes] = {
   "dead"
 };
 
-Object::Object(Object&& other)
-{
-  type = other.type;
-  real = other.real; // this is the biggest of the union so it's enough
-  other.type = objDead;
-}
-
-Object& Object::operator=(Object&& other)
-{
-  free();
-  type = other.type;
-  real = other.real; // this is the biggest of the union so it's enough
-  other.type = objDead;
-  return *this;
-}
-
-Object::~Object()
-{
-  free();
-}
-
 Object Object::copy() const {
   CHECK_NOT_DEAD;
 
   Object obj;
-  obj.type = type;
-  obj.real = real; // this is the biggest of the union so it's enough
+  std::memcpy(reinterpret_cast<void*>(&obj), this, sizeof(Object));
+
   switch (type) {
   case objString:
     obj.string = string->copy();
@@ -106,6 +85,7 @@ Object Object::copy() const {
   default:
     break;
   }
+
   return obj;
 }
 

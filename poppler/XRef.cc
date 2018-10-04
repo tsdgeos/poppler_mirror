@@ -366,7 +366,7 @@ XRef::XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA, GBool 
 
 XRef::~XRef() {
   for(int i=0; i<size; i++) {
-      entries[i].obj.free ();
+      entries[i].obj.~Object();
   }
   gfree(entries);
 
@@ -415,7 +415,7 @@ XRef *XRef::copy() const {
   for (int i = 0; i < size; ++i) {
     xref->entries[i].offset = entries[i].offset;
     xref->entries[i].type = entries[i].type;
-    xref->entries[i].obj.initNullAfterMalloc();
+    new (&xref->entries[i].obj) Object(objNull);
     xref->entries[i].flags = entries[i].flags;
     xref->entries[i].gen = entries[i].gen;
   }
@@ -464,13 +464,13 @@ int XRef::resize(int newSize)
     for (int i = size; i < newSize; ++i) {
       entries[i].offset = -1;
       entries[i].type = xrefEntryNone;
-      entries[i].obj.initNullAfterMalloc ();
+      new (&entries[i].obj) Object(objNull);
       entries[i].flags = 0;
       entries[i].gen = 0;
     }
   } else {
     for (int i = newSize; i < size; i++) {
-      entries[i].obj.free ();
+      entries[i].obj.~Object();
     }
   }
 
@@ -1327,7 +1327,7 @@ void XRef::add(int num, int gen, Goffset offs, GBool used) {
     for (int i = size; i < num + 1; ++i) {
       entries[i].offset = -1;
       entries[i].type = xrefEntryFree;
-      entries[i].obj.initNullAfterMalloc();
+      new (&entries[i].obj) Object(objNull);
       entries[i].flags = 0;
       entries[i].gen = 0;
     }
@@ -1399,7 +1399,7 @@ void XRef::removeIndirectObject(Ref r) {
   if (e->type == xrefEntryFree) {
     return;
   }
-  e->obj.free();
+  e->obj.~Object();
   e->type = xrefEntryFree;
   e->gen++;
   e->setFlag(XRefEntry::Updated, gTrue);

@@ -146,57 +146,63 @@ enum ObjType {
   objDead			// and object after shallowCopy
 };
 
-#define numObjTypes 16		// total number of object types
+constexpr int numObjTypes = 16;		// total number of object types
 
 //------------------------------------------------------------------------
 // Object
 //------------------------------------------------------------------------
 
-#define initObj(t) free(); zeroUnion(); type = t
-#define constructObj(t) type = t
-
 class Object {
 public:
-  // clear the anonymous union as best we can -- clear at least a pointer
-  void zeroUnion() { this->cString = nullptr; }
-
-  // Default constructor.
-  Object():
-    type(objNone) { zeroUnion(); }
-  ~Object();
+  Object() : type(objNone) {}
+  ~Object() { free(); }
 
   explicit Object(GBool boolnA)
-    { constructObj(objBool); booln = boolnA; }
+    { type = objBool; booln = boolnA; }
   explicit Object(int intgA)
-    { constructObj(objInt); intg = intgA; }
+    { type = objInt; intg = intgA; }
   explicit Object(ObjType typeA)
-    { constructObj(typeA); }
+    { type = typeA; }
   explicit Object(double realA)
-    { constructObj(objReal); real = realA; }
+    { type = objReal; real = realA; }
   explicit Object(GooString *stringA)
-    { assert(stringA); constructObj(objString); string = stringA; }
+    { assert(stringA); type = objString; string = stringA; }
   Object(ObjType typeA, const char *stringA)
-    { assert(typeA == objName || typeA == objCmd); assert(stringA); constructObj(typeA); cString = copyString(stringA); }
+    { assert(typeA == objName || typeA == objCmd); assert(stringA); type = typeA; cString = copyString(stringA); }
   explicit Object(long long int64gA)
-    { constructObj(objInt64); int64g = int64gA; }
+    { type = objInt64; int64g = int64gA; }
   explicit Object(Array *arrayA)
-    { assert(arrayA); constructObj(objArray); array = arrayA; }
+    { assert(arrayA); type = objArray; array = arrayA; }
   explicit Object(Dict *dictA)
-    { assert(dictA); constructObj(objDict); dict = dictA; }
+    { assert(dictA); type = objDict; dict = dictA; }
   explicit Object(Stream *streamA)
-    { assert(streamA); constructObj(objStream); stream = streamA; }
+    { assert(streamA); type = objStream; stream = streamA; }
   Object(int numA, int genA)
-    { constructObj(objRef); ref.num = numA; ref.gen = genA; }
+    { type = objRef; ref.num = numA; ref.gen = genA; }
+
   template<typename T> Object(T) = delete;
 
-  Object(Object&& other);
-  Object& operator=(Object&& other);
+  Object(Object&& other)
+  {
+    std::memcpy(reinterpret_cast<void*>(this), &other, sizeof(Object));
+    other.type = objDead;
+  }
+
+  Object& operator=(Object&& other)
+  {
+    free();
+
+    std::memcpy(reinterpret_cast<void*>(this), &other, sizeof(Object));
+    other.type = objDead;
+
+    return *this;
+  }
 
   Object &operator=(const Object &other) = delete;
   Object(const Object &other) = delete;
 
   // Set object to null.
-  void setToNull() { initObj(objNull); }
+  void setToNull() { free(); type = objNull; }
 
   // Copy this to obj
   Object copy() const;
@@ -301,15 +307,8 @@ public:
   void print(FILE *f = stdout) const;
 
 private:
-  friend class Array; // Needs free and initNullAfterMalloc
-  friend class Dict; // Needs free and initNullAfterMalloc
-  friend class XRef; // Needs free and initNullAfterMalloc
-
   // Free object contents.
   void free();
-
-  // Only use if are mallocing Objects
-  void initNullAfterMalloc() { constructObj(objNull); }
 
   ObjType type;			// object type
   union {			// value for each type:
