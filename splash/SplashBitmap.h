@@ -55,7 +55,7 @@ public:
   // upside-down, i.e., with the last row first in memory.
   SplashBitmap(int widthA, int heightA, int rowPad,
 	       SplashColorMode modeA, GBool alphaA,
-	       GBool topDown = gTrue, GooList *separationList = NULL);
+	       GBool topDown = gTrue, GooList *separationList = nullptr);
   static SplashBitmap *copy(SplashBitmap *src);
 
   ~SplashBitmap();

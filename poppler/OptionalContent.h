@@ -53,9 +53,9 @@ public:
   OCDisplayNode *getDisplayRoot();
 
   Array* getOrderArray() 
-    { return (order.isArray() && order.arrayGetLength() > 0) ? order.getArray() : NULL; }
+    { return (order.isArray() && order.arrayGetLength() > 0) ? order.getArray() : nullptr; }
   Array* getRBGroupsArray() 
-    { return (rbgroups.isArray() && rbgroups.arrayGetLength()) ? rbgroups.getArray() : NULL; }
+    { return (rbgroups.isArray() && rbgroups.arrayGetLength()) ? rbgroups.getArray() : nullptr; }
 
   bool optContentIsVisible( Object *dictRef );
 
@@ -142,9 +142,9 @@ private:
   void addChildren(GooList *childrenA);
   GooList *takeChildren();
 
-  GooString *name;		// display name (may be NULL)
-  OptionalContentGroup *ocg;	// NULL for display labels
-  GooList *children;		// NULL if there are no children
+  GooString *name;		// display name (may be nullptr)
+  OptionalContentGroup *ocg;	// nullptr for display labels
+  GooList *children;		// nullptr if there are no children
 				//   [OCDisplayNode]
 };
 

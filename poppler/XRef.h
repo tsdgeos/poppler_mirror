@@ -98,7 +98,7 @@ public:
   // Constructor, create an empty XRef but with info dict, used for PDF writing
   XRef(const Object *trailerDictA);
   // Constructor.  Read xref table from stream.
-  XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA = 0, GBool *wasReconstructed = NULL, GBool reconstruct = false);
+  XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA = 0, GBool *wasReconstructed = nullptr, GBool reconstruct = false);
 
   // Destructor.
   ~XRef();
@@ -248,7 +248,7 @@ private:
   GBool readXRefStream(Stream *xrefStr, Goffset *pos);
   GBool constructXRef(GBool *wasReconstructed, GBool needCatalogDict = gFalse);
   GBool parseEntry(Goffset offset, XRefEntry *entry);
-  void readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum = NULL);
+  void readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum = nullptr);
   void markUnencrypted(Object *obj);
 
   class XRefWriter {

@@ -19,7 +19,7 @@
 // Copyright (C) 2007, 2011, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2009-2013, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2012, 2013 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2012, 2013, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -142,10 +142,10 @@ public:
 			       int rotate, GBool useMediaBox, GBool crop,
 			       int sliceX, int sliceY, int sliceW, int sliceH,
 			       GBool printing,
-			       GBool (* abortCheckCbk)(void *data) = NULL,
-			       void * abortCheckCbkData = NULL,
-			       GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
-			       void *annotDisplayDecideCbkData = NULL)
+			       GBool (* abortCheckCbk)(void *data) = nullptr,
+			       void * abortCheckCbkData = nullptr,
+			       GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+			       void *annotDisplayDecideCbkData = nullptr)
     { return gTrue; }
 
   // Start a page.

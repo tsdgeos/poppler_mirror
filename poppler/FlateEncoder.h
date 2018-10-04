@@ -3,6 +3,7 @@
 // FlateEncoder.h
 //
 // Copyright (C) 2016, William Bader <williambader@hotmail.com>
+// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
 //
 // This file is under the GPLv2 or later license
 //
@@ -51,7 +52,7 @@ public:
     { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr++ & 0xff); }
   int lookChar() override
     { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr & 0xff); }
-  GooString *getPSFilter(int psLevel, const char *indent) override { return NULL; }
+  GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }
   GBool isBinary(GBool last = gTrue) override { return gTrue; }
   GBool isEncoder() override { return gTrue; }
 

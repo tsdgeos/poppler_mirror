@@ -223,7 +223,7 @@ public:
 			      StreamColorSpaceMode * /*csMode*/) {}
 
   // Return the next stream in the "stack".
-  virtual Stream *getNextStream() { return NULL; }
+  virtual Stream *getNextStream() { return nullptr; }
 
   // Add filters to this stream according to the parameters in <dict>.
   // Returns the new stream.
@@ -317,7 +317,7 @@ public:
   Stream *getUndecodedStream() override { return this; }
   Dict *getDict() override { return dict.getDict(); }
   Object *getDictObject() override { return &dict; }
-  virtual GooString *getFileName() { return NULL; }
+  virtual GooString *getFileName() { return nullptr; }
   virtual Goffset getLength() { return length; }
 
   // Get/set position of first byte of stream within the file.
@@ -1158,7 +1158,7 @@ public:
   void reset() override {}
   int getChar() override { return EOF; }
   int lookChar() override { return EOF; }
-  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override  { return NULL; }
+  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override  { return nullptr; }
   GBool isBinary(GBool /*last = gTrue*/) override { return gFalse; }
 };
 
@@ -1176,7 +1176,7 @@ public:
   int getChar() override;
   int lookChar() override;
   GooString *getPSFilter(int psLevel, const char *indent) override
-    { return NULL; }
+    { return nullptr; }
   GBool isBinary(GBool last = gTrue) override;
 
   int lookChar(int idx);
@@ -1200,7 +1200,7 @@ public:
   void reset() override;
   int getChar() override;
   int lookChar() override;
-  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return NULL; }
+  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
   GBool isBinary(GBool /*last = gTrue*/) override;
   GBool isEncoder() override { return gTrue; }
 
@@ -1225,7 +1225,7 @@ public:
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
   int lookChar() override
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return NULL; }
+  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
   GBool isBinary(GBool /*last = gTrue*/) override { return gFalse; }
   GBool isEncoder() override { return gTrue; }
 
@@ -1255,7 +1255,7 @@ public:
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
   int lookChar() override
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return NULL; }
+  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
   GBool isBinary(GBool /*last = gTrue*/) override { return gFalse; }
   GBool isEncoder() override { return gTrue; }
 
@@ -1285,7 +1285,7 @@ public:
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
   int lookChar() override
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return NULL; }
+  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
   GBool isBinary(GBool /*last = gTrue*/) override { return gTrue; }
   GBool isEncoder() override { return gTrue; }
 
@@ -1320,7 +1320,7 @@ public:
   int getChar() override;
   int lookChar() override;
   GooString *getPSFilter(int psLevel, const char *indent) override
-    { return NULL; }
+    { return nullptr; }
   GBool isBinary(GBool last = gTrue) override { return gTrue; }
   GBool isEncoder() override { return gTrue; }
 
@@ -1353,7 +1353,7 @@ public:
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
   int lookChar() override
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return NULL; }
+  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
   GBool isBinary(GBool /*last = gTrue*/) override { return gFalse; }
   GBool isEncoder() override { return gTrue; }
 
@@ -1382,7 +1382,7 @@ public:
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
   int lookChar() override
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return NULL; }
+  GooString *getPSFilter(int /*psLevel*/, const char * /*indent*/) override { return nullptr; }
   GBool isBinary(GBool /*last = gTrue*/) override { return gFalse; }
   GBool isEncoder() override { return gTrue; }
 

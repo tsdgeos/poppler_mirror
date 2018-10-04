@@ -92,7 +92,7 @@ public:
 
   // Create a new rasterizer object.
   Splash(SplashBitmap *bitmapA, GBool vectorAntialiasA,
-	 SplashScreenParams *screenParams = NULL);
+	 SplashScreenParams *screenParams = nullptr);
   Splash(SplashBitmap *bitmapA, GBool vectorAntialiasA,
 	 SplashScreen *screenA);
 

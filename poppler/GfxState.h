@@ -224,7 +224,7 @@ public:
   virtual GfxColorSpace *copy() = 0;
   virtual GfxColorSpaceMode getMode() = 0;
 
-  // Construct a color space.  Returns NULL if unsuccessful.
+  // Construct a color space.  Returns nullptr if unsuccessful.
   static GfxColorSpace *parse(GfxResources *res, Object *csObj, OutputDev *out, GfxState *state, int recursion = 0);
 
   // Convert to gray, RGB, or CMYK.
@@ -337,7 +337,7 @@ public:
   GfxColorSpace *copy() override;
   GfxColorSpaceMode getMode() override { return csCalGray; }
 
-  // Construct a CalGray color space.  Returns NULL if unsuccessful.
+  // Construct a CalGray color space.  Returns nullptr if unsuccessful.
   static GfxColorSpace *parse(Array *arr, GfxState *state);
 
   void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -415,7 +415,7 @@ public:
   GfxColorSpace *copy() override;
   GfxColorSpaceMode getMode() override { return csCalRGB; }
 
-  // Construct a CalRGB color space.  Returns NULL if unsuccessful.
+  // Construct a CalRGB color space.  Returns nullptr if unsuccessful.
   static GfxColorSpace *parse(Array *arr, GfxState *state);
 
   void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -494,7 +494,7 @@ public:
   GfxColorSpace *copy() override;
   GfxColorSpaceMode getMode() override { return csLab; }
 
-  // Construct a Lab color space.  Returns NULL if unsuccessful.
+  // Construct a Lab color space.  Returns nullptr if unsuccessful.
   static GfxColorSpace *parse(Array *arr, GfxState *state);
 
   void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -545,7 +545,7 @@ public:
   GfxColorSpace *copy() override;
   GfxColorSpaceMode getMode() override { return csICCBased; }
 
-  // Construct an ICCBased color space.  Returns NULL if unsuccessful.
+  // Construct an ICCBased color space.  Returns nullptr if unsuccessful.
   static GfxColorSpace *parse(Array *arr, OutputDev *out, GfxState *state, int recursion);
 
   void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -579,7 +579,7 @@ private:
   double rangeMax[4];		// max values for each component
   Ref iccProfileStream;		// the ICC profile
 #ifdef USE_CMS
-  int getIntent() { return (transform != NULL) ? transform->getIntent() : 0; }
+  int getIntent() { return (transform != nullptr) ? transform->getIntent() : 0; }
   GfxColorTransform *transform;
   GfxColorTransform *lineTransform; // color transform for line
   mutable std::map<unsigned int, unsigned int> cmsCache;
@@ -597,7 +597,7 @@ public:
   GfxColorSpace *copy() override;
   GfxColorSpaceMode getMode() override { return csIndexed; }
 
-  // Construct an Indexed color space.  Returns NULL if unsuccessful.
+  // Construct an Indexed color space.  Returns nullptr if unsuccessful.
   static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
   void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -650,7 +650,7 @@ public:
   GfxColorSpace *copy() override;
   GfxColorSpaceMode getMode() override { return csSeparation; }
 
-  // Construct a Separation color space.  Returns NULL if unsuccessful.
+  // Construct a Separation color space.  Returns nullptr if unsuccessful.
   static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
   void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -695,7 +695,7 @@ public:
   GfxColorSpace *copy() override;
   GfxColorSpaceMode getMode() override { return csDeviceN; }
 
-  // Construct a DeviceN color space.  Returns NULL if unsuccessful.
+  // Construct a DeviceN color space.  Returns nullptr if unsuccessful.
   static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
   void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -742,7 +742,7 @@ public:
   GfxColorSpace *copy() override;
   GfxColorSpaceMode getMode() override { return csPattern; }
 
-  // Construct a Pattern color space.  Returns NULL if unsuccessful.
+  // Construct a Pattern color space.  Returns nullptr if unsuccessful.
   static GfxColorSpace *parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion);
 
   void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -807,7 +807,7 @@ public:
   double getXStep() const { return xStep; }
   double getYStep() const { return yStep; }
   Dict *getResDict()
-    { return resDict.isDict() ? resDict.getDict() : (Dict *)NULL; }
+    { return resDict.isDict() ? resDict.getDict() : (Dict *)nullptr; }
   const double *getMatrix() const { return matrix; }
   Object *getContentStream() { return &contentStream; }
 
@@ -1228,7 +1228,7 @@ public:
 
   // Matte color ops
   void setMatteColor(const GfxColor *color) { useMatte = gTrue; matteColor = *color; }
-  const GfxColor *getMatteColor() const { return (useMatte) ? &matteColor : NULL; }
+  const GfxColor *getMatteColor() const { return (useMatte) ? &matteColor : nullptr; }
 private:
 
   GfxImageColorMap(GfxImageColorMap *colorMap);
@@ -1624,7 +1624,7 @@ public:
   // Push/pop GfxState on/off stack.
   GfxState *save();
   GfxState *restore();
-  GBool hasSaves() const { return saved != NULL; }
+  GBool hasSaves() const { return saved != nullptr; }
   GBool isParentState(GfxState *state) { return saved == state || (saved && saved->isParentState(state)); }
 
   // Misc
@@ -1652,8 +1652,8 @@ private:
   GBool strokeOverprint;	// stroke overprint
   int overprintMode;		// overprint mode
   Function *transfer[4];	// transfer function (entries may be: all
-				//   NULL = identity; last three NULL =
-				//   single function; all four non-NULL =
+				//   nullptr = identity; last three nullptr =
+				//   single function; all four non-nullptr =
 				//   R,G,B,gray functions)
 
   double lineWidth;		// line width

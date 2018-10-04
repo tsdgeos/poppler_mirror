@@ -38,8 +38,8 @@ public:
   StructTreeRoot(const StructTreeRoot &) = delete;
 
   PDFDoc *getDoc() { return doc; }
-  Dict *getRoleMap() { return roleMap.isDict() ? roleMap.getDict() : NULL; }
-  Dict *getClassMap() { return classMap.isDict() ? classMap.getDict() : NULL; }
+  Dict *getRoleMap() { return roleMap.isDict() ? roleMap.getDict() : nullptr; }
+  Dict *getClassMap() { return classMap.isDict() ? classMap.getDict() : nullptr; }
   unsigned getNumChildren() const { return elements.size(); }
   const StructElement *getChild(int i) const { return elements.at(i); }
   StructElement *getChild(int i) { return elements.at(i); }
@@ -57,7 +57,7 @@ public:
 	return it->second[mcid].element;
       }
     }
-    return NULL;
+    return nullptr;
   }
 
 private:

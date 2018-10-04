@@ -71,7 +71,7 @@ public:
 
   // Get stream.
   Stream *getStream()
-    { return curStr.isStream() ? curStr.getStream() : (Stream *)NULL; }
+    { return curStr.isStream() ? curStr.getStream() : nullptr; }
 
   // Get current position in file.  This is only used for error
   // messages.

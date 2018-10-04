@@ -103,7 +103,7 @@ class GlobalParams {
 public:
 
   // Initialize the global parameters
-  GlobalParams(const char *customPopplerDataDir = NULL);
+  GlobalParams(const char *customPopplerDataDir = nullptr);
 
   ~GlobalParams();
 
@@ -131,8 +131,8 @@ public:
   GooString *findFontFile(const GooString *fontName);
   GooString *findBase14FontFile(const GooString *base14Name, GfxFont *font);
   GooString *findSystemFontFile(GfxFont *font, SysFontType *type,
-			      int *fontNum, GooString *substituteFontName = NULL,
-		              const GooString *base14Name = NULL);
+			      int *fontNum, GooString *substituteFontName = nullptr,
+		              const GooString *base14Name = nullptr);
   GBool getPSExpandSmaller();
   GBool getPSShrinkLarger();
   PSLevel getPSLevel();
@@ -147,7 +147,7 @@ public:
 
   CharCodeToUnicode *getCIDToUnicode(GooString *collection);
   UnicodeMap *getUnicodeMap(GooString *encodingName);
-  CMap *getCMap(const GooString *collection, GooString *cMapName, Stream *stream = NULL);
+  CMap *getCMap(const GooString *collection, GooString *cMapName, Stream *stream = nullptr);
   UnicodeMap *getTextEncoding();
 
   GooList *getEncodingNames();
