@@ -264,7 +264,7 @@ public:
   //----- special access
   
   // Called to indicate that a new PDF document has been loaded.
-  void startDoc(PDFDoc *docA, CairoFontEngine *fontEngine = NULL);
+  void startDoc(PDFDoc *docA, CairoFontEngine *fontEngine = nullptr);
  
   GBool isReverseVideo() { return gFalse; }
   

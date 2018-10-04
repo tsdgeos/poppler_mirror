@@ -235,7 +235,7 @@ private:
 class HtmlOutputDev: public OutputDev {
 public:
 
-  // Open a text output file.  If <fileName> is NULL, no file is written
+  // Open a text output file.  If <fileName> is nullptr, no file is written
   // (this is useful, e.g., for searching text).  If <useASCII7> is true,
   // text is converted to 7-bit ASCII; otherwise, text is converted to
   // 8-bit ISO Latin-1.  <useASCII7> should also be set for Japanese
@@ -279,10 +279,10 @@ public:
                        int rotate, GBool useMediaBox, GBool crop,
                        int sliceX, int sliceY, int sliceW, int sliceH,
                        GBool printing,
-                       GBool (* abortCheckCbk)(void *data) = NULL,
-                       void * abortCheckCbkData = NULL,
-                       GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
-                       void *annotDisplayDecideCbkData = NULL) override
+                       GBool (* abortCheckCbk)(void *data) = nullptr,
+                       void * abortCheckCbkData = nullptr,
+                       GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+                       void *annotDisplayDecideCbkData = nullptr) override
   {
    docPage = page;
    return gTrue;

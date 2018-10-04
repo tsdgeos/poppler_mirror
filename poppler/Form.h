@@ -315,7 +315,7 @@ public:
 
   FormWidget* findWidgetByRef (Ref aref);
   int getNumWidgets() { return terminal ? numChildren : 0; }
-  FormWidget *getWidget(int i) { return terminal ? widgets[i] : NULL; }
+  FormWidget *getWidget(int i) { return terminal ? widgets[i] : nullptr; }
 
   // only implemented in FormFieldButton
   virtual void fillChildrenSiblingsID ();
@@ -457,8 +457,8 @@ public:
   ~FormFieldChoice();
 
   int getNumChoices() const { return numChoices; }
-  const GooString* getChoice(int i) const { return choices ? choices[i].optionName : NULL; }
-  const GooString* getExportVal (int i) const  { return choices ? choices[i].exportVal : NULL; }
+  const GooString* getChoice(int i) const { return choices ? choices[i].optionName : nullptr; }
+  const GooString* getExportVal (int i) const  { return choices ? choices[i].exportVal : nullptr; }
   // For multi-select choices it returns the first one
   const GooString* getSelectedChoice() const;
 

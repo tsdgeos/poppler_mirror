@@ -184,10 +184,10 @@ public:
 
 private:
 
-  LinkDest *dest;		// regular destination (NULL for remote
+  LinkDest *dest;		// regular destination (nullptr for remote
 				//   link with bad destination)
   GooString *namedDest;	// named destination (only one of dest and
-				//   and namedDest may be non-NULL)
+				//   and namedDest may be non-nullptr)
 };
 
 //------------------------------------------------------------------------
@@ -216,10 +216,10 @@ public:
 private:
 
   GooString *fileName;		// file name
-  LinkDest *dest;		// regular destination (NULL for remote
+  LinkDest *dest;		// regular destination (nullptr for remote
 				//   link with bad destination)
   GooString *namedDest;	// named destination (only one of dest and
-				//   and namedDest may be non-NULL)
+				//   and namedDest may be non-nullptr)
 };
 
 //------------------------------------------------------------------------
@@ -236,7 +236,7 @@ public:
   ~LinkLaunch();
 
   // Was the LinkLaunch created successfully?
-  GBool isOk() const override { return fileName != NULL; }
+  GBool isOk() const override { return fileName != nullptr; }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionLaunch; }
@@ -263,7 +263,7 @@ public:
   ~LinkURI();
 
   // Was the LinkURI created successfully?
-  GBool isOk() const override { return uri != NULL; }
+  GBool isOk() const override { return uri != nullptr; }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionURI; }
@@ -286,7 +286,7 @@ public:
 
   ~LinkNamed();
 
-  GBool isOk() const override { return name != NULL; }
+  GBool isOk() const override { return name != nullptr; }
 
   LinkActionKind getKind() const override { return actionNamed; }
   const GooString *getName() const { return name; }
@@ -314,14 +314,14 @@ public:
   LinkMovie(const Object *obj);
   ~LinkMovie();
 
-  GBool isOk() const override { return annotRef.num >= 0 || annotTitle != NULL; }
+  GBool isOk() const override { return annotRef.num >= 0 || annotTitle != nullptr; }
   LinkActionKind getKind() const override { return actionMovie; }
 
   // a movie action stores either an indirect reference to a movie annotation
   // or the movie annotation title
 
   GBool hasAnnotRef() const { return annotRef.num >= 0; }
-  GBool hasAnnotTitle() const { return annotTitle != NULL; }
+  GBool hasAnnotTitle() const { return annotTitle != nullptr; }
   const Ref *getAnnotRef() const { return &annotRef; }
   const GooString *getAnnotTitle() const { return annotTitle; }
 
@@ -395,7 +395,7 @@ public:
 
   ~LinkSound();
 
-  GBool isOk() const override { return sound != NULL; }
+  GBool isOk() const override { return sound != nullptr; }
 
   LinkActionKind getKind() const override { return actionSound; }
 
@@ -426,7 +426,7 @@ public:
 
   ~LinkJavaScript();
 
-  GBool isOk() const override { return js != NULL; }
+  GBool isOk() const override { return js != nullptr; }
 
   LinkActionKind getKind() const override { return actionJavaScript; }
   const GooString *getScript() const { return js; }
@@ -445,7 +445,7 @@ public:
 
   ~LinkOCGState();
 
-  GBool isOk() const override { return stateList != NULL; }
+  GBool isOk() const override { return stateList != nullptr; }
 
   LinkActionKind getKind() const override { return actionOCGState; }
 
@@ -514,7 +514,7 @@ public:
   ~LinkUnknown();
 
   // Was the LinkUnknown create successfully?
-  GBool isOk() const override { return action != NULL; }
+  GBool isOk() const override { return action != nullptr; }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionUnknown; }
@@ -546,7 +546,7 @@ public:
   AnnotLink *getLink(int i) const { return links[i]; }
 
   // If point <x>,<y> is in a link, return the associated action;
-  // else return NULL.
+  // else return nullptr.
   LinkAction *find(double x, double y) const;
 
   // Return true if <x>,<y> is in a link.

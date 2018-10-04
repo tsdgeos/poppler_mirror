@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Brad Hards <bradh@kde.org>
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
@@ -110,8 +110,8 @@ public:
 	      int imgURXA = 0, int imgURYA = 0,
 	      GBool forceRasterizeA = gFalse,
 	      GBool manualCtrlA = gFalse,
-	      PSOutCustomCodeCbk customCodeCbkA = NULL,
-	      void *customCodeCbkDataA = NULL);
+	      PSOutCustomCodeCbk customCodeCbkA = nullptr,
+	      void *customCodeCbkDataA = nullptr);
 
   // Open a PSOutputDev that will write to a generic stream.
   // pages has to be sorted in increasing order
@@ -126,8 +126,8 @@ public:
 	      int imgURXA = 0, int imgURYA = 0,
 	      GBool forceRasterizeA = gFalse,
 	      GBool manualCtrlA = gFalse,
-	      PSOutCustomCodeCbk customCodeCbkA = NULL,
-	      void *customCodeCbkDataA = NULL);
+	      PSOutCustomCodeCbk customCodeCbkA = nullptr,
+	      void *customCodeCbkDataA = nullptr);
 
   // Destructor -- writes the trailer and closes the file.
   virtual ~PSOutputDev();
@@ -191,10 +191,10 @@ public:
 			       int rotate, GBool useMediaBox, GBool crop,
 			       int sliceX, int sliceY, int sliceW, int sliceH,
 			       GBool printing,
-			       GBool (*abortCheckCbk)(void *data) = NULL,
-			       void *abortCheckCbkData = NULL,
-			       GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
-			       void *annotDisplayDecideCbkData = NULL) override;
+			       GBool (*abortCheckCbk)(void *data) = nullptr,
+			       void *abortCheckCbkData = nullptr,
+			       GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+			       void *annotDisplayDecideCbkData = nullptr) override;
 
   // Start a page.
   void startPage(int pageNum, GfxState *state, XRef *xref) override;

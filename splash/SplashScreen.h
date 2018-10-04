@@ -49,7 +49,7 @@ public:
   // level <value> at (<x>, <y>).
   int test(int x, int y, Guchar value) {
     int xx, yy;
-    if (mat == NULL) createMatrix();
+    if (mat == nullptr) createMatrix();
     xx = x & sizeM1;
     yy = y & sizeM1;
     return value < mat[(yy << log2Size) + xx] ? 0 : 1;
@@ -58,7 +58,7 @@ public:
   // Returns true if value is above the white threshold or below the
   // black threshold, i.e., if the corresponding halftone will be
   // solid white or black.
-  GBool isStatic(Guchar value) { if (mat == NULL) createMatrix(); return value < minVal || value >= maxVal; }
+  GBool isStatic(Guchar value) { if (mat == nullptr) createMatrix(); return value < minVal || value >= maxVal; }
 
 private:
   void createMatrix();

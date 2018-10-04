@@ -118,22 +118,22 @@ enum PDFSubtypeConformance {
 class PDFDoc {
 public:
 
-  PDFDoc(const GooString *fileNameA, const GooString *ownerPassword = NULL,
-	 const GooString *userPassword = NULL, void *guiDataA = NULL);
+  PDFDoc(const GooString *fileNameA, const GooString *ownerPassword = nullptr,
+	 const GooString *userPassword = nullptr, void *guiDataA = nullptr);
 
 #ifdef _WIN32
-  PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword = NULL,
-	 GooString *userPassword = NULL, void *guiDataA = NULL);
+  PDFDoc(wchar_t *fileNameA, int fileNameLen, GooString *ownerPassword = nullptr,
+	 GooString *userPassword = nullptr, void *guiDataA = nullptr);
 #endif
 
-  PDFDoc(BaseStream *strA, const GooString *ownerPassword = NULL,
-	 const GooString *userPassword = NULL, void *guiDataA = NULL);
+  PDFDoc(BaseStream *strA, const GooString *ownerPassword = nullptr,
+	 const GooString *userPassword = nullptr, void *guiDataA = nullptr);
   ~PDFDoc();
 
   PDFDoc(const PDFDoc &) = delete;
   PDFDoc& operator=(const PDFDoc &) = delete;
 
-  static PDFDoc *ErrorPDFDoc(int errorCode, const GooString *fileNameA = NULL);
+  static PDFDoc *ErrorPDFDoc(int errorCode, const GooString *fileNameA = nullptr);
 
   // Was PDF document successfully opened?
   GBool isOk() const { return ok; }
@@ -182,7 +182,7 @@ public:
   // Get number of pages.
   int getNumPages();
 
-  // Return the contents of the metadata stream, or NULL if there is
+  // Return the contents of the metadata stream, or nullptr if there is
   // no metadata.
   const GooString *readMetadata() const { return catalog->readMetadata(); }
 
@@ -196,29 +196,29 @@ public:
   void displayPage(OutputDev *out, int page,
 		   double hDPI, double vDPI, int rotate,
 		   GBool useMediaBox, GBool crop, GBool printing,
-		   GBool (*abortCheckCbk)(void *data) = NULL,
-		   void *abortCheckCbkData = NULL,
-                   GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
-                   void *annotDisplayDecideCbkData = NULL, GBool copyXRef = gFalse);
+		   GBool (*abortCheckCbk)(void *data) = nullptr,
+		   void *abortCheckCbkData = nullptr,
+                   GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+                   void *annotDisplayDecideCbkData = nullptr, GBool copyXRef = gFalse);
 
   // Display a range of pages.
   void displayPages(OutputDev *out, int firstPage, int lastPage,
 		    double hDPI, double vDPI, int rotate,
 		    GBool useMediaBox, GBool crop, GBool printing,
-		    GBool (*abortCheckCbk)(void *data) = NULL,
-		    void *abortCheckCbkData = NULL,
-                    GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
-                    void *annotDisplayDecideCbkData = NULL);
+		    GBool (*abortCheckCbk)(void *data) = nullptr,
+		    void *abortCheckCbkData = nullptr,
+                    GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+                    void *annotDisplayDecideCbkData = nullptr);
 
   // Display part of a page.
   void displayPageSlice(OutputDev *out, int page,
 			double hDPI, double vDPI, int rotate, 
 			GBool useMediaBox, GBool crop, GBool printing,
 			int sliceX, int sliceY, int sliceW, int sliceH,
-			GBool (*abortCheckCbk)(void *data) = NULL,
-			void *abortCheckCbkData = NULL,
-                        GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
-                        void *annotDisplayDecideCbkData = NULL, GBool copyXRef = gFalse);
+			GBool (*abortCheckCbk)(void *data) = nullptr,
+			void *abortCheckCbkData = nullptr,
+                        GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+                        void *annotDisplayDecideCbkData = nullptr, GBool copyXRef = gFalse);
 
   // Find a page, given its object ID.  Returns page number, or 0 if
   // not found.
@@ -229,7 +229,7 @@ public:
   Links *getLinks(int page);
 
   // Find a named destination.  Returns the link destination, or
-  // NULL if <name> is not a destination.
+  // nullptr if <name> is not a destination.
   LinkDest *findDest(const GooString *name)
     { return catalog->findDest(name); }
 
@@ -277,12 +277,12 @@ public:
   // Remove the document's Info dictionary and update the trailer dictionary.
   void removeDocInfo() { xref->removeDocInfo(); }
 
-  // Set doc info string entry. NULL or empty value will cause a removal.
+  // Set doc info string entry. nullptr or empty value will cause a removal.
   // Takes ownership of value.
   void setDocInfoStringEntry(const char *key, GooString *value);
 
   // Set document's properties in document's Info dictionary.
-  // NULL or empty value will cause a removal.
+  // nullptr or empty value will cause a removal.
   // Takes ownership of value.
   void setDocInfoTitle(GooString *title) { setDocInfoStringEntry("Title", title); }
   void setDocInfoAuthor(GooString *author) { setDocInfoStringEntry("Author", author); }
@@ -294,7 +294,7 @@ public:
   void setDocInfoModDate(GooString *modDate) { setDocInfoStringEntry("ModDate", modDate); }
 
   // Get document's properties from document's Info dictionary.
-  // Returns NULL on fail.
+  // Returns nullptr on fail.
   // Returned GooStrings should be freed by the caller.
   GooString *getDocInfoStringEntry(const char *key);
 

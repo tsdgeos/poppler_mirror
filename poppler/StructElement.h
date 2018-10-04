@@ -99,9 +99,9 @@ public:
   GBool isHidden() const { return hidden; }
   void setHidden(GBool hiddenA) { hidden = hiddenA; }
 
-  // The formatted value may be in the PDF, or be left undefined (NULL).
+  // The formatted value may be in the PDF, or be left undefined (nullptr).
   // In the later case the user agent should provide a default representation.
-  const char *getFormattedValue() const { return formatted ? formatted->getCString() : NULL; }
+  const char *getFormattedValue() const { return formatted ? formatted->getCString() : nullptr; }
   void setFormattedValue(const char *formattedA);
 
   ~Attribute();
@@ -115,8 +115,8 @@ private:
   GBool hidden;
   GooString *formatted;
 
-  GBool checkType(StructElement *element = NULL);
-  static Type getTypeForName(const char *name, StructElement *element = NULL);
+  GBool checkType(StructElement *element = nullptr);
+  static Type getTypeForName(const char *name, StructElement *element = nullptr);
   static Attribute *parseUserProperty(Dict *property);
 
   friend class StructElement;
@@ -175,11 +175,11 @@ public:
   // Optional ISO language name, e.g. en_US
   GooString *getLanguage() {
     if (!isContent() && s->language) return s->language;
-    return parent ? parent->getLanguage() : NULL;
+    return parent ? parent->getLanguage() : nullptr;
   }
   const GooString *getLanguage() const {
     if (!isContent() && s->language) return s->language;
-    return parent ? parent->getLanguage() : NULL;
+    return parent ? parent->getLanguage() : nullptr;
   }
 
   // Optional revision number, defaults to zero.
@@ -232,7 +232,7 @@ public:
   //   enclosed by *all* the child MCID reference elements of the subtree
   //   is returned. The text is assembled by traversing the leaf MCID
   //   reference elements in logical order.
-  // - In any other case, the function returns NULL.
+  // - In any other case, the function returns nullptr.
   //
   // A new string is returned, and the ownership passed to the caller.
   //

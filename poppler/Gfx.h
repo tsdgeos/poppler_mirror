@@ -154,14 +154,14 @@ public:
   Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
       double hDPI, double vDPI, const PDFRectangle *box,
       const PDFRectangle *cropBox, int rotate,
-      GBool (*abortCheckCbkA)(void *data) = NULL,
-      void *abortCheckCbkDataA = NULL, XRef *xrefA = NULL);
+      GBool (*abortCheckCbkA)(void *data) = nullptr,
+      void *abortCheckCbkDataA = nullptr, XRef *xrefA = nullptr);
 
   // Constructor for a sub-page object.
   Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict,
       const PDFRectangle *box, const PDFRectangle *cropBox,
-      GBool (*abortCheckCbkA)(void *data) = NULL,
-      void *abortCheckCbkDataA = NULL, Gfx *gfxA = NULL);
+      GBool (*abortCheckCbkA)(void *data) = nullptr,
+      void *abortCheckCbkDataA = nullptr, Gfx *gfxA = nullptr);
 #ifdef USE_CMS
   void initDisplayProfile();
 #endif
@@ -199,10 +199,10 @@ public:
 
   void drawForm(Object *str, Dict *resDict, const double *matrix, const double *bbox,
 	       GBool transpGroup = gFalse, GBool softMask = gFalse,
-	       GfxColorSpace *blendingColorSpace = NULL,
+	       GfxColorSpace *blendingColorSpace = nullptr,
 	       GBool isolated = gFalse, GBool knockout = gFalse,
-	       GBool alpha = gFalse, Function *transferFunc = NULL,
-	       GfxColor *backdropColor = NULL);
+	       GBool alpha = gFalse, Function *transferFunc = nullptr,
+	       GfxColor *backdropColor = nullptr);
 
   void pushResources(Dict *resDict);
   void popResources();

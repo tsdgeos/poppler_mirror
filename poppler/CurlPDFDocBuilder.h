@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2018 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -24,8 +24,8 @@ class CurlPDFDocBuilder : public PDFDocBuilder {
 
 public:
 
-  PDFDoc *buildPDFDoc(const GooString &uri, GooString *ownerPassword = NULL,
-    GooString *userPassword = NULL, void *guiDataA = NULL) override;
+  PDFDoc *buildPDFDoc(const GooString &uri, GooString *ownerPassword = nullptr,
+    GooString *userPassword = nullptr, void *guiDataA = nullptr) override;
   GBool supports(const GooString &uri) override;
 
 };

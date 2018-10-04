@@ -496,7 +496,8 @@ bool FormFieldChoice::canBeSpellChecked() const
 }
 
 
-struct SignatureValidationInfoPrivate {
+class SignatureValidationInfoPrivate {
+public:
 	SignatureValidationInfo::SignatureStatus signature_status;
 	SignatureValidationInfo::CertificateStatus certificate_status;
 

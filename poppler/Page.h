@@ -78,7 +78,7 @@ public:
 
   // Construct a new PageAttrs object by merging a dictionary
   // (of type Pages or Page) into another PageAttrs object.  If
-  // <attrs> is NULL, uses defaults.
+  // <attrs> is nullptr, uses defaults.
   PageAttrs(PageAttrs *attrs, Dict *dict);
 
   // Destructor.
@@ -96,18 +96,18 @@ public:
     { return lastModified.isString()
 	? lastModified.getString() : nullptr; }
   Dict *getBoxColorInfo()
-    { return boxColorInfo.isDict() ? boxColorInfo.getDict() : (Dict *)NULL; }
+    { return boxColorInfo.isDict() ? boxColorInfo.getDict() : nullptr; }
   Dict *getGroup()
-    { return group.isDict() ? group.getDict() : (Dict *)NULL; }
+    { return group.isDict() ? group.getDict() : nullptr; }
   Stream *getMetadata()
-    { return metadata.isStream() ? metadata.getStream() : (Stream *)NULL; }
+    { return metadata.isStream() ? metadata.getStream() : nullptr; }
   Dict *getPieceInfo()
-    { return pieceInfo.isDict() ? pieceInfo.getDict() : (Dict *)NULL; }
+    { return pieceInfo.isDict() ? pieceInfo.getDict() : nullptr; }
   Dict *getSeparationInfo()
     { return separationInfo.isDict()
-	? separationInfo.getDict() : (Dict *)NULL; }
+	? separationInfo.getDict() : nullptr; }
   Dict *getResourceDict()
-    { return resources.isDict() ? resources.getDict() : (Dict *)NULL; }
+    { return resources.isDict() ? resources.getDict() : nullptr; }
   Object *getResourceDictObject()
     { return &resources; }
   void replaceResource(Object &&obj1)
@@ -197,7 +197,7 @@ public:
   Links *getLinks();
 
   // Return a list of annots. It will be valid until the page is destroyed
-  Annots *getAnnots(XRef *xrefA = NULL);
+  Annots *getAnnots(XRef *xrefA = nullptr);
 
   // Get contents.
   Object getContents() { return contents.fetch(xref); }
@@ -232,16 +232,16 @@ public:
 		 int sliceX, int sliceY, int sliceW, int sliceH,
 		 GBool printing,
 		 GBool (*abortCheckCbk)(void *data),
-		 void *abortCheckCbkData, XRef *xrefA = NULL);
+		 void *abortCheckCbkData, XRef *xrefA = nullptr);
 
   // Display a page.
   void display(OutputDev *out, double hDPI, double vDPI,
 	       int rotate, GBool useMediaBox, GBool crop,
 	       GBool printing,
-	       GBool (*abortCheckCbk)(void *data) = NULL,
-	       void *abortCheckCbkData = NULL,
-               GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
-               void *annotDisplayDecideCbkData = NULL,
+	       GBool (*abortCheckCbk)(void *data) = nullptr,
+	       void *abortCheckCbkData = nullptr,
+               GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+               void *annotDisplayDecideCbkData = nullptr,
                GBool copyXRef = gFalse);
 
   // Display part of a page.
@@ -249,10 +249,10 @@ public:
 		    int rotate, GBool useMediaBox, GBool crop,
 		    int sliceX, int sliceY, int sliceW, int sliceH,
 		    GBool printing,
-		    GBool (*abortCheckCbk)(void *data) = NULL,
-		    void *abortCheckCbkData = NULL,
-                    GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = NULL,
-                    void *annotDisplayDecideCbkData = NULL,
+		    GBool (*abortCheckCbk)(void *data) = nullptr,
+		    void *abortCheckCbkData = nullptr,
+                    GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+                    void *annotDisplayDecideCbkData = nullptr,
                     GBool copyXRef = gFalse);
 
   void display(Gfx *gfx);

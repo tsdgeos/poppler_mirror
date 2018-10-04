@@ -36,7 +36,7 @@ public:
   const GooString *checksum() const { return m_checksum; }
   const GooString *mimeType() const { return m_mimetype; }
   Object *streamObject() { return &m_objStr; }
-  Stream *stream() { return isOk() ? m_objStr.getStream() : NULL; }
+  Stream *stream() { return isOk() ? m_objStr.getStream() : nullptr; }
   GBool isOk() const { return m_objStr.isStream(); }
   GBool save(const char *path);
 

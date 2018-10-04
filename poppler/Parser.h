@@ -52,7 +52,7 @@ public:
   // true, do not parse compound objects (arrays, dictionaries, or
   // streams).
   Object getObj(GBool simpleOnly = gFalse,
-     Guchar *fileKey = NULL,
+     Guchar *fileKey = nullptr,
 		 CryptAlgorithm encAlgorithm = cryptRC4, int keyLength = 0,
 		 int objNum = 0, int objGen = 0, int recursion = 0,
 		 GBool strict = gFalse);
