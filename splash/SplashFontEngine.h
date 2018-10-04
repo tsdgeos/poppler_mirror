@@ -30,6 +30,8 @@
 #pragma interface
 #endif
 
+#include <array>
+
 #include "goo/gtypes.h"
 #include "SplashTypes.h"
 
@@ -41,10 +43,6 @@ class SplashFontFile;
 class SplashFontFileID;
 class SplashFont;
 class SplashFontSrc;
-
-//------------------------------------------------------------------------
-
-#define splashFontCacheSize 16
 
 //------------------------------------------------------------------------
 // SplashFontEngine
@@ -88,13 +86,13 @@ public:
   //    [x' y'] = [x y] * mat
   // Note that the Splash y axis points downward.
   SplashFont *getFont(SplashFontFile *fontFile,
-		      SplashCoord *textMat, SplashCoord *ctm);
+		      const SplashCoord *textMat, const SplashCoord *ctm);
   GBool getAA();
   void setAA(GBool aa);
 
 private:
 
-  SplashFont *fontCache[splashFontCacheSize];
+  std::array<SplashFont*,16> fontCache;
 
   SplashFTFontEngine *ftEngine;
 };

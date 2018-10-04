@@ -44,7 +44,7 @@ class SplashFTFont: public SplashFont {
 public:
 
   SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
-	       SplashCoord *textMatA);
+	       const SplashCoord *textMatA);
 
   virtual ~SplashFTFont();
 

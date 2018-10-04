@@ -60,7 +60,7 @@ public:
   // Create a new SplashFTFont, i.e., a scaled instance of this font
   // file.
   SplashFont *makeFont(SplashCoord *mat,
-		       SplashCoord *textMat) override;
+		       const SplashCoord *textMat) override;
 
   // Provide access to the code-to-GID map
   int* getCodeToGID();
