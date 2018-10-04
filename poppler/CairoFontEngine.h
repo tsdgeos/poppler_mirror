@@ -97,11 +97,10 @@ public:
   GBool matches(Ref &other, GBool printing) override;
 
 private:
-  CairoType3Font(Ref ref, PDFDoc *doc,
+  CairoType3Font(Ref ref,
 		 cairo_font_face_t *cairo_font_face,
 		 int *codeToGID, Guint codeToGIDLen,
 		 GBool printing, XRef *xref);
-  PDFDoc *doc;
 };
 
 //------------------------------------------------------------------------

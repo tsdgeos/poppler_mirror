@@ -767,11 +767,10 @@ CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, PDFDoc *doc,
     }
   }
 
-  return new CairoType3Font(ref, doc, font_face, codeToGID, codeToGIDLen, printing, xref);
+  return new CairoType3Font(ref, font_face, codeToGID, codeToGIDLen, printing, xref);
 }
 
 CairoType3Font::CairoType3Font(Ref refA,
-			       PDFDoc *docA,
 			       cairo_font_face_t *cairo_font_faceA,
 			       int *codeToGIDA,
 			       Guint codeToGIDLenA,
@@ -780,8 +779,8 @@ CairoType3Font::CairoType3Font(Ref refA,
 							   codeToGIDA,
 							   codeToGIDLenA,
 							   gFalse,
-							   printingA),
-						 doc(docA) { }
+							   printingA)
+{ }
 
 CairoType3Font::~CairoType3Font() { }
 
