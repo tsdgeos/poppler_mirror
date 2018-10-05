@@ -20,7 +20,8 @@
 //
 //========================================================================
 
-#pragma once
+#ifndef GOO_LIST_H
+#define GOO_LIST_H
 
 #include <algorithm>
 #include <vector>
@@ -35,7 +36,7 @@ struct GooList : public std::vector<void *> {
   GooList() = default;
 
   // Create an empty list with space for <size> elements.
-  explicit GooList(int size) : std::vector<void *>(size) {}
+  explicit GooList(int size) { reserve(size); }
 
   // Movable but not copyable
   GooList(GooList &&other) = default;
@@ -63,3 +64,5 @@ inline void deleteGooList(GooList* list) {
   }
   delete list;
 }
+
+#endif // GOO_LIST_H
