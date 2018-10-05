@@ -302,7 +302,7 @@ HtmlPage::~HtmlPage() {
   delete fonts;
   delete links;
   delete imgExt;
-  deleteGooList(imgList, HtmlImage);
+  deleteGooList<HtmlImage>(imgList);
 }
 
 void HtmlPage::updateFont(GfxState *state) {
@@ -757,10 +757,9 @@ void HtmlPage::dumpAsXML(FILE* f,int page){
     fprintf(f,"\t%s\n",fontCSStyle->getCString());
     delete fontCSStyle;
   }
-  
-  int listlen=imgList->getLength();
-  for (int i = 0; i < listlen; i++) {
-    HtmlImage *img = (HtmlImage*)imgList->del(0);
+
+  for (auto ptr : *imgList) {
+    auto img = static_cast<HtmlImage *>(ptr);
     if (!noRoundedCoordinates) {
       fprintf(f, "<image top=\"%d\" left=\"%d\" ", xoutRound(img->yMin), xoutRound(img->xMin));
       fprintf(f, "width=\"%d\" height=\"%d\" ", xoutRound(img->xMax - img->xMin), xoutRound(img->yMax - img->yMin));
@@ -772,6 +771,7 @@ void HtmlPage::dumpAsXML(FILE* f,int page){
     fprintf(f,"src=\"%s\"/>\n",img->fName->getCString());
     delete img;
   }
+  imgList->clear();
 
   for(HtmlString *tmp=yxStrings;tmp;tmp=tmp->yxNext){
     if (tmp->htext){
@@ -952,9 +952,8 @@ void HtmlPage::dump(FILE *f, int pageNum)
   {
     fprintf(f,"<a name=%d></a>",pageNum);
     // Loop over the list of image names on this page
-    int listlen=imgList->getLength();
-    for (int i = 0; i < listlen; i++) {
-      HtmlImage *img = (HtmlImage*)imgList->del(0);
+    for (auto ptr : *imgList) {
+      auto img = static_cast<HtmlImage *>(ptr);
 
       // see printCSS() for class names
       const char *styles[4] = { "", " class=\"xflip\"", " class=\"yflip\"", " class=\"xyflip\"" };
@@ -965,6 +964,7 @@ void HtmlPage::dump(FILE *f, int pageNum)
       fprintf(f,"<img%s src=\"%s\"/><br/>\n",styles[style_index],img->fName->getCString());
       delete img;
     }
+    imgList->clear();
 
     GooString* str;
     for(HtmlString *tmp=yxStrings;tmp;tmp=tmp->yxNext){
@@ -1019,7 +1019,7 @@ void HtmlPage::setDocName(const char *fname){
 
 void HtmlPage::addImage(GooString *fname, GfxState *state) {
   HtmlImage *img = new HtmlImage(fname, state);
-  imgList->append(img);
+  imgList->push_back(img);
 }
 
 //------------------------------------------------------------------------
@@ -1129,11 +1129,11 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
   pages = new HtmlPage(rawOrder, extension);
   
   glMetaVars = new GooList();
-  glMetaVars->append(new HtmlMetaVar("generator", "pdftohtml 0.36"));  
-  if( author ) glMetaVars->append(new HtmlMetaVar("author", author));  
-  if( keywords ) glMetaVars->append(new HtmlMetaVar("keywords", keywords));  
-  if( date ) glMetaVars->append(new HtmlMetaVar("date", date));  
-  if( subject ) glMetaVars->append(new HtmlMetaVar("subject", subject));
+  glMetaVars->push_back(new HtmlMetaVar("generator", "pdftohtml 0.36"));
+  if( author ) glMetaVars->push_back(new HtmlMetaVar("author", author));
+  if( keywords ) glMetaVars->push_back(new HtmlMetaVar("keywords", keywords));
+  if( date ) glMetaVars->push_back(new HtmlMetaVar("date", date));
+  if( subject ) glMetaVars->push_back(new HtmlMetaVar("subject", subject));
  
   maxPageWidth = 0;
   maxPageHeight = 0;
@@ -1230,7 +1230,7 @@ HtmlOutputDev::~HtmlOutputDev() {
     delete Docname;
     delete docTitle;
 
-    deleteGooList(glMetaVars, HtmlMetaVar);
+    deleteGooList<HtmlMetaVar>(glMetaVars);
 
     if (fContentsFrame){
       fputs("</body>\n</html>\n",fContentsFrame);  

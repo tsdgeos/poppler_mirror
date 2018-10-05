@@ -438,14 +438,15 @@ void OCDisplayNode::addChild(OCDisplayNode *child) {
   if (!children) {
     children = new GooList();
   }
-  children->append(child);
+  children->push_back(child);
 }
 
 void OCDisplayNode::addChildren(GooList *childrenA) {
   if (!children) {
     children = new GooList();
   }
-  children->append(childrenA);
+  children->reserve(children->size() + childrenA->size());
+  children->insert(children->end(), childrenA->begin(), childrenA->end());
   delete childrenA;
 }
 
@@ -460,7 +461,7 @@ GooList *OCDisplayNode::takeChildren() {
 OCDisplayNode::~OCDisplayNode() {
   gfree(name);
   if (children) {
-    deleteGooList(children, OCDisplayNode);
+    deleteGooList<OCDisplayNode>(children);
   }
 }
 

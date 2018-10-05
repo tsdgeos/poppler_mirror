@@ -20,101 +20,46 @@
 //
 //========================================================================
 
-#ifndef GLIST_H
-#define GLIST_H
+#pragma once
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
-#include "gtypes.h"
+#include <algorithm>
+#include <vector>
 
 //------------------------------------------------------------------------
 // GooList
 //------------------------------------------------------------------------
 
-class GooList {
-public:
+struct GooList : public std::vector<void *> {
 
   // Create an empty list.
-  GooList();
+  GooList() = default;
 
-  // Create an empty list with space for <size1> elements.
-  GooList(int sizeA);
+  // Create an empty list with space for <size> elements.
+  explicit GooList(int size) : std::vector<void *>(size) {}
 
-  // Destructor - does not free pointed-to objects.
-  ~GooList();
+  // Movable but not copyable
+  GooList(GooList &&other) = default;
+  GooList& operator=(GooList &&other) = default;
 
-  //----- general
+  GooList(const GooList &other) = delete;
+  GooList& operator=(const GooList &other) = delete;
+
+  // Zero cost conversion from std::vector
+  explicit GooList(const std::vector<void *>& vec) : std::vector<void *>(vec) {}
+  explicit GooList(std::vector<void *>&& vec) : std::vector<void *>(std::move(vec)) {}
 
   // Get the number of elements.
-  int getLength() const { return length; }
-
-  // Returns a (shallow) copy of this list.
-  GooList *copy() const;
-
-  //----- ordered list support
+  int getLength() const { return size(); }
 
   // Return the <i>th element.
   // Assumes 0 <= i < length.
-  void *get(int i) const { return data[i]; }
-
-  // Replace the <i>th element.
-  // Assumes 0 <= i < length.
-  void put(int i, void *p) { data[i] = p; }
-
-  // Append an element to the end of the list.
-  void append(void *p);
-
-  // Append another list to the end of this one.
-  void append(GooList *list);
-
-  // Insert an element at index <i>.
-  // Assumes 0 <= i <= length.
-  void insert(int i, void *p);
-
-  // Deletes and returns the element at index <i>.
-  // Assumes 0 <= i < length.
-  void *del(int i);
-
-  // Sort the list accoring to the given comparison function.
-  // NB: this sorts an array of pointers, so the pointer args need to
-  // be double-dereferenced.
-  void sort(int (*cmp)(const void *ptr1, const void *ptr2));
-
-  // Reverse the list.
-  void reverse();
-
-  //----- control
-
-  // Set allocation increment to <inc>.  If inc > 0, that many
-  // elements will be allocated every time the list is expanded.
-  // If inc <= 0, the list will be doubled in size.
-  void setAllocIncr(int incA) { inc = incA; }
-
-private:
-  GooList(const GooList &other);
-  GooList& operator=(const GooList &other);
-
-  void expand();
-  void shrink();
-
-  void **data;			// the list elements
-  int size;			// size of data array
-  int length;			// number of elements on list
-  int inc;			// allocation increment
+  void *get(int i) const { return (*this)[i]; }
 };
 
-#define deleteGooList(list, T)                        \
-  do {                                              \
-    GooList *_list = (list);                          \
-    {                                               \
-      int _i;                                       \
-      for (_i = 0; _i < _list->getLength(); ++_i) { \
-        delete (T*)_list->get(_i);                  \
-      }                                             \
-      delete _list;                                 \
-    }                                               \
-  } while (0)
-
-#endif
+template<typename T>
+inline void deleteGooList(GooList* list) {
+  for (auto ptr : *list) {
+    delete static_cast<T *>(ptr);
+  }
+  delete list;
+}

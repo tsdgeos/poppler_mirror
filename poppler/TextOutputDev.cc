@@ -2272,7 +2272,7 @@ TextWordList::TextWordList(TextPage *text, GBool physLayout) {
 
   if (text->rawOrder) {
     for (word = text->rawWords; word; word = word->next) {
-      words->append(word);
+      words->push_back(word);
     }
 
   } else if (physLayout) {
@@ -2301,7 +2301,7 @@ TextWordList::TextWordList(TextPage *text, GBool physLayout) {
     }
     qsort(wordArray, nWords, sizeof(TextWord *), &TextWord::cmpYX);
     for (i = 0; i < nWords; ++i) {
-      words->append(wordArray[i]);
+      words->push_back(wordArray[i]);
     }
     gfree(wordArray);
 
@@ -2310,7 +2310,7 @@ TextWordList::TextWordList(TextPage *text, GBool physLayout) {
       for (blk = flow->blocks; blk; blk = blk->next) {
 	for (line = blk->lines; line; line = line->next) {
 	  for (word = line->words; word; word = word->next) {
-	    words->append(word);
+	    words->push_back(word);
 	  }
 	}
       }
@@ -2378,8 +2378,8 @@ TextPage::~TextPage() {
     }
   }
   delete fonts;
-  deleteGooList(underlines, TextUnderline);
-  deleteGooList(links, TextLink);
+  deleteGooList<TextUnderline>(underlines);
+  deleteGooList<TextLink>(links);
 }
 
 void TextPage::incRefCnt() {
@@ -2433,9 +2433,9 @@ void TextPage::clear() {
     }
     gfree(blocks);
   }
-  deleteGooList(fonts, TextFontInfo);
-  deleteGooList(underlines, TextUnderline);
-  deleteGooList(links, TextLink);
+  deleteGooList<TextFontInfo>(fonts);
+  deleteGooList<TextUnderline>(underlines);
+  deleteGooList<TextLink>(links);
 
   curWord = nullptr;
   charPos = 0;
@@ -2476,7 +2476,7 @@ void TextPage::updateFont(GfxState *state) {
   }
   if (!curFont) {
     curFont = new TextFontInfo(state);
-    fonts->append(curFont);
+    fonts->push_back(curFont);
   }
 
   // adjust the font size
@@ -2753,11 +2753,11 @@ void TextPage::addWord(TextWord *word) {
 }
 
 void TextPage::addUnderline(double x0, double y0, double x1, double y1) {
-  underlines->append(new TextUnderline(x0, y0, x1, y1));
+  underlines->push_back(new TextUnderline(x0, y0, x1, y1));
 }
 
 void TextPage::addLink(int xMin, int yMin, int xMax, int yMax, AnnotLink *link) {
-  links->append(new TextLink(xMin, yMin, xMax, yMax, link));
+  links->push_back(new TextLink(xMin, yMin, xMax, yMax, link));
 }
 
 void TextPage::coalesce(GBool physLayout, double fixedPitch, GBool doHTML) {
@@ -4381,7 +4381,7 @@ TextSelectionDumper::TextSelectionDumper(TextPage *page)
 TextSelectionDumper::~TextSelectionDumper()
 {
   for (int i = 0; i < nLines; i++)
-    deleteGooList(lines[i], TextWordSelection);
+    deleteGooList<TextWordSelection>(lines[i]);
   gfree(lines);
 }
 
@@ -4445,7 +4445,7 @@ void TextSelectionDumper::visitLine (TextLine *line,
 void TextSelectionDumper::visitWord (TextWord *word, int begin, int end,
                                      PDFRectangle *selection)
 {
-  words->append(new TextWordSelection(word, begin, end));
+  words->push_back(new TextWordSelection(word, begin, end));
 }
 
 void TextSelectionDumper::endPage()
@@ -4553,7 +4553,7 @@ void TextSelectionSizer::visitLine (TextLine *line,
 			   floor (y1 * scale),
 			   ceil (x2 * scale),
 			   ceil (y2 * scale));
-  list->append (rect);
+  list->push_back (rect);
 }
 
 
@@ -4617,7 +4617,7 @@ TextSelectionPainter::TextSelectionPainter(TextPage *page,
 
 TextSelectionPainter::~TextSelectionPainter()
 {
-  deleteGooList(selectionList, TextWordSelection);
+  deleteGooList<TextWordSelection>(selectionList);
   delete state;
 }
 
@@ -4657,7 +4657,7 @@ void TextSelectionPainter::visitLine (TextLine *line,
 void TextSelectionPainter::visitWord (TextWord *word, int begin, int end,
 				      PDFRectangle *selection)
 {
-  selectionList->append(new TextWordSelection(word, begin, end));
+  selectionList->push_back(new TextWordSelection(word, begin, end));
 }
 
 void TextSelectionPainter::endPage()

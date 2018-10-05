@@ -53,7 +53,7 @@ Outline::Outline(const Object *outlineObj, XRef *xref) {
 
 Outline::~Outline() {
   if (items) {
-    deleteGooList(items, OutlineItem);
+    deleteGooList<OutlineItem>(items);
   }
 }
 
@@ -134,7 +134,7 @@ GooList *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemR
     }
     alreadyRead[p->getRefNum()] = 1;
     OutlineItem *item = new OutlineItem(obj.getDict(), p->getRefNum(), parent, xrefA);
-    items->append(item);
+    items->push_back(item);
     p = &item->nextRef;
   }
 
@@ -156,7 +156,7 @@ void OutlineItem::open() {
 
 void OutlineItem::close() {
   if (kids) {
-    deleteGooList(kids, OutlineItem);
+    deleteGooList<OutlineItem>(kids);
     kids = nullptr;
   }
 }
