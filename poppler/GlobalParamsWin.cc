@@ -281,7 +281,7 @@ void SysFontList::scanWindowsFonts(GooString *winFontDir) {
 	    } else {
 	      p1 = p0 + strlen(p0);
 	    }
-	    fonts->append(makeWindowsFont(p0, fontNum,
+	    fonts->push_back(makeWindowsFont(p0, fontNum,
 					  fontPath->getCString()));
 	    p0 = p1;
 	    ++fontNum;
