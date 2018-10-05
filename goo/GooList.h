@@ -35,9 +35,6 @@ struct GooList : public std::vector<void *> {
   // Create an empty list.
   GooList() = default;
 
-  // Create an empty list with space for <size> elements.
-  explicit GooList(int size) { reserve(size); }
-
   // Movable but not copyable
   GooList(GooList &&other) = default;
   GooList& operator=(GooList &&other) = default;

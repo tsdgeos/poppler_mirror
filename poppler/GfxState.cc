@@ -2977,7 +2977,8 @@ GfxColorSpace *GfxDeviceNColorSpace::copy() {
   int i;
   int *mappingA = nullptr;
 
-  GooList *sepsCSA = new GooList(sepsCS->getLength());
+  GooList *sepsCSA = new GooList();
+  sepsCSA->reserve(sepsCS->getLength());
   for (i = 0; i < sepsCS->getLength(); i++) {
     GfxSeparationColorSpace *scs = (GfxSeparationColorSpace *) sepsCS->get(i);
     if (likely(scs != nullptr)) {
