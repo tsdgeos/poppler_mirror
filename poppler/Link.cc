@@ -175,12 +175,14 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
         }
     }
 
-    actionList = new GooList(1);
+    actionList = new GooList();
+    actionList->reserve(1);
     actionList->push_back(parseAction(&nextObj, nullptr, seenNextActions));
   } else if (nextObj.isArray()) {
     const Array *a = nextObj.getArray();
     const int n = a->getLength();
-    actionList = new GooList(n);
+    actionList = new GooList();
+    actionList->reserve(n);
     for (int i = 0; i < n; ++i) {
       const Object obj3 = a->get(i);
       if (!obj3.isDict()) {
