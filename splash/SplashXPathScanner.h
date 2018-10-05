@@ -28,9 +28,16 @@
 
 #include "SplashTypes.h"
 
+#include <vector>
+
 class SplashXPath;
 class SplashBitmap;
-struct SplashIntersect;
+
+struct SplashIntersect {
+  int y;
+  int x0, x1;			// intersection of segment with [y, y+1)
+  int count;			// EO/NZWN counter increment
+};
 
 //------------------------------------------------------------------------
 // SplashXPathScanner
@@ -69,13 +76,6 @@ public:
   // path.
   GBool testSpan(int x0, int x1, int y);
 
-  // Returns the next span inside the path at <y>.  If <y> is
-  // different than the previous call to getNextSpan, this returns the
-  // first span at <y>; otherwise it returns the next span (relative
-  // to the previous call to getNextSpan).  Returns false if there are
-  // no more spans at <y>.
-  GBool getNextSpan(int y, int *x0, int *x1);
-
   // Renders one anti-aliased line into <aaBuf>.  Returns the min and
   // max x coordinates with non-zero pixels in <x0> and <x1>.
   void renderAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y,
@@ -98,15 +98,27 @@ private:
   int xMin, yMin, xMax, yMax;
   GBool partialClip;
 
-  SplashIntersect *allInter;	// array of intersections
-  int allInterLen;		// number of intersections in <allInter>
-  int allInterSize;		// size of the <allInter> array
-  int *inter;			// indexes into <allInter> for each y value
-  int interY;			// current y value - used by getNextSpan
-  int interIdx;			// current index into <inter> - used by
-				//   getNextSpan 
-  int interCount;		// current EO/NZWN counter - used by
-				//   getNextSpan
+  typedef std::vector<SplashIntersect> IntersectionLine;
+  std::vector<IntersectionLine> allIntersections;
+
+  friend class SplashXPathScanIterator;
+};
+
+class SplashXPathScanIterator {
+public:
+  SplashXPathScanIterator(const SplashXPathScanner &scanner, int y);
+
+  // Returns the next span inside the path at the current y position
+  // Returns false if there are no more spans.
+  GBool getNextSpan(int *x0, int *x1);
+
+private:
+  typedef std::vector<SplashIntersect> IntersectionLine;
+  const IntersectionLine &line;
+
+  size_t interIdx;	// current index into <line>
+  int interCount;	// current EO/NZWN counter
+  const GBool eo;
 };
 
 #endif

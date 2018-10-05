@@ -30,7 +30,8 @@
 // GooList
 //------------------------------------------------------------------------
 
-struct GooList : public std::vector<void *> {
+class GooList : public std::vector<void *> {
+public:
 
   // Create an empty list.
   GooList() = default;

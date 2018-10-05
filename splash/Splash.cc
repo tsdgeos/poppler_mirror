@@ -2607,7 +2607,8 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
       }
     } else {
       for (y = yMinI; y <= yMaxI; ++y) {
-	while (scanner->getNextSpan(y, &x0, &x1)) {
+	SplashXPathScanIterator iterator(*scanner, y);
+	while (iterator.getNextSpan(&x0, &x1)) {
 	  if (clipRes == splashClipAllInside) {
 	    drawSpan(&pipe, x0, x1, y, gTrue);
 	  } else {
@@ -2729,7 +2730,8 @@ SplashError Splash::xorFill(SplashPath *path, GBool eo) {
 
     // draw the spans
     for (y = yMinI; y <= yMaxI; ++y) {
-      while (scanner->getNextSpan(y, &x0, &x1)) {
+      SplashXPathScanIterator iterator(*scanner, y);
+      while (iterator.getNextSpan(&x0, &x1)) {
 	if (clipRes == splashClipAllInside) {
 	  drawSpan(&pipe, x0, x1, y, gTrue);
 	} else {
@@ -6491,7 +6493,8 @@ SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
     } else {
       SplashClipResult clipRes2;
       for (y = yMinI; y <= yMaxI; ++y) {
-        while (scanner->getNextSpan(y, &x0, &x1)) {
+        SplashXPathScanIterator iterator(*scanner, y);
+        while (iterator.getNextSpan(&x0, &x1)) {
           if (clipRes == splashClipAllInside) {
             drawSpan(&pipe, x0, x1, y, gTrue);
           } else {
