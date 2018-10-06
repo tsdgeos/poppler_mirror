@@ -57,3 +57,19 @@ build_gcc_49:
     - mkdir -p build && cd build
     - cmake -G Ninja ..
     - ninja
+
+build_mingw64_fedora:
+  stage: build
+  image: fedora
+  before_script:
+    - yum -y install yum-utils
+    - yum-builddep -y mingw64-poppler
+    - yum -y install mingw64-curl make ninja-build mingw64-openjpeg2-tools mingw32-openjpeg2-tools
+    - mv /usr/x86_64-w64-mingw32/sys-root/mingw/bin/opj2_decompress.exe /usr/x86_64-w64-mingw32/sys-root/mingw/bin/opj_decompress.exe
+    - mv /usr/x86_64-w64-mingw32/sys-root/mingw/bin/opj2_compress.exe /usr/x86_64-w64-mingw32/sys-root/mingw/bin/opj_compress.exe
+    - mv /usr/x86_64-w64-mingw32/sys-root/mingw/bin/opj2_dump.exe /usr/x86_64-w64-mingw32/sys-root/mingw/bin/opj_dump.exe
+  script:
+    - sed -i '/SYSTEM/d' glib/CMakeLists.txt
+    - mkdir -p build && cd build
+    - mingw64-cmake -G Ninja ..
+    - ninja
