@@ -90,7 +90,6 @@ public:
    static GooString* HtmlFilter(const Unicode* u, int uLen); //char* s);
    GBool isEqual(const HtmlFont& x) const;
    GBool isEqualIgnoreBold(const HtmlFont& x) const;
-   static GooString* simple(HtmlFont *font, Unicode *content, int uLen);
    void print() const {printf("font: %s (%s) %d %s%s\n", FontName->getCString(), familyName.c_str(), size, bold ? "bold " : "", italic ? "italic " : "");};
 };
 

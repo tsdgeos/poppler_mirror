@@ -249,21 +249,6 @@ GooString* HtmlFont::HtmlFilter(const Unicode* u, int uLen) {
   return tmp;
 }
 
-GooString* HtmlFont::simple(HtmlFont* font, Unicode* content, int uLen){
-  GooString *cont=HtmlFilter (content, uLen); 
-
-  /*if (font.isBold()) {
-    cont->insert(0,"<b>",3);
-    cont->append("</b>",4);
-  }
-  if (font.isItalic()) {
-    cont->insert(0,"<i>",3);
-    cont->append("</i>",4);
-    } */
-
-  return cont;
-}
-
 HtmlFontAccu::HtmlFontAccu(){
   accu=new std::vector<HtmlFont>();
 }
