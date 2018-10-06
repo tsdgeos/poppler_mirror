@@ -33,9 +33,9 @@
 #ifndef GooString_H
 #define GooString_H
 
-#include <stdarg.h>
-#include <stdlib.h> // for NULL
+#include <cstdarg>
 #include <string>
+
 #include "gtypes.h"
 
 #ifdef __clang__
@@ -44,37 +44,52 @@
 # define GOOSTRING_FORMAT
 #endif
 
-class GooString {
+class GooString : private std::string {
 public:
 
-  // a special value telling that the length of the string is not given
-  // so it must be calculated from the strings
-  static const int CALC_STRING_LEN = -1;
-
   // Create an empty string.
-  GooString();
+  GooString() = default;
+
+  // Destructor.
+  ~GooString() = default;
+
+  GooString(GooString &&other) = default;
+  GooString& operator=(GooString &&other) = default;
+
+  GooString(const GooString &other) = delete;
+  GooString& operator=(const GooString &other) = delete;
 
   // Create a string from a C string.
-  explicit GooString(const char *sA);
+  explicit GooString(const char *sA) : std::string(sA) {}
+
+  // Zero-cost conversion from and to std::string
+  explicit GooString(const std::string& str) : std::string(str) {}
+  explicit GooString(std::string&& str) : std::string(std::move(str)) {}
+
+  const std::string& toStr() const { return *this; }
 
   // Create a string from <lengthA> chars at <sA>.  This string
   // can contain null characters.
-  GooString(const char *sA, int lengthA);
+  GooString(const char *sA, int lengthA) : std::string(sA, lengthA) {}
 
   // Create a string from <lengthA> chars at <idx> in <str>.
-  GooString(const GooString *str, int idx, int lengthA);
+  GooString(const GooString *str, int idx, int lengthA) : std::string(*str, idx, lengthA) {}
 
-  // Set content of a string to <newStr>. If <newLen> is CALC_STRING_LEN, then
-  // length of the string will be calculated with strlen(). Otherwise we assume
-  // this is a valid length of <newStr> (or its substring)
-  GooString* Set(const char *newStr, int newLen=CALC_STRING_LEN);
+  // Set content of a string to <newStr>.
+  GooString* Set(const GooString *newStr) { assign(*newStr); return this; }
+  GooString* Set(const char *newStr) { assign(newStr); return this; }
+  GooString* Set(const char *newStr, int newLen) { assign(newStr, newLen); return this; }
 
   // Copy a string.
-  explicit GooString(const GooString *str);
+  explicit GooString(const GooString *str) : std::string(*str) {}
   GooString *copy() const { return new GooString(this); }
 
   // Concatenate two strings.
-  GooString(GooString *str1, GooString *str2);
+  GooString(const GooString *str1, const GooString *str2) {
+    reserve(str1->size() + str2->size());
+    static_cast<std::string&>(*this).append(*str1);
+    static_cast<std::string&>(*this).append(*str2);
+  }
 
   // Convert an integer to a string.
   static GooString *fromInt(int x);
@@ -109,95 +124,65 @@ public:
   static GooString *format(const char *fmt, ...) GOOSTRING_FORMAT;
   static GooString *formatv(const char *fmt, va_list argList);
 
-  // Destructor.
-  ~GooString();
-
   // Get length.
-  int getLength() const { return length; }
+  int getLength() const { return size(); }
 
   // Get C string.
-  const char *getCString() const { return s; }
+  const char *getCString() const { return c_str(); }
 
   // Get <i>th character.
-  char getChar(int i) const { return s[i]; }
+  char getChar(int i) const { return (*this)[i]; }
 
   // Change <i>th character.
-  void setChar(int i, char c) { s[i] = c; }
+  void setChar(int i, char c) { (*this)[i] = c; }
 
   // Clear string to zero length.
-  GooString *clear();
+  GooString *clear() { static_cast<std::string&>(*this).clear(); return this; }
 
   // Append a character or string.
-  GooString *append(char c);
-  GooString *append(const GooString *str);
-  GooString *append(const char *str, int lengthA=CALC_STRING_LEN);
+  GooString *append(char c) { push_back(c); return this; }
+  GooString *append(const GooString *str) { static_cast<std::string&>(*this).append(*str); return this; }
+  GooString *append(const char *str) { static_cast<std::string&>(*this).append(str); return this; }
+  GooString *append(const char *str, int lengthA) { static_cast<std::string&>(*this).append(str, lengthA); return this; }
 
   // Append a formatted string.
   GooString *appendf(const char *fmt, ...) GOOSTRING_FORMAT;
   GooString *appendfv(const char *fmt, va_list argList);
 
   // Insert a character or string.
-  GooString *insert(int i, char c);
-  GooString *insert(int i, const GooString *str);
-  GooString *insert(int i, const char *str, int lengthA=CALC_STRING_LEN);
+  GooString *insert(int i, char c) { static_cast<std::string&>(*this).insert(i, 1, c); return this; }
+  GooString *insert(int i, const GooString *str) { static_cast<std::string&>(*this).insert(i, *str); return this; }
+  GooString *insert(int i, const char *str) { static_cast<std::string&>(*this).insert(i, str); return this; }
+  GooString *insert(int i, const char *str, int lengthA) { static_cast<std::string&>(*this).insert(i, str, lengthA); return this; }
 
   // Delete a character or range of characters.
-  GooString *del(int i, int n = 1);
+  GooString *del(int i, int n = 1) { erase(i, n); return this; }
 
   // Convert string to all-upper/all-lower case.
   GooString *upperCase();
   GooString *lowerCase();
 
   // Compare two strings:  -1:<  0:=  +1:>
-  int cmp(const GooString *str) const;
-  int cmpN(GooString *str, int n) const;
-  int cmp(const char *sA) const;
-  int cmpN(const char *sA, int n) const;
+  int cmp(const GooString *str) const { return compare(*str); }
+  int cmpN(GooString *str, int n) const { return compare(0, n, *str); }
+  int cmp(const char *sA) const { return compare(sA); }
+  int cmpN(const char *sA, int n) const { return compare(0, n, sA); }
 
+  // Return true if strings starts with prefix
+  bool startsWith(const char *prefix) const;
   // Return true if string ends with suffix
   bool endsWith(const char *suffix) const;
 
-  bool hasUnicodeMarker(void) const;
+  bool hasUnicodeMarker() const { return size() >= 2 && (*this)[0] == char(0xfe) && (*this)[1] == char(0xff); }
+  bool hasJustUnicodeMarker() const { return size() == 2 && hasUnicodeMarker(); }
+
   void prependUnicodeMarker();
-  bool hasJustUnicodeMarker(void) const { return length == 2 && hasUnicodeMarker(); }
 
   // Sanitizes the string so that it does
   // not contain any ( ) < > [ ] { } / %
   // The postscript mode also has some more strict checks
   // The caller owns the return value
   GooString *sanitizedName(bool psmode) const;
-
-  // Conversion from and to std::string
-  explicit GooString(const std::string& str) : GooString(str.data(), str.size()) {}
-  std::string toStr() const { return std::string(getCString(), getLength()); }
-
-private:
-  GooString(const GooString &other);
-  GooString& operator=(const GooString &other);
-
-  // You can tweak the final object size for different time/space tradeoffs.
-  // In libc malloc(), rounding is 16 so it's best to choose a value that
-  // is a multiple of 16.
-  static const int STR_FINAL_SIZE = 32;
-  static const int STR_STATIC_SIZE = STR_FINAL_SIZE - sizeof(int) - sizeof(char*);
-
-  int  roundedSize(int len);
-
-  char sStatic[STR_STATIC_SIZE];
-  int length;
-  char *s;
-
-  void resize(int newLength);
-  static void formatInt(long long x, char *buf, int bufSize,
-			bool zeroFill, int width, int base,
-			const char **p, int *len, bool upperCase = false);
-  static void formatUInt(unsigned long long x, char *buf, int bufSize,
-			 bool zeroFill, int width, int base,
-			 const char **p, int *len, bool upperCase = false);
-  static void formatDouble(double x, char *buf, int bufSize, int prec,
-			   bool trim, const char **p, int *len);
-  static void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec,
-				     bool trim, const char **p, int *len);
 };
 
 #endif

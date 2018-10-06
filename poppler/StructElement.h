@@ -72,7 +72,7 @@ public:
   Attribute(Type type, Object *value);
 
   // Creates an UserProperty attribute, with an arbitrary name and value.
-  Attribute(const char *name, int nameLen, Object *value);
+  Attribute(GooString &&name, Object *value);
 
   bool isOk() const { return type != Unknown; }
 
