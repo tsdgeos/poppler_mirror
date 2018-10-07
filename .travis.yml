@@ -1,16 +1,5 @@
 language: cpp
 
-before_install:
-  - eval "${NAME}"
-  - sudo add-apt-repository ppa:ricotz/testing -y
-  - sudo add-apt-repository ppa:aacid/openjp2trusty -y
-  - sudo apt-get -qq update
-  - sudo apt-get install -y libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 20
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 20
-  - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.9 20
-  - git clone git://git.freedesktop.org/git/poppler/test test-files
-
 addons:
   apt:
     sources:
@@ -23,11 +12,30 @@ matrix:
   include:
     - dist: trusty
       compiler: clang
-      env:
-        - NAME="clang"
+      before_install:
+        - sudo add-apt-repository ppa:ricotz/testing -y
+        - sudo add-apt-repository ppa:aacid/openjp2trusty -y
+        - sudo apt-get -qq update
+        - sudo apt-get install -y libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev
     - dist: trusty
       compiler: gcc
-      env:
-        - NAME="gcc"
+      before_install:
+        - sudo add-apt-repository ppa:ricotz/testing -y
+        - sudo add-apt-repository ppa:aacid/openjp2trusty -y
+        - sudo apt-get -qq update
+        - sudo apt-get install -y libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev
+        - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 20
+        - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 20
+        - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.9 20
+    - os: osx
+      osx_image: xcode9.3
+      before_install:
+        - brew unlink python
+        - brew install poppler --only-dependencies --build-from-source
+    - os: osx
+      osx_image: xcode8.3
+      before_install:
+        - brew unlink python
+        - brew install poppler --only-dependencies --build-from-source
 
 script: cmake . -DFONT_CONFIGURATION=generic -DTESTDATADIR=`pwd`/test-files && make -j2 && make test
