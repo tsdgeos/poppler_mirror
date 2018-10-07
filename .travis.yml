@@ -1,5 +1,7 @@
+language: cpp
+
 before_install:
-  - eval "${MATRIX_EVAL}"
+  - eval "${NAME}"
   - sudo add-apt-repository ppa:ricotz/testing -y
   - sudo add-apt-repository ppa:aacid/openjp2trusty -y
   - sudo apt-get -qq update
@@ -17,10 +19,15 @@ addons:
       - gcc-4.9
       - g++-4.9
 
-language: cpp
-
-compiler:
- - clang
- - gcc
+matrix:
+  include:
+    - dist: trusty
+      compiler: clang
+      env:
+        - NAME="clang"
+    - dist: trusty
+      compiler: gcc
+      env:
+        - NAME="gcc"
 
 script: cmake . -DFONT_CONFIGURATION=generic -DTESTDATADIR=`pwd`/test-files && make -j2 && make test
