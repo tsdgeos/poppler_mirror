@@ -36,7 +36,6 @@ matrix:
       before_install:
         - brew unlink python
         - brew install poppler --only-dependencies --build-from-source
-        - brew install qt
       script: cmake . -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF && make
 
     - os: osx
@@ -44,5 +43,4 @@ matrix:
       before_install:
         - brew unlink python
         - brew install poppler --only-dependencies --build-from-source
-        - brew install qt
       script: cmake . -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF && make
