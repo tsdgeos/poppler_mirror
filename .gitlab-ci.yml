@@ -13,7 +13,7 @@ variables:
   LANGUAGE: en_US:en
   LC_ALL: en_US.UTF-8
   TEST_DATA_URL: https://gitlab.freedesktop.org/${CI_PROJECT_NAMESPACE}/test.git
-  UPSTREAM_TEST_DATA_URL: https://@gitlab.freedesktop.org/poppler/test.git
+  UPSTREAM_TEST_DATA_URL: https://gitlab.freedesktop.org/poppler/test.git
 
 cache:
   key: "$CI_BUILD_NAME"
