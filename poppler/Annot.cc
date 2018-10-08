@@ -1748,7 +1748,7 @@ void Annot::draw(Gfx *gfx, GBool printing) {
 
   // draw the appearance stream
   Object obj = appearance.fetch(gfx->getXRef());
-  gfx->drawAnnot(&obj, nullptr, color, color.get(),
+  gfx->drawAnnot(&obj, nullptr, color.get(),
       rect->x1, rect->y1, rect->x2, rect->y2, getRotation());
 }
 
@@ -2662,39 +2662,6 @@ static GfxFont * createAnnotDrawFont(XRef * xref, Dict *fontResDict, const char*
   fontResDict->add("Font", Object(fontsDict));
 
   return GfxFont::makeFont(xref, resourceName, dummyRef, fontDict);
-}
-
-void AnnotFreeText::parseAppearanceString(GooString *da, double &fontsize, std::unique_ptr<AnnotColor> &fontcolor) {
-  fontsize = -1;
-
-  if (da) {
-    GooList * daToks = new GooList();
-    int i = FormFieldText::tokenizeDA(da, daToks, "Tf");
-
-    if (i >= 1) {
-      fontsize = gatof(( (GooString *)daToks->get(i-1) )->getCString());
-      // TODO: Font name
-    }
-    // Scan backwards: we are looking for the last set value
-    for (i = daToks->getLength()-1; i >= 0; --i) {
-      if (!fontcolor) {
-        if (!((GooString *)daToks->get(i))->cmp("g") && i >= 1) {
-          fontcolor = std::make_unique<AnnotColor>(gatof(( (GooString *)daToks->get(i-1) )->getCString()));
-        } else if (!((GooString *)daToks->get(i))->cmp("rg") && i >= 3) {
-          fontcolor = std::make_unique<AnnotColor>(gatof(( (GooString *)daToks->get(i-3) )->getCString()),
-                                                   gatof(( (GooString *)daToks->get(i-2) )->getCString()),
-                                                   gatof(( (GooString *)daToks->get(i-1) )->getCString()));
-        } else if (!((GooString *)daToks->get(i))->cmp("k") && i >= 4) {
-          fontcolor = std::make_unique<AnnotColor>(gatof(( (GooString *)daToks->get(i-4) )->getCString()),
-                                                   gatof(( (GooString *)daToks->get(i-3) )->getCString()),
-                                                   gatof(( (GooString *)daToks->get(i-2) )->getCString()),
-                                                   gatof(( (GooString *)daToks->get(i-1) )->getCString()));
-        }
-      }
-    }
-    deleteGooList(daToks, GooString);
-  }
->>>>>>> annots: Use std::unique_ptr instead of new/delete
 }
 
 void AnnotFreeText::generateFreeTextAppearance()
@@ -4178,8 +4145,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
       }
 
       // write the text string
-      const char *s = convertedText->getCString();
-      int len = convertedText->getLength();
+      const char *s = convertedText.getCString();
+      int len = convertedText.getLength();
       i = 0;
       xPrev = w;                // so that first character is placed properly
       while (i < comb && len > 0) {
