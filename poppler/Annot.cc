@@ -281,6 +281,8 @@ AnnotBorderEffect::AnnotBorderEffect(Dict *dict) {
 // AnnotPath
 //------------------------------------------------------------------------
 
+AnnotPath::AnnotPath() = default;
+
 AnnotPath::AnnotPath(Array *array) {
   parsePathArray(array);
 }
@@ -288,6 +290,8 @@ AnnotPath::AnnotPath(Array *array) {
 AnnotPath::AnnotPath(std::vector<AnnotCoord> &&coords) {
   this->coords = std::move(coords);
 }
+
+AnnotPath::~AnnotPath() = default;
 
 double AnnotPath::getX(int coord) const {
   if (coord >= 0 && coord < getCoordsLength())
@@ -401,6 +405,8 @@ AnnotQuadrilaterals::AnnotQuadrilaterals(std::unique_ptr<AnnotQuadrilateral[]> &
   quadrilateralsLength = quadsLength;
 }
 
+AnnotQuadrilaterals::~AnnotQuadrilaterals() = default;
+
 double AnnotQuadrilaterals::getX1(int quadrilateral) {
   if (quadrilateral >= 0  && quadrilateral < quadrilateralsLength)
     return quadrilaterals[quadrilateral].coord1.getX();
@@ -448,6 +454,8 @@ double AnnotQuadrilaterals::getY4(int quadrilateral) {
     return quadrilaterals[quadrilateral].coord4.getY();
   return 0;
 }
+
+AnnotQuadrilaterals::AnnotQuadrilateral::AnnotQuadrilateral() = default;
 
 AnnotQuadrilaterals::AnnotQuadrilateral::AnnotQuadrilateral(double x1, double y1,
     double x2, double y2, double x3, double y3, double x4, double y4)
@@ -1069,6 +1077,8 @@ AnnotAppearanceCharacs::AnnotAppearanceCharacs(Dict *dict) {
     position = captionNoIcon;
   }
 }
+
+AnnotAppearanceCharacs::~AnnotAppearanceCharacs() = default;
 
 //------------------------------------------------------------------------
 // AnnotAppearanceBBox
@@ -1814,6 +1824,8 @@ AnnotMarkup::AnnotMarkup(PDFDoc *docA, Object *dictObject, Object *obj) :
   initialize(docA, dictObject->getDict(), obj);
 }
 
+AnnotMarkup::~AnnotMarkup() = default;
+
 void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict, Object *obj) {
   Object obj1, obj2;
 
@@ -1969,6 +1981,8 @@ AnnotText::AnnotText(PDFDoc *docA, Object *dictObject, Object *obj) :
   flags |= flagNoZoom | flagNoRotate;
   initialize (docA, dictObject->getDict());
 }
+
+AnnotText::~AnnotText() = default;
 
 void AnnotText::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
@@ -2396,6 +2410,8 @@ AnnotLink::AnnotLink(PDFDoc *docA, Object *dictObject, Object *obj) :
   initialize (docA, dictObject->getDict());
 }
 
+AnnotLink::~AnnotLink() = default;
+
 void AnnotLink::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
 
@@ -2481,6 +2497,8 @@ AnnotFreeText::AnnotFreeText(PDFDoc *docA, Object *dictObject, Object *obj) :
   type = typeFreeText;
   initialize(docA, dictObject->getDict());
 }
+
+AnnotFreeText::~AnnotFreeText() = default;
 
 void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
@@ -2842,6 +2860,8 @@ AnnotLine::AnnotLine(PDFDoc *docA, Object *dictObject, Object *obj) :
   type = typeLine;
   initialize(docA, dictObject->getDict());
 }
+
+AnnotLine::~AnnotLine() = default;
 
 void AnnotLine::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
@@ -3289,6 +3309,8 @@ AnnotTextMarkup::AnnotTextMarkup(PDFDoc *docA, Object *dictObject, Object *obj) 
   initialize(docA, dictObject->getDict());
 }
 
+AnnotTextMarkup::~AnnotTextMarkup() = default;
+
 void AnnotTextMarkup::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
 
@@ -3542,6 +3564,8 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormFiel
   field = fieldA;
   initialize(docA, dictObject->getDict());
 }
+
+AnnotWidget::~AnnotWidget() = default;
 
 void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
@@ -4807,6 +4831,8 @@ AnnotMovie::AnnotMovie(PDFDoc *docA, Object *dictObject, Object *obj) :
   initialize(docA, dictObject->getDict());
 }
 
+AnnotMovie::~AnnotMovie() = default;
+
 void AnnotMovie::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
@@ -4925,6 +4951,8 @@ AnnotScreen::AnnotScreen(PDFDoc *docA, Object *dictObject, Object *obj) :
   initialize(docA, dictObject->getDict());
 }
 
+AnnotScreen::~AnnotScreen() = default;
+
 void AnnotScreen::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
@@ -4975,6 +5003,8 @@ AnnotStamp::AnnotStamp(PDFDoc *docA, Object *dictObject, Object *obj) :
   initialize(docA, dictObject->getDict());
 }
 
+AnnotStamp::~AnnotStamp() = default;
+
 void AnnotStamp::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1 = dict->lookup("Name");
   if (obj1.isName()) {
@@ -5021,6 +5051,8 @@ AnnotGeometry::AnnotGeometry(PDFDoc *docA, Object *dictObject, Object *obj) :
   type = typeSquare;
   initialize(docA, dictObject->getDict());
 }
+
+AnnotGeometry::~AnnotGeometry() = default;
 
 void AnnotGeometry::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
@@ -5221,6 +5253,8 @@ AnnotPolygon::AnnotPolygon(PDFDoc *docA, Object *dictObject, Object *obj) :
   type = typePolygon;
   initialize(docA, dictObject->getDict());
 }
+
+AnnotPolygon::~AnnotPolygon() = default;
 
 void AnnotPolygon::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
@@ -5451,6 +5485,8 @@ AnnotCaret::AnnotCaret(PDFDoc *docA, Object *dictObject, Object *obj) :
   initialize(docA, dictObject->getDict());
 }
 
+AnnotCaret::~AnnotCaret() = default;
+
 void AnnotCaret::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
@@ -5653,6 +5689,8 @@ AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, Object *dictObject, Objec
   initialize(docA, dictObject->getDict());
 }
 
+AnnotFileAttachment::~AnnotFileAttachment() = default;
+
 void AnnotFileAttachment::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1;
 
@@ -5850,6 +5888,8 @@ AnnotSound::AnnotSound(PDFDoc *docA, Object *dictObject, Object *obj) :
   initialize(docA, dictObject->getDict());
 }
 
+AnnotSound::~AnnotSound() = default;
+
 void AnnotSound::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1 = dict->lookup("Sound");
 
@@ -5992,6 +6032,8 @@ Annot3D::Annot3D(PDFDoc *docA, Object *dictObject, Object *obj) :
   initialize(docA, dictObject->getDict());
 }
 
+Annot3D::~Annot3D() = default;
+
 void Annot3D::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1 = dict->lookup("3DA");
   if (obj1.isDict()) {
@@ -6101,6 +6143,8 @@ AnnotRichMedia::AnnotRichMedia(PDFDoc *docA, Object *dictObject, Object *obj) :
   initialize(docA, dictObject->getDict());
 }
 
+AnnotRichMedia::~AnnotRichMedia() = default;
+
 void AnnotRichMedia::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1 = dict->lookup("RichMediaContent");
   if (obj1.isDict()) {
@@ -6132,6 +6176,8 @@ AnnotRichMedia::Settings::Settings(Dict *dict) {
     deactivation = std::make_unique<AnnotRichMedia::Deactivation>(obj1.getDict());
   }
 }
+
+AnnotRichMedia::Settings::~Settings() = default;
 
 AnnotRichMedia::Activation* AnnotRichMedia::Settings::getActivation() const {
   return activation.get();
@@ -6268,6 +6314,10 @@ AnnotRichMedia::Asset* AnnotRichMedia::Content::getAsset(int index) const {
   return assets[index];
 }
 
+AnnotRichMedia::Asset::Asset() = default;
+
+AnnotRichMedia::Asset::~Asset() = default;
+
 const GooString* AnnotRichMedia::Asset::getName() const {
   return name.get();
 }
@@ -6394,6 +6444,8 @@ AnnotRichMedia::Instance::Instance(Dict *dict)
   }
 }
 
+AnnotRichMedia::Instance::~Instance() = default;
+
 AnnotRichMedia::Instance::Type AnnotRichMedia::Instance::getType() const {
   return type;
 }
@@ -6409,6 +6461,8 @@ AnnotRichMedia::Params::Params(Dict *dict)
     flashVars = std::make_unique<GooString>(obj1.getString());
   }
 }
+
+AnnotRichMedia::Params::~Params() = default;
 
 const GooString* AnnotRichMedia::Params::getFlashVars() const {
   return flashVars.get();

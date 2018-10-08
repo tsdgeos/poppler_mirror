@@ -111,10 +111,10 @@ protected:
 
 class AnnotPath {
 public:
-  AnnotPath() = default;
+  AnnotPath();
   AnnotPath(Array *array);
   AnnotPath(std::vector<AnnotCoord> &&coords);
-  ~AnnotPath() = default;
+  ~AnnotPath();
 
   AnnotPath(const AnnotPath &) = delete;
   AnnotPath& operator=(const AnnotPath &other) = delete;
@@ -201,7 +201,7 @@ class AnnotQuadrilaterals {
 public:
   class AnnotQuadrilateral {
   public:
-    AnnotQuadrilateral() = default;
+    AnnotQuadrilateral();
     AnnotQuadrilateral(double x1, double y1, double x2, double y2, double x3,
       double y3, double x4, double y4);
 
@@ -210,7 +210,7 @@ public:
 
   AnnotQuadrilaterals(Array *array, PDFRectangle *rect);
   AnnotQuadrilaterals(std::unique_ptr<AnnotQuadrilateral[]> &&quads, int quadsLength);
-  ~AnnotQuadrilaterals() = default;
+  ~AnnotQuadrilaterals();
 
   AnnotQuadrilaterals(const AnnotQuadrilaterals &) = delete;
   AnnotQuadrilaterals& operator=(const AnnotQuadrilaterals &other) = delete;
@@ -477,7 +477,7 @@ public:
   };
 
   AnnotAppearanceCharacs(Dict *dict);
-  ~AnnotAppearanceCharacs() = default;
+  ~AnnotAppearanceCharacs();
 
   AnnotAppearanceCharacs(const AnnotAppearanceCharacs &) = delete;
   AnnotAppearanceCharacs& operator=(const AnnotAppearanceCharacs &) = delete;
@@ -808,7 +808,7 @@ public:
 
   AnnotMarkup(PDFDoc *docA, PDFRectangle *rect);
   AnnotMarkup(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotMarkup() = default;
+  ~AnnotMarkup();
 
   // getters
   const GooString *getLabel() const { return label.get(); }
@@ -868,7 +868,7 @@ public:
 
   AnnotText(PDFDoc *docA, PDFRectangle *rect);
   AnnotText(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotText() = default;
+  ~AnnotText();
 
   void draw(Gfx *gfx, GBool printing) override;
 
@@ -901,7 +901,7 @@ class AnnotMovie: public Annot {
  public:
   AnnotMovie(PDFDoc *docA, PDFRectangle *rect, Movie *movieA);
   AnnotMovie(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotMovie() = default;
+  ~AnnotMovie();
 
   void draw(Gfx *gfx, GBool printing) override;
 
@@ -925,7 +925,7 @@ class AnnotScreen: public Annot {
 
   AnnotScreen(PDFDoc *docA, PDFRectangle *rect);
   AnnotScreen(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotScreen() = default;
+  ~AnnotScreen();
 
   const GooString* getTitle() const { return title.get(); }
 
@@ -961,7 +961,7 @@ public:
 
   AnnotLink(PDFDoc *docA, PDFRectangle *rect);
   AnnotLink(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotLink() = default;
+  ~AnnotLink();
 
   void draw(Gfx *gfx, GBool printing) override;
 
@@ -1002,7 +1002,7 @@ public:
 
   AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da);
   AnnotFreeText(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotFreeText() = default;
+  ~AnnotFreeText();
 
   void draw(Gfx *gfx, GBool printing) override;
   Object getAppearanceResDict() override;
@@ -1065,7 +1065,7 @@ public:
 
   AnnotLine(PDFDoc *docA, PDFRectangle *rect);
   AnnotLine(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotLine() = default;
+  ~AnnotLine();
 
   void draw(Gfx *gfx, GBool printing) override;
   Object getAppearanceResDict() override;
@@ -1132,7 +1132,7 @@ public:
 
   AnnotTextMarkup(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
   AnnotTextMarkup(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotTextMarkup() = default;
+  ~AnnotTextMarkup();
 
   void draw(Gfx *gfx, GBool printing) override;
 
@@ -1159,7 +1159,7 @@ public:
 
   AnnotStamp(PDFDoc *docA, PDFRectangle *rect);
   AnnotStamp(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotStamp() = default;
+  ~AnnotStamp();
 
   void setIcon(GooString *new_icon);
 
@@ -1182,7 +1182,7 @@ public:
 
   AnnotGeometry(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
   AnnotGeometry(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotGeometry() = default;
+  ~AnnotGeometry();
 
   void draw(Gfx *gfx, GBool printing) override;
 
@@ -1218,7 +1218,7 @@ public:
 
   AnnotPolygon(PDFDoc *docA, PDFRectangle *rect, AnnotSubtype subType);
   AnnotPolygon(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotPolygon() = default;
+  ~AnnotPolygon();
 
   void draw(Gfx *gfx, GBool printing) override;
 
@@ -1268,7 +1268,7 @@ public:
 
   AnnotCaret(PDFDoc *docA, PDFRectangle *rect);
   AnnotCaret(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotCaret() = default;
+  ~AnnotCaret();
 
   void setSymbol(AnnotCaretSymbol new_symbol);
 
@@ -1328,7 +1328,7 @@ public:
 
   AnnotFileAttachment(PDFDoc *docA, PDFRectangle *rect, GooString *filename);
   AnnotFileAttachment(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotFileAttachment() = default;
+  ~AnnotFileAttachment();
 
   void draw(Gfx *gfx, GBool printing) override;
 
@@ -1356,7 +1356,7 @@ public:
 
   AnnotSound(PDFDoc *docA, PDFRectangle *rect, Sound *soundA);
   AnnotSound(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotSound() = default;
+  ~AnnotSound();
 
   void draw(Gfx *gfx, GBool printing) override;
 
@@ -1391,7 +1391,7 @@ public:
 
   AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj);
   AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormField *fieldA);
-  ~AnnotWidget() = default;
+  ~AnnotWidget();
 
   void draw(Gfx *gfx, GBool printing) override;
 
@@ -1470,7 +1470,7 @@ public:
 
   Annot3D(PDFDoc *docA, PDFRectangle *rect);
   Annot3D(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~Annot3D() = default;
+  ~Annot3D();
 
   // getters
 
@@ -1490,7 +1490,7 @@ public:
   class Params {
   public:
     Params(Dict *dict);
-    ~Params() = default;
+    ~Params();
 
     Params(const Params &) = delete;
     Params& operator=(const Params &) = delete;
@@ -1512,7 +1512,7 @@ public:
     };
 
     Instance(Dict *dict);
-    ~Instance() = default;
+    ~Instance();
 
     Instance(const Instance &) = delete;
     Instance& operator=(const Instance &) = delete;
@@ -1558,8 +1558,8 @@ public:
 
   class Asset {
   public:
-    Asset() = default;
-    ~Asset() = default;
+    Asset();
+    ~Asset();
 
     Asset(const Asset &) = delete;
     Asset& operator=(const Asset &) = delete;
@@ -1634,7 +1634,7 @@ public:
   class Settings {
   public:
     Settings(Dict *dict);
-    ~Settings() = default;
+    ~Settings();
 
     Settings(const Settings &) = delete;
     Settings& operator=(const Settings &) = delete;
@@ -1650,7 +1650,7 @@ public:
 
   AnnotRichMedia(PDFDoc *docA, PDFRectangle *rect);
   AnnotRichMedia(PDFDoc *docA, Object *dictObject, Object *obj);
-  ~AnnotRichMedia() = default;
+  ~AnnotRichMedia();
 
   Content* getContent() const;
 
