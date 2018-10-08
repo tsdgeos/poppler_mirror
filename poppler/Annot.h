@@ -968,7 +968,6 @@ public:
   // getters
   LinkAction *getAction() const { return action.get(); }
   AnnotLinkEffect getLinkEffect() const { return linkEffect; }
-  /*  Dict *getUriAction() const { return uriAction; } */
   AnnotQuadrilaterals *getQuadrilaterals() const { return quadrilaterals.get(); }
 
 protected:
