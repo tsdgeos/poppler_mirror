@@ -930,7 +930,7 @@ class AnnotScreen: public Annot {
   const GooString* getTitle() const { return title.get(); }
 
   AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs.get(); }
-  LinkAction *getAction() { return action.get(); } // The caller should now delete the result
+  LinkAction *getAction() { return action.get(); } // The caller should not delete the result
   LinkAction *getAdditionalAction(AdditionalActionsType type); // The caller should delete the result
 
  private:
