@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -837,6 +838,90 @@ poppler_document_find_dest (PopplerDocument *document,
   delete link_dest;
 
   return dest;
+}
+
+static gint
+_poppler_dest_compare_keys (gconstpointer a,
+			    gconstpointer b,
+			    gpointer user_data)
+{
+	return g_strcmp0 (static_cast<const gchar*>(a),
+			  static_cast<const gchar*>(b));
+}
+
+static void
+_poppler_dest_destroy_value (gpointer value)
+{
+	poppler_dest_free (static_cast<PopplerDest*>(value));
+}
+
+/**
+ * poppler_document_create_dests_tree:
+ * @document: A #PopplerDocument
+ *
+ * Creates named destinations balanced binary tree in @document
+ *
+ * The tree key is strings in the form returned by
+ * poppler_named_dest_bytestring() which constains a destination name.
+ * The tree value is the #PopplerDest* which contains a named destination.
+ * The return value must be freed with #g_tree_destroy.
+ *
+ * Returns: (transfer full) (nullable): the #GTree, or %NULL
+ * Since: 0.78
+ **/
+GTree *
+poppler_document_create_dests_tree (PopplerDocument *document)
+{
+	GTree *tree;
+	Catalog *catalog;
+	LinkDest *link_dest;
+	PopplerDest *dest;
+	int i;
+	gchar *key;
+
+	g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), nullptr);
+
+	catalog = document->doc->getCatalog ();
+	if (catalog == nullptr)
+		return nullptr;
+
+	tree = g_tree_new_full (_poppler_dest_compare_keys, nullptr,
+				g_free,
+				_poppler_dest_destroy_value);
+
+	// Iterate from name-dict
+	const int nDests = catalog->numDests ();
+	for (i = 0; i < nDests; ++i) {
+		// The names of name-dict cannot contain \0,
+		// so we can use strlen().
+		auto name = catalog->getDestsName (i);
+		key = poppler_named_dest_from_bytestring
+			(reinterpret_cast<const guint8*> (name),
+			 strlen (name));
+		link_dest = catalog->getDestsDest (i);
+		if (link_dest) {
+			dest = _poppler_dest_new_goto (document, link_dest);
+			delete link_dest;
+			g_tree_insert (tree, key, dest);
+		}
+	}
+
+	// Iterate form name-tree
+	const int nDestsNameTree = catalog->numDestNameTree ();
+	for (i = 0; i < nDestsNameTree; ++i) {
+		auto name = catalog->getDestNameTreeName (i);
+		key = poppler_named_dest_from_bytestring
+			(reinterpret_cast<const guint8*> (name->c_str ()),
+			 name->getLength ());
+		link_dest = catalog->getDestNameTreeDest (i);
+		if (link_dest) {
+			dest = _poppler_dest_new_goto (document, link_dest);
+			delete link_dest;
+			g_tree_insert (tree, key, dest);
+		}
+	}
+
+	return tree;
 }
 
 char *_poppler_goo_string_to_utf8(const GooString *s)

@@ -151,6 +151,7 @@ PopplerPageLayout
 PopplerPageMode
 PopplerPermissions
 PopplerViewerPreferences
+poppler_document_create_dests_tree
 poppler_document_find_dest
 poppler_document_get_attachments
 poppler_document_get_author
