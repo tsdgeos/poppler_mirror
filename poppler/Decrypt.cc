@@ -1480,9 +1480,6 @@ static const uint64_t shaK[80] = {
 static inline uint64_t rotr(uint64_t x, uint64_t n) {
   return (x >> n) | (x << (64 - n));
 }
-static inline uint64_t rotl(uint64_t x, uint64_t n){
-  return (x << n) | (x >> (64 - n));
-}
 static inline uint64_t sha512Ch(uint64_t x, uint64_t y, uint64_t z) {
   return (x & y) ^ (~x & z);
 }
