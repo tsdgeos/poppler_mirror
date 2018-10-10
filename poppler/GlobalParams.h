@@ -36,10 +36,6 @@
 #ifndef GLOBALPARAMS_H
 #define GLOBALPARAMS_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include <assert.h>
 #include "poppler-config.h"
 #include <stdio.h>

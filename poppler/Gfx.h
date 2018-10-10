@@ -32,10 +32,6 @@
 #ifndef GFX_H
 #define GFX_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "poppler-config.h"
 #include "goo/gtypes.h"
 #include "goo/GooList.h"

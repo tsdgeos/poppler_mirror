@@ -26,10 +26,6 @@
 #ifndef SPLASHFONTENGINE_H
 #define SPLASHFONTENGINE_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include <array>
 
 #include "goo/gtypes.h"

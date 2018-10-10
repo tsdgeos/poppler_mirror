@@ -16,15 +16,6 @@
 #ifndef DCTSTREAM_H
 #define DCTSTREAM_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
-
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include "poppler-config.h"
 #include <stdio.h>
 #include <stdlib.h>

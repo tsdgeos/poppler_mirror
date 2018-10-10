@@ -39,10 +39,6 @@
 #ifndef ANNOT_H
 #define ANNOT_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include <memory>
 #include <atomic>
 #include <mutex>

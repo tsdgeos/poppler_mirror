@@ -23,10 +23,6 @@
 #ifndef SPLASHSTATE_H
 #define SPLASHSTATE_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "SplashTypes.h"
 
 class SplashPattern;

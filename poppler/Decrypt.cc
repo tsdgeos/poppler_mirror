@@ -29,10 +29,6 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <cstdint>
 #include <string.h>
 #include "goo/gmem.h"

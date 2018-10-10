@@ -13,10 +13,6 @@
 #ifndef UTF_H
 #define UTF_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <cstdint>
 #include <climits>
 

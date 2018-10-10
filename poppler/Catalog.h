@@ -37,10 +37,6 @@
 #ifndef CATALOG_H
 #define CATALOG_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "poppler-config.h"
 #include "Object.h"
 

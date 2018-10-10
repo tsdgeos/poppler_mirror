@@ -22,10 +22,6 @@
 #ifndef SPLASHPATTERN_H
 #define SPLASHPATTERN_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "SplashTypes.h"
 
 class SplashScreen;

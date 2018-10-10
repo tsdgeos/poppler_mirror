@@ -28,10 +28,6 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <set>
 #include <limits>
 #include <stddef.h>

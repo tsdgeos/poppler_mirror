@@ -32,10 +32,6 @@
 #ifndef SPLASHOUTPUTDEV_H
 #define SPLASHOUTPUTDEV_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "goo/gtypes.h"
 #include "splash/SplashTypes.h"
 #include "splash/SplashPattern.h"

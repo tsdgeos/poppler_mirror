@@ -48,10 +48,6 @@
 //
 //========================================================================
 
-#ifdef __GNUC__
-#pragma implementation
-#endif
-
 #include "config.h"
 #include <stdio.h>
 #include <stdlib.h>

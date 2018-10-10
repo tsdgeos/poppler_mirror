@@ -33,10 +33,6 @@
 #ifndef GooString_H
 #define GooString_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include <stdarg.h>
 #include <stdlib.h> // for NULL
 #include <string>

@@ -9,10 +9,6 @@
 #ifndef JPXSTREAM_H
 #define JPXSTREAM_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "goo/gtypes.h"
 #include "Object.h"
 #include "Stream.h"

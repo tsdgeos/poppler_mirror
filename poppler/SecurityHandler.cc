@@ -25,10 +25,6 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include "GooString.h"
 #include "PDFDoc.h"
 #include "Decrypt.h"

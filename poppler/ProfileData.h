@@ -10,10 +10,6 @@
 #ifndef PROFILE_DATA_H
 #define PROFILE_DATA_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 //------------------------------------------------------------------------
 // ProfileData
 //------------------------------------------------------------------------

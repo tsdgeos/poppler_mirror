@@ -34,10 +34,6 @@
 #ifndef HTMLOUTPUTDEV_H
 #define HTMLOUTPUTDEV_H
 
-#ifdef __GNUC__
-#pragma interface
-#endif
-
 #include <stdio.h>
 #include "goo/gtypes.h"
 #include "goo/GooList.h"

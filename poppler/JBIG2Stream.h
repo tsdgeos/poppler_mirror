@@ -25,10 +25,6 @@
 #ifndef JBIG2STREAM_H
 #define JBIG2STREAM_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "goo/gtypes.h"
 #include "Object.h"
 #include "Stream.h"

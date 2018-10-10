@@ -14,10 +14,6 @@
 #ifndef STRUCTTREEROOT_H
 #define STRUCTTREEROOT_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "goo/gtypes.h"
 #include "Object.h"
 #include "StructElement.h"

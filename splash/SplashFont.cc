@@ -20,10 +20,6 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <limits.h>
 #include <string.h>
 #include "goo/gmem.h"

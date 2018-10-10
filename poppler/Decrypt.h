@@ -28,10 +28,6 @@
 #ifndef DECRYPT_H
 #define DECRYPT_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "goo/gtypes.h"
 #include "goo/GooString.h"
 #include "Object.h"

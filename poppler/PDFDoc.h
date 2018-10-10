@@ -41,10 +41,6 @@
 #ifndef PDFDOC_H
 #define PDFDOC_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include <mutex>
 
 #include "poppler-config.h"

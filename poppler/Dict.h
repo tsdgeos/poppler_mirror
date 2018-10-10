@@ -30,10 +30,6 @@
 #ifndef DICT_H
 #define DICT_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include <atomic>
 #include <mutex>
 #include <string>

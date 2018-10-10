@@ -35,10 +35,6 @@
 #ifndef OUTPUTDEV_H
 #define OUTPUTDEV_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "poppler-config.h"
 #include "goo/gtypes.h"
 #include "CharTypes.h"

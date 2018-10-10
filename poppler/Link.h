@@ -29,10 +29,6 @@
 #ifndef LINK_H
 #define LINK_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "Object.h"
 #include <memory>
 #include <set>

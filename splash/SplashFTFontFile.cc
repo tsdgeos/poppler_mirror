@@ -23,10 +23,6 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "poppler/GfxFont.h"

@@ -26,10 +26,6 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "Lexer.h"
 
 //------------------------------------------------------------------------

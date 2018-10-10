@@ -23,10 +23,6 @@
 #ifndef FOFIIDENTIFIER_H
 #define FOFIIDENTIFIER_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 //------------------------------------------------------------------------
 // FoFiIdentifier
 //------------------------------------------------------------------------

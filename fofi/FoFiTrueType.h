@@ -28,10 +28,6 @@
 #ifndef FOFITRUETYPE_H
 #define FOFITRUETYPE_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "stddef.h"
 #include <unordered_map>
 #include <string>

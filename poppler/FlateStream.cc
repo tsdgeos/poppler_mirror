@@ -13,10 +13,6 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include "poppler-config.h"
 
 #ifdef ENABLE_ZLIB_UNCOMPRESS

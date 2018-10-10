@@ -27,10 +27,6 @@
 #include <config.h>
 #include <poppler-config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <stdio.h>
 #include <stddef.h>
 #include <stdarg.h>

@@ -13,10 +13,6 @@
 //
 //========================================================================
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "goo/GooString.h"
 #include "StructTreeRoot.h"
 #include "StructElement.h"

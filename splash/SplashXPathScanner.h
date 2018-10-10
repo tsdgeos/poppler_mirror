@@ -22,10 +22,6 @@
 #ifndef SPLASHXPATHSCANNER_H
 #define SPLASHXPATHSCANNER_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "SplashTypes.h"
 
 #include <vector>
