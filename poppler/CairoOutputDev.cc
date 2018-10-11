@@ -3040,9 +3040,12 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref,
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 11, 2)
-    if (ref && ref->isRef()) {
-      status = setMimeIdFromRef(image, CAIRO_MIME_TYPE_UNIQUE_ID,
-                                "poppler-surface-", ref->getRef());
+    // Avoid UNIQUE_ID on PS output as it stores unique images in PS memory for re-use.
+    if (cairo_surface_get_type (cairo_get_target (cairo)) != CAIRO_SURFACE_TYPE_PS) {
+      if (ref && ref->isRef()) {
+        status = setMimeIdFromRef(image, CAIRO_MIME_TYPE_UNIQUE_ID,
+                                  "poppler-surface-", ref->getRef());
+      }
     }
 #endif
     if (!status) {
