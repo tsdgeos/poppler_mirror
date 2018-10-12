@@ -13,10 +13,6 @@
 //
 //========================================================================
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "StructElement.h"
 #include "StructTreeRoot.h"
 #include "GlobalParams.h"

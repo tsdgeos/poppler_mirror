@@ -22,10 +22,6 @@
 #ifndef SPLASHXPATH_H
 #define SPLASHXPATH_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "SplashTypes.h"
 
 class SplashPath;

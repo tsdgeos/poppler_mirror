@@ -20,10 +20,6 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include "SplashMath.h"
 #include "SplashScreen.h"
 #include "SplashPattern.h"

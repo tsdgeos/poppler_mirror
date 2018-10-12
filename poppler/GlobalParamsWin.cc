@@ -21,10 +21,6 @@ description for all fonts available in Windows. That's how MuPDF works.
 #include <config.h>
 #endif
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <windows.h>
 #if !(_WIN32_IE >= 0x0500)
 #error "_WIN32_IE must be defined >= 0x0500 for SHGFP_TYPE_CURRENT from shlobj.h"
@@ -295,8 +291,8 @@ void SysFontList::scanWindowsFonts(GooString *winFontDir) {
   }
 }
 
-SysFontInfo *SysFontList::makeWindowsFont(char *name, int fontNum,
-					  char *path) {
+SysFontInfo *SysFontList::makeWindowsFont(const char *name, int fontNum,
+					  const char *path) {
   int n;
   GBool bold, italic, oblique, fixedWidth;
   GooString *s;

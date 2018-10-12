@@ -24,10 +24,6 @@
 #ifndef OUTLINE_H
 #define OUTLINE_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "Object.h"
 #include "CharTypes.h"
 

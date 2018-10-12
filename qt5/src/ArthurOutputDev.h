@@ -30,10 +30,6 @@
 #ifndef ARTHUROUTPUTDEV_H
 #define ARTHUROUTPUTDEV_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include <memory>
 #include <map>
 #include <stack>

@@ -34,10 +34,6 @@
 #include <config.h>
 #include "poppler-config.h"
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
@@ -813,6 +809,9 @@ GBool XRef::readXRefStreamSection(Stream *xrefStr, int *w, int first, int n) {
 }
 
 // Attempt to construct an xref table for a damaged file.
+// Warning: Reconstruction of files where last XRef section is a stream
+//          or where some objects are defined inside an object stream is not yet supported.
+//          Existing data in XRef::entries may get corrupted if applied anyway.
 GBool XRef::constructXRef(GBool *wasReconstructed, GBool needCatalogDict) {
   Parser *parser;
   Object obj;
@@ -1522,7 +1521,7 @@ void XRef::readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum)
     }
     if (followed) {
       error(errSyntaxError, -1, "Circular XRef");
-      if (!(ok = constructXRef(nullptr))) {
+      if (!xRefStream && !(ok = constructXRef(nullptr))) {
         errCode = errDamaged;
       }
       break;
@@ -1538,8 +1537,7 @@ void XRef::readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum)
     // if there was a problem with the xref table, or we haven't found the entry
     // we were looking for, try to reconstruct the xref
     if (!ok || (!prevXRefOffset && untilEntryNum != -1 && entries[untilEntryNum].type == xrefEntryNone)) {
-        GBool wasReconstructed = false;
-        if (!(ok = constructXRef(&wasReconstructed))) {
+        if (!xRefStream && !(ok = constructXRef(nullptr))) {
             errCode = errDamaged;
             break;
         }
@@ -1573,7 +1571,7 @@ XRefEntry *XRef::getEntry(int i, GBool complainIfMissing)
 
       if (entries[i].type == xrefEntryNone) {
         if (complainIfMissing) {
-          error(errSyntaxError, -1, "Invalid XRef entry");
+          error(errSyntaxError, -1, "Invalid XRef entry {0:d}", i);
         }
         entries[i].type = xrefEntryFree;
       }

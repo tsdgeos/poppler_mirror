@@ -38,10 +38,6 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <cstdint>
 #include <string.h>
 #include <math.h>
@@ -80,12 +76,6 @@
 #else
 #define LOG(x)
 #endif
-
-static inline void printMatrix(cairo_matrix_t *matrix){
-	printf("%f %f, %f %f (%f %f)\n", matrix->xx, matrix->yx,
-			matrix->xy, matrix->yy,
-			matrix->x0, matrix->y0);
-}
 
 
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
@@ -1654,7 +1644,6 @@ void CairoOutputDev::beginTransparencyGroup(GfxState * /*state*/, const double *
       cairo_set_source_rgb (cairo_shape, 0, 0, 0);
       cairo_matrix_t matrix;
       cairo_get_matrix (cairo, &matrix);
-      //printMatrix(&matrix);
       cairo_set_matrix (cairo_shape, &matrix);
     }
   }

@@ -32,10 +32,6 @@
 #ifndef SPLASHBITMAP_H
 #define SPLASHBITMAP_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "SplashTypes.h"
 #include "poppler/GfxState.h"
 #include <stdio.h>

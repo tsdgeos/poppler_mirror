@@ -9,10 +9,6 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <goo/gmem.h>
 #include <goo/GooTimer.h>
 #include <splash/SplashTypes.h>

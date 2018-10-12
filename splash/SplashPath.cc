@@ -22,10 +22,6 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <string.h>
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"

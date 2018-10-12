@@ -33,10 +33,6 @@
 #ifndef GooString_H
 #define GooString_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include <stdarg.h>
 #include <stdlib.h> // for NULL
 #include <string>
@@ -120,7 +116,6 @@ public:
   int getLength() const { return length; }
 
   // Get C string.
-  char *getCString() { return s; }
   const char *getCString() const { return s; }
 
   // Get <i>th character.

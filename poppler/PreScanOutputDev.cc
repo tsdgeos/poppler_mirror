@@ -26,10 +26,6 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <math.h>
 #include "GlobalParams.h"
 #include "Gfx.h"

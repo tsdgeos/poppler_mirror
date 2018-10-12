@@ -25,10 +25,6 @@
 
 #include "poppler-config.h"
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "goo/gtypes.h"
 #include "Object.h"
 

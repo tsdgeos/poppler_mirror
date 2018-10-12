@@ -32,10 +32,6 @@
 #ifndef PAGE_H
 #define PAGE_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include <mutex>
 
 #include "poppler-config.h"

@@ -27,10 +27,6 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include <stdarg.h>
 #include "poppler-config.h"
 #include "goo/gtypes.h"

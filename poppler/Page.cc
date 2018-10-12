@@ -37,10 +37,6 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <stddef.h>
 #include <limits.h>
 #include "GlobalParams.h"

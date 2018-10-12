@@ -56,10 +56,6 @@
 #define CAN_CHECK_OPEN_FACES 1
 #endif
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 //------------------------------------------------------------------------
 // CairoFont
 //------------------------------------------------------------------------

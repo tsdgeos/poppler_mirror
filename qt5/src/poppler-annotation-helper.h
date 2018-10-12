@@ -21,6 +21,8 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include <memory>
+
 #include <QtCore/QDebug>
 
 #include <Object.h>
@@ -177,6 +179,6 @@ void XPDFReader::invTransform( double * M, const QPointF &p, double &x, double &
 }
 
 QColor convertAnnotColor( const AnnotColor *color );
-AnnotColor* convertQColor( const QColor &color );
+std::unique_ptr<AnnotColor> convertQColor( const QColor &color );
 
 }

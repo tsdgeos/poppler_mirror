@@ -24,10 +24,6 @@
 #ifndef FORM_H
 #define FORM_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "goo/GooList.h"
 #include "Object.h"
 #include "Annot.h"

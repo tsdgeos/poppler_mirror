@@ -27,10 +27,6 @@
 #ifndef FUNCTION_H
 #define FUNCTION_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "goo/gtypes.h"
 #include "Object.h"
 #include <set>

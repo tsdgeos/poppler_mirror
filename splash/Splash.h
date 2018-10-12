@@ -25,10 +25,6 @@
 #ifndef SPLASH_H
 #define SPLASH_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include <stddef.h>
 #include "SplashTypes.h"
 #include "SplashClip.h"

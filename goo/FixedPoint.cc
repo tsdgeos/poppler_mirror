@@ -26,10 +26,6 @@
 
 #ifdef USE_FIXEDPOINT
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include "FixedPoint.h"
 
 #define ln2 ((FixedPoint)0.69314718)

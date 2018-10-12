@@ -43,10 +43,6 @@
 
 #include <config.h>
 
-#ifdef USE_GCC_PRAGMAS
-#pragma implementation
-#endif
-
 #include <stddef.h>
 #include <stdlib.h>
 #include "goo/gmem.h"
@@ -76,10 +72,7 @@ Catalog::Catalog(PDFDoc *docA) {
   ok = gTrue;
   doc = docA;
   xref = doc->getXRef();
-  pages = nullptr;
-  pageRefs = nullptr;
   numPages = -1;
-  pagesSize = 0;
   baseURI = nullptr;
   pageLabelInfo = nullptr;
   form = nullptr;
@@ -96,7 +89,6 @@ Catalog::Catalog(PDFDoc *docA) {
   pagesRefList = nullptr;
   attrsList = nullptr;
   kidsIdxList = nullptr;
-  lastCachedPage = 0;
   markInfo = markInfoNull;
 
   Object catDict = xref->getCatalog();
@@ -145,15 +137,6 @@ Catalog::~Catalog() {
   }
   delete pagesRefList;
   delete pagesList;
-  if (pages) {
-    for (int i = 0; i < pagesSize; ++i) {
-      if (pages[i]) {
-	delete pages[i];
-      }
-    }
-    gfree(pages);
-  }
-  gfree(pageRefs);
   delete destNameTree;
   delete embeddedFileNameTree;
   delete jsNameTree;
@@ -198,13 +181,13 @@ Page *Catalog::getPage(int i)
   if (i < 1) return nullptr;
 
   catalogLocker();
-  if (i > lastCachedPage) {
+  if (std::size_t(i) > pages.size()) {
      GBool cached = cachePageTree(i);
      if ( cached == gFalse) {
        return nullptr;
      }
   }
-  return pages[i-1];
+  return pages[i-1].first.get();
 }
 
 Ref *Catalog::getPageRef(int i)
@@ -212,13 +195,13 @@ Ref *Catalog::getPageRef(int i)
   if (i < 1) return nullptr;
 
   catalogLocker();
-  if (i > lastCachedPage) {
+  if (std::size_t(i) > pages.size()) {
      GBool cached = cachePageTree(i);
      if ( cached == gFalse) {
        return nullptr;
      }
   }
-  return &pageRefs[i-1];
+  return &pages[i-1].second;
 }
 
 GBool Catalog::cachePageTree(int page)
@@ -252,20 +235,7 @@ GBool Catalog::cachePageTree(int page)
       return gFalse;
     }
 
-    pagesSize = getNumPages();
-    pages = (Page **)gmallocn_checkoverflow(pagesSize, sizeof(Page *));
-    pageRefs = (Ref *)gmallocn_checkoverflow(pagesSize, sizeof(Ref));
-    if (pages == nullptr || pageRefs == nullptr ) {
-      error(errSyntaxError, -1, "Cannot allocate page cache");
-      pagesSize = 0;
-      return gFalse;
-    }
-    for (int i = 0; i < pagesSize; ++i) {
-      pages[i] = nullptr;
-      pageRefs[i].num = -1;
-      pageRefs[i].gen = -1;
-    }
-
+    pages.clear();
     attrsList = new std::vector<PageAttrs *>();
     attrsList->push_back(new PageAttrs(nullptr, obj.getDict()));
     pagesList = new std::vector<Object>();
@@ -274,21 +244,19 @@ GBool Catalog::cachePageTree(int page)
     pagesRefList->push_back(pagesRef);
     kidsIdxList = new std::vector<int>();
     kidsIdxList->push_back(0);
-    lastCachedPage = 0;
-
   }
 
   while(1) {
 
-    if (page <= lastCachedPage) return gTrue;
+    if (std::size_t(page) <= pages.size()) return gTrue;
 
     if (pagesList->empty()) return gFalse;
 
     Object pagesDict = pagesList->back().copy();
     Object kids = pagesDict.dictLookup("Kids");
     if (!kids.isArray()) {
-      error(errSyntaxError, -1, "Kids object (page {0:d}) is wrong type ({1:s})",
-            lastCachedPage+1, kids.getTypeName());
+      error(errSyntaxError, -1, "Kids object (page {0:uld}) is wrong type ({1:s})",
+	    pages.size()+1, kids.getTypeName());
       return gFalse;
     }
 
@@ -305,8 +273,8 @@ GBool Catalog::cachePageTree(int page)
 
     Object kidRef = kids.arrayGetNF(kidsIdx);
     if (!kidRef.isRef()) {
-      error(errSyntaxError, -1, "Kid object (page {0:d}) is not an indirect reference ({1:s})",
-            lastCachedPage+1, kidRef.getTypeName());
+      error(errSyntaxError, -1, "Kid object (page {0:uld}) is not an indirect reference ({1:s})",
+	    pages.size()+1, kidRef.getTypeName());
       return gFalse;
     }
 
@@ -326,25 +294,20 @@ GBool Catalog::cachePageTree(int page)
     Object kid = kids.arrayGet(kidsIdx);
     if (kid.isDict("Page") || (kid.isDict() && !kid.getDict()->hasKey("Kids"))) {
       PageAttrs *attrs = new PageAttrs(attrsList->back(), kid.getDict());
-      Page *p = new Page(doc, lastCachedPage+1, &kid,
-                     kidRef.getRef(), attrs, form);
+      auto p = std::make_unique<Page>(doc, pages.size()+1, &kid,
+				      kidRef.getRef(), attrs, form);
       if (!p->isOk()) {
-        error(errSyntaxError, -1, "Failed to create page (page {0:d})", lastCachedPage+1);
-        delete p;
+	error(errSyntaxError, -1, "Failed to create page (page {0:uld})", pages.size()+1);
         return gFalse;
       }
 
-      if (lastCachedPage >= numPages) {
+      if (pages.size() >= std::size_t(numPages)) {
         error(errSyntaxError, -1, "Page count in top-level pages object is incorrect");
-        delete p;
         return gFalse;
       }
 
-      pages[lastCachedPage] = p;
-      pageRefs[lastCachedPage].num = kidRef.getRefNum();
-      pageRefs[lastCachedPage].gen = kidRef.getRefGen();
+      pages.emplace_back(std::move(p), kidRef.getRef());
 
-      lastCachedPage++;
       kidsIdxList->back()++;
 
     // This should really be isDict("Pages"), but I've seen at least one
@@ -355,8 +318,8 @@ GBool Catalog::cachePageTree(int page)
       pagesList->push_back(std::move(kid));
       kidsIdxList->push_back(0);
     } else {
-      error(errSyntaxError, -1, "Kid object (page {0:d}) is wrong type ({1:s})",
-            lastCachedPage+1, kid.getTypeName());
+      error(errSyntaxError, -1, "Kid object (page {0:uld}) is wrong type ({1:s})",
+	    pages.size()+1, kid.getTypeName());
       kidsIdxList->back()++;
     }
   }
@@ -777,20 +740,12 @@ int Catalog::getNumPages()
 	Dict *pageDict = pagesDict.getDict();
 	if (pageRootRef.isRef()) {
 	  const Ref pageRef = pageRootRef.getRef();
-	  Page *p = new Page(doc, 1, &pagesDict, pageRef, new PageAttrs(nullptr, pageDict), form);
+	  auto p = std::make_unique<Page>(doc, 1, &pagesDict, pageRef, new PageAttrs(nullptr, pageDict), form);
 	  if (p->isOk()) {
-	    pages = (Page **)gmallocn(1, sizeof(Page *));
-	    pageRefs = (Ref *)gmallocn(1, sizeof(Ref));
-
-	    pages[0] = p;
-	    pageRefs[0].num = pageRef.num;
-	    pageRefs[0].gen = pageRef.gen;
+	    pages.emplace_back(std::move(p), pageRef);
 
 	    numPages = 1;
-	    lastCachedPage = 1;
-	    pagesSize = 1;
 	  } else {
-	    delete p;
 	    numPages = 0;
 	  }
 	} else {

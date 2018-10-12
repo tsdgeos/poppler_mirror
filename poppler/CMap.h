@@ -25,10 +25,6 @@
 #ifndef CMAP_H
 #define CMAP_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include <atomic>
 
 #include "poppler-config.h"

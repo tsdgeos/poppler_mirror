@@ -22,10 +22,6 @@
 #ifndef SPLASHCLIP_H
 #define SPLASHCLIP_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "SplashTypes.h"
 #include "SplashMath.h"
 #include "SplashXPathScanner.h"

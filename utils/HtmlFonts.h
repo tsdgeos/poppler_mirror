@@ -65,8 +65,7 @@ class HtmlFont{
    GBool italic;
    GBool bold;
    GBool rotOrSkewed;
-   int pos; // position of the font name in the fonts array
-   static GooString *DefaultFont;
+   std::string familyName;
    GooString *FontName;
    HtmlFontColor color;
    double rotSkewMat[4]; // only four values needed for rotation and skew
@@ -77,7 +76,6 @@ public:
    HtmlFont& operator=(const HtmlFont& x);
    HtmlFontColor getColor() const {return color;}
    ~HtmlFont();
-   static void clear();
    GooString* getFullName();
    GBool isItalic() const {return italic;}
    GBool isBold() const {return bold;}
@@ -89,13 +87,10 @@ public:
    { rotOrSkewed = gTrue; memcpy(rotSkewMat, mat, sizeof(rotSkewMat)); }
    const double *getRotMat() const { return rotSkewMat; }
    GooString* getFontName();
-   static GooString* getDefaultFont();
-   static void setDefaultFont(GooString* defaultFont);
    static GooString* HtmlFilter(const Unicode* u, int uLen); //char* s);
    GBool isEqual(const HtmlFont& x) const;
    GBool isEqualIgnoreBold(const HtmlFont& x) const;
-   static GooString* simple(HtmlFont *font, Unicode *content, int uLen);
-   void print() const {printf("font: %s %d %s%spos: %d\n", FontName->getCString(), size, bold ? "bold " : "", italic ? "italic " : "", pos);};
+   void print() const {printf("font: %s (%s) %d %s%s\n", FontName->getCString(), familyName.c_str(), size, bold ? "bold " : "", italic ? "italic " : "");};
 };
 
 class HtmlFontAccu{

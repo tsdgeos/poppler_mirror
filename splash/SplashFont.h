@@ -21,10 +21,6 @@
 #ifndef SPLASHFONT_H
 #define SPLASHFONT_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "goo/gtypes.h"
 #include "SplashTypes.h"
 #include "SplashClip.h"

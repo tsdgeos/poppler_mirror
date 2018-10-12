@@ -16,10 +16,6 @@
 #ifndef FILE_SPEC_H
 #define FILE_SPEC_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "Object.h"
 
 class EmbFile {

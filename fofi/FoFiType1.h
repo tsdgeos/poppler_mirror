@@ -23,10 +23,6 @@
 #ifndef FOFITYPE1_H
 #define FOFITYPE1_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "goo/gtypes.h"
 #include "FoFiBase.h"
 

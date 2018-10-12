@@ -23,10 +23,6 @@
 #ifndef FOFIENCODINGS_H
 #define FOFIENCODINGS_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "goo/gtypes.h"
 
 //------------------------------------------------------------------------

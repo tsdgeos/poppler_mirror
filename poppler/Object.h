@@ -33,10 +33,6 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include <cassert>
 #include <set>
 #include <stdio.h>

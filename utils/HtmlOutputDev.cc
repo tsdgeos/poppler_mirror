@@ -48,10 +48,6 @@
 //
 //========================================================================
 
-#ifdef __GNUC__
-#pragma implementation
-#endif
-
 #include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -346,26 +342,15 @@ void HtmlPage::beginString(GfxState *state, const GooString *s) {
 
 
 void HtmlPage::conv(){
-  HtmlString *tmp;
+  for(HtmlString *tmp=yxStrings;tmp;tmp=tmp->yxNext){
+     delete tmp->htext;
+     tmp->htext=HtmlFont::HtmlFilter(tmp->text,tmp->len);
 
-  int linkIndex = 0;
-  HtmlFont* h;
-  for(tmp=yxStrings;tmp;tmp=tmp->yxNext){
-     int pos=tmp->fontpos;
-     //  printf("%d\n",pos);
-     h=fonts->Get(pos);
-
-     if (tmp->htext) delete tmp->htext; 
-     tmp->htext=HtmlFont::simple(h,tmp->text,tmp->len);
-
+     int linkIndex = 0;
      if (links->inLink(tmp->xMin,tmp->yMin,tmp->xMax,tmp->yMax, linkIndex)){
        tmp->link = links->getLink(linkIndex);
-       /*GooString *t=tmp->htext;
-       tmp->htext=links->getLink(k)->Link(tmp->htext);
-       delete t;*/
      }
   }
-
 }
 
 
@@ -1225,8 +1210,6 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
 }
 
 HtmlOutputDev::~HtmlOutputDev() {
-    HtmlFont::clear(); 
-    
     delete Docname;
     delete docTitle;
 

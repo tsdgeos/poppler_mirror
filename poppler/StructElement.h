@@ -13,10 +13,6 @@
 #ifndef STRUCTELEMENT_H
 #define STRUCTELEMENT_H
 
-#ifdef USE_GCC_PRAGMAS
-#pragma interface
-#endif
-
 #include "goo/gtypes.h"
 #include "goo/GooString.h"
 #include "MarkedContentOutputDev.h"
