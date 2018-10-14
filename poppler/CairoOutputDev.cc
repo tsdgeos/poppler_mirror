@@ -3040,7 +3040,9 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref,
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 11, 2)
-    // Avoid UNIQUE_ID on PS output as it stores unique images in PS memory for re-use.
+    // Since 1.5.10 the cairo PS backend stores images with UNIQUE_ID in PS memory so the
+    // image can be re-used multiple times. As we don't know how large the images are or
+    // how many times they are used, there is no benefit in enabling this. Issue #106
     if (cairo_surface_get_type (cairo_get_target (cairo)) != CAIRO_SURFACE_TYPE_PS) {
       if (ref && ref->isRef()) {
         status = setMimeIdFromRef(image, CAIRO_MIME_TYPE_UNIQUE_ID,
