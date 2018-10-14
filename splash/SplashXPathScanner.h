@@ -86,8 +86,7 @@ private:
 
   void computeIntersections();
   GBool addIntersection(double segYMin, double segYMax,
-		       Guint segFlags,
-		       int y, int x0, int x1);
+		       int y, int x0, int x1, int count);
 
   SplashXPath *xPath;
   GBool eo;
