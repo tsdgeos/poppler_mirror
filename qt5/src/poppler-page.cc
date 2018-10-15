@@ -500,7 +500,8 @@ static bool renderToArthur(QImageDumpingArthurOutputDev *arthur_output, QPainter
                                           h,
                                           abortHelper->shouldAbortRenderCallback ? shouldAbortRenderInternalCallback : nullAbortCallBack,
                                           abortHelper,
-                                          (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack);
+                                          (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack,
+                                          nullptr, gTrue);
   if (savePainter)
     painter->restore();
   return true;
