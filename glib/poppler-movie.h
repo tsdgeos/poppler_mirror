@@ -51,10 +51,15 @@ typedef enum
   POPPLER_MOVIE_PLAY_MODE_PALINDROME
 } PopplerMoviePlayMode;
 
+POPPLER_PUBLIC
 GType                poppler_movie_get_type      (void) G_GNUC_CONST;
+POPPLER_PUBLIC
 const gchar         *poppler_movie_get_filename  (PopplerMovie *poppler_movie);
+POPPLER_PUBLIC
 gboolean             poppler_movie_need_poster   (PopplerMovie *poppler_movie);
+POPPLER_PUBLIC
 gboolean             poppler_movie_show_controls (PopplerMovie *poppler_movie);
+POPPLER_PUBLIC
 PopplerMoviePlayMode poppler_movie_get_play_mode (PopplerMovie *poppler_movie);
 
 G_END_DECLS

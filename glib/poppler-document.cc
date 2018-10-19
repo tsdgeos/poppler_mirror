@@ -62,6 +62,10 @@ enum {
 	PROP_FORMAT,
 	PROP_FORMAT_MAJOR,
 	PROP_FORMAT_MINOR,
+	PROP_SUBTYPE,
+	PROP_SUBTYPE_STRING,
+	PROP_SUBTYPE_PART,
+	PROP_SUBTYPE_CONF,
 	PROP_AUTHOR,
 	PROP_SUBJECT,
 	PROP_KEYWORDS,
@@ -813,6 +817,85 @@ convert_page_mode (Catalog::PageMode pageMode)
     }
 }
 
+static PopplerPDFSubtype
+convert_pdf_subtype (PDFSubtype pdfSubtype)
+{
+  switch (pdfSubtype)
+    {
+    case subtypePDFA:
+      return POPPLER_PDF_SUBTYPE_PDF_A;
+    case subtypePDFE:
+      return POPPLER_PDF_SUBTYPE_PDF_E;
+    case subtypePDFUA:
+      return POPPLER_PDF_SUBTYPE_PDF_UA;
+    case subtypePDFVT:
+      return POPPLER_PDF_SUBTYPE_PDF_VT;
+    case subtypePDFX:
+      return POPPLER_PDF_SUBTYPE_PDF_X;
+    case subtypeNone:
+      return POPPLER_PDF_SUBTYPE_NONE;
+    case subtypeNull:
+    default:
+      return POPPLER_PDF_SUBTYPE_UNSET;
+    }
+}
+
+static PopplerPDFPart
+convert_pdf_subtype_part (PDFSubtypePart pdfSubtypePart)
+{
+  switch (pdfSubtypePart)
+    {
+    case subtypePart1:
+      return POPPLER_PDF_SUBTYPE_PART_1;
+    case subtypePart2:
+      return POPPLER_PDF_SUBTYPE_PART_2;
+    case subtypePart3:
+      return POPPLER_PDF_SUBTYPE_PART_3;
+    case subtypePart4:
+      return POPPLER_PDF_SUBTYPE_PART_4;
+    case subtypePart5:
+      return POPPLER_PDF_SUBTYPE_PART_5;
+    case subtypePart6:
+      return POPPLER_PDF_SUBTYPE_PART_6;
+    case subtypePart7:
+      return POPPLER_PDF_SUBTYPE_PART_7;
+    case subtypePart8:
+      return POPPLER_PDF_SUBTYPE_PART_8;
+    case subtypePartNone:
+      return POPPLER_PDF_SUBTYPE_PART_NONE;
+    case subtypePartNull:
+    default:
+      return POPPLER_PDF_SUBTYPE_PART_UNSET;
+    }
+}
+
+static PopplerPDFConformance
+convert_pdf_subtype_conformance (PDFSubtypeConformance pdfSubtypeConf)
+{
+  switch (pdfSubtypeConf)
+    {
+    case subtypeConfA:
+      return POPPLER_PDF_SUBTYPE_CONF_A;
+    case subtypeConfB:
+      return POPPLER_PDF_SUBTYPE_CONF_B;
+    case subtypeConfG:
+      return POPPLER_PDF_SUBTYPE_CONF_G;
+    case subtypeConfN:
+      return POPPLER_PDF_SUBTYPE_CONF_N;
+    case subtypeConfP:
+      return POPPLER_PDF_SUBTYPE_CONF_P;
+    case subtypeConfPG:
+      return POPPLER_PDF_SUBTYPE_CONF_PG;
+    case subtypeConfU:
+      return POPPLER_PDF_SUBTYPE_CONF_U;
+    case subtypeConfNone:
+      return POPPLER_PDF_SUBTYPE_CONF_NONE;
+    case subtypeConfNull:
+    default:
+      return POPPLER_PDF_SUBTYPE_CONF_UNSET;
+    }
+}
+
 /**
  * poppler_document_get_pdf_version_string:
  * @document: A #PopplerDocument
@@ -1358,6 +1441,108 @@ poppler_document_get_permissions (PopplerDocument *document)
 }
 
 /**
+ * poppler_document_get_pdf_subtype_string:
+ * @document: A #PopplerDocument
+ *
+ * Returns the PDF subtype version of @document as a string.
+ *
+ * Returns: (transfer full) (nullable): a newly allocated string containing
+ * the PDF subtype version of @document, or %NULL
+ *
+ * Since: 0.70
+ **/
+gchar *
+poppler_document_get_pdf_subtype_string (PopplerDocument *document)
+{
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), NULL);
+
+  GooString *infostring;
+
+  switch (document->doc->getPDFSubtype ())
+    {
+    case subtypePDFA:
+      infostring = document->doc->getDocInfoStringEntry ("GTS_PDFA1Version");
+      break;
+    case subtypePDFE:
+      infostring = document->doc->getDocInfoStringEntry ("GTS_PDFEVersion");
+      break;
+    case subtypePDFUA:
+      infostring = document->doc->getDocInfoStringEntry ("GTS_PDFUAVersion");
+      break;
+    case subtypePDFVT:
+      infostring = document->doc->getDocInfoStringEntry ("GTS_PDFVTVersion");
+      break;
+    case subtypePDFX:
+      infostring = document->doc->getDocInfoStringEntry ("GTS_PDFXVersion");
+      break;
+    case subtypeNone:
+    case subtypeNull:
+    default:
+      infostring = nullptr;
+    }
+
+  gchar *utf8 = _poppler_goo_string_to_utf8 (infostring);
+  delete infostring;
+
+  return utf8;
+}
+
+/**
+ * poppler_document_get_pdf_subtype:
+ * @document: A #PopplerDocument
+ *
+ * Returns the subtype of @document as a #PopplerPDFSubtype.
+ *
+ * Returns: the document's subtype
+ *
+ * Since: 0.70
+ **/
+PopplerPDFSubtype
+poppler_document_get_pdf_subtype (PopplerDocument *document)
+{
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), POPPLER_PDF_SUBTYPE_NONE);
+
+  return convert_pdf_subtype (document->doc->getPDFSubtype ());
+}
+
+/**
+ * poppler_document_get_pdf_part:
+ * @document: A #PopplerDocument
+ *
+ * Returns the part of the conforming standard that the @document adheres to
+ * as a #PopplerPDFSubtype.
+ *
+ * Returns: the document's subtype part
+ *
+ * Since: 0.70
+ **/
+PopplerPDFPart
+poppler_document_get_pdf_part (PopplerDocument *document)
+{
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), POPPLER_PDF_SUBTYPE_PART_NONE);
+
+  return convert_pdf_subtype_part (document->doc->getPDFSubtypePart ());
+}
+
+/**
+ * poppler_document_get_pdf_conformance:
+ * @document: A #PopplerDocument
+ *
+ * Returns the conformance level of the @document as #PopplerPDFConformance.
+ *
+ * Returns: the document's subtype conformance level
+ *
+ * Since: 0.70
+ **/
+PopplerPDFConformance
+poppler_document_get_pdf_conformance (PopplerDocument *document)
+{
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), POPPLER_PDF_SUBTYPE_CONF_NONE);
+
+  return convert_pdf_subtype_conformance (document->doc->getPDFSubtypeConformance ());
+}
+
+/**
  * poppler_document_get_metadata:
  * @document: A #PopplerDocument
  *
@@ -1450,6 +1635,18 @@ poppler_document_get_property (GObject    *object,
       break;
     case PROP_PERMISSIONS:
       g_value_set_flags (value, poppler_document_get_permissions (document));
+      break;
+    case PROP_SUBTYPE:
+      g_value_set_enum (value, poppler_document_get_pdf_subtype (document));
+      break;
+    case PROP_SUBTYPE_STRING:
+      g_value_take_string (value, poppler_document_get_pdf_subtype_string (document));
+      break;
+    case PROP_SUBTYPE_PART:
+      g_value_set_enum (value, poppler_document_get_pdf_part (document));
+      break;
+    case PROP_SUBTYPE_CONF:
+      g_value_set_enum (value, poppler_document_get_pdf_conformance (document));
       break;
     case PROP_METADATA:
       g_value_take_string (value, poppler_document_get_metadata (document));
@@ -1715,6 +1912,61 @@ poppler_document_class_init (PopplerDocumentClass *klass)
 						       "Permissions",
 						       POPPLER_TYPE_PERMISSIONS,
 						       POPPLER_PERMISSIONS_FULL,
+						       G_PARAM_READABLE));
+
+  /**
+   * PopplerDocument:subtype:
+   *
+   *  Document PDF subtype type
+   */
+  g_object_class_install_property (G_OBJECT_CLASS (klass),
+				   PROP_SUBTYPE,
+				   g_param_spec_enum ("subtype",
+						       "PDF Format Subtype Type",
+						       "The PDF subtype of the document",
+						       POPPLER_TYPE_PDF_SUBTYPE,
+						       POPPLER_PDF_SUBTYPE_UNSET,
+						       G_PARAM_READABLE));
+
+  /**
+   * PopplerDocument:subtype-string:
+   *
+   *  Document PDF subtype. See also poppler_document_get_pdf_subtype_string()
+   */
+  g_object_class_install_property (G_OBJECT_CLASS (klass),
+				   PROP_SUBTYPE_STRING,
+				   g_param_spec_string ("subtype-string",
+						       "PDF Format Subtype",
+						       "The PDF subtype of the document",
+						       nullptr,
+						       G_PARAM_READABLE));
+
+  /**
+   * PopplerDocument:subtype-part:
+   *
+   *  Document PDF subtype part
+   */
+  g_object_class_install_property (G_OBJECT_CLASS (klass),
+				   PROP_SUBTYPE_PART,
+						       g_param_spec_enum ("subtype-part",
+						       "PDF Format Subtype Part",
+						       "The part of PDF conformance",
+						       POPPLER_TYPE_PDF_PART,
+						       POPPLER_PDF_SUBTYPE_PART_UNSET,
+						       G_PARAM_READABLE));
+
+  /**
+   * PopplerDocument:subtype-conformance:
+   *
+   *  Document PDF subtype conformance
+   */
+  g_object_class_install_property (G_OBJECT_CLASS (klass),
+				   PROP_SUBTYPE_CONF,
+				   g_param_spec_enum ("subtype-conformance",
+						       "PDF Format Subtype Conformance",
+						       "The conformance level of PDF subtype",
+						       POPPLER_TYPE_PDF_CONFORMANCE,
+						       POPPLER_PDF_SUBTYPE_CONF_UNSET,
 						       G_PARAM_READABLE));
 
   /**

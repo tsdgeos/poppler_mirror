@@ -32,16 +32,22 @@ G_BEGIN_DECLS
 #define POPPLER_IS_PAGE(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), POPPLER_TYPE_PAGE))
 
 
+POPPLER_PUBLIC
 GType      	       poppler_page_get_type             (void) G_GNUC_CONST;
 
+POPPLER_PUBLIC
 void                   poppler_page_render               (PopplerPage        *page,
 							  cairo_t            *cairo);
+POPPLER_PUBLIC
 void                   poppler_page_render_for_printing  (PopplerPage        *page,
 							  cairo_t            *cairo);
+POPPLER_PUBLIC
 void       poppler_page_render_for_printing_with_options (PopplerPage        *page,
                                                           cairo_t            *cairo,
                                                           PopplerPrintFlags   options);
+POPPLER_PUBLIC
 cairo_surface_t       *poppler_page_get_thumbnail        (PopplerPage        *page);
+POPPLER_PUBLIC
 void                   poppler_page_render_selection     (PopplerPage        *page,
 							  cairo_t            *cairo,
 							  PopplerRectangle   *selection,
@@ -50,63 +56,95 @@ void                   poppler_page_render_selection     (PopplerPage        *pa
 							  PopplerColor       *glyph_color,
 							  PopplerColor       *background_color);
 
+POPPLER_PUBLIC
 void                   poppler_page_get_size             (PopplerPage        *page,
 							  double             *width,
 							  double             *height);
+POPPLER_PUBLIC
 int                    poppler_page_get_index            (PopplerPage        *page);
+POPPLER_PUBLIC
 gchar                 *poppler_page_get_label            (PopplerPage        *page);
+POPPLER_PUBLIC
 double                 poppler_page_get_duration         (PopplerPage        *page);
+POPPLER_PUBLIC
 PopplerPageTransition *poppler_page_get_transition       (PopplerPage        *page);
+POPPLER_PUBLIC
 gboolean               poppler_page_get_thumbnail_size   (PopplerPage        *page,
 							  int                *width,
 							  int                *height);
+POPPLER_PUBLIC
 GList             *poppler_page_find_text_with_options   (PopplerPage        *page,
 							  const  char        *text,
 							  PopplerFindFlags    options);
+POPPLER_PUBLIC
 GList     	      *poppler_page_find_text            (PopplerPage        *page,
 							  const  char        *text);
+POPPLER_PUBLIC
 void                   poppler_page_render_to_ps         (PopplerPage        *page,
 							  PopplerPSFile      *ps_file);
+POPPLER_PUBLIC
 char                  *poppler_page_get_text             (PopplerPage        *page);
+POPPLER_PUBLIC
 char                  *poppler_page_get_text_for_area    (PopplerPage        *page,
                                                           PopplerRectangle   *area);
+POPPLER_PUBLIC
 char                  *poppler_page_get_selected_text    (PopplerPage        *page,
 							  PopplerSelectionStyle style,
 							  PopplerRectangle   *selection);
+POPPLER_PUBLIC
 cairo_region_t        *poppler_page_get_selected_region  (PopplerPage        *page,
                                                           gdouble             scale,
                                                           PopplerSelectionStyle  style,
                                                           PopplerRectangle   *selection);
+POPPLER_PUBLIC
 GList                 *poppler_page_get_selection_region (PopplerPage        *page,
 							  gdouble             scale,
 							  PopplerSelectionStyle style,
 							  PopplerRectangle   *selection);
+POPPLER_PUBLIC
 void                   poppler_page_selection_region_free(GList              *region);
+POPPLER_PUBLIC
 GList                 *poppler_page_get_link_mapping     (PopplerPage        *page);
+POPPLER_PUBLIC
 void                   poppler_page_free_link_mapping    (GList              *list);
+POPPLER_PUBLIC
 GList                 *poppler_page_get_image_mapping    (PopplerPage        *page);
+POPPLER_PUBLIC
 void                   poppler_page_free_image_mapping   (GList              *list);
+POPPLER_PUBLIC
 cairo_surface_t       *poppler_page_get_image            (PopplerPage        *page,
 							  gint                image_id);
+POPPLER_PUBLIC
 GList              *poppler_page_get_form_field_mapping  (PopplerPage        *page);
+POPPLER_PUBLIC
 void                poppler_page_free_form_field_mapping (GList              *list);
+POPPLER_PUBLIC
 GList                 *poppler_page_get_annot_mapping    (PopplerPage        *page);
+POPPLER_PUBLIC
 void                   poppler_page_free_annot_mapping   (GList              *list);
+POPPLER_PUBLIC
 void                   poppler_page_add_annot            (PopplerPage        *page,
 							  PopplerAnnot       *annot);
+POPPLER_PUBLIC
 void                   poppler_page_remove_annot         (PopplerPage        *page,
                                                           PopplerAnnot       *annot);
+POPPLER_PUBLIC
 void 		      poppler_page_get_crop_box 	 (PopplerPage        *page,
 							  PopplerRectangle   *rect);
+POPPLER_PUBLIC
 gboolean               poppler_page_get_text_layout      (PopplerPage        *page,
                                                           PopplerRectangle  **rectangles,
                                                           guint              *n_rectangles);
+POPPLER_PUBLIC
 gboolean           poppler_page_get_text_layout_for_area (PopplerPage        *page,
                                                           PopplerRectangle   *area,
                                                           PopplerRectangle  **rectangles,
                                                           guint              *n_rectangles);
+POPPLER_PUBLIC
 GList                 *poppler_page_get_text_attributes  (PopplerPage        *page);
+POPPLER_PUBLIC
 void                   poppler_page_free_text_attributes (GList              *list);
+POPPLER_PUBLIC
 GList *        poppler_page_get_text_attributes_for_area (PopplerPage        *page,
                                                           PopplerRectangle   *area);
 
@@ -130,9 +168,13 @@ struct _PopplerRectangle
   gdouble y2;
 };
 
+POPPLER_PUBLIC
 GType             poppler_rectangle_get_type (void) G_GNUC_CONST;
+POPPLER_PUBLIC
 PopplerRectangle *poppler_rectangle_new      (void);
+POPPLER_PUBLIC
 PopplerRectangle *poppler_rectangle_copy     (PopplerRectangle *rectangle);
+POPPLER_PUBLIC
 void              poppler_rectangle_free     (PopplerRectangle *rectangle);
 
 /* A point on a page, with coordinates in PDF points. */
@@ -150,9 +192,13 @@ struct _PopplerPoint
   gdouble y;
 };
 
+POPPLER_PUBLIC
 GType             poppler_point_get_type (void) G_GNUC_CONST;
+POPPLER_PUBLIC
 PopplerPoint     *poppler_point_new      (void);
+POPPLER_PUBLIC
 PopplerPoint     *poppler_point_copy     (PopplerPoint *point);
+POPPLER_PUBLIC
 void              poppler_point_free     (PopplerPoint *point);
 
 /* PopplerQuadrilateral */
@@ -183,9 +229,13 @@ struct _PopplerQuadrilateral
   PopplerPoint p4;
 };
 
+POPPLER_PUBLIC
 GType                 poppler_quadrilateral_get_type (void) G_GNUC_CONST;
+POPPLER_PUBLIC
 PopplerQuadrilateral *poppler_quadrilateral_new      (void);
+POPPLER_PUBLIC
 PopplerQuadrilateral *poppler_quadrilateral_copy     (PopplerQuadrilateral *quad);
+POPPLER_PUBLIC
 void                 poppler_quadrilateral_free     (PopplerQuadrilateral *quad);
 
 /* A color in RGB */
@@ -207,9 +257,13 @@ struct _PopplerColor
   guint16 blue;
 };
 
+POPPLER_PUBLIC
 GType             poppler_color_get_type      (void) G_GNUC_CONST;
+POPPLER_PUBLIC
 PopplerColor     *poppler_color_new           (void);
+POPPLER_PUBLIC
 PopplerColor     *poppler_color_copy          (PopplerColor *color);
+POPPLER_PUBLIC
 void              poppler_color_free          (PopplerColor *color);
 
 /* Text attributes. */
@@ -238,9 +292,13 @@ struct _PopplerTextAttributes
   gint end_index;
 };
 
+POPPLER_PUBLIC
 GType                  poppler_text_attributes_get_type (void) G_GNUC_CONST;
+POPPLER_PUBLIC
 PopplerTextAttributes *poppler_text_attributes_new      (void);
+POPPLER_PUBLIC
 PopplerTextAttributes *poppler_text_attributes_copy     (PopplerTextAttributes *text_attrs);
+POPPLER_PUBLIC
 void                   poppler_text_attributes_free     (PopplerTextAttributes *text_attrs);
 
 /* Mapping between areas on the current page and PopplerActions */
@@ -260,9 +318,13 @@ struct  _PopplerLinkMapping
   PopplerAction *action;
 };
 
+POPPLER_PUBLIC
 GType               poppler_link_mapping_get_type (void) G_GNUC_CONST;
+POPPLER_PUBLIC
 PopplerLinkMapping *poppler_link_mapping_new      (void);
+POPPLER_PUBLIC
 PopplerLinkMapping *poppler_link_mapping_copy     (PopplerLinkMapping *mapping);
+POPPLER_PUBLIC
 void                poppler_link_mapping_free     (PopplerLinkMapping *mapping);
 
 /* Page Transition */
@@ -302,9 +364,13 @@ struct _PopplerPageTransition
   gdouble duration_real;
 };
 
+POPPLER_PUBLIC
 GType                  poppler_page_transition_get_type (void) G_GNUC_CONST;
+POPPLER_PUBLIC
 PopplerPageTransition *poppler_page_transition_new      (void);
+POPPLER_PUBLIC
 PopplerPageTransition *poppler_page_transition_copy     (PopplerPageTransition *transition);
+POPPLER_PUBLIC
 void                   poppler_page_transition_free     (PopplerPageTransition *transition);
 
 /* Mapping between areas on the current page and images */
@@ -324,9 +390,13 @@ struct  _PopplerImageMapping
   gint image_id;	
 };
 
+POPPLER_PUBLIC
 GType                  poppler_image_mapping_get_type (void) G_GNUC_CONST;
+POPPLER_PUBLIC
 PopplerImageMapping   *poppler_image_mapping_new      (void);
+POPPLER_PUBLIC
 PopplerImageMapping   *poppler_image_mapping_copy     (PopplerImageMapping *mapping);
+POPPLER_PUBLIC
 void                   poppler_image_mapping_free     (PopplerImageMapping *mapping);
 
 /* Mapping between areas on the current page and form fields */
@@ -346,9 +416,13 @@ struct  _PopplerFormFieldMapping
   PopplerFormField *field;
 };
 
+POPPLER_PUBLIC
 GType                    poppler_form_field_mapping_get_type (void) G_GNUC_CONST;
+POPPLER_PUBLIC
 PopplerFormFieldMapping *poppler_form_field_mapping_new      (void);
+POPPLER_PUBLIC
 PopplerFormFieldMapping *poppler_form_field_mapping_copy     (PopplerFormFieldMapping *mapping);
+POPPLER_PUBLIC
 void                     poppler_form_field_mapping_free     (PopplerFormFieldMapping *mapping);
 
 /* Mapping between areas on the current page and annots */
@@ -368,9 +442,13 @@ struct _PopplerAnnotMapping
   PopplerAnnot *annot;
 };
 
+POPPLER_PUBLIC
 GType                poppler_annot_mapping_get_type (void) G_GNUC_CONST;
+POPPLER_PUBLIC
 PopplerAnnotMapping *poppler_annot_mapping_new      (void);
+POPPLER_PUBLIC
 PopplerAnnotMapping *poppler_annot_mapping_copy     (PopplerAnnotMapping *mapping);
+POPPLER_PUBLIC
 void                 poppler_annot_mapping_free     (PopplerAnnotMapping *mapping);
 
 G_END_DECLS
