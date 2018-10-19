@@ -4241,7 +4241,10 @@ void Splash::scaleImageYdXd(SplashImageSource src, void *srcData,
   xq = srcWidth % scaledWidth;
 
   // allocate buffers
-  lineBuf = (Guchar *)gmallocn(srcWidth, nComps);
+  lineBuf = (Guchar *)gmallocn_checkoverflow(srcWidth, nComps);
+  if (unlikely(!lineBuf)) {
+    return;
+  }
   pixBuf = (Guint *)gmallocn_checkoverflow(srcWidth, nComps * sizeof(int));
   if (unlikely(!pixBuf)) {
     gfree(lineBuf);
