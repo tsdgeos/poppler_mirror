@@ -5,6 +5,8 @@
 
 #include <glib-object.h>
 
+#include "poppler.h"
+
 G_BEGIN_DECLS
 /*** END file-header ***/
 
@@ -14,6 +16,7 @@ G_BEGIN_DECLS
 /*** END file-production ***/
 
 /*** BEGIN value-header ***/
+POPPLER_PUBLIC
 GType @enum_name@_get_type (void) G_GNUC_CONST;
 #define POPPLER_TYPE_@ENUMSHORT@ (@enum_name@_get_type ())
 /*** END value-header ***/

@@ -72,10 +72,13 @@ typedef struct _PopplerAttachmentClass
 } PopplerAttachmentClass;
 
 
+POPPLER_PUBLIC
 GType     poppler_attachment_get_type         (void) G_GNUC_CONST;
+POPPLER_PUBLIC
 gboolean  poppler_attachment_save             (PopplerAttachment          *attachment,
 					       const char                 *filename,
 					       GError                    **error);
+POPPLER_PUBLIC
 gboolean  poppler_attachment_save_to_callback (PopplerAttachment          *attachment,
 					       PopplerAttachmentSaveFunc   save_func,
 					       gpointer                    user_data,

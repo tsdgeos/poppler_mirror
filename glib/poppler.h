@@ -21,8 +21,11 @@
 
 #include <glib-object.h>
 
+#include "poppler-macros.h"
+
 G_BEGIN_DECLS
 
+POPPLER_PUBLIC
 GQuark poppler_error_quark (void);
 
 #define POPPLER_ERROR poppler_error_quark ()
@@ -220,7 +223,9 @@ typedef enum
   POPPLER_BACKEND_CAIRO
 } PopplerBackend;
 
+POPPLER_PUBLIC
 PopplerBackend poppler_get_backend (void);
+POPPLER_PUBLIC
 const char *   poppler_get_version (void);
 
 G_END_DECLS
