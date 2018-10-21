@@ -488,17 +488,16 @@ pgd_action_view_set_action (GtkWidget     *action_view,
 gchar *
 pgd_format_date (time_t utime)
 {
-	time_t time = (time_t) utime;
-	char s[256];
-	const char *fmt_hack = "%c";
-	size_t len;
-	struct tm t;
-	if (time == 0 || !localtime_r (&time, &t)) return NULL;
-	len = strftime (s, sizeof (s), fmt_hack, &t);
+	GDateTime *dt = NULL;
+	gchar *s = NULL;
 
-	if (len == 0 || s[0] == '\0') return NULL;
+	if (utime == 0) return NULL;
+	dt = g_date_time_new_from_unix_local (utime);
+	if (dt == NULL) return NULL;
+	s = g_date_time_format (dt, "%c");
+	g_date_time_unref (dt);
 
-	return g_locale_to_utf8 (s, -1, NULL, NULL, NULL);
+	return s;
 }
 
 GtkWidget *
