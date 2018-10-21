@@ -817,7 +817,7 @@ get_id (const GooString *encodedidstring, GooString *id) {
   return gTrue;
 }
 
-GBool PDFDoc::getID(GooString *permanent_id, GooString *update_id) {
+GBool PDFDoc::getID(GooString *permanent_id, GooString *update_id) const {
   Object obj = xref->getTrailerDict()->dictLookup ("ID");
 
   if (obj.isArray() && obj.arrayGetLength() == 2) {
