@@ -129,7 +129,7 @@ UnicodeMap *UnicodeMap::parse(GooString *encodingNameA) {
 
 UnicodeMap::UnicodeMap(GooString *encodingNameA) {
   encodingName = encodingNameA;
-  unicodeOut = gFalse;
+  unicodeOut = false;
   kind = unicodeMapUser;
   ranges = nullptr;
   len = 0;
@@ -138,7 +138,7 @@ UnicodeMap::UnicodeMap(GooString *encodingNameA) {
   refCnt = 1;
 }
 
-UnicodeMap::UnicodeMap(const char *encodingNameA, GBool unicodeOutA,
+UnicodeMap::UnicodeMap(const char *encodingNameA, bool unicodeOutA,
 		       UnicodeMapRange *rangesA, int lenA) {
   encodingName = new GooString(encodingNameA);
   unicodeOut = unicodeOutA;
@@ -150,7 +150,7 @@ UnicodeMap::UnicodeMap(const char *encodingNameA, GBool unicodeOutA,
   refCnt = 1;
 }
 
-UnicodeMap::UnicodeMap(const char *encodingNameA, GBool unicodeOutA,
+UnicodeMap::UnicodeMap(const char *encodingNameA, bool unicodeOutA,
 		       UnicodeMapFunc funcA) {
   encodingName = new GooString(encodingNameA);
   unicodeOut = unicodeOutA;
@@ -255,7 +255,7 @@ void UnicodeMap::decRefCnt() {
   }
 }
 
-GBool UnicodeMap::match(const GooString *encodingNameA) const {
+bool UnicodeMap::match(const GooString *encodingNameA) const {
   return !encodingName->cmp(encodingNameA);
 }
 

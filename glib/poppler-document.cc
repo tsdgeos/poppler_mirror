@@ -306,10 +306,10 @@ poppler_document_new_from_stream (GInputStream *stream,
   }
 
   if (stream_is_memory_buffer_or_local_file(stream)) {
-    str = new PopplerInputStream(stream, cancellable, 0, gFalse, 0, Object(objNull));
+    str = new PopplerInputStream(stream, cancellable, 0, false, 0, Object(objNull));
   } else {
     CachedFile *cachedFile = new CachedFile(new PopplerCachedFileLoader(stream, cancellable, length), new GooString());
-    str = new CachedFileStream(cachedFile, 0, gFalse, cachedFile->getLength(), Object(objNull));
+    str = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
   }
 
   password_g = poppler_password_to_latin1(password);

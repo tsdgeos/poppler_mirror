@@ -112,7 +112,7 @@ Function::Function(const Function *func) {
     hasRange = func->hasRange;
 }
 
-GBool Function::init(Dict *dict) {
+bool Function::init(Dict *dict) {
   Object obj1;
   int i;
 
@@ -120,58 +120,58 @@ GBool Function::init(Dict *dict) {
   obj1 = dict->lookup("Domain");
   if (!obj1.isArray()) {
     error(errSyntaxError, -1, "Function is missing domain");
-    return gFalse;
+    return false;
   }
   m = obj1.arrayGetLength() / 2;
   if (m > funcMaxInputs) {
     error(errSyntaxError, -1, "Functions with more than {0:d} inputs are unsupported",
 	  funcMaxInputs);
-    return gFalse;
+    return false;
   }
   for (i = 0; i < m; ++i) {
     Object obj2 = obj1.arrayGet(2*i);
     if (!obj2.isNum()) {
       error(errSyntaxError, -1, "Illegal value in function domain array");
-      return gFalse;
+      return false;
     }
     domain[i][0] = obj2.getNum();
     obj2 = obj1.arrayGet(2*i+1);
     if (!obj2.isNum()) {
       error(errSyntaxError, -1, "Illegal value in function domain array");
-      return gFalse;
+      return false;
     }
     domain[i][1] = obj2.getNum();
   }
 
   //----- Range
-  hasRange = gFalse;
+  hasRange = false;
   n = 0;
   obj1 = dict->lookup("Range");
   if (obj1.isArray()) {
-    hasRange = gTrue;
+    hasRange = true;
     n = obj1.arrayGetLength() / 2;
     if (n > funcMaxOutputs) {
       error(errSyntaxError, -1, "Functions with more than {0:d} outputs are unsupported",
 	    funcMaxOutputs);
-      return gFalse;
+      return false;
     }
     for (i = 0; i < n; ++i) {
       Object obj2 = obj1.arrayGet(2*i);
       if (!obj2.isNum()) {
 	error(errSyntaxError, -1, "Illegal value in function range array");
-	return gFalse;
+	return false;
       }
       range[i][0] = obj2.getNum();
       obj2 = obj1.arrayGet(2*i+1);
       if (!obj2.isNum()) {
 	error(errSyntaxError, -1, "Illegal value in function range array");
-	return gFalse;
+	return false;
       }
       range[i][1] = obj2.getNum();
     }
   }
 
-  return gTrue;
+  return true;
 }
 
 //------------------------------------------------------------------------
@@ -189,7 +189,7 @@ IdentityFunction::IdentityFunction() {
     domain[i][0] = 0;
     domain[i][1] = 1;
   }
-  hasRange = gFalse;
+  hasRange = false;
 }
 
 IdentityFunction::~IdentityFunction() {
@@ -221,7 +221,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
   idxOffset = nullptr;
   samples = nullptr;
   sBuf = nullptr;
-  ok = gFalse;
+  ok = false;
 
   //----- initialize the generic stuff
   if (!init(dict)) {
@@ -397,7 +397,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
   }
   transform(in, cacheOut);
 
-  ok = gTrue;
+  ok = true;
 }
 
 SampledFunction::~SampledFunction() {
@@ -518,18 +518,18 @@ void SampledFunction::transform(const double *in, double *out) const {
   }
 }
 
-GBool SampledFunction::hasDifferentResultSet(const Function *func) const {
+bool SampledFunction::hasDifferentResultSet(const Function *func) const {
   if (func->getType() == 0) {
     SampledFunction *compTo = (SampledFunction *) func;
     if (compTo->getSampleNumber() != nSamples)
-      return gTrue;
+      return true;
     const double *compSamples = compTo->getSamples();
     for (int i = 0; i < nSamples; i++) {
       if (samples[i] != compSamples[i])
-        return gTrue;
+        return true;
     }
   }
-  return gFalse;
+  return false;
 }
 
 //------------------------------------------------------------------------
@@ -539,7 +539,7 @@ GBool SampledFunction::hasDifferentResultSet(const Function *func) const {
 ExponentialFunction::ExponentialFunction(Object *funcObj, Dict *dict) {
   Object obj1;
 
-  ok = gFalse;
+  ok = false;
 
   //----- initialize the generic stuff
   if (!init(dict)) {
@@ -611,7 +611,7 @@ ExponentialFunction::ExponentialFunction(Object *funcObj, Dict *dict) {
   e = obj1.getNum();
 
   isLinear = fabs(e-1.) < 1e-10;
-  ok = gTrue;
+  ok = true;
 }
 
 ExponentialFunction::~ExponentialFunction() {
@@ -658,7 +658,7 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
   Object obj1;
   int i;
 
-  ok = gFalse;
+  ok = false;
   funcs = nullptr;
   bounds = nullptr;
   encode = nullptr;
@@ -754,7 +754,7 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
   }
 
   n = funcs[0]->getOutputSize();
-  ok = gTrue;
+  ok = true;
   return;
 }
 
@@ -945,7 +945,7 @@ enum PSObjectType {
 struct PSObject {
   PSObjectType type;
   union {
-    GBool booln;		// boolean (stack only)
+    bool booln;		// boolean (stack only)
     int intg;			// integer (stack and code)
     double real;		// real (stack and code)
     PSOp op;			// operator (code only)
@@ -960,7 +960,7 @@ public:
 
   PSStack() {sp = psStackSize; }
   void clear() { sp = psStackSize; }
-  void pushBool(GBool booln)
+  void pushBool(bool booln)
   {
     if (checkOverflow()) {
       stack[--sp].type = psBool;
@@ -981,12 +981,12 @@ public:
       stack[sp].real = real;
     }
   }
-  GBool popBool()
+  bool popBool()
   {
     if (checkUnderflow() && checkType(psBool, psBool)) {
       return stack[sp++].booln;
     }
-    return gFalse;
+    return false;
   }
   int popInt()
   {
@@ -1006,14 +1006,14 @@ public:
     }
     return 0;
   }
-  GBool empty() { return sp == psStackSize; }
-  GBool topIsInt() { return sp < psStackSize && stack[sp].type == psInt; }
-  GBool topTwoAreInts()
+  bool empty() { return sp == psStackSize; }
+  bool topIsInt() { return sp < psStackSize && stack[sp].type == psInt; }
+  bool topTwoAreInts()
     { return sp < psStackSize - 1 &&
 	     stack[sp].type == psInt &&
              stack[sp+1].type == psInt; }
-  GBool topIsReal() { return sp < psStackSize && stack[sp].type == psReal; }
-  GBool topTwoAreNums()
+  bool topIsReal() { return sp < psStackSize && stack[sp].type == psReal; }
+  bool topTwoAreNums()
     { return sp < psStackSize - 1 &&
 	     (stack[sp].type == psInt || stack[sp].type == psReal) &&
 	     (stack[sp+1].type == psInt || stack[sp+1].type == psReal); }
@@ -1045,29 +1045,29 @@ public:
 
 private:
 
-  GBool checkOverflow(int n = 1)
+  bool checkOverflow(int n = 1)
   {
     if (sp - n < 0) {
       error(errSyntaxError, -1, "Stack overflow in PostScript function");
-      return gFalse;
+      return false;
     }
-    return gTrue;
+    return true;
   }
-  GBool checkUnderflow()
+  bool checkUnderflow()
   {
     if (sp == psStackSize) {
       error(errSyntaxError, -1, "Stack underflow in PostScript function");
-      return gFalse;
+      return false;
     }
-    return gTrue;
+    return true;
   }
-  GBool checkType(PSObjectType t1, PSObjectType t2)
+  bool checkType(PSObjectType t1, PSObjectType t2)
   {
     if (stack[sp].type != t1 && stack[sp].type != t2) {
       error(errSyntaxError, -1, "Type mismatch in PostScript function");
-      return gFalse;
+      return false;
     }
-    return gTrue;
+    return true;
   }
   PSObject stack[psStackSize];
   int sp;
@@ -1142,7 +1142,7 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict) {
   code = nullptr;
   codeString = nullptr;
   codeSize = 0;
-  ok = gFalse;
+  ok = false;
 
   //----- initialize the generic stuff
   if (!init(dict)) {
@@ -1184,7 +1184,7 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict) {
   }
   transform(in, cacheOut);
 
-  ok = gTrue;
+  ok = true;
   
  err2:
   str->close();
@@ -1257,23 +1257,23 @@ void PostScriptFunction::transform(const double *in, double *out) const {
   }
 }
 
-GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
+bool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
   GooString *tok;
-  GBool isReal;
+  bool isReal;
   int opPtr, elsePtr;
   int a, b, mid, cmp;
 
   while (1) {
     if (!(tok = getToken(str))) {
       error(errSyntaxError, -1, "Unexpected end of PostScript function stream");
-      return gFalse;
+      return false;
     }
     const char *p = tok->getCString();
     if (isdigit(*p) || *p == '.' || *p == '-') {
-      isReal = gFalse;
+      isReal = false;
       for (; *p; ++p) {
 	if (*p == '.') {
-	  isReal = gTrue;
+	  isReal = true;
 	  break;
 	}
       }
@@ -1293,22 +1293,22 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
       *codePtr += 3;
       resizeCode(opPtr + 2);
       if (!parseCode(str, codePtr)) {
-	return gFalse;
+	return false;
       }
       if (!(tok = getToken(str))) {
 	error(errSyntaxError, -1, "Unexpected end of PostScript function stream");
-	return gFalse;
+	return false;
       }
       if (!tok->cmp("{")) {
 	elsePtr = *codePtr;
 	if (!parseCode(str, codePtr)) {
 	  delete tok;
-	  return gFalse;
+	  return false;
 	}
 	delete tok;
 	if (!(tok = getToken(str))) {
 	  error(errSyntaxError, -1, "Unexpected end of PostScript function stream");
-	  return gFalse;
+	  return false;
 	}
       } else {
 	elsePtr = -1;
@@ -1317,7 +1317,7 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
 	if (elsePtr >= 0) {
 	  error(errSyntaxError, -1,
 		"Got 'if' operator with two blocks in PostScript function");
-	  return gFalse;
+	  return false;
 	}
 	code[opPtr].type = psOperator;
 	code[opPtr].op = psOpIf;
@@ -1327,7 +1327,7 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
 	if (elsePtr < 0) {
 	  error(errSyntaxError, -1,
 		"Got 'ifelse' operator with one block in PostScript function");
-	  return gFalse;
+	  return false;
 	}
 	code[opPtr].type = psOperator;
 	code[opPtr].op = psOpIfelse;
@@ -1339,7 +1339,7 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
 	error(errSyntaxError, -1,
 	      "Expected if/ifelse operator in PostScript function");
 	delete tok;
-	return gFalse;
+	return false;
       }
       delete tok;
     } else if (!tok->cmp("}")) {
@@ -1370,7 +1370,7 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
 	      "Unknown operator '{0:t}' in PostScript function",
 	      tok);
 	delete tok;
-	return gFalse;
+	return false;
       }
       delete tok;
       resizeCode(*codePtr);
@@ -1379,16 +1379,16 @@ GBool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
       ++*codePtr;
     }
   }
-  return gTrue;
+  return true;
 }
 
 GooString *PostScriptFunction::getToken(Stream *str) {
   GooString *s;
   int c;
-  GBool comment;
+  bool comment;
 
   s = new GooString();
-  comment = gFalse;
+  comment = false;
   while (1) {
     if ((c = str->getChar()) == EOF) {
       break;
@@ -1396,10 +1396,10 @@ GooString *PostScriptFunction::getToken(Stream *str) {
     codeString->append(c);
     if (comment) {
       if (c == '\x0a' || c == '\x0d') {
-	comment = gFalse;
+	comment = false;
       }
     } else if (c == '%') {
-      comment = gTrue;
+      comment = true;
     } else if (!isspace(c)) {
       break;
     }
@@ -1440,7 +1440,7 @@ void PostScriptFunction::resizeCode(int newSize) {
 void PostScriptFunction::exec(PSStack *stack, int codePtr) const {
   int i1, i2;
   double r1, r2, result;
-  GBool b1, b2;
+  bool b1, b2;
 
   while (1) {
     switch (code[codePtr].type) {
@@ -1552,7 +1552,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const {
 	stack->pushReal(pow(r1, r2));
 	break;
       case psOpFalse:
-	stack->pushBool(gFalse);
+	stack->pushBool(false);
 	break;
       case psOpFloor:
 	if (!stack->topIsInt()) {
@@ -1710,7 +1710,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const {
 	}
 	break;
       case psOpTrue:
-	stack->pushBool(gTrue);
+	stack->pushBool(true);
 	break;
       case psOpTruncate:
 	if (!stack->topIsInt()) {

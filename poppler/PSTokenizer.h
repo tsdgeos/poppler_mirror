@@ -34,7 +34,7 @@ public:
   ~PSTokenizer();
 
   // Get the next PostScript token.  Returns false at end-of-stream.
-  GBool getToken(char *buf, int size, int *length);
+  bool getToken(char *buf, int size, int *length);
 
 private:
 

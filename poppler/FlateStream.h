@@ -44,7 +44,7 @@ public:
   virtual int getRawChar() override;
   virtual void getRawChars(int nChars, int *buffer) override;
   virtual GooString *getPSFilter(int psLevel, const char *indent) override;
-  virtual GBool isBinary(GBool last = gTrue) override;
+  virtual bool isBinary(bool last = true) override;
 
 private:
   inline int doGetRawChar() {

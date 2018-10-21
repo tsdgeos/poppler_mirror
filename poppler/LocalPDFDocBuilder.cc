@@ -32,14 +32,14 @@ LocalPDFDocBuilder::buildPDFDoc(
   }
 }
 
-GBool LocalPDFDocBuilder::supports(const GooString &uri)
+bool LocalPDFDocBuilder::supports(const GooString &uri)
 {
   if (uri.cmpN("file://", 7) == 0) {
-    return gTrue;
+    return true;
   } else if (!strstr(uri.getCString(), "://")) {
-    return gTrue;
+    return true;
   } else {
-    return gFalse;
+    return false;
   }
 }
 

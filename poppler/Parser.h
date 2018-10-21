@@ -36,7 +36,7 @@ class Parser {
 public:
 
   // Constructor.
-  Parser(XRef *xrefA, Lexer *lexerA, GBool allowStreamsA);
+  Parser(XRef *xrefA, Lexer *lexerA, bool allowStreamsA);
 
   // Destructor.
   ~Parser();
@@ -47,11 +47,11 @@ public:
   // Get the next object from the input stream.  If <simpleOnly> is
   // true, do not parse compound objects (arrays, dictionaries, or
   // streams).
-  Object getObj(GBool simpleOnly = gFalse,
+  Object getObj(bool simpleOnly = false,
      Guchar *fileKey = nullptr,
 		 CryptAlgorithm encAlgorithm = cryptRC4, int keyLength = 0,
 		 int objNum = 0, int objGen = 0, int recursion = 0,
-		 GBool strict = gFalse);
+		 bool strict = false);
   
   Object getObj(int recursion);
   template<typename T> Object getObj(T) = delete;
@@ -66,14 +66,14 @@ private:
 
   XRef *xref;			// the xref table for this PDF file
   Lexer *lexer;			// input stream
-  GBool allowStreams;		// parse stream objects?
+  bool allowStreams;		// parse stream objects?
   Object buf1, buf2;		// next two tokens
   int inlineImg;		// set when inline image data is encountered
 
   Stream *makeStream(Object &&dict, Guchar *fileKey,
 		     CryptAlgorithm encAlgorithm, int keyLength,
 		     int objNum, int objGen, int recursion,
-		     GBool strict);
+		     bool strict);
   void shift(int objNum = -1);
   void shift(const char *cmdA, int objNum);
 };

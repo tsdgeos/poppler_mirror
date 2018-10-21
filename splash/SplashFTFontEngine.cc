@@ -46,8 +46,8 @@ extern "C" int unlink(char *filename);
 // SplashFTFontEngine
 //------------------------------------------------------------------------
 
-SplashFTFontEngine::SplashFTFontEngine(GBool aaA, GBool enableFreeTypeHintingA,
-				       GBool enableSlightHintingA, FT_Library libA) {
+SplashFTFontEngine::SplashFTFontEngine(bool aaA, bool enableFreeTypeHintingA,
+				       bool enableSlightHintingA, FT_Library libA) {
   FT_Int major, minor, patch;
 
   aa = aaA;
@@ -61,8 +61,8 @@ SplashFTFontEngine::SplashFTFontEngine(GBool aaA, GBool enableFreeTypeHintingA,
             (major == 2 && (minor > 1 || (minor == 1 && patch > 7)));
 }
 
-SplashFTFontEngine *SplashFTFontEngine::init(GBool aaA, GBool enableFreeTypeHintingA,
-					     GBool enableSlightHintingA) {
+SplashFTFontEngine *SplashFTFontEngine::init(bool aaA, bool enableFreeTypeHintingA,
+					     bool enableSlightHintingA) {
   FT_Library libA;
 
   if (FT_Init_FreeType(&libA)) {

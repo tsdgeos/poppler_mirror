@@ -26,7 +26,7 @@ public:
 
   PDFDoc *buildPDFDoc(const GooString &uri, GooString *ownerPassword = nullptr,
     GooString *userPassword = nullptr, void *guiDataA = nullptr) override;
-  GBool supports(const GooString &uri) override;
+  bool supports(const GooString &uri) override;
 
 };
 

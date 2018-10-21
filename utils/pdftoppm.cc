@@ -69,9 +69,9 @@
 
 static int firstPage = 1;
 static int lastPage = 0;
-static GBool printOnlyOdd = gFalse;
-static GBool printOnlyEven = gFalse;
-static GBool singleFile = gFalse;
+static bool printOnlyOdd = false;
+static bool printOnlyEven = false;
+static bool singleFile = false;
 static double resolution = 0.0;
 static double x_resolution = 150.0;
 static double y_resolution = 150.0;
@@ -83,25 +83,25 @@ static int param_y = 0;
 static int param_w = 0;
 static int param_h = 0;
 static int sz = 0;
-static GBool useCropBox = gFalse;
-static GBool mono = gFalse;
-static GBool gray = gFalse;
-static GBool png = gFalse;
-static GBool jpeg = gFalse;
-static GBool jpegcmyk = gFalse;
-static GBool tiff = gFalse;
+static bool useCropBox = false;
+static bool mono = false;
+static bool gray = false;
+static bool png = false;
+static bool jpeg = false;
+static bool jpegcmyk = false;
+static bool tiff = false;
 static GooString jpegOpt;
 static int jpegQuality = -1;
 static bool jpegProgressive = false;
 static bool jpegOptimize = false;
 #ifdef SPLASH_CMYK
-static GBool overprint = gFalse;
+static bool overprint = false;
 #endif
 static char enableFreeTypeStr[16] = "";
 static char antialiasStr[16] = "";
 static char vectorAntialiasStr[16] = "";
-static GBool fontAntialias = gTrue;
-static GBool vectorAntialias = gTrue;
+static bool fontAntialias = true;
+static bool vectorAntialias = true;
 static char ownerPassword[33] = "";
 static char userPassword[33] = "";
 static char TiffCompressionStr[16] = "";
@@ -110,9 +110,9 @@ static SplashThinLineMode thinLineMode = splashThinLineDefault;
 #ifdef UTILS_USE_PTHREADS
 static int numberOfJobs = 1;
 #endif // UTILS_USE_PTHREADS
-static GBool quiet = gFalse;
-static GBool printVersion = gFalse;
-static GBool printHelp = gFalse;
+static bool quiet = false;
+static bool printVersion = false;
+static bool printHelp = false;
 
 static const ArgDesc argDesc[] = {
   {"-f",      argInt,      &firstPage,     0,
@@ -215,7 +215,7 @@ static const ArgDesc argDesc[] = {
   {}
 };
 
-static GBool parseJpegOptions()
+static bool parseJpegOptions()
 {
   //jpegOpt format is: <opt1>=<val1>,<opt2>=<val2>,...
   const char *nextOpt = jpegOpt.getCString();
@@ -234,7 +234,7 @@ static GBool parseJpegOptions()
     const char *equal = strchr(opt.getCString(), '=');
     if (!equal) {
       fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.getCString());
-      return gFalse;
+      return false;
     }
     int iequal = equal - opt.getCString();
     GooString value(&opt, iequal + 1, opt.getLength() - iequal - 1);
@@ -244,35 +244,35 @@ static GBool parseJpegOptions()
     if (opt.cmp("quality") == 0) {
       if (!isInt(value.getCString())) {
 	fprintf(stderr, "Invalid jpeg quality\n");
-	return gFalse;
+	return false;
       }
       jpegQuality = atoi(value.getCString());
       if (jpegQuality < 0 || jpegQuality > 100) {
 	fprintf(stderr, "jpeg quality must be between 0 and 100\n");
-	return gFalse;
+	return false;
       }
     } else if (opt.cmp("progressive") == 0) {
-      jpegProgressive = gFalse;
+      jpegProgressive = false;
       if (value.cmp("y") == 0) {
-	jpegProgressive = gTrue;
+	jpegProgressive = true;
       } else if (value.cmp("n") != 0) {
 	fprintf(stderr, "jpeg progressive option must be \"y\" or \"n\"\n");
-	return gFalse;
+	return false;
       }
     } else if (opt.cmp("optimize") == 0 || opt.cmp("optimise") == 0) {
-      jpegOptimize = gFalse;
+      jpegOptimize = false;
       if (value.cmp("y") == 0) {
-	jpegOptimize = gTrue;
+	jpegOptimize = true;
       } else if (value.cmp("n") != 0) {
 	fprintf(stderr, "jpeg optimize option must be \"y\" or \"n\"\n");
-	return gFalse;
+	return false;
       }
     } else {
       fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.getCString());
-      return gFalse;
+      return false;
     }
   }
-  return gTrue;
+  return true;
 }
 
 static void savePageSlice(PDFDoc *doc,
@@ -287,7 +287,7 @@ static void savePageSlice(PDFDoc *doc,
   doc->displayPageSlice(splashOut, 
     pg, x_resolution, y_resolution, 
     0,
-    !useCropBox, gFalse, gFalse,
+    !useCropBox, false, false,
     x, y, w, h
   );
 
@@ -364,7 +364,7 @@ static void processPageJobs() {
 #ifdef SPLASH_CMYK
         			    (jpegcmyk || overprint) ? splashModeDeviceN8 :
 #endif
-		              splashModeRGB8, 4, gFalse, *pageJob.paperColor, gTrue, thinLineMode);
+		              splashModeRGB8, 4, false, *pageJob.paperColor, true, thinLineMode);
     splashOut->setFontAntialias(fontAntialias);
     splashOut->setVectorAntialias(vectorAntialias);
     splashOut->startDoc(pageJob.doc);
@@ -390,7 +390,7 @@ int main(int argc, char *argv[]) {
 #else
   pthread_t* jobs;
 #endif // UTILS_USE_PTHREADS
-  GBool ok;
+  bool ok;
   int exitCode;
   int pg, pg_num_len;
   double pg_w, pg_h, tmp;
@@ -401,7 +401,7 @@ int main(int argc, char *argv[]) {
   // parse args
   ok = parseArgs(argDesc, &argc, argv);
   if (mono && gray) {
-    ok = gFalse;
+    ok = false;
   }
   if ( resolution != 0.0 &&
        (x_resolution == 150.0 ||
@@ -519,7 +519,7 @@ int main(int argc, char *argv[]) {
   // write PPM files
 #ifdef SPLASH_CMYK
   if (jpegcmyk || overprint) {
-    globalParams->setOverprintPreview(gTrue);
+    globalParams->setOverprintPreview(true);
     for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
       paperColor[cp] = 0;
   } else 
@@ -538,7 +538,7 @@ int main(int argc, char *argv[]) {
 				    (jpegcmyk || overprint) ? splashModeDeviceN8 :
 #endif
 				             splashModeRGB8, 4,
-				  gFalse, paperColor, gTrue, thinLineMode);
+				  false, paperColor, true, thinLineMode);
 
 
 

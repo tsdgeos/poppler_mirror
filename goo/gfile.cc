@@ -513,7 +513,7 @@ bool GooFile::modificationTimeChangedSinceOpen() const
 // GDir and GDirEntry
 //------------------------------------------------------------------------
 
-GDirEntry::GDirEntry(const char *dirPath, const char *nameA, GBool doStat) {
+GDirEntry::GDirEntry(const char *dirPath, const char *nameA, bool doStat) {
 #ifdef VMS
   char *p;
 #elif defined(_WIN32)
@@ -524,14 +524,14 @@ GDirEntry::GDirEntry(const char *dirPath, const char *nameA, GBool doStat) {
 #endif
 
   name = new GooString(nameA);
-  dir = gFalse;
+  dir = false;
   fullPath = new GooString(dirPath);
   appendToPath(fullPath, nameA);
   if (doStat) {
 #ifdef VMS
     if (!strcmp(nameA, "-") ||
 	((p = strrchr(nameA, '.')) && !strncmp(p, ".DIR;", 5)))
-      dir = gTrue;
+      dir = true;
 #elif defined(ACORN)
 #else
 #ifdef _WIN32
@@ -550,7 +550,7 @@ GDirEntry::~GDirEntry() {
   delete name;
 }
 
-GDir::GDir(const char *name, GBool doStatA) {
+GDir::GDir(const char *name, bool doStatA) {
   path = new GooString(name);
   doStat = doStatA;
 #if defined(_WIN32)
@@ -603,7 +603,7 @@ GDirEntry *GDir::getNextEntry() {
   if (dir) {
     if (needParent) {
       e = new GDirEntry(path->getCString(), "-", doStat);
-      needParent = gFalse;
+      needParent = false;
       return e;
     }
     ent = readdir(dir);

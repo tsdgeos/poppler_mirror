@@ -43,7 +43,7 @@
 
 SplashClip::SplashClip(SplashCoord x0, SplashCoord y0,
 		       SplashCoord x1, SplashCoord y1,
-		       GBool antialiasA) {
+		       bool antialiasA) {
   antialias = antialiasA;
   if (x0 < x1) {
     xMin = x0;
@@ -210,11 +210,11 @@ SplashError SplashClip::clipToRect(SplashCoord x0, SplashCoord y0,
 }
 
 SplashError SplashClip::clipToPath(SplashPath *path, SplashCoord *matrix,
-				   SplashCoord flatness, GBool eo) {
+				   SplashCoord flatness, bool eo) {
   SplashXPath *xPath;
   int yMinAA, yMaxAA;
 
-  xPath = new SplashXPath(path, matrix, flatness, gTrue);
+  xPath = new SplashXPath(path, matrix, flatness, true);
 
   // check for an empty path
   if (xPath->length == 0) {
@@ -331,7 +331,7 @@ SplashClipResult SplashClip::testSpan(int spanXMin, int spanXMax, int spanY) {
   return splashClipAllInside;
 }
 
-void SplashClip::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, GBool adjustVertLine) {
+void SplashClip::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool adjustVertLine) {
   int xx0, xx1, xx, yy, i;
   SplashColorPtr p;
 

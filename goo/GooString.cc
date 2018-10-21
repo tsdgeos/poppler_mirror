@@ -228,7 +228,7 @@ GooString *GooString::fromInt(int x) {
   char buf[24]; // enough space for 64-bit ints plus a little extra
   const char *p;
   int len;
-  formatInt(x, buf, sizeof(buf), gFalse, 0, 10, &p, &len);
+  formatInt(x, buf, sizeof(buf), false, 0, 10, &p, &len);
   return new GooString(p, len);
 }
 
@@ -292,7 +292,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
   int argsLen, argsSize;
   GooStringFormatArg arg;
   int idx, width, prec;
-  GBool reverseAlign, zeroFill;
+  bool reverseAlign, zeroFill;
   GooStringFormatType ft;
   char buf[65];
   int len, i;
@@ -326,10 +326,10 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	}
 	++p0;
 	if (*p0 == '-') {
-	  reverseAlign = gTrue;
+	  reverseAlign = true;
 	  ++p0;
 	} else {
-	  reverseAlign = gFalse;
+	  reverseAlign = false;
 	}
 	width = 0;
 	zeroFill = *p0 == '0';
@@ -452,7 +452,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  break;
 	case fmtIntHexUpper:
 	  formatInt(arg.i, buf, sizeof(buf), zeroFill, width, 16, &str, &len,
-		    gTrue);
+		    true);
 	  break;
 	case fmtIntOctal:
 	  formatInt(arg.i, buf, sizeof(buf), zeroFill, width, 8, &str, &len);
@@ -470,7 +470,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  break;
 	case fmtUIntHexUpper:
 	  formatUInt(arg.ui, buf, sizeof(buf), zeroFill, width, 16,
-		     &str, &len, gTrue);
+		     &str, &len, true);
 	  break;
 	case fmtUIntOctal:
 	  formatUInt(arg.ui, buf, sizeof(buf), zeroFill, width, 8, &str, &len);
@@ -486,7 +486,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  break;
 	case fmtLongHexUpper:
 	  formatInt(arg.l, buf, sizeof(buf), zeroFill, width, 16, &str, &len,
-		    gTrue);
+		    true);
 	  break;
 	case fmtLongOctal:
 	  formatInt(arg.l, buf, sizeof(buf), zeroFill, width, 8, &str, &len);
@@ -504,7 +504,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  break;
 	case fmtULongHexUpper:
 	  formatUInt(arg.ul, buf, sizeof(buf), zeroFill, width, 16,
-		     &str, &len, gTrue);
+		     &str, &len, true);
 	  break;
 	case fmtULongOctal:
 	  formatUInt(arg.ul, buf, sizeof(buf), zeroFill, width, 8, &str, &len);
@@ -520,7 +520,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  break;
 	case fmtLongLongHexUpper:
 	  formatInt(arg.ll, buf, sizeof(buf), zeroFill, width, 16, &str, &len,
-		    gTrue);
+		    true);
 	  break;
 	case fmtLongLongOctal:
 	  formatInt(arg.ll, buf, sizeof(buf), zeroFill, width, 8, &str, &len);
@@ -538,7 +538,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  break;
 	case fmtULongLongHexUpper:
 	  formatUInt(arg.ull, buf, sizeof(buf), zeroFill, width, 16,
-		     &str, &len, gTrue);
+		     &str, &len, true);
 	  break;
 	case fmtULongLongOctal:
 	  formatUInt(arg.ull, buf, sizeof(buf), zeroFill, width, 8,
@@ -549,13 +549,13 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 		     &str, &len);
 	  break;
 	case fmtDouble:
-	  formatDouble(arg.f, buf, sizeof(buf), prec, gFalse, &str, &len);
+	  formatDouble(arg.f, buf, sizeof(buf), prec, false, &str, &len);
 	  break;
 	case fmtDoubleTrim:
-	  formatDouble(arg.f, buf, sizeof(buf), prec, gTrue, &str, &len);
+	  formatDouble(arg.f, buf, sizeof(buf), prec, true, &str, &len);
 	  break;
 	case fmtDoubleTrimSmallAware:
-	  formatDoubleSmallAware(arg.f, buf, sizeof(buf), prec, gTrue, &str, &len);
+	  formatDoubleSmallAware(arg.f, buf, sizeof(buf), prec, true, &str, &len);
 	  break;
 	case fmtChar:
 	  buf[0] = arg.c;
@@ -619,10 +619,10 @@ static const char lowerCaseDigits[17] = "0123456789abcdef";
 static const char upperCaseDigits[17] = "0123456789ABCDEF";
 
 void GooString::formatInt(long long x, char *buf, int bufSize,
-                          GBool zeroFill, int width, int base,
-                          const char **p, int *len, GBool upperCase) {
+                          bool zeroFill, int width, int base,
+                          const char **p, int *len, bool upperCase) {
   const char *vals = upperCase ? upperCaseDigits : lowerCaseDigits;
-  GBool neg;
+  bool neg;
   int start, i, j;
   unsigned long long abs_x;
 
@@ -654,8 +654,8 @@ void GooString::formatInt(long long x, char *buf, int bufSize,
 }
 
 void GooString::formatUInt(unsigned long long x, char *buf, int bufSize,
-                           GBool zeroFill, int width, int base,
-                           const char **p, int *len, GBool upperCase) {
+                           bool zeroFill, int width, int base,
+                           const char **p, int *len, bool upperCase) {
   const char *vals = upperCase ? upperCaseDigits : lowerCaseDigits;
   int i, j;
 
@@ -678,8 +678,8 @@ void GooString::formatUInt(unsigned long long x, char *buf, int bufSize,
 }
 
 void GooString::formatDouble(double x, char *buf, int bufSize, int prec,
-			   GBool trim, const char **p, int *len) {
-  GBool neg, started;
+			   bool trim, const char **p, int *len) {
+  bool neg, started;
   double x2;
   int d, i, j;
 
@@ -694,7 +694,7 @@ void GooString::formatDouble(double x, char *buf, int bufSize, int prec,
     d = (int)floor(x - 10 * x2 + 0.5);
     if (started || d != 0) {
       buf[--i] = '0' + d;
-      started = gTrue;
+      started = true;
     }
     x = x2;
   }
@@ -717,7 +717,7 @@ void GooString::formatDouble(double x, char *buf, int bufSize, int prec,
 }
 
 void GooString::formatDoubleSmallAware(double x, char *buf, int bufSize, int prec,
-				      GBool trim, const char **p, int *len)
+				      bool trim, const char **p, int *len)
 {
   double absX = fabs(x);
   if (absX >= 0.1) {
@@ -864,16 +864,16 @@ int GooString::cmpN(const char *sA, int n) const {
   return 0;
 }
 
-GBool GooString::endsWith(const char *suffix) const {
+bool GooString::endsWith(const char *suffix) const {
   int suffixLen = strlen(suffix);
 
   if (length < suffixLen)
-    return gFalse;
+    return false;
 
   return strcmp(s + length - suffixLen, suffix) == 0;
 }
 
-GBool GooString::hasUnicodeMarker(void) const
+bool GooString::hasUnicodeMarker(void) const
 {
   return length > 1 && (s[0] & 0xff) == 0xfe && (s[1] & 0xff) == 0xff;
 }
@@ -884,7 +884,7 @@ void GooString::prependUnicodeMarker()
     insert(0, (char)0xfe);
 }
 
-GooString *GooString::sanitizedName(GBool psmode) const
+GooString *GooString::sanitizedName(bool psmode) const
 {
   GooString *name;
   char buf[8];

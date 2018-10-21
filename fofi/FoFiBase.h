@@ -42,26 +42,26 @@ public:
 
 protected:
 
-  FoFiBase(const char *fileA, int lenA, GBool freeFileDataA);
+  FoFiBase(const char *fileA, int lenA, bool freeFileDataA);
   static char *readFile(const char *fileName, int *fileLen);
 
   // S = signed / U = unsigned
   // 8/16/32/Var = word length, in bytes
   // BE = big endian
-  int getS8(int pos, GBool *ok) const;
-  int getU8(int pos, GBool *ok) const;
-  int getS16BE(int pos, GBool *ok) const;
-  int getU16BE(int pos, GBool *ok) const;
-  int getS32BE(int pos, GBool *ok) const;
-  Guint getU32BE(int pos, GBool *ok) const;
-  Guint getU32LE(int pos, GBool *ok) const;
-  Guint getUVarBE(int pos, int size, GBool *ok) const;
+  int getS8(int pos, bool *ok) const;
+  int getU8(int pos, bool *ok) const;
+  int getS16BE(int pos, bool *ok) const;
+  int getU16BE(int pos, bool *ok) const;
+  int getS32BE(int pos, bool *ok) const;
+  Guint getU32BE(int pos, bool *ok) const;
+  Guint getU32LE(int pos, bool *ok) const;
+  Guint getUVarBE(int pos, int size, bool *ok) const;
 
-  GBool checkRegion(int pos, int size) const;
+  bool checkRegion(int pos, int size) const;
 
   const Guchar *file;
   int len;
-  GBool freeFileData;
+  bool freeFileData;
 };
 
 #endif

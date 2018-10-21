@@ -260,6 +260,6 @@ GooString *DCTStream::getPSFilter(int psLevel, const char *indent) {
   return s;
 }
 
-GBool DCTStream::isBinary(GBool last) {
-  return str->isBinary(gTrue);
+bool DCTStream::isBinary(bool last) {
+  return str->isBinary(true);
 }

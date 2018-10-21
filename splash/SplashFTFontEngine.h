@@ -41,7 +41,7 @@ class SplashFontSrc;
 class SplashFTFontEngine {
 public:
 
-  static SplashFTFontEngine *init(GBool aaA, GBool enableFreeTypeHintingA, GBool enableSlightHinting);
+  static SplashFTFontEngine *init(bool aaA, bool enableFreeTypeHintingA, bool enableSlightHinting);
 
   ~SplashFTFontEngine();
 
@@ -57,18 +57,18 @@ public:
                                       int *codeToGID, int codeToGIDLen);
   SplashFontFile *loadTrueTypeFont(SplashFontFileID *idA, SplashFontSrc *src,
 				   int *codeToGID, int codeToGIDLen, int faceIndex = 0);
-  GBool getAA() { return aa; }
-  void setAA(GBool aaA) { aa = aaA; }
+  bool getAA() { return aa; }
+  void setAA(bool aaA) { aa = aaA; }
 
 private:
 
-  SplashFTFontEngine(GBool aaA, GBool enableFreeTypeHintingA, GBool enableSlightHintingA, FT_Library libA);
+  SplashFTFontEngine(bool aaA, bool enableFreeTypeHintingA, bool enableSlightHintingA, FT_Library libA);
 
-  GBool aa;
-  GBool enableFreeTypeHinting;
-  GBool enableSlightHinting;
+  bool aa;
+  bool enableFreeTypeHinting;
+  bool enableSlightHinting;
   FT_Library lib;
-  GBool useCIDs;
+  bool useCIDs;
 
   friend class SplashFTFontFile;
   friend class SplashFTFont;

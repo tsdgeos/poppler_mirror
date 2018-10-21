@@ -181,12 +181,12 @@ void PSConverter::setPageConvertedCallback(void (* callback)(int page, void *pay
 	d->pageConvertedPayload = payload;
 }
 
-static GBool annotDisplayDecideCbk(Annot *annot, void *user_data)
+static bool annotDisplayDecideCbk(Annot *annot, void *user_data)
 {
 	if (annot->getType() == Annot::typeWidget)
-		return gTrue; // Never hide forms
+		return true; // Never hide forms
 	else
-		return *(GBool*)user_data;
+		return *(bool*)user_data;
 }
 
 bool PSConverter::convert()
@@ -229,8 +229,8 @@ bool PSConverter::convert()
 	                                     (d->opts & PrintToEPS) ? psModeEPS : psModePS,
 	                                     d->paperWidth,
 	                                     d->paperHeight,
-	                                     gFalse,
-	                                     gFalse,
+	                                     false,
+	                                     false,
 	                                     d->marginLeft,
 	                                     d->marginBottom,
 	                                     d->paperWidth - d->marginRight,
@@ -246,8 +246,8 @@ bool PSConverter::convert()
 	
 	if (psOut->isOk())
 	{
-		GBool isPrinting = (d->opts & Printing) ? gTrue : gFalse;
-		GBool showAnnotations = (d->opts & HideAnnotations) ? gFalse : gTrue;
+		bool isPrinting = (d->opts & Printing) ? true : false;
+		bool showAnnotations = (d->opts & HideAnnotations) ? false : true;
 		foreach(int page, d->pageList)
 		{
 			d->document->doc->displayPage(psOut,
@@ -255,13 +255,13 @@ bool PSConverter::convert()
 			                              d->hDPI,
 			                              d->vDPI,
 			                              d->rotate,
-			                              gFalse,
-			                              gTrue,
+			                              false,
+			                              true,
 			                              isPrinting,
 			                              nullptr,
 			                              nullptr,
 			                              annotDisplayDecideCbk,
-			                              &showAnnotations, gTrue);
+			                              &showAnnotations, true);
 			if (d->pageConvertedCallback)
 				(*d->pageConvertedCallback)(page, d->pageConvertedPayload);
 		}

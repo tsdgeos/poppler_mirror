@@ -50,22 +50,22 @@
 #include "JBIG2Stream.h"
 #include "ImageOutputDev.h"
 
-ImageOutputDev::ImageOutputDev(char *fileRootA, GBool pageNamesA, GBool listImagesA) {
+ImageOutputDev::ImageOutputDev(char *fileRootA, bool pageNamesA, bool listImagesA) {
   listImages = listImagesA;
   if (!listImages) {
     fileRoot = copyString(fileRootA);
     fileName = (char *)gmalloc(strlen(fileRoot) + 45);
   }
-  outputPNG = gFalse;
-  outputTiff = gFalse;
-  dumpJPEG =  gFalse;
-  dumpJP2 = gFalse;
-  dumpJBIG2 = gFalse;
-  dumpCCITT = gFalse;
+  outputPNG = false;
+  outputTiff = false;
+  dumpJPEG =  false;
+  dumpJP2 = false;
+  dumpJBIG2 = false;
+  dumpCCITT = false;
   pageNames = pageNamesA;
   imgNum = 0;
   pageNum = 0;
-  ok = gTrue;
+  ok = true;
   if (listImages) {
     printf("page   num  type   width height color comp bpc  enc interp  object ID x-ppi y-ppi size ratio\n");
     printf("--------------------------------------------------------------------------------------------\n");
@@ -119,7 +119,7 @@ static void printNumber(double d)
 void ImageOutputDev::listImage(GfxState *state, Object *ref, Stream *str,
 			       int width, int height,
 			       GfxImageColorMap *colorMap,
-			       GBool interpolate, GBool inlineImg,
+			       bool interpolate, bool inlineImg,
 			       ImageType imageType) {
   const char *type;
   const char *colorspace;
@@ -509,7 +509,7 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
 
 void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
 				int width, int height,
-				GfxImageColorMap *colorMap, GBool inlineImg) {
+				GfxImageColorMap *colorMap, bool inlineImg) {
   ImageFormat format;
   EmbedStream *embedStr;
 
@@ -674,18 +674,18 @@ void ImageOutputDev::writeImage(GfxState *state, Object *ref, Stream *str,
       embedStr->restore();
 }
 
-GBool ImageOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
+bool ImageOutputDev::tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
 				  const double *pmat, int paintType, int tilingType, Dict *resDict,
 				  const double *mat, const double *bbox,
 				  int x0, int y0, int x1, int y1,
 				  double xStep, double yStep) {
-  return gTrue;
+  return true;
   // do nothing -- this avoids the potentially slow loop in Gfx.cc
 }
 
 void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
-				   int width, int height, GBool invert,
-				   GBool interpolate, GBool inlineImg) {
+				   int width, int height, bool invert,
+				   bool interpolate, bool inlineImg) {
   if (listImages)
     listImage(state, ref, str, width, height, nullptr, interpolate, inlineImg, imgStencil);
   else
@@ -695,7 +695,7 @@ void ImageOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			       int width, int height,
 			       GfxImageColorMap *colorMap,
-			       GBool interpolate, int *maskColors, GBool inlineImg) {
+			       bool interpolate, int *maskColors, bool inlineImg) {
   if (listImages)
     listImage(state, ref, str, width, height, colorMap, interpolate, inlineImg, imgImage);
   else
@@ -704,27 +704,27 @@ void ImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 
 void ImageOutputDev::drawMaskedImage(
   GfxState *state, Object *ref, Stream *str,
-  int width, int height, GfxImageColorMap *colorMap, GBool interpolate,
-  Stream *maskStr, int maskWidth, int maskHeight, GBool maskInvert, GBool maskInterpolate) {
+  int width, int height, GfxImageColorMap *colorMap, bool interpolate,
+  Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert, bool maskInterpolate) {
   if (listImages) {
-    listImage(state, ref, str, width, height, colorMap, interpolate, gFalse, imgImage);
-    listImage(state, ref, str, maskWidth, maskHeight, nullptr, maskInterpolate, gFalse, imgMask);
+    listImage(state, ref, str, width, height, colorMap, interpolate, false, imgImage);
+    listImage(state, ref, str, maskWidth, maskHeight, nullptr, maskInterpolate, false, imgMask);
   } else {
-    writeImage(state, ref, str, width, height, colorMap, gFalse);
-    writeImage(state, ref, maskStr, maskWidth, maskHeight, nullptr, gFalse);
+    writeImage(state, ref, str, width, height, colorMap, false);
+    writeImage(state, ref, maskStr, maskWidth, maskHeight, nullptr, false);
   }
 }
 
 void ImageOutputDev::drawSoftMaskedImage(
   GfxState *state, Object *ref, Stream *str,
-  int width, int height, GfxImageColorMap *colorMap, GBool interpolate,
+  int width, int height, GfxImageColorMap *colorMap, bool interpolate,
   Stream *maskStr, int maskWidth, int maskHeight,
-  GfxImageColorMap *maskColorMap, GBool maskInterpolate) {
+  GfxImageColorMap *maskColorMap, bool maskInterpolate) {
   if (listImages) {
-    listImage(state, ref, str, width, height, colorMap, interpolate, gFalse, imgImage);
-    listImage(state, ref, maskStr, maskWidth, maskHeight, maskColorMap, maskInterpolate, gFalse, imgSmask);
+    listImage(state, ref, str, width, height, colorMap, interpolate, false, imgImage);
+    listImage(state, ref, maskStr, maskWidth, maskHeight, maskColorMap, maskInterpolate, false, imgSmask);
   } else {
-    writeImage(state, ref, str, width, height, colorMap, gFalse);
-    writeImage(state, ref, maskStr, maskWidth, maskHeight, maskColorMap, gFalse);
+    writeImage(state, ref, str, width, height, colorMap, false);
+    writeImage(state, ref, maskStr, maskWidth, maskHeight, maskColorMap, false);
   }
 }

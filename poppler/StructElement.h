@@ -74,7 +74,7 @@ public:
   // Creates an UserProperty attribute, with an arbitrary name and value.
   Attribute(const char *name, int nameLen, Object *value);
 
-  GBool isOk() const { return type != Unknown; }
+  bool isOk() const { return type != Unknown; }
 
   // Name, type and value can be set only on construction.
   Type getType() const { return type; }
@@ -92,8 +92,8 @@ public:
   void setRevision(Guint revisionA) { revision = revisionA; }
 
   // Hidden elements should not be displayed by the user agent
-  GBool isHidden() const { return hidden; }
-  void setHidden(GBool hiddenA) { hidden = hiddenA; }
+  bool isHidden() const { return hidden; }
+  void setHidden(bool hiddenA) { hidden = hiddenA; }
 
   // The formatted value may be in the PDF, or be left undefined (nullptr).
   // In the later case the user agent should provide a default representation.
@@ -108,10 +108,10 @@ private:
   Guint revision;
   mutable GooString name;
   mutable Object value;
-  GBool hidden;
+  bool hidden;
   GooString *formatted;
 
-  GBool checkType(StructElement *element = nullptr);
+  bool checkType(StructElement *element = nullptr);
   static Type getTypeForName(const char *name, StructElement *element = nullptr);
   static Attribute *parseUserProperty(Dict *property);
 
@@ -149,19 +149,19 @@ public:
 
   const char *getTypeName() const;
   Type getType() const { return type; }
-  GBool isOk() const { return type != Unknown; }
-  GBool isBlock() const;
-  GBool isInline() const;
-  GBool isGrouping() const;
+  bool isOk() const { return type != Unknown; }
+  bool isBlock() const;
+  bool isInline() const;
+  bool isGrouping() const;
 
-  inline GBool isContent() const { return (type == MCID) || isObjectRef(); }
-  inline GBool isObjectRef() const { return (type == OBJR && c->ref.num != -1 && c->ref.gen != -1); }
+  inline bool isContent() const { return (type == MCID) || isObjectRef(); }
+  inline bool isObjectRef() const { return (type == OBJR && c->ref.num != -1 && c->ref.gen != -1); }
 
   int getMCID() const { return c->mcid; }
   Ref getObjectRef() const { return c->ref; }
   Ref getParentRef() { return isContent() ? parent->getParentRef() : s->parentRef.getRef(); }
-  GBool hasPageRef() const;
-  GBool getPageRef(Ref& ref) const;
+  bool hasPageRef() const;
+  bool getPageRef(Ref& ref) const;
   StructTreeRoot *getStructTreeRoot() { return treeRoot; }
 
   // Optional element identifier.
@@ -210,7 +210,7 @@ public:
     }
   }
 
-  const Attribute* findAttribute(Attribute::Type attributeType, GBool inherit = gFalse,
+  const Attribute* findAttribute(Attribute::Type attributeType, bool inherit = false,
                                  Attribute::Owner owner = Attribute::UnknownOwner) const;
 
   const GooString *getAltText() const { return isContent() ? nullptr : s->altText; }
@@ -232,7 +232,7 @@ public:
   //
   // A new string is returned, and the ownership passed to the caller.
   //
-  GooString *getText(GBool recursive = gTrue) const {
+  GooString *getText(bool recursive = true) const {
     return appendSubTreeText(nullptr, recursive);
   }
 
@@ -246,7 +246,7 @@ public:
   ~StructElement();
 
 private:
-  GooString* appendSubTreeText(GooString *string, GBool recursive) const;
+  GooString* appendSubTreeText(GooString *string, bool recursive) const;
   const TextSpanArray& getTextSpansInternal(MarkedContentOutputDev& mcdev) const;
 
   typedef std::vector<Attribute*>     AttrPtrArray;
@@ -300,7 +300,7 @@ private:
   void parse(Dict* elementDict);
   StructElement* parseChild(Object *ref, Object* childObj, std::set<int> &seen);
   void parseChildren(Dict* element, std::set<int> &seen);
-  void parseAttributes(Dict *element, GBool keepExisting = gFalse);
+  void parseAttributes(Dict *element, bool keepExisting = false);
 
   friend class StructTreeRoot;
 };

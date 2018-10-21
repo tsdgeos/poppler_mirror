@@ -29,13 +29,13 @@
 
 MovieActivationParameters::MovieActivationParameters() {
   // default values
-  floatingWindow = gFalse;
+  floatingWindow = false;
   xPosition = 0.5;
   yPosition = 0.5;
   rate = 1.0;
   volume = 100;
-  showControls = gFalse;
-  synchronousPlay = gFalse;
+  showControls = false;
+  synchronousPlay = false;
   repeatMode = repeatModeOnce;
   start.units = 0;
   duration.units = 0;
@@ -141,7 +141,7 @@ void MovieActivationParameters::parseMovieActivation(const Object* aDict) {
   if (obj1.isArray()) {
     // the presence of that entry implies that the movie is to be played
     // in a floating window
-    floatingWindow = gTrue;
+    floatingWindow = true;
 
     Array* scale = obj1.getArray();
     if (scale->getLength() >= 2) {
@@ -177,7 +177,7 @@ void Movie::parseMovie (const Object *movieDict) {
   rotationAngle = 0;
   width = -1;
   height = -1;
-  showPoster = gFalse;
+  showPoster = false;
 
   Object obj1 = movieDict->dictLookup("F");
   Object obj2 = getFileSpecNameForPlatform(&obj1);
@@ -185,7 +185,7 @@ void Movie::parseMovie (const Object *movieDict) {
     fileName = obj2.getString()->copy();
   } else {
     error (errSyntaxError, -1, "Invalid Movie");
-    ok = gFalse;
+    ok = false;
     return;
   }
 
@@ -216,7 +216,7 @@ void Movie::parseMovie (const Object *movieDict) {
   poster = movieDict->dictLookupNF("Poster");
   if (!poster.isNull()) {
     if (poster.isRef() || poster.isStream()) {
-      showPoster = gTrue;
+      showPoster = true;
     } else if (poster.isBool()) {
       showPoster = poster.getBool();
       poster.setToNull();
@@ -231,23 +231,23 @@ Movie::~Movie() {
 }
 
 Movie::Movie(const Object *movieDict) {
-  ok = gTrue;
+  ok = true;
 
   if (movieDict->isDict())
     parseMovie(movieDict);
   else
-    ok = gFalse;
+    ok = false;
 }
 
 Movie::Movie(const Object *movieDict, const Object *aDict) {
-  ok = gTrue;
+  ok = true;
 
   if (movieDict->isDict()) {
     parseMovie(movieDict);
     if (aDict->isDict())
       MA.parseMovieActivation(aDict);
   } else {
-    ok = gFalse;
+    ok = false;
   }
 }
 

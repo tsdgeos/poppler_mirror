@@ -45,21 +45,21 @@ public:
   // and returns true if either is correct.  Sets <ownerPasswordOk> if
   // the owner password was correct.  Either or both of the passwords
   // may be NULL, which is treated as an empty string.
-  static GBool makeFileKey(int encVersion, int encRevision, int keyLength,
+  static bool makeFileKey(int encVersion, int encRevision, int keyLength,
 			   const GooString *ownerKey, const GooString *userKey,
 			   const GooString *ownerEnc, const GooString *userEnc,
 			   int permissions, const GooString *fileID,
 			   const GooString *ownerPassword, const GooString *userPassword,
-			   Guchar *fileKey, GBool encryptMetadata,
-			   GBool *ownerPasswordOk);
+			   Guchar *fileKey, bool encryptMetadata,
+			   bool *ownerPasswordOk);
 
 private:
 
-  static GBool makeFileKey2(int encVersion, int encRevision, int keyLength,
+  static bool makeFileKey2(int encVersion, int encRevision, int keyLength,
 			    const GooString *ownerKey, const GooString *userKey,
 			    int permissions, const GooString *fileID,
 			    const GooString *userPassword, Guchar *fileKey,
-			    GBool encryptMetadata);
+			    bool encryptMetadata);
 };
 
 //------------------------------------------------------------------------
@@ -83,7 +83,7 @@ struct DecryptAESState {
   Guchar state[16];
   Guchar cbc[16];
   Guchar buf[16];
-  GBool paddingReached; // encryption only
+  bool paddingReached; // encryption only
   int bufIdx;
 };
 
@@ -92,7 +92,7 @@ struct DecryptAES256State {
   Guchar state[16];
   Guchar cbc[16];
   Guchar buf[16];
-  GBool paddingReached; // encryption only
+  bool paddingReached; // encryption only
   int bufIdx;
 };
 
@@ -107,9 +107,9 @@ public:
   int getChar() override;
   int lookChar() override = 0;
   Goffset getPos() override;
-  GBool isBinary(GBool last) override;
+  bool isBinary(bool last) override;
   Stream *getUndecodedStream() override { return this; }
-  void setAutoDelete(GBool val);
+  void setAutoDelete(bool val);
 
 protected:
   CryptAlgorithm algo;
@@ -117,7 +117,7 @@ protected:
   Guchar objKey[32];
   Goffset charactersRead; // so that getPos() can be correct
   int nextCharBuff;   // EOF means not read yet
-  GBool autoDelete;
+  bool autoDelete;
 
   union {
     DecryptRC4State rc4;

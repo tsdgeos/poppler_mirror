@@ -98,7 +98,7 @@ void PageLabelInfo::parse(Object *tree) {
   }
 }
 
-GBool PageLabelInfo::labelToIndex(GooString *label, int *index) const
+bool PageLabelInfo::labelToIndex(GooString *label, int *index) const
 {
   const char *const str = label->getCString();
   const std::size_t strLen = label->getLength();
@@ -116,7 +116,7 @@ GBool PageLabelInfo::labelToIndex(GooString *label, int *index) const
       std::tie(number, ok) = fromDecimal(str + prefixLen, str + strLen, strUnicode);
       if (ok && number - interval.first < interval.length) {
     *index = interval.base + number - interval.first;
-	return gTrue;
+	return true;
       }
       break;
     case Interval::LowercaseRoman:
@@ -124,7 +124,7 @@ GBool PageLabelInfo::labelToIndex(GooString *label, int *index) const
       number = fromRoman(str + prefixLen);
       if (number >= 0 && number - interval.first < interval.length) {
     *index = interval.base + number - interval.first;
-	return gTrue;
+	return true;
       }
       break;
     case Interval::UppercaseLatin:
@@ -132,7 +132,7 @@ GBool PageLabelInfo::labelToIndex(GooString *label, int *index) const
       number = fromLatin(str + prefixLen);
       if (number >= 0 && number - interval.first < interval.length) {
     *index = interval.base + number - interval.first;
-	return gTrue;
+	return true;
       }
       break;
     case Interval::None:
@@ -140,10 +140,10 @@ GBool PageLabelInfo::labelToIndex(GooString *label, int *index) const
     }
   }
 
-  return gFalse;
+  return false;
 }
 
-GBool PageLabelInfo::indexToLabel(int index, GooString *label) const
+bool PageLabelInfo::indexToLabel(int index, GooString *label) const
 {
   char buffer[32];
   int base, number;
@@ -161,7 +161,7 @@ GBool PageLabelInfo::indexToLabel(int index, GooString *label) const
   }
 
   if (!matching_interval)
-    return gFalse;
+    return false;
 
   number = index - base + matching_interval->first;
   switch (matching_interval->style) {
@@ -170,16 +170,16 @@ GBool PageLabelInfo::indexToLabel(int index, GooString *label) const
     number_string.append(buffer);
     break;
   case Interval::LowercaseRoman:
-    toRoman(number, &number_string, gFalse);
+    toRoman(number, &number_string, false);
     break;
   case Interval::UppercaseRoman:
-    toRoman(number, &number_string, gTrue);
+    toRoman(number, &number_string, true);
     break;
   case Interval::LowercaseLatin:
-    toLatin(number, &number_string, gFalse);
+    toLatin(number, &number_string, false);
     break;
   case Interval::UppercaseLatin:
-    toLatin(number, &number_string, gTrue);
+    toLatin(number, &number_string, true);
     break;
   case Interval::None:
     break;
@@ -202,5 +202,5 @@ GBool PageLabelInfo::indexToLabel(int index, GooString *label) const
       label->append(&number_string);
   }
 
-  return gTrue;
+  return true;
 }

@@ -102,7 +102,7 @@ static int fromRoman(const char *buffer) {
   return value;
 }
 
-static void toRoman(int number, GooString *str, GBool uppercase) {
+static void toRoman(int number, GooString *str, bool uppercase) {
   static const char uppercaseNumerals[] = "IVXLCDM";
   static const char lowercaseNumerals[] = "ivxlcdm";
   int divisor;
@@ -171,7 +171,7 @@ static int fromLatin(const char *buffer)
   return -1;
 }
 
-static void toLatin(int number, GooString *str, GBool uppercase) {
+static void toLatin(int number, GooString *str, bool uppercase) {
   char base, letter;
   int i, count;
 

@@ -43,7 +43,7 @@ void TestPageLabelInfo::testFromDecimalUnicode()
 void TestPageLabelInfo::testToRoman()
 {
     GooString str;
-    toRoman(177, &str, gFalse);
+    toRoman(177, &str, false);
     QCOMPARE (str.getCString(), "clxxvii");
 }
 
@@ -56,7 +56,7 @@ void TestPageLabelInfo::testFromRoman()
 void TestPageLabelInfo::testToLatin()
 {
     GooString str;
-    toLatin(54, &str, gFalse);
+    toLatin(54, &str, false);
     QCOMPARE(str.getCString(), "bbb");
 }
 

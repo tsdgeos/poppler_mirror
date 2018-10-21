@@ -70,8 +70,8 @@ public:
   const Unicode *getTitle() const { return title; }
   int getTitleLength() const { return titleLen; }
   const LinkAction *getAction() const { return action; }
-  GBool isOpen() const { return startsOpen; }
-  GBool hasKids() const { return firstRef.isRef(); }
+  bool isOpen() const { return startsOpen; }
+  bool hasKids() const { return firstRef.isRef(); }
   const GooList *getKids() const { return kids; }
 
 private:
@@ -85,7 +85,7 @@ private:
   Object firstRef;
   Object lastRef;
   Object nextRef;
-  GBool startsOpen;
+  bool startsOpen;
   GooList *kids;	// NULL if this item is closed or has no kids,
 			// otherwise a list of OutlineItem
 };

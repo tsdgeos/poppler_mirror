@@ -153,7 +153,7 @@ public:
   Object() : type(objNone) {}
   ~Object() { free(); }
 
-  explicit Object(GBool boolnA)
+  explicit Object(bool boolnA)
     { type = objBool; booln = boolnA; }
   explicit Object(int intgA)
     { type = objInt; intg = intgA; }
@@ -209,34 +209,34 @@ public:
 
   // Type checking.
   ObjType getType() const { CHECK_NOT_DEAD; return type; }
-  GBool isBool() const { CHECK_NOT_DEAD; return type == objBool; }
-  GBool isInt() const { CHECK_NOT_DEAD; return type == objInt; }
-  GBool isReal() const { CHECK_NOT_DEAD; return type == objReal; }
-  GBool isNum() const { CHECK_NOT_DEAD; return type == objInt || type == objReal || type == objInt64; }
-  GBool isString() const { CHECK_NOT_DEAD; return type == objString; }
-  GBool isName() const { CHECK_NOT_DEAD; return type == objName; }
-  GBool isNull() const { CHECK_NOT_DEAD; return type == objNull; }
-  GBool isArray() const { CHECK_NOT_DEAD; return type == objArray; }
-  GBool isDict() const { CHECK_NOT_DEAD; return type == objDict; }
-  GBool isStream() const { CHECK_NOT_DEAD; return type == objStream; }
-  GBool isRef() const { CHECK_NOT_DEAD; return type == objRef; }
-  GBool isCmd() const { CHECK_NOT_DEAD; return type == objCmd; }
-  GBool isError() const { CHECK_NOT_DEAD; return type == objError; }
-  GBool isEOF() const { CHECK_NOT_DEAD; return type == objEOF; }
-  GBool isNone() const { CHECK_NOT_DEAD; return type == objNone; }
-  GBool isInt64() const { CHECK_NOT_DEAD; return type == objInt64; }
-  GBool isIntOrInt64() const { CHECK_NOT_DEAD; return type == objInt || type == objInt64; }
+  bool isBool() const { CHECK_NOT_DEAD; return type == objBool; }
+  bool isInt() const { CHECK_NOT_DEAD; return type == objInt; }
+  bool isReal() const { CHECK_NOT_DEAD; return type == objReal; }
+  bool isNum() const { CHECK_NOT_DEAD; return type == objInt || type == objReal || type == objInt64; }
+  bool isString() const { CHECK_NOT_DEAD; return type == objString; }
+  bool isName() const { CHECK_NOT_DEAD; return type == objName; }
+  bool isNull() const { CHECK_NOT_DEAD; return type == objNull; }
+  bool isArray() const { CHECK_NOT_DEAD; return type == objArray; }
+  bool isDict() const { CHECK_NOT_DEAD; return type == objDict; }
+  bool isStream() const { CHECK_NOT_DEAD; return type == objStream; }
+  bool isRef() const { CHECK_NOT_DEAD; return type == objRef; }
+  bool isCmd() const { CHECK_NOT_DEAD; return type == objCmd; }
+  bool isError() const { CHECK_NOT_DEAD; return type == objError; }
+  bool isEOF() const { CHECK_NOT_DEAD; return type == objEOF; }
+  bool isNone() const { CHECK_NOT_DEAD; return type == objNone; }
+  bool isInt64() const { CHECK_NOT_DEAD; return type == objInt64; }
+  bool isIntOrInt64() const { CHECK_NOT_DEAD; return type == objInt || type == objInt64; }
 
   // Special type checking.
-  GBool isName(const char *nameA) const
+  bool isName(const char *nameA) const
     { return type == objName && !strcmp(cString, nameA); }
-  GBool isDict(const char *dictType) const;
-  GBool isStream(const char *dictType) const;
-  GBool isCmd(const char *cmdA) const
+  bool isDict(const char *dictType) const;
+  bool isStream(const char *dictType) const;
+  bool isCmd(const char *cmdA) const
     { return type == objCmd && !strcmp(cString, cmdA); }
 
   // Accessors.
-  GBool getBool() const { OBJECT_TYPE_CHECK(objBool); return booln; }
+  bool getBool() const { OBJECT_TYPE_CHECK(objBool); return booln; }
   int getInt() const { OBJECT_TYPE_CHECK(objInt); return intg; }
   double getReal() const { OBJECT_TYPE_CHECK(objReal); return real; }
 
@@ -279,7 +279,7 @@ public:
   void dictAdd(const char *key, Object &&val);
   void dictSet(const char *key, Object &&val);
   void dictRemove(const char *key);
-  GBool dictIs(const char *dictType) const;
+  bool dictIs(const char *dictType) const;
   Object dictLookup(const char *key, int recursion = 0) const;
   Object dictLookupNF(const char *key) const;
   const char *dictGetKey(int i) const;
@@ -287,7 +287,7 @@ public:
   Object dictGetValNF(int i) const;
 
   // Stream accessors.
-  GBool streamIs(const char *dictType) const;
+  bool streamIs(const char *dictType) const;
   void streamReset();
   void streamClose();
   int streamGetChar() const;
@@ -308,7 +308,7 @@ private:
 
   ObjType type;			// object type
   union {			// value for each type:
-    GBool booln;		//   boolean
+    bool booln;		//   boolean
     int intg;			//   integer
     long long int64g;           //   64-bit integer
     double real;		//   real
@@ -360,10 +360,10 @@ inline void Object::dictSet(const char *key, Object &&val)
 inline void Object::dictRemove(const char *key)
   { OBJECT_TYPE_CHECK(objDict); dict->remove(key); }
 
-inline GBool Object::dictIs(const char *dictType) const
+inline bool Object::dictIs(const char *dictType) const
   { OBJECT_TYPE_CHECK(objDict); return dict->is(dictType); }
 
-inline GBool Object::isDict(const char *dictType) const
+inline bool Object::isDict(const char *dictType) const
   { return type == objDict && dictIs(dictType); }
 
 inline Object Object::dictLookup(const char *key, int recursion) const
@@ -387,10 +387,10 @@ inline Object Object::dictGetValNF(int i) const
 
 #include "Stream.h"
 
-inline GBool Object::streamIs(const char *dictType) const
+inline bool Object::streamIs(const char *dictType) const
   { OBJECT_TYPE_CHECK(objStream); return stream->getDict()->is(dictType); }
 
-inline GBool Object::isStream(const char *dictType) const
+inline bool Object::isStream(const char *dictType) const
   { return type == objStream && streamIs(dictType); }
 
 inline void Object::streamReset()

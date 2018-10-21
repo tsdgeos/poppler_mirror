@@ -154,11 +154,11 @@ void Dict::set(const char *key, Object &&val) {
 }
 
 
-GBool Dict::is(const char *type) const {
+bool Dict::is(const char *type) const {
   if (const auto *entry = find("Type")) {
     return entry->second.isName(type);
   }
-  return gFalse;
+  return false;
 }
 
 Object Dict::lookup(const char *key, int recursion) const {
@@ -175,7 +175,7 @@ Object Dict::lookupNF(const char *key) const {
   return Object(objNull);
 }
 
-GBool Dict::lookupInt(const char *key, const char *alt_key, int *value) const
+bool Dict::lookupInt(const char *key, const char *alt_key, int *value) const
 {
   auto obj1 = lookup(key);
   if (obj1.isNull() && alt_key != nullptr) {
@@ -183,11 +183,11 @@ GBool Dict::lookupInt(const char *key, const char *alt_key, int *value) const
   }
   if (obj1.isInt()) {
     *value = obj1.getInt();
-    return gTrue;
+    return true;
   }
-  return gFalse;
+  return false;
 }
 
-GBool Dict::hasKey(const char *key) const {
+bool Dict::hasKey(const char *key) const {
   return find(key) != nullptr;
 }

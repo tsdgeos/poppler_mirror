@@ -44,22 +44,22 @@ public:
 
   // Read a big-endian unsigned 16-bit integer.  Fills in *val and
   // returns true if successful.
-  virtual GBool getU16BE(int pos, int *val) = 0;
+  virtual bool getU16BE(int pos, int *val) = 0;
 
   // Read a big-endian unsigned 32-bit integer.  Fills in *val and
   // returns true if successful.
-  virtual GBool getU32BE(int pos, Guint *val) = 0;
+  virtual bool getU32BE(int pos, Guint *val) = 0;
 
   // Read a little-endian unsigned 32-bit integer.  Fills in *val and
   // returns true if successful.
-  virtual GBool getU32LE(int pos, Guint *val) = 0;
+  virtual bool getU32LE(int pos, Guint *val) = 0;
 
   // Read a big-endian unsigned <size>-byte integer, where 1 <= size
   // <= 4.  Fills in *val and returns true if successful.
-  virtual GBool getUVarBE(int pos, int size, Guint *val) = 0;
+  virtual bool getUVarBE(int pos, int size, Guint *val) = 0;
 
   // Compare against a string.  Returns true if equal.
-  virtual GBool cmp(int pos, const char *s) = 0;
+  virtual bool cmp(int pos, const char *s) = 0;
 
 };
 
@@ -71,11 +71,11 @@ public:
   static MemReader *make(const char *bufA, int lenA);
   ~MemReader();
   int getByte(int pos) override;
-  GBool getU16BE(int pos, int *val) override;
-  GBool getU32BE(int pos, Guint *val) override;
-  GBool getU32LE(int pos, Guint *val) override;
-  GBool getUVarBE(int pos, int size, Guint *val) override;
-  GBool cmp(int pos, const char *s) override;
+  bool getU16BE(int pos, int *val) override;
+  bool getU32BE(int pos, Guint *val) override;
+  bool getU32LE(int pos, Guint *val) override;
+  bool getUVarBE(int pos, int size, Guint *val) override;
+  bool cmp(int pos, const char *s) override;
 
 private:
 
@@ -104,56 +104,56 @@ int MemReader::getByte(int pos) {
   return buf[pos] & 0xff;
 }
 
-GBool MemReader::getU16BE(int pos, int *val) {
+bool MemReader::getU16BE(int pos, int *val) {
   if (pos < 0 || pos > len - 2) {
-    return gFalse;
+    return false;
   }
   *val = ((buf[pos] & 0xff) << 8) +
          (buf[pos+1] & 0xff);
-  return gTrue;
+  return true;
 }
 
-GBool MemReader::getU32BE(int pos, Guint *val) {
+bool MemReader::getU32BE(int pos, Guint *val) {
   if (pos < 0 || pos > len - 4) {
-    return gFalse;
+    return false;
   }
   *val = ((buf[pos] & 0xff) << 24) +
          ((buf[pos+1] & 0xff) << 16) +
          ((buf[pos+2] & 0xff) << 8) +
          (buf[pos+3] & 0xff);
-  return gTrue;
+  return true;
 }
 
-GBool MemReader::getU32LE(int pos, Guint *val) {
+bool MemReader::getU32LE(int pos, Guint *val) {
   if (pos < 0 || pos > len - 4) {
-    return gFalse;
+    return false;
   }
   *val = (buf[pos] & 0xff) +
          ((buf[pos+1] & 0xff) << 8) +
          ((buf[pos+2] & 0xff) << 16) +
          ((buf[pos+3] & 0xff) << 24);
-  return gTrue;
+  return true;
 }
 
-GBool MemReader::getUVarBE(int pos, int size, Guint *val) {
+bool MemReader::getUVarBE(int pos, int size, Guint *val) {
   int i;
 
   if (size < 1 || size > 4 || pos < 0 || pos > len - size) {
-    return gFalse;
+    return false;
   }
   *val = 0;
   for (i = 0; i < size; ++i) {
     *val = (*val << 8) + (buf[pos + i] & 0xff);
   }
-  return gTrue;
+  return true;
 }
 
-GBool MemReader::cmp(int pos, const char *s) {
+bool MemReader::cmp(int pos, const char *s) {
   int n;
 
   n = (int)strlen(s);
   if (pos < 0 || len < n || pos > len - n) {
-    return gFalse;
+    return false;
   }
   return !memcmp(buf + pos, s, n);
 }
@@ -166,16 +166,16 @@ public:
   static FileReader *make(const char *fileName);
   ~FileReader();
   int getByte(int pos) override;
-  GBool getU16BE(int pos, int *val) override;
-  GBool getU32BE(int pos, Guint *val) override;
-  GBool getU32LE(int pos, Guint *val) override;
-  GBool getUVarBE(int pos, int size, Guint *val) override;
-  GBool cmp(int pos, const char *s) override;
+  bool getU16BE(int pos, int *val) override;
+  bool getU32BE(int pos, Guint *val) override;
+  bool getU32LE(int pos, Guint *val) override;
+  bool getUVarBE(int pos, int size, Guint *val) override;
+  bool cmp(int pos, const char *s) override;
 
 private:
 
   FileReader(FILE *fA);
-  GBool fillBuf(int pos, int len);
+  bool fillBuf(int pos, int len);
 
   FILE *f;
   char buf[1024];
@@ -208,77 +208,77 @@ int FileReader::getByte(int pos) {
   return buf[pos - bufPos] & 0xff;
 }
 
-GBool FileReader::getU16BE(int pos, int *val) {
+bool FileReader::getU16BE(int pos, int *val) {
   if (!fillBuf(pos, 2)) {
-    return gFalse;
+    return false;
   }
   *val = ((buf[pos - bufPos] & 0xff) << 8) +
          (buf[pos - bufPos + 1] & 0xff);
-  return gTrue;
+  return true;
 }
 
-GBool FileReader::getU32BE(int pos, Guint *val) {
+bool FileReader::getU32BE(int pos, Guint *val) {
   if (!fillBuf(pos, 4)) {
-    return gFalse;
+    return false;
   }
   *val = ((buf[pos - bufPos] & 0xff) << 24) +
          ((buf[pos - bufPos + 1] & 0xff) << 16) +
          ((buf[pos - bufPos + 2] & 0xff) << 8) +
          (buf[pos - bufPos + 3] & 0xff);
-  return gTrue;
+  return true;
 }
 
-GBool FileReader::getU32LE(int pos, Guint *val) {
+bool FileReader::getU32LE(int pos, Guint *val) {
   if (!fillBuf(pos, 4)) {
-    return gFalse;
+    return false;
   }
   *val = (buf[pos - bufPos] & 0xff) +
          ((buf[pos - bufPos + 1] & 0xff) << 8) +
          ((buf[pos - bufPos + 2] & 0xff) << 16) +
          ((buf[pos - bufPos + 3] & 0xff) << 24);
-  return gTrue;
+  return true;
 }
 
-GBool FileReader::getUVarBE(int pos, int size, Guint *val) {
+bool FileReader::getUVarBE(int pos, int size, Guint *val) {
   int i;
 
   if (size < 1 || size > 4 || !fillBuf(pos, size)) {
-    return gFalse;
+    return false;
   }
   *val = 0;
   for (i = 0; i < size; ++i) {
     *val = (*val << 8) + (buf[pos - bufPos + i] & 0xff);
   }
-  return gTrue;
+  return true;
 }
 
-GBool FileReader::cmp(int pos, const char *s) {
+bool FileReader::cmp(int pos, const char *s) {
   int n;
 
   n = (int)strlen(s);
   if (!fillBuf(pos, n)) {
-    return gFalse;
+    return false;
   }
   return !memcmp(buf - bufPos + pos, s, n);
 }
 
-GBool FileReader::fillBuf(int pos, int len) {
+bool FileReader::fillBuf(int pos, int len) {
   if (pos < 0 || len < 0 || len > (int)sizeof(buf) ||
       pos > INT_MAX - (int)sizeof(buf)) {
-    return gFalse;
+    return false;
   }
   if (pos >= bufPos && pos + len <= bufPos + bufLen) {
-    return gTrue;
+    return true;
   }
   if (fseek(f, pos, SEEK_SET)) {
-    return gFalse;
+    return false;
   }
   bufPos = pos;
   bufLen = (int)fread(buf, 1, sizeof(buf), f);
   if (bufLen < len) {
-    return gFalse;
+    return false;
   }
-  return gTrue;
+  return true;
 }
 
 //------------------------------------------------------------------------
@@ -289,16 +289,16 @@ public:
   static StreamReader *make(int (*getCharA)(void *data), void *dataA);
   ~StreamReader();
   int getByte(int pos) override;
-  GBool getU16BE(int pos, int *val) override;
-  GBool getU32BE(int pos, Guint *val) override;
-  GBool getU32LE(int pos, Guint *val) override;
-  GBool getUVarBE(int pos, int size, Guint *val) override;
-  GBool cmp(int pos, const char *s) override;
+  bool getU16BE(int pos, int *val) override;
+  bool getU32BE(int pos, Guint *val) override;
+  bool getU32LE(int pos, Guint *val) override;
+  bool getUVarBE(int pos, int size, Guint *val) override;
+  bool cmp(int pos, const char *s) override;
 
 private:
 
   StreamReader(int (*getCharA)(void *data), void *dataA);
-  GBool fillBuf(int pos, int len);
+  bool fillBuf(int pos, int len);
 
   int (*getChar)(void *data);
   void *data;
@@ -329,68 +329,68 @@ int StreamReader::getByte(int pos) {
   return buf[pos - bufPos] & 0xff;
 }
 
-GBool StreamReader::getU16BE(int pos, int *val) {
+bool StreamReader::getU16BE(int pos, int *val) {
   if (!fillBuf(pos, 2)) {
-    return gFalse;
+    return false;
   }
   *val = ((buf[pos - bufPos] & 0xff) << 8) +
          (buf[pos - bufPos + 1] & 0xff);
-  return gTrue;
+  return true;
 }
 
-GBool StreamReader::getU32BE(int pos, Guint *val) {
+bool StreamReader::getU32BE(int pos, Guint *val) {
   if (!fillBuf(pos, 4)) {
-    return gFalse;
+    return false;
   }
   *val = ((buf[pos - bufPos] & 0xff) << 24) +
          ((buf[pos - bufPos + 1] & 0xff) << 16) +
          ((buf[pos - bufPos + 2] & 0xff) << 8) +
          (buf[pos - bufPos + 3] & 0xff);
-  return gTrue;
+  return true;
 }
 
-GBool StreamReader::getU32LE(int pos, Guint *val) {
+bool StreamReader::getU32LE(int pos, Guint *val) {
   if (!fillBuf(pos, 4)) {
-    return gFalse;
+    return false;
   }
   *val = (buf[pos - bufPos] & 0xff) +
          ((buf[pos - bufPos + 1] & 0xff) << 8) +
          ((buf[pos - bufPos + 2] & 0xff) << 16) +
          ((buf[pos - bufPos + 3] & 0xff) << 24);
-  return gTrue;
+  return true;
 }
 
-GBool StreamReader::getUVarBE(int pos, int size, Guint *val) {
+bool StreamReader::getUVarBE(int pos, int size, Guint *val) {
   int i;
 
   if (size < 1 || size > 4 || !fillBuf(pos, size)) {
-    return gFalse;
+    return false;
   }
   *val = 0;
   for (i = 0; i < size; ++i) {
     *val = (*val << 8) + (buf[pos - bufPos + i] & 0xff);
   }
-  return gTrue;
+  return true;
 }
 
-GBool StreamReader::cmp(int pos, const char *s) {
+bool StreamReader::cmp(int pos, const char *s) {
   const int n = (int)strlen(s);
   if (!fillBuf(pos, n)) {
-    return gFalse;
+    return false;
   }
   const int posDiff = pos - bufPos;
   return !memcmp(buf + posDiff, s, n);
 }
 
-GBool StreamReader::fillBuf(int pos, int len) {
+bool StreamReader::fillBuf(int pos, int len) {
   int c;
 
   if (pos < 0 || len < 0 || len > (int)sizeof(buf) ||
       pos > INT_MAX - (int)sizeof(buf)) {
-    return gFalse;
+    return false;
   }
   if (pos < bufPos) {
-    return gFalse;
+    return false;
   }
 
   // if requested region will not fit in the current buffer...
@@ -410,7 +410,7 @@ GBool StreamReader::fillBuf(int pos, int len) {
       bufLen = 0;
       while (bufPos < pos) {
 	if ((c = (*getChar)(data)) < 0) {
-	  return gFalse;
+	  return false;
 	}
 	++bufPos;
       }
@@ -420,12 +420,12 @@ GBool StreamReader::fillBuf(int pos, int len) {
   // read the rest of the requested data
   while (bufPos + bufLen < pos + len) {
     if ((c = (*getChar)(data)) < 0) {
-      return gFalse;
+      return false;
     }
     buf[bufLen++] = (char)c;
   }
 
-  return gTrue;
+  return true;
 }
 
 }

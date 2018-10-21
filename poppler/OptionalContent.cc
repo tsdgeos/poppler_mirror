@@ -35,12 +35,12 @@ OCGs::OCGs(Object *ocgObject, XRef *xref) :
   m_xref(xref)
 {
   // we need to parse the dictionary here, and build optionalContentGroups
-  ok = gTrue;
+  ok = true;
 
   Object ocgList = ocgObject->dictLookup("OCGs");
   if (!ocgList.isArray()) {
     error(errSyntaxError, -1, "Expected the optional content group list, but wasn't able to find it, or it isn't an Array");
-    ok = gFalse;
+    ok = false;
     return;
   }
 
@@ -64,7 +64,7 @@ OCGs::OCGs(Object *ocgObject, XRef *xref) :
   Object defaultOcgConfig = ocgObject->dictLookup("D");
   if (!defaultOcgConfig.isDict()) {
     error(errSyntaxError, -1, "Expected the default config, but wasn't able to find it, or it isn't a Dictionary");
-    ok = gFalse;
+    ok = false;
     return;
   }
 
@@ -194,14 +194,14 @@ bool OCGs::optContentIsVisible( Object *dictRef )
   return result;
 }
 
-GBool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
+bool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
   OptionalContentGroup *ocg;
-  GBool ret;
+  bool ret;
 
   if (recursion > visibilityExprRecursionLimit) {
     error(errSyntaxError, -1,
 	  "Loop detected in optional content visibility expression");
-    return gTrue;
+    return true;
   }
   if (expr->isRef()) {
     if ((ocg = findOcgByRef(expr->getRef()))) {
@@ -212,7 +212,7 @@ GBool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
   if (!expr2.isArray() || expr2.arrayGetLength() < 1) {
     error(errSyntaxError, -1,
 	  "Invalid optional content visibility expression");
-    return gTrue;
+    return true;
   }
   Object op = expr2.arrayGet(0);
   if (op.isName("Not")) {
@@ -222,16 +222,16 @@ GBool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
     } else {
       error(errSyntaxError, -1,
 	    "Invalid optional content visibility expression");
-      ret = gTrue;
+      ret = true;
     }
   } else if (op.isName("And")) {
-    ret = gTrue;
+    ret = true;
     for (int i = 1; i < expr2.arrayGetLength() && ret; ++i) {
       Object obj = expr2.arrayGetNF(i);
       ret = evalOCVisibilityExpr(&obj, recursion + 1);
     }
   } else if (op.isName("Or")) {
-    ret = gFalse;
+    ret = false;
     for (int i = 1; i < expr2.arrayGetLength() && !ret; ++i) {
       Object obj = expr2.arrayGetNF(i);
       ret = evalOCVisibilityExpr(&obj, recursion + 1);
@@ -239,7 +239,7 @@ GBool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
   } else {
     error(errSyntaxError, -1,
 	  "Invalid optional content visibility expression");
-    ret = gTrue;
+    ret = true;
   }
   return ret;
 }

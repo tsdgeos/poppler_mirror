@@ -24,8 +24,8 @@ Linearization::Linearization (BaseStream *str)
 
   str->reset();
   parser = new Parser(nullptr,
-      new Lexer(nullptr, str->makeSubStream(str->getStart(), gFalse, 0, Object(objNull))),
-      gFalse);
+      new Lexer(nullptr, str->makeSubStream(str->getStart(), false, 0, Object(objNull))),
+      false);
   Object obj1 = parser->getObj();
   Object obj2 = parser->getObj();
   Object obj3 = parser->getObj();

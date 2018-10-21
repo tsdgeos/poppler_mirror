@@ -35,11 +35,11 @@ PageTransition::PageTransition (Object *trans) {
   direction = transitionInward;
   angle = 0;
   scale = 1.0;
-  rectangular = gFalse;
-  ok = gTrue;
+  rectangular = false;
+  ok = true;
 
   if (!trans || !trans->isDict ()) {
-    ok = gFalse;
+    ok = false;
     return;
   }
 

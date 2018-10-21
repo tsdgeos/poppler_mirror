@@ -42,7 +42,7 @@
 //------------------------------------------------------------------------
 
 struct CMapVectorEntry {
-  GBool isVector;
+  bool isVector;
   union {
     CMapVectorEntry *vector;
     CID cid;
@@ -302,11 +302,11 @@ CMap::CMap(GooString *collectionA, GooString *cMapNameA) {
 
   collection = collectionA;
   cMapName = cMapNameA;
-  isIdent = gFalse;
+  isIdent = false;
   wMode = 0;
   vector = (CMapVectorEntry *)gmallocn(256, sizeof(CMapVectorEntry));
   for (i = 0; i < 256; ++i) {
-    vector[i].isVector = gFalse;
+    vector[i].isVector = false;
     vector[i].cid = 0;
   }
   refCnt = 1;
@@ -315,7 +315,7 @@ CMap::CMap(GooString *collectionA, GooString *cMapNameA) {
 CMap::CMap(GooString *collectionA, GooString *cMapNameA, int wModeA) {
   collection = collectionA;
   cMapName = cMapNameA;
-  isIdent = gTrue;
+  isIdent = true;
   wMode = wModeA;
   vector = nullptr;
   refCnt = 1;
@@ -366,11 +366,11 @@ void CMap::copyVector(CMapVectorEntry *dest, CMapVectorEntry *src) {
   for (i = 0; i < 256; ++i) {
     if (src[i].isVector) {
       if (!dest[i].isVector) {
-	dest[i].isVector = gTrue;
+	dest[i].isVector = true;
 	dest[i].vector =
 	  (CMapVectorEntry *)gmallocn(256, sizeof(CMapVectorEntry));
 	for (j = 0; j < 256; ++j) {
-	  dest[i].vector[j].isVector = gFalse;
+	  dest[i].vector[j].isVector = false;
 	  dest[i].vector[j].cid = 0;
 	}
       }
@@ -395,11 +395,11 @@ void CMap::addCIDs(Guint start, Guint end, Guint nBytes, CID firstCID) {
   for (i = nBytes - 1; i >= 1; --i) {
     byte = (start >> (8 * i)) & 0xff;
     if (!vec[byte].isVector) {
-      vec[byte].isVector = gTrue;
+      vec[byte].isVector = true;
       vec[byte].vector =
 	  (CMapVectorEntry *)gmallocn(256, sizeof(CMapVectorEntry));
       for (j = 0; j < 256; ++j) {
-	vec[byte].vector[j].isVector = gFalse;
+	vec[byte].vector[j].isVector = false;
 	vec[byte].vector[j].cid = 0;
       }
     }
@@ -447,7 +447,7 @@ void CMap::decRefCnt() {
   }
 }
 
-GBool CMap::match(const GooString *collectionA, const GooString *cMapNameA) {
+bool CMap::match(const GooString *collectionA, const GooString *cMapNameA) {
   return !collection->cmp(collectionA) && !cMapName->cmp(cMapNameA);
 }
 

@@ -52,21 +52,21 @@ public:
   int getChar() override;
   int lookChar() override;
   GooString *getPSFilter(int psLevel, const char *indent) override;
-  GBool isBinary(GBool last = gTrue) override;
+  bool isBinary(bool last = true) override;
   virtual Object *getGlobalsStream() { return &globalsStream; }
   virtual Ref getGlobalsStreamRef() { return globalsStreamRef; }
 
 private:
-  GBool hasGetChars() override { return true; }
+  bool hasGetChars() override { return true; }
   int getChars(int nChars, Guchar *buffer) override;
 
   void readSegments();
-  GBool readSymbolDictSeg(Guint segNum, Guint length,
+  bool readSymbolDictSeg(Guint segNum, Guint length,
 			  Guint *refSegs, Guint nRefSegs);
-  void readTextRegionSeg(Guint segNum, GBool imm,
-			 GBool lossless, Guint length,
+  void readTextRegionSeg(Guint segNum, bool imm,
+			 bool lossless, Guint length,
 			 Guint *refSegs, Guint nRefSegs);
-  JBIG2Bitmap *readTextRegion(GBool huff, GBool refine,
+  JBIG2Bitmap *readTextRegion(bool huff, bool refine,
 			      int w, int h,
 			      Guint numInstances,
 			      Guint logStrips,
@@ -88,26 +88,26 @@ private:
 			      Guint templ,
 			      int *atx, int *aty);
   void readPatternDictSeg(Guint segNum, Guint length);
-  void readHalftoneRegionSeg(Guint segNum, GBool imm,
-			     GBool lossless, Guint length,
+  void readHalftoneRegionSeg(Guint segNum, bool imm,
+			     bool lossless, Guint length,
 			     Guint *refSegs, Guint nRefSegs);
-  void readGenericRegionSeg(Guint segNum, GBool imm,
-			    GBool lossless, Guint length);
+  void readGenericRegionSeg(Guint segNum, bool imm,
+			    bool lossless, Guint length);
   void mmrAddPixels(int a1, int blackPixels,
 		    int *codingLine, int *a0i, int w);
   void mmrAddPixelsNeg(int a1, int blackPixels,
 		       int *codingLine, int *a0i, int w);
-  JBIG2Bitmap *readGenericBitmap(GBool mmr, int w, int h,
-				 int templ, GBool tpgdOn,
-				 GBool useSkip, JBIG2Bitmap *skip,
+  JBIG2Bitmap *readGenericBitmap(bool mmr, int w, int h,
+				 int templ, bool tpgdOn,
+				 bool useSkip, JBIG2Bitmap *skip,
 				 int *atx, int *aty,
 				 int mmrDataLength);
-  void readGenericRefinementRegionSeg(Guint segNum, GBool imm,
-				      GBool lossless, Guint length,
+  void readGenericRefinementRegionSeg(Guint segNum, bool imm,
+				      bool lossless, Guint length,
 				      Guint *refSegs,
 				      Guint nRefSegs);
   JBIG2Bitmap *readGenericRefinementRegion(int w, int h,
-					   int templ, GBool tpgrOn,
+					   int templ, bool tpgrOn,
 					   JBIG2Bitmap *refBitmap,
 					   int refDX, int refDY,
 					   int *atx, int *aty);
@@ -123,11 +123,11 @@ private:
   void resetRefinementStats(Guint templ,
 			    JArithmeticDecoderStats *prevStats);
   void resetIntStats(int symCodeLen);
-  GBool readUByte(Guint *x);
-  GBool readByte(int *x);
-  GBool readUWord(Guint *x);
-  GBool readULong(Guint *x);
-  GBool readLong(int *x);
+  bool readUByte(Guint *x);
+  bool readByte(int *x);
+  bool readUWord(Guint *x);
+  bool readULong(Guint *x);
+  bool readLong(int *x);
 
   Object globalsStream;
   Ref globalsStreamRef;

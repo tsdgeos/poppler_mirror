@@ -92,12 +92,12 @@ public:
   MarkedContentOutputDev(int mcidA);
   virtual ~MarkedContentOutputDev();
 
-  virtual GBool isOk() { return gTrue; }
-  GBool upsideDown() override { return gTrue; }
-  GBool useDrawChar() override { return gTrue; }
-  GBool interpretType3Chars() override { return gFalse; }
-  GBool needNonText() override { return gFalse; }
-  GBool needCharCount() override { return gFalse; }
+  virtual bool isOk() { return true; }
+  bool upsideDown() override { return true; }
+  bool useDrawChar() override { return true; }
+  bool interpretType3Chars() override { return false; }
+  bool needNonText() override { return false; }
+  bool needCharCount() override { return false; }
 
   void startPage(int pageNum, GfxState *state, XRef *xref) override;
   void endPage() override;

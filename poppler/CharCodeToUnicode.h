@@ -81,7 +81,7 @@ public:
   void decRefCnt();
 
   // Return true if this mapping matches the specified <tagA>.
-  GBool match(GooString *tagA);
+  bool match(GooString *tagA);
 
   // Set the mapping for <c>.
   void setMapping(CharCode c, Unicode *u, int len);
@@ -105,7 +105,7 @@ private:
   CharCodeToUnicode();
   CharCodeToUnicode(GooString *tagA);
   CharCodeToUnicode(GooString *tagA, Unicode *mapA,
-		    CharCode mapLenA, GBool copyMap,
+		    CharCode mapLenA, bool copyMap,
 		    CharCodeToUnicodeString *sMapA,
 		    int sMapLenA, int sMapSizeA);
 
@@ -115,7 +115,7 @@ private:
   CharCodeToUnicodeString *sMap;
   int sMapLen, sMapSize;
   std::atomic_int refCnt;
-  GBool isIdentity;
+  bool isIdentity;
 };
 
 //------------------------------------------------------------------------

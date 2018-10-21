@@ -265,13 +265,13 @@ poppler_page_get_text_page (PopplerPage *page)
     TextOutputDev *text_dev;
     Gfx           *gfx;
 
-    text_dev = new TextOutputDev (nullptr, gTrue, 0, gFalse, gFalse);
+    text_dev = new TextOutputDev (nullptr, true, 0, false, false);
     gfx = page->page->createGfx(text_dev,
 				72.0, 72.0, 0,
-				gFalse, /* useMediaBox */
-				gTrue, /* Crop */
+				false, /* useMediaBox */
+				true, /* Crop */
 				-1, -1, -1, -1,
-				gFalse, /* printing */
+				false, /* printing */
 				nullptr, nullptr);
     page->page->display(gfx);
     text_dev->endPage();
@@ -304,13 +304,13 @@ annot_is_markup (Annot *annot)
     }
 }
 
-static GBool
+static bool
 poppler_print_annot_cb (Annot *annot, void *user_data)
 {
   PopplerPrintFlags user_print_flags = (PopplerPrintFlags)GPOINTER_TO_INT (user_data);
 
   if (annot->getFlags () & Annot::flagHidden)
-    return gFalse;
+    return false;
 
   if (user_print_flags & POPPLER_PRINT_STAMP_ANNOTS_ONLY) {
     return (annot->getType() == Annot::typeStamp) ?
@@ -331,7 +331,7 @@ poppler_print_annot_cb (Annot *annot, void *user_data)
 static void
 _poppler_page_render (PopplerPage      *page,
 		      cairo_t          *cairo,
-		      GBool             printing,
+		      bool             printing,
                       PopplerPrintFlags print_flags)
 {
   CairoOutputDev *output_dev;
@@ -344,7 +344,7 @@ _poppler_page_render (PopplerPage      *page,
 
 
   if (!printing && page->text == nullptr) {
-    page->text = new TextPage (gFalse);
+    page->text = new TextPage (false);
     output_dev->setTextPage (page->text);
   }
   /* NOTE: instead of passing -1 we should/could use cairo_clip_extents()
@@ -352,8 +352,8 @@ _poppler_page_render (PopplerPage      *page,
   cairo_save (cairo);
   page->page->displaySlice(output_dev,
 			   72.0, 72.0, 0,
-			   gFalse, /* useMediaBox */
-			   gTrue, /* Crop */
+			   false, /* useMediaBox */
+			   true, /* Crop */
 			   -1, -1,
 			   -1, -1,
 			   printing,
@@ -382,7 +382,7 @@ poppler_page_render (PopplerPage *page,
 {
   g_return_if_fail (POPPLER_IS_PAGE (page));
 
-  _poppler_page_render (page, cairo, gFalse, (PopplerPrintFlags)0);
+  _poppler_page_render (page, cairo, false, (PopplerPrintFlags)0);
 }
 
 /**
@@ -403,7 +403,7 @@ poppler_page_render_for_printing_with_options (PopplerPage      *page,
 {
   g_return_if_fail (POPPLER_IS_PAGE (page));
 
-  _poppler_page_render (page, cairo, gTrue, options);
+  _poppler_page_render (page, cairo, true, options);
 }
 
 /**
@@ -419,7 +419,7 @@ poppler_page_render_for_printing (PopplerPage *page,
 {
   g_return_if_fail (POPPLER_IS_PAGE (page));
 
-  _poppler_page_render (page, cairo, gTrue, POPPLER_PRINT_ALL);
+  _poppler_page_render (page, cairo, true, POPPLER_PRINT_ALL);
 }
 
 static cairo_surface_t *
@@ -911,9 +911,9 @@ poppler_page_find_text_with_options (PopplerPage     *page,
   yMin = backwards ? height : 0;
 
   while (text_dev->findText (ucs4, ucs4_len,
-                             gFalse, gTrue, // startAtTop, stopAtBottom
+                             false, true, // startAtTop, stopAtBottom
                              start_at_last,
-                             gFalse, //stopAtLast
+                             false, //stopAtLast
                              options & POPPLER_FIND_CASE_SENSITIVE,
                              backwards,
                              options & POPPLER_FIND_WHOLE_WORDS_ONLY,
@@ -953,7 +953,7 @@ poppler_page_find_text (PopplerPage *page,
 
 static CairoImageOutputDev *
 poppler_page_get_image_output_dev (PopplerPage *page,
-				   GBool (*imgDrawDeviceCbk)(int img_id, void *data),
+				   bool (*imgDrawDeviceCbk)(int img_id, void *data),
 				   void *imgDrawCbkData)
 {
   CairoImageOutputDev *image_dev;
@@ -968,10 +968,10 @@ poppler_page_get_image_output_dev (PopplerPage *page,
 
   gfx = page->page->createGfx(image_dev,
 			      72.0, 72.0, 0,
-			      gFalse, /* useMediaBox */
-			      gTrue, /* Crop */
+			      false, /* useMediaBox */
+			      true, /* Crop */
 			      -1, -1, -1, -1,
-			      gFalse, /* printing */
+			      false, /* printing */
 			      nullptr, nullptr);
   page->page->display(gfx);
   delete gfx;
@@ -1026,7 +1026,7 @@ poppler_page_get_image_mapping (PopplerPage *page)
   return map_list;	
 }
 
-static GBool
+static bool
 image_draw_decide_cb (int image_id, void *data)
 {
   return (image_id == GPOINTER_TO_INT (data));
@@ -1116,12 +1116,12 @@ poppler_page_render_to_ps (PopplerPage   *page,
                                     nullptr, pages,
                                     psModePS, (int)ps_file->paper_width,
                                     (int)ps_file->paper_height, ps_file->duplex,
-                                    0, 0, 0, 0, gFalse, gFalse);
+                                    0, 0, 0, 0, false, false);
   }
 
 
   ps_file->document->doc->displayPage (ps_file->out, page->index + 1, 72.0, 72.0,
-				       0, gFalse, gTrue, gFalse);
+				       0, false, true, false);
 }
 
 static void

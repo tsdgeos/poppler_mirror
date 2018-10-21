@@ -62,9 +62,9 @@ struct MediaWindowParameters {
   double XPosition;                      // 0.5
   double YPosition;                      // 0.5
 
-  GBool hasTitleBar;                      // true
-  GBool hasCloseButton;                   // true
-  GBool isResizeable;                     // true
+  bool hasTitleBar;                      // true
+  bool hasCloseButton;                   // true
+  bool isResizeable;                     // true
 };
 
 
@@ -99,7 +99,7 @@ struct MediaParameters {
   // correspond to 'fit' SMIL's attribute
   MediaFittingPolicy fittingPolicy;        // fittingUndefined
 
-  GBool autoPlay;                          // true
+  bool autoPlay;                          // true
 
   // repeat count, can be real values, 0 means forever
   double repeatCount;                      // 1.0
@@ -111,7 +111,7 @@ struct MediaParameters {
   double opacity;                          // 1.0
   
 
-  GBool showControls;                      // false
+  bool showControls;                      // false
 
   MediaWindowParameters windowParams;
 };
@@ -123,7 +123,7 @@ class MediaRendition {
   ~MediaRendition();
   MediaRendition& operator=(const MediaRendition &) = delete;
 
-  GBool isOk () const { return ok; }
+  bool isOk () const { return ok; }
 
   const MediaParameters* getMHParameters() const { return &MH; }
   const MediaParameters* getBEParameters() const { return &BE; }
@@ -131,7 +131,7 @@ class MediaRendition {
   const GooString* getContentType() const { return contentType; }
   const GooString* getFileName() const { return fileName; }
 
-  GBool getIsEmbedded() const { return isEmbedded; }
+  bool getIsEmbedded() const { return isEmbedded; }
   Stream* getEmbbededStream() const { return isEmbedded ? embeddedStreamObject.getStream() : nullptr; }
   const Object* getEmbbededStreamObject() const { return isEmbedded ? &embeddedStreamObject : nullptr; }
   // write embedded stream to file
@@ -140,14 +140,14 @@ class MediaRendition {
   MediaRendition* copy() const;
 
  private:
-  GBool ok;
+  bool ok;
 
   // "Must Honor" parameters
   MediaParameters MH;
   // "Best Effort" parameters
   MediaParameters BE;
 
-  GBool isEmbedded;
+  bool isEmbedded;
 
   GooString* contentType;
 

@@ -38,8 +38,8 @@ public:
   virtual PDFDoc *buildPDFDoc(const GooString &uri, GooString *ownerPassword = nullptr,
       GooString *userPassword = nullptr, void *guiDataA = nullptr) = 0;
 
-  // Returns gTrue if the builder supports building a PDFDoc from the URI.
-  virtual GBool supports(const GooString &uri) = 0;
+  // Returns true if the builder supports building a PDFDoc from the URI.
+  virtual bool supports(const GooString &uri) = 0;
 
 };
 

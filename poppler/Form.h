@@ -89,7 +89,7 @@ public:
   virtual ~FormWidget();
 
   // Check if point is inside the field bounding rect
-  GBool inRect(double x, double y) const;
+  bool inRect(double x, double y) const;
 
   // Get the field bounding rect
   void getRect(double *x1, double *y1, double *x2, double *y2) const;
@@ -112,7 +112,7 @@ public:
   const GooString *getMappingName() const;
   GooString *getFullyQualifiedName();
 
-  GBool isModified () const;
+  bool isModified () const;
 
   bool isReadOnly() const;
   void setReadOnly(bool value);
@@ -168,8 +168,8 @@ public:
 
   FormButtonType getButtonType() const;
   
-  void setState (GBool state);
-  GBool getState () const;
+  void setState (bool state);
+  bool getState () const;
 
   const char* getOnStr() const;
   void setAppearanceState(const char *state);
@@ -300,7 +300,7 @@ public:
   bool isReadOnly () const { return readOnly; }
 
   GooString* getDefaultAppearance() const { return defaultAppearance; }
-  GBool hasTextQuadding() const { return hasQuadding; }
+  bool hasTextQuadding() const { return hasQuadding; }
   VariableTextQuadding getTextQuadding() const { return quadding; }
 
   const GooString *getPartialName() const { return partialName; }
@@ -345,7 +345,7 @@ public:
 
   // Variable Text
   GooString *defaultAppearance;
-  GBool hasQuadding;
+  bool hasQuadding;
   VariableTextQuadding quadding;
 
 private:
@@ -365,9 +365,9 @@ public:
 
   bool noToggleToOff () const { return noAllOff; }
 
-  // returns gTrue if the state modification is accepted
-  GBool setState (const char *state);
-  GBool getState(const char *state) const;
+  // returns true if the state modification is accepted
+  bool setState (const char *state);
+  bool getState(const char *state) const;
 
   const char *getAppearanceState() const { return appearanceState.isName() ? appearanceState.getName() : nullptr; }
 
@@ -560,7 +560,7 @@ public:
   static FormField *createFieldFromDict (Object* obj, PDFDoc *docA, const Ref& aref, FormField *parent, std::set<int> *usedParents);
 
   Object *getObj () const { return acroForm; }
-  GBool getNeedAppearances () const { return needAppearances; }
+  bool getNeedAppearances () const { return needAppearances; }
   int getNumFields() const { return numFields; }
   FormField* getRootField(int i) const { return rootFields[i]; }
   const GooString* getDefaultAppearance() const { return defaultAppearance; }
@@ -581,7 +581,7 @@ private:
   PDFDoc *doc;
   XRef* xref;
   Object *acroForm;
-  GBool needAppearances;
+  bool needAppearances;
   GfxResources *defaultResources;
   Object resDict;
   std::vector<Ref> calculateOrder;

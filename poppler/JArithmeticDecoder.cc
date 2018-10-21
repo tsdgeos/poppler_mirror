@@ -86,7 +86,7 @@ int JArithmeticDecoder::switchTab[47] = {
 JArithmeticDecoder::JArithmeticDecoder() {
   str = nullptr;
   dataLen = 0;
-  limitStream = gFalse;
+  limitStream = false;
   nBytesRead = 0;
 }
 
@@ -119,7 +119,7 @@ void JArithmeticDecoder::start() {
 
 void JArithmeticDecoder::restart(int dataLenA) {
   Guint cAdd;
-  GBool prevFF;
+  bool prevFF;
   int k, nBits;
 
   if (dataLen >= 0) {
@@ -131,7 +131,7 @@ void JArithmeticDecoder::restart(int dataLenA) {
     k = (-dataLen - 1) * 8 - ct;
     dataLen = dataLenA;
     cAdd = 0;
-    prevFF = gFalse;
+    prevFF = false;
     while (k > 0) {
       buf0 = readByte();
       if (prevFF) {
@@ -241,7 +241,7 @@ int JArithmeticDecoder::decodeByte(Guint context,
   return byte;
 }
 
-GBool JArithmeticDecoder::decodeInt(int *x, JArithmeticDecoderStats *stats) {
+bool JArithmeticDecoder::decodeInt(int *x, JArithmeticDecoderStats *stats) {
   int s;
   Guint v;
   int i;
@@ -293,13 +293,13 @@ GBool JArithmeticDecoder::decodeInt(int *x, JArithmeticDecoderStats *stats) {
 
   if (s) {
     if (v == 0) {
-      return gFalse;
+      return false;
     }
     *x = -(int)v;
   } else {
     *x = (int)v;
   }
-  return gTrue;
+  return true;
 }
 
 int JArithmeticDecoder::decodeIntBit(JArithmeticDecoderStats *stats) {

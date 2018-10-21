@@ -62,12 +62,12 @@ public:
   int getChar() override;
   int lookChar() override;
   GooString *getPSFilter(int psLevel, const char *indent) override;
-  GBool isBinary(GBool last = gTrue) override;
+  bool isBinary(bool last = true) override;
 
 private:
   void init();
 
-  GBool hasGetChars() override { return true; }
+  bool hasGetChars() override { return true; }
   int getChars(int nChars, Guchar *buffer) override;
 
   int colorXform;

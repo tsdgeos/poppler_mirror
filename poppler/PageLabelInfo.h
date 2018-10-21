@@ -29,8 +29,8 @@ public:
   PageLabelInfo(const PageLabelInfo &) = delete;
   PageLabelInfo& operator=(const PageLabelInfo &) = delete;
 
-  GBool labelToIndex(GooString *label, int *index) const;
-  GBool indexToLabel(int index, GooString *label) const;
+  bool labelToIndex(GooString *label, int *index) const;
+  bool indexToLabel(int index, GooString *label) const;
 
 private:
   void parse(Object *tree);

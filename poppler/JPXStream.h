@@ -89,7 +89,7 @@ struct JPXChannelDefn {
 //------------------------------------------------------------------------
 
 struct JPXTagTreeNode {
-  GBool finished;		// true if this node is finished
+  bool finished;		// true if this node is finished
   Guint val;			// current value
 };
 
@@ -100,7 +100,7 @@ struct JPXCodeBlock {
   Guint x0, y0, x1, y1;		// bounds
 
   //----- persistent state
-  GBool seen;			// true if this code-block has already
+  bool seen;			// true if this code-block has already
 				//   been seen
   Guint lBlock;			// base number of bits used for pkt data length
   Guint nextPass;		// next coding pass
@@ -173,7 +173,7 @@ struct JPXResLevel {
 
 struct JPXTileComp {
   //----- from the SIZ segment
-  GBool sgned;			// 1 for signed, 0 for unsigned
+  bool sgned;			// 1 for signed, 0 for unsigned
   Guint prec;			// precision, in bits
   Guint hSep;			// horizontal separation of samples
   Guint vSep;			// vertical separation of samples
@@ -210,7 +210,7 @@ struct JPXTileComp {
 //------------------------------------------------------------------------
 
 struct JPXTile {
-  GBool init;
+  bool init;
 
   //----- from the COD segments (main and tile)
   Guint progOrder;		// progression order
@@ -264,7 +264,7 @@ public:
   virtual int getChar() override;
   virtual int lookChar() override;
   virtual GooString *getPSFilter(int psLevel, const char *indent) override;
-  virtual GBool isBinary(GBool last = gTrue) override;
+  virtual bool isBinary(bool last = true) override;
   virtual void getImageParams(int *bitsPerComponent,
 			      StreamColorSpaceMode *csMode) override;
 
@@ -272,13 +272,13 @@ private:
 
   void fillReadBuf();
   void getImageParams2(int *bitsPerComponent, StreamColorSpaceMode *csMode);
-  GBool readBoxes();
-  GBool readColorSpecBox(Guint dataLen);
-  GBool readCodestream(Guint len);
-  GBool readTilePart();
-  GBool readTilePartData(Guint tileIdx,
-			 Guint tilePartLen, GBool tilePartToEOC);
-  GBool readCodeBlockData(JPXTileComp *tileComp,
+  bool readBoxes();
+  bool readColorSpecBox(Guint dataLen);
+  bool readCodestream(Guint len);
+  bool readTilePart();
+  bool readTilePartData(Guint tileIdx,
+			 Guint tilePartLen, bool tilePartToEOC);
+  bool readCodeBlockData(JPXTileComp *tileComp,
 			  JPXResLevel *resLevel,
 			  JPXPrecinct *precinct,
 			  JPXSubband *subband,
@@ -289,16 +289,16 @@ private:
 			     Guint r, JPXResLevel *resLevel);
   void inverseTransform1D(JPXTileComp *tileComp, int *data,
 			  Guint offset, Guint n);
-  GBool inverseMultiCompAndDC(JPXTile *tile);
-  GBool readBoxHdr(Guint *boxType, Guint *boxLen, Guint *dataLen);
+  bool inverseMultiCompAndDC(JPXTile *tile);
+  bool readBoxHdr(Guint *boxType, Guint *boxLen, Guint *dataLen);
   int readMarkerHdr(int *segType, Guint *segLen);
-  GBool readUByte(Guint *x);
-  GBool readByte(int *x);
-  GBool readUWord(Guint *x);
-  GBool readULong(Guint *x);
-  GBool readNBytes(int nBytes, GBool signd, int *x);
+  bool readUByte(Guint *x);
+  bool readByte(int *x);
+  bool readUWord(Guint *x);
+  bool readULong(Guint *x);
+  bool readNBytes(int nBytes, bool signd, int *x);
   void startBitBuf(Guint byteCountA);
-  GBool readBits(int nBits, Guint *x);
+  bool readBits(int nBits, Guint *x);
   void skipSOP();
   void skipEPH();
   Guint finishBitBuf();
@@ -308,21 +308,21 @@ private:
   Guint nComps;			// number of components
   Guint *bpc;			// bits per component, for each component
   Guint width, height;		// image size
-  GBool haveImgHdr;		// set if a JP2/JPX image header has been
+  bool haveImgHdr;		// set if a JP2/JPX image header has been
 				//   found
   JPXColorSpec cs;		// color specification
-  GBool haveCS;			// set if a color spec has been found
+  bool haveCS;			// set if a color spec has been found
   JPXPalette palette;		// the palette
-  GBool havePalette;		// set if a palette has been found
+  bool havePalette;		// set if a palette has been found
   JPXCompMap compMap;		// the component mapping
-  GBool haveCompMap;		// set if a component mapping has been found
+  bool haveCompMap;		// set if a component mapping has been found
   JPXChannelDefn channelDefn;	// channel definition
-  GBool haveChannelDefn;	// set if a channel defn has been found
+  bool haveChannelDefn;	// set if a channel defn has been found
 
   JPXImage img;			// JPEG2000 decoder data
   Guint bitBuf;			// buffer for bit reads
   int bitBufLen;		// number of bits in bitBuf
-  GBool bitBufSkip;		// true if next bit should be skipped
+  bool bitBufSkip;		// true if next bit should be skipped
 				//   (for bit stuffing)
   Guint byteCount;		// number of available bytes left
 

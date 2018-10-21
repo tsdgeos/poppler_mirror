@@ -34,17 +34,17 @@ CurlPDFDocBuilder::buildPDFDoc(const GooString &uri,
     }
 
     BaseStream *str = new CachedFileStream(
-         cachedFile, 0, gFalse, cachedFile->getLength(), Object(objNull));
+         cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
 
     return new PDFDoc(str, ownerPassword, userPassword, guiDataA);
 }
 
-GBool CurlPDFDocBuilder::supports(const GooString &uri)
+bool CurlPDFDocBuilder::supports(const GooString &uri)
 {
   if (uri.cmpN("http://", 7) == 0 || uri.cmpN("https://", 8) == 0) {
-    return gTrue;
+    return true;
   } else {
-    return gFalse;
+    return false;
   }
 }
 

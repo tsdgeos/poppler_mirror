@@ -37,7 +37,7 @@ public:
   OCGs& operator=(const OCGs &) = delete;
 
   // Is OCGS valid?
-  GBool isOk() const { return ok; }
+  bool isOk() const { return ok; }
   
   bool hasOCGs() const;
   const std::unordered_map< Ref, std::unique_ptr< OptionalContentGroup > > &getOCGs() const { return optionalContentGroups; }
@@ -56,9 +56,9 @@ public:
   bool optContentIsVisible( Object *dictRef );
 
 private:
-  GBool ok;
+  bool ok;
 
-  GBool evalOCVisibilityExpr(Object *expr, int recursion);
+  bool evalOCVisibilityExpr(Object *expr, int recursion);
   bool allOn( Array *ocgArray );
   bool allOff( Array *ocgArray );
   bool anyOn( Array *ocgArray );

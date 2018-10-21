@@ -79,7 +79,7 @@ public:
     { if (curStr.isStream()) curStr.streamSetPos(pos, dir); }
 
   // Returns true if <c> is a whitespace character.
-  static GBool isSpace(int c);
+  static bool isSpace(int c);
 
 
   // often (e.g. ~30% on PDF Refernce 1.6 pdf file from Adobe site) getChar
@@ -93,13 +93,13 @@ public:
 
 private:
 
-  int getChar(GBool comesFromLook = gFalse);
+  int getChar(bool comesFromLook = false);
   int lookChar();
 
   Array *streams;		// array of input streams
   int strPtr;			// index of current stream
   Object curStr;		// current stream
-  GBool freeArray;		// should lexer free the streams array?
+  bool freeArray;		// should lexer free the streams array?
   char tokBuf[tokBufSize];	// temporary token buffer
 
   XRef *xref;

@@ -30,8 +30,8 @@
 
 static int firstPage = 0;
 static int lastPage = 0;
-static GBool printVersion = gFalse;
-static GBool printHelp = gFalse;
+static bool printVersion = false;
+static bool printHelp = false;
 
 static const ArgDesc argDesc[] = {
   {"-f", argInt, &firstPage, 0,
@@ -146,7 +146,7 @@ static bool extractPages (const char *srcFileName, const char *destFileName) {
 int
 main (int argc, char *argv[])
 {
-  GBool ok;
+  bool ok;
   int exitCode;
 
   exitCode = 99;

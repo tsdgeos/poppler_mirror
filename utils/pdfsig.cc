@@ -116,10 +116,10 @@ static void dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_wi
     delete path;
 }
 
-static GBool printVersion = gFalse;
-static GBool printHelp = gFalse;
-static GBool dontVerifyCert = gFalse;
-static GBool dumpSignatures = gFalse;
+static bool printVersion = false;
+static bool printHelp = false;
+static bool dontVerifyCert = false;
+static bool dumpSignatures = false;
 
 static const ArgDesc argDesc[] = {
   {"-nocert", argFlag,     &dontVerifyCert,     0,
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 
   Win32Console win32Console(&argc, &argv);
   int exitCode = 99;
-  GBool ok;
+  bool ok;
 
   ok = parseArgs(argDesc, &argc, argv);
 

@@ -60,7 +60,7 @@ public:
   void init(double xx, double yx, double xy, double yy, double x0, double y0) {
     m[0] = xx; m[1] = yx; m[2] = xy; m[3] = yy; m[4] = x0; m[5] = y0;
   }
-  GBool invertTo(Matrix *other) const;
+  bool invertTo(Matrix *other) const;
   void translate(double tx, double ty);
   void scale(double sx, double sy);
   void transform(double x, double y, double *tx, double *ty) const;
@@ -239,13 +239,13 @@ public:
   virtual void createMapping(GooList *separationList, int maxSepComps);
 
   // Does this ColorSpace support getRGBLine?
-  virtual GBool useGetRGBLine() const { return gFalse; }
+  virtual bool useGetRGBLine() const { return false; }
   // Does this ColorSpace support getGrayLine?
-  virtual GBool useGetGrayLine() const { return gFalse; }
+  virtual bool useGetGrayLine() const { return false; }
   // Does this ColorSpace support getCMYKLine?
-  virtual GBool useGetCMYKLine() const { return gFalse; }
+  virtual bool useGetCMYKLine() const { return false; }
   // Does this ColorSpace support getDeviceNLine?
-  virtual GBool useGetDeviceNLine() const { return gFalse; }
+  virtual bool useGetDeviceNLine() const { return false; }
 
   // Return the number of color components.
   virtual int getNComps() const = 0;
@@ -260,7 +260,7 @@ public:
 
   // Returns true if painting operations in this color space never
   // mark the page (e.g., the "None" colorant).
-  virtual GBool isNonMarking() const { return gFalse; }
+  virtual bool isNonMarking() const { return false; }
 
   // Return the color space's overprint mask.
   Guint getOverprintMask() const { return overprintMask; }
@@ -310,10 +310,10 @@ public:
   void getCMYKLine(Guchar *in, Guchar *out, int length) override;
   void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
 
-  GBool useGetRGBLine() const override { return gTrue; }
-  GBool useGetGrayLine() const override { return gTrue; }
-  GBool useGetCMYKLine() const override { return gTrue; }
-  GBool useGetDeviceNLine() const override { return gTrue; }
+  bool useGetRGBLine() const override { return true; }
+  bool useGetGrayLine() const override { return true; }
+  bool useGetCMYKLine() const override { return true; }
+  bool useGetDeviceNLine() const override { return true; }
 
   int getNComps() const override { return 1; }
   void getDefaultColor(GfxColor *color) override;
@@ -388,10 +388,10 @@ public:
   void getCMYKLine(Guchar *in, Guchar *out, int length) override;
   void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
 
-  GBool useGetRGBLine() const override { return gTrue; }
-  GBool useGetGrayLine() const override { return gTrue; }
-  GBool useGetCMYKLine() const override { return gTrue; }
-  GBool useGetDeviceNLine() const override { return gTrue; }
+  bool useGetRGBLine() const override { return true; }
+  bool useGetGrayLine() const override { return true; }
+  bool useGetCMYKLine() const override { return true; }
+  bool useGetDeviceNLine() const override { return true; }
 
   int getNComps() const override { return 3; }
   void getDefaultColor(GfxColor *color) override;
@@ -468,9 +468,9 @@ public:
   void getRGBXLine(Guchar *in, Guchar *out, int length) override;
   void getCMYKLine(Guchar *in, Guchar *out, int length) override;
   void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
-  GBool useGetRGBLine() const override { return gTrue; }
-  GBool useGetCMYKLine() const override { return gTrue; }
-  GBool useGetDeviceNLine() const override { return gTrue; }
+  bool useGetRGBLine() const override { return true; }
+  bool useGetCMYKLine() const override { return true; }
+  bool useGetDeviceNLine() const override { return true; }
 
   int getNComps() const override { return 4; }
   void getDefaultColor(GfxColor *color) override;
@@ -554,9 +554,9 @@ public:
   void getCMYKLine(Guchar *in, Guchar *out, int length) override;
   void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
 
-  GBool useGetRGBLine() const override;
-  GBool useGetCMYKLine() const override;
-  GBool useGetDeviceNLine() const override;
+  bool useGetRGBLine() const override;
+  bool useGetCMYKLine() const override;
+  bool useGetDeviceNLine() const override;
 
   int getNComps() const override { return nComps; }
   void getDefaultColor(GfxColor *color) override;
@@ -606,9 +606,9 @@ public:
   void getCMYKLine(Guchar *in, Guchar *out, int length) override;
   void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
 
-  GBool useGetRGBLine() const override { return gTrue; }
-  GBool useGetCMYKLine() const override { return gTrue; }
-  GBool useGetDeviceNLine() const override { return gTrue; }
+  bool useGetRGBLine() const override { return true; }
+  bool useGetCMYKLine() const override { return true; }
+  bool useGetDeviceNLine() const override { return true; }
 
   int getNComps() const override { return 1; }
   void getDefaultColor(GfxColor *color) override;
@@ -659,7 +659,7 @@ public:
   int getNComps() const override { return 1; }
   void getDefaultColor(GfxColor *color) override;
 
-  GBool isNonMarking() const override { return nonMarking; }
+  bool isNonMarking() const override { return nonMarking; }
 
   // Separation-specific access.
   GooString *getName() { return name; }
@@ -669,13 +669,13 @@ public:
 private:
 
   GfxSeparationColorSpace(GooString *nameA, GfxColorSpace *altA,
-			  Function *funcA, GBool nonMarkingA,
+			  Function *funcA, bool nonMarkingA,
 			  Guint overprintMaskA, int *mappingA);
 
   GooString *name;		// colorant name
   GfxColorSpace *alt;		// alternate color space
   Function *func;		// tint transform (into alternate color space)
-  GBool nonMarking;
+  bool nonMarking;
 };
 
 //------------------------------------------------------------------------
@@ -704,7 +704,7 @@ public:
   int getNComps() const override { return nComps; }
   void getDefaultColor(GfxColor *color) override;
 
-  GBool isNonMarking() const override { return nonMarking; }
+  bool isNonMarking() const override { return nonMarking; }
 
   // DeviceN-specific access.
   const GooString *getColorantName(int i) const { return names[i]; }
@@ -715,14 +715,14 @@ private:
 
   GfxDeviceNColorSpace(int nCompsA, GooString **namesA,
 		       GfxColorSpace *alt, Function *func, GooList *sepsCSA,
-		       int *mappingA, GBool nonMarkingA, Guint overprintMaskA);
+		       int *mappingA, bool nonMarkingA, Guint overprintMaskA);
 
   int nComps;			// number of components
   GooString			// colorant names
     *names[gfxColorMaxComps];
   GfxColorSpace *alt;		// alternate color space
   Function *func;		// tint transform (into alternate color space)
-  GBool nonMarking;
+  bool nonMarking;
   GooList *sepsCS; // list of separation cs for spot colorants;
 };
 
@@ -867,14 +867,14 @@ public:
   int getType() const { return type; }
   GfxColorSpace *getColorSpace() { return colorSpace; }
   const GfxColor *getBackground() const { return &background; }
-  GBool getHasBackground() const { return hasBackground; }
+  bool getHasBackground() const { return hasBackground; }
   void getBBox(double *xMinA, double *yMinA, double *xMaxA, double *yMaxA) const
     { *xMinA = xMin; *yMinA = yMin; *xMaxA = xMax; *yMaxA = yMax; }
-  GBool getHasBBox() const { return hasBBox; }
+  bool getHasBBox() const { return hasBBox; }
 
 protected:
 
-  GBool init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
+  bool init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
   // 1: Function-based shading
   // 2: Axial shading
@@ -884,8 +884,8 @@ protected:
   // 6: Coons patch mesh
   // 7: Tensor-product patch mesh
   int type;
-  GBool hasBackground;
-  GBool hasBBox;
+  bool hasBackground;
+  bool hasBBox;
   GfxColorSpace *colorSpace;
   GfxColor background;
   double xMin, yMin, xMax, yMax;
@@ -901,14 +901,14 @@ public:
   GfxUnivariateShading(int typeA,
 		       double t0A, double t1A,
 		       Function **funcsA, int nFuncsA,
-		       GBool extend0A, GBool extend1A);
+		       bool extend0A, bool extend1A);
   GfxUnivariateShading(GfxUnivariateShading *shading);
   ~GfxUnivariateShading();
 
   double getDomain0() const { return t0; }
   double getDomain1() const { return t1; }
-  GBool getExtend0() const { return extend0; }
-  GBool getExtend1() const { return extend1; }
+  bool getExtend0() const { return extend0; }
+  bool getExtend1() const { return extend1; }
   int getNFuncs() const { return nFuncs; }
   const Function *getFunc(int i) const { return funcs[i]; }
   // returns the nComps of the shading
@@ -930,7 +930,7 @@ private:
   double t0, t1;
   Function *funcs[gfxColorMaxComps];
   int nFuncs;
-  GBool extend0, extend1;
+  bool extend0, extend1;
 
   int cacheSize, lastMatch;
   double *cacheBounds;
@@ -982,7 +982,7 @@ public:
 		  double x1A, double y1A,
 		  double t0A, double t1A,
 		  Function **funcsA, int nFuncsA,
-		  GBool extend0A, GBool extend1A);
+		  bool extend0A, bool extend1A);
   GfxAxialShading(GfxAxialShading *shading);
   ~GfxAxialShading();
 
@@ -1015,7 +1015,7 @@ public:
 		   double x1A, double y1A, double r1A,
 		   double t0A, double t1A,
 		   Function **funcsA, int nFuncsA,
-		   GBool extend0A, GBool extend1A);
+		   bool extend0A, bool extend1A);
   GfxRadialShading(GfxRadialShading *shading);
   ~GfxRadialShading();
 
@@ -1192,7 +1192,7 @@ public:
   GfxImageColorMap *copy() { return new GfxImageColorMap(this); }
 
   // Is color map valid?
-  GBool isOk() const { return ok; }
+  bool isOk() const { return ok; }
 
   // Get the color space.
   GfxColorSpace *getColorSpace() { return colorSpace; }
@@ -1223,7 +1223,7 @@ public:
   void getColor(Guchar *x, GfxColor *color);
 
   // Matte color ops
-  void setMatteColor(const GfxColor *color) { useMatte = gTrue; matteColor = *color; }
+  void setMatteColor(const GfxColor *color) { useMatte = true; matteColor = *color; }
   const GfxColor *getMatteColor() const { return (useMatte) ? &matteColor : nullptr; }
 private:
 
@@ -1243,9 +1243,9 @@ private:
     decodeLow[gfxColorMaxComps];
   double			// max - min value for each component
     decodeRange[gfxColorMaxComps];
-  GBool useMatte;
+  bool useMatte;
   GfxColor matteColor;
-  GBool ok;
+  bool ok;
 };
 
 //------------------------------------------------------------------------
@@ -1271,7 +1271,7 @@ public:
   int getNumPoints() const { return n; }
   double getX(int i) const { return x[i]; }
   double getY(int i) const { return y[i]; }
-  GBool getCurve(int i) const { return curve[i]; }
+  bool getCurve(int i) const { return curve[i]; }
 
   void setX(int i, double a) { x[i] = a; }
   void setY(int i, double a) { y[i] = a; }
@@ -1289,7 +1289,7 @@ public:
 
   // Close the subpath.
   void close();
-  GBool isClosed() const { return closed; }
+  bool isClosed() const { return closed; }
 
   // Add (<dx>, <dy>) to each point in the subpath.
   void offset(double dx, double dy);
@@ -1297,11 +1297,11 @@ public:
 private:
 
   double *x, *y;		// points
-  GBool *curve;			// curve[i] => point i is a control point
+  bool *curve;			// curve[i] => point i is a control point
 				//   for a Bezier curve
   int n;			// number of points
   int size;			// size of x/y arrays
-  GBool closed;			// set if path is closed
+  bool closed;			// set if path is closed
 
   GfxSubpath(const GfxSubpath *subpath);
 };
@@ -1323,10 +1323,10 @@ public:
     { return new GfxPath(justMoved, firstX, firstY, subpaths, n, size); }
 
   // Is there a current point?
-  GBool isCurPt() const { return n > 0 || justMoved; }
+  bool isCurPt() const { return n > 0 || justMoved; }
 
   // Is the path non-empty, i.e., is there at least one segment?
-  GBool isPath() const { return n > 0; }
+  bool isPath() const { return n > 0; }
 
   // Get subpaths.
   int getNumSubpaths() const { return n; }
@@ -1357,13 +1357,13 @@ public:
 
 private:
 
-  GBool justMoved;		// set if a new subpath was just started
+  bool justMoved;		// set if a new subpath was just started
   double firstX, firstY;	// first point in new subpath
   GfxSubpath **subpaths;	// subpaths
   int n;			// number of subpaths
   int size;			// size of subpaths array
 
-  GfxPath(GBool justMoved1, double firstX1, double firstY1,
+  GfxPath(bool justMoved1, double firstX1, double firstY1,
 	  GfxSubpath **subpaths1, int n1, int size1);
 };
 
@@ -1433,7 +1433,7 @@ public:
   // x <vDPI>, page box <pageBox>, page rotation <rotateA>, and
   // coordinate system specified by <upsideDown>.
   GfxState(double hDPIA, double vDPIA, const PDFRectangle *pageBox,
-	   int rotateA, GBool upsideDown);
+	   int rotateA, bool upsideDown);
 
   // Destructor.
   ~GfxState();
@@ -1442,7 +1442,7 @@ public:
   GfxState& operator=(const GfxState &) = delete;
 
   // Copy.
-  GfxState *copy(GBool copyPath = gFalse) const
+  GfxState *copy(bool copyPath = false) const
     { return new GfxState(this, copyPath); }
 
   // Accessors.
@@ -1482,8 +1482,8 @@ public:
   GfxBlendMode getBlendMode() const { return blendMode; }
   double getFillOpacity() const { return fillOpacity; }
   double getStrokeOpacity() const { return strokeOpacity; }
-  GBool getFillOverprint() const { return fillOverprint; }
-  GBool getStrokeOverprint() const { return strokeOverprint; }
+  bool getFillOverprint() const { return fillOverprint; }
+  bool getStrokeOverprint() const { return strokeOverprint; }
   int getOverprintMode() const { return overprintMode; }
   Function **getTransfer() { return transfer; }
   double getLineWidth() const { return lineWidth; }
@@ -1493,9 +1493,9 @@ public:
   int getLineJoin() const { return lineJoin; }
   int getLineCap() const { return lineCap; }
   double getMiterLimit() const { return miterLimit; }
-  GBool getStrokeAdjust() const { return strokeAdjust; }
-  GBool getAlphaIsShape() const { return alphaIsShape; }
-  GBool getTextKnockout() const { return textKnockout; }
+  bool getStrokeAdjust() const { return strokeAdjust; }
+  bool getAlphaIsShape() const { return alphaIsShape; }
+  bool getTextKnockout() const { return textKnockout; }
   GfxFont *getFont() { return font; }
   double getFontSize() const { return fontSize; }
   const double *getTextMat() const { return textMat; }
@@ -1517,8 +1517,8 @@ public:
   double getLineY() const { return lineY; }
 
   // Is there a current point/path?
-  GBool isCurPt() const { return path->isCurPt(); }
-  GBool isPath() const { return path->isPath(); }
+  bool isCurPt() const { return path->isCurPt(); }
+  bool isPath() const { return path->isPath(); }
 
   // Transforms.
   void transform(double x1, double y1, double *x2, double *y2)
@@ -1554,8 +1554,8 @@ public:
   void setBlendMode(GfxBlendMode mode) { blendMode = mode; }
   void setFillOpacity(double opac) { fillOpacity = opac; }
   void setStrokeOpacity(double opac) { strokeOpacity = opac; }
-  void setFillOverprint(GBool op) { fillOverprint = op; }
-  void setStrokeOverprint(GBool op) { strokeOverprint = op; }
+  void setFillOverprint(bool op) { fillOverprint = op; }
+  void setStrokeOverprint(bool op) { strokeOverprint = op; }
   void setOverprintMode(int op) { overprintMode = op; }
   void setTransfer(Function **funcs);
   void setLineWidth(double width) { lineWidth = width; }
@@ -1564,9 +1564,9 @@ public:
   void setLineJoin(int lineJoin1) { lineJoin = lineJoin1; }
   void setLineCap(int lineCap1) { lineCap = lineCap1; }
   void setMiterLimit(double limit) { miterLimit = limit; }
-  void setStrokeAdjust(GBool sa) { strokeAdjust = sa; }
-  void setAlphaIsShape(GBool ais) { alphaIsShape = ais; }
-  void setTextKnockout(GBool tk) { textKnockout = tk; }
+  void setStrokeAdjust(bool sa) { strokeAdjust = sa; }
+  void setAlphaIsShape(bool ais) { alphaIsShape = ais; }
+  void setTextKnockout(bool tk) { textKnockout = tk; }
   void setFont(GfxFont *fontA, double fontSizeA);
   void setTextMat(double a, double b, double c,
 		  double d, double e, double f)
@@ -1620,11 +1620,11 @@ public:
   // Push/pop GfxState on/off stack.
   GfxState *save();
   GfxState *restore();
-  GBool hasSaves() const { return saved != nullptr; }
-  GBool isParentState(GfxState *state) { return saved == state || (saved && saved->isParentState(state)); }
+  bool hasSaves() const { return saved != nullptr; }
+  bool isParentState(GfxState *state) { return saved == state || (saved && saved->isParentState(state)); }
 
   // Misc
-  GBool parseBlendMode(Object *obj, GfxBlendMode *mode);
+  bool parseBlendMode(Object *obj, GfxBlendMode *mode);
 
   ReusablePathIterator *getReusablePath() { return new ReusablePathIterator(path); }
 private:
@@ -1644,8 +1644,8 @@ private:
   GfxBlendMode blendMode;	// transparency blend mode
   double fillOpacity;		// fill opacity
   double strokeOpacity;		// stroke opacity
-  GBool fillOverprint;		// fill overprint
-  GBool strokeOverprint;	// stroke overprint
+  bool fillOverprint;		// fill overprint
+  bool strokeOverprint;	// stroke overprint
   int overprintMode;		// overprint mode
   Function *transfer[4];	// transfer function (entries may be: all
 				//   nullptr = identity; last three nullptr =
@@ -1660,9 +1660,9 @@ private:
   int lineJoin;			// line join style
   int lineCap;			// line cap style
   double miterLimit;		// line miter limit
-  GBool strokeAdjust;		// stroke adjustment
-  GBool alphaIsShape;		// alpha is shape
-  GBool textKnockout;		// text knockout
+  bool strokeAdjust;		// stroke adjustment
+  bool alphaIsShape;		// alpha is shape
+  bool textKnockout;		// text knockout
 
   GfxFont *font;		// font
   double fontSize;		// font size
@@ -1684,7 +1684,7 @@ private:
 
   GfxState *saved;		// next GfxState on stack
 
-  GfxState(const GfxState *state, GBool copyPath);
+  GfxState(const GfxState *state, bool copyPath);
 
 #ifdef USE_CMS
   void *localDisplayProfile;

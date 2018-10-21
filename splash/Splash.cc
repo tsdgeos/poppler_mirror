@@ -95,10 +95,10 @@ static inline int imgCoordMungeLower(SplashCoord x) {
 static inline int imgCoordMungeUpper(SplashCoord x) {
   return splashFloor(x) + 1;
 }
-static inline int imgCoordMungeLowerC(SplashCoord x, GBool glyphMode) {
+static inline int imgCoordMungeLowerC(SplashCoord x, bool glyphMode) {
   return glyphMode ? (splashCeil(x + 0.5) - 1) : splashFloor(x);
 }
-static inline int imgCoordMungeUpperC(SplashCoord x, GBool glyphMode) {
+static inline int imgCoordMungeUpperC(SplashCoord x, bool glyphMode) {
   return glyphMode ? (splashCeil(x + 0.5) - 1) : (splashFloor(x) + 1);
 }
 #endif
@@ -130,7 +130,7 @@ struct SplashPipe {
 
   // source alpha and color
   Guchar aInput;
-  GBool usesShape;
+  bool usesShape;
   SplashColorPtr cSrc;
   SplashColor cSrcVal = {};
 
@@ -138,7 +138,7 @@ struct SplashPipe {
   Guchar *alpha0Ptr;
 
   // knockout groups
-  GBool knockout;
+  bool knockout;
   Guchar knockoutOpacity;
 
   // soft mask
@@ -153,11 +153,11 @@ struct SplashPipe {
   Guchar shape;
 
   // result alpha and color
-  GBool noTransparency;
+  bool noTransparency;
   SplashPipeResultColorCtrl resultColorCtrl;
 
   // non-isolated group correction
-  GBool nonIsolatedGroup;
+  bool nonIsolatedGroup;
 
   // the "run" function
   void (Splash::*run)(SplashPipe *pipe);
@@ -248,9 +248,9 @@ inline void Splash::updateModY(int y) {
 
 inline void Splash::pipeInit(SplashPipe *pipe, int x, int y,
 			     SplashPattern *pattern, SplashColorPtr cSrc,
-			     Guchar aInput, GBool usesShape,
-			     GBool nonIsolatedGroup,
-			     GBool knockout, Guchar knockoutOpacity) {
+			     Guchar aInput, bool usesShape,
+			     bool nonIsolatedGroup,
+			     bool knockout, Guchar knockoutOpacity) {
   pipeSetXY(pipe, x, y);
   pipe->pattern = nullptr;
 
@@ -278,9 +278,9 @@ inline void Splash::pipeInit(SplashPipe *pipe, int x, int y,
   // result alpha
   if (aInput == 255 && !state->softMask && !usesShape &&
       !state->inNonIsolatedGroup && !nonIsolatedGroup) {
-    pipe->noTransparency = gTrue;
+    pipe->noTransparency = true;
   } else {
-    pipe->noTransparency = gFalse;
+    pipe->noTransparency = false;
   }
 
   // result color
@@ -1435,7 +1435,7 @@ inline void Splash::pipeIncX(SplashPipe *pipe) {
   }
 }
 
-inline void Splash::drawPixel(SplashPipe *pipe, int x, int y, GBool noClip) {
+inline void Splash::drawPixel(SplashPipe *pipe, int x, int y, bool noClip) {
   if (unlikely(y < 0))
     return;
 
@@ -1510,7 +1510,7 @@ inline void Splash::drawAAPixel(SplashPipe *pipe, int x, int y) {
 }
 
 inline void Splash::drawSpan(SplashPipe *pipe, int x0, int x1, int y,
-			     GBool noClip) {
+			     bool noClip) {
   int x;
 
   if (noClip) {
@@ -1541,7 +1541,7 @@ inline void Splash::drawSpan(SplashPipe *pipe, int x0, int x1, int y,
   }
 }
 
-inline void Splash::drawAALine(SplashPipe *pipe, int x0, int x1, int y, GBool adjustLine, Guchar lineOpacity) {
+inline void Splash::drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adjustLine, Guchar lineOpacity) {
 #if splashAASize == 4
   static int bitCount4[16] = { 0, 1, 1, 2, 1, 2, 2, 3,
 			       1, 2, 2, 3, 2, 3, 3, 4 };
@@ -1611,18 +1611,18 @@ inline void Splash::transform(SplashCoord *matrix,
 // Splash
 //------------------------------------------------------------------------
 
-Splash::Splash(SplashBitmap *bitmapA, GBool vectorAntialiasA,
+Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA,
 	       SplashScreenParams *screenParams) {
   int i;
 
   bitmap = bitmapA;
   vectorAntialias = vectorAntialiasA;
-  inShading = gFalse;
+  inShading = false;
   state = new SplashState(bitmap->width, bitmap->height, vectorAntialias,
 			  screenParams);
   if (vectorAntialias) {
     aaBuf = new SplashBitmap(splashAASize * bitmap->width, splashAASize,
-			     1, splashModeMono1, gFalse);
+			     1, splashModeMono1, false);
     for (i = 0; i <= splashAASize * splashAASize; ++i) {
       aaGamma[i] = (Guchar)splashRound(
 		       splashPow((SplashCoord)i /
@@ -1635,22 +1635,22 @@ Splash::Splash(SplashBitmap *bitmapA, GBool vectorAntialiasA,
   minLineWidth = 0;
   thinLineMode = splashThinLineDefault;
   clearModRegion();
-  debugMode = gFalse;
+  debugMode = false;
   alpha0Bitmap = nullptr;
 }
 
-Splash::Splash(SplashBitmap *bitmapA, GBool vectorAntialiasA,
+Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA,
 	       SplashScreen *screenA) {
   int i;
 
   bitmap = bitmapA;
-  inShading = gFalse;
+  inShading = false;
   vectorAntialias = vectorAntialiasA;
   state = new SplashState(bitmap->width, bitmap->height, vectorAntialias,
 			  screenA);
   if (vectorAntialias) {
     aaBuf = new SplashBitmap(splashAASize * bitmap->width, splashAASize,
-			     1, splashModeMono1, gFalse);
+			     1, splashModeMono1, false);
     for (i = 0; i <= splashAASize * splashAASize; ++i) {
       aaGamma[i] = (Guchar)splashRound(
 		       splashPow((SplashCoord)i /
@@ -1663,7 +1663,7 @@ Splash::Splash(SplashBitmap *bitmapA, GBool vectorAntialiasA,
   minLineWidth = 0;
   thinLineMode = splashThinLineDefault;
   clearModRegion();
-  debugMode = gFalse;
+  debugMode = false;
   alpha0Bitmap = nullptr;
 }
 
@@ -1739,7 +1739,7 @@ SplashCoord Splash::getLineDashPhase() {
   return state->lineDashPhase;
 }
 
-GBool Splash::getStrokeAdjust() {
+bool Splash::getStrokeAdjust() {
   return state->strokeAdjust;
 }
 
@@ -1751,7 +1751,7 @@ SplashBitmap *Splash::getSoftMask() {
   return state->softMask;
 }
 
-GBool Splash::getInNonIsolatedGroup() {
+bool Splash::getInNonIsolatedGroup() {
   return state->inNonIsolatedGroup;
 }
 
@@ -1790,20 +1790,20 @@ void Splash::setFillAlpha(SplashCoord alpha) {
 void Splash::setPatternAlpha(SplashCoord strokeAlpha, SplashCoord fillAlpha) {
   state->patternStrokeAlpha = strokeAlpha;
   state->patternFillAlpha = fillAlpha;
-  state->multiplyPatternAlpha = gTrue;
+  state->multiplyPatternAlpha = true;
 }
 
 void Splash::clearPatternAlpha() {
   state->patternStrokeAlpha = 1;
   state->patternFillAlpha = 1;
-  state->multiplyPatternAlpha = gFalse;
+  state->multiplyPatternAlpha = false;
 }
 
-void Splash::setFillOverprint(GBool fop) {
+void Splash::setFillOverprint(bool fop) {
   state->fillOverprint = fop;
 }
 
-void Splash::setStrokeOverprint(GBool gop) {
+void Splash::setStrokeOverprint(bool gop) {
   state->strokeOverprint = gop;
 }
 
@@ -1840,7 +1840,7 @@ void Splash::setLineDash(SplashCoord *lineDash, int lineDashLength,
   state->setLineDash(lineDash, lineDashLength, lineDashPhase);
 }
 
-void Splash::setStrokeAdjust(GBool strokeAdjust) {
+void Splash::setStrokeAdjust(bool strokeAdjust) {
   state->strokeAdjust = strokeAdjust;
 }
 
@@ -1854,7 +1854,7 @@ SplashError Splash::clipToRect(SplashCoord x0, SplashCoord y0,
   return state->clip->clipToRect(x0, y0, x1, y1);
 }
 
-SplashError Splash::clipToPath(SplashPath *path, GBool eo) {
+SplashError Splash::clipToPath(SplashPath *path, bool eo) {
   return state->clip->clipToPath(path, state->matrix, state->flatness, eo);
 }
 
@@ -1867,7 +1867,7 @@ void Splash::setInNonIsolatedGroup(SplashBitmap *alpha0BitmapA,
   alpha0Bitmap = alpha0BitmapA;
   alpha0X = alpha0XA;
   alpha0Y = alpha0YA;
-  state->inNonIsolatedGroup = gTrue;
+  state->inNonIsolatedGroup = true;
 }
 
 void Splash::setTransfer(Guchar *red, Guchar *green, Guchar *blue,
@@ -1875,7 +1875,7 @@ void Splash::setTransfer(Guchar *red, Guchar *green, Guchar *blue,
   state->setTransfer(red, green, blue, gray);
 }
 
-void Splash::setOverprintMask(Guint overprintMask, GBool additive) {
+void Splash::setOverprintMask(Guint overprintMask, bool additive) {
   state->overprintMask = overprintMask;
   state->overprintAdditive = additive;
 }
@@ -2113,11 +2113,11 @@ void Splash::strokeNarrow(SplashPath *path) {
 
   nClipRes[0] = nClipRes[1] = nClipRes[2] = 0;
 
-  SplashXPath xPath(path, state->matrix, state->flatness, gFalse);
+  SplashXPath xPath(path, state->matrix, state->flatness, false);
 
   pipeInit(&pipe, 0, 0, state->strokePattern, nullptr,
 	   (Guchar)splashRound(state->strokeAlpha * 255),
-	   gFalse, gFalse);
+	   false, false);
 
   for (i = 0, seg = xPath.segs; i < xPath.length; ++i, ++seg) {
     if (seg->y0 <= seg->y1) {
@@ -2200,8 +2200,8 @@ void Splash::strokeNarrow(SplashPath *path) {
 void Splash::strokeWide(SplashPath *path, SplashCoord w) {
   SplashPath *path2;
 
-  path2 = makeStrokePath(path, w, gFalse);
-  fillWithPattern(path2, gFalse, state->strokePattern, state->strokeAlpha);
+  path2 = makeStrokePath(path, w, false);
+  fillWithPattern(path2, false, state->strokePattern, state->strokeAlpha);
   delete path2;
 }
 
@@ -2336,7 +2336,7 @@ SplashPath *Splash::makeDashedPath(SplashPath *path) {
   SplashCoord lineDashTotal;
   SplashCoord lineDashStartPhase, lineDashDist, segLen;
   SplashCoord x0, y0, x1, y1, xa, ya;
-  GBool lineDashStartOn, lineDashOn, newPath;
+  bool lineDashStartOn, lineDashOn, newPath;
   int lineDashStartIdx, lineDashIdx;
   int i, j, k;
 
@@ -2351,7 +2351,7 @@ SplashPath *Splash::makeDashedPath(SplashPath *path) {
   lineDashStartPhase = state->lineDashPhase;
   i = splashFloor(lineDashStartPhase / lineDashTotal);
   lineDashStartPhase -= (SplashCoord)i * lineDashTotal;
-  lineDashStartOn = gTrue;
+  lineDashStartOn = true;
   lineDashStartIdx = 0;
   if (lineDashStartPhase > 0) {
     while (lineDashStartIdx < state->lineDashLength && lineDashStartPhase >= state->lineDash[lineDashStartIdx]) {
@@ -2381,7 +2381,7 @@ SplashPath *Splash::makeDashedPath(SplashPath *path) {
     lineDashDist = state->lineDash[lineDashIdx] - lineDashStartPhase;
 
     // process each segment of the subpath
-    newPath = gTrue;
+    newPath = true;
     for (k = i; k < j; ++k) {
 
       // grab the segment
@@ -2398,7 +2398,7 @@ SplashPath *Splash::makeDashedPath(SplashPath *path) {
 	  if (lineDashOn) {
 	    if (newPath) {
 	      dPath->moveTo(x0, y0);
-	      newPath = gFalse;
+	      newPath = false;
 	    }
 	    dPath->lineTo(x1, y1);
 	  }
@@ -2411,7 +2411,7 @@ SplashPath *Splash::makeDashedPath(SplashPath *path) {
 	  if (lineDashOn) {
 	    if (newPath) {
 	      dPath->moveTo(x0, y0);
-	      newPath = gFalse;
+	      newPath = false;
 	    }
 	    dPath->lineTo(xa, ya);
 	  }
@@ -2428,7 +2428,7 @@ SplashPath *Splash::makeDashedPath(SplashPath *path) {
 	    lineDashIdx = 0;
 	  }
 	  lineDashDist = state->lineDash[lineDashIdx];
-	  newPath = gTrue;
+	  newPath = true;
 	}
       }
     }
@@ -2436,7 +2436,7 @@ SplashPath *Splash::makeDashedPath(SplashPath *path) {
   }
   
   if (dPath->length == 0) {
-    GBool allSame = gTrue;
+    bool allSame = true;
     for (int i = 0; allSame && i < path->length - 1; ++i) {
       allSame = path->pts[i].x == path->pts[i + 1].x && path->pts[i].y == path->pts[i + 1].y;
     }
@@ -2451,7 +2451,7 @@ SplashPath *Splash::makeDashedPath(SplashPath *path) {
   return dPath;
 }
 
-SplashError Splash::fill(SplashPath *path, GBool eo) {
+SplashError Splash::fill(SplashPath *path, bool eo) {
   if (debugMode) {
     printf("fill [eo:%d]:\n", eo);
     dumpPath(path);
@@ -2484,14 +2484,14 @@ inline void Splash::getBBoxFP(SplashPath *path, SplashCoord *xMinA, SplashCoord 
   *yMaxA = yMaxFP;
 }
 
-SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
+SplashError Splash::fillWithPattern(SplashPath *path, bool eo,
 				    SplashPattern *pattern,
 				    SplashCoord alpha) {
   SplashPipe pipe = {};
   SplashXPathScanner *scanner;
   int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
   SplashClipResult clipRes, clipRes2;
-  GBool adjustLine = gFalse; 
+  bool adjustLine = false; 
   int linePosI = 0;
 
   if (path->length == 0) {
@@ -2512,7 +2512,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
 	!(path->flags[0] & splashPathClosed) &&
 	!(path->flags[1] & splashPathLast) &&
 	!(path->flags[2] & splashPathLast)) {
-      path->close(gTrue);
+      path->close(true);
       path->addStrokeAdjustHint(0, 2, 0, 4);
       path->addStrokeAdjustHint(1, 3, 0, 4);
     } else if (n == 5 &&
@@ -2528,20 +2528,20 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
   if (thinLineMode != splashThinLineDefault) {
     if (state->clip->getXMinI() == state->clip->getXMaxI()) {
       linePosI = state->clip->getXMinI();
-      adjustLine = gTrue;
+      adjustLine = true;
     } else if (state->clip->getXMinI() == state->clip->getXMaxI() - 1) {
-      adjustLine = gTrue;
+      adjustLine = true;
       linePosI = splashFloor(state->clip->getXMin() + state->lineWidth);
     } else if (state->clip->getYMinI() == state->clip->getYMaxI()) {
       linePosI = state->clip->getYMinI();
-      adjustLine = gTrue;
+      adjustLine = true;
     } else if (state->clip->getYMinI() == state->clip->getYMaxI() - 1) {
-      adjustLine = gTrue;
+      adjustLine = true;
       linePosI = splashFloor(state->clip->getYMin() + state->lineWidth);
     }
   }
 
-  SplashXPath xPath(path, state->matrix, state->flatness, gTrue,
+  SplashXPath xPath(path, state->matrix, state->flatness, true,
     adjustLine, linePosI);
   if (vectorAntialias && !inShading) {
     xPath.aaScale();
@@ -2581,7 +2581,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
     }
 
     pipeInit(&pipe, 0, yMinI, pattern, nullptr, (Guchar)splashRound(alpha * 255),
-	     vectorAntialias && !inShading, gFalse);
+	     vectorAntialias && !inShading, false);
 
     // draw the spans
     if (vectorAntialias && !inShading) {
@@ -2591,13 +2591,13 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
 	  state->clip->clipAALine(aaBuf, &x0, &x1, y, thinLineMode != splashThinLineDefault && xMinI == xMaxI);
 	}
 	Guchar lineShape = 255;
-	GBool adjustLine = gFalse;
+	bool adjustLine = false;
 	if (thinLineMode == splashThinLineShape && (xMinI == xMaxI || yMinI == yMaxI)) {
 	  // compute line shape for thin lines:
 	  SplashCoord mx, my, delta;
 	  transform(state->matrix, 0, 0, &mx, &my);
 	  transform(state->matrix, state->lineWidth, 0, &delta, &my);
-	  adjustLine = gTrue;
+	  adjustLine = true;
 	  lineShape = clip255((delta - mx) * 255);
 	}
 	drawAALine(&pipe, x0, x1, y, adjustLine, lineShape);
@@ -2607,7 +2607,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
 	SplashXPathScanIterator iterator(*scanner, y);
 	while (iterator.getNextSpan(&x0, &x1)) {
 	  if (clipRes == splashClipAllInside) {
-	    drawSpan(&pipe, x0, x1, y, gTrue);
+	    drawSpan(&pipe, x0, x1, y, true);
 	  } else {
 	    // limit the x range
 	    if (x0 < state->clip->getXMinI()) {
@@ -2629,7 +2629,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, GBool eo,
   return splashOk;
 }
 
-GBool Splash::pathAllOutside(SplashPath *path) {
+bool Splash::pathAllOutside(SplashPath *path) {
   SplashCoord xMin1, yMin1, xMax1, yMax1;
   SplashCoord xMin2, yMin2, xMax2, yMax2;
   SplashCoord x, y;
@@ -2696,7 +2696,7 @@ GBool Splash::pathAllOutside(SplashPath *path) {
          splashClipAllOutside;
 }
 
-SplashError Splash::xorFill(SplashPath *path, GBool eo) {
+SplashError Splash::xorFill(SplashPath *path, bool eo) {
   SplashPipe pipe;
   SplashXPathScanner *scanner;
   int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
@@ -2706,7 +2706,7 @@ SplashError Splash::xorFill(SplashPath *path, GBool eo) {
   if (path->length == 0) {
     return splashErrEmptyPath;
   }
-  SplashXPath xPath(path, state->matrix, state->flatness, gTrue);
+  SplashXPath xPath(path, state->matrix, state->flatness, true);
   xPath.sort();
   scanner = new SplashXPathScanner(&xPath, eo, state->clip->getYMinI(),
 				   state->clip->getYMaxI());
@@ -2723,14 +2723,14 @@ SplashError Splash::xorFill(SplashPath *path, GBool eo) {
 
     origBlendFunc = state->blendFunc;
     state->blendFunc = &blendXor;
-    pipeInit(&pipe, 0, yMinI, state->fillPattern, nullptr, 255, gFalse, gFalse);
+    pipeInit(&pipe, 0, yMinI, state->fillPattern, nullptr, 255, false, false);
 
     // draw the spans
     for (y = yMinI; y <= yMaxI; ++y) {
       SplashXPathScanIterator iterator(*scanner, y);
       while (iterator.getNextSpan(&x0, &x1)) {
 	if (clipRes == splashClipAllInside) {
-	  drawSpan(&pipe, x0, x1, y, gTrue);
+	  drawSpan(&pipe, x0, x1, y, true);
 	} else {
 	  // limit the x range
 	  if (x0 < state->clip->getXMinI()) {
@@ -2799,7 +2799,7 @@ void Splash::fillGlyph(SplashCoord x, SplashCoord y,
   opClipRes = clipRes;
 }
 
-void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) {
+void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, bool noClip) {
   SplashPipe pipe;
   int alpha0;
   Guchar alpha;
@@ -2838,7 +2838,7 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
   if (noClip) {
     if (glyph->aa) {
       pipeInit(&pipe, xStart, yStart,
-               state->fillPattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
+               state->fillPattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), true, false);
       for (yy = 0, y1 = yStart; yy < yyLimit; ++yy, ++y1) {
         pipeSetXY(&pipe, xStart, y1);
         for (xx = 0, x1 = xStart; xx < xxLimit; ++xx, ++x1) {
@@ -2858,7 +2858,7 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
       const int widthEight = splashCeil(glyph->w / 8.0);
 
       pipeInit(&pipe, xStart, yStart,
-               state->fillPattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), gFalse, gFalse);
+               state->fillPattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), false, false);
       for (yy = 0, y1 = yStart; yy < yyLimit; ++yy, ++y1) {
         pipeSetXY(&pipe, xStart, y1);
         for (xx = 0, x1 = xStart; xx < xxLimit; xx += 8) {
@@ -2880,7 +2880,7 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
   } else {
     if (glyph->aa) {
       pipeInit(&pipe, xStart, yStart,
-               state->fillPattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
+               state->fillPattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), true, false);
       for (yy = 0, y1 = yStart; yy < yyLimit; ++yy, ++y1) {
         pipeSetXY(&pipe, xStart, y1);
         for (xx = 0, x1 = xStart; xx < xxLimit; ++xx, ++x1) {
@@ -2904,7 +2904,7 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
       const int widthEight = splashCeil(glyph->w / 8.0);
 
       pipeInit(&pipe, xStart, yStart,
-               state->fillPattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), gFalse, gFalse);
+               state->fillPattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), false, false);
       for (yy = 0, y1 = yStart; yy < yyLimit; ++yy, ++y1) {
         pipeSetXY(&pipe, xStart, y1);
         for (xx = 0, x1 = xStart; xx < xxLimit; xx += 8) {
@@ -2932,10 +2932,10 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, GBool noClip) 
 
 SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData,
 				  int w, int h, SplashCoord *mat,
-				  GBool glyphMode) {
+				  bool glyphMode) {
   SplashBitmap *scaledMask;
   SplashClipResult clipRes;
-  GBool minorAxisZero;
+  bool minorAxisZero;
   int x0, y0, x1, y1, scaledWidth, scaledHeight;
   int yp;
 
@@ -3019,7 +3019,7 @@ SplashError Splash::fillImageMask(SplashImageMaskSource src, void *srcData,
 
 void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData,
 				    int srcWidth, int srcHeight,
-				    SplashCoord *mat, GBool glyphMode) {
+				    SplashCoord *mat, bool glyphMode) {
   SplashBitmap *scaledMask;
   SplashClipResult clipRes, clipRes2;
   SplashPipe pipe;
@@ -3213,7 +3213,7 @@ void Splash::arbitraryTransformMask(SplashImageMaskSource src, void *srcData,
 
   // initialize the pixel pipe
   pipeInit(&pipe, 0, 0, state->fillPattern, nullptr,
-	   (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
+	   (Guchar)splashRound(state->fillAlpha * 255), true, false);
   if (vectorAntialias) {
     drawAAPixelInit();
   }
@@ -3295,7 +3295,7 @@ SplashBitmap *Splash::scaleMask(SplashImageMaskSource src, void *srcData,
   SplashBitmap *dest;
 
   dest = new SplashBitmap(scaledWidth, scaledHeight, 1, splashModeMono8,
-			  gFalse);
+			  false);
   if (scaledHeight < srcHeight) {
     if (scaledWidth < srcWidth) {
       scaleMaskYdXd(src, srcData, srcWidth, srcHeight,
@@ -3658,7 +3658,7 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
   }
   if (vectorAntialias && clipRes != splashClipAllInside) {
     pipeInit(&pipe, xDest, yDest, state->fillPattern, nullptr,
-	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
+	     (Guchar)splashRound(state->fillAlpha * 255), true, false);
     drawAAPixelInit();
     for (y = 0; y < h; ++y) {
       for (x = 0; x < w; ++x) {
@@ -3668,7 +3668,7 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
     }
   } else {
     pipeInit(&pipe, xDest, yDest, state->fillPattern, nullptr,
-	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
+	     (Guchar)splashRound(state->fillAlpha * 255), true, false);
     if (clipRes == splashClipAllInside) {
       for (y = 0; y < h; ++y) {
 	pipeSetXY(&pipe, xDest, yDest + y);
@@ -3706,13 +3706,13 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
 }
 
 SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void *srcData,
-			      SplashColorMode srcMode, GBool srcAlpha,
-			      int w, int h, SplashCoord *mat, GBool interpolate,
-			      GBool tilingPattern) {
-  GBool ok;
+			      SplashColorMode srcMode, bool srcAlpha,
+			      int w, int h, SplashCoord *mat, bool interpolate,
+			      bool tilingPattern) {
+  bool ok;
   SplashBitmap *scaledImg;
   SplashClipResult clipRes;
-  GBool minorAxisZero;
+  bool minorAxisZero;
   int x0, y0, x1, y1, scaledWidth, scaledHeight;
   int nComps;
   int yp;
@@ -3724,7 +3724,7 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
   }
 
   // check color modes
-  ok = gFalse; // make gcc happy
+  ok = false; // make gcc happy
   nComps = 0; // make gcc happy
   switch (bitmap->mode) {
   case splashModeMono1:
@@ -3755,7 +3755,7 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
     break;
 #endif
   default:
-    ok = gFalse;
+    ok = false;
     break;
   }
   if (!ok) {
@@ -3856,10 +3856,10 @@ SplashError Splash::drawImage(SplashImageSource src, SplashICCTransform tf, void
 
 SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTransform tf, void *srcData,
 				     SplashColorMode srcMode, int nComps,
-				     GBool srcAlpha,
+				     bool srcAlpha,
 				     int srcWidth, int srcHeight,
-				     SplashCoord *mat, GBool interpolate,
-             GBool tilingPattern) {
+				     SplashCoord *mat, bool interpolate,
+             bool tilingPattern) {
   SplashBitmap *scaledImg;
   SplashClipResult clipRes, clipRes2;
   SplashPipe pipe;
@@ -4088,7 +4088,7 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
   pipeInit(&pipe, 0, 0, nullptr, pixel,
 	   (Guchar)splashRound(state->fillAlpha * 255),
 	   srcAlpha || (vectorAntialias && clipRes != splashClipAllInside),
-	   gFalse);
+	   false);
   if (vectorAntialias) {
     drawAAPixelInit();
   }
@@ -4165,27 +4165,27 @@ SplashError Splash::arbitraryTransformImage(SplashImageSource src, SplashICCTran
 
 // determine if a scaled image requires interpolation based on the scale and
 // the interpolate flag from the image dictionary
-static GBool isImageInterpolationRequired(int srcWidth, int srcHeight,
+static bool isImageInterpolationRequired(int srcWidth, int srcHeight,
                                           int scaledWidth, int scaledHeight,
-                                          GBool interpolate) {
+                                          bool interpolate) {
   if (interpolate || srcWidth == 0 || srcHeight == 0)
-    return gTrue;
+    return true;
 
   /* When scale factor is >= 400% we don't interpolate. See bugs #25268, #9860 */
   if (scaledWidth / srcWidth >= 4 || scaledHeight / srcHeight >= 4)
-    return gFalse;
+    return false;
 
-  return gTrue;
+  return true;
 }
 
 // Scale an image into a SplashBitmap.
 SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData,
 				 SplashColorMode srcMode, int nComps,
-				 GBool srcAlpha, int srcWidth, int srcHeight,
-				 int scaledWidth, int scaledHeight, GBool interpolate, GBool tilingPattern) {
+				 bool srcAlpha, int srcWidth, int srcHeight,
+				 int scaledWidth, int scaledHeight, bool interpolate, bool tilingPattern) {
   SplashBitmap *dest;
 
-  dest = new SplashBitmap(scaledWidth, scaledHeight, 1, srcMode, srcAlpha, gTrue, bitmap->getSeparationList());
+  dest = new SplashBitmap(scaledWidth, scaledHeight, 1, srcMode, srcAlpha, true, bitmap->getSeparationList());
   if (dest->getDataPtr() != nullptr && srcHeight > 0 && srcWidth > 0) {
     if (scaledHeight < srcHeight) {
       if (scaledWidth < srcWidth) {
@@ -4218,7 +4218,7 @@ SplashBitmap *Splash::scaleImage(SplashImageSource src, void *srcData,
 
 void Splash::scaleImageYdXd(SplashImageSource src, void *srcData,
 			    SplashColorMode srcMode, int nComps,
-			    GBool srcAlpha, int srcWidth, int srcHeight,
+			    bool srcAlpha, int srcWidth, int srcHeight,
 			    int scaledWidth, int scaledHeight,
 			    SplashBitmap *dest) {
   Guchar *lineBuf, *alphaLineBuf;
@@ -4461,7 +4461,7 @@ void Splash::scaleImageYdXd(SplashImageSource src, void *srcData,
 
 void Splash::scaleImageYdXu(SplashImageSource src, void *srcData,
 			    SplashColorMode srcMode, int nComps,
-			    GBool srcAlpha, int srcWidth, int srcHeight,
+			    bool srcAlpha, int srcWidth, int srcHeight,
 			    int scaledWidth, int scaledHeight,
 			    SplashBitmap *dest) {
   Guchar *lineBuf, *alphaLineBuf;
@@ -4611,7 +4611,7 @@ void Splash::scaleImageYdXu(SplashImageSource src, void *srcData,
 
 void Splash::scaleImageYuXd(SplashImageSource src, void *srcData,
 			    SplashColorMode srcMode, int nComps,
-			    GBool srcAlpha, int srcWidth, int srcHeight,
+			    bool srcAlpha, int srcWidth, int srcHeight,
 			    int scaledWidth, int scaledHeight,
 			    SplashBitmap *dest) {
   Guchar *lineBuf, *alphaLineBuf;
@@ -4773,7 +4773,7 @@ void Splash::scaleImageYuXd(SplashImageSource src, void *srcData,
 
 void Splash::scaleImageYuXu(SplashImageSource src, void *srcData,
 			    SplashColorMode srcMode, int nComps,
-			    GBool srcAlpha, int srcWidth, int srcHeight,
+			    bool srcAlpha, int srcWidth, int srcHeight,
 			    int scaledWidth, int scaledHeight,
 			    SplashBitmap *dest) {
   Guchar *lineBuf, *alphaLineBuf;
@@ -4954,7 +4954,7 @@ static void expandRow(Guchar *srcBuf, Guchar *dstBuf, int srcWidth, int scaledWi
 // Scale up image using bilinear interpolation
 void Splash::scaleImageYuXuBilinear(SplashImageSource src, void *srcData,
                                     SplashColorMode srcMode, int nComps,
-                                    GBool srcAlpha, int srcWidth, int srcHeight,
+                                    bool srcAlpha, int srcWidth, int srcHeight,
                                     int scaledWidth, int scaledHeight,
                                     SplashBitmap *dest) {
   Guchar *srcBuf, *lineBuf1, *lineBuf2, *alphaSrcBuf, *alphaLineBuf1, *alphaLineBuf2;
@@ -5104,14 +5104,14 @@ void Splash::vertFlipImage(SplashBitmap *img, int width, int height,
   gfree(lineBuf);
 }
 
-void Splash::blitImage(SplashBitmap *src, GBool srcAlpha, int xDest, int yDest) {
+void Splash::blitImage(SplashBitmap *src, bool srcAlpha, int xDest, int yDest) {
   SplashClipResult clipRes = state->clip->testRect(xDest, yDest, xDest + src->getWidth() - 1, yDest + src->getHeight() - 1);
   if (clipRes != splashClipAllOutside) {
     blitImage(src, srcAlpha, xDest, yDest, clipRes);
   }
 }
 
-void Splash::blitImage(SplashBitmap *src, GBool srcAlpha, int xDest, int yDest,
+void Splash::blitImage(SplashBitmap *src, bool srcAlpha, int xDest, int yDest,
 		       SplashClipResult clipRes) {
   SplashPipe pipe;
   SplashColor pixel = {};
@@ -5155,7 +5155,7 @@ void Splash::blitImage(SplashBitmap *src, GBool srcAlpha, int xDest, int yDest,
   // draw the unclipped region
   if (x0 < w && y0 < h && x0 < x1 && y0 < y1) {
     pipeInit(&pipe, xDest + x0, yDest + y0, nullptr, pixel,
-	     (Guchar)splashRound(state->fillAlpha * 255), srcAlpha, gFalse);
+	     (Guchar)splashRound(state->fillAlpha * 255), srcAlpha, false);
     if (srcAlpha) {
       for (y = y0; y < y1; ++y) {
 	pipeSetXY(&pipe, xDest + x0, yDest + y);
@@ -5197,7 +5197,7 @@ void Splash::blitImage(SplashBitmap *src, GBool srcAlpha, int xDest, int yDest,
   }
 }
 
-void Splash::blitImageClipped(SplashBitmap *src, GBool srcAlpha,
+void Splash::blitImageClipped(SplashBitmap *src, bool srcAlpha,
 			      int xSrc, int ySrc, int xDest, int yDest,
 			      int w, int h) {
   SplashPipe pipe;
@@ -5207,7 +5207,7 @@ void Splash::blitImageClipped(SplashBitmap *src, GBool srcAlpha,
 
   if (vectorAntialias) {
     pipeInit(&pipe, xDest, yDest, nullptr, pixel,
-	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, gFalse);
+	     (Guchar)splashRound(state->fillAlpha * 255), true, false);
     drawAAPixelInit();
     if (srcAlpha) {
       for (y = 0; y < h; ++y) {
@@ -5229,7 +5229,7 @@ void Splash::blitImageClipped(SplashBitmap *src, GBool srcAlpha,
     }
   } else {
     pipeInit(&pipe, xDest, yDest, nullptr, pixel,
-	     (Guchar)splashRound(state->fillAlpha * 255), srcAlpha, gFalse);
+	     (Guchar)splashRound(state->fillAlpha * 255), srcAlpha, false);
     if (srcAlpha) {
       for (y = 0; y < h; ++y) {
 	ap = src->getAlphaPtr() + (ySrc + y) * src->getWidth() + xSrc;
@@ -5267,8 +5267,8 @@ void Splash::blitImageClipped(SplashBitmap *src, GBool srcAlpha,
 
 SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
 			      int xDest, int yDest, int w, int h,
-			      GBool noClip, GBool nonIsolated,
-			      GBool knockout, SplashCoord knockoutOpacity) {
+			      bool noClip, bool nonIsolated,
+			      bool knockout, SplashCoord knockoutOpacity) {
   SplashPipe pipe;
   SplashColor pixel;
   Guchar alpha;
@@ -5289,7 +5289,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
   }
   if (src->alpha) {
     pipeInit(&pipe, xDest, yDest, nullptr, pixel,
-	     (Guchar)splashRound(state->fillAlpha * 255), gTrue, nonIsolated,
+	     (Guchar)splashRound(state->fillAlpha * 255), true, nonIsolated,
 	     knockout, (Guchar)splashRound(knockoutOpacity * 255));
     if (noClip) {
       for (y = 0; y < h; ++y) {
@@ -5330,7 +5330,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
     }
   } else {
     pipeInit(&pipe, xDest, yDest, nullptr, pixel,
-	     (Guchar)splashRound(state->fillAlpha * 255), gFalse, nonIsolated);
+	     (Guchar)splashRound(state->fillAlpha * 255), false, nonIsolated);
     if (noClip) {
       for (y = 0; y < h; ++y) {
 	pipeSetXY(&pipe, xDest, yDest + y);
@@ -5527,7 +5527,7 @@ void Splash::compositeBackground(SplashColorPtr color) {
   memset(bitmap->alpha, 255, bitmap->width * bitmap->height);
 }
 
-GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
+bool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
 {
   double xdbl[3] = {0., 0., 0.};
   double ydbl[3] = {0., 0., 0.};
@@ -5545,7 +5545,7 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
   double scanColorMap[2] = {0., 0.};
   int scanEdgeL[2] = { 0, 0 };
   int scanEdgeR[2] = { 0, 0 };
-  GBool hasFurtherSegment = gFalse;
+  bool hasFurtherSegment = false;
 
   int scanLineOff = 0;
   int bitmapOff = 0;
@@ -5560,7 +5560,7 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
   SplashColorPtr cur = nullptr;
   SplashCoord* userToCanvasMatrix = getMatrix();
   SplashColorMode bitmapMode = bitmap->getMode();
-  GBool hasAlpha = (bitmapAlpha != nullptr);
+  bool hasAlpha = (bitmapAlpha != nullptr);
   int rowSize = bitmap->getRowSize();
   int colorComps = 0;
   switch (bitmapMode) {
@@ -5591,11 +5591,11 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
   SplashPipe pipe;
   SplashColor cSrcVal;
 
-  pipeInit(&pipe, 0, 0, nullptr, cSrcVal, (Guchar)splashRound(state->strokeAlpha * 255), gFalse, gFalse);
+  pipeInit(&pipe, 0, 0, nullptr, cSrcVal, (Guchar)splashRound(state->strokeAlpha * 255), false, false);
 
   if (vectorAntialias) {
     if (aaBuf == nullptr)
-      return gFalse; // fall back to old behaviour
+      return false; // fall back to old behaviour
     drawAAPixelInit();
   }
 
@@ -5612,13 +5612,13 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
   // - the final step, is performed using a SplashPipe:
   // - assign the actual color into cSrcVal: pipe uses cSrcVal by reference
   // - invoke drawPixel(&pipe,X,Y,bNoClip);
-  GBool bDirectBlit = vectorAntialias ? gFalse : pipe.noTransparency && !state->blendFunc;
+  bool bDirectBlit = vectorAntialias ? false : pipe.noTransparency && !state->blendFunc;
   if (!bDirectBlit) {
     blitTarget = new SplashBitmap(bitmap->getWidth(),
                                   bitmap->getHeight(),
                                   bitmap->getRowPad(),
                                   bitmap->getMode(),
-                                  gTrue,
+                                  true,
                                   bitmap->getRowSize() >= 0);
     bitmapData = blitTarget->getDataPtr();
     bitmapAlpha = blitTarget->getAlphaPtr();
@@ -5627,7 +5627,7 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
     int S = bitmap->getWidth() * bitmap->getHeight();
     for (int i = 0; i < S; ++i)
       bitmapAlpha[i] = 0;
-    hasAlpha = gTrue;
+    hasAlpha = true;
   }
 
   if (shading->isParameterized()) {
@@ -5761,7 +5761,7 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
           }
           assert( y[scanEdgeL[0]]  <  y[scanEdgeL[1]] );
           assert( y[scanEdgeR[0]] <  y[scanEdgeR[1]] );
-          hasFurtherSegment = gFalse;
+          hasFurtherSegment = false;
         }
 
         yt = Y;
@@ -5814,7 +5814,7 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
     if (!bDirectBlit) {
       delete blitTarget;
     }
-    return gFalse;
+    return false;
   }
 
   if (!bDirectBlit) {
@@ -5835,7 +5835,7 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
         if (vectorAntialias) {
           drawAAPixel(&pipe, X, Y);
         } else {
-          drawPixel(&pipe, X, Y, gTrue); // no clipping - has already been done.
+          drawPixel(&pipe, X, Y, true); // no clipping - has already been done.
         }
       }
     }
@@ -5844,7 +5844,7 @@ GBool Splash::gouraudTriangleShadedFill(SplashGouraudColor *shading)
     blitTarget = nullptr;
   }
 
-  return gTrue;
+  return true;
 }
 
 SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
@@ -5956,11 +5956,11 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
 }
 
 SplashPath *Splash::makeStrokePath(SplashPath *path, SplashCoord w,
-				    GBool flatten) {
+				    bool flatten) {
 SplashPath *pathIn, *dashPath, *pathOut;
   SplashCoord d, dx, dy, wdx, wdy, dxNext, dyNext, wdxNext, wdyNext;
   SplashCoord crossprod, dotprod, miter, m;
-  GBool first, last, closed, hasangle;
+  bool first, last, closed, hasangle;
   int subpathStart0, subpathStart1, seg, i0, i1, j0, j1, k0, k1;
   int left0, left1, left2, right0, right1, right2, join0, join1, join2;
   int leftFirst, rightFirst, firstPt;
@@ -5988,7 +5988,7 @@ SplashPath *pathIn, *dashPath, *pathOut;
 
   subpathStart0 = subpathStart1 = 0; // make gcc happy
   seg = 0; // make gcc happy
-  closed = gFalse; // make gcc happy
+  closed = false; // make gcc happy
   left0 = left1 = right0 = right1 = join0 = join1 = 0; // make gcc happy
   leftFirst = rightFirst = firstPt = 0; // make gcc happy
 
@@ -6387,7 +6387,7 @@ void Splash::dumpXPath(SplashXPath *path) {
   }
 }
 
-SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
+SplashError Splash::shadedFill(SplashPath *path, bool hasBBox,
                                SplashPattern *pattern) {
   SplashPipe pipe;
   SplashXPathScanner *scanner;
@@ -6400,7 +6400,7 @@ SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
   if (path->length == 0) {
     return splashErrEmptyPath;
   }
-  SplashXPath xPath(path, state->matrix, state->flatness, gTrue);
+  SplashXPath xPath(path, state->matrix, state->flatness, true);
   if (vectorAntialias) {
     xPath.aaScale();
   }
@@ -6411,7 +6411,7 @@ SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
     yMinI = yMinI * splashAASize;
     yMaxI = (yMaxI + 1) * splashAASize - 1;
   }
-  scanner = new SplashXPathScanner(&xPath, gFalse, yMinI, yMaxI);
+  scanner = new SplashXPathScanner(&xPath, false, yMinI, yMaxI);
 
   // get the min and max x and y values
   if (vectorAntialias) {
@@ -6430,7 +6430,7 @@ SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
       yMaxI = state->clip->getYMaxI();
     }
 
-    pipeInit(&pipe, 0, yMinI, pattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), vectorAntialias && !hasBBox, gFalse);
+    pipeInit(&pipe, 0, yMinI, pattern, nullptr, (Guchar)splashRound(state->fillAlpha * 255), vectorAntialias && !hasBBox, false);
 
     // draw the spans
     if (vectorAntialias) {
@@ -6496,7 +6496,7 @@ SplashError Splash::shadedFill(SplashPath *path, GBool hasBBox,
         SplashXPathScanIterator iterator(*scanner, y);
         while (iterator.getNextSpan(&x0, &x1)) {
           if (clipRes == splashClipAllInside) {
-            drawSpan(&pipe, x0, x1, y, gTrue);
+            drawSpan(&pipe, x0, x1, y, true);
           } else {
             // limit the x range
             if (x0 < state->clip->getXMinI()) {

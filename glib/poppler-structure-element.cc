@@ -400,7 +400,7 @@ static EnumType
 attr_to_enum (PopplerStructureElement *poppler_structure_element)
 {
   const Attribute *attr =
-      poppler_structure_element->elem->findAttribute (EnumNameValue<EnumType>::attribute_type, gTrue);
+      poppler_structure_element->elem->findAttribute (EnumNameValue<EnumType>::attribute_type, true);
   return name_to_enum<EnumType> ((attr != nullptr)
                                  ? attr->getValue ()
                                  : Attribute::getDefaultValue (EnumNameValue<EnumType>::attribute_type));
@@ -412,7 +412,7 @@ attr_value_or_default (PopplerStructureElement *poppler_structure_element,
                        Attribute::Type          attribute_type)
 {
   const Attribute *attr =
-      poppler_structure_element->elem->findAttribute (attribute_type, gTrue);
+      poppler_structure_element->elem->findAttribute (attribute_type, true);
   return attr ? attr->getValue () : Attribute::getDefaultValue (attribute_type);
 }
 

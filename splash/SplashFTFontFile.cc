@@ -65,7 +65,7 @@ SplashFontFile *SplashFTFontFile::loadType1Font(SplashFTFontEngine *engineA,
   }
 
   return new SplashFTFontFile(engineA, idA, src,
-			      faceA, codeToGIDA, 256, gFalse, gTrue);
+			      faceA, codeToGIDA, 256, false, true);
 }
 
 SplashFontFile *SplashFTFontFile::loadCIDFont(SplashFTFontEngine *engineA,
@@ -84,7 +84,7 @@ SplashFontFile *SplashFTFontFile::loadCIDFont(SplashFTFontEngine *engineA,
   }
 
   return new SplashFTFontFile(engineA, idA, src,
-			      faceA, codeToGIDA, codeToGIDLenA, gFalse, gFalse);
+			      faceA, codeToGIDA, codeToGIDLenA, false, false);
 }
 
 SplashFontFile *SplashFTFontFile::loadTrueTypeFont(SplashFTFontEngine *engineA,
@@ -104,7 +104,7 @@ SplashFontFile *SplashFTFontFile::loadTrueTypeFont(SplashFTFontEngine *engineA,
   }
 
   return new SplashFTFontFile(engineA, idA, src,
-			      faceA, codeToGIDA, codeToGIDLenA, gTrue, gFalse);
+			      faceA, codeToGIDA, codeToGIDLenA, true, false);
 }
 
 SplashFTFontFile::SplashFTFontFile(SplashFTFontEngine *engineA,
@@ -112,7 +112,7 @@ SplashFTFontFile::SplashFTFontFile(SplashFTFontEngine *engineA,
 				   SplashFontSrc *srcA,
 				   FT_Face faceA,
 				   int *codeToGIDA, int codeToGIDLenA,
-				   GBool trueTypeA, GBool type1A):
+				   bool trueTypeA, bool type1A):
   SplashFontFile(idA, srcA)
 {
   engine = engineA;

@@ -46,12 +46,12 @@ public:
   virtual ~SplashFTFont();
 
   // Munge xFrac and yFrac before calling SplashFont::getGlyph.
-  GBool getGlyph(int c, int xFrac, int yFrac,
+  bool getGlyph(int c, int xFrac, int yFrac,
 		 SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes) override;
 
   // Rasterize a glyph.  The <xFrac> and <yFrac> values are the same
   // as described for getGlyph.
-  GBool makeGlyph(int c, int xFrac, int yFrac,
+  bool makeGlyph(int c, int xFrac, int yFrac,
 		  SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes) override;
 
   // Return the path for a glyph.
@@ -67,9 +67,9 @@ private:
   FT_Matrix textMatrix;
   SplashCoord textScale;
   int size;
-  GBool enableFreeTypeHinting;
-  GBool enableSlightHinting;
-  GBool isOk;
+  bool enableFreeTypeHinting;
+  bool enableSlightHinting;
+  bool isOk;
 };
 
 #endif

@@ -46,12 +46,12 @@ public:
   ViewerPreferences(Dict *prefDict);
   ~ViewerPreferences();
 
-  GBool getHideToolbar() const { return hideToolbar; }
-  GBool getHideMenubar() const { return hideMenubar; }
-  GBool getHideWindowUI() const { return hideWindowUI; }
-  GBool getFitWindow() const { return fitWindow; }
-  GBool getCenterWindow() const { return centerWindow; }
-  GBool getDisplayDocTitle() const { return displayDocTitle; }
+  bool getHideToolbar() const { return hideToolbar; }
+  bool getHideMenubar() const { return hideMenubar; }
+  bool getHideWindowUI() const { return hideWindowUI; }
+  bool getFitWindow() const { return fitWindow; }
+  bool getCenterWindow() const { return centerWindow; }
+  bool getDisplayDocTitle() const { return displayDocTitle; }
   NonFullScreenPageMode getNonFullScreenPageMode() const { return nonFullScreenPageMode; }
   Direction getDirection() const { return direction; }
   PrintScaling getPrintScaling() const { return printScaling; }
@@ -61,12 +61,12 @@ private:
 
   void init();
 
-  GBool hideToolbar;
-  GBool hideMenubar;
-  GBool hideWindowUI;
-  GBool fitWindow;
-  GBool centerWindow;
-  GBool displayDocTitle;
+  bool hideToolbar;
+  bool hideMenubar;
+  bool hideWindowUI;
+  bool fitWindow;
+  bool centerWindow;
+  bool displayDocTitle;
   NonFullScreenPageMode nonFullScreenPageMode;
   Direction direction;
   PrintScaling printScaling;

@@ -28,7 +28,7 @@
 #include "goo/GooString.h"
 #include <time.h>
 
-GBool parseDateString(const char *string, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute);
+bool parseDateString(const char *string, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute);
 
 /* Converts the time_t into a PDF Date format string.
  * If timet is NULL, current time is used.

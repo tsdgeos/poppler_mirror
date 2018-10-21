@@ -44,7 +44,7 @@ class SplashXPathScanner {
 public:
 
   // Create a new SplashXPathScanner object.  <xPathA> must be sorted.
-  SplashXPathScanner(SplashXPath *xPathA, GBool eoA,
+  SplashXPathScanner(SplashXPath *xPathA, bool eoA,
 		     int clipYMin, int clipYMax);
 
   ~SplashXPathScanner();
@@ -61,22 +61,22 @@ public:
 
   // Returns true if at least part of the path was outside the
   // clipYMin/clipYMax bounds passed to the constructor.
-  GBool hasPartialClip() { return partialClip; }
+  bool hasPartialClip() { return partialClip; }
 
   // Return the min/max x values for the span at <y>.
   void getSpanBounds(int y, int *spanXMin, int *spanXMax);
 
   // Returns true if (<x>,<y>) is inside the path.
-  GBool test(int x, int y);
+  bool test(int x, int y);
 
   // Returns true if the entire span ([<x0>,<x1>], <y>) is inside the
   // path.
-  GBool testSpan(int x0, int x1, int y);
+  bool testSpan(int x0, int x1, int y);
 
   // Renders one anti-aliased line into <aaBuf>.  Returns the min and
   // max x coordinates with non-zero pixels in <x0> and <x1>.
   void renderAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y,
-    GBool adjustVertLine = gFalse);
+    bool adjustVertLine = false);
 
   // Clips an anti-aliased line by setting pixels to zero.  On entry,
   // all non-zero pixels are between <x0> and <x1>.  This function
@@ -86,13 +86,13 @@ public:
 private:
 
   void computeIntersections();
-  GBool addIntersection(double segYMin, double segYMax,
+  bool addIntersection(double segYMin, double segYMax,
 		       int y, int x0, int x1, int count);
 
   SplashXPath *xPath;
-  GBool eo;
+  bool eo;
   int xMin, yMin, xMax, yMax;
-  GBool partialClip;
+  bool partialClip;
 
   typedef std::vector<SplashIntersect> IntersectionLine;
   std::vector<IntersectionLine> allIntersections;
@@ -106,7 +106,7 @@ public:
 
   // Returns the next span inside the path at the current y position
   // Returns false if there are no more spans.
-  GBool getNextSpan(int *x0, int *x1);
+  bool getNextSpan(int *x0, int *x1);
 
 private:
   typedef std::vector<SplashIntersect> IntersectionLine;
@@ -114,7 +114,7 @@ private:
 
   size_t interIdx;	// current index into <line>
   int interCount;	// current EO/NZWN counter
-  const GBool eo;
+  const bool eo;
 };
 
 #endif

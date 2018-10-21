@@ -51,8 +51,8 @@
 //------------------------------------------------------------------------
 
 SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
-			   SplashColorMode modeA, GBool alphaA,
-			   GBool topDown, GooList *separationListA) {
+			   SplashColorMode modeA, bool alphaA,
+			   bool topDown, GooList *separationListA) {
   width = widthA;
   height = heightA;
   mode = modeA;
@@ -542,7 +542,7 @@ static inline Guchar div255(int x) {
   return (Guchar)((x + (x >> 8) + 0x80) >> 8);
 }
 
-GBool SplashBitmap::convertToXBGR(ConversionMode conversionMode) {
+bool SplashBitmap::convertToXBGR(ConversionMode conversionMode) {
   if (mode == splashModeXBGR8) {
     if (conversionMode != conversionOpaque) {
       // Copy the alpha channel into the fourth component so that XBGR becomes ABGR.
@@ -569,7 +569,7 @@ GBool SplashBitmap::convertToXBGR(ConversionMode conversionMode) {
       }
     }
 
-    return gTrue;
+    return true;
   }
   
   int newrowSize = width * 4;

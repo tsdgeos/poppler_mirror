@@ -63,9 +63,9 @@ public:
   GooString *getFile()      { return file; };
   GooString *getEncoding()      { return encoding; };
   Type       getType()      { return type; };
-  GBool      getEmbedded()  { return emb; };
-  GBool      getSubset()    { return subset; };
-  GBool      getToUnicode() { return hasToUnicode; };
+  bool      getEmbedded()  { return emb; };
+  bool      getSubset()    { return subset; };
+  bool      getToUnicode() { return hasToUnicode; };
   Ref        getRef()       { return fontRef; };
   Ref        getEmbRef()    { return embRef; };
 
@@ -75,9 +75,9 @@ private:
   GooString *file;
   GooString *encoding;
   Type type;
-  GBool emb;
-  GBool subset;
-  GBool hasToUnicode;
+  bool emb;
+  bool subset;
+  bool hasToUnicode;
   Ref fontRef;
   Ref embRef;
 };

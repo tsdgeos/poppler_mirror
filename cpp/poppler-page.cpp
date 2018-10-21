@@ -206,7 +206,7 @@ bool page::search(const ustring &text, rectf &r, search_direction_enum direction
         u[i] = text[i];
     }
 
-    const GBool sCase = case_sensitivity == case_sensitive ? gTrue : gFalse;
+    const bool sCase = case_sensitivity == case_sensitive;
     const int rotation_value = (int)rotation * 90;
 
     bool found = false;
@@ -215,24 +215,24 @@ bool page::search(const ustring &text, rectf &r, search_direction_enum direction
     double rect_right = r.right();
     double rect_bottom = r.bottom();
 
-    TextOutputDev td(nullptr, gTrue, 0, gFalse, gFalse);
+    TextOutputDev td(nullptr, true, 0, false, false);
     d->doc->doc->displayPage(&td, d->index + 1, 72, 72, rotation_value, false, true, false);
     TextPage *text_page = td.takeText();
 
     switch (direction) {
     case search_from_top:
         found = text_page->findText(&u[0], len,
-                    gTrue, gTrue, gFalse, gFalse, sCase, gFalse, gFalse,
+                    true, true, false, false, sCase, false, false,
                     &rect_left, &rect_top, &rect_right, &rect_bottom);
         break;
     case search_next_result:
         found = text_page->findText(&u[0], len,
-                    gFalse, gTrue, gTrue, gFalse, sCase, gFalse, gFalse,
+                    false, true, true, false, sCase, false, false,
                     &rect_left, &rect_top, &rect_right, &rect_bottom);
         break;
     case search_previous_result:
         found = text_page->findText(&u[0], len,
-                    gFalse, gTrue, gTrue, gFalse, sCase, gTrue, gFalse,
+                    false, true, true, false, sCase, true, false,
                     &rect_left, &rect_top, &rect_right, &rect_bottom);
         break;
     }
@@ -273,8 +273,8 @@ ustring page::text(const rectf &r) const
 ustring page::text(const rectf &r, text_layout_enum layout_mode) const
 {
     std::unique_ptr<GooString> s;
-    const GBool use_raw_order = (layout_mode == raw_order_layout);
-    TextOutputDev td(nullptr, gFalse, 0, use_raw_order, gFalse);
+    const bool use_raw_order = (layout_mode == raw_order_layout);
+    TextOutputDev td(nullptr, false, 0, use_raw_order, false);
     d->doc->doc->displayPage(&td, d->index + 1, 72, 72, 0, false, true, false);
     if (r.is_empty()) {
         PDFRectangle rect = *d->page->getCropBox();
@@ -338,10 +338,10 @@ std::vector<text_box> page::text_list() const
     /* config values are same with Qt5 Page::TextList() */
     auto output_dev = std::make_unique<TextOutputDev>(
 	nullptr,    /* char* fileName */
-	gFalse,  /* GBool physLayoutA */
+	false,  /* bool physLayoutA */
 	0,       /* double fixedPitchA */
-	gFalse,  /* GBool rawOrderA */
-	gFalse  /* GBool append */
+	false,  /* bool rawOrderA */
+	false  /* bool append */
     );
 
     /*
@@ -352,11 +352,11 @@ std::vector<text_box> page::text_list() const
     d->doc->doc->displayPageSlice(output_dev.get(),
                                   d->index + 1,           /* page */
                                   72, 72, 0,              /* hDPI, vDPI, rot */
-                                  gFalse, gFalse, gFalse, /* useMediaBox, crop, printing */
+                                  false, false, false,    /* useMediaBox, crop, printing */
                                   -1, -1, -1, -1,         /* sliceX, sliceY, sliceW, sliceH */
                                   nullptr, nullptr,       /* abortCheckCbk(), abortCheckCbkData */
                                   nullptr, nullptr,       /* annotDisplayDecideCbk(), annotDisplayDecideCbkData */
-                                  gTrue);                 /* copyXRef */
+                                  true);                  /* copyXRef */
 
     if (std::unique_ptr< TextWordList > word_list{output_dev->makeWordList()}) {
 
@@ -375,7 +375,7 @@ std::vector<text_box> page::text_list() const
                 {xMin, yMin, xMax-xMin, yMax-yMin},
                 word->getRotation(),
                 {},
-                word->hasSpaceAfter() == gTrue
+                word->hasSpaceAfter() == true
             }};
 
             tb.m_data->char_bboxes.reserve(word->getLength());

@@ -36,9 +36,9 @@ MediaWindowParameters::MediaWindowParameters() {
   relativeTo = windowRelativeToDocument;
   XPosition = 0.5;
   YPosition = 0.5;
-  hasTitleBar = gTrue;
-  hasCloseButton = gTrue;
-  isResizeable = gTrue;
+  hasTitleBar = true;
+  hasCloseButton = true;
+  isResizeable = true;
 }
 
 MediaWindowParameters::~MediaWindowParameters() {
@@ -136,10 +136,10 @@ MediaParameters::MediaParameters() {
 
   volume = 100;
   fittingPolicy = fittingUndefined;
-  autoPlay = gTrue;
+  autoPlay = true;
   repeatCount = 1.0;
   opacity = 1.0;
-  showControls = gFalse;
+  showControls = false;
   duration = 0;
 }
 
@@ -251,19 +251,19 @@ MediaRendition::~MediaRendition() {
 }
 
 MediaRendition::MediaRendition(Object* obj) {
-  GBool hasClip = gFalse;
+  bool hasClip = false;
 
-  ok = gTrue;
+  ok = true;
   fileName = nullptr;
   contentType = nullptr;
-  isEmbedded = gFalse;
+  isEmbedded = false;
 
   //
   // Parse media clip data
   //
   Object tmp2 = obj->dictLookup("C");
   if (tmp2.isDict()) { // media clip
-    hasClip = gTrue;
+    hasClip = true;
     Object tmp = tmp2.dictLookup("S");
     if (tmp.isName()) {
       if (!strcmp(tmp.getName(), "MCD")) { // media clip data
@@ -277,7 +277,7 @@ MediaRendition::MediaRendition(Object* obj) {
 	  if (obj2.isDict()) {
 	    Object embedded = obj2.dictLookup("F");
 	    if (embedded.isStream()) {
-	      isEmbedded = gTrue;
+	      isEmbedded = true;
 	      embeddedStreamObject = embedded.copy();
 	    }
 	  }
@@ -285,7 +285,7 @@ MediaRendition::MediaRendition(Object* obj) {
 	  // TODO: D might be a form XObject too
 	} else {
 	  error (errSyntaxError, -1, "Invalid Media Clip Data");
-	  ok = gFalse;
+	  ok = false;
 	}
 
 	// FIXME: ignore CT if D is a form XObject
@@ -298,7 +298,7 @@ MediaRendition::MediaRendition(Object* obj) {
       }
     } else {
       error (errSyntaxError, -1, "Invalid Media Clip");
-      ok = gFalse;
+      ok = false;
     }
   }
 
@@ -319,7 +319,7 @@ MediaRendition::MediaRendition(Object* obj) {
     }
   } else if (!hasClip) {
     error (errSyntaxError, -1, "Invalid Media Rendition");
-    ok = gFalse;
+    ok = false;
   }
 
   //

@@ -67,9 +67,9 @@ public:
   JArithmeticDecoder& operator=(const JArithmeticDecoder &) = delete;
 
   void setStream(Stream *strA)
-    { str = strA; dataLen = 0; limitStream = gFalse; }
+    { str = strA; dataLen = 0; limitStream = false; }
   void setStream(Stream *strA, int dataLenA)
-    { str = strA; dataLen = dataLenA; limitStream = gTrue; }
+    { str = strA; dataLen = dataLenA; limitStream = true; }
 
   // Start decoding on a new stream.  This fills the byte buffers and
   // runs INITDEC.
@@ -91,7 +91,7 @@ public:
   int decodeByte(Guint context, JArithmeticDecoderStats *stats);
 
   // Returns false for OOB, otherwise sets *<x> and returns true.
-  GBool decodeInt(int *x, JArithmeticDecoderStats *stats);
+  bool decodeInt(int *x, JArithmeticDecoderStats *stats);
 
   Guint decodeIAID(Guint codeLen,
 		   JArithmeticDecoderStats *stats);
@@ -119,7 +119,7 @@ private:
   Stream *str;
   Guint nBytesRead;
   int dataLen;
-  GBool limitStream;
+  bool limitStream;
 };
 
 #endif

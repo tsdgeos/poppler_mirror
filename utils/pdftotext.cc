@@ -78,21 +78,21 @@ static int x = 0;
 static int y = 0;
 static int w = 0;
 static int h = 0;
-static GBool bbox = gFalse;
-static GBool bboxLayout = gFalse;
-static GBool physLayout = gFalse;
+static bool bbox = false;
+static bool bboxLayout = false;
+static bool physLayout = false;
 static double fixedPitch = 0;
-static GBool rawOrder = gFalse;
-static GBool htmlMeta = gFalse;
+static bool rawOrder = false;
+static bool htmlMeta = false;
 static char textEncName[128] = "";
 static char textEOL[16] = "";
-static GBool noPageBreaks = gFalse;
+static bool noPageBreaks = false;
 static char ownerPassword[33] = "\001";
 static char userPassword[33] = "\001";
-static GBool quiet = gFalse;
-static GBool printVersion = gFalse;
-static GBool printHelp = gFalse;
-static GBool printEnc = gFalse;
+static bool quiet = false;
+static bool printVersion = false;
+static bool printHelp = false;
+static bool printEnc = false;
 
 static const ArgDesc argDesc[] = {
   {"-f",       argInt,      &firstPage,     0,
@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
   FILE *f;
   UnicodeMap *uMap;
   Object info;
-  GBool ok;
+  bool ok;
   int exitCode;
 
   Win32Console win32Console(&argc, &argv);
@@ -190,10 +190,10 @@ int main(int argc, char *argv[]) {
   // parse args
   ok = parseArgs(argDesc, &argc, argv);
   if (bboxLayout) {
-    bbox = gTrue;
+    bbox = true;
   }
   if (bbox) {
-    htmlMeta = gTrue;
+    htmlMeta = true;
   }
   if (!ok || (argc < 2 && !printEnc) || argc > 3 || printVersion || printHelp) {
     fprintf(stderr, "pdftotext version %s\n", PACKAGE_VERSION);
@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
 
   fileName = new GooString(argv[1]);
   if (fixedPitch) {
-    physLayout = gTrue;
+    physLayout = true;
   }
 
   if (textEncName[0]) {
@@ -231,7 +231,7 @@ int main(int argc, char *argv[]) {
     }
   }
   if (noPageBreaks) {
-    globalParams->setTextPageBreaks(gFalse);
+    globalParams->setTextPageBreaks(false);
   }
   if (quiet) {
     globalParams->setErrQuiet(quiet);
@@ -382,12 +382,12 @@ int main(int argc, char *argv[]) {
     if (textOut->isOk()) {
       if ((w==0) && (h==0) && (x==0) && (y==0)) {
 	doc->displayPages(textOut, firstPage, lastPage, resolution, resolution, 0,
-			  gTrue, gFalse, gFalse);
+			  true, false, false);
       } else {
 	
 	for (int page = firstPage; page <= lastPage; ++page) {
 	  doc->displayPageSlice(textOut, page, resolution, resolution, 0,
-			      gTrue, gFalse, gFalse, 
+			      true, false, false, 
 			      x, y, w, h);
 	}
       }
@@ -438,7 +438,7 @@ int main(int argc, char *argv[]) {
 static void printInfoString(FILE *f, Dict *infoDict, const char *key,
 			    const char *text1, const char *text2, UnicodeMap *uMap) {
   const GooString *s1;
-  GBool isUnicode;
+  bool isUnicode;
   Unicode u;
   char buf[9];
   int i, n;
@@ -449,10 +449,10 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key,
     s1 = obj.getString();
     if ((s1->getChar(0) & 0xff) == 0xfe &&
 	(s1->getChar(1) & 0xff) == 0xff) {
-      isUnicode = gTrue;
+      isUnicode = true;
       i = 2;
     } else {
-      isUnicode = gFalse;
+      isUnicode = false;
       i = 0;
     }
     while (i < obj.getString()->getLength()) {
@@ -520,7 +520,7 @@ void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int l
   fprintf(f, "<doc>\n");
   for (int page = first; page <= last; ++page) {
     fprintf(f, "  <page width=\"%f\" height=\"%f\">\n",doc->getPageMediaWidth(page), doc->getPageMediaHeight(page));
-    doc->displayPage(textOut, page, resolution, resolution, 0, gTrue, gFalse, gFalse);
+    doc->displayPage(textOut, page, resolution, resolution, 0, true, false, false);
     for (flow = textOut->getFlows(); flow; flow = flow->getNext()) {
       fprintf(f, "    <flow>\n");
       for (blk = flow->getBlocks(); blk; blk = blk->getNext()) {
@@ -542,7 +542,7 @@ void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int 
   fprintf(f, "<doc>\n");
   for (int page = first; page <= last; ++page) {
     fprintf(f, "  <page width=\"%f\" height=\"%f\">\n",doc->getPageMediaWidth(page), doc->getPageMediaHeight(page));
-    doc->displayPage(textOut, page, resolution, resolution, 0, gTrue, gFalse, gFalse);
+    doc->displayPage(textOut, page, resolution, resolution, 0, true, false, false);
     TextWordList *wordlist = textOut->makeWordList();
     const int word_length = wordlist != nullptr ? wordlist->getLength() : 0;
     TextWord *word;

@@ -69,7 +69,7 @@ public:
   // Accessors.
   Object get(int i, int resursion = 0) const;
   Object getNF(int i) const;
-  GBool getString(int i, GooString *string) const;
+  bool getString(int i, GooString *string) const;
 
 private:
   friend class Object; // for incRef/decRef

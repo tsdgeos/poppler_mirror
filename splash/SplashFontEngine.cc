@@ -61,10 +61,10 @@ extern "C" int unlink(char *filename);
 //------------------------------------------------------------------------
 
 SplashFontEngine::SplashFontEngine(
-				   GBool enableFreeType,
-				   GBool enableFreeTypeHinting,
-				   GBool enableSlightHinting,
-				   GBool aa) {
+				   bool enableFreeType,
+				   bool enableFreeTypeHinting,
+				   bool enableSlightHinting,
+				   bool aa) {
   std::fill(fontCache.begin(), fontCache.end(), nullptr);
 
   if (enableFreeType) {
@@ -217,11 +217,11 @@ SplashFontFile *SplashFontEngine::loadTrueTypeFont(SplashFontFileID *idA,
   return fontFile;
 }
 
-GBool SplashFontEngine::getAA() {
-  return (ftEngine == nullptr) ? gFalse : ftEngine->getAA();
+bool SplashFontEngine::getAA() {
+  return (ftEngine == nullptr) ? false : ftEngine->getAA();
 }
 
-void SplashFontEngine::setAA(GBool aa) {
+void SplashFontEngine::setAA(bool aa) {
   if (ftEngine != nullptr) {
     ftEngine->setAA(aa);
   }
