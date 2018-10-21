@@ -309,11 +309,11 @@ public:
   PDFSubtypeConformance getPDFSubtypeConformance() const { return pdfConformance; }
 
   // Return the PDF version specified by the file.
-  int getPDFMajorVersion() { return pdfMajorVersion; }
-  int getPDFMinorVersion() { return pdfMinorVersion; }
+  int getPDFMajorVersion() const { return pdfMajorVersion; }
+  int getPDFMinorVersion() const { return pdfMinorVersion; }
 
   //Return the PDF ID in the trailer dictionary (if any).
-  GBool getID(GooString *permanent_id, GooString *update_id);
+  GBool getID(GooString *permanent_id, GooString *update_id) const;
 
   // Save one page with another name.
   int savePageAs(GooString *name, int pageNo);

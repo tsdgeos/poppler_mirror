@@ -41,6 +41,7 @@
 // Copyright (C) 2018 Evangelos Foutras <evangelos@foutrelis.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Evangelos Rigas <erigas@rnd2.org>
+// Copyright (C) 2018 Philipp Knechtges <philipp-dev@knechtges.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -817,7 +818,7 @@ get_id (const GooString *encodedidstring, GooString *id) {
   return gTrue;
 }
 
-GBool PDFDoc::getID(GooString *permanent_id, GooString *update_id) {
+GBool PDFDoc::getID(GooString *permanent_id, GooString *update_id) const {
   Object obj = xref->getTrailerDict()->dictLookup ("ID");
 
   if (obj.isArray() && obj.arrayGetLength() == 2) {
@@ -1179,7 +1180,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
   int keyLength;
   xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
 
-  outStr->printf("%%PDF-%d.%d\r\n",pdfMajorVersion,pdfMinorVersion);
+  writeHeader(outStr, getPDFMajorVersion(), getPDFMinorVersion());
   XRef *uxref = new XRef();
   uxref->add(0, 65535, 0, gFalse);
   xref->lock();
@@ -1357,7 +1358,7 @@ void PDFDoc::writeString (const GooString* s, OutStream* outStr, const Guchar *f
 Goffset PDFDoc::writeObjectHeader (Ref *ref, OutStream* outStr)
 {
   Goffset offset = outStr->getPos();
-  outStr->printf("%i %i obj ", ref->num, ref->gen);
+  outStr->printf("%i %i obj\r\n", ref->num, ref->gen);
   return offset;
 }
 
@@ -1508,7 +1509,7 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numO
 
 void PDFDoc::writeObjectFooter (OutStream* outStr)
 {
-  outStr->printf("endobj\r\n");
+  outStr->printf("\r\nendobj\r\n");
 }
 
 Object PDFDoc::createTrailerDict(int uxrefSize, GBool incrUpdate, Goffset startxRef,
