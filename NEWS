@@ -1,3 +1,24 @@
+Release 0.70.0
+        core:
+         * FreeText annotations: default to font from default appearance string
+         * Splash: Speed improvements
+         * Fix security issues found by oss-fuzz
+         * Improve page lable parsing
+         * Use std some std classes instead of self grown ones
+         * Various internal improvements
+
+        qt5:
+         * Add Page::index() method
+         * Improve method to get the page from a label string
+
+        glib:
+         * Fix crash on missing embedded file
+         * Add support for PDF subtype property
+         * Only export symbols in the public API
+
+        utils:
+         * pdftohtml: Improve font handling
+
 Release 0.69.0
         core:
          * Add annotation font color

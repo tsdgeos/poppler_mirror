@@ -7,6 +7,7 @@
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
 // Copyright 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
 

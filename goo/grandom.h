@@ -6,7 +6,8 @@
  * Pseudo-random number generation
  *
  * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
- */
+ * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+  */
 
 #ifndef GRANDOM_H
 #define GRANDOM_H
