@@ -12,6 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2007-2008, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

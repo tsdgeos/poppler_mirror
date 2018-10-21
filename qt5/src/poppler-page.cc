@@ -21,6 +21,7 @@
  * Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
+ * Copyright (C) 2018, Tobias Deiminger <haxtibal@posteo.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

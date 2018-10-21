@@ -7,6 +7,7 @@
 // Copyright (C) 2009 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009, 2010, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
+// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
 

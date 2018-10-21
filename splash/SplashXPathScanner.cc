@@ -14,6 +14,7 @@
 // Copyright (C) 2008, 2010, 2014 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2013, 2014 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
