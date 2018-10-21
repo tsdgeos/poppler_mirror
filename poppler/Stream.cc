@@ -180,6 +180,31 @@ Stream *Stream::addFilters(Dict *dict, int recursion) {
   return str;
 }
 
+class BaseStreamStream : public Stream
+{
+public:
+  BaseStreamStream(Stream *strA) : str(strA)
+  {
+  }
+
+  StreamKind getKind() override { return str->getBaseStream()->getKind(); }
+  void reset() override { str->getBaseStream()->reset(); }
+  int getChar() override { return str->getBaseStream()->getChar(); }
+  int lookChar() override { return str->getBaseStream()->lookChar(); }
+  bool isBinary(bool last = true) override { return str->getBaseStream()->isBinary(); }
+  int getUnfilteredChar () override { return str->getBaseStream()->getUnfilteredChar(); }
+  void unfilteredReset () override { str->getBaseStream()->unfilteredReset(); }
+  Goffset getPos() override { return str->getBaseStream()->getPos(); }
+  void setPos(Goffset pos, int dir) override { str->getBaseStream()->setPos(pos, dir); }
+  BaseStream *getBaseStream() override { return str->getBaseStream()->getBaseStream(); }
+  Stream *getUndecodedStream() override { return str->getBaseStream()->getUndecodedStream(); }
+  Dict *getDict() override { return str->getBaseStream()->getDict(); }
+  Object *getDictObject() override { return str->getBaseStream()->getDictObject(); }
+
+private:
+  std::unique_ptr<Stream> str;
+};
+
 Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int recursion, Dict *dict) {
   int pred;			// parameters
   int colors;
@@ -315,7 +340,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
 #endif
   } else if (!strcmp(name, "Crypt")) {
     if (str->getKind() == strCrypt) {
-      str = str->getBaseStream();
+      str = new BaseStreamStream(str);
     } else {
       error(errSyntaxError, getPos(), "Can't revert non decrypt streams");
     }
