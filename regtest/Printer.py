@@ -21,13 +21,16 @@ from Config import Config
 
 from threading import RLock
 
+
+_instance = None
+
+
 class Printer:
-
-    __single = None
-
     def __init__(self):
-        if Printer.__single is not None:
-            raise Printer.__single
+        global _instance
+        if _instance is not None:
+            raise RuntimeError('Printer must not be instantiated more than '
+                               'once. Use the get_printer() function instead.')
 
         self._verbose = Config().verbose
         self._stream = sys.stdout
@@ -37,7 +40,7 @@ class Printer:
 
         self._lock = RLock()
 
-        Printer.__single = self
+        _instance = self
 
     def _erase_current_line(self):
         if not self._current_line_len:
@@ -99,13 +102,8 @@ class Printer:
         with self._lock:
             self._blocked -= 1
 
+
 def get_printer():
-    try:
-        instance = Printer()
-    except Printer, i:
-        instance = i
-
-    return instance
-
-
-
+    if _instance is None:
+        Printer()
+    return _instance
