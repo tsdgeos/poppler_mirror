@@ -209,7 +209,7 @@ class TestRun:
             if e.errno != errno.ENOENT:
                 raise
         except:
-	    raise
+            raise
 
         if not tests:
             docs, total_docs = get_document_paths_from_dir(self._docsdir)
