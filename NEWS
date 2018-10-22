@@ -1,3 +1,7 @@
+Release 0.70.1
+        glib:
+         * Install missing file
+
 Release 0.70.0
         core:
          * FreeText annotations: default to font from default appearance string
