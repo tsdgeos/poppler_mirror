@@ -82,8 +82,8 @@ class Printer:
         with self._lock:
             if self._blocked > 0:
                 return
-            self.stderr.write(self._ensure_new_line(msg))
-            self.stderr.flush()
+            sys.stderr.write(self._ensure_new_line(msg))
+            sys.stderr.flush()
 
     def print_test_result(self, doc_path, backend_name, n_test, total_tests, msg):
         self.printout("[%d/%d] %s (%s): %s" % (n_test, total_tests, doc_path, backend_name, msg))
