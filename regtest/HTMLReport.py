@@ -331,9 +331,8 @@ class HTMLReport:
         html += failed + crashed + failed_to_run + "</body></html>"
 
         report_index = os.path.join(self._htmldir, 'index.html')
-        f = open(report_index, 'wb')
-        f.write(html)
-        f.close()
+        with open(report_index, 'w') as f:
+            f.write(html)
 
         if launch_browser:
             subprocess.Popen(['xdg-open', report_index])
