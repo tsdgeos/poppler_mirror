@@ -67,6 +67,7 @@ def get_passwords(docsdir):
         return {}
 
     passwords = {}
-    execfile(passwords_file, passwords)
+    with open(passwords_file) as f:
+        exec(f.read(), passwords)
     return passwords['passwords']
 
