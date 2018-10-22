@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, division, print_function
 
 from backends import get_backend, get_all_backends
 from Config import Config
@@ -279,7 +279,8 @@ class TestRun:
             if self._exited_early:
                 self.printer.printout_ln("Testing exited early")
                 self.printer.printout_ln()
-            self.printer.printout_ln("%d tests passed (%.2f%%)" % (self._n_passed, (self._n_passed * 100.) / self._n_run))
+            self.printer.printout_ln("%d tests passed (%.2f%%)" % (
+                self._n_passed, (self._n_passed * 100) / self._n_run))
             self.printer.printout_ln()
 
             def result_tests(test_dict):
@@ -300,7 +301,8 @@ class TestRun:
                 percs = []
                 for backend in test_dict:
                     n_docs = len(test_dict[backend])
-                    percs.append("%d %s (%.2f%%)" % (n_docs, backend, (n_docs * 100.) / n_tests))
+                    percs.append("%d %s (%.2f%%)" % (n_docs, backend,
+                                                     n_docs * 100 / n_tests))
                 return ", ".join(percs)
 
             test_results = [(self._failed, "unexpected failures"),
@@ -315,7 +317,9 @@ class TestRun:
                 if n_tests == 0:
                     continue
 
-                self.printer.printout_ln("%d %s (%.2f%%) [%s]" % (n_tests, test_msg, (n_tests * 100.) / self._n_run, backends_summary(test_dict, n_tests)))
+                self.printer.printout_ln("%d %s (%.2f%%) [%s]" % (
+                    n_tests, test_msg, n_tests * 100 / self._n_run,
+                    backends_summary(test_dict, n_tests)))
                 self.printer.printout_ln(tests)
                 self.printer.printout_ln()
         else:
