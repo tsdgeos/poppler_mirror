@@ -31,6 +31,7 @@ set(poppler_glib_public_headers
   poppler-form-field.h
   poppler-annot.h
   poppler-layer.h
+  poppler-macros.h
   poppler-movie.h
   poppler-media.h
   poppler.h
