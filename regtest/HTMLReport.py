@@ -296,15 +296,11 @@ class HTMLReport:
 
             results[root] = TestResult(self._docsdir, self._refsdir, self._outdir, root, files, backends)
 
-        tests = results.keys()
-        tests.sort()
-
         failed_anchors = []
         failed = ""
         crashed = ""
         failed_to_run = ""
-        for test_name in tests:
-            test = results[test_name]
+        for test_name, test in sorted(results.items()):
             if test.is_failed():
                 failed_anchors.append(test.get_test())
                 failed += test.get_failed_html()

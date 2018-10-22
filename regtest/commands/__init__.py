@@ -84,8 +84,7 @@ def print_help():
             pass
 
     print("Commands are:")
-    commands = [(x.name, x.description) for x in _commands.values()]
-    commands.sort()
+    commands = sorted((x.name, x.description) for x in _commands.values())
     for name, description in commands:
         print("  %-15s %s" % (name, description))
 
