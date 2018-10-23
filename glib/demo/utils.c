@@ -32,7 +32,7 @@ pgd_table_add_property_with_custom_widget (GtkGrid     *table,
 	GtkWidget *label;
 
 	label = gtk_label_new (NULL);
-	g_object_set (G_OBJECT (label), "xalign", 0.0, NULL);
+	g_object_set (G_OBJECT (label), "xalign", 0.0, "yalign", 0.0, NULL);
 	gtk_label_set_markup (GTK_LABEL (label), markup);
 	gtk_grid_attach (GTK_GRID (table), label, 0, *row, 1, 1);
 	gtk_widget_show (label);
