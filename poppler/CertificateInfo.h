@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@gmail.com>
+// Copyright 2018 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -81,8 +82,8 @@ public:
   void setIsSelfSigned(bool);
 
 private:
-  X509CertificateInfo(const X509CertificateInfo &);
-  X509CertificateInfo& operator=(const X509CertificateInfo &);
+  X509CertificateInfo(const X509CertificateInfo &) = delete;
+  X509CertificateInfo& operator=(const X509CertificateInfo &) = delete;
 
   EntityInfo issuer_info;
   EntityInfo subject_info;
