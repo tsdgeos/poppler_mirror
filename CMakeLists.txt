@@ -546,6 +546,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/PreScanOutputDev.h
     poppler/PSTokenizer.h
     poppler/Rendition.h
+    poppler/CertificateInfo.h
     poppler/Stream-CCITT.h
     poppler/Stream.h
     poppler/StructElement.h
