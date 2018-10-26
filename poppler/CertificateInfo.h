@@ -6,6 +6,7 @@
 //
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@gmail.com>
 // Copyright 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -42,12 +43,30 @@ public:
   ~X509CertificateInfo();
 
   struct PublicKeyInfo {
+    PublicKeyInfo();
+    ~PublicKeyInfo();
+
+    PublicKeyInfo(PublicKeyInfo &&);
+    PublicKeyInfo &operator=(PublicKeyInfo &&);
+
+    PublicKeyInfo(const PublicKeyInfo &) = delete;
+    PublicKeyInfo &operator=(const PublicKeyInfo &) = delete;
+
     GooString *publicKey;
     PublicKeyType publicKeyType;
     unsigned int publicKeyStrength; // in bits
   };
 
   struct EntityInfo {
+    EntityInfo();
+    ~EntityInfo();
+
+    EntityInfo(EntityInfo &&);
+    EntityInfo &operator=(EntityInfo &&);
+
+    EntityInfo(const EntityInfo &) = delete;
+    EntityInfo &operator=(const EntityInfo &) = delete;
+
     char *commonName;
     char *distinguishedName;
     char *email;
@@ -55,28 +74,30 @@ public:
   };
 
    struct Validity {
+    Validity() : notBefore(0), notAfter(0) {}
+
     time_t notBefore;
     time_t notAfter;
   };
 
   /* GETTERS */
   int getVersion() const;
-  GooString *getSerialNumber() const;
-  EntityInfo getIssuerInfo() const;
-  Validity getValidity() const;
-  EntityInfo getSubjectInfo() const;
-  PublicKeyInfo getPublicKeyInfo() const;
+  const GooString &getSerialNumber() const;
+  const EntityInfo &getIssuerInfo() const;
+  const Validity &getValidity() const;
+  const EntityInfo &getSubjectInfo() const;
+  const PublicKeyInfo &getPublicKeyInfo() const;
   unsigned int getKeyUsageExtensions() const;
-  GooString *getCertificateDER() const;
+  const GooString &getCertificateDER() const;
   bool getIsSelfSigned() const;
 
   /* SETTERS */
   void setVersion(int);
   void setSerialNumber(GooString *);
-  void setIssuerInfo(EntityInfo);
+  void setIssuerInfo(EntityInfo &&);
   void setValidity(Validity);
-  void setSubjectInfo(EntityInfo);
-  void setPublicKeyInfo(PublicKeyInfo);
+  void setSubjectInfo(EntityInfo &&);
+  void setPublicKeyInfo(PublicKeyInfo &&);
   void setKeyUsageExtensions(unsigned int);
   void setCertificateDER(GooString *);
   void setIsSelfSigned(bool);

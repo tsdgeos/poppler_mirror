@@ -9,6 +9,7 @@
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+// Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -107,7 +108,7 @@ time_t SignatureInfo::getSigningTime()
   return signing_time;
 }
 
-X509CertificateInfo *SignatureInfo::getCertificateInfo()
+const X509CertificateInfo *SignatureInfo::getCertificateInfo() const
 {
   return cert_info;
 }
@@ -160,5 +161,6 @@ void SignatureInfo::setSigningTime(time_t signingTime)
 
 void SignatureInfo::setCertificateInfo(X509CertificateInfo *certInfo)
 {
+  delete cert_info;
   cert_info = certInfo;
 }

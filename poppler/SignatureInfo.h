@@ -9,6 +9,7 @@
 // Copyright 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+// Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -57,7 +58,7 @@ public:
   int getHashAlgorithm(); // Returns a NSS3 HASH_HashType or -1 if compiled without NSS3
   time_t getSigningTime();
   bool isSubfilterSupported() { return sig_subfilter_supported; }
-  X509CertificateInfo *getCertificateInfo();
+  const X509CertificateInfo *getCertificateInfo() const;
 
   /* SETTERS */
   void setSignatureValStatus(enum SignatureValidationStatus );

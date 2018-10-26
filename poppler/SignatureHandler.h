@@ -8,6 +8,8 @@
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2015, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+// Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+// Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -45,13 +47,11 @@ public:
   NSSCMSVerificationStatus validateSignature();
   // Use -1 as validation_time for now
   SECErrorCodes validateCertificate(time_t validation_time);
-  X509CertificateInfo *getCertificateInfo();
+  X509CertificateInfo *getCertificateInfo() const;
 
   //Translate NSS error codes
   static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_code);
   static CertificateValidationStatus NSS_CertTranslate(SECErrorCodes nss_code);
-
-  static GooString *SECItemToGooString(SECItem secItem);
 
 private:
   SignatureHandler(const SignatureHandler &);
@@ -65,7 +65,7 @@ private:
   NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage * cms_msg);
   NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData * cms_sig_data);
   HASHContext * initHashContext();
-  void getEntityInfo(X509CertificateInfo::EntityInfo *info, CERTName *entityName);
+  X509CertificateInfo::EntityInfo getEntityInfo(CERTName *entityName) const;
 
   unsigned int hash_length;
   SECItem CMSitem;

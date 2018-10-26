@@ -11,6 +11,7 @@
 // Copyright 2017 Sebastian Rasmussen <sebras@gmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+// Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -81,39 +82,47 @@ time_t SignatureHandler::getSigningTime()
   return static_cast<time_t>(sTime/1000000);
 }
 
-void SignatureHandler::getEntityInfo(X509CertificateInfo::EntityInfo *info, CERTName *entityName)
+X509CertificateInfo::EntityInfo SignatureHandler::getEntityInfo(CERTName *entityName) const
 {
-  if (!info || !entityName)
-    return;
+  X509CertificateInfo::EntityInfo info;
 
-  memset(info, 0, sizeof *info);
+  if (!entityName)
+    return info;
 
   char *dn = CERT_NameToAscii(entityName);
   if (dn) {
-      info->distinguishedName = copyString(dn);
+      info.distinguishedName = copyString(dn);
       PORT_Free(dn);
   }
 
   char *cn = CERT_GetCommonName(entityName);
   if (cn) {
-    info->commonName = copyString(cn);
+    info.commonName = copyString(cn);
     PORT_Free(cn);
   }
 
   char *email = CERT_GetCertEmailAddress(entityName);
   if (email) {
-    info->email = copyString(email);
+    info.email = copyString(email);
     PORT_Free(email);
   }
 
   char *org = CERT_GetOrgName(entityName);
   if (org) {
-    info->organization = copyString(org);
+    info.organization = copyString(org);
     PORT_Free(org);
   }
+
+  return info;
 }
 
-X509CertificateInfo *SignatureHandler::getCertificateInfo()
+static GooString *SECItemToGooString(const SECItem &secItem)
+{
+  // TODO do we need to handle secItem.type;
+  return new GooString((const char *)secItem.data, secItem.len);
+}
+
+X509CertificateInfo *SignatureHandler::getCertificateInfo() const
 {
   if (!CMSSignerInfo)
     return nullptr;
@@ -123,16 +132,12 @@ X509CertificateInfo *SignatureHandler::getCertificateInfo()
     return nullptr;
 
   X509CertificateInfo *certInfo = new X509CertificateInfo;
-  if (!certInfo)
-    return nullptr;
 
   certInfo->setVersion(DER_GetInteger(&cert->version) + 1);
   certInfo->setSerialNumber(SECItemToGooString(cert->serialNumber));
 
   //issuer info
-  X509CertificateInfo::EntityInfo issuerInfo;
-  getEntityInfo(&issuerInfo, &cert->issuer);
-  certInfo->setIssuerInfo(issuerInfo);
+  certInfo->setIssuerInfo(getEntityInfo(&cert->issuer));
 
   //validity
   PRTime notBefore, notAfter;
@@ -143,9 +148,7 @@ X509CertificateInfo *SignatureHandler::getCertificateInfo()
   certInfo->setValidity(certValidity);
 
   //subject info
-  X509CertificateInfo::EntityInfo subjectInfo;
-  getEntityInfo(&subjectInfo, &cert->subject);
-  certInfo->setSubjectInfo(subjectInfo);
+  certInfo->setSubjectInfo(getEntityInfo(&cert->subject));
 
   //public key info
   X509CertificateInfo::PublicKeyInfo pkInfo;
@@ -170,7 +173,7 @@ X509CertificateInfo *SignatureHandler::getCertificateInfo()
       break;
   }
   pkInfo.publicKeyStrength = SECKEY_PublicKeyStrengthInBits(pk);
-  certInfo->setPublicKeyInfo(pkInfo);
+  certInfo->setPublicKeyInfo(std::move(pkInfo));
 
   certInfo->setKeyUsageExtensions(cert->keyUsage);
   certInfo->setCertificateDER(SECItemToGooString(cert->derCert));
@@ -472,9 +475,4 @@ CertificateValidationStatus SignatureHandler::NSS_CertTranslate(SECErrorCodes ns
     default:
       return CERTIFICATE_GENERIC_ERROR;
   }
-}
-
-GooString *SignatureHandler::SECItemToGooString(SECItem secItem)
-{
-  return new GooString((const char *)secItem.data, secItem.len);
 }

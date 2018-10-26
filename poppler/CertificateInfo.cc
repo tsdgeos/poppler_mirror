@@ -5,6 +5,8 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@gmail.com>
+// Copyright 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -13,27 +15,94 @@
 #include <string.h>
 #include <stdlib.h>
 
-X509CertificateInfo::X509CertificateInfo()
+X509CertificateInfo::PublicKeyInfo::PublicKeyInfo() :
+  publicKey(nullptr),
+  publicKeyType(OTHERKEY),
+  publicKeyStrength(0)
 {
-  memset(&issuer_info, 0, sizeof issuer_info);
-  memset(&subject_info, 0, sizeof subject_info);
-  cert_serial = nullptr;
-  cert_der = nullptr;
-  ku_extensions = KU_NONE;
-  cert_version = -1;
-  is_self_signed = false;
+}
+
+X509CertificateInfo::PublicKeyInfo::~PublicKeyInfo()
+{
+  delete publicKey;
+}
+
+X509CertificateInfo::PublicKeyInfo::PublicKeyInfo(X509CertificateInfo::PublicKeyInfo &&other)
+{
+  publicKey = other.publicKey;
+  publicKeyType = other.publicKeyType;
+  publicKeyStrength = other.publicKeyStrength;
+  other.publicKey = nullptr;
+}
+
+X509CertificateInfo::PublicKeyInfo &X509CertificateInfo::PublicKeyInfo::operator=(X509CertificateInfo::PublicKeyInfo &&other)
+{
+  delete publicKey;
+  publicKey = other.publicKey;
+  publicKeyType = other.publicKeyType;
+  publicKeyStrength = other.publicKeyStrength;
+  other.publicKey = nullptr;
+  return *this;
+}
+
+X509CertificateInfo::EntityInfo::EntityInfo() :
+  commonName(nullptr),
+  distinguishedName(nullptr),
+  email(nullptr),
+  organization(nullptr)
+{
+}
+
+X509CertificateInfo::EntityInfo::~EntityInfo()
+{
+  free(commonName);
+  free(distinguishedName);
+  free(email);
+  free(organization);
+}
+
+X509CertificateInfo::EntityInfo::EntityInfo(X509CertificateInfo::EntityInfo &&other)
+{
+  commonName = other.commonName;
+  distinguishedName = other.distinguishedName;
+  email = other.email;
+  organization = other.organization;
+  other.commonName = nullptr;
+  other.distinguishedName = nullptr;
+  other.email = nullptr;
+  other.organization = nullptr;
+}
+
+X509CertificateInfo::EntityInfo &X509CertificateInfo::EntityInfo::operator=(X509CertificateInfo::EntityInfo &&other)
+{
+  free(commonName);
+  free(distinguishedName);
+  free(email);
+  free(organization);
+  commonName = other.commonName;
+  distinguishedName = other.distinguishedName;
+  email = other.email;
+  organization = other.organization;
+  other.commonName = nullptr;
+  other.distinguishedName = nullptr;
+  other.email = nullptr;
+  other.organization = nullptr;
+  return *this;
+}
+
+X509CertificateInfo::X509CertificateInfo() :
+  cert_serial(nullptr),
+  cert_der(nullptr),
+  ku_extensions(KU_NONE),
+  cert_version(-1),
+  is_self_signed(false)
+{
 }
 
 X509CertificateInfo::~X509CertificateInfo()
 {
-  free(issuer_info.commonName);
-  free(issuer_info.distinguishedName);
-  free(issuer_info.email);
-  free(issuer_info.organization);
-  free(subject_info.commonName);
-  free(subject_info.distinguishedName);
-  free(subject_info.email);
-  free(subject_info.organization);
+  delete cert_serial;
+  delete cert_der;
 }
 
 int X509CertificateInfo::getVersion() const
@@ -41,27 +110,27 @@ int X509CertificateInfo::getVersion() const
   return cert_version;
 }
 
-GooString *X509CertificateInfo::getSerialNumber() const
+const GooString &X509CertificateInfo::getSerialNumber() const
 {
-  return cert_serial;
+  return *cert_serial;
 }
 
-X509CertificateInfo::EntityInfo X509CertificateInfo::getIssuerInfo() const
+const X509CertificateInfo::EntityInfo &X509CertificateInfo::getIssuerInfo() const
 {
   return issuer_info;
 }
 
-X509CertificateInfo::Validity X509CertificateInfo::getValidity() const
+const X509CertificateInfo::Validity &X509CertificateInfo::getValidity() const
 {
   return cert_validity;
 }
 
-X509CertificateInfo::EntityInfo X509CertificateInfo::getSubjectInfo() const
+const X509CertificateInfo::EntityInfo &X509CertificateInfo::getSubjectInfo() const
 {
   return subject_info;
 }
 
-X509CertificateInfo::PublicKeyInfo X509CertificateInfo::getPublicKeyInfo() const
+const X509CertificateInfo::PublicKeyInfo &X509CertificateInfo::getPublicKeyInfo() const
 {
   return public_key_info;
 }
@@ -71,9 +140,9 @@ unsigned int X509CertificateInfo::getKeyUsageExtensions() const
   return ku_extensions;
 }
 
-GooString *X509CertificateInfo::getCertificateDER() const
+const GooString &X509CertificateInfo::getCertificateDER() const
 {
-  return cert_der;
+  return *cert_der;
 }
 
 bool X509CertificateInfo::getIsSelfSigned() const
@@ -88,12 +157,13 @@ void X509CertificateInfo::setVersion(int version)
 
 void X509CertificateInfo::setSerialNumber(GooString *serialNumber)
 {
+  delete cert_serial;
   cert_serial = serialNumber;
 }
 
-void X509CertificateInfo::setIssuerInfo(EntityInfo issuerInfo)
+void X509CertificateInfo::setIssuerInfo(EntityInfo &&issuerInfo)
 {
-  issuer_info = issuerInfo;
+  issuer_info = std::move(issuerInfo);
 }
 
 void X509CertificateInfo::setValidity(Validity validity)
@@ -101,14 +171,14 @@ void X509CertificateInfo::setValidity(Validity validity)
   cert_validity = validity;
 }
 
-void X509CertificateInfo::setSubjectInfo(EntityInfo subjectInfo)
+void X509CertificateInfo::setSubjectInfo(EntityInfo &&subjectInfo)
 {
-  subject_info = subjectInfo;
+  subject_info = std::move(subjectInfo);
 }
 
-void X509CertificateInfo::setPublicKeyInfo(PublicKeyInfo pkInfo)
+void X509CertificateInfo::setPublicKeyInfo(PublicKeyInfo &&pkInfo)
 {
-  public_key_info = pkInfo;
+  public_key_info = std::move(pkInfo);
 }
 
 void X509CertificateInfo::setKeyUsageExtensions(unsigned int keyUsages)
@@ -118,6 +188,7 @@ void X509CertificateInfo::setKeyUsageExtensions(unsigned int keyUsages)
 
 void X509CertificateInfo::setCertificateDER(GooString *certDer)
 {
+  delete cert_der;
   cert_der = certDer;
 }
 

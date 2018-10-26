@@ -7,6 +7,7 @@
  * Copyright (C) 2017, Tobias C. Berner <tcberner@freebsd.org>
  * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
  * Copyright (C) 2018, Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+ * Copyright (C) 2018, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -451,6 +452,7 @@ namespace Poppler {
           Organization,
         };
 
+        CertificateInfo();
         CertificateInfo(CertificateInfoPrivate *priv);
         ~CertificateInfo();
 
@@ -522,7 +524,7 @@ namespace Poppler {
         CertificateInfo(const CertificateInfo &other);
         CertificateInfo &operator=(const CertificateInfo &other);
 
-        private:
+    private:
         Q_DECLARE_PRIVATE(CertificateInfo)
 
         QSharedPointer<CertificateInfoPrivate> d_ptr;
@@ -643,17 +645,16 @@ namespace Poppler {
 
 	/**
 	  Checks whether the signature authenticates the total document
-          except for the signature itself.
-          \since 0.58
+	  except for the signature itself.
+	  \since 0.58
 	 */
         bool signsTotalDocument() const;
 
-        /**
-          The signer certificate info
-
-          \since 0.73
-         */
-        CertificateInfo certificateInfo() const;
+	/**
+	  The signer certificate info.
+	  \since 0.73
+	*/
+	CertificateInfo certificateInfo() const;
 
 	SignatureValidationInfo(const SignatureValidationInfo &other);
 	SignatureValidationInfo &operator=(const SignatureValidationInfo &other);

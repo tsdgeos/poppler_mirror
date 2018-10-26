@@ -8,6 +8,7 @@
  * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+ * Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -522,13 +523,20 @@ public:
   bool is_null;
 };
 
+CertificateInfo::CertificateInfo()
+  : d_ptr( nullptr )
+{
+}
+
 CertificateInfo::CertificateInfo(CertificateInfoPrivate* priv)
-  : d_ptr(priv)
-{}
+  : d_ptr( priv )
+{
+}
 
 CertificateInfo::CertificateInfo(const CertificateInfo &other)
-  : d_ptr( other.d_ptr )
-{}
+ : d_ptr( other.d_ptr )
+{
+}
 
 CertificateInfo::~CertificateInfo() = default;
 
@@ -675,7 +683,7 @@ class SignatureValidationInfoPrivate {
 public:
 	SignatureValidationInfo::SignatureStatus signature_status;
 	SignatureValidationInfo::CertificateStatus certificate_status;
-	QSharedPointer<CertificateInfo> cert_info;
+	CertificateInfo cert_info;
 
 	QByteArray signature;
 	QString signer_name;
@@ -807,7 +815,7 @@ bool SignatureValidationInfo::signsTotalDocument() const
 CertificateInfo SignatureValidationInfo::certificateInfo() const
 {
   Q_D(const SignatureValidationInfo);
-  return *(d->cert_info.data());
+  return d->cert_info;
 }
 
 SignatureValidationInfo &SignatureValidationInfo::operator=(const SignatureValidationInfo &other)
@@ -933,7 +941,7 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
   delete checkedSignature;
 
   // set certificate info
-  X509CertificateInfo* ci = si->getCertificateInfo();
+  const X509CertificateInfo *ci = si->getCertificateInfo();
   CertificateInfoPrivate* certPriv = new CertificateInfoPrivate;
   certPriv->is_null = true;
   if (ci)
@@ -941,16 +949,16 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
     certPriv->version = ci->getVersion();
     certPriv->ku_extensions = ci->getKeyUsageExtensions();
 
-    GooString *certSerial = ci->getSerialNumber();
-    certPriv->serial_number = QByteArray(certSerial->c_str(), certSerial->getLength());
+    const GooString &certSerial = ci->getSerialNumber();
+    certPriv->serial_number = QByteArray(certSerial.c_str(), certSerial.getLength());
 
-    X509CertificateInfo::EntityInfo issuerInfo = ci->getIssuerInfo();
+    const X509CertificateInfo::EntityInfo &issuerInfo = ci->getIssuerInfo();
     certPriv->issuer_info.common_name = issuerInfo.commonName;
     certPriv->issuer_info.distinguished_name = issuerInfo.distinguishedName;
     certPriv->issuer_info.email_address = issuerInfo.email;
     certPriv->issuer_info.org_name = issuerInfo.organization;
 
-    X509CertificateInfo::EntityInfo subjectInfo = ci->getSubjectInfo();
+    const X509CertificateInfo::EntityInfo &subjectInfo = ci->getSubjectInfo();
     certPriv->subject_info.common_name = subjectInfo.commonName;
     certPriv->subject_info.distinguished_name = subjectInfo.distinguishedName;
     certPriv->subject_info.email_address = subjectInfo.email;
@@ -960,17 +968,17 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
     certPriv->validity_start = QDateTime::fromTime_t(certValidity.notBefore, Qt::UTC);
     certPriv->validity_end = QDateTime::fromTime_t(certValidity.notAfter, Qt::UTC);
 
-    X509CertificateInfo::PublicKeyInfo pkInfo = ci->getPublicKeyInfo();
+    const X509CertificateInfo::PublicKeyInfo &pkInfo = ci->getPublicKeyInfo();
     certPriv->public_key = QByteArray(pkInfo.publicKey->c_str(), pkInfo.publicKey->getLength());
     certPriv->public_key_type = static_cast<int>(pkInfo.publicKeyType);
     certPriv->public_key_strength = pkInfo.publicKeyStrength;
 
-    GooString *certDer = ci->getCertificateDER();
-    certPriv->certificate_der = QByteArray(certDer->c_str(), certDer->getLength());
+    const GooString &certDer = ci->getCertificateDER();
+    certPriv->certificate_der = QByteArray(certDer.c_str(), certDer.getLength());
 
     certPriv->is_null = false;
   }
-  priv->cert_info = QSharedPointer<CertificateInfo>(new CertificateInfo(certPriv));
+  priv->cert_info = CertificateInfo(certPriv);
 
   return SignatureValidationInfo(priv);
 }
