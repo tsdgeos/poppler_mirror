@@ -117,7 +117,7 @@ toc::~toc()
 
  This item is special, it has no title nor actions, it is open and its children
  are the effective root items of the TOC. This is provided as a convenience
- when iterating throught the TOC.
+ when iterating through the TOC.
 
  \returns the root "item"
  */
