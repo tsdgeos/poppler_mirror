@@ -67,10 +67,10 @@ public:
     EntityInfo(const EntityInfo &) = delete;
     EntityInfo &operator=(const EntityInfo &) = delete;
 
-    char *commonName;
-    char *distinguishedName;
-    char *email;
-    char *organization;
+    std::string commonName;
+    std::string distinguishedName;
+    std::string email;
+    std::string organization;
   };
 
    struct Validity {

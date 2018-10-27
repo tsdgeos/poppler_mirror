@@ -953,16 +953,16 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
     certPriv->serial_number = QByteArray(certSerial.c_str(), certSerial.getLength());
 
     const X509CertificateInfo::EntityInfo &issuerInfo = ci->getIssuerInfo();
-    certPriv->issuer_info.common_name = issuerInfo.commonName;
-    certPriv->issuer_info.distinguished_name = issuerInfo.distinguishedName;
-    certPriv->issuer_info.email_address = issuerInfo.email;
-    certPriv->issuer_info.org_name = issuerInfo.organization;
+    certPriv->issuer_info.common_name = issuerInfo.commonName.c_str();
+    certPriv->issuer_info.distinguished_name = issuerInfo.distinguishedName.c_str();
+    certPriv->issuer_info.email_address = issuerInfo.email.c_str();
+    certPriv->issuer_info.org_name = issuerInfo.organization.c_str();
 
     const X509CertificateInfo::EntityInfo &subjectInfo = ci->getSubjectInfo();
-    certPriv->subject_info.common_name = subjectInfo.commonName;
-    certPriv->subject_info.distinguished_name = subjectInfo.distinguishedName;
-    certPriv->subject_info.email_address = subjectInfo.email;
-    certPriv->subject_info.org_name = subjectInfo.organization;
+    certPriv->subject_info.common_name = subjectInfo.commonName.c_str();
+    certPriv->subject_info.distinguished_name = subjectInfo.distinguishedName.c_str();
+    certPriv->subject_info.email_address = subjectInfo.email.c_str();
+    certPriv->subject_info.org_name = subjectInfo.organization.c_str();
 
     X509CertificateInfo::Validity certValidity = ci->getValidity();
     certPriv->validity_start = QDateTime::fromTime_t(certValidity.notBefore, Qt::UTC);

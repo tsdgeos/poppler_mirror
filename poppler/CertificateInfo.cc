@@ -36,50 +36,13 @@ X509CertificateInfo::PublicKeyInfo &X509CertificateInfo::PublicKeyInfo::operator
   return *this;
 }
 
-X509CertificateInfo::EntityInfo::EntityInfo() :
-  commonName(nullptr),
-  distinguishedName(nullptr),
-  email(nullptr),
-  organization(nullptr)
-{
-}
+X509CertificateInfo::EntityInfo::EntityInfo() = default;
 
-X509CertificateInfo::EntityInfo::~EntityInfo()
-{
-  free(commonName);
-  free(distinguishedName);
-  free(email);
-  free(organization);
-}
+X509CertificateInfo::EntityInfo::~EntityInfo() = default;
 
-X509CertificateInfo::EntityInfo::EntityInfo(X509CertificateInfo::EntityInfo &&other)
-{
-  commonName = other.commonName;
-  distinguishedName = other.distinguishedName;
-  email = other.email;
-  organization = other.organization;
-  other.commonName = nullptr;
-  other.distinguishedName = nullptr;
-  other.email = nullptr;
-  other.organization = nullptr;
-}
+X509CertificateInfo::EntityInfo::EntityInfo(X509CertificateInfo::EntityInfo &&other) = default;
 
-X509CertificateInfo::EntityInfo &X509CertificateInfo::EntityInfo::operator=(X509CertificateInfo::EntityInfo &&other)
-{
-  free(commonName);
-  free(distinguishedName);
-  free(email);
-  free(organization);
-  commonName = other.commonName;
-  distinguishedName = other.distinguishedName;
-  email = other.email;
-  organization = other.organization;
-  other.commonName = nullptr;
-  other.distinguishedName = nullptr;
-  other.email = nullptr;
-  other.organization = nullptr;
-  return *this;
-}
+X509CertificateInfo::EntityInfo &X509CertificateInfo::EntityInfo::operator=(X509CertificateInfo::EntityInfo &&other) = default;
 
 X509CertificateInfo::X509CertificateInfo() :
   ku_extensions(KU_NONE),
