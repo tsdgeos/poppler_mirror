@@ -47,7 +47,7 @@ public:
   NSSCMSVerificationStatus validateSignature();
   // Use -1 as validation_time for now
   SECErrorCodes validateCertificate(time_t validation_time);
-  X509CertificateInfo *getCertificateInfo() const;
+  std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
 
   //Translate NSS error codes
   static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_code);

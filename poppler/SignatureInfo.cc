@@ -63,7 +63,6 @@ SignatureInfo::~SignatureInfo()
   free(reason);
   free(signer_name);
   free(subject_dn);
-  delete cert_info;
 }
 
 /* GETTERS */
@@ -110,7 +109,7 @@ time_t SignatureInfo::getSigningTime()
 
 const X509CertificateInfo *SignatureInfo::getCertificateInfo() const
 {
-  return cert_info;
+  return cert_info.get();
 }
 
 /* SETTERS */
@@ -159,8 +158,7 @@ void SignatureInfo::setSigningTime(time_t signingTime)
   signing_time = signingTime;
 }
 
-void SignatureInfo::setCertificateInfo(X509CertificateInfo *certInfo)
+void SignatureInfo::setCertificateInfo(std::unique_ptr<X509CertificateInfo> certInfo)
 {
-  delete cert_info;
-  cert_info = certInfo;
+  cert_info = std::move(certInfo);
 }

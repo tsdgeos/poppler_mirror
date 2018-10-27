@@ -16,6 +16,7 @@
 #ifndef SIGNATUREINFO_H
 #define SIGNATUREINFO_H
 
+#include <memory>
 #include <time.h>
 
 enum SignatureValidationStatus
@@ -70,7 +71,7 @@ public:
   void setHashAlgorithm(int);
   void setSigningTime(time_t);
   void setSubFilterSupport(bool isSupported) { sig_subfilter_supported = isSupported; }
-  void setCertificateInfo(X509CertificateInfo *);
+  void setCertificateInfo(std::unique_ptr<X509CertificateInfo>);
 
 private:
   SignatureInfo(const SignatureInfo &);
@@ -78,7 +79,7 @@ private:
 
   SignatureValidationStatus sig_status;
   CertificateValidationStatus cert_status;
-  X509CertificateInfo *cert_info;
+  std::unique_ptr<X509CertificateInfo> cert_info;
   char *signer_name;
   char *subject_dn;
   char *location;

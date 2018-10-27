@@ -122,7 +122,7 @@ static GooString SECItemToGooString(const SECItem &secItem)
   return GooString((const char *)secItem.data, secItem.len);
 }
 
-X509CertificateInfo *SignatureHandler::getCertificateInfo() const
+std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() const
 {
   if (!CMSSignerInfo)
     return nullptr;
@@ -131,7 +131,7 @@ X509CertificateInfo *SignatureHandler::getCertificateInfo() const
   if (!cert)
     return nullptr;
 
-  X509CertificateInfo *certInfo = new X509CertificateInfo;
+  auto certInfo = std::make_unique<X509CertificateInfo>();
 
   certInfo->setVersion(DER_GetInteger(&cert->version) + 1);
   certInfo->setSerialNumber(SECItemToGooString(cert->serialNumber));
