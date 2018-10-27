@@ -969,7 +969,7 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
     certPriv->validity_end = QDateTime::fromTime_t(certValidity.notAfter, Qt::UTC);
 
     const X509CertificateInfo::PublicKeyInfo &pkInfo = ci->getPublicKeyInfo();
-    certPriv->public_key = QByteArray(pkInfo.publicKey->c_str(), pkInfo.publicKey->getLength());
+    certPriv->public_key = QByteArray(pkInfo.publicKey.c_str(), pkInfo.publicKey.getLength());
     certPriv->public_key_type = static_cast<int>(pkInfo.publicKeyType);
     certPriv->public_key_strength = pkInfo.publicKeyStrength;
 

@@ -116,10 +116,10 @@ X509CertificateInfo::EntityInfo SignatureHandler::getEntityInfo(CERTName *entity
   return info;
 }
 
-static GooString *SECItemToGooString(const SECItem &secItem)
+static GooString SECItemToGooString(const SECItem &secItem)
 {
   // TODO do we need to handle secItem.type;
-  return new GooString((const char *)secItem.data, secItem.len);
+  return GooString((const char *)secItem.data, secItem.len);
 }
 
 X509CertificateInfo *SignatureHandler::getCertificateInfo() const

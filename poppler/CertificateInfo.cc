@@ -16,32 +16,23 @@
 #include <stdlib.h>
 
 X509CertificateInfo::PublicKeyInfo::PublicKeyInfo() :
-  publicKey(nullptr),
   publicKeyType(OTHERKEY),
   publicKeyStrength(0)
 {
 }
 
-X509CertificateInfo::PublicKeyInfo::~PublicKeyInfo()
-{
-  delete publicKey;
-}
-
 X509CertificateInfo::PublicKeyInfo::PublicKeyInfo(X509CertificateInfo::PublicKeyInfo &&other)
 {
-  publicKey = other.publicKey;
+  publicKey = std::move(other.publicKey);
   publicKeyType = other.publicKeyType;
   publicKeyStrength = other.publicKeyStrength;
-  other.publicKey = nullptr;
 }
 
 X509CertificateInfo::PublicKeyInfo &X509CertificateInfo::PublicKeyInfo::operator=(X509CertificateInfo::PublicKeyInfo &&other)
 {
-  delete publicKey;
-  publicKey = other.publicKey;
+  publicKey = std::move(other.publicKey);
   publicKeyType = other.publicKeyType;
   publicKeyStrength = other.publicKeyStrength;
-  other.publicKey = nullptr;
   return *this;
 }
 
@@ -91,19 +82,13 @@ X509CertificateInfo::EntityInfo &X509CertificateInfo::EntityInfo::operator=(X509
 }
 
 X509CertificateInfo::X509CertificateInfo() :
-  cert_serial(nullptr),
-  cert_der(nullptr),
   ku_extensions(KU_NONE),
   cert_version(-1),
   is_self_signed(false)
 {
 }
 
-X509CertificateInfo::~X509CertificateInfo()
-{
-  delete cert_serial;
-  delete cert_der;
-}
+X509CertificateInfo::~X509CertificateInfo() = default;
 
 int X509CertificateInfo::getVersion() const
 {
@@ -112,7 +97,7 @@ int X509CertificateInfo::getVersion() const
 
 const GooString &X509CertificateInfo::getSerialNumber() const
 {
-  return *cert_serial;
+  return cert_serial;
 }
 
 const X509CertificateInfo::EntityInfo &X509CertificateInfo::getIssuerInfo() const
@@ -142,7 +127,7 @@ unsigned int X509CertificateInfo::getKeyUsageExtensions() const
 
 const GooString &X509CertificateInfo::getCertificateDER() const
 {
-  return *cert_der;
+  return cert_der;
 }
 
 bool X509CertificateInfo::getIsSelfSigned() const
@@ -155,10 +140,9 @@ void X509CertificateInfo::setVersion(int version)
   cert_version = version;
 }
 
-void X509CertificateInfo::setSerialNumber(GooString *serialNumber)
+void X509CertificateInfo::setSerialNumber(const GooString &serialNumber)
 {
-  delete cert_serial;
-  cert_serial = serialNumber;
+  cert_serial.Set(&serialNumber);
 }
 
 void X509CertificateInfo::setIssuerInfo(EntityInfo &&issuerInfo)
@@ -186,10 +170,9 @@ void X509CertificateInfo::setKeyUsageExtensions(unsigned int keyUsages)
   ku_extensions = keyUsages;
 }
 
-void X509CertificateInfo::setCertificateDER(GooString *certDer)
+void X509CertificateInfo::setCertificateDER(const GooString &certDer)
 {
-  delete cert_der;
-  cert_der = certDer;
+  cert_der.Set(&certDer);
 }
 
 void X509CertificateInfo::setIsSelfSigned(bool isSelfSigned)

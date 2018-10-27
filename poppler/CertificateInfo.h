@@ -13,6 +13,7 @@
 #ifndef CERTIFICATEINFO_H
 #define CERTIFICATEINFO_H
 
+#include <memory>
 #include <time.h>
 #include "goo/GooString.h"
 
@@ -44,7 +45,6 @@ public:
 
   struct PublicKeyInfo {
     PublicKeyInfo();
-    ~PublicKeyInfo();
 
     PublicKeyInfo(PublicKeyInfo &&);
     PublicKeyInfo &operator=(PublicKeyInfo &&);
@@ -52,7 +52,7 @@ public:
     PublicKeyInfo(const PublicKeyInfo &) = delete;
     PublicKeyInfo &operator=(const PublicKeyInfo &) = delete;
 
-    GooString *publicKey;
+    GooString publicKey;
     PublicKeyType publicKeyType;
     unsigned int publicKeyStrength; // in bits
   };
@@ -93,13 +93,13 @@ public:
 
   /* SETTERS */
   void setVersion(int);
-  void setSerialNumber(GooString *);
+  void setSerialNumber(const GooString &);
   void setIssuerInfo(EntityInfo &&);
   void setValidity(Validity);
   void setSubjectInfo(EntityInfo &&);
   void setPublicKeyInfo(PublicKeyInfo &&);
   void setKeyUsageExtensions(unsigned int);
-  void setCertificateDER(GooString *);
+  void setCertificateDER(const GooString &);
   void setIsSelfSigned(bool);
 
 private:
@@ -110,8 +110,8 @@ private:
   EntityInfo subject_info;
   PublicKeyInfo public_key_info;
   Validity cert_validity;
-  GooString *cert_serial;
-  GooString *cert_der;
+  GooString cert_serial;
+  GooString cert_der;
   unsigned int ku_extensions;
   int cert_version;
   bool is_self_signed;
