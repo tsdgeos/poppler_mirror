@@ -77,7 +77,7 @@ public:
 
   ~SplashOutFontFileID() {}
 
-  GBool matches(SplashFontFileID *id) override {
+  bool matches(SplashFontFileID *id) override {
     return ((SplashOutFontFileID *)id)->r.num == r.num &&
            ((SplashOutFontFileID *)id)->r.gen == r.gen;
   }
@@ -244,7 +244,7 @@ void ArthurOutputDev::restoreState(GfxState *state)
 void ArthurOutputDev::updateAll(GfxState *state)
 {
   OutputDev::updateAll(state);
-  m_needFontUpdate = gTrue;
+  m_needFontUpdate = true;
 }
 
 // Set CTM (Current Transformation Matrix) to a fixed matrix
@@ -591,9 +591,9 @@ void ArthurOutputDev::updateFont(GfxState *state)
 
     fontsrc = new SplashFontSrc;
     if (fileName)
-      fontsrc->setFile(fileName, gFalse);
+      fontsrc->setFile(fileName, false);
     else
-      fontsrc->setBuf(tmpBuf, tmpBufLen, gTrue);
+      fontsrc->setBuf(tmpBuf, tmpBufLen, true);
     
     // load the font file
     switch (fontType) {
@@ -787,7 +787,7 @@ void ArthurOutputDev::eoFill(GfxState *state)
   m_painter.top()->fillPath( convertPath( state, state->getPath(), Qt::OddEvenFill ), m_currentBrush );
 }
 
-GBool ArthurOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax)
+bool ArthurOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading, double tMin, double tMax)
 {
   double x0, y0, x1, y1;
   shading->getCoords(&x0, &y0, &x1, &y1);
@@ -910,7 +910,7 @@ GBool ArthurOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading
   state->clearPath();
 
   // True means: The shaded region has been painted
-  return gTrue;
+  return true;
 }
 
 void ArthurOutputDev::clip(GfxState *state)
@@ -1055,8 +1055,8 @@ void ArthurOutputDev::endTextObject(GfxState *state)
 
 
 void ArthurOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
-				    int width, int height, GBool invert,
-				    GBool interpolate, GBool inlineImg)
+				    int width, int height, bool invert,
+				    bool interpolate, bool inlineImg)
 {
   auto imgStr = std::make_unique<ImageStream>(
 	str, width,
@@ -1098,7 +1098,7 @@ void ArthurOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 				int width, int height,
 				GfxImageColorMap *colorMap,
-				GBool interpolate, int *maskColors, GBool inlineImg)
+				bool interpolate, int *maskColors, bool inlineImg)
 {
   unsigned int *data;
   unsigned int *line;
@@ -1152,18 +1152,18 @@ void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 void ArthurOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str,
                                           int width, int height,
                                           GfxImageColorMap *colorMap,
-                                          GBool interpolate,
+                                          bool interpolate,
                                           Stream *maskStr,
                                           int maskWidth, int maskHeight,
                                           GfxImageColorMap *maskColorMap,
-                                          GBool maskInterpolate)
+                                          bool maskInterpolate)
 {
   // Bail out if the image size doesn't match the mask size.  I don't know
   // what to do in this case.
   if (width!=maskWidth || height!=maskHeight)
   {
     qDebug() << "Soft mask size does not match image size!";
-    drawImage(state, ref, str, width, height, colorMap, interpolate, nullptr, gFalse);
+    drawImage(state, ref, str, width, height, colorMap, interpolate, nullptr, false);
     return;
   }
 
@@ -1172,7 +1172,7 @@ void ArthurOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *
   if (maskColorMap->getColorSpace()->getNComps() != 1)
   {
     qDebug() << "Soft mask is not a single 8-bit channel!";
-    drawImage(state, ref, str, width, height, colorMap, interpolate, nullptr, gFalse);
+    drawImage(state, ref, str, width, height, colorMap, interpolate, nullptr, false);
     return;
   }
 
@@ -1223,8 +1223,8 @@ void ArthurOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *
 
 void ArthurOutputDev::beginTransparencyGroup(GfxState * /*state*/, const double * /*bbox*/,
                                              GfxColorSpace * /*blendingColorSpace*/,
-                                             GBool /*isolated*/, GBool /*knockout*/,
-                                             GBool /*forSoftMask*/)
+                                             bool /*isolated*/, bool /*knockout*/,
+                                             bool /*forSoftMask*/)
 {
   // The entire transparency group will be painted into a
   // freshly created QPicture object.  Since an existing painter

@@ -36,7 +36,7 @@ public:
   Hints(const Hints &) = delete;
   Hints& operator=(const Hints &) = delete;
 
-  GBool isOk() const;
+  bool isOk() const;
 
   int getPageObjectNum(int page);
   Goffset getPageOffset(int page);
@@ -45,8 +45,8 @@ public:
 private:
 
   void readTables(BaseStream *str, Linearization *linearization, XRef *xref, SecurityHandler *secHdlr);
-  GBool readPageOffsetTable(Stream *str);
-  GBool readSharedObjectsTable(Stream *str);
+  bool readPageOffsetTable(Stream *str);
+  bool readSharedObjectsTable(Stream *str);
 
   Guint hintsOffset;
   Guint hintsLength;
@@ -87,7 +87,7 @@ private:
   Guint *groupHasSignature;
   Guint *groupNumObjects;
   Guint *groupXRefOffset;
-  GBool ok;
+  bool ok;
 };
 
 #endif

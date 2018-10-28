@@ -222,8 +222,8 @@ void LinkAction::setNextActions(GooList *actions) {
 LinkDest::LinkDest(const Array *a) {
   // initialize fields
   left = bottom = right = top = zoom = 0;
-  changeLeft = changeTop = changeZoom = gFalse;
-  ok = gFalse;
+  changeLeft = changeTop = changeZoom = false;
+  ok = false;
 
   // get page
   if (a->getLength() < 2) {
@@ -233,11 +233,11 @@ LinkDest::LinkDest(const Array *a) {
   Object obj1 = a->getNF(0);
   if (obj1.isInt()) {
     pageNum = obj1.getInt() + 1;
-    pageIsRef = gFalse;
+    pageIsRef = false;
   } else if (obj1.isRef()) {
     pageRef.num = obj1.getRefNum();
     pageRef.gen = obj1.getRefGen();
-    pageIsRef = gTrue;
+    pageIsRef = true;
   } else {
     error(errSyntaxWarning, -1, "Bad annotation destination");
     return;
@@ -250,13 +250,13 @@ LinkDest::LinkDest(const Array *a) {
   if (obj1.isName("XYZ")) {
     kind = destXYZ;
     if (a->getLength() < 3) {
-      changeLeft = gFalse;
+      changeLeft = false;
     } else {
       Object obj2 = a->get(2);
       if (obj2.isNull()) {
-	changeLeft = gFalse;
+	changeLeft = false;
       } else if (obj2.isNum()) {
-	changeLeft = gTrue;
+	changeLeft = true;
 	left = obj2.getNum();
       } else {
 	error(errSyntaxWarning, -1, "Bad annotation destination position");
@@ -264,13 +264,13 @@ LinkDest::LinkDest(const Array *a) {
       }
     }
     if (a->getLength() < 4) {
-      changeTop = gFalse;
+      changeTop = false;
     } else {
       Object obj2 = a->get(3);
       if (obj2.isNull()) {
-	changeTop = gFalse;
+	changeTop = false;
       } else if (obj2.isNum()) {
-	changeTop = gTrue;
+	changeTop = true;
 	top = obj2.getNum();
       } else {
 	error(errSyntaxWarning, -1, "Bad annotation destination position");
@@ -278,14 +278,14 @@ LinkDest::LinkDest(const Array *a) {
       }
     }
     if (a->getLength() < 5) {
-      changeZoom = gFalse;
+      changeZoom = false;
     } else {
       Object obj2 = a->get(4);
       if (obj2.isNull()) {
-	changeZoom = gFalse;
+	changeZoom = false;
       } else if (obj2.isNum()) {
 	zoom = obj2.getNum();
-	changeZoom = (zoom == 0) ? gFalse : gTrue;
+	changeZoom = (zoom == 0) ? false : true;
       } else {
 	error(errSyntaxWarning, -1, "Bad annotation destination position");
 	return;
@@ -300,13 +300,13 @@ LinkDest::LinkDest(const Array *a) {
   } else if (obj1.isName("FitH")) {
     kind = destFitH;
     if (a->getLength() < 3) {
-      changeTop = gFalse;
+      changeTop = false;
     } else {
       Object obj2 = a->get(2);
       if (obj2.isNull()) {
-	changeTop = gFalse;
+	changeTop = false;
       } else if (obj2.isNum()) {
-	changeTop = gTrue;
+	changeTop = true;
 	top = obj2.getNum();
       } else {
 	error(errSyntaxWarning, -1, "Bad annotation destination position");
@@ -323,9 +323,9 @@ LinkDest::LinkDest(const Array *a) {
     kind = destFitV;
     Object obj2 = a->get(2);
     if (obj2.isNull()) {
-      changeLeft = gFalse;
+      changeLeft = false;
     } else if (obj2.isNum()) {
-      changeLeft = gTrue;
+      changeLeft = true;
       left = obj2.getNum();
     } else {
       error(errSyntaxWarning, -1, "Bad annotation destination position");
@@ -381,9 +381,9 @@ LinkDest::LinkDest(const Array *a) {
     kind = destFitBH;
     Object obj2 = a->get(2);
     if (obj2.isNull()) {
-      changeTop = gFalse;
+      changeTop = false;
     } else if (obj2.isNum()) {
-      changeTop = gTrue;
+      changeTop = true;
       top = obj2.getNum();
     } else {
       error(errSyntaxWarning, -1, "Bad annotation destination position");
@@ -399,9 +399,9 @@ LinkDest::LinkDest(const Array *a) {
     kind = destFitBV;
     Object obj2 = a->get(2);
     if (obj2.isNull()) {
-      changeLeft = gFalse;
+      changeLeft = false;
     } else if (obj2.isNum()) {
-      changeLeft = gTrue;
+      changeLeft = true;
       left = obj2.getNum();
     } else {
       error(errSyntaxWarning, -1, "Bad annotation destination position");
@@ -413,7 +413,7 @@ LinkDest::LinkDest(const Array *a) {
     error(errSyntaxWarning, -1, "Unknown annotation destination type");
   }
 
-  ok = gTrue;
+  ok = true;
   return;
 }
 
@@ -432,7 +432,7 @@ LinkDest::LinkDest(const LinkDest *dest) {
   changeLeft = dest->changeLeft;
   changeTop = dest->changeTop;
   changeZoom = dest->changeZoom;
-  ok = gTrue;
+  ok = true;
 }
 
 //------------------------------------------------------------------------
@@ -683,9 +683,9 @@ LinkMovie::~LinkMovie() {
 
 LinkSound::LinkSound(const Object *soundObj) {
   volume = 1.0;
-  sync = gFalse;
-  repeat = gFalse;
-  mix = gFalse;
+  sync = false;
+  repeat = false;
+  mix = false;
   sound = nullptr;
   if (soundObj->isDict())
   {
@@ -822,7 +822,7 @@ LinkJavaScript::~LinkJavaScript() {
 //------------------------------------------------------------------------
 LinkOCGState::LinkOCGState(const Object *obj) {
   stateList = new GooList();
-  preserveRB = gTrue;
+  preserveRB = true;
 
   Object obj1 = obj->dictLookup("State");
   if (obj1.isArray()) {
@@ -973,12 +973,12 @@ LinkAction *Links::find(double x, double y) const {
   return nullptr;
 }
 
-GBool Links::onLink(double x, double y) const {
+bool Links::onLink(double x, double y) const {
   int i;
 
   for (i = 0; i < numLinks; ++i) {
     if (links[i]->inRect(x, y))
-      return gTrue;
+      return true;
   }
-  return gFalse;
+  return false;
 }

@@ -33,11 +33,11 @@ public:
   const GooString *mimeType() const { return m_mimetype; }
   Object *streamObject() { return &m_objStr; }
   Stream *stream() { return isOk() ? m_objStr.getStream() : nullptr; }
-  GBool isOk() const { return m_objStr.isStream(); }
-  GBool save(const char *path);
+  bool isOk() const { return m_objStr.isStream(); }
+  bool save(const char *path);
 
 private:
-  GBool save2(FILE *f);
+  bool save2(FILE *f);
 
   int m_size;
   GooString *m_createDate;
@@ -55,7 +55,7 @@ public:
   FileSpec(const FileSpec &) = delete;
   FileSpec& operator=(const FileSpec &) = delete;
 
-  GBool isOk() const { return ok; }
+  bool isOk() const { return ok; }
 
   const GooString *getFileName() const { return fileName; }
   GooString *getFileNameForPlatform();
@@ -63,7 +63,7 @@ public:
   EmbFile *getEmbeddedFile();
 
 private:
-  GBool ok;
+  bool ok;
 
   Object fileSpec;
 

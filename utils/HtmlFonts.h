@@ -41,7 +41,7 @@ class HtmlFontColor{
    unsigned int r;
    unsigned int g;
    unsigned int b;
-   GBool Ok(unsigned int xcol){ return xcol<=255;}
+   bool Ok(unsigned int xcol){ return xcol<=255;}
    GooString *convtoX(unsigned  int xcol) const;
  public:
    HtmlFontColor():r(0),g(0),b(0){}
@@ -53,7 +53,7 @@ class HtmlFontColor{
    }
    ~HtmlFontColor(){};
    GooString* toString() const;
-   GBool isEqual(const HtmlFontColor& col) const{
+   bool isEqual(const HtmlFontColor& col) const{
      return ((r==col.r)&&(g==col.g)&&(b==col.b));
    }
 } ;  
@@ -63,9 +63,9 @@ class HtmlFont{
  private:
    unsigned int size;
    int lineSize;
-   GBool italic;
-   GBool bold;
-   GBool rotOrSkewed;
+   bool italic;
+   bool bold;
+   bool rotOrSkewed;
    std::string familyName;
    GooString *FontName;
    HtmlFontColor color;
@@ -78,19 +78,19 @@ public:
    HtmlFontColor getColor() const {return color;}
    ~HtmlFont();
    GooString* getFullName();
-   GBool isItalic() const {return italic;}
-   GBool isBold() const {return bold;}
-   GBool isRotOrSkewed() const { return rotOrSkewed; }
+   bool isItalic() const {return italic;}
+   bool isBold() const {return bold;}
+   bool isRotOrSkewed() const { return rotOrSkewed; }
    unsigned int getSize() const {return size;}
    int getLineSize() const {return lineSize;}
    void setLineSize(int _lineSize) { lineSize = _lineSize; }
    void setRotMat(const double * const mat)
-   { rotOrSkewed = gTrue; memcpy(rotSkewMat, mat, sizeof(rotSkewMat)); }
+   { rotOrSkewed = true; memcpy(rotSkewMat, mat, sizeof(rotSkewMat)); }
    const double *getRotMat() const { return rotSkewMat; }
    GooString* getFontName();
    static GooString* HtmlFilter(const Unicode* u, int uLen); //char* s);
-   GBool isEqual(const HtmlFont& x) const;
-   GBool isEqualIgnoreBold(const HtmlFont& x) const;
+   bool isEqual(const HtmlFont& x) const;
+   bool isEqualIgnoreBold(const HtmlFont& x) const;
    void print() const {printf("font: %s (%s) %d %s%s\n", FontName->getCString(), familyName.c_str(), size, bold ? "bold " : "", italic ? "italic " : "");};
 };
 

@@ -41,14 +41,14 @@ public:
   SplashFontSrc(const SplashFontSrc &) = delete;
   SplashFontSrc& operator=(const SplashFontSrc&) = delete;
 
-  void setFile(GooString *file, GBool del);
-  void setFile(const char *file, GBool del);
-  void setBuf(char *bufA, int buflenA, GBool del);
+  void setFile(GooString *file, bool del);
+  void setFile(const char *file, bool del);
+  void setBuf(char *bufA, int buflenA, bool del);
 
   void ref();
   void unref();
 
-  GBool isFile;
+  bool isFile;
   GooString *fileName;
   char *buf;
   int bufLen;
@@ -56,7 +56,7 @@ public:
 private:
   ~SplashFontSrc();
   int refcnt;
-  GBool deleteSrc;
+  bool deleteSrc;
 };
 
 class SplashFontFile {
@@ -81,7 +81,7 @@ public:
   // the SplashFontFile object.
   void decRefCnt();
 
-  GBool doAdjustMatrix;
+  bool doAdjustMatrix;
 
 protected:
 

@@ -172,7 +172,7 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref) {
 
   // check for an embedded font
   if (font->getType() == fontType3) {
-    emb = gTrue;
+    emb = true;
   } else {
     emb = font->getEmbeddedFontID(&embRef);
   }
@@ -191,7 +191,7 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref) {
   encoding = font->getEncodingName()->copy();
 
   // look for a ToUnicode map
-  hasToUnicode = gFalse;
+  hasToUnicode = false;
   Object fontObj = xref->fetch(fontRef.num, fontRef.gen);
   if (fontObj.isDict()) {
     hasToUnicode = fontObj.dictLookup("ToUnicode").isStream();
@@ -199,7 +199,7 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref) {
 
   // check for a font subset name: capital letters followed by a '+'
   // sign
-  subset = gFalse;
+  subset = false;
   if (name) {
     int i;
     for (i = 0; i < name->getLength(); ++i) {

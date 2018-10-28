@@ -68,14 +68,14 @@ private:
 		   SplashFontSrc *src,
 		   FT_Face faceA,
 		   int *codeToGIDA, int codeToGIDLenA,
-		   GBool trueTypeA, GBool type1A);
+		   bool trueTypeA, bool type1A);
 
   SplashFTFontEngine *engine;
   FT_Face face;
   int *codeToGID;
   int codeToGIDLen;
-  GBool trueType;
-  GBool type1;
+  bool trueType;
+  bool type1;
 
   friend class SplashFTFont;
 };

@@ -92,7 +92,7 @@ void PDFRectangle::clipTo(PDFRectangle *rect) {
 PageAttrs::PageAttrs(PageAttrs *attrs, Dict *dict) {
   Object obj1;
   PDFRectangle mBox;
-  const GBool isPage = dict->is("Page");
+  const bool isPage = dict->is("Page");
 
   // get old/default values
   if (attrs) {
@@ -109,7 +109,7 @@ PageAttrs::PageAttrs(PageAttrs *attrs, Dict *dict) {
     mediaBox.x2 = 612;
     mediaBox.y2 = 792;
     cropBox.x1 = cropBox.y1 = cropBox.x2 = cropBox.y2 = 0;
-    haveCropBox = gFalse;
+    haveCropBox = false;
     rotate = 0;
     resources.setToNull();
   }
@@ -121,7 +121,7 @@ PageAttrs::PageAttrs(PageAttrs *attrs, Dict *dict) {
 
   // crop box
   if (readBox(dict, "CropBox", &cropBox)) {
-    haveCropBox = gTrue;
+    haveCropBox = true;
   }
   if (!haveCropBox) {
     cropBox = mediaBox;
@@ -186,41 +186,41 @@ void PageAttrs::clipBoxes() {
   artBox.clipTo(&mediaBox);
 }
 
-GBool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box) {
+bool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box) {
   PDFRectangle tmp;
   double t;
   Object obj1, obj2;
-  GBool ok;
+  bool ok;
 
   obj1 = dict->lookup(key);
   if (obj1.isArray() && obj1.arrayGetLength() == 4) {
-    ok = gTrue;
+    ok = true;
     obj2 = obj1.arrayGet(0);
     if (obj2.isNum()) {
       tmp.x1 = obj2.getNum();
     } else {
-      ok = gFalse;
+      ok = false;
     }
     obj2 = obj1.arrayGet(1);
     if (obj2.isNum()) {
       tmp.y1 = obj2.getNum();
     } else {
-      ok = gFalse;
+      ok = false;
     }
     obj2 = obj1.arrayGet(2);
     if (obj2.isNum()) {
       tmp.x2 = obj2.getNum();
     } else {
-      ok = gFalse;
+      ok = false;
     }
     obj2 = obj1.arrayGet(3);
     if (obj2.isNum()) {
       tmp.y2 = obj2.getNum();
     } else {
-      ok = gFalse;
+      ok = false;
     }
     if (tmp.x1 == 0 && tmp.x2 == 0 && tmp.y1 == 0 && tmp.y2 == 0)
-      ok = gFalse;
+      ok = false;
     if (ok) {
       if (tmp.x1 > tmp.x2) {
 	t = tmp.x1; tmp.x1 = tmp.x2; tmp.x2 = t;
@@ -231,7 +231,7 @@ GBool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box) {
       *box = tmp;
     }
   } else {
-    ok = gFalse;
+    ok = false;
   }
   return ok;
 }
@@ -243,7 +243,7 @@ GBool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box) {
 #define pageLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 
 Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form) {
-  ok = gTrue;
+  ok = true;
   doc = docA;
   xref = doc->getXRef();
   num = numA;
@@ -313,7 +313,7 @@ Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *at
   annotsObj.setToNull();
  err1:
   contents.setToNull();
-  ok = gFalse;
+  ok = false;
 }
 
 Page::~Page() {
@@ -404,7 +404,7 @@ void Page::addAnnot(Annot *annot) {
       static_cast<AnnotPopup*>(annot)->getParentNF()->isNull()) {
     annots->appendAnnot(annot);
   }
-  annot->setPage(num, gTrue);
+  annot->setPage(num, true);
 
   AnnotMarkup *annotMarkup = dynamic_cast<AnnotMarkup*>(annot);
   if (annotMarkup) {
@@ -447,7 +447,7 @@ void Page::removeAnnot(Annot *annot) {
     }
   }
   annot->removeReferencedObjects(); // Note: Might recurse in removeAnnot again
-  annot->setPage(0, gFalse);
+  annot->setPage(0, false);
 }
 
 Links *Page::getLinks() {
@@ -459,23 +459,23 @@ FormPageWidgets *Page::getFormWidgets() {
 }
 
 void Page::display(OutputDev *out, double hDPI, double vDPI,
-		   int rotate, GBool useMediaBox, GBool crop,
-		   GBool printing,
-		   GBool (*abortCheckCbk)(void *data),
+		   int rotate, bool useMediaBox, bool crop,
+		   bool printing,
+		   bool (*abortCheckCbk)(void *data),
 		   void *abortCheckCbkData,
-                   GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data),
+                   bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data),
                    void *annotDisplayDecideCbkData,
-                   GBool copyXRef) {
+                   bool copyXRef) {
   displaySlice(out, hDPI, vDPI, rotate, useMediaBox, crop, -1, -1, -1, -1, printing,
 	       abortCheckCbk, abortCheckCbkData,
                annotDisplayDecideCbk, annotDisplayDecideCbkData, copyXRef);
 }
 
 Gfx *Page::createGfx(OutputDev *out, double hDPI, double vDPI,
-		     int rotate, GBool useMediaBox, GBool crop,
+		     int rotate, bool useMediaBox, bool crop,
 		     int sliceX, int sliceY, int sliceW, int sliceH,
-		     GBool printing,
-		     GBool (*abortCheckCbk)(void *data),
+		     bool printing,
+		     bool (*abortCheckCbk)(void *data),
 		     void *abortCheckCbkData, XRef *xrefA) {
   const PDFRectangle *mediaBox, *cropBox;
   PDFRectangle box;
@@ -512,14 +512,14 @@ Gfx *Page::createGfx(OutputDev *out, double hDPI, double vDPI,
 }
 
 void Page::displaySlice(OutputDev *out, double hDPI, double vDPI,
-			int rotate, GBool useMediaBox, GBool crop,
+			int rotate, bool useMediaBox, bool crop,
 			int sliceX, int sliceY, int sliceW, int sliceH,
-			GBool printing,
-			GBool (*abortCheckCbk)(void *data),
+			bool printing,
+			bool (*abortCheckCbk)(void *data),
 			void *abortCheckCbkData,
-                        GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data),
+                        bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data),
                         void *annotDisplayDecideCbkData,
-                        GBool copyXRef) {
+                        bool copyXRef) {
   Gfx *gfx;
   Annots *annotList;
   int i;
@@ -587,7 +587,7 @@ void Page::display(Gfx *gfx) {
   }
 }
 
-GBool Page::loadThumb(unsigned char **data_out,
+bool Page::loadThumb(unsigned char **data_out,
 		      int *width_out, int *height_out,
 		      int *rowstride_out)
 {
@@ -596,7 +596,7 @@ GBool Page::loadThumb(unsigned char **data_out,
   Object obj1;
   Dict *dict;
   GfxColorSpace *colorSpace;
-  GBool success = gFalse;
+  bool success = false;
   Stream *str;
   GfxImageColorMap *colorMap;
 
@@ -604,7 +604,7 @@ GBool Page::loadThumb(unsigned char **data_out,
   pageLocker();
   Object fetched_thumb = thumb.fetch(xref);
   if (!fetched_thumb.isStream()) {
-    return gFalse;
+    return false;
   }
 
   dict = fetched_thumb.streamGetDict();
@@ -671,7 +671,7 @@ GBool Page::loadThumb(unsigned char **data_out,
     delete imgstr;
   }
 
-  success = gTrue;
+  success = true;
 
   if (width_out)
     *width_out = width;
@@ -686,9 +686,9 @@ GBool Page::loadThumb(unsigned char **data_out,
 }
 
 void Page::makeBox(double hDPI, double vDPI, int rotate,
-		   GBool useMediaBox, GBool upsideDown,
+		   bool useMediaBox, bool upsideDown,
 		   double sliceX, double sliceY, double sliceW, double sliceH,
-		   PDFRectangle *box, GBool *crop) {
+		   PDFRectangle *box, bool *crop) {
   const PDFRectangle *mediaBox, *cropBox, *baseBox;
   double kx, ky;
 
@@ -743,7 +743,7 @@ void Page::makeBox(double hDPI, double vDPI, int rotate,
     *box = *mediaBox;
   } else {
     *box = *cropBox;
-    *crop = gFalse;
+    *crop = false;
   }
 }
 
@@ -759,7 +759,7 @@ void Page::processLinks(OutputDev *out) {
 }
 
 void Page::getDefaultCTM(double *ctm, double hDPI, double vDPI,
-			 int rotate, GBool useMediaBox, GBool upsideDown) {
+			 int rotate, bool useMediaBox, bool upsideDown) {
   GfxState *state;
   int i;
   rotate += getRotate();

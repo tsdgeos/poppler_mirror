@@ -103,12 +103,12 @@ ViewerPreferences::~ViewerPreferences()
 
 void ViewerPreferences::init()
 {
-  hideToolbar = gFalse;
-  hideMenubar = gFalse;
-  hideWindowUI = gFalse;
-  fitWindow = gFalse;
-  centerWindow = gFalse;
-  displayDocTitle = gFalse;
+  hideToolbar = false;
+  hideMenubar = false;
+  hideWindowUI = false;
+  fitWindow = false;
+  centerWindow = false;
+  displayDocTitle = false;
   nonFullScreenPageMode = nfpmUseNone;
   direction = directionL2R;
   printScaling = printScalingAppDefault;

@@ -31,10 +31,10 @@ class PopplerInputStream: public BaseStream {
 public:
 
   PopplerInputStream(GInputStream *inputStream, GCancellable *cancellableA,
-                     Goffset startA, GBool limitedA, Goffset lengthA, Object &&dictA);
+                     Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
   ~PopplerInputStream();
   BaseStream *copy() override;
-  Stream *makeSubStream(Goffset start, GBool limited,
+  Stream *makeSubStream(Goffset start, bool limited,
                         Goffset lengthA, Object &&dictA) override;
   StreamKind getKind() override { return strWeird; }
   void reset() override;
@@ -53,21 +53,21 @@ public:
 
 private:
 
-  GBool fillBuf();
+  bool fillBuf();
 
-  GBool hasGetChars() override { return true; }
+  bool hasGetChars() override { return true; }
   int getChars(int nChars, Guchar *buffer) override;
 
   GInputStream *inputStream;
   GCancellable *cancellable;
   Goffset start;
-  GBool limited;
+  bool limited;
   char buf[inputStreamBufSize];
   char *bufPtr;
   char *bufEnd;
   Goffset bufPos;
   int savePos;
-  GBool saved;
+  bool saved;
 };
 
 #endif /* __GI_SCANNER__ */

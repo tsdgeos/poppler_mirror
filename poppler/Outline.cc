@@ -89,11 +89,11 @@ OutlineItem::OutlineItem(const Dict *dict, int refNumA, OutlineItem *parentA, XR
   lastRef = dict->lookupNF("Last");
   nextRef = dict->lookupNF("Next");
 
-  startsOpen = gFalse;
+  startsOpen = false;
   obj1 = dict->lookup("Count");
   if (obj1.isInt()) {
     if (obj1.getInt() > 0) {
-      startsOpen = gTrue;
+      startsOpen = true;
     }
   }
 }

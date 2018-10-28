@@ -50,10 +50,10 @@ public:
 
   // Create a font engine.
   SplashFontEngine(
-		   GBool enableFreeType,
-		   GBool enableFreeTypeHinting,
-		   GBool enableSlightHinting,
-		   GBool aa);
+		   bool enableFreeType,
+		   bool enableFreeTypeHinting,
+		   bool enableSlightHinting,
+		   bool aa);
 
   ~SplashFontEngine();
 
@@ -84,8 +84,8 @@ public:
   // Note that the Splash y axis points downward.
   SplashFont *getFont(SplashFontFile *fontFile,
 		      const SplashCoord *textMat, const SplashCoord *ctm);
-  GBool getAA();
-  void setAA(GBool aa);
+  bool getAA();
+  void setAA(bool aa);
 
 private:
 

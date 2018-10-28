@@ -127,7 +127,7 @@ PdfInspector::PdfInspector(void)
     }
   doc = nullptr;
   output = new CairoOutputDev();
-  output->setPrinting (gFalse);
+  output->setPrinting (false);
 
   // set up initial widgets
   load (nullptr);
@@ -228,7 +228,7 @@ PdfInspector::analyze_page (int page)
   cairo_surface_destroy (surface);
   output->setCairo (cr);
   cairo_destroy (cr);
-  doc->displayPage (output, page + 1, 72, 72, 0, gFalse, gTrue, gFalse);
+  doc->displayPage (output, page + 1, 72, 72, 0, false, true, false);
   output->setCairo (nullptr);
 
   // Total time;

@@ -292,14 +292,14 @@ image page_renderer::render_page(const page *p,
     bgColor[0] = d->paper_color & 0xff;
     bgColor[1] = (d->paper_color >> 8) & 0xff;
     bgColor[2] = (d->paper_color >> 16) & 0xff;
-    SplashOutputDev splashOutputDev(colorMode, 4, gFalse, bgColor, gTrue, lineMode);
-    splashOutputDev.setFontAntialias(d->hints & text_antialiasing ? gTrue : gFalse);
-    splashOutputDev.setVectorAntialias(d->hints & antialiasing ? gTrue : gFalse);
-    splashOutputDev.setFreeTypeHinting(d->hints & text_hinting ? gTrue : gFalse, gFalse);
+    SplashOutputDev splashOutputDev(colorMode, 4, false, bgColor, true, lineMode);
+    splashOutputDev.setFontAntialias(d->hints & text_antialiasing ? true : false);
+    splashOutputDev.setVectorAntialias(d->hints & antialiasing ? true : false);
+    splashOutputDev.setFreeTypeHinting(d->hints & text_hinting ? true : false, false);
     splashOutputDev.startDoc(pdfdoc);
     pdfdoc->displayPageSlice(&splashOutputDev, pp->index + 1,
                              xres, yres, int(rotate) * 90,
-                             gFalse, gTrue, gFalse,
+                             false, true, false,
                              x, y, w, h);
 
     SplashBitmap *bitmap = splashOutputDev.getBitmap();

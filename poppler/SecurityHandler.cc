@@ -62,10 +62,10 @@ SecurityHandler::SecurityHandler(PDFDoc *docA) {
 SecurityHandler::~SecurityHandler() {
 }
 
-GBool SecurityHandler::checkEncryption(const GooString *ownerPassword,
+bool SecurityHandler::checkEncryption(const GooString *ownerPassword,
 				       const GooString *userPassword) {
   void *authData;
-  GBool ok;
+  bool ok;
   int i;
 
   if (ownerPassword || userPassword) {
@@ -129,7 +129,7 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
 						 Object *encryptDictA):
   SecurityHandler(docA)
 {
-  ok = gFalse;
+  ok = false;
   fileID = nullptr;
   ownerKey = nullptr;
   userKey = nullptr;
@@ -177,7 +177,7 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
       } else {
 	fileKeyLength = lengthObj.getInt() / 8;
       }
-      encryptMetadata = gTrue;
+      encryptMetadata = true;
       //~ this currently only handles a subset of crypt filter functionality
       //~ (in particular, it ignores the EFF entry in encryptDictA, and
       //~ doesn't handle the case where StmF, StrF, and EFF are not all the
@@ -251,7 +251,7 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
 	if (fileKeyLength > 16 || fileKeyLength < 0) {
 	  fileKeyLength = 16;
 	}
-	ok = gTrue;
+	ok = true;
       } else if (encVersion == 5 && (encRevision == 5 || encRevision == 6)) {
 	fileID = new GooString(); // unused for V=R=5
 	if (ownerEncObj.isString() && userEncObj.isString()) {
@@ -260,7 +260,7 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
 	  if (fileKeyLength > 32 || fileKeyLength < 0) {
 	    fileKeyLength = 32;
 	  }
-	  ok = gTrue;
+	  ok = true;
 	} else {
 	  error(errSyntaxError, -1, "Weird encryption owner/user info");
 	}
@@ -295,9 +295,9 @@ StandardSecurityHandler::~StandardSecurityHandler() {
   }
 }
 
-GBool StandardSecurityHandler::isUnencrypted() {
+bool StandardSecurityHandler::isUnencrypted() {
   if (!ok) {
-    return gTrue;
+    return true;
   }
   return encVersion == -1 && encRevision == -1;
 }
@@ -318,11 +318,11 @@ void StandardSecurityHandler::freeAuthData(void *authData) {
   delete (StandardAuthData *)authData;
 }
 
-GBool StandardSecurityHandler::authorize(void *authData) {
+bool StandardSecurityHandler::authorize(void *authData) {
   GooString *ownerPassword, *userPassword;
 
   if (!ok) {
-    return gFalse;
+    return false;
   }
   if (authData) {
     ownerPassword = ((StandardAuthData *)authData)->ownerPassword;
@@ -336,8 +336,8 @@ GBool StandardSecurityHandler::authorize(void *authData) {
 			    permFlags, fileID,
 			    ownerPassword, userPassword, fileKey,
 			    encryptMetadata, &ownerPasswordOk)) {
-    return gFalse;
+    return false;
   }
-  return gTrue;
+  return true;
 }
 

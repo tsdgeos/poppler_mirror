@@ -39,12 +39,12 @@ struct JPXStreamPrivate {
   int ccounter;
   int npixels;
   int ncomps;
-  GBool inited;
+  bool inited;
   int smaskInData;
-  void init2(OPJ_CODEC_FORMAT format, unsigned char *data, int length, GBool indexed);
+  void init2(OPJ_CODEC_FORMAT format, unsigned char *data, int length, bool indexed);
 };
 
-static inline Guchar adjustComp(int r, int adjust, int depth, int sgndcorr, GBool indexed) {
+static inline Guchar adjustComp(int r, int adjust, int depth, int sgndcorr, bool indexed) {
   if (!indexed) {
     r += sgndcorr;
     if (adjust) {
@@ -76,7 +76,7 @@ static inline int doGetChar(JPXStreamPrivate* priv) {
 
 JPXStream::JPXStream(Stream *strA) : FilterStream(strA) {
   priv = new JPXStreamPrivate;
-  priv->inited = gFalse;
+  priv->inited = false;
   priv->image = nullptr;
   priv->npixels = 0;
   priv->ncomps = 0;
@@ -106,7 +106,7 @@ Goffset JPXStream::getPos() {
 }
 
 int JPXStream::getChars(int nChars, Guchar *buffer) {
-  if (unlikely(priv->inited == gFalse)) { init(); }
+  if (unlikely(priv->inited == false)) { init(); }
 
   for (int i = 0; i < nChars; ++i) {
     const int c = doGetChar(priv);
@@ -117,13 +117,13 @@ int JPXStream::getChars(int nChars, Guchar *buffer) {
 }
 
 int JPXStream::getChar() {
-  if (unlikely(priv->inited == gFalse)) { init(); }
+  if (unlikely(priv->inited == false)) { init(); }
 
   return doGetChar(priv);
 }
 
 int JPXStream::lookChar() {
-  if (unlikely(priv->inited == gFalse)) { init(); }
+  if (unlikely(priv->inited == false)) { init(); }
 
   return doLookChar(priv);
 }
@@ -132,12 +132,12 @@ GooString *JPXStream::getPSFilter(int psLevel, const char *indent) {
   return nullptr;
 }
 
-GBool JPXStream::isBinary(GBool last) {
-  return str->isBinary(gTrue);
+bool JPXStream::isBinary(bool last) {
+  return str->isBinary(true);
 }
 
 void JPXStream::getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode) {
-  if (unlikely(priv->inited == gFalse)) { init(); }
+  if (unlikely(priv->inited == false)) { init(); }
 
   *bitsPerComponent = 8;
   int numComps = (priv->image) ? priv->image->numcomps : 1;
@@ -221,10 +221,10 @@ void JPXStream::init()
   int bufSize = BUFFER_INITIAL_SIZE;
   if (oLen.isInt()) bufSize = oLen.getInt();
 
-  GBool indexed = gFalse;
+  bool indexed = false;
   if (cspace.isArray() && cspace.arrayGetLength() > 0) {
     const Object cstype = cspace.arrayGet(0);
-    if (cstype.isName("Indexed")) indexed = gTrue;
+    if (cstype.isName("Indexed")) indexed = true;
   }
 
   priv->smaskInData = 0;
@@ -272,10 +272,10 @@ void JPXStream::init()
 
   priv->counter = 0;
   priv->ccounter = 0;
-  priv->inited = gTrue;
+  priv->inited = true;
 }
 
-void JPXStreamPrivate::init2(OPJ_CODEC_FORMAT format, unsigned char *buf, int length, GBool indexed)
+void JPXStreamPrivate::init2(OPJ_CODEC_FORMAT format, unsigned char *buf, int length, bool indexed)
 {
   JPXData jpxData;
 

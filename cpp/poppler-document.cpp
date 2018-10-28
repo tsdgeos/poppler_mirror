@@ -198,7 +198,7 @@ bool document::is_locked() const
 }
 
 /**
- Unlocks the current doocument, if locked.
+ Unlocks the current document, if locked.
 
  \returns the new locking status of the document
  */

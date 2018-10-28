@@ -71,13 +71,13 @@ public:
   void remove(const char *key);
 
   // Check if dictionary is of specified type.
-  GBool is(const char *type) const;
+  bool is(const char *type) const;
 
   // Look up an entry and return the value.  Returns a null object
   // if <key> is not in the dictionary.
   Object lookup(const char *key, int recursion = 0) const;
   Object lookupNF(const char *key) const;
-  GBool lookupInt(const char *key, const char *alt_key, int *value) const;
+  bool lookupInt(const char *key, const char *alt_key, int *value) const;
 
   // Iterative accessors.
   const char *getKey(int i) const { return entries[i].first.c_str(); }
@@ -91,7 +91,7 @@ public:
   
   XRef *getXRef() const { return xref; }
   
-  GBool hasKey(const char *key) const;
+  bool hasKey(const char *key) const;
 
 private:
   friend class Object; // for incRef/decRef

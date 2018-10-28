@@ -180,7 +180,7 @@ public:
   GfxFont(const GfxFont &) = delete;
   GfxFont& operator=(const GfxFont &other) = delete;
 
-  GBool isOk() const { return ok; }
+  bool isOk() const { return ok; }
 
   void incRefCnt();
   void decRefCnt();
@@ -192,7 +192,7 @@ public:
   const Ref *getID() const { return &id; }
 
   // Does this font match the tag?
-  GBool matches(const char *tagA) const { return !tag->cmp(tagA); }
+  bool matches(const char *tagA) const { return !tag->cmp(tagA); }
 
   // Get font family name.
   GooString *getFamily() const { return family; }
@@ -209,21 +209,21 @@ public:
 
   // Get font type.
   GfxFontType getType() const { return type; }
-  virtual GBool isCIDFont() const { return gFalse; }
+  virtual bool isCIDFont() const { return false; }
 
   // Get embedded font ID, i.e., a ref for the font file stream.
   // Returns false if there is no embedded font.
-  GBool getEmbeddedFontID(Ref *embID) const
+  bool getEmbeddedFontID(Ref *embID) const
     { *embID = embFontID; return embFontID.num >= 0; }
 
   // Invalidate an embedded font
   // Returns false if there is no embedded font.
-  GBool invalidateEmbeddedFont() {
+  bool invalidateEmbeddedFont() {
     if (embFontID.num >= 0) {
       embFontID.num = -1;
-      return gTrue;
+      return true;
     }
-    return gFalse;
+    return false;
   }
 
   // Get the PostScript font name for the embedded font.  Returns
@@ -232,11 +232,11 @@ public:
 
   // Get font descriptor flags.
   int getFlags() const { return flags; }
-  GBool isFixedWidth() const { return flags & fontFixedWidth; }
-  GBool isSerif() const { return flags & fontSerif; }
-  GBool isSymbolic() const { return flags & fontSymbolic; }
-  GBool isItalic() const { return flags & fontItalic; }
-  GBool isBold() const { return flags & fontBold; }
+  bool isFixedWidth() const { return flags & fontFixedWidth; }
+  bool isSerif() const { return flags & fontSerif; }
+  bool isSymbolic() const { return flags & fontSymbolic; }
+  bool isItalic() const { return flags & fontItalic; }
+  bool isBold() const { return flags & fontBold; }
 
   // Return the Unicode map.
   virtual const CharCodeToUnicode *getToUnicode() const = 0;
@@ -275,7 +275,7 @@ public:
 			  double *dx, double *dy, double *ox, double *oy) const = 0;
 
   // Does this font have a toUnicode map?
-  GBool hasToUnicodeCMap() const { return hasToUnicode; }
+  bool hasToUnicodeCMap() const { return hasToUnicode; }
 
   // Return the name of the encoding
   GooString *getEncodingName() const { return encodingName; }
@@ -293,7 +293,7 @@ protected:
   void readFontDescriptor(XRef *xref, Dict *fontDict);
   CharCodeToUnicode *readToUnicodeCMap(Dict *fontDict, int nBits,
 				       CharCodeToUnicode *ctu);
-  static GfxFontLoc *getExternalFont(GooString *path, GBool cid);
+  static GfxFontLoc *getExternalFont(GooString *path, bool cid);
 
   GooString *tag;			// PDF font tag
   Ref id;			// reference (used as unique ID)
@@ -311,8 +311,8 @@ protected:
   double ascent;		// max height above baseline
   double descent;		// max depth below baseline
   int refCnt;
-  GBool ok;
-  GBool hasToUnicode;
+  bool ok;
+  bool hasToUnicode;
   GooString *encodingName;
 };
 
@@ -340,10 +340,10 @@ public:
   const char *getCharName(int code) const { return enc[code]; }
 
   // Returns true if the PDF font specified an encoding.
-  GBool getHasEncoding() const { return hasEncoding; }
+  bool getHasEncoding() const { return hasEncoding; }
 
   // Returns true if the PDF font specified MacRomanEncoding.
-  GBool getUsesMacRomanEnc() const { return usesMacRomanEnc; }
+  bool getUsesMacRomanEnc() const { return usesMacRomanEnc; }
 
   // Get width of a character.
   double getWidth(Guchar c) const { return widths[c]; }
@@ -370,8 +370,8 @@ private:
   char encFree[256];		// boolean for each char name: if set,
 				//   the string is malloc'ed
   CharCodeToUnicode *ctu;	// char code --> Unicode
-  GBool hasEncoding;
-  GBool usesMacRomanEnc;
+  bool hasEncoding;
+  bool usesMacRomanEnc;
   double widths[256];		// character widths
   Object charProcs;		// Type 3 CharProcs dictionary
   Object resources;		// Type 3 Resources dictionary
@@ -389,7 +389,7 @@ public:
   GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
 	     GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
 
-  GBool isCIDFont() const override { return gTrue; }
+  bool isCIDFont() const override { return true; }
 
   int getNextChar(const char *s, int len, CharCode *code,
 			  Unicode **u, int *uLen,
@@ -417,13 +417,13 @@ private:
   ~GfxCIDFont();
 
   int mapCodeToGID(FoFiTrueType *ff, int cmapi,
-    Unicode unicode, GBool wmode);
+    Unicode unicode, bool wmode);
   double getWidth(CID cid) const;	// Get width of a character.
 
   GooString *collection;		// collection name
   CMap *cMap;			// char code --> CID
   CharCodeToUnicode *ctu;	// CID --> Unicode
-  GBool ctuUsesCharCode;	// true: ctu maps char code to Unicode;
+  bool ctuUsesCharCode;	// true: ctu maps char code to Unicode;
 				//   false: ctu maps CID to Unicode
   GfxFontCIDWidths widths;	// character widths
   int *cidToGID;		// CID --> GID mapping (for embedded

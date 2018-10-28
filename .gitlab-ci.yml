@@ -4,7 +4,7 @@ before_script:
   - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
   - apt-get update
   - apt-get build-dep --yes --no-install-recommends poppler
-  - apt-get install --yes --no-install-recommends ninja-build libcurl4-openssl-dev git ca-certificates locales libc++-dev libc++abi-dev clang
+  - apt-get install --yes --no-install-recommends ninja-build libcurl4-openssl-dev git ca-certificates locales libc++-dev libc++abi-dev clang libgtk-3-dev
   - echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
   - locale-gen
 
@@ -62,11 +62,11 @@ build_mingw64_fedora:
   stage: build
   image: fedora
   before_script:
-    - yum -y install yum-utils
-    - yum-builddep -y mingw64-poppler
-    - yum -y install mingw64-curl make ninja-build mingw64-openjpeg2-tools mingw32-openjpeg2-tools
+    - dnf install -y 'dnf-command(builddep)'
+    - dnf builddep -y mingw64-poppler
+    - dnf -y install mingw64-curl make ninja-build mingw64-openjpeg2-tools mingw32-openjpeg2-tools
   script:
-    - sed -i '/SYSTEM/d' glib/CMakeLists.txt
+    - sed -i '/SYSTEM/d' glib/CMakeLists.txt test/CMakeLists.txt
     - mkdir -p build && cd build
     - mingw64-cmake -G Ninja ..
     - ninja

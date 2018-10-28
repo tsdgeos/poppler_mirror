@@ -50,8 +50,8 @@ public:
   // <rowPad> bytes.  If <topDown> is false, the bitmap will be stored
   // upside-down, i.e., with the last row first in memory.
   SplashBitmap(int widthA, int heightA, int rowPad,
-	       SplashColorMode modeA, GBool alphaA,
-	       GBool topDown = gTrue, GooList *separationList = nullptr);
+	       SplashColorMode modeA, bool alphaA,
+	       bool topDown = true, GooList *separationList = nullptr);
   static SplashBitmap *copy(SplashBitmap *src);
 
   ~SplashBitmap();
@@ -76,9 +76,9 @@ public:
   struct WriteImgParams
   {
     int jpegQuality = -1;
-    GBool jpegProgressive = gFalse;
+    bool jpegProgressive = false;
     GooString tiffCompression;
-    GBool jpegOptimize = gFalse;
+    bool jpegOptimize = false;
   };
 
   SplashError writeImgFile(SplashImageFileFormat format, const char *fileName, int hDPI, int vDPI, WriteImgParams* params = nullptr);
@@ -92,7 +92,7 @@ public:
       conversionAlphaPremultiplied
   };
 
-  GBool convertToXBGR(ConversionMode conversionMode = conversionOpaque);
+  bool convertToXBGR(ConversionMode conversionMode = conversionOpaque);
 
   void getPixel(int x, int y, SplashColorPtr pixel);
   void getRGBLine(int y, SplashColorPtr line);

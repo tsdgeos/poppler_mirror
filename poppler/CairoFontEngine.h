@@ -47,18 +47,18 @@ public:
 	    cairo_font_face_t *face,
 	    int *codeToGID,
 	    Guint codeToGIDLen,
-	    GBool substitute,
-	    GBool printing);
+	    bool substitute,
+	    bool printing);
   virtual ~CairoFont();
   CairoFont(const CairoFont &) = delete;
   CairoFont& operator=(const CairoFont &other) = delete;
 
-  virtual GBool matches(Ref &other, GBool printing);
+  virtual bool matches(Ref &other, bool printing);
   cairo_font_face_t *getFontFace(void);
   unsigned long getGlyph(CharCode code, Unicode *u, int uLen);
   double getSubstitutionCorrection(GfxFont *gfxFont);
 
-  GBool isSubstitute() { return substitute; }
+  bool isSubstitute() { return substitute; }
 protected:
   Ref ref;
   cairo_font_face_t *cairo_font_face;
@@ -66,20 +66,20 @@ protected:
   int *codeToGID;
   Guint codeToGIDLen;
 
-  GBool substitute;
-  GBool printing;
+  bool substitute;
+  bool printing;
 };
 
 //------------------------------------------------------------------------
 
 class CairoFreeTypeFont : public CairoFont {
 public:
-  static CairoFreeTypeFont *create(GfxFont *gfxFont, XRef *xref, FT_Library lib, GBool useCIDs);
+  static CairoFreeTypeFont *create(GfxFont *gfxFont, XRef *xref, FT_Library lib, bool useCIDs);
   ~CairoFreeTypeFont();
 
 private:
   CairoFreeTypeFont(Ref ref, cairo_font_face_t *cairo_font_face,
-	    int *codeToGID, Guint codeToGIDLen, GBool substitute);
+	    int *codeToGID, Guint codeToGIDLen, bool substitute);
 };
 
 //------------------------------------------------------------------------
@@ -88,16 +88,16 @@ class CairoType3Font : public CairoFont {
 public:
   static CairoType3Font *create(GfxFont *gfxFont, PDFDoc *doc,
 				CairoFontEngine *fontEngine,
-				GBool printing, XRef *xref);
+				bool printing, XRef *xref);
   ~CairoType3Font();
 
-  GBool matches(Ref &other, GBool printing) override;
+  bool matches(Ref &other, bool printing) override;
 
 private:
   CairoType3Font(Ref ref,
 		 cairo_font_face_t *cairo_font_face,
 		 int *codeToGID, Guint codeToGIDLen,
-		 GBool printing, XRef *xref);
+		 bool printing, XRef *xref);
 };
 
 //------------------------------------------------------------------------
@@ -117,12 +117,12 @@ public:
   CairoFontEngine(const CairoFontEngine &) = delete;
   CairoFontEngine& operator=(const CairoFontEngine &other) = delete;
 
-  CairoFont *getFont(GfxFont *gfxFont, PDFDoc *doc, GBool printing, XRef *xref);
+  CairoFont *getFont(GfxFont *gfxFont, PDFDoc *doc, bool printing, XRef *xref);
 
 private:
   CairoFont *fontCache[cairoFontCacheSize];
   FT_Library lib;
-  GBool useCIDs;
+  bool useCIDs;
   mutable std::recursive_mutex mutex;
 };
 

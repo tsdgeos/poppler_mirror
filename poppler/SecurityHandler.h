@@ -48,7 +48,7 @@ public:
   SecurityHandler& operator=(const SecurityHandler &) = delete;
 
   // Returns true if the file is actually unencrypted.
-  virtual GBool isUnencrypted() { return gFalse; }
+  virtual bool isUnencrypted() { return false; }
 
   // Check the document's encryption.  If the document is encrypted,
   // this will first try <ownerPassword> and <userPassword> (in
@@ -59,7 +59,7 @@ public:
   // document can be opened (if it's unencrypted, or if a correct
   // password is obtained); false otherwise (encrypted and no correct
   // password).
-  GBool checkEncryption(const GooString *ownerPassword,
+  bool checkEncryption(const GooString *ownerPassword,
 			const GooString *userPassword);
 
   // Create authorization data for the specified owner and user
@@ -81,12 +81,12 @@ public:
   // authorization data (which may be NULL).  Returns true if
   // successful (i.e., if at least the right to open the document was
   // granted).
-  virtual GBool authorize(void *authData) = 0;
+  virtual bool authorize(void *authData) = 0;
 
   // Return the various authorization parameters.  These are only
   // valid after authorize has returned true.
   virtual int getPermissionFlags() = 0;
-  virtual GBool getOwnerPasswordOk() = 0;
+  virtual bool getOwnerPasswordOk() = 0;
   virtual Guchar *getFileKey() = 0;
   virtual int getFileKeyLength() = 0;
   virtual int getEncVersion() = 0;
@@ -108,14 +108,14 @@ public:
   StandardSecurityHandler(PDFDoc *docA, Object *encryptDictA);
   ~StandardSecurityHandler();
 
-  GBool isUnencrypted() override;
+  bool isUnencrypted() override;
   void *makeAuthData(const GooString *ownerPassword,
 			     const GooString *userPassword) override;
   void *getAuthData() override;
   void freeAuthData(void *authData) override;
-  GBool authorize(void *authData) override;
+  bool authorize(void *authData) override;
   int getPermissionFlags() override { return permFlags; }
-  GBool getOwnerPasswordOk() override { return ownerPasswordOk; }
+  bool getOwnerPasswordOk() override { return ownerPasswordOk; }
   Guchar *getFileKey() override { return fileKey; }
   int getFileKeyLength() override { return fileKeyLength; }
   int getEncVersion() override { return encVersion; }
@@ -125,18 +125,18 @@ public:
 private:
 
   int permFlags;
-  GBool ownerPasswordOk;
+  bool ownerPasswordOk;
   Guchar fileKey[32];
   int fileKeyLength;
   int encVersion;
   int encRevision;
-  GBool encryptMetadata;
+  bool encryptMetadata;
   CryptAlgorithm encAlgorithm;
 
   GooString *ownerKey, *userKey;
   GooString *ownerEnc, *userEnc;
   GooString *fileID;
-  GBool ok;
+  bool ok;
 };
 
 #endif

@@ -435,8 +435,8 @@ bool PdfEnginePoppler::load(const char *fileName)
 
 SplashOutputDev * PdfEnginePoppler::outputDevice() {
     if (!_outputDev) {
-        GBool bitmapTopDown = gTrue;
-        _outputDev = new SplashOutputDev(gSplashColorMode, 4, gFalse, gBgColor, bitmapTopDown);
+        bool bitmapTopDown = true;
+        _outputDev = new SplashOutputDev(gSplashColorMode, 4, false, gBgColor, bitmapTopDown);
         if (_outputDev)
             _outputDev->startDoc(_pdfDoc);
     }
@@ -450,9 +450,9 @@ SplashBitmap *PdfEnginePoppler::renderBitmap(int pageNo, double zoomReal, int ro
 
     double hDPI = (double)PDF_FILE_DPI * zoomReal * 0.01;
     double vDPI = (double)PDF_FILE_DPI * zoomReal * 0.01;
-    GBool  useMediaBox = gFalse;
-    GBool  crop        = gTrue;
-    GBool  doLinks     = gTrue;
+    bool  useMediaBox = false;
+    bool  crop        = true;
+    bool  doLinks     = true;
     _pdfDoc->displayPage(_outputDev, pageNo, hDPI, vDPI, rotation, useMediaBox, 
         crop, doLinks, nullptr, nullptr);
 
@@ -839,7 +839,7 @@ static void RenderPdfAsText(const char *fileName)
 
     LogInfo("started: %s\n", fileName);
 
-    TextOutputDev * textOut = new TextOutputDev(nullptr, gTrue, 0, gFalse, gFalse);
+    TextOutputDev * textOut = new TextOutputDev(nullptr, true, 0, false, false);
     if (!textOut->isOk()) {
         delete textOut;
         return;
@@ -870,9 +870,9 @@ static void RenderPdfAsText(const char *fileName)
 
         msTimer.start();
         int rotate = 0;
-        GBool useMediaBox = gFalse;
-        GBool crop = gTrue;
-        GBool doLinks = gFalse;
+        bool useMediaBox = false;
+        bool crop = true;
+        bool doLinks = false;
         pdfDoc->displayPage(textOut, curPage, 72, 72, rotate, useMediaBox, crop, doLinks);
         txt = textOut->getText(0.0, 0.0, 10000.0, 10000.0);
         msTimer.stop();
@@ -1240,7 +1240,7 @@ int main(int argc, char **argv)
     globalParams = new GlobalParams();
     if (!globalParams)
         return 1;
-    globalParams->setErrQuiet(gFalse);
+    globalParams->setErrQuiet(false);
 
     FILE * outFile = nullptr;
     if (gOutFileName) {

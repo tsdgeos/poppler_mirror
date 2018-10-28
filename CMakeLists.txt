@@ -24,14 +24,20 @@ CHECK_FILE_OFFSET_BITS()
 
 include(GNUInstallDirs)
 
+set(ENABLE_FUZZER FALSE)
+
 find_package (ECM 1.6.0 QUIET NO_MODULE)
 if (ECM_FOUND)
     include("${ECM_MODULE_DIR}/ECMEnableSanitizers.cmake")
+
+    if(ECM_ENABLE_SANITIZERS MATCHES fuzzer)
+        set(ENABLE_FUZZER TRUE)
+    endif()
 endif()
 
 set(POPPLER_MAJOR_VERSION "0")
 set(POPPLER_MINOR_VERSION "70")
-set(POPPLER_MICRO_VERSION "0")
+set(POPPLER_MICRO_VERSION "1")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION}.${POPPLER_MICRO_VERSION}")
 
 set (CMAKE_CXX_STANDARD 14)
@@ -303,11 +309,9 @@ else()
   set(CMAKE_CXX_FLAGS "${DEFAULT_COMPILE_WARNINGS} ${CMAKE_CXX_FLAGS}")
 endif()
 
-
 include(ConfigureChecks.cmake)
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 configure_file(poppler/poppler-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h)
-
 
 set(poppler_SRCS
   goo/gfile.cc
@@ -717,6 +721,7 @@ show_end_message_yesno("use curl" ENABLE_LIBCURL)
 show_end_message_yesno("use libopenjpeg2" WITH_OPENJPEG)
 show_end_message_yesno("use lcms2" USE_CMS)
 show_end_message_yesno("command line utils" ENABLE_UTILS)
+show_end_message_yesno("fuzz target" ENABLE_FUZZER)
 show_end_message("test data dir" ${TESTDATADIR})
 
 if(NOT ENABLE_SPLASH AND NOT CAIRO_FOUND)

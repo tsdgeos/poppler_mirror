@@ -92,7 +92,7 @@ static void parseDuplex(GooString *mode)
   fprintf(stderr, "Warning: Unknown duplex mode \"%s\"\n", mode->getCString());
 }
 
-static void fillCommonPrinterOptions(GBool duplex)
+static void fillCommonPrinterOptions(bool duplex)
 {
   if (duplex) {
     devmode->dmDuplex = DMDUP_HORIZONTAL;
@@ -118,7 +118,7 @@ static void fillPagePrinterOptions(double w, double h)
 }
 
 
-static void fillPrinterOptions(GBool duplex, GooString *printOpt)
+static void fillPrinterOptions(bool duplex, GooString *printOpt)
 {
   //printOpt format is: <opt1>=<val1>,<opt2>=<val2>,...
   const char *nextOpt = printOpt->getCString();
@@ -235,8 +235,8 @@ enum PageScale { NONE = 0, SHRINK = 1, FIT = 2 };
 
 // used to set/get option values in printDialogHookProc
 static PageScale pageScale;
-static GBool centerPage;
-static GBool useOrigPageSize;
+static bool centerPage;
+static bool useOrigPageSize;
 
 // PrintDlg callback to customize the print dialog with additional controls.
 static UINT_PTR CALLBACK printDialogHookProc(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam)
@@ -364,7 +364,7 @@ static UINT_PTR CALLBACK printDialogHookProc(HWND hdlg, UINT uiMsg, WPARAM wPara
 }
 
 void win32SetupPrinter(GooString *printer, GooString *printOpt,
-		       GBool duplex, GBool setupdlg)
+		       bool duplex, bool setupdlg)
 {
   if (printer->getCString()[0] == 0) {
     DWORD size = 0;
@@ -417,8 +417,8 @@ void win32SetupPrinter(GooString *printer, GooString *printOpt,
   }
 }
 
-void win32ShowPrintDialog(GBool *expand, GBool *noShrink, GBool *noCenter,
-			  GBool *usePDFPageSize, GBool *allPages,
+void win32ShowPrintDialog(bool *expand, bool *noShrink, bool *noCenter,
+			  bool *usePDFPageSize, bool *allPages,
 			  int *firstPage, int *lastPage, int maxPages)
 {
   PRINTDLG pd;
@@ -455,21 +455,21 @@ void win32ShowPrintDialog(GBool *expand, GBool *noShrink, GBool *noCenter,
     devmode = (DEVMODEA*)GlobalLock(hDevmode);
     hdc = pd.hDC;
     if (pd.Flags & PD_PAGENUMS) {
-      *allPages = gFalse;
+      *allPages = false;
       *firstPage = pd.nFromPage;
       *lastPage = pd.nToPage;
     } else {
-      *allPages = gTrue;
+      *allPages = true;
     }
     if (pageScale == NONE) {
-      *expand = gFalse;
-      *noShrink = gTrue;
+      *expand = false;
+      *noShrink = true;
     } else if (pageScale == SHRINK) {
-      *expand = gFalse;
-      *noShrink = gFalse;
+      *expand = false;
+      *noShrink = false;
     } else {
-      *expand = gTrue;
-      *noShrink = gFalse;
+      *expand = true;
+      *noShrink = false;
     }
     *noCenter = !centerPage;
     *usePDFPageSize = useOrigPageSize;
@@ -498,7 +498,7 @@ cairo_surface_t *win32BeginDocument(GooString *inputFileName, GooString *outputF
   return cairo_win32_printing_surface_create(hdc);
 }
 
-void win32BeginPage(double *w, double *h, GBool changePageSize, GBool useFullPage)
+void win32BeginPage(double *w, double *h, bool changePageSize, bool useFullPage)
 {
   if (changePageSize)
     fillPagePrinterOptions(*w, *h);

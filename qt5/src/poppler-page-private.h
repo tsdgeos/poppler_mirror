@@ -48,8 +48,8 @@ public:
   static Link* convertLinkActionToLink(::LinkAction * a, DocumentData *parentDoc, const QRectF &linkArea);
   
   TextPage *prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u);
-  GBool performSingleTextSearch(TextPage* textPage, QVector<Unicode> &u, double &sLeft, double &sTop, double &sRight, double &sBottom, Page::SearchDirection direction, GBool sCase, GBool sWords);
-  QList<QRectF> performMultipleTextSearch(TextPage* textPage, QVector<Unicode> &u, GBool sCase, GBool sWords);
+  bool performSingleTextSearch(TextPage* textPage, QVector<Unicode> &u, double &sLeft, double &sTop, double &sRight, double &sBottom, Page::SearchDirection direction, bool sCase, bool sWords);
+  QList<QRectF> performMultipleTextSearch(TextPage* textPage, QVector<Unicode> &u, bool sCase, bool sWords);
 };
 
 }

@@ -43,7 +43,7 @@
 // lots of nested arrays that made us consume all the stack
 #define recursionLimit 500
 
-Parser::Parser(XRef *xrefA, Lexer *lexerA, GBool allowStreamsA) {
+Parser::Parser(XRef *xrefA, Lexer *lexerA, bool allowStreamsA) {
   xref = xrefA;
   lexer = lexerA;
   inlineImg = 0;
@@ -58,14 +58,14 @@ Parser::~Parser() {
 
 Object Parser::getObj(int recursion)
 {
-  return getObj(gFalse, nullptr, cryptRC4, 0, 0, 0, recursion);
+  return getObj(false, nullptr, cryptRC4, 0, 0, 0, recursion);
 }
 
-Object Parser::getObj(GBool simpleOnly,
+Object Parser::getObj(bool simpleOnly,
            Guchar *fileKey,
 		       CryptAlgorithm encAlgorithm, int keyLength,
 		       int objNum, int objGen, int recursion,
-		       GBool strict) {
+		       bool strict) {
   Object obj;
   Stream *str;
   DecryptStream *decrypt;
@@ -89,7 +89,7 @@ Object Parser::getObj(GBool simpleOnly,
     shift();
     obj = Object(new Array(xref));
     while (!buf1.isCmd("]") && !buf1.isEOF() && recursion + 1 < recursionLimit) {
-      Object obj2 = getObj(gFalse, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1);
+      Object obj2 = getObj(false, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1);
       obj.arrayAdd(std::move(obj2));
     }
     if (recursion + 1 >= recursionLimit && strict) goto err;
@@ -116,7 +116,7 @@ Object Parser::getObj(GBool simpleOnly,
 	  if (strict && buf1.isError()) goto err;
 	  break;
 	}
-	Object obj2 = getObj(gFalse, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1);
+	Object obj2 = getObj(false, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1);
 	if (unlikely(obj2.isError() && recursion + 1 >= recursionLimit)) {
 	  break;
 	}
@@ -192,7 +192,7 @@ err:
 Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
 			   CryptAlgorithm encAlgorithm, int keyLength,
 			   int objNum, int objGen, int recursion,
-                           GBool strict) {
+                           bool strict) {
   BaseStream *baseStr;
   Stream *str;
   Goffset length;
@@ -267,7 +267,7 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
   }
 
   // make base stream
-  str = baseStr->makeSubStream(pos, gTrue, length, std::move(dict));
+  str = baseStr->makeSubStream(pos, true, length, std::move(dict));
 
   // handle decryption
   if (fileKey) {

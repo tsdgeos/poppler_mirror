@@ -233,7 +233,7 @@ static inline SplashCoord splashDist(SplashCoord x0, SplashCoord y0,
 #endif
 }
 
-static inline GBool splashCheckDet(SplashCoord m11, SplashCoord m12,
+static inline bool splashCheckDet(SplashCoord m11, SplashCoord m12,
 				   SplashCoord m21, SplashCoord m22,
 				   SplashCoord epsilon) {
 #ifdef USE_FIXEDPOINT

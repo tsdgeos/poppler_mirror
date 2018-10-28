@@ -264,7 +264,7 @@ public:
 protected:
   AnnotBorder();
 
-  GBool parseDashArray(Object *dashObj);
+  bool parseDashArray(Object *dashObj);
 
   AnnotBorderType type;
   double width;
@@ -443,10 +443,10 @@ public:
   void removeAllStreams();
 
   // Test if this AnnotAppearance references the specified stream
-  GBool referencesStream(Ref targetStreamRef);
+  bool referencesStream(Ref targetStreamRef);
 
 private:
-  static GBool referencesStream(Object *stateObj, Ref targetStreamRef);
+  static bool referencesStream(Object *stateObj, Ref targetStreamRef);
   void removeStream(Ref refToStream);
   void removeStateStreams(Object *state);
 
@@ -541,10 +541,10 @@ public:
   AnnotAppearanceBuilder(const AnnotAppearanceBuilder &) = delete;
   AnnotAppearanceBuilder& operator=(const AnnotAppearanceBuilder &) = delete;
 
-  void setDrawColor(const AnnotColor *color, GBool fill);
+  void setDrawColor(const AnnotColor *color, bool fill);
   void setLineStyleForBorder(const AnnotBorder *border);
   void setTextFont(const Object &fontName, double fontSize);
-  void drawCircle(double cx, double cy, double r, GBool fill);
+  void drawCircle(double cx, double cy, double r, bool fill);
   void drawCircleTopLeft(double cx, double cy, double r);
   void drawCircleBottomRight(double cx, double cy, double r);
   void drawFieldBorder(const FormField *field, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
@@ -565,10 +565,10 @@ private:
   bool drawFormFieldChoice(const FormFieldChoice *fieldChoice, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
   bool drawText(const GooString *text, const GooString *da, const GfxResources *resources,
 		const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect,
-		GBool multiline, int comb, int quadding,
-		GBool txField, GBool forceZapfDingbats,
+		bool multiline, int comb, int quadding,
+		bool txField, bool forceZapfDingbats,
 		XRef *xref, bool *addedDingbatsResource, // xref and addedDingbatsResource both must not be null if forceZapfDingbats is passed
-		GBool password);
+		bool password);
 
   GooString *appearBuf;
 };
@@ -651,16 +651,16 @@ public:
   Annot(PDFDoc *docA, PDFRectangle *rectA);
   Annot(PDFDoc *docA, Object *dictObject);
   Annot(PDFDoc *docA, Object *dictObject, Object *obj);
-  GBool isOk() { return ok; }
+  bool isOk() { return ok; }
 
   void incRefCnt();
   void decRefCnt();
 
-  virtual void draw(Gfx *gfx, GBool printing);
+  virtual void draw(Gfx *gfx, bool printing);
   // Get the resource dict of the appearance stream
   virtual Object getAppearanceResDict();
 
-  GBool match(Ref *refA)
+  bool match(Ref *refA)
     { return ref.num == refA->num && ref.gen == refA->gen; }
 
   double getXMin();
@@ -686,7 +686,7 @@ public:
   // getters
   PDFDoc *getDoc() const { return doc; }
   XRef *getXRef() const { return xref; }
-  GBool getHasRef() const { return hasRef; }
+  bool getHasRef() const { return hasRef; }
   Ref getRef() const { return ref; }
   AnnotSubtype getType() const { return type; }
   PDFRectangle *getRect() const { return rect.get(); }
@@ -705,28 +705,28 @@ public:
   int getId() { return ref.num; }
 
   // Check if point is inside the annot rectangle.
-  GBool inRect(double x, double y) const;
+  bool inRect(double x, double y) const;
 
   static void layoutText(const GooString *text, GooString *outBuf, int *i, const GfxFont *font,
 		  double *width, double widthLimit, int *charCount,
-		  GBool noReencode);
+		  bool noReencode);
 
 private:
   void readArrayNum(Object *pdfArray, int key, double *value);
   // write vStr[i:j[ in appearBuf
 
   void initialize (PDFDoc *docA, Dict *dict);
-  void setPage (int new_page, GBool updateP); // Called by Page::addAnnot and Annots ctor
+  void setPage (int new_page, bool updateP); // Called by Page::addAnnot and Annots ctor
 
 
 protected:
   virtual ~Annot();
   virtual void removeReferencedObjects(); // Called by Page::removeAnnot
-  Object createForm(const GooString *appearBuf, double *bbox, GBool transparencyGroup, Dict *resDict);
-  Object createForm(const GooString *appearBuf, double *bbox, GBool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
+  Object createForm(const GooString *appearBuf, double *bbox, bool transparencyGroup, Dict *resDict);
+  Object createForm(const GooString *appearBuf, double *bbox, bool transparencyGroup, Object &&resDictObject); // overload to support incRef/decRef
   Dict *createResourcesDict(const char *formName, Object &&formStream, const char *stateName,
 			   double opacity, const char *blendMode);
-  GBool isVisible(GBool printing);
+  bool isVisible(bool printing);
   int getRotation() const;
 
   // Updates the field key of the annotation dictionary
@@ -763,7 +763,7 @@ protected:
   Ref ref;                      // object ref identifying this annotation
   std::unique_ptr<AnnotBorder> border;              // Border, BS
   std::unique_ptr<AnnotColor> color;                // C
-  GBool ok;
+  bool ok;
 
   bool hasRef;
   mutable std::recursive_mutex mutex;
@@ -782,14 +782,14 @@ public:
   Object *getParentNF() { return &parent; }
   void setParent(Object *parentA);
   void setParent(Annot *parentA);
-  GBool getOpen() const { return open; }
-  void setOpen(GBool openA);
+  bool getOpen() const { return open; }
+  void setOpen(bool openA);
 
 protected:
   void initialize(PDFDoc *docA, Dict *dict);
 
   Object parent; // Parent
-  GBool open;   // Open
+  bool open;   // Open
 };
 
 //------------------------------------------------------------------------
@@ -867,21 +867,21 @@ public:
   AnnotText(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotText();
 
-  void draw(Gfx *gfx, GBool printing) override;
+  void draw(Gfx *gfx, bool printing) override;
 
   // getters
-  GBool getOpen() const { return open; }
+  bool getOpen() const { return open; }
   const GooString *getIcon() const { return icon.get(); }
   AnnotTextState getState() const { return state; }
 
-  void setOpen(GBool openA);
+  void setOpen(bool openA);
   void setIcon(GooString *new_icon);
 
 private:
 
   void initialize(PDFDoc *docA, Dict *dict);
 
-  GBool open;                       // Open       (Default false)
+  bool open;                       // Open       (Default false)
   std::unique_ptr<GooString> icon;  // Name       (Default Note)
   AnnotTextState state;             // State      (Default Umarked if
                                     //             StateModel Marked
@@ -900,7 +900,7 @@ class AnnotMovie: public Annot {
   AnnotMovie(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotMovie();
 
-  void draw(Gfx *gfx, GBool printing) override;
+  void draw(Gfx *gfx, bool printing) override;
 
   const GooString* getTitle() const { return title.get(); }
   Movie* getMovie() { return movie.get(); }
@@ -960,7 +960,7 @@ public:
   AnnotLink(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotLink();
 
-  void draw(Gfx *gfx, GBool printing) override;
+  void draw(Gfx *gfx, bool printing) override;
 
   // getters
   LinkAction *getAction() const { return action.get(); }
@@ -1001,7 +1001,7 @@ public:
   AnnotFreeText(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotFreeText();
 
-  void draw(Gfx *gfx, GBool printing) override;
+  void draw(Gfx *gfx, bool printing) override;
   Object getAppearanceResDict() override;
   void setContents(GooString *new_content) override;
 
@@ -1064,7 +1064,7 @@ public:
   AnnotLine(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotLine();
 
-  void draw(Gfx *gfx, GBool printing) override;
+  void draw(Gfx *gfx, bool printing) override;
   Object getAppearanceResDict() override;
   void setContents(GooString *new_content) override;
 
@@ -1131,7 +1131,7 @@ public:
   AnnotTextMarkup(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotTextMarkup();
 
-  void draw(Gfx *gfx, GBool printing) override;
+  void draw(Gfx *gfx, bool printing) override;
 
   // typeHighlight, typeUnderline, typeSquiggly or typeStrikeOut
   void setType(AnnotSubtype new_type);
@@ -1181,7 +1181,7 @@ public:
   AnnotGeometry(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotGeometry();
 
-  void draw(Gfx *gfx, GBool printing) override;
+  void draw(Gfx *gfx, bool printing) override;
 
   void setType(AnnotSubtype new_type); // typeSquare or typeCircle
   void setInteriorColor(std::unique_ptr<AnnotColor> &&new_color);
@@ -1217,7 +1217,7 @@ public:
   AnnotPolygon(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotPolygon();
 
-  void draw(Gfx *gfx, GBool printing) override;
+  void draw(Gfx *gfx, bool printing) override;
 
   void setType(AnnotSubtype new_type); // typePolygon or typePolyLine
   void setVertices(AnnotPath *path);
@@ -1292,7 +1292,7 @@ public:
   AnnotInk(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotInk();
 
-  void draw(Gfx *gfx, GBool printing) override;
+  void draw(Gfx *gfx, bool printing) override;
 
   void setInkList(AnnotPath **paths, int n_paths);
 
@@ -1327,7 +1327,7 @@ public:
   AnnotFileAttachment(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotFileAttachment();
 
-  void draw(Gfx *gfx, GBool printing) override;
+  void draw(Gfx *gfx, bool printing) override;
 
   // getters
   Object *getFile() { return &file; }
@@ -1355,7 +1355,7 @@ public:
   AnnotSound(PDFDoc *docA, Object *dictObject, Object *obj);
   ~AnnotSound();
 
-  void draw(Gfx *gfx, GBool printing) override;
+  void draw(Gfx *gfx, bool printing) override;
 
   // getters
   Sound *getSound() { return sound.get(); }
@@ -1390,7 +1390,7 @@ public:
   AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormField *fieldA);
   ~AnnotWidget();
 
-  void draw(Gfx *gfx, GBool printing) override;
+  void draw(Gfx *gfx, bool printing) override;
 
   void generateFieldAppearance (bool *addDingbatsResource);
   void updateAppearanceStream ();
@@ -1459,8 +1459,8 @@ class Annot3D: public Annot {
     ActivationAState aState;      // AIS (Default L)
     ActivationDTrigger dTrigger;  // D   (Default PI)
     ActivationDState dState;      // DIS (Default U)
-    GBool displayToolbar;         // TB  (Default true)
-    GBool displayNavigation;      // NP  (Default false);
+    bool displayToolbar;         // TB  (Default true)
+    bool displayNavigation;      // NP  (Default false);
   };
 public:
 
@@ -1682,7 +1682,7 @@ public:
   int getNumAnnots() const { return annots.size(); }
   Annot *getAnnot(int i) { return annots[i]; }
   void appendAnnot(Annot *annot);
-  GBool removeAnnot(Annot *annot);
+  bool removeAnnot(Annot *annot);
 
 private:
   Annot* createAnnot(Object* dictObject, Object *obj);

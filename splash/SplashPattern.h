@@ -43,17 +43,17 @@ public:
   SplashPattern& operator=(const SplashPattern &) = delete;
 
   // Return the color value for a specific pixel.
-  virtual GBool getColor(int x, int y, SplashColorPtr c) = 0;
+  virtual bool getColor(int x, int y, SplashColorPtr c) = 0;
 
   // Test if x,y-position is inside pattern.
-  virtual GBool testPosition(int x, int y) = 0;
+  virtual bool testPosition(int x, int y) = 0;
 
   // Returns true if this pattern object will return the same color
   // value for all pixels.
-  virtual GBool isStatic() = 0;
+  virtual bool isStatic() = 0;
 
   // Returns true if this pattern colorspace is CMYK.
-  virtual GBool isCMYK() = 0;
+  virtual bool isCMYK() = 0;
 private:
 };
 
@@ -70,13 +70,13 @@ public:
 
   ~SplashSolidColor();
 
-  GBool getColor(int x, int y, SplashColorPtr c) override;
+  bool getColor(int x, int y, SplashColorPtr c) override;
 
-  GBool testPosition(int x, int y) override { return gFalse; }
+  bool testPosition(int x, int y) override { return false; }
 
-  GBool isStatic() override { return gTrue; }
+  bool isStatic() override { return true; }
 
-  GBool isCMYK() override { return gFalse; }
+  bool isCMYK() override { return false; }
 
 private:
 
@@ -90,7 +90,7 @@ private:
 class SplashGouraudColor: public SplashPattern {
 public:
 
-  virtual GBool isParameterized() = 0;
+  virtual bool isParameterized() = 0;
 
   virtual int getNTriangles() = 0;
 

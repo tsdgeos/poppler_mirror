@@ -100,12 +100,12 @@ public:
 	      char *psTitleA,
 	      const std::vector<int> &pages, PSOutMode modeA,
 	      int paperWidthA = -1, int paperHeightA = -1,
-              GBool noCrop = gFalse,
-	      GBool duplexA = gTrue,
+              bool noCrop = false,
+	      bool duplexA = true,
 	      int imgLLXA = 0, int imgLLYA = 0,
 	      int imgURXA = 0, int imgURYA = 0,
-	      GBool forceRasterizeA = gFalse,
-	      GBool manualCtrlA = gFalse,
+	      bool forceRasterizeA = false,
+	      bool manualCtrlA = false,
 	      PSOutCustomCodeCbk customCodeCbkA = nullptr,
 	      void *customCodeCbkDataA = nullptr);
 
@@ -116,12 +116,12 @@ public:
 	      PDFDoc *docA,
 	      const std::vector<int> &pages, PSOutMode modeA,
 	      int paperWidthA = -1, int paperHeightA = -1,
-              GBool noCrop = gFalse,
-	      GBool duplexA = gTrue,
+              bool noCrop = false,
+	      bool duplexA = true,
 	      int imgLLXA = 0, int imgLLYA = 0,
 	      int imgURXA = 0, int imgURYA = 0,
-	      GBool forceRasterizeA = gFalse,
-	      GBool manualCtrlA = gFalse,
+	      bool forceRasterizeA = false,
+	      bool manualCtrlA = false,
 	      PSOutCustomCodeCbk customCodeCbkA = nullptr,
 	      void *customCodeCbkDataA = nullptr);
 
@@ -129,37 +129,37 @@ public:
   virtual ~PSOutputDev();
 
   // Check if file was successfully created.
-  virtual GBool isOk() { return ok; }
+  virtual bool isOk() { return ok; }
 
   //---- get info about output device
 
   // Does this device use upside-down coordinates?
   // (Upside-down means (0,0) is the top left corner of the page.)
-  GBool upsideDown() override { return gFalse; }
+  bool upsideDown() override { return false; }
 
   // Does this device use drawChar() or drawString()?
-  GBool useDrawChar() override { return gFalse; }
+  bool useDrawChar() override { return false; }
 
   // Does this device use tilingPatternFill()?  If this returns false,
   // tiling pattern fills will be reduced to a series of other drawing
   // operations.
-  GBool useTilingPatternFill() override { return gTrue; }
+  bool useTilingPatternFill() override { return true; }
 
   // Does this device use functionShadedFill(), axialShadedFill(), and
   // radialShadedFill()?  If this returns false, these shaded fills
   // will be reduced to a series of other drawing operations.
-  GBool useShadedFills(int type) override
+  bool useShadedFills(int type) override
     { return (type < 4 && level >= psLevel2) || (type == 7 && level >= psLevel3); }
 
   // Does this device use drawForm()?  If this returns false,
   // form-type XObjects will be interpreted (i.e., unrolled).
-  GBool useDrawForm() override { return preloadImagesForms; }
+  bool useDrawForm() override { return preloadImagesForms; }
 
   // Does this device use beginType3Char/endType3Char?  Otherwise,
   // text in Type 3 fonts will be drawn with drawChar/drawString.
-  GBool interpretType3Chars() override { return gFalse; }
+  bool interpretType3Chars() override { return false; }
   
-  GBool needClipToCropBox() override { return mode == psModeEPS; }
+  bool needClipToCropBox() override { return mode == psModeEPS; }
 
   //----- header/trailer (used only if manualCtrl is true)
 
@@ -183,13 +183,13 @@ public:
   // returns false, the page display is aborted.  Typically, an
   // OutputDev will use some alternate means to display the page
   // before returning false.
-  GBool checkPageSlice(Page *page, double hDPI, double vDPI,
-			       int rotate, GBool useMediaBox, GBool crop,
+  bool checkPageSlice(Page *page, double hDPI, double vDPI,
+			       int rotate, bool useMediaBox, bool crop,
 			       int sliceX, int sliceY, int sliceW, int sliceH,
-			       GBool printing,
-			       GBool (*abortCheckCbk)(void *data) = nullptr,
+			       bool printing,
+			       bool (*abortCheckCbk)(void *data) = nullptr,
 			       void *abortCheckCbkData = nullptr,
-			       GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+			       bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
 			       void *annotDisplayDecideCbkData = nullptr) override;
 
   // Start a page.
@@ -237,16 +237,16 @@ public:
   void stroke(GfxState *state) override;
   void fill(GfxState *state) override;
   void eoFill(GfxState *state) override;
-  GBool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
+  bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *cat, Object *str,
 				  const double *pmat, int paintType, int tilingType, Dict *resDict,
 				  const double *mat, const double *bbox,
 				  int x0, int y0, int x1, int y1,
 				  double xStep, double yStep) override;
-  GBool functionShadedFill(GfxState *state,
+  bool functionShadedFill(GfxState *state,
 				   GfxFunctionShading *shading) override;
-  GBool axialShadedFill(GfxState *state, GfxAxialShading *shading, double /*tMin*/, double /*tMax*/) override;
-  GBool radialShadedFill(GfxState *state, GfxRadialShading *shading, double /*sMin*/, double /*sMax*/) override;
-  GBool patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *shading) override;
+  bool axialShadedFill(GfxState *state, GfxAxialShading *shading, double /*tMin*/, double /*tMax*/) override;
+  bool radialShadedFill(GfxState *state, GfxRadialShading *shading, double /*sMin*/, double /*sMax*/) override;
+  bool patchMeshShadedFill(GfxState *state, GfxPatchMeshShading *shading) override;
 
   //----- path clipping
   void clip(GfxState *state) override;
@@ -260,22 +260,22 @@ public:
 
   //----- image drawing
   void drawImageMask(GfxState *state, Object *ref, Stream *str,
-			     int width, int height, GBool invert,
-			     GBool interpolate, GBool inlineImg) override;
+			     int width, int height, bool invert,
+			     bool interpolate, bool inlineImg) override;
   void setSoftMaskFromImageMask(GfxState *state,
 					Object *ref, Stream *str,
-					int width, int height, GBool invert,
-					GBool inlineImg, double *baseMatrix) override;
+					int width, int height, bool invert,
+					bool inlineImg, double *baseMatrix) override;
   void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) override;
   void drawImage(GfxState *state, Object *ref, Stream *str,
 			 int width, int height, GfxImageColorMap *colorMap,
-			 GBool interpolate, int *maskColors, GBool inlineImg) override;
+			 bool interpolate, int *maskColors, bool inlineImg) override;
   void drawMaskedImage(GfxState *state, Object *ref, Stream *str,
 			       int width, int height,
 			       GfxImageColorMap *colorMap,
-			       GBool interpolate,
+			       bool interpolate,
 			       Stream *maskStr, int maskWidth, int maskHeight,
-			       GBool maskInvert, GBool maskInterpolate) override;
+			       bool maskInvert, bool maskInterpolate) override;
 
 #ifdef OPI_SUPPORT
   //----- OPI functions
@@ -309,41 +309,41 @@ public:
   void setOverlayCbk(void (*cbk)(PSOutputDev *psOut, void *data),
 		     void *data)
     { overlayCbk = cbk; overlayCbkData = data; }
-  void setDisplayText(GBool display) { displayText = display; }
+  void setDisplayText(bool display) { displayText = display; }
 
-  void setPSCenter(GBool center) { psCenter = center; }
-  void setRasterAntialias(GBool a) { rasterAntialias = a; }
+  void setPSCenter(bool center) { psCenter = center; }
+  void setRasterAntialias(bool a) { rasterAntialias = a; }
   void setRasterResolution(double r) { rasterResolution = r; }
-  void setRasterMono(GBool b) { rasterMono = b; }
-  void setUncompressPreloadedImages(GBool b) { uncompressPreloadedImages = b; }
+  void setRasterMono(bool b) { rasterMono = b; }
+  void setUncompressPreloadedImages(bool b) { uncompressPreloadedImages = b; }
 
-  GBool getEmbedType1() const { return embedType1; }
-  GBool getEmbedTrueType() const { return embedTrueType; }
-  GBool getEmbedCIDPostScript() const { return embedCIDPostScript; }
-  GBool getEmbedCIDTrueType() const { return embedCIDTrueType; }
-  GBool getFontPassthrough() const { return fontPassthrough; }
-  GBool getOptimizeColorSpace() const { return optimizeColorSpace; }
-  GBool getPassLevel1CustomColor() const { return passLevel1CustomColor; }
-  GBool getEnableLZW() const { return enableLZW; };
-  GBool getEnableFlate() const
+  bool getEmbedType1() const { return embedType1; }
+  bool getEmbedTrueType() const { return embedTrueType; }
+  bool getEmbedCIDPostScript() const { return embedCIDPostScript; }
+  bool getEmbedCIDTrueType() const { return embedCIDTrueType; }
+  bool getFontPassthrough() const { return fontPassthrough; }
+  bool getOptimizeColorSpace() const { return optimizeColorSpace; }
+  bool getPassLevel1CustomColor() const { return passLevel1CustomColor; }
+  bool getEnableLZW() const { return enableLZW; };
+  bool getEnableFlate() const
 #ifdef ENABLE_ZLIB
     { return enableFlate; }
 #else
-    { return gFalse; }
+    { return false; }
 #endif
-  void setEmbedType1(GBool b) { embedType1 = b; }
-  void setEmbedTrueType(GBool b) { embedTrueType = b; }
-  void setEmbedCIDPostScript(GBool b) { embedCIDPostScript = b; }
-  void setEmbedCIDTrueType(GBool b) { embedCIDTrueType = b; }
-  void setFontPassthrough(GBool b) { fontPassthrough = b; }
-  void setOptimizeColorSpace(GBool b) { optimizeColorSpace = b; }
-  void setPassLevel1CustomColor(GBool b) { passLevel1CustomColor = b; }
-  void setPreloadImagesForms(GBool b) { preloadImagesForms = b; }
-  void setGenerateOPI(GBool b) { generateOPI = b; }
-  void setUseASCIIHex(GBool b) { useASCIIHex = b; }
-  void setUseBinary(GBool b) { useBinary = b; }
-  void setEnableLZW(GBool b) { enableLZW = b; }
-  void setEnableFlate(GBool b) { enableFlate = b; }
+  void setEmbedType1(bool b) { embedType1 = b; }
+  void setEmbedTrueType(bool b) { embedTrueType = b; }
+  void setEmbedCIDPostScript(bool b) { embedCIDPostScript = b; }
+  void setEmbedCIDTrueType(bool b) { embedCIDTrueType = b; }
+  void setFontPassthrough(bool b) { fontPassthrough = b; }
+  void setOptimizeColorSpace(bool b) { optimizeColorSpace = b; }
+  void setPassLevel1CustomColor(bool b) { passLevel1CustomColor = b; }
+  void setPreloadImagesForms(bool b) { preloadImagesForms = b; }
+  void setGenerateOPI(bool b) { generateOPI = b; }
+  void setUseASCIIHex(bool b) { useASCIIHex = b; }
+  void setUseBinary(bool b) { useBinary = b; }
+  void setEnableLZW(bool b) { enableLZW = b; }
+  void setEnableFlate(bool b) { enableFlate = b; }
 
 private:
 
@@ -351,8 +351,8 @@ private:
 	    PSFileType fileTypeA, char *psTitleA, PDFDoc *doc,
 	    const std::vector<int> &pages, PSOutMode modeA,
 	    int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
-	    GBool manualCtrlA, int paperWidthA, int paperHeightA,
-            GBool noCropA, GBool duplexA);
+	    bool manualCtrlA, int paperWidthA, int paperHeightA,
+            bool noCropA, bool duplexA);
   void postInit();
   void setupResources(Dict *resDict);
   void setupFonts(Dict *resDict);
@@ -367,51 +367,51 @@ private:
 				 GooString *psName);
   void setupEmbeddedCIDType0Font(GfxFont *font, Ref *id, GooString *psName);
   void setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id, GooString *psName,
-				    GBool needVerticalMetrics);
+				    bool needVerticalMetrics);
   void setupExternalCIDTrueTypeFont(GfxFont *font,
 				    GooString *fileName,
 				    GooString *psName,
-				    GBool needVerticalMetrics);
+				    bool needVerticalMetrics);
   void setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id, GooString *psName);
   void setupType3Font(GfxFont *font, GooString *psName, Dict *parentResDict);
   GooString *makePSFontName(GfxFont *font, const Ref *id);
   void setupImages(Dict *resDict);
-  void setupImage(Ref id, Stream *str, GBool mask);
+  void setupImage(Ref id, Stream *str, bool mask);
   void setupForms(Dict *resDict);
   void setupForm(Ref id, Object *strObj);
   void addProcessColor(double c, double m, double y, double k);
   void addCustomColor(GfxSeparationColorSpace *sepCS);
   void doPath(GfxPath *path);
-  void maskToClippingPath(Stream *maskStr, int maskWidth, int maskHeight, GBool maskInvert);
+  void maskToClippingPath(Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert);
   void doImageL1(Object *ref, GfxImageColorMap *colorMap,
-		 GBool invert, GBool inlineImg,
+		 bool invert, bool inlineImg,
 		 Stream *str, int width, int height, int len,
 		 int *maskColors, Stream *maskStr,
-		 int maskWidth, int maskHeight, GBool maskInvert);
+		 int maskWidth, int maskHeight, bool maskInvert);
   void doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
-		    GBool invert, GBool inlineImg,
+		    bool invert, bool inlineImg,
 		    Stream *str, int width, int height, int len,
 		    int *maskColors, Stream *maskStr,
-		    int maskWidth, int maskHeight, GBool maskInvert);
+		    int maskWidth, int maskHeight, bool maskInvert);
   void doImageL2(Object *ref, GfxImageColorMap *colorMap,
-		 GBool invert, GBool inlineImg,
+		 bool invert, bool inlineImg,
 		 Stream *str, int width, int height, int len,
 		 int *maskColors, Stream *maskStr,
-		 int maskWidth, int maskHeight, GBool maskInvert);
+		 int maskWidth, int maskHeight, bool maskInvert);
   void doImageL3(Object *ref, GfxImageColorMap *colorMap,
-		 GBool invert, GBool inlineImg,
+		 bool invert, bool inlineImg,
 		 Stream *str, int width, int height, int len,
 		 int *maskColors, Stream *maskStr,
-		 int maskWidth, int maskHeight, GBool maskInvert);
+		 int maskWidth, int maskHeight, bool maskInvert);
   void dumpColorSpaceL2(GfxColorSpace *colorSpace,
-			GBool genXform, GBool updateColors,
-			GBool map01);
-  GBool tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str,
+			bool genXform, bool updateColors,
+			bool map01);
+  bool tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str,
 			    const double *pmat, int paintType, int tilingType, Dict *resDict,
 			    const double *mat, const double *bbox,
 			    int x0, int y0, int x1, int y1,
 			    double xStep, double yStep);
-  GBool tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str,
+  bool tilingPatternFillL2(GfxState *state, Catalog *cat, Object *str,
 			    const double *pmat, int paintType, int tilingType, Dict *resDict,
 			    const double *mat, const double *bbox,
 			    int x0, int y0, int x1, int y1,
@@ -423,11 +423,11 @@ private:
   void opiTransform(GfxState *state, double x0, double y0,
 		    double *x1, double *y1);
 #endif
-  void cvtFunction(const Function *func, GBool invertPSFunction = gFalse);
+  void cvtFunction(const Function *func, bool invertPSFunction = false);
   GooString *filterPSName(const GooString *name);
 
   // Write the document-level setup.
-  void writeDocSetup(PDFDoc *doc, Catalog *catalog, const std::vector<int> &pages, GBool duplexA);
+  void writeDocSetup(PDFDoc *doc, Catalog *catalog, const std::vector<int> &pages, bool duplexA);
 
   void writePSChar(char c);
   void writePS(const char *s);
@@ -435,30 +435,30 @@ private:
   void writePSFmt(const char *fmt, ...);
   void writePSString(const GooString *s);
   void writePSName(const char *s);
-  GooString *filterPSLabel(GooString *label, GBool *needParens=nullptr);
+  GooString *filterPSLabel(GooString *label, bool *needParens=nullptr);
   void writePSTextLine(const GooString *s);
 
   PSLevel level;		// PostScript level (1, 2, separation)
   PSOutMode mode;		// PostScript mode (PS, EPS, form)
   int paperWidth;		// width of paper, in pts
   int paperHeight;		// height of paper, in pts
-  GBool paperMatch;		// true if paper size is set to match each page
+  bool paperMatch;		// true if paper size is set to match each page
   int prevWidth;		// width of previous page
                                 // (only psModePSOrigPageSizes output mode)
   int prevHeight;		// height of previous page
                                 // (only psModePSOrigPageSizes output mode)
   int imgLLX, imgLLY,		// imageable area, in pts
       imgURX, imgURY;
-  GBool noCrop;
-  GBool duplex;
+  bool noCrop;
+  bool duplex;
   std::vector<int> pages;
   char *psTitle;
-  GBool postInitDone;		// true if postInit() was called
+  bool postInitDone;		// true if postInit() was called
 
   PSOutputFunc outputFunc;
   void *outputStream;
   PSFileType fileType;		// file / pipe / stdout
-  GBool manualCtrl;
+  bool manualCtrl;
   int seqPage;			// current sequential page number
   void (*underlayCbk)(PSOutputDev *psOut, void *data);
   void *underlayCbkData;
@@ -517,50 +517,50 @@ private:
   PSOutCustomColor		// used custom colors
     *customColors;
 
-  GBool haveTextClip;		// set if text has been drawn with a
+  bool haveTextClip;		// set if text has been drawn with a
 				//   clipping render mode
 
-  GBool inType3Char;		// inside a Type 3 CharProc
-  GBool inUncoloredPattern;     // inside a uncolored pattern (PaintType = 2)
+  bool inType3Char;		// inside a Type 3 CharProc
+  bool inUncoloredPattern;     // inside a uncolored pattern (PaintType = 2)
   GooString *t3String;		// Type 3 content string
   double t3WX, t3WY,		// Type 3 character parameters
          t3LLX, t3LLY, t3URX, t3URY;
-  GBool t3FillColorOnly;	// operators should only use the fill color
-  GBool t3Cacheable;		// cleared if char is not cacheable
-  GBool t3NeedsRestore;		// set if a 'q' operator was issued
-  GBool forceRasterize;		// forces the page to be rasterized into a image before printing
-  GBool displayText;		// displayText
-  GBool psCenter;		// center pages on the paper
-  GBool rasterAntialias;	// antialias on rasterize
-  GBool uncompressPreloadedImages;
+  bool t3FillColorOnly;	// operators should only use the fill color
+  bool t3Cacheable;		// cleared if char is not cacheable
+  bool t3NeedsRestore;		// set if a 'q' operator was issued
+  bool forceRasterize;		// forces the page to be rasterized into a image before printing
+  bool displayText;		// displayText
+  bool psCenter;		// center pages on the paper
+  bool rasterAntialias;	// antialias on rasterize
+  bool uncompressPreloadedImages;
   double rasterResolution;	// PostScript rasterization resolution (dpi)
-  GBool rasterMono;		// true to do PostScript rasterization
+  bool rasterMono;		// true to do PostScript rasterization
 				//   in monochrome (gray); false to do it
 				//   in color (RGB/CMYK)
-  GBool embedType1;		// embed Type 1 fonts?
-  GBool embedTrueType;		// embed TrueType fonts?
-  GBool embedCIDPostScript;	// embed CID PostScript fonts?
-  GBool embedCIDTrueType;	// embed CID TrueType fonts?
-  GBool fontPassthrough;	// pass all fonts through as-is?
-  GBool optimizeColorSpace;	// false to keep gray RGB images in their original color space
+  bool embedType1;		// embed Type 1 fonts?
+  bool embedTrueType;		// embed TrueType fonts?
+  bool embedCIDPostScript;	// embed CID PostScript fonts?
+  bool embedCIDTrueType;	// embed CID TrueType fonts?
+  bool fontPassthrough;	// pass all fonts through as-is?
+  bool optimizeColorSpace;	// false to keep gray RGB images in their original color space
 				// true to optimize gray images to DeviceGray color space
-  GBool passLevel1CustomColor;	// false to convert all custom colors to CMYK
+  bool passLevel1CustomColor;	// false to convert all custom colors to CMYK
 				// true to pass custom colors
 				// has effect only when doing a level1sep
-  GBool preloadImagesForms;	// preload PostScript images and forms into
+  bool preloadImagesForms;	// preload PostScript images and forms into
 				//   memory
-  GBool generateOPI;		// generate PostScript OPI comments?
-  GBool useASCIIHex;		// use ASCIIHex instead of ASCII85?
-  GBool useBinary;		// use binary instead of hex
-  GBool enableLZW;		// enable LZW compression
-  GBool enableFlate;		// enable Flate compression
+  bool generateOPI;		// generate PostScript OPI comments?
+  bool useASCIIHex;		// use ASCIIHex instead of ASCII85?
+  bool useBinary;		// use binary instead of hex
+  bool enableLZW;		// enable LZW compression
+  bool enableFlate;		// enable Flate compression
 
 #ifdef OPI_SUPPORT
   int opi13Nest;		// nesting level of OPI 1.3 objects
   int opi20Nest;		// nesting level of OPI 2.0 objects
 #endif
 
-  GBool ok;			// set up ok?
+  bool ok;			// set up ok?
 
   friend class WinPDFPrinter;
 };

@@ -71,8 +71,8 @@ void removeStyleSuffix(std::string& familyName) {
 }
 
 #define xoutRound(x) ((int)(x + 0.5))
-extern GBool xml;
-extern GBool fontFullName;
+extern bool xml;
+extern bool fontFullName;
 
 HtmlFontColor::HtmlFontColor(GfxRGB rgb){
   r=static_cast<int>(rgb.r/65535.0*255.0);
@@ -117,12 +117,12 @@ HtmlFont::HtmlFont(GfxFont *font, int _size, GfxRGB rgb){
   lineSize = -1;
 
   size=(_size-1);
-  italic = gFalse;
-  bold = gFalse;
-  rotOrSkewed = gFalse;
+  italic = false;
+  bold = false;
+  rotOrSkewed = false;
 
-  if (font->isBold() || font->getWeight() >= GfxFont::W700) bold=gTrue;
-  if (font->isItalic()) italic=gTrue;
+  if (font->isBold() || font->getWeight() >= GfxFont::W700) bold=true;
+  if (font->isItalic()) italic=true;
 
   if (const GooString *fontname = font->getName()){
     FontName = new GooString(fontname);
@@ -131,13 +131,13 @@ HtmlFont::HtmlFont(GfxFont *font, int _size, GfxRGB rgb){
     fontnameLower.lowerCase();
 
     if (!bold && strstr(fontnameLower.getCString(),"bold")) {
-		bold=gTrue;
+		bold=true;
     }
 
     if (!italic &&
 	(strstr(fontnameLower.getCString(),"italic")||
 	 strstr(fontnameLower.getCString(),"oblique"))) {
-		italic=gTrue;
+		italic=true;
     }
 
     familyName = fontname->getCString();
@@ -184,7 +184,7 @@ HtmlFont& HtmlFont::operator=(const HtmlFont& x){
   This function is used to compare font uniquely for insertion into
   the list of all encountered fonts
 */
-GBool HtmlFont::isEqual(const HtmlFont& x) const{
+bool HtmlFont::isEqual(const HtmlFont& x) const{
   return (size==x.size) &&
 	  (lineSize==x.lineSize) &&
 	  (FontName->cmp(x.FontName) == 0) && (bold==x.bold) && (italic==x.italic) &&
@@ -196,7 +196,7 @@ GBool HtmlFont::isEqual(const HtmlFont& x) const{
   This one is used to decide whether two pieces of text can be joined together
   and therefore we don't care about bold/italics properties
 */
-GBool HtmlFont::isEqualIgnoreBold(const HtmlFont& x) const{
+bool HtmlFont::isEqualIgnoreBold(const HtmlFont& x) const{
   return ((size==x.size) &&
 	  (familyName == x.familyName) &&
 	  (color.isEqual(x.getColor())));

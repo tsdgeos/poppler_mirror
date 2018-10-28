@@ -254,7 +254,7 @@ poppler_form_field_button_set_state (PopplerFormField *field,
 {
   g_return_if_fail (field->widget->getType () == formButton);
 
-  static_cast<FormWidgetButton*>(field->widget)->setState ((GBool)state);
+  static_cast<FormWidgetButton*>(field->widget)->setState ((bool)state);
 }
 
 /**

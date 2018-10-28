@@ -155,17 +155,17 @@ public:
   int cmpN(const char *sA, int n) const;
 
   // Return true if string ends with suffix
-  GBool endsWith(const char *suffix) const;
+  bool endsWith(const char *suffix) const;
 
-  GBool hasUnicodeMarker(void) const;
+  bool hasUnicodeMarker(void) const;
   void prependUnicodeMarker();
-  GBool hasJustUnicodeMarker(void) const { return length == 2 && hasUnicodeMarker(); }
+  bool hasJustUnicodeMarker(void) const { return length == 2 && hasUnicodeMarker(); }
 
   // Sanitizes the string so that it does
   // not contain any ( ) < > [ ] { } / %
   // The postscript mode also has some more strict checks
   // The caller owns the return value
-  GooString *sanitizedName(GBool psmode) const;
+  GooString *sanitizedName(bool psmode) const;
 
   // Conversion from and to std::string
   explicit GooString(const std::string& str) : GooString(str.data(), str.size()) {}
@@ -189,15 +189,15 @@ private:
 
   void resize(int newLength);
   static void formatInt(long long x, char *buf, int bufSize,
-			GBool zeroFill, int width, int base,
-			const char **p, int *len, GBool upperCase = gFalse);
+			bool zeroFill, int width, int base,
+			const char **p, int *len, bool upperCase = false);
   static void formatUInt(unsigned long long x, char *buf, int bufSize,
-			 GBool zeroFill, int width, int base,
-			 const char **p, int *len, GBool upperCase = gFalse);
+			 bool zeroFill, int width, int base,
+			 const char **p, int *len, bool upperCase = false);
   static void formatDouble(double x, char *buf, int bufSize, int prec,
-			   GBool trim, const char **p, int *len);
+			   bool trim, const char **p, int *len);
   static void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec,
-				     GBool trim, const char **p, int *len);
+				     bool trim, const char **p, int *len);
 };
 
 #endif

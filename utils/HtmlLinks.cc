@@ -28,7 +28,7 @@
 
 #include "HtmlLinks.h"
 
-extern GBool xml;
+extern bool xml;
 
 HtmlLink::HtmlLink(const HtmlLink& x){
   Xmin=x.Xmin;
@@ -61,13 +61,13 @@ HtmlLink::~HtmlLink(){
  delete dest;
 }
 
-GBool HtmlLink::isEqualDest(const HtmlLink& x) const{
+bool HtmlLink::isEqualDest(const HtmlLink& x) const{
   return (!strcmp(dest->getCString(), x.dest->getCString()));
 }
 
-GBool HtmlLink::inLink(double xmin,double ymin,double xmax,double ymax) const {
+bool HtmlLink::inLink(double xmin,double ymin,double xmax,double ymax) const {
   double y=(ymin+ymax)/2;
-  if (y>Ymax) return gFalse;
+  if (y>Ymax) return false;
   return (y>Ymin)&&(xmin<Xmax)&&(xmax>Xmin);
  }
   
@@ -127,7 +127,7 @@ HtmlLinks::~HtmlLinks(){
   accu=nullptr; 
 }
 
-GBool HtmlLinks::inLink(double xmin,double ymin,double xmax,double ymax,int& p)const {
+bool HtmlLinks::inLink(double xmin,double ymin,double xmax,double ymax,int& p)const {
   
   for(std::vector<HtmlLink>::iterator i=accu->begin();i!=accu->end();++i){
     if (i->inLink(xmin,ymin,xmax,ymax)) {

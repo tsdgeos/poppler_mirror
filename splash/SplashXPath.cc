@@ -40,7 +40,7 @@ struct SplashXPathPoint {
 
 struct SplashXPathAdjust {
   int firstPt, lastPt;		// range of points
-  GBool vert;			// vertical or horizontal hint
+  bool vert;			// vertical or horizontal hint
   SplashCoord x0a, x0b,		// hint boundaries
               xma, xmb,
               x1a, x1b;
@@ -65,8 +65,8 @@ inline void SplashXPath::transform(SplashCoord *matrix,
 //------------------------------------------------------------------------
 
 SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
-			 SplashCoord flatness, GBool closeSubpaths,
-			 GBool adjustLines, int linePosI) {
+			 SplashCoord flatness, bool closeSubpaths,
+			 bool adjustLines, int linePosI) {
   SplashPathHint *hint;
   SplashXPathPoint *pts;
   SplashXPathAdjust *adjusts, *adjust;
@@ -96,11 +96,11 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
       x2 = pts[hint->ctrl1    ].x;    y2 = pts[hint->ctrl1    ].y;
       x3 = pts[hint->ctrl1 + 1].x;    y3 = pts[hint->ctrl1 + 1].y;
       if (x0 == x1 && x2 == x3) {
-	adjusts[i].vert = gTrue;
+	adjusts[i].vert = true;
 	adj0 = x0;
 	adj1 = x2;
       } else if (y0 == y1 && y2 == y3) {
-	adjusts[i].vert = gFalse;
+	adjusts[i].vert = false;
 	adj0 = y0;
 	adj1 = y2;
       } else {
@@ -282,7 +282,7 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0,
 			   SplashCoord x2, SplashCoord y2,
 			   SplashCoord x3, SplashCoord y3,
 			   SplashCoord flatness,
-			   GBool first, GBool last, GBool end0, GBool end1) {
+			   bool first, bool last, bool end0, bool end1) {
   SplashCoord *cx = new SplashCoord[(splashMaxCurveSplits + 1) * 3];
   SplashCoord *cy = new SplashCoord[(splashMaxCurveSplits + 1) * 3];
   int *cNext = new int[splashMaxCurveSplits + 1];

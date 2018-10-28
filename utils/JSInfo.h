@@ -42,14 +42,14 @@ public:
   void scanJS(int nPages, FILE *fout, UnicodeMap *uMap);
 
   // return true if PDF contains JavaScript
-  GBool containsJS();
+  bool containsJS();
 
 private:
 
   PDFDoc *doc;
   int currentPage;
-  GBool hasJS;
-  GBool print;
+  bool hasJS;
+  bool print;
   FILE *file;
   UnicodeMap *uniMap;
 

@@ -46,11 +46,11 @@ class GooString;
 class GDirEntry {
 public:
 
-  GDirEntry(const char *dirPath, const char *nameA, GBool doStat);
+  GDirEntry(const char *dirPath, const char *nameA, bool doStat);
   ~GDirEntry();
   const GooString *getName() const { return name; }
   const GooString *getFullPath() const { return fullPath; }
-  GBool isDir() const { return dir; }
+  bool isDir() const { return dir; }
 
 private:
   GDirEntry(const GDirEntry &other);
@@ -58,13 +58,13 @@ private:
 
   GooString *name;		// dir/file name
   GooString *fullPath;
-  GBool dir;			// is it a directory?
+  bool dir;			// is it a directory?
 };
 
 class GDir {
 public:
 
-  GDir(const char *name, GBool doStatA = gTrue);
+  GDir(const char *name, bool doStatA = true);
   ~GDir();
   GDirEntry *getNextEntry();
   void rewind();
@@ -74,7 +74,7 @@ private:
   GDir& operator=(const GDir &other);
 
   GooString *path;		// directory path
-  GBool doStat;			// call stat() for each entry?
+  bool doStat;			// call stat() for each entry?
 #if defined(_WIN32)
   WIN32_FIND_DATAA ffd;
   HANDLE hnd;
@@ -83,7 +83,7 @@ private:
 #else
   DIR *dir;			// the DIR structure from opendir()
 #ifdef VMS
-  GBool needParent;		// need to return an entry for [-]
+  bool needParent;		// need to return an entry for [-]
 #endif
 #endif
 };

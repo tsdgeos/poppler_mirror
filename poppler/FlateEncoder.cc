@@ -23,7 +23,7 @@ FlateEncoder::FlateEncoder(Stream *strA):
   int zlib_status;
 
   outBufPtr = outBufEnd = outBuf;
-  inBufEof = outBufEof = gFalse;
+  inBufEof = outBufEof = false;
 
   zlib_stream.zalloc = Z_NULL;
   zlib_stream.zfree = Z_NULL;
@@ -32,7 +32,7 @@ FlateEncoder::FlateEncoder(Stream *strA):
   zlib_status = deflateInit(&zlib_stream, Z_DEFAULT_COMPRESSION);
 
   if (zlib_status != Z_OK) {
-    inBufEof = outBufEof = gTrue;
+    inBufEof = outBufEof = true;
     error(errInternal, -1, "Internal: deflateInit() failed in FlateEncoder::FlateEncoder()");
   }
 
@@ -53,14 +53,14 @@ void FlateEncoder::reset() {
   str->reset();
 
   outBufPtr = outBufEnd = outBuf;
-  inBufEof = outBufEof = gFalse;
+  inBufEof = outBufEof = false;
 
   deflateEnd(&zlib_stream);
 
   zlib_status = deflateInit(&zlib_stream, Z_DEFAULT_COMPRESSION);
 
   if (zlib_status != Z_OK) {
-    inBufEof = outBufEof = gTrue;
+    inBufEof = outBufEof = true;
     error(errInternal, -1, "Internal: deflateInit() failed in FlateEncoder::reset()");
   }
 
@@ -68,7 +68,7 @@ void FlateEncoder::reset() {
   zlib_stream.avail_out = 1; /* anything but 0 to trigger a read */
 }
 
-GBool FlateEncoder::fillBuf() {
+bool FlateEncoder::fillBuf() {
   int n;
   unsigned int starting_avail_out;
   int zlib_status;
@@ -76,7 +76,7 @@ GBool FlateEncoder::fillBuf() {
   /* If the output is done, don't try to read more. */
 
   if (outBufEof) {
-    return gFalse;
+    return false;
   }
 
   /* The output buffer should be empty. */
@@ -108,7 +108,7 @@ GBool FlateEncoder::fillBuf() {
       n = (inBufEof? 0: str->doGetChars(inBufSize, inBuf));
 
       if (n == 0) {
-	inBufEof = gTrue;
+	inBufEof = true;
       }
 
       zlib_stream.next_in = inBuf;
@@ -126,9 +126,9 @@ GBool FlateEncoder::fillBuf() {
     if (zlib_status == Z_STREAM_ERROR ||
         zlib_stream.avail_out > starting_avail_out) {
       /* Unrecoverable error */
-      inBufEof = outBufEof = gTrue;
+      inBufEof = outBufEof = true;
       error(errInternal, -1, "Internal: deflate() failed in FlateEncoder::fillBuf()");
-      return gFalse;
+      return false;
     }
 
   } while (zlib_stream.avail_out == outBufSize && !inBufEof);
@@ -136,7 +136,7 @@ GBool FlateEncoder::fillBuf() {
   outBufEnd = &outBuf[ outBufSize ] - zlib_stream.avail_out;
 
   if (inBufEof && zlib_stream.avail_out != 0) {
-    outBufEof = gTrue;
+    outBufEof = true;
   }
 
   return outBufPtr < outBufEnd;

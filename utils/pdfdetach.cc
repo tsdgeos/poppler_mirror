@@ -44,15 +44,15 @@
 #include "Error.h"
 #include "Win32Console.h"
 
-static GBool doList = gFalse;
+static bool doList = false;
 static int saveNum = 0;
-static GBool saveAll = gFalse;
+static bool saveAll = false;
 static char savePath[1024] = "";
 static char textEncName[128] = "";
 static char ownerPassword[33] = "\001";
 static char userPassword[33] = "\001";
-static GBool printVersion = gFalse;
-static GBool printHelp = gFalse;
+static bool printVersion = false;
+static bool printHelp = false;
 
 static ArgDesc argDesc[] = {
   {"-list",   argFlag,     &doList,        0,
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
   char uBuf[8];
   char path[1024];
   char *p;
-  GBool ok;
+  bool ok;
   int exitCode;
   GooList *embeddedFiles = nullptr;
   int nFiles, nPages, n, i, j;
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
   Annot *annot;
   const GooString *s1;
   Unicode u;
-  GBool isUnicode;
+  bool isUnicode;
 
   Win32Console win32Console(&argc, &argv);
   exitCode = 99;
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
   if ((doList ? 1 : 0) +
       ((saveNum != 0) ? 1 : 0) +
       (saveAll ? 1 : 0) != 1) {
-    ok = gFalse;
+    ok = false;
   }
   if (!ok || argc != 2 || printVersion || printHelp) {
     fprintf(stderr, "pdfdetach version %s\n", PACKAGE_VERSION);
@@ -192,10 +192,10 @@ int main(int argc, char *argv[]) {
       printf("%d: ", i+1);
       s1 = fileSpec->getFileName();
       if ((s1->getChar(0) & 0xff) == 0xfe && (s1->getChar(1) & 0xff) == 0xff) {
-        isUnicode = gTrue;
+        isUnicode = true;
         j = 2;
       } else {
-        isUnicode = gFalse;
+        isUnicode = false;
         j = 0;
       }
       while (j < fileSpec->getFileName()->getLength()) {
@@ -229,10 +229,10 @@ int main(int argc, char *argv[]) {
       }
       s1 = fileSpec->getFileName();
       if ((s1->getChar(0) & 0xff) == 0xfe && (s1->getChar(1) & 0xff) == 0xff) {
-        isUnicode = gTrue;
+        isUnicode = true;
         j = 2;
       } else {
-        isUnicode = gFalse;
+        isUnicode = false;
         j = 0;
       }
       while (j < fileSpec->getFileName()->getLength()) {
@@ -272,10 +272,10 @@ int main(int argc, char *argv[]) {
       p = path;
       s1 = fileSpec->getFileName();
       if ((s1->getChar(0) & 0xff) == 0xfe && (s1->getChar(1) & 0xff) == 0xff) {
-        isUnicode = gTrue;
+        isUnicode = true;
         j = 2;
       } else {
-        isUnicode = gFalse;
+        isUnicode = false;
         j = 0;
       }
       while (j < fileSpec->getFileName()->getLength()) {

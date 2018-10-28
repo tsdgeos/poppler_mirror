@@ -55,7 +55,7 @@ public:
 
   // Returns true if this an OpenType font containing CFF data, false
   // if it's a TrueType font (or OpenType font with TrueType data).
-  GBool isOpenTypeCFF() const { return openTypeCFF; }
+  bool isOpenTypeCFF() const { return openTypeCFF; }
 
   // Return the number of cmaps defined by this font.
   int getNumCmaps() const;
@@ -118,7 +118,7 @@ public:
   // otherwise it will be left as binary data.  If <psName> is
   // non-NULL, it will be used as the PostScript font name.  (Only
   // useful for OpenType CFF fonts.)
-  void convertToType1(const char *psName, const char **newEncoding, GBool ascii,
+  void convertToType1(const char *psName, const char **newEncoding, bool ascii,
 		      FoFiOutputFunc outputFunc, void *outputStream) const;
 
   // Convert to a Type 2 CIDFont, suitable for embedding in a
@@ -127,7 +127,7 @@ public:
   // font).  The <cidMap> array maps CIDs to GIDs; it has <nCIDs>
   // entries.  (Not useful for OpenType CFF fonts.)
   void convertToCIDType2(const char *psName, int *cidMap, int nCIDs,
-			 GBool needVerticalMetrics,
+			 bool needVerticalMetrics,
 			 FoFiOutputFunc outputFunc, void *outputStream) const;
 
   // Convert to a Type 0 CIDFont, suitable for embedding in a
@@ -142,7 +142,7 @@ public:
   // table in the font).  The <cidMap> array maps CIDs to GIDs; it has
   // <nCIDs> entries.  (Not useful for OpenType CFF fonts.)
   void convertToType0(const char *psName, int *cidMap, int nCIDs,
-		      GBool needVerticalMetrics,
+		      bool needVerticalMetrics,
 		      int *maxValidGlyph,
 		      FoFiOutputFunc outputFunc, void *outputStream) const;
 
@@ -155,7 +155,7 @@ public:
   // Returns a pointer to the CFF font embedded in this OpenType font.
   // If successful, sets *<start> and *<length>, and returns true.
   // Otherwise returns false.  (Only useful for OpenType CFF fonts).
-  GBool getCFFBlock(char **start, int *length) const;
+  bool getCFFBlock(char **start, int *length) const;
 
   // setup vert/vrt2 GSUB for default lang
   int setupGSUB(const char *scriptName);
@@ -165,7 +165,7 @@ public:
 
 private:
 
-  FoFiTrueType(const char *fileA, int lenA, GBool freeFileDataA, int faceIndexA);
+  FoFiTrueType(const char *fileA, int lenA, bool freeFileDataA, int faceIndexA);
   void cvtEncoding(char **encoding,
 		   FoFiOutputFunc outputFunc,
 		   void *outputStream) const;
@@ -175,7 +175,7 @@ private:
 		      void *outputStream) const;
   void cvtSfnts(FoFiOutputFunc outputFunc,
 		void *outputStream, GooString *name,
-		GBool needVerticalMetrics,
+		bool needVerticalMetrics,
                 int *maxUsedGlyph) const;
   void dumpString(const Guchar *s, int length,
 		  FoFiOutputFunc outputFunc,
@@ -198,9 +198,9 @@ private:
   int locaFmt;
   int bbox[4];
   std::unordered_map<std::string,int> nameToGID;
-  GBool openTypeCFF;
+  bool openTypeCFF;
 
-  GBool parsedOk;
+  bool parsedOk;
   int faceIndex;
   Guint gsubFeatureTable;
   Guint gsubLookupList;

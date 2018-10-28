@@ -152,13 +152,13 @@ public:
   Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
       double hDPI, double vDPI, const PDFRectangle *box,
       const PDFRectangle *cropBox, int rotate,
-      GBool (*abortCheckCbkA)(void *data) = nullptr,
+      bool (*abortCheckCbkA)(void *data) = nullptr,
       void *abortCheckCbkDataA = nullptr, XRef *xrefA = nullptr);
 
   // Constructor for a sub-page object.
   Gfx(PDFDoc *docA, OutputDev *outA, Dict *resDict,
       const PDFRectangle *box, const PDFRectangle *cropBox,
-      GBool (*abortCheckCbkA)(void *data) = nullptr,
+      bool (*abortCheckCbkA)(void *data) = nullptr,
       void *abortCheckCbkDataA = nullptr, Gfx *gfxA = nullptr);
 #ifdef USE_CMS
   void initDisplayProfile();
@@ -171,7 +171,7 @@ public:
   XRef *getXRef() { return xref; }
 
   // Interpret a stream or array of streams.
-  void display(Object *obj, GBool topLevel = gTrue);
+  void display(Object *obj, bool topLevel = true);
 
   // Display an annotation, given its appearance (a Form XObject),
   // border style, and bounding box (in default user space).
@@ -193,13 +193,13 @@ public:
   // Get the current graphics state object.
   GfxState *getState() { return state; }
 
-  GBool checkTransparencyGroup(Dict *resDict);
+  bool checkTransparencyGroup(Dict *resDict);
 
   void drawForm(Object *str, Dict *resDict, const double *matrix, const double *bbox,
-	       GBool transpGroup = gFalse, GBool softMask = gFalse,
+	       bool transpGroup = false, bool softMask = false,
 	       GfxColorSpace *blendingColorSpace = nullptr,
-	       GBool isolated = gFalse, GBool knockout = gFalse,
-	       GBool alpha = gFalse, Function *transferFunc = nullptr,
+	       bool isolated = false, bool knockout = false,
+	       bool alpha = false, Function *transferFunc = nullptr,
 	       GfxColor *backdropColor = nullptr);
 
   void pushResources(Dict *resDict);
@@ -211,23 +211,23 @@ private:
   XRef *xref;			// the xref table for this PDF file
   Catalog *catalog;		// the Catalog for this PDF file  
   OutputDev *out;		// output device
-  GBool subPage;		// is this a sub-page object?
-  GBool printCommands;		// print the drawing commands (for debugging)
-  GBool profileCommands;	// profile the drawing commands (for debugging)
-  GBool commandAborted;         // did the previous command abort the drawing?
+  bool subPage;		// is this a sub-page object?
+  bool printCommands;		// print the drawing commands (for debugging)
+  bool profileCommands;	// profile the drawing commands (for debugging)
+  bool commandAborted;         // did the previous command abort the drawing?
   GfxResources *res;		// resource stack
   int updateLevel;
 
   GfxState *state;		// current graphics state
   int stackHeight;		// the height of the current graphics stack
   std::vector<int> stateGuards;   // a stack of state limits; to guard against unmatched pops
-  GBool fontChanged;		// set if font or text matrix has changed
+  bool fontChanged;		// set if font or text matrix has changed
   GfxClipType clip;		// do a clip?
   int ignoreUndef;		// current BX/EX nesting level
   double baseMatrix[6];		// default matrix for most recent
 				//   page/form/pattern
   int formDepth;
-  GBool ocState;		// true if drawing is enabled, false if
+  bool ocState;		// true if drawing is enabled, false if
 				//   disabled
 
   MarkedContentStack *mcStack;	// current BMC/EMC stack
@@ -237,16 +237,16 @@ private:
   std::set<int> formsDrawing;	// the forms/patterns that are being drawn
   std::set<int> charProcDrawing;	// the charProc that are being drawn
 
-  GBool				// callback to check for an abort
+  bool				// callback to check for an abort
     (*abortCheckCbk)(void *data);
   void *abortCheckCbkData;
 
   static Operator opTab[];	// table of operators
 
-  void go(GBool topLevel);
+  void go(bool topLevel);
   void execOp(Object *cmd, Object args[], int numArgs);
   Operator *findOp(const char *name);
-  GBool checkArg(Object *arg, TchkType type);
+  bool checkArg(Object *arg, TchkType type);
   Goffset getPos();
 
   int bottomGuard();
@@ -262,9 +262,9 @@ private:
   void opSetMiterLimit(Object args[], int numArgs);
   void opSetLineWidth(Object args[], int numArgs);
   void opSetExtGState(Object args[], int numArgs);
-  void doSoftMask(Object *str, GBool alpha,
+  void doSoftMask(Object *str, bool alpha,
 		  GfxColorSpace *blendingColorSpace,
-		  GBool isolated, GBool knockout,
+		  bool isolated, bool knockout,
 		  Function *transferFunc, GfxColor *backdropColor);
   void opSetRenderingIntent(Object args[], int numArgs);
 
@@ -301,15 +301,15 @@ private:
   void opCloseFillStroke(Object args[], int numArgs);
   void opEOFillStroke(Object args[], int numArgs);
   void opCloseEOFillStroke(Object args[], int numArgs);
-  void doPatternFill(GBool eoFill);
+  void doPatternFill(bool eoFill);
   void doPatternStroke();
   void doPatternText();
   void doPatternImageMask(Object *ref, Stream *str, int width, int height,
-			  GBool invert, GBool inlineImg);
+			  bool invert, bool inlineImg);
   void doTilingPatternFill(GfxTilingPattern *tPat,
-			   GBool stroke, GBool eoFill, GBool text);
+			   bool stroke, bool eoFill, bool text);
   void doShadingPatternFill(GfxShadingPattern *sPat,
-			    GBool stroke, GBool eoFill, GBool text);
+			    bool stroke, bool eoFill, bool text);
   void opShFill(Object args[], int numArgs);
   void doFunctionShFill(GfxFunctionShading *shading);
   void doFunctionShFill1(GfxFunctionShading *shading,
@@ -364,7 +364,7 @@ private:
 
   // XObject operators
   void opXObject(Object args[], int numArgs);
-  void doImage(Object *ref, Stream *str, GBool inlineImg);
+  void doImage(Object *ref, Stream *str, bool inlineImg);
   void doForm(Object *str);
 
   // in-line image operators
@@ -387,7 +387,7 @@ private:
   void opMarkPoint(Object args[], int numArgs);
   GfxState *saveStateStack();
   void restoreStateStack(GfxState *oldState);
-  GBool contentIsHidden();
+  bool contentIsHidden();
   void pushMarkedContent();
   void popMarkedContent();
 };

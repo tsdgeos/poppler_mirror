@@ -28,18 +28,6 @@
 #include "poppler-config.h"
 
 /*
- * These have stupid names to avoid conflicts with some (but not all)
- * C++ compilers which define them.
- */
-typedef bool GBool;
-#define gTrue true
-#define gFalse false
-
-#ifdef _MSC_VER
-#pragma warning(disable: 4800) /* 'type' : forcing value to bool 'true' or 'false' (performance warning) */
-#endif
-
-/*
  * These have stupid names to avoid conflicts with <sys/types.h>,
  * which on various systems defines some random subset of these.
  */

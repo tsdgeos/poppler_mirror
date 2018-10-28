@@ -59,11 +59,11 @@ static const char *fontTypeNames[] = {
 
 static int firstPage = 1;
 static int lastPage = 0;
-static GBool showSubst = gFalse;
+static bool showSubst = false;
 static char ownerPassword[33] = "\001";
 static char userPassword[33] = "\001";
-static GBool printVersion = gFalse;
-static GBool printHelp = gFalse;
+static bool printVersion = false;
+static bool printHelp = false;
 
 static const ArgDesc argDesc[] = {
   {"-f",      argInt,      &firstPage,     0,
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
   PDFDoc *doc;
   GooString *fileName;
   GooString *ownerPW, *userPW;
-  GBool ok;
+  bool ok;
   int exitCode;
 
   Win32Console win32Console(&argc, &argv);

@@ -76,21 +76,21 @@
 #include "pdftocairo-win32.h"
 
 
-static GBool png = gFalse;
-static GBool jpeg = gFalse;
-static GBool ps = gFalse;
-static GBool eps = gFalse;
-static GBool pdf = gFalse;
-static GBool printToWin32 = gFalse;
-static GBool printdlg = gFalse;
-static GBool svg = gFalse;
-static GBool tiff = gFalse;
+static bool png = false;
+static bool jpeg = false;
+static bool ps = false;
+static bool eps = false;
+static bool pdf = false;
+static bool printToWin32 = false;
+static bool printdlg = false;
+static bool svg = false;
+static bool tiff = false;
 
 static int firstPage = 1;
 static int lastPage = 0;
-static GBool printOnlyOdd = gFalse;
-static GBool printOnlyEven = gFalse;
-static GBool singleFile = gFalse;
+static bool printOnlyOdd = false;
+static bool printOnlyEven = false;
+static bool singleFile = false;
 static double resolution = 0.0;
 static double x_resolution = 150.0;
 static double y_resolution = 150.0;
@@ -102,31 +102,31 @@ static int crop_y = 0;
 static int crop_w = 0;
 static int crop_h = 0;
 static int sz = 0;
-static GBool useCropBox = gFalse;
-static GBool mono = gFalse;
-static GBool gray = gFalse;
-static GBool transp = gFalse;
+static bool useCropBox = false;
+static bool mono = false;
+static bool gray = false;
+static bool transp = false;
 static GooString antialias;
 static GooString icc;
 
-static GBool level2 = gFalse;
-static GBool level3 = gFalse;
-static GBool origPageSizes = gFalse;
+static bool level2 = false;
+static bool level3 = false;
+static bool origPageSizes = false;
 static char paperSize[15] = "";
 static int paperWidth = -1;
 static int paperHeight = -1;
-static GBool noCrop = gFalse;
-static GBool expand = gFalse;
-static GBool noShrink = gFalse;
-static GBool noCenter = gFalse;
-static GBool duplex = gFalse;
+static bool noCrop = false;
+static bool expand = false;
+static bool noShrink = false;
+static bool noCenter = false;
+static bool duplex = false;
 static char tiffCompressionStr[16] = "";
 
 static char ownerPassword[33] = "";
 static char userPassword[33] = "";
-static GBool quiet = gFalse;
-static GBool printVersion = gFalse;
-static GBool printHelp = gFalse;
+static bool quiet = false;
+static bool printVersion = false;
+static bool printHelp = false;
 
 static GooString jpegOpt;
 static int jpegQuality = -1;
@@ -136,7 +136,7 @@ static bool jpegOptimize = false;
 static GooString printer;
 static GooString printOpt;
 #ifdef CAIRO_HAS_WIN32_SURFACE
-static GBool setupdlg = gFalse;
+static bool setupdlg = false;
 #endif
 
 static const ArgDesc argDesc[] = {
@@ -278,9 +278,9 @@ static const ArgDesc argDesc[] = {
 
 
 static  cairo_surface_t *surface;
-static  GBool printing;
+static  bool printing;
 static  FILE *output_file;
-static GBool usePDFPageSize;
+static bool usePDFPageSize;
 static cairo_antialias_t antialiasEnum = CAIRO_ANTIALIAS_DEFAULT;
 
 #ifdef USE_CMS
@@ -307,13 +307,13 @@ static const AntiliasOption antialiasOptions[] =
   { nullptr,       CAIRO_ANTIALIAS_DEFAULT },
 };
 
-static GBool parseAntialiasOption()
+static bool parseAntialiasOption()
 {
   const AntiliasOption *option = antialiasOptions;
   while (option->name) {
     if (antialias.cmp(option->name) == 0) {
       antialiasEnum = option->value;
-      return gTrue;
+      return true;
     }
     option++;
   }
@@ -325,10 +325,10 @@ static GBool parseAntialiasOption()
     fprintf(stderr, "  %s\n", option->name);
     option++;
   }
-  return gFalse;
+  return false;
 }
 
-static GBool parseJpegOptions()
+static bool parseJpegOptions()
 {
   //jpegOpt format is: <opt1>=<val1>,<opt2>=<val2>,...
   const char *nextOpt = jpegOpt.getCString();
@@ -347,7 +347,7 @@ static GBool parseJpegOptions()
     const char *equal = strchr(opt.getCString(), '=');
     if (!equal) {
       fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.getCString());
-      return gFalse;
+      return false;
     }
     int iequal = equal - opt.getCString();
     GooString value(&opt, iequal + 1, opt.getLength() - iequal - 1);
@@ -357,35 +357,35 @@ static GBool parseJpegOptions()
     if (opt.cmp("quality") == 0) {
       if (!isInt(value.getCString())) {
 	fprintf(stderr, "Invalid jpeg quality\n");
-	return gFalse;
+	return false;
       }
       jpegQuality = atoi(value.getCString());
       if (jpegQuality < 0 || jpegQuality > 100) {
 	fprintf(stderr, "jpeg quality must be between 0 and 100\n");
-	return gFalse;
+	return false;
       }
     } else if (opt.cmp("progressive") == 0) {
-      jpegProgressive = gFalse;
+      jpegProgressive = false;
       if (value.cmp("y") == 0) {
-	jpegProgressive = gTrue;
+	jpegProgressive = true;
       } else if (value.cmp("n") != 0) {
 	fprintf(stderr, "jpeg progressive option must be \"y\" or \"n\"\n");
-	return gFalse;
+	return false;
       }
     } else if (opt.cmp("optimize") == 0 || opt.cmp("optimise") == 0) {
-      jpegOptimize = gFalse;
+      jpegOptimize = false;
       if (value.cmp("y") == 0) {
-	jpegOptimize = gTrue;
+	jpegOptimize = true;
       } else if (value.cmp("n") != 0) {
 	fprintf(stderr, "jpeg optimize option must be \"y\" or \"n\"\n");
-	return gFalse;
+	return false;
       }
     } else {
       fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.getCString());
-      return gFalse;
+      return false;
     }
   }
-  return gTrue;
+  return true;
 }
 
 static void writePageImage(GooString *filename)
@@ -682,9 +682,9 @@ static void beginPage(double *w, double *h)
 
 #ifdef CAIRO_HAS_WIN32_SURFACE
     if (printToWin32) {
-      GBool changePageSize = gTrue;
+      bool changePageSize = true;
       if (setupdlg && !origPageSizes)
-	changePageSize = gFalse;
+	changePageSize = false;
       win32BeginPage(w, h, changePageSize, noShrink); // w,h will be changed to actual size used
     }
 #endif
@@ -733,7 +733,7 @@ static void renderPage(PDFDoc *doc, CairoOutputDev *cairoOut, int pg,
 			72.0, 72.0,
 			0, /* rotate */
 			!useCropBox, /* useMediaBox */
-			gFalse, /* Crop */
+			false, /* Crop */
 			printing,
 			-1, -1, -1, -1);
   cairo_restore(cr);
@@ -796,7 +796,7 @@ static void endDocument()
   }
 }
 
-static GBool setPSPaperSize(char *size, int &psPaperWidth, int &psPaperHeight) {
+static bool setPSPaperSize(char *size, int &psPaperWidth, int &psPaperHeight) {
   if (!strcmp(size, "match")) {
     psPaperWidth = psPaperHeight = -1;
   } else if (!strcmp(size, "letter")) {
@@ -812,9 +812,9 @@ static GBool setPSPaperSize(char *size, int &psPaperWidth, int &psPaperHeight) {
     psPaperWidth = 842;
     psPaperHeight = 1190;
   } else {
-    return gFalse;
+    return false;
   }
-  return gTrue;
+  return true;
 }
 
 static GooString *getImageFileName(GooString *outputFileName, int numDigits, int page)
@@ -903,7 +903,7 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
   return name;
 }
 
-static void checkInvalidPrintOption(GBool option, const char *option_name)
+static void checkInvalidPrintOption(bool option, const char *option_name)
 {
   if (option) {
     fprintf(stderr, "Error: %s may only be used with the -png, -jpeg, or -tiff output options.\n", option_name);
@@ -911,7 +911,7 @@ static void checkInvalidPrintOption(GBool option, const char *option_name)
   }
 }
 
-static void checkInvalidImageOption(GBool option, const char *option_name)
+static void checkInvalidImageOption(bool option, const char *option_name)
 {
   if (option) {
     fprintf(stderr, "Error: %s may only be used with the -ps, -eps, -pdf, or -svg output options.\n", option_name);
@@ -975,9 +975,9 @@ int main(int argc, char *argv[]) {
     exit(99);
   }
   if (png || jpeg || tiff)
-    printing = gFalse;
+    printing = false;
   else
-    printing = gTrue;
+    printing = true;
 
   if (printing) {
     checkInvalidPrintOption(mono, "-mono");
@@ -1050,7 +1050,7 @@ int main(int argc, char *argv[]) {
     exit(99);
   }
   if (!level2 && !level3)
-    level3 = gTrue;
+    level3 = true;
 
   if (eps && (origPageSizes || paperSize[0] || paperWidth > 0 || paperHeight > 0)) {
     fprintf(stderr, "Error: page size options may not be used with eps output.\n");
@@ -1073,12 +1073,12 @@ int main(int argc, char *argv[]) {
     }
   }
   if (origPageSizes || paperWidth < 0 || paperHeight < 0)
-    usePDFPageSize = gTrue;
+    usePDFPageSize = true;
   else
-    usePDFPageSize = gFalse;
+    usePDFPageSize = false;
 
   if (printdlg)
-    printToWin32 = gTrue;
+    printToWin32 = true;
 
   globalParams = new GlobalParams();
   if (quiet) {
@@ -1181,9 +1181,9 @@ int main(int argc, char *argv[]) {
 
 #ifdef CAIRO_HAS_WIN32_SURFACE
     if (printdlg) {
-      GBool allPages = gFalse;
+      bool allPages = false;
       if (firstPage == 1 && lastPage == doc->getNumPages())
-	allPages = gTrue;
+	allPages = true;
       win32ShowPrintDialog(&expand, &noShrink, &noCenter,
 			   &usePDFPageSize, &allPages,
 			   &firstPage, &lastPage, doc->getNumPages());

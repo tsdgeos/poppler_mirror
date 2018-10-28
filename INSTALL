@@ -102,3 +102,7 @@ package) then use -DECM_ENABLE_SANITIZERS to specify the santizers. eg
 
 Some options may only be available with clang. Use
 -DCMAKE_CXX_COMPILER=clang++ to build with clang.
+
+The sanitizer can also be combined with fuzz testing by using Clang 6.0
+or later and additionally enabling the sanitizer fuzzer which
+will enable the fuzz target cpp/tests/pdf_fuzzer.

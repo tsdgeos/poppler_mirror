@@ -49,8 +49,8 @@ public:
   int lookChar() override
     { return (outBufPtr >= outBufEnd && !fillBuf()) ? EOF : (*outBufPtr & 0xff); }
   GooString *getPSFilter(int psLevel, const char *indent) override { return nullptr; }
-  GBool isBinary(GBool last = gTrue) override { return gTrue; }
-  GBool isEncoder() override { return gTrue; }
+  bool isBinary(bool last = true) override { return true; }
+  bool isEncoder() override { return true; }
 
 private:
 
@@ -60,11 +60,11 @@ private:
   Guchar outBuf[ outBufSize ];
   Guchar *outBufPtr;
   Guchar *outBufEnd;
-  GBool inBufEof;
-  GBool outBufEof;
+  bool inBufEof;
+  bool outBufEof;
   z_stream zlib_stream;
 
-  GBool fillBuf();
+  bool fillBuf();
 };
 
 #endif

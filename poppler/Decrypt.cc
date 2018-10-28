@@ -40,15 +40,15 @@
 static void rc4InitKey(Guchar *key, int keyLen, Guchar *state);
 static Guchar rc4DecryptByte(Guchar *state, Guchar *x, Guchar *y, Guchar c);
 
-static GBool aesReadBlock(Stream  *str, Guchar *in, GBool addPadding);
+static bool aesReadBlock(Stream  *str, Guchar *in, bool addPadding);
 
-static void aesKeyExpansion(DecryptAESState *s, Guchar *objKey, int objKeyLen, GBool decrypt);
+static void aesKeyExpansion(DecryptAESState *s, Guchar *objKey, int objKeyLen, bool decrypt);
 static void aesEncryptBlock(DecryptAESState *s, Guchar *in);
-static void aesDecryptBlock(DecryptAESState *s, Guchar *in, GBool last);
+static void aesDecryptBlock(DecryptAESState *s, Guchar *in, bool last);
 
-static void aes256KeyExpansion(DecryptAES256State *s, Guchar *objKey, int objKeyLen, GBool decrypt);
+static void aes256KeyExpansion(DecryptAES256State *s, Guchar *objKey, int objKeyLen, bool decrypt);
 static void aes256EncryptBlock(DecryptAES256State *s, Guchar *in);
-static void aes256DecryptBlock(DecryptAES256State *s, Guchar *in, GBool last);
+static void aes256DecryptBlock(DecryptAES256State *s, Guchar *in, bool last);
 
 static void sha256(Guchar *msg, int msgLen, Guchar *hash);
 static void sha384(Guchar *msg, int msgLen, Guchar *hash);
@@ -67,13 +67,13 @@ static const Guchar passwordPad[32] = {
 // Decrypt
 //------------------------------------------------------------------------
 
-GBool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
+bool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
 			   const GooString *ownerKey, const GooString *userKey,
 			   const GooString *ownerEnc, const GooString *userEnc,
 			   int permissions, const GooString *fileID,
 			   const GooString *ownerPassword, const GooString *userPassword,
-			   Guchar *fileKey, GBool encryptMetadata,
-			   GBool *ownerPasswordOk) {
+			   Guchar *fileKey, bool encryptMetadata,
+			   bool *ownerPasswordOk) {
   DecryptAES256State state;
   Guchar test[127 + 56], test2[32];
   GooString *userPassword2;
@@ -82,7 +82,7 @@ GBool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
   Guchar fx, fy;
   int len, i, j;
 
-  *ownerPasswordOk = gFalse;
+  *ownerPasswordOk = false;
 
   if (encRevision == 5 || encRevision == 6) {
 
@@ -112,18 +112,18 @@ GBool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
 	  //test contains the initial SHA-256 hash input K.
 	  revision6Hash(ownerPassword, test, userKey->getCString());
 	}
-	aes256KeyExpansion(&state, test, 32, gTrue);
+	aes256KeyExpansion(&state, test, 32, true);
 	for (i = 0; i < 16; ++i) {
 	  state.cbc[i] = 0;
 	}
-	aes256DecryptBlock(&state, (Guchar *)ownerEnc->getCString(), gFalse);
+	aes256DecryptBlock(&state, (Guchar *)ownerEnc->getCString(), false);
 	memcpy(fileKey, state.buf, 16);
 	aes256DecryptBlock(&state, (Guchar *)ownerEnc->getCString() + 16,
-			   gFalse);
+			   false);
 	memcpy(fileKey + 16, state.buf, 16);
 
-	*ownerPasswordOk = gTrue;
-	return gTrue;
+	*ownerPasswordOk = true;
+	return true;
       }
     }
 
@@ -153,21 +153,21 @@ GBool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
 	  //user key is not used in computing intermediate user key.
 	  revision6Hash(userPassword, test, nullptr);
 	}
-	aes256KeyExpansion(&state, test, 32, gTrue);
+	aes256KeyExpansion(&state, test, 32, true);
 	for (i = 0; i < 16; ++i) {
 	  state.cbc[i] = 0;
 	}
-	aes256DecryptBlock(&state, (Guchar *)userEnc->getCString(), gFalse);
+	aes256DecryptBlock(&state, (Guchar *)userEnc->getCString(), false);
 	memcpy(fileKey, state.buf, 16);
 	aes256DecryptBlock(&state, (Guchar *)userEnc->getCString() + 16,
-			   gFalse);
+			   false);
 	memcpy(fileKey + 16, state.buf, 16);
 
-	return gTrue;
+	return true;
       }
     }
 
-    return gFalse;
+    return false;
   } else {
 
     // try using the supplied owner password to generate the user password
@@ -208,9 +208,9 @@ GBool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
       if (makeFileKey2(encVersion, encRevision, keyLength, ownerKey, userKey,
 		       permissions, fileID, userPassword2, fileKey,
 		       encryptMetadata)) {
-	*ownerPasswordOk = gTrue;
+	*ownerPasswordOk = true;
 	delete userPassword2;
-	return gTrue;
+	return true;
       }
       delete userPassword2;
     }
@@ -222,18 +222,18 @@ GBool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
   }
 }
 
-GBool Decrypt::makeFileKey2(int encVersion, int encRevision, int keyLength,
+bool Decrypt::makeFileKey2(int encVersion, int encRevision, int keyLength,
 			    const GooString *ownerKey, const GooString *userKey,
 			    int permissions, const GooString *fileID,
 			    const GooString *userPassword, Guchar *fileKey,
-			    GBool encryptMetadata) {
+			    bool encryptMetadata) {
   Guchar *buf;
   Guchar test[32];
   Guchar fState[256];
   Guchar tmpKey[16];
   Guchar fx, fy;
   int len, i, j;
-  GBool ok;
+  bool ok;
 
   // generate file key
   buf = (Guchar *)gmalloc(72 + fileID->getLength());
@@ -293,7 +293,7 @@ GBool Decrypt::makeFileKey2(int encVersion, int encRevision, int keyLength,
     md5(buf, 32 + fileID->getLength(), buf);
     ok = memcmp(test, buf, 16) == 0;
   } else {
-    ok = gFalse;
+    ok = false;
   }
 
   gfree(buf);
@@ -355,7 +355,7 @@ BaseCryptStream::BaseCryptStream(Stream *strA, const Guchar *fileKey, CryptAlgor
   }
 
   charactersRead = 0;
-  autoDelete = gTrue;
+  autoDelete = true;
 }
 
 BaseCryptStream::~BaseCryptStream() {
@@ -384,11 +384,11 @@ int BaseCryptStream::getChar() {
   return c;
 }
 
-GBool BaseCryptStream::isBinary(GBool last) {
+bool BaseCryptStream::isBinary(bool last) {
   return str->isBinary(last);
 }
 
-void BaseCryptStream::setAutoDelete(GBool val) {
+void BaseCryptStream::setAutoDelete(bool val) {
   autoDelete = val;
 }
 
@@ -425,16 +425,16 @@ void EncryptStream::reset() {
     rc4InitKey(objKey, objKeyLength, state.rc4.state);
     break;
   case cryptAES:
-    aesKeyExpansion(&state.aes, objKey, objKeyLength, gFalse);
+    aesKeyExpansion(&state.aes, objKey, objKeyLength, false);
     memcpy(state.aes.buf, state.aes.cbc, 16); // Copy CBC IV to buf
     state.aes.bufIdx = 0;
-    state.aes.paddingReached = gFalse;
+    state.aes.paddingReached = false;
     break;
   case cryptAES256:
-    aes256KeyExpansion(&state.aes256, objKey, objKeyLength, gFalse);
+    aes256KeyExpansion(&state.aes256, objKey, objKeyLength, false);
     memcpy(state.aes256.buf, state.aes256.cbc, 16); // Copy CBC IV to buf
     state.aes256.bufIdx = 0;
-    state.aes256.paddingReached = gFalse;
+    state.aes256.paddingReached = false;
     break;
   case cryptNone:
     break;
@@ -458,7 +458,7 @@ int EncryptStream::lookChar() {
     break;
   case cryptAES:
     if (state.aes.bufIdx == 16 && !state.aes.paddingReached) {
-      state.aes.paddingReached = !aesReadBlock(str, in, gTrue);
+      state.aes.paddingReached = !aesReadBlock(str, in, true);
       aesEncryptBlock(&state.aes, in);
     }
     if (state.aes.bufIdx == 16) {
@@ -469,7 +469,7 @@ int EncryptStream::lookChar() {
     break;
   case cryptAES256:
     if (state.aes256.bufIdx == 16 && !state.aes256.paddingReached) {
-      state.aes256.paddingReached = !aesReadBlock(str, in, gTrue);
+      state.aes256.paddingReached = !aesReadBlock(str, in, true);
       aes256EncryptBlock(&state.aes256, in);
     }
     if (state.aes256.bufIdx == 16) {
@@ -507,14 +507,14 @@ void DecryptStream::reset() {
     rc4InitKey(objKey, objKeyLength, state.rc4.state);
     break;
   case cryptAES:
-    aesKeyExpansion(&state.aes, objKey, objKeyLength, gTrue);
+    aesKeyExpansion(&state.aes, objKey, objKeyLength, true);
     for (i = 0; i < 16; ++i) {
       state.aes.cbc[i] = str->getChar();
     }
     state.aes.bufIdx = 16;
     break;
   case cryptAES256:
-    aes256KeyExpansion(&state.aes256, objKey, objKeyLength, gTrue);
+    aes256KeyExpansion(&state.aes256, objKey, objKeyLength, true);
     for (i = 0; i < 16; ++i) {
       state.aes256.cbc[i] = str->getChar();
     }
@@ -541,7 +541,7 @@ int DecryptStream::lookChar() {
     break;
   case cryptAES:
     if (state.aes.bufIdx == 16) {
-      if (aesReadBlock(str, in, gFalse)) {
+      if (aesReadBlock(str, in, false)) {
         aesDecryptBlock(&state.aes, in, str->lookChar() == EOF);
       }
     }
@@ -553,7 +553,7 @@ int DecryptStream::lookChar() {
     break;
   case cryptAES256:
     if (state.aes256.bufIdx == 16) {
-      if (aesReadBlock(str, in, gFalse)) {
+      if (aesReadBlock(str, in, false)) {
         aes256DecryptBlock(&state.aes256, in, str->lookChar() == EOF);
       }
     }
@@ -610,8 +610,8 @@ static Guchar rc4DecryptByte(Guchar *state, Guchar *x, Guchar *y, Guchar c) {
 // AES decryption
 //------------------------------------------------------------------------
 
-// Returns gFalse if EOF was reached, gTrue otherwise
-static GBool aesReadBlock(Stream *str, Guchar *in, GBool addPadding)
+// Returns false if EOF was reached, true otherwise
+static bool aesReadBlock(Stream *str, Guchar *in, bool addPadding)
 {
   int c, i;
 
@@ -624,7 +624,7 @@ static GBool aesReadBlock(Stream *str, Guchar *in, GBool addPadding)
   }
 
   if (i == 16) {
-    return gTrue;
+    return true;
   } else {
     if (addPadding) {
       c = 16 - i;
@@ -632,7 +632,7 @@ static GBool aesReadBlock(Stream *str, Guchar *in, GBool addPadding)
         in[i++] = (Guchar)c;
       }
     }
-    return gFalse;
+    return false;
   }
 }
 
@@ -872,7 +872,7 @@ static inline void addRoundKey(Guchar *state, Guint *w) {
 }
 
 static void aesKeyExpansion(DecryptAESState *s,
-			    Guchar *objKey, int /*objKeyLen*/, GBool decrypt) {
+			    Guchar *objKey, int /*objKeyLen*/, bool decrypt) {
   Guint temp;
   int i, round;
 
@@ -935,7 +935,7 @@ static void aesEncryptBlock(DecryptAESState *s, Guchar *in) {
   s->bufIdx = 0;
 }
 
-static void aesDecryptBlock(DecryptAESState *s, Guchar *in, GBool last) {
+static void aesDecryptBlock(DecryptAESState *s, Guchar *in, bool last) {
   int c, round, n, i;
 
   // initial state
@@ -994,7 +994,7 @@ static void aesDecryptBlock(DecryptAESState *s, Guchar *in, GBool last) {
 //------------------------------------------------------------------------
 
 static void aes256KeyExpansion(DecryptAES256State *s,
-			       Guchar *objKey, int objKeyLen, GBool decrypt) {
+			       Guchar *objKey, int objKeyLen, bool decrypt) {
   Guint temp;
   int i, round;
 
@@ -1059,7 +1059,7 @@ static void aes256EncryptBlock(DecryptAES256State *s, Guchar *in) {
   s->bufIdx = 0;
 }
 
-static void aes256DecryptBlock(DecryptAES256State *s, Guchar *in, GBool last) {
+static void aes256DecryptBlock(DecryptAES256State *s, Guchar *in, bool last) {
   int c, round, n, i;
 
   // initial state
@@ -1728,8 +1728,8 @@ static void revision6Hash(const GooString *inputPassword, Guchar *K, const char 
     memcpy(state.cbc,K + 16,16);
     memcpy(state.buf, state.cbc, 16); // Copy CBC IV to buf
     state.bufIdx = 0;
-    state.paddingReached = gFalse;
-    aesKeyExpansion(&state,aesKey,16,gFalse);
+    state.paddingReached = false;
+    aesKeyExpansion(&state,aesKey,16,false);
 
     for(int i = 0; i < (4 * sequenceLength); i++) {
       aesEncryptBlock(&state,K1 + (16 * i));

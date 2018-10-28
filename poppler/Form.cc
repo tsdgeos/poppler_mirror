@@ -115,8 +115,8 @@ void FormWidget::createWidgetAnnotation() {
   widget = new AnnotWidget(doc, &obj, &obj1, field);
 }
 
-GBool FormWidget::inRect(double x, double y) const {
-  return widget ? widget->inRect(x, y) : gFalse;
+bool FormWidget::inRect(double x, double y) const {
+  return widget ? widget->inRect(x, y) : false;
 }
 
 void FormWidget::getRect(double *x1, double *y1, double *x2, double *y2) const {
@@ -228,7 +228,7 @@ void FormWidgetButton::updateWidgetAppearance()
   // The appearance stream must NOT be regenerated for this widget type
 }
 
-void FormWidgetButton::setState (GBool astate)
+void FormWidgetButton::setState (bool astate)
 {
   //pushButtons don't have state
   if (parent()->getButtonType() == formButtonPush)
@@ -242,9 +242,9 @@ void FormWidgetButton::setState (GBool astate)
   // Parent will call setAppearanceState()
 }
 
-GBool FormWidgetButton::getState () const
+bool FormWidgetButton::getState () const
 {
-  return onStr ? parent()->getState(onStr->getCString()) : gFalse;
+  return onStr ? parent()->getState(onStr->getCString()) : false;
 }
 
 FormFieldButton *FormWidgetButton::parent() const
@@ -624,7 +624,7 @@ FormField::FormField(PDFDoc *docA, Object *aobj, const Ref& aref, FormField *par
   defaultAppearance = nullptr;
   fullyQualifiedName = nullptr;
   quadding = quaddingLeftJustified;
-  hasQuadding = gFalse;
+  hasQuadding = false;
 
   ref = aref;
 
@@ -707,7 +707,7 @@ FormField::FormField(PDFDoc *docA, Object *aobj, const Ref& aref, FormField *par
   obj1 = Form::fieldLookup(dict, "Q");
   if (obj1.isInt()) {
     quadding = static_cast<VariableTextQuadding>(obj1.getInt());
-    hasQuadding = gTrue;
+    hasQuadding = true;
   }
 
   obj1 = dict->lookup("T");
@@ -846,7 +846,7 @@ GooString* FormField::getFullyQualifiedName() {
   Object parent;
   const GooString *parent_name;
   GooString *full_name;
-  GBool unicode_encoded = gFalse;
+  bool unicode_encoded = false;
 
   if (fullyQualifiedName)
     return fullyQualifiedName;
@@ -872,7 +872,7 @@ GooString* FormField::getFullyQualifiedName() {
       } else {
         full_name->insert(0, '.'); // 1-byte ascii period
         if (parent_name->hasUnicodeMarker()) {          
-          unicode_encoded = gTrue;
+          unicode_encoded = true;
           full_name = convertToUtf16(full_name);
           full_name->insert(0, parent_name->getCString() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
         } else {
@@ -895,7 +895,7 @@ GooString* FormField::getFullyQualifiedName() {
       }
     } else {
       if (partialName->hasUnicodeMarker()) {
-          unicode_encoded = gTrue;        
+          unicode_encoded = true;        
           full_name = convertToUtf16(full_name);
           full_name->append(partialName->getCString() + 2, partialName->getLength() - 2); // Remove the unicode BOM
       } else {
@@ -1051,28 +1051,28 @@ void FormFieldButton::fillChildrenSiblingsID()
   }
 }
 
-GBool FormFieldButton::setState(const char *state)
+bool FormFieldButton::setState(const char *state)
 {
   // A check button could behave as a radio button
   // when it's in a set of more than 1 buttons
   if (btype != formButtonRadio && btype != formButtonCheck)
-    return gFalse;
+    return false;
 
   if (terminal && parent && parent->getType() == formButton && appearanceState.isNull()) {
     // It's button in a set, set state on parent
     if (static_cast<FormFieldButton*>(parent)->setState(state)) {
-      return gTrue;
+      return true;
     }
-    return gFalse;
+    return false;
   }
 
-  GBool isOn = strcmp(state, "Off") != 0;
+  bool isOn = strcmp(state, "Off") != 0;
 
   if (!isOn && noAllOff)
-    return gFalse; // Don't allow to set all radio to off
+    return false; // Don't allow to set all radio to off
 
   const char *current = getAppearanceState();
-  GBool currentFound = gFalse, newFound = gFalse;
+  bool currentFound = false, newFound = false;
 
   for (int i = 0; i < numChildren; i++) {
     FormWidgetButton *widget;
@@ -1093,12 +1093,12 @@ GBool FormFieldButton::setState(const char *state)
       widget->setAppearanceState("Off");
       if (!isOn)
         break;
-      currentFound = gTrue;
+      currentFound = true;
     }
 
     if (isOn && strcmp(state, onStr) == 0) {
       widget->setAppearanceState(state);
-      newFound = gTrue;
+      newFound = true;
     }
 
     if (currentFound && newFound)
@@ -1107,14 +1107,14 @@ GBool FormFieldButton::setState(const char *state)
 
   updateState(state);
 
-  return gTrue;
+  return true;
 }
 
-GBool FormFieldButton::getState(const char *state) const {
+bool FormFieldButton::getState(const char *state) const {
   if (appearanceState.isName(state))
-    return gTrue;
+    return true;
 
-  return (parent && parent->getType() == formButton) ? static_cast<FormFieldButton*>(parent)->getState(state) : gFalse;
+  return (parent && parent->getType() == formButton) ? static_cast<FormFieldButton*>(parent)->getState(state) : false;
 }
 
 void FormFieldButton::updateState(const char *state) {
@@ -1378,16 +1378,16 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, For
     // seems to expect the exportVal instead of the optionName and so we do too.
     obj1 = Form::fieldLookup(dict, "V");
     if (obj1.isString()) {
-      GBool optionFound = gFalse;
+      bool optionFound = false;
 
       for (int i = 0; i < numChoices; i++) {
         if (choices[i].exportVal) {
           if (choices[i].exportVal->cmp(obj1.getString()) == 0) {
-            optionFound = gTrue;
+            optionFound = true;
           }
         } else if (choices[i].optionName) {
           if (choices[i].optionName->cmp(obj1.getString()) == 0) {
-            optionFound = gTrue;
+            optionFound = true;
           }
         }
 
@@ -1405,15 +1405,15 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, For
       for (int i = 0; i < numChoices; i++) {
         for (int j = 0; j < obj1.arrayGetLength(); j++) {
           Object obj2 = obj1.arrayGet(j);
-          GBool matches = gFalse;
+          bool matches = false;
 
           if (choices[i].exportVal) {
             if (choices[i].exportVal->cmp(obj2.getString()) == 0) {
-              matches = gTrue;
+              matches = true;
             }
           } else if (choices[i].optionName) {
             if (choices[i].optionName->cmp(obj2.getString()) == 0) {
-              matches = gTrue;
+              matches = true;
             }
           }
 

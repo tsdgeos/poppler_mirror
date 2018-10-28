@@ -116,7 +116,7 @@ public:
   Catalog& operator=(const Catalog &) = delete;
 
   // Is catalog valid?
-  GBool isOk() { return ok; }
+  bool isOk() { return ok; }
 
   // Get number of pages.
   int getNumPages();
@@ -188,8 +188,8 @@ public:
   GooString *getJS(int i);
 
   // Convert between page indices and page labels.
-  GBool labelToIndex(GooString *label, int *index);
-  GBool indexToLabel(int index, GooString *label);
+  bool labelToIndex(GooString *label, int *index);
+  bool indexToLabel(int index, GooString *label);
 
   Object *getOutline();
 
@@ -271,13 +271,13 @@ private:
   Object acroForm;		// AcroForm dictionary
   Object viewerPreferences;     // ViewerPreference dictionary
   OCGs *optContent;		// Optional Content groups
-  GBool ok;			// true if catalog is valid
+  bool ok;			// true if catalog is valid
   PageLabelInfo *pageLabelInfo; // info about page labels
   PageMode pageMode;		// page mode
   PageLayout pageLayout;	// page layout
   Object additionalActions;     // page additional actions
 
-  GBool cachePageTree(int page); // Cache first <page> pages.
+  bool cachePageTree(int page); // Cache first <page> pages.
   Object *findDestInTree(Object *tree, GooString *name, Object *obj);
 
   Object *getNames();

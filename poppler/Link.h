@@ -72,7 +72,7 @@ public:
   virtual ~LinkAction();
 
   // Was the LinkAction created successfully?
-  virtual GBool isOk() const = 0;
+  virtual bool isOk() const = 0;
 
   // Check link action type.
   virtual LinkActionKind getKind() const = 0;
@@ -121,11 +121,11 @@ public:
   LinkDest *copy() const { return new LinkDest(this); }
 
   // Was the LinkDest created successfully?
-  GBool isOk() const { return ok; }
+  bool isOk() const { return ok; }
 
   // Accessors.
   LinkDestKind getKind() const { return kind; }
-  GBool isPageRef() const { return pageIsRef; }
+  bool isPageRef() const { return pageIsRef; }
   int getPageNum() const { return pageNum; }
   Ref getPageRef() const { return pageRef; }
   double getLeft() const { return left; }
@@ -133,14 +133,14 @@ public:
   double getRight() const { return right; }
   double getTop() const { return top; }
   double getZoom() const { return zoom; }
-  GBool getChangeLeft() const { return changeLeft; }
-  GBool getChangeTop() const { return changeTop; }
-  GBool getChangeZoom() const { return changeZoom; }
+  bool getChangeLeft() const { return changeLeft; }
+  bool getChangeTop() const { return changeTop; }
+  bool getChangeZoom() const { return changeZoom; }
 
 private:
 
   LinkDestKind kind;		// destination type
-  GBool pageIsRef;		// is the page a reference or number?
+  bool pageIsRef;		// is the page a reference or number?
   union {
     Ref pageRef;		// reference to page
     int pageNum;		// one-relative page number
@@ -148,11 +148,11 @@ private:
   double left, bottom;		// position
   double right, top;
   double zoom;			// zoom factor
-  GBool changeLeft, changeTop;	// which position components to change:
-  GBool changeZoom;		//   destXYZ uses all three;
+  bool changeLeft, changeTop;	// which position components to change:
+  bool changeZoom;		//   destXYZ uses all three;
 				//   destFitH/BH use changeTop;
 				//   destFitV/BV use changeLeft
-  GBool ok;			// set if created successfully
+  bool ok;			// set if created successfully
 
   LinkDest(const LinkDest *dest);
 };
@@ -171,7 +171,7 @@ public:
   ~LinkGoTo();
 
   // Was the LinkGoTo created successfully?
-  GBool isOk() const override { return dest || namedDest; }
+  bool isOk() const override { return dest || namedDest; }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionGoTo; }
@@ -201,7 +201,7 @@ public:
   ~LinkGoToR();
 
   // Was the LinkGoToR created successfully?
-  GBool isOk() const override { return fileName && (dest || namedDest); }
+  bool isOk() const override { return fileName && (dest || namedDest); }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionGoToR; }
@@ -232,7 +232,7 @@ public:
   ~LinkLaunch();
 
   // Was the LinkLaunch created successfully?
-  GBool isOk() const override { return fileName != nullptr; }
+  bool isOk() const override { return fileName != nullptr; }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionLaunch; }
@@ -259,7 +259,7 @@ public:
   ~LinkURI();
 
   // Was the LinkURI created successfully?
-  GBool isOk() const override { return uri != nullptr; }
+  bool isOk() const override { return uri != nullptr; }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionURI; }
@@ -282,7 +282,7 @@ public:
 
   ~LinkNamed();
 
-  GBool isOk() const override { return name != nullptr; }
+  bool isOk() const override { return name != nullptr; }
 
   LinkActionKind getKind() const override { return actionNamed; }
   const GooString *getName() const { return name; }
@@ -310,14 +310,14 @@ public:
   LinkMovie(const Object *obj);
   ~LinkMovie();
 
-  GBool isOk() const override { return annotRef.num >= 0 || annotTitle != nullptr; }
+  bool isOk() const override { return annotRef.num >= 0 || annotTitle != nullptr; }
   LinkActionKind getKind() const override { return actionMovie; }
 
   // a movie action stores either an indirect reference to a movie annotation
   // or the movie annotation title
 
-  GBool hasAnnotRef() const { return annotRef.num >= 0; }
-  GBool hasAnnotTitle() const { return annotTitle != nullptr; }
+  bool hasAnnotRef() const { return annotRef.num >= 0; }
+  bool hasAnnotTitle() const { return annotTitle != nullptr; }
   const Ref *getAnnotRef() const { return &annotRef; }
   const GooString *getAnnotTitle() const { return annotTitle; }
 
@@ -353,14 +353,14 @@ public:
 
   ~LinkRendition();
 
-  GBool isOk() const override { return true; }
+  bool isOk() const override { return true; }
 
   LinkActionKind getKind() const override { return actionRendition; }
 
-  GBool hasRenditionObject() const { return renditionObj.isDict(); }
+  bool hasRenditionObject() const { return renditionObj.isDict(); }
   const Object* getRenditionObject() const { return &renditionObj; }
 
-  GBool hasScreenAnnot() const { return screenRef.isRef(); }
+  bool hasScreenAnnot() const { return screenRef.isRef(); }
   Ref getScreenAnnot() const { return screenRef.getRef(); }
 
   RenditionOperation getOperation() const { return operation; }
@@ -391,22 +391,22 @@ public:
 
   ~LinkSound();
 
-  GBool isOk() const override { return sound != nullptr; }
+  bool isOk() const override { return sound != nullptr; }
 
   LinkActionKind getKind() const override { return actionSound; }
 
   double getVolume() const { return volume; }
-  GBool getSynchronous() const { return sync; }
-  GBool getRepeat() const { return repeat; }
-  GBool getMix() const { return mix; }
+  bool getSynchronous() const { return sync; }
+  bool getRepeat() const { return repeat; }
+  bool getMix() const { return mix; }
   Sound *getSound() const { return sound; }
 
 private:
 
   double volume;
-  GBool sync;
-  GBool repeat;
-  GBool mix;
+  bool sync;
+  bool repeat;
+  bool mix;
   Sound *sound;
 };
 
@@ -422,7 +422,7 @@ public:
 
   ~LinkJavaScript();
 
-  GBool isOk() const override { return js != nullptr; }
+  bool isOk() const override { return js != nullptr; }
 
   LinkActionKind getKind() const override { return actionJavaScript; }
   const GooString *getScript() const { return js; }
@@ -441,7 +441,7 @@ public:
 
   ~LinkOCGState();
 
-  GBool isOk() const override { return stateList != nullptr; }
+  bool isOk() const override { return stateList != nullptr; }
 
   LinkActionKind getKind() const override { return actionOCGState; }
 
@@ -456,11 +456,11 @@ public:
   };
 
   const GooList *getStateList() const { return stateList; }
-  GBool getPreserveRB() const { return preserveRB; }
+  bool getPreserveRB() const { return preserveRB; }
 
 private:
   GooList *stateList;
-  GBool preserveRB;
+  bool preserveRB;
 };
 
 //------------------------------------------------------------------------
@@ -473,7 +473,7 @@ public:
 
   ~LinkHide();
 
-  GBool isOk() const override { return targetName != nullptr; }
+  bool isOk() const override { return targetName != nullptr; }
   LinkActionKind getKind() const override { return actionHide; }
 
   // According to spec the target can be either:
@@ -485,15 +485,15 @@ public:
   // While b / c appear to be very uncommon and can't easily be
   // created with Adobe Acrobat DC. So only support hide
   // actions with named targets (yet).
-  GBool hasTargetName() const { return targetName != nullptr; }
+  bool hasTargetName() const { return targetName != nullptr; }
   const GooString *getTargetName() const { return targetName; }
 
   // Should this action show or hide.
-  GBool isShowAction() const { return show; }
+  bool isShowAction() const { return show; }
 
 private:
   GooString *targetName;
-  GBool show;
+  bool show;
 };
 
 //------------------------------------------------------------------------
@@ -510,7 +510,7 @@ public:
   ~LinkUnknown();
 
   // Was the LinkUnknown create successfully?
-  GBool isOk() const override { return action != nullptr; }
+  bool isOk() const override { return action != nullptr; }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionUnknown; }
@@ -546,7 +546,7 @@ public:
   LinkAction *find(double x, double y) const;
 
   // Return true if <x>,<y> is in a link.
-  GBool onLink(double x, double y) const;
+  bool onLink(double x, double y) const;
 
 private:
 

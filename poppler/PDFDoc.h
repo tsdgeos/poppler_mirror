@@ -132,7 +132,7 @@ public:
   static PDFDoc *ErrorPDFDoc(int errorCode, const GooString *fileNameA = nullptr);
 
   // Was PDF document successfully opened?
-  GBool isOk() const { return ok; }
+  bool isOk() const { return ok; }
 
   // Get the error code (if isOk() returns false).
   int getErrorCode() const { return errCode; }
@@ -149,7 +149,7 @@ public:
 
   // Get the linearization table.
   Linearization *getLinearization();
-  GBool checkLinearization();
+  bool checkLinearization();
 
   // Get the xref table.
   XRef *getXRef() const { return xref; }
@@ -191,30 +191,30 @@ public:
   // Display a page.
   void displayPage(OutputDev *out, int page,
 		   double hDPI, double vDPI, int rotate,
-		   GBool useMediaBox, GBool crop, GBool printing,
-		   GBool (*abortCheckCbk)(void *data) = nullptr,
+		   bool useMediaBox, bool crop, bool printing,
+		   bool (*abortCheckCbk)(void *data) = nullptr,
 		   void *abortCheckCbkData = nullptr,
-                   GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
-                   void *annotDisplayDecideCbkData = nullptr, GBool copyXRef = gFalse);
+                   bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+                   void *annotDisplayDecideCbkData = nullptr, bool copyXRef = false);
 
   // Display a range of pages.
   void displayPages(OutputDev *out, int firstPage, int lastPage,
 		    double hDPI, double vDPI, int rotate,
-		    GBool useMediaBox, GBool crop, GBool printing,
-		    GBool (*abortCheckCbk)(void *data) = nullptr,
+		    bool useMediaBox, bool crop, bool printing,
+		    bool (*abortCheckCbk)(void *data) = nullptr,
 		    void *abortCheckCbkData = nullptr,
-                    GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+                    bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
                     void *annotDisplayDecideCbkData = nullptr);
 
   // Display part of a page.
   void displayPageSlice(OutputDev *out, int page,
 			double hDPI, double vDPI, int rotate, 
-			GBool useMediaBox, GBool crop, GBool printing,
+			bool useMediaBox, bool crop, bool printing,
 			int sliceX, int sliceY, int sliceW, int sliceH,
-			GBool (*abortCheckCbk)(void *data) = nullptr,
+			bool (*abortCheckCbk)(void *data) = nullptr,
 			void *abortCheckCbkData = nullptr,
-                        GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
-                        void *annotDisplayDecideCbkData = nullptr, GBool copyXRef = gFalse);
+                        bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+                        void *annotDisplayDecideCbkData = nullptr, bool copyXRef = false);
 
   // Find a page, given its object ID.  Returns page number, or 0 if
   // not found.
@@ -236,31 +236,31 @@ public:
   Outline *getOutline();
 
   // Is the file encrypted?
-  GBool isEncrypted() { return xref->isEncrypted(); }
+  bool isEncrypted() { return xref->isEncrypted(); }
 
   std::vector<FormWidgetSignature*> getSignatureWidgets();
 
   // Check various permissions.
-  GBool okToPrint(GBool ignoreOwnerPW = gFalse)
+  bool okToPrint(bool ignoreOwnerPW = false)
     { return xref->okToPrint(ignoreOwnerPW); }
-  GBool okToPrintHighRes(GBool ignoreOwnerPW = gFalse)
+  bool okToPrintHighRes(bool ignoreOwnerPW = false)
     { return xref->okToPrintHighRes(ignoreOwnerPW); }
-  GBool okToChange(GBool ignoreOwnerPW = gFalse)
+  bool okToChange(bool ignoreOwnerPW = false)
     { return xref->okToChange(ignoreOwnerPW); }
-  GBool okToCopy(GBool ignoreOwnerPW = gFalse)
+  bool okToCopy(bool ignoreOwnerPW = false)
     { return xref->okToCopy(ignoreOwnerPW); }
-  GBool okToAddNotes(GBool ignoreOwnerPW = gFalse)
+  bool okToAddNotes(bool ignoreOwnerPW = false)
     { return xref->okToAddNotes(ignoreOwnerPW); }
-  GBool okToFillForm(GBool ignoreOwnerPW = gFalse)
+  bool okToFillForm(bool ignoreOwnerPW = false)
     { return xref->okToFillForm(ignoreOwnerPW); }
-  GBool okToAccessibility(GBool ignoreOwnerPW = gFalse)
+  bool okToAccessibility(bool ignoreOwnerPW = false)
     { return xref->okToAccessibility(ignoreOwnerPW); }
-  GBool okToAssemble(GBool ignoreOwnerPW = gFalse)
+  bool okToAssemble(bool ignoreOwnerPW = false)
     { return xref->okToAssemble(ignoreOwnerPW); }
 
 
   // Is this document linearized?
-  GBool isLinearized(GBool tryingToReconstruct = gFalse);
+  bool isLinearized(bool tryingToReconstruct = false);
 
   // Return the document's Info dictionary (if any).
   Object getDocInfo() { return xref->getDocInfo(); }
@@ -313,7 +313,7 @@ public:
   int getPDFMinorVersion() const { return pdfMinorVersion; }
 
   //Return the PDF ID in the trailer dictionary (if any).
-  GBool getID(GooString *permanent_id, GooString *update_id) const;
+  bool getID(GooString *permanent_id, GooString *update_id) const;
 
   // Save one page with another name.
   int savePageAs(GooString *name, int pageNo);
@@ -332,17 +332,17 @@ public:
   // rewrite pageDict with MediaBox, CropBox and new page CTM
   void replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox);
   void markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts = nullptr);
-  GBool markAnnotations(Object *annots, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum, std::set<Dict*> *alreadyMarkedDicts = nullptr);
+  bool markAnnotations(Object *annots, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum, std::set<Dict*> *alreadyMarkedDicts = nullptr);
   void markAcroForm(Object *acrpForm, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum);
   // write all objects used by pageDict to outStr
-  Guint writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, GBool combine = gFalse);
+  Guint writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, bool combine = false);
   static void writeObject (Object *obj, OutStream* outStr, XRef *xref, Guint numOffset, Guchar *fileKey,
                            CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict*> *alreadyWrittenDicts = nullptr);
   static void writeHeader(OutStream *outStr, int major, int minor);
 
-  static Object createTrailerDict (int uxrefSize, GBool incrUpdate, Goffset startxRef,
+  static Object createTrailerDict (int uxrefSize, bool incrUpdate, Goffset startxRef,
                                   Ref *root, XRef *xRef, const char *fileName, Goffset fileSize);
-  static void writeXRefTableTrailer (Object &&trailerDict, XRef *uxref, GBool writeAllEntries,
+  static void writeXRefTableTrailer (Object &&trailerDict, XRef *uxref, bool writeAllEntries,
                                      Goffset uxrefOffset, OutStream* outStr, XRef *xRef);
   static void writeXRefStreamTrailer (Object &&trailerDict, XRef *uxref, Ref *uxrefStreamRef,
                                       Goffset uxrefOffset, OutStream* outStr, XRef *xRef);
@@ -363,8 +363,8 @@ private:
   { writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, objNum, objGen, alreadyWrittenDicts); }
   static void writeStream (Stream* str, OutStream* outStr);
   static void writeRawStream (Stream* str, OutStream* outStr);
-  void writeXRefTableTrailer (Goffset uxrefOffset, XRef *uxref, GBool writeAllEntries,
-                              int uxrefSize, OutStream* outStr, GBool incrUpdate);
+  void writeXRefTableTrailer (Goffset uxrefOffset, XRef *uxref, bool writeAllEntries,
+                              int uxrefSize, OutStream* outStr, bool incrUpdate);
   static void writeString (const GooString* s, OutStream* outStr, const Guchar *fileKey,
                            CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
   void saveIncrementalUpdate (OutStream* outStr);
@@ -377,17 +377,17 @@ private:
 
   PDFDoc();
   void init();
-  GBool setup(const GooString *ownerPassword, const GooString *userPassword);
-  GBool checkFooter();
+  bool setup(const GooString *ownerPassword, const GooString *userPassword);
+  bool checkFooter();
   void checkHeader();
-  GBool checkEncryption(const GooString *ownerPassword, const GooString *userPassword);
+  bool checkEncryption(const GooString *ownerPassword, const GooString *userPassword);
   void extractPDFSubtype();
 
   // Get the offset of the start xref table.
-  Goffset getStartXRef(GBool tryingToReconstruct = gFalse);
+  Goffset getStartXRef(bool tryingToReconstruct = false);
   // Get the offset of the entries in the main XRef table of a
   // linearized document (0 for non linearized documents).
-  Goffset getMainXRefEntriesOffset(GBool tryingToReconstruct = gFalse);
+  Goffset getMainXRefEntriesOffset(bool tryingToReconstruct = false);
   long long strToLongLong(const char *s);
 
   // Mark the document's Info dictionary as modified.
@@ -417,7 +417,7 @@ private:
   Outline *outline;
   Page **pageCache;
 
-  GBool ok;
+  bool ok;
   int errCode;
   //If there is an error opening the PDF file with fopen() in the constructor, 
   //then the POSIX errno will be here.

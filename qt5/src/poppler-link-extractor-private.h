@@ -37,9 +37,9 @@ class LinkExtractorOutputDev : public OutputDev
     ~LinkExtractorOutputDev();
 
     // inherited from OutputDev
-    GBool upsideDown() override { return gFalse; }
-    GBool useDrawChar() override { return gFalse; }
-    GBool interpretType3Chars() override { return gFalse; }
+    bool upsideDown() override { return false; }
+    bool useDrawChar() override { return false; }
+    bool interpretType3Chars() override { return false; }
     void processLink(::AnnotLink *link) override;
 
     // our stuff

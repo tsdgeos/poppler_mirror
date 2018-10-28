@@ -57,7 +57,7 @@ public:
 
 private:
 
-  FoFiType1(const char *fileA, int lenA, GBool freeFileDataA);
+  FoFiType1(const char *fileA, int lenA, bool freeFileDataA);
 
   char *getNextLine(char *line) const;
   void parse();
@@ -66,7 +66,7 @@ private:
   char *name;
   char **encoding;
   double fontMatrix[6];
-  GBool parsed;
+  bool parsed;
 };
 
 #endif

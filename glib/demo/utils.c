@@ -32,7 +32,7 @@ pgd_table_add_property_with_custom_widget (GtkGrid     *table,
 	GtkWidget *label;
 
 	label = gtk_label_new (NULL);
-	g_object_set (G_OBJECT (label), "xalign", 0.0, NULL);
+	g_object_set (G_OBJECT (label), "xalign", 0.0, "yalign", 0.0, NULL);
 	gtk_label_set_markup (GTK_LABEL (label), markup);
 	gtk_grid_attach (GTK_GRID (table), label, 0, *row, 1, 1);
 	gtk_widget_show (label);
@@ -488,17 +488,16 @@ pgd_action_view_set_action (GtkWidget     *action_view,
 gchar *
 pgd_format_date (time_t utime)
 {
-	time_t time = (time_t) utime;
-	char s[256];
-	const char *fmt_hack = "%c";
-	size_t len;
-	struct tm t;
-	if (time == 0 || !localtime_r (&time, &t)) return NULL;
-	len = strftime (s, sizeof (s), fmt_hack, &t);
+	GDateTime *dt = NULL;
+	gchar *s = NULL;
 
-	if (len == 0 || s[0] == '\0') return NULL;
+	if (utime == 0) return NULL;
+	dt = g_date_time_new_from_unix_local (utime);
+	if (dt == NULL) return NULL;
+	s = g_date_time_format (dt, "%c");
+	g_date_time_unref (dt);
 
-	return g_locale_to_utf8 (s, -1, NULL, NULL, NULL);
+	return s;
 }
 
 GtkWidget *

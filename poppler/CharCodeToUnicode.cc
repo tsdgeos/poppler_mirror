@@ -99,25 +99,25 @@ static int hexCharVals[256] = {
 
 // Parse a <len>-byte hex string <s> into *<val>.  Returns false on
 // error.
-static GBool parseHex(const char *s, int len, Guint *val) {
+static bool parseHex(const char *s, int len, Guint *val) {
   int i, x;
 
   *val = 0;
   for (i = 0; i < len; ++i) {
     x = hexCharVals[s[i] & 0xff];
     if (x < 0) {
-      return gFalse;
+      return false;
     }
     *val = (*val << 4) + x;
   }
-  return gTrue;
+  return true;
 }
 
 //------------------------------------------------------------------------
 
 CharCodeToUnicode *CharCodeToUnicode::makeIdentityMapping() {
   CharCodeToUnicode *ctu = new CharCodeToUnicode();
-  ctu->isIdentity = gTrue;
+  ctu->isIdentity = true;
   ctu->mapLen = 1;
   ctu->map = (Unicode *)gmallocn(ctu->mapLen, sizeof(Unicode));
   return ctu;
@@ -158,7 +158,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseCIDToUnicode(const char *fileName,
   }
   fclose(f);
 
-  ctu = new CharCodeToUnicode(collection->copy(), mapA, mapLenA, gTrue,
+  ctu = new CharCodeToUnicode(collection->copy(), mapA, mapLenA, true,
 			      nullptr, 0, 0);
   gfree(mapA);
   return ctu;
@@ -252,7 +252,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseUnicodeToUnicode(
   }
   fclose(f);
 
-  ctu = new CharCodeToUnicode(fileName->copy(), mapA, len, gTrue,
+  ctu = new CharCodeToUnicode(fileName->copy(), mapA, len, true,
 			      sMapA, sMapLenA, sMapSizeA);
   gfree(mapA);
   gfree(uBuf);
@@ -260,7 +260,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseUnicodeToUnicode(
 }
 
 CharCodeToUnicode *CharCodeToUnicode::make8BitToUnicode(Unicode *toUnicode) {
-  return new CharCodeToUnicode(nullptr, toUnicode, 256, gTrue, nullptr, 0, 0);
+  return new CharCodeToUnicode(nullptr, toUnicode, 256, true, nullptr, 0, 0);
 }
 
 CharCodeToUnicode *CharCodeToUnicode::parseCMap(GooString *buf, int nBits) {
@@ -480,7 +480,7 @@ CharCodeToUnicode::CharCodeToUnicode() {
   sMap = nullptr;
   sMapLen = sMapSize = 0;
   refCnt = 1;
-  isIdentity = gFalse;
+  isIdentity = false;
 }
 
 CharCodeToUnicode::CharCodeToUnicode(GooString *tagA) {
@@ -495,11 +495,11 @@ CharCodeToUnicode::CharCodeToUnicode(GooString *tagA) {
   sMap = nullptr;
   sMapLen = sMapSize = 0;
   refCnt = 1;
-  isIdentity = gFalse;
+  isIdentity = false;
 }
 
 CharCodeToUnicode::CharCodeToUnicode(GooString *tagA, Unicode *mapA,
-				     CharCode mapLenA, GBool copyMap,
+				     CharCode mapLenA, bool copyMap,
 				     CharCodeToUnicodeString *sMapA,
 				     int sMapLenA, int sMapSizeA) {
   tag = tagA;
@@ -514,7 +514,7 @@ CharCodeToUnicode::CharCodeToUnicode(GooString *tagA, Unicode *mapA,
   sMapLen = sMapLenA;
   sMapSize = sMapSizeA;
   refCnt = 1;
-  isIdentity = gFalse;
+  isIdentity = false;
 }
 
 CharCodeToUnicode::~CharCodeToUnicode() {
@@ -538,7 +538,7 @@ void CharCodeToUnicode::decRefCnt() {
   }
 }
 
-GBool CharCodeToUnicode::match(GooString *tagA) {
+bool CharCodeToUnicode::match(GooString *tagA) {
   return tag && !tag->cmp(tagA);
 }
 

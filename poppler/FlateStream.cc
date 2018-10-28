@@ -133,8 +133,8 @@ GooString *FlateStream::getPSFilter(int psLevel, const char *indent) {
   return s;
 }
 
-GBool FlateStream::isBinary(GBool last) {
-  return str->isBinary(gTrue);
+bool FlateStream::isBinary(bool last) {
+  return str->isBinary(true);
 }
 
 #endif

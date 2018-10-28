@@ -54,7 +54,7 @@ public:
   // Returns true if value is above the white threshold or below the
   // black threshold, i.e., if the corresponding halftone will be
   // solid white or black.
-  GBool isStatic(Guchar value) { if (mat == nullptr) createMatrix(); return value < minVal || value >= maxVal; }
+  bool isStatic(Guchar value) { if (mat == nullptr) createMatrix(); return value < minVal || value >= maxVal; }
 
 private:
   void createMatrix();

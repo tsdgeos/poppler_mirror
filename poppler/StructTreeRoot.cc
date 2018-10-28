@@ -58,7 +58,7 @@ void StructTreeRoot::parse(Dict *root)
   std::set<int> seenElements;
 
   // Parse the children StructElements
-  const GBool marked = doc->getCatalog()->getMarkInfo() & Catalog::markInfoMarked;
+  const bool marked = doc->getCatalog()->getMarkInfo() & Catalog::markInfoMarked;
   Object kids = root->lookup("K");
   if (kids.isArray()) {
     if (marked && kids.arrayGetLength() > 1) {

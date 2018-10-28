@@ -182,7 +182,7 @@ SplashError SplashPath::curveTo(SplashCoord x1, SplashCoord y1,
   return splashOk;
 }
 
-SplashError SplashPath::close(GBool force) {
+SplashError SplashPath::close(bool force) {
   if (noCurrentPoint()) {
     return splashErrNoCurPt;
   }
@@ -221,11 +221,11 @@ void SplashPath::offset(SplashCoord dx, SplashCoord dy) {
   }
 }
 
-GBool SplashPath::getCurPt(SplashCoord *x, SplashCoord *y) {
+bool SplashPath::getCurPt(SplashCoord *x, SplashCoord *y) {
   if (noCurrentPoint()) {
-    return gFalse;
+    return false;
   }
   *x = pts[length - 1].x;
   *y = pts[length - 1].y;
-  return gTrue;
+  return true;
 }

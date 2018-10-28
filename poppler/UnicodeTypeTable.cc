@@ -945,19 +945,19 @@ static inline char getType(Unicode c) {
   return type;
 }
 
-GBool unicodeTypeL(Unicode c) {
+bool unicodeTypeL(Unicode c) {
   return getType(c) == 'L';
 }
 
-GBool unicodeTypeR(Unicode c) {
+bool unicodeTypeR(Unicode c) {
   return getType(c) == 'R';
 }
 
-GBool unicodeTypeNum(Unicode c) {
+bool unicodeTypeNum(Unicode c) {
   return getType(c) == '#';
 }
 
-GBool unicodeTypeAlphaNum(Unicode c) {
+bool unicodeTypeAlphaNum(Unicode c) {
   char t;
 
   t = getType(c);
@@ -967,7 +967,7 @@ GBool unicodeTypeAlphaNum(Unicode c) {
 #define UNICODE_ALPHABETIC_PRESENTATION_BLOCK_BEGIN 0xFB00
 #define UNICODE_ALPHABETIC_PRESENTATION_BLOCK_END   0xFB4F
 
-GBool unicodeIsAlphabeticPresentationForm(Unicode c) {
+bool unicodeIsAlphabeticPresentationForm(Unicode c) {
   return c >= UNICODE_ALPHABETIC_PRESENTATION_BLOCK_BEGIN
     && c <= UNICODE_ALPHABETIC_PRESENTATION_BLOCK_END;
 }
@@ -1018,13 +1018,13 @@ Unicode unicodeToUpper(Unicode c) {
 // decomposition, write @u into @buf and return 1.
 // If reverseRTL is true, then decompositions of RTL characters will be output
 // in reverse order.
-static int decomp_compat(Unicode u, Unicode *buf, GBool reverseRTL = false) {
+static int decomp_compat(Unicode u, Unicode *buf, bool reverseRTL = false) {
   // decomposition tables stored as lists {character, decomp_length, offset}
   // so we do a binary search
   int start = 0, end = DECOMP_TABLE_LENGTH;
   if (u >= decomp_table[start].character 
       && u <= decomp_table[end - 1].character)
-    while (gTrue) {
+    while (true) {
       int midpoint = (start + end) / 2;
       if (u == decomp_table[midpoint].character) {
 	int offset = decomp_table[midpoint].offset;
@@ -1064,8 +1064,8 @@ static int decomp_compat(Unicode u, Unicode *buf, GBool reverseRTL = false) {
      ((((u) / 256) > (COMPOSE_TABLE_LAST)) ? 0 : CI((u) / 256, (u) % 256))
 
 // If @add combines with @base, write the combination to @out and return 
-// gTrue. Otherwise return gFalse.
-static GBool combine(Unicode base, Unicode add, Unicode *out) {
+// true. Otherwise return false.
+static bool combine(Unicode base, Unicode add, Unicode *out) {
   unsigned short idx_base, idx_add;
 
   idx_base = COMPOSE_INDEX(base);
@@ -1074,9 +1074,9 @@ static GBool combine(Unicode base, Unicode add, Unicode *out) {
     if (compose_first_single[idx_base - COMPOSE_FIRST_SINGLE_START][0]
 	== add) {
       *out = compose_first_single[idx_base - COMPOSE_FIRST_SINGLE_START][1];
-      return gTrue;
+      return true;
     } else
-      return gFalse;
+      return false;
   }
 
   idx_add = COMPOSE_INDEX(add);
@@ -1084,9 +1084,9 @@ static GBool combine(Unicode base, Unicode add, Unicode *out) {
     if (compose_second_single[idx_add - COMPOSE_SECOND_SINGLE_START][0]
 	== base) {
       *out = compose_second_single[idx_add - COMPOSE_SECOND_SINGLE_START][1];
-      return gTrue;
+      return true;
     } else
-      return gFalse;
+      return false;
   }
 
   if (idx_base >= COMPOSE_FIRST_START && idx_base < COMPOSE_FIRST_SINGLE_START 
@@ -1096,11 +1096,11 @@ static GBool combine(Unicode base, Unicode add, Unicode *out) {
       [idx_add - COMPOSE_SECOND_START];
     if (o) {
       *out = o;
-      return gTrue;
+      return true;
     }
   }
 
-  return gFalse;
+  return false;
 }
 
 #define HANGUL_S_BASE 0xAC00
@@ -1141,7 +1141,7 @@ Unicode *unicodeNormalizeNFKC(Unicode *in, int len,
 
 Unicode *unicodeNormalizeNFKC(Unicode *in, int len,
 			      int *out_len, int **indices,
-			      GBool reverseRTL) {
+			      bool reverseRTL) {
   Unicode *out;
   int i, o, *classes, *idx = nullptr;
 

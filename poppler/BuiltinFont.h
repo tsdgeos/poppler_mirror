@@ -56,7 +56,7 @@ public:
   BuiltinFontWidths(const BuiltinFontWidths &) = delete;
   BuiltinFontWidths& operator=(const BuiltinFontWidths &) = delete;
 
-  GBool getWidth(const char *name, Gushort *width);
+  bool getWidth(const char *name, Gushort *width);
 
 private:
 

@@ -23,8 +23,8 @@
 #include <poppler-config.h>
 #include <vector>
 
-static GBool printVersion = gFalse;
-static GBool printHelp = gFalse;
+static bool printVersion = false;
+static bool printHelp = false;
 
 static const ArgDesc argDesc[] = {
   {"-v", argFlag, &printVersion, 0,
@@ -146,7 +146,7 @@ int main (int argc, char *argv[])
   int exitCode;
 
   exitCode = 99;
-  const GBool ok = parseArgs (argDesc, &argc, argv);
+  const bool ok = parseArgs (argDesc, &argc, argv);
   if (!ok || argc < 3 || printVersion || printHelp) {
     fprintf(stderr, "pdfunite version %s\n", PACKAGE_VERSION);
     fprintf(stderr, "%s\n", popplerCopyright);
@@ -192,7 +192,7 @@ int main (int argc, char *argv[])
 
   yRef = new XRef();
   countRef = new XRef();
-  yRef->add(0, 65535, 0, gFalse);
+  yRef->add(0, 65535, 0, false);
   PDFDoc::writeHeader(outStr, majorVersion, minorVersion);
 
   // handle OutputIntents, AcroForm, OCProperties & Names
@@ -229,7 +229,7 @@ int main (int argc, char *argv[])
               Object idf = intent.dictLookup("OutputConditionIdentifier");
               if (idf.isString()) {
                 const GooString *gidf = idf.getString();
-                GBool removeIntent = gTrue;
+                bool removeIntent = true;
                 for (int k = 0; k < pageintents.arrayGetLength(); k++) {
                   Object pgintent = pageintents.arrayGet(k, 0);
                   if (pgintent.isDict()) {
@@ -237,7 +237,7 @@ int main (int argc, char *argv[])
                     if (pgidf.isString()) {
                       const GooString *gpgidf = pgidf.getString();
                       if (gpgidf->cmp(gidf) == 0) {
-                        removeIntent = gFalse;
+                        removeIntent = false;
                         break;
                       }
                     }
@@ -318,12 +318,12 @@ int main (int argc, char *argv[])
         doMergeFormDict(afObj.getDict(), pageForm.getDict(), numOffset);
       }
     }
-    objectsCount += docs[i]->writePageObjects(outStr, yRef, numOffset, gTrue);
+    objectsCount += docs[i]->writePageObjects(outStr, yRef, numOffset, true);
     numOffset = yRef->getNumObjects() + 1;
   }
 
   rootNum = yRef->getNumObjects() + 1;
-  yRef->add(rootNum, 0, outStr->getPos(), gTrue);
+  yRef->add(rootNum, 0, outStr->getPos(), true);
   outStr->printf("%d 0 obj\n", rootNum);
   outStr->printf("<< /Type /Catalog /Pages %d 0 R", rootNum + 1);
   // insert OutputIntents
@@ -355,7 +355,7 @@ int main (int argc, char *argv[])
   outStr->printf(">>\nendobj\n");
   objectsCount++;
 
-  yRef->add(rootNum + 1, 0, outStr->getPos(), gTrue);
+  yRef->add(rootNum + 1, 0, outStr->getPos(), true);
   outStr->printf("%d 0 obj\n", rootNum + 1);
   outStr->printf("<< /Type /Pages /Kids [");
   for (j = 0; j < (int) pages.size(); j++)
@@ -364,7 +364,7 @@ int main (int argc, char *argv[])
   objectsCount++;
 
   for (i = 0; i < (int) pages.size(); i++) {
-    yRef->add(rootNum + i + 2, 0, outStr->getPos(), gTrue);
+    yRef->add(rootNum + i + 2, 0, outStr->getPos(), true);
     outStr->printf("%d 0 obj\n", rootNum + i + 2);
     outStr->printf("<< ");
     Dict *pageDict = pages[i].getDict();
@@ -387,9 +387,9 @@ int main (int argc, char *argv[])
   Ref ref;
   ref.num = rootNum;
   ref.gen = 0;
-  Object trailerDict = PDFDoc::createTrailerDict(objectsCount, gFalse, 0, &ref, yRef,
+  Object trailerDict = PDFDoc::createTrailerDict(objectsCount, false, 0, &ref, yRef,
                                                 fileName, outStr->getPos());
-  PDFDoc::writeXRefTableTrailer(std::move(trailerDict), yRef, gTrue, // write all entries according to ISO 32000-1, 7.5.4 Cross-Reference Table: "For a file that has never been incrementally updated, the cross-reference section shall contain only one subsection, whose object numbering begins at 0."
+  PDFDoc::writeXRefTableTrailer(std::move(trailerDict), yRef, true, // write all entries according to ISO 32000-1, 7.5.4 Cross-Reference Table: "For a file that has never been incrementally updated, the cross-reference section shall contain only one subsection, whose object numbering begins at 0."
                                 uxrefOffset, outStr, yRef);
 
   outStr->close();

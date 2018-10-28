@@ -78,31 +78,31 @@ EmbFile::~EmbFile()
   delete m_mimetype;
 }
 
-GBool EmbFile::save(const char *path) {
+bool EmbFile::save(const char *path) {
   FILE *f;
-  GBool ret;
+  bool ret;
 
   if (!(f = fopen(path, "wb"))) {
-    return gFalse;
+    return false;
   }
   ret = save2(f);
   fclose(f);
   return ret;
 }
 
-GBool EmbFile::save2(FILE *f) {
+bool EmbFile::save2(FILE *f) {
   int c;
 
   m_objStr.streamReset();
   while ((c = m_objStr.streamGetChar()) != EOF) {
     fputc(c, f);
   }
-  return gTrue;
+  return true;
 }
 
 FileSpec::FileSpec(const Object *fileSpecA)
 {
-  ok = gTrue;
+  ok = true;
   fileName = nullptr;
   platformFileName = nullptr;
   embFile = nullptr;
@@ -111,7 +111,7 @@ FileSpec::FileSpec(const Object *fileSpecA)
 
   Object obj1 = getFileSpecName(fileSpecA);
   if (!obj1.isString()) {
-    ok = gFalse;
+    ok = false;
     error(errSyntaxError, -1, "Invalid FileSpec");
     return;
   }
@@ -123,7 +123,7 @@ FileSpec::FileSpec(const Object *fileSpecA)
     if (obj1.isDict()) {
       fileStream = obj1.dictLookupNF("F");
       if (!fileStream.isRef()) {
-        ok = gFalse;
+        ok = false;
         fileStream.setToNull();
         error(errSyntaxError, -1, "Invalid FileSpec: Embedded file stream is not an indirect reference");
         return;

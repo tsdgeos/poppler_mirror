@@ -84,14 +84,14 @@ Object Array::getNF(int i) const {
   return elems[i].copy();
 }
 
-GBool Array::getString(int i, GooString *string) const
+bool Array::getString(int i, GooString *string) const
 {
   Object obj = getNF(i);
   if (obj.isString()) {
     string->clear();
     string->append(obj.getString());
-    return gTrue;
+    return true;
   } else {
-    return gFalse;
+    return false;
   }
 }

@@ -19,15 +19,15 @@
 #define HTMLUTILS_H_
 
 #include <math.h> // fabs
-#include "goo/gtypes.h" // GBool
+#include "goo/gtypes.h" // bool
 
 // Returns true iff the difference between a and b is less than the threshold
 // We always use fuzzy math when comparing decimal numbers due to imprecision
-inline GBool is_within(double a, double thresh, double b) {
+inline bool is_within(double a, double thresh, double b) {
 	return fabs(a-b) < thresh;
 }
 
-inline GBool rot_matrices_equal(const double * const mat0, const double * const mat1) {
+inline bool rot_matrices_equal(const double * const mat0, const double * const mat1) {
 	return is_within(mat0[0], .1, mat1[0]) && is_within(mat0[1], .1, mat1[1]) &&
 			is_within(mat0[2], .1, mat1[2]) && is_within(mat0[3], .1, mat1[3]);
 }
@@ -35,7 +35,7 @@ inline GBool rot_matrices_equal(const double * const mat0, const double * const 
 // rotation is (cos q, sin q, -sin q, cos q, 0, 0)
 // sin q is zero iff there is no rotation, or 180 deg. rotation;
 // for 180 rotation, cos q will be negative
-inline GBool isMatRotOrSkew(const double * const mat) {
+inline bool isMatRotOrSkew(const double * const mat) {
 	return mat[0] < 0 || !is_within(mat[1], .1, 0);
 }
 

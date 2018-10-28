@@ -100,7 +100,7 @@ typedef struct
 GDKSplashOutputDev::GDKSplashOutputDev(GdkScreen *screen,
                                        void (*redrawCbkA)(void *data),
                                        void *redrawCbkDataA, SplashColor sc):
-  SplashOutputDev(splashModeRGB8, 4, gFalse, sc),
+  SplashOutputDev(splashModeRGB8, 4, false, sc),
   incrementalUpdate (1)
 {
   redrawCbk = redrawCbkA;
@@ -218,7 +218,7 @@ view_set_page (View *view, int page)
     cairo_destroy (cr);
     g_object_unref (poppler_page);
   } else {
-    view->doc->doc->displayPage (view->out, page + 1, 72, 72, 0, gFalse, gTrue, gTrue);
+    view->doc->doc->displayPage (view->out, page + 1, 72, 72, 0, false, true, true);
     w = view->out->getBitmapWidth();
     h = view->out->getBitmapHeight();
   }

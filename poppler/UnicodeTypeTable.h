@@ -27,15 +27,15 @@
 
 #include "goo/gtypes.h"
 
-extern GBool unicodeTypeL(Unicode c);
+extern bool unicodeTypeL(Unicode c);
 
-extern GBool unicodeTypeR(Unicode c);
+extern bool unicodeTypeR(Unicode c);
 
-extern GBool unicodeTypeNum(Unicode c);
+extern bool unicodeTypeNum(Unicode c);
 
-extern GBool unicodeTypeAlphaNum(Unicode c);
+extern bool unicodeTypeAlphaNum(Unicode c);
 
-extern GBool unicodeIsAlphabeticPresentationForm(Unicode c);
+extern bool unicodeIsAlphabeticPresentationForm(Unicode c);
 
 extern Unicode unicodeToUpper(Unicode c);
 
@@ -44,6 +44,6 @@ extern Unicode *unicodeNormalizeNFKC(Unicode *in, int len,
 
 extern Unicode *unicodeNormalizeNFKC(Unicode *in, int len,
 				     int *out_len, int **offsets,
-				     GBool reverseRTL);
+				     bool reverseRTL);
 
 #endif

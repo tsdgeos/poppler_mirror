@@ -69,20 +69,20 @@
 
 static int firstPage = 1;
 static int lastPage = 0;
-static GBool printBoxes = gFalse;
-static GBool printMetadata = gFalse;
-static GBool printJS = gFalse;
-static GBool isoDates = gFalse;
-static GBool rawDates = gFalse;
+static bool printBoxes = false;
+static bool printMetadata = false;
+static bool printJS = false;
+static bool isoDates = false;
+static bool rawDates = false;
 static char textEncName[128] = "";
 static char ownerPassword[33] = "\001";
 static char userPassword[33] = "\001";
-static GBool printVersion = gFalse;
-static GBool printHelp = gFalse;
-static GBool printEnc = gFalse;
-static GBool printStructure = gFalse;
-static GBool printStructureText = gFalse;
-static GBool printDests = gFalse;
+static bool printVersion = false;
+static bool printHelp = false;
+static bool printEnc = false;
+static bool printStructure = false;
+static bool printStructureText = false;
+static bool printDests = false;
 
 static const ArgDesc argDesc[] = {
   {"-f",      argInt,      &firstPage,        0,
@@ -254,7 +254,7 @@ static void printStruct(const StructElement *element, unsigned indent) {
   }
 
   if (printStructureText && element->isContent()) {
-    GooString *text = element->getText(gFalse);
+    GooString *text = element->getText(false);
     printIndent(indent);
     if (text) {
       printf("\"%s\"\n", text->getCString());
@@ -660,7 +660,7 @@ static void printPdfSubtype(PDFDoc *doc, UnicodeMap *uMap) {
   }
 }
 
-static void printInfo(PDFDoc *doc, UnicodeMap *uMap, long long filesize, GBool multiPage) {
+static void printInfo(PDFDoc *doc, UnicodeMap *uMap, long long filesize, bool multiPage) {
   Page *page;
   char buf[256];
   double w, h, wISO, hISO;
@@ -747,10 +747,10 @@ static void printInfo(PDFDoc *doc, UnicodeMap *uMap, long long filesize, GBool m
     }
 
     printf("yes (print:%s copy:%s change:%s addNotes:%s algorithm:%s)\n",
-	   doc->okToPrint(gTrue) ? "yes" : "no",
-	   doc->okToCopy(gTrue) ? "yes" : "no",
-	   doc->okToChange(gTrue) ? "yes" : "no",
-	   doc->okToAddNotes(gTrue) ? "yes" : "no",
+	   doc->okToPrint(true) ? "yes" : "no",
+	   doc->okToCopy(true) ? "yes" : "no",
+	   doc->okToChange(true) ? "yes" : "no",
+	   doc->okToAddNotes(true) ? "yes" : "no",
 	   encAlgorithmName);
   } else {
     printf("no\n");
@@ -842,9 +842,9 @@ int main(int argc, char *argv[]) {
   GooString *ownerPW, *userPW;
   UnicodeMap *uMap;
   FILE *f;
-  GBool ok;
+  bool ok;
   int exitCode;
-  GBool multiPage;
+  bool multiPage;
 
   exitCode = 99;
 
@@ -864,7 +864,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (printStructureText)
-    printStructure = gTrue;
+    printStructure = true;
 
   // read config file
   globalParams = new GlobalParams();
@@ -924,9 +924,9 @@ int main(int argc, char *argv[]) {
     firstPage = 1;
   }
   if (lastPage == 0) {
-    multiPage = gFalse;
+    multiPage = false;
   } else {
-    multiPage = gTrue;
+    multiPage = true;
   }
   if (lastPage < 1 || lastPage > doc->getNumPages()) {
     lastPage = doc->getNumPages();
@@ -975,7 +975,7 @@ int main(int argc, char *argv[]) {
       fclose(f);
     }
 
-    if (multiPage == gFalse)
+    if (multiPage == false)
       lastPage = 1;
 
     printInfo(doc, uMap, filesize, multiPage);

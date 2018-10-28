@@ -71,29 +71,29 @@
 
 static int firstPage = 1;
 static int lastPage = 0;
-static GBool rawOrder = gTrue;
-GBool printCommands = gTrue;
-static GBool printHelp = gFalse;
-GBool printHtml = gFalse;
-GBool complexMode=gFalse;
-GBool singleHtml=gFalse; // singleHtml
-GBool ignore=gFalse;
+static bool rawOrder = true;
+bool printCommands = true;
+static bool printHelp = false;
+bool printHtml = false;
+bool complexMode=false;
+bool singleHtml=false; // singleHtml
+bool ignore=false;
 static char extension[5]="png";
 static double scale=1.5;
-GBool noframes=gFalse;
-GBool stout=gFalse;
-GBool xml=gFalse;
-GBool noRoundedCoordinates = gFalse;
-static GBool errQuiet=gFalse;
-static GBool noDrm=gFalse;
+bool noframes=false;
+bool stout=false;
+bool xml=false;
+bool noRoundedCoordinates = false;
+static bool errQuiet=false;
+static bool noDrm=false;
 double wordBreakThreshold=10;  // 10%, below converted into a coefficient - 0.1
 
-GBool showHidden = gFalse;
-GBool noMerge = gFalse;
-GBool fontFullName = gFalse;
+bool showHidden = false;
+bool noMerge = false;
+bool fontFullName = false;
 static char ownerPassword[33] = "";
 static char userPassword[33] = "";
-static GBool printVersion = gFalse;
+static bool printVersion = false;
 
 static GooString* getInfoString(Dict *infoDict, const char *key);
 static GooString* getInfoDate(Dict *infoDict, const char *key);
@@ -162,8 +162,8 @@ static const ArgDesc argDesc[] = {
 class SplashOutputDevNoText : public SplashOutputDev {
 public:
   SplashOutputDevNoText(SplashColorMode colorModeA, int bitmapRowPadA,
-        GBool reverseVideoA, SplashColorPtr paperColorA,
-        GBool bitmapTopDownA = gTrue) : SplashOutputDev(colorModeA,
+        bool reverseVideoA, SplashColorPtr paperColorA,
+        bool bitmapTopDownA = true) : SplashOutputDev(colorModeA,
             bitmapRowPadA, reverseVideoA, paperColorA, bitmapTopDownA) { }
   virtual ~SplashOutputDevNoText() { }
   
@@ -171,13 +171,13 @@ public:
       double dx, double dy,
       double originX, double originY,
       CharCode code, int nBytes, Unicode *u, int uLen) override { }
-  GBool beginType3Char(GfxState *state, double x, double y,
+  bool beginType3Char(GfxState *state, double x, double y,
       double dx, double dy,
       CharCode code, Unicode *u, int uLen) override { return false; }
   void endType3Char(GfxState *state) override { }
   void beginTextObject(GfxState *state) override { }
   void endTextObject(GfxState *state) override { }
-  GBool interpretType3Chars() override { return gFalse; }
+  bool interpretType3Chars() override { return false; }
 };
 #endif
 
@@ -191,8 +191,8 @@ int main(int argc, char *argv[]) {
 #ifdef HAVE_SPLASH
   SplashOutputDev *splashOut = nullptr;
 #endif
-  GBool doOutline;
-  GBool ok;
+  bool doOutline;
+  bool ok;
   GooString *ownerPW, *userPW;
   Object info;
   int exit_status = EXIT_FAILURE;
@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
 
   if (errQuiet) {
     globalParams->setErrQuiet(errQuiet);
-    printCommands = gFalse; // I'm not 100% what is the differecne between them
+    printCommands = false; // I'm not 100% what is the differecne between them
   }
 
   if (textEncName[0]) {
@@ -311,22 +311,22 @@ int main(int argc, char *argv[]) {
    if (scale<0.5) scale=0.5;
    
    if (complexMode || singleHtml) {
-     //noframes=gFalse;
-     stout=gFalse;
+     //noframes=false;
+     stout=false;
    } 
 
    if (stout) {
-     noframes=gTrue;
-     complexMode=gFalse;
-     singleHtml=gFalse;
+     noframes=true;
+     complexMode=false;
+     singleHtml=false;
    }
 
    if (xml)
    { 
-       complexMode = gTrue;
-       singleHtml = gFalse;
-       noframes = gTrue;
-       noMerge = gTrue;
+       complexMode = true;
+       singleHtml = false;
+       noframes = true;
+       noMerge = true;
    }
 
   // get page range
@@ -391,7 +391,7 @@ int main(int argc, char *argv[]) {
   if (htmlOut->isOk())
   {
     doc->displayPages(htmlOut, firstPage, lastPage, 72 * scale, 72 * scale, 0,
-		      gTrue, gFalse, gFalse);
+		      true, false, false);
     htmlOut->dumpDocOutline(doc);
   }
   
@@ -405,13 +405,13 @@ int main(int argc, char *argv[]) {
     SplashImageFileFormat format = strcmp(extension, "jpg") ?
         splashFormatPng : splashFormatJpeg;
 
-    splashOut = new SplashOutputDevNoText(splashModeRGB8, 4, gFalse, color);
+    splashOut = new SplashOutputDevNoText(splashModeRGB8, 4, false, color);
     splashOut->startDoc(doc);
 
     for (int pg = firstPage; pg <= lastPage; ++pg) {
       doc->displayPage(splashOut, pg,
                        72 * scale, 72 * scale,
-                       0, gTrue, gFalse, gFalse);
+                       0, true, false, false);
       SplashBitmap *bitmap = splashOut->getBitmap();
 
       imgFileName = GooString::format("{0:s}{1:03d}.{2:s}", 
@@ -460,7 +460,7 @@ static GooString* getInfoString(Dict *infoDict, const char *key) {
   // Value HTML escaped and converted to desired encoding
   GooString *encodedString = nullptr;
   // Is rawString UCS2 (as opposed to pdfDocEncoding)
-  GBool isUnicode;
+  bool isUnicode;
 
   obj = infoDict->lookup(key);
   if (obj.isString()) {
@@ -468,10 +468,10 @@ static GooString* getInfoString(Dict *infoDict, const char *key) {
 
     // Convert rawString to unicode
     if (rawString->hasUnicodeMarker()) {
-      isUnicode = gTrue;
+      isUnicode = true;
       unicodeLength = (obj.getString()->getLength() - 2) / 2;
     } else {
-      isUnicode = gFalse;
+      isUnicode = false;
       unicodeLength = obj.getString()->getLength();
     }
     unicodeString = new Unicode[unicodeLength];

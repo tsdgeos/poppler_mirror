@@ -46,13 +46,13 @@ public:
   HtmlLink(double xmin,double ymin,double xmax,double ymax,GooString *_dest);
   ~HtmlLink();
   HtmlLink& operator=(const HtmlLink &) = delete;
-  GBool isEqualDest(const HtmlLink& x) const;
+  bool isEqualDest(const HtmlLink& x) const;
   GooString *getDest(){return new GooString(dest);}
   double getX1() const {return Xmin;}
   double getX2() const {return Xmax;}
   double getY1() const {return Ymin;}
   double getY2() const {return Ymax;}
-  GBool inLink(double xmin,double ymin,double xmax,double ymax) const ;
+  bool inLink(double xmin,double ymin,double xmax,double ymax) const ;
   //GooString *Link(GooString *content);
   GooString* getLinkStart();
   
@@ -67,7 +67,7 @@ public:
  HtmlLinks(const HtmlLinks &) = delete;
  HtmlLinks& operator=(const HtmlLinks &) = delete;
  void AddLink(const HtmlLink& x) {accu->push_back(x);}
- GBool inLink(double xmin,double ymin,double xmax,double ymax,int& p) const;
+ bool inLink(double xmin,double ymin,double xmax,double ymax,int& p) const;
  HtmlLink* getLink(int i) const;
 
 };

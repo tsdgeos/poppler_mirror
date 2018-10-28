@@ -59,8 +59,8 @@ public:
   PDFRectangle() { x1 = y1 = x2 = y2 = 0; }
   PDFRectangle(double x1A, double y1A, double x2A, double y2A)
     { x1 = x1A; y1 = y1A; x2 = x2A; y2 = y2A; }
-  GBool isValid() { return x1 != 0 || y1 != 0 || x2 != 0 || y2 != 0; }
-  GBool contains(double x, double y) { return x1 <= x && x <= x2 && y1 <= y && y <= y2; }
+  bool isValid() { return x1 != 0 || y1 != 0 || x2 != 0 || y2 != 0; }
+  bool contains(double x, double y) { return x1 <= x && x <= x2 && y1 <= y && y <= y2; }
   void clipTo(PDFRectangle *rect);
   
   bool operator==(const PDFRectangle &rect) const { return x1 == rect.x1 && y1 == rect.y1 && x2 == rect.x2 && y2 == rect.y2; }
@@ -84,7 +84,7 @@ public:
   // Accessors.
   const PDFRectangle *getMediaBox() const { return &mediaBox; }
   const PDFRectangle *getCropBox() const { return &cropBox; }
-  GBool isCropped() const { return haveCropBox; }
+  bool isCropped() const { return haveCropBox; }
   const PDFRectangle *getBleedBox() const { return &bleedBox; }
   const PDFRectangle *getTrimBox() const { return &trimBox; }
   const PDFRectangle *getArtBox() const { return &artBox; }
@@ -115,11 +115,11 @@ public:
 
 private:
 
-  GBool readBox(Dict *dict, const char *key, PDFRectangle *box);
+  bool readBox(Dict *dict, const char *key, PDFRectangle *box);
 
   PDFRectangle mediaBox;
   PDFRectangle cropBox;
-  GBool haveCropBox;
+  bool haveCropBox;
   PDFRectangle bleedBox;
   PDFRectangle trimBox;
   PDFRectangle artBox;
@@ -150,13 +150,13 @@ public:
   Page& operator=(const Page &) = delete;
 
   // Is page valid?
-  GBool isOk() const { return ok; }
+  bool isOk() const { return ok; }
 
   // Get page parameters.
   int getNum() const { return num; }
   const PDFRectangle *getMediaBox() const { return attrs->getMediaBox(); }
   const PDFRectangle *getCropBox() const { return attrs->getCropBox(); }
-  GBool isCropped() const { return attrs->isCropped(); }
+  bool isCropped() const { return attrs->isCropped(); }
   double getMediaWidth() const
     { return attrs->getMediaBox()->x2 - attrs->getMediaBox()->x1; }
   double getMediaHeight() const
@@ -201,7 +201,7 @@ public:
 
   // Get thumb.
   Object getThumb() { return thumb.fetch(xref); }
-  GBool loadThumb(unsigned char **data, int *width, int *height, int *rowstride);
+  bool loadThumb(unsigned char **data, int *width, int *height, int *rowstride);
 
   // Get transition.
   Object getTrans() { return trans.fetch(xref); }
@@ -225,45 +225,45 @@ public:
   LinkAction *getAdditionalAction(PageAdditionalActionsType type);
 
   Gfx *createGfx(OutputDev *out, double hDPI, double vDPI,
-		 int rotate, GBool useMediaBox, GBool crop,
+		 int rotate, bool useMediaBox, bool crop,
 		 int sliceX, int sliceY, int sliceW, int sliceH,
-		 GBool printing,
-		 GBool (*abortCheckCbk)(void *data),
+		 bool printing,
+		 bool (*abortCheckCbk)(void *data),
 		 void *abortCheckCbkData, XRef *xrefA = nullptr);
 
   // Display a page.
   void display(OutputDev *out, double hDPI, double vDPI,
-	       int rotate, GBool useMediaBox, GBool crop,
-	       GBool printing,
-	       GBool (*abortCheckCbk)(void *data) = nullptr,
+	       int rotate, bool useMediaBox, bool crop,
+	       bool printing,
+	       bool (*abortCheckCbk)(void *data) = nullptr,
 	       void *abortCheckCbkData = nullptr,
-               GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+               bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
                void *annotDisplayDecideCbkData = nullptr,
-               GBool copyXRef = gFalse);
+               bool copyXRef = false);
 
   // Display part of a page.
   void displaySlice(OutputDev *out, double hDPI, double vDPI,
-		    int rotate, GBool useMediaBox, GBool crop,
+		    int rotate, bool useMediaBox, bool crop,
 		    int sliceX, int sliceY, int sliceW, int sliceH,
-		    GBool printing,
-		    GBool (*abortCheckCbk)(void *data) = nullptr,
+		    bool printing,
+		    bool (*abortCheckCbk)(void *data) = nullptr,
 		    void *abortCheckCbkData = nullptr,
-                    GBool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
+                    bool (*annotDisplayDecideCbk)(Annot *annot, void *user_data) = nullptr,
                     void *annotDisplayDecideCbkData = nullptr,
-                    GBool copyXRef = gFalse);
+                    bool copyXRef = false);
 
   void display(Gfx *gfx);
 
   void makeBox(double hDPI, double vDPI, int rotate,
-	       GBool useMediaBox, GBool upsideDown,
+	       bool useMediaBox, bool upsideDown,
 	       double sliceX, double sliceY, double sliceW, double sliceH,
-	       PDFRectangle *box, GBool *crop);
+	       PDFRectangle *box, bool *crop);
 
   void processLinks(OutputDev *out);
 
   // Get the page's default CTM.
   void getDefaultCTM(double *ctm, double hDPI, double vDPI,
-		     int rotate, GBool useMediaBox, GBool upsideDown);
+		     int rotate, bool useMediaBox, bool upsideDown);
 
 private:
   // replace xref
@@ -282,7 +282,7 @@ private:
   Object trans;			// page transition
   Object actions;		// page additional actions
   double duration;              // page duration
-  GBool ok;			// true if page is valid
+  bool ok;			// true if page is valid
   mutable std::recursive_mutex mutex;
 };
 

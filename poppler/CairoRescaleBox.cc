@@ -263,7 +263,7 @@ static int compute_coverage (int coverage[], int src_length, int dest_length)
 }
 
 
-GBool CairoRescaleBox::downScaleImage(unsigned orig_width, unsigned orig_height,
+bool CairoRescaleBox::downScaleImage(unsigned orig_width, unsigned orig_height,
                                       signed scaled_width, signed scaled_height,
                                       unsigned short int start_column, unsigned short int start_row,
                                       unsigned short int width, unsigned short int height,
@@ -275,7 +275,7 @@ GBool CairoRescaleBox::downScaleImage(unsigned orig_width, unsigned orig_height,
   int *x_coverage = nullptr;
   int *y_coverage = nullptr;
   uint32_t *temp_buf = nullptr;
-  GBool retval = gFalse;
+  bool retval = false;
   unsigned int *dest;
   int dst_stride;
 
@@ -365,7 +365,7 @@ GBool CairoRescaleBox::downScaleImage(unsigned orig_width, unsigned orig_height,
   }
 //    assert (src_y<=orig_height);
 
-  retval = gTrue;
+  retval = true;
 
 cleanup:
   free (x_coverage);

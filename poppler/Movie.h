@@ -55,13 +55,13 @@ struct MovieActivationParameters {
 
   int volume;                              // 100
 
-  GBool showControls;                      // false
+  bool showControls;                      // false
 
-  GBool synchronousPlay;                   // false
+  bool synchronousPlay;                   // false
   MovieRepeatMode repeatMode;              // repeatModeOnce
 
   // floating window position
-  GBool floatingWindow;
+  bool floatingWindow;
   double xPosition;                        // 0.5
   double yPosition;                        // 0.5
   int znum;                                // 1
@@ -76,7 +76,7 @@ class Movie {
   ~Movie();
   Movie& operator=(const Movie &) = delete;
 
-  GBool isOk() const { return ok; }
+  bool isOk() const { return ok; }
   const MovieActivationParameters* getActivationParameters() const { return &MA; }
 
   const GooString* getFileName() const { return fileName; }
@@ -85,9 +85,9 @@ class Movie {
   void getAspect (int *widthA, int *heightA) const { *widthA = width; *heightA = height; }
 
   Object getPoster() const { return poster.copy(); }
-  GBool getShowPoster() const { return showPoster; }
+  bool getShowPoster() const { return showPoster; }
 
-  GBool getUseFloatingWindow() const { return MA.floatingWindow; }
+  bool getUseFloatingWindow() const { return MA.floatingWindow; }
   void  getFloatingWindowSize(int *width, int *height);
 
   Movie* copy() const ;
@@ -95,14 +95,14 @@ class Movie {
  private:
   void parseMovie (const Object *movieDict);
 
-  GBool ok;
+  bool ok;
 
   Gushort rotationAngle;                   // 0
   int width;                               // Aspect
   int height;                              // Aspect
 
   Object poster;
-  GBool showPoster;
+  bool showPoster;
 
   GooString* fileName;
 

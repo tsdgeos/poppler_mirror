@@ -69,7 +69,7 @@
 #define catalogLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 
 Catalog::Catalog(PDFDoc *docA) {
-  ok = gTrue;
+  ok = true;
   doc = docA;
   xref = doc->getXRef();
   numPages = -1;
@@ -94,7 +94,7 @@ Catalog::Catalog(PDFDoc *docA) {
   Object catDict = xref->getCatalog();
   if (!catDict.isDict()) {
     error(errSyntaxError, -1, "Catalog object is wrong type ({0:s})", catDict.getTypeName());
-    ok = gFalse;
+    ok = false;
     return;
   }
   // get the AcroForm dictionary
@@ -182,8 +182,8 @@ Page *Catalog::getPage(int i)
 
   catalogLocker();
   if (std::size_t(i) > pages.size()) {
-     GBool cached = cachePageTree(i);
-     if ( cached == gFalse) {
+     bool cached = cachePageTree(i);
+     if ( cached == false) {
        return nullptr;
      }
   }
@@ -196,15 +196,15 @@ Ref *Catalog::getPageRef(int i)
 
   catalogLocker();
   if (std::size_t(i) > pages.size()) {
-     GBool cached = cachePageTree(i);
-     if ( cached == gFalse) {
+     bool cached = cachePageTree(i);
+     if ( cached == false) {
        return nullptr;
      }
   }
   return &pages[i-1].second;
 }
 
-GBool Catalog::cachePageTree(int page)
+bool Catalog::cachePageTree(int page)
 {
   if (pagesList == nullptr) {
 
@@ -220,11 +220,11 @@ GBool Catalog::cachePageTree(int page)
         pagesRef = pagesDictRef.getRef();
       } else {
         error(errSyntaxError, -1, "Catalog dictionary does not contain a valid \"Pages\" entry");
-        return gFalse;
+        return false;
       }
     } else {
       error(errSyntaxError, -1, "Could not find catalog dictionary");
-      return gFalse;
+      return false;
     }
 
     Object obj = catDict.dictLookup("Pages");
@@ -232,7 +232,7 @@ GBool Catalog::cachePageTree(int page)
     // PDF file where the /Type entry is missing.
     if (!obj.isDict()) {
       error(errSyntaxError, -1, "Top-level pages object is wrong type ({0:s})", obj.getTypeName());
-      return gFalse;
+      return false;
     }
 
     pages.clear();
@@ -248,16 +248,16 @@ GBool Catalog::cachePageTree(int page)
 
   while(1) {
 
-    if (std::size_t(page) <= pages.size()) return gTrue;
+    if (std::size_t(page) <= pages.size()) return true;
 
-    if (pagesList->empty()) return gFalse;
+    if (pagesList->empty()) return false;
 
     Object pagesDict = pagesList->back().copy();
     Object kids = pagesDict.dictLookup("Kids");
     if (!kids.isArray()) {
       error(errSyntaxError, -1, "Kids object (page {0:uld}) is wrong type ({1:s})",
 	    pages.size()+1, kids.getTypeName());
-      return gFalse;
+      return false;
     }
 
     int kidsIdx = kidsIdxList->back();
@@ -275,13 +275,13 @@ GBool Catalog::cachePageTree(int page)
     if (!kidRef.isRef()) {
       error(errSyntaxError, -1, "Kid object (page {0:uld}) is not an indirect reference ({1:s})",
 	    pages.size()+1, kidRef.getTypeName());
-      return gFalse;
+      return false;
     }
 
-    GBool loop = gFalse;;
+    bool loop = false;;
     for (size_t i = 0; i < pagesRefList->size(); i++) {
       if (((*pagesRefList)[i]).num == kidRef.getRefNum()) {
-         loop = gTrue;
+         loop = true;
          break;
       }
     }
@@ -298,12 +298,12 @@ GBool Catalog::cachePageTree(int page)
 				      kidRef.getRef(), attrs, form);
       if (!p->isOk()) {
 	error(errSyntaxError, -1, "Failed to create page (page {0:uld})", pages.size()+1);
-        return gFalse;
+        return false;
       }
 
       if (pages.size() >= std::size_t(numPages)) {
         error(errSyntaxError, -1, "Page count in top-level pages object is incorrect");
-        return gFalse;
+        return false;
       }
 
       pages.emplace_back(std::move(p), kidRef.getRef());
@@ -324,7 +324,7 @@ GBool Catalog::cachePageTree(int page)
     }
   }
 
-  return gFalse;
+  return false;
 }
 
 int Catalog::findPage(int num, int gen) {
@@ -672,32 +672,32 @@ GooString *NameTree::getName(int index)
     }
 }
 
-GBool Catalog::labelToIndex(GooString *label, int *index)
+bool Catalog::labelToIndex(GooString *label, int *index)
 {
   char *end;
 
   PageLabelInfo *pli = getPageLabelInfo();
   if (pli != nullptr) {
     if (!pli->labelToIndex(label, index))
-      return gFalse;
+      return false;
   } else {
     *index = strtol(label->getCString(), &end, 10) - 1;
     if (*end != '\0')
-      return gFalse;
+      return false;
   }
 
   if (*index < 0 || *index >= getNumPages())
-    return gFalse;
+    return false;
 
-  return gTrue;
+  return true;
 }
 
-GBool Catalog::indexToLabel(int index, GooString *label)
+bool Catalog::indexToLabel(int index, GooString *label)
 {
   char buffer[32];
 
   if (index < 0 || index >= getNumPages())
-    return gFalse;
+    return false;
 
   PageLabelInfo *pli = getPageLabelInfo();
   if (pli != nullptr) {
@@ -705,7 +705,7 @@ GBool Catalog::indexToLabel(int index, GooString *label)
   } else {
     snprintf(buffer, sizeof (buffer), "%d", index + 1);
     label->append(buffer);	      
-    return gTrue;
+    return true;
   }
 }
 

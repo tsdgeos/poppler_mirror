@@ -79,7 +79,7 @@ public:
 
   // Return true if this CMap matches the specified <collectionA>, and
   // <cMapNameA>.
-  GBool match(const GooString *collectionA, const GooString *cMapNameA);
+  bool match(const GooString *collectionA, const GooString *cMapNameA);
 
   // Return the CID corresponding to the character code starting at
   // <s>, which contains <len> bytes.  Sets *<c> to the char code, and
@@ -106,7 +106,7 @@ private:
 
   GooString *collection;
   GooString *cMapName;
-  GBool isIdent;		// true if this CMap is an identity mapping,
+  bool isIdent;		// true if this CMap is an identity mapping,
 				//   or is based on one (via usecmap)
   int wMode;			// writing mode (0=horizontal, 1=vertical)
   CMapVectorEntry *vector;	// vector for first byte (NULL for

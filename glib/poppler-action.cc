@@ -444,7 +444,7 @@ find_annot_movie_for_action (PopplerDocument *document,
       Object annots = p->getAnnotsObject ();
       if (annots.isArray ()) {
         int j;
-	GBool found = gFalse;
+	bool found = false;
 
 	for (j = 0; j < annots.arrayGetLength () && !found; ++j) {
           annotObj = annots.arrayGet(j);
@@ -459,7 +459,7 @@ find_annot_movie_for_action (PopplerDocument *document,
 	      const GooString *t = obj1.getString ();
 
 	      if (title->cmp(t) == 0)
-	        found = gTrue;
+	        found = true;
 	    }
 	  }
 	  if (!found)
@@ -578,7 +578,7 @@ build_ocg_state (PopplerDocument *document,
 		 const LinkOCGState    *ocg_state)
 {
 	const GooList *st_list = ocg_state->getStateList();
-	GBool    preserve_rb = ocg_state->getPreserveRB();
+	bool    preserve_rb = ocg_state->getPreserveRB();
 	gint     i, j;
 	GList   *layer_state = nullptr;
 

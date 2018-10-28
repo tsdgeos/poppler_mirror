@@ -81,7 +81,7 @@ void XPDFReader::lookupBool( Dict * dict, char * type, bool & dest )
     if ( boolObj.isNull() )
         return;
     if ( boolObj.isBool() )
-        dest = boolObj.getBool() == gTrue;
+        dest = boolObj.getBool() == true;
     else
         qDebug() << type << " is not Bool." << endl;
 }

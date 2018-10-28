@@ -30,10 +30,10 @@
 #include <string.h>
 
 /* See PDF Reference 1.3, Section 3.8.2 for PDF Date representation */
-GBool parseDateString(const char *dateString, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute)
+bool parseDateString(const char *dateString, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute)
 {
-    if ( dateString == nullptr ) return gFalse;
-    if ( strlen(dateString) < 2 ) return gFalse;
+    if ( dateString == nullptr ) return false;
+    if ( strlen(dateString) < 2 ) return false;
 
     if ( dateString[0] == 'D' && dateString[1] == ':' )
         dateString += 2;
@@ -64,16 +64,16 @@ GBool parseDateString(const char *dateString, int *year, int *month, int *day, i
            }
            else
            {
-               return gFalse;
+               return false;
            }
        }
 
-       if (*year <= 0) return gFalse;
+       if (*year <= 0) return false;
 
-       return gTrue;
+       return true;
    }
 
-   return gFalse;
+   return false;
 }
 
 // Convert time to PDF date string
