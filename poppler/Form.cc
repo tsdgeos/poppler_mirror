@@ -235,16 +235,16 @@ void FormWidgetButton::setState (bool astate)
     return;
 
   // Silently return if can't set ON state
-  if (astate && !onStr)
+  if (astate && !getOnStr())
     return;
 
-  parent()->setState(astate ? onStr->getCString() : (char *)"Off");
+  parent()->setState(astate ? getOnStr() : (char *)"Off");
   // Parent will call setAppearanceState()
 }
 
 bool FormWidgetButton::getState () const
 {
-  return onStr ? parent()->getState(onStr->getCString()) : false;
+  return getOnStr() ? parent()->getState( getOnStr() ) : false;
 }
 
 FormFieldButton *FormWidgetButton::parent() const
