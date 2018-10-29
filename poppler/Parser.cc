@@ -197,6 +197,18 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
   Stream *str;
   Goffset length;
   Goffset pos, endPos;
+  XRefEntry *entry;
+
+  if (xref && (entry = xref->getEntry(objNum, false))) {
+    if (!entry->getFlag(XRefEntry::Parsing) ||
+        (objNum == 0 && objGen == 0)) {
+      entry->setFlag(XRefEntry::Parsing, true);
+    } else {
+      error(errSyntaxError, getPos(),
+            "Object '{0:d} {1:d} obj' is being already parsed", objNum, objGen);
+      return nullptr;
+    }
+  }
 
   // get stream start position
   lexer->skipToNextLine();
@@ -277,6 +289,9 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
 
   // get filters
   str = str->addFilters(str->getDict(), recursion);
+
+  if (entry)
+    entry->setFlag(XRefEntry::Parsing, false);
 
   return str;
 }

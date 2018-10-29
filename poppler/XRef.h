@@ -65,6 +65,7 @@ struct XRefEntry {
   enum Flag {
     // Regular flags
     Updated,     // Entry was modified
+    Parsing,     // Entry is currently being parsed
 
     // Special flags -- available only after xref->scanSpecialFlags() is run
     Unencrypted, // Entry is stored in unencrypted form (meaningless in unencrypted documents)
