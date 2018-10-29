@@ -3337,7 +3337,12 @@ void Splash::scaleMaskYdXd(SplashImageMaskSource src, void *srcData,
 
   // allocate buffers
   lineBuf = (Guchar *)gmalloc(srcWidth);
-  pixBuf = (Guint *)gmallocn(srcWidth, sizeof(int));
+  pixBuf = (Guint *)gmallocn_checkoverflow(srcWidth, sizeof(int));
+  if (unlikely(!pixBuf)) {
+      error(errInternal, -1, "Couldn't allocate memory for pixBux in Splash::scaleMaskYdXd");
+      gfree(lineBuf);
+      return;
+  }
 
   // init y scale Bresenham
   yt = 0;
