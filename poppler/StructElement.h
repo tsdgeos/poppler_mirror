@@ -7,6 +7,7 @@
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
 // Copyright 2014, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
 
@@ -72,7 +73,7 @@ public:
   Attribute(Type type, Object *value);
 
   // Creates an UserProperty attribute, with an arbitrary name and value.
-  Attribute(const char *name, int nameLen, Object *value);
+  Attribute(GooString &&name, Object *value);
 
   bool isOk() const { return type != Unknown; }
 

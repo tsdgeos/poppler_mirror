@@ -10,6 +10,7 @@
 // Copyright 2015 Dmytro Morgun <lztoad@gmail.com>
 // Copyright 2018 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
 
@@ -659,11 +660,11 @@ static StructElement::Type nameToType(const char *name)
 // Attribute
 //------------------------------------------------------------------------
 
-Attribute::Attribute(const char *nameA, int nameLenA, Object *valueA):
+Attribute::Attribute(GooString &&nameA, Object *valueA):
   type(UserProperty),
   owner(UserProperties),
   revision(0),
-  name(nameA, nameLenA),
+  name(std::move(nameA)),
   value(),
   hidden(false),
   formatted(nullptr)
@@ -769,16 +770,13 @@ Attribute::Type Attribute::getTypeForName(const char *name, StructElement *eleme
 Attribute *Attribute::parseUserProperty(Dict *property)
 {
   Object obj, value;
-  const char *name = nullptr;
-  int nameLen = GooString::CALC_STRING_LEN;
+  GooString name;
 
   obj = property->lookup("N");
   if (obj.isString()) {
-    const GooString *s = obj.getString();
-    name = s->getCString();
-    nameLen = s->getLength();
+    name.Set(obj.getString());
   } else if (obj.isName())
-    name = obj.getName();
+    name.Set(obj.getName());
   else {
     error(errSyntaxError, -1, "N object is wrong type ({0:s})", obj.getTypeName());
     return nullptr;
@@ -790,7 +788,7 @@ Attribute *Attribute::parseUserProperty(Dict *property)
     return nullptr;
   }
 
-  Attribute *attribute = new Attribute(name, nameLen, &value);
+  Attribute *attribute = new Attribute(std::move(name), &value);
   obj = property->lookup("F");
   if (obj.isString()) {
     attribute->setFormattedValue(obj.getString()->getCString());
