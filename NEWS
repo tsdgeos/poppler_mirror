@@ -1,3 +1,26 @@
+Release 0.71.0:
+        core:
+         * Replace the implementation of GooString by std::string but keep the exact interface intact.
+         * Replace GBool, gTrue, and gFalse by bool, true, false, resp.
+         * Splash: Fix crash if document is malformed (too wide)
+
+        qt5:
+         * Fix crash when adding Highlight Annotations
+         * Default to hidden symbols
+         * Fix two leaks in a test
+
+        glib:
+         * demo: Fix build on Windows
+         * demo: Align property labels to top of cell
+
+        cpp:
+         * Fix typos in documentation
+
+        build system:
+         * Enable searching for GTK on Windows
+         * Remove unused files
+         * Add fuzzer target from oss-fuzz project
+
 Release 0.70.1
         glib:
          * Install missing file
