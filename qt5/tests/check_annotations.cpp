@@ -26,6 +26,7 @@ void TestAnnotations::checkQColorPrecision() {
     double normalized = static_cast<uint16_t>(i) / static_cast<double>(std::numeric_limits<uint16_t>::max());
     GooString* serialized = GooString::format("{0:.5f}", normalized);
     double deserialized = gatof( serialized->getCString() );
+    delete serialized;
     uint16_t denormalized = std::round(deserialized * std::numeric_limits<uint16_t>::max());
     if (static_cast<uint16_t>(i) != denormalized) {
       precisionOk = false;
@@ -98,6 +99,7 @@ void TestAnnotations::checkFontSizeAndColor()
       if (annot != annots.constEnd())
           ++annot;
     }
+    qDeleteAll(annots);
   }
 }
 
