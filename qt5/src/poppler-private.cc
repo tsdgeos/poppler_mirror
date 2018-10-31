@@ -288,7 +288,7 @@ namespace Debug {
         for ( int i = 0; i < numItems; ++i )
         {
             // iterate over every object in 'items'
-            OutlineItem * outlineItem = (OutlineItem *)items->get( i );
+	    ::OutlineItem * outlineItem = (::OutlineItem *)items->get( i );
 
             // 1. create element using outlineItem's title as tagName
             QString name;

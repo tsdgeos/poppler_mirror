@@ -34,6 +34,7 @@ set(poppler_qt5_SRCS
   poppler-textbox.cc
   poppler-page-transition.cc
   poppler-media.cc
+  poppler-outline.cc
   ArthurOutputDev.cc
   poppler-version.cpp
 )

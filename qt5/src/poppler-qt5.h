@@ -70,6 +70,9 @@ namespace Poppler {
     class PDFConverter;
     class PSConverter;
 
+    struct OutlineItemData;
+    struct OutlineData;
+
     /**
 	Debug/error function.
 
@@ -978,6 +981,51 @@ delete it;
 	PageData *m_page;
     };
 
+    class POPPLER_QT5_EXPORT OutlineItem {
+      friend class Outline;
+    public:
+      OutlineItem();
+      ~OutlineItem();
+
+      OutlineItem(const OutlineItem &other);
+      OutlineItem &operator=(const OutlineItem &other);
+
+      OutlineItem(OutlineItem &&other);
+      OutlineItem &operator=(OutlineItem &&other);
+
+      bool isNull() const;
+
+      QString name() const;
+
+      bool isOpen() const;
+
+      QSharedPointer<const LinkDestination> destination() const;
+
+      QString externalFileName() const;
+
+      QString uri() const;
+
+      QVector<OutlineItem> children() const;
+
+    private:
+      OutlineItem(OutlineItemData *data);
+      OutlineItemData *m_data;
+    };
+
+    class POPPLER_QT5_EXPORT Outline {
+      friend class Document;
+    public:
+      ~Outline();
+
+      QVector<OutlineItem> items() const;
+
+    private:
+      Q_DISABLE_COPY(Outline)
+
+      Outline(OutlineData *data);
+      OutlineData *m_data;
+    };
+
 /**
    \brief PDF document.
 
@@ -1571,6 +1619,8 @@ QString subject = m_doc->info("Subject");
 	  \returns the TOC, or NULL if the Document does not have one
 	*/
 	QDomDocument *toc() const;
+
+	Outline *outline() const;
 	
 	/**
 	   Tries to resolve the named destination \p name.
