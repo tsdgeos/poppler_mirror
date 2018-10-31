@@ -40,13 +40,6 @@ struct OutlineItemData
   mutable QString uri;
 };
 
-struct OutlineData
-{
-  OutlineData(const ::Outline *data, DocumentData *documentData) : data{data}, documentData{documentData} {}
-  const ::Outline *data;
-  DocumentData *documentData;
-};
-
 }
 
 #endif

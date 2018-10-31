@@ -586,7 +586,7 @@ namespace Poppler {
     
     QDomDocument *Document::toc() const
     {
-	::Outline * outline = m_doc->doc->getOutline();
+        Outline * outline = m_doc->doc->getOutline();
         if ( !outline )
             return nullptr;
 
@@ -601,13 +601,19 @@ namespace Poppler {
         return toc;
     }
 
-    Outline *Document::outline() const
+    QVector<OutlineItem> Document::outline() const
     {
-      if (auto *outline = m_doc->doc->getOutline()) {
-	return new Outline{new OutlineData{outline, m_doc}};
+      QVector<OutlineItem> result;
+
+      if (::Outline *outline = m_doc->doc->getOutline()) {
+	if (const GooList *items = outline->getItems()) {
+	  for (void *item : *items) {
+	    result.push_back(OutlineItem{new OutlineItemData{static_cast<::OutlineItem *>(item), m_doc}});
+	  }
+	}
       }
 
-      return nullptr;
+      return result;
     }
 
     LinkDestination *Document::linkDestination( const QString &name )

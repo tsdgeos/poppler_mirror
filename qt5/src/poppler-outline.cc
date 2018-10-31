@@ -163,27 +163,4 @@ QVector<OutlineItem> OutlineItem::children() const
   return result;
 }
 
-Outline::Outline(OutlineData *data) : m_data{data} {}
-
-Outline::~Outline()
-{
-  delete m_data;
-  m_data = nullptr;
-}
-
-QVector<OutlineItem> Outline::items() const
-{
-  QVector<OutlineItem> result;
-
-  const ::Outline *data = m_data->data;
-
-  if (const GooList *items = data->getItems()) {
-    for (void *item : *items) {
-      result.push_back(OutlineItem{new OutlineItemData{static_cast<::OutlineItem *>(item), m_data->documentData}});
-    }
-  }
-
-  return result;
-}
-
 }

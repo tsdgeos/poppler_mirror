@@ -71,7 +71,6 @@ namespace Poppler {
     class PSConverter;
 
     struct OutlineItemData;
-    struct OutlineData;
 
     /**
 	Debug/error function.
@@ -982,7 +981,7 @@ delete it;
     };
 
     class POPPLER_QT5_EXPORT OutlineItem {
-      friend class Outline;
+      friend class Document;
     public:
       OutlineItem();
       ~OutlineItem();
@@ -1010,20 +1009,6 @@ delete it;
     private:
       OutlineItem(OutlineItemData *data);
       OutlineItemData *m_data;
-    };
-
-    class POPPLER_QT5_EXPORT Outline {
-      friend class Document;
-    public:
-      ~Outline();
-
-      QVector<OutlineItem> items() const;
-
-    private:
-      Q_DISABLE_COPY(Outline)
-
-      Outline(OutlineData *data);
-      OutlineData *m_data;
     };
 
 /**
@@ -1620,7 +1605,7 @@ QString subject = m_doc->info("Subject");
 	*/
 	QDomDocument *toc() const;
 
-	Outline *outline() const;
+	QVector<OutlineItem> outline() const;
 	
 	/**
 	   Tries to resolve the named destination \p name.

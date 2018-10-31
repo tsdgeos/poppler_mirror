@@ -20,15 +20,10 @@ void TestOutline::checkOutline_xr02()
   };
   QVERIFY(document.get());
 
-  std::unique_ptr<Poppler::Outline> outline{
-    document->outline()
-  };
-  QVERIFY(outline.get());
+  const auto outline = document->outline();
+  QCOMPARE(outline.size(), 2);
 
-  const auto items = outline->items();
-  QCOMPARE(items.size(), 2);
-
-  const auto &foo = items[0];
+  const auto &foo = outline[0];
   QVERIFY(!foo.isNull());
   QCOMPARE(foo.name(), QStringLiteral("foo"));
   QCOMPARE(foo.isOpen(), false);
@@ -39,7 +34,7 @@ void TestOutline::checkOutline_xr02()
   QVERIFY(foo.uri().isEmpty());
   QVERIFY(foo.children().isEmpty());
 
-  const auto &bar = items[1];
+  const auto &bar = outline[1];
   QVERIFY(!bar.isNull());
   QCOMPARE(bar.name(), QStringLiteral("bar"));
   QCOMPARE(bar.isOpen(), false);
