@@ -198,7 +198,7 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
   Stream *str;
   Goffset length;
   Goffset pos, endPos;
-  XRefEntry *entry;
+  XRefEntry *entry = nullptr;
 
   if (xref && (entry = xref->getEntry(objNum, false))) {
     if (!entry->getFlag(XRefEntry::Parsing) ||
