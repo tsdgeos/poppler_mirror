@@ -21,6 +21,7 @@
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -197,6 +198,18 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
   Stream *str;
   Goffset length;
   Goffset pos, endPos;
+  XRefEntry *entry;
+
+  if (xref && (entry = xref->getEntry(objNum, false))) {
+    if (!entry->getFlag(XRefEntry::Parsing) ||
+        (objNum == 0 && objGen == 0)) {
+      entry->setFlag(XRefEntry::Parsing, true);
+    } else {
+      error(errSyntaxError, getPos(),
+            "Object '{0:d} {1:d} obj' is being already parsed", objNum, objGen);
+      return nullptr;
+    }
+  }
 
   // get stream start position
   lexer->skipToNextLine();
@@ -277,6 +290,9 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
 
   // get filters
   str = str->addFilters(str->getDict(), recursion);
+
+  if (entry)
+    entry->setFlag(XRefEntry::Parsing, false);
 
   return str;
 }

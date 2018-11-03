@@ -23,6 +23,7 @@
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2018 Nelson Benítez León <nbenitezl@gmail.com>
 //
 //========================================================================
 
@@ -235,16 +236,16 @@ void FormWidgetButton::setState (bool astate)
     return;
 
   // Silently return if can't set ON state
-  if (astate && !onStr)
+  if (astate && !getOnStr())
     return;
 
-  parent()->setState(astate ? onStr->getCString() : (char *)"Off");
+  parent()->setState(astate ? getOnStr() : (char *)"Off");
   // Parent will call setAppearanceState()
 }
 
 bool FormWidgetButton::getState () const
 {
-  return onStr ? parent()->getState(onStr->getCString()) : false;
+  return getOnStr() ? parent()->getState( getOnStr() ) : false;
 }
 
 FormFieldButton *FormWidgetButton::parent() const

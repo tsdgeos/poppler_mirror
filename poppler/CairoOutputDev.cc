@@ -20,7 +20,7 @@
 // Copyright (C) 2005 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006-2011, 2013, 2014, 2017, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Carl Worth <cworth@cworth.org>
-// Copyright (C) 2008-2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2008-2018 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2008, 2009 Chris Wilson <chris@chris-wilson.co.uk>
 // Copyright (C) 2008, 2012 Hib Eris <hib@hiberis.nl>
@@ -3040,9 +3040,14 @@ void CairoOutputDev::setMimeData(GfxState *state, Stream *str, Object *ref,
     cairo_status_t status = CAIRO_STATUS_SUCCESS;
 
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 11, 2)
-    if (ref && ref->isRef()) {
-      status = setMimeIdFromRef(image, CAIRO_MIME_TYPE_UNIQUE_ID,
-                                "poppler-surface-", ref->getRef());
+    // Since 1.5.10 the cairo PS backend stores images with UNIQUE_ID in PS memory so the
+    // image can be re-used multiple times. As we don't know how large the images are or
+    // how many times they are used, there is no benefit in enabling this. Issue #106
+    if (cairo_surface_get_type (cairo_get_target (cairo)) != CAIRO_SURFACE_TYPE_PS) {
+      if (ref && ref->isRef()) {
+        status = setMimeIdFromRef(image, CAIRO_MIME_TYPE_UNIQUE_ID,
+                                  "poppler-surface-", ref->getRef());
+      }
     }
 #endif
     if (!status) {

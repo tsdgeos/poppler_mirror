@@ -16,6 +16,7 @@ class TestAnnotations : public QObject
 private slots:
   void checkQColorPrecision();
   void checkFontSizeAndColor();
+  void checkHighlightFromAndToQuads();
 };
 
 /* Is .5f sufficient for 16 bit color channel roundtrip trough save and load on all architectures? */
@@ -25,6 +26,7 @@ void TestAnnotations::checkQColorPrecision() {
     double normalized = static_cast<uint16_t>(i) / static_cast<double>(std::numeric_limits<uint16_t>::max());
     GooString* serialized = GooString::format("{0:.5f}", normalized);
     double deserialized = gatof( serialized->getCString() );
+    delete serialized;
     uint16_t denormalized = std::round(deserialized * std::numeric_limits<uint16_t>::max());
     if (static_cast<uint16_t>(i) != denormalized) {
       precisionOk = false;
@@ -97,7 +99,38 @@ void TestAnnotations::checkFontSizeAndColor()
       if (annot != annots.constEnd())
           ++annot;
     }
+    qDeleteAll(annots);
   }
+}
+
+namespace Poppler {
+    static bool operator==(const Poppler::HighlightAnnotation::Quad &a, const Poppler::HighlightAnnotation::Quad &b)
+    {
+        // FIXME We do not compare capStart, capEnd and feather since AnnotQuadrilaterals doesn't contain that info and thus
+        //       HighlightAnnotationPrivate::fromQuadrilaterals uses default values
+        return a.points[0] == b.points[0] && a.points[1] == b.points[1] && a.points[2] == b.points[2] && a.points[3] == b.points[3];
+    }
+}
+
+void TestAnnotations::checkHighlightFromAndToQuads()
+{
+    std::unique_ptr<Poppler::Document> doc{
+      Poppler::Document::load(TESTDATADIR "/unittestcases/UseNone.pdf")
+    };
+
+    std::unique_ptr<Poppler::Page> page{
+      doc->page(0)
+    };
+
+    auto ha = std::make_unique<Poppler::HighlightAnnotation>();
+    page->addAnnotation(ha.get());
+
+    const QList<Poppler::HighlightAnnotation::Quad> quads = {
+        { {{0, 0.1}, {0.2, 0.3}, {0.4, 0.5}, {0.6, 0.7}}, false, false, 0 },
+        { {{0.8, 0.9}, {0.1, 0.2}, {0.3, 0.4}, {0.5, 0.6}}, true, false, 0.4 }
+    };
+    ha->setHighlightQuads(quads);
+    QCOMPARE(ha->highlightQuads(), quads);
 }
 
 QTEST_GUILESS_MAIN(TestAnnotations)

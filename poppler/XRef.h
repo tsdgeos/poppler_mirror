@@ -24,6 +24,7 @@
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -65,6 +66,7 @@ struct XRefEntry {
   enum Flag {
     // Regular flags
     Updated,     // Entry was modified
+    Parsing,     // Entry is currently being parsed
 
     // Special flags -- available only after xref->scanSpecialFlags() is run
     Unencrypted, // Entry is stored in unencrypted form (meaningless in unencrypted documents)

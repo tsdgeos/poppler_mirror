@@ -3139,7 +3139,7 @@ QList< HighlightAnnotation::Quad > HighlightAnnotationPrivate::fromQuadrilateral
 AnnotQuadrilaterals * HighlightAnnotationPrivate::toQuadrilaterals(const QList< HighlightAnnotation::Quad > &quads) const
 {
     const int count = quads.size();
-    std::unique_ptr<AnnotQuadrilaterals::AnnotQuadrilateral[]> ac;
+    auto ac = std::make_unique<AnnotQuadrilaterals::AnnotQuadrilateral[]>(count);
 
     double MTX[6];
     fillTransformationMTX(MTX);
