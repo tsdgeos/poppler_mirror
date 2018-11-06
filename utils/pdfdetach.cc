@@ -251,7 +251,12 @@ int main(int argc, char *argv[]) {
       }
       *p = '\0';
 
-      if (!fileSpec->getEmbeddedFile()->save(path)) {
+      auto *embFile = fileSpec->getEmbeddedFile();
+      if (!embFile || !embFile->isOk()) {
+	exitCode = 3;
+	goto err2;
+      }
+      if (!embFile->save(path)) {
 	error(errIO, -1, "Error saving embedded file as '{0:s}'", p);
 	exitCode = 2;
 	goto err2;
@@ -296,7 +301,12 @@ int main(int argc, char *argv[]) {
       p = path;
     }
 
-    if (!fileSpec->getEmbeddedFile()->save(p)) {
+    auto *embFile = fileSpec->getEmbeddedFile();
+    if (!embFile || !embFile->isOk()) {
+      exitCode = 3;
+      goto err2;
+    }
+    if (!embFile->save(p)) {
       error(errIO, -1, "Error saving embedded file as '{0:s}'", p);
       exitCode = 2;
       goto err2;
