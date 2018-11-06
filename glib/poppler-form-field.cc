@@ -208,7 +208,7 @@ poppler_form_field_get_action (PopplerFormField *field)
  *               object is owned by @field and should not be freed.
  *
  *
- * Since: 0.71
+ * Since: 0.72
  */
 PopplerAction *
 poppler_form_field_get_additional_action (PopplerFormField           *field,

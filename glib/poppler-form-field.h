@@ -69,7 +69,7 @@ typedef enum
  *
  * Form field additional action types to be passed to @poppler_form_field_get_additional_action
  *
- * Since: 0.71
+ * Since: 0.72
  */
 typedef enum
 {
