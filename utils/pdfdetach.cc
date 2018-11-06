@@ -191,14 +191,18 @@ int main(int argc, char *argv[]) {
       fileSpec = static_cast<FileSpec *>(embeddedFiles->get(i));
       printf("%d: ", i+1);
       s1 = fileSpec->getFileName();
-      if ((s1->getChar(0) & 0xff) == 0xfe && (s1->getChar(1) & 0xff) == 0xff) {
+      if (!s1) {
+	exitCode = 3;
+	goto err2;
+      }
+      if (s1->hasUnicodeMarker()) {
         isUnicode = true;
         j = 2;
       } else {
         isUnicode = false;
         j = 0;
       }
-      while (j < fileSpec->getFileName()->getLength()) {
+      while (j < s1->getLength()) {
         if (isUnicode) {
           u = ((s1->getChar(j) & 0xff) << 8) | (s1->getChar(j+1) & 0xff);
           j += 2;
@@ -228,14 +232,18 @@ int main(int argc, char *argv[]) {
 	p = path;
       }
       s1 = fileSpec->getFileName();
-      if ((s1->getChar(0) & 0xff) == 0xfe && (s1->getChar(1) & 0xff) == 0xff) {
+      if (!s1) {
+	exitCode = 3;
+	goto err2;
+      }
+      if (s1->hasUnicodeMarker()) {
         isUnicode = true;
         j = 2;
       } else {
         isUnicode = false;
         j = 0;
       }
-      while (j < fileSpec->getFileName()->getLength()) {
+      while (j < s1->getLength()) {
         if (isUnicode) {
           u = ((s1->getChar(j) & 0xff) << 8) | (s1->getChar(j+1) & 0xff);
           j += 2;
@@ -251,7 +259,12 @@ int main(int argc, char *argv[]) {
       }
       *p = '\0';
 
-      if (!fileSpec->getEmbeddedFile()->save(path)) {
+      auto *embFile = fileSpec->getEmbeddedFile();
+      if (!embFile || !embFile->isOk()) {
+	exitCode = 3;
+	goto err2;
+      }
+      if (!embFile->save(path)) {
 	error(errIO, -1, "Error saving embedded file as '{0:s}'", p);
 	exitCode = 2;
 	goto err2;
@@ -271,14 +284,18 @@ int main(int argc, char *argv[]) {
     } else {
       p = path;
       s1 = fileSpec->getFileName();
-      if ((s1->getChar(0) & 0xff) == 0xfe && (s1->getChar(1) & 0xff) == 0xff) {
+      if (!s1) {
+	exitCode = 3;
+	goto err2;
+      }
+      if (s1->hasUnicodeMarker()) {
         isUnicode = true;
         j = 2;
       } else {
         isUnicode = false;
         j = 0;
       }
-      while (j < fileSpec->getFileName()->getLength()) {
+      while (j < s1->getLength()) {
         if (isUnicode) {
           u = ((s1->getChar(j) & 0xff) << 8) | (s1->getChar(j+1) & 0xff);
           j += 2;
@@ -296,7 +313,12 @@ int main(int argc, char *argv[]) {
       p = path;
     }
 
-    if (!fileSpec->getEmbeddedFile()->save(p)) {
+    auto *embFile = fileSpec->getEmbeddedFile();
+    if (!embFile || !embFile->isOk()) {
+      exitCode = 3;
+      goto err2;
+    }
+    if (!embFile->save(p)) {
       error(errIO, -1, "Error saving embedded file as '{0:s}'", p);
       exitCode = 2;
       goto err2;

@@ -230,6 +230,10 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
     length = 0;
   }
 
+  // the above dictLookup can cause a xref reconstruction if the file is damaged
+  // so we need to update the entry pointer
+  entry = xref ? xref->getEntry(objNum, false) : nullptr;
+
   // check for length in damaged file
   if (xref && xref->getStreamEnd(pos, &endPos)) {
     length = endPos - pos;

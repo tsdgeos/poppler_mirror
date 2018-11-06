@@ -10,6 +10,7 @@
 // Copyright (C) 2012, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -92,6 +93,9 @@ bool EmbFile::save(const char *path) {
 
 bool EmbFile::save2(FILE *f) {
   int c;
+
+  if (unlikely(!m_objStr.isStream()))
+    return false;
 
   m_objStr.streamReset();
   while ((c = m_objStr.streamGetChar()) != EOF) {
