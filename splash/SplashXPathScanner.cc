@@ -319,7 +319,7 @@ void SplashXPathScanner::computeIntersections() {
   }
   for (auto& line : allIntersections) {
     std::sort(line.begin(), line.end(),
-              [](const SplashIntersect &i0, const SplashIntersect &i1) {
+              [](const SplashIntersect i0, const SplashIntersect i1) {
                 return i0.x0 < i1.x0;
               });
   }

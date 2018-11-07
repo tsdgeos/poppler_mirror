@@ -50,7 +50,7 @@ private:
   // Note: Takes ownership of strings, increases refcount for font.
   TextSpan(GooString *text,
            GfxFont *font,
-           const GfxRGB& color)
+           const GfxRGB color)
       : data(new Data) {
     data->text = text;
     data->font = font;

@@ -30,7 +30,7 @@ static inline double clip01(double x) {
   return (x < 0) ? 0 : (x > 1) ? 1 : x;
 }
 
-static inline void cmykToRGBMatrixMultiplication(const double &c, const double &m, const double &y, const double &k, const double &c1, const double &m1, const double &y1, const double &k1, double &r, double &g, double &b)
+static inline void cmykToRGBMatrixMultiplication(const double c, const double m, const double y, const double k, const double c1, const double m1, const double y1, const double k1, double &r, double &g, double &b)
 {
   double x;
   // this is a matrix multiplication, unrolled for performance

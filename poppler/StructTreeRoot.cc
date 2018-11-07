@@ -175,7 +175,7 @@ void StructTreeRoot::parseNumberTreeNode(Dict *node)
 }
 
 
-void StructTreeRoot::parentTreeAdd(const Ref &objectRef, StructElement *element)
+void StructTreeRoot::parentTreeAdd(const Ref objectRef, StructElement *element)
 {
   auto range = refToParentMap.equal_range(objectRef);
   for (auto it = range.first; it !=range.second; ++it)

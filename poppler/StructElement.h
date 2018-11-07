@@ -280,7 +280,7 @@ private:
     };
 
     ContentData(int mcidA): mcid(mcidA) {}
-    ContentData(const Ref& r) { ref.num = r.num; ref.gen = r.gen; }
+    ContentData(const Ref r) { ref.num = r.num; ref.gen = r.gen; }
   };
 
   // Common data
@@ -296,7 +296,7 @@ private:
 
   StructElement(Dict *elementDict, StructTreeRoot *treeRootA, StructElement *parentA, std::set<int> &seen);
   StructElement(int mcid, StructTreeRoot *treeRootA, StructElement *parentA);
-  StructElement(const Ref &ref, StructTreeRoot *treeRootA, StructElement *parentA);
+  StructElement(const Ref ref, StructTreeRoot *treeRootA, StructElement *parentA);
 
   void parse(Dict* elementDict);
   StructElement* parseChild(Object *ref, Object* childObj, std::set<int> &seen);
