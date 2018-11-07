@@ -674,7 +674,7 @@ poppler_document_get_attachments (PopplerDocument *document)
       attachment = _poppler_attachment_new (emb_file);
       delete emb_file;
 
-      if (attachment != NULL)
+      if (attachment != nullptr)
         retval = g_list_prepend (retval, attachment);
     }
   return g_list_reverse (retval);

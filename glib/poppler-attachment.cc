@@ -105,7 +105,7 @@ _poppler_attachment_new (FileSpec *emb_file)
     attachment->description = _poppler_goo_string_to_utf8 (emb_file->getDescription ());
 
   embFile = emb_file->getEmbeddedFile();
-  if (embFile != NULL && embFile->streamObject()->isStream())
+  if (embFile != nullptr && embFile->streamObject()->isStream())
     {
       attachment->size = embFile->size ();
 
