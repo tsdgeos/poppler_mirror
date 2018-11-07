@@ -41,7 +41,7 @@ void PermissionsDock::fillInfo()
 do { \
     QListWidgetItem *item = new QListWidgetItem(); \
     item->setFlags(item->flags() & ~Qt::ItemIsEnabled); \
-    item->setText(title); \
+    item->setText(QStringLiteral(title)); \
     item->setCheckState(document()->function() ? Qt::Checked : Qt::Unchecked); \
     m_table->addItem(item); \
 } while (0)

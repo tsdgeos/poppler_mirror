@@ -6,6 +6,8 @@
 class TestGooString : public QObject
 {
     Q_OBJECT
+public:
+    TestGooString(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void testInsertData_data();
     void testInsertData();
@@ -83,19 +85,19 @@ void TestGooString::testFormat()
     {
         const QScopedPointer<GooString> goo(GooString::format("{0:ud} {1:d} {2:d}",
             UINT_MAX, INT_MAX, INT_MIN));
-        const QByteArray expected = QString("%1 %2 %3").arg(UINT_MAX).arg(INT_MAX).arg(INT_MIN).toLatin1();
+        const QByteArray expected = QStringLiteral("%1 %2 %3").arg(UINT_MAX).arg(INT_MAX).arg(INT_MIN).toLatin1();
         QCOMPARE(goo->getCString(), expected.constData());
     }
     {
         const QScopedPointer<GooString> goo(GooString::format("{0:uld} {1:ld} {2:ld}",
             ULONG_MAX, LONG_MAX, LONG_MIN));
-        const QByteArray expected = QString("%1 %2 %3").arg(ULONG_MAX).arg(LONG_MAX).arg(LONG_MIN).toLatin1();
+        const QByteArray expected = QStringLiteral("%1 %2 %3").arg(ULONG_MAX).arg(LONG_MAX).arg(LONG_MIN).toLatin1();
         QCOMPARE(goo->getCString(), expected.constData());
     }
     {
         const QScopedPointer<GooString> goo(GooString::format("{0:ulld} {1:lld} {2:lld}",
             ULLONG_MAX, LLONG_MAX, LLONG_MIN));
-        const QByteArray expected = QString("%1 %2 %3").arg(ULLONG_MAX).arg(LLONG_MAX).arg(LLONG_MIN).toLatin1();
+        const QByteArray expected = QStringLiteral("%1 %2 %3").arg(ULLONG_MAX).arg(LLONG_MAX).arg(LLONG_MIN).toLatin1();
         QCOMPARE(goo->getCString(), expected.constData());
     }
     {

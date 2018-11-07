@@ -41,12 +41,12 @@ int main( int argc, char **argv )
     QString backendString;
     if (argc == 3 && strcmp(argv[2], "-arthur") == 0)
     {
-        backendString = "Arthur";
+        backendString = QStringLiteral("Arthur");
         doc->setRenderBackend(Poppler::Document::ArthurBackend);
     }
     else
     {
-        backendString = "Splash";
+        backendString = QStringLiteral("Splash");
         doc->setRenderBackend(Poppler::Document::SplashBackend);
     }
     doc->setRenderHint(Poppler::Document::Antialiasing, true);
@@ -60,7 +60,7 @@ int main( int argc, char **argv )
             QTime t = QTime::currentTime();
             QImage image = page->renderToImage();
             qDebug() << "Rendering took" << t.msecsTo(QTime::currentTime()) << "msecs";
-            image.save(QString("test-render-to-file%1.ppm").arg(i));
+            image.save(QStringLiteral("test-render-to-file%1.ppm").arg(i));
             delete page;
         }
     }

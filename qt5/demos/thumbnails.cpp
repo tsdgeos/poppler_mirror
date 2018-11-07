@@ -34,8 +34,8 @@ ThumbnailsDock::ThumbnailsDock(QWidget *parent)
     m_list->setViewMode(QListView::ListMode);
     m_list->setMovement(QListView::Static);
     m_list->setVerticalScrollMode(QListView::ScrollPerPixel);
-    connect(m_list, SIGNAL(itemActivated(QListWidgetItem*)),
-            this, SLOT(slotItemActivated(QListWidgetItem*)));
+    connect(m_list, &QListWidget::itemActivated,
+            this, &ThumbnailsDock::slotItemActivated);
 }
 
 ThumbnailsDock::~ThumbnailsDock()

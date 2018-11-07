@@ -8,6 +8,9 @@ Q_DECLARE_METATYPE(QTime)
 class TestDateConv: public QObject
 {
     Q_OBJECT
+public:
+    TestDateConv(QObject *parent = nullptr) : QObject(parent) {}
+
 private slots:
     void initTestCase();
     void checkDates_data();

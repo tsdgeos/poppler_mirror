@@ -7,6 +7,8 @@
 class TestLinks : public QObject
 {
     Q_OBJECT
+public:
+    TestLinks(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void checkDocumentWithNoDests();
     void checkDests_xr01();
@@ -31,7 +33,7 @@ void TestLinks::checkDocumentWithNoDests()
     QVERIFY( doc );
 
     std::unique_ptr< Poppler::LinkDestination > dest;
-    dest.reset( doc->linkDestination("no.dests.in.this.document") );
+    dest.reset( doc->linkDestination(QStringLiteral("no.dests.in.this.document")) );
     QVERIFY( !isDestinationValid_pageNumber( dest.get(), doc ) );
     QVERIFY( isDestinationValid_name( dest.get() ) );
 
@@ -56,7 +58,7 @@ void TestLinks::checkDests_xr01()
     const Poppler::LinkDestination dest = link->destination();
     QVERIFY( !isDestinationValid_pageNumber( &dest, doc ) );
     QVERIFY( isDestinationValid_name( &dest ) );
-    QCOMPARE( dest.destinationName(), QString::fromLatin1("section.1") );
+    QCOMPARE( dest.destinationName(), QLatin1String("section.1") );
     }
 
     {
@@ -65,7 +67,7 @@ void TestLinks::checkDests_xr01()
     const Poppler::LinkDestination dest = link->destination();
     QVERIFY( !isDestinationValid_pageNumber( &dest, doc ) );
     QVERIFY( isDestinationValid_name( &dest ) );
-    QCOMPARE( dest.destinationName(), QString::fromLatin1("section.2") );
+    QCOMPARE( dest.destinationName(), QLatin1String("section.2") );
     }
 
     qDeleteAll(links);
@@ -80,13 +82,13 @@ void TestLinks::checkDests_xr02()
     QVERIFY( doc );
 
     std::unique_ptr< Poppler::LinkDestination > dest;
-    dest.reset( doc->linkDestination("section.1") );
+    dest.reset( doc->linkDestination(QStringLiteral("section.1")) );
     QVERIFY( isDestinationValid_pageNumber( dest.get(), doc ) );
     QVERIFY( !isDestinationValid_name( dest.get() ) );
-    dest.reset( doc->linkDestination("section.2") );
+    dest.reset( doc->linkDestination(QStringLiteral("section.2")) );
     QVERIFY( isDestinationValid_pageNumber( dest.get(), doc ) );
     QVERIFY( !isDestinationValid_name( dest.get() ) );
-    dest.reset( doc->linkDestination("section.3") );
+    dest.reset( doc->linkDestination(QStringLiteral("section.3")) );
     QVERIFY( !isDestinationValid_pageNumber( dest.get(), doc ) );
     QVERIFY( isDestinationValid_name( dest.get() ) );
 

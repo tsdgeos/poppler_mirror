@@ -37,8 +37,8 @@ static void fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *
         newitem->setText(0, e.tagName());
 
         bool isOpen = false;
-        if (e.hasAttribute(QString::fromLatin1("Open"))) {
-            isOpen = QVariant(e.attribute(QString::fromLatin1("Open"))).toBool();
+        if (e.hasAttribute(QStringLiteral("Open"))) {
+            isOpen = QVariant(e.attribute(QStringLiteral("Open"))).toBool();
         }
         if (isOpen) {
             tree->expandItem(newitem);

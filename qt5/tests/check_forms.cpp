@@ -7,6 +7,8 @@
 class TestForms: public QObject
 {
     Q_OBJECT
+public:
+    TestForms(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void testCheckbox();// Test for issue #655
 };

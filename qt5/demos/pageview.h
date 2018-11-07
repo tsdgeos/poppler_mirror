@@ -38,7 +38,7 @@ public:
     void documentClosed() override;
     void pageChanged(int page) override;
 
-private Q_SLOTS:
+public Q_SLOTS:
     void slotZoomChanged(qreal value);
     void slotRotationChanged(int value);
 

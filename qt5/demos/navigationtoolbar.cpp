@@ -30,7 +30,8 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
     m_firstAct = addAction(tr("First"), this, SLOT(slotGoFirst()));
     m_prevAct = addAction(tr("Previous"), this, SLOT(slotGoPrev()));
     m_pageCombo = new QComboBox(this);
-    connect(m_pageCombo, SIGNAL(activated(int)), this, SLOT(slotComboActivated(int)));
+    // TODO replace with qOverload once we start requiring Qt 5.7
+    connect(m_pageCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), this, &NavigationToolBar::slotComboActivated);
     addWidget(m_pageCombo);
     m_nextAct = addAction(tr("Next"), this, SLOT(slotGoNext()));
     m_lastAct = addAction(tr("Last"), this, SLOT(slotGoLast()));
@@ -52,7 +53,8 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
     m_zoomCombo->addItem(tr("300%"));
     m_zoomCombo->addItem(tr("400%"));
     m_zoomCombo->setCurrentIndex(6); // "100%"
-    connect(m_zoomCombo, SIGNAL(currentIndexChanged(QString)), this, SLOT(slotZoomComboChanged(QString)));
+    // TODO replace with qOverload once we start requiring Qt 5.7
+    connect(m_zoomCombo, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged), this, &NavigationToolBar::slotZoomComboChanged);
     addWidget(m_zoomCombo);
 
     m_rotationCombo = new QComboBox(this);
@@ -61,7 +63,8 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
     m_rotationCombo->addItem(trUtf8("90\302\260"));
     m_rotationCombo->addItem(trUtf8("180\302\260"));
     m_rotationCombo->addItem(trUtf8("270\302\260"));
-    connect(m_rotationCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slotRotationComboChanged(int)));
+    // TODO replace with qOverload once we start requiring Qt 5.7
+    connect(m_rotationCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &NavigationToolBar::slotRotationComboChanged);
     addWidget(m_rotationCombo);
 
     documentClosed();

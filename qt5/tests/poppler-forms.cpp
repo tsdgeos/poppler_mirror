@@ -99,7 +99,7 @@ static std::ostream& operator<< (std::ostream &out, const QString &string)
 
 static std::ostream& operator<< (std::ostream &out, const QRectF &rect)
 {
-    out << QString("top: %1 left: %2 width: %3 height: %4").arg(rect.x()).arg(rect.y()).arg(rect.width()).arg(rect.height());
+    out << QStringLiteral("top: %1 left: %2 width: %3 height: %4").arg(rect.x()).arg(rect.y()).arg(rect.width()).arg(rect.height());
     return out;
 }
 

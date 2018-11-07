@@ -24,7 +24,7 @@
 
 static QString yesNoStatement(bool value)
 {
-    return value ? QString::fromLatin1("yes") : QString::fromLatin1("no");
+    return value ? QStringLiteral("yes") : QStringLiteral("no");
 }
 
 FontsDock::FontsDock(QWidget *parent)
@@ -50,7 +50,7 @@ void FontsDock::fillInfo()
     int i = 0;
     Q_FOREACH(const Poppler::FontInfo &font, fonts) {
         if (font.name().isNull()) {
-            m_table->setItem(i, 0, new QTableWidgetItem(QString::fromLatin1("[none]")));
+            m_table->setItem(i, 0, new QTableWidgetItem(QStringLiteral("[none]")));
         } else {
             m_table->setItem(i, 0, new QTableWidgetItem(font.name()));
         }

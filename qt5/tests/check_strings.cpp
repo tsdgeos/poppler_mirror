@@ -30,6 +30,9 @@ class TestStrings : public QObject
 {
     Q_OBJECT
 
+public:
+    TestStrings(QObject *parent = nullptr) : QObject(parent) { }
+
 private slots:
     void initTestCase();
     void cleanupTestCase();
@@ -74,34 +77,34 @@ void TestStrings::check_unicodeToQString_data()
     const int l = 1;
     Unicode *u = new Unicode[l];
     u[0] = int('a');
-    QTest::newRow("a") << u << l << QString::fromUtf8("a");
+    QTest::newRow("a") << u << l << QStringLiteral("a");
     }
     {
     const int l = 1;
     Unicode *u = new Unicode[l];
     u[0] = 0x0161;
-    QTest::newRow("\u0161") << u << l << QString::fromUtf8("\u0161");
+    QTest::newRow("\u0161") << u << l << QStringLiteral("\u0161");
     }
     {
     const int l = 2;
     Unicode *u = new Unicode[l];
     u[0] = int('a');
     u[1] = int('b');
-    QTest::newRow("ab") << u << l << QString::fromUtf8("ab");
+    QTest::newRow("ab") << u << l << QStringLiteral("ab");
     }
     {
     const int l = 2;
     Unicode *u = new Unicode[l];
     u[0] = int('a');
     u[1] = 0x0161;
-    QTest::newRow("a\u0161") << u << l << QString::fromUtf8("a\u0161");
+    QTest::newRow("a\u0161") << u << l << QStringLiteral("a\u0161");
     }
     {
     const int l = 2;
     Unicode *u = new Unicode[l];
     u[0] = 0x5c01;
     u[1] = 0x9762;
-    QTest::newRow("\xe5\xb0\x81\xe9\x9d\xa2") << u << l << QString::fromUtf8("\xe5\xb0\x81\xe9\x9d\xa2");
+    QTest::newRow("\xe5\xb0\x81\xe9\x9d\xa2") << u << l << QStringLiteral("封面");
     }
     {
     const int l = 3;
@@ -109,7 +112,7 @@ void TestStrings::check_unicodeToQString_data()
     u[0] = 0x5c01;
     u[1] = 0x9762;
     u[2] = 0x0;
-    QTest::newRow("\xe5\xb0\x81\xe9\x9d\xa2 + 0") << u << l << QString::fromUtf8("\xe5\xb0\x81\xe9\x9d\xa2");
+    QTest::newRow("\xe5\xb0\x81\xe9\x9d\xa2 + 0") << u << l << QStringLiteral("封面");
     }
 }
 
@@ -133,33 +136,33 @@ void TestStrings::check_UnicodeParsedString_data()
     QTest::newRow("<empty>") << newGooString("")
                              << QString();
     QTest::newRow("a") << newGooString("a")
-                       << QString::fromUtf8("a");
+                       << QStringLiteral("a");
     QTest::newRow("ab") << newGooString("ab")
-                        << QString::fromUtf8("ab");
+                        << QStringLiteral("ab");
     QTest::newRow("~") << newGooString("~")
-                       << QString::fromUtf8("~");
+                       << QStringLiteral("~");
     QTest::newRow("test string") << newGooString("test string")
-                                 << QString::fromUtf8("test string");
+                                 << QStringLiteral("test string");
 
     // unicode strings
     QTest::newRow("<unicode marks>") << newGooString("\xFE\xFF")
                                      << QString();
     QTest::newRow("U a") << newGooString("\xFE\xFF\0a", 4)
-                         << QString::fromUtf8("a");
+                         << QStringLiteral("a");
     QTest::newRow("U ~") << newGooString("\xFE\xFF\0~", 4)
-                         << QString::fromUtf8("~");
+                         << QStringLiteral("~");
     QTest::newRow("U aa") << newGooString("\xFE\xFF\0a\0a", 6)
-                           << QString::fromUtf8("aa");
+                           << QStringLiteral("aa");
     QTest::newRow("U \xC3\x9F") << newGooString("\xFE\xFF\0\xDF", 4)
-                                << QString::fromUtf8("\xC3\x9F");
+                                << QStringLiteral("ß");
     QTest::newRow("U \xC3\x9F\x61") << newGooString("\xFE\xFF\0\xDF\0\x61", 6)
-                                    << QString::fromUtf8("\xC3\x9F\x61");
+                                    << QStringLiteral("ßa");
     QTest::newRow("U \xC5\xA1") << newGooString("\xFE\xFF\x01\x61", 4)
-                                << QString::fromUtf8("\xC5\xA1");
+                                << QStringLiteral("š");
     QTest::newRow("U \xC5\xA1\x61") << newGooString("\xFE\xFF\x01\x61\0\x61", 6)
-                                << QString::fromUtf8("\xC5\xA1\x61");
+                                << QStringLiteral("ša");
     QTest::newRow("test string") << newGooString("\xFE\xFF\0t\0e\0s\0t\0 \0s\0t\0r\0i\0n\0g", 24)
-                                 << QString::fromUtf8("test string");
+                                 << QStringLiteral("test string");
 }
 
 void TestStrings::check_UnicodeParsedString()
@@ -178,17 +181,17 @@ void TestStrings::check_QStringToUnicodeGooString_data()
 
     QTest::newRow("<null>") << QString()
                             << QByteArray("");
-    QTest::newRow("<empty>") << QString::fromUtf8("")
+    QTest::newRow("<empty>") << QString(QLatin1String(""))
                              << QByteArray("");
-    QTest::newRow("a") << QString::fromUtf8("a")
+    QTest::newRow("a") << QStringLiteral("a")
                        << QByteArray("\0a", 2);
-    QTest::newRow("ab") << QString::fromUtf8("ab")
+    QTest::newRow("ab") << QStringLiteral("ab")
                         << QByteArray("\0a\0b", 4);
-    QTest::newRow("test string") << QString::fromUtf8("test string")
+    QTest::newRow("test string") << QStringLiteral("test string")
                                  << QByteArray("\0t\0e\0s\0t\0 \0s\0t\0r\0i\0n\0g", 22);
-    QTest::newRow("\xC3\x9F") << QString::fromUtf8("\xC3\x9F")
+    QTest::newRow("\xC3\x9F") << QStringLiteral("ß")
                               << QByteArray("\0\xDF", 2);
-    QTest::newRow("\xC3\x9F\x61") << QString::fromUtf8("\xC3\x9F\x61")
+    QTest::newRow("\xC3\x9F\x61") << QStringLiteral("ßa")
                                   << QByteArray("\0\xDF\0\x61", 4);
 }
 
@@ -212,11 +215,11 @@ void TestStrings::check_QStringToGooString_data()
 
     QTest::newRow("<null>") << QString()
                             << newGooString("");
-    QTest::newRow("<empty>") << QString::fromUtf8("")
+    QTest::newRow("<empty>") << QString(QLatin1String(""))
                              << newGooString("");
-    QTest::newRow("a") << QString::fromUtf8("a")
+    QTest::newRow("a") << QStringLiteral("a")
                        << newGooString("a");
-    QTest::newRow("ab") << QString::fromUtf8("ab")
+    QTest::newRow("ab") << QStringLiteral("ab")
                         << newGooString("ab");
 }
 

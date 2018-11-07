@@ -17,7 +17,7 @@ int main( int argc, char **argv )
 
     QDir directory( argv[1] );
     foreach ( const QString &fileName, directory.entryList() ) {
-        if (fileName.endsWith("pdf") ) {
+        if (fileName.endsWith(QStringLiteral("pdf")) ) {
 	    qDebug() << "Doing" << fileName.toLatin1().data() << ":";
 	    Poppler::Document *doc = Poppler::Document::load( directory.canonicalPath()+"/"+fileName );
 	    if (!doc) {
@@ -30,14 +30,14 @@ int main( int argc, char **argv )
 	    } else {
 		int major = 0, minor = 0;
 		doc->getPdfVersion( &major, &minor );
-		doc->info("Title");
-		doc->info("Subject");
-		doc->info("Author");
-		doc->info("Keywords");
-		doc->info("Creator");
-		doc->info("Producer");
-		doc->date("CreationDate").toString();
-		doc->date("ModDate").toString();
+		doc->info(QStringLiteral("Title"));
+		doc->info(QStringLiteral("Subject"));
+		doc->info(QStringLiteral("Author"));
+		doc->info(QStringLiteral("Keywords"));
+		doc->info(QStringLiteral("Creator"));
+		doc->info(QStringLiteral("Producer"));
+		doc->date(QStringLiteral("CreationDate")).toString();
+		doc->date(QStringLiteral("ModDate")).toString();
 		doc->numPages();
 		doc->isLinearized();
 		doc->isEncrypted();

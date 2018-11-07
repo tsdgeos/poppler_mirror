@@ -9,6 +9,8 @@
 class TestPageLabelInfo : public QObject
 {
     Q_OBJECT
+public:
+    TestPageLabelInfo(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void testFromDecimal();
     void testFromDecimalUnicode();

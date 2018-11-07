@@ -7,6 +7,8 @@
 class TestActualText: public QObject
 {
     Q_OBJECT
+public:
+    TestActualText(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void checkActualText1();
 };
@@ -20,7 +22,7 @@ void TestActualText::checkActualText1()
     Poppler::Page *page = doc->page(0);
     QVERIFY( page );
 
-    QCOMPARE( page->text(QRectF()), QString("The slow brown fox jumps over the black dog.") );
+    QCOMPARE( page->text(QRectF()), QLatin1String("The slow brown fox jumps over the black dog.") );
 
     delete page;
 

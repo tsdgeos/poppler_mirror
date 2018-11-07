@@ -5,6 +5,8 @@
 class TestPageLayout: public QObject
 {
     Q_OBJECT
+public:
+    TestPageLayout(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void checkNone();
     void checkSingle();

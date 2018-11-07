@@ -9,8 +9,9 @@
 
 class PDFDisplay : public QWidget           // picture display widget
 {
+    Q_OBJECT
 public:
-    PDFDisplay( Poppler::Document *d );
+    PDFDisplay( Poppler::Document *d, QWidget *parent = nullptr );
     ~PDFDisplay();
 protected:
     void paintEvent( QPaintEvent * ) override;
@@ -22,7 +23,7 @@ private:
     Poppler::Document *doc;
 };
 
-PDFDisplay::PDFDisplay( Poppler::Document *d )
+PDFDisplay::PDFDisplay( Poppler::Document *d, QWidget *parent ) : QWidget( parent )
 {
     doc = d;
     m_currentPage = 0;
@@ -92,26 +93,26 @@ int main( int argc, char **argv )
 	qWarning() << "usage: test-password-qt5 owner-password filename";
 	exit(1);
     }
-  
+
     Poppler::Document *doc = Poppler::Document::load(argv[2], argv[1]);
     if (!doc)
     {
 	qWarning() << "doc not loaded";
 	exit(1);
     }
-  
+
     // output some meta-data
     int major = 0, minor = 0;
     doc->getPdfVersion( &major, &minor );
-    qDebug() << "    PDF Version: " << qPrintable(QString::fromLatin1("%1.%2").arg(major).arg(minor));
-    qDebug() << "          Title: " << doc->info("Title");
-    qDebug() << "        Subject: " << doc->info("Subject");
-    qDebug() << "         Author: " << doc->info("Author");
-    qDebug() << "      Key words: " << doc->info("Keywords");
-    qDebug() << "        Creator: " << doc->info("Creator");
-    qDebug() << "       Producer: " << doc->info("Producer");
-    qDebug() << "   Date created: " << doc->date("CreationDate").toString();
-    qDebug() << "  Date modified: " << doc->date("ModDate").toString();
+    qDebug() << "    PDF Version: " << qPrintable(QStringLiteral("%1.%2").arg(major).arg(minor));
+    qDebug() << "          Title: " << doc->info(QStringLiteral("Title"));
+    qDebug() << "        Subject: " << doc->info(QStringLiteral("Subject"));
+    qDebug() << "         Author: " << doc->info(QStringLiteral("Author"));
+    qDebug() << "      Key words: " << doc->info(QStringLiteral("Keywords"));
+    qDebug() << "        Creator: " << doc->info(QStringLiteral("Creator"));
+    qDebug() << "       Producer: " << doc->info(QStringLiteral("Producer"));
+    qDebug() << "   Date created: " << doc->date(QStringLiteral("CreationDate")).toString();
+    qDebug() << "  Date modified: " << doc->date(QStringLiteral("ModDate")).toString();
     qDebug() << "Number of pages: " << doc->numPages();
     qDebug() << "     Linearised: " << doc->isLinearized();
     qDebug() << "      Encrypted: " << doc->isEncrypted();
@@ -123,14 +124,16 @@ int main( int argc, char **argv )
     QStringList fontNameList;
     foreach( const Poppler::FontInfo &font, doc->fonts() )
 	fontNameList += font.name();
-    qDebug() << "          Fonts: " << fontNameList.join( ", " );
+    qDebug() << "          Fonts: " << fontNameList.join( QStringLiteral(", ") );
 
     Poppler::Page *page = doc->page(0);
     qDebug() << "    Page 1 size: " << page->pageSize().width()/72 << "inches x " << page->pageSize().height()/72 << "inches";
 
     PDFDisplay test( doc );        // create picture display
-    test.setWindowTitle("Poppler-Qt5 Test");
+    test.setWindowTitle(QStringLiteral("Poppler-Qt5 Test"));
     test.show();                            // show it
 
     return a.exec();                        // start event loop
 }
+
+#include "test-password-qt5.moc"
