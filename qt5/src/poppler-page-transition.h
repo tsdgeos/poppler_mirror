@@ -97,6 +97,7 @@ class POPPLER_QT5_EXPORT PageTransition {
    accessed by the constructor. The object is only accessed by this
    constructor, and may be deleted after the constructor returns.
   */
+  // TODO Next ABI break, make this private and remove reference
   PageTransition(const PageTransitionParams &params);
 
   /** \brief copy constructor */

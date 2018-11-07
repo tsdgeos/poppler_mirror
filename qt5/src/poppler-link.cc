@@ -430,7 +430,7 @@ class LinkMoviePrivate : public LinkPrivate
 	}
 
 	// LinkGoto
-	LinkGoto::LinkGoto( const QRectF &linkArea, QString extFileName, const LinkDestination & destination )
+	LinkGoto::LinkGoto( const QRectF &linkArea, QString extFileName, const LinkDestination & destination ) // clazy:exclude=function-args-by-ref
 		: Link( *new LinkGotoPrivate( linkArea, destination ) )
 	{
 		Q_D( LinkGoto );

@@ -259,6 +259,7 @@ class POPPLER_QT5_EXPORT LinkGoto : public Link
 		 * \param extFileName if not empty, the file name to be open
 		 * \param destination the destination to be reached
 		 */
+		// TODO Next ABI break, make extFileName const &
 		LinkGoto( const QRectF &linkArea, QString extFileName, const LinkDestination & destination );
 		/**
 		 * Destructor.

@@ -770,6 +770,7 @@ class POPPLER_QT5_EXPORT LinkAnnotation : public Annotation
     void setLinkHighlightMode( HighlightMode mode );
 
     QPointF linkRegionPoint( int id ) const;
+    // TODO Next ABI break, remove ref from point
     void setLinkRegionPoint( int id, const QPointF &point );
 
   private:
