@@ -160,7 +160,7 @@ namespace Debug {
             return nullptr;
         }
 
-        return QStringToUnicodeGooString(dt.toUTC().toString("yyyyMMddhhmmss+00'00'"));
+        return QStringToUnicodeGooString(dt.toUTC().toString(QStringLiteral("yyyyMMddhhmmss+00'00'")));
     }
 
     Annot::AdditionalActionsType toPopplerAdditionalActionType(Annotation::AdditionalActionType type) {
