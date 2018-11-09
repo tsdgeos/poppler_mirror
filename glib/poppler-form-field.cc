@@ -246,9 +246,9 @@ poppler_form_field_get_additional_action (PopplerFormField           *field,
 
   link_action = field->widget->getAdditionalAction (form_action);
   if (!link_action)
-    return NULL;
+    return nullptr;
 
-  *action = _poppler_action_new (NULL, link_action, NULL);
+  *action = _poppler_action_new (nullptr, link_action, nullptr);
 
   return *action;
 }
