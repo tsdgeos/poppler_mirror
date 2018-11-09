@@ -140,7 +140,3 @@ SplashFont *SplashFTFontFile::makeFont(SplashCoord *mat,
   font->initCache();
   return font;
 }
-
-int *SplashFTFontFile::getCodeToGID() {
-  return codeToGID;
-}
