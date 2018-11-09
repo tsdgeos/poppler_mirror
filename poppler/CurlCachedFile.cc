@@ -46,7 +46,7 @@ CurlCachedFileLoader::init(GooString *urlA, CachedFile *cachedFileA)
   cachedFile = cachedFileA;
   curl = curl_easy_init();
 
-  curl_easy_setopt(curl, CURLOPT_URL, url->getCString());
+  curl_easy_setopt(curl, CURLOPT_URL, url->c_str());
   curl_easy_setopt(curl, CURLOPT_HEADER, 1);
   curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &noop_cb);
@@ -81,10 +81,10 @@ int CurlCachedFileLoader::load(const std::vector<ByteRange> &ranges, CachedFileW
      toByte = fromByte + ranges[i].length - 1;
      GooString *range = GooString::format("{0:ud}-{1:ud}", fromByte, toByte);
 
-     curl_easy_setopt(curl, CURLOPT_URL, url->getCString());
+     curl_easy_setopt(curl, CURLOPT_URL, url->c_str());
      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, load_cb);
      curl_easy_setopt(curl, CURLOPT_WRITEDATA, writer);
-     curl_easy_setopt(curl, CURLOPT_RANGE, range->getCString());
+     curl_easy_setopt(curl, CURLOPT_RANGE, range->c_str());
      r = curl_easy_perform(curl);
      curl_easy_reset(curl);
 

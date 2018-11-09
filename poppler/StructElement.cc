@@ -698,7 +698,7 @@ Attribute::~Attribute()
 const char *Attribute::getTypeName() const
 {
   if (type == UserProperty)
-    return name.getCString();
+    return name.c_str();
 
   const AttributeMapEntry *entry = getAttributeMapEntry(attributeMapAll, type);
   if (entry)
@@ -791,7 +791,7 @@ Attribute *Attribute::parseUserProperty(Dict *property)
   Attribute *attribute = new Attribute(std::move(name), &value);
   obj = property->lookup("F");
   if (obj.isString()) {
-    attribute->setFormattedValue(obj.getString()->getCString());
+    attribute->setFormattedValue(obj.getString()->c_str());
   } else if (!obj.isNull()) {
     error(errSyntaxWarning, -1, "F object is wrong type ({0:s})", obj.getTypeName());
   }

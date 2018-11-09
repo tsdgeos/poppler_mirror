@@ -128,7 +128,7 @@ public:
   int getLength() const { return size(); }
 
   // Get C string.
-  const char *getCString() const { return c_str(); }
+  using std::string::c_str;
 
   // Get <i>th character.
   char getChar(int i) const { return (*this)[i]; }

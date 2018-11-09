@@ -654,7 +654,7 @@ void CairoOutputDev::updateFont(GfxState *state) {
   cairo_font_face_t *font_face;
   cairo_matrix_t matrix, invert_matrix;
 
-  LOG(printf ("updateFont() font=%s\n", state->getFont()->getName()->getCString()));
+  LOG(printf ("updateFont() font=%s\n", state->getFont()->getName()->c_str()));
 
   needFontUpdate = false;
 
@@ -2884,7 +2884,7 @@ static cairo_status_t setMimeIdFromRef(cairo_surface_t *surface,
 
   mime_id->appendf("{0:d}-{1:d}", ref.gen, ref.num);
 
-  idBuffer = copyString(mime_id->getCString());
+  idBuffer = copyString(mime_id->c_str());
   status = cairo_surface_set_mime_data (surface, mime_type,
                                         (const unsigned char *)idBuffer,
                                         mime_id->getLength(),
@@ -2945,7 +2945,7 @@ bool CairoOutputDev::setMimeDataForCCITTParams(Stream  *str,
   params.appendf(" BlackIs1={0:d}", ccittStr->getBlackIs1() ? 1 : 0);
   params.appendf(" DamagedRowsBeforeError={0:d}", ccittStr->getDamagedRowsBeforeError());
 
-  char *p = strdup(params.getCString());
+  char *p = strdup(params.c_str());
   if (cairo_surface_set_mime_data (image, CAIRO_MIME_TYPE_CCITT_FAX_PARAMS,
                                    (const unsigned char*)p,
                                    params.getLength(),

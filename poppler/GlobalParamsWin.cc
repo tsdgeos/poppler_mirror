@@ -278,7 +278,7 @@ void SysFontList::scanWindowsFonts(GooString *winFontDir) {
 	      p1 = p0 + strlen(p0);
 	    }
 	    fonts->push_back(makeWindowsFont(p0, fontNum,
-					  fontPath->getCString()));
+					  fontPath->c_str()));
 	    p0 = p1;
 	    ++fontNum;
 	  }
@@ -378,9 +378,9 @@ static GooString* replaceSuffix(GooString *path,
   int baseLenA = path->getLength() - suffLenA;
   int baseLenB = path->getLength() - suffLenB;
 
-  if (!strcasecmp(path->getCString()+baseLenA, suffixA)) {
+  if (!strcasecmp(path->c_str()+baseLenA, suffixA)) {
     path->del(baseLenA,suffLenA)->append(suffixB);
-  } else if (!strcasecmp(path->getCString()+baseLenB, suffixB)) {
+  } else if (!strcasecmp(path->c_str()+baseLenB, suffixB)) {
     path->del(baseLenB,suffLenB)->append(suffixA);
   }
 
@@ -409,8 +409,8 @@ void GlobalParams::setupBaseFonts(char * dir)
 
         if (dir) {
             GooString *fontPath = appendToPath(new GooString(dir), displayFontTab[i].t1FileName);
-            if (FileExists(fontPath->getCString()) ||
-                FileExists(replaceSuffix(fontPath, ".pfb", ".pfa")->getCString())) {
+            if (FileExists(fontPath->c_str()) ||
+                FileExists(replaceSuffix(fontPath, ".pfb", ".pfa")->c_str())) {
                 addFontFile(fontName, fontPath);
                 continue;
             }
@@ -419,8 +419,8 @@ void GlobalParams::setupBaseFonts(char * dir)
 
         if (winFontDir[0] && displayFontTab[i].ttFileName) {
             GooString *fontPath = appendToPath(new GooString(winFontDir), displayFontTab[i].ttFileName);
-            if (FileExists(fontPath->getCString()) ||
-                FileExists(replaceSuffix(fontPath, ".ttc", ".ttf")->getCString())) {
+            if (FileExists(fontPath->c_str()) ||
+                FileExists(replaceSuffix(fontPath, ".ttc", ".ttf")->c_str())) {
                 addFontFile(fontName, fontPath);
                 continue;
             }
@@ -486,16 +486,16 @@ static const char *findSubstituteName(GfxFont *font, const std::unordered_map<st
     GooString *name2 = new GooString(origName);
     int n = strlen(origName);
     // remove trailing "-Identity-H"
-    if (n > 11 && !strcmp(name2->getCString() + n - 11, "-Identity-H")) {
+    if (n > 11 && !strcmp(name2->c_str() + n - 11, "-Identity-H")) {
       name2->del(n - 11, 11);
       n -= 11;
     }
     // remove trailing "-Identity-V"
-    if (n > 11 && !strcmp(name2->getCString() + n - 11, "-Identity-V")) {
+    if (n > 11 && !strcmp(name2->c_str() + n - 11, "-Identity-V")) {
       name2->del(n - 11, 11);
       n -= 11;
     }
-    const auto substFile = substFiles.find(name2->getCString());
+    const auto substFile = substFiles.find(name2->c_str());
     if (substFile != substFiles.end()) {
       delete name2;
       return substFile->second.c_str();
@@ -548,18 +548,18 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
     *type = fi->type;
     *fontNum = fi->fontNum;
     if (substituteFontName)
-      substituteFontName->Set(fi->substituteName->getCString());
+      substituteFontName->Set(fi->substituteName->c_str());
   } else {
     GooString *substFontName = new GooString(findSubstituteName(font, fontFiles,
                                                                 substFiles,
-                                                                fontName->getCString()));
+                                                                fontName->c_str()));
     error(errSyntaxError, -1, "Couldn't find a font for '{0:t}', subst is '{1:t}'", fontName, substFontName);
     const auto fontFile = fontFiles.find(substFontName->toStr());
     if (fontFile != fontFiles.end()) {
       path = new GooString(fontFile->second.c_str());
       if (substituteFontName)
-	substituteFontName->Set(path->getCString());
-      if (!strcasecmp(path->getCString() + path->getLength() - 4, ".ttc")) {
+	substituteFontName->Set(path->c_str());
+      if (!strcasecmp(path->c_str() + path->getLength() - 4, ".ttc")) {
 	*type = sysFontTTC;
       } else {
 	*type = sysFontTTF;

@@ -93,7 +93,7 @@ int TextStringToUCS4(const GooString *textStr, Unicode **ucs4)
   Unicode *u;
 
   len = textStr->getLength();
-  s = textStr->getCString();
+  s = textStr->c_str();
   if (len == 0) {
     *ucs4 = nullptr;
     return 0;

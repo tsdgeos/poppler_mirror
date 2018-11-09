@@ -454,7 +454,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  reverseAlign = !reverseAlign;
 	  break;
 	case fmtGooString:
-	  str = arg.gs->getCString();
+	  str = arg.gs->c_str();
 	  len = arg.gs->getLength();
 	  reverseAlign = !reverseAlign;
 	  break;

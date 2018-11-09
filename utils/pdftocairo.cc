@@ -318,7 +318,7 @@ static bool parseAntialiasOption()
     option++;
   }
 
-  fprintf(stderr, "Error: Invalid antialias option \"%s\"\n", antialias.getCString());
+  fprintf(stderr, "Error: Invalid antialias option \"%s\"\n", antialias.c_str());
   fprintf(stderr, "Valid options are:\n");
   option = antialiasOptions;
   while (option->name) {
@@ -331,7 +331,7 @@ static bool parseAntialiasOption()
 static bool parseJpegOptions()
 {
   //jpegOpt format is: <opt1>=<val1>,<opt2>=<val2>,...
-  const char *nextOpt = jpegOpt.getCString();
+  const char *nextOpt = jpegOpt.c_str();
   while (nextOpt && *nextOpt)
   {
     const char *comma = strchr(nextOpt, ',');
@@ -344,22 +344,22 @@ static bool parseJpegOptions()
       nextOpt = nullptr;
     }
     //here opt is "<optN>=<valN> "
-    const char *equal = strchr(opt.getCString(), '=');
+    const char *equal = strchr(opt.c_str(), '=');
     if (!equal) {
-      fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.getCString());
+      fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.c_str());
       return false;
     }
-    int iequal = equal - opt.getCString();
+    int iequal = equal - opt.c_str();
     GooString value(&opt, iequal + 1, opt.getLength() - iequal - 1);
     opt.del(iequal, opt.getLength() - iequal);
     //here opt is "<optN>" and value is "<valN>"
 
     if (opt.cmp("quality") == 0) {
-      if (!isInt(value.getCString())) {
+      if (!isInt(value.c_str())) {
 	fprintf(stderr, "Invalid jpeg quality\n");
 	return false;
       }
-      jpegQuality = atoi(value.getCString());
+      jpegQuality = atoi(value.c_str());
       if (jpegQuality < 0 || jpegQuality > 100) {
 	fprintf(stderr, "jpeg quality must be between 0 and 100\n");
 	return false;
@@ -381,7 +381,7 @@ static bool parseJpegOptions()
 	return false;
       }
     } else {
-      fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.getCString());
+      fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.c_str());
       return false;
     }
   }
@@ -450,10 +450,10 @@ static void writePageImage(GooString *filename)
   if (filename->cmp("fd://0") == 0)
     file = stdout;
   else
-    file = fopen(filename->getCString(), "wb");
+    file = fopen(filename->c_str(), "wb");
 
   if (!file) {
-    fprintf(stderr, "Error opening output file %s\n", filename->getCString());
+    fprintf(stderr, "Error opening output file %s\n", filename->c_str());
     exit(2);
   }
 
@@ -464,7 +464,7 @@ static void writePageImage(GooString *filename)
   data = cairo_image_surface_get_data(surface);
 
   if (!writer->init(file, width, height, x_resolution, y_resolution)) {
-    fprintf(stderr, "Error writing %s\n", filename->getCString());
+    fprintf(stderr, "Error writing %s\n", filename->c_str());
     exit(2);
   }
   unsigned char *row = (unsigned char *) gmallocn(width, 4);
@@ -621,9 +621,9 @@ static void beginDocument(GooString *inputFileName, GooString *outputFileName, d
         output_file = stdout;
       else
       {
-        output_file = fopen(outputFileName->getCString(), "wb");
+        output_file = fopen(outputFileName->c_str(), "wb");
         if (!output_file) {
-          fprintf(stderr, "Error opening output file %s\n", outputFileName->getCString());
+          fprintf(stderr, "Error opening output file %s\n", outputFileName->c_str());
           exit(2);
         }
       }
@@ -869,7 +869,7 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
   }
 
   // strip everything up to last '/'
-  const char *s = fileName->getCString();
+  const char *s = fileName->c_str();
   const char *p = strrchr(s, '/');
   if (p) {
     p++;
@@ -883,9 +883,9 @@ static GooString *getOutputFileName(GooString *fileName, GooString *outputName)
   }
 
   // remove .pdf extension
-  p = strrchr(name->getCString(), '.');
+  p = strrchr(name->c_str(), '.');
   if (p && strcasecmp(p, ".pdf") == 0) {
-    GooString *name2 = new GooString(name->getCString(), name->getLength() - 4);
+    GooString *name2 = new GooString(name->c_str(), name->getLength() - 4);
     delete name;
     name = name2;
   }
@@ -983,7 +983,7 @@ int main(int argc, char *argv[]) {
     checkInvalidPrintOption(mono, "-mono");
     checkInvalidPrintOption(gray, "-gray");
     checkInvalidPrintOption(transp, "-transp");
-    checkInvalidPrintOption(icc.getCString()[0], "-icc");
+    checkInvalidPrintOption(icc.c_str()[0], "-icc");
     checkInvalidPrintOption(singleFile, "-singlefile");
     checkInvalidPrintOption(useCropBox, "-cropbox");
     checkInvalidPrintOption(scaleTo != 0, "-scale-to");
@@ -1006,7 +1006,7 @@ int main(int argc, char *argv[]) {
   if (printing)
     useCropBox = !noCrop;
 
-  if (icc.getCString()[0] && !png) {
+  if (icc.c_str()[0] && !png) {
     fprintf(stderr, "Error: -icc may only be used with png output.\n");
     exit(99);
   }
@@ -1111,10 +1111,10 @@ int main(int argc, char *argv[]) {
 
 #ifdef USE_CMS
   icc_data = nullptr;
-  if (icc.getCString()[0]) {
-    FILE *file = fopen(icc.getCString(), "rb");
+  if (icc.c_str()[0]) {
+    FILE *file = fopen(icc.c_str(), "rb");
     if (!file) {
-      fprintf(stderr, "Error: unable to open icc profile %s\n", icc.getCString());
+      fprintf(stderr, "Error: unable to open icc profile %s\n", icc.c_str());
       exit(4);
     }
     fseek (file, 0, SEEK_END);
@@ -1122,7 +1122,7 @@ int main(int argc, char *argv[]) {
     fseek (file, 0, SEEK_SET);
     icc_data = (unsigned char*)gmalloc(icc_data_size);
     if (fread(icc_data, icc_data_size, 1, file) != 1) {
-      fprintf(stderr, "Error: unable to read icc profile %s\n", icc.getCString());
+      fprintf(stderr, "Error: unable to read icc profile %s\n", icc.c_str());
       exit(4);
     }
     fclose(file);

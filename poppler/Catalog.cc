@@ -341,7 +341,7 @@ int Catalog::findPage(int num, int gen) {
 LinkDest *Catalog::findDest(const GooString *name) {
   // try named destination dictionary then name tree
   if (getDests()->isDict()) {
-    Object obj1 = getDests()->dictLookup(name->getCString());
+    Object obj1 = getDests()->dictLookup(name->c_str());
     return createLinkDest(&obj1);
   }
 
@@ -649,7 +649,7 @@ Object NameTree::lookup(const GooString *name)
   if (entry != nullptr) {
     return (*entry)->value.fetch(xref);
   } else {
-    error(errSyntaxError, -1, "failed to look up ({0:s})", name->getCString());
+    error(errSyntaxError, -1, "failed to look up ({0:s})", name->c_str());
     return Object(objNull);
   }
 }
@@ -681,7 +681,7 @@ bool Catalog::labelToIndex(GooString *label, int *index)
     if (!pli->labelToIndex(label, index))
       return false;
   } else {
-    *index = strtol(label->getCString(), &end, 10) - 1;
+    *index = strtol(label->c_str(), &end, 10) - 1;
     if (*end != '\0')
       return false;
   }

@@ -55,7 +55,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
           Object mvalue = mergeNameArray.arrayGetNF(j + 1);
           if (mkey.isString() && mvalue.isRef()) {
             if (mkey.getString()->cmp(key.getString()) < 0) {
-              newNameArray->add(Object(new GooString(mkey.getString()->getCString())));
+              newNameArray->add(Object(new GooString(mkey.getString()->c_str())));
               newNameArray->add(Object(mvalue.getRef().num + numOffset, mvalue.getRef().gen));
               j += 2;
             } else if (mkey.getString()->cmp(key.getString()) == 0) {
@@ -67,7 +67,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
             j += 2;
           }
         }
-        newNameArray->add(Object(new GooString(key.getString()->getCString())));
+        newNameArray->add(Object(new GooString(key.getString()->c_str())));
         newNameArray->add(Object(value.getRef().num, value.getRef().gen));
       }
     }
@@ -75,7 +75,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
       Object mkey = mergeNameArray.arrayGetNF(j);
       Object mvalue = mergeNameArray.arrayGetNF(j + 1);
       if (mkey.isString() && mvalue.isRef()) {
-        newNameArray->add(Object(new GooString(mkey.getString()->getCString())));
+        newNameArray->add(Object(new GooString(mkey.getString()->c_str())));
         newNameArray->add(Object(mvalue.getRef().num + numOffset, mvalue.getRef().gen));
       }
       j += 2;
@@ -88,7 +88,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
       Object key = mergeNameArray.arrayGetNF(i);
       Object value = mergeNameArray.arrayGetNF(i + 1);
       if (key.isString() && value.isRef()) {
-        newNameArray->add(Object(new GooString(key.getString()->getCString())));
+        newNameArray->add(Object(new GooString(key.getString()->c_str())));
         newNameArray->add(Object(value.getRef().num + numOffset, value.getRef().gen));
       }
     }
@@ -246,7 +246,7 @@ int main (int argc, char *argv[])
                 if (removeIntent) {
                   intents.arrayRemove(j);
                   error(errSyntaxWarning, -1, "Output intent {0:s} missing in pdf {1:s}, removed",
-                   gidf->getCString(), docs[i]->getFileName()->getCString());
+                   gidf->c_str(), docs[i]->getFileName()->c_str());
                 }
               } else {
                 intents.arrayRemove(j);

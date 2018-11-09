@@ -462,9 +462,9 @@ cmsHPROFILE loadColorProfile(const char *fileName)
   GooString *path = new GooString(GLOBAL_COLOR_PROFILE_DIR);
   path->append(fileName);
   // check if open the file
-  if ((fp = fopen(path->getCString(),"r")) != nullptr) {
+  if ((fp = fopen(path->c_str(),"r")) != nullptr) {
     fclose(fp);
-    hp = cmsOpenProfileFromFile(path->getCString(),"r");
+    hp = cmsOpenProfileFromFile(path->c_str(),"r");
   }
   delete path;
   return hp;
@@ -493,7 +493,7 @@ int GfxColorSpace::setupColorProfiles()
     if (displayProfileName == nullptr) {
       displayProfile = loadColorProfile("display.icc");
     } else if (displayProfileName->getLength() > 0) {
-      displayProfile = loadColorProfile(displayProfileName->getCString());
+      displayProfile = loadColorProfile(displayProfileName->c_str());
     }
   }
   // load RGB profile
@@ -2495,7 +2495,7 @@ GfxColorSpace *GfxIndexedColorSpace::parse(GfxResources *res, Array *arr, Output
       error(errSyntaxWarning, -1, "Bad Indexed color space (lookup table string too short)");
       goto err3;
     }
-    s = obj1.getString()->getCString();
+    s = obj1.getString()->c_str();
     for (i = 0; i <= indexHighA; ++i) {
       for (j = 0; j < n; ++j) {
 	cs->lookup[i*n + j] = (Guchar)*s++;

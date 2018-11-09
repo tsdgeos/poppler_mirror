@@ -115,7 +115,7 @@ _poppler_attachment_new (FileSpec *emb_file)
         _poppler_convert_pdf_date_to_gtime (embFile->modDate (), (time_t *)&attachment->mtime);
 
       if (embFile->checksum () && embFile->checksum ()->getLength () > 0)
-        attachment->checksum = g_string_new_len (embFile->checksum ()->getCString (),
+        attachment->checksum = g_string_new_len (embFile->checksum ()->c_str (),
                                                  embFile->checksum ()->getLength ());
       priv->obj_stream = embFile->streamObject()->copy();
     }

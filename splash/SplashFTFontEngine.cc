@@ -106,7 +106,7 @@ SplashFontFile *SplashFTFontEngine::loadCIDFont(SplashFontFileID *idA,
     nCIDs = 0;
   } else {
     if (src->isFile) {
-      ff = FoFiType1C::load(src->fileName->getCString());
+      ff = FoFiType1C::load(src->fileName->c_str());
     } else {
       ff = FoFiType1C::make(src->buf, src->bufLen);
     }
@@ -139,7 +139,7 @@ SplashFontFile *SplashFTFontEngine::loadOpenTypeCFFFont(SplashFontFileID *idA,
   if (!codeToGID) {
     if (!useCIDs) {
       if (src->isFile) {
-        ff = FoFiTrueType::load(src->fileName->getCString());
+        ff = FoFiTrueType::load(src->fileName->c_str());
       } else {
         ff = FoFiTrueType::make(src->buf, src->bufLen);
       }

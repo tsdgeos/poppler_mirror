@@ -123,7 +123,7 @@ time_t dateStringToTime(const GooString *dateString) {
   struct tm tm;
   time_t time;
 
-  if (!parseDateString (dateString->getCString(), &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute))
+  if (!parseDateString (dateString->c_str(), &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute))
     return -1;
 
   tm.tm_year = year - 1900;

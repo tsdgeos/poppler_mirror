@@ -79,7 +79,7 @@ QString SoundObject::url() const
 		return QString();
 
 	const GooString * goo = m_soundData->m_soundObj->getFileName();
-	return goo ? QString( goo->getCString() ) : QString();
+	return goo ? QString( goo->c_str() ) : QString();
 }
 
 QByteArray SoundObject::data() const

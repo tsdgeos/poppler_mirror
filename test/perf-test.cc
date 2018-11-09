@@ -879,7 +879,7 @@ static void RenderPdfAsText(const char *fileName)
         timeInMs = msTimer.getElapsed();
         if (gfTimings)
             LogInfo("page %d: %.2f ms\n", curPage, timeInMs);
-        printf("%s\n", txt->getCString());
+        printf("%s\n", txt->c_str());
         delete txt;
         txt = nullptr;
     }

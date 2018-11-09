@@ -760,9 +760,9 @@ namespace Poppler {
             return false;
 
         if (permanentId)
-            *permanentId = gooPermanentId.getCString();
+            *permanentId = gooPermanentId.c_str();
         if (updateId)
-            *updateId = gooUpdateId.getCString();
+            *updateId = gooUpdateId.c_str();
 
         return true;
     }

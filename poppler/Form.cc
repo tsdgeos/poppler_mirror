@@ -61,7 +61,7 @@ char* pdfDocEncodingToUTF16 (const GooString* orig, int* length)
   //double size, a unicode char takes 2 char, add 2 for the unicode marker
   *length = 2+2*orig->getLength();
   char *result = new char[(*length)];
-  const char *cstring = orig->getCString();
+  const char *cstring = orig->c_str();
   //unicode marker
   result[0] = (char)0xfe;
   result[1] = (char)0xff;
@@ -201,7 +201,7 @@ FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Re
 
 const char *FormWidgetButton::getOnStr() const {
   if (onStr)
-    return onStr->getCString();
+    return onStr->c_str();
 
   // 12.7.4.2.3 Check Boxes
   //  Yes should be used as the name for the on state
@@ -863,7 +863,7 @@ GooString* FormField::getFullyQualifiedName() {
       if (unicode_encoded) {
         full_name->insert(0, "\0.", 2); // 2-byte unicode period
         if (parent_name->hasUnicodeMarker()) {
-          full_name->insert(0, parent_name->getCString() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
+          full_name->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
         } else {
           int tmp_length;
           char* tmp_str = pdfDocEncodingToUTF16(parent_name, &tmp_length);
@@ -875,7 +875,7 @@ GooString* FormField::getFullyQualifiedName() {
         if (parent_name->hasUnicodeMarker()) {          
           unicode_encoded = true;
           full_name = convertToUtf16(full_name);
-          full_name->insert(0, parent_name->getCString() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
+          full_name->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
         } else {
           full_name->insert(0, parent_name);
         }
@@ -887,7 +887,7 @@ GooString* FormField::getFullyQualifiedName() {
   if (partialName) {
     if (unicode_encoded) {
       if (partialName->hasUnicodeMarker()) {
-        full_name->append(partialName->getCString() + 2, partialName->getLength() - 2); // Remove the unicode BOM
+        full_name->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
       } else {
         int tmp_length;
         char* tmp_str = pdfDocEncodingToUTF16(partialName, &tmp_length);
@@ -898,7 +898,7 @@ GooString* FormField::getFullyQualifiedName() {
       if (partialName->hasUnicodeMarker()) {
           unicode_encoded = true;        
           full_name = convertToUtf16(full_name);
-          full_name->append(partialName->getCString() + 2, partialName->getLength() - 2); // Remove the unicode BOM
+          full_name->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
       } else {
         full_name->append(partialName);
       }
@@ -1218,7 +1218,7 @@ double FormFieldText::getTextFontSize()
   double fontSize = -1;
   if (idx >= 0) {
     char* p = nullptr;
-    fontSize = strtod(static_cast<GooString*>(daToks->get(idx))->getCString(), &p);
+    fontSize = strtod(static_cast<GooString*>(daToks->get(idx))->c_str(), &p);
     if (!p || *p)
       fontSize = -1;
   }
@@ -1625,12 +1625,12 @@ void FormFieldSignature::parseInfo()
 
   const Object location_obj = sig_dict.dictLookup("Location");
   if (location_obj.isString()) {
-    signature_info->setLocation(location_obj.getString()->getCString());
+    signature_info->setLocation(location_obj.getString()->c_str());
   }
 
   const Object reason_obj = sig_dict.dictLookup("Reason");
   if (reason_obj.isString()) {
-    signature_info->setReason(reason_obj.getString()->getCString());
+    signature_info->setReason(reason_obj.getString()->c_str());
   }
 
   // retrieve SigningTime
@@ -1719,7 +1719,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
   SECErrorCodes cert_val_state;
   const int signature_len = signature->getLength();
   unsigned char *signatureuchar = (unsigned char *)gmalloc(signature_len);
-  memcpy(signatureuchar, signature->getCString(), signature_len);
+  memcpy(signatureuchar, signature->c_str(), signature_len);
   SignatureHandler signature_handler(signatureuchar, signature_len);
 
   Goffset fileLength = doc->getBaseStream()->getLength();

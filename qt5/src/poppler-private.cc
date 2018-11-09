@@ -96,7 +96,7 @@ namespace Debug {
             convertedStr.append(buf, n);
         }
 
-        return QString::fromUtf8(convertedStr.getCString(), convertedStr.getLength());
+        return QString::fromUtf8(convertedStr.c_str(), convertedStr.getLength());
     }
 
     QString UnicodeParsedString(const GooString *s1) {
@@ -108,7 +108,7 @@ namespace Debug {
         bool deleteCString;
         if ( ( s1->getChar(0) & 0xff ) == 0xfe && ( s1->getLength() > 1 && ( s1->getChar(1) & 0xff ) == 0xff ) )
         {
-            cString = s1->getCString();
+            cString = s1->c_str();
             stringLength = s1->getLength();
             deleteCString = false;
         }
@@ -200,7 +200,7 @@ namespace Debug {
                     // so better storing the reference and provide the viewport on demand
                     const GooString *s = g->getNamedDest();
                     QChar *charArray = new QChar[s->getLength()];
-                    for (int i = 0; i < s->getLength(); ++i) charArray[i] = QChar(s->getCString()[i]);
+                    for (int i = 0; i < s->getLength(); ++i) charArray[i] = QChar(s->c_str()[i]);
                     QString aux(charArray, s->getLength());
                     e->setAttribute( QStringLiteral("DestinationName"), aux );
                     delete[] charArray;
@@ -224,7 +224,7 @@ namespace Debug {
                     // so better storing the reference and provide the viewport on demand
                     const GooString *s = g->getNamedDest();
                     QChar *charArray = new QChar[s->getLength()];
-                    for (int i = 0; i < s->getLength(); ++i) charArray[i] = QChar(s->getCString()[i]);
+                    for (int i = 0; i < s->getLength(); ++i) charArray[i] = QChar(s->c_str()[i]);
                     QString aux(charArray, s->getLength());
                     e->setAttribute( QStringLiteral("DestinationName"), aux );
                     delete[] charArray;
@@ -234,13 +234,13 @@ namespace Debug {
                     LinkDestinationData ldd(destination, nullptr, doc, g->getFileName() != nullptr);
                     e->setAttribute( QStringLiteral("Destination"), LinkDestination(ldd).toString() );
                 }
-                e->setAttribute( QStringLiteral("ExternalFileName"), g->getFileName()->getCString() );
+                e->setAttribute( QStringLiteral("ExternalFileName"), g->getFileName()->c_str() );
                 break;
             }
             case actionURI:
             {
                 const LinkURI * u = static_cast< const LinkURI * >( a );
-                e->setAttribute( QStringLiteral("DestinationURI"), u->getURI()->getCString() );
+                e->setAttribute( QStringLiteral("DestinationURI"), u->getURI()->c_str() );
             }
             default: ;
         }

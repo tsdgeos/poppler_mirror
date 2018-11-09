@@ -239,7 +239,7 @@ class LinkMoviePrivate : public LinkPrivate
 		// in case this destination was named one, and it was not resolved
 		if ( data.namedDest && !ld )
 		{
-			d->name = QString::fromLatin1( data.namedDest->getCString() );
+			d->name = QString::fromLatin1( data.namedDest->c_str() );
 		}
 		
 		if (!ld) return;

@@ -508,7 +508,7 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
                 FileAttachmentAnnotation * f = new FileAttachmentAnnotation();
                 annotation = f;
                 // -> fileIcon
-                f->setFileIconName( QString::fromLatin1( attachann->getName()->getCString() ) );
+                f->setFileIconName( QString::fromLatin1( attachann->getName()->c_str() ) );
                 // -> embeddedFile
                 FileSpec *filespec = new FileSpec( attachann->getFile() );
                 f->setEmbeddedFile( new EmbeddedFile( *new EmbeddedFileData( filespec ) ) );
@@ -523,7 +523,7 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
                 annotation = s;
 
                 // -> soundIcon
-                s->setSoundIconName( QString::fromLatin1( soundann->getName()->getCString() ) );
+                s->setSoundIconName( QString::fromLatin1( soundann->getName()->c_str() ) );
                 // -> sound
                 s->setSound( new SoundObject( soundann->getSound() ) );
                 break;
@@ -542,7 +542,7 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
                 // -> movieTitle
                 const GooString * movietitle = movieann->getTitle();
                 if ( movietitle )
-                    m->setMovieTitle( QString::fromLatin1( movietitle->getCString() ) );
+                    m->setMovieTitle( QString::fromLatin1( movietitle->c_str() ) );
                 break;
             }
             case Annot::typeScreen:
@@ -1416,7 +1416,7 @@ QDateTime Annotation::modificationDate() const
         return d->modDate;
 
     if ( d->pdfAnnot->getModified() )
-        return convertDate( d->pdfAnnot->getModified()->getCString() );
+        return convertDate( d->pdfAnnot->getModified()->c_str() );
     else
         return QDateTime();
 }
@@ -1452,7 +1452,7 @@ QDateTime Annotation::creationDate() const
     const AnnotMarkup *markupann = dynamic_cast<const AnnotMarkup*>(d->pdfAnnot);
 
     if (markupann && markupann->getDate())
-        return convertDate( markupann->getDate()->getCString() );
+        return convertDate( markupann->getDate()->c_str() );
 
     return modificationDate();
 }
@@ -2062,7 +2062,7 @@ QString TextAnnotation::textIcon() const
     if (d->pdfAnnot->getType() == Annot::typeText)
     {
         const AnnotText * textann = static_cast<const AnnotText*>(d->pdfAnnot);
-        return QString::fromLatin1( textann->getIcon()->getCString() );
+        return QString::fromLatin1( textann->getIcon()->c_str() );
     }
 
     return QString();
@@ -3451,7 +3451,7 @@ QString StampAnnotation::stampIconName() const
         return d->stampIconName;
 
     const AnnotStamp * stampann = static_cast<const AnnotStamp*>(d->pdfAnnot);
-    return QString::fromLatin1( stampann->getIcon()->getCString() );
+    return QString::fromLatin1( stampann->getIcon()->c_str() );
 }
 
 void StampAnnotation::setStampIconName( const QString &name )

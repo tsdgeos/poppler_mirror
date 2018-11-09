@@ -864,10 +864,10 @@ bool document::get_pdf_id(std::string *permanent_id, std::string *update_id) con
     }
 
     if (permanent_id) {
-        *permanent_id = goo_permanent_id.getCString();
+        *permanent_id = goo_permanent_id.c_str();
     }
     if (update_id) {
-        *update_id = goo_update_id.getCString();
+        *update_id = goo_update_id.c_str();
     }
 
     return true;

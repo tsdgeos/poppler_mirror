@@ -88,7 +88,7 @@ GooString *SignatureHandler::getDefaultFirefoxCertDB_Linux()
   GooString * homePath = new GooString(getenv("HOME"));
   homePath = homePath->append("/.mozilla/firefox/");
 
-  if ((toSearchIn = opendir(homePath->getCString())) == nullptr) {
+  if ((toSearchIn = opendir(homePath->c_str())) == nullptr) {
     error(errInternal, 0, "couldn't find default Firefox Folder");
     delete homePath;
     return nullptr;
@@ -117,7 +117,7 @@ void SignatureHandler::init_nss()
   if (certDBPath == nullptr) {
     NSS_Init("sql:/etc/pki/nssdb");
   } else {
-    NSS_Init(certDBPath->getCString());
+    NSS_Init(certDBPath->c_str());
   }
   //Make sure NSS root certificates module is loaded
   SECMOD_AddNewModule("Root Certs", "libnssckbi.so", 0, 0);

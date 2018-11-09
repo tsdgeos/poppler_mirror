@@ -218,7 +218,7 @@ static const ArgDesc argDesc[] = {
 static bool parseJpegOptions()
 {
   //jpegOpt format is: <opt1>=<val1>,<opt2>=<val2>,...
-  const char *nextOpt = jpegOpt.getCString();
+  const char *nextOpt = jpegOpt.c_str();
   while (nextOpt && *nextOpt)
   {
     const char *comma = strchr(nextOpt, ',');
@@ -231,22 +231,22 @@ static bool parseJpegOptions()
       nextOpt = nullptr;
     }
     //here opt is "<optN>=<valN> "
-    const char *equal = strchr(opt.getCString(), '=');
+    const char *equal = strchr(opt.c_str(), '=');
     if (!equal) {
-      fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.getCString());
+      fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.c_str());
       return false;
     }
-    int iequal = equal - opt.getCString();
+    int iequal = equal - opt.c_str();
     GooString value(&opt, iequal + 1, opt.getLength() - iequal - 1);
     opt.del(iequal, opt.getLength() - iequal);
     //here opt is "<optN>" and value is "<valN>"
 
     if (opt.cmp("quality") == 0) {
-      if (!isInt(value.getCString())) {
+      if (!isInt(value.c_str())) {
 	fprintf(stderr, "Invalid jpeg quality\n");
 	return false;
       }
-      jpegQuality = atoi(value.getCString());
+      jpegQuality = atoi(value.c_str());
       if (jpegQuality < 0 || jpegQuality > 100) {
 	fprintf(stderr, "jpeg quality must be between 0 and 100\n");
 	return false;
@@ -268,7 +268,7 @@ static bool parseJpegOptions()
 	return false;
       }
     } else {
-      fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.getCString());
+      fprintf(stderr, "Unknown jpeg option \"%s\"\n", opt.c_str());
       return false;
     }
   }

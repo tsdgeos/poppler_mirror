@@ -351,9 +351,9 @@ int main(int argc, char *argv[]) {
     error(errCommandLine, -1, "You have to provide an output filename when reading form stdin.");
     goto err1;
   } else {
-    const char *p = fileName->getCString() + fileName->getLength() - 4;
+    const char *p = fileName->c_str() + fileName->getLength() - 4;
     if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
-      psFileName = new GooString(fileName->getCString(),
+      psFileName = new GooString(fileName->c_str(),
 			       fileName->getLength() - 4);
     } else {
       psFileName = fileName->copy();
@@ -386,7 +386,7 @@ int main(int argc, char *argv[]) {
   }
 
   // write PostScript file
-  psOut = new PSOutputDev(psFileName->getCString(), doc,
+  psOut = new PSOutputDev(psFileName->c_str(), doc,
 			  nullptr, pages, mode,
 			  paperWidth,
 			  paperHeight,

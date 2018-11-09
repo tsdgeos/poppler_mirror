@@ -290,9 +290,9 @@ int main(int argc, char *argv[]) {
      error(errCommandLine, -1, "You have to provide an output filename when reading form stdin.");
      goto err2;
   } else {
-    const char *p = fileName->getCString() + fileName->getLength() - 4;
+    const char *p = fileName->c_str() + fileName->getLength() - 4;
     if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")) {
-      textFileName = new GooString(fileName->getCString(),
+      textFileName = new GooString(fileName->c_str(),
 				 fileName->getLength() - 4);
     } else {
       textFileName = fileName->copy();
@@ -319,7 +319,7 @@ int main(int argc, char *argv[]) {
     if (!textFileName->cmp("-")) {
       f = stdout;
     } else {
-      if (!(f = fopen(textFileName->getCString(), "wb"))) {
+      if (!(f = fopen(textFileName->c_str(), "wb"))) {
 	error(errIO, -1, "Couldn't open text file '{0:t}'", textFileName);
 	exitCode = 2;
 	goto err3;
@@ -377,7 +377,7 @@ int main(int argc, char *argv[]) {
       fclose(f);
     }
   } else {
-    textOut = new TextOutputDev(textFileName->getCString(),
+    textOut = new TextOutputDev(textFileName->c_str(),
 				physLayout, fixedPitch, rawOrder, htmlMeta);
     if (textOut->isOk()) {
       if ((w==0) && (h==0) && (x==0) && (y==0)) {
@@ -405,7 +405,7 @@ int main(int argc, char *argv[]) {
     if (!textFileName->cmp("-")) {
       f = stdout;
     } else {
-      if (!(f = fopen(textFileName->getCString(), "ab"))) {
+      if (!(f = fopen(textFileName->c_str(), "ab"))) {
 	error(errIO, -1, "Couldn't open text file '{0:t}'", textFileName);
 	exitCode = 2;
 	goto err3;
@@ -476,7 +476,7 @@ static void printInfoString(FILE *f, Dict *infoDict, const char *key,
 static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *fmt) {
   Object obj = infoDict->lookup(key);
   if (obj.isString()) {
-    const char *s = obj.getString()->getCString();
+    const char *s = obj.getString()->c_str();
     if (s[0] == 'D' && s[1] == ':') {
       s += 2;
     }
@@ -500,7 +500,7 @@ static void printLine(FILE *f, TextLine *line) {
     if (lineYMax < yMax) lineYMax = yMax;
 
     GooString *wordText = word->getText();
-    const std::string myString = myXmlTokenReplace(wordText->getCString());
+    const std::string myString = myXmlTokenReplace(wordText->c_str());
     wordXML << "          <word xMin=\"" << xMin << "\" yMin=\"" << yMin << "\" xMax=\"" <<
             xMax << "\" yMax=\"" << yMax << "\">" << myString << "</word>\n";
     delete wordText;
@@ -553,7 +553,7 @@ void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int 
     for (int i = 0; i < word_length; ++i) {
       word = wordlist->get(i);
       word->getBBox(&xMinA, &yMinA, &xMaxA, &yMaxA);
-      const std::string myString = myXmlTokenReplace(word->getText()->getCString());
+      const std::string myString = myXmlTokenReplace(word->getText()->c_str());
       fprintf(f,"    <word xMin=\"%f\" yMin=\"%f\" xMax=\"%f\" yMax=\"%f\">%s</word>\n", xMinA, yMinA, xMaxA, yMaxA, myString.c_str());
     }
     fprintf(f, "  </page>\n");

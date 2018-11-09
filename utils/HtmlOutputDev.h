@@ -319,7 +319,7 @@ public:
   bool dumpDocOutline(PDFDoc* doc);
 
 private:
-  // convert encoding into a HTML standard, or encoding->getCString if not
+  // convert encoding into a HTML standard, or encoding->c_str if not
   // recognized. Will delete encoding for you and return a new one
   // that you have to delete
   static GooString* mapEncodingToHtml(GooString* encoding);

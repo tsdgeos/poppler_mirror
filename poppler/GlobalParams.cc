@@ -205,17 +205,17 @@ SysFontInfo::~SysFontInfo() {
 }
 
 bool SysFontInfo::match(SysFontInfo *fi) {
-  return !strcasecmp(name->getCString(), fi->name->getCString()) &&
+  return !strcasecmp(name->c_str(), fi->name->c_str()) &&
          bold == fi->bold && italic == fi->italic && oblique == fi->oblique && fixedWidth == fi->fixedWidth;
 }
 
 bool SysFontInfo::match(GooString *nameA, bool boldA, bool italicA, bool obliqueA, bool fixedWidthA) {
-  return !strcasecmp(name->getCString(), nameA->getCString()) &&
+  return !strcasecmp(name->c_str(), nameA->c_str()) &&
          bold == boldA && italic == italicA && oblique == obliqueA && fixedWidth == fixedWidthA;
 }
 
 bool SysFontInfo::match(GooString *nameA, bool boldA, bool italicA) {
-  return !strcasecmp(name->getCString(), nameA->getCString()) &&
+  return !strcasecmp(name->c_str(), nameA->c_str()) &&
          bold == boldA && italic == italicA;
 }
 
@@ -278,19 +278,19 @@ SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exac
   n = name2->getLength();
 
   // remove trailing "MT" (Foo-MT, Foo-BoldMT, etc.)
-  if (n > 2 && !strcmp(name2->getCString() + n - 2, "MT")) {
+  if (n > 2 && !strcmp(name2->c_str() + n - 2, "MT")) {
     name2->del(n - 2, 2);
     n -= 2;
   }
 
   // look for "Regular"
-  if (n > 7 && !strcmp(name2->getCString() + n - 7, "Regular")) {
+  if (n > 7 && !strcmp(name2->c_str() + n - 7, "Regular")) {
     name2->del(n - 7, 7);
     n -= 7;
   }
 
   // look for "Italic"
-  if (n > 6 && !strcmp(name2->getCString() + n - 6, "Italic")) {
+  if (n > 6 && !strcmp(name2->c_str() + n - 6, "Italic")) {
     name2->del(n - 6, 6);
     italic = true;
     n -= 6;
@@ -299,7 +299,7 @@ SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exac
   }
 
   // look for "Oblique"
-  if (n > 6 && !strcmp(name2->getCString() + n - 7, "Oblique")) {
+  if (n > 6 && !strcmp(name2->c_str() + n - 7, "Oblique")) {
     name2->del(n - 7, 7);
     oblique = true;
     n -= 6;
@@ -308,7 +308,7 @@ SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exac
   }
 
   // look for "Bold"
-  if (n > 4 && !strcmp(name2->getCString() + n - 4, "Bold")) {
+  if (n > 4 && !strcmp(name2->c_str() + n - 4, "Bold")) {
     name2->del(n - 4, 4);
     bold = true;
     n -= 4;
@@ -317,19 +317,19 @@ SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exac
   }
 
   // remove trailing "MT" (FooMT-Bold, etc.)
-  if (n > 2 && !strcmp(name2->getCString() + n - 2, "MT")) {
+  if (n > 2 && !strcmp(name2->c_str() + n - 2, "MT")) {
     name2->del(n - 2, 2);
     n -= 2;
   }
 
   // remove trailing "PS"
-  if (n > 2 && !strcmp(name2->getCString() + n - 2, "PS")) {
+  if (n > 2 && !strcmp(name2->c_str() + n - 2, "PS")) {
     name2->del(n - 2, 2);
     n -= 2;
   }
 
   // remove trailing "IdentityH"
-  if (n > 9 && !strcmp(name2->getCString() + n - 9, "IdentityH")) {
+  if (n > 9 && !strcmp(name2->c_str() + n - 9, "IdentityH")) {
     name2->del(n - 9, 9);
     n -= 9;
   }
@@ -503,7 +503,7 @@ void GlobalParams::parseNameToUnicode(const GooString *name) {
   Unicode u;
   char *tokptr;
 
-  if (!(f = openFile(name->getCString(), "r"))) {
+  if (!(f = openFile(name->c_str(), "r"))) {
     error(errIO, -1, "Couldn't open 'nameToUnicode' file '{0:t}'",
 	  name);
     return;
@@ -618,8 +618,8 @@ FILE *GlobalParams::findCMapFile(const GooString *collection, const GooString *c
   const auto cMapDirs = this->cMapDirs.equal_range(collection->toStr());
   for (auto cMapDir = cMapDirs.first; cMapDir != cMapDirs.second; ++cMapDir) {
     auto* const path = new GooString(cMapDir->second);
-    appendToPath(path, cMapName->getCString());
-    file = openFile(path->getCString(), "r");
+    appendToPath(path, cMapName->c_str());
+    file = openFile(path->c_str(), "r");
     delete path;
     if (file) {
       break;
@@ -637,8 +637,8 @@ FILE *GlobalParams::findToUnicodeFile(const GooString *name) {
   globalParamsLocker();
   for (i = 0; i < toUnicodeDirs->getLength(); ++i) {
     dir = (GooString *)toUnicodeDirs->get(i);
-    fileName = appendToPath(dir->copy(), name->getCString());
-    f = openFile(fileName->getCString(), "r");
+    fileName = appendToPath(dir->copy(), name->c_str());
+    f = openFile(fileName->c_str(), "r");
     delete fileName;
     if (f) {
       return f;
@@ -676,19 +676,19 @@ static const char *getFontLang(GfxFont *font)
     const GooString *collection = ((GfxCIDFont *)font)->getCollection();
     if (collection)
     {
-      if (strcmp(collection->getCString(), "Adobe-GB1") == 0)
+      if (strcmp(collection->c_str(), "Adobe-GB1") == 0)
         lang = "zh-cn"; // Simplified Chinese
-      else if (strcmp(collection->getCString(), "Adobe-CNS1") == 0)
+      else if (strcmp(collection->c_str(), "Adobe-CNS1") == 0)
         lang = "zh-tw"; // Traditional Chinese
-      else if (strcmp(collection->getCString(), "Adobe-Japan1") == 0)
+      else if (strcmp(collection->c_str(), "Adobe-Japan1") == 0)
         lang = "ja"; // Japanese
-      else if (strcmp(collection->getCString(), "Adobe-Japan2") == 0)
+      else if (strcmp(collection->c_str(), "Adobe-Japan2") == 0)
         lang = "ja"; // Japanese
-      else if (strcmp(collection->getCString(), "Adobe-Korea1") == 0)
+      else if (strcmp(collection->c_str(), "Adobe-Korea1") == 0)
         lang = "ko"; // Korean
-      else if (strcmp(collection->getCString(), "Adobe-UCS") == 0)
+      else if (strcmp(collection->c_str(), "Adobe-UCS") == 0)
         lang = "xx";
-      else if (strcmp(collection->getCString(), "Adobe-Identity") == 0)
+      else if (strcmp(collection->c_str(), "Adobe-Identity") == 0)
         lang = "xx";
       else
       {
@@ -713,7 +713,7 @@ static FcPattern *buildFcPattern(GfxFont *font, const GooString *base14Name)
   FcPattern *p;
 
   // this is all heuristics will be overwritten if font had proper info
-  char *fontName = strdup(((base14Name == nullptr) ? font->getName() : base14Name)->getCString());
+  char *fontName = strdup(((base14Name == nullptr) ? font->getName() : base14Name)->c_str());
 
   const char *modifiers = strchr (fontName, ',');
   if (modifiers == nullptr)
@@ -766,7 +766,7 @@ static FcPattern *buildFcPattern(GfxFont *font, const GooString *base14Name)
   // if the FontDescriptor specified a family name use it
   if (font->getFamily()) {
     free((char*)family);
-    family = font->getFamily()->getCString();
+    family = font->getFamily()->c_str();
     freeFamily = false;
   }
   
@@ -861,7 +861,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
     path = fi->path->copy();
     *type = fi->type;
     *fontNum = fi->fontNum;
-    substituteName.Set(fi->substituteName->getCString());
+    substituteName.Set(fi->substituteName->c_str());
   } else {
     FcChar8* s;
     char * ext;
@@ -999,7 +999,7 @@ GooString *GlobalParams::findSystemFontFile(GfxFont *font,
     *fontNum = fi->fontNum;
   }
   if (substituteFontName) {
-    substituteFontName->Set(substituteName.getCString());
+    substituteFontName->Set(substituteName.c_str());
   }
 fin:
   if (p)
@@ -1064,7 +1064,7 @@ void GlobalParams::setupBaseFonts(char *dir) {
     fileName = nullptr;
     if (dir) {
       fileName = appendToPath(new GooString(dir), displayFontTab[i].t1FileName);
-      if ((f = fopen(fileName->getCString(), "rb"))) {
+      if ((f = fopen(fileName->c_str(), "rb"))) {
 	      fclose(f);
       } else {
 	      delete fileName;
@@ -1074,7 +1074,7 @@ void GlobalParams::setupBaseFonts(char *dir) {
     for (j = 0; !fileName && displayFontDirs[j]; ++j) {
       fileName = appendToPath(new GooString(displayFontDirs[j]),
 			      displayFontTab[i].t1FileName);
-      if ((f = fopen(fileName->getCString(), "rb"))) {
+      if ((f = fopen(fileName->c_str(), "rb"))) {
 	      fclose(f);
       } else {
 	      delete fileName;

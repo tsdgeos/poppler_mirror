@@ -62,7 +62,7 @@ HtmlLink::~HtmlLink(){
 }
 
 bool HtmlLink::isEqualDest(const HtmlLink& x) const{
-  return (!strcmp(dest->getCString(), x.dest->getCString()));
+  return (!strcmp(dest->c_str(), x.dest->c_str()));
 }
 
 bool HtmlLink::inLink(double xmin,double ymin,double xmax,double ymax) const {

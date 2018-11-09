@@ -112,7 +112,7 @@ GooString *appendToPath(GooString *path, const char *fileName) {
   char *p0, *p1, *p2;
   char *q1;
 
-  p0 = path->getCString();
+  p0 = path->c_str();
   p1 = p0 + path->getLength() - 1;
   if (!strcmp(fileName, "-")) {
     if (*p1 == ']') {
@@ -154,7 +154,7 @@ GooString *appendToPath(GooString *path, const char *fileName) {
   tmp = new GooString(path);
   tmp->append('/');
   tmp->append(fileName);
-  GetFullPathNameA(tmp->getCString(), sizeof(buf), buf, &fp);
+  GetFullPathNameA(tmp->c_str(), sizeof(buf), buf, &fp);
   delete tmp;
   path->clear();
   path->append(buf);
@@ -168,7 +168,7 @@ GooString *appendToPath(GooString *path, const char *fileName) {
   path->append(".");
   i = path->getLength();
   path->append(fileName);
-  for (p = path->getCString() + i; *p; ++p) {
+  for (p = path->c_str() + i; *p; ++p) {
     if (*p == '/') {
       *p = '.';
     } else if (*p == '.') {
@@ -185,7 +185,7 @@ GooString *appendToPath(GooString *path, const char *fileName) {
   path->append(":");
   i = path->getLength();
   path->append(fileName);
-  for (p = path->getCString() + i; *p; ++p) {
+  for (p = path->c_str() + i; *p; ++p) {
     if (*p == '/') {
       *p = ':';
     } else if (*p == '.') {
@@ -434,7 +434,7 @@ Goffset GooFile::size() const {
 }
 
 GooFile* GooFile::open(const GooString *fileName) {
-  HANDLE handle = CreateFileA(fileName->getCString(),
+  HANDLE handle = CreateFileA(fileName->c_str(),
                               GENERIC_READ,
                               FILE_SHARE_READ | FILE_SHARE_WRITE,
                               nullptr,
@@ -483,9 +483,9 @@ Goffset GooFile::size() const {
 
 GooFile* GooFile::open(const GooString *fileName) {
 #ifdef VMS
-  int fd = ::open(fileName->getCString(), Q_RDONLY, "ctx=stm");
+  int fd = ::open(fileName->c_str(), Q_RDONLY, "ctx=stm");
 #else
-  int fd = ::open(fileName->getCString(), O_RDONLY);
+  int fd = ::open(fileName->c_str(), O_RDONLY);
 #endif
   
   return fd < 0 ? nullptr : new GooFile(fd);
@@ -535,10 +535,10 @@ GDirEntry::GDirEntry(const char *dirPath, const char *nameA, bool doStat) {
 #elif defined(ACORN)
 #else
 #ifdef _WIN32
-    fa = GetFileAttributesA(fullPath->getCString());
+    fa = GetFileAttributesA(fullPath->c_str());
     dir = (fa != 0xFFFFFFFF && (fa & FILE_ATTRIBUTE_DIRECTORY));
 #else
-    if (stat(fullPath->getCString(), &st) == 0)
+    if (stat(fullPath->c_str(), &st) == 0)
       dir = S_ISDIR(st.st_mode);
 #endif
 #endif
@@ -558,7 +558,7 @@ GDir::GDir(const char *name, bool doStatA) {
 
   tmp = path->copy();
   tmp->append("/*.*");
-  hnd = FindFirstFileA(tmp->getCString(), &ffd);
+  hnd = FindFirstFileA(tmp->c_str(), &ffd);
   delete tmp;
 #elif defined(ACORN)
 #elif defined(MACOS)
@@ -590,7 +590,7 @@ GDirEntry *GDir::getNextEntry() {
 
 #if defined(_WIN32)
   if (hnd != INVALID_HANDLE_VALUE) {
-    e = new GDirEntry(path->getCString(), ffd.cFileName, doStat);
+    e = new GDirEntry(path->c_str(), ffd.cFileName, doStat);
     if (!FindNextFileA(hnd, &ffd)) {
       FindClose(hnd);
       hnd = INVALID_HANDLE_VALUE;
@@ -602,13 +602,13 @@ GDirEntry *GDir::getNextEntry() {
   struct dirent *ent;
   if (dir) {
     if (needParent) {
-      e = new GDirEntry(path->getCString(), "-", doStat);
+      e = new GDirEntry(path->c_str(), "-", doStat);
       needParent = false;
       return e;
     }
     ent = readdir(dir);
     if (ent) {
-      e = new GDirEntry(path->getCString(), ent->d_name, doStat);
+      e = new GDirEntry(path->c_str(), ent->d_name, doStat);
     }
   }
 #else
@@ -619,7 +619,7 @@ GDirEntry *GDir::getNextEntry() {
     }
     while (ent && (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, "..")));
     if (ent) {
-      e = new GDirEntry(path->getCString(), ent->d_name, doStat);
+      e = new GDirEntry(path->c_str(), ent->d_name, doStat);
     }
   }
 #endif
@@ -635,7 +635,7 @@ void GDir::rewind() {
     FindClose(hnd);
   tmp = path->copy();
   tmp->append("/*.*");
-  hnd = FindFirstFileA(tmp->getCString(), &ffd);
+  hnd = FindFirstFileA(tmp->c_str(), &ffd);
   delete tmp;
 #elif defined(ACORN)
 #elif defined(MACOS)
@@ -643,7 +643,7 @@ void GDir::rewind() {
   if (dir)
     rewinddir(dir);
 #ifdef VMS
-  needParent = strchr(path->getCString(), '[') != NULL;
+  needParent = strchr(path->c_str(), '[') != NULL;
 #endif
 #endif
 }
