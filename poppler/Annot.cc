@@ -79,6 +79,10 @@
 #include <string.h>
 #include <algorithm>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #define fieldFlagReadOnly           0x00000001
 #define fieldFlagRequired           0x00000002
 #define fieldFlagNoExport           0x00000004
@@ -1652,6 +1656,89 @@ void AnnotAppearanceBuilder::drawCircleBottomRight(double cx, double cy, double 
   appearBuf->append("S\n");
 }
 
+void AnnotAppearanceBuilder::drawLineEndSquare(double x, double y, double size, bool fill, const Matrix& m) {
+  const double x1[3] {x - size/2., x - size/2., x + size/2.};
+  const double y1[3] {y + size/2., y - size/2., y - size/2.};
+  double tx, ty;
+
+  m.transform (x + size/2., y + size/2., &tx, &ty);
+  appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+  for (int i = 0; i<3; i++) {
+    m.transform (x1[i], y1[i], &tx, &ty);
+    appendf ("{0:.2f} {1:.2f} l\n", tx, ty);
+  }
+  appearBuf->append(fill ? "b\n" : "s\n");
+}
+
+void AnnotAppearanceBuilder::drawLineEndCircle(double x, double y, double size, bool fill, const Matrix& m) {
+  const double r = size/2.;
+  const double x1[4] {x + r, x - bezierCircle * r, x - r, x + bezierCircle * r};
+  const double x2[4] {x + bezierCircle*r, x - r, x - bezierCircle*r, x + r};
+  const double x3[4] {x, x - r, x, x + r};
+  const double y1[4] {y + bezierCircle * r, y + r, y - bezierCircle * r, y - r};
+  const double y2[4] {y + r, y + bezierCircle * r, y - r, y - bezierCircle * r};
+  const double y3[4] {y + r, y, y - r, y};
+  double tx[3];
+  double ty[3];
+
+  m.transform(x + r, y, &tx[0], &ty[0]);
+  appearBuf->appendf("{0:.2f} {1:.2f} m\n", tx[0], ty[0]);
+  for (int i=0; i<4; i++) {
+    m.transform(x1[i], y1[i], &tx[0], &ty[0]);
+    m.transform(x2[i], y2[i], &tx[1], &ty[1]);
+    m.transform(x3[i], y3[i], &tx[2], &ty[2]);
+    appearBuf->appendf("{0:.2f} {1:.2f} {2:.2f} {3:.2f} {4:.2f} {5:.2f} c\n",
+        tx[0], ty[0], tx[1], ty[1], tx[2], ty[2]);
+  }
+  appearBuf->append(fill ? "b\n" : "s\n");
+}
+
+void AnnotAppearanceBuilder::drawLineEndDiamond(double x, double y, double size, bool fill, const Matrix& m) {
+  const double x1[3] {x, x - size/2., x};
+  const double y1[3] {y + size/2., y, y - size/2.};
+  double tx, ty;
+
+  m.transform (x + size/2., y, &tx, &ty);
+  appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+  for (int i = 0; i<3; i++) {
+    m.transform (x1[i], y1[i], &tx, &ty);
+    appendf ("{0:.2f} {1:.2f} l\n", tx, ty);
+  }
+  appearBuf->append(fill ? "b\n" : "s\n");
+}
+
+void AnnotAppearanceBuilder::drawLineEndArrow(double x, double y, double size, int orientation, bool isOpen, bool fill, const Matrix& m) {
+  const double alpha {M_PI/6.};
+  const double xOffs { orientation*size/2.};
+  const double yOffs { tan(alpha)*size };
+  double tx, ty;
+
+  m.transform (x - xOffs, y+yOffs, &tx, &ty);
+  appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+  m.transform (x + xOffs, y, &tx, &ty);
+  appendf ("{0:.2f} {1:.2f} l\n", tx, ty);
+  m.transform (x - xOffs, y-yOffs, &tx, &ty);
+  appendf ("{0:.2f} {1:.2f} l\n", tx, ty);
+
+  if (isOpen) {
+    appearBuf->append("S\n");
+  } else {
+    appearBuf->append(fill ? "b\n" : "s\n");
+  }
+}
+
+void AnnotAppearanceBuilder::drawLineEndSlash(double x, double y, double size, const Matrix& m) {
+  const double alpha {M_PI/3.};
+  const double xOffs { cos(alpha)*size };
+  double tx, ty;
+
+  m.transform (x + size/2. - xOffs, y - size/2., &tx, &ty);
+  appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+  m.transform (x + size/2., y + size/2., &tx, &ty);
+  appendf ("{0:.2f} {1:.2f} l\n", tx, ty);
+  appearBuf->append("S\n");
+}
+
 Object Annot::createForm(const GooString *appearBuf, double *bbox, bool transparencyGroup, Dict *resDict) {
   return createForm(appearBuf, bbox, transparencyGroup, resDict ? Object(resDict) : Object());
 }
@@ -3070,9 +3157,70 @@ void AnnotLine::setIntent(AnnotLineIntent new_intent) {
   update ("IT", Object(objName, intentName));
 }
 
+double AnnotLine::shortenMainSegmentForEnding(AnnotLineEndingStyle endingStyle, double x, double size) {
+  switch(endingStyle) {
+  case annotLineEndingSquare:
+  case annotLineEndingCircle:
+  case annotLineEndingDiamond:
+  case annotLineEndingOpenArrow:
+  case annotLineEndingButt:
+    return x;
+  case annotLineEndingClosedArrow:
+  case annotLineEndingRClosedArrow:
+  case annotLineEndingROpenArrow:
+    return x - size;
+  case annotLineEndingSlash:
+    return x - cos(M_PI/3.)*size/2.;
+  default:
+    break;
+  }
+  return x;
+}
+
+void AnnotLine::drawLineEnding(AnnotLineEndingStyle endingStyle, AnnotAppearanceBuilder& appearBuilder, double x, double y, double size, bool fill, const Matrix& m) {
+  switch(endingStyle) {
+  case annotLineEndingSquare:
+    appearBuilder.drawLineEndSquare(x, y, size, fill, m);
+    break;
+  case annotLineEndingCircle:
+    appearBuilder.drawLineEndCircle(x, y, size, fill, m);
+    break;
+  case annotLineEndingDiamond:
+    appearBuilder.drawLineEndDiamond(x, y, size, fill, m);
+    break;
+  case annotLineEndingOpenArrow:
+    appearBuilder.drawLineEndArrow(x, y, size, 1, true, fill, m);
+    break;
+  case annotLineEndingClosedArrow:
+    appearBuilder.drawLineEndArrow(x, y, size, 1, false, fill, m);
+    break;
+  case annotLineEndingButt:
+    {
+      double tx, ty;
+      m.transform (x + size/2., y + size/2., &tx, &ty);
+      appearBuilder.appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+      m.transform (x + size/2., y - size/2., &tx, &ty);
+      appearBuilder.appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
+    }
+    break;
+  case annotLineEndingROpenArrow:
+    appearBuilder.drawLineEndArrow(x, y, size, -1, true, fill, m);
+    break;
+  case annotLineEndingRClosedArrow:
+    appearBuilder.drawLineEndArrow(x, y, size, -1, false, fill, m);
+    break;
+  case annotLineEndingSlash:
+    appearBuilder.drawLineEndSlash(x, y, size, m);
+    break;
+  default:
+    break;
+  }
+}
+
 void AnnotLine::generateLineAppearance()
 {
   double borderWidth, ca = opacity;
+  bool fill = false;
 
   appearBBox = std::make_unique<AnnotAppearanceBBox>(rect.get());
   AnnotAppearanceBuilder appearBuilder;
@@ -3080,7 +3228,10 @@ void AnnotLine::generateLineAppearance()
   if (color) {
     appearBuilder.setDrawColor(color.get(), false);
   }
-
+  if (interiorColor) {
+    appearBuilder.setDrawColor(interiorColor.get(), true);
+    fill = true;
+  }
   appearBuilder.setLineStyleForBorder(border.get());
   borderWidth = border->getWidth();
   appearBBox->setBorderWidth(std::max(1., borderWidth));
@@ -3107,6 +3258,7 @@ void AnnotLine::generateLineAppearance()
   const double fontsize = 9;
   const double captionhmargin = 2; // Left and right margin (inline caption only)
   const double captionmaxwidth = main_len - 2 * captionhmargin;
+  const double lineendingSize = std::min(6. * borderWidth, main_len/2);
 
   Dict *fontResDict;
   GfxFont *font;
@@ -3138,7 +3290,7 @@ void AnnotLine::generateLineAppearance()
   }
 
   // Draw main segment
-  matr.transform (0, leaderLineLength, &tx, &ty);
+  matr.transform (shortenMainSegmentForEnding(startStyle, 0, -lineendingSize), leaderLineLength, &tx, &ty);
   appearBuilder.appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
   appearBBox->extendTo (tx, ty);
 
@@ -3150,11 +3302,25 @@ void AnnotLine::generateLineAppearance()
     appearBuilder.appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
   }
 
-  matr.transform (main_len, leaderLineLength, &tx, &ty);
+  matr.transform (shortenMainSegmentForEnding(endStyle, main_len, lineendingSize), leaderLineLength, &tx, &ty);
   appearBuilder.appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
   appearBBox->extendTo (tx, ty);
 
-  // TODO: Line endings
+  if (startStyle != annotLineEndingNone) {
+    drawLineEnding(startStyle, appearBuilder, 0 + lineendingSize/2., leaderLineLength, -lineendingSize, fill, matr);
+    matr.transform (0, leaderLineLength+lineendingSize/2., &tx, &ty);
+    appearBBox->extendTo (tx, ty);
+    matr.transform (0, leaderLineLength-lineendingSize/2., &tx, &ty);
+    appearBBox->extendTo (tx, ty);
+  }
+
+  if (endStyle != annotLineEndingNone) {
+    drawLineEnding(endStyle, appearBuilder, main_len - lineendingSize/2., leaderLineLength, lineendingSize, fill, matr);
+    matr.transform (main_len, leaderLineLength+lineendingSize/2., &tx, &ty);
+    appearBBox->extendTo (tx, ty);
+    matr.transform (main_len, leaderLineLength-lineendingSize/2., &tx, &ty);
+    appearBBox->extendTo (tx, ty);
+  }
 
   // Draw caption text
   if (caption) {

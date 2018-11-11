@@ -532,7 +532,7 @@ private:
 //------------------------------------------------------------------------
 // AnnotAppearanceBuilder
 //------------------------------------------------------------------------
-
+class Matrix;
 class AnnotAppearanceBuilder {
 public:
   AnnotAppearanceBuilder();
@@ -547,6 +547,11 @@ public:
   void drawCircle(double cx, double cy, double r, bool fill);
   void drawCircleTopLeft(double cx, double cy, double r);
   void drawCircleBottomRight(double cx, double cy, double r);
+  void drawLineEndSquare(double x, double y, double size, bool fill, const Matrix& m);
+  void drawLineEndCircle(double x, double y, double size, bool fill, const Matrix& m);
+  void drawLineEndDiamond(double x, double y, double size, bool fill, const Matrix& m);
+  void drawLineEndArrow(double x, double y, double size, int orientation, bool isOpen, bool fill, const Matrix& m);
+  void drawLineEndSlash(double x, double y, double size, const Matrix& m);
   void drawFieldBorder(const FormField *field, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
   bool drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const GooString *appearState, XRef *xref, bool *addedDingbatsResource);
 
@@ -569,6 +574,7 @@ private:
 		bool txField, bool forceZapfDingbats,
 		XRef *xref, bool *addedDingbatsResource, // xref and addedDingbatsResource both must not be null if forceZapfDingbats is passed
 		bool password);
+  void drawArrowPath(double x, double y, const Matrix& m, int orientation=1);
 
   GooString *appearBuf;
 };
@@ -1098,6 +1104,8 @@ protected:
 
   void initialize(PDFDoc *docA, Dict *dict);
   void generateLineAppearance();
+  static double shortenMainSegmentForEnding(AnnotLineEndingStyle endingStyle, double x, double size);
+  static void drawLineEnding(AnnotLineEndingStyle endingStyle, AnnotAppearanceBuilder& appearBuilder, double x, double y, double size, bool fill, const Matrix& m);
 
   // required
   std::unique_ptr<AnnotCoord> coord1;
