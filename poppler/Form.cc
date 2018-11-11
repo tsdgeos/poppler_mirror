@@ -992,7 +992,10 @@ FormFieldButton::FormFieldButton(PDFDoc *docA, Object &&aobj, const Ref ref, For
     } 
   }
 
-  if (btype != formButtonPush) {
+  bool isChildRadiobutton = btype == formButtonRadio && terminal && parent && parent->getType() == formButton;
+  // Ignore "V" for child radiobuttons, so FormFieldButton::getState() does not use it and instead uses the
+  // "V" of the parent, which is the real value indicating the active field in the radio group. Issue #159
+  if (btype != formButtonPush && !isChildRadiobutton) {
     // Even though V is inheritable we are interested in the value of this
     // field, if not present it's probably because it's a button in a set.
     appearanceState = dict->lookup("V");
