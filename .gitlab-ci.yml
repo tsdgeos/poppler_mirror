@@ -70,3 +70,15 @@ build_mingw64_fedora:
     - mkdir -p build && cd build
     - mingw64-cmake -G Ninja ..
     - ninja
+
+build_clazy:
+  stage: build
+  image: fedora:rawhide
+  before_script:
+    - dnf install -y 'dnf-command(builddep)'
+    - dnf builddep -y poppler
+    - dnf -y install curl make ninja-build openjpeg2-tools clazy clang redhat-rpm-config
+  script:
+    - mkdir -p build && cd build
+    - CC=clang CXX=clazy CXXFLAGS="-Werror -Wno-cast-align -Wno-deprecated-declarations" cmake -G Ninja ..
+    - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja

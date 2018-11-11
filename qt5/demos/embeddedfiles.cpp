@@ -59,7 +59,7 @@ void EmbeddedFilesDock::fillInfo()
         m_table->setItem(i, 3, new QTableWidgetItem(file->createDate().toString(Qt::SystemLocaleDate)));
         m_table->setItem(i, 4, new QTableWidgetItem(file->modDate().toString(Qt::SystemLocaleDate)));
         const QByteArray checksum = file->checksum();
-        const QString checksumString = !checksum.isEmpty() ? QString::fromLatin1(checksum.toHex()) : QString::fromLatin1("n/a");
+        const QString checksumString = !checksum.isEmpty() ? QString::fromLatin1(checksum.toHex()) : QStringLiteral("n/a");
         m_table->setItem(i, 5, new QTableWidgetItem(checksumString));
         ++i;
     }

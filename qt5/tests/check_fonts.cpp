@@ -7,6 +7,8 @@
 class TestFontsData: public QObject
 {
     Q_OBJECT
+public:
+    TestFontsData(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void checkNoFonts();
     void checkType1();
@@ -72,9 +74,9 @@ void TestFontsData::checkType1()
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
     QCOMPARE( listOfFonts.size(), 1 );
-    QCOMPARE( listOfFonts.at(0).name(), QString("Helvetica") );
+    QCOMPARE( listOfFonts.at(0).name(), QLatin1String("Helvetica") );
     QCOMPARE( listOfFonts.at(0).type(), Poppler::FontInfo::Type1 );
-    QCOMPARE( listOfFonts.at(0).typeName(), QString("Type 1") );
+    QCOMPARE( listOfFonts.at(0).typeName(), QLatin1String("Type 1") );
 
     QCOMPARE( listOfFonts.at(0).isEmbedded(), false );
     QCOMPARE( listOfFonts.at(0).isSubset(), false );
@@ -90,16 +92,16 @@ void TestFontsData::checkType3()
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
     QCOMPARE( listOfFonts.size(), 2 );
-    QCOMPARE( listOfFonts.at(0).name(), QString("Helvetica") );
+    QCOMPARE( listOfFonts.at(0).name(), QLatin1String("Helvetica") );
     QCOMPARE( listOfFonts.at(0).type(), Poppler::FontInfo::Type1 );
-    QCOMPARE( listOfFonts.at(0).typeName(), QString("Type 1") );
+    QCOMPARE( listOfFonts.at(0).typeName(), QLatin1String("Type 1") );
 
     QCOMPARE( listOfFonts.at(0).isEmbedded(), false );
     QCOMPARE( listOfFonts.at(0).isSubset(), false );
 
-    QCOMPARE( listOfFonts.at(1).name(), QString("") );
+    QCOMPARE( listOfFonts.at(1).name(), QString() );
     QCOMPARE( listOfFonts.at(1).type(), Poppler::FontInfo::Type3 );
-    QCOMPARE( listOfFonts.at(1).typeName(), QString("Type 3") );
+    QCOMPARE( listOfFonts.at(1).typeName(), QLatin1String("Type 3") );
 
     QCOMPARE( listOfFonts.at(1).isEmbedded(), true );
     QCOMPARE( listOfFonts.at(1).isSubset(), false );
@@ -115,16 +117,16 @@ void TestFontsData::checkTrueType()
 
     QList<Poppler::FontInfo> listOfFonts = doc->fonts();
     QCOMPARE( listOfFonts.size(), 2 );
-    QCOMPARE( listOfFonts.at(0).name(), QString("Arial-BoldMT") );
+    QCOMPARE( listOfFonts.at(0).name(), QLatin1String("Arial-BoldMT") );
     QCOMPARE( listOfFonts.at(0).type(), Poppler::FontInfo::TrueType );
-    QCOMPARE( listOfFonts.at(0).typeName(), QString("TrueType") );
+    QCOMPARE( listOfFonts.at(0).typeName(), QLatin1String("TrueType") );
 
     QCOMPARE( listOfFonts.at(0).isEmbedded(), false );
     QCOMPARE( listOfFonts.at(0).isSubset(), false );
 
-    QCOMPARE( listOfFonts.at(1).name(), QString("ArialMT") );
+    QCOMPARE( listOfFonts.at(1).name(), QLatin1String("ArialMT") );
     QCOMPARE( listOfFonts.at(1).type(), Poppler::FontInfo::TrueType );
-    QCOMPARE( listOfFonts.at(1).typeName(), QString("TrueType") );
+    QCOMPARE( listOfFonts.at(1).typeName(), QLatin1String("TrueType") );
 
     QCOMPARE( listOfFonts.at(1).isEmbedded(), false );
     QCOMPARE( listOfFonts.at(1).isSubset(), false );

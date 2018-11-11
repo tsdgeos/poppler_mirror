@@ -13,6 +13,8 @@
 class TestAnnotations : public QObject
 {
   Q_OBJECT
+public:
+    TestAnnotations(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
   void checkQColorPrecision();
   void checkFontSizeAndColor();
@@ -38,10 +40,10 @@ void TestAnnotations::checkQColorPrecision() {
 
 void TestAnnotations::checkFontSizeAndColor()
 {
-  const QString contents{"foobar"};
+  const QString contents = QStringLiteral("foobar");
   const std::vector<QColor> testColors{QColor::fromRgb(0xAB, 0xCD, 0xEF),
                                        QColor::fromCmyk(0xAB, 0xBC, 0xCD, 0xDE)};
-  const QFont testFont("Helvetica", 20);
+  const QFont testFont(QStringLiteral("Helvetica"), 20);
 
   QTemporaryFile tempFile;
   QVERIFY(tempFile.open());

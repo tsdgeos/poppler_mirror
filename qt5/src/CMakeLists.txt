@@ -1,5 +1,6 @@
 add_definitions(${QT5_DEFINITIONS})
 add_definitions(${Qt5Core_DEFINITIONS})
+add_definitions(-DQT_NO_SIGNALS_SLOTS_KEYWORDS)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}

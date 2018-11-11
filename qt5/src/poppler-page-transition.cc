@@ -47,7 +47,7 @@ class PageTransitionData
     ::PageTransition *pt;
 };
 
-PageTransition::PageTransition(const PageTransitionParams &params)
+PageTransition::PageTransition(const PageTransitionParams &params) // clazy:exclude=function-args-by-value
 {
   data = new PageTransitionData(params.dictObj);
 }

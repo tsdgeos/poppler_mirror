@@ -6,6 +6,8 @@
 class TestLexer : public QObject
 {
     Q_OBJECT
+public:
+    TestLexer(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void testNumbers();
 };

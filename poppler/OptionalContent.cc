@@ -120,7 +120,7 @@ bool OCGs::hasOCGs() const
   return !( optionalContentGroups.empty() );
 }
 
-OptionalContentGroup* OCGs::findOcgByRef( const Ref &ref )
+OptionalContentGroup* OCGs::findOcgByRef( const Ref ref )
 {
   const auto ocg = optionalContentGroups.find( ref );
   return ocg != optionalContentGroups.end() ? ocg->second.get() : nullptr;

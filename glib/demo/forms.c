@@ -130,7 +130,7 @@ pgd_form_field_view_set_field (GtkWidget        *field_view,
 			       PopplerFormField *field)
 {
 	GtkWidget     *table;
-        PopplerAction *action;
+	PopplerAction *action;
 	GEnumValue    *enum_value;
 	gchar         *text;
 	gint           row = 0;
@@ -172,15 +172,55 @@ pgd_form_field_view_set_field (GtkWidget        *field_view,
 		g_free (text);
 	}
 
-        action = poppler_form_field_get_action (field);
-        if (action) {
-                GtkWidget *action_view;
+	action = poppler_form_field_get_action (field);
+	if (action) {
+		GtkWidget *action_view;
 
-                action_view = pgd_action_view_new (NULL);
-                pgd_action_view_set_action (action_view, action);
-                pgd_table_add_property_with_custom_widget (GTK_GRID (table), "<b>Action:</b>", action_view, &row);
-                gtk_widget_show (action_view);
-        }
+		action_view = pgd_action_view_new (NULL);
+		pgd_action_view_set_action (action_view, action);
+		pgd_table_add_property_with_custom_widget (GTK_GRID (table), "<b>Action:</b>", action_view, &row);
+		gtk_widget_show (action_view);
+	}
+
+	action = poppler_form_field_get_additional_action (field, POPPLER_ADDITIONAL_ACTION_FIELD_MODIFIED);
+	if (action) {
+		GtkWidget *action_view;
+
+		action_view = pgd_action_view_new (NULL);
+		pgd_action_view_set_action (action_view, action);
+		pgd_table_add_property_with_custom_widget (GTK_GRID (table), "<b>Field Modified Action:</b>", action_view, &row);
+		gtk_widget_show (action_view);
+	}
+
+	action = poppler_form_field_get_additional_action (field, POPPLER_ADDITIONAL_ACTION_FORMAT_FIELD);
+	if (action) {
+		GtkWidget *action_view;
+
+		action_view = pgd_action_view_new (NULL);
+		pgd_action_view_set_action (action_view, action);
+		pgd_table_add_property_with_custom_widget (GTK_GRID (table), "<b>Field Format Action:</b>", action_view, &row);
+		gtk_widget_show (action_view);
+	}
+
+	action = poppler_form_field_get_additional_action (field, POPPLER_ADDITIONAL_ACTION_VALIDATE_FIELD);
+	if (action) {
+		GtkWidget *action_view;
+
+		action_view = pgd_action_view_new (NULL);
+		pgd_action_view_set_action (action_view, action);
+		pgd_table_add_property_with_custom_widget (GTK_GRID (table), "<b>Validate Field Action:</b>", action_view, &row);
+		gtk_widget_show (action_view);
+	}
+
+	action = poppler_form_field_get_additional_action (field, POPPLER_ADDITIONAL_ACTION_CALCULATE_FIELD);
+	if (action) {
+		GtkWidget *action_view;
+
+		action_view = pgd_action_view_new (NULL);
+		pgd_action_view_set_action (action_view, action);
+		pgd_table_add_property_with_custom_widget (GTK_GRID (table), "<b>Calculate Field Action:</b>", action_view, &row);
+		gtk_widget_show (action_view);
+	}
 
 	switch (poppler_form_field_get_field_type (field)) {
 	case POPPLER_FORM_FIELD_BUTTON:

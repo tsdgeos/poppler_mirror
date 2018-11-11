@@ -1699,8 +1699,8 @@ Dict *Gfx8BitFont::getResources() {
 //------------------------------------------------------------------------
 
 struct cmpWidthExcepFunctor {
-  bool operator()(const GfxFontCIDWidthExcep &w1,
-		  const GfxFontCIDWidthExcep &w2) {
+  bool operator()(const GfxFontCIDWidthExcep w1,
+		  const GfxFontCIDWidthExcep w2) {
     return w1.first < w2.first;
   }
 };

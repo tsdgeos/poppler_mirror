@@ -48,7 +48,7 @@ struct SplashScreenPoint {
 
 
 struct cmpDistancesFunctor {
-  bool operator()(const SplashScreenPoint &p0, const SplashScreenPoint &p1) {
+  bool operator()(const SplashScreenPoint p0, const SplashScreenPoint p1) {
     return p0.dist < p1.dist;
   }
 };

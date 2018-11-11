@@ -51,7 +51,7 @@ void OptContentDock::fillInfo()
     }
 
     m_view->setModel(document()->optionalContentModel());
-    connect(m_view->model(), SIGNAL(dataChanged(QModelIndex, QModelIndex)), this, SLOT(reloadImage()));
+    connect(m_view->model(), &QAbstractItemModel::dataChanged, this, &OptContentDock::reloadImage);
     m_view->expandToDepth(1);
 }
 

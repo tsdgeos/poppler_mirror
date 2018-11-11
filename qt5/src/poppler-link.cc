@@ -148,7 +148,7 @@ class LinkSoundPrivate : public LinkPrivate
 class LinkRenditionPrivate : public LinkPrivate
 {
 	public:
-		LinkRenditionPrivate( const QRectF &area, ::MediaRendition *rendition, ::LinkRendition::RenditionOperation operation, const QString &script, const Ref &annotationReference );
+		LinkRenditionPrivate( const QRectF &area, ::MediaRendition *rendition, ::LinkRendition::RenditionOperation operation, const QString &script, const Ref annotationReference );
 		~LinkRenditionPrivate();
 
 		MediaRendition *rendition;
@@ -157,7 +157,7 @@ class LinkRenditionPrivate : public LinkPrivate
 		Ref annotationReference;
 };
 
-	LinkRenditionPrivate::LinkRenditionPrivate( const QRectF &area, ::MediaRendition *r, ::LinkRendition::RenditionOperation operation, const QString &javaScript, const Ref &ref )
+	LinkRenditionPrivate::LinkRenditionPrivate( const QRectF &area, ::MediaRendition *r, ::LinkRendition::RenditionOperation operation, const QString &javaScript, const Ref ref )
 		: LinkPrivate( area )
 		, rendition( r ? new MediaRendition( r ) : nullptr )
 		, action( LinkRendition::PlayRendition )
@@ -205,14 +205,14 @@ class LinkJavaScriptPrivate : public LinkPrivate
 class LinkMoviePrivate : public LinkPrivate
 {
 	public:
-		LinkMoviePrivate( const QRectF &area, LinkMovie::Operation operation, const QString &title, const Ref &reference );
+		LinkMoviePrivate( const QRectF &area, LinkMovie::Operation operation, const QString &title, const Ref reference );
 
 		LinkMovie::Operation operation;
 		QString annotationTitle;
 		Ref annotationReference;
 };
 
-	LinkMoviePrivate::LinkMoviePrivate( const QRectF &area, LinkMovie::Operation _operation, const QString &title, const Ref &reference  )
+	LinkMoviePrivate::LinkMoviePrivate( const QRectF &area, LinkMovie::Operation _operation, const QString &title, const Ref reference  )
 		: LinkPrivate( area ), operation( _operation ), annotationTitle( title ), annotationReference( reference )
 	{
 	}
@@ -430,7 +430,7 @@ class LinkMoviePrivate : public LinkPrivate
 	}
 
 	// LinkGoto
-	LinkGoto::LinkGoto( const QRectF &linkArea, QString extFileName, const LinkDestination & destination )
+	LinkGoto::LinkGoto( const QRectF &linkArea, QString extFileName, const LinkDestination & destination ) // clazy:exclude=function-args-by-ref
 		: Link( *new LinkGotoPrivate( linkArea, destination ) )
 	{
 		Q_D( LinkGoto );
@@ -591,7 +591,7 @@ class LinkMoviePrivate : public LinkPrivate
 	}
 
 	// LinkRendition
-	LinkRendition::LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref &annotationReference )
+	LinkRendition::LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref annotationReference )
 		: Link( *new LinkRenditionPrivate( linkArea, rendition, static_cast<enum ::LinkRendition::RenditionOperation>(operation), script, annotationReference ) )
 	{
 	}
@@ -658,7 +658,7 @@ class LinkMoviePrivate : public LinkPrivate
 	}
 
 	// LinkMovie
-	LinkMovie::LinkMovie( const QRectF &linkArea, Operation operation, const QString &annotationTitle, const Ref &annotationReference )
+	LinkMovie::LinkMovie( const QRectF &linkArea, Operation operation, const QString &annotationTitle, const Ref annotationReference )
 		: Link( *new LinkMoviePrivate( linkArea, operation, annotationTitle, annotationReference ) )
 	{
 	}

@@ -287,7 +287,7 @@ public:
 
 class FormField {
 public:
-  FormField(PDFDoc *docA, Object *aobj, const Ref& aref, FormField *parent, std::set<int> *usedParents, FormFieldType t=formUndef);
+  FormField(PDFDoc *docA, Object *aobj, const Ref aref, FormField *parent, std::set<int> *usedParents, FormFieldType t=formUndef);
 
   virtual ~FormField();
 
@@ -359,7 +359,7 @@ private:
 
 class FormFieldButton: public FormField {
 public:
-  FormFieldButton(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
+  FormFieldButton(PDFDoc *docA, Object *dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
   FormButtonType getButtonType () const { return btype; }
 
@@ -403,7 +403,7 @@ protected:
 
 class FormFieldText: public FormField {
 public:
-  FormFieldText(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
+  FormFieldText(PDFDoc *docA, Object *dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
   
   const GooString* getContent () const { return content; }
   void setContentCopy (const GooString* new_content);
@@ -448,7 +448,7 @@ protected:
 
 class FormFieldChoice: public FormField {
 public:
-  FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents);
+  FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
   ~FormFieldChoice();
 
@@ -516,7 +516,7 @@ protected:
 class FormFieldSignature: public FormField {
   friend class FormWidgetSignature;
 public:
-  FormFieldSignature(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents);
+  FormFieldSignature(PDFDoc *docA, Object *dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
   // Use -1 for now as validationTime
   SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime);
@@ -557,7 +557,7 @@ public:
   
   /* Creates a new Field of the type specified in obj's dict.
      used in Form::Form and FormField::FormField */
-  static FormField *createFieldFromDict (Object* obj, PDFDoc *docA, const Ref& aref, FormField *parent, std::set<int> *usedParents);
+  static FormField *createFieldFromDict (Object* obj, PDFDoc *docA, const Ref aref, FormField *parent, std::set<int> *usedParents);
 
   Object *getObj () const { return acroForm; }
   bool getNeedAppearances () const { return needAppearances; }

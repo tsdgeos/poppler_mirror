@@ -21,7 +21,7 @@
 AbstractInfoDock::AbstractInfoDock(QWidget *parent)
     : QDockWidget(parent), m_filled(false)
 {
-    connect(this, SIGNAL(visibilityChanged(bool)), SLOT(slotVisibilityChanged(bool)));
+    connect(this, &AbstractInfoDock::visibilityChanged, this, &AbstractInfoDock::slotVisibilityChanged);
 }
 
 AbstractInfoDock::~AbstractInfoDock()

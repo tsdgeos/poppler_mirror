@@ -17,15 +17,16 @@ int main( int argc, char **argv )
 
     QTime t;
     t.start();
-    QDir dbDir( QString( "./pdfdb" ) );
+    QDir dbDir( QStringLiteral( "./pdfdb" ) );
     if ( !dbDir.exists() ) {
 	qWarning() << "Database directory does not exist";
     }
 
     QStringList excludeSubDirs;
-    excludeSubDirs << "000048" << "000607";
+    excludeSubDirs << QStringLiteral("000048") << QStringLiteral("000607");
 
-    foreach ( const QString &subdir, dbDir.entryList(QStringList() << "0000*", QDir::Dirs) ) {
+    const QStringList dirs = dbDir.entryList(QStringList() << QStringLiteral("0000*"), QDir::Dirs);
+    foreach ( const QString &subdir, dirs ) {
 	if ( excludeSubDirs.contains(subdir) ) {
 	    // then skip it
 	} else {
@@ -37,14 +38,14 @@ int main( int argc, char **argv )
 	    } else {
 		int major = 0, minor = 0;
 		doc->getPdfVersion( &major, &minor );
-		doc->info("Title");
-		doc->info("Subject");
-		doc->info("Author");
-		doc->info("Keywords");
-		doc->info("Creator");
-		doc->info("Producer");
-		doc->date("CreationDate").toString();
-		doc->date("ModDate").toString();
+		doc->info(QStringLiteral("Title"));
+		doc->info(QStringLiteral("Subject"));
+		doc->info(QStringLiteral("Author"));
+		doc->info(QStringLiteral("Keywords"));
+		doc->info(QStringLiteral("Creator"));
+		doc->info(QStringLiteral("Producer"));
+		doc->date(QStringLiteral("CreationDate")).toString();
+		doc->date(QStringLiteral("ModDate")).toString();
 		doc->numPages();
 		doc->isLinearized();
 		doc->isEncrypted();
@@ -56,7 +57,7 @@ int main( int argc, char **argv )
 
 		for( int index = 0; index < doc->numPages(); ++index ) {
 		    Poppler::Page *page = doc->page( index );
-		    QImage image = page->renderToImage();
+		    page->renderToImage();
 		    page->pageSize();
 		    page->orientation();
 		    delete page;

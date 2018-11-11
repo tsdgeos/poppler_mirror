@@ -36,7 +36,7 @@ class PdfViewer : public QMainWindow
     friend class DocumentObserver;
 
 public:
-    PdfViewer();
+    PdfViewer(QWidget *parent = nullptr);
     ~PdfViewer();
 
     QSize sizeHint() const override;

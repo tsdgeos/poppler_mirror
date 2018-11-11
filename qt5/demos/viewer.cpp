@@ -43,21 +43,24 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMessageBox>
 
-PdfViewer::PdfViewer()
-    : QMainWindow(), m_currentPage(0), m_doc(nullptr)
+PdfViewer::PdfViewer(QWidget *parent)
+    : QMainWindow(parent), m_currentPage(0), m_doc(nullptr)
 {
     setWindowTitle(tr("Poppler-Qt5 Demo"));
 
     // setup the menus
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
-    m_fileOpenAct = fileMenu->addAction(tr("&Open"), this, SLOT(slotOpenFile()));
+    // TODO Use modern syntax when depending on Qt 5.6
+    m_fileOpenAct = fileMenu->addAction(tr("&Open"), this, SLOT(slotOpenFile())); // clazy:exclude=old-style-connect
     m_fileOpenAct->setShortcut(Qt::CTRL + Qt::Key_O);
     fileMenu->addSeparator();
-    m_fileSaveCopyAct = fileMenu->addAction(tr("&Save a Copy..."), this, SLOT(slotSaveCopy()));
+    // TODO Use modern syntax when depending on Qt 5.6
+    m_fileSaveCopyAct = fileMenu->addAction(tr("&Save a Copy..."), this, SLOT(slotSaveCopy())); // clazy:exclude=old-style-connect
     m_fileSaveCopyAct->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_S);
     m_fileSaveCopyAct->setEnabled(false);
     fileMenu->addSeparator();
-    QAction *act = fileMenu->addAction(tr("&Quit"), qApp, SLOT(closeAllWindows()));
+    // TODO Use modern syntax when depending on Qt 5.6
+    QAction *act = fileMenu->addAction(tr("&Quit"), qApp, SLOT(closeAllWindows())); // clazy:exclude=old-style-connect
     act->setShortcut(Qt::CTRL + Qt::Key_Q);
 
     QMenu *viewMenu = menuBar()->addMenu(tr("&View"));
@@ -65,10 +68,10 @@ PdfViewer::PdfViewer()
     QMenu *settingsMenu = menuBar()->addMenu(tr("&Settings"));
     m_settingsTextAAAct = settingsMenu->addAction(tr("Text Antialias"));
     m_settingsTextAAAct->setCheckable(true);
-    connect(m_settingsTextAAAct, SIGNAL(toggled(bool)), this, SLOT(slotToggleTextAA(bool)));
+    connect(m_settingsTextAAAct, &QAction::toggled, this, &PdfViewer::slotToggleTextAA);
     m_settingsGfxAAAct = settingsMenu->addAction(tr("Graphics Antialias"));
     m_settingsGfxAAAct->setCheckable(true);
-    connect(m_settingsGfxAAAct, SIGNAL(toggled(bool)), this, SLOT(slotToggleGfxAA(bool)));
+    connect(m_settingsGfxAAAct, &QAction::toggled, this, &PdfViewer::slotToggleGfxAA);
     QMenu *settingsRenderMenu = settingsMenu->addMenu(tr("Render Backend"));
     m_settingsRenderBackendGrp = new QActionGroup(settingsRenderMenu);
     m_settingsRenderBackendGrp->setExclusive(true);
@@ -81,12 +84,14 @@ PdfViewer::PdfViewer()
     act->setCheckable(true);
     act->setData(qVariantFromValue(1));
     m_settingsRenderBackendGrp->addAction(act);
-    connect(m_settingsRenderBackendGrp, SIGNAL(triggered(QAction*)),
-            this, SLOT(slotRenderBackend(QAction*)));
+    connect(m_settingsRenderBackendGrp, &QActionGroup::triggered,
+            this, &PdfViewer::slotRenderBackend);
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
-    act = helpMenu->addAction(tr("&About"), this, SLOT(slotAbout()));
-    act = helpMenu->addAction(tr("About &Qt"), this, SLOT(slotAboutQt()));
+    // TODO Use modern syntax when depending on Qt 5.6
+    act = helpMenu->addAction(tr("&About"), this, SLOT(slotAbout())); // clazy:exclude=old-style-connect
+    // TODO Use modern syntax when depending on Qt 5.6
+    act = helpMenu->addAction(tr("About &Qt"), this, SLOT(slotAboutQt())); // clazy:exclude=old-style-connect
 
     NavigationToolBar *navbar = new NavigationToolBar(this);
     addToolBar(navbar);
@@ -148,8 +153,8 @@ PdfViewer::PdfViewer()
         obs->m_viewer = this;
     }
 
-    connect(navbar, SIGNAL(zoomChanged(qreal)), view, SLOT(slotZoomChanged(qreal)));
-    connect(navbar, SIGNAL(rotationChanged(int)), view, SLOT(slotRotationChanged(int)));
+    connect(navbar, &NavigationToolBar::zoomChanged, view, &PageView::slotZoomChanged);
+    connect(navbar, &NavigationToolBar::rotationChanged, view, &PageView::slotRotationChanged);
 
     // activate AA by default
     m_settingsTextAAAct->setChecked(true);
@@ -254,8 +259,7 @@ void PdfViewer::slotSaveCopy()
 
 void PdfViewer::slotAbout()
 {
-    const QString text("This is a demo of the Poppler-Qt5 library.");
-    QMessageBox::about(this, QString::fromLatin1("About Poppler-Qt5 Demo"), text);
+    QMessageBox::about(this, tr("About Poppler-Qt5 Demo"), tr("This is a demo of the Poppler-Qt5 library."));
 }
 
 void PdfViewer::slotAboutQt()

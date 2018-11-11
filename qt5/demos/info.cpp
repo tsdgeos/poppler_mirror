@@ -43,8 +43,8 @@ void InfoDock::fillInfo()
     m_table->setHorizontalHeaderLabels(QStringList() << tr("Key") << tr("Value"));
     m_table->setRowCount(keys.count());
     QStringList dateKeys;
-    dateKeys << QString::fromLatin1("CreationDate");
-    dateKeys << QString::fromLatin1("ModDate");
+    dateKeys << QStringLiteral("CreationDate");
+    dateKeys << QStringLiteral("ModDate");
     int i = 0;
     Q_FOREACH(const QString &date, dateKeys) {
         const int id = keys.indexOf(date);

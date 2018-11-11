@@ -80,7 +80,7 @@ private:
 
   void parse(Dict *rootDict);
   void parseNumberTreeNode(Dict *node);
-  void parentTreeAdd(const Ref &objectRef, StructElement *element);
+  void parentTreeAdd(const Ref objectRef, StructElement *element);
 
   friend class StructElement;
 };

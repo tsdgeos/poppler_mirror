@@ -42,7 +42,7 @@ public:
   bool hasOCGs() const;
   const std::unordered_map< Ref, std::unique_ptr< OptionalContentGroup > > &getOCGs() const { return optionalContentGroups; }
 
-  OptionalContentGroup* findOcgByRef( const Ref &ref);
+  OptionalContentGroup* findOcgByRef( const Ref ref);
 
   // Get the root node of the optional content group display tree
   // (which does not necessarily include all of the OCGs).

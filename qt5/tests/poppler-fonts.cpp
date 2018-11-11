@@ -29,9 +29,9 @@ int main( int argc, char **argv )
   
     foreach( const Poppler::FontInfo &font, doc->fonts() ) {
 	if (font.name().isNull()) {
-	    std::cout << qPrintable( QString("%1").arg(QString("[none]"), -37) );
+	    std::cout << qPrintable( QStringLiteral("%1").arg(QStringLiteral("[none]"), -37) );
 	} else {
-	    std::cout << qPrintable( QString("%1").arg(font.name(), -37) );
+	    std::cout << qPrintable( QStringLiteral("%1").arg(font.name(), -37) );
 	}
 	switch( font.type() ) {
 	case Poppler::FontInfo::unknown:
@@ -82,7 +82,7 @@ int main( int argc, char **argv )
 	} else {
 	    std::cout << "no  ";
 	}
-	std::cout << qPrintable( QString("%1").arg(font.file()) );
+	std::cout << qPrintable( font.file() );
 	std::cout << std::endl;
     }
     delete doc;

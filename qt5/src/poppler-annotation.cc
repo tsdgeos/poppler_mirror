@@ -4011,7 +4011,7 @@ QPointF LinkAnnotation::linkRegionPoint( int id ) const
     return d->linkRegion[id];
 }
 
-void LinkAnnotation::setLinkRegionPoint( int id, const QPointF &point )
+void LinkAnnotation::setLinkRegionPoint( int id, const QPointF &point ) // clazy:exclude=function-args-by-value
 {
     if ( id < 0 || id >= 4 )
         return;

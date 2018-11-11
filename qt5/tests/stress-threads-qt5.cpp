@@ -18,6 +18,7 @@
 
 class SillyThread : public QThread
 {
+    Q_OBJECT
 public:
     SillyThread(Poppler::Document* document, QObject* parent = nullptr);
 
@@ -31,6 +32,7 @@ private:
 
 class CrazyThread : public QThread
 {
+    Q_OBJECT
 public:
     CrazyThread(uint seed, Poppler::Document* document, QMutex* annotationMutex, QObject* parent = nullptr);
 
@@ -114,11 +116,11 @@ void CrazyThread::run()
 
             PagePointer page(loadRandomPage(m_document));
 
-            page->search("c", Poppler::Page::IgnoreCase);
-            page->search("r");
-            page->search("a", Poppler::Page::IgnoreCase);
-            page->search("z");
-            page->search("y", Poppler::Page::IgnoreCase);
+            page->search(QStringLiteral("c"), Poppler::Page::IgnoreCase);
+            page->search(QStringLiteral("r"));
+            page->search(QStringLiteral("a"), Poppler::Page::IgnoreCase);
+            page->search(QStringLiteral("z"));
+            page->search(QStringLiteral("y"), Poppler::Page::IgnoreCase);
         }
 
         if(qrand() % 2 == 0)
@@ -186,7 +188,7 @@ void CrazyThread::run()
             }
 
             annotation->setBoundary(QRectF(0.0, 0.0, 0.5, 0.5));
-            annotation->setContents("crazy");
+            annotation->setContents(QStringLiteral("crazy"));
 
             page->addAnnotation(annotation);
 
@@ -208,8 +210,8 @@ void CrazyThread::run()
                     qDebug() << "modify annotation...";
 
                     annotations.at(qrand() % annotations.size())->setBoundary(QRectF(0.5, 0.5, 0.25, 0.25));
-                    annotations.at(qrand() % annotations.size())->setAuthor("foo");
-                    annotations.at(qrand() % annotations.size())->setContents("bar");
+                    annotations.at(qrand() % annotations.size())->setAuthor(QStringLiteral("foo"));
+                    annotations.at(qrand() % annotations.size())->setContents(QStringLiteral("bar"));
                     annotations.at(qrand() % annotations.size())->setCreationDate(QDateTime::currentDateTime());
                     annotations.at(qrand() % annotations.size())->setModificationDate(QDateTime::currentDateTime());
                 }
@@ -307,3 +309,5 @@ int main(int argc, char** argv)
 
     return EXIT_SUCCESS;
 }
+
+#include "stress-threads-qt5.moc"

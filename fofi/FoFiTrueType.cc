@@ -142,7 +142,7 @@ struct TrueTypeLoca {
 #define vertTag 0x76657274
 
 struct cmpTrueTypeLocaOffsetFunctor {
-  bool operator()(const TrueTypeLoca &loca1, const TrueTypeLoca &loca2) {
+  bool operator()(const TrueTypeLoca loca1, const TrueTypeLoca loca2) {
     if (loca1.origOffset == loca2.origOffset) {
       return loca1.idx < loca2.idx;
     }
@@ -151,7 +151,7 @@ struct cmpTrueTypeLocaOffsetFunctor {
 };
 
 struct cmpTrueTypeLocaIdxFunctor {
-  bool operator()(const TrueTypeLoca &loca1, const TrueTypeLoca &loca2) {
+  bool operator()(const TrueTypeLoca loca1, const TrueTypeLoca loca2) {
     return loca1.idx < loca2.idx;
   }
 };

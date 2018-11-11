@@ -860,7 +860,7 @@ StructElement::StructElement(int mcid, StructTreeRoot *treeRootA, StructElement 
   assert(parent);
 }
 
-StructElement::StructElement(const Ref& ref, StructTreeRoot *treeRootA, StructElement *parentA):
+StructElement::StructElement(const Ref ref, StructTreeRoot *treeRootA, StructElement *parentA):
   type(OBJR),
   treeRoot(treeRootA),
   parent(parentA),

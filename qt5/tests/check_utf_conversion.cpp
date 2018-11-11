@@ -7,6 +7,8 @@
 class TestUTFConversion : public QObject
 {
     Q_OBJECT
+public:
+    TestUTFConversion(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void testUTF_data();
     void testUTF();
@@ -30,18 +32,18 @@ void TestUTFConversion::testUTF_data()
 {
    QTest::addColumn<QString>("s");
 
-   QTest::newRow("<empty>") << QString::fromUtf8("");
-   QTest::newRow("a") << QString::fromUtf8("a");
-   QTest::newRow("abc") << QString::fromUtf8("abc");
-   QTest::newRow("Latin") << QString::fromUtf8("Vitrum edere possum; mihi non nocet");
-   QTest::newRow("Greek") << QString::fromUtf8("Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα");
-   QTest::newRow("Icelandic") << QString::fromUtf8("Ég get etið gler án þess að meiða mig");
-   QTest::newRow("Russian") << QString::fromUtf8("Я могу есть стекло, оно мне не вредит.");
-   QTest::newRow("Sanskrit") << QString::fromUtf8("काचं शक्नोम्यत्तुम् । नोपहिनस्ति माम् ॥");
-   QTest::newRow("Arabic") << QString::fromUtf8("أنا قادر على أكل الزجاج و هذا لا يؤلمني");
-   QTest::newRow("Chinese") << QString::fromUtf8("我能吞下玻璃而不伤身体。");
-   QTest::newRow("Thai") << QString::fromUtf8("ฉันกินกระจกได้ แต่มันไม่ทำให้ฉันเจ็บ");
-   QTest::newRow("non BMP") << QString::fromUtf8("𝓹𝓸𝓹𝓹𝓵𝓮𝓻");
+   QTest::newRow("<empty>") << QString(QLatin1String(""));
+   QTest::newRow("a") << QStringLiteral("a");
+   QTest::newRow("abc") << QStringLiteral("abc");
+   QTest::newRow("Latin") << QStringLiteral("Vitrum edere possum; mihi non nocet");
+   QTest::newRow("Greek") << QStringLiteral("Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα");
+   QTest::newRow("Icelandic") << QStringLiteral("Ég get etið gler án þess að meiða mig");
+   QTest::newRow("Russian") << QStringLiteral("Я могу есть стекло, оно мне не вредит.");
+   QTest::newRow("Sanskrit") << QStringLiteral("काचं शक्नोम्यत्तुम् । नोपहिनस्ति माम् ॥");
+   QTest::newRow("Arabic") << QStringLiteral("أنا قادر على أكل الزجاج و هذا لا يؤلمني");
+   QTest::newRow("Chinese") << QStringLiteral("我能吞下玻璃而不伤身体。");
+   QTest::newRow("Thai") << QStringLiteral("ฉันกินกระจกได้ แต่มันไม่ทำให้ฉันเจ็บ");
+   QTest::newRow("non BMP") << QStringLiteral("𝓹𝓸𝓹𝓹𝓵𝓮𝓻");
  }
 
 void TestUTFConversion::testUTF()

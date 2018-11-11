@@ -13,8 +13,9 @@
 
 class PDFDisplay : public QWidget           // picture display widget
 {
+    Q_OBJECT
 public:
-    PDFDisplay( Poppler::Document *d, bool arthur );
+    PDFDisplay( Poppler::Document *d, bool arthur, QWidget *parent = nullptr );
     ~PDFDisplay();
     void setShowTextRects(bool show);
     void display();
@@ -31,19 +32,19 @@ private:
     QList<Poppler::TextBox*> textRects;
 };
 
-PDFDisplay::PDFDisplay( Poppler::Document *d, bool arthur )
+PDFDisplay::PDFDisplay( Poppler::Document *d, bool arthur, QWidget *parent ) : QWidget( parent )
 {
     showTextRects = false;
     doc = d;
     m_currentPage = 0;
     if (arthur)
     {
-        backendString = "Arthur";
+        backendString = QStringLiteral("Arthur");
         doc->setRenderBackend(Poppler::Document::ArthurBackend);
     }
     else
     {
-        backendString = "Splash";
+        backendString = QStringLiteral("Splash");
         doc->setRenderBackend(Poppler::Document::SplashBackend);
     }
     doc->setRenderHint(Poppler::Document::Antialiasing, true);
@@ -131,7 +132,7 @@ void PDFDisplay::mousePressEvent( QMouseEvent *e )
   {
     if (tb->boundingBox().contains(e->pos()))
     {
-      QString tt = QString("Text: \"%1\"\nIndex in text list: %2").arg(tb->text()).arg(i);
+      const QString tt = QStringLiteral("Text: \"%1\"\nIndex in text list: %2").arg(tb->text()).arg(i);
       QToolTip::showText(e->globalPos(), tt, this);
       break;
     }
@@ -168,15 +169,15 @@ int main( int argc, char **argv )
     // output some meta-data
     int major = 0, minor = 0;
     doc->getPdfVersion( &major, &minor );
-    qDebug() << "    PDF Version: " << qPrintable(QString::fromLatin1("%1.%2").arg(major).arg(minor));
-    qDebug() << "          Title: " << doc->info("Title");
-    qDebug() << "        Subject: " << doc->info("Subject");
-    qDebug() << "         Author: " << doc->info("Author");
-    qDebug() << "      Key words: " << doc->info("Keywords");
-    qDebug() << "        Creator: " << doc->info("Creator");
-    qDebug() << "       Producer: " << doc->info("Producer");
-    qDebug() << "   Date created: " << doc->date("CreationDate").toString();
-    qDebug() << "  Date modified: " << doc->date("ModDate").toString();
+    qDebug() << "    PDF Version: " << qPrintable(QStringLiteral("%1.%2").arg(major).arg(minor));
+    qDebug() << "          Title: " << doc->info(QStringLiteral("Title"));
+    qDebug() << "        Subject: " << doc->info(QStringLiteral("Subject"));
+    qDebug() << "         Author: " << doc->info(QStringLiteral("Author"));
+    qDebug() << "      Key words: " << doc->info(QStringLiteral("Keywords"));
+    qDebug() << "        Creator: " << doc->info(QStringLiteral("Creator"));
+    qDebug() << "       Producer: " << doc->info(QStringLiteral("Producer"));
+    qDebug() << "   Date created: " << doc->date(QStringLiteral("CreationDate")).toString();
+    qDebug() << "  Date modified: " << doc->date(QStringLiteral("ModDate")).toString();
     qDebug() << "Number of pages: " << doc->numPages();
     qDebug() << "     Linearised: " << doc->isLinearized();
     qDebug() << "      Encrypted: " << doc->isEncrypted();
@@ -217,7 +218,7 @@ int main( int argc, char **argv )
     {
         bool useArthur = (argc == 3 && strcmp(argv[2], "-arthur") == 0);
         PDFDisplay test( doc, useArthur );        // create picture display
-        test.setWindowTitle("Poppler-Qt5 Test");
+        test.setWindowTitle(QStringLiteral("Poppler-Qt5 Test"));
         test.setShowTextRects(argc == 3 && strcmp(argv[2], "-textRects") == 0);
         test.display();
         test.show();                            // show it
@@ -235,3 +236,5 @@ int main( int argc, char **argv )
 	return a.exec();
     }
 }
+
+#include "test-poppler-qt5.moc"

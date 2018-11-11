@@ -71,6 +71,10 @@ struct _PopplerFormField
   PopplerDocument *document;
   FormWidget *widget;
   PopplerAction *action;
+  PopplerAction *field_modified_action;
+  PopplerAction *format_field_action;
+  PopplerAction *validate_field_action;
+  PopplerAction *calculate_field_action;
 };
 
 struct _PopplerAnnot

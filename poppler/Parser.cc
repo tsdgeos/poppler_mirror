@@ -198,16 +198,19 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
   Stream *str;
   Goffset length;
   Goffset pos, endPos;
-  XRefEntry *entry = nullptr;
 
-  if (xref && (entry = xref->getEntry(objNum, false))) {
-    if (!entry->getFlag(XRefEntry::Parsing) ||
-        (objNum == 0 && objGen == 0)) {
-      entry->setFlag(XRefEntry::Parsing, true);
-    } else {
-      error(errSyntaxError, getPos(),
-            "Object '{0:d} {1:d} obj' is being already parsed", objNum, objGen);
-      return nullptr;
+
+  if (xref) {
+    XRefEntry *entry = xref->getEntry(objNum, false);
+    if (entry) {
+      if (!entry->getFlag(XRefEntry::Parsing) ||
+	  (objNum == 0 && objGen == 0)) {
+	entry->setFlag(XRefEntry::Parsing, true);
+      } else {
+	error(errSyntaxError, getPos(),
+	      "Object '{0:d} {1:d} obj' is being already parsed", objNum, objGen);
+	return nullptr;
+      }
     }
   }
 
@@ -229,10 +232,6 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
     if (strict) return nullptr;
     length = 0;
   }
-
-  // the above dictLookup can cause a xref reconstruction if the file is damaged
-  // so we need to update the entry pointer
-  entry = xref ? xref->getEntry(objNum, false) : nullptr;
 
   // check for length in damaged file
   if (xref && xref->getStreamEnd(pos, &endPos)) {
@@ -295,8 +294,15 @@ Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
   // get filters
   str = str->addFilters(str->getDict(), recursion);
 
-  if (entry)
-    entry->setFlag(XRefEntry::Parsing, false);
+  if (xref) {
+    // Don't try to reuse the entry from the block at the start
+    // of the function, xref can change in the middle because of
+    // reconstruction
+    XRefEntry *entry = xref->getEntry(objNum, false);
+    if (entry) {
+      entry->setFlag(XRefEntry::Parsing, false);
+    }
+  }
 
   return str;
 }

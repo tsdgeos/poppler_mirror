@@ -608,7 +608,7 @@ void FormWidgetSignature::updateWidgetAppearance()
 // FormField
 //========================================================================
 
-FormField::FormField(PDFDoc *docA, Object *aobj, const Ref& aref, FormField *parentA, std::set<int> *usedParents, FormFieldType ty)
+FormField::FormField(PDFDoc *docA, Object *aobj, const Ref aref, FormField *parentA, std::set<int> *usedParents, FormFieldType ty)
 {
   doc = docA;
   xref = doc->getXRef();
@@ -966,7 +966,7 @@ void FormField::setReadOnly (bool value)
 //------------------------------------------------------------------------
 // FormFieldButton
 //------------------------------------------------------------------------
-FormFieldButton::FormFieldButton(PDFDoc *docA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
+FormFieldButton::FormFieldButton(PDFDoc *docA, Object *aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
   : FormField(docA, aobj, ref, parent, usedParents, formButton)
 {
   Dict* dict = obj.getDict();
@@ -1133,7 +1133,7 @@ FormFieldButton::~FormFieldButton()
 //------------------------------------------------------------------------
 // FormFieldText
 //------------------------------------------------------------------------
-FormFieldText::FormFieldText(PDFDoc *docA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
+FormFieldText::FormFieldText(PDFDoc *docA, Object *aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
   : FormField(docA, aobj, ref, parent, usedParents, formText)
 {
   Dict* dict = obj.getDict();
@@ -1296,7 +1296,7 @@ int FormFieldText::parseDA(GooList* daToks)
 //------------------------------------------------------------------------
 // FormFieldChoice
 //------------------------------------------------------------------------
-FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref& ref, FormField *parent, std::set<int> *usedParents)
+FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
   : FormField(docA, aobj, ref, parent, usedParents, formChoice)
 {
   numChoices = 0;
@@ -1588,7 +1588,7 @@ const GooString *FormFieldChoice::getSelectedChoice() const {
 //------------------------------------------------------------------------
 // FormFieldSignature
 //------------------------------------------------------------------------
-FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object *dict, const Ref& ref, FormField *parent, std::set<int> *usedParents)
+FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object *dict, const Ref ref, FormField *parent, std::set<int> *usedParents)
   : FormField(docA, dict, ref, parent, usedParents, formSignature),
     signature_type(adbe_pkcs7_detached),
     signature(nullptr), signature_info(nullptr)
@@ -1898,7 +1898,7 @@ Object Form::fieldLookup(Dict *field, const char *key) {
   return ::fieldLookup(field, key, &usedParents);
 }
 
-FormField *Form::createFieldFromDict (Object* obj, PDFDoc *docA, const Ref& pref, FormField *parent, std::set<int> *usedParents)
+FormField *Form::createFieldFromDict (Object* obj, PDFDoc *docA, const Ref pref, FormField *parent, std::set<int> *usedParents)
 {
     FormField *field;
 
