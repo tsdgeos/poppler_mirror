@@ -30,12 +30,12 @@ void TestSearch::bug7063()
 
     QCOMPARE( page->search(QStringLiteral("latin1:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
 
-    QCOMPARE( page->search(QStringLiteral("é"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("à"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("ç"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("search \"é\", \"à\" or \"ç\""), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("¥µ©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("¥©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
+    QCOMPARE( page->search(QString::fromUtf8("é"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("à"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("ç"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("search \"é\", \"à\" or \"ç\""), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("¥µ©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("¥©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false ); //clazy:exclude=qstring-allocations
 
     QCOMPARE( page->search(QStringLiteral("non-ascii:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
 
@@ -44,12 +44,12 @@ void TestSearch::bug7063()
 
     QCOMPARE( page->search(QStringLiteral("latin1:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
 
-    QCOMPARE( page->search(QStringLiteral("é"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("à"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("ç"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("search \"é\", \"à\" or \"ç\""), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("¥µ©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("¥©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
+    QCOMPARE( page->search(QString::fromUtf8("é"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("à"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("ç"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("search \"é\", \"à\" or \"ç\""), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("¥µ©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("¥©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false ); //clazy:exclude=qstring-allocations
 }
 
 void TestSearch::testNextAndPrevious()
