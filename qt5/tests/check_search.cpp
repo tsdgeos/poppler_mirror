@@ -30,12 +30,12 @@ void TestSearch::bug7063()
 
     QCOMPARE( page->search(QStringLiteral(u"latin1:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
 
-    QCOMPARE( page->search(QStringLiteral(u"é"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral(u"à"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral(u"ç"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral(u"search \"é\", \"à\" or \"ç\""), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral(u"¥µ©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral(u"¥©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
+    QCOMPARE( page->search(QString::fromUtf8("é"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("à"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("ç"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("search \"é\", \"à\" or \"ç\""), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("¥µ©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("¥©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false ); //clazy:exclude=qstring-allocations
 
     QCOMPARE( page->search(QStringLiteral(u"non-ascii:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
 
@@ -44,12 +44,12 @@ void TestSearch::bug7063()
 
     QCOMPARE( page->search(QStringLiteral(u"latin1:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
 
-    QCOMPARE( page->search(QStringLiteral(u"é"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral(u"à"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral(u"ç"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral(u"search \"é\", \"à\" or \"ç\""), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral(u"¥µ©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral(u"¥©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
+    QCOMPARE( page->search(QString::fromUtf8("é"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("à"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("ç"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("search \"é\", \"à\" or \"ç\""), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("¥µ©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true ); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(QString::fromUtf8("¥©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false ); //clazy:exclude=qstring-allocations
 }
 
 void TestSearch::testNextAndPrevious()
