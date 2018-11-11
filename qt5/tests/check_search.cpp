@@ -23,33 +23,33 @@ void TestSearch::bug7063()
 
     double rectLeft = 0.0, rectTop = 0.0, rectRight = page->pageSizeF().width(), rectBottom = page->pageSizeF().height();
 
-    QCOMPARE( page->search(QStringLiteral("non-ascii:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"non-ascii:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
 
-    QCOMPARE( page->search(QStringLiteral("Ascii"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
-    QCOMPARE( page->search(QStringLiteral("Ascii"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::IgnoreCase), true );
+    QCOMPARE( page->search(QStringLiteral(u"Ascii"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
+    QCOMPARE( page->search(QStringLiteral(u"Ascii"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::IgnoreCase), true );
 
-    QCOMPARE( page->search(QStringLiteral("latin1:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
+    QCOMPARE( page->search(QStringLiteral(u"latin1:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
 
-    QCOMPARE( page->search(QStringLiteral("é"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("à"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("ç"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("search \"é\", \"à\" or \"ç\""), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("¥µ©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("¥©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
+    QCOMPARE( page->search(QStringLiteral(u"é"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"à"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"ç"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"search \"é\", \"à\" or \"ç\""), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"¥µ©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"¥©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
 
-    QCOMPARE( page->search(QStringLiteral("non-ascii:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"non-ascii:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
 
-    QCOMPARE( page->search(QStringLiteral("Ascii"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
-    QCOMPARE( page->search(QStringLiteral("Ascii"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::IgnoreCase), true );
+    QCOMPARE( page->search(QStringLiteral(u"Ascii"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
+    QCOMPARE( page->search(QStringLiteral(u"Ascii"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop, Poppler::Page::IgnoreCase), true );
 
-    QCOMPARE( page->search(QStringLiteral("latin1:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
+    QCOMPARE( page->search(QStringLiteral(u"latin1:"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
 
-    QCOMPARE( page->search(QStringLiteral("é"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("à"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("ç"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("search \"é\", \"à\" or \"ç\""), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("¥µ©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
-    QCOMPARE( page->search(QStringLiteral("¥©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
+    QCOMPARE( page->search(QStringLiteral(u"é"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"à"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"ç"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"search \"é\", \"à\" or \"ç\""), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"¥µ©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"¥©"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), false );
 }
 
 void TestSearch::testNextAndPrevious()
@@ -62,83 +62,83 @@ void TestSearch::testNextAndPrevious()
 
     double rectLeft = 0.0, rectTop = 0.0, rectRight = page->pageSizeF().width(), rectBottom = page->pageSizeF().height();
 
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
     QVERIFY( qAbs(rectLeft - 161.44) < 0.01 );
     QVERIFY( qAbs(rectTop - 127.85) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), true );
     QVERIFY( qAbs(rectLeft - 171.46) < 0.01 );
     QVERIFY( qAbs(rectTop - 127.85) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), true );
     QVERIFY( qAbs(rectLeft - 161.44) < 0.01 );
     QVERIFY( qAbs(rectTop - 139.81) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), true );
     QVERIFY( qAbs(rectLeft - 171.46) < 0.01 );
     QVERIFY( qAbs(rectTop - 139.81) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), false );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), false );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), true );
     QVERIFY( qAbs(rectLeft - 161.44) < 0.01 );
     QVERIFY( qAbs(rectTop - 139.81) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), true );
     QVERIFY( qAbs(rectLeft - 171.46) < 0.01 );
     QVERIFY( qAbs(rectTop - 127.85) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), true );
     QVERIFY( qAbs(rectLeft - 161.44) < 0.01 );
     QVERIFY( qAbs(rectTop - 127.85) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), false );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), false );
 
     rectLeft = 0.0, rectTop = 0.0, rectRight = page->pageSizeF().width(), rectBottom = page->pageSizeF().height();
 
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::FromTop), true );
     QVERIFY( qAbs(rectLeft - 161.44) < 0.01 );
     QVERIFY( qAbs(rectTop - 127.85) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), true );
     QVERIFY( qAbs(rectLeft - 171.46) < 0.01 );
     QVERIFY( qAbs(rectTop - 127.85) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), true );
     QVERIFY( qAbs(rectLeft - 161.44) < 0.01 );
     QVERIFY( qAbs(rectTop - 139.81) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), true );
     QVERIFY( qAbs(rectLeft - 171.46) < 0.01 );
     QVERIFY( qAbs(rectTop - 139.81) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), false );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::NextResult), false );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), true );
     QVERIFY( qAbs(rectLeft - 161.44) < 0.01 );
     QVERIFY( qAbs(rectTop - 139.81) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), true );
     QVERIFY( qAbs(rectLeft - 171.46) < 0.01 );
     QVERIFY( qAbs(rectTop - 127.85) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), true );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), true );
     QVERIFY( qAbs(rectLeft - 161.44) < 0.01 );
     QVERIFY( qAbs(rectTop - 127.85) < 0.01 );
     QVERIFY( qAbs(rectRight - rectLeft - 6.70) < 0.01 );
     QVERIFY( qAbs(rectBottom - rectTop - 8.85) < 0.01 );
-    QCOMPARE( page->search(QStringLiteral("is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), false );
+    QCOMPARE( page->search(QStringLiteral(u"is"), rectLeft, rectTop, rectRight, rectBottom, Poppler::Page::PreviousResult), false );
 }
 
 void TestSearch::testWholeWordsOnly()
@@ -158,17 +158,17 @@ void TestSearch::testWholeWordsOnly()
 
     double left, top, right, bottom;
 
-    QCOMPARE( page->search(QStringLiteral("brown"), left, top, right, bottom, direction, mode0), true );
-    QCOMPARE( page->search(QStringLiteral("brOwn"), left, top, right, bottom, direction, mode0), false );
+    QCOMPARE( page->search(QStringLiteral(u"brown"), left, top, right, bottom, direction, mode0), true );
+    QCOMPARE( page->search(QStringLiteral(u"brOwn"), left, top, right, bottom, direction, mode0), false );
 
-    QCOMPARE( page->search(QStringLiteral("brOwn"), left, top, right, bottom, direction, mode1), true );
-    QCOMPARE( page->search(QStringLiteral("brawn"), left, top, right, bottom, direction, mode1), false );
+    QCOMPARE( page->search(QStringLiteral(u"brOwn"), left, top, right, bottom, direction, mode1), true );
+    QCOMPARE( page->search(QStringLiteral(u"brawn"), left, top, right, bottom, direction, mode1), false );
 
-    QCOMPARE( page->search(QStringLiteral("brown"), left, top, right, bottom, direction, mode2), true );
-    QCOMPARE( page->search(QStringLiteral("own"), left, top, right, bottom, direction, mode2), false );
+    QCOMPARE( page->search(QStringLiteral(u"brown"), left, top, right, bottom, direction, mode2), true );
+    QCOMPARE( page->search(QStringLiteral(u"own"), left, top, right, bottom, direction, mode2), false );
 
-    QCOMPARE( page->search(QStringLiteral("brOwn"), left, top, right, bottom, direction, mode3), true );
-    QCOMPARE( page->search(QStringLiteral("Own"), left, top, right, bottom, direction, mode3), false );
+    QCOMPARE( page->search(QStringLiteral(u"brOwn"), left, top, right, bottom, direction, mode3), true );
+    QCOMPARE( page->search(QStringLiteral(u"Own"), left, top, right, bottom, direction, mode3), false );
 }
 
 QTEST_GUILESS_MAIN(TestSearch)
