@@ -98,9 +98,9 @@ _poppler_media_new (const MediaRendition *poppler_media)
     media->stream = poppler_media->getEmbbededStreamObject()->copy();
     mime_type = poppler_media->getContentType();
     if (mime_type)
-      media->mime_type = g_strdup (mime_type->getCString());
+      media->mime_type = g_strdup (mime_type->c_str());
   } else {
-    media->filename = g_strdup (poppler_media->getFileName()->getCString());
+    media->filename = g_strdup (poppler_media->getFileName()->c_str());
   }
 
   return media;

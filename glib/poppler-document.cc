@@ -517,9 +517,9 @@ poppler_document_get_id (PopplerDocument *document,
 
   if (document->doc->getID (permanent_id ? &permanent : nullptr, update_id ? &update : nullptr)) {
     if (permanent_id)
-      *permanent_id = (gchar *)g_memdup (permanent.getCString(), 32);
+      *permanent_id = (gchar *)g_memdup (permanent.c_str(), 32);
     if (update_id)
-      *update_id = (gchar *)g_memdup (update.getCString(), 32);
+      *update_id = (gchar *)g_memdup (update.c_str(), 32);
 
     retval = TRUE;
   }
@@ -726,7 +726,7 @@ char *_poppler_goo_string_to_utf8(const GooString *s)
   char *result;
 
   if (s->hasUnicodeMarker()) {
-    result = g_convert (s->getCString () + 2,
+    result = g_convert (s->c_str () + 2,
 			s->getLength () - 2,
 			"UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
   } else {
@@ -1566,7 +1566,7 @@ poppler_document_get_metadata (PopplerDocument *document)
     GooString *s = catalog->readMetadata ();
 
     if (s != nullptr) {
-      retval = g_strdup (s->getCString());
+      retval = g_strdup (s->c_str());
       delete s;
     }
   }
@@ -2137,7 +2137,7 @@ unicode_to_char (const Unicode *unicode,
 		gstr.append(buf, n);
 	}
 
-	return g_strdup (gstr.getCString ());
+	return g_strdup (gstr.c_str ());
 }
 
 /**
@@ -2256,7 +2256,7 @@ poppler_fonts_iter_get_full_name (PopplerFontsIter *iter)
 
 	name = info->getName();
 	if (name != nullptr) {
-		return info->getName()->getCString();
+		return info->getName()->c_str();
 	} else {
 		return nullptr;
 	}
@@ -2311,7 +2311,7 @@ poppler_fonts_iter_get_substitute_name (PopplerFontsIter *iter)
 
 	name = info->getSubstituteName();
 	if (name != nullptr) {
-		return name->getCString();
+		return name->c_str();
 	} else {
 		return nullptr;
 	}
@@ -2336,7 +2336,7 @@ poppler_fonts_iter_get_file_name (PopplerFontsIter *iter)
 
 	file = info->getFile();
 	if (file != nullptr) {
-		return file->getCString();
+		return file->c_str();
 	} else {
 		return nullptr;
 	}
@@ -2382,7 +2382,7 @@ poppler_fonts_iter_get_encoding (PopplerFontsIter *iter)
 
 	encoding = info->getEncoding();
 	if (encoding != nullptr) {
-		return encoding->getCString();
+		return encoding->c_str();
 	} else {
 		return nullptr;
 	}
@@ -3151,11 +3151,11 @@ _poppler_convert_pdf_date_to_gtime (const GooString *date,
   gboolean retval;
 
   if (date->hasUnicodeMarker()) {
-    date_string = g_convert (date->getCString () + 2,
+    date_string = g_convert (date->c_str () + 2,
 			     date->getLength () - 2,
 			     "UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);		
   } else {
-    date_string = g_strndup (date->getCString (), date->getLength ());
+    date_string = g_strndup (date->c_str (), date->getLength ());
   }
 
   retval = poppler_date_parse (date_string, gdate);

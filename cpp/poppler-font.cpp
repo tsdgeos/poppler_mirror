@@ -43,10 +43,10 @@ public:
         , is_subset(fi->getSubset())
     {
         if (fi->getName()) {
-            font_name = fi->getName()->getCString();
+            font_name = fi->getName()->c_str();
         }
         if (fi->getFile()) {
-            font_file = fi->getFile()->getCString();
+            font_file = fi->getFile()->c_str();
         }
     }
 

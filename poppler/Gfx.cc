@@ -3672,8 +3672,8 @@ void Gfx::opSetFont(Object args[], int numArgs) {
   }
   if (printCommands) {
     printf("  font: tag=%s name='%s' %g\n",
-	   font->getTag()->getCString(),
-	   font->getName() ? font->getName()->getCString() : "???",
+	   font->getTag()->c_str(),
+	   font->getName() ? font->getName()->c_str() : "???",
 	   args[1].getNum());
     fflush(stdout);
   }
@@ -3941,7 +3941,7 @@ void Gfx::doShowText(const GooString *s) {
     curX = state->getCurX();
     curY = state->getCurY();
     oldParser = parser;
-    p = s->getCString();
+    p = s->c_str();
     len = s->getLength();
     while (len > 0) {
       n = font->getNextChar(p, len, &code,
@@ -4010,7 +4010,7 @@ void Gfx::doShowText(const GooString *s) {
     parser = oldParser;
 
   } else if (out->useDrawChar()) {
-    p = s->getCString();
+    p = s->c_str();
     len = s->getLength();
     while (len > 0) {
       n = font->getNextChar(p, len, &code,
@@ -4043,7 +4043,7 @@ void Gfx::doShowText(const GooString *s) {
     }
   } else {
     dx = dy = 0;
-    p = s->getCString();
+    p = s->c_str();
     len = s->getLength();
     nChars = nSpaces = 0;
     while (len > 0) {

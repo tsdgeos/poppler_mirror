@@ -70,7 +70,7 @@ void XPDFReader::lookupString( Dict * dict, char * type, QString & dest )
     if ( stringObj.isNull() )
         return;
     if ( stringObj.isString() )
-        dest = stringObj.getString()->getCString();
+        dest = stringObj.getString()->c_str();
     else
         qDebug() << type << " is not String." << endl;
 }
@@ -155,7 +155,7 @@ void XPDFReader::lookupDate( Dict * dict, char * type, QDateTime & dest )
         return;
     if ( dateObj.isString() )
     {
-        dest = convertDate( dateObj.getString()->getCString() );
+        dest = convertDate( dateObj.getString()->c_str() );
     }
     else
         qDebug() << type << " is not Date" << endl;

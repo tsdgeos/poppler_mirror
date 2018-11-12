@@ -31,7 +31,7 @@ void TestPageLabelInfo::testFromDecimal()
 void TestPageLabelInfo::testFromDecimalUnicode()
 {
   std::unique_ptr<GooString> str(Poppler::QStringToUnicodeGooString(QString::fromLocal8Bit("2342")));
-  const auto res = fromDecimal(str->getCString(), str->getCString() + str->getLength(), str->hasUnicodeMarker());
+  const auto res = fromDecimal(str->c_str(), str->c_str() + str->getLength(), str->hasUnicodeMarker());
 #ifndef HAVE_CODECVT
   QEXPECT_FAIL("", "unicode text to index fails without codecvt", Continue);
 #endif
@@ -46,26 +46,26 @@ void TestPageLabelInfo::testToRoman()
 {
     GooString str;
     toRoman(177, &str, false);
-    QCOMPARE (str.getCString(), "clxxvii");
+    QCOMPARE (str.c_str(), "clxxvii");
 }
 
 void TestPageLabelInfo::testFromRoman()
 {
     GooString roman("clxxvii");
-    QCOMPARE(fromRoman(roman.getCString()), 177);
+    QCOMPARE(fromRoman(roman.c_str()), 177);
 }
 
 void TestPageLabelInfo::testToLatin()
 {
     GooString str;
     toLatin(54, &str, false);
-    QCOMPARE(str.getCString(), "bbb");
+    QCOMPARE(str.c_str(), "bbb");
 }
 
 void TestPageLabelInfo::testFromLatin()
 {
     GooString latin("ddd");
-    QCOMPARE(fromLatin(latin.getCString()), 56);
+    QCOMPARE(fromLatin(latin.c_str()), 56);
 }
 
 QTEST_GUILESS_MAIN(TestPageLabelInfo)

@@ -818,7 +818,7 @@ poppler_page_get_selected_text (PopplerPage          *page,
 
   text = poppler_page_get_text_page (page);
   sel_text = text->getSelectionText (&pdf_selection, selection_style);
-  result = g_strdup (sel_text->getCString ());
+  result = g_strdup (sel_text->c_str ());
   delete sel_text;
 
   return result;
@@ -1710,7 +1710,7 @@ get_font_name_from_word (TextWord *word, gint word_i)
     }
   }
   subset = i > 0 && i < font_name->getLength () && font_name->getChar (i) == '+';
-  name = font_name->getCString ();
+  name = font_name->c_str ();
   if (subset)
     name += i + 1;
 

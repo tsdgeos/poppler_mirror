@@ -277,16 +277,16 @@ int main(int argc, char *argv[]) {
     GooString* tmp = new GooString(argv[2]);
     if (!xml) {
       if (tmp->getLength() >= 5) {
-        const char *p = tmp->getCString() + tmp->getLength() - 5;
+        const char *p = tmp->c_str() + tmp->getLength() - 5;
         if (!strcmp(p, ".html") || !strcmp(p, ".HTML")) {
-          htmlFileName = new GooString(tmp->getCString(), tmp->getLength() - 5);
+          htmlFileName = new GooString(tmp->c_str(), tmp->getLength() - 5);
         }
       }
     } else {
       if (tmp->getLength() >= 4) {
-        const char *p = tmp->getCString() + tmp->getLength() - 4;
+        const char *p = tmp->c_str() + tmp->getLength() - 4;
         if (!strcmp(p, ".xml") || !strcmp(p, ".XML")) {
-          htmlFileName = new GooString(tmp->getCString(), tmp->getLength() - 4);
+          htmlFileName = new GooString(tmp->c_str(), tmp->getLength() - 4);
         }
       }
     }
@@ -298,9 +298,9 @@ int main(int argc, char *argv[]) {
       error(errCommandLine, -1, "You have to provide an output filename when reading form stdin.");
       goto error;
   } else {
-    const char *p = fileName->getCString() + fileName->getLength() - 4;
+    const char *p = fileName->c_str() + fileName->getLength() - 4;
     if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF"))
-      htmlFileName = new GooString(fileName->getCString(),
+      htmlFileName = new GooString(fileName->c_str(),
 				 fileName->getLength() - 4);
     else
       htmlFileName = fileName->copy();
@@ -360,12 +360,12 @@ int main(int argc, char *argv[]) {
 
   doOutline = doc->getOutline()->getItems() != nullptr;
   // write text file
-  htmlOut = new HtmlOutputDev(doc->getCatalog(), htmlFileName->getCString(), 
-	  docTitle->getCString(), 
-	  author ? author->getCString() : nullptr,
-	  keywords ? keywords->getCString() : nullptr, 
-          subject ? subject->getCString() : nullptr, 
-	  date ? date->getCString() : nullptr,
+  htmlOut = new HtmlOutputDev(doc->getCatalog(), htmlFileName->c_str(), 
+	  docTitle->c_str(), 
+	  author ? author->c_str() : nullptr,
+	  keywords ? keywords->c_str() : nullptr, 
+          subject ? subject->c_str() : nullptr, 
+	  date ? date->c_str() : nullptr,
 	  extension,
 	  rawOrder, 
 	  firstPage,
@@ -415,9 +415,9 @@ int main(int argc, char *argv[]) {
       SplashBitmap *bitmap = splashOut->getBitmap();
 
       imgFileName = GooString::format("{0:s}{1:03d}.{2:s}", 
-          htmlFileName->getCString(), pg, extension);
+          htmlFileName->c_str(), pg, extension);
 
-      bitmap->writeImgFile(format, imgFileName->getCString(),
+      bitmap->writeImgFile(format, imgFileName->c_str(),
                            72 * scale, 72 * scale);
 
       delete imgFileName;
@@ -504,7 +504,7 @@ static GooString* getInfoDate(Dict *infoDict, const char *key) {
 
   obj = infoDict->lookup(key);
   if (obj.isString()) {
-    s = obj.getString()->getCString();
+    s = obj.getString()->c_str();
     // TODO do something with the timezone info
     if ( parseDateString( s, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute ) ) {
       tmStruct.tm_year = year - 1900;

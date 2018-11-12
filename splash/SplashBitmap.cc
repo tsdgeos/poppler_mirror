@@ -412,7 +412,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
         writer = new TiffWriter();
       }
       if (writer && params) {
-        ((TiffWriter *)writer)->setCompressionString(params->tiffCompression.getCString());
+        ((TiffWriter *)writer)->setCompressionString(params->tiffCompression.c_str());
       }
       break;
     #endif

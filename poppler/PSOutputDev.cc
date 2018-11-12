@@ -1730,7 +1730,7 @@ void PSOutputDev::writeDocSetup(PDFDoc *doc, Catalog *catalog,
   if (customCodeCbk) {
     if ((s = (*customCodeCbk)(this, psOutCustomDocSetup, 0,
 			      customCodeCbkData))) {
-      writePS(s->getCString());
+      writePS(s->c_str());
       delete s;
     }
   }
@@ -1750,7 +1750,7 @@ void PSOutputDev::writeTrailer() {
   } else {
     writePS("end\n");
     writePS("%%DocumentSuppliedResources:\n");
-    writePS(embFontList->getCString());
+    writePS(embFontList->c_str());
     if (level == psLevel1Sep || level == psLevel2Sep ||
 	level == psLevel3Sep) {
       writePS("%%DocumentProcessColors:");
@@ -1996,10 +1996,10 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
       if (font->isCIDFont()) {
 	error(errSyntaxError, -1,
 	      "Couldn't find a font to substitute for '{0:s}' ('{1:s}' character collection)",
-	      font->getName() ? font->getName()->getCString()
+	      font->getName() ? font->getName()->c_str()
 	                      : "(unnamed)",
 	      ((GfxCIDFont *)font)->getCollection()
-	          ? ((GfxCIDFont *)font)->getCollection()->getCString()
+	          ? ((GfxCIDFont *)font)->getCollection()->c_str()
 	          : "(unknown)");
 	if (font16EncLen >= font16EncSize) {
 	  font16EncSize += 16;
@@ -2013,7 +2013,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
       } else {
 	error(errSyntaxError, -1,
 	      "Couldn't find a font to substitute for '{0:s}'",
-	      font->getName() ? font->getName()->getCString()
+	      font->getName() ? font->getName()->c_str()
 	                      : "(unnamed)");
       }
       delete fontLoc;
@@ -2152,7 +2152,7 @@ void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName) {
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
   embFontList->append("%%+ font ");
-  embFontList->append(psName->getCString());
+  embFontList->append(psName->c_str());
   embFontList->append("\n");
 
   strObj.streamReset();
@@ -2305,11 +2305,11 @@ void PSOutputDev::setupExternalType1Font(GooString *fileName, GooString *psName)
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
   embFontList->append("%%+ font ");
-  embFontList->append(psName->getCString());
+  embFontList->append(psName->c_str());
   embFontList->append("\n");
 
   // copy the font file
-  if (!(fontFile = fopen(fileName->getCString(), "rb"))) {
+  if (!(fontFile = fopen(fileName->c_str(), "rb"))) {
     error(errIO, -1, "Couldn't open external font file");
     return;
   }
@@ -2391,13 +2391,13 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id,
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
   embFontList->append("%%+ font ");
-  embFontList->append(psName->getCString());
+  embFontList->append(psName->c_str());
   embFontList->append("\n");
 
   // convert it to a Type 1 font
   if ((fontBuf = font->readEmbFontFile(xref, &fontLen))) {
     if ((ffT1C = FoFiType1C::make(fontBuf, fontLen))) {
-      ffT1C->convertToType1(psName->getCString(), nullptr, true,
+      ffT1C->convertToType1(psName->c_str(), nullptr, true,
 			    outputFunc, outputStream);
       delete ffT1C;
     }
@@ -2436,14 +2436,14 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id,
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
   embFontList->append("%%+ font ");
-  embFontList->append(psName->getCString());
+  embFontList->append(psName->c_str());
   embFontList->append("\n");
 
   // convert it to a Type 1 font
   if ((fontBuf = font->readEmbFontFile(xref, &fontLen))) {
     if ((ffTT = FoFiTrueType::make(fontBuf, fontLen))) {
       if (ffTT->isOpenTypeCFF()) {
-	ffTT->convertToType1(psName->getCString(), nullptr, true,
+	ffTT->convertToType1(psName->c_str(), nullptr, true,
 			     outputFunc, outputStream);
       }
       delete ffTT;
@@ -2465,14 +2465,14 @@ void PSOutputDev::setupEmbeddedTrueTypeFont(GfxFont *font, Ref *id,
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
   embFontList->append("%%+ font ");
-  embFontList->append(psName->getCString());
+  embFontList->append(psName->c_str());
   embFontList->append("\n");
 
   // convert it to a Type 42 font
   if ((fontBuf = font->readEmbFontFile(xref, &fontLen))) {
     if ((ffTT = FoFiTrueType::make(fontBuf, fontLen))) {
       codeToGID = ((Gfx8BitFont *)font)->getCodeToGIDMap(ffTT);
-      ffTT->convertToType42(psName->getCString(),
+      ffTT->convertToType42(psName->c_str(),
 			    ((Gfx8BitFont *)font)->getHasEncoding()
 			      ? ((Gfx8BitFont *)font)->getEncoding()
 			      : nullptr,
@@ -2505,13 +2505,13 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, GooString *fileName,
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
   embFontList->append("%%+ font ");
-  embFontList->append(psName->getCString());
+  embFontList->append(psName->c_str());
   embFontList->append("\n");
 
   // convert it to a Type 42 font
-  if ((ffTT = FoFiTrueType::load(fileName->getCString()))) {
+  if ((ffTT = FoFiTrueType::load(fileName->c_str()))) {
     codeToGID = ((Gfx8BitFont *)font)->getCodeToGIDMap(ffTT);
-    ffTT->convertToType42(psName->getCString(),
+    ffTT->convertToType42(psName->c_str(),
 			  ((Gfx8BitFont *)font)->getHasEncoding()
 			    ? ((Gfx8BitFont *)font)->getEncoding()
 			    : nullptr,
@@ -2554,12 +2554,12 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font,
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
   embFontList->append("%%+ font ");
-  embFontList->append(psName->getCString());
+  embFontList->append(psName->c_str());
   embFontList->append("\n");
 
   // convert it to a Type 0 font
   //~ this should use fontNum to load the correct font
-  if ((ffTT = FoFiTrueType::load(fileName->getCString()))) {
+  if ((ffTT = FoFiTrueType::load(fileName->c_str()))) {
 
     // check for embedding permission
     if (ffTT->getEmbeddingRights() >= 1) {
@@ -2576,19 +2576,19 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font,
 	codeToGID = ((GfxCIDFont *)font)->getCodeToGIDMap(ffTT, &codeToGIDLen);
       }
       if (ffTT->isOpenTypeCFF()) {
-	ffTT->convertToCIDType0(psName->getCString(),
+	ffTT->convertToCIDType0(psName->c_str(),
 		codeToGID, codeToGIDLen,
 		outputFunc, outputStream);
       } else if (globalParams->getPSLevel() >= psLevel3) {
 	// Level 3: use a CID font
-	ffTT->convertToCIDType2(psName->getCString(),
+	ffTT->convertToCIDType2(psName->c_str(),
 		codeToGID, codeToGIDLen,
 		needVerticalMetrics,
 		outputFunc, outputStream);
       } else {
 	// otherwise: use a non-CID composite font
 	int maxValidGlyph = -1;
-	ffTT->convertToType0(psName->getCString(),
+	ffTT->convertToType0(psName->c_str(),
 		codeToGID, codeToGIDLen,
 		needVerticalMetrics,
 		&maxValidGlyph,
@@ -2599,7 +2599,7 @@ void PSOutputDev::setupExternalCIDTrueTypeFont(GfxFont *font,
     } else {
       error(errSyntaxError, -1,
 	    "TrueType font '{0:s}' does not allow embedding",
-	    font->getName() ? font->getName()->getCString() : "(unnamed)");
+	    font->getName() ? font->getName()->c_str() : "(unnamed)");
 	    
     }
     delete ffTT;
@@ -2637,7 +2637,7 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id,
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
   embFontList->append("%%+ font ");
-  embFontList->append(psName->getCString());
+  embFontList->append(psName->c_str());
   embFontList->append("\n");
 
   // convert it to a Type 0 font
@@ -2645,11 +2645,11 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id,
     if ((ffT1C = FoFiType1C::make(fontBuf, fontLen))) {
       if (globalParams->getPSLevel() >= psLevel3) {
 	// Level 3: use a CID font
-	ffT1C->convertToCIDType0(psName->getCString(), nullptr, 0,
+	ffT1C->convertToCIDType0(psName->c_str(), nullptr, 0,
 				 outputFunc, outputStream);
       } else {
 	// otherwise: use a non-CID composite font
-	ffT1C->convertToType0(psName->getCString(), nullptr, 0,
+	ffT1C->convertToType0(psName->c_str(), nullptr, 0,
 			      outputFunc, outputStream);
       }
       delete ffT1C;
@@ -2671,7 +2671,7 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id,
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
   embFontList->append("%%+ font ");
-  embFontList->append(psName->getCString());
+  embFontList->append(psName->c_str());
   embFontList->append("\n");
 
   // convert it to a Type 0 font
@@ -2679,7 +2679,7 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id,
     if ((ffTT = FoFiTrueType::make(fontBuf, fontLen))) {
       if (globalParams->getPSLevel() >= psLevel3) {
 	// Level 3: use a CID font
-	ffTT->convertToCIDType2(psName->getCString(),
+	ffTT->convertToCIDType2(psName->c_str(),
 				((GfxCIDFont *)font)->getCIDToGID(),
 				((GfxCIDFont *)font)->getCIDToGIDLen(),
 				needVerticalMetrics,
@@ -2687,7 +2687,7 @@ void PSOutputDev::setupEmbeddedCIDTrueTypeFont(GfxFont *font, Ref *id,
       } else {
 	// otherwise: use a non-CID composite font
 	int maxValidGlyph = -1;
-	ffTT->convertToType0(psName->getCString(),
+	ffTT->convertToType0(psName->c_str(),
 			     ((GfxCIDFont *)font)->getCIDToGID(),
 			     ((GfxCIDFont *)font)->getCIDToGIDLen(),
 			     needVerticalMetrics,
@@ -2732,7 +2732,7 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id,
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
   embFontList->append("%%+ font ");
-  embFontList->append(psName->getCString());
+  embFontList->append(psName->c_str());
   embFontList->append("\n");
 
   // convert it to a Type 0 font
@@ -2741,13 +2741,13 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id,
       if (ffTT->isOpenTypeCFF()) {
 	if (globalParams->getPSLevel() >= psLevel3) {
 	  // Level 3: use a CID font
-	  ffTT->convertToCIDType0(psName->getCString(),
+	  ffTT->convertToCIDType0(psName->c_str(),
 				  ((GfxCIDFont *)font)->getCIDToGID(),
 				  ((GfxCIDFont *)font)->getCIDToGIDLen(),
 				  outputFunc, outputStream);
 	} else {
 	  // otherwise: use a non-CID composite font
-	  ffTT->convertToType0(psName->getCString(),
+	  ffTT->convertToType0(psName->c_str(),
 			       ((GfxCIDFont *)font)->getCIDToGID(),
 			       ((GfxCIDFont *)font)->getCIDToGIDLen(),
 			       outputFunc, outputStream);
@@ -2784,7 +2784,7 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName,
   // beginning comment
   writePSFmt("%%BeginResource: font {0:t}\n", psName);
   embFontList->append("%%+ font ");
-  embFontList->append(psName->getCString());
+  embFontList->append(psName->c_str());
   embFontList->append("\n");
 
   // font dictionary
@@ -2832,9 +2832,9 @@ void PSOutputDev::setupType3Font(GfxFont *font, GooString *psName,
 	} else {
 	  buf = GooString::format("{0:.6g} {1:.6g} setcharwidth\n", t3WX, t3WY);
 	}
-	(*outputFunc)(outputStream, buf->getCString(), buf->getLength());
+	(*outputFunc)(outputStream, buf->c_str(), buf->getLength());
 	delete buf;
-	(*outputFunc)(outputStream, t3String->getCString(),
+	(*outputFunc)(outputStream, t3String->c_str(),
 		      t3String->getLength());
 	delete t3String;
 	t3String = nullptr;
@@ -3945,7 +3945,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   if (customCodeCbk) {
     if ((s = (*customCodeCbk)(this, psOutCustomPageSetup, pageNum,
 			      customCodeCbkData))) {
-      writePS(s->getCString());
+      writePS(s->c_str());
       delete s;
     }
   }
@@ -5114,7 +5114,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s) {
 
   // compute the positioning (dx, dy) for each char in the string
   nChars = 0;
-  p = s->getCString();
+  p = s->c_str();
   len = s->getLength();
   s2 = new GooString();
   dxdySize = font->isCIDFont() ? 8 : s->getLength();
@@ -6067,7 +6067,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
     writePS("    /RunLengthDecode filter\n");
   }
   if (useCompressed) {
-    writePS(s->getCString());
+    writePS(s->c_str());
   }
   if (s) {
     delete s;
@@ -6255,7 +6255,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
 		 ref->getRefNum(), ref->getRefGen());
     } else {
       writePS("currentfile\n");
-      writePS(maskFilters->getCString());
+      writePS(maskFilters->c_str());
       writePS("pdfMask\n");
 
       // add FlateEncode/LZWEncode/RunLengthEncode and ASCIIHex/85 encode filters
@@ -6485,7 +6485,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
     writePS("    /RunLengthDecode filter\n");
   }
   if (useCompressed) {
-    writePS(s->getCString());
+    writePS(s->c_str());
   }
   if (s) {
     delete s;
@@ -6510,7 +6510,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
     // mask data source
     if (mode == psModeForm || inType3Char || preloadImagesForms) {
       writePS("  /DataSource {pdfMaskSrc}\n");
-      writePS(maskFilters->getCString());
+      writePS(maskFilters->c_str());
     } else {
       writePS("  /DataSource maskStream\n");
     }
@@ -7414,7 +7414,7 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction) {
           break;
         }
       }
-      writePS(codeString->getCString());
+      writePS(codeString->c_str());
       writePS("\n");
       delete codeString;
       n = func4->getOutputSize();
@@ -7424,7 +7424,7 @@ void PSOutputDev::cvtFunction(const Function *func, bool invertPSFunction) {
       }
       writePS("}\n");
     } else {
-      writePS(func4->getCodeString()->getCString());
+      writePS(func4->getCodeString()->c_str());
       writePS("\n");
     }
     break;
@@ -7466,7 +7466,7 @@ void PSOutputDev::writePSFmt(const char *fmt, ...) {
     t3String->appendfv((char *)fmt, args);
   } else {
     buf = GooString::formatv((char *)fmt, args);
-    (*outputFunc)(outputStream, buf->getCString(), buf->getLength());
+    (*outputFunc)(outputStream, buf->c_str(), buf->getLength());
     delete buf;
   }
   va_end(args);
@@ -7479,7 +7479,7 @@ void PSOutputDev::writePSString(const GooString *s) {
 
   writePSChar('(');
   line = 1;
-  for (p = (Guchar *)s->getCString(), n = s->getLength(); n; ++p, --n) {
+  for (p = (Guchar *)s->c_str(), n = s->getLength(); n; ++p, --n) {
     if (line >= 64) {
       writePSChar('\\');
       writePSChar('\n');

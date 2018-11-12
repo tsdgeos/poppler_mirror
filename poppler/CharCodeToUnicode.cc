@@ -179,7 +179,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseUnicodeToUnicode(
   int line, n, i;
   char *tokptr;
 
-  if (!(f = openFile(fileName->getCString(), "r"))) {
+  if (!(f = openFile(fileName->c_str(), "r"))) {
     gfree(uBuf);
     error(errIO, -1, "Couldn't open unicodeToUnicode file '{0:t}'",
 	  fileName);
@@ -267,7 +267,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseCMap(GooString *buf, int nBits) {
   CharCodeToUnicode *ctu;
 
   ctu = new CharCodeToUnicode(nullptr);
-  const char *p = buf->getCString();
+  const char *p = buf->c_str();
   ctu->parseCMap1(&getCharFromString, &p, nBits);
   return ctu;
 }
@@ -289,7 +289,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseCMapFromFile(GooString *fileName,
 }
 
 void CharCodeToUnicode::mergeCMap(GooString *buf, int nBits) {
-  const char *p = buf->getCString();
+  const char *p = buf->c_str();
   parseCMap1(&getCharFromString, &p, nBits);
 }
 

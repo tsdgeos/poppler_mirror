@@ -79,14 +79,14 @@ void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...) {
   }
 
   if (errorCbk) {
-    (*errorCbk)(errorCbkData, category, pos, sanitized->getCString());
+    (*errorCbk)(errorCbkData, category, pos, sanitized->c_str());
   } else {
     if (pos >= 0) {
       fprintf(stderr, "%s (%lld): %s\n",
-	      errorCategoryNames[category], (long long)pos, sanitized->getCString());
+	      errorCategoryNames[category], (long long)pos, sanitized->c_str());
     } else {
       fprintf(stderr, "%s: %s\n",
-	      errorCategoryNames[category], sanitized->getCString());
+	      errorCategoryNames[category], sanitized->c_str());
     }
     fflush(stderr);
   }

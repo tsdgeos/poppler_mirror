@@ -58,7 +58,7 @@ rectf detail::pdfrectangle_to_rectf(const PDFRectangle &pdfrect)
 
 ustring detail::unicode_GooString_to_ustring(const GooString *str)
 {
-    const char *data = str->getCString();
+    const char *data = str->c_str();
     const int len = str->getLength();
 
     int i = 0;

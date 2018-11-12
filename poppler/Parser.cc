@@ -164,7 +164,7 @@ Object Parser::getObj(bool simpleOnly,
   } else if (buf1.isString() && fileKey) {
     s = buf1.getString();
     s2 = new GooString();
-    decrypt = new DecryptStream(new MemStream(s->getCString(), 0, s->getLength(), Object(objNull)),
+    decrypt = new DecryptStream(new MemStream(s->c_str(), 0, s->getLength(), Object(objNull)),
 				fileKey, encAlgorithm, keyLength,
 				objNum, objGen);
     decrypt->reset();

@@ -40,7 +40,7 @@ void JSInfo::printJS(const GooString *js) {
   char buf[8];
   int i, n, len;
 
-  if (!js || !js->getCString())
+  if (!js || !js->c_str())
     return;
 
   len = TextStringToUCS4(js, &u);
@@ -60,7 +60,7 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action, bool deleteLin
     if (print) {
       LinkJavaScript *linkjs = static_cast<LinkJavaScript *>(link);
       const GooString *s = linkjs->getScript();
-      if (s && s->getCString()) {
+      if (s && s->c_str()) {
 	fprintf(file, "%s:\n", action);
 	printJS(s);
 	fputs("\n\n", file);
@@ -74,7 +74,7 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action, bool deleteLin
       hasJS = true;
       if (print) {
         const GooString *s = linkr->getScript();
-        if (s && s->getCString()) {
+        if (s && s->c_str()) {
           fprintf(file, "%s (Rendition):\n", action);
           printJS(s);
           fputs("\n\n", file);
@@ -112,7 +112,7 @@ void JSInfo::scan(int nPages) {
     hasJS = true;
     if (print) {
       for (int i = 0; i < numNames; i++) {
-	fprintf(file, "Name Dictionary \"%s\":\n", doc->getCatalog()->getJSName(i)->getCString());
+	fprintf(file, "Name Dictionary \"%s\":\n", doc->getCatalog()->getJSName(i)->c_str());
 	GooString *js = doc->getCatalog()->getJS(i);
 	printJS(js);
 	delete js;

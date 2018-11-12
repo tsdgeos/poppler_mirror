@@ -229,13 +229,13 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
     {
       LinkLaunch * e = (LinkLaunch *)a;
       const GooString * p = e->getParams();
-      popplerLink = new LinkExecute( linkArea, e->getFileName()->getCString(), p ? p->getCString() : nullptr );
+      popplerLink = new LinkExecute( linkArea, e->getFileName()->c_str(), p ? p->c_str() : nullptr );
     }
     break;
 
     case actionNamed:
     {
-      const char * name = ((LinkNamed *)a)->getName()->getCString();
+      const char * name = ((LinkNamed *)a)->getName()->c_str();
       if ( !strcmp( name, "NextPage" ) )
         popplerLink = new LinkAction( linkArea, LinkAction::PageNext );
       else if ( !strcmp( name, "PrevPage" ) )
@@ -274,7 +274,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
 
     case actionURI:
     {
-      popplerLink = new LinkBrowse( linkArea, ((LinkURI *)a)->getURI()->getCString() );
+      popplerLink = new LinkBrowse( linkArea, ((LinkURI *)a)->getURI()->c_str() );
     }
     break;
 
@@ -688,7 +688,7 @@ QString Page::text(const QRectF &r, TextLayout textLayout) const
     s = output_dev->getText(r.left(), r.top(), r.right(), r.bottom());
   }
 
-  result = QString::fromUtf8(s->getCString());
+  result = QString::fromUtf8(s->c_str());
 
   delete output_dev;
   delete s;
@@ -792,7 +792,7 @@ QList<TextBox*> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbort
   for (int i = 0; i < word_list->getLength(); i++) {
     TextWord *word = word_list->get(i);
     GooString *gooWord = word->getText();
-    QString string = QString::fromUtf8(gooWord->getCString());
+    QString string = QString::fromUtf8(gooWord->c_str());
     delete gooWord;
     double xMin, yMin, xMax, yMax;
     word->getBBox(&xMin, &yMin, &xMax, &yMax);

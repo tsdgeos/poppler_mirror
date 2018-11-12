@@ -329,7 +329,7 @@ dest_new_named (const GooString *named_dest)
 	}
 
 	dest->type = POPPLER_DEST_NAMED;
-	dest->named_dest = g_strdup (named_dest->getCString ());
+	dest->named_dest = g_strdup (named_dest->c_str ());
 
 	return dest;
 }
@@ -392,10 +392,10 @@ build_launch (PopplerAction *action,
 	      const LinkLaunch    *link)
 {
 	if (link->getFileName()) {
-		action->launch.file_name = g_strdup (link->getFileName()->getCString ());
+		action->launch.file_name = g_strdup (link->getFileName()->c_str ());
 	}
 	if (link->getParams()) {
-		action->launch.params = g_strdup (link->getParams()->getCString ());
+		action->launch.params = g_strdup (link->getParams()->c_str ());
 	}
 }
 
@@ -405,7 +405,7 @@ build_uri (PopplerAction *action,
 {
 	const gchar *uri;
 
-	uri = link->getURI()->getCString ();
+	uri = link->getURI()->c_str ();
 	if (uri != nullptr)
 		action->uri.uri = g_strdup (uri);
 }
@@ -416,7 +416,7 @@ build_named (PopplerAction *action,
 {
 	const gchar *name;
 
-	name = link->getName ()->getCString ();
+	name = link->getName ()->c_str ();
 	if (name != nullptr)
 		action->named.named_dest = g_strdup (name);
 }

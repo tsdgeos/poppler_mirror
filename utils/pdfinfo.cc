@@ -158,7 +158,7 @@ static void printInfoDate(Dict *infoDict, const char *key, const char *text) {
   Object obj = infoDict->lookup(key);
   if (obj.isString()) {
     fputs(text, stdout);
-    s = obj.getString()->getCString();
+    s = obj.getString()->c_str();
     // TODO do something with the timezone info
     if ( parseDateString( s, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute ) ) {
       tmStruct.tm_year = year - 1900;
@@ -199,7 +199,7 @@ static void printISODate(Dict *infoDict, const char *key, const char *text)
   Object obj = infoDict->lookup(key);
   if (obj.isString()) {
     fputs(text, stdout);
-    s = obj.getString()->getCString();
+    s = obj.getString()->c_str();
     if ( parseDateString( s, &year, &mon, &day, &hour, &min, &sec, &tz, &tz_hour, &tz_minute ) ) {
       fprintf(stdout, "%04d-%02d-%02dT%02d:%02d:%02d", year, mon, day, hour, min, sec);
       if (tz_hour == 0 && tz_minute == 0) {
@@ -234,7 +234,7 @@ static void printAttribute(const Attribute *attribute, unsigned indent)
   printf(" /%s ", attribute->getTypeName());
   if (attribute->getType() == Attribute::UserProperty) {
     GooString *name = attribute->getName();
-    printf("(%s) ", name->getCString());
+    printf("(%s) ", name->c_str());
     delete name;
   }
   attribute->getValue()->print(stdout);
@@ -257,7 +257,7 @@ static void printStruct(const StructElement *element, unsigned indent) {
     GooString *text = element->getText(false);
     printIndent(indent);
     if (text) {
-      printf("\"%s\"\n", text->getCString());
+      printf("\"%s\"\n", text->c_str());
     } else {
       printf("(No content?)\n");
     }
@@ -268,10 +268,10 @@ static void printStruct(const StructElement *element, unsigned indent) {
       printIndent(indent);
       printf("%s", element->getTypeName());
       if (element->getID()) {
-          printf(" <%s>", element->getID()->getCString());
+          printf(" <%s>", element->getID()->c_str());
       }
       if (element->getTitle()) {
-          printf(" \"%s\"", element->getTitle()->getCString());
+          printf(" \"%s\"", element->getTitle()->c_str());
       }
       if (element->getRevision() > 0) {
           printf(" r%u", element->getRevision());
@@ -368,7 +368,7 @@ static void printLinkDest(LinkDest *dest) {
   s.append("                                ");
   s.setChar(26, ']');
   s.setChar(27, '\0');
-  printf("%s", s.getCString());
+  printf("%s", s.c_str());
 }
 
 static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
@@ -648,15 +648,15 @@ static void printPdfSubtype(PDFDoc *doc, UnicodeMap *uMap) {
         break;
     }
 
-    printf("    Title:         %s\n",typeExp->getCString());
-    printf("    Abbreviation:  %s\n", abbr->getCString());
+    printf("    Title:         %s\n",typeExp->c_str());
+    printf("    Abbreviation:  %s\n", abbr->c_str());
     if (part.get())
-      printf("    Subtitle:      Part %d: %s\n", subpart, part->getCString());
+      printf("    Subtitle:      Part %d: %s\n", subpart, part->c_str());
     else
       printf("    Subtitle:      Part %d\n", subpart);
     printf("    Standard:      %s-%d\n", typeExp->toStr().substr(0,9).c_str(), subpart);
     if (confExp.get())
-      printf("    Conformance:   %s\n", confExp->getCString());
+      printf("    Conformance:   %s\n", confExp->c_str());
   }
 }
 
@@ -942,7 +942,7 @@ int main(int argc, char *argv[]) {
     // print the metadata
     const GooString *metadata = doc->readMetadata();
     if (metadata) {
-      fputs(metadata->getCString(), stdout);
+      fputs(metadata->c_str(), stdout);
       fputc('\n', stdout);
       delete metadata;
     }
@@ -965,9 +965,9 @@ int main(int argc, char *argv[]) {
     long long filesize = 0;
 
 #ifdef VMS
-    f = fopen(fileName->getCString(), "rb", "ctx=stm");
+    f = fopen(fileName->c_str(), "rb", "ctx=stm");
 #else
-    f = fopen(fileName->getCString(), "rb");
+    f = fopen(fileName->c_str(), "rb");
 #endif
     if (f) {
       Gfseek(f, 0, SEEK_END);

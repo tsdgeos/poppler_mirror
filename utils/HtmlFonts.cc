@@ -130,17 +130,17 @@ HtmlFont::HtmlFont(GfxFont *font, int _size, GfxRGB rgb){
     GooString fontnameLower(fontname);
     fontnameLower.lowerCase();
 
-    if (!bold && strstr(fontnameLower.getCString(),"bold")) {
+    if (!bold && strstr(fontnameLower.c_str(),"bold")) {
 		bold=true;
     }
 
     if (!italic &&
-	(strstr(fontnameLower.getCString(),"italic")||
-	 strstr(fontnameLower.getCString(),"oblique"))) {
+	(strstr(fontnameLower.c_str(),"italic")||
+	 strstr(fontnameLower.c_str(),"oblique"))) {
 		italic=true;
     }
 
-    familyName = fontname->getCString();
+    familyName = fontname->c_str();
     removeStyleSuffix(familyName);
   } else {
     FontName = new GooString(defaultFamilyName);

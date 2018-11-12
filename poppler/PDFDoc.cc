@@ -148,7 +148,7 @@ PDFDoc::PDFDoc(const GooString *fileNameA, const GooString *ownerPassword,
 
   // try to open file
 #ifdef _WIN32
-  wchar_t *wFileName = (wchar_t*)utf8ToUtf16(fileName->getCString());
+  wchar_t *wFileName = (wchar_t*)utf8ToUtf16(fileName->c_str());
   file = GooFile::open(wFileName);
   gfree(wFileName);
 #else
@@ -799,7 +799,7 @@ GooString *PDFDoc::getDocInfoStringEntry(const char *key) {
 
 static bool
 get_id (const GooString *encodedidstring, GooString *id) {
-  const char *encodedid = encodedidstring->getCString();
+  const char *encodedid = encodedidstring->c_str();
   char pdfid[pdfIdLength + 1];
   int n;
 
@@ -897,7 +897,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   Ref *refPage = getCatalog()->getPageRef(pageNo);
   Object page = getXRef()->fetch(refPage->num, refPage->gen);
 
-  if (!(f = fopen(name->getCString(), "wb"))) {
+  if (!(f = fopen(name->c_str(), "wb"))) {
     error(errIO, -1, "Couldn't open file '{0:t}'", name);
     return errOpenFile;
   }
@@ -1012,7 +1012,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   ref.num = rootNum;
   ref.gen = 0;
   Object trailerDict = createTrailerDict(rootNum + 3, false, 0, &ref, getXRef(),
-                                        name->getCString(), uxrefOffset);
+                                        name->c_str(), uxrefOffset);
   writeXRefTableTrailer(std::move(trailerDict), yRef, false /* do not write unnecessary entries */,
                         uxrefOffset, outStr, getXRef());
 
@@ -1030,7 +1030,7 @@ int PDFDoc::saveAs(GooString *name, PDFWriteMode mode) {
   OutStream *outStr;
   int res;
 
-  if (!(f = fopen(name->getCString(), "wb"))) {
+  if (!(f = fopen(name->c_str(), "wb"))) {
     error(errIO, -1, "Couldn't open file '{0:t}'", name);
     return errOpenFile;
   }
@@ -1062,7 +1062,7 @@ int PDFDoc::saveWithoutChangesAs(GooString *name) {
   OutStream *outStr;
   int res;
 
-  if (!(f = fopen(name->getCString(), "wb"))) {
+  if (!(f = fopen(name->c_str(), "wb"))) {
     error(errIO, -1, "Couldn't open file '{0:t}'", name);
     return errOpenFile;
   }
@@ -1144,7 +1144,7 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
 
   Goffset uxrefOffset = outStr->getPos();
   int numobjects = xref->getNumObjects();
-  const char *fileNameA = fileName ? fileName->getCString() : nullptr;
+  const char *fileNameA = fileName ? fileName->c_str() : nullptr;
   Ref rootRef, uxrefStreamRef;
   rootRef.num = getXRef()->getRootNum();
   rootRef.gen = getXRef()->getRootGen();
@@ -1250,7 +1250,7 @@ void PDFDoc::writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint 
   for (int i=0; i<dict->getLength(); i++) {
     GooString keyName(dict->getKey(i));
     GooString *keyNameToPrint = keyName.sanitizedName(false /* non ps mode */);
-    outStr->printf("/%s ", keyNameToPrint->getCString());
+    outStr->printf("/%s ", keyNameToPrint->c_str());
     delete keyNameToPrint;
     Object obj1 = dict->getValNF(i);
     writeObject(&obj1, outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen, alreadyWrittenDicts);
@@ -1306,7 +1306,7 @@ void PDFDoc::writeString (const GooString* s, OutStream* outStr, const Guchar *f
   // Encrypt string if encryption is enabled
   GooString *sEnc = nullptr;
   if (fileKey) {
-    EncryptStream *enc = new EncryptStream(new MemStream(s->getCString(), 0, s->getLength(), Object(objNull)),
+    EncryptStream *enc = new EncryptStream(new MemStream(s->c_str(), 0, s->getLength(), Object(objNull)),
                                            fileKey, encAlgorithm, keyLength, objNum, objGen);
     sEnc = new GooString();
     int c;
@@ -1322,7 +1322,7 @@ void PDFDoc::writeString (const GooString* s, OutStream* outStr, const Guchar *f
   // Write data
   if (s->hasUnicodeMarker()) {
     //unicode string don't necessary end with \0
-    const char* c = s->getCString();
+    const char* c = s->c_str();
     outStr->printf("(");
     for(int i=0; i<s->getLength(); i++) {
       char unescaped = *(c+i)&0x000000ff;
@@ -1333,7 +1333,7 @@ void PDFDoc::writeString (const GooString* s, OutStream* outStr, const Guchar *f
     }
     outStr->printf(") ");
   } else {
-    const char* c = s->getCString();
+    const char* c = s->c_str();
     outStr->printf("(");
     for(int i=0; i<s->getLength(); i++) {
       char unescaped = *(c+i)&0x000000ff;
@@ -1381,7 +1381,7 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numO
     {
       GooString s;
       s.appendf("{0:.10g}", obj->getReal());
-      outStr->printf("%s ", s.getCString());
+      outStr->printf("%s ", s.c_str());
       break;
     }
     case objString:
@@ -1391,7 +1391,7 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numO
     {
       GooString name(obj->getName());
       GooString *nameToPrint = name.sanitizedName(false /* non ps mode */);
-      outStr->printf("/%s ", nameToPrint->getCString());
+      outStr->printf("/%s ", nameToPrint->c_str());
       delete nameToPrint;
       break;
     }
@@ -1558,7 +1558,7 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
 
   //calculate md5 digest
   Guchar digest[16];
-  md5((Guchar*)message.getCString(), message.getLength(), digest);
+  md5((Guchar*)message.c_str(), message.getLength(), digest);
 
   //create ID array
   // In case of encrypted files, the ID must not be changed because it's used to calculate the key
@@ -1616,7 +1616,7 @@ void PDFDoc::writeXRefStreamTrailer (Object &&trailerDict, XRef *uxref, Ref *uxr
   uxref->writeStreamToBuffer(&stmData, trailerDict.getDict(), xRef);
 
   // Create XRef stream object and write it
-  MemStream *mStream = new MemStream( stmData.getCString(), 0, stmData.getLength(), std::move(trailerDict) );
+  MemStream *mStream = new MemStream( stmData.c_str(), 0, stmData.getLength(), std::move(trailerDict) );
   writeObjectHeader(uxrefStreamRef, outStr);
   Object obj1(static_cast<Stream*>(mStream));
   writeObject(&obj1, outStr, xRef, 0, nullptr, cryptRC4, 0, 0, 0);
@@ -1630,7 +1630,7 @@ void PDFDoc::writeXRefStreamTrailer (Object &&trailerDict, XRef *uxref, Ref *uxr
 void PDFDoc::writeXRefTableTrailer(Goffset uxrefOffset, XRef *uxref, bool writeAllEntries,
                                    int uxrefSize, OutStream* outStr, bool incrUpdate)
 {
-  const char *fileNameA = fileName ? fileName->getCString() : nullptr;
+  const char *fileNameA = fileName ? fileName->c_str() : nullptr;
   // file size (doesn't include the trailer)
   unsigned int fileSize = 0;
   int c;

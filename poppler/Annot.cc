@@ -759,7 +759,7 @@ DefaultAppearance::DefaultAppearance(GooString *da) {
     int i = FormFieldText::tokenizeDA(da, daToks, "Tf");
 
     if (i >= 1) {
-      fontPtSize = gatof(( (GooString *)daToks->get(i-1) )->getCString());
+      fontPtSize = gatof(( (GooString *)daToks->get(i-1) )->c_str());
     }
     if (i >= 2) {
       // We are expecting a name, therefore the first letter should be '/'.
@@ -772,16 +772,16 @@ DefaultAppearance::DefaultAppearance(GooString *da) {
     for (i = daToks->getLength()-1; i >= 0; --i) {
       if (!fontColor) {
         if (!((GooString *)daToks->get(i))->cmp("g") && i >= 1) {
-          fontColor = std::make_unique<AnnotColor>(gatof(( (GooString *)daToks->get(i-1) )->getCString()));
+          fontColor = std::make_unique<AnnotColor>(gatof(( (GooString *)daToks->get(i-1) )->c_str()));
         } else if (!((GooString *)daToks->get(i))->cmp("rg") && i >= 3) {
-          fontColor = std::make_unique<AnnotColor>(gatof(( (GooString *)daToks->get(i-3) )->getCString()),
-                                                   gatof(( (GooString *)daToks->get(i-2) )->getCString()),
-                                                   gatof(( (GooString *)daToks->get(i-1) )->getCString()));
+          fontColor = std::make_unique<AnnotColor>(gatof(( (GooString *)daToks->get(i-3) )->c_str()),
+                                                   gatof(( (GooString *)daToks->get(i-2) )->c_str()),
+                                                   gatof(( (GooString *)daToks->get(i-1) )->c_str()));
         } else if (!((GooString *)daToks->get(i))->cmp("k") && i >= 4) {
-          fontColor = std::make_unique<AnnotColor>(gatof(( (GooString *)daToks->get(i-4) )->getCString()),
-                                                   gatof(( (GooString *)daToks->get(i-3) )->getCString()),
-                                                   gatof(( (GooString *)daToks->get(i-2) )->getCString()),
-                                                   gatof(( (GooString *)daToks->get(i-1) )->getCString()));
+          fontColor = std::make_unique<AnnotColor>(gatof(( (GooString *)daToks->get(i-4) )->c_str()),
+                                                   gatof(( (GooString *)daToks->get(i-3) )->c_str()),
+                                                   gatof(( (GooString *)daToks->get(i-2) )->c_str()),
+                                                   gatof(( (GooString *)daToks->get(i-1) )->c_str()));
         }
       }
     }
@@ -1279,7 +1279,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
 
   //----- get the annotation appearance
   if (appearStreams) {
-    appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->getCString());
+    appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->c_str());
   }
 
   //----- parse the border style
@@ -1464,7 +1464,7 @@ void Annot::setAppearanceState(const char *state) {
 
   // The appearance state determines the current appearance stream
   if (appearStreams) {
-    appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->getCString());
+    appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->c_str());
   } else {
     appearance.setToNull();
   }
@@ -1762,7 +1762,7 @@ Object Annot::createForm(const GooString *appearBuf, double *bbox, bool transpar
   if (resDictObject.isDict())
     appearDict->set("Resources", std::move(resDictObject));
 
-  Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->getCString()), 0,
+  Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->c_str()), 0,
 				     appearBuf->getLength(), Object(appearDict));
   return Object(mStream);
 }
@@ -2162,7 +2162,7 @@ void AnnotText::setIcon(GooString *new_icon) {
     icon = std::make_unique<GooString>("Note");
   }
 
-  update("Name", Object(objName, icon->getCString()));
+  update("Name", Object(objName, icon->c_str()));
   invalidateAppearance();
 }
 
@@ -3922,7 +3922,7 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i,
     // Compute width of character just output
     if (outBuf->getLength() > last_o2) {
       dx = 0.0;
-      font->getNextChar(outBuf->getCString() + last_o2,
+      font->getNextChar(outBuf->c_str() + last_o2,
                         outBuf->getLength() - last_o2,
                         &c, &uAux, &uLen, &dx, &dy, &ox, &oy);
       w += dx;
@@ -3977,7 +3977,7 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i,
   // Compute the actual width and character count of the final string, based on
   // breakpoint, if this information is requested by the caller.
   if (width != nullptr || charCount != nullptr) {
-    const char *s = outBuf->getCString();
+    const char *s = outBuf->c_str();
     int len = outBuf->getLength();
 
     if (width != nullptr)
@@ -4098,7 +4098,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
   if (tfPos >= 0) {
     tok = (GooString *)daToks->get(tfPos);
     if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
-      if (!resources || !(font = resources->lookupFont(tok->getCString() + 1))) {
+      if (!resources || !(font = resources->lookupFont(tok->c_str() + 1))) {
         if (forceZapfDingbats) {
           // We are forcing ZaDb but the font does not exist
           // so create a fake one
@@ -4118,7 +4118,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
       error(errSyntaxError, -1, "Invalid font name in 'Tf' operator in field's DA string");
     }
     tok = (GooString *)daToks->get(tfPos + 1);
-    fontSize = gatof(tok->getCString());
+    fontSize = gatof(tok->c_str());
   } else {
     error(errSyntaxError, -1, "Missing 'Tf' operator in field's DA string");
   }
@@ -4331,7 +4331,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
       }
 
       // write the text string
-      const char *s = convertedText.getCString();
+      const char *s = convertedText.c_str();
       int len = convertedText.getLength();
       i = 0;
       xPrev = w;                // so that first character is placed properly
@@ -4492,14 +4492,14 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
   if (tfPos >= 0) {
     tok = (GooString *)daToks->get(tfPos);
     if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
-      if (!resources || !(font = resources->lookupFont(tok->getCString() + 1))) {
+      if (!resources || !(font = resources->lookupFont(tok->c_str() + 1))) {
         error(errSyntaxError, -1, "Unknown font in field's DA string");
       }
     } else {
       error(errSyntaxError, -1, "Invalid font name in 'Tf' operator in field's DA string");
     }
     tok = (GooString *)daToks->get(tfPos + 1);
-    fontSize = gatof(tok->getCString());
+    fontSize = gatof(tok->c_str());
   } else {
     error(errSyntaxError, -1, "Missing 'Tf' operator in field's DA string");
   }
@@ -4761,7 +4761,7 @@ bool AnnotAppearanceBuilder::drawFormFieldButton(const FormFieldButton *field, c
   case formButtonRadio: {
     //~ Acrobat doesn't draw a caption if there is no AP dict (?)
     if (appearState && appearState->cmp("Off") != 0 &&
-        field->getState(appearState->getCString())) {
+        field->getState(appearState->c_str())) {
       if (caption) {
         return drawText(caption, da, resources, border, appearCharacs, rect, false, 0, fieldQuadCenter, false, true, xref, addedDingbatsResource, false);
       } else if (appearCharacs) {
@@ -4886,7 +4886,7 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource) {
   }
 
   // build the appearance stream
-  Stream *appearStream = new AutoFreeMemStream(copyString(appearBuf->getCString()), 0,
+  Stream *appearStream = new AutoFreeMemStream(copyString(appearBuf->c_str()), 0,
       appearBuf->getLength(), Object(appearDict));
   appearance = Object(appearStream);
 }
@@ -5063,7 +5063,7 @@ void AnnotMovie::draw(Gfx *gfx, bool printing) {
       formDict->set("Matrix", Object(matrix));
       formDict->set("Resources", Object(resDict));
 
-      Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->getCString()), 0,
+      Stream *mStream = new AutoFreeMemStream(copyString(appearBuf->c_str()), 0,
 			      appearBuf->getLength(), Object(formDict));
 
       Dict *dict = new Dict(gfx->getXRef());
@@ -5184,7 +5184,7 @@ void AnnotStamp::setIcon(GooString *new_icon) {
     icon = std::make_unique<GooString>();
   }
 
-  update("Name", Object(objName, icon->getCString()));
+  update("Name", Object(objName, icon->c_str()));
   invalidateAppearance();
 }
 

@@ -93,32 +93,32 @@ bool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
       if (len > 127) {
 	len = 127;
       }
-      memcpy(test, ownerPassword->getCString(), len);
-      memcpy(test + len, ownerKey->getCString() + 32, 8);
-      memcpy(test + len + 8, userKey->getCString(), 48);
+      memcpy(test, ownerPassword->c_str(), len);
+      memcpy(test + len, ownerKey->c_str() + 32, 8);
+      memcpy(test + len + 8, userKey->c_str(), 48);
       sha256(test, len + 56, test);
       if (encRevision == 6) {
 	//test contains the initial SHA-256 hash as input K.
-	revision6Hash(ownerPassword, test, userKey->getCString());
+	revision6Hash(ownerPassword, test, userKey->c_str());
       }
-      if (!memcmp(test, ownerKey->getCString(), 32)) {
+      if (!memcmp(test, ownerKey->c_str(), 32)) {
 
 	// compute the file key from the owner password
-	memcpy(test, ownerPassword->getCString(), len);
-	memcpy(test + len, ownerKey->getCString() + 40, 8);
-	memcpy(test + len + 8, userKey->getCString(), 48);
+	memcpy(test, ownerPassword->c_str(), len);
+	memcpy(test + len, ownerKey->c_str() + 40, 8);
+	memcpy(test + len + 8, userKey->c_str(), 48);
 	sha256(test, len + 56, test);
 	if (encRevision == 6) {
 	  //test contains the initial SHA-256 hash input K.
-	  revision6Hash(ownerPassword, test, userKey->getCString());
+	  revision6Hash(ownerPassword, test, userKey->c_str());
 	}
 	aes256KeyExpansion(&state, test, 32, true);
 	for (i = 0; i < 16; ++i) {
 	  state.cbc[i] = 0;
 	}
-	aes256DecryptBlock(&state, (Guchar *)ownerEnc->getCString(), false);
+	aes256DecryptBlock(&state, (Guchar *)ownerEnc->c_str(), false);
 	memcpy(fileKey, state.buf, 16);
-	aes256DecryptBlock(&state, (Guchar *)ownerEnc->getCString() + 16,
+	aes256DecryptBlock(&state, (Guchar *)ownerEnc->c_str() + 16,
 			   false);
 	memcpy(fileKey + 16, state.buf, 16);
 
@@ -134,19 +134,19 @@ bool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
       if (len > 127) {
 	len = 127;
       }
-      memcpy(test, userPassword->getCString(), len);
-      memcpy(test + len, userKey->getCString() + 32, 8);
+      memcpy(test, userPassword->c_str(), len);
+      memcpy(test + len, userKey->c_str() + 32, 8);
       sha256(test, len + 8, test);
       if(encRevision == 6) {
 	// test contains the initial SHA-256 hash input K.
 	// user key is not used in checking user password.
 	revision6Hash(userPassword, test, nullptr);
       }
-      if (!memcmp(test, userKey->getCString(), 32)) {
+      if (!memcmp(test, userKey->c_str(), 32)) {
 
 	// compute the file key from the user password
-	memcpy(test, userPassword->getCString(), len);
-	memcpy(test + len, userKey->getCString() + 40, 8);
+	memcpy(test, userPassword->c_str(), len);
+	memcpy(test + len, userKey->c_str() + 40, 8);
 	sha256(test, len + 8, test);
 	if(encRevision == 6) {
 	  //test contains the initial SHA-256 hash input K.
@@ -157,9 +157,9 @@ bool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
 	for (i = 0; i < 16; ++i) {
 	  state.cbc[i] = 0;
 	}
-	aes256DecryptBlock(&state, (Guchar *)userEnc->getCString(), false);
+	aes256DecryptBlock(&state, (Guchar *)userEnc->c_str(), false);
 	memcpy(fileKey, state.buf, 16);
-	aes256DecryptBlock(&state, (Guchar *)userEnc->getCString() + 16,
+	aes256DecryptBlock(&state, (Guchar *)userEnc->c_str() + 16,
 			   false);
 	memcpy(fileKey + 16, state.buf, 16);
 
@@ -174,10 +174,10 @@ bool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
     if (ownerPassword) {
       len = ownerPassword->getLength();
       if (len < 32) {
-	memcpy(test, ownerPassword->getCString(), len);
+	memcpy(test, ownerPassword->c_str(), len);
 	memcpy(test + len, passwordPad, 32 - len);
       } else {
-	memcpy(test, ownerPassword->getCString(), 32);
+	memcpy(test, ownerPassword->c_str(), 32);
       }
       md5(test, 32, test);
       if (encRevision == 3) {
@@ -192,7 +192,7 @@ bool Decrypt::makeFileKey(int encVersion, int encRevision, int keyLength,
 	  test2[i] = rc4DecryptByte(fState, &fx, &fy, ownerKey->getChar(i));
 	}
       } else {
-	memcpy(test2, ownerKey->getCString(), 32);
+	memcpy(test2, ownerKey->c_str(), 32);
 	for (i = 19; i >= 0; --i) {
 	  for (j = 0; j < keyLength; ++j) {
 	    tmpKey[j] = test[j] ^ i;
@@ -240,20 +240,20 @@ bool Decrypt::makeFileKey2(int encVersion, int encRevision, int keyLength,
   if (userPassword) {
     len = userPassword->getLength();
     if (len < 32) {
-      memcpy(buf, userPassword->getCString(), len);
+      memcpy(buf, userPassword->c_str(), len);
       memcpy(buf + len, passwordPad, 32 - len);
     } else {
-      memcpy(buf, userPassword->getCString(), 32);
+      memcpy(buf, userPassword->c_str(), 32);
     }
   } else {
     memcpy(buf, passwordPad, 32);
   }
-  memcpy(buf + 32, ownerKey->getCString(), 32);
+  memcpy(buf + 32, ownerKey->c_str(), 32);
   buf[64] = permissions & 0xff;
   buf[65] = (permissions >> 8) & 0xff;
   buf[66] = (permissions >> 16) & 0xff;
   buf[67] = (permissions >> 24) & 0xff;
-  memcpy(buf + 68, fileID->getCString(), fileID->getLength());
+  memcpy(buf + 68, fileID->c_str(), fileID->getLength());
   len = 68 + fileID->getLength();
   if (!encryptMetadata) {
     buf[len++] = 0xff;
@@ -277,7 +277,7 @@ bool Decrypt::makeFileKey2(int encVersion, int encRevision, int keyLength,
     }
     ok = memcmp(test, passwordPad, 32) == 0;
   } else if (encRevision == 3) {
-    memcpy(test, userKey->getCString(), 32);
+    memcpy(test, userKey->c_str(), 32);
     for (i = 19; i >= 0; --i) {
       for (j = 0; j < keyLength; ++j) {
 	tmpKey[j] = fileKey[j] ^ i;
@@ -289,7 +289,7 @@ bool Decrypt::makeFileKey2(int encVersion, int encRevision, int keyLength,
       }
     }
     memcpy(buf, passwordPad, 32);
-    memcpy(buf + 32, fileID->getCString(), fileID->getLength());
+    memcpy(buf + 32, fileID->c_str(), fileID->getLength());
     md5(buf, 32 + fileID->getLength(), buf);
     ok = memcmp(test, buf, 16) == 0;
   } else {

@@ -287,7 +287,7 @@ ustring page::text(const rectf &r, text_layout_enum layout_mode) const
     } else {
         s.reset(td.getText(r.left(), r.top(), r.right(), r.bottom()));
     }
-    return ustring::from_utf8(s->getCString());
+    return ustring::from_utf8(s->c_str());
 }
 
 /*

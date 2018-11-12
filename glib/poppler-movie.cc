@@ -82,7 +82,7 @@ _poppler_movie_new (const Movie *poppler_movie)
 
   movie = POPPLER_MOVIE (g_object_new (POPPLER_TYPE_MOVIE, nullptr));
 
-  movie->filename = g_strdup (poppler_movie->getFileName()->getCString());
+  movie->filename = g_strdup (poppler_movie->getFileName()->c_str());
   if (poppler_movie->getShowPoster()) {
     Object tmp = poppler_movie->getPoster();
     movie->need_poster = (!tmp.isRef() && !tmp.isStream());

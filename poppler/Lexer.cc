@@ -452,7 +452,7 @@ Object Lexer::getObj(int objNum) {
       *p = '\0';
       return Object(objName, tokBuf);
     } else {
-      Object obj(objName, s->getCString());
+      Object obj(objName, s->c_str());
       delete s;
       return obj;
     }

@@ -166,8 +166,8 @@ namespace Poppler {
 		
 		FontInfoData( ::FontInfo* fi )
 		{
-			if (fi->getName()) fontName = fi->getName()->getCString();
-			if (fi->getFile()) fontFile = fi->getFile()->getCString();
+			if (fi->getName()) fontName = fi->getName()->c_str();
+			if (fi->getFile()) fontFile = fi->getFile()->c_str();
 			isEmbedded = fi->getEmbedded();
 			isSubset = fi->getSubset();
 			type = (Poppler::FontInfo::Type)fi->getType();

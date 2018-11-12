@@ -1268,7 +1268,7 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
       error(errSyntaxError, -1, "Unexpected end of PostScript function stream");
       return false;
     }
-    const char *p = tok->getCString();
+    const char *p = tok->c_str();
     if (isdigit(*p) || *p == '.' || *p == '-') {
       isReal = false;
       for (; *p; ++p) {
@@ -1280,10 +1280,10 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
       resizeCode(*codePtr);
       if (isReal) {
 	code[*codePtr].type = psReal;
-          code[*codePtr].real = gatof(tok->getCString());
+          code[*codePtr].real = gatof(tok->c_str());
       } else {
 	code[*codePtr].type = psInt;
-	code[*codePtr].intg = atoi(tok->getCString());
+	code[*codePtr].intg = atoi(tok->c_str());
       }
       ++*codePtr;
       delete tok;

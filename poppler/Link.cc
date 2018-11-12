@@ -80,7 +80,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
 
   if (!obj->isDict()) {
       error(errSyntaxWarning, -1, "parseAction: Bad annotation action for URI '{0:s}'",
-            baseURI ? baseURI->getCString() : "NULL");
+            baseURI ? baseURI->c_str() : "NULL");
       return nullptr;
   }
 
@@ -143,7 +143,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
   // action is missing or wrong type
   } else {
     error(errSyntaxWarning, -1, "parseAction: Unknown annotation action object: URI = '{0:s}'",
-          baseURI ? baseURI->getCString() : "NULL");
+          baseURI ? baseURI->c_str() : "NULL");
     action = nullptr;
   }
 
@@ -575,7 +575,7 @@ LinkURI::LinkURI(const Object *uriObj, const GooString *baseURI) {
   uri = nullptr;
   if (uriObj->isString()) {
     uri2 = uriObj->getString();
-    n = (int)strcspn(uri2->getCString(), "/:");
+    n = (int)strcspn(uri2->c_str(), "/:");
     if (n < uri2->getLength() && uri2->getChar(n) == ':') {
       // "http:..." etc.
       uri = uri2->copy();
@@ -594,7 +594,7 @@ LinkURI::LinkURI(const Object *uriObj, const GooString *baseURI) {
 	  }
 	}
 	if (uri2->getChar(0) == '/') {
-	  uri->append(uri2->getCString() + 1, uri2->getLength() - 1);
+	  uri->append(uri2->c_str() + 1, uri2->getLength() - 1);
 	} else {
 	  uri->append(uri2);
 	}

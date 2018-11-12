@@ -117,7 +117,7 @@ QString FormField::name() const
   QString name;
   if (const GooString *goo = m_formData->fm->getPartialName())
   {
-    name = QString::fromLatin1(goo->getCString());
+    name = QString::fromLatin1(goo->c_str());
   }
   return name;
 }
@@ -144,7 +144,7 @@ QString FormField::uiName() const
   QString name;
   if (const GooString *goo = m_formData->fm->getAlternateUiName())
   {
-    name = QString::fromLatin1(goo->getCString());
+    name = QString::fromLatin1(goo->c_str());
   }
   return name;
 }
@@ -746,7 +746,7 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
   GooString* checkedSignature = fws->getCheckedSignature(&priv->docLength);
   if (priv->range_bounds.size() == 4 && checkedSignature)
   {
-    priv->signature = QByteArray::fromHex(checkedSignature->getCString());
+    priv->signature = QByteArray::fromHex(checkedSignature->c_str());
   }
   delete checkedSignature;
 

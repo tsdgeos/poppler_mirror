@@ -729,7 +729,7 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, PSOutputDev *ps) {
     substName = new GooString(base14SubstFonts[substIdx]);
     if (ps) {
       error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:s}'",
-	    base14SubstFonts[substIdx], name ? name->getCString() : "null");
+	    base14SubstFonts[substIdx], name ? name->c_str() : "null");
       fontLoc = new GfxFontLoc();
       fontLoc->locType = gfxFontLocResident;
       fontLoc->fontType = fontType1;
@@ -742,7 +742,7 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, PSOutputDev *ps) {
       if (path) {
 	if ((fontLoc = getExternalFont(path, false))) {
 	  error(errSyntaxWarning, -1, "Substituting font '{0:s}' for '{1:s}'",
-		  base14SubstFonts[substIdx], name ? name->getCString() : "");
+		  base14SubstFonts[substIdx], name ? name->c_str() : "");
 	  name = new GooString(base14SubstFonts[substIdx]);
 	  fontLoc->substIdx = substIdx;
 	  return fontLoc;
@@ -773,7 +773,7 @@ GfxFontLoc *GfxFont::getExternalFont(GooString *path, bool cid) {
   GfxFontType fontType;
   GfxFontLoc *fontLoc;
 
-  fft = FoFiIdentifier::identifyFile(path->getCString());
+  fft = FoFiIdentifier::identifyFile(path->c_str());
   switch (fft) {
   case fofiIdType1PFA:
   case fofiIdType1PFB:
@@ -1820,7 +1820,7 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
     return;
   }
   if (cMap->getCMapName()) {
-    encodingName->Set(cMap->getCMapName()->getCString());
+    encodingName->Set(cMap->getCMapName()->c_str());
   } else {
     encodingName->Set("Custom");
   }
@@ -2228,7 +2228,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
 
   wmode = getWMode();
   for (lp = CMapList;lp->collection != nullptr;lp++) {
-    if (strcmp(lp->collection,getCollection()->getCString()) == 0) {
+    if (strcmp(lp->collection,getCollection()->c_str()) == 0) {
       break;
     }
   }
@@ -2504,7 +2504,7 @@ void GfxFontDict::hashFontObject1(Object *obj, FNVHash *h) {
   case objString:
     h->hash('s');
     s = obj->getString();
-    h->hash(s->getCString(), s->getLength());
+    h->hash(s->c_str(), s->getLength());
     break;
   case objName:
     h->hash('n');

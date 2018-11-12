@@ -98,7 +98,7 @@ public:
 
   // The formatted value may be in the PDF, or be left undefined (nullptr).
   // In the later case the user agent should provide a default representation.
-  const char *getFormattedValue() const { return formatted ? formatted->getCString() : nullptr; }
+  const char *getFormattedValue() const { return formatted ? formatted->c_str() : nullptr; }
   void setFormattedValue(const char *formattedA);
 
   ~Attribute();

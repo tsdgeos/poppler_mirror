@@ -36,7 +36,7 @@ bool LocalPDFDocBuilder::supports(const GooString &uri)
 {
   if (uri.cmpN("file://", 7) == 0) {
     return true;
-  } else if (!strstr(uri.getCString(), "://")) {
+  } else if (!strstr(uri.c_str(), "://")) {
     return true;
   } else {
     return false;

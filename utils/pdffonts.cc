@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
           FontInfo *font = (FontInfo *)fonts->get(i);
           if (font->getFile()) {
             printf("%-36s",
-                   font->getName() ? font->getName()->getCString() : "[none]");
+                   font->getName() ? font->getName()->c_str() : "[none]");
             const Ref fontRef = font->getRef();
             if (fontRef.gen >= 100000) {
               printf(" [none]");
@@ -183,8 +183,8 @@ int main(int argc, char *argv[]) {
               printf(" %6d %2d", fontRef.num, fontRef.gen);
             }
             printf(" %-36s %s\n",
-                   font->getSubstituteName() ? font->getSubstituteName()->getCString() : "[none]",
-                   font->getFile()->getCString());
+                   font->getSubstituteName() ? font->getSubstituteName()->c_str() : "[none]",
+                   font->getFile()->c_str());
           }
           delete font;
         }
@@ -198,9 +198,9 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < fonts->getLength(); ++i) {
           FontInfo *font = (FontInfo *)fonts->get(i);
           printf("%-36s %-17s %-16s %-3s %-3s %-3s",
-                 font->getName() ? font->getName()->getCString() : "[none]",
+                 font->getName() ? font->getName()->c_str() : "[none]",
                  fontTypeNames[font->getType()],
-                 font->getEncoding()->getCString(),
+                 font->getEncoding()->c_str(),
                  font->getEmbedded() ? "yes" : "no",
                  font->getSubset() ? "yes" : "no",
                  font->getToUnicode() ? "yes" : "no");

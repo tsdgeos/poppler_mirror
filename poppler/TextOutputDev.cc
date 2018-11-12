@@ -5223,7 +5223,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc,
     for (word = rawWords; word; word = word->next) {
       s = new GooString();
       dumpFragment(word->text, word->len, uMap, s);
-      (*outputFunc)(outputStream, s->getCString(), s->getLength());
+      (*outputFunc)(outputStream, s->c_str(), s->getLength());
       delete s;
       if (word->next &&
 	  fabs(word->next->base - word->base) <
@@ -5297,7 +5297,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc,
       // print the line
       s = new GooString();
       col += dumpFragment(frag->line->text + frag->start, frag->len, uMap, s);
-      (*outputFunc)(outputStream, s->getCString(), s->getLength());
+      (*outputFunc)(outputStream, s->c_str(), s->getLength());
       delete s;
 
       // print one or more returns if necessary
@@ -5336,7 +5336,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc,
 	  }
 	  s = new GooString();
 	  dumpFragment(line->text, n, uMap, s);
-	  (*outputFunc)(outputStream, s->getCString(), s->getLength());
+	  (*outputFunc)(outputStream, s->c_str(), s->getLength());
 	  delete s;
 	  // output a newline when a hyphen is not suppressed
 	  if (n == line->len) {

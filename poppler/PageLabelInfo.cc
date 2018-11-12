@@ -44,7 +44,7 @@ PageLabelInfo::Interval::Interval(Object *dict, int baseA) {
   obj = dict->dictLookup("P");
   if (obj.isString()) {
     const auto str = obj.getString();
-    prefix.assign(str->getCString(), str->getLength());
+    prefix.assign(str->c_str(), str->getLength());
   }
 
   obj = dict->dictLookup("St");
@@ -100,7 +100,7 @@ void PageLabelInfo::parse(Object *tree) {
 
 bool PageLabelInfo::labelToIndex(GooString *label, int *index) const
 {
-  const char *const str = label->getCString();
+  const char *const str = label->c_str();
   const std::size_t strLen = label->getLength();
   const bool strUnicode = label->hasUnicodeMarker();
   int number;

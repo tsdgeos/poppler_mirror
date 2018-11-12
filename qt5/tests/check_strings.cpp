@@ -203,7 +203,7 @@ void TestStrings::check_QStringToUnicodeGooString()
     GooString *goo = Poppler::QStringToUnicodeGooString(string);
     QVERIFY(goo->hasUnicodeMarker());
     QCOMPARE(goo->getLength(), string.length() * 2 + 2);
-    QCOMPARE(result, QByteArray::fromRawData(goo->getCString() + 2, goo->getLength() - 2));
+    QCOMPARE(result, QByteArray::fromRawData(goo->c_str() + 2, goo->getLength() - 2));
 
     delete goo;
 }
@@ -229,7 +229,7 @@ void TestStrings::check_QStringToGooString()
     QFETCH(GooString*, result);
 
     GooString *goo = Poppler::QStringToGooString(string);
-    QCOMPARE(goo->getCString(), result->getCString());
+    QCOMPARE(goo->c_str(), result->c_str());
 
     delete goo;
 }

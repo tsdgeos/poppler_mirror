@@ -77,7 +77,7 @@ SplashFontSrc::~SplashFontSrc() {
   if (deleteSrc) {
     if (isFile) {
       if (fileName)
-	unlink(fileName->getCString());
+	unlink(fileName->c_str());
     } else {
       if (buf)
 	gfree(buf);

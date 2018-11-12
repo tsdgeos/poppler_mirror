@@ -67,7 +67,7 @@ static void parseSource(GooString *source)
     }
     option++;
   }
-  fprintf(stderr, "Warning: Unknown paper source \"%s\"\n", source->getCString());
+  fprintf(stderr, "Warning: Unknown paper source \"%s\"\n", source->c_str());
 }
 
 static const Win32Option win32DuplexMode[] =
@@ -89,7 +89,7 @@ static void parseDuplex(GooString *mode)
     }
     option++;
   }
-  fprintf(stderr, "Warning: Unknown duplex mode \"%s\"\n", mode->getCString());
+  fprintf(stderr, "Warning: Unknown duplex mode \"%s\"\n", mode->c_str());
 }
 
 static void fillCommonPrinterOptions(bool duplex)
@@ -121,7 +121,7 @@ static void fillPagePrinterOptions(double w, double h)
 static void fillPrinterOptions(bool duplex, GooString *printOpt)
 {
   //printOpt format is: <opt1>=<val1>,<opt2>=<val2>,...
-  const char *nextOpt = printOpt->getCString();
+  const char *nextOpt = printOpt->c_str();
   while (nextOpt && *nextOpt)
   {
     const char *comma = strchr(nextOpt, ',');
@@ -134,12 +134,12 @@ static void fillPrinterOptions(bool duplex, GooString *printOpt)
       nextOpt = NULL;
     }
     //here opt is "<optN>=<valN> "
-    const char *equal = strchr(opt.getCString(), '=');
+    const char *equal = strchr(opt.c_str(), '=');
     if (!equal) {
-      fprintf(stderr, "Warning: unknown printer option \"%s\"\n", opt.getCString());
+      fprintf(stderr, "Warning: unknown printer option \"%s\"\n", opt.c_str());
       continue;
     }
-    int iequal = equal - opt.getCString();
+    int iequal = equal - opt.c_str();
     GooString value(&opt, iequal + 1, opt.getLength() - iequal - 1);
     opt.del(iequal, opt.getLength() - iequal);
     //here opt is "<optN>" and value is "<valN>"
@@ -152,7 +152,7 @@ static void fillPrinterOptions(bool duplex, GooString *printOpt)
       else
 	parseDuplex( &value);
     } else {
-      fprintf(stderr, "Warning: unknown printer option \"%s\"\n", opt.getCString());
+      fprintf(stderr, "Warning: unknown printer option \"%s\"\n", opt.c_str());
     }
   }
 }
@@ -366,13 +366,13 @@ static UINT_PTR CALLBACK printDialogHookProc(HWND hdlg, UINT uiMsg, WPARAM wPara
 void win32SetupPrinter(GooString *printer, GooString *printOpt,
 		       bool duplex, bool setupdlg)
 {
-  if (printer->getCString()[0] == 0) {
+  if (printer->c_str()[0] == 0) {
     DWORD size = 0;
     GetDefaultPrinterA(nullptr, &size);
     printerName = (char*)gmalloc(size);
     GetDefaultPrinterA(printerName, &size);
   } else {
-    printerName = copyString(printer->getCString(), printer->getLength());
+    printerName = copyString(printer->c_str(), printer->getLength());
   }
 
   //Query the size of the DEVMODE struct
@@ -487,9 +487,9 @@ cairo_surface_t *win32BeginDocument(GooString *inputFileName, GooString *outputF
   if (inputFileName->cmp("fd://0") == 0)
     docinfo.lpszDocName = "pdftocairo <stdin>";
   else
-    docinfo.lpszDocName = inputFileName->getCString();
+    docinfo.lpszDocName = inputFileName->c_str();
   if (outputFileName)
-    docinfo.lpszOutput = outputFileName->getCString();
+    docinfo.lpszOutput = outputFileName->c_str();
   if (StartDocA(hdc, &docinfo) <=0) {
     fprintf(stderr, "Error: StartDoc failed\n");
     exit(99);

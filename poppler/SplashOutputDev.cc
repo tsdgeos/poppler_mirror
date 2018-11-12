@@ -2049,7 +2049,7 @@ reload:
 
     if (!(fontLoc = gfxFont->locateFont((xref) ? xref : doc->getXRef(), nullptr))) {
       error(errSyntaxError, -1, "Couldn't find a font for '{0:s}'",
-	    gfxFont->getName() ? gfxFont->getName()->getCString()
+	    gfxFont->getName() ? gfxFont->getName()->c_str()
 	                       : "(unnamed)");
       goto err2;
     }
@@ -2082,7 +2082,7 @@ reload:
 			   fontsrc,
 			   (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
-	      gfxFont->getName() ? gfxFont->getName()->getCString()
+	      gfxFont->getName() ? gfxFont->getName()->c_str()
 	                         : "(unnamed)");
 	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
@@ -2094,7 +2094,7 @@ reload:
 			   fontsrc,
 			   (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
-	      gfxFont->getName() ? gfxFont->getName()->getCString()
+	      gfxFont->getName() ? gfxFont->getName()->c_str()
 	                         : "(unnamed)");
 	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
@@ -2106,7 +2106,7 @@ reload:
 			   fontsrc,
 			   (const char **)((Gfx8BitFont *)gfxFont)->getEncoding()))) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
-	      gfxFont->getName() ? gfxFont->getName()->getCString()
+	      gfxFont->getName() ? gfxFont->getName()->c_str()
 	                         : "(unnamed)");
 	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
@@ -2115,7 +2115,7 @@ reload:
     case fontTrueType:
     case fontTrueTypeOT:
 	if (fileName)
-	 ff = FoFiTrueType::load(fileName->getCString());
+	 ff = FoFiTrueType::load(fileName->c_str());
 	else
 	ff = FoFiTrueType::make(tmpBuf, tmpBufLen);
       if (ff) {
@@ -2142,7 +2142,7 @@ reload:
 			   fontsrc,
 			   codeToGID, n))) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
-	      gfxFont->getName() ? gfxFont->getName()->getCString()
+	      gfxFont->getName() ? gfxFont->getName()->c_str()
 	                         : "(unnamed)");
 	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
@@ -2154,7 +2154,7 @@ reload:
 			   id,
 			   fontsrc))) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
-	      gfxFont->getName() ? gfxFont->getName()->getCString()
+	      gfxFont->getName() ? gfxFont->getName()->c_str()
 	                         : "(unnamed)");
 	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
@@ -2175,7 +2175,7 @@ reload:
 			   fontsrc,
                            codeToGID, n))) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
-	      gfxFont->getName() ? gfxFont->getName()->getCString()
+	      gfxFont->getName() ? gfxFont->getName()->c_str()
 	                         : "(unnamed)");
 	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
@@ -2194,13 +2194,13 @@ reload:
 	}
       } else {
 	if (fileName)
-	  ff = FoFiTrueType::load(fileName->getCString());
+	  ff = FoFiTrueType::load(fileName->c_str());
 	else
 	  ff = FoFiTrueType::make(tmpBuf, tmpBufLen);
 	if (! ff)
 	{
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
-	      gfxFont->getName() ? gfxFont->getName()->getCString()
+	      gfxFont->getName() ? gfxFont->getName()->c_str()
 	                         : "(unnamed)");
 	  goto err2;
 	}
@@ -2212,7 +2212,7 @@ reload:
 			   fontsrc,
 			   codeToGID, n, faceIndex))) {
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
-	      gfxFont->getName() ? gfxFont->getName()->getCString()
+	      gfxFont->getName() ? gfxFont->getName()->c_str()
 	                         : "(unnamed)");
 	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
