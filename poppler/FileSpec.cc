@@ -29,7 +29,7 @@
 
 #include "FileSpec.h"
 
-EmbFile::EmbFile(const Object *efStream)
+EmbFile::EmbFile(Object &&efStream)
 {
   m_size = -1;
   m_createDate = nullptr;
@@ -37,11 +37,11 @@ EmbFile::EmbFile(const Object *efStream)
   m_checksum = nullptr;
   m_mimetype = nullptr;
 
-  m_objStr = efStream->copy();
+  m_objStr = std::move(efStream);
 
-  if (efStream->isStream()) {
+  if (m_objStr.isStream()) {
     // dataDict corresponds to Table 3.41 in the PDF1.6 spec.
-    Dict *dataDict = efStream->streamGetDict();
+    Dict *dataDict = m_objStr.streamGetDict();
 
     // subtype is normally the mimetype
     Object subtypeName = dataDict->lookup("Subtype");
@@ -156,10 +156,8 @@ EmbFile *FileSpec::getEmbeddedFile()
   if (embFile)
     return embFile;
 
-  Object obj1;
   XRef *xref = fileSpec.getDict()->getXRef();
-  obj1 = fileStream.fetch(xref);
-  embFile = new EmbFile(&obj1);
+  embFile = new EmbFile(fileStream.fetch(xref));
 
   return embFile;
 }
