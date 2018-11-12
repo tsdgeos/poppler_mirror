@@ -2971,16 +2971,20 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict) {
     Object obj2;
 
     obj2 = obj1.arrayGet(0);
-    if (obj2.isString())
-      startStyle = parseAnnotLineEndingStyle(obj2.getString());
-    else
+    if (obj2.isName()) {
+      GooString leName(obj2.getName());
+      startStyle = parseAnnotLineEndingStyle(&leName);
+    } else {
       startStyle = annotLineEndingNone;
+    }
 
     obj2 = obj1.arrayGet(1);
-    if (obj2.isString())
-      endStyle = parseAnnotLineEndingStyle(obj2.getString());
-    else
+    if (obj2.isName()) {
+      GooString leName(obj2.getName());
+      endStyle = parseAnnotLineEndingStyle(&leName);
+    } else {
       endStyle = annotLineEndingNone;
+    }
 
   } else {
     startStyle = endStyle = annotLineEndingNone;
