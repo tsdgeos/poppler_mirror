@@ -786,7 +786,6 @@ public:
   ~AnnotPopup();
 
   Object *getParentNF() { return &parent; }
-  void setParent(Object *parentA);
   void setParent(Annot *parentA);
   bool getOpen() const { return open; }
   void setOpen(bool openA);

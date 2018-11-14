@@ -1879,10 +1879,6 @@ void AnnotPopup::initialize(PDFDoc *docA, Dict *dict) {
   }
 }
 
-void AnnotPopup::setParent(Object *parentA) {
-  update ("Parent", parentA->copy());
-}
-
 void AnnotPopup::setParent(Annot *parentA) {
   const Ref parentRef = parentA->getRef();
   update ("Parent", Object(parentRef.num, parentRef.gen));
