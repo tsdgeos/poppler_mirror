@@ -608,11 +608,11 @@ void FormWidgetSignature::updateWidgetAppearance()
 // FormField
 //========================================================================
 
-FormField::FormField(PDFDoc *docA, Object *aobj, const Ref aref, FormField *parentA, std::set<int> *usedParents, FormFieldType ty)
+FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *parentA, std::set<int> *usedParents, FormFieldType ty)
 {
   doc = docA;
   xref = doc->getXRef();
-  obj = aobj->copy();
+  obj = std::move(aobj);
   Dict* dict = obj.getDict();
   ref.num = ref.gen = 0;
   type = ty;
@@ -664,7 +664,7 @@ FormField::FormField(PDFDoc *docA, Object *aobj, const Ref aref, FormField *pare
 
           numChildren++;
           children = (FormField**)greallocn(children, numChildren, sizeof(FormField*));
-          children[numChildren - 1] = Form::createFieldFromDict(&childObj, doc, ref, this, &usedParentsAux);
+          children[numChildren - 1] = Form::createFieldFromDict(std::move(childObj), doc, ref, this, &usedParentsAux);
         } else {
 	  obj2 = childObj.dictLookup("Subtype");
 	  if (obj2.isName("Widget")) {
@@ -966,8 +966,8 @@ void FormField::setReadOnly (bool value)
 //------------------------------------------------------------------------
 // FormFieldButton
 //------------------------------------------------------------------------
-FormFieldButton::FormFieldButton(PDFDoc *docA, Object *aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, aobj, ref, parent, usedParents, formButton)
+FormFieldButton::FormFieldButton(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(docA, std::move(aobj), ref, parent, usedParents, formButton)
 {
   Dict* dict = obj.getDict();
   active_child = -1;
@@ -1133,8 +1133,8 @@ FormFieldButton::~FormFieldButton()
 //------------------------------------------------------------------------
 // FormFieldText
 //------------------------------------------------------------------------
-FormFieldText::FormFieldText(PDFDoc *docA, Object *aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, aobj, ref, parent, usedParents, formText)
+FormFieldText::FormFieldText(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(docA, std::move(aobj), ref, parent, usedParents, formText)
 {
   Dict* dict = obj.getDict();
   Object obj1;
@@ -1296,8 +1296,8 @@ int FormFieldText::parseDA(GooList* daToks)
 //------------------------------------------------------------------------
 // FormFieldChoice
 //------------------------------------------------------------------------
-FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object *aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, aobj, ref, parent, usedParents, formChoice)
+FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(docA, std::move(aobj), ref, parent, usedParents, formChoice)
 {
   numChoices = 0;
   choices = nullptr;
@@ -1588,8 +1588,8 @@ const GooString *FormFieldChoice::getSelectedChoice() const {
 //------------------------------------------------------------------------
 // FormFieldSignature
 //------------------------------------------------------------------------
-FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object *dict, const Ref ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, dict, ref, parent, usedParents, formSignature),
+FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents)
+  : FormField(docA, std::move(dict), ref, parent, usedParents, formSignature),
     signature_type(adbe_pkcs7_detached),
     signature(nullptr), signature_info(nullptr)
 {
@@ -1835,7 +1835,7 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
       }
 
       std::set<int> usedParents;
-      rootFields[numFields++] = createFieldFromDict (&obj2, doc, oref.getRef(), nullptr, &usedParents);
+      rootFields[numFields++] = createFieldFromDict (std::move(obj2), doc, oref.getRef(), nullptr, &usedParents);
 
     }
   } else {
@@ -1898,21 +1898,21 @@ Object Form::fieldLookup(Dict *field, const char *key) {
   return ::fieldLookup(field, key, &usedParents);
 }
 
-FormField *Form::createFieldFromDict (Object* obj, PDFDoc *docA, const Ref pref, FormField *parent, std::set<int> *usedParents)
+FormField *Form::createFieldFromDict (Object &&obj, PDFDoc *docA, const Ref pref, FormField *parent, std::set<int> *usedParents)
 {
     FormField *field;
 
-    Object obj2 = Form::fieldLookup(obj->getDict (), "FT");
+    const Object obj2 = Form::fieldLookup(obj.getDict (), "FT");
     if (obj2.isName("Btn")) {
-      field = new FormFieldButton(docA, obj, pref, parent, usedParents);
+      field = new FormFieldButton(docA, std::move(obj), pref, parent, usedParents);
     } else if (obj2.isName("Tx")) {
-      field = new FormFieldText(docA, obj, pref, parent, usedParents);
+      field = new FormFieldText(docA, std::move(obj), pref, parent, usedParents);
     } else if (obj2.isName("Ch")) {
-      field = new FormFieldChoice(docA, obj, pref, parent, usedParents);
+      field = new FormFieldChoice(docA, std::move(obj), pref, parent, usedParents);
     } else if (obj2.isName("Sig")) {
-      field = new FormFieldSignature(docA, obj, pref, parent, usedParents);
+      field = new FormFieldSignature(docA, std::move(obj), pref, parent, usedParents);
     } else { //we don't have an FT entry => non-terminal field
-      field = new FormField(docA, obj, pref, parent, usedParents);
+      field = new FormField(docA, std::move(obj), pref, parent, usedParents);
     }
 
     return field;
