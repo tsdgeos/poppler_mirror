@@ -477,7 +477,7 @@ find_annot_movie_for_action (PopplerDocument *document,
   if (annotObj.isDict ()) {
     Object tmp;
 
-    annot = new AnnotMovie (document->doc, &annotObj, &tmp);
+    annot = new AnnotMovie (document->doc, std::move(annotObj), &tmp);
     if (!annot->isOk ()) {
       delete annot;
       annot = nullptr;
