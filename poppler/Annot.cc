@@ -905,13 +905,12 @@ Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char
     break;
   }
 
-  Object res;
   if (apData.isDict() && state)
-    res = apData.dictLookupNF(state);
+    return apData.dictLookupNF(state);
   else if (apData.isRef())
-    res = apData.copy();
+    return apData;
 
-  return res;
+  return Object();
 }
 
 std::unique_ptr<GooString> AnnotAppearance::getStateKey(int i) {
