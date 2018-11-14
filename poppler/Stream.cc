@@ -213,7 +213,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
   int encoding;
   bool endOfLine, byteAlign, endOfBlock, black, damagedRowsBeforeError;
   int columns, rows;
-  Object globals, obj;
+  Object obj;
 
   if (!strcmp(name, "ASCIIHexDecode") || !strcmp(name, "AHx")) {
     str = new ASCIIHexStream(str);
@@ -325,12 +325,13 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
     }
     str = new FlateStream(str, pred, columns, colors, bits);
   } else if (!strcmp(name, "JBIG2Decode")) {
+    Object globals;
     if (params->isDict()) {
       XRef *xref = params->getDict()->getXRef();
       obj = params->dictLookupNF("JBIG2Globals");
       globals = obj.fetch(xref, recursion);
     }
-    str = new JBIG2Stream(str, &globals, &obj);
+    str = new JBIG2Stream(str, std::move(globals), &obj);
   } else if (!strcmp(name, "JPXDecode")) {
 #ifdef HAVE_JPX_DECODER
     str = new JPXStream(str);

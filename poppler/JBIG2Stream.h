@@ -43,7 +43,7 @@ class JBIG2MMRDecoder;
 class JBIG2Stream: public FilterStream {
 public:
 
-  JBIG2Stream(Stream *strA, Object *globalsStreamA, Object *globalsStreamRefA);
+  JBIG2Stream(Stream *strA, Object &&globalsStreamA, Object *globalsStreamRefA);
   ~JBIG2Stream();
   StreamKind getKind() override { return strJBIG2; }
   void reset() override;
