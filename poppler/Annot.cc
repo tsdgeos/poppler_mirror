@@ -5853,19 +5853,17 @@ AnnotFileAttachment::AnnotFileAttachment(PDFDoc *docA, Object *dictObject, Objec
 AnnotFileAttachment::~AnnotFileAttachment() = default;
 
 void AnnotFileAttachment::initialize(PDFDoc *docA, Dict* dict) {
-  Object obj1;
-
-  obj1 = dict->lookup("FS");
-  if (obj1.isDict() || obj1.isString()) {
-    file = obj1.copy();
+  Object objFS = dict->lookup("FS");
+  if (objFS.isDict() || objFS.isString()) {
+    file = std::move(objFS);
   } else {
     error(errSyntaxError, -1, "Bad Annot File Attachment");
     ok = false;
   }
 
-  obj1 = dict->lookup("Name");
-  if (obj1.isName()) {
-    name = std::make_unique<GooString>(obj1.getName());
+  Object objName = dict->lookup("Name");
+  if (objName.isName()) {
+    name = std::make_unique<GooString>(objName.getName());
   } else {
     name = std::make_unique<GooString>("PushPin");
   }
