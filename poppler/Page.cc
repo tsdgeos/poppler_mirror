@@ -170,9 +170,9 @@ PageAttrs::PageAttrs(PageAttrs *attrs, Dict *dict) {
   separationInfo = dict->lookup("SeparationInfo");
 
   // resource dictionary
-  obj1 = dict->lookup("Resources");
-  if (obj1.isDict()) {
-    resources = obj1.copy();
+  Object objResources = dict->lookup("Resources");
+  if (objResources.isDict()) {
+    resources = std::move(objResources);
   }
 }
 

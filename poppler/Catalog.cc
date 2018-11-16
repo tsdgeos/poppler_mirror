@@ -252,8 +252,7 @@ bool Catalog::cachePageTree(int page)
 
     if (pagesList->empty()) return false;
 
-    Object pagesDict = pagesList->back().copy();
-    Object kids = pagesDict.dictLookup("Kids");
+    Object kids = pagesList->back().dictLookup("Kids");
     if (!kids.isArray()) {
       error(errSyntaxError, -1, "Kids object (page {0:uld}) is wrong type ({1:s})",
 	    pages.size()+1, kids.getTypeName());
