@@ -293,7 +293,7 @@ bool Catalog::cachePageTree(int page)
     Object kid = kids.arrayGet(kidsIdx);
     if (kid.isDict("Page") || (kid.isDict() && !kid.getDict()->hasKey("Kids"))) {
       PageAttrs *attrs = new PageAttrs(attrsList->back(), kid.getDict());
-      auto p = std::make_unique<Page>(doc, pages.size()+1, &kid,
+      auto p = std::make_unique<Page>(doc, pages.size()+1, std::move(kid),
 				      kidRef.getRef(), attrs, form);
       if (!p->isOk()) {
 	error(errSyntaxError, -1, "Failed to create page (page {0:uld})", pages.size()+1);
@@ -739,7 +739,7 @@ int Catalog::getNumPages()
 	Dict *pageDict = pagesDict.getDict();
 	if (pageRootRef.isRef()) {
 	  const Ref pageRef = pageRootRef.getRef();
-	  auto p = std::make_unique<Page>(doc, 1, &pagesDict, pageRef, new PageAttrs(nullptr, pageDict), form);
+	  auto p = std::make_unique<Page>(doc, 1, std::move(pagesDict), pageRef, new PageAttrs(nullptr, pageDict), form);
 	  if (p->isOk()) {
 	    pages.emplace_back(std::move(p), pageRef);
 
