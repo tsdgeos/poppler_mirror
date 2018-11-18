@@ -114,10 +114,19 @@ GooString *SignatureHandler::getDefaultFirefoxCertDB_Linux()
 void SignatureHandler::init_nss() 
 {
   GooString *certDBPath = getDefaultFirefoxCertDB_Linux();
+  bool initSuccess = false;
   if (certDBPath == nullptr) {
-    NSS_Init("sql:/etc/pki/nssdb");
+    initSuccess = (NSS_Init("sql:/etc/pki/nssdb") == SECSuccess);
   } else {
-    NSS_Init(certDBPath->c_str());
+    initSuccess = (NSS_Init(certDBPath->c_str()) == SECSuccess);
+  }
+  if (!initSuccess) {
+    GooString homeNssDb(getenv("HOME"));
+    homeNssDb.append("/.pki/nssdb");
+    initSuccess = (NSS_Init(homeNssDb.c_str()) == SECSuccess);
+    if (!initSuccess) {
+      NSS_NoDB_Init(nullptr);
+    }
   }
   //Make sure NSS root certificates module is loaded
   SECMOD_AddNewModule("Root Certs", "libnssckbi.so", 0, 0);

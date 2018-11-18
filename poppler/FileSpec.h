@@ -20,7 +20,7 @@
 
 class EmbFile {
 public:
-  EmbFile(const Object *efStream);
+  EmbFile(Object &&efStream);
   ~EmbFile();
 
   EmbFile(const EmbFile &) = delete;

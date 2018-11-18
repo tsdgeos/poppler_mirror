@@ -170,9 +170,9 @@ PageAttrs::PageAttrs(PageAttrs *attrs, Dict *dict) {
   separationInfo = dict->lookup("SeparationInfo");
 
   // resource dictionary
-  obj1 = dict->lookup("Resources");
-  if (obj1.isDict()) {
-    resources = obj1.copy();
+  Object objResources = dict->lookup("Resources");
+  if (objResources.isDict()) {
+    resources = std::move(objResources);
   }
 }
 
@@ -242,7 +242,7 @@ bool PageAttrs::readBox(Dict *dict, const char *key, PDFRectangle *box) {
 
 #define pageLocker()   std::unique_lock<std::recursive_mutex> locker(mutex)
 
-Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form) {
+Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *attrsA, Form *form) {
   ok = true;
   doc = docA;
   xref = doc->getXRef();
@@ -250,7 +250,7 @@ Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *at
   duration = -1;
   annots = nullptr;
 
-  pageObj = pageDict->copy();
+  pageObj = std::move(pageDict);
   pageRef = pageRefA;
 
   // get attributes
@@ -258,7 +258,7 @@ Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *at
   attrs->clipBoxes();
 
   // transtion
-  trans = pageDict->dictLookupNF("Trans");
+  trans = pageObj.dictLookupNF("Trans");
   if (!(trans.isRef() || trans.isDict() || trans.isNull())) {
     error(errSyntaxError, -1, "Page transition object (page {0:d}) is wrong type ({1:s})",
 	  num, trans.getTypeName());
@@ -266,7 +266,7 @@ Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *at
   }
 
   // duration
-  Object tmp = pageDict->dictLookupNF("Dur");
+  Object tmp = pageObj.dictLookupNF("Dur");
   if (!(tmp.isNum() || tmp.isNull())) {
     error(errSyntaxError, -1, "Page duration object (page {0:d}) is wrong type ({1:s})",
 	  num, tmp.getTypeName());
@@ -275,7 +275,7 @@ Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *at
   }
 
   // annotations
-  annotsObj = pageDict->dictLookupNF("Annots");
+  annotsObj = pageObj.dictLookupNF("Annots");
   if (!(annotsObj.isRef() || annotsObj.isArray() || annotsObj.isNull())) {
     error(errSyntaxError, -1, "Page annotations object (page {0:d}) is wrong type ({1:s})",
 	  num, annotsObj.getTypeName());
@@ -283,7 +283,7 @@ Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *at
   }
 
   // contents
-  contents = pageDict->dictLookupNF("Contents");
+  contents = pageObj.dictLookupNF("Contents");
   if (!(contents.isRef() || contents.isArray() ||
 	contents.isNull())) {
     error(errSyntaxError, -1, "Page contents object (page {0:d}) is wrong type ({1:s})",
@@ -292,7 +292,7 @@ Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *at
   }
 
   // thumb
-  thumb = pageDict->dictLookupNF("Thumb");
+  thumb = pageObj.dictLookupNF("Thumb");
   if (!(thumb.isStream() || thumb.isNull() || thumb.isRef())) {
       error(errSyntaxError, -1, "Page thumb object (page {0:d}) is wrong type ({1:s})",
             num, thumb.getTypeName());
@@ -300,7 +300,7 @@ Page::Page(PDFDoc *docA, int numA, Object *pageDict, Ref pageRefA, PageAttrs *at
   }
 
   // actions
-  actions = pageDict->dictLookupNF("AA");
+  actions = pageObj.dictLookupNF("AA");
   if (!(actions.isDict() || actions.isNull())) {
       error(errSyntaxError, -1, "Page additional action object (page {0:d}) is wrong type ({1:s})",
             num, actions.getTypeName());

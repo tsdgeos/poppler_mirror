@@ -13,6 +13,7 @@ private slots:
     void testInsertData();
     void testInsert();
     void testFormat();
+    void testFromNullptr();
 };
 
 void TestGooString::testInsertData_data()
@@ -122,6 +123,42 @@ void TestGooString::testFormat()
         const QScopedPointer<GooString> goo(GooString::format("SomeText {0:d} }} }}}}", 3));
         QCOMPARE(goo->c_str(), "SomeText 3 } }}");
     }
+}
+
+void TestGooString::testFromNullptr()
+{
+  {
+    GooString str{static_cast<const GooString*>(nullptr)};
+    QCOMPARE(str.getLength(), 0);
+  }
+
+  {
+    GooString str;
+    str.Set(static_cast<const GooString*>(nullptr));
+    QCOMPARE(str.getLength(), 0);
+  }
+
+  {
+    GooString str{static_cast<const char*>(nullptr)};
+    QCOMPARE(str.getLength(), 0);
+  }
+
+  {
+    GooString str{static_cast<const char*>(nullptr), 0};
+    QCOMPARE(str.getLength(), 0);
+  }
+
+  {
+    GooString str;
+    str.Set(static_cast<const char*>(nullptr));
+    QCOMPARE(str.getLength(), 0);
+  }
+
+  {
+    GooString str;
+    str.Set(static_cast<const char*>(nullptr), 0);
+    QCOMPARE(str.getLength(), 0);
+  }
 }
 
 QTEST_GUILESS_MAIN(TestGooString)

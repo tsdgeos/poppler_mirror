@@ -60,7 +60,7 @@ public:
   GooString& operator=(const GooString &other) = delete;
 
   // Create a string from a C string.
-  explicit GooString(const char *sA) : std::string(sA) {}
+  explicit GooString(const char *sA) : std::string(sA ? sA : "") {}
 
   // Zero-cost conversion from and to std::string
   explicit GooString(const std::string& str) : std::string(str) {}
@@ -70,18 +70,18 @@ public:
 
   // Create a string from <lengthA> chars at <sA>.  This string
   // can contain null characters.
-  GooString(const char *sA, int lengthA) : std::string(sA, lengthA) {}
+  GooString(const char *sA, int lengthA) : std::string(sA ? sA : "", sA ? lengthA : 0) {}
 
   // Create a string from <lengthA> chars at <idx> in <str>.
   GooString(const GooString *str, int idx, int lengthA) : std::string(*str, idx, lengthA) {}
 
   // Set content of a string to <newStr>.
-  GooString* Set(const GooString *newStr) { assign(*newStr); return this; }
-  GooString* Set(const char *newStr) { assign(newStr); return this; }
-  GooString* Set(const char *newStr, int newLen) { assign(newStr, newLen); return this; }
+  GooString* Set(const GooString *newStr) { assign(newStr ? static_cast<const std::string&>(*newStr) : std::string{}); return this; }
+  GooString* Set(const char *newStr) { assign(newStr ? newStr : ""); return this; }
+  GooString* Set(const char *newStr, int newLen) { assign(newStr ? newStr : "", newStr ? newLen : 0); return this; }
 
   // Copy a string.
-  explicit GooString(const GooString *str) : std::string(*str) {}
+  explicit GooString(const GooString *str) : std::string(str ? static_cast<const std::string&>(*str) : std::string{}) {}
   GooString *copy() const { return new GooString(this); }
 
   // Concatenate two strings.

@@ -15,19 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+from __future__ import absolute_import, division, print_function
 
 import sys
 from Config import Config
 
 from threading import RLock
 
+
+_instance = None
+
+
 class Printer:
-
-    __single = None
-
     def __init__(self):
-        if Printer.__single is not None:
-            raise Printer.__single
+        global _instance
+        if _instance is not None:
+            raise RuntimeError('Printer must not be instantiated more than '
+                               'once. Use the get_printer() function instead.')
 
         self._verbose = Config().verbose
         self._stream = sys.stdout
@@ -37,7 +41,7 @@ class Printer:
 
         self._lock = RLock()
 
-        Printer.__single = self
+        _instance = self
 
     def _erase_current_line(self):
         if not self._current_line_len:
@@ -78,8 +82,8 @@ class Printer:
         with self._lock:
             if self._blocked > 0:
                 return
-            self.stderr.write(self._ensure_new_line(msg))
-            self.stderr.flush()
+            sys.stderr.write(self._ensure_new_line(msg))
+            sys.stderr.flush()
 
     def print_test_result(self, doc_path, backend_name, n_test, total_tests, msg):
         self.printout("[%d/%d] %s (%s): %s" % (n_test, total_tests, doc_path, backend_name, msg))
@@ -99,13 +103,8 @@ class Printer:
         with self._lock:
             self._blocked -= 1
 
+
 def get_printer():
-    try:
-        instance = Printer()
-    except Printer, i:
-        instance = i
-
-    return instance
-
-
-
+    if _instance is None:
+        Printer()
+    return _instance

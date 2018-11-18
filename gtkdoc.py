@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+from __future__ import absolute_import, division, print_function
 
 import errno
 import logging
@@ -22,6 +23,9 @@ import subprocess
 import sys
 
 PY2 = sys.version_info[0] == 2
+if PY2:
+    input = raw_input
+
 
 class GTKDoc(object):
 
@@ -180,7 +184,7 @@ class GTKDoc(object):
         question += ' [y/N] '
         answer = None
         while answer != 'y' and answer != 'n' and answer != '':
-            answer = raw_input(question).lower()
+            answer = input(question).lower()
         return answer == 'y'
 
     def _run_command(self, args, env=None, cwd=None, print_output=True, ignore_warnings=False):

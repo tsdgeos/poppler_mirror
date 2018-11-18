@@ -2099,7 +2099,7 @@ Page *PDFDoc::parsePage(int page)
   }
   Dict *pageDict = obj.getDict();
 
-  return new Page(this, page, &obj, pageRef,
+  return new Page(this, page, std::move(obj), pageRef,
                new PageAttrs(nullptr, pageDict), catalog->getForm());
 }
 

@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+from __future__ import absolute_import, division, print_function
 
 import argparse
 
@@ -84,10 +85,9 @@ def print_help():
             pass
 
     print("Commands are:")
-    commands = [(x.name, x.description) for x in _commands.values()]
-    commands.sort()
+    commands = sorted((x.name, x.description) for x in _commands.values())
     for name, description in commands:
         print("  %-15s %s" % (name, description))
 
-    print
+    print()
     print("For more information run 'poppler-regtest --help-command <command>'")

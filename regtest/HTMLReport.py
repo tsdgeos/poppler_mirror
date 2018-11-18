@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+from __future__ import absolute_import, division, print_function
 
 from backends import get_backend, get_all_backends
 from Config import Config
@@ -296,15 +297,11 @@ class HTMLReport:
 
             results[root] = TestResult(self._docsdir, self._refsdir, self._outdir, root, files, backends)
 
-        tests = results.keys()
-        tests.sort()
-
         failed_anchors = []
         failed = ""
         crashed = ""
         failed_to_run = ""
-        for test_name in tests:
-            test = results[test_name]
+        for test_name, test in sorted(results.items()):
             if test.is_failed():
                 failed_anchors.append(test.get_test())
                 failed += test.get_failed_html()
@@ -334,9 +331,8 @@ class HTMLReport:
         html += failed + crashed + failed_to_run + "</body></html>"
 
         report_index = os.path.join(self._htmldir, 'index.html')
-        f = open(report_index, 'wb')
-        f.write(html)
-        f.close()
+        with open(report_index, 'w') as f:
+            f.write(html)
 
         if launch_browser:
             subprocess.Popen(['xdg-open', report_index])

@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+from __future__ import absolute_import, division, print_function
 
 import os
 
@@ -66,6 +67,7 @@ def get_passwords(docsdir):
         return {}
 
     passwords = {}
-    execfile(passwords_file, passwords)
+    with open(passwords_file) as f:
+        exec(f.read(), passwords)
     return passwords['passwords']
 
