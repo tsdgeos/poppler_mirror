@@ -82,3 +82,26 @@ build_clazy:
     - mkdir -p build && cd build
     - CC=clang CXX=clazy CXXFLAGS="-Werror -Wno-cast-align -Wno-deprecated-declarations" cmake -G Ninja ..
     - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja
+
+build_android:
+  stage: build
+  image: apol/asdk:clang
+  before_script:
+    - git clone https://git.savannah.gnu.org/git/freetype/freetype2.git --single-branch -b VER-2-8-1
+    - pushd freetype2
+    - ANDROID_NDK_TOOLCHAIN_PREFIX=arm-linux-androideabi CFLAGS=-std=gnu99 /opt/helpers/build-standalone "./autogen.sh && ./configure --prefix=/opt/popplerandroid-deps --host=${ANDROID_NDK_TOOLCHAIN_PREFIX} && make -j`nproc` && make install"
+    - popd
+  script:
+    - mkdir -p build && cd build
+    - 'cmake -G Ninja .. -DCMAKE_SYSTEM_NAME=Android
+                         -DCMAKE_ANDROID_STL_TYPE=c++_shared
+                         -DCMAKE_ANDROID_API=24
+                         -DCMAKE_ANDROID_NDK_TOOLCHAIN_VERSION=clang
+                         -DCMAKE_INSTALL_PREFIX="/opt/popplerandroid-deps"
+                         -DCMAKE_PREFIX_PATH="$QT_ANDROID;/opt/popplerandroid-deps"
+                         -DCMAKE_BUILD_TYPE=debug
+                         -DCMAKE_POSITION_INDEPENDENT_CODE=OFF
+                         -DENABLE_DCTDECODER=unmaintained
+                         -DENABLE_LIBOPENJPEG=unmaintained
+                         -DENABLE_CPP=OFF'
+    - ninja && ninja install
