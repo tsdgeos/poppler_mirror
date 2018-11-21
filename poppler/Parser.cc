@@ -44,18 +44,21 @@
 // lots of nested arrays that made us consume all the stack
 #define recursionLimit 500
 
-Parser::Parser(XRef *xrefA, Lexer *lexerA, bool allowStreamsA) {
-  xref = xrefA;
-  lexer = lexerA;
-  inlineImg = 0;
+Parser::Parser(XRef *xrefA, Stream *streamA, bool allowStreamsA) : lexer{xrefA, streamA} {
   allowStreams = allowStreamsA;
-  buf1 = lexer->getObj();
-  buf2 = lexer->getObj();
+  buf1 = lexer.getObj();
+  buf2 = lexer.getObj();
+  inlineImg = 0;
 }
 
-Parser::~Parser() {
-  delete lexer;
+Parser::Parser(XRef *xrefA, Object *objectA, bool allowStreamsA) : lexer{xrefA, objectA} {
+  allowStreams = allowStreamsA;
+  buf1 = lexer.getObj();
+  buf2 = lexer.getObj();
+  inlineImg = 0;
 }
+
+Parser::~Parser() = default;
 
 Object Parser::getObj(int recursion)
 {
@@ -76,8 +79,8 @@ Object Parser::getObj(bool simpleOnly,
 
   // refill buffer after inline image data
   if (inlineImg == 2) {
-    buf1 = lexer->getObj();
-    buf2 = lexer->getObj();
+    buf1 = lexer.getObj();
+    buf2 = lexer.getObj();
     inlineImg = 0;
   }
 
@@ -88,7 +91,7 @@ Object Parser::getObj(bool simpleOnly,
   // array
   if (!simpleOnly && buf1.isCmd("[")) {
     shift();
-    obj = Object(new Array(xref));
+    obj = Object(new Array(lexer.getXRef()));
     while (!buf1.isCmd("]") && !buf1.isEOF() && recursion + 1 < recursionLimit) {
       Object obj2 = getObj(false, fileKey, encAlgorithm, keyLength, objNum, objGen, recursion + 1);
       obj.arrayAdd(std::move(obj2));
@@ -103,7 +106,7 @@ Object Parser::getObj(bool simpleOnly,
   // dictionary or stream
   } else if (!simpleOnly && buf1.isCmd("<<")) {
     shift(objNum);
-    obj = Object(new Dict(xref));
+    obj = Object(new Dict(lexer.getXRef()));
     while (!buf1.isCmd(">>") && !buf1.isEOF()) {
       if (!buf1.isName()) {
 	error(errSyntaxError, getPos(), "Dictionary key must be a name object");
@@ -203,7 +206,7 @@ Stream *Parser::makeStream(Object &&dict, unsigned char *fileKey,
   Goffset pos, endPos;
 
 
-  if (xref) {
+  if (XRef *xref = lexer.getXRef()) {
     XRefEntry *entry = xref->getEntry(objNum, false);
     if (entry) {
       if (!entry->getFlag(XRefEntry::Parsing) ||
@@ -218,8 +221,8 @@ Stream *Parser::makeStream(Object &&dict, unsigned char *fileKey,
   }
 
   // get stream start position
-  lexer->skipToNextLine();
-  if (!(str = lexer->getStream())) {
+  lexer.skipToNextLine();
+  if (!(str = lexer.getStream())) {
     return nullptr;
   }
   pos = str->getPos();
@@ -237,22 +240,22 @@ Stream *Parser::makeStream(Object &&dict, unsigned char *fileKey,
   }
 
   // check for length in damaged file
-  if (xref && xref->getStreamEnd(pos, &endPos)) {
+  if (lexer.hasXRef() && lexer.getXRef()->getStreamEnd(pos, &endPos)) {
     length = endPos - pos;
   }
 
   // in badly damaged PDF files, we can run off the end of the input
   // stream immediately after the "stream" token
-  if (!lexer->getStream()) {
+  if (!lexer.getStream()) {
     return nullptr;
   }
-  baseStr = lexer->getStream()->getBaseStream();
+  baseStr = lexer.getStream()->getBaseStream();
 
   // skip over stream data
-  if (Lexer::LOOK_VALUE_NOT_CACHED != lexer->lookCharLastValueCached) {
+  if (Lexer::LOOK_VALUE_NOT_CACHED != lexer.lookCharLastValueCached) {
       // take into account the fact that we've cached one value
       pos = pos - 1;
-      lexer->lookCharLastValueCached = Lexer::LOOK_VALUE_NOT_CACHED;
+      lexer.lookCharLastValueCached = Lexer::LOOK_VALUE_NOT_CACHED;
   }
   if (unlikely(length < 0)) {
       return nullptr;
@@ -260,7 +263,7 @@ Stream *Parser::makeStream(Object &&dict, unsigned char *fileKey,
   if (unlikely(pos > LLONG_MAX - length)) {
       return nullptr;
   }
-  lexer->setPos(pos + length);
+  lexer.setPos(pos + length);
 
   // refill token buffers and check for 'endstream'
   shift();  // kill '>>'
@@ -270,9 +273,9 @@ Stream *Parser::makeStream(Object &&dict, unsigned char *fileKey,
   } else {
     error(errSyntaxError, getPos(), "Missing 'endstream' or incorrect stream length");
     if (strict) return nullptr;
-    if (xref && lexer->getStream()) {
+    if (lexer.hasXRef() && lexer.getStream()) {
       // shift until we find the proper endstream or we change to another object or reach eof
-      length = lexer->getPos() - pos;
+      length = lexer.getPos() - pos;
       if (buf1.isCmd("endstream")) {
         dict.dictSet("Length", Object(length));
       }
@@ -297,7 +300,7 @@ Stream *Parser::makeStream(Object &&dict, unsigned char *fileKey,
   // get filters
   str = str->addFilters(str->getDict(), recursion);
 
-  if (xref) {
+  if (XRef *xref = lexer.getXRef()) {
     // Don't try to reuse the entry from the block at the start
     // of the function, xref can change in the middle because of
     // reconstruction
@@ -320,14 +323,14 @@ void Parser::shift(int objNum) {
       inlineImg = 0;
     }
   } else if (buf2.isCmd("ID")) {
-    lexer->skipChar();		// skip char after 'ID' command
+    lexer.skipChar();		// skip char after 'ID' command
     inlineImg = 1;
   }
   buf1 = std::move(buf2);
   if (inlineImg > 0)		// don't buffer inline image data
     buf2.setToNull();
   else {
-    buf2 = lexer->getObj(objNum);
+    buf2 = lexer.getObj(objNum);
   }
 }
 
@@ -341,15 +344,15 @@ void Parser::shift(const char *cmdA, int objNum) {
       inlineImg = 0;
     }
   } else if (buf2.isCmd("ID")) {
-    lexer->skipChar();		// skip char after 'ID' command
+    lexer.skipChar();		// skip char after 'ID' command
     inlineImg = 1;
   }
   buf1 = std::move(buf2);
   if (inlineImg > 0) {
     buf2.setToNull();
   } else if (buf1.isCmd(cmdA)) {
-    buf2 = lexer->getObj(objNum);
+    buf2 = lexer.getObj(objNum);
   } else {
-    buf2 = lexer->getObj(cmdA, objNum);
+    buf2 = lexer.getObj(cmdA, objNum);
   }
 }

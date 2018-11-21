@@ -36,7 +36,8 @@ class Parser {
 public:
 
   // Constructor.
-  Parser(XRef *xrefA, Lexer *lexerA, bool allowStreamsA);
+  Parser(XRef *xrefA, Stream *streamA, bool allowStreamsA);
+  Parser(XRef *xrefA, Object *objectA, bool allowStreamsA);
 
   // Destructor.
   ~Parser();
@@ -57,15 +58,14 @@ public:
   template<typename T> Object getObj(T) = delete;
 
   // Get stream.
-  Stream *getStream() { return lexer->getStream(); }
+  Stream *getStream() { return lexer.getStream(); }
 
   // Get current position in file.
-  Goffset getPos() { return lexer->getPos(); }
+  Goffset getPos() { return lexer.getPos(); }
 
 private:
 
-  XRef *xref;			// the xref table for this PDF file
-  Lexer *lexer;			// input stream
+  Lexer lexer;			// input stream
   bool allowStreams;		// parse stream objects?
   Object buf1, buf2;		// next two tokens
   int inlineImg;		// set when inline image data is encountered

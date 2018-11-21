@@ -709,7 +709,7 @@ void Gfx::display(Object *obj, bool topLevel) {
     error(errSyntaxError, -1, "Weird page contents");
     return;
   }
-  parser = new Parser(xref, new Lexer(xref, obj), false);
+  parser = new Parser(xref, obj, false);
   go(topLevel);
   delete parser;
   parser = nullptr;

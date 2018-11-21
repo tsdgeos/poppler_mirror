@@ -447,8 +447,7 @@ void GlobalParams::setupBaseFonts(char * dir)
     if (file != nullptr) {
       Parser *parser;
       parser = new Parser(nullptr,
-	      new Lexer(nullptr,
-	      new FileStream(file, 0, false, file->size(), Object(objNull))),
+              new FileStream(file, 0, false, file->size(), Object(objNull)),
 	      true);
       Object obj1 = parser->getObj();
       while (!obj1.isEOF()) {

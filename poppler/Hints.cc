@@ -202,7 +202,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
 
   MemStream *memStream = new MemStream (&buf[0], 0, bufLength, Object(objNull));
 
-  parser = new Parser(xref, new Lexer(xref, memStream), true);
+  parser = new Parser(xref, memStream, true);
 
   int num, gen;
   Object obj;

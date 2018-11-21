@@ -91,6 +91,9 @@ public:
   static const int LOOK_VALUE_NOT_CACHED = -3;
   int lookCharLastValueCached;
 
+  XRef *getXRef() const { return xref; }
+  bool hasXRef() const { return xref != nullptr; }
+
 private:
 
   int getChar(bool comesFromLook = false);
