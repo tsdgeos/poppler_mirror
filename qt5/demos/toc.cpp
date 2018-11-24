@@ -23,29 +23,28 @@
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QTreeWidget>
 
-static void fillToc(const QDomNode &parent, QTreeWidget *tree, QTreeWidgetItem *parentItem)
+static void fillToc(const QVector<Poppler::OutlineItem> &items, QTreeWidget *tree, QTreeWidgetItem *parentItem)
 {
     QTreeWidgetItem *newitem = nullptr;
-    for (QDomNode node = parent.firstChild(); !node.isNull(); node = node.nextSibling()) {
-        QDomElement e = node.toElement();
+    for (const auto &item : items) {
+        if (item.isNull()) {
+            continue;
+        }
 
         if (!parentItem) {
             newitem = new QTreeWidgetItem(tree, newitem);
         } else {
             newitem = new QTreeWidgetItem(parentItem, newitem);
         }
-        newitem->setText(0, e.tagName());
+        newitem->setText(0, item.name());
 
-        bool isOpen = false;
-        if (e.hasAttribute(QStringLiteral("Open"))) {
-            isOpen = QVariant(e.attribute(QStringLiteral("Open"))).toBool();
-        }
-        if (isOpen) {
+        if (item.isOpen()) {
             tree->expandItem(newitem);
         }
 
-        if (e.hasChildNodes()) {
-            fillToc(node, tree, newitem);
+        const auto children = item.children();
+        if (!children.isEmpty()) {
+            fillToc(children, tree, newitem);
         }
     }
 }
@@ -68,9 +67,9 @@ TocDock::~TocDock()
 
 void TocDock::fillInfo()
 {
-    const QDomDocument *toc = document()->toc();
-    if (toc) {
-        fillToc(*toc, m_tree, nullptr);
+    const auto outline = document()->outline();
+    if (!outline.isEmpty()) {
+        fillToc(outline, m_tree, nullptr);
     } else {
         QTreeWidgetItem *item = new QTreeWidgetItem();
         item->setText(0, tr("No TOC"));
