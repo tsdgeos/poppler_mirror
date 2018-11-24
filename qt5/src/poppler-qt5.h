@@ -980,9 +980,19 @@ delete it;
 	PageData *m_page;
     };
 
+    /**
+       \brief Item in the outline of a PDF document
+
+       Represents an item in the outline of PDF document, i.e. a name, an internal or external link and a set of child items.
+
+       \since 0.72
+    **/
     class POPPLER_QT5_EXPORT OutlineItem {
       friend class Document;
     public:
+      /**
+	 Constructs a null item, i.e. one that does not represent a valid item in the outline of some PDF document.
+      **/
       OutlineItem();
       ~OutlineItem();
 
@@ -992,18 +1002,47 @@ delete it;
       OutlineItem(OutlineItem &&other);
       OutlineItem &operator=(OutlineItem &&other);
 
+      /**
+	 Indicates whether an item is null, i.e. whether it does not represent a valid item in the outline of some PDF document.
+      **/
       bool isNull() const;
 
+      /**
+	 The name of the item which should be displayed to the user.
+      **/
       QString name() const;
 
+      /**
+	 Indicates whether the item should initially be display in an expanded or collapsed state.
+      **/
       bool isOpen() const;
 
+      /**
+	 The destination referred to by this item.
+
+	 \returns a shared pointer to an immutable link destination
+      **/
       QSharedPointer<const LinkDestination> destination() const;
 
+      /**
+	 The external file name of the document to which the \see destination refers
+
+	 \returns a string with the external file name or an empty string if there is none
+       */
       QString externalFileName() const;
 
+      /**
+	 The URI to which the item links
+
+	 \returns a string with the URI which this item links or an empty string if there is none
+      **/
       QString uri() const;
 
+      /**
+	 Gets the child items of this item
+
+	 \returns a vector outline items, empty if there are none
+      **/
       QVector<OutlineItem> children() const;
 
     private:
@@ -1605,6 +1644,13 @@ QString subject = m_doc->info("Subject");
 	*/
 	QDomDocument *toc() const;
 
+	/**
+	   Gets the outline of the document
+
+	   \returns a vector of outline items, empty if there are none
+
+	   \since 0.72
+	**/
 	QVector<OutlineItem> outline() const;
 	
 	/**
