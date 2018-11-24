@@ -46,6 +46,8 @@
 #include <time.h>
 #include "parseargs.h"
 #include "goo/GooString.h"
+#include "goo/gbase64.h"
+#include "goo/gbasename.h"
 #include "goo/gmem.h"
 #include "Object.h"
 #include "Stream.h"
@@ -68,6 +70,7 @@
 #include "DateInfo.h"
 #include "goo/gfile.h"
 #include "Win32Console.h"
+#include "InMemoryFile.h"
 
 static int firstPage = 1;
 static int lastPage = 0;
@@ -77,6 +80,7 @@ static bool printHelp = false;
 bool printHtml = false;
 bool complexMode=false;
 bool singleHtml=false; // singleHtml
+bool dataUrls = false;
 bool ignore=false;
 static char extension[5]="png";
 static double scale=1.5;
@@ -123,6 +127,10 @@ static const ArgDesc argDesc[] = {
    "generate complex document"},
   {"-s",      argFlag,     &singleHtml,          0,
    "generate single document that includes all pages"},
+#ifdef HAVE_IN_MEMORY_FILE
+  {"-dataurls", argFlag,   &dataUrls,      0,
+   "use data URLs instead of external images in HTML"},
+#endif
   {"-i",      argFlag,     &ignore,        0,
    "ignore images"},
   {"-noframes", argFlag,   &noframes,      0,
@@ -366,7 +374,6 @@ int main(int argc, char *argv[]) {
 	  keywords ? keywords->c_str() : nullptr, 
           subject ? subject->c_str() : nullptr, 
 	  date ? date->c_str() : nullptr,
-	  extension,
 	  rawOrder, 
 	  firstPage,
 	  doOutline);
@@ -387,13 +394,6 @@ int main(int argc, char *argv[]) {
   {
       delete date;
   }
-
-  if (htmlOut->isOk())
-  {
-    doc->displayPages(htmlOut, firstPage, lastPage, 72 * scale, 72 * scale, 0,
-		      true, false, false);
-    htmlOut->dumpDocOutline(doc);
-  }
   
   if ((complexMode || singleHtml) && !xml && !ignore) {
 #ifdef HAVE_SPLASH
@@ -409,6 +409,7 @@ int main(int argc, char *argv[]) {
     splashOut->startDoc(doc);
 
     for (int pg = firstPage; pg <= lastPage; ++pg) {
+      InMemoryFile imf;
       doc->displayPage(splashOut, pg,
                        72 * scale, 72 * scale,
                        0, true, false, false);
@@ -416,10 +417,22 @@ int main(int argc, char *argv[]) {
 
       imgFileName = GooString::format("{0:s}{1:03d}.{2:s}", 
           htmlFileName->c_str(), pg, extension);
-
-      bitmap->writeImgFile(format, imgFileName->c_str(),
-                           72 * scale, 72 * scale);
-
+      auto f1 = dataUrls ? imf.open("wb") : fopen(imgFileName->c_str(), "wb");
+      if (!f1) {
+        fprintf(stderr, "Could not open %s\n", imgFileName->c_str());
+        delete imgFileName;
+        continue;
+      }
+      bitmap->writeImgFile(format, f1, 72 * scale, 72 * scale);
+      fclose(f1);
+      if (dataUrls) {
+        htmlOut->addBackgroundImage(
+          std::string((format == splashFormatJpeg) ? "data:image/jpeg;base64," : "data:image/png;base64,") +
+          gbase64Encode(imf.getBuffer())
+        );
+      } else {
+        htmlOut->addBackgroundImage(gbasename(imgFileName->c_str()));
+      }
       delete imgFileName;
     }
 
@@ -434,7 +447,14 @@ int main(int argc, char *argv[]) {
     return -1;
 #endif
   }
-  
+
+  if (htmlOut->isOk())
+  {
+    doc->displayPages(htmlOut, firstPage, lastPage, 72 * scale, 72 * scale, 0,
+		      true, false, false);
+    htmlOut->dumpDocOutline(doc);
+  }
+
   delete htmlOut;
 
   exit_status = EXIT_SUCCESS;
