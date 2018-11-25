@@ -141,7 +141,7 @@ GooString *GooString::fromInt(int x) {
   int len;
   formatInt(x, buf, sizeof(buf), false, 0, 10, &p, &len);
 
-  return new GooString(buf, len);
+  return new GooString(p, len);
 }
 
 GooString *GooString::format(const char *fmt, ...) {
