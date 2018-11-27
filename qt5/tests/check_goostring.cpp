@@ -14,6 +14,7 @@ private slots:
     void testInsert();
     void testFormat();
     void testFromNullptr();
+    void testFromInt();
 };
 
 void TestGooString::testInsertData_data()
@@ -159,6 +160,25 @@ void TestGooString::testFromNullptr()
     str.Set(static_cast<const char*>(nullptr), 0);
     QCOMPARE(str.getLength(), 0);
   }
+}
+
+void TestGooString::testFromInt()
+{
+    struct _testcase {
+        int inty;
+        const char* str;
+    } cases[] = {
+        { 12345, "12345" },
+        { -1, "-1" },
+        { 0, "0" },
+        { 0x7fffffff, "2147483647" },
+        { -0x7fffffff - 1, "-2147483648" },
+    };
+
+    for (size_t k = 0; k < sizeof(cases) / sizeof(cases[0]); ++k) {
+        QScopedPointer<GooString> str(GooString::fromInt(cases[k].inty));
+        QCOMPARE(str->c_str(), cases[k].str);
+    }
 }
 
 QTEST_GUILESS_MAIN(TestGooString)
