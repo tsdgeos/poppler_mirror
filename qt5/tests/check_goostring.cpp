@@ -14,6 +14,7 @@ private slots:
     void testInsert();
     void testFormat();
     void testFromNullptr();
+    void testFromInt_data();
     void testFromInt();
 };
 
@@ -162,23 +163,24 @@ void TestGooString::testFromNullptr()
   }
 }
 
+void TestGooString::testFromInt_data()
+{
+    QTest::addColumn<int>("inty");
+    QTest::addColumn<QByteArray>("stringy");
+
+    QTest::newRow("Natural") << 12345 << QByteArray("12345");
+    QTest::newRow("Negative") << -1 << QByteArray("-1");
+    QTest::newRow("Zero") << 0 << QByteArray("0");
+    QTest::newRow("INT_MAX") << 0x7fffffff << QByteArray("2147483647");
+    QTest::newRow("-INT_MAX-1") << (-0x7fffffff - 1) << QByteArray("-2147483648");
+}
+
 void TestGooString::testFromInt()
 {
-    struct _testcase {
-        int inty;
-        const char* str;
-    } cases[] = {
-        { 12345, "12345" },
-        { -1, "-1" },
-        { 0, "0" },
-        { 0x7fffffff, "2147483647" },
-        { -0x7fffffff - 1, "-2147483648" },
-    };
-
-    for (size_t k = 0; k < sizeof(cases) / sizeof(cases[0]); ++k) {
-        QScopedPointer<GooString> str(GooString::fromInt(cases[k].inty));
-        QCOMPARE(str->c_str(), cases[k].str);
-    }
+    QFETCH(int, inty);
+    QFETCH(QByteArray, stringy);
+    QScopedPointer<GooString> str(GooString::fromInt(inty));
+    QCOMPARE(str->c_str(), stringy.constData());
 }
 
 QTEST_GUILESS_MAIN(TestGooString)
