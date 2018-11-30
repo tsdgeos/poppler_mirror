@@ -51,6 +51,7 @@
 
 class GfxState;
 class GooString;
+class HtmlImage;
 class PDFDoc;
 class OutlineItem;
 //------------------------------------------------------------------------
@@ -186,7 +187,7 @@ private:
   int fontsPageMarker; 
   HtmlFontAccu *fonts;
   HtmlLinks *links; 
-  GooList   *imgList;
+  GooList<HtmlImage*> *imgList;
   
   GooString *DocName;
   int pageWidth;
@@ -321,8 +322,8 @@ private:
   GooString* getLinkDest(AnnotLink *link);
   void dumpMetaVars(FILE *);
   void doFrame(int firstPage);
-  bool newHtmlOutlineLevel(FILE *output, const GooList *outlines, int level = 1);
-  void newXmlOutlineLevel(FILE *output, const GooList *outlines);
+  bool newHtmlOutlineLevel(FILE *output, const GooList<OutlineItem*> *outlines, int level = 1);
+  void newXmlOutlineLevel(FILE *output, const GooList<OutlineItem*> *outlines);
   int getOutlinePageNum(OutlineItem *item);
   void drawJpegImage(GfxState *state, Stream *str);
   void drawPngImage(GfxState *state, Stream *str, int width, int height,
@@ -344,7 +345,7 @@ private:
   int maxPageHeight;
   GooString *Docname;
   GooString *docTitle;
-  GooList *glMetaVars;
+  GooList<HtmlMetaVar*> *glMetaVars;
   Catalog *catalog;
   Page *docPage;
   std::vector<std::string> backgroundImages;

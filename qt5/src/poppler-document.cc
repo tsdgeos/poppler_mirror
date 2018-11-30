@@ -590,7 +590,7 @@ namespace Poppler {
         if ( !outline )
             return nullptr;
 
-        const GooList * items = outline->getItems();
+        const GooList<OutlineItem*> * items = outline->getItems();
         if ( !items || items->size() < 1 )
             return nullptr;
 

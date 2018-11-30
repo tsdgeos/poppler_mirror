@@ -1213,7 +1213,7 @@ FormFieldText::~FormFieldText()
 
 double FormFieldText::getTextFontSize()
 {
-  GooList* daToks = new GooList();
+  GooList<GooString*>* daToks = new GooList<GooString*>();
   int idx = parseDA(daToks);
   double fontSize = -1;
   if (idx >= 0) {
@@ -1222,18 +1222,18 @@ double FormFieldText::getTextFontSize()
     if (!p || *p)
       fontSize = -1;
   }
-  deleteGooList<GooString>(daToks);
+  deleteGooList<GooString*>(daToks);
   return fontSize;
 }
 
 void FormFieldText::setTextFontSize(int fontSize)
 {
   if (fontSize > 0 && obj.isDict()) {
-    GooList* daToks = new GooList();
+    GooList<GooString*>* daToks = new GooList<GooString*>();
     int idx = parseDA(daToks);
     if (idx == -1) {
       error(errSyntaxError, -1, "FormFieldText:: invalid DA object\n");
-      deleteGooList<GooString>(daToks);
+      deleteGooList<GooString*>(daToks);
       return;
     }
     if (defaultAppearance)
@@ -1248,14 +1248,14 @@ void FormFieldText::setTextFontSize(int fontSize)
         defaultAppearance->append(static_cast<GooString*>(daToks->get(i)));
       }
     }
-    deleteGooList<GooString>(daToks);
+    deleteGooList<GooString*>(daToks);
     obj.dictSet("DA", Object(defaultAppearance->copy()));
     xref->setModifiedObject(&obj, ref);
     updateChildrenAppearance();
   }
 }
 
-int FormFieldText::tokenizeDA(const GooString* da, GooList* daToks, const char* searchTok)
+int FormFieldText::tokenizeDA(const GooString* da, GooList<GooString*>* daToks, const char* searchTok)
 {
   int idx = -1;
   if(da && daToks) {
@@ -1279,7 +1279,7 @@ int FormFieldText::tokenizeDA(const GooString* da, GooList* daToks, const char* 
   return idx;
 }
 
-int FormFieldText::parseDA(GooList* daToks)
+int FormFieldText::parseDA(GooList<GooString*>* daToks)
 {
   int idx = -1;
   if (obj.isDict()) {

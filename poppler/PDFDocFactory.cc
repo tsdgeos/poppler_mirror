@@ -29,12 +29,12 @@
 // PDFDocFactory
 //------------------------------------------------------------------------
 
-PDFDocFactory::PDFDocFactory(GooList *pdfDocBuilders)
+PDFDocFactory::PDFDocFactory(GooList<PDFDocBuilder*> *pdfDocBuilders)
 {
   if (pdfDocBuilders) {
     builders = pdfDocBuilders;
   } else {
-    builders = new GooList();
+    builders = new GooList<PDFDocBuilder*>();
   }
   builders->push_back(new LocalPDFDocBuilder());
   builders->push_back(new StdinPDFDocBuilder());
@@ -46,7 +46,7 @@ PDFDocFactory::PDFDocFactory(GooList *pdfDocBuilders)
 PDFDocFactory::~PDFDocFactory()
 {
   if (builders) {
-    deleteGooList<PDFDocBuilder>(builders);
+    deleteGooList<PDFDocBuilder*>(builders);
   }
 }
 

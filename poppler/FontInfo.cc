@@ -51,8 +51,7 @@ FontInfoScanner::FontInfoScanner(PDFDoc *docA, int firstPage) {
 FontInfoScanner::~FontInfoScanner() {
 }
 
-GooList *FontInfoScanner::scan(int nPages) {
-  GooList *result;
+GooList<FontInfo*> *FontInfoScanner::scan(int nPages) {
   Page *page;
   Dict *resDict;
   Annots *annots;
@@ -62,7 +61,7 @@ GooList *FontInfoScanner::scan(int nPages) {
     return nullptr;
   }
  
-  result = new GooList();
+  auto result = new GooList<FontInfo*>();
 
   lastPage = currentPage + nPages;
   if (lastPage > doc->getNumPages() + 1) {
@@ -93,7 +92,7 @@ GooList *FontInfoScanner::scan(int nPages) {
   return result;
 }
 
-void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList) {
+void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, GooList<FontInfo*> *fontsList) {
   GfxFontDict *gfxFontDict;
   GfxFont *font;
 

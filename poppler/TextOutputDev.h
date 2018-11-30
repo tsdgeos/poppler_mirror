@@ -40,7 +40,6 @@
 #include "OutputDev.h"
 
 class GooString;
-class GooList;
 class Gfx;
 class GfxFont;
 class GfxState;
@@ -53,6 +52,8 @@ class TextLine;
 class TextLineFrag;
 class TextBlock;
 class TextFlow;
+class TextLink;
+class TextUnderline;
 class TextWordList;
 class TextPage;
 class TextSelectionVisitor;
@@ -518,7 +519,7 @@ public:
 
 private:
 
-  GooList *words;			// [TextWord]
+  GooList<TextWord*> *words;
 };
 
 #endif // TEXTOUT_WORD_LIST
@@ -636,14 +637,14 @@ public:
 		     SelectionStyle style,
 		     GfxColor *glyph_color, GfxColor *box_color);
 
-  GooList *getSelectionRegion(PDFRectangle *selection,
+  GooList<PDFRectangle*> *getSelectionRegion(PDFRectangle *selection,
 			      SelectionStyle style,
 			      double scale);
 
   GooString *getSelectionText(PDFRectangle *selection,
 			      SelectionStyle style);
 
-  GooList **getSelectionWords(PDFRectangle *selection,
+  GooList<TextWordSelection*> **getSelectionWords(PDFRectangle *selection,
                               SelectionStyle style,
                               int *nLines);
 
@@ -708,15 +709,14 @@ private:
 				//   rawOrder is set)
   TextWord *rawLastWord;	// last word on rawWords list
 
-  GooList *fonts;			// all font info objects used on this
-				//   page [TextFontInfo]
+  GooList<TextFontInfo*> *fonts;// all font info objects used on this page
 
   double lastFindXMin,		// coordinates of the last "find" result
          lastFindYMin;
   bool haveLastFind;
 
-  GooList *underlines;		// [TextUnderline]
-  GooList *links;		// [TextLink]
+  GooList<TextUnderline*> *underlines;
+  GooList<TextLink*> *links;
 
   int refCnt;
 
@@ -876,7 +876,7 @@ public:
 		     SelectionStyle style,
 		     GfxColor *glyph_color, GfxColor *box_color);
 
-  GooList *getSelectionRegion(PDFRectangle *selection,
+  GooList<PDFRectangle*> *getSelectionRegion(PDFRectangle *selection,
 			      SelectionStyle style,
 			      double scale);
 

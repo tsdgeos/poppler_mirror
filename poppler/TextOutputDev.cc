@@ -2281,7 +2281,7 @@ TextWordList::TextWordList(TextPage *text, bool physLayout) {
   TextWord **wordArray;
   int nWords, i;
 
-  words = new GooList();
+  words = new GooList<TextWord*>();
 
   if (text->rawOrder) {
     for (word = text->rawWords; word; word = word->next) {
@@ -2373,11 +2373,11 @@ TextPage::TextPage(bool rawOrderA) {
   blocks = nullptr;
   rawWords = nullptr;
   rawLastWord = nullptr;
-  fonts = new GooList();
+  fonts = new GooList<TextFontInfo*>();
   lastFindXMin = lastFindYMin = 0;
   haveLastFind = false;
-  underlines = new GooList();
-  links = new GooList();
+  underlines = new GooList<TextUnderline*>();
+  links = new GooList<TextLink*>();
   mergeCombining = true;
 }
 
@@ -2391,8 +2391,8 @@ TextPage::~TextPage() {
     }
   }
   delete fonts;
-  deleteGooList<TextUnderline>(underlines);
-  deleteGooList<TextLink>(links);
+  deleteGooList<TextUnderline*>(underlines);
+  deleteGooList<TextLink*>(links);
 }
 
 void TextPage::incRefCnt() {
@@ -2446,9 +2446,9 @@ void TextPage::clear() {
     }
     gfree(blocks);
   }
-  deleteGooList<TextFontInfo>(fonts);
-  deleteGooList<TextUnderline>(underlines);
-  deleteGooList<TextLink>(links);
+  deleteGooList<TextFontInfo*>(fonts);
+  deleteGooList<TextUnderline*>(underlines);
+  deleteGooList<TextLink*>(links);
 
   curWord = nullptr;
   charPos = 0;
@@ -2465,9 +2465,9 @@ void TextPage::clear() {
   blocks = nullptr;
   rawWords = nullptr;
   rawLastWord = nullptr;
-  fonts = new GooList();
-  underlines = new GooList();
-  links = new GooList();
+  fonts = new GooList<TextFontInfo*>();
+  underlines = new GooList<TextUnderline*>();
+  links = new GooList<TextLink*>();
 }
 
 void TextPage::updateFont(GfxState *state) {
@@ -4412,16 +4412,16 @@ public:
   void endPage();
 
   GooString *getText(void);
-  GooList **takeWordList(int *nLines);
+  GooList<TextWordSelection*> **takeWordList(int *nLines);
 
 private:
 
   void startLine();
   void finishLine();
 
-  GooList **lines;
+  GooList<TextWordSelection*> **lines;
   int nLines, linesSize;
-  GooList *words;
+  GooList<TextWordSelection*> *words;
   int tableId;
   TextBlock *currentBlock;
 };
@@ -4430,7 +4430,7 @@ TextSelectionDumper::TextSelectionDumper(TextPage *page)
     : TextSelectionVisitor(page)
 {
   linesSize = 256;
-  lines = (GooList **)gmallocn(linesSize, sizeof(GooList *));
+  lines = (GooList<TextWordSelection*> **)gmallocn(linesSize, sizeof(GooList<TextWordSelection*> *));
   nLines = 0;
 
   tableId = -1;
@@ -4441,21 +4441,21 @@ TextSelectionDumper::TextSelectionDumper(TextPage *page)
 TextSelectionDumper::~TextSelectionDumper()
 {
   for (int i = 0; i < nLines; i++)
-    deleteGooList<TextWordSelection>(lines[i]);
+    deleteGooList<TextWordSelection*>(lines[i]);
   gfree(lines);
 }
 
 void TextSelectionDumper::startLine()
 {
   finishLine();
-  words = new GooList();
+  words = new GooList<TextWordSelection*>();
 }
 
 void TextSelectionDumper::finishLine()
 {
   if (nLines == linesSize) {
     linesSize *= 2;
-    lines = (GooList **)grealloc(lines, linesSize * sizeof(GooList *));
+    lines = (GooList<TextWordSelection*> **)grealloc(lines, linesSize * sizeof(GooList<TextWordSelection*> *));
   }
 
   if (words && words->size() > 0)
@@ -4530,7 +4530,7 @@ GooString *TextSelectionDumper::getText (void)
   eolLen = uMap->mapUnicode(0x0a, eol, sizeof(eol));
 
   for (i = 0; i < nLines; i++) {
-    GooList *lineWords = lines[i];
+    GooList<TextWordSelection*> *lineWords = lines[i];
     for (std::size_t j = 0; j < lineWords->size(); j++) {
       TextWordSelection *sel = (TextWordSelection *)lineWords->get(j);
 
@@ -4547,9 +4547,9 @@ GooString *TextSelectionDumper::getText (void)
   return text;
 }
 
-GooList **TextSelectionDumper::takeWordList(int *nLinesOut)
+GooList<TextWordSelection*> **TextSelectionDumper::takeWordList(int *nLinesOut)
 {
-  GooList **returnValue = lines;
+  GooList<TextWordSelection*> **returnValue = lines;
 
   *nLinesOut = nLines;
   if (nLines == 0)
@@ -4579,10 +4579,10 @@ public:
   void visitWord (TextWord *word, int begin, int end,
 			  PDFRectangle *selection) override { };
 
-  GooList *getRegion () { return list; }
+  GooList<PDFRectangle*> *getRegion () { return list; }
 
 private:
-  GooList *list;
+  GooList<PDFRectangle*> *list;
   double scale;
 };
 
@@ -4590,7 +4590,7 @@ TextSelectionSizer::TextSelectionSizer(TextPage *page, double scale)
   : TextSelectionVisitor(page),
     scale(scale)
 {
-  list = new GooList();
+  list = new GooList<PDFRectangle*>();
 }
 
 void TextSelectionSizer::visitLine (TextLine *line, 
@@ -4645,7 +4645,7 @@ private:
   OutputDev *out;
   GfxColor *glyph_color;
   GfxState *state;
-  GooList *selectionList;
+  GooList<TextWordSelection*> *selectionList;
   Matrix ctm, ictm;
 };
 
@@ -4661,7 +4661,7 @@ TextSelectionPainter::TextSelectionPainter(TextPage *page,
 {
   PDFRectangle box(0, 0, page->pageWidth, page->pageHeight);
 
-  selectionList = new GooList();
+  selectionList = new GooList<TextWordSelection*>();
   state = new GfxState(72 * scale, 72 * scale, &box, rotation, false);
 
   state->getCTM(&ctm);
@@ -4677,7 +4677,7 @@ TextSelectionPainter::TextSelectionPainter(TextPage *page,
 
 TextSelectionPainter::~TextSelectionPainter()
 {
-  deleteGooList<TextWordSelection>(selectionList);
+  deleteGooList<TextWordSelection*>(selectionList);
   delete state;
 }
 
@@ -5121,7 +5121,7 @@ void TextPage::drawSelection(OutputDev *out,
   painter.endPage();
 }
 
-GooList *TextPage::getSelectionRegion(PDFRectangle *selection,
+GooList<PDFRectangle*> *TextPage::getSelectionRegion(PDFRectangle *selection,
 				      SelectionStyle style,
 				      double scale) {
   TextSelectionSizer sizer(this, scale);
@@ -5142,7 +5142,7 @@ GooString *TextPage::getSelectionText(PDFRectangle *selection,
   return dumper.getText();
 }
 
-GooList **TextPage::getSelectionWords(PDFRectangle *selection,
+GooList<TextWordSelection*> **TextPage::getSelectionWords(PDFRectangle *selection,
                                       SelectionStyle style,
                                       int *nLines)
 {
@@ -5900,7 +5900,7 @@ void TextOutputDev::drawSelection(OutputDev *out,
   text->drawSelection(out, scale, rotation, selection, style, glyph_color, box_color);
 }
 
-GooList *TextOutputDev::getSelectionRegion(PDFRectangle *selection,
+GooList<PDFRectangle*> *TextOutputDev::getSelectionRegion(PDFRectangle *selection,
 					   SelectionStyle style,
 					   double scale) {
   return text->getSelectionRegion(selection, style, scale);

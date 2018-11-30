@@ -54,7 +54,7 @@ LinkAction::LinkAction() : nextActionList(nullptr) {
 
 LinkAction::~LinkAction() {
   if (nextActionList)
-    deleteGooList<LinkAction>(nextActionList);
+    deleteGooList<LinkAction*>(nextActionList);
 }
 
 LinkAction *LinkAction::parseDest(const Object *obj) {
@@ -158,7 +158,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
 
   // parse the next actions
   const Object nextObj = obj->dictLookup("Next");
-  GooList *actionList = nullptr;
+  GooList<LinkAction*> *actionList = nullptr;
   if (nextObj.isDict()) {
 
     // Prevent circles in the tree by checking the ref against used refs in
@@ -172,13 +172,13 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
         }
     }
 
-    actionList = new GooList();
+    actionList = new GooList<LinkAction*>();
     actionList->reserve(1);
     actionList->push_back(parseAction(&nextObj, nullptr, seenNextActions));
   } else if (nextObj.isArray()) {
     const Array *a = nextObj.getArray();
     const int n = a->getLength();
-    actionList = new GooList();
+    actionList = new GooList<LinkAction*>();
     actionList->reserve(n);
     for (int i = 0; i < n; ++i) {
       const Object obj3 = a->get(i);
@@ -206,11 +206,11 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
   return action;
 }
 
-const GooList *LinkAction::nextActions() const {
+const GooList<LinkAction*> *LinkAction::nextActions() const {
   return nextActionList;
 }
 
-void LinkAction::setNextActions(GooList *actions) {
+void LinkAction::setNextActions(GooList<LinkAction*> *actions) {
   delete nextActionList;
   nextActionList = actions;
 }
@@ -824,7 +824,7 @@ LinkJavaScript::~LinkJavaScript() {
 // LinkOCGState
 //------------------------------------------------------------------------
 LinkOCGState::LinkOCGState(const Object *obj) {
-  stateList = new GooList();
+  stateList = new GooList<StateList*>();
   preserveRB = true;
 
   Object obj1 = obj->dictLookup("State");
@@ -839,7 +839,7 @@ LinkOCGState::LinkOCGState(const Object *obj) {
 
 	const char *name = obj2.getName();
 	stList = new StateList();
-	stList->list = new GooList();
+	stList->list = new GooList<Ref*>();
 	if (!strcmp (name, "ON")) {
 	  stList->st = On;
 	} else if (!strcmp (name, "OFF")) {
@@ -882,12 +882,12 @@ LinkOCGState::LinkOCGState(const Object *obj) {
 
 LinkOCGState::~LinkOCGState() {
   if (stateList)
-    deleteGooList<StateList>(stateList);
+    deleteGooList<StateList*>(stateList);
 }
 
 LinkOCGState::StateList::~StateList() {
   if (list)
-    deleteGooList<Ref>(list);
+    deleteGooList<Ref*>(list);
 }
 
 //------------------------------------------------------------------------

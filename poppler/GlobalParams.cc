@@ -246,15 +246,15 @@ private:
 			       const char *path);
 #endif
 
-  GooList *fonts;			// [SysFontInfo]
+  GooList<SysFontInfo*> *fonts;
 };
 
 SysFontList::SysFontList() {
-  fonts = new GooList();
+  fonts = new GooList<SysFontInfo*>();
 }
 
 SysFontList::~SysFontList() {
-  deleteGooList<SysFontInfo>(fonts);
+  deleteGooList<SysFontInfo*>(fonts);
 }
 
 SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exact) {
@@ -394,7 +394,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
 
   nameToUnicodeZapfDingbats = new NameToCharCode();
   nameToUnicodeText = new NameToCharCode();
-  toUnicodeDirs = new GooList();
+  toUnicodeDirs = new GooList<GooString*>();
   sysFonts = new SysFontList();
   psExpandSmaller = false;
   psShrinkLarger = true;
@@ -553,7 +553,7 @@ GlobalParams::~GlobalParams() {
 
   delete nameToUnicodeZapfDingbats;
   delete nameToUnicodeText;
-  deleteGooList<GooString>(toUnicodeDirs);
+  deleteGooList<GooString*>(toUnicodeDirs);
   delete sysFonts;
   delete textEncoding;
 
@@ -1203,9 +1203,9 @@ UnicodeMap *GlobalParams::getTextEncoding() {
   return getUnicodeMap2(textEncoding);
 }
 
-GooList *GlobalParams::getEncodingNames()
+GooList<GooString*> *GlobalParams::getEncodingNames()
 {
-  auto* const result = new GooList;
+  auto* const result = new GooList<GooString*>;
   for (const auto& unicodeMap : residentUnicodeMaps) {
     result->push_back(new GooString(unicodeMap.first));
   }

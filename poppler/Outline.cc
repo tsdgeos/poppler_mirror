@@ -50,7 +50,7 @@ Outline::Outline(const Object *outlineObj, XRef *xref) {
 
 Outline::~Outline() {
   if (items) {
-    deleteGooList<OutlineItem>(items);
+    deleteGooList<OutlineItem*>(items);
   }
 }
 
@@ -108,8 +108,8 @@ OutlineItem::~OutlineItem() {
   }
 }
 
-GooList *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA) {
-  GooList *items = new GooList();
+GooList<OutlineItem*> *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA) {
+  auto items = new GooList<OutlineItem*>();
 
   char* alreadyRead = (char *)gmalloc(xrefA->getNumObjects());
   memset(alreadyRead, 0, xrefA->getNumObjects());
@@ -153,7 +153,7 @@ void OutlineItem::open() {
 
 void OutlineItem::close() {
   if (kids) {
-    deleteGooList<OutlineItem>(kids);
+    deleteGooList<OutlineItem*>(kids);
     kids = nullptr;
   }
 }

@@ -51,7 +51,7 @@ public:
   // upside-down, i.e., with the last row first in memory.
   SplashBitmap(int widthA, int heightA, int rowPad,
 	       SplashColorMode modeA, bool alphaA,
-	       bool topDown = true, GooList *separationList = nullptr);
+	       bool topDown = true, GooList<GfxSeparationColorSpace*> *separationList = nullptr);
   static SplashBitmap *copy(SplashBitmap *src);
 
   ~SplashBitmap();
@@ -67,7 +67,7 @@ public:
   SplashColorMode getMode() { return mode; }
   SplashColorPtr getDataPtr() { return data; }
   unsigned char *getAlphaPtr() { return alpha; }
-  GooList *getSeparationList() { return separationList; }
+  GooList<GfxSeparationColorSpace*> *getSeparationList() { return separationList; }
 
   SplashError writePNMFile(char *fileName);
   SplashError writePNMFile(FILE *f);
@@ -117,7 +117,7 @@ private:
   SplashColorPtr data;		// pointer to row zero of the color data
   unsigned char *alpha;		// pointer to row zero of the alpha data
 				//   (always top-down)
-  GooList *separationList; // list of spot colorants and their mapping functions
+  GooList<GfxSeparationColorSpace*> *separationList; // list of spot colorants and their mapping functions
 
   friend class Splash;
 

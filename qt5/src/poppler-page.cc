@@ -362,7 +362,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
 
   if ( popplerLink )
   {
-    const GooList *nextActions = a->nextActions();
+    const GooList<::LinkAction*> *nextActions = a->nextActions();
     if ( nextActions )
     {
       QVector<Link *> links;

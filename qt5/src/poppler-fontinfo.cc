@@ -127,14 +127,14 @@ QList<FontInfo> FontIterator::next()
 	++d->currentPage;
 
 	QList<FontInfo> fonts;
-	GooList *items = d->fontInfoScanner.scan( 1 );
+	GooList<::FontInfo*> *items = d->fontInfoScanner.scan( 1 );
 	if ( !items )
 		return fonts;
 	fonts.reserve( items->size() );
 	for ( std::size_t i = 0; i < items->size(); ++i ) {
 		fonts.append( FontInfo( FontInfoData( ( ::FontInfo* )items->get( i ) ) ) );
 	}
-	deleteGooList<::FontInfo>( items );
+	deleteGooList<::FontInfo*>( items );
 	return fonts;
 }
 

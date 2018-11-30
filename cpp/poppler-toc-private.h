@@ -25,7 +25,8 @@
 
 #include <vector>
 
-class GooList;
+#include "goo/GooList.h"
+
 class Outline;
 class OutlineItem;
 
@@ -54,7 +55,7 @@ public:
     toc_item_private& operator=(const toc_item_private &) = delete;
 
     void load(const OutlineItem *item);
-    void load_children(const GooList *items);
+    void load_children(const GooList<OutlineItem*> *items);
 
     std::vector<toc_item*> children;
     ustring title;

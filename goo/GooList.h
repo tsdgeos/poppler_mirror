@@ -31,7 +31,8 @@
 // GooList
 //------------------------------------------------------------------------
 
-class GooList : public std::vector<void *> {
+template <typename T>
+class GooList : public std::vector<T> {
 public:
 
   // Create an empty list.
@@ -45,18 +46,18 @@ public:
   GooList& operator=(const GooList &other) = delete;
 
   // Zero cost conversion from std::vector
-  explicit GooList(const std::vector<void *>& vec) : std::vector<void *>(vec) {}
-  explicit GooList(std::vector<void *>&& vec) : std::vector<void *>(std::move(vec)) {}
+  explicit GooList(const std::vector<T>& vec) : std::vector<T>(vec) {}
+  explicit GooList(std::vector<T>&& vec) : std::vector<T>(std::move(vec)) {}
 
   // Return the <i>th element.
   // Assumes 0 <= i < length.
-  void *get(int i) const { return (*this)[i]; }
+  const T& get(int i) const { return (*this)[i]; }
 };
 
 template<typename T>
-inline void deleteGooList(GooList* list) {
+inline void deleteGooList(GooList<T>* list) {
   for (auto ptr : *list) {
-    delete static_cast<T *>(ptr);
+    delete ptr;
   }
   delete list;
 }

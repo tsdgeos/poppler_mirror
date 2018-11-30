@@ -756,7 +756,7 @@ DefaultAppearance::DefaultAppearance(GooString *da) {
   fontPtSize = -1;
 
   if (da) {
-    GooList * daToks = new GooList();
+    GooList<GooString*> * daToks = new GooList<GooString*>();
     int i = FormFieldText::tokenizeDA(da, daToks, "Tf");
 
     if (i >= 1) {
@@ -786,7 +786,7 @@ DefaultAppearance::DefaultAppearance(GooString *da) {
         }
       }
     }
-    deleteGooList<GooString>(daToks);
+    deleteGooList<GooString*>(daToks);
   }
 }
 
@@ -4028,7 +4028,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     bool txField, bool forceZapfDingbats,
     XRef *xref, bool *addedDingbatsResource,
     bool password) {
-  GooList *daToks;
+  GooList<GooString*> *daToks;
   GooString *tok;
   GooString convertedText;
   const GfxFont *font;
@@ -4046,7 +4046,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
   // parse the default appearance string
   tfPos = tmPos = -1;
   if (da) {
-    daToks = new GooList();
+    daToks = new GooList<GooString*>();
     i = 0;
     while (i < da->getLength()) {
       while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
@@ -4117,7 +4117,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
   }
   if (!font) {
     if (daToks) {
-      deleteGooList<GooString>(daToks);
+      deleteGooList<GooString*>(daToks);
     }
     return false;
   }
@@ -4425,7 +4425,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     appearBuf->append("EMC\n");
   }
   if (daToks) {
-    deleteGooList<GooString>(daToks);
+    deleteGooList<GooString*>(daToks);
   }
   if (freeText) {
     delete text;
@@ -4440,7 +4440,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 // Draw the variable text or caption for a field.
 bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect,
 			      const GooString *da, const GfxResources *resources, int quadding) {
-  GooList *daToks;
+  GooList<GooString*> *daToks;
   GooString *tok;
   GooString convertedText;
   const GfxFont *font;
@@ -4454,7 +4454,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
   // parse the default appearance string
   tfPos = tmPos = -1;
   if (da) {
-    daToks = new GooList();
+    daToks = new GooList<GooString*>();
     i = 0;
     while (i < da->getLength()) {
       while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
@@ -4498,7 +4498,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
   }
   if (!font) {
     if (daToks) {
-      deleteGooList<GooString>(daToks);
+      deleteGooList<GooString*>(daToks);
     }
     return false;
   }
@@ -4514,7 +4514,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
       if (fieldChoice->getChoice(i) == nullptr) {
         error(errSyntaxError, -1, "Invalid annotation listbox");
         if (daToks) {
-	  deleteGooList<GooString>(daToks);
+	  deleteGooList<GooString*>(daToks);
         }
         return false;
       }
@@ -4611,7 +4611,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
   }
 
   if (daToks) {
-    deleteGooList<GooString>(daToks);
+    deleteGooList<GooString*>(daToks);
   }
 
   return true;

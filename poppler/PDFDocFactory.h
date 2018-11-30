@@ -14,7 +14,6 @@
 
 #include "PDFDoc.h"
 
-class GooList;
 class GooString;
 class PDFDocBuilder;
 
@@ -34,7 +33,7 @@ class PDFDocFactory {
 
 public:
 
-  PDFDocFactory(GooList *pdfDocBuilders = nullptr);
+  PDFDocFactory(GooList<PDFDocBuilder*> *pdfDocBuilders = nullptr);
   ~PDFDocFactory();
 
   PDFDocFactory(const PDFDocFactory &) = delete;
@@ -51,7 +50,7 @@ public:
 
 private:
 
-  GooList *builders;
+  GooList<PDFDocBuilder*> *builders;
 
 };
 

@@ -61,6 +61,7 @@ struct PST1FontName;
 struct PSFont8Info;
 struct PSFont16Enc;
 class PSOutCustomColor;
+class PSOutPaperSize;
 class PSOutputDev;
 
 //------------------------------------------------------------------------
@@ -497,8 +498,8 @@ private:
   int numTilingPatterns;	// current number of nested tiling patterns
   int nextFunc;			// next unique number to use for a function
 
-  GooList *paperSizes;		// list of used paper sizes, if paperMatch
-				//   is true [PSOutPaperSize]
+  GooList<PSOutPaperSize*> *paperSizes;	// list of used paper sizes, if paperMatch
+				//   is true
   std::map<int,int> pagePaperSize; // page num to paperSize entry mapping
   double tx0, ty0;		// global translation
   double xScale0, yScale0;	// global scaling

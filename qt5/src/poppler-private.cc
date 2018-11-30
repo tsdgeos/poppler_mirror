@@ -282,7 +282,7 @@ namespace Debug {
     }
 
 
-    void DocumentData::addTocChildren( QDomDocument * docSyn, QDomNode * parent, const GooList * items )
+    void DocumentData::addTocChildren( QDomDocument * docSyn, QDomNode * parent, const GooList<OutlineItem*> * items )
     {
         for ( std::size_t i = 0; i < items->size(); ++i )
         {
@@ -308,7 +308,7 @@ namespace Debug {
 
             // 3. recursively descend over children
             outlineItem->open();
-            const GooList * children = outlineItem->getKids();
+            const GooList<OutlineItem*> * children = outlineItem->getKids();
             if ( children )
                 addTocChildren( docSyn, &item, children );
         }

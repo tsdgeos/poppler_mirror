@@ -432,24 +432,23 @@ OCDisplayNode::OCDisplayNode(OptionalContentGroup *ocgA) {
 
 void OCDisplayNode::addChild(OCDisplayNode *child) {
   if (!children) {
-    children = new GooList();
+    children = new GooList<OCDisplayNode*>();
   }
   children->push_back(child);
 }
 
-void OCDisplayNode::addChildren(GooList *childrenA) {
+void OCDisplayNode::addChildren(GooList<OCDisplayNode*> *childrenA) {
   if (!children) {
-    children = new GooList();
+    children = new GooList<OCDisplayNode*>();
   }
   children->reserve(children->size() + childrenA->size());
   children->insert(children->end(), childrenA->begin(), childrenA->end());
   delete childrenA;
 }
 
-GooList *OCDisplayNode::takeChildren() {
-  GooList *childrenA;
+GooList<OCDisplayNode*> *OCDisplayNode::takeChildren() {
+  GooList<OCDisplayNode*> *childrenA = children;
 
-  childrenA = children;
   children = nullptr;
   return childrenA;
 }
@@ -457,7 +456,7 @@ GooList *OCDisplayNode::takeChildren() {
 OCDisplayNode::~OCDisplayNode() {
   delete name;
   if (children) {
-    deleteGooList<OCDisplayNode>(children);
+    deleteGooList<OCDisplayNode*>(children);
   }
 }
 

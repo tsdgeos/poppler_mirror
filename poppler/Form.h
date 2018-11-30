@@ -426,10 +426,10 @@ public:
 
   void print(int indent) override;
 
-  static int tokenizeDA(const GooString* daString, GooList* daToks, const char* searchTok);
+  static int tokenizeDA(const GooString* daString, GooList<GooString*>* daToks, const char* searchTok);
 
 protected:
-  int parseDA(GooList* daToks);
+  int parseDA(GooList<GooString*>* daToks);
 
   GooString* content;
   bool multiline;

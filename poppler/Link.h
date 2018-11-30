@@ -29,12 +29,12 @@
 #ifndef LINK_H
 #define LINK_H
 
+#include "goo/GooList.h"
 #include "Object.h"
 #include <memory>
 #include <set>
 
 class GooString;
-class GooList;
 class Array;
 class Dict;
 class Sound;
@@ -85,15 +85,15 @@ public:
 
   // A List of the next actions to execute in order.
   // The list contains pointer to LinkAction objects.
-  const GooList *nextActions() const;
+  const GooList<LinkAction*> *nextActions() const;
 
   // Sets the next action list. Takes ownership of the actions.
-  void setNextActions(GooList *actions);
+  void setNextActions(GooList<LinkAction*> *actions);
 
 private:
   static LinkAction *parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions);
 
-  GooList *nextActionList;
+  GooList<LinkAction*> *nextActionList;
 };
 
 //------------------------------------------------------------------------
@@ -452,14 +452,14 @@ public:
     StateList(const StateList &) = delete;
     StateList& operator=(const StateList &) = delete;
     State st;
-    GooList *list;
+    GooList<Ref*> *list;
   };
 
-  const GooList *getStateList() const { return stateList; }
+  const GooList<StateList*> *getStateList() const { return stateList; }
   bool getPreserveRB() const { return preserveRB; }
 
 private:
-  GooList *stateList;
+  GooList<StateList*> *stateList;
   bool preserveRB;
 };
 

@@ -1325,7 +1325,7 @@ void PSOutputDev::postInit()
     paperMatch = false;
   }
   Page *page;
-  paperSizes = new GooList();
+  paperSizes = new GooList<PSOutPaperSize*>();
   for (size_t pgi = 0; pgi < pages.size(); ++pgi) {
     const int pg = pages[pgi];
     page = catalog->getPage(pg);
@@ -1478,7 +1478,7 @@ PSOutputDev::~PSOutputDev() {
 #endif
   }
   if (paperSizes) {
-    deleteGooList<PSOutPaperSize>(paperSizes);
+    deleteGooList<PSOutPaperSize*>(paperSizes);
   }
   if (embFontList) {
     delete embFontList;

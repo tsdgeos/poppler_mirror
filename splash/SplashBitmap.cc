@@ -54,7 +54,7 @@
 
 SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
 			   SplashColorMode modeA, bool alphaA,
-			   bool topDown, GooList *separationListA) {
+			   bool topDown, GooList<GfxSeparationColorSpace*> *separationListA) {
   width = widthA;
   height = heightA;
   mode = modeA;
@@ -124,10 +124,10 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
   } else {
     alpha = nullptr;
   }
-  separationList = new GooList();
+  separationList = new GooList<GfxSeparationColorSpace*>();
   if (separationListA != nullptr)
     for (std::size_t i = 0; i < separationListA->size(); i++)
-      separationList->push_back(((GfxSeparationColorSpace *) separationListA->get(i))->copy());
+      separationList->push_back((GfxSeparationColorSpace*)((GfxSeparationColorSpace *) separationListA->get(i))->copy());
 }
 
 SplashBitmap *SplashBitmap::copy(SplashBitmap *src) {
@@ -159,7 +159,7 @@ SplashBitmap::~SplashBitmap() {
     }
   }
   gfree(alpha);
-  deleteGooList<GfxSeparationColorSpace>(separationList);
+  deleteGooList<GfxSeparationColorSpace*>(separationList);
 }
 
 

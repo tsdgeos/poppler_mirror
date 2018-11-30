@@ -26,7 +26,7 @@
 
 void printEncodings()
 {
-  GooList *encNames = globalParams->getEncodingNames();
+  GooList<GooString*> *encNames = globalParams->getEncodingNames();
 
   std::sort(encNames->begin(), encNames->end(), [](void *lhs, void *rhs) {
     return static_cast<GooString *>(lhs)->cmp(static_cast<GooString *>(rhs)) < 0;

@@ -2163,7 +2163,7 @@ poppler_document_init (PopplerDocument *document)
 struct _PopplerIndexIter
 {
 	PopplerDocument *document;
-	const GooList *items;
+	const GooList<OutlineItem*> *items;
 	int index;
 };
 
@@ -2238,7 +2238,7 @@ poppler_index_iter_new (PopplerDocument *document)
 {
 	PopplerIndexIter *iter;
 	Outline *outline;
-	const GooList *items;
+	const GooList<OutlineItem*> *items;
 
 	outline = document->doc->getOutline();
 	if (outline == nullptr)
@@ -2401,7 +2401,7 @@ poppler_index_iter_free (PopplerIndexIter *iter)
 
 struct _PopplerFontsIter
 {
-	GooList *items;
+	GooList<FontInfo*> *items;
 	int index;
 };
 
@@ -2632,7 +2632,7 @@ poppler_fonts_iter_copy (PopplerFontsIter *iter)
 
 	new_iter = g_slice_dup (PopplerFontsIter, iter);
 
-	new_iter->items = new GooList ();
+	new_iter->items = new GooList<FontInfo*> ();
 	for (std::size_t i = 0; i < iter->items->size(); i++) {
 		FontInfo *info = (FontInfo *)iter->items->get(i);
 		new_iter->items->push_back (new FontInfo (*info));
@@ -2653,13 +2653,13 @@ poppler_fonts_iter_free (PopplerFontsIter *iter)
 	if (G_UNLIKELY (iter == nullptr))
 		return;
 
-	deleteGooList<FontInfo> (iter->items);
+	deleteGooList<FontInfo*> (iter->items);
 
 	g_slice_free (PopplerFontsIter, iter);
 }
 
 static PopplerFontsIter *
-poppler_fonts_iter_new (GooList *items)
+poppler_fonts_iter_new (GooList<FontInfo*> *items)
 {
 	PopplerFontsIter *iter;
 
@@ -2763,7 +2763,7 @@ poppler_font_info_scan (PopplerFontInfo   *font_info,
 			int                n_pages,
 			PopplerFontsIter **iter)
 {
-	GooList *items;
+	GooList<FontInfo*> *items;
 
 	g_return_val_if_fail (iter != nullptr, FALSE);
 

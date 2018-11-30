@@ -28,7 +28,6 @@
 #include "Object.h"
 #include "Stream.h"
 
-class GooList;
 class JBIG2Segment;
 class JBIG2Bitmap;
 class JArithmeticDecoder;
@@ -134,8 +133,8 @@ private:
   unsigned int pageDefPixel;
   JBIG2Bitmap *pageBitmap;
   unsigned int defCombOp;
-  GooList *segments;		// [JBIG2Segment]
-  GooList *globalSegments;	// [JBIG2Segment]
+  GooList<JBIG2Segment*> *segments;
+  GooList<JBIG2Segment*> *globalSegments;
   Stream *curStr;
   unsigned char *dataPtr;
   unsigned char *dataEnd;

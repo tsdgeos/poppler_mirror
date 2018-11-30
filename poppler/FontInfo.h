@@ -89,7 +89,7 @@ public:
   // Destructor.
   ~FontInfoScanner();
 
-  GooList *scan(int nPages);
+  GooList<FontInfo*> *scan(int nPages);
 
 private:
 
@@ -98,7 +98,7 @@ private:
   std::set<int> fonts;
   std::set<int> visitedObjects;
 
-  void scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList);
+  void scanFonts(XRef *xrefA, Dict *resDict, GooList<FontInfo*> *fontsList);
 };
 
 #endif

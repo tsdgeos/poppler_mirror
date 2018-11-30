@@ -14,13 +14,13 @@
 #ifndef OPTIONALCONTENT_H
 #define OPTIONALCONTENT_H
 
+#include "goo/GooList.h"
 #include "Object.h"
 #include "CharTypes.h"
 #include <unordered_map>
 #include <memory>
 
 class GooString;
-class GooList;
 class XRef;
 
 class OptionalContentGroup;
@@ -135,12 +135,12 @@ private:
   OCDisplayNode(const GooString *nameA);
   OCDisplayNode(OptionalContentGroup *ocgA);
   void addChild(OCDisplayNode *child);
-  void addChildren(GooList *childrenA);
-  GooList *takeChildren();
+  void addChildren(GooList<OCDisplayNode*> *childrenA);
+  GooList<OCDisplayNode*> *takeChildren();
 
   GooString *name;		// display name (may be nullptr)
   OptionalContentGroup *ocg;	// nullptr for display labels
-  GooList *children;		// nullptr if there are no children
+  GooList<OCDisplayNode*> *children;		// nullptr if there are no children
 				//   [OCDisplayNode]
 };
 
