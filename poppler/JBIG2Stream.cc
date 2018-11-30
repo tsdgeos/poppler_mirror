@@ -1704,7 +1704,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length,
     } else if (huffDH == 1) {
       huffDHTable = huffTableE;
     } else {
-      if (i >= (unsigned int)codeTables->getLength()) {
+      if (i >= codeTables->size()) {
 	goto codeTableError;
       }
       huffDHTable = ((JBIG2CodeTable *)codeTables->get(i++))->getHuffTable();
@@ -1714,7 +1714,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length,
     } else if (huffDW == 1) {
       huffDWTable = huffTableC;
     } else {
-      if (i >= (unsigned int)codeTables->getLength()) {
+      if (i >= codeTables->size()) {
 	goto codeTableError;
       }
       huffDWTable = ((JBIG2CodeTable *)codeTables->get(i++))->getHuffTable();
@@ -1722,7 +1722,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length,
     if (huffBMSize == 0) {
       huffBMSizeTable = huffTableA;
     } else {
-      if (i >= (unsigned int)codeTables->getLength()) {
+      if (i >= codeTables->size()) {
 	goto codeTableError;
       }
       huffBMSizeTable =
@@ -1731,7 +1731,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length,
     if (huffAggInst == 0) {
       huffAggInstTable = huffTableA;
     } else {
-      if (i >= (unsigned int)codeTables->getLength()) {
+      if (i >= codeTables->size()) {
 	goto codeTableError;
       }
       huffAggInstTable =
@@ -2136,7 +2136,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
     } else if (huffFS == 1) {
       huffFSTable = huffTableG;
     } else {
-      if (i >= (unsigned int)codeTables->getLength()) {
+      if (i >= codeTables->size()) {
 	goto codeTableError;
       }
       huffFSTable = ((JBIG2CodeTable *)codeTables->get(i++))->getHuffTable();
@@ -2148,7 +2148,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
     } else if (huffDS == 2) {
       huffDSTable = huffTableJ;
     } else {
-      if (i >= (unsigned int)codeTables->getLength()) {
+      if (i >= codeTables->size()) {
 	goto codeTableError;
       }
       huffDSTable = ((JBIG2CodeTable *)codeTables->get(i++))->getHuffTable();
@@ -2160,7 +2160,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
     } else if (huffDT == 2) {
       huffDTTable = huffTableM;
     } else {
-      if (i >= (unsigned int)codeTables->getLength()) {
+      if (i >= codeTables->size()) {
 	goto codeTableError;
       }
       huffDTTable = ((JBIG2CodeTable *)codeTables->get(i++))->getHuffTable();
@@ -2170,7 +2170,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
     } else if (huffRDW == 1) {
       huffRDWTable = huffTableO;
     } else {
-      if (i >= (unsigned int)codeTables->getLength()) {
+      if (i >= codeTables->size()) {
 	goto codeTableError;
       }
       huffRDWTable = ((JBIG2CodeTable *)codeTables->get(i++))->getHuffTable();
@@ -2180,7 +2180,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
     } else if (huffRDH == 1) {
       huffRDHTable = huffTableO;
     } else {
-      if (i >= (unsigned int)codeTables->getLength()) {
+      if (i >= codeTables->size()) {
 	goto codeTableError;
       }
       huffRDHTable = ((JBIG2CodeTable *)codeTables->get(i++))->getHuffTable();
@@ -2190,7 +2190,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
     } else if (huffRDX == 1) {
       huffRDXTable = huffTableO;
     } else {
-      if (i >= (unsigned int)codeTables->getLength()) {
+      if (i >= codeTables->size()) {
 	goto codeTableError;
       }
       huffRDXTable = ((JBIG2CodeTable *)codeTables->get(i++))->getHuffTable();
@@ -2200,7 +2200,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
     } else if (huffRDY == 1) {
       huffRDYTable = huffTableO;
     } else {
-      if (i >= (unsigned int)codeTables->getLength()) {
+      if (i >= codeTables->size()) {
 	goto codeTableError;
       }
       huffRDYTable = ((JBIG2CodeTable *)codeTables->get(i++))->getHuffTable();
@@ -2208,7 +2208,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
     if (huffRSize == 0) {
       huffRSizeTable = huffTableA;
     } else {
-      if (i >= (unsigned int)codeTables->getLength()) {
+      if (i >= codeTables->size()) {
 	goto codeTableError;
       }
       huffRSizeTable =
@@ -4175,15 +4175,14 @@ void JBIG2Stream::readExtensionSeg(unsigned int length) {
 
 JBIG2Segment *JBIG2Stream::findSegment(unsigned int segNum) {
   JBIG2Segment *seg;
-  int i;
 
-  for (i = 0; i < globalSegments->getLength(); ++i) {
+  for (std::size_t i = 0; i < globalSegments->size(); ++i) {
     seg = (JBIG2Segment *)globalSegments->get(i);
     if (seg->getSegNum() == segNum) {
       return seg;
     }
   }
-  for (i = 0; i < segments->getLength(); ++i) {
+  for (std::size_t i = 0; i < segments->size(); ++i) {
     seg = (JBIG2Segment *)segments->get(i);
     if (seg->getSegNum() == segNum) {
       return seg;

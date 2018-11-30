@@ -399,11 +399,11 @@ namespace Poppler
     QSet<OptContentItem *> changedItems;
 
     const GooList *statesList = popplerLinkOCGState->getStateList();
-    for (int i = 0; i < statesList->getLength(); ++i) {
+    for (std::size_t i = 0; i < statesList->size(); ++i) {
         ::LinkOCGState::StateList *stateList = (::LinkOCGState::StateList*)statesList->get(i);
 
         GooList *refsList = stateList->list;
-        for (int j = 0; j < refsList->getLength(); ++j) {
+        for (std::size_t j = 0; j < refsList->size(); ++j) {
             Ref *ref = (Ref *)refsList->get(j);
             OptContentItem *item = d->itemFromRef(QString::number(ref->num));
 

@@ -1239,10 +1239,10 @@ void FormFieldText::setTextFontSize(int fontSize)
     if (defaultAppearance)
       delete defaultAppearance;
     defaultAppearance = new GooString;
-    for (int i = 0; i < daToks->getLength(); ++i) {
+    for (std::size_t i = 0; i < daToks->size(); ++i) {
       if (i > 0)
         defaultAppearance->append(' ');
-      if (i == idx) {
+      if (i == (std::size_t)idx) {
         defaultAppearance->appendf("{0:d}", fontSize);
       } else {
         defaultAppearance->append(static_cast<GooString*>(daToks->get(i)));
@@ -1270,8 +1270,8 @@ int FormFieldText::tokenizeDA(const GooString* da, GooList* daToks, const char* 
         }
         GooString* tok = new GooString(da, i, j - i);
         if (searchTok && !tok->cmp(searchTok))
-          idx = daToks->getLength();
-        daToks->push_back(tok);
+          idx = daToks->size();
+	daToks->push_back(tok);
         i = j;
       }
     }

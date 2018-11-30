@@ -770,7 +770,7 @@ DefaultAppearance::DefaultAppearance(GooString *da) {
       }
     }
     // Scan backwards: we are looking for the last set value
-    for (i = daToks->getLength()-1; i >= 0; --i) {
+    for (i = daToks->size()-1; i >= 0; --i) {
       if (!fontColor) {
         if (!((GooString *)daToks->get(i))->cmp("g") && i >= 1) {
           fontColor = std::make_unique<AnnotColor>(gatof(( (GooString *)daToks->get(i-1) )->c_str()));
@@ -4060,7 +4060,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         i = j;
       }
     }
-    for (i = 2; i < daToks->getLength(); ++i) {
+    for (i = 2; i < (int)daToks->size(); ++i) {
       if (i >= 2 && !((GooString *)daToks->get(i))->cmp("Tf")) {
         tfPos = i - 2;
       } else if (i >= 6 && !((GooString *)daToks->get(i))->cmp("Tm")) {
@@ -4214,7 +4214,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
     // write the DA string
     if (daToks) {
-      for (i = 0; i < daToks->getLength(); ++i) {
+      for (i = 0; i < (int)daToks->size(); ++i) {
         appearBuf->append((GooString *)daToks->get(i))->append(' ');
       }
     }
@@ -4313,7 +4313,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
       // write the DA string
       if (daToks) {
-        for (i = 0; i < daToks->getLength(); ++i) {
+        for (i = 0; i < (int)daToks->size(); ++i) {
           appearBuf->append((GooString *)daToks->get(i))->append(' ');
         }
       }
@@ -4403,7 +4403,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
       // write the DA string
       if (daToks) {
-        for (i = 0; i < daToks->getLength(); ++i) {
+        for (std::size_t i = 0; i < daToks->size(); ++i) {
           appearBuf->append((GooString *)daToks->get(i))->append(' ');
         }
       }
@@ -4468,7 +4468,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 	i = j;
       }
     }
-    for (i = 2; i < daToks->getLength(); ++i) {
+    for (std::size_t i = 2; i < daToks->size(); ++i) {
       if (i >= 2 && !((GooString *)daToks->get(i))->cmp("Tf")) {
 	tfPos = i - 2;
       } else if (i >= 6 && !((GooString *)daToks->get(i))->cmp("Tm")) {
@@ -4583,7 +4583,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
     // write the DA string
     if (daToks) {
-      for (j = 0; j < daToks->getLength(); ++j) {
+      for (std::size_t j = 0; j < daToks->size(); ++j) {
         appearBuf->append((GooString *)daToks->get(j))->append(' ');
       }
     }

@@ -1,4 +1,4 @@
-/*
+  /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
  *
@@ -45,7 +45,7 @@ toc* toc_private::load_from_outline(Outline *outline)
     }
 
     const GooList *items = outline->getItems();
-    if (!items || items->getLength() < 1) {
+    if (!items || items->size() < 1) {
         return nullptr;
     }
 
@@ -76,7 +76,7 @@ void toc_item_private::load(const OutlineItem *item)
 
 void toc_item_private::load_children(const GooList *items)
 {
-    const int num_items = items->getLength();
+    const int num_items = items->size();
     children.resize(num_items);
     for (int i = 0; i < num_items; ++i) {
         OutlineItem *item = (OutlineItem *)items->get(i);

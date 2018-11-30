@@ -157,7 +157,7 @@ public:
   void addImage(GooString *fname, GfxState *state);
 
   // number of images on the current page
-  int  getNumImages() { return imgList->getLength(); }
+  int  getNumImages() { return imgList->size(); }
 
   void dump(FILE *f, int pageNum, const std::vector<std::string>& backgroundImages);
 

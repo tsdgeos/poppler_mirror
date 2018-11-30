@@ -284,8 +284,7 @@ namespace Debug {
 
     void DocumentData::addTocChildren( QDomDocument * docSyn, QDomNode * parent, const GooList * items )
     {
-        int numItems = items->getLength();
-        for ( int i = 0; i < numItems; ++i )
+        for ( std::size_t i = 0; i < items->size(); ++i )
         {
             // iterate over every object in 'items'
 	    ::OutlineItem * outlineItem = (::OutlineItem *)items->get( i );

@@ -591,11 +591,11 @@ namespace Poppler {
             return nullptr;
 
         const GooList * items = outline->getItems();
-        if ( !items || items->getLength() < 1 )
+        if ( !items || items->size() < 1 )
             return nullptr;
 
         QDomDocument *toc = new QDomDocument();
-        if ( items->getLength() > 0 )
+        if ( items->size() > 0 )
            m_doc->addTocChildren( toc, toc, items );
 
         return toc;

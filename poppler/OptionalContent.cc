@@ -465,7 +465,7 @@ int OCDisplayNode::getNumChildren() const {
   if (!children) {
     return 0;
   }
-  return children->getLength();
+  return children->size();
 }
 
 OCDisplayNode *OCDisplayNode::getChild(int idx) const {

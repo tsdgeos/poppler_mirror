@@ -366,7 +366,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
     if ( nextActions )
     {
       QVector<Link *> links;
-      for ( int i = 0; i < nextActions->getLength(); ++i )
+      for ( std::size_t i = 0; i < nextActions->size(); ++i )
       {
         links << convertLinkActionToLink( static_cast< ::LinkAction * >( nextActions->get( i ) ), parentDoc, linkArea );
       }

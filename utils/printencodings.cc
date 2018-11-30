@@ -33,7 +33,7 @@ void printEncodings()
   });
 
   printf("Available encodings are:\n");
-  for (int i = 0; i < encNames->getLength(); ++i) {
+  for (std::size_t i = 0; i < encNames->size(); ++i) {
     GooString *enc = (GooString*)encNames->get(i);
     printf("%s\n", enc->c_str());
   }

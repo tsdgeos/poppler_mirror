@@ -48,9 +48,6 @@ public:
   explicit GooList(const std::vector<void *>& vec) : std::vector<void *>(vec) {}
   explicit GooList(std::vector<void *>&& vec) : std::vector<void *>(std::move(vec)) {}
 
-  // Get the number of elements.
-  int getLength() const { return size(); }
-
   // Return the <i>th element.
   // Assumes 0 <= i < length.
   void *get(int i) const { return (*this)[i]; }

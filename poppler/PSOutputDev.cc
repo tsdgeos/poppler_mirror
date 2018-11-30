@@ -1357,12 +1357,12 @@ void PSOutputDev::postInit()
       paperWidth = w;
     if (h  > paperHeight)
       paperHeight = h;
-    for (i = 0; i < paperSizes->getLength(); ++i) {
+    for (i = 0; i < (int)paperSizes->size(); ++i) {
       size = (PSOutPaperSize *)paperSizes->get(i);
       if (pageDimensionEqual(w, size->w) && pageDimensionEqual(h, size->h))
         break;
     }
-    if (i == paperSizes->getLength()) {
+    if (i == (int)paperSizes->size()) {
       const StandardMedia *media = standardMedia;
       GooString *name = nullptr;
       while (media->name) {
@@ -1566,7 +1566,7 @@ void PSOutputDev::writeHeader(const std::vector<int> &pages,
 
   switch (mode) {
   case psModePS:
-    for (int i = 0; i < paperSizes->getLength(); ++i) {
+    for (std::size_t i = 0; i < paperSizes->size(); ++i) {
       size = (PSOutPaperSize *)paperSizes->get(i);
       writePSFmt("%%{0:s} {1:t} {2:d} {3:d} 0 () ()\n",
                  i==0 ? "DocumentMedia:" : "+", size->name, size->w, size->h);

@@ -2377,7 +2377,7 @@ poppler_index_iter_next (PopplerIndexIter *iter)
 	g_return_val_if_fail (iter != nullptr, FALSE);
 
 	iter->index++;
-	if (iter->index >= iter->items->getLength())
+	if (iter->index >= (int)iter->items->size())
 		return FALSE;
 
 	return TRUE;
@@ -2609,7 +2609,7 @@ poppler_fonts_iter_next (PopplerFontsIter *iter)
 	g_return_val_if_fail (iter != nullptr, FALSE);
 
 	iter->index++;
-	if (iter->index >= iter->items->getLength())
+	if (iter->index >= (int)iter->items->size())
 		return FALSE;
 
 	return TRUE;
@@ -2633,7 +2633,7 @@ poppler_fonts_iter_copy (PopplerFontsIter *iter)
 	new_iter = g_slice_dup (PopplerFontsIter, iter);
 
 	new_iter->items = new GooList ();
-	for (int i = 0; i < iter->items->getLength(); i++) {
+	for (std::size_t i = 0; i < iter->items->size(); i++) {
 		FontInfo *info = (FontInfo *)iter->items->get(i);
 		new_iter->items->push_back (new FontInfo (*info));
 	}
@@ -2771,7 +2771,7 @@ poppler_font_info_scan (PopplerFontInfo   *font_info,
 
 	if (items == nullptr) {
 		*iter = nullptr;
-	} else if (items->getLength() == 0) {
+	} else if (items->empty()) {
 		*iter = nullptr;
 		delete items;
 	} else {

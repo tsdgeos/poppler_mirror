@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
       printf("name                                 object ID substitute font                      substitute font file\n");
       printf("------------------------------------ --------- ------------------------------------ ------------------------------------\n");
       if (fonts) {
-        for (int i = 0; i < fonts->getLength(); ++i) {
+        for (std::size_t i = 0; i < fonts->size(); ++i) {
           FontInfo *font = (FontInfo *)fonts->get(i);
           if (font->getFile()) {
             printf("%-36s",
@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
       printf("name                                 type              encoding         emb sub uni object ID\n");
       printf("------------------------------------ ----------------- ---------------- --- --- --- ---------\n");
       if (fonts) {
-        for (int i = 0; i < fonts->getLength(); ++i) {
+        for (std::size_t i = 0; i < fonts->size(); ++i) {
           FontInfo *font = (FontInfo *)fonts->get(i);
           printf("%-36s %-17s %-16s %-3s %-3s %-3s",
                  font->getName() ? font->getName()->c_str() : "[none]",

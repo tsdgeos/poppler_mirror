@@ -137,7 +137,7 @@ GooList *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemR
 
   gfree(alreadyRead);
 
-  if (!items->getLength()) {
+  if (items->empty()) {
     delete items;
     items = nullptr;
   }

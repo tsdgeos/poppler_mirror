@@ -2336,11 +2336,11 @@ TextWordList::~TextWordList() {
 }
 
 int TextWordList::getLength() {
-  return words->getLength();
+  return words->size();
 }
 
 TextWord *TextWordList::get(int idx) {
-  if (idx < 0 || idx >= words->getLength()) {
+  if (idx < 0 || idx >= (int)words->size()) {
     return nullptr;
   }
   return (TextWord *)words->get(idx);
@@ -2476,11 +2476,10 @@ void TextPage::updateFont(GfxState *state) {
   const char *name;
   int code, mCode, letterCode, anyCode;
   double w;
-  int i;
 
   // get the font info object
   curFont = nullptr;
-  for (i = 0; i < fonts->getLength(); ++i) {
+  for (std::size_t i = 0; i < fonts->size(); ++i) {
     curFont = (TextFontInfo *)fonts->get(i);
     if (curFont->matches(state)) {
       break;
@@ -2834,7 +2833,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   if (doHTML) {
 
     //----- handle underlining
-    for (i = 0; i < underlines->getLength(); ++i) {
+    for (std::size_t i = 0; i < underlines->size(); ++i) {
       underline = (TextUnderline *)underlines->get(i);
       if (underline->horiz) {
 	// rot = 0
@@ -2897,7 +2896,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
     }
 
     //----- handle links
-    for (i = 0; i < links->getLength(); ++i) {
+    for (std::size_t i = 0; i < links->size(); ++i) {
       link = (TextLink *)links->get(i);
 
       // rot = 0
@@ -4459,7 +4458,7 @@ void TextSelectionDumper::finishLine()
     lines = (GooList **)grealloc(lines, linesSize * sizeof(GooList *));
   }
 
-  if (words && words->getLength() > 0)
+  if (words && words->size() > 0)
     lines[nLines++] = words;
   else if (words)
     delete words;
@@ -4517,7 +4516,7 @@ void TextSelectionDumper::endPage()
 GooString *TextSelectionDumper::getText (void)
 {
   GooString *text;
-  int i, j;
+  int i;
   UnicodeMap *uMap;
   char space[8], eol[16];
   int spaceLen, eolLen;
@@ -4532,11 +4531,11 @@ GooString *TextSelectionDumper::getText (void)
 
   for (i = 0; i < nLines; i++) {
     GooList *lineWords = lines[i];
-    for (j = 0; j < lineWords->getLength(); j++) {
+    for (std::size_t j = 0; j < lineWords->size(); j++) {
       TextWordSelection *sel = (TextWordSelection *)lineWords->get(j);
 
       page->dumpFragment (sel->word->text + sel->begin, sel->end - sel->begin, uMap, text);
-      if (j < lineWords->getLength() - 1)
+      if (j < lineWords->size() - 1)
         text->append(space, spaceLen);
     }
     if (i < nLines - 1)
@@ -4733,7 +4732,7 @@ void TextSelectionPainter::endPage()
   state->setFillColor(glyph_color);
   out->updateFillColor(state);
 
-  for (int i = 0; i < selectionList->getLength(); i++) {
+  for (std::size_t i = 0; i < selectionList->size(); i++) {
     TextWordSelection *sel = (TextWordSelection *) selectionList->get(i);
     int begin = sel->begin;
 

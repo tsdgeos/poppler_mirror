@@ -54,7 +54,7 @@ PDFDoc *
 PDFDocFactory::createPDFDoc(const GooString &uri, GooString *ownerPassword,
                                     GooString *userPassword, void *guiDataA)
 {
-  for (int i = builders->getLength() - 1; i >= 0 ; i--) {
+  for (int i = builders->size() - 1; i >= 0 ; i--) {
     PDFDocBuilder *builder = (PDFDocBuilder *) builders->get(i);
     if (builder->supports(uri)) {
       return builder->buildPDFDoc(uri, ownerPassword, userPassword, guiDataA);

@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  nFiles = embeddedFiles->getLength();
+  nFiles = embeddedFiles->size();
 
   // list embedded files
   if (doList) {
