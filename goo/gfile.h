@@ -80,6 +80,9 @@ extern "C" {
 
 class GooString;
 
+/* Integer type for all file offsets and file sizes */
+typedef long long Goffset;
+
 //------------------------------------------------------------------------
 
 // Append a file name to a path string.  <path> may be an empty

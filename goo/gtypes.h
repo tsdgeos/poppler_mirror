@@ -35,6 +35,5 @@ typedef unsigned char Guchar;
 typedef unsigned short Gushort;
 typedef unsigned int Guint;
 typedef unsigned long Gulong;
-typedef long long Goffset;
 
 #endif
