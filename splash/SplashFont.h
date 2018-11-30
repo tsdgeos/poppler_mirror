@@ -22,7 +22,6 @@
 #ifndef SPLASHFONT_H
 #define SPLASHFONT_H
 
-#include "goo/gtypes.h"
 #include "SplashTypes.h"
 #include "SplashClip.h"
 

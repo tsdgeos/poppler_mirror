@@ -23,7 +23,6 @@
 #ifndef FOFITYPE1_H
 #define FOFITYPE1_H
 
-#include "goo/gtypes.h"
 #include "FoFiBase.h"
 
 //------------------------------------------------------------------------

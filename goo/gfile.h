@@ -76,7 +76,6 @@ extern "C" {
 #  endif
 #endif
 }
-#include "gtypes.h"
 
 class GooString;
 

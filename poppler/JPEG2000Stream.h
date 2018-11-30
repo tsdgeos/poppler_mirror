@@ -18,7 +18,6 @@
 #define JPEG2000STREAM_H
 
 #include "config.h"
-#include "goo/gtypes.h"
 #include "Object.h"
 #include "Stream.h"
 

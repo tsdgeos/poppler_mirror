@@ -35,7 +35,6 @@
 #define XREF_H
 
 #include "poppler-config.h"
-#include "goo/gtypes.h"
 #include "Object.h"
 #include "Stream.h"
 #include "PopplerCache.h"

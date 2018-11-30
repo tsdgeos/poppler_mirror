@@ -25,7 +25,6 @@
 
 #include "poppler-config.h"
 
-#include "goo/gtypes.h"
 #include "Object.h"
 
 class GooString;

@@ -21,8 +21,6 @@
 #ifndef SPLASHFONTFILEID_H
 #define SPLASHFONTFILEID_H
 
-#include "goo/gtypes.h"
-
 //------------------------------------------------------------------------
 // SplashFontFileID
 //------------------------------------------------------------------------

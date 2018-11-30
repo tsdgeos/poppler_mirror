@@ -34,7 +34,6 @@
 
 #include "poppler-config.h"
 #include "CharTypes.h"
-#include "goo/gtypes.h"
 
 struct CharCodeToUnicodeString;
 class GooString;

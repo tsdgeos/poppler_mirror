@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 
-#include "goo/gtypes.h"
 #include "Object.h"
 
 class PageLabelInfo {

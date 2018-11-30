@@ -27,7 +27,6 @@
 #ifndef FUNCTION_H
 #define FUNCTION_H
 
-#include "goo/gtypes.h"
 #include "Object.h"
 #include <set>
 

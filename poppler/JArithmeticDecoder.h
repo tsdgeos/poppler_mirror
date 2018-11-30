@@ -25,8 +25,6 @@
 #ifndef JARITHMETICDECODER_H
 #define JARITHMETICDECODER_H
 
-#include "goo/gtypes.h"
-
 class Stream;
 
 //------------------------------------------------------------------------

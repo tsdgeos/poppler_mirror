@@ -25,8 +25,6 @@
 #ifndef UNICODETYPETABLE_H
 #define UNICODETYPETABLE_H
 
-#include "goo/gtypes.h"
-
 extern bool unicodeTypeL(Unicode c);
 
 extern bool unicodeTypeR(Unicode c);

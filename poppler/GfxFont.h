@@ -33,7 +33,6 @@
 #ifndef GFXFONT_H
 #define GFXFONT_H
 
-#include "goo/gtypes.h"
 #include "goo/GooString.h"
 #include "Object.h"
 #include "CharTypes.h"

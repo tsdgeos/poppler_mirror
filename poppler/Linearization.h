@@ -11,7 +11,6 @@
 #ifndef LINEARIZATION_H
 #define LINEARIZATION_H
 
-#include "goo/gtypes.h"
 #include "Object.h"
 class BaseStream;
 

@@ -36,7 +36,6 @@
 #define OUTPUTDEV_H
 
 #include "poppler-config.h"
-#include "goo/gtypes.h"
 #include "CharTypes.h"
 #include "Object.h"
 #include "PopplerCache.h"

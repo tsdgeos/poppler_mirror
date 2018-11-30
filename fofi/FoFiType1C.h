@@ -25,7 +25,6 @@
 #ifndef FOFITYPE1C_H
 #define FOFITYPE1C_H
 
-#include "goo/gtypes.h"
 #include "FoFiBase.h"
 
 class GooString;

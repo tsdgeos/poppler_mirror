@@ -14,7 +14,6 @@
 #ifndef STRUCTELEMENT_H
 #define STRUCTELEMENT_H
 
-#include "goo/gtypes.h"
 #include "goo/GooString.h"
 #include "MarkedContentOutputDev.h"
 #include "Object.h"

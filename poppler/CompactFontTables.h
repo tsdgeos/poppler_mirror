@@ -23,8 +23,6 @@
 #ifndef COMPACTFONTINFO_H
 #define COMPACTFONTINFO_H
 
-#include "goo/gtypes.h"
-
 static char *type1CStdStrings[391] = {
   ".notdef",
   "space",

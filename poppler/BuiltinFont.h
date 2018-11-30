@@ -23,8 +23,6 @@
 #ifndef BUILTINFONT_H
 #define BUILTINFONT_H
 
-#include "goo/gtypes.h"
-
 struct BuiltinFont;
 class BuiltinFontWidths;
 

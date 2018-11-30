@@ -35,7 +35,6 @@
 #define HTMLOUTPUTDEV_H
 
 #include <stdio.h>
-#include "goo/gtypes.h"
 #include "goo/GooList.h"
 #include "GfxFont.h"
 #include "OutputDev.h"

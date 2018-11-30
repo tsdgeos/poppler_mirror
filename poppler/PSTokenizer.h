@@ -23,8 +23,6 @@
 #ifndef PSTOKENIZER_H
 #define PSTOKENIZER_H
 
-#include "goo/gtypes.h"
-
 //------------------------------------------------------------------------
 
 class PSTokenizer {

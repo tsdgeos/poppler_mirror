@@ -33,7 +33,6 @@
 #include <mutex>
 
 #include "poppler-config.h"
-#include "goo/gtypes.h"
 #include <cairo-ft.h>
 
 #include "GfxFont.h"

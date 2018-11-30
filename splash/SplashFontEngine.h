@@ -29,7 +29,6 @@
 
 #include <array>
 
-#include "goo/gtypes.h"
 #include "SplashTypes.h"
 
 class SplashT1FontEngine;

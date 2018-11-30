@@ -40,7 +40,6 @@
 #ifndef CAIRO_RESCALE_BOX_H
 #define CAIRO_RESCALE_BOX_H
 
-#include "goo/gtypes.h"
 #include <cairo.h>
 
 class CairoRescaleBox {

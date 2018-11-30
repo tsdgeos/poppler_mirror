@@ -31,7 +31,6 @@
 #include "stddef.h"
 #include <unordered_map>
 #include <string>
-#include "goo/gtypes.h"
 #include "FoFiBase.h"
 
 class GooString;

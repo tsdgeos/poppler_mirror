@@ -7,8 +7,6 @@
 #ifndef SPLASHGLYPHBITMAP_H
 #define SPLASHGLYPHBITMAP_H
 
-#include "goo/gtypes.h"
-
 //------------------------------------------------------------------------
 // SplashGlyphBitmap
 //------------------------------------------------------------------------

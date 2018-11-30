@@ -28,7 +28,6 @@
 #ifndef DECRYPT_H
 #define DECRYPT_H
 
-#include "goo/gtypes.h"
 #include "goo/GooString.h"
 #include "Object.h"
 #include "Stream.h"

@@ -575,7 +575,6 @@ if(ENABLE_XPDF_HEADERS)
     goo/GooList.h
     goo/GooTimer.h
     goo/GooString.h
-    goo/gtypes.h
     goo/gmem.h
     goo/gdir.h
     goo/gfile.h

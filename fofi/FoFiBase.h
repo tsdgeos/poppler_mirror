@@ -23,8 +23,6 @@
 #ifndef FOFIBASE_H
 #define FOFIBASE_H
 
-#include "goo/gtypes.h"
-
 //------------------------------------------------------------------------
 
 typedef void (*FoFiOutputFunc)(void *stream, const char *data, int len);

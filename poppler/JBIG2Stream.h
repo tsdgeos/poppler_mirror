@@ -25,7 +25,6 @@
 #ifndef JBIG2STREAM_H
 #define JBIG2STREAM_H
 
-#include "goo/gtypes.h"
 #include "Object.h"
 #include "Stream.h"
 

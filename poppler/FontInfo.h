@@ -26,7 +26,6 @@
 #define FONT_INFO_H
 
 #include "Object.h"
-#include "goo/gtypes.h"
 #include "goo/GooList.h"
 
 class GfxFont;

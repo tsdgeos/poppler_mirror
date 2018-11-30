@@ -9,7 +9,6 @@
 #ifndef JPXSTREAM_H
 #define JPXSTREAM_H
 
-#include "goo/gtypes.h"
 #include "Object.h"
 #include "Stream.h"
 

@@ -34,7 +34,6 @@
 #define GFX_H
 
 #include "poppler-config.h"
-#include "goo/gtypes.h"
 #include "goo/GooList.h"
 #include "GfxState.h"
 #include "Object.h"

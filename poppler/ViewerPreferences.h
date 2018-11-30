@@ -11,8 +11,6 @@
 #ifndef VIEWERPREFERENCES_H
 #define VIEWERPREFERENCES_H
 
-#include "goo/gtypes.h"
-
 class Dict;
 
 //------------------------------------------------------------------------

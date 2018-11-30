@@ -29,7 +29,6 @@
 #include <atomic>
 
 #include "poppler-config.h"
-#include "goo/gtypes.h"
 #include "CharTypes.h"
 
 class GooString;

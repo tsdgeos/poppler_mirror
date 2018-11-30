@@ -14,7 +14,6 @@
 #define HINTS_H
 
 #include <string.h>
-#include "goo/gtypes.h"
 #include <vector>
 #include "PDFDoc.h"
 
