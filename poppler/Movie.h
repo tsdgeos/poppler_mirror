@@ -44,7 +44,7 @@ struct MovieActivationParameters {
 
   struct MovieTime {
     MovieTime() { units_per_second = 0; }
-    Gulong units;
+    unsigned long units;
     int units_per_second; // 0 : defined by movie
   };
 

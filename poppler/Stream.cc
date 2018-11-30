@@ -529,8 +529,8 @@ unsigned char *ImageStream::getLine() {
       p++;
     }
   } else {
-    const Gulong bitMask = (1 << nBits) - 1;
-    Gulong buf = 0;
+    const unsigned long bitMask = (1 << nBits) - 1;
+    unsigned long buf = 0;
     int bits = 0;
     unsigned char *p = inputLine;
     for (int i = 0; i < nVals; ++i) {
@@ -628,7 +628,7 @@ bool StreamPredictor::getNextLine() {
   unsigned char upLeftBuf[gfxColorMaxComps * 2 + 1];
   int left, up, upLeft, p, pa, pb, pc;
   int c;
-  Gulong inBuf, outBuf, bitMask;
+  unsigned long inBuf, outBuf, bitMask;
   int inBits, outBits;
   int i, j, k, kk;
 
@@ -1194,7 +1194,7 @@ void ASCII85Stream::reset() {
 
 int ASCII85Stream::lookChar() {
   int k;
-  Gulong t;
+  unsigned long t;
 
   if (index >= n) {
     if (eof)

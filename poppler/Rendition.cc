@@ -185,7 +185,7 @@ void MediaParameters::parseMediaPlayParameters(Object* obj) {
 	if (ddict.isDict()) {
 	  Object tmp2 = ddict.dictLookup("V");
 	  if (tmp2.isNum()) {
-	    duration = Gulong(tmp2.getNum());
+	    duration = (unsigned long)(tmp2.getNum());
 	  }
 	}
       }

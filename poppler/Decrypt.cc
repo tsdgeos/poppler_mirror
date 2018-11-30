@@ -1123,34 +1123,34 @@ static void aes256DecryptBlock(DecryptAES256State *s, unsigned char *in, bool la
 //------------------------------------------------------------------------
 
 // this works around a bug in older Sun compilers
-static inline Gulong rotateLeft(Gulong x, int r) {
+static inline unsigned long rotateLeft(unsigned long x, int r) {
   x &= 0xffffffff;
   return ((x << r) | (x >> (32 - r))) & 0xffffffff;
 }
 
-static inline Gulong md5Round1(Gulong a, Gulong b, Gulong c, Gulong d,
-			       Gulong Xk,  Gulong s, Gulong Ti) {
+static inline unsigned long md5Round1(unsigned long a, unsigned long b, unsigned long c, unsigned long d,
+			       unsigned long Xk,  unsigned long s, unsigned long Ti) {
   return b + rotateLeft((a + ((b & c) | (~b & d)) + Xk + Ti), s);
 }
 
-static inline Gulong md5Round2(Gulong a, Gulong b, Gulong c, Gulong d,
-			       Gulong Xk,  Gulong s, Gulong Ti) {
+static inline unsigned long md5Round2(unsigned long a, unsigned long b, unsigned long c, unsigned long d,
+			       unsigned long Xk,  unsigned long s, unsigned long Ti) {
   return b + rotateLeft((a + ((b & d) | (c & ~d)) + Xk + Ti), s);
 }
 
-static inline Gulong md5Round3(Gulong a, Gulong b, Gulong c, Gulong d,
-			       Gulong Xk,  Gulong s, Gulong Ti) {
+static inline unsigned long md5Round3(unsigned long a, unsigned long b, unsigned long c, unsigned long d,
+			       unsigned long Xk,  unsigned long s, unsigned long Ti) {
   return b + rotateLeft((a + (b ^ c ^ d) + Xk + Ti), s);
 }
 
-static inline Gulong md5Round4(Gulong a, Gulong b, Gulong c, Gulong d,
-			       Gulong Xk,  Gulong s, Gulong Ti) {
+static inline unsigned long md5Round4(unsigned long a, unsigned long b, unsigned long c, unsigned long d,
+			       unsigned long Xk,  unsigned long s, unsigned long Ti) {
   return b + rotateLeft((a + (c ^ (b | ~d)) + Xk + Ti), s);
 }
 
 void md5(const unsigned char *msg, int msgLen, unsigned char *digest) {
-  Gulong x[16] = {};
-  Gulong a, b, c, d, aa, bb, cc, dd;
+  unsigned long x[16] = {};
+  unsigned long a, b, c, d, aa, bb, cc, dd;
   int n64;
   int i, j, k;
 

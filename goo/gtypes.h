@@ -27,10 +27,5 @@
 
 #include "poppler-config.h"
 
-/*
- * These have stupid names to avoid conflicts with <sys/types.h>,
- * which on various systems defines some random subset of these.
- */
-typedef unsigned long Gulong;
 
 #endif
