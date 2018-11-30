@@ -604,7 +604,7 @@ bool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fol
   } else if (obj2.isRef()) {
     // certain buggy PDF generators generate "/Prev NNN 0 R" instead
     // of "/Prev NNN"
-    pos2 = (Guint)obj2.getRefNum();
+    pos2 = (unsigned int)obj2.getRefNum();
     if (pos2 != *pos) {
       *pos = pos2;
       more = true;
@@ -1141,7 +1141,7 @@ Object XRef::fetch(int num, int gen, int recursion) {
       goto err;
     }
 #endif
-    if (e->offset >= (Guint)size ||
+    if (e->offset >= (unsigned int)size ||
 	entries[e->offset].type != xrefEntryUncompressed) {
       error(errSyntaxError, -1, "Invalid object stream");
       goto err;

@@ -144,7 +144,7 @@ public:
     markInfoUserProperties = 1 << 2,
     markInfoSuspects       = 1 << 3,
   };
-  Guint getMarkInfo();
+  unsigned int getMarkInfo();
 
   // Find a page, given its object ID.  Returns page number, or 0 if
   // not found.
@@ -266,7 +266,7 @@ private:
   GooString *baseURI;		// base URI for URI-type links
   Object metadata;		// metadata stream
   StructTreeRoot *structTreeRoot;	// structure tree root
-  Guint markInfo;               // Flags from MarkInfo dictionary
+  unsigned int markInfo;               // Flags from MarkInfo dictionary
   Object outline;		// outline dictionary
   Object acroForm;		// AcroForm dictionary
   Object viewerPreferences;     // ViewerPreference dictionary

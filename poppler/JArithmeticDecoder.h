@@ -44,7 +44,7 @@ public:
   void reset();
   int getContextSize() { return contextSize; }
   void copyFrom(JArithmeticDecoderStats *stats);
-  void setEntry(Guint cx, int i, int mps);
+  void setEntry(unsigned int cx, int i, int mps);
 
 private:
 
@@ -85,39 +85,39 @@ public:
   void cleanup();
 
   // Decode one bit.
-  int decodeBit(Guint context, JArithmeticDecoderStats *stats);
+  int decodeBit(unsigned int context, JArithmeticDecoderStats *stats);
 
   // Decode eight bits.
-  int decodeByte(Guint context, JArithmeticDecoderStats *stats);
+  int decodeByte(unsigned int context, JArithmeticDecoderStats *stats);
 
   // Returns false for OOB, otherwise sets *<x> and returns true.
   bool decodeInt(int *x, JArithmeticDecoderStats *stats);
 
-  Guint decodeIAID(Guint codeLen,
+  unsigned int decodeIAID(unsigned int codeLen,
 		   JArithmeticDecoderStats *stats);
 
   void resetByteCounter() { nBytesRead = 0; }
-  Guint getByteCounter() { return nBytesRead; }
+  unsigned int getByteCounter() { return nBytesRead; }
 
 private:
 
-  Guint readByte();
+  unsigned int readByte();
   int decodeIntBit(JArithmeticDecoderStats *stats);
   void byteIn();
 
-  static Guint qeTab[47];
+  static unsigned int qeTab[47];
   static int nmpsTab[47];
   static int nlpsTab[47];
   static int switchTab[47];
 
-  Guint buf0, buf1;
-  Guint c, a;
+  unsigned int buf0, buf1;
+  unsigned int c, a;
   int ct;
 
-  Guint prev;			// for the integer decoder
+  unsigned int prev;			// for the integer decoder
 
   Stream *str;
-  Guint nBytesRead;
+  unsigned int nBytesRead;
   int dataLen;
   bool limitStream;
 };

@@ -366,7 +366,7 @@ void Splash::pipeRun(SplashPipe *pipe) {
 #ifdef SPLASH_CMYK
     if (bitmap->mode == splashModeCMYK8 || bitmap->mode == splashModeDeviceN8) {
       if (state->fillOverprint && state->overprintMode && pipe->pattern->isCMYK()) {
-        Guint mask = 15;
+        unsigned int mask = 15;
         if (pipe->cSrcVal[0] == 0) {
           mask &= ~1;
         }
@@ -1875,7 +1875,7 @@ void Splash::setTransfer(unsigned char *red, unsigned char *green, unsigned char
   state->setTransfer(red, green, blue, gray);
 }
 
-void Splash::setOverprintMask(Guint overprintMask, bool additive) {
+void Splash::setOverprintMask(unsigned int overprintMask, bool additive) {
   state->overprintMask = overprintMask;
   state->overprintAdditive = additive;
 }
@@ -3321,8 +3321,8 @@ void Splash::scaleMaskYdXd(SplashImageMaskSource src, void *srcData,
 			   int scaledWidth, int scaledHeight,
 			   SplashBitmap *dest) {
   unsigned char *lineBuf;
-  Guint *pixBuf;
-  Guint pix;
+  unsigned int *pixBuf;
+  unsigned int pix;
   unsigned char *destPtr;
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx, d, d0, d1;
   int i, j;
@@ -3337,7 +3337,7 @@ void Splash::scaleMaskYdXd(SplashImageMaskSource src, void *srcData,
 
   // allocate buffers
   lineBuf = (unsigned char *)gmalloc(srcWidth);
-  pixBuf = (Guint *)gmallocn_checkoverflow(srcWidth, sizeof(int));
+  pixBuf = (unsigned int *)gmallocn_checkoverflow(srcWidth, sizeof(int));
   if (unlikely(!pixBuf)) {
       error(errInternal, -1, "Couldn't allocate memory for pixBux in Splash::scaleMaskYdXd");
       gfree(lineBuf);
@@ -3407,8 +3407,8 @@ void Splash::scaleMaskYdXu(SplashImageMaskSource src, void *srcData,
 			   int scaledWidth, int scaledHeight,
 			   SplashBitmap *dest) {
   unsigned char *lineBuf;
-  Guint *pixBuf;
-  Guint pix;
+  unsigned int *pixBuf;
+  unsigned int pix;
   unsigned char *destPtr;
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, d;
   int i, j;
@@ -3429,7 +3429,7 @@ void Splash::scaleMaskYdXu(SplashImageMaskSource src, void *srcData,
 
   // allocate buffers
   lineBuf = (unsigned char *)gmalloc(srcWidth);
-  pixBuf = (Guint *)gmallocn(srcWidth, sizeof(int));
+  pixBuf = (unsigned int *)gmallocn(srcWidth, sizeof(int));
 
   // init y scale Bresenham
   yt = 0;
@@ -3488,7 +3488,7 @@ void Splash::scaleMaskYuXd(SplashImageMaskSource src, void *srcData,
 			   int scaledWidth, int scaledHeight,
 			   SplashBitmap *dest) {
   unsigned char *lineBuf;
-  Guint pix;
+  unsigned int pix;
   unsigned char *destPtr0, *destPtr;
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx, d, d0, d1;
   int i;
@@ -3570,7 +3570,7 @@ void Splash::scaleMaskYuXu(SplashImageMaskSource src, void *srcData,
 			   int scaledWidth, int scaledHeight,
 			   SplashBitmap *dest) {
   unsigned char *lineBuf;
-  Guint pix;
+  unsigned int pix;
   unsigned char *destPtr0, *destPtr;
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx;
   int i, j;
@@ -4227,13 +4227,13 @@ void Splash::scaleImageYdXd(SplashImageSource src, void *srcData,
 			    int scaledWidth, int scaledHeight,
 			    SplashBitmap *dest) {
   unsigned char *lineBuf, *alphaLineBuf;
-  Guint *pixBuf, *alphaPixBuf;
-  Guint pix0, pix1, pix2;
+  unsigned int *pixBuf, *alphaPixBuf;
+  unsigned int pix0, pix1, pix2;
 #ifdef SPLASH_CMYK
-  Guint pix3;
-  Guint pix[SPOT_NCOMPS+4], cp;
+  unsigned int pix3;
+  unsigned int pix[SPOT_NCOMPS+4], cp;
 #endif
-  Guint alpha;
+  unsigned int alpha;
   unsigned char *destPtr, *destAlphaPtr;
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx, xxa, d, d0, d1;
   int i, j;
@@ -4251,14 +4251,14 @@ void Splash::scaleImageYdXd(SplashImageSource src, void *srcData,
   if (unlikely(!lineBuf)) {
     return;
   }
-  pixBuf = (Guint *)gmallocn_checkoverflow(srcWidth, nComps * sizeof(int));
+  pixBuf = (unsigned int *)gmallocn_checkoverflow(srcWidth, nComps * sizeof(int));
   if (unlikely(!pixBuf)) {
     gfree(lineBuf);
     return;
   }
   if (srcAlpha) {
     alphaLineBuf = (unsigned char *)gmalloc(srcWidth);
-    alphaPixBuf = (Guint *)gmallocn(srcWidth, sizeof(int));
+    alphaPixBuf = (unsigned int *)gmallocn(srcWidth, sizeof(int));
   } else {
     alphaLineBuf = nullptr;
     alphaPixBuf = nullptr;
@@ -4470,9 +4470,9 @@ void Splash::scaleImageYdXu(SplashImageSource src, void *srcData,
 			    int scaledWidth, int scaledHeight,
 			    SplashBitmap *dest) {
   unsigned char *lineBuf, *alphaLineBuf;
-  Guint *pixBuf, *alphaPixBuf;
-  Guint pix[splashMaxColorComps];
-  Guint alpha;
+  unsigned int *pixBuf, *alphaPixBuf;
+  unsigned int pix[splashMaxColorComps];
+  unsigned int alpha;
   unsigned char *destPtr, *destAlphaPtr;
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, d;
   int i, j;
@@ -4487,10 +4487,10 @@ void Splash::scaleImageYdXu(SplashImageSource src, void *srcData,
 
   // allocate buffers
   lineBuf = (unsigned char *)gmallocn(srcWidth, nComps);
-  pixBuf = (Guint *)gmallocn(srcWidth, nComps * sizeof(int));
+  pixBuf = (unsigned int *)gmallocn(srcWidth, nComps * sizeof(int));
   if (srcAlpha) {
     alphaLineBuf = (unsigned char *)gmalloc(srcWidth);
-    alphaPixBuf = (Guint *)gmallocn(srcWidth, sizeof(int));
+    alphaPixBuf = (unsigned int *)gmallocn(srcWidth, sizeof(int));
   } else {
     alphaLineBuf = nullptr;
     alphaPixBuf = nullptr;
@@ -4620,8 +4620,8 @@ void Splash::scaleImageYuXd(SplashImageSource src, void *srcData,
 			    int scaledWidth, int scaledHeight,
 			    SplashBitmap *dest) {
   unsigned char *lineBuf, *alphaLineBuf;
-  Guint pix[splashMaxColorComps];
-  Guint alpha;
+  unsigned int pix[splashMaxColorComps];
+  unsigned int alpha;
   unsigned char *destPtr0, *destPtr, *destAlphaPtr0, *destAlphaPtr;
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx, xxa, d, d0, d1;
   int i, j;
@@ -4782,8 +4782,8 @@ void Splash::scaleImageYuXu(SplashImageSource src, void *srcData,
 			    int scaledWidth, int scaledHeight,
 			    SplashBitmap *dest) {
   unsigned char *lineBuf, *alphaLineBuf;
-  Guint pix[splashMaxColorComps];
-  Guint alpha;
+  unsigned int pix[splashMaxColorComps];
+  unsigned int alpha;
   unsigned char *destPtr0, *destPtr, *destAlphaPtr0, *destAlphaPtr;
   int yp, yq, xp, xq, yt, y, yStep, xt, x, xStep, xx;
   int i, j;
@@ -4963,7 +4963,7 @@ void Splash::scaleImageYuXuBilinear(SplashImageSource src, void *srcData,
                                     int scaledWidth, int scaledHeight,
                                     SplashBitmap *dest) {
   unsigned char *srcBuf, *lineBuf1, *lineBuf2, *alphaSrcBuf, *alphaLineBuf1, *alphaLineBuf2;
-  Guint pix[splashMaxColorComps];
+  unsigned int pix[splashMaxColorComps];
   unsigned char *destPtr0, *destPtr, *destAlphaPtr0, *destAlphaPtr;
   int i;
 

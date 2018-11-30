@@ -25,15 +25,15 @@ public:
   Linearization(BaseStream *str);
   ~Linearization();
 
-  Guint getLength();
-  Guint getHintsOffset();
-  Guint getHintsLength();
-  Guint getHintsOffset2();
-  Guint getHintsLength2();
+  unsigned int getLength();
+  unsigned int getHintsOffset();
+  unsigned int getHintsLength();
+  unsigned int getHintsOffset2();
+  unsigned int getHintsLength2();
   int getObjectNumberFirst();
-  Guint getEndFirst();
+  unsigned int getEndFirst();
   int getNumPages();
-  Guint getMainXRefEntriesOffset();
+  unsigned int getMainXRefEntriesOffset();
   int getPageFirst();
 
 private:

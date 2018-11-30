@@ -2469,7 +2469,7 @@ public:
 
 private:
 
-  Guint h;
+  unsigned int h;
 };
 
 int GfxFontDict::hashFontObject(Object *obj) {

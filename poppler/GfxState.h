@@ -263,7 +263,7 @@ public:
   virtual bool isNonMarking() const { return false; }
 
   // Return the color space's overprint mask.
-  Guint getOverprintMask() const { return overprintMask; }
+  unsigned int getOverprintMask() const { return overprintMask; }
 
   // Return the number of color space modes
   static int getNumColorSpaceModes();
@@ -283,7 +283,7 @@ public:
 #endif
 protected:
 
-  Guint overprintMask;
+  unsigned int overprintMask;
   int *mapping;
 };
 
@@ -621,7 +621,7 @@ public:
   int getIndexHigh() { return indexHigh; }
   unsigned char *getLookup() { return lookup; }
   GfxColor *mapColorToBase(const GfxColor *color, GfxColor *baseColor) const;
-  Guint getOverprintMask() { return base->getOverprintMask(); }
+  unsigned int getOverprintMask() { return base->getOverprintMask(); }
   void createMapping(GooList *separationList, int maxSepComps) override
     { base->createMapping(separationList, maxSepComps); }
 
@@ -670,7 +670,7 @@ private:
 
   GfxSeparationColorSpace(GooString *nameA, GfxColorSpace *altA,
 			  Function *funcA, bool nonMarkingA,
-			  Guint overprintMaskA, int *mappingA);
+			  unsigned int overprintMaskA, int *mappingA);
 
   GooString *name;		// colorant name
   GfxColorSpace *alt;		// alternate color space
@@ -715,7 +715,7 @@ private:
 
   GfxDeviceNColorSpace(int nCompsA, GooString **namesA,
 		       GfxColorSpace *alt, Function *func, GooList *sepsCSA,
-		       int *mappingA, bool nonMarkingA, Guint overprintMaskA);
+		       int *mappingA, bool nonMarkingA, unsigned int overprintMaskA);
 
   int nComps;			// number of components
   GooString			// colorant names

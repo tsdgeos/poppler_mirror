@@ -368,7 +368,7 @@ void FoFiType1::undoPFB() {
   bool ok;
   unsigned char *file2;
   int pos1, pos2, type;
-  Guint segLen;
+  unsigned int segLen;
 
   ok = true;
   if (getU8(0, &ok) != 0x80 || !ok) {

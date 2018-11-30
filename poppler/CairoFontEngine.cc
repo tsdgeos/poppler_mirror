@@ -64,7 +64,7 @@
 CairoFont::CairoFont(Ref refA,
 		     cairo_font_face_t *cairo_font_faceA,
 		     int *codeToGIDA,
-		     Guint codeToGIDLenA,
+		     unsigned int codeToGIDLenA,
 		     bool substituteA,
 		     bool printingA) : ref(refA),
 				       cairo_font_face(cairo_font_faceA),
@@ -373,7 +373,7 @@ _ft_new_face (FT_Library lib,
 CairoFreeTypeFont::CairoFreeTypeFont(Ref refA,
 				     cairo_font_face_t *cairo_font_faceA,
 				     int *codeToGIDA,
-				     Guint codeToGIDLenA,
+				     unsigned int codeToGIDLenA,
 				     bool substituteA) : CairoFont(refA,
 								   cairo_font_faceA,
 								   codeToGIDA,
@@ -401,7 +401,7 @@ CairoFreeTypeFont *CairoFreeTypeFont::create(GfxFont *gfxFont, XRef *xref,
   cairo_font_face_t *font_face;
 
   int *codeToGID;
-  Guint codeToGIDLen;
+  unsigned int codeToGIDLen;
   
   codeToGID = nullptr;
   codeToGIDLen = 0;
@@ -729,7 +729,7 @@ CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, PDFDoc *doc,
   cairo_font_face_t *font_face;
   Ref ref;
   int *codeToGID;
-  Guint codeToGIDLen;
+  unsigned int codeToGIDLen;
   int i, j;
   char **enc;
   Dict *charProcs;
@@ -770,7 +770,7 @@ CairoType3Font *CairoType3Font::create(GfxFont *gfxFont, PDFDoc *doc,
 CairoType3Font::CairoType3Font(Ref refA,
 			       cairo_font_face_t *cairo_font_faceA,
 			       int *codeToGIDA,
-			       Guint codeToGIDLenA,
+			       unsigned int codeToGIDLenA,
 			       bool printingA, XRef *xref) : CairoFont(refA,
 							   cairo_font_faceA,
 							   codeToGIDA,

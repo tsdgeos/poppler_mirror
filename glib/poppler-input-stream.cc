@@ -57,7 +57,7 @@ void PopplerInputStream::reset()
 {
   GSeekable *seekable = G_SEEKABLE(inputStream);
 
-  savePos = (Guint)g_seekable_tell(seekable);
+  savePos = (unsigned int)g_seekable_tell(seekable);
   g_seekable_seek(seekable, start, G_SEEK_SET, cancellable, nullptr);
   saved = true;
   bufPtr = bufEnd = buf;
@@ -74,7 +74,7 @@ void PopplerInputStream::close()
 
 void PopplerInputStream::setPos(Goffset pos, int dir)
 {
-  Guint size;
+  unsigned int size;
   GSeekable *seekable = G_SEEKABLE(inputStream);
 
   if (dir >= 0) {
@@ -82,13 +82,13 @@ void PopplerInputStream::setPos(Goffset pos, int dir)
     bufPos = pos;
   } else {
     g_seekable_seek(seekable, 0, G_SEEK_END, cancellable, nullptr);
-    size = (Guint)g_seekable_tell(seekable);
+    size = (unsigned int)g_seekable_tell(seekable);
 
     if (pos > size)
       pos = size;
 
     g_seekable_seek(seekable, -(goffset)pos, G_SEEK_END, cancellable, nullptr);
-    bufPos = (Guint)g_seekable_tell(seekable);
+    bufPos = (unsigned int)g_seekable_tell(seekable);
   }
   bufPtr = bufEnd = buf;
 }

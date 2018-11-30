@@ -53,9 +53,9 @@ protected:
   int getS16BE(int pos, bool *ok) const;
   int getU16BE(int pos, bool *ok) const;
   int getS32BE(int pos, bool *ok) const;
-  Guint getU32BE(int pos, bool *ok) const;
-  Guint getU32LE(int pos, bool *ok) const;
-  Guint getUVarBE(int pos, int size, bool *ok) const;
+  unsigned int getU32BE(int pos, bool *ok) const;
+  unsigned int getU32LE(int pos, bool *ok) const;
+  unsigned int getUVarBE(int pos, int size, bool *ok) const;
 
   bool checkRegion(int pos, int size) const;
 

@@ -46,7 +46,7 @@ public:
   CairoFont(Ref ref,
 	    cairo_font_face_t *face,
 	    int *codeToGID,
-	    Guint codeToGIDLen,
+	    unsigned int codeToGIDLen,
 	    bool substitute,
 	    bool printing);
   virtual ~CairoFont();
@@ -64,7 +64,7 @@ protected:
   cairo_font_face_t *cairo_font_face;
 
   int *codeToGID;
-  Guint codeToGIDLen;
+  unsigned int codeToGIDLen;
 
   bool substitute;
   bool printing;
@@ -79,7 +79,7 @@ public:
 
 private:
   CairoFreeTypeFont(Ref ref, cairo_font_face_t *cairo_font_face,
-	    int *codeToGID, Guint codeToGIDLen, bool substitute);
+	    int *codeToGID, unsigned int codeToGIDLen, bool substitute);
 };
 
 //------------------------------------------------------------------------
@@ -96,7 +96,7 @@ public:
 private:
   CairoType3Font(Ref ref,
 		 cairo_font_face_t *cairo_font_face,
-		 int *codeToGID, Guint codeToGIDLen,
+		 int *codeToGID, unsigned int codeToGIDLen,
 		 bool printing, XRef *xref);
 };
 

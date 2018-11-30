@@ -1551,7 +1551,7 @@ void PSOutputDev::writeHeader(const std::vector<int> &pages,
   }
   if(psTitle) {
     char *sanitizedTitle = strdup(psTitle);
-    for (Guint i = 0; i < strlen(sanitizedTitle); ++i) {
+    for (unsigned int i = 0; i < strlen(sanitizedTitle); ++i) {
       if (sanitizedTitle[i] == '\n' || sanitizedTitle[i] == '\r') {
         sanitizedTitle[i] = ' ';
       }

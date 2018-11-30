@@ -811,7 +811,7 @@ StructTreeRoot *Catalog::getStructTreeRoot()
   return structTreeRoot;
 }
 
-Guint Catalog::getMarkInfo()
+unsigned int Catalog::getMarkInfo()
 {
   if (markInfo == markInfoNull) {
     markInfo = 0;

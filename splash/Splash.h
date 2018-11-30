@@ -154,7 +154,7 @@ public:
   void setInNonIsolatedGroup(SplashBitmap *alpha0BitmapA,
 			     int alpha0XA, int alpha0YA);
   void setTransfer(unsigned char *red, unsigned char *green, unsigned char *blue, unsigned char *gray);
-  void setOverprintMask(Guint overprintMask, bool additive);
+  void setOverprintMask(unsigned int overprintMask, bool additive);
 
   //----- state save/restore
 

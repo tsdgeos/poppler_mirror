@@ -46,7 +46,7 @@ typedef int (*UnicodeMapFunc)(Unicode u, char *buf, int bufSize);
 
 struct UnicodeMapRange {
   Unicode start, end;		// range of Unicode chars
-  Guint code, nBytes;		// first output code
+  unsigned int code, nBytes;		// first output code
 };
 
 struct UnicodeMapExt;

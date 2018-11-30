@@ -71,11 +71,11 @@ public:
   int findCmap(int platform, int encoding) const;
 
   // Return the GID corresponding to <c> according to the <i>th cmap.
-  int mapCodeToGID(int i, Guint c) const;
+  int mapCodeToGID(int i, unsigned int c) const;
 
   // map gid to vertical glyph gid if exist.
   //   if not exist return original gid
-  Guint mapToVertGID(Guint orgGID);
+  unsigned int mapToVertGID(unsigned int orgGID);
 
   // Returns the GID corresponding to <name> according to the post
   // table.  Returns 0 if there is no mapping for <name> or if the
@@ -180,15 +180,15 @@ private:
   void dumpString(const unsigned char *s, int length,
 		  FoFiOutputFunc outputFunc,
 		  void *outputStream) const;
-  Guint computeTableChecksum(const unsigned char *data, int length) const;
+  unsigned int computeTableChecksum(const unsigned char *data, int length) const;
   void parse();
   void readPostTable();
   int seekTable(const char *tag) const;
-  Guint charToTag(const char *tagName);
-  Guint doMapToVertGID(Guint orgGID);
-  Guint scanLookupList(Guint listIndex, Guint orgGID);
-  Guint scanLookupSubTable(Guint subTable, Guint orgGID);
-  int checkGIDInCoverage(Guint coverage, Guint orgGID);
+  unsigned int charToTag(const char *tagName);
+  unsigned int doMapToVertGID(unsigned int orgGID);
+  unsigned int scanLookupList(unsigned int listIndex, unsigned int orgGID);
+  unsigned int scanLookupSubTable(unsigned int subTable, unsigned int orgGID);
+  int checkGIDInCoverage(unsigned int coverage, unsigned int orgGID);
 
   TrueTypeTable *tables;
   int nTables;
@@ -202,8 +202,8 @@ private:
 
   bool parsedOk;
   int faceIndex;
-  Guint gsubFeatureTable;
-  Guint gsubLookupList;
+  unsigned int gsubFeatureTable;
+  unsigned int gsubLookupList;
 };
 
 #endif

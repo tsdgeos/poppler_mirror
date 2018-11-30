@@ -79,7 +79,7 @@ struct DecryptRC4State {
 };
 
 struct DecryptAESState {
-  Guint w[44];
+  unsigned int w[44];
   unsigned char state[16];
   unsigned char cbc[16];
   unsigned char buf[16];
@@ -88,7 +88,7 @@ struct DecryptAESState {
 };
 
 struct DecryptAES256State {
-  Guint w[60];
+  unsigned int w[60];
   unsigned char state[16];
   unsigned char cbc[16];
   unsigned char buf[16];

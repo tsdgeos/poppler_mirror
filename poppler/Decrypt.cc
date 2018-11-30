@@ -674,7 +674,7 @@ static const unsigned char invSbox[256] = {
   0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d
 };
 
-static const Guint rcon[11] = {
+static const unsigned int rcon[11] = {
   0x00000000, // unused
   0x01000000,
   0x02000000,
@@ -688,14 +688,14 @@ static const Guint rcon[11] = {
   0x36000000
 };
 
-static inline Guint subWord(Guint x) {
+static inline unsigned int subWord(unsigned int x) {
   return (sbox[x >> 24] << 24)
          | (sbox[(x >> 16) & 0xff] << 16)
          | (sbox[(x >> 8) & 0xff] << 8)
          | sbox[x & 0xff];
 }
 
-static inline Guint rotWord(Guint x) {
+static inline unsigned int rotWord(unsigned int x) {
   return ((x << 8) & 0xffffffff) | (x >> 24);
 }
 
@@ -844,7 +844,7 @@ static inline void invMixColumns(unsigned char *state) {
   }
 }
 
-static inline void invMixColumnsW(Guint *w) {
+static inline void invMixColumnsW(unsigned int *w) {
   int c;
   unsigned char s0, s1, s2, s3;
 
@@ -860,7 +860,7 @@ static inline void invMixColumnsW(Guint *w) {
   }
 }
 
-static inline void addRoundKey(unsigned char *state, Guint *w) {
+static inline void addRoundKey(unsigned char *state, unsigned int *w) {
   int c;
 
   for (c = 0; c < 4; ++c) {
@@ -873,7 +873,7 @@ static inline void addRoundKey(unsigned char *state, Guint *w) {
 
 static void aesKeyExpansion(DecryptAESState *s,
 			    unsigned char *objKey, int /*objKeyLen*/, bool decrypt) {
-  Guint temp;
+  unsigned int temp;
   int i, round;
 
   //~ this assumes objKeyLen == 16
@@ -995,7 +995,7 @@ static void aesDecryptBlock(DecryptAESState *s, unsigned char *in, bool last) {
 
 static void aes256KeyExpansion(DecryptAES256State *s,
 			       unsigned char *objKey, int objKeyLen, bool decrypt) {
-  Guint temp;
+  unsigned int temp;
   int i, round;
 
   //~ this assumes objKeyLen == 32
@@ -1299,7 +1299,7 @@ void md5(const unsigned char *msg, int msgLen, unsigned char *digest) {
 // SHA-256 hash
 //------------------------------------------------------------------------
 
-static Guint sha256K[64] = {
+static unsigned int sha256K[64] = {
   0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
   0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
   0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
@@ -1318,39 +1318,39 @@ static Guint sha256K[64] = {
   0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-static inline Guint rotr(Guint x, Guint n) {
+static inline unsigned int rotr(unsigned int x, unsigned int n) {
   return (x >> n) | (x << (32 - n));
 }
 
-static inline Guint sha256Ch(Guint x, Guint y, Guint z) {
+static inline unsigned int sha256Ch(unsigned int x, unsigned int y, unsigned int z) {
   return (x & y) ^ (~x & z);
 }
 
-static inline Guint sha256Maj(Guint x, Guint y, Guint z) {
+static inline unsigned int sha256Maj(unsigned int x, unsigned int y, unsigned int z) {
   return (x & y) ^ (x & z) ^ (y & z);
 }
 
-static inline Guint sha256Sigma0(Guint x) {
+static inline unsigned int sha256Sigma0(unsigned int x) {
   return rotr(x, 2) ^ rotr(x, 13) ^ rotr(x, 22);
 }
 
-static inline Guint sha256Sigma1(Guint x) {
+static inline unsigned int sha256Sigma1(unsigned int x) {
   return rotr(x, 6) ^ rotr(x, 11) ^ rotr(x, 25);
 }
 
-static inline Guint sha256sigma0(Guint x) {
+static inline unsigned int sha256sigma0(unsigned int x) {
   return rotr(x, 7) ^ rotr(x, 18) ^ (x >> 3);
 }
 
-static inline Guint sha256sigma1(Guint x) {
+static inline unsigned int sha256sigma1(unsigned int x) {
   return rotr(x, 17) ^ rotr(x, 19) ^ (x >> 10);
 }
 
-static void sha256HashBlock(unsigned char *blk, Guint *H) {
-  Guint W[64];
-  Guint a, b, c, d, e, f, g, h;
-  Guint T1, T2;
-  Guint t;
+static void sha256HashBlock(unsigned char *blk, unsigned int *H) {
+  unsigned int W[64];
+  unsigned int a, b, c, d, e, f, g, h;
+  unsigned int T1, T2;
+  unsigned int t;
 
   // 1. prepare the message schedule
   for (t = 0; t < 16; ++t) {
@@ -1400,7 +1400,7 @@ static void sha256HashBlock(unsigned char *blk, Guint *H) {
 
 static void sha256(unsigned char *msg, int msgLen, unsigned char *hash) {
   unsigned char blk[64];
-  Guint H[8];
+  unsigned int H[8];
   int blkLen, i;
 
   H[0] = 0x6a09e667;
@@ -1500,7 +1500,7 @@ static void sha512HashBlock(unsigned char *blk, uint64_t *H) {
   uint64_t W[80];
   uint64_t a, b, c, d, e, f, g, h;
   uint64_t T1, T2;
-  Guint t;
+  unsigned int t;
 
   // 1. prepare the message schedule
   for (t = 0; t < 16; ++t) {

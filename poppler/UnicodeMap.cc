@@ -44,7 +44,7 @@
 struct UnicodeMapExt {
   Unicode u;			// Unicode char
   char code[maxExtCode];
-  Guint nBytes;
+  unsigned int nBytes;
 };
 
 //------------------------------------------------------------------------
@@ -261,7 +261,7 @@ bool UnicodeMap::match(const GooString *encodingNameA) const {
 
 int UnicodeMap::mapUnicode(Unicode u, char *buf, int bufSize) {
   int a, b, m, n, i, j;
-  Guint code;
+  unsigned int code;
 
   if (kind == unicodeMapFunc) {
     return (*func)(u, buf, bufSize);

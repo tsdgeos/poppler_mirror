@@ -2674,7 +2674,7 @@ GfxSeparationColorSpace::GfxSeparationColorSpace(GooString *nameA,
 						 GfxColorSpace *altA,
 						 Function *funcA,
 						 bool nonMarkingA,
-						 Guint overprintMaskA,
+						 unsigned int overprintMaskA,
 						 int *mappingA) {
   name = nameA;
   alt = altA;
@@ -2864,7 +2864,7 @@ void GfxSeparationColorSpace::createMapping(GooList *separationList, int maxSepC
       *mapping = 3;
       break;
     default:
-      Guint newOverprintMask = 0x10;
+      unsigned int newOverprintMask = 0x10;
       for (int i = 0; i < separationList->getLength(); i++) {
         GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)separationList->get(i);
         if (!sepCS->getName()->cmp(name)) {
@@ -2941,7 +2941,7 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
 					   GooList *sepsCSA,
 					   int *mappingA,
 					   bool nonMarkingA,
-					   Guint overprintMaskA) {
+					   unsigned int overprintMaskA) {
   int i;
 
   nComps = nCompsA;
@@ -3144,7 +3144,7 @@ void GfxDeviceNColorSpace::createMapping(GooList *separationList, int maxSepComp
   if (nonMarking)               // None
     return;
   mapping = (int *)gmalloc(sizeof(int) * nComps);
-  Guint newOverprintMask = 0;
+  unsigned int newOverprintMask = 0;
   for (int i = 0; i < nComps; i++) {
     if (!names[i]->cmp("None")) {
       mapping[i] = -1;
@@ -3161,7 +3161,7 @@ void GfxDeviceNColorSpace::createMapping(GooList *separationList, int maxSepComp
       newOverprintMask |= 0x08;
       mapping[i] = 3;
     } else {
-      Guint startOverprintMask = 0x10;
+      unsigned int startOverprintMask = 0x10;
       bool found = false;
       const Function *sepFunc = nullptr;
       if (nComps == 1)
@@ -4623,7 +4623,7 @@ public:
   ~GfxShadingBitBuf();
   GfxShadingBitBuf(const GfxShadingBitBuf &) = delete;
   GfxShadingBitBuf& operator=(const GfxShadingBitBuf &) = delete;
-  bool getBits(int n, Guint *val);
+  bool getBits(int n, unsigned int *val);
   void flushBits();
 
 private:
@@ -4644,7 +4644,7 @@ GfxShadingBitBuf::~GfxShadingBitBuf() {
   str->close();
 }
 
-bool GfxShadingBitBuf::getBits(int n, Guint *val) {
+bool GfxShadingBitBuf::getBits(int n, unsigned int *val) {
   int x;
 
   if (nBits >= n) {
@@ -4747,8 +4747,8 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
   GfxGouraudVertex *verticesA;
   int (*trianglesA)[3];
   int nComps, nVerticesA, nTrianglesA, vertSize, triSize;
-  Guint x, y, flag;
-  Guint c[gfxColorMaxComps];
+  unsigned int x, y, flag;
+  unsigned int c[gfxColorMaxComps];
   GfxShadingBitBuf *bitBuf;
   Object obj1;
   int i, j, k, state;
@@ -5101,11 +5101,11 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
   double cMul[gfxColorMaxComps];
   GfxPatch *patchesA, *p;
   int nComps, nPatchesA, patchesSize, nPts, nColors;
-  Guint flag;
+  unsigned int flag;
   double x[16], y[16];
-  Guint xi, yi;
+  unsigned int xi, yi;
   double c[4][gfxColorMaxComps];
-  Guint ci;
+  unsigned int ci;
   Object obj1;
   int i, j;
 

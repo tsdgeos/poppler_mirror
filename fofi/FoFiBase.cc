@@ -148,8 +148,8 @@ int FoFiBase::getS32BE(int pos, bool *ok) const {
   return x;
 }
 
-Guint FoFiBase::getU32BE(int pos, bool *ok) const {
-  Guint x;
+unsigned int FoFiBase::getU32BE(int pos, bool *ok) const {
+  unsigned int x;
 
   if (pos < 0 || pos+3 >= len || pos > INT_MAX - 3) {
     *ok = false;
@@ -162,8 +162,8 @@ Guint FoFiBase::getU32BE(int pos, bool *ok) const {
   return x;
 }
 
-Guint FoFiBase::getU32LE(int pos, bool *ok) const {
-  Guint x;
+unsigned int FoFiBase::getU32LE(int pos, bool *ok) const {
+  unsigned int x;
 
   if (pos < 0 || pos+3 >= len || pos > INT_MAX - 3) {
     *ok = false;
@@ -176,8 +176,8 @@ Guint FoFiBase::getU32LE(int pos, bool *ok) const {
   return x;
 }
 
-Guint FoFiBase::getUVarBE(int pos, int size, bool *ok) const {
-  Guint x;
+unsigned int FoFiBase::getUVarBE(int pos, int size, bool *ok) const {
+  unsigned int x;
   int i;
 
   if (pos < 0 || pos + size > len || pos > INT_MAX - size) {

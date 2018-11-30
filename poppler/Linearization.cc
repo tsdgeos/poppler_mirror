@@ -43,7 +43,7 @@ Linearization:: ~Linearization()
 {
 }
 
-Guint Linearization::getLength()
+unsigned int Linearization::getLength()
 {
   if (!linDict.isDict()) return 0;
 
@@ -57,7 +57,7 @@ Guint Linearization::getLength()
   }
 }
 
-Guint Linearization::getHintsOffset()
+unsigned int Linearization::getHintsOffset()
 {
   int hintsOffset;
 
@@ -76,7 +76,7 @@ Guint Linearization::getHintsOffset()
   return hintsOffset;
 }
 
-Guint Linearization::getHintsLength()
+unsigned int Linearization::getHintsLength()
 {
   int hintsLength;
 
@@ -95,7 +95,7 @@ Guint Linearization::getHintsLength()
   return hintsLength;
 }
 
-Guint Linearization::getHintsOffset2()
+unsigned int Linearization::getHintsOffset2()
 {
   int hintsOffset2 = 0; // default to 0
 
@@ -115,7 +115,7 @@ Guint Linearization::getHintsOffset2()
   return hintsOffset2;
 }
 
-Guint Linearization::getHintsLength2()
+unsigned int Linearization::getHintsLength2()
 {
   int hintsLength2 = 0; // default to 0
 
@@ -148,7 +148,7 @@ int Linearization::getObjectNumberFirst()
   }
 }
 
-Guint Linearization::getEndFirst()
+unsigned int Linearization::getEndFirst()
 {
   int pageEndFirst = 0;
   if (linDict.isDict() &&
@@ -174,7 +174,7 @@ int Linearization::getNumPages()
   }
 }
 
-Guint Linearization::getMainXRefEntriesOffset()
+unsigned int Linearization::getMainXRefEntriesOffset()
 {
   int mainXRefEntriesOffset = 0;
   if (linDict.isDict() &&

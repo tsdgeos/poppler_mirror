@@ -1845,7 +1845,7 @@ void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace,
 				       const GfxColor *singleColor,
 				       bool grayIndexed) {
 #ifdef SPLASH_CMYK
-  Guint mask;
+  unsigned int mask;
   GfxCMYK cmyk;
   bool additive = false;
   int i;

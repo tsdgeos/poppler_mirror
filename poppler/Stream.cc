@@ -876,7 +876,7 @@ Stream *CachedFileStream::makeSubStream(Goffset startA, bool limitedA,
 
 void CachedFileStream::reset()
 {
-  savePos = (Guint)cc->tell();
+  savePos = (unsigned int)cc->tell();
   cc->seek(start, SEEK_SET);
 
   saved = true;
@@ -916,20 +916,20 @@ bool CachedFileStream::fillBuf()
 
 void CachedFileStream::setPos(Goffset pos, int dir)
 {
-  Guint size;
+  unsigned int size;
 
   if (dir >= 0) {
     cc->seek(pos, SEEK_SET);
     bufPos = pos;
   } else {
     cc->seek(0, SEEK_END);
-    size = (Guint)cc->tell();
+    size = (unsigned int)cc->tell();
 
     if (pos > size)
-      pos = (Guint)size;
+      pos = (unsigned int)size;
 
     cc->seek(-(int)pos, SEEK_END);
-    bufPos = (Guint)cc->tell();
+    bufPos = (unsigned int)cc->tell();
   }
 
   bufPtr = bufEnd = buf;
@@ -5105,7 +5105,7 @@ void ASCII85Encoder::reset() {
 }
 
 bool ASCII85Encoder::fillBuf() {
-  Guint t;
+  unsigned int t;
   char buf1[5];
   int c0, c1, c2, c3;
   int n, i;

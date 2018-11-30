@@ -132,7 +132,7 @@ private:
          cmykTransferK[256];
   unsigned char deviceNTransfer[SPOT_NCOMPS+4][256];
 #endif
-  Guint overprintMask;
+  unsigned int overprintMask;
   bool overprintAdditive;
 
   SplashState *next;		// used by Splash class

@@ -127,7 +127,7 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList) 
   // recursively scan any resource dictionaries in objects in this
   // resource dictionary
   const char *resTypes[] = { "XObject", "Pattern" };
-  for (Guint resType = 0; resType < sizeof(resTypes) / sizeof(resTypes[0]); ++resType) {
+  for (unsigned int resType = 0; resType < sizeof(resTypes) / sizeof(resTypes[0]); ++resType) {
     Object objDict = resDict->lookup(resTypes[resType]);
     if (objDict.isDict()) {
       for (int i = 0; i < objDict.dictGetLength(); ++i) {

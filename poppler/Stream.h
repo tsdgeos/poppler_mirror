@@ -85,8 +85,8 @@ enum CryptAlgorithm {
 //------------------------------------------------------------------------
 
 typedef struct _ByteRange {
-  Guint offset;
-  Guint length;
+  unsigned int offset;
+  unsigned int length;
 } ByteRange;
 
 //------------------------------------------------------------------------
@@ -551,7 +551,7 @@ private:
   char buf[cachedStreamBufSize];
   char *bufPtr;
   char *bufEnd;
-  Guint bufPos;
+  unsigned int bufPos;
   int savePos;
   bool saved;
 };
@@ -605,7 +605,7 @@ public:
   Goffset getPos() override { return (int)(bufPtr - buf); }
 
   void setPos(Goffset pos, int dir = 0) override {
-    Guint i;
+    unsigned int i;
 
     if (dir >= 0) {
       i = pos;
@@ -914,7 +914,7 @@ private:
   bool eof;			// true if at eof
   bool nextLine2D;		// true if next line uses 2D encoding
   int row;			// current row
-  Guint inputBuf;		// input buffer
+  unsigned int inputBuf;		// input buffer
   int inputBits;		// number of bits in input buffer
   int *codingLine;		// coding line changing elements
   int *refLine;			// reference line changing elements
