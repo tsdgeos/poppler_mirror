@@ -125,7 +125,7 @@ bool PopplerInputStream::fillBuf()
   return true;
 }
 
-int PopplerInputStream::getChars(int nChars, Guchar *buffer)
+int PopplerInputStream::getChars(int nChars, unsigned char *buffer)
 {
   int n, m;
 

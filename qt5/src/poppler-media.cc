@@ -102,7 +102,7 @@ MediaRendition::data() const
     return QByteArray();
 
   QBuffer buffer;
-  Guchar data[BUFFER_MAX];
+  unsigned char data[BUFFER_MAX];
   int bread;
 
   buffer.open(QIODevice::WriteOnly);

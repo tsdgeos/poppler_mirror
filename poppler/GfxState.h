@@ -108,15 +108,15 @@ static inline double colToDbl(GfxColorComp x) {
   return (double)x / (double)gfxColorComp1;
 }
 
-static inline Guchar dblToByte(double x) {
+static inline unsigned char dblToByte(double x) {
   return (x * 255.0);
 }
 
-static inline double byteToDbl(Guchar x) {
+static inline double byteToDbl(unsigned char x) {
   return (double)x / (double)255.0;
 }
 
-static inline GfxColorComp byteToCol(Guchar x) {
+static inline GfxColorComp byteToCol(unsigned char x) {
   // (x / 255) << 16  =  (0.0000000100000001... * x) << 16
   //                  =  ((x << 8) + (x) + (x >> 8) + ...) << 16
   //                  =  (x << 8) + (x) + (x >> 7)
@@ -124,9 +124,9 @@ static inline GfxColorComp byteToCol(Guchar x) {
   return (GfxColorComp)((x << 8) + x + (x >> 7));
 }
 
-static inline Guchar colToByte(GfxColorComp x) {
+static inline unsigned char colToByte(GfxColorComp x) {
   // 255 * x + 0.5  =  256 * x - x + 0x8000
-  return (Guchar)(((x << 8) - x + 0x8000) >> 16);
+  return (unsigned char)(((x << 8) - x + 0x8000) >> 16);
 }
 
 static inline Gushort colToShort(GfxColorComp x) {
@@ -228,12 +228,12 @@ public:
   virtual void getRGB(const GfxColor *color, GfxRGB *rgb) const = 0;
   virtual void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const = 0;
   virtual void getDeviceN(const GfxColor *color, GfxColor *deviceN) const = 0;
-  virtual void getGrayLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) { error(errInternal, -1, "GfxColorSpace::getGrayLine this should not happen"); }
-  virtual void getRGBLine(Guchar * /*in*/, unsigned int * /*out*/, int /*length*/) { error(errInternal, -1, "GfxColorSpace::getRGBLine (first variant) this should not happen"); }
-  virtual void getRGBLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getRGBLine (second variant) this should not happen"); }
-  virtual void getRGBXLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getRGBXLine this should not happen"); }
-  virtual void getCMYKLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getCMYKLine this should not happen"); }
-  virtual void getDeviceNLine(Guchar * /*in*/, Guchar * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getDeviceNLine this should not happen"); }
+  virtual void getGrayLine(unsigned char * /*in*/, unsigned char * /*out*/, int /*length*/) { error(errInternal, -1, "GfxColorSpace::getGrayLine this should not happen"); }
+  virtual void getRGBLine(unsigned char * /*in*/, unsigned int * /*out*/, int /*length*/) { error(errInternal, -1, "GfxColorSpace::getRGBLine (first variant) this should not happen"); }
+  virtual void getRGBLine(unsigned char * /*in*/, unsigned char * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getRGBLine (second variant) this should not happen"); }
+  virtual void getRGBXLine(unsigned char * /*in*/, unsigned char * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getRGBXLine this should not happen"); }
+  virtual void getCMYKLine(unsigned char * /*in*/, unsigned char * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getCMYKLine this should not happen"); }
+  virtual void getDeviceNLine(unsigned char * /*in*/, unsigned char * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getDeviceNLine this should not happen"); }
 
   // create mapping for spot colorants
   virtual void createMapping(GooList *separationList, int maxSepComps);
@@ -303,12 +303,12 @@ public:
   void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
   void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const override;
   void getDeviceN(const GfxColor *color, GfxColor *deviceN) const override;
-  void getGrayLine(Guchar *in, Guchar *out, int length) override;
-  void getRGBLine(Guchar *in, unsigned int *out, int length) override;
-  void getRGBLine(Guchar *in, Guchar *out, int length) override;
-  void getRGBXLine(Guchar *in, Guchar *out, int length) override;
-  void getCMYKLine(Guchar *in, Guchar *out, int length) override;
-  void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
+  void getGrayLine(unsigned char *in, unsigned char *out, int length) override;
+  void getRGBLine(unsigned char *in, unsigned int *out, int length) override;
+  void getRGBLine(unsigned char *in, unsigned char *out, int length) override;
+  void getRGBXLine(unsigned char *in, unsigned char *out, int length) override;
+  void getCMYKLine(unsigned char *in, unsigned char *out, int length) override;
+  void getDeviceNLine(unsigned char *in, unsigned char *out, int length) override;
 
   bool useGetRGBLine() const override { return true; }
   bool useGetGrayLine() const override { return true; }
@@ -381,12 +381,12 @@ public:
   void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
   void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const override;
   void getDeviceN(const GfxColor *color, GfxColor *deviceN) const override;
-  void getGrayLine(Guchar *in, Guchar *out, int length) override;
-  void getRGBLine(Guchar *in, unsigned int *out, int length) override;
-  void getRGBLine(Guchar *in, Guchar *out, int length) override;
-  void getRGBXLine(Guchar *in, Guchar *out, int length) override;
-  void getCMYKLine(Guchar *in, Guchar *out, int length) override;
-  void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
+  void getGrayLine(unsigned char *in, unsigned char *out, int length) override;
+  void getRGBLine(unsigned char *in, unsigned int *out, int length) override;
+  void getRGBLine(unsigned char *in, unsigned char *out, int length) override;
+  void getRGBXLine(unsigned char *in, unsigned char *out, int length) override;
+  void getCMYKLine(unsigned char *in, unsigned char *out, int length) override;
+  void getDeviceNLine(unsigned char *in, unsigned char *out, int length) override;
 
   bool useGetRGBLine() const override { return true; }
   bool useGetGrayLine() const override { return true; }
@@ -463,11 +463,11 @@ public:
   void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
   void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const override;
   void getDeviceN(const GfxColor *color, GfxColor *deviceN) const override;
-  void getRGBLine(Guchar *in, unsigned int *out, int length) override;
-  void getRGBLine(Guchar *, Guchar *out, int length) override;
-  void getRGBXLine(Guchar *in, Guchar *out, int length) override;
-  void getCMYKLine(Guchar *in, Guchar *out, int length) override;
-  void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
+  void getRGBLine(unsigned char *in, unsigned int *out, int length) override;
+  void getRGBLine(unsigned char *, unsigned char *out, int length) override;
+  void getRGBXLine(unsigned char *in, unsigned char *out, int length) override;
+  void getCMYKLine(unsigned char *in, unsigned char *out, int length) override;
+  void getDeviceNLine(unsigned char *in, unsigned char *out, int length) override;
   bool useGetRGBLine() const override { return true; }
   bool useGetCMYKLine() const override { return true; }
   bool useGetDeviceNLine() const override { return true; }
@@ -548,11 +548,11 @@ public:
   void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
   void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const override;
   void getDeviceN(const GfxColor *color, GfxColor *deviceN) const override;
-  void getRGBLine(Guchar *in, unsigned int *out, int length) override;
-  void getRGBLine(Guchar *in, Guchar *out, int length) override;
-  void getRGBXLine(Guchar *in, Guchar *out, int length) override;
-  void getCMYKLine(Guchar *in, Guchar *out, int length) override;
-  void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
+  void getRGBLine(unsigned char *in, unsigned int *out, int length) override;
+  void getRGBLine(unsigned char *in, unsigned char *out, int length) override;
+  void getRGBXLine(unsigned char *in, unsigned char *out, int length) override;
+  void getCMYKLine(unsigned char *in, unsigned char *out, int length) override;
+  void getDeviceNLine(unsigned char *in, unsigned char *out, int length) override;
 
   bool useGetRGBLine() const override;
   bool useGetCMYKLine() const override;
@@ -600,11 +600,11 @@ public:
   void getRGB(const GfxColor *color, GfxRGB *rgb) const override;
   void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const override;
   void getDeviceN(const GfxColor *color, GfxColor *deviceN) const override;
-  void getRGBLine(Guchar *in, unsigned int *out, int length) override;
-  void getRGBLine(Guchar *in, Guchar *out, int length) override;
-  void getRGBXLine(Guchar *in, Guchar *out, int length) override;
-  void getCMYKLine(Guchar *in, Guchar *out, int length) override;
-  void getDeviceNLine(Guchar *in, Guchar *out, int length) override;
+  void getRGBLine(unsigned char *in, unsigned int *out, int length) override;
+  void getRGBLine(unsigned char *in, unsigned char *out, int length) override;
+  void getRGBXLine(unsigned char *in, unsigned char *out, int length) override;
+  void getCMYKLine(unsigned char *in, unsigned char *out, int length) override;
+  void getDeviceNLine(unsigned char *in, unsigned char *out, int length) override;
 
   bool useGetRGBLine() const override { return true; }
   bool useGetCMYKLine() const override { return true; }
@@ -619,7 +619,7 @@ public:
   // Indexed-specific access.
   GfxColorSpace *getBase() { return base; }
   int getIndexHigh() { return indexHigh; }
-  Guchar *getLookup() { return lookup; }
+  unsigned char *getLookup() { return lookup; }
   GfxColor *mapColorToBase(const GfxColor *color, GfxColor *baseColor) const;
   Guint getOverprintMask() { return base->getOverprintMask(); }
   void createMapping(GooList *separationList, int maxSepComps) override
@@ -630,7 +630,7 @@ private:
 
   GfxColorSpace *base;		// base color space
   int indexHigh;		// max pixel value
-  Guchar *lookup;		// lookup table
+  unsigned char *lookup;		// lookup table
 };
 
 //------------------------------------------------------------------------
@@ -1210,17 +1210,17 @@ public:
   bool useDeviceNLine() const { return (colorSpace2 && colorSpace2->useGetDeviceNLine ()) || (!colorSpace2 && colorSpace->useGetDeviceNLine ()); }
 
   // Convert an image pixel to a color.
-  void getGray(Guchar *x, GfxGray *gray);
-  void getRGB(Guchar *x, GfxRGB *rgb);
-  void getRGBLine(Guchar *in, unsigned int *out, int length);
-  void getRGBLine(Guchar *in, Guchar *out, int length);
-  void getRGBXLine(Guchar *in, Guchar *out, int length);
-  void getGrayLine(Guchar *in, Guchar *out, int length);
-  void getCMYKLine(Guchar *in, Guchar *out, int length);
-  void getDeviceNLine(Guchar *in, Guchar *out, int length);
-  void getCMYK(Guchar *x, GfxCMYK *cmyk);
-  void getDeviceN(Guchar *x, GfxColor *deviceN);
-  void getColor(Guchar *x, GfxColor *color);
+  void getGray(unsigned char *x, GfxGray *gray);
+  void getRGB(unsigned char *x, GfxRGB *rgb);
+  void getRGBLine(unsigned char *in, unsigned int *out, int length);
+  void getRGBLine(unsigned char *in, unsigned char *out, int length);
+  void getRGBXLine(unsigned char *in, unsigned char *out, int length);
+  void getGrayLine(unsigned char *in, unsigned char *out, int length);
+  void getCMYKLine(unsigned char *in, unsigned char *out, int length);
+  void getDeviceNLine(unsigned char *in, unsigned char *out, int length);
+  void getCMYK(unsigned char *x, GfxCMYK *cmyk);
+  void getDeviceN(unsigned char *x, GfxColor *deviceN);
+  void getColor(unsigned char *x, GfxColor *color);
 
   // Matte color ops
   void setMatteColor(const GfxColor *color) { useMatte = true; matteColor = *color; }
@@ -1238,7 +1238,7 @@ private:
     lookup[gfxColorMaxComps];
   GfxColorComp *		// optimized case lookup table
     lookup2[gfxColorMaxComps];
-  Guchar *byte_lookup;
+  unsigned char *byte_lookup;
   double			// minimum values for each component
     decodeLow[gfxColorMaxComps];
   double			// max - min value for each component

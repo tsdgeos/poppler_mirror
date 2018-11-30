@@ -89,7 +89,7 @@ public:
   void setOverprintMode(int overprintModeA) { overprintMode = overprintModeA; }
 
   // Set the transfer function.
-  void setTransfer(Guchar *red, Guchar *green, Guchar *blue, Guchar *gray);
+  void setTransfer(unsigned char *red, unsigned char *green, unsigned char *blue, unsigned char *gray);
 
 private:
 
@@ -121,16 +121,16 @@ private:
   bool fillOverprint;
   bool strokeOverprint;
   int overprintMode;
-  Guchar rgbTransferR[256],
+  unsigned char rgbTransferR[256],
          rgbTransferG[256],
          rgbTransferB[256];
-  Guchar grayTransfer[256];
+  unsigned char grayTransfer[256];
 #ifdef SPLASH_CMYK
-  Guchar cmykTransferC[256],
+  unsigned char cmykTransferC[256],
          cmykTransferM[256],
          cmykTransferY[256],
          cmykTransferK[256];
-  Guchar deviceNTransfer[SPOT_NCOMPS+4][256];
+  unsigned char deviceNTransfer[SPOT_NCOMPS+4][256];
 #endif
   Guint overprintMask;
   bool overprintAdditive;

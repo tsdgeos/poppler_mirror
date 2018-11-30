@@ -216,7 +216,7 @@ private:
 		     Type1CPrivateDict *pDict);
   void cvtNum(double x, bool isFP, GooString *charBuf) const;
   void eexecWrite(Type1CEexecBuf *eb, const char *s) const;
-  void eexecWriteCharstring(Type1CEexecBuf *eb, const Guchar *s, int n) const;
+  void eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s, int n) const;
   void writePSString(const char *s, FoFiOutputFunc outputFunc, void *outputStream) const;
   bool parse();
   void readTopDict();
@@ -246,7 +246,7 @@ private:
 
   int nGlyphs;
   int nFDs;
-  Guchar *fdSelect;
+  unsigned char *fdSelect;
   Gushort *charset;
   Gushort charsetLength;
   int gsubrBias;

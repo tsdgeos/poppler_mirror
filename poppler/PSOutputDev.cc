@@ -1049,7 +1049,7 @@ void DeviceNRecoder::reset() {
 }
 
 bool DeviceNRecoder::fillBuf() {
-  Guchar pixBuf[gfxColorMaxComps];
+  unsigned char pixBuf[gfxColorMaxComps];
   GfxColor color;
   double x[gfxColorMaxComps], y[gfxColorMaxComps];
   int i;
@@ -3224,15 +3224,15 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   GfxState *state;
   SplashBitmap *bitmap;
   Stream *str0, *str;
-  Guchar *p;
-  Guchar col[4];
+  unsigned char *p;
+  unsigned char col[4];
   double hDPI2, vDPI2;
   double m0, m1, m2, m3, m4, m5;
   int nStripes, stripeH, stripeY;
   int c, w, h, x, y, comp, i;
   int numComps, initialNumComps;
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
-  Guchar digit;
+  unsigned char digit;
   bool isGray;
 #endif
 
@@ -3430,7 +3430,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
 	      g = p[4*x] + p[4*x + 3];
 	      g = 255 - g;
 	      if (g < 0) g = 0;
-	      hexBuf[i++] = (Guchar) g;
+	      hexBuf[i++] = (unsigned char) g;
 	      if (i >= 64) {
 	        writePSBuf(hexBuf, i);
 	        i = 0;
@@ -5331,11 +5331,11 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
 			    int *maskColors, Stream *maskStr,
 			    int maskWidth, int maskHeight, bool maskInvert) {
   ImageStream *imgStr;
-  Guchar pixBuf[gfxColorMaxComps];
+  unsigned char pixBuf[gfxColorMaxComps];
   GfxGray gray;
   int col, x, y, c, i;
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
-  Guchar digit, grayValue;
+  unsigned char digit, grayValue;
 
   // explicit masking
   if (maskStr && !(maskColors && colorMap)) {
@@ -5487,13 +5487,13 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
 			       int *maskColors, Stream *maskStr,
 			       int maskWidth, int maskHeight, bool maskInvert) {
   ImageStream *imgStr;
-  Guchar *lineBuf;
-  Guchar pixBuf[gfxColorMaxComps];
+  unsigned char *lineBuf;
+  unsigned char pixBuf[gfxColorMaxComps];
   GfxCMYK cmyk;
   int x, y, i, comp;
   bool checkProcessColor;
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
-  Guchar digit;
+  unsigned char digit;
 
   // explicit masking
   if (maskStr && !(maskColors && colorMap)) {
@@ -5507,7 +5507,7 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
 	     useBinary ? "Bin" : "");
 
   // allocate a line buffer
-  lineBuf = (Guchar *)gmallocn(width, 4);
+  lineBuf = (unsigned char *)gmallocn(width, 4);
 
   // set up to process the data stream
   imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(),
@@ -5591,7 +5591,7 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
 
 void PSOutputDev::maskToClippingPath(Stream *maskStr, int maskWidth, int maskHeight, bool maskInvert) {
   ImageStream *imgStr;
-  Guchar *line;
+  unsigned char *line;
   PSOutImgClipRect *rects0, *rects1, *rectsTmp, *rectsOut;
   int rects0Len, rects1Len, rectsSize, rectsOutLen, rectsOutSize;
   bool emitRect, addRect, extendRect;
@@ -5714,7 +5714,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
 			    int maskWidth, int maskHeight, bool maskInvert) {
   Stream *str2;
   ImageStream *imgStr;
-  Guchar *line;
+  unsigned char *line;
   PSOutImgClipRect *rects0, *rects1, *rectsTmp, *rectsOut;
   int rects0Len, rects1Len, rectsSize, rectsOutLen, rectsOutSize;
   bool emitRect, addRect, extendRect;
@@ -6611,7 +6611,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
   GfxSeparationColorSpace *separationCS;
   GfxDeviceNColorSpace *deviceNCS;
   GfxColorSpace *baseCS;
-  Guchar *lookup, *p;
+  unsigned char *lookup, *p;
   double x[gfxColorMaxComps], y[gfxColorMaxComps];
   double low[gfxColorMaxComps], range[gfxColorMaxComps];
   GfxColor color;
@@ -7473,13 +7473,13 @@ void PSOutputDev::writePSFmt(const char *fmt, ...) {
 }
 
 void PSOutputDev::writePSString(const GooString *s) {
-  Guchar *p;
+  unsigned char *p;
   int n, line;
   char buf[8];
 
   writePSChar('(');
   line = 1;
-  for (p = (Guchar *)s->c_str(), n = s->getLength(); n; ++p, --n) {
+  for (p = (unsigned char *)s->c_str(), n = s->getLength(); n; ++p, --n) {
     if (line >= 64) {
       writePSChar('\\');
       writePSChar('\n');

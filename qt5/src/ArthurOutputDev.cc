@@ -1074,7 +1074,7 @@ void ArthurOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 
   for (int y = 0; y < height; y++) {
 
-    Guchar *pix = imgStr->getLine();
+    unsigned char *pix = imgStr->getLine();
 
     // Invert the vertical coordinate: y is increasing from top to bottom
     // on the page, but y is increasing bottom to top in the picture.
@@ -1103,7 +1103,7 @@ void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   unsigned int *data;
   unsigned int *line;
   int x, y;
-  Guchar *pix;
+  unsigned char *pix;
   int i;
   QImage image;
   int stride;
@@ -1195,12 +1195,12 @@ void ArthurOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *
   unsigned int *data = (unsigned int *)image.bits();
   int stride = image.bytesPerLine()/4;
 
-  std::vector<Guchar> maskLine(maskWidth);
+  std::vector<unsigned char> maskLine(maskWidth);
 
   for (int y = 0; y < height; y++) {
 
-    Guchar *pix = imgStr->getLine();
-    Guchar *maskPix = maskImageStr->getLine();
+    unsigned char *pix = imgStr->getLine();
+    unsigned char *maskPix = maskImageStr->getLine();
 
     // Invert the vertical coordinate: y is increasing from top to bottom
     // on the page, but y is increasing bottom to top in the picture.

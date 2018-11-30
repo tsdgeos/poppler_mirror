@@ -77,7 +77,7 @@ SplashScreen::SplashScreen(SplashScreenParams *params) {
 
 void SplashScreen::createMatrix()
 {
-  Guchar u;
+  unsigned char u;
   int black, white, i;
   
   SplashScreenParams *params = screenParams;
@@ -88,12 +88,12 @@ void SplashScreen::createMatrix()
   switch (params->type) {
 
   case splashScreenDispersed:
-    mat = (Guchar *)gmallocn(size * size, sizeof(Guchar));
+    mat = (unsigned char *)gmallocn(size * size, sizeof(unsigned char));
     buildDispersedMatrix(size/2, size/2, 1, size/2, 1);
     break;
 
   case splashScreenClustered:
-    mat = (Guchar *)gmallocn(size * size, sizeof(Guchar));
+    mat = (unsigned char *)gmallocn(size * size, sizeof(unsigned char));
     buildClusteredMatrix();
     break;
 
@@ -103,7 +103,7 @@ void SplashScreen::createMatrix()
       size <<= 1;
       ++log2Size;
     }
-    mat = (Guchar *)gmallocn(size * size, sizeof(Guchar));
+    mat = (unsigned char *)gmallocn(size * size, sizeof(unsigned char));
     buildSCDMatrix(params->dotRadius);
     break;
   }
@@ -127,9 +127,9 @@ void SplashScreen::createMatrix()
     u = splashRound((SplashCoord)255.0 *
 		    splashPow((SplashCoord)mat[i] / 255.0, params->gamma));
     if (u < black) {
-      u = (Guchar)black;
+      u = (unsigned char)black;
     } else if (u >= white) {
-      u = (Guchar)white;
+      u = (unsigned char)white;
     }
     mat[i] = u;
     if (u < minVal) {
@@ -160,7 +160,7 @@ void SplashScreen::buildDispersedMatrix(int i, int j, int val,
 void SplashScreen::buildClusteredMatrix() {
   SplashCoord *dist;
   SplashCoord u, v, d;
-  Guchar val;
+  unsigned char val;
   int size2, x, y, x1, y1, i;
 
   size2 = size >> 1;
@@ -373,9 +373,9 @@ SplashScreen::SplashScreen(SplashScreen *screen) {
   size = screen->size;
   sizeM1 = screen->sizeM1;
   log2Size = screen->log2Size;
-  mat = (Guchar *)gmallocn(size * size, sizeof(Guchar));
+  mat = (unsigned char *)gmallocn(size * size, sizeof(unsigned char));
   if (likely(mat != nullptr)) {
-    memcpy(mat, screen->mat, size * size * sizeof(Guchar));
+    memcpy(mat, screen->mat, size * size * sizeof(unsigned char));
   }
   minVal = screen->minVal;
   maxVal = screen->maxVal;

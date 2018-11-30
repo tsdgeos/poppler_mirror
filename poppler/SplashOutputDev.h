@@ -410,22 +410,22 @@ private:
   SplashPath convertPath(GfxState *state, GfxPath *path,
 			  bool dropEmptySubpaths);
   void drawType3Glyph(GfxState *state, T3FontCache *t3Font,
-		      T3FontCacheTag *tag, Guchar *data);
+		      T3FontCacheTag *tag, unsigned char *data);
 #ifdef USE_CMS
   bool useIccImageSrc(void *data);
   static void iccTransform(void *data, SplashBitmap *bitmap);
   static bool iccImageSrc(void *data, SplashColorPtr colorLine,
-			Guchar *alphaLine);
+			unsigned char *alphaLine);
 #endif
   static bool imageMaskSrc(void *data, SplashColorPtr line);
   static bool imageSrc(void *data, SplashColorPtr colorLine,
-			Guchar *alphaLine);
+			unsigned char *alphaLine);
   static bool alphaImageSrc(void *data, SplashColorPtr line,
-			     Guchar *alphaLine);
+			     unsigned char *alphaLine);
   static bool maskedImageSrc(void *data, SplashColorPtr line,
-			      Guchar *alphaLine);
+			      unsigned char *alphaLine);
   static bool tilingBitmapSrc(void *data, SplashColorPtr line,
-			     Guchar *alphaLine);
+			     unsigned char *alphaLine);
 
   bool keepAlphaChannel;	// don't fill with paper color, keep alpha channel
 

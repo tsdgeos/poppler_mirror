@@ -979,7 +979,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict) {
 }
 
 void XRef::setEncryption(int permFlagsA, bool ownerPasswordOkA,
-			 const Guchar *fileKeyA, int keyLengthA,
+			 const unsigned char *fileKeyA, int keyLengthA,
 			 int encVersionA, int encRevisionA,
 			 CryptAlgorithm encAlgorithmA) {
   int i;
@@ -1000,7 +1000,7 @@ void XRef::setEncryption(int permFlagsA, bool ownerPasswordOkA,
   encAlgorithm = encAlgorithmA;
 }
 
-void XRef::getEncryptionParameters(Guchar **fileKeyA, CryptAlgorithm *encAlgorithmA,
+void XRef::getEncryptionParameters(unsigned char **fileKeyA, CryptAlgorithm *encAlgorithmA,
                               int *keyLengthA) {
   if (encrypted) {
     *fileKeyA = fileKey;

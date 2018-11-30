@@ -664,7 +664,7 @@ private:
 //------------------------------------------------------------------------
 
 struct JBIG2BitmapPtr {
-  Guchar *p;
+  unsigned char *p;
   int shift;
   int x;
 };
@@ -694,7 +694,7 @@ public:
   int nextPixel(JBIG2BitmapPtr *ptr);
   void duplicateRow(int yDest, int ySrc);
   void combine(JBIG2Bitmap *bitmap, int x, int y, Guint combOp);
-  Guchar *getDataPtr() { return data; }
+  unsigned char *getDataPtr() { return data; }
   int getDataSize() { return h * line; }
   bool isOk() { return data != nullptr; }
 
@@ -703,7 +703,7 @@ private:
   JBIG2Bitmap(Guint segNumA, JBIG2Bitmap *bitmap);
 
   int w, h, line;
-  Guchar *data;
+  unsigned char *data;
 };
 
 JBIG2Bitmap::JBIG2Bitmap(Guint segNumA, int wA, int hA):
@@ -719,7 +719,7 @@ JBIG2Bitmap::JBIG2Bitmap(Guint segNumA, int wA, int hA):
     return;
   }
   // need to allocate one extra guard byte for use in combine()
-  data = (Guchar *)gmalloc_checkoverflow(h * line + 1);
+  data = (unsigned char *)gmalloc_checkoverflow(h * line + 1);
   if (data != nullptr) {
     data[h * line] = 0;
   }
@@ -745,7 +745,7 @@ JBIG2Bitmap::JBIG2Bitmap(Guint segNumA, JBIG2Bitmap *bitmap):
     return;
   }
   // need to allocate one extra guard byte for use in combine()
-  data = (Guchar *)gmalloc(h * line + 1);
+  data = (unsigned char *)gmalloc(h * line + 1);
   memcpy(data, bitmap->data, h * line);
   data[h * line] = 0;
 }
@@ -788,7 +788,7 @@ void JBIG2Bitmap::expand(int newH, Guint pixel) {
     return;
   }
   // need to allocate one extra guard byte for use in combine()
-  data = (Guchar *)grealloc(data, newH * line + 1);
+  data = (unsigned char *)grealloc(data, newH * line + 1);
   if (pixel) {
     memset(data + h * line, 0xff, (newH - h) * line);
   } else {
@@ -851,7 +851,7 @@ void JBIG2Bitmap::duplicateRow(int yDest, int ySrc) {
 void JBIG2Bitmap::combine(JBIG2Bitmap *bitmap, int x, int y,
 			  Guint combOp) {
   int x0, x1, y0, y1, xx, yy;
-  Guchar *srcPtr, *destPtr;
+  unsigned char *srcPtr, *destPtr;
   Guint src0, src1, src, dest, s1, s2, m1, m2, m3;
   bool oneByte;
 
@@ -1303,7 +1303,7 @@ Goffset JBIG2Stream::getPos() {
   return dataPtr - pageBitmap->getDataPtr();
 }
 
-int JBIG2Stream::getChars(int nChars, Guchar *buffer) {
+int JBIG2Stream::getChars(int nChars, unsigned char *buffer) {
   int n, i;
 
   if (nChars <= 0 || !dataPtr) {
@@ -1563,7 +1563,7 @@ bool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
   bool ex;
   int run, cnt, c;
   Guint i, j, k;
-  Guchar *p;
+  unsigned char *p;
 
   symWidths = nullptr;
 
@@ -1896,7 +1896,7 @@ bool JBIG2Stream::readSymbolDictSeg(Guint segNum, Guint length,
 	    memset(p, 0, bmSize - k);
 	    break;
 	  }
-	  *p++ = (Guchar)c;
+	  *p++ = (unsigned char)c;
 	}
       } else {
 	collBitmap = readGenericBitmap(true, totalWidth, symHeight,
@@ -2943,12 +2943,12 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(bool mmr, int w, int h,
   Guint ltpCX, cx, cx0, cx1, cx2;
   int *refLine, *codingLine;
   int code1, code2, code3;
-  Guchar *p0, *p1, *p2, *pp;
-  Guchar *atP0, *atP1, *atP2, *atP3;
+  unsigned char *p0, *p1, *p2, *pp;
+  unsigned char *atP0, *atP1, *atP2, *atP3;
   Guint buf0, buf1, buf2;
   Guint atBuf0, atBuf1, atBuf2, atBuf3;
   int atShift0, atShift1, atShift2, atShift3;
-  Guchar mask;
+  unsigned char mask;
   int x, y, x0, x1, a0i, b1i, blackPixels, pix, i;
 
   bitmap = new JBIG2Bitmap(0, w, h);

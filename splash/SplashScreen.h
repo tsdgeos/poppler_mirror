@@ -43,7 +43,7 @@ public:
 
   // Return the computed pixel value (0=black, 1=white) for the gray
   // level <value> at (<x>, <y>).
-  int test(int x, int y, Guchar value) {
+  int test(int x, int y, unsigned char value) {
     int xx, yy;
     if (mat == nullptr) createMatrix();
     xx = x & sizeM1;
@@ -54,7 +54,7 @@ public:
   // Returns true if value is above the white threshold or below the
   // black threshold, i.e., if the corresponding halftone will be
   // solid white or black.
-  bool isStatic(Guchar value) { if (mat == nullptr) createMatrix(); return value < minVal || value >= maxVal; }
+  bool isStatic(unsigned char value) { if (mat == nullptr) createMatrix(); return value < minVal || value >= maxVal; }
 
 private:
   void createMatrix();
@@ -66,13 +66,13 @@ private:
   void buildSCDMatrix(int r);
 
   SplashScreenParams *screenParams;	// params to create the other members
-  Guchar *mat;			// threshold matrix
+  unsigned char *mat;			// threshold matrix
   int size;			// size of the threshold matrix
   int sizeM1;			// size - 1
   int log2Size;			// log2(size)
-  Guchar minVal;		// any pixel value below minVal generates
+  unsigned char minVal;		// any pixel value below minVal generates
 				//   solid black
-  Guchar maxVal;		// any pixel value above maxVal generates
+  unsigned char maxVal;		// any pixel value above maxVal generates
 				//   solid white
 };
 

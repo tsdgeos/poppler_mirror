@@ -56,7 +56,7 @@ private:
   bool fillBuf();
 
   bool hasGetChars() override { return true; }
-  int getChars(int nChars, Guchar *buffer) override;
+  int getChars(int nChars, unsigned char *buffer) override;
 
   GInputStream *inputStream;
   GCancellable *cancellable;

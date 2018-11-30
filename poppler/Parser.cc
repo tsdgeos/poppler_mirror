@@ -63,7 +63,7 @@ Object Parser::getObj(int recursion)
 }
 
 Object Parser::getObj(bool simpleOnly,
-           Guchar *fileKey,
+           unsigned char *fileKey,
 		       CryptAlgorithm encAlgorithm, int keyLength,
 		       int objNum, int objGen, int recursion,
 		       bool strict) {
@@ -190,7 +190,7 @@ err:
   return Object(objError);
 }
 
-Stream *Parser::makeStream(Object &&dict, Guchar *fileKey,
+Stream *Parser::makeStream(Object &&dict, unsigned char *fileKey,
 			   CryptAlgorithm encAlgorithm, int keyLength,
 			   int objNum, int objGen, int recursion,
                            bool strict) {

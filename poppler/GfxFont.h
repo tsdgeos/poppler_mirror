@@ -346,7 +346,7 @@ public:
   bool getUsesMacRomanEnc() const { return usesMacRomanEnc; }
 
   // Get width of a character.
-  double getWidth(Guchar c) const { return widths[c]; }
+  double getWidth(unsigned char c) const { return widths[c]; }
 
   // Return a char code-to-GID mapping for the provided font file.
   // (This is only useful for TrueType fonts.)

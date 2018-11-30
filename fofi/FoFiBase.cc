@@ -35,7 +35,7 @@
 //------------------------------------------------------------------------
 
 FoFiBase::FoFiBase(const char *fileA, int lenA, bool freeFileDataA) {
-  file = (const Guchar *)fileA;
+  file = (const unsigned char *)fileA;
   len = lenA;
   freeFileData = freeFileDataA;
 }

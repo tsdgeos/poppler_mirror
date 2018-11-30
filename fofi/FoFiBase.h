@@ -59,7 +59,7 @@ protected:
 
   bool checkRegion(int pos, int size) const;
 
-  const Guchar *file;
+  const unsigned char *file;
   int len;
   bool freeFileData;
 };

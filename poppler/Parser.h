@@ -48,7 +48,7 @@ public:
   // true, do not parse compound objects (arrays, dictionaries, or
   // streams).
   Object getObj(bool simpleOnly = false,
-     Guchar *fileKey = nullptr,
+     unsigned char *fileKey = nullptr,
 		 CryptAlgorithm encAlgorithm = cryptRC4, int keyLength = 0,
 		 int objNum = 0, int objGen = 0, int recursion = 0,
 		 bool strict = false);
@@ -70,7 +70,7 @@ private:
   Object buf1, buf2;		// next two tokens
   int inlineImg;		// set when inline image data is encountered
 
-  Stream *makeStream(Object &&dict, Guchar *fileKey,
+  Stream *makeStream(Object &&dict, unsigned char *fileKey,
 		     CryptAlgorithm encAlgorithm, int keyLength,
 		     int objNum, int objGen, int recursion,
 		     bool strict);

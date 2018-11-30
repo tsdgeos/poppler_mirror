@@ -114,7 +114,7 @@ public:
   // Close down the stream.
   virtual void close();
 
-  inline int doGetChars(int nChars, Guchar *buffer)
+  inline int doGetChars(int nChars, unsigned char *buffer)
   {
     if (hasGetChars()) {
       return getChars(nChars, buffer);
@@ -130,7 +130,7 @@ public:
 
   inline void fillGooString(GooString *s)
   {
-    Guchar readBuf[4096];
+    unsigned char readBuf[4096];
     int readChars;
     reset();
     while ((readChars = doGetChars(4096, readBuf)) != 0) {
@@ -138,10 +138,10 @@ public:
     }
   }
   
-  inline Guchar *toUnsignedChars(int *length, int initialSize = 4096, int sizeIncrement = 4096)
+  inline unsigned char *toUnsignedChars(int *length, int initialSize = 4096, int sizeIncrement = 4096)
   {
     int readChars;
-    Guchar *buf = (Guchar *)gmalloc(initialSize);
+    unsigned char *buf = (unsigned char *)gmalloc(initialSize);
     int size = initialSize;
     *length = 0;
     int charsToRead = initialSize;
@@ -153,7 +153,7 @@ public:
         if (lookChar() != EOF) {
           size += sizeIncrement;
           charsToRead = sizeIncrement;
-          buf = (Guchar *)grealloc(buf, size);
+          buf = (unsigned char *)grealloc(buf, size);
         } else {
           continueReading = false;
         }
@@ -233,7 +233,7 @@ private:
   int decRef() { return --ref; }
 
   virtual bool hasGetChars() { return false; }
-  virtual int getChars(int nChars, Guchar *buffer);
+  virtual int getChars(int nChars, unsigned char *buffer);
 
   Stream *makeFilter(const char *name, Stream *str, Object *params, int recursion = 0, Dict *dict = nullptr);
 
@@ -379,11 +379,11 @@ public:
 
   // Gets the next pixel from the stream.  <pix> should be able to hold
   // at least nComps elements.  Returns false at end of file.
-  bool getPixel(Guchar *pix);
+  bool getPixel(unsigned char *pix);
 
   // Returns a pointer to the next line of pixels.  Returns NULL at
   // end of file.
-  Guchar *getLine();
+  unsigned char *getLine();
 
   // Skip an entire line from the image.
   void skipLine();
@@ -396,8 +396,8 @@ private:
   int nBits;			// bits per component
   int nVals;			// components per line
   int inputLineSize;		// input line buffer size
-  Guchar *inputLine;		// input line buffer
-  Guchar *imgLine;		// line buffer
+  unsigned char *inputLine;		// input line buffer
+  unsigned char *imgLine;		// line buffer
   int imgIdx;			// current index in imgLine
 };
 
@@ -422,7 +422,7 @@ public:
 
   int lookChar();
   int getChar();
-  int getChars(int nChars, Guchar *buffer);
+  int getChars(int nChars, unsigned char *buffer);
 
 private:
 
@@ -436,7 +436,7 @@ private:
   int nVals;			// components per line
   int pixBytes;			// bytes per pixel
   int rowBytes;			// bytes per line
-  Guchar *predLine;		// line buffer
+  unsigned char *predLine;		// line buffer
   int predIdx;			// current index in predLine
   bool ok;
 };
@@ -476,7 +476,7 @@ private:
   bool fillBuf();
   
   bool hasGetChars() override { return true; }
-  int getChars(int nChars, Guchar *buffer) override
+  int getChars(int nChars, unsigned char *buffer) override
     {
       int n, m;
 
@@ -639,7 +639,7 @@ private:
 
   bool hasGetChars() override { return true; }
 
-  int getChars(int nChars, Guchar *buffer) override {
+  int getChars(int nChars, unsigned char *buffer) override {
     int n;
 
     if (nChars <= 0) {
@@ -716,7 +716,7 @@ public:
 private:
 
   bool hasGetChars() override { return true; }
-  int getChars(int nChars, Guchar *buffer) override;
+  int getChars(int nChars, unsigned char *buffer) override;
 
   Stream *str;
   bool limited;
@@ -800,7 +800,7 @@ public:
 private:
 
   bool hasGetChars() override { return true; }
-  int getChars(int nChars, Guchar *buffer) override;
+  int getChars(int nChars, unsigned char *buffer) override;
 
   inline int doGetRawChar() {
     if (eof) {
@@ -822,13 +822,13 @@ private:
   struct {			// decoding table
     int length;
     int head;
-    Guchar tail;
+    unsigned char tail;
   } table[4097];
   int nextCode;			// next code to be used
   int nextBits;			// number of bits in next code word
   int prevCode;			// previous code used in stream
   int newChar;			// next char to be added to table
-  Guchar seqBuf[4097];		// buffer for current sequence
+  unsigned char seqBuf[4097];		// buffer for current sequence
   int seqLength;		// length of current sequence
   int seqIndex;			// index into current sequence
   bool first;			// first code after a table clear
@@ -859,7 +859,7 @@ public:
 private:
 
   bool hasGetChars() override { return true; }
-  int getChars(int nChars, Guchar *buffer) override;
+  int getChars(int nChars, unsigned char *buffer) override;
 
   char buf[128];		// buffer
   char *bufPtr;			// next char to read
@@ -957,10 +957,10 @@ struct DCTScanInfo {
 
 // DCT Huffman decoding table
 struct DCTHuffTable {
-  Guchar firstSym[17];		// first symbol for this bit length
+  unsigned char firstSym[17];		// first symbol for this bit length
   Gushort firstCode[17];	// first code for this bit length
   Gushort numCodes[17];		// number of codes of this bit length
-  Guchar sym[256];		// symbols
+  unsigned char sym[256];		// symbols
 };
 
 class DCTStream: public FilterStream {
@@ -1001,7 +1001,7 @@ private:
   DCTHuffTable acHuffTables[4];	// AC Huffman tables
   int numDCHuffTables;		// number of DC Huffman tables
   int numACHuffTables;		// number of AC Huffman tables
-  Guchar *rowBuf[4][32];	// buffer for one MCU (non-progressive mode)
+  unsigned char *rowBuf[4][32];	// buffer for one MCU (non-progressive mode)
   int *frameBuf[4];		// buffer for frame (progressive mode)
   int comp, x, y, dy;		// current position within image/MCU
   int restartCtr;		// MCUs left until restart
@@ -1021,7 +1021,7 @@ private:
 				int *prevDC, int data[64]);
   void decodeImage();
   void transformDataUnit(Gushort *quantTable,
-			 int dataIn[64], Guchar dataOut[64]);
+			 int dataIn[64], unsigned char dataOut[64]);
   int readHuffSym(DCTHuffTable *table);
   int readAmp(int size);
   int readBit();
@@ -1103,10 +1103,10 @@ private:
   }
 
   bool hasGetChars() override { return true; }
-  int getChars(int nChars, Guchar *buffer) override;
+  int getChars(int nChars, unsigned char *buffer) override;
 
   StreamPredictor *pred;	// predictor
-  Guchar buf[flateWindow];	// output data buffer
+  unsigned char buf[flateWindow];	// output data buffer
   int index;			// current index into output buffer
   int remain;			// number valid bytes in output buffer
   int codeBuf;			// input buffer
@@ -1325,7 +1325,7 @@ private:
   LZWEncoderNode table[4096];
   int nextSeq;
   int codeLen;
-  Guchar inBuf[4096];
+  unsigned char inBuf[4096];
   int inBufLen;
   int outBuf;
   int outBufLen;

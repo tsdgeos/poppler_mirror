@@ -56,10 +56,10 @@ private:
 
   static const int inBufSize = 16384;
   static const int outBufSize = inBufSize;
-  Guchar inBuf[ inBufSize ];
-  Guchar outBuf[ outBufSize ];
-  Guchar *outBufPtr;
-  Guchar *outBufEnd;
+  unsigned char inBuf[ inBufSize ];
+  unsigned char outBuf[ outBufSize ];
+  unsigned char *outBufPtr;
+  unsigned char *outBufEnd;
   bool inBufEof;
   bool outBufEof;
   z_stream zlib_stream;

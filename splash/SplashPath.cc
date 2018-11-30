@@ -56,9 +56,9 @@ SplashPath::SplashPath(SplashPath *path) {
   length = path->length;
   size = path->size;
   pts = (SplashPathPoint *)gmallocn(size, sizeof(SplashPathPoint));
-  flags = (Guchar *)gmallocn(size, sizeof(Guchar));
+  flags = (unsigned char *)gmallocn(size, sizeof(unsigned char));
   memcpy(pts, path->pts, length * sizeof(SplashPathPoint));
-  memcpy(flags, path->flags, length * sizeof(Guchar));
+  memcpy(flags, path->flags, length * sizeof(unsigned char));
   curSubpath = path->curSubpath;
   if (path->hints) {
     hintsLength = hintsSize = path->hintsLength;
@@ -106,7 +106,7 @@ void SplashPath::grow(int nPts) {
       size *= 2;
     }
     pts = (SplashPathPoint *)greallocn_checkoverflow(pts, size, sizeof(SplashPathPoint));
-    flags = (Guchar *)greallocn_checkoverflow(flags, size, sizeof(Guchar));
+    flags = (unsigned char *)greallocn_checkoverflow(flags, size, sizeof(unsigned char));
     if (unlikely(!pts || !flags)) {
       length = size = curSubpath = 0;
     }

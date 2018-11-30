@@ -44,7 +44,7 @@ struct JPXStreamPrivate {
   void init2(OPJ_CODEC_FORMAT format, unsigned char *data, int length, bool indexed);
 };
 
-static inline Guchar adjustComp(int r, int adjust, int depth, int sgndcorr, bool indexed) {
+static inline unsigned char adjustComp(int r, int adjust, int depth, int sgndcorr, bool indexed) {
   if (!indexed) {
     r += sgndcorr;
     if (adjust) {
@@ -105,7 +105,7 @@ Goffset JPXStream::getPos() {
   return priv->counter * priv->ncomps + priv->ccounter;
 }
 
-int JPXStream::getChars(int nChars, Guchar *buffer) {
+int JPXStream::getChars(int nChars, unsigned char *buffer) {
   if (unlikely(priv->inited == false)) { init(); }
 
   for (int i = 0; i < nChars; ++i) {

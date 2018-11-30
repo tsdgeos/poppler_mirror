@@ -107,7 +107,7 @@ public:
 
   // Get the points on the path.
   int getLength() { return length; }
-  void getPoint(int i, double *x, double *y, Guchar *f)
+  void getPoint(int i, double *x, double *y, unsigned char *f)
     { *x = pts[i].x; *y = pts[i].y; *f = flags[i]; }
 
   // Get the current point.
@@ -125,7 +125,7 @@ protected:
   bool openSubpath() { return curSubpath < length - 1; }
 
   SplashPathPoint *pts;		// array of points
-  Guchar *flags;		// array of flags
+  unsigned char *flags;		// array of flags
   int length, size;		// length/size of the pts and flags arrays
   int curSubpath;		// index of first point in last subpath
 

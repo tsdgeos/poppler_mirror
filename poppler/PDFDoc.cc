@@ -877,7 +877,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   // all objects, including Unencrypted ones.
   xref->scanSpecialFlags();
 
-  Guchar *fileKey;
+  unsigned char *fileKey;
   CryptAlgorithm encAlgorithm;
   int keyLength;
   xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
@@ -1106,7 +1106,7 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
   copyStr->close();
   delete copyStr;
 
-  Guchar *fileKey;
+  unsigned char *fileKey;
   CryptAlgorithm encAlgorithm;
   int keyLength;
   xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
@@ -1175,7 +1175,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
   // all objects, including Unencrypted ones.
   xref->scanSpecialFlags();
 
-  Guchar *fileKey;
+  unsigned char *fileKey;
   CryptAlgorithm encAlgorithm;
   int keyLength;
   xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
@@ -1229,7 +1229,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
   delete uxref;
 }
 
-void PDFDoc::writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint numOffset, Guchar *fileKey,
+void PDFDoc::writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint numOffset, unsigned char *fileKey,
                                CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict*> *alreadyWrittenDicts)
 {
   bool deleteSet = false;
@@ -1300,7 +1300,7 @@ void PDFDoc::writeRawStream (Stream* str, OutStream* outStr)
   outStr->printf("\r\nendstream\r\n");
 }
 
-void PDFDoc::writeString (const GooString* s, OutStream* outStr, const Guchar *fileKey,
+void PDFDoc::writeString (const GooString* s, OutStream* outStr, const unsigned char *fileKey,
                           CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
 {
   // Encrypt string if encryption is enabled
@@ -1362,7 +1362,7 @@ Goffset PDFDoc::writeObjectHeader (Ref *ref, OutStream* outStr)
   return offset;
 }
 
-void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numOffset, Guchar *fileKey,
+void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numOffset, unsigned char *fileKey,
                           CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict*> *alreadyWrittenDicts)
 {
   Array *array;
@@ -1557,8 +1557,8 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
   }
 
   //calculate md5 digest
-  Guchar digest[16];
-  md5((Guchar*)message.c_str(), message.getLength(), digest);
+  unsigned char digest[16];
+  md5((unsigned char*)message.c_str(), message.getLength(), digest);
 
   //create ID array
   // In case of encrypted files, the ID must not be changed because it's used to calculate the key
@@ -1921,7 +1921,7 @@ void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, Guint numOf
 Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, bool combine) 
 {
   Guint objectsCount = 0; //count the number of objects in the XRef(s)
-  Guchar *fileKey;
+  unsigned char *fileKey;
   CryptAlgorithm encAlgorithm;
   int keyLength;
   xRef->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);

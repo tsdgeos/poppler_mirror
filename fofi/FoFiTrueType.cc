@@ -936,16 +936,16 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
 			    void *outputStream, GooString *name,
 			    bool needVerticalMetrics,
                             int *maxUsedGlyph) const {
-  Guchar headData[54];
+  unsigned char headData[54];
   TrueTypeLoca *locaTable;
-  Guchar *locaData;
+  unsigned char *locaData;
   TrueTypeTable newTables[nT42Tables];
-  Guchar tableDir[12 + nT42Tables*16];
+  unsigned char tableDir[12 + nT42Tables*16];
   bool ok;
   Guint checksum;
   int nNewTables;
   int glyfTableLen, length, pos, glyfPos, i, j, k, vmtxTabLength;
-  Guchar vheaTab[36] = {
+  unsigned char vheaTab[36] = {
     0, 1, 0, 0,			// table version number
     0, 0,			// ascent
     0, 0,			// descent
@@ -964,7 +964,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
     0, 0,			// metric data format
     0, 1			// number of advance heights in vmtx table
   };
-  Guchar *vmtxTab;
+  unsigned char *vmtxTab;
   bool needVhea, needVmtx;
   int advance;
 
@@ -978,7 +978,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
     return;
   }
   memcpy(headData, file + pos, 54);
-  headData[8] = headData[9] = headData[10] = headData[11] = (Guchar)0;
+  headData[8] = headData[9] = headData[10] = headData[11] = (unsigned char)0;
 
   // check for a bogus loca format field in the 'head' table
   // (I've encountered fonts with loca format set to 0x0100 instead of 0x0001)
@@ -1032,17 +1032,17 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
   }
 
   // construct the new 'loca' table
-  locaData = (Guchar *)gmallocn(nGlyphs + 1, (locaFmt ? 4 : 2));
+  locaData = (unsigned char *)gmallocn(nGlyphs + 1, (locaFmt ? 4 : 2));
   for (i = 0; i <= nGlyphs; ++i) {
     pos = locaTable[i].newOffset;
     if (locaFmt) {
-      locaData[4*i  ] = (Guchar)(pos >> 24);
-      locaData[4*i+1] = (Guchar)(pos >> 16);
-      locaData[4*i+2] = (Guchar)(pos >>  8);
-      locaData[4*i+3] = (Guchar) pos;
+      locaData[4*i  ] = (unsigned char)(pos >> 24);
+      locaData[4*i+1] = (unsigned char)(pos >> 16);
+      locaData[4*i+2] = (unsigned char)(pos >>  8);
+      locaData[4*i+3] = (unsigned char) pos;
     } else {
-      locaData[2*i  ] = (Guchar)(pos >> 9);
-      locaData[2*i+1] = (Guchar)(pos >> 1);
+      locaData[2*i  ] = (unsigned char)(pos >> 9);
+      locaData[2*i+1] = (unsigned char)(pos >> 1);
     }
   }
 
@@ -1114,7 +1114,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
       } else if (needVerticalMetrics && i == t42VmtxTable) {
 	length = 4 + (nGlyphs - 1) * 2;
 	vmtxTabLength = length;
-	vmtxTab = (Guchar *)gmalloc(length);
+	vmtxTab = (unsigned char *)gmalloc(length);
 	vmtxTab[0] = advance / 256;
 	vmtxTab[1] = advance % 256;
 	for (j = 2; j < length; j += 2) {
@@ -1153,29 +1153,29 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
   tableDir[4] = 0;		// numTables
   tableDir[5] = nNewTables;
   tableDir[6] = 0;		// searchRange
-  tableDir[7] = (Guchar)128;
+  tableDir[7] = (unsigned char)128;
   tableDir[8] = 0;		// entrySelector
   tableDir[9] = 3;
   tableDir[10] = 0;		// rangeShift
-  tableDir[11] = (Guchar)(16 * nNewTables - 128);
+  tableDir[11] = (unsigned char)(16 * nNewTables - 128);
   pos = 12;
   for (i = 0; i < nNewTables; ++i) {
-    tableDir[pos   ] = (Guchar)(newTables[i].tag >> 24);
-    tableDir[pos+ 1] = (Guchar)(newTables[i].tag >> 16);
-    tableDir[pos+ 2] = (Guchar)(newTables[i].tag >>  8);
-    tableDir[pos+ 3] = (Guchar) newTables[i].tag;
-    tableDir[pos+ 4] = (Guchar)(newTables[i].checksum >> 24);
-    tableDir[pos+ 5] = (Guchar)(newTables[i].checksum >> 16);
-    tableDir[pos+ 6] = (Guchar)(newTables[i].checksum >>  8);
-    tableDir[pos+ 7] = (Guchar) newTables[i].checksum;
-    tableDir[pos+ 8] = (Guchar)(newTables[i].offset >> 24);
-    tableDir[pos+ 9] = (Guchar)(newTables[i].offset >> 16);
-    tableDir[pos+10] = (Guchar)(newTables[i].offset >>  8);
-    tableDir[pos+11] = (Guchar) newTables[i].offset;
-    tableDir[pos+12] = (Guchar)(newTables[i].len >> 24);
-    tableDir[pos+13] = (Guchar)(newTables[i].len >> 16);
-    tableDir[pos+14] = (Guchar)(newTables[i].len >>  8);
-    tableDir[pos+15] = (Guchar) newTables[i].len;
+    tableDir[pos   ] = (unsigned char)(newTables[i].tag >> 24);
+    tableDir[pos+ 1] = (unsigned char)(newTables[i].tag >> 16);
+    tableDir[pos+ 2] = (unsigned char)(newTables[i].tag >>  8);
+    tableDir[pos+ 3] = (unsigned char) newTables[i].tag;
+    tableDir[pos+ 4] = (unsigned char)(newTables[i].checksum >> 24);
+    tableDir[pos+ 5] = (unsigned char)(newTables[i].checksum >> 16);
+    tableDir[pos+ 6] = (unsigned char)(newTables[i].checksum >>  8);
+    tableDir[pos+ 7] = (unsigned char) newTables[i].checksum;
+    tableDir[pos+ 8] = (unsigned char)(newTables[i].offset >> 24);
+    tableDir[pos+ 9] = (unsigned char)(newTables[i].offset >> 16);
+    tableDir[pos+10] = (unsigned char)(newTables[i].offset >>  8);
+    tableDir[pos+11] = (unsigned char) newTables[i].offset;
+    tableDir[pos+12] = (unsigned char)(newTables[i].len >> 24);
+    tableDir[pos+13] = (unsigned char)(newTables[i].len >> 16);
+    tableDir[pos+14] = (unsigned char)(newTables[i].len >>  8);
+    tableDir[pos+15] = (unsigned char) newTables[i].len;
     pos += 16;
   }
 
@@ -1185,10 +1185,10 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
     checksum += newTables[i].checksum;
   }
   checksum = 0xb1b0afba - checksum; // because the TrueType spec says so
-  headData[ 8] = (Guchar)(checksum >> 24);
-  headData[ 9] = (Guchar)(checksum >> 16);
-  headData[10] = (Guchar)(checksum >>  8);
-  headData[11] = (Guchar) checksum;
+  headData[ 8] = (unsigned char)(checksum >> 24);
+  headData[ 9] = (unsigned char)(checksum >> 16);
+  headData[10] = (unsigned char)(checksum >>  8);
+  headData[11] = (unsigned char) checksum;
 
   // start the sfnts array
   if (name) {
@@ -1254,7 +1254,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
   }
 }
 
-void FoFiTrueType::dumpString(const Guchar *s, int length,
+void FoFiTrueType::dumpString(const unsigned char *s, int length,
 			      FoFiOutputFunc outputFunc,
 			      void *outputStream) const {
   GooString *buf;
@@ -1283,7 +1283,7 @@ void FoFiTrueType::dumpString(const Guchar *s, int length,
   (*outputFunc)(outputStream, "00>\n", 4);
 }
 
-Guint FoFiTrueType::computeTableChecksum(const Guchar *data, int length) const {
+Guint FoFiTrueType::computeTableChecksum(const unsigned char *data, int length) const {
   Guint checksum, word;
   int i;
 

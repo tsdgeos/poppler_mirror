@@ -354,11 +354,11 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
   ImageStream *imgStr = nullptr;
   unsigned char *row;
   unsigned char *rowp;
-  Guchar *p;
+  unsigned char *p;
   GfxRGB rgb;
   GfxCMYK cmyk;
   GfxGray gray;
-  Guchar zero[gfxColorMaxComps];
+  unsigned char zero[gfxColorMaxComps];
   int invert_bits;
 
   if (writer) {

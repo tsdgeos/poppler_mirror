@@ -94,7 +94,7 @@ void SplashFont::initCache() {
   } else {
     cacheSets = 1;
   }
-  cache = (Guchar *)gmallocn_checkoverflow(cacheSets* cacheAssoc, glyphSize);
+  cache = (unsigned char *)gmallocn_checkoverflow(cacheSets* cacheAssoc, glyphSize);
   if (cache != nullptr) {
     cacheTags = (SplashFontCacheTag *)gmallocn(cacheSets * cacheAssoc,
 					     sizeof(SplashFontCacheTag));
@@ -120,7 +120,7 @@ bool SplashFont::getGlyph(int c, int xFrac, int yFrac,
 			   SplashGlyphBitmap *bitmap, int x0, int y0, SplashClip *clip, SplashClipResult *clipRes) {
   SplashGlyphBitmap bitmap2;
   int size;
-  Guchar *p;
+  unsigned char *p;
   int i, j, k;
 
   // no fractional coordinates for large glyphs or non-anti-aliased

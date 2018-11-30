@@ -58,7 +58,7 @@ public:
 
 private:
   bool hasGetChars() override { return true; }
-  int getChars(int nChars, Guchar *buffer) override;
+  int getChars(int nChars, unsigned char *buffer) override;
 
   void readSegments();
   bool readSymbolDictSeg(Guint segNum, Guint length,
@@ -138,8 +138,8 @@ private:
   GooList *segments;		// [JBIG2Segment]
   GooList *globalSegments;	// [JBIG2Segment]
   Stream *curStr;
-  Guchar *dataPtr;
-  Guchar *dataEnd;
+  unsigned char *dataPtr;
+  unsigned char *dataEnd;
 
   JArithmeticDecoder *arithDecoder;
   JArithmeticDecoderStats *genericRegionStats;

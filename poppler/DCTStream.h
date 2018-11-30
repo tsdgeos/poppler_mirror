@@ -68,7 +68,7 @@ private:
   void init();
 
   bool hasGetChars() override { return true; }
-  int getChars(int nChars, Guchar *buffer) override;
+  int getChars(int nChars, unsigned char *buffer) override;
 
   int colorXform;
   JSAMPLE *current;

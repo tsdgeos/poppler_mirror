@@ -655,7 +655,7 @@ bool Page::loadThumb(unsigned char **data_out,
     imgstr->reset();
     for (int row = 0; row < height; ++row) {
       for (int col = 0; col < width; ++col) {
-        Guchar pix[gfxColorMaxComps];
+        unsigned char pix[gfxColorMaxComps];
         GfxRGB rgb;
 
         imgstr->getPixel(pix);

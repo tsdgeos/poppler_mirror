@@ -50,7 +50,7 @@ typedef bool (*SplashImageMaskSource)(void *data, SplashColorPtr pixel);
 // *<line> and returns true.  If the image stream is exhausted,
 // returns false.
 typedef bool (*SplashImageSource)(void *data, SplashColorPtr colorLine,
-				   Guchar *alphaLine);
+				   unsigned char *alphaLine);
 
 // Use ICCColorSpace to transform a bitmap
 typedef void (*SplashICCTransform)(void *data, SplashBitmap *bitmap);
@@ -153,7 +153,7 @@ public:
   void setSoftMask(SplashBitmap *softMask);
   void setInNonIsolatedGroup(SplashBitmap *alpha0BitmapA,
 			     int alpha0XA, int alpha0YA);
-  void setTransfer(Guchar *red, Guchar *green, Guchar *blue, Guchar *gray);
+  void setTransfer(unsigned char *red, unsigned char *green, unsigned char *blue, unsigned char *gray);
   void setOverprintMask(Guint overprintMask, bool additive);
 
   //----- state save/restore
@@ -164,7 +164,7 @@ public:
   //----- drawing operations
 
   // Fill the bitmap with <color>.  This is not subject to clipping.
-  void clear(SplashColorPtr color, Guchar alpha = 0x00);
+  void clear(SplashColorPtr color, unsigned char alpha = 0x00);
 
   // Stroke a path using the current stroke pattern.
   SplashError stroke(SplashPath *path);
@@ -288,9 +288,9 @@ private:
 
   void pipeInit(SplashPipe *pipe, int x, int y,
 		SplashPattern *pattern, SplashColorPtr cSrc,
-		Guchar aInput, bool usesShape,
+		unsigned char aInput, bool usesShape,
 		bool nonIsolatedGroup,
-		bool knockout = false, Guchar knockoutOpacity = 255);
+		bool knockout = false, unsigned char knockoutOpacity = 255);
   void pipeRun(SplashPipe *pipe);
   void pipeRunSimpleMono1(SplashPipe *pipe);
   void pipeRunSimpleMono8(SplashPipe *pipe);
@@ -316,7 +316,7 @@ private:
   void drawAAPixelInit();
   void drawAAPixel(SplashPipe *pipe, int x, int y);
   void drawSpan(SplashPipe *pipe, int x0, int x1, int y, bool noClip);
-  void drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adjustLine = false, Guchar lineOpacity = 0);
+  void drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adjustLine = false, unsigned char lineOpacity = 0);
   void transform(SplashCoord *matrix, SplashCoord xi, SplashCoord yi,
 		 SplashCoord *xo, SplashCoord *yo);
   void updateModX(int x);

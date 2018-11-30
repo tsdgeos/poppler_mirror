@@ -275,7 +275,7 @@ bool SplashFTFont::makeGlyph(int c, int xFrac, int yFrac,
   FT_GlyphSlot slot;
   FT_UInt gid;
   int rowSize;
-  Guchar *p, *q;
+  unsigned char *p, *q;
   int i;
 
   if (unlikely(!isOk)) {
@@ -339,7 +339,7 @@ bool SplashFTFont::makeGlyph(int c, int xFrac, int yFrac,
   } else {
     rowSize = (bitmap->w + 7) >> 3;
   }
-  bitmap->data = (Guchar *)gmallocn_checkoverflow(rowSize, bitmap->h);
+  bitmap->data = (unsigned char *)gmallocn_checkoverflow(rowSize, bitmap->h);
   if (!bitmap->data) {
     return false;
   }

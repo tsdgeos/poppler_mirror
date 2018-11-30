@@ -143,7 +143,7 @@ protected:
   SplashCoord xMin, yMin, xMax, yMax;
   int xMinI, yMinI, xMaxI, yMaxI;
   SplashXPath **paths;
-  Guchar *flags;
+  unsigned char *flags;
   SplashXPathScanner **scanners;
   int length, size;
 };

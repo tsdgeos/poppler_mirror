@@ -48,7 +48,7 @@ public:
 
 private:
 
-  Guchar *cxTab;		// cxTab[cx] = (i[cx] << 1) + mps[cx]
+  unsigned char *cxTab;		// cxTab[cx] = (i[cx] << 1) + mps[cx]
   int contextSize;
 
   friend class JArithmeticDecoder;

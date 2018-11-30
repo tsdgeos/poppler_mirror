@@ -108,7 +108,7 @@ int Stream::getRawChar() {
   return EOF;
 }
 
-int Stream::getChars(int nChars, Guchar *buffer) {
+int Stream::getChars(int nChars, unsigned char *buffer) {
   error(errInternal, -1, "Internal: called getChars() on non-predictor stream");
   return 0;
 }
@@ -449,9 +449,9 @@ ImageStream::ImageStream(Stream *strA, int widthA, int nCompsA, int nBitsA) {
   if (nComps <= 0 || nBits <= 0 || nVals > INT_MAX / nBits - 7 || width > INT_MAX / nComps) {
     inputLineSize = -1;
   }
-  inputLine = (Guchar *)gmallocn_checkoverflow(inputLineSize, sizeof(char));
+  inputLine = (unsigned char *)gmallocn_checkoverflow(inputLineSize, sizeof(char));
   if (nBits == 8) {
-    imgLine = (Guchar *)inputLine;
+    imgLine = (unsigned char *)inputLine;
   } else {
     if (nBits == 1) {
       imgLineSize = (nVals + 7) & ~7;
@@ -461,13 +461,13 @@ ImageStream::ImageStream(Stream *strA, int widthA, int nCompsA, int nBitsA) {
     if (nComps <= 0 || width > INT_MAX / nComps) {
       imgLineSize = -1;
     }
-    imgLine = (Guchar *)gmallocn_checkoverflow(imgLineSize, sizeof(Guchar));
+    imgLine = (unsigned char *)gmallocn_checkoverflow(imgLineSize, sizeof(unsigned char));
   }
   imgIdx = nVals;
 }
 
 ImageStream::~ImageStream() {
-  if (imgLine != (Guchar *)inputLine) {
+  if (imgLine != (unsigned char *)inputLine) {
     gfree(imgLine);
   }
   gfree(inputLine);
@@ -481,7 +481,7 @@ void ImageStream::close() {
   str->close();
 }
 
-bool ImageStream::getPixel(Guchar *pix) {
+bool ImageStream::getPixel(unsigned char *pix) {
   int i;
 
   if (imgIdx >= nVals) {
@@ -496,7 +496,7 @@ bool ImageStream::getPixel(Guchar *pix) {
   return true;
 }
 
-Guchar *ImageStream::getLine() {
+unsigned char *ImageStream::getLine() {
   if (unlikely(inputLine == nullptr)) {
       return nullptr;
   }
@@ -504,17 +504,17 @@ Guchar *ImageStream::getLine() {
   int readChars = str->doGetChars(inputLineSize, inputLine);
   for ( ; readChars < inputLineSize; readChars++) inputLine[readChars] = EOF;
   if (nBits == 1) {
-    Guchar *p = inputLine;
+    unsigned char *p = inputLine;
     for (int i = 0; i < nVals; i += 8) {
       const int c = *p++;
-      imgLine[i+0] = (Guchar)((c >> 7) & 1);
-      imgLine[i+1] = (Guchar)((c >> 6) & 1);
-      imgLine[i+2] = (Guchar)((c >> 5) & 1);
-      imgLine[i+3] = (Guchar)((c >> 4) & 1);
-      imgLine[i+4] = (Guchar)((c >> 3) & 1);
-      imgLine[i+5] = (Guchar)((c >> 2) & 1);
-      imgLine[i+6] = (Guchar)((c >> 1) & 1);
-      imgLine[i+7] = (Guchar)(c & 1);
+      imgLine[i+0] = (unsigned char)((c >> 7) & 1);
+      imgLine[i+1] = (unsigned char)((c >> 6) & 1);
+      imgLine[i+2] = (unsigned char)((c >> 5) & 1);
+      imgLine[i+3] = (unsigned char)((c >> 4) & 1);
+      imgLine[i+4] = (unsigned char)((c >> 3) & 1);
+      imgLine[i+5] = (unsigned char)((c >> 2) & 1);
+      imgLine[i+6] = (unsigned char)((c >> 1) & 1);
+      imgLine[i+7] = (unsigned char)(c & 1);
     }
   } else if (nBits == 8) {
     // special case: imgLine == inputLine
@@ -523,7 +523,7 @@ Guchar *ImageStream::getLine() {
     // we assume a component fits in 8 bits, with this hack
     // we treat 16 bit images as 8 bit ones until it's fixed correctly.
     // The hack has another part on GfxImageColorMap::GfxImageColorMap
-    Guchar *p = inputLine;
+    unsigned char *p = inputLine;
     for (int i = 0; i < nVals; ++i) {
       imgLine[i] = *p++;
       p++;
@@ -532,13 +532,13 @@ Guchar *ImageStream::getLine() {
     const Gulong bitMask = (1 << nBits) - 1;
     Gulong buf = 0;
     int bits = 0;
-    Guchar *p = inputLine;
+    unsigned char *p = inputLine;
     for (int i = 0; i < nVals; ++i) {
       while (bits < nBits) {
 	buf = (buf << 8) | (*p++ & 0xff);
 	bits += 8;
       }
-      imgLine[i] = (Guchar)((buf >> (bits - nBits)) & bitMask);
+      imgLine[i] = (unsigned char)((buf >> (bits - nBits)) & bitMask);
       bits -= nBits;
     }
   }
@@ -573,7 +573,7 @@ StreamPredictor::StreamPredictor(Stream *strA, int predictorA,
   }
   pixBytes = (nComps * nBits + 7) >> 3;
   rowBytes = ((nVals * nBits + 7) >> 3) + pixBytes;
-  predLine = (Guchar *)gmalloc(rowBytes);
+  predLine = (unsigned char *)gmalloc(rowBytes);
   memset(predLine, 0, rowBytes);
   predIdx = rowBytes;
 
@@ -602,7 +602,7 @@ int StreamPredictor::getChar() {
   return predLine[predIdx++];
 }
 
-int StreamPredictor::getChars(int nChars, Guchar *buffer) {
+int StreamPredictor::getChars(int nChars, unsigned char *buffer) {
   int n, m;
 
   n = 0;
@@ -625,7 +625,7 @@ int StreamPredictor::getChars(int nChars, Guchar *buffer) {
 
 bool StreamPredictor::getNextLine() {
   int curPred;
-  Guchar upLeftBuf[gfxColorMaxComps * 2 + 1];
+  unsigned char upLeftBuf[gfxColorMaxComps * 2 + 1];
   int left, up, upLeft, p, pa, pb, pc;
   int c;
   Gulong inBuf, outBuf, bitMask;
@@ -663,14 +663,14 @@ bool StreamPredictor::getNextLine() {
     }
     switch (curPred) {
     case 11:			// PNG sub
-      predLine[i] = predLine[i - pixBytes] + (Guchar)c;
+      predLine[i] = predLine[i - pixBytes] + (unsigned char)c;
       break;
     case 12:			// PNG up
-      predLine[i] = predLine[i] + (Guchar)c;
+      predLine[i] = predLine[i] + (unsigned char)c;
       break;
     case 13:			// PNG average
       predLine[i] = ((predLine[i - pixBytes] + predLine[i]) >> 1) +
-	            (Guchar)c;
+	            (unsigned char)c;
       break;
     case 14:			// PNG Paeth
       left = predLine[i - pixBytes];
@@ -684,15 +684,15 @@ bool StreamPredictor::getNextLine() {
       if ((pc = p - upLeft) < 0)
 	pc = -pc;
       if (pa <= pb && pa <= pc)
-	predLine[i] = left + (Guchar)c;
+	predLine[i] = left + (unsigned char)c;
       else if (pb <= pc)
-	predLine[i] = up + (Guchar)c;
+	predLine[i] = up + (unsigned char)c;
       else
-	predLine[i] = upLeft + (Guchar)c;
+	predLine[i] = upLeft + (unsigned char)c;
       break;
     case 10:			// PNG none
     default:			// no predictor or TIFF predictor
-      predLine[i] = (Guchar)c;
+      predLine[i] = (unsigned char)c;
       break;
     }
   }
@@ -723,19 +723,19 @@ bool StreamPredictor::getNextLine() {
 	    inBuf = (inBuf << 8) | (predLine[j++] & 0xff);
 	    inBits += 8;
 	  }
-	  upLeftBuf[kk] = (Guchar)((upLeftBuf[kk] +
+	  upLeftBuf[kk] = (unsigned char)((upLeftBuf[kk] +
 				    (inBuf >> (inBits - nBits))) & bitMask);
 	  inBits -= nBits;
 	  outBuf = (outBuf << nBits) | upLeftBuf[kk];
 	  outBits += nBits;
 	  if (outBits >= 8) {
-	    predLine[k++] = (Guchar)(outBuf >> (outBits - 8));
+	    predLine[k++] = (unsigned char)(outBuf >> (outBits - 8));
 	    outBits -= 8;
 	  }
 	}
       }
       if (outBits > 0) {
-	predLine[k++] = (Guchar)((outBuf << (8 - outBits)) +
+	predLine[k++] = (unsigned char)((outBuf << (8 - outBits)) +
 				 (inBuf & ((1 << (8 - outBits)) - 1)));
       }
     }
@@ -1034,7 +1034,7 @@ int EmbedStream::lookChar() {
   }
 }
 
-int EmbedStream::getChars(int nChars, Guchar *buffer) {
+int EmbedStream::getChars(int nChars, unsigned char *buffer) {
   int len;
 
   if (nChars <= 0) {
@@ -1321,7 +1321,7 @@ int LZWStream::getRawChar() {
   return doGetRawChar();
 }
 
-int LZWStream::getChars(int nChars, Guchar *buffer) {
+int LZWStream::getChars(int nChars, unsigned char *buffer) {
   int n, m;
 
   if (pred) {
@@ -1486,7 +1486,7 @@ void RunLengthStream::reset() {
   eof = false;
 }
 
-int RunLengthStream::getChars(int nChars, Guchar *buffer) {
+int RunLengthStream::getChars(int nChars, unsigned char *buffer) {
   int n, m;
 
   n = 0;
@@ -2384,7 +2384,7 @@ bool CCITTFaxStream::isBinary(bool last) {
 // clip [-256,511] --> [0,255]
 #define dctClipOffset 256
 #define dctClipLength 768
-static Guchar dctClip[dctClipLength];
+static unsigned char dctClip[dctClipLength];
 static int dctClipInit = 0;
 
 // zig zag decode map
@@ -2541,7 +2541,7 @@ void DCTStream::reset() {
     bufWidth = ((width + mcuWidth - 1) / mcuWidth) * mcuWidth;
     for (i = 0; i < numComps; ++i) {
       for (j = 0; j < mcuHeight; ++j) {
-	rowBuf[i][j] = (Guchar *)gmallocn(bufWidth, sizeof(Guchar));
+	rowBuf[i][j] = (unsigned char *)gmallocn(bufWidth, sizeof(unsigned char));
       }
     }
 
@@ -2645,8 +2645,8 @@ void DCTStream::restart() {
 // Read one row of MCUs from a sequential JPEG stream.
 bool DCTStream::readMCURow() {
   int data1[64];
-  Guchar data2[64];
-  Guchar *p1, *p2;
+  unsigned char data2[64];
+  unsigned char *p1, *p2;
   int pY, pCb, pCr, pR, pG, pB;
   int h, v, horiz, vert, hSub, vSub;
   int x1, x2, y2, x3, y3, x4, y4, x5, y5, cc, i;
@@ -3051,7 +3051,7 @@ bool DCTStream::readProgressiveDataUnit(DCTHuffTable *dcHuffTable,
 // Decode a progressive JPEG image.
 void DCTStream::decodeImage() {
   int dataIn[64];
-  Guchar dataOut[64];
+  unsigned char dataOut[64];
   Gushort *quantTable;
   int pY, pCb, pCr, pR, pG, pB;
   int x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, cc, i;
@@ -3192,7 +3192,7 @@ void DCTStream::decodeImage() {
 // The stage numbers mentioned in the comments refer to Figure 1 in this
 // paper.
 void DCTStream::transformDataUnit(Gushort *quantTable,
-				  int dataIn[64], Guchar dataOut[64]) {
+				  int dataIn[64], unsigned char dataOut[64]) {
   int v0, v1, v2, v3, v4, v5, v6, v7, t;
   int *p;
   int i;
@@ -3673,7 +3673,7 @@ bool DCTStream::readHuffmanTables() {
   int length;
   int index;
   Gushort code;
-  Guchar sym;
+  unsigned char sym;
   int i;
   int c;
 
@@ -4560,7 +4560,7 @@ int FlateStream::getChar() {
   return doGetRawChar();
 }
 
-int FlateStream::getChars(int nChars, Guchar *buffer) {
+int FlateStream::getChars(int nChars, unsigned char *buffer) {
   if (pred) {
     return pred->getChars(nChars, buffer);
   } else {

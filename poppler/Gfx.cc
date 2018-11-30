@@ -658,7 +658,7 @@ void Gfx::initDisplayProfile() {
               if (profile.isStream()) {
                 Stream *iccStream = profile.getStream();
                 int length = 0;
-                Guchar *profBuf = iccStream->toUnsignedChars(&length, 65536, 65536);
+                unsigned char *profBuf = iccStream->toUnsignedChars(&length, 65536, 65536);
                 cmsHPROFILE hp = cmsOpenProfileFromMem(profBuf,length);
                 if (hp == nullptr) {
                   error(errSyntaxWarning, -1, "read ICCBased color space profile error");
