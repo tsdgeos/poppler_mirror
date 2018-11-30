@@ -1223,8 +1223,8 @@ private:
 //------------------------------------------------------------------------
 
 struct T3FontCacheTag {
-  Gushort code;
-  Gushort mru;			// valid bit (0x8000) and MRU index
+  unsigned short code;
+  unsigned short mru;			// valid bit (0x8000) and MRU index
 };
 
 class T3FontCache {
@@ -1314,7 +1314,7 @@ T3FontCache::~T3FontCache() {
 }
 
 struct T3GlyphStack {
-  Gushort code;			// character code
+  unsigned short code;			// character code
 
   bool haveDx;			// set after seeing a d0/d1 operator
   bool doNotCache;		// set if we see a gsave/grestore before

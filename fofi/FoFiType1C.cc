@@ -1199,7 +1199,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf,
   Type1CIndexVal val;
   bool ok, dFP;
   double d, dx, dy;
-  Gushort r2;
+  unsigned short r2;
   unsigned char byte;
   int pos, subrBias, start, i, k;
 
@@ -2502,15 +2502,15 @@ bool FoFiType1C::readCharset() {
 
   if (topDict.charsetOffset == 0) {
     charset = fofiType1CISOAdobeCharset;
-    charsetLength = sizeof(fofiType1CISOAdobeCharset) / sizeof(Gushort);
+    charsetLength = sizeof(fofiType1CISOAdobeCharset) / sizeof(unsigned short);
   } else if (topDict.charsetOffset == 1) {
     charset = fofiType1CExpertCharset;
-    charsetLength = sizeof(fofiType1CExpertCharset) / sizeof(Gushort);
+    charsetLength = sizeof(fofiType1CExpertCharset) / sizeof(unsigned short);
   } else if (topDict.charsetOffset == 2) {
     charset = fofiType1CExpertSubsetCharset;
-    charsetLength = sizeof(fofiType1CExpertSubsetCharset) / sizeof(Gushort);
+    charsetLength = sizeof(fofiType1CExpertSubsetCharset) / sizeof(unsigned short);
   } else {
-    charset = (Gushort *)gmallocn(nGlyphs, sizeof(Gushort));
+    charset = (unsigned short *)gmallocn(nGlyphs, sizeof(unsigned short));
     charsetLength = nGlyphs;
     for (i = 0; i < nGlyphs; ++i) {
       charset[i] = 0;
@@ -2519,7 +2519,7 @@ bool FoFiType1C::readCharset() {
     charsetFormat = getU8(pos++, &parsedOk);
     if (charsetFormat == 0) {
       for (i = 1; i < nGlyphs; ++i) {
-	charset[i] = (Gushort)getU16BE(pos, &parsedOk);
+	charset[i] = (unsigned short)getU16BE(pos, &parsedOk);
 	pos += 2;
 	if (!parsedOk) {
 	  break;
@@ -2535,7 +2535,7 @@ bool FoFiType1C::readCharset() {
 	  break;
 	}
 	for (j = 0; j <= nLeft && i < nGlyphs; ++j) {
-	  charset[i++] = (Gushort)c++;
+	  charset[i++] = (unsigned short)c++;
 	}
       }
     } else if (charsetFormat == 2) {
@@ -2549,7 +2549,7 @@ bool FoFiType1C::readCharset() {
 	  break;
 	}
 	for (j = 0; j <= nLeft && i < nGlyphs; ++j) {
-	  charset[i++] = (Gushort)c++;
+	  charset[i++] = (unsigned short)c++;
 	}
       }
     }

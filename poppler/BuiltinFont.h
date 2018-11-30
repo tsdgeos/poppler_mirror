@@ -43,7 +43,7 @@ struct BuiltinFont {
 
 struct BuiltinFontWidth {
   const char *name;
-  Gushort width;
+  unsigned short width;
   BuiltinFontWidth *next;
 };
 
@@ -56,7 +56,7 @@ public:
   BuiltinFontWidths(const BuiltinFontWidths &) = delete;
   BuiltinFontWidths& operator=(const BuiltinFontWidths &) = delete;
 
-  bool getWidth(const char *name, Gushort *width);
+  bool getWidth(const char *name, unsigned short *width);
 
 private:
 

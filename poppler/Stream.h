@@ -958,8 +958,8 @@ struct DCTScanInfo {
 // DCT Huffman decoding table
 struct DCTHuffTable {
   unsigned char firstSym[17];		// first symbol for this bit length
-  Gushort firstCode[17];	// first code for this bit length
-  Gushort numCodes[17];		// number of codes of this bit length
+  unsigned short firstCode[17];	// first code for this bit length
+  unsigned short numCodes[17];		// number of codes of this bit length
   unsigned char sym[256];		// symbols
 };
 
@@ -995,7 +995,7 @@ private:
   bool gotJFIFMarker;		// set if APP0 JFIF marker was present
   bool gotAdobeMarker;		// set if APP14 Adobe marker was present
   int restartInterval;		// restart interval, in MCUs
-  Gushort quantTables[4][64];	// quantization tables
+  unsigned short quantTables[4][64];	// quantization tables
   int numQuantTables;		// number of quantization tables
   DCTHuffTable dcHuffTables[4];	// DC Huffman tables
   DCTHuffTable acHuffTables[4];	// AC Huffman tables
@@ -1020,7 +1020,7 @@ private:
 				DCTHuffTable *acHuffTable,
 				int *prevDC, int data[64]);
   void decodeImage();
-  void transformDataUnit(Gushort *quantTable,
+  void transformDataUnit(unsigned short *quantTable,
 			 int dataIn[64], unsigned char dataOut[64]);
   int readHuffSym(DCTHuffTable *table);
   int readAmp(int size);
@@ -1055,8 +1055,8 @@ private:
 
 // Huffman code table entry
 struct FlateCode {
-  Gushort len;			// code length, in bits
-  Gushort val;			// value represented by this code
+  unsigned short len;			// code length, in bits
+  unsigned short val;			// value represented by this code
 };
 
 struct FlateHuffmanTab {

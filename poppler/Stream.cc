@@ -3052,7 +3052,7 @@ bool DCTStream::readProgressiveDataUnit(DCTHuffTable *dcHuffTable,
 void DCTStream::decodeImage() {
   int dataIn[64];
   unsigned char dataOut[64];
-  Gushort *quantTable;
+  unsigned short *quantTable;
   int pY, pCb, pCr, pR, pG, pB;
   int x1, y1, x2, y2, x3, y3, x4, y4, x5, y5, cc, i;
   int h, v, horiz, vert, hSub, vSub;
@@ -3191,7 +3191,7 @@ void DCTStream::decodeImage() {
 //   988-991.
 // The stage numbers mentioned in the comments refer to Figure 1 in this
 // paper.
-void DCTStream::transformDataUnit(Gushort *quantTable,
+void DCTStream::transformDataUnit(unsigned short *quantTable,
 				  int dataIn[64], unsigned char dataOut[64]) {
   int v0, v1, v2, v3, v4, v5, v6, v7, t;
   int *p;
@@ -3350,7 +3350,7 @@ void DCTStream::transformDataUnit(Gushort *quantTable,
 }
 
 int DCTStream::readHuffSym(DCTHuffTable *table) {
-  Gushort code;
+  unsigned short code;
   int bit;
   int codeBits;
 
@@ -3672,7 +3672,7 @@ bool DCTStream::readHuffmanTables() {
   DCTHuffTable *tbl;
   int length;
   int index;
-  Gushort code;
+  unsigned short code;
   unsigned char sym;
   int i;
   int c;
@@ -4893,8 +4893,8 @@ void FlateStream::compHuffmanCodes(int *lengths, int n, FlateHuffmanTab *tab) {
 
 	// fill in the table entries
 	for (i = code2; i < tabSize; i += skip) {
-	  tab->codes[i].len = (Gushort)len;
-	  tab->codes[i].val = (Gushort)val;
+	  tab->codes[i].len = (unsigned short)len;
+	  tab->codes[i].val = (unsigned short)val;
 	}
 
 	++code;

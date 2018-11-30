@@ -694,7 +694,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
 	if (n) {
 	  codeToGID = (int *)gmallocn(n, sizeof(int));
 	  memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(),
-		  n * sizeof(Gushort));
+		  n * sizeof(unsigned short));
 	}
       } else {
 	if (fileName)

@@ -129,8 +129,8 @@ static inline unsigned char colToByte(GfxColorComp x) {
   return (unsigned char)(((x << 8) - x + 0x8000) >> 16);
 }
 
-static inline Gushort colToShort(GfxColorComp x) {
-  return (Gushort)(x);
+static inline unsigned short colToShort(GfxColorComp x) {
+  return (unsigned short)(x);
 }
 
 //------------------------------------------------------------------------

@@ -50,7 +50,7 @@ static inline int splashFloor(SplashCoord x) {
     // floor() and (int)() are implemented separately, which results
     // in changing the FPCW multiple times - so we optimize it with
     // some inline assembly
-    Gushort oldCW, newCW, t;
+    unsigned short oldCW, newCW, t;
     int result;
 
     __asm__ volatile("fldl   %4\n"
@@ -69,7 +69,7 @@ static inline int splashFloor(SplashCoord x) {
     // floor() and (int)() are implemented separately, which results
     // in changing the FPCW multiple times - so we optimize it with
     // some inline assembly
-    Gushort oldCW, newCW;
+    unsigned short oldCW, newCW;
     int result;
 
     __asm fld QWORD PTR x
@@ -97,7 +97,7 @@ static inline int splashCeil(SplashCoord x) {
   // ceil() and (int)() are implemented separately, which results
   // in changing the FPCW multiple times - so we optimize it with
   // some inline assembly
-  Gushort oldCW, newCW, t;
+  unsigned short oldCW, newCW, t;
   int result;
 
   __asm__ volatile("fldl   %4\n"
@@ -116,7 +116,7 @@ static inline int splashCeil(SplashCoord x) {
   // ceil() and (int)() are implemented separately, which results
   // in changing the FPCW multiple times - so we optimize it with
   // some inline assembly
-  Gushort oldCW, newCW;
+  unsigned short oldCW, newCW;
   int result;
 
   __asm fld QWORD PTR x
@@ -141,7 +141,7 @@ static inline int splashRound(SplashCoord x) {
   // this could use round-to-nearest mode and avoid the "+0.5",
   // but that produces slightly different results (because i+0.5
   // sometimes rounds up and sometimes down using the even rule)
-  Gushort oldCW, newCW, t;
+  unsigned short oldCW, newCW, t;
   int result;
 
   x += 0.5;
@@ -161,7 +161,7 @@ static inline int splashRound(SplashCoord x) {
   // this could use round-to-nearest mode and avoid the "+0.5",
   // but that produces slightly different results (because i+0.5
   // sometimes rounds up and sometimes down using the even rule)
-  Gushort oldCW, newCW;
+  unsigned short oldCW, newCW;
   int result;
 
   x += 0.5;

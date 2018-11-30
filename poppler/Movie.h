@@ -81,7 +81,7 @@ class Movie {
 
   const GooString* getFileName() const { return fileName; }
 
-  Gushort getRotationAngle() const { return rotationAngle; }
+  unsigned short getRotationAngle() const { return rotationAngle; }
   void getAspect (int *widthA, int *heightA) const { *widthA = width; *heightA = height; }
 
   Object getPoster() const { return poster.copy(); }
@@ -97,7 +97,7 @@ class Movie {
 
   bool ok;
 
-  Gushort rotationAngle;                   // 0
+  unsigned short rotationAngle;            // 0
   int width;                               // Aspect
   int height;                              // Aspect
 

@@ -133,7 +133,7 @@ struct Type1CEexecBuf {
   FoFiOutputFunc outputFunc;
   void *outputStream;
   bool ascii;			// ASCII encoding?
-  Gushort r1;			// eexec encryption key
+  unsigned short r1;		// eexec encryption key
   int line;			// number of eexec chars left on current line
 };
 
@@ -247,8 +247,8 @@ private:
   int nGlyphs;
   int nFDs;
   unsigned char *fdSelect;
-  Gushort *charset;
-  Gushort charsetLength;
+  unsigned short *charset;
+  unsigned short charsetLength;
   int gsubrBias;
 
   bool parsedOk;

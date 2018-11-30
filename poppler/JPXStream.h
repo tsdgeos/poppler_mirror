@@ -118,7 +118,7 @@ struct JPXCodeBlock {
   //----- coefficient data
   int *coeffs;
   char *touched;		// coefficient 'touched' flags
-  Gushort len;			// coefficient length
+  unsigned short len;			// coefficient length
   JArithmeticDecoder		// arithmetic decoder
     *arithDecoder;
   JArithmeticDecoderStats	// arithmetic decoder stats

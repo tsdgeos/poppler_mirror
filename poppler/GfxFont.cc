@@ -960,7 +960,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
   Unicode uBuf[8];
   double mul;
   int firstChar, lastChar;
-  Gushort w;
+  unsigned short w;
   Object obj1;
   int n, i, a, b, m;
 
@@ -2089,9 +2089,9 @@ const GooString *GfxCIDFont::getCollection() const {
 
 int GfxCIDFont::mapCodeToGID(FoFiTrueType *ff, int cmapi,
   Unicode unicode, bool wmode) {
-  Gushort gid = ff->mapCodeToGID(cmapi,unicode);
+  unsigned short gid = ff->mapCodeToGID(cmapi,unicode);
   if (wmode) {
-    Gushort vgid = ff->mapToVertGID(gid);
+    unsigned short vgid = ff->mapToVertGID(gid);
     if (vgid != 0) gid = vgid;
   }
   return gid;

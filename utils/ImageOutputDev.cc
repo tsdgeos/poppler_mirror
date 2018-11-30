@@ -428,7 +428,7 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
 
     case imgRGB48: {
       p = imgStr->getLine();
-      Gushort *rowp16 = (Gushort*)row;
+      unsigned short *rowp16 = (unsigned short*)row;
       for (int x = 0; x < width; ++x) {
 	if (p) {
 	  colorMap->getRGB(p, &rgb);
