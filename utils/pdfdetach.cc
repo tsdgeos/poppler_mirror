@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
   char *p;
   bool ok;
   int exitCode;
-  GooList *embeddedFiles = nullptr;
+  std::vector<FileSpec*> embeddedFiles;
   int nFiles, nPages, n, i, j;
   FileSpec *fileSpec;
   Page *page;
@@ -160,9 +160,8 @@ int main(int argc, char *argv[]) {
     goto err2;
   }
 
-  embeddedFiles = new GooList();
   for (i = 0; i < doc->getCatalog()->numEmbeddedFiles(); ++i)
-    embeddedFiles->push_back(doc->getCatalog()->embeddedFile(i));
+    embeddedFiles.push_back(doc->getCatalog()->embeddedFile(i));
 
   nPages = doc->getCatalog()->getNumPages();
   for (i = 0; i < nPages; ++i) {
@@ -177,17 +176,17 @@ int main(int argc, char *argv[]) {
       annot = annots->getAnnot(j);
       if (annot->getType() != Annot::typeFileAttachment)
         continue;
-      embeddedFiles->push_back(new FileSpec(static_cast<AnnotFileAttachment *>(annot)->getFile()));
+      embeddedFiles.push_back(new FileSpec(static_cast<AnnotFileAttachment *>(annot)->getFile()));
     }
   }
 
-  nFiles = embeddedFiles->size();
+  nFiles = embeddedFiles.size();
 
   // list embedded files
   if (doList) {
     printf("%d embedded files\n", nFiles);
     for (i = 0; i < nFiles; ++i) {
-      fileSpec = static_cast<FileSpec *>(embeddedFiles->get(i));
+      fileSpec = embeddedFiles[i];
       printf("%d: ", i+1);
       s1 = fileSpec->getFileName();
       if (!s1) {
@@ -218,7 +217,7 @@ int main(int argc, char *argv[]) {
   // save all embedded files
   } else if (saveAll) {
     for (i = 0; i < nFiles; ++i) {
-      fileSpec = static_cast<FileSpec *>(embeddedFiles->get(i));
+      fileSpec = embeddedFiles[i];
       if (savePath[0]) {
 	n = strlen(savePath);
 	if (n > (int)sizeof(path) - 2) {
@@ -277,7 +276,7 @@ int main(int argc, char *argv[]) {
       goto err2;
     }
 
-    fileSpec = static_cast<FileSpec *>(embeddedFiles->get(saveNum - 1));
+    fileSpec = embeddedFiles[saveNum - 1];
     if (savePath[0]) {
       p = savePath;
     } else {
@@ -328,8 +327,8 @@ int main(int argc, char *argv[]) {
 
   // clean up
  err2:
-  if (embeddedFiles)
-    deleteGooList<FileSpec>(embeddedFiles);
+  for (auto& file : embeddedFiles)
+    delete file;
   uMap->decRefCnt();
   delete doc;
  err1:
