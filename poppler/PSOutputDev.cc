@@ -1478,7 +1478,10 @@ PSOutputDev::~PSOutputDev() {
 #endif
   }
   if (paperSizes) {
-    deleteGooList<PSOutPaperSize*>(paperSizes);
+    for (auto entry : *paperSizes) {
+      delete entry;
+    }
+    delete paperSizes;
   }
   if (embFontList) {
     delete embFontList;

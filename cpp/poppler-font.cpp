@@ -225,7 +225,10 @@ std::vector<font_info> font_iterator::next()
     for (std::size_t i = 0; i < items->size(); ++i) {
         fonts[i] = font_info(*new font_info_private((FontInfo *)items->get(i)));
     }
-    deleteGooList<FontInfo*>(items);
+    for (auto entry : *items) {
+        delete entry;
+    }
+    delete items;
     return fonts;
 }
 

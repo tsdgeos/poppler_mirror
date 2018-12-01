@@ -292,7 +292,10 @@ HtmlPage::~HtmlPage() {
   delete DocName;
   delete fonts;
   delete links;
-  deleteGooList<HtmlImage*>(imgList);
+  for (auto entry : *imgList) {
+    delete entry;
+  }
+  delete imgList;
 }
 
 void HtmlPage::updateFont(GfxState *state) {
@@ -1199,7 +1202,10 @@ HtmlOutputDev::~HtmlOutputDev() {
     delete Docname;
     delete docTitle;
 
-    deleteGooList<HtmlMetaVar*>(glMetaVars);
+    for (auto entry : *glMetaVars) {
+      delete entry;
+    }
+    delete glMetaVars;
 
     if (fContentsFrame){
       fputs("</body>\n</html>\n",fContentsFrame);  

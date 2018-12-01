@@ -2975,7 +2975,10 @@ GfxDeviceNColorSpace::~GfxDeviceNColorSpace() {
   }
   delete alt;
   delete func;
-  deleteGooList<GfxSeparationColorSpace*>(sepsCS);
+  for (auto entry : *sepsCS) {
+    delete entry;
+  }
+  delete sepsCS;
   if (mapping != nullptr)
     gfree(mapping);
 }

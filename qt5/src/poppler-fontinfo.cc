@@ -134,7 +134,11 @@ QList<FontInfo> FontIterator::next()
 	for ( std::size_t i = 0; i < items->size(); ++i ) {
 		fonts.append( FontInfo( FontInfoData( ( ::FontInfo* )items->get( i ) ) ) );
 	}
-	deleteGooList<::FontInfo*>( items );
+	for ( auto entry : *items ) {
+		delete entry;
+	}
+	delete items;
+
 	return fonts;
 }
 

@@ -46,7 +46,10 @@ PDFDocFactory::PDFDocFactory(GooList<PDFDocBuilder*> *pdfDocBuilders)
 PDFDocFactory::~PDFDocFactory()
 {
   if (builders) {
-    deleteGooList<PDFDocBuilder*>(builders);
+    for (auto entry : *builders) {
+      delete entry;
+    }
+    delete builders;
   }
 }
 

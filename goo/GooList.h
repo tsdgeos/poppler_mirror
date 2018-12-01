@@ -54,12 +54,4 @@ public:
   const T& get(int i) const { return (*this)[i]; }
 };
 
-template<typename T>
-inline void deleteGooList(GooList<T>* list) {
-  for (auto ptr : *list) {
-    delete ptr;
-  }
-  delete list;
-}
-
 #endif // GOO_LIST_H

@@ -2391,8 +2391,14 @@ TextPage::~TextPage() {
     }
   }
   delete fonts;
-  deleteGooList<TextUnderline*>(underlines);
-  deleteGooList<TextLink*>(links);
+  for (auto entry : *underlines) {
+    delete entry;
+  }
+  delete underlines;
+  for (auto entry : *links) {
+    delete entry;
+  }
+  delete links;
 }
 
 void TextPage::incRefCnt() {
@@ -2446,9 +2452,18 @@ void TextPage::clear() {
     }
     gfree(blocks);
   }
-  deleteGooList<TextFontInfo*>(fonts);
-  deleteGooList<TextUnderline*>(underlines);
-  deleteGooList<TextLink*>(links);
+  for (auto entry : *fonts) {
+    delete entry;
+  }
+  delete fonts;
+  for (auto entry : *underlines) {
+    delete entry;
+  }
+  delete underlines;
+  for (auto entry : *links) {
+    delete entry;
+  }
+  delete links;
 
   curWord = nullptr;
   charPos = 0;
@@ -4440,8 +4455,12 @@ TextSelectionDumper::TextSelectionDumper(TextPage *page)
 
 TextSelectionDumper::~TextSelectionDumper()
 {
-  for (int i = 0; i < nLines; i++)
-    deleteGooList<TextWordSelection*>(lines[i]);
+  for (int i = 0; i < nLines; i++) {
+    for (auto entry : *(lines[i])) {
+      delete entry;
+    }
+    delete lines[i];
+  }
   gfree(lines);
 }
 
@@ -4677,7 +4696,10 @@ TextSelectionPainter::TextSelectionPainter(TextPage *page,
 
 TextSelectionPainter::~TextSelectionPainter()
 {
-  deleteGooList<TextWordSelection*>(selectionList);
+  for (auto entry : *selectionList) {
+    delete entry;
+  }
+  delete selectionList;
   delete state;
 }
 

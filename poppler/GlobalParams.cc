@@ -254,7 +254,10 @@ SysFontList::SysFontList() {
 }
 
 SysFontList::~SysFontList() {
-  deleteGooList<SysFontInfo*>(fonts);
+  for (auto entry : *fonts) {
+    delete entry;
+  }
+  delete fonts;
 }
 
 SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exact) {
@@ -553,7 +556,10 @@ GlobalParams::~GlobalParams() {
 
   delete nameToUnicodeZapfDingbats;
   delete nameToUnicodeText;
-  deleteGooList<GooString*>(toUnicodeDirs);
+  for (auto entry : *toUnicodeDirs) {
+    delete entry;
+  }
+  delete toUnicodeDirs;
   delete sysFonts;
   delete textEncoding;
 

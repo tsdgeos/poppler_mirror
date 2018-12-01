@@ -53,8 +53,12 @@ LinkAction::LinkAction() : nextActionList(nullptr) {
 }
 
 LinkAction::~LinkAction() {
-  if (nextActionList)
-    deleteGooList<LinkAction*>(nextActionList);
+  if (nextActionList) {
+    for (auto entry : *nextActionList) {
+      delete entry;
+    }
+    delete nextActionList;
+  }
 }
 
 LinkAction *LinkAction::parseDest(const Object *obj) {
@@ -881,13 +885,21 @@ LinkOCGState::LinkOCGState(const Object *obj) {
 }
 
 LinkOCGState::~LinkOCGState() {
-  if (stateList)
-    deleteGooList<StateList*>(stateList);
+  if (stateList) {
+    for (auto entry : *stateList) {
+      delete entry;
+    }
+    delete stateList;
+  }
 }
 
 LinkOCGState::StateList::~StateList() {
-  if (list)
-    deleteGooList<Ref*>(list);
+  if (list) {
+    for (auto entry : *list) {
+      delete entry;
+    }
+    delete list;
+  }
 }
 
 //------------------------------------------------------------------------
