@@ -79,7 +79,7 @@ void toc_item_private::load_children(const GooList<OutlineItem*> *items)
     const int num_items = items->size();
     children.resize(num_items);
     for (int i = 0; i < num_items; ++i) {
-        OutlineItem *item = (OutlineItem *)items->get(i);
+        OutlineItem *item = (*items)[i];
 
         toc_item *new_item = new toc_item();
         new_item->d->load(item);

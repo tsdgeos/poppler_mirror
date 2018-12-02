@@ -368,7 +368,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
       QVector<Link *> links;
       for ( std::size_t i = 0; i < nextActions->size(); ++i )
       {
-        links << convertLinkActionToLink( static_cast< ::LinkAction * >( nextActions->get( i ) ), parentDoc, linkArea );
+        links << convertLinkActionToLink( (*nextActions)[ i ], parentDoc, linkArea );
       }
       LinkPrivate::get(popplerLink)->nextLinks = links;
     }

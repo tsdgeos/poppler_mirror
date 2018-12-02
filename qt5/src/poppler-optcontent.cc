@@ -400,11 +400,11 @@ namespace Poppler
 
     const auto *statesList = popplerLinkOCGState->getStateList();
     for (std::size_t i = 0; i < statesList->size(); ++i) {
-        ::LinkOCGState::StateList *stateList = (::LinkOCGState::StateList*)statesList->get(i);
+        ::LinkOCGState::StateList *stateList = (*statesList)[i];
 
         auto *refsList = stateList->list;
         for (std::size_t j = 0; j < refsList->size(); ++j) {
-            Ref *ref = (Ref *)refsList->get(j);
+            Ref *ref = (*refsList)[j];
             OptContentItem *item = d->itemFromRef(QString::number(ref->num));
 
             if (stateList->st == ::LinkOCGState::On) {

@@ -132,7 +132,7 @@ QList<FontInfo> FontIterator::next()
 		return fonts;
 	fonts.reserve( items->size() );
 	for ( std::size_t i = 0; i < items->size(); ++i ) {
-		fonts.append( FontInfo( FontInfoData( ( ::FontInfo* )items->get( i ) ) ) );
+		fonts.append( FontInfo( FontInfoData( (*items)[ i ] ) ) );
 	}
 	for ( auto entry : *items ) {
 		delete entry;

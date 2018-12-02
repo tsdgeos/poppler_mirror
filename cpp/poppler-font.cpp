@@ -223,7 +223,7 @@ std::vector<font_info> font_iterator::next()
     }
     std::vector<font_info> fonts(items->size());
     for (std::size_t i = 0; i < items->size(); ++i) {
-        fonts[i] = font_info(*new font_info_private((FontInfo *)items->get(i)));
+        fonts[i] = font_info(*new font_info_private((*items)[i]));
     }
     for (auto entry : *items) {
         delete entry;

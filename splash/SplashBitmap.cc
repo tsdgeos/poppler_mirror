@@ -127,7 +127,7 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
   separationList = new GooList<GfxSeparationColorSpace*>();
   if (separationListA != nullptr)
     for (std::size_t i = 0; i < separationListA->size(); i++)
-      separationList->push_back((GfxSeparationColorSpace*)((GfxSeparationColorSpace *) separationListA->get(i))->copy());
+      separationList->push_back((GfxSeparationColorSpace*)( (*separationListA)[i])->copy());
 }
 
 SplashBitmap *SplashBitmap::copy(SplashBitmap *src) {

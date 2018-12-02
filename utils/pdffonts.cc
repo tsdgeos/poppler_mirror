@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
       printf("------------------------------------ --------- ------------------------------------ ------------------------------------\n");
       if (fonts) {
         for (std::size_t i = 0; i < fonts->size(); ++i) {
-          FontInfo *font = (FontInfo *)fonts->get(i);
+          FontInfo *font = (*fonts)[i];
           if (font->getFile()) {
             printf("%-36s",
                    font->getName() ? font->getName()->c_str() : "[none]");
@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
       printf("------------------------------------ ----------------- ---------------- --- --- --- ---------\n");
       if (fonts) {
         for (std::size_t i = 0; i < fonts->size(); ++i) {
-          FontInfo *font = (FontInfo *)fonts->get(i);
+          FontInfo *font = (*fonts)[i];
           printf("%-36s %-17s %-16s %-3s %-3s %-3s",
                  font->getName() ? font->getName()->c_str() : "[none]",
                  fontTypeNames[font->getType()],

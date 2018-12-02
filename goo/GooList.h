@@ -48,10 +48,6 @@ public:
   // Zero cost conversion from std::vector
   explicit GooList(const std::vector<T>& vec) : std::vector<T>(vec) {}
   explicit GooList(std::vector<T>&& vec) : std::vector<T>(std::move(vec)) {}
-
-  // Return the <i>th element.
-  // Assumes 0 <= i < length.
-  const T& get(int i) const { return (*this)[i]; }
 };
 
 #endif // GOO_LIST_H

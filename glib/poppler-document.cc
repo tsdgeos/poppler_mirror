@@ -2273,7 +2273,7 @@ poppler_index_iter_get_child (PopplerIndexIter *parent)
 
 	g_return_val_if_fail (parent != nullptr, NULL);
 	
-	item = (OutlineItem *)parent->items->get (parent->index);
+	item = (*parent->items)[parent->index];
 	item->open ();
 	if (! (item->hasKids() && item->getKids()) )
 		return nullptr;
@@ -2326,7 +2326,7 @@ poppler_index_iter_is_open (PopplerIndexIter *iter)
 {
 	OutlineItem *item;
 
-	item = (OutlineItem *)iter->items->get (iter->index);
+	item = (*iter->items)[iter->index];
 
 	return item->isOpen();
 }
@@ -2350,7 +2350,7 @@ poppler_index_iter_get_action (PopplerIndexIter  *iter)
 
 	g_return_val_if_fail (iter != nullptr, NULL);
 
-	item = (OutlineItem *)iter->items->get (iter->index);
+	item = (*iter->items)[iter->index];
 	link_action = item->getAction ();
 
 	title = unicode_to_char (item->getTitle(),
@@ -2423,7 +2423,7 @@ poppler_fonts_iter_get_full_name (PopplerFontsIter *iter)
 	GooString *name;
 	FontInfo *info;
 
-	info = (FontInfo *)iter->items->get (iter->index);
+	info = (*iter->items)[iter->index];
 
 	name = info->getName();
 	if (name != nullptr) {
@@ -2448,7 +2448,7 @@ poppler_fonts_iter_get_name (PopplerFontsIter *iter)
 	const char *name;
 
 	name = poppler_fonts_iter_get_full_name (iter);
-	info = (FontInfo *)iter->items->get (iter->index);
+	info = (*iter->items)[iter->index];
 
 	if (info->getSubset() && name) {
 		while (*name && *name != '+')
@@ -2478,7 +2478,7 @@ poppler_fonts_iter_get_substitute_name (PopplerFontsIter *iter)
 	GooString *name;
 	FontInfo *info;
 
-	info = (FontInfo *)iter->items->get (iter->index);
+	info = (*iter->items)[iter->index];
 
 	name = info->getSubstituteName();
 	if (name != nullptr) {
@@ -2503,7 +2503,7 @@ poppler_fonts_iter_get_file_name (PopplerFontsIter *iter)
 	GooString *file;
 	FontInfo *info;
 
-	info = (FontInfo *)iter->items->get (iter->index);
+	info = (*iter->items)[iter->index];
 
 	file = info->getFile();
 	if (file != nullptr) {
@@ -2528,7 +2528,7 @@ poppler_fonts_iter_get_font_type (PopplerFontsIter *iter)
 
 	g_return_val_if_fail (iter != nullptr, POPPLER_FONT_TYPE_UNKNOWN);
 
-	info = (FontInfo *)iter->items->get (iter->index);
+	info = (*iter->items)[iter->index];
 
 	return (PopplerFontType)info->getType ();
 }
@@ -2549,7 +2549,7 @@ poppler_fonts_iter_get_encoding (PopplerFontsIter *iter)
 	GooString *encoding;
 	FontInfo *info;
 
-	info = (FontInfo *)iter->items->get (iter->index);
+	info = (*iter->items)[iter->index];
 
 	encoding = info->getEncoding();
 	if (encoding != nullptr) {
@@ -2572,7 +2572,7 @@ poppler_fonts_iter_is_embedded (PopplerFontsIter *iter)
 {
 	FontInfo *info;
 
-	info = (FontInfo *)iter->items->get (iter->index);
+	info = (*iter->items)[iter->index];
 
 	return info->getEmbedded();
 }
@@ -2590,7 +2590,7 @@ poppler_fonts_iter_is_subset (PopplerFontsIter *iter)
 {
 	FontInfo *info;
 
-	info = (FontInfo *)iter->items->get (iter->index);
+	info = (*iter->items)[iter->index];
 
 	return info->getSubset();
 }
@@ -2634,7 +2634,7 @@ poppler_fonts_iter_copy (PopplerFontsIter *iter)
 
 	new_iter->items = new GooList<FontInfo*> ();
 	for (std::size_t i = 0; i < iter->items->size(); i++) {
-		FontInfo *info = (FontInfo *)iter->items->get(i);
+		FontInfo *info = (*iter->items)[i];
 		new_iter->items->push_back (new FontInfo (*info));
 	}
 

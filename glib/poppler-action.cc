@@ -590,7 +590,7 @@ build_ocg_state (PopplerDocument *document,
 	}
 
 	for (std::size_t i = 0; i < st_list->size(); ++i) {
-		LinkOCGState::StateList *list = (LinkOCGState::StateList *)st_list->get(i);
+		LinkOCGState::StateList *list = (*st_list)[i];
 		PopplerActionLayer *action_layer = g_slice_new0 (PopplerActionLayer);
 
 		switch (list->st) {
@@ -606,7 +606,7 @@ build_ocg_state (PopplerDocument *document,
 		}
 
 		for (std::size_t j = 0; j < list->list->size(); ++j) {
-			Ref *ref = (Ref *)list->list->get(j);
+			Ref *ref = (*list->list)[j];
 			PopplerLayer *layer = get_layer_for_ref (document, document->layers, ref, preserve_rb);
 
 			action_layer->layers = g_list_prepend (action_layer->layers, layer);

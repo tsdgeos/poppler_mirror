@@ -661,7 +661,7 @@ poppler_page_get_selection_region (PopplerPage           *page,
 				  selection_style, scale);
 
   for (std::size_t i = 0; i < list->size(); i++) {
-    PDFRectangle *selection_rect = (PDFRectangle *) list->get(i);
+    PDFRectangle *selection_rect = (*list)[i];
     PopplerRectangle *rect;
 
     rect = poppler_rectangle_new ();
@@ -751,7 +751,7 @@ poppler_page_get_selected_region (PopplerPage           *page,
   region = cairo_region_create ();
 
   for (std::size_t i = 0; i < list->size(); i++) {
-    PDFRectangle *selection_rect = (PDFRectangle *) list->get(i);
+    PDFRectangle *selection_rect = (*list)[i];
     cairo_rectangle_int_t rect;
 
     rect.x = (gint) ((selection_rect->x1 * scale) + 0.5);
@@ -2191,7 +2191,7 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
       n_rects += line_words->size() - 1;
       for (std::size_t j = 0; j < line_words->size(); j++)
         {
-          TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j);
+          TextWordSelection *word_sel = (*line_words)[j];
           n_rects += word_sel->getEnd() - word_sel->getBegin();
         }
     }
@@ -2204,7 +2204,7 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
       auto *line_words = word_list[i];
       for (std::size_t j = 0; j < line_words->size(); j++)
         {
-          TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j);
+          TextWordSelection *word_sel = (*line_words)[j];
           TextWord *word = word_sel->getWord();
           int end = word_sel->getEnd();
 
@@ -2224,7 +2224,7 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
 
           if (j < line_words->size() - 1)
             {
-              TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j + 1);
+              TextWordSelection *word_sel = (*line_words)[j + 1];
 
               word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
 	      // space is from one word to other and with the same height as
@@ -2373,7 +2373,7 @@ poppler_page_get_text_attributes_for_area (PopplerPage      *page,
       auto *line_words = word_list[i];
       for (std::size_t j = 0; j < line_words->size(); j++)
         {
-          TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j);
+          TextWordSelection *word_sel = (*line_words)[j];
           int end = word_sel->getEnd();
 
           word = word_sel->getWord();

@@ -471,5 +471,5 @@ int OCDisplayNode::getNumChildren() const {
 }
 
 OCDisplayNode *OCDisplayNode::getChild(int idx) const {
-  return (OCDisplayNode *)children->get(idx);
+  return (*children)[idx];
 }

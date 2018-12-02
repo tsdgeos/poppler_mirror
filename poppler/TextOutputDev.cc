@@ -2343,7 +2343,7 @@ TextWord *TextWordList::get(int idx) {
   if (idx < 0 || idx >= (int)words->size()) {
     return nullptr;
   }
-  return (TextWord *)words->get(idx);
+  return (*words)[idx];
 }
 
 #endif // TEXTOUT_WORD_LIST
@@ -2495,7 +2495,7 @@ void TextPage::updateFont(GfxState *state) {
   // get the font info object
   curFont = nullptr;
   for (std::size_t i = 0; i < fonts->size(); ++i) {
-    curFont = (TextFontInfo *)fonts->get(i);
+    curFont = (*fonts)[i];
     if (curFont->matches(state)) {
       break;
     }
@@ -2849,7 +2849,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
 
     //----- handle underlining
     for (std::size_t i = 0; i < underlines->size(); ++i) {
-      underline = (TextUnderline *)underlines->get(i);
+      underline = (*underlines)[i];
       if (underline->horiz) {
 	// rot = 0
 	if (pools[0]->minBaseIdx <= pools[0]->maxBaseIdx) {
@@ -2912,7 +2912,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
 
     //----- handle links
     for (std::size_t i = 0; i < links->size(); ++i) {
-      link = (TextLink *)links->get(i);
+      link = (*links)[i];
 
       // rot = 0
       if (pools[0]->minBaseIdx <= pools[0]->maxBaseIdx) {
@@ -4551,7 +4551,7 @@ GooString *TextSelectionDumper::getText (void)
   for (i = 0; i < nLines; i++) {
     GooList<TextWordSelection*> *lineWords = lines[i];
     for (std::size_t j = 0; j < lineWords->size(); j++) {
-      TextWordSelection *sel = (TextWordSelection *)lineWords->get(j);
+      TextWordSelection *sel = (*lineWords)[j];
 
       page->dumpFragment (sel->word->text + sel->begin, sel->end - sel->begin, uMap, text);
       if (j < lineWords->size() - 1)
@@ -4755,7 +4755,7 @@ void TextSelectionPainter::endPage()
   out->updateFillColor(state);
 
   for (std::size_t i = 0; i < selectionList->size(); i++) {
-    TextWordSelection *sel = (TextWordSelection *) selectionList->get(i);
+    TextWordSelection *sel = (*selectionList)[i];
     int begin = sel->begin;
 
     while (begin < sel->end) {

@@ -1218,7 +1218,7 @@ double FormFieldText::getTextFontSize()
   double fontSize = -1;
   if (idx >= 0) {
     char* p = nullptr;
-    fontSize = strtod(static_cast<GooString*>(daToks->get(idx))->c_str(), &p);
+    fontSize = strtod((*daToks)[idx]->c_str(), &p);
     if (!p || *p)
       fontSize = -1;
   }
@@ -1251,7 +1251,7 @@ void FormFieldText::setTextFontSize(int fontSize)
       if (i == (std::size_t)idx) {
         defaultAppearance->appendf("{0:d}", fontSize);
       } else {
-        defaultAppearance->append(static_cast<GooString*>(daToks->get(i)));
+        defaultAppearance->append((*daToks)[i]);
       }
     }
     for (auto entry : *daToks) {

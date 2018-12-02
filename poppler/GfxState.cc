@@ -2877,7 +2877,7 @@ void GfxSeparationColorSpace::createMapping(GooList<GfxSeparationColorSpace*> *s
     default:
       unsigned int newOverprintMask = 0x10;
       for (std::size_t i = 0; i < separationList->size(); i++) {
-        GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)separationList->get(i);
+        GfxSeparationColorSpace *sepCS = (*separationList)[i];
         if (!sepCS->getName()->cmp(name)) {
           if (sepCS->getFunc()->hasDifferentResultSet(func)) {
             error(errSyntaxWarning, -1,
@@ -2990,7 +2990,7 @@ GfxColorSpace *GfxDeviceNColorSpace::copy() {
   auto sepsCSA = new GooList<GfxSeparationColorSpace*>();
   sepsCSA->reserve(sepsCS->size());
   for (std::size_t i = 0; i < sepsCS->size(); i++) {
-    GfxSeparationColorSpace *scs = (GfxSeparationColorSpace *) sepsCS->get(i);
+    GfxSeparationColorSpace *scs = (*sepsCS)[i];
     if (likely(scs != nullptr)) {
       sepsCSA->push_back((GfxSeparationColorSpace*)scs->copy());
     }
@@ -3182,7 +3182,7 @@ void GfxDeviceNColorSpace::createMapping(GooList<GfxSeparationColorSpace*> *sepa
         sepFunc = func;
       else {
         for (std::size_t k = 0; k < sepsCS->size(); k++) {
-          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)sepsCS->get(k);
+          GfxSeparationColorSpace *sepCS = (*sepsCS)[k];
           if (!sepCS->getName()->cmp(names[i])) {
             sepFunc = sepCS->getFunc();
             break;
@@ -3190,7 +3190,7 @@ void GfxDeviceNColorSpace::createMapping(GooList<GfxSeparationColorSpace*> *sepa
         }
       }
       for (std::size_t j = 0; j < separationList->size(); j++) {
-        GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)separationList->get(j);
+        GfxSeparationColorSpace *sepCS = (*separationList)[j];
         if (!sepCS->getName()->cmp(names[i])) {
           if (sepFunc != nullptr && sepCS->getFunc()->hasDifferentResultSet(sepFunc)) {
             error(errSyntaxWarning, -1,
@@ -3222,7 +3222,7 @@ void GfxDeviceNColorSpace::createMapping(GooList<GfxSeparationColorSpace*> *sepa
 	  separationList->push_back(new GfxSeparationColorSpace(names[i]->copy(),alt->copy(), func->copy()));
         else {
           for (std::size_t k = 0; k < sepsCS->size(); k++) {
-            GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)sepsCS->get(k);
+            GfxSeparationColorSpace *sepCS = (*sepsCS)[k];
             if (!sepCS->getName()->cmp(names[i])) {
               found = true;
 	      separationList->push_back((GfxSeparationColorSpace*)sepCS->copy());
