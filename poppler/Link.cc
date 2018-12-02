@@ -35,7 +35,6 @@
 #include <string.h>
 #include "goo/gmem.h"
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "Error.h"
 #include "Object.h"
 #include "Array.h"
@@ -162,7 +161,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
 
   // parse the next actions
   const Object nextObj = obj->dictLookup("Next");
-  GooList<LinkAction*> *actionList = nullptr;
+  std::vector<LinkAction*> *actionList = nullptr;
   if (nextObj.isDict()) {
 
     // Prevent circles in the tree by checking the ref against used refs in
@@ -176,13 +175,13 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
         }
     }
 
-    actionList = new GooList<LinkAction*>();
+    actionList = new std::vector<LinkAction*>();
     actionList->reserve(1);
     actionList->push_back(parseAction(&nextObj, nullptr, seenNextActions));
   } else if (nextObj.isArray()) {
     const Array *a = nextObj.getArray();
     const int n = a->getLength();
-    actionList = new GooList<LinkAction*>();
+    actionList = new std::vector<LinkAction*>();
     actionList->reserve(n);
     for (int i = 0; i < n; ++i) {
       const Object obj3 = a->get(i);
@@ -210,11 +209,11 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
   return action;
 }
 
-const GooList<LinkAction*> *LinkAction::nextActions() const {
+const std::vector<LinkAction*> *LinkAction::nextActions() const {
   return nextActionList;
 }
 
-void LinkAction::setNextActions(GooList<LinkAction*> *actions) {
+void LinkAction::setNextActions(std::vector<LinkAction*> *actions) {
   delete nextActionList;
   nextActionList = actions;
 }
@@ -828,7 +827,7 @@ LinkJavaScript::~LinkJavaScript() {
 // LinkOCGState
 //------------------------------------------------------------------------
 LinkOCGState::LinkOCGState(const Object *obj) {
-  stateList = new GooList<StateList*>();
+  stateList = new std::vector<StateList*>();
   preserveRB = true;
 
   Object obj1 = obj->dictLookup("State");
@@ -843,7 +842,7 @@ LinkOCGState::LinkOCGState(const Object *obj) {
 
 	const char *name = obj2.getName();
 	stList = new StateList();
-	stList->list = new GooList<Ref*>();
+	stList->list = new std::vector<Ref*>();
 	if (!strcmp (name, "ON")) {
 	  stList->st = On;
 	} else if (!strcmp (name, "OFF")) {

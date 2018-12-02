@@ -46,7 +46,6 @@
 #include "goo/PNGWriter.h"
 #include "goo/TiffWriter.h"
 #include "goo/ImgWriter.h"
-#include "goo/GooList.h"
 
 //------------------------------------------------------------------------
 // SplashBitmap
@@ -54,7 +53,7 @@
 
 SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
 			   SplashColorMode modeA, bool alphaA,
-			   bool topDown, GooList<GfxSeparationColorSpace*> *separationListA) {
+			   bool topDown, std::vector<GfxSeparationColorSpace*> *separationListA) {
   width = widthA;
   height = heightA;
   mode = modeA;
@@ -124,7 +123,7 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
   } else {
     alpha = nullptr;
   }
-  separationList = new GooList<GfxSeparationColorSpace*>();
+  separationList = new std::vector<GfxSeparationColorSpace*>();
   if (separationListA != nullptr)
     for (std::size_t i = 0; i < separationListA->size(); i++)
       separationList->push_back((GfxSeparationColorSpace*)( (*separationListA)[i])->copy());

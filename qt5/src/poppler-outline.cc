@@ -23,7 +23,6 @@
 #include "poppler-private.h"
 #include "poppler-outline-private.h"
 
-#include "GooList.h"
 #include "Link.h"
 #include "Outline.h"
 
@@ -166,7 +165,7 @@ QVector<OutlineItem> OutlineItem::children() const
 
   if (::OutlineItem *data = m_data->data) {
     data->open();
-    if (const GooList *kids = data->getKids()) {
+    if (const auto *kids = data->getKids()) {
       for (void *kid : *kids) {
 	result.push_back(OutlineItem{new OutlineItemData{static_cast<::OutlineItem *>(kid), m_data->documentData}});
       }

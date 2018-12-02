@@ -56,7 +56,6 @@
 #include <assert.h>
 #include "goo/gmem.h"
 #include "goo/gstrtod.h"
-#include "GooList.h"
 #include "Error.h"
 #include "Object.h"
 #include "Catalog.h"
@@ -756,7 +755,7 @@ DefaultAppearance::DefaultAppearance(GooString *da) {
   fontPtSize = -1;
 
   if (da) {
-    GooList<GooString*> * daToks = new GooList<GooString*>();
+    std::vector<GooString*> * daToks = new std::vector<GooString*>();
     int i = FormFieldText::tokenizeDA(da, daToks, "Tf");
 
     if (i >= 1) {
@@ -4031,7 +4030,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     bool txField, bool forceZapfDingbats,
     XRef *xref, bool *addedDingbatsResource,
     bool password) {
-  GooList<GooString*> *daToks;
+  std::vector<GooString*> *daToks;
   GooString *tok;
   GooString convertedText;
   const GfxFont *font;
@@ -4049,7 +4048,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
   // parse the default appearance string
   tfPos = tmPos = -1;
   if (da) {
-    daToks = new GooList<GooString*>();
+    daToks = new std::vector<GooString*>();
     i = 0;
     while (i < da->getLength()) {
       while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
@@ -4449,7 +4448,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 // Draw the variable text or caption for a field.
 bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect,
 			      const GooString *da, const GfxResources *resources, int quadding) {
-  GooList<GooString*> *daToks;
+  std::vector<GooString*> *daToks;
   GooString *tok;
   GooString convertedText;
   const GfxFont *font;
@@ -4463,7 +4462,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
   // parse the default appearance string
   tfPos = tmPos = -1;
   if (da) {
-    daToks = new GooList<GooString*>();
+    daToks = new std::vector<GooString*>();
     i = 0;
     while (i < da->getLength()) {
       while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {

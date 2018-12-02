@@ -33,7 +33,7 @@ class PDFDocFactory {
 
 public:
 
-  PDFDocFactory(GooList<PDFDocBuilder*> *pdfDocBuilders = nullptr);
+  PDFDocFactory(std::vector<PDFDocBuilder*> *pdfDocBuilders = nullptr);
   ~PDFDocFactory();
 
   PDFDocFactory(const PDFDocFactory &) = delete;
@@ -50,7 +50,7 @@ public:
 
 private:
 
-  GooList<PDFDocBuilder*> *builders;
+  std::vector<PDFDocBuilder*> *builders;
 
 };
 

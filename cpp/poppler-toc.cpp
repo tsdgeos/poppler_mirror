@@ -25,7 +25,6 @@
 #include "poppler-toc-private.h"
 #include "poppler-private.h"
 
-#include "GooList.h"
 #include "Outline.h"
 
 using namespace poppler;
@@ -44,7 +43,7 @@ toc* toc_private::load_from_outline(Outline *outline)
         return nullptr;
     }
 
-    const GooList<OutlineItem*> *items = outline->getItems();
+    const std::vector<OutlineItem*> *items = outline->getItems();
     if (!items || items->size() < 1) {
         return nullptr;
     }
@@ -74,7 +73,7 @@ void toc_item_private::load(const OutlineItem *item)
     is_open = item->isOpen();
 }
 
-void toc_item_private::load_children(const GooList<OutlineItem*> *items)
+void toc_item_private::load_children(const std::vector<OutlineItem*> *items)
 {
     const int num_items = items->size();
     children.resize(num_items);
@@ -86,7 +85,7 @@ void toc_item_private::load_children(const GooList<OutlineItem*> *items)
         children[i] = new_item;
 
         item->open();
-        const GooList<OutlineItem*> *item_children = item->getKids();
+        const std::vector<OutlineItem*> *item_children = item->getKids();
         if (item_children) {
             new_item->d->load_children(item_children);
         }

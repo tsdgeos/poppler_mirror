@@ -519,7 +519,7 @@ public:
 
 private:
 
-  GooList<TextWord*> *words;
+  std::vector<TextWord*> *words;
 };
 
 #endif // TEXTOUT_WORD_LIST
@@ -637,14 +637,14 @@ public:
 		     SelectionStyle style,
 		     GfxColor *glyph_color, GfxColor *box_color);
 
-  GooList<PDFRectangle*> *getSelectionRegion(PDFRectangle *selection,
+  std::vector<PDFRectangle*> *getSelectionRegion(PDFRectangle *selection,
 			      SelectionStyle style,
 			      double scale);
 
   GooString *getSelectionText(PDFRectangle *selection,
 			      SelectionStyle style);
 
-  GooList<TextWordSelection*> **getSelectionWords(PDFRectangle *selection,
+  std::vector<TextWordSelection*> **getSelectionWords(PDFRectangle *selection,
                               SelectionStyle style,
                               int *nLines);
 
@@ -709,14 +709,14 @@ private:
 				//   rawOrder is set)
   TextWord *rawLastWord;	// last word on rawWords list
 
-  GooList<TextFontInfo*> *fonts;// all font info objects used on this page
+  std::vector<TextFontInfo*> *fonts;// all font info objects used on this page
 
   double lastFindXMin,		// coordinates of the last "find" result
          lastFindYMin;
   bool haveLastFind;
 
-  GooList<TextUnderline*> *underlines;
-  GooList<TextLink*> *links;
+  std::vector<TextUnderline*> *underlines;
+  std::vector<TextLink*> *links;
 
   int refCnt;
 
@@ -876,7 +876,7 @@ public:
 		     SelectionStyle style,
 		     GfxColor *glyph_color, GfxColor *box_color);
 
-  GooList<PDFRectangle*> *getSelectionRegion(PDFRectangle *selection,
+  std::vector<PDFRectangle*> *getSelectionRegion(PDFRectangle *selection,
 			      SelectionStyle style,
 			      double scale);
 

@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
   // get the fonts
   {
     FontInfoScanner scanner(doc, firstPage - 1);
-    GooList<FontInfo*> *fonts = scanner.scan(lastPage - firstPage + 1);
+    std::vector<FontInfo*> *fonts = scanner.scan(lastPage - firstPage + 1);
 
     if (showSubst) {
       // print the font substitutions

@@ -28,7 +28,6 @@
 #include <poppler-config.h>
 #include <stdio.h>
 #include "goo/gmem.h"
-#include "goo/GooList.h"
 #include "parseargs.h"
 #include "Annot.h"
 #include "GlobalParams.h"

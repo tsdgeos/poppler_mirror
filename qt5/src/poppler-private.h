@@ -124,7 +124,7 @@ namespace Poppler {
 	DocumentData(const DocumentData &) = delete;
 	DocumentData& operator=(const DocumentData &) = delete;
 	
-	void addTocChildren( QDomDocument * docSyn, QDomNode * parent, const GooList<OutlineItem*> * items );
+	void addTocChildren( QDomDocument * docSyn, QDomNode * parent, const std::vector<::OutlineItem*> * items );
 	
 	void setPaperColor(const QColor &color)
 	{

@@ -23,7 +23,6 @@
 #include <string.h>
 
 #ifndef __GI_SCANNER__
-#include <goo/GooList.h>
 #include <splash/SplashBitmap.h>
 #include <DateInfo.h>
 #include <GlobalParams.h>
@@ -2163,7 +2162,7 @@ poppler_document_init (PopplerDocument *document)
 struct _PopplerIndexIter
 {
 	PopplerDocument *document;
-	const GooList<OutlineItem*> *items;
+	const std::vector<OutlineItem*> *items;
 	int index;
 };
 
@@ -2238,7 +2237,7 @@ poppler_index_iter_new (PopplerDocument *document)
 {
 	PopplerIndexIter *iter;
 	Outline *outline;
-	const GooList<OutlineItem*> *items;
+	const std::vector<OutlineItem*> *items;
 
 	outline = document->doc->getOutline();
 	if (outline == nullptr)
@@ -2401,7 +2400,7 @@ poppler_index_iter_free (PopplerIndexIter *iter)
 
 struct _PopplerFontsIter
 {
-	GooList<FontInfo*> *items;
+	std::vector<FontInfo*> *items;
 	int index;
 };
 
@@ -2632,7 +2631,7 @@ poppler_fonts_iter_copy (PopplerFontsIter *iter)
 
 	new_iter = g_slice_dup (PopplerFontsIter, iter);
 
-	new_iter->items = new GooList<FontInfo*> ();
+	new_iter->items = new std::vector<FontInfo*> ();
 	for (std::size_t i = 0; i < iter->items->size(); i++) {
 		FontInfo *info = (*iter->items)[i];
 		new_iter->items->push_back (new FontInfo (*info));
@@ -2662,7 +2661,7 @@ poppler_fonts_iter_free (PopplerFontsIter *iter)
 }
 
 static PopplerFontsIter *
-poppler_fonts_iter_new (GooList<FontInfo*> *items)
+poppler_fonts_iter_new (std::vector<FontInfo*> *items)
 {
 	PopplerFontsIter *iter;
 
@@ -2766,7 +2765,7 @@ poppler_font_info_scan (PopplerFontInfo   *font_info,
 			int                n_pages,
 			PopplerFontsIter **iter)
 {
-	GooList<FontInfo*> *items;
+	std::vector<FontInfo*> *items;
 
 	g_return_val_if_fail (iter != nullptr, FALSE);
 

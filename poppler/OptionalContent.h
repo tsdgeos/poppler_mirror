@@ -14,7 +14,6 @@
 #ifndef OPTIONALCONTENT_H
 #define OPTIONALCONTENT_H
 
-#include "goo/GooList.h"
 #include "Object.h"
 #include "CharTypes.h"
 #include <unordered_map>
@@ -135,12 +134,12 @@ private:
   OCDisplayNode(const GooString *nameA);
   OCDisplayNode(OptionalContentGroup *ocgA);
   void addChild(OCDisplayNode *child);
-  void addChildren(GooList<OCDisplayNode*> *childrenA);
-  GooList<OCDisplayNode*> *takeChildren();
+  void addChildren(std::vector<OCDisplayNode*> *childrenA);
+  std::vector<OCDisplayNode*> *takeChildren();
 
   GooString *name;		// display name (may be nullptr)
   OptionalContentGroup *ocg;	// nullptr for display labels
-  GooList<OCDisplayNode*> *children;		// nullptr if there are no children
+  std::vector<OCDisplayNode*> *children;		// nullptr if there are no children
 				//   [OCDisplayNode]
 };
 

@@ -52,7 +52,6 @@
 #include <algorithm>
 #include <array>
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "poppler-config.h"
 #include "GlobalParams.h"
 #include "Object.h"
@@ -1325,7 +1324,7 @@ void PSOutputDev::postInit()
     paperMatch = false;
   }
   Page *page;
-  paperSizes = new GooList<PSOutPaperSize*>();
+  paperSizes = new std::vector<PSOutPaperSize*>();
   for (size_t pgi = 0; pgi < pages.size(); ++pgi) {
     const int pg = pages[pgi];
     page = catalog->getPage(pg);

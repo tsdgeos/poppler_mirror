@@ -580,7 +580,6 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h
     DESTINATION include/poppler)
   install(FILES
-    goo/GooList.h
     goo/GooTimer.h
     goo/GooString.h
     goo/gmem.h

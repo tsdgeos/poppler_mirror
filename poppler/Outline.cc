@@ -30,7 +30,6 @@
 
 #include "goo/gmem.h"
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "XRef.h"
 #include "Link.h"
 #include "PDFDocEncoding.h"
@@ -111,8 +110,8 @@ OutlineItem::~OutlineItem() {
   }
 }
 
-GooList<OutlineItem*> *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA) {
-  auto items = new GooList<OutlineItem*>();
+std::vector<OutlineItem*> *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA) {
+  auto items = new std::vector<OutlineItem*>();
 
   char* alreadyRead = (char *)gmalloc(xrefA->getNumObjects());
   memset(alreadyRead, 0, xrefA->getNumObjects());

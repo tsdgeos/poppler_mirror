@@ -20,7 +20,6 @@
 #include <math.h>
 
 #ifndef __GI_SCANNER__
-#include <goo/GooList.h>
 #include <GlobalParams.h>
 #include <PDFDoc.h>
 #include <Outline.h>

@@ -26,7 +26,6 @@
 
 #include "Object.h"
 #include "CharTypes.h"
-#include "goo/GooList.h"
 
 class GooString;
 class XRef;
@@ -44,11 +43,11 @@ public:
   Outline(const Outline &) = delete;
   Outline& operator=(const Outline &) = delete;
 
-  const GooList<OutlineItem*> *getItems() const { return items; }
+  const std::vector<OutlineItem*> *getItems() const { return items; }
 
 private:
 
-  GooList<OutlineItem*> *items; // nullptr if document has no outline,
+  std::vector<OutlineItem*> *items; // nullptr if document has no outline,
 };
 
 //------------------------------------------------------------------------
@@ -62,7 +61,7 @@ public:
   OutlineItem(const OutlineItem &) = delete;
   OutlineItem& operator=(const OutlineItem &) = delete;
 
-  static GooList<OutlineItem*> *readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA);
+  static std::vector<OutlineItem*> *readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA);
 
   void open();
   void close();
@@ -72,7 +71,7 @@ public:
   const LinkAction *getAction() const { return action; }
   bool isOpen() const { return startsOpen; }
   bool hasKids() const { return firstRef.isRef(); }
-  const GooList<OutlineItem*> *getKids() const { return kids; }
+  const std::vector<OutlineItem*> *getKids() const { return kids; }
 
 private:
 
@@ -86,7 +85,7 @@ private:
   Object lastRef;
   Object nextRef;
   bool startsOpen;
-  GooList<OutlineItem*> *kids;   // nullptr if this item is closed or has no kids
+  std::vector<OutlineItem*> *kids;   // nullptr if this item is closed or has no kids
 };
 
 #endif

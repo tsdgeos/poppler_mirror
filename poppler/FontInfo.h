@@ -26,7 +26,6 @@
 #define FONT_INFO_H
 
 #include "Object.h"
-#include "goo/GooList.h"
 
 class GfxFont;
 class PDFDoc;
@@ -89,7 +88,7 @@ public:
   // Destructor.
   ~FontInfoScanner();
 
-  GooList<FontInfo*> *scan(int nPages);
+  std::vector<FontInfo*> *scan(int nPages);
 
 private:
 
@@ -98,7 +97,7 @@ private:
   std::set<int> fonts;
   std::set<int> visitedObjects;
 
-  void scanFonts(XRef *xrefA, Dict *resDict, GooList<FontInfo*> *fontsList);
+  void scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo*> *fontsList);
 };
 
 #endif

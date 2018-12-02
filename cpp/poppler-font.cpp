@@ -217,7 +217,7 @@ std::vector<font_info> font_iterator::next()
 
     ++d->current_page;
 
-    GooList<FontInfo*> *items = d->font_info_scanner.scan(1);
+    std::vector<FontInfo*> *items = d->font_info_scanner.scan(1);
     if (!items) {
         return std::vector<font_info>();
     }

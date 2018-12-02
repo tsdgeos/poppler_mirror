@@ -15,7 +15,6 @@
 
 #include "PDFDocFactory.h"
 
-#include "goo/GooList.h"
 #include "goo/GooString.h"
 #include "PDFDoc.h"
 #include "LocalPDFDocBuilder.h"
@@ -29,12 +28,12 @@
 // PDFDocFactory
 //------------------------------------------------------------------------
 
-PDFDocFactory::PDFDocFactory(GooList<PDFDocBuilder*> *pdfDocBuilders)
+PDFDocFactory::PDFDocFactory(std::vector<PDFDocBuilder*> *pdfDocBuilders)
 {
   if (pdfDocBuilders) {
     builders = pdfDocBuilders;
   } else {
-    builders = new GooList<PDFDocBuilder*>();
+    builders = new std::vector<PDFDocBuilder*>();
   }
   builders->push_back(new LocalPDFDocBuilder());
   builders->push_back(new StdinPDFDocBuilder());

@@ -29,7 +29,6 @@
 #ifndef LINK_H
 #define LINK_H
 
-#include "goo/GooList.h"
 #include "Object.h"
 #include <memory>
 #include <set>
@@ -85,15 +84,15 @@ public:
 
   // A List of the next actions to execute in order.
   // The list contains pointer to LinkAction objects.
-  const GooList<LinkAction*> *nextActions() const;
+  const std::vector<LinkAction*> *nextActions() const;
 
   // Sets the next action list. Takes ownership of the actions.
-  void setNextActions(GooList<LinkAction*> *actions);
+  void setNextActions(std::vector<LinkAction*> *actions);
 
 private:
   static LinkAction *parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions);
 
-  GooList<LinkAction*> *nextActionList;
+  std::vector<LinkAction*> *nextActionList;
 };
 
 //------------------------------------------------------------------------
@@ -452,14 +451,14 @@ public:
     StateList(const StateList &) = delete;
     StateList& operator=(const StateList &) = delete;
     State st;
-    GooList<Ref*> *list;
+    std::vector<Ref*> *list;
   };
 
-  const GooList<StateList*> *getStateList() const { return stateList; }
+  const std::vector<StateList*> *getStateList() const { return stateList; }
   bool getPreserveRB() const { return preserveRB; }
 
 private:
-  GooList<StateList*> *stateList;
+  std::vector<StateList*> *stateList;
   bool preserveRB;
 };
 

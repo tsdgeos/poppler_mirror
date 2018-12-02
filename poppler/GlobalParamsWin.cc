@@ -34,7 +34,6 @@ description for all fonts available in Windows. That's how MuPDF works.
 
 #include "goo/gmem.h"
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "goo/gfile.h"
 #include "Error.h"
 #include "NameToCharCode.h"

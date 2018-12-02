@@ -17,7 +17,6 @@
 
 #include "goo/gmem.h"
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "Error.h"
 #include "OptionalContent.h"
 
@@ -432,22 +431,22 @@ OCDisplayNode::OCDisplayNode(OptionalContentGroup *ocgA) {
 
 void OCDisplayNode::addChild(OCDisplayNode *child) {
   if (!children) {
-    children = new GooList<OCDisplayNode*>();
+    children = new std::vector<OCDisplayNode*>();
   }
   children->push_back(child);
 }
 
-void OCDisplayNode::addChildren(GooList<OCDisplayNode*> *childrenA) {
+void OCDisplayNode::addChildren(std::vector<OCDisplayNode*> *childrenA) {
   if (!children) {
-    children = new GooList<OCDisplayNode*>();
+    children = new std::vector<OCDisplayNode*>();
   }
   children->reserve(children->size() + childrenA->size());
   children->insert(children->end(), childrenA->begin(), childrenA->end());
   delete childrenA;
 }
 
-GooList<OCDisplayNode*> *OCDisplayNode::takeChildren() {
-  GooList<OCDisplayNode*> *childrenA = children;
+std::vector<OCDisplayNode*> *OCDisplayNode::takeChildren() {
+  std::vector<OCDisplayNode*> *childrenA = children;
 
   children = nullptr;
   return childrenA;

@@ -432,7 +432,7 @@ GfxColorSpace *GfxColorSpace::parse(GfxResources *res, Object *csObj, OutputDev 
   return cs;
 }
 
-void GfxColorSpace::createMapping(GooList<GfxSeparationColorSpace*> *separationList, int maxSepComps) {
+void GfxColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *separationList, int maxSepComps) {
   return;
 }
 
@@ -2857,7 +2857,7 @@ void GfxSeparationColorSpace::getDefaultColor(GfxColor *color) {
   color->c[0] = gfxColorComp1;
 }
 
-void GfxSeparationColorSpace::createMapping(GooList<GfxSeparationColorSpace*> *separationList, int maxSepComps) {
+void GfxSeparationColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *separationList, int maxSepComps) {
   if (nonMarking)
     return;
   mapping = (int *)gmalloc(sizeof(int));
@@ -2914,7 +2914,7 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
 					   GooString **namesA,
 					   GfxColorSpace *altA,
 					   Function *funcA,
-					   GooList<GfxSeparationColorSpace*> *sepsCSA) {
+					   std::vector<GfxSeparationColorSpace*> *sepsCSA) {
   int i;
 
   nComps = nCompsA;
@@ -2949,7 +2949,7 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
 					   GooString **namesA,
 					   GfxColorSpace *altA,
 					   Function *funcA,
-					   GooList<GfxSeparationColorSpace*> *sepsCSA,
+					   std::vector<GfxSeparationColorSpace*> *sepsCSA,
 					   int *mappingA,
 					   bool nonMarkingA,
 					   unsigned int overprintMaskA) {
@@ -2987,7 +2987,7 @@ GfxColorSpace *GfxDeviceNColorSpace::copy() {
   int i;
   int *mappingA = nullptr;
 
-  auto sepsCSA = new GooList<GfxSeparationColorSpace*>();
+  auto sepsCSA = new std::vector<GfxSeparationColorSpace*>();
   sepsCSA->reserve(sepsCS->size());
   for (std::size_t i = 0; i < sepsCS->size(); i++) {
     GfxSeparationColorSpace *scs = (*sepsCS)[i];
@@ -3012,7 +3012,7 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
   Function *funcA;
   Object obj1;
   int i;
-  auto separationList = new GooList<GfxSeparationColorSpace*>();
+  auto separationList = new std::vector<GfxSeparationColorSpace*>();
 
   if (arr->getLength() != 4 && arr->getLength() != 5) {
     error(errSyntaxWarning, -1, "Bad DeviceN color space");
@@ -3154,7 +3154,7 @@ void GfxDeviceNColorSpace::getDefaultColor(GfxColor *color) {
   }
 }
 
-void GfxDeviceNColorSpace::createMapping(GooList<GfxSeparationColorSpace*> *separationList, int maxSepComps) {
+void GfxDeviceNColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *separationList, int maxSepComps) {
   if (nonMarking)               // None
     return;
   mapping = (int *)gmalloc(sizeof(int) * nComps);

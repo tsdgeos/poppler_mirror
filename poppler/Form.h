@@ -24,7 +24,6 @@
 #ifndef FORM_H
 #define FORM_H
 
-#include "goo/GooList.h"
 #include "Object.h"
 #include "Annot.h"
 
@@ -426,10 +425,10 @@ public:
 
   void print(int indent) override;
 
-  static int tokenizeDA(const GooString* daString, GooList<GooString*>* daToks, const char* searchTok);
+  static int tokenizeDA(const GooString* daString, std::vector<GooString*>* daToks, const char* searchTok);
 
 protected:
-  int parseDA(GooList<GooString*>* daToks);
+  int parseDA(std::vector<GooString*>* daToks);
 
   GooString* content;
   bool multiline;

@@ -58,7 +58,6 @@
 #include "goo/glibc.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "goo/gfile.h"
 #include "goo/gdir.h"
 #include "Error.h"
@@ -246,11 +245,11 @@ private:
 			       const char *path);
 #endif
 
-  GooList<SysFontInfo*> *fonts;
+  std::vector<SysFontInfo*> *fonts;
 };
 
 SysFontList::SysFontList() {
-  fonts = new GooList<SysFontInfo*>();
+  fonts = new std::vector<SysFontInfo*>();
 }
 
 SysFontList::~SysFontList() {
@@ -397,7 +396,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
 
   nameToUnicodeZapfDingbats = new NameToCharCode();
   nameToUnicodeText = new NameToCharCode();
-  toUnicodeDirs = new GooList<GooString*>();
+  toUnicodeDirs = new std::vector<GooString*>();
   sysFonts = new SysFontList();
   psExpandSmaller = false;
   psShrinkLarger = true;
@@ -1209,9 +1208,9 @@ UnicodeMap *GlobalParams::getTextEncoding() {
   return getUnicodeMap2(textEncoding);
 }
 
-GooList<GooString*> *GlobalParams::getEncodingNames()
+std::vector<GooString*> *GlobalParams::getEncodingNames()
 {
-  auto* const result = new GooList<GooString*>;
+  auto* const result = new std::vector<GooString*>;
   for (const auto& unicodeMap : residentUnicodeMaps) {
     result->push_back(new GooString(unicodeMap.first));
   }

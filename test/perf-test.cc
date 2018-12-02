@@ -51,7 +51,6 @@
 #include "Error.h"
 #include "ErrorCodes.h"
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "goo/GooTimer.h"
 #include "GlobalParams.h"
 #include "splash/SplashBitmap.h"

@@ -32,7 +32,6 @@
 #include "goo/gmem.h"
 #include "goo/gfile.h"
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "Error.h"
 #include "GlobalParams.h"
 #include "UnicodeMap.h"

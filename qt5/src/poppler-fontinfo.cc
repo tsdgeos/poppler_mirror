@@ -127,7 +127,7 @@ QList<FontInfo> FontIterator::next()
 	++d->currentPage;
 
 	QList<FontInfo> fonts;
-	GooList<::FontInfo*> *items = d->fontInfoScanner.scan( 1 );
+	std::vector<::FontInfo*> *items = d->fontInfoScanner.scan( 1 );
 	if ( !items )
 		return fonts;
 	fonts.reserve( items->size() );

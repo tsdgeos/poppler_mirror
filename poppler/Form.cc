@@ -1213,7 +1213,7 @@ FormFieldText::~FormFieldText()
 
 double FormFieldText::getTextFontSize()
 {
-  GooList<GooString*>* daToks = new GooList<GooString*>();
+  std::vector<GooString*>* daToks = new std::vector<GooString*>();
   int idx = parseDA(daToks);
   double fontSize = -1;
   if (idx >= 0) {
@@ -1232,7 +1232,7 @@ double FormFieldText::getTextFontSize()
 void FormFieldText::setTextFontSize(int fontSize)
 {
   if (fontSize > 0 && obj.isDict()) {
-    GooList<GooString*>* daToks = new GooList<GooString*>();
+    std::vector<GooString*>* daToks = new std::vector<GooString*>();
     int idx = parseDA(daToks);
     if (idx == -1) {
       error(errSyntaxError, -1, "FormFieldText:: invalid DA object\n");
@@ -1264,7 +1264,7 @@ void FormFieldText::setTextFontSize(int fontSize)
   }
 }
 
-int FormFieldText::tokenizeDA(const GooString* da, GooList<GooString*>* daToks, const char* searchTok)
+int FormFieldText::tokenizeDA(const GooString* da, std::vector<GooString*>* daToks, const char* searchTok)
 {
   int idx = -1;
   if(da && daToks) {
@@ -1288,7 +1288,7 @@ int FormFieldText::tokenizeDA(const GooString* da, GooList<GooString*>* daToks, 
   return idx;
 }
 
-int FormFieldText::parseDA(GooList<GooString*>* daToks)
+int FormFieldText::parseDA(std::vector<GooString*>* daToks)
 {
   int idx = -1;
   if (obj.isDict()) {

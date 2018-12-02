@@ -44,6 +44,7 @@
 #include <unordered_map>
 #include <string>
 #include <mutex>
+#include <vector>
 
 class GooString;
 class NameToCharCode;
@@ -144,7 +145,7 @@ public:
   CMap *getCMap(const GooString *collection, GooString *cMapName, Stream *stream = nullptr);
   UnicodeMap *getTextEncoding();
 
-  GooList<GooString*> *getEncodingNames();
+  std::vector<GooString*> *getEncodingNames();
 
   //----- functions to set parameters
   void addFontFile(GooString *fontName, GooString *path);
@@ -194,7 +195,7 @@ private:
   std::unordered_map<std::string, std::string> unicodeMaps;
   // list of CMap dirs, indexed by collection
   std::unordered_multimap<std::string, std::string> cMapDirs;
-  GooList<GooString*> *toUnicodeDirs;		// list of ToUnicode CMap dirs
+  std::vector<GooString*> *toUnicodeDirs;		// list of ToUnicode CMap dirs
   bool baseFontsInitialized;
 #ifdef _WIN32
   // windows font substitutes (for CID fonts)

@@ -36,7 +36,6 @@
 #include <math.h>
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"
-#include "goo/GooList.h"
 #include "poppler/Error.h"
 #include "SplashErrorCodes.h"
 #include "SplashMath.h"

@@ -18,15 +18,16 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include <algorithm>
+
 #include "printencodings.h"
 
 #include "GlobalParams.h"
-#include "goo/GooList.h"
 #include "goo/GooString.h"
 
 void printEncodings()
 {
-  GooList<GooString*> *encNames = globalParams->getEncodingNames();
+  std::vector<GooString*> *encNames = globalParams->getEncodingNames();
 
   std::sort(encNames->begin(), encNames->end(), [](void *lhs, void *rhs) {
     return static_cast<GooString *>(lhs)->cmp(static_cast<GooString *>(rhs)) < 0;
