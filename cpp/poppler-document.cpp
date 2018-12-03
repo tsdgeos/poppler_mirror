@@ -42,10 +42,13 @@
 
 using namespace poppler;
 
+std::mutex poppler::initer::mutex;
 unsigned int poppler::initer::count = 0U;
 
 initer::initer()
 {
+    std::lock_guard<std::mutex> lock{mutex};
+
     if (!count) {
         globalParams = new GlobalParams();
         setErrorCallback(detail::error_function, nullptr);
@@ -55,6 +58,8 @@ initer::initer()
 
 initer::~initer()
 {
+    std::lock_guard<std::mutex> lock{mutex};
+
     if (count > 0) {
         --count;
         if (!count) {

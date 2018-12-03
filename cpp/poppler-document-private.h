@@ -44,6 +44,7 @@ public:
     initer& operator=(const initer &) = delete;
 
 private:
+    static std::mutex mutex;
     static unsigned int count;
 };
 
