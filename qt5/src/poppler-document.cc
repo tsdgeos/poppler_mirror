@@ -56,6 +56,7 @@
 namespace Poppler {
 
   int DocumentData::count = 0;
+  QMutex DocumentData::mutex;
 
   Document *Document::load(const QString &filePath, const QByteArray &ownerPassword,
 			   const QByteArray &userPassword)

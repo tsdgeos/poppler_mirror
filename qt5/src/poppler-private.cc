@@ -252,6 +252,8 @@ namespace Debug {
         delete (OptContentModel *)m_optContentModel;
         delete doc;
     
+        QMutexLocker locker{&mutex};
+
         count --;
         if ( count == 0 )
         {
@@ -267,6 +269,8 @@ namespace Debug {
         m_hints = 0;
         m_optContentModel = nullptr;
       
+        QMutexLocker locker{&mutex};
+
         if ( count == 0 )
         {
             utf8Map = nullptr;

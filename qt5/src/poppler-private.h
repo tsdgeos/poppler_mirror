@@ -35,6 +35,7 @@
 #define _POPPLER_PRIVATE_H_
 
 #include <QtCore/QFile>
+#include <QtCore/QMutex>
 #include <QtCore/QPointer>
 #include <QtCore/QVector>
 
@@ -152,6 +153,7 @@ namespace Poppler {
 	QColor paperColor;
 	int m_hints;
 	static int count;
+	static QMutex mutex;
     };
 
     class FontInfoData
