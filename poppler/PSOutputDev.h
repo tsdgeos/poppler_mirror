@@ -61,7 +61,7 @@ struct PST1FontName;
 struct PSFont8Info;
 struct PSFont16Enc;
 class PSOutCustomColor;
-class PSOutPaperSize;
+struct PSOutPaperSize;
 class PSOutputDev;
 
 //------------------------------------------------------------------------
