@@ -2161,7 +2161,7 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
   TextPage *text;
   PopplerRectangle *rect;
   PDFRectangle selection;
-  int i, j, k;
+  int i, k;
   guint offset = 0;
   guint n_rects = 0;
   gdouble x1, y1, x2, y2;
