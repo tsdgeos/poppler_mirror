@@ -591,7 +591,7 @@ class LinkMoviePrivate : public LinkPrivate
 	}
 
 	// LinkRendition
-	LinkRendition::LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref annotationReference )
+	LinkRendition::LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref &annotationReference ) // clazy:exclude=function-args-by-value
 		: Link( *new LinkRenditionPrivate( linkArea, rendition, static_cast<enum ::LinkRendition::RenditionOperation>(operation), script, annotationReference ) )
 	{
 	}
@@ -658,7 +658,7 @@ class LinkMoviePrivate : public LinkPrivate
 	}
 
 	// LinkMovie
-	LinkMovie::LinkMovie( const QRectF &linkArea, Operation operation, const QString &annotationTitle, const Ref annotationReference )
+	LinkMovie::LinkMovie( const QRectF &linkArea, Operation operation, const QString &annotationTitle, const Ref &annotationReference ) // clazy:exclude=function-args-by-value
 		: Link( *new LinkMoviePrivate( linkArea, operation, annotationTitle, annotationReference ) )
 	{
 	}
