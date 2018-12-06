@@ -14,6 +14,8 @@ private slots:
     void testInsert();
     void testFormat();
     void testFromNullptr();
+    void testFromInt_data();
+    void testFromInt();
 };
 
 void TestGooString::testInsertData_data()
@@ -159,6 +161,26 @@ void TestGooString::testFromNullptr()
     str.Set(static_cast<const char*>(nullptr), 0);
     QCOMPARE(str.getLength(), 0);
   }
+}
+
+void TestGooString::testFromInt_data()
+{
+    QTest::addColumn<int>("inty");
+    QTest::addColumn<QByteArray>("stringy");
+
+    QTest::newRow("Natural") << 12345 << QByteArray("12345");
+    QTest::newRow("Negative") << -1 << QByteArray("-1");
+    QTest::newRow("Zero") << 0 << QByteArray("0");
+    QTest::newRow("INT_MAX") << 0x7fffffff << QByteArray("2147483647");
+    QTest::newRow("-INT_MAX-1") << (-0x7fffffff - 1) << QByteArray("-2147483648");
+}
+
+void TestGooString::testFromInt()
+{
+    QFETCH(int, inty);
+    QFETCH(QByteArray, stringy);
+    QScopedPointer<GooString> str(GooString::fromInt(inty));
+    QCOMPARE(str->c_str(), stringy.constData());
 }
 
 QTEST_GUILESS_MAIN(TestGooString)

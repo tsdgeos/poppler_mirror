@@ -28,6 +28,7 @@
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2018 Greg Knight <lyngvi@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -141,7 +142,7 @@ GooString *GooString::fromInt(int x) {
   int len;
   formatInt(x, buf, sizeof(buf), false, 0, 10, &p, &len);
 
-  return new GooString(buf, len);
+  return new GooString(p, len);
 }
 
 GooString *GooString::format(const char *fmt, ...) {

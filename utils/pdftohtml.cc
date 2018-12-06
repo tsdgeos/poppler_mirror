@@ -295,7 +295,7 @@ int main(int argc, char *argv[]) {
     }
     delete tmp;
   } else if (fileName->cmp("fd://0") == 0) {
-      error(errCommandLine, -1, "You have to provide an output filename when reading form stdin.");
+      error(errCommandLine, -1, "You have to provide an output filename when reading from stdin.");
       goto error;
   } else {
     const char *p = fileName->c_str() + fileName->getLength() - 4;

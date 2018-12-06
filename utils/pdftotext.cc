@@ -287,7 +287,7 @@ int main(int argc, char *argv[]) {
   if (argc == 3) {
     textFileName = new GooString(argv[2]);
   } else if (fileName->cmp("fd://0") == 0) {
-     error(errCommandLine, -1, "You have to provide an output filename when reading form stdin.");
+     error(errCommandLine, -1, "You have to provide an output filename when reading from stdin.");
      goto err2;
   } else {
     const char *p = fileName->c_str() + fileName->getLength() - 4;
