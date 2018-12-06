@@ -6,6 +6,7 @@
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+ * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
