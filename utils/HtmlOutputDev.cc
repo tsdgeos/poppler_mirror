@@ -1379,7 +1379,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
   }
 
   if (!isMask) {
-    Guchar *p;
+    unsigned char *p;
     GfxRGB rgb;
     png_byte *row = (png_byte *) gmalloc(3 * width);   // 3 bytes/pixel: RGB
     png_bytep *row_pointer= &row;
@@ -1434,7 +1434,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
     int invert_bits = 0xff;
     if (colorMap) {
       GfxGray gray;
-      Guchar zero[gfxColorMaxComps];
+      unsigned char zero[gfxColorMaxComps];
       memset(zero, 0, sizeof(zero));
       colorMap->getGray(zero, &gray);
       if (colToByte(gray) == 0)
@@ -1442,7 +1442,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
     }
 
     str->reset();
-    Guchar *png_row = (Guchar *)gmalloc(size);
+    unsigned char *png_row = (unsigned char *)gmalloc(size);
 
     for (int ri = 0; ri < height; ++ri)
     {

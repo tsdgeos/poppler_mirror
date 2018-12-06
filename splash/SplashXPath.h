@@ -40,7 +40,7 @@ struct SplashXPathSeg {
   SplashCoord x1, y1;		// second endpoint
   SplashCoord dxdy;		// slope: delta-x / delta-y
   SplashCoord dydx;		// slope: delta-y / delta-x
-  Guint flags;
+  unsigned int flags;
 };
 
 #define splashXPathHoriz   0x01 // segment is vertical (y0 == y1)

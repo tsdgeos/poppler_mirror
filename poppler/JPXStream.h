@@ -9,7 +9,6 @@
 #ifndef JPXSTREAM_H
 #define JPXSTREAM_H
 
-#include "goo/gtypes.h"
 #include "Object.h"
 #include "Stream.h"
 
@@ -40,7 +39,7 @@ enum JPXColorSpaceType {
 };
 
 struct JPXColorSpecCIELab {
-  Guint rl, ol, ra, oa, rb, ob, il;
+  unsigned int rl, ol, ra, oa, rb, ob, il;
 };
 
 struct JPXColorSpecEnumerated {
@@ -51,7 +50,7 @@ struct JPXColorSpecEnumerated {
 };
 
 struct JPXColorSpec {
-  Guint meth;			// method
+  unsigned int meth;			// method
   int prec;			// precedence
   union {
     JPXColorSpecEnumerated enumerated;
@@ -61,9 +60,9 @@ struct JPXColorSpec {
 //------------------------------------------------------------------------
 
 struct JPXPalette {
-  Guint nEntries;		// number of entries in the palette
-  Guint nComps;			// number of components in each entry
-  Guint *bpc;			// bits per component, for each component
+  unsigned int nEntries;		// number of entries in the palette
+  unsigned int nComps;			// number of components in each entry
+  unsigned int *bpc;			// bits per component, for each component
   int *c;			// color data:
 				//   c[i*nComps+j] = entry i, component j
 };
@@ -71,54 +70,54 @@ struct JPXPalette {
 //------------------------------------------------------------------------
 
 struct JPXCompMap {
-  Guint nChannels;		// number of channels
-  Guint *comp;			// codestream components mapped to each channel
-  Guint *type;			// 0 for direct use, 1 for palette mapping
-  Guint *pComp;			// palette components to use
+  unsigned int nChannels;		// number of channels
+  unsigned int *comp;			// codestream components mapped to each channel
+  unsigned int *type;			// 0 for direct use, 1 for palette mapping
+  unsigned int *pComp;			// palette components to use
 };
 
 //------------------------------------------------------------------------
 
 struct JPXChannelDefn {
-  Guint nChannels;		// number of channels
-  Guint *idx;			// channel indexes
-  Guint *type;			// channel types
-  Guint *assoc;			// channel associations
+  unsigned int nChannels;		// number of channels
+  unsigned int *idx;			// channel indexes
+  unsigned int *type;			// channel types
+  unsigned int *assoc;			// channel associations
 };
 
 //------------------------------------------------------------------------
 
 struct JPXTagTreeNode {
   bool finished;		// true if this node is finished
-  Guint val;			// current value
+  unsigned int val;			// current value
 };
 
 //------------------------------------------------------------------------
 
 struct JPXCodeBlock {
   //----- size
-  Guint x0, y0, x1, y1;		// bounds
+  unsigned int x0, y0, x1, y1;		// bounds
 
   //----- persistent state
   bool seen;			// true if this code-block has already
 				//   been seen
-  Guint lBlock;			// base number of bits used for pkt data length
-  Guint nextPass;		// next coding pass
+  unsigned int lBlock;			// base number of bits used for pkt data length
+  unsigned int nextPass;		// next coding pass
 
   //---- info from first packet
-  Guint nZeroBitPlanes;		// number of zero bit planes
+  unsigned int nZeroBitPlanes;		// number of zero bit planes
 
   //----- info for the current packet
-  Guint included;		// code-block inclusion in this packet:
+  unsigned int included;		// code-block inclusion in this packet:
 				//   0=not included, 1=included
-  Guint nCodingPasses;		// number of coding passes in this pkt
-  Guint *dataLen;		// data lengths (one per codeword segment)
-  Guint dataLenSize;		// size of the dataLen array
+  unsigned int nCodingPasses;		// number of coding passes in this pkt
+  unsigned int *dataLen;		// data lengths (one per codeword segment)
+  unsigned int dataLenSize;		// size of the dataLen array
 
   //----- coefficient data
   int *coeffs;
   char *touched;		// coefficient 'touched' flags
-  Gushort len;			// coefficient length
+  unsigned short len;			// coefficient length
   JArithmeticDecoder		// arithmetic decoder
     *arithDecoder;
   JArithmeticDecoderStats	// arithmetic decoder stats
@@ -129,12 +128,12 @@ struct JPXCodeBlock {
 
 struct JPXSubband {
   //----- computed
-  Guint x0, y0, x1, y1;		// bounds
-  Guint nXCBs, nYCBs;		// number of code-blocks in the x and y
+  unsigned int x0, y0, x1, y1;		// bounds
+  unsigned int nXCBs, nYCBs;		// number of code-blocks in the x and y
 				//   directions
 
   //----- tag trees
-  Guint maxTTLevel;		// max tag tree level
+  unsigned int maxTTLevel;		// max tag tree level
   JPXTagTreeNode *inclusion;	// inclusion tag tree for each subband
   JPXTagTreeNode *zeroBitPlane;	// zero-bit plane tag tree for each
 				//   subband
@@ -147,7 +146,7 @@ struct JPXSubband {
 
 struct JPXPrecinct {
   //----- computed
-  Guint x0, y0, x1, y1;		// bounds of the precinct
+  unsigned int x0, y0, x1, y1;		// bounds of the precinct
 
   //----- children
   JPXSubband *subbands;		// the subbands
@@ -157,12 +156,12 @@ struct JPXPrecinct {
 
 struct JPXResLevel {
   //----- from the COD and COC segments (main and tile)
-  Guint precinctWidth;		// log2(precinct width)
-  Guint precinctHeight;		// log2(precinct height)
+  unsigned int precinctWidth;		// log2(precinct width)
+  unsigned int precinctHeight;		// log2(precinct height)
 
   //----- computed
-  Guint x0, y0, x1, y1;		// bounds of the tile-comp (for this res level)
-  Guint bx0[3], by0[3],		// subband bounds
+  unsigned int x0, y0, x1, y1;		// bounds of the tile-comp (for this res level)
+  unsigned int bx0[3], by0[3],		// subband bounds
         bx1[3], by1[3];
 
   //---- children
@@ -174,28 +173,28 @@ struct JPXResLevel {
 struct JPXTileComp {
   //----- from the SIZ segment
   bool sgned;			// 1 for signed, 0 for unsigned
-  Guint prec;			// precision, in bits
-  Guint hSep;			// horizontal separation of samples
-  Guint vSep;			// vertical separation of samples
+  unsigned int prec;			// precision, in bits
+  unsigned int hSep;			// horizontal separation of samples
+  unsigned int vSep;			// vertical separation of samples
 
   //----- from the COD and COC segments (main and tile)
-  Guint style;			// coding style parameter (Scod / Scoc)
-  Guint nDecompLevels;		// number of decomposition levels
-  Guint codeBlockW;		// log2(code-block width)
-  Guint codeBlockH;		// log2(code-block height)
-  Guint codeBlockStyle;		// code-block style
-  Guint transform;		// wavelet transformation
+  unsigned int style;			// coding style parameter (Scod / Scoc)
+  unsigned int nDecompLevels;		// number of decomposition levels
+  unsigned int codeBlockW;		// log2(code-block width)
+  unsigned int codeBlockH;		// log2(code-block height)
+  unsigned int codeBlockStyle;		// code-block style
+  unsigned int transform;		// wavelet transformation
 
   //----- from the QCD and QCC segments (main and tile)
-  Guint quantStyle;		// quantization style
-  Guint *quantSteps;		// quantization step size for each subband
-  Guint nQuantSteps;		// number of entries in quantSteps
+  unsigned int quantStyle;		// quantization style
+  unsigned int *quantSteps;		// quantization step size for each subband
+  unsigned int nQuantSteps;		// number of entries in quantSteps
 
   //----- computed
-  Guint x0, y0, x1, y1;		// bounds of the tile-comp, in ref coords
-  Guint w;			// x1 - x0
-  Guint cbW;			// code-block width
-  Guint cbH;			// code-block height
+  unsigned int x0, y0, x1, y1;		// bounds of the tile-comp, in ref coords
+  unsigned int w;			// x1 - x0
+  unsigned int cbW;			// code-block width
+  unsigned int cbH;			// code-block height
 
   //----- image data
   int *data;			// the decoded image data
@@ -213,20 +212,20 @@ struct JPXTile {
   bool init;
 
   //----- from the COD segments (main and tile)
-  Guint progOrder;		// progression order
-  Guint nLayers;		// number of layers
-  Guint multiComp;		// multiple component transformation
+  unsigned int progOrder;		// progression order
+  unsigned int nLayers;		// number of layers
+  unsigned int multiComp;		// multiple component transformation
 
   //----- computed
-  Guint x0, y0, x1, y1;		// bounds of the tile, in ref coords
-  Guint maxNDecompLevels;	// max number of decomposition levels used
+  unsigned int x0, y0, x1, y1;		// bounds of the tile, in ref coords
+  unsigned int maxNDecompLevels;	// max number of decomposition levels used
 				//   in any component in this tile
 
   //----- progression order loop counters
-  Guint comp;			//   component
-  Guint res;			//   resolution level
-  Guint precinct;		//   precinct
-  Guint layer;			//   layer
+  unsigned int comp;			//   component
+  unsigned int res;			//   resolution level
+  unsigned int precinct;		//   precinct
+  unsigned int layer;			//   layer
 
   //----- children
   JPXTileComp *tileComps;	// the tile-components (len = JPXImage.nComps)
@@ -236,16 +235,16 @@ struct JPXTile {
 
 struct JPXImage {
   //----- from the SIZ segment
-  Guint xSize, ySize;		// size of reference grid
-  Guint xOffset, yOffset;	// image offset
-  Guint xTileSize, yTileSize;	// size of tiles
-  Guint xTileOffset,		// offset of first tile
+  unsigned int xSize, ySize;		// size of reference grid
+  unsigned int xOffset, yOffset;	// image offset
+  unsigned int xTileSize, yTileSize;	// size of tiles
+  unsigned int xTileOffset,		// offset of first tile
         yTileOffset;
-  Guint nComps;			// number of components
+  unsigned int nComps;			// number of components
 
   //----- computed
-  Guint nXTiles;		// number of tiles in x direction
-  Guint nYTiles;		// number of tiles in y direction
+  unsigned int nXTiles;		// number of tiles in x direction
+  unsigned int nYTiles;		// number of tiles in y direction
 
   //----- children
   JPXTile *tiles;		// the tiles (len = nXTiles * nYTiles)
@@ -273,41 +272,41 @@ private:
   void fillReadBuf();
   void getImageParams2(int *bitsPerComponent, StreamColorSpaceMode *csMode);
   bool readBoxes();
-  bool readColorSpecBox(Guint dataLen);
-  bool readCodestream(Guint len);
+  bool readColorSpecBox(unsigned int dataLen);
+  bool readCodestream(unsigned int len);
   bool readTilePart();
-  bool readTilePartData(Guint tileIdx,
-			 Guint tilePartLen, bool tilePartToEOC);
+  bool readTilePartData(unsigned int tileIdx,
+			 unsigned int tilePartLen, bool tilePartToEOC);
   bool readCodeBlockData(JPXTileComp *tileComp,
 			  JPXResLevel *resLevel,
 			  JPXPrecinct *precinct,
 			  JPXSubband *subband,
-			  Guint res, Guint sb,
+			  unsigned int res, unsigned int sb,
 			  JPXCodeBlock *cb);
   void inverseTransform(JPXTileComp *tileComp);
   void inverseTransformLevel(JPXTileComp *tileComp,
-			     Guint r, JPXResLevel *resLevel);
+			     unsigned int r, JPXResLevel *resLevel);
   void inverseTransform1D(JPXTileComp *tileComp, int *data,
-			  Guint offset, Guint n);
+			  unsigned int offset, unsigned int n);
   bool inverseMultiCompAndDC(JPXTile *tile);
-  bool readBoxHdr(Guint *boxType, Guint *boxLen, Guint *dataLen);
-  int readMarkerHdr(int *segType, Guint *segLen);
-  bool readUByte(Guint *x);
+  bool readBoxHdr(unsigned int *boxType, unsigned int *boxLen, unsigned int *dataLen);
+  int readMarkerHdr(int *segType, unsigned int *segLen);
+  bool readUByte(unsigned int *x);
   bool readByte(int *x);
-  bool readUWord(Guint *x);
-  bool readULong(Guint *x);
+  bool readUWord(unsigned int *x);
+  bool readULong(unsigned int *x);
   bool readNBytes(int nBytes, bool signd, int *x);
-  void startBitBuf(Guint byteCountA);
-  bool readBits(int nBits, Guint *x);
+  void startBitBuf(unsigned int byteCountA);
+  bool readBits(int nBits, unsigned int *x);
   void skipSOP();
   void skipEPH();
-  Guint finishBitBuf();
+  unsigned int finishBitBuf();
 
   BufStream *bufStr;		// buffered stream (for lookahead)
 
-  Guint nComps;			// number of components
-  Guint *bpc;			// bits per component, for each component
-  Guint width, height;		// image size
+  unsigned int nComps;			// number of components
+  unsigned int *bpc;			// bits per component, for each component
+  unsigned int width, height;		// image size
   bool haveImgHdr;		// set if a JP2/JPX image header has been
 				//   found
   JPXColorSpec cs;		// color specification
@@ -320,15 +319,15 @@ private:
   bool haveChannelDefn;	// set if a channel defn has been found
 
   JPXImage img;			// JPEG2000 decoder data
-  Guint bitBuf;			// buffer for bit reads
+  unsigned int bitBuf;			// buffer for bit reads
   int bitBufLen;		// number of bits in bitBuf
   bool bitBufSkip;		// true if next bit should be skipped
 				//   (for bit stuffing)
-  Guint byteCount;		// number of available bytes left
+  unsigned int byteCount;		// number of available bytes left
 
-  Guint curX, curY, curComp;	// current position for lookChar/getChar
-  Guint readBuf;		// read buffer
-  Guint readBufLen;		// number of valid bits in readBuf
+  unsigned int curX, curY, curComp;	// current position for lookChar/getChar
+  unsigned int readBuf;		// read buffer
+  unsigned int readBufLen;		// number of valid bits in readBuf
 };
 
 #endif

@@ -25,7 +25,6 @@
 
 #include "poppler-config.h"
 
-#include "goo/gtypes.h"
 #include "Object.h"
 
 class GooString;
@@ -87,7 +86,7 @@ public:
   // valid after authorize has returned true.
   virtual int getPermissionFlags() = 0;
   virtual bool getOwnerPasswordOk() = 0;
-  virtual Guchar *getFileKey() = 0;
+  virtual unsigned char *getFileKey() = 0;
   virtual int getFileKeyLength() = 0;
   virtual int getEncVersion() = 0;
   virtual int getEncRevision() = 0;
@@ -116,7 +115,7 @@ public:
   bool authorize(void *authData) override;
   int getPermissionFlags() override { return permFlags; }
   bool getOwnerPasswordOk() override { return ownerPasswordOk; }
-  Guchar *getFileKey() override { return fileKey; }
+  unsigned char *getFileKey() override { return fileKey; }
   int getFileKeyLength() override { return fileKeyLength; }
   int getEncVersion() override { return encVersion; }
   int getEncRevision() override { return encRevision; }
@@ -126,7 +125,7 @@ private:
 
   int permFlags;
   bool ownerPasswordOk;
-  Guchar fileKey[32];
+  unsigned char fileKey[32];
   int fileKeyLength;
   int encVersion;
   int encRevision;

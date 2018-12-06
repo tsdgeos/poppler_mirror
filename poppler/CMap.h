@@ -29,7 +29,6 @@
 #include <atomic>
 
 #include "poppler-config.h"
-#include "goo/gtypes.h"
 #include "CharTypes.h"
 
 class GooString;
@@ -89,7 +88,7 @@ public:
   // Return the writing mode (0=horizontal, 1=vertical).
   int getWMode() { return wMode; }
 
-  void setReverseMap(Guint *rmap, Guint rmapSize, Guint ncand);
+  void setReverseMap(unsigned int *rmap, unsigned int rmapSize, unsigned int ncand);
 
 private:
 
@@ -99,10 +98,10 @@ private:
   void useCMap(CMapCache *cache, char *useName);
   void useCMap(CMapCache *cache, Object *obj);
   void copyVector(CMapVectorEntry *dest, CMapVectorEntry *src);
-  void addCIDs(Guint start, Guint end, Guint nBytes, CID firstCID);
+  void addCIDs(unsigned int start, unsigned int end, unsigned int nBytes, CID firstCID);
   void freeCMapVector(CMapVectorEntry *vec);
-  void setReverseMapVector(Guint startCode, CMapVectorEntry *vec,
-          Guint *rmap, Guint rmapSize, Guint ncand);
+  void setReverseMapVector(unsigned int startCode, CMapVectorEntry *vec,
+          unsigned int *rmap, unsigned int rmapSize, unsigned int ncand);
 
   GooString *collection;
   GooString *cMapName;

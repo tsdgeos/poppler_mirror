@@ -115,7 +115,7 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
       rowSize = -rowSize;
     }
     if (alphaA) {
-      alpha = (Guchar *)gmallocn(width, height);
+      alpha = (unsigned char *)gmallocn(width, height);
     } else {
       alpha = nullptr;
     }
@@ -131,8 +131,8 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
 SplashBitmap *SplashBitmap::copy(SplashBitmap *src) {
   SplashBitmap *result = new SplashBitmap(src->getWidth(), src->getHeight(), src->getRowPad(), 
     src->getMode(), src->getAlphaPtr() != nullptr, src->getRowSize() >= 0, src->getSeparationList());
-  Guchar *dataSource = src->getDataPtr();
-  Guchar *dataDest = result->getDataPtr();
+  unsigned char *dataSource = src->getDataPtr();
+  unsigned char *dataDest = result->getDataPtr();
   int amount = src->getRowSize();
   if (amount < 0) {
     dataSource = dataSource + (src->getHeight() - 1) * amount;
@@ -322,7 +322,7 @@ void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel) {
   }
 }
 
-Guchar SplashBitmap::getAlpha(int x, int y) {
+unsigned char SplashBitmap::getAlpha(int x, int y) {
   return alpha[y * width + x];
 }
 
@@ -538,8 +538,8 @@ void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, ConversionMode conve
   }
 }
 
-static inline Guchar div255(int x) {
-  return (Guchar)((x + (x >> 8) + 0x80) >> 8);
+static inline unsigned char div255(int x) {
+  return (unsigned char)((x + (x >> 8) + 0x80) >> 8);
 }
 
 bool SplashBitmap::convertToXBGR(ConversionMode conversionMode) {
@@ -549,11 +549,11 @@ bool SplashBitmap::convertToXBGR(ConversionMode conversionMode) {
       const SplashColorPtr dbegin = data;
       const SplashColorPtr dend = data + rowSize * height;
 
-      Guchar *const abegin = alpha;
-      Guchar *const aend = alpha + width * height;
+      unsigned char *const abegin = alpha;
+      unsigned char *const aend = alpha + width * height;
 
       SplashColorPtr d = dbegin;
-      Guchar *a = abegin;
+      unsigned char *a = abegin;
 
       if (conversionMode == conversionAlphaPremultiplied) {
           for (; d < dend && a < aend; d += 4, a += 1) {

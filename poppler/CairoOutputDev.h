@@ -34,7 +34,6 @@
 #ifndef CAIROOUTPUTDEV_H
 #define CAIROOUTPUTDEV_H
 
-#include "goo/gtypes.h"
 #include <cairo-ft.h>
 #include "OutputDev.h"
 #include "TextOutputDev.h"

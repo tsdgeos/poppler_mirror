@@ -22,7 +22,6 @@
 #ifndef SPLASHFONT_H
 #define SPLASHFONT_H
 
-#include "goo/gtypes.h"
 #include "SplashTypes.h"
 #include "SplashClip.h"
 
@@ -109,7 +108,7 @@ protected:
 				//   (text space -> user space)
   bool aa;			// anti-aliasing
   int xMin, yMin, xMax, yMax;	// glyph bounding box
-  Guchar *cache;		// glyph bitmap cache
+  unsigned char *cache;		// glyph bitmap cache
   SplashFontCacheTag *		// cache tags
     cacheTags;
   int glyphW, glyphH;		// size of glyph bitmaps

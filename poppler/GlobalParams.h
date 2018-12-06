@@ -39,7 +39,6 @@
 #include <assert.h>
 #include "poppler-config.h"
 #include <stdio.h>
-#include "goo/gtypes.h"
 #include "CharTypes.h"
 #include "UnicodeMap.h"
 #include <unordered_map>

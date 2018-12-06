@@ -35,7 +35,6 @@
 #define XREF_H
 
 #include "poppler-config.h"
-#include "goo/gtypes.h"
 #include "Object.h"
 #include "Stream.h"
 #include "PopplerCache.h"
@@ -118,13 +117,13 @@ public:
 
   // Set the encryption parameters.
   void setEncryption(int permFlagsA, bool ownerPasswordOkA,
-		     const Guchar *fileKeyA, int keyLengthA,
+		     const unsigned char *fileKeyA, int keyLengthA,
 		     int encVersionA, int encRevisionA,
 		     CryptAlgorithm encAlgorithmA);
   // Mark Encrypt entry as Unencrypted
   void markUnencrypted();
 
-  void getEncryptionParameters(Guchar **fileKeyA, CryptAlgorithm *encAlgorithmA, int *keyLengthA);
+  void getEncryptionParameters(unsigned char **fileKeyA, CryptAlgorithm *encAlgorithmA, int *keyLengthA);
 
   // Is the file encrypted?
   bool isEncrypted() const { return encrypted; }
@@ -227,7 +226,7 @@ private:
   CryptAlgorithm encAlgorithm;	// encryption algorithm
   int keyLength;		// length of key, in bytes
   int permFlags;		// permission bits
-  Guchar fileKey[32];		// file decryption key
+  unsigned char fileKey[32];		// file decryption key
   bool ownerPasswordOk;	// true if owner password is correct
   Goffset prevXRefOffset;		// position of prev XRef section (= next to read)
   Goffset mainXRefEntriesOffset; // offset of entries in main XRef table

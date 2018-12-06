@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
-#include "goo/gtypes.h"
 #include "FoFiIdentifier.h"
 
 //------------------------------------------------------------------------
@@ -48,15 +47,15 @@ public:
 
   // Read a big-endian unsigned 32-bit integer.  Fills in *val and
   // returns true if successful.
-  virtual bool getU32BE(int pos, Guint *val) = 0;
+  virtual bool getU32BE(int pos, unsigned int *val) = 0;
 
   // Read a little-endian unsigned 32-bit integer.  Fills in *val and
   // returns true if successful.
-  virtual bool getU32LE(int pos, Guint *val) = 0;
+  virtual bool getU32LE(int pos, unsigned int *val) = 0;
 
   // Read a big-endian unsigned <size>-byte integer, where 1 <= size
   // <= 4.  Fills in *val and returns true if successful.
-  virtual bool getUVarBE(int pos, int size, Guint *val) = 0;
+  virtual bool getUVarBE(int pos, int size, unsigned int *val) = 0;
 
   // Compare against a string.  Returns true if equal.
   virtual bool cmp(int pos, const char *s) = 0;
@@ -72,9 +71,9 @@ public:
   ~MemReader();
   int getByte(int pos) override;
   bool getU16BE(int pos, int *val) override;
-  bool getU32BE(int pos, Guint *val) override;
-  bool getU32LE(int pos, Guint *val) override;
-  bool getUVarBE(int pos, int size, Guint *val) override;
+  bool getU32BE(int pos, unsigned int *val) override;
+  bool getU32LE(int pos, unsigned int *val) override;
+  bool getUVarBE(int pos, int size, unsigned int *val) override;
   bool cmp(int pos, const char *s) override;
 
 private:
@@ -113,7 +112,7 @@ bool MemReader::getU16BE(int pos, int *val) {
   return true;
 }
 
-bool MemReader::getU32BE(int pos, Guint *val) {
+bool MemReader::getU32BE(int pos, unsigned int *val) {
   if (pos < 0 || pos > len - 4) {
     return false;
   }
@@ -124,7 +123,7 @@ bool MemReader::getU32BE(int pos, Guint *val) {
   return true;
 }
 
-bool MemReader::getU32LE(int pos, Guint *val) {
+bool MemReader::getU32LE(int pos, unsigned int *val) {
   if (pos < 0 || pos > len - 4) {
     return false;
   }
@@ -135,7 +134,7 @@ bool MemReader::getU32LE(int pos, Guint *val) {
   return true;
 }
 
-bool MemReader::getUVarBE(int pos, int size, Guint *val) {
+bool MemReader::getUVarBE(int pos, int size, unsigned int *val) {
   int i;
 
   if (size < 1 || size > 4 || pos < 0 || pos > len - size) {
@@ -167,9 +166,9 @@ public:
   ~FileReader();
   int getByte(int pos) override;
   bool getU16BE(int pos, int *val) override;
-  bool getU32BE(int pos, Guint *val) override;
-  bool getU32LE(int pos, Guint *val) override;
-  bool getUVarBE(int pos, int size, Guint *val) override;
+  bool getU32BE(int pos, unsigned int *val) override;
+  bool getU32LE(int pos, unsigned int *val) override;
+  bool getUVarBE(int pos, int size, unsigned int *val) override;
   bool cmp(int pos, const char *s) override;
 
 private:
@@ -217,7 +216,7 @@ bool FileReader::getU16BE(int pos, int *val) {
   return true;
 }
 
-bool FileReader::getU32BE(int pos, Guint *val) {
+bool FileReader::getU32BE(int pos, unsigned int *val) {
   if (!fillBuf(pos, 4)) {
     return false;
   }
@@ -228,7 +227,7 @@ bool FileReader::getU32BE(int pos, Guint *val) {
   return true;
 }
 
-bool FileReader::getU32LE(int pos, Guint *val) {
+bool FileReader::getU32LE(int pos, unsigned int *val) {
   if (!fillBuf(pos, 4)) {
     return false;
   }
@@ -239,7 +238,7 @@ bool FileReader::getU32LE(int pos, Guint *val) {
   return true;
 }
 
-bool FileReader::getUVarBE(int pos, int size, Guint *val) {
+bool FileReader::getUVarBE(int pos, int size, unsigned int *val) {
   int i;
 
   if (size < 1 || size > 4 || !fillBuf(pos, size)) {
@@ -290,9 +289,9 @@ public:
   ~StreamReader();
   int getByte(int pos) override;
   bool getU16BE(int pos, int *val) override;
-  bool getU32BE(int pos, Guint *val) override;
-  bool getU32LE(int pos, Guint *val) override;
-  bool getUVarBE(int pos, int size, Guint *val) override;
+  bool getU32BE(int pos, unsigned int *val) override;
+  bool getU32LE(int pos, unsigned int *val) override;
+  bool getUVarBE(int pos, int size, unsigned int *val) override;
   bool cmp(int pos, const char *s) override;
 
 private:
@@ -338,7 +337,7 @@ bool StreamReader::getU16BE(int pos, int *val) {
   return true;
 }
 
-bool StreamReader::getU32BE(int pos, Guint *val) {
+bool StreamReader::getU32BE(int pos, unsigned int *val) {
   if (!fillBuf(pos, 4)) {
     return false;
   }
@@ -349,7 +348,7 @@ bool StreamReader::getU32BE(int pos, Guint *val) {
   return true;
 }
 
-bool StreamReader::getU32LE(int pos, Guint *val) {
+bool StreamReader::getU32LE(int pos, unsigned int *val) {
   if (!fillBuf(pos, 4)) {
     return false;
   }
@@ -360,7 +359,7 @@ bool StreamReader::getU32LE(int pos, Guint *val) {
   return true;
 }
 
-bool StreamReader::getUVarBE(int pos, int size, Guint *val) {
+bool StreamReader::getUVarBE(int pos, int size, unsigned int *val) {
   int i;
 
   if (size < 1 || size > 4 || !fillBuf(pos, size)) {
@@ -474,7 +473,7 @@ FoFiIdentifierType FoFiIdentifier::identifyStream(int (*getChar)(void *data),
 }
 
 static FoFiIdentifierType identify(Reader *reader) {
-  Guint n;
+  unsigned int n;
 
   //----- PFA
   if (reader->cmp(0, "%!PS-AdobeFont-1") ||
@@ -535,7 +534,7 @@ static FoFiIdentifierType identify(Reader *reader) {
 
 static FoFiIdentifierType identifyOpenType(Reader *reader) {
   FoFiIdentifierType type;
-  Guint offset;
+  unsigned int offset;
   int nTables, i;
 
   if (!reader->getU16BE(4, &nTables)) {
@@ -544,7 +543,7 @@ static FoFiIdentifierType identifyOpenType(Reader *reader) {
   for (i = 0; i < nTables; ++i) {
     if (reader->cmp(12 + i*16, "CFF ")) {
       if (reader->getU32BE(12 + i*16 + 8, &offset) &&
-	  offset < (Guint)INT_MAX) {
+	  offset < (unsigned int)INT_MAX) {
 	type = identifyCFF(reader, (int)offset);
 	if (type == fofiIdCFF8Bit) {
 	  type = fofiIdOpenTypeCFF8Bit;
@@ -560,7 +559,7 @@ static FoFiIdentifierType identifyOpenType(Reader *reader) {
 }
 
 static FoFiIdentifierType identifyCFF(Reader *reader, int start) {
-  Guint offset0, offset1;
+  unsigned int offset0, offset1;
   int hdrSize, offSize0, offSize1, pos, endPos, b0, n, i;
 
   //----- read the header
@@ -590,7 +589,7 @@ static FoFiIdentifierType identifyCFF(Reader *reader, int start) {
       return fofiIdUnknown;
     }
     if (!reader->getUVarBE(pos + 3 + n * offSize1, offSize1, &offset1) ||
-	offset1 > (Guint)INT_MAX) {
+	offset1 > (unsigned int)INT_MAX) {
       return fofiIdUnknown;
     }
     pos += 3 + (n + 1) * offSize1 + (int)offset1 - 1;
@@ -607,9 +606,9 @@ static FoFiIdentifierType identifyCFF(Reader *reader, int start) {
     return fofiIdUnknown;
   }
   if (!reader->getUVarBE(pos + 3, offSize1, &offset0) ||
-      offset0 > (Guint)INT_MAX ||
+      offset0 > (unsigned int)INT_MAX ||
       !reader->getUVarBE(pos + 3 + offSize1, offSize1, &offset1) ||
-      offset1 > (Guint)INT_MAX ||
+      offset1 > (unsigned int)INT_MAX ||
       offset0 > offset1) {
     return fofiIdUnknown;
   }

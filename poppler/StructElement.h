@@ -14,7 +14,6 @@
 #ifndef STRUCTELEMENT_H
 #define STRUCTELEMENT_H
 
-#include "goo/gtypes.h"
 #include "goo/GooString.h"
 #include "MarkedContentOutputDev.h"
 #include "Object.h"
@@ -89,8 +88,8 @@ public:
   GooString *getName() const { return type == UserProperty ? name.copy() : new GooString(getTypeName()); }
 
   // The revision is optional, and defaults to zero.
-  Guint getRevision() const { return revision; }
-  void setRevision(Guint revisionA) { revision = revisionA; }
+  unsigned int getRevision() const { return revision; }
+  void setRevision(unsigned int revisionA) { revision = revisionA; }
 
   // Hidden elements should not be displayed by the user agent
   bool isHidden() const { return hidden; }
@@ -106,7 +105,7 @@ public:
 private:
   Type type;
   Owner owner;
-  Guint revision;
+  unsigned int revision;
   mutable GooString name;
   mutable Object value;
   bool hidden;
@@ -180,8 +179,8 @@ public:
   }
 
   // Optional revision number, defaults to zero.
-  Guint getRevision() const { return isContent() ? 0 : s->revision; }
-  void setRevision(Guint revision) { if (isContent()) s->revision = revision; }
+  unsigned int getRevision() const { return isContent() ? 0 : s->revision; }
+  void setRevision(unsigned int revision) { if (isContent()) s->revision = revision; }
 
   // Optional element title, in human-readable form.
   const GooString *getTitle() const { return isContent() ? nullptr : s->title; }
@@ -261,7 +260,7 @@ private:
     GooString   *title;
     GooString   *expandedAbbr;
     GooString   *language;
-    Guint        revision;
+    unsigned int        revision;
     ElemPtrArray elements;
     AttrPtrArray attributes;
 

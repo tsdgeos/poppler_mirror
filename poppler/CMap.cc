@@ -133,7 +133,7 @@ CMap *CMap::parse(CMapCache *cache, const GooString *collectionA,
   PSTokenizer *pst;
   char tok1[256], tok2[256], tok3[256];
   int n1, n2, n3;
-  Guint start, end, code;
+  unsigned int start, end, code;
 
   if (stream) {
     stream->reset();
@@ -231,7 +231,7 @@ void CMap::parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data) {
   PSTokenizer *pst;
   char tok1[256], tok2[256], tok3[256];
   int n1, n2, n3;
-  Guint start = 0, end = 0, code;
+  unsigned int start = 0, end = 0, code;
 
   pst = new PSTokenizer(getCharFunc, data);
   pst->getToken(tok1, sizeof(tok1), &n1);
@@ -385,11 +385,11 @@ void CMap::copyVector(CMapVectorEntry *dest, CMapVectorEntry *src) {
   }
 }
 
-void CMap::addCIDs(Guint start, Guint end, Guint nBytes, CID firstCID) {
+void CMap::addCIDs(unsigned int start, unsigned int end, unsigned int nBytes, CID firstCID) {
   CMapVectorEntry *vec;
   CID cid;
   int byte;
-  Guint i, j;
+  unsigned int i, j;
 
   vec = vector;
   for (i = nBytes - 1; i >= 1; --i) {
@@ -480,8 +480,8 @@ CID CMap::getCID(const char *s, int len, CharCode *c, int *nUsed) {
   return 0;
 }
 
-void CMap::setReverseMapVector(Guint startCode, CMapVectorEntry *vec,
- Guint *rmap, Guint rmapSize, Guint ncand) {
+void CMap::setReverseMapVector(unsigned int startCode, CMapVectorEntry *vec,
+ unsigned int *rmap, unsigned int rmapSize, unsigned int ncand) {
   int i;
 
   if (vec == nullptr) return;
@@ -490,14 +490,14 @@ void CMap::setReverseMapVector(Guint startCode, CMapVectorEntry *vec,
       setReverseMapVector((startCode+i) << 8,
 	  vec[i].vector,rmap,rmapSize,ncand);
     } else {
-      Guint cid = vec[i].cid;
+      unsigned int cid = vec[i].cid;
 
       if (cid < rmapSize) {
-	Guint cand;
+	unsigned int cand;
 
 	for (cand = 0;cand < ncand;cand++) {
-	  Guint code = startCode+i;
-	  Guint idx = cid*ncand+cand;
+	  unsigned int code = startCode+i;
+	  unsigned int idx = cid*ncand+cand;
 	  if (rmap[idx] == 0) {
 	    rmap[idx] = code;
 	    break;
@@ -510,7 +510,7 @@ void CMap::setReverseMapVector(Guint startCode, CMapVectorEntry *vec,
   }
 }
 
-void CMap::setReverseMap(Guint *rmap, Guint rmapSize, Guint ncand) {
+void CMap::setReverseMap(unsigned int *rmap, unsigned int rmapSize, unsigned int ncand) {
   setReverseMapVector(0,vector,rmap,rmapSize,ncand);
 }
 

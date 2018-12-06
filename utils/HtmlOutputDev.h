@@ -35,7 +35,6 @@
 #define HTMLOUTPUTDEV_H
 
 #include <stdio.h>
-#include "goo/gtypes.h"
 #include "goo/GooList.h"
 #include "GfxFont.h"
 #include "OutputDev.h"
@@ -139,7 +138,7 @@ public:
   void addChar(GfxState *state, double x, double y,
 	       double dx, double dy, 
 		double ox, double oy, 
-		Unicode *u, int uLen); //Guchar c);
+		Unicode *u, int uLen); //unsigned char c);
 
   void updateFont(GfxState *state);
 

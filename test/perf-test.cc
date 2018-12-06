@@ -374,7 +374,7 @@ static SplashColor splashColBlack;
 
 static SplashColorPtr  gBgColor = SPLASH_COL_WHITE_PTR;
 
-static void splashColorSet(SplashColorPtr col, Guchar red, Guchar green, Guchar blue, Guchar alpha)
+static void splashColorSet(SplashColorPtr col, unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
 {
     switch (gSplashColorMode)
     {

@@ -29,7 +29,7 @@
 
 #include <stdarg.h>
 #include "poppler-config.h"
-#include "goo/gtypes.h"
+#include "goo/gfile.h"
 #include "goo/GooString.h"
 
 enum ErrorCategory {

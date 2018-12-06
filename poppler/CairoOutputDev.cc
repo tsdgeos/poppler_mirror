@@ -1992,7 +1992,7 @@ void CairoOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
   /* work around a cairo bug when scaling 1x1 surfaces */
   if (width == 1 && height == 1) {
     ImageStream *imgStr;
-    Guchar pix;
+    unsigned char pix;
     int invert_bit;
 
     imgStr = new ImageStream(str, width, 1, 1);
@@ -2046,7 +2046,7 @@ void CairoOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref, Stre
   /* work around a cairo bug when scaling 1x1 surfaces */
   if (width == 1 && height == 1) {
     ImageStream *imgStr;
-    Guchar pix;
+    unsigned char pix;
     int invert_bit;
 
     imgStr = new ImageStream(str, width, 1, 1);
@@ -2118,7 +2118,7 @@ void CairoOutputDev::drawImageMaskRegular(GfxState *state, Object *ref, Stream *
   cairo_pattern_t *pattern;
   int x, y, i, bit;
   ImageStream *imgStr;
-  Guchar *pix;
+  unsigned char *pix;
   cairo_matrix_t matrix;
   int invert_bit;
   ptrdiff_t row_stride;
@@ -2225,7 +2225,7 @@ void CairoOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream
   cairo_surface_t *image;
   cairo_pattern_t *pattern;
   ImageStream *imgStr;
-  Guchar *pix;
+  unsigned char *pix;
   cairo_matrix_t matrix;
   int invert_bit;
   ptrdiff_t row_stride;
@@ -2529,7 +2529,7 @@ void CairoOutputDev::drawMaskedImage(GfxState *state, Object *ref,
   cairo_pattern_t *maskPattern, *pattern;
   cairo_matrix_t matrix;
   cairo_matrix_t maskMatrix;
-  Guchar *pix;
+  unsigned char *pix;
   int x, y;
   int invert_bit;
   cairo_filter_t filter;
@@ -2686,7 +2686,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
   cairo_surface_t *maskImage, *image;
   cairo_pattern_t *maskPattern, *pattern;
   cairo_matrix_t maskMatrix, matrix;
-  Guchar *pix;
+  unsigned char *pix;
   int y;
   cairo_filter_t filter;
   cairo_filter_t maskFilter;
@@ -3107,12 +3107,12 @@ public:
     // build a lookup table here
     if (colorMap->getNumPixelComps() == 1) {
       int n;
-      Guchar pix;
+      unsigned char pix;
 
       n = 1 << colorMap->getBits();
       lookup = (GfxRGB *)gmallocn(n, sizeof(GfxRGB));
       for (i = 0; i < n; ++i) {
-        pix = (Guchar)i;
+        pix = (unsigned char)i;
 
         colorMap->getRGB(&pix, &lookup[i]);
       }
@@ -3187,7 +3187,7 @@ public:
   }
 
   void getRow(int row_num, uint32_t *row_data) override {
-    Guchar *pix;
+    unsigned char *pix;
 
     if (row_num <= current_row)
       return;
@@ -3204,7 +3204,7 @@ public:
 	imageError = true;
       }
     } else if (lookup) {
-      Guchar *p = pix;
+      unsigned char *p = pix;
       GfxRGB rgb;
 
       for (int i = 0; i < width; i++) {

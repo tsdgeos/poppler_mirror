@@ -682,7 +682,7 @@ public:
   virtual void setContents(GooString *new_content);
   void setName(GooString *new_name);
   void setModified(GooString *new_date);
-  void setFlags(Guint new_flags);
+  void setFlags(unsigned int new_flags);
 
   void setBorder(std::unique_ptr<AnnotBorder> &&new_border);
   void setColor(std::unique_ptr<AnnotColor> &&new_color);
@@ -701,7 +701,7 @@ public:
   int getPageNum() const { return page; }
   const GooString *getName() const { return name.get(); }
   const GooString *getModified() const { return modified.get(); }
-  Guint getFlags() const { return flags; }
+  unsigned int getFlags() const { return flags; }
   AnnotAppearance *getAppearStreams() const { return appearStreams.get(); }
   const GooString *getAppearState() const { return appearState.get(); }
   AnnotBorder *getBorder() const { return border.get(); }
@@ -755,7 +755,7 @@ protected:
   std::unique_ptr<GooString> name;                  // NM
   std::unique_ptr<GooString> modified;              // M
   int       page;                                   // P
-  Guint flags;                                      // F (must be a 32 bit unsigned int)
+  unsigned int flags;                                      // F (must be a 32 bit unsigned int)
   std::unique_ptr<AnnotAppearance> appearStreams;   // AP
   Object appearance;                                // a reference to the Form XObject stream
                                                     //   for the normal appearance

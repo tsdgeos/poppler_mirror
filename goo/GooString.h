@@ -36,8 +36,6 @@
 #include <cstdarg>
 #include <string>
 
-#include "gtypes.h"
-
 #ifdef __clang__
 # define GOOSTRING_FORMAT __attribute__((__annotate__("gooformat")))
 #else

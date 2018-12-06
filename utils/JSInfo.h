@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include "Object.h"
 #include "PDFDoc.h"
-#include "goo/gtypes.h"
 
 #include "Link.h"
 #include "UnicodeMap.h"

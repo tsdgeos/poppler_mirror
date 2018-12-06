@@ -533,7 +533,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       overprintPreview = m_page->parentDoc->m_hints & Document::OverprintPreview ? true : false;
       if (overprintPreview)
       {
-        Guchar c, m, y, k;
+        unsigned char c, m, y, k;
 
         c = 255 - m_page->parentDoc->paperColor.blue();
         m = 255 - m_page->parentDoc->paperColor.red();

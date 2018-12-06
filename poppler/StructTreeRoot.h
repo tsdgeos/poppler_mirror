@@ -14,7 +14,6 @@
 #ifndef STRUCTTREEROOT_H
 #define STRUCTTREEROOT_H
 
-#include "goo/gtypes.h"
 #include "Object.h"
 #include "StructElement.h"
 #include <map>

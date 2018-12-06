@@ -496,7 +496,8 @@ class POPPLER_QT5_EXPORT LinkRendition : public Link
 		 * \param annotationReference the object reference of the screen annotation associated with this rendition action
 		 * \since 0.22
 		 */
-		LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref annotationReference );
+		// TODO Next ABI break, remove & from annotationReference
+		LinkRendition( const QRectF &linkArea, ::MediaRendition *rendition, int operation, const QString &script, const Ref &annotationReference );
 
 		/**
 		 * Destructor.
@@ -595,7 +596,8 @@ class POPPLER_QT5_EXPORT LinkMovie : public Link
 		 *
 		 * Note: This constructor is supposed to be used by Poppler::Page only.
 		 */
-		LinkMovie( const QRectF &linkArea, Operation operation, const QString &annotationTitle, const Ref annotationReference );
+		// TODO Next ABI break, remove & from annotationReference
+		LinkMovie( const QRectF &linkArea, Operation operation, const QString &annotationTitle, const Ref &annotationReference );
 		/**
 		 * Destructor.
 		 */

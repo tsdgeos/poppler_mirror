@@ -35,7 +35,6 @@
 #define GDIR_H
 
 #include "poppler-config.h"
-#include "gtypes.h"
 
 class GooString;
 

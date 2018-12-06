@@ -166,7 +166,7 @@ bool FormField::isVisible() const
 
 void FormField::setVisible(bool value)
 {
-  Guint flags = m_formData->fm->getWidgetAnnotation()->getFlags();
+  unsigned int flags = m_formData->fm->getWidgetAnnotation()->getFlags();
   if (value) {
     flags &= ~Annot::flagHidden;
   } else {

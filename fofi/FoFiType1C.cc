@@ -1186,7 +1186,7 @@ void FoFiType1C::eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName,
   buf = GooString::format("/{0:s} {1:d} RD ", glyphName, charBuf->getLength());
   eexecWrite(eb, buf->c_str());
   delete buf;
-  eexecWriteCharstring(eb, (Guchar *)charBuf->c_str(),
+  eexecWriteCharstring(eb, (unsigned char *)charBuf->c_str(),
 		       charBuf->getLength());
   eexecWrite(eb, " ND\n");
 
@@ -1199,8 +1199,8 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf,
   Type1CIndexVal val;
   bool ok, dFP;
   double d, dx, dy;
-  Gushort r2;
-  Guchar byte;
+  unsigned short r2;
+  unsigned char byte;
   int pos, subrBias, start, i, k;
 
   start = charBuf->getLength();
@@ -1848,7 +1848,7 @@ void FoFiType1C::cvtGlyphWidth(bool useOp, GooString *charBuf,
 }
 
 void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf) const {
-  Guchar buf[12];
+  unsigned char buf[12];
   int y, n;
 
   n = 0;
@@ -1856,10 +1856,10 @@ void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf) const {
     if (x >= -32768 && x < 32768) {
       y = (int)(x * 256.0);
       buf[0] = 255;
-      buf[1] = (Guchar)(y >> 24);
-      buf[2] = (Guchar)(y >> 16);
-      buf[3] = (Guchar)(y >> 8);
-      buf[4] = (Guchar)y;
+      buf[1] = (unsigned char)(y >> 24);
+      buf[2] = (unsigned char)(y >> 16);
+      buf[3] = (unsigned char)(y >> 8);
+      buf[4] = (unsigned char)y;
       buf[5] = 255;
       buf[6] = 0;
       buf[7] = 0;
@@ -1874,24 +1874,24 @@ void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf) const {
   } else {
     y = (int)x;
     if (y >= -107 && y <= 107) {
-      buf[0] = (Guchar)(y + 139);
+      buf[0] = (unsigned char)(y + 139);
       n = 1;
     } else if (y > 107 && y <= 1131) {
       y -= 108;
-      buf[0] = (Guchar)((y >> 8) + 247);
-      buf[1] = (Guchar)(y & 0xff);
+      buf[0] = (unsigned char)((y >> 8) + 247);
+      buf[1] = (unsigned char)(y & 0xff);
       n = 2;
     } else if (y < -107 && y >= -1131) {
       y = -y - 108;
-      buf[0] = (Guchar)((y >> 8) + 251);
-      buf[1] = (Guchar)(y & 0xff);
+      buf[0] = (unsigned char)((y >> 8) + 251);
+      buf[1] = (unsigned char)(y & 0xff);
       n = 2;
     } else {
       buf[0] = 255;
-      buf[1] = (Guchar)(y >> 24);
-      buf[2] = (Guchar)(y >> 16);
-      buf[3] = (Guchar)(y >> 8);
-      buf[4] = (Guchar)y;
+      buf[1] = (unsigned char)(y >> 24);
+      buf[2] = (unsigned char)(y >> 16);
+      buf[3] = (unsigned char)(y >> 8);
+      buf[4] = (unsigned char)y;
       n = 5;
     }
   }
@@ -1899,10 +1899,10 @@ void FoFiType1C::cvtNum(double x, bool isFP, GooString *charBuf) const {
 }
 
 void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s) const {
-  Guchar *p;
-  Guchar x;
+  unsigned char *p;
+  unsigned char x;
 
-  for (p = (Guchar *)s; *p; ++p) {
+  for (p = (unsigned char *)s; *p; ++p) {
     x = *p ^ (eb->r1 >> 8);
     eb->r1 = (x + eb->r1) * 52845 + 22719;
     if (eb->ascii) {
@@ -1920,8 +1920,8 @@ void FoFiType1C::eexecWrite(Type1CEexecBuf *eb, const char *s) const {
 }
 
 void FoFiType1C::eexecWriteCharstring(Type1CEexecBuf *eb,
-				      const Guchar *s, int n) const {
-  Guchar x;
+				      const unsigned char *s, int n) const {
+  unsigned char x;
   int i;
 
   // eexec encryption
@@ -2360,7 +2360,7 @@ void FoFiType1C::readPrivateDict(int offset, int length,
 void FoFiType1C::readFDSelect() {
   int fdSelectFmt, pos, nRanges, gid0, gid1, fd, i, j;
 
-  fdSelect = (Guchar *)gmalloc(nGlyphs);
+  fdSelect = (unsigned char *)gmalloc(nGlyphs);
   if (topDict.fdSelectOffset == 0) {
     for (i = 0; i < nGlyphs; ++i) {
       fdSelect[i] = 0;
@@ -2502,15 +2502,15 @@ bool FoFiType1C::readCharset() {
 
   if (topDict.charsetOffset == 0) {
     charset = fofiType1CISOAdobeCharset;
-    charsetLength = sizeof(fofiType1CISOAdobeCharset) / sizeof(Gushort);
+    charsetLength = sizeof(fofiType1CISOAdobeCharset) / sizeof(unsigned short);
   } else if (topDict.charsetOffset == 1) {
     charset = fofiType1CExpertCharset;
-    charsetLength = sizeof(fofiType1CExpertCharset) / sizeof(Gushort);
+    charsetLength = sizeof(fofiType1CExpertCharset) / sizeof(unsigned short);
   } else if (topDict.charsetOffset == 2) {
     charset = fofiType1CExpertSubsetCharset;
-    charsetLength = sizeof(fofiType1CExpertSubsetCharset) / sizeof(Gushort);
+    charsetLength = sizeof(fofiType1CExpertSubsetCharset) / sizeof(unsigned short);
   } else {
-    charset = (Gushort *)gmallocn(nGlyphs, sizeof(Gushort));
+    charset = (unsigned short *)gmallocn(nGlyphs, sizeof(unsigned short));
     charsetLength = nGlyphs;
     for (i = 0; i < nGlyphs; ++i) {
       charset[i] = 0;
@@ -2519,7 +2519,7 @@ bool FoFiType1C::readCharset() {
     charsetFormat = getU8(pos++, &parsedOk);
     if (charsetFormat == 0) {
       for (i = 1; i < nGlyphs; ++i) {
-	charset[i] = (Gushort)getU16BE(pos, &parsedOk);
+	charset[i] = (unsigned short)getU16BE(pos, &parsedOk);
 	pos += 2;
 	if (!parsedOk) {
 	  break;
@@ -2535,7 +2535,7 @@ bool FoFiType1C::readCharset() {
 	  break;
 	}
 	for (j = 0; j <= nLeft && i < nGlyphs; ++j) {
-	  charset[i++] = (Gushort)c++;
+	  charset[i++] = (unsigned short)c++;
 	}
       }
     } else if (charsetFormat == 2) {
@@ -2549,7 +2549,7 @@ bool FoFiType1C::readCharset() {
 	  break;
 	}
 	for (j = 0; j <= nLeft && i < nGlyphs; ++j) {
-	  charset[i++] = (Gushort)c++;
+	  charset[i++] = (unsigned short)c++;
 	}
       }
     }

@@ -354,11 +354,11 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
   ImageStream *imgStr = nullptr;
   unsigned char *row;
   unsigned char *rowp;
-  Guchar *p;
+  unsigned char *p;
   GfxRGB rgb;
   GfxCMYK cmyk;
   GfxGray gray;
-  Guchar zero[gfxColorMaxComps];
+  unsigned char zero[gfxColorMaxComps];
   int invert_bits;
 
   if (writer) {
@@ -428,7 +428,7 @@ void ImageOutputDev::writeImageFile(ImgWriter *writer, ImageFormat format, const
 
     case imgRGB48: {
       p = imgStr->getLine();
-      Gushort *rowp16 = (Gushort*)row;
+      unsigned short *rowp16 = (unsigned short*)row;
       for (int x = 0; x < width; ++x) {
 	if (p) {
 	  colorMap->getRGB(p, &rgb);

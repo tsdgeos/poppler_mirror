@@ -228,7 +228,7 @@ int DCTStream::getChar() {
   return c;
 }
 
-int DCTStream::getChars(int nChars, Guchar *buffer) {
+int DCTStream::getChars(int nChars, unsigned char *buffer) {
   // Use volatile to prevent the compiler optimizing
   // variables into registers. See setjmp man page.
   volatile int i, c;

@@ -54,9 +54,9 @@ namespace
 
 union GooStringFormatArg {
   int i;
-  Guint ui;
+  unsigned int ui;
   long l;
-  Gulong ul;
+  unsigned long ul;
   long long ll;
   unsigned long long ull;
   double f;
@@ -279,7 +279,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  case fmtUIntHexUpper:
 	  case fmtUIntOctal:
 	  case fmtUIntBinary:
-	    args[argsLen].ui = va_arg(argList, Guint);
+	    args[argsLen].ui = va_arg(argList, unsigned int);
 	    break;
 	  case fmtLongDecimal:
 	  case fmtLongHex:
@@ -293,7 +293,7 @@ GooString *GooString::appendfv(const char *fmt, va_list argList) {
 	  case fmtULongHexUpper:
 	  case fmtULongOctal:
 	  case fmtULongBinary:
-	    args[argsLen].ul = va_arg(argList, Gulong);
+	    args[argsLen].ul = va_arg(argList, unsigned long);
 	    break;
 	  case fmtLongLongDecimal:
 	  case fmtLongLongHex:

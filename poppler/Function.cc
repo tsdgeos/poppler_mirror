@@ -212,9 +212,9 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
   int sampleBits;
   double sampleMul;
   Object obj1;
-  Guint buf, bitMask;
+  unsigned int buf, bitMask;
   int bits;
-  Guint s;
+  unsigned int s;
   double in[funcMaxInputs];
   int i, j, t, bit, idx;
 
@@ -1494,7 +1494,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const {
 	if (i2 > 0) {
 	  stack->pushInt(i1 << i2);
 	} else if (i2 < 0) {
-	  stack->pushInt((int)((Guint)i1 >> -i2));
+	  stack->pushInt((int)((unsigned int)i1 >> -i2));
 	} else {
 	  stack->pushInt(i1);
 	}

@@ -34,7 +34,6 @@
 #include <map>
 #include <stack>
 
-#include "goo/gtypes.h"
 #include "OutputDev.h"
 #include "GfxState.h"
 

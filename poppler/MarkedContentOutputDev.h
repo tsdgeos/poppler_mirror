@@ -12,7 +12,6 @@
 #ifndef MARKEDCONTENTOUTPUTDEV_H
 #define MARKEDCONTENTOUTPUTDEV_H
 
-#include "goo/gtypes.h"
 #include "goo/gmem.h"
 #include "OutputDev.h"
 #include "GfxState.h"

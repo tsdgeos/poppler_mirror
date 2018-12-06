@@ -34,7 +34,6 @@
 
 #include "poppler-config.h"
 #include <stdio.h>
-#include "goo/gtypes.h"
 #include "GfxFont.h"
 #include "GfxState.h"
 #include "OutputDev.h"

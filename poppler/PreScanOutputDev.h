@@ -27,7 +27,6 @@
 #ifndef PRESCANOUTPUTDEV_H
 #define PRESCANOUTPUTDEV_H
 
-#include "goo/gtypes.h"
 #include "Object.h"
 #include "GfxState.h"
 #include "GlobalParams.h"

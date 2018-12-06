@@ -17,7 +17,6 @@
 
 #include "poppler-config.h"
 
-#include "goo/gtypes.h"
 #include "Object.h"
 #include "Stream.h"
 
@@ -50,7 +49,7 @@ public:
   CachedFile(const CachedFile &) = delete;
   CachedFile& operator=(const CachedFile &) = delete;
 
-  Guint getLength() { return length; }
+  unsigned int getLength() { return length; }
   long int tell();
   int seek(long int offset, int origin);
   size_t read(void * ptr, size_t unitsize, size_t count);

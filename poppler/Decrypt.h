@@ -28,7 +28,6 @@
 #ifndef DECRYPT_H
 #define DECRYPT_H
 
-#include "goo/gtypes.h"
 #include "goo/GooString.h"
 #include "Object.h"
 #include "Stream.h"
@@ -50,7 +49,7 @@ public:
 			   const GooString *ownerEnc, const GooString *userEnc,
 			   int permissions, const GooString *fileID,
 			   const GooString *ownerPassword, const GooString *userPassword,
-			   Guchar *fileKey, bool encryptMetadata,
+			   unsigned char *fileKey, bool encryptMetadata,
 			   bool *ownerPasswordOk);
 
 private:
@@ -58,7 +57,7 @@ private:
   static bool makeFileKey2(int encVersion, int encRevision, int keyLength,
 			    const GooString *ownerKey, const GooString *userKey,
 			    int permissions, const GooString *fileID,
-			    const GooString *userPassword, Guchar *fileKey,
+			    const GooString *userPassword, unsigned char *fileKey,
 			    bool encryptMetadata);
 };
 
@@ -74,24 +73,24 @@ private:
  * previous output is kept in buf. The paddingReached field is only used in
  * case of encryption. */
 struct DecryptRC4State {
-  Guchar state[256];
-  Guchar x, y;
+  unsigned char state[256];
+  unsigned char x, y;
 };
 
 struct DecryptAESState {
-  Guint w[44];
-  Guchar state[16];
-  Guchar cbc[16];
-  Guchar buf[16];
+  unsigned int w[44];
+  unsigned char state[16];
+  unsigned char cbc[16];
+  unsigned char buf[16];
   bool paddingReached; // encryption only
   int bufIdx;
 };
 
 struct DecryptAES256State {
-  Guint w[60];
-  Guchar state[16];
-  Guchar cbc[16];
-  Guchar buf[16];
+  unsigned int w[60];
+  unsigned char state[16];
+  unsigned char cbc[16];
+  unsigned char buf[16];
   bool paddingReached; // encryption only
   int bufIdx;
 };
@@ -99,7 +98,7 @@ struct DecryptAES256State {
 class BaseCryptStream : public FilterStream {
 public:
 
-  BaseCryptStream(Stream *strA, const Guchar *fileKey, CryptAlgorithm algoA,
+  BaseCryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
                   int keyLength, int objNum, int objGen);
   ~BaseCryptStream();
   StreamKind getKind() override { return strCrypt; }
@@ -114,7 +113,7 @@ public:
 protected:
   CryptAlgorithm algo;
   int objKeyLength;
-  Guchar objKey[32];
+  unsigned char objKey[32];
   Goffset charactersRead; // so that getPos() can be correct
   int nextCharBuff;   // EOF means not read yet
   bool autoDelete;
@@ -133,7 +132,7 @@ protected:
 class EncryptStream : public BaseCryptStream {
 public:
 
-  EncryptStream(Stream *strA, const Guchar *fileKey, CryptAlgorithm algoA,
+  EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
                 int keyLength, int objNum, int objGen);
   ~EncryptStream();
   void reset() override;
@@ -143,7 +142,7 @@ public:
 class DecryptStream : public BaseCryptStream {
 public:
 
-  DecryptStream(Stream *strA, const Guchar *fileKey, CryptAlgorithm algoA,
+  DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
                 int keyLength, int objNum, int objGen);
   ~DecryptStream();
   void reset() override;
@@ -152,6 +151,6 @@ public:
  
 //------------------------------------------------------------------------
 
-extern void md5(const Guchar *msg, int msgLen, Guchar *digest);
+extern void md5(const unsigned char *msg, int msgLen, unsigned char *digest);
 
 #endif

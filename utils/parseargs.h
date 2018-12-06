@@ -28,8 +28,6 @@
 extern "C" {
 #endif
 
-#include "goo/gtypes.h"
-
 /*
  * Argument kinds.
  */

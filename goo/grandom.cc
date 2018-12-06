@@ -24,10 +24,10 @@ auto& grandom_engine()
 
 }
 
-void grandom_fill(Guchar *buff, int size)
+void grandom_fill(unsigned char *buff, int size)
 {
   auto& engine = grandom_engine();
-  std::uniform_int_distribution<unsigned short> distribution{std::numeric_limits<Guchar>::min(), std::numeric_limits<Guchar>::max()};
+  std::uniform_int_distribution<unsigned short> distribution{std::numeric_limits<unsigned char>::min(), std::numeric_limits<unsigned char>::max()};
   for (int index = 0; index < size; ++index) {
     buff[index] = distribution(engine);
   }

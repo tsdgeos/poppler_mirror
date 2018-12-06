@@ -22,7 +22,6 @@
 #ifndef SPLASHFONTFILE_H
 #define SPLASHFONTFILE_H
 
-#include "goo/gtypes.h"
 #include "SplashTypes.h"
 
 class GooString;

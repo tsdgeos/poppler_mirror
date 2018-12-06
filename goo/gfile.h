@@ -76,9 +76,11 @@ extern "C" {
 #  endif
 #endif
 }
-#include "gtypes.h"
 
 class GooString;
+
+/* Integer type for all file offsets and file sizes */
+typedef long long Goffset;
 
 //------------------------------------------------------------------------
 

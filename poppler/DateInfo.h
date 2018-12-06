@@ -24,7 +24,6 @@
 #ifndef DATE_INFO_H
 #define DATE_INFO_H
 
-#include "goo/gtypes.h"
 #include "goo/GooString.h"
 #include <time.h>
 

@@ -28,7 +28,7 @@ CurlPDFDocBuilder::buildPDFDoc(const GooString &uri,
     CachedFile *cachedFile = new CachedFile(
         new CurlCachedFileLoader(), uri.copy());
 
-    if (cachedFile->getLength() == ((Guint) -1)) {
+    if (cachedFile->getLength() == ((unsigned int) -1)) {
         cachedFile->decRefCnt();
         return PDFDoc::ErrorPDFDoc(errOpenFile, uri.copy());
     }

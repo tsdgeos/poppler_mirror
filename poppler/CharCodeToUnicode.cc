@@ -99,7 +99,7 @@ static int hexCharVals[256] = {
 
 // Parse a <len>-byte hex string <s> into *<val>.  Returns false on
 // error.
-static bool parseHex(const char *s, int len, Guint *val) {
+static bool parseHex(const char *s, int len, unsigned int *val) {
   int i, x;
 
   *val = 0;

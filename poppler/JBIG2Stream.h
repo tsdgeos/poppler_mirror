@@ -25,7 +25,6 @@
 #ifndef JBIG2STREAM_H
 #define JBIG2STREAM_H
 
-#include "goo/gtypes.h"
 #include "Object.h"
 #include "Stream.h"
 
@@ -58,24 +57,24 @@ public:
 
 private:
   bool hasGetChars() override { return true; }
-  int getChars(int nChars, Guchar *buffer) override;
+  int getChars(int nChars, unsigned char *buffer) override;
 
   void readSegments();
-  bool readSymbolDictSeg(Guint segNum, Guint length,
-			  Guint *refSegs, Guint nRefSegs);
-  void readTextRegionSeg(Guint segNum, bool imm,
-			 bool lossless, Guint length,
-			 Guint *refSegs, Guint nRefSegs);
+  bool readSymbolDictSeg(unsigned int segNum, unsigned int length,
+			  unsigned int *refSegs, unsigned int nRefSegs);
+  void readTextRegionSeg(unsigned int segNum, bool imm,
+			 bool lossless, unsigned int length,
+			 unsigned int *refSegs, unsigned int nRefSegs);
   JBIG2Bitmap *readTextRegion(bool huff, bool refine,
 			      int w, int h,
-			      Guint numInstances,
-			      Guint logStrips,
+			      unsigned int numInstances,
+			      unsigned int logStrips,
 			      int numSyms,
 			      JBIG2HuffmanTable *symCodeTab,
-			      Guint symCodeLen,
+			      unsigned int symCodeLen,
 			      JBIG2Bitmap **syms,
-			      Guint defPixel, Guint combOp,
-			      Guint transposed, Guint refCorner,
+			      unsigned int defPixel, unsigned int combOp,
+			      unsigned int transposed, unsigned int refCorner,
 			      int sOffset,
 			      JBIG2HuffmanTable *huffFSTable,
 			      JBIG2HuffmanTable *huffDSTable,
@@ -85,14 +84,14 @@ private:
 			      JBIG2HuffmanTable *huffRDXTable,
 			      JBIG2HuffmanTable *huffRDYTable,
 			      JBIG2HuffmanTable *huffRSizeTable,
-			      Guint templ,
+			      unsigned int templ,
 			      int *atx, int *aty);
-  void readPatternDictSeg(Guint segNum, Guint length);
-  void readHalftoneRegionSeg(Guint segNum, bool imm,
-			     bool lossless, Guint length,
-			     Guint *refSegs, Guint nRefSegs);
-  void readGenericRegionSeg(Guint segNum, bool imm,
-			    bool lossless, Guint length);
+  void readPatternDictSeg(unsigned int segNum, unsigned int length);
+  void readHalftoneRegionSeg(unsigned int segNum, bool imm,
+			     bool lossless, unsigned int length,
+			     unsigned int *refSegs, unsigned int nRefSegs);
+  void readGenericRegionSeg(unsigned int segNum, bool imm,
+			    bool lossless, unsigned int length);
   void mmrAddPixels(int a1, int blackPixels,
 		    int *codingLine, int *a0i, int w);
   void mmrAddPixelsNeg(int a1, int blackPixels,
@@ -102,44 +101,44 @@ private:
 				 bool useSkip, JBIG2Bitmap *skip,
 				 int *atx, int *aty,
 				 int mmrDataLength);
-  void readGenericRefinementRegionSeg(Guint segNum, bool imm,
-				      bool lossless, Guint length,
-				      Guint *refSegs,
-				      Guint nRefSegs);
+  void readGenericRefinementRegionSeg(unsigned int segNum, bool imm,
+				      bool lossless, unsigned int length,
+				      unsigned int *refSegs,
+				      unsigned int nRefSegs);
   JBIG2Bitmap *readGenericRefinementRegion(int w, int h,
 					   int templ, bool tpgrOn,
 					   JBIG2Bitmap *refBitmap,
 					   int refDX, int refDY,
 					   int *atx, int *aty);
-  void readPageInfoSeg(Guint length);
-  void readEndOfStripeSeg(Guint length);
-  void readProfilesSeg(Guint length);
-  void readCodeTableSeg(Guint segNum, Guint length);
-  void readExtensionSeg(Guint length);
-  JBIG2Segment *findSegment(Guint segNum);
-  void discardSegment(Guint segNum);
-  void resetGenericStats(Guint templ,
+  void readPageInfoSeg(unsigned int length);
+  void readEndOfStripeSeg(unsigned int length);
+  void readProfilesSeg(unsigned int length);
+  void readCodeTableSeg(unsigned int segNum, unsigned int length);
+  void readExtensionSeg(unsigned int length);
+  JBIG2Segment *findSegment(unsigned int segNum);
+  void discardSegment(unsigned int segNum);
+  void resetGenericStats(unsigned int templ,
 			 JArithmeticDecoderStats *prevStats);
-  void resetRefinementStats(Guint templ,
+  void resetRefinementStats(unsigned int templ,
 			    JArithmeticDecoderStats *prevStats);
   void resetIntStats(int symCodeLen);
-  bool readUByte(Guint *x);
+  bool readUByte(unsigned int *x);
   bool readByte(int *x);
-  bool readUWord(Guint *x);
-  bool readULong(Guint *x);
+  bool readUWord(unsigned int *x);
+  bool readULong(unsigned int *x);
   bool readLong(int *x);
 
   Object globalsStream;
   Ref globalsStreamRef;
-  Guint pageW, pageH, curPageH;
-  Guint pageDefPixel;
+  unsigned int pageW, pageH, curPageH;
+  unsigned int pageDefPixel;
   JBIG2Bitmap *pageBitmap;
-  Guint defCombOp;
+  unsigned int defCombOp;
   GooList *segments;		// [JBIG2Segment]
   GooList *globalSegments;	// [JBIG2Segment]
   Stream *curStr;
-  Guchar *dataPtr;
-  Guchar *dataEnd;
+  unsigned char *dataPtr;
+  unsigned char *dataEnd;
 
   JArithmeticDecoder *arithDecoder;
   JArithmeticDecoderStats *genericRegionStats;

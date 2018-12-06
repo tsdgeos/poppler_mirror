@@ -131,9 +131,9 @@ int main (int argc, char *argv[])
 ///////////////////////////////////////////////////////////////////////////
 {
   int objectsCount = 0;
-  Guint numOffset = 0;
+  unsigned int numOffset = 0;
   std::vector<Object> pages;
-  std::vector<Guint> offsets;
+  std::vector<unsigned int> offsets;
   XRef *yRef, *countRef;
   FILE *f;
   OutStream *outStr;

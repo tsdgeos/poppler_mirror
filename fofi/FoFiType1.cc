@@ -366,15 +366,15 @@ void FoFiType1::parse() {
 // Undo the PFB encoding, i.e., remove the PFB headers.
 void FoFiType1::undoPFB() {
   bool ok;
-  Guchar *file2;
+  unsigned char *file2;
   int pos1, pos2, type;
-  Guint segLen;
+  unsigned int segLen;
 
   ok = true;
   if (getU8(0, &ok) != 0x80 || !ok) {
     return;
   }
-  file2 = (Guchar *)gmalloc(len);
+  file2 = (unsigned char *)gmalloc(len);
   pos1 = pos2 = 0;
   while (getU8(pos1, &ok) == 0x80 && ok) {
     type = getU8(pos1 + 1, &ok);

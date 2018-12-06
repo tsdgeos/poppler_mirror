@@ -76,17 +76,17 @@ SplashState::SplashState(int width, int height, bool vectorAntialias,
   strokeOverprint = false;
   overprintMode = 0;	  
   for (i = 0; i < 256; ++i) {
-    rgbTransferR[i] = (Guchar)i;
-    rgbTransferG[i] = (Guchar)i;
-    rgbTransferB[i] = (Guchar)i;
-    grayTransfer[i] = (Guchar)i;
+    rgbTransferR[i] = (unsigned char)i;
+    rgbTransferG[i] = (unsigned char)i;
+    rgbTransferB[i] = (unsigned char)i;
+    grayTransfer[i] = (unsigned char)i;
 #ifdef SPLASH_CMYK
-    cmykTransferC[i] = (Guchar)i;
-    cmykTransferM[i] = (Guchar)i;
-    cmykTransferY[i] = (Guchar)i;
-    cmykTransferK[i] = (Guchar)i;
+    cmykTransferC[i] = (unsigned char)i;
+    cmykTransferM[i] = (unsigned char)i;
+    cmykTransferY[i] = (unsigned char)i;
+    cmykTransferK[i] = (unsigned char)i;
     for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
-      deviceNTransfer[cp][i] = (Guchar)i;
+      deviceNTransfer[cp][i] = (unsigned char)i;
 #endif
   }
   overprintMask = 0xffffffff;
@@ -129,17 +129,17 @@ SplashState::SplashState(int width, int height, bool vectorAntialias,
   strokeOverprint = false;
   overprintMode = 0;	  
   for (i = 0; i < 256; ++i) {
-    rgbTransferR[i] = (Guchar)i;
-    rgbTransferG[i] = (Guchar)i;
-    rgbTransferB[i] = (Guchar)i;
-    grayTransfer[i] = (Guchar)i;
+    rgbTransferR[i] = (unsigned char)i;
+    rgbTransferG[i] = (unsigned char)i;
+    rgbTransferB[i] = (unsigned char)i;
+    grayTransfer[i] = (unsigned char)i;
 #ifdef SPLASH_CMYK
-    cmykTransferC[i] = (Guchar)i;
-    cmykTransferM[i] = (Guchar)i;
-    cmykTransferY[i] = (Guchar)i;
-    cmykTransferK[i] = (Guchar)i;
+    cmykTransferC[i] = (unsigned char)i;
+    cmykTransferM[i] = (unsigned char)i;
+    cmykTransferY[i] = (unsigned char)i;
+    cmykTransferK[i] = (unsigned char)i;
     for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
-      deviceNTransfer[cp][i] = (Guchar)i;
+      deviceNTransfer[cp][i] = (unsigned char)i;
 #endif
   }
   overprintMask = 0xffffffff;
@@ -244,8 +244,8 @@ void SplashState::setSoftMask(SplashBitmap *softMaskA) {
   deleteSoftMask = true;
 }
 
-void SplashState::setTransfer(Guchar *red, Guchar *green, Guchar *blue,
-			      Guchar *gray) {
+void SplashState::setTransfer(unsigned char *red, unsigned char *green, unsigned char *blue,
+			      unsigned char *gray) {
 #ifdef SPLASH_CMYK
   int i;
 

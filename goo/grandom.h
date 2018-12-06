@@ -12,10 +12,8 @@
 #ifndef GRANDOM_H
 #define GRANDOM_H
 
-#include "gtypes.h"
-
 /// Fills the given buffer with random bytes
-void grandom_fill(Guchar *buff, int size);
+void grandom_fill(unsigned char *buff, int size);
 
 /// Returns a random number in [0,1)
 double grandom_double();

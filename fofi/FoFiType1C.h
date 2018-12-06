@@ -25,7 +25,6 @@
 #ifndef FOFITYPE1C_H
 #define FOFITYPE1C_H
 
-#include "goo/gtypes.h"
 #include "FoFiBase.h"
 
 class GooString;
@@ -133,7 +132,7 @@ struct Type1CEexecBuf {
   FoFiOutputFunc outputFunc;
   void *outputStream;
   bool ascii;			// ASCII encoding?
-  Gushort r1;			// eexec encryption key
+  unsigned short r1;		// eexec encryption key
   int line;			// number of eexec chars left on current line
 };
 
@@ -216,7 +215,7 @@ private:
 		     Type1CPrivateDict *pDict);
   void cvtNum(double x, bool isFP, GooString *charBuf) const;
   void eexecWrite(Type1CEexecBuf *eb, const char *s) const;
-  void eexecWriteCharstring(Type1CEexecBuf *eb, const Guchar *s, int n) const;
+  void eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s, int n) const;
   void writePSString(const char *s, FoFiOutputFunc outputFunc, void *outputStream) const;
   bool parse();
   void readTopDict();
@@ -246,9 +245,9 @@ private:
 
   int nGlyphs;
   int nFDs;
-  Guchar *fdSelect;
-  Gushort *charset;
-  Gushort charsetLength;
+  unsigned char *fdSelect;
+  unsigned short *charset;
+  unsigned short charsetLength;
   int gsubrBias;
 
   bool parsedOk;

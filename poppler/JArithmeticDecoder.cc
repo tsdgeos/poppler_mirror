@@ -18,7 +18,7 @@
 
 JArithmeticDecoderStats::JArithmeticDecoderStats(int contextSizeA) {
   contextSize = contextSizeA;
-  cxTab = (Guchar *)gmallocn(contextSize, sizeof(Guchar));
+  cxTab = (unsigned char *)gmallocn(contextSize, sizeof(unsigned char));
   reset();
 }
 
@@ -42,7 +42,7 @@ void JArithmeticDecoderStats::copyFrom(JArithmeticDecoderStats *stats) {
   memcpy(cxTab, stats->cxTab, contextSize);
 }
 
-void JArithmeticDecoderStats::setEntry(Guint cx, int i, int mps) {
+void JArithmeticDecoderStats::setEntry(unsigned int cx, int i, int mps) {
   cxTab[cx] = (i << 1) + mps;
 }
 
@@ -50,7 +50,7 @@ void JArithmeticDecoderStats::setEntry(Guint cx, int i, int mps) {
 // JArithmeticDecoder
 //------------------------------------------------------------------------
 
-Guint JArithmeticDecoder::qeTab[47] = {
+unsigned int JArithmeticDecoder::qeTab[47] = {
   0x56010000, 0x34010000, 0x18010000, 0x0AC10000,
   0x05210000, 0x02210000, 0x56010000, 0x54010000,
   0x48010000, 0x38010000, 0x30010000, 0x24010000,
@@ -90,7 +90,7 @@ JArithmeticDecoder::JArithmeticDecoder() {
   nBytesRead = 0;
 }
 
-inline Guint JArithmeticDecoder::readByte() {
+inline unsigned int JArithmeticDecoder::readByte() {
   if (limitStream) {
     --dataLen;
     if (dataLen < 0) {
@@ -98,7 +98,7 @@ inline Guint JArithmeticDecoder::readByte() {
     }
   }
   ++nBytesRead;
-  return (Guint)str->getChar() & 0xff;
+  return (unsigned int)str->getChar() & 0xff;
 }
 
 JArithmeticDecoder::~JArithmeticDecoder() {
@@ -118,7 +118,7 @@ void JArithmeticDecoder::start() {
 }
 
 void JArithmeticDecoder::restart(int dataLenA) {
-  Guint cAdd;
+  unsigned int cAdd;
   bool prevFF;
   int k, nBits;
 
@@ -165,10 +165,10 @@ void JArithmeticDecoder::cleanup() {
   }
 }
 
-int JArithmeticDecoder::decodeBit(Guint context,
+int JArithmeticDecoder::decodeBit(unsigned int context,
 				  JArithmeticDecoderStats *stats) {
   int bit;
-  Guint qe;
+  unsigned int qe;
   int iCX, mpsCX;
 
   iCX = stats->cxTab[context] >> 1;
@@ -229,7 +229,7 @@ int JArithmeticDecoder::decodeBit(Guint context,
   return bit;
 }
 
-int JArithmeticDecoder::decodeByte(Guint context,
+int JArithmeticDecoder::decodeByte(unsigned int context,
 				   JArithmeticDecoderStats *stats) {
   int byte;
   int i;
@@ -243,7 +243,7 @@ int JArithmeticDecoder::decodeByte(Guint context,
 
 bool JArithmeticDecoder::decodeInt(int *x, JArithmeticDecoderStats *stats) {
   int s;
-  Guint v;
+  unsigned int v;
   int i;
 
   prev = 1;
@@ -314,9 +314,9 @@ int JArithmeticDecoder::decodeIntBit(JArithmeticDecoderStats *stats) {
   return bit;
 }
 
-Guint JArithmeticDecoder::decodeIAID(Guint codeLen,
+unsigned int JArithmeticDecoder::decodeIAID(unsigned int codeLen,
 				     JArithmeticDecoderStats *stats) {
-  Guint i;
+  unsigned int i;
   int bit;
 
   prev = 1;

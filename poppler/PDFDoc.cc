@@ -877,7 +877,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   // all objects, including Unencrypted ones.
   xref->scanSpecialFlags();
 
-  Guchar *fileKey;
+  unsigned char *fileKey;
   CryptAlgorithm encAlgorithm;
   int keyLength;
   xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
@@ -1106,7 +1106,7 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
   copyStr->close();
   delete copyStr;
 
-  Guchar *fileKey;
+  unsigned char *fileKey;
   CryptAlgorithm encAlgorithm;
   int keyLength;
   xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
@@ -1175,7 +1175,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
   // all objects, including Unencrypted ones.
   xref->scanSpecialFlags();
 
-  Guchar *fileKey;
+  unsigned char *fileKey;
   CryptAlgorithm encAlgorithm;
   int keyLength;
   xref->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
@@ -1229,7 +1229,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
   delete uxref;
 }
 
-void PDFDoc::writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, Guint numOffset, Guchar *fileKey,
+void PDFDoc::writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, unsigned int numOffset, unsigned char *fileKey,
                                CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict*> *alreadyWrittenDicts)
 {
   bool deleteSet = false;
@@ -1300,7 +1300,7 @@ void PDFDoc::writeRawStream (Stream* str, OutStream* outStr)
   outStr->printf("\r\nendstream\r\n");
 }
 
-void PDFDoc::writeString (const GooString* s, OutStream* outStr, const Guchar *fileKey,
+void PDFDoc::writeString (const GooString* s, OutStream* outStr, const unsigned char *fileKey,
                           CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen)
 {
   // Encrypt string if encryption is enabled
@@ -1362,7 +1362,7 @@ Goffset PDFDoc::writeObjectHeader (Ref *ref, OutStream* outStr)
   return offset;
 }
 
-void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, Guint numOffset, Guchar *fileKey,
+void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, unsigned int numOffset, unsigned char *fileKey,
                           CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict*> *alreadyWrittenDicts)
 {
   Array *array;
@@ -1557,8 +1557,8 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
   }
 
   //calculate md5 digest
-  Guchar digest[16];
-  md5((Guchar*)message.c_str(), message.getLength(), digest);
+  unsigned char digest[16];
+  md5((unsigned char*)message.c_str(), message.getLength(), digest);
 
   //create ID array
   // In case of encrypted files, the ID must not be changed because it's used to calculate the key
@@ -1653,7 +1653,7 @@ void PDFDoc::writeHeader(OutStream *outStr, int major, int minor)
    outStr->printf("%%%c%c%c%c\n", 0xE2, 0xE3, 0xCF, 0xD3);
 }
 
-void PDFDoc::markDictionnary (Dict* dict, XRef * xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts)
+void PDFDoc::markDictionnary (Dict* dict, XRef * xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts)
 {
   bool deleteSet = false;
   if (!alreadyMarkedDicts) {
@@ -1687,7 +1687,7 @@ void PDFDoc::markDictionnary (Dict* dict, XRef * xRef, XRef *countRef, Guint num
   }
 }
 
-void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts)
+void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts)
 {
   Array *array;
 
@@ -1775,7 +1775,7 @@ void PDFDoc::replacePageDict(int pageNo, int rotate,
   getXRef()->setModifiedObject(&page, *refPage);
 }
 
-void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts)
+void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts)
 {
   pageDict->remove("OpenAction");
   pageDict->remove("Outlines");
@@ -1795,7 +1795,7 @@ void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, Guint n
   }
 }
 
-bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, Guint numOffset, int oldPageNum, int newPageNum, std::set<Dict*> *alreadyMarkedDicts) {
+bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldPageNum, int newPageNum, std::set<Dict*> *alreadyMarkedDicts) {
   bool modified = false;
   Object annots = annotsObj->fetch(getXRef());
   if (annots.isArray()) {
@@ -1878,7 +1878,7 @@ bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, Guin
   return modified;
 }
 
-void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, Guint numOffset, int oldRefNum, int newRefNum) {
+void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum) {
   bool modified = false;
   Object acroform = afObj->fetch(getXRef());
   if (acroform.isDict()) {
@@ -1918,10 +1918,10 @@ void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, Guint numOf
   return;
 }
 
-Guint PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, Guint numOffset, bool combine) 
+unsigned int PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, unsigned int numOffset, bool combine) 
 {
-  Guint objectsCount = 0; //count the number of objects in the XRef(s)
-  Guchar *fileKey;
+  unsigned int objectsCount = 0; //count the number of objects in the XRef(s)
+  unsigned char *fileKey;
   CryptAlgorithm encAlgorithm;
   int keyLength;
   xRef->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);
@@ -2054,7 +2054,7 @@ Goffset PDFDoc::getStartXRef(bool tryingToReconstruct)
 
 Goffset PDFDoc::getMainXRefEntriesOffset(bool tryingToReconstruct)
 {
-  Guint mainXRefEntriesOffset = 0;
+  unsigned int mainXRefEntriesOffset = 0;
 
   if (isLinearized(tryingToReconstruct)) {
     mainXRefEntriesOffset = getLinearization()->getMainXRefEntriesOffset();

@@ -36,7 +36,6 @@
 #include <string.h>
 #include <limits.h>
 #include <algorithm>
-#include "goo/gtypes.h"
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"
 #include "goo/GooString.h"
@@ -107,8 +106,8 @@
 //------------------------------------------------------------------------
 
 struct TrueTypeTable {
-  Guint tag;
-  Guint checksum;
+  unsigned int tag;
+  unsigned int checksum;
   int offset;
   int origOffset;
   int len;
@@ -337,10 +336,10 @@ int FoFiTrueType::findCmap(int platform, int encoding) const {
   return -1;
 }
 
-int FoFiTrueType::mapCodeToGID(int i, Guint c) const {
+int FoFiTrueType::mapCodeToGID(int i, unsigned int c) const {
   int gid;
-  Guint segCnt, segEnd, segStart, segDelta, segOffset;
-  Guint cmapFirst, cmapLen;
+  unsigned int segCnt, segEnd, segStart, segDelta, segOffset;
+  unsigned int cmapFirst, cmapLen;
   int pos, a, b, m;
   bool ok;
 
@@ -351,7 +350,7 @@ int FoFiTrueType::mapCodeToGID(int i, Guint c) const {
   pos = cmaps[i].offset;
   switch (cmaps[i].fmt) {
   case 0:
-    if (c + 6 >= (Guint)cmaps[i].len) {
+    if (c + 6 >= (unsigned int)cmaps[i].len) {
       return 0;
     }
     gid = getU8(cmaps[i].offset + 6 + c, &ok);
@@ -936,16 +935,16 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
 			    void *outputStream, GooString *name,
 			    bool needVerticalMetrics,
                             int *maxUsedGlyph) const {
-  Guchar headData[54];
+  unsigned char headData[54];
   TrueTypeLoca *locaTable;
-  Guchar *locaData;
+  unsigned char *locaData;
   TrueTypeTable newTables[nT42Tables];
-  Guchar tableDir[12 + nT42Tables*16];
+  unsigned char tableDir[12 + nT42Tables*16];
   bool ok;
-  Guint checksum;
+  unsigned int checksum;
   int nNewTables;
   int glyfTableLen, length, pos, glyfPos, i, j, k, vmtxTabLength;
-  Guchar vheaTab[36] = {
+  unsigned char vheaTab[36] = {
     0, 1, 0, 0,			// table version number
     0, 0,			// ascent
     0, 0,			// descent
@@ -964,7 +963,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
     0, 0,			// metric data format
     0, 1			// number of advance heights in vmtx table
   };
-  Guchar *vmtxTab;
+  unsigned char *vmtxTab;
   bool needVhea, needVmtx;
   int advance;
 
@@ -978,7 +977,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
     return;
   }
   memcpy(headData, file + pos, 54);
-  headData[8] = headData[9] = headData[10] = headData[11] = (Guchar)0;
+  headData[8] = headData[9] = headData[10] = headData[11] = (unsigned char)0;
 
   // check for a bogus loca format field in the 'head' table
   // (I've encountered fonts with loca format set to 0x0100 instead of 0x0001)
@@ -1032,17 +1031,17 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
   }
 
   // construct the new 'loca' table
-  locaData = (Guchar *)gmallocn(nGlyphs + 1, (locaFmt ? 4 : 2));
+  locaData = (unsigned char *)gmallocn(nGlyphs + 1, (locaFmt ? 4 : 2));
   for (i = 0; i <= nGlyphs; ++i) {
     pos = locaTable[i].newOffset;
     if (locaFmt) {
-      locaData[4*i  ] = (Guchar)(pos >> 24);
-      locaData[4*i+1] = (Guchar)(pos >> 16);
-      locaData[4*i+2] = (Guchar)(pos >>  8);
-      locaData[4*i+3] = (Guchar) pos;
+      locaData[4*i  ] = (unsigned char)(pos >> 24);
+      locaData[4*i+1] = (unsigned char)(pos >> 16);
+      locaData[4*i+2] = (unsigned char)(pos >>  8);
+      locaData[4*i+3] = (unsigned char) pos;
     } else {
-      locaData[2*i  ] = (Guchar)(pos >> 9);
-      locaData[2*i+1] = (Guchar)(pos >> 1);
+      locaData[2*i  ] = (unsigned char)(pos >> 9);
+      locaData[2*i+1] = (unsigned char)(pos >> 1);
     }
   }
 
@@ -1114,7 +1113,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
       } else if (needVerticalMetrics && i == t42VmtxTable) {
 	length = 4 + (nGlyphs - 1) * 2;
 	vmtxTabLength = length;
-	vmtxTab = (Guchar *)gmalloc(length);
+	vmtxTab = (unsigned char *)gmalloc(length);
 	vmtxTab[0] = advance / 256;
 	vmtxTab[1] = advance % 256;
 	for (j = 2; j < length; j += 2) {
@@ -1153,29 +1152,29 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
   tableDir[4] = 0;		// numTables
   tableDir[5] = nNewTables;
   tableDir[6] = 0;		// searchRange
-  tableDir[7] = (Guchar)128;
+  tableDir[7] = (unsigned char)128;
   tableDir[8] = 0;		// entrySelector
   tableDir[9] = 3;
   tableDir[10] = 0;		// rangeShift
-  tableDir[11] = (Guchar)(16 * nNewTables - 128);
+  tableDir[11] = (unsigned char)(16 * nNewTables - 128);
   pos = 12;
   for (i = 0; i < nNewTables; ++i) {
-    tableDir[pos   ] = (Guchar)(newTables[i].tag >> 24);
-    tableDir[pos+ 1] = (Guchar)(newTables[i].tag >> 16);
-    tableDir[pos+ 2] = (Guchar)(newTables[i].tag >>  8);
-    tableDir[pos+ 3] = (Guchar) newTables[i].tag;
-    tableDir[pos+ 4] = (Guchar)(newTables[i].checksum >> 24);
-    tableDir[pos+ 5] = (Guchar)(newTables[i].checksum >> 16);
-    tableDir[pos+ 6] = (Guchar)(newTables[i].checksum >>  8);
-    tableDir[pos+ 7] = (Guchar) newTables[i].checksum;
-    tableDir[pos+ 8] = (Guchar)(newTables[i].offset >> 24);
-    tableDir[pos+ 9] = (Guchar)(newTables[i].offset >> 16);
-    tableDir[pos+10] = (Guchar)(newTables[i].offset >>  8);
-    tableDir[pos+11] = (Guchar) newTables[i].offset;
-    tableDir[pos+12] = (Guchar)(newTables[i].len >> 24);
-    tableDir[pos+13] = (Guchar)(newTables[i].len >> 16);
-    tableDir[pos+14] = (Guchar)(newTables[i].len >>  8);
-    tableDir[pos+15] = (Guchar) newTables[i].len;
+    tableDir[pos   ] = (unsigned char)(newTables[i].tag >> 24);
+    tableDir[pos+ 1] = (unsigned char)(newTables[i].tag >> 16);
+    tableDir[pos+ 2] = (unsigned char)(newTables[i].tag >>  8);
+    tableDir[pos+ 3] = (unsigned char) newTables[i].tag;
+    tableDir[pos+ 4] = (unsigned char)(newTables[i].checksum >> 24);
+    tableDir[pos+ 5] = (unsigned char)(newTables[i].checksum >> 16);
+    tableDir[pos+ 6] = (unsigned char)(newTables[i].checksum >>  8);
+    tableDir[pos+ 7] = (unsigned char) newTables[i].checksum;
+    tableDir[pos+ 8] = (unsigned char)(newTables[i].offset >> 24);
+    tableDir[pos+ 9] = (unsigned char)(newTables[i].offset >> 16);
+    tableDir[pos+10] = (unsigned char)(newTables[i].offset >>  8);
+    tableDir[pos+11] = (unsigned char) newTables[i].offset;
+    tableDir[pos+12] = (unsigned char)(newTables[i].len >> 24);
+    tableDir[pos+13] = (unsigned char)(newTables[i].len >> 16);
+    tableDir[pos+14] = (unsigned char)(newTables[i].len >>  8);
+    tableDir[pos+15] = (unsigned char) newTables[i].len;
     pos += 16;
   }
 
@@ -1185,10 +1184,10 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
     checksum += newTables[i].checksum;
   }
   checksum = 0xb1b0afba - checksum; // because the TrueType spec says so
-  headData[ 8] = (Guchar)(checksum >> 24);
-  headData[ 9] = (Guchar)(checksum >> 16);
-  headData[10] = (Guchar)(checksum >>  8);
-  headData[11] = (Guchar) checksum;
+  headData[ 8] = (unsigned char)(checksum >> 24);
+  headData[ 9] = (unsigned char)(checksum >> 16);
+  headData[10] = (unsigned char)(checksum >>  8);
+  headData[11] = (unsigned char) checksum;
 
   // start the sfnts array
   if (name) {
@@ -1254,7 +1253,7 @@ void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
   }
 }
 
-void FoFiTrueType::dumpString(const Guchar *s, int length,
+void FoFiTrueType::dumpString(const unsigned char *s, int length,
 			      FoFiOutputFunc outputFunc,
 			      void *outputStream) const {
   GooString *buf;
@@ -1283,8 +1282,8 @@ void FoFiTrueType::dumpString(const Guchar *s, int length,
   (*outputFunc)(outputStream, "00>\n", 4);
 }
 
-Guint FoFiTrueType::computeTableChecksum(const Guchar *data, int length) const {
-  Guint checksum, word;
+unsigned int FoFiTrueType::computeTableChecksum(const unsigned char *data, int length) const {
+  unsigned int checksum, word;
   int i;
 
   checksum = 0;
@@ -1315,7 +1314,7 @@ Guint FoFiTrueType::computeTableChecksum(const Guchar *data, int length) const {
 }
 
 void FoFiTrueType::parse() {
-  Guint topTag;
+  unsigned int topTag;
   int pos, ver, i, j;
 
   parsedOk = true;
@@ -1518,7 +1517,7 @@ void FoFiTrueType::readPostTable() {
 }
 
 int FoFiTrueType::seekTable(const char *tag) const {
-  Guint tagI;
+  unsigned int tagI;
   int i;
 
   tagI = ((tag[0] & 0xff) << 24) |
@@ -1533,10 +1532,10 @@ int FoFiTrueType::seekTable(const char *tag) const {
   return -1;
 }
 
-Guint FoFiTrueType::charToTag(const char *tagName)
+unsigned int FoFiTrueType::charToTag(const char *tagName)
 {
   int n = strlen(tagName);
-  Guint tag = 0;
+  unsigned int tag = 0;
   int i;
 
   if (n > 4) n = 4;
@@ -1567,20 +1566,20 @@ int FoFiTrueType::setupGSUB(const char *scriptName)
 int FoFiTrueType::setupGSUB(const char *scriptName,
                             const char *languageName)
 {
-  Guint gsubTable;
+  unsigned int gsubTable;
   unsigned int i;
-  Guint scriptList, featureList;
-  Guint scriptCount;
-  Guint tag;
-  Guint scriptTable = 0;
-  Guint langSys;
-  Guint featureCount;
-  Guint featureIndex;
-  Guint ftable = 0;
-  Guint llist;
-  Guint scriptTag;
+  unsigned int scriptList, featureList;
+  unsigned int scriptCount;
+  unsigned int tag;
+  unsigned int scriptTable = 0;
+  unsigned int langSys;
+  unsigned int featureCount;
+  unsigned int featureIndex;
+  unsigned int ftable = 0;
+  unsigned int llist;
+  unsigned int scriptTag;
   int x;
-  Guint pos;
+  unsigned int pos;
 
   if (scriptName == nullptr) {
     gsubFeatureTable = 0;
@@ -1625,8 +1624,8 @@ int FoFiTrueType::setupGSUB(const char *scriptName,
   pos = gsubTable+scriptList+scriptTable;
   langSys = 0;
   if (languageName) {
-    Guint langTag = charToTag(languageName);
-    Guint langCount = getU16BE(pos+2,&parsedOk);
+    unsigned int langTag = charToTag(languageName);
+    unsigned int langCount = getU16BE(pos+2,&parsedOk);
     for (i = 0;i < langCount && langSys == 0;i++) {
       tag = getU32BE(pos+4+i*(4+2),&parsedOk);
       if (tag == langTag) {
@@ -1650,7 +1649,7 @@ int FoFiTrueType::setupGSUB(const char *scriptName,
   pos += 2;
 
   if (featureIndex != 0xffff) {
-    Guint tpos;
+    unsigned int tpos;
     /* read feature record */
     tpos = gsubTable+featureList;
     featureCount = getU16BE(tpos,&parsedOk);
@@ -1671,7 +1670,7 @@ int FoFiTrueType::setupGSUB(const char *scriptName,
   pos += 2;
   /* find 'vrt2' or 'vert' feature */
   for (i = 0;i < featureCount;i++) {
-    Guint oldPos;
+    unsigned int oldPos;
 
     featureIndex = getU16BE(pos,&parsedOk);
     pos += 2;
@@ -1698,13 +1697,13 @@ int FoFiTrueType::setupGSUB(const char *scriptName,
   return 0;
 }
 
-Guint FoFiTrueType::doMapToVertGID(Guint orgGID)
+unsigned int FoFiTrueType::doMapToVertGID(unsigned int orgGID)
 {
-  Guint lookupCount;
-  Guint lookupListIndex;
-  Guint i;
-  Guint gid = 0;
-  Guint pos;
+  unsigned int lookupCount;
+  unsigned int lookupListIndex;
+  unsigned int i;
+  unsigned int gid = 0;
+  unsigned int pos;
 
   pos = gsubFeatureTable+2;
   lookupCount = getU16BE(pos,&parsedOk);
@@ -1719,9 +1718,9 @@ Guint FoFiTrueType::doMapToVertGID(Guint orgGID)
   return gid;
 }
 
-Guint FoFiTrueType::mapToVertGID(Guint orgGID)
+unsigned int FoFiTrueType::mapToVertGID(unsigned int orgGID)
 {
-  Guint mapped;
+  unsigned int mapped;
 
   if (gsubFeatureTable == 0) return orgGID;
   if ((mapped = doMapToVertGID(orgGID)) != 0) {
@@ -1730,14 +1729,14 @@ Guint FoFiTrueType::mapToVertGID(Guint orgGID)
   return orgGID;
 }
 
-Guint FoFiTrueType::scanLookupList(Guint listIndex, Guint orgGID)
+unsigned int FoFiTrueType::scanLookupList(unsigned int listIndex, unsigned int orgGID)
 {
-  Guint lookupTable;
-  Guint subTableCount;
-  Guint subTable;
-  Guint i;
-  Guint gid = 0;
-  Guint pos;
+  unsigned int lookupTable;
+  unsigned int subTableCount;
+  unsigned int subTable;
+  unsigned int i;
+  unsigned int gid = 0;
+  unsigned int pos;
 
   if (gsubLookupList == 0) return 0; /* no lookup list */
   pos = gsubLookupList+2+listIndex*2;
@@ -1755,14 +1754,14 @@ Guint FoFiTrueType::scanLookupList(Guint listIndex, Guint orgGID)
   return gid;
 }
 
-Guint FoFiTrueType::scanLookupSubTable(Guint subTable, Guint orgGID)
+unsigned int FoFiTrueType::scanLookupSubTable(unsigned int subTable, unsigned int orgGID)
 {
-  Guint format;
-  Guint coverage;
+  unsigned int format;
+  unsigned int coverage;
   int delta;
   int glyphCount;
-  Guint substitute;
-  Guint gid = 0;
+  unsigned int substitute;
+  unsigned int gid = 0;
   int coverageIndex;
   int pos;
 
@@ -1798,13 +1797,13 @@ Guint FoFiTrueType::scanLookupSubTable(Guint subTable, Guint orgGID)
   return gid;
 }
 
-int FoFiTrueType::checkGIDInCoverage(Guint coverage, Guint orgGID)
+int FoFiTrueType::checkGIDInCoverage(unsigned int coverage, unsigned int orgGID)
 {
   int index = -1;
-  Guint format;
-  Guint count;
-  Guint i;
-  Guint pos;
+  unsigned int format;
+  unsigned int count;
+  unsigned int i;
+  unsigned int pos;
 
   pos = coverage;
   format = getU16BE(pos,&parsedOk);
@@ -1817,7 +1816,7 @@ int FoFiTrueType::checkGIDInCoverage(Guint coverage, Guint orgGID)
     // thus we cannot finish checking even when the range
     // including orgGID seems to have already passed.
     for (i = 0;i < count;i++) {
-      Guint gid;
+      unsigned int gid;
 
       gid = getU16BE(pos,&parsedOk);
       pos += 2;
@@ -1832,8 +1831,8 @@ int FoFiTrueType::checkGIDInCoverage(Guint coverage, Guint orgGID)
     count = getU16BE(pos,&parsedOk);
     pos += 2;
     for (i = 0;i < count;i++) {
-      Guint startGID, endGID;
-      Guint startIndex;
+      unsigned int startGID, endGID;
+      unsigned int startIndex;
 
       startGID = getU16BE(pos,&parsedOk);
       pos += 2;

@@ -66,7 +66,7 @@ public:
   int getRowPad() { return rowPad; }
   SplashColorMode getMode() { return mode; }
   SplashColorPtr getDataPtr() { return data; }
-  Guchar *getAlphaPtr() { return alpha; }
+  unsigned char *getAlphaPtr() { return alpha; }
   GooList *getSeparationList() { return separationList; }
 
   SplashError writePNMFile(char *fileName);
@@ -100,7 +100,7 @@ public:
 #ifdef SPLASH_CMYK
   void getCMYKLine(int y, SplashColorPtr line);
 #endif
-  Guchar getAlpha(int x, int y);
+  unsigned char getAlpha(int x, int y);
 
   // Caller takes ownership of the bitmap data.  The SplashBitmap
   // object is no longer valid -- the next call should be to the
@@ -115,7 +115,7 @@ private:
 				//   - negative for bottom-up bitmaps
   SplashColorMode mode;		// color mode
   SplashColorPtr data;		// pointer to row zero of the color data
-  Guchar *alpha;		// pointer to row zero of the alpha data
+  unsigned char *alpha;		// pointer to row zero of the alpha data
 				//   (always top-down)
   GooList *separationList; // list of spot colorants and their mapping functions
 

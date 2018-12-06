@@ -1401,7 +1401,7 @@ void Annot::setModified(GooString *new_modified) {
   update ("M", Object(modified->copy()));
 }
 
-void Annot::setFlags(Guint new_flags) {
+void Annot::setFlags(unsigned int new_flags) {
   annotLocker();
   flags = new_flags;
   update ("F", Object(int(flags)));

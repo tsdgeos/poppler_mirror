@@ -725,7 +725,7 @@ static void printInfo(PDFDoc *doc, UnicodeMap *uMap, long long filesize, bool mu
   // print encryption info
   printf("Encrypted:      ");
   if (doc->isEncrypted()) {
-    Guchar *fileKey;
+    unsigned char *fileKey;
     CryptAlgorithm encAlgorithm;
     int keyLength;
     doc->getXRef()->getEncryptionParameters(&fileKey, &encAlgorithm, &keyLength);

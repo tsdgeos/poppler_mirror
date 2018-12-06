@@ -302,8 +302,8 @@ Operator Gfx::opTab[] = {
 
 #define numOps (sizeof(opTab) / sizeof(Operator))
 
-static inline bool isSameGfxColor(const GfxColor &colorA, const GfxColor &colorB, Guint nComps, double delta) {
-  for (Guint k = 0; k < nComps; ++k) {
+static inline bool isSameGfxColor(const GfxColor &colorA, const GfxColor &colorB, unsigned int nComps, double delta) {
+  for (unsigned int k = 0; k < nComps; ++k) {
     if (abs(colorA.c[k] - colorB.c[k]) > delta) {
       return false;
     }
@@ -658,7 +658,7 @@ void Gfx::initDisplayProfile() {
               if (profile.isStream()) {
                 Stream *iccStream = profile.getStream();
                 int length = 0;
-                Guchar *profBuf = iccStream->toUnsignedChars(&length, 65536, 65536);
+                unsigned char *profBuf = iccStream->toUnsignedChars(&length, 65536, 65536);
                 cmsHPROFILE hp = cmsOpenProfileFromMem(profBuf,length);
                 if (hp == nullptr) {
                   error(errSyntaxWarning, -1, "read ICCBased color space profile error");

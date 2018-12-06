@@ -23,8 +23,6 @@
 #ifndef FOFIBASE_H
 #define FOFIBASE_H
 
-#include "goo/gtypes.h"
-
 //------------------------------------------------------------------------
 
 typedef void (*FoFiOutputFunc)(void *stream, const char *data, int len);
@@ -53,13 +51,13 @@ protected:
   int getS16BE(int pos, bool *ok) const;
   int getU16BE(int pos, bool *ok) const;
   int getS32BE(int pos, bool *ok) const;
-  Guint getU32BE(int pos, bool *ok) const;
-  Guint getU32LE(int pos, bool *ok) const;
-  Guint getUVarBE(int pos, int size, bool *ok) const;
+  unsigned int getU32BE(int pos, bool *ok) const;
+  unsigned int getU32LE(int pos, bool *ok) const;
+  unsigned int getUVarBE(int pos, int size, bool *ok) const;
 
   bool checkRegion(int pos, int size) const;
 
-  const Guchar *file;
+  const unsigned char *file;
   int len;
   bool freeFileData;
 };

@@ -356,7 +356,7 @@ void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf,
 				      int *x0, int *x1, int y, bool adjustVertLine) {
   int xx0, xx1, xx, xxMin, xxMax, yy, yyMax, interCount;
   size_t interIdx;
-  Guchar mask;
+  unsigned char mask;
   SplashColorPtr p;
 
   memset(aaBuf->getDataPtr(), 0, aaBuf->getRowSize() * aaBuf->getHeight());
@@ -405,7 +405,7 @@ void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf,
 	  if (xx & 7) {
 	    mask = adjustVertLine ? 0xff : 0xff >> (xx & 7);
 	    if (!adjustVertLine && (xx & ~7) == (xx1 & ~7)) {
-	      mask &= (Guchar)(0xff00 >> (xx1 & 7));
+	      mask &= (unsigned char)(0xff00 >> (xx1 & 7));
 	    }
 	    *p++ |= mask;
 	    xx = (xx & ~7) + 8;
@@ -414,7 +414,7 @@ void SplashXPathScanner::renderAALine(SplashBitmap *aaBuf,
 	    *p++ |= 0xff;
 	  }
 	  if (xx < xx1) {
-	    *p |= adjustVertLine ? 0xff : (Guchar)(0xff00 >> (xx1 & 7));
+	    *p |= adjustVertLine ? 0xff : (unsigned char)(0xff00 >> (xx1 & 7));
 	  }
 	}
 	if (xx0 < xxMin) {
@@ -437,7 +437,7 @@ void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf,
 				    int *x0, int *x1, int y) {
   int xx0, xx1, xx, yy, yyMin, yyMax, interCount;
   size_t interIdx;
-  Guchar mask;
+  unsigned char mask;
   SplashColorPtr p;
 
   yyMin = 0;
@@ -476,7 +476,7 @@ void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf,
 	if (xx < xx0) {
 	  p = aaBuf->getDataPtr() + yy * aaBuf->getRowSize() + (xx >> 3);
 	  if (xx & 7) {
-	    mask = (Guchar)(0xff00 >> (xx & 7));
+	    mask = (unsigned char)(0xff00 >> (xx & 7));
 	    if ((xx & ~7) == (xx0 & ~7)) {
 	      mask |= 0xff >> (xx0 & 7);
 	    }
@@ -501,7 +501,7 @@ void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf,
     if (xx < xx0 && xx >= 0) {
       p = aaBuf->getDataPtr() + yy * aaBuf->getRowSize() + (xx >> 3);
       if (xx & 7) {
-	mask = (Guchar)(0xff00 >> (xx & 7));
+	mask = (unsigned char)(0xff00 >> (xx & 7));
 	if ((xx & ~7) == (xx0 & ~7)) {
 	  mask &= 0xff >> (xx0 & 7);
 	}

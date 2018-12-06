@@ -18,7 +18,6 @@
 #define JPEG2000STREAM_H
 
 #include "config.h"
-#include "goo/gtypes.h"
 #include "Object.h"
 #include "Stream.h"
 
@@ -39,7 +38,7 @@ public:
   bool isBinary(bool last = true) override;
   void getImageParams(int *bitsPerComponent, StreamColorSpaceMode *csMode) override;
 
-  int readStream(int nChars, Guchar *buffer) {
+  int readStream(int nChars, unsigned char *buffer) {
     return str->doGetChars(nChars, buffer);
   }
 private:
@@ -49,7 +48,7 @@ private:
 
   void init();
   bool hasGetChars() override { return true; }
-  int getChars(int nChars, Guchar *buffer) override;
+  int getChars(int nChars, unsigned char *buffer) override;
 };
 
 #endif

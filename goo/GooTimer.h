@@ -18,7 +18,6 @@
 #define GOOTIMER_H
 
 #include "poppler-config.h"
-#include "gtypes.h"
 #ifdef HAVE_GETTIMEOFDAY
 #include <sys/time.h>
 #endif
