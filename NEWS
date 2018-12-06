@@ -1,3 +1,30 @@
+Release 0.72.0:
+        core:
+         * Fix checkbox lacking AP not bein able to change state. Issue #655
+         * Draw line annotation endings (arrow, circle, ...)
+         * cairo: Don't use UNIQUE_ID for PS output, to avoid using PS memory on cairo >= 1.5.10
+         * Be more stubborn looking for a nssdb. Issue #669
+         * GooString::fromInt: Repair the return value.
+         * Minor performance improvements
+         * Avoid cycles in PDF parsing
+         * Stream::makeFilter: Fix memory leak
+         * Fix various issues with malformed files
+         * Rename GooString::getCString to GooString::c_str
+         * Regenerate UnicodeDecompTables.h from python 3.7.1
+
+        utils:
+         * pdfdetach: Check for valid embedded file before trying to save it. Issue #661
+         * pdfdetach: Check for valid file name of embedded file before using it to determine save path. Issue #660
+         * Fix typos in utils.
+
+        glib:
+         * Fix missing PopplerAttachment destructor call
+         * Support getting form widget additional actions.
+         * docs: Small improvements
+
+        qt5:
+         * Internally compile with -DQT_NO_SIGNALS_SLOTS_KEYWORDS
+
 Release 0.71.0:
         core:
          * Replace the implementation of GooString by std::string but keep the exact interface intact.
