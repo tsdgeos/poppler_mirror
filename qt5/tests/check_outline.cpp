@@ -32,6 +32,7 @@ void TestOutline::checkOutline_xr02()
   QCOMPARE(fooDest->pageNumber(), 1);
   QVERIFY(foo.externalFileName().isEmpty());
   QVERIFY(foo.uri().isEmpty());
+  QVERIFY(!foo.hasChildren());
   QVERIFY(foo.children().isEmpty());
 
   const auto &bar = outline[1];
@@ -43,6 +44,7 @@ void TestOutline::checkOutline_xr02()
   QCOMPARE(barDest->pageNumber(), 2);
   QVERIFY(bar.externalFileName().isEmpty());
   QVERIFY(bar.uri().isEmpty());
+  QVERIFY(!bar.hasChildren());
   QVERIFY(bar.children().isEmpty());
 }
 

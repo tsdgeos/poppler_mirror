@@ -147,6 +147,17 @@ QString OutlineItem::uri() const
   return uri;
 }
 
+bool OutlineItem::hasChildren() const
+{
+  bool result = false;
+
+  if (::OutlineItem *data = m_data->data) {
+    result = data->hasKids();
+  }
+
+  return result;
+}
+
 QVector<OutlineItem> OutlineItem::children() const
 {
   QVector<OutlineItem> result;

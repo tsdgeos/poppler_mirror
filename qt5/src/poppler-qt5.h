@@ -1039,6 +1039,13 @@ delete it;
       QString uri() const;
 
       /**
+	 Determines if this item has any child items
+
+	 \returns true if there are any child items
+      **/
+      bool hasChildren() const;
+
+      /**
 	 Gets the child items of this item
 
 	 \returns a vector outline items, empty if there are none
