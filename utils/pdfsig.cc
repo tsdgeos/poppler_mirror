@@ -11,6 +11,7 @@
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+// Copyright 2019 Alexey Pavlov <alexpux@gmail.com>
 //
 //========================================================================
 
@@ -35,6 +36,7 @@
 #include "SignatureInfo.h"
 #include "Win32Console.h"
 #include "numberofcharacters.h"
+#include <libgen.h>
 
 static const char * getReadableSigState(SignatureValidationStatus sig_vs)
 {
