@@ -673,7 +673,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
         if (codeToGIDLen) {
           codeToGID = (int *)gmallocn(codeToGIDLen, sizeof(int));
           memcpy(codeToGID, ((GfxCIDFont *)gfxFont)->getCIDToGID(),
-                 codeToGIDLen * sizeof(unsigned short));
+                 codeToGIDLen * sizeof(int));
         }
       } else {
         auto ff = (fontLoc->locType != gfxFontLocEmbedded)
