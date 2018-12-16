@@ -12,6 +12,8 @@ set(CMAKE_C_VISIBILITY_PRESET hidden)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
+configure_file(poppler-version.h.in ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h @ONLY)
+
 set(poppler_qt5_SRCS
   poppler-annotation.cc
   poppler-document.cc
@@ -33,6 +35,7 @@ set(poppler_qt5_SRCS
   poppler-page-transition.cc
   poppler-media.cc
   ArthurOutputDev.cc
+  poppler-version.cpp
 )
 add_library(poppler-qt5 ${poppler_qt5_SRCS})
 set_target_properties(poppler-qt5 PROPERTIES VERSION 1.17.0 SOVERSION 1)
@@ -55,5 +58,6 @@ install(FILES
   poppler-export.h
   poppler-page-transition.h
   poppler-media.h
+  ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.h
   DESTINATION include/poppler/qt5)
 
