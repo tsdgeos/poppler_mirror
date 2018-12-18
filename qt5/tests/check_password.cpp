@@ -14,6 +14,8 @@ private slots:
     void password2a();
     void password2b();
     void password3();
+    void password4();
+    void password4b();
 };
 
 
@@ -80,6 +82,32 @@ void TestPassword::password3()
     QVERIFY( doc );
     QVERIFY( doc->isLocked() );
     QVERIFY( !doc->unlock( "", "password" ) );
+    QVERIFY( !doc->isLocked() );
+
+    delete doc;
+}
+
+// issue 690
+void TestPassword::password4()
+{
+    Poppler::Document *doc;
+    doc = Poppler::Document::load( QString::fromUtf8(TESTDATADIR "/unittestcases/encrypted-256.pdf") );
+    QVERIFY( doc );
+    QVERIFY( doc->isLocked() );
+    QVERIFY( !doc->unlock( "owner-secret", "" ) );
+    QVERIFY( !doc->isLocked() );
+
+    delete doc;
+}
+
+// issue 690
+void TestPassword::password4b()
+{
+    Poppler::Document *doc;
+    doc = Poppler::Document::load( QString::fromUtf8(TESTDATADIR "/unittestcases/encrypted-256.pdf") );
+    QVERIFY( doc );
+    QVERIFY( doc->isLocked() );
+    QVERIFY( !doc->unlock( "", "user-secret" ) );
     QVERIFY( !doc->isLocked() );
 
     delete doc;
