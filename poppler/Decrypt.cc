@@ -1717,7 +1717,7 @@ static void revision6Hash(const GooString *inputPassword, unsigned char *K, cons
     sequenceLength = inputPasswordLength + KLength + userKeyLength;
     totalLength = 64 * sequenceLength;
     //a.make the string K1
-    memcpy(K1, inputPassword, inputPasswordLength);
+    memcpy(K1, inputPassword->c_str(), inputPasswordLength);
     memcpy(K1 + inputPasswordLength, K , KLength);
     memcpy(K1 + inputPasswordLength + KLength, userKey, userKeyLength);
     for(int i = 1; i < 64 ; ++i) {
