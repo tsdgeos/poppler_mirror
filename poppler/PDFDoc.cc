@@ -293,7 +293,7 @@ bool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword
   if (catalog && !catalog->isOk()) {
     if (!wasReconstructed)
     {
-      // try one more time to contruct the Catalog, maybe the problem is damaged XRef 
+      // try one more time to construct the Catalog, maybe the problem is damaged XRef
       delete catalog;
       delete xref;
       xref = new XRef(str, 0, 0, nullptr, true);

@@ -987,7 +987,7 @@ delete it;
    \section ownership Ownership of the returned objects
 
    All the functions that returns class pointers create new object, and the
-   responsability of those is given to the callee.
+   responsibility of those is given to the callee.
 
    The only exception is \link Poppler::Page::transition() Page::transition()\endlink.
 
@@ -1025,7 +1025,7 @@ delete it;
 
    To know whether the %Poppler version you are using has support for color
    management, you can query Poppler::isCmsAvailable(). In case it is not
-   avilable, all the color management-related functions will either do nothing
+   available, all the color management-related functions will either do nothing
    or return null.
 */
     class POPPLER_QT5_EXPORT Document {
@@ -1546,7 +1546,7 @@ QString subject = m_doc->info("Subject");
 	/**
 	  Gets the table of contents (TOC) of the Document.
 	
-	  The caller is responsable for the returned object.
+	  The caller is responsible for the returned object.
 	
 	  In the tree the tag name is the 'screen' name of the entry. A tag can have
 	  attributes. Here follows the list of tag attributes with meaning:

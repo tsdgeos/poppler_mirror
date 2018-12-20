@@ -733,7 +733,7 @@ void Attribute::setFormattedValue(const char *formattedA)
 
 bool Attribute::checkType(StructElement *element)
 {
-  // If an element is passed, tighther type-checking can be done.
+  // If an element is passed, tighter type-checking can be done.
   if (!element)
     return true;
 

@@ -832,7 +832,7 @@ public:
 protected:
   void removeReferencedObjects() override;
 
-  std::unique_ptr<GooString> label;   // T            (Default autor)
+  std::unique_ptr<GooString> label;   // T            (Default author)
   std::unique_ptr<AnnotPopup> popup;  // Popup
   double opacity;                     // CA           (Default 1.0)
   // RC
@@ -840,7 +840,7 @@ protected:
   Ref inReplyTo;                      // IRT
   std::unique_ptr<GooString> subject; // Subj
   AnnotMarkupReplyType replyTo;       // RT           (Default R)
-  // this object is overrided by the custom intent fields defined in some
+  // this object is overridden by the custom intent fields defined in some
   // annotation types.
   //GooString *intent;                // IT
   AnnotExternalDataType exData;       // ExData

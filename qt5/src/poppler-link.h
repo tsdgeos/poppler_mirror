@@ -74,9 +74,9 @@ class POPPLER_QT5_EXPORT LinkDestination
 		{
 			/**
 			 * The new viewport is specified in terms of:
-			 * - possibile new left coordinate (see isChangeLeft() )
-			 * - possibile new top coordinate (see isChangeTop() )
-			 * - possibile new zoom level (see isChangeZoom() )
+			 * - possible new left coordinate (see isChangeLeft() )
+			 * - possible new top coordinate (see isChangeTop() )
+			 * - possible new zoom level (see isChangeZoom() )
 			 */
 			destXYZ = 1,
 			destFit = 2,
@@ -223,7 +223,7 @@ class POPPLER_QT5_EXPORT Link
 		QRectF linkArea() const;
 
 		/**
-		 * Get the next links to be activiated / executed after this link.
+		 * Get the next links to be activated / executed after this link.
 		 *
 		 * \since 0.64
 		 */

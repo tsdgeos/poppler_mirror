@@ -930,7 +930,7 @@ static bool testForNumericNames(Dict *fontDict, bool hex) {
       if (obj.getInt() > 5)
 	numeric = false;
     } else if (obj.isName()) {
-      // All character names must sucessfully parse.
+      // All character names must successfully parse.
       if (!parseNumericName(obj.getName(), hex, nullptr))
 	numeric = false;
     } else {

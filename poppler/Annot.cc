@@ -587,7 +587,7 @@ AnnotBorderBS::AnnotBorderBS(Dict *dict) {
   // acroread 8 seems to need both W and S entries for
   // any border to be drawn, even though the spec
   // doesn't claim anything of that sort. We follow
-  // that behaviour by veryifying both entries exist
+  // that behaviour by verifying both entries exist
   // otherwise we set the borderWidth to 0
   // --jrmuizel
   obj1 = dict->lookup("W");
@@ -2811,7 +2811,7 @@ void AnnotFreeText::generateFreeTextAppearance()
 
   GfxFont *font = nullptr;
 
-  // look for font name in default resources
+  // look for font name in the default resources
   Form *form = doc->getCatalog()->getForm(); // form is owned by catalog, no need to clean it up
 
   Object resourceObj;
@@ -2842,7 +2842,7 @@ void AnnotFreeText::generateFreeTextAppearance()
     }
   }
 
-  // if fontname is not in in default resources, create a Helvetica fake font
+  // if fontname is not in the default resources, create a Helvetica fake font
   if (!font) {
     Dict *fontResDict = new Dict(xref);
     resourceObj = Object(fontResDict);

@@ -221,7 +221,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
       // copy link file
       const QString fileName = UnicodeParsedString( g->getFileName() );
       const LinkDestinationData ldd( g->getDest(), g->getNamedDest(), parentDoc, !fileName.isEmpty() );
-      // ceate link: fileName, namedDest, object pointer
+      // create link: fileName, namedDest, object pointer
       popplerLink = new LinkGoto( linkArea, fileName, LinkDestination( ldd ) );
     }
     break;

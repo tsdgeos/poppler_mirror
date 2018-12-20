@@ -376,7 +376,7 @@ bool document::set_info_key(const std::string &key, const ustring &val)
 }
 
 /**
- Gets the time_t value value of the specified \p key of the document
+ Gets the time_t value of the specified \p key of the document
  information.
 
  \returns the time_t value for the \p key

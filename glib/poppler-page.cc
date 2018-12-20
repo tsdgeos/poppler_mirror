@@ -875,7 +875,7 @@ poppler_page_get_text_for_area (PopplerPage      *page,
  * @options: find options
  *
  * Finds @text in @page with the given #PopplerFindFlags options and
- * returns a #GList of rectangles for each occurance of the text on the page.
+ * returns a #GList of rectangles for each occurrence of the text on the page.
  * The coordinates are in PDF points.
  *
  * Return value: (element-type PopplerRectangle) (transfer full): a #GList of #PopplerRectangle,
@@ -940,7 +940,7 @@ poppler_page_find_text_with_options (PopplerPage     *page,
  * @text: the text to search for (UTF-8 encoded)
  *
  * Finds @text in @page with the default options (%POPPLER_FIND_DEFAULT) and
- * returns a #GList of rectangles for each occurance of the text on the page.
+ * returns a #GList of rectangles for each occurrence of the text on the page.
  * The coordinates are in PDF points.
  *
  * Return value: (element-type PopplerRectangle) (transfer full): a #GList of #PopplerRectangle,

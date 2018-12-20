@@ -562,7 +562,7 @@ poppler_structure_element_get_title (PopplerStructureElement *poppler_structure_
 }
 
 /**
- * popppler_structure_element_get_abbreviation:
+ * poppler_structure_element_get_abbreviation:
  * @poppler_structure_element: A #PopplerStructureElement
  *
  * Acronyms and abbreviations contained in elements of type
@@ -1133,7 +1133,7 @@ poppler_text_span_get_font_name (PopplerTextSpan *poppler_text_span)
  * </programlisting></informalexample>
  *
  * Return value: (transfer full) (array length=n_text_spans) (element-type PopplerTextSpan):
- *    An array of #PopplerTextSpan elments.
+ *    An array of #PopplerTextSpan elements.
  *
  * Since: 0.26
  */

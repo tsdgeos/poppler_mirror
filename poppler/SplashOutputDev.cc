@@ -4638,7 +4638,7 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     if (y1 - y0 > repeatY)
       repeatY = y1 - y0;
   }
-  // restore CTM and calculate rotate and scale with rounded matric
+  // restore CTM and calculate rotate and scale with rounded matrix
   state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
   state->concatCTM(mat[0], mat[1], mat[2], mat[3], mat[4], mat[5]);
   state->concatCTM(width * repeatX, 0, 0, height * repeatY, bbox[0], bbox[1]);

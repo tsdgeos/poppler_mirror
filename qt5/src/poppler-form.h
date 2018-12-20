@@ -413,7 +413,7 @@ namespace Poppler {
     public:
 
 	/**
-	   The verfication result of the signature.
+	   The verification result of the signature.
 	*/
 	enum SignatureStatus {
 	    SignatureValid,          ///< The signature is cryptographically valid.
@@ -493,7 +493,7 @@ namespace Poppler {
 	QString reason() const;
 
 	/**
-	  The the hash algorithm used for the signature.
+	  The hash algorithm used for the signature.
 	  \since 0.58
 	 */
 	HashAlgorithm hashAlgorithm() const;

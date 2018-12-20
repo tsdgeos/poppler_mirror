@@ -1925,7 +1925,7 @@ void CairoOutputDev::getScaledSize(const cairo_matrix_t *matrix,
   else
     get_singular_values (matrix, &yScale, &xScale);
 
-  int tx, tx2, ty, ty2; /* the integer co-oridinates of the resulting image */
+  int tx, tx2, ty, ty2; /* the integer co-ordinates of the resulting image */
   if (xScale >= 0) {
     tx = splashRound(matrix->x0 - 0.01);
     tx2 = splashRound(matrix->x0 + xScale + 0.01) - 1;
@@ -2242,7 +2242,7 @@ void CairoOutputDev::drawImageMaskPrescaled(GfxState *state, Object *ref, Stream
   /* this whole computation should be factored out */
   double xScale = matrix.xx;
   double yScale = matrix.yy;
-  int tx, tx2, ty, ty2; /* the integer co-oridinates of the resulting image */
+  int tx, tx2, ty, ty2; /* the integer co-ordinates of the resulting image */
   int scaledHeight;
   int scaledWidth;
   if (xScale >= 0) {

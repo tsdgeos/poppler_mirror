@@ -40,7 +40,7 @@ FlateStream::~FlateStream() {
 
 void FlateStream::reset() {
   //FIXME: what are the semantics of reset?
-  //i.e. how much intialization has to happen in the constructor?
+  //i.e. how much initialization has to happen in the constructor?
 
   /* reinitialize zlib */
   inflateEnd(&d_stream);
@@ -88,7 +88,7 @@ int FlateStream::fill_buffer() {
       return -1;
     }
 
-    /* set to the begining of out_buf */
+    /* set to the beginning of out_buf */
     d_stream.avail_out = sizeof(out_buf);
     d_stream.next_out = out_buf;
     out_pos = 0;

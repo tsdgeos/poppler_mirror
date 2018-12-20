@@ -1376,9 +1376,9 @@ public:
    * When GfxState::getReusablePath() is invoked, the currently active
    * path is taken per reference and its coordinates can be re-edited.
    *
-   * A ReusablePathIterator is intented to reduce overhead when the same
+   * A ReusablePathIterator is intended to reduce overhead when the same
    * path type is used a lot of times, only with different coordinates. It
-   * allows just to update the coordinates (occuring in the same order as
+   * allows just to update the coordinates (occurring in the same order as
    * in the original path).
    */
   class ReusablePathIterator {

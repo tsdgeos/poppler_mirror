@@ -140,7 +140,7 @@ public:
   // The caller is responsible for deleting uri and cachedFile.
   virtual size_t init(GooString *uri, CachedFile *cachedFile) = 0;
 
-  // Loads speficified byte ranges and passes it to the writer to store them.
+  // Loads specified byte ranges and passes it to the writer to store them.
   // Returns 0 on success, Anything but 0 on failure.
   // The caller is responsible for deleting the writer.
   virtual int load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer) = 0;

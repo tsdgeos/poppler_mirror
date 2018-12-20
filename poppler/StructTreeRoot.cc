@@ -47,7 +47,7 @@ void StructTreeRoot::parse(Dict *root)
 
   // ParentTree (optional). If present, it must be a number tree,
   // otherwise it is not possible to map stream objects to their
-  // corresponsing structure element. Here only the references are
+  // corresponding structure element. Here only the references are
   // loaded into the array, the pointers to the StructElements will
   // be filled-in later when parsing them.
   const Object parentTreeObj = root->lookup("ParentTree");

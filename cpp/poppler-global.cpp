@@ -163,7 +163,7 @@ using namespace poppler;
 /**
  \var poppler::permission_enum poppler::perm_fill_forms
 
- The permission to allow the the filling of interactive form fields
+ The permission to allow the filling of interactive form fields
  (including signature fields).
 
  \note this permission can be set even when the \ref poppler::perm_add_notes "perm_add_notes"

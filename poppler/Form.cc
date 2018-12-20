@@ -181,8 +181,8 @@ FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Re
   type = formButton;
   onStr = nullptr;
 
-  // Find the name of the ON state in the AP dictionnary
-  // The reference say the Off state, if it existe, _must_ be stored in the AP dict under the name /Off
+  // Find the name of the ON state in the AP dictionary
+  // The reference say the Off state, if it exists, _must_ be stored in the AP dict under the name /Off
   // The "on" state may be stored under any other name
   Object obj1 = obj.dictLookup("AP");
   if (obj1.isDict()) {
