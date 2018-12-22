@@ -2187,6 +2187,9 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat,
   //~ edge instead of left/bottom (?)
   xstep = fabs(tPat->getXStep());
   ystep = fabs(tPat->getYStep());
+  if (unlikely(xstep == 0 || ystep == 0)) {
+      goto restore;
+  }
   if (tPat->getBBox()[0] < tPat->getBBox()[2]) {
     xi0 = (int)ceil((xMin - tPat->getBBox()[2]) / xstep);
     xi1 = (int)floor((xMax - tPat->getBBox()[0]) / xstep) + 1;
