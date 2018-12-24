@@ -1548,11 +1548,31 @@ void XRef::readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum)
   }
 }
 
+namespace {
+
+struct DummyXRefEntry : XRefEntry {
+  DummyXRefEntry() {
+    offset = 0;
+    gen = -1;
+    type = xrefEntryNone;
+    flags = 0;
+  }
+};
+
+DummyXRefEntry dummyXRefEntry;
+
+}
+
 XRefEntry *XRef::getEntry(int i, bool complainIfMissing)
 {
   if (i >= size || entries[i].type == xrefEntryNone) {
 
     if ((!xRefStream) && mainXRefEntriesOffset) {
+      if (unlikely(i >= capacity)) {
+	error(errInternal, -1, "Request for out-of-bounds XRef entry [{0:d}]", i);
+	return &dummyXRefEntry;
+      }
+
       if (!parseEntry(mainXRefEntriesOffset + 20*i, &entries[i])) {
         error(errSyntaxError, -1, "Failed to parse XRef entry [{0:d}].", i);
       }
@@ -1563,12 +1583,7 @@ XRefEntry *XRef::getEntry(int i, bool complainIfMissing)
       // We might have reconstructed the xref
       // Check again i is in bounds
       if (unlikely(i >= size)) {
-        static XRefEntry dummy;
-        dummy.offset = 0;
-        dummy.gen = -1;
-        dummy.type = xrefEntryNone;
-        dummy.flags = 0;
-        return &dummy;
+	return &dummyXRefEntry;
       }
 
       if (entries[i].type == xrefEntryNone) {
