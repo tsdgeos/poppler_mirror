@@ -107,6 +107,8 @@ POPPLER_CPP_EXPORT time_type convert_date(const std::string &date);
 
 POPPLER_CPP_EXPORT std::ostream& operator<<(std::ostream& stream, const byte_array &array);
 
+POPPLER_CPP_EXPORT bool set_data_dir(const std::string &new_data_dir);
+
 typedef void(*debug_func)(const std::string &, void *);
 
 POPPLER_CPP_EXPORT void set_debug_error_function(debug_func debug_function, void *closure);

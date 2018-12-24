@@ -25,6 +25,7 @@
 #include "poppler-global.h"
 
 #include "poppler-private.h"
+#include "poppler-document-private.h"
 
 #include "DateInfo.h"
 
@@ -354,6 +355,22 @@ std::ostream& poppler::operator<<(std::ostream& stream, const byte_array &array)
     }
     stream << "]";
     return stream;
+}
+
+/**
+ * Sets a custom data directory for initialization of global parameters
+ *
+ * If no instances of \see document currently exist, this will save the
+ * given path as a custom data directory to be used when the first instance
+ * of the \see document is constructed.
+ *
+ * \returns true on success, false on failure
+ *
+ * \since 0.73.0
+ */
+bool poppler::set_data_dir(const std::string &new_data_dir)
+{
+    return initer::set_data_dir(new_data_dir);
 }
 
 /**
