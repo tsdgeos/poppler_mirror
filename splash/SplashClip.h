@@ -66,7 +66,7 @@ public:
   SplashError clipToRect(SplashCoord x0, SplashCoord y0,
 			 SplashCoord x1, SplashCoord y1);
 
-  // Interesect the clip with <path>.
+  // Intersect the clip with <path>.
   SplashError clipToPath(SplashPath *path, SplashCoord *matrix,
 			 SplashCoord flatness, bool eo);
 

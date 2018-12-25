@@ -357,7 +357,7 @@ class POPPLER_QT5_EXPORT Annotation
         QRectF geometry() const; // no default
         void setGeometry( const QRectF &geom );
 
-        // window contens/override properties
+        // window contents/override properties
         QString title() const;   // '' text in the titlebar (overrides author)
         void setTitle( const QString &title );
         QString summary() const; // '' short description (displayed if not empty)
@@ -609,7 +609,7 @@ class POPPLER_QT5_EXPORT GeomAnnotation : public Annotation
 /**
  * \short Text highlight annotation.
  *
- * The higlight annotation represents some areas of text being "highlighted".
+ * The highlight annotation represents some areas of text being "highlighted".
  */
 class POPPLER_QT5_EXPORT HighlightAnnotation : public Annotation
 {

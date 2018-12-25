@@ -5,6 +5,7 @@
  * Copyright (C) 2015, Tamas Szekeres <szekerest@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@
 #include "poppler-global.h"
 
 #include "poppler-private.h"
+#include "poppler-document-private.h"
 
 #include "DateInfo.h"
 
@@ -162,7 +164,7 @@ using namespace poppler;
 /**
  \var poppler::permission_enum poppler::perm_fill_forms
 
- The permission to allow the the filling of interactive form fields
+ The permission to allow the filling of interactive form fields
  (including signature fields).
 
  \note this permission can be set even when the \ref poppler::perm_add_notes "perm_add_notes"
@@ -226,7 +228,11 @@ byte_array ustring::to_utf8() const
         return byte_array();
     }
 
-    MiniIconv ic("UTF-8", "UTF-16");
+#ifdef WORDS_BIGENDIAN
+    MiniIconv ic("UTF-8", "UTF-16BE");
+#else
+    MiniIconv ic("UTF-8", "UTF-16LE");
+#endif
     if (!ic.is_valid()) {
         return byte_array();
     }
@@ -274,7 +280,11 @@ ustring ustring::from_utf8(const char *str, int len)
         }
     }
 
-    MiniIconv ic("UTF-16", "UTF-8");
+#ifdef WORDS_BIGENDIAN
+    MiniIconv ic("UTF-16BE", "UTF-8");
+#else
+    MiniIconv ic("UTF-16LE", "UTF-8");
+#endif
     if (!ic.is_valid()) {
         return ustring();
     }
@@ -345,6 +355,22 @@ std::ostream& poppler::operator<<(std::ostream& stream, const byte_array &array)
     }
     stream << "]";
     return stream;
+}
+
+/**
+ * Sets a custom data directory for initialization of global parameters
+ *
+ * If no instances of \see document currently exist, this will save the
+ * given path as a custom data directory to be used when the first instance
+ * of the \see document is constructed.
+ *
+ * \returns true on success, false on failure
+ *
+ * \since 0.73.0
+ */
+bool poppler::set_data_dir(const std::string &new_data_dir)
+{
+    return initer::set_data_dir(new_data_dir);
 }
 
 /**

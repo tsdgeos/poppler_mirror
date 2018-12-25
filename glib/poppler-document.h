@@ -229,7 +229,7 @@ typedef enum
  * @POPPLER_PDF_SUBTYPE_CONF_G: Level G (external graphical content) (PDF/X)
  * @POPPLER_PDF_SUBTYPE_CONF_N: Level N (external ICC Profile) (PDF/X)
  * @POPPLER_PDF_SUBTYPE_CONF_P: Level P (ICC Profile) (PDF/X)
- * @POPPLER_PDF_SUBTYPE_CONF_PG: Level PG (conjuction of P and G) (PDF/X)
+ * @POPPLER_PDF_SUBTYPE_CONF_PG: Level PG (conjunction of P and G) (PDF/X)
  * @POPPLER_PDF_SUBTYPE_CONF_U: Level U (Unicode) conformance (PDF/A)
  * @POPPLER_PDF_SUBTYPE_CONF_NONE: No conformance level available
  *

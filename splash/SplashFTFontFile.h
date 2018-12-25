@@ -58,9 +58,6 @@ public:
   SplashFont *makeFont(SplashCoord *mat,
 		       const SplashCoord *textMat) override;
 
-  // Provide access to the code-to-GID map
-  int* getCodeToGID();
-
 private:
 
   SplashFTFontFile(SplashFTFontEngine *engineA,

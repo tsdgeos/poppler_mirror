@@ -44,7 +44,7 @@ set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_EXTENSIONS OFF)
 
 # command line switches
-option(ENABLE_XPDF_HEADERS "Install unsupported xpdf headers." OFF)
+option(ENABLE_UNSTABLE_API_ABI_HEADERS "Install API/ABI unstable xpdf headers." OFF)
 option(BUILD_GTK_TESTS "Whether compile the GTK+ test programs." ON)
 option(BUILD_QT5_TESTS "Whether compile the Qt5 test programs." ON)
 option(BUILD_CPP_TESTS "Whether compile the CPP test programs." ON)
@@ -485,7 +485,7 @@ else()
 add_library(poppler ${poppler_SRCS})
 endif()
 set_target_properties(poppler PROPERTIES VERSION 83.0.0 SOVERSION 83)
-if(MINGW)
+if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
     set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()
@@ -495,7 +495,7 @@ if(CMAKE_USE_PTHREADS_INIT)
 endif()
 install(TARGETS poppler RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-if(ENABLE_XPDF_HEADERS)
+if(ENABLE_UNSTABLE_API_ABI_HEADERS)
   install(FILES
     poppler/Annot.h
     poppler/Array.h

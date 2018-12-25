@@ -1717,7 +1717,7 @@ static void revision6Hash(const GooString *inputPassword, unsigned char *K, cons
     sequenceLength = inputPasswordLength + KLength + userKeyLength;
     totalLength = 64 * sequenceLength;
     //a.make the string K1
-    memcpy(K1, inputPassword, inputPasswordLength);
+    memcpy(K1, inputPassword->c_str(), inputPasswordLength);
     memcpy(K1 + inputPasswordLength, K , KLength);
     memcpy(K1 + inputPasswordLength + KLength, userKey, userKeyLength);
     for(int i = 1; i < 64 ; ++i) {
@@ -1745,11 +1745,11 @@ static void revision6Hash(const GooString *inputPassword, unsigned char *K, cons
          |(uint64_t)BE16byteNumber[4] << 24 | (uint64_t)BE16byteNumber[5] << 16
          |(uint64_t)BE16byteNumber[6] << 8  | (uint64_t)BE16byteNumber[7] );
     uint64_t rem = N1 % 3 ;
-    // N2 conatains 0s in higer 4 bytes and 9th to 12 th bytes of BE16byteNumber in lower 4 bytes.
+    // N2 contains 0s in higher 4 bytes and 9th to 12 th bytes of BE16byteNumber in lower 4 bytes.
     N2 = ((uint64_t)BE16byteNumber[8] << 24 | (uint64_t)BE16byteNumber[9] << 16
          |(uint64_t)BE16byteNumber[10] << 8 | (uint64_t)BE16byteNumber[11] );
          rem = ((rem << 32 ) | N2) % 3 ;
-    // N3 conatains 0s in higer 4 bytes and 13th to 16th bytes of BE16byteNumber in lower 4 bytes.
+    // N3 contains 0s in higher 4 bytes and 13th to 16th bytes of BE16byteNumber in lower 4 bytes.
     N3 = ((uint64_t)BE16byteNumber[12] << 24 | (uint64_t)BE16byteNumber[13] << 16
          |(uint64_t)BE16byteNumber[14] << 8  | (uint64_t)BE16byteNumber[15] );
          rem = ((rem << 32 ) | N3) % 3 ;

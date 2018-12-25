@@ -1342,7 +1342,7 @@ poppler_document_set_modification_date (PopplerDocument *document,
  * Returns whether @document is linearized or not. Linearization of PDF
  * enables efficient incremental access of the PDF file in a network environment.
  *
- * Return value: %TRUE if @document is linearized, %FALSE otherwhise
+ * Return value: %TRUE if @document is linearized, %FALSE otherwise
  *
  * Since: 0.16
  **/
@@ -1409,7 +1409,7 @@ poppler_document_get_page_mode (PopplerDocument *document)
  *
  * Returns the flags specifying which operations are permitted when the document is opened.
  *
- * Return value: a set of falgs from  #PopplerPermissions enumeration
+ * Return value: a set of flags from  #PopplerPermissions enumeration
  *
  * Since: 0.16
  **/
@@ -2044,7 +2044,7 @@ poppler_index_iter_copy (PopplerIndexIter *iter)
  * {
  *   do
  *     {
- *       /<!-- -->* Get the the action and do something with it *<!-- -->/
+ *       /<!-- -->* Get the action and do something with it *<!-- -->/
  *       PopplerIndexIter *child = poppler_index_iter_get_child (iter);
  *       if (child)
  *         walk_index (child);
@@ -2394,7 +2394,7 @@ poppler_fonts_iter_get_encoding (PopplerFontsIter *iter)
  *
  * Returns whether the font associated with @iter is embedded in the document
  *
- * Returns: %TRUE if font is emebdded, %FALSE otherwise
+ * Returns: %TRUE if font is embedded, %FALSE otherwise
  */
 gboolean
 poppler_fonts_iter_is_embedded (PopplerFontsIter *iter)

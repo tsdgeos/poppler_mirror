@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,8 +44,12 @@ public:
     initer(const initer &) = delete;
     initer& operator=(const initer &) = delete;
 
+    static bool set_data_dir(const std::string &new_data_dir);
+
 private:
+    static std::mutex mutex;
     static unsigned int count;
+    static std::string data_dir;
 };
 
 class document_private : private initer

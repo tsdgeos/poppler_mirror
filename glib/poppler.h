@@ -154,6 +154,9 @@ typedef enum /*< flags >*/
  * @POPPLER_FIND_CASE_SENSITIVE: do case sensitive search
  * @POPPLER_FIND_BACKWARDS: search backwards
  * @POPPLER_FIND_WHOLE_WORDS_ONLY: search only whole words
+ * @POPPLER_FIND_IGNORE_DIACRITICS: do diacritics insensitive search,
+ * i.e. ignore accents, umlauts, diaeresis,etc. while matching. This
+ * option will be ignored if the search term is not pure ascii. Since 0.73.
  *
  * Flags using while searching text in a page
  *
@@ -164,7 +167,8 @@ typedef enum /*< flags >*/
   POPPLER_FIND_DEFAULT          = 0,
   POPPLER_FIND_CASE_SENSITIVE   = 1 << 0,
   POPPLER_FIND_BACKWARDS        = 1 << 1,
-  POPPLER_FIND_WHOLE_WORDS_ONLY = 1 << 2
+  POPPLER_FIND_WHOLE_WORDS_ONLY = 1 << 2,
+  POPPLER_FIND_IGNORE_DIACRITICS = 1 << 3
 } PopplerFindFlags;
 
 typedef struct _PopplerDocument            PopplerDocument;

@@ -243,7 +243,7 @@ void                 poppler_quadrilateral_free     (PopplerQuadrilateral *quad)
 
 /**
  * PopplerColor:
- * @red: the red componment of color
+ * @red: the red component of color
  * @green: the green component of color
  * @blue: the blue component of color
  *
@@ -275,7 +275,7 @@ void              poppler_color_free          (PopplerColor *color);
  * @is_underlined: if text is underlined
  * @color: a #PopplerColor, the foreground color
  * @start_index: start position this text attributes apply
- * @end_index: end position this text text attributes apply
+ * @end_index: end position this text attributes apply
  *
  * A #PopplerTextAttributes is used to describe text attributes of a range of text
  *
@@ -335,7 +335,7 @@ void                poppler_link_mapping_free     (PopplerLinkMapping *mapping);
  * @type: the type of transtition
  * @alignment: the dimension in which the transition effect shall occur.
  * Only for #POPPLER_PAGE_TRANSITION_SPLIT and #POPPLER_PAGE_TRANSITION_BLINDS transition types
- * @direction: the direccion of motion for the transition effect.
+ * @direction: the direction of motion for the transition effect.
  * Only for #POPPLER_PAGE_TRANSITION_SPLIT, #POPPLER_PAGE_TRANSITION_BOX and #POPPLER_PAGE_TRANSITION_FLY
  * transition types
  * @duration: the duration of the transition effect

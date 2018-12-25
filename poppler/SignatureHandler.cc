@@ -223,7 +223,7 @@ NSSCMSSignedData *SignatureHandler::CMS_SignedDataCreate(NSSCMSMessage * cms_msg
     // tempCerts field needs to be filled for complete memory release by NSSCMSSignedData_Destroy
     signedData->tempCerts = (CERTCertificate **) gmallocn( i+1, sizeof(CERTCertificate *));
     memset(signedData->tempCerts, 0, (i+1) * sizeof(CERTCertificate *));
-    // store the adresses of these temporary certificates for future release
+    // store the addresses of these temporary certificates for future release
     for (i = 0; signedData->rawCerts[i]; ++i)
       signedData->tempCerts[i] = CERT_NewTempCertificate(CERT_GetDefaultCertDB(), signedData->rawCerts[i], nullptr, 0, 0);
 

@@ -42,12 +42,16 @@
 
 using namespace poppler;
 
+std::mutex poppler::initer::mutex;
 unsigned int poppler::initer::count = 0U;
+std::string poppler::initer::data_dir;
 
 initer::initer()
 {
+    std::lock_guard<std::mutex> lock{mutex};
+
     if (!count) {
-        globalParams = new GlobalParams();
+        globalParams = new GlobalParams(!data_dir.empty() ? data_dir.c_str() : nullptr);
         setErrorCallback(detail::error_function, nullptr);
     }
     count++;
@@ -55,6 +59,8 @@ initer::initer()
 
 initer::~initer()
 {
+    std::lock_guard<std::mutex> lock{mutex};
+
     if (count > 0) {
         --count;
         if (!count) {
@@ -62,6 +68,18 @@ initer::~initer()
             globalParams = nullptr;
         }
     }
+}
+
+bool initer::set_data_dir(const std::string &new_data_dir)
+{
+    std::lock_guard<std::mutex> lock{mutex};
+
+    if (count == 0) {
+        data_dir = new_data_dir;
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -371,7 +389,7 @@ bool document::set_info_key(const std::string &key, const ustring &val)
 }
 
 /**
- Gets the time_t value value of the specified \p key of the document
+ Gets the time_t value of the specified \p key of the document
  information.
 
  \returns the time_t value for the \p key

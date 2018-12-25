@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
 
   if (errQuiet) {
     globalParams->setErrQuiet(errQuiet);
-    printCommands = false; // I'm not 100% what is the differecne between them
+    printCommands = false; // I'm not 100% what is the difference between them
   }
 
   if (textEncName[0]) {

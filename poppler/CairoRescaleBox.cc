@@ -77,7 +77,7 @@ static void downsample_row_box_filter (
         box size is constant
 
 
-       value = a * contribtion_a * 1/box_size + b * contribution_b * 1/box_size
+       value = a * contribution_a * 1/box_size + b * contribution_b * 1/box_size
                contribution_b = (1 - contribution_a)
                               = (1 - contribution_a_next)
     */
@@ -254,7 +254,7 @@ static int compute_coverage (int coverage[], int src_length, int dest_length)
         /* compute how much the right-most pixel contributes */
         overage = ratio*(right_fract);
 
-        /* the remainder is the the amount that the left-most pixel
+        /* the remainder is the amount that the left-most pixel
          * contributes */
         coverage[i] = (1<<24) - (count * ratio + overage);
     }

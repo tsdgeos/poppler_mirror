@@ -24,7 +24,7 @@
 /**
  * SECTION:poppler-form-field
  * @short_description: Form Field
- * @title: PoppplerFormField
+ * @title: PopplerFormField
  */
 
 typedef struct _PopplerFormFieldClass PopplerFormFieldClass;

@@ -60,7 +60,7 @@ int main( int argc, char **argv )
             QTime t = QTime::currentTime();
             QImage image = page->renderToImage();
             qDebug() << "Rendering took" << t.msecsTo(QTime::currentTime()) << "msecs";
-            image.save(QStringLiteral("test-render-to-file%1.ppm").arg(i));
+            image.save(QStringLiteral("test-render-to-file%1.png").arg(i));
             delete page;
         }
     }

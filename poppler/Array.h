@@ -67,7 +67,7 @@ public:
   void remove(int i);
 
   // Accessors.
-  Object get(int i, int resursion = 0) const;
+  Object get(int i, int recursion = 0) const;
   Object getNF(int i) const;
   bool getString(int i, GooString *string) const;
 

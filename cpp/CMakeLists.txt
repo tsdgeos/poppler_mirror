@@ -25,7 +25,7 @@ set(poppler_cpp_SRCS
 
 add_library(poppler-cpp ${poppler_cpp_SRCS})
 set_target_properties(poppler-cpp PROPERTIES VERSION 0.5.0 SOVERSION 0)
-if(MINGW)
+if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_CPP_SOVERSION poppler-cpp SOVERSION)
     set_target_properties(poppler-cpp PROPERTIES SUFFIX "-${POPPLER_CPP_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
 endif()

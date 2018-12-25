@@ -8,7 +8,7 @@
 
   TODO:
    * make it work with cairo output as well
-   * print more info about document like e.g. enumarate images,
+   * print more info about document like e.g. enumerate images,
      streams, compression, encryption, password-protection. Each should have
      a command-line arguments to turn it on/off
    * never over-write file given as -out argument (optionally, provide -force
@@ -142,12 +142,12 @@ static int  gResolutionX = 0;
 static int  gResolutionY = 0;
 /* If NULL, we output the log info to stdout. If not NULL, should be a name
    of the file to which we output log info.
-   Controled by -out command-line argument. */
+   Controlled by -out command-line argument. */
 static char *   gOutFileName = nullptr;
-/* FILE * correspondig to gOutFileName or stdout if gOutFileName is NULL or
+/* FILE * corresponding to gOutFileName or stdout if gOutFileName is NULL or
    was invalid name */
 static FILE *   gOutFile = nullptr;
-/* FILE * correspondig to gOutFileName or stderr if gOutFileName is NULL or
+/* FILE * corresponding to gOutFileName or stderr if gOutFileName is NULL or
    was invalid name */
 static FILE *   gErrFile = nullptr;
 

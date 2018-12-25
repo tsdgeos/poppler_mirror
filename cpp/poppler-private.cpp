@@ -4,6 +4,7 @@
  * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2017, 2018 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,7 +94,7 @@ ustring detail::unicode_GooString_to_ustring(const GooString *str)
 
 ustring detail::unicode_to_ustring(const Unicode *u, int length)
 {
-    ustring str(length * 2, 0);
+    ustring str(length, 0);
     ustring::iterator it = str.begin();
     const Unicode *uu = u;
     for (int i = 0; i < length; ++i) {

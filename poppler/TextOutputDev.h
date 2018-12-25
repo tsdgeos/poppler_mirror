@@ -23,6 +23,7 @@
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
+// Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -340,6 +341,9 @@ private:
   Unicode *normalized;		// normalized form of Unicode text
   int normalized_len;		// number of normalized Unicode chars
   int *normalized_idx;		// indices of normalized chars into Unicode text
+  Unicode *ascii_translation;	// ascii translation from the normalized text
+  int ascii_len;		// length of ascii translation text
+  int *ascii_idx;		// indices of ascii chars into Unicode text of line
 
   friend class TextLineFrag;
   friend class TextBlock;
@@ -602,6 +606,18 @@ public:
 		 bool startAtLast, bool stopAtLast,
 		 bool caseSensitive, bool backward,
 		 bool wholeWord,
+		 double *xMin, double *yMin,
+		 double *xMax, double *yMax);
+
+  // Adds new parameter ignoreDiacritics, which will do diacritics
+  // insensitive search, i.e. ignore accents, umlauts, diaeresis,etc.
+  // while matching. This option will be ignored if <s> contains characters
+  // which are not pure ascii.
+  bool findText(Unicode *s, int len,
+		 bool startAtTop, bool stopAtBottom,
+		 bool startAtLast, bool stopAtLast,
+		 bool caseSensitive, bool ignoreDiacritics,
+		 bool backward, bool wholeWord,
 		 double *xMin, double *yMin,
 		 double *xMax, double *yMax);
 

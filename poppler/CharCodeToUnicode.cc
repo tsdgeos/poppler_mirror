@@ -622,7 +622,7 @@ int CharCodeToUnicode::mapToCharCode(Unicode* u, CharCode *c, int usize) const {
     //for each entry in the sMap
     for (i=0; i<sMapLen; i++) {
       //if the entry's unicode length isn't the same are usize, the strings 
-      // are obviously differents
+      // are obviously different
       if (sMap[i].len != usize) continue;
       //compare the string char by char
       for (j=0; j<sMap[i].len; j++) {

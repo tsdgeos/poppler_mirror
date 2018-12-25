@@ -151,7 +151,7 @@ public:
   // Find a string.  If <top> is true, starts looking at top of page;
   // otherwise starts looking at <xMin>,<yMin>.  If <bottom> is true,
   // stops looking at bottom of page; otherwise stops looking at
-  // <xMax>,<yMax>.  If found, sets the text bounding rectange and
+  // <xMax>,<yMax>.  If found, sets the text bounding rectangle and
   // returns true; otherwise returns false.
   
 

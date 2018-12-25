@@ -18,6 +18,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+ * Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -739,7 +740,10 @@ delete it;
         {
             NoSearchFlags = 0x00000000, ///< since 0.63
             IgnoreCase = 0x00000001,    ///< Case differences are ignored
-            WholeWords = 0x00000002    ///< Only whole words are matched
+            WholeWords = 0x00000002,    ///< Only whole words are matched
+            IgnoreDiacritics = 0x00000004    ///< Diacritic differences (eg. accents, umlauts, diaeresis) are ignored. \since 0.73
+                                             ///< This option will have no effect if the search term contains characters which
+                                             ///< are not pure ascii.
         };
         Q_DECLARE_FLAGS( SearchFlags, SearchFlag )
 	
@@ -983,7 +987,7 @@ delete it;
    \section ownership Ownership of the returned objects
 
    All the functions that returns class pointers create new object, and the
-   responsability of those is given to the callee.
+   responsibility of those is given to the callee.
 
    The only exception is \link Poppler::Page::transition() Page::transition()\endlink.
 
@@ -1021,7 +1025,7 @@ delete it;
 
    To know whether the %Poppler version you are using has support for color
    management, you can query Poppler::isCmsAvailable(). In case it is not
-   avilable, all the color management-related functions will either do nothing
+   available, all the color management-related functions will either do nothing
    or return null.
 */
     class POPPLER_QT5_EXPORT Document {
@@ -1542,7 +1546,7 @@ QString subject = m_doc->info("Subject");
 	/**
 	  Gets the table of contents (TOC) of the Document.
 	
-	  The caller is responsable for the returned object.
+	  The caller is responsible for the returned object.
 	
 	  In the tree the tag name is the 'screen' name of the entry. A tag can have
 	  attributes. Here follows the list of tag attributes with meaning:
