@@ -6418,20 +6418,22 @@ AnnotRichMedia::Content::Content(Dict *dict) {
   if (obj1.isDict()) {
     Object obj2 = obj1.getDict()->lookup("Names");
     if (obj2.isArray()) {
-      nAssets = obj2.arrayGetLength() / 2;
+      const int length = obj2.arrayGetLength() / 2;
 
-      assets = (Asset **)gmallocn(nAssets, sizeof(Asset *));
+      assets = (Asset **)gmallocn(length, sizeof(Asset *));
+      for (int i = 0; i < length; ++i) {
+	Object objKey = obj2.arrayGet(2 * i);
+	Object objVal = obj2.arrayGet(2 * i + 1);
 
-      int counter = 0;
-      for (int i = 0; i < nAssets; ++i) {
-        assets[counter] = new AnnotRichMedia::Asset;
+	if (!objKey.isString() || objVal.isNull()) {
+	  error(errSyntaxError, -1, "Bad Annot Asset");
+	  continue;
+	}
 
-        Object objKey = obj2.arrayGet(i * 2);
-        assets[counter]->fileSpec = obj2.arrayGet(i * 2 + 1);
-
-        assets[counter]->name = std::make_unique<GooString>( objKey.getString() );
-        ++counter;
-
+	assets[nAssets] = new AnnotRichMedia::Asset;
+	assets[nAssets]->name = std::make_unique<GooString>( objKey.getString() );
+	assets[nAssets]->fileSpec = std::move(objVal);
+	++nAssets;
       }
     }
   }
