@@ -2023,7 +2023,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
   unsigned int numInstances, numSyms, symCodeLen;
   int atx[2], aty[2];
   unsigned int i, k, kk;
-  int j;
+  int j = 0;
 
   // region segment info field
   if (!readULong(&w) || !readULong(&h) ||

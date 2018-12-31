@@ -133,11 +133,12 @@ FileSpec::FileSpec(const Object *fileSpecA)
         return;
       }
     }
-  }
 
-  obj1 = fileSpec.dictLookup("Desc");
-  if (obj1.isString())
-    desc = obj1.getString()->copy();
+    obj1 = fileSpec.dictLookup("Desc");
+    if (obj1.isString()) {
+      desc = obj1.getString()->copy();
+    }
+  }
 }
 
 FileSpec::~FileSpec()

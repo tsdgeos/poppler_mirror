@@ -2,6 +2,7 @@
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, Patrick Spendrin <ps_ml@gmx.de>
  * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
+ * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
