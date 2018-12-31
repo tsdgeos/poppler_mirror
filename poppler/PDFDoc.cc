@@ -311,7 +311,7 @@ bool PDFDoc::setup(const GooString *ownerPassword, const GooString *userPassword
   extractPDFSubtype();
 
   // done
-  return true;
+  return xref->isOk();
 }
 
 PDFDoc::~PDFDoc() {
