@@ -243,7 +243,7 @@ JPXStream::JPXStream(Stream *strA):
   bufStr = new BufStream(str, 2);
 
   nComps = 0;
-  bpc = NULL;
+  bpc = nullptr;
   width = height = 0;
   haveCS = false;
   havePalette = false;
