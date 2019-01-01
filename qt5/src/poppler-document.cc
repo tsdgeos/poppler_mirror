@@ -639,7 +639,7 @@ namespace Poppler {
 #if defined(USE_CMS)
         return (void*)GfxColorSpace::getRGBProfile();
 #else
-        return NULL;
+        return nullptr;
 #endif
     }
 
@@ -648,7 +648,7 @@ namespace Poppler {
 #if defined(USE_CMS)
        return (void*)GfxColorSpace::getDisplayProfile();
 #else
-       return NULL;
+       return nullptr;
 #endif
     }
 

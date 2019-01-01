@@ -565,9 +565,9 @@ QString SignatureValidationInfo::reason() const
 
 SignatureValidationInfo::HashAlgorithm SignatureValidationInfo::hashAlgorithm() const
 {
+#ifdef ENABLE_NSS3
   Q_D(const SignatureValidationInfo);
 
-#ifdef ENABLE_NSS3
   switch (d->hash_algorithm)
   {
     case HASH_AlgMD2:
