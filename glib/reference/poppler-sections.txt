@@ -735,6 +735,8 @@ poppler_text_span_get_type
 <FILE>poppler-pdf-utility-functions</FILE>
 <TITLE>PDF Utility functions</TITLE>
 poppler_date_parse
+poppler_named_dest_from_bytestring
+poppler_named_dest_to_bytestring
 </SECTION>
 
 <SECTION>

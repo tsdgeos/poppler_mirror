@@ -681,40 +681,153 @@ poppler_document_get_attachments (PopplerDocument *document)
 }
 
 /**
+ * poppler_named_dest_from_bytestring:
+ * @data: (array length=length): the bytestring data
+ * @length: the bytestring length
+ *
+ * Converts a bytestring into a zero-terminated string suitable to
+ * pass to poppler_document_find_dest().
+ *
+ * Note that the returned string has no defined encoding and is not
+ * suitable for display to the user.
+ *
+ * The returned data must be freed using g_free().
+ *
+ * Returns: (transfer full): the named dest
+ *
+ * Since: 0.73
+ */
+char *
+poppler_named_dest_from_bytestring (const guint8 *data,
+				    gsize         length)
+{
+  const guint8 *p, *pend;
+  char *dest, *q;
+
+  g_return_val_if_fail (length != 0 || data != nullptr, nullptr);
+  /* Each source byte needs maximally 2 destination chars (\\ or \0) */
+  q = dest = (gchar *)g_malloc (length * 2 + 1);
+
+  pend = data + length;
+  for (p = data; p < pend; ++p) {
+    switch (*p) {
+    case '\0':
+      *q++ = '\\';
+      *q++ = '0';
+      break;
+    case '\\':
+      *q++ = '\\';
+      *q++ = '\\';
+      break;
+    default:
+      *q++ = *p;
+      break;
+    }
+  }
+
+  *q = 0; /* zero terminate */
+  return dest;
+}
+
+/**
+ * poppler_named_dest_to_bytestring:
+ * @name: the named dest string
+ * @length: (out): a location to store the length of the returned bytestring
+ *
+ * Converts a named dest string (e.g. from #PopplerDest.named_dest) into a
+ * bytestring, inverting the transformation of
+ * poppler_named_dest_from_bytestring().
+ *
+ * Note that the returned data is not zero terminated and may also
+ * contains embedded NUL bytes.
+ *
+ * If @name is not a valid named dest string, returns %NULL.
+ *
+ * The returned data must be freed using g_free().
+ *
+ * Returns: (array length=length) (transfer full) (nullable): a new bytestring,
+ *   or %NULL
+ *
+ * Since: 0.73
+ */
+guint8 *
+poppler_named_dest_to_bytestring (const char *name,
+				  gsize      *length)
+{
+  const char *p;
+  guint8 *data, *q;
+  gsize len;
+
+  g_return_val_if_fail (name != nullptr, nullptr);
+  g_return_val_if_fail (length != nullptr, nullptr);
+
+  len = strlen (name);
+  q = data = (guint8*) g_malloc (len);
+  for (p = name; *p; ++p) {
+    if (*p == '\\') {
+      p++;
+      len--;
+      if (*p == '0')
+	*q++ = '\0';
+      else if (*p == '\\')
+	*q++ = '\\';
+      else
+	goto invalid;
+    } else {
+      *q++ = *p;
+    }
+  }
+
+  *length = len;
+  return data;
+
+invalid:
+  g_free(data);
+  *length = 0;
+  return nullptr;
+}
+
+/**
  * poppler_document_find_dest:
  * @document: A #PopplerDocument
  * @link_name: a named destination
  *
- * Finds named destination @link_name in @document
+ * Creates a #PopplerDest for the named destination @link_name in @document.
  *
- * Return value: The #PopplerDest destination or %NULL if
- * @link_name is not a destination. Returned value must
- * be freed with #poppler_dest_free
+ * Note that named destinations are bytestrings, not string. That means that
+ * unless @link_name was returned by a poppler function (e.g. is
+ * #PopplerDest.named_dest), it needs to be converted to string
+ * using poppler_named_dest_from_bytestring() before being passed to this
+ * function.
+ *
+ * The returned value must be freed with poppler_dest_free().
+ *
+ * Return value: (transfer full): a new #PopplerDest destination, or %NULL if
+ *   @link_name is not a destination.
  **/
 PopplerDest *
 poppler_document_find_dest (PopplerDocument *document,
 			    const gchar     *link_name)
 {
-	PopplerDest *dest = nullptr;
-	LinkDest *link_dest = nullptr;
-	GooString *g_link_name;
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), nullptr);
+  g_return_val_if_fail (link_name != nullptr, nullptr);
 
-	g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), NULL);
-	g_return_val_if_fail (link_name != nullptr, NULL);
+  gsize len;
+  guint8* data = poppler_named_dest_to_bytestring (link_name, &len);
+  if (data == nullptr)
+    return nullptr;
 
-	g_link_name = new GooString (link_name);
+  GooString g_link_name ((const char*)data, (int)len);
+  g_free (data);
 
-	if (g_link_name) {
-		link_dest = document->doc->findDest (g_link_name);
-		delete g_link_name;
-	}
+  LinkDest *link_dest = document->doc->findDest (&g_link_name);
+  if (link_dest == nullptr)
+    return nullptr;
 
-	if (link_dest) {
-		dest = _poppler_dest_new_goto (document, link_dest);
-		delete link_dest;
-	}
+  PopplerDest *dest = _poppler_dest_new_goto (document, link_dest);
+  delete link_dest;
 
-	return dest;
+  return dest;
 }
 
 char *_poppler_goo_string_to_utf8(const GooString *s)

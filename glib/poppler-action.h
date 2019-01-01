@@ -164,6 +164,14 @@ typedef struct _PopplerActionJavascript PopplerActionJavascript;
  * @change_zoom: whether scale factor should be changed
  *
  * Data structure for holding a destination
+ *
+ * Note that @named_dest is the string representation of the named
+ * destination. This is the right form to pass to poppler functions,
+ * e.g. poppler_document_find_dest(), but to get the destination as
+ * it appears in the PDF itself, you need to convert it to a bytestring
+ * with poppler_named_dest_to_bytestring() first.
+ * Also note that @named_dest does not have a defined encoding and
+ * is not in a form suitable to be displayed to the user.
  */
 struct _PopplerDest
 {
@@ -316,6 +324,14 @@ POPPLER_PUBLIC
 void           poppler_dest_free       (PopplerDest   *dest);
 POPPLER_PUBLIC
 PopplerDest   *poppler_dest_copy       (PopplerDest   *dest);
+
+POPPLER_PUBLIC
+char   *poppler_named_dest_from_bytestring (const guint8 *data,
+                                            gsize         length);
+
+POPPLER_PUBLIC
+guint8 *poppler_named_dest_to_bytestring   (const char   *named_dest,
+                                            gsize        *length);
 
 G_END_DECLS
 
