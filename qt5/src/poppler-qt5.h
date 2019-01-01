@@ -1102,6 +1102,8 @@ delete it;
 
 	  \param outputProfileA is a \c cmsHPROFILE of the LCMS library.
 
+	  \note This should be called before any rendering happens and only once during the lifetime of the current process.
+
 	   \since 0.12
 	*/
 	void setColorDisplayProfile(void *outputProfileA);
@@ -1109,6 +1111,8 @@ delete it;
 	  Set a color display profile for the current document.
 
 	  \param name is the name of the display profile to set.
+
+	  \note This should be called before any rendering happens.
 
 	   \since 0.12
 	*/

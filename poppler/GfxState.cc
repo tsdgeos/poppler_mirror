@@ -226,6 +226,10 @@ static unsigned int getCMSNChannels(cmsColorSpaceSignature cs);
 static cmsHPROFILE loadColorProfile(const char *fileName);
 
 void GfxColorSpace::setDisplayProfile(void *displayProfileA) {
+  if (displayProfile != nullptr) {
+    error(errInternal, -1, "The display color profile can only be set once before any rendering is done.");
+    return;
+  }
   displayProfile = displayProfileA;
   if (displayProfile != nullptr) {
     cmsHTRANSFORM transform;
@@ -249,6 +253,11 @@ void GfxColorSpace::setDisplayProfile(void *displayProfileA) {
 }
 
 void GfxColorSpace::setDisplayProfileName(GooString *name) {
+  if (displayProfile != nullptr) {
+    error(errInternal, -1, "The display color profile can only be set before any rendering is done.");
+    return;
+  }
+  delete displayProfileName;
   displayProfileName = name->copy();
 }
 
