@@ -2,6 +2,7 @@
  * Copyright (C) 2005, Red Hat, Inc.
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+ * Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +37,7 @@
 #include <FontInfo.h>
 #include <PDFDocEncoding.h>
 #include <OptionalContent.h>
+#include <ViewerPreferences.h>
 #endif
 
 #include "poppler.h"
@@ -78,7 +80,8 @@ enum {
 	PROP_PAGE_MODE,
 	PROP_VIEWER_PREFERENCES,
 	PROP_PERMISSIONS,
-	PROP_METADATA
+	PROP_METADATA,
+	PROP_PRINT_SCALING
 };
 
 static void poppler_document_layers_free (PopplerDocument *document);
@@ -1517,6 +1520,44 @@ poppler_document_get_page_mode (PopplerDocument *document)
 }
 
 /**
+ * poppler_document_get_print_scaling:
+ * @document: A #PopplerDocument
+ *
+ * Returns the print scaling value suggested by author of the document.
+ *
+ * Return value: a #PopplerPrintScaling that should be used when document is printed
+ *
+ * Since: 0.73
+ **/
+PopplerPrintScaling
+poppler_document_get_print_scaling (PopplerDocument *document)
+{
+  Catalog *catalog;
+  ViewerPreferences *preferences;
+  PopplerPrintScaling print_scaling = POPPLER_PRINT_SCALING_APP_DEFAULT;
+
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), POPPLER_PRINT_SCALING_APP_DEFAULT);
+
+  catalog = document->doc->getCatalog ();
+  if (catalog && catalog->isOk ()) {
+    preferences = catalog->getViewerPreferences();
+    if (preferences) {
+      switch (preferences->getPrintScaling()) {
+        default:
+        case ViewerPreferences::PrintScaling::printScalingAppDefault:
+          print_scaling = POPPLER_PRINT_SCALING_APP_DEFAULT;
+          break;
+        case ViewerPreferences::PrintScaling::printScalingNone:
+          print_scaling = POPPLER_PRINT_SCALING_NONE;
+          break;
+      }
+    }
+  }
+
+  return print_scaling;
+}
+
+/**
  * poppler_document_get_permissions:
  * @document: A #PopplerDocument
  *
@@ -1745,6 +1786,9 @@ poppler_document_get_property (GObject    *object,
     case PROP_VIEWER_PREFERENCES:
       /* FIXME: write... */
       g_value_set_flags (value, POPPLER_VIEWER_PREFERENCES_UNSET);
+      break;
+    case PROP_PRINT_SCALING:
+      g_value_set_enum (value, poppler_document_get_print_scaling (document));
       break;
     case PROP_PERMISSIONS:
       g_value_set_flags (value, poppler_document_get_permissions (document));
@@ -2012,6 +2056,20 @@ poppler_document_class_init (PopplerDocumentClass *klass)
 						       POPPLER_TYPE_VIEWER_PREFERENCES,
 						       POPPLER_VIEWER_PREFERENCES_UNSET,
 						       G_PARAM_READABLE));
+
+  /**
+   * PopplerDocument:print-scaling:
+   *
+   * Since: 0.73
+   */
+  g_object_class_install_property (G_OBJECT_CLASS (klass),
+				   PROP_PRINT_SCALING,
+				   g_param_spec_enum ("print-scaling",
+						      "Print Scaling",
+						      "Print Scaling Viewer Preference",
+						      POPPLER_TYPE_PRINT_SCALING,
+						      POPPLER_PRINT_SCALING_APP_DEFAULT,
+						      (GParamFlags) (G_PARAM_READABLE | G_PARAM_STATIC_STRINGS)));
 
   /**
    * PopplerDocument:permissions:

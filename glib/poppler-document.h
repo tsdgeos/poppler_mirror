@@ -2,6 +2,7 @@
  * Copyright (C) 2004, Red Hat, Inc.
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+ * Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,6 +135,21 @@ typedef enum /*< flags >*/
   POPPLER_VIEWER_PREFERENCES_DISPLAY_DOC_TITLE = 1 << 5,
   POPPLER_VIEWER_PREFERENCES_DIRECTION_RTL = 1 << 6
 } PopplerViewerPreferences;
+
+/**
+ * PopplerPrintScaling:
+ * @POPPLER_PRINT_SCALING_APP_DEFAULT: application's default page scaling
+ * @POPPLER_PRINT_SCALING_NONE: no page scaling
+ *
+ * PrintScaling viewer preference
+ *
+ * Since: 0.73
+ */
+typedef enum
+{
+  POPPLER_PRINT_SCALING_APP_DEFAULT,
+  POPPLER_PRINT_SCALING_NONE
+} PopplerPrintScaling;
 
 /**
  * PopplerPermissions:
@@ -356,6 +372,7 @@ POPPLER_PUBLIC
 PopplerPDFConformance poppler_document_get_pdf_conformance (PopplerDocument *document);
 POPPLER_PUBLIC
 gchar             *poppler_document_get_metadata           (PopplerDocument *document);
+PopplerPrintScaling poppler_document_get_print_scaling     (PopplerDocument *document);
 
 /* Attachments */
 POPPLER_PUBLIC
