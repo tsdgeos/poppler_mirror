@@ -66,6 +66,8 @@
 
 #ifndef _WIN32
 
+using namespace std::string_literals;
+
 namespace {
 
 template< typename... >
@@ -270,8 +272,33 @@ GooString *appendToPath(GooString *path, const char *fileName) {
 #endif
 }
 
+static bool makeFileDescriptorCloexec(int fd) {
+#ifdef FD_CLOEXEC
+  int flags = fcntl(fd, F_GETFD);
+  if (flags >= 0 && !(flags & FD_CLOEXEC))
+    flags = fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
+
+  return flags >= 0;
+#else
+  return true;
+#endif
+}
+
 int openFileDescriptor(const char *path, int flags) {
-  return open(path, flags);
+#ifdef O_CLOEXEC
+  return open(path, flags | O_CLOEXEC);
+#else
+  int fd = open(path, flags);
+  if (fd == -1)
+    return fd;
+
+  if (!makeFileDescriptorCloexec(fd)) {
+    close(fd);
+    return -1;
+  }
+
+  return fd;
+#endif
 }
 
 FILE *openFile(const char *path, const char *mode) {
@@ -333,7 +360,23 @@ FILE *openFile(const char *path, const char *mode) {
     return fopen(nPath, mode);
   }
 #else
-  return fopen(path, mode);
+  // First try to atomically open the file with CLOEXEC
+  const std::string modeStr = mode + "e"s;
+  FILE *file = fopen(path, modeStr.c_str());
+  if (file != nullptr)
+    return file;
+
+  // Fall back to the provided mode and apply CLOEXEC afterwards
+  file = fopen(path, mode);
+  if (file == nullptr)
+    return nullptr;
+
+  if (!makeFileDescriptorCloexec(fileno(file))) {
+    fclose(file);
+    return nullptr;
+  }
+
+  return file;
 #endif
 }
 
