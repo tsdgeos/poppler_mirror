@@ -1141,7 +1141,7 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc,
 #endif
   } else {
     fileTypeA = psFile;
-    if (!(f = fopen(fileName, "w"))) {
+    if (!(f = openFile(fileName, "w"))) {
       error(errIO, -1, "Couldn't open PostScript file '{0:s}'", fileName);
       ok = false;
       return;
@@ -2309,7 +2309,7 @@ void PSOutputDev::setupExternalType1Font(GooString *fileName, GooString *psName)
   embFontList->append("\n");
 
   // copy the font file
-  if (!(fontFile = fopen(fileName->c_str(), "rb"))) {
+  if (!(fontFile = openFile(fileName->c_str(), "rb"))) {
     error(errIO, -1, "Couldn't open external font file");
     return;
   }

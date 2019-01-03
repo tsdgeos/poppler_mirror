@@ -897,7 +897,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   Ref *refPage = getCatalog()->getPageRef(pageNo);
   Object page = getXRef()->fetch(refPage->num, refPage->gen);
 
-  if (!(f = fopen(name->c_str(), "wb"))) {
+  if (!(f = openFile(name->c_str(), "wb"))) {
     error(errIO, -1, "Couldn't open file '{0:t}'", name);
     return errOpenFile;
   }
@@ -1030,7 +1030,7 @@ int PDFDoc::saveAs(GooString *name, PDFWriteMode mode) {
   OutStream *outStr;
   int res;
 
-  if (!(f = fopen(name->c_str(), "wb"))) {
+  if (!(f = openFile(name->c_str(), "wb"))) {
     error(errIO, -1, "Couldn't open file '{0:t}'", name);
     return errOpenFile;
   }
@@ -1062,7 +1062,7 @@ int PDFDoc::saveWithoutChangesAs(GooString *name) {
   OutStream *outStr;
   int res;
 
-  if (!(f = fopen(name->c_str(), "wb"))) {
+  if (!(f = openFile(name->c_str(), "wb"))) {
     error(errIO, -1, "Couldn't open file '{0:t}'", name);
     return errOpenFile;
   }

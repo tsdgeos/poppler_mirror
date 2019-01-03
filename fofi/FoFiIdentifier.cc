@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
+#include "goo/gfile.h"
 #include "FoFiIdentifier.h"
 
 //------------------------------------------------------------------------
@@ -184,7 +185,7 @@ private:
 FileReader *FileReader::make(const char *fileName) {
   FILE *fA;
 
-  if (!(fA = fopen(fileName, "rb"))) {
+  if (!(fA = openFile(fileName, "rb"))) {
     return nullptr;
   }
   return new FileReader(fA);

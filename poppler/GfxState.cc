@@ -46,6 +46,7 @@
 #include <stddef.h>
 #include <math.h>
 #include <string.h>
+#include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "Error.h"
 #include "Object.h"
@@ -461,7 +462,7 @@ cmsHPROFILE loadColorProfile(const char *fileName)
   if (fileName[0] == '/') {
     // full path
     // check if open the file
-    if ((fp = fopen(fileName,"r")) != nullptr) {
+    if ((fp = openFile(fileName,"r")) != nullptr) {
       fclose(fp);
       hp = cmsOpenProfileFromFile(fileName,"r");
     }
@@ -471,7 +472,7 @@ cmsHPROFILE loadColorProfile(const char *fileName)
   GooString *path = new GooString(GLOBAL_COLOR_PROFILE_DIR);
   path->append(fileName);
   // check if open the file
-  if ((fp = fopen(path->c_str(),"r")) != nullptr) {
+  if ((fp = openFile(path->c_str(),"r")) != nullptr) {
     fclose(fp);
     hp = cmsOpenProfileFromFile(path->c_str(),"r");
   }

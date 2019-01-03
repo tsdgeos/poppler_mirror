@@ -59,6 +59,7 @@
 #include <fcntl.h> // for O_BINARY
 #include <io.h>    // for setmode
 #endif
+#include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "goo/GooList.h"
@@ -5637,7 +5638,7 @@ TextOutputDev::TextOutputDev(const char *fileName, bool physLayoutA,
       // keep DOS from munging the end-of-line characters
       setmode(fileno(stdout), O_BINARY);
 #endif
-    } else if ((outputStream = fopen(fileName, append ? "ab" : "wb"))) {
+    } else if ((outputStream = openFile(fileName, append ? "ab" : "wb"))) {
       needClose = true;
     } else {
       error(errIO, -1, "Couldn't open text file '{0:s}'", fileName);

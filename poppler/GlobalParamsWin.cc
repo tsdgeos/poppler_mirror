@@ -216,7 +216,7 @@ static void GetWindowsFontDir(char *winFontDir, int cbWinFontDirLen)
 
 static bool FileExists(const char *path)
 {
-    FILE * f = fopen(path, "rb");
+    FILE * f = openFile(path, "rb");
     if (f) {
         fclose(f);
         return true;

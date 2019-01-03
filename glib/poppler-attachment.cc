@@ -18,7 +18,8 @@
 
 #include "config.h"
 #include <errno.h>
-#include <glib/gstdio.h>
+
+#include <goo/gfile.h>
 
 #include "poppler.h"
 #include "poppler-private.h"
@@ -173,7 +174,7 @@ poppler_attachment_save (PopplerAttachment  *attachment,
   
   g_return_val_if_fail (POPPLER_IS_ATTACHMENT (attachment), FALSE);
 
-  f = g_fopen (filename, "wb");
+  f = openFile (filename, "wb");
 
   if (f == nullptr)
     {
