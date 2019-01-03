@@ -270,6 +270,10 @@ GooString *appendToPath(GooString *path, const char *fileName) {
 #endif
 }
 
+int openFileDescriptor(const char *path, int flags) {
+  return open(path, flags);
+}
+
 FILE *openFile(const char *path, const char *mode) {
 #ifdef _WIN32
   OSVERSIONINFO version;
@@ -485,7 +489,7 @@ GooFile* GooFile::open(const GooString *fileName) {
 #ifdef VMS
   int fd = ::open(fileName->c_str(), Q_RDONLY, "ctx=stm");
 #else
-  int fd = ::open(fileName->c_str(), O_RDONLY);
+  int fd = openFileDescriptor(fileName->c_str(), O_RDONLY);
 #endif
   
   return fd < 0 ? nullptr : new GooFile(fd);

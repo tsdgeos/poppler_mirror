@@ -280,7 +280,7 @@ _ft_new_face (FT_Library lib,
 
   if (font_data == nullptr) {
     /* if we fail to mmap the file, just pass it to FreeType instead */
-    tmpl.fd = open (filename, O_RDONLY);
+    tmpl.fd = openFileDescriptor (filename, O_RDONLY);
     if (tmpl.fd == -1)
       return _ft_new_face_uncached (lib, filename, font_data, font_data_len, face_out, font_face_out);
 
