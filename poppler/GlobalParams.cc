@@ -402,8 +402,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   textEncoding = new GooString("UTF-8");
 #if defined(_WIN32)
   textEOL = eolDOS;
-#elif defined(MACOS)
-  textEOL = eolMac;
 #else
   textEOL = eolUnix;
 #endif

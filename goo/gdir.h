@@ -77,13 +77,8 @@ private:
 #if defined(_WIN32)
   WIN32_FIND_DATAA ffd;
   HANDLE hnd;
-#elif defined(ACORN)
-#elif defined(MACOS)
 #else
   DIR *dir;			// the DIR structure from opendir()
-#ifdef VMS
-  bool needParent;		// need to return an entry for [-]
-#endif
 #endif
 };
 

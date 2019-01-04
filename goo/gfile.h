@@ -51,15 +51,10 @@ extern "C" {
 #    endif
 #    include <windows.h>
 #  endif
-#elif defined(ACORN)
-#elif defined(MACOS)
-#  include <ctime.h>
 #else
 #  include <unistd.h>
 #  include <sys/types.h>
-#  if defined(VMS)
-#    include "vms_dirent.h"
-#  elif defined(HAVE_DIRENT_H)
+#  if defined(HAVE_DIRENT_H)
 #    include <dirent.h>
 #    define NAMLEN(d) strlen((d)->d_name)
 #  else

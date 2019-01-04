@@ -964,11 +964,7 @@ int main(int argc, char *argv[]) {
     // print info
     long long filesize = 0;
 
-#ifdef VMS
-    f = fopen(fileName->c_str(), "rb", "ctx=stm");
-#else
     f = fopen(fileName->c_str(), "rb");
-#endif
     if (f) {
       Gfseek(f, 0, SEEK_END);
       filesize = Gftell(f);

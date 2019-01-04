@@ -30,12 +30,6 @@
 #include "SplashFontFile.h"
 #include "SplashFontFileID.h"
 
-#ifdef VMS
-#if (__VMS_VER < 70000000)
-extern "C" int unlink(char *filename);
-#endif
-#endif
-
 //------------------------------------------------------------------------
 // SplashFontFile
 //------------------------------------------------------------------------

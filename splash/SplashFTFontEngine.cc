@@ -36,12 +36,6 @@
 #include "SplashFTFontFile.h"
 #include "SplashFTFontEngine.h"
 
-#ifdef VMS
-#if (__VMS_VER < 70000000)
-extern "C" int unlink(char *filename);
-#endif
-#endif
-
 //------------------------------------------------------------------------
 // SplashFTFontEngine
 //------------------------------------------------------------------------
