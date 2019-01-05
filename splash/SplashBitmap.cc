@@ -24,6 +24,7 @@
 // Copyright (C) 2015, 2018 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2016 Kenji Uno <ku@digitaldolphins.jp>
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
+// Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
