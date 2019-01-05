@@ -1064,7 +1064,7 @@ void GlobalParams::setupBaseFonts(char *dir) {
     fileName = nullptr;
     if (dir) {
       fileName = appendToPath(new GooString(dir), displayFontTab[i].t1FileName);
-      if ((f = fopen(fileName->c_str(), "rb"))) {
+      if ((f = openFile(fileName->c_str(), "rb"))) {
 	      fclose(f);
       } else {
 	      delete fileName;
@@ -1074,7 +1074,7 @@ void GlobalParams::setupBaseFonts(char *dir) {
     for (j = 0; !fileName && displayFontDirs[j]; ++j) {
       fileName = appendToPath(new GooString(displayFontDirs[j]),
 			      displayFontTab[i].t1FileName);
-      if ((f = fopen(fileName->c_str(), "rb"))) {
+      if ((f = openFile(fileName->c_str(), "rb"))) {
 	      fclose(f);
       } else {
 	      delete fileName;

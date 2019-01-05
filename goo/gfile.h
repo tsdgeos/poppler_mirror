@@ -88,6 +88,9 @@ typedef long long Goffset;
 // string, denoting the current directory).  Returns <path>.
 extern GooString *appendToPath(GooString *path, const char *fileName);
 
+// Open a file descriptor
+extern int openFileDescriptor(const char *path, int flags);
+
 // Open a file.  On Windows, this converts the path from UTF-8 to
 // UCS-2 and calls _wfopen (if available).  On other OSes, this simply
 // calls fopen.

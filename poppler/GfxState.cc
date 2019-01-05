@@ -32,7 +32,7 @@
 // Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Volker Krause <vkrause@kde.org>
-// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -46,6 +46,7 @@
 #include <stddef.h>
 #include <math.h>
 #include <string.h>
+#include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "Error.h"
 #include "Object.h"
@@ -226,6 +227,10 @@ static unsigned int getCMSNChannels(cmsColorSpaceSignature cs);
 static cmsHPROFILE loadColorProfile(const char *fileName);
 
 void GfxColorSpace::setDisplayProfile(void *displayProfileA) {
+  if (displayProfile != nullptr) {
+    error(errInternal, -1, "The display color profile can only be set once before any rendering is done.");
+    return;
+  }
   displayProfile = displayProfileA;
   if (displayProfile != nullptr) {
     cmsHTRANSFORM transform;
@@ -249,6 +254,11 @@ void GfxColorSpace::setDisplayProfile(void *displayProfileA) {
 }
 
 void GfxColorSpace::setDisplayProfileName(GooString *name) {
+  if (displayProfile != nullptr) {
+    error(errInternal, -1, "The display color profile can only be set before any rendering is done.");
+    return;
+  }
+  delete displayProfileName;
   displayProfileName = name->copy();
 }
 
@@ -452,7 +462,7 @@ cmsHPROFILE loadColorProfile(const char *fileName)
   if (fileName[0] == '/') {
     // full path
     // check if open the file
-    if ((fp = fopen(fileName,"r")) != nullptr) {
+    if ((fp = openFile(fileName,"r")) != nullptr) {
       fclose(fp);
       hp = cmsOpenProfileFromFile(fileName,"r");
     }
@@ -462,7 +472,7 @@ cmsHPROFILE loadColorProfile(const char *fileName)
   GooString *path = new GooString(GLOBAL_COLOR_PROFILE_DIR);
   path->append(fileName);
   // check if open the file
-  if ((fp = fopen(path->c_str(),"r")) != nullptr) {
+  if ((fp = openFile(path->c_str(),"r")) != nullptr) {
     fclose(fp);
     hp = cmsOpenProfileFromFile(path->c_str(),"r");
   }

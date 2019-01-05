@@ -243,14 +243,14 @@ JPXStream::JPXStream(Stream *strA):
   bufStr = new BufStream(str, 2);
 
   nComps = 0;
-  bpc = NULL;
+  bpc = nullptr;
   width = height = 0;
   haveCS = false;
   havePalette = false;
   haveCompMap = false;
   haveChannelDefn = false;
 
-  img.tiles = NULL;
+  img.tiles = nullptr;
   bitBuf = 0;
   bitBufLen = 0;
   bitBufSkip = false;
@@ -289,7 +289,7 @@ void JPXStream::close() {
   unsigned int comp, i, k, r, pre, sb;
 
   gfree(bpc);
-  bpc = NULL;
+  bpc = nullptr;
   if (havePalette) {
     gfree(palette.bpc);
     gfree(palette.c);
@@ -356,7 +356,7 @@ void JPXStream::close() {
       }
     }
     gfree(img.tiles);
-    img.tiles = NULL;
+    img.tiles = nullptr;
   }
   bufStr->close();
 }
@@ -412,7 +412,7 @@ void JPXStream::fillReadBuf() {
     tileIdx = ((curY - img.yTileOffset) / img.yTileSize) * img.nXTiles
               + (curX - img.xTileOffset) / img.xTileSize;
 #if 1 //~ ignore the palette, assume the PDF ColorSpace object is valid
-    if (img.tiles == NULL || tileIdx >= img.nXTiles * img.nYTiles || img.tiles[tileIdx].tileComps == NULL) {
+    if (img.tiles == nullptr || tileIdx >= img.nXTiles * img.nYTiles || img.tiles[tileIdx].tileComps == nullptr) {
       error(errSyntaxError, getPos(), "Unexpected tileIdx in fillReadBuf in JPX stream");
       return;
     } 
@@ -465,7 +465,7 @@ void JPXStream::fillReadBuf() {
 }
 
 GooString *JPXStream::getPSFilter(int psLevel, const char *indent) {
-  return NULL;
+  return nullptr;
 }
 
 bool JPXStream::isBinary(bool last) {
@@ -989,10 +989,10 @@ bool JPXStream::readCodestream(unsigned int len) {
 	img.tiles[i].tileComps = (JPXTileComp *)gmallocn(img.nComps,
 							 sizeof(JPXTileComp));
 	for (comp = 0; comp < img.nComps; ++comp) {
-	  img.tiles[i].tileComps[comp].quantSteps = NULL;
-	  img.tiles[i].tileComps[comp].data = NULL;
-	  img.tiles[i].tileComps[comp].buf = NULL;
-	  img.tiles[i].tileComps[comp].resLevels = NULL;
+	  img.tiles[i].tileComps[comp].quantSteps = nullptr;
+	  img.tiles[i].tileComps[comp].data = nullptr;
+	  img.tiles[i].tileComps[comp].buf = nullptr;
+	  img.tiles[i].tileComps[comp].resLevels = nullptr;
 	}
       }
       for (comp = 0; comp < img.nComps; ++comp) {
@@ -1024,7 +1024,7 @@ bool JPXStream::readCodestream(unsigned int len) {
 	      "JPX COD marker segment before SIZ segment");
 	return false;
       }
-      if (img.tiles == NULL || img.nXTiles * img.nYTiles == 0 || img.tiles[0].tileComps == NULL) {
+      if (img.tiles == nullptr || img.nXTiles * img.nYTiles == 0 || img.tiles[0].tileComps == nullptr) {
 	error(errSyntaxError, getPos(), "Error in JPX COD marker segment");
 	return false;
       } 
@@ -1074,12 +1074,12 @@ bool JPXStream::readCodestream(unsigned int len) {
 	      (JPXResLevel *)gmallocn_checkoverflow(
 		     (img.tiles[i].tileComps[comp].nDecompLevels + 1),
 		     sizeof(JPXResLevel));
-	  if (img.tiles[i].tileComps[comp].resLevels == NULL) {
+	  if (img.tiles[i].tileComps[comp].resLevels == nullptr) {
 	    error(errSyntaxError, getPos(), "Error in JPX COD marker segment");
 	    return false;
 	  }
 	  for (r = 0; r <= img.tiles[i].tileComps[comp].nDecompLevels; ++r) {
-	    img.tiles[i].tileComps[comp].resLevels[r].precincts = NULL;
+	    img.tiles[i].tileComps[comp].resLevels[r].precincts = nullptr;
 	  }
 	}
       }
@@ -1164,7 +1164,7 @@ bool JPXStream::readCodestream(unsigned int len) {
 		     (img.tiles[i].tileComps[comp].nDecompLevels + 1),
 		     sizeof(JPXResLevel));
 	for (r = 0; r <= img.tiles[i].tileComps[comp].nDecompLevels; ++r) {
-	  img.tiles[i].tileComps[comp].resLevels[r].precincts = NULL;
+	  img.tiles[i].tileComps[comp].resLevels[r].precincts = nullptr;
 	}
       }
       for (r = 0; r <= img.tiles[0].tileComps[comp].nDecompLevels; ++r) {
@@ -1607,7 +1607,7 @@ bool JPXStream::readTilePart() {
 	for (r = 0;
 	     r <= img.tiles[tileIdx].tileComps[comp].nDecompLevels;
 	     ++r) {
-	  img.tiles[tileIdx].tileComps[comp].resLevels[r].precincts = NULL;
+	  img.tiles[tileIdx].tileComps[comp].resLevels[r].precincts = nullptr;
 	}
       }
       for (r = 0; r <= img.tiles[tileIdx].tileComps[0].nDecompLevels; ++r) {
@@ -1667,7 +1667,7 @@ bool JPXStream::readTilePart() {
 		     (img.tiles[tileIdx].tileComps[comp].nDecompLevels + 1),
 		     sizeof(JPXResLevel));
       for (r = 0; r <= img.tiles[tileIdx].tileComps[comp].nDecompLevels; ++r) {
-	img.tiles[tileIdx].tileComps[comp].resLevels[r].precincts = NULL;
+	img.tiles[tileIdx].tileComps[comp].resLevels[r].precincts = nullptr;
       }
       for (r = 0; r <= img.tiles[tileIdx].tileComps[comp].nDecompLevels; ++r) {
 	if (img.tiles[tileIdx].tileComps[comp].style & 0x01) {
@@ -2082,8 +2082,8 @@ bool JPXStream::readTilePart() {
 		}
 		memset(cb->touched, 0,
 		       (1 << (tileComp->codeBlockW + tileComp->codeBlockH)));
-		cb->arithDecoder = NULL;
-		cb->stats = NULL;
+		cb->arithDecoder = nullptr;
+		cb->stats = nullptr;
 		++cb;
 	      }
 	    }

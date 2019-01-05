@@ -19,7 +19,7 @@
 // Copyright (C) 2012 Markus Trippelsdorf <markus@trippelsdorf.de>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Matthias Kramm <kramm@quiss.org>
-// Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
+// Copyright (C) 2018, 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -2488,7 +2488,6 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo,
 				    SplashPattern *pattern,
 				    SplashCoord alpha) {
   SplashPipe pipe = {};
-  SplashXPathScanner *scanner;
   int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
   SplashClipResult clipRes, clipRes2;
   bool adjustLine = false; 
@@ -2553,13 +2552,13 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo,
     yMinI = yMinI * splashAASize;
     yMaxI = (yMaxI + 1) * splashAASize - 1;
   }
-  scanner = new SplashXPathScanner(&xPath, eo, yMinI, yMaxI);
+  SplashXPathScanner scanner(&xPath, eo, yMinI, yMaxI);
 
   // get the min and max x and y values
   if (vectorAntialias && !inShading) {
-    scanner->getBBoxAA(&xMinI, &yMinI, &xMaxI, &yMaxI);
+    scanner.getBBoxAA(&xMinI, &yMinI, &xMaxI, &yMaxI);
   } else {
-    scanner->getBBox(&xMinI, &yMinI, &xMaxI, &yMaxI);
+    scanner.getBBox(&xMinI, &yMinI, &xMaxI, &yMaxI);
   }
 
   if (eo && (yMinI == yMaxI || xMinI == xMaxI) && thinLineMode != splashThinLineDefault) {
@@ -2568,7 +2567,6 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo,
     delta = (yMinI == yMaxI) ? yMaxFP - yMinFP : xMaxFP - xMinFP;
     if (delta < 0.2) {
       opClipRes = splashClipAllOutside;
-      delete scanner;
       return splashOk;
     }
   }
@@ -2576,7 +2574,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo,
   // check clipping
   if ((clipRes = state->clip->testRect(xMinI, yMinI, xMaxI, yMaxI))
       != splashClipAllOutside) {
-    if (scanner->hasPartialClip()) {
+    if (scanner.hasPartialClip()) {
       clipRes = splashClipPartial;
     }
 
@@ -2586,7 +2584,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo,
     // draw the spans
     if (vectorAntialias && !inShading) {
       for (y = yMinI; y <= yMaxI; ++y) {
-	scanner->renderAALine(aaBuf, &x0, &x1, y, thinLineMode != splashThinLineDefault && xMinI == xMaxI);
+	scanner.renderAALine(aaBuf, &x0, &x1, y, thinLineMode != splashThinLineDefault && xMinI == xMaxI);
 	if (clipRes != splashClipAllInside) {
 	  state->clip->clipAALine(aaBuf, &x0, &x1, y, thinLineMode != splashThinLineDefault && xMinI == xMaxI);
 	}
@@ -2604,7 +2602,7 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo,
       }
     } else {
       for (y = yMinI; y <= yMaxI; ++y) {
-	SplashXPathScanIterator iterator(*scanner, y);
+	SplashXPathScanIterator iterator(scanner, y);
 	while (iterator.getNextSpan(&x0, &x1)) {
 	  if (clipRes == splashClipAllInside) {
 	    drawSpan(&pipe, x0, x1, y, true);
@@ -2625,7 +2623,6 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo,
   }
   opClipRes = clipRes;
 
-  delete scanner;
   return splashOk;
 }
 
@@ -2698,7 +2695,6 @@ bool Splash::pathAllOutside(SplashPath *path) {
 
 SplashError Splash::xorFill(SplashPath *path, bool eo) {
   SplashPipe pipe;
-  SplashXPathScanner *scanner;
   int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
   SplashClipResult clipRes, clipRes2;
   SplashBlendFunc origBlendFunc;
@@ -2708,16 +2704,16 @@ SplashError Splash::xorFill(SplashPath *path, bool eo) {
   }
   SplashXPath xPath(path, state->matrix, state->flatness, true);
   xPath.sort();
-  scanner = new SplashXPathScanner(&xPath, eo, state->clip->getYMinI(),
+  SplashXPathScanner scanner(&xPath, eo, state->clip->getYMinI(),
 				   state->clip->getYMaxI());
 
   // get the min and max x and y values
-  scanner->getBBox(&xMinI, &yMinI, &xMaxI, &yMaxI);
+  scanner.getBBox(&xMinI, &yMinI, &xMaxI, &yMaxI);
 
   // check clipping
   if ((clipRes = state->clip->testRect(xMinI, yMinI, xMaxI, yMaxI))
       != splashClipAllOutside) {
-    if (scanner->hasPartialClip()) {
+    if (scanner.hasPartialClip()) {
       clipRes = splashClipPartial;
     }
 
@@ -2727,7 +2723,7 @@ SplashError Splash::xorFill(SplashPath *path, bool eo) {
 
     // draw the spans
     for (y = yMinI; y <= yMaxI; ++y) {
-      SplashXPathScanIterator iterator(*scanner, y);
+      SplashXPathScanIterator iterator(scanner, y);
       while (iterator.getNextSpan(&x0, &x1)) {
 	if (clipRes == splashClipAllInside) {
 	  drawSpan(&pipe, x0, x1, y, true);
@@ -2748,7 +2744,6 @@ SplashError Splash::xorFill(SplashPath *path, bool eo) {
   }
   opClipRes = clipRes;
 
-  delete scanner;
   return splashOk;
 }
 
@@ -6395,7 +6390,6 @@ void Splash::dumpXPath(SplashXPath *path) {
 SplashError Splash::shadedFill(SplashPath *path, bool hasBBox,
                                SplashPattern *pattern) {
   SplashPipe pipe;
-  SplashXPathScanner *scanner;
   int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
   SplashClipResult clipRes;
 
@@ -6416,13 +6410,13 @@ SplashError Splash::shadedFill(SplashPath *path, bool hasBBox,
     yMinI = yMinI * splashAASize;
     yMaxI = (yMaxI + 1) * splashAASize - 1;
   }
-  scanner = new SplashXPathScanner(&xPath, false, yMinI, yMaxI);
+  SplashXPathScanner scanner(&xPath, false, yMinI, yMaxI);
 
   // get the min and max x and y values
   if (vectorAntialias) {
-    scanner->getBBoxAA(&xMinI, &yMinI, &xMaxI, &yMaxI);
+    scanner.getBBoxAA(&xMinI, &yMinI, &xMaxI, &yMaxI);
   } else {
-    scanner->getBBox(&xMinI, &yMinI, &xMaxI, &yMaxI);
+    scanner.getBBox(&xMinI, &yMinI, &xMaxI, &yMaxI);
   }
 
   // check clipping
@@ -6440,7 +6434,7 @@ SplashError Splash::shadedFill(SplashPath *path, bool hasBBox,
     // draw the spans
     if (vectorAntialias) {
       for (y = yMinI; y <= yMaxI; ++y) {
-        scanner->renderAALine(aaBuf, &x0, &x1, y);
+        scanner.renderAALine(aaBuf, &x0, &x1, y);
         if (clipRes != splashClipAllInside) {
           state->clip->clipAALine(aaBuf, &x0, &x1, y);
         }
@@ -6498,7 +6492,7 @@ SplashError Splash::shadedFill(SplashPath *path, bool hasBBox,
     } else {
       SplashClipResult clipRes2;
       for (y = yMinI; y <= yMaxI; ++y) {
-        SplashXPathScanIterator iterator(*scanner, y);
+        SplashXPathScanIterator iterator(scanner, y);
         while (iterator.getNextSpan(&x0, &x1)) {
           if (clipRes == splashClipAllInside) {
             drawSpan(&pipe, x0, x1, y, true);
@@ -6519,6 +6513,5 @@ SplashError Splash::shadedFill(SplashPath *path, bool hasBBox,
   }
   opClipRes = clipRes;
 
-  delete scanner;
   return splashOk;
 }

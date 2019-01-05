@@ -12,7 +12,7 @@
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012, Tobias Koenig <tobias.koenig@kdab.com>
- * Copyright (C) 2012, 2014, 2015 Adam Reichold <adamreichold@myopera.com>
+ * Copyright (C) 2012, 2014, 2015, 2019 Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2013 Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
@@ -1102,6 +1102,8 @@ delete it;
 
 	  \param outputProfileA is a \c cmsHPROFILE of the LCMS library.
 
+	  \note This should be called before any rendering happens and only once during the lifetime of the current process.
+
 	   \since 0.12
 	*/
 	void setColorDisplayProfile(void *outputProfileA);
@@ -1109,6 +1111,8 @@ delete it;
 	  Set a color display profile for the current document.
 
 	  \param name is the name of the display profile to set.
+
+	  \note This should be called before any rendering happens.
 
 	   \since 0.12
 	*/

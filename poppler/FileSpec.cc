@@ -28,6 +28,7 @@
 #include <config.h>
 
 #include "FileSpec.h"
+#include "goo/gfile.h"
 
 EmbFile::EmbFile(Object &&efStream)
 {
@@ -83,7 +84,7 @@ bool EmbFile::save(const char *path) {
   FILE *f;
   bool ret;
 
-  if (!(f = fopen(path, "wb"))) {
+  if (!(f = openFile(path, "wb"))) {
     return false;
   }
   ret = save2(f);

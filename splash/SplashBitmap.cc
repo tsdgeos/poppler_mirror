@@ -36,6 +36,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
+#include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "SplashErrorCodes.h"
 #include "SplashBitmap.h"
@@ -165,7 +166,7 @@ SplashError SplashBitmap::writePNMFile(char *fileName) {
   FILE *f;
   SplashError e;
 
-  if (!(f = fopen(fileName, "wb"))) {
+  if (!(f = openFile(fileName, "wb"))) {
     return splashErrOpenFile;
   }
 
@@ -262,7 +263,7 @@ SplashError SplashBitmap::writeAlphaPGMFile(char *fileName) {
   if (!alpha) {
     return splashErrModeMismatch;
   }
-  if (!(f = fopen(fileName, "wb"))) {
+  if (!(f = openFile(fileName, "wb"))) {
     return splashErrOpenFile;
   }
   fprintf(f, "P5\n%d %d\n255\n", width, height);
@@ -338,7 +339,7 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, const char 
   FILE *f;
   SplashError e;
 
-  if (!(f = fopen(fileName, "wb"))) {
+  if (!(f = openFile(fileName, "wb"))) {
     return splashErrOpenFile;
   }
 

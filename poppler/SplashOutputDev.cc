@@ -3609,7 +3609,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   tf = maskColors == nullptr && useIccImageSrc(&imgData) ? &iccTransform : nullptr;
 #else
   src = maskColors ? &alphaImageSrc : &imageSrc;
-  tf = NULL;
+  tf = nullptr;
 #endif
   splash->drawImage(src, tf, &imgData, srcMode, maskColors ? true : false,
 		    width, height, mat, interpolate);

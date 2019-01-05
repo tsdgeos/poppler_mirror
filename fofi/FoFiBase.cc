@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <limits.h>
+#include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "poppler/Error.h"
 #include "FoFiBase.h"
@@ -51,7 +52,7 @@ char *FoFiBase::readFile(const char *fileName, int *fileLen) {
   char *buf;
   int n;
 
-  if (!(f = fopen(fileName, "rb"))) {
+  if (!(f = openFile(fileName, "rb"))) {
     error(errIO, -1, "Cannot open '{0:s}'", fileName);
     return nullptr;
   }

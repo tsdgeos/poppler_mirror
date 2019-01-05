@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2007-2009, 2011-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2009, 2011-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008, 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -897,7 +897,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   Ref *refPage = getCatalog()->getPageRef(pageNo);
   Object page = getXRef()->fetch(refPage->num, refPage->gen);
 
-  if (!(f = fopen(name->c_str(), "wb"))) {
+  if (!(f = openFile(name->c_str(), "wb"))) {
     error(errIO, -1, "Couldn't open file '{0:t}'", name);
     return errOpenFile;
   }
@@ -1030,7 +1030,7 @@ int PDFDoc::saveAs(GooString *name, PDFWriteMode mode) {
   OutStream *outStr;
   int res;
 
-  if (!(f = fopen(name->c_str(), "wb"))) {
+  if (!(f = openFile(name->c_str(), "wb"))) {
     error(errIO, -1, "Couldn't open file '{0:t}'", name);
     return errOpenFile;
   }
@@ -1062,7 +1062,7 @@ int PDFDoc::saveWithoutChangesAs(GooString *name) {
   OutStream *outStr;
   int res;
 
-  if (!(f = fopen(name->c_str(), "wb"))) {
+  if (!(f = openFile(name->c_str(), "wb"))) {
     error(errIO, -1, "Couldn't open file '{0:t}'", name);
     return errOpenFile;
   }

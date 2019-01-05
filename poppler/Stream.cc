@@ -2419,9 +2419,9 @@ DCTStream::DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion):
   x = y = dy = 0;
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 32; ++j) {
-      rowBuf[i][j] = NULL;
+      rowBuf[i][j] = nullptr;
     }
-    frameBuf[i] = NULL;
+    frameBuf[i] = nullptr;
   }
 
   if (!dctClipInit) {
@@ -2562,10 +2562,10 @@ void DCTStream::close() {
   for (i = 0; i < 4; ++i) {
     for (j = 0; j < 32; ++j) {
       gfree(rowBuf[i][j]);
-      rowBuf[i][j] = NULL;
+      rowBuf[i][j] = nullptr;
     }
     gfree(frameBuf[i]);
-    frameBuf[i] = NULL;
+    frameBuf[i] = nullptr;
   }
   FilterStream::close();
 }
@@ -3827,10 +3827,10 @@ GooString *DCTStream::getPSFilter(int psLevel, const char *indent) {
   GooString *s;
 
   if (psLevel < 2) {
-    return NULL;
+    return nullptr;
   }
   if (!(s = str->getPSFilter(psLevel, indent))) {
-    return NULL;
+    return nullptr;
   }
   s->append(indent)->append("<< >> /DCTDecode filter\n");
   return s;
