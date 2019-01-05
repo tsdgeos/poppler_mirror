@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2016, 2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2016, 2017, 2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
@@ -452,7 +452,6 @@ namespace Poppler {
           Organization,
         };
 
-        CertificateInfo();
         CertificateInfo(CertificateInfoPrivate *priv);
         ~CertificateInfo();
 

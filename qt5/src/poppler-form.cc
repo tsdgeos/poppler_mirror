@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015-2018 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015-2019 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
@@ -523,11 +523,6 @@ public:
   bool is_null;
 };
 
-CertificateInfo::CertificateInfo()
-  : d_ptr( nullptr )
-{
-}
-
 CertificateInfo::CertificateInfo(CertificateInfoPrivate* priv)
   : d_ptr( priv )
 {
@@ -681,6 +676,11 @@ QByteArray CertificateInfo::certificateData() const
 
 class SignatureValidationInfoPrivate {
 public:
+	SignatureValidationInfoPrivate(CertificateInfo &&ci)
+		: cert_info(ci)
+	{
+	}
+
 	SignatureValidationInfo::SignatureStatus signature_status;
 	SignatureValidationInfo::CertificateStatus certificate_status;
 	CertificateInfo cert_info;
@@ -869,7 +869,47 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
   FormWidgetSignature* fws = static_cast<FormWidgetSignature*>(m_formData->fm);
   const time_t validationTimeT = validationTime.isValid() ? validationTime.toTime_t() : -1;
   SignatureInfo* si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT);
-  SignatureValidationInfoPrivate* priv = new SignatureValidationInfoPrivate;
+
+  // get certificate info
+  const X509CertificateInfo *ci = si->getCertificateInfo();
+  CertificateInfoPrivate* certPriv = new CertificateInfoPrivate;
+  certPriv->is_null = true;
+  if (ci)
+  {
+    certPriv->version = ci->getVersion();
+    certPriv->ku_extensions = ci->getKeyUsageExtensions();
+
+    const GooString &certSerial = ci->getSerialNumber();
+    certPriv->serial_number = QByteArray(certSerial.c_str(), certSerial.getLength());
+
+    const X509CertificateInfo::EntityInfo &issuerInfo = ci->getIssuerInfo();
+    certPriv->issuer_info.common_name = issuerInfo.commonName.c_str();
+    certPriv->issuer_info.distinguished_name = issuerInfo.distinguishedName.c_str();
+    certPriv->issuer_info.email_address = issuerInfo.email.c_str();
+    certPriv->issuer_info.org_name = issuerInfo.organization.c_str();
+
+    const X509CertificateInfo::EntityInfo &subjectInfo = ci->getSubjectInfo();
+    certPriv->subject_info.common_name = subjectInfo.commonName.c_str();
+    certPriv->subject_info.distinguished_name = subjectInfo.distinguishedName.c_str();
+    certPriv->subject_info.email_address = subjectInfo.email.c_str();
+    certPriv->subject_info.org_name = subjectInfo.organization.c_str();
+
+    X509CertificateInfo::Validity certValidity = ci->getValidity();
+    certPriv->validity_start = QDateTime::fromTime_t(certValidity.notBefore, Qt::UTC);
+    certPriv->validity_end = QDateTime::fromTime_t(certValidity.notAfter, Qt::UTC);
+
+    const X509CertificateInfo::PublicKeyInfo &pkInfo = ci->getPublicKeyInfo();
+    certPriv->public_key = QByteArray(pkInfo.publicKey.c_str(), pkInfo.publicKey.getLength());
+    certPriv->public_key_type = static_cast<int>(pkInfo.publicKeyType);
+    certPriv->public_key_strength = pkInfo.publicKeyStrength;
+
+    const GooString &certDer = ci->getCertificateDER();
+    certPriv->certificate_der = QByteArray(certDer.c_str(), certDer.getLength());
+
+    certPriv->is_null = false;
+  }
+
+  SignatureValidationInfoPrivate* priv = new SignatureValidationInfoPrivate(CertificateInfo(certPriv));
   switch (si->getSignatureValStatus()) {
     case SIGNATURE_VALID:
       priv->signature_status = SignatureValidationInfo::SignatureValid;
@@ -939,46 +979,6 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime& v
     priv->signature = QByteArray::fromHex(checkedSignature->c_str());
   }
   delete checkedSignature;
-
-  // set certificate info
-  const X509CertificateInfo *ci = si->getCertificateInfo();
-  CertificateInfoPrivate* certPriv = new CertificateInfoPrivate;
-  certPriv->is_null = true;
-  if (ci)
-  {
-    certPriv->version = ci->getVersion();
-    certPriv->ku_extensions = ci->getKeyUsageExtensions();
-
-    const GooString &certSerial = ci->getSerialNumber();
-    certPriv->serial_number = QByteArray(certSerial.c_str(), certSerial.getLength());
-
-    const X509CertificateInfo::EntityInfo &issuerInfo = ci->getIssuerInfo();
-    certPriv->issuer_info.common_name = issuerInfo.commonName.c_str();
-    certPriv->issuer_info.distinguished_name = issuerInfo.distinguishedName.c_str();
-    certPriv->issuer_info.email_address = issuerInfo.email.c_str();
-    certPriv->issuer_info.org_name = issuerInfo.organization.c_str();
-
-    const X509CertificateInfo::EntityInfo &subjectInfo = ci->getSubjectInfo();
-    certPriv->subject_info.common_name = subjectInfo.commonName.c_str();
-    certPriv->subject_info.distinguished_name = subjectInfo.distinguishedName.c_str();
-    certPriv->subject_info.email_address = subjectInfo.email.c_str();
-    certPriv->subject_info.org_name = subjectInfo.organization.c_str();
-
-    X509CertificateInfo::Validity certValidity = ci->getValidity();
-    certPriv->validity_start = QDateTime::fromTime_t(certValidity.notBefore, Qt::UTC);
-    certPriv->validity_end = QDateTime::fromTime_t(certValidity.notAfter, Qt::UTC);
-
-    const X509CertificateInfo::PublicKeyInfo &pkInfo = ci->getPublicKeyInfo();
-    certPriv->public_key = QByteArray(pkInfo.publicKey.c_str(), pkInfo.publicKey.getLength());
-    certPriv->public_key_type = static_cast<int>(pkInfo.publicKeyType);
-    certPriv->public_key_strength = pkInfo.publicKeyStrength;
-
-    const GooString &certDer = ci->getCertificateDER();
-    certPriv->certificate_der = QByteArray(certDer.c_str(), certDer.getLength());
-
-    certPriv->is_null = false;
-  }
-  priv->cert_info = CertificateInfo(certPriv);
 
   return SignatureValidationInfo(priv);
 }
