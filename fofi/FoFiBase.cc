@@ -16,6 +16,7 @@
 // Copyright (C) 2008 Ed Avis <eda@waniasset.com>
 // Copyright (C) 2011 Jim Meyering <jim@meyering.net>
 // Copyright (C) 2016, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

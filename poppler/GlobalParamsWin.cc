@@ -11,6 +11,7 @@
    // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
    // Copyright (C) 2017, 2018 Albert Astals Cid <aacid@kde.org>
    // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+   // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 
 TODO: instead of a fixed mapping defined in displayFontTab, it could
 scan the whole fonts directory, parse TTF files and build font
