@@ -6,7 +6,7 @@
 //
 // Copyright 2015, 2016 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2016, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2016, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Markus Kilås <digital@markuspage.com>
 // Copyright 2017 Sebastian Rasmussen <sebras@gmail.com>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
@@ -91,25 +91,25 @@ X509CertificateInfo::EntityInfo SignatureHandler::getEntityInfo(CERTName *entity
 
   char *dn = CERT_NameToAscii(entityName);
   if (dn) {
-      info.distinguishedName = copyString(dn);
+      info.distinguishedName = dn;
       PORT_Free(dn);
   }
 
   char *cn = CERT_GetCommonName(entityName);
   if (cn) {
-    info.commonName = copyString(cn);
+    info.commonName = cn;
     PORT_Free(cn);
   }
 
   char *email = CERT_GetCertEmailAddress(entityName);
   if (email) {
-    info.email = copyString(email);
+    info.email = email;
     PORT_Free(email);
   }
 
   char *org = CERT_GetOrgName(entityName);
   if (org) {
-    info.organization = copyString(org);
+    info.organization = org;
     PORT_Free(org);
   }
 
