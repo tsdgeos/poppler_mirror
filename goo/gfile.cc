@@ -285,6 +285,8 @@ static bool makeFileDescriptorCloexec(int fd) {
 #endif
 }
 
+#ifndef _WIN32
+
 int openFileDescriptor(const char *path, int flags) {
 #ifdef O_CLOEXEC
   return open(path, flags | O_CLOEXEC);
@@ -301,6 +303,8 @@ int openFileDescriptor(const char *path, int flags) {
   return fd;
 #endif
 }
+
+#endif
 
 FILE *openFile(const char *path, const char *mode) {
 #ifdef _WIN32
