@@ -8,6 +8,8 @@
 // Copyright 2015 André Esser <bepandre@hotmail.com>
 // Copyright 2015, 2017 Albert Astals Cid <aacid@kde.org>
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+// Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+// Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -16,6 +18,7 @@
 
 #include "goo/GooString.h"
 #include "SignatureInfo.h"
+#include "CertificateInfo.h"
 
 /* NSPR Headers */
 #include <nspr.h>
@@ -44,6 +47,7 @@ public:
   NSSCMSVerificationStatus validateSignature();
   // Use -1 as validation_time for now
   SECErrorCodes validateCertificate(time_t validation_time);
+  std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
 
   //Translate NSS error codes
   static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_code);
@@ -61,6 +65,7 @@ private:
   NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage * cms_msg);
   NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData * cms_sig_data);
   HASHContext * initHashContext();
+  X509CertificateInfo::EntityInfo getEntityInfo(CERTName *entityName) const;
 
   unsigned int hash_length;
   SECItem CMSitem;

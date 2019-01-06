@@ -1271,7 +1271,7 @@ int FormFieldText::tokenizeDA(const GooString* da, GooList* daToks, const char* 
         GooString* tok = new GooString(da, i, j - i);
         if (searchTok && !tok->cmp(searchTok))
           idx = daToks->getLength();
-	daToks->push_back(tok);
+        daToks->push_back(tok);
         i = j;
       }
     }
@@ -1761,6 +1761,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
 
   cert_val_state = signature_handler.validateCertificate(validationTime);
   signature_info->setCertificateValStatus(SignatureHandler::NSS_CertTranslate(cert_val_state));
+  signature_info->setCertificateInfo(signature_handler.getCertificateInfo());
 
 #endif
   return signature_info;

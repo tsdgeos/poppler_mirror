@@ -9,12 +9,14 @@
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+// Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
 #include <config.h>
 
 #include "SignatureInfo.h"
+#include "CertificateInfo.h"
 #include "goo/gmem.h"
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +33,7 @@ SignatureInfo::SignatureInfo()
 {
   sig_status = SIGNATURE_NOT_VERIFIED;
   cert_status = CERTIFICATE_NOT_VERIFIED;
+  cert_info = nullptr;
   signer_name = nullptr;
   subject_dn = nullptr;
   location = nullptr;
@@ -44,6 +47,7 @@ SignatureInfo::SignatureInfo(SignatureValidationStatus sig_val_status, Certifica
 {
   sig_status = sig_val_status;
   cert_status = cert_val_status;
+  cert_info = nullptr;
   signer_name = nullptr;
   subject_dn = nullptr;
   location = nullptr;
@@ -103,6 +107,11 @@ time_t SignatureInfo::getSigningTime()
   return signing_time;
 }
 
+const X509CertificateInfo *SignatureInfo::getCertificateInfo() const
+{
+  return cert_info.get();
+}
+
 /* SETTERS */
 
 void SignatureInfo::setSignatureValStatus(enum SignatureValidationStatus sig_val_status)
@@ -147,4 +156,9 @@ void SignatureInfo::setHashAlgorithm(int type)
 void SignatureInfo::setSigningTime(time_t signingTime)
 {
   signing_time = signingTime;
+}
+
+void SignatureInfo::setCertificateInfo(std::unique_ptr<X509CertificateInfo> certInfo)
+{
+  cert_info = std::move(certInfo);
 }

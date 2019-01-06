@@ -395,6 +395,7 @@ set(poppler_SRCS
   poppler/ViewerPreferences.cc
   poppler/Movie.cc
   poppler/Rendition.cc
+  poppler/CertificateInfo.cc
 )
 set(poppler_LIBS ${FREETYPE_LIBRARIES})
 if(ENABLE_SPLASH)
@@ -545,6 +546,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/PreScanOutputDev.h
     poppler/PSTokenizer.h
     poppler/Rendition.h
+    poppler/CertificateInfo.h
     poppler/Stream-CCITT.h
     poppler/Stream.h
     poppler/StructElement.h
