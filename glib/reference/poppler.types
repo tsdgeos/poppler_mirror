@@ -60,6 +60,7 @@ poppler_pdf_subtype_get_type
 poppler_permissions_get_type
 poppler_point_get_type
 poppler_print_flags_get_type
+poppler_print_scaling_get_type
 poppler_ps_file_get_type
 poppler_quadrilateral_get_type
 poppler_rectangle_get_type

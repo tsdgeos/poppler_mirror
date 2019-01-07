@@ -151,8 +151,6 @@ pgd_action_view_add_destination (GtkWidget   *action_view,
 		pgd_table_add_property (table, "<b>Zoom:</b>", str, row);
 		g_free (str);
 	} else {
-		pgd_table_add_property (table, "<b>Named Dest:</b>", dest->named_dest, row);
-
 		if (document && !remote) {
 			PopplerDest *new_dest;
 

@@ -328,8 +328,11 @@ dest_new_named (const GooString *named_dest)
 		return dest;
 	}
 
+	const std::string& str = named_dest->toStr ();
+
 	dest->type = POPPLER_DEST_NAMED;
-	dest->named_dest = g_strdup (named_dest->c_str ());
+	dest->named_dest = poppler_named_dest_from_bytestring((const guint8*)str.data (),
+							      str.size ());
 
 	return dest;
 }
