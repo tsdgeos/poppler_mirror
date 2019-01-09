@@ -985,7 +985,7 @@ delete it;
 
        Represents an item in the outline of PDF document, i.e. a name, an internal or external link and a set of child items.
 
-       \since 0.72
+       \since 0.74
     **/
     class POPPLER_QT5_EXPORT OutlineItem {
       friend class Document;
@@ -1656,7 +1656,7 @@ QString subject = m_doc->info("Subject");
 
 	   \returns a vector of outline items, empty if there are none
 
-	   \since 0.72
+	   \since 0.74
 	**/
 	QVector<OutlineItem> outline() const;
 	
