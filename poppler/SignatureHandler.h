@@ -44,13 +44,10 @@ public:
   HASH_HashType getHashAlgorithm();
   void setSignature(unsigned char *, int);
   void updateHash(unsigned char * data_block, int data_len);
-  NSSCMSVerificationStatus validateSignature();
+  SignatureValidationStatus validateSignature();
   // Use -1 as validation_time for now
   CertificateValidationStatus validateCertificate(time_t validation_time);
   std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
-
-  //Translate NSS error codes
-  static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_code);
 
 private:
   SignatureHandler(const SignatureHandler &);

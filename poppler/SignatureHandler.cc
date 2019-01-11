@@ -349,12 +349,33 @@ NSSCMSSignerInfo *SignatureHandler::CMS_SignerInfoCreate(NSSCMSSignedData * cms_
   }
 }
 
-NSSCMSVerificationStatus SignatureHandler::validateSignature()
+static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_code)
+{
+  switch(nss_code)
+  {
+    case NSSCMSVS_GoodSignature:
+      return SIGNATURE_VALID;
+
+    case NSSCMSVS_BadSignature:
+      return SIGNATURE_INVALID;
+
+    case NSSCMSVS_DigestMismatch:
+      return SIGNATURE_DIGEST_MISMATCH;
+
+    case NSSCMSVS_ProcessingError:
+      return SIGNATURE_DECODING_ERROR;
+
+    default:
+      return SIGNATURE_GENERIC_ERROR;
+  }
+}
+
+SignatureValidationStatus SignatureHandler::validateSignature()
 {
   unsigned char *digest_buffer = nullptr;
 
   if (!CMSSignedData)
-    return NSSCMSVS_MalformedSignature;
+    return SIGNATURE_GENERIC_ERROR;
 
   digest_buffer = (unsigned char *)PORT_Alloc(hash_length);
   unsigned int result_len = 0;
@@ -379,12 +400,12 @@ NSSCMSVerificationStatus SignatureHandler::validateSignature()
         && digest.len == content_info_data->len)
     {
       PORT_Free(digest_buffer);
-      return NSSCMSVS_GoodSignature;
+      return SIGNATURE_VALID;
     }
     else
     {
       PORT_Free(digest_buffer);
-      return NSSCMSVS_DigestMismatch;
+      return SIGNATURE_DIGEST_MISMATCH;
     }
 
   }
@@ -392,12 +413,12 @@ NSSCMSVerificationStatus SignatureHandler::validateSignature()
   {
 
     PORT_Free(digest_buffer);
-    return CMSSignerInfo->verificationStatus;
+    return NSS_SigTranslate(CMSSignerInfo->verificationStatus);
   }
   else
   {
     PORT_Free(digest_buffer);
-    return NSSCMSVS_GoodSignature;
+    return SIGNATURE_VALID;
   }
 }
 
@@ -444,26 +465,4 @@ CertificateValidationStatus SignatureHandler::validateCertificate(time_t validat
   }
 
   return CERTIFICATE_GENERIC_ERROR;
-}
-
-
-SignatureValidationStatus SignatureHandler::NSS_SigTranslate(NSSCMSVerificationStatus nss_code)
-{
-  switch(nss_code)
-  {
-    case NSSCMSVS_GoodSignature:
-      return SIGNATURE_VALID;
-
-    case NSSCMSVS_BadSignature:
-      return SIGNATURE_INVALID;
-
-      case NSSCMSVS_DigestMismatch:
-      return SIGNATURE_DIGEST_MISMATCH;
-
-    case NSSCMSVS_ProcessingError:
-      return SIGNATURE_DECODING_ERROR;
-
-    default:
-      return SIGNATURE_GENERIC_ERROR;
-  }
 }

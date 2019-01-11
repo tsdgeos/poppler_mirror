@@ -1715,7 +1715,6 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     return signature_info;
   }
 
-  NSSCMSVerificationStatus sig_val_state;
   const int signature_len = signature->getLength();
   unsigned char *signatureuchar = (unsigned char *)gmalloc(signature_len);
   memcpy(signatureuchar, signature->c_str(), signature_len);
@@ -1743,8 +1742,8 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     hashSignedDataBlock(&signature_handler, len);
   }
 
-  sig_val_state = signature_handler.validateSignature();
-  signature_info->setSignatureValStatus(SignatureHandler::NSS_SigTranslate(sig_val_state));
+  const SignatureValidationStatus sig_val_state = signature_handler.validateSignature();
+  signature_info->setSignatureValStatus(sig_val_state);
   signature_info->setSignerName(signature_handler.getSignerName());
   signature_info->setSubjectDN(signature_handler.getSignerSubjectDN());
   signature_info->setHashAlgorithm(signature_handler.getHashAlgorithm());
@@ -1754,7 +1753,7 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     signature_info->setSigningTime(signature_handler.getSigningTime());
   }
 
-  if (sig_val_state != NSSCMSVS_GoodSignature || !doVerifyCert) {
+  if (sig_val_state != SIGNATURE_VALID || !doVerifyCert) {
     return signature_info;
   }
 
