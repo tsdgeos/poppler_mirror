@@ -1716,7 +1716,6 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
   }
 
   NSSCMSVerificationStatus sig_val_state;
-  SECErrorCodes cert_val_state;
   const int signature_len = signature->getLength();
   unsigned char *signatureuchar = (unsigned char *)gmalloc(signature_len);
   memcpy(signatureuchar, signature->c_str(), signature_len);
@@ -1759,8 +1758,8 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     return signature_info;
   }
 
-  cert_val_state = signature_handler.validateCertificate(validationTime);
-  signature_info->setCertificateValStatus(SignatureHandler::NSS_CertTranslate(cert_val_state));
+  const CertificateValidationStatus cert_val_state = signature_handler.validateCertificate(validationTime);
+  signature_info->setCertificateValStatus(cert_val_state);
   signature_info->setCertificateInfo(signature_handler.getCertificateInfo());
 
 #endif

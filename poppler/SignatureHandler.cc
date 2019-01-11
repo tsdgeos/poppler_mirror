@@ -401,13 +401,12 @@ NSSCMSVerificationStatus SignatureHandler::validateSignature()
   }
 }
 
-SECErrorCodes SignatureHandler::validateCertificate(time_t validation_time)
+CertificateValidationStatus SignatureHandler::validateCertificate(time_t validation_time)
 {
-  SECErrorCodes retVal;
   CERTCertificate *cert;
 
   if (!CMSSignerInfo)
-    return (SECErrorCodes) -1; //error code to avoid matching error codes defined in SECErrorCodes
+    return CERTIFICATE_GENERIC_ERROR;
 
   if ((cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB())) == nullptr)
     CMSSignerInfo->verificationStatus = NSSCMSVS_SigningCertNotFound;
@@ -425,9 +424,26 @@ SECErrorCodes SignatureHandler::validateCertificate(time_t validation_time)
   CERT_PKIXVerifyCert(cert, certificateUsageEmailSigner, inParams, nullptr,
                 CMSSignerInfo->cmsg->pwfn_arg);
 
-  retVal = (SECErrorCodes) PORT_GetError();
+  switch(PORT_GetError())
+  {
+    // 0 not defined in SECErrorCodes, it means success for this purpose.
+    case 0:
+      return CERTIFICATE_TRUSTED;
 
-  return retVal;
+    case SEC_ERROR_UNKNOWN_ISSUER:
+      return CERTIFICATE_UNKNOWN_ISSUER;
+
+    case SEC_ERROR_UNTRUSTED_ISSUER:
+      return CERTIFICATE_UNTRUSTED_ISSUER;
+
+    case SEC_ERROR_REVOKED_CERTIFICATE:
+      return CERTIFICATE_REVOKED;
+
+    case SEC_ERROR_EXPIRED_CERTIFICATE:
+      return CERTIFICATE_EXPIRED;
+  }
+
+  return CERTIFICATE_GENERIC_ERROR;
 }
 
 
@@ -449,30 +465,5 @@ SignatureValidationStatus SignatureHandler::NSS_SigTranslate(NSSCMSVerificationS
 
     default:
       return SIGNATURE_GENERIC_ERROR;
-  }
-}
-
-CertificateValidationStatus SignatureHandler::NSS_CertTranslate(SECErrorCodes nss_code)
-{
-  // 0 not defined in SECErrorCodes, it means success for this purpose.
-  if (nss_code == (SECErrorCodes) 0)
-    return CERTIFICATE_TRUSTED;
-
-  switch(nss_code)
-  {
-    case SEC_ERROR_UNKNOWN_ISSUER:
-      return CERTIFICATE_UNKNOWN_ISSUER;
-
-    case SEC_ERROR_UNTRUSTED_ISSUER:
-      return CERTIFICATE_UNTRUSTED_ISSUER;
-
-    case SEC_ERROR_REVOKED_CERTIFICATE:
-      return CERTIFICATE_REVOKED;
-
-    case SEC_ERROR_EXPIRED_CERTIFICATE:
-      return CERTIFICATE_EXPIRED;
-
-    default:
-      return CERTIFICATE_GENERIC_ERROR;
   }
 }
