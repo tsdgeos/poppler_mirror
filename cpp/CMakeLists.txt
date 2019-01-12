@@ -9,6 +9,7 @@ configure_file(poppler-version.h.in ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.
 add_subdirectory(tests)
 
 set(poppler_cpp_SRCS
+  poppler-destination.cpp
   poppler-document.cpp
   poppler-embedded-file.cpp
   poppler-font.cpp
@@ -33,6 +34,7 @@ target_link_libraries(poppler-cpp poppler ${ICONV_LIBRARIES})
 install(TARGETS poppler-cpp RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES
+  poppler-destination.h
   poppler-document.h
   poppler-embedded-file.h
   poppler-font.h
