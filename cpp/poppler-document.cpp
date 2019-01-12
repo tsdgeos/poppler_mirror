@@ -3,6 +3,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,11 +20,13 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "poppler-destination.h"
 #include "poppler-document.h"
 #include "poppler-embedded-file.h"
 #include "poppler-page.h"
 #include "poppler-toc.h"
 
+#include "poppler-destination-private.h"
 #include "poppler-document-private.h"
 #include "poppler-embedded-file-private.h"
 #include "poppler-page-private.h"
@@ -34,6 +37,7 @@
 #include "DateInfo.h"
 #include "ErrorCodes.h"
 #include "GlobalParams.h"
+#include "Link.h"
 #include "Outline.h"
 
 #include <algorithm>
@@ -1020,6 +1024,58 @@ std::vector<embedded_file *> document::embedded_files() const
         }
     }
     return d->embedded_files;
+}
+
+/**
+ Creates a map of all the named destinations in the %document.
+
+ \note The destination names may contain \\0 and other binary values
+ so they are not printable and cannot convert to null-terminated C strings.
+
+ \returns the map of the each name and destination
+
+ \since 0.74
+ */
+std::map<std::string, destination> document::create_destination_map() const
+{
+    std::map<std::string, destination> m;
+
+    Catalog *catalog = d->doc->getCatalog();
+    if (!catalog)
+        return m;
+
+    // Iterate from name-dict
+    const int nDests = catalog->numDests();
+    for (int i = 0; i < nDests; ++i ) {
+        std::string key(catalog->getDestsName (i));
+        LinkDest *link_dest = catalog->getDestsDest (i);
+
+        if (link_dest) {
+            destination dest(new destination_private(link_dest, d->doc));
+
+            m.emplace(std::move(key), std::move(dest));
+
+            delete link_dest;
+        }
+    }
+
+    // Iterate from name-tree
+    const int nDestsNameTree = catalog->numDestNameTree();
+    for (int i = 0; i < nDestsNameTree; ++i ) {
+        std::string key(catalog->getDestNameTreeName (i)->c_str (),
+                        catalog->getDestNameTreeName (i)->getLength ());
+        LinkDest *link_dest = catalog->getDestNameTreeDest (i);
+
+        if (link_dest) {
+            destination dest(new destination_private(link_dest, d->doc));
+
+            m.emplace(std::move(key), std::move(dest));
+
+            delete link_dest;
+        }
+    }
+
+    return m;
 }
 
 /**
