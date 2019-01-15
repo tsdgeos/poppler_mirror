@@ -12,7 +12,7 @@
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2012, Tobias Koenig <tobias.koenig@kdab.com>
- * Copyright (C) 2012, 2014, 2015, 2019 Adam Reichold <adamreichold@myopera.com>
+ * Copyright (C) 2012, 2014, 2015, 2018, 2019 Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2013 Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
@@ -69,6 +69,8 @@ namespace Poppler {
 
     class PDFConverter;
     class PSConverter;
+
+    struct OutlineItemData;
 
     /**
 	Debug/error function.
@@ -978,6 +980,83 @@ delete it;
 	PageData *m_page;
     };
 
+    /**
+       \brief Item in the outline of a PDF document
+
+       Represents an item in the outline of PDF document, i.e. a name, an internal or external link and a set of child items.
+
+       \since 0.74
+    **/
+    class POPPLER_QT5_EXPORT OutlineItem {
+      friend class Document;
+    public:
+      /**
+	 Constructs a null item, i.e. one that does not represent a valid item in the outline of some PDF document.
+      **/
+      OutlineItem();
+      ~OutlineItem();
+
+      OutlineItem(const OutlineItem &other);
+      OutlineItem &operator=(const OutlineItem &other);
+
+      OutlineItem(OutlineItem &&other);
+      OutlineItem &operator=(OutlineItem &&other);
+
+      /**
+	 Indicates whether an item is null, i.e. whether it does not represent a valid item in the outline of some PDF document.
+      **/
+      bool isNull() const;
+
+      /**
+	 The name of the item which should be displayed to the user.
+      **/
+      QString name() const;
+
+      /**
+	 Indicates whether the item should initially be display in an expanded or collapsed state.
+      **/
+      bool isOpen() const;
+
+      /**
+	 The destination referred to by this item.
+
+	 \returns a shared pointer to an immutable link destination
+      **/
+      QSharedPointer<const LinkDestination> destination() const;
+
+      /**
+	 The external file name of the document to which the \see destination refers
+
+	 \returns a string with the external file name or an empty string if there is none
+       */
+      QString externalFileName() const;
+
+      /**
+	 The URI to which the item links
+
+	 \returns a string with the URI which this item links or an empty string if there is none
+      **/
+      QString uri() const;
+
+      /**
+	 Determines if this item has any child items
+
+	 \returns true if there are any child items
+      **/
+      bool hasChildren() const;
+
+      /**
+	 Gets the child items of this item
+
+	 \returns a vector outline items, empty if there are none
+      **/
+      QVector<OutlineItem> children() const;
+
+    private:
+      OutlineItem(OutlineItemData *data);
+      OutlineItemData *m_data;
+    };
+
 /**
    \brief PDF document.
 
@@ -1571,6 +1650,15 @@ QString subject = m_doc->info("Subject");
 	  \returns the TOC, or NULL if the Document does not have one
 	*/
 	QDomDocument *toc() const;
+
+	/**
+	   Gets the outline of the document
+
+	   \returns a vector of outline items, empty if there are none
+
+	   \since 0.74
+	**/
+	QVector<OutlineItem> outline() const;
 	
 	/**
 	   Tries to resolve the named destination \p name.

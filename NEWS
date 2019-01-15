@@ -1,3 +1,35 @@
+Release 0.73.0:
+        core:
+         * Fix regression reading some encrypted files. Issue #690
+         * Add X509CertificateInfo classes
+         * Add new 'IgnoreDiacritics' option to ::findText(). Issue #637
+         * Open files with CLOEXEC flag set
+         * Remove Gulong, Guint, Gushort, Guchar typedefs
+         * Fix handling of some broken files.
+
+        cpp:
+         * Make initialization of globalParams threadsafe
+         * Fix page::text_list encoding issue
+         * Improve handling of UTF-16 by considering Endianess
+         * Add API to specify a custom data directory
+
+        qt5:
+         * Expose X509CertificateInfo
+         * Add the possibility of getting version
+         * Add new 'IgnoreDiacritics' search flag. Issue #637
+         * Make initialization of globalParams threadsafe
+         * ArthurOutputDev: Remove all Splash code usage
+
+        glib:
+         * add new 'POPPLER_FIND_IGNORE_DIACRITICS' find flag. Issue #637
+         * Fix named destinations. Issue #631
+         * Make PrintScaling preference available in API. Bug #92779
+
+        build system:
+         * Rename ENABLE_XPDF_HEADERS to ENABLE_UNSTABLE_API_ABI_HEADERS
+         * support enabling NSS on mingw
+         * Windows: only set SOVERSION for shared libs
+
 Release 0.72.0:
         core:
          * Fix checkbox lacking AP not bein able to change state. Issue #655

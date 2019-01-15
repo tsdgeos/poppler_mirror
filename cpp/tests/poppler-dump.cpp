@@ -3,6 +3,7 @@
  * Copyright (C) 2017, 2018, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+ * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@
  */
 
 #include <goo/glibc.h>
+#include <poppler-destination.h>
 #include <poppler-document.h>
 #include <poppler-embedded-file.h>
 #include <poppler-font.h>
@@ -29,9 +31,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <algorithm>
 #include <iomanip>
 #include <ios>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <sstream>
 
@@ -49,6 +53,7 @@ bool show_toc = false;
 bool show_fonts = false;
 bool show_embedded_files = false;
 bool show_pages = false;
+bool show_destinations = false;
 bool show_help = false;
 char show_text[32];
 bool show_text_list = false;
@@ -71,6 +76,8 @@ static const ArgDesc the_args[] = {
       "show the document-level embedded files" },
     { "--show-pages",          argFlag,  &show_pages,          0,
       "show pages information" },
+    { "--show-destinations",   argFlag,  &show_destinations,   0,
+      "show named destinations" },
     { "--show-text",           argString, &show_text,          sizeof(show_text),
       "show text (physical|raw) extracted from all pages" },
     { "--show-text-list",      argFlag, &show_text_list,       0,
@@ -317,6 +324,84 @@ static void print_page(poppler::page *p)
     std::cout << std::endl;
 }
 
+static void print_destination(const poppler::destination *d)
+{
+    if (d) {
+        std::cout << std::setw(out_width) << "Type" << ": ";
+        switch (d->type()) {
+        case poppler::destination::unknown:
+            std::cout << "unknown" << std::endl;
+            break;
+        case poppler::destination::xyz:
+            std::cout << "xyz" << std::endl
+                      << std::setw(out_width)
+                      << "Page" << ": " << d->page_number() << std::endl
+                      << std::setw(out_width)
+                      << "Left" << ": " << d->left() << std::endl
+                      << std::setw(out_width)
+                      << "Top" << ": " << d->top() << std::endl
+                      << std::setw(out_width)
+                      << "Zoom" << ": " << d->zoom() << std::endl;
+            break;
+        case poppler::destination::fit:
+            std::cout << "fit" << std::endl
+                      << std::setw(out_width)
+                      << "Page" << ": " << d->page_number() << std::endl;
+            break;
+        case poppler::destination::fit_h:
+            std::cout << "fit_h" << std::endl
+                      << std::setw(out_width)
+                      << "Page" << ": " << d->page_number() << std::endl
+                      << std::setw(out_width)
+                      << "Top" << ": " << d->top() << std::endl;
+            break;
+        case poppler::destination::fit_v:
+            std::cout << "fit_v" << std::endl
+                      << std::setw(out_width)
+                      << "Page" << ": " << d->page_number() << std::endl
+                      << std::setw(out_width)
+                      << "Left" << ": " << d->left() << std::endl;
+            break;
+        case poppler::destination::fit_r:
+            std::cout << "fit_r" << std::endl
+                      << std::setw(out_width)
+                      << "Page" << ": " << d->page_number() << std::endl
+                      << std::setw(out_width)
+                      << "Left" << ": " << d->left() << std::endl
+                      << std::setw(out_width)
+                      << "Bottom" << ": " << d->bottom() << std::endl
+                      << std::setw(out_width)
+                      << "Right" << ": " << d->right() << std::endl
+                      << std::setw(out_width)
+                      << "Top" << ": " << d->top() << std::endl;
+            break;
+        case poppler::destination::fit_b:
+            std::cout << "fit_b" << std::endl
+                      << std::setw(out_width)
+                      << "Page" << ": " << d->page_number() << std::endl;
+            break;
+        case poppler::destination::fit_b_h:
+            std::cout << "fit_b_h" << std::endl
+                      << std::setw(out_width)
+                      << "Page" << ": " << d->page_number() << std::endl
+                      << std::setw(out_width)
+                      << "Top" << ": " << d->top() << std::endl;
+            break;
+        case poppler::destination::fit_b_v:
+            std::cout << "fit_b_v" << std::endl
+                      << std::setw(out_width)
+                      << "Page" << ": " << d->page_number() << std::endl
+                      << std::setw(out_width)
+                      << "Left" << ": " << d->left() << std::endl;
+            break;
+        default:
+            std::cout << "error" << std::endl;
+            break;
+        }
+    }
+    std::cout << std::endl;
+}
+
 static void print_page_text(poppler::page *p)
 {
     if (p) {
@@ -414,6 +499,18 @@ int main(int argc, char *argv[])
             std::cout << "Page " << (i + 1) << "/" << pages << ":" << std::endl;
             std::unique_ptr<poppler::page> p(doc->create_page(i));
             print_page(p.get());
+        }
+    }
+    if (show_destinations) {
+        auto map = doc->create_destination_map();
+        for (const auto &pair: map) {
+            std::string s = pair.first;
+            for (auto &c: s) {
+                if (c < 0x20 || c>0x7e )
+                    c = '.';
+            }
+            std::cout << "Named destination \"" << s << "\":" << std::endl;
+            print_destination(&pair.second);
         }
     }
     if (show_text[0]) {

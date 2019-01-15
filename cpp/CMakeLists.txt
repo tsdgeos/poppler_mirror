@@ -9,6 +9,7 @@ configure_file(poppler-version.h.in ${CMAKE_CURRENT_BINARY_DIR}/poppler-version.
 add_subdirectory(tests)
 
 set(poppler_cpp_SRCS
+  poppler-destination.cpp
   poppler-document.cpp
   poppler-embedded-file.cpp
   poppler-font.cpp
@@ -24,7 +25,7 @@ set(poppler_cpp_SRCS
 )
 
 add_library(poppler-cpp ${poppler_cpp_SRCS})
-set_target_properties(poppler-cpp PROPERTIES VERSION 0.5.0 SOVERSION 0)
+set_target_properties(poppler-cpp PROPERTIES VERSION 0.6.0 SOVERSION 0)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_CPP_SOVERSION poppler-cpp SOVERSION)
     set_target_properties(poppler-cpp PROPERTIES SUFFIX "-${POPPLER_CPP_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -33,6 +34,7 @@ target_link_libraries(poppler-cpp poppler ${ICONV_LIBRARIES})
 install(TARGETS poppler-cpp RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES
+  poppler-destination.h
   poppler-document.h
   poppler-embedded-file.h
   poppler-font.h

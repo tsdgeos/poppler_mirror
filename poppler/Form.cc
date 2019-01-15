@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2006-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright 2007-2012, 2015-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2012, 2015-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2007-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2007, 2013, 2016 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2007 Iñigo Martínez <inigomartinez@gmail.com>
@@ -1715,8 +1715,6 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     return signature_info;
   }
 
-  NSSCMSVerificationStatus sig_val_state;
-  SECErrorCodes cert_val_state;
   const int signature_len = signature->getLength();
   unsigned char *signatureuchar = (unsigned char *)gmalloc(signature_len);
   memcpy(signatureuchar, signature->c_str(), signature_len);
@@ -1744,8 +1742,8 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     hashSignedDataBlock(&signature_handler, len);
   }
 
-  sig_val_state = signature_handler.validateSignature();
-  signature_info->setSignatureValStatus(SignatureHandler::NSS_SigTranslate(sig_val_state));
+  const SignatureValidationStatus sig_val_state = signature_handler.validateSignature();
+  signature_info->setSignatureValStatus(sig_val_state);
   signature_info->setSignerName(signature_handler.getSignerName());
   signature_info->setSubjectDN(signature_handler.getSignerSubjectDN());
   signature_info->setHashAlgorithm(signature_handler.getHashAlgorithm());
@@ -1755,12 +1753,12 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     signature_info->setSigningTime(signature_handler.getSigningTime());
   }
 
-  if (sig_val_state != NSSCMSVS_GoodSignature || !doVerifyCert) {
+  if (sig_val_state != SIGNATURE_VALID || !doVerifyCert) {
     return signature_info;
   }
 
-  cert_val_state = signature_handler.validateCertificate(validationTime);
-  signature_info->setCertificateValStatus(SignatureHandler::NSS_CertTranslate(cert_val_state));
+  const CertificateValidationStatus cert_val_state = signature_handler.validateCertificate(validationTime);
+  signature_info->setCertificateValStatus(cert_val_state);
   signature_info->setCertificateInfo(signature_handler.getCertificateInfo());
 
 #endif

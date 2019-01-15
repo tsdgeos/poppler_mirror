@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,29 +16,40 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef TOC_H
-#define TOC_H
+#ifndef POPPLER_DESTINATION_PRIVATE_H
+#define POPPLER_DESTINATION_PRIVATE_H
 
-#include "abstractinfodock.h"
+#include "poppler-global.h"
+#include "poppler-destination.h"
 
-class QTreeView;
+#include "Object.h"
 
-class TocDock : public AbstractInfoDock
+class PDFDoc;
+class LinkDest;
+
+namespace poppler
 {
-    Q_OBJECT
 
+class destination_private
+{
 public:
-    TocDock(QWidget *parent = nullptr);
-    ~TocDock();
+    destination_private(const LinkDest *ld, PDFDoc *doc);
 
-    void documentClosed() override;
+    destination::type_enum type;
+    bool page_number_unresolved;
+    union {
+        Ref page_ref;
+        int page_number;
+    };
+    double left, bottom;
+    double right, top;
+    double zoom;
+    bool change_left : 1, change_top : 1;
+    bool change_zoom : 1;
 
-protected:
-    void fillInfo() override;
-    void expandItemModels(const QModelIndex &parent);
-
-private:
-    QTreeView *m_tree;
+    PDFDoc *pdf_doc;
 };
+
+}
 
 #endif

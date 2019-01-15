@@ -11,6 +11,13 @@ include(CheckFunctionExists)
 include(CheckLibraryExists)
 include(CheckTypeSize)
 include(CheckCSourceCompiles)
+include(CMakePushCheckState)
+
+cmake_push_check_state()
+# this is going to be defined via config.h, and impacts Android's stdio.h
+if (_FILE_OFFSET_BITS)
+  set(CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} -D_FILE_OFFSET_BITS=${_FILE_OFFSET_BITS})
+endif()
 
 check_include_files(dlfcn.h HAVE_DLFCN_H)
 check_include_files(fcntl.h HAVE_FCNTL_H)
@@ -21,7 +28,7 @@ check_include_files(unistd.h HAVE_UNISTD_H)
 check_include_file_cxx(codecvt HAVE_CODECVT)
 
 check_function_exists(fseek64 HAVE_FSEEK64)
-check_function_exists(fseeko HAVE_FSEEKO)
+check_symbol_exists(fseeko "stdio.h" HAVE_FSEEKO)
 check_function_exists(ftell64 HAVE_FTELL64)
 check_function_exists(pread64 HAVE_PREAD64)
 check_function_exists(lseek64 HAVE_LSEEK64)
@@ -55,3 +62,5 @@ check_function_exists("nanosleep" HAVE_NANOSLEEP)
 if(NOT HAVE_NANOSLEEP)
   check_library_exists("rt" "nanosleep" "" LIB_RT_HAS_NANOSLEEP)
 endif(NOT HAVE_NANOSLEEP)
+
+cmake_pop_check_state()

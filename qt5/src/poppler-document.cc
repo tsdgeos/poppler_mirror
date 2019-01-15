@@ -48,6 +48,7 @@
 
 #include "poppler-private.h"
 #include "poppler-page-private.h"
+#include "poppler-outline-private.h"
 
 #if defined(USE_CMS)
 #include <lcms2.h>
@@ -598,6 +599,21 @@ namespace Poppler {
            m_doc->addTocChildren( toc, toc, items );
 
         return toc;
+    }
+
+    QVector<OutlineItem> Document::outline() const
+    {
+      QVector<OutlineItem> result;
+
+      if (::Outline *outline = m_doc->doc->getOutline()) {
+	if (const GooList *items = outline->getItems()) {
+	  for (void *item : *items) {
+	    result.push_back(OutlineItem{new OutlineItemData{static_cast<::OutlineItem *>(item), m_doc}});
+	  }
+	}
+      }
+
+      return result;
     }
 
     LinkDestination *Document::linkDestination( const QString &name )

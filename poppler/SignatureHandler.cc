@@ -349,12 +349,33 @@ NSSCMSSignerInfo *SignatureHandler::CMS_SignerInfoCreate(NSSCMSSignedData * cms_
   }
 }
 
-NSSCMSVerificationStatus SignatureHandler::validateSignature()
+static SignatureValidationStatus NSS_SigTranslate(NSSCMSVerificationStatus nss_code)
+{
+  switch(nss_code)
+  {
+    case NSSCMSVS_GoodSignature:
+      return SIGNATURE_VALID;
+
+    case NSSCMSVS_BadSignature:
+      return SIGNATURE_INVALID;
+
+    case NSSCMSVS_DigestMismatch:
+      return SIGNATURE_DIGEST_MISMATCH;
+
+    case NSSCMSVS_ProcessingError:
+      return SIGNATURE_DECODING_ERROR;
+
+    default:
+      return SIGNATURE_GENERIC_ERROR;
+  }
+}
+
+SignatureValidationStatus SignatureHandler::validateSignature()
 {
   unsigned char *digest_buffer = nullptr;
 
   if (!CMSSignedData)
-    return NSSCMSVS_MalformedSignature;
+    return SIGNATURE_GENERIC_ERROR;
 
   digest_buffer = (unsigned char *)PORT_Alloc(hash_length);
   unsigned int result_len = 0;
@@ -379,12 +400,12 @@ NSSCMSVerificationStatus SignatureHandler::validateSignature()
         && digest.len == content_info_data->len)
     {
       PORT_Free(digest_buffer);
-      return NSSCMSVS_GoodSignature;
+      return SIGNATURE_VALID;
     }
     else
     {
       PORT_Free(digest_buffer);
-      return NSSCMSVS_DigestMismatch;
+      return SIGNATURE_DIGEST_MISMATCH;
     }
 
   }
@@ -392,22 +413,21 @@ NSSCMSVerificationStatus SignatureHandler::validateSignature()
   {
 
     PORT_Free(digest_buffer);
-    return CMSSignerInfo->verificationStatus;
+    return NSS_SigTranslate(CMSSignerInfo->verificationStatus);
   }
   else
   {
     PORT_Free(digest_buffer);
-    return NSSCMSVS_GoodSignature;
+    return SIGNATURE_VALID;
   }
 }
 
-SECErrorCodes SignatureHandler::validateCertificate(time_t validation_time)
+CertificateValidationStatus SignatureHandler::validateCertificate(time_t validation_time)
 {
-  SECErrorCodes retVal;
   CERTCertificate *cert;
 
   if (!CMSSignerInfo)
-    return (SECErrorCodes) -1; //error code to avoid matching error codes defined in SECErrorCodes
+    return CERTIFICATE_GENERIC_ERROR;
 
   if ((cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB())) == nullptr)
     CMSSignerInfo->verificationStatus = NSSCMSVS_SigningCertNotFound;
@@ -425,41 +445,12 @@ SECErrorCodes SignatureHandler::validateCertificate(time_t validation_time)
   CERT_PKIXVerifyCert(cert, certificateUsageEmailSigner, inParams, nullptr,
                 CMSSignerInfo->cmsg->pwfn_arg);
 
-  retVal = (SECErrorCodes) PORT_GetError();
-
-  return retVal;
-}
-
-
-SignatureValidationStatus SignatureHandler::NSS_SigTranslate(NSSCMSVerificationStatus nss_code)
-{
-  switch(nss_code)
+  switch(PORT_GetError())
   {
-    case NSSCMSVS_GoodSignature:
-      return SIGNATURE_VALID;
+    // 0 not defined in SECErrorCodes, it means success for this purpose.
+    case 0:
+      return CERTIFICATE_TRUSTED;
 
-    case NSSCMSVS_BadSignature:
-      return SIGNATURE_INVALID;
-
-      case NSSCMSVS_DigestMismatch:
-      return SIGNATURE_DIGEST_MISMATCH;
-
-    case NSSCMSVS_ProcessingError:
-      return SIGNATURE_DECODING_ERROR;
-
-    default:
-      return SIGNATURE_GENERIC_ERROR;
-  }
-}
-
-CertificateValidationStatus SignatureHandler::NSS_CertTranslate(SECErrorCodes nss_code)
-{
-  // 0 not defined in SECErrorCodes, it means success for this purpose.
-  if (nss_code == (SECErrorCodes) 0)
-    return CERTIFICATE_TRUSTED;
-
-  switch(nss_code)
-  {
     case SEC_ERROR_UNKNOWN_ISSUER:
       return CERTIFICATE_UNKNOWN_ISSUER;
 
@@ -471,8 +462,7 @@ CertificateValidationStatus SignatureHandler::NSS_CertTranslate(SECErrorCodes ns
 
     case SEC_ERROR_EXPIRED_CERTIFICATE:
       return CERTIFICATE_EXPIRED;
-
-    default:
-      return CERTIFICATE_GENERIC_ERROR;
   }
+
+  return CERTIFICATE_GENERIC_ERROR;
 }

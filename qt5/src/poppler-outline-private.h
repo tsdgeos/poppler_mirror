@@ -1,6 +1,6 @@
-/*
- * Copyright (C) 2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2019, Albert Astals Cid <aacid@kde.org>
+/* poppler-outline-private.h: qt interface to poppler
+ *
+ * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,29 +17,31 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef TOC_H
-#define TOC_H
+#ifndef _POPPLER_OUTLINE_PRIVATE_H_
+#define _POPPLER_OUTLINE_PRIVATE_H_
 
-#include "abstractinfodock.h"
+#include <QtCore/QSharedPointer>
+#include <QtCore/QString>
 
-class QTreeView;
+class OutlineItem;
 
-class TocDock : public AbstractInfoDock
+namespace Poppler {
+
+class DocumentData;
+class LinkDestination;
+
+struct OutlineItemData
 {
-    Q_OBJECT
+  OutlineItemData(::OutlineItem *data, DocumentData *documentData) : data{data}, documentData{documentData} {}
+  ::OutlineItem *data;
+  DocumentData *documentData;
 
-public:
-    TocDock(QWidget *parent = nullptr);
-    ~TocDock();
-
-    void documentClosed() override;
-
-protected:
-    void fillInfo() override;
-    void expandItemModels(const QModelIndex &parent);
-
-private:
-    QTreeView *m_tree;
+  mutable QString name;
+  mutable QSharedPointer<const LinkDestination> destination;
+  mutable QString externalFileName;
+  mutable QString uri;
 };
+
+}
 
 #endif
