@@ -373,6 +373,7 @@ POPPLER_PUBLIC
 PopplerPDFConformance poppler_document_get_pdf_conformance (PopplerDocument *document);
 POPPLER_PUBLIC
 gchar             *poppler_document_get_metadata           (PopplerDocument *document);
+POPPLER_PUBLIC
 PopplerPrintScaling poppler_document_get_print_scaling     (PopplerDocument *document);
 
 /* Attachments */
