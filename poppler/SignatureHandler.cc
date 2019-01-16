@@ -45,7 +45,7 @@ unsigned int SignatureHandler::digestLength(SECOidTag digestAlgId)
 
 char *SignatureHandler::getSignerName()
 {
-  if (!CMSSignerInfo)
+  if (!CMSSignerInfo || !NSS_IsInitialized())
       return nullptr;
 
   CERTCertificate *cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
@@ -182,8 +182,7 @@ std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() cons
   return certInfo;
 }
 
-
-GooString *SignatureHandler::getDefaultFirefoxCertDB_Linux()
+static GooString *getDefaultFirefoxCertDB_Linux()
 {
   GooString * finalPath = nullptr;
   DIR *toSearchIn;
@@ -215,27 +214,45 @@ GooString *SignatureHandler::getDefaultFirefoxCertDB_Linux()
 /**
  * Initialise NSS
  */
-void SignatureHandler::init_nss()
+void SignatureHandler::setNSSDir(const GooString &nssDir)
 {
-  GooString *certDBPath = getDefaultFirefoxCertDB_Linux();
-  bool initSuccess = false;
-  if (certDBPath == nullptr) {
-    initSuccess = (NSS_Init("sql:/etc/pki/nssdb") == SECSuccess);
-  } else {
-    initSuccess = (NSS_Init(certDBPath->c_str()) == SECSuccess);
-  }
-  if (!initSuccess) {
-    GooString homeNssDb(getenv("HOME"));
-    homeNssDb.append("/.pki/nssdb");
-    initSuccess = (NSS_Init(homeNssDb.c_str()) == SECSuccess);
-    if (!initSuccess) {
-      NSS_NoDB_Init(nullptr);
-    }
-  }
-  //Make sure NSS root certificates module is loaded
-  SECMOD_AddNewModule("Root Certs", "libnssckbi.so", 0, 0);
+  static bool setNssDirCalled = false;
 
-  delete certDBPath;
+  if (NSS_IsInitialized() && nssDir.getLength() > 0) {
+    error(errInternal, 0, "You need to call setNSSDir before signature validation related operations happen");
+    return;
+  }
+
+  if (setNssDirCalled)
+    return;
+
+  setNssDirCalled = true;
+
+  bool initSuccess = false;
+  if (nssDir.getLength() > 0) {
+    initSuccess = (NSS_Init(nssDir.c_str()) == SECSuccess);
+  } else {
+    GooString *certDBPath = getDefaultFirefoxCertDB_Linux();
+    if (certDBPath == nullptr) {
+      initSuccess = (NSS_Init("sql:/etc/pki/nssdb") == SECSuccess);
+    } else {
+      initSuccess = (NSS_Init(certDBPath->c_str()) == SECSuccess);
+    }
+    if (!initSuccess) {
+      GooString homeNssDb(getenv("HOME"));
+      homeNssDb.append("/.pki/nssdb");
+      initSuccess = (NSS_Init(homeNssDb.c_str()) == SECSuccess);
+      if (!initSuccess) {
+	NSS_NoDB_Init(nullptr);
+      }
+    }
+    delete certDBPath;
+  }
+
+  if (initSuccess) {
+    //Make sure NSS root certificates module is loaded
+    SECMOD_AddNewModule("Root Certs", "libnssckbi.so", 0, 0);
+  }
 }
 
 
@@ -246,7 +263,7 @@ SignatureHandler::SignatureHandler(unsigned char *p7, int p7_length)
    CMSSignerInfo(nullptr),
    temp_certs(nullptr)
 {
-  init_nss();
+  setNSSDir({});
   CMSitem.data = p7;
   CMSitem.len = p7_length;
   CMSMessage = CMS_MessageCreate(&CMSitem);
@@ -375,6 +392,9 @@ SignatureValidationStatus SignatureHandler::validateSignature()
   unsigned char *digest_buffer = nullptr;
 
   if (!CMSSignedData)
+    return SIGNATURE_GENERIC_ERROR;
+
+  if (!NSS_IsInitialized())
     return SIGNATURE_GENERIC_ERROR;
 
   digest_buffer = (unsigned char *)PORT_Alloc(hash_length);
