@@ -101,6 +101,13 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
   if (obj.isBool()) {
     pickTrayByPDFSize = obj.getBool();
   }
+
+  obj = prefDict->lookup("NumCopies");
+  if (obj.isInt()) {
+    numCopies = obj.getInt();
+    if (numCopies < 2)
+      numCopies = 1;
+  }
 }
 
 ViewerPreferences::~ViewerPreferences()
@@ -120,4 +127,5 @@ void ViewerPreferences::init()
   printScaling = printScalingAppDefault;
   duplex = duplexNone;
   pickTrayByPDFSize = false;
+  numCopies = 1;
 }

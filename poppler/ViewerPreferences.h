@@ -56,6 +56,7 @@ public:
   PrintScaling getPrintScaling() const { return printScaling; }
   Duplex getDuplex() const { return duplex; }
   bool getPickTrayByPDFSize() const { return pickTrayByPDFSize; }
+  int getNumCopies() const { return numCopies; }
 
 private:
 
@@ -72,6 +73,7 @@ private:
   PrintScaling printScaling;
   Duplex duplex;
   bool pickTrayByPDFSize;
+  int numCopies;
 };
 
 #endif
