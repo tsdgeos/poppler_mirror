@@ -86,11 +86,6 @@
 #include "PSOutputDev.h"
 #include "PDFDoc.h"
 
-#ifdef MACOS
-// needed for setting type/creator of MacOS files
-#include "ICSupport.h"
-#endif
-
 // the MSVC math.h doesn't define this
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -1471,9 +1466,6 @@ PSOutputDev::~PSOutputDev() {
       }
     }
     if (fileType == psFile) {
-#ifdef MACOS
-      ICS_MapRefNumAndAssign((short)((FILE *)outputStream)->handle);
-#endif
       fclose((FILE *)outputStream);
     }
 #ifdef HAVE_POPEN

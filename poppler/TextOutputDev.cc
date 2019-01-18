@@ -75,11 +75,6 @@
 #include "Annot.h"
 #include "UTF.h"
 
-#ifdef MACOS
-// needed for setting type/creator of MacOS files
-#include "ICSupport.h"
-#endif
-
 //------------------------------------------------------------------------
 // parameters
 //------------------------------------------------------------------------
@@ -5674,9 +5669,6 @@ TextOutputDev::TextOutputDev(TextOutputFunc func, void *stream,
 
 TextOutputDev::~TextOutputDev() {
   if (needClose) {
-#ifdef MACOS
-    ICS_MapRefNumAndAssign((short)((FILE *)outputStream)->handle);
-#endif
     fclose((FILE *)outputStream);
   }
   if (text) {

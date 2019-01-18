@@ -77,12 +77,6 @@
 #include "SplashOutputDev.h"
 #include <algorithm>
 
-#ifdef VMS
-#if (__VMS_VER < 70000000)
-extern "C" int unlink(char *filename);
-#endif
-#endif
-
 static const double s_minLineWidth = 0.0;
 
 static inline void convertGfxColor(SplashColorPtr dest,
