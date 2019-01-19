@@ -66,9 +66,8 @@ build_mingw64_fedora:
     - dnf builddep -y mingw64-poppler
     - dnf -y install mingw64-curl make ninja-build mingw64-openjpeg2-tools mingw32-openjpeg2-tools
   script:
-    - sed -i '/SYSTEM/d' glib/CMakeLists.txt test/CMakeLists.txt
     - mkdir -p build && cd build
-    - mingw64-cmake -G Ninja ..
+    - mingw64-cmake -G Ninja .. -DCMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/include/
     - ninja
 
 build_clazy:
