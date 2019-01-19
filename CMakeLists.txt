@@ -451,7 +451,11 @@ if (ENABLE_NSS3)
   set(poppler_SRCS ${poppler_SRCS}
     poppler/SignatureHandler.cc
   )
-  set(poppler_LIBS ${poppler_LIBS} ${NSS3_LIBRARIES})
+  if(${CMAKE_VERSION} VERSION_LESS "3.6.0")
+    set(poppler_LIBS ${poppler_LIBS} ${NSS3_LIBRARIES})
+  else()
+    set(poppler_LIBS ${poppler_LIBS} PkgConfig::NSS3)
+  endif()
 endif()
 if (OpenJPEG_FOUND)
   set(poppler_SRCS ${poppler_SRCS}

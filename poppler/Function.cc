@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2008-2010, 2013-2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008-2010, 2013-2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
@@ -441,23 +441,24 @@ void SampledFunction::transform(const double *in, double *out) const {
   int e[funcMaxInputs];
   double efrac0[funcMaxInputs];
   double efrac1[funcMaxInputs];
-  int i, j, k, idx0, t;
 
   // check the cache
-  for (i = 0; i < m; ++i) {
+  bool inCache = true;
+  for (int i = 0; i < m; ++i) {
     if (in[i] != cacheIn[i]) {
+      inCache = false;
       break;
     }
   }
-  if (i == m) {
-    for (i = 0; i < n; ++i) {
+  if (inCache) {
+    for (int i = 0; i < n; ++i) {
       out[i] = cacheOut[i];
     }
     return;
   }
 
   // map input values into sample array
-  for (i = 0; i < m; ++i) {
+  for (int i = 0; i < m; ++i) {
     x = (in[i] - domain[i][0]) * inputMul[i] + encode[i][0];
     if (x < 0 || x != x) {  // x!=x is a more portable version of isnan(x)
       x = 0;
@@ -474,17 +475,17 @@ void SampledFunction::transform(const double *in, double *out) const {
   }
 
   // compute index for the first sample to be used
-  idx0 = 0;
-  for (k = m - 1; k >= 1; --k) {
+  int idx0 = 0;
+  for (int k = m - 1; k >= 1; --k) {
     idx0 = (idx0 + e[k]) * sampleSize[k-1];
   }
   idx0 = (idx0 + e[0]) * n;
 
   // for each output, do m-linear interpolation
-  for (i = 0; i < n; ++i) {
+  for (int i = 0; i < n; ++i) {
 
     // pull 2^m values out of the sample array
-    for (j = 0; j < (1<<m); ++j) {
+    for (int j = 0; j < (1<<m); ++j) {
       int idx = idx0 + idxOffset[j] + i;
       if (likely(idx >= 0 && idx < nSamples)) {
         sBuf[j] = samples[idx];
@@ -494,8 +495,8 @@ void SampledFunction::transform(const double *in, double *out) const {
     }
 
     // do m sets of interpolations
-    for (j = 0, t = (1<<m); j < m; ++j, t >>= 1) {
-      for (k = 0; k < t; k += 2) {
+    for (int j = 0, t = (1<<m); j < m; ++j, t >>= 1) {
+      for (int k = 0; k < t; k += 2) {
 	sBuf[k >> 1] = efrac0[j] * sBuf[k] + efrac1[j] * sBuf[k+1];
       }
     }
@@ -510,10 +511,10 @@ void SampledFunction::transform(const double *in, double *out) const {
   }
 
   // save current result in the cache
-  for (i = 0; i < m; ++i) {
+  for (int i = 0; i < m; ++i) {
     cacheIn[i] = in[i];
   }
-  for (i = 0; i < n; ++i) {
+  for (int i = 0; i < n; ++i) {
     cacheOut[i] = out[i];
   }
 }

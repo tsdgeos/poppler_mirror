@@ -15,6 +15,10 @@ include(FindPackageHandleStandardArgs)
 
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(GLIB2 "glib-2.0>=${GLIB_REQUIRED}" "gobject-2.0>=${GLIB_REQUIRED}" "gio-2.0>=${GLIB_REQUIRED}")
+if(${CMAKE_VERSION} VERSION_LESS "3.6.0")
+    pkg_check_modules(GLIB2 "glib-2.0>=${GLIB_REQUIRED}" "gobject-2.0>=${GLIB_REQUIRED}" "gio-2.0>=${GLIB_REQUIRED}")
+else()
+    pkg_check_modules(GLIB2 IMPORTED_TARGET "glib-2.0>=${GLIB_REQUIRED}" "gobject-2.0>=${GLIB_REQUIRED}" "gio-2.0>=${GLIB_REQUIRED}")
+endif()
 
 find_package_handle_standard_args(GLib DEFAULT_MSG GLIB2_LIBRARIES GLIB2_CFLAGS)
