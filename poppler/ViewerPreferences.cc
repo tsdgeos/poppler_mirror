@@ -6,6 +6,7 @@
 //
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2019 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
 
@@ -95,6 +96,11 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
       duplex = duplexDuplexFlipLongEdge;
     }
   }
+
+  obj = prefDict->lookup("PickTrayByPDFSize");
+  if (obj.isBool()) {
+    pickTrayByPDFSize = obj.getBool();
+  }
 }
 
 ViewerPreferences::~ViewerPreferences()
@@ -113,4 +119,5 @@ void ViewerPreferences::init()
   direction = directionL2R;
   printScaling = printScalingAppDefault;
   duplex = duplexNone;
+  pickTrayByPDFSize = false;
 }

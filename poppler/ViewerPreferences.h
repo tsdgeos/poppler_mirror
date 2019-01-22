@@ -5,6 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2011 Pino Toscano <pino@kde.org>
+// Copyright 2019 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
 
@@ -54,6 +55,7 @@ public:
   Direction getDirection() const { return direction; }
   PrintScaling getPrintScaling() const { return printScaling; }
   Duplex getDuplex() const { return duplex; }
+  bool getPickTrayByPDFSize() const { return pickTrayByPDFSize; }
 
 private:
 
@@ -69,6 +71,7 @@ private:
   Direction direction;
   PrintScaling printScaling;
   Duplex duplex;
+  bool pickTrayByPDFSize;
 };
 
 #endif
