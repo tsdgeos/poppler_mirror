@@ -111,9 +111,17 @@ _poppler_attachment_new (FileSpec *emb_file)
       attachment->size = embFile->size ();
 
       if (embFile->createDate ())
-        _poppler_convert_pdf_date_to_gtime (embFile->createDate (), (time_t *)&attachment->ctime);
+        {
+          time_t aux;
+          _poppler_convert_pdf_date_to_gtime (embFile->createDate (), &aux);
+          attachment->ctime = (GTime)aux; // FIXME This will overflow on dates from after 2038
+        }
       if (embFile->modDate ())
-        _poppler_convert_pdf_date_to_gtime (embFile->modDate (), (time_t *)&attachment->mtime);
+        {
+          time_t aux;
+          _poppler_convert_pdf_date_to_gtime (embFile->modDate (), &aux);
+          attachment->mtime = (GTime)aux; // FIXME This will overflow on dates from after 2038
+        }
 
       if (embFile->checksum () && embFile->checksum ()->getLength () > 0)
         attachment->checksum = g_string_new_len (embFile->checksum ()->c_str (),
