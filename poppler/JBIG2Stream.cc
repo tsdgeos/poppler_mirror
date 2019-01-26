@@ -24,6 +24,7 @@
 // Copyright (C) 2013, 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -493,7 +494,7 @@ void JBIG2MMRDecoder::reset() {
 }
 
 int JBIG2MMRDecoder::get2DCode() {
-  const CCITTCode *p;
+  const CCITTCode *p = nullptr;
 
   if (bufLen == 0) {
     buf = str->getChar() & 0xff;
@@ -502,7 +503,7 @@ int JBIG2MMRDecoder::get2DCode() {
     p = &twoDimTab1[(buf >> 1) & 0x7f];
   } else if (bufLen == 8) {
     p = &twoDimTab1[(buf >> 1) & 0x7f];
-  } else {
+  } else if (bufLen < 8) {
     p = &twoDimTab1[(buf << (7 - bufLen)) & 0x7f];
     if (p->bits < 0 || p->bits > (int)bufLen) {
       buf = (buf << 8) | (str->getChar() & 0xff);
@@ -511,7 +512,7 @@ int JBIG2MMRDecoder::get2DCode() {
       p = &twoDimTab1[(buf >> (bufLen - 7)) & 0x7f];
     }
   }
-  if (p->bits < 0) {
+  if (p == nullptr || p->bits < 0) {
     error(errSyntaxError, str->getPos(), "Bad two dim code in JBIG2 MMR stream");
     return EOF;
   }
