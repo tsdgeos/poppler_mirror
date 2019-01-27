@@ -18,6 +18,7 @@
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -391,6 +392,10 @@ void CMap::addCIDs(unsigned int start, unsigned int end, unsigned int nBytes, CI
   int byte;
   unsigned int i, j;
 
+  if (nBytes > 4) {
+    error(errSyntaxError, -1, "Illegal entry in cidchar block in CMap");
+    return;
+  }
   vec = vector;
   for (i = nBytes - 1; i >= 1; --i) {
     byte = (start >> (8 * i)) & 0xff;
