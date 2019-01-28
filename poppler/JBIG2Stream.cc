@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Raj Kumar <rkumar@archive.org>
 // Copyright (C) 2006 Paul Walmsley <paul@booyaka.com>
-// Copyright (C) 2006-2010, 2012, 2014-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012, 2014-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Edward Jiang <ejiang@google.com>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -4150,6 +4150,8 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum, unsigned int length) {
   if (JBIG2HuffmanDecoder::buildTable(huffTab, i)) {
     // create and store the new table segment
     segments->push_back(new JBIG2CodeTable(segNum, huffTab));
+  } else {
+    free(huffTab);
   }
 
   return;
