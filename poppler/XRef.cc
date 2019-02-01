@@ -1565,6 +1565,11 @@ DummyXRefEntry dummyXRefEntry;
 
 XRefEntry *XRef::getEntry(int i, bool complainIfMissing)
 {
+  if (unlikely(i < 0)) {
+    error(errInternal, -1, "Request for invalid XRef entry [{0:d}]", i);
+    return &dummyXRefEntry;
+  }
+
   if (i >= size || entries[i].type == xrefEntryNone) {
 
     if ((!xRefStream) && mainXRefEntriesOffset) {
