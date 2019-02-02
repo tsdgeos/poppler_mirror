@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2006, 2008-2010, 2012, 2014, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2006, 2008-2010, 2012, 2014, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -953,7 +953,6 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
   int len;
   FoFiType1 *ffT1;
   FoFiType1C *ffT1C;
-  int code;
   char *charName;
   bool missing, hex;
   bool numeric;
@@ -1213,7 +1212,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     if (obj2.isArray()) {
       encodingName->Set("Custom");
       hasEncoding = true;
-      code = 0;
+      int code = 0;
       for (i = 0; i < obj2.arrayGetLength(); ++i) {
 	Object obj3 = obj2.arrayGet(i);
 	if (obj3.isInt()) {
@@ -1243,7 +1242,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
   // pass 1: use the name-to-Unicode mapping table
   missing = hex = false;
   bool isZapfDingbats = name && name->endsWith("ZapfDingbats");
-  for (code = 0; code < 256; ++code) {
+  for (int code = 0; code < 256; ++code) {
     if ((charName = enc[code])) {
       if (isZapfDingbats) {
 	// include ZapfDingbats names
@@ -1284,7 +1283,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
 
   // pass 1a: Expand ligatures in the Alphabetic Presentation Form
   // block (eg "fi", "ffi") to normal form
-  for (code = 0; code < 256; ++code) {
+  for (int code = 0; code < 256; ++code) {
     if (unicodeIsAlphabeticPresentationForm(toUnicode[code])) {
       Unicode *normalized = unicodeNormalizeNFKC(&toUnicode[code], 1, &len, nullptr);
       if (len > 1)
@@ -1296,7 +1295,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
   // pass 2: try to fill in the missing chars, looking for ligatures, numeric
   // references and variants
   if (missing) {
-    for (code = 0; code < 256; ++code) {
+    for (int code = 0; code < 256; ++code) {
       if (!toUnicode[code]) {
 	if ((charName = enc[code]) && strcmp(charName, ".notdef")
 	    && (n = parseCharName(charName, uBuf, sizeof(uBuf)/sizeof(*uBuf), 
@@ -1326,7 +1325,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
   //----- get the character widths -----
 
   // initialize all widths
-  for (code = 0; code < 256; ++code) {
+  for (int code = 0; code < 256; ++code) {
     widths[code] = missingWidth * 0.001;
   }
 
@@ -1348,7 +1347,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     if (obj1.arrayGetLength() < lastChar - firstChar + 1) {
       lastChar = firstChar + obj1.arrayGetLength() - 1;
     }
-    for (code = firstChar; code <= lastChar; ++code) {
+    for (int code = firstChar; code <= lastChar; ++code) {
       Object obj2 = obj1.arrayGet(code - firstChar);
       if (obj2.isNum()) {
 	widths[code] = obj2.getNum() * mul;
@@ -1365,7 +1364,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     if (builtinFont->widths->getWidth("space", &w)) {
       widths[32] = 0.001 * w;
     }
-    for (code = 0; code < 256; ++code) {
+    for (int code = 0; code < 256; ++code) {
       if (enc[code] && builtinFont->widths->getWidth(enc[code], &w)) {
 	widths[code] = 0.001 * w;
       }
@@ -1395,7 +1394,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     if (builtinFont->widths->getWidth("space", &w)) {
       widths[32] = 0.001 * w;
     }
-    for (code = 0; code < 256; ++code) {
+    for (int code = 0; code < 256; ++code) {
       if (enc[code] && builtinFont->widths->getWidth(enc[code], &w)) {
 	widths[code] = 0.001 * w;
       }
