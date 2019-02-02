@@ -34,6 +34,7 @@
 // Copyright (C) 2014 Olly Betts <olly@survex.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1224,8 +1225,8 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
 	    }
 	    enc[code] = copyString(obj3.getName());
 	    encFree[code] = true;
+	    ++code;
 	  }
-	  ++code;
 	} else {
 	  error(errSyntaxError, -1,
 		"Wrong type in font encoding resource differences ({0:s})",
