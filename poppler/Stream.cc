@@ -35,6 +35,7 @@
 // Copyright (C) 2017 Jose Aliste <jaliste@src.gnome.org>
 // Copyright (C) 2017 Kay Dohmann <k.dohmann@gmx.net>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -712,7 +713,7 @@ bool StreamPredictor::getNextLine() {
       j = k = pixBytes;
       for (i = 0; i < width; ++i) {
 	for (kk = 0; kk < nComps; ++kk) {
-	  if (inBits < nBits) {
+	  while (inBits < nBits) {
 	    inBuf = (inBuf << 8) | (predLine[j++] & 0xff);
 	    inBits += 8;
 	  }
