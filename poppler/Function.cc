@@ -276,7 +276,7 @@ SampledFunction::SampledFunction(Object *funcObj, Dict *dict) {
       }
       idx = (idx + bit) * sampleSize[j-1];
     }
-    if (sampleSize[0] == 1) {
+    if (m > 0 && sampleSize[0] == 1) {
       bit = 0;
     } else {
       bit = (t >> (m - 1)) & 1;

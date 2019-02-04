@@ -6,10 +6,10 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2016 Markus Kilås <digital@markuspage.com>
-// Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
-// Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright 2017, 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
+// Copyright 2017, 2019 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2019 Alexey Pavlov <alexpux@gmail.com>
 //
@@ -33,6 +33,7 @@
 #include "PDFDocFactory.h"
 #include "Error.h"
 #include "GlobalParams.h"
+#include "SignatureHandler.h"
 #include "SignatureInfo.h"
 #include "Win32Console.h"
 #include "numberofcharacters.h"
@@ -118,12 +119,15 @@ static void dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_wi
     delete path;
 }
 
+static GooString nssDir;
 static bool printVersion = false;
 static bool printHelp = false;
 static bool dontVerifyCert = false;
 static bool dumpSignatures = false;
 
 static const ArgDesc argDesc[] = {
+  {"-nssdir", argGooString, &nssDir,     0,
+   "path to directory of libnss3 database"},
   {"-nocert", argFlag,     &dontVerifyCert,     0,
    "don't perform certificate validation"},
   {"-dump",   argFlag,     &dumpSignatures,     0,
@@ -170,6 +174,8 @@ int main(int argc, char *argv[])
   }
 
   fileName = new GooString(argv[argc - 1]);
+
+  SignatureHandler::setNSSDir(nssDir);
 
   // open PDF file
   doc = PDFDocFactory().createPDFDoc(*fileName, nullptr, nullptr);

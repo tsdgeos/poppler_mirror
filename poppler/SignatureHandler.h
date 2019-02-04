@@ -49,13 +49,16 @@ public:
   CertificateValidationStatus validateCertificate(time_t validation_time);
   std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
 
+  // Initializes the NSS dir with the custom given directory
+  // calling it with an empty string means use the default firefox db, /etc/pki/nssdb, ~/.pki/nssdb
+  // If you don't want a custom NSS dir and the default entries are fine for you, not calling this function is fine
+  // If wanted, this has to be called before doing signature validation calls
+  static void setNSSDir(const GooString &nssDir);
+
 private:
   SignatureHandler(const SignatureHandler &);
   SignatureHandler& operator=(const SignatureHandler &);
 
-  void init_nss();
-
-  GooString * getDefaultFirefoxCertDB_Linux();
   unsigned int digestLength(SECOidTag digestAlgId);
   NSSCMSMessage *CMS_MessageCreate(SECItem * cms_item);
   NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage * cms_msg);

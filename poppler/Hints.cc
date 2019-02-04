@@ -10,6 +10,7 @@
 // Copyright 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright 2016 Jeffrey Morlan <jmmorlan@sonic.net>
+// Copyright 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 //
 //========================================================================
 
@@ -416,7 +417,11 @@ bool Hints::readSharedObjectsTable(Stream *str)
   sbr.resetInputBits(); // reset on byte boundary. Not in specs!
   for (unsigned int i = 0; i < nSharedGroups && !sbr.atEOF(); i++) {
     if (groupHasSignature[i]) {
-       sbr.readBits(128);
+       // readBits doesn't supports more than 32 bits.
+       sbr.readBits(32);
+       sbr.readBits(32);
+       sbr.readBits(32);
+       sbr.readBits(32);
     }
   }
   if (sbr.atEOF())

@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
-// Copyright (C) 2010, 2011, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2011, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 //
@@ -82,66 +82,68 @@ SplashXPath::SplashXPath(SplashPath *path, SplashCoord *matrix,
 
   // set up the stroke adjustment hints
   if (path->hints) {
-    adjusts = (SplashXPathAdjust *)gmallocn(path->hintsLength,
+    adjusts = (SplashXPathAdjust *)gmallocn_checkoverflow(path->hintsLength,
 					    sizeof(SplashXPathAdjust));
-    for (i = 0; i < path->hintsLength; ++i) {
-      hint = &path->hints[i];
-      if (hint->ctrl0 + 1 >= path->length || hint->ctrl1 + 1 >= path->length) {
-	gfree(adjusts);
-	adjusts = nullptr;
-	break;
+    if (adjusts) {
+      for (i = 0; i < path->hintsLength; ++i) {
+	hint = &path->hints[i];
+	if (hint->ctrl0 + 1 >= path->length || hint->ctrl1 + 1 >= path->length) {
+	  gfree(adjusts);
+	  adjusts = nullptr;
+	  break;
+	}
+	x0 = pts[hint->ctrl0    ].x;    y0 = pts[hint->ctrl0    ].y;
+	x1 = pts[hint->ctrl0 + 1].x;    y1 = pts[hint->ctrl0 + 1].y;
+	x2 = pts[hint->ctrl1    ].x;    y2 = pts[hint->ctrl1    ].y;
+	x3 = pts[hint->ctrl1 + 1].x;    y3 = pts[hint->ctrl1 + 1].y;
+	if (x0 == x1 && x2 == x3) {
+	  adjusts[i].vert = true;
+	  adj0 = x0;
+	  adj1 = x2;
+	} else if (y0 == y1 && y2 == y3) {
+	  adjusts[i].vert = false;
+	  adj0 = y0;
+	  adj1 = y2;
+	} else {
+	  gfree(adjusts);
+	  adjusts = nullptr;
+	  break;
+	}
+	if (adj0 > adj1) {
+	  x0 = adj0;
+	  adj0 = adj1;
+	  adj1 = x0;
+	}
+	adjusts[i].x0a = adj0 - 0.01;
+	adjusts[i].x0b = adj0 + 0.01;
+	adjusts[i].xma = (SplashCoord)0.5 * (adj0 + adj1) - 0.01;
+	adjusts[i].xmb = (SplashCoord)0.5 * (adj0 + adj1) + 0.01;
+	adjusts[i].x1a = adj1 - 0.01;
+	adjusts[i].x1b = adj1 + 0.01;
+	// rounding both edge coordinates can result in lines of
+	// different widths (e.g., adj=10.1, adj1=11.3 --> x0=10, x1=11;
+	// adj0=10.4, adj1=11.6 --> x0=10, x1=12), but it has the
+	// benefit of making adjacent strokes/fills line up without any
+	// gaps between them
+	x0 = splashRound(adj0);
+	x1 = splashRound(adj1);
+	if (x1 == x0) {
+	  if (adjustLines) {
+	    // the adjustment moves thin lines (clip rectangle with
+	    // empty width or height) out of clip area, here we need
+	    // a special adjustment:
+	    x0 = linePosI;
+	    x1 = x0 + 1;
+	  } else {
+	    x1 = x1 + 1;
+	  }
+	}
+	adjusts[i].x0 = (SplashCoord)x0;
+	adjusts[i].x1 = (SplashCoord)x1 - 0.01;
+	adjusts[i].xm = (SplashCoord)0.5 * (adjusts[i].x0 + adjusts[i].x1);
+	adjusts[i].firstPt = hint->firstPt;
+	adjusts[i].lastPt = hint->lastPt;
       }
-      x0 = pts[hint->ctrl0    ].x;    y0 = pts[hint->ctrl0    ].y;
-      x1 = pts[hint->ctrl0 + 1].x;    y1 = pts[hint->ctrl0 + 1].y;
-      x2 = pts[hint->ctrl1    ].x;    y2 = pts[hint->ctrl1    ].y;
-      x3 = pts[hint->ctrl1 + 1].x;    y3 = pts[hint->ctrl1 + 1].y;
-      if (x0 == x1 && x2 == x3) {
-	adjusts[i].vert = true;
-	adj0 = x0;
-	adj1 = x2;
-      } else if (y0 == y1 && y2 == y3) {
-	adjusts[i].vert = false;
-	adj0 = y0;
-	adj1 = y2;
-      } else {
-	gfree(adjusts);
-	adjusts = nullptr;
-	break;
-      }
-      if (adj0 > adj1) {
-	x0 = adj0;
-	adj0 = adj1;
-	adj1 = x0;
-      }
-      adjusts[i].x0a = adj0 - 0.01;
-      adjusts[i].x0b = adj0 + 0.01;
-      adjusts[i].xma = (SplashCoord)0.5 * (adj0 + adj1) - 0.01;
-      adjusts[i].xmb = (SplashCoord)0.5 * (adj0 + adj1) + 0.01;
-      adjusts[i].x1a = adj1 - 0.01;
-      adjusts[i].x1b = adj1 + 0.01;
-      // rounding both edge coordinates can result in lines of
-      // different widths (e.g., adj=10.1, adj1=11.3 --> x0=10, x1=11;
-      // adj0=10.4, adj1=11.6 --> x0=10, x1=12), but it has the
-      // benefit of making adjacent strokes/fills line up without any
-      // gaps between them
-      x0 = splashRound(adj0);
-      x1 = splashRound(adj1);
-      if (x1 == x0) {
-        if (adjustLines) {
-          // the adjustment moves thin lines (clip rectangle with
-          // empty width or height) out of clip area, here we need
-          // a special adjustment:
-          x0 = linePosI;
-          x1 = x0 + 1;
-        } else {
-          x1 = x1 + 1;
-        }
-      }
-      adjusts[i].x0 = (SplashCoord)x0;
-      adjusts[i].x1 = (SplashCoord)x1 - 0.01;
-      adjusts[i].xm = (SplashCoord)0.5 * (adjusts[i].x0 + adjusts[i].x1);
-      adjusts[i].firstPt = hint->firstPt;
-      adjusts[i].lastPt = hint->lastPt;
     }
 
   } else {

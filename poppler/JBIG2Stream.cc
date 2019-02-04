@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Raj Kumar <rkumar@archive.org>
 // Copyright (C) 2006 Paul Walmsley <paul@booyaka.com>
-// Copyright (C) 2006-2010, 2012, 2014-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012, 2014-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2011 Edward Jiang <ejiang@google.com>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
@@ -24,6 +24,7 @@
 // Copyright (C) 2013, 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -326,7 +327,7 @@ public:
   unsigned int readBit();
 
   // Sort the table by prefix length and assign prefix values.
-  void buildTable(JBIG2HuffmanTable *table, unsigned int len);
+  static bool buildTable(JBIG2HuffmanTable *table, unsigned int len);
 
 private:
 
@@ -411,7 +412,7 @@ unsigned int JBIG2HuffmanDecoder::readBit() {
   return (buf >> bufLen) & 1;
 }
 
-void JBIG2HuffmanDecoder::buildTable(JBIG2HuffmanTable *table, unsigned int len) {
+bool JBIG2HuffmanDecoder::buildTable(JBIG2HuffmanTable *table, unsigned int len) {
   unsigned int i, j, k, prefix;
   JBIG2HuffmanTable tab;
 
@@ -447,10 +448,17 @@ void JBIG2HuffmanDecoder::buildTable(JBIG2HuffmanTable *table, unsigned int len)
     prefix = 0;
     table[i++].prefix = prefix++;
     for (; table[i].rangeLen != jbig2HuffmanEOT; ++i) {
-      prefix <<= table[i].prefixLen - table[i-1].prefixLen;
+      if (table[i].prefixLen - table[i-1].prefixLen > 32) {
+	error(errSyntaxError, -1, "Failed to build table for JBIG2 stream");
+	return false;
+      } else {
+	prefix <<= table[i].prefixLen - table[i-1].prefixLen;
+      }
       table[i].prefix = prefix++;
     }
   }
+
+  return true;
 }
 
 //------------------------------------------------------------------------
@@ -493,7 +501,7 @@ void JBIG2MMRDecoder::reset() {
 }
 
 int JBIG2MMRDecoder::get2DCode() {
-  const CCITTCode *p;
+  const CCITTCode *p = nullptr;
 
   if (bufLen == 0) {
     buf = str->getChar() & 0xff;
@@ -502,7 +510,7 @@ int JBIG2MMRDecoder::get2DCode() {
     p = &twoDimTab1[(buf >> 1) & 0x7f];
   } else if (bufLen == 8) {
     p = &twoDimTab1[(buf >> 1) & 0x7f];
-  } else {
+  } else if (bufLen < 8) {
     p = &twoDimTab1[(buf << (7 - bufLen)) & 0x7f];
     if (p->bits < 0 || p->bits > (int)bufLen) {
       buf = (buf << 8) | (str->getChar() & 0xff);
@@ -511,7 +519,7 @@ int JBIG2MMRDecoder::get2DCode() {
       p = &twoDimTab1[(buf >> (bufLen - 7)) & 0x7f];
     }
   }
-  if (p->bits < 0) {
+  if (p == nullptr || p->bits < 0) {
     error(errSyntaxError, str->getPos(), "Bad two dim code in JBIG2 MMR stream");
     return EOF;
   }
@@ -2006,7 +2014,7 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
 				    unsigned int *refSegs, unsigned int nRefSegs) {
   JBIG2Bitmap *bitmap;
   JBIG2HuffmanTable runLengthTab[36];
-  JBIG2HuffmanTable *symCodeTab;
+  JBIG2HuffmanTable *symCodeTab = nullptr;
   JBIG2HuffmanTable *huffFSTable, *huffDSTable, *huffDTTable;
   JBIG2HuffmanTable *huffRDWTable, *huffRDHTable;
   JBIG2HuffmanTable *huffRDXTable, *huffRDYTable, *huffRSizeTable;
@@ -2228,7 +2236,12 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
     runLengthTab[34].rangeLen = 7;
     runLengthTab[35].prefixLen = 0;
     runLengthTab[35].rangeLen = jbig2HuffmanEOT;
-    huffDecoder->buildTable(runLengthTab, 35);
+    if (!JBIG2HuffmanDecoder::buildTable(runLengthTab, 35)) {
+      huff = false;
+    }
+  }
+
+  if (huff) {
     symCodeTab = (JBIG2HuffmanTable *)gmallocn(numSyms + 1,
 					       sizeof(JBIG2HuffmanTable));
     for (i = 0; i < numSyms; ++i) {
@@ -2254,12 +2267,17 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
     }
     symCodeTab[numSyms].prefixLen = 0;
     symCodeTab[numSyms].rangeLen = jbig2HuffmanEOT;
-    huffDecoder->buildTable(symCodeTab, numSyms);
+    if (!JBIG2HuffmanDecoder::buildTable(symCodeTab, numSyms)) {
+      huff = false;
+      gfree(symCodeTab);
+      symCodeTab = nullptr;
+    }
     huffDecoder->reset();
 
   // set up the arithmetic decoder
-  } else {
-    symCodeTab = nullptr;
+  }
+
+  if (!huff) {
     resetIntStats(symCodeLen);
     arithDecoder->start();
   }
@@ -4129,10 +4147,12 @@ void JBIG2Stream::readCodeTableSeg(unsigned int segNum, unsigned int length) {
   huffTab[i].val = 0;
   huffTab[i].prefixLen = 0;
   huffTab[i].rangeLen = jbig2HuffmanEOT;
-  huffDecoder->buildTable(huffTab, i);
-
-  // create and store the new table segment
-  segments->push_back(new JBIG2CodeTable(segNum, huffTab));
+  if (JBIG2HuffmanDecoder::buildTable(huffTab, i)) {
+    // create and store the new table segment
+    segments->push_back(new JBIG2CodeTable(segNum, huffTab));
+  } else {
+    free(huffTab);
+  }
 
   return;
 
