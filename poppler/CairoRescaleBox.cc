@@ -279,7 +279,7 @@ bool CairoRescaleBox::downScaleImage(unsigned orig_width, unsigned orig_height,
   unsigned int *dest;
   int dst_stride;
 
-  dest = (unsigned int *)cairo_image_surface_get_data (dest_surface);
+  dest = reinterpret_cast<unsigned int *>(cairo_image_surface_get_data (dest_surface));
   dst_stride = cairo_image_surface_get_stride (dest_surface);
 
   scanline = (uint32_t*)gmallocn (orig_width, sizeof(int));

@@ -1024,7 +1024,7 @@ void ArthurOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 
   // TODO: Would using QImage::Format_Mono be more efficient here?
   QImage image(width, height, QImage::Format_ARGB32);
-  unsigned int *data = (unsigned int *)image.bits();
+  unsigned int *data = reinterpret_cast<unsigned int *>(image.bits());
   int stride = image.bytesPerLine()/4;
 
   QRgb fillColor = m_currentBrush.color().rgb();
@@ -1074,7 +1074,7 @@ void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
   imgStr->reset();
   
   image = QImage(width, height, QImage::Format_ARGB32);
-  data = (unsigned int *)image.bits();
+  data = reinterpret_cast<unsigned int *>(image.bits());
   stride = image.bytesPerLine()/4;
   for (y = 0; y < height; y++) {
     pix = imgStr->getLine();
@@ -1149,7 +1149,7 @@ void ArthurOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *
   maskImageStr->reset();
 
   QImage image(width, height, QImage::Format_ARGB32);
-  unsigned int *data = (unsigned int *)image.bits();
+  unsigned int *data = reinterpret_cast<unsigned int *>(image.bits());
   int stride = image.bytesPerLine()/4;
 
   std::vector<unsigned char> maskLine(maskWidth);
