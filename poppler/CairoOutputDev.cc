@@ -1826,7 +1826,7 @@ void CairoOutputDev::setSoftMask(GfxState * state, const double * bbox, bool alp
     cairo_destroy(maskCtx);
 
     /* convert to a luminocity map */
-    uint32_t *source_data = (uint32_t*)cairo_image_surface_get_data(source);
+    uint32_t *source_data = reinterpret_cast<uint32_t *>(cairo_image_surface_get_data(source));
     /* get stride in units of 32 bits */
     ptrdiff_t stride = cairo_image_surface_get_stride(source)/4;
     for (int y=0; y<height; y++) {
@@ -2594,7 +2594,7 @@ void CairoOutputDev::drawMaskedImage(GfxState *state, Object *ref,
   buffer = cairo_image_surface_get_data (image);
   row_stride = cairo_image_surface_get_stride (image);
   for (y = 0; y < height; y++) {
-    dest = (unsigned int *) (buffer + y * row_stride);
+    dest = reinterpret_cast<unsigned int *>(buffer + y * row_stride);
     pix = imgStr->getLine();
     colorMap->getRGBLine (pix, dest, width);
   }
@@ -2746,7 +2746,7 @@ void CairoOutputDev::drawSoftMaskedImage(GfxState *state, Object *ref, Stream *s
   buffer = cairo_image_surface_get_data (image);
   row_stride = cairo_image_surface_get_stride (image);
   for (y = 0; y < height; y++) {
-    dest = (unsigned int *) (buffer + y * row_stride);
+    dest = reinterpret_cast<unsigned int *>(buffer + y * row_stride);
     pix = imgStr->getLine();
     colorMap->getRGBLine (pix, dest, width);
   }
@@ -3154,7 +3154,7 @@ public:
       buffer = cairo_image_surface_get_data (image);
       stride = cairo_image_surface_get_stride (image);
       for (int y = 0; y < height; y++) {
-        uint32_t *dest = (uint32_t *) (buffer + y * stride);
+        uint32_t *dest = reinterpret_cast<uint32_t *>(buffer + y * stride);
         getRow(y, dest);
       }
     } else {
