@@ -1,3 +1,29 @@
+Release 0.74.0:
+        core:
+         * Remove support for obsolete systems. Issue #709
+         * Include timezone in timeToDateString()
+         * Fix/silence some warnings
+         * Fix issues with broken files
+
+        build system:
+         * Fix linking in FreeBSD
+         * Fix fseeko configure check on Android for API level < 24
+         * Remove unused MacroPushRequiredVars.cmake
+
+        qt5:
+         * Add API that lazily builds an outline by wrapping the internal objects
+         * Demo: Use new API to build Table Of Contents lazily
+
+        glib:
+         * Improve documentation
+         * Fix cast from 'GTime *' (aka 'int *') to 'time_t *' (aka 'long *')
+
+        utils:
+         * pdfsig: add -nssdir option
+
+        cpp:
+         * Add a way to get all the named destinations in a document.
+
 Release 0.73.0:
         core:
          * Fix regression reading some encrypted files. Issue #690
