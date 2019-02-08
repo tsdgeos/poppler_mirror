@@ -135,7 +135,7 @@ if (HAVE_INTROSPECTION AND BUILD_SHARED_LIBS)
   get_directory_property(_tmp_includes INCLUDE_DIRECTORIES)
   _list_prefix(_includes _tmp_includes "-I")
   set(Poppler_0_18_gir_CFLAGS ${_includes} -L${CMAKE_BINARY_DIR} -L${CMAKE_CURRENT_BINARY_DIR})
-  set(Poppler_0_18_gir_LIBS poppler-glib)
+  set(Poppler_0_18_gir_LIBS poppler-glib poppler)
   _list_prefix(_abs_introspection_files introspection_files "${CMAKE_CURRENT_SOURCE_DIR}/")
   list(APPEND _abs_introspection_files
     ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.c
