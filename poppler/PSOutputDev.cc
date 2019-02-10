@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2009, 2011-2013, 2015-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2009, 2011-2013, 2015-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
@@ -2119,7 +2119,7 @@ void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName) {
 
   // get the font stream and info
   Object obj1, obj2, obj3;
-  Object refObj(id->num, id->gen);
+  Object refObj(*id);
   Object strObj = refObj.fetch(xref);
   if (!strObj.isStream()) {
     error(errSyntaxError, -1, "Embedded font file object is not a stream");

@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005-2013, 2016-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006-2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2006 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
@@ -366,7 +366,7 @@ Annots *Page::getAnnots(XRef *xrefA) {
 }
 
 void Page::addAnnot(Annot *annot) {
-  Ref annotRef = annot->getRef ();
+  const Ref annotRef = annot->getRef ();
 
   // Make sure we have annots before adding the new one
   // even if it's an empty list so that we can safely
@@ -380,16 +380,16 @@ void Page::addAnnot(Annot *annot) {
     // we have to create it
 
     Object obj1 = Object(new Array(xref));
-    obj1.arrayAdd(Object(annotRef.num, annotRef.gen));
+    obj1.arrayAdd(Object(annotRef));
 
     annotsRef = xref->addIndirectObject (&obj1);
-    annotsObj = Object(annotsRef.num, annotsRef.gen);
-    pageObj.dictSet ("Annots", Object(annotsRef.num, annotsRef.gen));
+    annotsObj = Object(annotsRef);
+    pageObj.dictSet ("Annots", Object(annotsRef));
     xref->setModifiedObject (&pageObj, pageRef);
   } else {
     Object obj1 = getAnnotsObject();
     if (obj1.isArray()) {
-      obj1.arrayAdd (Object(annotRef.num, annotRef.gen));
+      obj1.arrayAdd (Object(annotRef));
       if (annotsObj.isRef())
         xref->setModifiedObject (&obj1, annotsObj.getRef());
       else

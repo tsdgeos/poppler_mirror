@@ -407,7 +407,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID) {
 
   t = fontUnknownType;
   if (embID->num >= 0) {
-    Object obj3(embID->num, embID->gen);
+    Object obj3(*embID);
     Object obj4 = obj3.fetch(xref);
     if (obj4.isStream()) {
       obj4.streamReset();
@@ -603,7 +603,7 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, PSOutputDev *ps) {
   //----- embedded font
   if (embFontID.num >= 0) {
     embed = true;
-    Object refObj(embFontID.num, embFontID.gen);
+    Object refObj(embFontID);
     Object embFontObj = refObj.fetch(xref);
     if (!embFontObj.isStream()) {
       error(errSyntaxError, -1, "Embedded font object is wrong type");
@@ -819,7 +819,7 @@ char *GfxFont::readEmbFontFile(XRef *xref, int *len) {
   char *buf;
   Stream *str;
 
-  Object obj1(embFontID.num, embFontID.gen);
+  Object obj1(embFontID);
   Object obj2 = obj1.fetch(xref);
   if (!obj2.isStream()) {
     error(errSyntaxError, -1, "Embedded font file is not a stream");

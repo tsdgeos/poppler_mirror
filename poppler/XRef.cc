@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Dan Sheridan <dan.sheridan@postman.org.uk>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010, 2012-2014, 2016-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010, 2012-2014, 2016-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -1206,7 +1206,7 @@ Object XRef::createDocInfoIfNoneExists() {
 
   obj = Object(new Dict(this));
   const Ref ref = addIndirectObject(&obj);
-  trailerDict.dictSet("Info", Object(ref.num, ref.gen));
+  trailerDict.dictSet("Info", Object(ref));
 
   return obj;
 }

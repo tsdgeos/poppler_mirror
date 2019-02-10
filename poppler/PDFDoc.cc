@@ -1583,7 +1583,7 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
     trailerDict->set("ID", Object(array));
   }
 
-  trailerDict->set("Root", Object(root->num, root->gen));
+  trailerDict->set("Root", Object(*root));
 
   if (incrUpdate) { 
     trailerDict->set("Prev", Object(startxRef));
