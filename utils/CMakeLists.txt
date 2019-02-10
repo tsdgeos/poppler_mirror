@@ -121,6 +121,7 @@ install(FILES pdftotext.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 # pdftohtml
 set(pdftohtml_SOURCES ${common_srcs}
+  InMemoryFile.cc
   pdftohtml.cc
   HtmlFonts.cc
   HtmlLinks.cc

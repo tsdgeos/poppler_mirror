@@ -36,6 +36,7 @@
 
 #include <stdio.h>
 #include "goo/GooList.h"
+#include "goo/gbasename.h"
 #include "GfxFont.h"
 #include "OutputDev.h"
 #include "HtmlLinks.h"
@@ -43,13 +44,6 @@
 #include "Link.h"
 #include "Catalog.h"
 #include "UnicodeMap.h"
-
-
-#ifdef _WIN32
-#  define SLASH '\\'
-#else
-#  define SLASH '/'
-#endif
 
 #define xoutRound(x) ((int)(x + 0.5))
 
@@ -69,7 +63,6 @@ enum UnicodeTextDirection {
   textDirRightLeft,
   textDirTopBottom
 };
-
 
 class HtmlString {
 public:
@@ -123,7 +116,7 @@ class HtmlPage {
 public:
 
   // Constructor.
-  HtmlPage(bool rawOrder, const char *imgExtVal);
+  HtmlPage(bool rawOrder);
 
   // Destructor.
   ~HtmlPage();
@@ -166,7 +159,7 @@ public:
   // number of images on the current page
   int  getNumImages() { return imgList->getLength(); }
 
-  void dump(FILE *f, int pageNum);
+  void dump(FILE *f, int pageNum, const std::vector<std::string>& backgroundImages);
 
   // Clear the page.
   void clear();
@@ -186,7 +179,7 @@ private:
   
   void setDocName(const char* fname);
   void dumpAsXML(FILE* f,int page);
-  void dumpComplex(FILE* f, int page);
+  void dumpComplex(FILE* f, int page, const std::vector<std::string>& backgroundImages);
   int dumpComplexHeaders(FILE * const file, FILE *& pageFile, int page);
 
   // marks the position of the fonts that belong to current page (for noframes)
@@ -196,7 +189,6 @@ private:
   GooList   *imgList;
   
   GooString *DocName;
-  GooString *imgExt;
   int pageWidth;
   int pageHeight;
   int firstPage;                // used to begin the numeration of pages
@@ -241,7 +233,6 @@ public:
 	  const char *keywords,
 	  const char *subject,
 	  const char *date,
-	  const char *extension,
 	  bool rawOrder,
 	  int firstPage = 1,
 	  bool outline = 0);
@@ -289,6 +280,10 @@ public:
 
   // End a page.
   void endPage() override;
+
+  // add a background image to the list of background images,
+  // as this seems to be done outside other processing. takes ownership of img.
+  void addBackgroundImage(const std::string& img);
 
   //----- update text state
   void updateFont(GfxState *state) override;
@@ -352,6 +347,7 @@ private:
   GooList *glMetaVars;
   Catalog *catalog;
   Page *docPage;
+  std::vector<std::string> backgroundImages;
   friend class HtmlPage;
 };
 

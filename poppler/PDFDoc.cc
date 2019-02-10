@@ -862,7 +862,7 @@ Hints *PDFDoc::getHints()
   return hints;
 }
 
-int PDFDoc::savePageAs(GooString *name, int pageNo) 
+int PDFDoc::savePageAs(const GooString *name, int pageNo)
 {
   FILE *f;
   OutStream *outStr;
@@ -1026,7 +1026,7 @@ int PDFDoc::savePageAs(GooString *name, int pageNo)
   return errNone;
 }
 
-int PDFDoc::saveAs(GooString *name, PDFWriteMode mode) {
+int PDFDoc::saveAs(const GooString *name, PDFWriteMode mode) {
   FILE *f;
   OutStream *outStr;
   int res;
@@ -1058,7 +1058,7 @@ int PDFDoc::saveAs(OutStream *outStr, PDFWriteMode mode) {
   return errNone;
 }
 
-int PDFDoc::saveWithoutChangesAs(GooString *name) {
+int PDFDoc::saveWithoutChangesAs(const GooString *name) {
   FILE *f;
   OutStream *outStr;
   int res;

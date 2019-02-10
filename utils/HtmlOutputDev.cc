@@ -58,7 +58,10 @@
 #include <math.h>
 #include <iostream>
 #include "goo/GooString.h"
+#include "goo/gbasename.h"
 #include "goo/GooList.h"
+#include "goo/gbase64.h"
+#include "goo/gbasename.h"
 #include "UnicodeMap.h"
 #include "goo/gmem.h"
 #include "Error.h"
@@ -70,6 +73,7 @@
 #include "HtmlOutputDev.h"
 #include "HtmlFonts.h"
 #include "HtmlUtils.h"
+#include "InMemoryFile.h"
 #include "Outline.h"
 #include "PDFDoc.h"
 
@@ -101,6 +105,7 @@ static inline bool IS_CLOSER(float x, float y, float z) { return fabs((x)-(y)) <
 
 extern bool complexMode;
 extern bool singleHtml;
+extern bool dataUrls;
 extern bool ignore;
 extern bool printCommands;
 extern bool printHtml;
@@ -115,16 +120,6 @@ extern double wordBreakThreshold;
 
 static bool debug = false;
 static GooString *gstr_buff0 = nullptr; // a workspace in which I format strings
-
-static GooString* basename(GooString* str){
-  
-  const char *p=str->c_str();
-  int len=str->getLength();
-  for (int i=len-1;i>=0;i--)
-    if (*(p+i)==SLASH) 
-      return new GooString((p+i+1),len-i-1);
-  return new GooString(str);
-}
 
 #if 0
 static GooString* Dirname(GooString* str){
@@ -276,7 +271,7 @@ void HtmlString::endString()
 // HtmlPage
 //------------------------------------------------------------------------
 
-HtmlPage::HtmlPage(bool rawOrder, const char *imgExtVal) {
+HtmlPage::HtmlPage(bool rawOrder) {
   this->rawOrder = rawOrder;
   curStr = nullptr;
   yxStrings = nullptr;
@@ -290,7 +285,6 @@ HtmlPage::HtmlPage(bool rawOrder, const char *imgExtVal) {
   fontsPageMarker = 0;
   DocName=nullptr;
   firstPage = -1;
-  imgExt = new GooString(imgExtVal);
 }
 
 HtmlPage::~HtmlPage() {
@@ -298,7 +292,6 @@ HtmlPage::~HtmlPage() {
   delete DocName;
   delete fonts;
   delete links;
-  delete imgExt;
   deleteGooList<HtmlImage>(imgList);
 }
 
@@ -858,15 +851,12 @@ int HtmlPage::dumpComplexHeaders(FILE * const file, FILE *& pageFile, int page) 
   return 0;
 }
 
-void HtmlPage::dumpComplex(FILE *file, int page){
+void HtmlPage::dumpComplex(FILE *file, int page, const std::vector<std::string>& backgroundImages) {
   FILE* pageFile;
-  GooString* tmp;
 
   if( firstPage == -1 ) firstPage = page; 
   
   if (dumpComplexHeaders(file, pageFile, page)) { error(errIO, -1, "Couldn't write headers."); return; }
-
-  tmp=basename(DocName);
    
   fputs("<style type=\"text/css\">\n<!--\n",pageFile);
   fputs("\tp {margin: 0; padding: 0;}",pageFile);
@@ -890,15 +880,12 @@ void HtmlPage::dumpComplex(FILE *file, int page){
   fprintf(pageFile,"<div id=\"page%d-div\" style=\"position:relative;width:%dpx;height:%dpx;\">\n",
       page, pageWidth, pageHeight);
 
-  if( !ignore ) 
+  if(!ignore && (size_t) (page - firstPage) < backgroundImages.size())
   {
     fprintf(pageFile,
-	    "<img width=\"%d\" height=\"%d\" src=\"%s%03d.%s\" alt=\"background image\"/>\n",
-	    pageWidth, pageHeight, tmp->c_str(), 
-		(page-firstPage+1), imgExt->c_str());
+      "<img width=\"%d\" height=\"%d\" src=\"%s\" alt=\"background image\"/>\n",
+      pageWidth, pageHeight, backgroundImages[page - firstPage].c_str());
   }
-  
-  delete tmp;
   
   for(HtmlString *tmp1=yxStrings;tmp1;tmp1=tmp1->yxNext){
     if (tmp1->htext){
@@ -927,12 +914,12 @@ void HtmlPage::dumpComplex(FILE *file, int page){
 }
 
 
-void HtmlPage::dump(FILE *f, int pageNum) 
+void HtmlPage::dump(FILE *f, int pageNum, const std::vector<std::string>& backgroundImages)
 {
   if (complexMode || singleHtml)
   {
     if (xml) dumpAsXML(f, pageNum);
-    if (!xml) dumpComplex(f, pageNum);  
+    if (!xml) dumpComplex(f, pageNum, backgroundImages);
   }
   else
   {
@@ -1070,7 +1057,7 @@ void HtmlOutputDev::doFrame(int firstPage){
   
   delete fName;
     
-  fName=basename(Docname);
+  const std::string baseName = gbasename(Docname->c_str());
   fputs(DOCTYPE, fContentsFrame);
   fputs("\n<html>",fContentsFrame);
   fputs("\n<head>",fContentsFrame);
@@ -1080,23 +1067,21 @@ void HtmlOutputDev::doFrame(int firstPage){
   dumpMetaVars(fContentsFrame);
   fprintf(fContentsFrame, "</head>\n");
   fputs("<frameset cols=\"100,*\">\n",fContentsFrame);
-  fprintf(fContentsFrame,"<frame name=\"links\" src=\"%s_ind.html\"/>\n",fName->c_str());
+  fprintf(fContentsFrame,"<frame name=\"links\" src=\"%s_ind.html\"/>\n", baseName.c_str());
   fputs("<frame name=\"contents\" src=",fContentsFrame); 
   if (complexMode) 
-      fprintf(fContentsFrame,"\"%s-%d.html\"",fName->c_str(), firstPage);
+      fprintf(fContentsFrame,"\"%s-%d.html\"", baseName.c_str(), firstPage);
   else
-      fprintf(fContentsFrame,"\"%ss.html\"",fName->c_str());
+      fprintf(fContentsFrame,"\"%ss.html\"", baseName.c_str());
   
   fputs("/>\n</frameset>\n</html>\n",fContentsFrame);
  
-  delete fName;
   delete htmlEncoding;
   fclose(fContentsFrame);  
 }
 
 HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char *title,
 	const char *author, const char *keywords, const char *subject, const char *date,
-	const char *extension,
 	bool rawOrder, int firstPage, bool outline) 
 {
   catalog = catalogA;
@@ -1112,7 +1097,7 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
   //pageNum=firstPage;
   // open file
   needClose = false;
-  pages = new HtmlPage(rawOrder, extension);
+  pages = new HtmlPage(rawOrder);
   
   glMetaVars = new GooList();
   glMetaVars->push_back(new HtmlMetaVar("generator", "pdftohtml 0.36"));
@@ -1120,7 +1105,7 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
   if( keywords ) glMetaVars->push_back(new HtmlMetaVar("keywords", keywords));
   if( date ) glMetaVars->push_back(new HtmlMetaVar("date", date));
   if( subject ) glMetaVars->push_back(new HtmlMetaVar("subject", subject));
- 
+
   maxPageWidth = 0;
   maxPageHeight = 0;
 
@@ -1149,9 +1134,9 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
 
          if (doOutline)
          {
-             GooString *str = basename(Docname);
-             fprintf(fContentsFrame, "<a href=\"%s%s\" target=\"contents\">Outline</a><br/>", str->c_str(), complexMode ? "-outline.html" : "s.html#outline");
-             delete str;
+             fprintf(fContentsFrame, "<a href=\"%s%s\" target=\"contents\">Outline</a><br/>",
+                 gbasename(Docname->c_str()).c_str(),
+                 complexMode ? "-outline.html" : "s.html#outline");
          }
      }
 	if (!complexMode)
@@ -1256,24 +1241,22 @@ void HtmlOutputDev::startPage(int pageNum, GfxState *state, XRef *xref) {
 #endif
 
   this->pageNum = pageNum;
-  GooString *str=basename(Docname);
+  const std::string str = gbasename(Docname->c_str());
   pages->clear(); 
   if(!noframes)
   {
     if (fContentsFrame)
 	{
       if (complexMode)
-		fprintf(fContentsFrame,"<a href=\"%s-%d.html\"",str->c_str(),pageNum);
+		fprintf(fContentsFrame,"<a href=\"%s-%d.html\"", str.c_str(), pageNum);
       else 
-		fprintf(fContentsFrame,"<a href=\"%ss.html#%d\"",str->c_str(),pageNum);
+		fprintf(fContentsFrame,"<a href=\"%ss.html#%d\"", str.c_str(), pageNum);
       fprintf(fContentsFrame," target=\"contents\" >Page %d</a><br/>\n",pageNum);
     }
   }
 
   pages->pageWidth=static_cast<int>(state->getPageWidth());
   pages->pageHeight=static_cast<int>(state->getPageHeight());
-
-  delete str;
 } 
 
 
@@ -1287,7 +1270,7 @@ void HtmlOutputDev::endPage() {
 
   pages->conv();
   pages->coalesce();
-  pages->dump(page, pageNum);
+  pages->dump(page, pageNum, backgroundImages);
   
   // I don't yet know what to do in the case when there are pages of different
   // sizes and we want complex output: running ghostscript many times 
@@ -1297,6 +1280,10 @@ void HtmlOutputDev::endPage() {
   
   //if(!noframes&&!xml) fputs("<br/>\n", fContentsFrame);
   if(!stout && !globalParams->getErrQuiet()) printf("Page-%d\n",(pageNum));
+}
+
+void HtmlOutputDev::addBackgroundImage(const std::string& img) {
+  backgroundImages.push_back(img);
 }
 
 void HtmlOutputDev::updateFont(GfxState *state) {
@@ -1324,12 +1311,14 @@ void HtmlOutputDev::drawChar(GfxState *state, double x, double y,
 
 void HtmlOutputDev::drawJpegImage(GfxState *state, Stream *str)
 {
-  FILE *f1;
+  InMemoryFile ims;
+  FILE *f1 = nullptr;
   int c;
 
   // open the image file
-  GooString *fName=createImageFileName("jpg");
-  if (!(f1 = fopen(fName->c_str(), "wb"))) {
+  GooString *fName = createImageFileName("jpg");
+  f1 = dataUrls ? ims.open("wb") : fopen(fName->c_str(), "wb");
+  if (!f1) {
     error(errIO, -1, "Couldn't open image file '{0:t}'", fName);
     delete fName;
     return;
@@ -1345,9 +1334,11 @@ void HtmlOutputDev::drawJpegImage(GfxState *state, Stream *str)
 
   fclose(f1);
 
-  if (fName) {
-      pages->addImage(fName, state);
+  if (dataUrls) {
+    delete fName;
+    fName = new GooString(std::string("data:image/jpeg;base64,") + gbase64Encode(ims.getBuffer()));
   }
+  pages->addImage(fName, state);
 }
 
 void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int height,
@@ -1355,6 +1346,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
 {
 #ifdef ENABLE_LIBPNG
   FILE *f1;
+  InMemoryFile ims;
 
   if (!colorMap && !isMask) {
     error(errInternal, -1, "Can't have color image without a color map");
@@ -1363,7 +1355,8 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
 
   // open the image file
   GooString *fName=createImageFileName("png");
-  if (!(f1 = fopen(fName->c_str(), "wb"))) {
+  f1 = dataUrls ? ims.open("wb") : fopen(fName->c_str(), "wb");
+  if (!f1) {
     error(errIO, -1, "Couldn't open image file '{0:t}'", fName);
     delete fName;
     return;
@@ -1468,6 +1461,10 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
   delete writer;
   fclose(f1);
 
+  if (dataUrls) {
+    delete fName;
+    fName = new GooString(std::string("data:image/png;base64,") + gbase64Encode(ims.getBuffer()));
+  }
   pages->addImage(fName, state);
 #else
   return;
@@ -1476,16 +1473,7 @@ void HtmlOutputDev::drawPngImage(GfxState *state, Stream *str, int width, int he
 
 GooString *HtmlOutputDev::createImageFileName(const char *ext)
 {
-  GooString *fName=new GooString(Docname);
-  fName->append("-");
-  GooString *pgNum= GooString::fromInt(pageNum);
-  GooString *imgnum= GooString::fromInt(pages->getNumImages()+1);
-
-  fName->append(pgNum)->append("_")->append(imgnum)->append(".")->append(ext);
-  delete pgNum;
-  delete imgnum;
-
-  return fName;
+  return GooString::format("{0:s}-{1:d}_{2:d}.{3:s}", Docname->c_str(), pageNum, pages->getNumImages() + 1, ext);
 }
 
 void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
@@ -1561,8 +1549,8 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
   switch(link->getAction()->getKind()) 
   {
       case actionGoTo:
-	  { 
-	  GooString* file=basename(Docname);
+	  {
+	  GooString* file = new GooString(gbasename(Docname->c_str()));
 	  int page=1;
 	  LinkGoTo *ha=(LinkGoTo *)link->getAction();
 	  LinkDest *dest=nullptr;
@@ -1781,7 +1769,7 @@ bool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, const GooList *outlines, i
 				frames		file-4.html	files.html#4
 				noframes	file.html#4	file.html#4
 				*/
-				linkName=basename(Docname);
+				linkName = new GooString(gbasename(Docname->c_str()));
 				GooString *str=GooString::fromInt(page);
 				if (noframes) {
 					linkName->append(".html#");
