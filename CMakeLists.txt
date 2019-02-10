@@ -314,6 +314,7 @@ configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 configure_file(poppler/poppler-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h)
 
 set(poppler_SRCS
+  goo/gbasename.cc
   goo/gfile.cc
   goo/GooTimer.cc
   goo/GooString.cc

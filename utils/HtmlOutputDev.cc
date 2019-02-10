@@ -58,6 +58,7 @@
 #include <math.h>
 #include <iostream>
 #include "goo/GooString.h"
+#include "goo/gbasename.h"
 #include "goo/GooList.h"
 #include "UnicodeMap.h"
 #include "goo/gmem.h"
@@ -115,16 +116,6 @@ extern double wordBreakThreshold;
 
 static bool debug = false;
 static GooString *gstr_buff0 = nullptr; // a workspace in which I format strings
-
-static GooString* basename(GooString* str){
-  
-  const char *p=str->c_str();
-  int len=str->getLength();
-  for (int i=len-1;i>=0;i--)
-    if (*(p+i)==SLASH) 
-      return new GooString((p+i+1),len-i-1);
-  return new GooString(str);
-}
 
 #if 0
 static GooString* Dirname(GooString* str){
@@ -860,13 +851,12 @@ int HtmlPage::dumpComplexHeaders(FILE * const file, FILE *& pageFile, int page) 
 
 void HtmlPage::dumpComplex(FILE *file, int page){
   FILE* pageFile;
-  GooString* tmp;
 
   if( firstPage == -1 ) firstPage = page; 
   
   if (dumpComplexHeaders(file, pageFile, page)) { error(errIO, -1, "Couldn't write headers."); return; }
 
-  tmp=basename(DocName);
+  const std::string str = gbasename(DocName->c_str());
    
   fputs("<style type=\"text/css\">\n<!--\n",pageFile);
   fputs("\tp {margin: 0; padding: 0;}",pageFile);
@@ -894,11 +884,9 @@ void HtmlPage::dumpComplex(FILE *file, int page){
   {
     fprintf(pageFile,
 	    "<img width=\"%d\" height=\"%d\" src=\"%s%03d.%s\" alt=\"background image\"/>\n",
-	    pageWidth, pageHeight, tmp->c_str(), 
+	    pageWidth, pageHeight, str.c_str(),
 		(page-firstPage+1), imgExt->c_str());
   }
-  
-  delete tmp;
   
   for(HtmlString *tmp1=yxStrings;tmp1;tmp1=tmp1->yxNext){
     if (tmp1->htext){
@@ -1070,7 +1058,7 @@ void HtmlOutputDev::doFrame(int firstPage){
   
   delete fName;
     
-  fName=basename(Docname);
+  const std::string baseName = gbasename(Docname->c_str());
   fputs(DOCTYPE, fContentsFrame);
   fputs("\n<html>",fContentsFrame);
   fputs("\n<head>",fContentsFrame);
@@ -1080,16 +1068,15 @@ void HtmlOutputDev::doFrame(int firstPage){
   dumpMetaVars(fContentsFrame);
   fprintf(fContentsFrame, "</head>\n");
   fputs("<frameset cols=\"100,*\">\n",fContentsFrame);
-  fprintf(fContentsFrame,"<frame name=\"links\" src=\"%s_ind.html\"/>\n",fName->c_str());
+  fprintf(fContentsFrame,"<frame name=\"links\" src=\"%s_ind.html\"/>\n", baseName.c_str());
   fputs("<frame name=\"contents\" src=",fContentsFrame); 
   if (complexMode) 
-      fprintf(fContentsFrame,"\"%s-%d.html\"",fName->c_str(), firstPage);
+      fprintf(fContentsFrame,"\"%s-%d.html\"", baseName.c_str(), firstPage);
   else
-      fprintf(fContentsFrame,"\"%ss.html\"",fName->c_str());
+      fprintf(fContentsFrame,"\"%ss.html\"", baseName.c_str());
   
   fputs("/>\n</frameset>\n</html>\n",fContentsFrame);
  
-  delete fName;
   delete htmlEncoding;
   fclose(fContentsFrame);  
 }
@@ -1149,9 +1136,9 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
 
          if (doOutline)
          {
-             GooString *str = basename(Docname);
-             fprintf(fContentsFrame, "<a href=\"%s%s\" target=\"contents\">Outline</a><br/>", str->c_str(), complexMode ? "-outline.html" : "s.html#outline");
-             delete str;
+             fprintf(fContentsFrame, "<a href=\"%s%s\" target=\"contents\">Outline</a><br/>",
+                 gbasename(Docname->c_str()).c_str(),
+                 complexMode ? "-outline.html" : "s.html#outline");
          }
      }
 	if (!complexMode)
@@ -1256,24 +1243,22 @@ void HtmlOutputDev::startPage(int pageNum, GfxState *state, XRef *xref) {
 #endif
 
   this->pageNum = pageNum;
-  GooString *str=basename(Docname);
+  const std::string str = gbasename(Docname->c_str());
   pages->clear(); 
   if(!noframes)
   {
     if (fContentsFrame)
 	{
       if (complexMode)
-		fprintf(fContentsFrame,"<a href=\"%s-%d.html\"",str->c_str(),pageNum);
+		fprintf(fContentsFrame,"<a href=\"%s-%d.html\"", str.c_str(), pageNum);
       else 
-		fprintf(fContentsFrame,"<a href=\"%ss.html#%d\"",str->c_str(),pageNum);
+		fprintf(fContentsFrame,"<a href=\"%ss.html#%d\"", str.c_str(), pageNum);
       fprintf(fContentsFrame," target=\"contents\" >Page %d</a><br/>\n",pageNum);
     }
   }
 
   pages->pageWidth=static_cast<int>(state->getPageWidth());
   pages->pageHeight=static_cast<int>(state->getPageHeight());
-
-  delete str;
 } 
 
 
@@ -1561,8 +1546,8 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
   switch(link->getAction()->getKind()) 
   {
       case actionGoTo:
-	  { 
-	  GooString* file=basename(Docname);
+	  {
+	  GooString* file = new GooString(gbasename(Docname->c_str()));
 	  int page=1;
 	  LinkGoTo *ha=(LinkGoTo *)link->getAction();
 	  LinkDest *dest=nullptr;
@@ -1781,7 +1766,7 @@ bool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, const GooList *outlines, i
 				frames		file-4.html	files.html#4
 				noframes	file.html#4	file.html#4
 				*/
-				linkName=basename(Docname);
+				linkName = new GooString(gbasename(Docname->c_str()));
 				GooString *str=GooString::fromInt(page);
 				if (noframes) {
 					linkName->append(".html#");

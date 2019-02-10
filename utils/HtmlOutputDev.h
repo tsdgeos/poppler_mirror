@@ -44,13 +44,6 @@
 #include "Catalog.h"
 #include "UnicodeMap.h"
 
-
-#ifdef _WIN32
-#  define SLASH '\\'
-#else
-#  define SLASH '/'
-#endif
-
 #define xoutRound(x) ((int)(x + 0.5))
 
 #define DOCTYPE "<!DOCTYPE html>"

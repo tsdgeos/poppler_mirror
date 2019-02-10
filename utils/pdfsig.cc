@@ -24,10 +24,10 @@
 #include <time.h>
 #include <hasht.h>
 #include <fstream>
-#include <libgen.h>
 #include "parseargs.h"
 #include "Object.h"
 #include "Array.h"
+#include "goo/gbasename.h"
 #include "Page.h"
 #include "PDFDoc.h"
 #include "PDFDocFactory.h"
@@ -108,9 +108,7 @@ static void dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_wi
     // since { is the magic character to replace things we need to put it twice where
     // we don't want it to be replaced
     GooString *format = GooString::format("{{0:s}}.sig{{1:{0:d}d}}", sigCountLength);
-    char *filenameCopy = strdup(filename);
-    GooString *path = GooString::format(format->c_str(), basename(filenameCopy), sig_num);
-    free(filenameCopy);
+    GooString *path = GooString::format(format->c_str(), gbasename(filename).c_str(), sig_num);
     printf("Signature #%d (%u bytes) => %s\n", sig_num, signature->getLength(), path->c_str());
     std::ofstream outfile(path->c_str(), std::ofstream::binary);
     outfile.write(signature->c_str(), signature->getLength());
