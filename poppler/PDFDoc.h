@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2009, 2014, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2014, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -316,13 +316,13 @@ public:
   bool getID(GooString *permanent_id, GooString *update_id) const;
 
   // Save one page with another name.
-  int savePageAs(GooString *name, int pageNo);
+  int savePageAs(const GooString *name, int pageNo);
   // Save this file with another name.
-  int saveAs(GooString *name, PDFWriteMode mode=writeStandard);
+  int saveAs(const GooString *name, PDFWriteMode mode=writeStandard);
   // Save this file in the given output stream.
   int saveAs(OutStream *outStr, PDFWriteMode mode=writeStandard);
   // Save this file with another name without saving changes
-  int saveWithoutChangesAs(GooString *name);
+  int saveWithoutChangesAs(const GooString *name);
   // Save this file in the given output stream without saving changes
   int saveWithoutChangesAs(OutStream *outStr);
 
