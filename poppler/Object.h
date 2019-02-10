@@ -172,10 +172,10 @@ public:
     { assert(dictA); type = objDict; dict = dictA; }
   explicit Object(Stream *streamA)
     { assert(streamA); type = objStream; stream = streamA; }
+  explicit Object(const Ref r)
+    { type = objRef; ref.num = r.num; ref.gen = r.gen; }
   Object(int numA, int genA)
     { type = objRef; ref.num = numA; ref.gen = genA; }
-  Object(const Ref r)
-    { type = objRef; ref.num = r.num; ref.gen = r.gen; }
 
   template<typename T> Object(T) = delete;
 
