@@ -24,6 +24,27 @@
  */
 #include "poppler-version.h"
 
+/**
+ \def POPPLER_VERSION
+ \brief The version string of the poppler-cpp header files.
+        e.g. in poppler version 0.1.2 this is "0.1.2".
+ */
+/**
+ \def POPPLER_VERSION_MAJOR
+ \brief The "major" version number of the poppler-cpp header files.
+        e.g. in poppler version 0.1.2 this is 0.
+ */
+/**
+ \def POPPLER_VERSION_MINOR
+ \brief The "minor" version number of the poppler-cpp header files.
+        e.g. in poppler version 0.1.2 this is 1.
+ */
+/**
+ \def POPPLER_VERSION_MICRO
+ \brief The "micro" version number of the poppler-cpp header files.
+        e.g. in poppler version 0.1.2 this is 2.
+ */
+
 using namespace poppler;
 
 /**
