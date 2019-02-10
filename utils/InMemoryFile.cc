@@ -58,7 +58,7 @@ int InMemoryFile::_seek(off64_t* offset, int whence)
 
 FILE* InMemoryFile::open(const char* mode)
 {
-#if HAVE_IN_MEMORY_FILE_FOPENCOOKIE
+#ifdef HAVE_IN_MEMORY_FILE_FOPENCOOKIE
     if (fptr != nullptr) {
         fprintf(stderr, "InMemoryFile: BUG: Why is this opened more than once?");
         return nullptr; // maybe there's some legit reason for it, whoever comes up with one can remove this line
