@@ -759,6 +759,7 @@ FileStream::FileStream(GooFile* fileA, Goffset startA, bool limitedA,
   bufPos = start;
   savePos = 0;
   saved = false;
+  needsEncryptionOnSave = false;
 }
 
 FileStream::~FileStream() {

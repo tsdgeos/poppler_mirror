@@ -76,6 +76,7 @@ public:
   // Look up an entry and return the value.  Returns a null object
   // if <key> is not in the dictionary.
   Object lookup(const char *key, int recursion = 0) const;
+  Object lookup(const char *key, Ref *returnRef, int recursion = 0) const;
   const Object &lookupNF(const char *key) const;
   bool lookupInt(const char *key, const char *alt_key, int *value) const;
 

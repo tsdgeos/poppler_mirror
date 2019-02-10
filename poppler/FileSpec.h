@@ -62,6 +62,8 @@ public:
   const GooString *getDescription() const { return desc; }
   EmbFile *getEmbeddedFile();
 
+  static Object newFileSpecObject(XRef *xref, GooFile *file, const std::string &fileName);
+
 private:
   bool ok;
 

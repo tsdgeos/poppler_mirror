@@ -470,6 +470,9 @@ public:
   int getUnfilteredChar () override { return getChar(); }
   void unfilteredReset () override { reset(); }
 
+  bool getNeedsEncryptionOnSave() const { return needsEncryptionOnSave; }
+  void setNeedsEncryptionOnSave(bool needsEncryptionOnSaveA) { needsEncryptionOnSave = needsEncryptionOnSaveA; }
+
 private:
 
   bool fillBuf();
@@ -508,6 +511,8 @@ private:
   Goffset bufPos;
   Goffset savePos;
   bool saved;
+  bool needsEncryptionOnSave;   // Needed for FileStreams that point to "external" files
+                                // and thus when saving we can't do a raw copy
 };
 
 //------------------------------------------------------------------------

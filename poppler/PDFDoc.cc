@@ -1469,6 +1469,12 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, unsigned i
           writeDictionnary (stream->getDict(),outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen, alreadyWrittenDicts);
           writeStream (stream,outStr);
           delete encStream;
+        } else if (fileKey != nullptr && stream->getKind() == strFile && static_cast<FileStream*>(stream)->getNeedsEncryptionOnSave()) {
+          EncryptStream *encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, objNum, objGen);
+          encStream->setAutoDelete(false);
+          writeDictionnary (encStream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen, alreadyWrittenDicts);
+          writeStream (encStream, outStr);
+          delete encStream;
         } else {
           //raw stream copy
           FilterStream *fs = dynamic_cast<FilterStream*>(stream);

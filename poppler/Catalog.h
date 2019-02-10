@@ -178,6 +178,14 @@ public:
   // Get the i'th file embedded (at the Document level) in the document
   FileSpec *embeddedFile(int i);
 
+  // Is there an embedded file with the given name?
+  bool hasEmbeddedFile(const std::string &fileName);
+
+  // Adds and embeddedFile
+  // If there is already an existing embedded file with the given fileName
+  // it gets replaced, if that's not what you want check hasEmbeddedFile first
+  void addEmbeddedFile(GooFile *file, const std::string &fileName);
+
   // Get the number of javascript scripts
   int numJS() { return getJSNameTree()->numEntries(); }
   GooString *getJSName(int i) { return getJSNameTree()->getName(i); }
