@@ -35,6 +35,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2018, 2019 Greg Knight <lyngvi@gmail.com>
+// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -42,6 +43,7 @@
 #ifndef _MSC_VER
 #  include <libgen.h>
 #endif
+#include <stdlib.h>
 #include <string.h>
 
 std::string gbasename(const char* filename)
