@@ -34,7 +34,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2018 Greg Knight <lyngvi@gmail.com>
+// Copyright (C) 2018, 2019 Greg Knight <lyngvi@gmail.com>
 //
 //========================================================================
 
