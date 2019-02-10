@@ -17,6 +17,9 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/**
+ \file poppler-page-transition.h
+ */
 #include "poppler-page-transition.h"
 
 #include "PageTransition.h"

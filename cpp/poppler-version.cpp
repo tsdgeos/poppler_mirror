@@ -16,6 +16,12 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/**
+ \file poppler-version.h.in
+ \brief poppler-version.h
+ \remark poppler-version.h.in is the file name in Poppler's source files.
+         The file name as an include file is poppler-version.h.
+ */
 #include "poppler-version.h"
 
 using namespace poppler;
