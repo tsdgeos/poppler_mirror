@@ -83,7 +83,6 @@ private:
     ~Entry();
     GooString name;
     Object value;
-    void free();
     static int cmpEntry(const void *voidEntry, const void *voidOtherEntry);
     static int cmp(const void *key, const void *entry);
   };
