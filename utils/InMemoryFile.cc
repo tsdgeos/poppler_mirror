@@ -25,6 +25,7 @@ InMemoryFile::InMemoryFile()
 {
 }
 
+#ifdef HAVE_IN_MEMORY_FILE_FOPENCOOKIE
 ssize_t InMemoryFile::_read(char* buf, size_t sz)
 {
     auto toRead = std::min<size_t>(data.size() - iohead, sz);
@@ -53,6 +54,7 @@ int InMemoryFile::_seek(off64_t* offset, int whence)
     iohead = static_cast<size_t>(*offset);
     return 0;
 }
+#endif // def HAVE_IN_MEMORY_FILE_FOPENCOOKIE
 
 FILE* InMemoryFile::open(const char* mode)
 {

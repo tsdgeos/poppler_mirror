@@ -32,9 +32,11 @@ private:
     std::vector<char> data;
     FILE *fptr;
 
+#ifdef HAVE_IN_MEMORY_FILE_FOPENCOOKIE
     ssize_t _read(char* buf, size_t sz);
     ssize_t _write(const char* buf, size_t sz);
     int _seek(off64_t* offset, int whence);
+#endif
 
 public:
     InMemoryFile();
