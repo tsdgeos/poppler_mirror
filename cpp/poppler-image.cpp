@@ -21,6 +21,9 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/**
+ \file poppler-image.h
+ */
 #include "poppler-image.h"
 
 #include "poppler-image-private.h"

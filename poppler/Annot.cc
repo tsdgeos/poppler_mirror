@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007, 2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2007-2013, 2015-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2013, 2015-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2013, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
@@ -1439,8 +1439,8 @@ void Annot::setPage(int pageIndex, bool updateP) {
   Object obj1(objNull);
 
   if (pageobj) {
-    Ref pageRef = pageobj->getRef();
-    obj1 = Object(pageRef.num, pageRef.gen);
+    const Ref pageRef = pageobj->getRef();
+    obj1 = Object(pageRef);
     page = pageIndex;
   } else {
     page = 0;
@@ -1881,7 +1881,7 @@ void AnnotPopup::initialize(PDFDoc *docA, Dict *dict) {
 
 void AnnotPopup::setParent(Annot *parentA) {
   const Ref parentRef = parentA->getRef();
-  update ("Parent", Object(parentRef.num, parentRef.gen));
+  update ("Parent", Object(parentRef));
 }
 
 void AnnotPopup::setOpen(bool openA) {
@@ -1994,7 +1994,7 @@ void AnnotMarkup::setPopup(std::unique_ptr<AnnotPopup> &&new_popup) {
 
   if (new_popup) {
     const Ref popupRef = new_popup->getRef();
-    update ("Popup", Object(popupRef.num, popupRef.gen));
+    update ("Popup", Object(popupRef));
 
     new_popup->setParent(this);
     popup = std::move(new_popup);
@@ -4920,7 +4920,7 @@ void AnnotWidget::updateAppearanceStream()
 
     // Write the AP dictionary
     obj1 = Object(new Dict(xref));
-    obj1.dictAdd("N", Object(updatedAppearanceStream.num, updatedAppearanceStream.gen));
+    obj1.dictAdd("N", Object(updatedAppearanceStream));
 
     // Update our internal pointers to the appearance dictionary
     appearStreams = std::make_unique<AnnotAppearance>(doc, &obj1);

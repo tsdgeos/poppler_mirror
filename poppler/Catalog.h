@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007, 2009-2011, 2013, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007, 2009-2011, 2013, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005, 2006, 2008 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -83,7 +83,6 @@ private:
     ~Entry();
     GooString name;
     Object value;
-    void free();
     static int cmpEntry(const void *voidEntry, const void *voidOtherEntry);
     static int cmp(const void *key, const void *entry);
   };
@@ -92,7 +91,6 @@ private:
   void addEntry(Entry *entry);
 
   XRef *xref;
-  Object *root;
   Entry **entries;
   int size, length; // size is the number of entries in
                     // the array of Entry*

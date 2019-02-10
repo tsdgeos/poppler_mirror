@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2006, 2008, 2010-2013, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2008, 2010-2013, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Ilya Gorenbein <igorenbein@finjan.com>
@@ -143,6 +143,7 @@ public:
   Object getCatalog();
 
   // Fetch an indirect reference.
+  Object fetch(const Ref ref, int recursion = 0);
   Object fetch(int num, int gen, int recursion = 0);
 
   // Return the document's Info dictionary (if any).

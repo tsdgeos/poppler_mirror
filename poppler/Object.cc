@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2008, 2010, 2012, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2012, 2017, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -89,7 +89,7 @@ Object Object::fetch(XRef *xref, int recursion) const {
   CHECK_NOT_DEAD;
 
   return (type == objRef && xref) ?
-         xref->fetch(ref.num, ref.gen, recursion) : copy();
+         xref->fetch(ref, recursion) : copy();
 }
 
 void Object::free() {

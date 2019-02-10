@@ -112,7 +112,7 @@ void FormWidget::createWidgetAnnotation() {
   if (widget)
     return;
 
-  Object obj1(ref.num, ref.gen);
+  Object obj1(ref);
   widget = new AnnotWidget(doc, &obj, &obj1, field);
 }
 

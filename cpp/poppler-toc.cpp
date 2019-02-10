@@ -17,6 +17,9 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/**
+ \file poppler-toc.h
+ */
 #include "poppler-toc.h"
 
 #include "poppler-toc-private.h"

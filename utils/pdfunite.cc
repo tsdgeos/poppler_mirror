@@ -7,7 +7,7 @@
 // Copyright (C) 2011-2015, 2017 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Arseny Solokha <asolokha@gmx.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012, 2014, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2014, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2015 Arthur Stavisky <vovodroid@gmail.com>
@@ -68,7 +68,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
           }
         }
         newNameArray->add(Object(new GooString(key.getString()->c_str())));
-        newNameArray->add(Object(value.getRef().num, value.getRef().gen));
+        newNameArray->add(Object(value.getRef()));
       }
     }
     while (j < mergeNameArray.arrayGetLength() - 1) {
@@ -287,7 +287,7 @@ int main (int argc, char *argv[])
 	    docs[i]->getCatalog()->getPage(j)->getRotate(),
 	    docs[i]->getCatalog()->getPage(j)->getMediaBox(), cropBox);
       Ref *refPage = docs[i]->getCatalog()->getPageRef(j);
-      Object page = docs[i]->getXRef()->fetch(refPage->num, refPage->gen);
+      Object page = docs[i]->getXRef()->fetch(*refPage);
       Dict *pageDict = page.getDict();
       Object *resDict = docs[i]->getCatalog()->getPage(j)->getResourceDictObject();
       if (resDict->isDict()) {

@@ -39,13 +39,21 @@
 //========================================================================
 
 #include "gbasename.h"
-#include <libgen.h>
+#ifndef _MSC_VER
+#  include <libgen.h>
+#endif
 #include <string.h>
 
 std::string gbasename(const char* filename)
 {
+#ifdef _MSC_VER
+  char fname[_MAX_FNAME] = {}, fext[_MAX_EXT] = {};
+  errno_t z = _splitpath_s(filename, NULL, 0, NULL, 0, fname, _countof(fname), fext, _countof(fext));
+  return std::string(fname) + std::string(fext);
+#else
   char* mutabl = strdup(filename);
   std::string retu = basename(mutabl);
   free(mutabl);
   return retu;
+#endif
 }

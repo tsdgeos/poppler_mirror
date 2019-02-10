@@ -16,7 +16,34 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/**
+ \file poppler-version.h.in
+ \brief poppler-version.h
+ \remark poppler-version.h.in is the file name in Poppler's source files.
+         The file name as an include file is poppler-version.h.
+ */
 #include "poppler-version.h"
+
+/**
+ \def POPPLER_VERSION
+ \brief The version string of the poppler-cpp header files.
+        e.g. in poppler version 0.1.2 this is "0.1.2".
+ */
+/**
+ \def POPPLER_VERSION_MAJOR
+ \brief The "major" version number of the poppler-cpp header files.
+        e.g. in poppler version 0.1.2 this is 0.
+ */
+/**
+ \def POPPLER_VERSION_MINOR
+ \brief The "minor" version number of the poppler-cpp header files.
+        e.g. in poppler version 0.1.2 this is 1.
+ */
+/**
+ \def POPPLER_VERSION_MICRO
+ \brief The "micro" version number of the poppler-cpp header files.
+        e.g. in poppler version 0.1.2 this is 2.
+ */
 
 using namespace poppler;
 

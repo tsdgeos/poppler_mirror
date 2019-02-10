@@ -435,7 +435,7 @@ find_annot_movie_for_action (PopplerDocument *document,
   if (link->hasAnnotRef ()) {
     const Ref *ref = link->getAnnotRef ();
 
-    annotObj = xref->fetch (ref->num, ref->gen);
+    annotObj = xref->fetch (*ref);
   } else if (link->hasAnnotTitle ()) {
     const GooString *title = link->getAnnotTitle ();
     int i;
