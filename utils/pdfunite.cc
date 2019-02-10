@@ -287,7 +287,7 @@ int main (int argc, char *argv[])
 	    docs[i]->getCatalog()->getPage(j)->getRotate(),
 	    docs[i]->getCatalog()->getPage(j)->getMediaBox(), cropBox);
       Ref *refPage = docs[i]->getCatalog()->getPageRef(j);
-      Object page = docs[i]->getXRef()->fetch(refPage->num, refPage->gen);
+      Object page = docs[i]->getXRef()->fetch(*refPage);
       Dict *pageDict = page.getDict();
       Object *resDict = docs[i]->getCatalog()->getPage(j)->getResourceDictObject();
       if (resDict->isDict()) {

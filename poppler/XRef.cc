@@ -1072,6 +1072,11 @@ Object XRef::getCatalog() {
   return catalog;
 }
 
+Object XRef::fetch(const Ref ref, int recursion)
+{
+    return fetch(ref.num, ref.gen, recursion);
+}
+
 Object XRef::fetch(int num, int gen, int recursion) {
   XRefEntry *e;
   Parser *parser;
@@ -1635,12 +1640,12 @@ void XRef::markUnencrypted(Object *obj) {
     }
     case objRef:
     {
-      Ref ref = obj->getRef();
+      const Ref ref = obj->getRef();
       XRefEntry *e = getEntry(ref.num);
       if (e->getFlag(XRefEntry::Unencrypted))
         return; // We've already been here: prevent infinite recursion
       e->setFlag(XRefEntry::Unencrypted, true);
-      obj1 = fetch(ref.num, ref.gen);
+      obj1 = fetch(ref);
       markUnencrypted(&obj1);
       break;
     }

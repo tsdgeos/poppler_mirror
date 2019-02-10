@@ -722,7 +722,7 @@ bool PDFDoc::checkLinearization() {
     }
 
     pageRef.gen = xref->getEntry(pageRef.num)->gen;
-    Object obj = xref->fetch(pageRef.num, pageRef.gen);
+    Object obj = xref->fetch(pageRef);
     if (!obj.isDict("Page")) {
       linearizationState = 2;
       return false;
@@ -896,7 +896,7 @@ int PDFDoc::savePageAs(const GooString *name, int pageNo)
     getCatalog()->getPage(pageNo)->getMediaBox(),
     cropBox);
   Ref *refPage = getCatalog()->getPageRef(pageNo);
-  Object page = getXRef()->fetch(refPage->num, refPage->gen);
+  Object page = getXRef()->fetch(*refPage);
 
   if (!(f = openFile(name->c_str(), "wb"))) {
     error(errIO, -1, "Couldn't open file '{0:t}'", name);
@@ -1125,7 +1125,7 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
       ref.num = i;
       ref.gen = xref->getEntry(i)->type == xrefEntryCompressed ? 0 : xref->getEntry(i)->gen;
       if (xref->getEntry(i)->type != xrefEntryFree) {
-        Object obj1 = xref->fetch(ref.num, ref.gen, 1);
+        Object obj1 = xref->fetch(ref, 1 /* recursion */);
         Goffset offset = writeObjectHeader(&ref, outStr);
         writeObject(&obj1, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
         writeObjectFooter(outStr);
@@ -1203,7 +1203,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
     } else if (type == xrefEntryUncompressed){ 
       ref.num = i;
       ref.gen = xref->getEntry(i)->gen;
-      Object obj1 = xref->fetch(ref.num, ref.gen, 1);
+      Object obj1 = xref->fetch(ref, 1 /* recursion */);
       Goffset offset = writeObjectHeader(&ref, outStr);
       // Write unencrypted objects in unencrypted form
       if (xref->getEntry(i)->getFlag(XRefEntry::Unencrypted)) {
@@ -1216,7 +1216,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
     } else if (type == xrefEntryCompressed) {
       ref.num = i;
       ref.gen = 0; //compressed entries have gen == 0
-      Object obj1 = xref->fetch(ref.num, ref.gen, 1);
+      Object obj1 = xref->fetch(ref, 1 /* recursion */);
       Goffset offset = writeObjectHeader(&ref, outStr);
       writeObject(&obj1, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
       writeObjectFooter(outStr);
@@ -1730,7 +1730,7 @@ void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, unsigned int n
           if (entry->gen > 9)
             break;
         } 
-        Object obj1 = getXRef()->fetch(obj->getRef().num, obj->getRef().gen);
+        Object obj1 = getXRef()->fetch(obj->getRef());
         markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum);
       }
       break;
@@ -1744,7 +1744,7 @@ void PDFDoc::replacePageDict(int pageNo, int rotate,
                              const PDFRectangle *cropBox)
 {
   Ref *refPage = getCatalog()->getPageRef(pageNo);
-  Object page = getXRef()->fetch(refPage->num, refPage->gen);
+  Object page = getXRef()->fetch(*refPage);
   Dict *pageDict = page.getDict();
   pageDict->remove("MediaBoxssdf");
   pageDict->remove("MediaBox");
@@ -1818,7 +1818,7 @@ bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsi
               } else if (obj2.getRef().num == newPageNum) {
                 continue;
               } else {
-                Object page  = getXRef()->fetch(obj2.getRef().num, obj2.getRef().gen);
+                Object page  = getXRef()->fetch(obj2.getRef());
                 if (page.isDict()) {
                   Dict *pageDict = page.getDict();
                   Object pagetype = pageDict->lookup("Type");
@@ -2093,7 +2093,7 @@ Page *PDFDoc::parsePage(int page)
   }
 
   pageRef.gen = xref->getEntry(pageRef.num)->gen;
-  Object obj = xref->fetch(pageRef.num, pageRef.gen);
+  Object obj = xref->fetch(pageRef);
   if (!obj.isDict("Page")) {
     error(errSyntaxWarning, -1, "Object ({0:d} {1:d}) is not a pageDict", pageRef.num, pageRef.gen);
     return nullptr;
