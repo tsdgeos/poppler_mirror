@@ -27,6 +27,7 @@
 #include <poppler-font.h>
 #include <poppler-page.h>
 #include <poppler-toc.h>
+#include <poppler-version.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -55,6 +56,7 @@ bool show_embedded_files = false;
 bool show_pages = false;
 bool show_destinations = false;
 bool show_help = false;
+bool show_version = false;
 char show_text[32];
 bool show_text_list = false;
 poppler::page::text_layout_enum show_text_layout = poppler::page::physical_layout;
@@ -86,6 +88,8 @@ static const ArgDesc the_args[] = {
       "print usage information" },
     { "--help",                argFlag,  &show_help,           0,
       "print usage information" },
+    { "--version",             argFlag,  &show_version,        0,
+      "print poppler version" },
     { nullptr, argFlag, nullptr, 0, nullptr }
 };
 
@@ -474,6 +478,12 @@ int main(int argc, char *argv[])
         show_pages = true;
     }
 
+    if (show_version) {
+        std::cout << std::setw(out_width) << "Compiled" << ": poppler-cpp "
+                  << POPPLER_VERSION << std::endl
+                  << std::setw(out_width) << "Running" << ": poppler-cpp "
+                  << poppler::version_string() << std::endl;
+    }
     if (show_info) {
         print_info(doc.get());
     }
