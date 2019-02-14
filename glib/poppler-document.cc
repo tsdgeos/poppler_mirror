@@ -308,7 +308,14 @@ poppler_document_new_from_stream (GInputStream *stream,
   }
 
   if (stream_is_memory_buffer_or_local_file(stream)) {
-    str = new PopplerInputStream(stream, cancellable, 0, false, 0, Object(objNull));
+    if (length == (goffset)-1) {
+      if (!g_seekable_seek(G_SEEKABLE(stream), 0, G_SEEK_END, cancellable, error)) {
+        g_prefix_error(error, "Unable to determine length of stream: ");
+        return nullptr;
+      }
+      length = g_seekable_tell(G_SEEKABLE(stream));
+    }
+    str = new PopplerInputStream(stream, cancellable, 0, false, length, Object(objNull));
   } else {
     CachedFile *cachedFile = new CachedFile(new PopplerCachedFileLoader(stream, cancellable, length), new GooString());
     str = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
