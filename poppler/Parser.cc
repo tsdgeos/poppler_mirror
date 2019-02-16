@@ -155,7 +155,10 @@ Object Parser::getObj(bool simpleOnly,
           return Object();
       }
 
-      return Object(num, gen);
+      Ref r;
+      r.num = num;
+      r.gen = gen;
+      return Object(r);
     } else {
       return Object(num);
     }

@@ -1812,7 +1812,10 @@ bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsi
               if (obj2.getRef().num == oldPageNum) {
                 Object obj3 = array->getNF(i);
                 if (obj3.isRef()) {
-                  dict->set("P", Object(newPageNum, 0));
+                  Ref r;
+                  r.num = newPageNum;
+                  r.gen = 0;
+                  dict->set("P", Object(r));
                   getXRef()->setModifiedObject(&obj1, obj3.getRef());
                 }
               } else if (obj2.getRef().num == newPageNum) {

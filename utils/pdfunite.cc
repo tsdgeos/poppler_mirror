@@ -56,7 +56,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
           if (mkey.isString() && mvalue.isRef()) {
             if (mkey.getString()->cmp(key.getString()) < 0) {
               newNameArray->add(Object(new GooString(mkey.getString()->c_str())));
-              newNameArray->add(Object(mvalue.getRef().num + numOffset, mvalue.getRef().gen));
+              newNameArray->add(Object( { mvalue.getRef().num + numOffset, mvalue.getRef().gen } ));
               j += 2;
             } else if (mkey.getString()->cmp(key.getString()) == 0) {
               j += 2;
@@ -76,7 +76,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
       Object mvalue = mergeNameArray.arrayGetNF(j + 1);
       if (mkey.isString() && mvalue.isRef()) {
         newNameArray->add(Object(new GooString(mkey.getString()->c_str())));
-        newNameArray->add(Object(mvalue.getRef().num + numOffset, mvalue.getRef().gen));
+        newNameArray->add(Object( { mvalue.getRef().num + numOffset, mvalue.getRef().gen } ));
       }
       j += 2;
     }
@@ -89,7 +89,7 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
       Object value = mergeNameArray.arrayGetNF(i + 1);
       if (key.isString() && value.isRef()) {
         newNameArray->add(Object(new GooString(key.getString()->c_str())));
-        newNameArray->add(Object(value.getRef().num + numOffset, value.getRef().gen));
+        newNameArray->add(Object( { value.getRef().num + numOffset, value.getRef().gen } ));
       }
     }
     srcNameTree->add("Names", Object(newNameArray));
@@ -118,7 +118,7 @@ static void doMergeFormDict(Dict *srcFormDict, Dict *mergeFormDict, int numOffse
   if (srcFields.isArray() && mergeFields.isArray()) {
     for (int i = 0; i < mergeFields.arrayGetLength(); i++) {
       Object value = mergeFields.arrayGetNF(i);
-      srcFields.arrayAdd(Object(value.getRef().num + numOffset, value.getRef().gen));
+      srcFields.arrayAdd(Object( { value.getRef().num + numOffset, value.getRef().gen } ));
     }
   }
 }

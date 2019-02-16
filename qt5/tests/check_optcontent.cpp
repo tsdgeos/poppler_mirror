@@ -175,7 +175,7 @@ void TestOptionalContent::checkVisibilitySetting()
 
     // In this test, both Ref(21,0) and Ref(28,0) start On,
     // based on the file settings
-    Object ref21obj( 21, 0 );
+    Object ref21obj( { 21, 0 } );
     Ref ref21 = ref21obj.getRef();
     OptionalContentGroup *ocgA = ocgs->findOcgByRef( ref21 );
     QVERIFY( ocgA );
@@ -183,7 +183,7 @@ void TestOptionalContent::checkVisibilitySetting()
     QVERIFY( (ocgA->getName()->cmp("A")) == 0 );
     QCOMPARE( ocgA->getState(), OptionalContentGroup::On );
 
-    Object ref28obj( 28, 0 );
+    Object ref28obj( { 28, 0 } );
     Ref ref28 = ref28obj.getRef();
     OptionalContentGroup *ocgB = ocgs->findOcgByRef( ref28 );
     QVERIFY( ocgB );
