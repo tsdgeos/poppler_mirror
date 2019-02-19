@@ -20,7 +20,7 @@
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2010-2012, 2014-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010-2012, 2014-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008, 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2009 Ross Moore <ross@maths.mq.edu.au>
@@ -876,16 +876,14 @@ TextPool::~TextPool() {
 }
 
 int TextPool::getBaseIdx(double base) {
-  int baseIdx;
-
-  baseIdx = (int)(base / textPoolStep);
-  if (baseIdx < minBaseIdx) {
+  const double baseIdxDouble = base / textPoolStep;
+  if (baseIdxDouble < minBaseIdx) {
     return minBaseIdx;
   }
-  if (baseIdx > maxBaseIdx) {
+  if (baseIdxDouble > maxBaseIdx) {
     return maxBaseIdx;
   }
-  return baseIdx;
+  return (int)baseIdxDouble;
 }
 
 void TextPool::addWord(TextWord *word) {
@@ -910,8 +908,13 @@ void TextPool::addWord(TextWord *word) {
     }
   } else if (wordBaseIdx < minBaseIdx) {
     newMinBaseIdx = wordBaseIdx - 128;
-    newPool = (TextWord **)gmallocn(maxBaseIdx - newMinBaseIdx + 1,
+    newPool = (TextWord **)gmallocn_checkoverflow(maxBaseIdx - newMinBaseIdx + 1,
 				    sizeof(TextWord *));
+    if (unlikely(!newPool)) {
+      error(errSyntaxWarning, -1, "newPool would overflow");
+      delete word;
+      return;
+    }
     for (baseIdx = newMinBaseIdx; baseIdx < minBaseIdx; ++baseIdx) {
       newPool[baseIdx - newMinBaseIdx] = nullptr;
     }
