@@ -82,7 +82,8 @@ enum {
 	PROP_PERMISSIONS,
 	PROP_METADATA,
 	PROP_PRINT_SCALING,
-	PROP_PRINT_DUPLEX
+	PROP_PRINT_DUPLEX,
+	PROP_PRINT_N_COPIES
 };
 
 static void poppler_document_layers_free (PopplerDocument *document);
@@ -1698,6 +1699,36 @@ poppler_document_get_print_duplex (PopplerDocument *document)
 }
 
 /**
+ * poppler_document_get_print_n_copies:
+ * @document: A #PopplerDocument
+ *
+ * Returns the suggested number of copies to be printed.
+ *
+ * Returns: Number of copies
+ *
+ * Since: 0.78
+ **/
+gint
+poppler_document_get_print_n_copies (PopplerDocument *document)
+{
+  Catalog *catalog;
+  ViewerPreferences *preferences;
+  gint retval = 1;
+
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), 1);
+
+  catalog = document->doc->getCatalog ();
+  if (catalog && catalog->isOk ()) {
+    preferences = catalog->getViewerPreferences();
+    if (preferences) {
+      retval = preferences->getNumCopies();
+    }
+  }
+
+  return retval;
+}
+
+/**
  * poppler_document_get_permissions:
  * @document: A #PopplerDocument
  *
@@ -1932,6 +1963,9 @@ poppler_document_get_property (GObject    *object,
       break;
     case PROP_PRINT_DUPLEX:
       g_value_set_enum (value, poppler_document_get_print_duplex (document));
+      break;
+    case PROP_PRINT_N_COPIES:
+      g_value_set_int (value, poppler_document_get_print_n_copies (document));
       break;
     case PROP_PERMISSIONS:
       g_value_set_flags (value, poppler_document_get_permissions (document));
@@ -2227,6 +2261,21 @@ poppler_document_class_init (PopplerDocumentClass *klass)
 						      POPPLER_TYPE_PRINT_DUPLEX,
 						      POPPLER_PRINT_DUPLEX_NONE,
 						      (GParamFlags) (G_PARAM_READABLE | G_PARAM_STATIC_STRINGS)));
+
+  /**
+   * PopplerDocument:print-n-copies:
+   *
+   * Suggested number of copies to be printed for this document
+   *
+   * Since: 0.78
+   */
+  g_object_class_install_property (G_OBJECT_CLASS (klass),
+				   PROP_PRINT_N_COPIES,
+				   g_param_spec_int ("print-n-copies",
+						     "Number of Copies to Print",
+						     "Number of Copies Viewer Preference",
+						     1, G_MAXINT, 1,
+						     (GParamFlags) (G_PARAM_READABLE | G_PARAM_STATIC_STRINGS)));
 
   /**
    * PopplerDocument:permissions:

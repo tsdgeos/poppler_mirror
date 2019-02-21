@@ -396,6 +396,8 @@ POPPLER_PUBLIC
 PopplerPrintScaling poppler_document_get_print_scaling     (PopplerDocument *document);
 POPPLER_PUBLIC
 PopplerPrintDuplex poppler_document_get_print_duplex       (PopplerDocument *document);
+POPPLER_PUBLIC
+gint               poppler_document_get_print_n_copies     (PopplerDocument *document);
 
 /* Attachments */
 POPPLER_PUBLIC
