@@ -12,6 +12,8 @@
 #ifndef VIEWERPREFERENCES_H
 #define VIEWERPREFERENCES_H
 
+#include <vector>
+
 class Dict;
 
 //------------------------------------------------------------------------
@@ -57,6 +59,7 @@ public:
   Duplex getDuplex() const { return duplex; }
   bool getPickTrayByPDFSize() const { return pickTrayByPDFSize; }
   int getNumCopies() const { return numCopies; }
+  std::vector<std::pair<int, int> > getPrintPageRange() const { return printPageRange; }
 
 private:
 
@@ -74,6 +77,7 @@ private:
   Duplex duplex;
   bool pickTrayByPDFSize;
   int numCopies;
+  std::vector<std::pair<int, int> > printPageRange;
 };
 
 #endif

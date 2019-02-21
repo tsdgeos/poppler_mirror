@@ -108,6 +108,30 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
     if (numCopies < 2)
       numCopies = 1;
   }
+
+  obj = prefDict->lookup("PrintPageRange");
+  if (obj.isArray()) {
+    Array *range = obj.getArray();
+    int length = range->getLength();
+    int pageNumber1, pageNumber2;
+
+    if (length % 2 == 1)
+      length--;
+
+    for (int i = 0; i < length; i += 2) {
+      Object obj2 = range->get(i);
+      Object obj3 = range->get(i + 1);
+
+      if (obj2.isInt() && (pageNumber1 = obj2.getInt()) >= 1 &&
+          obj3.isInt() && (pageNumber2 = obj3.getInt()) >= 1 &&
+          pageNumber1 < pageNumber2) {
+        printPageRange.push_back(std::pair<int, int>(pageNumber1, pageNumber2));
+      } else {
+        printPageRange.clear();
+        break;
+      }
+    }
+  }
 }
 
 ViewerPreferences::~ViewerPreferences()
