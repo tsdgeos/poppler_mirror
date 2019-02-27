@@ -141,11 +141,11 @@ void StructTreeRoot::parseNumberTreeNode(Dict *node)
 	int keyVal = key.getInt();
 	std::vector<Parent>& vec = parentTree[keyVal];
 
-	Object value = nums.arrayGet(i + 1);
-	if (value.isArray()) {
-	  vec.resize(value.arrayGetLength());
-	  for (int j = 0; j < value.arrayGetLength(); j++) {
-	    const Object &itemvalue = value.arrayGetNF(j);
+	Object valueArray = nums.arrayGet(i + 1);
+	if (valueArray.isArray()) {
+	  vec.resize(valueArray.arrayGetLength());
+	  for (int j = 0; j < valueArray.arrayGetLength(); j++) {
+	    const Object &itemvalue = valueArray.arrayGetNF(j);
 	    if (itemvalue.isRef()) {
 	      Ref ref = itemvalue.getRef();
 	      vec[j].ref = ref;
@@ -155,14 +155,14 @@ void StructTreeRoot::parseNumberTreeNode(Dict *node)
 	    }
 	  }
 	} else {
-	  value = nums.arrayGetNF(i + 1).copy();
-	  if (value.isRef()) {
-	    Ref ref = value.getRef();
+	  const Object &valueRef = nums.arrayGetNF(i + 1);
+	  if (valueRef.isRef()) {
+	    Ref ref = valueRef.getRef();
 	    vec.resize(1);
 	    vec[0].ref = ref;
 	    refToParentMap.insert(std::pair<Ref, Parent*>(ref, &vec[0]));
 	  } else {
-	    error(errSyntaxError, -1, "Nums item at position {0:d} is wrong type ({1:s})", i + 1, value.getTypeName());
+	    error(errSyntaxError, -1, "Nums item at position {0:d} is wrong type ({1:s})", i + 1, valueRef.getTypeName());
 	  }
 	}
       }
