@@ -1177,7 +1177,7 @@ void StructElement::parse(Dict *element)
   }
 }
 
-StructElement *StructElement::parseChild(Object *ref,
+StructElement *StructElement::parseChild(const Object *ref,
                                          Object *childObj,
                                          std::set<int> &seen)
 {
@@ -1255,7 +1255,7 @@ void StructElement::parseChildren(Dict *element, std::set<int> &seen)
   if (kids.isArray()) {
     for (int i = 0; i < kids.arrayGetLength(); i++) {
       Object obj = kids.arrayGet(i);
-      Object ref = kids.arrayGetNF(i).copy();
+      const Object &ref = kids.arrayGetNF(i);
       parseChild(&ref, &obj, seen);
     }
   } else if (kids.isDict() || kids.isInt()) {

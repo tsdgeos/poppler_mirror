@@ -6,7 +6,7 @@
 //
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
-// Copyright 2014, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2014, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
@@ -298,7 +298,7 @@ private:
   StructElement(const Ref ref, StructTreeRoot *treeRootA, StructElement *parentA);
 
   void parse(Dict* elementDict);
-  StructElement* parseChild(Object *ref, Object* childObj, std::set<int> &seen);
+  StructElement* parseChild(const Object *ref, Object* childObj, std::set<int> &seen);
   void parseChildren(Dict* element, std::set<int> &seen);
   void parseAttributes(Dict *element, bool keepExisting = false);
 
