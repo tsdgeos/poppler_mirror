@@ -6,7 +6,7 @@
 //
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
-// Copyright 2014, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2014, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Dmytro Morgun <lztoad@gmail.com>
 // Copyright 2018 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
@@ -1045,7 +1045,7 @@ void StructElement::parse(Dict *element)
   }
 
   // Parent object reference (required).
-  s->parentRef = element->lookupNF("P");
+  s->parentRef = element->lookupNF("P").copy();
   if (!s->parentRef.isRef()) {
     error(errSyntaxError, -1, "P object is wrong type ({0:s})", obj.getTypeName());
     return;
@@ -1085,7 +1085,7 @@ void StructElement::parse(Dict *element)
   // is to be rendered in. Note: each element stores only the /Pg value
   // contained by it, and StructElement::getPageRef() may look in parent
   // elements to find the page where an element belongs.
-  pageRef = element->lookupNF("Pg");
+  pageRef = element->lookupNF("Pg").copy();
 
   // Revision number (optional).
   obj = element->lookup("R");
@@ -1177,7 +1177,7 @@ void StructElement::parse(Dict *element)
   }
 }
 
-StructElement *StructElement::parseChild(Object *ref,
+StructElement *StructElement::parseChild(const Object *ref,
                                          Object *childObj,
                                          std::set<int> &seen)
 {
@@ -1201,17 +1201,17 @@ StructElement *StructElement::parseChild(Object *ref,
 
     child = new StructElement(mcidObj.getInt(), treeRoot, this);
 
-    Object pageRefObj = childObj->dictLookupNF("Pg");
+    Object pageRefObj = childObj->dictLookupNF("Pg").copy();
     if (pageRefObj.isRef()) {
       child->pageRef = std::move(pageRefObj);
     }
   } else if (childObj->isDict("OBJR")) {
-    Object refObj = childObj->dictLookupNF("Obj");
+    const Object &refObj = childObj->dictLookupNF("Obj");
     if (refObj.isRef()) {
 
       child = new StructElement(refObj.getRef(), treeRoot, this);
 
-      Object pageRefObj = childObj->dictLookupNF("Pg");
+      Object pageRefObj = childObj->dictLookupNF("Pg").copy();
       if (pageRefObj.isRef()) {
         child->pageRef = std::move(pageRefObj);
       }
@@ -1255,11 +1255,11 @@ void StructElement::parseChildren(Dict *element, std::set<int> &seen)
   if (kids.isArray()) {
     for (int i = 0; i < kids.arrayGetLength(); i++) {
       Object obj = kids.arrayGet(i);
-      Object ref = kids.arrayGetNF(i);
+      const Object &ref = kids.arrayGetNF(i);
       parseChild(&ref, &obj, seen);
     }
   } else if (kids.isDict() || kids.isInt()) {
-    Object ref = element->lookupNF("K");
+    const Object &ref = element->lookupNF("K");
     parseChild(&ref, &kids, seen);
   }
 }

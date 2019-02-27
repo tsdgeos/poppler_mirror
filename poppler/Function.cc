@@ -690,7 +690,7 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
   }
   for (i = 0; i < k; ++i) {
     std::set<int> usedParentsAux = *usedParents;
-    Object obj2 = obj1.arrayGetNF(i);
+    Object obj2 = obj1.arrayGetNF(i).copy();
     if (obj2.isRef()) {
       const Ref ref = obj2.getRef();
       if (usedParentsAux.find(ref.num) == usedParentsAux.end()) {

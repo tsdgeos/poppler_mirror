@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2008, 2016-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2016-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Nick Jones <nick.jones@network-box.com>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -44,7 +44,7 @@ Outline::Outline(const Object *outlineObj, XRef *xref) {
   if (!outlineObj->isDict()) {
     return;
   }
-  Object first = outlineObj->dictLookupNF("First");
+  const Object &first = outlineObj->dictLookupNF("First");
   items = OutlineItem::readItemList(nullptr, &first, xref);
 }
 
@@ -85,9 +85,9 @@ OutlineItem::OutlineItem(const Dict *dict, int refNumA, OutlineItem *parentA, XR
     }
   }
 
-  firstRef = dict->lookupNF("First");
-  lastRef = dict->lookupNF("Last");
-  nextRef = dict->lookupNF("Next");
+  firstRef = dict->lookupNF("First").copy();
+  lastRef = dict->lookupNF("Last").copy();
+  nextRef = dict->lookupNF("Next").copy();
 
   startsOpen = false;
   obj1 = dict->lookup("Count");

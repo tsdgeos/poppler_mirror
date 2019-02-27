@@ -5,7 +5,7 @@
 // Copyright 2007 Brad Hards <bradh@kde.org>
 // Copyright 2008 Pino Toscano <pino@kde.org>
 // Copyright 2008, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2008, 2010, 2011, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2008, 2010, 2011, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2008 Mark Kaplan <mkaplan@finjan.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -46,19 +46,19 @@ OCGs::OCGs(Object *ocgObject, XRef *xref) :
 
   // we now enumerate over the ocgList, and build up the optionalContentGroups list.
   for(int i = 0; i < ocgList.arrayGetLength(); ++i) {
-    Object ocg = ocgList.arrayGet(i);
-    if (!ocg.isDict()) {
+    Object ocgDict = ocgList.arrayGet(i);
+    if (!ocgDict.isDict()) {
       break;
     }
-    auto thisOptionalContentGroup = std::make_unique<OptionalContentGroup>(ocg.getDict());
-    ocg = ocgList.arrayGetNF(i);
-    if (!ocg.isRef()) {
+    auto thisOptionalContentGroup = std::make_unique<OptionalContentGroup>(ocgDict.getDict());
+    const Object &ocgRef = ocgList.arrayGetNF(i);
+    if (!ocgRef.isRef()) {
       break;
     }
-    thisOptionalContentGroup->setRef( ocg.getRef() );
+    thisOptionalContentGroup->setRef( ocgRef.getRef() );
     // the default is ON - we change state later, depending on BaseState, ON and OFF
     thisOptionalContentGroup->setState(OptionalContentGroup::On);
-    optionalContentGroups.emplace(ocg.getRef(), std::move(thisOptionalContentGroup));
+    optionalContentGroups.emplace(ocgRef.getRef(), std::move(thisOptionalContentGroup));
   }
 
   Object defaultOcgConfig = ocgObject->dictLookup("D");
@@ -79,7 +79,7 @@ OCGs::OCGs(Object *ocgObject, XRef *xref) :
   if (on.isArray()) {
     // ON is an optional element
     for (int i = 0; i < on.arrayGetLength(); ++i) {
-      Object reference = on.arrayGetNF(i);
+      const Object &reference = on.arrayGetNF(i);
       if (!reference.isRef()) {
 	// there can be null entries
 	break;
@@ -97,7 +97,7 @@ OCGs::OCGs(Object *ocgObject, XRef *xref) :
   if (off.isArray()) {
     // OFF is an optional element
     for (int i = 0; i < off.arrayGetLength(); ++i) {
-      Object reference = off.arrayGetNF(i);
+      const Object &reference = off.arrayGetNF(i);
       if (!reference.isRef()) {
 	// there can be null entries
 	break;
@@ -163,7 +163,7 @@ bool OCGs::optContentIsVisible( Object *dictRef )
     if (ve.isArray()) {
       result = evalOCVisibilityExpr(&ve, 0);
     } else {
-      Object ocg = dict->lookupNF("OCGs");
+      const Object &ocg = dict->lookupNF("OCGs");
       if (ocg.isArray()) {
         Object policy = dict->lookup("P");
         if (policy.isName("AllOn")) {
@@ -194,7 +194,7 @@ bool OCGs::optContentIsVisible( Object *dictRef )
   return result;
 }
 
-bool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
+bool OCGs::evalOCVisibilityExpr(const Object *expr, int recursion) {
   OptionalContentGroup *ocg;
   bool ret;
 
@@ -217,7 +217,7 @@ bool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
   Object op = expr2.arrayGet(0);
   if (op.isName("Not")) {
     if (expr2.arrayGetLength() == 2) {
-      Object obj = expr2.arrayGetNF(1);
+      const Object &obj = expr2.arrayGetNF(1);
       ret = !evalOCVisibilityExpr(&obj, recursion + 1);
     } else {
       error(errSyntaxError, -1,
@@ -227,13 +227,13 @@ bool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
   } else if (op.isName("And")) {
     ret = true;
     for (int i = 1; i < expr2.arrayGetLength() && ret; ++i) {
-      Object obj = expr2.arrayGetNF(i);
+      const Object &obj = expr2.arrayGetNF(i);
       ret = evalOCVisibilityExpr(&obj, recursion + 1);
     }
   } else if (op.isName("Or")) {
     ret = false;
     for (int i = 1; i < expr2.arrayGetLength() && !ret; ++i) {
-      Object obj = expr2.arrayGetNF(i);
+      const Object &obj = expr2.arrayGetNF(i);
       ret = evalOCVisibilityExpr(&obj, recursion + 1);
     }
   } else {
@@ -247,7 +247,7 @@ bool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
 bool OCGs::allOn( Array *ocgArray )
 {
   for (int i = 0; i < ocgArray->getLength(); ++i) {
-    Object ocgItem = ocgArray->getNF(i);
+    const Object &ocgItem = ocgArray->getNF(i);
     if (ocgItem.isRef()) {
       OptionalContentGroup* oc = findOcgByRef( ocgItem.getRef() );      
       if ( oc && oc->getState() == OptionalContentGroup::Off ) {
@@ -261,7 +261,7 @@ bool OCGs::allOn( Array *ocgArray )
 bool OCGs::allOff( Array *ocgArray )
 {
   for (int i = 0; i < ocgArray->getLength(); ++i) {
-    Object ocgItem = ocgArray->getNF(i);
+    const Object &ocgItem = ocgArray->getNF(i);
     if (ocgItem.isRef()) {
       OptionalContentGroup* oc = findOcgByRef( ocgItem.getRef() );      
       if ( oc && oc->getState() == OptionalContentGroup::On ) {
@@ -275,7 +275,7 @@ bool OCGs::allOff( Array *ocgArray )
 bool OCGs::anyOn( Array *ocgArray )
 {
   for (int i = 0; i < ocgArray->getLength(); ++i) {
-    Object ocgItem = ocgArray->getNF(i);
+    const Object &ocgItem = ocgArray->getNF(i);
     if (ocgItem.isRef()) {
       OptionalContentGroup* oc = findOcgByRef( ocgItem.getRef() );      
       if ( oc && oc->getState() == OptionalContentGroup::On ) {
@@ -289,7 +289,7 @@ bool OCGs::anyOn( Array *ocgArray )
 bool OCGs::anyOff( Array *ocgArray )
 {
   for (int i = 0; i < ocgArray->getLength(); ++i) {
-    Object ocgItem = ocgArray->getNF(i);
+    const Object &ocgItem = ocgArray->getNF(i);
     if (ocgItem.isRef()) {
       OptionalContentGroup* oc = findOcgByRef( ocgItem.getRef() );      
       if ( oc && oc->getState() == OptionalContentGroup::Off ) {
@@ -367,7 +367,7 @@ OptionalContentGroup::~OptionalContentGroup()
 
 //------------------------------------------------------------------------
 
-OCDisplayNode *OCDisplayNode::parse(Object *obj, OCGs *oc,
+OCDisplayNode *OCDisplayNode::parse(const Object *obj, OCGs *oc,
 				    XRef *xref, int recursion) {
   OptionalContentGroup *ocgA;
   OCDisplayNode *node, *child;
@@ -399,7 +399,7 @@ OCDisplayNode *OCDisplayNode::parse(Object *obj, OCGs *oc,
     node = new OCDisplayNode();
   }
   for (; i < obj2.arrayGetLength(); ++i) {
-    Object obj3 = obj2.arrayGetNF(i);
+    const Object &obj3 = obj2.arrayGetNF(i);
     if ((child = OCDisplayNode::parse(&obj3, oc, xref, recursion + 1))) {
       if (!child->ocg && !child->name && node->getNumChildren() > 0) {
 	node->getChild(node->getNumChildren() - 1)->addChildren(child->takeChildren());

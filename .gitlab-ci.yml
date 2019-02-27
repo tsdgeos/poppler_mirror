@@ -84,7 +84,7 @@ build_clazy:
 
 build_android:
   stage: build
-  image: apol/asdk:clang
+  image: kdeorg/android-sdk
   before_script:
     - git clone https://git.savannah.gnu.org/git/freetype/freetype2.git --single-branch -b VER-2-8-1
     - pushd freetype2

@@ -174,8 +174,6 @@ public:
     { assert(streamA); type = objStream; stream = streamA; }
   explicit Object(const Ref r)
     { type = objRef; ref.num = r.num; ref.gen = r.gen; }
-  Object(int numA, int genA)
-    { type = objRef; ref.num = numA; ref.gen = genA; }
 
   template<typename T> Object(T) = delete;
 
@@ -272,7 +270,7 @@ public:
   void arrayAdd(Object &&elem);
   void arrayRemove(int i);
   Object arrayGet(int i, int recursion) const;
-  Object arrayGetNF(int i) const;
+  const Object &arrayGetNF(int i) const;
 
   // Dict accessors.
   int dictGetLength() const;
@@ -282,10 +280,10 @@ public:
   void dictRemove(const char *key);
   bool dictIs(const char *dictType) const;
   Object dictLookup(const char *key, int recursion = 0) const;
-  Object dictLookupNF(const char *key) const;
+  const Object &dictLookupNF(const char *key) const;
   const char *dictGetKey(int i) const;
   Object dictGetVal(int i) const;
-  Object dictGetValNF(int i) const;
+  const Object &dictGetValNF(int i) const;
 
   // Stream accessors.
   bool streamIs(const char *dictType) const;
@@ -340,7 +338,7 @@ inline void Object::arrayRemove(int i)
 inline Object Object::arrayGet(int i, int recursion = 0) const
   { OBJECT_TYPE_CHECK(objArray); return array->get(i, recursion); }
 
-inline Object Object::arrayGetNF(int i) const
+inline const Object &Object::arrayGetNF(int i) const
   { OBJECT_TYPE_CHECK(objArray); return array->getNF(i); }
 
 //------------------------------------------------------------------------
@@ -370,7 +368,7 @@ inline bool Object::isDict(const char *dictType) const
 inline Object Object::dictLookup(const char *key, int recursion) const
   { OBJECT_TYPE_CHECK(objDict); return dict->lookup(key, recursion); }
 
-inline Object Object::dictLookupNF(const char *key) const
+inline const Object &Object::dictLookupNF(const char *key) const
   { OBJECT_TYPE_CHECK(objDict); return dict->lookupNF(key); }
 
 inline const char *Object::dictGetKey(int i) const
@@ -379,7 +377,7 @@ inline const char *Object::dictGetKey(int i) const
 inline Object Object::dictGetVal(int i) const
   { OBJECT_TYPE_CHECK(objDict); return dict->getVal(i); }
 
-inline Object Object::dictGetValNF(int i) const
+inline const Object &Object::dictGetValNF(int i) const
   { OBJECT_TYPE_CHECK(objDict); return dict->getValNF(i); }
 
 //------------------------------------------------------------------------

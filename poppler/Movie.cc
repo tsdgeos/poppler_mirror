@@ -6,7 +6,7 @@
 // Hugo Mercier <hmercier31[at]gmail.com> (c) 2008
 // Pino Toscano <pino@kde.org> (c) 2008
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
-// Albert Astals Cid <aacid@kde.org> (c) 2010, 2017, 2018
+// Albert Astals Cid <aacid@kde.org> (c) 2010, 2017-2019
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -213,7 +213,7 @@ void Movie::parseMovie (const Object *movieDict) {
   //
   // movie poster
   //
-  poster = movieDict->dictLookupNF("Poster");
+  poster = movieDict->dictLookupNF("Poster").copy();
   if (!poster.isNull()) {
     if (poster.isRef() || poster.isStream()) {
       showPoster = true;

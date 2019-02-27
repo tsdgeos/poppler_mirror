@@ -891,22 +891,22 @@ Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char
   // Obtain dictionary or stream associated to appearance type
   switch (type) {
   case appearRollover:
-    apData = appearDict.dictLookupNF("R");
+    apData = appearDict.dictLookupNF("R").copy();
     if (apData.isNull())
-      apData = appearDict.dictLookupNF("N");
+      apData = appearDict.dictLookupNF("N").copy();
     break;
   case appearDown:
-    apData = appearDict.dictLookupNF("D");
+    apData = appearDict.dictLookupNF("D").copy();
     if (apData.isNull())
-      apData = appearDict.dictLookupNF("N");
+      apData = appearDict.dictLookupNF("N").copy();
     break;
   case appearNormal:
-    apData = appearDict.dictLookupNF("N");
+    apData = appearDict.dictLookupNF("N").copy();
     break;
   }
 
   if (apData.isDict() && state)
-    return apData.dictLookupNF(state);
+    return apData.dictLookupNF(state).copy();
   else if (apData.isRef())
     return apData;
 
@@ -914,7 +914,7 @@ Object AnnotAppearance::getAppearanceStream(AnnotAppearanceType type, const char
 }
 
 std::unique_ptr<GooString> AnnotAppearance::getStateKey(int i) {
-  Object obj1 = appearDict.dictLookupNF("N");
+  const Object &obj1 = appearDict.dictLookupNF("N");
   if (obj1.isDict())
     return std::make_unique<GooString>(obj1.dictGetKey(i));
   return nullptr;
@@ -922,7 +922,7 @@ std::unique_ptr<GooString> AnnotAppearance::getStateKey(int i) {
 
 int AnnotAppearance::getNumStates() {
   int res = 0;
-  Object obj1 = appearDict.dictLookupNF("N");
+  const Object &obj1 = appearDict.dictLookupNF("N");
   if (obj1.isDict())
     res = obj1.dictGetLength();
   return res;
@@ -938,7 +938,7 @@ bool AnnotAppearance::referencesStream(Object *stateObj, Ref refToStream) {
   } else if (stateObj->isDict()) { // Test each value
     const int size = stateObj->dictGetLength();
     for (int i = 0; i < size; ++i) {
-      Object obj1 = stateObj->dictGetValNF(i);
+      const Object &obj1 = stateObj->dictGetValNF(i);
       if (obj1.isRef()) {
         Ref r = obj1.getRef();
         if (r.num == refToStream.num && r.gen == refToStream.gen) {
@@ -956,17 +956,17 @@ bool AnnotAppearance::referencesStream(Ref refToStream) {
   bool found;
 
   // Scan each state's ref/subdictionary
-  obj1 = appearDict.dictLookupNF("N");
+  obj1 = appearDict.dictLookupNF("N").copy();
   found = referencesStream(&obj1, refToStream);
   if (found)
     return true;
 
-  obj1 = appearDict.dictLookupNF("R");
+  obj1 = appearDict.dictLookupNF("R").copy();
   found = referencesStream(&obj1, refToStream);
   if (found)
     return true;
 
-  obj1 = appearDict.dictLookupNF("D");
+  obj1 = appearDict.dictLookupNF("D").copy();
   found = referencesStream(&obj1, refToStream);
   return found;
 }
@@ -1001,7 +1001,7 @@ void AnnotAppearance::removeStateStreams(Object *obj1) {
   } else if (obj1->isDict()) {
     const int size = obj1->dictGetLength();
     for (int i = 0; i < size; ++i) {
-      Object obj2 = obj1->dictGetValNF(i);
+      const Object &obj2 = obj1->dictGetValNF(i);
       if (obj2.isRef()) {
         removeStream(obj2.getRef());
       }
@@ -1011,11 +1011,11 @@ void AnnotAppearance::removeStateStreams(Object *obj1) {
 
 void AnnotAppearance::removeAllStreams() {
   Object obj1;
-  obj1 = appearDict.dictLookupNF("N");
+  obj1 = appearDict.dictLookupNF("N").copy();
   removeStateStreams(&obj1);
-  obj1 = appearDict.dictLookupNF("R");
+  obj1 = appearDict.dictLookupNF("R").copy();
   removeStateStreams(&obj1);
-  obj1 = appearDict.dictLookupNF("D");
+  obj1 = appearDict.dictLookupNF("D").copy();
   removeStateStreams(&obj1);
 }
 
@@ -1226,7 +1226,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   }
 
   // Note: This value is overwritten by Annots ctor
-  obj1 = dict->lookupNF("P");
+  obj1 = dict->lookupNF("P").copy();
   if (obj1.isRef()) {
     Ref ref = obj1.getRef();
 
@@ -1303,7 +1303,7 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
     treeKey = 0;
   }
 
-  oc = dict->lookupNF("OC");
+  oc = dict->lookupNF("OC").copy();
 }
 
 void Annot::getRect(double *x1, double *y1, double *x2, double *y2) const {
@@ -1866,7 +1866,7 @@ AnnotPopup::~AnnotPopup() {
 }
 
 void AnnotPopup::initialize(PDFDoc *docA, Dict *dict) {
-  parent = dict->lookupNF("Parent");
+  parent = dict->lookupNF("Parent").copy();
   if (!parent.isRef()) {
     parent.setToNull();
   }
@@ -1905,7 +1905,7 @@ AnnotMarkup::AnnotMarkup(PDFDoc *docA, Object &&dictObject, const Object *obj) :
 AnnotMarkup::~AnnotMarkup() = default;
 
 void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict) {
-  Object obj1, obj2;
+  Object obj1;
 
   obj1 = dict->lookup("T");
   if (obj1.isString()) {
@@ -1913,7 +1913,7 @@ void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict) {
   }
 
   Object popupObj = dict->lookup("Popup");
-  obj2 = dict->lookupNF("Popup");
+  const Object &obj2 = dict->lookupNF("Popup");
   if (popupObj.isDict() && obj2.isRef()) {
     popup = std::make_unique<AnnotPopup>(docA, std::move(popupObj), &obj2);
   }
@@ -1930,7 +1930,7 @@ void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict) {
     date.reset(obj1.getString()->copy());
   }
 
-  obj1 = dict->lookupNF("IRT");
+  obj1 = dict->lookupNF("IRT").copy();
   if (obj1.isRef()) {
     inReplyTo = obj1.getRef();
   } else {
@@ -2825,7 +2825,7 @@ void AnnotFreeText::generateFreeTextAppearance()
       error(errSyntaxWarning, -1, "Font subdictionary is not a dictionary");
     } else {
       // Get the font dictionary for the actual requested font
-      Object fontDictionary = fontResources.getDict()->lookupNF(da.getFontName().getName());
+      Object fontDictionary = fontResources.getDict()->lookupNF(da.getFontName().getName()).copy();
 
       // Resolve reference, if necessary
       Ref fontReference = {-1, -1};
@@ -3760,7 +3760,7 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
     action.reset(LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI()));
   }
 
-  additionalActions = dict->lookupNF("AA");
+  additionalActions = dict->lookupNF("AA").copy();
 
   obj1 = dict->lookup("Parent");
   if (obj1.isDict()) {
@@ -5132,7 +5132,7 @@ void AnnotScreen::initialize(PDFDoc *docA, Dict* dict) {
     }
   }
 
-  additionalActions = dict->lookupNF("AA");
+  additionalActions = dict->lookupNF("AA").copy();
 
   obj1 = dict->lookup("MK");
   if (obj1.isDict()) {
@@ -6646,7 +6646,7 @@ Annots::Annots(PDFDoc *docA, int page, Object *annotsObj) {
       //form widget
       Object obj1 = annotsObj->arrayGet(i);
       if (obj1.isDict()) {
-	Object obj2 = annotsObj->arrayGetNF(i);
+	const Object &obj2 = annotsObj->arrayGetNF(i);
         annot = createAnnot (std::move(obj1), &obj2);
         if (annot) {
           if (annot->isOk()) {

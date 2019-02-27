@@ -16,7 +16,7 @@
 // Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
-// Copyright (C) 2008-2010, 2012-2014, 2016-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012-2014, 2016-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
@@ -163,7 +163,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
 
     // Prevent circles in the tree by checking the ref against used refs in
     // our current tree branch.
-    const Object nextRefObj = obj->dictLookupNF("Next");
+    const Object &nextRefObj = obj->dictLookupNF("Next");
     if (nextRefObj.isRef()) {
         const Ref ref = nextRefObj.getRef();
         if (!seenNextActions->insert(ref.num).second) {
@@ -188,7 +188,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
       }
 
       // Similar circle check as above.
-      const Object obj3Ref = a->getNF(i);
+      const Object &obj3Ref = a->getNF(i);
       if (obj3Ref.isRef()) {
           const Ref ref = obj3Ref.getRef();
           if (!seenNextActions->insert(ref.num).second) {
@@ -230,13 +230,13 @@ LinkDest::LinkDest(const Array *a) {
     error(errSyntaxWarning, -1, "Annotation destination array is too short");
     return;
   }
-  Object obj1 = a->getNF(0);
-  if (obj1.isInt()) {
-    pageNum = obj1.getInt() + 1;
+  const Object &obj0 = a->getNF(0);
+  if (obj0.isInt()) {
+    pageNum = obj0.getInt() + 1;
     pageIsRef = false;
-  } else if (obj1.isRef()) {
-    pageRef.num = obj1.getRefNum();
-    pageRef.gen = obj1.getRefGen();
+  } else if (obj0.isRef()) {
+    pageRef.num = obj0.getRefNum();
+    pageRef.gen = obj0.getRefGen();
     pageIsRef = true;
   } else {
     error(errSyntaxWarning, -1, "Bad annotation destination");
@@ -244,7 +244,7 @@ LinkDest::LinkDest(const Array *a) {
   }
 
   // get destination type
-  obj1 = a->get(1);
+  Object obj1 = a->get(1);
 
   // XYZ link
   if (obj1.isName("XYZ")) {
@@ -637,7 +637,7 @@ LinkMovie::LinkMovie(const Object *obj) {
   annotRef.num = -1;
   annotTitle = nullptr;
 
-  Object tmp = obj->dictLookupNF("Annotation");
+  Object tmp = obj->dictLookupNF("Annotation").copy();
   if (tmp.isRef()) {
     annotRef = tmp.getRef();
   }
@@ -758,7 +758,7 @@ LinkRendition::LinkRendition(const Object *obj) {
 	  renditionObj.setToNull();
 	}
 
-	screenRef = obj->dictLookupNF("AN");
+	screenRef = obj->dictLookupNF("AN").copy();
 	if (!screenRef.isRef() && operation >= 0 && operation <= 4) {
 	  error(errSyntaxWarning, -1, "Invalid Rendition Action: no AN field with op = {0:d}", operationCode);
 	  screenRef.setToNull();
@@ -829,7 +829,7 @@ LinkOCGState::LinkOCGState(const Object *obj) {
     StateList *stList = nullptr;
 
     for (int i = 0; i < obj1.arrayGetLength(); ++i) {
-      Object obj2 = obj1.arrayGetNF(i);
+      const Object &obj2 = obj1.arrayGetNF(i);
       if (obj2.isName()) {
         if (stList)
 	  stateList->push_back(stList);

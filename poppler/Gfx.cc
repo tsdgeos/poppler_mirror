@@ -317,7 +317,6 @@ static inline bool isSameGfxColor(const GfxColor &colorA, const GfxColor &colorB
 
 GfxResources::GfxResources(XRef *xrefA, Dict *resDictA, GfxResources *nextA) :
     gStateCache(2), xref(xrefA) {
-  Object obj1, obj2;
   Ref r;
 
   if (resDictA) {
@@ -325,9 +324,9 @@ GfxResources::GfxResources(XRef *xrefA, Dict *resDictA, GfxResources *nextA) :
     // build font dictionary
     Dict *resDict = resDictA->copy(xref);
     fonts = nullptr;
-    obj1 = resDict->lookupNF("Font");
+    const Object &obj1 = resDict->lookupNF("Font");
     if (obj1.isRef()) {
-      obj2 = obj1.fetch(xref);
+      Object obj2 = obj1.fetch(xref);
       if (obj2.isDict()) {
 	r = obj1.getRef();
 	fonts = new GfxFontDict(xref, &r, obj2.getDict());
@@ -414,7 +413,7 @@ Object GfxResources::lookupXObjectNF(const char *name) {
 
   for (resPtr = this; resPtr; resPtr = resPtr->next) {
     if (resPtr->xObjDict.isDict()) {
-      Object obj = resPtr->xObjDict.dictLookupNF(name);
+      Object obj = resPtr->xObjDict.dictLookupNF(name).copy();
       if (!obj.isNull())
 	return obj;
     }
@@ -428,7 +427,7 @@ Object GfxResources::lookupMarkedContentNF(const char *name) {
 
   for (resPtr = this; resPtr; resPtr = resPtr->next) {
     if (resPtr->propertiesDict.isDict()) {
-      Object obj = resPtr->propertiesDict.dictLookupNF(name);
+      Object obj = resPtr->propertiesDict.dictLookupNF(name).copy();
       if (!obj.isNull())
 	return obj;
     }
@@ -457,7 +456,7 @@ GfxPattern *GfxResources::lookupPattern(const char *name, OutputDev *out, GfxSta
 
   for (resPtr = this; resPtr; resPtr = resPtr->next) {
     if (resPtr->patternDict.isDict()) {
-      Object obj = resPtr->patternDict.dictLookupNF(name);
+      Object obj = resPtr->patternDict.dictLookupNF(name).copy();
       if (!obj.isNull()) {
 	Ref patternRef = { -1, -1 };
 	if (obj.isRef()) {
@@ -515,7 +514,7 @@ Object GfxResources::lookupGStateNF(const char *name) {
 
   for (resPtr = this; resPtr; resPtr = resPtr->next) {
     if (resPtr->gStateDict.isDict()) {
-      Object obj = resPtr->gStateDict.dictLookupNF(name);
+      Object obj = resPtr->gStateDict.dictLookupNF(name).copy();
       if (!obj.isNull()) {
 	return obj;
       }
@@ -1241,7 +1240,7 @@ void Gfx::opSetExtGState(Object args[], int numArgs) {
   if (obj2.isArray()) {
     GfxFont *font;
     if (obj2.arrayGetLength() == 2) {
-      Object fargs0 = obj2.arrayGetNF(0);
+      const Object &fargs0 = obj2.arrayGetNF(0);
       Object fargs1 = obj2.arrayGet(1);
       if (fargs0.isRef() && fargs1.isNum()) {
 	Object fobj = fargs0.fetch(xref);
@@ -1277,7 +1276,7 @@ void Gfx::opSetExtGState(Object args[], int numArgs) {
     if (obj2.arrayGetLength() == 2) {
       Object dargs[2];
 
-      dargs[0] = obj2.arrayGetNF(0);
+      dargs[0] = obj2.arrayGetNF(0).copy();
       dargs[1] = obj2.arrayGet(1);
       if (dargs[0].isArray() && dargs[1].isInt()) {
 	opSetDash(dargs,2);
@@ -4228,7 +4227,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg) {
 
   // check for optional content key
   if (ref) {
-    obj1 = dict->lookupNF("OC");
+    obj1 = dict->lookupNF("OC").copy();
     if (catalog->getOptContentConfig() && !catalog->getOptContentConfig()->optContentIsVisible(&obj1)) {
       return;
     }
@@ -4692,7 +4691,7 @@ void Gfx::doForm(Object *str) {
 
   // check for optional content key
   ocSaved = ocState;
-  obj1 = dict->lookupNF("OC");
+  obj1 = dict->lookupNF("OC").copy();
   if (catalog->getOptContentConfig() && !catalog->getOptContentConfig()->optContentIsVisible(&obj1)) {
     if (out->needCharCount()) {
       ocState = false;

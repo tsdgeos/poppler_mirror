@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2013, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
@@ -120,7 +120,7 @@ Catalog::Catalog(PDFDoc *docA) {
   }
 
   // actions
-  additionalActions = catDict.dictLookupNF("AA");
+  additionalActions = catDict.dictLookupNF("AA").copy();
 
   // get the ViewerPreferences dictionary
   viewerPreferences = catDict.dictLookup("ViewerPreferences");
@@ -213,7 +213,7 @@ bool Catalog::cachePageTree(int page)
     Object catDict = xref->getCatalog();
 
     if (catDict.isDict()) {
-      Object pagesDictRef = catDict.dictLookupNF("Pages");
+      const Object &pagesDictRef = catDict.dictLookupNF("Pages");
       if (pagesDictRef.isRef() &&
           pagesDictRef.getRefNum() >= 0 &&
           pagesDictRef.getRefNum() < xref->getNumObjects()) {
@@ -270,7 +270,7 @@ bool Catalog::cachePageTree(int page)
        continue;
     }
 
-    Object kidRef = kids.arrayGetNF(kidsIdx);
+    const Object &kidRef = kids.arrayGetNF(kidsIdx);
     if (!kidRef.isRef()) {
       error(errSyntaxError, -1, "Kid object (page {0:uld}) is not an indirect reference ({1:s})",
 	    pages.size()+1, kidRef.getTypeName());
@@ -558,7 +558,7 @@ NameTree::Entry::Entry(Array *array, int index) {
     else
       error(errSyntaxError, -1, "Invalid page tree");
   }
-  value = array->getNF(index + 1);
+  value = array->getNF(index + 1).copy();
 }
 
 NameTree::Entry::~Entry() {
@@ -615,7 +615,7 @@ void NameTree::parse(Object *tree, std::set<int> &seen) {
   Object kids = tree->dictLookup("Kids");
   if (kids.isArray()) {
     for (int i = 0; i < kids.arrayGetLength(); ++i) {
-      Object kidRef = kids.arrayGetNF(i);
+      const Object &kidRef = kids.arrayGetNF(i);
       if (kidRef.isRef()) {
 	const int numObj = kidRef.getRef().num;
 	if (seen.find(numObj) != seen.end()) {
@@ -732,7 +732,7 @@ int Catalog::getNumPages()
     // some PDF files actually use real numbers here ("/Count 9.0")
     if (!obj.isNum()) {
       if (pagesDict.dictIs("Page")) {
-	Object pageRootRef = catDict.dictLookupNF("Pages");
+	const Object &pageRootRef = catDict.dictLookupNF("Pages");
 
 	error(errSyntaxError, -1, "Pages top-level is a single Page. The document is malformed, trying to recover...");
 

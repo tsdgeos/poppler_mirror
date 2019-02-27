@@ -341,14 +341,14 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID) {
 
   Object fontDesc = fontDict2->lookup("FontDescriptor");
   if (fontDesc.isDict()) {
-    Object obj3 = fontDesc.dictLookupNF("FontFile");
+    Object obj3 = fontDesc.dictLookupNF("FontFile").copy();
     if (obj3.isRef()) {
       *embID = obj3.getRef();
       if (expectedType != fontType1) {
 	err = true;
       }
     }
-    if (embID->num == -1 && (obj3 = fontDesc.dictLookupNF("FontFile2"), obj3.isRef())) {
+    if (embID->num == -1 && (obj3 = fontDesc.dictLookupNF("FontFile2").copy(), obj3.isRef())) {
       *embID = obj3.getRef();
       if (isType0) {
 	expectedType = fontCIDType2;
@@ -356,7 +356,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID) {
 	err = true;
       }
     }
-    if (embID->num == -1 && (obj3 = fontDesc.dictLookupNF("FontFile3"), obj3.isRef())) {
+    if (embID->num == -1 && (obj3 = fontDesc.dictLookupNF("FontFile3").copy(), obj3.isRef())) {
       *embID = obj3.getRef();
       Object obj4 = obj3.fetch(xref);
       if (obj4.isStream()) {
@@ -1684,7 +1684,7 @@ Object Gfx8BitFont::getCharProc(int code) {
 
 Object Gfx8BitFont::getCharProcNF(int code) {
   if (enc[code] && charProcs.isDict()) {
-    return charProcs.dictLookupNF(enc[code]);
+    return charProcs.dictLookupNF(enc[code]).copy();
   } else {
     return Object(objNull);
   }
@@ -2388,7 +2388,7 @@ GfxFontDict::GfxFontDict(XRef *xref, Ref *fontDictRef, Dict *fontDict) {
   numFonts = fontDict->getLength();
   fonts = (GfxFont **)gmallocn(numFonts, sizeof(GfxFont *));
   for (i = 0; i < numFonts; ++i) {
-    Object obj1 = fontDict->getValNF(i);
+    const Object &obj1 = fontDict->getValNF(i);
     Object obj2 = obj1.fetch(xref);
     if (obj2.isDict()) {
       if (obj1.isRef()) {
@@ -2479,8 +2479,7 @@ int GfxFontDict::hashFontObject(Object *obj) {
   return h.get31();
 }
 
-void GfxFontDict::hashFontObject1(Object *obj, FNVHash *h) {
-  Object obj2;
+void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h) {
   const GooString *s;
   const char *p;
   double r;
@@ -2519,7 +2518,7 @@ void GfxFontDict::hashFontObject1(Object *obj, FNVHash *h) {
     n = obj->arrayGetLength();
     h->hash((char *)&n, sizeof(int));
     for (i = 0; i < n; ++i) {
-      obj2 = obj->arrayGetNF(i);
+      const Object &obj2 = obj->arrayGetNF(i);
       hashFontObject1(&obj2, h);
     }
     break;
@@ -2530,7 +2529,7 @@ void GfxFontDict::hashFontObject1(Object *obj, FNVHash *h) {
     for (i = 0; i < n; ++i) {
       p = obj->dictGetKey(i);
       h->hash(p, (int)strlen(p));
-      obj2 = obj->dictGetValNF(i);
+      const Object &obj2 = obj->dictGetValNF(i);
       hashFontObject1(&obj2, h);
     }
     break;

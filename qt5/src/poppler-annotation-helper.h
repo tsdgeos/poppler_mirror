@@ -1,5 +1,5 @@
 /* poppler-annotation-helper.h: qt interface to poppler
- * Copyright (C) 2006, 2008, 2017, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2008, 2017-2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2018, Dileep Sankhla <sankhla.dileep96@gmail.com>
@@ -139,7 +139,7 @@ void XPDFReader::lookupColor( Dict * dict, char * type, QColor & dest )
 
 void XPDFReader::lookupIntRef( Dict * dict, char * type, int & dest )
 {
-    Object refObj = dict->lookupNF( type );
+    const Object &refObj = dict->lookupNF( type );
     if ( refObj.isNull() )
         return;
     if ( refObj.isRef() )

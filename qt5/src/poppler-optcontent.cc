@@ -3,7 +3,7 @@
  * Copyright (C) 2007, Brad Hards <bradh@kde.org>
  * Copyright (C) 2008, 2014, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008, Carlos Garcia Campos <carlosgc@gnome.org>
- * Copyright (C) 2015-2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2015-2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Hubert Figuière <hub@figuiere.net>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -43,7 +43,7 @@ namespace Poppler
   {
     itemsInGroup.reserve(rbarray->getLength());
     for (int i = 0; i < rbarray->getLength(); ++i) {
-      Object ref = rbarray->getNF( i );
+      const Object &ref = rbarray->getNF( i );
       if ( ! ref.isRef() ) {
 	qDebug() << "expected ref, but got:" << ref.getType();
       }
@@ -201,7 +201,7 @@ namespace Poppler
     for (int i = 0; i < orderArray->getLength(); ++i) {
       Object orderItem = orderArray->get(i);
       if ( orderItem.isDict() ) {
-	Object item = orderArray->getNF(i);
+	const Object &item = orderArray->getNF(i);
 	if (item.isRef() ) {
           OptContentItem *ocItem = m_optContentItems.value(QString::number(item.getRefNum()));
 	  if (ocItem) {

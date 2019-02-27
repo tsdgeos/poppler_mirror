@@ -1791,7 +1791,7 @@ void PSOutputDev::setupResources(Dict *resDict) {
 
       // avoid infinite recursion on XObjects
       skip = false;
-      Object xObjRef = xObjDict.dictGetValNF(i);
+      const Object &xObjRef = xObjDict.dictGetValNF(i);
       if (xObjRef.isRef()) {
 	Ref ref0 = xObjRef.getRef();
 	if (resourceIDs.find(ref0.num) != resourceIDs.end()) {
@@ -1822,7 +1822,7 @@ void PSOutputDev::setupResources(Dict *resDict) {
 
       // avoid infinite recursion on Patterns
       skip = false;
-      Object patRef = patDict.dictGetValNF(i);
+      const Object &patRef = patDict.dictGetValNF(i);
       if (patRef.isRef()) {
 	Ref ref0 = patRef.getRef();
 	if (resourceIDs.find(ref0.num) != resourceIDs.end()) {
@@ -1854,7 +1854,7 @@ void PSOutputDev::setupFonts(Dict *resDict) {
   int i;
 
   gfxFontDict = nullptr;
-  Object obj1 = resDict->lookupNF("Font");
+  const Object &obj1 = resDict->lookupNF("Font");
   if (obj1.isRef()) {
     Object obj2 = obj1.fetch(xref);
     if (obj2.isDict()) {
@@ -2893,7 +2893,7 @@ void PSOutputDev::setupImages(Dict *resDict) {
   Object xObjDict = resDict->lookup("XObject");
   if (xObjDict.isDict()) {
     for (int i = 0; i < xObjDict.dictGetLength(); ++i) {
-      Object xObjRef = xObjDict.dictGetValNF(i);
+      const Object &xObjRef = xObjDict.dictGetValNF(i);
       Object xObj = xObjDict.dictGetVal(i);
       if (xObj.isStream()) {
 	Object subtypeObj = xObj.streamGetDict()->lookup("Subtype");
@@ -3110,7 +3110,7 @@ void PSOutputDev::setupForms(Dict *resDict) {
   Object xObjDict = resDict->lookup("XObject");
   if (xObjDict.isDict()) {
     for (int i = 0; i < xObjDict.dictGetLength(); ++i) {
-      Object xObjRef = xObjDict.dictGetValNF(i);
+      const Object &xObjRef = xObjDict.dictGetValNF(i);
       Object xObj = xObjDict.dictGetVal(i);
       if (xObj.isStream()) {
 	Object subtypeObj = xObj.streamGetDict()->lookup("Subtype");
