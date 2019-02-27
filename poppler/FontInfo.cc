@@ -99,15 +99,15 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList) 
 
   // scan the fonts in this resource dictionary
   gfxFontDict = nullptr;
-  Object obj1 = resDict->lookupNF("Font");
-  if (obj1.isRef()) {
-    Object obj2 = obj1.fetch(xrefA);
+  Object fontObj = resDict->lookupNF("Font");
+  if (fontObj.isRef()) {
+    Object obj2 = fontObj.fetch(xrefA);
     if (obj2.isDict()) {
-      Ref r = obj1.getRef();
+      Ref r = fontObj.getRef();
       gfxFontDict = new GfxFontDict(xrefA, &r, obj2.getDict());
     }
-  } else if (obj1.isDict()) {
-    gfxFontDict = new GfxFontDict(xrefA, nullptr, obj1.getDict());
+  } else if (fontObj.isDict()) {
+    gfxFontDict = new GfxFontDict(xrefA, nullptr, fontObj.getDict());
   }
   if (gfxFontDict) {
     for (int i = 0; i < gfxFontDict->getNumFonts(); ++i) {
@@ -131,10 +131,10 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList) 
     Object objDict = resDict->lookup(resTypes[resType]);
     if (objDict.isDict()) {
       for (int i = 0; i < objDict.dictGetLength(); ++i) {
-        obj1 = objDict.dictGetValNF(i).copy();
-        if (obj1.isRef()) {
+        const Object &resObj = objDict.dictGetValNF(i).copy();
+        if (resObj.isRef()) {
           // check for an already-seen object
-          const Ref r = obj1.getRef();
+          const Ref r = resObj.getRef();
           if (visitedObjects.find(r.num) != visitedObjects.end()) {
             continue;
           }
@@ -142,7 +142,7 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList) 
           visitedObjects.insert(r.num);
         }
 
-        Object obj2 = obj1.fetch(xrefA);
+        Object obj2 = resObj.fetch(xrefA);
         if (obj2.isStream()) {
           Object resObj = obj2.streamGetDict()->lookup("Resources");
           if (resObj.isDict() && resObj.getDict() != resDict) {
