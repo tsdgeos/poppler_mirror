@@ -118,7 +118,7 @@ private:
 class OCDisplayNode {
 public:
 
-  static OCDisplayNode *parse(Object *obj, OCGs *oc, XRef *xref, int recursion = 0);
+  static OCDisplayNode *parse(const Object *obj, OCGs *oc, XRef *xref, int recursion = 0);
   OCDisplayNode();
   ~OCDisplayNode();
 

@@ -46,19 +46,19 @@ OCGs::OCGs(Object *ocgObject, XRef *xref) :
 
   // we now enumerate over the ocgList, and build up the optionalContentGroups list.
   for(int i = 0; i < ocgList.arrayGetLength(); ++i) {
-    Object ocg = ocgList.arrayGet(i);
-    if (!ocg.isDict()) {
+    Object ocgDict = ocgList.arrayGet(i);
+    if (!ocgDict.isDict()) {
       break;
     }
-    auto thisOptionalContentGroup = std::make_unique<OptionalContentGroup>(ocg.getDict());
-    ocg = ocgList.arrayGetNF(i).copy();
-    if (!ocg.isRef()) {
+    auto thisOptionalContentGroup = std::make_unique<OptionalContentGroup>(ocgDict.getDict());
+    const Object &ocgRef = ocgList.arrayGetNF(i);
+    if (!ocgRef.isRef()) {
       break;
     }
-    thisOptionalContentGroup->setRef( ocg.getRef() );
+    thisOptionalContentGroup->setRef( ocgRef.getRef() );
     // the default is ON - we change state later, depending on BaseState, ON and OFF
     thisOptionalContentGroup->setState(OptionalContentGroup::On);
-    optionalContentGroups.emplace(ocg.getRef(), std::move(thisOptionalContentGroup));
+    optionalContentGroups.emplace(ocgRef.getRef(), std::move(thisOptionalContentGroup));
   }
 
   Object defaultOcgConfig = ocgObject->dictLookup("D");
@@ -367,7 +367,7 @@ OptionalContentGroup::~OptionalContentGroup()
 
 //------------------------------------------------------------------------
 
-OCDisplayNode *OCDisplayNode::parse(Object *obj, OCGs *oc,
+OCDisplayNode *OCDisplayNode::parse(const Object *obj, OCGs *oc,
 				    XRef *xref, int recursion) {
   OptionalContentGroup *ocgA;
   OCDisplayNode *node, *child;
@@ -399,7 +399,7 @@ OCDisplayNode *OCDisplayNode::parse(Object *obj, OCGs *oc,
     node = new OCDisplayNode();
   }
   for (; i < obj2.arrayGetLength(); ++i) {
-    Object obj3 = obj2.arrayGetNF(i).copy();
+    const Object &obj3 = obj2.arrayGetNF(i);
     if ((child = OCDisplayNode::parse(&obj3, oc, xref, recursion + 1))) {
       if (!child->ocg && !child->name && node->getNumChildren() > 0) {
 	node->getChild(node->getNumChildren() - 1)->addChildren(child->takeChildren());
