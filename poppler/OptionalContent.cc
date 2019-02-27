@@ -194,7 +194,7 @@ bool OCGs::optContentIsVisible( Object *dictRef )
   return result;
 }
 
-bool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
+bool OCGs::evalOCVisibilityExpr(const Object *expr, int recursion) {
   OptionalContentGroup *ocg;
   bool ret;
 
@@ -217,7 +217,7 @@ bool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
   Object op = expr2.arrayGet(0);
   if (op.isName("Not")) {
     if (expr2.arrayGetLength() == 2) {
-      Object obj = expr2.arrayGetNF(1).copy();
+      const Object &obj = expr2.arrayGetNF(1);
       ret = !evalOCVisibilityExpr(&obj, recursion + 1);
     } else {
       error(errSyntaxError, -1,
@@ -227,13 +227,13 @@ bool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
   } else if (op.isName("And")) {
     ret = true;
     for (int i = 1; i < expr2.arrayGetLength() && ret; ++i) {
-      Object obj = expr2.arrayGetNF(i).copy();
+      const Object &obj = expr2.arrayGetNF(i);
       ret = evalOCVisibilityExpr(&obj, recursion + 1);
     }
   } else if (op.isName("Or")) {
     ret = false;
     for (int i = 1; i < expr2.arrayGetLength() && !ret; ++i) {
-      Object obj = expr2.arrayGetNF(i).copy();
+      const Object &obj = expr2.arrayGetNF(i);
       ret = evalOCVisibilityExpr(&obj, recursion + 1);
     }
   } else {

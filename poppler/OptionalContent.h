@@ -4,7 +4,7 @@
 //
 // Copyright 2007 Brad Hards <bradh@kde.org>
 // Copyright 2008 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2013, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2013, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 // Released under the GPL (version 2, or later, at your option)
@@ -58,7 +58,7 @@ public:
 private:
   bool ok;
 
-  bool evalOCVisibilityExpr(Object *expr, int recursion);
+  bool evalOCVisibilityExpr(const Object *expr, int recursion);
   bool allOn( Array *ocgArray );
   bool allOff( Array *ocgArray );
   bool anyOn( Array *ocgArray );
