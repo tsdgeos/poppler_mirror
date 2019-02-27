@@ -2479,8 +2479,7 @@ int GfxFontDict::hashFontObject(Object *obj) {
   return h.get31();
 }
 
-void GfxFontDict::hashFontObject1(Object *obj, FNVHash *h) {
-  Object obj2;
+void GfxFontDict::hashFontObject1(const Object *obj, FNVHash *h) {
   const GooString *s;
   const char *p;
   double r;
@@ -2519,7 +2518,7 @@ void GfxFontDict::hashFontObject1(Object *obj, FNVHash *h) {
     n = obj->arrayGetLength();
     h->hash((char *)&n, sizeof(int));
     for (i = 0; i < n; ++i) {
-      obj2 = obj->arrayGetNF(i).copy();
+      const Object &obj2 = obj->arrayGetNF(i);
       hashFontObject1(&obj2, h);
     }
     break;
@@ -2530,7 +2529,7 @@ void GfxFontDict::hashFontObject1(Object *obj, FNVHash *h) {
     for (i = 0; i < n; ++i) {
       p = obj->dictGetKey(i);
       h->hash(p, (int)strlen(p));
-      obj2 = obj->dictGetValNF(i).copy();
+      const Object &obj2 = obj->dictGetValNF(i);
       hashFontObject1(&obj2, h);
     }
     break;
