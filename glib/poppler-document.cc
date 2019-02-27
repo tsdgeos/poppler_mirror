@@ -2845,7 +2845,7 @@ get_optional_content_rbgroups (OCGs *ocg)
       for (j = 0; j < rb_array->getLength (); ++j) {
 	OptionalContentGroup *oc;
 
-        Object ref = rb_array->getNF (j);
+        const Object &ref = rb_array->getNF (j);
 	if (!ref.isRef ()) {
 	  continue;
 	}
@@ -2888,7 +2888,7 @@ get_optional_content_items_sorted (OCGs *ocg, Layer *parent, Array *order)
     Object orderItem = order->get (i);
 
     if (orderItem.isDict ()) {
-      Object ref = order->getNF (i);
+      const Object &ref = order->getNF (i);
       if (ref.isRef ()) {
         OptionalContentGroup *oc = ocg->findOcgByRef (ref.getRef ());
 	Layer *layer = layer_new (oc);

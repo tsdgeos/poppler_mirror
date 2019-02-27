@@ -47,12 +47,12 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
     Array *newNameArray = new Array(srcXRef);
     int j = 0;
     for (int i = 0; i < srcNameArray.arrayGetLength() - 1; i += 2) {
-      Object key = srcNameArray.arrayGetNF(i);
-      Object value = srcNameArray.arrayGetNF(i + 1);
+      const Object &key = srcNameArray.arrayGetNF(i);
+      const Object &value = srcNameArray.arrayGetNF(i + 1);
       if (key.isString() && value.isRef()) {
         while (j < mergeNameArray.arrayGetLength() - 1) {
-          Object mkey = mergeNameArray.arrayGetNF(j);
-          Object mvalue = mergeNameArray.arrayGetNF(j + 1);
+          const Object &mkey = mergeNameArray.arrayGetNF(j);
+          const Object &mvalue = mergeNameArray.arrayGetNF(j + 1);
           if (mkey.isString() && mvalue.isRef()) {
             if (mkey.getString()->cmp(key.getString()) < 0) {
               newNameArray->add(Object(new GooString(mkey.getString()->c_str())));
@@ -72,8 +72,8 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
       }
     }
     while (j < mergeNameArray.arrayGetLength() - 1) {
-      Object mkey = mergeNameArray.arrayGetNF(j);
-      Object mvalue = mergeNameArray.arrayGetNF(j + 1);
+      const Object &mkey = mergeNameArray.arrayGetNF(j);
+      const Object &mvalue = mergeNameArray.arrayGetNF(j + 1);
       if (mkey.isString() && mvalue.isRef()) {
         newNameArray->add(Object(new GooString(mkey.getString()->c_str())));
         newNameArray->add(Object( { mvalue.getRef().num + numOffset, mvalue.getRef().gen } ));
@@ -85,8 +85,8 @@ static void doMergeNameTree(PDFDoc *doc, XRef *srcXRef, XRef *countRef, int oldR
   } else if (srcNameArray.isNull() && mergeNameArray.isArray()) {
     Array *newNameArray = new Array(srcXRef);
     for (int i = 0; i < mergeNameArray.arrayGetLength() - 1; i += 2) {
-      Object key = mergeNameArray.arrayGetNF(i);
-      Object value = mergeNameArray.arrayGetNF(i + 1);
+      const Object &key = mergeNameArray.arrayGetNF(i);
+      const Object &value = mergeNameArray.arrayGetNF(i + 1);
       if (key.isString() && value.isRef()) {
         newNameArray->add(Object(new GooString(key.getString()->c_str())));
         newNameArray->add(Object( { value.getRef().num + numOffset, value.getRef().gen } ));
@@ -117,7 +117,7 @@ static void doMergeFormDict(Dict *srcFormDict, Dict *mergeFormDict, int numOffse
   Object mergeFields = mergeFormDict->lookup("Fields");
   if (srcFields.isArray() && mergeFields.isArray()) {
     for (int i = 0; i < mergeFields.arrayGetLength(); i++) {
-      Object value = mergeFields.arrayGetNF(i);
+      const Object &value = mergeFields.arrayGetNF(i);
       srcFields.arrayAdd(Object( { value.getRef().num + numOffset, value.getRef().gen } ));
     }
   }
@@ -372,7 +372,7 @@ int main (int argc, char *argv[])
       if (j > 0)
 	outStr->printf(" ");
       const char *key = pageDict->getKey(j);
-      Object value = pageDict->getValNF(j);
+      Object value = pageDict->getValNF(j).copy();
       if (strcmp(key, "Parent") == 0) {
         outStr->printf("/Parent %d 0 R", rootNum + 1);
       } else {

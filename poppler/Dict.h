@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2010, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -82,7 +82,7 @@ public:
   // Iterative accessors.
   const char *getKey(int i) const { return entries[i].first.c_str(); }
   Object getVal(int i) const { return entries[i].second.fetch(xref); }
-  Object getValNF(int i) const { return entries[i].second.copy(); }
+  const Object &getValNF(int i) const { return entries[i].second; }
 
   // Set the xref pointer.  This is only used in one special case: the
   // trailer dictionary, which is read before the xref table is

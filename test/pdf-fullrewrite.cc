@@ -125,8 +125,8 @@ static bool compareDictionaries(Dict *dictA, Dict *dictB)
    * in dictB is also contained in dictA */
   for (int i = 0; i < length; ++i) {
     const char *key = dictA->getKey(i);
-    Object valA = dictA->getValNF(i);
-    Object valB = dictB->lookupNF(key);
+    Object valA = dictA->getValNF(i).copy();
+    Object valB = dictB->lookupNF(key).copy();
     if (!compareObjects(&valA, &valB))
       return false;
   }
@@ -197,8 +197,8 @@ static bool compareObjects(Object *objA, Object *objB)
           return false;
         } else {
           for (int i = 0; i < length; ++i) {
-            Object elemA = arrayA->getNF(i);
-            Object elemB = arrayB->getNF(i);
+            Object elemA = arrayA->getNF(i).copy();
+            Object elemB = arrayB->getNF(i).copy();
             if (!compareObjects(&elemA, &elemB)) {
               return false;
             }

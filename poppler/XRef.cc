@@ -1617,7 +1617,7 @@ void XRef::markUnencrypted(Object *obj) {
     {
       Array *array = obj->getArray();
       for (int i = 0; i < array->getLength(); i++) {
-	obj1 = array->getNF(i);
+	obj1 = array->getNF(i).copy();
         markUnencrypted(&obj1);
       }
       break;
@@ -1633,7 +1633,7 @@ void XRef::markUnencrypted(Object *obj) {
         dict = obj->getDict();
       }
       for (int i = 0; i < dict->getLength(); i++) {
-	obj1 = dict->getValNF(i);
+	obj1 = dict->getValNF(i).copy();
         markUnencrypted(&obj1);
       }
       break;

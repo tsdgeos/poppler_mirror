@@ -1241,7 +1241,7 @@ void Gfx::opSetExtGState(Object args[], int numArgs) {
   if (obj2.isArray()) {
     GfxFont *font;
     if (obj2.arrayGetLength() == 2) {
-      Object fargs0 = obj2.arrayGetNF(0);
+      const Object &fargs0 = obj2.arrayGetNF(0);
       Object fargs1 = obj2.arrayGet(1);
       if (fargs0.isRef() && fargs1.isNum()) {
 	Object fobj = fargs0.fetch(xref);
@@ -1277,7 +1277,7 @@ void Gfx::opSetExtGState(Object args[], int numArgs) {
     if (obj2.arrayGetLength() == 2) {
       Object dargs[2];
 
-      dargs[0] = obj2.arrayGetNF(0);
+      dargs[0] = obj2.arrayGetNF(0).copy();
       dargs[1] = obj2.arrayGet(1);
       if (dargs[0].isArray() && dargs[1].isInt()) {
 	opSetDash(dargs,2);

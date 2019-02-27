@@ -634,7 +634,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
   if (obj1.isArray()) {
     // Load children
     for (int i = 0 ; i < obj1.arrayGetLength(); i++) {
-      Object childRef = obj1.arrayGetNF(i);
+      const Object &childRef = obj1.arrayGetNF(i);
       if (!childRef.isRef()) {
         error (errSyntaxError, -1, "Invalid form field renference");
         continue;
@@ -1817,7 +1817,7 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
     Array *array = obj1.getArray();
     for(int i=0; i<array->getLength(); i++) {
       Object obj2 = array->get(i);
-      Object oref = array->getNF(i);
+      const Object &oref = array->getNF(i);
       if (!oref.isRef()) {
         error(errSyntaxWarning, -1, "Direct object in rootFields");
         continue;
@@ -1846,7 +1846,7 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
     Array *array = obj1.getArray();
     calculateOrder.reserve(array->getLength());
     for(int i=0; i<array->getLength(); i++) {
-      Object oref = array->getNF(i);
+      const Object &oref = array->getNF(i);
       if (!oref.isRef()) {
         error(errSyntaxWarning, -1, "Direct object in CO");
         continue;

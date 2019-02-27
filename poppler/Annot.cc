@@ -938,7 +938,7 @@ bool AnnotAppearance::referencesStream(Object *stateObj, Ref refToStream) {
   } else if (stateObj->isDict()) { // Test each value
     const int size = stateObj->dictGetLength();
     for (int i = 0; i < size; ++i) {
-      Object obj1 = stateObj->dictGetValNF(i);
+      const Object &obj1 = stateObj->dictGetValNF(i);
       if (obj1.isRef()) {
         Ref r = obj1.getRef();
         if (r.num == refToStream.num && r.gen == refToStream.gen) {
@@ -1001,7 +1001,7 @@ void AnnotAppearance::removeStateStreams(Object *obj1) {
   } else if (obj1->isDict()) {
     const int size = obj1->dictGetLength();
     for (int i = 0; i < size; ++i) {
-      Object obj2 = obj1->dictGetValNF(i);
+      const Object &obj2 = obj1->dictGetValNF(i);
       if (obj2.isRef()) {
         removeStream(obj2.getRef());
       }
@@ -6646,7 +6646,7 @@ Annots::Annots(PDFDoc *docA, int page, Object *annotsObj) {
       //form widget
       Object obj1 = annotsObj->arrayGet(i);
       if (obj1.isDict()) {
-	Object obj2 = annotsObj->arrayGetNF(i);
+	const Object &obj2 = annotsObj->arrayGetNF(i);
         annot = createAnnot (std::move(obj1), &obj2);
         if (annot) {
           if (annot->isOk()) {

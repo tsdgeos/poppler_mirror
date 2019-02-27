@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -68,7 +68,7 @@ public:
 
   // Accessors.
   Object get(int i, int recursion = 0) const;
-  Object getNF(int i) const;
+  const Object &getNF(int i) const;
   bool getString(int i, GooString *string) const;
 
 private:

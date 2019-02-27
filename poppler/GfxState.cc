@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2006-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009, 2011-2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2019 Christian Persch <chpe@gnome.org>
@@ -1828,7 +1828,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
     error(errSyntaxError, -1, "Bad ICCBased color space");
     return nullptr;
   }
-  obj1 = arr->getNF(1);
+  obj1 = arr->getNF(1).copy();
   if (obj1.isRef()) {
     iccProfileStreamA = obj1.getRef();
   } else {

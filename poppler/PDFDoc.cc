@@ -975,7 +975,7 @@ int PDFDoc::savePageAs(const GooString *name, int pageNo)
       strcmp(key, "Pages") != 0) 
     {
       if (j > 0) outStr->printf(" ");
-      Object value = catDict->getValNF(j);
+      Object value = catDict->getValNF(j).copy();
       outStr->printf("/%s ", key);
       writeObject(&value, outStr, getXRef(), 0, nullptr, cryptRC4, 0, 0, 0);
     }
@@ -998,7 +998,7 @@ int PDFDoc::savePageAs(const GooString *name, int pageNo)
   for (int n = 0; n < pageDict->getLength(); n++) {
     if (n > 0) outStr->printf(" ");
     const char *key = pageDict->getKey(n);
-    Object value = pageDict->getValNF(n);
+    Object value = pageDict->getValNF(n).copy();
     if (strcmp(key, "Parent") == 0) {
       outStr->printf("/Parent %d 0 R", rootNum + 1);
     } else {
@@ -1253,7 +1253,7 @@ void PDFDoc::writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, unsign
     GooString *keyNameToPrint = keyName.sanitizedName(false /* non ps mode */);
     outStr->printf("/%s ", keyNameToPrint->c_str());
     delete keyNameToPrint;
-    Object obj1 = dict->getValNF(i);
+    Object obj1 = dict->getValNF(i).copy();
     writeObject(&obj1, outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen, alreadyWrittenDicts);
   }
   outStr->printf(">> ");
@@ -1403,7 +1403,7 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, unsigned i
       array = obj->getArray();
       outStr->printf("[");
       for (int i=0; i<array->getLength(); i++) {
-	Object obj1 = array->getNF(i);
+	Object obj1 = array->getNF(i).copy();
         writeObject(&obj1, outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen);
       }
       outStr->printf("] ");
@@ -1673,10 +1673,10 @@ void PDFDoc::markDictionnary (Dict* dict, XRef * xRef, XRef *countRef, unsigned 
   for (int i=0; i<dict->getLength(); i++) {
     const char *key = dict->getKey(i);
     if (strcmp(key, "Annots") != 0) {
-      Object obj1 = dict->getValNF(i);
+      Object obj1 = dict->getValNF(i).copy();
       markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
     } else {
-      Object annotsObj = dict->getValNF(i);
+      Object annotsObj = dict->getValNF(i).copy();
       if (!annotsObj.isNull()) {
         markAnnotations(&annotsObj, xRef, countRef, 0, oldRefNum, newRefNum, alreadyMarkedDicts);
       }
@@ -1696,7 +1696,7 @@ void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, unsigned int n
     case objArray:
       array = obj->getArray();
       for (int i=0; i<array->getLength(); i++) {
-        Object obj1 = array->getNF(i);
+        Object obj1 = array->getNF(i).copy();
         markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum);
       }
       break;
@@ -1784,7 +1784,7 @@ void PDFDoc::markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigne
 
   for (int n = 0; n < pageDict->getLength(); n++) {
     const char *key = pageDict->getKey(n);
-    Object value  = pageDict->getValNF(n);
+    Object value  = pageDict->getValNF(n).copy();
     if (strcmp(key, "Parent") != 0 &&
 	      strcmp(key, "Pages") != 0 &&
 	      strcmp(key, "AcroForm") != 0 &&
@@ -1810,7 +1810,7 @@ bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsi
             Object obj2 = dict->lookupNF("P");
             if (obj2.isRef()) {
               if (obj2.getRef().num == oldPageNum) {
-                Object obj3 = array->getNF(i);
+                const Object &obj3 = array->getNF(i);
                 if (obj3.isRef()) {
                   Ref r;
                   r.num = newPageNum;
@@ -1837,7 +1837,7 @@ bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsi
           }
           markPageObjects(dict, xRef, countRef, numOffset, oldPageNum, newPageNum, alreadyMarkedDicts);
         }
-        obj1 = array->getNF(i);
+        obj1 = array->getNF(i).copy();
         if (obj1.isRef()) {
           if (obj1.getRef().num + (int) numOffset >= xRef->getNumObjects() || xRef->getEntry(obj1.getRef().num + numOffset)->type == xrefEntryFree) {
             if (getXRef()->getEntry(obj1.getRef().num)->type == xrefEntryFree) {
@@ -1889,10 +1889,10 @@ void PDFDoc::markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, unsigned in
       Dict *dict = acroform.getDict();
       for (int i=0; i < dict->getLength(); i++) {
         if (strcmp(dict->getKey(i), "Fields") == 0) {
-          Object fields = dict->getValNF(i);
+          Object fields = dict->getValNF(i).copy();
           modified = markAnnotations(&fields, xRef, countRef, numOffset, oldRefNum, newRefNum);
         } else {
-          Object obj = dict->getValNF(i);
+          Object obj = dict->getValNF(i).copy();
           markObject(&obj, xRef, countRef, numOffset, oldRefNum, newRefNum);
         }
       }

@@ -16,7 +16,7 @@
 // Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
-// Copyright (C) 2008-2010, 2012-2014, 2016-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012-2014, 2016-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
@@ -188,7 +188,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
       }
 
       // Similar circle check as above.
-      const Object obj3Ref = a->getNF(i);
+      const Object &obj3Ref = a->getNF(i);
       if (obj3Ref.isRef()) {
           const Ref ref = obj3Ref.getRef();
           if (!seenNextActions->insert(ref.num).second) {
@@ -230,7 +230,7 @@ LinkDest::LinkDest(const Array *a) {
     error(errSyntaxWarning, -1, "Annotation destination array is too short");
     return;
   }
-  Object obj1 = a->getNF(0);
+  Object obj1 = a->getNF(0).copy();
   if (obj1.isInt()) {
     pageNum = obj1.getInt() + 1;
     pageIsRef = false;
@@ -829,7 +829,7 @@ LinkOCGState::LinkOCGState(const Object *obj) {
     StateList *stList = nullptr;
 
     for (int i = 0; i < obj1.arrayGetLength(); ++i) {
-      Object obj2 = obj1.arrayGetNF(i);
+      const Object &obj2 = obj1.arrayGetNF(i);
       if (obj2.isName()) {
         if (stList)
 	  stateList->push_back(stList);

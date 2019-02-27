@@ -423,7 +423,7 @@ void Page::removeAnnot(Annot *annot) {
     int idx = -1;
     // Get annotation position
     for (int i = 0; idx == -1 && i < annArray.arrayGetLength(); ++i) {
-      Object tmp = annArray.arrayGetNF(i);
+      const Object &tmp = annArray.arrayGetNF(i);
       if (tmp.isRef()) {
         Ref currAnnot = tmp.getRef();
         if (currAnnot.num == annotRef.num && currAnnot.gen == annotRef.gen) {

@@ -156,7 +156,7 @@ void Object::print(FILE *f) const {
     for (i = 0; i < arrayGetLength(); ++i) {
       if (i > 0)
 	fprintf(f, " ");
-      obj = arrayGetNF(i);
+      obj = arrayGetNF(i).copy();
       obj.print(f);
     }
     fprintf(f, "]");
@@ -165,7 +165,7 @@ void Object::print(FILE *f) const {
     fprintf(f, "<<");
     for (i = 0; i < dictGetLength(); ++i) {
       fprintf(f, " /%s ", dictGetKey(i));
-      obj = dictGetValNF(i);
+      obj = dictGetValNF(i).copy();
       obj.print(f);
     }
     fprintf(f, " >>");

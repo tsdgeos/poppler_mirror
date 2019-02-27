@@ -7,7 +7,7 @@
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright 2017 Jan-Erik S <janerik234678@gmail.com>
-// Copyright 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2017, 2018 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018, Adam Reichold <adam.reichold@t-online.de>
 //
@@ -65,7 +65,7 @@ void StructTreeRoot::parse(Dict *root)
       error(errSyntaxWarning, -1, "K in StructTreeRoot has more than one children in a tagged PDF");
     }
     for (int i = 0; i < kids.arrayGetLength(); i++) {
-      Object ref = kids.arrayGetNF(i);
+      const Object &ref = kids.arrayGetNF(i);
       if (ref.isRef()) {
         seenElements.insert(ref.getRefNum());
       }
@@ -145,7 +145,7 @@ void StructTreeRoot::parseNumberTreeNode(Dict *node)
 	if (value.isArray()) {
 	  vec.resize(value.arrayGetLength());
 	  for (int j = 0; j < value.arrayGetLength(); j++) {
-	    Object itemvalue = value.arrayGetNF(j);
+	    const Object &itemvalue = value.arrayGetNF(j);
 	    if (itemvalue.isRef()) {
 	      Ref ref = itemvalue.getRef();
 	      vec[j].ref = ref;
@@ -155,7 +155,7 @@ void StructTreeRoot::parseNumberTreeNode(Dict *node)
 	    }
 	  }
 	} else {
-	  value = nums.arrayGetNF(i + 1);
+	  value = nums.arrayGetNF(i + 1).copy();
 	  if (value.isRef()) {
 	    Ref ref = value.getRef();
 	    vec.resize(1);

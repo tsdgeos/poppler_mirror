@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2013, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2013, 2017, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -77,16 +77,17 @@ Object Array::get(int i, int recursion) const {
   return elems[i].fetch(xref, recursion);
 }
 
-Object Array::getNF(int i) const {
+const Object &Array::getNF(int i) const {
   if (i < 0 || std::size_t(i) >= elems.size()) {
-    return Object(objNull);
+    static Object nullObj(objNull);
+    return nullObj;
   }
-  return elems[i].copy();
+  return elems[i];
 }
 
 bool Array::getString(int i, GooString *string) const
 {
-  Object obj = getNF(i);
+  const Object &obj = getNF(i);
   if (obj.isString()) {
     string->clear();
     string->append(obj.getString());

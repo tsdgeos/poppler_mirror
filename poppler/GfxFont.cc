@@ -2388,7 +2388,7 @@ GfxFontDict::GfxFontDict(XRef *xref, Ref *fontDictRef, Dict *fontDict) {
   numFonts = fontDict->getLength();
   fonts = (GfxFont **)gmallocn(numFonts, sizeof(GfxFont *));
   for (i = 0; i < numFonts; ++i) {
-    Object obj1 = fontDict->getValNF(i);
+    const Object &obj1 = fontDict->getValNF(i);
     Object obj2 = obj1.fetch(xref);
     if (obj2.isDict()) {
       if (obj1.isRef()) {
@@ -2519,7 +2519,7 @@ void GfxFontDict::hashFontObject1(Object *obj, FNVHash *h) {
     n = obj->arrayGetLength();
     h->hash((char *)&n, sizeof(int));
     for (i = 0; i < n; ++i) {
-      obj2 = obj->arrayGetNF(i);
+      obj2 = obj->arrayGetNF(i).copy();
       hashFontObject1(&obj2, h);
     }
     break;
@@ -2530,7 +2530,7 @@ void GfxFontDict::hashFontObject1(Object *obj, FNVHash *h) {
     for (i = 0; i < n; ++i) {
       p = obj->dictGetKey(i);
       h->hash(p, (int)strlen(p));
-      obj2 = obj->dictGetValNF(i);
+      obj2 = obj->dictGetValNF(i).copy();
       hashFontObject1(&obj2, h);
     }
     break;

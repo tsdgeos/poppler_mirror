@@ -6,7 +6,7 @@
 //
 // Copyright 2013, 2014 Igalia S.L.
 // Copyright 2014 Luigi Scarso <luigi.scarso@gmail.com>
-// Copyright 2014, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2014, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2015 Dmytro Morgun <lztoad@gmail.com>
 // Copyright 2018 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
@@ -1255,7 +1255,7 @@ void StructElement::parseChildren(Dict *element, std::set<int> &seen)
   if (kids.isArray()) {
     for (int i = 0; i < kids.arrayGetLength(); i++) {
       Object obj = kids.arrayGet(i);
-      Object ref = kids.arrayGetNF(i);
+      Object ref = kids.arrayGetNF(i).copy();
       parseChild(&ref, &obj, seen);
     }
   } else if (kids.isDict() || kids.isInt()) {

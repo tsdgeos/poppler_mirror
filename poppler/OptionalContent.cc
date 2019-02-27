@@ -5,7 +5,7 @@
 // Copyright 2007 Brad Hards <bradh@kde.org>
 // Copyright 2008 Pino Toscano <pino@kde.org>
 // Copyright 2008, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2008, 2010, 2011, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2008, 2010, 2011, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2008 Mark Kaplan <mkaplan@finjan.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -51,7 +51,7 @@ OCGs::OCGs(Object *ocgObject, XRef *xref) :
       break;
     }
     auto thisOptionalContentGroup = std::make_unique<OptionalContentGroup>(ocg.getDict());
-    ocg = ocgList.arrayGetNF(i);
+    ocg = ocgList.arrayGetNF(i).copy();
     if (!ocg.isRef()) {
       break;
     }
@@ -79,7 +79,7 @@ OCGs::OCGs(Object *ocgObject, XRef *xref) :
   if (on.isArray()) {
     // ON is an optional element
     for (int i = 0; i < on.arrayGetLength(); ++i) {
-      Object reference = on.arrayGetNF(i);
+      const Object &reference = on.arrayGetNF(i);
       if (!reference.isRef()) {
 	// there can be null entries
 	break;
@@ -97,7 +97,7 @@ OCGs::OCGs(Object *ocgObject, XRef *xref) :
   if (off.isArray()) {
     // OFF is an optional element
     for (int i = 0; i < off.arrayGetLength(); ++i) {
-      Object reference = off.arrayGetNF(i);
+      const Object &reference = off.arrayGetNF(i);
       if (!reference.isRef()) {
 	// there can be null entries
 	break;
@@ -217,7 +217,7 @@ bool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
   Object op = expr2.arrayGet(0);
   if (op.isName("Not")) {
     if (expr2.arrayGetLength() == 2) {
-      Object obj = expr2.arrayGetNF(1);
+      Object obj = expr2.arrayGetNF(1).copy();
       ret = !evalOCVisibilityExpr(&obj, recursion + 1);
     } else {
       error(errSyntaxError, -1,
@@ -227,13 +227,13 @@ bool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
   } else if (op.isName("And")) {
     ret = true;
     for (int i = 1; i < expr2.arrayGetLength() && ret; ++i) {
-      Object obj = expr2.arrayGetNF(i);
+      Object obj = expr2.arrayGetNF(i).copy();
       ret = evalOCVisibilityExpr(&obj, recursion + 1);
     }
   } else if (op.isName("Or")) {
     ret = false;
     for (int i = 1; i < expr2.arrayGetLength() && !ret; ++i) {
-      Object obj = expr2.arrayGetNF(i);
+      Object obj = expr2.arrayGetNF(i).copy();
       ret = evalOCVisibilityExpr(&obj, recursion + 1);
     }
   } else {
@@ -247,7 +247,7 @@ bool OCGs::evalOCVisibilityExpr(Object *expr, int recursion) {
 bool OCGs::allOn( Array *ocgArray )
 {
   for (int i = 0; i < ocgArray->getLength(); ++i) {
-    Object ocgItem = ocgArray->getNF(i);
+    const Object &ocgItem = ocgArray->getNF(i);
     if (ocgItem.isRef()) {
       OptionalContentGroup* oc = findOcgByRef( ocgItem.getRef() );      
       if ( oc && oc->getState() == OptionalContentGroup::Off ) {
@@ -261,7 +261,7 @@ bool OCGs::allOn( Array *ocgArray )
 bool OCGs::allOff( Array *ocgArray )
 {
   for (int i = 0; i < ocgArray->getLength(); ++i) {
-    Object ocgItem = ocgArray->getNF(i);
+    const Object &ocgItem = ocgArray->getNF(i);
     if (ocgItem.isRef()) {
       OptionalContentGroup* oc = findOcgByRef( ocgItem.getRef() );      
       if ( oc && oc->getState() == OptionalContentGroup::On ) {
@@ -275,7 +275,7 @@ bool OCGs::allOff( Array *ocgArray )
 bool OCGs::anyOn( Array *ocgArray )
 {
   for (int i = 0; i < ocgArray->getLength(); ++i) {
-    Object ocgItem = ocgArray->getNF(i);
+    const Object &ocgItem = ocgArray->getNF(i);
     if (ocgItem.isRef()) {
       OptionalContentGroup* oc = findOcgByRef( ocgItem.getRef() );      
       if ( oc && oc->getState() == OptionalContentGroup::On ) {
@@ -289,7 +289,7 @@ bool OCGs::anyOn( Array *ocgArray )
 bool OCGs::anyOff( Array *ocgArray )
 {
   for (int i = 0; i < ocgArray->getLength(); ++i) {
-    Object ocgItem = ocgArray->getNF(i);
+    const Object &ocgItem = ocgArray->getNF(i);
     if (ocgItem.isRef()) {
       OptionalContentGroup* oc = findOcgByRef( ocgItem.getRef() );      
       if ( oc && oc->getState() == OptionalContentGroup::Off ) {
@@ -399,7 +399,7 @@ OCDisplayNode *OCDisplayNode::parse(Object *obj, OCGs *oc,
     node = new OCDisplayNode();
   }
   for (; i < obj2.arrayGetLength(); ++i) {
-    Object obj3 = obj2.arrayGetNF(i);
+    Object obj3 = obj2.arrayGetNF(i).copy();
     if ((child = OCDisplayNode::parse(&obj3, oc, xref, recursion + 1))) {
       if (!child->ocg && !child->name && node->getNumChildren() > 0) {
 	node->getChild(node->getNumChildren() - 1)->addChildren(child->takeChildren());
