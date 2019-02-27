@@ -99,7 +99,7 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList) 
 
   // scan the fonts in this resource dictionary
   gfxFontDict = nullptr;
-  Object fontObj = resDict->lookupNF("Font");
+  const Object &fontObj = resDict->lookupNF("Font");
   if (fontObj.isRef()) {
     Object obj2 = fontObj.fetch(xrefA);
     if (obj2.isDict()) {

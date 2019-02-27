@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2006-2010, 2012-2014, 2016, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012-2014, 2016-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -322,7 +322,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
     Object globals;
     if (params->isDict()) {
       XRef *xref = params->getDict()->getXRef();
-      obj = params->dictLookupNF("JBIG2Globals");
+      obj = params->dictLookupNF("JBIG2Globals").copy();
       globals = obj.fetch(xref, recursion);
     }
     str = new JBIG2Stream(str, std::move(globals), &obj);

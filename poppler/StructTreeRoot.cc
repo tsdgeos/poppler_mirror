@@ -95,7 +95,7 @@ void StructTreeRoot::parse(Dict *root)
     StructElement *child = new StructElement(kids.getDict(), this, nullptr, seenElements);
     if (child->isOk()) {
       appendChild(child);
-      Object ref = root->lookupNF("K");
+      const Object &ref = root->lookupNF("K");
       if (ref.isRef())
         parentTreeAdd(ref.getRef(), child);
     } else {

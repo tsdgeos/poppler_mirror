@@ -258,7 +258,7 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *a
   attrs->clipBoxes();
 
   // transtion
-  trans = pageObj.dictLookupNF("Trans");
+  trans = pageObj.dictLookupNF("Trans").copy();
   if (!(trans.isRef() || trans.isDict() || trans.isNull())) {
     error(errSyntaxError, -1, "Page transition object (page {0:d}) is wrong type ({1:s})",
 	  num, trans.getTypeName());
@@ -266,7 +266,7 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *a
   }
 
   // duration
-  Object tmp = pageObj.dictLookupNF("Dur");
+  const Object &tmp = pageObj.dictLookupNF("Dur");
   if (!(tmp.isNum() || tmp.isNull())) {
     error(errSyntaxError, -1, "Page duration object (page {0:d}) is wrong type ({1:s})",
 	  num, tmp.getTypeName());
@@ -275,7 +275,7 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *a
   }
 
   // annotations
-  annotsObj = pageObj.dictLookupNF("Annots");
+  annotsObj = pageObj.dictLookupNF("Annots").copy();
   if (!(annotsObj.isRef() || annotsObj.isArray() || annotsObj.isNull())) {
     error(errSyntaxError, -1, "Page annotations object (page {0:d}) is wrong type ({1:s})",
 	  num, annotsObj.getTypeName());
@@ -283,7 +283,7 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *a
   }
 
   // contents
-  contents = pageObj.dictLookupNF("Contents");
+  contents = pageObj.dictLookupNF("Contents").copy();
   if (!(contents.isRef() || contents.isArray() ||
 	contents.isNull())) {
     error(errSyntaxError, -1, "Page contents object (page {0:d}) is wrong type ({1:s})",
@@ -292,7 +292,7 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *a
   }
 
   // thumb
-  thumb = pageObj.dictLookupNF("Thumb");
+  thumb = pageObj.dictLookupNF("Thumb").copy();
   if (!(thumb.isStream() || thumb.isNull() || thumb.isRef())) {
       error(errSyntaxError, -1, "Page thumb object (page {0:d}) is wrong type ({1:s})",
             num, thumb.getTypeName());
@@ -300,7 +300,7 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *a
   }
 
   // actions
-  actions = pageObj.dictLookupNF("AA");
+  actions = pageObj.dictLookupNF("AA").copy();
   if (!(actions.isDict() || actions.isNull())) {
       error(errSyntaxError, -1, "Page additional action object (page {0:d}) is wrong type ({1:s})",
             num, actions.getTypeName());
@@ -340,15 +340,15 @@ void Page::replaceXRef(XRef *xrefA) {
   Object obj1;
   Dict *pageDict = pageObj.getDict()->copy(xrefA);
   xref = xrefA;
-  trans = pageDict->lookupNF("Trans");
-  annotsObj = pageDict->lookupNF("Annots");
-  contents = pageDict->lookupNF("Contents");
+  trans = pageDict->lookupNF("Trans").copy();
+  annotsObj = pageDict->lookupNF("Annots").copy();
+  contents = pageDict->lookupNF("Contents").copy();
   if (contents.isArray()) {
-    obj1 = pageDict->lookupNF("Contents");
+    obj1 = pageDict->lookupNF("Contents").copy();
     contents = obj1.getArray()->copy(xrefA);
   }
-  thumb = pageDict->lookupNF("Thumb");
-  actions = pageDict->lookupNF("AA");
+  thumb = pageDict->lookupNF("Thumb").copy();
+  actions = pageDict->lookupNF("AA").copy();
   obj1 = pageDict->lookup("Resources");
   if (obj1.isDict()) {
     attrs->replaceResource(std::move(obj1));

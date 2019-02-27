@@ -163,7 +163,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
 
     // Prevent circles in the tree by checking the ref against used refs in
     // our current tree branch.
-    const Object nextRefObj = obj->dictLookupNF("Next");
+    const Object &nextRefObj = obj->dictLookupNF("Next");
     if (nextRefObj.isRef()) {
         const Ref ref = nextRefObj.getRef();
         if (!seenNextActions->insert(ref.num).second) {
@@ -637,7 +637,7 @@ LinkMovie::LinkMovie(const Object *obj) {
   annotRef.num = -1;
   annotTitle = nullptr;
 
-  Object tmp = obj->dictLookupNF("Annotation");
+  Object tmp = obj->dictLookupNF("Annotation").copy();
   if (tmp.isRef()) {
     annotRef = tmp.getRef();
   }
@@ -758,7 +758,7 @@ LinkRendition::LinkRendition(const Object *obj) {
 	  renditionObj.setToNull();
 	}
 
-	screenRef = obj->dictLookupNF("AN");
+	screenRef = obj->dictLookupNF("AN").copy();
 	if (!screenRef.isRef() && operation >= 0 && operation <= 4) {
 	  error(errSyntaxWarning, -1, "Invalid Rendition Action: no AN field with op = {0:d}", operationCode);
 	  screenRef.setToNull();

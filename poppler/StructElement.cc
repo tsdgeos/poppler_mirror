@@ -1045,7 +1045,7 @@ void StructElement::parse(Dict *element)
   }
 
   // Parent object reference (required).
-  s->parentRef = element->lookupNF("P");
+  s->parentRef = element->lookupNF("P").copy();
   if (!s->parentRef.isRef()) {
     error(errSyntaxError, -1, "P object is wrong type ({0:s})", obj.getTypeName());
     return;
@@ -1085,7 +1085,7 @@ void StructElement::parse(Dict *element)
   // is to be rendered in. Note: each element stores only the /Pg value
   // contained by it, and StructElement::getPageRef() may look in parent
   // elements to find the page where an element belongs.
-  pageRef = element->lookupNF("Pg");
+  pageRef = element->lookupNF("Pg").copy();
 
   // Revision number (optional).
   obj = element->lookup("R");
@@ -1201,17 +1201,17 @@ StructElement *StructElement::parseChild(const Object *ref,
 
     child = new StructElement(mcidObj.getInt(), treeRoot, this);
 
-    Object pageRefObj = childObj->dictLookupNF("Pg");
+    Object pageRefObj = childObj->dictLookupNF("Pg").copy();
     if (pageRefObj.isRef()) {
       child->pageRef = std::move(pageRefObj);
     }
   } else if (childObj->isDict("OBJR")) {
-    Object refObj = childObj->dictLookupNF("Obj");
+    const Object &refObj = childObj->dictLookupNF("Obj");
     if (refObj.isRef()) {
 
       child = new StructElement(refObj.getRef(), treeRoot, this);
 
-      Object pageRefObj = childObj->dictLookupNF("Pg");
+      Object pageRefObj = childObj->dictLookupNF("Pg").copy();
       if (pageRefObj.isRef()) {
         child->pageRef = std::move(pageRefObj);
       }
@@ -1259,7 +1259,7 @@ void StructElement::parseChildren(Dict *element, std::set<int> &seen)
       parseChild(&ref, &obj, seen);
     }
   } else if (kids.isDict() || kids.isInt()) {
-    Object ref = element->lookupNF("K");
+    const Object &ref = element->lookupNF("K");
     parseChild(&ref, &kids, seen);
   }
 }

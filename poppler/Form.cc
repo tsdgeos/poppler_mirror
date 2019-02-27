@@ -648,7 +648,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
       const Ref ref = childRef.getRef();
       if (usedParents->find(ref.num) == usedParents->end()) {
         // Field child: it could be a form field or a widget or composed dict
-        Object obj2 = childObj.dictLookupNF("Parent");
+        Object obj2 = childObj.dictLookupNF("Parent").copy();
 	Object obj3 = childObj.dictLookup("Parent");
         if (obj2.isRef() || obj3.isDict()) {
           // Child is a form field or composed dict
@@ -1875,7 +1875,7 @@ static Object fieldLookup(Dict *field, const char *key, std::set<int> *usedParen
   if (!obj.isNull()) {
     return obj;
   }
-  Object parent = dict->lookupNF("Parent");
+  const Object &parent = dict->lookupNF("Parent");
   if (parent.isRef()) {
     const Ref ref = parent.getRef();
     if (usedParents->find(ref.num) == usedParents->end()) {

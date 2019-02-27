@@ -291,7 +291,7 @@ XRef::XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA, bool *
     }
 
     // set size to (at least) the size specified in trailer dict
-    obj = trailerDict.dictLookupNF("Size");
+    obj = trailerDict.dictLookupNF("Size").copy();
     if (!obj.isInt()) {
         error(errSyntaxWarning, -1, "No valid XRef size in trailer");
     } else {
@@ -306,7 +306,7 @@ XRef::XRef(BaseStream *strA, Goffset pos, Goffset mainXRefEntriesOffsetA, bool *
     }
 
     // get the root dictionary (catalog) object
-    obj = trailerDict.dictLookupNF("Root");
+    obj = trailerDict.dictLookupNF("Root").copy();
     if (obj.isRef()) {
       rootNum = obj.getRefNum();
       rootGen = obj.getRefGen();
@@ -588,7 +588,7 @@ bool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fol
   }
 
   // get the 'Prev' pointer
-  obj2 = obj.getDict()->lookupNF("Prev");
+  obj2 = obj.getDict()->lookupNF("Prev").copy();
   if (obj2.isInt() || obj2.isInt64()) {
     if (obj2.isInt())
       pos2 = obj2.getInt();
@@ -657,7 +657,7 @@ bool XRef::readXRefStream(Stream *xrefStr, Goffset *pos) {
   ok = false;
 
   Dict *dict = xrefStr->getDict();
-  obj = dict->lookupNF("Size");
+  obj = dict->lookupNF("Size").copy();
   if (!obj.isInt()) {
     return false;
   }
@@ -672,7 +672,7 @@ bool XRef::readXRefStream(Stream *xrefStr, Goffset *pos) {
     }
   }
 
-  obj = dict->lookupNF("W");
+  obj = dict->lookupNF("W").copy();
   if (!obj.isArray() || obj.arrayGetLength() < 3) {
     return false;
   }
@@ -691,7 +691,7 @@ bool XRef::readXRefStream(Stream *xrefStr, Goffset *pos) {
   }
 
   xrefStr->reset();
-  Object idx = dict->lookupNF("Index");
+  const Object &idx = dict->lookupNF("Index");
   if (idx.isArray()) {
     for (int i = 0; i+1 < idx.arrayGetLength(); i += 2) {
       obj = idx.arrayGet(i);
@@ -715,7 +715,7 @@ bool XRef::readXRefStream(Stream *xrefStr, Goffset *pos) {
     }
   }
 
-  obj = dict->lookupNF("Prev");
+  obj = dict->lookupNF("Prev").copy();
   if (obj.isInt() && obj.getInt() >= 0) {
     *pos = obj.getInt();
     more = true;
@@ -816,7 +816,6 @@ bool XRef::readXRefStreamSection(Stream *xrefStr, int *w, int first, int n) {
 //          Existing data in XRef::entries may get corrupted if applied anyway.
 bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict) {
   Parser *parser;
-  Object obj;
   char buf[256];
   Goffset pos;
   int num, gen;
@@ -872,7 +871,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict) {
 		 false);
         Object newTrailerDict = parser->getObj();
         if (newTrailerDict.isDict()) {
-	  obj = newTrailerDict.dictLookupNF("Root");
+	  const Object &obj = newTrailerDict.dictLookupNF("Root");
 	  if (obj.isRef() && (!gotRoot || !needCatalogDict) && rootNum != obj.getRefNum()) {
 	    rootNum = obj.getRefNum();
 	    rootGen = obj.getRefGen();
@@ -1196,7 +1195,7 @@ Object XRef::getDocInfo() {
 
 // Added for the pdftex project.
 Object XRef::getDocInfoNF() {
-  return trailerDict.dictLookupNF("Info");
+  return trailerDict.dictLookupNF("Info").copy();
 }
 
 Object XRef::createDocInfoIfNoneExists() {
@@ -1695,7 +1694,7 @@ void XRef::scanSpecialFlags() {
 
 void XRef::markUnencrypted() {
   // Mark objects referred from the Encrypt dict as Unencrypted
-  Object obj = trailerDict.dictLookupNF("Encrypt");
+  const Object &obj = trailerDict.dictLookupNF("Encrypt");
   if (obj.isRef()) {
     XRefEntry *e = getEntry(obj.getRefNum());
     e->setFlag(XRefEntry::Unencrypted, true);

@@ -341,14 +341,14 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID) {
 
   Object fontDesc = fontDict2->lookup("FontDescriptor");
   if (fontDesc.isDict()) {
-    Object obj3 = fontDesc.dictLookupNF("FontFile");
+    Object obj3 = fontDesc.dictLookupNF("FontFile").copy();
     if (obj3.isRef()) {
       *embID = obj3.getRef();
       if (expectedType != fontType1) {
 	err = true;
       }
     }
-    if (embID->num == -1 && (obj3 = fontDesc.dictLookupNF("FontFile2"), obj3.isRef())) {
+    if (embID->num == -1 && (obj3 = fontDesc.dictLookupNF("FontFile2").copy(), obj3.isRef())) {
       *embID = obj3.getRef();
       if (isType0) {
 	expectedType = fontCIDType2;
@@ -356,7 +356,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID) {
 	err = true;
       }
     }
-    if (embID->num == -1 && (obj3 = fontDesc.dictLookupNF("FontFile3"), obj3.isRef())) {
+    if (embID->num == -1 && (obj3 = fontDesc.dictLookupNF("FontFile3").copy(), obj3.isRef())) {
       *embID = obj3.getRef();
       Object obj4 = obj3.fetch(xref);
       if (obj4.isStream()) {
@@ -1684,7 +1684,7 @@ Object Gfx8BitFont::getCharProc(int code) {
 
 Object Gfx8BitFont::getCharProcNF(int code) {
   if (enc[code] && charProcs.isDict()) {
-    return charProcs.dictLookupNF(enc[code]);
+    return charProcs.dictLookupNF(enc[code]).copy();
   } else {
     return Object(objNull);
   }

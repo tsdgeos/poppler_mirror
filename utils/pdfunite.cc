@@ -204,12 +204,12 @@ int main (int argc, char *argv[])
     Object catObj = docs[0]->getXRef()->getCatalog();
     Dict *catDict = catObj.getDict();
     intents = catDict->lookup("OutputIntents");
-    afObj = catDict->lookupNF("AcroForm");
+    afObj = catDict->lookupNF("AcroForm").copy();
     Ref *refPage = docs[0]->getCatalog()->getPageRef(1);
     if (!afObj.isNull() && refPage) {
       docs[0]->markAcroForm(&afObj, yRef, countRef, 0, refPage->num, refPage->num);
     }
-    ocObj = catDict->lookupNF("OCProperties");
+    ocObj = catDict->lookupNF("OCProperties").copy();
     if (!ocObj.isNull() && ocObj.isDict() && refPage) {
       docs[0]->markPageObjects(ocObj.getDict(), yRef, countRef, 0, refPage->num, refPage->num);
     }
@@ -296,7 +296,7 @@ int main (int argc, char *argv[])
       pages.push_back(std::move(page));
       offsets.push_back(numOffset);
       docs[i]->markPageObjects(pageDict, yRef, countRef, numOffset, refPage->num, refPage->num);
-      Object annotsObj = pageDict->lookupNF("Annots");
+      Object annotsObj = pageDict->lookupNF("Annots").copy();
       if (!annotsObj.isNull()) {
         docs[i]->markAnnotations(&annotsObj, yRef, countRef, numOffset, refPage->num, refPage->num);
       }
@@ -313,7 +313,7 @@ int main (int argc, char *argv[])
     Object pageForm = pageCatDict->lookup("AcroForm");
     if (i > 0 && !pageForm.isNull() && pageForm.isDict()) {
       if (afObj.isNull()) {
-        afObj = pageCatDict->lookupNF("AcroForm");
+        afObj = pageCatDict->lookupNF("AcroForm").copy();
       } else if (afObj.isDict()) {
         doMergeFormDict(afObj.getDict(), pageForm.getDict(), numOffset);
       }

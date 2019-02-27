@@ -925,7 +925,7 @@ int PDFDoc::savePageAs(const GooString *name, int pageNo)
     markPageObjects(infoDict, yRef, countRef, 0, refPage->num, rootNum + 2);
     if (trailerObj->isDict()) {
       Dict *trailerDict = trailerObj->getDict();
-      Object ref = trailerDict->lookupNF("Info");
+      const Object &ref = trailerDict->lookupNF("Info");
       if (ref.isRef()) {
         yRef->add(ref.getRef().num, ref.getRef().gen, 0, true);
         if (getXRef()->getEntry(ref.getRef().num)->type == xrefEntryCompressed) {
@@ -939,7 +939,7 @@ int PDFDoc::savePageAs(const GooString *name, int pageNo)
   Object catObj = getXRef()->getCatalog();
   Dict *catDict = catObj.getDict();
   Object pagesObj = catDict->lookup("Pages");
-  Object afObj = catDict->lookupNF("AcroForm");
+  Object afObj = catDict->lookupNF("AcroForm").copy();
   if (!afObj.isNull()) {
     markAcroForm(&afObj, yRef, countRef, 0, refPage->num, rootNum + 2);
   }
@@ -958,7 +958,7 @@ int PDFDoc::savePageAs(const GooString *name, int pageNo)
     }
   }
   markPageObjects(pageDict, yRef, countRef, 0, refPage->num, rootNum + 2);
-  Object annotsObj = pageDict->lookupNF("Annots");
+  Object annotsObj = pageDict->lookupNF("Annots").copy();
   if (!annotsObj.isNull()) {
     markAnnotations(&annotsObj, yRef, countRef, 0, refPage->num, rootNum + 2);
   }
@@ -1550,7 +1550,7 @@ Object PDFDoc::createTrailerDict(int uxrefSize, bool incrUpdate, Goffset startxR
 
   bool hasEncrypt = false;
   if (!xRef->getTrailerDict()->isNone()) {
-    Object obj2 = xRef->getTrailerDict()->dictLookupNF("Encrypt");
+    Object obj2 = xRef->getTrailerDict()->dictLookupNF("Encrypt").copy();
     if (!obj2.isNull()) {
       trailerDict->set("Encrypt", std::move(obj2));
       hasEncrypt = true;
@@ -1807,7 +1807,7 @@ bool PDFDoc::markAnnotations(Object *annotsObj, XRef *xRef, XRef *countRef, unsi
           Dict *dict = obj1.getDict();
           Object type = dict->lookup("Type");
           if (type.isName() && strcmp(type.getName(), "Annot") == 0) {
-            Object obj2 = dict->lookupNF("P");
+            const Object &obj2 = dict->lookupNF("P");
             if (obj2.isRef()) {
               if (obj2.getRef().num == oldPageNum) {
                 const Object &obj3 = array->getNF(i);

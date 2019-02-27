@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2007-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2008, 2010, 2013, 2014, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2013, 2014, 2017, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -168,11 +168,12 @@ Object Dict::lookup(const char *key, int recursion) const {
   return Object(objNull);
 }
 
-Object Dict::lookupNF(const char *key) const {
+const Object &Dict::lookupNF(const char *key) const {
   if (const auto *entry = find(key)) {
-    return entry->second.copy();
+    return entry->second;
   }
-  return Object(objNull);
+  static Object nullObj(objNull);
+  return nullObj;
 }
 
 bool Dict::lookupInt(const char *key, const char *alt_key, int *value) const

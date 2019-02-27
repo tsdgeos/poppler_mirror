@@ -120,7 +120,7 @@ Catalog::Catalog(PDFDoc *docA) {
   }
 
   // actions
-  additionalActions = catDict.dictLookupNF("AA");
+  additionalActions = catDict.dictLookupNF("AA").copy();
 
   // get the ViewerPreferences dictionary
   viewerPreferences = catDict.dictLookup("ViewerPreferences");
@@ -213,7 +213,7 @@ bool Catalog::cachePageTree(int page)
     Object catDict = xref->getCatalog();
 
     if (catDict.isDict()) {
-      Object pagesDictRef = catDict.dictLookupNF("Pages");
+      const Object &pagesDictRef = catDict.dictLookupNF("Pages");
       if (pagesDictRef.isRef() &&
           pagesDictRef.getRefNum() >= 0 &&
           pagesDictRef.getRefNum() < xref->getNumObjects()) {
@@ -732,7 +732,7 @@ int Catalog::getNumPages()
     // some PDF files actually use real numbers here ("/Count 9.0")
     if (!obj.isNum()) {
       if (pagesDict.dictIs("Page")) {
-	Object pageRootRef = catDict.dictLookupNF("Pages");
+	const Object &pageRootRef = catDict.dictLookupNF("Pages");
 
 	error(errSyntaxError, -1, "Pages top-level is a single Page. The document is malformed, trying to recover...");
 

@@ -163,7 +163,7 @@ bool OCGs::optContentIsVisible( Object *dictRef )
     if (ve.isArray()) {
       result = evalOCVisibilityExpr(&ve, 0);
     } else {
-      Object ocg = dict->lookupNF("OCGs");
+      const Object &ocg = dict->lookupNF("OCGs");
       if (ocg.isArray()) {
         Object policy = dict->lookup("P");
         if (policy.isName("AllOn")) {

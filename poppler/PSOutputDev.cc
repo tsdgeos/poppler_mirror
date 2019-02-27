@@ -1854,7 +1854,7 @@ void PSOutputDev::setupFonts(Dict *resDict) {
   int i;
 
   gfxFontDict = nullptr;
-  Object obj1 = resDict->lookupNF("Font");
+  const Object &obj1 = resDict->lookupNF("Font");
   if (obj1.isRef()) {
     Object obj2 = obj1.fetch(xref);
     if (obj2.isDict()) {

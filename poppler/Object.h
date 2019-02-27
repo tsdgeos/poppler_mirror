@@ -280,7 +280,7 @@ public:
   void dictRemove(const char *key);
   bool dictIs(const char *dictType) const;
   Object dictLookup(const char *key, int recursion = 0) const;
-  Object dictLookupNF(const char *key) const;
+  const Object &dictLookupNF(const char *key) const;
   const char *dictGetKey(int i) const;
   Object dictGetVal(int i) const;
   const Object &dictGetValNF(int i) const;
@@ -368,7 +368,7 @@ inline bool Object::isDict(const char *dictType) const
 inline Object Object::dictLookup(const char *key, int recursion) const
   { OBJECT_TYPE_CHECK(objDict); return dict->lookup(key, recursion); }
 
-inline Object Object::dictLookupNF(const char *key) const
+inline const Object &Object::dictLookupNF(const char *key) const
   { OBJECT_TYPE_CHECK(objDict); return dict->lookupNF(key); }
 
 inline const char *Object::dictGetKey(int i) const
