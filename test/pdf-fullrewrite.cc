@@ -16,7 +16,7 @@
 #include "utils/parseargs.h"
 
 static bool compareDocuments(PDFDoc *origDoc, PDFDoc *newDoc);
-static bool compareObjects(Object *objA, Object *objB);
+static bool compareObjects(const Object *objA, const Object *objB);
 
 static char ownerPassword[33] = "\001";
 static char userPassword[33] = "\001";
@@ -125,8 +125,8 @@ static bool compareDictionaries(Dict *dictA, Dict *dictB)
    * in dictB is also contained in dictA */
   for (int i = 0; i < length; ++i) {
     const char *key = dictA->getKey(i);
-    Object valA = dictA->getValNF(i).copy();
-    Object valB = dictB->lookupNF(key).copy();
+    const Object &valA = dictA->getValNF(i);
+    const Object &valB = dictB->lookupNF(key);
     if (!compareObjects(&valA, &valB))
       return false;
   }
@@ -134,7 +134,7 @@ static bool compareDictionaries(Dict *dictA, Dict *dictB)
   return true;
 }
 
-static bool compareObjects(Object *objA, Object *objB)
+static bool compareObjects(const Object *objA, const Object *objB)
 {
   switch (objA->getType()) {
     case objBool:
@@ -197,8 +197,8 @@ static bool compareObjects(Object *objA, Object *objB)
           return false;
         } else {
           for (int i = 0; i < length; ++i) {
-            Object elemA = arrayA->getNF(i).copy();
-            Object elemB = arrayB->getNF(i).copy();
+            const Object &elemA = arrayA->getNF(i);
+            const Object &elemB = arrayB->getNF(i);
             if (!compareObjects(&elemA, &elemB)) {
               return false;
             }
