@@ -230,13 +230,13 @@ LinkDest::LinkDest(const Array *a) {
     error(errSyntaxWarning, -1, "Annotation destination array is too short");
     return;
   }
-  Object obj1 = a->getNF(0).copy();
-  if (obj1.isInt()) {
-    pageNum = obj1.getInt() + 1;
+  const Object &obj0 = a->getNF(0);
+  if (obj0.isInt()) {
+    pageNum = obj0.getInt() + 1;
     pageIsRef = false;
-  } else if (obj1.isRef()) {
-    pageRef.num = obj1.getRefNum();
-    pageRef.gen = obj1.getRefGen();
+  } else if (obj0.isRef()) {
+    pageRef.num = obj0.getRefNum();
+    pageRef.gen = obj0.getRefGen();
     pageIsRef = true;
   } else {
     error(errSyntaxWarning, -1, "Bad annotation destination");
@@ -244,7 +244,7 @@ LinkDest::LinkDest(const Array *a) {
   }
 
   // get destination type
-  obj1 = a->get(1);
+  Object obj1 = a->get(1);
 
   // XYZ link
   if (obj1.isName("XYZ")) {
