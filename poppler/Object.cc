@@ -127,7 +127,6 @@ const char *Object::getTypeName() const {
 }
 
 void Object::print(FILE *f) const {
-  Object obj;
   int i;
 
   switch (type) {
@@ -156,7 +155,7 @@ void Object::print(FILE *f) const {
     for (i = 0; i < arrayGetLength(); ++i) {
       if (i > 0)
 	fprintf(f, " ");
-      obj = arrayGetNF(i).copy();
+      const Object &obj = arrayGetNF(i);
       obj.print(f);
     }
     fprintf(f, "]");
@@ -165,7 +164,7 @@ void Object::print(FILE *f) const {
     fprintf(f, "<<");
     for (i = 0; i < dictGetLength(); ++i) {
       fprintf(f, " /%s ", dictGetKey(i));
-      obj = dictGetValNF(i).copy();
+      const Object &obj = dictGetValNF(i);
       obj.print(f);
     }
     fprintf(f, " >>");
