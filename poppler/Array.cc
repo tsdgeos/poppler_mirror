@@ -77,6 +77,20 @@ Object Array::get(int i, int recursion) const {
   return elems[i].fetch(xref, recursion);
 }
 
+Object Array::get(int i, Ref *returnRef, int recursion) const
+{
+  if (i < 0 || std::size_t(i) >= elems.size()) {
+    *returnRef = { 0, 0 };
+    return Object(objNull);
+  }
+  if (elems[i].getType() == objRef) {
+    *returnRef = elems[i].getRef();
+  } else {
+    *returnRef = { 0, 0 };
+  }
+  return elems[i].fetch(xref, recursion);
+}
+
 const Object &Array::getNF(int i) const {
   if (i < 0 || std::size_t(i) >= elems.size()) {
     static Object nullObj(objNull);
