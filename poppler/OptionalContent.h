@@ -53,7 +53,7 @@ public:
   Array* getRBGroupsArray() 
     { return (rbgroups.isArray() && rbgroups.arrayGetLength()) ? rbgroups.getArray() : nullptr; }
 
-  bool optContentIsVisible( Object *dictRef );
+  bool optContentIsVisible( const Object *dictRef );
 
 private:
   bool ok;
