@@ -401,7 +401,7 @@ void Page::addAnnot(Annot *annot) {
   // so add to the list only Popup annots without a
   // markup annotation associated.
   if (annot->getType() != Annot::typePopup ||
-      static_cast<AnnotPopup*>(annot)->getParentNF()->isNull()) {
+      !static_cast<AnnotPopup*>(annot)->hasParent()) {
     annots->appendAnnot(annot);
   }
   annot->setPage(num, true);

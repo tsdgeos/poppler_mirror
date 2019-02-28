@@ -1927,9 +1927,11 @@ AnnotPopup::~AnnotPopup() {
 }
 
 void AnnotPopup::initialize(PDFDoc *docA, Dict *dict) {
-  parent = dict->lookupNF("Parent").copy();
-  if (!parent.isRef()) {
-    parent.setToNull();
+  const Object &parentObj = dict->lookupNF("Parent");
+  if (parentObj.isRef()) {
+    parentRef = parentObj.getRef();
+  } else {
+    parentRef = Ref::INVALID();
   }
 
   Object obj1 = dict->lookup("Open");
@@ -1941,7 +1943,7 @@ void AnnotPopup::initialize(PDFDoc *docA, Dict *dict) {
 }
 
 void AnnotPopup::setParent(Annot *parentA) {
-  const Ref parentRef = parentA->getRef();
+  parentRef = parentA->getRef();
   update ("Parent", Object(parentRef));
 }
 

@@ -788,7 +788,7 @@ public:
   AnnotPopup(PDFDoc *docA, Object &&dictObject, const Object *obj);
   ~AnnotPopup();
 
-  Object *getParentNF() { return &parent; }
+  bool hasParent() const { return parentRef != Ref::INVALID(); }
   void setParent(Annot *parentA);
   bool getOpen() const { return open; }
   void setOpen(bool openA);
@@ -796,7 +796,7 @@ public:
 protected:
   void initialize(PDFDoc *docA, Dict *dict);
 
-  Object parent; // Parent
+  Ref parentRef; // Parent
   bool open;   // Open
 };
 
