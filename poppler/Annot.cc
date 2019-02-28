@@ -1224,9 +1224,9 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   }
 
   // Note: This value is overwritten by Annots ctor
-  obj1 = dict->lookupNF("P").copy();
-  if (obj1.isRef()) {
-    Ref ref = obj1.getRef();
+  const Object &pObj = dict->lookupNF("P");
+  if (pObj.isRef()) {
+    Ref ref = pObj.getRef();
 
     page = doc->getCatalog()->findPage (ref.num, ref.gen);
   } else {
@@ -1928,9 +1928,9 @@ void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict) {
     date.reset(obj1.getString()->copy());
   }
 
-  obj1 = dict->lookupNF("IRT").copy();
-  if (obj1.isRef()) {
-    inReplyTo = obj1.getRef();
+  const Object &irtObj = dict->lookupNF("IRT");
+  if (irtObj.isRef()) {
+    inReplyTo = irtObj.getRef();
   } else {
     inReplyTo.num = 0;
     inReplyTo.gen = 0;
