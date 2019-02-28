@@ -17,7 +17,7 @@
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
-// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
 //
@@ -360,8 +360,8 @@ public:
   bool hasRenditionObject() const { return renditionObj.isDict(); }
   const Object* getRenditionObject() const { return &renditionObj; }
 
-  bool hasScreenAnnot() const { return screenRef.isRef(); }
-  Ref getScreenAnnot() const { return screenRef.getRef(); }
+  bool hasScreenAnnot() const { return screenRef.num != -1; }
+  Ref getScreenAnnot() const { return screenRef; }
 
   RenditionOperation getOperation() const { return operation; }
 
@@ -371,7 +371,7 @@ public:
 
 private:
 
-  Object screenRef;
+  Ref screenRef;
   Object renditionObj;
   RenditionOperation operation;
 
