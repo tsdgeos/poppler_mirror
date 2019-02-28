@@ -131,7 +131,7 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, GooList *fontsList) 
     Object objDict = resDict->lookup(resTypes[resType]);
     if (objDict.isDict()) {
       for (int i = 0; i < objDict.dictGetLength(); ++i) {
-        const Object &resObj = objDict.dictGetValNF(i).copy();
+        const Object &resObj = objDict.dictGetValNF(i);
         if (resObj.isRef()) {
           // check for an already-seen object
           const Ref r = resObj.getRef();
