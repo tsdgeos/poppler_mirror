@@ -2823,14 +2823,8 @@ void AnnotFreeText::generateFreeTextAppearance()
       error(errSyntaxWarning, -1, "Font subdictionary is not a dictionary");
     } else {
       // Get the font dictionary for the actual requested font
-      Object fontDictionary = fontResources.getDict()->lookupNF(da.getFontName().getName()).copy();
-
-      // Resolve reference, if necessary
-      Ref fontReference = {-1, -1};
-      if (fontDictionary.isRef()) {
-        fontReference = fontDictionary.getRef();
-        fontDictionary = fontDictionary.fetch(xref);
-      }
+      Ref fontReference;
+      Object fontDictionary = fontResources.getDict()->lookup(da.getFontName().getName(), &fontReference);
 
       if (fontDictionary.isDict()) {
         font = GfxFont::makeFont(xref, da.getFontName().getName(), fontReference, fontDictionary.getDict());
