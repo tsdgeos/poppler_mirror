@@ -21,7 +21,7 @@
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
-// Copyright (C) 2009-2011, 2013, 2016-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012, 2015 Tobias Koenig <tokoe@kdab.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -446,9 +446,9 @@ public:
   bool referencesStream(Ref targetStreamRef);
 
 private:
-  static bool referencesStream(Object *stateObj, Ref targetStreamRef);
+  static bool referencesStream(const Object *stateObj, Ref targetStreamRef);
   void removeStream(Ref refToStream);
-  void removeStateStreams(Object *state);
+  void removeStateStreams(const Object *state);
 
 protected:
   PDFDoc *doc;

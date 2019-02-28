@@ -929,7 +929,7 @@ int AnnotAppearance::getNumStates() {
 }
 
 // Test if stateObj (a Ref or a Dict) points to the specified stream
-bool AnnotAppearance::referencesStream(Object *stateObj, Ref refToStream) {
+bool AnnotAppearance::referencesStream(const Object *stateObj, Ref refToStream) {
   if (stateObj->isRef()) {
     Ref r = stateObj->getRef();
     if (r.num == refToStream.num && r.gen == refToStream.gen) {
@@ -952,22 +952,21 @@ bool AnnotAppearance::referencesStream(Object *stateObj, Ref refToStream) {
 
 // Test if this AnnotAppearance references the specified stream
 bool AnnotAppearance::referencesStream(Ref refToStream) {
-  Object obj1;
   bool found;
 
   // Scan each state's ref/subdictionary
-  obj1 = appearDict.dictLookupNF("N").copy();
-  found = referencesStream(&obj1, refToStream);
+  const Object &objN = appearDict.dictLookupNF("N");
+  found = referencesStream(&objN, refToStream);
   if (found)
     return true;
 
-  obj1 = appearDict.dictLookupNF("R").copy();
-  found = referencesStream(&obj1, refToStream);
+  const Object &objR = appearDict.dictLookupNF("R");
+  found = referencesStream(&objR, refToStream);
   if (found)
     return true;
 
-  obj1 = appearDict.dictLookupNF("D").copy();
-  found = referencesStream(&obj1, refToStream);
+  const Object &objD = appearDict.dictLookupNF("D");
+  found = referencesStream(&objD, refToStream);
   return found;
 }
 
@@ -995,7 +994,7 @@ void AnnotAppearance::removeStream(Ref refToStream) {
 }
 
 // Removes stream if obj is a Ref, or removes pointed streams if obj is a Dict
-void AnnotAppearance::removeStateStreams(Object *obj1) {
+void AnnotAppearance::removeStateStreams(const Object *obj1) {
   if (obj1->isRef()) {
     removeStream(obj1->getRef());
   } else if (obj1->isDict()) {
@@ -1010,13 +1009,12 @@ void AnnotAppearance::removeStateStreams(Object *obj1) {
 }
 
 void AnnotAppearance::removeAllStreams() {
-  Object obj1;
-  obj1 = appearDict.dictLookupNF("N").copy();
-  removeStateStreams(&obj1);
-  obj1 = appearDict.dictLookupNF("R").copy();
-  removeStateStreams(&obj1);
-  obj1 = appearDict.dictLookupNF("D").copy();
-  removeStateStreams(&obj1);
+  const Object &objN = appearDict.dictLookupNF("N");
+  removeStateStreams(&objN);
+  const Object &objR = appearDict.dictLookupNF("R");
+  removeStateStreams(&objR);
+  const Object &objD = appearDict.dictLookupNF("D");
+  removeStateStreams(&objD);
 }
 
 //------------------------------------------------------------------------
