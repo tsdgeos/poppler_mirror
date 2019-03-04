@@ -16,6 +16,7 @@
 // Copyright (C) 2008, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
+// Copyright (C) 2019 Robert Niemi <robert.den.klurige@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
