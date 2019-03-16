@@ -42,6 +42,7 @@
 // Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
 // Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
 // Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1736,6 +1737,66 @@ void AnnotAppearanceBuilder::drawLineEndSlash(double x, double y, double size, c
   appearBuf->append("S\n");
 }
 
+void AnnotAppearanceBuilder::drawLineEnding(AnnotLineEndingStyle endingStyle, double x, double y, double size, bool fill, const Matrix& m) {
+  switch(endingStyle) {
+  case annotLineEndingSquare:
+    drawLineEndSquare(x, y, size, fill, m);
+    break;
+  case annotLineEndingCircle:
+    drawLineEndCircle(x, y, size, fill, m);
+    break;
+  case annotLineEndingDiamond:
+    drawLineEndDiamond(x, y, size, fill, m);
+    break;
+  case annotLineEndingOpenArrow:
+    drawLineEndArrow(x, y, size, 1, true, fill, m);
+    break;
+  case annotLineEndingClosedArrow:
+    drawLineEndArrow(x, y, size, 1, false, fill, m);
+    break;
+  case annotLineEndingButt:
+    {
+      double tx, ty;
+      m.transform (x + size/2., y + size/2., &tx, &ty);
+      appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
+      m.transform (x + size/2., y - size/2., &tx, &ty);
+      appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
+    }
+    break;
+  case annotLineEndingROpenArrow:
+    drawLineEndArrow(x, y, size, -1, true, fill, m);
+    break;
+  case annotLineEndingRClosedArrow:
+    drawLineEndArrow(x, y, size, -1, false, fill, m);
+    break;
+  case annotLineEndingSlash:
+    drawLineEndSlash(x, y, size, m);
+    break;
+  default:
+    break;
+  }
+}
+
+double AnnotAppearanceBuilder::shortenLineSegmentForEnding(AnnotLineEndingStyle endingStyle, double x, double size) {
+  switch(endingStyle) {
+  case annotLineEndingSquare:
+  case annotLineEndingCircle:
+  case annotLineEndingDiamond:
+  case annotLineEndingOpenArrow:
+  case annotLineEndingButt:
+    return x;
+  case annotLineEndingClosedArrow:
+  case annotLineEndingRClosedArrow:
+  case annotLineEndingROpenArrow:
+    return x - size;
+  case annotLineEndingSlash:
+    return x - cos(M_PI/3.)*size/2.;
+  default:
+    break;
+  }
+  return x;
+}
+
 Object Annot::createForm(const GooString *appearBuf, double *bbox, bool transparencyGroup, Dict *resDict) {
   return createForm(appearBuf, bbox, transparencyGroup, resDict ? Object(resDict) : Object());
 }
@@ -3148,65 +3209,6 @@ void AnnotLine::setIntent(AnnotLineIntent new_intent) {
   update ("IT", Object(objName, intentName));
 }
 
-double AnnotLine::shortenMainSegmentForEnding(AnnotLineEndingStyle endingStyle, double x, double size) {
-  switch(endingStyle) {
-  case annotLineEndingSquare:
-  case annotLineEndingCircle:
-  case annotLineEndingDiamond:
-  case annotLineEndingOpenArrow:
-  case annotLineEndingButt:
-    return x;
-  case annotLineEndingClosedArrow:
-  case annotLineEndingRClosedArrow:
-  case annotLineEndingROpenArrow:
-    return x - size;
-  case annotLineEndingSlash:
-    return x - cos(M_PI/3.)*size/2.;
-  default:
-    break;
-  }
-  return x;
-}
-
-void AnnotLine::drawLineEnding(AnnotLineEndingStyle endingStyle, AnnotAppearanceBuilder& appearBuilder, double x, double y, double size, bool fill, const Matrix& m) {
-  switch(endingStyle) {
-  case annotLineEndingSquare:
-    appearBuilder.drawLineEndSquare(x, y, size, fill, m);
-    break;
-  case annotLineEndingCircle:
-    appearBuilder.drawLineEndCircle(x, y, size, fill, m);
-    break;
-  case annotLineEndingDiamond:
-    appearBuilder.drawLineEndDiamond(x, y, size, fill, m);
-    break;
-  case annotLineEndingOpenArrow:
-    appearBuilder.drawLineEndArrow(x, y, size, 1, true, fill, m);
-    break;
-  case annotLineEndingClosedArrow:
-    appearBuilder.drawLineEndArrow(x, y, size, 1, false, fill, m);
-    break;
-  case annotLineEndingButt:
-    {
-      double tx, ty;
-      m.transform (x + size/2., y + size/2., &tx, &ty);
-      appearBuilder.appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
-      m.transform (x + size/2., y - size/2., &tx, &ty);
-      appearBuilder.appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
-    }
-    break;
-  case annotLineEndingROpenArrow:
-    appearBuilder.drawLineEndArrow(x, y, size, -1, true, fill, m);
-    break;
-  case annotLineEndingRClosedArrow:
-    appearBuilder.drawLineEndArrow(x, y, size, -1, false, fill, m);
-    break;
-  case annotLineEndingSlash:
-    appearBuilder.drawLineEndSlash(x, y, size, m);
-    break;
-  default:
-    break;
-  }
-}
 
 void AnnotLine::generateLineAppearance()
 {
@@ -3281,7 +3283,7 @@ void AnnotLine::generateLineAppearance()
   }
 
   // Draw main segment
-  matr.transform (shortenMainSegmentForEnding(startStyle, 0, -lineendingSize), leaderLineLength, &tx, &ty);
+  matr.transform (AnnotAppearanceBuilder::shortenLineSegmentForEnding(startStyle, 0, -lineendingSize), leaderLineLength, &tx, &ty);
   appearBuilder.appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
   appearBBox->extendTo (tx, ty);
 
@@ -3293,12 +3295,12 @@ void AnnotLine::generateLineAppearance()
     appearBuilder.appendf ("{0:.2f} {1:.2f} m\n", tx, ty);
   }
 
-  matr.transform (shortenMainSegmentForEnding(endStyle, main_len, lineendingSize), leaderLineLength, &tx, &ty);
+  matr.transform (AnnotAppearanceBuilder::shortenLineSegmentForEnding(endStyle, main_len, lineendingSize), leaderLineLength, &tx, &ty);
   appearBuilder.appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
   appearBBox->extendTo (tx, ty);
 
   if (startStyle != annotLineEndingNone) {
-    drawLineEnding(startStyle, appearBuilder, 0 + lineendingSize/2., leaderLineLength, -lineendingSize, fill, matr);
+    appearBuilder.drawLineEnding(startStyle, 0 + lineendingSize/2., leaderLineLength, -lineendingSize, fill, matr);
     matr.transform (0, leaderLineLength+lineendingSize/2., &tx, &ty);
     appearBBox->extendTo (tx, ty);
     matr.transform (0, leaderLineLength-lineendingSize/2., &tx, &ty);
@@ -3306,7 +3308,7 @@ void AnnotLine::generateLineAppearance()
   }
 
   if (endStyle != annotLineEndingNone) {
-    drawLineEnding(endStyle, appearBuilder, main_len - lineendingSize/2., leaderLineLength, lineendingSize, fill, matr);
+    appearBuilder.drawLineEnding(endStyle, main_len - lineendingSize/2., leaderLineLength, lineendingSize, fill, matr);
     matr.transform (main_len, leaderLineLength+lineendingSize/2., &tx, &ty);
     appearBBox->extendTo (tx, ty);
     matr.transform (main_len, leaderLineLength-lineendingSize/2., &tx, &ty);
@@ -5434,17 +5436,19 @@ void AnnotPolygon::initialize(PDFDoc *docA, Dict* dict) {
   obj1 = dict->lookup("LE");
   if (obj1.isArray() && obj1.arrayGetLength() == 2) {
     Object obj2 = obj1.arrayGet(0);
-    if(obj2.isString())
-      startStyle = parseAnnotLineEndingStyle(obj2.getString());
-    else
+    if (obj2.isName()) {
+      const GooString leName(obj2.getName());
+      startStyle = parseAnnotLineEndingStyle(&leName);
+    } else {
       startStyle = annotLineEndingNone;
-
+    }
     obj2 = obj1.arrayGet(1);
-    if(obj2.isString())
-      endStyle = parseAnnotLineEndingStyle(obj2.getString());
-    else
+    if (obj2.isName()) {
+      const GooString leName(obj2.getName());
+      endStyle = parseAnnotLineEndingStyle(&leName);
+    } else {
       endStyle = annotLineEndingNone;
-
+    }
   } else {
     startStyle = endStyle = annotLineEndingNone;
   }
@@ -5548,6 +5552,79 @@ void AnnotPolygon::setIntent(AnnotPolygonIntent new_intent) {
   update ("IT", Object(objName, intentName));
 }
 
+void AnnotPolygon::generatePolyLineAppearance(AnnotAppearanceBuilder* appearBuilder){
+  const bool fill = (bool) interiorColor;
+  const double x1 = vertices->getX(0);
+  const double y1 = vertices->getY(0);
+  const double x2 = vertices->getX(1);
+  const double y2 = vertices->getY(1);
+  const double x3 = vertices->getX(vertices->getCoordsLength()-2);
+  const double y3 = vertices->getY(vertices->getCoordsLength()-2);
+  const double x4 = vertices->getX(vertices->getCoordsLength()-1);
+  const double y4 = vertices->getY(vertices->getCoordsLength()-1);
+
+  const double len_1 = sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+  // length of last segment
+  const double len_2 = sqrt((x4-x3)*(x4-x3) + (y4-y3)*(y4-y3));
+
+  // segments become positive x direction, coord1 becomes (0,0).
+  Matrix matr1,matr2;
+  const double angle1 = atan2(y2 - y1, x2 - x1);
+  const double angle2 = atan2(y4 - y3, x4 - x3);
+
+  matr1.m[0] = matr1.m[3] = cos(angle1);
+  matr1.m[1] = sin(angle1);
+  matr1.m[2] = -matr1.m[1];
+  matr1.m[4] = x1-rect->x1;
+  matr1.m[5] = y1-rect->y1;
+
+  matr2.m[0] = matr2.m[3] = cos(angle2);
+  matr2.m[1] = sin(angle2);
+  matr2.m[2] = -matr2.m[1];
+  matr2.m[4] = x3-rect->x1;
+  matr2.m[5] = y3-rect->y1;
+
+  const double lineEndingSize1 = std::min(6. * border->getWidth(), len_1/2);
+  const double lineEndingSize2 = std::min(6. * border->getWidth(), len_2/2);
+
+  if (vertices->getCoordsLength() != 0) {
+    double tx, ty;
+    matr1.transform (AnnotAppearanceBuilder::shortenLineSegmentForEnding(startStyle, 0, -lineEndingSize1), 0, &tx, &ty);
+    appearBuilder->appendf ("{0:.2f} {1:.2f} m\n", tx,ty);
+    appearBBox->extendTo (tx,ty);
+
+    for (int i = 1; i < vertices->getCoordsLength() - 1; ++i) {
+      appearBuilder->appendf ("{0:.2f} {1:.2f} l\n", vertices->getX(i) - rect->x1, vertices->getY(i) - rect->y1);
+      appearBBox->extendTo (vertices->getX(i) - rect->x1, vertices->getY(i) - rect->y1);
+    }
+
+    if(vertices->getCoordsLength() > 1) {
+      matr2.transform (AnnotAppearanceBuilder::shortenLineSegmentForEnding(endStyle, len_2, lineEndingSize2), 0, &tx, &ty);
+      appearBuilder->appendf ("{0:.2f} {1:.2f} l S\n", tx, ty);
+      appearBBox->extendTo (tx, ty);
+    }
+  }
+
+  if (startStyle != annotLineEndingNone) {
+    double tx, ty;
+    appearBuilder->drawLineEnding(startStyle, 0 + lineEndingSize1/2., 0, -lineEndingSize1, fill, matr1);
+    matr1.transform (0, lineEndingSize1/2., &tx, &ty);
+    appearBBox->extendTo (tx, ty);
+    matr1.transform (0, -lineEndingSize1/2., &tx, &ty);
+    appearBBox->extendTo (tx, ty);
+  }
+
+  if (endStyle != annotLineEndingNone) {
+    double tx, ty;
+    appearBuilder->drawLineEnding(endStyle, len_2 - lineEndingSize2/2., 0, lineEndingSize2, fill, matr2);
+    matr2.transform (len_2, lineEndingSize2/2., &tx, &ty);
+    appearBBox->extendTo (tx, ty);
+    matr2.transform (len_2, -lineEndingSize2/2., &tx, &ty);
+    appearBBox->extendTo (tx, ty);
+  }
+
+}
+
 void AnnotPolygon::draw(Gfx *gfx, bool printing) {
   double ca = 1;
 
@@ -5573,26 +5650,25 @@ void AnnotPolygon::draw(Gfx *gfx, bool printing) {
       appearBuilder.setDrawColor(interiorColor.get(), true);
     }
 
-    if (vertices->getCoordsLength() != 0) {
-      appearBuilder.appendf ("{0:.2f} {1:.2f} m\n", vertices->getX(0) - rect->x1, vertices->getY(0) - rect->y1);
-      appearBBox->extendTo (vertices->getX(0) - rect->x1, vertices->getY(0) - rect->y1);
+    if(type == typePolyLine){
+      generatePolyLineAppearance(&appearBuilder);
+    } else {
+      if (vertices->getCoordsLength() != 0) {
+        appearBuilder.appendf ("{0:.2f} {1:.2f} m\n", vertices->getX(0) - rect->x1, vertices->getY(0) - rect->y1);
+        appearBBox->extendTo (vertices->getX(0) - rect->x1, vertices->getY(0) - rect->y1);
 
-      for (int i = 1; i < vertices->getCoordsLength(); ++i) {
-        appearBuilder.appendf ("{0:.2f} {1:.2f} l\n", vertices->getX(i) - rect->x1, vertices->getY(i) - rect->y1);
-        appearBBox->extendTo (vertices->getX(i) - rect->x1, vertices->getY(i) - rect->y1);
-      }
+        for (int i = 1; i < vertices->getCoordsLength(); ++i) {
+          appearBuilder.appendf ("{0:.2f} {1:.2f} l\n", vertices->getX(i) - rect->x1, vertices->getY(i) - rect->y1);
+          appearBBox->extendTo (vertices->getX(i) - rect->x1, vertices->getY(i) - rect->y1);
+        }
 
-      if (type == typePolygon) {
         if (interiorColor && interiorColor->getSpace() != AnnotColor::colorTransparent) {
           appearBuilder.append ("b\n");
         } else {
           appearBuilder.append ("s\n");
         }
-      } else {
-        appearBuilder.append ("S\n");
       }
     }
-
     appearBuilder.append ("Q\n");
 
     double bbox[4];

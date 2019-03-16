@@ -31,6 +31,7 @@
 // Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
 // Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -547,6 +548,7 @@ public:
   void drawCircle(double cx, double cy, double r, bool fill);
   void drawCircleTopLeft(double cx, double cy, double r);
   void drawCircleBottomRight(double cx, double cy, double r);
+  void drawLineEnding(AnnotLineEndingStyle endingStyle, double x, double y, double size, bool fill, const Matrix& m);
   void drawLineEndSquare(double x, double y, double size, bool fill, const Matrix& m);
   void drawLineEndCircle(double x, double y, double size, bool fill, const Matrix& m);
   void drawLineEndDiamond(double x, double y, double size, bool fill, const Matrix& m);
@@ -554,6 +556,7 @@ public:
   void drawLineEndSlash(double x, double y, double size, const Matrix& m);
   void drawFieldBorder(const FormField *field, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
   bool drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const GooString *appearState, XRef *xref, bool *addedDingbatsResource);
+  static double shortenLineSegmentForEnding(AnnotLineEndingStyle endingStyle, double x, double size);
 
   void writeString(const GooString &str);
 
@@ -1103,8 +1106,6 @@ protected:
 
   void initialize(PDFDoc *docA, Dict *dict);
   void generateLineAppearance();
-  static double shortenMainSegmentForEnding(AnnotLineEndingStyle endingStyle, double x, double size);
-  static void drawLineEnding(AnnotLineEndingStyle endingStyle, AnnotAppearanceBuilder& appearBuilder, double x, double y, double size, bool fill, const Matrix& m);
 
   // required
   std::unique_ptr<AnnotCoord> coord1;
@@ -1225,7 +1226,7 @@ public:
   ~AnnotPolygon();
 
   void draw(Gfx *gfx, bool printing) override;
-
+  void generatePolyLineAppearance(AnnotAppearanceBuilder* appearBuilder);
   void setType(AnnotSubtype new_type); // typePolygon or typePolyLine
   void setVertices(AnnotPath *path);
   void setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyle end);
