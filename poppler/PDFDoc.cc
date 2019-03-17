@@ -1703,7 +1703,7 @@ void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, unsigned int n
       array = obj->getArray();
       for (int i=0; i<array->getLength(); i++) {
         Object obj1 = array->getNF(i).copy();
-        markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum);
+        markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
       }
       break;
     case objDict:
