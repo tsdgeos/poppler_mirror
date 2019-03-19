@@ -1,5 +1,10 @@
 image: debian:unstable
 
+stages:
+  - build
+  - document
+  - publish
+
 before_script:
   - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
   - apt-get update
@@ -12,6 +17,7 @@ variables:
   LANG: en_US.UTF-8
   LANGUAGE: en_US:en
   LC_ALL: en_US.UTF-8
+  DEBIAN_FRONTEND: noninteractive
   TEST_DATA_URL: https://gitlab.freedesktop.org/${CI_PROJECT_NAMESPACE}/test.git
   UPSTREAM_TEST_DATA_URL: https://gitlab.freedesktop.org/poppler/test.git
 
@@ -72,7 +78,7 @@ build_mingw64_fedora:
 
 build_clazy:
   stage: build
-  image: fedora:rawhide
+  image: fedora
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y poppler
@@ -104,3 +110,30 @@ build_android:
                          -DENABLE_LIBOPENJPEG=unmaintained
                          -DENABLE_CPP=OFF'
     - ninja && ninja install
+
+qt5_docs:
+  only:
+    - master
+  stage: document
+  variables:
+    QT_SELECT: qt5
+  script:
+    - apt-get install --yes --no-install-recommends doxygen graphviz qtchooser qttools5-dev-tools
+    - cd qt5/src
+    - doxygen
+  cache: {}
+  artifacts:
+    paths:
+      - qt5/src/APIDOCS-html
+
+trigger_pages:
+  only:
+    - master
+  stage: publish
+  image: alpine:latest
+  before_script:
+    - apk --update upgrade
+    - apk add curl ca-certificates
+  script:
+    - 'curl --request POST --form "token=$WEB_PAGE_TRIGGER" --form ref=master https://gitlab.freedesktop.org/api/v4/projects/poppler%2Fpoppler-web-page/trigger/pipeline'
+  cache: {}

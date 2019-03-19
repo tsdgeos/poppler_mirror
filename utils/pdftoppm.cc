@@ -28,6 +28,7 @@
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
+// Copyright (C) 2019 Yves-Gaël Chény <gitlab@r0b0t.fr>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -86,6 +87,8 @@ static int sz = 0;
 static bool useCropBox = false;
 static bool mono = false;
 static bool gray = false;
+static char sep[2] = "-";
+static bool forceNum = false;
 static bool png = false;
 static bool jpeg = false;
 static bool jpegcmyk = false;
@@ -156,6 +159,10 @@ static const ArgDesc argDesc[] = {
    "generate a monochrome PBM file"},
   {"-gray",   argFlag,     &gray,          0,
    "generate a grayscale PGM file"},
+  {"-sep",   argString,      sep, sizeof(sep),
+    "single character separator between name and page number, default - "},
+  {"-forcenum",   argFlag,      &forceNum, 0,
+	"force page number even if there is only one page "},
 #ifdef ENABLE_LIBPNG
   {"-png",    argFlag,     &png,           0,
    "generate a PNG file"},
@@ -585,12 +592,12 @@ int main(int argc, char *argv[]) {
     }
     if (ppmRoot != nullptr) {
       const char *ext = png ? "png" : (jpeg || jpegcmyk) ? "jpg" : tiff ? "tif" : mono ? "pbm" : gray ? "pgm" : "ppm";
-      if (singleFile) {
+      if (singleFile && !forceNum ) {
         ppmFile = new char[strlen(ppmRoot) + 1 + strlen(ext) + 1];
         sprintf(ppmFile, "%s.%s", ppmRoot, ext);
       } else {
         ppmFile = new char[strlen(ppmRoot) + 1 + pg_num_len + 1 + strlen(ext) + 1];
-        sprintf(ppmFile, "%s-%0*d.%s", ppmRoot, pg_num_len, pg, ext);
+        sprintf(ppmFile, "%s%s%0*d.%s", ppmRoot, sep, pg_num_len, pg, ext);
       }
     } else {
       ppmFile = nullptr;

@@ -159,7 +159,7 @@ public:
 
   int getMCID() const { return c->mcid; }
   Ref getObjectRef() const { return c->ref; }
-  Ref getParentRef() { return isContent() ? parent->getParentRef() : s->parentRef.getRef(); }
+  Ref getParentRef() { return isContent() ? parent->getParentRef() : s->parentRef; }
   bool hasPageRef() const;
   bool getPageRef(Ref& ref) const;
   StructTreeRoot *getStructTreeRoot() { return treeRoot; }
@@ -253,7 +253,7 @@ private:
   typedef std::vector<StructElement*> ElemPtrArray;
 
   struct StructData {
-    Object       parentRef;
+    Ref         parentRef;
     GooString   *altText;
     GooString   *actualText;
     GooString   *id;

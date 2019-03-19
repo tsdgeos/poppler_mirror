@@ -13,6 +13,7 @@
 // Copyright (C) 2015 Arthur Stavisky <vovodroid@gmail.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
 
@@ -165,7 +166,8 @@ int main (int argc, char *argv[])
   for (i = 1; i < argc - 1; i++) {
     GooString *gfileName = new GooString(argv[i]);
     PDFDoc *doc = new PDFDoc(gfileName, nullptr, nullptr, nullptr);
-    if (doc->isOk() && !doc->isEncrypted()) {
+    if (doc->isOk() && !doc->isEncrypted() &&
+        doc->getXRef()->getCatalog().isDict()) {
       docs.push_back(doc);
       if (doc->getPDFMajorVersion() > majorVersion) {
         majorVersion = doc->getPDFMajorVersion();
@@ -176,8 +178,13 @@ int main (int argc, char *argv[])
         }
       }
     } else if (doc->isOk()) {
-      error(errUnimplemented, -1, "Could not merge encrypted files ('{0:s}')", argv[i]);
-      return -1;
+      if (doc->isEncrypted()) {
+        error(errUnimplemented, -1, "Could not merge encrypted files ('{0:s}')", argv[i]);
+        return -1;
+      } else if (!doc->getXRef()->getCatalog().isDict()) {
+        error(errSyntaxError, -1, "XRef's Catalog is not a dictionary ('{0:s}')", argv[i]);
+        return -1;
+      }
     } else {
       error(errSyntaxError, -1, "Could not merge damaged documents ('{0:s}')", argv[i]);
       return -1;

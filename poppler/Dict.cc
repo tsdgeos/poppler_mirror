@@ -168,6 +168,19 @@ Object Dict::lookup(const char *key, int recursion) const {
   return Object(objNull);
 }
 
+Object Dict::lookup(const char *key, Ref *returnRef, int recursion) const {
+  if (const auto *entry = find(key)) {
+    if (entry->second.getType() == objRef) {
+      *returnRef = entry->second.getRef();
+    } else {
+      *returnRef = { 0, 0 };
+    }
+    return entry->second.fetch(xref, recursion);
+  }
+  *returnRef = { 0, 0 };
+  return Object(objNull);
+}
+
 const Object &Dict::lookupNF(const char *key) const {
   if (const auto *entry = find(key)) {
     return entry->second;

@@ -496,6 +496,9 @@ unsigned char *ImageStream::getLine() {
   }
  
   int readChars = str->doGetChars(inputLineSize, inputLine);
+  if (unlikely(readChars == -1)) {
+      readChars = 0;
+  }
   for ( ; readChars < inputLineSize; readChars++) inputLine[readChars] = EOF;
   if (nBits == 1) {
     unsigned char *p = inputLine;
@@ -756,6 +759,7 @@ FileStream::FileStream(GooFile* fileA, Goffset startA, bool limitedA,
   bufPos = start;
   savePos = 0;
   saved = false;
+  needsEncryptionOnSave = false;
 }
 
 FileStream::~FileStream() {

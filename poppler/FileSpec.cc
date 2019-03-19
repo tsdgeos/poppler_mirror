@@ -29,6 +29,7 @@
 #include <config.h>
 
 #include "FileSpec.h"
+#include "XRef.h"
 #include "goo/gfile.h"
 
 EmbFile::EmbFile(Object &&efStream)
@@ -163,6 +164,33 @@ EmbFile *FileSpec::getEmbeddedFile()
   embFile = new EmbFile(fileStream.fetch(xref));
 
   return embFile;
+}
+
+Object FileSpec::newFileSpecObject(XRef *xref, GooFile *file, const std::string &fileName)
+{
+  Object paramsDict = Object(new Dict(xref));
+  paramsDict.dictSet("Size", Object(file->size()));
+
+  // No Subtype in the embedded file stream dictionary for now
+  Object streamDict = Object(new Dict(xref));
+  streamDict.dictSet("Length", Object(file->size()));
+  streamDict.dictSet("Params", std::move(paramsDict));
+
+  FileStream *fStream = new FileStream(file, 0, false, file->size(), std::move(streamDict));
+  fStream->setNeedsEncryptionOnSave(true);
+  Stream *stream = fStream;
+  Object streamObj = Object(stream);
+  const Ref streamRef = xref->addIndirectObject(&streamObj);
+
+  Dict *efDict = new Dict(xref);
+  efDict->set("F", Object(streamRef));
+
+  Dict *fsDict = new Dict(xref);
+  fsDict->set("Type", Object(objName, "Filespec"));
+  fsDict->set("UF", Object(new GooString(fileName)));
+  fsDict->set("EF", Object(efDict));
+
+  return Object(fsDict);
 }
 
 GooString *FileSpec::getFileNameForPlatform()

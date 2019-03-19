@@ -57,6 +57,15 @@ target_link_libraries(pdfdetach ${common_libs})
 install(TARGETS pdfdetach DESTINATION bin)
 install(FILES pdfdetach.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
+# pdfdetach
+set(pdfattach_SOURCES ${common_srcs}
+  pdfattach.cc
+)
+add_executable(pdfattach ${pdfattach_SOURCES})
+target_link_libraries(pdfattach ${common_libs})
+install(TARGETS pdfattach DESTINATION bin)
+install(FILES pdfattach.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+
 # pdffonts
 set(pdffonts_SOURCES ${common_srcs}
   pdffonts.cc

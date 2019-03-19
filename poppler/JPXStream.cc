@@ -16,6 +16,7 @@
 // Copyright (C) 2008, 2012 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
+// Copyright (C) 2019 Robert Niemi <robert.den.klurige@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -2816,7 +2817,7 @@ void JPXStream::inverseTransform(JPXTileComp *tileComp) {
 	    if (shift2 > 0) {
 	      cover(94);
 	      if (val < 0) {
-		val = (val << shift2) - (1 << (shift2 - 1));
+		val = (((unsigned int)val) << shift2) - (1 << (shift2 - 1));
 	      } else {
 		val = (val << shift2) + (1 << (shift2 - 1));
 	      }
@@ -2828,7 +2829,7 @@ void JPXStream::inverseTransform(JPXTileComp *tileComp) {
 	      cover(96);
 	      if (tileComp->transform == 0) {
 		cover(97);
-		val &= -1 << fracBits;
+		val &= 0xFFFFFFFF << fracBits;
 	      }
 	    } else {
 	      cover(98);
@@ -2931,7 +2932,7 @@ void JPXStream::inverseTransformLevel(JPXTileComp *tileComp,
 	      if (shift2 > 0) {
 		cover(74);
 		if (val < 0) {
-		  val = (val << shift2) - (1 << (shift2 - 1));
+		  val = (((unsigned int)val) << shift2) - (1 << (shift2 - 1));
 		} else {
 		  val = (val << shift2) + (1 << (shift2 - 1));
 		}
@@ -2942,7 +2943,7 @@ void JPXStream::inverseTransformLevel(JPXTileComp *tileComp,
 	      if (qStyle == 0) {
 		cover(76);
 		if (tileComp->transform == 0) {
-		  val &= -1 << fracBits;
+		  val &= 0xFFFFFFFF << fracBits;
 		}
 	      } else {
 		cover(77);

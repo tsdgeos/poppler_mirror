@@ -1469,6 +1469,12 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, unsigned i
           writeDictionnary (stream->getDict(),outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen, alreadyWrittenDicts);
           writeStream (stream,outStr);
           delete encStream;
+        } else if (fileKey != nullptr && stream->getKind() == strFile && static_cast<FileStream*>(stream)->getNeedsEncryptionOnSave()) {
+          EncryptStream *encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, objNum, objGen);
+          encStream->setAutoDelete(false);
+          writeDictionnary (encStream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, objNum, objGen, alreadyWrittenDicts);
+          writeStream (encStream, outStr);
+          delete encStream;
         } else {
           //raw stream copy
           FilterStream *fs = dynamic_cast<FilterStream*>(stream);
@@ -1697,7 +1703,7 @@ void PDFDoc::markObject (Object* obj, XRef *xRef, XRef *countRef, unsigned int n
       array = obj->getArray();
       for (int i=0; i<array->getLength(); i++) {
         Object obj1 = array->getNF(i).copy();
-        markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum);
+        markObject(&obj1, xRef, countRef, numOffset, oldRefNum, newRefNum, alreadyMarkedDicts);
       }
       break;
     case objDict:

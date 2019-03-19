@@ -49,6 +49,10 @@ char *SignatureHandler::getSignerName()
       return nullptr;
 
   CERTCertificate *cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+
+  if (!cert)
+      return nullptr;
+
   return CERT_GetCommonName(&cert->subject);
 }
 
@@ -395,6 +399,9 @@ SignatureValidationStatus SignatureHandler::validateSignature()
     return SIGNATURE_GENERIC_ERROR;
 
   if (!NSS_IsInitialized())
+    return SIGNATURE_GENERIC_ERROR;
+
+  if (!hash_context)
     return SIGNATURE_GENERIC_ERROR;
 
   digest_buffer = (unsigned char *)PORT_Alloc(hash_length);

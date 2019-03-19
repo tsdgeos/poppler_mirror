@@ -1045,11 +1045,12 @@ void StructElement::parse(Dict *element)
   }
 
   // Parent object reference (required).
-  s->parentRef = element->lookupNF("P").copy();
-  if (!s->parentRef.isRef()) {
+  const Object &objP = element->lookupNF("P");
+  if (!objP.isRef()) {
     error(errSyntaxError, -1, "P object is wrong type ({0:s})", obj.getTypeName());
     return;
   }
+  s->parentRef = objP.getRef();
 
   // Check whether the S-type is valid for the top level
   // element and create a node of the appropriate type.

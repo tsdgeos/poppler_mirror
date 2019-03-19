@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010, 2011, 2016-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2011, 2016-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
@@ -470,6 +470,9 @@ public:
   int getUnfilteredChar () override { return getChar(); }
   void unfilteredReset () override { reset(); }
 
+  bool getNeedsEncryptionOnSave() const { return needsEncryptionOnSave; }
+  void setNeedsEncryptionOnSave(bool needsEncryptionOnSaveA) { needsEncryptionOnSave = needsEncryptionOnSaveA; }
+
 private:
 
   bool fillBuf();
@@ -508,6 +511,8 @@ private:
   Goffset bufPos;
   Goffset savePos;
   bool saved;
+  bool needsEncryptionOnSave;   // Needed for FileStreams that point to "external" files
+                                // and thus when saving we can't do a raw copy
 };
 
 //------------------------------------------------------------------------

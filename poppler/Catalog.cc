@@ -432,6 +432,87 @@ FileSpec *Catalog::embeddedFile(int i)
     return embeddedFile;
 }
 
+bool Catalog::hasEmbeddedFile(const std::string &fileName)
+{
+  NameTree *ef = getEmbeddedFileNameTree();
+  for (int i = 0; i < ef->numEntries(); ++i) {
+    if (fileName == ef->getName(i)->toStr())
+      return true;
+  }
+  return false;
+}
+
+void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
+{
+  catalogLocker();
+
+  Object fileSpecObj = FileSpec::newFileSpecObject(xref, file, fileName);
+  const Ref fileSpecRef = xref->addIndirectObject(&fileSpecObj);
+
+  Object catDict = xref->getCatalog();
+  Ref namesObjRef;
+  Object namesObj = catDict.getDict()->lookup("Names", &namesObjRef);
+  if (!namesObj.isDict()) {
+    // Need to create the names Dict
+    catDict.dictSet("Names", Object(new Dict(xref)));
+    namesObj = catDict.getDict()->lookup("Names");
+
+    // Trigger getting the names dict again when needed
+    names = Object();
+  }
+
+  Dict *namesDict = namesObj.getDict();
+
+  // We create a new EmbeddedFiles nametree, this replaces the existing one (if any), but it's not a problem
+  Object embeddedFilesObj = Object(new Dict(xref));
+  const Ref embeddedFilesRef = xref->addIndirectObject(&embeddedFilesObj);
+
+  Array *embeddedFilesNamesArray = new Array(xref);
+
+  // This flattens out the existing EmbeddedFiles nametree (if any), should not be a problem
+  NameTree *ef = getEmbeddedFileNameTree();
+  bool fileAlreadyAdded = false;
+  for (int i = 0; i < ef->numEntries(); ++i) {
+    GooString *efNameI = ef->getName(i);
+
+    // we need to add the file if it has not been added yet and the name is smaller or equal lexicographically
+    // than the current item
+    const bool sameFileName = fileName == efNameI->toStr();
+    const bool addFile = !fileAlreadyAdded && (sameFileName || fileName < efNameI->toStr());
+    if (addFile) {
+      // If the new name is smaller lexicographically than an existing file add it in its correct position
+      embeddedFilesNamesArray->add(Object(new GooString(fileName)));
+      embeddedFilesNamesArray->add(Object(fileSpecRef));
+      fileAlreadyAdded = true;
+    }
+    if (sameFileName) {
+      // If the new name is the same lexicographically than an existing file then don't add the existing file (i.e. replace)
+      continue;
+    }
+    embeddedFilesNamesArray->add(Object(efNameI->copy()));
+    embeddedFilesNamesArray->add(ef->getValue(i)->copy());
+  }
+
+  if (!fileAlreadyAdded) {
+    // The new file is bigger lexicographically than the existing ones
+    embeddedFilesNamesArray->add(Object(new GooString(fileName)));
+    embeddedFilesNamesArray->add(Object(fileSpecRef));
+  }
+
+  embeddedFilesObj.dictSet("Names", Object(embeddedFilesNamesArray));
+  namesDict->set("EmbeddedFiles", Object(embeddedFilesRef));
+
+  if (namesObjRef.num != 0) {
+    xref->setModifiedObject(&namesObj, namesObjRef);
+  } else {
+    xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
+  }
+
+  // recreate Nametree on next call that uses it
+  delete embeddedFileNameTree;
+  embeddedFileNameTree = nullptr;
+}
+
 GooString *Catalog::getJS(int i)
 {
   Object obj;

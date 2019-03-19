@@ -637,12 +637,12 @@ LinkMovie::LinkMovie(const Object *obj) {
   annotRef.num = -1;
   annotTitle = nullptr;
 
-  Object tmp = obj->dictLookupNF("Annotation").copy();
-  if (tmp.isRef()) {
-    annotRef = tmp.getRef();
+  const Object &annotationObj = obj->dictLookupNF("Annotation");
+  if (annotationObj.isRef()) {
+    annotRef = annotationObj.getRef();
   }
 
-  tmp = obj->dictLookup("T");
+  Object tmp = obj->dictLookup("T");
   if (tmp.isString()) {
     annotTitle = tmp.getString()->copy();
   }
@@ -729,6 +729,8 @@ LinkRendition::LinkRendition(const Object *obj) {
   js = nullptr;
   int operationCode = -1;
 
+  screenRef.num = -1;
+
   if (obj->isDict()) {
     Object tmp = obj->dictLookup("JS");
     if (!tmp.isNull()) {
@@ -758,10 +760,11 @@ LinkRendition::LinkRendition(const Object *obj) {
 	  renditionObj.setToNull();
 	}
 
-	screenRef = obj->dictLookupNF("AN").copy();
-	if (!screenRef.isRef() && operation >= 0 && operation <= 4) {
+	const Object &anObj = obj->dictLookupNF("AN");
+	if (anObj.isRef()) {
+	  screenRef = anObj.getRef();
+	} else if (operation >= 0 && operation <= 4) {
 	  error(errSyntaxWarning, -1, "Invalid Rendition Action: no AN field with op = {0:d}", operationCode);
-	  screenRef.setToNull();
 	}
       }
 

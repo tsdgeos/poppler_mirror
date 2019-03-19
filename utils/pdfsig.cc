@@ -276,9 +276,9 @@ int main(int argc, char *argv[])
   exitCode = 0;
 
 end:
-  delete globalParams;
   delete fileName;
   delete doc;
+  delete globalParams;
 
   return exitCode;
 }

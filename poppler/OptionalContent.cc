@@ -137,7 +137,7 @@ OCDisplayNode *OCGs::getDisplayRoot()
   return display.get();
 }
 
-bool OCGs::optContentIsVisible( Object *dictRef )
+bool OCGs::optContentIsVisible( const Object *dictRef )
 {
   Dict *dict;
   bool result = true;

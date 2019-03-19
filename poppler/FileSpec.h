@@ -6,7 +6,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2017-2019 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -61,6 +61,8 @@ public:
   GooString *getFileNameForPlatform();
   const GooString *getDescription() const { return desc; }
   EmbFile *getEmbeddedFile();
+
+  static Object newFileSpecObject(XRef *xref, GooFile *file, const std::string &fileName);
 
 private:
   bool ok;

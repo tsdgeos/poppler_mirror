@@ -648,9 +648,9 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
       const Ref ref = childRef.getRef();
       if (usedParents->find(ref.num) == usedParents->end()) {
         // Field child: it could be a form field or a widget or composed dict
-        Object obj2 = childObj.dictLookupNF("Parent").copy();
+        const Object &objParent = childObj.dictLookupNF("Parent");
 	Object obj3 = childObj.dictLookup("Parent");
-        if (obj2.isRef() || obj3.isDict()) {
+        if (objParent.isRef() || obj3.isDict()) {
           // Child is a form field or composed dict
           // We create the field, if it's composed
           // it will create the widget as a child
@@ -666,7 +666,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
           children = (FormField**)greallocn(children, numChildren, sizeof(FormField*));
           children[numChildren - 1] = Form::createFieldFromDict(std::move(childObj), doc, ref, this, &usedParentsAux);
         } else {
-	  obj2 = childObj.dictLookup("Subtype");
+	  Object obj2 = childObj.dictLookup("Subtype");
 	  if (obj2.isName("Widget")) {
 	    // Child is a widget annotation
 	    if (!terminal && numChildren > 0) {

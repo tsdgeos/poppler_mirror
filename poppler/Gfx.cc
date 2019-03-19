@@ -4214,7 +4214,6 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg) {
   bool maskInvert;
   bool maskInterpolate;
   Stream *maskStr;
-  Object obj1;
   int i, n;
 
   // get info from the stream
@@ -4227,14 +4226,14 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg) {
 
   // check for optional content key
   if (ref) {
-    obj1 = dict->lookupNF("OC").copy();
-    if (catalog->getOptContentConfig() && !catalog->getOptContentConfig()->optContentIsVisible(&obj1)) {
+    const Object &objOC = dict->lookupNF("OC");
+    if (catalog->getOptContentConfig() && !catalog->getOptContentConfig()->optContentIsVisible(&objOC)) {
       return;
     }
   }
 
   // get size
-  obj1 = dict->lookup("Width");
+  Object obj1 = dict->lookup("Width");
   if (obj1.isNull()) {
     obj1 = dict->lookup("W");
   }
@@ -4691,8 +4690,8 @@ void Gfx::doForm(Object *str) {
 
   // check for optional content key
   ocSaved = ocState;
-  obj1 = dict->lookupNF("OC").copy();
-  if (catalog->getOptContentConfig() && !catalog->getOptContentConfig()->optContentIsVisible(&obj1)) {
+  const Object &objOC = dict->lookupNF("OC");
+  if (catalog->getOptContentConfig() && !catalog->getOptContentConfig()->optContentIsVisible(&objOC)) {
     if (out->needCharCount()) {
       ocState = false;
     } else {

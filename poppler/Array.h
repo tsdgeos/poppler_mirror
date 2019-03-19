@@ -68,6 +68,7 @@ public:
 
   // Accessors.
   Object get(int i, int recursion = 0) const;
+  Object get(int i, Ref *returnRef, int recursion = 0) const;
   const Object &getNF(int i) const;
   bool getString(int i, GooString *string) const;
 
