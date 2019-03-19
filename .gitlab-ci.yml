@@ -126,6 +126,19 @@ qt5_docs:
     paths:
       - qt5/src/APIDOCS-html
 
+cpp_docs:
+  only:
+    - master
+  stage: document
+  script:
+    - apt-get install --yes --no-install-recommends doxygen graphviz
+    - cd cpp
+    - doxygen
+  cache: {}
+  artifacts:
+    paths:
+      - cpp/APIDOCS-html
+
 trigger_pages:
   only:
     - master
