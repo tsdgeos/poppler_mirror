@@ -2094,15 +2094,18 @@ QFont TextAnnotation::textFont() const
     if ( !d->pdfAnnot )
         return d->textFont;
 
-    QFont font;
+    double fontSize { AnnotFreeText::undefinedFontPtSize };
     if ( d->pdfAnnot->getType() == Annot::typeFreeText )
     {
-        if ( std::unique_ptr<DefaultAppearance> da{ d->getDefaultAppearanceFromNative() } )
+        std::unique_ptr<DefaultAppearance> da{ d->getDefaultAppearanceFromNative() };
+        if ( da && da->getFontPtSize() > 0 )
         {
-            font.setPointSize( da->getFontPtSize() );
+            fontSize = da->getFontPtSize();
         }
     }
 
+    QFont font;
+    font.setPointSizeF( fontSize );
     return font;
 }
 

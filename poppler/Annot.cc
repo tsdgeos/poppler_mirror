@@ -2620,6 +2620,8 @@ void AnnotLink::draw(Gfx *gfx, bool printing) {
 //------------------------------------------------------------------------
 // AnnotFreeText
 //------------------------------------------------------------------------
+const double AnnotFreeText::undefinedFontPtSize = 10.;
+
 AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da) :
     AnnotMarkup(docA, rect) {
   type = typeFreeText;
@@ -2647,8 +2649,7 @@ void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict) {
     appearanceString.reset(obj1.getString()->copy());
   } else {
     appearanceString = std::make_unique<GooString>();
-    error(errSyntaxError, -1, "Bad appearance for annotation");
-    ok = false;
+    error(errSyntaxWarning, -1, "Bad appearance for annotation");
   }
 
   obj1 = dict->lookup("Q");
@@ -2843,7 +2844,7 @@ void AnnotFreeText::generateFreeTextAppearance()
   if (!da.getFontName().isName())
     da.setFontName(Object(objName, "AnnotDrawFont"));
   if (da.getFontPtSize() <= 0)
-    da.setFontPtSize(10);
+    da.setFontPtSize(undefinedFontPtSize);
   if (!da.getFontColor())
     da.setFontColor(std::make_unique<AnnotColor>(0, 0, 0));
   if (!contents)

@@ -1005,6 +1005,8 @@ public:
     intentFreeTextTypeWriter  // FreeTextTypeWriter
   };
 
+  static const double undefinedFontPtSize;
+
   AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da);
   AnnotFreeText(PDFDoc *docA, Object &&dictObject, const Object *obj);
   ~AnnotFreeText();
