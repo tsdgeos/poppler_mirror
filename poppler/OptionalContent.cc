@@ -8,6 +8,7 @@
 // Copyright 2008, 2010, 2011, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2008 Mark Kaplan <mkaplan@finjan.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // Released under the GPL (version 2, or later, at your option)
 //

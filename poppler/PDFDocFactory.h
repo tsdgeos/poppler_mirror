@@ -6,6 +6,7 @@
 //
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
 // Copyright 2010, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 

@@ -6,6 +6,7 @@
 // Copyright 2008 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2013, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // Released under the GPL (version 2, or later, at your option)
 //

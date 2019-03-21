@@ -5,6 +5,7 @@
  * Copyright (C) 2005-2008, 2015, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, 2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2019, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2005, 2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
