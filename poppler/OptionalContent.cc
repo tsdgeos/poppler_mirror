@@ -455,7 +455,7 @@ GooList *OCDisplayNode::takeChildren() {
 }
 
 OCDisplayNode::~OCDisplayNode() {
-  gfree(name);
+  delete name;
   if (children) {
     deleteGooList<OCDisplayNode>(children);
   }
