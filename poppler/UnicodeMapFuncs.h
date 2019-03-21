@@ -15,15 +15,20 @@
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
 //
 //========================================================================
 
+#ifndef UNICODEMAPFUNCS_H
+#define UNICODEMAPFUNCS_H
+
 #include "UTF.h"
 
 int mapUTF8(Unicode u, char *buf, int bufSize);
 
 int mapUTF16(Unicode u, char *buf, int bufSize);
+
+#endif

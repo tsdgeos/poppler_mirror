@@ -23,6 +23,9 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#ifndef _POPPLER_ANNOTATION_HELPER_H_
+#define _POPPLER_ANNOTATION_HELPER_H_
+
 #include <memory>
 
 #include <QtCore/QDebug>
@@ -184,3 +187,5 @@ QColor convertAnnotColor( const AnnotColor *color );
 std::unique_ptr<AnnotColor> convertQColor( const QColor &color );
 
 }
+
+#endif

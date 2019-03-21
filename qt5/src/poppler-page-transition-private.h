@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005, Albert Astals Cid
+ * Copyright (C) 2005, 2019, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,9 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#ifndef _POPPLER_PAGE_TRANSITION_PRIVATE_H_
+#define _POPPLER_PAGE_TRANSITION_PRIVATE_H_
+
 class Object;
 
 namespace Poppler {
@@ -26,3 +29,5 @@ class PageTransitionParams {
 };
 
 }
+
+#endif

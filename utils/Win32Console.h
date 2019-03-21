@@ -5,11 +5,15 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
 //
 //========================================================================
+
+#ifndef WIN32CONSOLE_H
+#define WIN32CONSOLE_H
 
 // UTF-8 Support for win32 console
 //
@@ -61,3 +65,5 @@ public:
 };
 
 #endif // _WIN32
+
+#endif
