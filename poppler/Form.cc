@@ -24,6 +24,7 @@
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2018 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -1213,49 +1214,58 @@ FormFieldText::~FormFieldText()
 
 double FormFieldText::getTextFontSize()
 {
-  GooList* daToks = new GooList();
+  std::vector<GooString*>* daToks = new std::vector<GooString*>();
   int idx = parseDA(daToks);
   double fontSize = -1;
   if (idx >= 0) {
     char* p = nullptr;
-    fontSize = strtod(static_cast<GooString*>(daToks->get(idx))->c_str(), &p);
+    fontSize = strtod((*daToks)[idx]->c_str(), &p);
     if (!p || *p)
       fontSize = -1;
   }
-  deleteGooList<GooString>(daToks);
+  for (auto entry : *daToks) {
+    delete entry;
+  }
+  delete daToks;
   return fontSize;
 }
 
 void FormFieldText::setTextFontSize(int fontSize)
 {
   if (fontSize > 0 && obj.isDict()) {
-    GooList* daToks = new GooList();
+    std::vector<GooString*>* daToks = new std::vector<GooString*>();
     int idx = parseDA(daToks);
     if (idx == -1) {
       error(errSyntaxError, -1, "FormFieldText:: invalid DA object\n");
-      deleteGooList<GooString>(daToks);
+      for (auto entry : *daToks) {
+        delete entry;
+      }
+      delete daToks;
       return;
     }
     if (defaultAppearance)
       delete defaultAppearance;
     defaultAppearance = new GooString;
-    for (int i = 0; i < daToks->getLength(); ++i) {
+    for (std::size_t i = 0; i < daToks->size(); ++i) {
       if (i > 0)
         defaultAppearance->append(' ');
-      if (i == idx) {
+      if (i == (std::size_t)idx) {
         defaultAppearance->appendf("{0:d}", fontSize);
       } else {
-        defaultAppearance->append(static_cast<GooString*>(daToks->get(i)));
+        defaultAppearance->append((*daToks)[i]);
       }
     }
-    deleteGooList<GooString>(daToks);
+    for (auto entry : *daToks) {
+      delete entry;
+    }
+    delete daToks;
     obj.dictSet("DA", Object(defaultAppearance->copy()));
     xref->setModifiedObject(&obj, ref);
     updateChildrenAppearance();
   }
 }
 
-int FormFieldText::tokenizeDA(const GooString* da, GooList* daToks, const char* searchTok)
+int FormFieldText::tokenizeDA(const GooString* da, std::vector<GooString*>* daToks, const char* searchTok)
 {
   int idx = -1;
   if(da && daToks) {
@@ -1270,8 +1280,8 @@ int FormFieldText::tokenizeDA(const GooString* da, GooList* daToks, const char* 
         }
         GooString* tok = new GooString(da, i, j - i);
         if (searchTok && !tok->cmp(searchTok))
-          idx = daToks->getLength();
-        daToks->push_back(tok);
+          idx = daToks->size();
+	daToks->push_back(tok);
         i = j;
       }
     }
@@ -1279,7 +1289,7 @@ int FormFieldText::tokenizeDA(const GooString* da, GooList* daToks, const char* 
   return idx;
 }
 
-int FormFieldText::parseDA(GooList* daToks)
+int FormFieldText::parseDA(std::vector<GooString*>* daToks)
 {
   int idx = -1;
   if (obj.isDict()) {

@@ -17,7 +17,7 @@
  * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  * Copyright (C) 2016 Arseniy Lartsev <arseniy@alumni.chalmers.se>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
- * Copyright (C) 2017, 2018, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2017-2019, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
@@ -362,13 +362,13 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
 
   if ( popplerLink )
   {
-    const GooList *nextActions = a->nextActions();
+    const std::vector<::LinkAction*> *nextActions = a->nextActions();
     if ( nextActions )
     {
       QVector<Link *> links;
-      for ( int i = 0; i < nextActions->getLength(); ++i )
+      for ( std::size_t i = 0; i < nextActions->size(); ++i )
       {
-        links << convertLinkActionToLink( static_cast< ::LinkAction * >( nextActions->get( i ) ), parentDoc, linkArea );
+        links << convertLinkActionToLink( (*nextActions)[ i ], parentDoc, linkArea );
       }
       LinkPrivate::get(popplerLink)->nextLinks = links;
     }

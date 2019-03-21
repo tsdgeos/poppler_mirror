@@ -35,6 +35,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -52,7 +53,6 @@
 #include <algorithm>
 #include <array>
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "poppler-config.h"
 #include "GlobalParams.h"
 #include "Object.h"
@@ -1325,7 +1325,7 @@ void PSOutputDev::postInit()
     paperMatch = false;
   }
   Page *page;
-  paperSizes = new GooList();
+  paperSizes = new std::vector<PSOutPaperSize*>();
   for (size_t pgi = 0; pgi < pages.size(); ++pgi) {
     const int pg = pages[pgi];
     page = catalog->getPage(pg);
@@ -1357,12 +1357,12 @@ void PSOutputDev::postInit()
       paperWidth = w;
     if (h  > paperHeight)
       paperHeight = h;
-    for (i = 0; i < paperSizes->getLength(); ++i) {
-      size = (PSOutPaperSize *)paperSizes->get(i);
+    for (i = 0; i < (int)paperSizes->size(); ++i) {
+      size = (*paperSizes)[i];
       if (pageDimensionEqual(w, size->w) && pageDimensionEqual(h, size->h))
         break;
     }
-    if (i == paperSizes->getLength()) {
+    if (i == (int)paperSizes->size()) {
       const StandardMedia *media = standardMedia;
       GooString *name = nullptr;
       while (media->name) {
@@ -1478,7 +1478,10 @@ PSOutputDev::~PSOutputDev() {
 #endif
   }
   if (paperSizes) {
-    deleteGooList<PSOutPaperSize>(paperSizes);
+    for (auto entry : *paperSizes) {
+      delete entry;
+    }
+    delete paperSizes;
   }
   if (embFontList) {
     delete embFontList;
@@ -1566,8 +1569,8 @@ void PSOutputDev::writeHeader(const std::vector<int> &pages,
 
   switch (mode) {
   case psModePS:
-    for (int i = 0; i < paperSizes->getLength(); ++i) {
-      size = (PSOutPaperSize *)paperSizes->get(i);
+    for (std::size_t i = 0; i < paperSizes->size(); ++i) {
+      size = (*paperSizes)[i];
       writePSFmt("%%{0:s} {1:t} {2:d} {3:d} 0 () ()\n",
                  i==0 ? "DocumentMedia:" : "+", size->name, size->w, size->h);
     }
@@ -1575,7 +1578,7 @@ void PSOutputDev::writeHeader(const std::vector<int> &pages,
     writePSFmt("%%Pages: {0:d}\n", static_cast<int>(pages.size()));
     writePS("%%EndComments\n");
     if (!paperMatch) {
-      size = (PSOutPaperSize *)paperSizes->get(0);
+      size = (*paperSizes)[0];
       writePS("%%BeginDefaults\n");
       writePSFmt("%%PageMedia: {0:t}\n", size->name);
       writePS("%%EndDefaults\n");
@@ -3836,7 +3839,7 @@ void PSOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
     ty += (rotate == 0 || rotate == 180) ? imgLLY : -imgLLX;
 
     if (paperMatch) {
-      paperSize = (PSOutPaperSize *)paperSizes->get(pagePaperSize[pageNum]);
+      paperSize = (*paperSizes)[pagePaperSize[pageNum]];
       writePSFmt("%%PageMedia: {0:t}\n", paperSize->name);
     }
 

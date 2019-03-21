@@ -40,6 +40,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -58,7 +59,6 @@
 #include "goo/glibc.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "goo/gfile.h"
 #include "goo/gdir.h"
 #include "Error.h"
@@ -246,15 +246,18 @@ private:
 			       const char *path);
 #endif
 
-  GooList *fonts;			// [SysFontInfo]
+  std::vector<SysFontInfo*> *fonts;
 };
 
 SysFontList::SysFontList() {
-  fonts = new GooList();
+  fonts = new std::vector<SysFontInfo*>();
 }
 
 SysFontList::~SysFontList() {
-  deleteGooList<SysFontInfo>(fonts);
+  for (auto entry : *fonts) {
+    delete entry;
+  }
+  delete fonts;
 }
 
 SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exact) {
@@ -337,8 +340,8 @@ SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exac
 
   // search for the font
   fi = nullptr;
-  for (i = 0; i < fonts->getLength(); ++i) {
-    fi = (SysFontInfo *)fonts->get(i);
+  for (std::size_t i = 0; i < fonts->size(); ++i) {
+    fi = (*fonts)[i];
     if (fi->match(name2, bold, italic, oblique, fixedWidth)) {
       break;
     }
@@ -346,8 +349,8 @@ SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exac
   }
   if (!fi && !exact && bold) {
     // try ignoring the bold flag
-    for (i = 0; i < fonts->getLength(); ++i) {
-      fi = (SysFontInfo *)fonts->get(i);
+    for (std::size_t i = 0; i < fonts->size(); ++i) {
+      fi = (*fonts)[i];
       if (fi->match(name2, false, italic)) {
 	break;
       }
@@ -356,8 +359,8 @@ SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exac
   }
   if (!fi && !exact && (bold || italic)) {
     // try ignoring the bold and italic flags
-    for (i = 0; i < fonts->getLength(); ++i) {
-      fi = (SysFontInfo *)fonts->get(i);
+    for (std::size_t i = 0; i < fonts->size(); ++i) {
+      fi = (*fonts)[i];
       if (fi->match(name2, false, false)) {
 	break;
       }
@@ -394,7 +397,7 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
 
   nameToUnicodeZapfDingbats = new NameToCharCode();
   nameToUnicodeText = new NameToCharCode();
-  toUnicodeDirs = new GooList();
+  toUnicodeDirs = new std::vector<GooString*>();
   sysFonts = new SysFontList();
   psExpandSmaller = false;
   psShrinkLarger = true;
@@ -553,7 +556,10 @@ GlobalParams::~GlobalParams() {
 
   delete nameToUnicodeZapfDingbats;
   delete nameToUnicodeText;
-  deleteGooList<GooString>(toUnicodeDirs);
+  for (auto entry : *toUnicodeDirs) {
+    delete entry;
+  }
+  delete toUnicodeDirs;
   delete sysFonts;
   delete textEncoding;
 
@@ -631,11 +637,10 @@ FILE *GlobalParams::findCMapFile(const GooString *collection, const GooString *c
 FILE *GlobalParams::findToUnicodeFile(const GooString *name) {
   GooString *dir, *fileName;
   FILE *f;
-  int i;
 
   globalParamsLocker();
-  for (i = 0; i < toUnicodeDirs->getLength(); ++i) {
-    dir = (GooString *)toUnicodeDirs->get(i);
+  for (std::size_t i = 0; i < toUnicodeDirs->size(); ++i) {
+    dir = (*toUnicodeDirs)[i];
     fileName = appendToPath(dir->copy(), name->c_str());
     f = openFile(fileName->c_str(), "r");
     delete fileName;
@@ -1204,9 +1209,9 @@ UnicodeMap *GlobalParams::getTextEncoding() {
   return getUnicodeMap2(textEncoding);
 }
 
-GooList *GlobalParams::getEncodingNames()
+std::vector<GooString*> *GlobalParams::getEncodingNames()
 {
-  auto* const result = new GooList;
+  auto* const result = new std::vector<GooString*>;
   for (const auto& unicodeMap : residentUnicodeMaps) {
     result->push_back(new GooString(unicodeMap.first));
   }

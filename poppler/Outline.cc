@@ -20,6 +20,7 @@
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -30,7 +31,6 @@
 
 #include "goo/gmem.h"
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "XRef.h"
 #include "Link.h"
 #include "PDFDocEncoding.h"
@@ -50,7 +50,10 @@ Outline::Outline(const Object *outlineObj, XRef *xref) {
 
 Outline::~Outline() {
   if (items) {
-    deleteGooList<OutlineItem>(items);
+    for (auto entry : *items) {
+      delete entry;
+    }
+    delete items;
   }
 }
 
@@ -108,8 +111,8 @@ OutlineItem::~OutlineItem() {
   }
 }
 
-GooList *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA) {
-  GooList *items = new GooList();
+std::vector<OutlineItem*> *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA) {
+  auto items = new std::vector<OutlineItem*>();
 
   char* alreadyRead = (char *)gmalloc(xrefA->getNumObjects());
   memset(alreadyRead, 0, xrefA->getNumObjects());
@@ -137,7 +140,7 @@ GooList *OutlineItem::readItemList(OutlineItem *parent, const Object *firstItemR
 
   gfree(alreadyRead);
 
-  if (!items->getLength()) {
+  if (items->empty()) {
     delete items;
     items = nullptr;
   }
@@ -153,7 +156,10 @@ void OutlineItem::open() {
 
 void OutlineItem::close() {
   if (kids) {
-    deleteGooList<OutlineItem>(kids);
+    for (auto entry : *kids) {
+      delete entry;
+    }
+    delete kids;
     kids = nullptr;
   }
 }

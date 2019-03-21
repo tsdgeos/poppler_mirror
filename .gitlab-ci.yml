@@ -126,6 +126,33 @@ qt5_docs:
     paths:
       - qt5/src/APIDOCS-html
 
+cpp_docs:
+  only:
+    - master
+  stage: document
+  script:
+    - apt-get install --yes --no-install-recommends doxygen graphviz
+    - cd cpp
+    - doxygen
+  cache: {}
+  artifacts:
+    paths:
+      - cpp/APIDOCS-html
+
+glib_docs:
+  only:
+    - master
+  stage: document
+  script:
+    - apt-get install --yes --no-install-recommends gtk-doc-tools
+    - mkdir -p build && cd build
+    - cmake -G Ninja -DENABLE_GTK_DOC=YES ..
+    - ninja glib-docs
+  cache: {}
+  artifacts:
+    paths:
+      - build/glib/reference/html
+
 trigger_pages:
   only:
     - master

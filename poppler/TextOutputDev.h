@@ -24,6 +24,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
 // Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -40,7 +41,6 @@
 #include "OutputDev.h"
 
 class GooString;
-class GooList;
 class Gfx;
 class GfxFont;
 class GfxState;
@@ -53,6 +53,8 @@ class TextLine;
 class TextLineFrag;
 class TextBlock;
 class TextFlow;
+class TextLink;
+class TextUnderline;
 class TextWordList;
 class TextPage;
 class TextSelectionVisitor;
@@ -518,7 +520,7 @@ public:
 
 private:
 
-  GooList *words;			// [TextWord]
+  std::vector<TextWord*> *words;
 };
 
 #endif // TEXTOUT_WORD_LIST
@@ -636,14 +638,14 @@ public:
 		     SelectionStyle style,
 		     GfxColor *glyph_color, GfxColor *box_color);
 
-  GooList *getSelectionRegion(PDFRectangle *selection,
+  std::vector<PDFRectangle*> *getSelectionRegion(PDFRectangle *selection,
 			      SelectionStyle style,
 			      double scale);
 
   GooString *getSelectionText(PDFRectangle *selection,
 			      SelectionStyle style);
 
-  GooList **getSelectionWords(PDFRectangle *selection,
+  std::vector<TextWordSelection*> **getSelectionWords(PDFRectangle *selection,
                               SelectionStyle style,
                               int *nLines);
 
@@ -708,15 +710,14 @@ private:
 				//   rawOrder is set)
   TextWord *rawLastWord;	// last word on rawWords list
 
-  GooList *fonts;			// all font info objects used on this
-				//   page [TextFontInfo]
+  std::vector<TextFontInfo*> *fonts;// all font info objects used on this page
 
   double lastFindXMin,		// coordinates of the last "find" result
          lastFindYMin;
   bool haveLastFind;
 
-  GooList *underlines;		// [TextUnderline]
-  GooList *links;		// [TextLink]
+  std::vector<TextUnderline*> *underlines;
+  std::vector<TextLink*> *links;
 
   int refCnt;
 
@@ -876,7 +877,7 @@ public:
 		     SelectionStyle style,
 		     GfxColor *glyph_color, GfxColor *box_color);
 
-  GooList *getSelectionRegion(PDFRectangle *selection,
+  std::vector<PDFRectangle*> *getSelectionRegion(PDFRectangle *selection,
 			      SelectionStyle style,
 			      double scale);
 

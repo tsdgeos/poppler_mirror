@@ -29,7 +29,7 @@
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2015 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Marek Kasik <mkasik@redhat.com>
-// Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2017, 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
@@ -432,7 +432,7 @@ GfxColorSpace *GfxColorSpace::parse(GfxResources *res, Object *csObj, OutputDev 
   return cs;
 }
 
-void GfxColorSpace::createMapping(GooList *separationList, int maxSepComps) {
+void GfxColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *separationList, int maxSepComps) {
   return;
 }
 
@@ -2857,7 +2857,7 @@ void GfxSeparationColorSpace::getDefaultColor(GfxColor *color) {
   color->c[0] = gfxColorComp1;
 }
 
-void GfxSeparationColorSpace::createMapping(GooList *separationList, int maxSepComps) {
+void GfxSeparationColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *separationList, int maxSepComps) {
   if (nonMarking)
     return;
   mapping = (int *)gmalloc(sizeof(int));
@@ -2876,8 +2876,8 @@ void GfxSeparationColorSpace::createMapping(GooList *separationList, int maxSepC
       break;
     default:
       unsigned int newOverprintMask = 0x10;
-      for (int i = 0; i < separationList->getLength(); i++) {
-        GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)separationList->get(i);
+      for (std::size_t i = 0; i < separationList->size(); i++) {
+        GfxSeparationColorSpace *sepCS = (*separationList)[i];
         if (!sepCS->getName()->cmp(name)) {
           if (sepCS->getFunc()->hasDifferentResultSet(func)) {
             error(errSyntaxWarning, -1,
@@ -2892,15 +2892,15 @@ void GfxSeparationColorSpace::createMapping(GooList *separationList, int maxSepC
         }
         newOverprintMask <<=1;
       }
-      if (separationList->getLength() == maxSepComps) {
+      if ((int)separationList->size() == maxSepComps) {
         error(errSyntaxWarning, -1,
 	        "Too many ({0:d}) spots, convert '{1:t}' immediately", maxSepComps, name);
         gfree(mapping);
         mapping = nullptr;
         return;
       }
-      *mapping = separationList->getLength() + 4;
-      separationList->push_back(copy());
+      *mapping = separationList->size() + 4;
+      separationList->push_back((GfxSeparationColorSpace*)copy());
       overprintMask = newOverprintMask;
       break;
   }
@@ -2914,7 +2914,7 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
 					   GooString **namesA,
 					   GfxColorSpace *altA,
 					   Function *funcA,
-					   GooList *sepsCSA) {
+					   std::vector<GfxSeparationColorSpace*> *sepsCSA) {
   int i;
 
   nComps = nCompsA;
@@ -2949,7 +2949,7 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
 					   GooString **namesA,
 					   GfxColorSpace *altA,
 					   Function *funcA,
-					   GooList *sepsCSA,
+					   std::vector<GfxSeparationColorSpace*> *sepsCSA,
 					   int *mappingA,
 					   bool nonMarkingA,
 					   unsigned int overprintMaskA) {
@@ -2975,7 +2975,10 @@ GfxDeviceNColorSpace::~GfxDeviceNColorSpace() {
   }
   delete alt;
   delete func;
-  deleteGooList<GfxSeparationColorSpace>(sepsCS);
+  for (auto entry : *sepsCS) {
+    delete entry;
+  }
+  delete sepsCS;
   if (mapping != nullptr)
     gfree(mapping);
 }
@@ -2984,12 +2987,12 @@ GfxColorSpace *GfxDeviceNColorSpace::copy() {
   int i;
   int *mappingA = nullptr;
 
-  GooList *sepsCSA = new GooList();
-  sepsCSA->reserve(sepsCS->getLength());
-  for (i = 0; i < sepsCS->getLength(); i++) {
-    GfxSeparationColorSpace *scs = (GfxSeparationColorSpace *) sepsCS->get(i);
+  auto sepsCSA = new std::vector<GfxSeparationColorSpace*>();
+  sepsCSA->reserve(sepsCS->size());
+  for (std::size_t i = 0; i < sepsCS->size(); i++) {
+    GfxSeparationColorSpace *scs = (*sepsCS)[i];
     if (likely(scs != nullptr)) {
-      sepsCSA->push_back(scs->copy());
+      sepsCSA->push_back((GfxSeparationColorSpace*)scs->copy());
     }
   }
   if (mapping != nullptr) {
@@ -3009,7 +3012,7 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
   Function *funcA;
   Object obj1;
   int i;
-  GooList *separationList = new GooList();
+  auto separationList = new std::vector<GfxSeparationColorSpace*>();
 
   if (arr->getLength() != 4 && arr->getLength() != 5) {
     error(errSyntaxWarning, -1, "Bad DeviceN color space");
@@ -3057,7 +3060,7 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
       for (i = 0; i < colorants->getLength(); i++) {
         Object obj3 = colorants->getVal(i);
         if (obj3.isArray()) {
-	  separationList->push_back(GfxSeparationColorSpace::parse(res, obj3.getArray(), out, state, recursion));
+	  separationList->push_back((GfxSeparationColorSpace*)GfxSeparationColorSpace::parse(res, obj3.getArray(), out, state, recursion));
         } else {
           error(errSyntaxWarning, -1, "Bad DeviceN color space (colorant value entry is not an Array)");
           goto err5;
@@ -3151,7 +3154,7 @@ void GfxDeviceNColorSpace::getDefaultColor(GfxColor *color) {
   }
 }
 
-void GfxDeviceNColorSpace::createMapping(GooList *separationList, int maxSepComps) {
+void GfxDeviceNColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *separationList, int maxSepComps) {
   if (nonMarking)               // None
     return;
   mapping = (int *)gmalloc(sizeof(int) * nComps);
@@ -3178,16 +3181,16 @@ void GfxDeviceNColorSpace::createMapping(GooList *separationList, int maxSepComp
       if (nComps == 1)
         sepFunc = func;
       else {
-        for (int k = 0; k < sepsCS->getLength(); k++) {
-          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)sepsCS->get(k);
+        for (std::size_t k = 0; k < sepsCS->size(); k++) {
+          GfxSeparationColorSpace *sepCS = (*sepsCS)[k];
           if (!sepCS->getName()->cmp(names[i])) {
             sepFunc = sepCS->getFunc();
             break;
           }
         }
       }
-      for (int j = 0; j < separationList->getLength(); j++) {
-        GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)separationList->get(j);
+      for (std::size_t j = 0; j < separationList->size(); j++) {
+        GfxSeparationColorSpace *sepCS = (*separationList)[j];
         if (!sepCS->getName()->cmp(names[i])) {
           if (sepFunc != nullptr && sepCS->getFunc()->hasDifferentResultSet(sepFunc)) {
             error(errSyntaxWarning, -1,
@@ -3205,7 +3208,7 @@ void GfxDeviceNColorSpace::createMapping(GooList *separationList, int maxSepComp
         startOverprintMask <<=1;
       }
       if (!found) {
-        if (separationList->getLength() == maxSepComps) {
+        if ((int)separationList->size() == maxSepComps) {
           error(errSyntaxWarning, -1,
             "Too many ({0:d}) spots, convert '{1:t}' immediately", maxSepComps, names[i]);
           gfree(mapping);
@@ -3213,16 +3216,16 @@ void GfxDeviceNColorSpace::createMapping(GooList *separationList, int maxSepComp
           overprintMask = 0xffffffff;
           return;
         }
-        mapping[i] = separationList->getLength() + 4;
+        mapping[i] = separationList->size() + 4;
         newOverprintMask |= startOverprintMask;
         if (nComps == 1)
 	  separationList->push_back(new GfxSeparationColorSpace(names[i]->copy(),alt->copy(), func->copy()));
         else {
-          for (int k = 0; k < sepsCS->getLength(); k++) {
-            GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)sepsCS->get(k);
+          for (std::size_t k = 0; k < sepsCS->size(); k++) {
+            GfxSeparationColorSpace *sepCS = (*sepsCS)[k];
             if (!sepCS->getName()->cmp(names[i])) {
               found = true;
-	      separationList->push_back(sepCS->copy());
+	      separationList->push_back((GfxSeparationColorSpace*)sepCS->copy());
               break;
             }
           }

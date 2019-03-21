@@ -20,6 +20,7 @@
 // Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -34,7 +35,6 @@
 #include <set>
 
 class GooString;
-class GooList;
 class Array;
 class Dict;
 class Sound;
@@ -85,15 +85,15 @@ public:
 
   // A List of the next actions to execute in order.
   // The list contains pointer to LinkAction objects.
-  const GooList *nextActions() const;
+  const std::vector<LinkAction*> *nextActions() const;
 
   // Sets the next action list. Takes ownership of the actions.
-  void setNextActions(GooList *actions);
+  void setNextActions(std::vector<LinkAction*> *actions);
 
 private:
   static LinkAction *parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions);
 
-  GooList *nextActionList;
+  std::vector<LinkAction*> *nextActionList;
 };
 
 //------------------------------------------------------------------------
@@ -452,14 +452,14 @@ public:
     StateList(const StateList &) = delete;
     StateList& operator=(const StateList &) = delete;
     State st;
-    GooList *list;
+    std::vector<Ref*> *list;
   };
 
-  const GooList *getStateList() const { return stateList; }
+  const std::vector<StateList*> *getStateList() const { return stateList; }
   bool getPreserveRB() const { return preserveRB; }
 
 private:
-  GooList *stateList;
+  std::vector<StateList*> *stateList;
   bool preserveRB;
 };
 

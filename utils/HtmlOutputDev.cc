@@ -43,6 +43,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Thibaut Brard <thibaut.brard@gmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -59,7 +60,6 @@
 #include <iostream>
 #include "goo/GooString.h"
 #include "goo/gbasename.h"
-#include "goo/GooList.h"
 #include "goo/gbase64.h"
 #include "goo/gbasename.h"
 #include "UnicodeMap.h"
@@ -279,7 +279,7 @@ HtmlPage::HtmlPage(bool rawOrder) {
   yxCur1 = yxCur2 = nullptr;
   fonts=new HtmlFontAccu();
   links=new HtmlLinks();
-  imgList=new GooList();
+  imgList=new std::vector<HtmlImage*>();
   pageWidth=0;
   pageHeight=0;
   fontsPageMarker = 0;
@@ -292,7 +292,10 @@ HtmlPage::~HtmlPage() {
   delete DocName;
   delete fonts;
   delete links;
-  deleteGooList<HtmlImage>(imgList);
+  for (auto entry : *imgList) {
+    delete entry;
+  }
+  delete imgList;
 }
 
 void HtmlPage::updateFont(GfxState *state) {
@@ -1099,7 +1102,7 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
   needClose = false;
   pages = new HtmlPage(rawOrder);
   
-  glMetaVars = new GooList();
+  glMetaVars = new std::vector<HtmlMetaVar*>();
   glMetaVars->push_back(new HtmlMetaVar("generator", "pdftohtml 0.36"));
   if( author ) glMetaVars->push_back(new HtmlMetaVar("author", author));
   if( keywords ) glMetaVars->push_back(new HtmlMetaVar("keywords", keywords));
@@ -1199,7 +1202,10 @@ HtmlOutputDev::~HtmlOutputDev() {
     delete Docname;
     delete docTitle;
 
-    deleteGooList<HtmlMetaVar>(glMetaVars);
+    for (auto entry : *glMetaVars) {
+      delete entry;
+    }
+    delete glMetaVars;
 
     if (fContentsFrame){
       fputs("</body>\n</html>\n",fContentsFrame);  
@@ -1666,9 +1672,9 @@ void HtmlOutputDev::dumpMetaVars(FILE *file)
 {
   GooString *var;
 
-  for(int i = 0; i < glMetaVars->getLength(); i++)
+  for(std::size_t i = 0; i < glMetaVars->size(); i++)
   {
-     HtmlMetaVar *t = (HtmlMetaVar*)glMetaVars->get(i); 
+     HtmlMetaVar *t = (*glMetaVars)[i];
      var = t->toString(); 
      fprintf(file, "%s\n", var->c_str());
      delete var;
@@ -1687,7 +1693,7 @@ bool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 	if (!outline)
 		return false;
 
-	const GooList *outlines = outline->getItems();
+	const std::vector<OutlineItem*> *outlines = outline->getItems();
 	if (!outlines)
 		return false;
   
@@ -1744,7 +1750,7 @@ bool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 	return true;
 }
 
-bool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, const GooList *outlines, int level)
+bool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, const std::vector<OutlineItem*> *outlines, int level)
 {
 	bool atLeastOne = false;
 
@@ -1755,9 +1761,9 @@ bool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, const GooList *outlines, i
 	}
 	fputs("<ul>\n",output);
 
-	for (int i = 0; i < outlines->getLength(); i++)
+	for (std::size_t i = 0; i < outlines->size(); i++)
 	{
-		OutlineItem *item = (OutlineItem*)outlines->get(i);
+		OutlineItem *item = (*outlines)[i];
 		GooString *titleStr = HtmlFont::HtmlFilter(item->getTitle(),
 							   item->getTitleLength());
 
@@ -1812,13 +1818,13 @@ bool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, const GooList *outlines, i
 	return atLeastOne;
 }
 
-void HtmlOutputDev::newXmlOutlineLevel(FILE *output, const GooList *outlines)
+void HtmlOutputDev::newXmlOutlineLevel(FILE *output, const std::vector<OutlineItem*> *outlines)
 {
     fputs("<outline>\n", output);
 
-    for (int i = 0; i < outlines->getLength(); i++)
+    for (std::size_t i = 0; i < outlines->size(); i++)
     {
-        OutlineItem *item     = (OutlineItem*)outlines->get(i);
+        OutlineItem *item     = (*outlines)[i];
         GooString   *titleStr = HtmlFont::HtmlFilter(item->getTitle(),
                                                      item->getTitleLength());
         int page = getOutlinePageNum(item);

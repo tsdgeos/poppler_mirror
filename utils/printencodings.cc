@@ -2,6 +2,7 @@
  * Copyright (C) 2008, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2019, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,23 +19,24 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include <algorithm>
+
 #include "printencodings.h"
 
 #include "GlobalParams.h"
-#include "goo/GooList.h"
 #include "goo/GooString.h"
 
 void printEncodings()
 {
-  GooList *encNames = globalParams->getEncodingNames();
+  std::vector<GooString*> *encNames = globalParams->getEncodingNames();
 
   std::sort(encNames->begin(), encNames->end(), [](void *lhs, void *rhs) {
     return static_cast<GooString *>(lhs)->cmp(static_cast<GooString *>(rhs)) < 0;
   });
 
   printf("Available encodings are:\n");
-  for (int i = 0; i < encNames->getLength(); ++i) {
-    GooString *enc = (GooString*)encNames->get(i);
+  for (std::size_t i = 0; i < encNames->size(); ++i) {
+    GooString *enc = (*encNames)[i];
     printf("%s\n", enc->c_str());
   }
 

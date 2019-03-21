@@ -7,6 +7,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -282,13 +283,12 @@ namespace Debug {
     }
 
 
-    void DocumentData::addTocChildren( QDomDocument * docSyn, QDomNode * parent, const GooList * items )
+    void DocumentData::addTocChildren( QDomDocument * docSyn, QDomNode * parent, const std::vector<::OutlineItem*> * items )
     {
-        int numItems = items->getLength();
-        for ( int i = 0; i < numItems; ++i )
+        for ( std::size_t i = 0; i < items->size(); ++i )
         {
             // iterate over every object in 'items'
-	    ::OutlineItem * outlineItem = (::OutlineItem *)items->get( i );
+            ::OutlineItem * outlineItem = (*items)[ i ];
 
             // 1. create element using outlineItem's title as tagName
             QString name;
@@ -309,7 +309,7 @@ namespace Debug {
 
             // 3. recursively descend over children
             outlineItem->open();
-            const GooList * children = outlineItem->getKids();
+            const std::vector<::OutlineItem*> * children = outlineItem->getKids();
             if ( children )
                 addTocChildren( docSyn, &item, children );
         }

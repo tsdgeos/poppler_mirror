@@ -13,6 +13,7 @@
  * Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -56,6 +57,7 @@
 
 class LinkDest;
 class FormWidget;
+class OutlineItem;
 
 namespace Poppler {
 
@@ -123,7 +125,7 @@ namespace Poppler {
 	DocumentData(const DocumentData &) = delete;
 	DocumentData& operator=(const DocumentData &) = delete;
 	
-	void addTocChildren( QDomDocument * docSyn, QDomNode * parent, const GooList * items );
+	void addTocChildren( QDomDocument * docSyn, QDomNode * parent, const std::vector<::OutlineItem*> * items );
 	
 	void setPaperColor(const QColor &color)
 	{

@@ -27,6 +27,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Philipp Knechtges <philipp-dev@knechtges.com>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -61,6 +62,7 @@ struct PST1FontName;
 struct PSFont8Info;
 struct PSFont16Enc;
 class PSOutCustomColor;
+struct PSOutPaperSize;
 class PSOutputDev;
 
 //------------------------------------------------------------------------
@@ -497,8 +499,8 @@ private:
   int numTilingPatterns;	// current number of nested tiling patterns
   int nextFunc;			// next unique number to use for a function
 
-  GooList *paperSizes;		// list of used paper sizes, if paperMatch
-				//   is true [PSOutPaperSize]
+  std::vector<PSOutPaperSize*> *paperSizes;	// list of used paper sizes, if paperMatch
+				//   is true
   std::map<int,int> pagePaperSize; // page num to paperSize entry mapping
   double tx0, ty0;		// global translation
   double xScale0, yScale0;	// global scaling

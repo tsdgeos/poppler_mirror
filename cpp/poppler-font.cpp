@@ -2,6 +2,7 @@
  * Copyright (C) 2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2015, Tamas Szekeres <szekerest@gmail.com>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2019, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -217,15 +218,18 @@ std::vector<font_info> font_iterator::next()
 
     ++d->current_page;
 
-    GooList *items = d->font_info_scanner.scan(1);
+    std::vector<FontInfo*> *items = d->font_info_scanner.scan(1);
     if (!items) {
         return std::vector<font_info>();
     }
-    std::vector<font_info> fonts(items->getLength());
-    for (int i = 0; i < items->getLength(); ++i) {
-        fonts[i] = font_info(*new font_info_private((FontInfo *)items->get(i)));
+    std::vector<font_info> fonts(items->size());
+    for (std::size_t i = 0; i < items->size(); ++i) {
+        fonts[i] = font_info(*new font_info_private((*items)[i]));
     }
-    deleteGooList<FontInfo>(items);
+    for (auto entry : *items) {
+        delete entry;
+    }
+    delete items;
     return fonts;
 }
 

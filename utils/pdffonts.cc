@@ -19,6 +19,7 @@
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -164,15 +165,15 @@ int main(int argc, char *argv[]) {
   // get the fonts
   {
     FontInfoScanner scanner(doc, firstPage - 1);
-    GooList *fonts = scanner.scan(lastPage - firstPage + 1);
+    std::vector<FontInfo*> *fonts = scanner.scan(lastPage - firstPage + 1);
 
     if (showSubst) {
       // print the font substitutions
       printf("name                                 object ID substitute font                      substitute font file\n");
       printf("------------------------------------ --------- ------------------------------------ ------------------------------------\n");
       if (fonts) {
-        for (int i = 0; i < fonts->getLength(); ++i) {
-          FontInfo *font = (FontInfo *)fonts->get(i);
+        for (std::size_t i = 0; i < fonts->size(); ++i) {
+          FontInfo *font = (*fonts)[i];
           if (font->getFile()) {
             printf("%-36s",
                    font->getName() ? font->getName()->c_str() : "[none]");
@@ -195,8 +196,8 @@ int main(int argc, char *argv[]) {
       printf("name                                 type              encoding         emb sub uni object ID\n");
       printf("------------------------------------ ----------------- ---------------- --- --- --- ---------\n");
       if (fonts) {
-        for (int i = 0; i < fonts->getLength(); ++i) {
-          FontInfo *font = (FontInfo *)fonts->get(i);
+        for (std::size_t i = 0; i < fonts->size(); ++i) {
+          FontInfo *font = (*fonts)[i];
           printf("%-36s %-17s %-16s %-3s %-3s %-3s",
                  font->getName() ? font->getName()->c_str() : "[none]",
                  fontTypeNames[font->getType()],

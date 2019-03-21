@@ -3,13 +3,17 @@
 // This file is under the GPLv2 or later license
 //
 // Copyright (C) 2005-2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
 //
 //========================================================================
+
+#ifndef PAGELABELINFO_H
+#define PAGELABELINFO_H
 
 #include <limits.h>
 #include <stdlib.h>
@@ -52,3 +56,5 @@ private:
 
   std::vector<Interval> intervals;
 };
+
+#endif

@@ -23,7 +23,7 @@
 // Copyright (C) 2011-2014, 2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
 // Copyright (C) 2015, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2017, 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -47,10 +47,10 @@ class Gfx;
 class GfxFont;
 class PDFRectangle;
 class GfxShading;
-class GooList;
 class OutputDev;
 class GfxState;
 class GfxResources;
+class GfxSeparationColorSpace;
 
 class Matrix {
 public:
@@ -235,7 +235,7 @@ public:
   virtual void getDeviceNLine(unsigned char * /*in*/, unsigned char * /*out*/, int /*length*/) {  error(errInternal, -1, "GfxColorSpace::getDeviceNLine this should not happen"); }
 
   // create mapping for spot colorants
-  virtual void createMapping(GooList *separationList, int maxSepComps);
+  virtual void createMapping(std::vector<GfxSeparationColorSpace*> *separationList, int maxSepComps);
 
   // Does this ColorSpace support getRGBLine?
   virtual bool useGetRGBLine() const { return false; }
@@ -621,7 +621,7 @@ public:
   unsigned char *getLookup() { return lookup; }
   GfxColor *mapColorToBase(const GfxColor *color, GfxColor *baseColor) const;
   unsigned int getOverprintMask() { return base->getOverprintMask(); }
-  void createMapping(GooList *separationList, int maxSepComps) override
+  void createMapping(std::vector<GfxSeparationColorSpace*> *separationList, int maxSepComps) override
     { base->createMapping(separationList, maxSepComps); }
 
 
@@ -653,7 +653,7 @@ public:
   void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const override;
   void getDeviceN(const GfxColor *color, GfxColor *deviceN) const override;
 
-  void createMapping(GooList *separationList, int maxSepComps) override;
+  void createMapping(std::vector<GfxSeparationColorSpace*> *separationList, int maxSepComps) override;
 
   int getNComps() const override { return 1; }
   void getDefaultColor(GfxColor *color) override;
@@ -685,7 +685,7 @@ class GfxDeviceNColorSpace: public GfxColorSpace {
 public:
 
   GfxDeviceNColorSpace(int nCompsA, GooString **namesA,
-		       GfxColorSpace *alt, Function *func, GooList *sepsCS);
+		       GfxColorSpace *alt, Function *func, std::vector<GfxSeparationColorSpace*> *sepsCS);
   ~GfxDeviceNColorSpace();
   GfxColorSpace *copy() override;
   GfxColorSpaceMode getMode() override { return csDeviceN; }
@@ -698,7 +698,7 @@ public:
   void getCMYK(const GfxColor *color, GfxCMYK *cmyk) const override;
   void getDeviceN(const GfxColor *color, GfxColor *deviceN) const override;
 
-  void createMapping(GooList *separationList, int maxSepComps) override;
+  void createMapping(std::vector<GfxSeparationColorSpace*> *separationList, int maxSepComps) override;
 
   int getNComps() const override { return nComps; }
   void getDefaultColor(GfxColor *color) override;
@@ -713,7 +713,7 @@ public:
 private:
 
   GfxDeviceNColorSpace(int nCompsA, GooString **namesA,
-		       GfxColorSpace *alt, Function *func, GooList *sepsCSA,
+		       GfxColorSpace *alt, Function *func, std::vector<GfxSeparationColorSpace*> *sepsCSA,
 		       int *mappingA, bool nonMarkingA, unsigned int overprintMaskA);
 
   int nComps;			// number of components
@@ -722,7 +722,7 @@ private:
   GfxColorSpace *alt;		// alternate color space
   Function *func;		// tint transform (into alternate color space)
   bool nonMarking;
-  GooList *sepsCS; // list of separation cs for spot colorants;
+  std::vector<GfxSeparationColorSpace*> *sepsCS; // list of separation cs for spot colorants;
 };
 
 //------------------------------------------------------------------------

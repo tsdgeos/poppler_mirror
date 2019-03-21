@@ -21,6 +21,7 @@
 // Copyright (C) 2012 Matthias Kramm <kramm@quiss.org>
 // Copyright (C) 2018, 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -36,7 +37,6 @@
 #include <math.h>
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"
-#include "goo/GooList.h"
 #include "poppler/Error.h"
 #include "SplashErrorCodes.h"
 #include "SplashMath.h"
@@ -5283,9 +5283,9 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
     return splashErrZeroImage;
   }
 
-  if(src->getSeparationList()->getLength() > bitmap->getSeparationList()->getLength()) {
-    for (x = bitmap->getSeparationList()->getLength(); x < src->getSeparationList()->getLength(); x++)
-      bitmap->getSeparationList()->push_back(((GfxSeparationColorSpace *)src->getSeparationList()->get(x))->copy());
+  if(src->getSeparationList()->size() > bitmap->getSeparationList()->size()) {
+    for (x = bitmap->getSeparationList()->size(); x < (int)src->getSeparationList()->size(); x++)
+      bitmap->getSeparationList()->push_back((GfxSeparationColorSpace *)((*src->getSeparationList())[x])->copy());
   }
   if (src->alpha) {
     pipeInit(&pipe, xDest, yDest, nullptr, pixel,

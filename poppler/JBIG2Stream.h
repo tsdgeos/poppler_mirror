@@ -16,6 +16,7 @@
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -28,7 +29,6 @@
 #include "Object.h"
 #include "Stream.h"
 
-class GooList;
 class JBIG2Segment;
 class JBIG2Bitmap;
 class JArithmeticDecoder;
@@ -134,8 +134,8 @@ private:
   unsigned int pageDefPixel;
   JBIG2Bitmap *pageBitmap;
   unsigned int defCombOp;
-  GooList *segments;		// [JBIG2Segment]
-  GooList *globalSegments;	// [JBIG2Segment]
+  std::vector<JBIG2Segment*> *segments;
+  std::vector<JBIG2Segment*> *globalSegments;
   Stream *curStr;
   unsigned char *dataPtr;
   unsigned char *dataEnd;

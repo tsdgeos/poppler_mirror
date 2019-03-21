@@ -15,6 +15,7 @@
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2016, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -28,9 +29,9 @@
 #include "CharTypes.h"
 
 class GooString;
-class GooList;
 class XRef;
 class LinkAction;
+class OutlineItem;
 
 //------------------------------------------------------------------------
 
@@ -43,12 +44,11 @@ public:
   Outline(const Outline &) = delete;
   Outline& operator=(const Outline &) = delete;
 
-  const GooList *getItems() const { return items; }
+  const std::vector<OutlineItem*> *getItems() const { return items; }
 
 private:
 
-  GooList *items;		// NULL if document has no outline,
-				// otherwise, a list of OutlineItem
+  std::vector<OutlineItem*> *items; // nullptr if document has no outline,
 };
 
 //------------------------------------------------------------------------
@@ -62,7 +62,7 @@ public:
   OutlineItem(const OutlineItem &) = delete;
   OutlineItem& operator=(const OutlineItem &) = delete;
 
-  static GooList *readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA);
+  static std::vector<OutlineItem*> *readItemList(OutlineItem *parent, const Object *firstItemRef, XRef *xrefA);
 
   void open();
   void close();
@@ -72,7 +72,7 @@ public:
   const LinkAction *getAction() const { return action; }
   bool isOpen() const { return startsOpen; }
   bool hasKids() const { return firstRef.isRef(); }
-  const GooList *getKids() const { return kids; }
+  const std::vector<OutlineItem*> *getKids() const { return kids; }
 
 private:
 
@@ -86,8 +86,7 @@ private:
   Object lastRef;
   Object nextRef;
   bool startsOpen;
-  GooList *kids;	// NULL if this item is closed or has no kids,
-			// otherwise a list of OutlineItem
+  std::vector<OutlineItem*> *kids;   // nullptr if this item is closed or has no kids
 };
 
 #endif

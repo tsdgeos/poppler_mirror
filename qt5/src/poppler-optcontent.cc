@@ -7,6 +7,7 @@
  * Copyright (C) 2017, Hubert Figuière <hub@figuiere.net>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -398,13 +399,13 @@ namespace Poppler
 
     QSet<OptContentItem *> changedItems;
 
-    const GooList *statesList = popplerLinkOCGState->getStateList();
-    for (int i = 0; i < statesList->getLength(); ++i) {
-        ::LinkOCGState::StateList *stateList = (::LinkOCGState::StateList*)statesList->get(i);
+    const std::vector<::LinkOCGState::StateList*> *statesList = popplerLinkOCGState->getStateList();
+    for (std::size_t i = 0; i < statesList->size(); ++i) {
+        ::LinkOCGState::StateList *stateList = (*statesList)[i];
 
-        GooList *refsList = stateList->list;
-        for (int j = 0; j < refsList->getLength(); ++j) {
-            Ref *ref = (Ref *)refsList->get(j);
+        std::vector<Ref*> *refsList = stateList->list;
+        for (std::size_t j = 0; j < refsList->size(); ++j) {
+            Ref *ref = (*refsList)[j];
             OptContentItem *item = d->itemFromRef(QString::number(ref->num));
 
             if (stateList->st == ::LinkOCGState::On) {

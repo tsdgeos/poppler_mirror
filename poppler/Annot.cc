@@ -41,7 +41,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
 // Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
-// Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2018, 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -56,7 +56,6 @@
 #include <assert.h>
 #include "goo/gmem.h"
 #include "goo/gstrtod.h"
-#include "GooList.h"
 #include "Error.h"
 #include "Object.h"
 #include "Catalog.h"
@@ -756,37 +755,40 @@ DefaultAppearance::DefaultAppearance(GooString *da) {
   fontPtSize = -1;
 
   if (da) {
-    GooList * daToks = new GooList();
+    std::vector<GooString*> * daToks = new std::vector<GooString*>();
     int i = FormFieldText::tokenizeDA(da, daToks, "Tf");
 
     if (i >= 1) {
-      fontPtSize = gatof(( (GooString *)daToks->get(i-1) )->c_str());
+      fontPtSize = gatof( (*daToks)[i-1]->c_str());
     }
     if (i >= 2) {
       // We are expecting a name, therefore the first letter should be '/'.
-      if (((const char*)daToks->get(i-2)) && ((const char*)daToks->get(i-2))[0] == '/') {
+      if ((*daToks)[i-2] && ((const char*)((*daToks)[i-2]))[0] == '/') {
         // The +1 is here to skip the leading '/'.
-        fontName = Object(objName, ((const char*)daToks->get(i-2))+1);
+        fontName = Object(objName, ((const char*)(*daToks)[i-2])+1);
       }
     }
     // Scan backwards: we are looking for the last set value
-    for (i = daToks->getLength()-1; i >= 0; --i) {
+    for (i = daToks->size()-1; i >= 0; --i) {
       if (!fontColor) {
-        if (!((GooString *)daToks->get(i))->cmp("g") && i >= 1) {
-          fontColor = std::make_unique<AnnotColor>(gatof(( (GooString *)daToks->get(i-1) )->c_str()));
-        } else if (!((GooString *)daToks->get(i))->cmp("rg") && i >= 3) {
-          fontColor = std::make_unique<AnnotColor>(gatof(( (GooString *)daToks->get(i-3) )->c_str()),
-                                                   gatof(( (GooString *)daToks->get(i-2) )->c_str()),
-                                                   gatof(( (GooString *)daToks->get(i-1) )->c_str()));
-        } else if (!((GooString *)daToks->get(i))->cmp("k") && i >= 4) {
-          fontColor = std::make_unique<AnnotColor>(gatof(( (GooString *)daToks->get(i-4) )->c_str()),
-                                                   gatof(( (GooString *)daToks->get(i-3) )->c_str()),
-                                                   gatof(( (GooString *)daToks->get(i-2) )->c_str()),
-                                                   gatof(( (GooString *)daToks->get(i-1) )->c_str()));
+        if (!((*daToks)[i])->cmp("g") && i >= 1) {
+          fontColor = std::make_unique<AnnotColor>(gatof(( (*daToks)[i-1] )->c_str()));
+        } else if (!((*daToks)[i])->cmp("rg") && i >= 3) {
+          fontColor = std::make_unique<AnnotColor>(gatof(( (*daToks)[i-3] )->c_str()),
+                                                   gatof(( (*daToks)[i-2] )->c_str()),
+                                                   gatof(( (*daToks)[i-1] )->c_str()));
+        } else if (!((*daToks)[i])->cmp("k") && i >= 4) {
+          fontColor = std::make_unique<AnnotColor>(gatof(( (*daToks)[i-4] )->c_str()),
+                                                   gatof(( (*daToks)[i-3] )->c_str()),
+                                                   gatof(( (*daToks)[i-2] )->c_str()),
+                                                   gatof(( (*daToks)[i-1] )->c_str()));
         }
       }
     }
-    deleteGooList<GooString>(daToks);
+    for (auto entry : *daToks) {
+      delete entry;
+    }
+    delete daToks;
   }
 }
 
@@ -4028,7 +4030,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     bool txField, bool forceZapfDingbats,
     XRef *xref, bool *addedDingbatsResource,
     bool password) {
-  GooList *daToks;
+  std::vector<GooString*> *daToks;
   GooString *tok;
   GooString convertedText;
   const GfxFont *font;
@@ -4046,7 +4048,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
   // parse the default appearance string
   tfPos = tmPos = -1;
   if (da) {
-    daToks = new GooList();
+    daToks = new std::vector<GooString*>();
     i = 0;
     while (i < da->getLength()) {
       while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
@@ -4060,10 +4062,10 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         i = j;
       }
     }
-    for (i = 2; i < daToks->getLength(); ++i) {
-      if (i >= 2 && !((GooString *)daToks->get(i))->cmp("Tf")) {
+    for (i = 2; i < (int)daToks->size(); ++i) {
+      if (i >= 2 && !((*daToks)[i])->cmp("Tf")) {
         tfPos = i - 2;
-      } else if (i >= 6 && !((GooString *)daToks->get(i))->cmp("Tm")) {
+      } else if (i >= 6 && !((*daToks)[i])->cmp("Tm")) {
         tmPos = i - 6;
       }
     }
@@ -4078,7 +4080,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     *addedDingbatsResource = false;
 
     if (tfPos >= 0) {
-      tok = (GooString *)daToks->get(tfPos);
+      tok = (*daToks)[tfPos];
       if (tok->cmp("/ZaDb")) {
         tok->clear();
         tok->append("/ZaDb");
@@ -4089,7 +4091,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
   font = nullptr;
   fontSize = 0;
   if (tfPos >= 0) {
-    tok = (GooString *)daToks->get(tfPos);
+    tok = (*daToks)[tfPos];
     if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
       if (!resources || !(font = resources->lookupFont(tok->c_str() + 1))) {
         if (forceZapfDingbats) {
@@ -4110,14 +4112,17 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     } else {
       error(errSyntaxError, -1, "Invalid font name in 'Tf' operator in field's DA string");
     }
-    tok = (GooString *)daToks->get(tfPos + 1);
+    tok = (*daToks)[tfPos + 1];
     fontSize = gatof(tok->c_str());
   } else {
     error(errSyntaxError, -1, "Missing 'Tf' operator in field's DA string");
   }
   if (!font) {
     if (daToks) {
-      deleteGooList<GooString>(daToks);
+      for (auto entry : *daToks) {
+        delete entry;
+      }
+      delete daToks;
     }
     return false;
   }
@@ -4191,7 +4196,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         }
       }
       if (tfPos >= 0) {
-        tok = (GooString *)daToks->get(tfPos + 1);
+        tok = (*daToks)[tfPos + 1];
         tok->clear();
         tok->appendf("{0:.2f}", fontSize);
       }
@@ -4204,18 +4209,18 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
     // set the font matrix
     if (tmPos >= 0) {
-      tok = (GooString *)daToks->get(tmPos + 4);
+      tok = (*daToks)[tmPos + 4];
       tok->clear();
       tok->append('0');
-      tok = (GooString *)daToks->get(tmPos + 5);
+      tok = (*daToks)[tmPos + 5];
       tok->clear();
       tok->appendf("{0:.2f}", y);
     }
 
     // write the DA string
     if (daToks) {
-      for (i = 0; i < daToks->getLength(); ++i) {
-        appearBuf->append((GooString *)daToks->get(i))->append(' ');
+      for (i = 0; i < (int)daToks->size(); ++i) {
+        appearBuf->append((*daToks)[i])->append(' ');
       }
     }
 
@@ -4274,7 +4279,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         }
         fontSize = floor(fontSize);
         if (tfPos >= 0) {
-          tok = (GooString *)daToks->get(tfPos + 1);
+          tok = (*daToks)[tfPos + 1];
           tok->clear();
           tok->appendf("{0:.2f}", fontSize);
         }
@@ -4303,18 +4308,18 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
       // set the font matrix
       if (tmPos >= 0) {
-        tok = (GooString *)daToks->get(tmPos + 4);
+        tok = (*daToks)[tmPos + 4];
         tok->clear();
         tok->appendf("{0:.2f}", x);
-        tok = (GooString *)daToks->get(tmPos + 5);
+        tok = (*daToks)[tmPos + 5];
         tok->clear();
         tok->appendf("{0:.2f}", y);
       }
 
       // write the DA string
       if (daToks) {
-        for (i = 0; i < daToks->getLength(); ++i) {
-          appearBuf->append((GooString *)daToks->get(i))->append(' ');
+        for (i = 0; i < (int)daToks->size(); ++i) {
+          appearBuf->append((*daToks)[i])->append(' ');
         }
       }
 
@@ -4369,7 +4374,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         }
         fontSize = floor(fontSize);
         if (tfPos >= 0) {
-          tok = (GooString *)daToks->get(tfPos + 1);
+          tok = (*daToks)[tfPos + 1];
           tok->clear();
           tok->appendf("{0:.2f}", fontSize);
         }
@@ -4393,18 +4398,18 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
       // set the font matrix
       if (tmPos >= 0) {
-        tok = (GooString *)daToks->get(tmPos + 4);
+        tok = (*daToks)[tmPos + 4];
         tok->clear();
         tok->appendf("{0:.2f}", x);
-        tok = (GooString *)daToks->get(tmPos + 5);
+        tok = (*daToks)[tmPos + 5];
         tok->clear();
         tok->appendf("{0:.2f}", y);
       }
 
       // write the DA string
       if (daToks) {
-        for (i = 0; i < daToks->getLength(); ++i) {
-          appearBuf->append((GooString *)daToks->get(i))->append(' ');
+        for (std::size_t i = 0; i < daToks->size(); ++i) {
+          appearBuf->append((*daToks)[i])->append(' ');
         }
       }
 
@@ -4425,7 +4430,10 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     appearBuf->append("EMC\n");
   }
   if (daToks) {
-    deleteGooList<GooString>(daToks);
+    for (auto entry : *daToks) {
+      delete entry;
+    }
+    delete daToks;
   }
   if (freeText) {
     delete text;
@@ -4440,7 +4448,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 // Draw the variable text or caption for a field.
 bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, const AnnotBorder *border, const PDFRectangle *rect,
 			      const GooString *da, const GfxResources *resources, int quadding) {
-  GooList *daToks;
+  std::vector<GooString*> *daToks;
   GooString *tok;
   GooString convertedText;
   const GfxFont *font;
@@ -4454,7 +4462,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
   // parse the default appearance string
   tfPos = tmPos = -1;
   if (da) {
-    daToks = new GooList();
+    daToks = new std::vector<GooString*>();
     i = 0;
     while (i < da->getLength()) {
       while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
@@ -4468,10 +4476,10 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 	i = j;
       }
     }
-    for (i = 2; i < daToks->getLength(); ++i) {
-      if (i >= 2 && !((GooString *)daToks->get(i))->cmp("Tf")) {
+    for (std::size_t i = 2; i < daToks->size(); ++i) {
+      if (i >= 2 && !((*daToks)[i])->cmp("Tf")) {
 	tfPos = i - 2;
-      } else if (i >= 6 && !((GooString *)daToks->get(i))->cmp("Tm")) {
+      } else if (i >= 6 && !((*daToks)[i])->cmp("Tm")) {
 	tmPos = i - 6;
       }
     }
@@ -4483,7 +4491,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
   font = nullptr;
   fontSize = 0;
   if (tfPos >= 0) {
-    tok = (GooString *)daToks->get(tfPos);
+    tok = (*daToks)[tfPos];
     if (tok->getLength() >= 1 && tok->getChar(0) == '/') {
       if (!resources || !(font = resources->lookupFont(tok->c_str() + 1))) {
         error(errSyntaxError, -1, "Unknown font in field's DA string");
@@ -4491,14 +4499,17 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     } else {
       error(errSyntaxError, -1, "Invalid font name in 'Tf' operator in field's DA string");
     }
-    tok = (GooString *)daToks->get(tfPos + 1);
+    tok = (*daToks)[tfPos + 1];
     fontSize = gatof(tok->c_str());
   } else {
     error(errSyntaxError, -1, "Missing 'Tf' operator in field's DA string");
   }
   if (!font) {
     if (daToks) {
-      deleteGooList<GooString>(daToks);
+      for (auto entry : *daToks) {
+        delete entry;
+      }
+      delete daToks;
     }
     return false;
   }
@@ -4514,7 +4525,10 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
       if (fieldChoice->getChoice(i) == nullptr) {
         error(errSyntaxError, -1, "Invalid annotation listbox");
         if (daToks) {
-	  deleteGooList<GooString>(daToks);
+          for (auto entry : *daToks) {
+            delete entry;
+          }
+          delete daToks;
         }
         return false;
       }
@@ -4530,7 +4544,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
     }
     fontSize = floor(fontSize);
     if (tfPos >= 0) {
-      tok = (GooString *)daToks->get(tfPos + 1);
+      tok = (*daToks)[tfPos + 1];
       tok->clear();
       tok->appendf("{0:.2f}", fontSize);
     }
@@ -4573,18 +4587,18 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
     // set the font matrix
     if (tmPos >= 0) {
-      tok = (GooString *)daToks->get(tmPos + 4);
+      tok = (*daToks)[tmPos + 4];
       tok->clear();
       tok->appendf("{0:.2f}", x);
-      tok = (GooString *)daToks->get(tmPos + 5);
+      tok = (*daToks)[tmPos + 5];
       tok->clear();
       tok->appendf("{0:.2f}", y);
     }
 
     // write the DA string
     if (daToks) {
-      for (j = 0; j < daToks->getLength(); ++j) {
-        appearBuf->append((GooString *)daToks->get(j))->append(' ');
+      for (std::size_t j = 0; j < daToks->size(); ++j) {
+        appearBuf->append((*daToks)[j])->append(' ');
       }
     }
 
@@ -4611,7 +4625,10 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
   }
 
   if (daToks) {
-    deleteGooList<GooString>(daToks);
+    for (auto entry : *daToks) {
+      delete entry;
+    }
+    delete daToks;
   }
 
   return true;

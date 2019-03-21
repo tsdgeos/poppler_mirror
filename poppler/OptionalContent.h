@@ -6,6 +6,7 @@
 // Copyright 2008 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2013, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // Released under the GPL (version 2, or later, at your option)
 //
@@ -20,7 +21,6 @@
 #include <memory>
 
 class GooString;
-class GooList;
 class XRef;
 
 class OptionalContentGroup;
@@ -135,12 +135,12 @@ private:
   OCDisplayNode(const GooString *nameA);
   OCDisplayNode(OptionalContentGroup *ocgA);
   void addChild(OCDisplayNode *child);
-  void addChildren(GooList *childrenA);
-  GooList *takeChildren();
+  void addChildren(std::vector<OCDisplayNode*> *childrenA);
+  std::vector<OCDisplayNode*> *takeChildren();
 
   GooString *name;		// display name (may be nullptr)
   OptionalContentGroup *ocg;	// nullptr for display labels
-  GooList *children;		// nullptr if there are no children
+  std::vector<OCDisplayNode*> *children;		// nullptr if there are no children
 				//   [OCDisplayNode]
 };
 

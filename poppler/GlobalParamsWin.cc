@@ -12,6 +12,7 @@
    // Copyright (C) 2017, 2018 Albert Astals Cid <aacid@kde.org>
    // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
    // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
+   // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 
 TODO: instead of a fixed mapping defined in displayFontTab, it could
 scan the whole fonts directory, parse TTF files and build font
@@ -34,7 +35,6 @@ description for all fonts available in Windows. That's how MuPDF works.
 
 #include "goo/gmem.h"
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "goo/gfile.h"
 #include "Error.h"
 #include "NameToCharCode.h"

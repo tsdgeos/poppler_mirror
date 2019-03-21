@@ -25,6 +25,7 @@
 // Copyright (C) 2016 Kenji Uno <ku@digitaldolphins.jp>
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -46,7 +47,6 @@
 #include "goo/PNGWriter.h"
 #include "goo/TiffWriter.h"
 #include "goo/ImgWriter.h"
-#include "goo/GooList.h"
 
 //------------------------------------------------------------------------
 // SplashBitmap
@@ -54,7 +54,7 @@
 
 SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
 			   SplashColorMode modeA, bool alphaA,
-			   bool topDown, GooList *separationListA) {
+			   bool topDown, std::vector<GfxSeparationColorSpace*> *separationListA) {
   width = widthA;
   height = heightA;
   mode = modeA;
@@ -124,10 +124,10 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
   } else {
     alpha = nullptr;
   }
-  separationList = new GooList();
+  separationList = new std::vector<GfxSeparationColorSpace*>();
   if (separationListA != nullptr)
-    for (int i = 0; i < separationListA->getLength(); i++)
-      separationList->push_back(((GfxSeparationColorSpace *) separationListA->get(i))->copy());
+    for (std::size_t i = 0; i < separationListA->size(); i++)
+      separationList->push_back((GfxSeparationColorSpace*)( (*separationListA)[i])->copy());
 }
 
 SplashBitmap *SplashBitmap::copy(SplashBitmap *src) {
@@ -159,7 +159,10 @@ SplashBitmap::~SplashBitmap() {
     }
   }
   gfree(alpha);
-  deleteGooList<GfxSeparationColorSpace>(separationList);
+  for (auto entry : *separationList) {
+    delete entry;
+  }
+  delete separationList;
 }
 
 

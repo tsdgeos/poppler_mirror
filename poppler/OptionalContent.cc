@@ -8,6 +8,7 @@
 // Copyright 2008, 2010, 2011, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2008 Mark Kaplan <mkaplan@finjan.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // Released under the GPL (version 2, or later, at your option)
 //
@@ -17,7 +18,6 @@
 
 #include "goo/gmem.h"
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "Error.h"
 #include "OptionalContent.h"
 
@@ -432,32 +432,34 @@ OCDisplayNode::OCDisplayNode(OptionalContentGroup *ocgA) {
 
 void OCDisplayNode::addChild(OCDisplayNode *child) {
   if (!children) {
-    children = new GooList();
+    children = new std::vector<OCDisplayNode*>();
   }
   children->push_back(child);
 }
 
-void OCDisplayNode::addChildren(GooList *childrenA) {
+void OCDisplayNode::addChildren(std::vector<OCDisplayNode*> *childrenA) {
   if (!children) {
-    children = new GooList();
+    children = new std::vector<OCDisplayNode*>();
   }
   children->reserve(children->size() + childrenA->size());
   children->insert(children->end(), childrenA->begin(), childrenA->end());
   delete childrenA;
 }
 
-GooList *OCDisplayNode::takeChildren() {
-  GooList *childrenA;
+std::vector<OCDisplayNode*> *OCDisplayNode::takeChildren() {
+  std::vector<OCDisplayNode*> *childrenA = children;
 
-  childrenA = children;
   children = nullptr;
   return childrenA;
 }
 
 OCDisplayNode::~OCDisplayNode() {
-  gfree(name);
+  delete name;
   if (children) {
-    deleteGooList<OCDisplayNode>(children);
+    for (auto entry : *children) {
+      delete entry;
+    }
+    delete children;
   }
 }
 
@@ -465,9 +467,9 @@ int OCDisplayNode::getNumChildren() const {
   if (!children) {
     return 0;
   }
-  return children->getLength();
+  return children->size();
 }
 
 OCDisplayNode *OCDisplayNode::getChild(int idx) const {
-  return (OCDisplayNode *)children->get(idx);
+  return (*children)[idx];
 }

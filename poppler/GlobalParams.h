@@ -27,6 +27,7 @@
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -44,9 +45,9 @@
 #include <unordered_map>
 #include <string>
 #include <mutex>
+#include <vector>
 
 class GooString;
-class GooList;
 class NameToCharCode;
 class CharCodeToUnicode;
 class CharCodeToUnicodeCache;
@@ -145,7 +146,7 @@ public:
   CMap *getCMap(const GooString *collection, GooString *cMapName, Stream *stream = nullptr);
   UnicodeMap *getTextEncoding();
 
-  GooList *getEncodingNames();
+  std::vector<GooString*> *getEncodingNames();
 
   //----- functions to set parameters
   void addFontFile(GooString *fontName, GooString *path);
@@ -195,7 +196,7 @@ private:
   std::unordered_map<std::string, std::string> unicodeMaps;
   // list of CMap dirs, indexed by collection
   std::unordered_multimap<std::string, std::string> cMapDirs;
-  GooList *toUnicodeDirs;		// list of ToUnicode CMap dirs [GooString]
+  std::vector<GooString*> *toUnicodeDirs;		// list of ToUnicode CMap dirs
   bool baseFontsInitialized;
 #ifdef _WIN32
   // windows font substitutes (for CID fonts)

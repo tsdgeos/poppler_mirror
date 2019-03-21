@@ -4,7 +4,7 @@
  * Copyright (C) 2012, Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2018, Dileep Sankhla <sankhla.dileep96@gmail.com>
  * Copyright (C) 2018, Carlos Garcia Campos <carlosgc@gnome.org>
- * Copyright (C) 2018, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2018, 2019, Oliver Sander <oliver.sander@tu-dresden.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -22,6 +22,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
+
+#ifndef _POPPLER_ANNOTATION_HELPER_H_
+#define _POPPLER_ANNOTATION_HELPER_H_
 
 #include <memory>
 
@@ -184,3 +187,5 @@ QColor convertAnnotColor( const AnnotColor *color );
 std::unique_ptr<AnnotColor> convertQColor( const QColor &color );
 
 }
+
+#endif

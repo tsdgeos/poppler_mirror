@@ -1,6 +1,7 @@
-/*
+  /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2019, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +26,6 @@
 #include "poppler-toc-private.h"
 #include "poppler-private.h"
 
-#include "GooList.h"
 #include "Outline.h"
 
 using namespace poppler;
@@ -44,8 +44,8 @@ toc* toc_private::load_from_outline(Outline *outline)
         return nullptr;
     }
 
-    const GooList *items = outline->getItems();
-    if (!items || items->getLength() < 1) {
+    const std::vector<OutlineItem*> *items = outline->getItems();
+    if (!items || items->size() < 1) {
         return nullptr;
     }
 
@@ -74,19 +74,19 @@ void toc_item_private::load(const OutlineItem *item)
     is_open = item->isOpen();
 }
 
-void toc_item_private::load_children(const GooList *items)
+void toc_item_private::load_children(const std::vector<OutlineItem*> *items)
 {
-    const int num_items = items->getLength();
+    const int num_items = items->size();
     children.resize(num_items);
     for (int i = 0; i < num_items; ++i) {
-        OutlineItem *item = (OutlineItem *)items->get(i);
+        OutlineItem *item = (*items)[i];
 
         toc_item *new_item = new toc_item();
         new_item->d->load(item);
         children[i] = new_item;
 
         item->open();
-        const GooList *item_children = item->getKids();
+        const std::vector<OutlineItem*> *item_children = item->getKids();
         if (item_children) {
             new_item->d->load_children(item_children);
         }

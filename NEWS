@@ -1,3 +1,20 @@
+Release 0.75.0:
+        core:
+         * Fix rendering of some annotations
+         * Fix crashes in broken files
+         * Small internal code improvements
+
+        cpp:
+         * Improve documentation
+         * tests: Add showing version information to poppler-dump
+
+        utils:
+         * pdfattach: new util
+         * pdftohtml: add -dataurls parameter
+         * pdftoppm: add -sep and -forcenum parameters
+         * pdftohtml: make singleHtml and stout not mutually exclusive
+         * pdfsig: fix use after free
+
 Release 0.74.0:
         core:
          * Remove support for obsolete systems. Issue #709

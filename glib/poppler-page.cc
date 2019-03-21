@@ -20,7 +20,6 @@
 #include <math.h>
 
 #ifndef __GI_SCANNER__
-#include <goo/GooList.h>
 #include <GlobalParams.h>
 #include <PDFDoc.h>
 #include <Outline.h>
@@ -636,9 +635,7 @@ poppler_page_get_selection_region (PopplerPage           *page,
   PDFRectangle poppler_selection;
   TextPage *text;
   SelectionStyle selection_style = selectionStyleGlyph;
-  GooList *list;
   GList *region = nullptr;
-  int i;
 
   poppler_selection.x1 = selection->x1;
   poppler_selection.y1 = selection->y1;
@@ -659,11 +656,11 @@ poppler_page_get_selection_region (PopplerPage           *page,
     }
 
   text = poppler_page_get_text_page (page);
-  list = text->getSelectionRegion(&poppler_selection,
+  std::vector<PDFRectangle*>* list = text->getSelectionRegion(&poppler_selection,
 				  selection_style, scale);
 
-  for (i = 0; i < list->getLength(); i++) {
-    PDFRectangle *selection_rect = (PDFRectangle *) list->get(i);
+  for (std::size_t i = 0; i < list->size(); i++) {
+    PDFRectangle *selection_rect = (*list)[i];
     PopplerRectangle *rect;
 
     rect = poppler_rectangle_new ();
@@ -726,9 +723,7 @@ poppler_page_get_selected_region (PopplerPage           *page,
   PDFRectangle poppler_selection;
   TextPage *text;
   SelectionStyle selection_style = selectionStyleGlyph;
-  GooList *list;
   cairo_region_t *region;
-  int i;
 
   poppler_selection.x1 = selection->x1;
   poppler_selection.y1 = selection->y1;
@@ -749,13 +744,13 @@ poppler_page_get_selected_region (PopplerPage           *page,
     }
 
   text = poppler_page_get_text_page (page);
-  list = text->getSelectionRegion(&poppler_selection,
+  std::vector<PDFRectangle*>* list = text->getSelectionRegion(&poppler_selection,
 				  selection_style, 1.0);
 
   region = cairo_region_create ();
 
-  for (i = 0; i < list->getLength(); i++) {
-    PDFRectangle *selection_rect = (PDFRectangle *) list->get(i);
+  for (std::size_t i = 0; i < list->size(); i++) {
+    PDFRectangle *selection_rect = (*list)[i];
     cairo_rectangle_int_t rect;
 
     rect.x = (gint) ((selection_rect->x1 * scale) + 0.5);
@@ -2166,12 +2161,11 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
   TextPage *text;
   PopplerRectangle *rect;
   PDFRectangle selection;
-  int i, j, k;
+  int i, k;
   guint offset = 0;
   guint n_rects = 0;
   gdouble x1, y1, x2, y2;
   gdouble x3, y3, x4, y4;
-  GooList **word_list;
   int n_lines;
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), FALSE);
@@ -2185,18 +2179,18 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
   selection.y2 = area->y2;
 
   text = poppler_page_get_text_page (page);
-  word_list = text->getSelectionWords (&selection, selectionStyleGlyph, &n_lines);
+  std::vector<TextWordSelection*>** word_list = text->getSelectionWords (&selection, selectionStyleGlyph, &n_lines);
   if (!word_list)
           return FALSE;
 
   n_rects += n_lines - 1;
   for (i = 0; i < n_lines; i++)
     {
-      GooList *line_words = word_list[i];
-      n_rects += line_words->getLength() - 1;
-      for (j = 0; j < line_words->getLength(); j++)
+      std::vector<TextWordSelection*> *line_words = word_list[i];
+      n_rects += line_words->size() - 1;
+      for (std::size_t j = 0; j < line_words->size(); j++)
         {
-          TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j);
+          TextWordSelection *word_sel = (*line_words)[j];
           n_rects += word_sel->getEnd() - word_sel->getBegin();
         }
     }
@@ -2206,10 +2200,10 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
 
   for (i = 0; i < n_lines; i++)
     {
-      GooList *line_words = word_list[i];
-      for (j = 0; j < line_words->getLength(); j++)
+      std::vector<TextWordSelection*> *line_words = word_list[i];
+      for (std::size_t j = 0; j < line_words->size(); j++)
         {
-          TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j);
+          TextWordSelection *word_sel = (*line_words)[j];
           TextWord *word = word_sel->getWord();
           int end = word_sel->getEnd();
 
@@ -2227,9 +2221,9 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
           rect = *rectangles + offset;
           word->getBBox (&x1, &y1, &x2, &y2);
 
-          if (j < line_words->getLength() - 1)
+          if (j < line_words->size() - 1)
             {
-              TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j + 1);
+              TextWordSelection *word_sel = (*line_words)[j + 1];
 
               word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
 	      // space is from one word to other and with the same height as
@@ -2352,12 +2346,11 @@ poppler_page_get_text_attributes_for_area (PopplerPage      *page,
 {
   TextPage *text;
   PDFRectangle selection;
-  GooList **word_list;
   int n_lines;
   PopplerTextAttributes *attrs = nullptr;
   TextWord *word, *prev_word = nullptr;
   gint word_i, prev_word_i;
-  gint i, j;
+  gint i;
   gint offset = 0;
   GList *attributes = nullptr;
 
@@ -2370,16 +2363,16 @@ poppler_page_get_text_attributes_for_area (PopplerPage      *page,
   selection.y2 = area->y2;
 
   text = poppler_page_get_text_page (page);
-  word_list = text->getSelectionWords (&selection, selectionStyleGlyph, &n_lines);
+  std::vector<TextWordSelection*>** word_list = text->getSelectionWords (&selection, selectionStyleGlyph, &n_lines);
   if (!word_list)
           return nullptr;
 
   for (i = 0; i < n_lines; i++)
     {
-      GooList *line_words = word_list[i];
-      for (j = 0; j < line_words->getLength(); j++)
+      std::vector<TextWordSelection*> *line_words = word_list[i];
+      for (std::size_t j = 0; j < line_words->size(); j++)
         {
-          TextWordSelection *word_sel = (TextWordSelection *)line_words->get(j);
+          TextWordSelection *word_sel = (*line_words)[j];
           int end = word_sel->getEnd();
 
           word = word_sel->getWord();
@@ -2398,7 +2391,7 @@ poppler_page_get_text_attributes_for_area (PopplerPage      *page,
               prev_word_i = word_i;
             }
 
-          if (j < line_words->getLength() - 1)
+          if (j < line_words->size() - 1)
             {
               attrs->end_index = offset;
               offset++;

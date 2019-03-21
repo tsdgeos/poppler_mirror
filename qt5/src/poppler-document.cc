@@ -13,6 +13,7 @@
  * Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2017 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+ * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -590,12 +591,12 @@ namespace Poppler {
         if ( !outline )
             return nullptr;
 
-        const GooList * items = outline->getItems();
-        if ( !items || items->getLength() < 1 )
+        const std::vector<::OutlineItem*> * items = outline->getItems();
+        if ( !items || items->size() < 1 )
             return nullptr;
 
         QDomDocument *toc = new QDomDocument();
-        if ( items->getLength() > 0 )
+        if ( items->size() > 0 )
            m_doc->addTocChildren( toc, toc, items );
 
         return toc;
@@ -606,7 +607,7 @@ namespace Poppler {
       QVector<OutlineItem> result;
 
       if (::Outline *outline = m_doc->doc->getOutline()) {
-	if (const GooList *items = outline->getItems()) {
+	if (const std::vector<::OutlineItem*> *items = outline->getItems()) {
 	  for (void *item : *items) {
 	    result.push_back(OutlineItem{new OutlineItemData{static_cast<::OutlineItem *>(item), m_doc}});
 	  }

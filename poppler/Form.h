@@ -18,13 +18,13 @@
 // Copyright 2018 Andre Heinecke <aheinecke@intevation.de>
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
+// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
 #ifndef FORM_H
 #define FORM_H
 
-#include "goo/GooList.h"
 #include "Object.h"
 #include "Annot.h"
 
@@ -426,10 +426,10 @@ public:
 
   void print(int indent) override;
 
-  static int tokenizeDA(const GooString* daString, GooList* daToks, const char* searchTok);
+  static int tokenizeDA(const GooString* daString, std::vector<GooString*>* daToks, const char* searchTok);
 
 protected:
-  int parseDA(GooList* daToks);
+  int parseDA(std::vector<GooString*>* daToks);
 
   GooString* content;
   bool multiline;

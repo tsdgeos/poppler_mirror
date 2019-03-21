@@ -3,15 +3,19 @@
 // This file is under the GPLv2 or later license
 //
 // Copyright (C) 2005-2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2009, 2014 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2009, 2014, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Simon Kellner <kellner@kit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
 //
 //========================================================================
+
+#ifndef PAGELABELINFO_P_H
+#define PAGELABELINFO_P_H
 
 /* http://mathworld.wolfram.com/RomanNumerals.html */
 
@@ -186,3 +190,5 @@ static void toLatin(int number, GooString *str, bool uppercase) {
   for (i = 0; i < count; i++)
     str->append(letter);
 }
+
+#endif

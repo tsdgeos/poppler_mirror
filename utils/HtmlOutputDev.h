@@ -25,6 +25,7 @@
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -35,7 +36,6 @@
 #define HTMLOUTPUTDEV_H
 
 #include <stdio.h>
-#include "goo/GooList.h"
 #include "goo/gbasename.h"
 #include "GfxFont.h"
 #include "OutputDev.h"
@@ -51,6 +51,7 @@
 
 class GfxState;
 class GooString;
+class HtmlImage;
 class PDFDoc;
 class OutlineItem;
 //------------------------------------------------------------------------
@@ -157,7 +158,7 @@ public:
   void addImage(GooString *fname, GfxState *state);
 
   // number of images on the current page
-  int  getNumImages() { return imgList->getLength(); }
+  int  getNumImages() { return imgList->size(); }
 
   void dump(FILE *f, int pageNum, const std::vector<std::string>& backgroundImages);
 
@@ -186,7 +187,7 @@ private:
   int fontsPageMarker; 
   HtmlFontAccu *fonts;
   HtmlLinks *links; 
-  GooList   *imgList;
+  std::vector<HtmlImage*> *imgList;
   
   GooString *DocName;
   int pageWidth;
@@ -321,8 +322,8 @@ private:
   GooString* getLinkDest(AnnotLink *link);
   void dumpMetaVars(FILE *);
   void doFrame(int firstPage);
-  bool newHtmlOutlineLevel(FILE *output, const GooList *outlines, int level = 1);
-  void newXmlOutlineLevel(FILE *output, const GooList *outlines);
+  bool newHtmlOutlineLevel(FILE *output, const std::vector<OutlineItem*> *outlines, int level = 1);
+  void newXmlOutlineLevel(FILE *output, const std::vector<OutlineItem*> *outlines);
   int getOutlinePageNum(OutlineItem *item);
   void drawJpegImage(GfxState *state, Stream *str);
   void drawPngImage(GfxState *state, Stream *str, int width, int height,
@@ -344,7 +345,7 @@ private:
   int maxPageHeight;
   GooString *Docname;
   GooString *docTitle;
-  GooList *glMetaVars;
+  std::vector<HtmlMetaVar*> *glMetaVars;
   Catalog *catalog;
   Page *docPage;
   std::vector<std::string> backgroundImages;

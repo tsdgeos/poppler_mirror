@@ -1,6 +1,7 @@
 /* Copyright Krzysztof Kowalczyk 2006-2007
    Copyright Hib Eris <hib@hiberis.nl> 2008, 2013
    Copyright 2018 Albert Astals Cid <aacid@kde.org> 2018
+   Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
    License: GPLv2 */
 /*
   A tool to stress-test poppler rendering and measure rendering times for
@@ -51,7 +52,6 @@
 #include "Error.h"
 #include "ErrorCodes.h"
 #include "goo/GooString.h"
-#include "goo/GooList.h"
 #include "goo/GooTimer.h"
 #include "GlobalParams.h"
 #include "splash/SplashBitmap.h"

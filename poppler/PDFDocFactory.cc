@@ -8,6 +8,7 @@
 // Copyright 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 
@@ -15,7 +16,6 @@
 
 #include "PDFDocFactory.h"
 
-#include "goo/GooList.h"
 #include "goo/GooString.h"
 #include "PDFDoc.h"
 #include "LocalPDFDocBuilder.h"
@@ -29,12 +29,12 @@
 // PDFDocFactory
 //------------------------------------------------------------------------
 
-PDFDocFactory::PDFDocFactory(GooList *pdfDocBuilders)
+PDFDocFactory::PDFDocFactory(std::vector<PDFDocBuilder*> *pdfDocBuilders)
 {
   if (pdfDocBuilders) {
     builders = pdfDocBuilders;
   } else {
-    builders = new GooList();
+    builders = new std::vector<PDFDocBuilder*>();
   }
   builders->push_back(new LocalPDFDocBuilder());
   builders->push_back(new StdinPDFDocBuilder());
@@ -46,7 +46,10 @@ PDFDocFactory::PDFDocFactory(GooList *pdfDocBuilders)
 PDFDocFactory::~PDFDocFactory()
 {
   if (builders) {
-    deleteGooList<PDFDocBuilder>(builders);
+    for (auto entry : *builders) {
+      delete entry;
+    }
+    delete builders;
   }
 }
 
@@ -54,8 +57,8 @@ PDFDoc *
 PDFDocFactory::createPDFDoc(const GooString &uri, GooString *ownerPassword,
                                     GooString *userPassword, void *guiDataA)
 {
-  for (int i = builders->getLength() - 1; i >= 0 ; i--) {
-    PDFDocBuilder *builder = (PDFDocBuilder *) builders->get(i);
+  for (int i = builders->size() - 1; i >= 0 ; i--) {
+    PDFDocBuilder *builder = (*builders)[i];
     if (builder->supports(uri)) {
       return builder->buildPDFDoc(uri, ownerPassword, userPassword, guiDataA);
     }
