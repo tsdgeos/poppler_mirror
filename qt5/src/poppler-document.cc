@@ -606,7 +606,7 @@ namespace Poppler {
       QVector<OutlineItem> result;
 
       if (::Outline *outline = m_doc->doc->getOutline()) {
-	if (const auto *items = outline->getItems()) {
+	if (const std::vector<::OutlineItem*> *items = outline->getItems()) {
 	  for (void *item : *items) {
 	    result.push_back(OutlineItem{new OutlineItemData{static_cast<::OutlineItem *>(item), m_doc}});
 	  }

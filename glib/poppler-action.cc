@@ -580,7 +580,7 @@ build_ocg_state (PopplerDocument *document,
 		 PopplerAction   *action,
 		 const LinkOCGState    *ocg_state)
 {
-	const auto *st_list = ocg_state->getStateList();
+	const std::vector<LinkOCGState::StateList*> *st_list = ocg_state->getStateList();
 	bool    preserve_rb = ocg_state->getPreserveRB();
 	GList   *layer_state = nullptr;
 

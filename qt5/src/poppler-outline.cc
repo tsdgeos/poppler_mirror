@@ -165,7 +165,7 @@ QVector<OutlineItem> OutlineItem::children() const
 
   if (::OutlineItem *data = m_data->data) {
     data->open();
-    if (const auto *kids = data->getKids()) {
+    if (const std::vector<::OutlineItem*> *kids = data->getKids()) {
       for (void *kid : *kids) {
 	result.push_back(OutlineItem{new OutlineItemData{static_cast<::OutlineItem *>(kid), m_data->documentData}});
       }

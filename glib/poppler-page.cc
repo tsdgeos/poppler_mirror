@@ -656,7 +656,7 @@ poppler_page_get_selection_region (PopplerPage           *page,
     }
 
   text = poppler_page_get_text_page (page);
-  auto list = text->getSelectionRegion(&poppler_selection,
+  std::vector<PDFRectangle*>* list = text->getSelectionRegion(&poppler_selection,
 				  selection_style, scale);
 
   for (std::size_t i = 0; i < list->size(); i++) {
@@ -744,7 +744,7 @@ poppler_page_get_selected_region (PopplerPage           *page,
     }
 
   text = poppler_page_get_text_page (page);
-  auto list = text->getSelectionRegion(&poppler_selection,
+  std::vector<PDFRectangle*>* list = text->getSelectionRegion(&poppler_selection,
 				  selection_style, 1.0);
 
   region = cairo_region_create ();
@@ -2179,14 +2179,14 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
   selection.y2 = area->y2;
 
   text = poppler_page_get_text_page (page);
-  auto word_list = text->getSelectionWords (&selection, selectionStyleGlyph, &n_lines);
+  std::vector<TextWordSelection*>** word_list = text->getSelectionWords (&selection, selectionStyleGlyph, &n_lines);
   if (!word_list)
           return FALSE;
 
   n_rects += n_lines - 1;
   for (i = 0; i < n_lines; i++)
     {
-      auto *line_words = word_list[i];
+      std::vector<TextWordSelection*> *line_words = word_list[i];
       n_rects += line_words->size() - 1;
       for (std::size_t j = 0; j < line_words->size(); j++)
         {
@@ -2200,7 +2200,7 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
 
   for (i = 0; i < n_lines; i++)
     {
-      auto *line_words = word_list[i];
+      std::vector<TextWordSelection*> *line_words = word_list[i];
       for (std::size_t j = 0; j < line_words->size(); j++)
         {
           TextWordSelection *word_sel = (*line_words)[j];
@@ -2363,13 +2363,13 @@ poppler_page_get_text_attributes_for_area (PopplerPage      *page,
   selection.y2 = area->y2;
 
   text = poppler_page_get_text_page (page);
-  auto word_list = text->getSelectionWords (&selection, selectionStyleGlyph, &n_lines);
+  std::vector<TextWordSelection*>** word_list = text->getSelectionWords (&selection, selectionStyleGlyph, &n_lines);
   if (!word_list)
           return nullptr;
 
   for (i = 0; i < n_lines; i++)
     {
-      auto *line_words = word_list[i];
+      std::vector<TextWordSelection*> *line_words = word_list[i];
       for (std::size_t j = 0; j < line_words->size(); j++)
         {
           TextWordSelection *word_sel = (*line_words)[j];

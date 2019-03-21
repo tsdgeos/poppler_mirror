@@ -398,11 +398,11 @@ namespace Poppler
 
     QSet<OptContentItem *> changedItems;
 
-    const auto *statesList = popplerLinkOCGState->getStateList();
+    const std::vector<::LinkOCGState::StateList*> *statesList = popplerLinkOCGState->getStateList();
     for (std::size_t i = 0; i < statesList->size(); ++i) {
         ::LinkOCGState::StateList *stateList = (*statesList)[i];
 
-        auto *refsList = stateList->list;
+        std::vector<Ref*> *refsList = stateList->list;
         for (std::size_t j = 0; j < refsList->size(); ++j) {
             Ref *ref = (*refsList)[j];
             OptContentItem *item = d->itemFromRef(QString::number(ref->num));
