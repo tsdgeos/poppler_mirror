@@ -34,6 +34,7 @@
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -226,10 +227,10 @@ static int compute_coverage (int coverage[], int src_length, int dest_length)
     /* I have a proof of this, which this margin is too narrow to contain */
     for (i=0; i<dest_length; i++)
     {
-        float left_side = i*scale;
-        float right_side = (i+1)*scale;
-        float right_fract = right_side - floor (right_side);
-        float left_fract = ceil (left_side) - left_side;
+        double left_side = i*scale;
+        double right_side = (i+1)*scale;
+        double right_fract = right_side - floor (right_side);
+        double left_fract = ceil (left_side) - left_side;
         int overage;
         /* find out how many source pixels will be used to fill the box */
         int count = floor (right_side) - ceil (left_side);
