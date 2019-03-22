@@ -1089,6 +1089,7 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
 {
   catalog = catalogA;
   fContentsFrame = nullptr;
+  page = nullptr;
   docTitle = new GooString(title);
   pages = nullptr;
   dumpJPEG=true;
