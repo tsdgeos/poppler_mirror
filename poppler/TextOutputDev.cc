@@ -180,7 +180,7 @@
 namespace {
 
 inline bool isAscii7 (Unicode uchar) {
-  return !(uchar & 0x80);
+  return uchar < 128;
 }
 
 }
