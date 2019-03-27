@@ -638,7 +638,7 @@ LinkNamed::~LinkNamed() {
 //------------------------------------------------------------------------
 
 LinkMovie::LinkMovie(const Object *obj) {
-  annotRef.num = -1;
+  annotRef = Ref::INVALID();
   annotTitle = nullptr;
 
   const Object &annotationObj = obj->dictLookupNF("Annotation");
@@ -651,7 +651,7 @@ LinkMovie::LinkMovie(const Object *obj) {
     annotTitle = tmp.getString()->copy();
   }
 
-  if ((annotTitle == nullptr) && (annotRef.num == -1)) {
+  if ((annotTitle == nullptr) && (annotRef == Ref::INVALID())) {
     error(errSyntaxError, -1,
 	  "Movie action is missing both the Annot and T keys");
   }
@@ -733,7 +733,7 @@ LinkRendition::LinkRendition(const Object *obj) {
   js = nullptr;
   int operationCode = -1;
 
-  screenRef.num = -1;
+  screenRef = Ref::INVALID();
 
   if (obj->isDict()) {
     Object tmp = obj->dictLookup("JS");

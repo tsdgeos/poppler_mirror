@@ -360,7 +360,7 @@ public:
   bool hasRenditionObject() const { return renditionObj.isDict(); }
   const Object* getRenditionObject() const { return &renditionObj; }
 
-  bool hasScreenAnnot() const { return screenRef.num != -1; }
+  bool hasScreenAnnot() const { return screenRef != Ref::INVALID(); }
   Ref getScreenAnnot() const { return screenRef; }
 
   RenditionOperation getOperation() const { return operation; }

@@ -1,5 +1,5 @@
 /* poppler-link.cc: qt interface to poppler
- * Copyright (C) 2006-2007, 2013, 2016-2018, Albert Astals Cid
+ * Copyright (C) 2006-2007, 2013, 2016-2019, Albert Astals Cid
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
@@ -626,7 +626,7 @@ class LinkMoviePrivate : public LinkPrivate
 	bool LinkRendition::isReferencedAnnotation( const ScreenAnnotation *annotation ) const
 	{
 		Q_D( const LinkRendition );
-		if ( d->annotationReference.num != -1 && d->annotationReference == annotation->d_ptr->pdfObjectReference() )
+		if ( d->annotationReference != Ref::INVALID() && d->annotationReference == annotation->d_ptr->pdfObjectReference() )
 		{
 			return true;
 		}
@@ -681,7 +681,7 @@ class LinkMoviePrivate : public LinkPrivate
 	bool LinkMovie::isReferencedAnnotation( const MovieAnnotation *annotation ) const
 	{
 		Q_D( const LinkMovie );
-		if ( d->annotationReference.num != -1 && d->annotationReference == annotation->d_ptr->pdfObjectReference() )
+		if ( d->annotationReference != Ref::INVALID() && d->annotationReference == annotation->d_ptr->pdfObjectReference() )
 		{
 			return true;
 		}

@@ -155,7 +155,7 @@ public:
   bool isGrouping() const;
 
   inline bool isContent() const { return (type == MCID) || isObjectRef(); }
-  inline bool isObjectRef() const { return (type == OBJR && c->ref.num != -1 && c->ref.gen != -1); }
+  inline bool isObjectRef() const { return (type == OBJR && c->ref != Ref::INVALID()); }
 
   int getMCID() const { return c->mcid; }
   Ref getObjectRef() const { return c->ref; }

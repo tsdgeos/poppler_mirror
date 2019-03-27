@@ -3773,7 +3773,7 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
     border = std::make_unique<AnnotBorderBS>(obj1.getDict());
   }
 
-  updatedAppearanceStream.num = updatedAppearanceStream.gen = -1;
+  updatedAppearanceStream = Ref::INVALID();
 }
 
 LinkAction* AnnotWidget::getAdditionalAction(AdditionalActionsType type)
@@ -4100,9 +4100,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         if (forceZapfDingbats) {
           // We are forcing ZaDb but the font does not exist
           // so create a fake one
-          Ref r; // dummy Ref, it's not used at all in this codepath
-          r.num = -1;
-          r.gen = -1;
+          Ref r = Ref::INVALID(); // dummy Ref, it's not used at all in this codepath
           Dict *d = new Dict(xref);
           fontToFree = new Gfx8BitFont(xref, "ZaDb", r, new GooString("ZapfDingbats"), fontType1, r, d);
           delete d;
@@ -4908,7 +4906,7 @@ void AnnotWidget::updateAppearanceStream()
 {
   // If this the first time updateAppearanceStream() is called on this widget,
   // destroy the AP dictionary because we are going to create a new one.
-  if (updatedAppearanceStream.num == -1) {
+  if (updatedAppearanceStream == Ref::INVALID()) {
     invalidateAppearance(); // Delete AP dictionary and all referenced streams
   }
 
@@ -4928,7 +4926,7 @@ void AnnotWidget::updateAppearanceStream()
   // If this the first time updateAppearanceStream() is called on this widget,
   // create a new AP dictionary containing the new appearance stream.
   // Otherwise, just update the stream we had created previously.
-  if (updatedAppearanceStream.num == -1) {
+  if (updatedAppearanceStream == Ref::INVALID()) {
     // Write the appearance stream
     updatedAppearanceStream = xref->addIndirectObject(&obj1);
 

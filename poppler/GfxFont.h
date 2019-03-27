@@ -218,8 +218,8 @@ public:
   // Invalidate an embedded font
   // Returns false if there is no embedded font.
   bool invalidateEmbeddedFont() {
-    if (embFontID.num >= 0) {
-      embFontID.num = -1;
+    if (embFontID != Ref::INVALID()) {
+      embFontID = Ref::INVALID();
       return true;
     }
     return false;
