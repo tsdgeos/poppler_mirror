@@ -129,6 +129,7 @@ namespace Debug {
         }
 
         QString result;
+        result.reserve(stringLength / 2);
         // i = 2 to skip the unicode marker
         for ( int i = 2; i < stringLength; i += 2 )
         {
