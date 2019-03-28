@@ -3,7 +3,7 @@
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2017, 2018 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2019 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -62,12 +62,9 @@ ustring detail::unicode_GooString_to_ustring(const GooString *str)
     const char *data = str->c_str();
     const int len = str->getLength();
 
-    int i = 0;
-    bool is_unicode = false;
-    if ((data[0] & 0xff) == 0xfe && (len > 1 && (data[1] & 0xff) == 0xff)) {
-        is_unicode = true;
-        i = 2;
-    }
+    const bool is_unicodeLE = str->hasUnicodeMarkerLE();
+    const bool is_unicode = str->hasUnicodeMarker() || is_unicodeLE;
+    int i = is_unicode ? 2 : 0;
     ustring::size_type ret_len = len - i;
     if (is_unicode) {
         ret_len >>= 1;
@@ -77,7 +74,8 @@ ustring detail::unicode_GooString_to_ustring(const GooString *str)
     ustring::value_type u;
     if (is_unicode) {
         while (i < len) {
-            u = ((data[i] & 0xff) << 8) | (data[i + 1] & 0xff);
+            u = is_unicodeLE ? ((data[i + 1] & 0xff) << 8) | (data[i] & 0xff)
+                             : ((data[i] & 0xff) << 8) | (data[i + 1] & 0xff);
             i += 2;
             ret[ret_index++] = u;
         }
