@@ -1,6 +1,6 @@
 /* poppler-private.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
- * Copyright (C) 2006, 2011, 2015, 2017, 2018 by Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2011, 2015, 2017-2019 by Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2008, 2010, 2011, 2014 by Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 by Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
@@ -108,8 +108,16 @@ namespace Debug {
         const char *cString;
         int stringLength;
         bool deleteCString;
-        if ( ( s1->getChar(0) & 0xff ) == 0xfe && ( s1->getLength() > 1 && ( s1->getChar(1) & 0xff ) == 0xff ) )
+        bool isLE = false;
+        if ( s1->hasUnicodeMarker() )
         {
+            cString = s1->c_str();
+            stringLength = s1->getLength();
+            deleteCString = false;
+        }
+        else if ( s1->hasUnicodeMarkerLE() )
+        {
+            isLE = true;
             cString = s1->c_str();
             stringLength = s1->getLength();
             deleteCString = false;
@@ -124,7 +132,8 @@ namespace Debug {
         // i = 2 to skip the unicode marker
         for ( int i = 2; i < stringLength; i += 2 )
         {
-            const Unicode u = ( ( cString[i] & 0xff ) << 8 ) | ( cString[i+1] & 0xff );
+            const Unicode u = isLE ? ( ( cString[i+1] & 0xff ) << 8 ) | ( cString[i] & 0xff )
+                                   : ( ( cString[i] & 0xff ) << 8 ) | ( cString[i+1] & 0xff );
             result += QChar( u );
         }
         if (deleteCString)

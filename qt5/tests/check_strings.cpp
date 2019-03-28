@@ -163,6 +163,8 @@ void TestStrings::check_UnicodeParsedString_data()
                                 << QStringLiteral("ša");
     QTest::newRow("test string") << newGooString("\xFE\xFF\0t\0e\0s\0t\0 \0s\0t\0r\0i\0n\0g", 24)
                                  << QStringLiteral("test string");
+    QTest::newRow("UTF16-LE") << newGooString("\xFF\xFE\xDA\x00\x6E\x00\xEE\x00\x63\x00\xF6\x00\x64\x00\xE9\x00\x51\x75", 18)
+                                 << QStringLiteral("Únîcödé畑");
 }
 
 void TestStrings::check_UnicodeParsedString()
