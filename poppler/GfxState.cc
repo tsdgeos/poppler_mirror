@@ -1772,11 +1772,9 @@ void GfxLabColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange,
 // GfxICCBasedColorSpace
 //------------------------------------------------------------------------
 
-GfxICCBasedColorSpace::GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA,
-					     Ref *iccProfileStreamA) {
+GfxICCBasedColorSpace::GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA) {
   nComps = nCompsA;
   alt = altA;
-  iccProfileStream = *iccProfileStreamA;
   rangeMin[0] = rangeMin[1] = rangeMin[2] = rangeMin[3] = 0;
   rangeMax[0] = rangeMax[1] = rangeMax[2] = rangeMax[3] = 1;
 #ifdef USE_CMS
@@ -1801,7 +1799,7 @@ GfxColorSpace *GfxICCBasedColorSpace::copy() {
   GfxICCBasedColorSpace *cs;
   int i;
 
-  cs = new GfxICCBasedColorSpace(nComps, alt->copy(), &iccProfileStream);
+  cs = new GfxICCBasedColorSpace(nComps, alt->copy());
   for (i = 0; i < 4; ++i) {
     cs->rangeMin[i] = rangeMin[i];
     cs->rangeMax[i] = rangeMax[i];
@@ -1902,7 +1900,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
       delete altA;
       return nullptr;
   }
-  cs = new GfxICCBasedColorSpace(nCompsA, altA, &iccProfileStreamA);
+  cs = new GfxICCBasedColorSpace(nCompsA, altA);
   obj2 = dict->lookup("Range");
   if (obj2.isArray() && obj2.arrayGetLength() == 2 * nCompsA) {
     Object obj4;

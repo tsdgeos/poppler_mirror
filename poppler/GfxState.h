@@ -17,7 +17,7 @@
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009-2011, 2013, 2016-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2013, 2016-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011-2014, 2016 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -534,8 +534,7 @@ private:
 class GfxICCBasedColorSpace: public GfxColorSpace {
 public:
 
-  GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA,
-			Ref *iccProfileStreamA);
+  GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA);
   ~GfxICCBasedColorSpace();
   GfxColorSpace *copy() override;
   GfxColorSpaceMode getMode() override { return csICCBased; }
@@ -572,7 +571,6 @@ private:
   GfxColorSpace *alt;		// alternate color space
   double rangeMin[4];		// min values for each component
   double rangeMax[4];		// max values for each component
-  Ref iccProfileStream;		// the ICC profile
 #ifdef USE_CMS
   int getIntent() { return (transform != nullptr) ? transform->getIntent() : 0; }
   GfxColorTransform *transform;
