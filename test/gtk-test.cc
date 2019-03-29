@@ -17,14 +17,14 @@
 #include <gtk/gtk.h>
 #include <math.h>
 
-static int page = 0;
+static int requested_page = 0;
 static gboolean cairo_output = FALSE;
 static gboolean splash_output = FALSE;
 static const char **file_arguments = nullptr;
 static const GOptionEntry options[] = {
   { "cairo", 'c', 0, G_OPTION_ARG_NONE, &cairo_output, "Cairo Output Device", nullptr},
   { "splash", 's', 0, G_OPTION_ARG_NONE, &splash_output, "Splash Output Device", nullptr},
-  { "page", 'p', 0, G_OPTION_ARG_INT, &page, "Page number", "PAGE" },
+  { "page", 'p', 0, G_OPTION_ARG_INT, &requested_page, "Page number", "PAGE" },
   { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &file_arguments, nullptr, "PDF-FILES…" },
   { }
 };
@@ -394,7 +394,7 @@ main (int argc, char *argv [])
 
     view = view_new (doc);
     view_list = g_list_prepend (view_list, view);
-    view_set_page (view, CLAMP (page, 0, poppler_document_get_n_pages (doc) - 1));
+    view_set_page (view, CLAMP (requested_page, 0, poppler_document_get_n_pages (doc) - 1));
   }
 
   gtk_main ();
