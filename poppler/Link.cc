@@ -239,8 +239,7 @@ LinkDest::LinkDest(const Array *a) {
     pageNum = obj0.getInt() + 1;
     pageIsRef = false;
   } else if (obj0.isRef()) {
-    pageRef.num = obj0.getRefNum();
-    pageRef.gen = obj0.getRefGen();
+    pageRef = obj0.getRef();
     pageIsRef = true;
   } else {
     error(errSyntaxWarning, -1, "Bad annotation destination");
@@ -859,8 +858,7 @@ LinkOCGState::LinkOCGState(const Object *obj) {
         if (stList) {
 	  Ref ocgRef = obj2.getRef();
 	  Ref *item = new Ref();
-	  item->num = ocgRef.num;
-	  item->gen = ocgRef.gen;
+	  *item = ocgRef;
 	  stList->list->push_back(item);
 	} else {
 	  error(errSyntaxWarning, -1, "Invalid OCG Action State array, expected name instead of ref");

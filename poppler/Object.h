@@ -179,7 +179,7 @@ public:
   explicit Object(Stream *streamA)
     { assert(streamA); type = objStream; stream = streamA; }
   explicit Object(const Ref r)
-    { type = objRef; ref.num = r.num; ref.gen = r.gen; }
+    { type = objRef; ref = r; }
 
   template<typename T> Object(T) = delete;
 

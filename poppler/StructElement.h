@@ -279,7 +279,7 @@ private:
     };
 
     ContentData(int mcidA): mcid(mcidA) {}
-    ContentData(const Ref r) { ref.num = r.num; ref.gen = r.gen; }
+    ContentData(const Ref r) { ref = r; }
   };
 
   // Common data
