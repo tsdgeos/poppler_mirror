@@ -3944,9 +3944,9 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */,
   imgMaskData.y = 0;
   imgMaskData.maskStr = nullptr;
   imgMaskData.maskColorMap = nullptr;
-  const unsigned n = 1 << maskColorMap->getBits();
-  imgMaskData.lookup = (SplashColorPtr)gmalloc(n);
-  for (unsigned i = 0; i < n; ++i) {
+  const unsigned imgMaskDataLookupSize = 1 << maskColorMap->getBits();
+  imgMaskData.lookup = (SplashColorPtr)gmalloc(imgMaskDataLookupSize);
+  for (unsigned i = 0; i < imgMaskDataLookupSize; ++i) {
     pix = (unsigned char)i;
     maskColorMap->getGray(&pix, &gray);
     imgMaskData.lookup[i] = colToByte(gray);
