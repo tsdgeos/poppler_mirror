@@ -934,8 +934,8 @@ int AnnotAppearance::getNumStates() {
 // Test if stateObj (a Ref or a Dict) points to the specified stream
 bool AnnotAppearance::referencesStream(const Object *stateObj, Ref refToStream) {
   if (stateObj->isRef()) {
-    Ref r = stateObj->getRef();
-    if (r.num == refToStream.num && r.gen == refToStream.gen) {
+    const Ref r = stateObj->getRef();
+    if (r == refToStream) {
       return true;
     }
   } else if (stateObj->isDict()) { // Test each value
@@ -943,8 +943,8 @@ bool AnnotAppearance::referencesStream(const Object *stateObj, Ref refToStream) 
     for (int i = 0; i < size; ++i) {
       const Object &obj1 = stateObj->dictGetValNF(i);
       if (obj1.isRef()) {
-        Ref r = obj1.getRef();
-        if (r.num == refToStream.num && r.gen == refToStream.gen) {
+        const Ref r = obj1.getRef();
+        if (r == refToStream) {
           return true;
         }
       }

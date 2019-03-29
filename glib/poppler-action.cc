@@ -554,9 +554,9 @@ get_layer_for_ref (PopplerDocument *document,
 		Layer *layer = (Layer *)l->data;
 
 		if (layer->oc) {
-			Ref ocgRef = layer->oc->getRef();
+			const Ref ocgRef = layer->oc->getRef();
 
-			if (ref->num == ocgRef.num && ref->gen == ocgRef.gen) {
+			if (*ref == ocgRef) {
 				GList *rb_group = nullptr;
 
 				if (preserve_rb)

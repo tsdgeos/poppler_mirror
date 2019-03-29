@@ -669,8 +669,8 @@ public:
   // Get the resource dict of the appearance stream
   virtual Object getAppearanceResDict();
 
-  bool match(Ref *refA)
-    { return ref.num == refA->num && ref.gen == refA->gen; }
+  bool match(const Ref *refA) const
+    { return ref == *refA; }
 
   double getXMin();
   double getYMin();

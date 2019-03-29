@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -1204,8 +1204,7 @@ public:
   ~SplashOutFontFileID() {}
 
   bool matches(SplashFontFileID *id) override {
-    return ((SplashOutFontFileID *)id)->r.num == r.num &&
-           ((SplashOutFontFileID *)id)->r.gen == r.gen;
+    return ((SplashOutFontFileID *)id)->r == r;
   }
 
 private:
@@ -1234,7 +1233,7 @@ public:
   T3FontCache& operator=(const T3FontCache &) = delete;
   bool matches(const Ref *idA, double m11A, double m12A,
 		double m21A, double m22A)
-    { return fontID.num == idA->num && fontID.gen == idA->gen &&
+    { return fontID == *idA &&
 	     m11 == m11A && m12 == m12A && m21 == m21A && m22 == m22A; }
 
   Ref fontID;			// PDF font ID

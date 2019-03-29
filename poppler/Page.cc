@@ -425,8 +425,8 @@ void Page::removeAnnot(Annot *annot) {
     for (int i = 0; idx == -1 && i < annArray.arrayGetLength(); ++i) {
       const Object &tmp = annArray.arrayGetNF(i);
       if (tmp.isRef()) {
-        Ref currAnnot = tmp.getRef();
-        if (currAnnot.num == annotRef.num && currAnnot.gen == annotRef.gen) {
+        const Ref currAnnot = tmp.getRef();
+        if (currAnnot == annotRef) {
           idx = i;
         }
       }

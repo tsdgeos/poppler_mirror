@@ -828,8 +828,7 @@ FormWidget* FormField::findWidgetByRef (Ref aref)
 {
   if (terminal) {
     for(int i=0; i<numChildren; i++) {
-      if (widgets[i]->getRef().num == aref.num 
-          && widgets[i]->getRef().gen == aref.gen)
+      if (widgets[i]->getRef() == aref)
         return widgets[i];
     }
   } else {

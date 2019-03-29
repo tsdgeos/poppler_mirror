@@ -1891,8 +1891,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
 
   // check if font is already set up
   for (i = 0; i < fontIDLen; ++i) {
-    if (fontIDs[i].num == font->getID()->num &&
-	fontIDs[i].gen == font->getID()->gen) {
+    if (fontIDs[i] == *font->getID()) {
       return;
     }
   }
@@ -2368,8 +2367,7 @@ void PSOutputDev::setupEmbeddedType1CFont(GfxFont *font, Ref *id,
 
   // check if font is already embedded
   for (i = 0; i < t1FontNameLen; ++i) {
-    if (t1FontNames[i].fontFileID.num == id->num &&
-	t1FontNames[i].fontFileID.gen == id->gen) {
+    if (t1FontNames[i].fontFileID == *id) {
       psName->clear();
       psName->insert(0, t1FontNames[i].psName);
       return;
@@ -2413,8 +2411,7 @@ void PSOutputDev::setupEmbeddedOpenTypeT1CFont(GfxFont *font, Ref *id,
 
   // check if font is already embedded
   for (i = 0; i < t1FontNameLen; ++i) {
-    if (t1FontNames[i].fontFileID.num == id->num &&
-	t1FontNames[i].fontFileID.gen == id->gen) {
+    if (t1FontNames[i].fontFileID == *id) {
       psName->clear();
       psName->insert(0, t1FontNames[i].psName);
       return;
@@ -2614,8 +2611,7 @@ void PSOutputDev::setupEmbeddedCIDType0Font(GfxFont *font, Ref *id,
 
   // check if font is already embedded
   for (i = 0; i < t1FontNameLen; ++i) {
-    if (t1FontNames[i].fontFileID.num == id->num &&
-	t1FontNames[i].fontFileID.gen == id->gen) {
+    if (t1FontNames[i].fontFileID == *id) {
       psName->clear();
       psName->insert(0, t1FontNames[i].psName);
       return;
@@ -2709,8 +2705,7 @@ void PSOutputDev::setupEmbeddedOpenTypeCFFFont(GfxFont *font, Ref *id,
 
   // check if font is already embedded
   for (i = 0; i < t1FontNameLen; ++i) {
-    if (t1FontNames[i].fontFileID.num == id->num &&
-	t1FontNames[i].fontFileID.gen == id->gen) {
+    if (t1FontNames[i].fontFileID == *id) {
       psName->clear();
       psName->insert(0, t1FontNames[i].psName);
       return;
@@ -2905,7 +2900,7 @@ void PSOutputDev::setupImages(Dict *resDict) {
 	    imgID = xObjRef.getRef();
 	    int j;
 	    for (j = 0; j < imgIDLen; ++j) {
-	      if (imgIDs[j].num == imgID.num && imgIDs[j].gen == imgID.gen) {
+	      if (imgIDs[j] == imgID) {
 		break;
 	      }
 	    }
@@ -3138,7 +3133,7 @@ void PSOutputDev::setupForm(Ref id, Object *strObj) {
 
   // check if form is already defined
   for (int i = 0; i < formIDLen; ++i) {
-    if (formIDs[i].num == id.num && formIDs[i].gen == id.gen) {
+    if (formIDs[i] == id) {
       return;
     }
   }
@@ -5086,8 +5081,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s) {
   codeToGID = nullptr;
   if (font->isCIDFont()) {
     for (i = 0; i < font16EncLen; ++i) {
-      if (font->getID()->num == font16Enc[i].fontID.num &&
-	  font->getID()->gen == font16Enc[i].fontID.gen) {
+      if (*font->getID() == font16Enc[i].fontID) {
 	if (!font16Enc[i].enc) {
 	  // font substitution failed, so don't output any text
 	  return;
@@ -5100,8 +5094,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s) {
   // check for a code-to-GID map
   } else {
     for (i = 0; i < font8InfoLen; ++i) {
-      if (font->getID()->num == font8Info[i].fontID.num &&
-	  font->getID()->gen == font8Info[i].fontID.gen) {
+      if (*font->getID() == font8Info[i].fontID) {
 	codeToGID = font8Info[i].codeToGID;
 	break;
       }
