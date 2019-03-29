@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2010-2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -2438,7 +2438,7 @@ SplashPath *Splash::makeDashedPath(SplashPath *path) {
   
   if (dPath->length == 0) {
     bool allSame = true;
-    for (int i = 0; allSame && i < path->length - 1; ++i) {
+    for (i = 0; allSame && i < path->length - 1; ++i) {
       allSame = path->pts[i].x == path->pts[i + 1].x && path->pts[i].y == path->pts[i + 1].y;
     }
     if (allSame) {
