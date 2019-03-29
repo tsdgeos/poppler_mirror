@@ -437,7 +437,7 @@ poppler_structure_element_get_page (PopplerStructureElement *poppler_structure_e
   Ref ref;
   if (poppler_structure_element->elem->getPageRef (ref))
     {
-      return poppler_structure_element->document->doc->findPage(ref.num, ref.gen) - 1;
+      return poppler_structure_element->document->doc->findPage(ref) - 1;
     }
 
   return -1;

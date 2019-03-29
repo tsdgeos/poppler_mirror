@@ -274,8 +274,8 @@ dest_new_goto (PopplerDocument *document,
 
 	if (link_dest->isPageRef ()) {
 		if (document) {
-			Ref page_ref = link_dest->getPageRef ();
-			dest->page_num = document->doc->findPage (page_ref.num, page_ref.gen);
+			const Ref page_ref = link_dest->getPageRef ();
+			dest->page_num = document->doc->findPage (page_ref);
 		} else {
 			/* FIXME: We don't keep areound the page_ref for the
 			 * remote doc, so we can't look this up.  Guess that

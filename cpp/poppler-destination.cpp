@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
+ * Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -196,7 +197,7 @@ int destination::page_number() const
     if (d->page_number_unresolved) {
         d->page_number_unresolved = false;
         d->page_number =
-            d->pdf_doc->findPage(d->page_ref.num, d->page_ref.gen);
+            d->pdf_doc->findPage(d->page_ref);
     }
 
     return d->page_number;

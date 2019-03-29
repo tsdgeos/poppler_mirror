@@ -146,7 +146,7 @@ public:
 
   // Find a page, given its object ID.  Returns page number, or 0 if
   // not found.
-  int findPage(int num, int gen);
+  int findPage(const Ref pageRef);
 
   // Find a named destination.  Returns the link destination, or
   // NULL if <name> is not a destination.

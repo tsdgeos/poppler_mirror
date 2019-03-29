@@ -256,8 +256,8 @@ class LinkMoviePrivate : public LinkPrivate
 		if ( !ld->isPageRef() ) d->pageNum = ld->getPageNum();
 		else
 		{
-			Ref ref = ld->getPageRef();
-			d->pageNum = data.doc->doc->findPage( ref.num, ref.gen );
+			const Ref ref = ld->getPageRef();
+			d->pageNum = data.doc->doc->findPage( ref );
 		}
 		double left = ld->getLeft();
 		double bottom = ld->getBottom();
