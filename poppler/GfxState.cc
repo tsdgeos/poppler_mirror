@@ -2976,7 +2976,6 @@ GfxDeviceNColorSpace::~GfxDeviceNColorSpace() {
 }
 
 GfxColorSpace *GfxDeviceNColorSpace::copy() {
-  int i;
   int *mappingA = nullptr;
 
   auto sepsCSA = new std::vector<GfxSeparationColorSpace*>();
@@ -2989,7 +2988,7 @@ GfxColorSpace *GfxDeviceNColorSpace::copy() {
   }
   if (mapping != nullptr) {
     mappingA = (int *)gmalloc(sizeof(int) * nComps);
-    for (i = 0; i < nComps; i++)
+    for (int i = 0; i < nComps; i++)
       mappingA[i] = mapping[i];
   }
   return new GfxDeviceNColorSpace(nComps, names, alt->copy(), func->copy(),
