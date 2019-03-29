@@ -844,7 +844,6 @@ bool ArthurOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading,
     }
 
     // set the color
-    GfxRGB rgb;
     shading->getColorSpace()->getRGB(&color1, &rgb);
     qColor.setRgb(colToByte(rgb.r), colToByte(rgb.g), colToByte(rgb.b));
     gradient.setColorAt((ta[j] - tMin)/(tMax - tMin), qColor);
