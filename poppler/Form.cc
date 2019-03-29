@@ -615,7 +615,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
   xref = doc->getXRef();
   obj = std::move(aobj);
   Dict* dict = obj.getDict();
-  ref.num = ref.gen = 0;
+  ref = aref;
   type = ty;
   parent = parentA;
   numChildren = 0;
@@ -627,8 +627,6 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
   fullyQualifiedName = nullptr;
   quadding = quaddingLeftJustified;
   hasQuadding = false;
-
-  ref = aref;
 
   //childs
   Object obj1 = dict->lookup("Kids");
