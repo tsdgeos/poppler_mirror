@@ -1815,7 +1815,6 @@ GfxColorSpace *GfxICCBasedColorSpace::copy() {
 
 GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState *state, int recursion) {
   GfxICCBasedColorSpace *cs;
-  Ref iccProfileStreamA;
   int nCompsA;
   GfxColorSpace *altA;
   Dict *dict;
@@ -1827,15 +1826,10 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
     return nullptr;
   }
   const Object &obj1Ref = arr->getNF(1);
-  if (obj1Ref.isRef()) {
-    iccProfileStreamA = obj1Ref.getRef();
-  } else {
-    iccProfileStreamA.num = 0;
-    iccProfileStreamA.gen = 0;
-  }
+  const Ref iccProfileStreamA = obj1Ref.isRef() ? obj1Ref.getRef() : Ref::INVALID();
 #ifdef USE_CMS
   // check cache
-  if (out && iccProfileStreamA.num > 0) {
+  if (out && iccProfileStreamA != Ref::INVALID()) {
     if (auto *item = out->getIccColorSpaceCache()->lookup(iccProfileStreamA)) {
       cs = static_cast<GfxICCBasedColorSpace*>(item->copy());
       int transformIntent = cs->getIntent();
@@ -1976,7 +1970,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
     cmsCloseProfile(hp);
   }
   // put this colorSpace into cache
-  if (out && iccProfileStreamA.num > 0) {
+  if (out && iccProfileStreamA != Ref::INVALID()) {
     out->getIccColorSpaceCache()->put(iccProfileStreamA, static_cast<GfxICCBasedColorSpace*>(cs->copy()));
   }
 #endif

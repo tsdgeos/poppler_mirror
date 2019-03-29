@@ -97,7 +97,7 @@ class AnnotationPrivate : public QSharedData
         AnnotPath * toAnnotPath(const QLinkedList<QPointF> &l) const;
 
         /* Scan page for annotations, parentId=0 searches for root annotations, subtypes empty means all subtypes */
-        static QList<Annotation*> findAnnotations(::Page *pdfPage, DocumentData *doc, const QSet<Annotation::SubType> &subtypes, int parentId = 0);
+        static QList<Annotation*> findAnnotations(::Page *pdfPage, DocumentData *doc, const QSet<Annotation::SubType> &subtypes, int parentId = -1);
 
         /* Add given annotation to given page */
         static void addAnnotationToPage(::Page *pdfPage, DocumentData *doc, const Annotation * ann);

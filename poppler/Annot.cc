@@ -1997,8 +1997,7 @@ void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict) {
   if (irtObj.isRef()) {
     inReplyTo = irtObj.getRef();
   } else {
-    inReplyTo.num = 0;
-    inReplyTo.gen = 0;
+    inReplyTo = Ref::INVALID();
   }
 
   obj1 = dict->lookup("Subj");

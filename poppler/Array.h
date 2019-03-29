@@ -68,6 +68,7 @@ public:
 
   // Accessors.
   Object get(int i, int recursion = 0) const;
+  // Same as above but if the returned object is a fetched Ref returns such Ref in returnRef, otherwise returnRef is Ref::INVALID()
   Object get(int i, Ref *returnRef, int recursion = 0) const;
   const Object &getNF(int i) const;
   bool getString(int i, GooString *string) const;

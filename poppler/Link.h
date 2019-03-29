@@ -310,13 +310,13 @@ public:
   LinkMovie(const Object *obj);
   ~LinkMovie();
 
-  bool isOk() const override { return annotRef.num >= 0 || annotTitle != nullptr; }
+  bool isOk() const override { return hasAnnotRef() || hasAnnotTitle(); }
   LinkActionKind getKind() const override { return actionMovie; }
 
   // a movie action stores either an indirect reference to a movie annotation
   // or the movie annotation title
 
-  bool hasAnnotRef() const { return annotRef.num >= 0; }
+  bool hasAnnotRef() const { return annotRef != Ref::INVALID(); }
   bool hasAnnotTitle() const { return annotTitle != nullptr; }
   const Ref *getAnnotRef() const { return &annotRef; }
   const GooString *getAnnotTitle() const { return annotTitle; }

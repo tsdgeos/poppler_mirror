@@ -173,11 +173,11 @@ Object Dict::lookup(const char *key, Ref *returnRef, int recursion) const {
     if (entry->second.getType() == objRef) {
       *returnRef = entry->second.getRef();
     } else {
-      *returnRef = { 0, 0 };
+      *returnRef = Ref::INVALID();
     }
     return entry->second.fetch(xref, recursion);
   }
-  *returnRef = { 0, 0 };
+  *returnRef = Ref::INVALID();
   return Object(objNull);
 }
 

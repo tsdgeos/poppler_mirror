@@ -821,6 +821,7 @@ public:
   double getOpacity() const { return opacity; }
   // getRC
   const GooString *getDate() const { return date.get(); }
+  bool isInReplyTo() const { return inReplyTo != Ref::INVALID(); }
   int getInReplyToID() const { return inReplyTo.num; }
   const GooString *getSubject() const { return subject.get(); }
   AnnotMarkupReplyType getReplyTo() const { return replyTo; }
