@@ -1297,13 +1297,13 @@ void StructElement::parseAttributes(Dict *attributes, bool keepExisting)
       for (int i = 0; i < attributes->getLength(); i++) {
         const char *key = attributes->getKey(i);
         if (strcmp(key, "O") != 0) {
-          Attribute::Type type = Attribute::getTypeForName(key, this);
+          Attribute::Type t = Attribute::getTypeForName(key, this);
 
           // Check if the attribute is already defined.
           if (keepExisting) {
             bool exists = false;
             for (unsigned j = 0; j < getNumAttributes(); j++) {
-              if (getAttribute(j)->getType() == type) {
+              if (getAttribute(j)->getType() == t) {
                 exists = true;
                 break;
               }
@@ -1312,10 +1312,10 @@ void StructElement::parseAttributes(Dict *attributes, bool keepExisting)
               continue;
           }
 
-          if (type != Attribute::Unknown) {
+          if (t != Attribute::Unknown) {
             Object value = attributes->getVal(i);
             bool typeCheckOk = true;
-            Attribute *attribute = new Attribute(type, &value);
+            Attribute *attribute = new Attribute(t, &value);
 
             if (attribute->isOk() && (typeCheckOk = attribute->checkType(this))) {
               appendAttribute(attribute);
