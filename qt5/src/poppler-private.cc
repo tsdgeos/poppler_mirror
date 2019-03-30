@@ -105,41 +105,18 @@ namespace Debug {
         if ( !s1 || s1->getLength() == 0 )
             return QString();
 
-        const char *cString;
-        int stringLength;
-        bool deleteCString;
-        bool isLE = false;
-        if ( s1->hasUnicodeMarker() )
+        if ( s1->hasUnicodeMarker() || s1->hasUnicodeMarkerLE() )
         {
-            cString = s1->c_str();
-            stringLength = s1->getLength();
-            deleteCString = false;
-        }
-        else if ( s1->hasUnicodeMarkerLE() )
-        {
-            isLE = true;
-            cString = s1->c_str();
-            stringLength = s1->getLength();
-            deleteCString = false;
+            return QString::fromUtf16(reinterpret_cast<const ushort *>(s1->c_str()), s1->getLength() / 2);
         }
         else
         {
-            cString = pdfDocEncodingToUTF16(s1, &stringLength);
-            deleteCString = true;
-        }
-
-        QString result;
-        result.reserve(stringLength / 2);
-        // i = 2 to skip the unicode marker
-        for ( int i = 2; i < stringLength; i += 2 )
-        {
-            const Unicode u = isLE ? ( ( cString[i+1] & 0xff ) << 8 ) | ( cString[i] & 0xff )
-                                   : ( ( cString[i] & 0xff ) << 8 ) | ( cString[i+1] & 0xff );
-            result += QChar( u );
-        }
-        if (deleteCString)
+            int stringLength;
+            const char *cString = pdfDocEncodingToUTF16(s1, &stringLength);
+            auto result = QString::fromUtf16(reinterpret_cast<const ushort *>(cString), stringLength / 2);
             delete[] cString;
-        return result;
+            return result;
+        }
     }
 
     GooString *QStringToUnicodeGooString(const QString &s) {
