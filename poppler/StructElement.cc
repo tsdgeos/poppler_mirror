@@ -1002,7 +1002,7 @@ const TextSpanArray& StructElement::getTextSpansInternal(MarkedContentOutputDev&
 
   Ref ref;
   if (getPageRef(ref)) {
-    startPage = endPage = treeRoot->getDoc()->findPage(ref.num, ref.gen);
+    startPage = endPage = treeRoot->getDoc()->findPage(ref);
   }
 
   if (!(startPage && endPage)) {

@@ -274,8 +274,8 @@ dest_new_goto (PopplerDocument *document,
 
 	if (link_dest->isPageRef ()) {
 		if (document) {
-			Ref page_ref = link_dest->getPageRef ();
-			dest->page_num = document->doc->findPage (page_ref.num, page_ref.gen);
+			const Ref page_ref = link_dest->getPageRef ();
+			dest->page_num = document->doc->findPage (page_ref);
 		} else {
 			/* FIXME: We don't keep areound the page_ref for the
 			 * remote doc, so we can't look this up.  Guess that
@@ -554,9 +554,9 @@ get_layer_for_ref (PopplerDocument *document,
 		Layer *layer = (Layer *)l->data;
 
 		if (layer->oc) {
-			Ref ocgRef = layer->oc->getRef();
+			const Ref ocgRef = layer->oc->getRef();
 
-			if (ref->num == ocgRef.num && ref->gen == ocgRef.gen) {
+			if (*ref == ocgRef) {
 				GList *rb_group = nullptr;
 
 				if (preserve_rb)

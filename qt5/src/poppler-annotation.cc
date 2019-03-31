@@ -8,7 +8,7 @@
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
  * Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
- * Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
+ * Copyright (C) 2018, 2019 Tobias Deiminger <haxtibal@posteo.de>
  * Copyright (C) 2018 Carlos Garcia Campos <carlosgc@gnome.org>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -2094,15 +2094,18 @@ QFont TextAnnotation::textFont() const
     if ( !d->pdfAnnot )
         return d->textFont;
 
-    QFont font;
+    double fontSize { AnnotFreeText::undefinedFontPtSize };
     if ( d->pdfAnnot->getType() == Annot::typeFreeText )
     {
-        if ( std::unique_ptr<DefaultAppearance> da{ d->getDefaultAppearanceFromNative() } )
+        std::unique_ptr<DefaultAppearance> da{ d->getDefaultAppearanceFromNative() };
+        if ( da && da->getFontPtSize() > 0 )
         {
-            font.setPointSize( da->getFontPtSize() );
+            fontSize = da->getFontPtSize();
         }
     }
 
+    QFont font;
+    font.setPointSizeF( fontSize );
     return font;
 }
 

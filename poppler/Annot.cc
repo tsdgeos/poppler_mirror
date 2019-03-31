@@ -40,7 +40,7 @@
 // Copyright 2018 Andre Heinecke <aheinecke@intevation.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
-// Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
+// Copyright (C) 2018, 2019 Tobias Deiminger <haxtibal@posteo.de>
 // Copyright (C) 2018, 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
 //
@@ -934,8 +934,8 @@ int AnnotAppearance::getNumStates() {
 // Test if stateObj (a Ref or a Dict) points to the specified stream
 bool AnnotAppearance::referencesStream(const Object *stateObj, Ref refToStream) {
   if (stateObj->isRef()) {
-    Ref r = stateObj->getRef();
-    if (r.num == refToStream.num && r.gen == refToStream.gen) {
+    const Ref r = stateObj->getRef();
+    if (r == refToStream) {
       return true;
     }
   } else if (stateObj->isDict()) { // Test each value
@@ -943,8 +943,8 @@ bool AnnotAppearance::referencesStream(const Object *stateObj, Ref refToStream) 
     for (int i = 0; i < size; ++i) {
       const Object &obj1 = stateObj->dictGetValNF(i);
       if (obj1.isRef()) {
-        Ref r = obj1.getRef();
-        if (r.num == refToStream.num && r.gen == refToStream.gen) {
+        const Ref r = obj1.getRef();
+        if (r == refToStream) {
           return true;
         }
       }
@@ -1229,9 +1229,9 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   // Note: This value is overwritten by Annots ctor
   const Object &pObj = dict->lookupNF("P");
   if (pObj.isRef()) {
-    Ref ref = pObj.getRef();
+    const Ref ref = pObj.getRef();
 
-    page = doc->getCatalog()->findPage (ref.num, ref.gen);
+    page = doc->getCatalog()->findPage (ref);
   } else {
     page = 0;
   }
@@ -1927,9 +1927,11 @@ AnnotPopup::~AnnotPopup() {
 }
 
 void AnnotPopup::initialize(PDFDoc *docA, Dict *dict) {
-  parent = dict->lookupNF("Parent").copy();
-  if (!parent.isRef()) {
-    parent.setToNull();
+  const Object &parentObj = dict->lookupNF("Parent");
+  if (parentObj.isRef()) {
+    parentRef = parentObj.getRef();
+  } else {
+    parentRef = Ref::INVALID();
   }
 
   Object obj1 = dict->lookup("Open");
@@ -1941,7 +1943,7 @@ void AnnotPopup::initialize(PDFDoc *docA, Dict *dict) {
 }
 
 void AnnotPopup::setParent(Annot *parentA) {
-  const Ref parentRef = parentA->getRef();
+  parentRef = parentA->getRef();
   update ("Parent", Object(parentRef));
 }
 
@@ -2620,6 +2622,8 @@ void AnnotLink::draw(Gfx *gfx, bool printing) {
 //------------------------------------------------------------------------
 // AnnotFreeText
 //------------------------------------------------------------------------
+const double AnnotFreeText::undefinedFontPtSize = 10.;
+
 AnnotFreeText::AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da) :
     AnnotMarkup(docA, rect) {
   type = typeFreeText;
@@ -2647,8 +2651,7 @@ void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict) {
     appearanceString.reset(obj1.getString()->copy());
   } else {
     appearanceString = std::make_unique<GooString>();
-    error(errSyntaxError, -1, "Bad appearance for annotation");
-    ok = false;
+    error(errSyntaxWarning, -1, "Bad appearance for annotation");
   }
 
   obj1 = dict->lookup("Q");
@@ -2843,7 +2846,7 @@ void AnnotFreeText::generateFreeTextAppearance()
   if (!da.getFontName().isName())
     da.setFontName(Object(objName, "AnnotDrawFont"));
   if (da.getFontPtSize() <= 0)
-    da.setFontPtSize(10);
+    da.setFontPtSize(undefinedFontPtSize);
   if (!da.getFontColor())
     da.setFontColor(std::make_unique<AnnotColor>(0, 0, 0));
   if (!contents)
@@ -3770,7 +3773,7 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
     border = std::make_unique<AnnotBorderBS>(obj1.getDict());
   }
 
-  updatedAppearanceStream.num = updatedAppearanceStream.gen = -1;
+  updatedAppearanceStream = Ref::INVALID();
 }
 
 LinkAction* AnnotWidget::getAdditionalAction(AdditionalActionsType type)
@@ -4097,9 +4100,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         if (forceZapfDingbats) {
           // We are forcing ZaDb but the font does not exist
           // so create a fake one
-          Ref r; // dummy Ref, it's not used at all in this codepath
-          r.num = -1;
-          r.gen = -1;
+          Ref r = Ref::INVALID(); // dummy Ref, it's not used at all in this codepath
           Dict *d = new Dict(xref);
           fontToFree = new Gfx8BitFont(xref, "ZaDb", r, new GooString("ZapfDingbats"), fontType1, r, d);
           delete d;
@@ -4905,7 +4906,7 @@ void AnnotWidget::updateAppearanceStream()
 {
   // If this the first time updateAppearanceStream() is called on this widget,
   // destroy the AP dictionary because we are going to create a new one.
-  if (updatedAppearanceStream.num == -1) {
+  if (updatedAppearanceStream == Ref::INVALID()) {
     invalidateAppearance(); // Delete AP dictionary and all referenced streams
   }
 
@@ -4925,7 +4926,7 @@ void AnnotWidget::updateAppearanceStream()
   // If this the first time updateAppearanceStream() is called on this widget,
   // create a new AP dictionary containing the new appearance stream.
   // Otherwise, just update the stream we had created previously.
-  if (updatedAppearanceStream.num == -1) {
+  if (updatedAppearanceStream == Ref::INVALID()) {
     // Write the appearance stream
     updatedAppearanceStream = xref->addIndirectObject(&obj1);
 

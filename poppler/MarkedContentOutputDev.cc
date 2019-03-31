@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2013 Igalia S.L.
-// Copyright 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018, 2019 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -109,8 +109,7 @@ bool MarkedContentOutputDev::needFontChange(const GfxFont* font) const
     return true;
 
   // Two non-null valid fonts are the same if they point to the same Ref
-  if (currentFont->getID()->num == font->getID()->num &&
-      currentFont->getID()->gen == font->getID()->gen)
+  if (*currentFont->getID() == *font->getID())
     return false;
 
   return true;

@@ -7,6 +7,7 @@
 // Copyright 2010, 2012 Hib Eris <hib@hiberis.nl>
 // Copyright 2015 Jason Crain <jason@aquaticape.us>
 // Copyright 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2019 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
 
@@ -24,7 +25,7 @@ Linearization::Linearization (BaseStream *str)
 
   str->reset();
   parser = new Parser(nullptr,
-      new Lexer(nullptr, str->makeSubStream(str->getStart(), false, 0, Object(objNull))),
+      str->makeSubStream(str->getStart(), false, 0, Object(objNull)),
       false);
   Object obj1 = parser->getObj();
   Object obj2 = parser->getObj();

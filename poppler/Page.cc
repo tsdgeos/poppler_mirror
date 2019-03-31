@@ -401,7 +401,7 @@ void Page::addAnnot(Annot *annot) {
   // so add to the list only Popup annots without a
   // markup annotation associated.
   if (annot->getType() != Annot::typePopup ||
-      static_cast<AnnotPopup*>(annot)->getParentNF()->isNull()) {
+      !static_cast<AnnotPopup*>(annot)->hasParent()) {
     annots->appendAnnot(annot);
   }
   annot->setPage(num, true);
@@ -425,8 +425,8 @@ void Page::removeAnnot(Annot *annot) {
     for (int i = 0; idx == -1 && i < annArray.arrayGetLength(); ++i) {
       const Object &tmp = annArray.arrayGetNF(i);
       if (tmp.isRef()) {
-        Ref currAnnot = tmp.getRef();
-        if (currAnnot.num == annotRef.num && currAnnot.gen == annotRef.gen) {
+        const Ref currAnnot = tmp.getRef();
+        if (currAnnot == annotRef) {
           idx = i;
         }
       }

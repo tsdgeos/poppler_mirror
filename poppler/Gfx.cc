@@ -39,8 +39,9 @@
 // Copyright (C) 2012 Lu Wang <coolwanglu@gmail.com>
 // Copyright (C) 2014 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
-// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Denis Onishchenko <denis.onischenko@gmail.com>
+// Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -709,7 +710,7 @@ void Gfx::display(Object *obj, bool topLevel) {
     error(errSyntaxError, -1, "Weird page contents");
     return;
   }
-  parser = new Parser(xref, new Lexer(xref, obj), false);
+  parser = new Parser(xref, obj, false);
   go(topLevel);
   delete parser;
   parser = nullptr;
@@ -2809,7 +2810,7 @@ void Gfx::doAxialShFill(GfxAxialShading *shading) {
 
     // use the average of the colors of the two sides of the region
     for (k = 0; k < nComps; ++k) {
-      color0.c[k] = (color0.c[k] + color1.c[k]) / 2;
+      color0.c[k] = safeAverage(color0.c[k], color1.c[k]);
     }
 
     // compute the coordinates of the point on the t axis; then
@@ -3114,7 +3115,7 @@ void Gfx::doRadialShFill(GfxRadialShading *shading) {
 
     // use the average of the colors at the two circles
     for (k = 0; k < nComps; ++k) {
-      colorA.c[k] = (colorA.c[k] + colorB.c[k]) / 2;
+      colorA.c[k] = safeAverage(colorA.c[k], colorB.c[k]);
     }
     state->setFillColor(&colorA);
     if (out->useFillColorStop())
@@ -3357,9 +3358,9 @@ void Gfx::gouraudFillTriangle(double x0, double y0, GfxColor *color0,
     x20 = 0.5 * (x2 + x0);
     y20 = 0.5 * (y2 + y0);
     for (i = 0; i < nComps; ++i) {
-      color01.c[i] = (color0->c[i] + color1->c[i]) / 2;
-      color12.c[i] = (color1->c[i] + color2->c[i]) / 2;
-      color20.c[i] = (color2->c[i] + color0->c[i]) / 2;
+      color01.c[i] = safeAverage(color0->c[i], color1->c[i]);
+      color12.c[i] = safeAverage(color1->c[i], color2->c[i]);
+      color20.c[i] = safeAverage(color2->c[i], color0->c[i]);
     }
     gouraudFillTriangle(x0, y0, color0, x01, y01, &color01,
 			x20, y20, &color20, nComps, depth + 1, path);
@@ -3584,22 +3585,22 @@ void Gfx::fillPatch(const GfxPatch *patch, int colorComps, int patchColorComps, 
     for (i = 0; i < patchColorComps; ++i) {
       patch00.color[0][0].c[i] = patch->color[0][0].c[i];
       patch00.color[0][1].c[i] = (patch->color[0][0].c[i] +
-				  patch->color[0][1].c[i]) / 2;
+				  patch->color[0][1].c[i]) / 2.;
       patch01.color[0][0].c[i] = patch00.color[0][1].c[i];
       patch01.color[0][1].c[i] = patch->color[0][1].c[i];
       patch01.color[1][1].c[i] = (patch->color[0][1].c[i] +
-				  patch->color[1][1].c[i]) / 2;
+				  patch->color[1][1].c[i]) / 2.;
       patch11.color[0][1].c[i] = patch01.color[1][1].c[i];
       patch11.color[1][1].c[i] = patch->color[1][1].c[i];
       patch11.color[1][0].c[i] = (patch->color[1][1].c[i] +
-				  patch->color[1][0].c[i]) / 2;
+				  patch->color[1][0].c[i]) / 2.;
       patch10.color[1][1].c[i] = patch11.color[1][0].c[i];
       patch10.color[1][0].c[i] = patch->color[1][0].c[i];
       patch10.color[0][0].c[i] = (patch->color[1][0].c[i] +
-				  patch->color[0][0].c[i]) / 2;
+				  patch->color[0][0].c[i]) / 2.;
       patch00.color[1][0].c[i] = patch10.color[0][0].c[i];
       patch00.color[1][1].c[i] = (patch00.color[1][0].c[i] +
-				  patch01.color[1][1].c[i]) / 2;
+				  patch01.color[1][1].c[i]) / 2.;
       patch01.color[1][0].c[i] = patch00.color[1][1].c[i];
       patch11.color[0][0].c[i] = patch00.color[1][1].c[i];
       patch10.color[0][1].c[i] = patch00.color[1][1].c[i];

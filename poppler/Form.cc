@@ -23,7 +23,7 @@
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright 2018 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright 2018, 2019 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
@@ -615,7 +615,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
   xref = doc->getXRef();
   obj = std::move(aobj);
   Dict* dict = obj.getDict();
-  ref.num = ref.gen = 0;
+  ref = aref;
   type = ty;
   parent = parentA;
   numChildren = 0;
@@ -627,8 +627,6 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
   fullyQualifiedName = nullptr;
   quadding = quaddingLeftJustified;
   hasQuadding = false;
-
-  ref = aref;
 
   //childs
   Object obj1 = dict->lookup("Kids");
@@ -830,8 +828,7 @@ FormWidget* FormField::findWidgetByRef (Ref aref)
 {
   if (terminal) {
     for(int i=0; i<numChildren; i++) {
-      if (widgets[i]->getRef().num == aref.num 
-          && widgets[i]->getRef().gen == aref.gen)
+      if (widgets[i]->getRef() == aref)
         return widgets[i];
     }
   } else {
@@ -995,7 +992,10 @@ FormFieldButton::FormFieldButton(PDFDoc *docA, Object &&aobj, const Ref ref, For
     } 
   }
 
-  if (btype != formButtonPush) {
+  bool isChildRadiobutton = btype == formButtonRadio && terminal && parent && parent->getType() == formButton;
+  // Ignore "V" for child radiobuttons, so FormFieldButton::getState() does not use it and instead uses the
+  // "V" of the parent, which is the real value indicating the active field in the radio group. Issue #159
+  if (btype != formButtonPush && !isChildRadiobutton) {
     // Even though V is inheritable we are interested in the value of this
     // field, if not present it's probably because it's a button in a set.
     appearanceState = dict->lookup("V");

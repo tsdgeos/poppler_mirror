@@ -44,21 +44,12 @@ build_clang_libcpp:
     - ninja
     - ctest --output-on-failure
 
-build_gcc_49:
+build_ubuntu_16_04:
   stage: build
-  image: ubuntu:trusty
+  image: ubuntu:xenial
   before_script:
     - apt-get update
-    - apt-get install --yes software-properties-common
-    - add-apt-repository --yes ppa:ubuntu-toolchain-r/test
-    - add-apt-repository --yes ppa:george-edison55/cmake-3.x
-    - add-apt-repository --yes ppa:ricotz/testing
-    - add-apt-repository --yes ppa:aacid/openjp2trusty
-    - apt-get update
-    - apt-get install --yes build-essential cmake ninja-build gcc-4.9 g++-4.9 libjpeg-dev libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev
-    - update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 20
-    - update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 20
-    - update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.9 20
+    - apt-get install --yes --no-install-recommends build-essential cmake ninja-build libjpeg-dev libopenjp2-7-dev qtbase5-dev gobject-introspection libglib2.0-dev libgtk-3-dev libgirepository1.0-dev libnss3-dev ca-certificates
   script:
     - mkdir -p build && cd build
     - cmake -G Ninja ..

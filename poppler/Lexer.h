@@ -17,6 +17,7 @@
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2019 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -90,6 +91,9 @@ public:
   // that no value was cached
   static const int LOOK_VALUE_NOT_CACHED = -3;
   int lookCharLastValueCached;
+
+  XRef *getXRef() const { return xref; }
+  bool hasXRef() const { return xref != nullptr; }
 
 private:
 

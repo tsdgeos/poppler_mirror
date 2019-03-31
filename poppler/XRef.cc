@@ -157,7 +157,7 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion) {
   // parse the header: object numbers and offsets
   objStr.streamReset();
   str = new EmbedStream(objStr.getStream(), Object(objNull), true, first);
-  parser = new Parser(xref, new Lexer(xref, str), false);
+  parser = new Parser(xref, str, false);
   for (i = 0; i < nObjects; ++i) {
     obj1 = parser->getObj();
     Object obj2 = parser->getObj();
@@ -196,7 +196,7 @@ ObjectStream::ObjectStream(XRef *xref, int objStrNumA, int recursion) {
       str = new EmbedStream(objStr.getStream(), Object(objNull), true,
 			    offsets[i+1] - offsets[i]);
     }
-    parser = new Parser(xref, new Lexer(xref, str), false);
+    parser = new Parser(xref, str, false);
     objs[i] = parser->getObj();
     while (str->getChar() != EOF) ;
     delete parser;
@@ -459,8 +459,7 @@ bool XRef::readXRef(Goffset *pos, std::vector<Goffset> *followedXRefStm, std::ve
 
   // start up a parser, parse one token
   parser = new Parser(nullptr,
-	     new Lexer(nullptr,
-	       str->makeSubStream(start + *pos, false, 0, Object(objNull))),
+	     str->makeSubStream(start + *pos, false, 0, Object(objNull)),
 	     true);
   obj = parser->getObj(true);
 
@@ -866,8 +865,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict) {
       // got trailer dictionary
       if (!strncmp(p, "trailer", 7)) {
         parser = new Parser(nullptr,
-		 new Lexer(nullptr,
-		   str->makeSubStream(pos + 7, false, 0, Object(objNull))),
+		 str->makeSubStream(pos + 7, false, 0, Object(objNull)),
 		 false);
         Object newTrailerDict = parser->getObj();
         if (newTrailerDict.isDict()) {
@@ -1078,7 +1076,6 @@ Object XRef::fetch(const Ref ref, int recursion)
 
 Object XRef::fetch(int num, int gen, int recursion) {
   XRefEntry *e;
-  Parser *parser;
   Object obj1, obj2, obj3;
 
   xrefLocker();
@@ -1099,13 +1096,12 @@ Object XRef::fetch(int num, int gen, int recursion) {
     if (e->gen != gen || e->offset < 0) {
       goto err;
     }
-    parser = new Parser(this,
-	       new Lexer(this,
-		 str->makeSubStream(start + e->offset, false, 0, Object(objNull))),
-	       true);
-    obj1 = parser->getObj(recursion);
-    obj2 = parser->getObj(recursion);
-    obj3 = parser->getObj(recursion);
+    Parser parser{this,
+	       str->makeSubStream(start + e->offset, false, 0, Object(objNull)),
+	       true};
+    obj1 = parser.getObj(recursion);
+    obj2 = parser.getObj(recursion);
+    obj3 = parser.getObj(recursion);
     if (!obj1.isInt() || obj1.getInt() != num ||
 	!obj2.isInt() || obj2.getInt() != gen ||
 	!obj3.isCmd("obj")) {
@@ -1124,17 +1120,14 @@ Object XRef::fetch(int num, int gen, int recursion) {
 	  if (longNumber <= INT_MAX && longNumber >= INT_MIN && *end_ptr == '\0') {
 	    int number = longNumber;
 	    error(errSyntaxWarning, -1, "Cmd was not obj but {0:s}, assuming the creator meant obj {1:d}", cmd, number);
-	    delete parser;
 	    return Object(number);
 	  }
 	}
       }
-      delete parser;
       goto err;
     }
-    Object obj = parser->getObj(false, (encrypted && !e->getFlag(XRefEntry::Unencrypted)) ? fileKey : nullptr,
+    Object obj = parser.getObj(false, (encrypted && !e->getFlag(XRefEntry::Unencrypted)) ? fileKey : nullptr,
 		   encAlgorithm, keyLength, num, gen, recursion);
-    delete parser;
     return obj;
   }
 
@@ -1486,8 +1479,8 @@ bool XRef::parseEntry(Goffset offset, XRefEntry *entry)
   if (unlikely(entry == nullptr))
     return false;
 
-  Parser parser(nullptr, new Lexer(nullptr,
-     str->makeSubStream(offset, false, 20, Object(objNull))), true);
+  Parser parser(nullptr,
+     str->makeSubStream(offset, false, 20, Object(objNull)), true);
 
   Object obj1, obj2, obj3;
   if (((obj1 = parser.getObj(), obj1.isInt()) || obj1.isInt64()) &&

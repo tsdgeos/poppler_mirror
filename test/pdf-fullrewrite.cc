@@ -247,9 +247,9 @@ static bool compareObjects(const Object *objA, const Object *objB)
       if (objB->getType() != objRef) {
         return false;
       } else {
-        Ref refA = objA->getRef();
-        Ref refB = objB->getRef();
-        return (refA.num == refB.num) && (refA.gen == refB.gen);
+        const Ref refA = objA->getRef();
+        const Ref refB = objB->getRef();
+        return refA == refB;
       }
     }
     default:

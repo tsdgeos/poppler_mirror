@@ -24,6 +24,7 @@
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2019 Christophe Fergeau <cfergeau@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -172,6 +173,7 @@ public:
   bool endsWith(const char *suffix) const;
 
   bool hasUnicodeMarker() const { return size() >= 2 && (*this)[0] == char(0xfe) && (*this)[1] == char(0xff); }
+  bool hasUnicodeMarkerLE() const { return size() >= 2 && (*this)[0] == char(0xff) && (*this)[1] == char(0xfe); }
   bool hasJustUnicodeMarker() const { return size() == 2 && hasUnicodeMarker(); }
 
   void prependUnicodeMarker();

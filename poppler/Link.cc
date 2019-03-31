@@ -239,8 +239,7 @@ LinkDest::LinkDest(const Array *a) {
     pageNum = obj0.getInt() + 1;
     pageIsRef = false;
   } else if (obj0.isRef()) {
-    pageRef.num = obj0.getRefNum();
-    pageRef.gen = obj0.getRefGen();
+    pageRef = obj0.getRef();
     pageIsRef = true;
   } else {
     error(errSyntaxWarning, -1, "Bad annotation destination");
@@ -638,7 +637,7 @@ LinkNamed::~LinkNamed() {
 //------------------------------------------------------------------------
 
 LinkMovie::LinkMovie(const Object *obj) {
-  annotRef.num = -1;
+  annotRef = Ref::INVALID();
   annotTitle = nullptr;
 
   const Object &annotationObj = obj->dictLookupNF("Annotation");
@@ -651,7 +650,7 @@ LinkMovie::LinkMovie(const Object *obj) {
     annotTitle = tmp.getString()->copy();
   }
 
-  if ((annotTitle == nullptr) && (annotRef.num == -1)) {
+  if ((annotTitle == nullptr) && (annotRef == Ref::INVALID())) {
     error(errSyntaxError, -1,
 	  "Movie action is missing both the Annot and T keys");
   }
@@ -733,7 +732,7 @@ LinkRendition::LinkRendition(const Object *obj) {
   js = nullptr;
   int operationCode = -1;
 
-  screenRef.num = -1;
+  screenRef = Ref::INVALID();
 
   if (obj->isDict()) {
     Object tmp = obj->dictLookup("JS");
@@ -859,8 +858,7 @@ LinkOCGState::LinkOCGState(const Object *obj) {
         if (stList) {
 	  Ref ocgRef = obj2.getRef();
 	  Ref *item = new Ref();
-	  item->num = ocgRef.num;
-	  item->gen = ocgRef.gen;
+	  *item = ocgRef;
 	  stList->list->push_back(item);
 	} else {
 	  error(errSyntaxWarning, -1, "Invalid OCG Action State array, expected name instead of ref");

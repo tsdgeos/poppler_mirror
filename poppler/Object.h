@@ -82,10 +82,16 @@ class Stream;
 struct Ref {
   int num;			// object number
   int gen;			// generation number
+
+  static constexpr Ref INVALID() { return {-1, -1}; };
 };
 
 inline bool operator== (const Ref lhs, const Ref rhs) noexcept {
   return lhs.num == rhs.num && lhs.gen == rhs.gen;
+}
+
+inline bool operator!= (const Ref lhs, const Ref rhs) noexcept {
+  return lhs.num != rhs.num || lhs.gen != rhs.gen;
 }
 
 inline bool operator< (const Ref lhs, const Ref rhs) noexcept {
@@ -173,7 +179,7 @@ public:
   explicit Object(Stream *streamA)
     { assert(streamA); type = objStream; stream = streamA; }
   explicit Object(const Ref r)
-    { type = objRef; ref.num = r.num; ref.gen = r.gen; }
+    { type = objRef; ref = r; }
 
   template<typename T> Object(T) = delete;
 

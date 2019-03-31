@@ -844,6 +844,10 @@ char *_poppler_goo_string_to_utf8(const GooString *s)
     result = g_convert (s->c_str () + 2,
 			s->getLength () - 2,
 			"UTF-8", "UTF-16BE", nullptr, nullptr, nullptr);
+  } else if (s->hasUnicodeMarkerLE()) {
+    result = g_convert (s->c_str () + 2,
+			s->getLength () - 2,
+			"UTF-8", "UTF-16LE", nullptr, nullptr, nullptr);
   } else {
     int len;
     gunichar *ucs4_temp;

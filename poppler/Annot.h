@@ -28,7 +28,7 @@
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
-// Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
+// Copyright (C) 2018, 2019 Tobias Deiminger <haxtibal@posteo.de>
 // Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
@@ -669,8 +669,8 @@ public:
   // Get the resource dict of the appearance stream
   virtual Object getAppearanceResDict();
 
-  bool match(Ref *refA)
-    { return ref.num == refA->num && ref.gen == refA->gen; }
+  bool match(const Ref *refA) const
+    { return ref == *refA; }
 
   double getXMin();
   double getYMin();
@@ -788,7 +788,7 @@ public:
   AnnotPopup(PDFDoc *docA, Object &&dictObject, const Object *obj);
   ~AnnotPopup();
 
-  Object *getParentNF() { return &parent; }
+  bool hasParent() const { return parentRef != Ref::INVALID(); }
   void setParent(Annot *parentA);
   bool getOpen() const { return open; }
   void setOpen(bool openA);
@@ -796,7 +796,7 @@ public:
 protected:
   void initialize(PDFDoc *docA, Dict *dict);
 
-  Object parent; // Parent
+  Ref parentRef; // Parent
   bool open;   // Open
 };
 
@@ -1004,6 +1004,8 @@ public:
     intentFreeTextCallout,    // FreeTextCallout
     intentFreeTextTypeWriter  // FreeTextTypeWriter
   };
+
+  static const double undefinedFontPtSize;
 
   AnnotFreeText(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da);
   AnnotFreeText(PDFDoc *docA, Object &&dictObject, const Object *obj);

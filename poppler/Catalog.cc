@@ -326,12 +326,12 @@ bool Catalog::cachePageTree(int page)
   return false;
 }
 
-int Catalog::findPage(int num, int gen) {
+int Catalog::findPage(const Ref pageRef) {
   int i;
 
   for (i = 0; i < getNumPages(); ++i) {
     Ref *ref = getPageRef(i+1);
-    if (ref != nullptr && ref->num == num && ref->gen == gen)
+    if (ref != nullptr && *ref == pageRef)
       return i + 1;
   }
   return 0;

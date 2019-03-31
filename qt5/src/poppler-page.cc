@@ -1,7 +1,7 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -299,8 +299,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
 
       const QString title = ( lm->hasAnnotTitle() ? UnicodeParsedString( lm->getAnnotTitle() ) : QString() );
 
-      Ref reference;
-      reference.num = reference.gen = -1;
+      Ref reference = Ref::INVALID();
       if ( lm->hasAnnotRef() )
         reference = *lm->getAnnotRef();
 
@@ -329,8 +328,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
     {
       ::LinkRendition *lrn = (::LinkRendition *)a;
 
-      Ref reference;
-      reference.num = reference.gen = -1;
+      Ref reference = Ref::INVALID();
       if ( lrn->hasScreenAnnot() )
         reference = lrn->getScreenAnnot();
 

@@ -11,6 +11,7 @@
 // Copyright 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright 2016 Jeffrey Morlan <jmmorlan@sonic.net>
 // Copyright 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
+// Copyright 2019 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
 
@@ -202,7 +203,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
 
   MemStream *memStream = new MemStream (&buf[0], 0, bufLength, Object(objNull));
 
-  parser = new Parser(xref, new Lexer(xref, memStream), true);
+  parser = new Parser(xref, memStream, true);
 
   int num, gen;
   Object obj;

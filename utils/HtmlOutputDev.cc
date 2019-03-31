@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2013, 2016-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Kjartan Maraas <kmaraas@gnome.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Haruyuki Kawabe <Haruyuki.Kawabe@unisys.co.jp>
@@ -42,7 +42,7 @@
 // Copyright (C) 2017 Caolán McNamara <caolanm@redhat.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Thibaut Brard <thibaut.brard@gmail.com>
-// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -1089,6 +1089,7 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
 {
   catalog = catalogA;
   fContentsFrame = nullptr;
+  page = nullptr;
   docTitle = new GooString(title);
   pages = nullptr;
   dumpJPEG=true;
@@ -1567,8 +1568,8 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 	      
 	  if (dest){ 
 	      if (dest->isPageRef()){
-		  Ref pageref=dest->getPageRef();
-		  page=catalog->findPage(pageref.num,pageref.gen);
+		  const Ref pageref=dest->getPageRef();
+		  page=catalog->findPage(pageref);
 	      }
 	      else {
 		  page=dest->getPageNum();
@@ -1874,8 +1875,8 @@ int HtmlOutputDev::getOutlinePageNum(OutlineItem *item)
         return pagenum;
 
     if (linkdest->isPageRef()) {
-        Ref pageref = linkdest->getPageRef();
-        pagenum = catalog->findPage(pageref.num, pageref.gen);
+        const Ref pageref = linkdest->getPageRef();
+        pagenum = catalog->findPage(pageref);
     } else {
         pagenum = linkdest->getPageNum();
     }

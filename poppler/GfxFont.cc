@@ -601,7 +601,7 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, PSOutputDev *ps) {
   }
 
   //----- embedded font
-  if (embFontID.num >= 0) {
+  if (embFontID != Ref::INVALID()) {
     embed = true;
     Object refObj(embFontID);
     Object embFontObj = refObj.fetch(xref);
@@ -823,7 +823,7 @@ char *GfxFont::readEmbFontFile(XRef *xref, int *len) {
   Object obj2 = obj1.fetch(xref);
   if (!obj2.isStream()) {
     error(errSyntaxError, -1, "Embedded font file is not a stream");
-    embFontID.num = -1;
+    embFontID = Ref::INVALID();
     *len = 0;
     return nullptr;
   }
@@ -1027,7 +1027,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
 
   // for non-embedded fonts, don't trust the ascent/descent/bbox
   // values from the font descriptor
-  if (builtinFont && embFontID.num < 0) {
+  if (builtinFont && embFontID == Ref::INVALID()) {
     ascent = 0.001 * builtinFont->ascent;
     descent = 0.001 * builtinFont->descent;
     fontBBox[0] = 0.001 * builtinFont->bbox[0];
@@ -1123,7 +1123,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
   ffT1 = nullptr;
   ffT1C = nullptr;
   buf = nullptr;
-  if (type == fontType1 && embFontID.num >= 0) {
+  if (type == fontType1 && embFontID != Ref::INVALID()) {
     if ((buf = readEmbFontFile(xref, &len))) {
       if ((ffT1 = FoFiType1::make(buf, len))) {
 	if (ffT1->getName()) {
@@ -1139,7 +1139,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
       }
       gfree(buf);
     }
-  } else if (type == fontType1C && embFontID.num >= 0) {
+  } else if (type == fontType1C && embFontID != Ref::INVALID()) {
     if ((buf = readEmbFontFile(xref, &len))) {
       if ((ffT1C = FoFiType1C::make(buf, len))) {
 	if (ffT1C->getName()) {
@@ -1159,7 +1159,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
 
   // get default base encoding
   if (!baseEnc) {
-    if (builtinFont && embFontID.num < 0) {
+    if (builtinFont && embFontID == Ref::INVALID()) {
       baseEnc = builtinFont->defaultBaseEnc;
       hasEncoding = true;
     } else if (type == fontTrueType) {
@@ -1197,7 +1197,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
   // T1C->T1 conversion (since the 'seac' operator depends on having
   // the accents in the encoding), so we fill in any gaps from
   // StandardEncoding
-  if (type == fontType1C && embFontID.num >= 0 && baseEncFromFontFile) {
+  if (type == fontType1C && embFontID != Ref::INVALID() && baseEncFromFontFile) {
     for (i = 0; i < 256; ++i) {
       if (!enc[i] && standardEncoding[i]) {
 	enc[i] = (char *)standardEncoding[i];
