@@ -7,6 +7,7 @@
 // Copyright 2010, 2012 Hib Eris <hib@hiberis.nl>
 // Copyright 2015 Jason Crain <jason@aquaticape.us>
 // Copyright 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2019 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
 

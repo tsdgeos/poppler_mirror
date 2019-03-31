@@ -11,6 +11,7 @@
 // Copyright 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright 2016 Jeffrey Morlan <jmmorlan@sonic.net>
 // Copyright 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
+// Copyright 2019 Adam Reichold <adam.reichold@t-online.de>
 //
 //========================================================================
 

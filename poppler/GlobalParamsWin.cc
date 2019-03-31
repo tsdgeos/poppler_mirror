@@ -6,7 +6,7 @@
    // Copyright (C) 2012 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
    // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
    // Copyright (C) 2012 Mark Brand <mabrand@mabrand.nl>
-   // Copyright (C) 2013, 2018 Adam Reichold <adamreichold@myopera.com>
+   // Copyright (C) 2013, 2018, 2019 Adam Reichold <adamreichold@myopera.com>
    // Copyright (C) 2013 Dmytro Morgun <lztoad@gmail.com>
    // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
    // Copyright (C) 2017, 2018 Albert Astals Cid <aacid@kde.org>
