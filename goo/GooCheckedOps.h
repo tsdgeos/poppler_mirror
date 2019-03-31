@@ -12,17 +12,21 @@
 #ifndef GOO_CHECKED_OPS_H
 #define GOO_CHECKED_OPS_H
 
-#include <climits>
 #include <limits>
+#include <type_traits>
 
-inline bool checkedAssign(long long lz, int *z) {
-  static_assert(LLONG_MAX > INT_MAX, "Need type larger than int to perform overflow checks.");
+template<typename T> inline bool checkedAssign(long long lz, T *z) {
+  static_assert(std::numeric_limits<long long>::max() > std::numeric_limits<T>::max(),
+    "The max of long long type must be larger to perform overflow checks.");
+  static_assert(std::numeric_limits<long long>::min() < std::numeric_limits<T>::min(),
+    "The min of long long type must be smaller to perform overflow checks.");
 
-  if (lz > INT_MAX || lz < INT_MIN) {
+  if (lz > std::numeric_limits<T>::max() ||
+    lz < std::numeric_limits<T>::min()) {
     return true;
   }
 
-  *z = static_cast<int>(lz);
+  *z = static_cast<T>(lz);
   return false;
 }
 
@@ -30,18 +34,18 @@ inline bool checkedAssign(long long lz, int *z) {
   #define __has_builtin(x) 0
 #endif
 
-inline bool checkedAdd(int x, int y, int *z) {
-#if __GNUC__ >= 5 || __has_builtin(__builtin_sadd_overflow)
-  return __builtin_sadd_overflow(x, y, z);
+template<typename T> inline bool checkedAdd(T x, T y, T *z) {
+#if __GNUC__ >= 5 || __has_builtin(__builtin_add_overflow)
+  return __builtin_add_overflow(x, y, z);
 #else
   const auto lz = static_cast<long long>(x) + static_cast<long long>(y);
   return checkedAssign(lz, z);
 #endif
 }
 
-inline bool checkedMultiply(int x, int y, int *z) {
-#if __GNUC__ >= 5 || __has_builtin(__builtin_smul_overflow)
-  return __builtin_smul_overflow(x, y, z);
+template<typename T> inline bool checkedMultiply(T x, T y, T *z) {
+#if __GNUC__ >= 5 || __has_builtin(__builtin_mul_overflow)
+  return __builtin_mul_overflow(x, y, z);
 #else
   const auto lz = static_cast<long long>(x) * static_cast<long long>(y);
   return checkedAssign(lz, z);
