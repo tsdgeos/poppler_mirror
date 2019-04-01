@@ -39,7 +39,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2018, 2019 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
@@ -180,7 +180,7 @@
 namespace {
 
 inline bool isAscii7 (Unicode uchar) {
-  return !(uchar & 0x80);
+  return uchar < 128;
 }
 
 }

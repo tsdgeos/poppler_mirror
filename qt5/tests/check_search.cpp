@@ -12,6 +12,7 @@ private slots:
     void testNextAndPrevious();
     void testWholeWordsOnly();
     void testIgnoreDiacritics();
+    void testRussianSearch(); // Issue #743
 };
 
 void TestSearch::bug7063()
@@ -227,6 +228,36 @@ void TestSearch::testIgnoreDiacritics()
     QCOMPARE( page->search(QStringLiteral("La Ciguena Volo"), left, top, right, bottom, direction, mode2), true );
     QCOMPARE( page->search(QStringLiteral("Survole Nos Tetes"), left, top, right, bottom, direction, mode2), true );
     QCOMPARE( page->search(QStringLiteral("Uber Unsere Kopfe"), left, top, right, bottom, direction, mode2), true );
+}
+
+void TestSearch::testRussianSearch()
+{
+    // Test for issue #743
+    QScopedPointer< Poppler::Document > document(Poppler::Document::load(TESTDATADIR "/unittestcases/russian.pdf"));
+    QVERIFY( document );
+
+    QScopedPointer< Poppler::Page > page(document->page(0));
+    QVERIFY( page );
+
+    const Poppler::Page::SearchDirection direction = Poppler::Page::FromTop;
+
+    const Poppler::Page::SearchFlags mode0 = Poppler::Page::NoSearchFlags;
+    const Poppler::Page::SearchFlags mode1 = Poppler::Page::IgnoreDiacritics;
+    const Poppler::Page::SearchFlags mode2 = Poppler::Page::IgnoreDiacritics | Poppler::Page::IgnoreCase;
+    const Poppler::Page::SearchFlags mode0W = mode0 | Poppler::Page::WholeWords;
+    const Poppler::Page::SearchFlags mode1W = mode1 | Poppler::Page::WholeWords;
+    const Poppler::Page::SearchFlags mode2W = mode2 | Poppler::Page::WholeWords;
+
+    double l, t, r, b; //left, top, right, bottom
+
+    // In the searched page 5, these two words do exist: простой and Простой
+    const QString str = QString::fromUtf8("простой"); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(str, l, t, r, b, direction, mode0), true );
+    QCOMPARE( page->search(str, l, t, r, b, direction, mode1), true );
+    QCOMPARE( page->search(str, l, t, r, b, direction, mode2), true );
+    QCOMPARE( page->search(str, l, t, r, b, direction, mode0W), true );
+    QCOMPARE( page->search(str, l, t, r, b, direction, mode1W), true );
+    QCOMPARE( page->search(str, l, t, r, b, direction, mode2W), true );
 }
 
 QTEST_GUILESS_MAIN(TestSearch)
