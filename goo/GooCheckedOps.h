@@ -6,6 +6,7 @@
 //
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
+// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -16,13 +17,13 @@
 #include <type_traits>
 
 template<typename T> inline bool checkedAssign(long long lz, T *z) {
-  static_assert(std::numeric_limits<long long>::max() > std::numeric_limits<T>::max(),
+  static_assert((std::numeric_limits<long long>::max)() > (std::numeric_limits<T>::max)(),
     "The max of long long type must be larger to perform overflow checks.");
-  static_assert(std::numeric_limits<long long>::min() < std::numeric_limits<T>::min(),
+  static_assert((std::numeric_limits<long long>::min)() < (std::numeric_limits<T>::min)(),
     "The min of long long type must be smaller to perform overflow checks.");
 
-  if (lz > std::numeric_limits<T>::max() ||
-    lz < std::numeric_limits<T>::min()) {
+  if (lz > (std::numeric_limits<T>::max)() ||
+    lz < (std::numeric_limits<T>::min)()) {
     return true;
   }
 
@@ -53,9 +54,9 @@ template<typename T> inline bool checkedMultiply(T x, T y, T *z) {
 }
 
 template<typename T> inline T safeAverage(T a, T b) {
-  static_assert(std::numeric_limits<long long>::max() > std::numeric_limits<T>::max(),
+  static_assert((std::numeric_limits<long long>::max)() > (std::numeric_limits<T>::max)(),
     "The max of long long type must be larger to perform overflow checks.");
-  static_assert(std::numeric_limits<long long>::min() < std::numeric_limits<T>::min(),
+  static_assert((std::numeric_limits<long long>::min)() < (std::numeric_limits<T>::min)(),
     "The min of long long type must be smaller to perform overflow checks.");
 
   return static_cast<T>((static_cast<long long>(a) + static_cast<long long>(b)) / 2);
