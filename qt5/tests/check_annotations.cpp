@@ -152,7 +152,7 @@ void TestAnnotations::checkUTF16LEAnnot()
     QCOMPARE(annots.size(), 2);
 
     auto annot = annots[1];
-    QCOMPARE(annot->contents(), QStringLiteral("Únîcödé豰"));
+    QCOMPARE(annot->contents(), QString::fromUtf8("Únîcödé豰")); //clazy:exclude=qstring-allocations
 }
 
 QTEST_GUILESS_MAIN(TestAnnotations)
