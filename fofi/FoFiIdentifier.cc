@@ -16,6 +16,7 @@
 // Copyright (C) 2013 Christoph Duelli <duelli@melosgmbh.de>
 // Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -26,6 +27,7 @@
 #include <string.h>
 #include <limits.h>
 #include "goo/gfile.h"
+#include "goo/GooCheckedOps.h"
 #include "FoFiIdentifier.h"
 
 //------------------------------------------------------------------------
@@ -614,9 +616,9 @@ static FoFiIdentifierType identifyCFF(Reader *reader, int start) {
       offset0 > offset1) {
     return fofiIdUnknown;
   }
-  pos = pos + 3 + (n + 1) * offSize1 + (int)offset0 - 1;
-  endPos = pos + 3 + (n + 1) * offSize1 + (int)offset1 - 1;
-  if (pos < 0 || endPos < 0 || pos > endPos) {
+  if (checkedAdd(pos + 3 + (n + 1) * offSize1, (int)offset0 - 1, &pos) ||
+    checkedAdd(pos + 3 + (n + 1) * offSize1, (int)offset1 - 1, &endPos) ||
+    pos < 0 || endPos < 0 || pos > endPos) {
     return fofiIdUnknown;
   }
   
