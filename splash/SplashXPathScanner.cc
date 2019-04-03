@@ -452,7 +452,10 @@ void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf,
   for (yy = 0; yy < splashAASize; ++yy) {
     xx = *x0 * splashAASize;
     if (yy >= yyMin && yy <= yyMax) {
-      const auto& line = allIntersections[splashAASize * y + yy - yMin];
+      const int intersectionIndex = splashAASize * y + yy - yMin;
+      if (unlikely(intersectionIndex < 0 || (unsigned)intersectionIndex >= allIntersections.size()))
+	break;
+      const auto& line = allIntersections[intersectionIndex];
       interIdx = 0;
       interCount = 0;
       while (interIdx < line.size() && xx < (*x1 + 1) * splashAASize) {
