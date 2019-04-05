@@ -633,19 +633,18 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
   if (obj1.isArray()) {
     // Load children
     for (int i = 0 ; i < obj1.arrayGetLength(); i++) {
-      const Object &childRef = obj1.arrayGetNF(i);
-      if (!childRef.isRef()) {
+      Ref childRef;
+      Object childObj = obj1.getArray()->get(i, &childRef);
+      if (childRef == Ref::INVALID()) {
         error (errSyntaxError, -1, "Invalid form field renference");
         continue;
       }
-      Object childObj = obj1.arrayGet(i);
       if (!childObj.isDict()) {
         error (errSyntaxError, -1, "Form field child is not a dictionary");
         continue;
       }
 
-      const Ref ref = childRef.getRef();
-      if (usedParents->find(ref.num) == usedParents->end()) {
+      if (usedParents->find(childRef.num) == usedParents->end()) {
         // Field child: it could be a form field or a widget or composed dict
         const Object &objParent = childObj.dictLookupNF("Parent");
 	Object obj3 = childObj.dictLookup("Parent");
@@ -654,7 +653,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
           // We create the field, if it's composed
           // it will create the widget as a child
           std::set<int> usedParentsAux = *usedParents;
-          usedParentsAux.insert(ref.num);
+          usedParentsAux.insert(childRef.num);
 
           if (terminal) {
             error(errSyntaxWarning, -1, "Field can't have both Widget AND Field as kids\n");
@@ -663,7 +662,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
 
           numChildren++;
           children = (FormField**)greallocn(children, numChildren, sizeof(FormField*));
-          children[numChildren - 1] = Form::createFieldFromDict(std::move(childObj), doc, ref, this, &usedParentsAux);
+          children[numChildren - 1] = Form::createFieldFromDict(std::move(childObj), doc, childRef, this, &usedParentsAux);
         } else {
 	  Object obj2 = childObj.dictLookup("Subtype");
 	  if (obj2.isName("Widget")) {
@@ -672,7 +671,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
 	      error(errSyntaxWarning, -1, "Field can't have both Widget AND Field as kids\n");
 	      continue;
 	    }
-	    _createWidget(&childObj, ref);
+	    _createWidget(&childObj, childRef);
 	  }
 	}
       }
