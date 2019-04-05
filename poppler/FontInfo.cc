@@ -144,7 +144,17 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo
 
         Object obj2 = dictObjI.fetch(xrefA);
         if (obj2.isStream()) {
-          Object resObj = obj2.streamGetDict()->lookup("Resources");
+          Ref resourcesRef;
+          const Object resObj = obj2.streamGetDict()->lookup("Resources", &resourcesRef);
+
+          if (resourcesRef != Ref::INVALID()) {
+            if (visitedObjects.find(resourcesRef.num) != visitedObjects.end()) {
+              continue;
+            }
+
+            visitedObjects.insert(resourcesRef.num);
+          }
+
           if (resObj.isDict() && resObj.getDict() != resDict) {
             scanFonts(xrefA, resObj.getDict(), fontsList);
           }
