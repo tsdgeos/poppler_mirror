@@ -5769,12 +5769,12 @@ AnnotInk::AnnotInk(PDFDoc *docA, PDFRectangle *rect) :
   annotObj.dictSet ("Subtype", Object(objName, "Ink"));
 
   // Store dummy path with one null vertex only
-  Array *inkList = new Array(doc->getXRef());
+  Array *inkListArray = new Array(doc->getXRef());
   Array *vList = new Array(doc->getXRef());
   vList->add(Object(0.));
   vList->add(Object(0.));
-  inkList->add(Object(vList));
-  annotObj.dictSet("InkList", Object(inkList));
+  inkListArray->add(Object(vList));
+  annotObj.dictSet("InkList", Object(inkListArray));
 
   initialize(docA, annotObj.getDict());
 }
