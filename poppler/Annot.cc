@@ -1229,9 +1229,9 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   // Note: This value is overwritten by Annots ctor
   const Object &pObj = dict->lookupNF("P");
   if (pObj.isRef()) {
-    const Ref ref = pObj.getRef();
+    const Ref pRef = pObj.getRef();
 
-    page = doc->getCatalog()->findPage (ref);
+    page = doc->getCatalog()->findPage (pRef);
   } else {
     page = 0;
   }
