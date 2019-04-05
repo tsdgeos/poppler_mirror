@@ -6599,15 +6599,15 @@ AnnotRichMedia::Configuration::Configuration(Dict *dict)
 
   obj1 = dict->lookup("Subtype");
   if (obj1.isName()) {
-    const char *name = obj1.getName();
+    const char *subtypeName = obj1.getName();
 
-    if (!strcmp(name, "3D")) {
+    if (!strcmp(subtypeName, "3D")) {
       type = type3D;
-    } else if (!strcmp(name, "Flash")) {
+    } else if (!strcmp(subtypeName, "Flash")) {
       type = typeFlash;
-    } else if (!strcmp(name, "Sound")) {
+    } else if (!strcmp(subtypeName, "Sound")) {
       type = typeSound;
-    } else if (!strcmp(name, "Video")) {
+    } else if (!strcmp(subtypeName, "Video")) {
       type = typeVideo;
     } else {
       // determine from first non null instance
