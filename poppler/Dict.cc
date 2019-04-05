@@ -202,6 +202,17 @@ bool Dict::lookupInt(const char *key, const char *alt_key, int *value) const
   return false;
 }
 
+Object Dict::getVal(int i, Ref *returnRef) const
+{
+    const DictEntry &entry = entries[i];
+    if (entry.second.getType() == objRef) {
+      *returnRef = entry.second.getRef();
+    } else {
+      *returnRef = Ref::INVALID();
+    }
+    return entry.second.fetch(xref);
+}
+
 bool Dict::hasKey(const char *key) const {
   return find(key) != nullptr;
 }
