@@ -115,9 +115,8 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo
         Ref fontRef = *font->getID();
 
         // add this font to the list if not already found
-        if (fonts.find(fontRef.num) == fonts.end()) {
+	if (fonts.insert(fontRef.num).second) {
 	  fontsList->push_back(new FontInfo(font, xrefA));
-          fonts.insert(fontRef.num);
         }
       }
     }
@@ -135,11 +134,9 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo
         const Object obj2 = objDict.getDict()->getVal(i, &obj2Ref);
         if (obj2Ref != Ref::INVALID()) {
           // check for an already-seen object
-          if (visitedObjects.find(obj2Ref.num) != visitedObjects.end()) {
+	  if (!visitedObjects.insert(obj2Ref.num).second) {
             continue;
-          }
-
-          visitedObjects.insert(obj2Ref.num);
+	  }
         }
 
         if (obj2.isStream()) {
@@ -147,11 +144,9 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo
           const Object resObj = obj2.streamGetDict()->lookup("Resources", &resourcesRef);
 
           if (resourcesRef != Ref::INVALID()) {
-            if (visitedObjects.find(resourcesRef.num) != visitedObjects.end()) {
+	    if (!visitedObjects.insert(resourcesRef.num).second) {
               continue;
-            }
-
-            visitedObjects.insert(resourcesRef.num);
+	    }
           }
 
           if (resObj.isDict() && resObj.getDict() != resDict) {

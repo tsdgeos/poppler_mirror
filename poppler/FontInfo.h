@@ -28,6 +28,8 @@
 
 #include "Object.h"
 
+#include <unordered_set>
+
 class GfxFont;
 class PDFDoc;
 
@@ -95,8 +97,8 @@ private:
 
   PDFDoc *doc;
   int currentPage;
-  std::set<int> fonts;
-  std::set<int> visitedObjects;
+  std::unordered_set<int> fonts;
+  std::unordered_set<int> visitedObjects;
 
   void scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo*> *fontsList);
 };
