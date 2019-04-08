@@ -25,6 +25,7 @@
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2018, 2019 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2019 Tomoyuki Kubota <himajin100000@gmail.com>
 //
 //========================================================================
 
@@ -64,8 +65,8 @@ char* pdfDocEncodingToUTF16 (const GooString* orig, int* length)
   char *result = new char[(*length)];
   const char *cstring = orig->c_str();
   //unicode marker
-  result[0] = (char)0xfe;
-  result[1] = (char)0xff;
+  result[0] = '\xfe';
+  result[1] = '\xff';
   //convert to utf16
   for(int i=2,j=0; i<(*length); i+=2,j++) {
     Unicode u = pdfDocEncoding[(unsigned int)((unsigned char)cstring[j])]&0xffff;
