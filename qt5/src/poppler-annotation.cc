@@ -1,5 +1,5 @@
 /* poppler-annotation.cc: qt interface to poppler
- * Copyright (C) 2006, 2009, 2012-2015, 2018 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2009, 2012-2015, 2018, 2019 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008, 2010 Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Guillermo A. Amaral B. <gamaral@kde.org>
  * Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -1741,7 +1741,7 @@ Annotation::RevScope Annotation::revisionScope() const
 
     const AnnotMarkup *markupann = dynamic_cast<const AnnotMarkup*>(d->pdfAnnot);
 
-    if (markupann && markupann->getInReplyToID() != 0)
+    if (markupann && markupann->isInReplyTo())
     {
         switch (markupann->getReplyTo())
         {
@@ -1764,7 +1764,7 @@ Annotation::RevType Annotation::revisionType() const
 
     const AnnotText *textann = dynamic_cast<const AnnotText*>(d->pdfAnnot);
 
-    if (textann && textann->getInReplyToID() != 0)
+    if (textann && textann->isInReplyTo())
     {
         switch (textann->getState())
         {

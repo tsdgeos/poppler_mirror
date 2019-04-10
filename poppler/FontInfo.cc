@@ -13,7 +13,7 @@
 // Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
-// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -115,9 +115,8 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo
         Ref fontRef = *font->getID();
 
         // add this font to the list if not already found
-        if (fonts.find(fontRef.num) == fonts.end()) {
+	if (fonts.insert(fontRef.num).second) {
 	  fontsList->push_back(new FontInfo(font, xrefA));
-          fonts.insert(fontRef.num);
         }
       }
     }
@@ -131,20 +130,25 @@ void FontInfoScanner::scanFonts(XRef *xrefA, Dict *resDict, std::vector<FontInfo
     Object objDict = resDict->lookup(resTypes[resType]);
     if (objDict.isDict()) {
       for (int i = 0; i < objDict.dictGetLength(); ++i) {
-        const Object &resObj = objDict.dictGetValNF(i);
-        if (resObj.isRef()) {
+        Ref obj2Ref;
+        const Object obj2 = objDict.getDict()->getVal(i, &obj2Ref);
+        if (obj2Ref != Ref::INVALID()) {
           // check for an already-seen object
-          const Ref r = resObj.getRef();
-          if (visitedObjects.find(r.num) != visitedObjects.end()) {
+	  if (!visitedObjects.insert(obj2Ref.num).second) {
             continue;
-          }
-
-          visitedObjects.insert(r.num);
+	  }
         }
 
-        Object obj2 = resObj.fetch(xrefA);
         if (obj2.isStream()) {
-          Object resObj = obj2.streamGetDict()->lookup("Resources");
+          Ref resourcesRef;
+          const Object resObj = obj2.streamGetDict()->lookup("Resources", &resourcesRef);
+
+          if (resourcesRef != Ref::INVALID()) {
+	    if (!visitedObjects.insert(resourcesRef.num).second) {
+              continue;
+	    }
+          }
+
           if (resObj.isDict() && resObj.getDict() != resDict) {
             scanFonts(xrefA, resObj.getDict(), fontsList);
           }

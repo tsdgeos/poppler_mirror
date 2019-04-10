@@ -2,7 +2,7 @@
  * Copyright (C) 2007, Pino Toscano <pino@kde.org>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
- * Copyright (C) 2012, 2014, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2012, 2014, 2018, 2019, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,7 +97,7 @@ class AnnotationPrivate : public QSharedData
         AnnotPath * toAnnotPath(const QLinkedList<QPointF> &l) const;
 
         /* Scan page for annotations, parentId=0 searches for root annotations, subtypes empty means all subtypes */
-        static QList<Annotation*> findAnnotations(::Page *pdfPage, DocumentData *doc, const QSet<Annotation::SubType> &subtypes, int parentId = 0);
+        static QList<Annotation*> findAnnotations(::Page *pdfPage, DocumentData *doc, const QSet<Annotation::SubType> &subtypes, int parentId = -1);
 
         /* Add given annotation to given page */
         static void addAnnotationToPage(::Page *pdfPage, DocumentData *doc, const Annotation * ann);

@@ -6,6 +6,7 @@
 //
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2019 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
 
@@ -95,6 +96,42 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
       duplex = duplexDuplexFlipLongEdge;
     }
   }
+
+  obj = prefDict->lookup("PickTrayByPDFSize");
+  if (obj.isBool()) {
+    pickTrayByPDFSize = obj.getBool();
+  }
+
+  obj = prefDict->lookup("NumCopies");
+  if (obj.isInt()) {
+    numCopies = obj.getInt();
+    if (numCopies < 2)
+      numCopies = 1;
+  }
+
+  obj = prefDict->lookup("PrintPageRange");
+  if (obj.isArray()) {
+    Array *range = obj.getArray();
+    int length = range->getLength();
+    int pageNumber1, pageNumber2;
+
+    if (length % 2 == 1)
+      length--;
+
+    for (int i = 0; i < length; i += 2) {
+      Object obj2 = range->get(i);
+      Object obj3 = range->get(i + 1);
+
+      if (obj2.isInt() && (pageNumber1 = obj2.getInt()) >= 1 &&
+          obj3.isInt() && (pageNumber2 = obj3.getInt()) >= 1 &&
+          pageNumber1 < pageNumber2) {
+        printPageRange.push_back(std::pair<int, int>(pageNumber1, pageNumber2));
+      } else {
+        printPageRange.clear();
+        break;
+      }
+    }
+  }
 }
 
 ViewerPreferences::~ViewerPreferences()
@@ -113,4 +150,6 @@ void ViewerPreferences::init()
   direction = directionL2R;
   printScaling = printScalingAppDefault;
   duplex = duplexNone;
+  pickTrayByPDFSize = false;
+  numCopies = 1;
 }

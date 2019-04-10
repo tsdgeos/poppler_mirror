@@ -290,7 +290,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID) {
   bool isType0, err;
 
   t = fontUnknownType;
-  embID->num = embID->gen = -1;
+  *embID = Ref::INVALID();
   err = false;
 
   Object subtype = fontDict->lookup("Subtype");
@@ -348,7 +348,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID) {
 	err = true;
       }
     }
-    if (embID->num == -1 && (obj3 = fontDesc.dictLookupNF("FontFile2").copy(), obj3.isRef())) {
+    if (*embID == Ref::INVALID() && (obj3 = fontDesc.dictLookupNF("FontFile2").copy(), obj3.isRef())) {
       *embID = obj3.getRef();
       if (isType0) {
 	expectedType = fontCIDType2;
@@ -356,7 +356,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID) {
 	err = true;
       }
     }
-    if (embID->num == -1 && (obj3 = fontDesc.dictLookupNF("FontFile3").copy(), obj3.isRef())) {
+    if (*embID == Ref::INVALID() && (obj3 = fontDesc.dictLookupNF("FontFile3").copy(), obj3.isRef())) {
       *embID = obj3.getRef();
       Object obj4 = obj3.fetch(xref);
       if (obj4.isStream()) {
@@ -406,7 +406,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID) {
   }
 
   t = fontUnknownType;
-  if (embID->num >= 0) {
+  if (*embID != Ref::INVALID()) {
     Object obj3(*embID);
     Object obj4 = obj3.fetch(xref);
     if (obj4.isStream()) {

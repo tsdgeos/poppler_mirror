@@ -5,11 +5,14 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2011 Pino Toscano <pino@kde.org>
+// Copyright 2019 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
 
 #ifndef VIEWERPREFERENCES_H
 #define VIEWERPREFERENCES_H
+
+#include <vector>
 
 class Dict;
 
@@ -54,6 +57,9 @@ public:
   Direction getDirection() const { return direction; }
   PrintScaling getPrintScaling() const { return printScaling; }
   Duplex getDuplex() const { return duplex; }
+  bool getPickTrayByPDFSize() const { return pickTrayByPDFSize; }
+  int getNumCopies() const { return numCopies; }
+  std::vector<std::pair<int, int> > getPrintPageRange() const { return printPageRange; }
 
 private:
 
@@ -69,6 +75,9 @@ private:
   Direction direction;
   PrintScaling printScaling;
   Duplex duplex;
+  bool pickTrayByPDFSize;
+  int numCopies;
+  std::vector<std::pair<int, int> > printPageRange;
 };
 
 #endif

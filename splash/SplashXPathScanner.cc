@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2008, 2010, 2014, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2014, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
 // Copyright (C) 2013, 2014 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
@@ -452,7 +452,10 @@ void SplashXPathScanner::clipAALine(SplashBitmap *aaBuf,
   for (yy = 0; yy < splashAASize; ++yy) {
     xx = *x0 * splashAASize;
     if (yy >= yyMin && yy <= yyMax) {
-      const auto& line = allIntersections[splashAASize * y + yy - yMin];
+      const int intersectionIndex = splashAASize * y + yy - yMin;
+      if (unlikely(intersectionIndex < 0 || (unsigned)intersectionIndex >= allIntersections.size()))
+	break;
+      const auto& line = allIntersections[intersectionIndex];
       interIdx = 0;
       interCount = 0;
       while (interIdx < line.size() && xx < (*x1 + 1) * splashAASize) {

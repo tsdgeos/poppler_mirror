@@ -502,7 +502,7 @@ void Catalog::addEmbeddedFile(GooFile *file, const std::string &fileName)
   embeddedFilesObj.dictSet("Names", Object(embeddedFilesNamesArray));
   namesDict->set("EmbeddedFiles", Object(embeddedFilesRef));
 
-  if (namesObjRef.num != 0) {
+  if (namesObjRef != Ref::INVALID()) {
     xref->setModifiedObject(&namesObj, namesObjRef);
   } else {
     xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });

@@ -80,13 +80,13 @@ Object Array::get(int i, int recursion) const {
 Object Array::get(int i, Ref *returnRef, int recursion) const
 {
   if (i < 0 || std::size_t(i) >= elems.size()) {
-    *returnRef = { 0, 0 };
+    *returnRef = Ref::INVALID();
     return Object(objNull);
   }
   if (elems[i].getType() == objRef) {
     *returnRef = elems[i].getRef();
   } else {
-    *returnRef = { 0, 0 };
+    *returnRef = Ref::INVALID();
   }
   return elems[i].fetch(xref, recursion);
 }

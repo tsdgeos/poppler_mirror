@@ -16,6 +16,7 @@
 // Copyright (C) 2009, 2010, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1205,10 +1206,10 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf,
 
   start = charBuf->getLength();
   if (top) {
-    charBuf->append((char)73);
-    charBuf->append((char)58);
-    charBuf->append((char)147);
-    charBuf->append((char)134);
+    charBuf->append('\x49'); //73;
+    charBuf->append('\x3A'); //58;
+    charBuf->append('\x93'); //147;
+    charBuf->append('\x86'); //134;
     nOps = 0;
     nHints = 0;
     firstOp = true;

@@ -213,7 +213,7 @@ public:
   // Get embedded font ID, i.e., a ref for the font file stream.
   // Returns false if there is no embedded font.
   bool getEmbeddedFontID(Ref *embID) const
-    { *embID = embFontID; return embFontID.num >= 0; }
+    { *embID = embFontID; return embFontID != Ref::INVALID(); }
 
   // Invalidate an embedded font
   // Returns false if there is no embedded font.

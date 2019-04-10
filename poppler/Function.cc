@@ -692,7 +692,7 @@ StitchingFunction::StitchingFunction(Object *funcObj, Dict *dict, std::set<int> 
     std::set<int> usedParentsAux = *usedParents;
     Ref ref;
     Object obj2 = obj1.getArray()->get(i, &ref);
-    if (ref.num != 0) {
+    if (ref != Ref::INVALID()) {
       if (usedParentsAux.find(ref.num) == usedParentsAux.end()) {
         usedParentsAux.insert(ref.num);
       } else {
