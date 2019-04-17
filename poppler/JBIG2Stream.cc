@@ -2596,7 +2596,10 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine,
 	  break;
 	}
       }
-      s += sOffset + ds;
+      if (checkedAdd(s, sOffset + ds, &s)) {
+	delete bitmap;
+	return nullptr;
+      }
     }
   }
 
