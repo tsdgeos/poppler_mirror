@@ -138,10 +138,12 @@ Hints::Hints(BaseStream *str, Linearization *linearization, XRef *xref, Security
     nPages = 0;
   }
 
-  memset(pageLength, 0, nPages * sizeof(unsigned int));
-  memset(pageOffset, 0, nPages * sizeof(unsigned int));
-  memset(numSharedObject, 0, nPages * sizeof(unsigned int));
-  memset(pageObjectNum, 0, nPages * sizeof(int));
+  if (nPages != 0) {
+    memset(pageLength, 0, nPages * sizeof(unsigned int));
+    memset(pageOffset, 0, nPages * sizeof(unsigned int));
+    memset(numSharedObject, 0, nPages * sizeof(unsigned int));
+    memset(pageObjectNum, 0, nPages * sizeof(int));
+  }
 
   groupLength = nullptr;
   groupOffset = nullptr;

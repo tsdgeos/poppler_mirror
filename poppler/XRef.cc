@@ -27,6 +27,7 @@
 // Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Tobias Deiminger <haxtibal@posteo.de>
+// Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1576,7 +1577,8 @@ XRefEntry *XRef::getEntry(int i, bool complainIfMissing)
       }
 
       if (!parseEntry(mainXRefEntriesOffset + 20*i, &entries[i])) {
-        error(errSyntaxError, -1, "Failed to parse XRef entry [{0:d}].", i);
+	error(errSyntaxError, -1, "Failed to parse XRef entry [{0:d}].", i);
+	return &dummyXRefEntry;
       }
     } else {
       // Read XRef tables until the entry we're looking for is found
