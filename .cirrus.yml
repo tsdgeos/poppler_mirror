@@ -2,5 +2,5 @@ freebsd_instance:
   image: freebsd-11-2-release-amd64
 
 task:
-    install_script: pkg install -y cmake ninja llvm freetype2 fontconfig pkgconf lcms2 nspr png tiff nss openjpeg cairo qt5-widgets qt5-xml qt5-qmake qt5-buildtools qt5-testlib
+    install_script: pkg install -y cmake ninja freetype2 fontconfig pkgconf lcms2 nspr png tiff nss openjpeg cairo qt5-widgets qt5-xml qt5-qmake qt5-buildtools qt5-testlib
     script: cmake . -G Ninja && ninja
