@@ -2999,7 +2999,7 @@ bool SplashOutputDev::useIccImageSrc(void *data) {
       break;
 #ifdef SPLASH_CMYK
     case splashModeCMYK8:
-      if (colorSpace->getAlt() != NULL && colorSpace->getAlt()->getMode() == csDeviceCMYK)
+      if (colorSpace->getAlt() != nullptr && colorSpace->getAlt()->getMode() == csDeviceCMYK)
         return true;
       break;
 #endif
@@ -3587,7 +3587,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 
 #ifdef SPLASH_CMYK
   setOverprintMask(colorMap->getColorSpace(), state->getFillOverprint(),
-		   state->getOverprintMode(), NULL, grayIndexed);
+		   state->getOverprintMode(), nullptr, grayIndexed);
 #else		   
   setOverprintMask(colorMap->getColorSpace(), state->getFillOverprint(),
 		   state->getOverprintMode(), nullptr);
