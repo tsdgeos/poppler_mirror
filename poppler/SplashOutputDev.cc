@@ -495,54 +495,6 @@ static inline unsigned char div255(int x) {
   return (unsigned char)((x + (x >> 8) + 0x80) >> 8);
 }
 
-#ifdef SPLASH_CMYK
-
-#include "GfxState_helpers.h"
-
-//-------------------------------------------------------------------------
-// helper for Blend functions (convert CMYK to RGB, do blend, convert back)
-//-------------------------------------------------------------------------
-
-// based in GfxState.cc
-
-static void cmykToRGB(SplashColorPtr cmyk, SplashColor rgb) {
-  double c, m, y, k, c1, m1, y1, k1, r, g, b;
-
-  c = colToDbl(byteToCol(cmyk[0]));
-  m = colToDbl(byteToCol(cmyk[1]));
-  y = colToDbl(byteToCol(cmyk[2]));
-  k = colToDbl(byteToCol(cmyk[3]));
-  c1 = 1 - c;
-  m1 = 1 - m;
-  y1 = 1 - y;
-  k1 = 1 - k;
-  cmykToRGBMatrixMultiplication(c, m, y, k, c1, m1, y1, k1, r, g, b);
-  rgb[0] = colToByte(clip01(dblToCol(r)));
-  rgb[1] = colToByte(clip01(dblToCol(g)));
-  rgb[2] = colToByte(clip01(dblToCol(b)));
-}
-
-static void rgbToCMYK(SplashColor rgb, SplashColorPtr cmyk) {
-  GfxColorComp c, m, y, k;
-
-  c = clip01(gfxColorComp1 - byteToCol(rgb[0]));
-  m = clip01(gfxColorComp1 - byteToCol(rgb[1]));
-  y = clip01(gfxColorComp1 - byteToCol(rgb[2]));
-  k = c;
-  if (m < k) {
-    k = m;
-  }
-  if (y < k) {
-    k = y;
-  }
-  cmyk[0] = colToByte(c - k);
-  cmyk[1] = colToByte(m - k);
-  cmyk[2] = colToByte(y - k);
-  cmyk[3] = colToByte(k);
-}
-
-#endif
-
 //------------------------------------------------------------------------
 // Blend functions
 //------------------------------------------------------------------------
