@@ -18,7 +18,7 @@
 // Copyright (C) 2010, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Harry Roberts <harry.roberts@midnight-labs.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
-// Copyright (C) 2010, 2015 William Bader <williambader@hotmail.com>
+// Copyright (C) 2010, 2015, 2019 William Bader <williambader@hotmail.com>
 // Copyright (C) 2011-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Anthony Wesley <awesley@smartnetworks.com.au>
 // Copyright (C) 2015, 2018 Adam Reichold <adamreichold@myopera.com>
