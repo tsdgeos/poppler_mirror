@@ -22,7 +22,7 @@
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2009-2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2014-2016 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2014-2016, 2019 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Patrick Spendrin <ps_ml@gmx.de>
 // Copyright (C) 2010 Brian Cameron <brian.cameron@oracle.com>
 // Copyright (C) 2010 Paweł Wiejacha <pawel.wiejacha@gmail.com>
@@ -2954,6 +2954,10 @@ bool SplashOutputDev::useIccImageSrc(void *data) {
       if (colorSpace->getAlt() != nullptr && colorSpace->getAlt()->getMode() == csDeviceCMYK)
         return true;
       break;
+    case splashModeDeviceN8:
+      if (colorSpace->getAlt() != nullptr && colorSpace->getAlt()->getMode() == csDeviceN)
+        return true;
+      break;
 #endif
     }
   }
@@ -3190,6 +3194,10 @@ void SplashOutputDev::iccTransform(void *data, SplashBitmap *bitmap) {
 #ifdef SPLASH_CMYK
     case splashModeCMYK8:
       imgData->colorMap->getCMYKLine(p, colorLine, bitmap->getWidth());
+      memcpy(p, colorLine, nComps * bitmap->getWidth());
+      break;
+    case splashModeDeviceN8:
+      imgData->colorMap->getDeviceNLine(p, colorLine, bitmap->getWidth());
       memcpy(p, colorLine, nComps * bitmap->getWidth());
       break;
 #endif
