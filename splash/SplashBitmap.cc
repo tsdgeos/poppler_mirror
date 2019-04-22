@@ -447,13 +447,13 @@ void SplashBitmap::getRGBLine(int yl, SplashColorPtr line) {
     y = byteToDbl(col[2]);
     k = byteToDbl(col[3]);
 #ifdef SPLASH_CMYK
-    if (separationList->getLength() > 0) {
-      for (int i = 0; i < separationList->getLength(); i++) {
+    if (separationList->size() > 0) {
+      for (std::size_t i = 0; i < separationList->size(); i++) {
         if (col[i+4] > 0) {
           GfxCMYK cmyk;
           GfxColor input;
           input.c[0] = byteToCol(col[i+4]);
-          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)separationList->get(i);
+          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)((*separationList)[i]);
           sepCS->getCMYK(&input, &cmyk);
           col[0] = colToByte(cmyk.c);
           col[1] = colToByte(cmyk.m);
@@ -493,13 +493,13 @@ void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, ConversionMode conve
     y = byteToDbl(col[2]);
     k = byteToDbl(col[3]);
 #ifdef SPLASH_CMYK
-    if (separationList->getLength() > 0) {
-      for (int i = 0; i < separationList->getLength(); i++) {
+    if (separationList->size() > 0) {
+      for (std::size_t i = 0; i < separationList->size(); i++) {
         if (col[i+4] > 0) {
           GfxCMYK cmyk;
           GfxColor input;
           input.c[0] = byteToCol(col[i+4]);
-          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)separationList->get(i);
+          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)((*separationList)[i]);
           sepCS->getCMYK(&input, &cmyk);
           col[0] = colToByte(cmyk.c);
           col[1] = colToByte(cmyk.m);
@@ -602,18 +602,18 @@ void SplashBitmap::getCMYKLine(int yl, SplashColorPtr line) {
 
   for (int x = 0; x < width; x++) {
     getPixel(x, yl, col);
-    if (separationList->getLength() > 0) {
+    if (separationList->size() > 0) {
       double c, m, y, k;
       c = byteToDbl(col[0]);
       m = byteToDbl(col[1]);
       y = byteToDbl(col[2]);
       k = byteToDbl(col[3]);
-      for (int i = 0; i < separationList->getLength(); i++) {
+      for (std::size_t i = 0; i < separationList->size(); i++) {
         if (col[i+4] > 0) {
           GfxCMYK cmyk;
           GfxColor input;
           input.c[0] = byteToCol(col[i+4]);
-          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)separationList->get(i);
+          GfxSeparationColorSpace *sepCS = (GfxSeparationColorSpace *)((*separationList)[i]);
           sepCS->getCMYK(&input, &cmyk);
           col[0] = colToByte(cmyk.c);
           col[1] = colToByte(cmyk.m);
