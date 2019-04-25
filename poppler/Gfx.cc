@@ -4007,7 +4007,10 @@ void Gfx::doShowText(const GooString *s) {
       curX += tdx;
       curY += tdy;
       state->moveTo(curX, curY);
-      out->updateCTM(state, 0, 0, 0, 0, 0, 0);
+      // Call updateCTM with the identity transformation.  That way, the CTM is unchanged,
+      // but any side effect that the method may have is triggered.  This is the case,
+      // in particular, for the Splash backend.
+      out->updateCTM(state, 1, 0, 0, 1, 0, 0);
       p += n;
       len -= n;
     }
