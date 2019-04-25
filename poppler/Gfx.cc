@@ -3982,7 +3982,7 @@ void Gfx::doShowText(const GooString *s) {
 	      charProcDrawingIt = charProcDrawing.insert(refNum).first;
 	    } else {
 	      displayCharProc = false;
-	      error(errSyntaxError, -1, "CharProc wants to draw a CharProc that is already beign drawn");
+	      error(errSyntaxError, -1, "CharProc wants to draw a CharProc that is already being drawn");
 	    }
 	  }
 	  if (displayCharProc) {
