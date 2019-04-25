@@ -1,3 +1,21 @@
+Release 0.76.0:
+        core:
+         * Fix regression on case-insensitive search. Issue #743
+         * Remove GooList, use std::vector instead
+         * Fix radiobutton reporting wrong state. Issue #159
+         * Handle UTF16-LE strings
+         * Don't error out if there's no DA in FreeText annotation
+         * cairo: Compute correct coverage values for box filter.
+         * cairo: Constrain number of cycles in rescale filter. 
+         * Read more fields from ViewerPreferences
+         * Introduce and use Ref::INVALID
+         * Fix crashes in broken files
+         * Fix mismatched free/delete
+         * Add missing include guards
+
+        utils:
+         * pdftohtml: Properly initialize HtmlOutputDev::page to avoid SIGSEGV upon error exit. Issue #742
+
 Release 0.75.0:
         core:
          * Fix rendering of some annotations
