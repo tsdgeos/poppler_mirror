@@ -412,7 +412,7 @@ QList<Annotation*> AnnotationPrivate::findAnnotations(::Page *pdfPage, DocumentD
         if (!markupann)
         {
             // Assume it's a root annotation, and skip if user didn't request it
-            if (parentID != 0)
+            if (parentID != -1)
                 continue;
         }
         else if (markupann->getInReplyToID() != parentID)
