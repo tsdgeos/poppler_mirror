@@ -45,9 +45,9 @@ set (CMAKE_CXX_EXTENSIONS OFF)
 
 # command line switches
 option(ENABLE_UNSTABLE_API_ABI_HEADERS "Install API/ABI unstable xpdf headers." OFF)
-option(BUILD_GTK_TESTS "Whether compile the GTK+ test programs." ON)
-option(BUILD_QT5_TESTS "Whether compile the Qt5 test programs." ON)
-option(BUILD_CPP_TESTS "Whether compile the CPP test programs." ON)
+option(BUILD_GTK_TESTS "Whether to compile the GTK+ test programs." ON)
+option(BUILD_QT5_TESTS "Whether to compile the Qt5 test programs." ON)
+option(BUILD_CPP_TESTS "Whether to compile the CPP test programs." ON)
 option(ENABLE_SPLASH "Build the Splash graphics backend." ON)
 option(ENABLE_UTILS "Compile poppler command line utils." ON)
 option(ENABLE_CPP "Compile poppler cpp wrapper." ON)
@@ -96,7 +96,7 @@ endif()
 if(WIN32)
   set(_default_fontconfiguration "win32")
 elseif(ANDROID)
-  # on android we don't have fontconfig and we don't want window-specific code
+  # on android we don't have fontconfig and we don't want windows-specific code
   set(_default_fontconfiguration "generic")
 else()
   set(_default_fontconfiguration "fontconfig")
