@@ -555,8 +555,8 @@ public:
   void drawLineEndSlash(double x, double y, double size, const Matrix& m);
   void drawFieldBorder(const FormField *field, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
   bool drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const GooString *appearState, XRef *xref, bool *addedDingbatsResource);
-  static double shortenLineSegmentForEnding(AnnotLineEndingStyle endingStyle, double x, double size);
-
+  static double lineEndingXShorten(AnnotLineEndingStyle endingStyle, double size);
+  static double lineEndingXExtendBBox(AnnotLineEndingStyle endingStyle, double size);
   void writeString(const GooString &str);
 
   void append(const char *text);
