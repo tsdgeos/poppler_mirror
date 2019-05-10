@@ -190,6 +190,8 @@ std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() cons
   certInfo->setCertificateDER(SECItemToGooString(cert->derCert));
   certInfo->setIsSelfSigned(CERT_CompareName(&cert->subject, &cert->issuer) == SECEqual);
 
+  SECKEY_DestroyPublicKey(pk);
+
   return certInfo;
 }
 
