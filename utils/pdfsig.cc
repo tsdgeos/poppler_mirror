@@ -257,13 +257,12 @@ int main(int argc, char *argv[])
              ranges[0], ranges[1], ranges[2], ranges[3]);
       Goffset checked_file_size;
       GooString* signature = sig_widgets.at(i)->getCheckedSignature(&checked_file_size);
-      if (signature && checked_file_size == ranges[3])
-      {
+      if (signature && checked_file_size == ranges[3]) {
         printf("  - Total document signed\n");
-        delete signature;
-      }
-      else
+      } else {
         printf("  - Not total document signed\n");
+      }
+      delete signature;
     }
     printf("  - Signature Validation: %s\n", getReadableSigState(sig_info->getSignatureValStatus()));
     gfree(time_str);
