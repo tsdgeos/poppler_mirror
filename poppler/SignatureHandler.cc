@@ -26,6 +26,13 @@
 #include <dirent.h>
 #include <Error.h>
 
+static void shutdownNss()
+{
+  if (NSS_Shutdown() != SECSuccess) {
+    fprintf(stderr, "NSS_Shutdown failed: %s\n", PR_ErrorToString(PORT_GetError(), PR_LANGUAGE_I_DEFAULT));
+  }
+}
+
 unsigned int SignatureHandler::digestLength(SECOidTag digestAlgId)
 {
   switch(digestAlgId){
@@ -232,6 +239,8 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
 
   setNssDirCalled = true;
 
+  atexit(shutdownNss);
+
   bool initSuccess = false;
   if (nssDir.getLength() > 0) {
     initSuccess = (NSS_Init(nssDir.c_str()) == SECSuccess);
@@ -305,9 +314,6 @@ SignatureHandler::~SignatureHandler()
     HASH_Destroy(hash_context);
 
   free(temp_certs);
-
-  if (NSS_Shutdown()!=SECSuccess)
-    fprintf(stderr, "Detail: %s\n", PR_ErrorToString(PORT_GetError(), PR_LANGUAGE_I_DEFAULT));
 }
 
 NSSCMSMessage *SignatureHandler::CMS_MessageCreate(SECItem * cms_item)
