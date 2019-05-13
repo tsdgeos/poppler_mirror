@@ -5851,7 +5851,7 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
 				    int xDest, int yDest, int w, int h) {
   SplashColorPtr p, sp;
   unsigned char *q;
-  int x, y, mask, srcMask;
+  int x, y, mask, srcMask, width = w, height = h;
 
   if (src->mode != bitmap->mode) {
     return splashErrModeMismatch;
@@ -5861,14 +5861,32 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
     return splashErrZeroImage;
   }
 
+  if (src->getWidth() - xSrc < width)
+    width = src->getWidth() - xSrc;
+
+  if (src->getHeight() - ySrc < height)
+    height = src->getHeight() - ySrc;
+
+  if (bitmap->getWidth() - xDest < width)
+    width = bitmap->getWidth() - xDest;
+
+  if (bitmap->getHeight() - yDest < height)
+    height = bitmap->getHeight() - yDest;
+
+  if (width < 0)
+    width = 0;
+
+  if (height < 0)
+    height = 0;
+
   switch (bitmap->mode) {
   case splashModeMono1:
-    for (y = 0; y < h; ++y) {
+    for (y = 0; y < height; ++y) {
       p = &bitmap->data[(yDest + y) * bitmap->rowSize + (xDest >> 3)];
       mask = 0x80 >> (xDest & 7);
       sp = &src->data[(ySrc + y) * src->rowSize + (xSrc >> 3)];
       srcMask = 0x80 >> (xSrc & 7);
-      for (x = 0; x < w; ++x) {
+      for (x = 0; x < width; ++x) {
 	if (*sp & srcMask) {
 	  *p |= mask;
 	} else {
@@ -5886,20 +5904,20 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
     }
     break;
   case splashModeMono8:
-    for (y = 0; y < h; ++y) {
+    for (y = 0; y < height; ++y) {
       p = &bitmap->data[(yDest + y) * bitmap->rowSize + xDest];
       sp = &src->data[(ySrc + y) * bitmap->rowSize + xSrc];
-      for (x = 0; x < w; ++x) {
+      for (x = 0; x < width; ++x) {
 	*p++ = *sp++;
       }
     }
     break;
   case splashModeRGB8:
   case splashModeBGR8:
-    for (y = 0; y < h; ++y) {
+    for (y = 0; y < height; ++y) {
       p = &bitmap->data[(yDest + y) * bitmap->rowSize + 3 * xDest];
       sp = &src->data[(ySrc + y) * src->rowSize + 3 * xSrc];
-      for (x = 0; x < w; ++x) {
+      for (x = 0; x < width; ++x) {
 	*p++ = *sp++;
 	*p++ = *sp++;
 	*p++ = *sp++;
@@ -5907,10 +5925,10 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
     }
     break;
   case splashModeXBGR8:
-    for (y = 0; y < h; ++y) {
+    for (y = 0; y < height; ++y) {
       p = &bitmap->data[(yDest + y) * bitmap->rowSize + 4 * xDest];
       sp = &src->data[(ySrc + y) * src->rowSize + 4 * xSrc];
-      for (x = 0; x < w; ++x) {
+      for (x = 0; x < width; ++x) {
 	*p++ = *sp++;
 	*p++ = *sp++;
 	*p++ = *sp++;
@@ -5921,10 +5939,10 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
     break;
 #ifdef SPLASH_CMYK
   case splashModeCMYK8:
-    for (y = 0; y < h; ++y) {
+    for (y = 0; y < height; ++y) {
       p = &bitmap->data[(yDest + y) * bitmap->rowSize + 4 * xDest];
       sp = &src->data[(ySrc + y) * src->rowSize + 4 * xSrc];
-      for (x = 0; x < w; ++x) {
+      for (x = 0; x < width; ++x) {
 	*p++ = *sp++;
 	*p++ = *sp++;
 	*p++ = *sp++;
@@ -5933,10 +5951,10 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
     }
     break;
   case splashModeDeviceN8:
-    for (y = 0; y < h; ++y) {
+    for (y = 0; y < height; ++y) {
       p = &bitmap->data[(yDest + y) * bitmap->rowSize + (SPOT_NCOMPS+4) * xDest];
       sp = &src->data[(ySrc + y) * src->rowSize + (SPOT_NCOMPS+4) * xSrc];
-      for (x = 0; x < w; ++x) {
+      for (x = 0; x < width; ++x) {
         for (int cp=0; cp < SPOT_NCOMPS+4; cp++)
           *p++ = *sp++;
       }
@@ -5946,9 +5964,9 @@ SplashError Splash::blitTransparent(SplashBitmap *src, int xSrc, int ySrc,
   }
 
   if (bitmap->alpha) {
-    for (y = 0; y < h; ++y) {
+    for (y = 0; y < height; ++y) {
       q = &bitmap->alpha[(yDest + y) * bitmap->width + xDest];
-      memset(q, 0x00, w);
+      memset(q, 0x00, width);
     }
   }
 
