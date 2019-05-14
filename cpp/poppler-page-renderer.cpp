@@ -303,7 +303,9 @@ image page_renderer::render_page(const page *p,
     pdfdoc->displayPageSlice(&splashOutputDev, pp->index + 1,
                              xres, yres, int(rotate) * 90,
                              false, true, false,
-                             x, y, w, h);
+                             x, y, w, h,
+                             nullptr, nullptr, nullptr, nullptr,
+                             true);
 
     SplashBitmap *bitmap = splashOutputDev.getBitmap();
     const int bw = bitmap->getWidth();
