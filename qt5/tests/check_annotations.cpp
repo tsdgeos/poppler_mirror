@@ -20,6 +20,7 @@ private slots:
   void checkFontSizeAndColor();
   void checkHighlightFromAndToQuads();
   void checkUTF16LEAnnot();
+  void checkNonMarkupAnnotations();
 };
 
 /* Is .5f sufficient for 16 bit color channel roundtrip trough save and load on all architectures? */
@@ -154,6 +155,23 @@ void TestAnnotations::checkUTF16LEAnnot()
     auto annot = annots[1];
     QCOMPARE(annot->contents(), QString::fromUtf8("Únîcödé豰")); //clazy:exclude=qstring-allocations
 }
+
+void TestAnnotations::checkNonMarkupAnnotations()
+{
+    std::unique_ptr<Poppler::Document> doc{
+      Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf")
+    };
+    QVERIFY(doc.get());
+
+    std::unique_ptr<Poppler::Page> page{
+      doc->page(0)
+    };
+    QVERIFY(page.get());
+
+    auto annots = page->annotations();
+    QCOMPARE(annots.size(), 17);
+}
+
 
 QTEST_GUILESS_MAIN(TestAnnotations)
 

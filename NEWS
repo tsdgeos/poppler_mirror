@@ -1,3 +1,15 @@
+Release 0.76.1:
+        core:
+         * Make the mul tables be calculated at compile time with constexpr.
+         * splash: Fix compile with SPLASH_CMYK enabled
+         * Some typo fixing in error messages
+
+        qt5:
+         * Fix regression in annotation handling
+
+        build system:
+         * Fix some typos in build system output and comments
+
 Release 0.76.0:
         core:
          * Fix regression on case-insensitive search. Issue #743

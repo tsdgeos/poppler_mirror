@@ -26,6 +26,13 @@
 #include <dirent.h>
 #include <Error.h>
 
+static void shutdownNss()
+{
+  if (NSS_Shutdown() != SECSuccess) {
+    fprintf(stderr, "NSS_Shutdown failed: %s\n", PR_ErrorToString(PORT_GetError(), PR_LANGUAGE_I_DEFAULT));
+  }
+}
+
 unsigned int SignatureHandler::digestLength(SECOidTag digestAlgId)
 {
   switch(digestAlgId){
@@ -183,6 +190,8 @@ std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() cons
   certInfo->setCertificateDER(SECItemToGooString(cert->derCert));
   certInfo->setIsSelfSigned(CERT_CompareName(&cert->subject, &cert->issuer) == SECEqual);
 
+  SECKEY_DestroyPublicKey(pk);
+
   return certInfo;
 }
 
@@ -231,6 +240,8 @@ void SignatureHandler::setNSSDir(const GooString &nssDir)
     return;
 
   setNssDirCalled = true;
+
+  atexit(shutdownNss);
 
   bool initSuccess = false;
   if (nssDir.getLength() > 0) {
@@ -305,9 +316,6 @@ SignatureHandler::~SignatureHandler()
     HASH_Destroy(hash_context);
 
   free(temp_certs);
-
-  if (NSS_Shutdown()!=SECSuccess)
-    fprintf(stderr, "Detail: %s\n", PR_ErrorToString(PORT_GetError(), PR_LANGUAGE_I_DEFAULT));
 }
 
 NSSCMSMessage *SignatureHandler::CMS_MessageCreate(SECItem * cms_item)
