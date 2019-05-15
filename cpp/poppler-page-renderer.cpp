@@ -2,6 +2,7 @@
  * Copyright (C) 2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
+ * Copyright (C) 2019, Julián Unrrein <junrrein@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
