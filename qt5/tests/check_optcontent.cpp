@@ -4,6 +4,7 @@
 #include "GlobalParams.h"
 
 #include <poppler-qt5.h>
+#include <poppler-optcontent-private.h>
 
 class TestOptionalContent: public QObject
 {
@@ -399,14 +400,17 @@ void TestOptionalContent::checkRadioButtons()
     subindex = optContent->index( 0, 0, index );
     QCOMPARE( optContent->data( subindex, Qt::DisplayRole ).toString(), QLatin1String( "English" ) );
     QCOMPARE( static_cast<Qt::CheckState>( optContent->data( subindex, Qt::CheckStateRole ).toInt() ), Qt::Unchecked );
+    QCOMPARE( static_cast<Poppler::OptContentItem *>(subindex.internalPointer())->group()->getState(), OptionalContentGroup::Off );
 
     subindex = optContent->index( 2, 0, index );
     QCOMPARE( optContent->data( subindex, Qt::DisplayRole ).toString(), QLatin1String( "Japanese" ) );
     QCOMPARE( static_cast<Qt::CheckState>( optContent->data( subindex, Qt::CheckStateRole ).toInt() ), Qt::Checked );
+    QCOMPARE( static_cast<Poppler::OptContentItem *>(subindex.internalPointer())->group()->getState(), OptionalContentGroup::On );
 
     subindex = optContent->index( 1, 0, index );
     QCOMPARE( optContent->data( subindex, Qt::DisplayRole ).toString(), QLatin1String( "French" ) );
     QCOMPARE( static_cast<Qt::CheckState>( optContent->data( subindex, Qt::CheckStateRole ).toInt() ), Qt::Unchecked );
+    QCOMPARE( static_cast<Poppler::OptContentItem *>(subindex.internalPointer())->group()->getState(), OptionalContentGroup::Off );
 
     // and turning on French should turn off Japanese
     QVERIFY( optContent->setData( subindex, QVariant( true ), Qt::CheckStateRole ) );
@@ -414,14 +418,17 @@ void TestOptionalContent::checkRadioButtons()
     subindex = optContent->index( 0, 0, index );
     QCOMPARE( optContent->data( subindex, Qt::DisplayRole ).toString(), QLatin1String( "English" ) );
     QCOMPARE( static_cast<Qt::CheckState>( optContent->data( subindex, Qt::CheckStateRole ).toInt() ), Qt::Unchecked );
+    QCOMPARE( static_cast<Poppler::OptContentItem *>(subindex.internalPointer())->group()->getState(), OptionalContentGroup::Off );
 
     subindex = optContent->index( 2, 0, index );
     QCOMPARE( optContent->data( subindex, Qt::DisplayRole ).toString(), QLatin1String( "Japanese" ) );
     QCOMPARE( static_cast<Qt::CheckState>( optContent->data( subindex, Qt::CheckStateRole ).toInt() ), Qt::Unchecked );
+    QCOMPARE( static_cast<Poppler::OptContentItem *>(subindex.internalPointer())->group()->getState(), OptionalContentGroup::Off );
 
     subindex = optContent->index( 1, 0, index );
     QCOMPARE( optContent->data( subindex, Qt::DisplayRole ).toString(), QLatin1String( "French" ) );
     QCOMPARE( static_cast<Qt::CheckState>( optContent->data( subindex, Qt::CheckStateRole ).toInt() ), Qt::Checked );
+    QCOMPARE( static_cast<Poppler::OptContentItem *>(subindex.internalPointer())->group()->getState(), OptionalContentGroup::On );
 
 
     // and turning off French should leave them all off
@@ -430,14 +437,17 @@ void TestOptionalContent::checkRadioButtons()
     subindex = optContent->index( 0, 0, index );
     QCOMPARE( optContent->data( subindex, Qt::DisplayRole ).toString(), QLatin1String( "English" ) );
     QCOMPARE( static_cast<Qt::CheckState>( optContent->data( subindex, Qt::CheckStateRole ).toInt() ), Qt::Unchecked );
+    QCOMPARE( static_cast<Poppler::OptContentItem *>(subindex.internalPointer())->group()->getState(), OptionalContentGroup::Off );
 
     subindex = optContent->index( 2, 0, index );
     QCOMPARE( optContent->data( subindex, Qt::DisplayRole ).toString(), QLatin1String( "Japanese" ) );
     QCOMPARE( static_cast<Qt::CheckState>( optContent->data( subindex, Qt::CheckStateRole ).toInt() ), Qt::Unchecked );
+    QCOMPARE( static_cast<Poppler::OptContentItem *>(subindex.internalPointer())->group()->getState(), OptionalContentGroup::Off );
 
     subindex = optContent->index( 1, 0, index );
     QCOMPARE( optContent->data( subindex, Qt::DisplayRole ).toString(), QLatin1String( "French" ) );
     QCOMPARE( static_cast<Qt::CheckState>( optContent->data( subindex, Qt::CheckStateRole ).toInt() ), Qt::Unchecked );
+    QCOMPARE( static_cast<Poppler::OptContentItem *>(subindex.internalPointer())->group()->getState(), OptionalContentGroup::Off );
 
     delete doc;
 }

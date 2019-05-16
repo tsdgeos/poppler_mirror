@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2007, Brad Hards <bradh@kde.org>
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2016, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2016, 2018, 2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Hubert Figuière <hub@figuiere.net>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -76,6 +76,8 @@ namespace Poppler
     bool isEnabled() const { return m_enabled; }
 
     QSet<OptContentItem*> recurseListChildren(bool includeMe = false) const;
+
+    OptionalContentGroup *group() const { return m_group; }
 
     private:
     OptionalContentGroup *m_group;
