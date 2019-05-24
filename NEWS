@@ -1,3 +1,20 @@
+Release 0.77.0:
+        core:
+         * Fix crash on signature handling. Issue #766
+         * Fix small memory leak in SignatureHandler::getCertificateInfo
+         * Splash: Restrict filling of overlapping boxes. Issue #750
+         * Fix crash on malformed files
+
+        qt5:
+         * Fix optional content handling with exclusive layers
+
+        cpp:
+         * Make render_page thread-safe
+
+        utils:
+         * pdfsig: Fix small memory leak
+         * pdftotext: Fix typo in manpage
+
 Release 0.76.1:
         core:
          * Make the mul tables be calculated at compile time with constexpr.
