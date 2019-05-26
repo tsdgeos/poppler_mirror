@@ -223,7 +223,7 @@ poppler_document_new_from_file (const char  *uri,
 
 /**
  * poppler_document_new_from_data:
- * @data: the pdf data contained in a char array
+ * @data: (array length=length) (element-type guint8): the pdf data
  * @length: the length of #data
  * @password: (allow-none): password to unlock the file with, or %NULL
  * @error: (allow-none): Return location for an error, or %NULL
