@@ -298,6 +298,10 @@ PopplerDocument   *poppler_document_new_from_data          (char            *dat
 							    const char      *password,
 							    GError         **error);
 POPPLER_PUBLIC
+PopplerDocument   *poppler_document_new_from_bytes         (GBytes          *bytes,
+							    const char      *password,
+							    GError         **error);
+POPPLER_PUBLIC
 PopplerDocument   *poppler_document_new_from_stream        (GInputStream    *stream,
                                                             goffset          length,
                                                             const char      *password,

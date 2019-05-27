@@ -24,6 +24,8 @@
 #include <string.h>
 
 #ifndef __GI_SCANNER__
+#include <memory>
+
 #include <splash/SplashBitmap.h>
 #include <DateInfo.h>
 #include <GlobalParams.h>
@@ -234,6 +236,9 @@ poppler_document_new_from_file (const char  *uri,
  * Creates a new #PopplerDocument.  If %NULL is returned, then @error will be
  * set. Possible errors include those in the #POPPLER_ERROR and #G_FILE_ERROR
  * domains.
+ *
+ * Note that @data must remain valid for as long as the returned document exists.
+ * Prefer using poppler_document_new_from_bytes().
  * 
  * Return value: A newly created #PopplerDocument, or %NULL
  **/
@@ -253,6 +258,60 @@ poppler_document_new_from_data (char        *data,
   
   // create stream
   str = new MemStream(data, 0, length, Object(objNull));
+
+  password_g = poppler_password_to_latin1(password);
+  newDoc = new PDFDoc(str, password_g, password_g);
+  delete password_g;
+
+  return _poppler_document_new_from_pdfdoc (newDoc, error);
+}
+
+class BytesStream : public MemStream
+{
+  std::unique_ptr<GBytes, decltype(&g_bytes_unref)> m_bytes;
+
+public:
+  BytesStream(GBytes *bytes, Object &&dictA)
+    : MemStream(static_cast<const char*>(g_bytes_get_data(bytes, nullptr)),
+		0, g_bytes_get_size(bytes), std::move(dictA)),
+      m_bytes{g_bytes_ref(bytes), &g_bytes_unref}
+  { }
+};
+
+/**
+ * poppler_document_new_from_bytes:
+ * @bytes: a #GBytes
+ * @password: (allow-none): password to unlock the file with, or %NULL
+ * @error: (allow-none): Return location for an error, or %NULL
+ *
+ * Creates a new #PopplerDocument from @bytes. The returned document
+ * will hold a reference to @bytes.
+ *
+ * On error,  %NULL is returned, with @error set. Possible errors include
+ * those in the #POPPLER_ERROR and #G_FILE_ERROR domains.
+ *
+ * Return value: (transfer full): a newly created #PopplerDocument, or %NULL
+ *
+ * Since: 0.82
+ **/
+PopplerDocument *
+poppler_document_new_from_bytes (GBytes      *bytes,
+				 const char  *password,
+				 GError     **error)
+{
+  PDFDoc *newDoc;
+  BytesStream *str;
+  GooString *password_g;
+
+  g_return_val_if_fail(bytes != nullptr, nullptr);
+  g_return_val_if_fail(error == nullptr || *error == nullptr, nullptr);
+
+  if (!globalParams) {
+    globalParams = new GlobalParams();
+  }
+
+  // create stream
+  str = new BytesStream(bytes, Object(objNull));
 
   password_g = poppler_password_to_latin1(password);
   newDoc = new PDFDoc(str, password_g, password_g);
