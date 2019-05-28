@@ -276,8 +276,8 @@ stream_is_memory_buffer_or_local_file (GInputStream *stream)
  * Creates a new #PopplerDocument reading the PDF contents from @stream.
  * Note that the given #GInputStream must be seekable or %G_IO_ERROR_NOT_SUPPORTED
  * will be returned.
- * Possible errors include those in the #POPPLER_ERROR and #G_FILE_ERROR
- * domains.
+ * Possible errors include those in the #POPPLER_ERROR, #G_FILE_ERROR
+ * and #G_IO_ERROR domains.
  *
  * Returns: (transfer full): a new #PopplerDocument, or %NULL
  *
