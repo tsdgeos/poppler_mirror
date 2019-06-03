@@ -2,7 +2,7 @@
  * Copyright (C) 2004, Red Hat, Inc.
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2018-2019 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -151,6 +151,25 @@ typedef enum
   POPPLER_PRINT_SCALING_APP_DEFAULT,
   POPPLER_PRINT_SCALING_NONE
 } PopplerPrintScaling;
+
+/**
+ * PopplerPrintDuplex:
+ * @POPPLER_PRINT_DUPLEX_NONE: No preference on duplex printing
+ * @POPPLER_PRINT_DUPLEX_SIMPLEX: Print single-sided
+ * @POPPLER_PRINT_DUPLEX_DUPLEX_FLIP_SHORT_EDGE: Duplex and flip on the short edge of the sheet
+ * @POPPLER_PRINT_DUPLEX_DUPLEX_FLIP_LONG_EDGE: Duplex and flip on the long edge of the sheet
+ *
+ * Duplex viewer preference
+ *
+ * Since: 0.78
+ */
+typedef enum
+{
+  POPPLER_PRINT_DUPLEX_NONE,
+  POPPLER_PRINT_DUPLEX_SIMPLEX,
+  POPPLER_PRINT_DUPLEX_DUPLEX_FLIP_SHORT_EDGE,
+  POPPLER_PRINT_DUPLEX_DUPLEX_FLIP_LONG_EDGE
+} PopplerPrintDuplex;
 
 /**
  * PopplerPermissions:
@@ -375,6 +394,8 @@ POPPLER_PUBLIC
 gchar             *poppler_document_get_metadata           (PopplerDocument *document);
 POPPLER_PUBLIC
 PopplerPrintScaling poppler_document_get_print_scaling     (PopplerDocument *document);
+POPPLER_PUBLIC
+PopplerPrintDuplex poppler_document_get_print_duplex       (PopplerDocument *document);
 
 /* Attachments */
 POPPLER_PUBLIC

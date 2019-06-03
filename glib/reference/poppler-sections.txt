@@ -175,6 +175,7 @@ poppler_document_get_pdf_subtype_string
 poppler_document_get_pdf_version
 poppler_document_get_pdf_version_string
 poppler_document_get_permissions
+poppler_document_get_print_duplex
 poppler_document_get_print_scaling
 poppler_document_get_producer
 poppler_document_get_subject
@@ -248,6 +249,7 @@ POPPLER_TYPE_PDF_CONFORMANCE
 POPPLER_TYPE_PDF_PART
 POPPLER_TYPE_PDF_SUBTYPE
 POPPLER_TYPE_PERMISSIONS
+POPPLER_TYPE_PRINT_DUPLEX
 POPPLER_TYPE_PRINT_SCALING
 POPPLER_TYPE_PS_FILE
 POPPLER_TYPE_VIEWER_PREFERENCES
@@ -263,6 +265,7 @@ poppler_pdf_conformance_get_type
 poppler_pdf_part_get_type
 poppler_pdf_subtype_get_type
 poppler_permissions_get_type
+poppler_print_duplex_get_type
 poppler_print_scaling_get_type
 poppler_ps_file_get_type
 poppler_viewer_preferences_get_type

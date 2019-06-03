@@ -2,7 +2,7 @@
  * Copyright (C) 2005, Red Hat, Inc.
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2018-2019 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -81,7 +81,8 @@ enum {
 	PROP_VIEWER_PREFERENCES,
 	PROP_PERMISSIONS,
 	PROP_METADATA,
-	PROP_PRINT_SCALING
+	PROP_PRINT_SCALING,
+	PROP_PRINT_DUPLEX
 };
 
 static void poppler_document_layers_free (PopplerDocument *document);
@@ -1653,6 +1654,50 @@ poppler_document_get_print_scaling (PopplerDocument *document)
 }
 
 /**
+ * poppler_document_get_print_duplex:
+ * @document: A #PopplerDocument
+ *
+ * Returns the duplex mode value suggested for printing by author of the document.
+ *
+ * Returns: a #PopplerPrintDuplex that should be used when document is printed
+ *
+ * Since: 0.78
+ **/
+PopplerPrintDuplex
+poppler_document_get_print_duplex (PopplerDocument *document)
+{
+  Catalog *catalog;
+  ViewerPreferences *preferences;
+  PopplerPrintDuplex duplex = POPPLER_PRINT_DUPLEX_NONE;
+
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), POPPLER_PRINT_DUPLEX_NONE);
+
+  catalog = document->doc->getCatalog ();
+  if (catalog && catalog->isOk ()) {
+    preferences = catalog->getViewerPreferences();
+    if (preferences) {
+      switch (preferences->getDuplex()) {
+        default:
+        case ViewerPreferences::Duplex::duplexNone:
+          duplex = POPPLER_PRINT_DUPLEX_NONE;
+          break;
+        case ViewerPreferences::Duplex::duplexSimplex:
+          duplex = POPPLER_PRINT_DUPLEX_SIMPLEX;
+          break;
+        case ViewerPreferences::Duplex::duplexDuplexFlipShortEdge:
+          duplex = POPPLER_PRINT_DUPLEX_DUPLEX_FLIP_SHORT_EDGE;
+          break;
+        case ViewerPreferences::Duplex::duplexDuplexFlipLongEdge:
+          duplex = POPPLER_PRINT_DUPLEX_DUPLEX_FLIP_LONG_EDGE;
+          break;
+      }
+    }
+  }
+
+  return duplex;
+}
+
+/**
  * poppler_document_get_permissions:
  * @document: A #PopplerDocument
  *
@@ -1884,6 +1929,9 @@ poppler_document_get_property (GObject    *object,
       break;
     case PROP_PRINT_SCALING:
       g_value_set_enum (value, poppler_document_get_print_scaling (document));
+      break;
+    case PROP_PRINT_DUPLEX:
+      g_value_set_enum (value, poppler_document_get_print_duplex (document));
       break;
     case PROP_PERMISSIONS:
       g_value_set_flags (value, poppler_document_get_permissions (document));
@@ -2164,6 +2212,20 @@ poppler_document_class_init (PopplerDocumentClass *klass)
 						      "Print Scaling Viewer Preference",
 						      POPPLER_TYPE_PRINT_SCALING,
 						      POPPLER_PRINT_SCALING_APP_DEFAULT,
+						      (GParamFlags) (G_PARAM_READABLE | G_PARAM_STATIC_STRINGS)));
+
+  /**
+   * PopplerDocument:print-duplex:
+   *
+   * Since: 0.78
+   */
+  g_object_class_install_property (G_OBJECT_CLASS (klass),
+				   PROP_PRINT_DUPLEX,
+				   g_param_spec_enum ("print-duplex",
+						      "Print Duplex",
+						      "Duplex Viewer Preference",
+						      POPPLER_TYPE_PRINT_DUPLEX,
+						      POPPLER_PRINT_DUPLEX_NONE,
 						      (GParamFlags) (G_PARAM_READABLE | G_PARAM_STATIC_STRINGS)));
 
   /**

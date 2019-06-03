@@ -59,6 +59,7 @@ poppler_pdf_part_get_type
 poppler_pdf_subtype_get_type
 poppler_permissions_get_type
 poppler_point_get_type
+poppler_print_duplex_get_type
 poppler_print_flags_get_type
 poppler_print_scaling_get_type
 poppler_ps_file_get_type
