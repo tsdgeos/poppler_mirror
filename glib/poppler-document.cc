@@ -1728,6 +1728,53 @@ poppler_document_get_print_n_copies (PopplerDocument *document)
   return retval;
 }
 
+/* PopplerPageRange */
+
+POPPLER_DEFINE_BOXED_TYPE (PopplerPageRange, poppler_page_range,
+			   poppler_page_range_copy,
+			   poppler_page_range_free)
+
+/**
+ * poppler_page_range_new:
+ *
+ * Creates a new #PopplerPageRange
+ *
+ * Returns: a new #PopplerPageRange, use poppler_page_range_free() to free it
+ */
+PopplerPageRange *
+poppler_page_range_new (void)
+{
+  return g_slice_new0 (PopplerPageRange);
+}
+
+/**
+ * poppler_page_range_copy:
+ * @range: a #PopplerPageRange to copy
+ *
+ * Creates a copy of @range
+ *
+ * Returns: a new allocated copy of @range
+ */
+PopplerPageRange *
+poppler_page_range_copy (PopplerPageRange *range)
+{
+  g_return_val_if_fail (range != nullptr, NULL);
+
+  return g_slice_dup (PopplerPageRange, range);
+}
+
+/**
+ * poppler_page_range_free:
+ * @range: a #PopplerPageRange
+ *
+ * Frees the given #PopplerPageRange
+ */
+void
+poppler_page_range_free (PopplerPageRange *range)
+{
+  g_slice_free (PopplerPageRange, range);
+}
+
 /**
  * poppler_document_get_permissions:
  * @document: A #PopplerDocument

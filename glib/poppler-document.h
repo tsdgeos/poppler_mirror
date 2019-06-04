@@ -521,6 +521,30 @@ void           poppler_ps_file_set_duplex     (PopplerPSFile   *ps_file,
 POPPLER_PUBLIC
 void           poppler_ps_file_free           (PopplerPSFile   *ps_file);
 
+/**
+ * PopplerPageRange:
+ * @start_page: first page in the range of pages
+ * @end_page:   last page in the range of pages
+ *
+ * A #PopplerPageRange is used to specify a range of pages.
+ *
+ * Since: 0.78
+ */
+#define POPPLER_TYPE_PAGE_RANGE               (poppler_page_range_get_type ())
+struct _PopplerPageRange
+{
+  gint start_page;
+  gint end_page;
+};
+
+POPPLER_PUBLIC
+GType             poppler_page_range_get_type (void) G_GNUC_CONST;
+POPPLER_PUBLIC
+PopplerPageRange *poppler_page_range_new      ();
+POPPLER_PUBLIC
+PopplerPageRange *poppler_page_range_copy     (PopplerPageRange *range);
+POPPLER_PUBLIC
+void              poppler_page_range_free     (PopplerPageRange *range);
 
 
 G_END_DECLS
