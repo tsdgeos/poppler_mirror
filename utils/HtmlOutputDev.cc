@@ -271,8 +271,8 @@ void HtmlString::endString()
 // HtmlPage
 //------------------------------------------------------------------------
 
-HtmlPage::HtmlPage(bool rawOrder) {
-  this->rawOrder = rawOrder;
+HtmlPage::HtmlPage(bool rawOrderA) {
+  rawOrder = rawOrderA;
   curStr = nullptr;
   yxStrings = nullptr;
   xyStrings = nullptr;
@@ -1085,7 +1085,7 @@ void HtmlOutputDev::doFrame(int firstPage){
 
 HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char *title,
 	const char *author, const char *keywords, const char *subject, const char *date,
-	bool rawOrder, int firstPage, bool outline) 
+	bool rawOrderA, int firstPage, bool outline)
 {
   catalog = catalogA;
   fContentsFrame = nullptr;
@@ -1094,7 +1094,7 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
   pages = nullptr;
   dumpJPEG=true;
   //write = true;
-  this->rawOrder = rawOrder;
+  rawOrder = rawOrderA;
   this->doOutline = outline;
   ok = false;
   //this->firstPage = firstPage;
@@ -1227,7 +1227,7 @@ HtmlOutputDev::~HtmlOutputDev() {
       delete pages;
 }
 
-void HtmlOutputDev::startPage(int pageNum, GfxState *state, XRef *xref) {
+void HtmlOutputDev::startPage(int pageNumA, GfxState *state, XRef *xref) {
 #if 0
   if (mode&&!xml){
     if (write){
@@ -1247,7 +1247,7 @@ void HtmlOutputDev::startPage(int pageNum, GfxState *state, XRef *xref) {
   }
 #endif
 
-  this->pageNum = pageNum;
+  pageNum = pageNumA;
   const std::string str = gbasename(Docname->c_str());
   pages->clear(); 
   if(!noframes)
@@ -1558,7 +1558,7 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
       case actionGoTo:
 	  {
 	  GooString* file = new GooString(gbasename(Docname->c_str()));
-	  int page=1;
+	  int destPage=1;
 	  LinkGoTo *ha=(LinkGoTo *)link->getAction();
 	  LinkDest *dest=nullptr;
 	  if (ha->getDest()!=nullptr)
@@ -1569,15 +1569,15 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 	  if (dest){ 
 	      if (dest->isPageRef()){
 		  const Ref pageref=dest->getPageRef();
-		  page=catalog->findPage(pageref);
+		  destPage=catalog->findPage(pageref);
 	      }
 	      else {
-		  page=dest->getPageNum();
+		  destPage=dest->getPageNum();
 	      }
 
 	      delete dest;
 
-	      GooString *str=GooString::fromInt(page);
+	      GooString *str=GooString::fromInt(destPage);
 	      /* 		complex 	simple
 	       	frames		file-4.html	files.html#4
 		noframes	file.html#4	file.html#4
@@ -1602,7 +1602,7 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 		}
 	      }
 
-	      if (printCommands) printf(" link to page %d ",page);
+	      if (printCommands) printf(" link to page %d ",destPage);
 	      delete str;
 	      return file;
 	  }
@@ -1615,7 +1615,7 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 	  {
 	  LinkGoToR *ha=(LinkGoToR *) link->getAction();
 	  LinkDest *dest=nullptr;
-	  int page=1;
+	  int destPage=1;
 	  GooString *file=new GooString();
 	  if (ha->getFileName()){
 	      delete file;
@@ -1623,10 +1623,10 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 	  }
 	  if (ha->getDest()!=nullptr)  dest=ha->getDest()->copy();
 	  if (dest&&file){
-	      if (!(dest->isPageRef()))  page=dest->getPageNum();
+	      if (!(dest->isPageRef()))  destPage=dest->getPageNum();
 	      delete dest;
 
-	      if (printCommands) printf(" link to page %d ",page);
+	      if (printCommands) printf(" link to page %d ",destPage);
 	      if (printHtml){
 		  const char *p=file->c_str()+file->getLength()-4;
 		  if (!strcmp(p, ".pdf") || !strcmp(p, ".PDF")){
@@ -1634,7 +1634,7 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 		      file->append(".html");
 		  }
 		  file->append('#');
-		  GooString *pgNum = GooString::fromInt(page);
+		  GooString *pgNum = GooString::fromInt(destPage);
 		  file->append(pgNum);
 		  delete pgNum;
 	      }
@@ -1769,15 +1769,15 @@ bool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, const std::vector<OutlineI
 							   item->getTitleLength());
 
 		GooString *linkName = nullptr;;
-        int page = getOutlinePageNum(item);
-        if (page > 0)
+        const int itemPage = getOutlinePageNum(item);
+        if (itemPage > 0)
         {
 				/*		complex		simple
 				frames		file-4.html	files.html#4
 				noframes	file.html#4	file.html#4
 				*/
 				linkName = new GooString(gbasename(Docname->c_str()));
-				GooString *str=GooString::fromInt(page);
+				GooString *str=GooString::fromInt(itemPage);
 				if (noframes) {
 					linkName->append(".html#");
 					linkName->append(str);
@@ -1828,11 +1828,11 @@ void HtmlOutputDev::newXmlOutlineLevel(FILE *output, const std::vector<OutlineIt
         OutlineItem *item     = (*outlines)[i];
         GooString   *titleStr = HtmlFont::HtmlFilter(item->getTitle(),
                                                      item->getTitleLength());
-        int page = getOutlinePageNum(item);
-        if (page > 0)
+        const int itemPage = getOutlinePageNum(item);
+        if (itemPage > 0)
         {
             fprintf(output, "<item page=\"%d\">%s</item>\n",
-                    page, titleStr->c_str());
+                    itemPage, titleStr->c_str());
         }
         else
         {
