@@ -4401,8 +4401,8 @@ protected:
   TextPage *page;
 };
 
-TextSelectionVisitor::TextSelectionVisitor (TextPage *page)
-  : page(page)
+TextSelectionVisitor::TextSelectionVisitor (TextPage *p)
+  : page(p)
 {
 }
 
@@ -4441,8 +4441,8 @@ private:
   TextBlock *currentBlock;
 };
 
-TextSelectionDumper::TextSelectionDumper(TextPage *page)
-    : TextSelectionVisitor(page)
+TextSelectionDumper::TextSelectionDumper(TextPage *p)
+    : TextSelectionVisitor(p)
 {
   linesSize = 256;
   lines = (std::vector<TextWordSelection*> **)gmallocn(linesSize, sizeof(std::vector<TextWordSelection*> *));
@@ -4605,8 +4605,8 @@ private:
   double scale;
 };
 
-TextSelectionSizer::TextSelectionSizer(TextPage *page, double scale)
-  : TextSelectionVisitor(page),
+TextSelectionSizer::TextSelectionSizer(TextPage *p, double scale)
+  : TextSelectionVisitor(p),
     scale(scale)
 {
   list = new std::vector<PDFRectangle*>();
@@ -4668,17 +4668,17 @@ private:
   Matrix ctm, ictm;
 };
 
-TextSelectionPainter::TextSelectionPainter(TextPage *page,
+TextSelectionPainter::TextSelectionPainter(TextPage *p,
 					   double scale,
 					   int rotation,
 					   OutputDev *out,
 					   GfxColor *box_color,
 					   GfxColor *glyph_color)
-  : TextSelectionVisitor(page),
+  : TextSelectionVisitor(p),
     out(out),
     glyph_color(glyph_color)
 {
-  PDFRectangle box(0, 0, page->pageWidth, page->pageHeight);
+  PDFRectangle box(0, 0, p->pageWidth, p->pageHeight);
 
   selectionList = new std::vector<TextWordSelection*>();
   state = new GfxState(72 * scale, 72 * scale, &box, rotation, false);
