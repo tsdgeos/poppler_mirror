@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Brad Hards <bradh@kde.org>
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
@@ -168,7 +168,7 @@ public:
   // Write the document-level header.
   void writeHeader(const std::vector<int> &pages,
 		   const PDFRectangle *mediaBox, const PDFRectangle *cropBox,
-		   int pageRotate, char *pstitle);
+		   int pageRotate, const char *title);
 
   // Write the Xpdf procset.
   void writeXpdfProcset();

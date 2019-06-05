@@ -1521,7 +1521,7 @@ PSOutputDev::~PSOutputDev() {
 
 void PSOutputDev::writeHeader(const std::vector<int> &pages,
 			      const PDFRectangle *mediaBox, const PDFRectangle *cropBox,
-			      int pageRotate, char *psTitle) {
+			      int pageRotate, const char *title) {
   PSOutPaperSize *size;
   double x1, y1, x2, y2;
 
@@ -1545,8 +1545,8 @@ void PSOutputDev::writeHeader(const std::vector<int> &pages,
         writePSTextLine(obj1.getString());
     }
   }
-  if(psTitle) {
-    char *sanitizedTitle = strdup(psTitle);
+  if(title) {
+    char *sanitizedTitle = strdup(title);
     for (unsigned int i = 0; i < strlen(sanitizedTitle); ++i) {
       if (sanitizedTitle[i] == '\n' || sanitizedTitle[i] == '\r') {
         sanitizedTitle[i] = ' ';
