@@ -5601,10 +5601,10 @@ void ActualText::addChar(GfxState *state, double x, double y,
   actualTextNBytes += nBytes;
 }
 
-void ActualText::begin(GfxState *state, const GooString *text) {
+void ActualText::begin(GfxState *state, const GooString *t) {
   if (actualText)
     delete actualText;
-  actualText = new GooString(text);
+  actualText = new GooString(t);
   actualTextNBytes = 0;
 }
 
@@ -5738,9 +5738,9 @@ void TextOutputDev::incCharCount(int nChars) {
   text->incCharCount(nChars);
 }
 
-void TextOutputDev::beginActualText(GfxState *state, const GooString *text)
+void TextOutputDev::beginActualText(GfxState *state, const GooString *t)
 {
-  actualText->begin(state, text);
+  actualText->begin(state, t);
 }
 
 void TextOutputDev::endActualText(GfxState *state)
