@@ -1081,9 +1081,9 @@ static void outputToFile(void *stream, const char *data, int len) {
   fwrite(data, 1, len, (FILE *)stream);
 }
 
-PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc,
+PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA,
 			 char *psTitleA,
-			 const std::vector<int> &pages, PSOutMode modeA,
+			 const std::vector<int> &pagesA, PSOutMode modeA,
 			 int paperWidthA, int paperHeightA,
                          bool noCropA, bool duplexA,
 			 int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
@@ -1145,15 +1145,15 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc,
   }
 
   init(outputToFile, f, fileTypeA, psTitleA,
-       doc, pages, modeA,
+       docA, pagesA, modeA,
        imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA,
        paperWidthA, paperHeightA, noCropA, duplexA);
 }
 
 PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
 			 char *psTitleA,
-			 PDFDoc *doc,
-			 const std::vector<int> &pages, PSOutMode modeA,
+			 PDFDoc *docA,
+			 const std::vector<int> &pagesA, PSOutMode modeA,
 			 int paperWidthA, int paperHeightA,
                          bool noCropA, bool duplexA,
 			 int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
@@ -1183,7 +1183,7 @@ PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
   psTitle = nullptr;
 
   init(outputFuncA, outputStreamA, psGeneric, psTitleA,
-       doc, pages, modeA,
+       docA, pagesA, modeA,
        imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA,
        paperWidthA, paperHeightA, noCropA, duplexA);
 }
