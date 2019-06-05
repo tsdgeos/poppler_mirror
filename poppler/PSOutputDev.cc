@@ -4501,18 +4501,17 @@ bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Ob
     // Don't need to use patterns if only one instance of the pattern is used
     PDFRectangle box;
     Gfx *gfx;
-    double x, y, tx, ty;
 
-    x = x0 * xStep;
-    y = y0 * yStep;
-    tx = x * mat[0] + y * mat[2] + mat[4];
-    ty = x * mat[1] + y * mat[3] + mat[5];
+    const double singleStep_x = x0 * xStep;
+    const double singleStep_y = y0 * yStep;
+    const double singleStep_tx = singleStep_x * mat[0] + singleStep_y * mat[2] + mat[4];
+    const double singleStep_ty = singleStep_x * mat[1] + singleStep_y * mat[3] + mat[5];
     box.x1 = bbox[0];
     box.y1 = bbox[1];
     box.x2 = bbox[2];
     box.y2 = bbox[3];
     gfx = new Gfx(doc, this, resDict, &box, nullptr, nullptr, nullptr, gfxA);
-    writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] cm\n", mat[0], mat[1], mat[2], mat[3], tx, ty);
+    writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] cm\n", mat[0], mat[1], mat[2], mat[3], singleStep_tx, singleStep_ty);
     inType3Char = true;
     gfx->display(str);
     inType3Char = false;
