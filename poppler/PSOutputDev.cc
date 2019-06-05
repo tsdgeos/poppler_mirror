@@ -1349,8 +1349,8 @@ void PSOutputDev::postInit()
       h = (int)ceil(page->getCropHeight());
     }
     if (paperMatch) {
-      int rotate = page->getRotate();
-      if (rotate == 90 || rotate == 270)
+      const int pageRotate = page->getRotate();
+      if (pageRotate == 90 || pageRotate == 270)
         std::swap(w, h);
     }
     if (w  > paperWidth)
