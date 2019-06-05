@@ -1324,11 +1324,11 @@ void PSOutputDev::postInit()
   } else {
     paperMatch = false;
   }
-  Page *page;
+
   paperSizes = new std::vector<PSOutPaperSize*>();
   for (size_t pgi = 0; pgi < pages.size(); ++pgi) {
     const int pg = pages[pgi];
-    page = catalog->getPage(pg);
+    Page *page = catalog->getPage(pg);
     if (page == nullptr)
       paperMatch = false;
     if (!paperMatch) {
