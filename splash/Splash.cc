@@ -2590,16 +2590,16 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo,
 	  state->clip->clipAALine(aaBuf, &x0, &x1, y, thinLineMode != splashThinLineDefault && xMinI == xMaxI);
 	}
 	unsigned char lineShape = 255;
-	bool adjustLine = false;
+	bool doAdjustLine = false;
 	if (thinLineMode == splashThinLineShape && (xMinI == xMaxI || yMinI == yMaxI)) {
 	  // compute line shape for thin lines:
 	  SplashCoord mx, my, delta;
 	  transform(state->matrix, 0, 0, &mx, &my);
 	  transform(state->matrix, state->lineWidth, 0, &delta, &my);
-	  adjustLine = true;
+	  doAdjustLine = true;
 	  lineShape = clip255((delta - mx) * 255);
 	}
-	drawAALine(&pipe, x0, x1, y, adjustLine, lineShape);
+	drawAALine(&pipe, x0, x1, y, doAdjustLine, lineShape);
       }
     } else {
       for (y = yMinI; y <= yMaxI; ++y) {
