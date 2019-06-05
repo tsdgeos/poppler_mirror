@@ -479,7 +479,7 @@ private:
   int fontIDSize;		// size of fontIDs array
   std::set<int> resourceIDs;	// list of object IDs of objects containing Resources we've already set up
   std::unordered_set<std::string> fontNames; // all used font names
-  std::unordered_map<std::string, int> fontMaxValidGlyph; // max valid glyph of each font
+  std::unordered_map<std::string, int> perFontMaxValidGlyph; // max valid glyph of each font
   PST1FontName *t1FontNames;	// font names for Type 1/1C fonts
   int t1FontNameLen;		// number of entries in t1FontNames array
   int t1FontNameSize;		// size of t1FontNames array

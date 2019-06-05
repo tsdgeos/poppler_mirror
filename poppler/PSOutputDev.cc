@@ -2529,7 +2529,7 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, GooString *fileName,
 
 void PSOutputDev::updateFontMaxValidGlyph(GfxFont *font, int maxValidGlyph) {
   if (maxValidGlyph >= 0 && font->getName()) {
-    auto& fontMaxValidGlyph = this->fontMaxValidGlyph[font->getName()->toStr()];
+    auto& fontMaxValidGlyph = perFontMaxValidGlyph[font->getName()->toStr()];
     if (fontMaxValidGlyph < maxValidGlyph) {
       fontMaxValidGlyph = maxValidGlyph;
     }
@@ -5071,7 +5071,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s) {
   if (!(font = state->getFont())) {
     return;
   }
-  maxGlyphInt = (font->getName() ? fontMaxValidGlyph[font->getName()->toStr()] : 0);
+  maxGlyphInt = (font->getName() ? perFontMaxValidGlyph[font->getName()->toStr()] : 0);
   if (maxGlyphInt < 0) maxGlyphInt = 0;
   maxGlyph = (CharCode) maxGlyphInt;
   wMode = font->getWMode();
