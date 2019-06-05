@@ -166,7 +166,7 @@ public:
   //----- header/trailer (used only if manualCtrl is true)
 
   // Write the document-level header.
-  void writeHeader(const std::vector<int> &pages,
+  void writeHeader(int nPages,
 		   const PDFRectangle *mediaBox, const PDFRectangle *cropBox,
 		   int pageRotate, const char *title);
 

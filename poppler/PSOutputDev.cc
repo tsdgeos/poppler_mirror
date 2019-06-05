@@ -1424,7 +1424,7 @@ void PSOutputDev::postInit()
     Page *page;
     // this check is needed in case the document has zero pages
     if ((page = doc->getPage(pageList[0]))) {
-      writeHeader(pageList,
+      writeHeader(pageList.size(),
 		  page->getMediaBox(),
 		  page->getCropBox(),
 		  page->getRotate(),
@@ -1432,7 +1432,7 @@ void PSOutputDev::postInit()
     } else {
       error(errSyntaxError, -1, "Invalid page {0:d}", pageList[0]);
       box = new PDFRectangle(0, 0, 1, 1);
-      writeHeader(pageList, box, box, 0, psTitle);
+      writeHeader(pageList.size(), box, box, 0, psTitle);
       delete box;
     }
     if (mode != psModeForm) {
@@ -1519,7 +1519,7 @@ PSOutputDev::~PSOutputDev() {
   gfree(psTitle);
 }
 
-void PSOutputDev::writeHeader(const std::vector<int> &pages,
+void PSOutputDev::writeHeader(int nPages,
 			      const PDFRectangle *mediaBox, const PDFRectangle *cropBox,
 			      int pageRotate, const char *title) {
   PSOutPaperSize *size;
@@ -1575,7 +1575,7 @@ void PSOutputDev::writeHeader(const std::vector<int> &pages,
                  i==0 ? "DocumentMedia:" : "+", size->name, size->w, size->h);
     }
     writePSFmt("%%BoundingBox: 0 0 {0:d} {1:d}\n", paperWidth, paperHeight);
-    writePSFmt("%%Pages: {0:d}\n", static_cast<int>(pages.size()));
+    writePSFmt("%%Pages: {0:d}\n", nPages);
     writePS("%%EndComments\n");
     if (!paperMatch) {
       size = (*paperSizes)[0];
