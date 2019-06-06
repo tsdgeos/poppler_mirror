@@ -4605,9 +4605,9 @@ private:
   double scale;
 };
 
-TextSelectionSizer::TextSelectionSizer(TextPage *p, double scale)
+TextSelectionSizer::TextSelectionSizer(TextPage *p, double s)
   : TextSelectionVisitor(p),
-    scale(scale)
+    scale(s)
 {
   list = new std::vector<PDFRectangle*>();
 }
