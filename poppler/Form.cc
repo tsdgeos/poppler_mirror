@@ -173,8 +173,8 @@ LinkAction *FormWidget::getActivationAction() {
   return widget ? widget->getAction() : nullptr;
 }
 
-LinkAction *FormWidget::getAdditionalAction(Annot::FormAdditionalActionsType type) {
-  return widget ? widget->getFormAdditionalAction(type) : nullptr;
+LinkAction *FormWidget::getAdditionalAction(Annot::FormAdditionalActionsType t) {
+  return widget ? widget->getFormAdditionalAction(t) : nullptr;
 }
 
 FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
