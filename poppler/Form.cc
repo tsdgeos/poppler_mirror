@@ -842,7 +842,7 @@ FormWidget* FormField::findWidgetByRef (Ref aref)
 
 GooString* FormField::getFullyQualifiedName() {
   Object obj1;
-  Object parent;
+  Object parentObj;
   const GooString *parent_name;
   GooString *full_name;
   bool unicode_encoded = false;
@@ -853,8 +853,8 @@ GooString* FormField::getFullyQualifiedName() {
   full_name = new GooString();
 
   obj1 = obj.copy();
-  while (parent = obj1.dictLookup("Parent"), parent.isDict()) {
-    Object obj2 = parent.dictLookup("T");
+  while (parentObj = obj1.dictLookup("Parent"), parentObj.isDict()) {
+    Object obj2 = parentObj.dictLookup("T");
     if (obj2.isString()) {
       parent_name = obj2.getString();
 
@@ -879,7 +879,7 @@ GooString* FormField::getFullyQualifiedName() {
         }
       }
     }
-    obj1 = parent.copy();
+    obj1 = parentObj.copy();
   }
 
   if (partialName) {
