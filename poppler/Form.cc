@@ -799,7 +799,7 @@ void FormField::createWidgetAnnotations() {
   }
 }
 
-void FormField::_createWidget (Object *obj, Ref aref)
+void FormField::_createWidget (Object *objA, Ref aref)
 {
   terminal = true;
   numChildren++;
@@ -807,16 +807,16 @@ void FormField::_createWidget (Object *obj, Ref aref)
   //ID = index in "widgets" table
   switch (type) {
   case formButton:
-    widgets[numChildren-1] = new FormWidgetButton(doc, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetButton(doc, objA, numChildren-1, aref, this);
     break;
   case formText:
-    widgets[numChildren-1] = new FormWidgetText(doc, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetText(doc, objA, numChildren-1, aref, this);
     break;
   case formChoice:
-    widgets[numChildren-1] = new FormWidgetChoice(doc, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetChoice(doc, objA, numChildren-1, aref, this);
     break;
   case formSignature:
-    widgets[numChildren-1] = new FormWidgetSignature(doc, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetSignature(doc, objA, numChildren-1, aref, this);
     break;
   default:
     error(errSyntaxWarning, -1, "SubType on non-terminal field, invalid document?");
