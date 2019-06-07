@@ -463,16 +463,16 @@ SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool fo
 
 std::vector<Goffset> FormWidgetSignature::getSignedRangeBounds()
 {
-  Object* obj = static_cast<FormFieldSignature*>(field)->getByteRange();
+  Object* byteRangeObj = static_cast<FormFieldSignature*>(field)->getByteRange();
   std::vector<Goffset> range_vec;
-  if (obj->isArray())
+  if (byteRangeObj->isArray())
   {
-    if (obj->arrayGetLength() == 4)
+    if (byteRangeObj->arrayGetLength() == 4)
     {
       for (int i = 0; i < 2; ++i)
       {
-        Object offsetObj(obj->arrayGet(2*i));
-        Object lenObj(obj->arrayGet(2*i+1));
+        Object offsetObj(byteRangeObj->arrayGet(2*i));
+        Object lenObj(byteRangeObj->arrayGet(2*i+1));
         if (offsetObj.isIntOrInt64() && lenObj.isIntOrInt64())
         {
           Goffset offset = offsetObj.getIntOrInt64();
