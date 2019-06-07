@@ -429,7 +429,7 @@ private:
   GooString *filterPSName(const GooString *name);
 
   // Write the document-level setup.
-  void writeDocSetup(PDFDoc *doc, Catalog *catalog, const std::vector<int> &pages, bool duplexA);
+  void writeDocSetup(Catalog *catalog, const std::vector<int> &pageList, bool duplexA);
 
   void writePSChar(char c);
   void writePS(const char *s);

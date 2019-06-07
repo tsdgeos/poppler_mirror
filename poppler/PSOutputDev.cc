@@ -1443,7 +1443,7 @@ void PSOutputDev::postInit()
       writePS("%%EndProlog\n");
       writePS("%%BeginSetup\n");
     }
-    writeDocSetup(doc, catalog, pageList, duplex);
+    writeDocSetup(catalog, pageList, duplex);
     if (mode != psModeForm) {
       writePS("%%EndSetup\n");
     }
@@ -1658,8 +1658,8 @@ void PSOutputDev::writeXpdfProcset() {
   }
 }
 
-void PSOutputDev::writeDocSetup(PDFDoc *doc, Catalog *catalog,
-				const std::vector<int> &pages,
+void PSOutputDev::writeDocSetup(Catalog *catalog,
+				const std::vector<int> &pageList,
                                 bool duplexA) {
   Page *page;
   Dict *resDict;
@@ -1673,8 +1673,8 @@ void PSOutputDev::writeDocSetup(PDFDoc *doc, Catalog *catalog,
   } else {
     writePS("xpdf begin\n");
   }
-  for (size_t pgi = 0; pgi < pages.size(); ++pgi) {
-    const int pg = pages[pgi];
+  for (size_t pgi = 0; pgi < pageList.size(); ++pgi) {
+    const int pg = pageList[pgi];
     page = doc->getPage(pg);
     if (!page) {
       error(errSyntaxError, -1, "Failed writing resources for page {0:d}", pg);
