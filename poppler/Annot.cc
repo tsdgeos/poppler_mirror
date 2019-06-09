@@ -232,6 +232,14 @@ static LinkAction* getAdditionalAction(Annot::AdditionalActionsType type, Object
   return linkAction;
 }
 
+static const char *getFormAdditionalActionKey(Annot::FormAdditionalActionsType type)
+{
+    return (type == Annot::actionFieldModified ?  "K" :
+            type == Annot::actionFormatField ?    "F" :
+            type == Annot::actionValidateField ?  "V" :
+            type == Annot::actionCalculateField ? "C" : nullptr);
+}
+
 //------------------------------------------------------------------------
 // AnnotBorderEffect
 //------------------------------------------------------------------------
@@ -3777,10 +3785,7 @@ LinkAction* AnnotWidget::getFormAdditionalAction(FormAdditionalActionsType formA
   Object additionalActionsObject = additionalActions.fetch(doc->getXRef());
 
   if (additionalActionsObject.isDict()) {
-    const char *key = (formAdditionalActionType == Annot::actionFieldModified ?  "K" :
-                       formAdditionalActionType == Annot::actionFormatField ?    "F" :
-                       formAdditionalActionType == Annot::actionValidateField ?  "V" :
-                       formAdditionalActionType == Annot::actionCalculateField ? "C" : nullptr);
+    const char *key = getFormAdditionalActionKey(formAdditionalActionType);
 
     Object actionObject = additionalActionsObject.dictLookup(key);
     if (actionObject.isDict())
@@ -3788,6 +3793,29 @@ LinkAction* AnnotWidget::getFormAdditionalAction(FormAdditionalActionsType formA
   }
 
   return linkAction;
+}
+
+bool AnnotWidget::setFormAdditionalAction(FormAdditionalActionsType formAdditionalActionType, const GooString &js)
+{
+  Object additionalActionsObject = additionalActions.fetch(doc->getXRef());
+
+  if (!additionalActionsObject.isDict()) {
+    additionalActionsObject = Object(new Dict(doc->getXRef()));
+    annotObj.dictSet("AA", additionalActionsObject.copy());
+  }
+
+  additionalActionsObject.dictSet(getFormAdditionalActionKey(formAdditionalActionType),
+                                  LinkJavaScript::createObject(doc->getXRef(), js));
+
+  if (additionalActions.isRef()) {
+    doc->getXRef()->setModifiedObject(&additionalActionsObject, additionalActions.getRef());
+  } else if (hasRef) {
+    doc->getXRef()->setModifiedObject(&annotObj, ref);
+  } else {
+    error(errInternal, -1, "AnnotWidget::setFormAdditionalAction, where neither additionalActions is ref nor annotobj itself is ref");
+    return false;
+  }
+  return true;
 }
 
 // Grand unified handler for preparing text strings to be drawn into form

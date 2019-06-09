@@ -1410,6 +1410,8 @@ public:
   LinkAction *getFormAdditionalAction(FormAdditionalActionsType type); // The caller should delete the result
   Dict *getParent() { return parent; }
 
+  bool setFormAdditionalAction(FormAdditionalActionsType type, const GooString &js);
+
 private:
 
   void initialize(PDFDoc *docA, Dict *dict);

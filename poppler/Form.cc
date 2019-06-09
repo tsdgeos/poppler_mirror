@@ -177,6 +177,13 @@ LinkAction *FormWidget::getAdditionalAction(Annot::FormAdditionalActionsType t) 
   return widget ? widget->getFormAdditionalAction(t) : nullptr;
 }
 
+bool FormWidget::setAdditionalAction(Annot::FormAdditionalActionsType t, const GooString &js) {
+  if (!widget)
+    return false;
+
+  return widget->setFormAdditionalAction(t, js);
+}
+
 FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Ref refA, FormField *p) :
 	FormWidget(docA, aobj, num, refA, p)
 {
