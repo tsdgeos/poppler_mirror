@@ -823,6 +823,15 @@ LinkJavaScript::~LinkJavaScript() {
   }
 }
 
+Object LinkJavaScript::createObject(XRef *xref, const GooString &js)
+{
+  Dict *linkDict = new Dict(xref);
+  linkDict->add("S", Object(objName, "JavaScript"));
+  linkDict->add("JS", Object(js.copy()));
+
+  return Object(linkDict);
+}
+
 //------------------------------------------------------------------------
 // LinkOCGState
 //------------------------------------------------------------------------
