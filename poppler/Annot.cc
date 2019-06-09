@@ -881,7 +881,6 @@ AnnotIconFit::AnnotIconFit(Dict* dict) {
 AnnotAppearance::AnnotAppearance(PDFDoc *docA, Object *dict) {
   assert(dict->isDict());
   doc = docA;
-  xref = docA->getXRef();
   appearDict = dict->copy();
 }
 
@@ -993,7 +992,7 @@ void AnnotAppearance::removeStream(Ref refToStream) {
   }
 
   // TODO: stream resources (e.g. font), AP name tree
-  xref->removeIndirectObject(refToStream);
+  doc->getXRef()->removeIndirectObject(refToStream);
 }
 
 // Removes stream if obj is a Ref, or removes pointed streams if obj is a Dict

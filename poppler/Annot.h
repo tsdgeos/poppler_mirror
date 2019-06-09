@@ -453,7 +453,6 @@ private:
 
 protected:
   PDFDoc *doc;
-  XRef *xref;                   // the xref table for this PDF file
   Object appearDict;            // Annotation's AP
 };
 
