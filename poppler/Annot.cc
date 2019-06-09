@@ -232,24 +232,6 @@ static LinkAction* getAdditionalAction(Annot::AdditionalActionsType type, Object
   return linkAction;
 }
 
-static LinkAction* getFormAdditionalAction(Annot::FormAdditionalActionsType type, Object *additionalActions, PDFDoc *doc) {
-  LinkAction *linkAction = nullptr;
-  Object additionalActionsObject = additionalActions->fetch(doc->getXRef());
-
-  if (additionalActionsObject.isDict()) {
-    const char *key = (type == Annot::actionFieldModified ?  "K" :
-                       type == Annot::actionFormatField ?    "F" :
-                       type == Annot::actionValidateField ?  "V" :
-                       type == Annot::actionCalculateField ? "C" : nullptr);
-
-    Object actionObject = additionalActionsObject.dictLookup(key);
-    if (actionObject.isDict())
-      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
-  }
-
-  return linkAction;
-}
-
 //------------------------------------------------------------------------
 // AnnotBorderEffect
 //------------------------------------------------------------------------
@@ -3791,7 +3773,21 @@ LinkAction* AnnotWidget::getAdditionalAction(AdditionalActionsType additionalAct
 
 LinkAction* AnnotWidget::getFormAdditionalAction(FormAdditionalActionsType formAdditionalActionType)
 {
-  return ::getFormAdditionalAction(formAdditionalActionType, &additionalActions, doc);
+  LinkAction *linkAction = nullptr;
+  Object additionalActionsObject = additionalActions.fetch(doc->getXRef());
+
+  if (additionalActionsObject.isDict()) {
+    const char *key = (formAdditionalActionType == Annot::actionFieldModified ?  "K" :
+                       formAdditionalActionType == Annot::actionFormatField ?    "F" :
+                       formAdditionalActionType == Annot::actionValidateField ?  "V" :
+                       formAdditionalActionType == Annot::actionCalculateField ? "C" : nullptr);
+
+    Object actionObject = additionalActionsObject.dictLookup(key);
+    if (actionObject.isDict())
+      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+  }
+
+  return linkAction;
 }
 
 // Grand unified handler for preparing text strings to be drawn into form
