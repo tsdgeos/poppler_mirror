@@ -693,7 +693,6 @@ public:
 
   // getters
   PDFDoc *getDoc() const { return doc; }
-  XRef *getXRef() const { return xref; }
   bool getHasRef() const { return hasRef; }
   Ref getRef() const { return ref; }
   AnnotSubtype getType() const { return type; }
@@ -747,7 +746,7 @@ protected:
   Object annotObj;
 
   std::atomic_int refCnt;
-  
+
   // required data
   AnnotSubtype type;                                // Annotation type
   std::unique_ptr<PDFRectangle> rect;               // Rect
@@ -767,7 +766,6 @@ protected:
   Object oc;                                        // OC
 
   PDFDoc *doc;
-  XRef *xref;			// the xref table for this PDF file
   Ref ref;                      // object ref identifying this annotation
   std::unique_ptr<AnnotBorder> border;              // Border, BS
   std::unique_ptr<AnnotColor> color;                // C

@@ -1186,7 +1186,6 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
 
   ok = true;
   doc = docA;
-  xref = doc->getXRef();
 
   appearance.setToNull();
 
@@ -1334,7 +1333,7 @@ void Annot::setRect(double x1, double y1, double x2, double y2) {
     rect->y2 = y1;
   }
 
-  Array *a = new Array(xref);
+  Array *a = new Array(doc->getXRef());
   a->add(Object(rect->x1));
   a->add(Object(rect->y1));
   a->add(Object(rect->x2));
@@ -1359,7 +1358,7 @@ void Annot::update(const char *key, Object &&value) {
 
   annotObj.dictSet(const_cast<char*>(key), std::move(value));
   
-  xref->setModifiedObject(&annotObj, ref);
+  doc->getXRef()->setModifiedObject(&annotObj, ref);
 }
 
 void Annot::setContents(GooString *new_content) {
@@ -1411,7 +1410,7 @@ void Annot::setBorder(std::unique_ptr<AnnotBorder> &&new_border) {
   annotLocker();
 
   if (new_border) {
-    Object obj1 = new_border->writeToObject(xref);
+    Object obj1 = new_border->writeToObject(doc->getXRef());
     update(new_border->getType() == AnnotBorder::typeArray ? "Border" : "BS", std::move(obj1));
     border = std::move(new_border);
   } else {
@@ -1424,7 +1423,7 @@ void Annot::setColor(std::unique_ptr<AnnotColor> &&new_color) {
   annotLocker();
 
   if (new_color) {
-    Object obj1 = new_color->writeToObject(xref);
+    Object obj1 = new_color->writeToObject(doc->getXRef());
     update ("C", std::move(obj1));
     color = std::move(new_color);
   } else {
@@ -1803,18 +1802,18 @@ Object Annot::createForm(const GooString *appearBuf, double *bbox, bool transpar
 }
 
 Object Annot::createForm(const GooString *appearBuf, double *bbox, bool transparencyGroup, Object &&resDictObject) {
-  Dict *appearDict = new Dict(xref);
+  Dict *appearDict = new Dict(doc->getXRef());
   appearDict->set("Length", Object(appearBuf->getLength()));
   appearDict->set("Subtype", Object(objName, "Form"));
 
-  Array *a = new Array(xref);
+  Array *a = new Array(doc->getXRef());
   a->add(Object(bbox[0]));
   a->add(Object(bbox[1]));
   a->add(Object(bbox[2]));
   a->add(Object(bbox[3]));
   appearDict->set("BBox", Object(a));
   if (transparencyGroup) {
-    Dict *d = new Dict(xref);
+    Dict *d = new Dict(doc->getXRef());
     d->set("S", Object(objName, "Transparency"));
     appearDict->set("Group", Object(d));
   }
@@ -1829,19 +1828,19 @@ Object Annot::createForm(const GooString *appearBuf, double *bbox, bool transpar
 Dict *Annot::createResourcesDict(const char *formName, Object &&formStream,
 				const char *stateName,
 				double opacity, const char *blendMode) {
-  Dict *gsDict = new Dict(xref);
+  Dict *gsDict = new Dict(doc->getXRef());
   if (opacity != 1) {
     gsDict->set("CA", Object(opacity));
     gsDict->set("ca", Object(opacity));
   }
   if (blendMode)
     gsDict->set("BM", Object(objName, blendMode));
-  Dict *stateDict = new Dict(xref);
+  Dict *stateDict = new Dict(doc->getXRef());
   stateDict->set(stateName, Object(gsDict));
-  Dict *formDict = new Dict(xref);
+  Dict *formDict = new Dict(doc->getXRef());
   formDict->set(formName, std::move(formStream));
 
-  Dict *resDict = new Dict(xref);
+  Dict *resDict = new Dict(doc->getXRef());
   resDict->set("ExtGState", Object(stateDict));
   resDict->set("XObject", Object(formDict));
 
@@ -1852,7 +1851,7 @@ Object Annot::getAppearanceResDict() {
   Object obj1, obj2;
 
   // Fetch appearance's resource dict (if any)
-  obj1 = appearance.fetch(xref);
+  obj1 = appearance.fetch(doc->getXRef());
   if (obj1.isStream()) {
     obj2 = obj1.streamGetDict()->lookup("Resources");
     if (obj2.isDict()) {
@@ -2767,7 +2766,7 @@ void AnnotFreeText::setCalloutLine(AnnotCalloutLine *line) {
   } else {
     double x1 = line->getX1(), y1 = line->getY1();
     double x2 = line->getX2(), y2 = line->getY2();
-    obj1 = Object( new Array(xref) );
+    obj1 = Object( new Array(doc->getXRef()) );
     obj1.arrayAdd( Object(x1) );
     obj1.arrayAdd( Object(y1) );
     obj1.arrayAdd( Object(x2) );
@@ -2891,7 +2890,7 @@ void AnnotFreeText::generateFreeTextAppearance()
       Object fontDictionary = fontResources.getDict()->lookup(da.getFontName().getName(), &fontReference);
 
       if (fontDictionary.isDict()) {
-        font = GfxFont::makeFont(xref, da.getFontName().getName(), fontReference, fontDictionary.getDict());
+        font = GfxFont::makeFont(doc->getXRef(), da.getFontName().getName(), fontReference, fontDictionary.getDict());
       } else {
         error(errSyntaxWarning, -1, "Font dictionary is not a dictionary");
       }
@@ -2900,9 +2899,9 @@ void AnnotFreeText::generateFreeTextAppearance()
 
   // if fontname is not in the default resources, create a Helvetica fake font
   if (!font) {
-    Dict *fontResDict = new Dict(xref);
+    Dict *fontResDict = new Dict(doc->getXRef());
     resourceObj = Object(fontResDict);
-    font = createAnnotDrawFont(xref, fontResDict, da.getFontName().getName());
+    font = createAnnotDrawFont(doc->getXRef(), fontResDict, da.getFontName().getName());
   }
 
   // Set font state
@@ -3147,7 +3146,7 @@ void AnnotLine::setVertices(double x1, double y1, double x2, double y2) {
   coord1 = std::make_unique<AnnotCoord>(x1, y1);
   coord2 = std::make_unique<AnnotCoord>(x2, y2);
 
-  Array *lArray = new Array(xref);
+  Array *lArray = new Array(doc->getXRef());
   lArray->add( Object(x1) );
   lArray->add( Object(y1) );
   lArray->add( Object(x2) );
@@ -3161,7 +3160,7 @@ void AnnotLine::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyl
   startStyle = start;
   endStyle = end;
 
-  Array *leArray = new Array(xref);
+  Array *leArray = new Array(doc->getXRef());
   leArray->add( Object(objName, convertAnnotLineEndingStyle( startStyle )) );
   leArray->add( Object(objName, convertAnnotLineEndingStyle( endStyle )) );
 
@@ -3171,7 +3170,7 @@ void AnnotLine::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingStyl
 
 void AnnotLine::setInteriorColor(std::unique_ptr<AnnotColor> &&new_color) {
   if (new_color) {
-    Object obj1 = new_color->writeToObject(xref);
+    Object obj1 = new_color->writeToObject(doc->getXRef());
     update ("IC", std::move(obj1));
     interiorColor = std::move(new_color);
   } else {
@@ -3261,8 +3260,8 @@ void AnnotLine::generateLineAppearance()
 
   // Calculate caption width and height
   if (caption) {
-    fontResDict = new Dict(xref);
-    font = createAnnotDrawFont(xref, fontResDict);
+    fontResDict = new Dict(doc->getXRef());
+    font = createAnnotDrawFont(doc->getXRef(), fontResDict);
     int lines = 0;
     int i = 0;
     while (i < contents->getLength()) {
@@ -3521,7 +3520,7 @@ void AnnotTextMarkup::setType(AnnotSubtype new_type) {
 }
 
 void AnnotTextMarkup::setQuadrilaterals(AnnotQuadrilaterals *quadPoints) {
-  Array *a = new Array(xref);
+  Array *a = new Array(doc->getXRef());
 
   for (int i = 0; i < quadPoints->getQuadrilateralsLength(); ++i) {
     a->add(Object(quadPoints->getX1(i)));
@@ -4870,18 +4869,18 @@ void AnnotWidget::generateFieldAppearance(bool *addedDingbatsResource) {
 
   resources = form->getDefaultResources();
 
-  const bool success = appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), xref, addedDingbatsResource);
+  const bool success = appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource);
   if (!success && da != form->getDefaultAppearance()) {
     da = form->getDefaultAppearance();
-    appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), xref, addedDingbatsResource);
+    appearBuilder.drawFormField(field, form, resources, da, border.get(), appearCharacs.get(), rect.get(), appearState.get(), doc->getXRef(), addedDingbatsResource);
   }
 
   const GooString *appearBuf = appearBuilder.buffer();
   // build the appearance stream dictionary
-  Dict *appearDict = new Dict(xref);
+  Dict *appearDict = new Dict(doc->getXRef());
   appearDict->add("Length", Object(appearBuf->getLength()));
   appearDict->add("Subtype", Object(objName, "Form"));
-  Array *bbox = new Array(xref);
+  Array *bbox = new Array(doc->getXRef());
   bbox->add(Object(0));
   bbox->add(Object(0));
   bbox->add(Object(rect->x2 - rect->x1));
@@ -4919,17 +4918,17 @@ void AnnotWidget::updateAppearanceStream()
   generateFieldAppearance(&dummyAddDingbatsResource);
 
   // Fetch the appearance stream we've just created
-  Object obj1 = appearance.fetch(xref);
+  Object obj1 = appearance.fetch(doc->getXRef());
 
   // If this the first time updateAppearanceStream() is called on this widget,
   // create a new AP dictionary containing the new appearance stream.
   // Otherwise, just update the stream we had created previously.
   if (updatedAppearanceStream == Ref::INVALID()) {
     // Write the appearance stream
-    updatedAppearanceStream = xref->addIndirectObject(&obj1);
+    updatedAppearanceStream = doc->getXRef()->addIndirectObject(&obj1);
 
     // Write the AP dictionary
-    obj1 = Object(new Dict(xref));
+    obj1 = Object(new Dict(doc->getXRef()));
     obj1.dictAdd("N", Object(updatedAppearanceStream));
 
     // Update our internal pointers to the appearance dictionary
@@ -4938,7 +4937,7 @@ void AnnotWidget::updateAppearanceStream()
     update("AP", std::move(obj1));
   } else {
     // Replace the existing appearance stream
-    xref->setModifiedObject(&obj1, updatedAppearanceStream);
+    doc->getXRef()->setModifiedObject(&obj1, updatedAppearanceStream);
   }
 }
 
@@ -5282,7 +5281,7 @@ void AnnotGeometry::setType(AnnotSubtype new_type) {
 
 void AnnotGeometry::setInteriorColor(std::unique_ptr<AnnotColor> &&new_color) {
   if (new_color) {
-    Object obj1 = new_color->writeToObject(xref);
+    Object obj1 = new_color->writeToObject(doc->getXRef());
     update ("IC", std::move(obj1));
     interiorColor = std::move(new_color);
   } else {
@@ -5522,7 +5521,7 @@ void AnnotPolygon::setType(AnnotSubtype new_type) {
 }
 
 void AnnotPolygon::setVertices(AnnotPath *path) {
-  Array *a = new Array(xref);
+  Array *a = new Array(doc->getXRef());
   for (int i = 0; i < path->getCoordsLength(); i++) {
     a->add(Object(path->getX(i)));
     a->add(Object(path->getY(i)));
@@ -5538,7 +5537,7 @@ void AnnotPolygon::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingS
   startStyle = start;
   endStyle = end;
 
-  Array *a = new Array(xref);
+  Array *a = new Array(doc->getXRef());
   a->add( Object(objName, convertAnnotLineEndingStyle( startStyle )) );
   a->add( Object(objName, convertAnnotLineEndingStyle( endStyle )) );
 
@@ -5548,7 +5547,7 @@ void AnnotPolygon::setStartEndStyle(AnnotLineEndingStyle start, AnnotLineEndingS
 
 void AnnotPolygon::setInteriorColor(std::unique_ptr<AnnotColor> &&new_color) {
   if (new_color) {
-    Object obj1 = new_color->writeToObject(xref);
+    Object obj1 = new_color->writeToObject(doc->getXRef());
     update ("IC", std::move(obj1));
     interiorColor = std::move(new_color);
   }
@@ -5812,7 +5811,7 @@ void AnnotInk::initialize(PDFDoc *docA, Dict* dict) {
 void AnnotInk::writeInkList(AnnotPath **paths, int n_paths, Array *dest_array) {
   for (int i = 0; i < n_paths; ++i) {
     AnnotPath *path = paths[i];
-    Array *a = new Array(xref);
+    Array *a = new Array(doc->getXRef());
     for (int j = 0; j < path->getCoordsLength(); ++j) {
       a->add(Object(path->getX(j)));
       a->add(Object(path->getY(j)));
@@ -5843,7 +5842,7 @@ void AnnotInk::freeInkList() {
 void AnnotInk::setInkList(AnnotPath **paths, int n_paths) {
   freeInkList();
 
-  Array *a = new Array(xref);
+  Array *a = new Array(doc->getXRef());
   writeInkList(paths, n_paths, a);
 
   parseInkList(a);
