@@ -28,6 +28,7 @@
  */
 
 #include "poppler-private.h"
+#include "poppler-form.h"
 
 #include <QtCore/QByteArray>
 #include <QtCore/QDebug>
@@ -300,6 +301,11 @@ namespace Debug {
             if ( children )
                 addTocChildren( docSyn, &item, children );
         }
+    }
+
+    FormFieldIconData POPPLER_QT5_EXPORT *FormFieldIconData::getData( const FormFieldIcon &f )
+    {
+        return f.d_ptr;
     }
 
 }

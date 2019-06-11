@@ -49,6 +49,30 @@ namespace Poppler {
     class Link;
 
     class FormFieldData;
+    class FormFieldIconData;
+
+    /**
+	 The class containing the appearance information
+
+	 \since 0.78
+     */
+
+    class POPPLER_QT5_EXPORT FormFieldIcon {
+    
+    friend class FormFieldIconData;
+    
+    public:
+
+    	FormFieldIcon(FormFieldIconData *data);
+    	FormFieldIcon(const FormFieldIcon &ffIcon);
+    	~FormFieldIcon();
+
+    	FormFieldIcon& operator=(const FormFieldIcon &ffIcon);
+
+    private:
+
+    	FormFieldIconData *d_ptr;
+    };
     /**
       The base class representing a form field.
 
@@ -208,6 +232,21 @@ namespace Poppler {
 	 * The caption to be used for the button.
 	 */
 	QString caption() const;
+
+	/**
+	 * Gets the icon used by the button
+	 *
+	 * \since 0.78
+	 */
+	FormFieldIcon icon() const;
+
+	/**
+	 * Sets a new icon for the button, it has to be a icon 
+	 * returned by FormFieldButton::icon.
+	 *
+	 * \since 0.78
+	 */ 
+	void setIcon(const FormFieldIcon &icon);
 
 	/**
 	  The state of the button.

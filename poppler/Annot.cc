@@ -3819,6 +3819,17 @@ bool AnnotWidget::setFormAdditionalAction(FormAdditionalActionsType formAddition
   return true;
 }
 
+void AnnotWidget::setNewAppearance(Object &&newAppearance)
+{
+  if (!newAppearance.isNull()) {
+    appearStreams = std::make_unique<AnnotAppearance>(doc, &newAppearance);
+    update("AP", std::move(newAppearance));
+  }
+
+  if (appearStreams)
+    appearance = appearStreams->getAppearanceStream(AnnotAppearance::appearNormal, appearState->c_str());
+}
+
 // Grand unified handler for preparing text strings to be drawn into form
 // fields.  Takes as input a text string (in PDFDocEncoding or UTF-16).
 // Converts some or all of this string to the appropriate encoding for the
@@ -4980,7 +4991,7 @@ void AnnotWidget::updateAppearanceStream()
 void AnnotWidget::draw(Gfx *gfx, bool printing) {
   if (!isVisible (printing))
     return;
-
+  
   annotLocker();
   bool addDingbatsResource = false;
 

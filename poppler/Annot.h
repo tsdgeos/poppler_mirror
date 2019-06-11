@@ -1409,6 +1409,7 @@ public:
   LinkAction *getAdditionalAction(AdditionalActionsType type); // The caller should delete the result
   LinkAction *getFormAdditionalAction(FormAdditionalActionsType type); // The caller should delete the result
   Dict *getParent() { return parent; }
+  void setNewAppearance(Object &&newAppearance);
 
   bool setFormAdditionalAction(FormAdditionalActionsType type, const GooString &js);
 

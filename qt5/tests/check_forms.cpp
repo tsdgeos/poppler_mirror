@@ -2,6 +2,7 @@
 
 #include <poppler-qt5.h>
 #include <poppler-form.h>
+#include <poppler-private.h>
 #include <Form.h>
 
 class TestForms: public QObject
@@ -12,6 +13,7 @@ public:
 private slots:
     void testCheckbox();// Test for issue #655
     void testCheckboxIssue159();// Test for issue #159
+    void testSetIcon();// Test that setIcon will always be valid.
 };
 
 void TestForms::testCheckbox()
@@ -86,6 +88,64 @@ void TestForms::testCheckboxIssue159()
 
     // Test that "Beer" is indeed not reporting as being selected
     QCOMPARE( beerFieldButton->state() , false );
+}
+
+void TestForms::testSetIcon()
+{
+    QScopedPointer< Poppler::Document > document(Poppler::Document::load(TESTDATADIR "/unittestcases/form_set_icon.pdf"));
+    QVERIFY( document );
+
+    QScopedPointer< Poppler::Page > page(document->page(0));
+    QVERIFY( page );
+
+    QList<Poppler::FormField*> forms = page->formFields();
+
+    Poppler::FormFieldButton *anmButton = nullptr;
+
+    // First we are finding the field which will have its icon changed
+    Q_FOREACH (Poppler::FormField *field, forms) {
+
+        if (field->type() != Poppler::FormField::FormButton)
+            continue;
+
+        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field);
+        if (field->name() == QStringLiteral("anm0"))
+            anmButton = fieldButton;
+
+    }
+
+    QVERIFY( anmButton );
+
+    // Then we set the Icon on this field, for every other field
+    // And verify if it has a valid icon
+    Q_FOREACH (Poppler::FormField *field, forms) {
+
+        if (field->type() != Poppler::FormField::FormButton)
+            continue;
+
+        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field);
+        if (field->name() == QStringLiteral("anm0"))
+            continue;
+
+        Poppler::FormFieldIcon newIcon = fieldButton->icon();
+
+        anmButton->setIcon( newIcon );
+
+        Poppler::FormFieldIcon anmIcon = anmButton->icon();
+
+        QVERIFY( Poppler::FormFieldIconData::getData( anmIcon ) );
+        QVERIFY( Poppler::FormFieldIconData::getData( anmIcon )->icon );
+
+        QCOMPARE( Poppler::FormFieldIconData::getData( anmIcon )->icon->lookupNF("AP").dictLookupNF("N").getRef().num,
+                  Poppler::FormFieldIconData::getData( newIcon )->icon->lookupNF("AP").dictLookupNF("N").getRef().num);
+    }
+
+    // Just making sure that setting a invalid icon will still produce a valid icon.
+    anmButton->setIcon( nullptr );
+    Poppler::FormFieldIcon anmIcon = anmButton->icon();
+
+    QVERIFY( Poppler::FormFieldIconData::getData( anmIcon ) );
+    QVERIFY( Poppler::FormFieldIconData::getData( anmIcon )->icon );
 }
 
 QTEST_GUILESS_MAIN(TestForms)

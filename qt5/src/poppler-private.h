@@ -237,6 +237,14 @@ namespace Poppler {
 		::FormWidget *fm;
 		QRectF box;
     };
+    
+    class FormFieldIcon;
+    class FormFieldIconData
+    {
+    public:
+    	static FormFieldIconData *getData( const FormFieldIcon &f );
+    	Dict *icon;
+    };
 
 }
 
