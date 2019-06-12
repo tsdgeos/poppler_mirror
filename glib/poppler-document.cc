@@ -1776,6 +1776,50 @@ poppler_page_range_free (PopplerPageRange *range)
 }
 
 /**
+ * poppler_document_get_print_page_ranges:
+ * @document: A #PopplerDocument
+ * @n_ranges: (out): return location for number of ranges
+ *
+ * Returns the suggested page ranges to print in the form of array
+ * of #PopplerPageRanges and number of ranges.
+ *
+ * Returns: (array length=n_ranges) (transfer full): an array
+ *          of #PopplerPageRanges or NULL. Free the array when
+ *          it is no longer needed.
+ *
+ * Since: 0.78
+ **/
+PopplerPageRange *
+poppler_document_get_print_page_ranges (PopplerDocument *document,
+                                        int             *n_ranges)
+{
+  Catalog *catalog;
+  ViewerPreferences *preferences;
+  std::vector<std::pair<int, int>> ranges;
+  PopplerPageRange *result = nullptr;
+
+  *n_ranges = 0;
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), NULL);
+
+  catalog = document->doc->getCatalog ();
+  if (catalog && catalog->isOk ()) {
+    preferences = catalog->getViewerPreferences ();
+    if (preferences) {
+      ranges = preferences->getPrintPageRange ();
+
+      *n_ranges = ranges.size ();
+      result = g_new (PopplerPageRange, ranges.size ());
+      for (guint i = 0; i < ranges.size (); ++i) {
+        result[i].start_page = ranges[i].first;
+        result[i].end_page = ranges[i].second;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
  * poppler_document_get_permissions:
  * @document: A #PopplerDocument
  *

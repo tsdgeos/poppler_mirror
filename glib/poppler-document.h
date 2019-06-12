@@ -398,6 +398,9 @@ POPPLER_PUBLIC
 PopplerPrintDuplex poppler_document_get_print_duplex       (PopplerDocument *document);
 POPPLER_PUBLIC
 gint               poppler_document_get_print_n_copies     (PopplerDocument *document);
+POPPLER_PUBLIC
+PopplerPageRange  *poppler_document_get_print_page_ranges  (PopplerDocument *document,
+                                                            int             *n_ranges);
 
 /* Attachments */
 POPPLER_PUBLIC
