@@ -48,57 +48,53 @@ MovieActivationParameters::~MovieActivationParameters() {
 
 void MovieActivationParameters::parseMovieActivation(const Object* aDict) {
   Object obj1 = aDict->dictLookup("Start");
-  if (obj1.isNull()) {
-    if (obj1.isInt()) {
-      // If it is representable as an integer (subject to the implementation limit for
-      // integers, as described in Appendix C), it should be specified as such.
+  if (obj1.isInt()) {
+    // If it is representable as an integer (subject to the implementation limit for
+    // integers, as described in Appendix C), it should be specified as such.
 
-      start.units = obj1.getInt();
-    } else if (obj1.isString()) {
-      // If it is not representable as an integer, it should be specified as an 8-byte
-      // string representing a 64-bit twos-complement integer, most significant
-      // byte first.
+    start.units = obj1.getInt();
+  } else if (obj1.isString()) {
+    // If it is not representable as an integer, it should be specified as an 8-byte
+    // string representing a 64-bit twos-complement integer, most significant
+    // byte first.
 
+    // UNSUPPORTED
+  } else if (obj1.isArray()) {
+    Array* a = obj1.getArray();
+
+    Object tmp = a->get(0);
+    if (tmp.isInt()) {
+      start.units = tmp.getInt();
+    }
+    if (tmp.isString()) {
       // UNSUPPORTED
-    } else if (obj1.isArray()) {
-      Array* a = obj1.getArray();
+    }
 
-      Object tmp = a->get(0);
-      if (tmp.isInt()) {
-        start.units = tmp.getInt();
-      }
-      if (tmp.isString()) {
-        // UNSUPPORTED
-      }
-
-      tmp = a->get(1);
-      if (tmp.isInt()) {
-        start.units_per_second = tmp.getInt();
-      }
+    tmp = a->get(1);
+    if (tmp.isInt()) {
+      start.units_per_second = tmp.getInt();
     }
   }
 
   obj1 = aDict->dictLookup("Duration");
-  if (obj1.isNull()) {
-    if (obj1.isInt()) {
-      duration.units = obj1.getInt();
-    } else if (obj1.isString()) {
+  if (obj1.isInt()) {
+    duration.units = obj1.getInt();
+  } else if (obj1.isString()) {
+    // UNSUPPORTED
+  } else if (obj1.isArray()) {
+    Array* a = obj1.getArray();
+
+    Object tmp = a->get(0);
+    if (tmp.isInt()) {
+      duration.units = tmp.getInt();
+    }
+    if (tmp.isString()) {
       // UNSUPPORTED
-    } else if (obj1.isArray()) {
-      Array* a = obj1.getArray();
+    }
 
-      Object tmp = a->get(0);
-      if (tmp.isInt()) {
-        duration.units = tmp.getInt();
-      }
-      if (tmp.isString()) {
-        // UNSUPPORTED
-      }
-
-      tmp = a->get(1);
-      if (tmp.isInt()) {
-        duration.units_per_second = tmp.getInt();
-      }
+    tmp = a->get(1);
+    if (tmp.isInt()) {
+      duration.units_per_second = tmp.getInt();
     }
   }
 
