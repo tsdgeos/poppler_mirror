@@ -48,7 +48,7 @@
 // Function
 //------------------------------------------------------------------------
 
-Function::Function() {
+Function::Function() : domain{} {
 }
 
 Function::~Function() {
