@@ -564,6 +564,7 @@ pgd_movie_view_set_movie (GtkWidget    *movie_view,
 	GtkWidget  *button;
         GEnumValue *enum_value;
 	gint        row = 0;
+	PopplerMovieTime start, duration;
 
 	table = gtk_bin_get_child (GTK_BIN (movie_view));
 	if (table) {
@@ -590,7 +591,15 @@ pgd_movie_view_set_movie (GtkWidget    *movie_view,
 	pgd_table_add_property (GTK_GRID (table), "<b>Need Poster:</b>", poppler_movie_need_poster (movie) ? "Yes" : "No", &row);
 	pgd_table_add_property (GTK_GRID (table), "<b>Show Controls:</b>", poppler_movie_show_controls (movie) ? "Yes" : "No", &row);
         enum_value = g_enum_get_value ((GEnumClass *) g_type_class_ref (POPPLER_TYPE_MOVIE_PLAY_MODE), poppler_movie_get_play_mode (movie));
-        pgd_table_add_property (GTK_GRID (table), "<b>Play mode:</b>", enum_value->value_name, &row);
+        pgd_table_add_property (GTK_GRID (table), "<b>Play Mode:</b>", enum_value->value_name, &row);
+	pgd_table_add_property (GTK_GRID (table), "<b>Synchronous Play:</b>", poppler_movie_synchronous_play (movie) ? "Yes" : "No", &row);
+	pgd_table_add_property (GTK_GRID (table), "<b>Volume:</b>", g_strdup_printf("%i", poppler_movie_get_volume (movie)), &row);
+	pgd_table_add_property (GTK_GRID (table), "<b>Rate:</b>", g_strdup_printf("%g", poppler_movie_get_rate (movie)), &row);
+        start = poppler_movie_get_start (movie);
+        pgd_table_add_property (GTK_GRID (table), "<b>Start:</b>", g_strdup_printf("%lu/%i s", start.units, start.units_per_second), &row);
+        duration = poppler_movie_get_duration (movie);
+        pgd_table_add_property (GTK_GRID (table), "<b>Duration:</b>", g_strdup_printf("%lu/%i s", duration.units, duration.units_per_second), &row);
+	pgd_table_add_property (GTK_GRID (table), "<b>Rotation Angle:</b>", g_strdup_printf("%u", poppler_movie_get_rotation_angle (movie)), &row);
 
 	button = gtk_button_new_with_mnemonic ("_Play");
 	g_signal_connect (button, "clicked",
