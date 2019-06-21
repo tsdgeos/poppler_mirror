@@ -2188,7 +2188,6 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
   unsigned long code;
   int wmode;
   const char **cmapName;
-  CMap *cMap;
   CMapListEntry *lp;
   int cmap;
   int cmapPlatform, cmapEncoding;
@@ -2261,14 +2260,15 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
     for (cmapName = lp->CMaps;*cmapName != nullptr;cmapName++) {
       GooString cname(*cmapName);
 
-      if ((cMap = globalParams->getCMap(getCollection(),&cname))
+      CMap *cnameCMap;
+      if ((cnameCMap = globalParams->getCMap(getCollection(),&cname))
 	   != nullptr) {
-	    if (cMap->getWMode()) {
-		cMap->setReverseMap(vumap,n,1);
+	    if (cnameCMap->getWMode()) {
+		cnameCMap->setReverseMap(vumap,n,1);
 	    } else {
-		cMap->setReverseMap(humap,n,N_UCS_CANDIDATES);
+		cnameCMap->setReverseMap(humap,n,N_UCS_CANDIDATES);
 	    }
-	cMap->decRefCnt();
+	cnameCMap->decRefCnt();
       }
     }
     ff->setupGSUB(lp->scriptTag, lp->languageTag);
