@@ -4047,7 +4047,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
   const GfxFont *font;
   double dx, dy;
   double fontSize, fontSize2, borderWidth, x, xPrev, y, w, wMax;
-  int tfPos, tmPos, i, j;
+  int tfPos, tmPos, j;
   int rot;
   bool freeText = false;      // true if text should be freed before return
   GfxFont *fontToFree = nullptr;
@@ -4060,7 +4060,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
   tfPos = tmPos = -1;
   if (da) {
     daToks = new std::vector<GooString*>();
-    i = 0;
+    int i = 0;
     while (i < da->getLength()) {
       while (i < da->getLength() && Lexer::isSpace(da->getChar(i))) {
         ++i;
@@ -4148,7 +4148,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
       len = text->getLength();
 
     GooString *newText = new GooString;
-    for (i = 0; i < len; ++i)
+    for (int i = 0; i < len; ++i)
       newText->append('*');
     text = newText;
     freeText = true;
@@ -4193,7 +4193,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     if (fontSize == 0) {
       for (fontSize = 20; fontSize > 1; --fontSize) {
         y = dy - 3;
-        i = 0;
+        int i = 0;
         while (i < text->getLength()) {
           Annot::layoutText(text, &convertedText, &i, font, &w, wMax / fontSize, nullptr,
                      forceZapfDingbats);
@@ -4228,7 +4228,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
     // write the DA string
     if (daToks) {
-      for (i = 0; i < (int)daToks->size(); ++i) {
+      for (int i = 0; i < (int)daToks->size(); ++i) {
         appearBuf->append((*daToks)[i])->append(' ');
       }
     }
@@ -4239,7 +4239,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
     }
 
     // write a series of lines of text
-    i = 0;
+    int i = 0;
     xPrev = 0;
     while (i < text->getLength()) {
       Annot::layoutText(text, &convertedText, &i, font, &w, wMax / fontSize, nullptr,
@@ -4294,7 +4294,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         }
       }
 
-      i = 0;
+      int i = 0;
       Annot::layoutText(text, &convertedText, &i, font, nullptr, 0.0, &charCount,
                  forceZapfDingbats);
       if (charCount > comb)
@@ -4370,8 +4370,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
       // regular (non-comb) formatting
     } else {
-      i = 0;
-      Annot::layoutText(text, &convertedText, &i, font, &w, 0.0, nullptr,
+      int ii = 0;
+      Annot::layoutText(text, &convertedText, &ii, font, &w, 0.0, nullptr,
                  forceZapfDingbats);
 
       // compute font autosize
