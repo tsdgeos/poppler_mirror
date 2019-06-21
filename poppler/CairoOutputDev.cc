@@ -87,12 +87,12 @@
 // CairoImage
 //------------------------------------------------------------------------
 
-CairoImage::CairoImage (double x1, double y1, double x2, double y2) {
-  this->image = nullptr;
-  this->x1 = x1;
-  this->y1 = y1;
-  this->x2 = x2;
-  this->y2 = y2;
+CairoImage::CairoImage (double x1A, double y1A, double x2A, double y2A) {
+  image = nullptr;
+  x1 = x1A;
+  y1 = y1A;
+  x2 = x2A;
+  y2 = y2A;
 }
 
 CairoImage::~CairoImage () {
@@ -100,10 +100,10 @@ CairoImage::~CairoImage () {
     cairo_surface_destroy (image);
 }
 
-void CairoImage::setImage (cairo_surface_t *image) {
-  if (this->image)
-    cairo_surface_destroy (this->image);
-  this->image = cairo_surface_reference (image);
+void CairoImage::setImage (cairo_surface_t *i) {
+  if (image)
+    cairo_surface_destroy (image);
+  image = cairo_surface_reference (i);
 }
 
 //------------------------------------------------------------------------
@@ -193,25 +193,25 @@ CairoOutputDev::~CairoOutputDev() {
     delete actualText;  
 }
 
-void CairoOutputDev::setCairo(cairo_t *cairo)
+void CairoOutputDev::setCairo(cairo_t *c)
 {
-  if (this->cairo != nullptr) {
-    cairo_status_t status = cairo_status (this->cairo);
+  if (cairo != nullptr) {
+    cairo_status_t status = cairo_status (cairo);
     if (status) {
       error(errInternal, -1, "cairo context error: {0:s}\n", cairo_status_to_string(status));
     }
-    cairo_destroy (this->cairo);
+    cairo_destroy (cairo);
     assert(!cairo_shape);
   }
-  if (cairo != nullptr) {
-    this->cairo = cairo_reference (cairo);
+  if (c != nullptr) {
+    cairo = cairo_reference (c);
 	/* save the initial matrix so that we can use it for type3 fonts. */
 	//XXX: is this sufficient? could we miss changes to the matrix somehow?
 	cairo_get_matrix(cairo, &orig_matrix);
 	setContextAntialias(cairo, antialias);
   } else {
-    this->cairo = nullptr;
-    this->cairo_shape = nullptr;
+    cairo = nullptr;
+    cairo_shape = nullptr;
   }
 }
 
@@ -231,9 +231,9 @@ void CairoOutputDev::setTextPage(TextPage *text)
   }
 }
 
-void CairoOutputDev::setAntialias(cairo_antialias_t antialias)
+void CairoOutputDev::setAntialias(cairo_antialias_t a)
 {
-  this->antialias = antialias;
+  antialias = a;
   if (cairo)
     setContextAntialias (cairo, antialias);
   if (cairo_shape)
@@ -751,11 +751,11 @@ void CairoOutputDev::alignStrokeCoords(GfxSubpath *subpath, int i, double *x, do
 
 #undef STROKE_COORD_TOLERANCE
 
-void CairoOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path) {
+void CairoOutputDev::doPath(cairo_t *c, GfxState *state, GfxPath *path) {
   GfxSubpath *subpath;
   int i, j;
   double x, y;
-  cairo_new_path (cairo);
+  cairo_new_path (c);
   for (i = 0; i < path->getNumSubpaths(); ++i) {
     subpath = path->getSubpath(i);
     if (subpath->getNumPoints() > 0) {
@@ -765,7 +765,7 @@ void CairoOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path) {
         x = subpath->getX(0);
         y = subpath->getY(0);
       }
-      cairo_move_to (cairo, x, y);
+      cairo_move_to (c, x, y);
       j = 1;
       while (j < subpath->getNumPoints()) {
 	if (subpath->getCurve(j)) {
@@ -775,7 +775,7 @@ void CairoOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path) {
             x = subpath->getX(j+2);
             y = subpath->getY(j+2);
           }
-	  cairo_curve_to( cairo,
+	  cairo_curve_to( c,
 			  subpath->getX(j), subpath->getY(j),
 			  subpath->getX(j+1), subpath->getY(j+1),
 			  x, y);
@@ -788,13 +788,13 @@ void CairoOutputDev::doPath(cairo_t *cairo, GfxState *state, GfxPath *path) {
             x = subpath->getX(j);
             y = subpath->getY(j);
           }
-          cairo_line_to (cairo, x, y);
+          cairo_line_to (c, x, y);
 	  ++j;
 	}
       }
       if (subpath->isClosed()) {
 	LOG (printf ("close\n"));
-	cairo_close_path (cairo);
+	cairo_close_path (c);
       }
     }
   }
