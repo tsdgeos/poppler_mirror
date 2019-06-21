@@ -4780,8 +4780,8 @@ void TextSelectionPainter::endPage()
       GooString *string = new GooString ((char *) sel->word->charcode, fEnd - begin);
       out->beginString(state, string);
 
-      for (int i = begin; i < fEnd; i++) {
-        if (i != begin && sel->word->charPos[i] == sel->word->charPos[i - 1])
+      for (int j = begin; j < fEnd; j++) {
+        if (j != begin && sel->word->charPos[j] == sel->word->charPos[j - 1])
           continue;
 
 	out->drawChar(state, sel->word->textMat[i].m[4], sel->word->textMat[i].m[5], 0, 0, 0, 0,
