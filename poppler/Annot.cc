@@ -287,8 +287,8 @@ AnnotPath::AnnotPath(Array *array) {
   parsePathArray(array);
 }
 
-AnnotPath::AnnotPath(std::vector<AnnotCoord> &&coords) {
-  this->coords = std::move(coords);
+AnnotPath::AnnotPath(std::vector<AnnotCoord> &&coordsA) {
+  coords = std::move(coordsA);
 }
 
 AnnotPath::~AnnotPath() = default;
