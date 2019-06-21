@@ -2803,7 +2803,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   int count[4];
   int lrCount;
   int col1, col2;
-  int i, j, n;
+  int j, n;
 
   if (rawOrder) {
     primaryRot = 0;
@@ -3331,7 +3331,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   for (blk = blkList; blk; blk = blk->next) {
     for (line = blk->lines; line; line = line->next) {
       for (word0 = line->words; word0; word0 = word0->next) {
-	for (i = 0; i < word0->len; ++i) {
+	for (int i = 0; i < word0->len; ++i) {
 	  if (unicodeTypeL(word0->text[i])) {
 	    ++lrCount;
 	  } else if (unicodeTypeR(word0->text[i])) {
@@ -3357,6 +3357,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   if (physLayout && fixedPitch) {
 
     blocks = (TextBlock **)gmallocn(nBlocks, sizeof(TextBlock *));
+    int i;
     for (blk = blkList, i = 0; blk; blk = blk->next, ++i) {
       blocks[i] = blk;
       col1 = 0; // make gcc happy
@@ -3386,6 +3387,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
 
     // sort blocks into xy order for column assignment
     blocks = (TextBlock **)gmallocn(nBlocks, sizeof(TextBlock *));
+    int i;
     for (blk = blkList, i = 0; blk; blk = blk->next, ++i) {
       blocks[i] = blk;
     }
@@ -3485,7 +3487,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   //----- reading order sort
 
   // compute space on left and right sides of each block
-  for (i = 0; i < nBlocks; ++i) {
+  for (int i = 0; i < nBlocks; ++i) {
     blk0 = blocks[i];
     for (j = 0; j < nBlocks; ++j) {
       blk1 = blocks[j];
@@ -3501,7 +3503,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
 
   int sortPos = 0;
   bool *visited = (bool *)gmallocn(nBlocks, sizeof(bool));
-  for (i = 0; i < nBlocks; i++) {
+  for (int i = 0; i < nBlocks; i++) {
     visited[i] = false;
   }
 
@@ -3677,7 +3679,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   PDFRectangle *envelopes = new PDFRectangle [numTables];
   TextBlock **ending_blocks = new TextBlock* [numTables];
 
-  for (i = 0; i < numTables; i++) {
+  for (int i = 0; i < numTables; i++) {
     envelopes[i].x1 = DBL_MAX;
     envelopes[i].x2 = DBL_MIN;
     envelopes[i].y1 = DBL_MAX;
@@ -3764,7 +3766,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
     }
   }
 
-  i = -1;
+  int i = -1;
   for (blk1 = blkList; blk1; blk1 = blk1->next) {
     i++;
     sortPos = blk1->visitDepthFirst(blkList, i, blocks, sortPos, visited);
