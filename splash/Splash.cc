@@ -367,20 +367,20 @@ void Splash::pipeRun(SplashPipe *pipe) {
 #ifdef SPLASH_CMYK
     if (bitmap->mode == splashModeCMYK8 || bitmap->mode == splashModeDeviceN8) {
       if (state->fillOverprint && state->overprintMode && pipe->pattern->isCMYK()) {
-        unsigned int mask = 15;
+        unsigned int overprintMask = 15;
         if (pipe->cSrcVal[0] == 0) {
-          mask &= ~1;
+          overprintMask &= ~1;
         }
         if (pipe->cSrcVal[1] == 0) {
-          mask &= ~2;
+          overprintMask &= ~2;
         }
         if (pipe->cSrcVal[2] == 0) {
-          mask &= ~4;
+          overprintMask &= ~4;
         }
         if (pipe->cSrcVal[3] == 0) {
-          mask &= ~8;
+          overprintMask &= ~8;
         }
-        state->overprintMask = mask;
+        state->overprintMask = overprintMask;
       }
     }
 #endif
