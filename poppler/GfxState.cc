@@ -3516,10 +3516,10 @@ GfxShading::GfxShading(GfxShading *shading) {
     background.c[i] = shading->background.c[i];
   }
   hasBackground = shading->hasBackground;
-  xMin = shading->xMin;
-  yMin = shading->yMin;
-  xMax = shading->xMax;
-  yMax = shading->yMax;
+  bbox_xMin = shading->bbox_xMin;
+  bbox_yMin = shading->bbox_yMin;
+  bbox_xMax = shading->bbox_xMax;
+  bbox_yMax = shading->bbox_yMax;
   hasBBox = shading->hasBBox;
 }
 
@@ -3630,7 +3630,7 @@ bool GfxShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *s
     }
   }
 
-  xMin = yMin = xMax = yMax = 0;
+  bbox_xMin = bbox_yMin = bbox_xMax = bbox_yMax = 0;
   hasBBox = false;
   obj1 = dict->lookup("BBox");
   if (obj1.isArray()) {
@@ -3642,10 +3642,10 @@ bool GfxShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *s
       if (obj2.isNum() && obj3.isNum() && obj4.isNum() && obj5.isNum())
       {
         hasBBox = true;
-        xMin = obj2.getNum();
-        yMin = obj3.getNum();
-        xMax = obj4.getNum();
-        yMax = obj5.getNum();
+        bbox_xMin = obj2.getNum();
+        bbox_yMin = obj3.getNum();
+        bbox_xMax = obj4.getNum();
+        bbox_yMax = obj5.getNum();
       } else {
         error(errSyntaxWarning, -1, "Bad BBox in shading dictionary (Values not numbers)");
       }
