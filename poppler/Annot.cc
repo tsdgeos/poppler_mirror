@@ -4485,11 +4485,11 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 	i = j;
       }
     }
-    for (std::size_t i = 2; i < daToks->size(); ++i) {
-      if (i >= 2 && !((*daToks)[i])->cmp("Tf")) {
-	tfPos = i - 2;
-      } else if (i >= 6 && !((*daToks)[i])->cmp("Tm")) {
-	tmPos = i - 6;
+    for (std::size_t k = 2; k < daToks->size(); ++k) {
+      if (k >= 2 && !((*daToks)[k])->cmp("Tf")) {
+	tfPos = k - 2;
+      } else if (k >= 6 && !((*daToks)[k])->cmp("Tm")) {
+	tmPos = k - 6;
       }
     }
   } else {
@@ -4606,8 +4606,8 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
     // write the DA string
     if (daToks) {
-      for (std::size_t j = 0; j < daToks->size(); ++j) {
-        appearBuf->append((*daToks)[j])->append(' ');
+      for (std::size_t k = 0; k < daToks->size(); ++k) {
+        appearBuf->append((*daToks)[k])->append(' ');
       }
     }
 
