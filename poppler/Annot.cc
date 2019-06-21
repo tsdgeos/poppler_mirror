@@ -4346,16 +4346,16 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
         CharCode code;
         Unicode *uAux;
         int uLen, n;
-        double dx, dy, ox, oy;
+        double char_dx, char_dy, ox, oy;
 
-        dx = 0.0;
-        n = font->getNextChar(s, len, &code, &uAux, &uLen, &dx, &dy, &ox, &oy);
-        dx *= fontSize;
+        char_dx = 0.0;
+        n = font->getNextChar(s, len, &code, &uAux, &uLen, &char_dx, &char_dy, &ox, &oy);
+        char_dx *= fontSize;
 
         // center each character within its cell, by advancing the text
         // position the appropriate amount relative to the start of the
         // previous character
-        x = 0.5 * (w - dx);
+        x = 0.5 * (w - char_dx);
         appearBuf->appendf("{0:.2f} 0 Td\n", x - xPrev + w);
 
         GooString charBuf(s, n);
