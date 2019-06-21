@@ -2257,9 +2257,9 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
 
           if (j < line_words->size() - 1)
             {
-              TextWordSelection *word_sel = (*line_words)[j + 1];
+              TextWordSelection *next_word_sel = (*line_words)[j + 1];
 
-              word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
+              next_word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
 	      // space is from one word to other and with the same height as
 	      // first word.
 	      rect->x1 = x2;
