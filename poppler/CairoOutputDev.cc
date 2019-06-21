@@ -161,7 +161,7 @@ CairoOutputDev::CairoOutputDev() {
   cairo_shape = nullptr;
   knockoutCount = 0;
 
-  text = nullptr;
+  textPage = nullptr;
   actualText = nullptr;
 
   // the SA parameter supposedly defaults to false, but Acrobat
@@ -187,8 +187,8 @@ CairoOutputDev::~CairoOutputDev() {
     cairo_pattern_destroy (mask);
   if (shape)
     cairo_pattern_destroy (shape);
-  if (text) 
-    text->decRefCnt();
+  if (textPage)
+    textPage->decRefCnt();
   if (actualText)
     delete actualText;  
 }
@@ -217,16 +217,16 @@ void CairoOutputDev::setCairo(cairo_t *cairo)
 
 void CairoOutputDev::setTextPage(TextPage *text)
 {
-  if (this->text) 
-    this->text->decRefCnt();
+  if (textPage)
+    textPage->decRefCnt();
   if (actualText)
     delete actualText;
   if (text) {
-    this->text = text;
-    this->text->incRefCnt();
+    textPage = text;
+    textPage->incRefCnt();
     actualText = new ActualText(text);
   } else {
-    this->text = nullptr;
+    textPage = nullptr;
     actualText = nullptr;
   }
 }
@@ -276,17 +276,17 @@ void CairoOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
   stroke_pattern = cairo_pattern_reference(fill_pattern);
   stroke_color.r = stroke_color.g = stroke_color.b = 0;
 
-  if (text)
-    text->startPage(state);
+  if (textPage)
+    textPage->startPage(state);
   if (xrefA != nullptr) {
     xref = xrefA;
   }
 }
 
 void CairoOutputDev::endPage() {
-  if (text) {
-    text->endPage();
-    text->coalesce(true, 0, false);
+  if (textPage) {
+    textPage->endPage();
+    textPage->coalesce(true, 0, false);
   }
 }
 
@@ -354,8 +354,8 @@ void CairoOutputDev::updateAll(GfxState *state) {
   updateStrokeOpacity(state);
   updateBlendMode(state);
   needFontUpdate = true;
-  if (text)
-    text->updateFont(state);
+  if (textPage)
+    textPage->updateFont(state);
 }
 
 void CairoOutputDev::setDefaultCTM(const double *ctm) {
@@ -659,8 +659,8 @@ void CairoOutputDev::updateFont(GfxState *state) {
   needFontUpdate = false;
 
   //FIXME: use cairo font engine?
-  if (text)
-    text->updateFont(state);
+  if (textPage)
+    textPage->updateFont(state);
   
   currentFont = fontEngine->getFont (state->getFont(), doc, printing, xref);
 
@@ -1423,7 +1423,7 @@ void CairoOutputDev::drawChar(GfxState *state, double x, double y,
     }
   }
 
-  if (!text)
+  if (!textPage)
     return;
   actualText->addChar (state, x, y, dx, dy, code, nBytes, u, uLen);
 }
@@ -1580,13 +1580,13 @@ void CairoOutputDev::endTextObject(GfxState *state) {
 
 void CairoOutputDev::beginActualText(GfxState *state, const GooString *text)
 {
-  if (this->text)
+  if (textPage)
     actualText->begin(state, text);
 }
 
 void CairoOutputDev::endActualText(GfxState *state)
 {
-  if (text)
+  if (textPage)
     actualText->end(state);
 }
 
