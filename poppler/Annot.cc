@@ -3784,14 +3784,14 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
   updatedAppearanceStream = Ref::INVALID();
 }
 
-LinkAction* AnnotWidget::getAdditionalAction(AdditionalActionsType type)
+LinkAction* AnnotWidget::getAdditionalAction(AdditionalActionsType additionalActionType)
 {
-  return ::getAdditionalAction(type, &additionalActions, doc);
+  return ::getAdditionalAction(additionalActionType, &additionalActions, doc);
 }
 
-LinkAction* AnnotWidget::getFormAdditionalAction(FormAdditionalActionsType type)
+LinkAction* AnnotWidget::getFormAdditionalAction(FormAdditionalActionsType formAdditionalActionType)
 {
-  return ::getFormAdditionalAction(type, &additionalActions, doc);
+  return ::getFormAdditionalAction(formAdditionalActionType, &additionalActions, doc);
 }
 
 // Grand unified handler for preparing text strings to be drawn into form
@@ -5160,12 +5160,12 @@ void AnnotScreen::initialize(PDFDoc *docA, Dict* dict) {
   }
 }
 
-LinkAction* AnnotScreen::getAdditionalAction(AdditionalActionsType type)
+LinkAction* AnnotScreen::getAdditionalAction(AdditionalActionsType additionalActionType)
 {
-  if (type == actionFocusIn || type == actionFocusOut) // not defined for screen annotation
+  if (additionalActionType == actionFocusIn || additionalActionType == actionFocusOut) // not defined for screen annotation
     return nullptr;
 
-  return ::getAdditionalAction(type, &additionalActions, doc);
+  return ::getAdditionalAction(additionalActionType, &additionalActions, doc);
 }
 
 //------------------------------------------------------------------------
