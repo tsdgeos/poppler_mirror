@@ -5833,8 +5833,14 @@ void AnnotInk::initialize(PDFDoc *docA, Dict* dict) {
   } else {
     inkListLength = 0;
     inkList = nullptr;
-    error(errSyntaxError, -1, "Bad Annot Ink List");
-    ok = false;
+    obj1 = dict->lookup("AP");
+
+    // Although InkList is required, it should be ignored
+    // when there is an AP entry in the Annot.
+    if (!obj1.isDict()) {
+      error(errSyntaxError, -1, "Bad Annot Ink List");
+      ok = false;
+    }
   }
 
   obj1 = dict->lookup("BS");
