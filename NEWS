@@ -1,3 +1,24 @@
+Release 0.78.0:
+        core:
+         * Fix line annotation arrows for usage in dimensioning
+         * Handle Ink annots without an InkList but with an AP
+         * Fix typos preventing parsing of Movie start and duration
+         * Fix crash on malformed files
+
+        glib:
+         * Add poppler_document_create_dests_tree()
+         * Don't use the deprecated g_type_class_add_private()
+         * Document the differences between render() and render_for_printing()
+         * Fix introspection for poppler_document_new_from_data
+         * Don't create PopplerInputStream with length 0. Issue #414
+         * Document G_IO_ERROR as a possible error condition
+         * docs: Add index for API new in 0.78
+
+        build system:
+         * Fixes cross compilation of gir in Void Linux
+         * Add -Wshadow to the default warning flags
+         * install pkg-config pc files if pkg-config is found
+
 Release 0.77.0:
         core:
          * Fix crash on signature handling. Issue #766
