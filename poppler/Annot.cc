@@ -23,7 +23,7 @@
 // Copyright (C) 2008 Michael Vrable <mvrable@cs.ucsd.edu>
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
-// Copyright (C) 2011, 2013 José Aliste <jaliste@src.gnome.org>
+// Copyright (C) 2011, 2013, 2019 José Aliste <jaliste@src.gnome.org>
 // Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012, 2015 Tobias Koenig <tokoe@kdab.com>
@@ -5833,12 +5833,13 @@ void AnnotInk::initialize(PDFDoc *docA, Dict* dict) {
   } else {
     inkListLength = 0;
     inkList = nullptr;
-    obj1 = dict->lookup("AP");
+    error(errSyntaxError, -1, "Bad Annot Ink List");
 
+    obj1 = dict->lookup("AP");
     // Although InkList is required, it should be ignored
-    // when there is an AP entry in the Annot.
+    // when there is an AP entry in the Annot, so do not fail
+    // when that happens
     if (!obj1.isDict()) {
-      error(errSyntaxError, -1, "Bad Annot Ink List");
       ok = false;
     }
   }
