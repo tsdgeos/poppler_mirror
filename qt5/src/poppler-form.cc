@@ -431,6 +431,14 @@ void FormFieldText::setText( const QString& text )
   delete goo;
 }
 
+void FormFieldText::setAppearanceText( const QString& text )
+{
+  FormWidgetText* fwt = static_cast<FormWidgetText*>(m_formData->fm);
+  GooString * goo = QStringToUnicodeGooString( text );
+  fwt->setAppearanceContent( goo );
+  delete goo;
+}
+
 bool FormFieldText::isPassword() const
 {
   FormWidgetText* fwt = static_cast<FormWidgetText*>(m_formData->fm);

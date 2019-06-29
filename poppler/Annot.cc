@@ -4856,7 +4856,7 @@ bool AnnotAppearanceBuilder::drawFormFieldText(const FormFieldText *fieldText, c
   VariableTextQuadding quadding;
   const GooString *contents;
 
-  contents = fieldText->getContent();
+  contents = fieldText->getAppearanceContent();
   if (contents) {
     quadding = fieldText->hasTextQuadding() ? fieldText->getTextQuadding() : form->getTextQuadding();
 

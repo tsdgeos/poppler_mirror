@@ -80,6 +80,9 @@ namespace Poppler {
       \since 0.6
      */
     class POPPLER_QT5_EXPORT FormField {
+
+    friend class FormFieldData;
+
     public:
 
 	/**
@@ -322,6 +325,13 @@ namespace Poppler {
 	  \p text.
 	 */
 	void setText( const QString& text );
+
+	/**
+	  Sets the text inside the Appearance Stream to the specified
+	  \p text
+	  \since 0.80
+	 */
+	void setAppearanceText( const QString& text );
 
 	/**
 	  Whether this text field is a password input, eg its text \b must be

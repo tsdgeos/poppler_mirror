@@ -15,6 +15,7 @@ private slots:
     void testCheckboxIssue159();// Test for issue #159
     void testSetIcon();// Test that setIcon will always be valid.
     void testSetPrintable();
+    void testSetAppearanceText();
 };
 
 void TestForms::testCheckbox()
@@ -166,6 +167,45 @@ void TestForms::testSetPrintable()
         field->setPrintable( false );
         QCOMPARE( field->isPrintable(), false );
     }
+}
+
+void TestForms::testSetAppearanceText()
+{
+    QScopedPointer< Poppler::Document > document(Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf"));
+    QVERIFY( document );
+
+    QScopedPointer< Poppler::Page > page(document->page(0));
+    QVERIFY( page );
+
+    QList<Poppler::FormField*> forms = page->formFields();
+
+    int nTextForms = 0;
+
+    Q_FOREACH (Poppler::FormField *field, forms) {
+
+        if (field->type() != Poppler::FormField::FormText)
+            continue;
+
+        nTextForms++;
+
+        Poppler::FormFieldText *fft = static_cast< Poppler::FormFieldText * >( field );
+
+        const QString textToSet = "HOLA" + fft->name();
+        fft->setAppearanceText( textToSet );
+
+        Dict *dict = Poppler::FormFieldData::getFormWidget( fft )->getObj()->getDict();
+        Object strObject = dict->lookup( "AP" ).dictLookup( "N" );
+
+        QVERIFY( strObject.isStream() );
+
+        GooString s;
+        strObject.getStream()->fillGooString(&s);
+
+        const QString textToFind = QStringLiteral("\n(%1) Tj\n").arg(textToSet);
+        QVERIFY( s.toStr().find( textToFind.toStdString() ) != std::string::npos );
+    }
+
+    QCOMPARE( nTextForms, 5 );
 }
 
 QTEST_GUILESS_MAIN(TestForms)

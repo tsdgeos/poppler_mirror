@@ -304,6 +304,11 @@ namespace Debug {
         }
     }
 
+    FormWidget *FormFieldData::getFormWidget( const FormField *f )
+    {
+        return f->m_formData->fm;
+    }
+
     FormFieldIconData *FormFieldIconData::getData( const FormFieldIcon &f )
     {
         return f.d_ptr;

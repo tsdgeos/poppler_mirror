@@ -45,6 +45,7 @@
 #include <config.h>
 #include <GfxState.h>
 #include <GlobalParams.h>
+#include <Form.h>
 #include <PDFDoc.h>
 #include <FontInfo.h>
 #include <OutputDev.h>
@@ -237,6 +238,7 @@ namespace Poppler {
 		::Page *page;
 		::FormWidget *fm;
 		QRectF box;
+		static POPPLER_QT5_EXPORT ::FormWidget *getFormWidget( const FormField *f );
     };
     
     class FormFieldIcon;
