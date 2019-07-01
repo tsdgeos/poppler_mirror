@@ -753,9 +753,10 @@ DefaultAppearance::DefaultAppearance(GooString *da) {
     }
     if (i >= 2) {
       // We are expecting a name, therefore the first letter should be '/'.
-      if ((*daToks)[i-2] && ((const char*)((*daToks)[i-2]))[0] == '/') {
+      const GooString* fontToken = (*daToks)[i-2];
+      if (fontToken && fontToken->getLength() > 1 && fontToken->getChar(0) == '/') {
         // The +1 is here to skip the leading '/'.
-        fontName = Object(objName, ((const char*)(*daToks)[i-2])+1);
+        fontName = Object(objName, fontToken->c_str() + 1);
       }
     }
     // Scan backwards: we are looking for the last set value
