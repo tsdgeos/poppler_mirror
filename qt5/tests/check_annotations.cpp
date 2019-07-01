@@ -7,6 +7,7 @@
 
 #include <poppler-qt5.h>
 
+#include "poppler/Annot.h"
 #include "goo/GooString.h"
 #include "goo/gstrtod.h"
 
@@ -21,6 +22,7 @@ private slots:
   void checkHighlightFromAndToQuads();
   void checkUTF16LEAnnot();
   void checkNonMarkupAnnotations();
+  void checkDefaultAppearance();
 };
 
 /* Is .5f sufficient for 16 bit color channel roundtrip trough save and load on all architectures? */
@@ -170,6 +172,44 @@ void TestAnnotations::checkNonMarkupAnnotations()
 
     auto annots = page->annotations();
     QCOMPARE(annots.size(), 17);
+}
+
+void TestAnnotations::checkDefaultAppearance()
+{
+    std::unique_ptr<GooString> roundtripString;
+    {
+        GooString daString{ "/Helv 10 Tf 0.1 0.2 0.3 rg" };
+        const DefaultAppearance da { &daString };
+        QCOMPARE( da.getFontPtSize(), 10. );
+        QVERIFY( da.getFontName().isName() );
+        QCOMPARE( da.getFontName().getName(), "Helv" );
+        const AnnotColor* color = da.getFontColor();
+        QVERIFY( color );
+        QCOMPARE( color->getSpace(), AnnotColor::colorRGB );
+        QCOMPARE( color->getValues()[0], 0.1 );
+        QCOMPARE( color->getValues()[1], 0.2 );
+        QCOMPARE( color->getValues()[2], 0.3 );
+        roundtripString.reset( da.toAppearanceString() );
+    }
+    {
+        /* roundtrip through parse/generate/parse shall preserve values */
+        const DefaultAppearance da { roundtripString.get() };
+        QCOMPARE( da.getFontPtSize(), 10. );
+        QVERIFY( da.getFontName().isName() );
+        QCOMPARE( da.getFontName().getName(), "Helv" );
+        const AnnotColor* color = da.getFontColor();
+        QVERIFY( color );
+        QCOMPARE( color->getSpace(), AnnotColor::colorRGB );
+        QCOMPARE( color->getValues()[0], 0.1 );
+        QCOMPARE( color->getValues()[1], 0.2 );
+        QCOMPARE( color->getValues()[2], 0.3 );
+    }
+    {
+        /* parsing bad DA strings must not cause crash */
+        GooString daString{ "/ % Tf 1 2 rg" };
+        const DefaultAppearance da { &daString };
+        QVERIFY( !da.getFontName().isName() );
+    }
 }
 
 
