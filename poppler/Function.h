@@ -240,7 +240,7 @@ private:
 
   PostScriptFunction(const PostScriptFunction *func);
   bool parseCode(Stream *str, int *codePtr);
-  GooString *getToken(Stream *str);
+  GooString getToken(Stream *str);
   void resizeCode(int newSize);
   void exec(PSStack *stack, int codePtr) const;
 

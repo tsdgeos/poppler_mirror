@@ -1135,7 +1135,6 @@ void PSStack::roll(int n, int j) {
 PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict) {
   Stream *str;
   int codePtr;
-  GooString *tok;
   double in[funcMaxInputs];
   int i;
 
@@ -1163,14 +1162,10 @@ PostScriptFunction::PostScriptFunction(Object *funcObj, Dict *dict) {
   //----- parse the function
   codeString = new GooString();
   str->reset();
-  if (!(tok = getToken(str)) || tok->cmp("{")) {
+  if (getToken(str).cmp("{") != 0) {
     error(errSyntaxError, -1, "Expected '{{' at start of PostScript function");
-    if (tok) {
-      delete tok;
-    }
     goto err1;
   }
-  delete tok;
   codePtr = 0;
   if (!parseCode(str, &codePtr)) {
     goto err2;
@@ -1258,17 +1253,13 @@ void PostScriptFunction::transform(const double *in, double *out) const {
 }
 
 bool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
-  GooString *tok;
   bool isReal;
   int opPtr, elsePtr;
   int a, b, mid, cmp;
 
   while (1) {
-    if (!(tok = getToken(str))) {
-      error(errSyntaxError, -1, "Unexpected end of PostScript function stream");
-      return false;
-    }
-    const char *p = tok->c_str();
+    GooString tok = getToken(str);
+    const char *p = tok.c_str();
     if (isdigit(*p) || *p == '.' || *p == '-') {
       isReal = false;
       for (; *p; ++p) {
@@ -1280,40 +1271,30 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
       resizeCode(*codePtr);
       if (isReal) {
 	code[*codePtr].type = psReal;
-          code[*codePtr].real = gatof(tok->c_str());
+          code[*codePtr].real = gatof(tok.c_str());
       } else {
 	code[*codePtr].type = psInt;
-	code[*codePtr].intg = atoi(tok->c_str());
+	code[*codePtr].intg = atoi(tok.c_str());
       }
       ++*codePtr;
-      delete tok;
-    } else if (!tok->cmp("{")) {
-      delete tok;
+    } else if (!tok.cmp("{")) {
       opPtr = *codePtr;
       *codePtr += 3;
       resizeCode(opPtr + 2);
       if (!parseCode(str, codePtr)) {
 	return false;
       }
-      if (!(tok = getToken(str))) {
-	error(errSyntaxError, -1, "Unexpected end of PostScript function stream");
-	return false;
-      }
-      if (!tok->cmp("{")) {
+      tok = getToken(str);
+      if (!tok.cmp("{")) {
 	elsePtr = *codePtr;
 	if (!parseCode(str, codePtr)) {
-	  delete tok;
 	  return false;
 	}
-	delete tok;
-	if (!(tok = getToken(str))) {
-	  error(errSyntaxError, -1, "Unexpected end of PostScript function stream");
-	  return false;
-	}
+	tok = getToken(str);
       } else {
 	elsePtr = -1;
       }
-      if (!tok->cmp("if")) {
+      if (!tok.cmp("if")) {
 	if (elsePtr >= 0) {
 	  error(errSyntaxError, -1,
 		"Got 'if' operator with two blocks in PostScript function");
@@ -1323,7 +1304,7 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
 	code[opPtr].op = psOpIf;
 	code[opPtr+2].type = psBlock;
 	code[opPtr+2].blk = *codePtr;
-      } else if (!tok->cmp("ifelse")) {
+      } else if (!tok.cmp("ifelse")) {
 	if (elsePtr < 0) {
 	  error(errSyntaxError, -1,
 		"Got 'ifelse' operator with one block in PostScript function");
@@ -1338,12 +1319,9 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
       } else {
 	error(errSyntaxError, -1,
 	      "Expected if/ifelse operator in PostScript function");
-	delete tok;
 	return false;
       }
-      delete tok;
-    } else if (!tok->cmp("}")) {
-      delete tok;
+    } else if (!tok.cmp("}")) {
       resizeCode(*codePtr);
       code[*codePtr].type = psOperator;
       code[*codePtr].op = psOpReturn;
@@ -1356,7 +1334,7 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
       // invariant: psOpNames[a] < tok < psOpNames[b]
       while (b - a > 1) {
 	mid = (a + b) / 2;
-	cmp = tok->cmp(psOpNames[mid]);
+	cmp = tok.cmp(psOpNames[mid]);
 	if (cmp > 0) {
 	  a = mid;
 	} else if (cmp < 0) {
@@ -1368,11 +1346,9 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
       if (cmp != 0) {
 	error(errSyntaxError, -1,
 	      "Unknown operator '{0:t}' in PostScript function",
-	      tok);
-	delete tok;
+	      &tok);
 	return false;
       }
-      delete tok;
       resizeCode(*codePtr);
       code[*codePtr].type = psOperator;
       code[*codePtr].op = (PSOp)a;
@@ -1382,12 +1358,11 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
   return true;
 }
 
-GooString *PostScriptFunction::getToken(Stream *str) {
-  GooString *s;
+GooString PostScriptFunction::getToken(Stream *str) {
   int c;
   bool comment;
 
-  s = new GooString();
+  GooString s;
   comment = false;
   while (1) {
     if ((c = str->getChar()) == EOF) {
@@ -1405,10 +1380,10 @@ GooString *PostScriptFunction::getToken(Stream *str) {
     }
   }
   if (c == '{' || c == '}') {
-    s->append((char)c);
+    s.append((char)c);
   } else if (isdigit(c) || c == '.' || c == '-') {
     while (1) {
-      s->append((char)c);
+      s.append((char)c);
       c = str->lookChar();
       if (c == EOF || !(isdigit(c) || c == '.' || c == '-')) {
 	break;
@@ -1418,7 +1393,7 @@ GooString *PostScriptFunction::getToken(Stream *str) {
     }
   } else {
     while (1) {
-      s->append((char)c);
+      s.append((char)c);
       c = str->lookChar();
       if (c == EOF || !isalnum(c)) {
 	break;
