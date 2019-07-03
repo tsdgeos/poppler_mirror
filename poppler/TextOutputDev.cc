@@ -887,7 +887,6 @@ int TextPool::getBaseIdx(double base) {
 }
 
 void TextPool::addWord(TextWord *word) {
-  TextWord **newPool;
   int wordBaseIdx, newMinBaseIdx, newMaxBaseIdx, baseIdx;
   TextWord *w0, *w1;
 
@@ -908,7 +907,7 @@ void TextPool::addWord(TextWord *word) {
     }
   } else if (wordBaseIdx < minBaseIdx) {
     newMinBaseIdx = wordBaseIdx - 128;
-    newPool = (TextWord **)gmallocn_checkoverflow(maxBaseIdx - newMinBaseIdx + 1,
+    TextWord **newPool = (TextWord **)gmallocn_checkoverflow(maxBaseIdx - newMinBaseIdx + 1,
 				    sizeof(TextWord *));
     if (unlikely(!newPool)) {
       error(errSyntaxWarning, -1, "newPool would overflow");
@@ -925,8 +924,14 @@ void TextPool::addWord(TextWord *word) {
     minBaseIdx = newMinBaseIdx;
   } else if (wordBaseIdx > maxBaseIdx) {
     newMaxBaseIdx = wordBaseIdx + 128;
-    pool = (TextWord **)greallocn(pool, newMaxBaseIdx - minBaseIdx + 1,
-				  sizeof(TextWord *));
+    TextWord **reallocatedPool = (TextWord **)greallocn(pool, newMaxBaseIdx - minBaseIdx + 1,
+				  sizeof(TextWord *), true /*checkoverflow*/, false /*free_pool*/);
+    if (!reallocatedPool) {
+      error(errSyntaxWarning, -1, "new pool size would overflow");
+      delete word;
+      return;
+    }
+    pool = reallocatedPool;
     for (baseIdx = maxBaseIdx + 1; baseIdx <= newMaxBaseIdx; ++baseIdx) {
       pool[baseIdx - minBaseIdx] = nullptr;
     }
