@@ -211,7 +211,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
       LinkGoTo * g = (LinkGoTo *) a;
       const LinkDestinationData ldd( g->getDest(), g->getNamedDest(), parentDoc, false );
       // create link: no ext file, namedDest, object pointer
-      popplerLink = new LinkGoto( linkArea, QString::null, LinkDestination( ldd ) );
+      popplerLink = new LinkGoto( linkArea, QString(), LinkDestination( ldd ) );
     }
     break;
 
