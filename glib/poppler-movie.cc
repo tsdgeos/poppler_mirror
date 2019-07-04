@@ -211,6 +211,8 @@ poppler_movie_get_play_mode (PopplerMovie *poppler_movie)
  * the PDF viewer accepts any interactive action
  *
  * Return value: %TRUE if yes, %FALSE otherwise
+ *
+ * Since: 0.79
  */
 gboolean
 poppler_movie_synchronous_play (PopplerMovie *poppler_movie)
@@ -227,6 +229,8 @@ poppler_movie_synchronous_play (PopplerMovie *poppler_movie)
  * Returns the playback audio volume
  *
  * Return value: volume setting for the movie (0 - 100)
+ *
+ * Since: 0.79
  */
 gint
 poppler_movie_get_volume (PopplerMovie *poppler_movie)
@@ -243,6 +247,8 @@ poppler_movie_get_volume (PopplerMovie *poppler_movie)
  * Returns the relative speed of the movie
  *
  * Return value: the relative speed of the movie (1 means no change)
+ *
+ * Since: 0.79
  */
 gdouble
 poppler_movie_get_rate (PopplerMovie *poppler_movie)
@@ -260,6 +266,8 @@ poppler_movie_get_rate (PopplerMovie *poppler_movie)
  *
  * Return value: the number of degrees the movie should be rotated (positive,
  * multiples of 90: 0, 90, 180, 270)
+ *
+ * Since: 0.79
  */
 gushort
 poppler_movie_get_rotation_angle (PopplerMovie *poppler_movie)
@@ -269,20 +277,38 @@ poppler_movie_get_rotation_angle (PopplerMovie *poppler_movie)
   return poppler_movie->rotation_angle;
 }
 
-const static PopplerMovieTime time0 = {0, 0};
-
-PopplerMovieTime
-poppler_movie_get_start (PopplerMovie *poppler_movie)
+/**
+ * poppler_movie_get_start:
+ * @poppler_movie: a #PopplerMovie
+ * @start: (out): a return location for a #PopplerMovieTime
+ *
+ * Obtains the start position of the movie playback
+ *
+ * Since: 0.79
+ */
+void
+poppler_movie_get_start (PopplerMovie *poppler_movie,
+                         PopplerMovieTime *start)
 {
-  g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), time0);
+  g_return_if_fail (POPPLER_IS_MOVIE (poppler_movie));
 
-  return poppler_movie->start;
+  *start = poppler_movie->start;
 }
 
-PopplerMovieTime
-poppler_movie_get_duration (PopplerMovie *poppler_movie)
+/**
+ * poppler_movie_get_duration:
+ * @poppler_movie: a #PopplerMovie
+ * @duration: (out): a return location for a #PopplerMovieTime
+ *
+ * Obtains the duration of the movie playback
+ *
+ * Since: 0.79
+ */
+void
+poppler_movie_get_duration (PopplerMovie *poppler_movie,
+                            PopplerMovieTime *duration)
 {
-  g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), time0);
+  g_return_if_fail (POPPLER_IS_MOVIE (poppler_movie));
 
-  return poppler_movie->duration;
+  *duration = poppler_movie->duration;
 }

@@ -595,9 +595,9 @@ pgd_movie_view_set_movie (GtkWidget    *movie_view,
 	pgd_table_add_property (GTK_GRID (table), "<b>Synchronous Play:</b>", poppler_movie_synchronous_play (movie) ? "Yes" : "No", &row);
 	pgd_table_add_property (GTK_GRID (table), "<b>Volume:</b>", g_strdup_printf("%i", poppler_movie_get_volume (movie)), &row);
 	pgd_table_add_property (GTK_GRID (table), "<b>Rate:</b>", g_strdup_printf("%g", poppler_movie_get_rate (movie)), &row);
-        start = poppler_movie_get_start (movie);
+        poppler_movie_get_start (movie, &start);
         pgd_table_add_property (GTK_GRID (table), "<b>Start:</b>", g_strdup_printf("%lu/%i s", start.units, start.units_per_second), &row);
-        duration = poppler_movie_get_duration (movie);
+        poppler_movie_get_duration (movie, &duration);
         pgd_table_add_property (GTK_GRID (table), "<b>Duration:</b>", g_strdup_printf("%lu/%i s", duration.units, duration.units_per_second), &row);
 	pgd_table_add_property (GTK_GRID (table), "<b>Rotation Angle:</b>", g_strdup_printf("%u", poppler_movie_get_rotation_angle (movie)), &row);
 
