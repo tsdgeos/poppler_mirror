@@ -4877,7 +4877,13 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
       int oldVertSize = vertSize;
       vertSize = (vertSize == 0) ? 16 : 2 * vertSize;
       verticesA = (GfxGouraudVertex *)
-	              greallocn(verticesA, vertSize, sizeof(GfxGouraudVertex));
+	              greallocn_checkoverflow(verticesA, vertSize, sizeof(GfxGouraudVertex));
+      if (unlikely(!verticesA)) {
+        error(errSyntaxWarning, -1, "GfxGouraudTriangleShading::parse: vertices size overflow");
+        gfree(trianglesA);
+        delete bitBuf;
+        return nullptr;
+      }
       memset(verticesA + oldVertSize, 0, (vertSize - oldVertSize) * sizeof(GfxGouraudVertex));
     }
     verticesA[nVerticesA].x = xMin + xMul * (double)x;
