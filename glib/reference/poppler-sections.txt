@@ -583,10 +583,17 @@ poppler_media_get_type
 <TITLE>Poppler Movie</TITLE>
 PopplerMovie
 PopplerMoviePlayMode
+PopplerMovieTime
+poppler_movie_get_duration
 poppler_movie_get_filename
 poppler_movie_get_play_mode
+poppler_movie_get_rate
+poppler_movie_get_rotation_angle
+poppler_movie_get_start
+poppler_movie_get_volume
 poppler_movie_need_poster
 poppler_movie_show_controls
+poppler_movie_synchronous_play
 
 <SUBSECTION Standard>
 POPPLER_MOVIE
