@@ -43,6 +43,7 @@
 // Copyright (C) 2018, 2019 Tobias Deiminger <haxtibal@posteo.de>
 // Copyright (C) 2018, 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
+// Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
