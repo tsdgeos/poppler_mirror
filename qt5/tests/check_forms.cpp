@@ -14,6 +14,7 @@ private slots:
     void testCheckbox();// Test for issue #655
     void testCheckboxIssue159();// Test for issue #159
     void testSetIcon();// Test that setIcon will always be valid.
+    void testSetPrintable();
 };
 
 void TestForms::testCheckbox()
@@ -146,6 +147,25 @@ void TestForms::testSetIcon()
 
     QVERIFY( Poppler::FormFieldIconData::getData( anmIcon ) );
     QVERIFY( Poppler::FormFieldIconData::getData( anmIcon )->icon );
+}
+
+void TestForms::testSetPrintable()
+{
+    QScopedPointer< Poppler::Document > document(Poppler::Document::load(TESTDATADIR "/unittestcases/form_set_icon.pdf"));
+    QVERIFY( document );
+
+    QScopedPointer< Poppler::Page > page(document->page(0));
+    QVERIFY( page );
+
+    QList<Poppler::FormField*> forms = page->formFields();
+
+    Q_FOREACH (Poppler::FormField *field, forms) {
+        field->setPrintable( true );
+        QCOMPARE( field->isPrintable(), true );
+            
+        field->setPrintable( false );
+        QCOMPARE( field->isPrintable(), false );
+    }
 }
 
 QTEST_GUILESS_MAIN(TestForms)

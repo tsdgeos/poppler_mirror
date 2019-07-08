@@ -155,6 +155,18 @@ namespace Poppler {
 	void setVisible(bool value);
 
 	/**
+	  Whether this field is printable.
+	  \since 0.79
+	 */	
+	bool isPrintable() const;
+
+	/**
+	  Set whether this field is printable.
+	  \since 0.79
+	 */
+	void setPrintable(bool value);
+
+	/**
 	  The activation action of this form field.
 
 	  \note It may be null.

@@ -207,6 +207,22 @@ void FormField::setVisible(bool value)
   m_formData->fm->getWidgetAnnotation()->setFlags(flags);
 }
 
+bool FormField::isPrintable() const
+{
+  return (m_formData->fm->getWidgetAnnotation()->getFlags() & Annot::flagPrint);
+}
+
+void FormField::setPrintable(bool value)
+{
+  unsigned int flags = m_formData->fm->getWidgetAnnotation()->getFlags();
+  if (value) {
+    flags |= Annot::flagPrint;
+  } else {
+    flags &= ~Annot::flagPrint;
+  }
+  m_formData->fm->getWidgetAnnotation()->setFlags(flags);
+}
+
 Link* FormField::activationAction() const
 {
   Link* action = nullptr;
