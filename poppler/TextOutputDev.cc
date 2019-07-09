@@ -4791,8 +4791,8 @@ void TextSelectionPainter::endPage()
         if (j != begin && sel->word->charPos[j] == sel->word->charPos[j - 1])
           continue;
 
-	out->drawChar(state, sel->word->textMat[i].m[4], sel->word->textMat[i].m[5], 0, 0, 0, 0,
-		      sel->word->charcode[i], 1, nullptr, 0);
+	out->drawChar(state, sel->word->textMat[j].m[4], sel->word->textMat[j].m[5], 0, 0, 0, 0,
+		      sel->word->charcode[j], 1, nullptr, 0);
       }
       out->endString(state);
       delete string;
