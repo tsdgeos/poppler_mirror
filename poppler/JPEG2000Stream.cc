@@ -219,7 +219,7 @@ void JPXStream::init()
   }
 
   int bufSize = BUFFER_INITIAL_SIZE;
-  if (oLen.isInt()) bufSize = oLen.getInt();
+  if (oLen.isInt() && oLen.getInt() > 0) bufSize = oLen.getInt();
 
   bool indexed = false;
   if (cspace.isArray() && cspace.arrayGetLength() > 0) {
