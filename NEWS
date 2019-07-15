@@ -1,3 +1,19 @@
+Release 0.79.0:
+        core:
+         * Fix regression on TextSelectionPainter
+         * Fix parsing of DefaultAppearance
+         * Fix memory leak in PostScriptFunction
+         * Fix crashes in fuzzed files
+
+        qt5:
+         * Implemented support for setIcon by changing appearance
+         * Added option to set the form available to print
+         * QString::null is deprecated, use QString()
+         * Replace deprecated qStableSort with std::stable_sort
+
+        build system:
+         * Turn README into README.md and expand it
+
 Release 0.78.0:
         core:
          * Fix line annotation arrows for usage in dimensioning
