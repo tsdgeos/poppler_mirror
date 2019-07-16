@@ -197,6 +197,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
           const Ref ref = obj3Ref.getRef();
           if (!seenNextActions->insert(ref.num).second) {
               error(errSyntaxWarning, -1, "parseAction: Circular next actions detected in array.");
+              delete actionList;
               return action;
           }
       }
