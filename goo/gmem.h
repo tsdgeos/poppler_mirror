@@ -55,11 +55,9 @@ inline void *gmalloc_checkoverflow(size_t size) {
   return gmalloc(size, true);
 }
 
-/// Same as free, but checks for and ignores NULL pointers.
+/// Same as free
 inline void gfree(void *p) {
-  if (p) {
-    std::free(p);
-  }
+  std::free(p);
 }
 
 /// Same as realloc, but prints error message and exits if realloc() returns NULL.
