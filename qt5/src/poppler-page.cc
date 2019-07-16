@@ -783,6 +783,7 @@ QList<TextBox*> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbort
   TextWordList *word_list = output_dev->makeWordList();
   
   if (!word_list || (shouldAbortExtractionCallback && shouldAbortExtractionCallback(closure))) {
+    delete word_list;
     delete output_dev;
     return output_list;
   }
