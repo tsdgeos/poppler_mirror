@@ -454,20 +454,13 @@ Object GfxResources::lookupColorSpace(const char *name) {
 
 GfxPattern *GfxResources::lookupPattern(const char *name, OutputDev *out, GfxState *state) {
   GfxResources *resPtr;
-  GfxPattern *pattern;
 
   for (resPtr = this; resPtr; resPtr = resPtr->next) {
     if (resPtr->patternDict.isDict()) {
-      Object obj = resPtr->patternDict.dictLookupNF(name).copy();
+      Ref patternRef = Ref::INVALID();
+      Object obj = resPtr->patternDict.getDict()->lookup(name, &patternRef);
       if (!obj.isNull()) {
-	Ref patternRef = { -1, -1 };
-	if (obj.isRef()) {
-	  patternRef = obj.getRef();
-	  obj = obj.fetch(resPtr->patternDict.getDict()->getXRef());
-	}
-
-	pattern = GfxPattern::parse(resPtr, &obj, out, state, patternRef.num);
-	return pattern;
+	return GfxPattern::parse(resPtr, &obj, out, state, patternRef.num);
       }
     }
   }
