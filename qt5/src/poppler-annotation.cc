@@ -769,8 +769,7 @@ Ref AnnotationPrivate::pdfObjectReference() const
 {
     if (pdfAnnot == nullptr)
     {
-        const Ref invalid_ref = { -1, -1 };
-        return invalid_ref;
+        return Ref::INVALID();
     }
 
     return pdfAnnot->getRef();
