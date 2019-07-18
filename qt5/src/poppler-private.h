@@ -243,7 +243,7 @@ namespace Poppler {
     class FormFieldIconData
     {
     public:
-    	static FormFieldIconData *getData( const FormFieldIcon &f );
+    	static POPPLER_QT5_EXPORT FormFieldIconData *getData( const FormFieldIcon &f );
     	Dict *icon;
     };
 
