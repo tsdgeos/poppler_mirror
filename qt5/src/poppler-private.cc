@@ -304,7 +304,7 @@ namespace Debug {
         }
     }
 
-    FormFieldIconData POPPLER_QT5_EXPORT *FormFieldIconData::getData( const FormFieldIcon &f )
+    FormFieldIconData *FormFieldIconData::getData( const FormFieldIcon &f )
     {
         return f.d_ptr;
     }
