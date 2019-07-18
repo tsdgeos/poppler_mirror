@@ -8,6 +8,7 @@
  * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
  * Copyright (C) 2018, Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
  * Copyright (C) 2018, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +50,30 @@ namespace Poppler {
     class Link;
 
     class FormFieldData;
+    class FormFieldIconData;
+
+    /**
+	 The class containing the appearance information
+
+	 \since 0.78
+     */
+
+    class POPPLER_QT5_EXPORT FormFieldIcon {
+    
+    friend class FormFieldIconData;
+    
+    public:
+
+    	FormFieldIcon(FormFieldIconData *data);
+    	FormFieldIcon(const FormFieldIcon &ffIcon);
+    	~FormFieldIcon();
+
+    	FormFieldIcon& operator=(const FormFieldIcon &ffIcon);
+
+    private:
+
+    	FormFieldIconData *d_ptr;
+    };
     /**
       The base class representing a form field.
 
@@ -131,6 +156,18 @@ namespace Poppler {
 	void setVisible(bool value);
 
 	/**
+	  Whether this field is printable.
+	  \since 0.79
+	 */	
+	bool isPrintable() const;
+
+	/**
+	  Set whether this field is printable.
+	  \since 0.79
+	 */
+	void setPrintable(bool value);
+
+	/**
 	  The activation action of this form field.
 
 	  \note It may be null.
@@ -208,6 +245,21 @@ namespace Poppler {
 	 * The caption to be used for the button.
 	 */
 	QString caption() const;
+
+	/**
+	 * Gets the icon used by the button
+	 *
+	 * \since 0.78
+	 */
+	FormFieldIcon icon() const;
+
+	/**
+	 * Sets a new icon for the button, it has to be a icon 
+	 * returned by FormFieldButton::icon.
+	 *
+	 * \since 0.78
+	 */ 
+	void setIcon(const FormFieldIcon &icon);
 
 	/**
 	  The state of the button.

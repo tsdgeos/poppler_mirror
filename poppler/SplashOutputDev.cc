@@ -3944,9 +3944,9 @@ void SplashOutputDev::drawSoftMaskedImage(GfxState *state, Object * /* ref */,
   imgMaskData.y = 0;
   imgMaskData.maskStr = nullptr;
   imgMaskData.maskColorMap = nullptr;
-  const unsigned n = 1 << maskColorMap->getBits();
-  imgMaskData.lookup = (SplashColorPtr)gmalloc(n);
-  for (unsigned i = 0; i < n; ++i) {
+  const unsigned imgMaskDataLookupSize = 1 << maskColorMap->getBits();
+  imgMaskData.lookup = (SplashColorPtr)gmalloc(imgMaskDataLookupSize);
+  for (unsigned i = 0; i < imgMaskDataLookupSize; ++i) {
     pix = (unsigned char)i;
     maskColorMap->getGray(&pix, &gray);
     imgMaskData.lookup[i] = colToByte(gray);
@@ -4581,6 +4581,10 @@ bool SplashOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat
     surface_width = (int) ceil (fabs(kx));
     surface_height = (int) ceil (fabs(ky));
     // adjust repeat values to completely fill region
+    if (unlikely(surface_width == 0 || surface_height == 0)) {
+        state->setCTM(savedCTM[0], savedCTM[1], savedCTM[2], savedCTM[3], savedCTM[4], savedCTM[5]);
+        return false;
+    }
     repeatX = result_width / surface_width;
     repeatY = result_height / surface_height;
     if (surface_width * repeatX < result_width)

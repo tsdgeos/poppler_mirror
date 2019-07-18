@@ -454,20 +454,13 @@ Object GfxResources::lookupColorSpace(const char *name) {
 
 GfxPattern *GfxResources::lookupPattern(const char *name, OutputDev *out, GfxState *state) {
   GfxResources *resPtr;
-  GfxPattern *pattern;
 
   for (resPtr = this; resPtr; resPtr = resPtr->next) {
     if (resPtr->patternDict.isDict()) {
-      Object obj = resPtr->patternDict.dictLookupNF(name).copy();
+      Ref patternRef = Ref::INVALID();
+      Object obj = resPtr->patternDict.getDict()->lookup(name, &patternRef);
       if (!obj.isNull()) {
-	Ref patternRef = { -1, -1 };
-	if (obj.isRef()) {
-	  patternRef = obj.getRef();
-	  obj = obj.fetch(resPtr->patternDict.getDict()->getXRef());
-	}
-
-	pattern = GfxPattern::parse(resPtr, &obj, out, state, patternRef.num);
-	return pattern;
+	return GfxPattern::parse(resPtr, &obj, out, state, patternRef.num);
       }
     }
   }
@@ -4007,7 +4000,10 @@ void Gfx::doShowText(const GooString *s) {
       curX += tdx;
       curY += tdy;
       state->moveTo(curX, curY);
-      out->updateCTM(state, 0, 0, 0, 0, 0, 0);
+      // Call updateCTM with the identity transformation.  That way, the CTM is unchanged,
+      // but any side effect that the method may have is triggered.  This is the case,
+      // in particular, for the Splash backend.
+      out->updateCTM(state, 1, 0, 0, 1, 0, 0);
       p += n;
       len -= n;
     }

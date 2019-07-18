@@ -131,14 +131,16 @@ namespace Poppler
       child->m_enabled = state == OptContentItem::On;
       child->m_stateBackup = oldState;
     }
-    if (!m_group || !obeyRadioGroups) {
+    if (!m_group) {
       return;
     }
     if ( state == OptContentItem::On ) {
       m_group->setState( OptionalContentGroup::On );
-      for (int i = 0; i < m_rbGroups.size(); ++i) {
-        RadioButtonGroup *rbgroup = m_rbGroups.at(i);
-        changedItems += rbgroup->setItemOn( this );
+      if (obeyRadioGroups) {
+	for (int i = 0; i < m_rbGroups.size(); ++i) {
+	  RadioButtonGroup *rbgroup = m_rbGroups.at(i);
+	  changedItems += rbgroup->setItemOn( this );
+	}
       }
     } else if ( state == OptContentItem::Off ) {
       m_group->setState( OptionalContentGroup::Off );
@@ -365,7 +367,7 @@ namespace Poppler
           Q_FOREACH (OptContentItem *item, changedItems) {
             indexes.append(d->indexFromItem(item, 0));
           }
-          qStableSort(indexes);
+          std::stable_sort(indexes.begin(), indexes.end());
           Q_FOREACH (const QModelIndex &changedIndex, indexes) {
             emit dataChanged(changedIndex, changedIndex);
           }
@@ -429,7 +431,7 @@ namespace Poppler
       Q_FOREACH (OptContentItem *item, changedItems) {
         indexes.append(d->indexFromItem(item, 0));
       }
-      qStableSort(indexes);
+      std::stable_sort(indexes.begin(), indexes.end());
       Q_FOREACH (const QModelIndex &changedIndex, indexes) {
         emit dataChanged(changedIndex, changedIndex);
       }

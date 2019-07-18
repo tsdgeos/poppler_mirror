@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2008, 2012, 2013, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007 Brad Hards <bradh@kde.org>
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
@@ -166,9 +166,9 @@ public:
   //----- header/trailer (used only if manualCtrl is true)
 
   // Write the document-level header.
-  void writeHeader(const std::vector<int> &pages,
+  void writeHeader(int nPages,
 		   const PDFRectangle *mediaBox, const PDFRectangle *cropBox,
-		   int pageRotate, char *pstitle);
+		   int pageRotate, const char *title);
 
   // Write the Xpdf procset.
   void writeXpdfProcset();
@@ -429,7 +429,7 @@ private:
   GooString *filterPSName(const GooString *name);
 
   // Write the document-level setup.
-  void writeDocSetup(PDFDoc *doc, Catalog *catalog, const std::vector<int> &pages, bool duplexA);
+  void writeDocSetup(Catalog *catalog, const std::vector<int> &pageList, bool duplexA);
 
   void writePSChar(char c);
   void writePS(const char *s);
@@ -479,7 +479,7 @@ private:
   int fontIDSize;		// size of fontIDs array
   std::set<int> resourceIDs;	// list of object IDs of objects containing Resources we've already set up
   std::unordered_set<std::string> fontNames; // all used font names
-  std::unordered_map<std::string, int> fontMaxValidGlyph; // max valid glyph of each font
+  std::unordered_map<std::string, int> perFontMaxValidGlyph; // max valid glyph of each font
   PST1FontName *t1FontNames;	// font names for Type 1/1C fonts
   int t1FontNameLen;		// number of entries in t1FontNames array
   int t1FontNameSize;		// size of t1FontNames array

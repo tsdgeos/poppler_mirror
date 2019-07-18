@@ -934,10 +934,10 @@ static void RenderPdf(const char *fileName)
 
         SplashBitmap *bmpSplash = nullptr;
 
-        GooTimer msTimer;
+        GooTimer msRenderTimer;
         bmpSplash = engineSplash->renderBitmap(curPage, 100.0, 0);
-        msTimer.stop();
-        double timeInMs = msTimer.getElapsed();
+        msRenderTimer.stop();
+        timeInMs = msRenderTimer.getElapsed();
         if (gfTimings) {
             if (!bmpSplash)
                 LogInfo("page splash %d: failed to render\n", curPage);

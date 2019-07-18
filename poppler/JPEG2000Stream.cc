@@ -4,7 +4,7 @@
 //
 // A JPX stream decoder using OpenJPEG
 //
-// Copyright 2008-2010, 2012, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2008-2010, 2012, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2011 Daniel Glöckner <daniel-gl@gmx.net>
 // Copyright 2014, 2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
@@ -219,7 +219,7 @@ void JPXStream::init()
   }
 
   int bufSize = BUFFER_INITIAL_SIZE;
-  if (oLen.isInt()) bufSize = oLen.getInt();
+  if (oLen.isInt() && oLen.getInt() > 0) bufSize = oLen.getInt();
 
   bool indexed = false;
   if (cspace.isArray() && cspace.arrayGetLength() > 0) {
@@ -250,6 +250,12 @@ void JPXStream::init()
     if (alpha == 1 && priv->smaskInData == 0) priv->ncomps--;
     for (int component = 0; component < priv->ncomps; component++) {
       if (priv->image->comps[component].data == nullptr) {
+        close();
+        break;
+      }
+      const int componentPixels = priv->image->comps[component].w * priv->image->comps[component].h;
+      if (componentPixels != priv->npixels) {
+        error(errSyntaxWarning, -1, "Component {0:d} has different WxH than component 0", component);
         close();
         break;
       }

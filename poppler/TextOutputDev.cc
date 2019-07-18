@@ -887,7 +887,6 @@ int TextPool::getBaseIdx(double base) {
 }
 
 void TextPool::addWord(TextWord *word) {
-  TextWord **newPool;
   int wordBaseIdx, newMinBaseIdx, newMaxBaseIdx, baseIdx;
   TextWord *w0, *w1;
 
@@ -908,7 +907,7 @@ void TextPool::addWord(TextWord *word) {
     }
   } else if (wordBaseIdx < minBaseIdx) {
     newMinBaseIdx = wordBaseIdx - 128;
-    newPool = (TextWord **)gmallocn_checkoverflow(maxBaseIdx - newMinBaseIdx + 1,
+    TextWord **newPool = (TextWord **)gmallocn_checkoverflow(maxBaseIdx - newMinBaseIdx + 1,
 				    sizeof(TextWord *));
     if (unlikely(!newPool)) {
       error(errSyntaxWarning, -1, "newPool would overflow");
@@ -925,8 +924,14 @@ void TextPool::addWord(TextWord *word) {
     minBaseIdx = newMinBaseIdx;
   } else if (wordBaseIdx > maxBaseIdx) {
     newMaxBaseIdx = wordBaseIdx + 128;
-    pool = (TextWord **)greallocn(pool, newMaxBaseIdx - minBaseIdx + 1,
-				  sizeof(TextWord *));
+    TextWord **reallocatedPool = (TextWord **)greallocn(pool, newMaxBaseIdx - minBaseIdx + 1,
+				  sizeof(TextWord *), true /*checkoverflow*/, false /*free_pool*/);
+    if (!reallocatedPool) {
+      error(errSyntaxWarning, -1, "new pool size would overflow");
+      delete word;
+      return;
+    }
+    pool = reallocatedPool;
     for (baseIdx = maxBaseIdx + 1; baseIdx <= newMaxBaseIdx; ++baseIdx) {
       pool[baseIdx - minBaseIdx] = nullptr;
     }
@@ -2803,7 +2808,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   int count[4];
   int lrCount;
   int col1, col2;
-  int i, j, n;
+  int j, n;
 
   if (rawOrder) {
     primaryRot = 0;
@@ -3331,7 +3336,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   for (blk = blkList; blk; blk = blk->next) {
     for (line = blk->lines; line; line = line->next) {
       for (word0 = line->words; word0; word0 = word0->next) {
-	for (i = 0; i < word0->len; ++i) {
+	for (int i = 0; i < word0->len; ++i) {
 	  if (unicodeTypeL(word0->text[i])) {
 	    ++lrCount;
 	  } else if (unicodeTypeR(word0->text[i])) {
@@ -3357,6 +3362,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   if (physLayout && fixedPitch) {
 
     blocks = (TextBlock **)gmallocn(nBlocks, sizeof(TextBlock *));
+    int i;
     for (blk = blkList, i = 0; blk; blk = blk->next, ++i) {
       blocks[i] = blk;
       col1 = 0; // make gcc happy
@@ -3386,6 +3392,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
 
     // sort blocks into xy order for column assignment
     blocks = (TextBlock **)gmallocn(nBlocks, sizeof(TextBlock *));
+    int i;
     for (blk = blkList, i = 0; blk; blk = blk->next, ++i) {
       blocks[i] = blk;
     }
@@ -3485,7 +3492,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   //----- reading order sort
 
   // compute space on left and right sides of each block
-  for (i = 0; i < nBlocks; ++i) {
+  for (int i = 0; i < nBlocks; ++i) {
     blk0 = blocks[i];
     for (j = 0; j < nBlocks; ++j) {
       blk1 = blocks[j];
@@ -3501,7 +3508,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
 
   int sortPos = 0;
   bool *visited = (bool *)gmallocn(nBlocks, sizeof(bool));
-  for (i = 0; i < nBlocks; i++) {
+  for (int i = 0; i < nBlocks; i++) {
     visited[i] = false;
   }
 
@@ -3677,7 +3684,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   PDFRectangle *envelopes = new PDFRectangle [numTables];
   TextBlock **ending_blocks = new TextBlock* [numTables];
 
-  for (i = 0; i < numTables; i++) {
+  for (int i = 0; i < numTables; i++) {
     envelopes[i].x1 = DBL_MAX;
     envelopes[i].x2 = DBL_MIN;
     envelopes[i].y1 = DBL_MAX;
@@ -3764,7 +3771,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
     }
   }
 
-  i = -1;
+  int i = -1;
   for (blk1 = blkList; blk1; blk1 = blk1->next) {
     i++;
     sortPos = blk1->visitDepthFirst(blkList, i, blocks, sortPos, visited);
@@ -4401,8 +4408,8 @@ protected:
   TextPage *page;
 };
 
-TextSelectionVisitor::TextSelectionVisitor (TextPage *page)
-  : page(page)
+TextSelectionVisitor::TextSelectionVisitor (TextPage *p)
+  : page(p)
 {
 }
 
@@ -4441,8 +4448,8 @@ private:
   TextBlock *currentBlock;
 };
 
-TextSelectionDumper::TextSelectionDumper(TextPage *page)
-    : TextSelectionVisitor(page)
+TextSelectionDumper::TextSelectionDumper(TextPage *p)
+    : TextSelectionVisitor(p)
 {
   linesSize = 256;
   lines = (std::vector<TextWordSelection*> **)gmallocn(linesSize, sizeof(std::vector<TextWordSelection*> *));
@@ -4605,9 +4612,9 @@ private:
   double scale;
 };
 
-TextSelectionSizer::TextSelectionSizer(TextPage *page, double scale)
-  : TextSelectionVisitor(page),
-    scale(scale)
+TextSelectionSizer::TextSelectionSizer(TextPage *p, double s)
+  : TextSelectionVisitor(p),
+    scale(s)
 {
   list = new std::vector<PDFRectangle*>();
 }
@@ -4668,17 +4675,17 @@ private:
   Matrix ctm, ictm;
 };
 
-TextSelectionPainter::TextSelectionPainter(TextPage *page,
+TextSelectionPainter::TextSelectionPainter(TextPage *p,
 					   double scale,
 					   int rotation,
-					   OutputDev *out,
+					   OutputDev *outA,
 					   GfxColor *box_color,
-					   GfxColor *glyph_color)
-  : TextSelectionVisitor(page),
-    out(out),
-    glyph_color(glyph_color)
+					   GfxColor *glyph_colorA)
+  : TextSelectionVisitor(p),
+    out(outA),
+    glyph_color(glyph_colorA)
 {
-  PDFRectangle box(0, 0, page->pageWidth, page->pageHeight);
+  PDFRectangle box(0, 0, p->pageWidth, p->pageHeight);
 
   selectionList = new std::vector<TextWordSelection*>();
   state = new GfxState(72 * scale, 72 * scale, &box, rotation, false);
@@ -4780,12 +4787,12 @@ void TextSelectionPainter::endPage()
       GooString *string = new GooString ((char *) sel->word->charcode, fEnd - begin);
       out->beginString(state, string);
 
-      for (int i = begin; i < fEnd; i++) {
-        if (i != begin && sel->word->charPos[i] == sel->word->charPos[i - 1])
+      for (int j = begin; j < fEnd; j++) {
+        if (j != begin && sel->word->charPos[j] == sel->word->charPos[j - 1])
           continue;
 
-	out->drawChar(state, sel->word->textMat[i].m[4], sel->word->textMat[i].m[5], 0, 0, 0, 0,
-		      sel->word->charcode[i], 1, nullptr, 0);
+	out->drawChar(state, sel->word->textMat[j].m[4], sel->word->textMat[j].m[5], 0, 0, 0, 0,
+		      sel->word->charcode[j], 1, nullptr, 0);
       }
       out->endString(state);
       delete string;
@@ -5601,10 +5608,10 @@ void ActualText::addChar(GfxState *state, double x, double y,
   actualTextNBytes += nBytes;
 }
 
-void ActualText::begin(GfxState *state, const GooString *text) {
+void ActualText::begin(GfxState *state, const GooString *t) {
   if (actualText)
     delete actualText;
-  actualText = new GooString(text);
+  actualText = new GooString(t);
   actualTextNBytes = 0;
 }
 
@@ -5738,9 +5745,9 @@ void TextOutputDev::incCharCount(int nChars) {
   text->incCharCount(nChars);
 }
 
-void TextOutputDev::beginActualText(GfxState *state, const GooString *text)
+void TextOutputDev::beginActualText(GfxState *state, const GooString *t)
 {
-  actualText->begin(state, text);
+  actualText->begin(state, t);
 }
 
 void TextOutputDev::endActualText(GfxState *state)

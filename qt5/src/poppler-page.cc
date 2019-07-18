@@ -211,7 +211,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
       LinkGoTo * g = (LinkGoTo *) a;
       const LinkDestinationData ldd( g->getDest(), g->getNamedDest(), parentDoc, false );
       // create link: no ext file, namedDest, object pointer
-      popplerLink = new LinkGoto( linkArea, QString::null, LinkDestination( ldd ) );
+      popplerLink = new LinkGoto( linkArea, QString(), LinkDestination( ldd ) );
     }
     break;
 
@@ -517,7 +517,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
   return renderToImage(xres, yres, x, y, w, h, rotate, partialUpdateCallback, shouldDoPartialUpdateCallback, nullptr, payload);
 }
 
-QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h, Rotation rotate, RenderToImagePartialUpdateFunc partialUpdateCallback, ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback, ShouldAbortQueryFunc shouldAbortRenderCallback, const QVariant &payload) const
+QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, int h, Rotation rotate, RenderToImagePartialUpdateFunc partialUpdateCallback, ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback, ShouldAbortQueryFunc shouldAbortRenderCallback, const QVariant &payload) const
 {
   int rotation = (int)rotate * 90;
   QImage img;
@@ -593,7 +593,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
 
       OutputDevCallbackHelper *abortHelper = &splash_output;
       m_page->parentDoc->doc->displayPageSlice(&splash_output, m_page->index + 1, xres, yres,
-                                               rotation, false, true, false, x, y, w, h,
+                                               rotation, false, true, false, xPos, yPos, w, h,
                                                shouldAbortRenderCallback ? shouldAbortRenderInternalCallback : nullAbortCallBack, abortHelper,
                                                (hideAnnotations) ? annotDisplayDecideCbk : nullAnnotCallBack,
                                                nullptr, true);
@@ -617,7 +617,7 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
       QPainter painter(&tmpimg);
       QImageDumpingArthurOutputDev arthur_output(&painter, &tmpimg);
       arthur_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
-      renderToArthur(&arthur_output, &painter, m_page, xres, yres, x, y, w, h, rotate, DontSaveAndRestore);
+      renderToArthur(&arthur_output, &painter, m_page, xres, yres, xPos, yPos, w, h, rotate, DontSaveAndRestore);
       painter.end();
       img = tmpimg;
       break;
@@ -783,6 +783,7 @@ QList<TextBox*> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbort
   TextWordList *word_list = output_dev->makeWordList();
   
   if (!word_list || (shouldAbortExtractionCallback && shouldAbortExtractionCallback(closure))) {
+    delete word_list;
     delete output_dev;
     return output_list;
   }

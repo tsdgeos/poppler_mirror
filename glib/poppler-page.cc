@@ -373,7 +373,9 @@ _poppler_page_render (PopplerPage      *page,
  * Render the page to the given cairo context. This function
  * is for rendering a page that will be displayed. If you want
  * to render a page that will be printed use
- * poppler_page_render_for_printing() instead
+ * poppler_page_render_for_printing() instead.  Please see the documentation
+ * for that function for the differences between rendering to the screen and
+ * rendering to a printer.
  **/
 void
 poppler_page_render (PopplerPage *page,
@@ -393,6 +395,9 @@ poppler_page_render (PopplerPage *page,
  * Render the page to the given cairo context for printing
  * with the specified options
  *
+ * See the documentation for poppler_page_render_for_printing() for the
+ * differences between rendering to the screen and rendering to a printer.
+ *
  * Since: 0.16
  **/
 void
@@ -410,7 +415,36 @@ poppler_page_render_for_printing_with_options (PopplerPage      *page,
  * @page: the page to render from
  * @cairo: cairo context to render to
  *
- * Render the page to the given cairo context for printing.
+ * Render the page to the given cairo context for printing with
+ * #POPPLER_PRINT_ALL flags selected.  If you want a different set of flags,
+ * use poppler_page_render_for_printing_with_options().
+ *
+ * The difference between poppler_page_render() and this function is that some
+ * things get rendered differently between screens and printers:
+ *
+ * <itemizedlist>
+ *   <listitem>
+ *     PDF annotations get rendered according to their #PopplerAnnotFlag value.
+ *     For example, #POPPLER_ANNOT_FLAG_PRINT refers to whether an annotation
+ *     is printed or not, whereas #POPPLER_ANNOT_FLAG_NO_VIEW refers to whether
+ *     an annotation is invisible when displaying to the screen.
+ *   </listitem>
+ *   <listitem>
+ *     PDF supports "hairlines" of width 0.0, which often get rendered as
+ *     having a width of 1 device pixel.  When displaying on a screen, Cairo
+ *     may render such lines wide so that they are hard to see, and Poppler
+ *     makes use of PDF's Stroke Adjust graphics parameter to make the lines
+ *     easier to see.  However, when printing, Poppler is able to directly use a
+ *     printer's pixel size instead.
+ *   </listitem>
+ *   <listitem>
+ *     Some advanced features in PDF may require an image to be rasterized
+ *     before sending off to a printer.  This may produce raster images which
+ *     exceed Cairo's limits.  The "printing" functions will detect this condition
+ *     and try to down-scale the intermediate surfaces as appropriate.
+ *   </listitem>
+ * </itemizedlist>
+ * 
  **/
 void
 poppler_page_render_for_printing (PopplerPage *page,
@@ -2223,9 +2257,9 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
 
           if (j < line_words->size() - 1)
             {
-              TextWordSelection *word_sel = (*line_words)[j + 1];
+              TextWordSelection *next_word_sel = (*line_words)[j + 1];
 
-              word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
+              next_word_sel->getWord()->getBBox(&x3, &y3, &x4, &y4);
 	      // space is from one word to other and with the same height as
 	      // first word.
 	      rect->x1 = x2;

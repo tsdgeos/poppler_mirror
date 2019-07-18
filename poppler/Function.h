@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2010, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2010, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -240,7 +240,7 @@ private:
 
   PostScriptFunction(const PostScriptFunction *func);
   bool parseCode(Stream *str, int *codePtr);
-  GooString *getToken(Stream *str);
+  GooString getToken(Stream *str);
   void resizeCode(int newSize);
   void exec(PSStack *stack, int codePtr) const;
 

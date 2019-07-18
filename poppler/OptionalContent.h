@@ -99,11 +99,11 @@ public:
   Ref getRef() const;
   void setRef(const Ref ref);
 
-  State getState() { return m_state; };
+  State getState() const { return m_state; };
   void setState(State state) { m_state = state; };
 
-  UsageState getViewState() { return viewState; }
-  UsageState getPrintState() { return printState; }
+  UsageState getViewState() const { return viewState; }
+  UsageState getPrintState() const { return printState; }
 
 private:
   GooString *m_name;

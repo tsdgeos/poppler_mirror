@@ -427,6 +427,8 @@ public:
   LinkActionKind getKind() const override { return actionJavaScript; }
   const GooString *getScript() const { return js; }
 
+  static Object createObject(XRef *xref, const GooString &js);
+
 private:
 
   GooString *js;

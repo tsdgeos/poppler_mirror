@@ -173,12 +173,19 @@ LinkAction *FormWidget::getActivationAction() {
   return widget ? widget->getAction() : nullptr;
 }
 
-LinkAction *FormWidget::getAdditionalAction(Annot::FormAdditionalActionsType type) {
-  return widget ? widget->getFormAdditionalAction(type) : nullptr;
+LinkAction *FormWidget::getAdditionalAction(Annot::FormAdditionalActionsType t) {
+  return widget ? widget->getFormAdditionalAction(t) : nullptr;
 }
 
-FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
-	FormWidget(docA, aobj, num, ref, p)
+bool FormWidget::setAdditionalAction(Annot::FormAdditionalActionsType t, const GooString &js) {
+  if (!widget)
+    return false;
+
+  return widget->setFormAdditionalAction(t, js);
+}
+
+FormWidgetButton::FormWidgetButton (PDFDoc *docA, Object *aobj, unsigned num, Ref refA, FormField *p) :
+	FormWidget(docA, aobj, num, refA, p)
 {
   type = formButton;
   onStr = nullptr;
@@ -256,8 +263,8 @@ FormFieldButton *FormWidgetButton::parent() const
 }
 
 
-FormWidgetText::FormWidgetText (PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
-	FormWidget(docA, aobj, num, ref, p)
+FormWidgetText::FormWidgetText (PDFDoc *docA, Object *aobj, unsigned num, Ref refA, FormField *p) :
+	FormWidget(docA, aobj, num, refA, p)
 {
   type = formText;
 }
@@ -333,8 +340,8 @@ FormFieldText *FormWidgetText::parent() const
   return static_cast<FormFieldText*>(field);
 }
 
-FormWidgetChoice::FormWidgetChoice(PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
-	FormWidget(docA, aobj, num, ref, p)
+FormWidgetChoice::FormWidgetChoice(PDFDoc *docA, Object *aobj, unsigned num, Ref refA, FormField *p) :
+	FormWidget(docA, aobj, num, refA, p)
 {
   type = formChoice;
 }
@@ -445,8 +452,8 @@ FormFieldChoice *FormWidgetChoice::parent() const
   return static_cast<FormFieldChoice*>(field);
 }
 
-FormWidgetSignature::FormWidgetSignature(PDFDoc *docA, Object *aobj, unsigned num, Ref ref, FormField *p) :
-	FormWidget(docA, aobj, num, ref, p)
+FormWidgetSignature::FormWidgetSignature(PDFDoc *docA, Object *aobj, unsigned num, Ref refA, FormField *p) :
+	FormWidget(docA, aobj, num, refA, p)
 {
   type = formSignature;
 }
@@ -463,16 +470,16 @@ SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool fo
 
 std::vector<Goffset> FormWidgetSignature::getSignedRangeBounds()
 {
-  Object* obj = static_cast<FormFieldSignature*>(field)->getByteRange();
+  Object* byteRangeObj = static_cast<FormFieldSignature*>(field)->getByteRange();
   std::vector<Goffset> range_vec;
-  if (obj->isArray())
+  if (byteRangeObj->isArray())
   {
-    if (obj->arrayGetLength() == 4)
+    if (byteRangeObj->arrayGetLength() == 4)
     {
       for (int i = 0; i < 2; ++i)
       {
-        Object offsetObj(obj->arrayGet(2*i));
-        Object lenObj(obj->arrayGet(2*i+1));
+        Object offsetObj(byteRangeObj->arrayGet(2*i));
+        Object lenObj(byteRangeObj->arrayGet(2*i+1));
         if (offsetObj.isIntOrInt64() && lenObj.isIntOrInt64())
         {
           Goffset offset = offsetObj.getIntOrInt64();
@@ -799,7 +806,7 @@ void FormField::createWidgetAnnotations() {
   }
 }
 
-void FormField::_createWidget (Object *obj, Ref aref)
+void FormField::_createWidget (Object *objA, Ref aref)
 {
   terminal = true;
   numChildren++;
@@ -807,16 +814,16 @@ void FormField::_createWidget (Object *obj, Ref aref)
   //ID = index in "widgets" table
   switch (type) {
   case formButton:
-    widgets[numChildren-1] = new FormWidgetButton(doc, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetButton(doc, objA, numChildren-1, aref, this);
     break;
   case formText:
-    widgets[numChildren-1] = new FormWidgetText(doc, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetText(doc, objA, numChildren-1, aref, this);
     break;
   case formChoice:
-    widgets[numChildren-1] = new FormWidgetChoice(doc, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetChoice(doc, objA, numChildren-1, aref, this);
     break;
   case formSignature:
-    widgets[numChildren-1] = new FormWidgetSignature(doc, obj, numChildren-1, aref, this);
+    widgets[numChildren-1] = new FormWidgetSignature(doc, objA, numChildren-1, aref, this);
     break;
   default:
     error(errSyntaxWarning, -1, "SubType on non-terminal field, invalid document?");
@@ -842,7 +849,7 @@ FormWidget* FormField::findWidgetByRef (Ref aref)
 
 GooString* FormField::getFullyQualifiedName() {
   Object obj1;
-  Object parent;
+  Object parentObj;
   const GooString *parent_name;
   GooString *full_name;
   bool unicode_encoded = false;
@@ -853,8 +860,8 @@ GooString* FormField::getFullyQualifiedName() {
   full_name = new GooString();
 
   obj1 = obj.copy();
-  while (parent = obj1.dictLookup("Parent"), parent.isDict()) {
-    Object obj2 = parent.dictLookup("T");
+  while (parentObj = obj1.dictLookup("Parent"), parentObj.isDict()) {
+    Object obj2 = parentObj.dictLookup("T");
     if (obj2.isString()) {
       parent_name = obj2.getString();
 
@@ -879,7 +886,7 @@ GooString* FormField::getFullyQualifiedName() {
         }
       }
     }
-    obj1 = parent.copy();
+    obj1 = parentObj.copy();
   }
 
   if (partialName) {
@@ -964,8 +971,8 @@ void FormField::setReadOnly (bool value)
 //------------------------------------------------------------------------
 // FormFieldButton
 //------------------------------------------------------------------------
-FormFieldButton::FormFieldButton(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, std::move(aobj), ref, parent, usedParents, formButton)
+FormFieldButton::FormFieldButton(PDFDoc *docA, Object &&aobj, const Ref refA, FormField *parentA, std::set<int> *usedParents)
+  : FormField(docA, std::move(aobj), refA, parentA, usedParents, formButton)
 {
   Dict* dict = obj.getDict();
   active_child = -1;
@@ -1134,8 +1141,8 @@ FormFieldButton::~FormFieldButton()
 //------------------------------------------------------------------------
 // FormFieldText
 //------------------------------------------------------------------------
-FormFieldText::FormFieldText(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, std::move(aobj), ref, parent, usedParents, formText)
+FormFieldText::FormFieldText(PDFDoc *docA, Object &&aobj, const Ref refA, FormField *parentA, std::set<int> *usedParents)
+  : FormField(docA, std::move(aobj), refA, parentA, usedParents, formText)
 {
   Dict* dict = obj.getDict();
   Object obj1;
@@ -1306,8 +1313,8 @@ int FormFieldText::parseDA(std::vector<GooString*>* daToks)
 //------------------------------------------------------------------------
 // FormFieldChoice
 //------------------------------------------------------------------------
-FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, std::move(aobj), ref, parent, usedParents, formChoice)
+FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, FormField *parentA, std::set<int> *usedParents)
+  : FormField(docA, std::move(aobj), refA, parentA, usedParents, formChoice)
 {
   numChoices = 0;
   choices = nullptr;
@@ -1598,8 +1605,8 @@ const GooString *FormFieldChoice::getSelectedChoice() const {
 //------------------------------------------------------------------------
 // FormFieldSignature
 //------------------------------------------------------------------------
-FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents)
-  : FormField(docA, std::move(dict), ref, parent, usedParents, formSignature),
+FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref refA, FormField *parentA, std::set<int> *usedParents)
+  : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature),
     signature_type(adbe_pkcs7_detached),
     signature(nullptr), signature_info(nullptr)
 {

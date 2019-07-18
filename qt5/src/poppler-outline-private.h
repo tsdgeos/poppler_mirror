@@ -1,6 +1,7 @@
 /* poppler-outline-private.h: qt interface to poppler
  *
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +33,7 @@ class LinkDestination;
 
 struct OutlineItemData
 {
-  OutlineItemData(::OutlineItem *data, DocumentData *documentData) : data{data}, documentData{documentData} {}
+  OutlineItemData(::OutlineItem *oi, DocumentData *dd) : data{oi}, documentData{dd} {}
   ::OutlineItem *data;
   DocumentData *documentData;
 

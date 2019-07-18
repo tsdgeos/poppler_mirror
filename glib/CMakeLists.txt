@@ -86,7 +86,7 @@ set(poppler_glib_generated_SRCS
   ${CMAKE_SOURCE_DIR}/poppler/CairoRescaleBox.cc
 )
 add_library(poppler-glib ${poppler_glib_SRCS} ${poppler_glib_generated_SRCS})
-set_target_properties(poppler-glib PROPERTIES VERSION 8.12.0 SOVERSION 8)
+set_target_properties(poppler-glib PROPERTIES VERSION 8.13.0 SOVERSION 8)
 set_target_properties(poppler-glib PROPERTIES C_VISIBILITY_PRESET hidden)
 set_target_properties(poppler-glib PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(poppler-glib PROPERTIES VISIBILITY_INLINES_HIDDEN 1)
@@ -135,7 +135,7 @@ if (HAVE_INTROSPECTION AND BUILD_SHARED_LIBS)
   get_directory_property(_tmp_includes INCLUDE_DIRECTORIES)
   _list_prefix(_includes _tmp_includes "-I")
   set(Poppler_0_18_gir_CFLAGS ${_includes} -L${CMAKE_BINARY_DIR} -L${CMAKE_CURRENT_BINARY_DIR})
-  set(Poppler_0_18_gir_LIBS poppler-glib)
+  set(Poppler_0_18_gir_LIBS poppler-glib poppler)
   _list_prefix(_abs_introspection_files introspection_files "${CMAKE_CURRENT_SOURCE_DIR}/")
   list(APPEND _abs_introspection_files
     ${CMAKE_CURRENT_BINARY_DIR}/poppler-enums.c

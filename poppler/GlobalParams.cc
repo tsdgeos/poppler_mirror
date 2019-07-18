@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
@@ -264,22 +264,23 @@ SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exac
   GooString *name2;
   bool bold, italic, oblique;
   SysFontInfo *fi;
-  char c;
-  int n, i;
+  int n;
 
   name2 = name->copy();
 
   // remove space, comma, dash chars
-  i = 0;
-  while (i < name2->getLength()) {
-    c = name2->getChar(i);
-    if (c == ' ' || c == ',' || c == '-') {
-      name2->del(i);
-    } else {
-      ++i;
+  {
+    int i = 0;
+    while (i < name2->getLength()) {
+        const char c = name2->getChar(i);
+        if (c == ' ' || c == ',' || c == '-') {
+        name2->del(i);
+        } else {
+        ++i;
+        }
     }
+    n = name2->getLength();
   }
-  n = name2->getLength();
 
   // remove trailing "MT" (Foo-MT, Foo-BoldMT, etc.)
   if (n > 2 && !strcmp(name2->c_str() + n - 2, "MT")) {
@@ -620,8 +621,8 @@ FILE *GlobalParams::findCMapFile(const GooString *collection, const GooString *c
   FILE *file = nullptr;
 
   globalParamsLocker();
-  const auto cMapDirs = this->cMapDirs.equal_range(collection->toStr());
-  for (auto cMapDir = cMapDirs.first; cMapDir != cMapDirs.second; ++cMapDir) {
+  const auto collectionCMapDirs = cMapDirs.equal_range(collection->toStr());
+  for (auto cMapDir = collectionCMapDirs.first; cMapDir != collectionCMapDirs.second; ++cMapDir) {
     auto* const path = new GooString(cMapDir->second);
     appendToPath(path, cMapName->c_str());
     file = openFile(path->c_str(), "r");

@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -386,6 +387,8 @@ GList             *poppler_document_get_attachments        (PopplerDocument  *do
 POPPLER_PUBLIC
 PopplerDest       *poppler_document_find_dest              (PopplerDocument  *document,
 							    const gchar      *link_name);
+POPPLER_PUBLIC
+GTree             *poppler_document_create_dests_tree      (PopplerDocument  *document);
 
 /* Form */
 POPPLER_PUBLIC

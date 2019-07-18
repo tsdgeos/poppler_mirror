@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
-// Copyright (C) 2007-2010, 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2010, 2017, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Jonathan Kew <jonathan_kew@sil.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -55,11 +55,9 @@ inline void *gmalloc_checkoverflow(size_t size) {
   return gmalloc(size, true);
 }
 
-/// Same as free, but checks for and ignores NULL pointers.
+/// Same as free
 inline void gfree(void *p) {
-  if (p) {
-    std::free(p);
-  }
+  std::free(p);
 }
 
 /// Same as realloc, but prints error message and exits if realloc() returns NULL.
@@ -139,9 +137,11 @@ inline void *gmallocn3(int width, int height, int size, bool checkoverflow = fal
   return gmalloc(bytes, checkoverflow);
 }
 
-inline void *greallocn(void *p, int count, int size, bool checkoverflow = false) {
+inline void *greallocn(void *p, int count, int size, bool checkoverflow = false, bool free_p = true) {
   if (count == 0) {
-    gfree(p);
+    if (free_p) {
+      gfree(p);
+    }
     return nullptr;
   }
 
@@ -150,7 +150,9 @@ inline void *greallocn(void *p, int count, int size, bool checkoverflow = false)
     std::fputs("Bogus memory allocation size\n", stderr);
 
     if (checkoverflow) {
-      gfree(p);
+      if (free_p) {
+        gfree(p);
+      }
       return nullptr;
     }
 

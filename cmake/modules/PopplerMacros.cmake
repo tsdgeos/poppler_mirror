@@ -43,10 +43,8 @@ macro(POPPLER_ADD_UNITTEST exe build_flag)
 endmacro(POPPLER_ADD_UNITTEST)
 
 macro(POPPLER_CREATE_INSTALL_PKGCONFIG generated_file install_location)
-  if(NOT MSVC)
-    configure_file(${generated_file}.cmake ${CMAKE_CURRENT_BINARY_DIR}/${generated_file} @ONLY)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${generated_file} DESTINATION ${install_location})
-  endif(NOT MSVC)
+  configure_file(${generated_file}.cmake ${CMAKE_CURRENT_BINARY_DIR}/${generated_file} @ONLY)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${generated_file} DESTINATION ${install_location})
 endmacro(POPPLER_CREATE_INSTALL_PKGCONFIG)
 
 macro(SHOW_END_MESSAGE what value)
@@ -112,13 +110,13 @@ if(CMAKE_COMPILER_IS_GNUCXX)
   set(_warn "${_warn} -Wmissing-declarations")
   set(_warn "${_warn} -Wundef")
   set(_warn "${_warn} -Wzero-as-null-pointer-constant")
+  set(_warn "${_warn} -Wshadow")
   if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0.0")
     set(_warn "${_warn} -Wsuggest-override")
   endif()
 
   # set extra warnings
   set(_warnx "${_warnx} -Wconversion")
-  set(_warnx "${_warnx} -Wshadow")
   set(_warnx "${_warnx} -Wuseless-cast")
 
   set(DEFAULT_COMPILE_WARNINGS "${_warn}")
@@ -160,10 +158,10 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set(_warn "${_warn} -Wmissing-declarations")
   set(_warn "${_warn} -Wundef")
   set(_warn "${_warn} -Wzero-as-null-pointer-constant")
+  set(_warn "${_warn} -Wshadow")
 
   # set extra warnings
   set(_warnx "${_warnx} -Wconversion")
-  set(_warnx "${_warnx} -Wshadow")
 
   set(DEFAULT_COMPILE_WARNINGS "${_warn}")
   set(DEFAULT_COMPILE_WARNINGS_EXTRA "${_warn} ${_warnx}")

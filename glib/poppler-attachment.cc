@@ -40,18 +40,18 @@ struct PopplerAttachmentPrivate
   Object obj_stream{};
 };
 
-#define POPPLER_ATTACHMENT_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), POPPLER_TYPE_ATTACHMENT, PopplerAttachmentPrivate))
-
 static void poppler_attachment_finalize (GObject *obj);
 
-G_DEFINE_TYPE (PopplerAttachment, poppler_attachment, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (PopplerAttachment, poppler_attachment, G_TYPE_OBJECT)
+
+#define GET_PRIVATE(obj) ((PopplerAttachmentPrivate *) poppler_attachment_get_instance_private (obj))
 
 static void
 poppler_attachment_init (PopplerAttachment *attachment)
 {
   void *place;
 
-  place = g_type_instance_get_private ((GTypeInstance*)attachment, POPPLER_TYPE_ATTACHMENT);
+  place = GET_PRIVATE (attachment);
   new (place) PopplerAttachmentPrivate();
 }
 
@@ -59,15 +59,16 @@ static void
 poppler_attachment_class_init (PopplerAttachmentClass *klass)
 {
   G_OBJECT_CLASS (klass)->finalize = poppler_attachment_finalize;
-  g_type_class_add_private (klass, sizeof (PopplerAttachmentPrivate));
 }
 
 static void
 poppler_attachment_finalize (GObject *obj)
 {
   PopplerAttachment *attachment;
+  PopplerAttachmentPrivate *priv;
 
   attachment = (PopplerAttachment *) obj;
+  priv = GET_PRIVATE (attachment);
 
   if (attachment->name)
     g_free (attachment->name);
@@ -81,7 +82,7 @@ poppler_attachment_finalize (GObject *obj)
     g_string_free (attachment->checksum, TRUE);
   attachment->checksum = nullptr;
 
-  POPPLER_ATTACHMENT_GET_PRIVATE (obj)->~PopplerAttachmentPrivate ();
+  priv->~PopplerAttachmentPrivate ();
 
   G_OBJECT_CLASS (poppler_attachment_parent_class)->finalize (obj);
 }
@@ -98,7 +99,7 @@ _poppler_attachment_new (FileSpec *emb_file)
   g_assert (emb_file != nullptr);
 
   attachment = (PopplerAttachment *) g_object_new (POPPLER_TYPE_ATTACHMENT, nullptr);
-  priv = POPPLER_ATTACHMENT_GET_PRIVATE (attachment);
+  priv = GET_PRIVATE (attachment);
 
   if (emb_file->getFileName ())
     attachment->name = _poppler_goo_string_to_utf8 (emb_file->getFileName ());
@@ -238,14 +239,16 @@ poppler_attachment_save_to_callback (PopplerAttachment          *attachment,
 				     gpointer                    user_data,
 				     GError                    **error)
 {
+  PopplerAttachmentPrivate *priv;
   Stream *stream;
   gchar buf[BUF_SIZE]; 
   int i;
   gboolean eof_reached = FALSE;
 
   g_return_val_if_fail (POPPLER_IS_ATTACHMENT (attachment), FALSE);
+  priv = GET_PRIVATE (attachment);
 
-  stream = POPPLER_ATTACHMENT_GET_PRIVATE (attachment)->obj_stream.getStream();
+  stream = priv->obj_stream.getStream();
   stream->reset();
 
   do

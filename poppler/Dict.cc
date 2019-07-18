@@ -98,11 +98,10 @@ inline const Dict::DictEntry *Dict::find(const char *key) const {
     if (!sorted) {
       dictLocker();
       if (!sorted) {
-	auto& entries = const_cast<std::vector<DictEntry>&>(this->entries);
-	auto& sorted = const_cast<std::atomic_bool&>(this->sorted);
+	Dict *that = const_cast<Dict*>(this);
 
-	std::sort(entries.begin(), entries.end(), CmpDictEntry{});
-	sorted = true;
+	std::sort(that->entries.begin(), that->entries.end(), CmpDictEntry{});
+	that->sorted = true;
       }
     }
   }

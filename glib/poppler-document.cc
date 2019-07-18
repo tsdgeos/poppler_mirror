@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -223,7 +224,7 @@ poppler_document_new_from_file (const char  *uri,
 
 /**
  * poppler_document_new_from_data:
- * @data: the pdf data contained in a char array
+ * @data: (array length=length) (element-type guint8): the pdf data
  * @length: the length of #data
  * @password: (allow-none): password to unlock the file with, or %NULL
  * @error: (allow-none): Return location for an error, or %NULL
@@ -276,8 +277,8 @@ stream_is_memory_buffer_or_local_file (GInputStream *stream)
  * Creates a new #PopplerDocument reading the PDF contents from @stream.
  * Note that the given #GInputStream must be seekable or %G_IO_ERROR_NOT_SUPPORTED
  * will be returned.
- * Possible errors include those in the #POPPLER_ERROR and #G_FILE_ERROR
- * domains.
+ * Possible errors include those in the #POPPLER_ERROR, #G_FILE_ERROR
+ * and #G_IO_ERROR domains.
  *
  * Returns: (transfer full): a new #PopplerDocument, or %NULL
  *
@@ -308,7 +309,14 @@ poppler_document_new_from_stream (GInputStream *stream,
   }
 
   if (stream_is_memory_buffer_or_local_file(stream)) {
-    str = new PopplerInputStream(stream, cancellable, 0, false, 0, Object(objNull));
+    if (length == (goffset)-1) {
+      if (!g_seekable_seek(G_SEEKABLE(stream), 0, G_SEEK_END, cancellable, error)) {
+        g_prefix_error(error, "Unable to determine length of stream: ");
+        return nullptr;
+      }
+      length = g_seekable_tell(G_SEEKABLE(stream));
+    }
+    str = new PopplerInputStream(stream, cancellable, 0, false, length, Object(objNull));
   } else {
     CachedFile *cachedFile = new CachedFile(new PopplerCachedFileLoader(stream, cancellable, length), new GooString());
     str = new CachedFileStream(cachedFile, 0, false, cachedFile->getLength(), Object(objNull));
@@ -830,6 +838,90 @@ poppler_document_find_dest (PopplerDocument *document,
   delete link_dest;
 
   return dest;
+}
+
+static gint
+_poppler_dest_compare_keys (gconstpointer a,
+			    gconstpointer b,
+			    gpointer user_data)
+{
+	return g_strcmp0 (static_cast<const gchar*>(a),
+			  static_cast<const gchar*>(b));
+}
+
+static void
+_poppler_dest_destroy_value (gpointer value)
+{
+	poppler_dest_free (static_cast<PopplerDest*>(value));
+}
+
+/**
+ * poppler_document_create_dests_tree:
+ * @document: A #PopplerDocument
+ *
+ * Creates named destinations balanced binary tree in @document
+ *
+ * The tree key is strings in the form returned by
+ * poppler_named_dest_bytestring() which constains a destination name.
+ * The tree value is the #PopplerDest* which contains a named destination.
+ * The return value must be freed with #g_tree_destroy.
+ *
+ * Returns: (transfer full) (nullable): the #GTree, or %NULL
+ * Since: 0.78
+ **/
+GTree *
+poppler_document_create_dests_tree (PopplerDocument *document)
+{
+	GTree *tree;
+	Catalog *catalog;
+	LinkDest *link_dest;
+	PopplerDest *dest;
+	int i;
+	gchar *key;
+
+	g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), nullptr);
+
+	catalog = document->doc->getCatalog ();
+	if (catalog == nullptr)
+		return nullptr;
+
+	tree = g_tree_new_full (_poppler_dest_compare_keys, nullptr,
+				g_free,
+				_poppler_dest_destroy_value);
+
+	// Iterate from name-dict
+	const int nDests = catalog->numDests ();
+	for (i = 0; i < nDests; ++i) {
+		// The names of name-dict cannot contain \0,
+		// so we can use strlen().
+		auto name = catalog->getDestsName (i);
+		key = poppler_named_dest_from_bytestring
+			(reinterpret_cast<const guint8*> (name),
+			 strlen (name));
+		link_dest = catalog->getDestsDest (i);
+		if (link_dest) {
+			dest = _poppler_dest_new_goto (document, link_dest);
+			delete link_dest;
+			g_tree_insert (tree, key, dest);
+		}
+	}
+
+	// Iterate form name-tree
+	const int nDestsNameTree = catalog->numDestNameTree ();
+	for (i = 0; i < nDestsNameTree; ++i) {
+		auto name = catalog->getDestNameTreeName (i);
+		key = poppler_named_dest_from_bytestring
+			(reinterpret_cast<const guint8*> (name->c_str ()),
+			 name->getLength ());
+		link_dest = catalog->getDestNameTreeDest (i);
+		if (link_dest) {
+			dest = _poppler_dest_new_goto (document, link_dest);
+			delete link_dest;
+			g_tree_insert (tree, key, dest);
+		}
+	}
+
+	return tree;
 }
 
 char *_poppler_goo_string_to_utf8(const GooString *s)

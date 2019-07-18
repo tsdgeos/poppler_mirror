@@ -9,6 +9,7 @@
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
  * Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,6 +70,36 @@ Qt::Alignment formTextAlignment(::FormWidget *fm)
 }
 
 namespace Poppler {
+
+FormFieldIcon::FormFieldIcon(FormFieldIconData *data)
+  : d_ptr(data)
+{
+}
+
+FormFieldIcon::FormFieldIcon(const FormFieldIcon &ffIcon)
+{
+  d_ptr = new FormFieldIconData;
+  d_ptr->icon = ffIcon.d_ptr->icon;
+}
+
+FormFieldIcon& FormFieldIcon::operator=(const FormFieldIcon &ffIcon)
+{
+  if(this != &ffIcon)
+  {  
+    delete d_ptr;
+    d_ptr = nullptr;
+
+    d_ptr = new FormFieldIconData;
+    *d_ptr = *ffIcon.d_ptr;
+  }
+  
+  return *this;
+}
+
+FormFieldIcon::~FormFieldIcon()
+{
+  delete d_ptr;
+}
 
 FormField::FormField(FormFieldData &dd)
   : m_formData(&dd)
@@ -173,6 +204,22 @@ void FormField::setVisible(bool value)
     flags &= ~Annot::flagHidden;
   } else {
     flags |= Annot::flagHidden;
+  }
+  m_formData->fm->getWidgetAnnotation()->setFlags(flags);
+}
+
+bool FormField::isPrintable() const
+{
+  return (m_formData->fm->getWidgetAnnotation()->getFlags() & Annot::flagPrint);
+}
+
+void FormField::setPrintable(bool value)
+{
+  unsigned int flags = m_formData->fm->getWidgetAnnotation()->getFlags();
+  if (value) {
+    flags |= Annot::flagPrint;
+  } else {
+    flags &= ~Annot::flagPrint;
   }
   m_formData->fm->getWidgetAnnotation()->setFlags(flags);
 }
@@ -282,6 +329,34 @@ QString FormFieldButton::caption() const
     }
   }
   return ret;
+}
+
+FormFieldIcon FormFieldButton::icon() const
+{
+  FormWidgetButton* fwb = static_cast<FormWidgetButton*>(m_formData->fm);
+  if (fwb->getButtonType() == formButtonPush)
+  {
+    Dict *dict = m_formData->fm->getObj()->getDict();
+    FormFieldIconData *data = new FormFieldIconData;
+    data->icon = dict;
+    return FormFieldIcon(data);
+  }
+  return FormFieldIcon(nullptr);
+}
+
+void FormFieldButton::setIcon(const FormFieldIcon &icon)
+{
+  if(FormFieldIconData::getData( icon ) == nullptr)
+    return;
+
+  FormWidgetButton* fwb = static_cast<FormWidgetButton*>(m_formData->fm);
+  if (fwb->getButtonType() == formButtonPush)
+  {
+    ::AnnotWidget *w = m_formData->fm->getWidgetAnnotation(); 
+    FormFieldIconData *data = FormFieldIconData::getData( icon );
+    if(data->icon != nullptr)
+      w->setNewAppearance(data->icon->lookup("AP"));
+  }
 }
 
 bool FormFieldButton::state() const

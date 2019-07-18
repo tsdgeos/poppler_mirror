@@ -1081,9 +1081,9 @@ static void outputToFile(void *stream, const char *data, int len) {
   fwrite(data, 1, len, (FILE *)stream);
 }
 
-PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc,
+PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA,
 			 char *psTitleA,
-			 const std::vector<int> &pages, PSOutMode modeA,
+			 const std::vector<int> &pagesA, PSOutMode modeA,
 			 int paperWidthA, int paperHeightA,
                          bool noCropA, bool duplexA,
 			 int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
@@ -1145,15 +1145,15 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *doc,
   }
 
   init(outputToFile, f, fileTypeA, psTitleA,
-       doc, pages, modeA,
+       docA, pagesA, modeA,
        imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA,
        paperWidthA, paperHeightA, noCropA, duplexA);
 }
 
 PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
 			 char *psTitleA,
-			 PDFDoc *doc,
-			 const std::vector<int> &pages, PSOutMode modeA,
+			 PDFDoc *docA,
+			 const std::vector<int> &pagesA, PSOutMode modeA,
 			 int paperWidthA, int paperHeightA,
                          bool noCropA, bool duplexA,
 			 int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
@@ -1183,7 +1183,7 @@ PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
   psTitle = nullptr;
 
   init(outputFuncA, outputStreamA, psGeneric, psTitleA,
-       doc, pages, modeA,
+       docA, pagesA, modeA,
        imgLLXA, imgLLYA, imgURXA, imgURYA, manualCtrlA,
        paperWidthA, paperHeightA, noCropA, duplexA);
 }
@@ -1324,11 +1324,11 @@ void PSOutputDev::postInit()
   } else {
     paperMatch = false;
   }
-  Page *page;
+
   paperSizes = new std::vector<PSOutPaperSize*>();
   for (size_t pgi = 0; pgi < pages.size(); ++pgi) {
     const int pg = pages[pgi];
-    page = catalog->getPage(pg);
+    Page *page = catalog->getPage(pg);
     if (page == nullptr)
       paperMatch = false;
     if (!paperMatch) {
@@ -1349,8 +1349,8 @@ void PSOutputDev::postInit()
       h = (int)ceil(page->getCropHeight());
     }
     if (paperMatch) {
-      int rotate = page->getRotate();
-      if (rotate == 90 || rotate == 270)
+      const int pageRotate = page->getRotate();
+      if (pageRotate == 90 || pageRotate == 270)
         std::swap(w, h);
     }
     if (w  > paperWidth)
@@ -1424,7 +1424,7 @@ void PSOutputDev::postInit()
     Page *page;
     // this check is needed in case the document has zero pages
     if ((page = doc->getPage(pageList[0]))) {
-      writeHeader(pageList,
+      writeHeader(pageList.size(),
 		  page->getMediaBox(),
 		  page->getCropBox(),
 		  page->getRotate(),
@@ -1432,7 +1432,7 @@ void PSOutputDev::postInit()
     } else {
       error(errSyntaxError, -1, "Invalid page {0:d}", pageList[0]);
       box = new PDFRectangle(0, 0, 1, 1);
-      writeHeader(pageList, box, box, 0, psTitle);
+      writeHeader(pageList.size(), box, box, 0, psTitle);
       delete box;
     }
     if (mode != psModeForm) {
@@ -1443,7 +1443,7 @@ void PSOutputDev::postInit()
       writePS("%%EndProlog\n");
       writePS("%%BeginSetup\n");
     }
-    writeDocSetup(doc, catalog, pageList, duplex);
+    writeDocSetup(catalog, pageList, duplex);
     if (mode != psModeForm) {
       writePS("%%EndSetup\n");
     }
@@ -1519,9 +1519,9 @@ PSOutputDev::~PSOutputDev() {
   gfree(psTitle);
 }
 
-void PSOutputDev::writeHeader(const std::vector<int> &pages,
+void PSOutputDev::writeHeader(int nPages,
 			      const PDFRectangle *mediaBox, const PDFRectangle *cropBox,
-			      int pageRotate, char *psTitle) {
+			      int pageRotate, const char *title) {
   PSOutPaperSize *size;
   double x1, y1, x2, y2;
 
@@ -1545,8 +1545,8 @@ void PSOutputDev::writeHeader(const std::vector<int> &pages,
         writePSTextLine(obj1.getString());
     }
   }
-  if(psTitle) {
-    char *sanitizedTitle = strdup(psTitle);
+  if(title) {
+    char *sanitizedTitle = strdup(title);
     for (unsigned int i = 0; i < strlen(sanitizedTitle); ++i) {
       if (sanitizedTitle[i] == '\n' || sanitizedTitle[i] == '\r') {
         sanitizedTitle[i] = ' ';
@@ -1575,7 +1575,7 @@ void PSOutputDev::writeHeader(const std::vector<int> &pages,
                  i==0 ? "DocumentMedia:" : "+", size->name, size->w, size->h);
     }
     writePSFmt("%%BoundingBox: 0 0 {0:d} {1:d}\n", paperWidth, paperHeight);
-    writePSFmt("%%Pages: {0:d}\n", static_cast<int>(pages.size()));
+    writePSFmt("%%Pages: {0:d}\n", nPages);
     writePS("%%EndComments\n");
     if (!paperMatch) {
       size = (*paperSizes)[0];
@@ -1658,8 +1658,8 @@ void PSOutputDev::writeXpdfProcset() {
   }
 }
 
-void PSOutputDev::writeDocSetup(PDFDoc *doc, Catalog *catalog,
-				const std::vector<int> &pages,
+void PSOutputDev::writeDocSetup(Catalog *catalog,
+				const std::vector<int> &pageList,
                                 bool duplexA) {
   Page *page;
   Dict *resDict;
@@ -1673,8 +1673,8 @@ void PSOutputDev::writeDocSetup(PDFDoc *doc, Catalog *catalog,
   } else {
     writePS("xpdf begin\n");
   }
-  for (size_t pgi = 0; pgi < pages.size(); ++pgi) {
-    const int pg = pages[pgi];
+  for (size_t pgi = 0; pgi < pageList.size(); ++pgi) {
+    const int pg = pageList[pgi];
     page = doc->getPage(pg);
     if (!page) {
       error(errSyntaxError, -1, "Failed writing resources for page {0:d}", pg);
@@ -2529,7 +2529,7 @@ void PSOutputDev::setupExternalTrueTypeFont(GfxFont *font, GooString *fileName,
 
 void PSOutputDev::updateFontMaxValidGlyph(GfxFont *font, int maxValidGlyph) {
   if (maxValidGlyph >= 0 && font->getName()) {
-    auto& fontMaxValidGlyph = this->fontMaxValidGlyph[font->getName()->toStr()];
+    auto& fontMaxValidGlyph = perFontMaxValidGlyph[font->getName()->toStr()];
     if (fontMaxValidGlyph < maxValidGlyph) {
       fontMaxValidGlyph = maxValidGlyph;
     }
@@ -4501,18 +4501,17 @@ bool PSOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat, Ob
     // Don't need to use patterns if only one instance of the pattern is used
     PDFRectangle box;
     Gfx *gfx;
-    double x, y, tx, ty;
 
-    x = x0 * xStep;
-    y = y0 * yStep;
-    tx = x * mat[0] + y * mat[2] + mat[4];
-    ty = x * mat[1] + y * mat[3] + mat[5];
+    const double singleStep_x = x0 * xStep;
+    const double singleStep_y = y0 * yStep;
+    const double singleStep_tx = singleStep_x * mat[0] + singleStep_y * mat[2] + mat[4];
+    const double singleStep_ty = singleStep_x * mat[1] + singleStep_y * mat[3] + mat[5];
     box.x1 = bbox[0];
     box.y1 = bbox[1];
     box.x2 = bbox[2];
     box.y2 = bbox[3];
     gfx = new Gfx(doc, this, resDict, &box, nullptr, nullptr, nullptr, gfxA);
-    writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] cm\n", mat[0], mat[1], mat[2], mat[3], tx, ty);
+    writePSFmt("[{0:.6g} {1:.6g} {2:.6g} {3:.6g} {4:.6g} {5:.6g}] cm\n", mat[0], mat[1], mat[2], mat[3], singleStep_tx, singleStep_ty);
     inType3Char = true;
     gfx->display(str);
     inType3Char = false;
@@ -5071,7 +5070,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s) {
   if (!(font = state->getFont())) {
     return;
   }
-  maxGlyphInt = (font->getName() ? fontMaxValidGlyph[font->getName()->toStr()] : 0);
+  maxGlyphInt = (font->getName() ? perFontMaxValidGlyph[font->getName()->toStr()] : 0);
   if (maxGlyphInt < 0) maxGlyphInt = 0;
   maxGlyph = (CharCode) maxGlyphInt;
   wMode = font->getWMode();

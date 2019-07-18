@@ -32,6 +32,7 @@
 // Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
+// Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -453,7 +454,6 @@ private:
 
 protected:
   PDFDoc *doc;
-  XRef *xref;                   // the xref table for this PDF file
   Object appearDict;            // Annotation's AP
 };
 
@@ -556,8 +556,8 @@ public:
   void drawLineEndSlash(double x, double y, double size, const Matrix& m);
   void drawFieldBorder(const FormField *field, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect);
   bool drawFormField(const FormField *field, const Form *form, const GfxResources *resources, const GooString *da, const AnnotBorder *border, const AnnotAppearanceCharacs *appearCharacs, const PDFRectangle *rect, const GooString *appearState, XRef *xref, bool *addedDingbatsResource);
-  static double shortenLineSegmentForEnding(AnnotLineEndingStyle endingStyle, double x, double size);
-
+  static double lineEndingXShorten(AnnotLineEndingStyle endingStyle, double size);
+  static double lineEndingXExtendBBox(AnnotLineEndingStyle endingStyle, double size);
   void writeString(const GooString &str);
 
   void append(const char *text);
@@ -694,7 +694,6 @@ public:
 
   // getters
   PDFDoc *getDoc() const { return doc; }
-  XRef *getXRef() const { return xref; }
   bool getHasRef() const { return hasRef; }
   Ref getRef() const { return ref; }
   AnnotSubtype getType() const { return type; }
@@ -748,7 +747,7 @@ protected:
   Object annotObj;
 
   std::atomic_int refCnt;
-  
+
   // required data
   AnnotSubtype type;                                // Annotation type
   std::unique_ptr<PDFRectangle> rect;               // Rect
@@ -768,7 +767,6 @@ protected:
   Object oc;                                        // OC
 
   PDFDoc *doc;
-  XRef *xref;			// the xref table for this PDF file
   Ref ref;                      // object ref identifying this annotation
   std::unique_ptr<AnnotBorder> border;              // Border, BS
   std::unique_ptr<AnnotColor> color;                // C
@@ -1412,6 +1410,9 @@ public:
   LinkAction *getAdditionalAction(AdditionalActionsType type); // The caller should delete the result
   LinkAction *getFormAdditionalAction(FormAdditionalActionsType type); // The caller should delete the result
   Dict *getParent() { return parent; }
+  void setNewAppearance(Object &&newAppearance);
+
+  bool setFormAdditionalAction(FormAdditionalActionsType type, const GooString &js);
 
 private:
 

@@ -866,7 +866,7 @@ public:
   const GfxColor *getBackground() const { return &background; }
   bool getHasBackground() const { return hasBackground; }
   void getBBox(double *xMinA, double *yMinA, double *xMaxA, double *yMaxA) const
-    { *xMinA = xMin; *yMinA = yMin; *xMaxA = xMax; *yMaxA = yMax; }
+    { *xMinA = bbox_xMin; *yMinA = bbox_yMin; *xMaxA = bbox_xMax; *yMaxA = bbox_yMax; }
   bool getHasBBox() const { return hasBBox; }
 
 protected:
@@ -885,7 +885,7 @@ protected:
   bool hasBBox;
   GfxColorSpace *colorSpace;
   GfxColor background;
-  double xMin, yMin, xMax, yMax;
+  double bbox_xMin, bbox_yMin, bbox_xMax, bbox_yMax;
 };
 
 //------------------------------------------------------------------------

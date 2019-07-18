@@ -8,6 +8,7 @@
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -28,6 +29,7 @@
  */
 
 #include "poppler-private.h"
+#include "poppler-form.h"
 
 #include <QtCore/QByteArray>
 #include <QtCore/QDebug>
@@ -300,6 +302,11 @@ namespace Debug {
             if ( children )
                 addTocChildren( docSyn, &item, children );
         }
+    }
+
+    FormFieldIconData POPPLER_QT5_EXPORT *FormFieldIconData::getData( const FormFieldIcon &f )
+    {
+        return f.d_ptr;
     }
 
 }

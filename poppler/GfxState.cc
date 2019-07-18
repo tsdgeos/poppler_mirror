@@ -2976,7 +2976,6 @@ GfxDeviceNColorSpace::~GfxDeviceNColorSpace() {
 }
 
 GfxColorSpace *GfxDeviceNColorSpace::copy() {
-  int i;
   int *mappingA = nullptr;
 
   auto sepsCSA = new std::vector<GfxSeparationColorSpace*>();
@@ -2989,7 +2988,7 @@ GfxColorSpace *GfxDeviceNColorSpace::copy() {
   }
   if (mapping != nullptr) {
     mappingA = (int *)gmalloc(sizeof(int) * nComps);
-    for (i = 0; i < nComps; i++)
+    for (int i = 0; i < nComps; i++)
       mappingA[i] = mapping[i];
   }
   return new GfxDeviceNColorSpace(nComps, names, alt->copy(), func->copy(),
@@ -3517,10 +3516,10 @@ GfxShading::GfxShading(GfxShading *shading) {
     background.c[i] = shading->background.c[i];
   }
   hasBackground = shading->hasBackground;
-  xMin = shading->xMin;
-  yMin = shading->yMin;
-  xMax = shading->xMax;
-  yMax = shading->yMax;
+  bbox_xMin = shading->bbox_xMin;
+  bbox_yMin = shading->bbox_yMin;
+  bbox_xMax = shading->bbox_xMax;
+  bbox_yMax = shading->bbox_yMax;
   hasBBox = shading->hasBBox;
 }
 
@@ -3631,7 +3630,7 @@ bool GfxShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *s
     }
   }
 
-  xMin = yMin = xMax = yMax = 0;
+  bbox_xMin = bbox_yMin = bbox_xMax = bbox_yMax = 0;
   hasBBox = false;
   obj1 = dict->lookup("BBox");
   if (obj1.isArray()) {
@@ -3643,10 +3642,10 @@ bool GfxShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *s
       if (obj2.isNum() && obj3.isNum() && obj4.isNum() && obj5.isNum())
       {
         hasBBox = true;
-        xMin = obj2.getNum();
-        yMin = obj3.getNum();
-        xMax = obj4.getNum();
-        yMax = obj5.getNum();
+        bbox_xMin = obj2.getNum();
+        bbox_yMin = obj3.getNum();
+        bbox_xMax = obj4.getNum();
+        bbox_yMax = obj5.getNum();
       } else {
         error(errSyntaxWarning, -1, "Bad BBox in shading dictionary (Values not numbers)");
       }
@@ -4878,7 +4877,13 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
       int oldVertSize = vertSize;
       vertSize = (vertSize == 0) ? 16 : 2 * vertSize;
       verticesA = (GfxGouraudVertex *)
-	              greallocn(verticesA, vertSize, sizeof(GfxGouraudVertex));
+	              greallocn_checkoverflow(verticesA, vertSize, sizeof(GfxGouraudVertex));
+      if (unlikely(!verticesA)) {
+        error(errSyntaxWarning, -1, "GfxGouraudTriangleShading::parse: vertices size overflow");
+        gfree(trianglesA);
+        delete bitBuf;
+        return nullptr;
+      }
       memset(verticesA + oldVertSize, 0, (vertSize - oldVertSize) * sizeof(GfxGouraudVertex));
     }
     verticesA[nVerticesA].x = xMin + xMul * (double)x;

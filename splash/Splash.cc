@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2010-2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -367,20 +367,20 @@ void Splash::pipeRun(SplashPipe *pipe) {
 #ifdef SPLASH_CMYK
     if (bitmap->mode == splashModeCMYK8 || bitmap->mode == splashModeDeviceN8) {
       if (state->fillOverprint && state->overprintMode && pipe->pattern->isCMYK()) {
-        unsigned int mask = 15;
+        unsigned int overprintMask = 15;
         if (pipe->cSrcVal[0] == 0) {
-          mask &= ~1;
+          overprintMask &= ~1;
         }
         if (pipe->cSrcVal[1] == 0) {
-          mask &= ~2;
+          overprintMask &= ~2;
         }
         if (pipe->cSrcVal[2] == 0) {
-          mask &= ~4;
+          overprintMask &= ~4;
         }
         if (pipe->cSrcVal[3] == 0) {
-          mask &= ~8;
+          overprintMask &= ~8;
         }
-        state->overprintMask = mask;
+        state->overprintMask = overprintMask;
       }
     }
 #endif
@@ -2438,7 +2438,7 @@ SplashPath *Splash::makeDashedPath(SplashPath *path) {
   
   if (dPath->length == 0) {
     bool allSame = true;
-    for (int i = 0; allSame && i < path->length - 1; ++i) {
+    for (i = 0; allSame && i < path->length - 1; ++i) {
       allSame = path->pts[i].x == path->pts[i + 1].x && path->pts[i].y == path->pts[i + 1].y;
     }
     if (allSame) {
@@ -2590,16 +2590,16 @@ SplashError Splash::fillWithPattern(SplashPath *path, bool eo,
 	  state->clip->clipAALine(aaBuf, &x0, &x1, y, thinLineMode != splashThinLineDefault && xMinI == xMaxI);
 	}
 	unsigned char lineShape = 255;
-	bool adjustLine = false;
+	bool doAdjustLine = false;
 	if (thinLineMode == splashThinLineShape && (xMinI == xMaxI || yMinI == yMaxI)) {
 	  // compute line shape for thin lines:
 	  SplashCoord mx, my, delta;
 	  transform(state->matrix, 0, 0, &mx, &my);
 	  transform(state->matrix, state->lineWidth, 0, &delta, &my);
-	  adjustLine = true;
+	  doAdjustLine = true;
 	  lineShape = clip255((delta - mx) * 255);
 	}
-	drawAALine(&pipe, x0, x1, y, adjustLine, lineShape);
+	drawAALine(&pipe, x0, x1, y, doAdjustLine, lineShape);
       }
     } else {
       for (y = yMinI; y <= yMaxI; ++y) {
