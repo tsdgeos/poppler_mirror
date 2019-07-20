@@ -55,7 +55,7 @@ namespace Poppler {
     /**
 	 The class containing the appearance information
 
-	 \since 0.78
+	 \since 0.79
      */
 
     class POPPLER_QT5_EXPORT FormFieldIcon {
@@ -249,7 +249,7 @@ namespace Poppler {
 	/**
 	 * Gets the icon used by the button
 	 *
-	 * \since 0.78
+	 * \since 0.79
 	 */
 	FormFieldIcon icon() const;
 
@@ -257,7 +257,7 @@ namespace Poppler {
 	 * Sets a new icon for the button, it has to be a icon 
 	 * returned by FormFieldButton::icon.
 	 *
-	 * \since 0.78
+	 * \since 0.79
 	 */ 
 	void setIcon(const FormFieldIcon &icon);
 
