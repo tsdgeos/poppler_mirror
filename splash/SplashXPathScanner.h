@@ -25,6 +25,12 @@
 
 #include "SplashTypes.h"
 
+#include <poppler-config.h>
+
+#ifdef USE_BOOST_HEADERS
+#include <boost/container/small_vector.hpp>
+#endif
+
 #include <vector>
 
 class SplashXPath;
@@ -94,7 +100,11 @@ private:
   int xMin, yMin, xMax, yMax;
   bool partialClip;
 
+#ifdef USE_BOOST_HEADERS
+  typedef boost::container::small_vector<SplashIntersect, 4> IntersectionLine;
+#else
   typedef std::vector<SplashIntersect> IntersectionLine;
+#endif
   std::vector<IntersectionLine> allIntersections;
 
   friend class SplashXPathScanIterator;
@@ -109,7 +119,11 @@ public:
   bool getNextSpan(int *x0, int *x1);
 
 private:
+#ifdef USE_BOOST_HEADERS
+  typedef boost::container::small_vector<SplashIntersect, 4> IntersectionLine;
+#else
   typedef std::vector<SplashIntersect> IntersectionLine;
+#endif
   const IntersectionLine &line;
 
   size_t interIdx;	// current index into <line>

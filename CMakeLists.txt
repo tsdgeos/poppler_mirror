@@ -286,6 +286,14 @@ if(LCMS2_FOUND)
   include_directories(SYSTEM ${LCMS2_INCLUDE_DIR})
 endif()
 
+if(ENABLE_SPLASH)
+  find_package(Boost 1.58.0)
+  if(Boost_FOUND)
+    include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+    set(USE_BOOST_HEADERS ON)
+  endif()
+endif()
+
 # Recent versions of poppler-data install a .pc file.
 # Use it to determine the encoding data path, if available.
 # Default to the same prefix otherwise.
@@ -730,6 +738,7 @@ show_end_message_yesno("use nss3" ENABLE_NSS3)
 show_end_message_yesno("use curl" ENABLE_LIBCURL)
 show_end_message_yesno("use libopenjpeg2" WITH_OPENJPEG)
 show_end_message_yesno("use lcms2" USE_CMS)
+show_end_message_yesno("use boost" Boost_FOUND)
 show_end_message_yesno("command line utils" ENABLE_UTILS)
 show_end_message_yesno("fuzz target" ENABLE_FUZZER)
 show_end_message("test data dir" ${TESTDATADIR})
@@ -760,6 +769,10 @@ endif()
 
 if(NOT HAVE_JPX_DECODER)
   message("Warning: You're not compiling any JPX decoder. Some files will fail to display properly.")
+endif()
+
+if(ENABLE_SPLASH AND NOT Boost_FOUND)
+  message("Warning: Use of boost is recommended for better performance.")
 endif()
 
 set(ARCHIVE_NAME ${CMAKE_PROJECT_NAME}-${POPPLER_VERSION})
