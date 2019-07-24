@@ -36,6 +36,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -999,6 +1000,31 @@ Form *Catalog::getForm()
     }
 
     return form;
+}
+
+void Catalog::setAcroForm()
+{
+    catalogLocker();
+
+    Object newForm = Object(new Dict(xref));
+    newForm.dictSet("SigFlags", Object(3));
+    Ref ref = xref->addIndirectObject(&newForm);
+
+    Object catDict = xref->getCatalog();
+    Ref acroFormRef;
+    Object acroFormObj = catDict.getDict()->lookup("AcroForm", &acroFormRef);
+
+    if (!acroFormObj.isDict()) {
+        // none there yet, need to create a new one
+        catDict.dictSet("AcroForm", Object(ref));
+        acroFormObj = catDict.getDict()->lookup("AcroForm");
+    }
+
+    if (acroFormRef != Ref::INVALID()) {
+        xref->setModifiedObject(&acroFormObj, acroFormRef);
+    } else {
+        xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
+    }
 }
 
 ViewerPreferences *Catalog::getViewerPreferences()

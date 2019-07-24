@@ -11,6 +11,7 @@
  * Copyright (C) 2018, 2019 Tobias Deiminger <haxtibal@posteo.de>
  * Copyright (C) 2018 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -4205,7 +4206,10 @@ Annotation *WidgetAnnotationPrivate::makeAlias()
 
 Annot *WidgetAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
 {
-    return nullptr; // Not implemented
+    Catalog *catalog = doc->doc->getCatalog();
+    catalog->setAcroForm();
+
+    return pdfAnnot;
 }
 
 WidgetAnnotation::WidgetAnnotation(WidgetAnnotationPrivate &dd) : Annotation(dd) { }
