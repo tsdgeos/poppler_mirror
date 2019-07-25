@@ -8,6 +8,7 @@
  * Copyright (C) 2012, 2013 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2013, Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2018, Dileep Sankhla <sankhla.dileep96@gmail.com>
+ * Copyright (C) 2020, Katarina Behrens <Katarina.Behrens@cib.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -1084,6 +1085,7 @@ class POPPLER_QT5_EXPORT WidgetAnnotation : public Annotation
     friend class AnnotationPrivate;
 
 public:
+    WidgetAnnotation();
     ~WidgetAnnotation() override;
 
     SubType subType() const override;
@@ -1097,7 +1099,6 @@ public:
     Link *additionalAction(AdditionalActionType type) const;
 
 private:
-    WidgetAnnotation();
     WidgetAnnotation(WidgetAnnotationPrivate &dd);
     void store(QDomNode &parentNode, QDomDocument &document) const override; // stub
     Q_DECLARE_PRIVATE(WidgetAnnotation)

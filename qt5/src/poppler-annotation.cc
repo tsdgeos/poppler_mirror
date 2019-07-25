@@ -95,6 +95,9 @@ Annotation *AnnotationUtils::createAnnotation(const QDomElement &annElement)
     case Annotation::ACaret:
         annotation = new CaretAnnotation(annElement);
         break;
+    case Annotation::AWidget:
+        annotation = new WidgetAnnotation();
+        break;
     }
 
     // return created annotation
@@ -4206,9 +4209,23 @@ Annotation *WidgetAnnotationPrivate::makeAlias()
 
 Annot *WidgetAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData *doc)
 {
-    Catalog *catalog = doc->doc->getCatalog();
-    catalog->setAcroForm();
+    WidgetAnnotation *w = static_cast<WidgetAnnotation *>(makeAlias());
 
+    // Set page and document
+    pdfPage = destPage;
+    parentDoc = doc;
+
+    // Set pdfAnnot
+    PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
+    pdfAnnot = new AnnotWidget(destPage->getDoc(), &rect);
+
+    Catalog *catalog = doc->doc->getCatalog();
+    catalog->setAcroForm(pdfAnnot->getRef());
+
+    // Set properties
+    flushBaseAnnotationProperties();
+
+    delete w;
     return pdfAnnot;
 }
 

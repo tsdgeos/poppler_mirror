@@ -1002,21 +1002,25 @@ Form *Catalog::getForm()
     return form;
 }
 
-void Catalog::setAcroForm()
+void Catalog::setAcroForm(const Ref formRef)
 {
     catalogLocker();
-
-    Object newForm = Object(new Dict(xref));
-    newForm.dictSet("SigFlags", Object(3));
-    Ref ref = xref->addIndirectObject(&newForm);
 
     Object catDict = xref->getCatalog();
     Ref acroFormRef;
     Object acroFormObj = catDict.getDict()->lookup("AcroForm", &acroFormRef);
 
     if (!acroFormObj.isDict()) {
-        // none there yet, need to create a new one
-        catDict.dictSet("AcroForm", Object(ref));
+        // none there yet, need to create a new fields dict
+        Object newForm = Object(new Dict(xref));
+        newForm.dictSet("SigFlags", Object(3));
+
+        Array *fieldArray = new Array(xref);
+        fieldArray->add(Object(formRef));
+        newForm.dictSet("Fields", Object(fieldArray));
+
+        Ref newRef = xref->addIndirectObject(&newForm);
+        catDict.dictSet("AcroForm", Object(newRef));
         acroFormObj = catDict.getDict()->lookup("AcroForm");
     }
 

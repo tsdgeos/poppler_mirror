@@ -45,6 +45,7 @@
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
 // Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
+// Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -3759,6 +3760,12 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormFiel
     type = typeWidget;
     field = fieldA;
     initialize(docA, dictObject->getDict());
+}
+
+AnnotWidget::AnnotWidget(PDFDoc *docA, PDFRectangle *rect) : Annot(docA, rect)
+{
+    type = typeWidget;
+    annotObj.dictSet("Subtype", Object(objName, "Widget"));
 }
 
 AnnotWidget::~AnnotWidget() = default;

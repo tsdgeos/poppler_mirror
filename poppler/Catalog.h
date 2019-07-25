@@ -204,7 +204,7 @@ public:
     Object *getOutline();
 
     Object *getAcroForm() { return &acroForm; }
-    void setAcroForm();
+    void setAcroForm(const Ref formRef);
 
     OCGs *getOptContentConfig() { return optContent; }
 
