@@ -3765,7 +3765,11 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormFiel
 AnnotWidget::AnnotWidget(PDFDoc *docA, PDFRectangle *rect) : Annot(docA, rect)
 {
     type = typeWidget;
+    flags |= flagPrint | flagLocked;
+
     annotObj.dictSet("Subtype", Object(objName, "Widget"));
+    annotObj.dictSet("FT", Object(objName, "Sig"));
+    annotObj.dictSet("F", Object(int(flags)));
 }
 
 AnnotWidget::~AnnotWidget() = default;

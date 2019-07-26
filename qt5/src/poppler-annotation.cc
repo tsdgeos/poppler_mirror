@@ -4223,7 +4223,7 @@ Annot *WidgetAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData
     catalog->setAcroForm(pdfAnnot->getRef());
 
     // Set properties
-    flushBaseAnnotationProperties();
+    // flushBaseAnnotationProperties();
 
     delete w;
     return pdfAnnot;
