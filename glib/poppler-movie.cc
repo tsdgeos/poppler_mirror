@@ -212,7 +212,7 @@ poppler_movie_get_play_mode (PopplerMovie *poppler_movie)
  *
  * Return value: %TRUE if yes, %FALSE otherwise
  *
- * Since: 0.79
+ * Since: 0.80
  */
 gboolean
 poppler_movie_synchronous_play (PopplerMovie *poppler_movie)
@@ -230,7 +230,7 @@ poppler_movie_synchronous_play (PopplerMovie *poppler_movie)
  *
  * Return value: volume setting for the movie (0 - 100)
  *
- * Since: 0.79
+ * Since: 0.80
  */
 gint
 poppler_movie_get_volume (PopplerMovie *poppler_movie)
@@ -248,7 +248,7 @@ poppler_movie_get_volume (PopplerMovie *poppler_movie)
  *
  * Return value: the relative speed of the movie (1 means no change)
  *
- * Since: 0.79
+ * Since: 0.80
  */
 gdouble
 poppler_movie_get_rate (PopplerMovie *poppler_movie)
@@ -267,7 +267,7 @@ poppler_movie_get_rate (PopplerMovie *poppler_movie)
  * Return value: the number of degrees the movie should be rotated (positive,
  * multiples of 90: 0, 90, 180, 270)
  *
- * Since: 0.79
+ * Since: 0.80
  */
 gushort
 poppler_movie_get_rotation_angle (PopplerMovie *poppler_movie)
@@ -284,7 +284,7 @@ poppler_movie_get_rotation_angle (PopplerMovie *poppler_movie)
  *
  * Obtains the start position of the movie playback
  *
- * Since: 0.79
+ * Since: 0.80
  */
 void
 poppler_movie_get_start (PopplerMovie *poppler_movie,
@@ -302,7 +302,7 @@ poppler_movie_get_start (PopplerMovie *poppler_movie,
  *
  * Obtains the duration of the movie playback
  *
- * Since: 0.79
+ * Since: 0.80
  */
 void
 poppler_movie_get_duration (PopplerMovie *poppler_movie,

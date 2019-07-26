@@ -58,7 +58,7 @@ typedef enum
  * value in seconds, calculate (double) units/units_per_second. Note that
  * units_per_second may be zero if the respective entity is undefined.
  *
- * Since: 0.79
+ * Since: 0.80
  */
 typedef struct {
   gulong units;
