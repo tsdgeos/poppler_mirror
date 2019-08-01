@@ -553,7 +553,7 @@ class TextPage {
 public:
 
   // Constructor.
-  TextPage(bool rawOrderA);
+  TextPage(bool rawOrderA, bool discardDiagA = false);
 
   TextPage(const TextPage &) = delete;
   TextPage& operator=(const TextPage &) = delete;
@@ -685,6 +685,7 @@ private:
   int dumpFragment(Unicode *text, int len, UnicodeMap *uMap, GooString *s);
 
   bool rawOrder;		// keep text in content stream order
+  bool discardDiag;		// discard diagonal text
   bool mergeCombining;		// merge when combining and base characters
 				// are drawn on top of each other
 
@@ -698,6 +699,7 @@ private:
   int nTinyChars;		// number of "tiny" chars seen so far
   bool lastCharOverlap;	// set if the last added char overlapped the
 				//   previous char
+  bool diagonal;		// whether the current text is diagonal
 
   TextPool *pools[4];		// a "pool" of TextWords for each rotation
   TextFlow *flows;		// linked list of flows
@@ -772,18 +774,20 @@ public:
   // written (this is useful, e.g., for searching text).  If
   // <physLayoutA> is true, the original physical layout of the text
   // is maintained.  If <rawOrder> is true, the text is kept in
-  // content stream order.
+  // content stream order.  If <discardDiag> is true, diagonal text
+  // is removed from output.
   TextOutputDev(const char *fileName, bool physLayoutA,
 		double fixedPitchA, bool rawOrderA,
-		bool append);
+		bool append, bool discardDiagA = false);
 
   // Create a TextOutputDev which will write to a generic stream.  If
   // <physLayoutA> is true, the original physical layout of the text
   // is maintained.  If <rawOrder> is true, the text is kept in
-  // content stream order.
+  // content stream order.  If <discardDiag> is true, diagonal text
+  // is removed from output.
   TextOutputDev(TextOutputFunc func, void *stream,
 		bool physLayoutA, double fixedPitchA,
-		bool rawOrderA);
+		bool rawOrderA, bool discardDiagA = false);
 
   // Destructor.
   ~TextOutputDev();
@@ -920,6 +924,9 @@ private:
 				//   assume fixed-pitch characters with this
 				//   width
   bool rawOrder;		// keep text in content stream order
+  bool discardDiag;     // Diagonal text, i.e., text that is not close to one of the
+				//0, 90, 180, or 270 degree axes, is discarded. This is useful
+				// to skip watermarks drawn on top of body text, etc.
   bool doHTML;			// extra processing for HTML conversion
   bool ok;			// set up ok?
 

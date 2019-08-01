@@ -62,6 +62,11 @@ Keep the text in content stream order.  This is a hack which often
 "undoes" column formatting, etc.  Use of raw mode is no longer
 recommended.
 .TP
+.B \-nodiag
+Discard diagonal text (i.e., text that is not close to one of the
+0, 90, 180, or 270 degree axes). This is useful for skipping
+watermarks drawn on body text.
+.TP
 .B \-htmlmeta
 Generate a simple HTML file, including the meta information.  This
 simply wraps the text in <pre> and </pre> and prepends the meta
