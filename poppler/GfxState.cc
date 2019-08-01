@@ -4277,6 +4277,9 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
     for (i = 0; i < nFuncsA; ++i) {
       Object obj2 = obj1.arrayGet(i);
       if (!(funcsA[i] = Function::parse(&obj2))) {
+	for (int j = 0; j < i; ++j) {
+	  delete funcsA[j];
+	}
 	return nullptr;
       }
     }
