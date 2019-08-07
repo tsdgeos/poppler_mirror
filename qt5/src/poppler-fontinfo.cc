@@ -52,6 +52,11 @@ QString FontInfo::name() const
 	return m_data->fontName;
 }
 
+QString FontInfo::substituteName() const
+{
+	return m_data->fontSubstituteName;
+}
+
 QString FontInfo::file() const
 {
 	return m_data->fontFile;

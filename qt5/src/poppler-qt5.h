@@ -210,6 +210,12 @@ namespace Poppler {
 	QString name() const;
 
 	/**
+	   The name of the substitute font. Can be a null QString if the font has no substitute font
+	   @since 0.80
+	*/
+	QString substituteName() const;
+
+	/**
 	   The path of the font file used to represent this font on this system,
 	   or a null string is the font is embedded
 	*/

@@ -175,6 +175,7 @@ namespace Poppler {
 		{
 			if (fi->getName()) fontName = fi->getName()->c_str();
 			if (fi->getFile()) fontFile = fi->getFile()->c_str();
+			if (fi->getSubstituteName()) fontSubstituteName = fi->getSubstituteName()->c_str();
 			isEmbedded = fi->getEmbedded();
 			isSubset = fi->getSubset();
 			type = (Poppler::FontInfo::Type)fi->getType();
@@ -185,6 +186,7 @@ namespace Poppler {
 		FontInfoData& operator=(const FontInfoData &) = default;
 
 		QString fontName;
+		QString fontSubstituteName;
 		QString fontFile;
 		bool isEmbedded : 1;
 		bool isSubset : 1;
