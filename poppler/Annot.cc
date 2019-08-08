@@ -3762,7 +3762,7 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormFiel
     initialize(docA, dictObject->getDict());
 }
 
-AnnotWidget::AnnotWidget(PDFDoc *docA, PDFRectangle *rect) : Annot(docA, rect)
+AnnotWidget::AnnotWidget(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da) : Annot(docA, rect)
 {
     type = typeWidget;
     flags |= flagPrint | flagLocked;
@@ -3770,6 +3770,30 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, PDFRectangle *rect) : Annot(docA, rect)
     annotObj.dictSet("Subtype", Object(objName, "Widget"));
     annotObj.dictSet("FT", Object(objName, "Sig"));
     annotObj.dictSet("F", Object(int(flags)));
+
+    GooString *daStr = da.toAppearanceString();
+    annotObj.dictSet("DA", Object(daStr));
+
+    Catalog *catalog = doc->getCatalog();
+    catalog->setAcroForm(ref);
+
+    initialize(docA, annotObj.getDict());
+
+    bool dummyAddDingbatsResource = false; // This is only update so if we didn't need to add
+                                           // the dingbats resource we should not need it now
+    generateFieldAppearance(&dummyAddDingbatsResource);
+    // Fetch the appearance stream we've just created
+    Object obj1 = appearance.fetch(doc->getXRef());
+    updatedAppearanceStream = doc->getXRef()->addIndirectObject(&obj1);
+
+    // Write the AP dictionary
+    obj1 = Object(new Dict(doc->getXRef()));
+    obj1.dictAdd("N", Object(updatedAppearanceStream));
+
+    // Update our internal pointers to the appearance dictionary
+    appearStreams = std::make_unique<AnnotAppearance>(doc, &obj1);
+
+    update("AP", std::move(obj1));
 }
 
 AnnotWidget::~AnnotWidget() = default;

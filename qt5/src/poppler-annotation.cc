@@ -4216,14 +4216,12 @@ Annot *WidgetAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData
     parentDoc = doc;
 
     // Set pdfAnnot
+    DefaultAppearance da { { objName, "Invalid_font" }, static_cast<double>(11.0), std::unique_ptr<AnnotColor> { convertQColor(QColor(Qt::black)) } };
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
-    pdfAnnot = new AnnotWidget(destPage->getDoc(), &rect);
+    pdfAnnot = new AnnotWidget(destPage->getDoc(), &rect, da);
 
     Catalog *catalog = doc->doc->getCatalog();
     catalog->setAcroForm(pdfAnnot->getRef());
-
-    // Set properties
-    // flushBaseAnnotationProperties();
 
     delete w;
     return pdfAnnot;

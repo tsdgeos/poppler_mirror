@@ -1008,9 +1008,9 @@ void Catalog::setAcroForm(const Ref formRef)
 
     Object catDict = xref->getCatalog();
     Ref acroFormRef;
-    Object acroFormObj = catDict.getDict()->lookup("AcroForm", &acroFormRef);
+    acroForm = catDict.getDict()->lookup("AcroForm", &acroFormRef);
 
-    if (!acroFormObj.isDict()) {
+    if (!acroForm.isDict()) {
         // none there yet, need to create a new fields dict
         Object newForm = Object(new Dict(xref));
         newForm.dictSet("SigFlags", Object(3));
@@ -1021,11 +1021,11 @@ void Catalog::setAcroForm(const Ref formRef)
 
         Ref newRef = xref->addIndirectObject(&newForm);
         catDict.dictSet("AcroForm", Object(newRef));
-        acroFormObj = catDict.getDict()->lookup("AcroForm");
+        acroForm = catDict.getDict()->lookup("AcroForm");
     }
 
     if (acroFormRef != Ref::INVALID()) {
-        xref->setModifiedObject(&acroFormObj, acroFormRef);
+        xref->setModifiedObject(&acroForm, acroFormRef);
     } else {
         xref->setModifiedObject(&catDict, { xref->getRootNum(), xref->getRootGen() });
     }

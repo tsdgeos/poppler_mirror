@@ -1408,7 +1408,7 @@ public:
         highlightModePush // P,T
     };
 
-    AnnotWidget(PDFDoc *docA, PDFRectangle *rect);
+    AnnotWidget(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da);
     AnnotWidget(PDFDoc *docA, Object &&dictObject, const Object *obj);
     AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormField *fieldA);
     ~AnnotWidget() override;
