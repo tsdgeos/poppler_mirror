@@ -5260,8 +5260,12 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
     if (nPatchesA == patchesSize) {
       int oldPatchesSize = patchesSize;
       patchesSize = (patchesSize == 0) ? 16 : 2 * patchesSize;
-      patchesA = (GfxPatch *)greallocn(patchesA,
+      patchesA = (GfxPatch *)greallocn_checkoverflow(patchesA,
 				       patchesSize, sizeof(GfxPatch));
+      if (unlikely(!patchesA)) {
+	for (int k = 0; k < nFuncsA; ++k) delete funcsA[k];
+	return nullptr;
+      }
       memset(patchesA + oldPatchesSize, 0, (patchesSize - oldPatchesSize) * sizeof(GfxPatch));
     }
     p = &patchesA[nPatchesA];
