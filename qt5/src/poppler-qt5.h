@@ -19,6 +19,7 @@
  * Copyright (C) 2017 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
+ * Copyright (C) 2019 Jan Grulich <jgrulich@redhat.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -208,6 +209,12 @@ namespace Poppler {
 	   The name of the font. Can be a null QString if the font has no name
 	*/
 	QString name() const;
+
+	/**
+	   The name of the substitute font. Can be a null QString if the font has no substitute font
+	   @since 0.80
+	*/
+	QString substituteName() const;
 
 	/**
 	   The path of the font file used to represent this font on this system,

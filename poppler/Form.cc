@@ -26,6 +26,7 @@
 // Copyright 2018, 2019 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2019 Tomoyuki Kubota <himajin100000@gmail.com>
+// Copyright 2019 João Netto <joaonetto901@gmail.com>
 //
 //========================================================================
 
@@ -333,6 +334,11 @@ void FormWidgetText::setTextFontSize(int fontSize)
 void FormWidgetText::setContent(const GooString* new_content)
 {
   parent()->setContentCopy(new_content);
+}
+
+void FormWidgetText::setAppearanceContent(const GooString* new_content)
+{
+  parent()->setAppearanceContentCopy(new_content);
 }
 
 FormFieldText *FormWidgetText::parent() const
@@ -1147,6 +1153,7 @@ FormFieldText::FormFieldText(PDFDoc *docA, Object &&aobj, const Ref refA, FormFi
   Dict* dict = obj.getDict();
   Object obj1;
   content = nullptr;
+  internalContent = nullptr;
   multiline = password = fileSelect = doNotSpellCheck = doNotScroll = comb = richText = false;
   maxLen = 0;
 
@@ -1214,9 +1221,21 @@ void FormFieldText::setContentCopy (const GooString* new_content)
   updateChildrenAppearance();
 }
 
+void FormFieldText::setAppearanceContentCopy (const GooString* new_content)
+{
+  delete internalContent;
+  internalContent = nullptr;
+
+  if (new_content) {
+    internalContent = new_content->copy();
+  }
+  updateChildrenAppearance();
+}
+
 FormFieldText::~FormFieldText()
 {
   delete content;
+  delete internalContent;
 }
 
 double FormFieldText::getTextFontSize()

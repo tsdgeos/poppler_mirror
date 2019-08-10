@@ -42,6 +42,7 @@
 // Copyright (C) 2018, 2019 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -176,6 +177,10 @@
 // combining character
 #define combMaxMidDelta 0.3
 #define combMaxBaseDelta 0.4
+
+// Text is considered diagonal if abs(tan(angle)) > diagonalThreshold.
+// (Or 1/tan(angle) for 90/270 degrees.)
+#define diagonalThreshold 0.1
 
 namespace {
 
@@ -2357,11 +2362,12 @@ TextWord *TextWordList::get(int idx) {
 // TextPage
 //------------------------------------------------------------------------
 
-TextPage::TextPage(bool rawOrderA) {
+TextPage::TextPage(bool rawOrderA, bool discardDiagA) {
   int rot;
 
   refCnt = 1;
   rawOrder = rawOrderA;
+  discardDiag = discardDiagA;
   curWord = nullptr;
   charPos = 0;
   curFont = nullptr;
@@ -2384,6 +2390,7 @@ TextPage::TextPage(bool rawOrderA) {
   underlines = new std::vector<TextUnderline*>();
   links = new std::vector<TextLink*>();
   mergeCombining = true;
+  diagonal = false;
 }
 
 TextPage::~TextPage() {
@@ -2470,6 +2477,7 @@ void TextPage::clear() {
   }
   delete links;
 
+  diagonal = false;
   curWord = nullptr;
   charPos = 0;
   curFont = nullptr;
@@ -2591,6 +2599,11 @@ void TextPage::beginWord(GfxState *state) {
     rot = (m[0] > 0 || m[3] < 0) ? 0 : 2;
   } else {
     rot = (m[2] > 0) ? 1 : 3;
+  }
+  if (fabs(m[0]) >= fabs(m[1]))  {
+    diagonal = fabs(m[1]) > diagonalThreshold * fabs(m[0]);
+  } else {
+    diagonal = fabs(m[0]) > diagonalThreshold * fabs(m[1]);
   }
 
   // for vertical writing mode, the lines are effectively rotated 90
@@ -2720,6 +2733,12 @@ void TextPage::addChar(GfxState *state, double x, double y,
       beginWord(state);
     }
 
+    // throw away diagonal chars
+    if (discardDiag && diagonal) {
+      charPos += nBytes;
+      return;
+    }
+
     // page rotation and/or transform matrices can cause text to be
     // drawn in reverse order -- in this case, swap the begin/end
     // coordinates and break text into individual chars
@@ -2729,6 +2748,13 @@ void TextPage::addChar(GfxState *state, double x, double y,
         (curWord->rot == 3 && h1 > 0)) {
       endWord();
       beginWord(state);
+
+      // throw away diagonal chars
+      if (discardDiag && diagonal) {
+        charPos += nBytes;
+        return;
+      }
+
       x1 += w1;
       y1 += h1;
       w1 = -w1;
@@ -5648,11 +5674,12 @@ static void TextOutputDev_outputToFile(void *stream, const char *text, int len) 
 
 TextOutputDev::TextOutputDev(const char *fileName, bool physLayoutA,
 			     double fixedPitchA, bool rawOrderA,
-			     bool append) {
+			     bool append, bool discardDiagA) {
   text = nullptr;
   physLayout = physLayoutA;
   fixedPitch = physLayout ? fixedPitchA : 0;
   rawOrder = rawOrderA;
+  discardDiag = discardDiagA;
   doHTML = false;
   ok = true;
 
@@ -5679,21 +5706,22 @@ TextOutputDev::TextOutputDev(const char *fileName, bool physLayoutA,
   }
 
   // set up text object
-  text = new TextPage(rawOrderA);
+  text = new TextPage(rawOrderA, discardDiagA);
   actualText = new ActualText(text);
 }
 
 TextOutputDev::TextOutputDev(TextOutputFunc func, void *stream,
 			     bool physLayoutA, double fixedPitchA,
-			     bool rawOrderA) {
+			     bool rawOrderA, bool discardDiagA) {
   outputFunc = func;
   outputStream = stream;
   needClose = false;
   physLayout = physLayoutA;
   fixedPitch = physLayout ? fixedPitchA : 0;
   rawOrder = rawOrderA;
+  discardDiag = discardDiagA;
   doHTML = false;
-  text = new TextPage(rawOrderA);
+  text = new TextPage(rawOrderA, discardDiagA);
   actualText = new ActualText(text);
   ok = true;
 }
@@ -5961,7 +5989,7 @@ TextPage *TextOutputDev::takeText() {
   TextPage *ret;
 
   ret = text;
-  text = new TextPage(rawOrder);
+  text = new TextPage(rawOrder, discardDiag);
   return ret;
 }
 

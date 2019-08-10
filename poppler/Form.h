@@ -19,6 +19,7 @@
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2019 João Netto <joaonetto901@gmail.com>
 //
 //========================================================================
 
@@ -193,6 +194,8 @@ public:
 
   //expects a UTF16BE string
   void setContent(const GooString* new_content);
+  //sets the text inside the field appearance stream
+  void setAppearanceContent(const GooString* new_content);
 
   void updateWidgetAppearance() override;
 
@@ -407,7 +410,9 @@ public:
   FormFieldText(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
   
   const GooString* getContent () const { return content; }
+  const GooString* getAppearanceContent () const { return internalContent ? internalContent : content; }
   void setContentCopy (const GooString* new_content);
+  void setAppearanceContentCopy (const GooString* new_content);
   ~FormFieldText();
 
   bool isMultiline () const { return multiline; }
@@ -433,6 +438,7 @@ protected:
   int parseDA(std::vector<GooString*>* daToks);
 
   GooString* content;
+  GooString* internalContent;
   bool multiline;
   bool password;
   bool fileSelect;

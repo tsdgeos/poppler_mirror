@@ -29,6 +29,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Sanchit Anand <sanxchit@gmail.com>
+// Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -83,6 +84,7 @@ static bool bboxLayout = false;
 static bool physLayout = false;
 static double fixedPitch = 0;
 static bool rawOrder = false;
+static bool discardDiag = false;
 static bool htmlMeta = false;
 static char textEncName[128] = "";
 static char textEOL[16] = "";
@@ -115,6 +117,8 @@ static const ArgDesc argDesc[] = {
    "assume fixed-pitch (or tabular) text"},
   {"-raw",     argFlag,     &rawOrder,      0,
    "keep strings in content stream order"},
+  {"-nodiag",  argFlag,     &discardDiag,   0,
+   "discard diagonal text"},
   {"-htmlmeta", argFlag,   &htmlMeta,       0,
    "generate a simple HTML file, including the meta information"},
   {"-enc",     argString,   textEncName,    sizeof(textEncName),
@@ -363,7 +367,7 @@ int main(int argc, char *argv[]) {
 
   // write text file
   if (htmlMeta && bbox) { // htmlMeta && is superfluous but makes gcc happier
-    textOut = new TextOutputDev(nullptr, physLayout, fixedPitch, rawOrder, htmlMeta);
+    textOut = new TextOutputDev(nullptr, physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
 
     if (textOut->isOk()) {
       if (bboxLayout) {
@@ -378,7 +382,7 @@ int main(int argc, char *argv[]) {
     }
   } else {
     textOut = new TextOutputDev(textFileName->c_str(),
-				physLayout, fixedPitch, rawOrder, htmlMeta);
+				physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
     if (textOut->isOk()) {
       if ((w==0) && (h==0) && (x==0) && (y==0)) {
 	doc->displayPages(textOut, firstPage, lastPage, resolution, resolution, 0,

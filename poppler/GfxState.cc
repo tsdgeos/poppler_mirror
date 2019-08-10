@@ -4277,6 +4277,9 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
     for (i = 0; i < nFuncsA; ++i) {
       Object obj2 = obj1.arrayGet(i);
       if (!(funcsA[i] = Function::parse(&obj2))) {
+	for (int j = 0; j < i; ++j) {
+	  delete funcsA[j];
+	}
 	return nullptr;
       }
     }
@@ -5257,8 +5260,12 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
     if (nPatchesA == patchesSize) {
       int oldPatchesSize = patchesSize;
       patchesSize = (patchesSize == 0) ? 16 : 2 * patchesSize;
-      patchesA = (GfxPatch *)greallocn(patchesA,
+      patchesA = (GfxPatch *)greallocn_checkoverflow(patchesA,
 				       patchesSize, sizeof(GfxPatch));
+      if (unlikely(!patchesA)) {
+	for (int k = 0; k < nFuncsA; ++k) delete funcsA[k];
+	return nullptr;
+      }
       memset(patchesA + oldPatchesSize, 0, (patchesSize - oldPatchesSize) * sizeof(GfxPatch));
     }
     p = &patchesA[nPatchesA];
