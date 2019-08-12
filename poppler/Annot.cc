@@ -3779,6 +3779,8 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearan
 
     initialize(docA, annotObj.getDict());
 
+    field = form->getRootField(form->getNumFields() - 1);
+
     bool dummyAddDingbatsResource = false; // This is only update so if we didn't need to add
                                            // the dingbats resource we should not need it now
     generateFieldAppearance(&dummyAddDingbatsResource);
