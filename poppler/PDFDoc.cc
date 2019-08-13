@@ -927,7 +927,7 @@ int PDFDoc::savePageAs(const GooString *name, int pageNo)
       Dict *trailerDict = trailerObj->getDict();
       const Object &ref = trailerDict->lookupNF("Info");
       if (ref.isRef()) {
-        yRef->add(ref.getRef().num, ref.getRef().gen, 0, true);
+        yRef->add(ref.getRef(), 0, true);
         if (getXRef()->getEntry(ref.getRef().num)->type == xrefEntryCompressed) {
           yRef->getEntry(ref.getRef().num)->type = xrefEntryCompressed;
         }
@@ -1129,9 +1129,9 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
         Goffset offset = writeObjectHeader(&ref, outStr);
         writeObject(&obj1, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
         writeObjectFooter(outStr);
-        uxref->add(ref.num, ref.gen, offset, true);
+        uxref->add(ref, offset, true);
       } else {
-        uxref->add(ref.num, ref.gen, 0, false);
+        uxref->add(ref, 0, false);
       }
     }
   }
@@ -1157,7 +1157,7 @@ void PDFDoc::saveIncrementalUpdate (OutStream* outStr)
     // Append an entry for the xref stream itself
     uxrefStreamRef.num = numobjects++;
     uxrefStreamRef.gen = 0;
-    uxref->add(uxrefStreamRef.num, uxrefStreamRef.gen, uxrefOffset, true);
+    uxref->add(uxrefStreamRef, uxrefOffset, true);
   }
 
   Object trailerDict = createTrailerDict(numobjects, true, getStartXRef(), &rootRef, getXRef(), fileNameA, uxrefOffset);
@@ -1194,12 +1194,12 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
       /* the XRef class adds a lot of irrelevant free entries, we only want the significant one
           and we don't want the one with num=0 because it has already been added (gen = 65535)*/
       if (ref.gen > 0 && ref.num > 0)
-        uxref->add(ref.num, ref.gen, 0, false);
+        uxref->add(ref, 0, false);
     } else if (xref->getEntry(i)->getFlag(XRefEntry::DontRewrite)) {
       // This entry must not be written, put a free entry instead (with incremented gen)
       ref.num = i;
       ref.gen = xref->getEntry(i)->gen + 1;
-      uxref->add(ref.num, ref.gen, 0, false);
+      uxref->add(ref, 0, false);
     } else if (type == xrefEntryUncompressed){ 
       ref.num = i;
       ref.gen = xref->getEntry(i)->gen;
@@ -1212,7 +1212,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
         writeObject(&obj1, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
       }
       writeObjectFooter(outStr);
-      uxref->add(ref.num, ref.gen, offset, true);
+      uxref->add(ref, offset, true);
     } else if (type == xrefEntryCompressed) {
       ref.num = i;
       ref.gen = 0; //compressed entries have gen == 0
@@ -1220,7 +1220,7 @@ void PDFDoc::saveCompleteRewrite (OutStream* outStr)
       Goffset offset = writeObjectHeader(&ref, outStr);
       writeObject(&obj1, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
       writeObjectFooter(outStr);
-      uxref->add(ref.num, ref.gen, offset, true);
+      uxref->add(ref, offset, true);
     }
   }
   xref->unlock();
@@ -1952,7 +1952,7 @@ unsigned int PDFDoc::writePageObjects(OutStream *outStr, XRef *xRef, unsigned in
         writeObject(&obj, outStr, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
       }
       writeObjectFooter(outStr);
-      xRef->add(ref.num, ref.gen, offset, true);
+      xRef->add(ref, offset, true);
     }
   }
   return objectsCount;
