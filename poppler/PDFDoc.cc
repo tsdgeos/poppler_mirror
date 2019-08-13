@@ -1308,7 +1308,7 @@ void PDFDoc::writeString (const GooString* s, OutStream* outStr, const unsigned 
   GooString *sEnc = nullptr;
   if (fileKey) {
     EncryptStream *enc = new EncryptStream(new MemStream(s->c_str(), 0, s->getLength(), Object(objNull)),
-                                           fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
+                                           fileKey, encAlgorithm, keyLength, ref);
     sEnc = new GooString();
     int c;
     enc->reset();
@@ -1440,12 +1440,12 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, unsigned i
                   }
                 }
                 if (removeFilter) {
-                  encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
+                  encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref);
                   encStream->setAutoDelete(false);
                   stream = encStream;
                 }
               } else {
-                encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
+                encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref);
                 encStream->setAutoDelete(false);
                 stream = encStream;
               }
@@ -1453,7 +1453,7 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, unsigned i
               removeFilter = false;
             }
           } else if (fileKey != nullptr) { // Encrypt stream
-            encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
+            encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref);
             encStream->setAutoDelete(false);
             stream = encStream;
           }
@@ -1476,7 +1476,7 @@ void PDFDoc::writeObject (Object* obj, OutStream* outStr, XRef *xRef, unsigned i
           writeStream (stream,outStr);
           delete encStream;
         } else if (fileKey != nullptr && stream->getKind() == strFile && static_cast<FileStream*>(stream)->getNeedsEncryptionOnSave()) {
-          EncryptStream *encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref.num, ref.gen);
+          EncryptStream *encStream = new EncryptStream(stream, fileKey, encAlgorithm, keyLength, ref);
           encStream->setAutoDelete(false);
           writeDictionnary (encStream->getDict(), outStr, xRef, numOffset, fileKey, encAlgorithm, keyLength, ref, alreadyWrittenDicts);
           writeStream (encStream, outStr);
