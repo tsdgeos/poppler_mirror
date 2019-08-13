@@ -338,6 +338,8 @@ public:
   unsigned int writePageObjects(OutStream *outStr, XRef *xRef, unsigned int numOffset, bool combine = false);
   static void writeObject (Object *obj, OutStream* outStr, XRef *xref, unsigned int numOffset, unsigned char *fileKey,
                            CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict*> *alreadyWrittenDicts = nullptr);
+  static void writeObject (Object *obj, OutStream* outStr, XRef *xref, unsigned int numOffset, unsigned char *fileKey,
+                           CryptAlgorithm encAlgorithm, int keyLength, Ref ref, std::set<Dict*> *alreadyWrittenDicts = nullptr);
   static void writeHeader(OutStream *outStr, int major, int minor);
 
   static Object createTrailerDict (int uxrefSize, bool incrUpdate, Goffset startxRef,
@@ -352,21 +354,24 @@ private:
   void markDictionnary (Dict* dict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts);
   void markObject (Object *obj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts = nullptr);
   static void writeDictionnary (Dict* dict, OutStream* outStr, XRef *xRef, unsigned int numOffset, unsigned char *fileKey,
-                                CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen, std::set<Dict*> *alreadyWrittenDicts);
+                                CryptAlgorithm encAlgorithm, int keyLength, Ref ref, std::set<Dict*> *alreadyWrittenDicts);
 
   // Write object header to current file stream and return its offset
   static Goffset writeObjectHeader (Ref *ref, OutStream* outStr);
   static void writeObjectFooter (OutStream* outStr);
 
-  void writeObject (Object *obj, OutStream* outStr, unsigned char *fileKey, CryptAlgorithm encAlgorithm,
-                    int keyLength, int objNum, int objGen, std::set<Dict*> *alreadyWrittenDicts = nullptr)
-  { writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, objNum, objGen, alreadyWrittenDicts); }
+  inline void writeObject (Object *obj, OutStream* outStr, unsigned char *fileKey, CryptAlgorithm encAlgorithm,
+                    int keyLength, int objNum, int objGen)
+  { writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, {objNum, objGen}); }
+  inline void writeObject (Object *obj, OutStream* outStr, unsigned char *fileKey, CryptAlgorithm encAlgorithm,
+                    int keyLength, Ref ref)
+  { writeObject(obj, outStr, getXRef(), 0, fileKey, encAlgorithm, keyLength, ref); }
   static void writeStream (Stream* str, OutStream* outStr);
   static void writeRawStream (Stream* str, OutStream* outStr);
   void writeXRefTableTrailer (Goffset uxrefOffset, XRef *uxref, bool writeAllEntries,
                               int uxrefSize, OutStream* outStr, bool incrUpdate);
   static void writeString (const GooString* s, OutStream* outStr, const unsigned char *fileKey,
-                           CryptAlgorithm encAlgorithm, int keyLength, int objNum, int objGen);
+                           CryptAlgorithm encAlgorithm, int keyLength, Ref ref);
   void saveIncrementalUpdate (OutStream* outStr);
   void saveCompleteRewrite (OutStream* outStr);
 
