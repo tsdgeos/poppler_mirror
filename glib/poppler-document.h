@@ -161,7 +161,7 @@ typedef enum
  *
  * Duplex viewer preference
  *
- * Since: 0.78
+ * Since: 0.80
  */
 typedef enum
 {
@@ -400,7 +400,7 @@ POPPLER_PUBLIC
 gint               poppler_document_get_print_n_copies     (PopplerDocument *document);
 POPPLER_PUBLIC
 PopplerPageRange  *poppler_document_get_print_page_ranges  (PopplerDocument *document,
-                                                            int             *n_ranges);
+                                                            int             *n_ranges) G_GNUC_MALLOC;
 
 /* Attachments */
 POPPLER_PUBLIC
@@ -531,24 +531,13 @@ void           poppler_ps_file_free           (PopplerPSFile   *ps_file);
  *
  * A #PopplerPageRange is used to specify a range of pages.
  *
- * Since: 0.78
+ * Since: 0.80
  */
-#define POPPLER_TYPE_PAGE_RANGE               (poppler_page_range_get_type ())
 struct _PopplerPageRange
 {
   gint start_page;
   gint end_page;
 };
-
-POPPLER_PUBLIC
-GType             poppler_page_range_get_type (void) G_GNUC_CONST;
-POPPLER_PUBLIC
-PopplerPageRange *poppler_page_range_new      ();
-POPPLER_PUBLIC
-PopplerPageRange *poppler_page_range_copy     (PopplerPageRange *range);
-POPPLER_PUBLIC
-void              poppler_page_range_free     (PopplerPageRange *range);
-
 
 G_END_DECLS
 

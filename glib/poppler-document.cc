@@ -1662,7 +1662,7 @@ poppler_document_get_print_scaling (PopplerDocument *document)
  *
  * Returns: a #PopplerPrintDuplex that should be used when document is printed
  *
- * Since: 0.78
+ * Since: 0.80
  **/
 PopplerPrintDuplex
 poppler_document_get_print_duplex (PopplerDocument *document)
@@ -1706,7 +1706,7 @@ poppler_document_get_print_duplex (PopplerDocument *document)
  *
  * Returns: Number of copies
  *
- * Since: 0.78
+ * Since: 0.80
  **/
 gint
 poppler_document_get_print_n_copies (PopplerDocument *document)
@@ -1728,53 +1728,6 @@ poppler_document_get_print_n_copies (PopplerDocument *document)
   return retval;
 }
 
-/* PopplerPageRange */
-
-POPPLER_DEFINE_BOXED_TYPE (PopplerPageRange, poppler_page_range,
-			   poppler_page_range_copy,
-			   poppler_page_range_free)
-
-/**
- * poppler_page_range_new:
- *
- * Creates a new #PopplerPageRange
- *
- * Returns: a new #PopplerPageRange, use poppler_page_range_free() to free it
- */
-PopplerPageRange *
-poppler_page_range_new (void)
-{
-  return g_slice_new0 (PopplerPageRange);
-}
-
-/**
- * poppler_page_range_copy:
- * @range: a #PopplerPageRange to copy
- *
- * Creates a copy of @range
- *
- * Returns: a new allocated copy of @range
- */
-PopplerPageRange *
-poppler_page_range_copy (PopplerPageRange *range)
-{
-  g_return_val_if_fail (range != nullptr, NULL);
-
-  return g_slice_dup (PopplerPageRange, range);
-}
-
-/**
- * poppler_page_range_free:
- * @range: a #PopplerPageRange
- *
- * Frees the given #PopplerPageRange
- */
-void
-poppler_page_range_free (PopplerPageRange *range)
-{
-  g_slice_free (PopplerPageRange, range);
-}
-
 /**
  * poppler_document_get_print_page_ranges:
  * @document: A #PopplerDocument
@@ -1787,7 +1740,7 @@ poppler_page_range_free (PopplerPageRange *range)
  *          of #PopplerPageRanges or NULL. Free the array when
  *          it is no longer needed.
  *
- * Since: 0.78
+ * Since: 0.80
  **/
 PopplerPageRange *
 poppler_document_get_print_page_ranges (PopplerDocument *document,
@@ -2342,7 +2295,7 @@ poppler_document_class_init (PopplerDocumentClass *klass)
   /**
    * PopplerDocument:print-duplex:
    *
-   * Since: 0.78
+   * Since: 0.80
    */
   g_object_class_install_property (G_OBJECT_CLASS (klass),
 				   PROP_PRINT_DUPLEX,
@@ -2358,7 +2311,7 @@ poppler_document_class_init (PopplerDocumentClass *klass)
    *
    * Suggested number of copies to be printed for this document
    *
-   * Since: 0.78
+   * Since: 0.80
    */
   g_object_class_install_property (G_OBJECT_CLASS (klass),
 				   PROP_PRINT_N_COPIES,
