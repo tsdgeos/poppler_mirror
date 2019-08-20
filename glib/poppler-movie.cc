@@ -228,16 +228,16 @@ poppler_movie_is_synchronous (PopplerMovie *poppler_movie)
  *
  * Returns the playback audio volume
  *
- * Return value: volume setting for the movie (0 - 100)
+ * Return value: volume setting for the movie (0.0 - 1.0)
  *
  * Since: 0.80
  */
-gint
+gdouble
 poppler_movie_get_volume (PopplerMovie *poppler_movie)
 {
   g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), 0);
 
-  return poppler_movie->volume;
+  return poppler_movie->volume/100.0;
 }
 
 /**
