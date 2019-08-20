@@ -65,9 +65,6 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   FT_Face face;
   int div;
   int x, y;
-#ifdef USE_FIXEDPOINT
-  SplashCoord scale;
-#endif
 
   face = fontFileA->face;
   if (FT_New_Size(face, &sizeObj)) {
@@ -91,60 +88,6 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
 
   div = face->bbox.xMax > 20000 ? 65536 : 1;
 
-#ifdef USE_FIXEDPOINT
-  scale = (SplashCoord)1 / (SplashCoord)face->units_per_EM;
-
-  // transform the four corners of the font bounding box -- the min
-  // and max values form the bounding box of the transformed font
-  x = (int)(mat[0] * (scale * (face->bbox.xMin / div)) +
-	    mat[2] * (scale * (face->bbox.yMin / div)));
-  xMin = xMax = x;
-  y = (int)(mat[1] * (scale * (face->bbox.xMin / div)) +
-	    mat[3] * (scale * (face->bbox.yMin / div)));
-  yMin = yMax = y;
-  x = (int)(mat[0] * (scale * (face->bbox.xMin / div)) +
-	    mat[2] * (scale * (face->bbox.yMax / div)));
-  if (x < xMin) {
-    xMin = x;
-  } else if (x > xMax) {
-    xMax = x;
-  }
-  y = (int)(mat[1] * (scale * (face->bbox.xMin / div)) +
-	    mat[3] * (scale * (face->bbox.yMax / div)));
-  if (y < yMin) {
-    yMin = y;
-  } else if (y > yMax) {
-    yMax = y;
-  }
-  x = (int)(mat[0] * (scale * (face->bbox.xMax / div)) +
-	    mat[2] * (scale * (face->bbox.yMin / div)));
-  if (x < xMin) {
-    xMin = x;
-  } else if (x > xMax) {
-    xMax = x;
-  }
-  y = (int)(mat[1] * (scale * (face->bbox.xMax / div)) +
-	    mat[3] * (scale * (face->bbox.yMin / div)));
-  if (y < yMin) {
-    yMin = y;
-  } else if (y > yMax) {
-    yMax = y;
-  }
-  x = (int)(mat[0] * (scale * (face->bbox.xMax / div)) +
-	    mat[2] * (scale * (face->bbox.yMax / div)));
-  if (x < xMin) {
-    xMin = x;
-  } else if (x > xMax) {
-    xMax = x;
-  }
-  y = (int)(mat[1] * (scale * (face->bbox.xMax / div)) +
-	    mat[3] * (scale * (face->bbox.yMax / div)));
-  if (y < yMin) {
-    yMin = y;
-  } else if (y > yMax) {
-    yMax = y;
-  }
-#else // USE_FIXEDPOINT
   // transform the four corners of the font bounding box -- the min
   // and max values form the bounding box of the transformed font
   x = (int)((mat[0] * face->bbox.xMin + mat[2] * face->bbox.yMin) /
@@ -195,7 +138,6 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   } else if (y > yMax) {
     yMax = y;
   }
-#endif // USE_FIXEDPOINT
   // This is a kludge: some buggy PDF generators embed fonts with
   // zero bounding boxes.
   if (xMax == xMin) {
@@ -208,16 +150,6 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   }
 
   // compute the transform matrix
-#ifdef USE_FIXEDPOINT
-  matrix.xx = (FT_Fixed)((mat[0] / size).get16Dot16());
-  matrix.yx = (FT_Fixed)((mat[1] / size).get16Dot16());
-  matrix.xy = (FT_Fixed)((mat[2] / size).get16Dot16());
-  matrix.yy = (FT_Fixed)((mat[3] / size).get16Dot16());
-  textMatrix.xx = (FT_Fixed)((textMat[0] / (textScale * size)).get16Dot16());
-  textMatrix.yx = (FT_Fixed)((textMat[1] / (textScale * size)).get16Dot16());
-  textMatrix.xy = (FT_Fixed)((textMat[2] / (textScale * size)).get16Dot16());
-  textMatrix.yy = (FT_Fixed)((textMat[3] / (textScale * size)).get16Dot16());
-#else
   matrix.xx = (FT_Fixed)((mat[0] / size) * 65536);
   matrix.yx = (FT_Fixed)((mat[1] / size) * 65536);
   matrix.xy = (FT_Fixed)((mat[2] / size) * 65536);
@@ -226,7 +158,6 @@ SplashFTFont::SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
   textMatrix.yx = (FT_Fixed)((textMat[1] / (textScale * size)) * 65536);
   textMatrix.xy = (FT_Fixed)((textMat[2] / (textScale * size)) * 65536);
   textMatrix.yy = (FT_Fixed)((textMat[3] / (textScale * size)) * 65536);
-#endif
 
   isOk = true;
 }

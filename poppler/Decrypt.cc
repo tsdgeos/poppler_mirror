@@ -305,7 +305,7 @@ bool Decrypt::makeFileKey2(int encVersion, int encRevision, int keyLength,
 //------------------------------------------------------------------------
 
 BaseCryptStream::BaseCryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
-				 int keyLength, int objNum, int objGen):
+				 int keyLength, Ref refA):
   FilterStream(strA)
 {
   algo = algoA;
@@ -321,11 +321,11 @@ BaseCryptStream::BaseCryptStream(Stream *strA, const unsigned char *fileKey, Cry
   switch (algo) {
   case cryptRC4:
     if (likely(keyLength < static_cast<int>(sizeof(objKey) - 4))) {
-      objKey[keyLength] = objNum & 0xff;
-      objKey[keyLength + 1] = (objNum >> 8) & 0xff;
-      objKey[keyLength + 2] = (objNum >> 16) & 0xff;
-      objKey[keyLength + 3] = objGen & 0xff;
-      objKey[keyLength + 4] = (objGen >> 8) & 0xff;
+      objKey[keyLength] = refA.num & 0xff;
+      objKey[keyLength + 1] = (refA.num >> 8) & 0xff;
+      objKey[keyLength + 2] = (refA.num >> 16) & 0xff;
+      objKey[keyLength + 3] = refA.gen & 0xff;
+      objKey[keyLength + 4] = (refA.gen >> 8) & 0xff;
       md5(objKey, keyLength + 5, objKey);
     }
     if ((objKeyLength = keyLength + 5) > 16) {
@@ -333,11 +333,11 @@ BaseCryptStream::BaseCryptStream(Stream *strA, const unsigned char *fileKey, Cry
     }
     break;
   case cryptAES:
-    objKey[keyLength] = objNum & 0xff;
-    objKey[keyLength + 1] = (objNum >> 8) & 0xff;
-    objKey[keyLength + 2] = (objNum >> 16) & 0xff;
-    objKey[keyLength + 3] = objGen & 0xff;
-    objKey[keyLength + 4] = (objGen >> 8) & 0xff;
+    objKey[keyLength] = refA.num & 0xff;
+    objKey[keyLength + 1] = (refA.num >> 8) & 0xff;
+    objKey[keyLength + 2] = (refA.num >> 16) & 0xff;
+    objKey[keyLength + 3] = refA.gen & 0xff;
+    objKey[keyLength + 4] = (refA.gen >> 8) & 0xff;
     objKey[keyLength + 5] = 0x73; // 's'
     objKey[keyLength + 6] = 0x41; // 'A'
     objKey[keyLength + 7] = 0x6c; // 'l'
@@ -397,8 +397,8 @@ void BaseCryptStream::setAutoDelete(bool val) {
 //------------------------------------------------------------------------
 
 EncryptStream::EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
-			     int keyLength, int objNum, int objGen):
-  BaseCryptStream(strA, fileKey, algoA, keyLength, objNum, objGen)
+			     int keyLength, Ref refA):
+  BaseCryptStream(strA, fileKey, algoA, keyLength, refA)
 {
   // Fill the CBC initialization vector for AES and AES-256
   switch (algo) {
@@ -489,8 +489,8 @@ int EncryptStream::lookChar() {
 //------------------------------------------------------------------------
 
 DecryptStream::DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
-			     int keyLength, int objNum, int objGen):
-  BaseCryptStream(strA, fileKey, algoA, keyLength, objNum, objGen)
+			     int keyLength, Ref refA):
+  BaseCryptStream(strA, fileKey, algoA, keyLength, refA)
 {
 }
 

@@ -62,7 +62,6 @@ option(ENABLE_LIBCURL "Build libcurl based HTTP support." ON)
 option(ENABLE_ZLIB "Build with zlib." ON)
 option(ENABLE_ZLIB_UNCOMPRESS "Use zlib to uncompress flate streams (not totally safe)." OFF)
 option(SPLASH_CMYK "Include support for CMYK rasterization." OFF)
-option(USE_FIXEDPOINT "Use fixed point arithmetic in the Splash backend" OFF)
 option(USE_FLOAT "Use single precision arithmetic in the Splash backend" OFF)
 option(BUILD_SHARED_LIBS "Build poppler as a shared library" ON)
 if(WIN32)
@@ -328,7 +327,6 @@ set(poppler_SRCS
   goo/gfile.cc
   goo/GooTimer.cc
   goo/GooString.cc
-  goo/FixedPoint.cc
   goo/NetPBMWriter.cc
   goo/PNGWriter.cc
   goo/TiffWriter.cc
@@ -594,7 +592,6 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     goo/gmem.h
     goo/gdir.h
     goo/gfile.h
-    goo/FixedPoint.h
     goo/ImgWriter.h
     goo/GooCheckedOps.h
     goo/GooLikely.h
@@ -745,10 +742,6 @@ show_end_message("test data dir" ${TESTDATADIR})
 
 if(NOT ENABLE_SPLASH AND NOT CAIRO_FOUND)
   message("Warning: There is no rendering backend enabled")
-endif()
-
-if(USE_FIXEDPOINT AND USE_FLOAT)
-  message("Warning: Single precision and fixed point options should not be enabled at the same time")
 endif()
 
 if(NOT ENABLE_LIBJPEG AND HAVE_DCT_DECODER)

@@ -193,6 +193,7 @@ public:
   Ref addIndirectObject (const Object* o);
   void removeIndirectObject(Ref r);
   void add(int num, int gen,  Goffset offs, bool used);
+  void add(Ref ref, Goffset offs, bool used);
 
   // Output XRef table to stream
   void writeTableToFile(OutStream* outStr, bool writeAllEntries);

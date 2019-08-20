@@ -1264,6 +1264,11 @@ int XRef::getNumEntry(Goffset offset)
   else return -1;
 }
 
+void XRef::add(Ref ref, Goffset offs, bool used)
+{
+    add(ref.num, ref.gen, offs, used);
+}
+
 void XRef::add(int num, int gen, Goffset offs, bool used) {
   xrefLocker();
   if (num >= size) {

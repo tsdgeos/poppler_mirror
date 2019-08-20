@@ -38,11 +38,6 @@
 #define POPPLER_VERSION "${POPPLER_VERSION}"
 #endif
 
-/* Use fixedpoint. */
-#ifndef USE_FIXEDPOINT
-#cmakedefine USE_FIXEDPOINT 1
-#endif
-
 /* Use single precision arithmetic in the Splash backend */
 #ifndef USE_FLOAT
 #cmakedefine USE_FLOAT 1

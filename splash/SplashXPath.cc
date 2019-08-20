@@ -293,11 +293,7 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0,
   SplashCoord dx, dy, mx, my, d1, d2, flatness2;
   int p1, p2, p3;
 
-#ifdef USE_FIXEDPOINT
-  flatness2 = flatness;
-#else
   flatness2 = flatness * flatness;
-#endif
 
   // initial segment
   p1 = 0;
@@ -337,17 +333,12 @@ void SplashXPath::addCurve(SplashCoord x0, SplashCoord y0,
     // line)
     mx = (xl0 + xr3) * 0.5;
     my = (yl0 + yr3) * 0.5;
-#ifdef USE_FIXEDPOINT
-    d1 = splashDist(xx1, yy1, mx, my);
-    d2 = splashDist(xx2, yy2, mx, my);
-#else
     dx = xx1 - mx;
     dy = yy1 - my;
     d1 = dx*dx + dy*dy;
     dx = xx2 - mx;
     dy = yy2 - my;
     d2 = dx*dx + dy*dy;
-#endif    
 
     // if the curve is flat enough, or no more subdivisions are
     // allowed, add the straight line segment
@@ -417,21 +408,8 @@ void SplashXPath::addSegment(SplashCoord x0, SplashCoord y0,
     segs[length].dxdy = segs[length].dydx = 0;
     segs[length].flags |= splashXPathVert;
   } else {
-#ifdef USE_FIXEDPOINT
-    if (FixedPoint::divCheck(x1 - x0, y1 - y0, &segs[length].dxdy)) {
-      segs[length].dydx = (SplashCoord)1 / segs[length].dxdy;
-    } else {
-      segs[length].dxdy = segs[length].dydx = 0;
-      if (splashAbs(x1 - x0) > splashAbs(y1 - y0)) {
-	segs[length].flags |= splashXPathHoriz;
-      } else {
-	segs[length].flags |= splashXPathVert;
-      }
-    }
-#else
     segs[length].dxdy = (x1 - x0) / (y1 - y0);
     segs[length].dydx = (SplashCoord)1 / segs[length].dxdy;
-#endif
   }
   if (y0 > y1) {
     segs[length].flags |= splashXPathFlip;
