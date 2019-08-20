@@ -2214,11 +2214,7 @@ SplashPath *Splash::flattenPath(SplashPath *path, SplashCoord *matrix,
   int i;
 
   fPath = new SplashPath();
-#ifdef USE_FIXEDPOINT
-  flatness2 = flatness;
-#else
   flatness2 = flatness * flatness;
-#endif
   i = 0;
   while (i < path->length) {
     flag = path->flags[i];
@@ -2283,21 +2279,13 @@ void Splash::flattenCurve(SplashCoord x0, SplashCoord y0,
     // line)
     transform(matrix, (xl0 + xr3) * 0.5, (yl0 + yr3) * 0.5, &mx, &my);
     transform(matrix, xx1, yy1, &tx, &ty);
-#ifdef USE_FIXEDPOINT
-    d1 = splashDist(tx, ty, mx, my);
-#else
     dx = tx - mx;
     dy = ty - my;
     d1 = dx*dx + dy*dy;
-#endif
     transform(matrix, xx2, yy2, &tx, &ty);
-#ifdef USE_FIXEDPOINT
-    d2 = splashDist(tx, ty, mx, my);
-#else
     dx = tx - mx;
     dy = ty - my;
     d2 = dx*dx + dy*dy;
-#endif
 
     // if the curve is flat enough, or no more subdivisions are
     // allowed, add the straight line segment
@@ -6087,19 +6075,10 @@ SplashPath *pathIn, *dashPath, *pathOut;
 	 ++k1) ;
 
     // compute the deltas for segment (i1, j0)
-#ifdef USE_FIXEDPOINT
-    // the 1/d value can be small, which introduces significant
-    // inaccuracies in fixed point mode
-    d = splashDist(pathIn->pts[i1].x, pathIn->pts[i1].y,
-		   pathIn->pts[j0].x, pathIn->pts[j0].y);
-    dx = (pathIn->pts[j0].x - pathIn->pts[i1].x) / d;
-    dy = (pathIn->pts[j0].y - pathIn->pts[i1].y) / d;
-#else
     d = (SplashCoord)1 / splashDist(pathIn->pts[i1].x, pathIn->pts[i1].y,
 				    pathIn->pts[j0].x, pathIn->pts[j0].y);
     dx = d * (pathIn->pts[j0].x - pathIn->pts[i1].x);
     dy = d * (pathIn->pts[j0].y - pathIn->pts[i1].y);
-#endif
     wdx = (SplashCoord)0.5 * w * dx;
     wdy = (SplashCoord)0.5 * w * dy;
 
@@ -6188,19 +6167,10 @@ SplashPath *pathIn, *dashPath, *pathOut;
     if (!last || closed) {
 
       // compute the deltas for segment (j1, k0)
-#ifdef USE_FIXEDPOINT
-      // the 1/d value can be small, which introduces significant
-      // inaccuracies in fixed point mode
-      d = splashDist(pathIn->pts[j1].x, pathIn->pts[j1].y,
-		     pathIn->pts[k0].x, pathIn->pts[k0].y);
-      dxNext = (pathIn->pts[k0].x - pathIn->pts[j1].x) / d;
-      dyNext = (pathIn->pts[k0].y - pathIn->pts[j1].y) / d;
-#else
       d = (SplashCoord)1 / splashDist(pathIn->pts[j1].x, pathIn->pts[j1].y,
 				      pathIn->pts[k0].x, pathIn->pts[k0].y);
       dxNext = d * (pathIn->pts[k0].x - pathIn->pts[j1].x);
       dyNext = d * (pathIn->pts[k0].y - pathIn->pts[j1].y);
-#endif
       wdxNext = (SplashCoord)0.5 * w * dxNext;
       wdyNext = (SplashCoord)0.5 * w * dyNext;
 

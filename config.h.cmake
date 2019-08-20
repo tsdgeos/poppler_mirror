@@ -165,9 +165,6 @@
 /* Defines if use cms */
 #cmakedefine USE_CMS 1
 
-/* Use fixed point arithmetic in the Splash backend */
-#cmakedefine USE_FIXEDPOINT 1
-
 /* Use single precision arithmetic in the Splash backend */
 #cmakedefine USE_FLOAT 1
 

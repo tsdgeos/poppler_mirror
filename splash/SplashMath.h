@@ -24,17 +24,11 @@
 
 #include "poppler-config.h"
 
-#ifdef USE_FIXEDPOINT
-#include "goo/FixedPoint.h"
-#else
 #include <math.h>
-#endif
 #include "SplashTypes.h"
 
 static inline SplashCoord splashAbs(SplashCoord x) {
-#if defined(USE_FIXEDPOINT)
-  return FixedPoint::abs(x);
-#elif defined(USE_FLOAT)
+#if defined(USE_FLOAT)
   return fabsf(x);
 #else
   return fabs(x);
@@ -42,9 +36,7 @@ static inline SplashCoord splashAbs(SplashCoord x) {
 }
 
 static inline int splashFloor(SplashCoord x) {
-#if defined(USE_FIXEDPOINT)
-    return FixedPoint::floor(x);
-#elif defined(USE_FLOAT)
+#if defined(USE_FLOAT)
     return (int)floorf(x);
 #elif defined(__GNUC__) && defined(__i386__)
     // floor() and (int)() are implemented separately, which results
@@ -89,9 +81,7 @@ static inline int splashFloor(SplashCoord x) {
 }
 
 static inline int splashCeil(SplashCoord x) {
-#if defined(USE_FIXEDPOINT)
-  return FixedPoint::ceil(x);
-#elif defined(USE_FLOAT)
+#if defined(USE_FLOAT)
   return (int)ceilf(x);
 #elif defined(__GNUC__) && defined(__i386__)
   // ceil() and (int)() are implemented separately, which results
@@ -135,9 +125,7 @@ static inline int splashCeil(SplashCoord x) {
 }
 
 static inline int splashRound(SplashCoord x) {
-#if defined(USE_FIXEDPOINT)
-  return FixedPoint::round(x);
-#elif defined(__GNUC__) && defined(__i386__)
+#if defined(__GNUC__) && defined(__i386__)
   // this could use round-to-nearest mode and avoid the "+0.5",
   // but that produces slightly different results (because i+0.5
   // sometimes rounds up and sometimes down using the even rule)
@@ -181,17 +169,11 @@ static inline int splashRound(SplashCoord x) {
 }
 
 static inline SplashCoord splashAvg(SplashCoord x, SplashCoord y) {
-#ifdef USE_FIXEDPOINT
-  return FixedPoint::avg(x, y);
-#else
   return 0.5 * (x + y);
-#endif
 }
  
 static inline SplashCoord splashSqrt(SplashCoord x) {
-#if defined(USE_FIXEDPOINT)
-  return FixedPoint::sqrt(x);
-#elif defined(USE_FLOAT)
+#if defined(USE_FLOAT)
   return sqrtf(x);
 #else
   return sqrt(x);
@@ -199,9 +181,7 @@ static inline SplashCoord splashSqrt(SplashCoord x) {
 }
 
 static inline SplashCoord splashPow(SplashCoord x, SplashCoord y) {
-#if defined(USE_FIXEDPOINT)
-  return FixedPoint::pow(x, y);
-#elif defined(USE_FLOAT)
+#if defined(USE_FLOAT)
   return powf(x, y);
 #else
   return pow(x, y);
@@ -213,34 +193,13 @@ static inline SplashCoord splashDist(SplashCoord x0, SplashCoord y0,
   SplashCoord dx, dy;
   dx = x1 - x0;
   dy = y1 - y0;
-#ifdef USE_FIXEDPOINT
-  // this handles the situation where dx*dx or dy*dy is too large to
-  // fit in the 16.16 fixed point format
-  SplashCoord dxa, dya, d;
-  dxa = splashAbs(dx);
-  dya = splashAbs(dy);
-  if (dxa == 0 && dya == 0) {
-    return 0;
-  } else if (dxa > dya) {
-    d = dya / dxa;
-    return dxa * FixedPoint::sqrt(d*d + 1);
-  } else {
-    d = dxa / dya;
-    return dya * FixedPoint::sqrt(d*d + 1);
-  }
-#else
   return splashSqrt(dx * dx + dy * dy);
-#endif
 }
 
 static inline bool splashCheckDet(SplashCoord m11, SplashCoord m12,
 				   SplashCoord m21, SplashCoord m22,
 				   SplashCoord epsilon) {
-#ifdef USE_FIXEDPOINT
-  return FixedPoint::checkDet(m11, m12, m21, m22, epsilon);
-#else
   return fabs(m11 * m22 - m12 * m21) >= epsilon;
-#endif
 }
 
 #endif

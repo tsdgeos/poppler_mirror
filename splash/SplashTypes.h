@@ -31,10 +31,7 @@
 // coordinates
 //------------------------------------------------------------------------
 
-#if defined(USE_FIXEDPOINT)
-#include "goo/FixedPoint.h"
-typedef FixedPoint SplashCoord;
-#elif defined(USE_FLOAT)
+#if defined(USE_FLOAT)
 typedef float SplashCoord;
 #else
 typedef double SplashCoord;
