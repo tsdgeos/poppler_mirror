@@ -51,20 +51,6 @@ typedef enum
   POPPLER_MOVIE_PLAY_MODE_PALINDROME
 } PopplerMoviePlayMode;
 
-/**
- * PopplerMovieTime:
- *
- * Time-related entities (start position, duration); to get the equivalent
- * value in seconds, calculate (double) units/units_per_second. Note that
- * units_per_second may be zero if the respective entity is undefined.
- *
- * Since: 0.80
- */
-typedef struct {
-  gulong units;
-  gint units_per_second;
-} PopplerMovieTime;
-
 POPPLER_PUBLIC
 GType                poppler_movie_get_type      (void) G_GNUC_CONST;
 POPPLER_PUBLIC
@@ -84,11 +70,9 @@ gdouble              poppler_movie_get_rate (PopplerMovie *poppler_movie);
 POPPLER_PUBLIC
 gushort              poppler_movie_get_rotation_angle (PopplerMovie *poppler_movie);
 POPPLER_PUBLIC
-void                 poppler_movie_get_start (PopplerMovie *poppler_movie,
-                                              PopplerMovieTime *start);
+guint64              poppler_movie_get_start (PopplerMovie *poppler_movie);
 POPPLER_PUBLIC
-void                 poppler_movie_get_duration (PopplerMovie *poppler_movie,
-                                                 PopplerMovieTime *duration);
+guint64              poppler_movie_get_duration (PopplerMovie *poppler_movie);
 
 G_END_DECLS
 

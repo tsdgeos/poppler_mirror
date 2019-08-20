@@ -41,8 +41,8 @@ struct _PopplerMovie
   gboolean synchronous_play;
   gint     volume;
   gdouble  rate;
-  PopplerMovieTime start;
-  PopplerMovieTime duration;
+  guint64  start;
+  guint64  duration;
   gushort  rotation_angle;
 };
 
@@ -117,11 +117,21 @@ _poppler_movie_new (const Movie *poppler_movie)
 
   movie->rate = poppler_movie->getActivationParameters()->rate;
 
-  movie->start.units = poppler_movie->getActivationParameters()->start.units;
-  movie->start.units_per_second = poppler_movie->getActivationParameters()->start.units_per_second;
+  if (poppler_movie->getActivationParameters()->start.units_per_second > 0) {
+    movie->start = 1000000000L*
+      poppler_movie->getActivationParameters()->start.units/
+      poppler_movie->getActivationParameters()->start.units_per_second;
+  } else {
+    movie->start = 0L;
+  }
 
-  movie->duration.units = poppler_movie->getActivationParameters()->duration.units;
-  movie->duration.units_per_second = poppler_movie->getActivationParameters()->duration.units_per_second;
+  if (poppler_movie->getActivationParameters()->duration.units_per_second > 0) {
+    movie->duration = 1000000000L*
+      poppler_movie->getActivationParameters()->duration.units/
+      poppler_movie->getActivationParameters()->duration.units_per_second;
+  } else {
+    movie->duration = 0L;
+  }
 
   movie->rotation_angle = poppler_movie->getRotationAngle();
 
@@ -280,35 +290,35 @@ poppler_movie_get_rotation_angle (PopplerMovie *poppler_movie)
 /**
  * poppler_movie_get_start:
  * @poppler_movie: a #PopplerMovie
- * @start: (out): a return location for a #PopplerMovieTime
  *
- * Obtains the start position of the movie playback
+ * Returns the start position of the movie playback
+ *
+ * Return value: the start position of the movie playback (in ns)
  *
  * Since: 0.80
  */
-void
-poppler_movie_get_start (PopplerMovie *poppler_movie,
-                         PopplerMovieTime *start)
+guint64
+poppler_movie_get_start (PopplerMovie *poppler_movie)
 {
-  g_return_if_fail (POPPLER_IS_MOVIE (poppler_movie));
+  g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), 0L);
 
-  *start = poppler_movie->start;
+  return poppler_movie->start;
 }
 
 /**
  * poppler_movie_get_duration:
  * @poppler_movie: a #PopplerMovie
- * @duration: (out): a return location for a #PopplerMovieTime
  *
- * Obtains the duration of the movie playback
+ * Returns the duration of the movie playback
+ *
+ * Return value: the duration of the movie playback (in ns)
  *
  * Since: 0.80
  */
-void
-poppler_movie_get_duration (PopplerMovie *poppler_movie,
-                            PopplerMovieTime *duration)
+guint64
+poppler_movie_get_duration (PopplerMovie *poppler_movie)
 {
-  g_return_if_fail (POPPLER_IS_MOVIE (poppler_movie));
+  g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), 0L);
 
-  *duration = poppler_movie->duration;
+  return poppler_movie->duration;
 }
