@@ -76,7 +76,7 @@ gboolean             poppler_movie_show_controls (PopplerMovie *poppler_movie);
 POPPLER_PUBLIC
 PopplerMoviePlayMode poppler_movie_get_play_mode (PopplerMovie *poppler_movie);
 POPPLER_PUBLIC
-gboolean             poppler_movie_synchronous_play (PopplerMovie *poppler_movie);
+gboolean             poppler_movie_is_synchronous (PopplerMovie *poppler_movie);
 POPPLER_PUBLIC
 gint                 poppler_movie_get_volume (PopplerMovie *poppler_movie);
 POPPLER_PUBLIC

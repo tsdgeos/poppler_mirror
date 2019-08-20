@@ -204,7 +204,7 @@ poppler_movie_get_play_mode (PopplerMovie *poppler_movie)
 }
 
 /**
- * poppler_movie_synchronous_play:
+ * poppler_movie_is_synchronous:
  * @poppler_movie: a #PopplerMovie
  *
  * Returns whether the user must wait for the movie to be finished before
@@ -215,7 +215,7 @@ poppler_movie_get_play_mode (PopplerMovie *poppler_movie)
  * Since: 0.80
  */
 gboolean
-poppler_movie_synchronous_play (PopplerMovie *poppler_movie)
+poppler_movie_is_synchronous (PopplerMovie *poppler_movie)
 {
   g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), FALSE);
 

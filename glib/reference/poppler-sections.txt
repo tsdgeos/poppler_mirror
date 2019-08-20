@@ -593,7 +593,7 @@ poppler_movie_get_start
 poppler_movie_get_volume
 poppler_movie_need_poster
 poppler_movie_show_controls
-poppler_movie_synchronous_play
+poppler_movie_is_synchronous
 
 <SUBSECTION Standard>
 POPPLER_MOVIE
