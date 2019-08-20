@@ -1751,8 +1751,9 @@ poppler_document_get_print_page_ranges (PopplerDocument *document,
   std::vector<std::pair<int, int>> ranges;
   PopplerPageRange *result = nullptr;
 
+  g_return_val_if_fail (n_ranges != nullptr, nullptr);
   *n_ranges = 0;
-  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), NULL);
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), nullptr);
 
   catalog = document->doc->getCatalog ();
   if (catalog && catalog->isOk ()) {
