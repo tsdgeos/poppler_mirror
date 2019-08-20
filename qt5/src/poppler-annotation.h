@@ -1082,6 +1082,7 @@ private:
  */
 class POPPLER_QT5_EXPORT WidgetAnnotation : public Annotation
 {
+    friend class AnnotationUtils;
     friend class AnnotationPrivate;
 
 public:
@@ -1099,6 +1100,7 @@ public:
     Link *additionalAction(AdditionalActionType type) const;
 
 private:
+    WidgetAnnotation(const QDomNode &node);
     WidgetAnnotation(WidgetAnnotationPrivate &dd);
     void store(QDomNode &parentNode, QDomDocument &document) const override; // stub
     Q_DECLARE_PRIVATE(WidgetAnnotation)

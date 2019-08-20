@@ -96,7 +96,7 @@ Annotation *AnnotationUtils::createAnnotation(const QDomElement &annElement)
         annotation = new CaretAnnotation(annElement);
         break;
     case Annotation::AWidget:
-        annotation = new WidgetAnnotation();
+        annotation = new WidgetAnnotation(annElement);
         break;
     }
 
@@ -4227,9 +4227,11 @@ Annot *WidgetAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData
     return pdfAnnot;
 }
 
+WidgetAnnotation::WidgetAnnotation() : Annotation(*new WidgetAnnotationPrivate()) { }
+
 WidgetAnnotation::WidgetAnnotation(WidgetAnnotationPrivate &dd) : Annotation(dd) { }
 
-WidgetAnnotation::WidgetAnnotation() : Annotation(*new WidgetAnnotationPrivate()) { }
+WidgetAnnotation::WidgetAnnotation(const QDomNode &node) : Annotation(*new WidgetAnnotationPrivate(), node) { }
 
 WidgetAnnotation::~WidgetAnnotation() { }
 
