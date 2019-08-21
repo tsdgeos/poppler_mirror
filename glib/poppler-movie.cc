@@ -118,17 +118,19 @@ _poppler_movie_new (const Movie *poppler_movie)
 
   movie->rate = poppler_movie->getActivationParameters()->rate;
 
-  if (poppler_movie->getActivationParameters()->start.units_per_second > 0) {
-    movie->start = 1000000000L*
-      poppler_movie->getActivationParameters()->start.units/
+  if (poppler_movie->getActivationParameters()->start.units_per_second > 0 &&
+      poppler_movie->getActivationParameters()->start.units <= G_MAXUINT64 / 1000000000) {
+    movie->start = 1000000000L *
+      poppler_movie->getActivationParameters()->start.units /
       poppler_movie->getActivationParameters()->start.units_per_second;
   } else {
     movie->start = 0L;
   }
 
-  if (poppler_movie->getActivationParameters()->duration.units_per_second > 0) {
-    movie->duration = 1000000000L*
-      poppler_movie->getActivationParameters()->duration.units/
+  if (poppler_movie->getActivationParameters()->duration.units_per_second > 0 &&
+      poppler_movie->getActivationParameters()->duration.units <= G_MAXUINT64 / 1000000000) {
+    movie->duration = 1000000000L *
+      poppler_movie->getActivationParameters()->duration.units /
       poppler_movie->getActivationParameters()->duration.units_per_second;
   } else {
     movie->duration = 0L;
