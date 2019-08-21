@@ -1424,6 +1424,7 @@ public:
     std::unique_ptr<LinkAction> getAdditionalAction(AdditionalActionsType type);
     std::unique_ptr<LinkAction> getFormAdditionalAction(FormAdditionalActionsType type);
     Dict *getParent() { return parent; }
+    FormWidget *getFormWidget() { return formWidget; }
     void setNewAppearance(Object &&newAppearance);
 
     bool setFormAdditionalAction(FormAdditionalActionsType type, const GooString &js);
@@ -1435,6 +1436,7 @@ private:
 
     Form *form;
     FormField *field; // FormField object for this annotation
+    FormWidget *formWidget;
     AnnotWidgetHighlightMode mode; // H  (Default I)
     std::unique_ptr<AnnotAppearanceCharacs> appearCharacs; // MK
     std::unique_ptr<LinkAction> action; // A

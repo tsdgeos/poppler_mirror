@@ -3762,7 +3762,7 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormFiel
     initialize(docA, dictObject->getDict());
 }
 
-AnnotWidget::AnnotWidget(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearance &da) : Annot(docA, rect)
+AnnotWidget::AnnotWidget(PDFDoc *docA, PDFRectangle *rectA, const DefaultAppearance &da) : Annot(docA, rectA)
 {
     type = typeWidget;
     flags |= flagPrint | flagLocked;
@@ -3779,7 +3779,9 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, PDFRectangle *rect, const DefaultAppearan
 
     initialize(docA, annotObj.getDict());
 
-    field = form->getRootField(form->getNumFields() - 1);
+    int fieldAt = form->getNumFields() - 1;
+    field = form->getRootField(fieldAt);
+    formWidget = field->getWidget(field->getNumWidgets() - 1);
 
     bool dummyAddDingbatsResource = false; // This is only update so if we didn't need to add
                                            // the dingbats resource we should not need it now

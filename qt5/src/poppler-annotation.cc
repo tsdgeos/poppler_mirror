@@ -39,6 +39,7 @@
 
 // local includes
 #include "poppler-annotation.h"
+#include "poppler-form.h"
 #include "poppler-link.h"
 #include "poppler-qt5.h"
 #include "poppler-annotation-helper.h"
@@ -4200,6 +4201,7 @@ class WidgetAnnotationPrivate : public AnnotationPrivate
 public:
     Annotation *makeAlias() override;
     Annot *createNativeAnnot(::Page *destPage, DocumentData *doc) override;
+    FormWidget *formWidget();
 };
 
 Annotation *WidgetAnnotationPrivate::makeAlias()
@@ -4225,6 +4227,17 @@ Annot *WidgetAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData
 
     delete w;
     return pdfAnnot;
+}
+
+::FormWidget *WidgetAnnotationPrivate::formWidget()
+{
+    ::FormWidget *fw = nullptr;
+    AnnotWidget *widgetann = dynamic_cast<AnnotWidget *>(pdfAnnot);
+
+    if (widgetann)
+        fw = widgetann->getFormWidget();
+
+    return fw;
 }
 
 WidgetAnnotation::WidgetAnnotation() : Annotation(*new WidgetAnnotationPrivate()) { }
@@ -4254,6 +4267,12 @@ Link *WidgetAnnotation::additionalAction(AdditionalActionType type) const
 {
     Q_D(const WidgetAnnotation);
     return d->additionalAction(type);
+}
+
+::FormWidget *WidgetAnnotation::getFormWidget()
+{
+    Q_D(WidgetAnnotation);
+    return d->formWidget();
 }
 
 /** RichMediaAnnotation [Annotation] */

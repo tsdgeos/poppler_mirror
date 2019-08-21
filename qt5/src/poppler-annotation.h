@@ -43,6 +43,8 @@
 #include <QtXml/QDomDocument>
 #include "poppler-export.h"
 
+class FormWidget;
+
 namespace Poppler {
 
 class Annotation;
@@ -1090,6 +1092,7 @@ public:
     ~WidgetAnnotation() override;
 
     SubType subType() const override;
+    ::FormWidget *getFormWidget();
 
     /**
      * Returns the additional action of the given @p type fo the annotation or
