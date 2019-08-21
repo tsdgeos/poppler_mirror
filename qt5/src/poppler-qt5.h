@@ -62,6 +62,7 @@ class AnnotMovie;
 */
 namespace Poppler {
 
+class Annotation;
 class Document;
 class DocumentData;
 
@@ -1869,7 +1870,7 @@ QString subject = m_doc->info("Subject");
     */
     QVector<int> formCalculateOrder() const;
 
-    void sign();
+    void sign(Poppler::Annotation *pWhichAnnotation);
 
     /**
      Returns the signatures of this document.
