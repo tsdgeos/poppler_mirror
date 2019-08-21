@@ -583,7 +583,6 @@ poppler_media_get_type
 <TITLE>Poppler Movie</TITLE>
 PopplerMovie
 PopplerMoviePlayMode
-PopplerMovieTime
 poppler_movie_get_duration
 poppler_movie_get_filename
 poppler_movie_get_play_mode
