@@ -1659,6 +1659,8 @@ poppler_document_get_print_scaling (PopplerDocument *document)
  * @document: A #PopplerDocument
  *
  * Returns the duplex mode value suggested for printing by author of the document.
+ * Value POPPLER_PRINT_DUPLEX_NONE means that the document does not specify this
+ * preference.
  *
  * Returns: a #PopplerPrintDuplex that should be used when document is printed
  *
@@ -1703,6 +1705,9 @@ poppler_document_get_print_duplex (PopplerDocument *document)
  * @document: A #PopplerDocument
  *
  * Returns the suggested number of copies to be printed.
+ * This preference should be applied only if returned value
+ * is greater than 1 since value 1 usually means that
+ * the document does not specify it.
  *
  * Returns: Number of copies
  *
@@ -1735,6 +1740,8 @@ poppler_document_get_print_n_copies (PopplerDocument *document)
  *
  * Returns the suggested page ranges to print in the form of array
  * of #PopplerPageRanges and number of ranges.
+ * NULL pointer means that the document does not specify page ranges
+ * for printing.
  *
  * Returns: (array length=n_ranges) (transfer full): an array
  *          of #PopplerPageRanges or NULL. Free the array when
