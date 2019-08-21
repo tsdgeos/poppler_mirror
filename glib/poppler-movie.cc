@@ -39,7 +39,7 @@ struct _PopplerMovie
   gboolean show_controls;
   PopplerMoviePlayMode mode;
   gboolean synchronous_play;
-  gint     volume;
+  gdouble  volume;
   gdouble  rate;
   guint64  start;
   guint64  duration;
@@ -113,7 +113,8 @@ _poppler_movie_new (const Movie *poppler_movie)
 
   movie->synchronous_play = poppler_movie->getActivationParameters()->synchronousPlay;
 
-  movie->volume = poppler_movie->getActivationParameters()->volume;
+  // map 0 - 100 to 0.0 - 1.0
+  movie->volume = poppler_movie->getActivationParameters()->volume / 100.0;
 
   movie->rate = poppler_movie->getActivationParameters()->rate;
 
@@ -247,7 +248,7 @@ poppler_movie_get_volume (PopplerMovie *poppler_movie)
 {
   g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), 0);
 
-  return poppler_movie->volume/100.0;
+  return poppler_movie->volume;
 }
 
 /**
