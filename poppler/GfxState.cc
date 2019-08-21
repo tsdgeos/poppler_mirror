@@ -1825,9 +1825,9 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
     error(errSyntaxError, -1, "Bad ICCBased color space");
     return nullptr;
   }
+#ifdef USE_CMS
   const Object &obj1Ref = arr->getNF(1);
   const Ref iccProfileStreamA = obj1Ref.isRef() ? obj1Ref.getRef() : Ref::INVALID();
-#ifdef USE_CMS
   // check cache
   if (out && iccProfileStreamA != Ref::INVALID()) {
     if (auto *item = out->getIccColorSpaceCache()->lookup(iccProfileStreamA)) {
