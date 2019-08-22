@@ -527,9 +527,7 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
     {
 #if defined(HAVE_SPLASH)
       SplashColor bgColor;
-      bool overprintPreview = false;
-#ifdef SPLASH_CMYK
-      overprintPreview = m_page->parentDoc->m_hints & Document::OverprintPreview ? true : false;
+      const bool overprintPreview = m_page->parentDoc->m_hints & Document::OverprintPreview ? true : false;
       if (overprintPreview)
       {
         unsigned char c, m, y, k;
@@ -553,17 +551,13 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
         }
       }
       else
-#endif
       {
         bgColor[0] = m_page->parentDoc->paperColor.blue();
         bgColor[1] = m_page->parentDoc->paperColor.green();
         bgColor[2] = m_page->parentDoc->paperColor.red();
       }
 
-      SplashColorMode colorMode = splashModeXBGR8;
-#ifdef SPLASH_CMYK
-      if (overprintPreview) colorMode = splashModeDeviceN8;
-#endif
+      const SplashColorMode colorMode = overprintPreview ? splashModeDeviceN8 : splashModeXBGR8;
 
       SplashThinLineMode thinLineMode = splashThinLineDefault;
       if (m_page->parentDoc->m_hints & Document::ThinLineShape) thinLineMode = splashThinLineShape;
