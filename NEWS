@@ -1,3 +1,30 @@
+Release 0.80.0:
+        core:
+         * Annotations: Implement support for setting a different text in the appearance stream than the real text
+         * Splash: Optionally use small_vector from boost
+         * Fix memory leaks on broken files
+         * Fix abort on broken files
+         * Small code simplifications
+         * Remove USE_FIXEDPOINT support. Issue #821
+
+        qt5:
+         * Fix MSVC build
+         * Add subsitute-font information
+         * Fix since marker of some functions
+         * Fix leak when aborting text extraction
+         * Small code simplifications
+
+        glib:
+         * Make print scaling getter visible
+         * Make Duplex/NumCopies/PrintPageRange preference available in API
+         * Implement Movie API
+
+        utils:
+         * pdftotext: Add -nodiag flag to remove diagonal text on output
+
+        build system:
+         * Mark external lib include dirs as SYSTEM
+
 Release 0.79.0:
         core:
          * Fix regression on TextSelectionPainter
