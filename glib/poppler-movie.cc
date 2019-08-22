@@ -38,6 +38,12 @@ struct _PopplerMovie
   gboolean need_poster;
   gboolean show_controls;
   PopplerMoviePlayMode mode;
+  gboolean synchronous_play;
+  gdouble  volume;
+  gdouble  rate;
+  guint64  start;
+  guint64  duration;
+  gushort  rotation_angle;
 };
 
 struct _PopplerMovieClass
@@ -104,6 +110,33 @@ _poppler_movie_new (const Movie *poppler_movie)
     movie->mode = POPPLER_MOVIE_PLAY_MODE_PALINDROME;
     break;
   }
+
+  movie->synchronous_play = poppler_movie->getActivationParameters()->synchronousPlay;
+
+  // map 0 - 100 to 0.0 - 1.0
+  movie->volume = poppler_movie->getActivationParameters()->volume / 100.0;
+
+  movie->rate = poppler_movie->getActivationParameters()->rate;
+
+  if (poppler_movie->getActivationParameters()->start.units_per_second > 0 &&
+      poppler_movie->getActivationParameters()->start.units <= G_MAXUINT64 / 1000000000) {
+    movie->start = 1000000000L *
+      poppler_movie->getActivationParameters()->start.units /
+      poppler_movie->getActivationParameters()->start.units_per_second;
+  } else {
+    movie->start = 0L;
+  }
+
+  if (poppler_movie->getActivationParameters()->duration.units_per_second > 0 &&
+      poppler_movie->getActivationParameters()->duration.units <= G_MAXUINT64 / 1000000000) {
+    movie->duration = 1000000000L *
+      poppler_movie->getActivationParameters()->duration.units /
+      poppler_movie->getActivationParameters()->duration.units_per_second;
+  } else {
+    movie->duration = 0L;
+  }
+
+  movie->rotation_angle = poppler_movie->getRotationAngle();
 
   return movie;
 }
@@ -181,4 +214,114 @@ poppler_movie_get_play_mode (PopplerMovie *poppler_movie)
   g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), POPPLER_MOVIE_PLAY_MODE_ONCE);
 
   return poppler_movie->mode;
+}
+
+/**
+ * poppler_movie_is_synchronous:
+ * @poppler_movie: a #PopplerMovie
+ *
+ * Returns whether the user must wait for the movie to be finished before
+ * the PDF viewer accepts any interactive action
+ *
+ * Return value: %TRUE if yes, %FALSE otherwise
+ *
+ * Since: 0.80
+ */
+gboolean
+poppler_movie_is_synchronous (PopplerMovie *poppler_movie)
+{
+  g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), FALSE);
+
+  return poppler_movie->synchronous_play;
+}
+
+/**
+ * poppler_movie_get_volume:
+ * @poppler_movie: a #PopplerMovie
+ *
+ * Returns the playback audio volume
+ *
+ * Return value: volume setting for the movie (0.0 - 1.0)
+ *
+ * Since: 0.80
+ */
+gdouble
+poppler_movie_get_volume (PopplerMovie *poppler_movie)
+{
+  g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), 0);
+
+  return poppler_movie->volume;
+}
+
+/**
+ * poppler_movie_get_rate:
+ * @poppler_movie: a #PopplerMovie
+ *
+ * Returns the relative speed of the movie
+ *
+ * Return value: the relative speed of the movie (1 means no change)
+ *
+ * Since: 0.80
+ */
+gdouble
+poppler_movie_get_rate (PopplerMovie *poppler_movie)
+{
+  g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), 0);
+
+  return poppler_movie->rate;
+}
+
+/**
+ * poppler_movie_get_rotation_angle:
+ * @poppler_movie: a #PopplerMovie
+ *
+ * Returns the rotation angle
+ *
+ * Return value: the number of degrees the movie should be rotated (positive,
+ * multiples of 90: 0, 90, 180, 270)
+ *
+ * Since: 0.80
+ */
+gushort
+poppler_movie_get_rotation_angle (PopplerMovie *poppler_movie)
+{
+  g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), 0);
+
+  return poppler_movie->rotation_angle;
+}
+
+/**
+ * poppler_movie_get_start:
+ * @poppler_movie: a #PopplerMovie
+ *
+ * Returns the start position of the movie playback
+ *
+ * Return value: the start position of the movie playback (in ns)
+ *
+ * Since: 0.80
+ */
+guint64
+poppler_movie_get_start (PopplerMovie *poppler_movie)
+{
+  g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), 0L);
+
+  return poppler_movie->start;
+}
+
+/**
+ * poppler_movie_get_duration:
+ * @poppler_movie: a #PopplerMovie
+ *
+ * Returns the duration of the movie playback
+ *
+ * Return value: the duration of the movie playback (in ns)
+ *
+ * Since: 0.80
+ */
+guint64
+poppler_movie_get_duration (PopplerMovie *poppler_movie)
+{
+  g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), 0L);
+
+  return poppler_movie->duration;
 }

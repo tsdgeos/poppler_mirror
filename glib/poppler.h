@@ -211,6 +211,7 @@ typedef struct _PopplerQuadrilateral       PopplerQuadrilateral;
 typedef struct _PopplerStructureElement    PopplerStructureElement;
 typedef struct _PopplerStructureElementIter PopplerStructureElementIter;
 typedef struct _PopplerTextSpan            PopplerTextSpan;
+typedef struct _PopplerPageRange           PopplerPageRange;
 
 /**
  * PopplerBackend:

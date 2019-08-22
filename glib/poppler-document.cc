@@ -2,7 +2,7 @@
  * Copyright (C) 2005, Red Hat, Inc.
  *
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018 Marek Kasik <mkasik@redhat.com>
+ * Copyright (C) 2018-2019 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -81,7 +81,9 @@ enum {
 	PROP_VIEWER_PREFERENCES,
 	PROP_PERMISSIONS,
 	PROP_METADATA,
-	PROP_PRINT_SCALING
+	PROP_PRINT_SCALING,
+	PROP_PRINT_DUPLEX,
+	PROP_PRINT_N_COPIES
 };
 
 static void poppler_document_layers_free (PopplerDocument *document);
@@ -1653,6 +1655,132 @@ poppler_document_get_print_scaling (PopplerDocument *document)
 }
 
 /**
+ * poppler_document_get_print_duplex:
+ * @document: A #PopplerDocument
+ *
+ * Returns the duplex mode value suggested for printing by author of the document.
+ * Value POPPLER_PRINT_DUPLEX_NONE means that the document does not specify this
+ * preference.
+ *
+ * Returns: a #PopplerPrintDuplex that should be used when document is printed
+ *
+ * Since: 0.80
+ **/
+PopplerPrintDuplex
+poppler_document_get_print_duplex (PopplerDocument *document)
+{
+  Catalog *catalog;
+  ViewerPreferences *preferences;
+  PopplerPrintDuplex duplex = POPPLER_PRINT_DUPLEX_NONE;
+
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), POPPLER_PRINT_DUPLEX_NONE);
+
+  catalog = document->doc->getCatalog ();
+  if (catalog && catalog->isOk ()) {
+    preferences = catalog->getViewerPreferences();
+    if (preferences) {
+      switch (preferences->getDuplex()) {
+        default:
+        case ViewerPreferences::Duplex::duplexNone:
+          duplex = POPPLER_PRINT_DUPLEX_NONE;
+          break;
+        case ViewerPreferences::Duplex::duplexSimplex:
+          duplex = POPPLER_PRINT_DUPLEX_SIMPLEX;
+          break;
+        case ViewerPreferences::Duplex::duplexDuplexFlipShortEdge:
+          duplex = POPPLER_PRINT_DUPLEX_DUPLEX_FLIP_SHORT_EDGE;
+          break;
+        case ViewerPreferences::Duplex::duplexDuplexFlipLongEdge:
+          duplex = POPPLER_PRINT_DUPLEX_DUPLEX_FLIP_LONG_EDGE;
+          break;
+      }
+    }
+  }
+
+  return duplex;
+}
+
+/**
+ * poppler_document_get_print_n_copies:
+ * @document: A #PopplerDocument
+ *
+ * Returns the suggested number of copies to be printed.
+ * This preference should be applied only if returned value
+ * is greater than 1 since value 1 usually means that
+ * the document does not specify it.
+ *
+ * Returns: Number of copies
+ *
+ * Since: 0.80
+ **/
+gint
+poppler_document_get_print_n_copies (PopplerDocument *document)
+{
+  Catalog *catalog;
+  ViewerPreferences *preferences;
+  gint retval = 1;
+
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), 1);
+
+  catalog = document->doc->getCatalog ();
+  if (catalog && catalog->isOk ()) {
+    preferences = catalog->getViewerPreferences();
+    if (preferences) {
+      retval = preferences->getNumCopies();
+    }
+  }
+
+  return retval;
+}
+
+/**
+ * poppler_document_get_print_page_ranges:
+ * @document: A #PopplerDocument
+ * @n_ranges: (out): return location for number of ranges
+ *
+ * Returns the suggested page ranges to print in the form of array
+ * of #PopplerPageRanges and number of ranges.
+ * NULL pointer means that the document does not specify page ranges
+ * for printing.
+ *
+ * Returns: (array length=n_ranges) (transfer full): an array
+ *          of #PopplerPageRanges or NULL. Free the array when
+ *          it is no longer needed.
+ *
+ * Since: 0.80
+ **/
+PopplerPageRange *
+poppler_document_get_print_page_ranges (PopplerDocument *document,
+                                        int             *n_ranges)
+{
+  Catalog *catalog;
+  ViewerPreferences *preferences;
+  std::vector<std::pair<int, int>> ranges;
+  PopplerPageRange *result = nullptr;
+
+  g_return_val_if_fail (n_ranges != nullptr, nullptr);
+  *n_ranges = 0;
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), nullptr);
+
+  catalog = document->doc->getCatalog ();
+  if (catalog && catalog->isOk ()) {
+    preferences = catalog->getViewerPreferences ();
+    if (preferences) {
+      ranges = preferences->getPrintPageRange ();
+
+      *n_ranges = ranges.size ();
+      result = g_new (PopplerPageRange, ranges.size ());
+      for (guint i = 0; i < ranges.size (); ++i) {
+        result[i].start_page = ranges[i].first;
+        result[i].end_page = ranges[i].second;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
  * poppler_document_get_permissions:
  * @document: A #PopplerDocument
  *
@@ -1884,6 +2012,12 @@ poppler_document_get_property (GObject    *object,
       break;
     case PROP_PRINT_SCALING:
       g_value_set_enum (value, poppler_document_get_print_scaling (document));
+      break;
+    case PROP_PRINT_DUPLEX:
+      g_value_set_enum (value, poppler_document_get_print_duplex (document));
+      break;
+    case PROP_PRINT_N_COPIES:
+      g_value_set_int (value, poppler_document_get_print_n_copies (document));
       break;
     case PROP_PERMISSIONS:
       g_value_set_flags (value, poppler_document_get_permissions (document));
@@ -2165,6 +2299,35 @@ poppler_document_class_init (PopplerDocumentClass *klass)
 						      POPPLER_TYPE_PRINT_SCALING,
 						      POPPLER_PRINT_SCALING_APP_DEFAULT,
 						      (GParamFlags) (G_PARAM_READABLE | G_PARAM_STATIC_STRINGS)));
+
+  /**
+   * PopplerDocument:print-duplex:
+   *
+   * Since: 0.80
+   */
+  g_object_class_install_property (G_OBJECT_CLASS (klass),
+				   PROP_PRINT_DUPLEX,
+				   g_param_spec_enum ("print-duplex",
+						      "Print Duplex",
+						      "Duplex Viewer Preference",
+						      POPPLER_TYPE_PRINT_DUPLEX,
+						      POPPLER_PRINT_DUPLEX_NONE,
+						      (GParamFlags) (G_PARAM_READABLE | G_PARAM_STATIC_STRINGS)));
+
+  /**
+   * PopplerDocument:print-n-copies:
+   *
+   * Suggested number of copies to be printed for this document
+   *
+   * Since: 0.80
+   */
+  g_object_class_install_property (G_OBJECT_CLASS (klass),
+				   PROP_PRINT_N_COPIES,
+				   g_param_spec_int ("print-n-copies",
+						     "Number of Copies to Print",
+						     "Number of Copies Viewer Preference",
+						     1, G_MAXINT, 1,
+						     (GParamFlags) (G_PARAM_READABLE | G_PARAM_STATIC_STRINGS)));
 
   /**
    * PopplerDocument:permissions:

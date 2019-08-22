@@ -61,6 +61,18 @@ POPPLER_PUBLIC
 gboolean             poppler_movie_show_controls (PopplerMovie *poppler_movie);
 POPPLER_PUBLIC
 PopplerMoviePlayMode poppler_movie_get_play_mode (PopplerMovie *poppler_movie);
+POPPLER_PUBLIC
+gboolean             poppler_movie_is_synchronous (PopplerMovie *poppler_movie);
+POPPLER_PUBLIC
+gdouble              poppler_movie_get_volume (PopplerMovie *poppler_movie);
+POPPLER_PUBLIC
+gdouble              poppler_movie_get_rate (PopplerMovie *poppler_movie);
+POPPLER_PUBLIC
+gushort              poppler_movie_get_rotation_angle (PopplerMovie *poppler_movie);
+POPPLER_PUBLIC
+guint64              poppler_movie_get_start (PopplerMovie *poppler_movie);
+POPPLER_PUBLIC
+guint64              poppler_movie_get_duration (PopplerMovie *poppler_movie);
 
 G_END_DECLS
 
