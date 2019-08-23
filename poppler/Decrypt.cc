@@ -355,6 +355,7 @@ BaseCryptStream::BaseCryptStream(Stream *strA, const unsigned char *fileKey, Cry
   }
 
   charactersRead = 0;
+  nextCharBuff = EOF;
   autoDelete = true;
 }
 
