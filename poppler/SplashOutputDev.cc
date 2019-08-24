@@ -1740,13 +1740,13 @@ void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace,
       GfxDeviceNColorSpace *deviceNCS = (GfxDeviceNColorSpace *)colorSpace;
       additive = mask == 0x0f && !deviceNCS->isNonMarking();
       for (i = 0; i < deviceNCS->getNComps() && additive; i++) {
-        if (deviceNCS->getColorantName(i)->cmp("Cyan") == 0) {
+        if (deviceNCS->getColorantName(i).compare("Cyan") == 0) {
           additive = false;
-        } else if (deviceNCS->getColorantName(i)->cmp("Magenta") == 0) {
+        } else if (deviceNCS->getColorantName(i).compare("Magenta") == 0) {
           additive = false;
-        } else if (deviceNCS->getColorantName(i)->cmp("Yellow") == 0) {
+        } else if (deviceNCS->getColorantName(i).compare("Yellow") == 0) {
           additive = false;
-        } else if (deviceNCS->getColorantName(i)->cmp("Black") == 0) {
+        } else if (deviceNCS->getColorantName(i).compare("Black") == 0) {
           additive = false;
         }
       }

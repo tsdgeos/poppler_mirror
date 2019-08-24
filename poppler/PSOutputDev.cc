@@ -1766,14 +1766,14 @@ void PSOutputDev::writeTrailer() {
       writePS("%%DocumentCustomColors:");
       for (cc = customColors; cc; cc = cc->next) {
 	writePS(" ");
-	writePSString(cc->name);
+	writePSString(cc->name->toStr());
       }
       writePS("\n");
       writePS("%%CMYKCustomColor:\n");
       for (cc = customColors; cc; cc = cc->next) {
 	writePSFmt("%%+ {0:.4g} {1:.4g} {2:.4g} {3:.4g} ",
 		   cc->c, cc->m, cc->y, cc->k);
-	writePSString(cc->name);
+	writePSString(cc->name->toStr());
 	writePS("\n");
       }
     }
@@ -5178,7 +5178,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s) {
   }
 
   if (nChars > 0) {
-    writePSString(s2);
+    writePSString(s2->toStr());
     writePS("\n[");
     for (i = 0; i < 2 * nChars; ++i) {
       if (i > 0) {
@@ -6812,7 +6812,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
   case csSeparation:
     separationCS = (GfxSeparationColorSpace *)colorSpace;
     writePS("[/Separation ");
-    writePSString(separationCS->getName());
+    writePSString(separationCS->getName()->toStr());
     writePS(" ");
     dumpColorSpaceL2(separationCS->getAlt(), false, false, false);
     writePS("\n");
@@ -6936,7 +6936,7 @@ void PSOutputDev::opiBegin20(GfxState *state, Dict *dict) {
 	Object obj4 = obj1.arrayGet(i+1);
 	if (obj3.isString() && obj4.isNum()) {
 	  writePS(" ");
-	  writePSString(obj3.getString());
+	  writePSString(obj3.getString()->toStr());
 	  writePSFmt(" {0:.6g}", obj4.getNum());
 	}
       }
@@ -7011,7 +7011,7 @@ void PSOutputDev::opiBegin13(GfxState *state, Dict *dict) {
     if (obj2.isString()) {
       writePSFmt("%ALDImageColor: {0:.4g} {1:.4g} {2:.4g} {3:.4g} ",
 		 c, m, y, k);
-      writePSString(obj2.getString());
+      writePSString(obj2.getString()->toStr());
       writePS("\n");
     }
   }
@@ -7458,14 +7458,14 @@ void PSOutputDev::writePSFmt(const char *fmt, ...) {
   va_end(args);
 }
 
-void PSOutputDev::writePSString(const GooString *s) {
+void PSOutputDev::writePSString(const std::string &s) {
   unsigned char *p;
   int n, line;
   char buf[8];
 
   writePSChar('(');
   line = 1;
-  for (p = (unsigned char *)s->c_str(), n = s->getLength(); n; ++p, --n) {
+  for (p = (unsigned char *)s.c_str(), n = s.size(); n; ++p, --n) {
     if (line >= 64) {
       writePSChar('\\');
       writePSChar('\n');

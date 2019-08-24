@@ -2903,33 +2903,32 @@ void GfxSeparationColorSpace::createMapping(std::vector<GfxSeparationColorSpace*
 //------------------------------------------------------------------------
 
 GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
-					   GooString **namesA,
+					   std::vector<std::string> &&namesA,
 					   GfxColorSpace *altA,
 					   Function *funcA,
-					   std::vector<GfxSeparationColorSpace*> *sepsCSA) {
-  int i;
-
-  nComps = nCompsA;
+					   std::vector<GfxSeparationColorSpace*> *sepsCSA)
+ : nComps(nCompsA)
+ , names(std::move(namesA))
+{
   alt = altA;
   func = funcA;
   sepsCS = sepsCSA;
   nonMarking = true;
   overprintMask = 0;
   mapping = nullptr;
-  for (i = 0; i < nComps; ++i) {
-    names[i] = namesA[i];
-    if (names[i]->cmp("None")) {
+  for (int i = 0; i < nComps; ++i) {
+    if (names[i].compare("None")) {
       nonMarking = false;
     }
-    if (!names[i]->cmp("Cyan")) {
+    if (!names[i].compare("Cyan")) {
       overprintMask |= 0x01;
-    } else if (!names[i]->cmp("Magenta")) {
+    } else if (!names[i].compare("Magenta")) {
       overprintMask |= 0x02;
-    } else if (!names[i]->cmp("Yellow")) {
+    } else if (!names[i].compare("Yellow")) {
       overprintMask |= 0x04;
-    } else if (!names[i]->cmp("Black")) {
+    } else if (!names[i].compare("Black")) {
       overprintMask |= 0x08;
-    } else if (!names[i]->cmp("All")) {
+    } else if (!names[i].compare("All")) {
       overprintMask = 0xffffffff;
     } else {
       overprintMask = 0x0f;
@@ -2938,33 +2937,25 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
 }
 
 GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
-					   GooString **namesA,
+					   const std::vector<std::string> &namesA,
 					   GfxColorSpace *altA,
 					   Function *funcA,
 					   std::vector<GfxSeparationColorSpace*> *sepsCSA,
 					   int *mappingA,
 					   bool nonMarkingA,
-					   unsigned int overprintMaskA) {
-  int i;
-
-  nComps = nCompsA;
+					   unsigned int overprintMaskA)
+ : nComps(nCompsA)
+ , names(namesA)
+{
   alt = altA;
   func = funcA;
   sepsCS = sepsCSA;
   mapping = mappingA;
   nonMarking = nonMarkingA;
   overprintMask = overprintMaskA;
-  for (i = 0; i < nComps; ++i) {
-    names[i] = namesA[i]->copy();
-  }
 }
 
 GfxDeviceNColorSpace::~GfxDeviceNColorSpace() {
-  int i;
-
-  for (i = 0; i < nComps; ++i) {
-    delete names[i];
-  }
   delete alt;
   delete func;
   for (auto entry : *sepsCS) {
@@ -2998,11 +2989,10 @@ GfxColorSpace *GfxDeviceNColorSpace::copy() {
 //~ handle the 'None' colorant
 GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, OutputDev *out, GfxState *state, int recursion) {
   int nCompsA;
-  GooString *namesA[gfxColorMaxComps];
+  std::vector<std::string> namesA;
   GfxColorSpace *altA;
   Function *funcA;
   Object obj1;
-  int i;
   auto separationList = new std::vector<GfxSeparationColorSpace*>();
 
   if (arr->getLength() != 4 && arr->getLength() != 5) {
@@ -3020,19 +3010,19 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
 	  nCompsA, gfxColorMaxComps);
     nCompsA = gfxColorMaxComps;
   }
-  for (i = 0; i < nCompsA; ++i) {
+  for (int i = 0; i < nCompsA; ++i) {
     Object obj2 = obj1.arrayGet(i);
     if (!obj2.isName()) {
       error(errSyntaxWarning, -1, "Bad DeviceN color space (names)");
       nCompsA = i;
-      goto err3;
+      goto err1;
     }
-    namesA[i] = new GooString(obj2.getName());
+    namesA.emplace_back(obj2.getName());
   }
   obj1 = arr->get(2);
   if (!(altA = GfxColorSpace::parse(res, &obj1, out, state, recursion + 1))) {
     error(errSyntaxWarning, -1, "Bad DeviceN color space (alternate color space)");
-    goto err3;
+    goto err1;
   }
   obj1 = arr->get(3);
   if (!(funcA = Function::parse(&obj1))) {
@@ -3048,7 +3038,7 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
     Object obj2 = attribs->lookup("Colorants");
     if (obj2.isDict()) {
       Dict *colorants = obj2.getDict();
-      for (i = 0; i < colorants->getLength(); i++) {
+      for (int i = 0; i < colorants->getLength(); i++) {
         Object obj3 = colorants->getVal(i);
         if (obj3.isArray()) {
 	  GfxSeparationColorSpace *cs = (GfxSeparationColorSpace*)GfxSeparationColorSpace::parse(res, obj3.getArray(), out, state, recursion);
@@ -3062,16 +3052,12 @@ GfxColorSpace *GfxDeviceNColorSpace::parse(GfxResources *res, Array *arr, Output
       }
     }
   }
-  return new GfxDeviceNColorSpace(nCompsA, namesA, altA, funcA, separationList);
+  return new GfxDeviceNColorSpace(nCompsA, std::move(namesA), altA, funcA, separationList);
 
  err5:
   delete funcA;
  err4:
   delete altA;
- err3:
-  for (i = 0; i < nCompsA; ++i) {
-    delete namesA[i];
-  }
  err1:
   delete separationList;
   return nullptr;
@@ -3154,18 +3140,18 @@ void GfxDeviceNColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *
   mapping = (int *)gmalloc(sizeof(int) * nComps);
   unsigned int newOverprintMask = 0;
   for (int i = 0; i < nComps; i++) {
-    if (!names[i]->cmp("None")) {
+    if (!names[i].compare("None")) {
       mapping[i] = -1;
-    } else if (!names[i]->cmp("Cyan")) {
+    } else if (!names[i].compare("Cyan")) {
       newOverprintMask |= 0x01;
       mapping[i] = 0;
-    } else if (!names[i]->cmp("Magenta")) {
+    } else if (!names[i].compare("Magenta")) {
       newOverprintMask |= 0x02;
       mapping[i] = 1;
-    } else if (!names[i]->cmp("Yellow")) {
+    } else if (!names[i].compare("Yellow")) {
       newOverprintMask |= 0x04;
       mapping[i] = 2;
-    } else if (!names[i]->cmp("Black")) {
+    } else if (!names[i].compare("Black")) {
       newOverprintMask |= 0x08;
       mapping[i] = 3;
     } else {
@@ -3188,7 +3174,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *
         if (!sepCS->getName()->cmp(names[i])) {
           if (sepFunc != nullptr && sepCS->getFunc()->hasDifferentResultSet(sepFunc)) {
             error(errSyntaxWarning, -1,
-              "Different functions found for '{0:t}', convert immediately", names[i]);
+              "Different functions found for '{0:s}', convert immediately", names[i].c_str());
             gfree(mapping);
             mapping = nullptr;
             overprintMask = 0xffffffff;
@@ -3204,7 +3190,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *
       if (!found) {
         if ((int)separationList->size() == maxSepComps) {
           error(errSyntaxWarning, -1,
-            "Too many ({0:d}) spots, convert '{1:t}' immediately", maxSepComps, names[i]);
+            "Too many ({0:d}) spots, convert '{1:s}' immediately", maxSepComps, names[i].c_str());
           gfree(mapping);
           mapping = nullptr;
           overprintMask = 0xffffffff;
@@ -3213,7 +3199,7 @@ void GfxDeviceNColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *
         mapping[i] = separationList->size() + 4;
         newOverprintMask |= startOverprintMask;
         if (nComps == 1)
-	  separationList->push_back(new GfxSeparationColorSpace(names[i]->copy(),alt->copy(), func->copy()));
+	  separationList->push_back(new GfxSeparationColorSpace(new GooString(names[i]),alt->copy(), func->copy()));
         else {
           for (std::size_t k = 0; k < sepsCS->size(); k++) {
             GfxSeparationColorSpace *sepCS = (*sepsCS)[k];
