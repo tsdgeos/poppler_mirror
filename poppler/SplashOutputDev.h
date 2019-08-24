@@ -399,10 +399,8 @@ private:
   void setupScreenParams(double hDPI, double vDPI);
   SplashPattern *getColor(GfxGray gray);
   SplashPattern *getColor(GfxRGB *rgb);
-#ifdef SPLASH_CMYK
   SplashPattern *getColor(GfxCMYK *cmyk);
   SplashPattern *getColor(GfxColor *deviceN);
-#endif
   static void getMatteColor( SplashColorMode colorMode, GfxImageColorMap *colorMap, const GfxColor * matteColor, SplashColor splashMatteColor);
   void setOverprintMask(GfxColorSpace *colorSpace, bool overprintFlag,
 			int overprintMode, const GfxColor *singleColor, bool grayIndexed = false);

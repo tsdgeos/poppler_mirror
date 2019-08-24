@@ -76,7 +76,7 @@ build_clazy:
     - dnf -y install glibc-langpack-en curl make ninja-build openjpeg2-tools clazy clang redhat-rpm-config
   script:
     - mkdir -p build && cd build
-    - CC=clang CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -DSPLASH_CMYK=ON -G Ninja ..
+    - CC=clang CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..
     - CLAZY_CHECKS="level0,level1,level2,isempty-vs-count,qhash-with-char-pointer-key,tr-non-literal,no-non-pod-global-static" ninja
 
 build_android:

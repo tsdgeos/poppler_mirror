@@ -125,13 +125,11 @@ private:
          rgbTransferG[256],
          rgbTransferB[256];
   unsigned char grayTransfer[256];
-#ifdef SPLASH_CMYK
   unsigned char cmykTransferC[256],
          cmykTransferM[256],
          cmykTransferY[256],
          cmykTransferK[256];
   unsigned char deviceNTransfer[SPOT_NCOMPS+4][256];
-#endif
   unsigned int overprintMask;
   bool overprintAdditive;
 

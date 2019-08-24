@@ -863,11 +863,7 @@ namespace Poppler {
     }
 
     bool isOverprintPreviewAvailable() {
-#ifdef SPLASH_CMYK
         return true;
-#else
-        return false;
-#endif
    }
 
 }

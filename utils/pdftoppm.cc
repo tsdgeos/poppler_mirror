@@ -97,9 +97,7 @@ static GooString jpegOpt;
 static int jpegQuality = -1;
 static bool jpegProgressive = false;
 static bool jpegOptimize = false;
-#ifdef SPLASH_CMYK
 static bool overprint = false;
-#endif
 static char enableFreeTypeStr[16] = "";
 static char antialiasStr[16] = "";
 static char vectorAntialiasStr[16] = "";
@@ -170,17 +168,13 @@ static const ArgDesc argDesc[] = {
 #ifdef ENABLE_LIBJPEG
   {"-jpeg",   argFlag,     &jpeg,           0,
    "generate a JPEG file"},
-#ifdef SPLASH_CMYK
   {"-jpegcmyk",argFlag,    &jpegcmyk,       0,
    "generate a CMYK JPEG file"},
-#endif
   {"-jpegopt",  argGooString, &jpegOpt,    0,
    "jpeg options, with format <opt1>=<val1>[,<optN>=<valN>]*"},
 #endif
-#ifdef SPLASH_CMYK
   {"-overprint",argFlag,   &overprint,      0,
    "enable overprint"},
-#endif
 #ifdef ENABLE_LIBTIFF
   {"-tiff",    argFlag,     &tiff,           0,
    "generate a TIFF file"},
@@ -368,9 +362,7 @@ static void processPageJobs() {
     // process the job    
     SplashOutputDev *splashOut = new SplashOutputDev(mono ? splashModeMono1 :
                   gray ? splashModeMono8 :
-#ifdef SPLASH_CMYK
         			    (jpegcmyk || overprint) ? splashModeDeviceN8 :
-#endif
 		              splashModeRGB8, 4, false, *pageJob.paperColor, true, thinLineMode);
     splashOut->setFontAntialias(fontAntialias);
     splashOut->setVectorAntialias(vectorAntialias);
@@ -524,14 +516,11 @@ int main(int argc, char *argv[]) {
   }
 
   // write PPM files
-#ifdef SPLASH_CMYK
   if (jpegcmyk || overprint) {
     globalParams->setOverprintPreview(true);
     for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
       paperColor[cp] = 0;
-  } else 
-#endif
-  {
+  } else {
     paperColor[0] = 255;
     paperColor[1] = 255;
     paperColor[2] = 255;
@@ -541,9 +530,7 @@ int main(int argc, char *argv[]) {
 
   splashOut = new SplashOutputDev(mono ? splashModeMono1 :
 				    gray ? splashModeMono8 :
-#ifdef SPLASH_CMYK
 				    (jpegcmyk || overprint) ? splashModeDeviceN8 :
-#endif
 				             splashModeRGB8, 4,
 				  false, paperColor, true, thinLineMode);
 

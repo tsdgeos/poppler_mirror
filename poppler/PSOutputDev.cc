@@ -3268,14 +3268,12 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
     paperColor[0] = 0xff;
     splashOut = new SplashOutputDev(splashModeMono8, 1, false,
 				    paperColor, false);
-#ifdef SPLASH_CMYK
   } else if (level == psLevel1Sep || level == psLevel2Sep ||
 	     level == psLevel3Sep || globalParams->getOverprintPreview()) {
     numComps = 4;
     paperColor[0] = paperColor[1] = paperColor[2] = paperColor[3] = 0;
     splashOut = new SplashOutputDev(splashModeCMYK8, 1, false,
 				    paperColor, false);
-#endif
   } else {
     numComps = 3;
     paperColor[0] = paperColor[1] = paperColor[2] = 0xff;

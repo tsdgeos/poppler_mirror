@@ -58,25 +58,18 @@ typedef void (*SplashICCTransform)(void *data, SplashBitmap *bitmap);
 //------------------------------------------------------------------------
 
 enum SplashPipeResultColorCtrl {
-#ifdef SPLASH_CMYK
   splashPipeResultColorNoAlphaBlendCMYK,
   splashPipeResultColorNoAlphaBlendDeviceN,
-#endif
   splashPipeResultColorNoAlphaBlendRGB,
   splashPipeResultColorNoAlphaBlendMono,
   splashPipeResultColorAlphaNoBlendMono,
   splashPipeResultColorAlphaNoBlendRGB,
-#ifdef SPLASH_CMYK
   splashPipeResultColorAlphaNoBlendCMYK,
   splashPipeResultColorAlphaNoBlendDeviceN,
-#endif
   splashPipeResultColorAlphaBlendMono,
-  splashPipeResultColorAlphaBlendRGB
-#ifdef SPLASH_CMYK
-  ,
+  splashPipeResultColorAlphaBlendRGB,
   splashPipeResultColorAlphaBlendCMYK,
   splashPipeResultColorAlphaBlendDeviceN
-#endif
 };
 
 //------------------------------------------------------------------------
@@ -297,19 +290,15 @@ private:
   void pipeRunSimpleRGB8(SplashPipe *pipe);
   void pipeRunSimpleXBGR8(SplashPipe *pipe);
   void pipeRunSimpleBGR8(SplashPipe *pipe);
-#ifdef SPLASH_CMYK
   void pipeRunSimpleCMYK8(SplashPipe *pipe);
   void pipeRunSimpleDeviceN8(SplashPipe *pipe);
-#endif
   void pipeRunAAMono1(SplashPipe *pipe);
   void pipeRunAAMono8(SplashPipe *pipe);
   void pipeRunAARGB8(SplashPipe *pipe);
   void pipeRunAAXBGR8(SplashPipe *pipe);
   void pipeRunAABGR8(SplashPipe *pipe);
-#ifdef SPLASH_CMYK
   void pipeRunAACMYK8(SplashPipe *pipe);
   void pipeRunAADeviceN8(SplashPipe *pipe);
-#endif
   void pipeSetXY(SplashPipe *pipe, int x, int y);
   void pipeIncX(SplashPipe *pipe);
   void drawPixel(SplashPipe *pipe, int x, int y, bool noClip);

@@ -98,9 +98,7 @@ public:
   void getPixel(int x, int y, SplashColorPtr pixel);
   void getRGBLine(int y, SplashColorPtr line);
   void getXBGRLine(int y, SplashColorPtr line, ConversionMode conversionMode = conversionOpaque);
-#ifdef SPLASH_CMYK
   void getCMYKLine(int y, SplashColorPtr line);
-#endif
   unsigned char getAlpha(int x, int y);
 
   // Caller takes ownership of the bitmap data.  The SplashBitmap

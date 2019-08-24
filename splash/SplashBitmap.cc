@@ -89,7 +89,6 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
       rowSize = -1;
     }
     break;
-#ifdef SPLASH_CMYK
   case splashModeCMYK8:
     if (width > 0 && width <= INT_MAX / 4) {
       rowSize = width * 4;
@@ -104,7 +103,6 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
       rowSize = -1;
     }
     break;
-#endif
   }
   if (rowSize > 0) {
     rowSize += rowPad - 1;
@@ -249,14 +247,12 @@ SplashError SplashBitmap::writePNMFile(FILE *f) {
     }
     break;
 
-#ifdef SPLASH_CMYK
   case splashModeCMYK8:
   case splashModeDeviceN8:
     // PNM doesn't support CMYK
     error(errInternal, -1, "unsupported SplashBitmap mode");
     return splashErrGeneric;
     break;
-#endif
   }
   return splashOk;
 }
@@ -310,7 +306,6 @@ void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel) {
     pixel[1] = p[1];
     pixel[2] = p[0];
     break;
-#ifdef SPLASH_CMYK
   case splashModeCMYK8:
     p = &data[y * rowSize + 4 * x];
     pixel[0] = p[0];
@@ -323,7 +318,6 @@ void SplashBitmap::getPixel(int x, int y, SplashColorPtr pixel) {
     for (int cp = 0; cp < SPOT_NCOMPS + 4; cp++)
       pixel[cp] = p[cp];
     break;
-#endif
   }
 }
 
@@ -379,12 +373,10 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
     #endif
 
     #ifdef ENABLE_LIBJPEG
-    #ifdef SPLASH_CMYK
     case splashFormatJpegCMYK:
       writer = new JpegWriter(JpegWriter::CMYK);
       setJpegParams(writer, params);
       break;
-    #endif
     case splashFormatJpeg:
       writer = new JpegWriter();
       setJpegParams(writer, params);
@@ -406,12 +398,10 @@ SplashError SplashBitmap::writeImgFile(SplashImageFileFormat format, FILE *f, in
       case splashModeBGR8:
         writer = new TiffWriter(TiffWriter::RGB);
         break;
-#ifdef SPLASH_CMYK
       case splashModeCMYK8:
       case splashModeDeviceN8:
         writer = new TiffWriter(TiffWriter::CMYK);
         break;
-#endif
       default:
         fprintf(stderr, "TiffWriter: Mode %d not supported\n", mode);
         writer = new TiffWriter();
@@ -446,7 +436,6 @@ void SplashBitmap::getRGBLine(int yl, SplashColorPtr line) {
     m = byteToDbl(col[1]);
     y = byteToDbl(col[2]);
     k = byteToDbl(col[3]);
-#ifdef SPLASH_CMYK
     if (separationList->size() > 0) {
       for (std::size_t i = 0; i < separationList->size(); i++) {
         if (col[i+4] > 0) {
@@ -470,7 +459,6 @@ void SplashBitmap::getRGBLine(int yl, SplashColorPtr line) {
       if (y > 1) y = 1;
       if (k > 1) k = 1;
     }
-#endif
     c1 = 1 - c;
     m1 = 1 - m;
     y1 = 1 - y;
@@ -492,7 +480,6 @@ void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, ConversionMode conve
     m = byteToDbl(col[1]);
     y = byteToDbl(col[2]);
     k = byteToDbl(col[3]);
-#ifdef SPLASH_CMYK
     if (separationList->size() > 0) {
       for (std::size_t i = 0; i < separationList->size(); i++) {
         if (col[i+4] > 0) {
@@ -516,7 +503,6 @@ void SplashBitmap::getXBGRLine(int yl, SplashColorPtr line, ConversionMode conve
       if (y > 1) y = 1;
       if (k > 1) k = 1;
     }
-#endif
     c1 = 1 - c;
     m1 = 1 - m;
     y1 = 1 - y;
@@ -596,7 +582,6 @@ bool SplashBitmap::convertToXBGR(ConversionMode conversionMode) {
   return newdata != nullptr;
 }
 
-#ifdef SPLASH_CMYK
 void SplashBitmap::getCMYKLine(int yl, SplashColorPtr line) {
   SplashColor col;
 
@@ -636,13 +621,10 @@ void SplashBitmap::getCMYKLine(int yl, SplashColorPtr line) {
     *line++ = col[3];
   }
 }
-#endif
 
 SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int vDPI, SplashColorMode imageWriterFormat) {
   if (mode != splashModeRGB8 && mode != splashModeMono8 && mode != splashModeMono1 && mode != splashModeXBGR8 && mode != splashModeBGR8
-#ifdef SPLASH_CMYK
       && mode != splashModeCMYK8 && mode != splashModeDeviceN8
-#endif
      ) {
     error(errInternal, -1, "unsupported SplashBitmap mode");
     return splashErrGeneric;
@@ -653,7 +635,6 @@ SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int
   }
 
   switch (mode) {
-#ifdef SPLASH_CMYK
     case splashModeCMYK8:
       if (writer->supportCMYK()) {
         SplashColorPtr row;
@@ -704,7 +685,6 @@ SplashError SplashBitmap::writeImgFile(ImgWriter *writer, FILE *f, int hDPI, int
         delete[] row;
       }
     break;
-#endif
     case splashModeRGB8:
     {
       SplashColorPtr row;
