@@ -1870,7 +1870,7 @@ QString subject = m_doc->info("Subject");
     */
     QVector<int> formCalculateOrder() const;
 
-    void sign(Poppler::Annotation *pWhichAnnotation);
+    void sign(Poppler::Annotation *pWhichAnnotation, const QString &certCN, const QString &password);
 
     /**
      Returns the signatures of this document.

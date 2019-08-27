@@ -859,14 +859,14 @@ QDateTime convertDate(const char *dateString)
     return QDateTime();
 }
 
-void Document::sign(Poppler::Annotation *pWhichAnnotation)
+void Document::sign(Poppler::Annotation *pWhichAnnotation, const QString &certCN, const QString &password)
 {
     Poppler::WidgetAnnotation *wa = dynamic_cast<Poppler::WidgetAnnotation *>(pWhichAnnotation);
     FormWidget *formWidget = wa->getFormWidget();
 
     FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(formWidget);
-    // if (fws)
-    //    fws->signDocument("tmp.pdf", , "SHA256", pWhichAnnotation->, "no reason");
+    if (fws)
+        fws->signDocument("tmp.pdf", certCN.toUtf8().constData(), "SHA256", password.toUtf8().constData(), "no reason");
 }
 
 QDateTime convertDate(char *dateString)
