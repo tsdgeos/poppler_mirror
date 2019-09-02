@@ -9,7 +9,7 @@ before_script:
   - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
   - apt-get update
   - apt-get build-dep --yes --no-install-recommends poppler
-  - apt-get install --yes --no-install-recommends ninja-build libcurl4-openssl-dev git ca-certificates locales libc++-7-dev libc++abi-7-dev clang libgtk-3-dev
+  - apt-get install --yes --no-install-recommends ninja-build libcurl4-openssl-dev git ca-certificates locales libc++-dev libc++abi-dev clang libgtk-3-dev
   - echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
   - locale-gen
 
