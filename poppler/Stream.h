@@ -27,6 +27,7 @@
 // Copyright (C) 2013, 2018 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
+// Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -324,6 +325,63 @@ protected:
 
   Goffset length;
   Object dict;
+};
+
+//------------------------------------------------------------------------
+// BaseInputStream
+//------------------------------------------------------------------------
+
+class BaseSeekInputStream: public BaseStream {
+public:
+
+  // This enum is used to tell the seek() method how it must reposition
+  // the stream offset.
+  enum SeekType {
+    SeekSet, // the offset is set to offset bytes
+    SeekCur, // the offset is set to its current location plus offset bytes
+    SeekEnd  // the offset is set to the size of the stream plus offset bytes
+  };
+
+  BaseSeekInputStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA);
+  ~BaseSeekInputStream() override;
+  StreamKind getKind() const override { return strWeird; }
+  void reset() override;
+  void close() override;
+  int getChar() override
+    { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
+  int lookChar() override
+    { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
+  Goffset getPos() override { return bufPos + (bufPtr - buf); }
+  void setPos(Goffset pos, int dir = 0) override;
+  Goffset getStart() override { return start; }
+  void moveStart(Goffset delta) override;
+
+  int getUnfilteredChar() override { return getChar(); }
+  void unfilteredReset() override { reset(); }
+
+protected:
+
+  Goffset start;
+  bool limited;
+
+private:
+
+  bool fillBuf();
+
+  bool hasGetChars() override { return true; }
+  int getChars(int nChars, unsigned char *buffer) override;
+
+  virtual Goffset currentPos() const = 0;
+  virtual void setCurrentPos(Goffset offset) = 0;
+  virtual Goffset read(char *buf, Goffset size) = 0;
+
+  static constexpr int seekInputStreamBufSize = 1024;
+  char buf[seekInputStreamBufSize];
+  char *bufPtr;
+  char *bufEnd;
+  Goffset bufPos;
+  Goffset savePos;
+  bool saved;
 };
 
 //------------------------------------------------------------------------

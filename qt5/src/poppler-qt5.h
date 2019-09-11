@@ -20,6 +20,7 @@
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
  * Copyright (C) 2019 Jan Grulich <jgrulich@redhat.com>
+ * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1241,6 +1242,34 @@ delete it;
 			      const QByteArray &ownerPassword=QByteArray(),
 			      const QByteArray &userPassword=QByteArray());
 	
+	/**
+	   Load the document from a device
+
+	   \param device the device of the data to load
+	   \param ownerPassword the Latin1-encoded owner password to use in
+	   loading the file
+	   \param userPassword the Latin1-encoded user ("open") password
+	   to use in loading the file
+
+	   \return the loaded document, or NULL on error
+
+	   \note The caller owns the pointer to Document, and this should
+	   be deleted when no longer required.
+
+	   \note The ownership of the device stays with the caller.
+
+	   \note if the file is on disk it is recommended to use the other load overload
+	   since it is less resource intensive
+
+	   \warning The returning document may be locked if a password is required
+	   to open the file, and one is not provided (as the userPassword).
+
+	   \since 0.85
+	*/
+	static Document *load(QIODevice *device,
+			      const QByteArray &ownerPassword=QByteArray(),
+			      const QByteArray &userPassword=QByteArray());
+
 	/**
 	   Load the document from memory
 

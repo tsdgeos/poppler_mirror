@@ -11,7 +11,20 @@ public:
     TestActualText(QObject *parent = nullptr) : QObject(parent) { }
 private slots:
     void checkActualText1();
+    void checkActualText2();
+private:
+    void checkActualText(Poppler::Document *doc);
 };
+
+void TestActualText::checkActualText(Poppler::Document *doc)
+{
+    Poppler::Page *page = doc->page(0);
+    QVERIFY( page );
+
+    QCOMPARE( page->text(QRectF()), QLatin1String("The slow brown fox jumps over the black dog.") );
+
+    delete page;
+}
 
 void TestActualText::checkActualText1()
 {
@@ -19,12 +32,21 @@ void TestActualText::checkActualText1()
     doc = Poppler::Document::load(TESTDATADIR "/unittestcases/WithActualText.pdf");
     QVERIFY( doc );
 
-    Poppler::Page *page = doc->page(0);
-    QVERIFY( page );
+    checkActualText(doc);
 
-    QCOMPARE( page->text(QRectF()), QLatin1String("The slow brown fox jumps over the black dog.") );
+    delete doc;
+}
 
-    delete page;
+void TestActualText::checkActualText2()
+{
+    QFile file(TESTDATADIR "/unittestcases/WithActualText.pdf");
+    QVERIFY(file.open(QIODevice::ReadOnly));
+
+    Poppler::Document *doc;
+    doc = Poppler::Document::load(&file);
+    QVERIFY( doc );
+
+    checkActualText(doc);
 
     delete doc;
 }

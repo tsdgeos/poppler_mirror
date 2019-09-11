@@ -29,6 +29,7 @@ set(poppler_qt5_SRCS
   poppler-pdf-converter.cc
   poppler-private.cc
   poppler-ps-converter.cc
+  poppler-qiodeviceinstream.cc
   poppler-qiodeviceoutstream.cc
   poppler-sound.cc
   poppler-textbox.cc

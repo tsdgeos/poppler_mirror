@@ -16,6 +16,7 @@
  * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2019 Jan Grulich <jgrulich@redhat.com>
+ * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -57,6 +58,7 @@
 
 #include "poppler-qt5.h"
 #include "poppler-embeddedfile-private.h"
+#include "poppler-qiodeviceinstream-private.h"
 
 class LinkDest;
 class FormWidget;
@@ -99,6 +101,7 @@ namespace Poppler {
 	GlobalParamsIniter(qt5ErrorFunction)
 	    {
 		init();
+		m_device = nullptr;
 		m_filePath = filePath;	
 
 #ifdef _WIN32
@@ -112,9 +115,21 @@ namespace Poppler {
 		delete userPassword;
 	    }
 	
+	DocumentData(QIODevice *device, GooString *ownerPassword, GooString *userPassword) :
+	GlobalParamsIniter(qt5ErrorFunction)
+	    {
+		m_device = device;
+		QIODeviceInStream *str = new QIODeviceInStream(device, 0, false, device->size(), Object(objNull));
+		init();
+		doc = new PDFDoc(str, ownerPassword, userPassword);
+		delete ownerPassword;
+		delete userPassword;
+	    }
+
 	DocumentData(const QByteArray &data, GooString *ownerPassword, GooString *userPassword) :
 	GlobalParamsIniter(qt5ErrorFunction)
 	    {
+		m_device = nullptr;
 		fileContents = data;
 		MemStream *str = new MemStream((char*)fileContents.data(), 0, fileContents.length(), Object(objNull));
 		init();
@@ -153,6 +168,7 @@ namespace Poppler {
 
 	PDFDoc *doc;
 	QString m_filePath;
+	QIODevice *m_device;
 	QByteArray fileContents;
 	bool locked;
 	Document::RenderBackend m_backend;
