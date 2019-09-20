@@ -3134,6 +3134,13 @@ public:
 	  scaledWidth = MAX_PRINT_IMAGE_SIZE * (double)width/height;
 	}
 	needsCustomDownscaling = true;
+
+        if (scaledWidth == 0) {
+          scaledWidth = 1;
+        }
+        if (scaledHeight == 0) {
+          scaledHeight = 1;
+        }
       } else {
 	needsCustomDownscaling = false;
       }
