@@ -435,7 +435,7 @@ private:
   void writePS(const char *s);
   void writePSBuf(const char *s, int len);
   void writePSFmt(const char *fmt, ...);
-  void writePSString(const GooString *s);
+  void writePSString(const std::string &s);
   void writePSName(const char *s);
   GooString *filterPSLabel(GooString *label, bool *needParens=nullptr);
   void writePSTextLine(const GooString *s);

@@ -682,7 +682,7 @@ private:
 class GfxDeviceNColorSpace: public GfxColorSpace {
 public:
 
-  GfxDeviceNColorSpace(int nCompsA, GooString **namesA,
+  GfxDeviceNColorSpace(int nCompsA, std::vector<std::string> &&namesA,
 		       GfxColorSpace *alt, Function *func, std::vector<GfxSeparationColorSpace*> *sepsCS);
   ~GfxDeviceNColorSpace();
   GfxColorSpace *copy() override;
@@ -704,19 +704,18 @@ public:
   bool isNonMarking() const override { return nonMarking; }
 
   // DeviceN-specific access.
-  const GooString *getColorantName(int i) const { return names[i]; }
+  const std::string &getColorantName(int i) const { return names[i]; }
   GfxColorSpace *getAlt() { return alt; }
   Function *getTintTransformFunc() { return func; }
 
 private:
 
-  GfxDeviceNColorSpace(int nCompsA, GooString **namesA,
+  GfxDeviceNColorSpace(int nCompsA, const std::vector<std::string> &namesA,
 		       GfxColorSpace *alt, Function *func, std::vector<GfxSeparationColorSpace*> *sepsCSA,
 		       int *mappingA, bool nonMarkingA, unsigned int overprintMaskA);
 
-  int nComps;			// number of components
-  GooString			// colorant names
-    *names[gfxColorMaxComps];
+  const int nComps;			// number of components
+  const std::vector<std::string> names;	// colorant names
   GfxColorSpace *alt;		// alternate color space
   Function *func;		// tint transform (into alternate color space)
   bool nonMarking;

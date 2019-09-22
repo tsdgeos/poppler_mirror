@@ -17,7 +17,7 @@
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
-// Copyright (C) 2008-2010, 2012, 2014, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012, 2014, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015, 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -164,6 +164,7 @@ public:
 
   // Compare two strings:  -1:<  0:=  +1:>
   int cmp(const GooString *str) const { return compare(*str); }
+  int cmp(const std::string &str) const { return compare(str); }
   int cmpN(GooString *str, int n) const { return compare(0, n, *str); }
   int cmp(const char *sA) const { return compare(sA); }
   int cmpN(const char *sA, int n) const { return compare(0, n, sA); }
