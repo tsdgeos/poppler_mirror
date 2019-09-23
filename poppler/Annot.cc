@@ -3864,6 +3864,12 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i,
   double w = 0.0;
   int uLen, n;
   double dx, dy, ox, oy;
+
+  if (width != nullptr)
+    *width = 0.0;
+  if (charCount != nullptr)
+    *charCount = 0;
+
   if (!text) {
     return;
   }
@@ -4022,11 +4028,6 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i,
   if (width != nullptr || charCount != nullptr) {
     const char *s = outBuf->c_str();
     int len = outBuf->getLength();
-
-    if (width != nullptr)
-      *width = 0.0;
-    if (charCount != nullptr)
-      *charCount = 0;
 
     while (len > 0) {
       dx = 0.0;
