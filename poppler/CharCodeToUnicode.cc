@@ -603,7 +603,7 @@ int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode **u) {
   return 0;
 }
 
-int CharCodeToUnicode::mapToCharCode(Unicode* u, CharCode *c, int usize) const {
+int CharCodeToUnicode::mapToCharCode(const Unicode* u, CharCode *c, int usize) const {
   //look for charcode in map
   if (usize == 1 || (usize > 1 && !(*u & ~0xff))) {
     if (isIdentity) {

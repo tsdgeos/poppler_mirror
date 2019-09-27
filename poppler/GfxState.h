@@ -806,8 +806,8 @@ public:
 private:
 
   GfxTilingPattern(int paintTypeA, int tilingTypeA,
-		   double *bboxA, double xStepA, double yStepA,
-		   Object *resDictA, double *matrixA,
+		   const double *bboxA, double xStepA, double yStepA,
+		   Object *resDictA, const double *matrixA,
 		   Object *contentStreamA, int patternRefNumA);
 
   int paintType;
@@ -836,7 +836,7 @@ public:
 
 private:
 
-  GfxShadingPattern(GfxShading *shadingA, double *matrixA, int patternRefNumA);
+  GfxShadingPattern(GfxShading *shadingA, const double *matrixA, int patternRefNumA);
 
   GfxShading *shading;
   double matrix[6];
@@ -943,7 +943,7 @@ public:
 
   GfxFunctionShading(double x0A, double y0A,
 		     double x1A, double y1A,
-		     double *matrixA,
+		     const double *matrixA,
 		     Function **funcsA, int nFuncsA);
   GfxFunctionShading(GfxFunctionShading *shading);
   ~GfxFunctionShading();
@@ -1206,17 +1206,17 @@ public:
   bool useDeviceNLine() const { return (colorSpace2 && colorSpace2->useGetDeviceNLine ()) || (!colorSpace2 && colorSpace->useGetDeviceNLine ()); }
 
   // Convert an image pixel to a color.
-  void getGray(unsigned char *x, GfxGray *gray);
-  void getRGB(unsigned char *x, GfxRGB *rgb);
+  void getGray(const unsigned char *x, GfxGray *gray);
+  void getRGB(const unsigned char *x, GfxRGB *rgb);
   void getRGBLine(unsigned char *in, unsigned int *out, int length);
   void getRGBLine(unsigned char *in, unsigned char *out, int length);
   void getRGBXLine(unsigned char *in, unsigned char *out, int length);
   void getGrayLine(unsigned char *in, unsigned char *out, int length);
   void getCMYKLine(unsigned char *in, unsigned char *out, int length);
   void getDeviceNLine(unsigned char *in, unsigned char *out, int length);
-  void getCMYK(unsigned char *x, GfxCMYK *cmyk);
-  void getDeviceN(unsigned char *x, GfxColor *deviceN);
-  void getColor(unsigned char *x, GfxColor *color);
+  void getCMYK(const unsigned char *x, GfxCMYK *cmyk);
+  void getDeviceN(const unsigned char *x, GfxColor *deviceN);
+  void getColor(const unsigned char *x, GfxColor *color);
 
   // Matte color ops
   void setMatteColor(const GfxColor *color) { useMatte = true; matteColor = *color; }

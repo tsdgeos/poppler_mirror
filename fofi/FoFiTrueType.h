@@ -125,7 +125,7 @@ public:
   // name (so we don't need to depend on the 'name' table in the
   // font).  The <cidMap> array maps CIDs to GIDs; it has <nCIDs>
   // entries.  (Not useful for OpenType CFF fonts.)
-  void convertToCIDType2(const char *psName, int *cidMap, int nCIDs,
+  void convertToCIDType2(const char *psName, const int *cidMap, int nCIDs,
 			 bool needVerticalMetrics,
 			 FoFiOutputFunc outputFunc, void *outputStream) const;
 
@@ -169,7 +169,7 @@ private:
 		   FoFiOutputFunc outputFunc,
 		   void *outputStream) const;
   void cvtCharStrings(char **encoding,
-		      int *codeToGID,
+		      const int *codeToGID,
 		      FoFiOutputFunc outputFunc,
 		      void *outputStream) const;
   void cvtSfnts(FoFiOutputFunc outputFunc,

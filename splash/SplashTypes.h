@@ -85,6 +85,7 @@ constexpr std::size_t splashMaxColorComps = SPOT_NCOMPS+4;
 
 typedef unsigned char SplashColor[splashMaxColorComps];
 typedef unsigned char *SplashColorPtr;
+typedef const unsigned char *SplashColorConstPtr;
 
 // RGB8
 static inline unsigned char splashRGB8R(SplashColorPtr rgb8) { return rgb8[0]; }
@@ -118,7 +119,7 @@ static inline void splashClearColor(SplashColorPtr dest) {
     dest[i] = 0;
 }
 
-static inline void splashColorCopy(SplashColorPtr dest, SplashColorPtr src) {
+static inline void splashColorCopy(SplashColorPtr dest, SplashColorConstPtr src) {
   dest[0] = src[0];
   dest[1] = src[1];
   dest[2] = src[2];
@@ -127,7 +128,7 @@ static inline void splashColorCopy(SplashColorPtr dest, SplashColorPtr src) {
     dest[i] = src[i];
 }
 
-static inline void splashColorXor(SplashColorPtr dest, SplashColorPtr src) {
+static inline void splashColorXor(SplashColorPtr dest, SplashColorConstPtr src) {
   dest[0] ^= src[0];
   dest[1] ^= src[1];
   dest[2] ^= src[2];

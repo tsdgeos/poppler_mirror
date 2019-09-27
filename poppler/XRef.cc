@@ -733,7 +733,7 @@ bool XRef::readXRefStream(Stream *xrefStr, Goffset *pos) {
   return more;
 }
 
-bool XRef::readXRefStreamSection(Stream *xrefStr, int *w, int first, int n) {
+bool XRef::readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n) {
   unsigned long long offset, gen;
   int type, c, i, j;
 

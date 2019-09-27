@@ -37,18 +37,18 @@
 #include "Decrypt.h"
 #include "Error.h"
 
-static void rc4InitKey(unsigned char *key, int keyLen, unsigned char *state);
+static void rc4InitKey(const unsigned char *key, int keyLen, unsigned char *state);
 static unsigned char rc4DecryptByte(unsigned char *state, unsigned char *x, unsigned char *y, unsigned char c);
 
 static bool aesReadBlock(Stream  *str, unsigned char *in, bool addPadding);
 
-static void aesKeyExpansion(DecryptAESState *s, unsigned char *objKey, int objKeyLen, bool decrypt);
-static void aesEncryptBlock(DecryptAESState *s, unsigned char *in);
-static void aesDecryptBlock(DecryptAESState *s, unsigned char *in, bool last);
+static void aesKeyExpansion(DecryptAESState *s, const unsigned char *objKey, int objKeyLen, bool decrypt);
+static void aesEncryptBlock(DecryptAESState *s, const unsigned char *in);
+static void aesDecryptBlock(DecryptAESState *s, const unsigned char *in, bool last);
 
-static void aes256KeyExpansion(DecryptAES256State *s, unsigned char *objKey, int objKeyLen, bool decrypt);
-static void aes256EncryptBlock(DecryptAES256State *s, unsigned char *in);
-static void aes256DecryptBlock(DecryptAES256State *s, unsigned char *in, bool last);
+static void aes256KeyExpansion(DecryptAES256State *s, const unsigned char *objKey, int objKeyLen, bool decrypt);
+static void aes256EncryptBlock(DecryptAES256State *s, const unsigned char *in);
+static void aes256DecryptBlock(DecryptAES256State *s, const unsigned char *in, bool last);
 
 static void sha256(unsigned char *msg, int msgLen, unsigned char *hash);
 static void sha384(unsigned char *msg, int msgLen, unsigned char *hash);
@@ -574,7 +574,7 @@ int DecryptStream::lookChar() {
 // RC4-compatible decryption
 //------------------------------------------------------------------------
 
-static void rc4InitKey(unsigned char *key, int keyLen, unsigned char *state) {
+static void rc4InitKey(const unsigned char *key, int keyLen, unsigned char *state) {
   unsigned char index1, index2;
   unsigned char t;
   int i;
@@ -925,7 +925,7 @@ static inline void invMixColumnsW(unsigned int *w) {
   }
 }
 
-static inline void addRoundKey(unsigned char *state, unsigned int *w) {
+static inline void addRoundKey(unsigned char *state, const unsigned int *w) {
   int c;
 
   for (c = 0; c < 4; ++c) {
@@ -937,7 +937,7 @@ static inline void addRoundKey(unsigned char *state, unsigned int *w) {
 }
 
 static void aesKeyExpansion(DecryptAESState *s,
-			    unsigned char *objKey, int /*objKeyLen*/, bool decrypt) {
+			    const unsigned char *objKey, int /*objKeyLen*/, bool decrypt) {
   unsigned int temp;
   int i, round;
 
@@ -963,7 +963,7 @@ static void aesKeyExpansion(DecryptAESState *s,
   }
 }
 
-static void aesEncryptBlock(DecryptAESState *s, unsigned char *in) {
+static void aesEncryptBlock(DecryptAESState *s, const unsigned char *in) {
   int c, round;
 
   // initial state (input is xor'd with previous output because of CBC)
@@ -1000,7 +1000,7 @@ static void aesEncryptBlock(DecryptAESState *s, unsigned char *in) {
   s->bufIdx = 0;
 }
 
-static void aesDecryptBlock(DecryptAESState *s, unsigned char *in, bool last) {
+static void aesDecryptBlock(DecryptAESState *s, const unsigned char *in, bool last) {
   int c, round, n, i;
 
   // initial state
@@ -1059,7 +1059,7 @@ static void aesDecryptBlock(DecryptAESState *s, unsigned char *in, bool last) {
 //------------------------------------------------------------------------
 
 static void aes256KeyExpansion(DecryptAES256State *s,
-			       unsigned char *objKey, int objKeyLen, bool decrypt) {
+			       const unsigned char *objKey, int objKeyLen, bool decrypt) {
   unsigned int temp;
   int i, round;
 
@@ -1087,7 +1087,7 @@ static void aes256KeyExpansion(DecryptAES256State *s,
   }
 }
 
-static void aes256EncryptBlock(DecryptAES256State *s, unsigned char *in) {
+static void aes256EncryptBlock(DecryptAES256State *s, const unsigned char *in) {
   int c, round;
 
   // initial state (input is xor'd with previous output because of CBC)
@@ -1124,7 +1124,7 @@ static void aes256EncryptBlock(DecryptAES256State *s, unsigned char *in) {
   s->bufIdx = 0;
 }
 
-static void aes256DecryptBlock(DecryptAES256State *s, unsigned char *in, bool last) {
+static void aes256DecryptBlock(DecryptAES256State *s, const unsigned char *in, bool last) {
   int c, round, n, i;
 
   // initial state
@@ -1411,7 +1411,7 @@ static inline unsigned int sha256sigma1(unsigned int x) {
   return rotr(x, 17) ^ rotr(x, 19) ^ (x >> 10);
 }
 
-static void sha256HashBlock(unsigned char *blk, unsigned int *H) {
+static void sha256HashBlock(const unsigned char *blk, unsigned int *H) {
   unsigned int W[64];
   unsigned int a, b, c, d, e, f, g, h;
   unsigned int T1, T2;
@@ -1561,7 +1561,7 @@ static inline uint64_t sha512sigma1(uint64_t x) {
   return rotr(x, 19) ^ rotr(x, 61) ^ (x >> 6);
 }
 
-static void sha512HashBlock(unsigned char *blk, uint64_t *H) {
+static void sha512HashBlock(const unsigned char *blk, uint64_t *H) {
   uint64_t W[80];
   uint64_t a, b, c, d, e, f, g, h;
   uint64_t T1, T2;

@@ -1507,7 +1507,7 @@ void HtmlOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 
 void HtmlOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			      int width, int height, GfxImageColorMap *colorMap,
-			      bool interpolate, int *maskColors, bool inlineImg) {
+			      bool interpolate, const int *maskColors, bool inlineImg) {
 
   if (ignore||(complexMode && !xml)) {
     OutputDev::drawImage(state, ref, str, width, height, colorMap, interpolate,

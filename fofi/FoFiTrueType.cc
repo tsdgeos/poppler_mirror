@@ -572,7 +572,7 @@ void FoFiTrueType::convertToType1(const char *psName, const char **newEncoding,
 }
 
 void FoFiTrueType::convertToCIDType2(const char *psName,
-				     int *cidMap, int nCIDs,
+				     const int *cidMap, int nCIDs,
 				     bool needVerticalMetrics,
 				     FoFiOutputFunc outputFunc,
 				     void *outputStream) const {
@@ -880,7 +880,7 @@ void FoFiTrueType::cvtEncoding(char **encoding,
 }
 
 void FoFiTrueType::cvtCharStrings(char **encoding,
-				  int *codeToGID,
+				  const int *codeToGID,
 				  FoFiOutputFunc outputFunc,
 				  void *outputStream) const {
   const char *name;

@@ -76,7 +76,7 @@ bool parseDateString(const char *dateString, int *year, int *month, int *day, in
    return false;
 }
 
-GooString *timeToDateString(time_t *timeA)
+GooString *timeToDateString(const time_t *timeA)
 {
   const time_t timet = timeA ? *timeA : time(nullptr);
 

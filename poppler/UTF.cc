@@ -431,7 +431,7 @@ struct Ascii7Map
 };
 
 void unicodeToAscii7(Unicode *in, int len, Unicode **ucs4_out,
-                     int *out_len, int *in_idx, int **indices)
+                     int *out_len, const int *in_idx, int **indices)
 {
   static Ascii7Map uMap;
   int *idx = nullptr;

@@ -221,7 +221,7 @@ public:
 
   void drawImage(GfxState *state, Object *ref, Stream *str,
 		 int width, int height, GfxImageColorMap *colorMap,
-		 bool interpolate, int *maskColors, bool inlineImg) override;
+		 bool interpolate, const int *maskColors, bool inlineImg) override;
   void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str,
 			   int width, int height,
 			   GfxImageColorMap *colorMap,
@@ -469,7 +469,7 @@ public:
 		     bool interpolate, bool inlineImg) override;
   void drawImage(GfxState *state, Object *ref, Stream *str,
 		 int width, int height, GfxImageColorMap *colorMap,
-		 bool interpolate, int *maskColors, bool inlineImg) override;
+		 bool interpolate, const int *maskColors, bool inlineImg) override;
   void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str,
 			   int width, int height,
 			   GfxImageColorMap *colorMap,

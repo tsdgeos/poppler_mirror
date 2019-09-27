@@ -306,7 +306,7 @@ public:
   void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) override;
   void drawImage(GfxState *state, Object *ref, Stream *str,
 			 int width, int height, GfxImageColorMap *colorMap,
-			 bool interpolate, int *maskColors, bool inlineImg) override;
+			 bool interpolate, const int *maskColors, bool inlineImg) override;
   void drawMaskedImage(GfxState *state, Object *ref, Stream *str,
 			       int width, int height,
 			       GfxImageColorMap *colorMap,

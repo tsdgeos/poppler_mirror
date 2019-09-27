@@ -2831,7 +2831,7 @@ struct SplashOutImageData {
   ImageStream *imgStr;
   GfxImageColorMap *colorMap;
   SplashColorPtr lookup;
-  int *maskColors;
+  const int *maskColors;
   SplashColorMode colorMode;
   int width, height, y;
   ImageStream *maskStr;
@@ -3317,7 +3317,7 @@ void SplashOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 				int width, int height,
 				GfxImageColorMap *colorMap,
 				bool interpolate,
-				int *maskColors, bool inlineImg) {
+				const int *maskColors, bool inlineImg) {
   SplashCoord mat[6];
   SplashOutImageData imgData;
   SplashColorMode srcMode;

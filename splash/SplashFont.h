@@ -46,7 +46,7 @@ class SplashPath;
 class SplashFont {
 public:
 
-  SplashFont(SplashFontFile *fontFileA, SplashCoord *matA,
+  SplashFont(SplashFontFile *fontFileA, const SplashCoord *matA,
 	     const SplashCoord *textMatA, bool aaA);
 
   // This must be called after the constructor, so that the subclass
@@ -61,7 +61,7 @@ public:
   SplashFontFile *getFontFile() { return fontFile; }
 
   // Return true if <this> matches the specified font file and matrix.
-  bool matches(SplashFontFile *fontFileA, SplashCoord *matA,
+  bool matches(SplashFontFile *fontFileA, const SplashCoord *matA,
 		const SplashCoord *textMatA) const {
     return fontFileA == fontFile &&
            matA[0] == mat[0] && matA[1] == mat[1] &&

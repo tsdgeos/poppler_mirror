@@ -5247,7 +5247,7 @@ void PSOutputDev::unsetSoftMaskFromImageMask(GfxState * state, double *baseMatri
 
 void PSOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			    int width, int height, GfxImageColorMap *colorMap,
-			    bool interpolate, int *maskColors, bool inlineImg) {
+			    bool interpolate, const int *maskColors, bool inlineImg) {
   int len;
 
   len = height * ((width * colorMap->getNumPixelComps() *
@@ -5314,7 +5314,7 @@ void PSOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
 void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
 			    bool invert, bool inlineImg,
 			    Stream *str, int width, int height, int len,
-			    int *maskColors, Stream *maskStr,
+			    const int *maskColors, Stream *maskStr,
 			    int maskWidth, int maskHeight, bool maskInvert) {
   ImageStream *imgStr;
   unsigned char pixBuf[gfxColorMaxComps];
@@ -5470,7 +5470,7 @@ void PSOutputDev::doImageL1(Object *ref, GfxImageColorMap *colorMap,
 void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
 			       bool invert, bool inlineImg,
 			       Stream *str, int width, int height, int len,
-			       int *maskColors, Stream *maskStr,
+			       const int *maskColors, Stream *maskStr,
 			       int maskWidth, int maskHeight, bool maskInvert) {
   ImageStream *imgStr;
   unsigned char *lineBuf;
@@ -5696,7 +5696,7 @@ void PSOutputDev::maskToClippingPath(Stream *maskStr, int maskWidth, int maskHei
 void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
 			    bool invert, bool inlineImg,
 			    Stream *str, int width, int height, int len,
-			    int *maskColors, Stream *maskStr,
+			    const int *maskColors, Stream *maskStr,
 			    int maskWidth, int maskHeight, bool maskInvert) {
   Stream *str2;
   ImageStream *imgStr;
@@ -6176,7 +6176,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
 void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
 			    bool invert, bool inlineImg,
 			    Stream *str, int width, int height, int len,
-			    int *maskColors, Stream *maskStr,
+			    const int *maskColors, Stream *maskStr,
 			    int maskWidth, int maskHeight, bool maskInvert) {
   Stream *str2;
   GooString *s;

@@ -242,7 +242,7 @@ private:
   int resize(int newSize);
   bool readXRef(Goffset *pos, std::vector<Goffset> *followedXRefStm, std::vector<int> *xrefStreamObjsNum);
   bool readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *followedXRefStm, std::vector<int> *xrefStreamObjsNum);
-  bool readXRefStreamSection(Stream *xrefStr, int *w, int first, int n);
+  bool readXRefStreamSection(Stream *xrefStr, const int *w, int first, int n);
   bool readXRefStream(Stream *xrefStr, Goffset *pos);
   bool constructXRef(bool *wasReconstructed, bool needCatalogDict = false);
   bool parseEntry(Goffset offset, XRefEntry *entry);

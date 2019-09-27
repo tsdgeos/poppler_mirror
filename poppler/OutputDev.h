@@ -299,7 +299,7 @@ public:
   virtual void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix);
   virtual void drawImage(GfxState *state, Object *ref, Stream *str,
 			 int width, int height, GfxImageColorMap *colorMap,
-			 bool interpolate, int *maskColors, bool inlineImg);
+			 bool interpolate, const int *maskColors, bool inlineImg);
   virtual void drawMaskedImage(GfxState *state, Object *ref, Stream *str,
 			       int width, int height,
 			       GfxImageColorMap *colorMap, bool interpolate,

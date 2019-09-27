@@ -489,7 +489,7 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
   (*outputFunc)(outputStream, "cleartomark\n", 12);
 }
 
-void FoFiType1C::convertToCIDType0(const char *psName, int *codeMap, int nCodes,
+void FoFiType1C::convertToCIDType0(const char *psName, const int *codeMap, int nCodes,
 				   FoFiOutputFunc outputFunc,
 				   void *outputStream) {
   int *cidMap;
@@ -834,7 +834,7 @@ void FoFiType1C::convertToCIDType0(const char *psName, int *codeMap, int nCodes,
   gfree(cidMap);
 }
 
-void FoFiType1C::convertToType0(const char *psName, int *codeMap, int nCodes,
+void FoFiType1C::convertToType0(const char *psName, const int *codeMap, int nCodes,
 				FoFiOutputFunc outputFunc,
 				void *outputStream) {
   int *cidMap;

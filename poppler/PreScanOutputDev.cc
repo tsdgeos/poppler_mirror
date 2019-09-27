@@ -218,7 +218,7 @@ void PreScanOutputDev::drawImageMask(GfxState *state, Object * /*ref*/, Stream *
 void PreScanOutputDev::drawImage(GfxState *state, Object * /*ref*/, Stream *str,
 				 int width, int height,
 				 GfxImageColorMap *colorMap,
-				 bool /*interpolate*/, int * /*maskColors*/, bool inlineImg) {
+				 bool /*interpolate*/, const int * /*maskColors*/, bool inlineImg) {
   GfxColorSpace *colorSpace;
   int i, j;
 

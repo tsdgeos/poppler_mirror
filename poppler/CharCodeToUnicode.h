@@ -91,7 +91,7 @@ public:
   int mapToUnicode(CharCode c, Unicode **u);
 
   // Map a Unicode to CharCode.
-  int mapToCharCode(Unicode* u, CharCode *c, int usize) const;
+  int mapToCharCode(const Unicode* u, CharCode *c, int usize) const;
 
   // Return the mapping's length, i.e., one more than the max char
   // code supported by the mapping.
