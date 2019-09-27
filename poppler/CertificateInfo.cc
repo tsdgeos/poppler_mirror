@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@gmail.com>
-// Copyright 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
@@ -21,14 +21,14 @@ X509CertificateInfo::PublicKeyInfo::PublicKeyInfo() :
 {
 }
 
-X509CertificateInfo::PublicKeyInfo::PublicKeyInfo(X509CertificateInfo::PublicKeyInfo &&other)
+X509CertificateInfo::PublicKeyInfo::PublicKeyInfo(X509CertificateInfo::PublicKeyInfo &&other) noexcept
 {
   publicKey = std::move(other.publicKey);
   publicKeyType = other.publicKeyType;
   publicKeyStrength = other.publicKeyStrength;
 }
 
-X509CertificateInfo::PublicKeyInfo &X509CertificateInfo::PublicKeyInfo::operator=(X509CertificateInfo::PublicKeyInfo &&other)
+X509CertificateInfo::PublicKeyInfo &X509CertificateInfo::PublicKeyInfo::operator=(X509CertificateInfo::PublicKeyInfo &&other) noexcept
 {
   publicKey = std::move(other.publicKey);
   publicKeyType = other.publicKeyType;
@@ -40,9 +40,18 @@ X509CertificateInfo::EntityInfo::EntityInfo() = default;
 
 X509CertificateInfo::EntityInfo::~EntityInfo() = default;
 
-X509CertificateInfo::EntityInfo::EntityInfo(X509CertificateInfo::EntityInfo &&other) = default;
+X509CertificateInfo::EntityInfo::EntityInfo(X509CertificateInfo::EntityInfo &&other) noexcept = default;
 
-X509CertificateInfo::EntityInfo &X509CertificateInfo::EntityInfo::operator=(X509CertificateInfo::EntityInfo &&other) = default;
+// TODO when we stop supporting gcc 5.4 use this instead of the manually defined one
+// X509CertificateInfo::EntityInfo &X509CertificateInfo::EntityInfo::operator=(X509CertificateInfo::EntityInfo &&other) noexcept = default;
+X509CertificateInfo::EntityInfo &X509CertificateInfo::EntityInfo::operator=(X509CertificateInfo::EntityInfo &&other) noexcept
+{
+  commonName = std::move(other.commonName);
+  distinguishedName = std::move(other.distinguishedName);
+  email = std::move(other.email);
+  organization = std::move(other.organization);
+  return *this;
+}
 
 X509CertificateInfo::X509CertificateInfo() :
   ku_extensions(KU_NONE),

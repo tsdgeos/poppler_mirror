@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
+ * Copyright (C) 2019, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +42,7 @@ public:
     };
 
     ~destination();
-    destination(destination &&other);
+    destination(destination &&other) noexcept;
 
     type_enum type() const;
     int page_number() const;
@@ -54,7 +55,7 @@ public:
     bool is_change_top() const;
     bool is_change_zoom() const;
 
-    destination& operator=(destination &&other);
+    destination& operator=(destination &&other) noexcept;
 
 private:
     destination(destination_private *dd);

@@ -183,13 +183,13 @@ public:
 
   template<typename T> Object(T) = delete;
 
-  Object(Object&& other)
+  Object(Object&& other) noexcept
   {
     std::memcpy(reinterpret_cast<void*>(this), &other, sizeof(Object));
     other.type = objDead;
   }
 
-  Object& operator=(Object&& other)
+  Object& operator=(Object&& other) noexcept
   {
     free();
 

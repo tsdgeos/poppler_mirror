@@ -173,7 +173,7 @@ destination::destination(destination_private *dd)
 /**
  Move constructor.
  */
-destination::destination(destination &&other)
+destination::destination(destination &&other) noexcept
 {
     *this = std::move(other);
 }
@@ -270,7 +270,7 @@ bool destination::is_change_zoom() const
 /**
  Move assignment operator.
  */
-destination& destination::operator=(destination &&other)
+destination& destination::operator=(destination &&other) noexcept
 {
     if (this != &other) {
         d = other.d;
