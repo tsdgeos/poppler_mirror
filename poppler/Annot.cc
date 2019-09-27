@@ -4084,7 +4084,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
   GooString convertedText;
   const GfxFont *font;
   double dx, dy;
-  double fontSize, fontSize2, borderWidth, x, xPrev, y, w, wMax;
+  double fontSize, borderWidth, x, xPrev, y, w, wMax;
   int tfPos, tmPos, j;
   int rot;
   bool freeText = false;      // true if text should be freed before return
@@ -4415,9 +4415,11 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
       // compute font autosize
       if (fontSize == 0) {
         fontSize = dy - 2 * borderWidth;
-        fontSize2 = (dx - 4 - 2 * borderWidth) / w;
-        if (fontSize2 < fontSize) {
-          fontSize = fontSize2;
+        if (w > 0) {
+          const double fontSize2 = (dx - 4 - 2 * borderWidth) / w;
+          if (fontSize2 < fontSize) {
+            fontSize = fontSize2;
+          }
         }
         fontSize = floor(fontSize);
         if (tfPos >= 0) {
@@ -4499,7 +4501,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
   GooString *tok;
   GooString convertedText;
   const GfxFont *font;
-  double fontSize, fontSize2, borderWidth, x, y, w, wMax;
+  double fontSize, borderWidth, x, y, w, wMax;
   int tfPos, tmPos, i, j;
 
   //~ if there is no MK entry, this should use the existing content stream,
@@ -4585,7 +4587,7 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
       }
     }
     fontSize = rect->y2 - rect->y1 - 2 * borderWidth;
-    fontSize2 = (rect->x2 - rect->x1 - 4 - 2 * borderWidth) / wMax;
+    const double fontSize2 = (rect->x2 - rect->x1 - 4 - 2 * borderWidth) / wMax;
     if (fontSize2 < fontSize) {
       fontSize = fontSize2;
     }
