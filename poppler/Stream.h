@@ -1065,7 +1065,7 @@ struct FlateCode {
 };
 
 struct FlateHuffmanTab {
-  FlateCode *codes;
+  const FlateCode *codes;
   int maxLen;
 };
 
@@ -1140,7 +1140,7 @@ private:
   bool startBlock();
   void loadFixedCodes();
   bool readDynamicCodes();
-  void compHuffmanCodes(int *lengths, int n, FlateHuffmanTab *tab);
+  FlateCode *compHuffmanCodes(const int *lengths, int n, int *maxLen);
   int getHuffmanCodeWord(FlateHuffmanTab *tab);
   int getCodeWord(int bits);
 };

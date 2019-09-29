@@ -4433,7 +4433,7 @@ static const FlateCode flateFixedLitCodeTabCodes[512] = {
 };
 
 FlateHuffmanTab FlateStream::fixedLitCodeTab = {
-  const_cast<FlateCode*>(flateFixedLitCodeTabCodes), 9
+  flateFixedLitCodeTabCodes, 9
 };
 
 static const FlateCode flateFixedDistCodeTabCodes[32] = {
@@ -4472,7 +4472,7 @@ static const FlateCode flateFixedDistCodeTabCodes[32] = {
 };
 
 FlateHuffmanTab FlateStream::fixedDistCodeTab = {
-  const_cast<FlateCode*>(flateFixedDistCodeTabCodes), 5
+  flateFixedDistCodeTabCodes, 5
 };
 
 FlateStream::FlateStream(Stream *strA, int predictor, int columns,
@@ -4494,10 +4494,10 @@ FlateStream::FlateStream(Stream *strA, int predictor, int columns,
 
 FlateStream::~FlateStream() {
   if (litCodeTab.codes != fixedLitCodeTab.codes) {
-    gfree(litCodeTab.codes);
+    gfree(const_cast<FlateCode *>(litCodeTab.codes));
   }
   if (distCodeTab.codes != fixedDistCodeTab.codes) {
-    gfree(distCodeTab.codes);
+    gfree(const_cast<FlateCode *>(distCodeTab.codes));
   }
   if (pred) {
     delete pred;
@@ -4685,11 +4685,11 @@ bool FlateStream::startBlock() {
 
   // free the code tables from the previous block
   if (litCodeTab.codes != fixedLitCodeTab.codes) {
-    gfree(litCodeTab.codes);
+    gfree(const_cast<FlateCode *>(litCodeTab.codes));
   }
   litCodeTab.codes = nullptr;
   if (distCodeTab.codes != fixedDistCodeTab.codes) {
-    gfree(distCodeTab.codes);
+    gfree(const_cast<FlateCode *>(distCodeTab.codes));
   }
   distCodeTab.codes = nullptr;
 
@@ -4791,7 +4791,7 @@ bool FlateStream::readDynamicCodes() {
       goto err;
     }
   }
-  compHuffmanCodes(codeLenCodeLengths, flateMaxCodeLenCodes, &codeLenCodeTab);
+  codeLenCodeTab.codes = compHuffmanCodes(codeLenCodeLengths, flateMaxCodeLenCodes, &codeLenCodeTab.maxLen);
 
   // build the literal and distance code tables
   len = 0;
@@ -4840,44 +4840,44 @@ bool FlateStream::readDynamicCodes() {
       codeLengths[i++] = len = code;
     }
   }
-  compHuffmanCodes(codeLengths, numLitCodes, &litCodeTab);
-  compHuffmanCodes(codeLengths + numLitCodes, numDistCodes, &distCodeTab);
+  litCodeTab.codes = compHuffmanCodes(codeLengths, numLitCodes, &litCodeTab.maxLen);
+  distCodeTab.codes = compHuffmanCodes(codeLengths + numLitCodes, numDistCodes, &distCodeTab.maxLen);
 
-  gfree(codeLenCodeTab.codes);
+  gfree(const_cast<FlateCode *>(codeLenCodeTab.codes));
   return true;
 
 err:
   error(errSyntaxError, getPos(), "Bad dynamic code table in flate stream");
-  gfree(codeLenCodeTab.codes);
+  gfree(const_cast<FlateCode *>(codeLenCodeTab.codes));
   return false;
 }
 
 // Convert an array <lengths> of <n> lengths, in value order, into a
 // Huffman code lookup table.
-void FlateStream::compHuffmanCodes(int *lengths, int n, FlateHuffmanTab *tab) {
-  int tabSize, len, code, code2, skip, val, i, t;
+FlateCode *FlateStream::compHuffmanCodes(const int *lengths, int n, int *maxLen) {
+  int len, code, code2, skip, val, i, t;
 
   // find max code length
-  tab->maxLen = 0;
+  *maxLen = 0;
   for (val = 0; val < n; ++val) {
-    if (lengths[val] > tab->maxLen) {
-      tab->maxLen = lengths[val];
+    if (lengths[val] > *maxLen) {
+      *maxLen = lengths[val];
     }
   }
 
   // allocate the table
-  tabSize = 1 << tab->maxLen;
-  tab->codes = (FlateCode *)gmallocn(tabSize, sizeof(FlateCode));
+  const int tabSize = 1 << *maxLen;
+  FlateCode *codes = (FlateCode *)gmallocn(tabSize, sizeof(FlateCode));
 
   // clear the table
   for (i = 0; i < tabSize; ++i) {
-    tab->codes[i].len = 0;
-    tab->codes[i].val = 0;
+    codes[i].len = 0;
+    codes[i].val = 0;
   }
 
   // build the table
   for (len = 1, code = 0, skip = 2;
-       len <= tab->maxLen;
+       len <= *maxLen;
        ++len, code <<= 1, skip <<= 1) {
     for (val = 0; val < n; ++val) {
       if (lengths[val] == len) {
@@ -4892,18 +4892,20 @@ void FlateStream::compHuffmanCodes(int *lengths, int n, FlateHuffmanTab *tab) {
 
 	// fill in the table entries
 	for (i = code2; i < tabSize; i += skip) {
-	  tab->codes[i].len = (unsigned short)len;
-	  tab->codes[i].val = (unsigned short)val;
+	  codes[i].len = (unsigned short)len;
+	  codes[i].val = (unsigned short)val;
 	}
 
 	++code;
       }
     }
   }
+  
+  return codes;
 }
 
 int FlateStream::getHuffmanCodeWord(FlateHuffmanTab *tab) {
-  FlateCode *code;
+  const FlateCode *code;
   int c;
 
   while (codeSize < tab->maxLen) {
