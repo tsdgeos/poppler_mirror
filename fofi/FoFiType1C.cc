@@ -17,6 +17,7 @@
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

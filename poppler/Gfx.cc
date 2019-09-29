@@ -43,6 +43,7 @@
 // Copyright (C) 2018 Denis Onishchenko <denis.onischenko@gmail.com>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

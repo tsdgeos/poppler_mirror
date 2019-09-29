@@ -26,6 +26,7 @@
 // Copyright (C) 2013 Peter Breitenlohner <peb@mppmu.mpg.de>
 // Copyright (C) 2013, 2018 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

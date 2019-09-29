@@ -36,6 +36,7 @@
 // Copyright (C) 2017 Kay Dohmann <k.dohmann@gmx.net>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
