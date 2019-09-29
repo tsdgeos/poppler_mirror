@@ -107,7 +107,7 @@ FoFiType1C::~FoFiType1C() {
       charset != fofiType1CISOAdobeCharset &&
       charset != fofiType1CExpertCharset &&
       charset != fofiType1CExpertSubsetCharset) {
-    gfree(charset);
+    gfree(const_cast<unsigned short *>(charset));
   }
 }
 
@@ -2503,25 +2503,25 @@ bool FoFiType1C::readCharset() {
   int nLeft, i, j;
 
   if (topDict.charsetOffset == 0) {
-    charset = const_cast<unsigned short*>(fofiType1CISOAdobeCharset);
+    charset = fofiType1CISOAdobeCharset;
     charsetLength = sizeof(fofiType1CISOAdobeCharset) / sizeof(unsigned short);
   } else if (topDict.charsetOffset == 1) {
-    charset = const_cast<unsigned short*>(fofiType1CExpertCharset);
+    charset = fofiType1CExpertCharset;
     charsetLength = sizeof(fofiType1CExpertCharset) / sizeof(unsigned short);
   } else if (topDict.charsetOffset == 2) {
-    charset = const_cast<unsigned short*>(fofiType1CExpertSubsetCharset);
+    charset = fofiType1CExpertSubsetCharset;
     charsetLength = sizeof(fofiType1CExpertSubsetCharset) / sizeof(unsigned short);
   } else {
-    charset = (unsigned short *)gmallocn(nGlyphs, sizeof(unsigned short));
+    unsigned short *customCharset = (unsigned short *)gmallocn(nGlyphs, sizeof(unsigned short));
     charsetLength = nGlyphs;
     for (i = 0; i < nGlyphs; ++i) {
-      charset[i] = 0;
+      customCharset[i] = 0;
     }
     pos = topDict.charsetOffset;
     charsetFormat = getU8(pos++, &parsedOk);
     if (charsetFormat == 0) {
       for (i = 1; i < nGlyphs; ++i) {
-	charset[i] = (unsigned short)getU16BE(pos, &parsedOk);
+	customCharset[i] = (unsigned short)getU16BE(pos, &parsedOk);
 	pos += 2;
 	if (!parsedOk) {
 	  break;
@@ -2537,7 +2537,7 @@ bool FoFiType1C::readCharset() {
 	  break;
 	}
 	for (j = 0; j <= nLeft && i < nGlyphs; ++j) {
-	  charset[i++] = (unsigned short)c++;
+	  customCharset[i++] = (unsigned short)c++;
 	}
       }
     } else if (charsetFormat == 2) {
@@ -2551,16 +2551,17 @@ bool FoFiType1C::readCharset() {
 	  break;
 	}
 	for (j = 0; j <= nLeft && i < nGlyphs; ++j) {
-	  charset[i++] = (unsigned short)c++;
+	  customCharset[i++] = (unsigned short)c++;
 	}
       }
     }
     if (!parsedOk) {
-      gfree(charset);
+      gfree(customCharset);
       charset = nullptr;
       charsetLength = 0;
       return false;
     }
+    charset = customCharset;
   }
   return true;
 }

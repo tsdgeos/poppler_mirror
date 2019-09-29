@@ -246,7 +246,7 @@ private:
   int nGlyphs;
   int nFDs;
   unsigned char *fdSelect;
-  unsigned short *charset;
+  const unsigned short *charset;
   unsigned short charsetLength;
   int gsubrBias;
 
