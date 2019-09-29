@@ -4,6 +4,7 @@
 //
 // Copyright 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright 2019 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -69,7 +70,7 @@ PdfInspector::PdfInspector(void)
   
   builder = gtk_builder_new ();
 
-  if (!gtk_builder_add_from_file (builder, "./pdf-inspector.ui", &error))
+  if (!gtk_builder_add_from_file (builder, SRC_DIR "/pdf-inspector.ui", &error))
   {
     g_warning ("Couldn't load builder file: %s", error->message);
     g_error_free (error);
