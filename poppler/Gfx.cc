@@ -133,7 +133,7 @@
 // Operator table
 //------------------------------------------------------------------------
 
-Operator Gfx::opTab[] = {
+const Operator Gfx::opTab[] = {
   {"\"",  3, {tchkNum,    tchkNum,    tchkString},
           &Gfx::opMoveSetShowText},
   {"'",   1, {tchkString},
@@ -823,7 +823,7 @@ void Gfx::go(bool topLevel) {
 }
 
 void Gfx::execOp(Object *cmd, Object args[], int numArgs) {
-  Operator *op;
+  const Operator *op;
   Object *argPtr;
   int i;
 
@@ -870,7 +870,7 @@ void Gfx::execOp(Object *cmd, Object args[], int numArgs) {
   (this->*op->func)(argPtr, numArgs);
 }
 
-Operator *Gfx::findOp(const char *name) {
+const Operator *Gfx::findOp(const char *name) {
   int a, b, m, cmp;
 
   a = -1;

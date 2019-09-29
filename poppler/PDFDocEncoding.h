@@ -27,7 +27,7 @@
 
 class GooString;
 
-extern Unicode pdfDocEncoding[256];
+extern const Unicode pdfDocEncoding[256];
 
 char* pdfDocEncodingToUTF16 (const GooString* orig, int* length);
 

@@ -1124,11 +1124,11 @@ private:
   bool endOfBlock;		// set when end of block is reached
   bool eof;			// set when end of stream is reached
 
-  static int			// code length code reordering
+  static const int		// code length code reordering
     codeLenCodeMap[flateMaxCodeLenCodes];
-  static FlateDecode		// length decoding info
+  static const FlateDecode	// length decoding info
     lengthDecode[flateMaxLitCodes-257];
-  static FlateDecode		// distance decoding info
+  static const FlateDecode	// distance decoding info
     distDecode[flateMaxDistCodes];
   static FlateHuffmanTab	// fixed literal code table
     fixedLitCodeTab;

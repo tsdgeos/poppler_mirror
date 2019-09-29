@@ -3845,11 +3845,11 @@ bool DCTStream::isBinary(bool last) {
 // FlateStream
 //------------------------------------------------------------------------
 
-int FlateStream::codeLenCodeMap[flateMaxCodeLenCodes] = {
+const int FlateStream::codeLenCodeMap[flateMaxCodeLenCodes] = {
   16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15
 };
 
-FlateDecode FlateStream::lengthDecode[flateMaxLitCodes-257] = {
+const FlateDecode FlateStream::lengthDecode[flateMaxLitCodes-257] = {
   {0,   3},
   {0,   4},
   {0,   5},
@@ -3883,7 +3883,7 @@ FlateDecode FlateStream::lengthDecode[flateMaxLitCodes-257] = {
   {0, 258}
 };
 
-FlateDecode FlateStream::distDecode[flateMaxDistCodes] = {
+const FlateDecode FlateStream::distDecode[flateMaxDistCodes] = {
   { 0,     1},
   { 0,     2},
   { 0,     3},
@@ -3916,7 +3916,7 @@ FlateDecode FlateStream::distDecode[flateMaxDistCodes] = {
   {13, 24577}
 };
 
-static FlateCode flateFixedLitCodeTabCodes[512] = {
+static const FlateCode flateFixedLitCodeTabCodes[512] = {
   {7, 0x0100},
   {8, 0x0050},
   {8, 0x0010},
@@ -4432,10 +4432,10 @@ static FlateCode flateFixedLitCodeTabCodes[512] = {
 };
 
 FlateHuffmanTab FlateStream::fixedLitCodeTab = {
-  flateFixedLitCodeTabCodes, 9
+  const_cast<FlateCode*>(flateFixedLitCodeTabCodes), 9
 };
 
-static FlateCode flateFixedDistCodeTabCodes[32] = {
+static const FlateCode flateFixedDistCodeTabCodes[32] = {
   {5, 0x0000},
   {5, 0x0010},
   {5, 0x0008},
@@ -4471,7 +4471,7 @@ static FlateCode flateFixedDistCodeTabCodes[32] = {
 };
 
 FlateHuffmanTab FlateStream::fixedDistCodeTab = {
-  flateFixedDistCodeTabCodes, 5
+  const_cast<FlateCode*>(flateFixedDistCodeTabCodes), 5
 };
 
 FlateStream::FlateStream(Stream *strA, int predictor, int columns,

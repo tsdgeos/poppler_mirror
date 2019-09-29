@@ -103,10 +103,10 @@ private:
   int decodeIntBit(JArithmeticDecoderStats *stats);
   void byteIn();
 
-  static unsigned int qeTab[47];
-  static int nmpsTab[47];
-  static int nlpsTab[47];
-  static int switchTab[47];
+  static const unsigned int qeTab[47];
+  static const int nmpsTab[47];
+  static const int nlpsTab[47];
+  static const int switchTab[47];
 
   unsigned int buf0, buf1;
   unsigned int c, a;

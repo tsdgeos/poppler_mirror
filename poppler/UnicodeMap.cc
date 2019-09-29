@@ -139,11 +139,11 @@ UnicodeMap::UnicodeMap(GooString *encodingNameA) {
 }
 
 UnicodeMap::UnicodeMap(const char *encodingNameA, bool unicodeOutA,
-		       UnicodeMapRange *rangesA, int lenA) {
+		       const UnicodeMapRange *rangesA, int lenA) {
   encodingName = new GooString(encodingNameA);
   unicodeOut = unicodeOutA;
   kind = unicodeMapResident;
-  ranges = rangesA;
+  ranges = const_cast<UnicodeMapRange*>(rangesA);
   len = lenA;
   eMaps = nullptr;
   eMapsLen = 0;

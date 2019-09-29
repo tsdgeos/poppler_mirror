@@ -240,11 +240,11 @@ private:
     (*abortCheckCbk)(void *data);
   void *abortCheckCbkData;
 
-  static Operator opTab[];	// table of operators
+  static const Operator opTab[]; // table of operators
 
   void go(bool topLevel);
   void execOp(Object *cmd, Object args[], int numArgs);
-  Operator *findOp(const char *name);
+  const Operator *findOp(const char *name);
   bool checkArg(Object *arg, TchkType type);
   Goffset getPos();
 

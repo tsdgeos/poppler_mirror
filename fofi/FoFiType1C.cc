@@ -2502,13 +2502,13 @@ bool FoFiType1C::readCharset() {
   int nLeft, i, j;
 
   if (topDict.charsetOffset == 0) {
-    charset = fofiType1CISOAdobeCharset;
+    charset = const_cast<unsigned short*>(fofiType1CISOAdobeCharset);
     charsetLength = sizeof(fofiType1CISOAdobeCharset) / sizeof(unsigned short);
   } else if (topDict.charsetOffset == 1) {
-    charset = fofiType1CExpertCharset;
+    charset = const_cast<unsigned short*>(fofiType1CExpertCharset);
     charsetLength = sizeof(fofiType1CExpertCharset) / sizeof(unsigned short);
   } else if (topDict.charsetOffset == 2) {
-    charset = fofiType1CExpertSubsetCharset;
+    charset = const_cast<unsigned short*>(fofiType1CExpertSubsetCharset);
     charsetLength = sizeof(fofiType1CExpertSubsetCharset) / sizeof(unsigned short);
   } else {
     charset = (unsigned short *)gmallocn(nGlyphs, sizeof(unsigned short));

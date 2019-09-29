@@ -50,7 +50,7 @@ void JArithmeticDecoderStats::setEntry(unsigned int cx, int i, int mps) {
 // JArithmeticDecoder
 //------------------------------------------------------------------------
 
-unsigned int JArithmeticDecoder::qeTab[47] = {
+unsigned const int JArithmeticDecoder::qeTab[47] = {
   0x56010000, 0x34010000, 0x18010000, 0x0AC10000,
   0x05210000, 0x02210000, 0x56010000, 0x54010000,
   0x48010000, 0x38010000, 0x30010000, 0x24010000,
@@ -65,19 +65,19 @@ unsigned int JArithmeticDecoder::qeTab[47] = {
   0x00050000, 0x00010000, 0x56010000
 };
 
-int JArithmeticDecoder::nmpsTab[47] = {
+const int JArithmeticDecoder::nmpsTab[47] = {
    1,  2,  3,  4,  5, 38,  7,  8,  9, 10, 11, 12, 13, 29, 15, 16,
   17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
   33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 45, 46
 };
 
-int JArithmeticDecoder::nlpsTab[47] = {
+const int JArithmeticDecoder::nlpsTab[47] = {
    1,  6,  9, 12, 29, 33,  6, 14, 14, 14, 17, 18, 20, 21, 14, 14,
   15, 16, 17, 18, 19, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
   30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 46
 };
 
-int JArithmeticDecoder::switchTab[47] = {
+const int JArithmeticDecoder::switchTab[47] = {
   1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0

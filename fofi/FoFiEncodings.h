@@ -35,8 +35,8 @@ extern const char * const fofiType1ExpertEncoding[256];
 //------------------------------------------------------------------------
 
 extern const char *fofiType1CStdStrings[391];
-extern unsigned short fofiType1CISOAdobeCharset[229];
-extern unsigned short fofiType1CExpertCharset[166];
-extern unsigned short fofiType1CExpertSubsetCharset[87];
+extern const unsigned short fofiType1CISOAdobeCharset[229];
+extern const unsigned short fofiType1CExpertCharset[166];
+extern const unsigned short fofiType1CExpertSubsetCharset[87];
 
 #endif

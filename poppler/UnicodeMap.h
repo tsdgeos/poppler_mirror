@@ -61,7 +61,7 @@ public:
 
   // Create a resident UnicodeMap.
   UnicodeMap(const char *encodingNameA, bool unicodeOutA,
-	     UnicodeMapRange *rangesA, int lenA);
+	     const UnicodeMapRange *rangesA, int lenA);
 
   // Create a resident UnicodeMap that uses a function instead of a
   // list of ranges.

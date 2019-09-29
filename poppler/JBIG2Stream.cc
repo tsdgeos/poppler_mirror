@@ -63,7 +63,7 @@ struct JBIG2HuffmanTable {
   unsigned int prefix;
 };
 
-static JBIG2HuffmanTable huffTableA[] = {
+static const JBIG2HuffmanTable huffTableA[] = {
   {     0, 1,  4,              0x000 },
   {    16, 2,  8,              0x002 },
   {   272, 3, 16,              0x006 },
@@ -71,7 +71,7 @@ static JBIG2HuffmanTable huffTableA[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableB[] = {
+static const JBIG2HuffmanTable huffTableB[] = {
   {     0, 1,  0,              0x000 },
   {     1, 2,  0,              0x002 },
   {     2, 3,  0,              0x006 },
@@ -82,7 +82,7 @@ static JBIG2HuffmanTable huffTableB[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableC[] = {
+static const JBIG2HuffmanTable huffTableC[] = {
   {     0, 1,  0,              0x000 },
   {     1, 2,  0,              0x002 },
   {     2, 3,  0,              0x006 },
@@ -95,7 +95,7 @@ static JBIG2HuffmanTable huffTableC[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableD[] = {
+static const JBIG2HuffmanTable huffTableD[] = {
   {     1, 1,  0,              0x000 },
   {     2, 2,  0,              0x002 },
   {     3, 3,  0,              0x006 },
@@ -105,7 +105,7 @@ static JBIG2HuffmanTable huffTableD[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableE[] = {
+static const JBIG2HuffmanTable huffTableE[] = {
   {     1, 1,  0,              0x000 },
   {     2, 2,  0,              0x002 },
   {     3, 3,  0,              0x006 },
@@ -117,7 +117,7 @@ static JBIG2HuffmanTable huffTableE[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableF[] = {
+static const JBIG2HuffmanTable huffTableF[] = {
   {     0, 2,  7,              0x000 },
   {   128, 3,  7,              0x002 },
   {   256, 3,  8,              0x003 },
@@ -135,7 +135,7 @@ static JBIG2HuffmanTable huffTableF[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableG[] = {
+static const JBIG2HuffmanTable huffTableG[] = {
   {  -512, 3,  8,              0x000 },
   {   256, 3,  8,              0x001 },
   {   512, 3,  9,              0x002 },
@@ -154,7 +154,7 @@ static JBIG2HuffmanTable huffTableG[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableH[] = {
+static const JBIG2HuffmanTable huffTableH[] = {
   {     0, 2,  1,              0x000 },
   {     0, 2, jbig2HuffmanOOB, 0x001 },
   {     4, 3,  4,              0x004 },
@@ -179,7 +179,7 @@ static JBIG2HuffmanTable huffTableH[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableI[] = {
+static const JBIG2HuffmanTable huffTableI[] = {
   {     0, 2, jbig2HuffmanOOB, 0x000 },
   {    -1, 3,  1,              0x002 },
   {     1, 3,  1,              0x003 },
@@ -205,7 +205,7 @@ static JBIG2HuffmanTable huffTableI[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableJ[] = {
+static const JBIG2HuffmanTable huffTableJ[] = {
   {    -2, 2,  2,              0x000 },
   {     6, 2,  6,              0x001 },
   {     0, 2, jbig2HuffmanOOB, 0x002 },
@@ -230,7 +230,7 @@ static JBIG2HuffmanTable huffTableJ[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableK[] = {
+static const JBIG2HuffmanTable huffTableK[] = {
   {     1, 1,  0,              0x000 },
   {     2, 2,  1,              0x002 },
   {     4, 4,  0,              0x00c },
@@ -247,7 +247,7 @@ static JBIG2HuffmanTable huffTableK[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableL[] = {
+static const JBIG2HuffmanTable huffTableL[] = {
   {     1, 1,  0,              0x000 },
   {     2, 2,  0,              0x002 },
   {     3, 3,  1,              0x006 },
@@ -264,7 +264,7 @@ static JBIG2HuffmanTable huffTableL[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableM[] = {
+static const JBIG2HuffmanTable huffTableM[] = {
   {     1, 1,  0,              0x000 },
   {     2, 3,  0,              0x004 },
   {     7, 3,  3,              0x005 },
@@ -281,7 +281,7 @@ static JBIG2HuffmanTable huffTableM[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableN[] = {
+static const JBIG2HuffmanTable huffTableN[] = {
   {     0, 1,  0,              0x000 },
   {    -2, 3,  0,              0x004 },
   {    -1, 3,  0,              0x005 },
@@ -290,7 +290,7 @@ static JBIG2HuffmanTable huffTableN[] = {
   {     0, 0, jbig2HuffmanEOT, 0     }
 };
 
-static JBIG2HuffmanTable huffTableO[] = {
+static const JBIG2HuffmanTable huffTableO[] = {
   {     0, 1,  0,              0x000 },
   {    -1, 3,  0,              0x004 },
   {     1, 3,  0,              0x005 },
@@ -321,7 +321,7 @@ public:
   void reset();
 
   // Returns false for OOB, otherwise sets *<x> and returns true.
-  bool decodeInt(int *x, JBIG2HuffmanTable *table);
+  bool decodeInt(int *x, const JBIG2HuffmanTable *table);
 
   unsigned int readBits(unsigned int n);
   unsigned int readBit();
@@ -350,7 +350,7 @@ void JBIG2HuffmanDecoder::reset() {
 }
 
 //~ optimize this
-bool JBIG2HuffmanDecoder::decodeInt(int *x, JBIG2HuffmanTable *table) {
+bool JBIG2HuffmanDecoder::decodeInt(int *x, const JBIG2HuffmanTable *table) {
   unsigned int i, len, prefix;
 
   i = 0;
@@ -1559,8 +1559,8 @@ void JBIG2Stream::readSegments() {
 bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length,
 				     unsigned int *refSegs, unsigned int nRefSegs) {
   JBIG2SymbolDict *symbolDict;
-  JBIG2HuffmanTable *huffDHTable, *huffDWTable;
-  JBIG2HuffmanTable *huffBMSizeTable, *huffAggInstTable;
+  const JBIG2HuffmanTable *huffDHTable, *huffDWTable;
+  const JBIG2HuffmanTable *huffBMSizeTable, *huffAggInstTable;
   JBIG2Segment *seg;
   std::vector<JBIG2Segment*> *codeTables;
   JBIG2SymbolDict *inputSymbolDict;
@@ -2021,9 +2021,9 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
   JBIG2Bitmap *bitmap;
   JBIG2HuffmanTable runLengthTab[36];
   JBIG2HuffmanTable *symCodeTab = nullptr;
-  JBIG2HuffmanTable *huffFSTable, *huffDSTable, *huffDTTable;
-  JBIG2HuffmanTable *huffRDWTable, *huffRDHTable;
-  JBIG2HuffmanTable *huffRDXTable, *huffRDYTable, *huffRSizeTable;
+  const JBIG2HuffmanTable *huffFSTable, *huffDSTable, *huffDTTable;
+  const JBIG2HuffmanTable *huffRDWTable, *huffRDHTable;
+  const JBIG2HuffmanTable *huffRDXTable, *huffRDYTable, *huffRSizeTable;
   JBIG2Segment *seg;
   std::vector<JBIG2Segment*> *codeTables;
   JBIG2SymbolDict *symbolDict;
@@ -2340,20 +2340,20 @@ JBIG2Bitmap *JBIG2Stream::readTextRegion(bool huff, bool refine,
 					 unsigned int numInstances,
 					 unsigned int logStrips,
 					 int numSyms,
-					 JBIG2HuffmanTable *symCodeTab,
+					 const JBIG2HuffmanTable *symCodeTab,
 					 unsigned int symCodeLen,
 					 JBIG2Bitmap **syms,
 					 unsigned int defPixel, unsigned int combOp,
 					 unsigned int transposed, unsigned int refCorner,
 					 int sOffset,
-					 JBIG2HuffmanTable *huffFSTable,
-					 JBIG2HuffmanTable *huffDSTable,
-					 JBIG2HuffmanTable *huffDTTable,
-					 JBIG2HuffmanTable *huffRDWTable,
-					 JBIG2HuffmanTable *huffRDHTable,
-					 JBIG2HuffmanTable *huffRDXTable,
-					 JBIG2HuffmanTable *huffRDYTable,
-					 JBIG2HuffmanTable *huffRSizeTable,
+					 const JBIG2HuffmanTable *huffFSTable,
+					 const JBIG2HuffmanTable *huffDSTable,
+					 const JBIG2HuffmanTable *huffDTTable,
+					 const JBIG2HuffmanTable *huffRDWTable,
+					 const JBIG2HuffmanTable *huffRDHTable,
+					 const JBIG2HuffmanTable *huffRDXTable,
+					 const JBIG2HuffmanTable *huffRDYTable,
+					 const JBIG2HuffmanTable *huffRSizeTable,
 					 unsigned int templ,
 					 int *atx, int *aty) {
   JBIG2Bitmap *bitmap;
