@@ -23,6 +23,7 @@
  * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+ * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1870,8 +1871,6 @@ QString subject = m_doc->info("Subject");
     */
     QVector<int> formCalculateOrder() const;
 
-    void sign(Poppler::Annotation *pWhichAnnotation, const QString &certCN, const QString &password);
-
     /**
      Returns the signatures of this document.
 
@@ -2129,6 +2128,21 @@ public:
       The currently set options for the PDF export.
      */
     PDFOptions pdfOptions() const;
+
+    /**
+               Sign PDF at given Annotation / signature form
+
+               \param pWhichAnnotation ptr to signature form
+               \param certCN Common Name of cert to sign (aka nickname)
+               \param digestName if empty, defaults to SHA256. otherwise specifies digest algo
+               \param password password for cert
+               \param reason optional reason for the signature
+
+               \return whether the signing succeeded
+
+               \since 0.81
+            */
+    bool sign(Poppler::Annotation *pWhichAnnotation, const QString &certCN, const QString &digestName, const QString &password, const QString &reason);
 
     bool convert() override;
 

@@ -1,6 +1,7 @@
 /* poppler-pdf-converter.cc: qt interface to poppler
  * Copyright (C) 2008, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008, 2009, 2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -101,6 +102,26 @@ bool PDFConverter::convert()
     }
 
     return (errorCode == errNone);
+}
+
+bool PDFConverter::sign(Poppler::Annotation *pWhichAnnotation, const QString &certCN, const QString &digestName, const QString &password, const QString &reason)
+{
+    Q_D(PDFConverter);
+    d->lastError = NoError;
+
+    if (d->document->locked) {
+        d->lastError = FileLockedError;
+        return false;
+    }
+
+    Poppler::WidgetAnnotation *wa = dynamic_cast<Poppler::WidgetAnnotation *>(pWhichAnnotation);
+    FormWidget *formWidget = wa->getFormWidget();
+
+    FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(formWidget);
+    if (fws)
+        return fws->signDocument(d->outputFileName.toUtf8().constData(), certCN.toUtf8().constData(), digestName.isEmpty() ? "SHA256" : digestName.toUtf8().constData(), password.toUtf8().constData(), reason.toUtf8().constData());
+
+    return false;
 }
 
 }

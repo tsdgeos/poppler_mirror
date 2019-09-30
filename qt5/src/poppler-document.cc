@@ -17,6 +17,7 @@
  * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
  * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+ * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -857,16 +858,6 @@ QDateTime convertDate(const char *dateString)
         }
     }
     return QDateTime();
-}
-
-void Document::sign(Poppler::Annotation *pWhichAnnotation, const QString &certCN, const QString &password)
-{
-    Poppler::WidgetAnnotation *wa = dynamic_cast<Poppler::WidgetAnnotation *>(pWhichAnnotation);
-    FormWidget *formWidget = wa->getFormWidget();
-
-    FormWidgetSignature *fws = dynamic_cast<FormWidgetSignature *>(formWidget);
-    if (fws)
-        fws->signDocument("tmp.pdf", certCN.toUtf8().constData(), "SHA256", password.toUtf8().constData(), "no reason");
 }
 
 QDateTime convertDate(char *dateString)
