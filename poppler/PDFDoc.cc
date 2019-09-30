@@ -44,6 +44,7 @@
 // Copyright (C) 2018 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1306,15 +1307,6 @@ void PDFDoc::writeString(const GooString *s, OutStream *outStr, const unsigned c
             outStr->printf("%c", unescaped);
         }
         outStr->printf(") ");
-    } else if (s->hasASN1Marker()) {
-        // format ASN1 strings hex encoded and enclosed in <>
-        const char *c = s->c_str();
-        outStr->printf("<");
-        for (int i = 0; i < s->getLength(); i++) {
-            unsigned char value = *(c + i) & 0x000000ff;
-            outStr->printf("%2.2x", value);
-        }
-        outStr->printf("> ");
     } else {
         const char *c = s->c_str();
         outStr->printf("(");

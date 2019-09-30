@@ -28,6 +28,7 @@
 // Copyright 2019 Tomoyuki Kubota <himajin100000@gmail.com>
 // Copyright 2019 João Netto <joaonetto901@gmail.com>
 // Copyright 2020 Marek Kasik <mkasik@redhat.com>
+// Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 //
 //========================================================================
 
@@ -727,7 +728,7 @@ bool FormWidgetSignature::createSignature(Object &vObj, const GooString &name, c
     vObj.dictAdd("M", Object(date));
     if (reason.getLength() > 0)
         vObj.dictAdd("Reason", Object(reason.copy()));
-    vObj.dictAdd("Contents", Object(signature->copy()));
+    vObj.dictAdd("Contents", Object(objHexString, signature->copy()));
     Object bObj(new Array(xref));
     // reserve space in byte range for maximum number of bytes
     bObj.arrayAdd(Object(static_cast<long long>(0LL)));
