@@ -34,7 +34,7 @@
 // Copyright (C) 2015 Li Junling <lijunling@sina.com>
 // Copyright (C) 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright (C) 2015 André Esser <bepandre@hotmail.com>
-// Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+// Copyright (C) 2016, 2020 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2017 Jean Ghali <jghali@libertysurf.fr>
 // Copyright (C) 2017 Fredrik Fornwall <fredrik@fornwall.net>
 // Copyright (C) 2018 Ben Timby <btimby@gmail.com>
@@ -1373,6 +1373,15 @@ void PDFDoc::writeObject(Object *obj, OutStream *outStr, XRef *xRef, unsigned in
     case objString:
         writeString(obj->getString(), outStr, fileKey, encAlgorithm, keyLength, ref);
         break;
+    case objHexString: {
+        const GooString *s = obj->getHexString();
+        outStr->printf("<");
+        for (int i = 0; i < s->getLength(); i++) {
+            outStr->printf("%02x", s->getChar(i) & 0xff);
+        }
+        outStr->printf("> ");
+        break;
+    }
     case objName: {
         GooString name(obj->getName());
         GooString *nameToPrint = name.sanitizedName(false /* non ps mode */);

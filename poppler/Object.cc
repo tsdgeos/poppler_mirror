@@ -16,6 +16,7 @@
 // Copyright (C) 2008, 2010, 2012, 2017, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2020 Jakub Alba <jakubalba@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -36,7 +37,7 @@
 // Object
 //------------------------------------------------------------------------
 
-static const char *objTypeNames[numObjTypes] = { "boolean", "integer", "real", "string", "name", "null", "array", "dictionary", "stream", "ref", "cmd", "error", "eof", "none", "integer64", "dead" };
+static const char *objTypeNames[numObjTypes] = { "boolean", "integer", "real", "string", "name", "null", "array", "dictionary", "stream", "ref", "cmd", "error", "eof", "none", "integer64", "hexString", "dead" };
 
 Object Object::copy() const
 {
@@ -47,6 +48,7 @@ Object Object::copy() const
 
     switch (type) {
     case objString:
+    case objHexString:
         obj.string = string->copy();
         break;
     case objName:
@@ -80,6 +82,8 @@ void Object::free()
 {
     switch (type) {
     case objString:
+    case objHexString:
+
         delete string;
         break;
     case objName:
@@ -130,6 +134,13 @@ void Object::print(FILE *f) const
         fprintf(f, "(");
         fwrite(string->c_str(), 1, string->getLength(), f);
         fprintf(f, ")");
+        break;
+    case objHexString:
+        fprintf(f, "<");
+        for (i = 0; i < string->getLength(); i++) {
+            fprintf(f, "%02x", string->getChar(i) & 0xff);
+        }
+        fprintf(f, ">");
         break;
     case objName:
         fprintf(f, "/%s", cString);

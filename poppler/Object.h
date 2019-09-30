@@ -21,7 +21,7 @@
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013, 2017, 2018 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Adrian Perez de Castro <aperez@igalia.com>
-// Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
+// Copyright (C) 2016, 2020 Jakub Alba <jakubalba@gmail.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -151,10 +151,11 @@ enum ObjType
 
     // poppler-only objects
     objInt64, // integer with at least 64-bits
+    objHexString, // hex string
     objDead // and object after shallowCopy
 };
 
-constexpr int numObjTypes = 16; // total number of object types
+constexpr int numObjTypes = 17; // total number of object types
 
 //------------------------------------------------------------------------
 // Object
@@ -188,9 +189,16 @@ public:
         type = objString;
         string = stringA;
     }
+    Object(ObjType typeA, GooString *stringA)
+    {
+        assert(typeA == objName || typeA == objCmd || typeA == objHexString);
+        assert(stringA);
+        type = typeA;
+        string = stringA;
+    }
     Object(ObjType typeA, const char *stringA)
     {
-        assert(typeA == objName || typeA == objCmd);
+        assert(typeA == objName || typeA == objCmd || typeA == objHexString);
         assert(stringA);
         type = typeA;
         cString = copyString(stringA);
@@ -290,6 +298,11 @@ public:
     {
         CHECK_NOT_DEAD;
         return type == objString;
+    }
+    bool isHexString()
+    {
+        CHECK_NOT_DEAD;
+        return type == objHexString;
     }
     bool isName() const
     {
@@ -401,6 +414,17 @@ public:
         type = objDead;
         return string;
     }
+    const GooString *getHexString() const
+    {
+        OBJECT_TYPE_CHECK(objHexString);
+        return string;
+    }
+    GooString *takeHexString()
+    {
+        OBJECT_TYPE_CHECK(objHexString);
+        type = objDead;
+        return string;
+    }
     const char *getName() const
     {
         OBJECT_TYPE_CHECK(objName);
@@ -504,7 +528,7 @@ private:
         int intg; //   integer
         long long int64g; //   64-bit integer
         double real; //   real
-        GooString *string; //   string
+        GooString *string; // [hex] string
         char *cString; //   name or command, depending on objType
         Array *array; //   array
         Dict *dict; //   dictionary
