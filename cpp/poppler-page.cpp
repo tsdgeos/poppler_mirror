@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2017, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
@@ -300,8 +300,8 @@ text_box_data::~text_box_data() = default;
 
 text_box::~text_box() = default;
 
-text_box& text_box::operator=(text_box&& a) = default;
-text_box::text_box(text_box&& a) = default;
+text_box& text_box::operator=(text_box&& a) noexcept = default;
+text_box::text_box(text_box&& a) noexcept = default;
 
 text_box::text_box(text_box_data *data) : m_data{data}
 {

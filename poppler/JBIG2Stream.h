@@ -17,6 +17,7 @@
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -70,20 +71,20 @@ private:
 			      unsigned int numInstances,
 			      unsigned int logStrips,
 			      int numSyms,
-			      JBIG2HuffmanTable *symCodeTab,
+			      const JBIG2HuffmanTable *symCodeTab,
 			      unsigned int symCodeLen,
 			      JBIG2Bitmap **syms,
 			      unsigned int defPixel, unsigned int combOp,
 			      unsigned int transposed, unsigned int refCorner,
 			      int sOffset,
-			      JBIG2HuffmanTable *huffFSTable,
-			      JBIG2HuffmanTable *huffDSTable,
-			      JBIG2HuffmanTable *huffDTTable,
-			      JBIG2HuffmanTable *huffRDWTable,
-			      JBIG2HuffmanTable *huffRDHTable,
-			      JBIG2HuffmanTable *huffRDXTable,
-			      JBIG2HuffmanTable *huffRDYTable,
-			      JBIG2HuffmanTable *huffRSizeTable,
+			      const JBIG2HuffmanTable *huffFSTable,
+			      const JBIG2HuffmanTable *huffDSTable,
+			      const JBIG2HuffmanTable *huffDTTable,
+			      const JBIG2HuffmanTable *huffRDWTable,
+			      const JBIG2HuffmanTable *huffRDHTable,
+			      const JBIG2HuffmanTable *huffRDXTable,
+			      const JBIG2HuffmanTable *huffRDYTable,
+			      const JBIG2HuffmanTable *huffRSizeTable,
 			      unsigned int templ,
 			      int *atx, int *aty);
   void readPatternDictSeg(unsigned int segNum, unsigned int length);

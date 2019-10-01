@@ -3401,8 +3401,8 @@ GfxTilingPattern *GfxTilingPattern::parse(Object *patObj, int patternRefNum) {
 }
 
 GfxTilingPattern::GfxTilingPattern(int paintTypeA, int tilingTypeA,
-				   double *bboxA, double xStepA, double yStepA,
-				   Object *resDictA, double *matrixA,
+				   const double *bboxA, double xStepA, double yStepA,
+				   Object *resDictA, const double *matrixA,
 				   Object *contentStreamA, int patternRefNumA) :
   GfxPattern(1, patternRefNumA)
 {
@@ -3468,7 +3468,7 @@ GfxShadingPattern *GfxShadingPattern::parse(GfxResources *res, Object *patObj, O
   return new GfxShadingPattern(shadingA, matrixA, patternRefNum);
 }
 
-GfxShadingPattern::GfxShadingPattern(GfxShading *shadingA, double *matrixA, int patternRefNumA):
+GfxShadingPattern::GfxShadingPattern(GfxShading *shadingA, const double *matrixA, int patternRefNumA):
   GfxPattern(2, patternRefNumA)
 {
   int i;
@@ -3652,7 +3652,7 @@ bool GfxShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *s
 
 GfxFunctionShading::GfxFunctionShading(double x0A, double y0A,
 				       double x1A, double y1A,
-				       double *matrixA,
+				       const double *matrixA,
 				       Function **funcsA, int nFuncsA):
   GfxShading(1)
 {
@@ -5893,7 +5893,7 @@ GfxImageColorMap::~GfxImageColorMap() {
   gfree(byte_lookup);
 }
 
-void GfxImageColorMap::getGray(unsigned char *x, GfxGray *gray) {
+void GfxImageColorMap::getGray(const unsigned char *x, GfxGray *gray) {
   GfxColor color;
   int i;
 
@@ -5910,7 +5910,7 @@ void GfxImageColorMap::getGray(unsigned char *x, GfxGray *gray) {
   }
 }
 
-void GfxImageColorMap::getRGB(unsigned char *x, GfxRGB *rgb) {
+void GfxImageColorMap::getRGB(const unsigned char *x, GfxRGB *rgb) {
   GfxColor color;
   int i;
 
@@ -6191,7 +6191,7 @@ void GfxImageColorMap::getDeviceNLine(unsigned char *in, unsigned char *out, int
 
 }
 
-void GfxImageColorMap::getCMYK(unsigned char *x, GfxCMYK *cmyk) {
+void GfxImageColorMap::getCMYK(const unsigned char *x, GfxCMYK *cmyk) {
   GfxColor color;
   int i;
 
@@ -6208,7 +6208,7 @@ void GfxImageColorMap::getCMYK(unsigned char *x, GfxCMYK *cmyk) {
   }
 }
 
-void GfxImageColorMap::getDeviceN(unsigned char *x, GfxColor *deviceN) {
+void GfxImageColorMap::getDeviceN(const unsigned char *x, GfxColor *deviceN) {
   GfxColor color;
   int i;
 
@@ -6225,7 +6225,7 @@ void GfxImageColorMap::getDeviceN(unsigned char *x, GfxColor *deviceN) {
   }
 }
 
-void GfxImageColorMap::getColor(unsigned char *x, GfxColor *color) {
+void GfxImageColorMap::getColor(const unsigned char *x, GfxColor *color) {
   int maxPixel, i;
 
   maxPixel = (1 << bits) - 1;

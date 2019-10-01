@@ -12,7 +12,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
-// Copyright (C) 2007, 2011, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007, 2011, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010-2013, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -222,7 +222,7 @@ public:
 
   // Composite this Splash object onto a background color.  The
   // background alpha is assumed to be 1.
-  void compositeBackground(SplashColorPtr color);
+  void compositeBackground(SplashColorConstPtr color);
 
   // Copy a rectangular region from <src> onto the bitmap belonging to
   // this Splash object.  The destination alpha values are all set to
@@ -306,7 +306,7 @@ private:
   void drawAAPixel(SplashPipe *pipe, int x, int y);
   void drawSpan(SplashPipe *pipe, int x0, int x1, int y, bool noClip);
   void drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adjustLine = false, unsigned char lineOpacity = 0);
-  void transform(SplashCoord *matrix, SplashCoord xi, SplashCoord yi,
+  void transform(const SplashCoord *matrix, SplashCoord xi, SplashCoord yi,
 		 SplashCoord *xo, SplashCoord *yo);
   void updateModX(int x);
   void updateModY(int y);

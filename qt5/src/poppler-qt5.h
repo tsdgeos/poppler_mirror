@@ -1006,8 +1006,8 @@ delete it;
       OutlineItem(const OutlineItem &other);
       OutlineItem &operator=(const OutlineItem &other);
 
-      OutlineItem(OutlineItem &&other);
-      OutlineItem &operator=(OutlineItem &&other);
+      OutlineItem(OutlineItem &&other) noexcept;
+      OutlineItem &operator=(OutlineItem &&other) noexcept;
 
       /**
 	 Indicates whether an item is null, i.e. whether it does not represent a valid item in the outline of some PDF document.

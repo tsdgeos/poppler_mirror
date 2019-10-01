@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -75,7 +75,7 @@ public:
 
   SplashPath(const SplashPath&) = delete;
   SplashPath& operator=(const SplashPath&) = delete;
-  SplashPath(SplashPath&& path);
+  SplashPath(SplashPath&& path) noexcept;
 
   // Append <path> to <this>.
   void append(SplashPath *path);

@@ -1054,7 +1054,7 @@ void ArthurOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 void ArthurOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 				int width, int height,
 				GfxImageColorMap *colorMap,
-				bool interpolate, int *maskColors, bool inlineImg)
+				bool interpolate, const int *maskColors, bool inlineImg)
 {
   unsigned int *data;
   unsigned int *line;

@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -46,7 +46,7 @@ class SplashPath;
 class SplashFont {
 public:
 
-  SplashFont(SplashFontFile *fontFileA, SplashCoord *matA,
+  SplashFont(SplashFontFile *fontFileA, const SplashCoord *matA,
 	     const SplashCoord *textMatA, bool aaA);
 
   // This must be called after the constructor, so that the subclass
@@ -61,7 +61,7 @@ public:
   SplashFontFile *getFontFile() { return fontFile; }
 
   // Return true if <this> matches the specified font file and matrix.
-  bool matches(SplashFontFile *fontFileA, SplashCoord *matA,
+  bool matches(SplashFontFile *fontFileA, const SplashCoord *matA,
 		const SplashCoord *textMatA) const {
     return fontFileA == fontFile &&
            matA[0] == mat[0] && matA[1] == mat[1] &&

@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
-// Copyright (C) 2005, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2010 Pino Toscano <pino@kde.org>
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
@@ -150,7 +150,7 @@ public:
 		     bool interpolate, bool inlineImg) override;
   void drawImage(GfxState *state, Object *ref, Stream *str,
 		 int width, int height, GfxImageColorMap *colorMap,
-		 bool interpolate, int *maskColors, bool inlineImg) override;
+		 bool interpolate, const int *maskColors, bool inlineImg) override;
 
   void drawSoftMaskedImage(GfxState *state, Object *ref, Stream *str,
                            int width, int height,

@@ -576,10 +576,9 @@ static struct CombiningTable combiningTable[] = {
 
 // returning combining versions of characters
 static Unicode getCombiningChar(Unicode u) {
-  int len = sizeof(combiningTable) / sizeof(combiningTable[0]);
-  for (int i = 0; i < len; ++i) {
-    if (u == combiningTable[i].base)
-      return combiningTable[i].comb;
+  for (const CombiningTable &combining : combiningTable) {
+    if (u == combining.base)
+      return combining.comb;
   }
   return 0;
 }

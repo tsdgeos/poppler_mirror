@@ -1796,8 +1796,8 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
 	  "Adobe-Japan2",
 	  "Adobe-Korea1",
 	};
-	for (size_t i = 0; i < sizeof(knownCollections)/sizeof(knownCollections[0]); i++) {
-	  if (collection->cmp(knownCollections[i]) == 0) {
+	for (const char *knownCollection : knownCollections) {
+	  if (collection->cmp(knownCollection) == 0) {
 	    error(errSyntaxError, -1, "Missing language pack for '{0:t}' mapping", collection);
 	    return;
 	  }

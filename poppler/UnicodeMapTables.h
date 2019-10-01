@@ -6,7 +6,21 @@
 //
 //========================================================================
 
-static UnicodeMapRange latin1UnicodeMapRanges[] = {
+//========================================================================
+//
+// Modified under the Poppler project - http://poppler.freedesktop.org
+//
+// All changes made under the Poppler project to this file are licensed
+// under GPL version 2 or later
+//
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
+//
+// To see a description of the changes please see the Changelog file that
+// came with your tarball or type make ChangeLog if you are building from git
+//
+//========================================================================
+
+static const UnicodeMapRange latin1UnicodeMapRanges[] = {
   { 0x000a, 0x000a, 0x0a, 1 },
   { 0x000c, 0x000d, 0x0c, 1 },
   { 0x0020, 0x007e, 0x20, 1 },
@@ -70,7 +84,7 @@ static UnicodeMapRange latin1UnicodeMapRanges[] = {
 };
 #define latin1UnicodeMapLen (sizeof(latin1UnicodeMapRanges) / sizeof(UnicodeMapRange))
 
-static UnicodeMapRange ascii7UnicodeMapRanges[] = {
+static const UnicodeMapRange ascii7UnicodeMapRanges[] = {
   { 0x000a, 0x000a, 0x0a, 1 },
   { 0x000c, 0x000d, 0x0c, 1 },
   { 0x0020, 0x005f, 0x20, 1 },
@@ -205,7 +219,7 @@ static UnicodeMapRange ascii7UnicodeMapRanges[] = {
 };
 #define ascii7UnicodeMapLen (sizeof(ascii7UnicodeMapRanges) / sizeof(UnicodeMapRange))
 
-static UnicodeMapRange symbolUnicodeMapRanges[] = {
+static const UnicodeMapRange symbolUnicodeMapRanges[] = {
   { 0x0020, 0x0021, 0x20, 1 },
   { 0x0023, 0x0023, 0x23, 1 },
   { 0x0025, 0x0026, 0x25, 1 },
@@ -330,7 +344,7 @@ static UnicodeMapRange symbolUnicodeMapRanges[] = {
 };
 #define symbolUnicodeMapLen (sizeof(symbolUnicodeMapRanges) / sizeof(UnicodeMapRange))
 
-static UnicodeMapRange zapfDingbatsUnicodeMapRanges[] = {
+static const UnicodeMapRange zapfDingbatsUnicodeMapRanges[] = {
   { 0x0020, 0x0020, 0x20, 1 },
   { 0x2192, 0x2192, 0xd5, 1 },
   { 0x2194, 0x2195, 0xd6, 1 },

@@ -2,7 +2,7 @@
 //
 // DateInfo.h
 //
-// Copyright (C) 2008, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright (C) 2015 André Esser <bepandre@hotmail.com>
@@ -33,7 +33,7 @@ bool parseDateString(const char *string, int *year, int *month, int *day, int *h
  * If timet is NULL, current time is used.
  * Returns new GooString. Free with delete.
  */
-GooString *timeToDateString(time_t *timet);
+GooString *timeToDateString(const time_t *timet);
 
 /* Convert PDF date string to time.
  * Returns -1 if conversion fails.

@@ -3068,7 +3068,7 @@ private:
   GfxRGB *lookup;
   int width;
   GfxImageColorMap *colorMap;
-  int *maskColors;
+  const int *maskColors;
   int current_row;
   bool imageError;
 
@@ -3078,7 +3078,7 @@ public:
                                   int scaledWidth, int scaledHeight,
                                   bool printing,
                                   GfxImageColorMap *colorMapA,
-                                  int *maskColorsA) {
+                                  const int *maskColorsA) {
     cairo_surface_t *image = nullptr;
     int i;
 
@@ -3253,7 +3253,7 @@ void CairoOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 			       int widthA, int heightA,
 			       GfxImageColorMap *colorMap,
 			       bool interpolate,
-			       int *maskColors, bool inlineImg)
+			       const int *maskColors, bool inlineImg)
 {
   cairo_surface_t *image;
   cairo_pattern_t *pattern, *maskPattern;
@@ -3474,7 +3474,7 @@ void CairoImageOutputDev::setSoftMaskFromImageMask(GfxState *state, Object *ref,
 
 void CairoImageOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
 				    int width, int height, GfxImageColorMap *colorMap,
-				    bool interpolate, int *maskColors, bool inlineImg)
+				    bool interpolate, const int *maskColors, bool inlineImg)
 {
   cairo_t *cr;
   cairo_surface_t *surface;

@@ -1553,7 +1553,7 @@ inline void Splash::drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adj
 //------------------------------------------------------------------------
 
 // Transform a point from user space to device space.
-inline void Splash::transform(SplashCoord *matrix,
+inline void Splash::transform(const SplashCoord *matrix,
 			      SplashCoord xi, SplashCoord yi,
 			      SplashCoord *xo, SplashCoord *yo) {
   //                          [ m[0] m[1] 0 ]
@@ -5291,7 +5291,7 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
   return splashOk;
 }
 
-void Splash::compositeBackground(SplashColorPtr color) {
+void Splash::compositeBackground(SplashColorConstPtr color) {
   SplashColorPtr p;
   unsigned char *q;
   unsigned char alpha, alpha1, c, color0, color1, color2;

@@ -271,7 +271,7 @@ public:
   void unsetSoftMaskFromImageMask(GfxState *state, double *baseMatrix) override;
   void drawImage(GfxState *state, Object *ref, Stream *str,
 			 int width, int height, GfxImageColorMap *colorMap,
-			 bool interpolate, int *maskColors, bool inlineImg) override;
+			 bool interpolate, const int *maskColors, bool inlineImg) override;
   void drawMaskedImage(GfxState *state, Object *ref, Stream *str,
 			       int width, int height,
 			       GfxImageColorMap *colorMap,
@@ -388,22 +388,22 @@ private:
   void doImageL1(Object *ref, GfxImageColorMap *colorMap,
 		 bool invert, bool inlineImg,
 		 Stream *str, int width, int height, int len,
-		 int *maskColors, Stream *maskStr,
+		 const int *maskColors, Stream *maskStr,
 		 int maskWidth, int maskHeight, bool maskInvert);
   void doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
 		    bool invert, bool inlineImg,
 		    Stream *str, int width, int height, int len,
-		    int *maskColors, Stream *maskStr,
+		    const int *maskColors, Stream *maskStr,
 		    int maskWidth, int maskHeight, bool maskInvert);
   void doImageL2(Object *ref, GfxImageColorMap *colorMap,
 		 bool invert, bool inlineImg,
 		 Stream *str, int width, int height, int len,
-		 int *maskColors, Stream *maskStr,
+		 const int *maskColors, Stream *maskStr,
 		 int maskWidth, int maskHeight, bool maskInvert);
   void doImageL3(Object *ref, GfxImageColorMap *colorMap,
 		 bool invert, bool inlineImg,
 		 Stream *str, int width, int height, int len,
-		 int *maskColors, Stream *maskStr,
+		 const int *maskColors, Stream *maskStr,
 		 int maskWidth, int maskHeight, bool maskInvert);
   void dumpColorSpaceL2(GfxColorSpace *colorSpace,
 			bool genXform, bool updateColors,

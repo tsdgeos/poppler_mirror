@@ -1,3 +1,11 @@
+Release 0.81.0:
+        core:
+         * Splash: Always enable support for CMYK rasterization
+         * CairoOutputDev: Check scaled dimensions for 0. Issue #737
+         * BaseCryptStream: Fix potential uninitialized memory read
+         * SplashBitmap: Fix wrong width condition for splashModeDeviceN8
+         * Fix crashes in malformed files
+
 Release 0.80.0:
         core:
          * Annotations: Implement support for setting a different text in the appearance stream than the real text

@@ -43,6 +43,7 @@
 // Copyright (C) 2018 Denis Onishchenko <denis.onischenko@gmail.com>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -133,7 +134,7 @@
 // Operator table
 //------------------------------------------------------------------------
 
-Operator Gfx::opTab[] = {
+const Operator Gfx::opTab[] = {
   {"\"",  3, {tchkNum,    tchkNum,    tchkString},
           &Gfx::opMoveSetShowText},
   {"'",   1, {tchkString},
@@ -823,7 +824,7 @@ void Gfx::go(bool topLevel) {
 }
 
 void Gfx::execOp(Object *cmd, Object args[], int numArgs) {
-  Operator *op;
+  const Operator *op;
   Object *argPtr;
   int i;
 
@@ -870,7 +871,7 @@ void Gfx::execOp(Object *cmd, Object args[], int numArgs) {
   (this->*op->func)(argPtr, numArgs);
 }
 
-Operator *Gfx::findOp(const char *name) {
+const Operator *Gfx::findOp(const char *name) {
   int a, b, m, cmp;
 
   a = -1;

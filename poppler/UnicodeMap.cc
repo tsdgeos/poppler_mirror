@@ -14,11 +14,12 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2010 Jakub Wilk <jwilk@jwilk.net>
-// Copyright (C) 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2017 Jean Ghali <jghali@libertysurf.fr>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -70,7 +71,7 @@ UnicodeMap *UnicodeMap::parse(GooString *encodingNameA) {
   map = new UnicodeMap(encodingNameA->copy());
 
   size = 8;
-  map->ranges = (UnicodeMapRange *)gmallocn(size, sizeof(UnicodeMapRange));
+  UnicodeMapRange *customRanges = (UnicodeMapRange *)gmallocn(size, sizeof(UnicodeMapRange));
   eMapsSize = 0;
 
   line = 1;
@@ -85,10 +86,10 @@ UnicodeMap *UnicodeMap::parse(GooString *encodingNameA) {
       if (nBytes <= 4) {
 	if (map->len == size) {
 	  size *= 2;
-	  map->ranges = (UnicodeMapRange *)
-	    greallocn(map->ranges, size, sizeof(UnicodeMapRange));
+	  customRanges = (UnicodeMapRange *)
+	    greallocn(customRanges, size, sizeof(UnicodeMapRange));
 	}
-	range = &map->ranges[map->len];
+	range = &customRanges[map->len];
 	sscanf(tok1, "%x", &range->start);
 	sscanf(tok2, "%x", &range->end);
 	sscanf(tok3, "%x", &range->code);
@@ -124,6 +125,7 @@ UnicodeMap *UnicodeMap::parse(GooString *encodingNameA) {
 
   fclose(f);
 
+  map->ranges = customRanges;
   return map;
 }
 
@@ -139,7 +141,7 @@ UnicodeMap::UnicodeMap(GooString *encodingNameA) {
 }
 
 UnicodeMap::UnicodeMap(const char *encodingNameA, bool unicodeOutA,
-		       UnicodeMapRange *rangesA, int lenA) {
+		       const UnicodeMapRange *rangesA, int lenA) {
   encodingName = new GooString(encodingNameA);
   unicodeOut = unicodeOutA;
   kind = unicodeMapResident;
@@ -164,7 +166,7 @@ UnicodeMap::UnicodeMap(const char *encodingNameA, bool unicodeOutA,
 UnicodeMap::~UnicodeMap() {
   delete encodingName;
   if (kind == unicodeMapUser && ranges) {
-    gfree(ranges);
+    gfree(const_cast<UnicodeMapRange *>(ranges));
   }
   if (eMaps) {
     gfree(eMaps);

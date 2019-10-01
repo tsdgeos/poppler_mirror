@@ -1244,7 +1244,7 @@ void Annotation::storeBaseAnnotationProperties( QDomNode & annNode, QDomDocument
     bE.setAttribute( QStringLiteral("b"), QString::number( (double)brect.bottom() ) );
 
     // Sub-Node-2 - penStyle
-    const QVector<double> dashArray = s.dashArray();
+    const QVector<double> &dashArray = s.dashArray();
     if ( s.width() != 1 || s.lineStyle() != Solid || s.xCorners() != 0 ||
          s.yCorners() != 0.0 || dashArray.size() != 1 || dashArray[0] != 3 )
     {

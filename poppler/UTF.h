@@ -8,6 +8,7 @@
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -87,6 +88,6 @@ char *utf16ToUtf8(const uint16_t *utf16, int *len = nullptr);
 //              of length @out_len + 1, for each character in the ascii string giving the index
 //              of the corresponding character in the text of the line (thanks to this info
 //              being passed in @in_idx parameter).
-void unicodeToAscii7(Unicode *in, int len, Unicode **ucs4_out, int *out_len, int *in_idx, int **indices);
+void unicodeToAscii7(Unicode *in, int len, Unicode **ucs4_out, int *out_len, const int *in_idx, int **indices);
 
 #endif

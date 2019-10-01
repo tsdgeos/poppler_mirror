@@ -16,8 +16,9 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -61,7 +62,7 @@ public:
 
   // Create a resident UnicodeMap.
   UnicodeMap(const char *encodingNameA, bool unicodeOutA,
-	     UnicodeMapRange *rangesA, int lenA);
+	     const UnicodeMapRange *rangesA, int lenA);
 
   // Create a resident UnicodeMap that uses a function instead of a
   // list of ranges.
@@ -103,7 +104,7 @@ private:
   UnicodeMapKind kind;
   bool unicodeOut;
   union {
-    UnicodeMapRange *ranges;	// (user, resident)
+    const UnicodeMapRange *ranges;	// (user, resident)
     UnicodeMapFunc func;	// (func)
   };
   int len;			// (user, resident)

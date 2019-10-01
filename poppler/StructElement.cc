@@ -592,18 +592,18 @@ getAttributeMapEntry(const AttributeMapEntry **entryList, const char *name)
 
 static inline const OwnerMapEntry *getOwnerMapEntry(Attribute::Owner owner)
 {
-  for (unsigned i = 0; i < sizeof(ownerMap) / sizeof(ownerMap[0]); i++) {
-    if (owner == ownerMap[i].owner)
-      return &ownerMap[i];
+  for (const OwnerMapEntry &entry : ownerMap) {
+    if (owner == entry.owner)
+      return &entry;
   }
   return nullptr;
 }
 
 static inline const OwnerMapEntry *getOwnerMapEntry(const char *name)
 {
-  for (unsigned i = 0; i < sizeof(ownerMap) / sizeof(ownerMap[0]); i++) {
-    if (strcmp(name, ownerMap[i].name) == 0)
-      return &ownerMap[i];
+  for (const OwnerMapEntry &entry : ownerMap) {
+    if (strcmp(name, entry.name) == 0)
+      return &entry;
   }
   return nullptr;
 }
@@ -622,18 +622,18 @@ static Attribute::Owner nameToOwner(const char *name)
 
 static inline const TypeMapEntry *getTypeMapEntry(StructElement::Type type)
 {
-  for (unsigned i = 0; i < sizeof(typeMap) / sizeof(typeMap[0]); i++) {
-    if (type == typeMap[i].type)
-      return &typeMap[i];
+  for (const TypeMapEntry &entry : typeMap) {
+    if (type == entry.type)
+      return &entry;
   }
   return nullptr;
 }
 
 static inline const TypeMapEntry *getTypeMapEntry(const char *name)
 {
-  for (unsigned i = 0; i < sizeof(typeMap) / sizeof(typeMap[0]); i++) {
-    if (strcmp(name, typeMap[i].name) == 0)
-      return &typeMap[i];
+  for (const TypeMapEntry &entry : typeMap) {
+    if (strcmp(name, entry.name) == 0)
+      return &entry;
   }
   return nullptr;
 }

@@ -16,6 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -103,10 +104,10 @@ private:
   int decodeIntBit(JArithmeticDecoderStats *stats);
   void byteIn();
 
-  static unsigned int qeTab[47];
-  static int nmpsTab[47];
-  static int nlpsTab[47];
-  static int switchTab[47];
+  static const unsigned int qeTab[47];
+  static const int nmpsTab[47];
+  static const int nlpsTab[47];
+  static const int switchTab[47];
 
   unsigned int buf0, buf1;
   unsigned int c, a;

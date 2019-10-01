@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@gmail.com>
-// Copyright 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
@@ -46,8 +46,8 @@ public:
   struct PublicKeyInfo {
     PublicKeyInfo();
 
-    PublicKeyInfo(PublicKeyInfo &&);
-    PublicKeyInfo &operator=(PublicKeyInfo &&);
+    PublicKeyInfo(PublicKeyInfo &&) noexcept;
+    PublicKeyInfo &operator=(PublicKeyInfo &&) noexcept;
 
     PublicKeyInfo(const PublicKeyInfo &) = delete;
     PublicKeyInfo &operator=(const PublicKeyInfo &) = delete;
@@ -61,8 +61,8 @@ public:
     EntityInfo();
     ~EntityInfo();
 
-    EntityInfo(EntityInfo &&);
-    EntityInfo &operator=(EntityInfo &&);
+    EntityInfo(EntityInfo &&) noexcept;
+    EntityInfo &operator=(EntityInfo &&) noexcept;
 
     EntityInfo(const EntityInfo &) = delete;
     EntityInfo &operator=(const EntityInfo &) = delete;

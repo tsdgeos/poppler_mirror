@@ -2,7 +2,7 @@
 //
 // DateInfo.cc
 //
-// Copyright (C) 2008, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright (C) 2015 André Esser <bepandre@hotmail.com>
@@ -76,7 +76,7 @@ bool parseDateString(const char *dateString, int *year, int *month, int *day, in
    return false;
 }
 
-GooString *timeToDateString(time_t *timeA)
+GooString *timeToDateString(const time_t *timeA)
 {
   const time_t timet = timeA ? *timeA : time(nullptr);
 

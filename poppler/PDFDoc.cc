@@ -473,7 +473,7 @@ bool PDFDoc::checkEncryption(const GooString *ownerPassword, const GooString *us
 static PDFSubtypePart pdfPartFromString(PDFSubtype subtype, GooString *pdfSubtypeVersion) {
   const std::regex regex("PDF/(?:A|X|VT|E|UA)-([[:digit:]])(?:[[:alpha:]]{1,2})?:?([[:digit:]]{4})?");
   std::smatch match;
-  std::string pdfsubver = pdfSubtypeVersion->toStr();
+  const std::string &pdfsubver = pdfSubtypeVersion->toStr();
   PDFSubtypePart subtypePart = subtypePartNone;
 
   if (std::regex_search(pdfsubver, match, regex)) {
@@ -533,7 +533,7 @@ static PDFSubtypePart pdfPartFromString(PDFSubtype subtype, GooString *pdfSubtyp
 static PDFSubtypeConformance pdfConformanceFromString(GooString *pdfSubtypeVersion) {
   const std::regex regex("PDF/(?:A|X|VT|E|UA)-[[:digit:]]([[:alpha:]]+)");
   std::smatch match;
-  const std::string pdfsubver = pdfSubtypeVersion->toStr();
+  const std::string &pdfsubver = pdfSubtypeVersion->toStr();
   PDFSubtypeConformance pdfConf = subtypeConfNone;
 
   // match contains the PDF conformance (A, B, G, N, P, PG or U)

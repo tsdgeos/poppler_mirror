@@ -26,6 +26,7 @@
 // Copyright (C) 2013 Peter Breitenlohner <peb@mppmu.mpg.de>
 // Copyright (C) 2013, 2018 Adam Reichold <adamreichold@myopera.com>
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1064,7 +1065,7 @@ struct FlateCode {
 };
 
 struct FlateHuffmanTab {
-  FlateCode *codes;
+  const FlateCode *codes;
   int maxLen;
 };
 
@@ -1124,11 +1125,11 @@ private:
   bool endOfBlock;		// set when end of block is reached
   bool eof;			// set when end of stream is reached
 
-  static int			// code length code reordering
+  static const int		// code length code reordering
     codeLenCodeMap[flateMaxCodeLenCodes];
-  static FlateDecode		// length decoding info
+  static const FlateDecode	// length decoding info
     lengthDecode[flateMaxLitCodes-257];
-  static FlateDecode		// distance decoding info
+  static const FlateDecode	// distance decoding info
     distDecode[flateMaxDistCodes];
   static FlateHuffmanTab	// fixed literal code table
     fixedLitCodeTab;
@@ -1139,7 +1140,7 @@ private:
   bool startBlock();
   void loadFixedCodes();
   bool readDynamicCodes();
-  void compHuffmanCodes(int *lengths, int n, FlateHuffmanTab *tab);
+  FlateCode *compHuffmanCodes(const int *lengths, int n, int *maxLen);
   int getHuffmanCodeWord(FlateHuffmanTab *tab);
   int getCodeWord(int bits);
 };

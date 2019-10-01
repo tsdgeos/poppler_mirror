@@ -434,7 +434,7 @@ class LinkMoviePrivate : public LinkPrivate
 		: Link( *new LinkGotoPrivate( linkArea, destination ) )
 	{
 		Q_D( LinkGoto );
-		d->extFileName = extFileName;
+		d->extFileName = std::move(extFileName); // TODO remove when extFileName moves to be a const &
 	}
 	
 	LinkGoto::~LinkGoto()

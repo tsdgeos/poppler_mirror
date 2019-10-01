@@ -13,10 +13,11 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2010, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2010, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
+// Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -106,7 +107,7 @@ FoFiType1C::~FoFiType1C() {
       charset != fofiType1CISOAdobeCharset &&
       charset != fofiType1CExpertCharset &&
       charset != fofiType1CExpertSubsetCharset) {
-    gfree(charset);
+    gfree(const_cast<unsigned short *>(charset));
   }
 }
 
@@ -489,7 +490,7 @@ void FoFiType1C::convertToType1(const char *psName, const char **newEncoding, bo
   (*outputFunc)(outputStream, "cleartomark\n", 12);
 }
 
-void FoFiType1C::convertToCIDType0(const char *psName, int *codeMap, int nCodes,
+void FoFiType1C::convertToCIDType0(const char *psName, const int *codeMap, int nCodes,
 				   FoFiOutputFunc outputFunc,
 				   void *outputStream) {
   int *cidMap;
@@ -834,7 +835,7 @@ void FoFiType1C::convertToCIDType0(const char *psName, int *codeMap, int nCodes,
   gfree(cidMap);
 }
 
-void FoFiType1C::convertToType0(const char *psName, int *codeMap, int nCodes,
+void FoFiType1C::convertToType0(const char *psName, const int *codeMap, int nCodes,
 				FoFiOutputFunc outputFunc,
 				void *outputStream) {
   int *cidMap;
@@ -2511,16 +2512,16 @@ bool FoFiType1C::readCharset() {
     charset = fofiType1CExpertSubsetCharset;
     charsetLength = sizeof(fofiType1CExpertSubsetCharset) / sizeof(unsigned short);
   } else {
-    charset = (unsigned short *)gmallocn(nGlyphs, sizeof(unsigned short));
+    unsigned short *customCharset = (unsigned short *)gmallocn(nGlyphs, sizeof(unsigned short));
     charsetLength = nGlyphs;
     for (i = 0; i < nGlyphs; ++i) {
-      charset[i] = 0;
+      customCharset[i] = 0;
     }
     pos = topDict.charsetOffset;
     charsetFormat = getU8(pos++, &parsedOk);
     if (charsetFormat == 0) {
       for (i = 1; i < nGlyphs; ++i) {
-	charset[i] = (unsigned short)getU16BE(pos, &parsedOk);
+	customCharset[i] = (unsigned short)getU16BE(pos, &parsedOk);
 	pos += 2;
 	if (!parsedOk) {
 	  break;
@@ -2536,7 +2537,7 @@ bool FoFiType1C::readCharset() {
 	  break;
 	}
 	for (j = 0; j <= nLeft && i < nGlyphs; ++j) {
-	  charset[i++] = (unsigned short)c++;
+	  customCharset[i++] = (unsigned short)c++;
 	}
       }
     } else if (charsetFormat == 2) {
@@ -2550,16 +2551,17 @@ bool FoFiType1C::readCharset() {
 	  break;
 	}
 	for (j = 0; j <= nLeft && i < nGlyphs; ++j) {
-	  charset[i++] = (unsigned short)c++;
+	  customCharset[i++] = (unsigned short)c++;
 	}
       }
     }
     if (!parsedOk) {
-      gfree(charset);
+      gfree(customCharset);
       charset = nullptr;
       charsetLength = 0;
       return false;
     }
+    charset = customCharset;
   }
   return true;
 }
