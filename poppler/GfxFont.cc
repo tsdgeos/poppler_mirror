@@ -2183,7 +2183,6 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
   Unicode *vumap = nullptr;
   Unicode *tumap = nullptr;
   int *codeToGID = nullptr;
-  unsigned long n;
   int i;
   unsigned long code;
   int wmode;
@@ -2231,7 +2230,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
       break;
     }
   }
-  n = 65536;
+  const unsigned int n = 65536;
   tumap = new Unicode[n];
   humap = new Unicode[n*N_UCS_CANDIDATES];
   memset(humap,0,sizeof(Unicode)*n*N_UCS_CANDIDATES);
