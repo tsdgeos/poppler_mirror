@@ -1829,7 +1829,7 @@ poppler_document_get_print_page_ranges (PopplerDocument *document,
 
       *n_ranges = ranges.size ();
       result = g_new (PopplerPageRange, ranges.size ());
-      for (guint i = 0; i < ranges.size (); ++i) {
+      for (size_t i = 0; i < ranges.size (); ++i) {
         result[i].start_page = ranges[i].first;
         result[i].end_page = ranges[i].second;
       }

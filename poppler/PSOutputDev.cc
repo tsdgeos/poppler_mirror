@@ -1547,7 +1547,7 @@ void PSOutputDev::writeHeader(int nPages,
   }
   if(title) {
     char *sanitizedTitle = strdup(title);
-    for (unsigned int i = 0; i < strlen(sanitizedTitle); ++i) {
+    for (size_t i = 0; i < strlen(sanitizedTitle); ++i) {
       if (sanitizedTitle[i] == '\n' || sanitizedTitle[i] == '\r') {
         sanitizedTitle[i] = ' ';
       }
@@ -2108,8 +2108,8 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
 void PSOutputDev::setupEmbeddedType1Font(Ref *id, GooString *psName) {
   static const char hexChar[17] = "0123456789abcdef";
   Dict *dict;
-  long length1, length2, length3;
-  int c, i;
+  long length1, length2, length3, i;
+  int c;
   int start[4];
   bool binMode;
   bool writePadding = true;

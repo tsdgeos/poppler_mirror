@@ -471,9 +471,9 @@ static const struct OwnerMapEntry {
 
 static bool ownerHasMorePriority(Attribute::Owner a, Attribute::Owner b)
 {
-  unsigned aIndex, bIndex;
+  size_t aIndex, bIndex, i;
 
-  for (unsigned i = aIndex = bIndex = 0; i < sizeof(ownerMap) / sizeof(ownerMap[0]); i++) {
+  for (i = aIndex = bIndex = 0; i < sizeof(ownerMap) / sizeof(ownerMap[0]); i++) {
     if (ownerMap[i].owner == a)
       aIndex = i;
     if (ownerMap[i].owner == b)

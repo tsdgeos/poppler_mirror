@@ -103,8 +103,8 @@ static void error(const std::string &msg)
 static std::ostream& operator<<(std::ostream& stream, const poppler::ustring &str)
 {
     const poppler::byte_array ba = str.to_utf8();
-    for (unsigned int i = 0; i < ba.size(); ++i) {
-        stream << (char)(ba[i]);
+    for (const char c : ba) {
+        stream << c;
     }
     return stream;
 }
