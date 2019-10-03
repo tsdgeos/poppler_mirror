@@ -21,8 +21,8 @@ void TestObject::benchDefaultConstructor() {
 }
 
 void TestObject::benchMoveConstructor() {
-  Object src;
   QBENCHMARK {
+    Object src;
     Object dst{std::move(src)};
   }
 }

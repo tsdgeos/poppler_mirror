@@ -4345,7 +4345,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
           x = borderWidth;
         break;
       case quaddingCentered:
-        x = borderWidth + (comb - charCount) / 2 * w;
+        x = borderWidth + (comb - charCount) / 2.0 * w;
         break;
       case quaddingRightJustified:
         x = borderWidth + (comb - charCount) * w;

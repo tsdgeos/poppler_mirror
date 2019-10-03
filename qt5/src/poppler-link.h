@@ -1,5 +1,5 @@
 /* poppler-link.h: qt interface to poppler
- * Copyright (C) 2006, 2013, 2016, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006, 2013, 2016, 2018, 2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2007-2008, 2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2010, 2012, Guillermo Amaral <gamaral@kdab.com>
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
@@ -34,8 +34,6 @@
 
 struct Ref;
 class MediaRendition;
-class MovieAnnotation;
-class ScreenAnnotation;
 
 namespace Poppler {
 
@@ -53,6 +51,8 @@ class LinkRenditionPrivate;
 class LinkOCGStatePrivate;
 class LinkHidePrivate;
 class MediaRendition;
+class MovieAnnotation;
+class ScreenAnnotation;
 class SoundObject;
 
 /**
