@@ -165,6 +165,9 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
   set(DEFAULT_COMPILE_WARNINGS "${_warn}")
   set(DEFAULT_COMPILE_WARNINGS_EXTRA "${_warn} ${_warnx}")
+
+  set(CMAKE_CXX_FLAGS                "-fno-exceptions -fno-check-new -fno-common -D_DEFAULT_SOURCE")
+  set(CMAKE_C_FLAGS                  "-std=c99 -D_DEFAULT_SOURCE")
 endif()
 
 if(CMAKE_C_COMPILER MATCHES "icc")
