@@ -54,6 +54,8 @@ typedef gboolean (*PopplerAttachmentSaveFunc) (const gchar  *buf,
 					       gpointer      data,
 					       GError      **error);
 
+/* GTime is deprecated, but is part of our ABI here (see #715, #765). */
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 struct _PopplerAttachment
 {
   GObject parent;
@@ -65,6 +67,7 @@ struct _PopplerAttachment
   GTime ctime;
   GString *checksum;
 };
+G_GNUC_END_IGNORE_DEPRECATIONS
 
 typedef struct _PopplerAttachmentClass
 {
