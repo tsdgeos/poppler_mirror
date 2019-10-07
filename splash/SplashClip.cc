@@ -25,6 +25,7 @@
 #include <string.h>
 #include "goo/gmem.h"
 #include "SplashErrorCodes.h"
+#include "SplashMath.h"
 #include "SplashPath.h"
 #include "SplashXPath.h"
 #include "SplashXPathScanner.h"

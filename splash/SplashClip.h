@@ -23,7 +23,6 @@
 #define SPLASHCLIP_H
 
 #include "SplashTypes.h"
-#include "SplashMath.h"
 #include "SplashXPathScanner.h"
 
 class SplashPath;

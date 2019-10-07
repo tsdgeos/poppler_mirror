@@ -74,6 +74,7 @@
 #include "splash/SplashFont.h"
 #include "splash/SplashFontFile.h"
 #include "splash/SplashFontFileID.h"
+#include "splash/SplashMath.h"
 #include "splash/Splash.h"
 #include "SplashOutputDev.h"
 #include <algorithm>
