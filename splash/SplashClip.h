@@ -23,10 +23,10 @@
 #define SPLASHCLIP_H
 
 #include "SplashTypes.h"
-#include "SplashXPathScanner.h"
 
 class SplashPath;
 class SplashXPath;
+class SplashXPathScanner;
 class SplashBitmap;
 
 //------------------------------------------------------------------------
@@ -72,29 +72,13 @@ public:
   // Returns true if (<x>,<y>) is inside the clip.
   bool test(int x, int y)
   {
-    int i;
-
     // check the rectangle
     if (x < xMinI || x > xMaxI || y < yMinI || y > yMaxI) {
       return false;
     }
 
     // check the paths
-    if (antialias) {
-      for (i = 0; i < length; ++i) {
-        if (!scanners[i]->test(x * splashAASize, y * splashAASize)) {
-	  return false;
-        }
-      }
-    } else {
-      for (i = 0; i < length; ++i) {
-        if (!scanners[i]->test(x, y)) {
-	  return false;
-        }
-      }
-    }
-
-    return true;
+    return testClipPaths(x, y);
   }
 
   // Tests a rectangle against the clipping region.  Returns one of:
@@ -137,6 +121,7 @@ protected:
 
   SplashClip(SplashClip *clip);
   void grow(int nPaths);
+  bool testClipPaths(int x, int y);
 
   bool antialias;
   SplashCoord xMin, yMin, xMax, yMax;

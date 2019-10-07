@@ -406,3 +406,18 @@ void SplashClip::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool a
     }
   }
 }
+
+bool SplashClip::testClipPaths(int x, int y) {
+  if (antialias) {
+    x *= splashAASize;
+    y *= splashAASize;
+  }
+
+  for (int i = 0; i < length; ++i) {
+    if (!scanners[i]->test(x, y)) {
+      return false;
+    }
+  }
+
+  return true;
+}
