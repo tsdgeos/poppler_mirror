@@ -1441,7 +1441,12 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
     } else if (obj1.isArray()) {
       for (int i = 0; i < numChoices; i++) {
         for (int j = 0; j < obj1.arrayGetLength(); j++) {
-          Object obj2 = obj1.arrayGet(j);
+          const Object obj2 = obj1.arrayGet(j);
+          if (!obj2.isString()) {
+            error(errSyntaxError, -1, "FormWidgetChoice:: V array contains a non string object");
+            continue;
+          }
+
           bool matches = false;
 
           if (choices[i].exportVal) {
