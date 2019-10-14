@@ -165,15 +165,13 @@ int main(int argc, char *argv[]) {
   // get the fonts
   {
     FontInfoScanner scanner(doc, firstPage - 1);
-    std::vector<FontInfo*> *fonts = scanner.scan(lastPage - firstPage + 1);
+    const std::vector<FontInfo*> fonts = scanner.scan(lastPage - firstPage + 1);
 
     if (showSubst) {
       // print the font substitutions
       printf("name                                 object ID substitute font                      substitute font file\n");
       printf("------------------------------------ --------- ------------------------------------ ------------------------------------\n");
-      if (fonts) {
-        for (std::size_t i = 0; i < fonts->size(); ++i) {
-          FontInfo *font = (*fonts)[i];
+        for (FontInfo* font : fonts) {
           if (font->getFile()) {
             printf("%-36s",
                    font->getName() ? font->getName()->c_str() : "[none]");
@@ -189,15 +187,11 @@ int main(int argc, char *argv[]) {
           }
           delete font;
         }
-        delete fonts;
-      }
     } else {
       // print the font info
       printf("name                                 type              encoding         emb sub uni object ID\n");
       printf("------------------------------------ ----------------- ---------------- --- --- --- ---------\n");
-      if (fonts) {
-        for (std::size_t i = 0; i < fonts->size(); ++i) {
-          FontInfo *font = (*fonts)[i];
+        for (FontInfo* font : fonts) {
           printf("%-36s %-17s %-16s %-3s %-3s %-3s",
                  font->getName() ? font->getName()->c_str() : "[none]",
                  fontTypeNames[font->getType()],
@@ -213,8 +207,6 @@ int main(int argc, char *argv[]) {
           }
           delete font;
         }
-        delete fonts;
-      }
     }
   }
 

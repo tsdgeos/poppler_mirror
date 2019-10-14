@@ -92,7 +92,7 @@ public:
   // Destructor.
   ~FontInfoScanner();
 
-  std::vector<FontInfo*> *scan(int nPages);
+  std::vector<FontInfo*> scan(int nPages);
 
 private:
 

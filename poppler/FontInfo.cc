@@ -52,17 +52,17 @@ FontInfoScanner::FontInfoScanner(PDFDoc *docA, int firstPage) {
 FontInfoScanner::~FontInfoScanner() {
 }
 
-std::vector<FontInfo*> *FontInfoScanner::scan(int nPages) {
+std::vector<FontInfo*> FontInfoScanner::scan(int nPages) {
   Page *page;
   Dict *resDict;
   Annots *annots;
   int lastPage;
 
+  std::vector<FontInfo*> result;
+
   if (currentPage > doc->getNumPages()) {
-    return nullptr;
+    return result;
   }
- 
-  auto result = new std::vector<FontInfo*>();
 
   lastPage = currentPage + nPages;
   if (lastPage > doc->getNumPages() + 1) {
