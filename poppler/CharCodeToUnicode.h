@@ -88,14 +88,14 @@ public:
   // Map a CharCode to Unicode. Returns a pointer in u to internal storage
   // so never store the pointers it returns, just the data, otherwise
   // your pointed values might get changed by future calls
-  int mapToUnicode(CharCode c, Unicode **u);
+  int mapToUnicode(CharCode c, Unicode **u) const;
 
   // Map a Unicode to CharCode.
   int mapToCharCode(const Unicode* u, CharCode *c, int usize) const;
 
   // Return the mapping's length, i.e., one more than the max char
   // code supported by the mapping.
-  CharCode getLength() { return mapLen; }
+  CharCode getLength() const { return mapLen; }
 
 private:
 
