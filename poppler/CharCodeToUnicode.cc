@@ -27,6 +27,7 @@
 // Copyright (C) 2017 Jean Ghali <jghali@libertysurf.fr>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 <corentinf@free.fr>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -579,7 +580,7 @@ void CharCodeToUnicode::setMapping(CharCode c, Unicode *u, int len) {
   }
 }
 
-int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode **u) {
+int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode const **u) const {
   int i;
 
   if (isIdentity) {

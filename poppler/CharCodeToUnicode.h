@@ -21,6 +21,7 @@
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 <corentinf@free.fr>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -88,14 +89,14 @@ public:
   // Map a CharCode to Unicode. Returns a pointer in u to internal storage
   // so never store the pointers it returns, just the data, otherwise
   // your pointed values might get changed by future calls
-  int mapToUnicode(CharCode c, Unicode **u);
+  int mapToUnicode(CharCode c, Unicode const **u) const;
 
   // Map a Unicode to CharCode.
   int mapToCharCode(const Unicode* u, CharCode *c, int usize) const;
 
   // Return the mapping's length, i.e., one more than the max char
   // code supported by the mapping.
-  CharCode getLength() { return mapLen; }
+  CharCode getLength() const { return mapLen; }
 
 private:
 

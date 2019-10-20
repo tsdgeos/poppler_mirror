@@ -141,7 +141,7 @@ public:
   void drawChar(GfxState *state, double x, double y,
 		double dx, double dy,
 		double originX, double originY,
-		CharCode code, int nBytes, Unicode *u, int uLen) override;
+		CharCode code, int nBytes, const Unicode *u, int uLen) override;
   void endTextObject(GfxState *state) override;
 
   //----- image drawing

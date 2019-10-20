@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2013 Igalia S.L.
-// Copyright 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018, 2019 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -106,7 +106,7 @@ public:
                         double dx, double dy,
                         double ox, double oy,
                         CharCode c, int nBytes,
-                        Unicode *u, int uLen) override;
+                        const Unicode *u, int uLen) override;
 
   void beginMarkedContent(const char *name, Dict *properties) override;
   void endMarkedContent(GfxState *state) override;

@@ -13,6 +13,7 @@
 //
 // Copyright (C) 2010 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -25,6 +26,7 @@
 #include <string.h>
 #include "goo/gmem.h"
 #include "SplashErrorCodes.h"
+#include "SplashMath.h"
 #include "SplashPath.h"
 #include "SplashXPath.h"
 #include "SplashXPathScanner.h"
@@ -404,4 +406,19 @@ void SplashClip::clipAALine(SplashBitmap *aaBuf, int *x0, int *x1, int y, bool a
       *x1 = *x1 + 1;
     }
   }
+}
+
+bool SplashClip::testClipPaths(int x, int y) {
+  if (antialias) {
+    x *= splashAASize;
+    y *= splashAASize;
+  }
+
+  for (int i = 0; i < length; ++i) {
+    if (!scanners[i]->test(x, y)) {
+      return false;
+    }
+  }
+
+  return true;
 }

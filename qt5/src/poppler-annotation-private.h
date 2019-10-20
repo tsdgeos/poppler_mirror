@@ -32,7 +32,6 @@
 
 class Annot;
 class AnnotPath;
-class Link;
 class Page;
 class PDFRectangle;
 

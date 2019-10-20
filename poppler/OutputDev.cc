@@ -95,7 +95,7 @@ void OutputDev::updateAll(GfxState *state) {
 
 bool OutputDev::beginType3Char(GfxState *state, double x, double y,
 				double dx, double dy,
-				CharCode code, Unicode *u, int uLen) {
+				CharCode code, const Unicode *u, int uLen) {
   return false;
 }
 

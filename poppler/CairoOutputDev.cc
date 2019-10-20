@@ -1395,7 +1395,7 @@ void CairoOutputDev::beginString(GfxState *state, const GooString *s)
 void CairoOutputDev::drawChar(GfxState *state, double x, double y,
 			      double dx, double dy,
 			      double originX, double originY,
-			      CharCode code, int nBytes, Unicode *u, int uLen)
+			      CharCode code, int nBytes, const Unicode *u, int uLen)
 {
   if (currentFont) {
     glyphs[glyphCount].index = currentFont->getGlyph (code, u, uLen);
@@ -1512,7 +1512,7 @@ finish:
 
 bool CairoOutputDev::beginType3Char(GfxState *state, double x, double y,
 				      double dx, double dy,
-				      CharCode code, Unicode *u, int uLen) {
+				      CharCode code, const Unicode *u, int uLen) {
 
   cairo_save (cairo);
   cairo_matrix_t matrix;

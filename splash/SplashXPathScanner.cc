@@ -129,9 +129,9 @@ void SplashXPathScanner::getSpanBounds(int y, int *spanXMin, int *spanXMax) {
   if (!line.empty()) {
     *spanXMin = line[0].x0;
     int xx = line[0].x1;
-    for (unsigned int i = 1; i < line.size(); ++i) {
-      if (line[i].x1 > xx) {
-	xx = line[i].x1;
+    for (const SplashIntersect &intersect : line) {
+      if (intersect.x1 > xx) {
+	xx = intersect.x1;
       }
     }
     *spanXMax = xx;

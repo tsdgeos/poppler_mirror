@@ -13,6 +13,7 @@
 //
 // Copyright (C) 2010, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -23,11 +24,10 @@
 #define SPLASHCLIP_H
 
 #include "SplashTypes.h"
-#include "SplashMath.h"
-#include "SplashXPathScanner.h"
 
 class SplashPath;
 class SplashXPath;
+class SplashXPathScanner;
 class SplashBitmap;
 
 //------------------------------------------------------------------------
@@ -73,29 +73,13 @@ public:
   // Returns true if (<x>,<y>) is inside the clip.
   bool test(int x, int y)
   {
-    int i;
-
     // check the rectangle
     if (x < xMinI || x > xMaxI || y < yMinI || y > yMaxI) {
       return false;
     }
 
     // check the paths
-    if (antialias) {
-      for (i = 0; i < length; ++i) {
-        if (!scanners[i]->test(x * splashAASize, y * splashAASize)) {
-	  return false;
-        }
-      }
-    } else {
-      for (i = 0; i < length; ++i) {
-        if (!scanners[i]->test(x, y)) {
-	  return false;
-        }
-      }
-    }
-
-    return true;
+    return testClipPaths(x, y);
   }
 
   // Tests a rectangle against the clipping region.  Returns one of:
@@ -138,6 +122,7 @@ protected:
 
   SplashClip(SplashClip *clip);
   void grow(int nPaths);
+  bool testClipPaths(int x, int y);
 
   bool antialias;
   SplashCoord xMin, yMin, xMax, yMax;

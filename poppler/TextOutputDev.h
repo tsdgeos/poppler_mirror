@@ -17,7 +17,7 @@
 // Copyright (C) 2006 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2007, 2008, 2011, 2013 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2008, 2010, 2015, 2016, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2015, 2016, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Brian Ewins <brian.ewins@gmail.com>
 // Copyright (C) 2012, 2013, 2015, 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -577,7 +577,7 @@ public:
   // Add a character to the current word.
   void addChar(GfxState *state, double x, double y,
 	       double dx, double dy,
-	       CharCode c, int nBytes, Unicode *u, int uLen);
+	       CharCode c, int nBytes, const Unicode *u, int uLen);
 
   // Add <nChars> invisible characters.
   void incCharCount(int nChars);
@@ -748,7 +748,7 @@ public:
 
   void addChar(GfxState *state, double x, double y,
 	       double dx, double dy,
-	       CharCode c, int nBytes, Unicode *u, int uLen);
+	       CharCode c, int nBytes, const Unicode *u, int uLen);
   void begin(GfxState *state, const GooString *text);
   void end(GfxState *state);
 
@@ -836,7 +836,7 @@ public:
   void drawChar(GfxState *state, double x, double y,
 		double dx, double dy,
 		double originX, double originY,
-		CharCode c, int nBytes, Unicode *u, int uLen) override;
+		CharCode c, int nBytes, const Unicode *u, int uLen) override;
   void incCharCount(int nChars) override;
   void beginActualText(GfxState *state, const GooString *text) override;
   void endActualText(GfxState *state) override;

@@ -3874,7 +3874,7 @@ void Gfx::doShowText(const GooString *s) {
   int wMode;
   double riseX, riseY;
   CharCode code;
-  Unicode *u = nullptr;
+  const Unicode *u = nullptr;
   double x, y, dx, dy, dx2, dy2, curX, curY, tdx, tdy, ddx, ddy;
   double originX, originY, tOriginX, tOriginY;
   double x0, y0, x1, y1;

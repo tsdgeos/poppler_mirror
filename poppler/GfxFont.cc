@@ -1530,7 +1530,7 @@ static int parseCharName(char *charName, Unicode *uBuf, int uLen,
 }
 
 int Gfx8BitFont::getNextChar(const char *s, int len, CharCode *code,
-			     Unicode **u, int *uLen,
+			     Unicode const **u, int *uLen,
 			     double *dx, double *dy, double *ox, double *oy) const {
   CharCode c;
 
@@ -1638,7 +1638,7 @@ int *Gfx8BitFont::getCodeToGIDMap(FoFiTrueType *ff) {
 
   // map Unicode through the cmap
   } else if (useUnicode) {
-    Unicode *uAux;
+    const Unicode *uAux;
     for (i = 0; i < 256; ++i) {
       if (((charName = enc[i]) && (u = globalParams->mapNameToUnicodeAll(charName))))
 	map[i] = ff->mapCodeToGID(cmap, u);
@@ -2006,7 +2006,7 @@ GfxCIDFont::~GfxCIDFont() {
 }
 
 int GfxCIDFont::getNextChar(const char *s, int len, CharCode *code,
-			    Unicode **u, int *uLen,
+			    Unicode const **u, int *uLen,
 			    double *dx, double *dy, double *ox, double *oy) const {
   CID cid;
   CharCode dummy;
@@ -2183,7 +2183,6 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
   Unicode *vumap = nullptr;
   Unicode *tumap = nullptr;
   int *codeToGID = nullptr;
-  unsigned long n;
   int i;
   unsigned long code;
   int wmode;
@@ -2231,7 +2230,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
       break;
     }
   }
-  n = 65536;
+  const unsigned int n = 65536;
   tumap = new Unicode[n];
   humap = new Unicode[n*N_UCS_CANDIDATES];
   memset(humap,0,sizeof(Unicode)*n*N_UCS_CANDIDATES);
@@ -2243,7 +2242,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
       CharCode cid;
       for (cid = 0;cid < n ;cid++) {
 	int len;
-	Unicode *ucodes;
+	const Unicode *ucodes;
 
 	len = tctu->mapToUnicode(cid,&ucodes);
 	if (len == 1) {
@@ -2278,7 +2277,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
     if (ctu) {
       CharCode cid;
       for (cid = 0;cid < n ;cid++) {
-	Unicode *ucode;
+	const Unicode *ucode;
 
 	if (ctu->mapToUnicode(cid, &ucode))
 	  humap[cid*N_UCS_CANDIDATES] = ucode[0];

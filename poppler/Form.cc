@@ -585,7 +585,7 @@ GooString* FormWidgetSignature::getCheckedSignature(Goffset *checkedFileSize)
             }
             if (sigLen > 0 && 2*(sigLen+lenBytes) <= len-4)
             {
-              for (int i = 2*(sigLen+lenBytes)+4; i < len; ++i)
+              for (Goffset i = 2*(sigLen+lenBytes)+4; i < len; ++i)
               {
                 if (gstr.getChar(i) != '0')
                 {
@@ -598,9 +598,9 @@ GooString* FormWidgetSignature::getCheckedSignature(Goffset *checkedFileSize)
               len = 0;
           }
         }
-        for (int i = 0; i < len; ++i)
+        for ( const char c : gstr.toStr() )
         {
-          if (!isxdigit(gstr.getChar(i)))
+          if (!isxdigit(c))
             len = 0;
         }
         if (len > 0)
@@ -1441,7 +1441,12 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
     } else if (obj1.isArray()) {
       for (int i = 0; i < numChoices; i++) {
         for (int j = 0; j < obj1.arrayGetLength(); j++) {
-          Object obj2 = obj1.arrayGet(j);
+          const Object obj2 = obj1.arrayGet(j);
+          if (!obj2.isString()) {
+            error(errSyntaxError, -1, "FormWidgetChoice:: V array contains a non string object");
+            continue;
+          }
+
           bool matches = false;
 
           if (choices[i].exportVal) {
