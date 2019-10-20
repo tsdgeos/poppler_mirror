@@ -121,7 +121,7 @@ void MarkedContentOutputDev::drawChar(GfxState *state,
                                       double dx, double dy,
                                       double ox, double oy,
                                       CharCode c, int nBytes,
-                                      Unicode *u, int uLen)
+                                      const Unicode *u, int uLen)
 {
   if (!inMarkedContent() || !uLen)
     return;

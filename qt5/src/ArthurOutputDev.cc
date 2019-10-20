@@ -882,7 +882,7 @@ void ArthurOutputDev::eoClip(GfxState *state)
 void ArthurOutputDev::drawChar(GfxState *state, double x, double y,
 			       double dx, double dy,
 			       double originX, double originY,
-			       CharCode code, int nBytes, Unicode *u, int uLen) {
+			       CharCode code, int nBytes, const Unicode *u, int uLen) {
 
   // First handle type3 fonts
   GfxFont *gfxFont = state->getFont();

@@ -579,7 +579,7 @@ void CharCodeToUnicode::setMapping(CharCode c, Unicode *u, int len) {
   }
 }
 
-int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode **u) const {
+int CharCodeToUnicode::mapToUnicode(CharCode c, Unicode const **u) const {
   int i;
 
   if (isIdentity) {

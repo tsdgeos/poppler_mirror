@@ -271,11 +271,11 @@ public:
   virtual void drawChar(GfxState * /*state*/, double /*x*/, double /*y*/,
 			double /*dx*/, double /*dy*/,
 			double /*originX*/, double /*originY*/,
-			CharCode /*code*/, int /*nBytes*/, Unicode * /*u*/, int /*uLen*/) {}
+			CharCode /*code*/, int /*nBytes*/, const Unicode * /*u*/, int /*uLen*/) {}
   virtual void drawString(GfxState * /*state*/, const GooString * /*s*/) {}
   virtual bool beginType3Char(GfxState * /*state*/, double /*x*/, double /*y*/,
 			       double /*dx*/, double /*dy*/,
-			       CharCode /*code*/, Unicode * /*u*/, int /*uLen*/);
+			       CharCode /*code*/, const Unicode * /*u*/, int /*uLen*/);
   virtual void endType3Char(GfxState * /*state*/) {}
   virtual void beginTextObject(GfxState * /*state*/) {}
   virtual void endTextObject(GfxState * /*state*/) {}

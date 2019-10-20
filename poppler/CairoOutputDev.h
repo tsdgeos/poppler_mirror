@@ -192,13 +192,13 @@ public:
   void drawChar(GfxState *state, double x, double y,
 		double dx, double dy,
 		double originX, double originY,
-		CharCode code, int nBytes, Unicode *u, int uLen) override;
+		CharCode code, int nBytes, const Unicode *u, int uLen) override;
   void beginActualText(GfxState *state, const GooString *text) override;
   void endActualText(GfxState *state) override;
 
   bool beginType3Char(GfxState *state, double x, double y,
 		       double dx, double dy,
-		       CharCode code, Unicode *u, int uLen) override;
+		       CharCode code, const Unicode *u, int uLen) override;
   void endType3Char(GfxState *state) override;
   void beginTextObject(GfxState *state) override;
   void endTextObject(GfxState *state) override;

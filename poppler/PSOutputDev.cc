@@ -5043,7 +5043,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s) {
   const char *p;
   UnicodeMap *uMap;
   CharCode code;
-  Unicode *u;
+  const Unicode *u;
   char buf[8];
   double *dxdy;
   int dxdySize, len, nChars, uLen, n, m, i, j;

@@ -270,7 +270,7 @@ public:
   // the number actually used.  Returns the number of bytes used by
   // the char code.
   virtual int getNextChar(const char *s, int len, CharCode *code,
-			  Unicode **u, int *uLen,
+			  Unicode const **u, int *uLen,
 			  double *dx, double *dy, double *ox, double *oy) const = 0;
 
   // Does this font have a toUnicode map?
@@ -326,7 +326,7 @@ public:
 	      GfxFontType typeA, Ref embFontIDA, Dict *fontDict);
 
   int getNextChar(const char *s, int len, CharCode *code,
-			  Unicode **u, int *uLen,
+			  Unicode const **u, int *uLen,
 			  double *dx, double *dy, double *ox, double *oy) const override;
 
   // Return the encoding.
@@ -391,7 +391,7 @@ public:
   bool isCIDFont() const override { return true; }
 
   int getNextChar(const char *s, int len, CharCode *code,
-			  Unicode **u, int *uLen,
+			  Unicode const **u, int *uLen,
 			  double *dx, double *dy, double *ox, double *oy) const override;
 
   // Return the writing mode (0=horizontal, 1=vertical).

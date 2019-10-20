@@ -353,7 +353,7 @@ void HtmlPage::conv(){
 
 void HtmlPage::addChar(GfxState *state, double x, double y,
 		       double dx, double dy, 
-			double ox, double oy, Unicode *u, int uLen) {
+			double ox, double oy, const Unicode *u, int uLen) {
   double x1, y1, w1, h1, dx2, dy2;
   int n, i;
   state->transform(x, y, &x1, &y1);
@@ -1308,7 +1308,7 @@ void HtmlOutputDev::endString(GfxState *state) {
 void HtmlOutputDev::drawChar(GfxState *state, double x, double y,
 	      double dx, double dy,
 	      double originX, double originY,
-	      CharCode code, int /*nBytes*/, Unicode *u, int uLen) 
+	      CharCode code, int /*nBytes*/, const Unicode *u, int uLen)
 {
   if ( !showHidden && (state->getRender() & 3) == 3) {
     return;

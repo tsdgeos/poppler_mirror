@@ -3860,7 +3860,8 @@ void Annot::layoutText(const GooString *text, GooString *outBuf, int *i,
                              int *charCount, bool noReencode)
 {
   CharCode c;
-  Unicode uChar, *uAux;
+  Unicode uChar;
+  const Unicode *uAux;
   double w = 0.0;
   int uLen, n;
   double dx, dy, ox, oy;
@@ -4382,7 +4383,7 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
       xPrev = w;                // so that first character is placed properly
       while (i < comb && len > 0) {
         CharCode code;
-        Unicode *uAux;
+        const Unicode *uAux;
         int uLen, n;
         double char_dx, char_dy, ox, oy;
 

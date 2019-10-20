@@ -99,7 +99,7 @@ public:
   void endStringOp(GfxState *state) override;
   bool beginType3Char(GfxState *state, double x, double y,
 		       double dx, double dy,
-		       CharCode code, Unicode *u, int uLen) override;
+		       CharCode code, const Unicode *u, int uLen) override;
   void endType3Char(GfxState *state) override;
 
   //----- image drawing

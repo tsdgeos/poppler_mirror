@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007-2008, 2010, 2012, 2015-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2012, 2015-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Mike Slegeir <tehpola@yahoo.com>
 // Copyright (C) 2010, 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -178,10 +178,10 @@ public:
   void drawChar(GfxState *state, double x, double y,
       double dx, double dy,
       double originX, double originY,
-      CharCode code, int nBytes, Unicode *u, int uLen) override { }
+      CharCode code, int nBytes, const Unicode *u, int uLen) override { }
   bool beginType3Char(GfxState *state, double x, double y,
       double dx, double dy,
-      CharCode code, Unicode *u, int uLen) override { return false; }
+      CharCode code, const Unicode *u, int uLen) override { return false; }
   void endType3Char(GfxState *state) override { }
   void beginTextObject(GfxState *state) override { }
   void endTextObject(GfxState *state) override { }

@@ -2616,7 +2616,7 @@ void TextPage::beginWord(GfxState *state) {
 
 void TextPage::addChar(GfxState *state, double x, double y,
 		       double dx, double dy,
-		       CharCode c, int nBytes, Unicode *u, int uLen) {
+		       CharCode c, int nBytes, const Unicode *u, int uLen) {
   double x1, y1, w1, h1, dx2, dy2, base, sp, delta;
   bool overlap;
   int i;
@@ -5617,7 +5617,7 @@ ActualText::~ActualText() {
 
 void ActualText::addChar(GfxState *state, double x, double y,
 			 double dx, double dy,
-			 CharCode c, int nBytes, Unicode *u, int uLen) {
+			 CharCode c, int nBytes, const Unicode *u, int uLen) {
   if (!actualText) {
     text->addChar(state, x, y, dx, dy, c, nBytes, u, uLen);
     return;
@@ -5764,7 +5764,7 @@ void TextOutputDev::endString(GfxState *state) {
 void TextOutputDev::drawChar(GfxState *state, double x, double y,
 			     double dx, double dy,
 			     double originX, double originY,
-			     CharCode c, int nBytes, Unicode *u, int uLen) {
+			     CharCode c, int nBytes, const Unicode *u, int uLen) {
   actualText->addChar(state, x, y, dx, dy, c, nBytes, u, uLen);
 }
 

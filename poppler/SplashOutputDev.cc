@@ -2233,7 +2233,7 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y,
 			       double dx, double dy,
 			       double originX, double originY,
 			       CharCode code, int nBytes,
-			       Unicode *u, int uLen) {
+			       const Unicode *u, int uLen) {
   SplashPath *path;
   int render;
   bool doFill, doStroke, doClip, strokeAdjust;
@@ -2343,7 +2343,7 @@ void SplashOutputDev::drawChar(GfxState *state, double x, double y,
 
 bool SplashOutputDev::beginType3Char(GfxState *state, double x, double y,
 				      double dx, double dy,
-				      CharCode code, Unicode *u, int uLen) {
+				      CharCode code, const Unicode *u, int uLen) {
   GfxFont *gfxFont;
   const Ref *fontID;
   const double *ctm, *bbox;

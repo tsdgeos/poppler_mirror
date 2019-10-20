@@ -185,7 +185,7 @@ void PreScanOutputDev::endStringOp(GfxState * /*state*/) {
 
 bool PreScanOutputDev::beginType3Char(GfxState * /*state*/, double /*x*/, double /*y*/,
 				       double /*dx*/, double /*dy*/,
-				       CharCode /*code*/, Unicode * /*u*/, int /*uLen*/) {
+				       CharCode /*code*/, const Unicode * /*u*/, int /*uLen*/) {
   // return false so all Type 3 chars get rendered (no caching)
   return false;
 }
