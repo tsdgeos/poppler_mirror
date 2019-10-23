@@ -20,15 +20,23 @@ matrix:
       script: cmake . -G Ninja -DFONT_CONFIGURATION=generic && ninja
 
     - os: osx
-      osx_image: xcode9.3
+      osx_image: xcode9.2
       before_install:
         - brew unlink python
         - brew install poppler --only-dependencies --build-from-source
       script: cmake . -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF && make
 
     - os: osx
-      osx_image: xcode8.3
+      osx_image: xcode10.1
       before_install:
         - brew unlink python
         - brew install poppler --only-dependencies --build-from-source
       script: cmake . -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF && make
+
+    - os: osx
+      osx_image: xcode11.2
+      before_install:
+        - brew unlink python
+        - brew install poppler --only-dependencies --build-from-source
+      script: cmake . -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF && make
+
