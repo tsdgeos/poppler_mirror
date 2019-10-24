@@ -52,44 +52,43 @@ FontInfoScanner::FontInfoScanner(PDFDoc *docA, int firstPage) {
 FontInfoScanner::~FontInfoScanner() {
 }
 
-std::vector<FontInfo*> *FontInfoScanner::scan(int nPages) {
+std::vector<FontInfo*> FontInfoScanner::scan(int nPages) {
   Page *page;
   Dict *resDict;
   Annots *annots;
   int lastPage;
 
+  std::vector<FontInfo*> result;
+
   if (currentPage > doc->getNumPages()) {
-    return nullptr;
+    return result;
   }
- 
-  auto result = new std::vector<FontInfo*>();
 
   lastPage = currentPage + nPages;
   if (lastPage > doc->getNumPages() + 1) {
     lastPage = doc->getNumPages() + 1;
   }
 
-  XRef *xrefA = doc->getXRef()->copy();
+  std::unique_ptr<XRef> xrefA(doc->getXRef()->copy());
   for (int pg = currentPage; pg < lastPage; ++pg) {
     page = doc->getPage(pg);
     if (!page) continue;
 
-    if ((resDict = page->getResourceDictCopy(xrefA))) {
-      scanFonts(xrefA, resDict, result);
+    if ((resDict = page->getResourceDictCopy(xrefA.get()))) {
+      scanFonts(xrefA.get(), resDict, &result);
       delete resDict;
     }
     annots = page->getAnnots();
     for (int i = 0; i < annots->getNumAnnots(); ++i) {
       Object obj1 = annots->getAnnot(i)->getAppearanceResDict();
       if (obj1.isDict()) {
-        scanFonts(xrefA, obj1.getDict(), result);
+        scanFonts(xrefA.get(), obj1.getDict(), &result);
       }
     }
   }
 
   currentPage = lastPage;
 
-  delete xrefA;
   return result;
 }
 

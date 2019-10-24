@@ -134,17 +134,12 @@ QList<FontInfo> FontIterator::next()
 	++d->currentPage;
 
 	QList<FontInfo> fonts;
-	std::vector<::FontInfo*> *items = d->fontInfoScanner.scan( 1 );
-	if ( !items )
-		return fonts;
-	fonts.reserve( items->size() );
-	for ( std::size_t i = 0; i < items->size(); ++i ) {
-		fonts.append( FontInfo( FontInfoData( (*items)[ i ] ) ) );
-	}
-	for ( auto entry : *items ) {
+	const std::vector<::FontInfo*> items = d->fontInfoScanner.scan( 1 );
+	fonts.reserve( items.size() );
+	for ( ::FontInfo* entry : items ) {
+		fonts.append( FontInfo( FontInfoData( entry ) ) );
 		delete entry;
 	}
-	delete items;
 
 	return fonts;
 }

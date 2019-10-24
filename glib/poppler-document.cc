@@ -4,6 +4,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018-2019 Marek Kasik <mkasik@redhat.com>
  * Copyright (C) 2019 Masamichi Hosoda <trueroad@trueroad.jp>
+ * Copyright (C) 2019, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2718,7 +2719,7 @@ poppler_index_iter_free (PopplerIndexIter *iter)
 
 struct _PopplerFontsIter
 {
-	std::vector<FontInfo*> *items;
+	std::vector<FontInfo*> items;
 	int index;
 };
 
@@ -2740,7 +2741,7 @@ poppler_fonts_iter_get_full_name (PopplerFontsIter *iter)
 	GooString *name;
 	FontInfo *info;
 
-	info = (*iter->items)[iter->index];
+	info = iter->items[iter->index];
 
 	name = info->getName();
 	if (name != nullptr) {
@@ -2765,7 +2766,7 @@ poppler_fonts_iter_get_name (PopplerFontsIter *iter)
 	const char *name;
 
 	name = poppler_fonts_iter_get_full_name (iter);
-	info = (*iter->items)[iter->index];
+	info = iter->items[iter->index];
 
 	if (info->getSubset() && name) {
 		while (*name && *name != '+')
@@ -2795,7 +2796,7 @@ poppler_fonts_iter_get_substitute_name (PopplerFontsIter *iter)
 	GooString *name;
 	FontInfo *info;
 
-	info = (*iter->items)[iter->index];
+	info = iter->items[iter->index];
 
 	name = info->getSubstituteName();
 	if (name != nullptr) {
@@ -2820,7 +2821,7 @@ poppler_fonts_iter_get_file_name (PopplerFontsIter *iter)
 	GooString *file;
 	FontInfo *info;
 
-	info = (*iter->items)[iter->index];
+	info = iter->items[iter->index];
 
 	file = info->getFile();
 	if (file != nullptr) {
@@ -2845,7 +2846,7 @@ poppler_fonts_iter_get_font_type (PopplerFontsIter *iter)
 
 	g_return_val_if_fail (iter != nullptr, POPPLER_FONT_TYPE_UNKNOWN);
 
-	info = (*iter->items)[iter->index];
+	info = iter->items[iter->index];
 
 	return (PopplerFontType)info->getType ();
 }
@@ -2866,7 +2867,7 @@ poppler_fonts_iter_get_encoding (PopplerFontsIter *iter)
 	GooString *encoding;
 	FontInfo *info;
 
-	info = (*iter->items)[iter->index];
+	info = iter->items[iter->index];
 
 	encoding = info->getEncoding();
 	if (encoding != nullptr) {
@@ -2889,7 +2890,7 @@ poppler_fonts_iter_is_embedded (PopplerFontsIter *iter)
 {
 	FontInfo *info;
 
-	info = (*iter->items)[iter->index];
+	info = iter->items[iter->index];
 
 	return info->getEmbedded();
 }
@@ -2907,7 +2908,7 @@ poppler_fonts_iter_is_subset (PopplerFontsIter *iter)
 {
 	FontInfo *info;
 
-	info = (*iter->items)[iter->index];
+	info = iter->items[iter->index];
 
 	return info->getSubset();
 }
@@ -2926,7 +2927,7 @@ poppler_fonts_iter_next (PopplerFontsIter *iter)
 	g_return_val_if_fail (iter != nullptr, FALSE);
 
 	iter->index++;
-	if (iter->index >= (int)iter->items->size())
+	if (iter->index >= (int)iter->items.size())
 		return FALSE;
 
 	return TRUE;
@@ -2949,10 +2950,10 @@ poppler_fonts_iter_copy (PopplerFontsIter *iter)
 
 	new_iter = g_slice_dup (PopplerFontsIter, iter);
 
-	new_iter->items = new std::vector<FontInfo*> ();
-	for (std::size_t i = 0; i < iter->items->size(); i++) {
-		FontInfo *info = (*iter->items)[i];
-		new_iter->items->push_back (new FontInfo (*info));
+	new_iter->items.resize(iter->items.size());
+	for (std::size_t i = 0; i < iter->items.size(); i++) {
+		FontInfo *info = iter->items[i];
+		new_iter->items[i] = new FontInfo (*info);
 	}
 
 	return new_iter;
@@ -2970,21 +2971,21 @@ poppler_fonts_iter_free (PopplerFontsIter *iter)
 	if (G_UNLIKELY (iter == nullptr))
 		return;
 
-        for (auto entry : *iter->items) {
+        for (auto entry : iter->items) {
           delete entry;
         }
-        delete iter->items;
+        iter->items.~vector<FontInfo*>();
 
 	g_slice_free (PopplerFontsIter, iter);
 }
 
 static PopplerFontsIter *
-poppler_fonts_iter_new (std::vector<FontInfo*> *items)
+poppler_fonts_iter_new (std::vector<FontInfo*> &&items)
 {
 	PopplerFontsIter *iter;
 
 	iter = g_slice_new (PopplerFontsIter);
-	iter->items = items;
+	new ((void*)&iter->items) std::vector<FontInfo*>(std::move(items));
 	iter->index = 0;
 
 	return iter;
@@ -3083,22 +3084,18 @@ poppler_font_info_scan (PopplerFontInfo   *font_info,
 			int                n_pages,
 			PopplerFontsIter **iter)
 {
-	std::vector<FontInfo*> *items;
-
 	g_return_val_if_fail (iter != nullptr, FALSE);
 
-	items = font_info->scanner->scan(n_pages);
+	std::vector<FontInfo*> items = font_info->scanner->scan(n_pages);
 
-	if (items == nullptr) {
+	if (items.empty()) {
 		*iter = nullptr;
-	} else if (items->empty()) {
-		*iter = nullptr;
-		delete items;
+		return FALSE;
 	} else {
-		*iter = poppler_fonts_iter_new(items);
+		*iter = poppler_fonts_iter_new(std::move(items));
 	}
 	
-	return (items != nullptr);
+	return TRUE;
 }
 
 /* For backward compatibility */

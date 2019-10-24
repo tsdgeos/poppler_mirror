@@ -662,6 +662,13 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
       splash/SplashXPathScanner.h
       DESTINATION include/poppler/splash)
   endif()
+  if(CAIRO_FOUND)
+    install(FILES
+      poppler/CairoFontEngine.h
+      poppler/CairoOutputDev.h
+      poppler/CairoRescaleBox.h
+      DESTINATION include/poppler)
+  endif()
 endif()
 
 

@@ -218,18 +218,13 @@ std::vector<font_info> font_iterator::next()
 
     ++d->current_page;
 
-    std::vector<FontInfo*> *items = d->font_info_scanner.scan(1);
-    if (!items) {
-        return std::vector<font_info>();
-    }
-    std::vector<font_info> fonts(items->size());
-    for (std::size_t i = 0; i < items->size(); ++i) {
-        fonts[i] = font_info(*new font_info_private((*items)[i]));
-    }
-    for (auto entry : *items) {
+    const std::vector<FontInfo*> items = d->font_info_scanner.scan(1);
+    std::vector<font_info> fonts;
+    fonts.reserve(items.size());
+    for (FontInfo* entry : items) {
+        fonts.push_back(font_info(*new font_info_private(entry)));
         delete entry;
     }
-    delete items;
     return fonts;
 }
 
