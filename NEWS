@@ -1,3 +1,19 @@
+Release 0.82.0:
+        core:
+         * Fix not being able to open some files. Issue #832
+         * Fix crashes in malformed files
+         * Fix memory leak on broken files
+         * Minor performance improvements
+         * Minor code improvements
+
+        glib:
+         * Add poppler_document_new_from_bytes
+         * PopplerAttachment: Silence deprecation warnings for ctime/mtime
+
+        build system:
+         * pdf-inspector: Support builddir != srcdir
+         * Install Cairo* headers if Cairo has been found
+
 Release 0.81.0:
         core:
          * Splash: Always enable support for CMYK rasterization
