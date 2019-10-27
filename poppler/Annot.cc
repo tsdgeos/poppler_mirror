@@ -187,11 +187,10 @@ static AnnotExternalDataType parseAnnotExternalData(Dict* dict) {
 static std::unique_ptr<PDFRectangle> parseDiffRectangle(Array *array, PDFRectangle *rect) {
   if (array->getLength() == 4) {
     // deltas
-    Object obj1;
-    double dx1 = (obj1 = array->get(0), obj1.isNum() ? obj1.getNum() : 0);
-    double dy1 = (obj1 = array->get(1), obj1.isNum() ? obj1.getNum() : 0);
-    double dx2 = (obj1 = array->get(2), obj1.isNum() ? obj1.getNum() : 0);
-    double dy2 = (obj1 = array->get(3), obj1.isNum() ? obj1.getNum() : 0);
+    const double dx1 = array->get(0).getNumWithDefaultValue(0);
+    const double dy1 = array->get(1).getNumWithDefaultValue(0);
+    const double dx2 = array->get(2).getNumWithDefaultValue(0);
+    const double dy2 = array->get(3).getNumWithDefaultValue(0);
 
     // checking that the numbers are valid (i.e. >= 0),
     // and that applying the differences still give us a valid rect
@@ -260,9 +259,8 @@ AnnotBorderEffect::AnnotBorderEffect(Dict *dict) {
     effectType = borderEffectNoEffect;
   }
 
-  obj1 = dict->lookup("I");
-  if (obj1.isNum() && effectType == borderEffectCloudy) {
-    intensity = obj1.getNum();
+  if (effectType == borderEffectCloudy) {
+    intensity = dict->lookup("I").getNumWithDefaultValue(0);
   } else {
     intensity = 0;
   }
@@ -844,9 +842,8 @@ AnnotIconFit::AnnotIconFit(Dict* dict) {
 
   obj1 = dict->lookup("A");
   if (obj1.isArray() && obj1.arrayGetLength() == 2) {
-    Object obj2;
-    (obj2 = obj1.arrayGet(0), obj2.isNum() ? left = obj2.getNum() : left = 0);
-    (obj2 = obj1.arrayGet(1), obj2.isNum() ? bottom = obj2.getNum() : bottom = 0);
+    left = obj1.arrayGet(0).getNumWithDefaultValue(0);
+    bottom = obj1.arrayGet(1).getNumWithDefaultValue(0);
 
     if (left < 0 || left > 1)
       left = 0.5;
@@ -1185,11 +1182,10 @@ void Annot::initialize(PDFDoc *docA, Dict *dict) {
   rect = std::make_unique<PDFRectangle>();
   obj1 = dict->lookup("Rect");
   if (obj1.isArray() && obj1.arrayGetLength() == 4) {
-    Object obj2;
-    (obj2 = obj1.arrayGet(0), obj2.isNum() ? rect->x1 = obj2.getNum() : rect->x1 = 0);
-    (obj2 = obj1.arrayGet(1), obj2.isNum() ? rect->y1 = obj2.getNum() : rect->y1 = 0);
-    (obj2 = obj1.arrayGet(2), obj2.isNum() ? rect->x2 = obj2.getNum() : rect->x2 = 1);
-    (obj2 = obj1.arrayGet(3), obj2.isNum() ? rect->y2 = obj2.getNum() : rect->y2 = 1);
+    rect->x1 = obj1.arrayGet(0).getNumWithDefaultValue(0);
+    rect->y1 = obj1.arrayGet(1).getNumWithDefaultValue(0);
+    rect->x2 = obj1.arrayGet(2).getNumWithDefaultValue(1);
+    rect->y2 = obj1.arrayGet(3).getNumWithDefaultValue(1);
 
     if (rect->x1 > rect->x2) {
       double t = rect->x1;
@@ -1980,12 +1976,7 @@ void AnnotMarkup::initialize(PDFDoc *docA, Dict *dict) {
     popup = std::make_unique<AnnotPopup>(docA, std::move(popupObj), &obj2);
   }
 
-  obj1 = dict->lookup("CA");
-  if (obj1.isNum()) {
-    opacity = obj1.getNum();
-  } else {
-    opacity = 1.0;
-  }
+  opacity = dict->lookup("CA").getNumWithDefaultValue(1.0);
 
   obj1 = dict->lookup("CreationDate");
   if (obj1.isString()) {
@@ -2666,18 +2657,14 @@ void AnnotFreeText::initialize(PDFDoc *docA, Dict *dict) {
 
   obj1 = dict->lookup("CL");
   if (obj1.isArray() && obj1.arrayGetLength() >= 4) {
-    double x1, y1, x2, y2;
-    Object obj2;
-
-    (obj2 = obj1.arrayGet(0), obj2.isNum() ? x1 = obj2.getNum() : x1 = 0);
-    (obj2 = obj1.arrayGet(1), obj2.isNum() ? y1 = obj2.getNum() : y1 = 0);
-    (obj2 = obj1.arrayGet(2), obj2.isNum() ? x2 = obj2.getNum() : x2 = 0);
-    (obj2 = obj1.arrayGet(3), obj2.isNum() ? y2 = obj2.getNum() : y2 = 0);
+    const double x1 = obj1.arrayGet(0).getNumWithDefaultValue(0);
+    const double y1 = obj1.arrayGet(1).getNumWithDefaultValue(0);
+    const double x2 = obj1.arrayGet(2).getNumWithDefaultValue(0);
+    const double y2 = obj1.arrayGet(3).getNumWithDefaultValue(0);
 
     if (obj1.arrayGetLength() == 6) {
-      double x3, y3;
-      (obj2 = obj1.arrayGet(4), obj2.isNum() ? x3 = obj2.getNum() : x3 = 0);
-      (obj2 = obj1.arrayGet(5), obj2.isNum() ? y3 = obj2.getNum() : y3 = 0);
+      const double x3 = obj1.arrayGet(4).getNumWithDefaultValue(0);
+      const double y3 = obj1.arrayGet(5).getNumWithDefaultValue(0);
       calloutLine = std::make_unique<AnnotCalloutMultiLine>(x1, y1, x2, y2, x3, y3);
     } else {
       calloutLine = std::make_unique<AnnotCalloutLine>(x1, y1, x2, y2);
@@ -3002,13 +2989,10 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict) {
 
   obj1 = dict->lookup("L");
   if (obj1.isArray() && obj1.arrayGetLength() == 4) {
-    Object obj2;
-    double x1, y1, x2, y2;
-
-    (obj2 = obj1.arrayGet(0), obj2.isNum() ? x1 = obj2.getNum() : x1 = 0);
-    (obj2 = obj1.arrayGet(1), obj2.isNum() ? y1 = obj2.getNum() : y1 = 0);
-    (obj2 = obj1.arrayGet(2), obj2.isNum() ? x2 = obj2.getNum() : x2 = 0);
-    (obj2 = obj1.arrayGet(3), obj2.isNum() ? y2 = obj2.getNum() : y2 = 0);
+    const double x1 = obj1.arrayGet(0).getNumWithDefaultValue(0);
+    const double y1 = obj1.arrayGet(1).getNumWithDefaultValue(0);
+    const double x2 = obj1.arrayGet(2).getNumWithDefaultValue(0);
+    const double y2 = obj1.arrayGet(3).getNumWithDefaultValue(0);
 
     coord1 = std::make_unique<AnnotCoord>(x1, y1);
     coord2 = std::make_unique<AnnotCoord>(x2, y2);
@@ -3046,22 +3030,11 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict) {
     interiorColor = std::make_unique<AnnotColor>(obj1.getArray());
   }
 
-  obj1 = dict->lookup("LL");
-  if (obj1.isNum()) {
-    leaderLineLength = obj1.getNum();
-  } else {
-    leaderLineLength = 0;
-  }
+  leaderLineLength = dict->lookup("LL").getNumWithDefaultValue(0);
 
-  obj1 = dict->lookup("LLE");
-  if (obj1.isNum()) {
-    leaderLineExtension = obj1.getNum();
-
-    if (leaderLineExtension < 0)
-      leaderLineExtension = 0;
-  } else {
+  leaderLineExtension = dict->lookup("LLE").getNumWithDefaultValue(0);
+  if (leaderLineExtension < 0)
     leaderLineExtension = 0;
-  }
 
   obj1 = dict->lookup("Cap");
   if (obj1.isBool()) {
@@ -3085,15 +3058,9 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict) {
     intent = intentLineArrow;
   }
 
-  obj1 = dict->lookup("LLO");
-  if (obj1.isNum()) {
-    leaderLineOffset = obj1.getNum();
-
-    if (leaderLineOffset < 0)
-      leaderLineOffset = 0;
-  } else {
+  leaderLineOffset = dict->lookup("LLO").getNumWithDefaultValue(0);
+  if (leaderLineOffset < 0)
     leaderLineOffset = 0;
-  }
 
   obj1 = dict->lookup("CP");
   if (obj1.isName()) {
@@ -3119,12 +3086,8 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict) {
 
   obj1 = dict->lookup("CO");
   if (obj1.isArray() && (obj1.arrayGetLength() == 2)) {
-    Object obj2;
-
-    obj2 = obj1.arrayGet(0);
-    captionTextHorizontal = obj2.isNum() ? obj2.getNum() : 0;
-    obj2 = obj1.arrayGet(1);
-    captionTextVertical = obj2.isNum() ? obj2.getNum() : 0;
+    captionTextHorizontal = obj1.arrayGet(0).getNumWithDefaultValue(0);
+    captionTextVertical = obj1.arrayGet(1).getNumWithDefaultValue(0);
   } else {
     captionTextHorizontal = captionTextVertical = 0;
   }

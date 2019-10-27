@@ -796,32 +796,18 @@ GfxColorSpace *GfxCalGrayColorSpace::parse(Array *arr, GfxState *state) {
   cs = new GfxCalGrayColorSpace();
   obj2 = obj1.dictLookup("WhitePoint");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    if (likely(obj3.isNum()))
-      cs->whiteX = obj3.getNum();
-    obj3 = obj2.arrayGet(1);
-    if (likely(obj3.isNum()))
-      cs->whiteY = obj3.getNum();
-    obj3 = obj2.arrayGet(2);
-    if (likely(obj3.isNum()))
-      cs->whiteZ = obj3.getNum();
+    cs->whiteX = obj2.arrayGet(0).getNumWithDefaultValue(1);
+    cs->whiteY = obj2.arrayGet(1).getNumWithDefaultValue(1);
+    cs->whiteZ = obj2.arrayGet(2).getNumWithDefaultValue(1);
   }
   obj2 = obj1.dictLookup("BlackPoint");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    if (likely(obj3.isNum()))
-      cs->blackX = obj3.getNum();
-    obj3 = obj2.arrayGet(1);
-    if (likely(obj3.isNum()))
-      cs->blackY = obj3.getNum();
-    obj3 = obj2.arrayGet(2);
-    if (likely(obj3.isNum()))
-      cs->blackZ = obj3.getNum();
+    cs->blackX = obj2.arrayGet(0).getNumWithDefaultValue(0);
+    cs->blackY = obj2.arrayGet(1).getNumWithDefaultValue(0);
+    cs->blackZ = obj2.arrayGet(2).getNumWithDefaultValue(0);
   }
-  obj2 = obj1.dictLookup("Gamma");
-  if (obj2.isNum()) {
-    cs->gamma = obj2.getNum();
-  }
+
+  cs->gamma = obj1.dictLookup("Gamma").getNumWithDefaultValue(1);
 
   cs->kr = 1 / (xyzrgb[0][0] * cs->whiteX +
 		xyzrgb[0][1] * cs->whiteY +
@@ -1166,39 +1152,21 @@ GfxColorSpace *GfxCalRGBColorSpace::parse(Array *arr, GfxState *state) {
   cs = new GfxCalRGBColorSpace();
   obj2 = obj1.dictLookup("WhitePoint");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    if (likely(obj3.isNum()))
-      cs->whiteX = obj3.getNum();
-    obj3 = obj2.arrayGet(1);
-    if (likely(obj3.isNum()))
-      cs->whiteY = obj3.getNum();
-    obj3 = obj2.arrayGet(2);
-    if (likely(obj3.isNum()))
-      cs->whiteZ = obj3.getNum();
+    cs->whiteX = obj2.arrayGet(0).getNumWithDefaultValue(1);
+    cs->whiteY = obj2.arrayGet(1).getNumWithDefaultValue(1);
+    cs->whiteZ = obj2.arrayGet(2).getNumWithDefaultValue(1);
   }
   obj2 = obj1.dictLookup("BlackPoint");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    if (likely(obj3.isNum()))
-      cs->blackX = obj3.getNum();
-    obj3 = obj2.arrayGet(1);
-    if (likely(obj3.isNum()))
-      cs->blackY = obj3.getNum();
-    obj3 = obj2.arrayGet(2);
-    if (likely(obj3.isNum()))
-      cs->blackZ = obj3.getNum();
+    cs->blackX = obj2.arrayGet(0).getNumWithDefaultValue(0);
+    cs->blackY = obj2.arrayGet(1).getNumWithDefaultValue(0);
+    cs->blackZ = obj2.arrayGet(2).getNumWithDefaultValue(0);
   }
   obj2 = obj1.dictLookup("Gamma");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    if (likely(obj3.isNum()))
-      cs->gammaR = obj3.getNum();
-    obj3 = obj2.arrayGet(1);
-    if (likely(obj3.isNum()))
-      cs->gammaG = obj3.getNum();
-    obj3 = obj2.arrayGet(2);
-    if (likely(obj3.isNum()))
-      cs->gammaB = obj3.getNum();
+    cs->gammaR = obj2.arrayGet(0).getNumWithDefaultValue(1);
+    cs->gammaG = obj2.arrayGet(1).getNumWithDefaultValue(1);
+    cs->gammaB = obj2.arrayGet(2).getNumWithDefaultValue(1);
   }
   obj2 = obj1.dictLookup("Matrix");
   if (obj2.isArray() && obj2.arrayGetLength() == 9) {
@@ -1537,32 +1505,22 @@ GfxColorSpace *GfxLabColorSpace::parse(Array *arr, GfxState *state) {
   bool ok = true;
   obj2 = obj1.dictLookup("WhitePoint");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    cs->whiteX = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(1);
-    cs->whiteY = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(2);
-    cs->whiteZ = obj3.getNum(&ok);
+    cs->whiteX = obj2.arrayGet(0).getNum(&ok);
+    cs->whiteY = obj2.arrayGet(1).getNum(&ok);
+    cs->whiteZ = obj2.arrayGet(2).getNum(&ok);
   }
   obj2 = obj1.dictLookup("BlackPoint");
   if (obj2.isArray() && obj2.arrayGetLength() == 3) {
-    Object obj3 = obj2.arrayGet(0);
-    cs->blackX = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(1);
-    cs->blackY = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(2);
-    cs->blackZ = obj3.getNum(&ok);
+    cs->blackX = obj2.arrayGet(0).getNum(&ok);
+    cs->blackY = obj2.arrayGet(1).getNum(&ok);
+    cs->blackZ = obj2.arrayGet(2).getNum(&ok);
   }
   obj2 = obj1.dictLookup("Range");
   if (obj2.isArray() && obj2.arrayGetLength() == 4) {
-    Object obj3 = obj2.arrayGet(0);
-    cs->aMin = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(1);
-    cs->aMax = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(2);
-    cs->bMin = obj3.getNum(&ok);
-    obj3 = obj2.arrayGet(3);
-    cs->bMax = obj3.getNum(&ok);
+    cs->aMin = obj2.arrayGet(0).getNum(&ok);
+    cs->aMax = obj2.arrayGet(1).getNum(&ok);
+    cs->bMin = obj2.arrayGet(2).getNum(&ok);
+    cs->bMax = obj2.arrayGet(3).getNum(&ok);
   }
 
   if (!ok) {
@@ -1818,7 +1776,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
   int nCompsA;
   GfxColorSpace *altA;
   Dict *dict;
-  Object obj1, obj2, obj3;
+  Object obj1, obj2;
   int i;
 
   if (arr->getLength() < 2) {
@@ -1897,14 +1855,9 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
   cs = new GfxICCBasedColorSpace(nCompsA, altA);
   obj2 = dict->lookup("Range");
   if (obj2.isArray() && obj2.arrayGetLength() == 2 * nCompsA) {
-    Object obj4;
     for (i = 0; i < nCompsA; ++i) {
-      obj3 = obj2.arrayGet(2*i);
-      obj4 = obj2.arrayGet(2*i+1);
-      if (obj3.isNum() && obj4.isNum()) {
-        cs->rangeMin[i] = obj3.getNum();
-        cs->rangeMax[i] = obj4.getNum();
-      }
+      cs->rangeMin[i] = obj2.arrayGet(2*i).getNumWithDefaultValue(0);
+      cs->rangeMax[i] = obj2.arrayGet(2*i+1).getNumWithDefaultValue(1);
     }
   }
 
@@ -3624,18 +3577,12 @@ bool GfxShading::init(GfxResources *res, Dict *dict, OutputDev *out, GfxState *s
   obj1 = dict->lookup("BBox");
   if (obj1.isArray()) {
     if (obj1.arrayGetLength() == 4) {
-      Object obj2 = obj1.arrayGet(0);
-      Object obj3 = obj1.arrayGet(1);
-      Object obj4 = obj1.arrayGet(2);
-      Object obj5 = obj1.arrayGet(3);
-      if (obj2.isNum() && obj3.isNum() && obj4.isNum() && obj5.isNum())
-      {
-        hasBBox = true;
-        bbox_xMin = obj2.getNum();
-        bbox_yMin = obj3.getNum();
-        bbox_xMax = obj4.getNum();
-        bbox_yMax = obj5.getNum();
-      } else {
+      hasBBox = true;
+      bbox_xMin = obj1.arrayGet(0).getNum(&hasBBox);
+      bbox_yMin = obj1.arrayGet(1).getNum(&hasBBox);
+      bbox_xMax = obj1.arrayGet(2).getNum(&hasBBox);
+      bbox_yMax = obj1.arrayGet(3).getNum(&hasBBox);
+      if (!hasBBox) {
         error(errSyntaxWarning, -1, "Bad BBox in shading dictionary (Values not numbers)");
       }
     } else {
@@ -3711,11 +3658,10 @@ GfxFunctionShading *GfxFunctionShading::parse(GfxResources *res, Dict *dict, Out
   obj1 = dict->lookup("Domain");
   if (obj1.isArray() && obj1.arrayGetLength() == 4) {
     bool decodeOk = true;
-    Object obj2;
-    x0A = (obj2 = obj1.arrayGet(0), obj2.getNum(&decodeOk));
-    x1A = (obj2 = obj1.arrayGet(1), obj2.getNum(&decodeOk));
-    y0A = (obj2 = obj1.arrayGet(2), obj2.getNum(&decodeOk));
-    y1A = (obj2 = obj1.arrayGet(3), obj2.getNum(&decodeOk));
+    x0A = obj1.arrayGet(0).getNum(&decodeOk);
+    x1A = obj1.arrayGet(1).getNum(&decodeOk);
+    y0A = obj1.arrayGet(2).getNum(&decodeOk);
+    y1A = obj1.arrayGet(3).getNum(&decodeOk);
 
     if (!decodeOk) {
       error(errSyntaxWarning, -1, "Invalid Domain array in function shading dictionary");
@@ -3729,13 +3675,12 @@ GfxFunctionShading *GfxFunctionShading::parse(GfxResources *res, Dict *dict, Out
   obj1 = dict->lookup("Matrix");
   if (obj1.isArray() && obj1.arrayGetLength() == 6) {
     bool decodeOk = true;
-    Object obj2;
-    matrixA[0] = (obj2 = obj1.arrayGet(0), obj2.getNum(&decodeOk));
-    matrixA[1] = (obj2 = obj1.arrayGet(1), obj2.getNum(&decodeOk));
-    matrixA[2] = (obj2 = obj1.arrayGet(2), obj2.getNum(&decodeOk));
-    matrixA[3] = (obj2 = obj1.arrayGet(3), obj2.getNum(&decodeOk));
-    matrixA[4] = (obj2 = obj1.arrayGet(4), obj2.getNum(&decodeOk));
-    matrixA[5] = (obj2 = obj1.arrayGet(5), obj2.getNum(&decodeOk));
+    matrixA[0] = obj1.arrayGet(0).getNum(&decodeOk);
+    matrixA[1] = obj1.arrayGet(1).getNum(&decodeOk);
+    matrixA[2] = obj1.arrayGet(2).getNum(&decodeOk);
+    matrixA[3] = obj1.arrayGet(3).getNum(&decodeOk);
+    matrixA[4] = obj1.arrayGet(4).getNum(&decodeOk);
+    matrixA[5] = obj1.arrayGet(5).getNum(&decodeOk);
 
     if (!decodeOk) {
       error(errSyntaxWarning, -1, "Invalid Matrix array in function shading dictionary");
@@ -4039,16 +3984,10 @@ GfxAxialShading *GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev
   x0A = y0A = x1A = y1A = 0;
   obj1 = dict->lookup("Coords");
   if (obj1.isArray() && obj1.arrayGetLength() == 4) {
-    Object obj2 = obj1.arrayGet(0);
-    Object obj3 = obj1.arrayGet(1);
-    Object obj4 = obj1.arrayGet(2);
-    Object obj5 = obj1.arrayGet(3);
-    if (obj2.isNum() && obj3.isNum() && obj4.isNum() && obj5.isNum()) {
-      x0A = obj2.getNum();
-      y0A = obj3.getNum();
-      x1A = obj4.getNum();
-      y1A = obj5.getNum();
-    }
+    x0A = obj1.arrayGet(0).getNumWithDefaultValue(0);
+    y0A = obj1.arrayGet(1).getNumWithDefaultValue(0);
+    x1A = obj1.arrayGet(2).getNumWithDefaultValue(0);
+    y1A = obj1.arrayGet(3).getNumWithDefaultValue(0);
   } else {
     error(errSyntaxWarning, -1, "Missing or invalid Coords in shading dictionary");
     return nullptr;
@@ -4058,12 +3997,8 @@ GfxAxialShading *GfxAxialShading::parse(GfxResources *res, Dict *dict, OutputDev
   t1A = 1;
   obj1 = dict->lookup("Domain");
   if (obj1.isArray() && obj1.arrayGetLength() == 2) {
-    Object obj2 = obj1.arrayGet(0);
-    Object obj3 = obj1.arrayGet(1);
-    if (obj2.isNum() && obj3.isNum()) {
-      t0A = obj2.getNum();
-      t1A = obj3.getNum();
-    }
+    t0A = obj1.arrayGet(0).getNumWithDefaultValue(0);
+    t1A = obj1.arrayGet(1).getNumWithDefaultValue(1);
   }
 
   obj1 = dict->lookup("Function");
@@ -4234,14 +4169,12 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
   x0A = y0A = r0A = x1A = y1A = r1A = 0;
   obj1 = dict->lookup("Coords");
   if (obj1.isArray() && obj1.arrayGetLength() == 6) {
-    Object obj2;
-    bool dummy; // just so that we can use the getNum that returns 0 on obj2 not being a num instead of aborting
-    x0A = (obj2 = obj1.arrayGet(0), obj2.getNum(&dummy));
-    y0A = (obj2 = obj1.arrayGet(1), obj2.getNum(&dummy));
-    r0A = (obj2 = obj1.arrayGet(2), obj2.getNum(&dummy));
-    x1A = (obj2 = obj1.arrayGet(3), obj2.getNum(&dummy));
-    y1A = (obj2 = obj1.arrayGet(4), obj2.getNum(&dummy));
-    r1A = (obj2 = obj1.arrayGet(5), obj2.getNum(&dummy));
+    x0A = obj1.arrayGet(0).getNumWithDefaultValue(0);
+    y0A = obj1.arrayGet(1).getNumWithDefaultValue(0);
+    r0A = obj1.arrayGet(2).getNumWithDefaultValue(0);
+    x1A = obj1.arrayGet(3).getNumWithDefaultValue(0);
+    y1A = obj1.arrayGet(4).getNumWithDefaultValue(0);
+    r1A = obj1.arrayGet(5).getNumWithDefaultValue(0);
   } else {
     error(errSyntaxWarning, -1, "Missing or invalid Coords in shading dictionary");
     return nullptr;
@@ -4251,9 +4184,8 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
   t1A = 1;
   obj1 = dict->lookup("Domain");
   if (obj1.isArray() && obj1.arrayGetLength() == 2) {
-    Object obj2;
-    t0A = (obj2 = obj1.arrayGet(0), obj2.isNum() ? obj2.getNum() : 0);
-    t1A = (obj2 = obj1.arrayGet(1), obj2.isNum() ? obj2.getNum() : 1);
+    t0A = obj1.arrayGet(0).getNumWithDefaultValue(0);
+    t1A = obj1.arrayGet(1).getNumWithDefaultValue(1);
   }
 
   obj1 = dict->lookup("Function");
@@ -4792,17 +4724,16 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
   }
   obj1 = dict->lookup("Decode");
   if (obj1.isArray() && obj1.arrayGetLength() >= 6) {
-    Object obj2;
     bool decodeOk = true;
-    xMin = (obj2 = obj1.arrayGet(0), obj2.getNum(&decodeOk));
-    xMax = (obj2 = obj1.arrayGet(1), obj2.getNum(&decodeOk));
+    xMin = obj1.arrayGet(0).getNum(&decodeOk);
+    xMax = obj1.arrayGet(1).getNum(&decodeOk);
     xMul = (xMax - xMin) / (pow(2.0, coordBits) - 1);
-    yMin = (obj2 = obj1.arrayGet(2), obj2.getNum(&decodeOk));
-    yMax = (obj2 = obj1.arrayGet(3), obj2.getNum(&decodeOk));
+    yMin = obj1.arrayGet(2).getNum(&decodeOk);
+    yMax = obj1.arrayGet(3).getNum(&decodeOk);
     yMul = (yMax - yMin) / (pow(2.0, coordBits) - 1);
     for (i = 0; 5 + 2*i < obj1.arrayGetLength() && i < gfxColorMaxComps; ++i) {
-      cMin[i] = (obj2 = obj1.arrayGet(4 + 2*i), obj2.getNum(&decodeOk));
-      cMax[i] = (obj2 = obj1.arrayGet(5 + 2*i), obj2.getNum(&decodeOk));
+      cMin[i] = obj1.arrayGet(4 + 2*i).getNum(&decodeOk);
+      cMax[i] = obj1.arrayGet(5 + 2*i).getNum(&decodeOk);
       cMul[i] = (cMax[i] - cMin[i]) / (double)((1u << compBits) - 1);
     }
     nComps = i;
@@ -5144,16 +5075,15 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
   obj1 = dict->lookup("Decode");
   if (obj1.isArray() && obj1.arrayGetLength() >= 6) {
     bool decodeOk = true;
-    Object obj2;
-    xMin = (obj2 = obj1.arrayGet(0), obj2.getNum(&decodeOk));
-    xMax = (obj2 = obj1.arrayGet(1), obj2.getNum(&decodeOk));
+    xMin = obj1.arrayGet(0).getNum(&decodeOk);
+    xMax = obj1.arrayGet(1).getNum(&decodeOk);
     xMul = (xMax - xMin) / (pow(2.0, coordBits) - 1);
-    yMin = (obj2 = obj1.arrayGet(2), obj2.getNum(&decodeOk));
-    yMax = (obj2 = obj1.arrayGet(3), obj2.getNum(&decodeOk));
+    yMin = obj1.arrayGet(2).getNum(&decodeOk);
+    yMax = obj1.arrayGet(3).getNum(&decodeOk);
     yMul = (yMax - yMin) / (pow(2.0, coordBits) - 1);
     for (i = 0; 5 + 2*i < obj1.arrayGetLength() && i < gfxColorMaxComps; ++i) {
-      cMin[i] = (obj2 = obj1.arrayGet(4 + 2*i), obj2.getNum(&decodeOk));
-      cMax[i] = (obj2 = obj1.arrayGet(5 + 2*i), obj2.getNum(&decodeOk));
+      cMin[i] = obj1.arrayGet(4 + 2*i).getNum(&decodeOk);
+      cMax[i] = obj1.arrayGet(5 + 2*i).getNum(&decodeOk);
       cMul[i] = (cMax[i] - cMin[i]) / (double)((1u << compBits) - 1);
     }
     nComps = i;

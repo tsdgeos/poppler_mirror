@@ -74,10 +74,7 @@ Sound::Sound(const Object *obj, bool readAttrs)
       kind = soundEmbedded;
     }
     // sampling rate
-    tmp = dict->lookup("R");
-    if (tmp.isNum()) {
-      samplingRate = tmp.getNum();
-    }
+    samplingRate = dict->lookup("R").getNumWithDefaultValue(0);
     // sound channels
     tmp = dict->lookup("C");
     if (tmp.isInt()) {
