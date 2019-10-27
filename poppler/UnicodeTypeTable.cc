@@ -18,6 +18,7 @@
 // Copyright (C) 2008, 2016 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Khaled Hosny <khaledhosny@eglug.org>
+// Copyright (C) 2019 Adriaan de Groot <groot@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1134,12 +1135,12 @@ static bool combine(Unicode base, Unicode add, Unicode *out) {
 // for each character in the normalized string giving the index in @in of the 
 // corresponding unnormalized character. @indices is not guaranteed monotone or
 // onto.
-Unicode *unicodeNormalizeNFKC(Unicode *in, int len,
+Unicode *unicodeNormalizeNFKC(const Unicode *in, int len,
 			      int *out_len, int **indices) {
     return unicodeNormalizeNFKC(in, len, out_len, indices, false);
 }
 
-Unicode *unicodeNormalizeNFKC(Unicode *in, int len,
+Unicode *unicodeNormalizeNFKC(const Unicode *in, int len,
 			      int *out_len, int **indices,
 			      bool reverseRTL) {
   Unicode *out;
