@@ -33,6 +33,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <math.h>
+#include <string>
 #include "parseargs.h"
 #include "goo/GooString.h"
 #include "goo/gmem.h"
@@ -92,7 +93,6 @@ static const ArgDesc argDesc[] = {
 
 int main(int argc, char *argv[]) {
   PDFDoc *doc;
-  GooString *fileName;
   GooString *ownerPW, *userPW;
   bool ok;
   int exitCode;
@@ -113,7 +113,11 @@ int main(int argc, char *argv[]) {
       exitCode = 0;
     return exitCode;
   }
-  fileName = new GooString(argv[1]);
+
+  std::string fileName(argv[1]);
+  if (fileName == "-") {
+      fileName = "fd://0";
+  }
 
   // read config file
   globalParams = new GlobalParams();
@@ -129,13 +133,8 @@ int main(int argc, char *argv[]) {
   } else {
     userPW = nullptr;
   }
-  if (fileName->cmp("-") == 0) {
-      delete fileName;
-      fileName = new GooString("fd://0");
-  }
 
-  doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
-  delete fileName;
+  doc = PDFDocFactory().createPDFDoc(GooString(fileName), ownerPW, userPW);
 
   if (userPW) {
     delete userPW;
