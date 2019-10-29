@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
     }
     if (printVersion || printHelp)
       exitCode = 0;
-    goto err0;
+    return exitCode;
   }
   fileName = new GooString(argv[1]);
 
@@ -215,7 +215,6 @@ int main(int argc, char *argv[]) {
  err1:
   delete doc;
   delete globalParams;
- err0:
 
   return exitCode;
 }
