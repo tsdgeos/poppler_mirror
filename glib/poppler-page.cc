@@ -1383,6 +1383,7 @@ poppler_page_get_annot_mapping (PopplerPage *page)
   double width, height;
   gint i;
   Annots *annots;
+  const PDFRectangle *crop_box;
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
 
@@ -1391,6 +1392,7 @@ poppler_page_get_annot_mapping (PopplerPage *page)
     return nullptr;
 
   poppler_page_get_size (page, &width, &height);
+  crop_box = page->page->getCropBox ();
 
   for (i = 0; i < annots->getNumAnnots (); i++) {
     PopplerAnnotMapping *mapping;
@@ -1442,10 +1444,10 @@ poppler_page_get_annot_mapping (PopplerPage *page)
       }
 
     annot_rect = annot->getRect ();
-    rect.x1 = annot_rect->x1 - page->page->getCropBox()->x1;
-    rect.y1 = annot_rect->y1 - page->page->getCropBox()->y1;
-    rect.x2 = annot_rect->x2 - page->page->getCropBox()->x1;
-    rect.y2 = annot_rect->y2 - page->page->getCropBox()->y1;
+    rect.x1 = annot_rect->x1 - crop_box->x1;
+    rect.y1 = annot_rect->y1 - crop_box->y1;
+    rect.x2 = annot_rect->x2 - crop_box->x1;
+    rect.y2 = annot_rect->y2 - crop_box->y1;
 
     if (! (annot->getFlags () & Annot::flagNoRotate))
       rotation = page->page->getRotate ();
