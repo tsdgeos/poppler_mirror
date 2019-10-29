@@ -33,6 +33,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <math.h>
+#include <memory>
 #include <string>
 #include "parseargs.h"
 #include "goo/GooString.h"
@@ -92,7 +93,6 @@ static const ArgDesc argDesc[] = {
 };
 
 int main(int argc, char *argv[]) {
-  PDFDoc *doc;
   GooString *ownerPW, *userPW;
   bool ok;
   int exitCode;
@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
     userPW = nullptr;
   }
 
-  doc = PDFDocFactory().createPDFDoc(GooString(fileName), ownerPW, userPW);
+  auto doc = std::unique_ptr<PDFDoc>(PDFDocFactory().createPDFDoc(GooString(fileName), ownerPW, userPW));
 
   if (userPW) {
     delete userPW;
@@ -163,7 +163,7 @@ int main(int argc, char *argv[]) {
 
   // get the fonts
   {
-    FontInfoScanner scanner(doc, firstPage - 1);
+    FontInfoScanner scanner(doc.get(), firstPage - 1);
     const std::vector<FontInfo*> fonts = scanner.scan(lastPage - firstPage + 1);
 
     if (showSubst) {
@@ -212,7 +212,6 @@ int main(int argc, char *argv[]) {
   exitCode = 0;
 
  err1:
-  delete doc;
   delete globalParams;
 
   return exitCode;
