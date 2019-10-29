@@ -140,6 +140,8 @@ PopplerAnnot      *_poppler_annot_line_new (Annot *annot);
 PopplerAnnot      *_poppler_annot_circle_new (Annot *annot);
 PopplerAnnot      *_poppler_annot_square_new (Annot *annot);
 
+const PDFRectangle *_poppler_annot_get_cropbox (PopplerAnnot *poppler_annot);
+
 char *_poppler_goo_string_to_utf8(const GooString *s);
 gboolean _poppler_convert_pdf_date_to_gtime (const GooString *date,
 					     time_t    *gdate);
