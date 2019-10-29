@@ -93,7 +93,7 @@ static const ArgDesc argDesc[] = {
 };
 
 int main(int argc, char *argv[]) {
-  GooString *ownerPW, *userPW;
+  std::unique_ptr<GooString> ownerPW, userPW;
   bool ok;
   int exitCode;
 
@@ -124,24 +124,14 @@ int main(int argc, char *argv[]) {
 
   // open PDF file
   if (ownerPassword[0] != '\001') {
-    ownerPW = new GooString(ownerPassword);
-  } else {
-    ownerPW = nullptr;
+    ownerPW = std::make_unique<GooString>(ownerPassword);
   }
   if (userPassword[0] != '\001') {
-    userPW = new GooString(userPassword);
-  } else {
-    userPW = nullptr;
+    userPW = std::make_unique<GooString>(userPassword);
   }
 
-  auto doc = std::unique_ptr<PDFDoc>(PDFDocFactory().createPDFDoc(GooString(fileName), ownerPW, userPW));
+  auto doc = std::unique_ptr<PDFDoc>(PDFDocFactory().createPDFDoc(GooString(fileName), ownerPW.get(), userPW.get()));
 
-  if (userPW) {
-    delete userPW;
-  }
-  if (ownerPW) {
-    delete ownerPW;
-  }
   if (!doc->isOk()) {
     exitCode = 1;
     goto err1;
