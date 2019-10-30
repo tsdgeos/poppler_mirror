@@ -16,7 +16,7 @@
 // Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2007, 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
-// Copyright (C) 2008-2010, 2012-2014, 2016-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012-2014, 2016-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
@@ -827,8 +827,6 @@ Object LinkJavaScript::createObject(XRef *xref, const GooString &js)
 LinkOCGState::LinkOCGState(const Object *obj)
 : isValid(true)
 {
-  preserveRB = true;
-
   Object obj1 = obj->dictLookup("State");
   if (obj1.isArray()) {
     StateList stList;
@@ -866,10 +864,7 @@ LinkOCGState::LinkOCGState(const Object *obj)
     isValid = false;
   }
 
-  obj1 = obj->dictLookup("PreserveRB");
-  if (obj1.isBool()) {
-    preserveRB = obj1.getBool();
-  }
+  preserveRB = obj->dictLookup("PreserveRB").getBoolWithDefaultValue(true);
 }
 
 //------------------------------------------------------------------------

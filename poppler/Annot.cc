@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007, 2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright (C) 2007-2013, 2015-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2013, 2015-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2007-2013, 2018 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2007, 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2007 Jeff Muizelaar <jeff@infidigm.net>
@@ -855,12 +855,7 @@ AnnotIconFit::AnnotIconFit(Dict* dict) {
     left = bottom = 0.5;
   }
 
-  obj1 = dict->lookup("FB");
-  if (obj1.isBool()) {
-    fullyBounds = obj1.getBool();
-  } else {
-    fullyBounds = false;
-  }
+  fullyBounds = dict->lookup("FB").getBoolWithDefaultValue(false);
 }
 
 //------------------------------------------------------------------------
@@ -1929,12 +1924,7 @@ void AnnotPopup::initialize(PDFDoc *docA, Dict *dict) {
     parentRef = Ref::INVALID();
   }
 
-  Object obj1 = dict->lookup("Open");
-  if (obj1.isBool()) {
-    open = obj1.getBool();
-  } else {
-    open = false;
-  }
+  open = dict->lookup("Open").getBoolWithDefaultValue(false);
 }
 
 void AnnotPopup::setParent(Annot *parentA) {
@@ -2117,11 +2107,7 @@ AnnotText::~AnnotText() = default;
 void AnnotText::initialize(PDFDoc *docA, Dict *dict) {
   Object obj1;
 
-  obj1 = dict->lookup("Open");
-  if (obj1.isBool())
-    open = obj1.getBool();
-  else
-    open = false;
+  open = dict->lookup("Open").getBoolWithDefaultValue(false);
 
   obj1 = dict->lookup("Name");
   if (obj1.isName()) {
@@ -3036,12 +3022,7 @@ void AnnotLine::initialize(PDFDoc *docA, Dict *dict) {
   if (leaderLineExtension < 0)
     leaderLineExtension = 0;
 
-  obj1 = dict->lookup("Cap");
-  if (obj1.isBool()) {
-    caption = obj1.getBool();
-  } else {
-    caption = false;
-  }
+  caption = dict->lookup("Cap").getBoolWithDefaultValue(false);
 
   obj1 = dict->lookup("IT");
   if (obj1.isName()) {
@@ -6376,19 +6357,9 @@ Annot3D::Activation::Activation(Dict *dict) {
     dState = dStateUnknown;
   }
 
-  obj1 = dict->lookup("TB");
-  if (obj1.isBool()) {
-    displayToolbar = obj1.getBool();
-  } else {
-    displayToolbar = true;
-  }
+  displayToolbar = dict->lookup("TB").getBoolWithDefaultValue(true);
 
-  obj1 = dict->lookup("NP");
-  if (obj1.isBool()) {
-    displayNavigation = obj1.getBool();
-  } else {
-    displayNavigation = false;
-  }
+  displayNavigation = dict->lookup("NP").getBoolWithDefaultValue(false);
 }
 
 //------------------------------------------------------------------------
