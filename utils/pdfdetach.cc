@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
   fileName = new GooString(argv[1]);
 
   // read config file
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
   if (textEncName[0]) {
     globalParams->setTextEncoding(textEncName);
   }
@@ -332,7 +332,6 @@ int main(int argc, char *argv[]) {
   uMap->decRefCnt();
   delete doc;
  err1:
-  delete globalParams;
  err0:
 
   return exitCode;

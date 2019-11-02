@@ -212,11 +212,10 @@ int main(int argc, char *argv[]) {
   }
 
   // read config file
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
 
   if (printEnc) {
     printEncodings();
-    delete globalParams;
     exitCode = 0;
     goto err0;
   }
@@ -433,7 +432,6 @@ int main(int argc, char *argv[]) {
   delete fileName;
   uMap->decRefCnt();
  err1:
-  delete globalParams;
  err0:
 
   return exitCode;

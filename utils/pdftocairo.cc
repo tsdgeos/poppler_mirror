@@ -1079,7 +1079,7 @@ int main(int argc, char *argv[]) {
   if (printdlg)
     printToWin32 = true;
 
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
   if (quiet) {
     globalParams->setErrQuiet(quiet);
   }
@@ -1262,7 +1262,6 @@ int main(int argc, char *argv[]) {
   // clean up
   delete cairoOut;
   delete doc;
-  delete globalParams;
   if (fileName)
     delete fileName;
   if (outputName)

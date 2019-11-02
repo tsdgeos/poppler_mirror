@@ -334,7 +334,7 @@ main (int argc, char *argv [])
   
   gtk_init (&argc, &argv);
   
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
   globalParams->setProfileCommands (true);
   globalParams->setPrintCommands (true);
 
@@ -354,7 +354,6 @@ main (int argc, char *argv [])
   inspector->run ();
 
   delete inspector;
-  delete globalParams;
   
   return 0;
 }

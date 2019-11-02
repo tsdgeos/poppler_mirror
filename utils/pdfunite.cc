@@ -161,7 +161,7 @@ int main (int argc, char *argv[])
     return exitCode;
   }
   exitCode = 0;
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
 
   for (i = 1; i < argc - 1; i++) {
     GooString *gfileName = new GooString(argv[i]);
@@ -405,6 +405,5 @@ int main (int argc, char *argv[])
   delete yRef;
   delete countRef;
   for (i = 0; i < (int) docs.size (); i++) delete docs[i];
-  delete globalParams;
   return exitCode;
 }

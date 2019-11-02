@@ -58,7 +58,7 @@ initer::initer()
     std::lock_guard<std::mutex> lock{mutex};
 
     if (!count) {
-        globalParams = new GlobalParams(!data_dir.empty() ? data_dir.c_str() : nullptr);
+        globalParams = std::make_unique<GlobalParams>(!data_dir.empty() ? data_dir.c_str() : nullptr);
         setErrorCallback(detail::error_function, nullptr);
     }
     count++;
@@ -71,8 +71,7 @@ initer::~initer()
     if (count > 0) {
         --count;
         if (!count) {
-            delete globalParams;
-            globalParams = nullptr;
+            globalParams.reset();
         }
     }
 }

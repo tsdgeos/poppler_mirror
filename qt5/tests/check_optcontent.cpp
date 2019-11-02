@@ -89,7 +89,7 @@ void TestOptionalContent::checkNoOptionalContent()
 void TestOptionalContent::checkIsVisible()
 {
     GooString *fileName = new GooString(TESTDATADIR "/unittestcases/vis_policy_test.pdf");
-    globalParams = new GlobalParams();
+    globalParams = std::make_unique<GlobalParams>();
     PDFDoc *doc = new PDFDoc( fileName );
     QVERIFY( doc );
 
@@ -157,12 +157,12 @@ void TestOptionalContent::checkIsVisible()
     QCOMPARE( ocgs->optContentIsVisible( &obj ), false );
 
     delete doc;
-    delete globalParams;
+    globalParams.reset();
 }
 
 void TestOptionalContent::checkVisibilitySetting()
 {
-    globalParams = new GlobalParams();
+    globalParams = std::make_unique<GlobalParams>();
     GooString *fileName = new GooString(TESTDATADIR "/unittestcases/vis_policy_test.pdf");
     PDFDoc *doc = new PDFDoc( fileName );
     QVERIFY( doc );
@@ -363,7 +363,7 @@ void TestOptionalContent::checkVisibilitySetting()
     QCOMPARE( ocgs->optContentIsVisible( &obj ), false );
 
     delete doc;
-    delete globalParams;
+    globalParams.reset();
 }
 
 void TestOptionalContent::checkRadioButtons()

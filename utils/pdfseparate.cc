@@ -168,12 +168,11 @@ main (int argc, char *argv[])
 	exitCode = 0;
       goto err0;
     }
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
   ok = extractPages (argv[1], argv[2]);
   if (ok) {
     exitCode = 0;
   }
-  delete globalParams;
 
 err0:
 

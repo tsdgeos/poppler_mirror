@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
   SignatureInfo *sig_info = nullptr;
   char *time_str = nullptr;
   std::vector<FormWidgetSignature*> sig_widgets;
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
 
   Win32Console win32Console(&argc, &argv);
   int exitCode = 99;
@@ -277,7 +277,6 @@ int main(int argc, char *argv[])
 end:
   delete fileName;
   delete doc;
-  delete globalParams;
 
   return exitCode;
 }

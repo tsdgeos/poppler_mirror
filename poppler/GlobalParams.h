@@ -44,6 +44,7 @@
 #include "UnicodeMap.h"
 #include <unordered_map>
 #include <string>
+#include <memory>
 #include <mutex>
 #include <vector>
 
@@ -63,7 +64,7 @@ class SysFontList;
 //------------------------------------------------------------------------
 
 // The global parameters object.
-extern GlobalParams *globalParams;
+extern std::unique_ptr<GlobalParams> globalParams;
 
 //------------------------------------------------------------------------
 

@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
     imgRoot = argv[2];
 
   // read config file
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
   if (quiet) {
     globalParams->setErrQuiet(quiet);
   }
@@ -227,7 +227,6 @@ int main(int argc, char *argv[]) {
   // clean up
  err1:
   delete doc;
-  delete globalParams;
  err0:
 
   return exitCode;

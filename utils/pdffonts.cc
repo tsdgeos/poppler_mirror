@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
   }
 
   // read config file
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
 
   // open PDF file
   if (ownerPassword[0] != '\001') {
@@ -201,7 +201,6 @@ int main(int argc, char *argv[]) {
   exitCode = 0;
 
  err1:
-  delete globalParams;
 
   return exitCode;
 }

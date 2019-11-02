@@ -249,7 +249,7 @@ namespace Debug {
         if ( count == 0 )
         {
             utf8Map = nullptr;
-            delete globalParams;
+            globalParams.reset();
         }
       }
     
@@ -265,7 +265,7 @@ namespace Debug {
         if ( count == 0 )
         {
             utf8Map = nullptr;
-            globalParams = new GlobalParams();
+            globalParams = std::make_unique<GlobalParams>();
             setErrorCallback(qt5ErrorFunction, nullptr);
         }
         count ++;

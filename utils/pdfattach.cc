@@ -70,8 +70,7 @@ int main(int argc, char *argv[]) {
   const GooString attachFilePath(argv[2]);
 
   // init GlobalParams
-  auto gp = std::make_unique<GlobalParams>();
-  globalParams = gp.get();
+  globalParams = std::make_unique<GlobalParams>();
 
   // open PDF file
   std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(pdfFileName, nullptr, nullptr));

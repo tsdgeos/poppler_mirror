@@ -440,7 +440,7 @@ int main(int argc, char *argv[]) {
   }
 
   // read config file
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
   if (enableFreeTypeStr[0]) {
     if (!globalParams->setEnableFreeType(enableFreeTypeStr)) {
       fprintf(stderr, "Bad '-freetype' value on command line\n");
@@ -642,7 +642,6 @@ int main(int argc, char *argv[]) {
   // clean up
  err1:
   delete doc;
-  delete globalParams;
  err0:
 
   return exitCode;
