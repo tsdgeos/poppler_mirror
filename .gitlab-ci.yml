@@ -69,7 +69,7 @@ build_mingw64_fedora:
 
 build_clazy:
   stage: build
-  image: fedora:30
+  image: fedora
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y poppler
