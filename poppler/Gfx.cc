@@ -946,10 +946,8 @@ void Gfx::opSetDash(Object args[], int numArgs) {
     dash = nullptr;
   } else {
     dash = (double *)gmallocn(length, sizeof(double));
-    bool dummyOk;
     for (i = 0; i < length; ++i) {
-      const Object obj = a->get(i);
-      dash[i] = obj.getNum(&dummyOk);
+      dash[i] = a->get(i).getNumWithDefaultValue(0);
     }
   }
   state->setLineDash(dash, length, args[1].getNum());

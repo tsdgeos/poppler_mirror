@@ -307,6 +307,13 @@ public:
   const char *getTypeName() const;
   void print(FILE *f = stdout) const;
 
+  double getNumWithDefaultValue(double defaultValue) const {
+    if (unlikely(type != objInt && type != objInt64 && type != objReal)) {
+      return defaultValue;
+    }
+    return type == objInt ? (double)intg : type == objInt64 ? (double)int64g : real;
+  }
+
 private:
   // Free object contents.
   void free();

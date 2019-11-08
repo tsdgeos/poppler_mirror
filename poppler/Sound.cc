@@ -1,6 +1,6 @@
 /* Sound.cc - an object that holds the sound structure
  * Copyright (C) 2006-2007, Pino Toscano <pino@kde.org>
- * Copyright (C) 2009, 2017, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2009, 2017-2019, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,10 +74,7 @@ Sound::Sound(const Object *obj, bool readAttrs)
       kind = soundEmbedded;
     }
     // sampling rate
-    tmp = dict->lookup("R");
-    if (tmp.isNum()) {
-      samplingRate = tmp.getNum();
-    }
+    samplingRate = dict->lookup("R").getNumWithDefaultValue(0);
     // sound channels
     tmp = dict->lookup("C");
     if (tmp.isInt()) {

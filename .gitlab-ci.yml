@@ -61,10 +61,10 @@ build_mingw64_fedora:
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y mingw64-poppler
-    - dnf -y install glibc-langpack-en mingw64-curl make ninja-build mingw64-openjpeg2-tools mingw32-openjpeg2-tools
+    - dnf -y install glibc-langpack-en make ninja-build
   script:
     - mkdir -p build && cd build
-    - mingw64-cmake -G Ninja .. -DCMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES:PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/include/
+    - mingw64-cmake -G Ninja ..
     - ninja
 
 build_clazy:
@@ -73,7 +73,7 @@ build_clazy:
   before_script:
     - dnf install -y 'dnf-command(builddep)'
     - dnf builddep -y poppler
-    - dnf -y install glibc-langpack-en curl make ninja-build openjpeg2-tools clazy clang redhat-rpm-config
+    - dnf -y install glibc-langpack-en make ninja-build clazy clang redhat-rpm-config libcurl-devel
   script:
     - mkdir -p build && cd build
     - CC=clang CXX=clazy CXXFLAGS="-Werror -Wno-deprecated-declarations" cmake -G Ninja ..

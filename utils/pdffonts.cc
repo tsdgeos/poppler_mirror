@@ -31,8 +31,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
-#include <string.h>
 #include <math.h>
+#include <memory>
+#include <string>
 #include "parseargs.h"
 #include "goo/GooString.h"
 #include "goo/gmem.h"
@@ -91,9 +92,7 @@ static const ArgDesc argDesc[] = {
 };
 
 int main(int argc, char *argv[]) {
-  PDFDoc *doc;
-  GooString *fileName;
-  GooString *ownerPW, *userPW;
+  std::unique_ptr<GooString> ownerPW, userPW;
   bool ok;
   int exitCode;
 
@@ -111,38 +110,27 @@ int main(int argc, char *argv[]) {
     }
     if (printVersion || printHelp)
       exitCode = 0;
-    goto err0;
+    return exitCode;
   }
-  fileName = new GooString(argv[1]);
+
+  std::string fileName(argv[1]);
+  if (fileName == "-") {
+      fileName = "fd://0";
+  }
 
   // read config file
   globalParams = new GlobalParams();
 
   // open PDF file
   if (ownerPassword[0] != '\001') {
-    ownerPW = new GooString(ownerPassword);
-  } else {
-    ownerPW = nullptr;
+    ownerPW = std::make_unique<GooString>(ownerPassword);
   }
   if (userPassword[0] != '\001') {
-    userPW = new GooString(userPassword);
-  } else {
-    userPW = nullptr;
-  }
-  if (fileName->cmp("-") == 0) {
-      delete fileName;
-      fileName = new GooString("fd://0");
+    userPW = std::make_unique<GooString>(userPassword);
   }
 
-  doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
-  delete fileName;
+  auto doc = std::unique_ptr<PDFDoc>(PDFDocFactory().createPDFDoc(GooString(fileName), ownerPW.get(), userPW.get()));
 
-  if (userPW) {
-    delete userPW;
-  }
-  if (ownerPW) {
-    delete ownerPW;
-  }
   if (!doc->isOk()) {
     exitCode = 1;
     goto err1;
@@ -164,7 +152,7 @@ int main(int argc, char *argv[]) {
 
   // get the fonts
   {
-    FontInfoScanner scanner(doc, firstPage - 1);
+    FontInfoScanner scanner(doc.get(), firstPage - 1);
     const std::vector<FontInfo*> fonts = scanner.scan(lastPage - firstPage + 1);
 
     if (showSubst) {
@@ -213,9 +201,7 @@ int main(int argc, char *argv[]) {
   exitCode = 0;
 
  err1:
-  delete doc;
   delete globalParams;
- err0:
 
   return exitCode;
 }

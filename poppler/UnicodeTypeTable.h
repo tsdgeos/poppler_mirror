@@ -16,6 +16,7 @@
 // Copyright (C) 2006 Ed Catmur <ed@catmur.co.uk>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Khaled Hosny <khaledhosny@eglug.org>
+// Copyright (C) 2019 Adriaan de Groot <groot@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -37,10 +38,10 @@ extern bool unicodeIsAlphabeticPresentationForm(Unicode c);
 
 extern Unicode unicodeToUpper(Unicode c);
 
-extern Unicode *unicodeNormalizeNFKC(Unicode *in, int len,
+extern Unicode *unicodeNormalizeNFKC(const Unicode *in, int len,
 				     int *out_len, int **offsets);
 
-extern Unicode *unicodeNormalizeNFKC(Unicode *in, int len,
+extern Unicode *unicodeNormalizeNFKC(const Unicode *in, int len,
 				     int *out_len, int **offsets,
 				     bool reverseRTL);
 

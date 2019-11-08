@@ -2263,7 +2263,10 @@ void JBIG2Stream::readTextRegionSeg(unsigned int segNum, bool imm,
 	  symCodeTab[i++].prefixLen = 0;
 	}
       } else if (j > 0x100) {
-	if (unlikely(i == 0)) ++i;
+	if (unlikely(i == 0)) {
+	  symCodeTab[i].prefixLen = 0;
+	  ++i;
+	}
 	for (j -= 0x100; j && i < numSyms; --j) {
 	  symCodeTab[i].prefixLen = symCodeTab[i-1].prefixLen;
 	  ++i;
