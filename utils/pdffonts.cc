@@ -94,10 +94,8 @@ static const ArgDesc argDesc[] = {
 int main(int argc, char *argv[]) {
   std::unique_ptr<GooString> ownerPW, userPW;
   bool ok;
-  int exitCode;
 
   Win32Console win32Console(&argc, &argv);
-  exitCode = 99;
 
   // parse args
   ok = parseArgs(argDesc, &argc, argv);
@@ -109,8 +107,8 @@ int main(int argc, char *argv[]) {
       printUsage("pdffonts", "<PDF-file>", argDesc);
     }
     if (printVersion || printHelp)
-      exitCode = 0;
-    return exitCode;
+      return 0;
+    return 99;
   }
 
   std::string fileName(argv[1]);
@@ -132,8 +130,7 @@ int main(int argc, char *argv[]) {
   auto doc = std::unique_ptr<PDFDoc>(PDFDocFactory().createPDFDoc(GooString(fileName), ownerPW.get(), userPW.get()));
 
   if (!doc->isOk()) {
-    exitCode = 1;
-    goto err1;
+    return 1;
   }
 
   // get page range
@@ -147,7 +144,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr,
             "Wrong page range given: the first page (%d) can not be after the last page (%d).\n",
             firstPage, lastPage);
-    goto err1;
+    return 99;
   }
 
   // get the fonts
@@ -198,11 +195,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  exitCode = 0;
-
- err1:
-
-  return exitCode;
+  return 0;
 }
 
 
