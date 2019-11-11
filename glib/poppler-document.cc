@@ -192,7 +192,7 @@ poppler_document_new_from_file (const char  *uri,
   char *filename;
 
   if (!globalParams) {
-    globalParams = new GlobalParams();
+    globalParams = std::make_unique<GlobalParams>();
   }
 
   filename = g_filename_from_uri (uri, nullptr, error);
@@ -254,7 +254,7 @@ poppler_document_new_from_data (char        *data,
   GooString *password_g;
 
   if (!globalParams) {
-    globalParams = new GlobalParams();
+    globalParams = std::make_unique<GlobalParams>();
   }
   
   // create stream
@@ -308,7 +308,7 @@ poppler_document_new_from_bytes (GBytes      *bytes,
   g_return_val_if_fail(error == nullptr || *error == nullptr, nullptr);
 
   if (!globalParams) {
-    globalParams = new GlobalParams();
+    globalParams = std::make_unique<GlobalParams>();
   }
 
   // create stream
@@ -361,7 +361,7 @@ poppler_document_new_from_stream (GInputStream *stream,
   g_return_val_if_fail(length == (goffset)-1 || length > 0, NULL);
 
   if (!globalParams) {
-    globalParams = new GlobalParams();
+    globalParams = std::make_unique<GlobalParams>();
   }
 
   if (!G_IS_SEEKABLE(stream) || !g_seekable_can_seek(G_SEEKABLE(stream))) {

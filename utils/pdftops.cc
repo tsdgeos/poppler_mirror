@@ -269,7 +269,7 @@ int main(int argc, char *argv[]) {
   fileName = new GooString(argv[1]);
 
   // read config file
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
   if (origPageSizes) {
     paperWidth = paperHeight = -1;
   }
@@ -434,7 +434,6 @@ int main(int argc, char *argv[]) {
   delete doc;
   delete fileName;
  err0:
-  delete globalParams;
 
   return exitCode;
 }

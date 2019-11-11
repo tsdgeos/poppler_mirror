@@ -369,7 +369,7 @@ main (int argc, char *argv [])
 
   gtk_init (&argc, &argv);
 
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
 
   for (int i = 0; file_arguments[i]; i++) {
     View            *view;
@@ -398,8 +398,6 @@ main (int argc, char *argv [])
   }
 
   gtk_main ();
-
-  delete globalParams;
 
   return 0;
 }

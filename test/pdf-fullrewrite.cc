@@ -75,7 +75,7 @@ int main (int argc, char *argv[])
   }
 
   // load input document
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
   doc = new PDFDoc(inputName, ownerPW, userPW);
   if (!doc->isOk()) {
     fprintf(stderr, "Error loading input document\n");
@@ -107,7 +107,6 @@ int main (int argc, char *argv[])
 done:
   delete docOut;
   delete doc;
-  delete globalParams;
   delete userPW;
   delete ownerPW;
   return res;

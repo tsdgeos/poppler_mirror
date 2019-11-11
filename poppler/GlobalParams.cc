@@ -96,7 +96,7 @@
 
 //------------------------------------------------------------------------
 
-GlobalParams *globalParams = nullptr;
+std::unique_ptr<GlobalParams> globalParams;
 
 #if defined(ENABLE_RELOCATABLE) && defined(_WIN32)
 

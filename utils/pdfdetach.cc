@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
   fileName = new GooString(argv[1]);
 
   // read config file
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
   if (textEncName[0]) {
     globalParams->setTextEncoding(textEncName);
   }
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
   if (!(uMap = globalParams->getTextEncoding())) {
     error(errConfig, -1, "Couldn't get text encoding");
     delete fileName;
-    goto err1;
+    goto err0;
   }
 
   // open PDF file
@@ -331,8 +331,6 @@ int main(int argc, char *argv[]) {
     delete file;
   uMap->decRefCnt();
   delete doc;
- err1:
-  delete globalParams;
  err0:
 
   return exitCode;

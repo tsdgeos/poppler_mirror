@@ -1237,7 +1237,7 @@ int main(int argc, char **argv)
     assert(gArgsListRoot);
 
     SplashColorsInit();
-    globalParams = new GlobalParams();
+    globalParams = std::make_unique<GlobalParams>();
     if (!globalParams)
         return 1;
     globalParams->setErrQuiet(false);
@@ -1270,7 +1270,6 @@ int main(int argc, char **argv)
         fclose(outFile);
     PreviewBitmapDestroy();
     StrList_Destroy(&gArgsListRoot);
-    delete globalParams;
     free(gOutFileName);
     return 0;
 }

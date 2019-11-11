@@ -57,14 +57,14 @@ void TestStrings::initTestCase()
     qRegisterMetaType<GooString*>("GooString*");
     qRegisterMetaType<Unicode*>("Unicode*");
 
-    globalParams = new GlobalParams();
+    globalParams = std::make_unique<GlobalParams>();
 }
 
 void TestStrings::cleanupTestCase()
 {
     qDeleteAll(m_gooStrings);
 
-    delete globalParams;
+    globalParams.reset();
 }
 
 void TestStrings::check_unicodeToQString_data()

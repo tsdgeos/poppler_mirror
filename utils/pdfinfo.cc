@@ -868,11 +868,10 @@ int main(int argc, char *argv[]) {
     printStructure = true;
 
   // read config file
-  globalParams = new GlobalParams();
+  globalParams = std::make_unique<GlobalParams>();
 
   if (printEnc) {
     printEncodings();
-    delete globalParams;
     exitCode = 0;
     goto err0;
   }
@@ -985,7 +984,6 @@ int main(int argc, char *argv[]) {
   delete doc;
   delete fileName;
  err1:
-  delete globalParams;
  err0:
 
   return exitCode;
