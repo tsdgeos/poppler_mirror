@@ -29,6 +29,7 @@
 // Copyright (C) 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 // Copyright (C) 2019 Yves-Gaël Chény <gitlab@r0b0t.fr>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git

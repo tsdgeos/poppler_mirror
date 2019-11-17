@@ -12,6 +12,7 @@
 // Copyright (C) 2017 Léonard Michelet <leonard.michelet@smile.fr>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 #include "config.h"
