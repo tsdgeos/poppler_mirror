@@ -91,9 +91,6 @@ public:
     static_cast<std::string&>(*this).append(*str2);
   }
 
-  // Convert an integer to a string.
-  static GooString *fromInt(int x);
-
   // Create a formatted string.  Similar to printf, but without the
   // string overflow issues.  Formatting elements consist of:
   //     {<arg>:[<width>][.<precision>]<type>}

@@ -275,13 +275,13 @@ int HtmlFontAccu::AddFont(const HtmlFont& font){
 // get CSS font definition for font #i 
 GooString* HtmlFontAccu::CSStyle(int i, int j){
    GooString *tmp=new GooString();
-   GooString *iStr=GooString::fromInt(i);
-   GooString *jStr=GooString::fromInt(j);
+   GooString *iStr=new GooString(std::to_string(i));
+   GooString *jStr=new GooString(std::to_string(j));
 
    std::vector<HtmlFont>::iterator g=accu->begin();
    g+=i;
    HtmlFont font=*g;
-   GooString *Size=GooString::fromInt(font.getSize());
+   GooString *Size=new GooString(std::to_string(font.getSize()));
    GooString *colorStr=font.getColor().toString();
    GooString *fontName=(fontFullName ? font.getFullName() : font.getFontName());
    GooString *lSize;
@@ -294,7 +294,7 @@ GooString* HtmlFontAccu::CSStyle(int i, int j){
      tmp->append(Size);
      if( font.getLineSize() != -1 && font.getLineSize() != 0 )
      {
-	 lSize = GooString::fromInt(font.getLineSize());
+	 lSize = new GooString(std::to_string(font.getLineSize()));
 	 tmp->append("px;line-height:");
 	 tmp->append(lSize);
 	 delete lSize;

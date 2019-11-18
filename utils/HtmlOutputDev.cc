@@ -814,7 +814,7 @@ int HtmlPage::dumpComplexHeaders(FILE * const file, FILE *& pageFile, int page) 
 
   if( !noframes )
   {
-      GooString* pgNum=GooString::fromInt(page);
+      GooString* pgNum=new GooString(std::to_string(page));
       tmp = new GooString(DocName);
       if (!singleHtml){
             tmp->append('-')->append(pgNum)->append(".html");
@@ -1577,7 +1577,7 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 
 	      delete dest;
 
-	      GooString *str=GooString::fromInt(destPage);
+	      GooString *str=new GooString(std::to_string(destPage));
 	      /* 		complex 	simple
 	       	frames		file-4.html	files.html#4
 		noframes	file.html#4	file.html#4
@@ -1634,7 +1634,7 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 		      file->append(".html");
 		  }
 		  file->append('#');
-		  GooString *pgNum = GooString::fromInt(destPage);
+		  GooString *pgNum = new GooString(std::to_string(destPage));
 		  file->append(pgNum);
 		  delete pgNum;
 	      }
@@ -1777,7 +1777,7 @@ bool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, const std::vector<OutlineI
 				noframes	file.html#4	file.html#4
 				*/
 				linkName = new GooString(gbasename(Docname->c_str()));
-				GooString *str=GooString::fromInt(itemPage);
+				GooString *str = new GooString(std::to_string(itemPage));
 				if (noframes) {
 					linkName->append(".html#");
 					linkName->append(str);
