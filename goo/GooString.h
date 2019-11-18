@@ -156,7 +156,6 @@ public:
   GooString *del(int i, int n = 1) { erase(i, n); return this; }
 
   // Convert string to all-upper/all-lower case.
-  GooString *upperCase();
   GooString *lowerCase();
 
   // Compare two strings:  -1:<  0:=  +1:>

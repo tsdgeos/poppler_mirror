@@ -614,16 +614,6 @@ void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec,
 
 }
 
-GooString *GooString::upperCase() {
-  for (auto& c : *this) {
-    if (std::islower(c)) {
-      c = std::toupper(c);
-    }
-  }
-
-  return this;
-}
-
 GooString *GooString::lowerCase() {
   for (auto& c : *this) {
     if (std::isupper(c)) {
