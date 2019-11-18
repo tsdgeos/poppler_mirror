@@ -139,6 +139,7 @@ public:
   // Append a character or string.
   GooString *append(char c) { push_back(c); return this; }
   GooString *append(const GooString *str) { static_cast<std::string&>(*this).append(*str); return this; }
+  GooString *append(const std::string& str) { static_cast<std::string&>(*this).append(str); return this; }
   GooString *append(const char *str) { static_cast<std::string&>(*this).append(str); return this; }
   GooString *append(const char *str, int lengthA) { static_cast<std::string&>(*this).append(str, lengthA); return this; }
 
