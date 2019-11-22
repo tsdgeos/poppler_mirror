@@ -299,7 +299,6 @@ public:
   int streamGetChars(int nChars, unsigned char *buffer) const;
   int streamLookChar() const;
   char *streamGetLine(char *buf, int size) const;
-  Goffset streamGetPos() const;
   void streamSetPos(Goffset pos, int dir = 0);
   Dict *streamGetDict() const;
 
@@ -422,9 +421,6 @@ inline int Object::streamLookChar() const
 
 inline char *Object::streamGetLine(char *buf, int size) const
   { OBJECT_TYPE_CHECK(objStream); return stream->getLine(buf, size); }
-
-inline Goffset Object::streamGetPos() const
-  { OBJECT_TYPE_CHECK(objStream); return stream->getPos(); }
 
 inline void Object::streamSetPos(Goffset pos, int dir)
   { OBJECT_TYPE_CHECK(objStream); stream->setPos(pos, dir); }

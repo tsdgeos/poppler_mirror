@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006-2010, 2012-2014, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2010, 2012-2014, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2010 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012, 2013 Adrian Johnson <ajohnson@redneon.com>
@@ -377,7 +377,7 @@ Object Lexer::getObj(int objNum) {
 	  // we are growing see if the document is not malformed and we are growing too much
 	  if (objNum > 0 && xref != nullptr)
 	  {
-	    int newObjNum = xref->getNumEntry(curStr.streamGetPos());
+	    const int newObjNum = xref->getNumEntry(getPos());
 	    if (newObjNum != objNum)
 	    {
 	      error(errSyntaxError, getPos(), "Unterminated string");

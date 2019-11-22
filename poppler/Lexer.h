@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2007, 2010, 2013, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2007, 2010, 2013, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -72,8 +72,8 @@ public:
 
   // Get current position in file.  This is only used for error
   // messages.
-  Goffset getPos()
-    { return curStr.isStream() ? curStr.streamGetPos() : -1; }
+  Goffset getPos() const
+    { return curStr.isStream() ? curStr.getStream()->getPos() : -1; }
 
   // Set position in file.
   void setPos(Goffset pos, int dir = 0)
