@@ -59,10 +59,10 @@ NavigationToolBar::NavigationToolBar(QWidget *parent)
 
     m_rotationCombo = new QComboBox(this);
     // NOTE: \302\260 = degree symbol
-    m_rotationCombo->addItem(trUtf8("0\302\260"));
-    m_rotationCombo->addItem(trUtf8("90\302\260"));
-    m_rotationCombo->addItem(trUtf8("180\302\260"));
-    m_rotationCombo->addItem(trUtf8("270\302\260"));
+    m_rotationCombo->addItem(tr("0\302\260"));
+    m_rotationCombo->addItem(tr("90\302\260"));
+    m_rotationCombo->addItem(tr("180\302\260"));
+    m_rotationCombo->addItem(tr("270\302\260"));
     // TODO replace with qOverload once we start requiring Qt 5.7
     connect(m_rotationCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &NavigationToolBar::slotRotationComboChanged);
     addWidget(m_rotationCombo);
