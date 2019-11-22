@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2016, 2017, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2017, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
@@ -52,7 +52,7 @@ void JSInfo::printJS(const GooString *js) {
   gfree(u);
 }
 
-void JSInfo::scanLinkAction(LinkAction *link, const char *action, bool deleteLink) {
+void JSInfo::scanLinkAction(LinkAction *link, const char *action) {
   if (!link)
     return;
 
@@ -82,8 +82,6 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action, bool deleteLin
       }
     }
   }
-  if (deleteLink)
-    delete link;
 }
 
 void JSInfo::scanJS(int nPages) {
@@ -141,7 +139,7 @@ void JSInfo::scan(int nPages) {
       for (int j = 0; j < field->getNumWidgets(); j++) {
 	FormWidget *widget = field->getWidget(j);
 	scanLinkAction(widget->getActivationAction(),
-                       "Field Activated", false);
+                       "Field Activated");
 	scanLinkAction(widget->getAdditionalAction(Annot::actionFieldModified),
                        "Field Modified");
 	scanLinkAction(widget->getAdditionalAction(Annot::actionFormatField),
@@ -178,11 +176,11 @@ void JSInfo::scan(int nPages) {
     for (int i = 0; i < annots->getNumAnnots(); ++i) {
       if (annots->getAnnot(i)->getType() == Annot::typeLink) {
 	AnnotLink *annot = static_cast<AnnotLink *>(annots->getAnnot(i));
-	scanLinkAction(annot->getAction(), "Link Annotation Activated", false);
+	scanLinkAction(annot->getAction(), "Link Annotation Activated");
       } else if (annots->getAnnot(i)->getType() == Annot::typeScreen) {
 	AnnotScreen *annot = static_cast<AnnotScreen *>(annots->getAnnot(i));
 	scanLinkAction(annot->getAction(),
-                       "Screen Annotation Activated", false);
+                       "Screen Annotation Activated");
 	scanLinkAction(annot->getAdditionalAction(Annot::actionCursorEntering),
                        "Screen Annotation Cursor Enter");
 	scanLinkAction(annot->getAdditionalAction(Annot::actionCursorLeaving),
@@ -207,7 +205,7 @@ void JSInfo::scan(int nPages) {
       } else if (annots->getAnnot(i)->getType() == Annot::typeWidget) {
 	AnnotWidget *annot = static_cast<AnnotWidget *>(annots->getAnnot(i));
 	scanLinkAction(annot->getAction(),
-                       "Widget Annotation Activated", false);
+                       "Widget Annotation Activated");
 	scanLinkAction(annot->getAdditionalAction(Annot::actionCursorEntering),
                        "Widget Annotation Cursor Enter");
 	scanLinkAction(annot->getAdditionalAction(Annot::actionCursorLeaving),

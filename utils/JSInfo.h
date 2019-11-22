@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2016, 2020 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
@@ -53,7 +53,7 @@ private:
   const UnicodeMap *uniMap;
 
   void scan(int nPages);
-  void scanLinkAction(LinkAction *link, const char *action, bool deleteLink = true);
+  void scanLinkAction(LinkAction *link, const char *action);
   void printJS(const GooString *js);
 
 };
