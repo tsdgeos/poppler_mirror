@@ -236,7 +236,6 @@ public:
   bool isName(const char *nameA) const
     { return type == objName && !strcmp(cString, nameA); }
   bool isDict(const char *dictType) const;
-  bool isStream(const char *dictType) const;
   bool isCmd(const char *cmdA) const
     { return type == objCmd && !strcmp(cString, cmdA); }
 
@@ -292,7 +291,6 @@ public:
   const Object &dictGetValNF(int i) const;
 
   // Stream accessors.
-  bool streamIs(const char *dictType) const;
   void streamReset();
   void streamClose();
   int streamGetChar() const;
@@ -395,12 +393,6 @@ inline const Object &Object::dictGetValNF(int i) const
 //------------------------------------------------------------------------
 
 #include "Stream.h"
-
-inline bool Object::streamIs(const char *dictType) const
-  { OBJECT_TYPE_CHECK(objStream); return stream->getDict()->is(dictType); }
-
-inline bool Object::isStream(const char *dictType) const
-  { return type == objStream && streamIs(dictType); }
 
 inline void Object::streamReset()
   { OBJECT_TYPE_CHECK(objStream); stream->reset(); }
