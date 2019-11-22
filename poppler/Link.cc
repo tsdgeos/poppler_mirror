@@ -51,11 +51,7 @@
 //------------------------------------------------------------------------
 LinkAction::LinkAction() = default;
 
-LinkAction::~LinkAction() {
-  for (auto entry : nextActionList) {
-    delete entry;
-  }
-}
+LinkAction::~LinkAction() = default;
 
 LinkAction *LinkAction::parseDest(const Object *obj) {
   LinkAction *action;
@@ -158,7 +154,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
 
   // parse the next actions
   const Object nextObj = obj->dictLookup("Next");
-  std::vector<LinkAction*> actionList;
+  std::vector<std::unique_ptr<LinkAction> > actionList;
   if (nextObj.isDict()) {
 
     // Prevent circles in the tree by checking the ref against used refs in
@@ -173,7 +169,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
     }
 
     actionList.reserve(1);
-    actionList.push_back(parseAction(&nextObj, nullptr, seenNextActions));
+    actionList.push_back(std::unique_ptr<LinkAction>(parseAction(&nextObj, nullptr, seenNextActions)));
   } else if (nextObj.isArray()) {
     const Array *a = nextObj.getArray();
     const int n = a->getLength();
@@ -195,7 +191,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
           }
       }
 
-      actionList.push_back(parseAction(&obj3, nullptr, seenNextActions));
+      actionList.push_back(std::unique_ptr<LinkAction>(parseAction(&obj3, nullptr, seenNextActions)));
     }
   }
 
@@ -204,7 +200,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
   return action;
 }
 
-const std::vector<LinkAction*>& LinkAction::nextActions() const {
+const std::vector<std::unique_ptr<LinkAction> >& LinkAction::nextActions() const {
   return nextActionList;
 }
 

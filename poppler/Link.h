@@ -85,13 +85,12 @@ public:
   static LinkAction *parseAction(const Object *obj, const GooString *baseURI = nullptr);
 
   // A List of the next actions to execute in order.
-  // The list contains pointer to LinkAction objects.
-  const std::vector<LinkAction*>& nextActions() const;
+  const std::vector<std::unique_ptr<LinkAction> >& nextActions() const;
 
 private:
   static LinkAction *parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions);
 
-  std::vector<LinkAction*> nextActionList;
+  std::vector<std::unique_ptr<LinkAction> > nextActionList;
 };
 
 //------------------------------------------------------------------------
