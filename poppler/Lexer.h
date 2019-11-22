@@ -76,8 +76,8 @@ public:
     { return curStr.isStream() ? curStr.getStream()->getPos() : -1; }
 
   // Set position in file.
-  void setPos(Goffset pos, int dir = 0)
-    { if (curStr.isStream()) curStr.streamSetPos(pos, dir); }
+  void setPos(Goffset pos)
+    { if (curStr.isStream()) curStr.getStream()->setPos(pos); }
 
   // Returns true if <c> is a whitespace character.
   static bool isSpace(int c);

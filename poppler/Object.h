@@ -422,9 +422,6 @@ inline int Object::streamLookChar() const
 inline char *Object::streamGetLine(char *buf, int size) const
   { OBJECT_TYPE_CHECK(objStream); return stream->getLine(buf, size); }
 
-inline void Object::streamSetPos(Goffset pos, int dir)
-  { OBJECT_TYPE_CHECK(objStream); stream->setPos(pos, dir); }
-
 inline Dict *Object::streamGetDict() const
   { OBJECT_TYPE_CHECK(objStream); return stream->getDict(); }
 
