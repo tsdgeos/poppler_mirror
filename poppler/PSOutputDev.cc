@@ -1006,7 +1006,7 @@ private:
 
   int width, height;
   GfxImageColorMap *colorMap;
-  Function *func;
+  const Function *func;
   ImageStream *imgStr;
   int buf[gfxColorMaxComps];
   int pixelIdx;
@@ -4977,15 +4977,14 @@ void PSOutputDev::clipToStrokePath(GfxState *state) {
   writePS("Ws\n");
 }
 
-void PSOutputDev::doPath(GfxPath *path) {
-  GfxSubpath *subpath;
+void PSOutputDev::doPath(const GfxPath *path) {
   double x0, y0, x1, y1, x2, y2, x3, y3, x4, y4;
   int n, m, i, j;
 
   n = path->getNumSubpaths();
 
   if (n == 1 && path->getSubpath(0)->getNumPoints() == 5) {
-    subpath = path->getSubpath(0);
+    const GfxSubpath *subpath = path->getSubpath(0);
     x0 = subpath->getX(0);
     y0 = subpath->getY(0);
     x4 = subpath->getX(4);
@@ -5012,7 +5011,7 @@ void PSOutputDev::doPath(GfxPath *path) {
   }
 
   for (i = 0; i < n; ++i) {
-    subpath = path->getSubpath(i);
+    const GfxSubpath *subpath = path->getSubpath(i);
     m = subpath->getNumPoints();
     writePSFmt("{0:.6g} {1:.6g} m\n", subpath->getX(0), subpath->getY(0));
     j = 1;
@@ -6602,7 +6601,6 @@ void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
   double low[gfxColorMaxComps], range[gfxColorMaxComps];
   GfxColor color;
   GfxCMYK cmyk;
-  Function *func;
   int n, numComps, numAltComps;
   int byte;
   int i, j, k;
@@ -6745,7 +6743,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
     lookup = indexedCS->getLookup();
     writePSFmt(" {0:d} <\n", n);
     if (baseCS->getMode() == csDeviceN && level != psLevel3 && level != psLevel3Sep) {
-      func = ((GfxDeviceNColorSpace *)baseCS)->getTintTransformFunc();
+      const Function *func = ((GfxDeviceNColorSpace *)baseCS)->getTintTransformFunc();
       baseCS->getDefaultRanges(low, range, indexedCS->getIndexHigh());
       if (((GfxDeviceNColorSpace *)baseCS)->getAlt()->getMode() == csLab) {
 	labCS = (GfxLabColorSpace *)((GfxDeviceNColorSpace *)baseCS)->getAlt();

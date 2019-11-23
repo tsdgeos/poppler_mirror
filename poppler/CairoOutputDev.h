@@ -274,7 +274,7 @@ public:
   double *getType3GlyphBBox () { return t3_glyph_bbox; }
 
 protected:
-  void doPath(cairo_t *cairo, GfxState *state, GfxPath *path);
+  void doPath(cairo_t *cairo, GfxState *state, const GfxPath *path);
   cairo_surface_t *downscaleSurface(cairo_surface_t *orig_surface);
   void getScaledSize(const cairo_matrix_t *matrix,
                      int orig_width, int orig_height,
@@ -285,7 +285,7 @@ protected:
   void setMimeData(GfxState *state, Stream *str, Object *ref,
 		   GfxImageColorMap *colorMap, cairo_surface_t *image, int height);
   void fillToStrokePathClip(GfxState *state);
-  void alignStrokeCoords(GfxSubpath *subpath, int i, double *x, double *y);
+  void alignStrokeCoords(const GfxSubpath *subpath, int i, double *x, double *y);
 #if CAIRO_VERSION >= CAIRO_VERSION_ENCODE(1, 14, 0)
   bool setMimeDataForJBIG2Globals (Stream *str, cairo_surface_t *image);
 #endif

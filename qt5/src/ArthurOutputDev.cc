@@ -698,15 +698,14 @@ void ArthurOutputDev::updateFont(GfxState *state)
   }
 }
 
-static QPainterPath convertPath(GfxState *state, GfxPath *path, Qt::FillRule fillRule)
+static QPainterPath convertPath(GfxState *state, const GfxPath *path, Qt::FillRule fillRule)
 {
-  GfxSubpath *subpath;
   int i, j;
 
   QPainterPath qPath;
   qPath.setFillRule(fillRule);
   for (i = 0; i < path->getNumSubpaths(); ++i) {
-    subpath = path->getSubpath(i);
+    const GfxSubpath *subpath = path->getSubpath(i);
     if (subpath->getNumPoints() > 0) {
       qPath.moveTo(subpath->getX(0), subpath->getY(0));
       j = 1;

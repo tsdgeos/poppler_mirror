@@ -404,7 +404,7 @@ private:
   static void getMatteColor( SplashColorMode colorMode, GfxImageColorMap *colorMap, const GfxColor * matteColor, SplashColor splashMatteColor);
   void setOverprintMask(GfxColorSpace *colorSpace, bool overprintFlag,
 			int overprintMode, const GfxColor *singleColor, bool grayIndexed = false);
-  SplashPath convertPath(GfxState *state, GfxPath *path,
+  SplashPath convertPath(GfxState *state, const GfxPath *path,
 			  bool dropEmptySubpaths);
   void drawType3Glyph(GfxState *state, T3FontCache *t3Font,
 		      T3FontCacheTag *tag, unsigned char *data);

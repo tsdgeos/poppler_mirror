@@ -2192,15 +2192,14 @@ void SplashOutputDev::clipToStrokePath(GfxState *state) {
   delete path2;
 }
 
-SplashPath SplashOutputDev::convertPath(GfxState *state, GfxPath *path,
+SplashPath SplashOutputDev::convertPath(GfxState *state, const GfxPath *path,
 					 bool dropEmptySubpaths) {
   SplashPath sPath;
-  GfxSubpath *subpath;
   int n, i, j;
 
   n = dropEmptySubpaths ? 1 : 0;
   for (i = 0; i < path->getNumSubpaths(); ++i) {
-    subpath = path->getSubpath(i);
+    const GfxSubpath *subpath = path->getSubpath(i);
     if (subpath->getNumPoints() > n) {
       sPath.reserve(subpath->getNumPoints() + 1);
       sPath.moveTo((SplashCoord)subpath->getX(0),
