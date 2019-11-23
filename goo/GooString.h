@@ -91,9 +91,6 @@ public:
     static_cast<std::string&>(*this).append(*str2);
   }
 
-  // Convert an integer to a string.
-  static GooString *fromInt(int x);
-
   // Create a formatted string.  Similar to printf, but without the
   // string overflow issues.  Formatting elements consist of:
   //     {<arg>:[<width>][.<precision>]<type>}
@@ -142,6 +139,7 @@ public:
   // Append a character or string.
   GooString *append(char c) { push_back(c); return this; }
   GooString *append(const GooString *str) { static_cast<std::string&>(*this).append(*str); return this; }
+  GooString *append(const std::string& str) { static_cast<std::string&>(*this).append(str); return this; }
   GooString *append(const char *str) { static_cast<std::string&>(*this).append(str); return this; }
   GooString *append(const char *str, int lengthA) { static_cast<std::string&>(*this).append(str, lengthA); return this; }
 
@@ -158,8 +156,7 @@ public:
   // Delete a character or range of characters.
   GooString *del(int i, int n = 1) { erase(i, n); return this; }
 
-  // Convert string to all-upper/all-lower case.
-  GooString *upperCase();
+  // Convert string to all-lower case.
   GooString *lowerCase();
 
   // Compare two strings:  -1:<  0:=  +1:>

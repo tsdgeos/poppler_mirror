@@ -712,7 +712,7 @@ void CairoOutputDev::updateFont(GfxState *state) {
 
 /* Align stroke coordinate i if the point is the start or end of a
  * horizontal or vertical line */
-void CairoOutputDev::alignStrokeCoords(GfxSubpath *subpath, int i, double *x, double *y)
+void CairoOutputDev::alignStrokeCoords(const GfxSubpath *subpath, int i, double *x, double *y)
 {
   double x1, y1, x2, y2;
   bool align = false;
@@ -752,13 +752,12 @@ void CairoOutputDev::alignStrokeCoords(GfxSubpath *subpath, int i, double *x, do
 
 #undef STROKE_COORD_TOLERANCE
 
-void CairoOutputDev::doPath(cairo_t *c, GfxState *state, GfxPath *path) {
-  GfxSubpath *subpath;
+void CairoOutputDev::doPath(cairo_t *c, GfxState *state, const GfxPath *path) {
   int i, j;
   double x, y;
   cairo_new_path (c);
   for (i = 0; i < path->getNumSubpaths(); ++i) {
-    subpath = path->getSubpath(i);
+    const GfxSubpath *subpath = path->getSubpath(i);
     if (subpath->getNumPoints() > 0) {
       if (align_stroke_coords) {
         alignStrokeCoords(subpath, 0, &x, &y);

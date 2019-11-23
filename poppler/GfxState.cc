@@ -437,7 +437,7 @@ void GfxColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *separat
 }
 
 void GfxColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange,
-				     int maxImgPixel) {
+				     int maxImgPixel) const {
   int i;
 
   for (i = 0; i < getNComps(); ++i) {
@@ -733,7 +733,7 @@ void GfxDeviceGrayColorSpace::getDeviceN(const GfxColor *color, GfxColor *device
   deviceN->c[3] = clip01(gfxColorComp1 - color->c[0]);
 }
 
-void GfxDeviceGrayColorSpace::getDefaultColor(GfxColor *color) {
+void GfxDeviceGrayColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
 }
 
@@ -943,7 +943,7 @@ void GfxCalGrayColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) 
   deviceN->c[3] = cmyk.k;
 }
 
-void GfxCalGrayColorSpace::getDefaultColor(GfxColor *color) {
+void GfxCalGrayColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
 }
 
@@ -1085,7 +1085,7 @@ void GfxDeviceRGBColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN
   deviceN->c[3] = cmyk.k;
 }
 
-void GfxDeviceRGBColorSpace::getDefaultColor(GfxColor *color) {
+void GfxDeviceRGBColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
   color->c[1] = 0;
   color->c[2] = 0;
@@ -1310,7 +1310,7 @@ void GfxCalRGBColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) c
   deviceN->c[3] = cmyk.k;
 }
 
-void GfxCalRGBColorSpace::getDefaultColor(GfxColor *color) {
+void GfxCalRGBColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
   color->c[1] = 0;
   color->c[2] = 0;
@@ -1442,7 +1442,7 @@ void GfxDeviceCMYKColorSpace::getDeviceN(const GfxColor *color, GfxColor *device
   deviceN->c[3] = clip01(color->c[3]);
 }
 
-void GfxDeviceCMYKColorSpace::getDefaultColor(GfxColor *color) {
+void GfxDeviceCMYKColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
   color->c[1] = 0;
   color->c[2] = 0;
@@ -1698,7 +1698,7 @@ void GfxLabColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) cons
   deviceN->c[3] = cmyk.k;
 }
 
-void GfxLabColorSpace::getDefaultColor(GfxColor *color) {
+void GfxLabColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
   if (aMin > 0) {
     color->c[1] = dblToCol(aMin);
@@ -1717,7 +1717,7 @@ void GfxLabColorSpace::getDefaultColor(GfxColor *color) {
 }
 
 void GfxLabColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange,
-					int maxImgPixel) {
+					int maxImgPixel) const {
   decodeLow[0] = 0;
   decodeRange[0] = 100;
   decodeLow[1] = aMin;
@@ -2342,7 +2342,7 @@ void GfxICCBasedColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN)
   deviceN->c[3] = cmyk.k;
 }
 
-void GfxICCBasedColorSpace::getDefaultColor(GfxColor *color) {
+void GfxICCBasedColorSpace::getDefaultColor(GfxColor *color) const {
   int i;
 
   for (i = 0; i < nComps; ++i) {
@@ -2358,7 +2358,7 @@ void GfxICCBasedColorSpace::getDefaultColor(GfxColor *color) {
 
 void GfxICCBasedColorSpace::getDefaultRanges(double *decodeLow,
 					     double *decodeRange,
-					     int maxImgPixel) {
+					     int maxImgPixel) const {
   alt->getDefaultRanges(decodeLow, decodeRange, maxImgPixel);
 
 #if 0
@@ -2591,13 +2591,13 @@ void GfxIndexedColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) 
   base->getDeviceN(mapColorToBase(color, &color2), deviceN);
 }
 
-void GfxIndexedColorSpace::getDefaultColor(GfxColor *color) {
+void GfxIndexedColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = 0;
 }
 
 void GfxIndexedColorSpace::getDefaultRanges(double *decodeLow,
 					    double *decodeRange,
-					    int maxImgPixel) {
+					    int maxImgPixel) const {
   decodeLow[0] = 0;
   decodeRange[0] = maxImgPixel;
 }
@@ -2798,7 +2798,7 @@ void GfxSeparationColorSpace::getDeviceN(const GfxColor *color, GfxColor *device
   }
 }
 
-void GfxSeparationColorSpace::getDefaultColor(GfxColor *color) {
+void GfxSeparationColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0] = gfxColorComp1;
 }
 
@@ -3079,7 +3079,7 @@ void GfxDeviceNColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) 
   }
 }
 
-void GfxDeviceNColorSpace::getDefaultColor(GfxColor *color) {
+void GfxDeviceNColorSpace::getDefaultColor(GfxColor *color) const {
   int i;
 
   for (i = 0; i < nComps; ++i) {
@@ -3235,7 +3235,7 @@ void GfxPatternColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) 
   deviceN->c[3] = 1;
 }
 
-void GfxPatternColorSpace::getDefaultColor(GfxColor *color) {
+void GfxPatternColorSpace::getDefaultColor(GfxColor *color) const {
   color->c[0]=0;
 }
 
@@ -4053,7 +4053,7 @@ GfxShading *GfxAxialShading::copy() {
   return new GfxAxialShading(this);
 }
 
-double GfxAxialShading::getDistance(double sMin, double sMax) {
+double GfxAxialShading::getDistance(double sMin, double sMax) const {
   double xMin, yMin, xMax, yMax;
 
   xMin = x0 + sMin * (x1 - x0);
@@ -4232,7 +4232,7 @@ GfxShading *GfxRadialShading::copy() {
   return new GfxRadialShading(this);
 }
 
-double GfxRadialShading::getDistance(double sMin, double sMax) {
+double GfxRadialShading::getDistance(double sMin, double sMax) const {
   double xMin, yMin, rMin, xMax, yMax, rMax;
 
   xMin = x0 + sMin * (x1 - x0);
@@ -6701,7 +6701,7 @@ void GfxState::setPath(GfxPath *pathA) {
 }
 
 void GfxState::getUserClipBBox(double *xMin, double *yMin,
-			       double *xMax, double *yMax) {
+			       double *xMax, double *yMax) const {
   double ictm[6];
   double xMin1, yMin1, xMax1, yMax1, tx, ty;
 
@@ -6769,7 +6769,7 @@ void GfxState::getUserClipBBox(double *xMin, double *yMin,
   *yMax = yMax1;
 }
 
-double GfxState::transformWidth(double w) {
+double GfxState::transformWidth(double w) const {
   double x, y;
 
   x = ctm[0] + ctm[2];
@@ -6777,7 +6777,7 @@ double GfxState::transformWidth(double w) {
   return w * sqrt(0.5 * (x * x + y * y));
 }
 
-double GfxState::getTransformedFontSize() {
+double GfxState::getTransformedFontSize() const {
   double x1, y1, x2, y2;
 
   x1 = textMat[2] * fontSize;
@@ -6788,7 +6788,7 @@ double GfxState::getTransformedFontSize() {
 }
 
 void GfxState::getFontTransMat(double *m11, double *m12,
-			       double *m21, double *m22) {
+			       double *m21, double *m22) const {
   *m11 = (textMat[0] * ctm[0] + textMat[1] * ctm[2]) * fontSize;
   *m12 = (textMat[0] * ctm[1] + textMat[1] * ctm[3]) * fontSize;
   *m21 = (textMat[2] * ctm[0] + textMat[3] * ctm[2]) * fontSize;

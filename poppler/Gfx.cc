@@ -4350,9 +4350,9 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg) {
       char *tempIntent = nullptr;
       Object objIntent = dict->lookup("Intent");
       if (objIntent.isName()) {
-        tempIntent = state->getRenderingIntent();
-        if (tempIntent != nullptr) {
-          tempIntent = strdup(tempIntent);
+        const char *stateIntent = state->getRenderingIntent();
+        if (stateIntent != nullptr) {
+          tempIntent = strdup(stateIntent);
         }
         state->setRenderingIntent(objIntent.getName());
       }

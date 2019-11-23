@@ -12,6 +12,7 @@
 // Copyright 2017, 2019 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2019 Alexey Pavlov <alexpux@gmail.com>
+// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 //========================================================================
 

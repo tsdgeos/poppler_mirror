@@ -30,6 +30,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Steven Boswell <ulatekh@yahoo.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -275,29 +276,23 @@ int HtmlFontAccu::AddFont(const HtmlFont& font){
 // get CSS font definition for font #i 
 GooString* HtmlFontAccu::CSStyle(int i, int j){
    GooString *tmp=new GooString();
-   GooString *iStr=GooString::fromInt(i);
-   GooString *jStr=GooString::fromInt(j);
 
    std::vector<HtmlFont>::iterator g=accu->begin();
    g+=i;
    HtmlFont font=*g;
-   GooString *Size=GooString::fromInt(font.getSize());
    GooString *colorStr=font.getColor().toString();
    GooString *fontName=(fontFullName ? font.getFullName() : font.getFontName());
-   GooString *lSize;
    
    if(!xml){
      tmp->append(".ft");
-     tmp->append(jStr);
-     tmp->append(iStr);
+     tmp->append(std::to_string(j));
+     tmp->append(std::to_string(i));
      tmp->append("{font-size:");
-     tmp->append(Size);
+     tmp->append(std::to_string(font.getSize()));
      if( font.getLineSize() != -1 && font.getLineSize() != 0 )
      {
-	 lSize = GooString::fromInt(font.getLineSize());
 	 tmp->append("px;line-height:");
-	 tmp->append(lSize);
-	 delete lSize;
+	 tmp->append(std::to_string(font.getLineSize()));
      }
      tmp->append("px;font-family:");
      tmp->append(fontName); //font.getFontName());
@@ -330,9 +325,9 @@ GooString* HtmlFontAccu::CSStyle(int i, int j){
    }
    if (xml) {
      tmp->append("<fontspec id=\"");
-     tmp->append(iStr);
+     tmp->append(std::to_string(i));
      tmp->append("\" size=\"");
-     tmp->append(Size);
+     tmp->append(std::to_string(font.getSize()));
      tmp->append("\" family=\"");
      tmp->append(fontName);
      tmp->append("\" color=\"");
@@ -342,9 +337,6 @@ GooString* HtmlFontAccu::CSStyle(int i, int j){
 
    delete fontName;
    delete colorStr;
-   delete jStr;
-   delete iStr;
-   delete Size;
    return tmp;
 }
  

@@ -810,39 +810,34 @@ static void printCSS(FILE *f)
 }
 
 int HtmlPage::dumpComplexHeaders(FILE * const file, FILE *& pageFile, int page) {
-  GooString* tmp;
 
   if( !noframes )
   {
-      GooString* pgNum=GooString::fromInt(page);
-      tmp = new GooString(DocName);
+      const std::string pgNum = std::to_string(page);
+      std::string pageFileName(DocName->toStr());
       if (!singleHtml){
-            tmp->append('-')->append(pgNum)->append(".html");
-            pageFile = fopen(tmp->c_str(), "w");
+            pageFileName += '-' + pgNum + ".html";
+            pageFile = fopen(pageFileName.c_str(), "w");
       } else {
-            tmp->append("-html")->append(".html");
-            pageFile = fopen(tmp->c_str(), "a");
+            pageFileName += "-html.html";
+            pageFile = fopen(pageFileName.c_str(), "a");
       }
-      delete pgNum;
+
       if (!pageFile) {
-	  error(errIO, -1, "Couldn't open html file '{0:t}'", tmp);
-	  delete tmp;
+	  error(errIO, -1, "Couldn't open html file '{0:t}'", pageFileName.c_str());
 	  return 1;
       } 
 
       if (!singleHtml)
         fprintf(pageFile,"%s\n<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"\" xml:lang=\"\">\n<head>\n<title>Page %d</title>\n\n", DOCTYPE, page);
       else
-        fprintf(pageFile,"%s\n<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"\" xml:lang=\"\">\n<head>\n<title>%s</title>\n\n", DOCTYPE, tmp->c_str());
+        fprintf(pageFile,"%s\n<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"\" xml:lang=\"\">\n<head>\n<title>%s</title>\n\n", DOCTYPE, pageFileName.c_str());
 
-      delete tmp;
-
-      GooString *htmlEncoding = HtmlOutputDev::mapEncodingToHtml(globalParams->getTextEncodingName());
+      const std::string htmlEncoding = HtmlOutputDev::mapEncodingToHtml(globalParams->getTextEncodingName())->toStr();
       if (!singleHtml)
-        fprintf(pageFile, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding->c_str());
+        fprintf(pageFile, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding.c_str());
       else
-        fprintf(pageFile, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n <br/>\n", htmlEncoding->c_str());
-      delete htmlEncoding;
+        fprintf(pageFile, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n <br/>\n", htmlEncoding.c_str());
   }
   else 
   {
@@ -1577,7 +1572,6 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 
 	      delete dest;
 
-	      GooString *str=GooString::fromInt(destPage);
 	      /* 		complex 	simple
 	       	frames		file-4.html	files.html#4
 		noframes	file.html#4	file.html#4
@@ -1585,25 +1579,24 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 	      if (noframes)
 	      {
 		  file->append(".html#");
-		  file->append(str);
+		  file->append(std::to_string(destPage));
 	      }
 	      else
 	      {
 	      	if( complexMode ) 
 		{
 		    file->append("-");
-		    file->append(str);
+		    file->append(std::to_string(destPage));
 		    file->append(".html");
 		}
 		else
 		{
 		    file->append("s.html#");
-		    file->append(str);
+		    file->append(std::to_string(destPage));
 		}
 	      }
 
 	      if (printCommands) printf(" link to page %d ",destPage);
-	      delete str;
 	      return file;
 	  }
 	  else 
@@ -1634,9 +1627,7 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 		      file->append(".html");
 		  }
 		  file->append('#');
-		  GooString *pgNum = GooString::fromInt(destPage);
-		  file->append(pgNum);
-		  delete pgNum;
+		  file->append(std::to_string(destPage));
 	      }
 	  }
 	  if (printCommands && file) printf("filename %s\n",file->c_str());
@@ -1777,21 +1768,19 @@ bool HtmlOutputDev::newHtmlOutlineLevel(FILE *output, const std::vector<OutlineI
 				noframes	file.html#4	file.html#4
 				*/
 				linkName = new GooString(gbasename(Docname->c_str()));
-				GooString *str=GooString::fromInt(itemPage);
 				if (noframes) {
 					linkName->append(".html#");
-					linkName->append(str);
+					linkName->append(std::to_string(itemPage));
 				} else {
 					if( complexMode ) {
 						linkName->append("-");
-						linkName->append(str);
+						linkName->append(std::to_string(itemPage));
 						linkName->append(".html");
 					} else {
 						linkName->append("s.html#");
-						linkName->append(str);
+						linkName->append(std::to_string(itemPage));
 					}
 				}
-				delete str;
 		}
 
 		fputs("<li>",output);

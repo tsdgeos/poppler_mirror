@@ -136,15 +136,6 @@ void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec,
 
 //------------------------------------------------------------------------
 
-GooString *GooString::fromInt(int x) {
-  char buf[24]; // enough space for 64-bit ints plus a little extra
-  const char *p;
-  int len;
-  formatInt(x, buf, sizeof(buf), false, 0, 10, &p, &len);
-
-  return new GooString(p, len);
-}
-
 GooString *GooString::format(const char *fmt, ...) {
   auto *s = new GooString();
 
@@ -621,16 +612,6 @@ void formatDoubleSmallAware(double x, char *buf, int bufSize, int prec,
   }
 }
 
-}
-
-GooString *GooString::upperCase() {
-  for (auto& c : *this) {
-    if (std::islower(c)) {
-      c = std::toupper(c);
-    }
-  }
-
-  return this;
 }
 
 GooString *GooString::lowerCase() {

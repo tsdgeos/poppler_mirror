@@ -5783,18 +5783,16 @@ void TextOutputDev::endActualText(GfxState *state)
 }
 
 void TextOutputDev::stroke(GfxState *state) {
-  GfxPath *path;
-  GfxSubpath *subpath;
   double x[2], y[2];
 
   if (!doHTML) {
     return;
   }
-  path = state->getPath();
+  const GfxPath *path = state->getPath();
   if (path->getNumSubpaths() != 1) {
     return;
   }
-  subpath = path->getSubpath(0);
+  const GfxSubpath *subpath = path->getSubpath(0);
   if (subpath->getNumPoints() != 2) {
     return;
   }
@@ -5808,8 +5806,6 @@ void TextOutputDev::stroke(GfxState *state) {
 }
 
 void TextOutputDev::fill(GfxState *state) {
-  GfxPath *path;
-  GfxSubpath *subpath;
   double x[5], y[5];
   double rx0, ry0, rx1, ry1, t;
   int i;
@@ -5817,11 +5813,11 @@ void TextOutputDev::fill(GfxState *state) {
   if (!doHTML) {
     return;
   }
-  path = state->getPath();
+  const GfxPath *path = state->getPath();
   if (path->getNumSubpaths() != 1) {
     return;
   }
-  subpath = path->getSubpath(0);
+  const GfxSubpath *subpath = path->getSubpath(0);
   if (subpath->getNumPoints() != 5) {
     return;
   }
