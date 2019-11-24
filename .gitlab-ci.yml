@@ -83,8 +83,9 @@ build_android:
   stage: build
   image: kdeorg/android-aarch64-sdk
   before_script:
-    - git clone https://git.savannah.gnu.org/git/freetype/freetype2.git --single-branch -b VER-2-8-1
-    - pushd freetype2
+    - wget https://download.savannah.gnu.org/releases/freetype/freetype-2.10.1.tar.xz
+    - tar xvfh freetype-2.10.1.tar.xz
+    - pushd freetype-2.10.1
     - CFLAGS=-std=gnu99 /opt/helpers/build-standalone "./autogen.sh && ./configure --enable-shared=no --prefix=/opt/popplerandroid-deps --host=${ANDROID_NDK_TOOLCHAIN_PREFIX} && make -j`nproc` && make install"
     - popd
   script:
