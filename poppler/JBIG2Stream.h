@@ -18,6 +18,7 @@
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
+// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -45,7 +46,7 @@ public:
 
   JBIG2Stream(Stream *strA, Object &&globalsStreamA, Object *globalsStreamRefA);
   ~JBIG2Stream();
-  StreamKind getKind() override { return strJBIG2; }
+  StreamKind getKind() const override { return strJBIG2; }
   void reset() override;
   void close() override;
   Goffset getPos() override;

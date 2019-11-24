@@ -101,7 +101,7 @@ public:
   BaseCryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
                   int keyLength, Ref ref);
   ~BaseCryptStream();
-  StreamKind getKind() override { return strCrypt; }
+  StreamKind getKind() const override { return strCrypt; }
   void reset() override;
   int getChar() override;
   int lookChar() override = 0;

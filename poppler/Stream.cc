@@ -182,7 +182,7 @@ public:
   {
   }
 
-  StreamKind getKind() override { return str->getBaseStream()->getKind(); }
+  StreamKind getKind() const override { return str->getBaseStream()->getKind(); }
   void reset() override { str->getBaseStream()->reset(); }
   int getChar() override { return str->getBaseStream()->getChar(); }
   int lookChar() override { return str->getBaseStream()->lookChar(); }

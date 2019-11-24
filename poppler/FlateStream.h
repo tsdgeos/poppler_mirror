@@ -3,7 +3,7 @@
 // FlateStream.h
 //
 // Copyright (C) 2005, Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2010, 2011, Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2011, 2019, Albert Astals Cid <aacid@kde.org>
 //
 // This file is under the GPLv2 or later license
 //
@@ -37,7 +37,7 @@ public:
 
   FlateStream(Stream *strA, int predictor, int columns, int colors, int bits);
   virtual ~FlateStream();
-  virtual StreamKind getKind() override { return strFlate; }
+  virtual StreamKind getKind() const override { return strFlate; }
   virtual void reset() override;
   virtual int getChar() override;
   virtual int lookChar() override;

@@ -8,7 +8,7 @@
 //
 // Copyright 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright 2010 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -49,7 +49,7 @@ public:
   CachedFile(const CachedFile &) = delete;
   CachedFile& operator=(const CachedFile &) = delete;
 
-  unsigned int getLength() { return length; }
+  unsigned int getLength() const { return length; }
   long int tell();
   int seek(long int offset, int origin);
   size_t read(void * ptr, size_t unitsize, size_t count);
