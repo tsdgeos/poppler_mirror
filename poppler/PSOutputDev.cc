@@ -990,7 +990,7 @@ public:
   DeviceNRecoder(Stream *strA, int widthA, int heightA,
 		 GfxImageColorMap *colorMapA);
   ~DeviceNRecoder();
-  StreamKind getKind() override { return strWeird; }
+  StreamKind getKind() const override { return strWeird; }
   void reset() override;
   int getChar() override
     { return (bufIdx >= bufSize && !fillBuf()) ? EOF : buf[bufIdx++]; }

@@ -106,7 +106,7 @@ public:
   Stream& operator=(const Stream &other) = delete;
 
   // Get kind of stream.
-  virtual StreamKind getKind() = 0;
+  virtual StreamKind getKind() const = 0;
 
   // Reset stream to beginning.
   virtual void reset() = 0;
@@ -456,7 +456,7 @@ public:
   BaseStream *copy() override;
   Stream *makeSubStream(Goffset startA, bool limitedA,
 				Goffset lengthA, Object &&dictA) override;
-  StreamKind getKind() override { return strFile; }
+  StreamKind getKind() const override { return strFile; }
   void reset() override;
   void close() override;
   int getChar() override
@@ -531,7 +531,7 @@ public:
   BaseStream *copy() override;
   Stream *makeSubStream(Goffset startA, bool limitedA,
 				Goffset lengthA, Object &&dictA) override;
-  StreamKind getKind() override { return strCachedFile; }
+  StreamKind getKind() const override { return strCachedFile; }
   void reset() override;
   void close() override;
   int getChar() override
@@ -593,7 +593,7 @@ public:
     return new BaseMemStream(buf, startA, newLength, std::move(dictA));
   }
 
-  StreamKind getKind() override { return strWeird; }
+  StreamKind getKind() const override { return strWeird; }
 
   void reset() override {
     bufPtr = buf + start;
@@ -703,7 +703,7 @@ public:
   BaseStream *copy() override;
   Stream *makeSubStream(Goffset start, bool limitedA,
 				Goffset lengthA, Object &&dictA) override;
-  StreamKind getKind() override { return str->getKind(); }
+  StreamKind getKind() const override { return str->getKind(); }
   void reset() override {}
   int getChar() override;
   int lookChar() override;
@@ -744,7 +744,7 @@ public:
 
   ASCIIHexStream(Stream *strA);
   ~ASCIIHexStream();
-  StreamKind getKind() override { return strASCIIHex; }
+  StreamKind getKind() const override { return strASCIIHex; }
   void reset() override;
   int getChar() override
     { int c = lookChar(); buf = EOF; return c; }
@@ -767,7 +767,7 @@ public:
 
   ASCII85Stream(Stream *strA);
   ~ASCII85Stream();
-  StreamKind getKind() override { return strASCII85; }
+  StreamKind getKind() const override { return strASCII85; }
   void reset() override;
   int getChar() override
     { int ch = lookChar(); ++index; return ch; }
@@ -793,7 +793,7 @@ public:
   LZWStream(Stream *strA, int predictor, int columns, int colors,
 	    int bits, int earlyA);
   ~LZWStream();
-  StreamKind getKind() override { return strLZW; }
+  StreamKind getKind() const override { return strLZW; }
   void reset() override;
   int getChar() override;
   int lookChar() override;
@@ -852,7 +852,7 @@ public:
 
   RunLengthStream(Stream *strA);
   ~RunLengthStream();
-  StreamKind getKind() override { return strRunLength; }
+  StreamKind getKind() const override { return strRunLength; }
   void reset() override;
   int getChar() override
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
@@ -887,7 +887,7 @@ public:
 		 bool byteAlignA, int columnsA, int rowsA,
 		 bool endOfBlockA, bool blackA, int damagedRowsBeforeErrorA);
   ~CCITTFaxStream();
-  StreamKind getKind() override { return strCCITTFax; }
+  StreamKind getKind() const override { return strCCITTFax; }
   void reset() override;
   int getChar() override
     { int c = lookChar(); buf = EOF; return c; }
@@ -973,7 +973,7 @@ public:
 
   DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion);
   virtual ~DCTStream();
-  StreamKind getKind() override { return strDCT; }
+  StreamKind getKind() const override { return strDCT; }
   void reset() override;
   void close() override;
   int getChar() override;
@@ -1081,7 +1081,7 @@ public:
   FlateStream(Stream *strA, int predictor, int columns,
 	      int colors, int bits);
   ~FlateStream();
-  StreamKind getKind() override { return strFlate; }
+  StreamKind getKind() const override { return strFlate; }
   void reset() override;
   int getChar() override;
   int lookChar() override;
@@ -1155,7 +1155,7 @@ public:
 
   EOFStream(Stream *strA);
   ~EOFStream();
-  StreamKind getKind() override { return strWeird; }
+  StreamKind getKind() const override { return strWeird; }
   void reset() override {}
   int getChar() override { return EOF; }
   int lookChar() override { return EOF; }
@@ -1172,7 +1172,7 @@ public:
 
   BufStream(Stream *strA, int bufSizeA);
   ~BufStream();
-  StreamKind getKind() override { return strWeird; }
+  StreamKind getKind() const override { return strWeird; }
   void reset() override;
   int getChar() override;
   int lookChar() override;
@@ -1197,7 +1197,7 @@ public:
 
   FixedLengthEncoder(Stream *strA, int lengthA);
   ~FixedLengthEncoder();
-  StreamKind getKind() override { return strWeird; }
+  StreamKind getKind() const override { return strWeird; }
   void reset() override;
   int getChar() override;
   int lookChar() override;
@@ -1220,7 +1220,7 @@ public:
 
   ASCIIHexEncoder(Stream *strA);
   ~ASCIIHexEncoder();
-  StreamKind getKind() override { return strWeird; }
+  StreamKind getKind() const override { return strWeird; }
   void reset() override;
   int getChar() override
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
@@ -1250,7 +1250,7 @@ public:
 
   ASCII85Encoder(Stream *strA);
   ~ASCII85Encoder();
-  StreamKind getKind() override { return strWeird; }
+  StreamKind getKind() const override { return strWeird; }
   void reset() override;
   int getChar() override
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
@@ -1280,7 +1280,7 @@ public:
 
   RunLengthEncoder(Stream *strA);
   ~RunLengthEncoder();
-  StreamKind getKind() override { return strWeird; }
+  StreamKind getKind() const override { return strWeird; }
   void reset() override;
   int getChar() override
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
@@ -1316,7 +1316,7 @@ public:
 
   LZWEncoder(Stream *strA);
   ~LZWEncoder();
-  StreamKind getKind() override { return strWeird; }
+  StreamKind getKind() const override { return strWeird; }
   void reset() override;
   int getChar() override;
   int lookChar() override;
@@ -1348,7 +1348,7 @@ public:
 
   CMYKGrayEncoder(Stream *strA);
   ~CMYKGrayEncoder();
-  StreamKind getKind() override { return strWeird; }
+  StreamKind getKind() const override { return strWeird; }
   void reset() override;
   int getChar() override
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
@@ -1377,7 +1377,7 @@ public:
 
   RGBGrayEncoder(Stream *strA);
   ~RGBGrayEncoder();
-  StreamKind getKind() override { return strWeird; }
+  StreamKind getKind() const override { return strWeird; }
   void reset() override;
   int getChar() override
     { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
