@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dominic Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2008, 2010, 2011, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2011, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jan Jockusch <jan@jockusch.de>
 // Copyright (C) 2010, 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Kenneth Berland <ken@hero.com>
@@ -487,10 +487,10 @@ static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *
   }
 }
 
-static void printLine(FILE *f, TextLine *line) {
+static void printLine(FILE *f, const TextLine *line) {
   double xMin, yMin, xMax, yMax;
   double lineXMin = 0, lineYMin = 0, lineXMax = 0, lineYMax = 0;
-  TextWord *word;
+  const TextWord *word;
   std::stringstream wordXML;
   wordXML << std::fixed << std::setprecision(6);
 
@@ -516,9 +516,9 @@ static void printLine(FILE *f, TextLine *line) {
 
 void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last) {
   double xMin, yMin, xMax, yMax;
-  TextFlow *flow;
-  TextBlock *blk;
-  TextLine *line;
+  const TextFlow *flow;
+  const TextBlock *blk;
+  const TextLine *line;
 
   fprintf(f, "<doc>\n");
   for (int page = first; page <= last; ++page) {

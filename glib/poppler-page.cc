@@ -1723,9 +1723,9 @@ poppler_text_attributes_new (void)
 }
 
 static gchar *
-get_font_name_from_word (TextWord *word, gint word_i)
+get_font_name_from_word (const TextWord *word, gint word_i)
 {
-  GooString *font_name = word->getFontName(word_i);
+  const GooString *font_name = word->getFontName(word_i);
   const gchar *name;
   gboolean subset;
   gint i;
@@ -1751,7 +1751,7 @@ get_font_name_from_word (TextWord *word, gint word_i)
  * Allocates a new PopplerTextAttributes with word attributes
  */
 static PopplerTextAttributes *
-poppler_text_attributes_new_from_word (TextWord *word, gint i)
+poppler_text_attributes_new_from_word (const TextWord *word, gint i)
 {
   PopplerTextAttributes *attrs = poppler_text_attributes_new ();
   gdouble r, g, b;
@@ -2238,7 +2238,7 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
       for (std::size_t j = 0; j < line_words->size(); j++)
         {
           TextWordSelection *word_sel = (*line_words)[j];
-          TextWord *word = word_sel->getWord();
+          const TextWord *word = word_sel->getWord();
           int end = word_sel->getEnd();
 
           for (k = word_sel->getBegin(); k < end; k++)
@@ -2311,7 +2311,7 @@ poppler_page_free_text_attributes (GList *list)
 }
 
 static gboolean
-word_text_attributes_equal (TextWord *a, gint ai, TextWord *b, gint bi)
+word_text_attributes_equal (const TextWord *a, gint ai, const TextWord *b, gint bi)
 {
   double ar, ag, ab, br, bg, bb;
 
@@ -2382,7 +2382,7 @@ poppler_page_get_text_attributes_for_area (PopplerPage      *page,
   PDFRectangle selection;
   int n_lines;
   PopplerTextAttributes *attrs = nullptr;
-  TextWord *word, *prev_word = nullptr;
+  const TextWord *word, *prev_word = nullptr;
   gint word_i, prev_word_i;
   gint i;
   gint offset = 0;

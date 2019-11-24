@@ -261,7 +261,7 @@ bool UnicodeMap::match(const GooString *encodingNameA) const {
   return !encodingName->cmp(encodingNameA);
 }
 
-int UnicodeMap::mapUnicode(Unicode u, char *buf, int bufSize) {
+int UnicodeMap::mapUnicode(Unicode u, char *buf, int bufSize) const {
   int a, b, m, n, i, j;
   unsigned int code;
 

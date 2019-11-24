@@ -1493,7 +1493,7 @@ public:
   bool getStrokeAdjust() const { return strokeAdjust; }
   bool getAlphaIsShape() const { return alphaIsShape; }
   bool getTextKnockout() const { return textKnockout; }
-  GfxFont *getFont() { return font; }
+  GfxFont *getFont() const { return font; }
   double getFontSize() const { return fontSize; }
   const double *getTextMat() const { return textMat; }
   double getCharSpace() const { return charSpace; }
