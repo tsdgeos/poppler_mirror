@@ -94,7 +94,7 @@ public:
   // output and returns the number of bytes used.  Output will be
   // truncated at <bufSize> bytes.  No string terminator is written.
   // Returns 0 if no mapping is found.
-  int mapUnicode(Unicode u, char *buf, int bufSize);
+  int mapUnicode(Unicode u, char *buf, int bufSize) const;
 
 private:
 

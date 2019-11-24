@@ -782,7 +782,7 @@ QList<TextBox*> Page::textList(Rotation rotate, ShouldAbortQueryFunc shouldAbort
     return output_list;
   }
   
-  QHash<TextWord *, TextBox*> wordBoxMap;
+  QHash<const TextWord *, TextBox*> wordBoxMap;
   
   output_list.reserve(word_list->getLength());
   for (int i = 0; i < word_list->getLength(); i++) {
