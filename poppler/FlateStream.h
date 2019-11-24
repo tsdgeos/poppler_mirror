@@ -37,14 +37,14 @@ public:
 
   FlateStream(Stream *strA, int predictor, int columns, int colors, int bits);
   virtual ~FlateStream();
-  virtual StreamKind getKind() const override { return strFlate; }
-  virtual void reset() override;
-  virtual int getChar() override;
-  virtual int lookChar() override;
-  virtual int getRawChar() override;
-  virtual void getRawChars(int nChars, int *buffer) override;
-  virtual GooString *getPSFilter(int psLevel, const char *indent) override;
-  virtual bool isBinary(bool last = true) override;
+  StreamKind getKind() const override { return strFlate; }
+  void reset() override;
+  int getChar() override;
+  int lookChar() override;
+  int getRawChar() override;
+  void getRawChars(int nChars, int *buffer) override;
+  GooString *getPSFilter(int psLevel, const char *indent) override;
+  bool isBinary(bool last = true) override;
 
 private:
   inline int doGetRawChar() {

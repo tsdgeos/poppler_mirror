@@ -167,12 +167,12 @@ public:
 	       double llx, double lly, double urx, double ury) override;
 
   //----- transparency groups and soft masks
-  virtual void beginTransparencyGroup(GfxState *state, const double *bbox,
+  void beginTransparencyGroup(GfxState *state, const double *bbox,
                                       GfxColorSpace *blendingColorSpace,
                                       bool isolated, bool knockout,
                                       bool forSoftMask) override;
-  virtual void endTransparencyGroup(GfxState *state) override;
-  virtual void paintTransparencyGroup(GfxState *state, const double *bbox) override;
+  void endTransparencyGroup(GfxState *state) override;
+  void paintTransparencyGroup(GfxState *state, const double *bbox) override;
 
   //----- special access
 
