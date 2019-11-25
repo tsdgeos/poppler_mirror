@@ -101,8 +101,8 @@ FormFieldIcon::~FormFieldIcon()
   delete d_ptr;
 }
 
-FormField::FormField(FormFieldData &dd)
-  : m_formData(&dd)
+FormField::FormField(std::unique_ptr<FormFieldData> dd)
+  : m_formData(std::move(dd))
 {
   const int rotation = m_formData->page->getRotate();
   // reading the coords
@@ -129,11 +129,7 @@ FormField::FormField(FormFieldData &dd)
   m_formData->box = QRectF(topLeft, QSizeF(bottomRight.x() - topLeft.x(), bottomRight.y() - topLeft.y()));
 }
 
-FormField::~FormField()
-{
-  delete m_formData;
-  m_formData = nullptr;
-}
+FormField::~FormField() = default;
 
 QRectF FormField::rect() const
 {
@@ -273,7 +269,7 @@ Link *FormField::additionalAction(Annotation::AdditionalActionType type) const
 }
 
 FormFieldButton::FormFieldButton(DocumentData *doc, ::Page *p, ::FormWidgetButton *w)
-  : FormField(*new FormFieldData(doc, p, w))
+  : FormField(std::make_unique<FormFieldData>(doc, p, w))
 {
 }
 
@@ -394,7 +390,7 @@ QList<int> FormFieldButton::siblings() const
 
 
 FormFieldText::FormFieldText(DocumentData *doc, ::Page *p, ::FormWidgetText *w)
-  : FormField(*new FormFieldData(doc, p, w))
+  : FormField(std::make_unique<FormFieldData>(doc, p, w))
 {
 }
 
@@ -482,7 +478,7 @@ void FormFieldText::setFontSize(int fontSize)
 }
 
 FormFieldChoice::FormFieldChoice(DocumentData *doc, ::Page *p, ::FormWidgetChoice *w)
-  : FormField(*new FormFieldData(doc, p, w))
+  : FormField(std::make_unique<FormFieldData>(doc, p, w))
 {
 }
 
@@ -910,7 +906,7 @@ SignatureValidationInfo &SignatureValidationInfo::operator=(const SignatureValid
 }
 
 FormFieldSignature::FormFieldSignature(DocumentData *doc, ::Page *p, ::FormWidgetSignature *w)
-  : FormField(*new FormFieldData(doc, p, w))
+  : FormField(std::make_unique<FormFieldData>(doc, p, w))
 {
 }
 
