@@ -12,6 +12,7 @@
  * Copyright (C) 2018 Carlos Garcia Campos <carlosgc@gnome.org>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
+ * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -782,7 +783,7 @@ Link* AnnotationPrivate::additionalAction( Annotation::AdditionalActionType type
 
     const Annot::AdditionalActionsType actionType = toPopplerAdditionalActionType(type);
 
-    ::LinkAction *linkAction = nullptr;
+    std::unique_ptr<::LinkAction> linkAction = nullptr;
     if ( pdfAnnot->getType() == Annot::typeScreen )
         linkAction = static_cast<AnnotScreen*>( pdfAnnot )->getAdditionalAction( actionType );
     else
@@ -791,7 +792,7 @@ Link* AnnotationPrivate::additionalAction( Annotation::AdditionalActionType type
     Link *link = nullptr;
 
     if ( linkAction )
-        link = PageData::convertLinkActionToLink( linkAction, parentDoc, QRectF() );
+        link = PageData::convertLinkActionToLink( linkAction.get(), parentDoc, QRectF() );
 
     return link;
 }

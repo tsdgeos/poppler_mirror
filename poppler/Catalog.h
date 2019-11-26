@@ -247,7 +247,7 @@ public:
     actionPrintDocumentFinish,  ///< Performed after printing the document
   };
 
-  LinkAction *getAdditionalAction(DocumentAdditionalActionsType type);
+  std::unique_ptr<LinkAction> getAdditionalAction(DocumentAdditionalActionsType type);
 
 private:
 

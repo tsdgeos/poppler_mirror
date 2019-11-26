@@ -25,6 +25,7 @@
 #ifndef OUTLINE_H
 #define OUTLINE_H
 
+#include <memory>
 #include "Object.h"
 #include "CharTypes.h"
 
@@ -69,7 +70,8 @@ public:
 
   const Unicode *getTitle() const { return title; }
   int getTitleLength() const { return titleLen; }
-  const LinkAction *getAction() const { return action; }
+  // OutlineItem keeps the ownership of the action
+  const LinkAction *getAction() const { return action.get(); }
   bool isOpen() const { return startsOpen; }
   bool hasKids() const { return firstRef.isRef(); }
   const std::vector<OutlineItem*> *getKids() const { return kids; }
@@ -81,7 +83,7 @@ private:
   XRef *xref;
   Unicode *title;
   int titleLen;
-  LinkAction *action;
+  std::unique_ptr<LinkAction> action;
   Object firstRef;
   Object lastRef;
   Object nextRef;

@@ -29,7 +29,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
 // Copyright (C) 2018, 2019 Tobias Deiminger <haxtibal@posteo.de>
-// Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2018, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
 // Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
@@ -935,7 +935,7 @@ class AnnotScreen: public Annot {
 
   AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs.get(); }
   LinkAction *getAction() { return action.get(); } // The caller should not delete the result
-  LinkAction *getAdditionalAction(AdditionalActionsType type); // The caller should delete the result
+  std::unique_ptr<LinkAction> getAdditionalAction(AdditionalActionsType type);
 
  private:
   void initialize(PDFDoc *docA, Dict *dict);
@@ -1407,8 +1407,8 @@ public:
   AnnotWidgetHighlightMode getMode() { return mode; }
   AnnotAppearanceCharacs *getAppearCharacs() { return appearCharacs.get(); }
   LinkAction *getAction() { return action.get(); }  // The caller should not delete the result
-  LinkAction *getAdditionalAction(AdditionalActionsType type); // The caller should delete the result
-  LinkAction *getFormAdditionalAction(FormAdditionalActionsType type); // The caller should delete the result
+  std::unique_ptr<LinkAction> getAdditionalAction(AdditionalActionsType type);
+  std::unique_ptr<LinkAction> getFormAdditionalAction(FormAdditionalActionsType type);
   Dict *getParent() { return parent; }
   void setNewAppearance(Object &&newAppearance);
 

@@ -1074,8 +1074,7 @@ NameTree *Catalog::getJSNameTree()
   return jsNameTree;
 }
 
-LinkAction* Catalog::getAdditionalAction(DocumentAdditionalActionsType type) {
-  LinkAction *linkAction = nullptr;
+std::unique_ptr<LinkAction> Catalog::getAdditionalAction(DocumentAdditionalActionsType type) {
   Object additionalActionsObject = additionalActions.fetch(doc->getXRef());
   if (additionalActionsObject.isDict()) {
     const char *key = (type == actionCloseDocument ?       "WC" :
@@ -1086,7 +1085,7 @@ LinkAction* Catalog::getAdditionalAction(DocumentAdditionalActionsType type) {
 
     Object actionObject = additionalActionsObject.dictLookup(key);
     if (actionObject.isDict())
-      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+      return LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
   }
-  return linkAction;
+  return nullptr;
 }

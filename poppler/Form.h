@@ -119,7 +119,7 @@ public:
   void setReadOnly(bool value);
 
   LinkAction *getActivationAction(); // The caller should not delete the result
-  LinkAction *getAdditionalAction(Annot::FormAdditionalActionsType type); // The caller should delete the result
+  std::unique_ptr<LinkAction> getAdditionalAction(Annot::FormAdditionalActionsType type);
   bool setAdditionalAction(Annot::FormAdditionalActionsType t, const GooString &js);
 
   // return the unique ID corresponding to pageNum/fieldNum

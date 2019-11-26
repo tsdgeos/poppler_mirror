@@ -174,7 +174,7 @@ LinkAction *FormWidget::getActivationAction() {
   return widget ? widget->getAction() : nullptr;
 }
 
-LinkAction *FormWidget::getAdditionalAction(Annot::FormAdditionalActionsType t) {
+std::unique_ptr<LinkAction> FormWidget::getAdditionalAction(Annot::FormAdditionalActionsType t) {
   return widget ? widget->getFormAdditionalAction(t) : nullptr;
 }
 

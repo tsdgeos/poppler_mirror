@@ -66,7 +66,6 @@ OutlineItem::OutlineItem(const Dict *dict, int refNumA, OutlineItem *parentA, XR
   parent = parentA;
   xref = xrefA;
   title = nullptr;
-  action = nullptr;
   kids = nullptr;
 
 
@@ -105,9 +104,6 @@ OutlineItem::~OutlineItem() {
   close();
   if (title) {
     gfree(title);
-  }
-  if (action) {
-    delete action;
   }
 }
 

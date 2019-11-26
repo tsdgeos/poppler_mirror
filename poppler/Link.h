@@ -79,16 +79,16 @@ public:
   virtual LinkActionKind getKind() const = 0;
 
   // Parse a destination (old-style action) name, string, or array.
-  static LinkAction *parseDest(const Object *obj);
+  static std::unique_ptr<LinkAction> parseDest(const Object *obj);
 
   // Parse an action dictionary.
-  static LinkAction *parseAction(const Object *obj, const GooString *baseURI = nullptr);
+  static std::unique_ptr<LinkAction> parseAction(const Object *obj, const GooString *baseURI = nullptr);
 
   // A List of the next actions to execute in order.
   const std::vector<std::unique_ptr<LinkAction> >& nextActions() const;
 
 private:
-  static LinkAction *parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions);
+  static std::unique_ptr<LinkAction> parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions);
 
   std::vector<std::unique_ptr<LinkAction> > nextActionList;
 };
