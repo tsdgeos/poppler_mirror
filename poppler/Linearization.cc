@@ -6,7 +6,7 @@
 //
 // Copyright 2010, 2012 Hib Eris <hib@hiberis.nl>
 // Copyright 2015 Jason Crain <jason@aquaticape.us>
-// Copyright 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2017, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright 2019 Even Rouault <even.rouault@spatialys.com>
 //
@@ -47,7 +47,7 @@ Linearization:: ~Linearization()
 {
 }
 
-unsigned int Linearization::getLength()
+unsigned int Linearization::getLength() const
 {
   if (!linDict.isDict()) return 0;
 
@@ -61,7 +61,7 @@ unsigned int Linearization::getLength()
   }
 }
 
-unsigned int Linearization::getHintsOffset()
+unsigned int Linearization::getHintsOffset() const
 {
   int hintsOffset;
 
@@ -80,7 +80,7 @@ unsigned int Linearization::getHintsOffset()
   return hintsOffset;
 }
 
-unsigned int Linearization::getHintsLength()
+unsigned int Linearization::getHintsLength() const
 {
   int hintsLength;
 
@@ -99,7 +99,7 @@ unsigned int Linearization::getHintsLength()
   return hintsLength;
 }
 
-unsigned int Linearization::getHintsOffset2()
+unsigned int Linearization::getHintsOffset2() const
 {
   int hintsOffset2 = 0; // default to 0
 
@@ -119,7 +119,7 @@ unsigned int Linearization::getHintsOffset2()
   return hintsOffset2;
 }
 
-unsigned int Linearization::getHintsLength2()
+unsigned int Linearization::getHintsLength2() const
 {
   int hintsLength2 = 0; // default to 0
 
@@ -139,7 +139,7 @@ unsigned int Linearization::getHintsLength2()
   return hintsLength2;
 }
 
-int Linearization::getObjectNumberFirst()
+int Linearization::getObjectNumberFirst() const
 {
   int objectNumberFirst = 0;
   if (linDict.isDict() &&
@@ -152,7 +152,7 @@ int Linearization::getObjectNumberFirst()
   }
 }
 
-unsigned int Linearization::getEndFirst()
+unsigned int Linearization::getEndFirst() const
 {
   int pageEndFirst = 0;
   if (linDict.isDict() &&
@@ -165,7 +165,7 @@ unsigned int Linearization::getEndFirst()
   }
 }
 
-int Linearization::getNumPages()
+int Linearization::getNumPages() const
 {
   int numPages = 0;
   if (linDict.isDict() &&
@@ -178,7 +178,7 @@ int Linearization::getNumPages()
   }
 }
 
-unsigned int Linearization::getMainXRefEntriesOffset()
+unsigned int Linearization::getMainXRefEntriesOffset() const
 {
   int mainXRefEntriesOffset = 0;
   if (linDict.isDict() &&
@@ -191,7 +191,7 @@ unsigned int Linearization::getMainXRefEntriesOffset()
   }
 }
 
-int Linearization::getPageFirst()
+int Linearization::getPageFirst() const
 {
   int pageFirst = 0; // Optional, defaults to 0.
 
