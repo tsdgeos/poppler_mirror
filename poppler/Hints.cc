@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2010, 2012 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2011, 2013, 2014, 2016-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2011, 2013, 2014, 2016-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010, 2013 Pino Toscano <pino@kde.org>
 // Copyright 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -184,20 +184,25 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
   hintsOffset2 = linearization->getHintsOffset2();
   hintsLength2 = linearization->getHintsLength2();
 
-  Parser *parser;
+  const unsigned int bufLength = hintsLength + hintsLength2;
 
-  int bufLength = hintsLength + hintsLength2;
+  if (bufLength == 0) {
+      ok = false;
+      return;
+  }
 
   std::vector<char> buf(bufLength);
   char *p = &buf[0];
 
-  Stream *s = str->makeSubStream(hintsOffset, false, hintsLength, Object(objNull));
-  s->reset();
-  for (unsigned int i=0; i < hintsLength; i++) { *p++ = s->getChar(); }
-  delete s;
+  if (hintsOffset && hintsLength) {
+    Stream *s = str->makeSubStream(hintsOffset, false, hintsLength, Object(objNull));
+    s->reset();
+    for (unsigned int i=0; i < hintsLength; i++) { *p++ = s->getChar(); }
+    delete s;
+  }
 
   if (hintsOffset2 && hintsLength2) {
-    s = str->makeSubStream(hintsOffset2, false, hintsLength2, Object(objNull));
+    Stream *s = str->makeSubStream(hintsOffset2, false, hintsLength2, Object(objNull));
     s->reset();
     for (unsigned int i=0; i < hintsLength2; i++) { *p++ = s->getChar(); }
     delete s;
@@ -205,7 +210,7 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
 
   MemStream *memStream = new MemStream (&buf[0], 0, bufLength, Object(objNull));
 
-  parser = new Parser(xref, memStream, true);
+  Parser *parser = new Parser(xref, memStream, true);
 
   int num, gen;
   Object obj;
@@ -234,9 +239,11 @@ void Hints::readTables(BaseStream *str, Linearization *linearization, XRef *xref
         }
     } else {
       error(errSyntaxWarning, -1, "Invalid shared object hint table offset");
+      ok = false;
     }
   } else {
     error(errSyntaxWarning, -1, "Failed parsing hints table object");
+    ok = false;
   }
 
   delete parser;
