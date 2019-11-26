@@ -36,6 +36,8 @@ Linearization::Linearization (BaseStream *str)
     if (!(obj5.isNum() && obj5.getNum() > 0)) {
        linDict.setToNull();
     }
+  } else {
+    linDict.setToNull();
   }
   delete parser;
 }
