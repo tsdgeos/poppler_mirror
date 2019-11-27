@@ -87,7 +87,8 @@ poppler_action_layer_copy (PopplerActionLayer *action_layer)
 	PopplerActionLayer *retval = g_slice_dup (PopplerActionLayer, action_layer);
 
 	retval->layers = g_list_copy (action_layer->layers);
-	g_list_foreach (action_layer->layers, (GFunc)g_object_ref, nullptr);
+	for (GList *l = retval->layers; l != nullptr; l = l->next)
+		g_object_ref (l->data);
 
 	return retval;
 }
