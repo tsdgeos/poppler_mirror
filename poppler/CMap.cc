@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2008, 2009, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2009, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -322,7 +322,7 @@ CMap::CMap(GooString *collectionA, GooString *cMapNameA, int wModeA) {
   refCnt = 1;
 }
 
-void CMap::useCMap(CMapCache *cache, char *useName) {
+void CMap::useCMap(CMapCache *cache, const char *useName) {
   GooString *useNameStr;
   CMap *subCMap;
 

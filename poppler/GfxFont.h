@@ -173,7 +173,7 @@ public:
   // Build a GfxFont object.
   static GfxFont *makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict);
 
-  GfxFont(const char *tagA, Ref idA, GooString *nameA,
+  GfxFont(const char *tagA, Ref idA, const GooString *nameA,
 	  GfxFontType typeA, Ref embFontIDA);
 
   GfxFont(const GfxFont &) = delete;
@@ -258,7 +258,7 @@ public:
   GfxFontLoc *locateFont(XRef *xref, PSOutputDev *ps);
 
   // Locate a Base-14 font file for a specified font name.
-  static GfxFontLoc *locateBase14Font(GooString *base14Name);
+  static GfxFontLoc *locateBase14Font(const GooString *base14Name);
 
   // Read an external or embedded font file into a buffer.
   char *readEmbFontFile(XRef *xref, int *len);
@@ -296,7 +296,7 @@ protected:
 
   GooString *tag;			// PDF font tag
   Ref id;			// reference (used as unique ID)
-  GooString *name;		// font name
+  const GooString *name;		// font name
   GooString *family;		// font family
   Stretch stretch;			// font stretch
   Weight weight;			// font weight

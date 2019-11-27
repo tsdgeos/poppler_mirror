@@ -1,6 +1,7 @@
 /* PageTransition.cc
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2015, Arseniy Lartsev <arseniy@alumni.chalmers.se>
+ * Copyright (C) 2019, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,28 +64,28 @@ public:
   ~PageTransition ();
 
   // Was the Page Transition created successfully?
-  bool isOk() { return ok; }
+  bool isOk() const { return ok; }
 
   // Get type
-  PageTransitionType getType() { return type; }
+  PageTransitionType getType() const { return type; }
 
   // Get duration
-  double getDuration() { return duration; }
+  double getDuration() const { return duration; }
 
   // Get alignment
-  PageTransitionAlignment getAlignment() { return alignment; }
+  PageTransitionAlignment getAlignment() const { return alignment; }
 
   // Get direction
-  PageTransitionDirection getDirection() { return direction; }
+  PageTransitionDirection getDirection() const { return direction; }
 
   // Get angle
-  int getAngle() { return angle; }
+  int getAngle() const { return angle; }
 
   // Get scale
-  double getScale() { return scale; }
+  double getScale() const { return scale; }
 
   // Is rectangular?
-  bool isRectangular() { return rectangular; }
+  bool isRectangular() const { return rectangular; }
 
 private:
   

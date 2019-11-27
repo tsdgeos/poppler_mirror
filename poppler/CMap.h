@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
-// Copyright (C) 2009, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
@@ -72,9 +72,9 @@ public:
   void decRefCnt();
 
   // Return collection name (<registry>-<ordering>).
-  GooString *getCollection() { return collection; }
+  const GooString *getCollection() const { return collection; }
 
-  GooString *getCMapName() { return cMapName; }
+  const GooString *getCMapName() const { return cMapName; }
 
   // Return true if this CMap matches the specified <collectionA>, and
   // <cMapNameA>.
@@ -86,7 +86,7 @@ public:
   CID getCID(const char *s, int len, CharCode *c, int *nUsed);
 
   // Return the writing mode (0=horizontal, 1=vertical).
-  int getWMode() { return wMode; }
+  int getWMode() const { return wMode; }
 
   void setReverseMap(unsigned int *rmap, unsigned int rmapSize, unsigned int ncand);
 
@@ -95,7 +95,7 @@ private:
   void parse2(CMapCache *cache, int (*getCharFunc)(void *), void *data);
   CMap(GooString *collectionA, GooString *cMapNameA);
   CMap(GooString *collectionA, GooString *cMapNameA, int wModeA);
-  void useCMap(CMapCache *cache, char *useName);
+  void useCMap(CMapCache *cache, const char *useName);
   void useCMap(CMapCache *cache, Object *obj);
   void copyVector(CMapVectorEntry *dest, CMapVectorEntry *src);
   void addCIDs(unsigned int start, unsigned int end, unsigned int nBytes, CID firstCID);
