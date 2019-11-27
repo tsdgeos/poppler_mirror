@@ -173,9 +173,6 @@ public:
   // Build a GfxFont object.
   static GfxFont *makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict);
 
-  GfxFont(const char *tagA, Ref idA, const GooString *nameA,
-	  GfxFontType typeA, Ref embFontIDA);
-
   GfxFont(const GfxFont &) = delete;
   GfxFont& operator=(const GfxFont &other) = delete;
 
@@ -285,6 +282,7 @@ public:
   static const char *getAlternateName(const char *name);
 
 protected:
+  GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType typeA, Ref embFontIDA);
 
   virtual ~GfxFont();
 
