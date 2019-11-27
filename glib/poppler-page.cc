@@ -2383,7 +2383,7 @@ poppler_page_get_text_attributes_for_area (PopplerPage      *page,
   GList *attributes = nullptr;
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
-  g_return_val_if_fail (area != nullptr, FALSE);
+  g_return_val_if_fail (area != nullptr, nullptr);
 
   selection.x1 = area->x1;
   selection.y1 = area->y1;
