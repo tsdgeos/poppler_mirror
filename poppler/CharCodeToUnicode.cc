@@ -125,7 +125,7 @@ CharCodeToUnicode *CharCodeToUnicode::makeIdentityMapping() {
 }
 
 CharCodeToUnicode *CharCodeToUnicode::parseCIDToUnicode(const char *fileName,
-							GooString *collection) {
+							const GooString *collection) {
   FILE *f;
   Unicode *mapA;
   CharCode size, mapLenA;
@@ -166,7 +166,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseCIDToUnicode(const char *fileName,
 }
 
 CharCodeToUnicode *CharCodeToUnicode::parseUnicodeToUnicode(
-						    GooString *fileName) {
+						    const GooString *fileName) {
   FILE *f;
   Unicode *mapA;
   CharCodeToUnicodeString *sMapA;
@@ -264,7 +264,7 @@ CharCodeToUnicode *CharCodeToUnicode::make8BitToUnicode(Unicode *toUnicode) {
   return new CharCodeToUnicode(nullptr, toUnicode, 256, true, nullptr, 0, 0);
 }
 
-CharCodeToUnicode *CharCodeToUnicode::parseCMap(GooString *buf, int nBits) {
+CharCodeToUnicode *CharCodeToUnicode::parseCMap(const GooString *buf, int nBits) {
   CharCodeToUnicode *ctu;
 
   ctu = new CharCodeToUnicode(nullptr);
@@ -273,7 +273,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseCMap(GooString *buf, int nBits) {
   return ctu;
 }
 
-CharCodeToUnicode *CharCodeToUnicode::parseCMapFromFile(GooString *fileName,
+CharCodeToUnicode *CharCodeToUnicode::parseCMapFromFile(const GooString *fileName,
   int nBits) {
   CharCodeToUnicode *ctu;
   FILE *f;
@@ -289,7 +289,7 @@ CharCodeToUnicode *CharCodeToUnicode::parseCMapFromFile(GooString *fileName,
   return ctu;
 }
 
-void CharCodeToUnicode::mergeCMap(GooString *buf, int nBits) {
+void CharCodeToUnicode::mergeCMap(const GooString *buf, int nBits) {
   const char *p = buf->c_str();
   parseCMap1(&getCharFromString, &p, nBits);
 }
@@ -539,7 +539,7 @@ void CharCodeToUnicode::decRefCnt() {
   }
 }
 
-bool CharCodeToUnicode::match(GooString *tagA) {
+bool CharCodeToUnicode::match(const GooString *tagA) {
   return tag && !tag->cmp(tagA);
 }
 

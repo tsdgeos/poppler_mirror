@@ -52,12 +52,12 @@ public:
   // specified by <fileName>.  Sets the initial reference count to 1.
   // Returns NULL on failure.
   static CharCodeToUnicode *parseCIDToUnicode(const char *fileName,
-					      GooString *collection);
+					      const GooString *collection);
 
   // Create a Unicode-to-Unicode mapping from the file specified by
   // <fileName>.  Sets the initial reference count to 1.  Returns NULL
   // on failure.
-  static CharCodeToUnicode *parseUnicodeToUnicode(GooString *fileName);
+  static CharCodeToUnicode *parseUnicodeToUnicode(const GooString *fileName);
 
   // Create the CharCode-to-Unicode mapping for an 8-bit font.
   // <toUnicode> is an array of 256 Unicode indexes.  Sets the initial
@@ -65,12 +65,12 @@ public:
   static CharCodeToUnicode *make8BitToUnicode(Unicode *toUnicode);
 
   // Parse a ToUnicode CMap for an 8- or 16-bit font.
-  static CharCodeToUnicode *parseCMap(GooString *buf, int nBits);
-  static CharCodeToUnicode *parseCMapFromFile(GooString *fileName, int nBits);
+  static CharCodeToUnicode *parseCMap(const GooString *buf, int nBits);
+  static CharCodeToUnicode *parseCMapFromFile(const GooString *fileName, int nBits);
 
   // Parse a ToUnicode CMap for an 8- or 16-bit font, merging it into
   // <this>.
-  void mergeCMap(GooString *buf, int nBits);
+  void mergeCMap(const GooString *buf, int nBits);
 
   ~CharCodeToUnicode();
 
@@ -81,7 +81,7 @@ public:
   void decRefCnt();
 
   // Return true if this mapping matches the specified <tagA>.
-  bool match(GooString *tagA);
+  bool match(const GooString *tagA);
 
   // Set the mapping for <c>.
   void setMapping(CharCode c, Unicode *u, int len);

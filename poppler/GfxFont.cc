@@ -233,7 +233,7 @@ GfxFont *GfxFont::makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict
   return font;
 }
 
-GfxFont::GfxFont(const char *tagA, Ref idA, GooString *nameA,
+GfxFont::GfxFont(const char *tagA, Ref idA, const GooString *nameA,
 		 GfxFontType typeA, Ref embFontIDA) {
   ok = false;
   tag = new GooString(tagA);
@@ -759,7 +759,7 @@ GfxFontLoc *GfxFont::locateFont(XRef *xref, PSOutputDev *ps) {
   return nullptr;
 }
 
-GfxFontLoc *GfxFont::locateBase14Font(GooString *base14Name) {
+GfxFontLoc *GfxFont::locateBase14Font(const GooString *base14Name) {
   GooString *path;
 
   path = globalParams->findFontFile(base14Name);
