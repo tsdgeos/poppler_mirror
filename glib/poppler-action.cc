@@ -74,8 +74,7 @@ poppler_action_layer_free (PopplerActionLayer *action_layer)
 		return;
 
 	if (action_layer->layers) {
-		g_list_foreach (action_layer->layers, (GFunc)g_object_unref, nullptr);
-		g_list_free (action_layer->layers);
+		g_list_free_full (action_layer->layers, g_object_unref);
 		action_layer->layers = nullptr;
 	}
 
@@ -136,8 +135,7 @@ poppler_action_free (PopplerAction *action)
 		break;
 	case POPPLER_ACTION_OCG_STATE:
 		if (action->ocg_state.state_list) {
-			g_list_foreach (action->ocg_state.state_list, (GFunc)poppler_action_layer_free, nullptr);
-			g_list_free (action->ocg_state.state_list);
+			g_list_free_full (action->ocg_state.state_list, (GDestroyNotify)poppler_action_layer_free);
 		}
 		break;
 	case POPPLER_ACTION_JAVASCRIPT:

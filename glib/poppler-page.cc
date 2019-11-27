@@ -729,8 +729,7 @@ poppler_page_selection_region_free (GList *region)
   if (G_UNLIKELY (!region))
     return;
 
-  g_list_foreach (region, (GFunc)poppler_rectangle_free, nullptr);
-  g_list_free (region);
+  g_list_free_full (region, (GDestroyNotify)poppler_rectangle_free);
 }
 
 /**
@@ -1117,8 +1116,7 @@ poppler_page_free_image_mapping (GList *list)
   if (G_UNLIKELY (list == nullptr))
     return;
 
-  g_list_foreach (list, (GFunc)poppler_image_mapping_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_image_mapping_free);
 }
 
 /**
@@ -1301,8 +1299,7 @@ poppler_page_free_link_mapping (GList *list)
   if (G_UNLIKELY (list == nullptr))
     return;
 
-  g_list_foreach (list, (GFunc)poppler_link_mapping_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_link_mapping_free);
 }
 
 /**
@@ -1368,8 +1365,7 @@ poppler_page_free_form_field_mapping (GList *list)
   if (G_UNLIKELY (list == nullptr))
     return;
 
-  g_list_foreach (list, (GFunc) poppler_form_field_mapping_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_form_field_mapping_free);
 }
 
 /**
@@ -1505,8 +1501,7 @@ poppler_page_free_annot_mapping (GList *list)
   if (G_UNLIKELY (!list))
     return;
 
-  g_list_foreach (list, (GFunc)poppler_annot_mapping_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_annot_mapping_free);
 }
 
 /**
@@ -2306,8 +2301,7 @@ poppler_page_free_text_attributes (GList *list)
   if (G_UNLIKELY (list == nullptr))
     return;
 
-  g_list_foreach (list, (GFunc)poppler_text_attributes_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_text_attributes_free);
 }
 
 static gboolean
