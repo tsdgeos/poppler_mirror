@@ -2738,7 +2738,7 @@ POPPLER_DEFINE_BOXED_TYPE (PopplerFontsIter, poppler_fonts_iter,
 const char *
 poppler_fonts_iter_get_full_name (PopplerFontsIter *iter)
 {
-	GooString *name;
+	const GooString *name;
 	FontInfo *info;
 
 	info = iter->items[iter->index];
@@ -2793,7 +2793,7 @@ poppler_fonts_iter_get_name (PopplerFontsIter *iter)
 const char *
 poppler_fonts_iter_get_substitute_name (PopplerFontsIter *iter)
 {
-	GooString *name;
+	const GooString *name;
 	FontInfo *info;
 
 	info = iter->items[iter->index];
@@ -2818,7 +2818,7 @@ poppler_fonts_iter_get_substitute_name (PopplerFontsIter *iter)
 const char *
 poppler_fonts_iter_get_file_name (PopplerFontsIter *iter)
 {
-	GooString *file;
+	const GooString *file;
 	FontInfo *info;
 
 	info = iter->items[iter->index];
@@ -2864,7 +2864,7 @@ poppler_fonts_iter_get_font_type (PopplerFontsIter *iter)
 const char *
 poppler_fonts_iter_get_encoding (PopplerFontsIter *iter)
 {
-	GooString *encoding;
+	const GooString *encoding;
 	FontInfo *info;
 
 	info = iter->items[iter->index];

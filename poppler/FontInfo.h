@@ -3,7 +3,7 @@
 // FontInfo.h
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2008, 2010, 2011, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2008, 2010, 2011, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Brad Hards <bradh@frogmouth.net>
 // Copyright (C) 2009 Pino Toscano <pino@kde.org>
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
@@ -54,22 +54,22 @@ public:
   // Constructor.
   FontInfo(GfxFont *fontA, XRef *xrefA);
   // Copy constructor
-  FontInfo(FontInfo& f);
+  FontInfo(const FontInfo& f);
   // Destructor.
   ~FontInfo();
 
   FontInfo& operator=(const FontInfo &) = delete;
 
-  GooString *getName()      { return name; };
-  GooString *getSubstituteName() { return substituteName; };
-  GooString *getFile()      { return file; };
-  GooString *getEncoding()      { return encoding; };
-  Type       getType()      { return type; };
-  bool      getEmbedded()  { return emb; };
-  bool      getSubset()    { return subset; };
-  bool      getToUnicode() { return hasToUnicode; };
-  Ref        getRef()       { return fontRef; };
-  Ref        getEmbRef()    { return embRef; };
+  const GooString *getName() const     { return name; };
+  const GooString *getSubstituteName() const { return substituteName; };
+  const GooString *getFile() const      { return file; };
+  const GooString *getEncoding() const      { return encoding; };
+  Type       getType() const      { return type; };
+  bool      getEmbedded() const  { return emb; };
+  bool      getSubset() const    { return subset; };
+  bool      getToUnicode() const { return hasToUnicode; };
+  Ref        getRef() const       { return fontRef; };
+  Ref        getEmbRef() const    { return embRef; };
 
 private:
   GooString *name;

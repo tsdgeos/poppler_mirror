@@ -214,7 +214,7 @@ FontInfo::FontInfo(GfxFont *font, XRef *xref) {
   }
 }
 
-FontInfo::FontInfo(FontInfo& f) {
+FontInfo::FontInfo(const FontInfo& f) {
   name = f.name ? f.name->copy() : nullptr;
   file = f.file ? f.file->copy() : nullptr;
   encoding = f.encoding ? f.encoding->copy() : nullptr;
