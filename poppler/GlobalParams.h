@@ -133,7 +133,7 @@ public:
   bool getPSExpandSmaller();
   bool getPSShrinkLarger();
   PSLevel getPSLevel();
-  GooString *getTextEncodingName();
+  std::string getTextEncodingName() const;
   EndOfLineKind getTextEOL();
   bool getTextPageBreaks();
   bool getEnableFreeType();

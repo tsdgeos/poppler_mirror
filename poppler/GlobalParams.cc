@@ -1134,9 +1134,9 @@ PSLevel GlobalParams::getPSLevel() {
   return psLevel;
 }
 
-GooString *GlobalParams::getTextEncodingName() {
+std::string GlobalParams::getTextEncodingName() const {
   globalParamsLocker();
-  return textEncoding->copy();
+  return textEncoding->toStr();
 }
 
 EndOfLineKind GlobalParams::getTextEOL() {

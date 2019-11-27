@@ -833,7 +833,7 @@ int HtmlPage::dumpComplexHeaders(FILE * const file, FILE *& pageFile, int page) 
       else
         fprintf(pageFile,"%s\n<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"\" xml:lang=\"\">\n<head>\n<title>%s</title>\n\n", DOCTYPE, pageFileName.c_str());
 
-      const std::string htmlEncoding = HtmlOutputDev::mapEncodingToHtml(globalParams->getTextEncodingName())->toStr();
+      const std::string htmlEncoding = HtmlOutputDev::mapEncodingToHtml(globalParams->getTextEncodingName());
       if (!singleHtml)
         fprintf(pageFile, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding.c_str());
       else
@@ -1028,23 +1028,20 @@ static const char* HtmlEncodings[][2] = {
     {nullptr, nullptr}
 };
 
-GooString* HtmlOutputDev::mapEncodingToHtml(GooString* encoding)
+std::string HtmlOutputDev::mapEncodingToHtml(const std::string &encoding)
 {
-  GooString* enc = encoding;
   for(int i = 0; HtmlEncodings[i][0] != nullptr; i++)
   {
-    if( enc->cmp(HtmlEncodings[i][0]) == 0 )
+    if( encoding.compare(HtmlEncodings[i][0]) == 0 )
     {
-      delete enc;
-      return new GooString(HtmlEncodings[i][1]);
+      return HtmlEncodings[i][1];
     }
   }
-  return enc; 
+  return encoding;
 }
 
 void HtmlOutputDev::doFrame(int firstPage){
   GooString* fName=new GooString(Docname);
-  GooString* htmlEncoding;
   fName->append(".html");
 
   if (!(fContentsFrame = fopen(fName->c_str(), "w"))){
@@ -1060,8 +1057,8 @@ void HtmlOutputDev::doFrame(int firstPage){
   fputs("\n<html>",fContentsFrame);
   fputs("\n<head>",fContentsFrame);
   fprintf(fContentsFrame,"\n<title>%s</title>",docTitle->c_str());
-  htmlEncoding = mapEncodingToHtml(globalParams->getTextEncodingName());
-  fprintf(fContentsFrame, "\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding->c_str());
+  const std::string htmlEncoding = mapEncodingToHtml(globalParams->getTextEncodingName());
+  fprintf(fContentsFrame, "\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding.c_str());
   dumpMetaVars(fContentsFrame);
   fprintf(fContentsFrame, "</head>\n");
   fputs("<frameset cols=\"100,*\">\n",fContentsFrame);
@@ -1074,7 +1071,6 @@ void HtmlOutputDev::doFrame(int firstPage){
   
   fputs("/>\n</frameset>\n</html>\n",fContentsFrame);
  
-  delete htmlEncoding;
   fclose(fContentsFrame);  
 }
 
@@ -1171,10 +1167,10 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
       delete right;
     }
 
-    GooString *htmlEncoding = mapEncodingToHtml(globalParams->getTextEncodingName()); 
+    const std::string htmlEncoding = mapEncodingToHtml(globalParams->getTextEncodingName());
     if (xml) 
     {
-      fprintf(page, "<?xml version=\"1.0\" encoding=\"%s\"?>\n", htmlEncoding->c_str());
+      fprintf(page, "<?xml version=\"1.0\" encoding=\"%s\"?>\n", htmlEncoding.c_str());
       fputs("<!DOCTYPE pdf2xml SYSTEM \"pdf2xml.dtd\">\n\n", page);
       fprintf(page,"<pdf2xml producer=\"%s\" version=\"%s\">\n", PACKAGE_NAME, PACKAGE_VERSION);
     } 
@@ -1182,14 +1178,13 @@ HtmlOutputDev::HtmlOutputDev(Catalog *catalogA, const char *fileName, const char
     {
       fprintf(page,"%s\n<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"\" xml:lang=\"\">\n<head>\n<title>%s</title>\n", DOCTYPE, docTitle->c_str());
       
-      fprintf(page, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding->c_str());
+      fprintf(page, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"/>\n", htmlEncoding.c_str());
       
       dumpMetaVars(page);
       printCSS(page);
       fprintf(page,"</head>\n");
       fprintf(page,"<body bgcolor=\"#A0A0A0\" vlink=\"blue\" link=\"blue\">\n");
     }
-    delete htmlEncoding;
   }
   ok = true; 
 }
@@ -1710,7 +1705,7 @@ bool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
 				return false;
 			bClose = true;
 
-			GooString *htmlEncoding =
+			const std::string htmlEncoding =
 				HtmlOutputDev::mapEncodingToHtml(globalParams->getTextEncodingName());
 
 			fprintf(output, "<html xmlns=\"http://www.w3.org/1999/xhtml\" " \
@@ -1719,8 +1714,7 @@ bool HtmlOutputDev::dumpDocOutline(PDFDoc* doc)
                                 "<title>Document Outline</title>\n"     \
                                 "<meta http-equiv=\"Content-Type\" content=\"text/html; " \
                                 "charset=%s\"/>\n"                      \
-                                "</head>\n<body>\n", htmlEncoding->c_str());
-			delete htmlEncoding;
+                                "</head>\n<body>\n", htmlEncoding.c_str());
 		}
 	}
  
