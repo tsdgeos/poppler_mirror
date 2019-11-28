@@ -389,6 +389,7 @@ public:
   void setFontAntialias(bool anti) { fontAntialias = anti; }
 
   void setFreeTypeHinting(bool enable, bool enableSlightHinting);
+  void setEnableFreeType(bool enable) { enableFreeType = enable; }
 
 protected:
   void doUpdateFont(GfxState *state);
@@ -433,6 +434,7 @@ private:
   bool fontAntialias;
   bool vectorAntialias;
   bool overprintPreview;
+  bool enableFreeType;
   bool enableFreeTypeHinting;
   bool enableSlightHinting;
   bool reverseVideo;		// reverse video mode

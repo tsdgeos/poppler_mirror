@@ -410,7 +410,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   textEOL = eolUnix;
 #endif
   textPageBreaks = true;
-  enableFreeType = true;
   overprintPreview = false;
   printCommands = false;
   profileCommands = false;
@@ -1149,11 +1148,6 @@ bool GlobalParams::getTextPageBreaks() {
   return textPageBreaks;
 }
 
-bool GlobalParams::getEnableFreeType() {
-  globalParamsLocker();
-  return enableFreeType;
-}
-
 bool GlobalParams::getPrintCommands() {
   globalParamsLocker();
   return printCommands;
@@ -1269,11 +1263,6 @@ bool GlobalParams::setTextEOL(const char *s) {
 void GlobalParams::setTextPageBreaks(bool pageBreaks) {
   globalParamsLocker();
   textPageBreaks = pageBreaks;
-}
-
-bool GlobalParams::setEnableFreeType(const char *s) {
-  globalParamsLocker();
-  return parseYesNo2(s, &enableFreeType);
 }
 
 void GlobalParams::setOverprintPreview(bool overprintPreviewA) {

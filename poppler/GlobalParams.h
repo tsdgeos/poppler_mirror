@@ -136,7 +136,6 @@ public:
   std::string getTextEncodingName() const;
   EndOfLineKind getTextEOL();
   bool getTextPageBreaks();
-  bool getEnableFreeType();
   bool getOverprintPreview() { return overprintPreview; }
   bool getPrintCommands();
   bool getProfileCommands();
@@ -157,7 +156,6 @@ public:
   void setTextEncoding(const char *encodingName);
   bool setTextEOL(const char *s);
   void setTextPageBreaks(bool pageBreaks);
-  bool setEnableFreeType(const char *s);
   void setOverprintPreview(bool overprintPreviewA);
   void setPrintCommands(bool printCommandsA);
   void setProfileCommands(bool profileCommandsA);
@@ -214,7 +212,6 @@ private:
   EndOfLineKind textEOL;	// type of EOL marker to use for text
 				//   output
   bool textPageBreaks;		// insert end-of-page markers?
-  bool enableFreeType;		// FreeType enable flag
   bool overprintPreview;	// enable overprint preview
   bool printCommands;		// print the drawing commands
   bool profileCommands;	// profile the drawing commands

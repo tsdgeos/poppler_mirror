@@ -100,6 +100,7 @@ static bool jpegProgressive = false;
 static bool jpegOptimize = false;
 static bool overprint = false;
 static char enableFreeTypeStr[16] = "";
+static bool enableFreeType = true;
 static char antialiasStr[16] = "";
 static char vectorAntialiasStr[16] = "";
 static bool fontAntialias = true;
@@ -367,6 +368,7 @@ static void processPageJobs() {
 		              splashModeRGB8, 4, false, *pageJob.paperColor, true, thinLineMode);
     splashOut->setFontAntialias(fontAntialias);
     splashOut->setVectorAntialias(vectorAntialias);
+    splashOut->setEnableFreeType(enableFreeType);
     splashOut->startDoc(pageJob.doc);
     
     savePageSlice(pageJob.doc, splashOut, pageJob.pg, x, y, w, h, pageJob.pg_w, pageJob.pg_h, pageJob.ppmFile);
@@ -443,7 +445,7 @@ int main(int argc, char *argv[]) {
   // read config file
   globalParams = std::make_unique<GlobalParams>();
   if (enableFreeTypeStr[0]) {
-    if (!globalParams->setEnableFreeType(enableFreeTypeStr)) {
+    if (!GlobalParams::parseYesNo2(enableFreeTypeStr, &enableFreeType)) {
       fprintf(stderr, "Bad '-freetype' value on command line\n");
     }
   }
@@ -539,6 +541,7 @@ int main(int argc, char *argv[]) {
 
   splashOut->setFontAntialias(fontAntialias);
   splashOut->setVectorAntialias(vectorAntialias);
+  splashOut->setEnableFreeType(enableFreeType);
   splashOut->startDoc(doc);
   
 #endif // UTILS_USE_PTHREADS

@@ -181,10 +181,6 @@ void ArthurOutputDev::startDoc(PDFDoc* doc) {
   xref = doc->getXRef();
   m_doc = doc;
 
-  if (!globalParams->getEnableFreeType()) {
-    qCritical() << "Arthur backend will not render text without FreeType, but it is disabled!";
-  }
-
   for (auto& codeToGID : m_codeToGIDCache) {
     gfree(const_cast<int*>(codeToGID.second));
   }

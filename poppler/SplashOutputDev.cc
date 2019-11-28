@@ -1252,6 +1252,7 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
   fontAntialias = true;
   vectorAntialias = true;
   overprintPreview = overprintPreviewA;
+  enableFreeType = true;
   enableFreeTypeHinting = false;
   enableSlightHinting = false;
   setupScreenParams(72.0, 72.0);
@@ -1338,7 +1339,7 @@ void SplashOutputDev::startDoc(PDFDoc *docA) {
     delete fontEngine;
   }
   fontEngine = new SplashFontEngine(
-				    globalParams->getEnableFreeType(),
+				    enableFreeType,
 				    enableFreeTypeHinting,
 				    enableSlightHinting,
 				      getFontAntialias() &&
