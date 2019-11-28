@@ -389,7 +389,7 @@ static GooString* replaceSuffix(GooString *path,
 }
 
 
-void GlobalParams::setupBaseFonts(char * dir)
+void GlobalParams::setupBaseFonts(const char * dir)
 {
     const char *dataRoot = popplerDataDir ? popplerDataDir : POPPLER_DATADIR;
     GooString *fileName = nullptr;
@@ -477,7 +477,7 @@ void GlobalParams::setupBaseFonts(char * dir)
     }
 }
 
-static const char *findSubstituteName(GfxFont *font, const std::unordered_map<std::string, std::string>& fontFiles,
+static const char *findSubstituteName(const GfxFont *font, const std::unordered_map<std::string, std::string>& fontFiles,
                                       const std::unordered_map<std::string, std::string>& substFiles,
                                       const char *origName)
 {
@@ -528,7 +528,7 @@ static const char *findSubstituteName(GfxFont *font, const std::unordered_map<st
 }
 
 /* Windows implementation of external font matching code */
-GooString *GlobalParams::findSystemFontFile(GfxFont *font,
+GooString *GlobalParams::findSystemFontFile(const GfxFont *font,
 					  SysFontType *type,
 					  int *fontNum, GooString *substituteFontName,
                                           const GooString *base14Name) {

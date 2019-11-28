@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
@@ -107,11 +107,11 @@ public:
   GlobalParams(const GlobalParams &) = delete;
   GlobalParams& operator=(const GlobalParams &) = delete;
 
-  void setupBaseFonts(char *dir);
+  void setupBaseFonts(const char *dir);
 
   //----- accessors
 
-  CharCode getMacRomanCharCode(char *charName);
+  CharCode getMacRomanCharCode(const char *charName);
 
   // Return Unicode values for character names.  Used for general text
   // extraction.
@@ -126,8 +126,8 @@ public:
   FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
   FILE *findToUnicodeFile(const GooString *name);
   GooString *findFontFile(const GooString *fontName);
-  GooString *findBase14FontFile(const GooString *base14Name, GfxFont *font);
-  GooString *findSystemFontFile(GfxFont *font, SysFontType *type,
+  GooString *findBase14FontFile(const GooString *base14Name, const GfxFont *font);
+  GooString *findSystemFontFile(const GfxFont *font, SysFontType *type,
 			      int *fontNum, GooString *substituteFontName = nullptr,
 		              const GooString *base14Name = nullptr);
   bool getPSExpandSmaller();
@@ -142,22 +142,22 @@ public:
   bool getProfileCommands();
   bool getErrQuiet();
 
-  CharCodeToUnicode *getCIDToUnicode(GooString *collection);
+  CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
   UnicodeMap *getUnicodeMap(GooString *encodingName);
-  CMap *getCMap(const GooString *collection, GooString *cMapName, Stream *stream = nullptr);
+  CMap *getCMap(const GooString *collection, const GooString *cMapName, Stream *stream = nullptr);
   UnicodeMap *getTextEncoding();
 
   std::vector<GooString*> *getEncodingNames();
 
   //----- functions to set parameters
-  void addFontFile(GooString *fontName, GooString *path);
+  void addFontFile(const GooString *fontName, const GooString *path);
   void setPSExpandSmaller(bool expand);
   void setPSShrinkLarger(bool shrink);
   void setPSLevel(PSLevel level);
-  void setTextEncoding(char *encodingName);
-  bool setTextEOL(char *s);
+  void setTextEncoding(const char *encodingName);
+  bool setTextEOL(const char *s);
   void setTextPageBreaks(bool pageBreaks);
-  bool setEnableFreeType(char *s);
+  bool setEnableFreeType(const char *s);
   void setOverprintPreview(bool overprintPreviewA);
   void setPrintCommands(bool printCommandsA);
   void setProfileCommands(bool profileCommandsA);

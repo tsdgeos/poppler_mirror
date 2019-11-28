@@ -574,7 +574,7 @@ GlobalParams::~GlobalParams() {
 // accessors
 //------------------------------------------------------------------------
 
-CharCode GlobalParams::getMacRomanCharCode(char *charName) {
+CharCode GlobalParams::getMacRomanCharCode(const char *charName) {
   // no need to lock - macRomanReverseMap is constant
   return macRomanReverseMap->lookup(charName);
 }
@@ -671,7 +671,7 @@ static bool findModifier(const char *name, const char *modifier, const char **st
   }
 }
 
-static const char *getFontLang(GfxFont *font)
+static const char *getFontLang(const GfxFont *font)
 {
   const char *lang;
 
@@ -707,7 +707,7 @@ static const char *getFontLang(GfxFont *font)
   return lang;
 }
 
-static FcPattern *buildFcPattern(GfxFont *font, const GooString *base14Name)
+static FcPattern *buildFcPattern(const GfxFont *font, const GooString *base14Name)
 {
   int weight = -1,
       slant = -1,
@@ -840,17 +840,17 @@ GooString *GlobalParams::findFontFile(const GooString *fontName) {
 */
 #ifdef WITH_FONTCONFIGURATION_FONTCONFIG
 // not needed for fontconfig
-void GlobalParams::setupBaseFonts(char *) {
+void GlobalParams::setupBaseFonts(const char *) {
 }
 
-GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, GfxFont *font) {
+GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font) {
   SysFontType type;
   int fontNum;
   
   return findSystemFontFile(font, &type, &fontNum, nullptr, base14Name);
 }
 
-GooString *GlobalParams::findSystemFontFile(GfxFont *font,
+GooString *GlobalParams::findSystemFontFile(const GfxFont *font,
 					  SysFontType *type,
 					  int *fontNum, GooString *substituteFontName, const GooString *base14Name) {
   SysFontInfo *fi = nullptr;
@@ -1016,11 +1016,11 @@ fin:
 #elif WITH_FONTCONFIGURATION_WIN32
 #include "GlobalParamsWin.cc"
 
-GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, GfxFont *font) {
+GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font) {
   return findFontFile(base14Name);
 }
 #else
-GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, GfxFont *font) {
+GooString *GlobalParams::findBase14FontFile(const GooString *base14Name, const GfxFont *font) {
   return findFontFile(base14Name);
 }
 
@@ -1055,7 +1055,7 @@ static const char *displayFontDirs[] = {
   nullptr
 };
 
-void GlobalParams::setupBaseFonts(char *dir) {
+void GlobalParams::setupBaseFonts(const char *dir) {
   GooString *fontName;
   GooString *fileName;
   FILE *f;
@@ -1097,7 +1097,7 @@ void GlobalParams::setupBaseFonts(char *dir) {
 
 }
 
-GooString *GlobalParams::findSystemFontFile(GfxFont *font,
+GooString *GlobalParams::findSystemFontFile(const GfxFont *font,
 					  SysFontType *type,
 					  int *fontNum, GooString * /*substituteFontName*/,
 					  const GooString * /*base14Name*/) {
@@ -1170,7 +1170,7 @@ bool GlobalParams::getErrQuiet() {
   return errQuiet;
 }
 
-CharCodeToUnicode *GlobalParams::getCIDToUnicode(GooString *collection) {
+CharCodeToUnicode *GlobalParams::getCIDToUnicode(const GooString *collection) {
   CharCodeToUnicode *ctu;
 
   globalParamsLocker();
@@ -1201,7 +1201,7 @@ UnicodeMap *GlobalParams::getUnicodeMap2(GooString *encodingName) {
   return map;
 }
 
-CMap *GlobalParams::getCMap(const GooString *collection, GooString *cMapName, Stream *stream) {
+CMap *GlobalParams::getCMap(const GooString *collection, const GooString *cMapName, Stream *stream) {
   cMapCacheLocker();
   return cMapCache->getCMap(collection, cMapName, stream);
 }
@@ -1226,7 +1226,7 @@ std::vector<GooString*> *GlobalParams::getEncodingNames()
 // functions to set parameters
 //------------------------------------------------------------------------
 
-void GlobalParams::addFontFile(GooString *fontName, GooString *path) {
+void GlobalParams::addFontFile(const GooString *fontName, const GooString *path) {
   globalParamsLocker();
   fontFiles[fontName->toStr()] = path->toStr();
 }
@@ -1246,13 +1246,13 @@ void GlobalParams::setPSLevel(PSLevel level) {
   psLevel = level;
 }
 
-void GlobalParams::setTextEncoding(char *encodingName) {
+void GlobalParams::setTextEncoding(const char *encodingName) {
   globalParamsLocker();
   delete textEncoding;
   textEncoding = new GooString(encodingName);
 }
 
-bool GlobalParams::setTextEOL(char *s) {
+bool GlobalParams::setTextEOL(const char *s) {
   globalParamsLocker();
   if (!strcmp(s, "unix")) {
     textEOL = eolUnix;
@@ -1271,7 +1271,7 @@ void GlobalParams::setTextPageBreaks(bool pageBreaks) {
   textPageBreaks = pageBreaks;
 }
 
-bool GlobalParams::setEnableFreeType(char *s) {
+bool GlobalParams::setEnableFreeType(const char *s) {
   globalParamsLocker();
   return parseYesNo2(s, &enableFreeType);
 }
