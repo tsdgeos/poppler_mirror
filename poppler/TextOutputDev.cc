@@ -4166,7 +4166,7 @@ bool TextPage::findText(const Unicode *s, int len,
 }
 
 GooString *TextPage::getText(double xMin, double yMin,
-			   double xMax, double yMax) const {
+			   double xMax, double yMax, EndOfLineKind textEOL) const {
   GooString *s;
   UnicodeMap *uMap;
   TextBlock *blk;
@@ -4209,7 +4209,7 @@ GooString *TextPage::getText(double xMin, double yMin,
 
   spaceLen = uMap->mapUnicode(0x20, space, sizeof(space));
   eolLen = 0; // make gcc happy
-  switch (globalParams->getTextEOL()) {
+  switch (textEOL) {
   case eolUnix:
     eolLen = uMap->mapUnicode(0x0a, eol, sizeof(eol));
     break;
@@ -5289,7 +5289,7 @@ bool TextPage::findCharRange(int pos, int length,
 }
 
 void TextPage::dump(void *outputStream, TextOutputFunc outputFunc,
-		    bool physLayout) {
+		    bool physLayout, EndOfLineKind textEOL, bool pageBreaks) {
   UnicodeMap *uMap;
   TextFlow *flow;
   TextBlock *blk;
@@ -5300,7 +5300,6 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc,
   TextLineFrag *frag;
   char space[8], eol[16], eop[8];
   int spaceLen, eolLen, eopLen;
-  bool pageBreaks;
   GooString *s;
   double delta;
   int col, i, j, d, n;
@@ -5311,7 +5310,7 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc,
   }
   spaceLen = uMap->mapUnicode(0x20, space, sizeof(space));
   eolLen = 0; // make gcc happy
-  switch (globalParams->getTextEOL()) {
+  switch (textEOL) {
   case eolUnix:
     eolLen = uMap->mapUnicode(0x0a, eol, sizeof(eol));
     break;
@@ -5324,7 +5323,6 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc,
     break;
   }
   eopLen = uMap->mapUnicode(0x0c, eop, sizeof(eop));
-  pageBreaks = globalParams->getTextPageBreaks();
 
   //~ writing mode (horiz/vert)
 
@@ -5674,6 +5672,8 @@ TextOutputDev::TextOutputDev(const char *fileName, bool physLayoutA,
   rawOrder = rawOrderA;
   discardDiag = discardDiagA;
   doHTML = false;
+  textEOL = defaultEndOfLine();
+  textPageBreaks = true;
   ok = true;
 
   // open file
@@ -5716,6 +5716,8 @@ TextOutputDev::TextOutputDev(TextOutputFunc func, void *stream,
   doHTML = false;
   text = new TextPage(rawOrderA, discardDiagA);
   actualText = new ActualText(text);
+  textEOL = defaultEndOfLine();
+  textPageBreaks = true;
   ok = true;
 }
 
@@ -5737,7 +5739,7 @@ void TextOutputDev::endPage() {
   text->endPage();
   text->coalesce(physLayout, fixedPitch, doHTML);
   if (outputStream) {
-    text->dump(outputStream, outputFunc, physLayout);
+    text->dump(outputStream, outputFunc, physLayout, textEOL, textPageBreaks);
   }
 }
 
@@ -5934,7 +5936,7 @@ bool TextOutputDev::findText(const Unicode *s, int len,
 
 GooString *TextOutputDev::getText(double xMin, double yMin,
 				double xMax, double yMax) const {
-  return text->getText(xMin, yMin, xMax, yMax);
+  return text->getText(xMin, yMin, xMax, yMax, textEOL);
 }
 
 void TextOutputDev::drawSelection(OutputDev *out,
