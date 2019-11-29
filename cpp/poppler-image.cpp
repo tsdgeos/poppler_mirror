@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2010-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
- * Copyright (C) 2017, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jeroen Ooms <jeroenooms@gmail.com>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
@@ -498,6 +498,9 @@ std::vector<std::string> image::supported_image_formats()
  */
 image& image::operator=(const image &pt)
 {
+    if (this == &pt)
+        return *this;
+
     if (pt.d) {
         ++pt.d->ref;
     }
