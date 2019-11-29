@@ -1032,7 +1032,7 @@ std::string HtmlOutputDev::mapEncodingToHtml(const std::string &encoding)
 {
   for(int i = 0; HtmlEncodings[i][0] != nullptr; i++)
   {
-    if( encoding.compare(HtmlEncodings[i][0]) == 0 )
+    if( encoding == HtmlEncodings[i][0] )
     {
       return HtmlEncodings[i][1];
     }

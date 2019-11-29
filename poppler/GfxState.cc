@@ -2870,18 +2870,18 @@ GfxDeviceNColorSpace::GfxDeviceNColorSpace(int nCompsA,
   overprintMask = 0;
   mapping = nullptr;
   for (int i = 0; i < nComps; ++i) {
-    if (names[i].compare("None")) {
+    if (names[i] != "None") {
       nonMarking = false;
     }
-    if (!names[i].compare("Cyan")) {
+    if (names[i] == "Cyan") {
       overprintMask |= 0x01;
-    } else if (!names[i].compare("Magenta")) {
+    } else if (names[i] == "Magenta") {
       overprintMask |= 0x02;
-    } else if (!names[i].compare("Yellow")) {
+    } else if (names[i] == "Yellow") {
       overprintMask |= 0x04;
-    } else if (!names[i].compare("Black")) {
+    } else if (names[i] == "Black") {
       overprintMask |= 0x08;
-    } else if (!names[i].compare("All")) {
+    } else if (names[i] == "All") {
       overprintMask = 0xffffffff;
     } else {
       overprintMask = 0x0f;
@@ -3093,18 +3093,18 @@ void GfxDeviceNColorSpace::createMapping(std::vector<GfxSeparationColorSpace*> *
   mapping = (int *)gmalloc(sizeof(int) * nComps);
   unsigned int newOverprintMask = 0;
   for (int i = 0; i < nComps; i++) {
-    if (!names[i].compare("None")) {
+    if (names[i] == "None") {
       mapping[i] = -1;
-    } else if (!names[i].compare("Cyan")) {
+    } else if (names[i] == "Cyan") {
       newOverprintMask |= 0x01;
       mapping[i] = 0;
-    } else if (!names[i].compare("Magenta")) {
+    } else if (names[i] == "Magenta") {
       newOverprintMask |= 0x02;
       mapping[i] = 1;
-    } else if (!names[i].compare("Yellow")) {
+    } else if (names[i] == "Yellow") {
       newOverprintMask |= 0x04;
       mapping[i] = 2;
-    } else if (!names[i].compare("Black")) {
+    } else if (names[i] == "Black") {
       newOverprintMask |= 0x08;
       mapping[i] = 3;
     } else {
