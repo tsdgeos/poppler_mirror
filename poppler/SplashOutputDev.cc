@@ -1418,8 +1418,7 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
     color[0] = color[1] = color[2] = color[3] = 0;
     break;
   case splashModeDeviceN8:
-    for (int i = 0; i < 4 + SPOT_NCOMPS; i++)
-      color[i] = 0;
+    splashClearColor(color);
     break;
   }
   splash->setStrokePattern(new SplashSolidColor(color));

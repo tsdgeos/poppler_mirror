@@ -96,13 +96,13 @@ int CachedFile::cache(const std::vector<ByteRange> &origRanges)
 
   for (int i = 0; i < numChunks; ++i)
     chunkNeeded[i] = false;
-  for (size_t i = 0; i < ranges->size(); i++) {
+  for (const ByteRange &r : *ranges) {
 
-    if ((*ranges)[i].length == 0) continue;
-    if ((*ranges)[i].offset >= length) continue;
+    if (r.length == 0) continue;
+    if (r.offset >= length) continue;
 
-    size_t start = (*ranges)[i].offset;
-    size_t end = start + (*ranges)[i].length - 1;
+    const size_t start = r.offset;
+    size_t end = start + r.length - 1;
     if (end >= length) end = length - 1;
 
     startChunk = start / CachedFileChunkSize;

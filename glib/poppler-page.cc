@@ -693,8 +693,7 @@ poppler_page_get_selection_region (PopplerPage           *page,
   std::vector<PDFRectangle*>* list = text->getSelectionRegion(&poppler_selection,
 				  selection_style, scale);
 
-  for (std::size_t i = 0; i < list->size(); i++) {
-    PDFRectangle *selection_rect = (*list)[i];
+  for (const PDFRectangle *selection_rect : *list) {
     PopplerRectangle *rect;
 
     rect = poppler_rectangle_new ();
@@ -782,8 +781,7 @@ poppler_page_get_selected_region (PopplerPage           *page,
 
   region = cairo_region_create ();
 
-  for (std::size_t i = 0; i < list->size(); i++) {
-    PDFRectangle *selection_rect = (*list)[i];
+  for (const PDFRectangle *selection_rect : *list) {
     cairo_rectangle_int_t rect;
 
     rect.x = (gint) ((selection_rect->x1 * scale) + 0.5);
@@ -2217,9 +2215,8 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
     {
       std::vector<TextWordSelection*> *line_words = word_list[i];
       n_rects += line_words->size() - 1;
-      for (std::size_t j = 0; j < line_words->size(); j++)
+      for (const TextWordSelection *word_sel : *line_words)
         {
-          TextWordSelection *word_sel = (*line_words)[j];
           n_rects += word_sel->getEnd() - word_sel->getBegin();
         }
     }

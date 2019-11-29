@@ -278,8 +278,8 @@ bool Catalog::cachePageTree(int page)
     }
 
     bool loop = false;;
-    for (size_t i = 0; i < pagesRefList->size(); i++) {
-      if (((*pagesRefList)[i]).num == kidRef.getRefNum()) {
+    for (const Ref &pageRef : *pagesRefList) {
+      if (pageRef.num == kidRef.getRefNum()) {
          loop = true;
          break;
       }

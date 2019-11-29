@@ -13,6 +13,7 @@
 //
 // Copyright (C) 2009, 2011, 2012, 2015 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -81,8 +82,9 @@ SplashState::SplashState(int width, int height, bool vectorAntialias,
     cmykTransferM[i] = (unsigned char)i;
     cmykTransferY[i] = (unsigned char)i;
     cmykTransferK[i] = (unsigned char)i;
-    for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
-      deviceNTransfer[cp][i] = (unsigned char)i;
+    for (auto &cp : deviceNTransfer) {
+      cp[i] = (unsigned char)i;
+    }
   }
   overprintMask = 0xffffffff;
   overprintAdditive = false;
@@ -132,8 +134,9 @@ SplashState::SplashState(int width, int height, bool vectorAntialias,
     cmykTransferM[i] = (unsigned char)i;
     cmykTransferY[i] = (unsigned char)i;
     cmykTransferK[i] = (unsigned char)i;
-    for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
-      deviceNTransfer[cp][i] = (unsigned char)i;
+    for (auto &cp : deviceNTransfer) {
+      cp[i] = (unsigned char)i;
+    }
   }
   overprintMask = 0xffffffff;
   overprintAdditive = false;

@@ -2506,8 +2506,8 @@ void TextPage::updateFont(const GfxState *state) {
 
   // get the font info object
   curFont = nullptr;
-  for (std::size_t i = 0; i < fonts->size(); ++i) {
-    curFont = (*fonts)[i];
+  for (TextFontInfo *f : *fonts) {
+    curFont = f;
     if (curFont->matches(state)) {
       break;
     }
@@ -2824,8 +2824,6 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   TextLine *line;
   TextBlock *blkList, *blk, *lastBlk, *blk0, *blk1, *blk2;
   TextFlow *flow, *lastFlow;
-  TextUnderline *underline;
-  TextLink *link;
   int rot, poolMinBaseIdx, baseIdx, startBaseIdx, endBaseIdx;
   double minBase, maxBase, newMinBase, newMaxBase;
   double fontSize, colSpace1, colSpace2, lineSpace, intraLineSpace, blkSpace;
@@ -2878,8 +2876,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   if (doHTML) {
 
     //----- handle underlining
-    for (std::size_t i = 0; i < underlines->size(); ++i) {
-      underline = (*underlines)[i];
+    for (const TextUnderline *underline : *underlines) {
       if (underline->horiz) {
 	// rot = 0
 	if (pools[0]->minBaseIdx <= pools[0]->maxBaseIdx) {
@@ -2941,9 +2938,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
     }
 
     //----- handle links
-    for (std::size_t i = 0; i < links->size(); ++i) {
-      link = (*links)[i];
-
+    for (const TextLink *link : *links) {
       // rot = 0
       if (pools[0]->minBaseIdx <= pools[0]->maxBaseIdx) {
 	startBaseIdx = pools[0]->getBaseIdx(link->yMin);
@@ -4786,8 +4781,7 @@ void TextSelectionPainter::endPage()
   state->setFillColor(glyph_color);
   out->updateFillColor(state);
 
-  for (std::size_t i = 0; i < selectionList->size(); i++) {
-    TextWordSelection *sel = (*selectionList)[i];
+  for (const TextWordSelection *sel : *selectionList) {
     int begin = sel->begin;
 
     while (begin < sel->end) {

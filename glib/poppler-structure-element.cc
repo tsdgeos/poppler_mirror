@@ -1152,8 +1152,8 @@ poppler_structure_element_get_text_spans (PopplerStructureElement *poppler_struc
   PopplerTextSpan **text_spans = g_new0 (PopplerTextSpan*, spans.size ());
 
   size_t i = 0;
-  for (TextSpanArray::const_iterator s = spans.begin (); s != spans.end (); ++s)
-    text_spans[i++] = text_span_poppler_text_span (*s);
+  for (const TextSpan &s : spans)
+    text_spans[i++] = text_span_poppler_text_span (s);
 
   *n_text_spans = spans.size ();
 

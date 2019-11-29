@@ -4230,8 +4230,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
     // write the DA string
     if (daToks) {
-      for (int i = 0; i < (int)daToks->size(); ++i) {
-        appearBuf->append((*daToks)[i])->append(' ');
+      for (const GooString *daTok : *daToks) {
+        appearBuf->append(daTok)->append(' ');
       }
     }
 
@@ -4421,8 +4421,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
       // write the DA string
       if (daToks) {
-        for (std::size_t i = 0; i < daToks->size(); ++i) {
-          appearBuf->append((*daToks)[i])->append(' ');
+        for (const GooString *daTok : *daToks) {
+          appearBuf->append(daTok)->append(' ');
         }
       }
 
@@ -4610,8 +4610,8 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
     // write the DA string
     if (daToks) {
-      for (std::size_t k = 0; k < daToks->size(); ++k) {
-        appearBuf->append((*daToks)[k])->append(' ');
+      for (const GooString *daTok : *daToks) {
+        appearBuf->append(daTok)->append(' ');
       }
     }
 

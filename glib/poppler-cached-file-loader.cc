@@ -88,10 +88,10 @@ int PopplerCachedFileLoader::load(const std::vector<ByteRange> &ranges, CachedFi
     return 0;
 
   size = 0;
-  for (size_t i = 0; i < ranges.size(); i++) {
-    bytesToRead = MIN(CachedFileChunkSize, ranges[i].length);
+  for (const ByteRange &range : ranges) {
+    bytesToRead = MIN(CachedFileChunkSize, range.length);
     rangeBytesRead = 0;
-    g_seekable_seek(G_SEEKABLE(inputStream), ranges[i].offset, G_SEEK_SET, cancellable, nullptr);
+    g_seekable_seek(G_SEEKABLE(inputStream), range.offset, G_SEEK_SET, cancellable, nullptr);
     do {
       bytesRead = g_input_stream_read(inputStream, buf, bytesToRead, cancellable, nullptr);
       if (bytesRead == -1)
@@ -100,7 +100,7 @@ int PopplerCachedFileLoader::load(const std::vector<ByteRange> &ranges, CachedFi
       writer->write(buf, bytesRead);
       size += bytesRead;
       rangeBytesRead += bytesRead;
-      bytesToRead = ranges[i].length - rangeBytesRead;
+      bytesToRead = range.length - rangeBytesRead;
     } while (bytesRead > 0 && bytesToRead > 0);
   }
 

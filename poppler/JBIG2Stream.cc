@@ -4194,16 +4194,12 @@ void JBIG2Stream::readExtensionSeg(unsigned int length) {
 }
 
 JBIG2Segment *JBIG2Stream::findSegment(unsigned int segNum) {
-  JBIG2Segment *seg;
-
-  for (std::size_t i = 0; i < globalSegments->size(); ++i) {
-    seg = (*globalSegments)[i];
+  for (JBIG2Segment *seg : *globalSegments) {
     if (seg->getSegNum() == segNum) {
       return seg;
     }
   }
-  for (std::size_t i = 0; i < segments->size(); ++i) {
-    seg = (*segments)[i];
+  for (JBIG2Segment *seg : *segments) {
     if (seg->getSegNum() == segNum) {
       return seg;
     }

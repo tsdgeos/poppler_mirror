@@ -1518,8 +1518,8 @@ void XRef::readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum)
   std::vector<Goffset> followedPrev;
   while (prevXRefOffset && (untilEntryNum == -1 || (untilEntryNum < size && entries[untilEntryNum].type == xrefEntryNone))) {
     bool followed = false;
-    for (size_t j = 0; j < followedPrev.size(); j++) {
-      if (followedPrev.at(j) == prevXRefOffset) {
+    for (long long j : followedPrev) {
+      if (j == prevXRefOffset) {
         followed = true;
         break;
       }
@@ -1682,8 +1682,7 @@ void XRef::scanSpecialFlags() {
   }
 
   // Mark XRef streams objects as Unencrypted and DontRewrite
-  for (size_t i = 0; i < xrefStreamObjNums.size(); ++i) {
-    const int objNum = xrefStreamObjNums.at(i);
+  for (const int objNum : xrefStreamObjNums) {
     getEntry(objNum)->setFlag(XRefEntry::Unencrypted, true);
     getEntry(objNum)->setFlag(XRefEntry::DontRewrite, true);
   }

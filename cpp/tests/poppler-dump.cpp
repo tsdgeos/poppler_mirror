@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2017, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
@@ -426,9 +426,9 @@ static void print_page_text_list(poppler::page *p)
     auto text_list = p->text_list();
 
     std::cout << "---" << std::endl;
-    for (size_t i = 0; i < text_list.size(); i ++) {
-        poppler::rectf bbox = text_list[i].bbox();
-        poppler::ustring ustr = text_list[i].text();
+    for (const poppler::text_box &text : text_list) {
+        poppler::rectf bbox = text.bbox();
+        poppler::ustring ustr = text.text();
         std::cout << "[" << ustr << "] @ ";
         std::cout << "( x=" << bbox.x() << " y=" << bbox.y() << " w=" << bbox.width() << " h=" << bbox.height() << " )";
         std::cout << std::endl;

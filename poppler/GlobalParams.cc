@@ -263,7 +263,6 @@ SysFontList::~SysFontList() {
 SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exact) {
   GooString *name2;
   bool bold, italic, oblique;
-  SysFontInfo *fi;
   int n;
 
   name2 = name->copy();
@@ -340,9 +339,9 @@ SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exac
   }
 
   // search for the font
-  fi = nullptr;
-  for (std::size_t i = 0; i < fonts->size(); ++i) {
-    fi = (*fonts)[i];
+  SysFontInfo *fi = nullptr;
+  for (SysFontInfo *f : *fonts) {
+    fi = f;
     if (fi->match(name2, bold, italic, oblique, fixedWidth)) {
       break;
     }
@@ -350,8 +349,8 @@ SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exac
   }
   if (!fi && !exact && bold) {
     // try ignoring the bold flag
-    for (std::size_t i = 0; i < fonts->size(); ++i) {
-      fi = (*fonts)[i];
+    for (SysFontInfo *f : *fonts) {
+      fi = f;
       if (fi->match(name2, false, italic)) {
 	break;
       }
@@ -360,8 +359,8 @@ SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, bool exac
   }
   if (!fi && !exact && (bold || italic)) {
     // try ignoring the bold and italic flags
-    for (std::size_t i = 0; i < fonts->size(); ++i) {
-      fi = (*fonts)[i];
+    for (SysFontInfo *f : *fonts) {
+      fi = f;
       if (fi->match(name2, false, false)) {
 	break;
       }
@@ -635,12 +634,11 @@ FILE *GlobalParams::findCMapFile(const GooString *collection, const GooString *c
 }
 
 FILE *GlobalParams::findToUnicodeFile(const GooString *name) {
-  GooString *dir, *fileName;
+  GooString *fileName;
   FILE *f;
 
   globalParamsLocker();
-  for (std::size_t i = 0; i < toUnicodeDirs->size(); ++i) {
-    dir = (*toUnicodeDirs)[i];
+  for (GooString *dir : *toUnicodeDirs) {
     fileName = appendToPath(dir->copy(), name->c_str());
     f = openFile(fileName->c_str(), "r");
     delete fileName;

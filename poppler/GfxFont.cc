@@ -1325,8 +1325,8 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
   //----- get the character widths -----
 
   // initialize all widths
-  for (int code = 0; code < 256; ++code) {
-    widths[code] = missingWidth * 0.001;
+  for (double &width : widths) {
+    width = missingWidth * 0.001;
   }
 
   // use widths from font dict, if present

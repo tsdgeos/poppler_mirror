@@ -4520,8 +4520,8 @@ void Splash::scaleImageYdXu(SplashImageSource src, void *srcData,
 	break;
       case splashModeDeviceN8:
 	for (i = 0; i < xStep; ++i) {
-    for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
-      *destPtr++ = (unsigned char)pix[cp];
+	  for (unsigned int cp : pix)
+	    *destPtr++ = (unsigned char)cp;
 	}
 	break;
       }
@@ -4672,8 +4672,8 @@ void Splash::scaleImageYuXd(SplashImageSource src, void *srcData,
       case splashModeDeviceN8:
 	for (i = 0; i < yStep; ++i) {
 	  destPtr = destPtr0 + (i * scaledWidth + x) * nComps;
-    for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
-      *destPtr++ = (unsigned char)pix[cp];
+	  for (unsigned int cp : pix)
+	    *destPtr++ = (unsigned char)cp;
 	}
 	break;
       }
@@ -4826,8 +4826,8 @@ void Splash::scaleImageYuXu(SplashImageSource src, void *srcData,
 	for (i = 0; i < yStep; ++i) {
 	  for (j = 0; j < xStep; ++j) {
 	    destPtr = destPtr0 + (i * scaledWidth + xx + j) * nComps;
-      for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
-        *destPtr++ = (unsigned char)pix[cp];
+	    for (unsigned int cp : pix)
+	      *destPtr++ = (unsigned char)cp;
 	  }
 	}
 	break;
@@ -4977,8 +4977,8 @@ void Splash::scaleImageYuXuBilinear(SplashImageSource src, void *srcData,
           *destPtr++ = (unsigned char)pix[3];
           break;
         case splashModeDeviceN8:
-          for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
-            *destPtr++ = (unsigned char)pix[cp];
+	  for (unsigned int cp : pix)
+	    *destPtr++ = (unsigned char)cp;
           break;
       }
 

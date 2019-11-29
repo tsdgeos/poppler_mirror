@@ -1326,8 +1326,7 @@ void PSOutputDev::postInit()
   }
 
   paperSizes = new std::vector<PSOutPaperSize*>();
-  for (size_t pgi = 0; pgi < pages.size(); ++pgi) {
-    const int pg = pages[pgi];
+  for (const int pg : pages) {
     Page *page = catalog->getPage(pg);
     if (page == nullptr)
       paperMatch = false;
@@ -1673,8 +1672,7 @@ void PSOutputDev::writeDocSetup(Catalog *catalog,
   } else {
     writePS("xpdf begin\n");
   }
-  for (size_t pgi = 0; pgi < pageList.size(); ++pgi) {
-    const int pg = pageList[pgi];
+  for (const int pg : pageList) {
     page = doc->getPage(pg);
     if (!page) {
       error(errSyntaxError, -1, "Failed writing resources for page {0:d}", pg);

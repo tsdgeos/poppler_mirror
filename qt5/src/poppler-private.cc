@@ -274,10 +274,9 @@ namespace Debug {
 
     void DocumentData::addTocChildren( QDomDocument * docSyn, QDomNode * parent, const std::vector<::OutlineItem*> * items )
     {
-        for ( std::size_t i = 0; i < items->size(); ++i )
+        for ( ::OutlineItem * outlineItem :  *items )
         {
             // iterate over every object in 'items'
-            ::OutlineItem * outlineItem = (*items)[ i ];
 
             // 1. create element using outlineItem's title as tagName
             QString name;

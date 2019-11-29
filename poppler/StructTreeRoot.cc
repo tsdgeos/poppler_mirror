@@ -33,8 +33,8 @@ StructTreeRoot::StructTreeRoot(PDFDoc *docA, Dict *structTreeRootDict):
 
 StructTreeRoot::~StructTreeRoot()
 {
-  for (ElemPtrArray::iterator i = elements.begin(); i != elements.end(); ++i)
-    delete *i;
+  for (StructElement *element : elements)
+    delete element;
 }
 
 void StructTreeRoot::parse(Dict *root)
