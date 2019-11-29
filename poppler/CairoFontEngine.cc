@@ -39,7 +39,7 @@
 #include <config.h>
 
 #include "config.h"
-#include <string.h>
+#include <cstring>
 #include "CairoFontEngine.h"
 #include "CairoOutputDev.h"
 #include "GlobalParams.h"

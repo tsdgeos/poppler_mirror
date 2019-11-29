@@ -28,7 +28,7 @@
 
 #include <config.h>
 
-#include <stddef.h>
+#include <cstddef>
 #include "Object.h"
 #include "Stream.h"
 #include "GfxState.h"

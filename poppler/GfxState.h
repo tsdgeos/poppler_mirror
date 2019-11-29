@@ -39,7 +39,7 @@
 #include "Object.h"
 #include "Function.h"
 
-#include <assert.h>
+#include <cassert>
 #include <map>
 
 class Array;

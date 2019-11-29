@@ -37,14 +37,14 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
-#include <time.h>
+#include <ctime>
 #include "parseargs.h"
 #include "goo/GooString.h"
 #include "goo/gbase64.h"

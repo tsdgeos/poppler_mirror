@@ -61,7 +61,7 @@
 
 #ifndef HAVE_STRTOK_R
 
-#include <string.h>
+#include <cstring>
 
 #define __rawmemchr strchr
 

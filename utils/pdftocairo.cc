@@ -42,9 +42,9 @@
 #include "config.h"
 #include <poppler-config.h>
 #include <cstdint>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
+#include <cstdio>
+#include <cmath>
+#include <cstring>
 #include "parseargs.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"

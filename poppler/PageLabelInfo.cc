@@ -14,10 +14,10 @@
 //========================================================================
 
 #include <config.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
+#include <climits>
+#include <cstdlib>
+#include <cstdio>
+#include <cassert>
 
 #include <algorithm>
 

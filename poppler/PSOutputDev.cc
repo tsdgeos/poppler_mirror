@@ -44,12 +44,12 @@
 
 #include <config.h>
 
-#include <stdio.h>
-#include <stddef.h>
-#include <stdarg.h>
-#include <signal.h>
-#include <math.h>
-#include <limits.h>
+#include <cstdio>
+#include <cstddef>
+#include <cstdarg>
+#include <csignal>
+#include <cmath>
+#include <climits>
 #include <algorithm>
 #include <array>
 #include "goo/GooString.h"

@@ -17,7 +17,7 @@
  */
 
 #include "config.h"
-#include <math.h>
+#include <cmath>
 
 #ifndef __GI_SCANNER__
 #include <GlobalParams.h>

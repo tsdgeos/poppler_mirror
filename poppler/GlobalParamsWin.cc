@@ -28,10 +28,10 @@ description for all fonts available in Windows. That's how MuPDF works.
 #error "_WIN32_IE must be defined >= 0x0500 for SHGFP_TYPE_CURRENT from shlobj.h"
 #endif
 #include <shlobj.h>
-#include <string.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <assert.h>
+#include <cstring>
+#include <cstdio>
+#include <cctype>
+#include <cassert>
 
 #include "goo/gmem.h"
 #include "goo/GooString.h"

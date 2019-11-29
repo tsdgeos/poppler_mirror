@@ -36,14 +36,14 @@
 // Not enabled by default.
 //#define COPY_FILE 1
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <time.h>
+#include <cassert>
+#include <cstdio>
+#include <cstdarg>
+#include <cctype>
+#include <cstdlib>
+#include <cstring>
+#include <cerrno>
+#include <ctime>
 
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>

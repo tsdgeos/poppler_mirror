@@ -28,7 +28,7 @@
 #ifndef _POPPLER_QT5_FORM_H_
 #define _POPPLER_QT5_FORM_H_
 
-#include <time.h>
+#include <ctime>
 #include <QtCore/QDateTime>
 #include <QtCore/QList>
 #include <QtCore/QRectF>

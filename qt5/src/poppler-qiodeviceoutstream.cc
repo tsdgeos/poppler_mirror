@@ -21,7 +21,7 @@
 
 #include <QtCore/QIODevice>
 
-#include <stdio.h>
+#include <cstdio>
 
 #define QIODeviceOutStreamBufSize 8192
 

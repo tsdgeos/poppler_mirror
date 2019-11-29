@@ -22,7 +22,7 @@
 
 #include <config.h>
 
-#include <string.h>
+#include <cstring>
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"
 #include "SplashErrorCodes.h"

@@ -26,7 +26,7 @@
 // Ensure stdio.h is included before redefining stdio functions. We need to provide
 // our own declarations for the redefined functions because win32 stdio.h functions
 // have DLL export decorations.
-#include <stdio.h>
+#include <cstdio>
 
 #ifndef WIN32_CONSOLE_IMPL // don't redefine in Win32Console.cc so we can call original functions
 #define printf(...)  win32_fprintf(stdout, __VA_ARGS__)

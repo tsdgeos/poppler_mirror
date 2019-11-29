@@ -42,7 +42,7 @@
 #include "GlobalParams.h"
 #include "UnicodeMap.h"
 #include "GfxFont.h"
-#include <stdio.h>
+#include <cstdio>
 
 namespace
 {

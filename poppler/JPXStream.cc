@@ -25,7 +25,7 @@
 
 #include <config.h>
 
-#include <limits.h>
+#include <climits>
 #include "gmem.h"
 #include "Error.h"
 #include "JArithmeticDecoder.h"

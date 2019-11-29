@@ -28,10 +28,10 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <math.h>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
+#include <cmath>
 #include "goo/gmem.h"
 #include "goo/gstrtod.h"
 #include "Object.h"

@@ -37,9 +37,9 @@
 #ifndef GLOBALPARAMS_H
 #define GLOBALPARAMS_H
 
-#include <assert.h>
+#include <cassert>
 #include "poppler-config.h"
-#include <stdio.h>
+#include <cstdio>
 #include "CharTypes.h"
 #include "UnicodeMap.h"
 #include <unordered_map>

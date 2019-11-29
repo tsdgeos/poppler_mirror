@@ -34,11 +34,11 @@
 #include "config.h"
 #include <poppler-config.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <ctype.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cctype>
+#include <cmath>
 #include "goo/gmem.h"
 #include "goo/NetPBMWriter.h"
 #include "goo/PNGWriter.h"

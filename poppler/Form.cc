@@ -34,10 +34,10 @@
 
 #include <set>
 #include <limits>
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "Error.h"

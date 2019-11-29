@@ -23,9 +23,9 @@
 //
 //========================================================================
 
-#include <stdio.h>
-#include <string.h>
-#include <limits.h>
+#include <cstdio>
+#include <cstring>
+#include <climits>
 #include "goo/gfile.h"
 #include "goo/GooCheckedOps.h"
 #include "FoFiIdentifier.h"

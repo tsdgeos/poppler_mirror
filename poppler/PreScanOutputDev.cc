@@ -26,7 +26,7 @@
 
 #include <config.h>
 
-#include <math.h>
+#include <cmath>
 #include "GlobalParams.h"
 #include "Gfx.h"
 #include "GfxFont.h"

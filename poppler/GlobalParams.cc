@@ -49,9 +49,9 @@
 
 #include <config.h>
 
-#include <string.h>
-#include <stdio.h>
-#include <ctype.h>
+#include <cstring>
+#include <cstdio>
+#include <cctype>
 #ifdef _WIN32
 #  include <shlobj.h>
 #  include <mbstring.h>

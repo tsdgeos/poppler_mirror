@@ -41,9 +41,9 @@
 #include <config.h>
 
 #include <cstdint>
-#include <string.h>
-#include <math.h>
-#include <assert.h>
+#include <cstring>
+#include <cmath>
+#include <cassert>
 #include <cairo.h>
 
 #include "goo/gfile.h"

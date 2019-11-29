@@ -34,10 +34,10 @@
 
 #include <config.h>
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <limits.h>
+#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+#include <climits>
 #include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "SplashErrorCodes.h"

@@ -28,7 +28,7 @@
 #ifndef FOFITRUETYPE_H
 #define FOFITRUETYPE_H
 
-#include "stddef.h"
+#include <cstddef>
 #include <unordered_map>
 #include <string>
 #include "FoFiBase.h"

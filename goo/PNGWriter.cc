@@ -19,8 +19,8 @@
 #ifdef ENABLE_LIBPNG
 
 #include <zlib.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 #include "poppler/Error.h"
 #include "goo/gmem.h"

@@ -25,7 +25,7 @@
 #define DATE_INFO_H
 
 #include "goo/GooString.h"
-#include <time.h>
+#include <ctime>
 
 bool parseDateString(const char *string, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute);
 

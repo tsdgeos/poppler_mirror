@@ -14,7 +14,7 @@
 #define CERTIFICATEINFO_H
 
 #include <memory>
-#include <time.h>
+#include <ctime>
 #include "goo/GooString.h"
 
 enum CertificateKeyUsageExtension

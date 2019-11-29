@@ -45,15 +45,15 @@
 
 #include <config.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <limits.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <climits>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <string.h>
-#include <ctype.h>
+#include <cstring>
+#include <cctype>
 #include "goo/gmem.h"
 #include "goo/gfile.h"
 #include "poppler-config.h"

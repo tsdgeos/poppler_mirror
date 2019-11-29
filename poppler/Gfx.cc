@@ -52,11 +52,11 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <string.h>
-#include <math.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstddef>
+#include <cstring>
+#include <cmath>
 #include <memory>
 #include "goo/gmem.h"
 #include "goo/GooTimer.h"

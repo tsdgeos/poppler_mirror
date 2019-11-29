@@ -15,11 +15,11 @@
 #ifndef PAGELABELINFO_H
 #define PAGELABELINFO_H
 
-#include <limits.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <assert.h>
+#include <climits>
+#include <cstdlib>
+#include <cstdio>
+#include <cctype>
+#include <cassert>
 #include <string>
 #include <vector>
 

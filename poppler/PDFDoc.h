@@ -44,7 +44,7 @@
 #include <mutex>
 
 #include "poppler-config.h"
-#include <stdio.h>
+#include <cstdio>
 #include "XRef.h"
 #include "Catalog.h"
 #include "Page.h"

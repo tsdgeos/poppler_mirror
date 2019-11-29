@@ -50,7 +50,7 @@
 
 #include <config.h>
 
-#include <string.h>
+#include <cstring>
 #include <cmath>
 #include "goo/gfile.h"
 #include "GlobalParams.h"

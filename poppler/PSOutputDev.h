@@ -38,7 +38,7 @@
 #define PSOUTPUTDEV_H
 
 #include "poppler-config.h"
-#include <stddef.h>
+#include <cstddef>
 #include "Object.h"
 #include "GfxState.h"
 #include "GlobalParams.h"

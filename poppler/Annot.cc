@@ -52,9 +52,9 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <math.h>
-#include <assert.h>
+#include <cstdlib>
+#include <cmath>
+#include <cassert>
 #include "goo/gmem.h"
 #include "goo/gstrtod.h"
 #include "Error.h"
@@ -77,7 +77,7 @@
 #include "FileSpec.h"
 #include "DateInfo.h"
 #include "Link.h"
-#include <string.h>
+#include <cstring>
 #include <algorithm>
 
 #ifndef M_PI

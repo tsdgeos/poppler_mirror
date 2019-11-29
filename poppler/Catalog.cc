@@ -43,8 +43,8 @@
 
 #include <config.h>
 
-#include <stddef.h>
-#include <stdlib.h>
+#include <cstddef>
+#include <cstdlib>
 #include "goo/gmem.h"
 #include "Object.h"
 #include "PDFDoc.h"

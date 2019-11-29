@@ -27,7 +27,7 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#include <stdarg.h>
+#include <cstdarg>
 #include "poppler-config.h"
 #include "goo/gfile.h"
 #include "goo/GooString.h"

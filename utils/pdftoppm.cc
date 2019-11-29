@@ -42,8 +42,8 @@
 #include <fcntl.h> // for O_BINARY
 #include <io.h>    // for setmode
 #endif
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
 #include "parseargs.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
@@ -64,7 +64,7 @@
 // #define UTILS_USE_PTHREADS 1
 
 #ifdef UTILS_USE_PTHREADS
-#include <errno.h>
+#include <cerrno>
 #include <pthread.h>
 #include <deque>
 #endif // UTILS_USE_PTHREADS

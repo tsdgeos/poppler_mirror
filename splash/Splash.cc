@@ -31,11 +31,11 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <assert.h>
-#include <math.h>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
+#include <cassert>
+#include <cmath>
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"
 #include "poppler/Error.h"

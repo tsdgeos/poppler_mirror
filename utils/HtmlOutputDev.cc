@@ -51,12 +51,12 @@
 //========================================================================
 
 #include "config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stddef.h>
-#include <ctype.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstdarg>
+#include <cstddef>
+#include <cctype>
+#include <cmath>
 #include <iostream>
 #include "goo/GooString.h"
 #include "goo/gbasename.h"
@@ -101,7 +101,7 @@ public:
 };
 
 // returns true if x is closer to y than x is to z
-static inline bool IS_CLOSER(float x, float y, float z) { return fabs((x)-(y)) < fabs((x)-(z)); }
+static inline bool IS_CLOSER(float x, float y, float z) { return std::fabs((x)-(y)) < std::fabs((x)-(z)); }
 
 extern bool complexMode;
 extern bool singleHtml;

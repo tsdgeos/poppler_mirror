@@ -30,6 +30,7 @@ if (HAVE_CAIRO)
   include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
+    SYSTEM
     ${CAIRO_INCLUDE_DIRS}
   )
   add_definitions(${CAIRO_CFLAGS})
@@ -105,6 +106,7 @@ if (ENABLE_NSS3)
     pdfsig.cc
   )
   add_executable(pdfsig ${pdfsig_SOURCES})
+  target_include_directories(pdfsig SYSTEM PRIVATE ${NSS3_INCLUDE_DIRS})
   target_link_libraries(pdfsig ${common_libs})
   install(TARGETS pdfsig DESTINATION bin)
   install(FILES pdfsig.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)

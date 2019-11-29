@@ -15,7 +15,7 @@
 #ifndef IMGWRITER_H
 #define IMGWRITER_H
 
-#include <stdio.h>
+#include <cstdio>
 
 class ImgWriter
 {

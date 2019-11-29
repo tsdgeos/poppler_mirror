@@ -20,7 +20,7 @@
 #include "Object.h"
 #include "Dict.h"
 #include <set>
-#include <assert.h>
+#include <cassert>
 
 
 StructTreeRoot::StructTreeRoot(PDFDoc *docA, Dict *structTreeRootDict):

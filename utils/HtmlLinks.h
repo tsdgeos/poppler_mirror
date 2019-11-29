@@ -27,8 +27,8 @@
 #ifndef _HTML_LINKS
 #define _HTML_LINKS
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include <vector>
 #include "goo/GooString.h"
 

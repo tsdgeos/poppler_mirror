@@ -31,7 +31,7 @@
 
 #include "poppler/poppler-config.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include "goo/ImgWriter.h"
 #include "OutputDev.h"
 

@@ -7,7 +7,7 @@
 //========================================================================
 
 #include <config.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include "FontEncodingTables.h"
 #include "BuiltinFontTables.h"
 

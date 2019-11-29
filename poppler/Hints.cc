@@ -27,7 +27,7 @@
 #include "Lexer.h"
 #include "SecurityHandler.h"
 
-#include <limits.h>
+#include <climits>
 
 class StreamBitReader {
 public:

@@ -16,7 +16,7 @@
 
 #include "InMemoryFile.h"
 
-#include <string.h>
+#include <cstring>
 #include <sstream>
 
 InMemoryFile::InMemoryFile()

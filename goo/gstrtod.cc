@@ -22,10 +22,10 @@
 
 #include "gstrtod.h"
 
-#include <locale.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
+#include <clocale>
+#include <cerrno>
+#include <cstdlib>
+#include <cstring>
 
 #define ascii_isspace(c) \
   (c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v')

@@ -47,11 +47,11 @@
 #include <config.h>
 
 #include <cstdint>
-#include <stdint.h>
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <math.h>
+#include <cstdint>
+#include <cstdio>
+#include <cassert>
+#include <cstdlib>
+#include <cmath>
 #include "goo/gmem.h"
 #include "CairoRescaleBox.h"
 

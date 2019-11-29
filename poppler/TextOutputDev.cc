@@ -51,12 +51,12 @@
 
 #include <config.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
 #include <cmath>
-#include <float.h>
-#include <ctype.h>
+#include <cfloat>
+#include <cctype>
 #include <algorithm>
 #ifdef _WIN32
 #include <fcntl.h> // for O_BINARY

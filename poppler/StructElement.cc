@@ -21,7 +21,7 @@
 #include "PDFDoc.h"
 #include "Dict.h"
 
-#include <assert.h>
+#include <cassert>
 
 class GfxState;
 

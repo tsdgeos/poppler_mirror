@@ -16,7 +16,7 @@
 #ifndef JS_INFO_H
 #define JS_INFO_H
 
-#include <stdio.h>
+#include <cstdio>
 #include "Object.h"
 #include "PDFDoc.h"
 

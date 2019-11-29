@@ -32,8 +32,8 @@
 
 #include <config.h>
 
-#include <stddef.h>
-#include <string.h>
+#include <cstddef>
+#include <cstring>
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "Error.h"

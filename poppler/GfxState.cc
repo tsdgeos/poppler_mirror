@@ -44,9 +44,9 @@
 
 #include <algorithm>
 #include <memory>
-#include <stddef.h>
-#include <math.h>
-#include <string.h>
+#include <cstddef>
+#include <cmath>
+#include <cstring>
 #include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "Error.h"

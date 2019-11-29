@@ -25,7 +25,7 @@
 #include <StructElement.h>
 #include <GlobalParams.h>
 #include <UnicodeMap.h>
-#include <math.h>
+#include <cmath>
 #endif /* !__GI_SCANNER__ */
 
 #include "poppler.h"

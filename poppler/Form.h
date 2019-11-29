@@ -29,7 +29,7 @@
 #include "Object.h"
 #include "Annot.h"
 
-#include <time.h>
+#include <ctime>
 
 #include <set>
 #include <vector>

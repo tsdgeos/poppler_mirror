@@ -37,13 +37,13 @@
 #include <config.h>
 #include "poppler-config.h"
 
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <limits.h>
-#include <float.h>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
+#include <cmath>
+#include <cctype>
+#include <climits>
+#include <cfloat>
 #include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "Object.h"

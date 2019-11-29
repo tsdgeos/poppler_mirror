@@ -26,11 +26,11 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <limits.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
+#include <climits>
+#include <cctype>
 #include "Lexer.h"
 #include "Error.h"
 #include "XRef.h"

@@ -35,7 +35,7 @@
 #ifndef HTMLOUTPUTDEV_H
 #define HTMLOUTPUTDEV_H
 
-#include <stdio.h>
+#include <cstdio>
 #include "goo/gbasename.h"
 #include "GfxFont.h"
 #include "OutputDev.h"

@@ -36,10 +36,10 @@
 #define GFILE_H
 
 #include "poppler-config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <time.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <ctime>
 extern "C" {
 #if defined(_WIN32)
 #  include <sys/stat.h>

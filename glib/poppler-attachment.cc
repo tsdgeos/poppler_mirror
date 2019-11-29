@@ -17,7 +17,7 @@
  */
 
 #include "config.h"
-#include <errno.h>
+#include <cerrno>
 
 #include <goo/gfile.h>
 

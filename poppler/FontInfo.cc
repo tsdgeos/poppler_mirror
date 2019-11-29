@@ -30,11 +30,11 @@
 //========================================================================
 
 #include "config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
+#include <cmath>
 #include "GlobalParams.h"
 #include "Error.h"
 #include "Object.h"

@@ -17,7 +17,7 @@
 #define SIGNATUREINFO_H
 
 #include <memory>
-#include <time.h>
+#include <ctime>
 
 enum SignatureValidationStatus
 {

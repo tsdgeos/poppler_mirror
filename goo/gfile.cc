@@ -40,11 +40,11 @@
 #  include <sys/types.h>
 #  include <sys/stat.h>
 #  include <fcntl.h>
-#  include <limits.h>
-#  include <string.h>
+#  include <climits>
+#  include <cstring>
 #  include <pwd.h>
 #endif // _WIN32
-#include <stdio.h>
+#include <cstdio>
 #include <limits>
 #include "GooString.h"
 #include "gfile.h"

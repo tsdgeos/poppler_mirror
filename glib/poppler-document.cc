@@ -22,7 +22,7 @@
  */
 
 #include "config.h"
-#include <string.h>
+#include <cstring>
 
 #ifndef __GI_SCANNER__
 #include <memory>

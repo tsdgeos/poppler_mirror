@@ -21,7 +21,7 @@
 
 #include <config.h>
 
-#include <string.h>
+#include <cstring>
 #include "goo/gmem.h"
 #include "SplashPattern.h"
 #include "SplashScreen.h"

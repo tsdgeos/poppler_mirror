@@ -35,8 +35,8 @@
 
 #include <config.h>
 
-#include <string.h>
-#include <math.h>
+#include <cstring>
+#include <cmath>
 
 #include <array>
 
