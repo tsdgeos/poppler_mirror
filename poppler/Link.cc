@@ -951,44 +951,27 @@ LinkUnknown::~LinkUnknown() {
 //------------------------------------------------------------------------
 
 Links::Links(Annots *annots) {
-  int size;
-  int i;
-
-  links = nullptr;
-  size = 0;
-  numLinks = 0;
-
   if (!annots)
     return;
 
-  for (i = 0; i < annots->getNumAnnots(); ++i) {
+  for (int i = 0; i < annots->getNumAnnots(); ++i) {
     Annot *annot = annots->getAnnot(i);
 
     if (annot->getType() != Annot::typeLink)
       continue;
 
-    if (numLinks >= size) {
-      size += 16;
-      links = (AnnotLink **)greallocn(links, size, sizeof(AnnotLink *));
-    }
     annot->incRefCnt();
-    links[numLinks++] = static_cast<AnnotLink *>(annot);
+    links.push_back(static_cast<AnnotLink *>(annot));
   }
 }
 
 Links::~Links() {
-  int i;
-
-  for (i = 0; i < numLinks; ++i)
-    links[i]->decRefCnt();
-
-  gfree(links);
+  for (AnnotLink *link : links)
+    link->decRefCnt();
 }
 
 LinkAction *Links::find(double x, double y) const {
-  int i;
-
-  for (i = numLinks - 1; i >= 0; --i) {
+  for (int i = getNumLinks() - 1; i >= 0; --i) {
     if (links[i]->inRect(x, y)) {
       return links[i]->getAction();
     }
@@ -997,10 +980,8 @@ LinkAction *Links::find(double x, double y) const {
 }
 
 bool Links::onLink(double x, double y) const {
-  int i;
-
-  for (i = 0; i < numLinks; ++i) {
-    if (links[i]->inRect(x, y))
+  for (AnnotLink *link : links) {
+    if (link->inRect(x, y))
       return true;
   }
   return false;

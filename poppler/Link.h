@@ -540,7 +540,7 @@ public:
   Links& operator=(const Links &) = delete;
 
   // Iterate through list of links.
-  int getNumLinks() const { return numLinks; }
+  int getNumLinks() const { return links.size(); }
   AnnotLink *getLink(int i) const { return links[i]; }
 
   // If point <x>,<y> is in a link, return the associated action;
@@ -552,8 +552,7 @@ public:
 
 private:
 
-  AnnotLink **links;
-  int numLinks;
+  std::vector<AnnotLink *> links;
 };
 
 #endif
