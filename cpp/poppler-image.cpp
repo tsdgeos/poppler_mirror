@@ -225,8 +225,8 @@ image::image(char *idata, int iwidth, int iheight, image::format_enum iformat)
 /**
  Copy constructor.
  */
-image::image(const image &pt)
-    : d(pt.d)
+image::image(const image &img)
+    : d(img.d)
 {
     if (d) {
         ++d->ref;
@@ -496,16 +496,16 @@ std::vector<std::string> image::supported_image_formats()
 /**
  Assignment operator.
  */
-image& image::operator=(const image &pt)
+image& image::operator=(const image &img)
 {
-    if (this == &pt)
+    if (this == &img)
         return *this;
 
-    if (pt.d) {
-        ++pt.d->ref;
+    if (img.d) {
+        ++img.d->ref;
     }
     image_private *old_d = d;
-    d = pt.d;
+    d = img.d;
     if (old_d && !--old_d->ref) {
         delete old_d;
     }

@@ -445,10 +445,10 @@ public:
   void removeAllStreams();
 
   // Test if this AnnotAppearance references the specified stream
-  bool referencesStream(Ref targetStreamRef);
+  bool referencesStream(Ref refToStream);
 
 private:
-  static bool referencesStream(const Object *stateObj, Ref targetStreamRef);
+  static bool referencesStream(const Object *stateObj, Ref refToStream);
   void removeStream(Ref refToStream);
   void removeStateStreams(const Object *state);
 
@@ -511,7 +511,7 @@ protected:
 class AnnotAppearanceBBox
 {
 public:
-  AnnotAppearanceBBox(PDFRectangle *init);
+  AnnotAppearanceBBox(PDFRectangle *rect);
 
   void setBorderWidth(double w) { borderWidth = w; }
 
@@ -684,7 +684,7 @@ public:
   // new_content should never be NULL
   virtual void setContents(GooString *new_content);
   void setName(GooString *new_name);
-  void setModified(GooString *new_date);
+  void setModified(GooString *new_modified);
   void setFlags(unsigned int new_flags);
 
   void setBorder(std::unique_ptr<AnnotBorder> &&new_border);
@@ -724,7 +724,7 @@ private:
   // write vStr[i:j[ in appearBuf
 
   void initialize (PDFDoc *docA, Dict *dict);
-  void setPage (int new_page, bool updateP); // Called by Page::addAnnot and Annots ctor
+  void setPage (int pageIndex, bool updateP); // Called by Page::addAnnot and Annots ctor
 
 
 protected:
@@ -1401,7 +1401,7 @@ public:
 
   void draw(Gfx *gfx, bool printing) override;
 
-  void generateFieldAppearance (bool *addDingbatsResource);
+  void generateFieldAppearance (bool *addedDingbatsResource);
   void updateAppearanceStream ();
 
   AnnotWidgetHighlightMode getMode() { return mode; }

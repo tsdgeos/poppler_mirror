@@ -300,7 +300,7 @@ private:
   void parse(Dict* elementDict);
   StructElement* parseChild(const Object *ref, Object* childObj, std::set<int> &seen);
   void parseChildren(Dict* element, std::set<int> &seen);
-  void parseAttributes(Dict *element, bool keepExisting = false);
+  void parseAttributes(Dict *attributes, bool keepExisting = false);
 
   friend class StructTreeRoot;
 };

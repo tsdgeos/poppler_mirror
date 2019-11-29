@@ -1110,7 +1110,7 @@ public:
   T3FontCache(const Ref *fontID, double m11A, double m12A,
 	      double m21A, double m22A,
 	      int glyphXA, int glyphYA, int glyphWA, int glyphHA,
-	      bool aa, bool validBBoxA);
+	      bool validBBoxA, bool aa);
   ~T3FontCache();
   T3FontCache(const T3FontCache &) = delete;
   T3FontCache& operator=(const T3FontCache &) = delete;

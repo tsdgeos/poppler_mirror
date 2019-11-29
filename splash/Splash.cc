@@ -1759,8 +1759,8 @@ void Splash::setFillOverprint(bool fop) {
   state->fillOverprint = fop;
 }
 
-void Splash::setStrokeOverprint(bool gop) {
-  state->strokeOverprint = gop;
+void Splash::setStrokeOverprint(bool sop) {
+  state->strokeOverprint = sop;
 }
 
 void Splash::setOverprintMode(int opm) {

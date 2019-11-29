@@ -1,5 +1,5 @@
 /* poppler-annotation.h: qt interface to poppler
- * Copyright (C) 2006-2008, 2012, 2013, 2018 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2008, 2012, 2013, 2018, 2019 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
  * Copyright (C) 2007, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2010, Philip Lorenz <lorenzph+freedesktop@gmail.com>
@@ -426,8 +426,8 @@ class POPPLER_QT5_EXPORT Annotation
   protected:
     /// \cond PRIVATE
     Annotation( AnnotationPrivate &dd );
-    Annotation( AnnotationPrivate &dd, const QDomNode &description );
-    void storeBaseAnnotationProperties( QDomNode & parentNode, QDomDocument & document ) const;
+    Annotation( AnnotationPrivate &dd, const QDomNode &annNode );
+    void storeBaseAnnotationProperties( QDomNode & annNode, QDomDocument & document ) const;
     Q_DECLARE_PRIVATE( Annotation )
     QExplicitlySharedDataPointer<AnnotationPrivate> d_ptr;
     /// \endcond
@@ -593,7 +593,7 @@ class POPPLER_QT5_EXPORT GeomAnnotation : public Annotation
     enum GeomType { InscribedSquare, InscribedCircle };
 
     GeomType geomType() const;
-    void setGeomType( GeomType style );
+    void setGeomType( GeomType type );
 
     QColor geomInnerColor() const;
     void setGeomInnerColor( const QColor &color );
@@ -890,7 +890,7 @@ class POPPLER_QT5_EXPORT SoundAnnotation : public Annotation
      *
      * \note SoundAnnotation takes ownership of the object
      */
-    void setSound( SoundObject *ef );
+    void setSound( SoundObject *s );
 
   private:
     SoundAnnotation();

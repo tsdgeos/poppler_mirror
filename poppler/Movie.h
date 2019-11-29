@@ -5,7 +5,7 @@
 //---------------------------------------------------------------------------------
 // Hugo Mercier <hmercier31[at]gmail.com> (c) 2008
 // Carlos Garcia Campos <carlosgc@gnome.org> (c) 2010
-// Albert Astals Cid <aacid@kde.org> (c) 2017, 2018
+// Albert Astals Cid <aacid@kde.org> (c) 2017-2019
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ struct MovieActivationParameters {
   ~MovieActivationParameters();
 
   // parse from a "Movie Activation" dictionary
-  void parseMovieActivation(const Object* actObj);
+  void parseMovieActivation(const Object* aDict);
 
   enum MovieRepeatMode {
     repeatModeOnce,
@@ -70,9 +70,9 @@ struct MovieActivationParameters {
 
 class Movie {
  public:
-  Movie(const Object *objMovie, const Object *objAct);
-  Movie(const Object *objMovie);
-  Movie(const Movie &movie);
+  Movie(const Object *movieDict, const Object *aDict);
+  Movie(const Object *movieDict);
+  Movie(const Movie &other);
   ~Movie();
   Movie& operator=(const Movie &) = delete;
 

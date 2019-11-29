@@ -985,13 +985,13 @@ void AnnotAppearance::removeStream(Ref refToStream) {
 }
 
 // Removes stream if obj is a Ref, or removes pointed streams if obj is a Dict
-void AnnotAppearance::removeStateStreams(const Object *obj1) {
-  if (obj1->isRef()) {
-    removeStream(obj1->getRef());
-  } else if (obj1->isDict()) {
-    const int size = obj1->dictGetLength();
+void AnnotAppearance::removeStateStreams(const Object *state) {
+  if (state->isRef()) {
+    removeStream(state->getRef());
+  } else if (state->isDict()) {
+    const int size = state->dictGetLength();
     for (int i = 0; i < size; ++i) {
-      const Object &obj2 = obj1->dictGetValNF(i);
+      const Object &obj2 = state->dictGetValNF(i);
       if (obj2.isRef()) {
         removeStream(obj2.getRef());
       }

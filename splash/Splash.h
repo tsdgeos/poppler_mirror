@@ -115,8 +115,8 @@ public:
   //----- state write
 
   void setMatrix(SplashCoord *matrix);
-  void setStrokePattern(SplashPattern *strokeColor);
-  void setFillPattern(SplashPattern *fillColor);
+  void setStrokePattern(SplashPattern *strokePattern);
+  void setFillPattern(SplashPattern *fillPattern);
   void setScreen(SplashScreen *screen);
   void setBlendFunc(SplashBlendFunc func);
   void setStrokeAlpha(SplashCoord alpha);

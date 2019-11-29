@@ -165,7 +165,7 @@ protected:
 
 class FormWidgetButton: public FormWidget {
 public:
-  FormWidgetButton(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
+  FormWidgetButton(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
   ~FormWidgetButton ();
 
   FormButtonType getButtonType() const;
@@ -188,7 +188,7 @@ protected:
 
 class FormWidgetText: public FormWidget {
 public:
-  FormWidgetText(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
+  FormWidgetText(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
   //return the field's content (UTF16BE)
   const GooString* getContent() const;
 
@@ -222,7 +222,7 @@ protected:
 
 class FormWidgetChoice: public FormWidget {
 public:
-  FormWidgetChoice(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
+  FormWidgetChoice(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
   ~FormWidgetChoice();
 
   int getNumChoices() const;
@@ -263,7 +263,7 @@ protected:
 
 class FormWidgetSignature: public FormWidget {
 public:
-  FormWidgetSignature(PDFDoc *docA, Object *dict, unsigned num, Ref ref, FormField *p);
+  FormWidgetSignature(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
   void updateWidgetAppearance() override;
 
   FormSignatureType signatureType();
@@ -300,7 +300,7 @@ public:
   Object* getObj() { return &obj; }
   Ref getRef() { return ref; }
 
-  void setReadOnly (bool b);
+  void setReadOnly (bool value);
   bool isReadOnly () const { return readOnly; }
 
   GooString* getDefaultAppearance() const { return defaultAppearance; }
@@ -407,7 +407,7 @@ protected:
 
 class FormFieldText: public FormField {
 public:
-  FormFieldText(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
+  FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref ref, FormField *parent, std::set<int> *usedParents);
   
   const GooString* getContent () const { return content; }
   const GooString* getAppearanceContent () const { return internalContent ? internalContent : content; }

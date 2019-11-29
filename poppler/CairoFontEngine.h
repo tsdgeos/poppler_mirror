@@ -42,12 +42,12 @@ class CairoFontEngine;
 
 class CairoFont {
 public:
-  CairoFont(Ref ref,
-	    cairo_font_face_t *face,
-	    int *codeToGID,
-	    unsigned int codeToGIDLen,
-	    bool substitute,
-	    bool printing);
+  CairoFont(Ref refA,
+	    cairo_font_face_t *cairo_font_faceA,
+	    int *codeToGIDA,
+	    unsigned int codeToGIDLenA,
+	    bool substituteA,
+	    bool printingA);
   virtual ~CairoFont();
   CairoFont(const CairoFont &) = delete;
   CairoFont& operator=(const CairoFont &other) = delete;

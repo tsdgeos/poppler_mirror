@@ -563,7 +563,7 @@ delete it;
 	   because doing a partial rendering update needs to copy the image
 	   buffer so if it is not wanted it is better skipped early.
 
-	   \param closure opaque structure that will be passed
+	   \param payload opaque structure that will be passed
 	   back to partialUpdateCallback and shouldDoPartialUpdateCallback.
 
 	   \warning The parameter (\p x, \p y, \p w, \p h) are not
@@ -578,7 +578,7 @@ delete it;
                              int x, int y, int w, int h, Rotation rotate,
                              RenderToImagePartialUpdateFunc partialUpdateCallback,
                              ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback,
-                             const QVariant &closure
+                             const QVariant &payload
                             ) const;
 
 	/**
@@ -631,7 +631,7 @@ delete it;
 	   \param shouldAbortRenderCallback callback that will be called
 	   to ask if the rendering should be cancelled.
 
-	   \param closure opaque structure that will be passed
+	   \param payload opaque structure that will be passed
 	   back to partialUpdateCallback, shouldDoPartialUpdateCallback
 	   and shouldAbortRenderCallback.
 
@@ -648,7 +648,7 @@ delete it;
                              RenderToImagePartialUpdateFunc partialUpdateCallback,
                              ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback,
                              ShouldAbortQueryFunc shouldAbortRenderCallback,
-                             const QVariant &closure
+                             const QVariant &payload
                             ) const;
 
         /**
@@ -781,7 +781,7 @@ delete it;
 
            \since 0.31
         **/
-        bool search(const QString &text, double &rectLeft, double &rectTop, double &rectRight, double &rectBottom, SearchDirection direction, SearchFlags flags = NoSearchFlags, Rotation rotate = Rotate0) const;
+        bool search(const QString &text, double &sLeft, double &sTop, double &sRight, double &sBottom, SearchDirection direction, SearchFlags flags = NoSearchFlags, Rotation rotate = Rotate0) const;
 
 	/**
 	   Returns a list of all occurrences of the specified text on the page.
@@ -1347,9 +1347,9 @@ QDateTime modified = m_doc->date("ModDate");
 	   - CreationDate: the date of creation of the document
 	   - ModDate: the date of the last change in the document
 
-	   \param data the type of date that is required
+	   \param type the type of date that is required
 	*/
-	QDateTime date( const QString & data ) const;
+	QDateTime date( const QString & type ) const;
 
 	/**
 	   Set the Info dict date entry specified by \param key to \param val
@@ -1394,11 +1394,11 @@ QString subject = m_doc->info("Subject");
 	   In addition to \c Title and \c Subject, other information that may
 	   be available include \c Author, \c Keywords, \c Creator and \c Producer.
 
-	   \param data the information that is required
+	   \param type the information that is required
 
 	   \sa infoKeys() to get a list of the available keys
 	*/
-	QString info( const QString & data ) const;
+	QString info( const QString & type ) const;
 
 	/**
 	   Set the value of the document's Info dictionary entry specified by \param key to \param val
@@ -1618,7 +1618,7 @@ QString subject = m_doc->info("Subject");
 
 	   \since 0.10
 	*/
-	QByteArray fontData(const FontInfo &font) const;
+	QByteArray fontData(const FontInfo &fi) const;
 
 	/**
 	   The documents embedded within the PDF document.

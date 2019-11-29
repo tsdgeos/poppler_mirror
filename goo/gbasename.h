@@ -9,6 +9,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2018 Greg Knight <lyngvi@gmail.com>
+// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -17,6 +18,6 @@
 
 #include <string>
 
-std::string gbasename(const char* input);
+std::string gbasename(const char* filename);
 
 #endif // ndef GBASENAME_H

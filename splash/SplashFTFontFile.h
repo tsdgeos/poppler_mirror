@@ -14,6 +14,7 @@
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2017, 2018 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -43,7 +44,7 @@ public:
   static SplashFontFile *loadCIDFont(SplashFTFontEngine *engineA,
 					 SplashFontFileID *idA,
 					 SplashFontSrc *src,
-					 int *codeToCIDA, int codeToGIDLenA);
+					 int *codeToGIDA, int codeToGIDLenA);
   static SplashFontFile *loadTrueTypeFont(SplashFTFontEngine *engineA,
 					  SplashFontFileID *idA,
 					  SplashFontSrc *src,

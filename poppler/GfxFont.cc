@@ -2097,7 +2097,7 @@ int GfxCIDFont::mapCodeToGID(FoFiTrueType *ff, int cmapi,
   return gid;
 }
 
-int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
+int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen) {
 #define N_UCS_CANDIDATES 2
   /* space characters */
   static const unsigned long spaces[] = { 
@@ -2192,7 +2192,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
   int cmapPlatform, cmapEncoding;
   Ref embID;
 
-  *mapsizep = 0;
+  *codeToGIDLen = 0;
   if (!ctu || !getCollection()) return nullptr;
   if (getCollection()->cmp("Adobe-Identity") == 0) return nullptr;
   if (getEmbeddedFontID(&embID)) {
@@ -2200,7 +2200,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
     * CIDToGIDMap should be embedded in PDF file
     * and already set. So return it.
     */
-    *mapsizep = getCIDToGIDLen();
+    *codeToGIDLen = getCIDToGIDLen();
     return getCIDToGID();
   }
 
@@ -2337,7 +2337,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
     }
     codeToGID[code] = gid;
   }
-  *mapsizep = n;
+  *codeToGIDLen = n;
   if (humap != nullptr) delete[] humap;
   if (tumap != nullptr) delete[] tumap;
   if (vumap != nullptr) delete[] vumap;

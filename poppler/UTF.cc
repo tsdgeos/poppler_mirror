@@ -42,7 +42,7 @@ bool UnicodeIsValid(Unicode ucs4)
     ((ucs4 & 0xfffe) != 0xfffe);
 }
 
-int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4)
+int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4_out)
 {
   int i, n, len;
   Unicode *u;
@@ -56,7 +56,7 @@ int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4)
     }
     len++;
   }
-  if (ucs4 == nullptr)
+  if (ucs4_out == nullptr)
     return len;
 
   u = (Unicode*)gmallocn(len, sizeof(Unicode));
@@ -85,7 +85,7 @@ int UTF16toUCS4(const Unicode *utf16, int utf16Len, Unicode **ucs4)
     }
     n++;
   }
-  *ucs4 = u;
+  *ucs4_out = u;
   return len;
 }
 

@@ -7201,8 +7201,8 @@ void PSOutputDev::type3D1(GfxState *state, double wx, double wy,
   t3NeedsRestore = true;
 }
 
-void PSOutputDev::drawForm(Ref id) {
-  writePSFmt("f_{0:d}_{1:d}\n", id.num, id.gen);
+void PSOutputDev::drawForm(Ref ref) {
+  writePSFmt("f_{0:d}_{1:d}\n", ref.num, ref.gen);
 }
 
 void PSOutputDev::psXObject(Stream *psStream, Stream *level1Stream) {

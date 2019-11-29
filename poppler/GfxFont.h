@@ -406,7 +406,7 @@ public:
   int *getCIDToGID() const { return cidToGID; }
   int getCIDToGIDLen() const { return cidToGIDLen; }
 
-  int *getCodeToGIDMap(FoFiTrueType *ff, int *length);
+  int *getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen);
 
   double getWidth(char* s, int len) const;
 

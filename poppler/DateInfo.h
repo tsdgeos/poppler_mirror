@@ -30,10 +30,10 @@
 bool parseDateString(const char *string, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute);
 
 /* Converts the time_t into a PDF Date format string.
- * If timet is NULL, current time is used.
+ * If timeA is NULL, current time is used.
  * Returns new GooString. Free with delete.
  */
-GooString *timeToDateString(const time_t *timet);
+GooString *timeToDateString(const time_t *timeA);
 
 /* Convert PDF date string to time.
  * Returns -1 if conversion fails.

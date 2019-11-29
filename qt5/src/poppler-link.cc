@@ -148,7 +148,7 @@ class LinkSoundPrivate : public LinkPrivate
 class LinkRenditionPrivate : public LinkPrivate
 {
 	public:
-		LinkRenditionPrivate( const QRectF &area, ::MediaRendition *rendition, ::LinkRendition::RenditionOperation operation, const QString &script, const Ref annotationReference );
+		LinkRenditionPrivate( const QRectF &area, ::MediaRendition *rendition, ::LinkRendition::RenditionOperation operation, const QString &script, const Ref ref );
 		~LinkRenditionPrivate();
 
 		MediaRendition *rendition;

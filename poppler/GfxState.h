@@ -919,7 +919,7 @@ public:
 				 double xMin, double yMin,
 				 double xMax, double yMax) = 0;
 
-  virtual double getDistance(double tMin, double tMax) const = 0;
+  virtual double getDistance(double sMin, double sMax) const = 0;
 
 private:
 
@@ -993,7 +993,7 @@ public:
 				 double xMin, double yMin,
 				 double xMax, double yMax) override;
 
-  double getDistance(double tMin, double tMax) const override;
+  double getDistance(double sMin, double sMax) const override;
 
 private:
 
@@ -1027,7 +1027,7 @@ public:
 				 double xMin, double yMin,
 				 double xMax, double yMax) override;
 
-  double getDistance(double tMin, double tMax) const override;
+  double getDistance(double sMin, double sMax) const override;
 
 private:
 
