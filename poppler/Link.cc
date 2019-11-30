@@ -969,20 +969,3 @@ Links::~Links() {
   for (AnnotLink *link : links)
     link->decRefCnt();
 }
-
-LinkAction *Links::find(double x, double y) const {
-  for (int i = getNumLinks() - 1; i >= 0; --i) {
-    if (links[i]->inRect(x, y)) {
-      return links[i]->getAction();
-    }
-  }
-  return nullptr;
-}
-
-bool Links::onLink(double x, double y) const {
-  for (AnnotLink *link : links) {
-    if (link->inRect(x, y))
-      return true;
-  }
-  return false;
-}

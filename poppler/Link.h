@@ -543,13 +543,6 @@ public:
   int getNumLinks() const { return links.size(); }
   AnnotLink *getLink(int i) const { return links[i]; }
 
-  // If point <x>,<y> is in a link, return the associated action;
-  // else return nullptr.
-  LinkAction *find(double x, double y) const;
-
-  // Return true if <x>,<y> is in a link.
-  bool onLink(double x, double y) const;
-
 private:
 
   std::vector<AnnotLink *> links;
