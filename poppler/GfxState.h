@@ -142,6 +142,10 @@ struct GfxColor {
   GfxColorComp c[gfxColorMaxComps];
 };
 
+static inline void clearGfxColor(GfxColor *gfxColor) {
+  memset(gfxColor->c, 0, sizeof(GfxColorComp) * gfxColorMaxComps);
+}
+
 //------------------------------------------------------------------------
 // GfxGray
 //------------------------------------------------------------------------

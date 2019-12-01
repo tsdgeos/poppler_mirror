@@ -728,8 +728,7 @@ void GfxDeviceGrayColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) cons
 }
 
 void GfxDeviceGrayColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   deviceN->c[3] = clip01(gfxColorComp1 - color->c[0]);
 }
 
@@ -934,8 +933,7 @@ void GfxCalGrayColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const {
 
 void GfxCalGrayColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
   GfxCMYK cmyk;
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   getCMYK(color, &cmyk);
   deviceN->c[0] = cmyk.c;
   deviceN->c[1] = cmyk.m;
@@ -1076,8 +1074,7 @@ void GfxDeviceRGBColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
 
 void GfxDeviceRGBColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
   GfxCMYK cmyk;
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   getCMYK(color, &cmyk);
   deviceN->c[0] = cmyk.c;
   deviceN->c[1] = cmyk.m;
@@ -1301,8 +1298,7 @@ void GfxCalRGBColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const {
 
 void GfxCalRGBColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
   GfxCMYK cmyk;
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   getCMYK(color, &cmyk);
   deviceN->c[0] = cmyk.c;
   deviceN->c[1] = cmyk.m;
@@ -1434,8 +1430,7 @@ void GfxDeviceCMYKColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) cons
 }
 
 void GfxDeviceCMYKColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   deviceN->c[0] = clip01(color->c[0]);
   deviceN->c[1] = clip01(color->c[1]);
   deviceN->c[2] = clip01(color->c[2]);
@@ -1689,8 +1684,7 @@ void GfxLabColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const {
 
 void GfxLabColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
   GfxCMYK cmyk;
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   getCMYK(color, &cmyk);
   deviceN->c[0] = cmyk.c;
   deviceN->c[1] = cmyk.m;
@@ -2333,8 +2327,7 @@ bool GfxICCBasedColorSpace::useGetDeviceNLine() const {
 
 void GfxICCBasedColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
   GfxCMYK cmyk;
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   getCMYK(color, &cmyk);
   deviceN->c[0] = cmyk.c;
   deviceN->c[1] = cmyk.m;
@@ -2783,8 +2776,7 @@ void GfxSeparationColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) cons
 }
 
 void GfxSeparationColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   if (mapping == nullptr || mapping[0] == -1) {
     GfxCMYK cmyk;
 
@@ -3062,8 +3054,7 @@ void GfxDeviceNColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const {
 }
 
 void GfxDeviceNColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   if (mapping == nullptr) {
     GfxCMYK cmyk;
 
@@ -3230,8 +3221,7 @@ void GfxPatternColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const {
 }
 
 void GfxPatternColorSpace::getDeviceN(const GfxColor *color, GfxColor *deviceN) const {
-  for (int i = 0; i < gfxColorMaxComps; i++)
-    deviceN->c[i] = 0;
+  clearGfxColor(deviceN);
   deviceN->c[3] = 1;
 }
 
@@ -3813,8 +3803,7 @@ int GfxUnivariateShading::getColor(double t, GfxColor *color) {
   }
 
   if (unlikely(nFuncs < 1 || nComps > gfxColorMaxComps)) {
-    for (int i = 0; i < gfxColorMaxComps; i++)
-        color->c[i] = 0;
+    clearGfxColor(color);
     return gfxColorMaxComps;
   }
 
