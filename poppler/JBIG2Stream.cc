@@ -1244,6 +1244,8 @@ JBIG2Stream::~JBIG2Stream() {
 }
 
 void JBIG2Stream::reset() {
+  freeSegments();
+
   // read the globals stream
   globalSegments = new std::vector<JBIG2Segment*>();
   if (globalsStream.isStream()) {
@@ -1274,11 +1276,7 @@ void JBIG2Stream::reset() {
   }
 }
 
-void JBIG2Stream::close() {
-  if (pageBitmap) {
-    delete pageBitmap;
-    pageBitmap = nullptr;
-  }
+void JBIG2Stream::freeSegments() {
   if (segments) {
     for (auto entry : *segments) {
       delete entry;
@@ -1293,6 +1291,14 @@ void JBIG2Stream::close() {
     delete globalSegments;
     globalSegments = nullptr;
   }
+}
+
+void JBIG2Stream::close() {
+  if (pageBitmap) {
+    delete pageBitmap;
+    pageBitmap = nullptr;
+  }
+  freeSegments();
   dataPtr = dataEnd = nullptr;
   FilterStream::close();
 }

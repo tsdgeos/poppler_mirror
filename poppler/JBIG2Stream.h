@@ -61,6 +61,8 @@ private:
   bool hasGetChars() override { return true; }
   int getChars(int nChars, unsigned char *buffer) override;
 
+  void freeSegments();
+
   void readSegments();
   bool readSymbolDictSeg(unsigned int segNum, unsigned int length,
 			  unsigned int *refSegs, unsigned int nRefSegs);
