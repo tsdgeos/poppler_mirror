@@ -53,7 +53,7 @@ public:
   CairoFont& operator=(const CairoFont &other) = delete;
 
   virtual bool matches(Ref &other, bool printing);
-  cairo_font_face_t *getFontFace(void);
+  cairo_font_face_t *getFontFace();
   unsigned long getGlyph(CharCode code, const Unicode *u, int uLen);
   double getSubstitutionCorrection(GfxFont *gfxFont);
 

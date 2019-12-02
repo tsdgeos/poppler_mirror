@@ -42,11 +42,11 @@ enum {
 class PdfInspector {
 public:
 
-  PdfInspector(void);
+  PdfInspector();
 
   void set_file_name (const char *file_name);
   void load (const char *file_name);
-  void run (void);
+  void run ();
   void error_dialog (const char *error_message);
   void analyze_page (int page);
 
@@ -63,7 +63,7 @@ private:
 
 
 
-PdfInspector::PdfInspector(void)
+PdfInspector::PdfInspector()
 {
   GtkWidget *widget;
   GError* error = nullptr;

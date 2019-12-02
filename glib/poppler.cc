@@ -112,7 +112,7 @@ error_cb (void *data G_GNUC_UNUSED,
 }
 
 static void __attribute__((__constructor__))
-poppler_constructor (void)
+poppler_constructor ()
 {
   setErrorCallback (error_cb, nullptr);
 }

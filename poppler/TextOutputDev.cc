@@ -4458,7 +4458,7 @@ public:
 			  const PDFRectangle *selection) override;
   void endPage();
 
-  GooString *getText(void);
+  GooString *getText();
   std::vector<TextWordSelection*> **takeWordList(int *nLines);
 
 private:
@@ -4564,7 +4564,7 @@ void TextSelectionDumper::endPage()
   finishLine();
 }
 
-GooString *TextSelectionDumper::getText (void)
+GooString *TextSelectionDumper::getText ()
 {
   GooString *text;
   int i;

@@ -85,7 +85,7 @@ CairoFont::matches(Ref &other, bool printingA) {
 }
 
 cairo_font_face_t *
-CairoFont::getFontFace(void) {
+CairoFont::getFontFace() {
   return cairo_font_face;
 }
 
