@@ -313,7 +313,7 @@ static void sleep_milliseconds(int milliseconds)
     nanosecs = (milliseconds - (secs * 1000)) * 1000;
     tv.tv_sec = (time_t) secs;
     tv.tv_nsec = (long) nanosecs;
-    while (1)
+    while (true)
     {
         int rval = nanosleep(&tv, &tv);
         if (rval == 0)

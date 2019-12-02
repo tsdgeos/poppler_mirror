@@ -277,7 +277,7 @@ void FoFiType1::parse() {
 	}
 	for (p = buf; *p == ' ' || *p == '\t'; ++p) ;
 	if (!strncmp(p, "dup", 3)) {
-	  while (1) {
+	  while (true) {
 	    p += 3;
 	    for (; *p == ' ' || *p == '\t'; ++p) ;
 	    code = 0;

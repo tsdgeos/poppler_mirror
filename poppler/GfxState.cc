@@ -4767,7 +4767,7 @@ GfxGouraudTriangleShading *GfxGouraudTriangleShading::parse(GfxResources *res, i
   state = 0;
   flag = 0; // make gcc happy
   bitBuf = new GfxShadingBitBuf(str);
-  while (1) {
+  while (true) {
     if (typeA == 4) {
       if (!bitBuf->getBits(flagBits, &flag)) {
 	break;
@@ -5114,7 +5114,7 @@ GfxPatchMeshShading *GfxPatchMeshShading::parse(GfxResources *res, int typeA, Di
   patchesA = nullptr;
   patchesSize = 0;
   auto bitBuf = std::make_unique<GfxShadingBitBuf>(str);
-  while (1) {
+  while (true) {
     if (!bitBuf->getBits(flagBits, &flag)) {
       break;
     }

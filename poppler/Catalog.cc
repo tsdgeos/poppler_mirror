@@ -246,7 +246,7 @@ bool Catalog::cachePageTree(int page)
     kidsIdxList->push_back(0);
   }
 
-  while(1) {
+  while(true) {
 
     if (std::size_t(page) <= pages.size()) return true;
 

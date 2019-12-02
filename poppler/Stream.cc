@@ -248,7 +248,7 @@ Stream *Stream::makeFilter(const char *name, Stream *str, Object *params, int re
     rows = 0;
     endOfBlock = true;
     black = false;
-    damagedRowsBeforeError = 0;
+    damagedRowsBeforeError = false;
   if (params->isDict()) {
       obj = params->dictLookup("K", recursion);
       if (obj.isInt()) {
@@ -2053,7 +2053,7 @@ int CCITTFaxStream::lookChar() {
     // this if we know the stream contains end-of-line markers because
     // the "just plow on" technique tends to work better otherwise
     } else if (err && endOfLine) {
-      while (1) {
+      while (true) {
 	code1 = lookBits(13);
 	if (code1 == EOF) {
 	  eof = true;

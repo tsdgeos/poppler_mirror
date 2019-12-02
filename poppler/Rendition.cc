@@ -361,7 +361,7 @@ void MediaRendition::outputToFile(FILE* fp) {
 
   embeddedStreamObject.streamReset();
 
-  while (1) {
+  while (true) {
     int c = embeddedStreamObject.streamGetChar();
     if (c == EOF)
       break;

@@ -1652,7 +1652,7 @@ void CairoOutputDev::beginTransparencyGroup(GfxState * /*state*/, const double *
     /* we need to track the shape */
     cairo_push_group (cairo_shape);
   }
-  if (0 && forSoftMask)
+  if (false && forSoftMask)
     cairo_push_group_with_content (cairo, CAIRO_CONTENT_ALPHA);
   else
     cairo_push_group (cairo);

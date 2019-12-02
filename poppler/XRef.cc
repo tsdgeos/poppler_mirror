@@ -508,7 +508,7 @@ bool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fol
   Goffset pos2;
   int first, n;
 
-  while (1) {
+  while (true) {
     obj = parser->getObj(true);
     if (obj.isCmd("trailer")) {
       break;
@@ -841,7 +841,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict) {
   }
 
   str->reset();
-  while (1) {
+  while (true) {
     pos = str->getPos();
     if (!str->getLine(buf, 256)) {
       break;

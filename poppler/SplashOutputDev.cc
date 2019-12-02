@@ -2739,7 +2739,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 
   imgMaskData.imgStr = new ImageStream(str, width, 1, 1);
   imgMaskData.imgStr->reset();
-  imgMaskData.invert = invert ? 0 : 1;
+  imgMaskData.invert = invert ? false : true;
   imgMaskData.width = width;
   imgMaskData.height = height;
   imgMaskData.y = 0;
@@ -2790,7 +2790,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state,
   mat[5] = ctm[3] + ctm[5];
   imgMaskData.imgStr = new ImageStream(str, width, 1, 1);
   imgMaskData.imgStr->reset();
-  imgMaskData.invert = invert ? 0 : 1;
+  imgMaskData.invert = invert ? false : true;
   imgMaskData.width = width;
   imgMaskData.height = height;
   imgMaskData.y = 0;
@@ -3620,7 +3620,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
     mat[5] = 0;
     imgMaskData.imgStr = new ImageStream(maskStr, maskWidth, 1, 1);
     imgMaskData.imgStr->reset();
-    imgMaskData.invert = maskInvert ? 0 : 1;
+    imgMaskData.invert = maskInvert ? false : true;
     imgMaskData.width = maskWidth;
     imgMaskData.height = maskHeight;
     imgMaskData.y = 0;

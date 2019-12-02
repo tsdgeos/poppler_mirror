@@ -538,7 +538,7 @@ int JBIG2MMRDecoder::getWhiteCode() {
     bufLen = 8;
     ++nBytesRead;
   }
-  while (1) {
+  while (true) {
     if (bufLen >= 11 && ((buf >> (bufLen - 7)) & 0x7f) == 0) {
       if (bufLen <= 12) {
 	code = buf << (12 - bufLen);
@@ -581,7 +581,7 @@ int JBIG2MMRDecoder::getBlackCode() {
     bufLen = 8;
     ++nBytesRead;
   }
-  while (1) {
+  while (true) {
     if (bufLen >= 10 && ((buf >> (bufLen - 6)) & 0x3f) == 0) {
       if (bufLen <= 13) {
 	code = buf << (13 - bufLen);
@@ -1808,7 +1808,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length,
     j = i;
 
     // read the symbols in this height class
-    while (1) {
+    while (true) {
 
       // read the delta width
       if (huff) {
@@ -3191,7 +3191,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(bool mmr, int w, int h,
 
       // convert the run lengths to a bitmap line
       i = 0;
-      while (1) {
+      while (true) {
 	for (x = codingLine[i]; x < codingLine[i+1]; ++x) {
 	  bitmap->setPixel(x, y);
 	}
@@ -3235,7 +3235,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(bool mmr, int w, int h,
       }
     }
 
-    ltp = 0;
+    ltp = false;
     cx = cx0 = cx1 = cx2 = 0; // make gcc happy
     for (y = 0; y < h; ++y) {
 
@@ -3890,7 +3890,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericRefinementRegion(int w, int h,
     ltpCX = 0x0010;
   }
 
-  ltp = 0;
+  ltp = false;
   for (y = 0; y < h; ++y) {
 
     if (templ) {

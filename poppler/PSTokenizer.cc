@@ -69,7 +69,7 @@ bool PSTokenizer::getToken(char *buf, int size, int *length) {
 
   // skip leading whitespace and comments
   comment = false;
-  while (1) {
+  while (true) {
     if ((c = getChar()) == EOF) {
       buf[0] = '\0';
       *length = 0;

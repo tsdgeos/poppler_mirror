@@ -132,10 +132,10 @@ bool HtmlLinks::inLink(double xmin,double ymin,double xmax,double ymax,int& p)co
   for(std::vector<HtmlLink>::iterator i=accu->begin();i!=accu->end();++i){
     if (i->inLink(xmin,ymin,xmax,ymax)) {
         p=(i - accu->begin());
-        return 1;
+        return true;
     }
    }
-  return 0;
+  return false;
 }
 
 HtmlLink* HtmlLinks::getLink(int i) const{

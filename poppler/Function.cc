@@ -1257,7 +1257,7 @@ bool PostScriptFunction::parseCode(Stream *str, int *codePtr) {
   int opPtr, elsePtr;
   int a, b, mid, cmp;
 
-  while (1) {
+  while (true) {
     GooString tok = getToken(str);
     const char *p = tok.c_str();
     if (isdigit(*p) || *p == '.' || *p == '-') {
@@ -1364,7 +1364,7 @@ GooString PostScriptFunction::getToken(Stream *str) {
 
   GooString s;
   comment = false;
-  while (1) {
+  while (true) {
     if ((c = str->getChar()) == EOF) {
       break;
     }
@@ -1382,7 +1382,7 @@ GooString PostScriptFunction::getToken(Stream *str) {
   if (c == '{' || c == '}') {
     s.append((char)c);
   } else if (isdigit(c) || c == '.' || c == '-') {
-    while (1) {
+    while (true) {
       s.append((char)c);
       c = str->lookChar();
       if (c == EOF || !(isdigit(c) || c == '.' || c == '-')) {
@@ -1392,7 +1392,7 @@ GooString PostScriptFunction::getToken(Stream *str) {
       codeString->append(c);
     }
   } else {
-    while (1) {
+    while (true) {
       s.append((char)c);
       c = str->lookChar();
       if (c == EOF || !isalnum(c)) {
@@ -1417,7 +1417,7 @@ void PostScriptFunction::exec(PSStack *stack, int codePtr) const {
   double r1, r2, result;
   bool b1, b2;
 
-  while (1) {
+  while (true) {
     switch (code[codePtr].type) {
     case psInt:
       stack->pushInt(code[codePtr++].intg);

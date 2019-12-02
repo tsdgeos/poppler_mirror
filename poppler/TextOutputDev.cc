@@ -1641,7 +1641,7 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch) {
   poolMinBaseIdx = pool->minBaseIdx;
   charCount = 0;
   nLines = 0;
-  while (1) {
+  while (true) {
 
     // find the first non-empty line in the pool
     for (;
@@ -1683,7 +1683,7 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch) {
     wordSpacing = fixedPitch ? fixedPitch : maxWordSpacing * fontSize;
 
     // find the rest of the words in this line
-    while (1) {
+    while (true) {
 
       // find the left-most word whose baseline is in the range for
       // this line
@@ -3021,7 +3021,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
     count[rot] = 0;
 
     // add blocks until no more words are left
-    while (1) {
+    while (true) {
 
       // find the first non-empty line in the pool
       for (;

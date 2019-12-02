@@ -236,7 +236,7 @@ public:
 	  const char *date,
 	  bool rawOrder,
 	  int firstPage = 1,
-	  bool outline = 0);
+	  bool outline = false);
 
   // Destructor.
   ~HtmlOutputDev() override;
