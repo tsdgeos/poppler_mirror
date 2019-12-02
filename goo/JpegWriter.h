@@ -40,6 +40,9 @@ public:
   JpegWriter(Format format = RGB);
   ~JpegWriter() override;
 
+  JpegWriter(const JpegWriter &other) = delete;
+  JpegWriter& operator=(const JpegWriter &other) = delete;
+
   void setQuality(int quality);
   void setProgressive(bool progressive);
   void setOptimize(bool optimize);
@@ -52,9 +55,6 @@ public:
   bool supportCMYK() override;
 
 private:
-  JpegWriter(const JpegWriter &other);
-  JpegWriter& operator=(const JpegWriter &other);
-
   JpegWriterPrivate *priv;
 };
 

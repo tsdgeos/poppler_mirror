@@ -38,6 +38,9 @@ public:
   TiffWriter(Format format = RGB);
   ~TiffWriter() override;
 
+  TiffWriter(const TiffWriter &other) = delete;
+  TiffWriter& operator=(const TiffWriter &other) = delete;
+
   void setCompressionString(const char *compressionStringArg);
 
   bool init(FILE *openedFile, int width, int height, int hDPI, int vDPI) override;
@@ -50,9 +53,6 @@ public:
   bool close() override;
 
 private:
-  TiffWriter(const TiffWriter &other);
-  TiffWriter& operator=(const TiffWriter &other);
-
   TiffWriterPrivate *priv;
 };
 
