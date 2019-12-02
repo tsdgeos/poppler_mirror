@@ -367,21 +367,21 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
     }
 #if defined(ENABLE_LIBPNG)
     else if (fmt == "png") {
-        w.reset(new PNGWriter());
+        w = std::make_unique<PNGWriter>();
     }
 #endif
 #if defined(ENABLE_LIBJPEG)
     else if (fmt == "jpeg" || fmt == "jpg") {
-        w.reset(new JpegWriter());
+        w = std::make_unique<JpegWriter>();
     }
 #endif
 #if defined(ENABLE_LIBTIFF)
     else if (fmt == "tiff") {
-        w.reset(new TiffWriter());
+        w = std::make_unique<TiffWriter>();
     }
 #endif
     else if (fmt == "pnm") {
-        w.reset(new NetPBMWriter(pnm_format(d->format)));
+        w = std::make_unique<NetPBMWriter>(pnm_format(d->format));
     }
     if (!w.get()) {
         return false;

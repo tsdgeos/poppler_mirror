@@ -4463,7 +4463,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg) {
       if (obj1.isNull()) {
 	obj1 = maskDict->lookup("D");
       }
-      maskColorMap.reset(new GfxImageColorMap(maskBits, &obj1, maskColorSpace));
+      maskColorMap = std::make_unique<GfxImageColorMap>(maskBits, &obj1, maskColorSpace);
       if (!maskColorMap->isOk()) {
 	goto err1;
       }

@@ -183,7 +183,7 @@ void OutputDev::opiEnd(GfxState *state, Dict *opiDict) {
 #endif
 
 void OutputDev::startProfile() {
-  profileHash.reset(new std::unordered_map<std::string, ProfileData>);
+  profileHash = std::make_unique<std::unordered_map<std::string, ProfileData>>();
 }
 
 std::unique_ptr<std::unordered_map<std::string, ProfileData>> OutputDev::endProfile() {
