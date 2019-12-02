@@ -34,7 +34,7 @@ public:
   enum Format { RGB, MONOCHROME };
 
   NetPBMWriter(Format formatA = RGB);
-  ~NetPBMWriter() {};
+  ~NetPBMWriter() override {};
 
   bool init(FILE *f, int width, int height, int hDPI, int vDPI) override;
 

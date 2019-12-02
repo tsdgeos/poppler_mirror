@@ -34,7 +34,7 @@ class LinkExtractorOutputDev : public OutputDev
 {
   public:
     LinkExtractorOutputDev(PageData *data);
-    ~LinkExtractorOutputDev();
+    ~LinkExtractorOutputDev() override;
 
     // inherited from OutputDev
     bool upsideDown() override { return false; }

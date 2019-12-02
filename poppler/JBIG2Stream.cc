@@ -683,7 +683,7 @@ class JBIG2Bitmap: public JBIG2Segment {
 public:
 
   JBIG2Bitmap(unsigned int segNumA, int wA, int hA);
-  ~JBIG2Bitmap();
+  ~JBIG2Bitmap() override;
   JBIG2SegmentType getType() override { return jbig2SegBitmap; }
   JBIG2Bitmap *copy() { return new JBIG2Bitmap(0, this); }
   JBIG2Bitmap *getSlice(unsigned int x, unsigned int y, unsigned int wA, unsigned int hA);
@@ -1059,7 +1059,7 @@ class JBIG2SymbolDict: public JBIG2Segment {
 public:
 
   JBIG2SymbolDict(unsigned int segNumA, unsigned int sizeA);
-  ~JBIG2SymbolDict();
+  ~JBIG2SymbolDict() override;
   JBIG2SegmentType getType() override { return jbig2SegSymbolDict; }
   unsigned int getSize() { return size; }
   void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap) { bitmaps[idx] = bitmap; }
@@ -1120,7 +1120,7 @@ class JBIG2PatternDict: public JBIG2Segment {
 public:
 
   JBIG2PatternDict(unsigned int segNumA, unsigned int sizeA);
-  ~JBIG2PatternDict();
+  ~JBIG2PatternDict() override;
   JBIG2SegmentType getType() override { return jbig2SegPatternDict; }
   unsigned int getSize() { return size; }
   void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap) { if (likely(idx < size)) bitmaps[idx] = bitmap; }
@@ -1161,7 +1161,7 @@ class JBIG2CodeTable: public JBIG2Segment {
 public:
 
   JBIG2CodeTable(unsigned int segNumA, JBIG2HuffmanTable *tableA);
-  ~JBIG2CodeTable();
+  ~JBIG2CodeTable() override;
   JBIG2SegmentType getType() override { return jbig2SegCodeTable; }
   JBIG2HuffmanTable *getHuffTable() { return table; }
 

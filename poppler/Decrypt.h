@@ -100,7 +100,7 @@ public:
 
   BaseCryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
                   int keyLength, Ref ref);
-  ~BaseCryptStream();
+  ~BaseCryptStream() override;
   StreamKind getKind() const override { return strCrypt; }
   void reset() override;
   int getChar() override;
@@ -134,7 +134,7 @@ public:
 
   EncryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
                 int keyLength, Ref ref);
-  ~EncryptStream();
+  ~EncryptStream() override;
   void reset() override;
   int lookChar() override;
 };
@@ -144,7 +144,7 @@ public:
 
   DecryptStream(Stream *strA, const unsigned char *fileKey, CryptAlgorithm algoA,
                 int keyLength, Ref ref);
-  ~DecryptStream();
+  ~DecryptStream() override;
   void reset() override;
   int lookChar() override;
 };

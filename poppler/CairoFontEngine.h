@@ -74,7 +74,7 @@ protected:
 class CairoFreeTypeFont : public CairoFont {
 public:
   static CairoFreeTypeFont *create(GfxFont *gfxFont, XRef *xref, FT_Library lib, bool useCIDs);
-  ~CairoFreeTypeFont();
+  ~CairoFreeTypeFont() override;
 
 private:
   CairoFreeTypeFont(Ref ref, cairo_font_face_t *cairo_font_face,
@@ -88,7 +88,7 @@ public:
   static CairoType3Font *create(GfxFont *gfxFont, PDFDoc *doc,
 				CairoFontEngine *fontEngine,
 				bool printing, XRef *xref);
-  ~CairoType3Font();
+  ~CairoType3Font() override;
 
   bool matches(Ref &other, bool printing) override;
 

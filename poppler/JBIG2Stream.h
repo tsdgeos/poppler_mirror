@@ -46,7 +46,7 @@ class JBIG2Stream: public FilterStream {
 public:
 
   JBIG2Stream(Stream *strA, Object &&globalsStreamA, Object *globalsStreamRefA);
-  ~JBIG2Stream();
+  ~JBIG2Stream() override;
   StreamKind getKind() const override { return strJBIG2; }
   void reset() override;
   void close() override;

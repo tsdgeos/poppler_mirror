@@ -69,7 +69,7 @@ public:
   ArthurOutputDev(QPainter *painter );
 
   // Destructor.
-  ~ArthurOutputDev();
+  ~ArthurOutputDev() override;
 
   void setFontHinting(FontHinting hinting) { m_fontHinting = hinting; }
 

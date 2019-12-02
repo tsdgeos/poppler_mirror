@@ -29,7 +29,7 @@ class InfoDock : public AbstractInfoDock
 
 public:
     InfoDock(QWidget *parent = nullptr);
-    ~InfoDock();
+    ~InfoDock() override;
 
     void documentClosed() override;
 

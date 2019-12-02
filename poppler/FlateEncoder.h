@@ -41,7 +41,7 @@ class FlateEncoder: public FilterStream {
 public:
 
   FlateEncoder(Stream *strA);
-  ~FlateEncoder();
+  ~FlateEncoder() override;
   StreamKind getKind() const override { return strWeird; }
   void reset() override;
   int getChar() override

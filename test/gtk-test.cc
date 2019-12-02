@@ -46,7 +46,7 @@ public:
                      void (*redrawCbkA)(void *data),
                      void *redrawCbkDataA, SplashColor sc);
   
-  virtual ~GDKSplashOutputDev();
+  ~GDKSplashOutputDev() override;
 
   //----- initialization and control
 

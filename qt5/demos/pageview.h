@@ -32,7 +32,7 @@ class PageView : public QScrollArea, public DocumentObserver
 
 public:
     PageView(QWidget *parent = nullptr);
-    ~PageView();
+    ~PageView() override;
 
     void documentLoaded() override;
     void documentClosed() override;

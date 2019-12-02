@@ -168,7 +168,7 @@ public:
   LinkGoTo(const Object *destObj);
 
   // Destructor.
-  ~LinkGoTo();
+  ~LinkGoTo() override;
 
   // Was the LinkGoTo created successfully?
   bool isOk() const override { return dest || namedDest; }
@@ -198,7 +198,7 @@ public:
   LinkGoToR(Object *fileSpecObj, Object *destObj);
 
   // Destructor.
-  ~LinkGoToR();
+  ~LinkGoToR() override;
 
   // Was the LinkGoToR created successfully?
   bool isOk() const override { return fileName && (dest || namedDest); }
@@ -229,7 +229,7 @@ public:
   LinkLaunch(const Object *actionObj);
 
   // Destructor.
-  ~LinkLaunch();
+  ~LinkLaunch() override;
 
   // Was the LinkLaunch created successfully?
   bool isOk() const override { return fileName != nullptr; }
@@ -256,7 +256,7 @@ public:
   LinkURI(const Object *uriObj, const GooString *baseURI);
 
   // Destructor.
-  ~LinkURI();
+  ~LinkURI() override;
 
   // Was the LinkURI created successfully?
   bool isOk() const override { return uri != nullptr; }
@@ -280,7 +280,7 @@ public:
   // Build a LinkNamed given the action name.
   LinkNamed(const Object *nameObj);
 
-  ~LinkNamed();
+  ~LinkNamed() override;
 
   bool isOk() const override { return name != nullptr; }
 
@@ -308,7 +308,7 @@ public:
   };
 
   LinkMovie(const Object *obj);
-  ~LinkMovie();
+  ~LinkMovie() override;
 
   bool isOk() const override { return hasAnnotRef() || hasAnnotTitle(); }
   LinkActionKind getKind() const override { return actionMovie; }
@@ -351,7 +351,7 @@ public:
 
   LinkRendition(const Object *Obj);
 
-  ~LinkRendition();
+  ~LinkRendition() override;
 
   bool isOk() const override { return true; }
 
@@ -389,7 +389,7 @@ public:
 
   LinkSound(const Object *soundObj);
 
-  ~LinkSound();
+  ~LinkSound() override;
 
   bool isOk() const override { return sound != nullptr; }
 
@@ -420,7 +420,7 @@ public:
   // Build a LinkJavaScript given the action name.
   LinkJavaScript(Object *jsObj);
 
-  ~LinkJavaScript();
+  ~LinkJavaScript() override;
 
   bool isOk() const override { return js != nullptr; }
 
@@ -441,7 +441,7 @@ class LinkOCGState: public LinkAction {
 public:
   LinkOCGState(const Object *obj);
 
-  ~LinkOCGState();
+  ~LinkOCGState() override;
 
   bool isOk() const override { return stateList != nullptr; }
 
@@ -473,7 +473,7 @@ class LinkHide: public LinkAction {
 public:
   LinkHide(const Object *hideObj);
 
-  ~LinkHide();
+  ~LinkHide() override;
 
   bool isOk() const override { return targetName != nullptr; }
   LinkActionKind getKind() const override { return actionHide; }
@@ -509,7 +509,7 @@ public:
   LinkUnknown(const char *actionA);
 
   // Destructor.
-  ~LinkUnknown();
+  ~LinkUnknown() override;
 
   // Was the LinkUnknown create successfully?
   bool isOk() const override { return action != nullptr; }

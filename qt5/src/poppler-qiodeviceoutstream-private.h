@@ -31,7 +31,7 @@ class QIODeviceOutStream : public OutStream
 {
   public:
     QIODeviceOutStream(QIODevice* device);
-    ~QIODeviceOutStream();
+    ~QIODeviceOutStream() override;
 
     void close() override;
     Goffset getPos() override;

@@ -38,7 +38,7 @@ public:
 
   JpegWriter(int quality, bool progressive, Format format = RGB);
   JpegWriter(Format format = RGB);
-  ~JpegWriter();
+  ~JpegWriter() override;
 
   void setQuality(int quality);
   void setProgressive(bool progressive);

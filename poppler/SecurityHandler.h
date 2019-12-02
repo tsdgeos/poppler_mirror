@@ -105,7 +105,7 @@ class StandardSecurityHandler: public SecurityHandler {
 public:
 
   StandardSecurityHandler(PDFDoc *docA, Object *encryptDictA);
-  ~StandardSecurityHandler();
+  ~StandardSecurityHandler() override;
 
   bool isUnencrypted() override;
   void *makeAuthData(const GooString *ownerPassword,

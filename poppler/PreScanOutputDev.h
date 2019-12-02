@@ -43,7 +43,7 @@ public:
   PreScanOutputDev(PDFDoc *docA);
 
   // Destructor.
-  ~PreScanOutputDev();
+  ~PreScanOutputDev() override;
 
   //----- get info about output device
 

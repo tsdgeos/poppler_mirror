@@ -62,7 +62,7 @@ public:
 
   SplashPattern *copy() override { return new SplashFunctionPattern(colorMode, state, (GfxFunctionShading *) shading); }
 
-  ~SplashFunctionPattern();
+  ~SplashFunctionPattern() override;
 
   bool testPosition(int x, int y) override { return true; }
 
@@ -88,7 +88,7 @@ public:
 
   SplashUnivariatePattern(SplashColorMode colorMode, GfxState *state, GfxUnivariateShading *shading);
 
-  ~SplashUnivariatePattern();
+  ~SplashUnivariatePattern() override;
 
   bool getColor(int x, int y, SplashColorPtr c) override;
 
@@ -118,7 +118,7 @@ public:
 
   SplashPattern *copy() override { return new SplashAxialPattern(colorMode, state, (GfxAxialShading *) shading); }
 
-  ~SplashAxialPattern();
+  ~SplashAxialPattern() override;
 
   bool getParameter(double xc, double yc, double *t) override;
 
@@ -135,7 +135,7 @@ public:
 
   SplashPattern *copy() override { return new SplashGouraudPattern(bDirectColorTranslation, state, shading); }
 
-  ~SplashGouraudPattern();
+  ~SplashGouraudPattern() override;
 
   bool getColor(int x, int y, SplashColorPtr c) override { return false; }
 
@@ -169,7 +169,7 @@ public:
 
   SplashPattern *copy() override { return new SplashRadialPattern(colorMode, state, (GfxRadialShading *) shading); }
 
-  ~SplashRadialPattern();
+  ~SplashRadialPattern() override;
 
   bool getParameter(double xs, double ys, double *t) override;
 
@@ -198,7 +198,7 @@ public:
 		  bool overprintPreviewA = globalParams->getOverprintPreview());
 
   // Destructor.
-  ~SplashOutputDev();
+  ~SplashOutputDev() override;
 
   //----- get info about output device
 

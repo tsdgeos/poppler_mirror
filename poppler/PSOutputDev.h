@@ -128,7 +128,7 @@ public:
 	      void *customCodeCbkDataA = nullptr);
 
   // Destructor -- writes the trailer and closes the file.
-  virtual ~PSOutputDev();
+  ~PSOutputDev() override;
 
   // Check if file was successfully created.
   virtual bool isOk() { return ok; }

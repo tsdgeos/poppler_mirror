@@ -61,7 +61,7 @@ class TocModel : public QAbstractItemModel
             }
         }
 
-        ~TocModel()
+        ~TocModel() override
         {
             qDeleteAll(m_topItems);
         }

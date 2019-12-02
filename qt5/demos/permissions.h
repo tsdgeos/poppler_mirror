@@ -29,7 +29,7 @@ class PermissionsDock : public AbstractInfoDock
 
 public:
     PermissionsDock(QWidget *parent = nullptr);
-    ~PermissionsDock();
+    ~PermissionsDock() override;
 
     void documentClosed() override;
 

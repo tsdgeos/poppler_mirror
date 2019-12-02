@@ -56,7 +56,7 @@ class DCTStream: public FilterStream {
 public:
 
   DCTStream(Stream *strA, int colorXformA, Dict *dict, int recursion);
-  ~DCTStream();
+  ~DCTStream() override;
   StreamKind getKind() const override { return strDCT; }
   void reset() override;
   int getChar() override;

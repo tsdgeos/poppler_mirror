@@ -43,7 +43,7 @@ public:
   SplashFTFont(SplashFTFontFile *fontFileA, SplashCoord *matA,
 	       const SplashCoord *textMatA);
 
-  virtual ~SplashFTFont();
+  ~SplashFTFont() override;
 
   // Munge xFrac and yFrac before calling SplashFont::getGlyph.
   bool getGlyph(int c, int xFrac, int yFrac,

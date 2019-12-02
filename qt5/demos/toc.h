@@ -30,7 +30,7 @@ class TocDock : public AbstractInfoDock
 
 public:
     TocDock(QWidget *parent = nullptr);
-    ~TocDock();
+    ~TocDock() override;
 
     void documentClosed() override;
 

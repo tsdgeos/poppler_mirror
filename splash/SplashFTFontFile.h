@@ -52,7 +52,7 @@ public:
 					  int codeToGIDLenA,
 					  int faceIndexA=0);
 
-  ~SplashFTFontFile();
+  ~SplashFTFontFile() override;
 
   // Create a new SplashFTFont, i.e., a scaled instance of this font
   // file.

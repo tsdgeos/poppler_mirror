@@ -791,7 +791,7 @@ public:
 		bool rawOrderA, bool discardDiagA = false);
 
   // Destructor.
-  ~TextOutputDev();
+  ~TextOutputDev() override;
 
   // Check if file was successfully created.
   virtual bool isOk() { return ok; }

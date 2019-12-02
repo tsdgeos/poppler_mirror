@@ -68,7 +68,7 @@ public:
 
   SplashPattern *copy() override { return new SplashSolidColor(color); }
 
-  ~SplashSolidColor();
+  ~SplashSolidColor() override;
 
   bool getColor(int x, int y, SplashColorPtr c) override;
 

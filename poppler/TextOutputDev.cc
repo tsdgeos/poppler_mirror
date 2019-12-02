@@ -4442,7 +4442,7 @@ TextSelectionVisitor::TextSelectionVisitor (TextPage *p)
 class TextSelectionDumper : public TextSelectionVisitor {
 public:
   TextSelectionDumper(TextPage *page);
-  ~TextSelectionDumper();
+  ~TextSelectionDumper() override;
 
   void visitBlock (TextBlock *block, 
 			   TextLine *begin,
@@ -4615,7 +4615,7 @@ std::vector<TextWordSelection*> **TextSelectionDumper::takeWordList(int *nLinesO
 class TextSelectionSizer : public TextSelectionVisitor {
 public:
   TextSelectionSizer(TextPage *page, double scale);
-  ~TextSelectionSizer() { }
+  ~TextSelectionSizer() override { }
 
   void visitBlock (TextBlock *block,
 			   TextLine *begin,
@@ -4676,7 +4676,7 @@ public:
 		       OutputDev *out,
 		       const GfxColor *box_color,
 		       const GfxColor *glyph_color);
-  ~TextSelectionPainter();
+  ~TextSelectionPainter() override;
 
   void visitBlock (TextBlock *block,
 			   TextLine *begin,

@@ -149,7 +149,7 @@ public:
   // Create a FoFiType1C object from a file on disk.
   static FoFiType1C *load(const char *fileName);
 
-  virtual ~FoFiType1C();
+  ~FoFiType1C() override;
 
   // Return the font name.
   const char *getName() const;

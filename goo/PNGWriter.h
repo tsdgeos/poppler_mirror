@@ -37,7 +37,7 @@ public:
   enum Format { RGB, RGBA, GRAY, MONOCHROME, RGB48 };
 
   PNGWriter(Format format = RGB);
-  ~PNGWriter();
+  ~PNGWriter() override;
 
   void setICCProfile(const char *name, unsigned char *data, int size);
   void setSRGBProfile();

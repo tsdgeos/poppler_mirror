@@ -126,7 +126,7 @@ class LinkSoundPrivate : public LinkPrivate
 {
 	public:
 		LinkSoundPrivate( const QRectF &area );
-		~LinkSoundPrivate();
+		~LinkSoundPrivate() override;
 
 		double volume;
 		bool sync : 1;
@@ -149,7 +149,7 @@ class LinkRenditionPrivate : public LinkPrivate
 {
 	public:
 		LinkRenditionPrivate( const QRectF &area, ::MediaRendition *rendition, ::LinkRendition::RenditionOperation operation, const QString &script, const Ref ref );
-		~LinkRenditionPrivate();
+		~LinkRenditionPrivate() override;
 
 		MediaRendition *rendition;
 		LinkRendition::RenditionAction action;

@@ -36,7 +36,7 @@ public:
   enum Format { RGB, RGBA_PREMULTIPLIED, GRAY, MONOCHROME, CMYK, RGB48 };
 
   TiffWriter(Format format = RGB);
-  ~TiffWriter();
+  ~TiffWriter() override;
 
   void setCompressionString(const char *compressionStringArg);
 

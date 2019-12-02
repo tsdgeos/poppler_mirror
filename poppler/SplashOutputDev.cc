@@ -1084,7 +1084,7 @@ public:
 
   SplashOutFontFileID(const Ref *rA) { r = *rA; }
 
-  ~SplashOutFontFileID() {}
+  ~SplashOutFontFileID() override {}
 
   bool matches(SplashFontFileID *id) override {
     return ((SplashOutFontFileID *)id)->r == r;

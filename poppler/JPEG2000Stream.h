@@ -27,7 +27,7 @@ class JPXStream: public FilterStream {
 public:
 
   JPXStream(Stream *strA);
-  ~JPXStream();
+  ~JPXStream() override;
   StreamKind getKind() const override { return strJPX; }
   void reset() override;
   void close() override;

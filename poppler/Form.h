@@ -166,7 +166,7 @@ protected:
 class FormWidgetButton: public FormWidget {
 public:
   FormWidgetButton(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
-  ~FormWidgetButton ();
+  ~FormWidgetButton () override;
 
   FormButtonType getButtonType() const;
   
@@ -223,7 +223,7 @@ protected:
 class FormWidgetChoice: public FormWidget {
 public:
   FormWidgetChoice(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
-  ~FormWidgetChoice();
+  ~FormWidgetChoice() override;
 
   int getNumChoices() const;
   //return the display name of the i-th choice (UTF16BE)
@@ -386,7 +386,7 @@ public:
 
   void print(int indent) override;
 
-  ~FormFieldButton();
+  ~FormFieldButton() override;
 protected:
   void updateState(const char *state);
 
@@ -413,7 +413,7 @@ public:
   const GooString* getAppearanceContent () const { return internalContent ? internalContent : content; }
   void setContentCopy (const GooString* new_content);
   void setAppearanceContentCopy (const GooString* new_content);
-  ~FormFieldText();
+  ~FormFieldText() override;
 
   bool isMultiline () const { return multiline; }
   bool isPassword () const { return password; }
@@ -457,7 +457,7 @@ class FormFieldChoice: public FormField {
 public:
   FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
-  ~FormFieldChoice();
+  ~FormFieldChoice() override;
 
   int getNumChoices() const { return numChoices; }
   const GooString* getChoice(int i) const { return choices ? choices[i].optionName : nullptr; }
@@ -528,7 +528,7 @@ public:
   // Use -1 for now as validationTime
   SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime);
 
-  ~FormFieldSignature();
+  ~FormFieldSignature() override;
   Object* getByteRange() { return &byte_range; }
   const GooString* getSignature() const { return signature; }
 

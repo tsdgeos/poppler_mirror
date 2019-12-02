@@ -1928,7 +1928,7 @@ height = dummy.height();
             /**
               Destructor.
             */
-            ~PSConverter();
+            ~PSConverter() override;
 
             /** Sets the list of pages to print. Mandatory. */
             void setPageList(const QList<int> &pageList);
@@ -2049,7 +2049,7 @@ height = dummy.height();
             /**
               Destructor.
             */
-            ~PDFConverter();
+            ~PDFConverter() override;
 
             /**
               Sets the options for the PDF export.

@@ -72,7 +72,7 @@ class MemReader: public Reader {
 public:
 
   static MemReader *make(const char *bufA, int lenA);
-  ~MemReader();
+  ~MemReader() override;
   int getByte(int pos) override;
   bool getU16BE(int pos, int *val) override;
   bool getU32BE(int pos, unsigned int *val) override;
@@ -167,7 +167,7 @@ class FileReader: public Reader {
 public:
 
   static FileReader *make(const char *fileName);
-  ~FileReader();
+  ~FileReader() override;
   int getByte(int pos) override;
   bool getU16BE(int pos, int *val) override;
   bool getU32BE(int pos, unsigned int *val) override;
@@ -290,7 +290,7 @@ class StreamReader: public Reader {
 public:
 
   static StreamReader *make(int (*getCharA)(void *data), void *dataA);
-  ~StreamReader();
+  ~StreamReader() override;
   int getByte(int pos) override;
   bool getU16BE(int pos, int *val) override;
   bool getU32BE(int pos, unsigned int *val) override;

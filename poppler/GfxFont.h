@@ -360,7 +360,7 @@ public:
   Dict *getResources();
 
 private:
-  ~Gfx8BitFont();
+  ~Gfx8BitFont() override;
 
   const Base14FontMapEntry *base14;	// for Base-14 fonts only; NULL otherwise
   char *enc[256];		// char code --> char name
@@ -411,7 +411,7 @@ public:
   double getWidth(char* s, int len) const;
 
 private:
-  ~GfxCIDFont();
+  ~GfxCIDFont() override;
 
   int mapCodeToGID(FoFiTrueType *ff, int cmapi,
     Unicode unicode, bool wmode);
