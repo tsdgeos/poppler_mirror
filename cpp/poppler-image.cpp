@@ -480,16 +480,16 @@ std::vector<std::string> image::supported_image_formats()
 {
     std::vector<std::string> formats;
 #if defined(ENABLE_LIBPNG)
-    formats.push_back("png");
+    formats.emplace_back("png");
 #endif
 #if defined(ENABLE_LIBJPEG)
-    formats.push_back("jpeg");
-    formats.push_back("jpg");
+    formats.emplace_back("jpeg");
+    formats.emplace_back("jpg");
 #endif
 #if defined(ENABLE_LIBTIFF)
-    formats.push_back("tiff");
+    formats.emplace_back("tiff");
 #endif
-    formats.push_back("pnm");
+    formats.emplace_back("pnm");
     return formats;
 }
 
