@@ -683,17 +683,17 @@ class JBIG2Bitmap: public JBIG2Segment {
 public:
 
   JBIG2Bitmap(unsigned int segNumA, int wA, int hA);
+  JBIG2Bitmap(JBIG2Bitmap *bitmap);
   ~JBIG2Bitmap() override;
   JBIG2SegmentType getType() override { return jbig2SegBitmap; }
-  JBIG2Bitmap *copy() { return new JBIG2Bitmap(0, this); }
   JBIG2Bitmap *getSlice(unsigned int x, unsigned int y, unsigned int wA, unsigned int hA);
   void expand(int newH, unsigned int pixel);
   void clearToZero();
   void clearToOne();
-  int getWidth() { return w; }
-  int getHeight() { return h; }
-  int getLineSize() { return line; }
-  int getPixel(int x, int y)
+  int getWidth() const { return w; }
+  int getHeight() const { return h; }
+  int getLineSize() const { return line; }
+  int getPixel(int x, int y) const
     { return (x < 0 || x >= w || y < 0 || y >= h) ? 0 :
              (data[y * line + (x >> 3)] >> (7 - (x & 7))) & 1; }
   void setPixel(int x, int y)
@@ -705,13 +705,10 @@ public:
   void duplicateRow(int yDest, int ySrc);
   void combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp);
   unsigned char *getDataPtr() { return data; }
-  int getDataSize() { return h * line; }
-  bool isOk() { return data != nullptr; }
+  int getDataSize() const { return h * line; }
+  bool isOk() const { return data != nullptr; }
 
 private:
-
-  JBIG2Bitmap(unsigned int segNumA, JBIG2Bitmap *bitmap);
-
   int w, h, line;
   unsigned char *data;
 };
@@ -735,8 +732,8 @@ JBIG2Bitmap::JBIG2Bitmap(unsigned int segNumA, int wA, int hA):
   }
 }
 
-JBIG2Bitmap::JBIG2Bitmap(unsigned int segNumA, JBIG2Bitmap *bitmap):
-  JBIG2Segment(segNumA)
+JBIG2Bitmap::JBIG2Bitmap(JBIG2Bitmap *bitmap):
+  JBIG2Segment(0)
 {
   if (unlikely(bitmap == nullptr)) {
     error(errSyntaxError, -1, "NULL bitmap in JBIG2Bitmap");
@@ -1967,7 +1964,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length,
     }
     if (ex) {
       for (cnt = 0; cnt < run; ++cnt) {
-	symbolDict->setBitmap(j++, bitmaps[i++]->copy());
+	symbolDict->setBitmap(j++, new JBIG2Bitmap(bitmaps[i++]));
       }
     } else {
       i += run;
