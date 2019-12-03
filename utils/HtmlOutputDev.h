@@ -208,7 +208,7 @@ public:
     HtmlMetaVar(const HtmlMetaVar &) = delete;
     HtmlMetaVar& operator=(const HtmlMetaVar &) = delete;
 
-    GooString* toString();
+    GooString* toString() const;
 
 private:
 

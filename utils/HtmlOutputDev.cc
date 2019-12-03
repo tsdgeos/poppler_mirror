@@ -1009,7 +1009,7 @@ HtmlMetaVar::~HtmlMetaVar()
    delete content;
 } 
     
-GooString* HtmlMetaVar::toString()
+GooString* HtmlMetaVar::toString() const
 {
     GooString *result = new GooString("<meta name=\"");
     result->append(name);
@@ -1659,7 +1659,7 @@ void HtmlOutputDev::dumpMetaVars(FILE *file)
 {
   GooString *var;
 
-  for(HtmlMetaVar *t : *glMetaVars)
+  for(const HtmlMetaVar *t : *glMetaVars)
   {
      var = t->toString();
      fprintf(file, "%s\n", var->c_str());
