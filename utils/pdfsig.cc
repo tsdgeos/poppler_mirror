@@ -96,12 +96,12 @@ static char *getReadableTime(time_t unix_time)
   return time_str;
 }
 
-static void dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_widget, const char *filename)
+static bool dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_widget, const char *filename)
 {
     const GooString *signature = sig_widget->getSignature();
     if (!signature) {
         printf("Cannot dump signature #%d\n", sig_num);
-        return;
+        return false;
     }
 
     const int sigCountLength = numberOfCharacters(sigCount);
@@ -116,6 +116,8 @@ static void dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_wi
     outfile.close();
     delete format;
     delete path;
+
+    return true;
 }
 
 static GooString nssDir;
@@ -156,7 +158,7 @@ int main(int argc, char *argv[])
 
   Win32Console win32Console(&argc, &argv);
   int exitCode = 99;
-  bool ok;
+  bool ok, dumpingOk;
 
   ok = parseArgs(argDesc, &argc, argv);
 
@@ -189,9 +191,13 @@ int main(int argc, char *argv[])
 
   if (sigCount >= 1) {
     if (dumpSignatures) {
+      exitCode = 0;
       printf("Dumping Signatures: %u\n", sigCount);
       for (unsigned int i = 0; i < sigCount; i++) {
-        dumpSignature(i, sigCount, sig_widgets.at(i), fileName->c_str());
+        dumpingOk = dumpSignature(i, sigCount, sig_widgets.at(i), fileName->c_str());
+        if (!dumpingOk) {
+          exitCode = 99;
+        }
       }
       goto end;
     } else {
