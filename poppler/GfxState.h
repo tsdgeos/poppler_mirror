@@ -220,7 +220,7 @@ public:
   GfxColorSpace(const GfxColorSpace &) = delete;
   GfxColorSpace& operator=(const GfxColorSpace &other) = delete;
 
-  virtual GfxColorSpace *copy() = 0;
+  virtual GfxColorSpace *copy() const = 0;
   virtual GfxColorSpaceMode getMode() const = 0;
 
   // Construct a color space.  Returns nullptr if unsuccessful.
@@ -299,7 +299,7 @@ public:
 
   GfxDeviceGrayColorSpace();
   ~GfxDeviceGrayColorSpace() override;
-  GfxColorSpace *copy() override;
+  GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csDeviceGray; }
 
   void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -333,7 +333,7 @@ public:
 
   GfxCalGrayColorSpace();
   ~GfxCalGrayColorSpace() override;
-  GfxColorSpace *copy() override;
+  GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csCalGray; }
 
   // Construct a CalGray color space.  Returns nullptr if unsuccessful.
@@ -377,7 +377,7 @@ public:
 
   GfxDeviceRGBColorSpace();
   ~GfxDeviceRGBColorSpace() override;
-  GfxColorSpace *copy() override;
+  GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csDeviceRGB; }
 
   void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -411,7 +411,7 @@ public:
 
   GfxCalRGBColorSpace();
   ~GfxCalRGBColorSpace() override;
-  GfxColorSpace *copy() override;
+  GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csCalRGB; }
 
   // Construct a CalRGB color space.  Returns nullptr if unsuccessful.
@@ -459,7 +459,7 @@ public:
 
   GfxDeviceCMYKColorSpace();
   ~GfxDeviceCMYKColorSpace() override;
-  GfxColorSpace *copy() override;
+  GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csDeviceCMYK; }
 
   void getGray(const GfxColor *color, GfxGray *gray) const override;
@@ -490,7 +490,7 @@ public:
 
   GfxLabColorSpace();
   ~GfxLabColorSpace() override;
-  GfxColorSpace *copy() override;
+  GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csLab; }
 
   // Construct a Lab color space.  Returns nullptr if unsuccessful.
@@ -540,7 +540,7 @@ public:
 
   GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA);
   ~GfxICCBasedColorSpace() override;
-  GfxColorSpace *copy() override;
+  GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csICCBased; }
 
   // Construct an ICCBased color space.  Returns nullptr if unsuccessful.
@@ -591,7 +591,7 @@ public:
 
   GfxIndexedColorSpace(GfxColorSpace *baseA, int indexHighA);
   ~GfxIndexedColorSpace() override;
-  GfxColorSpace *copy() override;
+  GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csIndexed; }
 
   // Construct an Indexed color space.  Returns nullptr if unsuccessful.
@@ -644,7 +644,7 @@ public:
   GfxSeparationColorSpace(GooString *nameA, GfxColorSpace *altA,
 			  Function *funcA);
   ~GfxSeparationColorSpace() override;
-  GfxColorSpace *copy() override;
+  GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csSeparation; }
 
   // Construct a Separation color space.  Returns nullptr if unsuccessful.
@@ -689,7 +689,7 @@ public:
   GfxDeviceNColorSpace(int nCompsA, std::vector<std::string> &&namesA,
 		       GfxColorSpace *alt, Function *func, std::vector<GfxSeparationColorSpace*> *sepsCS);
   ~GfxDeviceNColorSpace() override;
-  GfxColorSpace *copy() override;
+  GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csDeviceN; }
 
   // Construct a DeviceN color space.  Returns nullptr if unsuccessful.
@@ -735,7 +735,7 @@ public:
 
   GfxPatternColorSpace(GfxColorSpace *underA);
   ~GfxPatternColorSpace() override;
-  GfxColorSpace *copy() override;
+  GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csPattern; }
 
   // Construct a Pattern color space.  Returns nullptr if unsuccessful.
@@ -773,7 +773,7 @@ public:
 
   static GfxPattern *parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state, int patternRefNum);
 
-  virtual GfxPattern *copy() = 0;
+  virtual GfxPattern *copy() const = 0;
 
   int getType() const { return type; }
 
@@ -795,7 +795,7 @@ public:
   static GfxTilingPattern *parse(Object *patObj, int patternRefNum);
   ~GfxTilingPattern() override;
 
-  GfxPattern *copy() override;
+  GfxPattern *copy() const override;
 
   int getPaintType() const { return paintType; }
   int getTilingType() const { return tilingType; }
@@ -811,8 +811,8 @@ private:
 
   GfxTilingPattern(int paintTypeA, int tilingTypeA,
 		   const double *bboxA, double xStepA, double yStepA,
-		   Object *resDictA, const double *matrixA,
-		   Object *contentStreamA, int patternRefNumA);
+		   const Object *resDictA, const double *matrixA,
+		   const Object *contentStreamA, int patternRefNumA);
 
   int paintType;
   int tilingType;
@@ -833,7 +833,7 @@ public:
   static GfxShadingPattern *parse(GfxResources *res, Object *patObj, OutputDev *out, GfxState *state, int patternRefNum);
   ~GfxShadingPattern() override;
 
-  GfxPattern *copy() override;
+  GfxPattern *copy() const override;
 
   GfxShading *getShading() { return shading; }
   const double *getMatrix() const { return matrix; }
@@ -854,7 +854,7 @@ class GfxShading {
 public:
 
   GfxShading(int typeA);
-  GfxShading(GfxShading *shading);
+  GfxShading(const GfxShading *shading);
   virtual ~GfxShading();
 
   GfxShading(const GfxShading &) = delete;
@@ -862,7 +862,7 @@ public:
 
   static GfxShading *parse(GfxResources *res, Object *obj, OutputDev *out, GfxState *state);
 
-  virtual GfxShading *copy() = 0;
+  virtual GfxShading *copy() const = 0;
 
   int getType() const { return type; }
   GfxColorSpace *getColorSpace() { return colorSpace; }
@@ -902,7 +902,7 @@ public:
 		       double t0A, double t1A,
 		       Function **funcsA, int nFuncsA,
 		       bool extend0A, bool extend1A);
-  GfxUnivariateShading(GfxUnivariateShading *shading);
+  GfxUnivariateShading(const GfxUnivariateShading *shading);
   ~GfxUnivariateShading() override;
 
   double getDomain0() const { return t0; }
@@ -949,12 +949,12 @@ public:
 		     double x1A, double y1A,
 		     const double *matrixA,
 		     Function **funcsA, int nFuncsA);
-  GfxFunctionShading(GfxFunctionShading *shading);
+  GfxFunctionShading(const GfxFunctionShading *shading);
   ~GfxFunctionShading() override;
 
   static GfxFunctionShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-  GfxShading *copy() override;
+  GfxShading *copy() const override;
 
   void getDomain(double *x0A, double *y0A, double *x1A, double *y1A) const
     { *x0A = x0; *y0A = y0; *x1A = x1; *y1A = y1; }
@@ -983,12 +983,12 @@ public:
 		  double t0A, double t1A,
 		  Function **funcsA, int nFuncsA,
 		  bool extend0A, bool extend1A);
-  GfxAxialShading(GfxAxialShading *shading);
+  GfxAxialShading(const GfxAxialShading *shading);
   ~GfxAxialShading() override;
 
   static GfxAxialShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-  GfxShading *copy() override;
+  GfxShading *copy() const override;
 
   void getCoords(double *x0A, double *y0A, double *x1A, double *y1A) const
     { *x0A = x0; *y0A = y0; *x1A = x1; *y1A = y1; }
@@ -1016,12 +1016,12 @@ public:
 		   double t0A, double t1A,
 		   Function **funcsA, int nFuncsA,
 		   bool extend0A, bool extend1A);
-  GfxRadialShading(GfxRadialShading *shading);
+  GfxRadialShading(const GfxRadialShading *shading);
   ~GfxRadialShading() override;
 
   static GfxRadialShading *parse(GfxResources *res, Dict *dict, OutputDev *out, GfxState *state);
 
-  GfxShading *copy() override;
+  GfxShading *copy() const override;
 
   void getCoords(double *x0A, double *y0A, double *r0A,
 		 double *x1A, double *y1A, double *r1A) const
@@ -1054,12 +1054,12 @@ public:
 			    GfxGouraudVertex *verticesA, int nVerticesA,
 			    int (*trianglesA)[3], int nTrianglesA,
 			    Function **funcsA, int nFuncsA);
-  GfxGouraudTriangleShading(GfxGouraudTriangleShading *shading);
+  GfxGouraudTriangleShading(const GfxGouraudTriangleShading *shading);
   ~GfxGouraudTriangleShading() override;
 
   static GfxGouraudTriangleShading *parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
 
-  GfxShading *copy() override;
+  GfxShading *copy() const override;
 
   int getNTriangles() const { return nTriangles; }
 
@@ -1140,12 +1140,12 @@ public:
 
   GfxPatchMeshShading(int typeA, GfxPatch *patchesA, int nPatchesA,
 		      Function **funcsA, int nFuncsA);
-  GfxPatchMeshShading(GfxPatchMeshShading *shading);
+  GfxPatchMeshShading(const GfxPatchMeshShading *shading);
   ~GfxPatchMeshShading() override;
 
   static GfxPatchMeshShading *parse(GfxResources *res, int typeA, Dict *dict, Stream *str, OutputDev *out, GfxState *state);
 
-  GfxShading *copy() override;
+  GfxShading *copy() const override;
 
   int getNPatches() const { return nPatches; }
   const GfxPatch *getPatch(int i) const { return &patches[i]; }
@@ -1189,7 +1189,7 @@ public:
   GfxImageColorMap& operator=(const GfxImageColorMap &) = delete;
 
   // Return a copy of this color map.
-  GfxImageColorMap *copy() { return new GfxImageColorMap(this); }
+  GfxImageColorMap *copy() const { return new GfxImageColorMap(this); }
 
   // Is color map valid?
   bool isOk() const { return ok; }
@@ -1227,7 +1227,7 @@ public:
   const GfxColor *getMatteColor() const { return (useMatte) ? &matteColor : nullptr; }
 private:
 
-  GfxImageColorMap(GfxImageColorMap *colorMap);
+  GfxImageColorMap(const GfxImageColorMap *colorMap);
 
   GfxColorSpace *colorSpace;	// the image color space
   int bits;			// bits per component

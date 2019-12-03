@@ -124,7 +124,7 @@ SplashBitmap::SplashBitmap(int widthA, int heightA, int rowPadA,
   }
   separationList = new std::vector<GfxSeparationColorSpace*>();
   if (separationListA != nullptr)
-    for (GfxSeparationColorSpace *separation : *separationListA)
+    for (const GfxSeparationColorSpace *separation : *separationListA)
       separationList->push_back((GfxSeparationColorSpace*)separation->copy());
 }
 

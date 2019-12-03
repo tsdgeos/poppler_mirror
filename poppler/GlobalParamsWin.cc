@@ -532,7 +532,7 @@ GooString *GlobalParams::findSystemFontFile(const GfxFont *font,
 					  SysFontType *type,
 					  int *fontNum, GooString *substituteFontName,
                                           const GooString *base14Name) {
-  SysFontInfo *fi;
+  const SysFontInfo *fi;
   GooString *path = nullptr;
   const GooString *fontName = font->getName();
   if (!fontName) return nullptr;

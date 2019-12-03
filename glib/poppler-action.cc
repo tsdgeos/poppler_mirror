@@ -544,7 +544,7 @@ build_rendition (PopplerAction *action,
 static PopplerLayer *
 get_layer_for_ref (PopplerDocument *document,
 		   GList           *layers,
-		   Ref             *ref,
+		   const Ref       *ref,
 		   gboolean         preserve_rb)
 {
 	GList *l;
@@ -603,7 +603,7 @@ build_ocg_state (PopplerDocument *document,
 			break;
 		}
 
-		for (Ref *ref : (*list->list)) {
+		for (const Ref *ref : (*list->list)) {
 			PopplerLayer *layer = get_layer_for_ref (document, document->layers, ref, preserve_rb);
 
 			action_layer->layers = g_list_prepend (action_layer->layers, layer);
