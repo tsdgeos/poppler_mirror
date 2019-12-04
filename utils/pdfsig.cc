@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 
   Win32Console win32Console(&argc, &argv);
   int exitCode = 99;
-  bool ok, dumpingOk;
+  bool ok;
 
   ok = parseArgs(argDesc, &argc, argv);
 
@@ -194,9 +194,9 @@ int main(int argc, char *argv[])
       exitCode = 0;
       printf("Dumping Signatures: %u\n", sigCount);
       for (unsigned int i = 0; i < sigCount; i++) {
-        dumpingOk = dumpSignature(i, sigCount, sig_widgets.at(i), fileName->c_str());
+        const bool dumpingOk = dumpSignature(i, sigCount, sig_widgets.at(i), fileName->c_str());
         if (!dumpingOk) {
-          exitCode = 99;
+          exitCode = 3;
         }
       }
       goto end;
