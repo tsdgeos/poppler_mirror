@@ -26,8 +26,8 @@
 
 #include <config.h>
 
-#include <stdio.h>
-#include <limits.h>
+#include <cstdio>
+#include <climits>
 #include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "poppler/Error.h"

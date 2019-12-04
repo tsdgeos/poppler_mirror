@@ -22,7 +22,7 @@
  */
 
 #include "config.h"
-#include <string.h>
+#include <cstring>
 
 #ifndef __GI_SCANNER__
 #include <memory>
@@ -3127,8 +3127,7 @@ layer_free (Layer *layer)
     return;
 
   if (layer->kids) {
-	  g_list_foreach (layer->kids, (GFunc)layer_free, nullptr);
-	  g_list_free (layer->kids);
+	  g_list_free_full (layer->kids, (GDestroyNotify)layer_free);
   }
 
   if (layer->label) {
@@ -3276,11 +3275,8 @@ poppler_document_layers_free (PopplerDocument *document)
   if (G_UNLIKELY (!document->layers))
     return;
 
-  g_list_foreach (document->layers, (GFunc)layer_free, nullptr);
-  g_list_free (document->layers);
-
-  g_list_foreach (document->layers_rbgroups, (GFunc)g_list_free, nullptr);
-  g_list_free (document->layers_rbgroups);
+  g_list_free_full (document->layers, (GDestroyNotify)layer_free);
+  g_list_free_full (document->layers_rbgroups, (GDestroyNotify)g_list_free);
 
   document->layers = nullptr;
   document->layers_rbgroups = nullptr;

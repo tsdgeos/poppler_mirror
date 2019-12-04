@@ -51,12 +51,12 @@
 
 #include <config.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
 #include <cmath>
-#include <float.h>
-#include <ctype.h>
+#include <cfloat>
+#include <cctype>
 #include <algorithm>
 #ifdef _WIN32
 #include <fcntl.h> // for O_BINARY
@@ -1641,7 +1641,7 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch) {
   poolMinBaseIdx = pool->minBaseIdx;
   charCount = 0;
   nLines = 0;
-  while (1) {
+  while (true) {
 
     // find the first non-empty line in the pool
     for (;
@@ -1683,7 +1683,7 @@ void TextBlock::coalesce(const UnicodeMap *uMap, double fixedPitch) {
     wordSpacing = fixedPitch ? fixedPitch : maxWordSpacing * fontSize;
 
     // find the rest of the words in this line
-    while (1) {
+    while (true) {
 
       // find the left-most word whose baseline is in the range for
       // this line
@@ -2506,8 +2506,8 @@ void TextPage::updateFont(const GfxState *state) {
 
   // get the font info object
   curFont = nullptr;
-  for (std::size_t i = 0; i < fonts->size(); ++i) {
-    curFont = (*fonts)[i];
+  for (TextFontInfo *f : *fonts) {
+    curFont = f;
     if (curFont->matches(state)) {
       break;
     }
@@ -2824,8 +2824,6 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   TextLine *line;
   TextBlock *blkList, *blk, *lastBlk, *blk0, *blk1, *blk2;
   TextFlow *flow, *lastFlow;
-  TextUnderline *underline;
-  TextLink *link;
   int rot, poolMinBaseIdx, baseIdx, startBaseIdx, endBaseIdx;
   double minBase, maxBase, newMinBase, newMaxBase;
   double fontSize, colSpace1, colSpace2, lineSpace, intraLineSpace, blkSpace;
@@ -2878,8 +2876,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   if (doHTML) {
 
     //----- handle underlining
-    for (std::size_t i = 0; i < underlines->size(); ++i) {
-      underline = (*underlines)[i];
+    for (const TextUnderline *underline : *underlines) {
       if (underline->horiz) {
 	// rot = 0
 	if (pools[0]->minBaseIdx <= pools[0]->maxBaseIdx) {
@@ -2941,9 +2938,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
     }
 
     //----- handle links
-    for (std::size_t i = 0; i < links->size(); ++i) {
-      link = (*links)[i];
-
+    for (const TextLink *link : *links) {
       // rot = 0
       if (pools[0]->minBaseIdx <= pools[0]->maxBaseIdx) {
 	startBaseIdx = pools[0]->getBaseIdx(link->yMin);
@@ -3021,7 +3016,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
     count[rot] = 0;
 
     // add blocks until no more words are left
-    while (1) {
+    while (true) {
 
       // find the first non-empty line in the pool
       for (;
@@ -4442,7 +4437,7 @@ TextSelectionVisitor::TextSelectionVisitor (TextPage *p)
 class TextSelectionDumper : public TextSelectionVisitor {
 public:
   TextSelectionDumper(TextPage *page);
-  ~TextSelectionDumper();
+  ~TextSelectionDumper() override;
 
   void visitBlock (TextBlock *block, 
 			   TextLine *begin,
@@ -4458,7 +4453,7 @@ public:
 			  const PDFRectangle *selection) override;
   void endPage();
 
-  GooString *getText(void);
+  GooString *getText();
   std::vector<TextWordSelection*> **takeWordList(int *nLines);
 
 private:
@@ -4564,7 +4559,7 @@ void TextSelectionDumper::endPage()
   finishLine();
 }
 
-GooString *TextSelectionDumper::getText (void)
+GooString *TextSelectionDumper::getText ()
 {
   GooString *text;
   int i;
@@ -4615,7 +4610,7 @@ std::vector<TextWordSelection*> **TextSelectionDumper::takeWordList(int *nLinesO
 class TextSelectionSizer : public TextSelectionVisitor {
 public:
   TextSelectionSizer(TextPage *page, double scale);
-  ~TextSelectionSizer() { }
+  ~TextSelectionSizer() override { }
 
   void visitBlock (TextBlock *block,
 			   TextLine *begin,
@@ -4676,7 +4671,7 @@ public:
 		       OutputDev *out,
 		       const GfxColor *box_color,
 		       const GfxColor *glyph_color);
-  ~TextSelectionPainter();
+  ~TextSelectionPainter() override;
 
   void visitBlock (TextBlock *block,
 			   TextLine *begin,
@@ -4786,8 +4781,7 @@ void TextSelectionPainter::endPage()
   state->setFillColor(glyph_color);
   out->updateFillColor(state);
 
-  for (std::size_t i = 0; i < selectionList->size(); i++) {
-    TextWordSelection *sel = (*selectionList)[i];
+  for (const TextWordSelection *sel : *selectionList) {
     int begin = sel->begin;
 
     while (begin < sel->end) {

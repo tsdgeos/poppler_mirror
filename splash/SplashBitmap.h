@@ -35,7 +35,7 @@
 
 #include "SplashTypes.h"
 #include "poppler/GfxState.h"
-#include <stdio.h>
+#include <cstdio>
 
 class ImgWriter;
 

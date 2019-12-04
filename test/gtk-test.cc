@@ -15,7 +15,7 @@
 #include <poppler.h>
 #include <poppler-private.h>
 #include <gtk/gtk.h>
-#include <math.h>
+#include <cmath>
 
 static int requested_page = 0;
 static gboolean cairo_output = FALSE;
@@ -46,7 +46,7 @@ public:
                      void (*redrawCbkA)(void *data),
                      void *redrawCbkDataA, SplashColor sc);
   
-  virtual ~GDKSplashOutputDev();
+  ~GDKSplashOutputDev() override;
 
   //----- initialization and control
 

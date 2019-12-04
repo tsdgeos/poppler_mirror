@@ -15,7 +15,7 @@
 
 
 #include "config.h"
-#include <stdio.h>
+#include <cstdio>
 #include "Object.h"
 #include "Dict.h"
 #include "Annot.h"

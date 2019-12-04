@@ -38,7 +38,7 @@
 #define PSOUTPUTDEV_H
 
 #include "poppler-config.h"
-#include <stddef.h>
+#include <cstddef>
 #include "Object.h"
 #include "GfxState.h"
 #include "GlobalParams.h"
@@ -128,7 +128,7 @@ public:
 	      void *customCodeCbkDataA = nullptr);
 
   // Destructor -- writes the trailer and closes the file.
-  virtual ~PSOutputDev();
+  ~PSOutputDev() override;
 
   // Check if file was successfully created.
   virtual bool isOk() { return ok; }

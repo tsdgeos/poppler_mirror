@@ -48,14 +48,15 @@ public:
 
   GDirEntry(const char *dirPath, const char *nameA, bool doStat);
   ~GDirEntry();
+
+  GDirEntry(const GDirEntry &other) = delete;
+  GDirEntry& operator=(const GDirEntry &other) = delete;
+
   const GooString *getName() const { return name; }
   const GooString *getFullPath() const { return fullPath; }
   bool isDir() const { return dir; }
 
 private:
-  GDirEntry(const GDirEntry &other);
-  GDirEntry& operator=(const GDirEntry &other);
-
   GooString *name;		// dir/file name
   GooString *fullPath;
   bool dir;			// is it a directory?
@@ -66,13 +67,14 @@ public:
 
   GDir(const char *name, bool doStatA = true);
   ~GDir();
+
+  GDir(const GDir &other) = delete;
+  GDir& operator=(const GDir &other) = delete;
+
   GDirEntry *getNextEntry();
   void rewind();
 
 private:
-  GDir(const GDir &other);
-  GDir& operator=(const GDir &other);
-
   GooString *path;		// directory path
   bool doStat;			// call stat() for each entry?
 #if defined(_WIN32)

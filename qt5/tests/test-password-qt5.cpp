@@ -12,7 +12,7 @@ class PDFDisplay : public QWidget           // picture display widget
     Q_OBJECT
 public:
     PDFDisplay( Poppler::Document *d, QWidget *parent = nullptr );
-    ~PDFDisplay();
+    ~PDFDisplay() override;
 protected:
     void paintEvent( QPaintEvent * ) override;
     void keyPressEvent( QKeyEvent * ) override;

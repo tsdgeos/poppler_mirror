@@ -24,7 +24,7 @@ class CurlCachedFileLoader : public CachedFileLoader {
 public:
 
   CurlCachedFileLoader();
-  ~CurlCachedFileLoader();
+  ~CurlCachedFileLoader() override;
   size_t init(GooString *url, CachedFile* cachedFile) override;
   int load(const std::vector<ByteRange> &ranges, CachedFileWriter *writer) override;
 

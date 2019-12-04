@@ -35,9 +35,9 @@
 
 #include <cassert>
 #include <set>
-#include <stdio.h>
-#include <string.h>
-#include <limits.h>
+#include <cstdio>
+#include <cstring>
+#include <climits>
 #include "goo/gmem.h"
 #include "goo/GooString.h"
 #include "goo/GooLikely.h"

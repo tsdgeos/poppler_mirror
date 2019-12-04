@@ -1,6 +1,6 @@
 /* Sound.h - an object that holds the sound structure
  * Copyright (C) 2006-2007, Pino Toscano <pino@kde.org>
- * Copyright (C) 2017, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2019, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,8 +41,8 @@ enum SoundEncoding {
 class Sound
 {
 public:
-  // Try to parse the Object s
-  static Sound *parseSound(Object *s);
+  // Try to parse the Object obj
+  static Sound *parseSound(Object *obj);
 
   // Destructor
   ~Sound();

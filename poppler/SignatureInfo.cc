@@ -18,8 +18,8 @@
 #include "SignatureInfo.h"
 #include "CertificateInfo.h"
 #include "goo/gmem.h"
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef ENABLE_NSS3
     #include <hasht.h>

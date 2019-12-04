@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2019, Oliver Sander <oliver.sander@tu-dresden.de>
@@ -35,8 +35,7 @@ void printEncodings()
   });
 
   printf("Available encodings are:\n");
-  for (std::size_t i = 0; i < encNames->size(); ++i) {
-    GooString *enc = (*encNames)[i];
+  for (const GooString *enc : *encNames) {
     printf("%s\n", enc->c_str());
   }
 

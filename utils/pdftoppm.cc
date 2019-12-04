@@ -18,7 +18,7 @@
 // Copyright (C) 2009 Michael K. Johnson <a1237@danlj.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
-// Copyright (C) 2009-2011, 2015, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009-2011, 2015, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010, 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
@@ -42,8 +42,8 @@
 #include <fcntl.h> // for O_BINARY
 #include <io.h>    // for setmode
 #endif
-#include <stdio.h>
-#include <math.h>
+#include <cstdio>
+#include <cmath>
 #include "parseargs.h"
 #include "goo/gmem.h"
 #include "goo/GooString.h"
@@ -64,7 +64,7 @@
 // #define UTILS_USE_PTHREADS 1
 
 #ifdef UTILS_USE_PTHREADS
-#include <errno.h>
+#include <cerrno>
 #include <pthread.h>
 #include <deque>
 #endif // UTILS_USE_PTHREADS
@@ -100,6 +100,7 @@ static bool jpegProgressive = false;
 static bool jpegOptimize = false;
 static bool overprint = false;
 static char enableFreeTypeStr[16] = "";
+static bool enableFreeType = true;
 static char antialiasStr[16] = "";
 static char vectorAntialiasStr[16] = "";
 static bool fontAntialias = true;
@@ -367,6 +368,7 @@ static void processPageJobs() {
 		              splashModeRGB8, 4, false, *pageJob.paperColor, true, thinLineMode);
     splashOut->setFontAntialias(fontAntialias);
     splashOut->setVectorAntialias(vectorAntialias);
+    splashOut->setEnableFreeType(enableFreeType);
     splashOut->startDoc(pageJob.doc);
     
     savePageSlice(pageJob.doc, splashOut, pageJob.pg, x, y, w, h, pageJob.pg_w, pageJob.pg_h, pageJob.ppmFile);
@@ -443,7 +445,7 @@ int main(int argc, char *argv[]) {
   // read config file
   globalParams = std::make_unique<GlobalParams>();
   if (enableFreeTypeStr[0]) {
-    if (!globalParams->setEnableFreeType(enableFreeTypeStr)) {
+    if (!GlobalParams::parseYesNo2(enableFreeTypeStr, &enableFreeType)) {
       fprintf(stderr, "Bad '-freetype' value on command line\n");
     }
   }
@@ -519,8 +521,7 @@ int main(int argc, char *argv[]) {
   // write PPM files
   if (jpegcmyk || overprint) {
     globalParams->setOverprintPreview(true);
-    for (int cp = 0; cp < SPOT_NCOMPS+4; cp++)
-      paperColor[cp] = 0;
+    splashClearColor(paperColor);
   } else {
     paperColor[0] = 255;
     paperColor[1] = 255;
@@ -539,6 +540,7 @@ int main(int argc, char *argv[]) {
 
   splashOut->setFontAntialias(fontAntialias);
   splashOut->setVectorAntialias(vectorAntialias);
+  splashOut->setEnableFreeType(enableFreeType);
   splashOut->startDoc(doc);
   
 #endif // UTILS_USE_PTHREADS

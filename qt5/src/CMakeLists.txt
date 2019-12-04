@@ -48,6 +48,9 @@ target_link_libraries(poppler-qt5 poppler ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIE
 if(MSVC)
 target_link_libraries(poppler-qt5 poppler ${poppler_LIBS})
 endif()
+if (ENABLE_NSS3)
+    target_include_directories(poppler-qt5 SYSTEM PRIVATE ${NSS3_INCLUDE_DIRS})
+endif()
 install(TARGETS poppler-qt5 RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES

@@ -24,7 +24,7 @@
 
 #include "poppler-config.h"
 
-#include <math.h>
+#include <cmath>
 #include "SplashTypes.h"
 
 static inline SplashCoord splashAbs(SplashCoord x) {

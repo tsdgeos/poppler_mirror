@@ -1,3 +1,21 @@
+Release 0.83.0:
+        core:
+         * Improve when a file is recognized as Linearized
+         * Improve const-ness of the code
+         * Make code a bit more readable/maintanable
+         * Fix uninitialized memory uses in broken files
+
+        utils:
+         * pdffonts: Make code a bit more readable/maintanable
+         * pdftohtml: Make code a bit more readable/maintanable
+
+        qt5:
+         * Remove a bunch of unused internal functions
+         * trUtf8 -> tr (less warnings)
+
+        build system:
+         * make-glib-api-docs: switch to python3
+
 Release 0.82.0:
         core:
          * Fix not being able to open some files. Issue #832

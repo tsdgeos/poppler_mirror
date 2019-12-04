@@ -173,9 +173,6 @@ public:
   // Build a GfxFont object.
   static GfxFont *makeFont(XRef *xref, const char *tagA, Ref idA, Dict *fontDict);
 
-  GfxFont(const char *tagA, Ref idA, const GooString *nameA,
-	  GfxFontType typeA, Ref embFontIDA);
-
   GfxFont(const GfxFont &) = delete;
   GfxFont& operator=(const GfxFont &other) = delete;
 
@@ -285,6 +282,7 @@ public:
   static const char *getAlternateName(const char *name);
 
 protected:
+  GfxFont(const char *tagA, Ref idA, const GooString *nameA, GfxFontType typeA, Ref embFontIDA);
 
   virtual ~GfxFont();
 
@@ -362,7 +360,7 @@ public:
   Dict *getResources();
 
 private:
-  ~Gfx8BitFont();
+  ~Gfx8BitFont() override;
 
   const Base14FontMapEntry *base14;	// for Base-14 fonts only; NULL otherwise
   char *enc[256];		// char code --> char name
@@ -408,12 +406,12 @@ public:
   int *getCIDToGID() const { return cidToGID; }
   int getCIDToGIDLen() const { return cidToGIDLen; }
 
-  int *getCodeToGIDMap(FoFiTrueType *ff, int *length);
+  int *getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen);
 
   double getWidth(char* s, int len) const;
 
 private:
-  ~GfxCIDFont();
+  ~GfxCIDFont() override;
 
   int mapCodeToGID(FoFiTrueType *ff, int cmapi,
     Unicode unicode, bool wmode);

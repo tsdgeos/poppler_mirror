@@ -41,8 +41,8 @@
 #include "poppler-private.h"
 #include "poppler-annotation-helper.h"
 
-#include <math.h>
-#include <ctype.h>
+#include <cmath>
+#include <cctype>
 
 #ifdef ENABLE_NSS3
   #include <hasht.h>

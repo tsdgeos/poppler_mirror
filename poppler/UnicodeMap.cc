@@ -28,8 +28,8 @@
 
 #include <config.h>
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include "goo/glibc.h"
 #include "goo/gmem.h"
 #include "goo/gfile.h"

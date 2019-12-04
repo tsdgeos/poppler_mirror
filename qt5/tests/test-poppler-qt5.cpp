@@ -16,7 +16,7 @@ class PDFDisplay : public QWidget           // picture display widget
     Q_OBJECT
 public:
     PDFDisplay( Poppler::Document *d, bool arthur, QWidget *parent = nullptr );
-    ~PDFDisplay();
+    ~PDFDisplay() override;
     void setShowTextRects(bool show);
     void display();
 protected:

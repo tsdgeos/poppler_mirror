@@ -37,14 +37,14 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
-#include <time.h>
+#include <ctime>
 #include "parseargs.h"
 #include "goo/GooString.h"
 #include "goo/gbase64.h"
@@ -174,7 +174,7 @@ public:
         bool reverseVideoA, SplashColorPtr paperColorA,
         bool bitmapTopDownA = true) : SplashOutputDev(colorModeA,
             bitmapRowPadA, reverseVideoA, paperColorA, bitmapTopDownA) { }
-  virtual ~SplashOutputDevNoText() { }
+  ~SplashOutputDevNoText() override { }
   
   void drawChar(GfxState *state, double x, double y,
       double dx, double dy,

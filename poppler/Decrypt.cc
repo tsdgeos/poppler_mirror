@@ -31,7 +31,7 @@
 #include <config.h>
 
 #include <cstdint>
-#include <string.h>
+#include <cstring>
 #include "goo/gmem.h"
 #include "goo/grandom.h"
 #include "Decrypt.h"

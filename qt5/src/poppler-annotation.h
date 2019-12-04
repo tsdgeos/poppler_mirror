@@ -1,5 +1,5 @@
 /* poppler-annotation.h: qt interface to poppler
- * Copyright (C) 2006-2008, 2012, 2013, 2018 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2006-2008, 2012, 2013, 2018, 2019 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2006, 2008 Pino Toscano <pino@kde.org>
  * Copyright (C) 2007, Brad Hards <bradh@frogmouth.net>
  * Copyright (C) 2010, Philip Lorenz <lorenzph+freedesktop@gmail.com>
@@ -426,8 +426,8 @@ class POPPLER_QT5_EXPORT Annotation
   protected:
     /// \cond PRIVATE
     Annotation( AnnotationPrivate &dd );
-    Annotation( AnnotationPrivate &dd, const QDomNode &description );
-    void storeBaseAnnotationProperties( QDomNode & parentNode, QDomDocument & document ) const;
+    Annotation( AnnotationPrivate &dd, const QDomNode &annNode );
+    void storeBaseAnnotationProperties( QDomNode & annNode, QDomDocument & document ) const;
     Q_DECLARE_PRIVATE( Annotation )
     QExplicitlySharedDataPointer<AnnotationPrivate> d_ptr;
     /// \endcond
@@ -454,7 +454,7 @@ class POPPLER_QT5_EXPORT TextAnnotation : public Annotation
     enum InplaceIntent { Unknown, Callout, TypeWriter };
 
     TextAnnotation( TextType type );
-    ~TextAnnotation();
+    ~TextAnnotation() override;
     SubType subType() const override;
 
     /**
@@ -531,7 +531,7 @@ class POPPLER_QT5_EXPORT LineAnnotation : public Annotation
 
     /// \since 0.20
     LineAnnotation( LineType type );
-    ~LineAnnotation();
+    ~LineAnnotation() override;
     SubType subType() const override;
 
     /// \since 0.20
@@ -586,14 +586,14 @@ class POPPLER_QT5_EXPORT GeomAnnotation : public Annotation
 
   public:
     GeomAnnotation();
-    ~GeomAnnotation();
+    ~GeomAnnotation() override;
     SubType subType() const override;
 
     // common enums
     enum GeomType { InscribedSquare, InscribedCircle };
 
     GeomType geomType() const;
-    void setGeomType( GeomType style );
+    void setGeomType( GeomType type );
 
     QColor geomInnerColor() const;
     void setGeomInnerColor( const QColor &color );
@@ -618,7 +618,7 @@ class POPPLER_QT5_EXPORT HighlightAnnotation : public Annotation
 
   public:
     HighlightAnnotation();
-    ~HighlightAnnotation();
+    ~HighlightAnnotation() override;
     SubType subType() const override;
 
     /**
@@ -685,7 +685,7 @@ class POPPLER_QT5_EXPORT StampAnnotation : public Annotation
 
   public:
     StampAnnotation();
-    ~StampAnnotation();
+    ~StampAnnotation() override;
     SubType subType() const override;
 
     /**
@@ -736,7 +736,7 @@ class POPPLER_QT5_EXPORT InkAnnotation : public Annotation
 
   public:
     InkAnnotation();
-    ~InkAnnotation();
+    ~InkAnnotation() override;
     SubType subType() const override;
 
     QList< QLinkedList<QPointF> > inkPaths() const;
@@ -756,7 +756,7 @@ class POPPLER_QT5_EXPORT LinkAnnotation : public Annotation
   friend class AnnotationPrivate;
 
   public:
-    ~LinkAnnotation();
+    ~LinkAnnotation() override;
     SubType subType() const override;
 
     // local enums
@@ -794,7 +794,7 @@ class POPPLER_QT5_EXPORT CaretAnnotation : public Annotation
 
   public:
     CaretAnnotation();
-    ~CaretAnnotation();
+    ~CaretAnnotation() override;
     SubType subType() const override;
 
     /**
@@ -825,7 +825,7 @@ class POPPLER_QT5_EXPORT FileAttachmentAnnotation : public Annotation
   friend class AnnotationPrivate;
 
   public:
-    ~FileAttachmentAnnotation();
+    ~FileAttachmentAnnotation() override;
     SubType subType() const override;
 
     /**
@@ -869,7 +869,7 @@ class POPPLER_QT5_EXPORT SoundAnnotation : public Annotation
   friend class AnnotationPrivate;
 
   public:
-    ~SoundAnnotation();
+    ~SoundAnnotation() override;
     SubType subType() const override;
 
     /**
@@ -890,7 +890,7 @@ class POPPLER_QT5_EXPORT SoundAnnotation : public Annotation
      *
      * \note SoundAnnotation takes ownership of the object
      */
-    void setSound( SoundObject *ef );
+    void setSound( SoundObject *s );
 
   private:
     SoundAnnotation();
@@ -913,7 +913,7 @@ class POPPLER_QT5_EXPORT MovieAnnotation : public Annotation
   friend class AnnotationPrivate;
 
   public:
-    ~MovieAnnotation();
+    ~MovieAnnotation() override;
     SubType subType() const override;
 
     /**
@@ -957,7 +957,7 @@ class POPPLER_QT5_EXPORT ScreenAnnotation : public Annotation
   friend class AnnotationPrivate;
 
   public:
-    ~ScreenAnnotation();
+    ~ScreenAnnotation() override;
 
     SubType subType() const override;
 
@@ -1014,7 +1014,7 @@ class POPPLER_QT5_EXPORT WidgetAnnotation : public Annotation
   friend class AnnotationPrivate;
 
   public:
-    ~WidgetAnnotation();
+    ~WidgetAnnotation() override;
 
     SubType subType() const override;
 
@@ -1046,7 +1046,7 @@ class POPPLER_QT5_EXPORT RichMediaAnnotation : public Annotation
   friend class AnnotationPrivate;
 
   public:
-    ~RichMediaAnnotation();
+    ~RichMediaAnnotation() override;
 
     SubType subType() const override;
 

@@ -27,7 +27,7 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#include <stdio.h>
+#include <cstdio>
 #include "goo/gmem.h"
 #include "parseargs.h"
 #include "Annot.h"

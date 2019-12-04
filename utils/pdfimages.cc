@@ -30,10 +30,10 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
 #include "parseargs.h"
 #include "goo/GooString.h"
 #include "goo/gmem.h"

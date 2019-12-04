@@ -38,7 +38,7 @@ public:
   // Create a FoFiType1 object from a file on disk.
   static FoFiType1 *load(const char *fileName);
 
-  ~FoFiType1();
+  ~FoFiType1() override;
 
   // Return the font name.
   const char *getName();

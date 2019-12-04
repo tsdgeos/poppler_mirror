@@ -52,9 +52,9 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <math.h>
-#include <assert.h>
+#include <cstdlib>
+#include <cmath>
+#include <cassert>
 #include "goo/gmem.h"
 #include "goo/gstrtod.h"
 #include "Error.h"
@@ -77,7 +77,7 @@
 #include "FileSpec.h"
 #include "DateInfo.h"
 #include "Link.h"
-#include <string.h>
+#include <cstring>
 #include <algorithm>
 
 #ifndef M_PI
@@ -985,13 +985,13 @@ void AnnotAppearance::removeStream(Ref refToStream) {
 }
 
 // Removes stream if obj is a Ref, or removes pointed streams if obj is a Dict
-void AnnotAppearance::removeStateStreams(const Object *obj1) {
-  if (obj1->isRef()) {
-    removeStream(obj1->getRef());
-  } else if (obj1->isDict()) {
-    const int size = obj1->dictGetLength();
+void AnnotAppearance::removeStateStreams(const Object *state) {
+  if (state->isRef()) {
+    removeStream(state->getRef());
+  } else if (state->isDict()) {
+    const int size = state->dictGetLength();
     for (int i = 0; i < size; ++i) {
-      const Object &obj2 = obj1->dictGetValNF(i);
+      const Object &obj2 = state->dictGetValNF(i);
       if (obj2.isRef()) {
         removeStream(obj2.getRef());
       }
@@ -4230,8 +4230,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
     // write the DA string
     if (daToks) {
-      for (int i = 0; i < (int)daToks->size(); ++i) {
-        appearBuf->append((*daToks)[i])->append(' ');
+      for (const GooString *daTok : *daToks) {
+        appearBuf->append(daTok)->append(' ');
       }
     }
 
@@ -4421,8 +4421,8 @@ bool AnnotAppearanceBuilder::drawText(const GooString *text, const GooString *da
 
       // write the DA string
       if (daToks) {
-        for (std::size_t i = 0; i < daToks->size(); ++i) {
-          appearBuf->append((*daToks)[i])->append(' ');
+        for (const GooString *daTok : *daToks) {
+          appearBuf->append(daTok)->append(' ');
         }
       }
 
@@ -4610,8 +4610,8 @@ bool AnnotAppearanceBuilder::drawListBox(const FormFieldChoice *fieldChoice, con
 
     // write the DA string
     if (daToks) {
-      for (std::size_t k = 0; k < daToks->size(); ++k) {
-        appearBuf->append((*daToks)[k])->append(' ');
+      for (const GooString *daTok : *daToks) {
+        appearBuf->append(daTok)->append(' ');
       }
     }
 

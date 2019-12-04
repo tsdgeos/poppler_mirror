@@ -36,8 +36,8 @@
 
 #include <config.h>
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include "goo/glibc.h"
 #include "goo/gmem.h"
 #include "goo/gfile.h"
@@ -665,7 +665,7 @@ CharCodeToUnicodeCache::~CharCodeToUnicodeCache() {
   gfree(cache);
 }
 
-CharCodeToUnicode *CharCodeToUnicodeCache::getCharCodeToUnicode(GooString *tag) {
+CharCodeToUnicode *CharCodeToUnicodeCache::getCharCodeToUnicode(const GooString *tag) {
   CharCodeToUnicode *ctu;
   int i, j;
 

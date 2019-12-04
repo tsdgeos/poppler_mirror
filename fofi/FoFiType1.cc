@@ -27,9 +27,9 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
+#include <cstdlib>
+#include <cstring>
+#include <climits>
 #include "goo/glibc.h"
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"
@@ -277,7 +277,7 @@ void FoFiType1::parse() {
 	}
 	for (p = buf; *p == ' ' || *p == '\t'; ++p) ;
 	if (!strncmp(p, "dup", 3)) {
-	  while (1) {
+	  while (true) {
 	    p += 3;
 	    for (; *p == ' ' || *p == '\t'; ++p) ;
 	    code = 0;

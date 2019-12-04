@@ -38,8 +38,8 @@
 
 #include <config.h>
 
-#include <stddef.h>
-#include <limits.h>
+#include <cstddef>
+#include <climits>
 #include "GlobalParams.h"
 #include "Object.h"
 #include "Array.h"

@@ -37,13 +37,13 @@
 #include <config.h>
 #include "poppler-config.h"
 
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <math.h>
-#include <ctype.h>
-#include <limits.h>
-#include <float.h>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
+#include <cmath>
+#include <cctype>
+#include <climits>
+#include <cfloat>
 #include "goo/gfile.h"
 #include "goo/gmem.h"
 #include "Object.h"
@@ -508,7 +508,7 @@ bool XRef::readXRefTable(Parser *parser, Goffset *pos, std::vector<Goffset> *fol
   Goffset pos2;
   int first, n;
 
-  while (1) {
+  while (true) {
     obj = parser->getObj(true);
     if (obj.isCmd("trailer")) {
       break;
@@ -841,7 +841,7 @@ bool XRef::constructXRef(bool *wasReconstructed, bool needCatalogDict) {
   }
 
   str->reset();
-  while (1) {
+  while (true) {
     pos = str->getPos();
     if (!str->getLine(buf, 256)) {
       break;
@@ -1518,8 +1518,8 @@ void XRef::readXRefUntil(int untilEntryNum, std::vector<int> *xrefStreamObjsNum)
   std::vector<Goffset> followedPrev;
   while (prevXRefOffset && (untilEntryNum == -1 || (untilEntryNum < size && entries[untilEntryNum].type == xrefEntryNone))) {
     bool followed = false;
-    for (size_t j = 0; j < followedPrev.size(); j++) {
-      if (followedPrev.at(j) == prevXRefOffset) {
+    for (long long j : followedPrev) {
+      if (j == prevXRefOffset) {
         followed = true;
         break;
       }
@@ -1682,8 +1682,7 @@ void XRef::scanSpecialFlags() {
   }
 
   // Mark XRef streams objects as Unencrypted and DontRewrite
-  for (size_t i = 0; i < xrefStreamObjNums.size(); ++i) {
-    const int objNum = xrefStreamObjNums.at(i);
+  for (const int objNum : xrefStreamObjNums) {
     getEntry(objNum)->setFlag(XRefEntry::Unencrypted, true);
     getEntry(objNum)->setFlag(XRefEntry::DontRewrite, true);
   }

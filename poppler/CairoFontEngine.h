@@ -42,18 +42,18 @@ class CairoFontEngine;
 
 class CairoFont {
 public:
-  CairoFont(Ref ref,
-	    cairo_font_face_t *face,
-	    int *codeToGID,
-	    unsigned int codeToGIDLen,
-	    bool substitute,
-	    bool printing);
+  CairoFont(Ref refA,
+	    cairo_font_face_t *cairo_font_faceA,
+	    int *codeToGIDA,
+	    unsigned int codeToGIDLenA,
+	    bool substituteA,
+	    bool printingA);
   virtual ~CairoFont();
   CairoFont(const CairoFont &) = delete;
   CairoFont& operator=(const CairoFont &other) = delete;
 
   virtual bool matches(Ref &other, bool printing);
-  cairo_font_face_t *getFontFace(void);
+  cairo_font_face_t *getFontFace();
   unsigned long getGlyph(CharCode code, const Unicode *u, int uLen);
   double getSubstitutionCorrection(GfxFont *gfxFont);
 
@@ -74,7 +74,7 @@ protected:
 class CairoFreeTypeFont : public CairoFont {
 public:
   static CairoFreeTypeFont *create(GfxFont *gfxFont, XRef *xref, FT_Library lib, bool useCIDs);
-  ~CairoFreeTypeFont();
+  ~CairoFreeTypeFont() override;
 
 private:
   CairoFreeTypeFont(Ref ref, cairo_font_face_t *cairo_font_face,
@@ -88,7 +88,7 @@ public:
   static CairoType3Font *create(GfxFont *gfxFont, PDFDoc *doc,
 				CairoFontEngine *fontEngine,
 				bool printing, XRef *xref);
-  ~CairoType3Font();
+  ~CairoType3Font() override;
 
   bool matches(Ref &other, bool printing) override;
 

@@ -91,7 +91,7 @@ public:
   CairoOutputDev();
 
   // Destructor.
-  virtual ~CairoOutputDev();
+  ~CairoOutputDev() override;
 
   //----- get info about output device
 
@@ -383,7 +383,7 @@ public:
   CairoImageOutputDev();
 
   // Destructor.
-  virtual ~CairoImageOutputDev();
+  ~CairoImageOutputDev() override;
 
   //----- get info about output device
 

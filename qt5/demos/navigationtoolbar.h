@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
+ * Copyright (C) 2019, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,15 +34,15 @@ class NavigationToolBar : public QToolBar, public DocumentObserver
 
 public:
     NavigationToolBar(QWidget *parent = nullptr);
-    ~NavigationToolBar();
+    ~NavigationToolBar() override;
 
     void documentLoaded() override;
     void documentClosed() override;
     void pageChanged(int page) override;
 
 Q_SIGNALS:
-    void zoomChanged(qreal value);
-    void rotationChanged(int rotation);
+    void zoomChanged(qreal value); // NOLINT(readability-inconsistent-declaration-parameter-name)
+    void rotationChanged(int rotation); // NOLINT(readability-inconsistent-declaration-parameter-name)
 
 private Q_SLOTS:
     void slotGoFirst();

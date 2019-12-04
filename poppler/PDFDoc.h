@@ -44,7 +44,7 @@
 #include <mutex>
 
 #include "poppler-config.h"
-#include <stdio.h>
+#include <cstdio>
 #include "XRef.h"
 #include "Catalog.h"
 #include "Page.h"
@@ -333,7 +333,7 @@ public:
   void replacePageDict(int pageNo, int rotate, const PDFRectangle *mediaBox, const PDFRectangle *cropBox);
   void markPageObjects(Dict *pageDict, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum, std::set<Dict*> *alreadyMarkedDicts = nullptr);
   bool markAnnotations(Object *annots, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldPageNum, int newPageNum, std::set<Dict*> *alreadyMarkedDicts = nullptr);
-  void markAcroForm(Object *acrpForm, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldPageNum, int newPageNum);
+  void markAcroForm(Object *afObj, XRef *xRef, XRef *countRef, unsigned int numOffset, int oldRefNum, int newRefNum);
   // write all objects used by pageDict to outStr
   unsigned int writePageObjects(OutStream *outStr, XRef *xRef, unsigned int numOffset, bool combine = false);
   static void writeObject (Object *obj, OutStream* outStr, XRef *xref, unsigned int numOffset, unsigned char *fileKey,

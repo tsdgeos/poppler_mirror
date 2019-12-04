@@ -27,6 +27,7 @@
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
+// Copyright (C) 2019 Even Rouault <even.rouault@spatialys.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -35,8 +36,8 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <limits.h>
+#include <cstdlib>
+#include <climits>
 #include "Error.h"
 #include "JArithmeticDecoder.h"
 #include "JBIG2Stream.h"
@@ -537,7 +538,7 @@ int JBIG2MMRDecoder::getWhiteCode() {
     bufLen = 8;
     ++nBytesRead;
   }
-  while (1) {
+  while (true) {
     if (bufLen >= 11 && ((buf >> (bufLen - 7)) & 0x7f) == 0) {
       if (bufLen <= 12) {
 	code = buf << (12 - bufLen);
@@ -580,7 +581,7 @@ int JBIG2MMRDecoder::getBlackCode() {
     bufLen = 8;
     ++nBytesRead;
   }
-  while (1) {
+  while (true) {
     if (bufLen >= 10 && ((buf >> (bufLen - 6)) & 0x3f) == 0) {
       if (bufLen <= 13) {
 	code = buf << (13 - bufLen);
@@ -682,17 +683,17 @@ class JBIG2Bitmap: public JBIG2Segment {
 public:
 
   JBIG2Bitmap(unsigned int segNumA, int wA, int hA);
-  ~JBIG2Bitmap();
+  JBIG2Bitmap(JBIG2Bitmap *bitmap);
+  ~JBIG2Bitmap() override;
   JBIG2SegmentType getType() override { return jbig2SegBitmap; }
-  JBIG2Bitmap *copy() { return new JBIG2Bitmap(0, this); }
   JBIG2Bitmap *getSlice(unsigned int x, unsigned int y, unsigned int wA, unsigned int hA);
   void expand(int newH, unsigned int pixel);
   void clearToZero();
   void clearToOne();
-  int getWidth() { return w; }
-  int getHeight() { return h; }
-  int getLineSize() { return line; }
-  int getPixel(int x, int y)
+  int getWidth() const { return w; }
+  int getHeight() const { return h; }
+  int getLineSize() const { return line; }
+  int getPixel(int x, int y) const
     { return (x < 0 || x >= w || y < 0 || y >= h) ? 0 :
              (data[y * line + (x >> 3)] >> (7 - (x & 7))) & 1; }
   void setPixel(int x, int y)
@@ -704,13 +705,10 @@ public:
   void duplicateRow(int yDest, int ySrc);
   void combine(JBIG2Bitmap *bitmap, int x, int y, unsigned int combOp);
   unsigned char *getDataPtr() { return data; }
-  int getDataSize() { return h * line; }
-  bool isOk() { return data != nullptr; }
+  int getDataSize() const { return h * line; }
+  bool isOk() const { return data != nullptr; }
 
 private:
-
-  JBIG2Bitmap(unsigned int segNumA, JBIG2Bitmap *bitmap);
-
   int w, h, line;
   unsigned char *data;
 };
@@ -734,8 +732,8 @@ JBIG2Bitmap::JBIG2Bitmap(unsigned int segNumA, int wA, int hA):
   }
 }
 
-JBIG2Bitmap::JBIG2Bitmap(unsigned int segNumA, JBIG2Bitmap *bitmap):
-  JBIG2Segment(segNumA)
+JBIG2Bitmap::JBIG2Bitmap(JBIG2Bitmap *bitmap):
+  JBIG2Segment(0)
 {
   if (unlikely(bitmap == nullptr)) {
     error(errSyntaxError, -1, "NULL bitmap in JBIG2Bitmap");
@@ -1058,7 +1056,7 @@ class JBIG2SymbolDict: public JBIG2Segment {
 public:
 
   JBIG2SymbolDict(unsigned int segNumA, unsigned int sizeA);
-  ~JBIG2SymbolDict();
+  ~JBIG2SymbolDict() override;
   JBIG2SegmentType getType() override { return jbig2SegSymbolDict; }
   unsigned int getSize() { return size; }
   void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap) { bitmaps[idx] = bitmap; }
@@ -1119,7 +1117,7 @@ class JBIG2PatternDict: public JBIG2Segment {
 public:
 
   JBIG2PatternDict(unsigned int segNumA, unsigned int sizeA);
-  ~JBIG2PatternDict();
+  ~JBIG2PatternDict() override;
   JBIG2SegmentType getType() override { return jbig2SegPatternDict; }
   unsigned int getSize() { return size; }
   void setBitmap(unsigned int idx, JBIG2Bitmap *bitmap) { if (likely(idx < size)) bitmaps[idx] = bitmap; }
@@ -1160,7 +1158,7 @@ class JBIG2CodeTable: public JBIG2Segment {
 public:
 
   JBIG2CodeTable(unsigned int segNumA, JBIG2HuffmanTable *tableA);
-  ~JBIG2CodeTable();
+  ~JBIG2CodeTable() override;
   JBIG2SegmentType getType() override { return jbig2SegCodeTable; }
   JBIG2HuffmanTable *getHuffTable() { return table; }
 
@@ -1244,6 +1242,8 @@ JBIG2Stream::~JBIG2Stream() {
 }
 
 void JBIG2Stream::reset() {
+  freeSegments();
+
   // read the globals stream
   globalSegments = new std::vector<JBIG2Segment*>();
   if (globalsStream.isStream()) {
@@ -1274,11 +1274,7 @@ void JBIG2Stream::reset() {
   }
 }
 
-void JBIG2Stream::close() {
-  if (pageBitmap) {
-    delete pageBitmap;
-    pageBitmap = nullptr;
-  }
+void JBIG2Stream::freeSegments() {
   if (segments) {
     for (auto entry : *segments) {
       delete entry;
@@ -1293,6 +1289,14 @@ void JBIG2Stream::close() {
     delete globalSegments;
     globalSegments = nullptr;
   }
+}
+
+void JBIG2Stream::close() {
+  if (pageBitmap) {
+    delete pageBitmap;
+    pageBitmap = nullptr;
+  }
+  freeSegments();
   dataPtr = dataEnd = nullptr;
   FilterStream::close();
 }
@@ -1801,7 +1805,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length,
     j = i;
 
     // read the symbols in this height class
-    while (1) {
+    while (true) {
 
       // read the delta width
       if (huff) {
@@ -1960,7 +1964,7 @@ bool JBIG2Stream::readSymbolDictSeg(unsigned int segNum, unsigned int length,
     }
     if (ex) {
       for (cnt = 0; cnt < run; ++cnt) {
-	symbolDict->setBitmap(j++, bitmaps[i++]->copy());
+	symbolDict->setBitmap(j++, new JBIG2Bitmap(bitmaps[i++]));
       }
     } else {
       i += run;
@@ -3184,7 +3188,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(bool mmr, int w, int h,
 
       // convert the run lengths to a bitmap line
       i = 0;
-      while (1) {
+      while (true) {
 	for (x = codingLine[i]; x < codingLine[i+1]; ++x) {
 	  bitmap->setPixel(x, y);
 	}
@@ -3228,7 +3232,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericBitmap(bool mmr, int w, int h,
       }
     }
 
-    ltp = 0;
+    ltp = false;
     cx = cx0 = cx1 = cx2 = 0; // make gcc happy
     for (y = 0; y < h; ++y) {
 
@@ -3883,7 +3887,7 @@ JBIG2Bitmap *JBIG2Stream::readGenericRefinementRegion(int w, int h,
     ltpCX = 0x0010;
   }
 
-  ltp = 0;
+  ltp = false;
   for (y = 0; y < h; ++y) {
 
     if (templ) {
@@ -4187,16 +4191,12 @@ void JBIG2Stream::readExtensionSeg(unsigned int length) {
 }
 
 JBIG2Segment *JBIG2Stream::findSegment(unsigned int segNum) {
-  JBIG2Segment *seg;
-
-  for (std::size_t i = 0; i < globalSegments->size(); ++i) {
-    seg = (*globalSegments)[i];
+  for (JBIG2Segment *seg : *globalSegments) {
     if (seg->getSegNum() == segNum) {
       return seg;
     }
   }
-  for (std::size_t i = 0; i < segments->size(); ++i) {
-    seg = (*segments)[i];
+  for (JBIG2Segment *seg : *segments) {
     if (seg->getSegNum() == segNum) {
       return seg;
     }

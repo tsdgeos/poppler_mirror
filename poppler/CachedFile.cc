@@ -6,7 +6,7 @@
 //
 // Copyright 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright 2010, 2011 Hib Eris <hib@hiberis.nl>
-// Copyright 2010, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright 2010, 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Julien Nabet <serval2412@yahoo.fr>
 //
 //========================================================================
@@ -18,10 +18,10 @@
 // CachedFile
 //------------------------------------------------------------------------
 
-CachedFile::CachedFile(CachedFileLoader *cachedFileLoaderA, GooString *uriA)
+CachedFile::CachedFile(CachedFileLoader *cacheLoader, GooString *uriA)
 {
   uri = uriA;
-  loader = cachedFileLoaderA;
+  loader = cacheLoader;
 
   streamPos = 0;
   chunks = new std::vector<Chunk>();
@@ -96,13 +96,13 @@ int CachedFile::cache(const std::vector<ByteRange> &origRanges)
 
   for (int i = 0; i < numChunks; ++i)
     chunkNeeded[i] = false;
-  for (size_t i = 0; i < ranges->size(); i++) {
+  for (const ByteRange &r : *ranges) {
 
-    if ((*ranges)[i].length == 0) continue;
-    if ((*ranges)[i].offset >= length) continue;
+    if (r.length == 0) continue;
+    if (r.offset >= length) continue;
 
-    size_t start = (*ranges)[i].offset;
-    size_t end = start + (*ranges)[i].length - 1;
+    const size_t start = r.offset;
+    size_t end = start + r.length - 1;
     if (end >= length) end = length - 1;
 
     startChunk = start / CachedFileChunkSize;

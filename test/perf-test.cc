@@ -36,14 +36,14 @@
 // Not enabled by default.
 //#define COPY_FILE 1
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <time.h>
+#include <cassert>
+#include <cstdio>
+#include <cstdarg>
+#include <cctype>
+#include <cstdlib>
+#include <cstring>
+#include <cerrno>
+#include <ctime>
 
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
@@ -74,8 +74,8 @@
    They can be no-ops. An implementation for windows is in
    perf-test-preview-win.cc
 */
-extern void PreviewBitmapInit(void);
-extern void PreviewBitmapDestroy(void);
+extern void PreviewBitmapInit();
+extern void PreviewBitmapDestroy();
 extern void PreviewBitmapSplash(SplashBitmap *bmpSplash);
 
 class PdfEnginePoppler {
@@ -86,14 +86,14 @@ public:
     PdfEnginePoppler(const PdfEnginePoppler &) = delete;
     PdfEnginePoppler& operator=(const PdfEnginePoppler &) = delete;
 
-    const char *fileName(void) const { return _fileName; };
+    const char *fileName() const { return _fileName; };
 
     void setFileName(const char *fileName) {
         assert(!_fileName);
         _fileName = (char*)strdup(fileName);
     }
 
-    int pageCount(void) const { return _pageCount; }
+    int pageCount() const { return _pageCount; }
 
     bool load(const char *fileName);
     SplashBitmap *renderBitmap(int pageNo, double zoomReal, int rotation);
@@ -313,7 +313,7 @@ static void sleep_milliseconds(int milliseconds)
     nanosecs = (milliseconds - (secs * 1000)) * 1000;
     tv.tv_sec = (time_t) secs;
     tv.tv_nsec = (long) nanosecs;
-    while (1)
+    while (true)
     {
         int rval = nanosleep(&tv, &tv);
         if (rval == 0)
@@ -394,7 +394,7 @@ static void splashColorSet(SplashColorPtr col, unsigned char red, unsigned char 
     }
 }
 
-static void SplashColorsInit(void)
+static void SplashColorsInit()
 {
     splashColorSet(SPLASH_COL_RED_PTR, 0xff, 0, 0, 0);
     splashColorSet(SPLASH_COL_GREEN_PTR, 0, 0xff, 0, 0);
@@ -818,7 +818,7 @@ static void PrintUsageAndExit(int argc, char **argv)
     exit(0);
 }
 
-static bool ShowPreview(void)
+static bool ShowPreview()
 {
     if (gfPreview || gfSlowPreview)
         return true;

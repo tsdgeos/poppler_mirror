@@ -132,7 +132,7 @@ public:
   // Get the CharCodeToUnicode object for <tag>.  Increments its
   // reference count; there will be one reference for the cache plus
   // one for the caller of this function.  Returns NULL on failure.
-  CharCodeToUnicode *getCharCodeToUnicode(GooString *tag);
+  CharCodeToUnicode *getCharCodeToUnicode(const GooString *tag);
 
   // Insert <ctu> into the cache, in the most-recently-used position.
   void add(CharCodeToUnicode *ctu);

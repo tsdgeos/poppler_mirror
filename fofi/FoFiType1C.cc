@@ -26,9 +26,9 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
 #include "goo/gmem.h"
 #include "goo/gstrtod.h"
 #include "goo/GooLikely.h"
@@ -2673,7 +2673,7 @@ int FoFiType1C::getDeltaIntArray(int *arr, int maxLen) const {
   x = 0;
   for (i = 0; i < n; ++i) {
     int y;
-    if (unlikely(isinf(ops[i].num))) {
+    if (unlikely(std::isinf(ops[i].num))) {
       return i;
     }
     if (checkedAdd(x, (int)ops[i].num, &y)) {

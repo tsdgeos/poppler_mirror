@@ -17,17 +17,17 @@
 //========================================================================
 #include "config.h"
 #include <poppler-config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
 #include "parseargs.h"
 #include "goo/GooString.h"
 #include "PDFDoc.h"
 #include "ErrorCodes.h"
 #include "GlobalParams.h"
 #include "Win32Console.h"
-#include <ctype.h>
+#include <cctype>
 
 static int firstPage = 0;
 static int lastPage = 0;

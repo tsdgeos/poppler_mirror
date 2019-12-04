@@ -41,7 +41,7 @@ struct JPXStreamPrivate {
   int ncomps;
   bool inited;
   int smaskInData;
-  void init2(OPJ_CODEC_FORMAT format, unsigned char *data, int length, bool indexed);
+  void init2(OPJ_CODEC_FORMAT format, unsigned char *buf, int length, bool indexed);
 };
 
 static inline unsigned char adjustComp(int r, int adjust, int depth, int sgndcorr, bool indexed) {

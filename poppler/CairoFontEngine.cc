@@ -39,7 +39,7 @@
 #include <config.h>
 
 #include "config.h"
-#include <string.h>
+#include <cstring>
 #include "CairoFontEngine.h"
 #include "CairoOutputDev.h"
 #include "GlobalParams.h"
@@ -85,7 +85,7 @@ CairoFont::matches(Ref &other, bool printingA) {
 }
 
 cairo_font_face_t *
-CairoFont::getFontFace(void) {
+CairoFont::getFontFace() {
   return cairo_font_face;
 }
 

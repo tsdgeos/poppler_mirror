@@ -28,10 +28,10 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cmath>
 #include <memory>
 #include <string>
 #include "parseargs.h"
@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
       // print the font substitutions
       printf("name                                 object ID substitute font                      substitute font file\n");
       printf("------------------------------------ --------- ------------------------------------ ------------------------------------\n");
-        for (FontInfo* font : fonts) {
+        for (const FontInfo* font : fonts) {
           if (font->getFile()) {
             printf("%-36s",
                    font->getName() ? font->getName()->c_str() : "[none]");
@@ -176,7 +176,7 @@ int main(int argc, char *argv[]) {
       // print the font info
       printf("name                                 type              encoding         emb sub uni object ID\n");
       printf("------------------------------------ ----------------- ---------------- --- --- --- ---------\n");
-        for (FontInfo* font : fonts) {
+        for (const FontInfo* font : fonts) {
           printf("%-36s %-17s %-16s %-3s %-3s %-3s",
                  font->getName() ? font->getName()->c_str() : "[none]",
                  fontTypeNames[font->getType()],

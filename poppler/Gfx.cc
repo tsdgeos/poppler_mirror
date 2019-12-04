@@ -52,11 +52,11 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stddef.h>
-#include <string.h>
-#include <math.h>
+#include <cstdlib>
+#include <cstdio>
+#include <cstddef>
+#include <cstring>
+#include <cmath>
 #include <memory>
 #include "goo/gmem.h"
 #include "goo/GooTimer.h"
@@ -4463,7 +4463,7 @@ void Gfx::doImage(Object *ref, Stream *str, bool inlineImg) {
       if (obj1.isNull()) {
 	obj1 = maskDict->lookup("D");
       }
-      maskColorMap.reset(new GfxImageColorMap(maskBits, &obj1, maskColorSpace));
+      maskColorMap = std::make_unique<GfxImageColorMap>(maskBits, &obj1, maskColorSpace);
       if (!maskColorMap->isOk()) {
 	goto err1;
       }

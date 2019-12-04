@@ -27,7 +27,11 @@ class JPXStream: public FilterStream {
 public:
 
   JPXStream(Stream *strA);
-  ~JPXStream();
+  ~JPXStream() override;
+
+  JPXStream(const JPXStream &other) = delete;
+  JPXStream& operator=(const JPXStream &other) = delete;
+
   StreamKind getKind() const override { return strJPX; }
   void reset() override;
   void close() override;
@@ -42,8 +46,6 @@ public:
     return str->doGetChars(nChars, buffer);
   }
 private:
-  JPXStream(const JPXStream &other);
-  JPXStream& operator=(const JPXStream &other);
   JPXStreamPrivate *priv;
 
   void init();

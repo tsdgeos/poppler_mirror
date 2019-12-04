@@ -125,7 +125,7 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
       if (obj2.isInt() && (pageNumber1 = obj2.getInt()) >= 1 &&
           obj3.isInt() && (pageNumber2 = obj3.getInt()) >= 1 &&
           pageNumber1 < pageNumber2) {
-        printPageRange.push_back(std::pair<int, int>(pageNumber1, pageNumber2));
+        printPageRange.emplace_back(pageNumber1, pageNumber2);
       } else {
         printPageRange.clear();
         break;

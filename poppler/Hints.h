@@ -13,7 +13,7 @@
 #ifndef HINTS_H
 #define HINTS_H
 
-#include <string.h>
+#include <cstring>
 #include <vector>
 #include "PDFDoc.h"
 

@@ -32,7 +32,7 @@
 #include "GlobalParams.h"
 #include "SecurityHandler.h"
 
-#include <limits.h>
+#include <climits>
 
 //------------------------------------------------------------------------
 // SecurityHandler

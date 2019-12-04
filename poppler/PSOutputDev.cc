@@ -23,7 +23,7 @@
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2011, 2012, 2014-2017 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2012, 2014-2017, 2019 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009-2011, 2013-2015, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012, 2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -44,12 +44,12 @@
 
 #include <config.h>
 
-#include <stdio.h>
-#include <stddef.h>
-#include <stdarg.h>
-#include <signal.h>
-#include <math.h>
-#include <limits.h>
+#include <cstdio>
+#include <cstddef>
+#include <cstdarg>
+#include <csignal>
+#include <cmath>
+#include <climits>
 #include <algorithm>
 #include <array>
 #include "goo/GooString.h"
@@ -989,7 +989,7 @@ public:
 
   DeviceNRecoder(Stream *strA, int widthA, int heightA,
 		 GfxImageColorMap *colorMapA);
-  ~DeviceNRecoder();
+  ~DeviceNRecoder() override;
   StreamKind getKind() const override { return strWeird; }
   void reset() override;
   int getChar() override
@@ -1326,8 +1326,7 @@ void PSOutputDev::postInit()
   }
 
   paperSizes = new std::vector<PSOutPaperSize*>();
-  for (size_t pgi = 0; pgi < pages.size(); ++pgi) {
-    const int pg = pages[pgi];
+  for (const int pg : pages) {
     Page *page = catalog->getPage(pg);
     if (page == nullptr)
       paperMatch = false;
@@ -1673,8 +1672,7 @@ void PSOutputDev::writeDocSetup(Catalog *catalog,
   } else {
     writePS("xpdf begin\n");
   }
-  for (size_t pgi = 0; pgi < pageList.size(); ++pgi) {
-    const int pg = pageList[pgi];
+  for (const int pg : pageList) {
     page = doc->getPage(pg);
     if (!page) {
       error(errSyntaxError, -1, "Failed writing resources for page {0:d}", pg);
@@ -4105,6 +4103,16 @@ void PSOutputDev::updateFillColor(GfxState *state) {
       m = colToDbl(cmyk.m);
       y = colToDbl(cmyk.y);
       k = colToDbl(cmyk.k);
+      if (getOptimizeColorSpace()) {
+	double g;
+	g = 0.299*c + 0.587*m + 0.114*y;
+	if ((fabs(m - c) < 0.01 && fabs(m - y) < 0.01) ||
+	    (fabs(m - c) < 0.2 && fabs(m - y) < 0.2 && k + g > 1.5)) {
+	  c = m = y = 0.0;
+	  k += g;
+	  if (k > 1.0) k = 1.0;
+	}
+      }
       writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} k\n", c, m, y, k);
       addProcessColor(c, m, y, k);
     }
@@ -4162,6 +4170,16 @@ void PSOutputDev::updateStrokeColor(GfxState *state) {
       m = colToDbl(cmyk.m);
       y = colToDbl(cmyk.y);
       k = colToDbl(cmyk.k);
+      if (getOptimizeColorSpace()) {
+	double g;
+	g = 0.299*c + 0.587*m + 0.114*y;
+	if ((fabs(m - c) < 0.01 && fabs(m - y) < 0.01) ||
+	    (fabs(m - c) < 0.2 && fabs(m - y) < 0.2 && k + g > 1.5)) {
+	  c = m = y = 0.0;
+	  k += g;
+	  if (k > 1.0) k = 1.0;
+	}
+      }
       writePSFmt("{0:.4g} {1:.4g} {2:.4g} {3:.4g} K\n", c, m, y, k);
       addProcessColor(c, m, y, k);
     }
@@ -5479,79 +5497,142 @@ void PSOutputDev::doImageL1Sep(Object *ref, GfxImageColorMap *colorMap,
   bool checkProcessColor;
   char hexBuf[32*2 + 2];	// 32 values X 2 chars/value + line ending + null
   unsigned char digit;
+  bool isGray;
 
   // explicit masking
   if (maskStr && !(maskColors && colorMap)) {
     maskToClippingPath(maskStr, maskWidth, maskHeight, maskInvert);
   }
 
-  // width, height, matrix, bits per component
-  writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1Sep{5:s}\n",
-	     width, height,
-	     width, -height, height,
-	     useBinary ? "Bin" : "");
-
   // allocate a line buffer
   lineBuf = (unsigned char *)gmallocn(width, 4);
+
+  // scan for all gray
+  if (getOptimizeColorSpace()) {
+    ImageStream *imgCheckStr;
+    imgCheckStr = new ImageStream(str, width, colorMap->getNumPixelComps(),
+			   colorMap->getBits());
+    imgCheckStr->reset();
+    isGray = true;
+    for (y = 0; y < height; ++y) {
+      for (x = 0; x < width; ++x) {
+	imgCheckStr->getPixel(pixBuf);
+	colorMap->getCMYK(pixBuf, &cmyk);
+	if (colToByte(cmyk.c) != colToByte(cmyk.m) || colToByte(cmyk.c) != colToByte(cmyk.y)) {
+	  isGray = false;
+	  y = height; // end outer loop
+	  break;
+	}
+      }
+    }
+    imgCheckStr->close();
+    delete imgCheckStr;
+  } else {
+    isGray = false;
+  }
 
   // set up to process the data stream
   imgStr = new ImageStream(str, width, colorMap->getNumPixelComps(),
 			   colorMap->getBits());
   imgStr->reset();
 
+  // width, height, matrix, bits per component
+  writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1{5:s}{6:s}\n",
+	     width, height,
+	     width, -height, height,
+	     isGray ? "" : "Sep",
+	     useBinary ? "Bin" : "");
+
   // process the data stream
   checkProcessColor = true;
   i = 0;
-  for (y = 0; y < height; ++y) {
 
-    // read the line
-    if (checkProcessColor) {
-      checkProcessColor = (((psProcessCyan | psProcessMagenta | psProcessYellow | psProcessBlack) & ~processColors) != 0);
-    }
-    if (checkProcessColor) {
-      for (x = 0; x < width; ++x) {
-        imgStr->getPixel(pixBuf);
-        colorMap->getCMYK(pixBuf, &cmyk);
-        lineBuf[4*x+0] = colToByte(cmyk.c);
-        lineBuf[4*x+1] = colToByte(cmyk.m);
-        lineBuf[4*x+2] = colToByte(cmyk.y);
-        lineBuf[4*x+3] = colToByte(cmyk.k);
-        addProcessColor(colToDbl(cmyk.c), colToDbl(cmyk.m),
-		        colToDbl(cmyk.y), colToDbl(cmyk.k));
-      }
-    } else {
-      for (x = 0; x < width; ++x) {
-        imgStr->getPixel(pixBuf);
-        colorMap->getCMYK(pixBuf, &cmyk);
-        lineBuf[4*x+0] = colToByte(cmyk.c);
-        lineBuf[4*x+1] = colToByte(cmyk.m);
-        lineBuf[4*x+2] = colToByte(cmyk.y);
-        lineBuf[4*x+3] = colToByte(cmyk.k);
-      }
-    }
+  if (isGray) {
+    int g;
+    for (y = 0; y < height; ++y) {
 
-    // write one line of each color component
-    if (useBinary) {
-      for (comp = 0; comp < 4; ++comp) {
-        for (x = 0; x < width; ++x) {
-	  hexBuf[i++] = lineBuf[4*x + comp];
-	  if (i >= 64) {
-	    writePSBuf(hexBuf, i);
-	    i = 0;
+      // read the line
+      if (checkProcessColor) {
+	checkProcessColor = ((psProcessBlack & processColors) == 0);
+      }
+      for (x = 0; x < width; ++x) {
+	imgStr->getPixel(pixBuf);
+	colorMap->getCMYK(pixBuf, &cmyk);
+	g = colToByte(cmyk.c) + colToByte(cmyk.k);
+	if (checkProcessColor && g > 0) {
+	  processColors |= psProcessBlack;
+	}
+	g = 255 - g;
+	if (g < 0) g = 0;
+	if (useBinary) {
+	  hexBuf[i++] = g;
+	} else {
+	  digit = g / 16;
+	  hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
+	  digit = g % 16;
+	  hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
+	}
+	if (i >= 64) {
+	  if (!useBinary) {
+	    hexBuf[i++] = '\n';
 	  }
+	  writePSBuf(hexBuf, i);
+	  i = 0;
 	}
       }
-    } else {
-      for (comp = 0; comp < 4; ++comp) {
+    }
+  } else {
+    for (y = 0; y < height; ++y) {
+
+      // read the line
+      if (checkProcessColor) {
+        checkProcessColor = (((psProcessCyan | psProcessMagenta | psProcessYellow | psProcessBlack) & ~processColors) != 0);
+      }
+      if (checkProcessColor) {
         for (x = 0; x < width; ++x) {
-	  digit = lineBuf[4*x + comp] / 16;
-	  hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
-	  digit = lineBuf[4*x + comp] % 16;
-	  hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
-	  if (i >= 64) {
-	    hexBuf[i++] = '\n';
-	    writePSBuf(hexBuf, i);
-	    i = 0;
+          imgStr->getPixel(pixBuf);
+          colorMap->getCMYK(pixBuf, &cmyk);
+          lineBuf[4*x+0] = colToByte(cmyk.c);
+          lineBuf[4*x+1] = colToByte(cmyk.m);
+          lineBuf[4*x+2] = colToByte(cmyk.y);
+          lineBuf[4*x+3] = colToByte(cmyk.k);
+          addProcessColor(colToDbl(cmyk.c), colToDbl(cmyk.m),
+		          colToDbl(cmyk.y), colToDbl(cmyk.k));
+        }
+      } else {
+        for (x = 0; x < width; ++x) {
+          imgStr->getPixel(pixBuf);
+          colorMap->getCMYK(pixBuf, &cmyk);
+          lineBuf[4*x+0] = colToByte(cmyk.c);
+          lineBuf[4*x+1] = colToByte(cmyk.m);
+          lineBuf[4*x+2] = colToByte(cmyk.y);
+          lineBuf[4*x+3] = colToByte(cmyk.k);
+        }
+      }
+
+      // write one line of each color component
+      if (useBinary) {
+        for (comp = 0; comp < 4; ++comp) {
+          for (x = 0; x < width; ++x) {
+	    hexBuf[i++] = lineBuf[4*x + comp];
+	    if (i >= 64) {
+	      writePSBuf(hexBuf, i);
+	      i = 0;
+	    }
+	  }
+        }
+      } else {
+        for (comp = 0; comp < 4; ++comp) {
+          for (x = 0; x < width; ++x) {
+	    digit = lineBuf[4*x + comp] / 16;
+	    hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
+	    digit = lineBuf[4*x + comp] % 16;
+	    hexBuf[i++] = digit + ((digit >= 10)? 'a'-10: '0');
+	    if (i >= 64) {
+	      hexBuf[i++] = '\n';
+	      writePSBuf(hexBuf, i);
+	      i = 0;
+	    }
 	  }
 	}
       }
@@ -7201,8 +7282,8 @@ void PSOutputDev::type3D1(GfxState *state, double wx, double wy,
   t3NeedsRestore = true;
 }
 
-void PSOutputDev::drawForm(Ref id) {
-  writePSFmt("f_{0:d}_{1:d}\n", id.num, id.gen);
+void PSOutputDev::drawForm(Ref ref) {
+  writePSFmt("f_{0:d}_{1:d}\n", ref.num, ref.gen);
 }
 
 void PSOutputDev::psXObject(Stream *psStream, Stream *level1Stream) {

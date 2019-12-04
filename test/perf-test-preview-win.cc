@@ -4,7 +4,7 @@
 /* This is a preview support for perf-test for Windows */
 
 #include <windows.h>
-#include <assert.h>
+#include <cassert>
 
 #include "SplashBitmap.h"
 

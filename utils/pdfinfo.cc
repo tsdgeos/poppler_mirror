@@ -15,7 +15,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dom Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2010, 2012, 2016-2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2010, 2012, 2016-2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Vittal Aithal <vittal.aithal@cognidox.com>
 // Copyright (C) 2012, 2013, 2016-2018 Adrian Johnson <ajohnson@redneon.com>
@@ -35,12 +35,12 @@
 
 #include "config.h"
 #include <poppler-config.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
+#include <ctime>
+#include <cmath>
 #include <map>
 #include "parseargs.h"
 #include "printencodings.h"
@@ -447,33 +447,33 @@ static void printPdfSubtype(PDFDoc *doc, UnicodeMap *uMap) {
     {
       case subtypePDFA:
         printInfoString(info.getDict(), "GTS_PDFA1Version", "PDF subtype:    ", uMap);
-        typeExp.reset( new GooString("ISO 19005 - Electronic document file format for long-term preservation (PDF/A)") );
-        standard.reset(  new GooString("ISO 19005") );
-        abbr.reset( new GooString("PDF/A") );
+        typeExp = std::make_unique<GooString>("ISO 19005 - Electronic document file format for long-term preservation (PDF/A)");
+        standard = std::make_unique<GooString>("ISO 19005");
+        abbr = std::make_unique<GooString>("PDF/A");
         break;
       case subtypePDFE:
         printInfoString(info.getDict(), "GTS_PDFEVersion", "PDF subtype:    ", uMap);
-        typeExp.reset( new GooString("ISO 24517 - Engineering document format using PDF (PDF/E)") );
-        standard.reset( new GooString("ISO 24517") );
-        abbr.reset( new GooString("PDF/E") );
+        typeExp = std::make_unique<GooString>("ISO 24517 - Engineering document format using PDF (PDF/E)");
+        standard = std::make_unique<GooString>("ISO 24517");
+        abbr = std::make_unique<GooString>("PDF/E");
         break;
       case subtypePDFUA:
         printInfoString(info.getDict(), "GTS_PDFUAVersion", "PDF subtype:    ", uMap);
-        typeExp.reset( new GooString("ISO 14289 - Electronic document file format enhancement for accessibility (PDF/UA)") );
-        standard.reset( new GooString("ISO 14289") );
-        abbr.reset( new GooString("PDF/UA") );
+        typeExp = std::make_unique<GooString>("ISO 14289 - Electronic document file format enhancement for accessibility (PDF/UA)");
+        standard = std::make_unique<GooString>("ISO 14289");
+        abbr = std::make_unique<GooString>("PDF/UA");
         break;
       case subtypePDFVT:
         printInfoString(info.getDict(), "GTS_PDFVTVersion", "PDF subtype:    ", uMap);
-        typeExp.reset( new GooString("ISO 16612 - Electronic document file format for variable data exchange (PDF/VT)") );
-        standard.reset( new GooString("ISO 16612") );
-        abbr.reset( new GooString("PDF/VT") );
+        typeExp = std::make_unique<GooString>("ISO 16612 - Electronic document file format for variable data exchange (PDF/VT)");
+        standard = std::make_unique<GooString>("ISO 16612");
+        abbr = std::make_unique<GooString>("PDF/VT");
         break;
       case subtypePDFX:
         printInfoString(info.getDict(), "GTS_PDFXVersion", "PDF subtype:    ", uMap);
-        typeExp.reset( new GooString("ISO 15930 - Electronic document file format for prepress digital data exchange (PDF/X)") );
-        standard.reset( new GooString("ISO 15930") );
-        abbr.reset( new GooString("PDF/X") );
+        typeExp = std::make_unique<GooString>("ISO 15930 - Electronic document file format for prepress digital data exchange (PDF/X)");
+        standard = std::make_unique<GooString>("ISO 15930");
+        abbr = std::make_unique<GooString>("PDF/X");
         break;
       case subtypeNone:
       case subtypeNull:
@@ -537,13 +537,13 @@ static void printPdfSubtype(PDFDoc *doc, UnicodeMap *uMap) {
       case subtypePDFA:
           switch (subpart) {
           case subtypePart1:
-            part.reset( new GooString("Use of PDF 1.4") );
+            part = std::make_unique<GooString>("Use of PDF 1.4");
             break;
           case subtypePart2:
-            part.reset( new GooString("Use of ISO 32000-1") );
+            part = std::make_unique<GooString>("Use of ISO 32000-1");
             break;
           case subtypePart3:
-            part.reset( new GooString("Use of ISO 32000-1 with support for embedded files") );
+            part = std::make_unique<GooString>("Use of ISO 32000-1 with support for embedded files");
             break;
           default:
             break;
@@ -552,7 +552,7 @@ static void printPdfSubtype(PDFDoc *doc, UnicodeMap *uMap) {
       case subtypePDFE:
         switch (subpart) {
           case subtypePart1:
-            part.reset( new GooString("Use of PDF 1.6") );
+            part = std::make_unique<GooString>("Use of PDF 1.6");
             break;
           default:
             break;
@@ -561,13 +561,13 @@ static void printPdfSubtype(PDFDoc *doc, UnicodeMap *uMap) {
       case subtypePDFUA:
         switch (subpart) {
           case subtypePart1:
-            part.reset( new GooString("Use of ISO 32000-1") );
+            part = std::make_unique<GooString>("Use of ISO 32000-1");
             break;
           case subtypePart2:
-            part.reset( new GooString("Use of ISO 32000-2") );
+            part = std::make_unique<GooString>("Use of ISO 32000-2");
             break;
           case subtypePart3:
-            part.reset( new GooString("Use of ISO 32000-1 with support for embedded files") );
+            part = std::make_unique<GooString>("Use of ISO 32000-1 with support for embedded files");
             break;
           default:
             break;
@@ -576,13 +576,13 @@ static void printPdfSubtype(PDFDoc *doc, UnicodeMap *uMap) {
       case subtypePDFVT:
         switch (subpart) {
           case subtypePart1:
-            part.reset( new GooString("Using PPML 2.1 and PDF 1.4") );
+            part = std::make_unique<GooString>("Using PPML 2.1 and PDF 1.4");
             break;
           case subtypePart2:
-            part.reset( new GooString("Using PDF/X-4 and PDF/X-5 (PDF/VT-1 and PDF/VT-2)") );
+            part = std::make_unique<GooString>("Using PDF/X-4 and PDF/X-5 (PDF/VT-1 and PDF/VT-2)");
             break;
           case subtypePart3:
-            part.reset( new GooString("Using PDF/X-6 (PDF/VT-3)") );
+            part = std::make_unique<GooString>("Using PDF/X-6 (PDF/VT-3)");
             break;
           default:
             break;
@@ -591,25 +591,25 @@ static void printPdfSubtype(PDFDoc *doc, UnicodeMap *uMap) {
       case subtypePDFX:
         switch (subpart) {
           case subtypePart1:
-            part.reset( new GooString("Complete exchange using CMYK data (PDF/X-1 and PDF/X-1a)") );
+            part = std::make_unique<GooString>("Complete exchange using CMYK data (PDF/X-1 and PDF/X-1a)");
             break;
           case subtypePart3:
-            part.reset( new GooString("Complete exchange suitable for colour-managed workflows (PDF/X-3)") );
+            part = std::make_unique<GooString>("Complete exchange suitable for colour-managed workflows (PDF/X-3)");
             break;
           case subtypePart4:
-            part.reset( new GooString("Complete exchange of CMYK and spot colour printing data using PDF 1.4 (PDF/X-1a)") );
+            part = std::make_unique<GooString>("Complete exchange of CMYK and spot colour printing data using PDF 1.4 (PDF/X-1a)");
             break;
           case subtypePart5:
-            part.reset( new GooString("Partial exchange of printing data using PDF 1.4 (PDF/X-2) [Withdrawn]") );
+            part = std::make_unique<GooString>("Partial exchange of printing data using PDF 1.4 (PDF/X-2) [Withdrawn]");
             break;
           case subtypePart6:
-            part.reset( new GooString("Complete exchange of printing data suitable for colour-managed workflows using PDF 1.4 (PDF/X-3)") );
+            part = std::make_unique<GooString>("Complete exchange of printing data suitable for colour-managed workflows using PDF 1.4 (PDF/X-3)");
             break;
           case subtypePart7:
-            part.reset( new GooString("Complete exchange of printing data (PDF/X-4) and partial exchange of printing data with external profile reference (PDF/X-4p) using PDF 1.6") );
+            part = std::make_unique<GooString>("Complete exchange of printing data (PDF/X-4) and partial exchange of printing data with external profile reference (PDF/X-4p) using PDF 1.6");
             break;
           case subtypePart8:
-            part.reset( new GooString("Partial exchange of printing data using PDF 1.6 (PDF/X-5)") );
+            part = std::make_unique<GooString>("Partial exchange of printing data using PDF 1.6 (PDF/X-5)");
             break;
           default:
             break;
@@ -623,25 +623,25 @@ static void printPdfSubtype(PDFDoc *doc, UnicodeMap *uMap) {
     switch (doc->getPDFSubtypeConformance())
     {
       case subtypeConfA:
-        confExp.reset( new GooString("Level A, Accessible") );
+        confExp = std::make_unique<GooString>("Level A, Accessible");
         break;
       case subtypeConfB:
-        confExp.reset( new GooString("Level B, Basic") );
+        confExp = std::make_unique<GooString>("Level B, Basic");
         break;
       case subtypeConfG:
-        confExp.reset( new GooString("Level G, External graphical content") );
+        confExp = std::make_unique<GooString>("Level G, External graphical content");
         break;
       case subtypeConfN:
-        confExp.reset( new GooString("Level N, External ICC profile") );
+        confExp = std::make_unique<GooString>("Level N, External ICC profile");
         break;
       case subtypeConfP:
-        confExp.reset( new GooString("Level P, Embedded ICC profile") );
+        confExp = std::make_unique<GooString>("Level P, Embedded ICC profile");
         break;
       case subtypeConfPG:
-        confExp.reset( new GooString("Level PG, Embedded ICC profile and external graphical content") );
+        confExp = std::make_unique<GooString>("Level PG, Embedded ICC profile and external graphical content");
         break;
       case subtypeConfU:
-        confExp.reset( new GooString("Level U, Unicode support") );
+        confExp = std::make_unique<GooString>("Level U, Unicode support");
         break;
       case subtypeConfNone:
       case subtypeConfNull:

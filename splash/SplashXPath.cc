@@ -23,8 +23,8 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 #include <algorithm>
 #include "goo/gmem.h"
 #include "goo/GooLikely.h"

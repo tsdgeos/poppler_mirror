@@ -52,15 +52,15 @@
 #include <config.h>
 #include <poppler-config.h>
 
-#include <ctype.h>
-#include <locale.h>
-#include <stdio.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <time.h>
+#include <cctype>
+#include <clocale>
+#include <cstdio>
+#include <cerrno>
+#include <climits>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
+#include <ctime>
 #include <regex>
 #include <sys/stat.h>
 #include "goo/glibc.h"

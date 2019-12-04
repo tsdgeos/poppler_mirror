@@ -384,7 +384,7 @@ std::vector<text_box> page::text_list() const
             tb.m_data->char_bboxes.reserve(word->getLength());
             for (int j = 0; j < word->getLength(); j ++) {
                 word->getCharBBox(j, &xMin, &yMin, &xMax, &yMax);
-                tb.m_data->char_bboxes.push_back({xMin, yMin, xMax-xMin, yMax-yMin});
+                tb.m_data->char_bboxes.emplace_back(xMin, yMin, xMax-xMin, yMax-yMin);
             }
 
             output_list.push_back(std::move(tb));

@@ -17,7 +17,7 @@
  */
 
 #include "config.h"
-#include <math.h>
+#include <cmath>
 
 #ifndef __GI_SCANNER__
 #include <GlobalParams.h>
@@ -693,8 +693,7 @@ poppler_page_get_selection_region (PopplerPage           *page,
   std::vector<PDFRectangle*>* list = text->getSelectionRegion(&poppler_selection,
 				  selection_style, scale);
 
-  for (std::size_t i = 0; i < list->size(); i++) {
-    PDFRectangle *selection_rect = (*list)[i];
+  for (const PDFRectangle *selection_rect : *list) {
     PopplerRectangle *rect;
 
     rect = poppler_rectangle_new ();
@@ -729,8 +728,7 @@ poppler_page_selection_region_free (GList *region)
   if (G_UNLIKELY (!region))
     return;
 
-  g_list_foreach (region, (GFunc)poppler_rectangle_free, nullptr);
-  g_list_free (region);
+  g_list_free_full (region, (GDestroyNotify)poppler_rectangle_free);
 }
 
 /**
@@ -783,8 +781,7 @@ poppler_page_get_selected_region (PopplerPage           *page,
 
   region = cairo_region_create ();
 
-  for (std::size_t i = 0; i < list->size(); i++) {
-    PDFRectangle *selection_rect = (*list)[i];
+  for (const PDFRectangle *selection_rect : *list) {
     cairo_rectangle_int_t rect;
 
     rect.x = (gint) ((selection_rect->x1 * scale) + 0.5);
@@ -1117,8 +1114,7 @@ poppler_page_free_image_mapping (GList *list)
   if (G_UNLIKELY (list == nullptr))
     return;
 
-  g_list_foreach (list, (GFunc)poppler_image_mapping_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_image_mapping_free);
 }
 
 /**
@@ -1146,7 +1142,7 @@ poppler_page_render_to_ps (PopplerPage   *page,
                                     nullptr, pages,
                                     psModePS, (int)ps_file->paper_width,
                                     (int)ps_file->paper_height, ps_file->duplex,
-                                    0, 0, 0, 0, false, false);
+                                    false, 0, 0, 0, false, false);
   }
 
 
@@ -1301,8 +1297,7 @@ poppler_page_free_link_mapping (GList *list)
   if (G_UNLIKELY (list == nullptr))
     return;
 
-  g_list_foreach (list, (GFunc)poppler_link_mapping_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_link_mapping_free);
 }
 
 /**
@@ -1368,8 +1363,7 @@ poppler_page_free_form_field_mapping (GList *list)
   if (G_UNLIKELY (list == nullptr))
     return;
 
-  g_list_foreach (list, (GFunc) poppler_form_field_mapping_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_form_field_mapping_free);
 }
 
 /**
@@ -1505,8 +1499,7 @@ poppler_page_free_annot_mapping (GList *list)
   if (G_UNLIKELY (!list))
     return;
 
-  g_list_foreach (list, (GFunc)poppler_annot_mapping_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_annot_mapping_free);
 }
 
 /**
@@ -2222,9 +2215,8 @@ poppler_page_get_text_layout_for_area (PopplerPage       *page,
     {
       std::vector<TextWordSelection*> *line_words = word_list[i];
       n_rects += line_words->size() - 1;
-      for (std::size_t j = 0; j < line_words->size(); j++)
+      for (const TextWordSelection *word_sel : *line_words)
         {
-          TextWordSelection *word_sel = (*line_words)[j];
           n_rects += word_sel->getEnd() - word_sel->getBegin();
         }
     }
@@ -2306,8 +2298,7 @@ poppler_page_free_text_attributes (GList *list)
   if (G_UNLIKELY (list == nullptr))
     return;
 
-  g_list_foreach (list, (GFunc)poppler_text_attributes_free, nullptr);
-  g_list_free (list);
+  g_list_free_full (list, (GDestroyNotify)poppler_text_attributes_free);
 }
 
 static gboolean
@@ -2389,7 +2380,7 @@ poppler_page_get_text_attributes_for_area (PopplerPage      *page,
   GList *attributes = nullptr;
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
-  g_return_val_if_fail (area != nullptr, FALSE);
+  g_return_val_if_fail (area != nullptr, nullptr);
 
   selection.x1 = area->x1;
   selection.y1 = area->y1;

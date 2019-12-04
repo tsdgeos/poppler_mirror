@@ -26,11 +26,11 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <limits.h>
-#include <ctype.h>
+#include <cstdlib>
+#include <cstddef>
+#include <cstring>
+#include <climits>
+#include <cctype>
 #include "Lexer.h"
 #include "Error.h"
 #include "XRef.h"
@@ -162,7 +162,7 @@ Object Lexer::getObj(int objNum) {
 
   // skip whitespace and comments
   comment = false;
-  while (1) {
+  while (true) {
     if ((c = getChar()) == EOF) {
       return Object(objEOF);
     }
@@ -194,7 +194,7 @@ Object Lexer::getObj(int objNum) {
     } else if (c != '+') {
       xi = c - '0';
     }
-    while (1) {
+    while (true) {
       c = lookChar();
       if (isdigit(c)) {
 	getChar();
@@ -250,7 +250,7 @@ Object Lexer::getObj(int objNum) {
       xf = xll;
     }
     scale = 0.1;
-    while (1) {
+    while (true) {
       c = lookChar();
       if (c == '-') {
 	// ignore minus signs in the middle of numbers to match
@@ -483,7 +483,7 @@ Object Lexer::getObj(int objNum) {
       m = n = 0;
       c2 = 0;
       s = nullptr;
-      while (1) {
+      while (true) {
 	c = getChar();
 	if (c == '>') {
 	  break;
@@ -588,7 +588,7 @@ Object Lexer::getObj(const char *cmdA, int objNum) {
   const char *cmd1 = tokBuf;
   *tokBuf = 0;
   while (strcmp(cmdA, cmd1) && (objNum < 0 || (xref && xref->getNumEntry(getPos()) == objNum))) {
-    while (1) {
+    while (true) {
       if ((c = getChar()) == EOF) {
         return Object(objEOF);
       }
@@ -621,7 +621,7 @@ Object Lexer::getObj(const char *cmdA, int objNum) {
 void Lexer::skipToNextLine() {
   int c;
 
-  while (1) {
+  while (true) {
     c = getChar();
     if (c == EOF || c == '\n') {
       return;

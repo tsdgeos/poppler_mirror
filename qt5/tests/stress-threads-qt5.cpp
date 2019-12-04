@@ -5,7 +5,7 @@
 #include <windows.h>
 #define sleep Sleep
 #endif
-#include <time.h>
+#include <ctime>
 
 #include <poppler-qt5.h>
 #include <poppler-form.h>

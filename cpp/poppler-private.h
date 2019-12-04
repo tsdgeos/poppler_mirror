@@ -32,7 +32,7 @@
 #include "Error.h"
 #include "CharTypes.h"
 
-#include <stdarg.h>
+#include <cstdarg>
 
 class GooString;
 class PDFRectangle;

@@ -25,7 +25,7 @@
 //
 //========================================================================
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "CharTypes.h"
 #include "UnicodeTypeTable.h"
 #include "goo/gmem.h"

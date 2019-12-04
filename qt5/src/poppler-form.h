@@ -28,7 +28,7 @@
 #ifndef _POPPLER_QT5_FORM_H_
 #define _POPPLER_QT5_FORM_H_
 
-#include <time.h>
+#include <ctime>
 #include <QtCore/QDateTime>
 #include <QtCore/QList>
 #include <QtCore/QRectF>
@@ -235,7 +235,7 @@ namespace Poppler {
 	/// \cond PRIVATE
 	FormFieldButton(DocumentData *doc, ::Page *p, ::FormWidgetButton *w);
 	/// \endcond
-	~FormFieldButton();
+	~FormFieldButton() override;
 
 	FormType type() const override;
 
@@ -306,7 +306,7 @@ namespace Poppler {
 	/// \cond PRIVATE
 	FormFieldText(DocumentData *doc, ::Page *p, ::FormWidgetText *w);
 	/// \endcond
-	~FormFieldText();
+	~FormFieldText() override;
 
 	FormType type() const override;
 
@@ -395,7 +395,7 @@ namespace Poppler {
 	/// \cond PRIVATE
 	FormFieldChoice(DocumentData *doc, ::Page *p, ::FormWidgetChoice *w);
 	/// \endcond
-	~FormFieldChoice();
+	~FormFieldChoice() override;
 
 	FormType type() const override;
 
@@ -755,7 +755,7 @@ namespace Poppler {
 	/// \cond PRIVATE
 	FormFieldSignature(DocumentData *doc, ::Page *p, ::FormWidgetSignature *w);
 	/// \endcond
-	~FormFieldSignature();
+	~FormFieldSignature() override;
 
 	FormType type() const override;
 

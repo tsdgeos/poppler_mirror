@@ -17,7 +17,7 @@
 #define SIGNATUREINFO_H
 
 #include <memory>
-#include <time.h>
+#include <ctime>
 
 enum SignatureValidationStatus
 {
@@ -49,6 +49,9 @@ public:
   SignatureInfo(SignatureValidationStatus, CertificateValidationStatus);
   ~SignatureInfo();
 
+  SignatureInfo(const SignatureInfo &) = delete;
+  SignatureInfo& operator=(const SignatureInfo &) = delete;
+
   /* GETTERS */
   SignatureValidationStatus getSignatureValStatus();
   CertificateValidationStatus getCertificateValStatus();
@@ -74,9 +77,6 @@ public:
   void setCertificateInfo(std::unique_ptr<X509CertificateInfo>);
 
 private:
-  SignatureInfo(const SignatureInfo &);
-  SignatureInfo& operator=(const SignatureInfo &);
-
   SignatureValidationStatus sig_status;
   CertificateValidationStatus cert_status;
   std::unique_ptr<X509CertificateInfo> cert_info;

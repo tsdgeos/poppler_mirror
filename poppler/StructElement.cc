@@ -21,7 +21,7 @@
 #include "PDFDoc.h"
 #include "Dict.h"
 
-#include <assert.h>
+#include <cassert>
 
 class GfxState;
 
@@ -829,8 +829,8 @@ StructElement::StructData::~StructData()
   delete id;
   delete title;
   delete language;
-  for (ElemPtrArray::iterator i = elements.begin(); i != elements.end(); ++i) delete *i;
-  for (AttrPtrArray::iterator i = attributes.begin(); i != attributes.end(); ++i) delete *i;
+  for (StructElement *element : elements) delete element;
+  for (Attribute *attribute : attributes) delete attribute;
 }
 
 
@@ -975,8 +975,8 @@ GooString* StructElement::appendSubTreeText(GooString *string, bool recursive) c
     if (!string)
       string = new GooString();
 
-    for (TextSpanArray::const_iterator i = spans.begin(); i != spans.end(); ++i)
-      string->append(i->getText());
+    for (const TextSpan &span : spans)
+      string->append(span.getText());
 
     return string;
   }

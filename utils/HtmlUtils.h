@@ -18,7 +18,7 @@
 #ifndef HTMLUTILS_H_
 #define HTMLUTILS_H_
 
-#include <math.h> // fabs
+#include <cmath> // fabs
 
 // Returns true iff the difference between a and b is less than the threshold
 // We always use fuzzy math when comparing decimal numbers due to imprecision

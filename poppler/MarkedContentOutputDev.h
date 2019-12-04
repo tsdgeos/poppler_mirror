@@ -89,7 +89,7 @@ typedef std::vector<TextSpan> TextSpanArray;
 class MarkedContentOutputDev: public OutputDev {
 public:
   MarkedContentOutputDev(int mcidA);
-  virtual ~MarkedContentOutputDev();
+  ~MarkedContentOutputDev() override;
 
   virtual bool isOk() { return true; }
   bool upsideDown() override { return true; }

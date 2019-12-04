@@ -53,7 +53,7 @@ namespace Poppler
     Q_OBJECT
 
     public:
-    ~OptContentModel();
+    ~OptContentModel() override;
 
     QModelIndex index(int row, int column, const QModelIndex &parent) const override;
     QModelIndex parent(const QModelIndex &child) const override;

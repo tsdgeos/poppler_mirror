@@ -43,8 +43,8 @@
 #ifndef _MSC_VER
 #  include <libgen.h>
 #endif
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstring>
 
 std::string gbasename(const char* filename)
 {

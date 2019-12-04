@@ -23,7 +23,7 @@
 
 #include "SplashTypes.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 //------------------------------------------------------------------------
 // SplashScreen

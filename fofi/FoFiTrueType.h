@@ -28,7 +28,7 @@
 #ifndef FOFITRUETYPE_H
 #define FOFITRUETYPE_H
 
-#include "stddef.h"
+#include <cstddef>
 #include <unordered_map>
 #include <string>
 #include "FoFiBase.h"
@@ -50,7 +50,7 @@ public:
   // Create a FoFiTrueType object from a file on disk.
   static FoFiTrueType *load(const char *fileName, int faceIndexA=0);
 
-  ~FoFiTrueType();
+  ~FoFiTrueType() override;
 
   // Returns true if this an OpenType font containing CFF data, false
   // if it's a TrueType font (or OpenType font with TrueType data).

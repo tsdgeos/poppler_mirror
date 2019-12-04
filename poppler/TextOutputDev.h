@@ -36,7 +36,7 @@
 #define TEXTOUTPUTDEV_H
 
 #include "poppler-config.h"
-#include <stdio.h>
+#include <cstdio>
 #include "GfxFont.h"
 #include "GfxState.h"
 #include "OutputDev.h"
@@ -791,7 +791,7 @@ public:
 		bool rawOrderA, bool discardDiagA = false);
 
   // Destructor.
-  ~TextOutputDev();
+  ~TextOutputDev() override;
 
   // Check if file was successfully created.
   virtual bool isOk() { return ok; }

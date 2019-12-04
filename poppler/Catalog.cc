@@ -43,8 +43,8 @@
 
 #include <config.h>
 
-#include <stddef.h>
-#include <stdlib.h>
+#include <cstddef>
+#include <cstdlib>
 #include "goo/gmem.h"
 #include "Object.h"
 #include "PDFDoc.h"
@@ -246,7 +246,7 @@ bool Catalog::cachePageTree(int page)
     kidsIdxList->push_back(0);
   }
 
-  while(1) {
+  while(true) {
 
     if (std::size_t(page) <= pages.size()) return true;
 
@@ -278,8 +278,8 @@ bool Catalog::cachePageTree(int page)
     }
 
     bool loop = false;;
-    for (size_t i = 0; i < pagesRefList->size(); i++) {
-      if (((*pagesRefList)[i]).num == kidRef.getRefNum()) {
+    for (const Ref &pageRef : *pagesRefList) {
+      if (pageRef.num == kidRef.getRefNum()) {
          loop = true;
          break;
       }

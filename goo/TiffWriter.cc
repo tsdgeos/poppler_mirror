@@ -16,7 +16,7 @@
 
 #ifdef ENABLE_LIBTIFF
 
-#include <string.h>
+#include <cstring>
 
 #ifdef _WIN32
 #include <io.h>

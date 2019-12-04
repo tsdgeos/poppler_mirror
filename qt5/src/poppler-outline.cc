@@ -44,6 +44,9 @@ OutlineItem::OutlineItem(const OutlineItem &other) : m_data{new OutlineItemData{
 
 OutlineItem &OutlineItem::operator=(const OutlineItem &other)
 {
+  if (this == &other)
+    return *this;
+
   auto *data = new OutlineItemData{*other.m_data};
   qSwap(m_data, data);
   delete data;

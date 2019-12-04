@@ -14,7 +14,7 @@
 #include <config.h>
 
 #include "GooTimer.h"
-#include <string.h>
+#include <cstring>
 
 #define USEC_PER_SEC 1000000
 

@@ -62,7 +62,7 @@ public:
 
   SplashPattern *copy() override { return new SplashFunctionPattern(colorMode, state, (GfxFunctionShading *) shading); }
 
-  ~SplashFunctionPattern();
+  ~SplashFunctionPattern() override;
 
   bool testPosition(int x, int y) override { return true; }
 
@@ -88,7 +88,7 @@ public:
 
   SplashUnivariatePattern(SplashColorMode colorMode, GfxState *state, GfxUnivariateShading *shading);
 
-  ~SplashUnivariatePattern();
+  ~SplashUnivariatePattern() override;
 
   bool getColor(int x, int y, SplashColorPtr c) override;
 
@@ -118,9 +118,9 @@ public:
 
   SplashPattern *copy() override { return new SplashAxialPattern(colorMode, state, (GfxAxialShading *) shading); }
 
-  ~SplashAxialPattern();
+  ~SplashAxialPattern() override;
 
-  bool getParameter(double xs, double ys, double *t) override;
+  bool getParameter(double xc, double yc, double *t) override;
 
 private:
   double x0, y0, x1, y1;
@@ -135,7 +135,7 @@ public:
 
   SplashPattern *copy() override { return new SplashGouraudPattern(bDirectColorTranslation, state, shading); }
 
-  ~SplashGouraudPattern();
+  ~SplashGouraudPattern() override;
 
   bool getColor(int x, int y, SplashColorPtr c) override { return false; }
 
@@ -152,7 +152,7 @@ public:
                             double *x2, double *y2, double *color2) override
   { shading->getTriangle(i, x0, y0, color0, x1, y1, color1, x2, y2, color2); }
 
-  void getParameterizedColor(double t, SplashColorMode mode, SplashColorPtr c) override;
+  void getParameterizedColor(double colorinterp, SplashColorMode mode, SplashColorPtr dest) override;
 
 private:
   GfxGouraudTriangleShading *shading;
@@ -169,7 +169,7 @@ public:
 
   SplashPattern *copy() override { return new SplashRadialPattern(colorMode, state, (GfxRadialShading *) shading); }
 
-  ~SplashRadialPattern();
+  ~SplashRadialPattern() override;
 
   bool getParameter(double xs, double ys, double *t) override;
 
@@ -198,7 +198,7 @@ public:
 		  bool overprintPreviewA = globalParams->getOverprintPreview());
 
   // Destructor.
-  ~SplashOutputDev();
+  ~SplashOutputDev() override;
 
   //----- get info about output device
 
@@ -269,7 +269,7 @@ public:
   void fill(GfxState *state) override;
   void eoFill(GfxState *state) override;
   bool tilingPatternFill(GfxState *state, Gfx *gfx, Catalog *catalog, Object *str,
-				  const double *pmat, int paintType, int tilingType, Dict *resDict,
+				  const double *ptm, int paintType, int tilingType, Dict *resDict,
 				  const double *mat, const double *bbox,
 				  int x0, int y0, int x1, int y1,
 				  double xStep, double yStep) override;
@@ -389,6 +389,7 @@ public:
   void setFontAntialias(bool anti) { fontAntialias = anti; }
 
   void setFreeTypeHinting(bool enable, bool enableSlightHinting);
+  void setEnableFreeType(bool enable) { enableFreeType = enable; }
 
 protected:
   void doUpdateFont(GfxState *state);
@@ -433,6 +434,7 @@ private:
   bool fontAntialias;
   bool vectorAntialias;
   bool overprintPreview;
+  bool enableFreeType;
   bool enableFreeTypeHinting;
   bool enableSlightHinting;
   bool reverseVideo;		// reverse video mode

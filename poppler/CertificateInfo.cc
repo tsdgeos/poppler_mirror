@@ -12,8 +12,8 @@
 
 #include "CertificateInfo.h"
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 
 X509CertificateInfo::PublicKeyInfo::PublicKeyInfo() :
   publicKeyType(OTHERKEY),

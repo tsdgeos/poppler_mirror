@@ -29,7 +29,7 @@ class AbstractInfoDock : public QDockWidget, public DocumentObserver
 
 public:
     AbstractInfoDock(QWidget *parent = nullptr);
-    ~AbstractInfoDock();
+    ~AbstractInfoDock() override;
 
     void documentLoaded() override;
     void documentClosed() override;

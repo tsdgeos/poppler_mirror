@@ -1,4 +1,5 @@
 include_directories(
+  SYSTEM
   ${GTK3_INCLUDE_DIRS}
 )
 

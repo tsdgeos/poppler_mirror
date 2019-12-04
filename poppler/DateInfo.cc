@@ -26,8 +26,8 @@
 #include "glibc.h"
 #include "DateInfo.h"
 
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 /* See PDF Reference 1.3, Section 3.8.2 for PDF Date representation */
 bool parseDateString(const char *dateString, int *year, int *month, int *day, int *hour, int *minute, int *second, char *tz, int *tzHour, int *tzMinute)

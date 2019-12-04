@@ -27,9 +27,9 @@
 #include <config.h>
 #include <poppler-config.h>
 
-#include <stdio.h>
-#include <stddef.h>
-#include <stdarg.h>
+#include <cstdio>
+#include <cstddef>
+#include <cstdarg>
 #include "GooString.h"
 #include "GlobalParams.h"
 #include "Error.h"

@@ -14,7 +14,7 @@
 #define CERTIFICATEINFO_H
 
 #include <memory>
-#include <time.h>
+#include <ctime>
 #include "goo/GooString.h"
 
 enum CertificateKeyUsageExtension
@@ -42,6 +42,9 @@ class X509CertificateInfo {
 public:
   X509CertificateInfo();
   ~X509CertificateInfo();
+
+  X509CertificateInfo(const X509CertificateInfo &) = delete;
+  X509CertificateInfo& operator=(const X509CertificateInfo &) = delete;
 
   struct PublicKeyInfo {
     PublicKeyInfo();
@@ -103,9 +106,6 @@ public:
   void setIsSelfSigned(bool);
 
 private:
-  X509CertificateInfo(const X509CertificateInfo &) = delete;
-  X509CertificateInfo& operator=(const X509CertificateInfo &) = delete;
-
   EntityInfo issuer_info;
   EntityInfo subject_info;
   PublicKeyInfo public_key_info;

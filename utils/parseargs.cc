@@ -23,11 +23,11 @@
 
 ========================================================================*/
 
-#include <stdio.h>
-#include <stddef.h>
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cstddef>
+#include <cstring>
+#include <cstdlib>
+#include <cctype>
 #include "parseargs.h"
 
 #include "goo/gstrtod.h"

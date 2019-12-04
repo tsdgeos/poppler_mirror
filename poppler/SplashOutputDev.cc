@@ -50,7 +50,7 @@
 
 #include <config.h>
 
-#include <string.h>
+#include <cstring>
 #include <cmath>
 #include "goo/gfile.h"
 #include "GlobalParams.h"
@@ -1084,7 +1084,7 @@ public:
 
   SplashOutFontFileID(const Ref *rA) { r = *rA; }
 
-  ~SplashOutFontFileID() {}
+  ~SplashOutFontFileID() override {}
 
   bool matches(SplashFontFileID *id) override {
     return ((SplashOutFontFileID *)id)->r == r;
@@ -1110,7 +1110,7 @@ public:
   T3FontCache(const Ref *fontID, double m11A, double m12A,
 	      double m21A, double m22A,
 	      int glyphXA, int glyphYA, int glyphWA, int glyphHA,
-	      bool aa, bool validBBoxA);
+	      bool validBBoxA, bool aa);
   ~T3FontCache();
   T3FontCache(const T3FontCache &) = delete;
   T3FontCache& operator=(const T3FontCache &) = delete;
@@ -1252,6 +1252,7 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
   fontAntialias = true;
   vectorAntialias = true;
   overprintPreview = overprintPreviewA;
+  enableFreeType = true;
   enableFreeTypeHinting = false;
   enableSlightHinting = false;
   setupScreenParams(72.0, 72.0);
@@ -1338,7 +1339,7 @@ void SplashOutputDev::startDoc(PDFDoc *docA) {
     delete fontEngine;
   }
   fontEngine = new SplashFontEngine(
-				    globalParams->getEnableFreeType(),
+				    enableFreeType,
 				    enableFreeTypeHinting,
 				    enableSlightHinting,
 				      getFontAntialias() &&
@@ -1417,8 +1418,7 @@ void SplashOutputDev::startPage(int pageNum, GfxState *state, XRef *xrefA) {
     color[0] = color[1] = color[2] = color[3] = 0;
     break;
   case splashModeDeviceN8:
-    for (int i = 0; i < 4 + SPOT_NCOMPS; i++)
-      color[i] = 0;
+    splashClearColor(color);
     break;
   }
   splash->setStrokePattern(new SplashSolidColor(color));
@@ -1741,13 +1741,13 @@ void SplashOutputDev::setOverprintMask(GfxColorSpace *colorSpace,
       GfxDeviceNColorSpace *deviceNCS = (GfxDeviceNColorSpace *)colorSpace;
       additive = mask == 0x0f && !deviceNCS->isNonMarking();
       for (i = 0; i < deviceNCS->getNComps() && additive; i++) {
-        if (deviceNCS->getColorantName(i).compare("Cyan") == 0) {
+        if (deviceNCS->getColorantName(i) == "Cyan") {
           additive = false;
-        } else if (deviceNCS->getColorantName(i).compare("Magenta") == 0) {
+        } else if (deviceNCS->getColorantName(i) == "Magenta") {
           additive = false;
-        } else if (deviceNCS->getColorantName(i).compare("Yellow") == 0) {
+        } else if (deviceNCS->getColorantName(i) == "Yellow") {
           additive = false;
-        } else if (deviceNCS->getColorantName(i).compare("Black") == 0) {
+        } else if (deviceNCS->getColorantName(i) == "Black") {
           additive = false;
         }
       }
@@ -2738,7 +2738,7 @@ void SplashOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
 
   imgMaskData.imgStr = new ImageStream(str, width, 1, 1);
   imgMaskData.imgStr->reset();
-  imgMaskData.invert = invert ? 0 : 1;
+  imgMaskData.invert = invert ? false : true;
   imgMaskData.width = width;
   imgMaskData.height = height;
   imgMaskData.y = 0;
@@ -2789,7 +2789,7 @@ void SplashOutputDev::setSoftMaskFromImageMask(GfxState *state,
   mat[5] = ctm[3] + ctm[5];
   imgMaskData.imgStr = new ImageStream(str, width, 1, 1);
   imgMaskData.imgStr->reset();
-  imgMaskData.invert = invert ? 0 : 1;
+  imgMaskData.invert = invert ? false : true;
   imgMaskData.width = width;
   imgMaskData.height = height;
   imgMaskData.y = 0;
@@ -3619,7 +3619,7 @@ void SplashOutputDev::drawMaskedImage(GfxState *state, Object *ref,
     mat[5] = 0;
     imgMaskData.imgStr = new ImageStream(maskStr, maskWidth, 1, 1);
     imgMaskData.imgStr->reset();
-    imgMaskData.invert = maskInvert ? 0 : 1;
+    imgMaskData.invert = maskInvert ? false : true;
     imgMaskData.width = maskWidth;
     imgMaskData.height = maskHeight;
     imgMaskData.y = 0;

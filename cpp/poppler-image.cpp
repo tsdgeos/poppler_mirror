@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2010-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
- * Copyright (C) 2017, 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2017, Jeroen Ooms <jeroenooms@gmail.com>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
@@ -225,8 +225,8 @@ image::image(char *idata, int iwidth, int iheight, image::format_enum iformat)
 /**
  Copy constructor.
  */
-image::image(const image &pt)
-    : d(pt.d)
+image::image(const image &img)
+    : d(img.d)
 {
     if (d) {
         ++d->ref;
@@ -367,21 +367,21 @@ bool image::save(const std::string &file_name, const std::string &out_format, in
     }
 #if defined(ENABLE_LIBPNG)
     else if (fmt == "png") {
-        w.reset(new PNGWriter());
+        w = std::make_unique<PNGWriter>();
     }
 #endif
 #if defined(ENABLE_LIBJPEG)
     else if (fmt == "jpeg" || fmt == "jpg") {
-        w.reset(new JpegWriter());
+        w = std::make_unique<JpegWriter>();
     }
 #endif
 #if defined(ENABLE_LIBTIFF)
     else if (fmt == "tiff") {
-        w.reset(new TiffWriter());
+        w = std::make_unique<TiffWriter>();
     }
 #endif
     else if (fmt == "pnm") {
-        w.reset(new NetPBMWriter(pnm_format(d->format)));
+        w = std::make_unique<NetPBMWriter>(pnm_format(d->format));
     }
     if (!w.get()) {
         return false;
@@ -480,29 +480,32 @@ std::vector<std::string> image::supported_image_formats()
 {
     std::vector<std::string> formats;
 #if defined(ENABLE_LIBPNG)
-    formats.push_back("png");
+    formats.emplace_back("png");
 #endif
 #if defined(ENABLE_LIBJPEG)
-    formats.push_back("jpeg");
-    formats.push_back("jpg");
+    formats.emplace_back("jpeg");
+    formats.emplace_back("jpg");
 #endif
 #if defined(ENABLE_LIBTIFF)
-    formats.push_back("tiff");
+    formats.emplace_back("tiff");
 #endif
-    formats.push_back("pnm");
+    formats.emplace_back("pnm");
     return formats;
 }
 
 /**
  Assignment operator.
  */
-image& image::operator=(const image &pt)
+image& image::operator=(const image &img)
 {
-    if (pt.d) {
-        ++pt.d->ref;
+    if (this == &img)
+        return *this;
+
+    if (img.d) {
+        ++img.d->ref;
     }
     image_private *old_d = d;
-    d = pt.d;
+    d = img.d;
     if (old_d && !--old_d->ref) {
         delete old_d;
     }

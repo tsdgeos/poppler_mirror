@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017, 2019, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,8 +65,8 @@ int main(int argc, char *argv[])
     if (show_formats) {
         const std::vector<std::string> formats = poppler::image::supported_image_formats();
         std::cout << "Supported image formats:" << std::endl;
-        for (size_t i = 0; i < formats.size(); ++i) {
-            std::cout << "  " << formats[i] << std::endl;
+        for (const std::string &format : formats) {
+            std::cout << "  " << format << std::endl;
         }
         exit(0);
     }

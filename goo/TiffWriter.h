@@ -36,7 +36,10 @@ public:
   enum Format { RGB, RGBA_PREMULTIPLIED, GRAY, MONOCHROME, CMYK, RGB48 };
 
   TiffWriter(Format format = RGB);
-  ~TiffWriter();
+  ~TiffWriter() override;
+
+  TiffWriter(const TiffWriter &other) = delete;
+  TiffWriter& operator=(const TiffWriter &other) = delete;
 
   void setCompressionString(const char *compressionStringArg);
 
@@ -50,9 +53,6 @@ public:
   bool close() override;
 
 private:
-  TiffWriter(const TiffWriter &other);
-  TiffWriter& operator=(const TiffWriter &other);
-
   TiffWriterPrivate *priv;
 };
 

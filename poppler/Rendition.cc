@@ -24,7 +24,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //*********************************************************************************
 
-#include <math.h>
+#include <cmath>
 #include "Rendition.h"
 #include "FileSpec.h"
 
@@ -361,7 +361,7 @@ void MediaRendition::outputToFile(FILE* fp) {
 
   embeddedStreamObject.streamReset();
 
-  while (1) {
+  while (true) {
     int c = embeddedStreamObject.streamGetChar();
     if (c == EOF)
       break;

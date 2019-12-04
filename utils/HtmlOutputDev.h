@@ -35,7 +35,7 @@
 #ifndef HTMLOUTPUTDEV_H
 #define HTMLOUTPUTDEV_H
 
-#include <stdio.h>
+#include <cstdio>
 #include "goo/gbasename.h"
 #include "GfxFont.h"
 #include "OutputDev.h"
@@ -208,7 +208,7 @@ public:
     HtmlMetaVar(const HtmlMetaVar &) = delete;
     HtmlMetaVar& operator=(const HtmlMetaVar &) = delete;
 
-    GooString* toString();
+    GooString* toString() const;
 
 private:
 
@@ -236,10 +236,10 @@ public:
 	  const char *date,
 	  bool rawOrder,
 	  int firstPage = 1,
-	  bool outline = 0);
+	  bool outline = false);
 
   // Destructor.
-  virtual ~HtmlOutputDev();
+  ~HtmlOutputDev() override;
 
   // Check if file was successfully created.
   virtual bool isOk() { return ok; }
@@ -315,9 +315,8 @@ public:
 
 private:
   // convert encoding into a HTML standard, or encoding->c_str if not
-  // recognized. Will delete encoding for you and return a new one
-  // that you have to delete
-  static GooString* mapEncodingToHtml(GooString* encoding);
+  // recognized.
+  static std::string mapEncodingToHtml(const std::string &encoding);
   void doProcessLink(AnnotLink *link);
   GooString* getLinkDest(AnnotLink *link);
   void dumpMetaVars(FILE *);

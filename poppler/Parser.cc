@@ -30,7 +30,7 @@
 
 #include <config.h>
 
-#include <stddef.h>
+#include <cstddef>
 #include "Object.h"
 #include "Array.h"
 #include "Dict.h"

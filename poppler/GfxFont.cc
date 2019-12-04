@@ -43,12 +43,12 @@
 
 #include <config.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <math.h>
-#include <limits.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cctype>
+#include <cmath>
+#include <climits>
 #include <algorithm>
 #include "goo/gmem.h"
 #include "Error.h"
@@ -1325,8 +1325,8 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
   //----- get the character widths -----
 
   // initialize all widths
-  for (int code = 0; code < 256; ++code) {
-    widths[code] = missingWidth * 0.001;
+  for (double &width : widths) {
+    width = missingWidth * 0.001;
   }
 
   // use widths from font dict, if present
@@ -2097,7 +2097,7 @@ int GfxCIDFont::mapCodeToGID(FoFiTrueType *ff, int cmapi,
   return gid;
 }
 
-int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
+int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *codeToGIDLen) {
 #define N_UCS_CANDIDATES 2
   /* space characters */
   static const unsigned long spaces[] = { 
@@ -2192,7 +2192,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
   int cmapPlatform, cmapEncoding;
   Ref embID;
 
-  *mapsizep = 0;
+  *codeToGIDLen = 0;
   if (!ctu || !getCollection()) return nullptr;
   if (getCollection()->cmp("Adobe-Identity") == 0) return nullptr;
   if (getEmbeddedFontID(&embID)) {
@@ -2200,7 +2200,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
     * CIDToGIDMap should be embedded in PDF file
     * and already set. So return it.
     */
-    *mapsizep = getCIDToGIDLen();
+    *codeToGIDLen = getCIDToGIDLen();
     return getCIDToGID();
   }
 
@@ -2337,7 +2337,7 @@ int *GfxCIDFont::getCodeToGIDMap(FoFiTrueType *ff, int *mapsizep) {
     }
     codeToGID[code] = gid;
   }
-  *mapsizep = n;
+  *codeToGIDLen = n;
   if (humap != nullptr) delete[] humap;
   if (tumap != nullptr) delete[] tumap;
   if (vumap != nullptr) delete[] vumap;

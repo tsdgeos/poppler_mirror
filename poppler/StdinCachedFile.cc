@@ -18,7 +18,7 @@
 #include <fcntl.h> // for O_BINARY
 #include <io.h>    // for setmode
 #endif
-#include <stdio.h>
+#include <cstdio>
 
 size_t StdinCacheLoader::init(GooString *dummy, CachedFile *cachedFile)
 {

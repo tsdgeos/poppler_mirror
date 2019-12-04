@@ -31,7 +31,7 @@
 
 #include "poppler/poppler-config.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include "goo/ImgWriter.h"
 #include "OutputDev.h"
 
@@ -66,7 +66,7 @@ public:
   ImageOutputDev(char *fileRootA, bool pageNamesA, bool listImagesA);
 
   // Destructor.
-  virtual ~ImageOutputDev();
+  ~ImageOutputDev() override;
 
   // Use PNG format for output
   void enablePNG(bool png) { outputPNG = png; }
