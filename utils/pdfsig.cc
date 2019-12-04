@@ -13,6 +13,7 @@
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2019 Alexey Pavlov <alexpux@gmail.com>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2019 Nelson Efrain A. Cruz <neac03@gmail.com>
 //
 //========================================================================
 
