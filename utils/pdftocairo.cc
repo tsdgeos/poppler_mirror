@@ -1170,6 +1170,16 @@ int main(int argc, char *argv[]) {
     exit(99);
   }
 
+  // If our page range selection and document size indicate we're only
+  // outputting a single page, ensure that even/odd page selection doesn't
+  // filter out that single page.
+  if (firstPage == lastPage &&
+       ((printOnlyEven && firstPage % 2 == 0) ||
+        (printOnlyOdd && firstPage % 2 == 1))) {
+    fprintf(stderr, "Invalid even/odd page selection, no pages match criteria.\n");
+    exit(99);
+  }
+
   if (singleFile && firstPage < lastPage) {
     if (!quiet) {
       fprintf(stderr,
@@ -1197,9 +1207,6 @@ int main(int argc, char *argv[]) {
     }
 #endif
 
-  // Make sure firstPage is always used so that beginDocument() is called
-  if ((printOnlyEven && firstPage % 2 == 0) || (printOnlyOdd && firstPage % 2 == 1))
-    firstPage++;
 
   cairoOut = new CairoOutputDev();
   cairoOut->startDoc(doc);

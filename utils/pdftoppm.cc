@@ -517,6 +517,17 @@ int main(int argc, char *argv[]) {
     goto err1;
   }
 
+  // If our page range selection and document size indicate we're only
+  // outputting a single page, ensure that even/odd page selection doesn't
+  // filter out that single page.
+  if (firstPage == lastPage &&
+       ((printOnlyEven && firstPage % 2 == 0) ||
+        (printOnlyOdd && firstPage % 2 == 1))) {
+    fprintf(stderr, "Invalid even/odd page selection, no pages match criteria.\n");
+    goto err1;
+  }
+
+
   if (singleFile && firstPage < lastPage) {
     if (!quiet) {
       fprintf(stderr,
