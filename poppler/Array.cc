@@ -46,14 +46,14 @@ Array::Array(XRef *xrefA) {
 Array::~Array() {
 }
 
-Object Array::copy(XRef *xrefA) const {
+Array *Array::copy(XRef *xrefA) const {
   arrayLocker();
   Array *a = new Array(xrefA);
   a->elems.reserve(elems.size());
   for (const auto& elem : elems) {
     a->elems.push_back(elem.copy());
   }
-  return Object(a);
+  return a;
 }
 
 void Array::add(Object &&elem) {

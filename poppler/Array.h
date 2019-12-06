@@ -57,7 +57,7 @@ public:
   int getLength() const { return elems.size(); }
 
   // Copy array with new xref
-  Object copy(XRef *xrefA) const;
+  Array *copy(XRef *xrefA) const;
 
   // Add an element
   // elem becomes a dead object after this call
