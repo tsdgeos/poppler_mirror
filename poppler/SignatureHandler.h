@@ -10,6 +10,7 @@
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 //
 //========================================================================
 
@@ -19,6 +20,7 @@
 #include "goo/GooString.h"
 #include "SignatureInfo.h"
 #include "CertificateInfo.h"
+#include "vector"
 
 /* NSPR Headers */
 #include <nspr.h>
@@ -36,6 +38,7 @@
 class SignatureHandler
 {
 public:
+    explicit SignatureHandler();
     SignatureHandler(unsigned char *p7, int p7_length);
     SignatureHandler(const char *certNickname, SECOidTag digestAlgTag);
     ~SignatureHandler();
@@ -50,6 +53,7 @@ public:
     // Use -1 as validation_time for now
     CertificateValidationStatus validateCertificate(time_t validation_time);
     std::unique_ptr<X509CertificateInfo> getCertificateInfo() const;
+    std::vector<std::unique_ptr<X509CertificateInfo>> getAvailableSigningCertificates();
     GooString *signDetached(const char *password);
 
     static SECOidTag getHashOidTag(const char *digestName);
@@ -81,7 +85,6 @@ private:
     NSSCMSSignedData *CMS_SignedDataCreate(NSSCMSMessage *cms_msg);
     NSSCMSSignerInfo *CMS_SignerInfoCreate(NSSCMSSignedData *cms_sig_data);
     HASHContext *initHashContext();
-    X509CertificateInfo::EntityInfo getEntityInfo(CERTName *entityName) const;
     static void outputCallback(void *arg, const char *buf, unsigned long len);
 
     unsigned int hash_length;

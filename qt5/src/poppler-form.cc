@@ -11,6 +11,7 @@
  * Copyright (C) 2018, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2020 David García Garzón <voki@canvoki.net>
+ * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +37,7 @@
 #include <Link.h>
 #include <SignatureInfo.h>
 #include <CertificateInfo.h>
+#include <SignatureHandler.h>
 
 #include "poppler-form.h"
 #include "poppler-page-private.h"
@@ -949,14 +951,8 @@ SignatureValidationInfo FormFieldSignature::validate(ValidateOptions opt) const
     return validate(opt, QDateTime());
 }
 
-SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &validationTime) const
+static CertificateInfoPrivate *createCertificateInfoPrivate(const X509CertificateInfo *ci)
 {
-    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
-    const time_t validationTimeT = validationTime.isValid() ? validationTime.toTime_t() : -1;
-    SignatureInfo *si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT);
-
-    // get certificate info
-    const X509CertificateInfo *ci = si->getCertificateInfo();
     CertificateInfoPrivate *certPriv = new CertificateInfoPrivate;
     certPriv->is_null = true;
     if (ci) {
@@ -992,6 +988,19 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
 
         certPriv->is_null = false;
     }
+
+    return certPriv;
+}
+
+SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &validationTime) const
+{
+    FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
+    const time_t validationTimeT = validationTime.isValid() ? validationTime.toTime_t() : -1;
+    SignatureInfo *si = fws->validateSignature(opt & ValidateVerifyCertificate, opt & ValidateForceRevalidation, validationTimeT);
+
+    // get certificate info
+    const X509CertificateInfo *ci = si->getCertificateInfo();
+    CertificateInfoPrivate *certPriv = createCertificateInfoPrivate(ci);
 
     SignatureValidationInfoPrivate *priv = new SignatureValidationInfoPrivate(CertificateInfo(certPriv));
     switch (si->getSignatureValStatus()) {
@@ -1062,6 +1071,20 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
     delete checkedSignature;
 
     return SignatureValidationInfo(priv);
+}
+
+QVector<CertificateInfo *> POPPLER_QT5_EXPORT getAvailableSigningCertificates()
+{
+    SignatureHandler sigHandler;
+    std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = sigHandler.getAvailableSigningCertificates();
+
+    QVector<CertificateInfo *> vReturnCerts;
+    for (auto &cert : vCerts) {
+        CertificateInfoPrivate *certPriv = createCertificateInfoPrivate(cert.get());
+        vReturnCerts.append(new CertificateInfo(certPriv));
+    }
+
+    return vReturnCerts;
 }
 
 }

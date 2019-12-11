@@ -12,6 +12,7 @@
 // Copyright 2017 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 //
 //========================================================================
 
@@ -19,14 +20,15 @@
 
 #include "SignatureHandler.h"
 #include "goo/gmem.h"
-#include <secmod.h>
-#include <keyhi.h>
-#include <secder.h>
 
 #include <dirent.h>
 #include <Error.h>
 
 /* NSS headers */
+#include <secmod.h>
+#include <keyhi.h>
+#include <secder.h>
+#include <pk11pub.h>
 #include <secpkcs7.h>
 
 void SignatureHandler::outputCallback(void *arg, const char *buf, unsigned long len)
@@ -122,7 +124,7 @@ time_t SignatureHandler::getSigningTime()
     return static_cast<time_t>(sTime / 1000000);
 }
 
-X509CertificateInfo::EntityInfo SignatureHandler::getEntityInfo(CERTName *entityName) const
+static X509CertificateInfo::EntityInfo getEntityInfo(CERTName *entityName)
 {
     X509CertificateInfo::EntityInfo info;
 
@@ -162,15 +164,8 @@ static GooString SECItemToGooString(const SECItem &secItem)
     return GooString((const char *)secItem.data, secItem.len);
 }
 
-std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() const
+static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromCERT(CERTCertificate *cert)
 {
-    if (!CMSSignerInfo)
-        return nullptr;
-
-    CERTCertificate *cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
-    if (!cert)
-        return nullptr;
-
     auto certInfo = std::make_unique<X509CertificateInfo>();
 
     certInfo->setVersion(DER_GetInteger(&cert->version) + 1);
@@ -221,6 +216,18 @@ std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() cons
     SECKEY_DestroyPublicKey(pk);
 
     return certInfo;
+}
+
+std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() const
+{
+    if (!CMSSignerInfo)
+        return nullptr;
+
+    CERTCertificate *cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+    if (!cert)
+        return nullptr;
+
+    return getCertificateInfoFromCERT(cert);
 }
 
 static GooString *getDefaultFirefoxCertDB_Linux()
@@ -318,6 +325,12 @@ SignatureHandler::SignatureHandler(const char *certNickname, SECOidTag digestAlg
     CMSMessage = NSS_CMSMessage_Create(nullptr);
     signing_cert = CERT_FindCertByNickname(CERT_GetDefaultCertDB(), certNickname);
     hash_context = HASH_Create(HASH_GetHashTypeByOidTag(digestAlgTag));
+}
+
+SignatureHandler::SignatureHandler() : hash_length(), digest_alg_tag(), CMSitem(), hash_context(nullptr), CMSMessage(nullptr), CMSSignedData(nullptr), CMSSignerInfo(nullptr), signing_cert(nullptr), temp_certs(nullptr)
+{
+    setNSSDir({});
+    CMSMessage = NSS_CMSMessage_Create(nullptr);
 }
 
 HASHContext *SignatureHandler::initHashContext()
@@ -569,4 +582,39 @@ GooString *SignatureHandler::signDetached(const char *password)
     SEC_PKCS7DestroyContentInfo(p7_info);
     PORT_Free(reinterpret_cast<void *>(digest_buffer));
     return signature;
+}
+
+std::vector<std::unique_ptr<X509CertificateInfo>> SignatureHandler::getAvailableSigningCertificates()
+{
+    std::vector<std::unique_ptr<X509CertificateInfo>> certsList;
+    PK11SlotList *slotList = PK11_GetAllTokens(CKM_INVALID_MECHANISM, PR_FALSE, PR_FALSE, nullptr);
+    if (slotList) {
+        for (PK11SlotListElement *slotElement = slotList->head; slotElement; slotElement = slotElement->next) {
+            PK11SlotInfo *pSlot = slotElement->slot;
+            if (PK11_NeedLogin(pSlot)) {
+                SECStatus nRet = PK11_Authenticate(pSlot, PR_TRUE, nullptr);
+                // PK11_Authenticate may fail in case the a slot has not been initialized.
+                // this is the case if the user has a new profile, so that they have never
+                // added a personal certificate.
+                if (nRet != SECSuccess && PORT_GetError() != SEC_ERROR_IO)
+                    continue;
+            }
+
+            SECKEYPrivateKeyList *privKeyList = PK11_ListPrivateKeysInSlot(pSlot);
+            if (privKeyList) {
+                for (SECKEYPrivateKeyListNode *curPri = PRIVKEY_LIST_HEAD(privKeyList); !PRIVKEY_LIST_END(curPri, privKeyList) && curPri != nullptr; curPri = PRIVKEY_LIST_NEXT(curPri)) {
+                    if (curPri->key) {
+                        CERTCertificate *cert = PK11_GetCertFromPrivateKey(curPri->key);
+                        if (cert) {
+                            certsList.push_back(getCertificateInfoFromCERT(cert));
+                            CERT_DestroyCertificate(cert);
+                        }
+                    }
+                }
+                SECKEY_DestroyPrivateKeyList(privKeyList);
+            }
+        }
+    }
+
+    return certsList;
 }

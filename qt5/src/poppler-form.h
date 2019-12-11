@@ -10,6 +10,7 @@
  * Copyright (C) 2018, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2019, Adrian Johnson <ajohnson@redneon.com>
+ * Copyright (C) 2020, Thorsten Behrens <Thorsten.Behrens@CIB.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +33,7 @@
 #include <memory>
 #include <ctime>
 #include <QtCore/QDateTime>
+#include <QtCore/QVector>
 #include <QtCore/QList>
 #include <QtCore/QRectF>
 #include <QtCore/QStringList>
@@ -823,6 +825,8 @@ public:
 private:
     Q_DISABLE_COPY(FormFieldSignature)
 };
+
+QVector<CertificateInfo *> POPPLER_QT5_EXPORT getAvailableSigningCertificates();
 
 }
 
