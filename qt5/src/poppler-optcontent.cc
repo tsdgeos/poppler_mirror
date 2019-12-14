@@ -403,8 +403,8 @@ namespace Poppler
 
     const std::vector<::LinkOCGState::StateList*>& statesList = popplerLinkOCGState->getStateList();
     for (const ::LinkOCGState::StateList *stateList : statesList) {
-        const std::vector<Ref> *refsList = stateList->list;
-        for (const Ref& ref : *refsList) {
+        const std::vector<Ref>& refsList = stateList->list;
+        for (const Ref& ref : refsList) {
             OptContentItem *item = d->itemFromRef(QString::number(ref.num));
 
             if (stateList->st == ::LinkOCGState::On) {

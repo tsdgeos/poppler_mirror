@@ -449,12 +449,12 @@ public:
 
   enum State { On, Off, Toggle};
   struct StateList {
-    StateList() { list = nullptr; }
-    ~StateList();
+    StateList() = default;
+    ~StateList() = default;
     StateList(const StateList &) = delete;
     StateList& operator=(const StateList &) = delete;
     State st;
-    std::vector<Ref> *list;
+    std::vector<Ref> list;
   };
 
   const std::vector<StateList*>& getStateList() const { return stateList; }

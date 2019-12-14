@@ -853,7 +853,6 @@ LinkOCGState::LinkOCGState(const Object *obj)
 
 	const char *name = obj2.getName();
 	stList = new StateList();
-	stList->list = new std::vector<Ref>();
 	if (!strcmp (name, "ON")) {
 	  stList->st = On;
 	} else if (!strcmp (name, "OFF")) {
@@ -867,7 +866,7 @@ LinkOCGState::LinkOCGState(const Object *obj)
 	}
       } else if (obj2.isRef()) {
         if (stList) {
-	  stList->list->push_back(obj2.getRef());
+	  stList->list.push_back(obj2.getRef());
 	} else {
 	  error(errSyntaxWarning, -1, "Invalid OCG Action State array, expected name instead of ref");
 	}
@@ -893,12 +892,6 @@ LinkOCGState::LinkOCGState(const Object *obj)
 LinkOCGState::~LinkOCGState() {
   for (auto entry : stateList) {
     delete entry;
-  }
-}
-
-LinkOCGState::StateList::~StateList() {
-  if (list) {
-    delete list;
   }
 }
 

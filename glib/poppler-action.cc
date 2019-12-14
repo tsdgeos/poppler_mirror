@@ -603,7 +603,7 @@ build_ocg_state (PopplerDocument *document,
 			break;
 		}
 
-		for (const Ref& ref : (*list->list)) {
+		for (const Ref& ref : list->list) {
 			PopplerLayer *layer = get_layer_for_ref (document, document->layers, ref, preserve_rb);
 
 			action_layer->layers = g_list_prepend (action_layer->layers, layer);
