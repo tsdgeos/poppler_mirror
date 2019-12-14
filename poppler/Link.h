@@ -454,7 +454,7 @@ public:
     StateList(const StateList &) = delete;
     StateList& operator=(const StateList &) = delete;
     State st;
-    std::vector<Ref*> *list;
+    std::vector<Ref> *list;
   };
 
   const std::vector<StateList*>& getStateList() const { return stateList; }
