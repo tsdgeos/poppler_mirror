@@ -441,7 +441,7 @@ class LinkOCGState: public LinkAction {
 public:
   LinkOCGState(const Object *obj);
 
-  ~LinkOCGState() override;
+  ~LinkOCGState() override = default;
 
   bool isOk() const override { return isValid; }
 
@@ -451,17 +451,17 @@ public:
   struct StateList {
     StateList() = default;
     ~StateList() = default;
-    StateList(const StateList &) = delete;
+    StateList(const StateList &) = default;
     StateList& operator=(const StateList &) = delete;
     State st;
     std::vector<Ref> list;
   };
 
-  const std::vector<StateList*>& getStateList() const { return stateList; }
+  const std::vector<StateList>& getStateList() const { return stateList; }
   bool getPreserveRB() const { return preserveRB; }
 
 private:
-  std::vector<StateList*> stateList;
+  std::vector<StateList> stateList;
   bool isValid;
   bool preserveRB;
 };

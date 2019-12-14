@@ -401,15 +401,15 @@ namespace Poppler
 
     QSet<OptContentItem *> changedItems;
 
-    const std::vector<::LinkOCGState::StateList*>& statesList = popplerLinkOCGState->getStateList();
-    for (const ::LinkOCGState::StateList *stateList : statesList) {
-        const std::vector<Ref>& refsList = stateList->list;
+    const std::vector<::LinkOCGState::StateList>& statesList = popplerLinkOCGState->getStateList();
+    for (const ::LinkOCGState::StateList& stateList : statesList) {
+        const std::vector<Ref>& refsList = stateList.list;
         for (const Ref& ref : refsList) {
             OptContentItem *item = d->itemFromRef(QString::number(ref.num));
 
-            if (stateList->st == ::LinkOCGState::On) {
+            if (stateList.st == ::LinkOCGState::On) {
               item->setState(OptContentItem::On, popplerLinkOCGState->getPreserveRB(), changedItems);
-            } else if (stateList->st == ::LinkOCGState::Off) {
+            } else if (stateList.st == ::LinkOCGState::Off) {
               item->setState(OptContentItem::Off, popplerLinkOCGState->getPreserveRB(), changedItems);
             } else {
               OptContentItem::ItemState newState = item->state() == OptContentItem::On ? OptContentItem::Off : OptContentItem::On;
