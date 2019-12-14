@@ -443,7 +443,7 @@ public:
 
   ~LinkOCGState() override;
 
-  bool isOk() const override { return stateList != nullptr; }
+  bool isOk() const override { return isValid; }
 
   LinkActionKind getKind() const override { return actionOCGState; }
 
@@ -457,11 +457,12 @@ public:
     std::vector<Ref*> *list;
   };
 
-  const std::vector<StateList*> *getStateList() const { return stateList; }
+  const std::vector<StateList*>& getStateList() const { return stateList; }
   bool getPreserveRB() const { return preserveRB; }
 
 private:
-  std::vector<StateList*> *stateList;
+  std::vector<StateList*> stateList;
+  bool isValid;
   bool preserveRB;
 };
 

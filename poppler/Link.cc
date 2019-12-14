@@ -836,8 +836,9 @@ Object LinkJavaScript::createObject(XRef *xref, const GooString &js)
 //------------------------------------------------------------------------
 // LinkOCGState
 //------------------------------------------------------------------------
-LinkOCGState::LinkOCGState(const Object *obj) {
-  stateList = new std::vector<StateList*>();
+LinkOCGState::LinkOCGState(const Object *obj)
+: isValid(true)
+{
   preserveRB = true;
 
   Object obj1 = obj->dictLookup("State");
@@ -848,7 +849,7 @@ LinkOCGState::LinkOCGState(const Object *obj) {
       const Object &obj2 = obj1.arrayGetNF(i);
       if (obj2.isName()) {
         if (stList)
-	  stateList->push_back(stList);
+	  stateList.push_back(stList);
 
 	const char *name = obj2.getName();
 	stList = new StateList();
@@ -875,15 +876,15 @@ LinkOCGState::LinkOCGState(const Object *obj) {
 	}
       } else {
         error(errSyntaxWarning, -1, "Invalid item in OCG Action State array");
+        isValid = false;
       }
     }
     // Add the last group
     if (stList)
-      stateList->push_back(stList);
+      stateList.push_back(stList);
   } else {
     error(errSyntaxWarning, -1, "Invalid OCGState action");
-    delete stateList;
-    stateList = nullptr;
+    isValid = false;
   }
 
   obj1 = obj->dictLookup("PreserveRB");
@@ -893,11 +894,8 @@ LinkOCGState::LinkOCGState(const Object *obj) {
 }
 
 LinkOCGState::~LinkOCGState() {
-  if (stateList) {
-    for (auto entry : *stateList) {
-      delete entry;
-    }
-    delete stateList;
+  for (auto entry : stateList) {
+    delete entry;
   }
 }
 
