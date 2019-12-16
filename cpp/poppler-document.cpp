@@ -868,6 +868,32 @@ bool document::is_linearized() const
 }
 
 /**
+ \returns the form type within the document
+ \since 25.04
+ */
+enum document::form_type document::form_type() const
+{
+    switch (d->doc->getCatalog()->getFormType()) {
+    case Catalog::AcroForm:
+        return form_type::acro;
+    case Catalog::XfaForm:
+        return form_type::xfa;
+    case Catalog::NoForm:
+    default:
+        return form_type::none;
+    }
+}
+
+/**
+ \returns true if the document contains javascript
+ \since 25.04
+ */
+bool document::has_javascript() const
+{
+    return d->doc->getCatalog()->numJS() > 0;
+}
+
+/**
  Check for available "document permission".
 
  \returns whether the specified permission is allowed
