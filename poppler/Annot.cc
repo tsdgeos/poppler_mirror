@@ -3752,6 +3752,7 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, Object &&dictObject, const Object *obj) :
 {
     type = typeWidget;
     field = nullptr;
+    formWidget = nullptr;
     initialize(docA, annotObj.getDict());
 }
 
@@ -3759,6 +3760,7 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, Object *dictObject, Object *obj, FormFiel
 {
     type = typeWidget;
     field = fieldA;
+    formWidget = nullptr;
     initialize(docA, dictObject->getDict());
 }
 
