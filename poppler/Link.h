@@ -451,8 +451,6 @@ public:
   struct StateList {
     StateList() = default;
     ~StateList() = default;
-    StateList(const StateList &) = default;
-    StateList& operator=(const StateList &) = delete;
     State st;
     std::vector<Ref> list;
   };
