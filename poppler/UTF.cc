@@ -446,7 +446,7 @@ void unicodeToAscii7(Unicode *in, int len, Unicode **ucs4_out,
     if (!in_idx)
       indices = nullptr;
     else
-      idx = (int *) gmallocn(len * 2 + 1, sizeof(int));
+      idx = (int *) gmallocn(len * 8 + 1, sizeof(int));
   }
 
   GooString gstr;

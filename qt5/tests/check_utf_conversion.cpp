@@ -1,7 +1,12 @@
 #include <QtCore/QScopedPointer>
 #include <QtTest/QtTest>
 
+#include <poppler-private.h>
+
 #include <cstring>
+
+#include "GlobalParams.h"
+#include "UnicodeTypeTable.h"
 #include "UTF.h"
 
 class TestUTFConversion : public QObject
@@ -12,6 +17,7 @@ public:
 private slots:
     void testUTF_data();
     void testUTF();
+    void testUnicodeToAscii7();
 };
 
 static bool compare(const char *a, const char *b)
@@ -26,6 +32,16 @@ static bool compare(const uint16_t *a, const uint16_t *b)
 	    return false;
     }
     return *a == *b;
+}
+
+static bool compare(const Unicode *a, const char *b, int len)
+{
+  for (int i = 0; i < len; i++) {
+    if (a[i] != (Unicode) b[i])
+        return false;
+  }
+
+  return *a == (Unicode) *b;
 }
 
 void TestUTFConversion::testUTF_data()
@@ -86,6 +102,45 @@ void TestUTFConversion::testUTF()
     free (utf8String);
 
     free(str);
+}
+
+void TestUTFConversion::testUnicodeToAscii7()
+{
+  globalParams = std::make_unique<GlobalParams>();
+
+  // Test string is one 'Registered' and twenty 'Copyright' chars
+  // so it's long enough to reproduce the bug given that glibc
+  // malloc() always returns 8-byte aligned memory addresses.
+  GooString *goo = Poppler::QStringToUnicodeGooString(QString::fromUtf8("®©©©©©©©©©©©©©©©©©©©©")); //clazy:exclude=qstring-allocations
+
+  Unicode *in;
+  const int in_len = TextStringToUCS4(goo, &in);
+
+  delete goo;
+
+  int in_norm_len;
+  int *in_norm_idx;
+  Unicode *in_norm = unicodeNormalizeNFKC(in, in_len, &in_norm_len, &in_norm_idx, true);
+
+  free(in);
+
+  Unicode *out;
+  int out_len;
+  int *out_ascii_idx;
+
+  unicodeToAscii7(in_norm, in_norm_len, &out, &out_len, in_norm_idx, &out_ascii_idx);
+
+  free(in_norm);
+  free(in_norm_idx);
+
+  //ascii7 conversion: ® -> (R)   © -> (c)
+  const char *expected_ascii = (char*) "(R)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)";
+
+  QCOMPARE(out_len, (int)strlen(expected_ascii) );
+  QVERIFY( compare(out, expected_ascii, out_len) );
+
+  free(out);
+  free(out_ascii_idx);
 }
 
 QTEST_GUILESS_MAIN(TestUTFConversion)

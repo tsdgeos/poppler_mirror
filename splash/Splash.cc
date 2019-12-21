@@ -206,35 +206,6 @@ static void blendXor(SplashColorPtr src, SplashColorPtr dest,
 }
 
 //------------------------------------------------------------------------
-// modified region
-//------------------------------------------------------------------------
-
-void Splash::clearModRegion() {
-  modXMin = bitmap->getWidth();
-  modYMin = bitmap->getHeight();
-  modXMax = -1;
-  modYMax = -1;
-}
-
-inline void Splash::updateModX(int x) {
-  if (x < modXMin) {
-    modXMin = x;
-  }
-  if (x > modXMax) {
-    modXMax = x;
-  }
-}
-
-inline void Splash::updateModY(int y) {
-  if (y < modYMin) {
-    modYMin = y;
-  }
-  if (y > modYMax) {
-    modYMax = y;
-  }
-}
-
-//------------------------------------------------------------------------
 // pipeline
 //------------------------------------------------------------------------
 
@@ -1398,8 +1369,6 @@ inline void Splash::drawPixel(SplashPipe *pipe, int x, int y, bool noClip) {
   if (noClip || state->clip->test(x, y)) {
     pipeSetXY(pipe, x, y);
     (this->*pipe->run)(pipe);
-    updateModX(x);
-    updateModY(y);
   }
 }
 
@@ -1460,8 +1429,6 @@ inline void Splash::drawAAPixel(SplashPipe *pipe, int x, int y) {
     pipeSetXY(pipe, x, y);
     pipe->shape = div255(aaGamma[t] * pipe->shape);
     (this->*pipe->run)(pipe);
-    updateModX(x);
-    updateModY(y);
   }
 }
 
@@ -1474,9 +1441,6 @@ inline void Splash::drawSpan(SplashPipe *pipe, int x0, int x1, int y,
     for (x = x0; x <= x1; ++x) {
       (this->*pipe->run)(pipe);
     }
-    updateModX(x0);
-    updateModX(x1);
-    updateModY(y);
   } else {
     if (x0 < state->clip->getXMinI()) {
       x0 = state->clip->getXMinI();
@@ -1488,8 +1452,6 @@ inline void Splash::drawSpan(SplashPipe *pipe, int x0, int x1, int y,
     for (x = x0; x <= x1; ++x) {
       if (state->clip->test(x, y)) {
 	(this->*pipe->run)(pipe);
-	updateModX(x);
-	updateModY(y);
       } else {
 	pipeIncX(pipe);
       }
@@ -1542,8 +1504,6 @@ inline void Splash::drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adj
     if (t != 0) {
       pipe->shape = (adjustLine) ? div255((int) lineOpacity * (double)aaGamma[t]) : (double)aaGamma[t];
       (this->*pipe->run)(pipe);
-      updateModX(x);
-      updateModY(y);
     } else {
       pipeIncX(pipe);
     }
@@ -1590,7 +1550,6 @@ Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA,
   }
   minLineWidth = 0;
   thinLineMode = splashThinLineDefault;
-  clearModRegion();
   debugMode = false;
   alpha0Bitmap = nullptr;
 }
@@ -1618,7 +1577,6 @@ Splash::Splash(SplashBitmap *bitmapA, bool vectorAntialiasA,
   }
   minLineWidth = 0;
   thinLineMode = splashThinLineDefault;
-  clearModRegion();
   debugMode = false;
   alpha0Bitmap = nullptr;
 }
@@ -1989,11 +1947,6 @@ void Splash::clear(SplashColorPtr color, unsigned char alpha) {
   if (bitmap->alpha) {
     memset(bitmap->alpha, alpha, bitmap->width * bitmap->height);
   }
-
-  updateModX(0);
-  updateModY(0);
-  updateModX(bitmap->width - 1);
-  updateModY(bitmap->height - 1);
 }
 
 SplashError Splash::stroke(SplashPath *path) {
@@ -2783,8 +2736,6 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, bool noClip) {
           if (alpha != 0) {
             pipe.shape = alpha;
             (this->*pipe.run)(&pipe);
-            updateModX(x1);
-            updateModY(y1);
           } else {
             pipeIncX(&pipe);
           }
@@ -2803,8 +2754,6 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, bool noClip) {
           for (xx1 = 0; xx1 < 8 && xx + xx1 < xxLimit; ++xx1, ++x1) {
             if (alpha0 & 0x80) {
               (this->*pipe.run)(&pipe);
-              updateModX(x1);
-              updateModY(y1);
             } else {
               pipeIncX(&pipe);
             }
@@ -2826,8 +2775,6 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, bool noClip) {
             if (alpha != 0) {
               pipe.shape = alpha;
               (this->*pipe.run)(&pipe);
-              updateModX(x1);
-              updateModY(y1);
             } else {
               pipeIncX(&pipe);
             }
@@ -2850,8 +2797,6 @@ void Splash::fillGlyph2(int x0, int y0, SplashGlyphBitmap *glyph, bool noClip) {
             if (state->clip->test(x1, y1)) {
               if (alpha0 & 0x80) {
                 (this->*pipe.run)(&pipe);
-                updateModX(x1);
-                updateModY(y1);
               } else {
                 pipeIncX(&pipe);
               }
@@ -3624,10 +3569,6 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
 	  ++p;
 	}
       }
-      updateModX(xDest);
-      updateModX(xDest + w - 1);
-      updateModY(yDest);
-      updateModY(yDest + h - 1);
     } else {
       for (y = 0; y < h; ++y) {
 	pipeSetXY(&pipe, xDest, yDest + y);
@@ -3635,8 +3576,6 @@ void Splash::blitMask(SplashBitmap *src, int xDest, int yDest,
 	  if (*p && state->clip->test(xDest + x, yDest + y)) {
 	    pipe.shape = *p;
 	    (this->*pipe.run)(&pipe);
-	    updateModX(xDest + x);
-	    updateModY(yDest + y);
 	  } else {
 	    pipeIncX(&pipe);
 	  }
@@ -5103,10 +5042,6 @@ void Splash::blitImage(SplashBitmap *src, bool srcAlpha, int xDest, int yDest,
 	}
       }
     }
-    updateModX(xDest + x0);
-    updateModX(xDest + x1 - 1);
-    updateModY(yDest + y0);
-    updateModY(yDest + y1 - 1);
   }
 
   // draw the clipped regions
@@ -5167,8 +5102,6 @@ void Splash::blitImageClipped(SplashBitmap *src, bool srcAlpha,
 	    src->getPixel(xSrc + x, ySrc + y, pixel);
 	    pipe.shape = *ap++;
 	    (this->*pipe.run)(&pipe);
-	    updateModX(xDest + x);
-	    updateModY(yDest + y);
 	  } else {
 	    pipeIncX(&pipe);
 	    ++ap;
@@ -5182,8 +5115,6 @@ void Splash::blitImageClipped(SplashBitmap *src, bool srcAlpha,
 	  if (state->clip->test(xDest + x, yDest + y)) {
 	    src->getPixel(xSrc + x, ySrc + y, pixel);
 	    (this->*pipe.run)(&pipe);
-	    updateModX(xDest + x);
-	    updateModY(yDest + y);
 	  } else {
 	    pipeIncX(&pipe);
 	  }
@@ -5232,10 +5163,6 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
 	  (this->*pipe.run)(&pipe);
 	}
       }
-      updateModX(xDest);
-      updateModX(xDest + w - 1);
-      updateModY(yDest);
-      updateModY(yDest + h - 1);
     } else {
       for (y = 0; y < h; ++y) {
 	pipeSetXY(&pipe, xDest, yDest + y);
@@ -5248,8 +5175,6 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
 	    // correct, but works out the same
 	    pipe.shape = alpha;
 	    (this->*pipe.run)(&pipe);
-	    updateModX(xDest + x);
-	    updateModY(yDest + y);
 	  } else {
 	    pipeIncX(&pipe);
 	  }
@@ -5267,10 +5192,6 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
 	  (this->*pipe.run)(&pipe);
 	}
       }
-      updateModX(xDest);
-      updateModX(xDest + w - 1);
-      updateModY(yDest);
-      updateModY(yDest + h - 1);
     } else {
       for (y = 0; y < h; ++y) {
 	pipeSetXY(&pipe, xDest, yDest + y);
@@ -5278,8 +5199,6 @@ SplashError Splash::composite(SplashBitmap *src, int xSrc, int ySrc,
 	  src->getPixel(xSrc + x, ySrc + y, pixel);
 	  if (state->clip->test(xDest + x, yDest + y)) {
 	    (this->*pipe.run)(&pipe);
-	    updateModX(xDest + x);
-	    updateModY(yDest + y);
 	  } else {
 	    pipeIncX(&pipe);
 	  }

@@ -403,12 +403,6 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   psShrinkLarger = true;
   psLevel = psLevel2;
   textEncoding = new GooString("UTF-8");
-#if defined(_WIN32)
-  textEOL = eolDOS;
-#else
-  textEOL = eolUnix;
-#endif
-  textPageBreaks = true;
   overprintPreview = false;
   printCommands = false;
   profileCommands = false;
@@ -1138,16 +1132,6 @@ std::string GlobalParams::getTextEncodingName() const {
   return textEncoding->toStr();
 }
 
-EndOfLineKind GlobalParams::getTextEOL() {
-  globalParamsLocker();
-  return textEOL;
-}
-
-bool GlobalParams::getTextPageBreaks() {
-  globalParamsLocker();
-  return textPageBreaks;
-}
-
 bool GlobalParams::getPrintCommands() {
   globalParamsLocker();
   return printCommands;
@@ -1244,25 +1228,6 @@ void GlobalParams::setTextEncoding(const char *encodingName) {
   globalParamsLocker();
   delete textEncoding;
   textEncoding = new GooString(encodingName);
-}
-
-bool GlobalParams::setTextEOL(const char *s) {
-  globalParamsLocker();
-  if (!strcmp(s, "unix")) {
-    textEOL = eolUnix;
-  } else if (!strcmp(s, "dos")) {
-    textEOL = eolDOS;
-  } else if (!strcmp(s, "mac")) {
-    textEOL = eolMac;
-  } else {
-    return false;
-  }
-  return true;
-}
-
-void GlobalParams::setTextPageBreaks(bool pageBreaks) {
-  globalParamsLocker();
-  textPageBreaks = pageBreaks;
 }
 
 void GlobalParams::setOverprintPreview(bool overprintPreviewA) {

@@ -441,27 +441,26 @@ class LinkOCGState: public LinkAction {
 public:
   LinkOCGState(const Object *obj);
 
-  ~LinkOCGState() override;
+  ~LinkOCGState() override = default;
 
-  bool isOk() const override { return stateList != nullptr; }
+  bool isOk() const override { return isValid; }
 
   LinkActionKind getKind() const override { return actionOCGState; }
 
   enum State { On, Off, Toggle};
   struct StateList {
-    StateList() { list = nullptr; }
-    ~StateList();
-    StateList(const StateList &) = delete;
-    StateList& operator=(const StateList &) = delete;
+    StateList() = default;
+    ~StateList() = default;
     State st;
-    std::vector<Ref*> *list;
+    std::vector<Ref> list;
   };
 
-  const std::vector<StateList*> *getStateList() const { return stateList; }
+  const std::vector<StateList>& getStateList() const { return stateList; }
   bool getPreserveRB() const { return preserveRB; }
 
 private:
-  std::vector<StateList*> *stateList;
+  std::vector<StateList> stateList;
+  bool isValid;
   bool preserveRB;
 };
 

@@ -365,12 +365,6 @@ public:
   // Get the Splash object.
   Splash *getSplash() { return splash; }
 
-  // Get the modified region.
-  void getModRegion(int *xMin, int *yMin, int *xMax, int *yMax);
-
-  // Clear the modified region.
-  void clearModRegion();
-
   SplashFont *getCurrentFont() { return font; }
 
   // If <skipTextA> is true, don't draw horizontal text.

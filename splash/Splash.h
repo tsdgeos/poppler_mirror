@@ -250,14 +250,6 @@ public:
   void setThinLineMode(SplashThinLineMode thinLineModeA) { thinLineMode = thinLineModeA; }
   SplashThinLineMode getThinLineMode() { return thinLineMode; }
 
-  // Get a bounding box which includes all modifications since the
-  // last call to clearModRegion.
-  void getModRegion(int *xMin, int *yMin, int *xMax, int *yMax)
-    { *xMin = modXMin; *yMin = modYMin; *xMax = modXMax; *yMax = modYMax; }
-
-  // Clear the modified region bounding box.
-  void clearModRegion();
-
   // Get clipping status for the last drawing operation subject to
   // clipping.
   SplashClipResult getClipRes() { return opClipRes; }
@@ -308,8 +300,6 @@ private:
   void drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adjustLine = false, unsigned char lineOpacity = 0);
   void transform(const SplashCoord *matrix, SplashCoord xi, SplashCoord yi,
 		 SplashCoord *xo, SplashCoord *yo);
-  void updateModX(int x);
-  void updateModY(int y);
   void strokeNarrow(SplashPath *path);
   void strokeWide(SplashPath *path, SplashCoord w);
   SplashPath *flattenPath(SplashPath *path, SplashCoord *matrix,
@@ -409,7 +399,6 @@ private:
   SplashCoord aaGamma[splashAASize * splashAASize + 1];
   SplashCoord minLineWidth;
   SplashThinLineMode thinLineMode;
-  int modXMin, modYMin, modXMax, modYMax;
   SplashClipResult opClipRes;
   bool vectorAntialias;
   bool inShading;

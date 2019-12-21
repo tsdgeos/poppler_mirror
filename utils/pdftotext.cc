@@ -88,7 +88,7 @@ static bool rawOrder = false;
 static bool discardDiag = false;
 static bool htmlMeta = false;
 static char textEncName[128] = "";
-static char textEOL[16] = "";
+static char textEOLStr[16] = "";
 static bool noPageBreaks = false;
 static char ownerPassword[33] = "\001";
 static char userPassword[33] = "\001";
@@ -126,7 +126,7 @@ static const ArgDesc argDesc[] = {
    "output text encoding name"},
   {"-listenc",argFlag,     &printEnc,      0,
    "list available encodings"},
-  {"-eol",     argString,   textEOL,        sizeof(textEOL),
+  {"-eol",     argString,   textEOLStr,        sizeof(textEOLStr),
    "output end-of-line convention (unix, dos, or mac)"},
   {"-nopgbrk", argFlag,     &noPageBreaks,  0,
    "don't insert page breaks between pages"},
@@ -188,6 +188,7 @@ int main(int argc, char *argv[]) {
   Object info;
   bool ok;
   int exitCode;
+  EndOfLineKind textEOL = TextOutputDev::defaultEndOfLine();
 
   Win32Console win32Console(&argc, &argv);
   exitCode = 99;
@@ -229,13 +230,16 @@ int main(int argc, char *argv[]) {
   if (textEncName[0]) {
     globalParams->setTextEncoding(textEncName);
   }
-  if (textEOL[0]) {
-    if (!globalParams->setTextEOL(textEOL)) {
+  if (textEOLStr[0]) {
+    if (!strcmp(textEOLStr, "unix")) {
+      textEOL = eolUnix;
+    } else if (!strcmp(textEOLStr, "dos")) {
+      textEOL = eolDOS;
+    } else if (!strcmp(textEOLStr, "mac")) {
+      textEOL = eolMac;
+    } else {
       fprintf(stderr, "Bad '-eol' value on command line\n");
     }
-  }
-  if (noPageBreaks) {
-    globalParams->setTextPageBreaks(false);
   }
   if (quiet) {
     globalParams->setErrQuiet(quiet);
@@ -370,6 +374,10 @@ int main(int argc, char *argv[]) {
     textOut = new TextOutputDev(nullptr, physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
 
     if (textOut->isOk()) {
+      textOut->setTextEOL(textEOL);
+      if (noPageBreaks) {
+	textOut->setTextPageBreaks(false);
+      }
       if (bboxLayout) {
         printDocBBox(f, doc, textOut, firstPage, lastPage);
       }
@@ -384,6 +392,10 @@ int main(int argc, char *argv[]) {
     textOut = new TextOutputDev(textFileName->c_str(),
 				physLayout, fixedPitch, rawOrder, htmlMeta, discardDiag);
     if (textOut->isOk()) {
+      textOut->setTextEOL(textEOL);
+      if (noPageBreaks) {
+	textOut->setTextPageBreaks(false);
+      }
       if ((w==0) && (h==0) && (x==0) && (y==0)) {
 	doc->displayPages(textOut, firstPage, lastPage, resolution, resolution, 0,
 			  true, false, false);

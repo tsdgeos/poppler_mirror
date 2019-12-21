@@ -13,6 +13,7 @@
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2019 Alexey Pavlov <alexpux@gmail.com>
 // Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2019 Nelson Efrain A. Cruz <neac03@gmail.com>
 //
 //========================================================================
 
@@ -96,12 +97,12 @@ static char *getReadableTime(time_t unix_time)
   return time_str;
 }
 
-static void dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_widget, const char *filename)
+static bool dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_widget, const char *filename)
 {
     const GooString *signature = sig_widget->getSignature();
     if (!signature) {
         printf("Cannot dump signature #%d\n", sig_num);
-        return;
+        return false;
     }
 
     const int sigCountLength = numberOfCharacters(sigCount);
@@ -116,6 +117,8 @@ static void dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_wi
     outfile.close();
     delete format;
     delete path;
+
+    return true;
 }
 
 static GooString nssDir;
@@ -189,9 +192,13 @@ int main(int argc, char *argv[])
 
   if (sigCount >= 1) {
     if (dumpSignatures) {
+      exitCode = 0;
       printf("Dumping Signatures: %u\n", sigCount);
       for (unsigned int i = 0; i < sigCount; i++) {
-        dumpSignature(i, sigCount, sig_widgets.at(i), fileName->c_str());
+        const bool dumpingOk = dumpSignature(i, sigCount, sig_widgets.at(i), fileName->c_str());
+        if (!dumpingOk) {
+          exitCode = 3;
+        }
       }
       goto end;
     } else {

@@ -27,6 +27,7 @@
 // Copyright (C) 2018 Evangelos Rigas <erigas@rnd2.org>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 Thomas Fischer <fischer@unix-ag.uni-kl.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -665,7 +666,7 @@ static void printPdfSubtype(PDFDoc *doc, UnicodeMap *uMap) {
 static void printInfo(PDFDoc *doc, UnicodeMap *uMap, long long filesize, bool multiPage) {
   Page *page;
   char buf[256];
-  double w, h, wISO, hISO;
+  double w, h, wISO, hISO, isoThreshold;
   int pg, i;
   int r;
 
@@ -767,20 +768,22 @@ static void printInfo(PDFDoc *doc, UnicodeMap *uMap, long long filesize, bool mu
     } else {
       printf("Page size:      %g x %g pts", w, h);
     }
-    if ((fabs(w - 612) < 0.1 && fabs(h - 792) < 0.1) ||
-	(fabs(w - 792) < 0.1 && fabs(h - 612) < 0.1)) {
+    if ((fabs(w - 612) < 1 && fabs(h - 792) < 1) ||
+       (fabs(w - 792) < 1 && fabs(h - 612) < 1)) {
       printf(" (letter)");
     } else {
       hISO = sqrt(sqrt(2.0)) * 7200 / 2.54;
       wISO = hISO / sqrt(2.0);
+      isoThreshold = hISO * 0.003; ///< allow for 0.3% error when guessing conformance to ISO 216, A series
       for (i = 0; i <= 6; ++i) {
-	if ((fabs(w - wISO) < 1 && fabs(h - hISO) < 1) ||
-	    (fabs(w - hISO) < 1 && fabs(h - wISO) < 1)) {
+	if ((fabs(w - wISO) < isoThreshold && fabs(h - hISO) < isoThreshold) ||
+	    (fabs(w - hISO) < isoThreshold && fabs(h - wISO) < isoThreshold)) {
 	  printf(" (A%d)", i);
 	  break;
 	}
 	hISO = wISO;
 	wISO /= sqrt(2.0);
+	isoThreshold /= sqrt(2.0);
       }
     }
     printf("\n");

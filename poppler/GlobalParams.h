@@ -88,12 +88,6 @@ enum PSLevel {
 
 //------------------------------------------------------------------------
 
-enum EndOfLineKind {
-  eolUnix,			// LF
-  eolDOS,			// CR+LF
-  eolMac			// CR
-};
-
 //------------------------------------------------------------------------
 
 class GlobalParams {
@@ -134,8 +128,6 @@ public:
   bool getPSShrinkLarger();
   PSLevel getPSLevel();
   std::string getTextEncodingName() const;
-  EndOfLineKind getTextEOL();
-  bool getTextPageBreaks();
   bool getOverprintPreview() { return overprintPreview; }
   bool getPrintCommands();
   bool getProfileCommands();
@@ -154,8 +146,6 @@ public:
   void setPSShrinkLarger(bool shrink);
   void setPSLevel(PSLevel level);
   void setTextEncoding(const char *encodingName);
-  bool setTextEOL(const char *s);
-  void setTextPageBreaks(bool pageBreaks);
   void setOverprintPreview(bool overprintPreviewA);
   void setPrintCommands(bool printCommandsA);
   void setProfileCommands(bool profileCommandsA);
@@ -209,9 +199,6 @@ private:
   PSLevel psLevel;		// PostScript level to generate
   GooString *textEncoding;	// encoding (unicodeMap) to use for text
 				//   output
-  EndOfLineKind textEOL;	// type of EOL marker to use for text
-				//   output
-  bool textPageBreaks;		// insert end-of-page markers?
   bool overprintPreview;	// enable overprint preview
   bool printCommands;		// print the drawing commands
   bool profileCommands;	// profile the drawing commands

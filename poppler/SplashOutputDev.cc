@@ -4310,15 +4310,6 @@ SplashBitmap *SplashOutputDev::takeBitmap() {
   return ret;
 }
 
-void SplashOutputDev::getModRegion(int *xMin, int *yMin,
-				   int *xMax, int *yMax) {
-  splash->getModRegion(xMin, yMin, xMax, yMax);
-}
-
-void SplashOutputDev::clearModRegion() {
-  splash->clearModRegion();
-}
-
 #if 1 //~tmp: turn off anti-aliasing temporarily
 bool SplashOutputDev::getVectorAntialias() {
   return splash->getVectorAntialias();

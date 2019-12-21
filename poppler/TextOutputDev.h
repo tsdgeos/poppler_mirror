@@ -70,6 +70,12 @@ enum SelectionStyle {
   selectionStyleLine
 };
 
+enum EndOfLineKind {
+  eolUnix,			// LF
+  eolDOS,			// CR+LF
+  eolMac			// CR
+};
+
 //------------------------------------------------------------------------
 // TextFontInfo
 //------------------------------------------------------------------------
@@ -626,7 +632,7 @@ public:
 
   // Get the text which is inside the specified rectangle.
   GooString *getText(double xMin, double yMin,
-		     double xMax, double yMax) const;
+		     double xMax, double yMax, EndOfLineKind textEOL) const;
 
   void visitSelection(TextSelectionVisitor *visitor,
 		      const PDFRectangle *selection,
@@ -659,7 +665,7 @@ public:
 
   // Dump contents of page to a file.
   void dump(void *outputStream, TextOutputFunc outputFunc,
-	    bool physLayout);
+	    bool physLayout, EndOfLineKind textEOL, bool pageBreaks);
 
   // Get the head of the linked list of TextFlows.
   const TextFlow *getFlows() const { return flows; }
@@ -912,6 +918,16 @@ public:
   // last rasterized page.
   const TextFlow *getFlows() const;
 
+  static constexpr EndOfLineKind defaultEndOfLine() {
+#if defined(_WIN32)
+    return eolDOS;
+#else
+    return eolUnix;
+#endif
+  }
+  void setTextEOL(EndOfLineKind textEOLA) { textEOL = textEOLA; }
+  void setTextPageBreaks(bool textPageBreaksA) { textPageBreaks = textPageBreaksA; }
+
 private:
 
   TextOutputFunc outputFunc;	// output function
@@ -930,6 +946,8 @@ private:
 				// to skip watermarks drawn on top of body text, etc.
   bool doHTML;			// extra processing for HTML conversion
   bool ok;			// set up ok?
+  bool textPageBreaks;		// insert end-of-page markers?
+  EndOfLineKind textEOL;       // type of EOL marker to use
 
   ActualText *actualText;
 };

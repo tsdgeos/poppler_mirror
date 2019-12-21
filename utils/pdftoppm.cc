@@ -30,6 +30,8 @@
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 // Copyright (C) 2019 Yves-Gaël Chény <gitlab@r0b0t.fr>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 <corentinf@free.fr>
+// Copyright (C) 2019 Kris Jurka <jurka@ejurka.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -74,6 +76,7 @@ static int lastPage = 0;
 static bool printOnlyOdd = false;
 static bool printOnlyEven = false;
 static bool singleFile = false;
+static bool scaleDimensionBeforeRotation = false;
 static double resolution = 0.0;
 static double x_resolution = 150.0;
 static double y_resolution = 150.0;
@@ -128,6 +131,8 @@ static const ArgDesc argDesc[] = {
    "print only even pages"},
   {"-singlefile", argFlag,  &singleFile,   0,
    "write only the first page and do not add digits"},
+  {"-scale-dimension-before-rotation", argFlag,  &scaleDimensionBeforeRotation,   0,
+   "for rotated pdf, resize dimensions before the rotation"},
 
   {"-r",      argFP,       &resolution,    0,
    "resolution, in DPI (default is 150)"},
@@ -217,6 +222,11 @@ static const ArgDesc argDesc[] = {
    "print usage information"},
   {}
 };
+
+static bool needToRotate(int angle)
+{
+    return (angle == 90) || (angle == 270);
+}
 
 static bool parseJpegOptions()
 {
@@ -395,7 +405,7 @@ int main(int argc, char *argv[]) {
   bool ok;
   int exitCode;
   int pg, pg_num_len;
-  double pg_w, pg_h, tmp;
+  double pg_w, pg_h;
 
   Win32Console win32Console(&argc, &argv);
   exitCode = 99;
@@ -509,6 +519,17 @@ int main(int argc, char *argv[]) {
     goto err1;
   }
 
+  // If our page range selection and document size indicate we're only
+  // outputting a single page, ensure that even/odd page selection doesn't
+  // filter out that single page.
+  if (firstPage == lastPage &&
+       ((printOnlyEven && firstPage % 2 == 0) ||
+        (printOnlyOdd && firstPage % 2 == 1))) {
+    fprintf(stderr, "Invalid even/odd page selection, no pages match criteria.\n");
+    goto err1;
+  }
+
+
   if (singleFile && firstPage < lastPage) {
     if (!quiet) {
       fprintf(stderr,
@@ -558,6 +579,9 @@ int main(int argc, char *argv[]) {
       pg_h = doc->getPageMediaHeight(pg);
     }
 
+    if (scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg)))
+      std::swap(pg_w, pg_h);
+
     if (scaleTo != 0) {
       resolution = (72.0 * scaleTo) / (pg_w > pg_h ? pg_w : pg_h);
       x_resolution = y_resolution = resolution;
@@ -575,11 +599,10 @@ int main(int argc, char *argv[]) {
     }
     pg_w = pg_w * (x_resolution / 72.0);
     pg_h = pg_h * (y_resolution / 72.0);
-    if ((doc->getPageRotate(pg) == 90) || (doc->getPageRotate(pg) == 270)) {
-      tmp = pg_w;
-      pg_w = pg_h;
-      pg_h = tmp;
-    }
+
+    if (!scaleDimensionBeforeRotation && needToRotate(doc->getPageRotate(pg)))
+      std::swap(pg_w, pg_h);
+
     if (ppmRoot != nullptr) {
       const char *ext = png ? "png" : (jpeg || jpegcmyk) ? "jpg" : tiff ? "tif" : mono ? "pbm" : gray ? "pgm" : "ppm";
       if (singleFile && !forceNum ) {

@@ -29,7 +29,7 @@
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2015 Philipp Reinkemeier <philipp.reinkemeier@offis.de>
-// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -337,21 +337,19 @@ Dict *Page::getResourceDictCopy(XRef *xrefA) {
 }
 
 void Page::replaceXRef(XRef *xrefA) {
-  Object obj1;
   Dict *pageDict = pageObj.getDict()->copy(xrefA);
   xref = xrefA;
   trans = pageDict->lookupNF("Trans").copy();
   annotsObj = pageDict->lookupNF("Annots").copy();
   contents = pageDict->lookupNF("Contents").copy();
   if (contents.isArray()) {
-    obj1 = pageDict->lookupNF("Contents").copy();
-    contents = obj1.getArray()->copy(xrefA);
+    contents = Object(contents.getArray()->copy(xrefA));
   }
   thumb = pageDict->lookupNF("Thumb").copy();
   actions = pageDict->lookupNF("AA").copy();
-  obj1 = pageDict->lookup("Resources");
-  if (obj1.isDict()) {
-    attrs->replaceResource(std::move(obj1));
+  Object resources = pageDict->lookup("Resources");
+  if (resources.isDict()) {
+    attrs->replaceResource(std::move(resources));
   }
   delete pageDict;
 }
