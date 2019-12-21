@@ -22,6 +22,7 @@ matrix:
     - os: osx
       osx_image: xcode10.1
       before_install:
+        - brew uninstall poppler gdal postgis
         - brew install poppler --only-dependencies --build-from-source
       script: cmake . -DFONT_CONFIGURATION=generic -DBUILD_SHARED_LIBS=OFF && make
 
