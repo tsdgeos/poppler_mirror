@@ -1,6 +1,6 @@
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
-#include <QtCore/QTime>
+#include <QtCore/QElapsedTimer>
 #include <QtWidgets/QApplication>
 #include <QtGui/QImage>
 
@@ -15,7 +15,7 @@ int main( int argc, char **argv )
     Q_UNUSED( argc );
     Q_UNUSED( argv );
 
-    QTime t;
+    QElapsedTimer t;
     t.start();
     QDir dbDir( QStringLiteral( "./pdfdb" ) );
     if ( !dbDir.exists() ) {
