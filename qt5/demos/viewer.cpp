@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2008-2009, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2019, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2009, Shawn Rutledge <shawn.t.rutledge@gmail.com>
  * Copyright (C) 2013, Fabio D'Urso <fabiodurso@hotmail.it>
  *
@@ -78,11 +78,11 @@ PdfViewer::PdfViewer(QWidget *parent)
     act = settingsRenderMenu->addAction(tr("Splash"));
     act->setCheckable(true);
     act->setChecked(true);
-    act->setData(qVariantFromValue(0));
+    act->setData(QVariant::fromValue(0));
     m_settingsRenderBackendGrp->addAction(act);
     act = settingsRenderMenu->addAction(tr("Arthur"));
     act->setCheckable(true);
-    act->setData(qVariantFromValue(1));
+    act->setData(QVariant::fromValue(1));
     m_settingsRenderBackendGrp->addAction(act);
     connect(m_settingsRenderBackendGrp, &QActionGroup::triggered,
             this, &PdfViewer::slotRenderBackend);

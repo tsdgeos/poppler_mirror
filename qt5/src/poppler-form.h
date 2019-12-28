@@ -28,6 +28,7 @@
 #ifndef _POPPLER_QT5_FORM_H_
 #define _POPPLER_QT5_FORM_H_
 
+#include <memory>
 #include <ctime>
 #include <QtCore/QDateTime>
 #include <QtCore/QList>
@@ -205,9 +206,9 @@ namespace Poppler {
 
     protected:
 	/// \cond PRIVATE
-	FormField(FormFieldData &dd);
+	FormField(std::unique_ptr<FormFieldData> dd);
 
-	FormFieldData *m_formData;
+	std::unique_ptr<FormFieldData> m_formData;
 	/// \endcond
 
     private:

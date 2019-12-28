@@ -4356,8 +4356,12 @@ void Splash::scaleImageYdXu(SplashImageSource src, void *srcData,
   xq = scaledWidth % srcWidth;
 
   // allocate buffers
+  pixBuf = (unsigned int *)gmallocn_checkoverflow(srcWidth, nComps * sizeof(int));
+  if (unlikely(!pixBuf)) {
+    error(errInternal, -1, "Splash::scaleImageYdXu. Couldn't allocate pixBuf memory");
+    return;
+  }
   lineBuf = (unsigned char *)gmallocn(srcWidth, nComps);
-  pixBuf = (unsigned int *)gmallocn(srcWidth, nComps * sizeof(int));
   if (srcAlpha) {
     alphaLineBuf = (unsigned char *)gmalloc(srcWidth);
     alphaPixBuf = (unsigned int *)gmallocn(srcWidth, sizeof(int));

@@ -22,6 +22,7 @@
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019 Hartmut Goebel <h.goebel@crazy-compilers.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -191,6 +192,12 @@ int main(int argc, char *argv[]) {
   // get page range
   if (firstPage < 1)
     firstPage = 1;
+  if (firstPage > doc->getNumPages()) {
+    error(errCommandLine, -1,
+          "Wrong page range given: the first page ({0:d}) can not be larger then the number of pages in the document ({1:d}).",
+          firstPage, doc->getNumPages());
+    goto err1;
+  }
   if (lastPage < 1 || lastPage > doc->getNumPages())
     lastPage = doc->getNumPages();
   if (lastPage < firstPage) {

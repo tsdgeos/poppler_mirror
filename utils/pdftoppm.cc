@@ -88,6 +88,7 @@ static int param_y = 0;
 static int param_w = 0;
 static int param_h = 0;
 static int sz = 0;
+static bool hideAnnotations = false;
 static bool useCropBox = false;
 static bool mono = false;
 static bool gray = false;
@@ -159,6 +160,8 @@ static const ArgDesc argDesc[] = {
    "size of crop square in pixels (sets W and H)"},
   {"-cropbox",argFlag,     &useCropBox,    0,
    "use the crop box rather than media box"},
+  {"-hide-annotations", argFlag,  &hideAnnotations,    0,
+   "do not show annotations"},
 
   {"-mono",   argFlag,     &mono,          0,
    "generate a monochrome PBM file"},
@@ -288,6 +291,10 @@ static bool parseJpegOptions()
   return true;
 }
 
+static auto annotDisplayDecideCbk = [](Annot *annot, void *user_data) {
+  return !hideAnnotations;
+};
+
 static void savePageSlice(PDFDoc *doc,
                    SplashOutputDev *splashOut, 
                    int pg, int x, int y, int w, int h, 
@@ -301,7 +308,8 @@ static void savePageSlice(PDFDoc *doc,
     pg, x_resolution, y_resolution, 
     0,
     !useCropBox, false, false,
-    x, y, w, h
+    x, y, w, h,
+    nullptr, nullptr, annotDisplayDecideCbk, nullptr
   );
 
   SplashBitmap *bitmap = splashOut->getBitmap();

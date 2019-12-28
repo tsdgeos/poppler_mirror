@@ -1,6 +1,6 @@
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
-#include <QtCore/QTime>
+#include <QtCore/QElapsedTimer>
 #include <QtWidgets/QApplication>
 #include <QtGui/QImage>
 
@@ -12,7 +12,7 @@ int main( int argc, char **argv )
 {
     QApplication a( argc, argv );               // QApplication required!
 
-    QTime t;
+    QElapsedTimer t;
     t.start();
 
     QDir directory( argv[1] );
