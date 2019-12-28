@@ -32,6 +32,7 @@
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 <corentinf@free.fr>
 // Copyright (C) 2019 Kris Jurka <jurka@ejurka.com>
+// Copyright (C) 2019 Sébastien Berthier <s.berthier@bee-buzziness.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
