@@ -374,7 +374,7 @@ std::ostream& poppler::operator<<(std::ostream& stream, const byte_array &array)
  */
 bool poppler::set_data_dir(const std::string &new_data_dir)
 {
-    return initer::set_data_dir(new_data_dir);
+    return GlobalParamsIniter::setCustomDataDir(new_data_dir);
 }
 
 /**

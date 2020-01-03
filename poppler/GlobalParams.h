@@ -42,6 +42,7 @@
 #include <cstdio>
 #include "CharTypes.h"
 #include "UnicodeMap.h"
+#include "Error.h"
 #include <unordered_map>
 #include <string>
 #include <memory>
@@ -213,6 +214,24 @@ private:
   mutable std::recursive_mutex cMapCacheMutex;
 
   const char *popplerDataDir;
+};
+
+class GlobalParamsIniter
+{
+public:
+  GlobalParamsIniter(ErrorCallback errorCallback, void *errorCallbackData);
+  ~GlobalParamsIniter();
+
+  GlobalParamsIniter(const GlobalParamsIniter &) = delete;
+  GlobalParamsIniter &operator=(const GlobalParamsIniter &) = delete;
+
+  static bool setCustomDataDir(const std::string &dir);
+
+private:
+  static std::mutex mutex;
+  static int count;
+
+  static std::string customDataDir;
 };
 
 #endif

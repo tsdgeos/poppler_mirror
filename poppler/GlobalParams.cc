@@ -1245,3 +1245,43 @@ void GlobalParams::setErrQuiet(bool errQuietA) {
   globalParamsLocker();
   errQuiet = errQuietA;
 }
+
+GlobalParamsIniter::GlobalParamsIniter(ErrorCallback errorCallback, void *errorCallbackData)
+{
+  std::lock_guard<std::mutex> lock{mutex};
+
+  if (count == 0) {
+    globalParams = std::make_unique<GlobalParams>(!customDataDir.empty() ? customDataDir.c_str() : nullptr);
+
+    setErrorCallback(errorCallback, errorCallbackData);
+  }
+
+  count++;
+}
+
+GlobalParamsIniter::~GlobalParamsIniter()
+{
+  std::lock_guard<std::mutex> lock{mutex};
+
+  --count;
+
+  if (count == 0) {
+    globalParams.reset();
+  }
+}
+
+bool GlobalParamsIniter::setCustomDataDir(const std::string &dir)
+{
+  std::lock_guard<std::mutex> lock{mutex};
+
+  if (count == 0) {
+    customDataDir = dir;
+    return true;
+  }
+
+  return false;
+}
+
+std::mutex GlobalParamsIniter::mutex;
+int GlobalParamsIniter::count = 0;
+std::string GlobalParamsIniter::customDataDir;
