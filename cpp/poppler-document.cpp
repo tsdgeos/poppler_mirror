@@ -85,7 +85,7 @@ document_private::document_private(const char *file_data, int file_data_length,
 }
 
 document_private::document_private()
-    : GlobalParamsIniter(detail::error_function, nullptr)
+    : GlobalParamsIniter(detail::error_function)
     , doc(nullptr)
     , raw_doc_data(nullptr)
     , raw_doc_data_length(0)

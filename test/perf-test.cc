@@ -739,7 +739,7 @@ static void StrList_Destroy(StrList **root)
     *root = nullptr;
 }
 
-static void my_error(void *, ErrorCategory, Goffset pos, const char *msg) {
+static void my_error(ErrorCategory, Goffset pos, const char *msg) {
 #if 0
     char        buf[4096], *p = buf;
 
@@ -1230,7 +1230,7 @@ static void RenderCmdLineArg(char *cmdLineArg)
 
 int main(int argc, char **argv)
 {
-    setErrorCallback(my_error, nullptr);
+    setErrorCallback(my_error);
     ParseCommandLine(argc, argv);
     if (0 == StrList_Len(&gArgsListRoot))
         PrintUsageAndExit(argc, argv);

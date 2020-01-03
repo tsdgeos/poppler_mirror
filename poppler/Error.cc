@@ -46,11 +46,9 @@ static const char *errorCategoryNames[] = {
 };
 
 static ErrorCallback errorCbk = nullptr;
-static void *errorCbkData = nullptr;
 
-void setErrorCallback(ErrorCallback cbk, void *data) {
+void setErrorCallback(ErrorCallback cbk) {
   errorCbk = cbk;
-  errorCbkData = data;
 }
 
 void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...) {
@@ -76,7 +74,7 @@ void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...) {
   }
 
   if (errorCbk) {
-    (*errorCbk)(errorCbkData, category, pos, sanitized->c_str());
+    (*errorCbk)(category, pos, sanitized->c_str());
   } else {
     if (pos >= 0) {
       fprintf(stderr, "%s (%lld): %s\n",

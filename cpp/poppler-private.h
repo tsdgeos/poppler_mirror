@@ -47,7 +47,7 @@ namespace detail
 
 extern debug_func user_debug_function;
 extern void *debug_closure;
-void error_function(void *data, ErrorCategory category, Goffset pos, const char *msg);
+void error_function(ErrorCategory category, Goffset pos, const char *msg);
 
 rectf pdfrectangle_to_rectf(const PDFRectangle &pdfrect);
 

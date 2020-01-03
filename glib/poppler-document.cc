@@ -193,7 +193,7 @@ poppler_document_new_from_file (const char  *uri,
   GooString *password_g;
   char *filename;
 
-  auto initer = new GlobalParamsIniter(_poppler_error_cb, nullptr);
+  auto initer = new GlobalParamsIniter(_poppler_error_cb);
 
   filename = g_filename_from_uri (uri, nullptr, error);
   if (!filename)
@@ -253,7 +253,7 @@ poppler_document_new_from_data (char        *data,
   MemStream *str;
   GooString *password_g;
 
-  auto initer = new GlobalParamsIniter(_poppler_error_cb, nullptr);
+  auto initer = new GlobalParamsIniter(_poppler_error_cb);
   
   // create stream
   str = new MemStream(data, 0, length, Object(objNull));
@@ -305,7 +305,7 @@ poppler_document_new_from_bytes (GBytes      *bytes,
   g_return_val_if_fail(bytes != nullptr, nullptr);
   g_return_val_if_fail(error == nullptr || *error == nullptr, nullptr);
 
-  auto initer = new GlobalParamsIniter(_poppler_error_cb, nullptr);
+  auto initer = new GlobalParamsIniter(_poppler_error_cb);
 
   // create stream
   str = new BytesStream(bytes, Object(objNull));
@@ -356,7 +356,7 @@ poppler_document_new_from_stream (GInputStream *stream,
   g_return_val_if_fail(G_IS_INPUT_STREAM(stream), NULL);
   g_return_val_if_fail(length == (goffset)-1 || length > 0, NULL);
 
-  auto initer = new GlobalParamsIniter(_poppler_error_cb, nullptr);
+  auto initer = new GlobalParamsIniter(_poppler_error_cb);
 
   if (!G_IS_SEEKABLE(stream) || !g_seekable_can_seek(G_SEEKABLE(stream))) {
     g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,

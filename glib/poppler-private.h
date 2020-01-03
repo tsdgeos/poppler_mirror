@@ -163,6 +163,6 @@ type_name##_get_type (void)                                                     
 	return g_define_type_id__volatile;                                            \
 }
 
-void _poppler_error_cb (void *data, ErrorCategory category, Goffset pos, const char *message);
+void _poppler_error_cb (ErrorCategory category, Goffset pos, const char *message);
 
 #endif

@@ -223,7 +223,7 @@ private:
 class GlobalParamsIniter
 {
 public:
-  GlobalParamsIniter(ErrorCallback errorCallback, void *errorCallbackData);
+  GlobalParamsIniter(ErrorCallback errorCallback);
   ~GlobalParamsIniter();
 
   GlobalParamsIniter(const GlobalParamsIniter &) = delete;

@@ -47,9 +47,9 @@ enum ErrorCategory {
   errInternal          // internal error - malfunction within the Xpdf code
 };
 
-using ErrorCallback = void (*)(void *data, ErrorCategory category, Goffset pos, const char *msg);
+using ErrorCallback = void (*)(ErrorCategory category, Goffset pos, const char *msg);
 
-extern void setErrorCallback(ErrorCallback cbk, void *data);
+extern void setErrorCallback(ErrorCallback cbk);
 
 extern void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...) GOOSTRING_FORMAT;
 

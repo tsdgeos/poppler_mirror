@@ -84,8 +84,7 @@ poppler_get_version (void)
  */
 
 void
-_poppler_error_cb (void *data G_GNUC_UNUSED,
-                   ErrorCategory category,
+_poppler_error_cb (ErrorCategory category,
                    Goffset pos,
                    const char *message)
 {

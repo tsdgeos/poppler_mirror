@@ -75,7 +75,7 @@ namespace Poppler {
 
     GooString *QDateTimeToUnicodeGooString(const QDateTime &dt);
 
-    void qt5ErrorFunction(void * /*data*/, ErrorCategory /*category*/, Goffset pos, const char *msg);
+    void qt5ErrorFunction(ErrorCategory /*category*/, Goffset pos, const char *msg);
 
     Annot::AdditionalActionsType toPopplerAdditionalActionType(Annotation::AdditionalActionType type);
 
@@ -96,7 +96,7 @@ namespace Poppler {
     class DocumentData : private GlobalParamsIniter {
     public:
 	DocumentData(const QString &filePath, GooString *ownerPassword, GooString *userPassword) :
-	GlobalParamsIniter(qt5ErrorFunction, nullptr)
+	GlobalParamsIniter(qt5ErrorFunction)
 	    {
 		init();
 		m_filePath = filePath;	
@@ -113,7 +113,7 @@ namespace Poppler {
 	    }
 	
 	DocumentData(const QByteArray &data, GooString *ownerPassword, GooString *userPassword) :
-	GlobalParamsIniter(qt5ErrorFunction, nullptr)
+	GlobalParamsIniter(qt5ErrorFunction)
 	    {
 		fileContents = data;
 		MemStream *str = new MemStream((char*)fileContents.data(), 0, fileContents.length(), Object(objNull));
