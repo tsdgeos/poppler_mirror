@@ -85,7 +85,7 @@ public:
 
   // A List of the next actions to execute in order.
   // The list contains pointer to LinkAction objects.
-  const std::vector<LinkAction*> *nextActions() const;
+  const std::vector<LinkAction*>& nextActions() const;
 
   // Sets the next action list.
   void setNextActions(std::vector<LinkAction*>&& actions);
