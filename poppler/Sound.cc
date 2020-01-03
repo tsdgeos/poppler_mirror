@@ -1,6 +1,6 @@
 /* Sound.cc - an object that holds the sound structure
  * Copyright (C) 2006-2007, Pino Toscano <pino@kde.org>
- * Copyright (C) 2009, 2017-2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2009, 2017-2020, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,6 @@ Sound::Sound(const Object *obj, bool readAttrs)
 {
   streamObj = obj->copy();
 
-  fileName = nullptr;
   samplingRate = 0.0;
   channels = 1;
   bitsPerSample = 8;
@@ -66,7 +65,7 @@ Sound::Sound(const Object *obj, bool readAttrs)
       kind = soundExternal;
       Object obj1 = getFileSpecNameForPlatform (&tmp);
       if (obj1.isString()) {
-        fileName = obj1.getString()->copy();
+        fileName = obj1.getString()->toStr();
       }
     } else {
       // no file specification, then the sound data have to be
@@ -105,7 +104,6 @@ Sound::Sound(const Object *obj, bool readAttrs)
 
 Sound::~Sound()
 {
-  delete fileName;
 }
 
 Stream *Sound::getStream()
@@ -118,9 +116,7 @@ Sound *Sound::copy() const
   Sound *newsound = new Sound(&streamObj, false);
 
   newsound->kind = kind;
-  if (fileName) {
-    newsound->fileName = fileName->copy();
-  }
+  newsound->fileName = fileName;
   newsound->samplingRate = samplingRate;
   newsound->channels = channels;
   newsound->bitsPerSample = bitsPerSample;
