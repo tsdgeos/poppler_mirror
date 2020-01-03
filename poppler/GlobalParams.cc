@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
@@ -1165,10 +1165,6 @@ CharCodeToUnicode *GlobalParams::getCIDToUnicode(const GooString *collection) {
 }
 
 UnicodeMap *GlobalParams::getUnicodeMap(GooString *encodingName) {
-  return getUnicodeMap2(encodingName);
-}
-
-UnicodeMap *GlobalParams::getUnicodeMap2(GooString *encodingName) {
   UnicodeMap *map;
 
   if (!(map = getResidentUnicodeMap(encodingName))) {
@@ -1185,7 +1181,7 @@ CMap *GlobalParams::getCMap(const GooString *collection, const GooString *cMapNa
 }
 
 UnicodeMap *GlobalParams::getTextEncoding() {
-  return getUnicodeMap2(textEncoding);
+  return getUnicodeMap(textEncoding);
 }
 
 std::vector<GooString*> *GlobalParams::getEncodingNames()

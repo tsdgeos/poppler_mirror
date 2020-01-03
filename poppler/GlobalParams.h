@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
@@ -156,7 +156,6 @@ public:
 private:
 
   void parseNameToUnicode(const GooString *name);
-  UnicodeMap *getUnicodeMap2(GooString *encodingName);
 
   void scanEncodingDirs();
   void addCIDToUnicode(const GooString *collection, const GooString *fileName);
