@@ -397,23 +397,23 @@ namespace Poppler
 
   void OptContentModel::applyLink( LinkOCGState *link )
   {
-    ::LinkOCGState *popplerLinkOCGState = static_cast<LinkOCGStatePrivate*>(link->d_ptr)->popplerLinkOCGState;
+    LinkOCGStatePrivate *linkPrivate = link->d_func();
 
     QSet<OptContentItem *> changedItems;
 
-    const std::vector<::LinkOCGState::StateList>& statesList = popplerLinkOCGState->getStateList();
+    const std::vector<::LinkOCGState::StateList>& statesList = linkPrivate->stateList;
     for (const ::LinkOCGState::StateList& stateList : statesList) {
         const std::vector<Ref>& refsList = stateList.list;
         for (const Ref& ref : refsList) {
             OptContentItem *item = d->itemFromRef(QString::number(ref.num));
 
             if (stateList.st == ::LinkOCGState::On) {
-              item->setState(OptContentItem::On, popplerLinkOCGState->getPreserveRB(), changedItems);
+              item->setState(OptContentItem::On, linkPrivate->preserveRB, changedItems);
             } else if (stateList.st == ::LinkOCGState::Off) {
-              item->setState(OptContentItem::Off, popplerLinkOCGState->getPreserveRB(), changedItems);
+              item->setState(OptContentItem::Off, linkPrivate->preserveRB, changedItems);
             } else {
               OptContentItem::ItemState newState = item->state() == OptContentItem::On ? OptContentItem::Off : OptContentItem::On;
-              item->setState(newState, popplerLinkOCGState->getPreserveRB(), changedItems);
+              item->setState(newState, linkPrivate->preserveRB, changedItems);
             }
         }
     }

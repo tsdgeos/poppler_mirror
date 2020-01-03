@@ -177,8 +177,6 @@ class POPPLER_QT5_EXPORT LinkDestination
  */
 class POPPLER_QT5_EXPORT Link
 {
-	friend class OptContentModel;
-
 	public:
 		/// \cond PRIVATE
 		Link( const QRectF &linkArea );
@@ -624,6 +622,8 @@ class POPPLER_QT5_EXPORT LinkMovie : public Link
  */
 class POPPLER_QT5_EXPORT LinkOCGState : public Link
 {
+	friend class OptContentModel;
+
 	public:
 		/**
 		 * Create a new OCGState link. This is only used by Poppler::Page.

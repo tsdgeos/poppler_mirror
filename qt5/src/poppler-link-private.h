@@ -20,6 +20,10 @@
 #ifndef _POPPLER_LINK_PRIVATE_H_
 #define _POPPLER_LINK_PRIVATE_H_
 
+#include <vector>
+
+#include "Link.h"
+
 class LinkOCGState;
 
 namespace Poppler {
@@ -56,13 +60,17 @@ public:
 class LinkOCGStatePrivate : public LinkPrivate
 {
 public:
-    LinkOCGStatePrivate( const QRectF &area, ::LinkOCGState *plocg )
+    LinkOCGStatePrivate( const QRectF &area,
+                         const std::vector<::LinkOCGState::StateList>& sList,
+                         bool pRB )
         : LinkPrivate( area )
-        , popplerLinkOCGState( plocg )
+        , stateList( sList )
+        , preserveRB( pRB )
     {
     }
 
-    ::LinkOCGState *popplerLinkOCGState;
+    std::vector<::LinkOCGState::StateList> stateList;
+    bool preserveRB;
 };
 
 

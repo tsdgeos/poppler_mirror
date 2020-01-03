@@ -340,7 +340,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
     {
       ::LinkOCGState *plocg = (::LinkOCGState *)a;
 
-      LinkOCGStatePrivate *locgp = new LinkOCGStatePrivate( linkArea, plocg );
+      LinkOCGStatePrivate *locgp = new LinkOCGStatePrivate( linkArea, plocg->getStateList(), plocg->getPreserveRB() );
       popplerLink = new LinkOCGState( locgp );
     }
     break;
