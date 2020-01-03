@@ -134,7 +134,7 @@ public:
   bool getErrQuiet();
 
   CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
-  UnicodeMap *getUnicodeMap(GooString *encodingName);
+  UnicodeMap *getUnicodeMap(const GooString *encodingName);
   CMap *getCMap(const GooString *collection, const GooString *cMapName, Stream *stream = nullptr);
   UnicodeMap *getTextEncoding();
 

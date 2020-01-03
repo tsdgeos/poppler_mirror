@@ -50,7 +50,7 @@ struct UnicodeMapExt {
 
 //------------------------------------------------------------------------
 
-UnicodeMap *UnicodeMap::parse(GooString *encodingNameA) {
+UnicodeMap *UnicodeMap::parse(const GooString *encodingNameA) {
   FILE *f;
   UnicodeMap *map;
   UnicodeMapRange *range;
@@ -68,7 +68,7 @@ UnicodeMap *UnicodeMap::parse(GooString *encodingNameA) {
     return nullptr;
   }
 
-  map = new UnicodeMap(encodingNameA->copy());
+  map = new UnicodeMap(encodingNameA->toStr());
 
   size = 8;
   UnicodeMapRange *customRanges = (UnicodeMapRange *)gmallocn(size, sizeof(UnicodeMapRange));
@@ -129,7 +129,7 @@ UnicodeMap *UnicodeMap::parse(GooString *encodingNameA) {
   return map;
 }
 
-UnicodeMap::UnicodeMap(GooString *encodingNameA) {
+UnicodeMap::UnicodeMap(const std::string &encodingNameA) {
   encodingName = encodingNameA;
   unicodeOut = false;
   kind = unicodeMapUser;
@@ -142,7 +142,7 @@ UnicodeMap::UnicodeMap(GooString *encodingNameA) {
 
 UnicodeMap::UnicodeMap(const char *encodingNameA, bool unicodeOutA,
 		       const UnicodeMapRange *rangesA, int lenA) {
-  encodingName = new GooString(encodingNameA);
+  encodingName = encodingNameA;
   unicodeOut = unicodeOutA;
   kind = unicodeMapResident;
   ranges = rangesA;
@@ -154,7 +154,7 @@ UnicodeMap::UnicodeMap(const char *encodingNameA, bool unicodeOutA,
 
 UnicodeMap::UnicodeMap(const char *encodingNameA, bool unicodeOutA,
 		       UnicodeMapFunc funcA) {
-  encodingName = new GooString(encodingNameA);
+  encodingName = encodingNameA;
   unicodeOut = unicodeOutA;
   kind = unicodeMapFunc;
   func = funcA;
@@ -164,7 +164,6 @@ UnicodeMap::UnicodeMap(const char *encodingNameA, bool unicodeOutA,
 }
 
 UnicodeMap::~UnicodeMap() {
-  delete encodingName;
   if (kind == unicodeMapUser && ranges) {
     gfree(const_cast<UnicodeMapRange *>(ranges));
   }
@@ -174,7 +173,7 @@ UnicodeMap::~UnicodeMap() {
 }
 
 UnicodeMap::UnicodeMap(UnicodeMap &&other) noexcept
-  : encodingName{other.encodingName}
+  : encodingName{std::move(other.encodingName)}
   , kind{other.kind}
   , unicodeOut{other.unicodeOut}
   , len{other.len}
@@ -192,7 +191,6 @@ UnicodeMap::UnicodeMap(UnicodeMap &&other) noexcept
     func = other.func;
     break;
   }
-  other.encodingName = nullptr;
   other.eMaps = nullptr;
 }
 
@@ -258,7 +256,7 @@ void UnicodeMap::decRefCnt() {
 }
 
 bool UnicodeMap::match(const GooString *encodingNameA) const {
-  return !encodingName->cmp(encodingNameA);
+  return encodingName == encodingNameA->toStr();
 }
 
 int UnicodeMap::mapUnicode(Unicode u, char *buf, int bufSize) const {
@@ -328,7 +326,7 @@ UnicodeMapCache::~UnicodeMapCache() {
   }
 }
 
-UnicodeMap *UnicodeMapCache::getUnicodeMap(GooString *encodingName) {
+UnicodeMap *UnicodeMapCache::getUnicodeMap(const GooString *encodingName) {
   UnicodeMap *map;
   int i, j;
 

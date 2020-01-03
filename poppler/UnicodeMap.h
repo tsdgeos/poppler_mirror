@@ -31,6 +31,7 @@
 #include "poppler-config.h"
 #include "CharTypes.h"
 #include <atomic>
+#include <string>
 
 class GooString;
 
@@ -58,7 +59,7 @@ public:
 
   // Create the UnicodeMap specified by <encodingName>.  Sets the
   // initial reference count to 1.  Returns NULL on failure.
-  static UnicodeMap *parse(GooString *encodingNameA);
+  static UnicodeMap *parse(const GooString *encodingNameA);
 
   // Create a resident UnicodeMap.
   UnicodeMap(const char *encodingNameA, bool unicodeOutA,
@@ -82,7 +83,7 @@ public:
   void incRefCnt();
   void decRefCnt();
 
-  const GooString *getEncodingName() const { return encodingName; }
+  std::string getEncodingName() const { return encodingName; }
 
   bool isUnicode() const { return unicodeOut; }
 
@@ -98,9 +99,9 @@ public:
 
 private:
 
-  UnicodeMap(GooString *encodingNameA);
+  UnicodeMap(const std::string &encodingNameA);
 
-  GooString *encodingName;
+  std::string encodingName;
   UnicodeMapKind kind;
   bool unicodeOut;
   union {
@@ -129,7 +130,7 @@ public:
   // Get the UnicodeMap for <encodingName>.  Increments its reference
   // count; there will be one reference for the cache plus one for the
   // caller of this function.  Returns NULL on failure.
-  UnicodeMap *getUnicodeMap(GooString *encodingName);
+  UnicodeMap *getUnicodeMap(const GooString *encodingName);
 
 private:
 

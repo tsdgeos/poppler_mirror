@@ -428,17 +428,17 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   // set up the residentUnicodeMaps table
   residentUnicodeMaps.reserve(6);
   UnicodeMap map = {"Latin1", false, latin1UnicodeMapRanges, latin1UnicodeMapLen};
-  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
   map = {"ASCII7", false, ascii7UnicodeMapRanges, ascii7UnicodeMapLen};
-  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
   map = {"Symbol", false, symbolUnicodeMapRanges, symbolUnicodeMapLen};
-  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
   map = {"ZapfDingbats", false, zapfDingbatsUnicodeMapRanges, zapfDingbatsUnicodeMapLen};
-  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
   map = {"UTF-8", true, &mapUTF8};
-  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
   map = {"UTF-16", true, &mapUTF16};
-  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
 
   scanEncodingDirs();
 }
@@ -1164,7 +1164,7 @@ CharCodeToUnicode *GlobalParams::getCIDToUnicode(const GooString *collection) {
   return ctu;
 }
 
-UnicodeMap *GlobalParams::getUnicodeMap(GooString *encodingName) {
+UnicodeMap *GlobalParams::getUnicodeMap(const GooString *encodingName) {
   UnicodeMap *map;
 
   if (!(map = getResidentUnicodeMap(encodingName))) {
