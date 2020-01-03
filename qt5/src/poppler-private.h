@@ -75,7 +75,7 @@ namespace Poppler {
 
     GooString *QDateTimeToUnicodeGooString(const QDateTime &dt);
 
-    void qt5ErrorFunction(int pos, char *msg, va_list args);
+    void qt5ErrorFunction(void * /*data*/, ErrorCategory /*category*/, Goffset pos, const char *msg);
 
     Annot::AdditionalActionsType toPopplerAdditionalActionType(Annotation::AdditionalActionType type);
 
@@ -93,9 +93,10 @@ namespace Poppler {
             bool externalDest;
     };
 
-    class DocumentData {
+    class DocumentData : private GlobalParamsIniter {
     public:
-	DocumentData(const QString &filePath, GooString *ownerPassword, GooString *userPassword)
+	DocumentData(const QString &filePath, GooString *ownerPassword, GooString *userPassword) :
+	GlobalParamsIniter(qt5ErrorFunction, nullptr)
 	    {
 		init();
 		m_filePath = filePath;	
@@ -111,7 +112,8 @@ namespace Poppler {
 		delete userPassword;
 	    }
 	
-	DocumentData(const QByteArray &data, GooString *ownerPassword, GooString *userPassword)
+	DocumentData(const QByteArray &data, GooString *ownerPassword, GooString *userPassword) :
+	GlobalParamsIniter(qt5ErrorFunction, nullptr)
 	    {
 		fileContents = data;
 		MemStream *str = new MemStream((char*)fileContents.data(), 0, fileContents.length(), Object(objNull));
@@ -158,8 +160,6 @@ namespace Poppler {
 	QPointer<OptContentModel> m_optContentModel;
 	QColor paperColor;
 	int m_hints;
-	static int count;
-	static QMutex mutex;
     };
 
     class FontInfoData

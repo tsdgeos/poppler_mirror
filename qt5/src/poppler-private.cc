@@ -54,15 +54,13 @@ namespace Debug {
 
 }
 
-    static UnicodeMap *utf8Map = nullptr;
-
     void setDebugErrorFunction(PopplerDebugFunc function, const QVariant &closure)
     {
         Debug::debugFunction = function ? function : Debug::qDebugDebugFunction;
         Debug::debugClosure = closure;
     }
 
-    static void qt5ErrorFunction(void * /*data*/, ErrorCategory /*category*/, Goffset pos, const char *msg)
+    void qt5ErrorFunction(void * /*data*/, ErrorCategory /*category*/, Goffset pos, const char *msg)
     {
         QString emsg;
 
@@ -79,12 +77,7 @@ namespace Debug {
     }
 
     QString unicodeToQString(const Unicode* u, int len) {
-        if (!utf8Map)
-        {
-                GooString enc("UTF-8");
-                utf8Map = globalParams->getUnicodeMap(&enc);
-                utf8Map->incRefCnt();
-        }
+        const UnicodeMap *utf8Map = globalParams->getUtf8Map();
 
         // ignore the last character if it is 0x0
         if ((len > 0) && (u[len - 1] == 0))
@@ -242,15 +235,6 @@ namespace Debug {
         qDeleteAll(m_embeddedFiles);
         delete (OptContentModel *)m_optContentModel;
         delete doc;
-    
-        QMutexLocker locker{&mutex};
-
-        count --;
-        if ( count == 0 )
-        {
-            utf8Map = nullptr;
-            globalParams.reset();
-        }
       }
     
     void DocumentData::init()
@@ -259,16 +243,6 @@ namespace Debug {
         paperColor = Qt::white;
         m_hints = 0;
         m_optContentModel = nullptr;
-      
-        QMutexLocker locker{&mutex};
-
-        if ( count == 0 )
-        {
-            utf8Map = nullptr;
-            globalParams = std::make_unique<GlobalParams>();
-            setErrorCallback(qt5ErrorFunction, nullptr);
-        }
-        count ++;
     }
 
 

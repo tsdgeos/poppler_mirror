@@ -414,6 +414,8 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   unicodeMapCache = new UnicodeMapCache();
   cMapCache = new CMapCache();
 
+  utf8Map = nullptr;
+
   baseFontsInitialized = false;
 
   // set up the initial nameToUnicode tables
@@ -1130,6 +1132,16 @@ PSLevel GlobalParams::getPSLevel() {
 std::string GlobalParams::getTextEncodingName() const {
   globalParamsLocker();
   return textEncoding->toStr();
+}
+
+const UnicodeMap *GlobalParams::getUtf8Map() {
+  if (!utf8Map) {
+    GooString enc("UTF-8");
+    utf8Map = globalParams->getUnicodeMap(&enc);
+    utf8Map->incRefCnt();
+  }
+
+  return utf8Map;
 }
 
 bool GlobalParams::getPrintCommands() {

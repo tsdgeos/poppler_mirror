@@ -139,6 +139,8 @@ public:
   CMap *getCMap(const GooString *collection, const GooString *cMapName, Stream *stream = nullptr);
   UnicodeMap *getTextEncoding();
 
+  const UnicodeMap *getUtf8Map();
+
   std::vector<GooString*> *getEncodingNames();
 
   //----- functions to set parameters
@@ -208,6 +210,8 @@ private:
   CharCodeToUnicodeCache *unicodeToUnicodeCache;
   UnicodeMapCache *unicodeMapCache;
   CMapCache *cMapCache;
+
+  UnicodeMap *utf8Map;
   
   mutable std::recursive_mutex mutex;
   mutable std::recursive_mutex unicodeMapCacheMutex;
