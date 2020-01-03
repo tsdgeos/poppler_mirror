@@ -45,13 +45,10 @@ static const char *errorCategoryNames[] = {
   "Internal Error"
 };
 
-static void (*errorCbk)(void *data, ErrorCategory category,
-			Goffset pos, const char *msg) = nullptr;
+static ErrorCallback errorCbk = nullptr;
 static void *errorCbkData = nullptr;
 
-void setErrorCallback(void (*cbk)(void *data, ErrorCategory category,
-				  Goffset pos, const char *msg),
-		      void *data) {
+void setErrorCallback(ErrorCallback cbk, void *data) {
   errorCbk = cbk;
   errorCbkData = data;
 }
