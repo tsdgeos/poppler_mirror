@@ -23,7 +23,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -49,15 +49,11 @@
 //------------------------------------------------------------------------
 // LinkAction
 //------------------------------------------------------------------------
-LinkAction::LinkAction() : nextActionList(nullptr) {
-}
+LinkAction::LinkAction() = default;
 
 LinkAction::~LinkAction() {
-  if (nextActionList) {
-    for (auto entry : *nextActionList) {
-      delete entry;
-    }
-    delete nextActionList;
+  for (auto entry : nextActionList) {
+    delete entry;
   }
 }
 
@@ -162,7 +158,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
 
   // parse the next actions
   const Object nextObj = obj->dictLookup("Next");
-  std::vector<LinkAction*> *actionList = nullptr;
+  std::vector<LinkAction*> actionList;
   if (nextObj.isDict()) {
 
     // Prevent circles in the tree by checking the ref against used refs in
@@ -176,14 +172,12 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
         }
     }
 
-    actionList = new std::vector<LinkAction*>();
-    actionList->reserve(1);
-    actionList->push_back(parseAction(&nextObj, nullptr, seenNextActions));
+    actionList.reserve(1);
+    actionList.push_back(parseAction(&nextObj, nullptr, seenNextActions));
   } else if (nextObj.isArray()) {
     const Array *a = nextObj.getArray();
     const int n = a->getLength();
-    actionList = new std::vector<LinkAction*>();
-    actionList->reserve(n);
+    actionList.reserve(n);
     for (int i = 0; i < n; ++i) {
       const Object obj3 = a->get(i);
       if (!obj3.isDict()) {
@@ -197,27 +191,25 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
           const Ref ref = obj3Ref.getRef();
           if (!seenNextActions->insert(ref.num).second) {
               error(errSyntaxWarning, -1, "parseAction: Circular next actions detected in array.");
-              delete actionList;
               return action;
           }
       }
 
-      actionList->push_back(parseAction(&obj3, nullptr, seenNextActions));
+      actionList.push_back(parseAction(&obj3, nullptr, seenNextActions));
     }
   }
 
-  action->setNextActions(actionList);
+  action->setNextActions(std::move(actionList));
 
   return action;
 }
 
 const std::vector<LinkAction*> *LinkAction::nextActions() const {
-  return nextActionList;
+  return &nextActionList;
 }
 
-void LinkAction::setNextActions(std::vector<LinkAction*> *actions) {
-  delete nextActionList;
-  nextActionList = actions;
+void LinkAction::setNextActions(std::vector<LinkAction*>&& actions) {
+  nextActionList = std::move(actions);
 }
 
 //------------------------------------------------------------------------
