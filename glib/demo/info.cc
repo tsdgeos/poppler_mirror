@@ -134,7 +134,7 @@ GtkWidget *pgd_info_create_widget(PopplerDocument *document)
     gchar *perm_id;
     gchar *up_id;
     gboolean linearized;
-    GTime creation_date, mod_date;
+    GDateTime *creation_date, *mod_date;
     GEnumValue *enum_value;
     PopplerBackend backend;
     PopplerPageLayout layout;
@@ -143,8 +143,8 @@ GtkWidget *pgd_info_create_widget(PopplerDocument *document)
     PopplerViewerPreferences view_prefs;
     gint row = 0;
 
-    g_object_get(document, "title", &title, "format", &format, "author", &author, "subject", &subject, "keywords", &keywords, "creation-date", &creation_date, "mod-date", &mod_date, "creator", &creator, "producer", &producer, "linearized",
-                 &linearized, "page-mode", &mode, "page-layout", &layout, "permissions", &permissions, "viewer-preferences", &view_prefs, "metadata", &metadata, NULL);
+    g_object_get(document, "title", &title, "format", &format, "author", &author, "subject", &subject, "keywords", &keywords, "creation-datetime", &creation_date, "mod-datetime", &mod_date, "creator", &creator, "producer", &producer,
+                 "linearized", &linearized, "page-mode", &mode, "page-layout", &layout, "permissions", &permissions, "viewer-preferences", &view_prefs, "metadata", &metadata, NULL);
 
     vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 12);
 
@@ -200,12 +200,14 @@ GtkWidget *pgd_info_create_widget(PopplerDocument *document)
 
     pgd_table_add_property(GTK_GRID(table), "<b>Linearized:</b>", linearized ? "Yes" : "No", &row);
 
-    str = pgd_format_date(creation_date);
+    str = g_date_time_format(creation_date, "%c");
     pgd_table_add_property(GTK_GRID(table), "<b>Creation Date:</b>", str, &row);
+    g_clear_pointer(&creation_date, g_date_time_unref);
     g_free(str);
 
-    str = pgd_format_date(mod_date);
+    str = g_date_time_format(mod_date, "%c");
     pgd_table_add_property(GTK_GRID(table), "<b>Modification Date:</b>", str, &row);
+    g_clear_pointer(&mod_date, g_date_time_unref);
     g_free(str);
 
     enum_value = g_enum_get_value((GEnumClass *)g_type_class_peek(POPPLER_TYPE_PAGE_MODE), mode);
