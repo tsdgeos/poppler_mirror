@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -46,7 +46,6 @@ public:
     document_private(const char *file_data, int file_data_length,
                      const std::string &owner_password,
                      const std::string &user_password);
-    document_private();
     ~document_private();
 
     static document* check_document(document_private *doc, byte_array *file_data);
@@ -57,6 +56,8 @@ public:
     int raw_doc_data_length;
     bool is_locked;
     std::vector<embedded_file *> embedded_files;
+private:
+    document_private();
 };
 
 }
