@@ -199,17 +199,13 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
     }
   }
 
-  action->setNextActions(std::move(actionList));
+  action->nextActionList = std::move(actionList);
 
   return action;
 }
 
 const std::vector<LinkAction*>& LinkAction::nextActions() const {
   return nextActionList;
-}
-
-void LinkAction::setNextActions(std::vector<LinkAction*>&& actions) {
-  nextActionList = std::move(actions);
 }
 
 //------------------------------------------------------------------------

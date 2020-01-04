@@ -87,9 +87,6 @@ public:
   // The list contains pointer to LinkAction objects.
   const std::vector<LinkAction*>& nextActions() const;
 
-  // Sets the next action list.
-  void setNextActions(std::vector<LinkAction*>&& actions);
-
 private:
   static LinkAction *parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions);
 
