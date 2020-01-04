@@ -140,6 +140,7 @@ const PDFRectangle *_poppler_annot_get_cropbox(PopplerAnnot *poppler_annot);
 
 char *_poppler_goo_string_to_utf8(const GooString *s);
 gboolean _poppler_convert_pdf_date_to_gtime(const GooString *date, time_t *gdate);
+GDateTime *_poppler_convert_pdf_date_to_date_time(const GooString *date);
 
 /*
  * A convenience macro for boxed type implementations, which defines a

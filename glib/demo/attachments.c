@@ -42,19 +42,22 @@ static void pgd_attachments_fill_model(GtkListStore *model, PopplerDocument *doc
         PopplerAttachment *attachment = POPPLER_ATTACHMENT(l->data);
         GtkTreeIter iter;
         gchar *size;
-        gchar *ctime, *mtime;
+        GDateTime *ctime, *mtime;
+        gchar *ctime_str, *mtime_str;
 
         size = g_strdup_printf("%" G_GSIZE_FORMAT, attachment->size);
-        ctime = pgd_format_date(attachment->ctime);
-        mtime = pgd_format_date(attachment->mtime);
+        ctime = poppler_attachment_get_ctime(attachment);
+        ctime_str = ctime ? g_date_time_format(ctime, "%c") : NULL;
+        mtime = poppler_attachment_get_mtime(attachment);
+        mtime_str = mtime ? g_date_time_format(mtime, "%c") : NULL;
 
         gtk_list_store_append(model, &iter);
         gtk_list_store_set(model, &iter, ATTACHMENTS_NAME_COLUMN, attachment->name ? attachment->name : "Unknown", ATTACHMENTS_DESCRIPTION_COLUMN, attachment->description ? attachment->description : "Unknown", ATTACHMENTS_SIZE_COLUMN,
-                           size ? size : "Unknown", ATTACHMENTS_CTIME_COLUMN, ctime ? ctime : "Unknown", ATTACHMENTS_MTIME_COLUMN, mtime ? mtime : "Unknown", ATTACHMENTS_ATTACHMENT_COLUMN, attachment, -1);
+                           size ? size : "Unknown", ATTACHMENTS_CTIME_COLUMN, ctime_str ? ctime_str : "Unknown", ATTACHMENTS_MTIME_COLUMN, mtime_str ? mtime_str : "Unknown", ATTACHMENTS_ATTACHMENT_COLUMN, attachment, -1);
 
         g_free(size);
-        g_free(ctime);
-        g_free(mtime);
+        g_free(ctime_str);
+        g_free(mtime_str);
 
         g_object_unref(attachment);
     }

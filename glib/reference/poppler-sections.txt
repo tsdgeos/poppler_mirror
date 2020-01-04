@@ -330,6 +330,8 @@ poppler_action_movie_operation_get_type
 <TITLE>PopplerAttachment</TITLE>
 PopplerAttachment
 PopplerAttachmentSaveFunc
+poppler_attachment_get_ctime
+poppler_attachment_get_mtime
 poppler_attachment_save
 poppler_attachment_save_to_callback
 

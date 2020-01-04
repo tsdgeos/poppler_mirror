@@ -3309,3 +3309,39 @@ gboolean _poppler_convert_pdf_date_to_gtime(const GooString *date, time_t *gdate
 
     return retval;
 }
+
+/**
+ * _poppler_convert_pdf_date_to_date_time:
+ * @date: a PDF date
+ *
+ * Converts the PDF date in @date to a #GDateTime.
+ *
+ * Returns: The converted date, or %NULL on error.
+ **/
+GDateTime *_poppler_convert_pdf_date_to_date_time(const GooString *date)
+{
+    GDateTime *date_time = nullptr;
+    GTimeZone *time_zone = nullptr;
+    int year, mon, day, hour, min, sec, tzHours, tzMins;
+    char tz;
+
+    if (parseDateString(date->c_str(), &year, &mon, &day, &hour, &min, &sec, &tz, &tzHours, &tzMins)) {
+        if (tz == '+' || tz == '-') {
+            gchar *identifier;
+
+            identifier = g_strdup_printf("%c%02u:%02u", tz, tzHours, tzMins);
+            time_zone = g_time_zone_new(identifier);
+            g_free(identifier);
+        } else if (tz == '\0' || tz == 'Z') {
+            time_zone = g_time_zone_new_utc();
+        } else {
+            g_warning("unexpected tz val '%c'", tz);
+            time_zone = g_time_zone_new_utc();
+        }
+
+        date_time = g_date_time_new(time_zone, year, mon, day, hour, min, sec);
+        g_time_zone_unref(time_zone);
+    }
+
+    return date_time;
+}
