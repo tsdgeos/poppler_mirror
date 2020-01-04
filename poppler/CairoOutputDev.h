@@ -320,7 +320,7 @@ protected:
   PDFDoc *doc;			// the current document
 
   static FT_Library ft_lib;
-  static bool ft_lib_initialized;
+  static std::once_flag ft_lib_once_flag;
 
   CairoFontEngine *fontEngine;
   bool fontEngine_owner;

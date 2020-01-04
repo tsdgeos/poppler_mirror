@@ -118,15 +118,12 @@ void CairoImage::setImage (cairo_surface_t *i) {
 // FT_Library instance; to avoid leaks, just use a single global instance
 // initialized the first time it is needed.
 FT_Library CairoOutputDev::ft_lib;
-bool CairoOutputDev::ft_lib_initialized = false;
+std::once_flag CairoOutputDev::ft_lib_once_flag;
 
 CairoOutputDev::CairoOutputDev() {
   doc = nullptr;
 
-  if (!ft_lib_initialized) {
-    FT_Init_FreeType(&ft_lib);
-    ft_lib_initialized = true;
-  }
+  std::call_once(ft_lib_once_flag, FT_Init_FreeType, &ft_lib);
 
   fontEngine = nullptr;
   fontEngine_owner = false;
