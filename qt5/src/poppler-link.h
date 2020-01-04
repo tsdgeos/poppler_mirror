@@ -5,6 +5,7 @@
  * Copyright (C) 2012, Tobias Koenig <tokoe@kdab.com>
  * Copyright (C) 2013, Anthony Granger <grangeranthony@gmail.com>
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
+ * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
