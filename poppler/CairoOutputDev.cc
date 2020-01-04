@@ -1402,8 +1402,7 @@ void CairoOutputDev::drawChar(GfxState *state, double x, double y,
     glyphs[glyphCount].y = y - originY;
     glyphCount++;
     if (use_show_text_glyphs) {
-      GooString enc("UTF-8");
-      UnicodeMap *utf8Map = globalParams->getUnicodeMap(&enc);
+      const UnicodeMap *utf8Map = globalParams->getUtf8Map();
       if (utf8Max - utf8Count < uLen*6) {
         // utf8 encoded characters can be up to 6 bytes
 	if (utf8Max > uLen*6)
