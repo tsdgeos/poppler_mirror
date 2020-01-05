@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //

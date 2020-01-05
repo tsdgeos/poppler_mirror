@@ -16,7 +16,7 @@
 // Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2013 Yury G. Kudryashov <urkud.urkud@gmail.com>
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //

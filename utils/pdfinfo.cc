@@ -15,7 +15,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dom Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2010, 2012, 2016-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2010, 2012, 2016-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Vittal Aithal <vittal.aithal@cognidox.com>
 // Copyright (C) 2012, 2013, 2016-2018 Adrian Johnson <ajohnson@redneon.com>
