@@ -173,7 +173,7 @@ QString FormField::uiName() const
   QString name;
   if (const GooString *goo = m_formData->fm->getAlternateUiName())
   {
-    name = QString::fromLatin1(goo->c_str());
+    name = UnicodeParsedString(goo);
   }
   return name;
 }
