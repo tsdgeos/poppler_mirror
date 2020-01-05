@@ -2604,13 +2604,7 @@ static gchar *
 unicode_to_char (const Unicode *unicode,
 		 int      len)
 {
-	static UnicodeMap *uMap = nullptr;
-	if (uMap == nullptr) {
-		GooString *enc = new GooString("UTF-8");
-		uMap = globalParams->getUnicodeMap(enc);
-		uMap->incRefCnt ();
-		delete enc;
-	}
+	const UnicodeMap *uMap = globalParams->getUtf8Map();
 		
 	GooString gstr;
 	gchar buf[8]; /* 8 is enough for mapping an unicode char to a string */
