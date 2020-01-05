@@ -18,7 +18,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
-// Copyright (C) 2010, 2012, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2012, 2017, 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2011 Steven Murdoch <Steven.Murdoch@cl.cam.ac.uk>
 // Copyright (C) 2011 Joshua Richardson <jric@chegg.com>
 // Copyright (C) 2012 Igor Slepchin <igor.slepchin@gmail.com>
@@ -61,7 +61,7 @@ class HtmlFontColor{
 
 class HtmlFont{
  private:
-   unsigned int size;
+   int size;
    int lineSize;
    bool italic;
    bool bold;
@@ -81,7 +81,7 @@ public:
    bool isItalic() const {return italic;}
    bool isBold() const {return bold;}
    bool isRotOrSkewed() const { return rotOrSkewed; }
-   unsigned int getSize() const {return size;}
+   int getSize() const {return size;}
    int getLineSize() const {return lineSize;}
    void setLineSize(int _lineSize) { lineSize = _lineSize; }
    void setRotMat(const double * const mat)
