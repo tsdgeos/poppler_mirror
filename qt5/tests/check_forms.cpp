@@ -16,6 +16,7 @@ private slots:
     void testSetIcon();// Test that setIcon will always be valid.
     void testSetPrintable();
     void testSetAppearanceText();
+    void testUnicodeFieldAttributes();
 };
 
 void TestForms::testCheckbox()
@@ -207,6 +208,23 @@ void TestForms::testSetAppearanceText()
 
     QCOMPARE( nTextForms, 5 );
 }
+
+void TestForms::testUnicodeFieldAttributes()
+{
+    QScopedPointer< Poppler::Document > document(Poppler::Document::load(TESTDATADIR "/unittestcases/fieldWithUtf16Names.pdf"));
+    QVERIFY( document );
+
+    QScopedPointer< Poppler::Page > page(document->page(0));
+    QVERIFY( page );
+
+    QList<Poppler::FormField*> forms = page->formFields();
+
+	Poppler::FormField * field = forms.first();
+
+	QCOMPARE(field->name(), QStringLiteral("Tex"));
+	QCOMPARE(field->uiName(), QStringLiteral("Texto de ayuda"));
+}
+
 
 QTEST_GUILESS_MAIN(TestForms)
 #include "check_forms.moc"

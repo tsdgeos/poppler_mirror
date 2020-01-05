@@ -147,7 +147,7 @@ QString FormField::name() const
   QString name;
   if (const GooString *goo = m_formData->fm->getPartialName())
   {
-    name = QString::fromLatin1(goo->c_str());
+    name = UnicodeParsedString(goo);
   }
   return name;
 }
