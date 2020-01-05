@@ -32,8 +32,6 @@ MarkedContentOutputDev::MarkedContentOutputDev(int mcidA):
 
 MarkedContentOutputDev::~MarkedContentOutputDev()
 {
-  if (unicodeMap)
-    unicodeMap->decRefCnt();
   if (currentFont)
     currentFont->decRefCnt();
   delete currentText;

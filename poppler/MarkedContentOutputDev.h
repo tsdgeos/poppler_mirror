@@ -127,7 +127,7 @@ private:
   std::vector<int> mcidStack;
   double           pageWidth;
   double           pageHeight;
-  UnicodeMap      *unicodeMap;
+  const UnicodeMap *unicodeMap;
 };
 
 #endif /* !MARKEDCONTENTOUTPUTDEV_H */

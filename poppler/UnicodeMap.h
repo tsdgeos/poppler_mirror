@@ -30,8 +30,10 @@
 
 #include "poppler-config.h"
 #include "CharTypes.h"
+
 #include <atomic>
 #include <string>
+#include <vector>
 
 class GooString;
 
@@ -80,9 +82,6 @@ public:
   UnicodeMap(const UnicodeMap &) = delete;
   UnicodeMap& operator=(const UnicodeMap &) = delete;
 
-  void incRefCnt();
-  void decRefCnt();
-
   std::string getEncodingName() const { return encodingName; }
 
   bool isUnicode() const { return unicodeOut; }
@@ -111,12 +110,9 @@ private:
   int len;			// (user, resident)
   UnicodeMapExt *eMaps;		// (user)
   int eMapsLen;			// (user)
-  std::atomic_int refCnt;
 };
 
 //------------------------------------------------------------------------
-
-#define unicodeMapCacheSize 4
 
 class UnicodeMapCache {
 public:
@@ -127,14 +123,12 @@ public:
   UnicodeMapCache(const UnicodeMapCache &) = delete;
   UnicodeMapCache& operator=(const UnicodeMapCache &) = delete;
 
-  // Get the UnicodeMap for <encodingName>.  Increments its reference
-  // count; there will be one reference for the cache plus one for the
-  // caller of this function.  Returns NULL on failure.
-  UnicodeMap *getUnicodeMap(const GooString *encodingName);
+  // Get the UnicodeMap for <encodingName>.  Returns NULL on failure.
+  const UnicodeMap *getUnicodeMap(const GooString *encodingName);
 
 private:
 
-  UnicodeMap *cache[unicodeMapCacheSize];
+  std::vector<UnicodeMap *> cache;
 };
 
 #endif

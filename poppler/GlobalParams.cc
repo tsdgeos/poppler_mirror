@@ -593,7 +593,6 @@ UnicodeMap *GlobalParams::getResidentUnicodeMap(const GooString *encodingName) {
   const auto unicodeMap = residentUnicodeMaps.find(encodingName->toStr());
   if (unicodeMap != residentUnicodeMaps.end()) {
     map = &unicodeMap->second;
-    map->incRefCnt();
   }
 
   return map;
@@ -1138,7 +1137,6 @@ const UnicodeMap *GlobalParams::getUtf8Map() {
   if (!utf8Map) {
     GooString enc("UTF-8");
     utf8Map = globalParams->getUnicodeMap(&enc);
-    utf8Map->incRefCnt();
   }
 
   return utf8Map;
@@ -1176,8 +1174,8 @@ CharCodeToUnicode *GlobalParams::getCIDToUnicode(const GooString *collection) {
   return ctu;
 }
 
-UnicodeMap *GlobalParams::getUnicodeMap(const GooString *encodingName) {
-  UnicodeMap *map;
+const UnicodeMap *GlobalParams::getUnicodeMap(const GooString *encodingName) {
+  const UnicodeMap *map;
 
   if (!(map = getResidentUnicodeMap(encodingName))) {
     unicodeMapCacheLocker();
@@ -1192,7 +1190,7 @@ CMap *GlobalParams::getCMap(const GooString *collection, const GooString *cMapNa
   return cMapCache->getCMap(collection, cMapName, stream);
 }
 
-UnicodeMap *GlobalParams::getTextEncoding() {
+const UnicodeMap *GlobalParams::getTextEncoding() {
   return getUnicodeMap(textEncoding);
 }
 

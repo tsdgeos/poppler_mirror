@@ -135,9 +135,9 @@ public:
   bool getErrQuiet();
 
   CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
-  UnicodeMap *getUnicodeMap(const GooString *encodingName);
+  const UnicodeMap *getUnicodeMap(const GooString *encodingName);
   CMap *getCMap(const GooString *collection, const GooString *cMapName, Stream *stream = nullptr);
-  UnicodeMap *getTextEncoding();
+  const UnicodeMap *getTextEncoding();
 
   const UnicodeMap *getUtf8Map();
 
@@ -211,7 +211,7 @@ private:
   UnicodeMapCache *unicodeMapCache;
   CMapCache *cMapCache;
 
-  UnicodeMap *utf8Map;
+  const UnicodeMap *utf8Map;
   
   mutable std::recursive_mutex mutex;
   mutable std::recursive_mutex unicodeMapCacheMutex;

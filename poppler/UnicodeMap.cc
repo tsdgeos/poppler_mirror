@@ -137,7 +137,6 @@ UnicodeMap::UnicodeMap(const std::string &encodingNameA) {
   len = 0;
   eMaps = nullptr;
   eMapsLen = 0;
-  refCnt = 1;
 }
 
 UnicodeMap::UnicodeMap(const char *encodingNameA, bool unicodeOutA,
@@ -149,7 +148,6 @@ UnicodeMap::UnicodeMap(const char *encodingNameA, bool unicodeOutA,
   len = lenA;
   eMaps = nullptr;
   eMapsLen = 0;
-  refCnt = 1;
 }
 
 UnicodeMap::UnicodeMap(const char *encodingNameA, bool unicodeOutA,
@@ -160,7 +158,6 @@ UnicodeMap::UnicodeMap(const char *encodingNameA, bool unicodeOutA,
   func = funcA;
   eMaps = nullptr;
   eMapsLen = 0;
-  refCnt = 1;
 }
 
 UnicodeMap::~UnicodeMap() {
@@ -179,7 +176,6 @@ UnicodeMap::UnicodeMap(UnicodeMap &&other) noexcept
   , len{other.len}
   , eMaps{other.eMaps}
   , eMapsLen{other.eMapsLen}
-  , refCnt{1}
 {
   switch (kind) {
   case unicodeMapUser:
@@ -245,16 +241,6 @@ void UnicodeMap::swap(UnicodeMap &other) noexcept
   swap(eMapsLen, other.eMapsLen);
 }
 
-void UnicodeMap::incRefCnt() {
-  refCnt.fetch_add(1);
-}
-
-void UnicodeMap::decRefCnt() {
-  if (refCnt.fetch_sub(1) == 1) {
-    delete this;
-  }
-}
-
 bool UnicodeMap::match(const GooString *encodingNameA) const {
   return encodingName == encodingNameA->toStr();
 }
@@ -309,52 +295,23 @@ int UnicodeMap::mapUnicode(Unicode u, char *buf, int bufSize) const {
 //------------------------------------------------------------------------
 
 UnicodeMapCache::UnicodeMapCache() {
-  int i;
-
-  for (i = 0; i < unicodeMapCacheSize; ++i) {
-    cache[i] = nullptr;
-  }
 }
 
 UnicodeMapCache::~UnicodeMapCache() {
-  int i;
-
-  for (i = 0; i < unicodeMapCacheSize; ++i) {
-    if (cache[i]) {
-      cache[i]->decRefCnt();
-    }
+  for (UnicodeMap *map : cache) {
+    delete map;
   }
 }
 
-UnicodeMap *UnicodeMapCache::getUnicodeMap(const GooString *encodingName) {
-  UnicodeMap *map;
-  int i, j;
-
-  if (cache[0] && cache[0]->match(encodingName)) {
-    cache[0]->incRefCnt();
-    return cache[0];
-  }
-  for (i = 1; i < unicodeMapCacheSize; ++i) {
-    if (cache[i] && cache[i]->match(encodingName)) {
-      map = cache[i];
-      for (j = i; j >= 1; --j) {
-	cache[j] = cache[j - 1];
-      }
-      cache[0] = map;
-      map->incRefCnt();
+const UnicodeMap *UnicodeMapCache::getUnicodeMap(const GooString *encodingName) {
+  for (UnicodeMap *map : cache) {
+    if (map->match(encodingName)) {
       return map;
     }
   }
-  if ((map = UnicodeMap::parse(encodingName))) {
-    if (cache[unicodeMapCacheSize - 1]) {
-      cache[unicodeMapCacheSize - 1]->decRefCnt();
-    }
-    for (j = unicodeMapCacheSize - 1; j >= 1; --j) {
-      cache[j] = cache[j - 1];
-    }
-    cache[0] = map;
-    map->incRefCnt();
-    return map;
+  UnicodeMap *map = UnicodeMap::parse(encodingName);
+  if (map) {
+    cache.emplace_back(map);
   }
-  return nullptr;
+  return map;
 }

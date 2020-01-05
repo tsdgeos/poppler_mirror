@@ -422,7 +422,7 @@ char *utf16ToUtf8(const uint16_t *utf16, int *len)
 
 struct Ascii7Map
 {
-  UnicodeMap *d;
+  const UnicodeMap *d;
   Ascii7Map()
   {
     GooString enc("ASCII7");

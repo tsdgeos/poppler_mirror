@@ -803,7 +803,7 @@ int TextWord::cmpYX(const void *p1, const void *p2) {
 
 GooString *TextWord::getText() const {
   GooString *s;
-  UnicodeMap *uMap;
+  const UnicodeMap *uMap;
   char buf[8];
   int n, i;
 
@@ -815,7 +815,6 @@ GooString *TextWord::getText() const {
     n = uMap->mapUnicode(text[i], buf, sizeof(buf));
     s->append(buf, n);
   }
-  uMap->decRefCnt();
   return s;
 }
 
@@ -2818,7 +2817,6 @@ void TextPage::addLink(int xMin, int yMin, int xMax, int yMax, AnnotLink *link) 
 }
 
 void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
-  UnicodeMap *uMap;
   TextPool *pool;
   TextWord *word0, *word1, *word2;
   TextLine *line;
@@ -2839,7 +2837,7 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
     return;
   }
 
-  uMap = globalParams->getTextEncoding();
+  const UnicodeMap *uMap = globalParams->getTextEncoding();
   blkList = nullptr;
   lastBlk = nullptr;
   nBlocks = 0;
@@ -3884,10 +3882,6 @@ void TextPage::coalesce(bool physLayout, double fixedPitch, bool doHTML) {
   }
   printf("\n");
 #endif
-
-  if (uMap) {
-    uMap->decRefCnt();
-  }
 }
 
 bool TextPage::findText(const Unicode *s, int len,
@@ -4168,7 +4162,7 @@ bool TextPage::findText(const Unicode *s, int len,
 GooString *TextPage::getText(double xMin, double yMin,
 			   double xMax, double yMax, EndOfLineKind textEOL) const {
   GooString *s;
-  UnicodeMap *uMap;
+  const UnicodeMap *uMap;
   TextBlock *blk;
   TextLine *line;
   TextLineFrag *frags;
@@ -4400,7 +4394,6 @@ GooString *TextPage::getText(double xMin, double yMin,
   }
 
   gfree(frags);
-  uMap->decRefCnt();
 
   return s;
 }
@@ -4563,7 +4556,7 @@ GooString *TextSelectionDumper::getText ()
 {
   GooString *text;
   int i;
-  UnicodeMap *uMap;
+  const UnicodeMap *uMap;
   char space[8], eol[16];
   int spaceLen, eolLen;
 
@@ -4587,8 +4580,6 @@ GooString *TextSelectionDumper::getText ()
     if (i < nLines - 1)
       text->append(eol, eolLen);
   }
-
-  uMap->decRefCnt();
 
   return text;
 }
@@ -5290,7 +5281,7 @@ bool TextPage::findCharRange(int pos, int length,
 
 void TextPage::dump(void *outputStream, TextOutputFunc outputFunc,
 		    bool physLayout, EndOfLineKind textEOL, bool pageBreaks) {
-  UnicodeMap *uMap;
+  const UnicodeMap *uMap;
   TextFlow *flow;
   TextBlock *blk;
   TextLine *line;
@@ -5461,8 +5452,6 @@ void TextPage::dump(void *outputStream, TextOutputFunc outputFunc,
   if (pageBreaks) {
     (*outputFunc)(outputStream, eop, eopLen);
   }
-
-  uMap->decRefCnt();
 }
 
 void TextPage::setMergeCombining(bool merge) {

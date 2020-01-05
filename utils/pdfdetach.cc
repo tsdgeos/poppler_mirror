@@ -83,7 +83,7 @@ static ArgDesc argDesc[] = {
 
 int main(int argc, char *argv[]) {
   GooString *fileName;
-  UnicodeMap *uMap;
+  const UnicodeMap *uMap;
   GooString *ownerPW, *userPW;
   PDFDoc *doc;
   char uBuf[8];
@@ -329,7 +329,6 @@ int main(int argc, char *argv[]) {
  err2:
   for (auto& file : embeddedFiles)
     delete file;
-  uMap->decRefCnt();
   delete doc;
  err0:
 

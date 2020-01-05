@@ -92,7 +92,7 @@ void JSInfo::scanJS(int nPages) {
   scan(nPages);
 }
 
-void JSInfo::scanJS(int nPages, FILE *fout, UnicodeMap *uMap) {
+void JSInfo::scanJS(int nPages, FILE *fout, const UnicodeMap *uMap) {
   print = true;
   file = fout;
   uniMap = uMap;

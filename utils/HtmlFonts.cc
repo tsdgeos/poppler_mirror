@@ -214,7 +214,7 @@ GooString* HtmlFont::getFullName(){
 // this method if plain wrong todo
 GooString* HtmlFont::HtmlFilter(const Unicode* u, int uLen) {
   GooString *tmp = new GooString();
-  UnicodeMap *uMap;
+  const UnicodeMap *uMap;
   char buf[8];
   int n;
 
@@ -247,7 +247,6 @@ GooString* HtmlFont::HtmlFilter(const Unicode* u, int uLen) {
     }
   }
 
-  uMap->decRefCnt();
   return tmp;
 }
 

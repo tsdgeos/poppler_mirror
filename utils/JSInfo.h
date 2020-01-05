@@ -38,7 +38,7 @@ public:
   void scanJS(int nPages);
 
   // scan and print JS in the PDF
-  void scanJS(int nPages, FILE *fout, UnicodeMap *uMap);
+  void scanJS(int nPages, FILE *fout, const UnicodeMap *uMap);
 
   // return true if PDF contains JavaScript
   bool containsJS();
@@ -50,7 +50,7 @@ private:
   bool hasJS;
   bool print;
   FILE *file;
-  UnicodeMap *uniMap;
+  const UnicodeMap *uniMap;
 
   void scan(int nPages);
   void scanLinkAction(LinkAction *link, const char *action, bool deleteLink = true);
