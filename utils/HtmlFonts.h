@@ -96,7 +96,7 @@ public:
 
 class HtmlFontAccu{
 private:
-  std::vector<HtmlFont> *accu;
+  std::vector<HtmlFont> accu;
   
 public:
   HtmlFontAccu();
@@ -105,10 +105,10 @@ public:
   HtmlFontAccu& operator=(const HtmlFontAccu &) = delete;
   int AddFont(const HtmlFont& font);
   HtmlFont *Get(int i){
-    return &(*accu)[i];
+    return &accu[i];
   } 
   GooString* CSStyle(int i, int j = 0);
-  int size() const {return accu->size();}
+  int size() const {return accu.size();}
   
 };  
 #endif
