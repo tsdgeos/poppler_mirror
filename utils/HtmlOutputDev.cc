@@ -489,7 +489,6 @@ static void CloseTags( GooString *htext, bool &finish_a, bool &finish_italic, bo
 // It may also strip out duplicate strings (if they are on top of each other); sometimes they are to create a font effect
 void HtmlPage::coalesce() {
   HtmlString *str1, *str2;
-  HtmlFont *hfont1, *hfont2;
   double space, horSpace, vertSpace, vertOverlap;
   bool addSpace, addLineBreak;
   int n, i;
@@ -551,7 +550,7 @@ void HtmlPage::coalesce() {
   
   str1 = yxStrings;
   
-  hfont1 = getFont(str1);
+  const HtmlFont *hfont1 = getFont(str1);
   if( hfont1->isBold() )
     str1->htext->insert(0,"<b>",3);
   if( hfont1->isItalic() )
@@ -564,7 +563,7 @@ void HtmlPage::coalesce() {
   curX = str1->xMin; curY = str1->yMin;
 
   while (str1 && (str2 = str1->yxNext)) {
-    hfont2 = getFont(str2);
+    const HtmlFont *hfont2 = getFont(str2);
     space = str1->yMax - str1->yMin; // the height of the font's bounding box
     horSpace = str2->xMin - str1->xMax;
     // if strings line up on left-hand side AND they are on subsequent lines, we need a line break

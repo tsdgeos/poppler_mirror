@@ -104,7 +104,7 @@ public:
   HtmlFontAccu(const HtmlFontAccu &) = delete;
   HtmlFontAccu& operator=(const HtmlFontAccu &) = delete;
   int AddFont(const HtmlFont& font);
-  HtmlFont *Get(int i){
+  const HtmlFont *Get(int i) const {
     return &accu[i];
   } 
   GooString* CSStyle(int i, int j = 0);
