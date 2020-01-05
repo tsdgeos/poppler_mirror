@@ -423,8 +423,7 @@ char *utf16ToUtf8(const uint16_t *utf16, int *len)
 void unicodeToAscii7(const Unicode *in, int len, Unicode **ucs4_out,
                      int *out_len, const int *in_idx, int **indices)
 {
-  GooString enc("ASCII7");
-  const UnicodeMap *uMap = globalParams->getUnicodeMap(&enc);
+  const UnicodeMap *uMap = globalParams->getUnicodeMap("ASCII7");
   int *idx = nullptr;
 
   if (!len) {

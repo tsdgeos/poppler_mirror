@@ -586,11 +586,11 @@ Unicode GlobalParams::mapNameToUnicodeText(const char *charName) {
   return nameToUnicodeText->lookup(charName);
 }
 
-UnicodeMap *GlobalParams::getResidentUnicodeMap(const GooString *encodingName) {
+UnicodeMap *GlobalParams::getResidentUnicodeMap(const std::string &encodingName) {
   UnicodeMap *map = nullptr;
 
   globalParamsLocker();
-  const auto unicodeMap = residentUnicodeMaps.find(encodingName->toStr());
+  const auto unicodeMap = residentUnicodeMaps.find(encodingName);
   if (unicodeMap != residentUnicodeMaps.end()) {
     map = &unicodeMap->second;
   }
@@ -598,11 +598,11 @@ UnicodeMap *GlobalParams::getResidentUnicodeMap(const GooString *encodingName) {
   return map;
 }
 
-FILE *GlobalParams::getUnicodeMapFile(const GooString *encodingName) {
+FILE *GlobalParams::getUnicodeMapFile(const std::string &encodingName) {
   FILE *file = nullptr;
 
   globalParamsLocker();
-  const auto unicodeMap = unicodeMaps.find(encodingName->toStr());
+  const auto unicodeMap = unicodeMaps.find(encodingName);
   if (unicodeMap != unicodeMaps.end()) {
     file = openFile(unicodeMap->second.c_str(), "r");
   }
@@ -1135,8 +1135,7 @@ std::string GlobalParams::getTextEncodingName() const {
 
 const UnicodeMap *GlobalParams::getUtf8Map() {
   if (!utf8Map) {
-    GooString enc("UTF-8");
-    utf8Map = globalParams->getUnicodeMap(&enc);
+    utf8Map = globalParams->getUnicodeMap("UTF-8");
   }
 
   return utf8Map;
@@ -1174,7 +1173,7 @@ CharCodeToUnicode *GlobalParams::getCIDToUnicode(const GooString *collection) {
   return ctu;
 }
 
-const UnicodeMap *GlobalParams::getUnicodeMap(const GooString *encodingName) {
+const UnicodeMap *GlobalParams::getUnicodeMap(const std::string &encodingName) {
   const UnicodeMap *map;
 
   if (!(map = getResidentUnicodeMap(encodingName))) {
@@ -1191,7 +1190,7 @@ CMap *GlobalParams::getCMap(const GooString *collection, const GooString *cMapNa
 }
 
 const UnicodeMap *GlobalParams::getTextEncoding() {
-  return getUnicodeMap(textEncoding);
+  return getUnicodeMap(textEncoding->toStr());
 }
 
 std::vector<GooString*> *GlobalParams::getEncodingNames()

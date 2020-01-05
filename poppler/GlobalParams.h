@@ -116,8 +116,8 @@ public:
   // lookups or text extraction with ZapfDingbats fonts.
   Unicode mapNameToUnicodeAll(const char *charName);
 
-  UnicodeMap *getResidentUnicodeMap(const GooString *encodingName);
-  FILE *getUnicodeMapFile(const GooString *encodingName);
+  UnicodeMap *getResidentUnicodeMap(const std::string &encodingName);
+  FILE *getUnicodeMapFile(const std::string &encodingName);
   FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
   FILE *findToUnicodeFile(const GooString *name);
   GooString *findFontFile(const GooString *fontName);
@@ -135,7 +135,7 @@ public:
   bool getErrQuiet();
 
   CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
-  const UnicodeMap *getUnicodeMap(const GooString *encodingName);
+  const UnicodeMap *getUnicodeMap(const std::string &encodingName);
   CMap *getCMap(const GooString *collection, const GooString *cMapName, Stream *stream = nullptr);
   const UnicodeMap *getTextEncoding();
 

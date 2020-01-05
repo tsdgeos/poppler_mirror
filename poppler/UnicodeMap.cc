@@ -50,7 +50,7 @@ struct UnicodeMapExt {
 
 //------------------------------------------------------------------------
 
-UnicodeMap *UnicodeMap::parse(const GooString *encodingNameA) {
+UnicodeMap *UnicodeMap::parse(const std::string &encodingNameA) {
   FILE *f;
   UnicodeMap *map;
   UnicodeMapRange *range;
@@ -63,12 +63,12 @@ UnicodeMap *UnicodeMap::parse(const GooString *encodingNameA) {
 
   if (!(f = globalParams->getUnicodeMapFile(encodingNameA))) {
     error(errSyntaxError, -1,
-	  "Couldn't find unicodeMap file for the '{0:t}' encoding",
-	  encodingNameA);
+	  "Couldn't find unicodeMap file for the '{0:s}' encoding",
+	  encodingNameA.c_str());
     return nullptr;
   }
 
-  map = new UnicodeMap(encodingNameA->toStr());
+  map = new UnicodeMap(encodingNameA);
 
   size = 8;
   UnicodeMapRange *customRanges = (UnicodeMapRange *)gmallocn(size, sizeof(UnicodeMapRange));
@@ -112,13 +112,13 @@ UnicodeMap *UnicodeMap::parse(const GooString *encodingNameA) {
 	++map->eMapsLen;
       } else {
 	error(errSyntaxError, -1,
-	      "Bad line ({0:d}) in unicodeMap file for the '{1:t}' encoding",
-	      line, encodingNameA);
+	      "Bad line ({0:d}) in unicodeMap file for the '{1:s}' encoding",
+	      line, encodingNameA.c_str());
       }
     } else {
       error(errSyntaxError, -1,
-	    "Bad line ({0:d}) in unicodeMap file for the '{1:t}' encoding",
-	    line, encodingNameA);
+	    "Bad line ({0:d}) in unicodeMap file for the '{1:s}' encoding",
+	    line, encodingNameA.c_str());
     }
     ++line;
   }
@@ -241,8 +241,8 @@ void UnicodeMap::swap(UnicodeMap &other) noexcept
   swap(eMapsLen, other.eMapsLen);
 }
 
-bool UnicodeMap::match(const GooString *encodingNameA) const {
-  return encodingName == encodingNameA->toStr();
+bool UnicodeMap::match(const std::string &encodingNameA) const {
+  return encodingName == encodingNameA;
 }
 
 int UnicodeMap::mapUnicode(Unicode u, char *buf, int bufSize) const {
@@ -303,7 +303,7 @@ UnicodeMapCache::~UnicodeMapCache() {
   }
 }
 
-const UnicodeMap *UnicodeMapCache::getUnicodeMap(const GooString *encodingName) {
+const UnicodeMap *UnicodeMapCache::getUnicodeMap(const std::string &encodingName) {
   for (UnicodeMap *map : cache) {
     if (map->match(encodingName)) {
       return map;

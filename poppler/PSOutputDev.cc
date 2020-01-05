@@ -2046,7 +2046,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
 					     sizeof(PSFont16Enc));
       }
       font16Enc[font16EncLen].fontID = *font->getID();
-      if ((uMap = globalParams->getUnicodeMap(fontLoc->encoding))) {
+      if ((uMap = globalParams->getUnicodeMap(fontLoc->encoding->toStr()))) {
 	font16Enc[font16EncLen].enc = fontLoc->encoding->copy();
       } else {
 	error(errSyntaxError, -1,
@@ -5099,7 +5099,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s) {
 	  // font substitution failed, so don't output any text
 	  return;
 	}
-	uMap = globalParams->getUnicodeMap(font16Enc[i].enc);
+	uMap = globalParams->getUnicodeMap(font16Enc[i].enc->toStr());
 	break;
       }
     }

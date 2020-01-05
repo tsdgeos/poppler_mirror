@@ -35,8 +35,6 @@
 #include <string>
 #include <vector>
 
-class GooString;
-
 //------------------------------------------------------------------------
 
 enum UnicodeMapKind {
@@ -61,7 +59,7 @@ public:
 
   // Create the UnicodeMap specified by <encodingName>.  Sets the
   // initial reference count to 1.  Returns NULL on failure.
-  static UnicodeMap *parse(const GooString *encodingNameA);
+  static UnicodeMap *parse(const std::string &encodingNameA);
 
   // Create a resident UnicodeMap.
   UnicodeMap(const char *encodingNameA, bool unicodeOutA,
@@ -88,7 +86,7 @@ public:
 
   // Return true if this UnicodeMap matches the specified
   // <encodingNameA>.
-  bool match(const GooString *encodingNameA) const;
+  bool match(const std::string &encodingNameA) const;
 
   // Map Unicode to the target encoding.  Fills in <buf> with the
   // output and returns the number of bytes used.  Output will be
@@ -124,7 +122,7 @@ public:
   UnicodeMapCache& operator=(const UnicodeMapCache &) = delete;
 
   // Get the UnicodeMap for <encodingName>.  Returns NULL on failure.
-  const UnicodeMap *getUnicodeMap(const GooString *encodingName);
+  const UnicodeMap *getUnicodeMap(const std::string &encodingName);
 
 private:
 
