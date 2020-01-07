@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2006, 2008-2010, 2012, 2014, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2006, 2008-2010, 2012, 2014, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
@@ -946,7 +946,7 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
 			 GfxFontType typeA, Ref embFontIDA, Dict *fontDict):
   GfxFont(tagA, idA, nameA, typeA, embFontIDA) {
   GooString *name2;
-  BuiltinFont *builtinFont;
+  const BuiltinFont *builtinFont;
   const char **baseEnc;
   bool baseEncFromFontFile;
   char *buf;
