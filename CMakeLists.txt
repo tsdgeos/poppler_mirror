@@ -573,7 +573,6 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/ViewerPreferences.h
     poppler/XRef.h
     poppler/CharTypes.h
-    poppler/CompactFontTables.h
     poppler/ErrorCodes.h
     poppler/NameToUnicodeTable.h
     poppler/PSOutputDev.h
