@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2011, 2012 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2011, 2012, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 //
 // To see a description of the changes please see the Changelog file that
@@ -31,7 +31,7 @@ struct NameToUnicodeTab {
 };
 
 // map character names to Unicode
-static struct NameToUnicodeTab nameToUnicodeTextTab[] = {
+static const struct NameToUnicodeTab nameToUnicodeTextTab[] = {
   {0x0021, "!"},
   {0x0023, "#"},
   {0x0024, "$"},
@@ -4278,7 +4278,7 @@ static struct NameToUnicodeTab nameToUnicodeTextTab[] = {
 };
 
 // map ZapfDingbats names to Unicode
-static struct NameToUnicodeTab nameToUnicodeZapfDingbatsTab[] = {
+static const struct NameToUnicodeTab nameToUnicodeZapfDingbatsTab[] = {
   {0x275e, "a100"},
   {0x2761, "a101"},
   {0x2762, "a102"},

@@ -883,7 +883,7 @@ struct PSSubstFont {
 };
 
 // NB: must be in same order as base14SubstFonts in GfxFont.cc
-static PSSubstFont psBase14SubstFonts[14] = {
+static const PSSubstFont psBase14SubstFonts[14] = {
   {"Courier",               0.600},
   {"Courier-Oblique",       0.600},
   {"Courier-Bold",          0.600},

@@ -559,7 +559,7 @@ struct CombiningTable {
   Unicode comb;
 };
 
-static struct CombiningTable combiningTable[] = {
+static const struct CombiningTable combiningTable[] = {
   {0x0060, 0x0300}, // grave
   {0x00a8, 0x0308}, // dieresis
   {0x00af, 0x0304}, // macron

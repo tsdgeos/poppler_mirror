@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010, 2016-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2016-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Matthias Franz <matthias@ktug.or.kr>
 // Copyright (C) 2009 David Benjamin <davidben@mit.edu>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -1403,7 +1403,7 @@ void md5(const unsigned char *msg, int msgLen, unsigned char *digest) {
 // SHA-256 hash
 //------------------------------------------------------------------------
 
-static unsigned int sha256K[64] = {
+static const unsigned int sha256K[64] = {
   0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
   0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
   0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
