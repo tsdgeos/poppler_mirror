@@ -66,11 +66,6 @@ public:
   virtual void *makeAuthData(const GooString *ownerPassword,
 			     const GooString *userPassword) = 0;
 
-  // Construct authorization data, typically by prompting the user for
-  // a password.  Returns an authorization data object, or NULL to
-  // cancel.
-  virtual void *getAuthData() = 0;
-
   // Free the authorization data returned by makeAuthData or
   // getAuthData.
   virtual void freeAuthData(void *authData) = 0;
@@ -109,7 +104,6 @@ public:
   bool isUnencrypted() const override;
   void *makeAuthData(const GooString *ownerPassword,
 			     const GooString *userPassword) override;
-  void *getAuthData() override;
   void freeAuthData(void *authData) override;
   bool authorize(void *authData) override;
   int getPermissionFlags() const override { return permFlags; }

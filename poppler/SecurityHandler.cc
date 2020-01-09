@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2010, 2012, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2010, 2012, 2015, 2017, 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2016 Alok Anand <alok4nand@gmail.com>
@@ -65,26 +65,15 @@ SecurityHandler::~SecurityHandler() {
 bool SecurityHandler::checkEncryption(const GooString *ownerPassword,
 				       const GooString *userPassword) {
   void *authData;
-  bool ok;
-  int i;
 
   if (ownerPassword || userPassword) {
     authData = makeAuthData(ownerPassword, userPassword);
   } else {
     authData = nullptr;
   }
-  ok = authorize(authData);
+  const bool ok = authorize(authData);
   if (authData) {
     freeAuthData(authData);
-  }
-  for (i = 0; !ok && i < 3; ++i) {
-    if (!(authData = getAuthData())) {
-      break;
-    }
-    ok = authorize(authData);
-    if (authData) {
-      freeAuthData(authData);
-    }
   }
   if (!ok) {
     if (!ownerPassword && !userPassword) {
@@ -308,10 +297,6 @@ void *StandardSecurityHandler::makeAuthData(const GooString *ownerPassword,
 			                    : nullptr,
 			      userPassword ? userPassword->copy()
 			                   : nullptr);
-}
-
-void *StandardSecurityHandler::getAuthData() {
-  return nullptr;
 }
 
 void StandardSecurityHandler::freeAuthData(void *authData) {
