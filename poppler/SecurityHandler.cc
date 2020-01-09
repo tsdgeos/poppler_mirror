@@ -295,7 +295,7 @@ StandardSecurityHandler::~StandardSecurityHandler() {
   }
 }
 
-bool StandardSecurityHandler::isUnencrypted() {
+bool StandardSecurityHandler::isUnencrypted() const {
   if (!ok) {
     return true;
   }
