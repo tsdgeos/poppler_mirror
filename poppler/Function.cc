@@ -1077,11 +1077,12 @@ private:
 void PSStack::copy(int n) {
   int i;
 
-  if (sp + n > psStackSize) {
+  int aux;
+  if (unlikely(checkedAdd(sp, n, &aux) || aux > psStackSize)) {
     error(errSyntaxError, -1, "Stack underflow in PostScript function");
     return;
   }
-  if (unlikely(sp - n > psStackSize)) {
+  if (unlikely(checkedSubtraction(sp, n, &aux) || aux > psStackSize)) {
     error(errSyntaxError, -1, "Stack underflow in PostScript function");
     return;
   }
