@@ -56,7 +56,6 @@ class CharCodeToUnicodeCache;
 class UnicodeMapCache;
 class CMap;
 class CMapCache;
-struct XpdfSecurityHandler;
 class GlobalParams;
 class GfxFont;
 class Stream;

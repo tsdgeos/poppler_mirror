@@ -29,7 +29,6 @@
 
 class GooString;
 class PDFDoc;
-struct XpdfSecurityHandler;
 
 //------------------------------------------------------------------------
 // SecurityHandler
