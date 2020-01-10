@@ -6,7 +6,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
- * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -374,7 +374,7 @@ std::ostream& poppler::operator<<(std::ostream& stream, const byte_array &array)
  */
 bool poppler::set_data_dir(const std::string &new_data_dir)
 {
-    return initer::set_data_dir(new_data_dir);
+    return GlobalParamsIniter::setCustomDataDir(new_data_dir);
 }
 
 /**

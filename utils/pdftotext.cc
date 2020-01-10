@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dominic Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2008, 2010, 2011, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2008, 2010, 2011, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Jan Jockusch <jan@jockusch.de>
 // Copyright (C) 2010, 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Kenneth Berland <ken@hero.com>
@@ -68,7 +68,7 @@
 #include "Win32Console.h"
 
 static void printInfoString(FILE *f, Dict *infoDict, const char *key,
-			    const char *text1, const char *text2, UnicodeMap *uMap);
+			    const char *text1, const char *text2, const UnicodeMap *uMap);
 static void printInfoDate(FILE *f, Dict *infoDict, const char *key, const char *fmt);
 void printDocBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last);
 void printWordBBox(FILE *f, PDFDoc *doc, TextOutputDev *textOut, int first, int last);
@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
   GooString *ownerPW, *userPW;
   TextOutputDev *textOut;
   FILE *f;
-  UnicodeMap *uMap;
+  const UnicodeMap *uMap;
   Object info;
   bool ok;
   int exitCode;
@@ -443,7 +443,6 @@ int main(int argc, char *argv[]) {
  err2:
   delete doc;
   delete fileName;
-  uMap->decRefCnt();
  err1:
  err0:
 
@@ -451,7 +450,7 @@ int main(int argc, char *argv[]) {
 }
 
 static void printInfoString(FILE *f, Dict *infoDict, const char *key,
-			    const char *text1, const char *text2, UnicodeMap *uMap) {
+			    const char *text1, const char *text2, const UnicodeMap *uMap) {
   const GooString *s1;
   bool isUnicode;
   Unicode u;

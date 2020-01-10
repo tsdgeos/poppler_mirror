@@ -16,7 +16,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
@@ -30,9 +30,10 @@
 
 #include "poppler-config.h"
 #include "CharTypes.h"
-#include <atomic>
 
-class GooString;
+#include <atomic>
+#include <string>
+#include <vector>
 
 //------------------------------------------------------------------------
 
@@ -58,7 +59,7 @@ public:
 
   // Create the UnicodeMap specified by <encodingName>.  Sets the
   // initial reference count to 1.  Returns NULL on failure.
-  static UnicodeMap *parse(GooString *encodingNameA);
+  static UnicodeMap *parse(const std::string &encodingNameA);
 
   // Create a resident UnicodeMap.
   UnicodeMap(const char *encodingNameA, bool unicodeOutA,
@@ -79,16 +80,13 @@ public:
   UnicodeMap(const UnicodeMap &) = delete;
   UnicodeMap& operator=(const UnicodeMap &) = delete;
 
-  void incRefCnt();
-  void decRefCnt();
-
-  const GooString *getEncodingName() const { return encodingName; }
+  std::string getEncodingName() const { return encodingName; }
 
   bool isUnicode() const { return unicodeOut; }
 
   // Return true if this UnicodeMap matches the specified
   // <encodingNameA>.
-  bool match(const GooString *encodingNameA) const;
+  bool match(const std::string &encodingNameA) const;
 
   // Map Unicode to the target encoding.  Fills in <buf> with the
   // output and returns the number of bytes used.  Output will be
@@ -98,9 +96,9 @@ public:
 
 private:
 
-  UnicodeMap(GooString *encodingNameA);
+  UnicodeMap(const std::string &encodingNameA);
 
-  GooString *encodingName;
+  std::string encodingName;
   UnicodeMapKind kind;
   bool unicodeOut;
   union {
@@ -110,12 +108,9 @@ private:
   int len;			// (user, resident)
   UnicodeMapExt *eMaps;		// (user)
   int eMapsLen;			// (user)
-  std::atomic_int refCnt;
 };
 
 //------------------------------------------------------------------------
-
-#define unicodeMapCacheSize 4
 
 class UnicodeMapCache {
 public:
@@ -126,14 +121,12 @@ public:
   UnicodeMapCache(const UnicodeMapCache &) = delete;
   UnicodeMapCache& operator=(const UnicodeMapCache &) = delete;
 
-  // Get the UnicodeMap for <encodingName>.  Increments its reference
-  // count; there will be one reference for the cache plus one for the
-  // caller of this function.  Returns NULL on failure.
-  UnicodeMap *getUnicodeMap(GooString *encodingName);
+  // Get the UnicodeMap for <encodingName>.  Returns NULL on failure.
+  const UnicodeMap *getUnicodeMap(const std::string &encodingName);
 
 private:
 
-  UnicodeMap *cache[unicodeMapCacheSize];
+  std::vector<UnicodeMap *> cache;
 };
 
 #endif

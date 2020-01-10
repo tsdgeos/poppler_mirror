@@ -1,6 +1,7 @@
 /* poppler-link-private.h: qt interface to poppler
  * Copyright (C) 2016, 2018, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
+ * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +20,10 @@
 
 #ifndef _POPPLER_LINK_PRIVATE_H_
 #define _POPPLER_LINK_PRIVATE_H_
+
+#include <vector>
+
+#include "Link.h"
 
 class LinkOCGState;
 
@@ -56,13 +61,17 @@ public:
 class LinkOCGStatePrivate : public LinkPrivate
 {
 public:
-    LinkOCGStatePrivate( const QRectF &area, ::LinkOCGState *plocg )
+    LinkOCGStatePrivate( const QRectF &area,
+                         const std::vector<::LinkOCGState::StateList>& sList,
+                         bool pRB )
         : LinkPrivate( area )
-        , popplerLinkOCGState( plocg )
+        , stateList( sList )
+        , preserveRB( pRB )
     {
     }
 
-    ::LinkOCGState *popplerLinkOCGState;
+    std::vector<::LinkOCGState::StateList> stateList;
+    bool preserveRB;
 };
 
 

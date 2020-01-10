@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2006-2008 Julien Rebetez <julienr@svn.gnome.org>
-// Copyright 2007-2012, 2015-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2012, 2015-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright 2007-2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright 2007, 2013, 2016 Adrian Johnson <ajohnson@redneon.com>
 // Copyright 2007 Iñigo Martínez <inigomartinez@gmail.com>
@@ -1831,8 +1831,7 @@ Form::Form(PDFDoc *docA, Object* acroFormA)
   defaultAppearance = nullptr;
   defaultResources = nullptr;
 
-  obj1 = acroForm->dictLookup("NeedAppearances");
-  needAppearances = (obj1.isBool() && obj1.getBool());
+  needAppearances = acroForm->dictLookup("NeedAppearances").getBoolWithDefaultValue(false);
 
   obj1 = acroForm->dictLookup("DA");
   if (obj1.isString())

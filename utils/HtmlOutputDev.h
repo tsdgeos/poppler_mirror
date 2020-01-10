@@ -14,7 +14,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2007, 2009, 2012, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2007, 2009, 2012, 2018-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008, 2009 Warren Toomey <wkt@tuhs.org>
 // Copyright (C) 2009, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
@@ -167,7 +167,7 @@ public:
   
   void conv();
 private:
-  HtmlFont* getFont(HtmlString *hStr) { return fonts->Get(hStr->fontpos); }
+  const HtmlFont* getFont(HtmlString *hStr) const { return fonts->Get(hStr->fontpos); }
 
   double fontSize;		// current font size
   bool rawOrder;		// keep strings in content stream order

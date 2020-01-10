@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
@@ -26,7 +26,7 @@
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
-// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -42,6 +42,7 @@
 #include <cstdio>
 #include "CharTypes.h"
 #include "UnicodeMap.h"
+#include "Error.h"
 #include <unordered_map>
 #include <string>
 #include <memory>
@@ -55,7 +56,6 @@ class CharCodeToUnicodeCache;
 class UnicodeMapCache;
 class CMap;
 class CMapCache;
-struct XpdfSecurityHandler;
 class GlobalParams;
 class GfxFont;
 class Stream;
@@ -115,8 +115,8 @@ public:
   // lookups or text extraction with ZapfDingbats fonts.
   Unicode mapNameToUnicodeAll(const char *charName);
 
-  UnicodeMap *getResidentUnicodeMap(const GooString *encodingName);
-  FILE *getUnicodeMapFile(const GooString *encodingName);
+  UnicodeMap *getResidentUnicodeMap(const std::string &encodingName);
+  FILE *getUnicodeMapFile(const std::string &encodingName);
   FILE *findCMapFile(const GooString *collection, const GooString *cMapName);
   FILE *findToUnicodeFile(const GooString *name);
   GooString *findFontFile(const GooString *fontName);
@@ -134,9 +134,11 @@ public:
   bool getErrQuiet();
 
   CharCodeToUnicode *getCIDToUnicode(const GooString *collection);
-  UnicodeMap *getUnicodeMap(GooString *encodingName);
+  const UnicodeMap *getUnicodeMap(const std::string &encodingName);
   CMap *getCMap(const GooString *collection, const GooString *cMapName, Stream *stream = nullptr);
-  UnicodeMap *getTextEncoding();
+  const UnicodeMap *getTextEncoding();
+
+  const UnicodeMap *getUtf8Map();
 
   std::vector<GooString*> *getEncodingNames();
 
@@ -156,7 +158,6 @@ public:
 private:
 
   void parseNameToUnicode(const GooString *name);
-  UnicodeMap *getUnicodeMap2(GooString *encodingName);
 
   void scanEncodingDirs();
   void addCIDToUnicode(const GooString *collection, const GooString *fileName);
@@ -208,12 +209,32 @@ private:
   CharCodeToUnicodeCache *unicodeToUnicodeCache;
   UnicodeMapCache *unicodeMapCache;
   CMapCache *cMapCache;
+
+  const UnicodeMap *utf8Map;
   
   mutable std::recursive_mutex mutex;
   mutable std::recursive_mutex unicodeMapCacheMutex;
   mutable std::recursive_mutex cMapCacheMutex;
 
   const char *popplerDataDir;
+};
+
+class GlobalParamsIniter
+{
+public:
+  GlobalParamsIniter(ErrorCallback errorCallback);
+  ~GlobalParamsIniter();
+
+  GlobalParamsIniter(const GlobalParamsIniter &) = delete;
+  GlobalParamsIniter &operator=(const GlobalParamsIniter &) = delete;
+
+  static bool setCustomDataDir(const std::string &dir);
+
+private:
+  static std::mutex mutex;
+  static int count;
+
+  static std::string customDataDir;
 };
 
 #endif

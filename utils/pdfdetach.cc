@@ -16,7 +16,7 @@
 // Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2013 Yury G. Kudryashov <urkud.urkud@gmail.com>
 // Copyright (C) 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
@@ -83,7 +83,7 @@ static ArgDesc argDesc[] = {
 
 int main(int argc, char *argv[]) {
   GooString *fileName;
-  UnicodeMap *uMap;
+  const UnicodeMap *uMap;
   GooString *ownerPW, *userPW;
   PDFDoc *doc;
   char uBuf[8];
@@ -329,7 +329,6 @@ int main(int argc, char *argv[]) {
  err2:
   for (auto& file : embeddedFiles)
     delete file;
-  uMap->decRefCnt();
   delete doc;
  err0:
 

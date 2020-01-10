@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2012, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2018, 2020 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -29,7 +29,6 @@
 
 class GooString;
 class PDFDoc;
-struct XpdfSecurityHandler;
 
 //------------------------------------------------------------------------
 // SecurityHandler
@@ -47,7 +46,7 @@ public:
   SecurityHandler& operator=(const SecurityHandler &) = delete;
 
   // Returns true if the file is actually unencrypted.
-  virtual bool isUnencrypted() { return false; }
+  virtual bool isUnencrypted() const { return false; }
 
   // Check the document's encryption.  If the document is encrypted,
   // this will first try <ownerPassword> and <userPassword> (in
@@ -67,11 +66,6 @@ public:
   virtual void *makeAuthData(const GooString *ownerPassword,
 			     const GooString *userPassword) = 0;
 
-  // Construct authorization data, typically by prompting the user for
-  // a password.  Returns an authorization data object, or NULL to
-  // cancel.
-  virtual void *getAuthData() = 0;
-
   // Free the authorization data returned by makeAuthData or
   // getAuthData.
   virtual void freeAuthData(void *authData) = 0;
@@ -84,13 +78,13 @@ public:
 
   // Return the various authorization parameters.  These are only
   // valid after authorize has returned true.
-  virtual int getPermissionFlags() = 0;
-  virtual bool getOwnerPasswordOk() = 0;
-  virtual unsigned char *getFileKey() = 0;
-  virtual int getFileKeyLength() = 0;
-  virtual int getEncVersion() = 0;
-  virtual int getEncRevision() = 0;
-  virtual CryptAlgorithm getEncAlgorithm() = 0;
+  virtual int getPermissionFlags() const = 0;
+  virtual bool getOwnerPasswordOk() const = 0;
+  virtual const unsigned char *getFileKey() const = 0;
+  virtual int getFileKeyLength() const = 0;
+  virtual int getEncVersion() const = 0;
+  virtual int getEncRevision() const = 0;
+  virtual CryptAlgorithm getEncAlgorithm() const = 0;
 
 protected:
 
@@ -107,19 +101,18 @@ public:
   StandardSecurityHandler(PDFDoc *docA, Object *encryptDictA);
   ~StandardSecurityHandler() override;
 
-  bool isUnencrypted() override;
+  bool isUnencrypted() const override;
   void *makeAuthData(const GooString *ownerPassword,
 			     const GooString *userPassword) override;
-  void *getAuthData() override;
   void freeAuthData(void *authData) override;
   bool authorize(void *authData) override;
-  int getPermissionFlags() override { return permFlags; }
-  bool getOwnerPasswordOk() override { return ownerPasswordOk; }
-  unsigned char *getFileKey() override { return fileKey; }
-  int getFileKeyLength() override { return fileKeyLength; }
-  int getEncVersion() override { return encVersion; }
-  int getEncRevision() override { return encRevision; }
-  CryptAlgorithm getEncAlgorithm() override { return encAlgorithm; }
+  int getPermissionFlags() const override { return permFlags; }
+  bool getOwnerPasswordOk() const override { return ownerPasswordOk; }
+  const unsigned char *getFileKey() const override { return fileKey; }
+  int getFileKeyLength() const override { return fileKeyLength; }
+  int getEncVersion() const override { return encVersion; }
+  int getEncRevision() const override { return encRevision; }
+  CryptAlgorithm getEncAlgorithm() const override { return encAlgorithm; }
 
 private:
 

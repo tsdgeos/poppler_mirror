@@ -7,7 +7,7 @@
  * Copyright (C) 2017, Hubert Figuière <hub@figuiere.net>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
- * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -397,23 +397,23 @@ namespace Poppler
 
   void OptContentModel::applyLink( LinkOCGState *link )
   {
-    ::LinkOCGState *popplerLinkOCGState = static_cast<LinkOCGStatePrivate*>(link->d_ptr)->popplerLinkOCGState;
+    LinkOCGStatePrivate *linkPrivate = link->d_func();
 
     QSet<OptContentItem *> changedItems;
 
-    const std::vector<::LinkOCGState::StateList>& statesList = popplerLinkOCGState->getStateList();
+    const std::vector<::LinkOCGState::StateList>& statesList = linkPrivate->stateList;
     for (const ::LinkOCGState::StateList& stateList : statesList) {
         const std::vector<Ref>& refsList = stateList.list;
         for (const Ref& ref : refsList) {
             OptContentItem *item = d->itemFromRef(QString::number(ref.num));
 
             if (stateList.st == ::LinkOCGState::On) {
-              item->setState(OptContentItem::On, popplerLinkOCGState->getPreserveRB(), changedItems);
+              item->setState(OptContentItem::On, linkPrivate->preserveRB, changedItems);
             } else if (stateList.st == ::LinkOCGState::Off) {
-              item->setState(OptContentItem::Off, popplerLinkOCGState->getPreserveRB(), changedItems);
+              item->setState(OptContentItem::Off, linkPrivate->preserveRB, changedItems);
             } else {
               OptContentItem::ItemState newState = item->state() == OptContentItem::On ? OptContentItem::Off : OptContentItem::On;
-              item->setState(newState, popplerLinkOCGState->getPreserveRB(), changedItems);
+              item->setState(newState, linkPrivate->preserveRB, changedItems);
             }
         }
     }

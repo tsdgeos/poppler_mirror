@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2009, 201, 2010, 2013, 2014, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2009, 201, 2010, 2013, 2014, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2009 Ilya Gorenbein <igorenbein@finjan.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
@@ -66,7 +66,7 @@ Object Parser::getObj(int recursion)
 }
 
 Object Parser::getObj(bool simpleOnly,
-           unsigned char *fileKey,
+           const unsigned char *fileKey,
 		       CryptAlgorithm encAlgorithm, int keyLength,
 		       int objNum, int objGen, int recursion,
 		       bool strict) {
@@ -196,7 +196,7 @@ err:
   return Object(objError);
 }
 
-Stream *Parser::makeStream(Object &&dict, unsigned char *fileKey,
+Stream *Parser::makeStream(Object &&dict, const unsigned char *fileKey,
 			   CryptAlgorithm encAlgorithm, int keyLength,
 			   int objNum, int objGen, int recursion,
                            bool strict) {

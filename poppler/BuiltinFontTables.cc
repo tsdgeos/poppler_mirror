@@ -6,6 +6,20 @@
 //
 //========================================================================
 
+//========================================================================
+//
+// Modified under the Poppler project - http://poppler.freedesktop.org
+//
+// All changes made under the Poppler project to this file are licensed
+// under GPL version 2 or later
+//
+// Copyright (C) 2020 Albert Astals Cid <aacid@kde.org>
+//
+// To see a description of the changes please see the Changelog file that
+// came with your tarball or type make ChangeLog if you are building from git
+//
+//========================================================================
+
 #include <config.h>
 #include <cstdlib>
 #include "FontEncodingTables.h"
@@ -4243,7 +4257,7 @@ BuiltinFont builtinFonts[] = {
   { "ZapfDingbats",          zapfDingbatsEncoding,        820, -143, {  -1, -143,  981,  820}, nullptr }
 };
 
-BuiltinFont *builtinFontSubst[] = {
+const BuiltinFont *builtinFontSubst[] = {
   &builtinFonts[0],
   &builtinFonts[3],
   &builtinFonts[1],

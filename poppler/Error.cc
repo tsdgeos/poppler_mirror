@@ -18,6 +18,7 @@
 // Copyright (C) 2007 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2012 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2020 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -45,15 +46,10 @@ static const char *errorCategoryNames[] = {
   "Internal Error"
 };
 
-static void (*errorCbk)(void *data, ErrorCategory category,
-			Goffset pos, const char *msg) = nullptr;
-static void *errorCbkData = nullptr;
+static ErrorCallback errorCbk = nullptr;
 
-void setErrorCallback(void (*cbk)(void *data, ErrorCategory category,
-				  Goffset pos, const char *msg),
-		      void *data) {
+void setErrorCallback(ErrorCallback cbk) {
   errorCbk = cbk;
-  errorCbkData = data;
 }
 
 void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...) {
@@ -79,7 +75,7 @@ void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...) {
   }
 
   if (errorCbk) {
-    (*errorCbk)(errorCbkData, category, pos, sanitized->c_str());
+    (*errorCbk)(category, pos, sanitized->c_str());
   } else {
     if (pos >= 0) {
       fprintf(stderr, "%s (%lld): %s\n",

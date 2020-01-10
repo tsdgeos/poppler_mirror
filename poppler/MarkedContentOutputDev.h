@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2013 Igalia S.L.
-// Copyright 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2018-2020 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -127,7 +127,7 @@ private:
   std::vector<int> mcidStack;
   double           pageWidth;
   double           pageHeight;
-  UnicodeMap      *unicodeMap;
+  const UnicodeMap *unicodeMap;
 };
 
 #endif /* !MARKEDCONTENTOUTPUTDEV_H */

@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2006-2009, 2011-2013, 2015-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2009, 2011-2013, 2015-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2007, 2008 Brad Hards <bradh@kde.org>
 // Copyright (C) 2008, 2009 Koji Otani <sho@bbr.jp>
@@ -883,7 +883,7 @@ struct PSSubstFont {
 };
 
 // NB: must be in same order as base14SubstFonts in GfxFont.cc
-static PSSubstFont psBase14SubstFonts[14] = {
+static const PSSubstFont psBase14SubstFonts[14] = {
   {"Courier",               0.600},
   {"Courier-Oblique",       0.600},
   {"Courier-Bold",          0.600},
@@ -1880,7 +1880,7 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
   GooString *psName;
   char buf[16];
   bool subst;
-  UnicodeMap *uMap;
+  const UnicodeMap *uMap;
   const char *charName;
   double xs, ys;
   int code;
@@ -2046,9 +2046,8 @@ void PSOutputDev::setupFont(GfxFont *font, Dict *parentResDict) {
 					     sizeof(PSFont16Enc));
       }
       font16Enc[font16EncLen].fontID = *font->getID();
-      if ((uMap = globalParams->getUnicodeMap(fontLoc->encoding))) {
+      if ((uMap = globalParams->getUnicodeMap(fontLoc->encoding->toStr()))) {
 	font16Enc[font16EncLen].enc = fontLoc->encoding->copy();
-	uMap->decRefCnt();
       } else {
 	error(errSyntaxError, -1,
 	      "Couldn't find Unicode map for 16-bit font encoding '{0:t}'",
@@ -5058,7 +5057,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s) {
   GooString *s2;
   double dx, dy, originX, originY;
   const char *p;
-  UnicodeMap *uMap;
+  const UnicodeMap *uMap;
   CharCode code;
   const Unicode *u;
   char buf[8];
@@ -5100,7 +5099,7 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s) {
 	  // font substitution failed, so don't output any text
 	  return;
 	}
-	uMap = globalParams->getUnicodeMap(font16Enc[i].enc);
+	uMap = globalParams->getUnicodeMap(font16Enc[i].enc->toStr());
 	break;
       }
     }
@@ -5189,9 +5188,6 @@ void PSOutputDev::drawString(GfxState *state, const GooString *s) {
     }
     p += n;
     len -= n;
-  }
-  if (uMap) {
-    uMap->decRefCnt();
   }
 
   if (nChars > 0) {

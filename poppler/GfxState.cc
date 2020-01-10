@@ -16,7 +16,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006, 2010 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2006-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009, 2012 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2009, 2011-2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009, 2019 Christian Persch <chpe@gnome.org>
@@ -4200,9 +4200,8 @@ GfxRadialShading *GfxRadialShading::parse(GfxResources *res, Dict *dict, OutputD
   extend0A = extend1A = false;
   obj1 = dict->lookup("Extend");
   if (obj1.isArray() && obj1.arrayGetLength() == 2) {
-    Object obj2;
-    extend0A = (obj2 = obj1.arrayGet(0), obj2.isBool() ? obj2.getBool() : false);
-    extend1A = (obj2 = obj1.arrayGet(1), obj2.isBool() ? obj2.getBool() : false);
+    extend0A = obj1.arrayGet(0).getBoolWithDefaultValue(false);
+    extend1A = obj1.arrayGet(1).getBoolWithDefaultValue(false);
   }
 
   shading = new GfxRadialShading(x0A, y0A, r0A, x1A, y1A, r1A, t0A, t1A,

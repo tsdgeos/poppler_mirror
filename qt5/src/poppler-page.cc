@@ -17,7 +17,7 @@
  * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  * Copyright (C) 2016 Arseniy Lartsev <arseniy@alumni.chalmers.se>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
- * Copyright (C) 2017-2019, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2017-2020, Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2017, 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
@@ -340,7 +340,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
     {
       ::LinkOCGState *plocg = (::LinkOCGState *)a;
 
-      LinkOCGStatePrivate *locgp = new LinkOCGStatePrivate( linkArea, plocg );
+      LinkOCGStatePrivate *locgp = new LinkOCGStatePrivate( linkArea, plocg->getStateList(), plocg->getPreserveRB() );
       popplerLink = new LinkOCGState( locgp );
     }
     break;
@@ -360,16 +360,12 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
 
   if ( popplerLink )
   {
-    const std::vector<::LinkAction*> *nextActions = a->nextActions();
-    if ( nextActions )
+    QVector<Link *> links;
+    for ( ::LinkAction *nextAction : a->nextActions() )
     {
-      QVector<Link *> links;
-      for ( ::LinkAction *nextAction : *nextActions )
-      {
-        links << convertLinkActionToLink( nextAction, parentDoc, linkArea );
-      }
-      LinkPrivate::get(popplerLink)->nextLinks = links;
+      links << convertLinkActionToLink( nextAction, parentDoc, linkArea );
     }
+    LinkPrivate::get(popplerLink)->nextLinks = links;
   }
 
   return popplerLink;

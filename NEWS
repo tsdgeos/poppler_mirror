@@ -1,3 +1,28 @@
+Release 0.84.0:
+        core:
+         * Fix crash when converting from Unicode to ASCII-7
+         * Splash::scaleImageYdXu: Protect against crash if srcWidth is too big
+         * JBIG2Stream: fix potential crash in malformed documents
+         * JBIG2Stream: fix leak in reset() if called several times
+         * Internal code improvements
+
+        utils:
+         * pdfimages: Add error message if first page is larger then number of pages.
+         * pdfinfo: Improved paper size recognition
+         * pdfsig: Fix exit code when dumping signatures
+         * pdftocairo: Error out when even/odd selects 0 pages
+         * pdftohtml: Fix memory leak
+         * pdftoppm: Add an option to scale before rotate
+         * pdftoppm: Add -hide-annotations option
+         * pdftoppm: Error out when even/odd selects 0 pages
+         * pdftops: Improve -optimizecolorspace
+
+        qt5:
+         * Code cleanups
+
+        glib:
+         * Fix compiler warrnings
+
 Release 0.83.0:
         core:
          * Improve when a file is recognized as Linearized

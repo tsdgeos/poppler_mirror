@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2010, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2010, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
@@ -39,7 +39,7 @@
 
 //------------------------------------------------------------------------
 
-static char hexChars[17] = "0123456789ABCDEF";
+static const char hexChars[17] = "0123456789ABCDEF";
 
 //------------------------------------------------------------------------
 // FoFiType1C
@@ -2567,7 +2567,7 @@ bool FoFiType1C::readCharset() {
 }
 
 int FoFiType1C::getOp(int pos, bool charstring, bool *ok) {
-  static char nybChars[16] = "0123456789.ee -";
+  static const char nybChars[16] = "0123456789.ee -";
   Type1COp op;
   char buf[65];
   int b0, b1, nyb0, nyb1, x, i;

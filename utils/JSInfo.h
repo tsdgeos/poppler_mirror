@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2016 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 //
 // To see a description of the changes please see the Changelog file that
@@ -38,7 +38,7 @@ public:
   void scanJS(int nPages);
 
   // scan and print JS in the PDF
-  void scanJS(int nPages, FILE *fout, UnicodeMap *uMap);
+  void scanJS(int nPages, FILE *fout, const UnicodeMap *uMap);
 
   // return true if PDF contains JavaScript
   bool containsJS();
@@ -50,7 +50,7 @@ private:
   bool hasJS;
   bool print;
   FILE *file;
-  UnicodeMap *uniMap;
+  const UnicodeMap *uniMap;
 
   void scan(int nPages);
   void scanLinkAction(LinkAction *link, const char *action, bool deleteLink = true);

@@ -15,7 +15,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2006 Dom Lachowicz <cinamod@hotmail.com>
-// Copyright (C) 2007-2010, 2012, 2016-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007-2010, 2012, 2016-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2011 Vittal Aithal <vittal.aithal@cognidox.com>
 // Copyright (C) 2012, 2013, 2016-2018 Adrian Johnson <ajohnson@redneon.com>
@@ -130,7 +130,7 @@ static const ArgDesc argDesc[] = {
 };
 
 static void printInfoString(Dict *infoDict, const char *key, const char *text,
-			    UnicodeMap *uMap) {
+			    const UnicodeMap *uMap) {
   const GooString *s1;
   Unicode *u;
   char buf[8];
@@ -374,7 +374,7 @@ static void printLinkDest(LinkDest *dest) {
   printf("%s", s.c_str());
 }
 
-static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
+static void printDestinations(PDFDoc *doc, const UnicodeMap *uMap) {
   std::map<Ref,std::map<GooString*,LinkDest*,GooStringCompare> > map;
 
   int numDests = doc->getCatalog()->numDestNameTree();
@@ -428,7 +428,7 @@ static void printDestinations(PDFDoc *doc, UnicodeMap *uMap) {
   }
 }
 
-static void printPdfSubtype(PDFDoc *doc, UnicodeMap *uMap) {
+static void printPdfSubtype(PDFDoc *doc, const UnicodeMap *uMap) {
   const Object info = doc->getDocInfo();
   if (info.isDict()) {
     const PDFSubtype pdftype = doc->getPDFSubtype();
@@ -663,7 +663,7 @@ static void printPdfSubtype(PDFDoc *doc, UnicodeMap *uMap) {
   }
 }
 
-static void printInfo(PDFDoc *doc, UnicodeMap *uMap, long long filesize, bool multiPage) {
+static void printInfo(PDFDoc *doc, const UnicodeMap *uMap, long long filesize, bool multiPage) {
   Page *page;
   char buf[256];
   double w, h, wISO, hISO, isoThreshold;
@@ -845,7 +845,7 @@ int main(int argc, char *argv[]) {
   PDFDoc *doc;
   GooString *fileName;
   GooString *ownerPW, *userPW;
-  UnicodeMap *uMap;
+  const UnicodeMap *uMap;
   FILE *f;
   bool ok;
   int exitCode;
@@ -984,7 +984,6 @@ int main(int argc, char *argv[]) {
 
   // clean up
  err2:
-  uMap->decRefCnt();
   delete doc;
   delete fileName;
  err1:

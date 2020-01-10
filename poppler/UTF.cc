@@ -16,7 +16,7 @@
 // Copyright (C) 2008 Koji Otani <sho@bbr.jp>
 // Copyright (C) 2012, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2016, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2016, 2018-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2016 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
@@ -420,20 +420,10 @@ char *utf16ToUtf8(const uint16_t *utf16, int *len)
   return utf8;
 }
 
-struct Ascii7Map
-{
-  UnicodeMap *d;
-  Ascii7Map()
-  {
-    GooString enc("ASCII7");
-    d = globalParams->getUnicodeMap(&enc);
-  }
-};
-
-void unicodeToAscii7(Unicode *in, int len, Unicode **ucs4_out,
+void unicodeToAscii7(const Unicode *in, int len, Unicode **ucs4_out,
                      int *out_len, const int *in_idx, int **indices)
 {
-  static Ascii7Map uMap;
+  const UnicodeMap *uMap = globalParams->getUnicodeMap("ASCII7");
   int *idx = nullptr;
 
   if (!len) {
@@ -455,7 +445,7 @@ void unicodeToAscii7(Unicode *in, int len, Unicode **ucs4_out,
   int i, n, k;
 
   for (i = k = 0; i < len; ++i) {
-     n = uMap.d->mapUnicode(in[i], buf, sizeof(buf));
+     n = uMap->mapUnicode(in[i], buf, sizeof(buf));
      if (!n) {
        // the Unicode char could not be converted to ascii7 counterpart
        // so just fill with a non-printable ascii char

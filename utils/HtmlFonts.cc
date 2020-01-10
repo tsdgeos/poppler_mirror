@@ -17,7 +17,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2007, 2010, 2012, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2007, 2010, 2012, 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2008 Boris Toloknov <tlknv@yandex.ru>
 // Copyright (C) 2008 Tomas Are Haavet <tomasare@gmail.com>
 // Copyright (C) 2010 OSSD CDAC Mumbai by Leena Chourey (leenac@cdacmumbai.in) and Onkar Potdar (onkar@cdacmumbai.in)
@@ -117,7 +117,7 @@ HtmlFont::HtmlFont(GfxFont *font, int _size, GfxRGB rgb){
 
   lineSize = -1;
 
-  size=(_size-1);
+  size=_size;
   italic = false;
   bold = false;
   rotOrSkewed = false;
@@ -214,7 +214,7 @@ GooString* HtmlFont::getFullName(){
 // this method if plain wrong todo
 GooString* HtmlFont::HtmlFilter(const Unicode* u, int uLen) {
   GooString *tmp = new GooString();
-  UnicodeMap *uMap;
+  const UnicodeMap *uMap;
   char buf[8];
   int n;
 
@@ -247,37 +247,34 @@ GooString* HtmlFont::HtmlFilter(const Unicode* u, int uLen) {
     }
   }
 
-  uMap->decRefCnt();
   return tmp;
 }
 
 HtmlFontAccu::HtmlFontAccu(){
-  accu=new std::vector<HtmlFont>();
 }
 
 HtmlFontAccu::~HtmlFontAccu(){
-  if (accu) delete accu;
 }
 
 int HtmlFontAccu::AddFont(const HtmlFont& font){
  std::vector<HtmlFont>::iterator i; 
- for (i=accu->begin();i!=accu->end();++i)
+ for (i=accu.begin();i!=accu.end();++i)
  {
 	if (font.isEqual(*i)) 
 	{
-		return (int)(i-(accu->begin()));
+		return (int)(i-(accu.begin()));
 	}
  }
 
- accu->push_back(font);
- return (accu->size()-1);
+ accu.push_back(font);
+ return (accu.size()-1);
 }
 
 // get CSS font definition for font #i 
 GooString* HtmlFontAccu::CSStyle(int i, int j){
    GooString *tmp=new GooString();
 
-   std::vector<HtmlFont>::iterator g=accu->begin();
+   std::vector<HtmlFont>::iterator g=accu.begin();
    g+=i;
    HtmlFont font=*g;
    GooString *colorStr=font.getColor().toString();

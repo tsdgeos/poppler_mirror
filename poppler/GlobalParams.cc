@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Martin Kretzschmar <martink@gnome.org>
 // Copyright (C) 2005, 2006 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2010, 2012, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2006, 2007 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
@@ -38,7 +38,7 @@
 // Copyright (C) 2017 Christoph Cullmann <cullmann@kde.org>
 // Copyright (C) 2017 Jean Ghali <jghali@libertysurf.fr>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
-// Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
@@ -414,6 +414,8 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   unicodeMapCache = new UnicodeMapCache();
   cMapCache = new CMapCache();
 
+  utf8Map = nullptr;
+
   baseFontsInitialized = false;
 
   // set up the initial nameToUnicode tables
@@ -428,17 +430,17 @@ GlobalParams::GlobalParams(const char *customPopplerDataDir)
   // set up the residentUnicodeMaps table
   residentUnicodeMaps.reserve(6);
   UnicodeMap map = {"Latin1", false, latin1UnicodeMapRanges, latin1UnicodeMapLen};
-  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
   map = {"ASCII7", false, ascii7UnicodeMapRanges, ascii7UnicodeMapLen};
-  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
   map = {"Symbol", false, symbolUnicodeMapRanges, symbolUnicodeMapLen};
-  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
   map = {"ZapfDingbats", false, zapfDingbatsUnicodeMapRanges, zapfDingbatsUnicodeMapLen};
-  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
   map = {"UTF-8", true, &mapUTF8};
-  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
   map = {"UTF-16", true, &mapUTF16};
-  residentUnicodeMaps.emplace(map.getEncodingName()->toStr(), std::move(map));
+  residentUnicodeMaps.emplace(map.getEncodingName(), std::move(map));
 
   scanEncodingDirs();
 }
@@ -584,24 +586,23 @@ Unicode GlobalParams::mapNameToUnicodeText(const char *charName) {
   return nameToUnicodeText->lookup(charName);
 }
 
-UnicodeMap *GlobalParams::getResidentUnicodeMap(const GooString *encodingName) {
+UnicodeMap *GlobalParams::getResidentUnicodeMap(const std::string &encodingName) {
   UnicodeMap *map = nullptr;
 
   globalParamsLocker();
-  const auto unicodeMap = residentUnicodeMaps.find(encodingName->toStr());
+  const auto unicodeMap = residentUnicodeMaps.find(encodingName);
   if (unicodeMap != residentUnicodeMaps.end()) {
     map = &unicodeMap->second;
-    map->incRefCnt();
   }
 
   return map;
 }
 
-FILE *GlobalParams::getUnicodeMapFile(const GooString *encodingName) {
+FILE *GlobalParams::getUnicodeMapFile(const std::string &encodingName) {
   FILE *file = nullptr;
 
   globalParamsLocker();
-  const auto unicodeMap = unicodeMaps.find(encodingName->toStr());
+  const auto unicodeMap = unicodeMaps.find(encodingName);
   if (unicodeMap != unicodeMaps.end()) {
     file = openFile(unicodeMap->second.c_str(), "r");
   }
@@ -1132,6 +1133,14 @@ std::string GlobalParams::getTextEncodingName() const {
   return textEncoding->toStr();
 }
 
+const UnicodeMap *GlobalParams::getUtf8Map() {
+  if (!utf8Map) {
+    utf8Map = globalParams->getUnicodeMap("UTF-8");
+  }
+
+  return utf8Map;
+}
+
 bool GlobalParams::getPrintCommands() {
   globalParamsLocker();
   return printCommands;
@@ -1164,12 +1173,8 @@ CharCodeToUnicode *GlobalParams::getCIDToUnicode(const GooString *collection) {
   return ctu;
 }
 
-UnicodeMap *GlobalParams::getUnicodeMap(GooString *encodingName) {
-  return getUnicodeMap2(encodingName);
-}
-
-UnicodeMap *GlobalParams::getUnicodeMap2(GooString *encodingName) {
-  UnicodeMap *map;
+const UnicodeMap *GlobalParams::getUnicodeMap(const std::string &encodingName) {
+  const UnicodeMap *map;
 
   if (!(map = getResidentUnicodeMap(encodingName))) {
     unicodeMapCacheLocker();
@@ -1184,8 +1189,8 @@ CMap *GlobalParams::getCMap(const GooString *collection, const GooString *cMapNa
   return cMapCache->getCMap(collection, cMapName, stream);
 }
 
-UnicodeMap *GlobalParams::getTextEncoding() {
-  return getUnicodeMap2(textEncoding);
+const UnicodeMap *GlobalParams::getTextEncoding() {
+  return getUnicodeMap(textEncoding->toStr());
 }
 
 std::vector<GooString*> *GlobalParams::getEncodingNames()
@@ -1249,3 +1254,43 @@ void GlobalParams::setErrQuiet(bool errQuietA) {
   globalParamsLocker();
   errQuiet = errQuietA;
 }
+
+GlobalParamsIniter::GlobalParamsIniter(ErrorCallback errorCallback)
+{
+  std::lock_guard<std::mutex> lock{mutex};
+
+  if (count == 0) {
+    globalParams = std::make_unique<GlobalParams>(!customDataDir.empty() ? customDataDir.c_str() : nullptr);
+
+    setErrorCallback(errorCallback);
+  }
+
+  count++;
+}
+
+GlobalParamsIniter::~GlobalParamsIniter()
+{
+  std::lock_guard<std::mutex> lock{mutex};
+
+  --count;
+
+  if (count == 0) {
+    globalParams.reset();
+  }
+}
+
+bool GlobalParamsIniter::setCustomDataDir(const std::string &dir)
+{
+  std::lock_guard<std::mutex> lock{mutex};
+
+  if (count == 0) {
+    customDataDir = dir;
+    return true;
+  }
+
+  return false;
+}
+
+std::mutex GlobalParamsIniter::mutex;
+int GlobalParamsIniter::count = 0;
+std::string GlobalParamsIniter::customDataDir;

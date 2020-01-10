@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
-// Copyright (C) 2005-2013, 2015-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Thorkild Stray <thorkild@ifi.uio.no>
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006-2011 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -986,7 +986,7 @@ void Gfx::opSetExtGState(Object args[], int numArgs) {
   Function *funcs[4];
   GfxColor backdropColor;
   bool haveBackdropColor;
-  bool alpha, isolated, knockout;
+  bool alpha;
   double opac;
   int i;
 
@@ -1193,19 +1193,12 @@ void Gfx::opSetExtGState(Object args[], int numArgs) {
 	Object obj4 = obj3.streamGetDict()->lookup("Group");
 	if (obj4.isDict()) {
 	  GfxColorSpace *blendingColorSpace = nullptr;
-	  isolated = knockout = false;
 	  Object obj5 = obj4.dictLookup("CS");
 	  if (!obj5.isNull()) {
 	    blendingColorSpace = GfxColorSpace::parse(res, &obj5, out, state);
 	  }
-	  obj5 = obj4.dictLookup("I");
-	  if (obj5.isBool()) {
-	    isolated = obj5.getBool();
-	  }
-	  obj5 = obj4.dictLookup("K");
-	  if (obj5.isBool()) {
-	    knockout = obj5.getBool();
-	  }
+	  const bool isolated = obj4.dictLookup("I").getBoolWithDefaultValue(false);
+	  const bool knockout = obj4.dictLookup("K").getBoolWithDefaultValue(false);
 	  if (!haveBackdropColor) {
 	    if (blendingColorSpace) {
 	      blendingColorSpace->getDefaultColor(&backdropColor);

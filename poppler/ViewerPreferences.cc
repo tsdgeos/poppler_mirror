@@ -5,7 +5,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright 2011 Pino Toscano <pino@kde.org>
-// Copyright 2017 Albert Astals Cid <aacid@kde.org>
+// Copyright 2017, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright 2019 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
@@ -21,37 +21,19 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
 {
   init();
 
-  Object obj = prefDict->lookup("HideToolbar");
-  if (obj.isBool()) {
-    hideToolbar = obj.getBool();
-  }
+  hideToolbar = prefDict->lookup("HideToolbar").getBoolWithDefaultValue(false);
 
-  obj = prefDict->lookup("HideMenubar");
-  if (obj.isBool()) {
-    hideMenubar = obj.getBool();
-  }
+  hideMenubar = prefDict->lookup("HideMenubar").getBoolWithDefaultValue(false);
 
-  obj = prefDict->lookup("HideWindowUI");
-  if (obj.isBool()) {
-    hideWindowUI = obj.getBool();
-  }
+  hideWindowUI = prefDict->lookup("HideWindowUI").getBoolWithDefaultValue(false);
 
-  obj = prefDict->lookup("FitWindow");
-  if (obj.isBool()) {
-    fitWindow = obj.getBool();
-  }
+  fitWindow = prefDict->lookup("FitWindow").getBoolWithDefaultValue(false);
 
-  obj = prefDict->lookup("CenterWindow");
-  if (obj.isBool()) {
-    centerWindow = obj.getBool();
-  }
+  centerWindow = prefDict->lookup("CenterWindow").getBoolWithDefaultValue(false);
 
-  obj = prefDict->lookup("DisplayDocTitle");
-  if (obj.isBool()) {
-    displayDocTitle = obj.getBool();
-  }
+  displayDocTitle = prefDict->lookup("DisplayDocTitle").getBoolWithDefaultValue(false);
 
-  obj = prefDict->lookup("NonFullScreenPageMode");
+  Object obj = prefDict->lookup("NonFullScreenPageMode");
   if (obj.isName()) {
     const char *mode = obj.getName();
     if (!strcmp(mode, "UseNone")) {
@@ -97,10 +79,7 @@ ViewerPreferences::ViewerPreferences(Dict *prefDict)
     }
   }
 
-  obj = prefDict->lookup("PickTrayByPDFSize");
-  if (obj.isBool()) {
-    pickTrayByPDFSize = obj.getBool();
-  }
+  pickTrayByPDFSize = prefDict->lookup("PickTrayByPDFSize").getBoolWithDefaultValue(false);
 
   obj = prefDict->lookup("NumCopies");
   if (obj.isInt()) {
@@ -140,16 +119,9 @@ ViewerPreferences::~ViewerPreferences()
 
 void ViewerPreferences::init()
 {
-  hideToolbar = false;
-  hideMenubar = false;
-  hideWindowUI = false;
-  fitWindow = false;
-  centerWindow = false;
-  displayDocTitle = false;
   nonFullScreenPageMode = nfpmUseNone;
   direction = directionL2R;
   printScaling = printScalingAppDefault;
   duplex = duplexNone;
-  pickTrayByPDFSize = false;
   numCopies = 1;
 }

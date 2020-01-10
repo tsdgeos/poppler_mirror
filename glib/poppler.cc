@@ -23,6 +23,8 @@
 #include <Error.h>
 #endif
 
+#include "poppler-private.h"
+
 /**
  * SECTION: poppler-errors
  * @title: Error handling
@@ -76,18 +78,15 @@ poppler_get_version (void)
   return poppler_version;
 }
 
-#if  __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
-
 /* We want to install an error callback so that PDF syntax warnings etc
  * can be redirected through the GLib logging API instead of always just
  * going to stderr.
  */
 
-static void
-error_cb (void *data G_GNUC_UNUSED,
-          ErrorCategory category,
-          Goffset pos,
-          const char *message)
+void
+_poppler_error_cb (ErrorCategory category,
+                   Goffset pos,
+                   const char *message)
 {
   static const char * const cat_str[] = {
     "Syntax warning",
@@ -110,11 +109,3 @@ error_cb (void *data G_GNUC_UNUSED,
          "%s at position %" G_GOFFSET_FORMAT ": %s",
          cat_str[category], (goffset) pos, message);
 }
-
-static void __attribute__((__constructor__))
-poppler_constructor ()
-{
-  setErrorCallback (error_cb, nullptr);
-}
-
-#endif /* GNUC */

@@ -2,7 +2,7 @@
  * Copyright (C) 2009-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
- * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
  * Copyright (C) 2019, Oliver Sander <oliver.sander@tu-dresden.de>
  *
@@ -50,53 +50,9 @@
 
 using namespace poppler;
 
-std::mutex poppler::initer::mutex;
-unsigned int poppler::initer::count = 0U;
-std::string poppler::initer::data_dir;
-
-initer::initer()
-{
-    std::lock_guard<std::mutex> lock{mutex};
-
-    if (!count) {
-        globalParams = std::make_unique<GlobalParams>(!data_dir.empty() ? data_dir.c_str() : nullptr);
-        setErrorCallback(detail::error_function, nullptr);
-    }
-    count++;
-}
-
-initer::~initer()
-{
-    std::lock_guard<std::mutex> lock{mutex};
-
-    if (count > 0) {
-        --count;
-        if (!count) {
-            globalParams.reset();
-        }
-    }
-}
-
-bool initer::set_data_dir(const std::string &new_data_dir)
-{
-    std::lock_guard<std::mutex> lock{mutex};
-
-    if (count == 0) {
-        data_dir = new_data_dir;
-        return true;
-    }
-
-    return false;
-}
-
-
 document_private::document_private(GooString *file_path, const std::string &owner_password,
                                    const std::string &user_password)
-    : initer()
-    , doc(nullptr)
-    , raw_doc_data(nullptr)
-    , raw_doc_data_length(0)
-    , is_locked(false)
+    : document_private()
 {
     GooString goo_owner_password(owner_password.c_str());
     GooString goo_user_password(user_password.c_str());
@@ -106,11 +62,7 @@ document_private::document_private(GooString *file_path, const std::string &owne
 document_private::document_private(byte_array *file_data,
                                    const std::string &owner_password,
                                    const std::string &user_password)
-    : initer()
-    , doc(nullptr)
-    , raw_doc_data(nullptr)
-    , raw_doc_data_length(0)
-    , is_locked(false)
+    : document_private()
 {
     file_data->swap(doc_data);
     MemStream *memstr = new MemStream(&doc_data[0], 0, doc_data.size(), Object(objNull));
@@ -122,16 +74,23 @@ document_private::document_private(byte_array *file_data,
 document_private::document_private(const char *file_data, int file_data_length,
                                    const std::string &owner_password,
                                    const std::string &user_password)
-    : initer()
-    , doc(nullptr)
-    , raw_doc_data(file_data)
-    , raw_doc_data_length(file_data_length)
-    , is_locked(false)
+    : document_private()
 {
+    raw_doc_data = file_data;
+    raw_doc_data_length = file_data_length;
     MemStream *memstr = new MemStream(const_cast<char *>(raw_doc_data), 0, raw_doc_data_length, Object(objNull));
     GooString goo_owner_password(owner_password.c_str());
     GooString goo_user_password(user_password.c_str());
     doc = new PDFDoc(memstr, &goo_owner_password, &goo_user_password);
+}
+
+document_private::document_private()
+    : GlobalParamsIniter(detail::error_function)
+    , doc(nullptr)
+    , raw_doc_data(nullptr)
+    , raw_doc_data_length(0)
+    , is_locked(false)
+{
 }
 
 document_private::~document_private()

@@ -20,7 +20,8 @@
 // Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -85,15 +86,12 @@ public:
 
   // A List of the next actions to execute in order.
   // The list contains pointer to LinkAction objects.
-  const std::vector<LinkAction*> *nextActions() const;
-
-  // Sets the next action list. Takes ownership of the actions.
-  void setNextActions(std::vector<LinkAction*> *actions);
+  const std::vector<LinkAction*>& nextActions() const;
 
 private:
   static LinkAction *parseAction(const Object *obj, const GooString *baseURI, std::set<int> *seenNextActions);
 
-  std::vector<LinkAction*> *nextActionList;
+  std::vector<LinkAction*> nextActionList;
 };
 
 //------------------------------------------------------------------------

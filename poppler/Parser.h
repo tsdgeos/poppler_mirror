@@ -13,7 +13,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2006, 2010, 2013, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006, 2010, 2013, 2017, 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
@@ -50,7 +50,7 @@ public:
   // true, do not parse compound objects (arrays, dictionaries, or
   // streams).
   Object getObj(bool simpleOnly = false,
-     unsigned char *fileKey = nullptr,
+		 const unsigned char *fileKey = nullptr,
 		 CryptAlgorithm encAlgorithm = cryptRC4, int keyLength = 0,
 		 int objNum = 0, int objGen = 0, int recursion = 0,
 		 bool strict = false);
@@ -71,7 +71,7 @@ private:
   Object buf1, buf2;		// next two tokens
   int inlineImg;		// set when inline image data is encountered
 
-  Stream *makeStream(Object &&dict, unsigned char *fileKey,
+  Stream *makeStream(Object &&dict, const unsigned char *fileKey,
 		     CryptAlgorithm encAlgorithm, int keyLength,
 		     int objNum, int objGen, int recursion,
 		     bool strict);

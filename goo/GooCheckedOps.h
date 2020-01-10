@@ -6,7 +6,7 @@
 //
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
-// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019, 2020 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -40,6 +40,15 @@ template<typename T> inline bool checkedAdd(T x, T y, T *z) {
   return __builtin_add_overflow(x, y, z);
 #else
   const auto lz = static_cast<long long>(x) + static_cast<long long>(y);
+  return checkedAssign(lz, z);
+#endif
+}
+
+template<typename T> inline bool checkedSubtraction(T x, T y, T *z) {
+#if __GNUC__ >= 5 || __has_builtin(__builtin_sub_overflow)
+  return __builtin_sub_overflow(x, y, z);
+#else
+  const auto lz = static_cast<long long>(x) - static_cast<long long>(y);
   return checkedAssign(lz, z);
 #endif
 }

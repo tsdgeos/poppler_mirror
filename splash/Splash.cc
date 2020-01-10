@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2010-2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
@@ -1378,7 +1378,7 @@ inline void Splash::drawAAPixelInit() {
 
 inline void Splash::drawAAPixel(SplashPipe *pipe, int x, int y) {
 #if splashAASize == 4
-  static int bitCount4[16] = { 0, 1, 1, 2, 1, 2, 2, 3,
+  static const int bitCount4[16] = { 0, 1, 1, 2, 1, 2, 2, 3,
 			       1, 2, 2, 3, 2, 3, 3, 4 };
   int w;
 #else
@@ -1461,7 +1461,7 @@ inline void Splash::drawSpan(SplashPipe *pipe, int x0, int x1, int y,
 
 inline void Splash::drawAALine(SplashPipe *pipe, int x0, int x1, int y, bool adjustLine, unsigned char lineOpacity) {
 #if splashAASize == 4
-  static int bitCount4[16] = { 0, 1, 1, 2, 1, 2, 2, 3,
+  static const int bitCount4[16] = { 0, 1, 1, 2, 1, 2, 2, 3,
 			       1, 2, 2, 3, 2, 3, 3, 4 };
   SplashColorPtr p0, p1, p2, p3;
   int t;

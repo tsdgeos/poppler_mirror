@@ -18,6 +18,7 @@
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2014 Fabio D'Urso <fabiodurso@hotmail.it>
+// Copyright (C) 2020 Adam Reichold <adam.reichold@t-online.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -47,9 +48,9 @@ enum ErrorCategory {
   errInternal          // internal error - malfunction within the Xpdf code
 };
 
-extern void setErrorCallback(void (*cbk)(void *data, ErrorCategory category,
-					 Goffset pos, const char *msg),
-			     void *data);
+using ErrorCallback = void (*)(ErrorCategory category, Goffset pos, const char *msg);
+
+extern void setErrorCallback(ErrorCallback cbk);
 
 extern void CDECL error(ErrorCategory category, Goffset pos, const char *msg, ...) GOOSTRING_FORMAT;
 

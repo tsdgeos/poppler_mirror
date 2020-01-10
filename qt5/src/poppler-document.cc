@@ -7,7 +7,7 @@
  * Copyright (C) 2012 Koji Otani <sho@bbr.jp>
  * Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
- * Copyright (C) 2014, 2018 Adam Reichold <adam.reichold@t-online.de>
+ * Copyright (C) 2014, 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2015 William Bader <williambader@hotmail.com>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
@@ -56,9 +56,6 @@
 #endif
 
 namespace Poppler {
-
-  int DocumentData::count = 0;
-  QMutex DocumentData::mutex;
 
   Document *Document::load(const QString &filePath, const QByteArray &ownerPassword,
 			   const QByteArray &userPassword)

@@ -1,6 +1,6 @@
 /* Sound.h - an object that holds the sound structure
  * Copyright (C) 2006-2007, Pino Toscano <pino@kde.org>
- * Copyright (C) 2017-2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2017-2020, Albert Astals Cid <aacid@kde.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ public:
   Stream *getStream();
 
   SoundKind getSoundKind() const { return kind; }
-  const GooString *getFileName() const { return fileName; }
+  const std::string &getFileName() const { return fileName; }
   double getSamplingRate() const { return samplingRate; }
   int getChannels() const { return channels; }
   int getBitsPerSample() const { return bitsPerSample; }
@@ -68,7 +68,7 @@ private:
 
   Object streamObj;
   SoundKind kind;
-  GooString *fileName;
+  std::string fileName;
   double samplingRate;
   int channels;
   int bitsPerSample;
