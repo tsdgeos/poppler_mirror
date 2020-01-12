@@ -58,7 +58,7 @@
 #include "CMap.h"
 #include "CharCodeToUnicode.h"
 #include "FontEncodingTables.h"
-#include "BuiltinFontTables.h"
+#include "BuiltinFont.h"
 #include "UnicodeTypeTable.h"
 #include <fofi/FoFiIdentifier.h>
 #include <fofi/FoFiType1.h>
@@ -1000,9 +1000,9 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
   // is it a built-in font?
   builtinFont = nullptr;
   if (base14) {
-    for (i = 0; i < nBuiltinFonts; ++i) {
-      if (!strcmp(base14->base14Name, builtinFonts[i].name)) {
-	builtinFont = &builtinFonts[i];
+    for (const BuiltinFont &bf : builtinFonts) {
+      if (!strcmp(base14->base14Name, bf.name)) {
+	builtinFont = &bf;
 	break;
       }
     }
@@ -1361,11 +1361,11 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
   } else if (builtinFont) {
     // this is a kludge for broken PDF files that encode char 32
     // as .notdef
-    if (builtinFont->widths->getWidth("space", &w)) {
+    if (builtinFont->getWidth("space", &w)) {
       widths[32] = 0.001 * w;
     }
     for (int code = 0; code < 256; ++code) {
-      if (enc[code] && builtinFont->widths->getWidth(enc[code], &w)) {
+      if (enc[code] && builtinFont->getWidth(enc[code], &w)) {
 	widths[code] = 0.001 * w;
       }
     }
@@ -1391,11 +1391,11 @@ Gfx8BitFont::Gfx8BitFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA
     builtinFont = builtinFontSubst[i];
     // this is a kludge for broken PDF files that encode char 32
     // as .notdef
-    if (builtinFont->widths->getWidth("space", &w)) {
+    if (builtinFont->getWidth("space", &w)) {
       widths[32] = 0.001 * w;
     }
     for (int code = 0; code < 256; ++code) {
-      if (enc[code] && builtinFont->widths->getWidth(enc[code], &w)) {
+      if (enc[code] && builtinFont->getWidth(enc[code], &w)) {
 	widths[code] = 0.001 * w;
       }
     }

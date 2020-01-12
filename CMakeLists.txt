@@ -63,6 +63,7 @@ option(ENABLE_ZLIB "Build with zlib." ON)
 option(ENABLE_ZLIB_UNCOMPRESS "Use zlib to uncompress flate streams (not totally safe)." OFF)
 option(USE_FLOAT "Use single precision arithmetic in the Splash backend" OFF)
 option(BUILD_SHARED_LIBS "Build poppler as a shared library" ON)
+option(RUN_GPERF_IF_PRESENT "Run gperf if it is found" ON)
 if(WIN32)
   option(ENABLE_RELOCATABLE "Do not hardcode the poppler library location (on Windows)." ON)
 else()
@@ -319,6 +320,8 @@ include(ConfigureChecks.cmake)
 configure_file(config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 configure_file(poppler/poppler-config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h)
 
+find_program(GPERF gperf)
+
 set(poppler_SRCS
   goo/gbase64.cc
   goo/gbasename.cc
@@ -342,8 +345,6 @@ set(poppler_SRCS
   fofi/FoFiIdentifier.cc
   poppler/Annot.cc
   poppler/Array.cc
-  poppler/BuiltinFont.cc
-  poppler/BuiltinFontTables.cc
   poppler/CachedFile.cc
   poppler/Catalog.cc
   poppler/CharCodeToUnicode.cc
@@ -491,6 +492,41 @@ if(TIFF_FOUND)
   set(poppler_LIBS ${poppler_LIBS} ${TIFF_LIBRARIES})
 endif()
 
+if (GPERF AND RUN_GPERF_IF_PRESENT)
+    macro(ADD_GPERF_FILE input)
+        add_custom_command(OUTPUT poppler/${input}.c
+                       COMMAND gperf poppler/${input}.gperf > ${CMAKE_CURRENT_BINARY_DIR}/poppler/${input}.c
+                       COMMAND gperf poppler/${input}.gperf > ${CMAKE_CURRENT_SOURCE_DIR}/poppler/${input}.pregenerated.c
+                       DEPENDS poppler/${input}.gperf
+                       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+        set(poppler_SRCS ${poppler_SRCS}
+            poppler/${input}.c
+        )
+    endmacro()
+else()
+    macro(ADD_GPERF_FILE input)
+        set(poppler_SRCS ${poppler_SRCS}
+            poppler/${input}.pregenerated.c
+        )
+    endmacro()
+endif()
+
+ADD_GPERF_FILE(CourierWidths)
+ADD_GPERF_FILE(CourierBoldWidths)
+ADD_GPERF_FILE(CourierBoldObliqueWidths)
+ADD_GPERF_FILE(CourierObliqueWidths)
+ADD_GPERF_FILE(HelveticaWidths)
+ADD_GPERF_FILE(HelveticaBoldWidths)
+ADD_GPERF_FILE(HelveticaBoldObliqueWidths)
+ADD_GPERF_FILE(HelveticaObliqueWidths)
+ADD_GPERF_FILE(SymbolWidths)
+ADD_GPERF_FILE(TimesBoldWidths)
+ADD_GPERF_FILE(TimesBoldItalicWidths)
+ADD_GPERF_FILE(TimesItalicWidths)
+ADD_GPERF_FILE(TimesRomanWidths)
+ADD_GPERF_FILE(ZapfDingbatsWidths)
+
 if(MSVC)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_library(poppler STATIC ${poppler_SRCS})
@@ -512,8 +548,6 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
   install(FILES
     poppler/Annot.h
     poppler/Array.h
-    poppler/BuiltinFont.h
-    poppler/BuiltinFontTables.h
     poppler/CachedFile.h
     poppler/Catalog.h
     poppler/CharCodeToUnicode.h
