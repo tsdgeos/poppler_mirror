@@ -66,7 +66,6 @@
 #include "CharCodeToUnicode.h"
 #include "UnicodeMap.h"
 #include "CMap.h"
-#include "BuiltinFontTables.h"
 #include "FontEncodingTables.h"
 #include "GlobalParams.h"
 #include "GfxFont.h"
@@ -384,8 +383,6 @@ const SysFontInfo *SysFontList::find(const GooString *name, bool fixedWidth, boo
 GlobalParams::GlobalParams(const char *customPopplerDataDir)
   : popplerDataDir(customPopplerDataDir)
 {
-  initBuiltinFontTables();
-
   // scan the encoding in reverse because we want the lowest-numbered
   // index for each char name ('space' is encoded twice)
   macRomanReverseMap = new NameToCharCode();
@@ -545,8 +542,6 @@ bool GlobalParams::parseYesNo2(const char *token, bool *flag) {
 }
 
 GlobalParams::~GlobalParams() {
-  freeBuiltinFontTables();
-
   delete macRomanReverseMap;
 
   delete nameToUnicodeZapfDingbats;

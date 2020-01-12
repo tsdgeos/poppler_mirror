@@ -41,7 +41,6 @@ description for all fonts available in Windows. That's how MuPDF works.
 #include "CharCodeToUnicode.h"
 #include "UnicodeMap.h"
 #include "CMap.h"
-#include "BuiltinFontTables.h"
 #include "FontEncodingTables.h"
 #include "GlobalParams.h"
 #include "GfxFont.h"

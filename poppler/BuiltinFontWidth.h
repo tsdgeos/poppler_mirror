@@ -1,6 +1,6 @@
 //========================================================================
 //
-// BuiltinFontTables.h
+// BuiltinFontWidth.h
 //
 // Copyright 2001-2003 Glyph & Cog, LLC
 //
@@ -20,18 +20,13 @@
 //
 //========================================================================
 
-#ifndef BUILTINFONTTABLES_H
-#define BUILTINFONTTABLES_H
+#ifndef BUILTINFONTWIDTH_H
+#define BUILTINFONTWIDTH_H
 
-#include "BuiltinFont.h"
-
-#define nBuiltinFonts      14
-#define nBuiltinFontSubsts 12
-
-extern BuiltinFont builtinFonts[nBuiltinFonts];
-extern const BuiltinFont *builtinFontSubst[nBuiltinFontSubsts];
-
-extern void initBuiltinFontTables();
-extern void freeBuiltinFontTables();
+struct BuiltinFontWidth
+{
+  const char *name;
+  unsigned short width;
+};
 
 #endif
