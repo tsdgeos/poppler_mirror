@@ -1176,8 +1176,8 @@ void FoFiType1C::convertToType0(const char *psName, const int *codeMap, int nCod
 
 void FoFiType1C::eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName,
 			       int offset, int nBytes,
-			       Type1CIndex *subrIdx,
-			       Type1CPrivateDict *pDict) {
+			       const Type1CIndex *subrIdx,
+			       const Type1CPrivateDict *pDict) {
   GooString *buf;
   GooString *charBuf;
 
@@ -1196,7 +1196,7 @@ void FoFiType1C::eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName,
 }
 
 void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf,
-			  Type1CIndex *subrIdx, Type1CPrivateDict *pDict,
+			  const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict,
 			  bool top) {
   Type1CIndexVal val;
   bool ok, dFP;
@@ -1828,7 +1828,7 @@ void FoFiType1C::cvtGlyph(int offset, int nBytes, GooString *charBuf,
 }
 
 void FoFiType1C::cvtGlyphWidth(bool useOp, GooString *charBuf,
-			       Type1CPrivateDict *pDict) {
+			       const Type1CPrivateDict *pDict) {
   double w;
   bool wFP;
   int i;
