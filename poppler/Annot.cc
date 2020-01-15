@@ -46,6 +46,7 @@
 // Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
 // Copyright (C) 2020 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by Technische Universität Dresden
 // Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+// Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -3776,30 +3777,15 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, PDFRectangle *rectA, const DefaultAppeara
     GooString *daStr = da.toAppearanceString();
     annotObj.dictSet("DA", Object(daStr));
 
-    Catalog *catalog = doc->getCatalog();
-    catalog->setAcroForm(ref);
-
     initialize(docA, annotObj.getDict());
 
-    int fieldAt = form->getNumFields() - 1;
-    field = form->getRootField(fieldAt);
+    field = new FormFieldSignature(doc, Object(annotObj.getDict()), ref, nullptr, nullptr);
     formWidget = field->getWidget(field->getNumWidgets() - 1);
 
     bool dummyAddDingbatsResource = false; // This is only update so if we didn't need to add
                                            // the dingbats resource we should not need it now
     generateFieldAppearance(&dummyAddDingbatsResource);
-    // Fetch the appearance stream we've just created
-    Object obj1 = appearance.fetch(doc->getXRef());
-    updatedAppearanceStream = doc->getXRef()->addIndirectObject(&obj1);
-
-    // Write the AP dictionary
-    obj1 = Object(new Dict(doc->getXRef()));
-    obj1.dictAdd("N", Object(updatedAppearanceStream));
-
-    // Update our internal pointers to the appearance dictionary
-    appearStreams = std::make_unique<AnnotAppearance>(doc, &obj1);
-
-    update("AP", std::move(obj1));
+    updateAppearanceStream();
 }
 
 AnnotWidget::~AnnotWidget() = default;
