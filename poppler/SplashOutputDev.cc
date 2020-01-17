@@ -1248,7 +1248,6 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
   colorMode = colorModeA;
   bitmapRowPad = bitmapRowPadA;
   bitmapTopDown = bitmapTopDownA;
-  bitmapUpsideDown = false;
   fontAntialias = true;
   vectorAntialias = true;
   overprintPreview = overprintPreviewA;
