@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2006 Stefan Schweizer <genstef@gentoo.org>
-// Copyright (C) 2006-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2006-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
 // Copyright (C) 2007 Koji Otani <sho@bbr.jp>
@@ -1283,7 +1283,6 @@ SplashOutputDev::SplashOutputDev(SplashColorMode colorModeA,
   needFontUpdate = false;
   textClipPath = nullptr;
   transpGroupStack = nullptr;
-  nestCount = 0;
   xref = nullptr;
 }
 
@@ -2499,7 +2498,6 @@ void SplashOutputDev::endType3Char(GfxState *state) {
   T3GlyphStack *t3gs;
 
   if (t3GlyphStack->cacheTag) {
-    --nestCount;
     memcpy(t3GlyphStack->cacheData, bitmap->getDataPtr(),
 	   t3GlyphStack->cache->glyphSize);
     delete bitmap;
@@ -2657,7 +2655,6 @@ void SplashOutputDev::type3D1(GfxState *state, double wx, double wy,
   state->setCTM(ctm[0], ctm[1], ctm[2], ctm[3],
 		-t3Font->glyphX, -t3Font->glyphY);
   updateCTM(state, 0, 0, 0, 0, 0, 0);
-  ++nestCount;
 }
 
 void SplashOutputDev::drawType3Glyph(GfxState *state, T3FontCache *t3Font,
@@ -4098,12 +4095,10 @@ void SplashOutputDev::beginTransparencyGroup(GfxState *state, const double *bbox
   transpGroup->tBitmap = bitmap;
   state->shiftCTMAndClip(-tx, -ty);
   updateCTM(state, 0, 0, 0, 0, 0, 0);
-  ++nestCount;
 }
 
 void SplashOutputDev::endTransparencyGroup(GfxState *state) {
   // restore state
-  --nestCount;
   delete splash;
   bitmap = transpGroupStack->origBitmap;
   colorMode = bitmap->getMode();

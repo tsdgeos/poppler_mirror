@@ -20,7 +20,7 @@
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2012, 2015, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2015, 2018-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2015, 2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
@@ -368,8 +368,6 @@ public:
   void setSkipText(bool skipHorizTextA, bool skipRotatedTextA)
     { skipHorizText = skipHorizTextA; skipRotatedText = skipRotatedTextA; }
 
-  int getNestCount() { return nestCount; }
-
 #if 1 //~tmp: turn off anti-aliasing temporarily
   bool getVectorAntialias() override;
   void setVectorAntialias(bool vaa) override;
@@ -450,7 +448,6 @@ private:
 
   SplashTransparencyGroup *	// transparency group stack
     transpGroupStack;
-  int nestCount;
 };
 
 #endif
