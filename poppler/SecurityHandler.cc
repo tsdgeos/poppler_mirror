@@ -125,6 +125,7 @@ StandardSecurityHandler::StandardSecurityHandler(PDFDoc *docA,
   ownerEnc = nullptr;
   userEnc = nullptr;
   fileKeyLength = 0;
+  encAlgorithm = cryptNone;
 
   Object versionObj = encryptDictA->dictLookup("V");
   Object revisionObj = encryptDictA->dictLookup("R");
