@@ -573,6 +573,7 @@ public:
 
     EntityInfo issuer_info;
     EntityInfo subject_info;
+    QString nick_name;
     QByteArray certificate_der;
     QByteArray serial_number;
     QByteArray public_key;
@@ -650,6 +651,12 @@ QString CertificateInfo::subjectInfo(EntityInfoKey key) const
     default:
         return QString();
     }
+}
+
+QString CertificateInfo::nickName() const
+{
+    Q_D(const CertificateInfo);
+    return d->nick_name;
 }
 
 QDateTime CertificateInfo::validityStart() const
@@ -973,6 +980,8 @@ static CertificateInfoPrivate *createCertificateInfoPrivate(const X509Certificat
         certPriv->subject_info.distinguished_name = subjectInfo.distinguishedName.c_str();
         certPriv->subject_info.email_address = subjectInfo.email.c_str();
         certPriv->subject_info.org_name = subjectInfo.organization.c_str();
+
+        certPriv->nick_name = ci->getNickName().c_str();
 
         X509CertificateInfo::Validity certValidity = ci->getValidity();
         certPriv->validity_start = QDateTime::fromTime_t(certValidity.notBefore, Qt::UTC);
