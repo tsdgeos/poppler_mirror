@@ -3777,6 +3777,9 @@ AnnotWidget::AnnotWidget(PDFDoc *docA, PDFRectangle *rectA, const DefaultAppeara
     GooString *daStr = da.toAppearanceString();
     annotObj.dictSet("DA", Object(daStr));
 
+    Catalog *catalog = doc->getCatalog();
+    catalog->setAcroForm(ref);
+
     initialize(docA, annotObj.getDict());
 
     field = new FormFieldSignature(doc, Object(annotObj.getDict()), ref, nullptr, nullptr);

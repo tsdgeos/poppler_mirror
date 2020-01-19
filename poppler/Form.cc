@@ -532,6 +532,8 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 
     FormFieldSignature *signatureField = static_cast<FormFieldSignature *>(field);
     GooString gReason(reason ? reason : "");
+    // TODO getSignerName() is only set when CMSSignerInfo available -
+    // i.e. in the check-signature-case
     char *signerName = sigHandler.getSignerName();
     GooString gName(signerName);
     free(signerName);
@@ -724,6 +726,7 @@ bool FormWidgetSignature::createSignature(Object &vObj, const GooString &name, c
         break;
     }
     vObj.dictAdd("Name", Object(name.copy()));
+    vObj.dictAdd("Location", Object(new GooString("unknown")));
     GooString *date = timeToDateString(nullptr);
     vObj.dictAdd("M", Object(date));
     if (reason.getLength() > 0)

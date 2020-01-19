@@ -12,6 +12,7 @@
  * Copyright (C) 2018 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+ * Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -4221,9 +4222,6 @@ Annot *WidgetAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData
     DefaultAppearance da { { objName, "Invalid_font" }, static_cast<double>(11.0), std::unique_ptr<AnnotColor> { convertQColor(QColor(Qt::black)) } };
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
     pdfAnnot = new AnnotWidget(destPage->getDoc(), &rect, da);
-
-    Catalog *catalog = doc->doc->getCatalog();
-    catalog->setAcroForm(pdfAnnot->getRef());
 
     delete w;
     return pdfAnnot;
