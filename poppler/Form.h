@@ -22,6 +22,7 @@
 // Copyright 2019 João Netto <joaonetto901@gmail.com>
 // Copyright 2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2020 Marek Kasik <mkasik@redhat.com>
+// Copyright 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 //
 //========================================================================
 
@@ -46,6 +47,7 @@ class LinkAction;
 class GfxResources;
 class PDFDoc;
 class SignatureInfo;
+class X509CertificateInfo;
 class SignatureHandler;
 
 enum FormFieldType
@@ -143,6 +145,7 @@ public:
 
     void createWidgetAnnotation();
     AnnotWidget *getWidgetAnnotation() const { return widget; }
+    void setWidgetAnnotation(AnnotWidget *_widget) { widget = _widget; }
 
     virtual void updateWidgetAppearance() = 0;
 
@@ -607,6 +610,9 @@ public:
     FormSignatureType getSignatureType() const { return signature_type; }
     void setSignatureType(FormSignatureType t) { signature_type = t; }
 
+    const GooString *getAppearanceContent() const;
+    void setCertificateInfo(std::unique_ptr<X509CertificateInfo> &);
+
 private:
     void parseInfo();
     void hashSignedDataBlock(SignatureHandler *handler, Goffset block_len);
@@ -615,6 +621,8 @@ private:
     Object byte_range;
     GooString *signature;
     SignatureInfo *signature_info;
+    std::unique_ptr<X509CertificateInfo> certificate_info;
+    mutable GooString *content;
 
     void print(int indent) override;
 };

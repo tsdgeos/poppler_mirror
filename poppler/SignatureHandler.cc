@@ -223,14 +223,17 @@ static std::unique_ptr<X509CertificateInfo> getCertificateInfoFromCERT(CERTCerti
 
 std::unique_ptr<X509CertificateInfo> SignatureHandler::getCertificateInfo() const
 {
-    if (!CMSSignerInfo)
-        return nullptr;
+    if (CMSSignerInfo) {
+        CERTCertificate *cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
+        if (!cert)
+            return nullptr;
+        return getCertificateInfoFromCERT(cert);
+    } else {
+        if (!signing_cert)
+            return nullptr;
 
-    CERTCertificate *cert = NSS_CMSSignerInfo_GetSigningCertificate(CMSSignerInfo, CERT_GetDefaultCertDB());
-    if (!cert)
-        return nullptr;
-
-    return getCertificateInfoFromCERT(cert);
+        return getCertificateInfoFromCERT(signing_cert);
+    }
 }
 
 static GooString *getDefaultFirefoxCertDB_Linux()
@@ -589,6 +592,9 @@ GooString *SignatureHandler::signDetached(const char *password)
 
 std::vector<std::unique_ptr<X509CertificateInfo>> SignatureHandler::getAvailableSigningCertificates()
 {
+    // set callback, in case one of the slots has a password set
+    // PK11_SetPasswordFunc( GetPasswordFunction );
+
     std::vector<std::unique_ptr<X509CertificateInfo>> certsList;
     PK11SlotList *slotList = PK11_GetAllTokens(CKM_INVALID_MECHANISM, PR_FALSE, PR_FALSE, nullptr);
     if (slotList) {
@@ -618,6 +624,8 @@ std::vector<std::unique_ptr<X509CertificateInfo>> SignatureHandler::getAvailable
             }
         }
     }
+
+    // PK11_SetPasswordFunc( nullptr );
 
     return certsList;
 }

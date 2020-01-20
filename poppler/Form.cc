@@ -56,6 +56,7 @@
 #    include "SignatureHandler.h"
 #endif
 #include "SignatureInfo.h"
+#include "CertificateInfo.h"
 #include "XRef.h"
 #include "PDFDocEncoding.h"
 #include "Annot.h"
@@ -531,6 +532,10 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
         return false;
 
     FormFieldSignature *signatureField = static_cast<FormFieldSignature *>(field);
+    std::unique_ptr<X509CertificateInfo> certInfo = sigHandler.getCertificateInfo();
+    signatureField->setCertificateInfo(certInfo);
+    updateWidgetAppearance(); // add visible signing info to appearance
+
     GooString gReason(reason ? reason : "");
     // TODO getSignerName() is only set when CMSSignerInfo available -
     // i.e. in the check-signature-case
@@ -756,7 +761,8 @@ GooString *FormWidgetSignature::getCheckedSignature(Goffset *checkedFileSize)
 
 void FormWidgetSignature::updateWidgetAppearance()
 {
-    // Unimplemented
+    if (widget)
+        widget->updateAppearanceStream();
 }
 
 //========================================================================
@@ -1931,7 +1937,7 @@ void FormFieldChoice::reset(const std::vector<std::string> &excludedFields)
 // FormFieldSignature
 //------------------------------------------------------------------------
 FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref refA, FormField *parentA, std::set<int> *usedParents)
-    : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature), signature_type(unknown_signature_type), signature(nullptr)
+    : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature), signature_type(unknown_signature_type), signature(nullptr), content(nullptr)
 {
     signature_info = new SignatureInfo();
     parseInfo();
@@ -1941,12 +1947,34 @@ FormFieldSignature::~FormFieldSignature()
 {
     delete signature_info;
     delete signature;
+    delete content;
 }
 
 void FormFieldSignature::setSignature(const GooString &sig)
 {
     delete signature;
     signature = sig.copy();
+}
+
+const GooString *FormFieldSignature::getAppearanceContent() const
+{
+    if (!certificate_info)
+        return nullptr;
+    if (!content)
+        content = new GooString();
+
+    // TODO perhaps add a few more things?
+    content->Set("Signed by: ");
+    content->append(certificate_info->getSubjectInfo().commonName.c_str());
+    content->append("\n\n");
+    content->append(timeToDateString(nullptr));
+
+    return content;
+}
+
+void FormFieldSignature::setCertificateInfo(std::unique_ptr<X509CertificateInfo> &certInfo)
+{
+    certificate_info.swap(certInfo);
 }
 
 void FormFieldSignature::parseInfo()

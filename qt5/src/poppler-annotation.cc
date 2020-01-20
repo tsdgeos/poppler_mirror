@@ -4219,9 +4219,13 @@ Annot *WidgetAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData
     parentDoc = doc;
 
     // Set pdfAnnot
-    DefaultAppearance da { { objName, "Invalid_font" }, static_cast<double>(11.0), std::unique_ptr<AnnotColor> { convertQColor(QColor(Qt::black)) } };
+    DefaultAppearance da { { objName, "Invalid_font" }, static_cast<double>(10.0), std::unique_ptr<AnnotColor> { convertQColor(QColor(Qt::red)) } };
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
-    pdfAnnot = new AnnotWidget(destPage->getDoc(), &rect, da);
+    pdfAnnot = new AnnotWidget(destPage->getDoc(), &rect, da, std::unique_ptr<AnnotColor> { convertQColor(QColor(Qt::red)) }, std::unique_ptr<AnnotColor> { convertQColor(QColor(240, 240, 240)) });
+
+    std::unique_ptr<AnnotBorder> border(new AnnotBorderBS());
+    border->setWidth(1.5);
+    pdfAnnot->setBorder(std::move(border));
 
     delete w;
     return pdfAnnot;
