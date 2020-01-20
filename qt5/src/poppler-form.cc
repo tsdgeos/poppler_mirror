@@ -30,6 +30,8 @@
 
 #include "poppler-qt5.h"
 
+#include <config.h>
+
 #include <QtCore/QSizeF>
 
 #include <Form.h>
@@ -37,7 +39,9 @@
 #include <Link.h>
 #include <SignatureInfo.h>
 #include <CertificateInfo.h>
-#include <SignatureHandler.h>
+#ifdef ENABLE_NSS3
+#    include <SignatureHandler.h>
+#endif
 
 #include "poppler-form.h"
 #include "poppler-page-private.h"
@@ -922,6 +926,7 @@ void FormFieldSignature::setSignatureType(SignatureType type)
 
 bool FormFieldSignature::sign(const QString &saveFilename, const QString &certNickname, const QString &password, DigestAlgorithm digestAlg, const QString &reason)
 {
+#ifdef ENABLE_NSS3
     FormWidgetSignature *fws = static_cast<FormWidgetSignature *>(m_formData->fm);
     const char *digest = nullptr;
     const char *rs = nullptr;
@@ -951,6 +956,14 @@ bool FormFieldSignature::sign(const QString &saveFilename, const QString &certNi
     free(name);
     free(pw);
     return ok;
+#else
+    (void)saveFilename;
+    (void)certNickname;
+    (void)password;
+    (void)digestAlg;
+    (void)reason;
+    return false;
+#endif
 }
 
 SignatureValidationInfo FormFieldSignature::validate(ValidateOptions opt) const
@@ -1084,14 +1097,17 @@ SignatureValidationInfo FormFieldSignature::validate(int opt, const QDateTime &v
 
 QVector<CertificateInfo *> POPPLER_QT5_EXPORT getAvailableSigningCertificates()
 {
+    QVector<CertificateInfo *> vReturnCerts;
+
+#ifdef ENABLE_NSS3
     SignatureHandler sigHandler;
     std::vector<std::unique_ptr<X509CertificateInfo>> vCerts = sigHandler.getAvailableSigningCertificates();
 
-    QVector<CertificateInfo *> vReturnCerts;
     for (auto &cert : vCerts) {
         CertificateInfoPrivate *certPriv = createCertificateInfoPrivate(cert.get());
         vReturnCerts.append(new CertificateInfo(certPriv));
     }
+#endif
 
     return vReturnCerts;
 }
