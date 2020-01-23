@@ -505,19 +505,17 @@ public:
   // Build a LinkUnknown with the specified action type.
   LinkUnknown(const char *actionA);
 
-  // Destructor.
-  ~LinkUnknown() override;
-
   // Was the LinkUnknown create successfully?
-  bool isOk() const override { return action != nullptr; }
+  // Yes: nothing can go wrong when creating LinkUnknown objects
+  bool isOk() const override { return true; }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionUnknown; }
-  const GooString *getAction() const { return action; }
+  const std::string& getAction() const { return action; }
 
 private:
 
-  GooString *action;		// action subtype
+  std::string action;		// action subtype
 };
 
 //------------------------------------------------------------------------

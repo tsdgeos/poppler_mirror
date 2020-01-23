@@ -896,11 +896,7 @@ LinkHide::~LinkHide() {
 //------------------------------------------------------------------------
 
 LinkUnknown::LinkUnknown(const char *actionA) {
-  action = new GooString(actionA);
-}
-
-LinkUnknown::~LinkUnknown() {
-  delete action;
+  action = std::string(actionA ? actionA : "");
 }
 
 //------------------------------------------------------------------------
