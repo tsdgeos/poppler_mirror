@@ -523,11 +523,10 @@ static void
 build_javascript (PopplerAction *action,
 		  const LinkJavaScript *link)
 {
-	const GooString *script;
-
-	script = link->getScript();
-	if (script)
-		action->javascript.script = _poppler_goo_string_to_utf8 (script);
+	if (link->isOk()) {
+	        const GooString script(link->getScript());
+		action->javascript.script = _poppler_goo_string_to_utf8 (&script);
+        }
 
 }
 

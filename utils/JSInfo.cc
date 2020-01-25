@@ -59,10 +59,11 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action, bool deleteLin
     hasJS = true;
     if (print) {
       LinkJavaScript *linkjs = static_cast<LinkJavaScript *>(link);
-      const GooString *s = linkjs->getScript();
-      if (s && s->c_str()) {
+      if (linkjs->isOk()) {
+	const std::string& s = linkjs->getScript();
 	fprintf(file, "%s:\n", action);
-	printJS(s);
+	GooString gooS = GooString(s);
+	printJS(&gooS);
 	fputs("\n\n", file);
       }
     }

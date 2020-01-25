@@ -418,18 +418,17 @@ public:
   // Build a LinkJavaScript given the action name.
   LinkJavaScript(Object *jsObj);
 
-  ~LinkJavaScript() override;
-
-  bool isOk() const override { return js != nullptr; }
+  bool isOk() const override { return isValid; }
 
   LinkActionKind getKind() const override { return actionJavaScript; }
-  const GooString *getScript() const { return js; }
+  const std::string& getScript() const { return js; }
 
   static Object createObject(XRef *xref, const GooString &js);
 
 private:
 
-  GooString *js;
+  std::string js;
+  bool isValid;
 };
 
 //------------------------------------------------------------------------

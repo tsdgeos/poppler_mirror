@@ -289,7 +289,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
     case actionJavaScript:
     {
       ::LinkJavaScript *ljs = (::LinkJavaScript *)a;
-      popplerLink = new LinkJavaScript( linkArea, UnicodeParsedString(ljs->getScript()) );
+      popplerLink = new LinkJavaScript( linkArea, UnicodeParsedString( ljs->getScript() ) );
     }
     break;
 

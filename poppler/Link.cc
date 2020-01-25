@@ -794,21 +794,16 @@ LinkRendition::~LinkRendition() {
 //------------------------------------------------------------------------
 
 LinkJavaScript::LinkJavaScript(Object *jsObj) {
-  js = nullptr;
+  isValid = false;
 
   if (jsObj->isString()) {
-    js = new GooString(jsObj->getString());
+    js = jsObj->getString()->toStr();
+    isValid = true;
   }
   else if (jsObj->isStream()) {
     Stream *stream = jsObj->getStream();
-    js = new GooString();
-    stream->fillGooString(js);
-  }
-}
-
-LinkJavaScript::~LinkJavaScript() {
-  if (js) {
-    delete js;
+    stream->fillString(js);
+    isValid = true;
   }
 }
 
