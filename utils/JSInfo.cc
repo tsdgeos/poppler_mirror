@@ -71,15 +71,13 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action, bool deleteLin
 
   if (link->getKind() == actionRendition) {
     LinkRendition *linkr = static_cast<LinkRendition *>(link);
-    if (linkr->getScript()) {
+    if (!linkr->getScript().empty()) {
       hasJS = true;
       if (print) {
-        const GooString *s = linkr->getScript();
-        if (s && s->c_str()) {
-          fprintf(file, "%s (Rendition):\n", action);
-          printJS(s);
-          fputs("\n\n", file);
-        }
+        fprintf(file, "%s (Rendition):\n", action);
+        const GooString s(linkr->getScript());
+        printJS(&s);
+        fputs("\n\n", file);
       }
     }
   }

@@ -714,7 +714,6 @@ LinkSound::LinkSound(const Object *soundObj) {
 LinkRendition::LinkRendition(const Object *obj) {
   operation = NoRendition;
   media = nullptr;
-  js = nullptr;
   int operationCode = -1;
 
   screenRef = Ref::INVALID();
@@ -723,11 +722,10 @@ LinkRendition::LinkRendition(const Object *obj) {
     Object tmp = obj->dictLookup("JS");
     if (!tmp.isNull()) {
       if (tmp.isString()) {
-        js = new GooString(tmp.getString());
+        js = tmp.getString()->toStr();
       } else if (tmp.isStream()) {
         Stream *stream = tmp.getStream();
-	js = new GooString();
-	stream->fillGooString(js);
+	stream->fillString(js);
       } else {
         error(errSyntaxWarning, -1, "Invalid Rendition Action: JS not string or stream");
       }
@@ -736,7 +734,7 @@ LinkRendition::LinkRendition(const Object *obj) {
     tmp = obj->dictLookup("OP");
     if (tmp.isInt()) {
       operationCode = tmp.getInt();
-      if (!js && (operationCode < 0 || operationCode > 4)) {
+      if (js.empty() && (operationCode < 0 || operationCode > 4)) {
         error(errSyntaxWarning, -1, "Invalid Rendition Action: unrecognized operation valued: {0:d}", operationCode);
       } else {
         // retrieve rendition object
@@ -773,14 +771,13 @@ LinkRendition::LinkRendition(const Object *obj) {
           operation = PlayRendition;
           break;
       }
-    } else if (!js) {
+    } else if (js=="") {
       error(errSyntaxWarning, -1, "Invalid Rendition action: no OP or JS field defined");
     }
   }
 }
 
 LinkRendition::~LinkRendition() {
-  delete js;
   delete media;
 }
 

@@ -365,7 +365,7 @@ public:
 
   const MediaRendition* getMedia() const { return media; }
 
-  const GooString *getScript() const { return js; }
+  const std::string& getScript() const { return js; }
 
 private:
 
@@ -375,7 +375,7 @@ private:
 
   MediaRendition* media;
 
-  GooString *js;
+  std::string js;
 };
 
 //------------------------------------------------------------------------
