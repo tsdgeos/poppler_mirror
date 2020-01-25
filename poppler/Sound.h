@@ -20,6 +20,8 @@
 #ifndef Sound_H
 #define Sound_H
 
+#include <memory>
+
 class Object;
 class Stream;
 
@@ -41,7 +43,7 @@ class Sound
 {
 public:
   // Try to parse the Object obj
-  static Sound *parseSound(Object *obj);
+  static std::unique_ptr<Sound> parseSound(Object *obj);
 
   // Destructor
   ~Sound();

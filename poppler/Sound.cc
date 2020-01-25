@@ -22,7 +22,7 @@
 #include "Stream.h"
 #include "FileSpec.h"
 
-Sound *Sound::parseSound(Object *obj)
+std::unique_ptr<Sound> Sound::parseSound(Object *obj)
 {
   // let's try to see if this Object is a Sound, according to the PDF specs
   // (section 9.2)
@@ -40,7 +40,7 @@ Sound *Sound::parseSound(Object *obj)
   // the Dict must have the 'R' key of type num
   Object tmp = dict->lookup("R");
   if (tmp.isNum()) {
-    return new Sound(obj);
+    return std::unique_ptr<Sound>(new Sound(obj));
   } else {
     return nullptr;
   }

@@ -387,8 +387,6 @@ public:
 
   LinkSound(const Object *soundObj);
 
-  ~LinkSound() override;
-
   bool isOk() const override { return sound != nullptr; }
 
   LinkActionKind getKind() const override { return actionSound; }
@@ -397,7 +395,7 @@ public:
   bool getSynchronous() const { return sync; }
   bool getRepeat() const { return repeat; }
   bool getMix() const { return mix; }
-  Sound *getSound() const { return sound; }
+  Sound *getSound() const { return sound.get(); }
 
 private:
 
@@ -405,7 +403,7 @@ private:
   bool sync;
   bool repeat;
   bool mix;
-  Sound *sound;
+  std::unique_ptr<Sound> sound;
 };
 
 //------------------------------------------------------------------------

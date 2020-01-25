@@ -6140,7 +6140,7 @@ AnnotSound::~AnnotSound() = default;
 void AnnotSound::initialize(PDFDoc *docA, Dict* dict) {
   Object obj1 = dict->lookup("Sound");
 
-  sound.reset(Sound::parseSound(&obj1));
+  sound = Sound::parseSound(&obj1);
   if (!sound) {
     error(errSyntaxError, -1, "Bad Annot Sound");
     ok = false;
