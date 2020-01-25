@@ -831,8 +831,15 @@ private:
     Q_DISABLE_COPY(FormFieldSignature)
 };
 
+/**
+  Return vector of suitable signing certificates
+*/
 QVector<CertificateInfo *> POPPLER_QT5_EXPORT getAvailableSigningCertificates();
 
+/**
+  Set non-standard NSS CertDB directory (as a file URL)
+*/
+void POPPLER_QT5_EXPORT setNSSDir(const QString &pathURL);
 }
 
 #endif

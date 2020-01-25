@@ -33,6 +33,7 @@
 #include <config.h>
 
 #include <QtCore/QSizeF>
+#include <QUrl>
 
 #include <Form.h>
 #include <Object.h>
@@ -1110,6 +1111,19 @@ QVector<CertificateInfo *> POPPLER_QT5_EXPORT getAvailableSigningCertificates()
 #endif
 
     return vReturnCerts;
+}
+
+void POPPLER_QT5_EXPORT setNSSDir(const QString &path)
+{
+#ifdef ENABLE_NSS3
+    if (path.isEmpty())
+        return;
+
+    GooString *goo = QStringToGooString(QUrl(path).toLocalFile());
+    SignatureHandler::setNSSDir(*goo);
+#else
+    (void)path;
+#endif
 }
 
 }
