@@ -470,9 +470,7 @@ class LinkHide: public LinkAction {
 public:
   LinkHide(const Object *hideObj);
 
-  ~LinkHide() override;
-
-  bool isOk() const override { return targetName != nullptr; }
+  bool isOk() const override { return hasTargetNameFlag; }
   LinkActionKind getKind() const override { return actionHide; }
 
   // According to spec the target can be either:
@@ -484,14 +482,16 @@ public:
   // While b / c appear to be very uncommon and can't easily be
   // created with Adobe Acrobat DC. So only support hide
   // actions with named targets (yet).
-  bool hasTargetName() const { return targetName != nullptr; }
-  const GooString *getTargetName() const { return targetName; }
+  bool hasTargetName() const { return hasTargetNameFlag; }
+  const std::string& getTargetName() const { return targetName; }
 
   // Should this action show or hide.
   bool isShowAction() const { return show; }
 
 private:
-  GooString *targetName;
+
+  bool hasTargetNameFlag;
+  std::string targetName;
   bool show;
 };
 

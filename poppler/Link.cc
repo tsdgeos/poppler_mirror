@@ -872,23 +872,20 @@ LinkOCGState::LinkOCGState(const Object *obj)
 //------------------------------------------------------------------------
 
 LinkHide::LinkHide(const Object *hideObj) {
-  targetName = nullptr;
+  hasTargetNameFlag = false;
   show = false; // Default
 
   if (hideObj->isDict()) {
       const Object targetObj = hideObj->dictLookup("T");
       if (targetObj.isString()) {
-	targetName = targetObj.getString()->copy();
+	targetName = targetObj.getString()->toStr();
+        hasTargetNameFlag = true;
       }
       const Object shouldHide = hideObj->dictLookup("H");
       if (shouldHide.isBool()) {
 	show = !shouldHide.getBool();
       }
   }
-}
-
-LinkHide::~LinkHide() {
-  delete targetName;
 }
 
 //------------------------------------------------------------------------
