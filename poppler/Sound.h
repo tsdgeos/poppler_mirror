@@ -20,7 +20,6 @@
 #ifndef Sound_H
 #define Sound_H
 
-class GooString;
 class Object;
 class Stream;
 
