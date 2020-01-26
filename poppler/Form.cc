@@ -59,12 +59,12 @@
 #include "Lexer.h"
 
 //return a newly allocated char* containing an UTF16BE string of size length
-char* pdfDocEncodingToUTF16 (const GooString* orig, int* length)
+char* pdfDocEncodingToUTF16 (const std::string& orig, int* length)
 {
   //double size, a unicode char takes 2 char, add 2 for the unicode marker
-  *length = 2+2*orig->getLength();
+  *length = 2+2*orig.size();
   char *result = new char[(*length)];
-  const char *cstring = orig->c_str();
+  const char *cstring = orig.c_str();
   //unicode marker
   result[0] = '\xfe';
   result[1] = '\xff';
@@ -80,7 +80,7 @@ char* pdfDocEncodingToUTF16 (const GooString* orig, int* length)
 static GooString *convertToUtf16(GooString *pdfDocEncodingString)
 {
   int tmp_length;
-  char* tmp_str = pdfDocEncodingToUTF16(pdfDocEncodingString, &tmp_length);
+  char* tmp_str = pdfDocEncodingToUTF16(pdfDocEncodingString->toStr(), &tmp_length);
   delete pdfDocEncodingString;
   pdfDocEncodingString = new GooString(tmp_str, tmp_length);
   delete [] tmp_str;
@@ -877,7 +877,7 @@ GooString* FormField::getFullyQualifiedName() {
           full_name->insert(0, parent_name->c_str() + 2, parent_name->getLength() - 2); // Remove the unicode BOM
         } else {
           int tmp_length;
-          char* tmp_str = pdfDocEncodingToUTF16(parent_name, &tmp_length);
+          char* tmp_str = pdfDocEncodingToUTF16(parent_name->toStr(), &tmp_length);
           full_name->insert(0, tmp_str + 2, tmp_length - 2); // Remove the unicode BOM
           delete [] tmp_str;
         }
@@ -901,7 +901,7 @@ GooString* FormField::getFullyQualifiedName() {
         full_name->append(partialName->c_str() + 2, partialName->getLength() - 2); // Remove the unicode BOM
       } else {
         int tmp_length;
-        char* tmp_str = pdfDocEncodingToUTF16(partialName, &tmp_length);
+        char* tmp_str = pdfDocEncodingToUTF16(partialName->toStr(), &tmp_length);
         full_name->append(tmp_str + 2, tmp_length - 2); // Remove the unicode BOM
         delete [] tmp_str;
       }
@@ -1189,7 +1189,7 @@ FormFieldText::FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref refA, For
     } else if (obj1.getString()->getLength() > 0) {
       //non-unicode string -- assume pdfDocEncoding and try to convert to UTF16BE
       int tmp_length;
-      char* tmp_str = pdfDocEncodingToUTF16(obj1.getString(), &tmp_length);
+      char* tmp_str = pdfDocEncodingToUTF16(obj1.getString()->toStr(), &tmp_length);
       content = new GooString(tmp_str, tmp_length);
       delete [] tmp_str;
     }

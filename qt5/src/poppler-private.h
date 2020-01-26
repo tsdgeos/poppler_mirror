@@ -71,6 +71,8 @@ namespace Poppler {
 
     POPPLER_QT5_EXPORT QString UnicodeParsedString(const GooString *s1);
 
+    POPPLER_QT5_EXPORT QString UnicodeParsedString(const std::string& s1);
+
     POPPLER_QT5_EXPORT GooString *QStringToUnicodeGooString(const QString &s);
 
     POPPLER_QT5_EXPORT GooString *QStringToGooString(const QString &s);

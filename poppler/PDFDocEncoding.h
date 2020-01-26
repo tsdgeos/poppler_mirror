@@ -24,12 +24,14 @@
 #ifndef PDFDOCENCODING_H
 #define PDFDOCENCODING_H
 
+#include <string>
+
 #include "CharTypes.h"
 
 class GooString;
 
 extern const Unicode pdfDocEncoding[256];
 
-char* pdfDocEncodingToUTF16 (const GooString* orig, int* length);
+char* pdfDocEncodingToUTF16 (const std::string& orig, int* length);
 
 #endif

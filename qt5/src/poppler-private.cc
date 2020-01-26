@@ -97,12 +97,16 @@ namespace Debug {
     }
 
     QString UnicodeParsedString(const GooString *s1) {
-        if ( !s1 || s1->getLength() == 0 )
+        return (s1) ? UnicodeParsedString(s1->toStr()) : QString();
+    }
+
+    QString UnicodeParsedString(const std::string& s1) {
+        if ( s1.empty() )
             return QString();
 
-        if ( s1->hasUnicodeMarker() || s1->hasUnicodeMarkerLE() )
+        if ( GooString::hasUnicodeMarker(s1) || GooString::hasUnicodeMarkerLE(s1) )
         {
-            return QString::fromUtf16(reinterpret_cast<const ushort *>(s1->c_str()), s1->getLength() / 2);
+            return QString::fromUtf16(reinterpret_cast<const ushort *>(s1.c_str()), s1.size() / 2);
         }
         else
         {

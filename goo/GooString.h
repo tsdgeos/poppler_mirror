@@ -173,7 +173,9 @@ public:
   bool endsWith(const char *suffix) const;
 
   bool hasUnicodeMarker() const { return size() >= 2 && (*this)[0] == '\xfe' && (*this)[1] == '\xff'; }
+  static bool hasUnicodeMarker(const std::string& s) { return s.size() >= 2 && s[0] == '\xfe' && s[1] == '\xff'; }
   bool hasUnicodeMarkerLE() const { return size() >= 2 && (*this)[0] == '\xff' && (*this)[1] == '\xfe'; }
+  static bool hasUnicodeMarkerLE(const std::string& s) { return s.size() >= 2 && s[0] == '\xff' && s[1] == '\xfe'; }
   bool hasJustUnicodeMarker() const { return size() == 2 && hasUnicodeMarker(); }
 
   void prependUnicodeMarker();
