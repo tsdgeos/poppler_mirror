@@ -609,15 +609,10 @@ LinkURI::~LinkURI() {
 //------------------------------------------------------------------------
 
 LinkNamed::LinkNamed(const Object *nameObj) {
-  name = nullptr;
+  hasNameFlag = false;
   if (nameObj->isName()) {
-    name = new GooString(nameObj->getName());
-  }
-}
-
-LinkNamed::~LinkNamed() {
-  if (name) {
-    delete name;
+    name = (nameObj->getName()) ? nameObj->getName() : "";
+    hasNameFlag = true;
   }
 }
 

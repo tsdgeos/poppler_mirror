@@ -416,9 +416,7 @@ static void
 build_named (PopplerAction *action,
 	     const LinkNamed     *link)
 {
-	const gchar *name;
-
-	name = link->getName ()->c_str ();
+	const gchar* name = link->getName ().c_str ();
 	if (name != nullptr)
 		action->named.named_dest = g_strdup (name);
 }

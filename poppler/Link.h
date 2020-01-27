@@ -278,16 +278,15 @@ public:
   // Build a LinkNamed given the action name.
   LinkNamed(const Object *nameObj);
 
-  ~LinkNamed() override;
-
-  bool isOk() const override { return name != nullptr; }
+  bool isOk() const override { return hasNameFlag; }
 
   LinkActionKind getKind() const override { return actionNamed; }
-  const GooString *getName() const { return name; }
+  const std::string& getName() const { return name; }
 
 private:
 
-  GooString *name;
+  std::string name;
+  bool hasNameFlag;
 };
 
 
