@@ -436,7 +436,7 @@ find_annot_movie_for_action (PopplerDocument *document,
 
     annotObj = xref->fetch (*ref);
   } else if (link->hasAnnotTitle ()) {
-    const GooString *title = link->getAnnotTitle ();
+    const std::string& title = link->getAnnotTitle ();
     int i;
 
     for (i = 1; i <= document->doc->getNumPages (); ++i) {
@@ -457,11 +457,8 @@ find_annot_movie_for_action (PopplerDocument *document,
 	    }
 
 	    obj1 = annotObj.dictLookup ("T");
-	    if (obj1.isString()) {
-	      const GooString *t = obj1.getString ();
-
-	      if (title->cmp(t) == 0)
-	        found = true;
+	    if (obj1.isString() && obj1.getString()->toStr() == title) {
+              found = true;
 	    }
 	  }
 	  if (!found)

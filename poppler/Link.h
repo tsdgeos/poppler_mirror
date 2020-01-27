@@ -306,25 +306,25 @@ public:
   };
 
   LinkMovie(const Object *obj);
-  ~LinkMovie() override;
 
-  bool isOk() const override { return hasAnnotRef() || hasAnnotTitle(); }
+  bool isOk() const override { return hasAnnotRef() || hasAnnotTitleFlag; }
   LinkActionKind getKind() const override { return actionMovie; }
 
   // a movie action stores either an indirect reference to a movie annotation
   // or the movie annotation title
 
   bool hasAnnotRef() const { return annotRef != Ref::INVALID(); }
-  bool hasAnnotTitle() const { return annotTitle != nullptr; }
+  bool hasAnnotTitle() const { return hasAnnotTitleFlag; }
   const Ref *getAnnotRef() const { return &annotRef; }
-  const GooString *getAnnotTitle() const { return annotTitle; }
+  const std::string& getAnnotTitle() const { return annotTitle; }
 
   OperationType getOperation() const { return operation; }
 
 private:
 
   Ref annotRef;            // Annotation
-  GooString *annotTitle;   // T
+  std::string annotTitle;  // T
+  bool hasAnnotTitleFlag;
 
   OperationType operation; // Operation
 };
