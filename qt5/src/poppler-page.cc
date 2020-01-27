@@ -275,7 +275,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
 
     case actionURI:
     {
-      popplerLink = new LinkBrowse( linkArea, ((LinkURI *)a)->getURI()->c_str() );
+      popplerLink = new LinkBrowse( linkArea, ((LinkURI *)a)->getURI().c_str() );
     }
     break;
 

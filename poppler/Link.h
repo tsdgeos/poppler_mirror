@@ -253,19 +253,17 @@ public:
   // Build a LinkURI given the URI (string) and base URI.
   LinkURI(const Object *uriObj, const GooString *baseURI);
 
-  // Destructor.
-  ~LinkURI() override;
-
   // Was the LinkURI created successfully?
-  bool isOk() const override { return uri != nullptr; }
+  bool isOk() const override { return hasURIFlag; }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionURI; }
-  const GooString *getURI() const { return uri; }
+  const std::string& getURI() const { return uri; }
 
 private:
 
-  GooString *uri;			// the URI
+  std::string uri;			// the URI
+  bool hasURIFlag;
 };
 
 //------------------------------------------------------------------------

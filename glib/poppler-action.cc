@@ -405,9 +405,7 @@ static void
 build_uri (PopplerAction *action,
 	   const LinkURI       *link)
 {
-	const gchar *uri;
-
-	uri = link->getURI()->c_str ();
+	const gchar *uri = link->getURI().c_str ();
 	if (uri != nullptr)
 		action->uri.uri = g_strdup (uri);
 }

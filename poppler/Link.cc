@@ -560,48 +560,38 @@ LinkLaunch::~LinkLaunch() {
 //------------------------------------------------------------------------
 
 LinkURI::LinkURI(const Object *uriObj, const GooString *baseURI) {
-  const GooString *uri2;
-  int n;
-  char c;
-
-  uri = nullptr;
+  hasURIFlag = false;
   if (uriObj->isString()) {
-    uri2 = uriObj->getString();
-    n = (int)strcspn(uri2->c_str(), "/:");
-    if (n < uri2->getLength() && uri2->getChar(n) == ':') {
+    const std::string& uri2 = uriObj->getString()->toStr();
+    size_t n = strcspn(uri2.c_str(), "/:");
+    if (n < uri2.size() && uri2[n] == ':') {
       // "http:..." etc.
-      uri = uri2->copy();
-    } else if (!uri2->cmpN("www.", 4)) {
+      uri = uri2;
+    } else if (!uri2.compare(0,4,"www.")) {
       // "www.[...]" without the leading "http://"
-      uri = new GooString("http://");
-      uri->append(uri2);
+      uri = "http://" + uri2;
     } else {
       // relative URI
       if (baseURI) {
-	uri = baseURI->copy();
-	if (uri->getLength() > 0) {
-	  c = uri->getChar(uri->getLength() - 1);
+	uri = baseURI->toStr();
+	if (uri.size() > 0) {
+	  char c = uri.back();
 	  if (c != '/' && c != '?') {
-	    uri->append('/');
+	    uri += '/';
 	  }
 	}
-	if (uri2->getChar(0) == '/') {
-	  uri->append(uri2->c_str() + 1, uri2->getLength() - 1);
+	if (uri2[0] == '/') {
+	  uri.append(uri2.c_str() + 1, uri2.size() - 1);
 	} else {
-	  uri->append(uri2);
+	  uri += uri2;
 	}
       } else {
-	uri = uri2->copy();
+	uri = uri2;
       }
     }
   } else {
     error(errSyntaxWarning, -1, "Illegal URI-type link");
   }
-}
-
-LinkURI::~LinkURI() {
-  if (uri)
-    delete uri;
 }
 
 //------------------------------------------------------------------------

@@ -228,7 +228,7 @@ namespace Debug {
             case actionURI:
             {
                 const LinkURI * u = static_cast< const LinkURI * >( a );
-                e->setAttribute( QStringLiteral("DestinationURI"), u->getURI()->c_str() );
+                e->setAttribute( QStringLiteral("DestinationURI"), u->getURI().c_str() );
             }
             default: ;
         }
