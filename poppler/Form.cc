@@ -543,7 +543,8 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     GooString gName(signerName);
     free(signerName);
     Object vObj(new Dict(xref));
-    if (!createSignature(vObj, gName, gReason, tmpSignature)) {
+    Ref vref = xref->addIndirectObject(&vObj);
+    if (!createSignature(vObj, vref, gName, gReason, tmpSignature)) {
         delete tmpSignature;
         return false;
     }
@@ -557,7 +558,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
 
     // Get start/end offset of signature object in the saved PDF
     Goffset objStart, objEnd;
-    if (!getObjectStartEnd(fname, ref.num, &objStart, &objEnd)) {
+    if (!getObjectStartEnd(fname, vref.num, &objStart, &objEnd)) {
         fprintf(stderr, "signDocument: unable to get signature object offsets\n");
     }
 
@@ -710,7 +711,7 @@ bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sig
     return true;
 }
 
-bool FormWidgetSignature::createSignature(Object &vObj, const GooString &name, const GooString &reason, const GooString *signature)
+bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooString &name, const GooString &reason, const GooString *signature)
 {
     vObj.dictAdd("Type", Object(objName, "Sig"));
     vObj.dictAdd("Filter", Object(objName, "Adobe.PPKLite"));
@@ -744,7 +745,8 @@ bool FormWidgetSignature::createSignature(Object &vObj, const GooString &name, c
     bObj.arrayAdd(Object(static_cast<long long>(9999999999LL)));
     bObj.arrayAdd(Object(static_cast<long long>(9999999999LL)));
     vObj.dictAdd("ByteRange", bObj.copy());
-    obj.dictSet("V", vObj.copy());
+    obj.dictSet("V", Object(vRef));
+    obj.dictSet("DV", Object(vRef));
     xref->setModifiedObject(&obj, ref);
     return true;
 }

@@ -315,7 +315,7 @@ public:
     const GooString *getSignature() const;
 
 private:
-    bool createSignature(Object &vObj, const GooString &name, const GooString &reason, const GooString *signature);
+    bool createSignature(Object &vObj, Ref vRef, const GooString &name, const GooString &reason, const GooString *signature);
     bool getObjectStartEnd(GooString *filename, int objNum, Goffset *objStart, Goffset *objEnd);
     bool updateOffsets(FILE *f, Goffset objStart, Goffset objEnd, Goffset *sigStart, Goffset *sigEnd, Goffset *fileSize);
 
