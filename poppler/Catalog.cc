@@ -37,6 +37,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Katarina Behrens <Katarina.Behrens@cib.de>
+// Copyright (C) 2020 Thorsten Behrens <Thorsten.Behrens@CIB.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1022,6 +1023,11 @@ void Catalog::setAcroForm(const Ref formRef)
         Ref newRef = xref->addIndirectObject(&newForm);
         catDict.dictSet("AcroForm", Object(newRef));
         acroForm = catDict.getDict()->lookup("AcroForm");
+    } else {
+        // append to field array
+        Ref fieldRef;
+        Object fieldArray = acroForm.getDict()->lookup("Fields", &fieldRef);
+        fieldArray.getArray()->add(Object(formRef));
     }
 
     if (acroFormRef != Ref::INVALID()) {
