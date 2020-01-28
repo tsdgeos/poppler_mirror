@@ -273,6 +273,9 @@ void TestSearch::testDeseretSearch()
 
     const QString str = QString::fromUtf8("𐐐𐐯𐑊𐐬"); //clazy:exclude=qstring-allocations
     QCOMPARE( page->search(str, l, t, r, b, Poppler::Page::FromTop, Poppler::Page::NoSearchFlags), true );
+
+    const QString str2 = QString::fromUtf8("𐐸𐐯𐑊𐐬"); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(str2, l, t, r, b, Poppler::Page::FromTop,  Poppler::Page::IgnoreCase), true );
 }
 
 QTEST_GUILESS_MAIN(TestSearch)
