@@ -525,7 +525,7 @@ bool FormWidgetSignature::signDocument(const char *saveFilename, const char *cer
     // calculate a signature over tmp_buffer with the certificate to get its size
     unsigned char tmp_buffer[4];
     memcpy(tmp_buffer, "PDF", 4);
-    SignatureHandler sigHandler(certNickname, SignatureHandler::getHashOidTag(digestName));
+    SignatureHandler sigHandler(certNickname, SEC_OID_SHA256);
     sigHandler.updateHash(tmp_buffer, 4);
     GooString *tmpSignature = sigHandler.signDetached(password);
     if (!tmpSignature)

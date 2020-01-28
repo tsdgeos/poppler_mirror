@@ -31,12 +31,229 @@
 #include <pk11pub.h>
 #include <secpkcs7.h>
 
-void SignatureHandler::outputCallback(void *arg, const char *buf, unsigned long len)
+#include <cert.h>
+#include <hasht.h>
+#include <secerr.h>
+#include <sechash.h>
+#include <cms.h>
+#include <cmst.h>
+
+// ASN.1 used in the (much simpler) time stamp request. From RFC3161
+// and other sources.
+
+/*
+AlgorithmIdentifier  ::=  SEQUENCE  {
+     algorithm  OBJECT IDENTIFIER,
+     parameters ANY DEFINED BY algorithm OPTIONAL  }
+                   -- contains a value of the type
+                   -- registered for use with the
+                   -- algorithm object identifier value
+
+MessageImprint ::= SEQUENCE  {
+    hashAlgorithm AlgorithmIdentifier,
+    hashedMessage OCTET STRING  }
+*/
+
+struct MessageImprint
 {
-    if (arg && buf) {
-        GooString *gSignature = reinterpret_cast<GooString *>(arg);
-        gSignature->append(buf, len);
-    }
+    SECAlgorithmID hashAlgorithm;
+    SECItem hashedMessage;
+};
+
+/*
+Extension  ::=  SEQUENCE  {
+    extnID    OBJECT IDENTIFIER,
+    critical  BOOLEAN DEFAULT FALSE,
+    extnValue OCTET STRING  }
+*/
+
+struct Extension
+{
+    SECItem const extnID;
+    SECItem const critical;
+    SECItem const extnValue;
+};
+
+/*
+Extensions ::= SEQUENCE SIZE (1..MAX) OF Extension
+*/
+
+/*
+TSAPolicyId ::= OBJECT IDENTIFIER
+
+TimeStampReq ::= SEQUENCE  {
+    version            INTEGER  { v1(1) },
+    messageImprint     MessageImprint,
+    --a hash algorithm OID and the hash value of the data to be
+    --time-stamped
+    reqPolicy          TSAPolicyId         OPTIONAL,
+    nonce              INTEGER             OPTIONAL,
+    certReq            BOOLEAN             DEFAULT FALSE,
+    extensions     [0] IMPLICIT Extensions OPTIONAL  }
+*/
+
+struct TimeStampReq
+{
+    SECItem version;
+    MessageImprint messageImprint;
+    SECItem reqPolicy;
+    SECItem nonce;
+    SECItem certReq;
+    Extension *extensions;
+};
+
+/**
+ * General name, defined by RFC 3280.
+ */
+struct GeneralName
+{
+    CERTName name;
+};
+
+/**
+ * List of general names (only one for now), defined by RFC 3280.
+ */
+struct GeneralNames
+{
+    GeneralName names;
+};
+
+/**
+ * Supplies different fields to identify a certificate, defined by RFC 5035.
+ */
+struct IssuerSerial
+{
+    GeneralNames issuer;
+    SECItem serialNumber;
+};
+
+/**
+ * Supplies different fields that are used to identify certificates, defined by
+ * RFC 5035.
+ */
+struct ESSCertIDv2
+{
+    SECAlgorithmID hashAlgorithm;
+    SECItem certHash;
+    IssuerSerial issuerSerial;
+};
+
+/**
+ * This attribute uses the ESSCertIDv2 structure, defined by RFC 5035.
+ */
+struct SigningCertificateV2
+{
+    ESSCertIDv2 **certs;
+
+    SigningCertificateV2() : certs(nullptr) { }
+};
+
+/**
+ * GeneralName ::= CHOICE {
+ *      otherName                       [0]     OtherName,
+ *      rfc822Name                      [1]     IA5String,
+ *      dNSName                         [2]     IA5String,
+ *      x400Address                     [3]     ORAddress,
+ *      directoryName                   [4]     Name,
+ *      ediPartyName                    [5]     EDIPartyName,
+ *      uniformResourceIdentifier       [6]     IA5String,
+ *      iPAddress                       [7]     OCTET STRING,
+ *      registeredID                    [8]     OBJECT IDENTIFIER
+ * }
+ */
+const SEC_ASN1Template GeneralNameTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(GeneralName) }, { SEC_ASN1_INLINE, offsetof(GeneralName, name), CERT_NameTemplate, 0 }, { 0, 0, nullptr, 0 } };
+
+/**
+ * GeneralNames ::= SEQUENCE SIZE (1..MAX) OF GeneralName
+ */
+const SEC_ASN1Template GeneralNamesTemplate[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(GeneralNames) }, { SEC_ASN1_INLINE | SEC_ASN1_CONTEXT_SPECIFIC | 4, offsetof(GeneralNames, names), GeneralNameTemplate, 0 }, { 0, 0, nullptr, 0 } };
+
+/**
+ * IssuerSerial ::= SEQUENCE {
+ *     issuer GeneralNames,
+ *     serialNumber CertificateSerialNumber
+ * }
+ */
+const SEC_ASN1Template IssuerSerialTemplate[] = {
+    { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(IssuerSerial) }, { SEC_ASN1_INLINE, offsetof(IssuerSerial, issuer), GeneralNamesTemplate, 0 }, { SEC_ASN1_INTEGER, offsetof(IssuerSerial, serialNumber), nullptr, 0 }, { 0, 0, nullptr, 0 }
+};
+
+/**
+ * Hash ::= OCTET STRING
+ *
+ * ESSCertIDv2 ::= SEQUENCE {
+ *     hashAlgorithm AlgorithmIdentifier DEFAULT {algorithm id-sha256},
+ *     certHash Hash,
+ *     issuerSerial IssuerSerial OPTIONAL
+ * }
+ */
+
+SEC_ASN1_MKSUB(SECOID_AlgorithmIDTemplate)
+
+const SEC_ASN1Template ESSCertIDv2Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(ESSCertIDv2) },
+                                                 { SEC_ASN1_INLINE | SEC_ASN1_XTRN, offsetof(ESSCertIDv2, hashAlgorithm), SEC_ASN1_SUB(SECOID_AlgorithmIDTemplate), 0 },
+                                                 { SEC_ASN1_OCTET_STRING, offsetof(ESSCertIDv2, certHash), nullptr, 0 },
+                                                 { SEC_ASN1_INLINE | SEC_ASN1_XTRN, offsetof(ESSCertIDv2, issuerSerial), IssuerSerialTemplate, 0 },
+                                                 { 0, 0, nullptr, 0 } };
+
+/**
+ * SigningCertificateV2 ::= SEQUENCE {
+ * }
+ */
+const SEC_ASN1Template SigningCertificateV2Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(SigningCertificateV2) }, { SEC_ASN1_SEQUENCE_OF, offsetof(SigningCertificateV2, certs), ESSCertIDv2Template, 0 }, { 0, 0, nullptr, 0 } };
+
+struct PKIStatusInfo
+{
+    SECItem status;
+    SECItem statusString;
+    SECItem failInfo;
+};
+
+const SEC_ASN1Template PKIStatusInfo_Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(PKIStatusInfo) },
+                                                    { SEC_ASN1_INTEGER, offsetof(PKIStatusInfo, status), nullptr, 0 },
+                                                    { SEC_ASN1_CONSTRUCTED | SEC_ASN1_SEQUENCE | SEC_ASN1_OPTIONAL, offsetof(PKIStatusInfo, statusString), nullptr, 0 },
+                                                    { SEC_ASN1_BIT_STRING | SEC_ASN1_OPTIONAL, offsetof(PKIStatusInfo, failInfo), nullptr, 0 },
+                                                    { 0, 0, nullptr, 0 } };
+
+const SEC_ASN1Template Any_Template[] = { { SEC_ASN1_ANY, 0, nullptr, sizeof(SECItem) } };
+
+struct TimeStampResp
+{
+    PKIStatusInfo status;
+    SECItem timeStampToken;
+};
+
+const SEC_ASN1Template TimeStampResp_Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(TimeStampResp) },
+                                                    { SEC_ASN1_INLINE, offsetof(TimeStampResp, status), PKIStatusInfo_Template, 0 },
+                                                    { SEC_ASN1_ANY | SEC_ASN1_OPTIONAL, offsetof(TimeStampResp, timeStampToken), Any_Template, 0 },
+                                                    { 0, 0, nullptr, 0 } };
+
+const SEC_ASN1Template MessageImprint_Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(MessageImprint) },
+                                                     { SEC_ASN1_INLINE, offsetof(MessageImprint, hashAlgorithm), SECOID_AlgorithmIDTemplate, 0 },
+                                                     { SEC_ASN1_OCTET_STRING, offsetof(MessageImprint, hashedMessage), nullptr, 0 },
+                                                     { 0, 0, nullptr, 0 } };
+
+const SEC_ASN1Template Extension_Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(Extension) },
+                                                { SEC_ASN1_OBJECT_ID, offsetof(Extension, extnID), nullptr, 0 },
+                                                { SEC_ASN1_BOOLEAN, offsetof(Extension, critical), nullptr, 0 },
+                                                { SEC_ASN1_OCTET_STRING, offsetof(Extension, extnValue), nullptr, 0 },
+                                                { 0, 0, nullptr, 0 } };
+
+const SEC_ASN1Template Extensions_Template[] = { { SEC_ASN1_SEQUENCE_OF, 0, Extension_Template, 0 } };
+
+const SEC_ASN1Template TimeStampReq_Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(TimeStampReq) },
+                                                   { SEC_ASN1_INTEGER, offsetof(TimeStampReq, version), nullptr, 0 },
+                                                   { SEC_ASN1_INLINE, offsetof(TimeStampReq, messageImprint), MessageImprint_Template, 0 },
+                                                   { SEC_ASN1_OBJECT_ID | SEC_ASN1_OPTIONAL, offsetof(TimeStampReq, reqPolicy), nullptr, 0 },
+                                                   { SEC_ASN1_INTEGER | SEC_ASN1_OPTIONAL, offsetof(TimeStampReq, nonce), nullptr, 0 },
+                                                   { SEC_ASN1_BOOLEAN | SEC_ASN1_OPTIONAL, offsetof(TimeStampReq, certReq), nullptr, 0 },
+                                                   { SEC_ASN1_OPTIONAL | SEC_ASN1_CONTEXT_SPECIFIC | 0, offsetof(TimeStampReq, extensions), Extensions_Template, 0 },
+                                                   { 0, 0, nullptr, 0 } };
+
+// a dummy, actually
+static char *passwordCallback(PK11SlotInfo * /*slot*/, PRBool /*retry*/, void *arg)
+{
+    return PL_strdup(static_cast<char *>(arg));
 }
 
 static void shutdownNss()
@@ -44,6 +261,207 @@ static void shutdownNss()
     if (NSS_Shutdown() != SECSuccess) {
         fprintf(stderr, "NSS_Shutdown failed: %s\n", PR_ErrorToString(PORT_GetError(), PR_LANGUAGE_I_DEFAULT));
     }
+}
+
+// SEC_StringToOID() and NSS_CMSSignerInfo_AddUnauthAttr() are
+// not exported from libsmime, so copy them here. Sigh.
+
+static SECStatus my_SEC_StringToOID(SECItem *to, const char *from, PRUint32 len)
+{
+    PRUint32 decimal_numbers = 0;
+    PRUint32 result_bytes = 0;
+    SECStatus rv;
+    PRUint8 result[1024];
+
+    static const PRUint32 max_decimal = 0xffffffff / 10;
+    static const char OIDstring[] = { "OID." };
+
+    if (!from || !to) {
+        PORT_SetError(SEC_ERROR_INVALID_ARGS);
+        return SECFailure;
+    }
+    if (!len) {
+        len = PL_strlen(from);
+    }
+    if (len >= 4 && !PL_strncasecmp(from, OIDstring, 4)) {
+        from += 4; /* skip leading "OID." if present */
+        len -= 4;
+    }
+    if (!len) {
+    bad_data:
+        PORT_SetError(SEC_ERROR_BAD_DATA);
+        return SECFailure;
+    }
+    do {
+        PRUint32 decimal = 0;
+        while (len > 0 && (*from >= '0' && *from <= '9')) {
+            PRUint32 addend = *from++ - '0';
+            --len;
+            if (decimal > max_decimal) /* overflow */
+                goto bad_data;
+            decimal = (decimal * 10) + addend;
+            if (decimal < addend) /* overflow */
+                goto bad_data;
+        }
+        if (len != 0 && *from != '.') {
+            goto bad_data;
+        }
+        if (decimal_numbers == 0) {
+            if (decimal > 2)
+                goto bad_data;
+            result[0] = decimal * 40;
+            result_bytes = 1;
+        } else if (decimal_numbers == 1) {
+            if (decimal > 40)
+                goto bad_data;
+            result[0] += decimal;
+        } else {
+            /* encode the decimal number,  */
+            PRUint8 *rp;
+            PRUint32 num_bytes = 0;
+            PRUint32 tmp = decimal;
+            while (tmp) {
+                num_bytes++;
+                tmp >>= 7;
+            }
+            if (!num_bytes)
+                ++num_bytes; /* use one byte for a zero value */
+            if (num_bytes + result_bytes > sizeof result)
+                goto bad_data;
+            tmp = num_bytes;
+            rp = result + result_bytes - 1;
+            rp[tmp] = static_cast<PRUint8>(decimal & 0x7f);
+            decimal >>= 7;
+            while (--tmp > 0) {
+                rp[tmp] = static_cast<PRUint8>(decimal | 0x80);
+                decimal >>= 7;
+            }
+            result_bytes += num_bytes;
+        }
+        ++decimal_numbers;
+        if (len > 0) { /* skip trailing '.' */
+            ++from;
+            --len;
+        }
+    } while (len > 0);
+    /* now result contains result_bytes of data */
+    if (to->data && to->len >= result_bytes) {
+        to->len = result_bytes;
+        PORT_Memcpy(to->data, result, to->len);
+        rv = SECSuccess;
+    } else {
+        SECItem result_item = { siBuffer, nullptr, 0 };
+        result_item.data = result;
+        result_item.len = result_bytes;
+        rv = SECITEM_CopyItem(nullptr, to, &result_item);
+    }
+    return rv;
+}
+
+static NSSCMSAttribute *my_NSS_CMSAttributeArray_FindAttrByOidTag(NSSCMSAttribute **attrs, SECOidTag oidtag, PRBool only)
+{
+    SECOidData *oid;
+    NSSCMSAttribute *attr1, *attr2;
+
+    if (attrs == nullptr)
+        return nullptr;
+
+    oid = SECOID_FindOIDByTag(oidtag);
+    if (oid == nullptr)
+        return nullptr;
+
+    while ((attr1 = *attrs++) != nullptr) {
+        if (attr1->type.len == oid->oid.len && PORT_Memcmp(attr1->type.data, oid->oid.data, oid->oid.len) == 0)
+            break;
+    }
+
+    if (attr1 == nullptr)
+        return nullptr;
+
+    if (!only)
+        return attr1;
+
+    while ((attr2 = *attrs++) != nullptr) {
+        if (attr2->type.len == oid->oid.len && PORT_Memcmp(attr2->type.data, oid->oid.data, oid->oid.len) == 0)
+            break;
+    }
+
+    if (attr2 != nullptr)
+        return nullptr;
+
+    return attr1;
+}
+
+static SECStatus my_NSS_CMSArray_Add(PLArenaPool *poolp, void ***array, void *obj)
+{
+    int n = 0;
+    void **dest;
+
+    PORT_Assert(array != NULL);
+    if (array == nullptr)
+        return SECFailure;
+
+    if (*array == nullptr) {
+        dest = static_cast<void **>(PORT_ArenaAlloc(poolp, 2 * sizeof(void *)));
+    } else {
+        void **p = *array;
+        while (*p++)
+            n++;
+        dest = static_cast<void **>(PORT_ArenaGrow(poolp, *array, (n + 1) * sizeof(void *), (n + 2) * sizeof(void *)));
+    }
+
+    if (dest == nullptr)
+        return SECFailure;
+
+    dest[n] = obj;
+    dest[n + 1] = nullptr;
+    *array = dest;
+    return SECSuccess;
+}
+
+static SECOidTag my_NSS_CMSAttribute_GetType(NSSCMSAttribute *attr)
+{
+    SECOidData *typetag;
+
+    typetag = SECOID_FindOID(&(attr->type));
+    if (typetag == nullptr)
+        return SEC_OID_UNKNOWN;
+
+    return typetag->offset;
+}
+
+static SECStatus my_NSS_CMSAttributeArray_AddAttr(PLArenaPool *poolp, NSSCMSAttribute ***attrs, NSSCMSAttribute *attr)
+{
+    NSSCMSAttribute *oattr;
+    void *mark;
+    SECOidTag type;
+
+    mark = PORT_ArenaMark(poolp);
+
+    /* find oidtag of attr */
+    type = my_NSS_CMSAttribute_GetType(attr);
+
+    /* see if we have one already */
+    oattr = my_NSS_CMSAttributeArray_FindAttrByOidTag(*attrs, type, PR_FALSE);
+    PORT_Assert(oattr == NULL);
+    if (oattr != nullptr)
+        goto loser; /* XXX or would it be better to replace it? */
+
+    /* no, shove it in */
+    if (my_NSS_CMSArray_Add(poolp, reinterpret_cast<void ***>(attrs), static_cast<void *>(attr)) != SECSuccess)
+        goto loser;
+
+    PORT_ArenaUnmark(poolp, mark);
+    return SECSuccess;
+
+loser:
+    PORT_ArenaRelease(poolp, mark);
+    return SECFailure;
+}
+
+static SECStatus my_NSS_CMSSignerInfo_AddAuthAttr(NSSCMSSignerInfo *signerinfo, NSSCMSAttribute *attr)
+{
+    return my_NSS_CMSAttributeArray_AddAttr(signerinfo->cmsg->poolp, &(signerinfo->authAttr), attr);
 }
 
 unsigned int SignatureHandler::digestLength(SECOidTag digestAlgId)
@@ -560,33 +978,136 @@ GooString *SignatureHandler::signDetached(const char *password)
     SECItem digest;
     digest.data = digest_buffer;
     digest.len = result_len;
-    SEC_PKCS7ContentInfo *p7_info = SEC_PKCS7CreateSignedData(signing_cert, certUsageEmailSigner, CERT_GetDefaultCertDB(), digest_alg_tag, &digest, nullptr, nullptr);
-    if (!p7_info) {
-        PORT_Free(reinterpret_cast<void *>(digest_buffer));
-        return nullptr;
-    }
-    SEC_PKCS7SignerInfo **signerinfos = p7_info->content.signedData->signerInfos;
-    if (!signerinfos) {
-        PORT_Free(reinterpret_cast<void *>(digest_buffer));
-        SEC_PKCS7DestroyContentInfo(p7_info);
-        return nullptr;
-    }
-    for (SEC_PKCS7SignerInfo *si = *signerinfos; si; si = *++signerinfos) {
-        if (si->cert) {
-            si->certList = CERT_CertChainFromCert(si->cert, certUsageEmailSigner, PR_TRUE);
-        }
-    }
-    SEC_PKCS7AddSigningTime(p7_info);
-    GooString *signature = new GooString;
-    PWData pwdata = { password ? PWData::PW_PLAINTEXT : PWData::PW_NONE, password };
 
-    if (SEC_PKCS7Encode(p7_info, outputCallback, reinterpret_cast<void *>(signature), nullptr, nullptr, &pwdata) != SECSuccess) {
-        PORT_Free(reinterpret_cast<void *>(digest_buffer));
-        delete signature;
-        signature = nullptr;
-    }
-    SEC_PKCS7DestroyContentInfo(p7_info);
-    PORT_Free(reinterpret_cast<void *>(digest_buffer));
+    /////////////////////////////////////
+    /// Code from LibreOffice under MPLv2
+    /////////////////////////////////////
+    NSSCMSSignedData *cms_sd;
+    NSSCMSSignerInfo *cms_signer;
+
+    NSSCMSMessage *result = NSS_CMSMessage_Create(nullptr);
+    if (!result)
+        return nullptr;
+
+    cms_sd = NSS_CMSSignedData_Create(result);
+    if (!cms_sd)
+        return nullptr;
+
+    NSSCMSContentInfo *cms_cinfo = NSS_CMSMessage_GetContentInfo(result);
+    if (NSS_CMSContentInfo_SetContent_SignedData(result, cms_cinfo, cms_sd) != SECSuccess)
+        return nullptr;
+
+    cms_cinfo = NSS_CMSSignedData_GetContentInfo(cms_sd);
+
+    // Attach NULL data as detached data
+    if (NSS_CMSContentInfo_SetContent_Data(result, cms_cinfo, nullptr, PR_TRUE) != SECSuccess)
+        return nullptr;
+
+    // hardcode SHA256 these days...
+    cms_signer = NSS_CMSSignerInfo_Create(result, signing_cert, SEC_OID_SHA256);
+    if (!cms_signer)
+        return nullptr;
+
+    if (NSS_CMSSignerInfo_IncludeCerts(cms_signer, NSSCMSCM_CertChain, certUsageEmailSigner) != SECSuccess)
+        return nullptr;
+
+    if (NSS_CMSSignedData_AddCertificate(cms_sd, signing_cert) != SECSuccess)
+        return nullptr;
+
+    if (NSS_CMSSignedData_AddSignerInfo(cms_sd, cms_signer) != SECSuccess)
+        return nullptr;
+
+    if (NSS_CMSSignedData_SetDigestValue(cms_sd, SEC_OID_SHA256, &digest) != SECSuccess)
+        return nullptr;
+
+    // TODO add the TSA time stamping code, too?
+
+    // Add the signing certificate as a signed attribute.
+    ESSCertIDv2 *aCertIDs[2];
+    ESSCertIDv2 aCertID;
+    // Write ESSCertIDv2.hashAlgorithm.
+    aCertID.hashAlgorithm.algorithm.data = nullptr;
+    aCertID.hashAlgorithm.parameters.data = nullptr;
+    SECOID_SetAlgorithmID(nullptr, &aCertID.hashAlgorithm, SEC_OID_SHA256, nullptr);
+
+    // Write ESSCertIDv2.certHash.
+    SECItem aCertHashItem;
+    unsigned char certhash[32];
+    SECStatus rv = PK11_HashBuf(SEC_OID_SHA256, certhash, signing_cert->derCert.data, signing_cert->derCert.len);
+    if (rv != SECSuccess)
+        return nullptr;
+
+    aCertHashItem.type = siBuffer;
+    aCertHashItem.data = certhash;
+    aCertHashItem.len = 32;
+    aCertID.certHash = aCertHashItem;
+
+    // Write ESSCertIDv2.issuerSerial.
+    IssuerSerial aSerial;
+    GeneralName aName;
+    aName.name = signing_cert->issuer;
+    aSerial.issuer.names = aName;
+    aSerial.serialNumber = signing_cert->serialNumber;
+    aCertID.issuerSerial = aSerial;
+    // Write SigningCertificateV2.certs.
+    aCertIDs[0] = &aCertID;
+    aCertIDs[1] = nullptr;
+    SigningCertificateV2 aCertificate;
+    aCertificate.certs = &aCertIDs[0];
+    SECItem *pEncodedCertificate = SEC_ASN1EncodeItem(nullptr, nullptr, &aCertificate, SigningCertificateV2Template);
+    if (!pEncodedCertificate)
+        return nullptr;
+
+    NSSCMSAttribute aAttribute;
+    SECItem aAttributeValues[2];
+    SECItem *pAttributeValues[2];
+    pAttributeValues[0] = aAttributeValues;
+    pAttributeValues[1] = nullptr;
+    aAttributeValues[0] = *pEncodedCertificate;
+    aAttributeValues[1].type = siBuffer;
+    aAttributeValues[1].data = nullptr;
+    aAttributeValues[1].len = 0;
+    aAttribute.values = pAttributeValues;
+
+    SECOidData aOidData;
+    aOidData.oid.data = nullptr;
+    /*
+     * id-aa-signingCertificateV2 OBJECT IDENTIFIER ::=
+     * { iso(1) member-body(2) us(840) rsadsi(113549) pkcs(1) pkcs9(9)
+     *   smime(16) id-aa(2) 47 }
+     */
+    if (my_SEC_StringToOID(&aOidData.oid, "1.2.840.113549.1.9.16.2.47", 0) != SECSuccess)
+        return nullptr;
+
+    aOidData.offset = SEC_OID_UNKNOWN;
+    aOidData.desc = "id-aa-signingCertificateV2";
+    aOidData.mechanism = CKM_SHA_1;
+    aOidData.supportedExtension = UNSUPPORTED_CERT_EXTENSION;
+    aAttribute.typeTag = &aOidData;
+    aAttribute.type = aOidData.oid;
+    aAttribute.encoded = PR_TRUE;
+
+    if (my_NSS_CMSSignerInfo_AddAuthAttr(cms_signer, &aAttribute) != SECSuccess)
+        return nullptr;
+
+    SECItem cms_output;
+    cms_output.data = nullptr;
+    cms_output.len = 0;
+    PLArenaPool *arena = PORT_NewArena(10000);
+    NSSCMSEncoderContext *cms_ecx;
+
+    cms_ecx = NSS_CMSEncoder_Start(result, nullptr, nullptr, &cms_output, arena, passwordCallback, const_cast<char *>(password), nullptr, nullptr, nullptr, nullptr);
+    if (!cms_ecx)
+        return nullptr;
+
+    if (NSS_CMSEncoder_Finish(cms_ecx) != SECSuccess)
+        return nullptr;
+
+    GooString *signature = new GooString(reinterpret_cast<const char *>(cms_output.data), cms_output.len);
+
+    SECITEM_FreeItem(pEncodedCertificate, PR_TRUE);
+    NSS_CMSMessage_Destroy(result);
+
     return signature;
 }
 
