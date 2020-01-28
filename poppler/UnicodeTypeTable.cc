@@ -19,6 +19,7 @@
 // Copyright (C) 2012 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Khaled Hosny <khaledhosny@eglug.org>
 // Copyright (C) 2019 Adriaan de Groot <groot@kde.org>
+// Copyright (C) 2020 Alex Henrie <alexhenrie24@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
