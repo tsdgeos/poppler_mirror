@@ -13,6 +13,7 @@ private slots:
     void testWholeWordsOnly();
     void testIgnoreDiacritics();
     void testRussianSearch(); // Issue #743
+    void testDeseretSearch(); // Issue #853
 };
 
 void TestSearch::bug7063()
@@ -258,6 +259,20 @@ void TestSearch::testRussianSearch()
     QCOMPARE( page->search(str, l, t, r, b, direction, mode0W), true );
     QCOMPARE( page->search(str, l, t, r, b, direction, mode1W), true );
     QCOMPARE( page->search(str, l, t, r, b, direction, mode2W), true );
+}
+
+void TestSearch::testDeseretSearch()
+{
+    QScopedPointer< Poppler::Document > document(Poppler::Document::load(TESTDATADIR "/unittestcases/deseret.pdf"));
+    QVERIFY( document );
+
+    QScopedPointer< Poppler::Page > page(document->page(0));
+    QVERIFY( page );
+
+    double l, t, r, b; //left, top, right, bottom
+
+    const QString str = QString::fromUtf8("𐐐𐐯𐑊𐐬"); //clazy:exclude=qstring-allocations
+    QCOMPARE( page->search(str, l, t, r, b, Poppler::Page::FromTop, Poppler::Page::NoSearchFlags), true );
 }
 
 QTEST_GUILESS_MAIN(TestSearch)
