@@ -22,17 +22,10 @@
 
 PopplerInputStream::PopplerInputStream(GInputStream *inputStreamA, GCancellable *cancellableA,
                                        Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
-  : BaseStream(std::move(dictA), lengthA)
+  : BaseSeekInputStream(startA, limitedA, lengthA, std::move(dictA))
 {
   inputStream = (GInputStream *)g_object_ref(inputStreamA);
   cancellable = cancellableA ? (GCancellable *)g_object_ref(cancellableA) : nullptr;
-  start = startA;
-  limited = limitedA;
-  length = lengthA;
-  bufPtr = bufEnd = buf;
-  bufPos = start;
-  savePos = 0;
-  saved = false;
 }
 
 PopplerInputStream::~PopplerInputStream()
@@ -53,96 +46,19 @@ Stream *PopplerInputStream::makeSubStream(Goffset startA, bool limitedA,
   return new PopplerInputStream(inputStream, cancellable, startA, limitedA, lengthA, std::move(dictA));
 }
 
-void PopplerInputStream::reset()
+Goffset PopplerInputStream::currentPos() const
 {
   GSeekable *seekable = G_SEEKABLE(inputStream);
-
-  savePos = (unsigned int)g_seekable_tell(seekable);
-  g_seekable_seek(seekable, start, G_SEEK_SET, cancellable, nullptr);
-  saved = true;
-  bufPtr = bufEnd = buf;
-  bufPos = start;
+  return g_seekable_tell(seekable);
 }
 
-void PopplerInputStream::close()
+void PopplerInputStream::setCurrentPos(Goffset offset)
 {
-  if (!saved)
-    return;
-  g_seekable_seek(G_SEEKABLE(inputStream), savePos, G_SEEK_SET, cancellable, nullptr);
-  saved = false;
-}
-
-void PopplerInputStream::setPos(Goffset pos, int dir)
-{
-  unsigned int size;
   GSeekable *seekable = G_SEEKABLE(inputStream);
-
-  if (dir >= 0) {
-    g_seekable_seek(seekable, pos, G_SEEK_SET, cancellable, nullptr);
-    bufPos = pos;
-  } else {
-    g_seekable_seek(seekable, 0, G_SEEK_END, cancellable, nullptr);
-    size = (unsigned int)g_seekable_tell(seekable);
-
-    if (pos > size)
-      pos = size;
-
-    g_seekable_seek(seekable, -(goffset)pos, G_SEEK_END, cancellable, nullptr);
-    bufPos = (unsigned int)g_seekable_tell(seekable);
-  }
-  bufPtr = bufEnd = buf;
+  g_seekable_seek(seekable, offset, G_SEEK_SET, cancellable, nullptr);
 }
 
-void PopplerInputStream::moveStart(Goffset delta)
+Goffset PopplerInputStream::read(char *buffer, Goffset count)
 {
-  start += delta;
-  bufPtr = bufEnd = buf;
-  bufPos = start;
-}
-
-bool PopplerInputStream::fillBuf()
-{
-  int n;
-
-  bufPos += bufEnd - buf;
-  bufPtr = bufEnd = buf;
-  if (limited && bufPos >= start + length) {
-    return false;
-  }
-
-  if (limited && bufPos + inputStreamBufSize > start + length) {
-    n = start + length - bufPos;
-  } else {
-    n = inputStreamBufSize - (bufPos % inputStreamBufSize);
-  }
-
-  n = g_input_stream_read(inputStream, buf, n, cancellable, nullptr);
-  bufEnd = buf + n;
-  if (bufPtr >= bufEnd) {
-    return false;
-  }
-
-  return true;
-}
-
-int PopplerInputStream::getChars(int nChars, unsigned char *buffer)
-{
-  int n, m;
-
-  n = 0;
-  while (n < nChars) {
-    if (bufPtr >= bufEnd) {
-      if (!fillBuf()) {
-        break;
-      }
-    }
-    m = (int)(bufEnd - bufPtr);
-    if (m > nChars - n) {
-      m = nChars - n;
-    }
-    memcpy(buffer + n, bufPtr, m);
-    bufPtr += m;
-    n += m;
-  }
-  return n;
+  return g_input_stream_read(inputStream, buffer, count, cancellable, nullptr);
 }

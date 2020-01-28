@@ -26,9 +26,7 @@
 #include <Object.h>
 #include <Stream.h>
 
-#define inputStreamBufSize 1024
-
-class PopplerInputStream: public BaseStream {
+class PopplerInputStream: public BaseSeekInputStream {
 public:
 
   PopplerInputStream(GInputStream *inputStream, GCancellable *cancellableA,
@@ -37,38 +35,15 @@ public:
   BaseStream *copy() override;
   Stream *makeSubStream(Goffset start, bool limited,
                         Goffset lengthA, Object &&dictA) override;
-  StreamKind getKind() const override { return strWeird; }
-  void reset() override;
-  void close() override;
-  int getChar() override
-    { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr++ & 0xff); }
-  int lookChar() override
-    { return (bufPtr >= bufEnd && !fillBuf()) ? EOF : (*bufPtr & 0xff); }
-  Goffset getPos() override { return bufPos + (bufPtr - buf); }
-  void setPos(Goffset pos, int dir = 0) override;
-  Goffset getStart() override { return start; }
-  void moveStart(Goffset delta) override;
-
-  int getUnfilteredChar() override { return getChar(); }
-  void unfilteredReset() override { reset(); }
 
 private:
 
-  bool fillBuf();
-
-  bool hasGetChars() override { return true; }
-  int getChars(int nChars, unsigned char *buffer) override;
+  Goffset currentPos() const override;
+  void setCurrentPos(Goffset offset) override;
+  Goffset read(char *buffer, Goffset count) override;
 
   GInputStream *inputStream;
   GCancellable *cancellable;
-  Goffset start;
-  bool limited;
-  char buf[inputStreamBufSize];
-  char *bufPtr;
-  char *bufEnd;
-  Goffset bufPos;
-  int savePos;
-  bool saved;
 };
 
 #endif /* __GI_SCANNER__ */

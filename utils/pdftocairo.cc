@@ -18,7 +18,7 @@
 // Copyright (C) 2009 Michael K. Johnson <a1237@danlj.org>
 // Copyright (C) 2009 Shen Liang <shenzhuxi@gmail.com>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
-// Copyright (C) 2009, 2010, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2010, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2010, 2011-2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2010, 2014 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Jonathan Liu <net147@gmail.com>
@@ -1215,8 +1215,8 @@ int main(int argc, char *argv[]) {
     crop_w = crop_h = sz;
   pg_num_len = numberOfCharacters(doc->getNumPages());
   for (pg = firstPage; pg <= lastPage; ++pg) {
-    if (printOnlyEven && pg % 2 == 0) continue;
-    if (printOnlyOdd && pg % 2 == 1) continue;
+    if (printOnlyEven && pg % 2 == 1) continue;
+    if (printOnlyOdd && pg % 2 == 0) continue;
     if (useCropBox) {
       pg_w = doc->getPageCropWidth(pg);
       pg_h = doc->getPageCropHeight(pg);

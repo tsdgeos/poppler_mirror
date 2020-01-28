@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2006 Takashi Iwai <tiwai@suse.de>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
-// Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2020 Albert Astals Cid <aacid@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -206,13 +206,13 @@ private:
   FoFiType1C(const char *fileA, int lenA, bool freeFileDataA);
   void eexecCvtGlyph(Type1CEexecBuf *eb, const char *glyphName,
 		     int offset, int nBytes,
-		     Type1CIndex *subrIdx,
-		     Type1CPrivateDict *pDict);
+		     const Type1CIndex *subrIdx,
+		     const Type1CPrivateDict *pDict);
   void cvtGlyph(int offset, int nBytes, GooString *charBuf,
-		Type1CIndex *subrIdx, Type1CPrivateDict *pDict,
+		const Type1CIndex *subrIdx, const Type1CPrivateDict *pDict,
 		bool top);
   void cvtGlyphWidth(bool useOp, GooString *charBuf,
-		     Type1CPrivateDict *pDict);
+		     const Type1CPrivateDict *pDict);
   void cvtNum(double x, bool isFP, GooString *charBuf) const;
   void eexecWrite(Type1CEexecBuf *eb, const char *s) const;
   void eexecWriteCharstring(Type1CEexecBuf *eb, const unsigned char *s, int n) const;

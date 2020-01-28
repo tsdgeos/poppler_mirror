@@ -20,7 +20,7 @@
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011, 2017 Adrian Johnson <ajohnson@redneon.com>
-// Copyright (C) 2012, 2015, 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2015, 2018-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2015, 2016 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 //
@@ -215,7 +215,7 @@ public:
 
   // Does this device use upside-down coordinates?
   // (Upside-down means (0,0) is the top left corner of the page.)
-  bool upsideDown() override { return bitmapTopDown ^ bitmapUpsideDown; }
+  bool upsideDown() override { return bitmapTopDown; }
 
   // Does this device use drawChar() or drawString()?
   bool useDrawChar() override { return true; }
@@ -358,10 +358,6 @@ public:
   // caller.
   SplashBitmap *takeBitmap();
 
-  // Set this flag to true to generate an upside-down bitmap (useful
-  // for Windows BMP files).
-  void setBitmapUpsideDown(bool f) { bitmapUpsideDown = f; }
-
   // Get the Splash object.
   Splash *getSplash() { return splash; }
 
@@ -371,8 +367,6 @@ public:
   // If <skipRotatedTextA> is true, don't draw rotated (non-horizontal) text.
   void setSkipText(bool skipHorizTextA, bool skipRotatedTextA)
     { skipHorizText = skipHorizTextA; skipRotatedText = skipRotatedTextA; }
-
-  int getNestCount() { return nestCount; }
 
 #if 1 //~tmp: turn off anti-aliasing temporarily
   bool getVectorAntialias() override;
@@ -424,7 +418,6 @@ private:
   SplashColorMode colorMode;
   int bitmapRowPad;
   bool bitmapTopDown;
-  bool bitmapUpsideDown;
   bool fontAntialias;
   bool vectorAntialias;
   bool overprintPreview;
@@ -455,7 +448,6 @@ private:
 
   SplashTransparencyGroup *	// transparency group stack
     transpGroupStack;
-  int nestCount;
 };
 
 #endif

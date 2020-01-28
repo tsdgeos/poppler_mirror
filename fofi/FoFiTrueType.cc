@@ -932,7 +932,7 @@ void FoFiTrueType::cvtCharStrings(char **encoding,
 }
 
 void FoFiTrueType::cvtSfnts(FoFiOutputFunc outputFunc,
-			    void *outputStream, GooString *name,
+			    void *outputStream, const GooString *name,
 			    bool needVerticalMetrics,
                             int *maxUsedGlyph) const {
   unsigned char headData[54];

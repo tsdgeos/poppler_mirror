@@ -37,6 +37,7 @@
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
+// Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -406,6 +407,112 @@ BaseStream::BaseStream(Object &&dictA, Goffset lengthA) {
 }
 
 BaseStream::~BaseStream() {
+}
+
+//------------------------------------------------------------------------
+// BaseStream
+//------------------------------------------------------------------------
+
+BaseSeekInputStream::BaseSeekInputStream(Goffset startA, bool limitedA, Goffset lengthA, Object &&dictA)
+  : BaseStream(std::move(dictA), lengthA)
+  , start(startA)
+  , limited(limitedA)
+  , bufPtr(buf)
+  , bufEnd(buf)
+  , bufPos(start)
+  , savePos(0)
+  , saved(false)
+{
+}
+
+BaseSeekInputStream::~BaseSeekInputStream()
+{
+}
+
+void BaseSeekInputStream::reset()
+{
+  savePos = currentPos();
+  setCurrentPos(start);
+  saved = true;
+  bufPtr = bufEnd = buf;
+  bufPos = start;
+}
+
+void BaseSeekInputStream::close()
+{
+  if (!saved)
+    return;
+  setCurrentPos(savePos);
+  saved = false;
+}
+
+void BaseSeekInputStream::setPos(Goffset pos, int dir)
+{
+  if (dir >= 0) {
+    setCurrentPos(pos);
+    bufPos = pos;
+  } else {
+    if (pos > length)
+      pos = length;
+
+    bufPos = length - pos;
+    setCurrentPos(bufPos);
+  }
+  bufPtr = bufEnd = buf;
+}
+
+void BaseSeekInputStream::moveStart(Goffset delta)
+{
+  start += delta;
+  bufPtr = bufEnd = buf;
+  bufPos = start;
+}
+
+bool BaseSeekInputStream::fillBuf()
+{
+  Goffset n;
+
+  bufPos += bufEnd - buf;
+  bufPtr = bufEnd = buf;
+  if (limited && bufPos >= start + length) {
+    return false;
+  }
+
+  if (limited && bufPos + seekInputStreamBufSize > start + length) {
+    n = start + length - bufPos;
+  } else {
+    n = seekInputStreamBufSize - (bufPos % seekInputStreamBufSize);
+  }
+
+  n = read(buf, n);
+  bufEnd = buf + n;
+  if (bufPtr >= bufEnd) {
+    return false;
+  }
+
+  return true;
+}
+
+int BaseSeekInputStream::getChars(int nChars, unsigned char *buffer)
+{
+  int n, m;
+
+  n = 0;
+  while (n < nChars) {
+    if (bufPtr >= bufEnd) {
+      if (!fillBuf()) {
+        break;
+      }
+    }
+    m = (int)(bufEnd - bufPtr);
+    if (m > nChars - n) {
+      m = nChars - n;
+    }
+    memcpy(buffer + n, bufPtr, m);
+    bufPtr += m;
+    n += m;
+  }
+  return n;
 }
 
 //------------------------------------------------------------------------
