@@ -1,7 +1,7 @@
 /* poppler-page.cc: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2008 Carlos Garcia Campos <carlosgc@gnome.org>
@@ -373,10 +373,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
 
 inline TextPage *PageData::prepareTextSearch(const QString &text, Page::Rotation rotate, QVector<Unicode> *u)
 {
-  const QChar * str = text.unicode();
-  const int len = text.length();
-  u->resize(len);
-  for (int i = 0; i < len; ++i) (*u)[i] = str[i].unicode();
+  *u = text.toUcs4();
 
   const int rotation = (int)rotate * 90;
 
