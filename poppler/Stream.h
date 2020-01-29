@@ -142,12 +142,7 @@ public:
 
   inline void fillGooString(GooString *s)
   {
-    unsigned char readBuf[4096];
-    int readChars;
-    reset();
-    while ((readChars = doGetChars(4096, readBuf)) != 0) {
-      s->append((const char *)readBuf, readChars);
-    }
+    fillString(s->toNonConstStr());
   }
   
   inline unsigned char *toUnsignedChars(int *length, int initialSize = 4096, int sizeIncrement = 4096)
