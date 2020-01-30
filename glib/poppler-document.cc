@@ -100,7 +100,7 @@ struct _PopplerDocumentClass
 G_DEFINE_TYPE (PopplerDocument, poppler_document, G_TYPE_OBJECT)
 
 static PopplerDocument *
-_poppler_document_new_from_pdfdoc (GlobalParamsIniter *initer,
+_poppler_document_new_from_pdfdoc (std::unique_ptr<GlobalParamsIniter> &&initer,
                                    PDFDoc             *newDoc,
                                    GError             **error)
 {
@@ -146,7 +146,7 @@ _poppler_document_new_from_pdfdoc (GlobalParamsIniter *initer,
   }
 
   document = (PopplerDocument *) g_object_new (POPPLER_TYPE_DOCUMENT, nullptr);
-  document->initer = initer;
+  document->initer = std::move(initer);
   document->doc = newDoc;
 
   document->output_dev = new CairoOutputDev ();
@@ -193,7 +193,7 @@ poppler_document_new_from_file (const char  *uri,
   GooString *password_g;
   char *filename;
 
-  auto initer = new GlobalParamsIniter(_poppler_error_cb);
+  auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
 
   filename = g_filename_from_uri (uri, nullptr, error);
   if (!filename)
@@ -209,7 +209,7 @@ poppler_document_new_from_file (const char  *uri,
 
   filenameW = new WCHAR[length];
   if (!filenameW)
-      return NULL;
+      return nullptr;
 
   length = MultiByteToWideChar(CP_UTF8, 0, filename, -1, filenameW, length);
 
@@ -224,7 +224,7 @@ poppler_document_new_from_file (const char  *uri,
 
   delete password_g;
 
-  return _poppler_document_new_from_pdfdoc (initer, newDoc, error);
+  return _poppler_document_new_from_pdfdoc (std::move(initer), newDoc, error);
 }
 
 /**
@@ -253,7 +253,7 @@ poppler_document_new_from_data (char        *data,
   MemStream *str;
   GooString *password_g;
 
-  auto initer = new GlobalParamsIniter(_poppler_error_cb);
+  auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
   
   // create stream
   str = new MemStream(data, 0, length, Object(objNull));
@@ -262,7 +262,7 @@ poppler_document_new_from_data (char        *data,
   newDoc = new PDFDoc(str, password_g, password_g);
   delete password_g;
 
-  return _poppler_document_new_from_pdfdoc (initer, newDoc, error);
+  return _poppler_document_new_from_pdfdoc (std::move(initer), newDoc, error);
 }
 
 class BytesStream : public MemStream
@@ -305,7 +305,7 @@ poppler_document_new_from_bytes (GBytes      *bytes,
   g_return_val_if_fail(bytes != nullptr, nullptr);
   g_return_val_if_fail(error == nullptr || *error == nullptr, nullptr);
 
-  auto initer = new GlobalParamsIniter(_poppler_error_cb);
+  auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
 
   // create stream
   str = new BytesStream(bytes, Object(objNull));
@@ -314,7 +314,7 @@ poppler_document_new_from_bytes (GBytes      *bytes,
   newDoc = new PDFDoc(str, password_g, password_g);
   delete password_g;
 
-  return _poppler_document_new_from_pdfdoc (initer, newDoc, error);
+  return _poppler_document_new_from_pdfdoc (std::move(initer), newDoc, error);
 }
 
 static inline gboolean
@@ -356,7 +356,7 @@ poppler_document_new_from_stream (GInputStream *stream,
   g_return_val_if_fail(G_IS_INPUT_STREAM(stream), NULL);
   g_return_val_if_fail(length == (goffset)-1 || length > 0, NULL);
 
-  auto initer = new GlobalParamsIniter(_poppler_error_cb);
+  auto initer = std::make_unique<GlobalParamsIniter>(_poppler_error_cb);
 
   if (!G_IS_SEEKABLE(stream) || !g_seekable_can_seek(G_SEEKABLE(stream))) {
     g_set_error_literal(error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
@@ -382,7 +382,7 @@ poppler_document_new_from_stream (GInputStream *stream,
   newDoc = new PDFDoc(str, password_g, password_g);
   delete password_g;
 
-  return _poppler_document_new_from_pdfdoc (initer, newDoc, error);
+  return _poppler_document_new_from_pdfdoc (std::move(initer), newDoc, error);
 }
 
 /**
@@ -542,7 +542,7 @@ poppler_document_finalize (GObject *object)
   poppler_document_layers_free (document);
   delete document->output_dev;
   delete document->doc;
-  delete document->initer;
+  delete document->initer.release();
 
   G_OBJECT_CLASS (poppler_document_parent_class)->finalize (object);
 }
