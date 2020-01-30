@@ -152,6 +152,7 @@ namespace Poppler {
 					new GooString(ownerPassword.data()),
 					new GooString(userPassword.data()));
 	    }
+	    else
 	    {
 		doc2 = new DocumentData(m_doc->m_filePath,
 					new GooString(ownerPassword.data()),
