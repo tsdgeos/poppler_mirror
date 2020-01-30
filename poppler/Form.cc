@@ -714,7 +714,7 @@ bool FormWidgetSignature::updateSignature(FILE *f, Goffset sigStart, Goffset sig
 bool FormWidgetSignature::createSignature(Object &vObj, Ref vRef, const GooString &name, const GooString &reason, const GooString *signature)
 {
     vObj.dictAdd("Type", Object(objName, "Sig"));
-    vObj.dictAdd("Filter", Object(objName, "Adobe.PPKLite"));
+    vObj.dictAdd("Filter", Object(objName, "Adobe.PPKMS"));
     switch (signatureType()) {
     case unknown_signature_type:
         // we don't support signing with an unknown subFilter

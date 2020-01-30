@@ -4223,7 +4223,7 @@ Annot *WidgetAnnotationPrivate::createNativeAnnot(::Page *destPage, DocumentData
     PDFRectangle rect = boundaryToPdfRectangle(boundary, flags);
     pdfAnnot = new AnnotWidget(destPage->getDoc(), &rect, da, std::unique_ptr<AnnotColor> { convertQColor(QColor(Qt::red)) }, std::unique_ptr<AnnotColor> { convertQColor(QColor(240, 240, 240)) });
 
-    std::unique_ptr<AnnotBorder> border(new AnnotBorderBS());
+    std::unique_ptr<AnnotBorder> border(new AnnotBorderArray());
     border->setWidth(1.5);
     pdfAnnot->setBorder(std::move(border));
 
