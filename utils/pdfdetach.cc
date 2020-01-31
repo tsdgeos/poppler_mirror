@@ -45,6 +45,7 @@
 
 static bool doList = false;
 static int saveNum = 0;
+static char saveFile[128] = "";
 static bool saveAll = false;
 static char savePath[1024] = "";
 static char textEncName[128] = "";
@@ -57,7 +58,9 @@ static ArgDesc argDesc[] = {
   {"-list",   argFlag,     &doList,        0,
    "list all embedded files"},
   {"-save",   argInt,      &saveNum,       0,
-   "save the specified embedded file"},
+   "save the specified embedded file (file number)"},
+  {"-savefile",argString,  &saveFile,      sizeof(saveFile),
+   "save the specified embedded file (file name)"},
   {"-saveall", argFlag,    &saveAll,       0,
    "save all embedded files"},
   {"-o",      argString,   savePath,       sizeof(savePath),
@@ -90,6 +93,7 @@ int main(int argc, char *argv[]) {
   char path[1024];
   char *p;
   bool ok;
+  bool hasSaveFile;
   int exitCode;
   std::vector<FileSpec*> embeddedFiles;
   int nFiles, nPages, n, i, j;
@@ -106,8 +110,10 @@ int main(int argc, char *argv[]) {
 
   // parse args
   ok = parseArgs(argDesc, &argc, argv);
+  hasSaveFile = strlen(saveFile) > 0;
   if ((doList ? 1 : 0) +
       ((saveNum != 0) ? 1 : 0) +
+      ((hasSaveFile != 0) ? 1 : 0) +
       (saveAll ? 1 : 0) != 1) {
     ok = false;
   }
@@ -271,8 +277,18 @@ int main(int argc, char *argv[]) {
 
   // save an embedded file
   } else {
+    if (hasSaveFile) {
+      for (i = 0; i < nFiles; ++i) {
+        fileSpec = embeddedFiles[i];
+        s1 = fileSpec->getFileName();
+        if (strcmp(s1->c_str(), saveFile) == 0) {
+          saveNum = i + 1;
+          break;
+        }
+      }
+    }
     if (saveNum < 1 || saveNum > nFiles) {
-      error(errCommandLine, -1, "Invalid file number");
+      error(errCommandLine, -1, hasSaveFile ? "Invalid file name" : "Invalid file number");
       goto err2;
     }
 
