@@ -202,6 +202,7 @@ const SEC_ASN1Template ESSCertIDv2Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr
  */
 const SEC_ASN1Template SigningCertificateV2Template[] = { { SEC_ASN1_SEQUENCE, 0, nullptr, sizeof(SigningCertificateV2) }, { SEC_ASN1_SEQUENCE_OF, offsetof(SigningCertificateV2, certs), ESSCertIDv2Template, 0 }, { 0, 0, nullptr, 0 } };
 
+/*
 struct PKIStatusInfo
 {
     SECItem status;
@@ -249,6 +250,7 @@ const SEC_ASN1Template TimeStampReq_Template[] = { { SEC_ASN1_SEQUENCE, 0, nullp
                                                    { SEC_ASN1_BOOLEAN | SEC_ASN1_OPTIONAL, offsetof(TimeStampReq, certReq), nullptr, 0 },
                                                    { SEC_ASN1_OPTIONAL | SEC_ASN1_CONTEXT_SPECIFIC | 0, offsetof(TimeStampReq, extensions), Extensions_Template, 0 },
                                                    { 0, 0, nullptr, 0 } };
+*/
 
 // a dummy, actually
 static char *passwordCallback(PK11SlotInfo * /*slot*/, PRBool /*retry*/, void *arg)
