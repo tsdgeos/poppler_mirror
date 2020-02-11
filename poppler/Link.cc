@@ -425,34 +425,23 @@ LinkDest::LinkDest(const LinkDest *dest) {
 //------------------------------------------------------------------------
 
 LinkGoTo::LinkGoTo(const Object *destObj) {
-  dest = nullptr;
-  namedDest = nullptr;
-
   // named destination
   if (destObj->isName()) {
-    namedDest = new GooString(destObj->getName());
+    namedDest = std::make_unique<GooString>(destObj->getName());
   } else if (destObj->isString()) {
-    namedDest = destObj->getString()->copy();
+    namedDest = std::unique_ptr<GooString>(destObj->getString()->copy());
 
   // destination dictionary
   } else if (destObj->isArray()) {
-    dest = new LinkDest(destObj->getArray());
+    dest = std::make_unique<LinkDest>(destObj->getArray());
     if (!dest->isOk()) {
-      delete dest;
-      dest = nullptr;
+      dest.reset();
     }
 
   // error
   } else {
     error(errSyntaxWarning, -1, "Illegal annotation destination");
   }
-}
-
-LinkGoTo::~LinkGoTo() {
-  if (dest)
-    delete dest;
-  if (namedDest)
-    delete namedDest;
 }
 
 //------------------------------------------------------------------------
@@ -460,28 +449,23 @@ LinkGoTo::~LinkGoTo() {
 //------------------------------------------------------------------------
 
 LinkGoToR::LinkGoToR(Object *fileSpecObj, Object *destObj) {
-  fileName = nullptr;
-  dest = nullptr;
-  namedDest = nullptr;
-
   // get file name
   Object obj1 = getFileSpecNameForPlatform (fileSpecObj);
   if (obj1.isString()) {
-    fileName = obj1.getString()->copy();
+    fileName = std::unique_ptr<GooString>(obj1.getString()->copy());
   }
 
   // named destination
   if (destObj->isName()) {
-    namedDest = new GooString(destObj->getName());
+    namedDest = std::make_unique<GooString>(destObj->getName());
   } else if (destObj->isString()) {
-    namedDest = destObj->getString()->copy();
+    namedDest = std::unique_ptr<GooString>(destObj->getString()->copy());
 
   // destination dictionary
   } else if (destObj->isArray()) {
-    dest = new LinkDest(destObj->getArray());
+    dest = std::make_unique<LinkDest>(destObj->getArray());
     if (!dest->isOk()) {
-      delete dest;
-      dest = nullptr;
+      dest.reset();
     }
 
   // error
@@ -490,31 +474,18 @@ LinkGoToR::LinkGoToR(Object *fileSpecObj, Object *destObj) {
   }
 }
 
-LinkGoToR::~LinkGoToR() {
-  if (fileName)
-    delete fileName;
-  if (dest)
-    delete dest;
-  if (namedDest)
-    delete namedDest;
-}
-
-
 //------------------------------------------------------------------------
 // LinkLaunch
 //------------------------------------------------------------------------
 
 LinkLaunch::LinkLaunch(const Object *actionObj) {
 
-  fileName = nullptr;
-  params = nullptr;
-
   if (actionObj->isDict()) {
     Object obj1 = actionObj->dictLookup("F");
     if (!obj1.isNull()) {
       Object obj3 = getFileSpecNameForPlatform (&obj1);
       if (obj3.isString()) {
-	fileName = obj3.getString()->copy();
+	fileName = std::unique_ptr<GooString>(obj3.getString()->copy());
       }
     } else {
 #ifdef _WIN32
@@ -528,24 +499,17 @@ LinkLaunch::LinkLaunch(const Object *actionObj) {
 	Object obj2 = obj1.dictLookup("F");
 	Object obj3 = getFileSpecNameForPlatform (&obj2);
 	if (obj3.isString()) {
-	  fileName = obj3.getString()->copy();
+	  fileName = std::unique_ptr<GooString>(obj3.getString()->copy());
 	}
 	obj2 = obj1.dictLookup("P");
 	if (obj2.isString()) {
-	  params = obj2.getString()->copy();
+	  params = std::unique_ptr<GooString>(obj2.getString()->copy());
 	}
       } else {
 	error(errSyntaxWarning, -1, "Bad launch-type link action");
       }
     }
   }
-}
-
-LinkLaunch::~LinkLaunch() {
-  if (fileName)
-    delete fileName;
-  if (params)
-    delete params;
 }
 
 //------------------------------------------------------------------------
