@@ -140,6 +140,19 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
 }
 
 /**
+ * poppler_attachment_get_checksum:
+ * @attachment: a #PopplerAttachment
+ *
+ * Returns: The attachment's checksum.
+ *
+ * Since: 20.09.0
+ */
+const GString *poppler_attachment_get_checksum(PopplerAttachment *attachment)
+{
+    return attachment->checksum;
+}
+
+/**
  * poppler_attachment_get_ctime:
  * @attachment: a #PopplerAttachment
  *
@@ -151,6 +164,19 @@ PopplerAttachment *_poppler_attachment_new(FileSpec *emb_file)
 GDateTime *poppler_attachment_get_ctime(PopplerAttachment *attachment)
 {
     return GET_PRIVATE(attachment)->ctime;
+}
+
+/**
+ * poppler_attachment_get_description:
+ * @attachment: a #PopplerAttachment
+ *
+ * Returns: The attachment's descriptive text.
+ *
+ * Since: 20.09.0
+ */
+const gchar *poppler_attachment_get_description(PopplerAttachment *attachment)
+{
+    return attachment->description;
 }
 
 /**
@@ -166,6 +192,32 @@ GDateTime *poppler_attachment_get_ctime(PopplerAttachment *attachment)
 GDateTime *poppler_attachment_get_mtime(PopplerAttachment *attachment)
 {
     return GET_PRIVATE(attachment)->mtime;
+}
+
+/**
+ * poppler_attachment_get_name:
+ * @attachment: a #PopplerAttachment
+ *
+ * Returns: The attachment's name.
+ *
+ * Since: 20.09.0
+ */
+const gchar *poppler_attachment_get_name(PopplerAttachment *attachment)
+{
+    return attachment->name;
+}
+
+/**
+ * poppler_attachment_get_size:
+ * @attachment: a #PopplerAttachment
+ *
+ * Returns: The attachment's size.
+ *
+ * Since: 20.09.0
+ */
+gsize poppler_attachment_get_size(PopplerAttachment *attachment)
+{
+    return attachment->size;
 }
 
 static gboolean save_helper(const gchar *buf, gsize count, gpointer data, GError **error)
