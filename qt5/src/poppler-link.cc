@@ -234,7 +234,7 @@ class LinkMoviePrivate : public LinkPrivate
 		if ( data.namedDest && !ld && !data.externalDest )
 		{
 			deleteDest = true;
-			ld = data.doc->doc->findDest( data.namedDest );
+			ld = data.doc->doc->findDest( data.namedDest ).release();
 		}
 		// in case this destination was named one, and it was not resolved
 		if ( data.namedDest && !ld )

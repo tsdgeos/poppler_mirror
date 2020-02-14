@@ -43,6 +43,8 @@
 #include <vector>
 #include <memory>
 
+#include <poppler/Link.h>
+
 class PDFDoc;
 class XRef;
 class Object;
@@ -150,7 +152,7 @@ public:
 
   // Find a named destination.  Returns the link destination, or
   // NULL if <name> is not a destination.
-  LinkDest *findDest(const GooString *name);
+  std::unique_ptr<LinkDest> findDest(const GooString *name);
 
   Object *getDests();
 
@@ -161,7 +163,7 @@ public:
   const char *getDestsName(int i);
 
   // Get the i'th named destination link destination in name-dict
-  LinkDest *getDestsDest(int i);
+  std::unique_ptr<LinkDest> getDestsDest(int i);
 
   // Get the number of named destinations in name-tree
   int numDestNameTree() { return getDestNameTree()->numEntries(); }
@@ -170,7 +172,7 @@ public:
   GooString *getDestNameTreeName(int i) { return getDestNameTree()->getName(i); }
 
   // Get the i'th named destination link destination in name-tree
-  LinkDest *getDestNameTreeDest(int i);
+  std::unique_ptr<LinkDest> getDestNameTreeDest(int i);
 
   // Get the number of embedded files
   int numEmbeddedFiles() { return getEmbeddedFileNameTree()->numEntries(); }
@@ -290,7 +292,7 @@ private:
   NameTree *getDestNameTree();
   NameTree *getEmbeddedFileNameTree();
   NameTree *getJSNameTree();
-  LinkDest *createLinkDest(Object *obj);
+  std::unique_ptr<LinkDest> createLinkDest(Object *obj);
 
   mutable std::recursive_mutex mutex;
 };

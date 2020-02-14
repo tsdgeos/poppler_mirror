@@ -226,7 +226,7 @@ public:
 
   // Find a named destination.  Returns the link destination, or
   // nullptr if <name> is not a destination.
-  LinkDest *findDest(const GooString *name)
+  std::unique_ptr<LinkDest> findDest(const GooString *name)
     { return catalog->findDest(name); }
 
   // Process the links for a page.

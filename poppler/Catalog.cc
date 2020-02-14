@@ -337,7 +337,7 @@ int Catalog::findPage(const Ref pageRef) {
   return 0;
 }
 
-LinkDest *Catalog::findDest(const GooString *name) {
+std::unique_ptr<LinkDest> Catalog::findDest(const GooString *name) {
   // try named destination dictionary then name tree
   if (getDests()->isDict()) {
     Object obj1 = getDests()->dictLookup(name->c_str());
@@ -349,23 +349,22 @@ LinkDest *Catalog::findDest(const GooString *name) {
   return createLinkDest(&obj2);
 }
 
-LinkDest *Catalog::createLinkDest(Object *obj)
+std::unique_ptr<LinkDest> Catalog::createLinkDest(Object *obj)
 {
-  LinkDest *dest = nullptr;
+  std::unique_ptr<LinkDest> dest;
   if (obj->isArray()) {
-    dest = new LinkDest(obj->getArray());
+    dest = std::make_unique<LinkDest>(obj->getArray());
   } else if (obj->isDict()) {
     Object obj2 = obj->dictLookup("D");
     if (obj2.isArray())
-      dest = new LinkDest(obj2.getArray());
+      dest = std::make_unique<LinkDest>(obj2.getArray());
     else
       error(errSyntaxWarning, -1, "Bad named destination value");
   } else {
     error(errSyntaxWarning, -1, "Bad named destination value");
   }
   if (dest && !dest->isOk()) {
-    delete dest;
-    dest = nullptr;
+    dest.reset();
   }
 
   return dest;
@@ -393,7 +392,7 @@ const char *Catalog::getDestsName(int i)
   return obj->dictGetKey(i);
 }
 
-LinkDest *Catalog::getDestsDest(int i)
+std::unique_ptr<LinkDest> Catalog::getDestsDest(int i)
 {
   Object *obj = getDests();
   if (!obj->isDict()) {
@@ -403,7 +402,7 @@ LinkDest *Catalog::getDestsDest(int i)
   return createLinkDest(&obj1);
 }
 
-LinkDest *Catalog::getDestNameTreeDest(int i)
+std::unique_ptr<LinkDest> Catalog::getDestNameTreeDest(int i)
 {
   Object obj;
 

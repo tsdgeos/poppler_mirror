@@ -887,12 +887,11 @@ poppler_document_find_dest (PopplerDocument *document,
   GooString g_link_name ((const char*)data, (int)len);
   g_free (data);
 
-  LinkDest *link_dest = document->doc->findDest (&g_link_name);
+  std::unique_ptr<LinkDest> link_dest = document->doc->findDest (&g_link_name);
   if (link_dest == nullptr)
     return nullptr;
 
-  PopplerDest *dest = _poppler_dest_new_goto (document, link_dest);
-  delete link_dest;
+  PopplerDest *dest = _poppler_dest_new_goto (document, link_dest.get());
 
   return dest;
 }
@@ -931,7 +930,6 @@ poppler_document_create_dests_tree (PopplerDocument *document)
 {
 	GTree *tree;
 	Catalog *catalog;
-	LinkDest *link_dest;
 	PopplerDest *dest;
 	int i;
 	gchar *key;
@@ -955,10 +953,9 @@ poppler_document_create_dests_tree (PopplerDocument *document)
 		key = poppler_named_dest_from_bytestring
 			(reinterpret_cast<const guint8*> (name),
 			 strlen (name));
-		link_dest = catalog->getDestsDest (i);
+		std::unique_ptr<LinkDest> link_dest = catalog->getDestsDest (i);
 		if (link_dest) {
-			dest = _poppler_dest_new_goto (document, link_dest);
-			delete link_dest;
+			dest = _poppler_dest_new_goto (document, link_dest.get());
 			g_tree_insert (tree, key, dest);
 		}
 	}
@@ -970,10 +967,9 @@ poppler_document_create_dests_tree (PopplerDocument *document)
 		key = poppler_named_dest_from_bytestring
 			(reinterpret_cast<const guint8*> (name->c_str ()),
 			 name->getLength ());
-		link_dest = catalog->getDestNameTreeDest (i);
+		std::unique_ptr<LinkDest> link_dest = catalog->getDestNameTreeDest (i);
 		if (link_dest) {
-			dest = _poppler_dest_new_goto (document, link_dest);
-			delete link_dest;
+			dest = _poppler_dest_new_goto (document, link_dest.get());
 			g_tree_insert (tree, key, dest);
 		}
 	}
