@@ -26,7 +26,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Evangelos Rigas <erigas@rnd2.org>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Thomas Fischer <fischer@unix-ag.uni-kl.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -303,7 +303,7 @@ struct GooStringCompare {
   }
 };
 
-static void printLinkDest(LinkDest *dest) {
+static void printLinkDest(const std::unique_ptr<LinkDest>& dest) {
   GooString s;
 
   switch (dest->getKind()) {
@@ -375,29 +375,29 @@ static void printLinkDest(LinkDest *dest) {
 }
 
 static void printDestinations(PDFDoc *doc, const UnicodeMap *uMap) {
-  std::map<Ref,std::map<GooString*,LinkDest*,GooStringCompare> > map;
+  std::map<Ref,std::map<GooString*,std::unique_ptr<LinkDest>,GooStringCompare> > map;
 
   int numDests = doc->getCatalog()->numDestNameTree();
   for (int i = 0; i < numDests; i++) {
     GooString *name = new GooString(doc->getCatalog()->getDestNameTreeName(i));
-    LinkDest *dest = doc->getCatalog()->getDestNameTreeDest(i);
+    std::unique_ptr<LinkDest> dest = doc->getCatalog()->getDestNameTreeDest(i);
     if (dest && dest->isPageRef()) {
-      map[dest->getPageRef()].insert(std::make_pair(name, dest));
+      Ref pageRef = dest->getPageRef();
+      map[pageRef].insert(std::make_pair(name, std::move(dest)));
     } else {
       delete name;
-      delete dest;
     }
   }
 
   numDests = doc->getCatalog()->numDests();
   for (int i = 0; i < numDests; i++) {
     GooString *name = new GooString(doc->getCatalog()->getDestsName(i));
-    LinkDest *dest = doc->getCatalog()->getDestsDest(i);
+    std::unique_ptr<LinkDest> dest = doc->getCatalog()->getDestsDest(i);
     if (dest && dest->isPageRef()) {
-      map[dest->getPageRef()].insert(std::make_pair(name, dest));
+      Ref pageRef = dest->getPageRef();
+      map[pageRef].insert(std::make_pair(name, std::move(dest)));
     } else {
       delete name;
-      delete dest;
     }
   }
 
@@ -421,7 +421,6 @@ static void printDestinations(PDFDoc *doc, const UnicodeMap *uMap) {
 	  gfree(u);
 	  printf("\"\n");
 	  delete it.first;
-	  delete it.second;
 	}
       }
     }

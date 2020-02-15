@@ -4,7 +4,7 @@
  * Copyright (C) 2017, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, 2020, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
- * Copyright (C) 2019, Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019, 2020, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1010,14 +1010,12 @@ std::map<std::string, destination> document::create_destination_map() const
     const int nDests = catalog->numDests();
     for (int i = 0; i < nDests; ++i ) {
         std::string key(catalog->getDestsName (i));
-        LinkDest *link_dest = catalog->getDestsDest (i);
+        std::unique_ptr<LinkDest> link_dest = catalog->getDestsDest (i);
 
         if (link_dest) {
-            destination dest(new destination_private(link_dest, d->doc));
+            destination dest(new destination_private(link_dest.get(), d->doc));
 
             m.emplace(std::move(key), std::move(dest));
-
-            delete link_dest;
         }
     }
 
@@ -1026,14 +1024,12 @@ std::map<std::string, destination> document::create_destination_map() const
     for (int i = 0; i < nDestsNameTree; ++i ) {
         std::string key(catalog->getDestNameTreeName (i)->c_str (),
                         catalog->getDestNameTreeName (i)->getLength ());
-        LinkDest *link_dest = catalog->getDestNameTreeDest (i);
+        std::unique_ptr<LinkDest> link_dest = catalog->getDestNameTreeDest (i);
 
         if (link_dest) {
-            destination dest(new destination_private(link_dest, d->doc));
+            destination dest(new destination_private(link_dest.get(), d->doc));
 
             m.emplace(std::move(key), std::move(dest));
-
-            delete link_dest;
         }
     }
 

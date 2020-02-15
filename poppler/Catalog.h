@@ -28,6 +28,7 @@
 // Copyright (C) 2016 Masamichi Hosoda <trueroad@trueroad.jp>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -39,6 +40,7 @@
 
 #include "poppler-config.h"
 #include "Object.h"
+#include "Link.h"
 
 #include <vector>
 #include <memory>
@@ -49,8 +51,6 @@ class Object;
 class Page;
 class PageAttrs;
 struct Ref;
-class LinkDest;
-class LinkAction;
 class PageLabelInfo;
 class Form;
 class OCGs;
@@ -150,7 +150,7 @@ public:
 
   // Find a named destination.  Returns the link destination, or
   // NULL if <name> is not a destination.
-  LinkDest *findDest(const GooString *name);
+  std::unique_ptr<LinkDest> findDest(const GooString *name);
 
   Object *getDests();
 
@@ -161,7 +161,7 @@ public:
   const char *getDestsName(int i);
 
   // Get the i'th named destination link destination in name-dict
-  LinkDest *getDestsDest(int i);
+  std::unique_ptr<LinkDest> getDestsDest(int i);
 
   // Get the number of named destinations in name-tree
   int numDestNameTree() { return getDestNameTree()->numEntries(); }
@@ -170,7 +170,7 @@ public:
   GooString *getDestNameTreeName(int i) { return getDestNameTree()->getName(i); }
 
   // Get the i'th named destination link destination in name-tree
-  LinkDest *getDestNameTreeDest(int i);
+  std::unique_ptr<LinkDest> getDestNameTreeDest(int i);
 
   // Get the number of embedded files
   int numEmbeddedFiles() { return getEmbeddedFileNameTree()->numEntries(); }
@@ -290,7 +290,7 @@ private:
   NameTree *getDestNameTree();
   NameTree *getEmbeddedFileNameTree();
   NameTree *getJSNameTree();
-  LinkDest *createLinkDest(Object *obj);
+  std::unique_ptr<LinkDest> createLinkDest(Object *obj);
 
   mutable std::recursive_mutex mutex;
 };

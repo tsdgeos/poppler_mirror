@@ -43,7 +43,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Thibaut Brard <thibaut.brard@gmail.com>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -1549,9 +1549,9 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 	  GooString* file = new GooString(gbasename(Docname->c_str()));
 	  int destPage=1;
 	  LinkGoTo *ha=(LinkGoTo *)link->getAction();
-	  LinkDest *dest=nullptr;
+	  std::unique_ptr<LinkDest> dest;
 	  if (ha->getDest()!=nullptr)
-	      dest=ha->getDest()->copy();
+	      dest=std::unique_ptr<LinkDest>(ha->getDest()->copy());
 	  else if (ha->getNamedDest()!=nullptr)
 	      dest=catalog->findDest(ha->getNamedDest());
 	      
@@ -1563,8 +1563,6 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 	      else {
 		  destPage=dest->getPageNum();
 	      }
-
-	      delete dest;
 
 	      /* 		complex 	simple
 	       	frames		file-4.html	files.html#4
@@ -1834,7 +1832,7 @@ int HtmlOutputDev::getOutlinePageNum(OutlineItem *item)
 {
     const LinkAction *action   = item->getAction();
     const LinkGoTo   *link     = nullptr;
-    LinkDest   *linkdest = nullptr;
+    std::unique_ptr<LinkDest> linkdest;
     int         pagenum  = -1;
 
     if (!action || action->getKind() != actionGoTo)
@@ -1846,7 +1844,7 @@ int HtmlOutputDev::getOutlinePageNum(OutlineItem *item)
         return pagenum;
 
     if (link->getDest())
-        linkdest = link->getDest()->copy();
+        linkdest = std::unique_ptr<LinkDest>(link->getDest()->copy());
     else if (link->getNamedDest())
         linkdest = catalog->findDest(link->getNamedDest());
 
@@ -1860,6 +1858,5 @@ int HtmlOutputDev::getOutlinePageNum(OutlineItem *item)
         pagenum = linkdest->getPageNum();
     }
 
-    delete linkdest;
     return pagenum;
 }

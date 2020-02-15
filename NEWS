@@ -1,3 +1,24 @@
+Release 0.85.0:
+        core:
+         * Fix case unsensitive search for Deseret and Osage. Issue #853
+         * Fix crash in unicodeToAscii7
+         * CairoOutputDev: make initialisation thread-safe
+         * Fix crash on broken files. Issues #869, #870
+         * Internal code improvements
+
+        utils:
+         * pdftoppm/pdftocairo: Fix -e/-o printing the wrong pages. Issue #873
+         * pdftohtml: Fix issue with the font size sometimes being huge
+
+        qt5:
+         * Fix FormField::name encoding
+         * Accept UTF-16 uiNames for form fields
+         * Fix search for "complex" characters
+         * Allow to load document from QIODevice
+
+        glib:
+         * make the frontend initialization thread safe.
+
 Release 0.84.0:
         core:
          * Fix crash when converting from Unicode to ASCII-7

@@ -1383,6 +1383,7 @@ poppler_page_get_annot_mapping (PopplerPage *page)
   double width, height;
   gint i;
   Annots *annots;
+  const PDFRectangle *crop_box;
 
   g_return_val_if_fail (POPPLER_IS_PAGE (page), NULL);
 
@@ -1391,6 +1392,7 @@ poppler_page_get_annot_mapping (PopplerPage *page)
     return nullptr;
 
   poppler_page_get_size (page, &width, &height);
+  crop_box = page->page->getCropBox ();
 
   for (i = 0; i < annots->getNumAnnots (); i++) {
     PopplerAnnotMapping *mapping;
@@ -1442,10 +1444,10 @@ poppler_page_get_annot_mapping (PopplerPage *page)
       }
 
     annot_rect = annot->getRect ();
-    rect.x1 = annot_rect->x1 - page->page->getCropBox()->x1;
-    rect.y1 = annot_rect->y1 - page->page->getCropBox()->y1;
-    rect.x2 = annot_rect->x2 - page->page->getCropBox()->x1;
-    rect.y2 = annot_rect->y2 - page->page->getCropBox()->y1;
+    rect.x1 = annot_rect->x1 - crop_box->x1;
+    rect.y1 = annot_rect->y1 - crop_box->y1;
+    rect.x2 = annot_rect->x2 - crop_box->x1;
+    rect.y2 = annot_rect->y2 - crop_box->y1;
 
     if (! (annot->getFlags () & Annot::flagNoRotate))
       rotation = page->page->getRotate ();
@@ -1502,6 +1504,34 @@ poppler_page_free_annot_mapping (GList *list)
   g_list_free_full (list, (GDestroyNotify)poppler_annot_mapping_free);
 }
 
+/* Adds or removes (according to @add parameter) the passed in @crop_box from the
+ * passed in @quads and returns it as a new #AnnotQuadrilaterals object */
+static AnnotQuadrilaterals *
+new_quads_from_offset_cropbox (const PDFRectangle* crop_box,
+                               AnnotQuadrilaterals *quads,
+                               gboolean add)
+{
+  int len = quads->getQuadrilateralsLength();
+  auto quads_array = std::make_unique<AnnotQuadrilaterals::AnnotQuadrilateral[]>(len);
+  for (int i = 0; i < len; i++) {
+     if (add) {
+       quads_array[i] = AnnotQuadrilaterals::AnnotQuadrilateral (
+         quads->getX1(i) + crop_box->x1, quads->getY1(i) + crop_box->y1,
+         quads->getX2(i) + crop_box->x1, quads->getY2(i) + crop_box->y1,
+         quads->getX3(i) + crop_box->x1, quads->getY3(i) + crop_box->y1,
+         quads->getX4(i) + crop_box->x1, quads->getY4(i) + crop_box->y1);
+     } else {
+       quads_array[i] = AnnotQuadrilaterals::AnnotQuadrilateral (
+         quads->getX1(i) - crop_box->x1, quads->getY1(i) - crop_box->y1,
+         quads->getX2(i) - crop_box->x1, quads->getY2(i) - crop_box->y1,
+         quads->getX3(i) - crop_box->x1, quads->getY3(i) - crop_box->y1,
+         quads->getX4(i) - crop_box->x1, quads->getY4(i) - crop_box->y1);
+     }
+  }
+
+  return new AnnotQuadrilaterals (std::move(quads_array), len);
+}
+
 /**
  * poppler_page_add_annot:
  * @page: a #PopplerPage
@@ -1515,8 +1545,35 @@ void
 poppler_page_add_annot (PopplerPage  *page,
 			PopplerAnnot *annot)
 {
+  double x1, y1, x2, y2;
+  const PDFRectangle *crop_box;
+  const PDFRectangle *page_crop_box;
+
   g_return_if_fail (POPPLER_IS_PAGE (page));
   g_return_if_fail (POPPLER_IS_ANNOT (annot));
+
+  /* Add the page's cropBox to the coordinates of rect field of annot */
+  page_crop_box = page->page->getCropBox ();
+  annot->annot->getRect(&x1, &y1, &x2, &y2);
+  annot->annot->setRect(x1 + page_crop_box->x1,
+                        y1 + page_crop_box->y1,
+                        x2 + page_crop_box->x1,
+                        y2 + page_crop_box->y1);
+
+  AnnotTextMarkup *annot_markup = dynamic_cast<AnnotTextMarkup*>(annot->annot);
+  if (annot_markup) {
+    AnnotQuadrilaterals *quads;
+    crop_box = _poppler_annot_get_cropbox (annot);
+    if (crop_box) {
+      /* Handle hypothetical case of annot being added is already existing on a prior page, so
+       * first remove cropbox of the prior page before adding cropbox of the new page later */
+      quads = new_quads_from_offset_cropbox (crop_box, annot_markup->getQuadrilaterals(), FALSE);
+      annot_markup->setQuadrilaterals( quads );
+    }
+    /* Add to annot's quadrilaterals the offset for the cropbox of the new page */
+    quads = new_quads_from_offset_cropbox (page_crop_box, annot_markup->getQuadrilaterals(), TRUE);
+    annot_markup->setQuadrilaterals( quads );
+  }
 
   page->page->addAnnot (annot->annot);
 }
