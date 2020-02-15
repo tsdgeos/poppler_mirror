@@ -28,6 +28,7 @@
 // Copyright (C) 2016 Masamichi Hosoda <trueroad@trueroad.jp>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -39,11 +40,10 @@
 
 #include "poppler-config.h"
 #include "Object.h"
+#include "Link.h"
 
 #include <vector>
 #include <memory>
-
-#include <poppler/Link.h>
 
 class PDFDoc;
 class XRef;
@@ -51,8 +51,6 @@ class Object;
 class Page;
 class PageAttrs;
 struct Ref;
-class LinkDest;
-class LinkAction;
 class PageLabelInfo;
 class Form;
 class OCGs;

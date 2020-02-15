@@ -26,7 +26,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Evangelos Rigas <erigas@rnd2.org>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Thomas Fischer <fischer@unix-ag.uni-kl.de>
 //
 // To see a description of the changes please see the Changelog file that
