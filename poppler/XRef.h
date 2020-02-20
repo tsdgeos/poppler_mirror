@@ -128,6 +128,9 @@ public:
   // Is the file encrypted?
   bool isEncrypted() const { return encrypted; }
 
+  // Is the given Ref encrypted?
+  bool isRefEncrypted(Ref r);
+
   // Check various permissions.
   bool okToPrint(bool ignoreOwnerPW = false) const;
   bool okToPrintHighRes(bool ignoreOwnerPW = false) const;
@@ -163,6 +166,7 @@ public:
   // Return the catalog object reference.
   int getRootNum() const { return rootNum; }
   int getRootGen() const { return rootGen; }
+  Ref getRoot() const { return { rootNum, rootGen }; }
 
   // Get end position for a stream in a damaged file.
   // Returns false if unknown or file is not damaged.

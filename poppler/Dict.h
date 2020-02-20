@@ -78,6 +78,9 @@ public:
   Object lookup(const char *key, int recursion = 0) const;
   // Same as above but if the returned object is a fetched Ref returns such Ref in returnRef, otherwise returnRef is Ref::INVALID()
   Object lookup(const char *key, Ref *returnRef, int recursion = 0) const;
+  // Look up an entry and return the value.  Returns a null object
+  // if <key> is not in the dictionary or if it is a ref to a non encrypted object in a partially encrypted document
+  Object lookupEnsureEncryptedIfNeeded(const char *key) const;
   const Object &lookupNF(const char *key) const;
   bool lookupInt(const char *key, const char *alt_key, int *value) const;
 

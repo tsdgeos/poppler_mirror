@@ -102,9 +102,9 @@ Catalog::Catalog(PDFDoc *docA) {
   acroForm = catDict.dictLookup("AcroForm");
 
   // read base URI
-  Object obj = catDict.dictLookup("URI");
+  Object obj = catDict.getDict()->lookupEnsureEncryptedIfNeeded("URI");
   if (obj.isDict()) {
-    Object obj2 = obj.dictLookup("Base");
+    Object obj2 = obj.getDict()->lookupEnsureEncryptedIfNeeded("Base");
     if (obj2.isString()) {
       baseURI = obj2.getString()->copy();
     }

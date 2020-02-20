@@ -1012,6 +1012,35 @@ void XRef::getEncryptionParameters(unsigned char **fileKeyA, CryptAlgorithm *enc
   }
 }
 
+bool XRef::isRefEncrypted(Ref r)
+{
+  xrefLocker();
+
+  const XRefEntry *e = getEntry(r.num);
+  if (!e->obj.isNull()) { //check for updated object
+    return false;
+  }
+
+  switch (e->type) {
+    case xrefEntryUncompressed:
+    {
+      return encrypted && !e->getFlag(XRefEntry::Unencrypted);
+    }
+
+    case xrefEntryCompressed:
+    {
+      const Object objStr = fetch(e->offset, 0);
+      return objStr.getStream()->isEncrypted();
+    }
+
+    default:
+    {
+    }
+  }
+
+  return false;
+}
+
 bool XRef::okToPrint(bool ignoreOwnerPW) const {
   return (!ignoreOwnerPW && ownerPasswordOk) || (permFlags & permPrint);
 }

@@ -220,11 +220,14 @@ public:
 			      StreamColorSpaceMode * /*csMode*/) {}
 
   // Return the next stream in the "stack".
-  virtual Stream *getNextStream() { return nullptr; }
+  virtual Stream *getNextStream() const { return nullptr; }
 
   // Add filters to this stream according to the parameters in <dict>.
   // Returns the new stream.
   Stream *addFilters(Dict *dict, int recursion = 0);
+
+  // Returns true if this stream includes a crypt filter.
+  bool isEncrypted() const;
 
 private:
   friend class Object; // for incRef/decRef
@@ -402,7 +405,7 @@ public:
   Stream *getUndecodedStream() override { return str->getUndecodedStream(); }
   Dict *getDict() override { return str->getDict(); }
   Object *getDictObject() override { return str->getDictObject(); }
-  Stream *getNextStream() override { return str; }
+  Stream *getNextStream() const override { return str; }
 
   int getUnfilteredChar () override { return str->getUnfilteredChar(); }
   void unfilteredReset () override { str->unfilteredReset(); }
