@@ -1175,8 +1175,8 @@ int main(int argc, char *argv[]) {
   // outputting a single page, ensure that even/odd page selection doesn't
   // filter out that single page.
   if (firstPage == lastPage &&
-       ((printOnlyEven && firstPage % 2 == 0) ||
-        (printOnlyOdd && firstPage % 2 == 1))) {
+       ((printOnlyEven && firstPage % 2 == 1) ||
+        (printOnlyOdd && firstPage % 2 == 0))) {
     fprintf(stderr, "Invalid even/odd page selection, no pages match criteria.\n");
     exit(99);
   }
