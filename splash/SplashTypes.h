@@ -128,6 +128,13 @@ static inline void splashColorCopy(SplashColorPtr dest, SplashColorConstPtr src)
     dest[i] = src[i];
 }
 
+static inline bool splashColorEqual(SplashColorConstPtr dest, SplashColorConstPtr src) {
+  for (int i = 0; i < SPOT_NCOMPS + 4; i++)
+    if (dest[i] != src[i])
+        return false;
+  return true;
+}
+
 static inline void splashColorXor(SplashColorPtr dest, SplashColorConstPtr src) {
   dest[0] ^= src[0];
   dest[1] ^= src[1];

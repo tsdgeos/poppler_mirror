@@ -94,9 +94,14 @@ public:
 
   virtual int getNTriangles() = 0;
 
-  virtual  void getTriangle(int i, double *x0, double *y0, double *color0,
+  virtual void getParametrizedTriangle(int i, double *x0, double *y0, double *color0,
                             double *x1, double *y1, double *color1,
                             double *x2, double *y2, double *color2) = 0;
+
+  virtual void getNonParametrizedTriangle(int i, SplashColorMode mode,
+                            double *x0, double *y0, SplashColorPtr color0,
+                            double *x1, double *y1, SplashColorPtr color1,
+                            double *x2, double *y2, SplashColorPtr color2) = 0;
 
   virtual void getParameterizedColor(double t, SplashColorMode mode, SplashColorPtr c) = 0;
 };
