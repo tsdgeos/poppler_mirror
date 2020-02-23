@@ -17,7 +17,7 @@
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
-// Copyright (C) 2008-2010, 2012, 2014, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012, 2014, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015, 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -173,9 +173,9 @@ public:
   // Return true if string ends with suffix
   bool endsWith(const char *suffix) const;
 
-  bool hasUnicodeMarker() const { return size() >= 2 && (*this)[0] == '\xfe' && (*this)[1] == '\xff'; }
+  bool hasUnicodeMarker() const { return hasUnicodeMarker(*this); }
   static bool hasUnicodeMarker(const std::string& s) { return s.size() >= 2 && s[0] == '\xfe' && s[1] == '\xff'; }
-  bool hasUnicodeMarkerLE() const { return size() >= 2 && (*this)[0] == '\xff' && (*this)[1] == '\xfe'; }
+  bool hasUnicodeMarkerLE() const { return hasUnicodeMarkerLE(*this); }
   static bool hasUnicodeMarkerLE(const std::string& s) { return s.size() >= 2 && s[0] == '\xff' && s[1] == '\xfe'; }
   bool hasJustUnicodeMarker() const { return size() == 2 && hasUnicodeMarker(); }
 
