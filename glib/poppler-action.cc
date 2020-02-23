@@ -405,9 +405,7 @@ static void
 build_uri (PopplerAction *action,
 	   const LinkURI       *link)
 {
-	const gchar *uri;
-
-	uri = link->getURI()->c_str ();
+	const gchar *uri = link->getURI().c_str ();
 	if (uri != nullptr)
 		action->uri.uri = g_strdup (uri);
 }
@@ -416,9 +414,7 @@ static void
 build_named (PopplerAction *action,
 	     const LinkNamed     *link)
 {
-	const gchar *name;
-
-	name = link->getName ()->c_str ();
+	const gchar* name = link->getName ().c_str ();
 	if (name != nullptr)
 		action->named.named_dest = g_strdup (name);
 }
@@ -436,7 +432,7 @@ find_annot_movie_for_action (PopplerDocument *document,
 
     annotObj = xref->fetch (*ref);
   } else if (link->hasAnnotTitle ()) {
-    const GooString *title = link->getAnnotTitle ();
+    const std::string& title = link->getAnnotTitle ();
     int i;
 
     for (i = 1; i <= document->doc->getNumPages (); ++i) {
@@ -457,11 +453,8 @@ find_annot_movie_for_action (PopplerDocument *document,
 	    }
 
 	    obj1 = annotObj.dictLookup ("T");
-	    if (obj1.isString()) {
-	      const GooString *t = obj1.getString ();
-
-	      if (title->cmp(t) == 0)
-	        found = true;
+	    if (obj1.isString() && obj1.getString()->toStr() == title) {
+              found = true;
 	    }
 	  }
 	  if (!found)
@@ -523,11 +516,10 @@ static void
 build_javascript (PopplerAction *action,
 		  const LinkJavaScript *link)
 {
-	const GooString *script;
-
-	script = link->getScript();
-	if (script)
-		action->javascript.script = _poppler_goo_string_to_utf8 (script);
+	if (link->isOk()) {
+	        const GooString script(link->getScript());
+		action->javascript.script = _poppler_goo_string_to_utf8 (&script);
+        }
 
 }
 

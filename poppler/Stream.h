@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
 // Copyright (C) 2008 Julien Rebetez <julien@fhtagn.net>
-// Copyright (C) 2008, 2010, 2011, 2016-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008, 2010, 2011, 2016-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009 Stefan Thomas <thomas@eload24.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
@@ -28,6 +28,7 @@
 // Copyright (C) 2013 Pino Toscano <pino@kde.org>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
+// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -129,14 +130,19 @@ public:
     }
   }
 
-  inline void fillGooString(GooString *s)
+  inline void fillString(std::string& s)
   {
     unsigned char readBuf[4096];
     int readChars;
     reset();
     while ((readChars = doGetChars(4096, readBuf)) != 0) {
-      s->append((const char *)readBuf, readChars);
+      s.append((const char *)readBuf, readChars);
     }
+  }
+
+  inline void fillGooString(GooString *s)
+  {
+    fillString(s->toNonConstStr());
   }
   
   inline unsigned char *toUnsignedChars(int *length, int initialSize = 4096, int sizeIncrement = 4096)

@@ -236,30 +236,30 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
 
     case actionNamed:
     {
-      const char * name = ((LinkNamed *)a)->getName()->c_str();
-      if ( !strcmp( name, "NextPage" ) )
+      const std::string& name = ((LinkNamed *)a)->getName();
+      if ( name == "NextPage" )
         popplerLink = new LinkAction( linkArea, LinkAction::PageNext );
-      else if ( !strcmp( name, "PrevPage" ) )
+      else if ( name == "PrevPage" )
         popplerLink = new LinkAction( linkArea, LinkAction::PagePrev );
-      else if ( !strcmp( name, "FirstPage" ) )
+      else if ( name == "FirstPage" )
         popplerLink = new LinkAction( linkArea, LinkAction::PageFirst );
-      else if ( !strcmp( name, "LastPage" ) )
+      else if ( name == "LastPage" )
         popplerLink = new LinkAction( linkArea, LinkAction::PageLast );
-      else if ( !strcmp( name, "GoBack" ) )
+      else if ( name == "GoBack" )
         popplerLink = new LinkAction( linkArea, LinkAction::HistoryBack );
-      else if ( !strcmp( name, "GoForward" ) )
+      else if ( name == "GoForward" )
         popplerLink = new LinkAction( linkArea, LinkAction::HistoryForward );
-      else if ( !strcmp( name, "Quit" ) )
+      else if ( name == "Quit" )
         popplerLink = new LinkAction( linkArea, LinkAction::Quit );
-      else if ( !strcmp( name, "GoToPage" ) )
+      else if ( name == "GoToPage" )
         popplerLink = new LinkAction( linkArea, LinkAction::GoToPage );
-      else if ( !strcmp( name, "Find" ) )
+      else if ( name == "Find" )
         popplerLink = new LinkAction( linkArea, LinkAction::Find );
-      else if ( !strcmp( name, "FullScreen" ) )
+      else if ( name == "FullScreen" )
         popplerLink = new LinkAction( linkArea, LinkAction::Presentation );
-      else if ( !strcmp( name, "Print" ) )
+      else if ( name == "Print" )
         popplerLink = new LinkAction( linkArea, LinkAction::Print );
-      else if ( !strcmp( name, "Close" ) )
+      else if ( name == "Close" )
       {
         // acroread closes the document always, doesnt care whether 
         // its presentation mode or not
@@ -275,7 +275,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
 
     case actionURI:
     {
-      popplerLink = new LinkBrowse( linkArea, ((LinkURI *)a)->getURI()->c_str() );
+      popplerLink = new LinkBrowse( linkArea, ((LinkURI *)a)->getURI().c_str() );
     }
     break;
 
@@ -289,7 +289,7 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
     case actionJavaScript:
     {
       ::LinkJavaScript *ljs = (::LinkJavaScript *)a;
-      popplerLink = new LinkJavaScript( linkArea, UnicodeParsedString(ljs->getScript()) );
+      popplerLink = new LinkJavaScript( linkArea, UnicodeParsedString( ljs->getScript() ) );
     }
     break;
 

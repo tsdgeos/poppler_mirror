@@ -1628,7 +1628,7 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
       case actionURI:
 	  { 
 	  LinkURI *ha=(LinkURI *) link->getAction();
-	  GooString* file=new GooString(ha->getURI()->c_str());
+	  GooString* file=new GooString(ha->getURI());
 	  // printf("uri : %s\n",file->c_str());
 	  return file;
 	  }

@@ -1,6 +1,7 @@
 /* Sound.cc - an object that holds the sound structure
  * Copyright (C) 2006-2007, Pino Toscano <pino@kde.org>
  * Copyright (C) 2009, 2017-2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2020, Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +18,12 @@
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "GooString.h"
 #include "Object.h"
 #include "Sound.h"
 #include "Stream.h"
 #include "FileSpec.h"
 
-Sound *Sound::parseSound(Object *obj)
+std::unique_ptr<Sound> Sound::parseSound(Object *obj)
 {
   // let's try to see if this Object is a Sound, according to the PDF specs
   // (section 9.2)
@@ -41,7 +41,7 @@ Sound *Sound::parseSound(Object *obj)
   // the Dict must have the 'R' key of type num
   Object tmp = dict->lookup("R");
   if (tmp.isNum()) {
-    return new Sound(obj);
+    return std::unique_ptr<Sound>(new Sound(obj));
   } else {
     return nullptr;
   }

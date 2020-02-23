@@ -7,7 +7,7 @@
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018-2020 Adam Reichold <adam.reichold@t-online.de>
- * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
@@ -97,12 +97,16 @@ namespace Debug {
     }
 
     QString UnicodeParsedString(const GooString *s1) {
-        if ( !s1 || s1->getLength() == 0 )
+        return (s1) ? UnicodeParsedString(s1->toStr()) : QString();
+    }
+
+    QString UnicodeParsedString(const std::string& s1) {
+        if ( s1.empty() )
             return QString();
 
-        if ( s1->hasUnicodeMarker() || s1->hasUnicodeMarkerLE() )
+        if ( GooString::hasUnicodeMarker(s1) || GooString::hasUnicodeMarkerLE(s1) )
         {
-            return QString::fromUtf16(reinterpret_cast<const ushort *>(s1->c_str()), s1->getLength() / 2);
+            return QString::fromUtf16(reinterpret_cast<const ushort *>(s1.c_str()), s1.size() / 2);
         }
         else
         {
@@ -224,7 +228,7 @@ namespace Debug {
             case actionURI:
             {
                 const LinkURI * u = static_cast< const LinkURI * >( a );
-                e->setAttribute( QStringLiteral("DestinationURI"), u->getURI()->c_str() );
+                e->setAttribute( QStringLiteral("DestinationURI"), u->getURI().c_str() );
             }
             default: ;
         }

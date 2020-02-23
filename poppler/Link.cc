@@ -560,38 +560,33 @@ LinkLaunch::~LinkLaunch() {
 //------------------------------------------------------------------------
 
 LinkURI::LinkURI(const Object *uriObj, const GooString *baseURI) {
-  const GooString *uri2;
-  int n;
-  char c;
-
-  uri = nullptr;
+  hasURIFlag = false;
   if (uriObj->isString()) {
-    uri2 = uriObj->getString();
-    n = (int)strcspn(uri2->c_str(), "/:");
-    if (n < uri2->getLength() && uri2->getChar(n) == ':') {
+    const std::string& uri2 = uriObj->getString()->toStr();
+    size_t n = strcspn(uri2.c_str(), "/:");
+    if (n < uri2.size() && uri2[n] == ':') {
       // "http:..." etc.
-      uri = uri2->copy();
-    } else if (!uri2->cmpN("www.", 4)) {
+      uri = uri2;
+    } else if (!uri2.compare(0,4,"www.")) {
       // "www.[...]" without the leading "http://"
-      uri = new GooString("http://");
-      uri->append(uri2);
+      uri = "http://" + uri2;
     } else {
       // relative URI
       if (baseURI) {
-	uri = baseURI->copy();
-	if (uri->getLength() > 0) {
-	  c = uri->getChar(uri->getLength() - 1);
+	uri = baseURI->toStr();
+	if (uri.size() > 0) {
+	  char c = uri.back();
 	  if (c != '/' && c != '?') {
-	    uri->append('/');
+	    uri += '/';
 	  }
 	}
-	if (uri2->getChar(0) == '/') {
-	  uri->append(uri2->c_str() + 1, uri2->getLength() - 1);
+	if (uri2[0] == '/') {
+	  uri.append(uri2.c_str() + 1, uri2.size() - 1);
 	} else {
-	  uri->append(uri2);
+	  uri += uri2;
 	}
       } else {
-	uri = uri2->copy();
+	uri = uri2;
       }
     }
   } else {
@@ -599,25 +594,15 @@ LinkURI::LinkURI(const Object *uriObj, const GooString *baseURI) {
   }
 }
 
-LinkURI::~LinkURI() {
-  if (uri)
-    delete uri;
-}
-
 //------------------------------------------------------------------------
 // LinkNamed
 //------------------------------------------------------------------------
 
 LinkNamed::LinkNamed(const Object *nameObj) {
-  name = nullptr;
+  hasNameFlag = false;
   if (nameObj->isName()) {
-    name = new GooString(nameObj->getName());
-  }
-}
-
-LinkNamed::~LinkNamed() {
-  if (name) {
-    delete name;
+    name = (nameObj->getName()) ? nameObj->getName() : "";
+    hasNameFlag = true;
   }
 }
 
@@ -627,7 +612,7 @@ LinkNamed::~LinkNamed() {
 
 LinkMovie::LinkMovie(const Object *obj) {
   annotRef = Ref::INVALID();
-  annotTitle = nullptr;
+  hasAnnotTitleFlag = false;
 
   const Object &annotationObj = obj->dictLookupNF("Annotation");
   if (annotationObj.isRef()) {
@@ -636,10 +621,11 @@ LinkMovie::LinkMovie(const Object *obj) {
 
   Object tmp = obj->dictLookup("T");
   if (tmp.isString()) {
-    annotTitle = tmp.getString()->copy();
+    annotTitle = tmp.getString()->toStr();
+    hasAnnotTitleFlag = true;
   }
 
-  if ((annotTitle == nullptr) && (annotRef == Ref::INVALID())) {
+  if ((!hasAnnotTitleFlag) && (annotRef == Ref::INVALID())) {
     error(errSyntaxError, -1,
 	  "Movie action is missing both the Annot and T keys");
   }
@@ -660,12 +646,6 @@ LinkMovie::LinkMovie(const Object *obj) {
     else if (!strcmp(name, "Resume")) {
       operation = operationTypeResume;
     }
-  }
-}
-
-LinkMovie::~LinkMovie() {
-  if (annotTitle) {
-    delete annotTitle;
   }
 }
 
@@ -707,10 +687,6 @@ LinkSound::LinkSound(const Object *soundObj) {
   }
 }
 
-LinkSound::~LinkSound() {
-  delete sound;
-}
-
 //------------------------------------------------------------------------
 // LinkRendition
 //------------------------------------------------------------------------
@@ -718,7 +694,6 @@ LinkSound::~LinkSound() {
 LinkRendition::LinkRendition(const Object *obj) {
   operation = NoRendition;
   media = nullptr;
-  js = nullptr;
   int operationCode = -1;
 
   screenRef = Ref::INVALID();
@@ -727,11 +702,10 @@ LinkRendition::LinkRendition(const Object *obj) {
     Object tmp = obj->dictLookup("JS");
     if (!tmp.isNull()) {
       if (tmp.isString()) {
-        js = new GooString(tmp.getString());
+        js = tmp.getString()->toStr();
       } else if (tmp.isStream()) {
         Stream *stream = tmp.getStream();
-	js = new GooString();
-	stream->fillGooString(js);
+	stream->fillString(js);
       } else {
         error(errSyntaxWarning, -1, "Invalid Rendition Action: JS not string or stream");
       }
@@ -740,7 +714,7 @@ LinkRendition::LinkRendition(const Object *obj) {
     tmp = obj->dictLookup("OP");
     if (tmp.isInt()) {
       operationCode = tmp.getInt();
-      if (!js && (operationCode < 0 || operationCode > 4)) {
+      if (js.empty() && (operationCode < 0 || operationCode > 4)) {
         error(errSyntaxWarning, -1, "Invalid Rendition Action: unrecognized operation valued: {0:d}", operationCode);
       } else {
         // retrieve rendition object
@@ -777,14 +751,13 @@ LinkRendition::LinkRendition(const Object *obj) {
           operation = PlayRendition;
           break;
       }
-    } else if (!js) {
+    } else if (js=="") {
       error(errSyntaxWarning, -1, "Invalid Rendition action: no OP or JS field defined");
     }
   }
 }
 
 LinkRendition::~LinkRendition() {
-  delete js;
   delete media;
 }
 
@@ -794,21 +767,16 @@ LinkRendition::~LinkRendition() {
 //------------------------------------------------------------------------
 
 LinkJavaScript::LinkJavaScript(Object *jsObj) {
-  js = nullptr;
+  isValid = false;
 
   if (jsObj->isString()) {
-    js = new GooString(jsObj->getString());
+    js = jsObj->getString()->toStr();
+    isValid = true;
   }
   else if (jsObj->isStream()) {
     Stream *stream = jsObj->getStream();
-    js = new GooString();
-    stream->fillGooString(js);
-  }
-}
-
-LinkJavaScript::~LinkJavaScript() {
-  if (js) {
-    delete js;
+    stream->fillString(js);
+    isValid = true;
   }
 }
 
@@ -872,13 +840,14 @@ LinkOCGState::LinkOCGState(const Object *obj)
 //------------------------------------------------------------------------
 
 LinkHide::LinkHide(const Object *hideObj) {
-  targetName = nullptr;
+  hasTargetNameFlag = false;
   show = false; // Default
 
   if (hideObj->isDict()) {
       const Object targetObj = hideObj->dictLookup("T");
       if (targetObj.isString()) {
-	targetName = targetObj.getString()->copy();
+	targetName = targetObj.getString()->toStr();
+        hasTargetNameFlag = true;
       }
       const Object shouldHide = hideObj->dictLookup("H");
       if (shouldHide.isBool()) {
@@ -887,20 +856,12 @@ LinkHide::LinkHide(const Object *hideObj) {
   }
 }
 
-LinkHide::~LinkHide() {
-  delete targetName;
-}
-
 //------------------------------------------------------------------------
 // LinkUnknown
 //------------------------------------------------------------------------
 
 LinkUnknown::LinkUnknown(const char *actionA) {
-  action = new GooString(actionA);
-}
-
-LinkUnknown::~LinkUnknown() {
-  delete action;
+  action = std::string(actionA ? actionA : "");
 }
 
 //------------------------------------------------------------------------

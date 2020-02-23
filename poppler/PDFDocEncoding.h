@@ -15,6 +15,7 @@
 //
 // Copyright (C) 2007 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
+// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -24,12 +25,14 @@
 #ifndef PDFDOCENCODING_H
 #define PDFDOCENCODING_H
 
+#include <string>
+
 #include "CharTypes.h"
 
 class GooString;
 
 extern const Unicode pdfDocEncoding[256];
 
-char* pdfDocEncodingToUTF16 (const GooString* orig, int* length);
+char* pdfDocEncodingToUTF16 (const std::string& orig, int* length);
 
 #endif

@@ -253,19 +253,17 @@ public:
   // Build a LinkURI given the URI (string) and base URI.
   LinkURI(const Object *uriObj, const GooString *baseURI);
 
-  // Destructor.
-  ~LinkURI() override;
-
   // Was the LinkURI created successfully?
-  bool isOk() const override { return uri != nullptr; }
+  bool isOk() const override { return hasURIFlag; }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionURI; }
-  const GooString *getURI() const { return uri; }
+  const std::string& getURI() const { return uri; }
 
 private:
 
-  GooString *uri;			// the URI
+  std::string uri;			// the URI
+  bool hasURIFlag;
 };
 
 //------------------------------------------------------------------------
@@ -278,16 +276,15 @@ public:
   // Build a LinkNamed given the action name.
   LinkNamed(const Object *nameObj);
 
-  ~LinkNamed() override;
-
-  bool isOk() const override { return name != nullptr; }
+  bool isOk() const override { return hasNameFlag; }
 
   LinkActionKind getKind() const override { return actionNamed; }
-  const GooString *getName() const { return name; }
+  const std::string& getName() const { return name; }
 
 private:
 
-  GooString *name;
+  std::string name;
+  bool hasNameFlag;
 };
 
 
@@ -306,25 +303,25 @@ public:
   };
 
   LinkMovie(const Object *obj);
-  ~LinkMovie() override;
 
-  bool isOk() const override { return hasAnnotRef() || hasAnnotTitle(); }
+  bool isOk() const override { return hasAnnotRef() || hasAnnotTitleFlag; }
   LinkActionKind getKind() const override { return actionMovie; }
 
   // a movie action stores either an indirect reference to a movie annotation
   // or the movie annotation title
 
   bool hasAnnotRef() const { return annotRef != Ref::INVALID(); }
-  bool hasAnnotTitle() const { return annotTitle != nullptr; }
+  bool hasAnnotTitle() const { return hasAnnotTitleFlag; }
   const Ref *getAnnotRef() const { return &annotRef; }
-  const GooString *getAnnotTitle() const { return annotTitle; }
+  const std::string& getAnnotTitle() const { return annotTitle; }
 
   OperationType getOperation() const { return operation; }
 
 private:
 
   Ref annotRef;            // Annotation
-  GooString *annotTitle;   // T
+  std::string annotTitle;  // T
+  bool hasAnnotTitleFlag;
 
   OperationType operation; // Operation
 };
@@ -365,7 +362,7 @@ public:
 
   const MediaRendition* getMedia() const { return media; }
 
-  const GooString *getScript() const { return js; }
+  const std::string& getScript() const { return js; }
 
 private:
 
@@ -375,7 +372,7 @@ private:
 
   MediaRendition* media;
 
-  GooString *js;
+  std::string js;
 };
 
 //------------------------------------------------------------------------
@@ -387,8 +384,6 @@ public:
 
   LinkSound(const Object *soundObj);
 
-  ~LinkSound() override;
-
   bool isOk() const override { return sound != nullptr; }
 
   LinkActionKind getKind() const override { return actionSound; }
@@ -397,7 +392,7 @@ public:
   bool getSynchronous() const { return sync; }
   bool getRepeat() const { return repeat; }
   bool getMix() const { return mix; }
-  Sound *getSound() const { return sound; }
+  Sound *getSound() const { return sound.get(); }
 
 private:
 
@@ -405,7 +400,7 @@ private:
   bool sync;
   bool repeat;
   bool mix;
-  Sound *sound;
+  std::unique_ptr<Sound> sound;
 };
 
 //------------------------------------------------------------------------
@@ -418,18 +413,17 @@ public:
   // Build a LinkJavaScript given the action name.
   LinkJavaScript(Object *jsObj);
 
-  ~LinkJavaScript() override;
-
-  bool isOk() const override { return js != nullptr; }
+  bool isOk() const override { return isValid; }
 
   LinkActionKind getKind() const override { return actionJavaScript; }
-  const GooString *getScript() const { return js; }
+  const std::string& getScript() const { return js; }
 
   static Object createObject(XRef *xref, const GooString &js);
 
 private:
 
-  GooString *js;
+  std::string js;
+  bool isValid;
 };
 
 //------------------------------------------------------------------------
@@ -470,9 +464,7 @@ class LinkHide: public LinkAction {
 public:
   LinkHide(const Object *hideObj);
 
-  ~LinkHide() override;
-
-  bool isOk() const override { return targetName != nullptr; }
+  bool isOk() const override { return hasTargetNameFlag; }
   LinkActionKind getKind() const override { return actionHide; }
 
   // According to spec the target can be either:
@@ -484,14 +476,16 @@ public:
   // While b / c appear to be very uncommon and can't easily be
   // created with Adobe Acrobat DC. So only support hide
   // actions with named targets (yet).
-  bool hasTargetName() const { return targetName != nullptr; }
-  const GooString *getTargetName() const { return targetName; }
+  bool hasTargetName() const { return hasTargetNameFlag; }
+  const std::string& getTargetName() const { return targetName; }
 
   // Should this action show or hide.
   bool isShowAction() const { return show; }
 
 private:
-  GooString *targetName;
+
+  bool hasTargetNameFlag;
+  std::string targetName;
   bool show;
 };
 
@@ -505,19 +499,17 @@ public:
   // Build a LinkUnknown with the specified action type.
   LinkUnknown(const char *actionA);
 
-  // Destructor.
-  ~LinkUnknown() override;
-
   // Was the LinkUnknown create successfully?
-  bool isOk() const override { return action != nullptr; }
+  // Yes: nothing can go wrong when creating LinkUnknown objects
+  bool isOk() const override { return true; }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionUnknown; }
-  const GooString *getAction() const { return action; }
+  const std::string& getAction() const { return action; }
 
 private:
 
-  GooString *action;		// action subtype
+  std::string action;		// action subtype
 };
 
 //------------------------------------------------------------------------

@@ -17,7 +17,7 @@
 //
 // Copyright (C) 2006 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2006 Krzysztof Kowalczyk <kkowalczyk@gmail.com>
-// Copyright (C) 2008-2010, 2012, 2014, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2008-2010, 2012, 2014, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012-2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2013 Jason Crain <jason@aquaticape.us>
 // Copyright (C) 2015, 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -26,7 +26,7 @@
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2019 Christophe Fergeau <cfergeau@redhat.com>
 // Copyright (C) 2019 Tomoyuki Kubota <himajin100000@gmail.com>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -68,6 +68,7 @@ public:
   explicit GooString(std::string&& str) : std::string(std::move(str)) {}
 
   const std::string& toStr() const { return *this; }
+  std::string& toNonConstStr() { return *this; }
 
   // Create a string from <lengthA> chars at <sA>.  This string
   // can contain null characters.
@@ -172,8 +173,10 @@ public:
   // Return true if string ends with suffix
   bool endsWith(const char *suffix) const;
 
-  bool hasUnicodeMarker() const { return size() >= 2 && (*this)[0] == '\xfe' && (*this)[1] == '\xff'; }
-  bool hasUnicodeMarkerLE() const { return size() >= 2 && (*this)[0] == '\xff' && (*this)[1] == '\xfe'; }
+  bool hasUnicodeMarker() const { return hasUnicodeMarker(*this); }
+  static bool hasUnicodeMarker(const std::string& s) { return s.size() >= 2 && s[0] == '\xfe' && s[1] == '\xff'; }
+  bool hasUnicodeMarkerLE() const { return hasUnicodeMarkerLE(*this); }
+  static bool hasUnicodeMarkerLE(const std::string& s) { return s.size() >= 2 && s[0] == '\xff' && s[1] == '\xfe'; }
   bool hasJustUnicodeMarker() const { return size() == 2 && hasUnicodeMarker(); }
 
   void prependUnicodeMarker();

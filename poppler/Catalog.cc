@@ -14,7 +14,7 @@
 // under GPL version 2 or later
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
-// Copyright (C) 2005-2013, 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2005 Jeff Muizelaar <jrmuizel@nit.ca>
 // Copyright (C) 2005 Jonathan Blandford <jrb@redhat.com>
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>

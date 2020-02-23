@@ -7,6 +7,7 @@
 // Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016, 2017, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
+// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -59,10 +60,11 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action, bool deleteLin
     hasJS = true;
     if (print) {
       LinkJavaScript *linkjs = static_cast<LinkJavaScript *>(link);
-      const GooString *s = linkjs->getScript();
-      if (s && s->c_str()) {
+      if (linkjs->isOk()) {
+	const std::string& s = linkjs->getScript();
 	fprintf(file, "%s:\n", action);
-	printJS(s);
+	GooString gooS = GooString(s);
+	printJS(&gooS);
 	fputs("\n\n", file);
       }
     }
@@ -70,15 +72,13 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action, bool deleteLin
 
   if (link->getKind() == actionRendition) {
     LinkRendition *linkr = static_cast<LinkRendition *>(link);
-    if (linkr->getScript()) {
+    if (!linkr->getScript().empty()) {
       hasJS = true;
       if (print) {
-        const GooString *s = linkr->getScript();
-        if (s && s->c_str()) {
-          fprintf(file, "%s (Rendition):\n", action);
-          printJS(s);
-          fputs("\n\n", file);
-        }
+        fprintf(file, "%s (Rendition):\n", action);
+        const GooString s(linkr->getScript());
+        printJS(&s);
+        fputs("\n\n", file);
       }
     }
   }
