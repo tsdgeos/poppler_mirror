@@ -10,9 +10,9 @@
  * Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
  * Copyright (C) 2018, 2019 Tobias Deiminger <haxtibal@posteo.de>
  * Copyright (C) 2018 Carlos Garcia Campos <carlosgc@gnome.org>
+ * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
- * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

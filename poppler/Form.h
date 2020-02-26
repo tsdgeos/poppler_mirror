@@ -18,7 +18,7 @@
 // Copyright 2018 Andre Heinecke <aheinecke@intevation.de>
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
-// Copyright 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2019 João Netto <joaonetto901@gmail.com>
 //
 //========================================================================
