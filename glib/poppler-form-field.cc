@@ -2,6 +2,7 @@
  *
  * Copyright (C) 2007 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2006 Julien Rebetez
+ * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +18,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
  */
+
+#include <memory>
 
 #include "poppler.h"
 #include "poppler-private.h"
@@ -215,7 +218,6 @@ poppler_form_field_get_additional_action (PopplerFormField           *field,
 					  PopplerAdditionalActionType type)
 {
   Annot::FormAdditionalActionsType form_action;
-  LinkAction *link_action;
   PopplerAction **action;
 
   switch (type)
@@ -244,11 +246,11 @@ poppler_form_field_get_additional_action (PopplerFormField           *field,
   if (*action)
     return *action;
 
-  link_action = field->widget->getAdditionalAction (form_action);
+  std::unique_ptr<LinkAction> link_action = field->widget->getAdditionalAction (form_action);
   if (!link_action)
     return nullptr;
 
-  *action = _poppler_action_new (nullptr, link_action, nullptr);
+  *action = _poppler_action_new (nullptr, link_action.get(), nullptr);
 
   return *action;
 }

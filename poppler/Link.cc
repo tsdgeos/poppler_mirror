@@ -51,32 +51,24 @@
 //------------------------------------------------------------------------
 LinkAction::LinkAction() = default;
 
-LinkAction::~LinkAction() {
-  for (auto entry : nextActionList) {
-    delete entry;
-  }
-}
+LinkAction::~LinkAction() = default;
 
-LinkAction *LinkAction::parseDest(const Object *obj) {
-  LinkAction *action;
-
-  action = new LinkGoTo(obj);
+std::unique_ptr<LinkAction> LinkAction::parseDest(const Object *obj) {
+  auto action = std::unique_ptr<LinkAction>(new LinkGoTo(obj));
   if (!action->isOk()) {
-    delete action;
-    return nullptr;
+    action.reset();
   }
   return action;
 }
 
-LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI)
+std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const GooString *baseURI)
 {
     std::set<int> seenNextActions;
     return parseAction(obj, baseURI, &seenNextActions);
 }
 
-LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
+std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const GooString *baseURI,
                                     std::set<int> *seenNextActions) {
-  LinkAction *action;
 
   if (!obj->isDict()) {
       error(errSyntaxWarning, -1, "parseAction: Bad annotation action for URI '{0:s}'",
@@ -84,61 +76,62 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
       return nullptr;
   }
 
+  std::unique_ptr<LinkAction> action;
   Object obj2 = obj->dictLookup("S");
 
   // GoTo action
   if (obj2.isName("GoTo")) {
     Object obj3 = obj->dictLookup("D");
-    action = new LinkGoTo(&obj3);
+    action = std::make_unique<LinkGoTo>(&obj3);
 
   // GoToR action
   } else if (obj2.isName("GoToR")) {
     Object obj3 = obj->dictLookup("F");
     Object obj4 = obj->dictLookup("D");
-    action = new LinkGoToR(&obj3, &obj4);
+    action = std::make_unique<LinkGoToR>(&obj3, &obj4);
 
   // Launch action
   } else if (obj2.isName("Launch")) {
-    action = new LinkLaunch(obj);
+    action = std::make_unique<LinkLaunch>(obj);
 
   // URI action
   } else if (obj2.isName("URI")) {
     Object obj3 = obj->dictLookup("URI");
-    action = new LinkURI(&obj3, baseURI);
+    action = std::make_unique<LinkURI>(&obj3, baseURI);
 
   // Named action
   } else if (obj2.isName("Named")) {
     Object obj3 = obj->dictLookup("N");
-    action = new LinkNamed(&obj3);
+    action = std::make_unique<LinkNamed>(&obj3);
 
   // Movie action
   } else if (obj2.isName("Movie")) {
-    action = new LinkMovie(obj);
+    action = std::make_unique<LinkMovie>(obj);
 
   // Rendition action
   } else if (obj2.isName("Rendition")) {
-    action = new LinkRendition(obj);
+    action = std::make_unique<LinkRendition>(obj);
 
   // Sound action
   } else if (obj2.isName("Sound")) {
-    action = new LinkSound(obj);
+    action = std::make_unique<LinkSound>(obj);
 
   // JavaScript action
   } else if (obj2.isName("JavaScript")) {
     Object obj3 = obj->dictLookup("JS");
-    action = new LinkJavaScript(&obj3);
+    action = std::make_unique<LinkJavaScript>(&obj3);
 
   // Set-OCG-State action
   } else if (obj2.isName("SetOCGState")) {
-    action = new LinkOCGState(obj);
+    action = std::make_unique<LinkOCGState>(obj);
 
   // Hide action
   } else if (obj2.isName("Hide")) {
-    action = new LinkHide(obj);
+    action = std::make_unique<LinkHide>(obj);
 
   // unknown action
   } else if (obj2.isName()) {
-    action = new LinkUnknown(obj2.getName());
+    action = std::make_unique<LinkUnknown>(obj2.getName());
 
   // action is missing or wrong type
   } else {
@@ -148,7 +141,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
   }
 
   if (action && !action->isOk()) {
-    delete action;
+    action.reset();
     return nullptr;
   }
 
@@ -158,7 +151,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
 
   // parse the next actions
   const Object nextObj = obj->dictLookup("Next");
-  std::vector<LinkAction*> actionList;
+  std::vector<std::unique_ptr<LinkAction> > actionList;
   if (nextObj.isDict()) {
 
     // Prevent circles in the tree by checking the ref against used refs in
@@ -204,7 +197,7 @@ LinkAction *LinkAction::parseAction(const Object *obj, const GooString *baseURI,
   return action;
 }
 
-const std::vector<LinkAction*>& LinkAction::nextActions() const {
+const std::vector<std::unique_ptr<LinkAction> >& LinkAction::nextActions() const {
   return nextActionList;
 }
 

@@ -208,8 +208,7 @@ static std::unique_ptr<PDFRectangle> parseDiffRectangle(Array *array, PDFRectang
   return nullptr;
 }
 
-static LinkAction* getAdditionalAction(Annot::AdditionalActionsType type, Object *additionalActions, PDFDoc *doc) {
-  LinkAction *linkAction = nullptr;
+static std::unique_ptr<LinkAction> getAdditionalAction(Annot::AdditionalActionsType type, Object *additionalActions, PDFDoc *doc) {
   Object additionalActionsObject = additionalActions->fetch(doc->getXRef());
 
   if (additionalActionsObject.isDict()) {
@@ -226,10 +225,10 @@ static LinkAction* getAdditionalAction(Annot::AdditionalActionsType type, Object
 
     Object actionObject = additionalActionsObject.dictLookup(key);
     if (actionObject.isDict())
-      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+      return LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
   }
 
-  return linkAction;
+  return nullptr;
 }
 
 static const char *getFormAdditionalActionKey(Annot::FormAdditionalActionsType type)
@@ -2534,12 +2533,12 @@ void AnnotLink::initialize(PDFDoc *docA, Dict *dict) {
   // look for destination
   obj1 = dict->lookup("Dest");
   if (!obj1.isNull()) {
-    action.reset(LinkAction::parseDest(&obj1));
+    action = LinkAction::parseDest(&obj1);
   // look for action
   } else {
     obj1 = dict->lookup("A");
     if (obj1.isDict()) {
-      action.reset(LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI()));
+      action = LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI());
     }
   }
 
@@ -3700,7 +3699,7 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
 
   obj1 = dict->lookup("A");
   if (obj1.isDict()) {
-    action.reset(LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI()));
+    action = LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI());
   }
 
   additionalActions = dict->lookupNF("AA").copy();
@@ -3720,14 +3719,13 @@ void AnnotWidget::initialize(PDFDoc *docA, Dict *dict) {
   updatedAppearanceStream = Ref::INVALID();
 }
 
-LinkAction* AnnotWidget::getAdditionalAction(AdditionalActionsType additionalActionType)
+std::unique_ptr<LinkAction> AnnotWidget::getAdditionalAction(AdditionalActionsType additionalActionType)
 {
   return ::getAdditionalAction(additionalActionType, &additionalActions, doc);
 }
 
-LinkAction* AnnotWidget::getFormAdditionalAction(FormAdditionalActionsType formAdditionalActionType)
+std::unique_ptr<LinkAction> AnnotWidget::getFormAdditionalAction(FormAdditionalActionsType formAdditionalActionType)
 {
-  LinkAction *linkAction = nullptr;
   Object additionalActionsObject = additionalActions.fetch(doc->getXRef());
 
   if (additionalActionsObject.isDict()) {
@@ -3735,10 +3733,10 @@ LinkAction* AnnotWidget::getFormAdditionalAction(FormAdditionalActionsType formA
 
     Object actionObject = additionalActionsObject.dictLookup(key);
     if (actionObject.isDict())
-      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+      return LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
   }
 
-  return linkAction;
+  return nullptr;
 }
 
 bool AnnotWidget::setFormAdditionalAction(FormAdditionalActionsType formAdditionalActionType, const GooString &js)
@@ -5129,7 +5127,7 @@ void AnnotScreen::initialize(PDFDoc *docA, Dict* dict) {
 
   obj1 = dict->lookup("A");
   if (obj1.isDict()) {
-    action.reset(LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI()));
+    action = LinkAction::parseAction(&obj1, doc->getCatalog()->getBaseURI());
     if (action && action->getKind() == actionRendition && page == 0) {
       error (errSyntaxError, -1, "Invalid Rendition action: associated screen annotation without P");
       action = nullptr;
@@ -5145,7 +5143,7 @@ void AnnotScreen::initialize(PDFDoc *docA, Dict* dict) {
   }
 }
 
-LinkAction* AnnotScreen::getAdditionalAction(AdditionalActionsType additionalActionType)
+std::unique_ptr<LinkAction> AnnotScreen::getAdditionalAction(AdditionalActionsType additionalActionType)
 {
   if (additionalActionType == actionFocusIn || additionalActionType == actionFocusOut) // not defined for screen annotation
     return nullptr;

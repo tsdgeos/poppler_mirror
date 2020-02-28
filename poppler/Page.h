@@ -24,6 +24,7 @@
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -33,6 +34,7 @@
 #ifndef PAGE_H
 #define PAGE_H
 
+#include <memory>
 #include <mutex>
 
 #include "poppler-config.h"
@@ -222,7 +224,7 @@ public:
     actionClosePage,    ///< Performed when closing the page
   };
 
-  LinkAction *getAdditionalAction(PageAdditionalActionsType type);
+  std::unique_ptr<LinkAction> getAdditionalAction(PageAdditionalActionsType type);
 
   Gfx *createGfx(OutputDev *out, double hDPI, double vDPI,
 		 int rotate, bool useMediaBox, bool crop,

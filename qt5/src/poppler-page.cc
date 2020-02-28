@@ -23,6 +23,7 @@
  * Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
  * Copyright (C) 2018, Tobias Deiminger <haxtibal@posteo.de>
  * Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
+ * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -361,9 +362,9 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
   if ( popplerLink )
   {
     QVector<Link *> links;
-    for ( ::LinkAction *nextAction : a->nextActions() )
+    for ( const std::unique_ptr<::LinkAction>& nextAction : a->nextActions() )
     {
-      links << convertLinkActionToLink( nextAction, parentDoc, linkArea );
+      links << convertLinkActionToLink( nextAction.get(), parentDoc, linkArea );
     }
     LinkPrivate::get(popplerLink)->nextLinks = links;
   }
@@ -835,12 +836,11 @@ Link *Page::action( PageAction act ) const
     Dict *dict = o.getDict();
     const char *key = act == Page::Opening ? "O" : "C";
     Object o2 = dict->lookup((char*)key);
-    ::LinkAction *lact = ::LinkAction::parseAction(&o2, m_page->parentDoc->doc->getCatalog()->getBaseURI() );
+    std::unique_ptr<::LinkAction> lact = ::LinkAction::parseAction(&o2, m_page->parentDoc->doc->getCatalog()->getBaseURI() );
     Link *popplerLink = nullptr;
     if (lact != nullptr)
     {
-      popplerLink = m_page->convertLinkActionToLink(lact, QRectF());
-      delete lact;
+      popplerLink = m_page->convertLinkActionToLink(lact.get(), QRectF());
     }
     return popplerLink;
   }

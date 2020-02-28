@@ -82,9 +82,9 @@
 static const double s_minLineWidth = 0.0;
 
 static inline void convertGfxColor(SplashColorPtr dest,
-                                   SplashColorMode colorMode,
-                                   GfxColorSpace *colorSpace,
-                                   GfxColor *src) {
+                                   const SplashColorMode colorMode,
+                                   const GfxColorSpace *colorSpace,
+                                   const GfxColor *src) {
   SplashColor color;
   GfxGray gray;
   GfxRGB rgb;
@@ -134,9 +134,9 @@ static inline void convertGfxColor(SplashColorPtr dest,
 // to ensure that everything is initialized.
 
 static inline void convertGfxShortColor(SplashColorPtr dest,
-                                   SplashColorMode colorMode,
-                                   GfxColorSpace *colorSpace,
-                                   GfxColor *src) {
+                                   const SplashColorMode colorMode,
+                                   const GfxColorSpace *colorSpace,
+                                   const GfxColor *src) {
   switch (colorMode) {
     case splashModeMono1:
     case splashModeMono8:
@@ -194,21 +194,29 @@ SplashGouraudPattern::SplashGouraudPattern(bool bDirectColorTranslationA,
 SplashGouraudPattern::~SplashGouraudPattern() {
 }
 
+void SplashGouraudPattern::getNonParametrizedTriangle(int i, SplashColorMode mode, double *x0, double *y0, SplashColorPtr color0,
+                                        double *x1, double *y1, SplashColorPtr color1,
+                                        double *x2, double *y2, SplashColorPtr color2) {
+  GfxColor c0, c1, c2;
+  shading->getTriangle(i, x0, y0, &c0, x1, y1, &c1, x2, y2, &c2);
+
+  const GfxColorSpace* srcColorSpace = shading->getColorSpace();
+  convertGfxColor(color0, mode, srcColorSpace, &c0);
+  convertGfxColor(color1, mode, srcColorSpace, &c1);
+  convertGfxColor(color2, mode, srcColorSpace, &c2);
+}
+
+
 void SplashGouraudPattern::getParameterizedColor(double colorinterp, SplashColorMode mode, SplashColorPtr dest) {
   GfxColor src;
-  GfxColorSpace* srcColorSpace = shading->getColorSpace();
-  int colorComps = 3;
-  if (mode == splashModeCMYK8)
-    colorComps=4;
-  else if (mode == splashModeDeviceN8)
-    colorComps=4 + SPOT_NCOMPS;
-
   shading->getParameterizedColor(colorinterp, &src);
 
   if (bDirectColorTranslation) {
+    const int colorComps = splashColorModeNComps[mode];
     for (int m = 0; m < colorComps; ++m)
       dest[m] = colToByte(src.c[m]);
   } else {
+    GfxColorSpace* srcColorSpace = shading->getColorSpace();
     convertGfxShortColor(dest, mode, srcColorSpace, &src);
   }
 }
@@ -4540,17 +4548,12 @@ bool SplashOutputDev::gouraudTriangleShadedFill(GfxState *state, GfxGouraudTrian
     break;
   }
   // restore vector antialias because we support it here
-  if (shading->isParameterized()) {
-    SplashGouraudColor *splashShading = new SplashGouraudPattern(bDirectColorTranslation, state, shading);
-    bool vaa = getVectorAntialias();
-    bool retVal = false;
-    setVectorAntialias(true);
-    retVal = splash->gouraudTriangleShadedFill(splashShading);
-    setVectorAntialias(vaa);
-    delete splashShading;
-    return retVal;
-  }
-  return false;
+  SplashGouraudPattern splashShading(bDirectColorTranslation, state, shading);
+  const bool vaa = getVectorAntialias();
+  setVectorAntialias(true);
+  const bool retVal = splash->gouraudTriangleShadedFill(&splashShading);
+  setVectorAntialias(vaa);
+  return retVal;
 }
 
 bool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePattern *pattern, double tMin, double tMax) {

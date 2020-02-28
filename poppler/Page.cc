@@ -30,6 +30,7 @@
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2015 Philipp Reinkemeier <philipp.reinkemeier@offis.de>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -775,8 +776,7 @@ void Page::getDefaultCTM(double *ctm, double hDPI, double vDPI,
  delete state;
 }
 
-LinkAction* Page::getAdditionalAction(PageAdditionalActionsType type) {
-  LinkAction *linkAction = nullptr;
+std::unique_ptr<LinkAction> Page::getAdditionalAction(PageAdditionalActionsType type) {
   Object additionalActionsObject = actions.fetch(doc->getXRef());
   if (additionalActionsObject.isDict()) {
     const char *key = (type == actionOpenPage ?  "O" :
@@ -784,8 +784,8 @@ LinkAction* Page::getAdditionalAction(PageAdditionalActionsType type) {
 
     Object actionObject = additionalActionsObject.dictLookup(key);
     if (actionObject.isDict())
-      linkAction = LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
+      return LinkAction::parseAction(&actionObject, doc->getCatalog()->getBaseURI());
   }
 
-  return linkAction;
+  return nullptr;
 }

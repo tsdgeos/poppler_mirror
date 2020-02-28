@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Marco Pesenti Gritti <mpg@redhat.com>
 // Copyright (C) 2016, 2018 Albert Astals Cid <aacid@kde.org>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -25,6 +25,7 @@
 #ifndef OUTLINE_H
 #define OUTLINE_H
 
+#include <memory>
 #include "Object.h"
 #include "CharTypes.h"
 
@@ -69,7 +70,8 @@ public:
 
   const Unicode *getTitle() const { return title; }
   int getTitleLength() const { return titleLen; }
-  const LinkAction *getAction() const { return action; }
+  // OutlineItem keeps the ownership of the action
+  const LinkAction *getAction() const { return action.get(); }
   bool isOpen() const { return startsOpen; }
   bool hasKids() const { return firstRef.isRef(); }
   const std::vector<OutlineItem*> *getKids() const { return kids; }
@@ -81,7 +83,7 @@ private:
   XRef *xref;
   Unicode *title;
   int titleLen;
-  LinkAction *action;
+  std::unique_ptr<LinkAction> action;
   Object firstRef;
   Object lastRef;
   Object nextRef;

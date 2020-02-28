@@ -29,7 +29,7 @@
 // Copyright (C) 2015 William Bader <williambader@hotmail.com>
 // Copyright (C) 2018 Martin Packman <gzlist@googlemail.com>
 // Copyright (C) 2019 Yves-Gaël Chény <gitlab@r0b0t.fr>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 <corentinf@free.fr>
 // Copyright (C) 2019 Kris Jurka <jurka@ejurka.com>
 // Copyright (C) 2019 Sébastien Berthier <s.berthier@bee-buzziness.com>
@@ -532,8 +532,8 @@ int main(int argc, char *argv[]) {
   // outputting a single page, ensure that even/odd page selection doesn't
   // filter out that single page.
   if (firstPage == lastPage &&
-       ((printOnlyEven && firstPage % 2 == 0) ||
-        (printOnlyOdd && firstPage % 2 == 1))) {
+       ((printOnlyEven && firstPage % 2 == 1) ||
+        (printOnlyOdd && firstPage % 2 == 0))) {
     fprintf(stderr, "Invalid even/odd page selection, no pages match criteria.\n");
     goto err1;
   }

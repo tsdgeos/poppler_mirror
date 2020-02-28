@@ -8,7 +8,7 @@
  * Copyright (C) 2018, Andre Heinecke <aheinecke@intevation.de>
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
- * Copyright (C) 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2018, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2020 David García Garzón <voki@canvoki.net>
  *
@@ -244,9 +244,9 @@ Link *FormField::additionalAction(AdditionalActionType type) const
   }
 
   Link* action = nullptr;
-  if (::LinkAction *act = m_formData->fm->getAdditionalAction(actionType))
+  if (std::unique_ptr<::LinkAction> act = m_formData->fm->getAdditionalAction(actionType))
   {
-    action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
+    action = PageData::convertLinkActionToLink(act.get(), m_formData->doc, QRectF());
   }
   return action;
 }
@@ -262,9 +262,9 @@ Link *FormField::additionalAction(Annotation::AdditionalActionType type) const
   const Annot::AdditionalActionsType actionType = toPopplerAdditionalActionType(type);
 
   Link* action = nullptr;
-  if (::LinkAction *act = w->getAdditionalAction(actionType))
+  if (std::unique_ptr<::LinkAction> act = w->getAdditionalAction(actionType))
   {
-    action = PageData::convertLinkActionToLink(act, m_formData->doc, QRectF());
+    action = PageData::convertLinkActionToLink(act.get(), m_formData->doc, QRectF());
   }
   return action;
 }

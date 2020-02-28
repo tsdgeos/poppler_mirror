@@ -10,6 +10,7 @@
  * Copyright (C) 2018 Dileep Sankhla <sankhla.dileep96@gmail.com>
  * Copyright (C) 2018, 2019 Tobias Deiminger <haxtibal@posteo.de>
  * Copyright (C) 2018 Carlos Garcia Campos <carlosgc@gnome.org>
+ * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
  * Adapting code from
  *   Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
  *
@@ -782,7 +783,7 @@ Link* AnnotationPrivate::additionalAction( Annotation::AdditionalActionType type
 
     const Annot::AdditionalActionsType actionType = toPopplerAdditionalActionType(type);
 
-    ::LinkAction *linkAction = nullptr;
+    std::unique_ptr<::LinkAction> linkAction = nullptr;
     if ( pdfAnnot->getType() == Annot::typeScreen )
         linkAction = static_cast<AnnotScreen*>( pdfAnnot )->getAdditionalAction( actionType );
     else
@@ -791,7 +792,7 @@ Link* AnnotationPrivate::additionalAction( Annotation::AdditionalActionType type
     Link *link = nullptr;
 
     if ( linkAction )
-        link = PageData::convertLinkActionToLink( linkAction, parentDoc, QRectF() );
+        link = PageData::convertLinkActionToLink( linkAction.get(), parentDoc, QRectF() );
 
     return link;
 }
