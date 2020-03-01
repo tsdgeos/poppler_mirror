@@ -13,6 +13,7 @@ private slots:
     void checkDocumentWithNoDests();
     void checkDests_xr01();
     void checkDests_xr02();
+    void checkDocumentURILink();
 };
 
 static bool isDestinationValid_pageNumber( const Poppler::LinkDestination *dest, const Poppler::Document *doc )
@@ -94,6 +95,28 @@ void TestLinks::checkDests_xr02()
 
     delete doc;
 }
+
+void TestLinks::checkDocumentURILink()
+{
+    Poppler::Document *doc;
+    doc = Poppler::Document::load(TESTDATADIR "/unittestcases/checkbox_issue_159.pdf");
+    QVERIFY( doc );
+
+    Poppler::Page *page = doc->page(0);
+    QVERIFY( page );
+
+    QList< Poppler::Link* > links = page->links();
+    QCOMPARE( links.count(), 1 );
+
+    QCOMPARE( links.at(0)->linkType(), Poppler::Link::Browse );
+    Poppler::LinkBrowse *link = static_cast< Poppler::LinkBrowse * >( links.at(0) );
+    QCOMPARE( link->url(), QLatin1String("http://www.tcpdf.org") );
+
+    qDeleteAll(links);
+    delete page;
+    delete doc;
+}
+
 
 QTEST_GUILESS_MAIN(TestLinks)
 

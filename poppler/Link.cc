@@ -519,6 +519,7 @@ LinkLaunch::LinkLaunch(const Object *actionObj) {
 LinkURI::LinkURI(const Object *uriObj, const GooString *baseURI) {
   hasURIFlag = false;
   if (uriObj->isString()) {
+    hasURIFlag = true;
     const std::string& uri2 = uriObj->getString()->toStr();
     size_t n = strcspn(uri2.c_str(), "/:");
     if (n < uri2.size() && uri2[n] == ':') {
