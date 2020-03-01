@@ -33,6 +33,8 @@
 #include "poppler.h"
 #include "poppler-private.h"
 
+#define SUPPORTED_ROTATION(r) (r == 90 || r == 180 || r == 270)
+
 /**
  * SECTION:poppler-page
  * @short_description: Information about a page in a document
@@ -1400,9 +1402,11 @@ poppler_page_get_annot_mapping (PopplerPage *page)
     PopplerRectangle rect;
     Annot *annot;
     PDFRectangle *annot_rect;
+    gboolean flag_no_rotate;
     gint rotation = 0;
 
     annot = annots->getAnnot (i);
+    flag_no_rotate = annot->getFlags () & Annot::flagNoRotate;
 
     /* Create the mapping */
     mapping = poppler_annot_mapping_new ();
@@ -1450,35 +1454,53 @@ poppler_page_get_annot_mapping (PopplerPage *page)
     rect.x2 = annot_rect->x2 - crop_box->x1;
     rect.y2 = annot_rect->y2 - crop_box->y1;
 
-    if (! (annot->getFlags () & Annot::flagNoRotate))
-      rotation = page->page->getRotate ();
+    rotation = page->page->getRotate ();
 
-    switch (rotation)
-      {
-      case 90:
-        mapping->area.x1 = rect.y1;
-        mapping->area.y1 = height - rect.x2;
-        mapping->area.x2 = mapping->area.x1 + (rect.y2 - rect.y1);
-        mapping->area.y2 = mapping->area.y1 + (rect.x2 - rect.x1);
-        break;
-      case 180:
-        mapping->area.x1 = width - rect.x2;
-        mapping->area.y1 = height - rect.y2;
-        mapping->area.x2 = mapping->area.x1 + (rect.x2 - rect.x1);
-        mapping->area.y2 = mapping->area.y1 + (rect.y2 - rect.y1);
-        break;
-      case 270:
-        mapping->area.x1 = width - rect.y2;
-        mapping->area.y1 = rect.x1;
-        mapping->area.x2 = mapping->area.x1 + (rect.y2 - rect.y1);
-        mapping->area.y2 = mapping->area.y1 + (rect.x2 - rect.x1);
-        break;
-      default:
-        mapping->area.x1 = rect.x1;
-        mapping->area.y1 = rect.y1;
-        mapping->area.x2 = rect.x2;
-        mapping->area.y2 = rect.y2;
+    if (rotation == 0 || !SUPPORTED_ROTATION (rotation)) { /* zero or unknown rotation */
+      mapping->area.x1 = rect.x1;
+      mapping->area.y1 = rect.y1;
+      mapping->area.x2 = rect.x2;
+      mapping->area.y2 = rect.y2;
+    } else {
+      gdouble annot_height = rect.y2 - rect.y1;
+      gdouble annot_width = rect.x2 - rect.x1;
+
+      if (flag_no_rotate) {
+        if (rotation == 90) {
+          mapping->area.x1 = rect.y2;
+          mapping->area.y1 = height - (rect.x1 + annot_height);
+          mapping->area.x2 = rect.y2 + annot_width;
+          mapping->area.y2 = height - rect.x1;
+        } else if (rotation == 180) {
+          mapping->area.x1 = width - rect.x1;
+          mapping->area.x2 = MIN (mapping->area.x1 + annot_width, width);
+          mapping->area.y2 = height - rect.y2;
+          mapping->area.y1 = MAX (0, mapping->area.y2 - annot_height);
+        } else if (rotation == 270) {
+          mapping->area.x1 = width - rect.y2;
+          mapping->area.x2 = MIN (mapping->area.x1 + annot_width, width);
+          mapping->area.y2 = rect.x1;
+          mapping->area.y1 = MAX (0, mapping->area.y2 - annot_height);
+        }
+      } else { /* !flag_no_rotate */
+        if (rotation == 90) {
+          mapping->area.x1 = rect.y1;
+          mapping->area.y1 = height - rect.x2;
+          mapping->area.x2 = mapping->area.x1 + annot_height;
+          mapping->area.y2 = mapping->area.y1 + annot_width;
+        } else if (rotation == 180) {
+          mapping->area.x1 = width - rect.x2;
+          mapping->area.y1 = height - rect.y2;
+          mapping->area.x2 = mapping->area.x1 + annot_width;
+          mapping->area.y2 = mapping->area.y1 + annot_height;
+        } else if (rotation == 270) {
+          mapping->area.x1 = width - rect.y2;
+          mapping->area.y1 = rect.x1;
+          mapping->area.x2 = mapping->area.x1 + annot_height;
+          mapping->area.y2 = mapping->area.y1 + annot_width;
+        }
       }
+    }
 
     map_list = g_list_prepend (map_list, mapping);
   }
