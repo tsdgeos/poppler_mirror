@@ -1,3 +1,22 @@
+Release 0.86.0:
+        core:
+         * Fix link content exfiltration attack
+         * Splash: Implement gouraudTriangleShadedFill for some non parametrized shadings. Issue #881
+         * Fix case unsensitive search for Old Hungarian, Warang Citi, Medefaidrin and Adlam
+         * Internal code improvements
+
+        glib:
+         * Automatic handle of page's cropbox on annots. Issue #129
+         * Fix memory leak if poppler_document_new_from_file fails
+         * Minor speed optimization on poppler_page_get_annot_mapping
+
+         utils:
+         * pdfdetach: add 'savefile' option
+         * pdftoppm/pdftocairo: Fix more odd/even mismatch
+
+        qt5:
+         * Fix loading from iodevice
+
 Release 0.85.0:
         core:
          * Fix case unsensitive search for Deseret and Osage. Issue #853

@@ -164,22 +164,19 @@ public:
   // Build a LinkGoTo from a destination (dictionary, name, or string).
   LinkGoTo(const Object *destObj);
 
-  // Destructor.
-  ~LinkGoTo() override;
-
   // Was the LinkGoTo created successfully?
   bool isOk() const override { return dest || namedDest; }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionGoTo; }
-  const LinkDest *getDest() const { return dest; }
-  const GooString *getNamedDest() const { return namedDest; }
+  const LinkDest *getDest() const { return dest.get(); }
+  const GooString *getNamedDest() const { return namedDest.get(); }
 
 private:
 
-  LinkDest *dest;		// regular destination (nullptr for remote
+  std::unique_ptr<LinkDest> dest;		// regular destination (nullptr for remote
 				//   link with bad destination)
-  GooString *namedDest;	// named destination (only one of dest and
+  std::unique_ptr<GooString> namedDest;	// named destination (only one of dest and
 				//   and namedDest may be non-nullptr)
 };
 
@@ -194,24 +191,21 @@ public:
   // (dictionary, name, or string).
   LinkGoToR(Object *fileSpecObj, Object *destObj);
 
-  // Destructor.
-  ~LinkGoToR() override;
-
   // Was the LinkGoToR created successfully?
   bool isOk() const override { return fileName && (dest || namedDest); }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionGoToR; }
-  const GooString *getFileName() const { return fileName; }
-  const LinkDest *getDest() const { return dest; }
-  const GooString *getNamedDest() const { return namedDest; }
+  const GooString *getFileName() const { return fileName.get(); }
+  const LinkDest *getDest() const { return dest.get(); }
+  const GooString *getNamedDest() const { return namedDest.get(); }
 
 private:
 
-  GooString *fileName;		// file name
-  LinkDest *dest;		// regular destination (nullptr for remote
+  std::unique_ptr<GooString> fileName;		// file name
+  std::unique_ptr<LinkDest> dest;		// regular destination (nullptr for remote
 				//   link with bad destination)
-  GooString *namedDest;	// named destination (only one of dest and
+  std::unique_ptr<GooString> namedDest;	// named destination (only one of dest and
 				//   and namedDest may be non-nullptr)
 };
 
@@ -225,21 +219,18 @@ public:
   // Build a LinkLaunch from an action dictionary.
   LinkLaunch(const Object *actionObj);
 
-  // Destructor.
-  ~LinkLaunch() override;
-
   // Was the LinkLaunch created successfully?
   bool isOk() const override { return fileName != nullptr; }
 
   // Accessors.
   LinkActionKind getKind() const override { return actionLaunch; }
-  const GooString *getFileName() const { return fileName; }
-  const GooString *getParams() const { return params; }
+  const GooString *getFileName() const { return fileName.get(); }
+  const GooString *getParams() const { return params.get(); }
 
 private:
 
-  GooString *fileName;		// file name
-  GooString *params;		// parameters
+  std::unique_ptr<GooString> fileName;		// file name
+  std::unique_ptr<GooString> params;		// parameters
 };
 
 //------------------------------------------------------------------------
