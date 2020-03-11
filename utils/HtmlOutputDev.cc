@@ -1546,7 +1546,6 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
   {
       case actionGoTo:
 	  {
-	  GooString* file = new GooString(gbasename(Docname->c_str()));
 	  int destPage=1;
 	  LinkGoTo *ha=(LinkGoTo *)link->getAction();
 	  std::unique_ptr<LinkDest> dest;
@@ -1556,6 +1555,8 @@ GooString* HtmlOutputDev::getLinkDest(AnnotLink *link){
 	      dest=catalog->findDest(ha->getNamedDest());
 	      
 	  if (dest){ 
+	      GooString* file = new GooString(gbasename(Docname->c_str()));
+
 	      if (dest->isPageRef()){
 		  const Ref pageref=dest->getPageRef();
 		  destPage=catalog->findPage(pageref);
