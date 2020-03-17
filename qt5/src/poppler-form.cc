@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, 2011, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2012, 2015-2019 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2012, 2015-2020 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2011 Carlos Garcia Campos <carlosgc@gnome.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
@@ -509,6 +509,22 @@ QStringList FormFieldChoice::choices() const
   for (int i = 0; i < num; ++i)
   {
     ret.append(UnicodeParsedString(fwc->getChoice(i)));
+  }
+  return ret;
+}
+
+QVector<QPair<QString,QString>> FormFieldChoice::choicesWithExportValues() const
+{
+  FormWidgetChoice* fwc = static_cast<FormWidgetChoice*>(m_formData->fm);
+  QVector<QPair<QString, QString>> ret;
+  const int num = fwc->getNumChoices();
+  ret.reserve(num);
+  for (int i = 0; i < num; ++i)
+  {
+    const QString display = UnicodeParsedString(fwc->getChoice(i));
+    const GooString *exportValueG = fwc->getExportVal(i);
+    const QString exportValue = exportValueG ? UnicodeParsedString(exportValueG) : display;
+    ret.append({display, exportValue});
   }
   return ret;
 }
