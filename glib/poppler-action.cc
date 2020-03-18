@@ -528,7 +528,7 @@ build_rendition (PopplerAction *action,
 		 const LinkRendition *link)
 {
 	action->rendition.op = link->getOperation();
-	if (link->hasRenditionObject())
+	if (link->getMedia())
 		action->rendition.media = _poppler_media_new (link->getMedia());
 	// TODO: annotation reference
 }

@@ -688,7 +688,7 @@ LinkRendition::LinkRendition(const Object *obj) {
         error(errSyntaxWarning, -1, "Invalid Rendition Action: unrecognized operation valued: {0:d}", operationCode);
       } else {
         // retrieve rendition object
-        renditionObj = obj->dictLookup("R");
+        Object renditionObj = obj->dictLookup("R");
         if (renditionObj.isDict()) {
           media = new MediaRendition(&renditionObj);
 	} else if (operationCode == 0 || operationCode == 4) {
