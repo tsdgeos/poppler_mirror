@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2005, 2007-2011, 2014, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005, 2007-2011, 2014, 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006 Kristian Høgsberg <krh@bitplanet.net>
 // Copyright (C) 2009 Petr Gajdos <pgajdos@novell.com>
 // Copyright (C) 2010 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -327,7 +327,7 @@ struct SplashFTFontPath {
 };
 
 SplashPath *SplashFTFont::getGlyphPath(int c) {
-  static FT_Outline_Funcs outlineFuncs = {
+  static const FT_Outline_Funcs outlineFuncs = {
 #if FREETYPE_MINOR <= 1
     (int (*)(FT_Vector *, void *))&glyphPathMoveTo,
     (int (*)(FT_Vector *, void *))&glyphPathLineTo,

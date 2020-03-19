@@ -4,7 +4,7 @@
 //
 // This file is licensed under the GPLv2 or later
 //
-// Copyright (C) 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2019, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
@@ -27,7 +27,7 @@ static bool doReplace = false;
 static bool printVersion = false;
 static bool printHelp = false;
 
-static ArgDesc argDesc[] = {
+static const ArgDesc argDesc[] = {
   {"-replace",   argFlag,     &doReplace,        0,
    "replace embedded file with same name (if it exists)"},
   {"-v",      argFlag,     &printVersion,  0,

@@ -44,7 +44,7 @@ typedef struct
   const gchar *label;
 } Annotations;
 
-static Annotations supported_annots[] = {
+static const Annotations supported_annots[] = {
     { POPPLER_ANNOT_TEXT,       "Text" },
     { POPPLER_ANNOT_LINE,       "Line" },
     { POPPLER_ANNOT_SQUARE,     "Square" },

@@ -55,7 +55,7 @@ static char userPassword[33] = "\001";
 static bool printVersion = false;
 static bool printHelp = false;
 
-static ArgDesc argDesc[] = {
+static const ArgDesc argDesc[] = {
   {"-list",   argFlag,     &doList,        0,
    "list all embedded files"},
   {"-save",   argInt,      &saveNum,       0,

@@ -11,6 +11,7 @@
 // This file is licensed under the GPLv2 or later
 //
 // Copyright (C) 2018, 2019 Greg Knight <lyngvi@gmail.com>
+// Copyright (C) 2020 Albert Astals Cid <aacid@kde.org>
 //
 //========================================================================
 
@@ -63,7 +64,7 @@ FILE* InMemoryFile::open(const char* mode)
         fprintf(stderr, "InMemoryFile: BUG: Why is this opened more than once?");
         return nullptr; // maybe there's some legit reason for it, whoever comes up with one can remove this line
     }
-    static cookie_io_functions_t methods = {
+    static const cookie_io_functions_t methods = {
         /* .read = */ [](void* self, char* buf, size_t sz) { return ((InMemoryFile*)self)->_read(buf, sz); },
         /* .write = */ [](void* self, const char* buf, size_t sz) { return ((InMemoryFile*)self)->_write(buf, sz); },
         /* .seek = */ [](void* self, off64_t* offset, int whence) { return ((InMemoryFile*)self)->_seek(offset, whence); },

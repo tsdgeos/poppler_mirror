@@ -11,7 +11,7 @@
 // All changes made under the Poppler project to this file are licensed
 // under GPL version 2 or later
 //
-// Copyright (C) 2009, 2016, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2009, 2016, 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 //
 // To see a description of the changes please see the Changelog file that
@@ -30,7 +30,7 @@
 #include "SplashMath.h"
 #include "SplashScreen.h"
 
-static SplashScreenParams defaultParams = {
+static const SplashScreenParams defaultParams = {
   splashScreenDispersed,	// type
   2,				// size
   2,				// dotRadius
@@ -62,7 +62,7 @@ struct cmpDistancesFunctor {
 // sqrt(2)).  If <clustered> is false, this generates an optimal
 // threshold matrix using recursive tesselation.  Gamma correction
 // (gamma = 1 / 1.33) is also computed here.
-SplashScreen::SplashScreen(SplashScreenParams *params) {
+SplashScreen::SplashScreen(const SplashScreenParams *params) {
 
   if (!params) {
     params = &defaultParams;
@@ -80,7 +80,7 @@ void SplashScreen::createMatrix()
   unsigned char u;
   int black, white, i;
   
-  SplashScreenParams *params = screenParams;
+  const SplashScreenParams *params = screenParams;
 
   // size must be a power of 2, and at least 2
   for (size = 2, log2Size = 1; size < params->size; size <<= 1, ++log2Size) ;
