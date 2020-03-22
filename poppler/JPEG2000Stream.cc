@@ -357,6 +357,10 @@ void JPXStreamPrivate::init2(OPJ_CODEC_FORMAT format, unsigned char *buf, int le
     return;
 
 error:
+  if (image != nullptr) {
+    opj_image_destroy(image);
+    image = nullptr;
+  }
   opj_stream_destroy(stream);
   opj_destroy_codec(decoder);
   if (format == OPJ_CODEC_JP2) {
