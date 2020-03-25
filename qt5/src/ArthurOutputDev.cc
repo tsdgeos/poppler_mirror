@@ -268,10 +268,17 @@ void ArthurOutputDev::updateLineDash(GfxState *state)
   }
 
   QVector<qreal> pattern(dashLength);
+  double scaling = state->getLineWidth();
+
+  //  Negative line widths are not allowed, width 0 counts as 'one pixel width'.
+  if (scaling <= 0) {
+    scaling = 1.0;
+  }
+
   for (int i = 0; i < dashLength; ++i) {
     // pdf measures the dash pattern in dots, but Qt uses the
     // line width as the unit.
-    pattern[i] = dashPattern[i] / state->getLineWidth();
+    pattern[i] = dashPattern[i] / scaling;
   }
   m_currentPen.setDashPattern(pattern);
   m_currentPen.setDashOffset(dashStart);
