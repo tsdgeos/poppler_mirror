@@ -1,4 +1,4 @@
-image: debian:unstable
+image: debian:testing
 
 stages:
   - build
