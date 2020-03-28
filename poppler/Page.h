@@ -20,7 +20,7 @@
 // Copyright (C) 2007 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright (C) 2008 Iñigo Martínez <inigomartinez@gmail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2012, 2017, 2018 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2012, 2017, 2018, 2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013, 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -61,8 +61,8 @@ public:
   PDFRectangle() { x1 = y1 = x2 = y2 = 0; }
   PDFRectangle(double x1A, double y1A, double x2A, double y2A)
     { x1 = x1A; y1 = y1A; x2 = x2A; y2 = y2A; }
-  bool isValid() { return x1 != 0 || y1 != 0 || x2 != 0 || y2 != 0; }
-  bool contains(double x, double y) { return x1 <= x && x <= x2 && y1 <= y && y <= y2; }
+  bool isValid() const { return x1 != 0 || y1 != 0 || x2 != 0 || y2 != 0; }
+  bool contains(double x, double y) const { return x1 <= x && x <= x2 && y1 <= y && y <= y2; }
   void clipTo(PDFRectangle *rect);
   
   bool operator==(const PDFRectangle &rect) const { return x1 == rect.x1 && y1 == rect.y1 && x2 == rect.x2 && y2 == rect.y2; }
