@@ -51,6 +51,7 @@ class Annot;
 class Gfx;
 class FormPageWidgets;
 class Form;
+class FormField;
 
 //------------------------------------------------------------------------
 
@@ -286,6 +287,13 @@ private:
   double duration;              // page duration
   bool ok;			// true if page is valid
   mutable std::recursive_mutex mutex;
+  // standalone widgets are special FormWidget's inside a Page that *are not*
+  // referenced from the Catalog's Field array. That means they are standlone,
+  // i.e. the PDF document does not have a FormField associated with them. We
+  // create standalone FormFields to contain those special FormWidgets, as
+  // they are 'de facto' being used to implement tooltips. See #34
+  std::vector<FormField*> standaloneFields;
+  void loadStandaloneFields(Annots *annotations, Form *form);
 };
 
 #endif

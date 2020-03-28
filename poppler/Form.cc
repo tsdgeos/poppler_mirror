@@ -646,6 +646,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
   fullyQualifiedName = nullptr;
   quadding = quaddingLeftJustified;
   hasQuadding = false;
+  standAlone = false;
 
   //childs
   Object obj1 = dict->lookup("Kids");
@@ -2022,6 +2023,21 @@ FormPageWidgets::FormPageWidgets (Annots *annots, unsigned int page, Form *form)
         widgets[numWidgets++] = tmp;
       }
     }
+  }
+}
+
+void FormPageWidgets::addWidgets(const std::vector<FormField*>& addedWidgets, unsigned int page)
+{
+  if (addedWidgets.empty())
+    return;
+
+  size += addedWidgets.size();
+  widgets = (FormWidget**)greallocn(widgets, size, sizeof(FormWidget*));
+
+  for (auto frmField : addedWidgets) {
+    FormWidget *frmWidget = frmField->getWidget(0);
+    frmWidget->setID(FormWidget::encodeID(page, numWidgets));
+    widgets[numWidgets++] = frmWidget;
   }
 }
 

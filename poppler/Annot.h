@@ -696,6 +696,7 @@ public:
   PDFDoc *getDoc() const { return doc; }
   bool getHasRef() const { return hasRef; }
   Ref getRef() const { return ref; }
+  Dict *getDict() const { return annotObj.getDict(); }
   AnnotSubtype getType() const { return type; }
   PDFRectangle *getRect() const { return rect.get(); }
   void getRect(double *x1, double *y1, double *x2, double *y2) const;

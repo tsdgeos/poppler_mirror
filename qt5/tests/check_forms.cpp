@@ -16,6 +16,7 @@ private slots:
     void testSetIcon();// Test that setIcon will always be valid.
     void testSetPrintable();
     void testSetAppearanceText();
+    void testStandAloneWidgets(); // check for 'de facto' tooltips. Issue #34
     void testUnicodeFieldAttributes();
 };
 
@@ -45,6 +46,36 @@ void TestForms::testCheckbox()
     chkFormFieldButton->setState( true );
     // now test if it was succesfully 'checked'
     QCOMPARE( chkFormFieldButton->state() , true );
+}
+
+void TestForms::testStandAloneWidgets()
+{
+    // Check for 'de facto' tooltips. Issue #34
+    QScopedPointer< Poppler::Document > document(Poppler::Document::load(TESTDATADIR "/unittestcases/tooltip.pdf"));
+    QVERIFY( document );
+
+    QScopedPointer< Poppler::Page > page(document->page(0));
+    QVERIFY( page );
+
+    QList<Poppler::FormField*> forms = page->formFields();
+
+    QCOMPARE( forms.size() , 3 );
+
+    Q_FOREACH (Poppler::FormField *field, forms) {
+        QCOMPARE( field->type() , Poppler::FormField::FormButton );
+
+        Poppler::FormFieldButton *fieldButton = static_cast<Poppler::FormFieldButton *>(field);
+        QCOMPARE( fieldButton->buttonType() , Poppler::FormFieldButton::Push );
+
+        FormField *ff = Poppler::FormFieldData::getFormWidget( fieldButton )->getField();
+        QVERIFY( ff );
+        QCOMPARE( ff->isStandAlone() , true );
+
+        // tooltip.pdf has only these 3 standalone widgets
+        QVERIFY( field->uiName() == QStringLiteral("This is a tooltip!") ||
+                 field->uiName() == QStringLiteral("Sulfuric acid") ||
+                 field->uiName() == QStringLiteral("little Gauß") );
+    }
 }
 
 void TestForms::testCheckboxIssue159()

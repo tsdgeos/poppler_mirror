@@ -303,6 +303,8 @@ public:
 
   void setReadOnly (bool value);
   bool isReadOnly () const { return readOnly; }
+  void setStandAlone (bool value) { standAlone = value; }
+  bool isStandAlone () const { return standAlone; }
 
   GooString* getDefaultAppearance() const { return defaultAppearance; }
   bool hasTextQuadding() const { return hasQuadding; }
@@ -352,6 +354,9 @@ public:
   GooString *defaultAppearance;
   bool hasQuadding;
   VariableTextQuadding quadding;
+
+  //True when FormField is not part of Catalog's Field array (or there isn't one).
+  bool standAlone;
 
 private:
   FormField() {}
@@ -564,7 +569,8 @@ public:
   static Object fieldLookup(Dict *field, const char *key);
   
   /* Creates a new Field of the type specified in obj's dict.
-     used in Form::Form and FormField::FormField */
+     used in Form::Form , FormField::FormField and
+     Page::loadStandaloneFields */
   static FormField *createFieldFromDict (Object &&obj, PDFDoc *docA, const Ref aref, FormField *parent, std::set<int> *usedParents);
 
   Object *getObj () const { return acroForm; }
@@ -613,6 +619,7 @@ public:
 
   int getNumWidgets() const { return numWidgets; }
   FormWidget* getWidget(int i) const { return widgets[i]; }
+  void addWidgets(const std::vector<FormField*>& addedWidgets, unsigned int page);
 
 private:
   FormWidget** widgets;

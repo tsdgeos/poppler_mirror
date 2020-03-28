@@ -320,6 +320,9 @@ Page::Page(PDFDoc *docA, int numA, Object &&pageDict, Ref pageRefA, PageAttrs *a
 Page::~Page() {
   delete attrs;
   delete annots;
+  for (auto frmField : standaloneFields) {
+    delete frmField;
+  }
 }
 
 Dict *Page::getResourceDict() { 
@@ -355,10 +358,50 @@ void Page::replaceXRef(XRef *xrefA) {
   delete pageDict;
 }
 
+/* Loads standalone fields into Page, should be called once per page only */
+void Page::loadStandaloneFields(Annots *annotations, Form *form) {
+  const int numAnnots = annotations ? annotations->getNumAnnots() : 0;
+  if (numAnnots < 1)
+    return;
+
+  /* Look for standalone annots, identified by being: 1) of type Widget
+   * 2) of subtype Button 3) not referenced from the Catalog's Form Field array */
+  for (int i = 0; i < numAnnots; ++i) {
+    Annot *annot = annotations->getAnnot(i);
+
+    if (annot->getType() != Annot::typeWidget || !annot->getHasRef())
+      continue;
+
+    const Ref r = annot->getRef();
+    if (form && form->findWidgetByRef(r))
+      continue; // this annot is referenced inside Form, skip it
+
+    std::set<int> parents;
+    FormField *field = Form::createFieldFromDict (Object(annot->getDict()),
+                                                  annot->getDoc(), r, nullptr, &parents);
+
+    if (field && field->getType() == formButton && field->getNumWidgets() == 1) {
+
+      field->setStandAlone(true);
+      FormWidget *formWidget = field->getWidget(0);
+
+      if (!formWidget->getWidgetAnnotation())
+        formWidget->createWidgetAnnotation();
+
+      standaloneFields.push_back(field);
+
+    } else if (field) {
+      delete field;
+    }
+  }
+}
+
 Annots *Page::getAnnots(XRef *xrefA) {
   if (!annots) {
     Object obj = getAnnotsObject(xrefA);
     annots = new Annots(doc, num, &obj);
+    // Load standalone fields once for the page
+    loadStandaloneFields(annots, doc->getCatalog()->getForm());
   }
 
   return annots;
@@ -454,7 +497,10 @@ Links *Page::getLinks() {
 }
 
 FormPageWidgets *Page::getFormWidgets() {
-  return new FormPageWidgets(getAnnots(), num, doc->getCatalog()->getForm());
+  FormPageWidgets *frmPageWidgets = new FormPageWidgets(getAnnots(), num, doc->getCatalog()->getForm());
+  frmPageWidgets->addWidgets(standaloneFields, num);
+
+  return frmPageWidgets;
 }
 
 void Page::display(OutputDev *out, double hDPI, double vDPI,
