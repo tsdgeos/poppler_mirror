@@ -101,6 +101,8 @@ PopplerAction        *poppler_form_field_get_action              (PopplerFormFie
 POPPLER_PUBLIC
 PopplerAction        *poppler_form_field_get_additional_action   (PopplerFormField *field,
 								  PopplerAdditionalActionType type);
+POPPLER_PUBLIC
+gchar                *poppler_form_field_get_alternate_ui_name   (PopplerFormField *field);
 
 /* Button Field */
 POPPLER_PUBLIC

@@ -384,6 +384,30 @@ poppler_form_field_get_name (PopplerFormField *field)
   return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
 }
 
+/**
+ * poppler_form_field_get_alternate_ui_name:
+ * @field: a #PopplerFormField
+ *
+ * Gets the alternate ui name of @field. This name is also commonly
+ * used by pdf producers/readers to show it as a tooltip when @field area
+ * is hovered by a pointing device (eg. mouse).
+ *
+ * Return value: a new allocated string. It must be freed with g_free() when done.
+ *
+ * Since: 0.88
+ **/
+gchar*
+poppler_form_field_get_alternate_ui_name (PopplerFormField *field)
+{
+  const GooString *tmp;
+
+  g_return_val_if_fail (POPPLER_IS_FORM_FIELD (field), NULL);
+
+  tmp = field->widget->getAlternateUiName();
+
+  return tmp ? _poppler_goo_string_to_utf8 (tmp) : nullptr;
+}
+
 /* Text Field */
 /**
  * poppler_form_field_text_get_text_type:
