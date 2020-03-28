@@ -1,6 +1,6 @@
 /* poppler-form.h: qt interface to poppler
  * Copyright (C) 2007-2008, Pino Toscano <pino@kde.org>
- * Copyright (C) 2008, 2011, 2016, 2017, 2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2008, 2011, 2016, 2017, 2019, 2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2012, Adam Reichold <adamreichold@myopera.com>
  * Copyright (C) 2016, Hanno Meyer-Thurow <h.mth@web.de>
  * Copyright (C) 2017, Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
@@ -409,6 +409,14 @@ namespace Poppler {
 	  The possible choices of the choice field.
 	 */
 	QStringList choices() const;
+
+	/**
+	  The possible choices of the choice field.
+	  The first value of the pair is the display name of the choice,
+	  The second value is the export value (i.e. for use in javascript, etc) of the choice
+	  @since 0.87
+	 */
+	QVector<QPair<QString,QString>> choicesWithExportValues() const;
 
 	/**
 	  Whether this FormFieldChoice::ComboBox is editable, i.e. the user

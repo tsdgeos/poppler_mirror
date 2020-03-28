@@ -4,7 +4,7 @@
 //
 // A JPX stream decoder using OpenJPEG
 //
-// Copyright 2008-2010, 2012, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2008-2010, 2012, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright 2011 Daniel Glöckner <daniel-gl@gmx.net>
 // Copyright 2014, 2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright 2013, 2014 Adrian Johnson <ajohnson@redneon.com>
@@ -357,6 +357,10 @@ void JPXStreamPrivate::init2(OPJ_CODEC_FORMAT format, unsigned char *buf, int le
     return;
 
 error:
+  if (image != nullptr) {
+    opj_image_destroy(image);
+    image = nullptr;
+  }
   opj_stream_destroy(stream);
   opj_destroy_codec(decoder);
   if (format == OPJ_CODEC_JP2) {

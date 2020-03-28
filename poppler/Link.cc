@@ -444,6 +444,8 @@ LinkGoTo::LinkGoTo(const Object *destObj) {
   }
 }
 
+LinkGoTo::~LinkGoTo() = default;
+
 //------------------------------------------------------------------------
 // LinkGoToR
 //------------------------------------------------------------------------
@@ -473,6 +475,8 @@ LinkGoToR::LinkGoToR(Object *fileSpecObj, Object *destObj) {
     error(errSyntaxWarning, -1, "Illegal annotation destination");
   }
 }
+
+LinkGoToR::~LinkGoToR() = default;
 
 //------------------------------------------------------------------------
 // LinkLaunch
@@ -552,6 +556,8 @@ LinkURI::LinkURI(const Object *uriObj, const GooString *baseURI) {
   }
 }
 
+LinkURI::~LinkURI() = default;
+
 //------------------------------------------------------------------------
 // LinkNamed
 //------------------------------------------------------------------------
@@ -563,6 +569,8 @@ LinkNamed::LinkNamed(const Object *nameObj) {
     hasNameFlag = true;
   }
 }
+
+LinkNamed::~LinkNamed() = default;
 
 //------------------------------------------------------------------------
 // LinkMovie
@@ -607,6 +615,8 @@ LinkMovie::LinkMovie(const Object *obj) {
   }
 }
 
+LinkMovie::~LinkMovie() = default;
+
 //------------------------------------------------------------------------
 // LinkSound
 //------------------------------------------------------------------------
@@ -645,6 +655,8 @@ LinkSound::LinkSound(const Object *soundObj) {
   }
 }
 
+LinkSound::~LinkSound() = default;
+
 //------------------------------------------------------------------------
 // LinkRendition
 //------------------------------------------------------------------------
@@ -676,7 +688,7 @@ LinkRendition::LinkRendition(const Object *obj) {
         error(errSyntaxWarning, -1, "Invalid Rendition Action: unrecognized operation valued: {0:d}", operationCode);
       } else {
         // retrieve rendition object
-        renditionObj = obj->dictLookup("R");
+        Object renditionObj = obj->dictLookup("R");
         if (renditionObj.isDict()) {
           media = new MediaRendition(&renditionObj);
 	} else if (operationCode == 0 || operationCode == 4) {
@@ -738,6 +750,8 @@ LinkJavaScript::LinkJavaScript(Object *jsObj) {
   }
 }
 
+LinkJavaScript::~LinkJavaScript() = default;
+
 Object LinkJavaScript::createObject(XRef *xref, const GooString &js)
 {
   Dict *linkDict = new Dict(xref);
@@ -793,6 +807,8 @@ LinkOCGState::LinkOCGState(const Object *obj)
   preserveRB = obj->dictLookup("PreserveRB").getBoolWithDefaultValue(true);
 }
 
+LinkOCGState::~LinkOCGState() = default;
+
 //------------------------------------------------------------------------
 // LinkHide
 //------------------------------------------------------------------------
@@ -814,6 +830,8 @@ LinkHide::LinkHide(const Object *hideObj) {
   }
 }
 
+LinkHide::~LinkHide() = default;
+
 //------------------------------------------------------------------------
 // LinkUnknown
 //------------------------------------------------------------------------
@@ -821,6 +839,8 @@ LinkHide::LinkHide(const Object *hideObj) {
 LinkUnknown::LinkUnknown(const char *actionA) {
   action = std::string(actionA ? actionA : "");
 }
+
+LinkUnknown::~LinkUnknown() = default;
 
 //------------------------------------------------------------------------
 // Links

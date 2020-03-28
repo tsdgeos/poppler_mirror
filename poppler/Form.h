@@ -6,7 +6,7 @@
 //
 // Copyright 2006 Julien Rebetez <julienr@svn.gnome.org>
 // Copyright 2007, 2008, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright 2007-2010, 2012, 2015-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2007-2010, 2012, 2015-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright 2010 Mark Riedesel <mark@klowner.com>
 // Copyright 2011 Pino Toscano <pino@kde.org>
 // Copyright 2012 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -228,6 +228,7 @@ public:
   int getNumChoices() const;
   //return the display name of the i-th choice (UTF16BE)
   const GooString* getChoice(int i) const;
+  const GooString* getExportVal(int i) const;
   //select the i-th choice
   void select (int i); 
 

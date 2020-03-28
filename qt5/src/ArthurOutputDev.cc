@@ -23,7 +23,7 @@
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Dominik Haumann <dhaumann@kde.org>
 // Copyright (C) 2013 Mihai Niculescu <q.quark@gmail.com>
-// Copyright (C) 2017, 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2017, 2018, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2017 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -268,10 +268,17 @@ void ArthurOutputDev::updateLineDash(GfxState *state)
   }
 
   QVector<qreal> pattern(dashLength);
+  double scaling = state->getLineWidth();
+
+  //  Negative line widths are not allowed, width 0 counts as 'one pixel width'.
+  if (scaling <= 0) {
+    scaling = 1.0;
+  }
+
   for (int i = 0; i < dashLength; ++i) {
     // pdf measures the dash pattern in dots, but Qt uses the
     // line width as the unit.
-    pattern[i] = dashPattern[i] / state->getLineWidth();
+    pattern[i] = dashPattern[i] / scaling;
   }
   m_currentPen.setDashPattern(pattern);
   m_currentPen.setDashOffset(dashStart);

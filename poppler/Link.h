@@ -17,7 +17,7 @@
 // Copyright (C) 2008 Hugo Mercier <hmercier31@gmail.com>
 // Copyright (C) 2010, 2011 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2012 Tobias Koening <tobias.koenig@kdab.com>
-// Copyright (C) 2018, 2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2018-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
@@ -164,6 +164,8 @@ public:
   // Build a LinkGoTo from a destination (dictionary, name, or string).
   LinkGoTo(const Object *destObj);
 
+  ~LinkGoTo() override;
+
   // Was the LinkGoTo created successfully?
   bool isOk() const override { return dest || namedDest; }
 
@@ -190,6 +192,8 @@ public:
   // Build a LinkGoToR from a file spec (dictionary) and destination
   // (dictionary, name, or string).
   LinkGoToR(Object *fileSpecObj, Object *destObj);
+
+  ~LinkGoToR() override;
 
   // Was the LinkGoToR created successfully?
   bool isOk() const override { return fileName && (dest || namedDest); }
@@ -243,6 +247,8 @@ public:
   // Build a LinkURI given the URI (string) and base URI.
   LinkURI(const Object *uriObj, const GooString *baseURI);
 
+  ~LinkURI() override;
+
   // Was the LinkURI created successfully?
   bool isOk() const override { return hasURIFlag; }
 
@@ -265,6 +271,8 @@ public:
 
   // Build a LinkNamed given the action name.
   LinkNamed(const Object *nameObj);
+
+  ~LinkNamed() override;
 
   bool isOk() const override { return hasNameFlag; }
 
@@ -293,6 +301,8 @@ public:
   };
 
   LinkMovie(const Object *obj);
+
+  ~LinkMovie() override;
 
   bool isOk() const override { return hasAnnotRef() || hasAnnotTitleFlag; }
   LinkActionKind getKind() const override { return actionMovie; }
@@ -342,9 +352,6 @@ public:
 
   LinkActionKind getKind() const override { return actionRendition; }
 
-  bool hasRenditionObject() const { return renditionObj.isDict(); }
-  const Object* getRenditionObject() const { return &renditionObj; }
-
   bool hasScreenAnnot() const { return screenRef != Ref::INVALID(); }
   Ref getScreenAnnot() const { return screenRef; }
 
@@ -357,7 +364,6 @@ public:
 private:
 
   Ref screenRef;
-  Object renditionObj;
   RenditionOperation operation;
 
   MediaRendition* media;
@@ -373,6 +379,8 @@ class LinkSound: public LinkAction {
 public:
 
   LinkSound(const Object *soundObj);
+
+  ~LinkSound() override;
 
   bool isOk() const override { return sound != nullptr; }
 
@@ -403,6 +411,8 @@ public:
   // Build a LinkJavaScript given the action name.
   LinkJavaScript(Object *jsObj);
 
+  ~LinkJavaScript() override;
+
   bool isOk() const override { return isValid; }
 
   LinkActionKind getKind() const override { return actionJavaScript; }
@@ -423,7 +433,7 @@ class LinkOCGState: public LinkAction {
 public:
   LinkOCGState(const Object *obj);
 
-  ~LinkOCGState() override = default;
+  ~LinkOCGState() override;
 
   bool isOk() const override { return isValid; }
 
@@ -453,6 +463,8 @@ private:
 class LinkHide: public LinkAction {
 public:
   LinkHide(const Object *hideObj);
+
+  ~LinkHide() override;
 
   bool isOk() const override { return hasTargetNameFlag; }
   LinkActionKind getKind() const override { return actionHide; }
@@ -488,6 +500,8 @@ public:
 
   // Build a LinkUnknown with the specified action type.
   LinkUnknown(const char *actionA);
+
+  ~LinkUnknown() override;
 
   // Was the LinkUnknown create successfully?
   // Yes: nothing can go wrong when creating LinkUnknown objects

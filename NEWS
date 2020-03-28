@@ -1,3 +1,8 @@
+Release 0.86.1:
+        core:
+         * Fix regression in Browse Link handling
+         * Internal code improvements
+
 Release 0.86.0:
         core:
          * Fix link content exfiltration attack

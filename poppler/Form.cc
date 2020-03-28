@@ -423,6 +423,11 @@ const GooString* FormWidgetChoice::getChoice(int i) const
   return parent()->getChoice(i);
 }
 
+const GooString* FormWidgetChoice::getExportVal(int i) const
+{
+  return parent()->getExportVal(i);
+}
+
 bool FormWidgetChoice::isCombo () const 
 { 
   return parent()->isCombo();
