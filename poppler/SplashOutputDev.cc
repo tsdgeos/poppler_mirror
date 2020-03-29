@@ -2847,7 +2847,7 @@ struct SplashOutImageData {
 bool SplashOutputDev::useIccImageSrc(void *data) {
   SplashOutImageData *imgData = (SplashOutImageData *)data;
 
-  if (!imgData->lookup && imgData->colorMap->getColorSpace()->getMode() == csICCBased) {
+  if (!imgData->lookup && imgData->colorMap->getColorSpace()->getMode() == csICCBased && imgData->colorMap->getBits() != 1) {
     GfxICCBasedColorSpace *colorSpace = (GfxICCBasedColorSpace *) imgData->colorMap->getColorSpace();
     switch (imgData->colorMode) {
     case splashModeMono1:

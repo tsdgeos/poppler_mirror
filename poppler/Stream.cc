@@ -813,7 +813,7 @@ bool StreamPredictor::getNextLine() {
 
   // apply TIFF (component) predictor
   if (predictor == 2) {
-    if (nBits == 1) {
+    if (nBits == 1 && nComps == 1) {
       inBuf = predLine[pixBytes - 1];
       for (i = pixBytes; i < rowBytes; i += 8) {
 	// 1-bit add is just xor
