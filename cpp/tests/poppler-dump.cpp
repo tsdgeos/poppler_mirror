@@ -4,6 +4,7 @@
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
+ * Copyright (C) 2020, Jiri Jakes <freedesktop@jirijakes.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

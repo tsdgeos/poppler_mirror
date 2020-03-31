@@ -6,6 +6,7 @@
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2018, Aleksey Nikolaev <nae202@gmail.com>
+ * Copyright (C) 2020, Jiri Jakes <freedesktop@jirijakes.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
