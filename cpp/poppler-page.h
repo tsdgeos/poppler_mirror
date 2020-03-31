@@ -91,7 +91,8 @@ public:
     };
     enum text_layout_enum {
         physical_layout,
-        raw_order_layout
+        raw_order_layout,
+        non_raw_non_physical_layout
     };
 
     ~page();
