@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
- * Copyright (C) 2018, 2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018-2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2018, Aleksey Nikolaev <nae202@gmail.com>
  * Copyright (C) 2020, Jiri Jakes <freedesktop@jirijakes.eu>
@@ -93,7 +93,7 @@ public:
     enum text_layout_enum {
         physical_layout,
         raw_order_layout,
-        non_raw_non_physical_layout
+        non_raw_non_physical_layout ///< \since 0.88
     };
 
     ~page();
