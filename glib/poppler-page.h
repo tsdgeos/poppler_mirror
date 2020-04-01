@@ -132,6 +132,9 @@ POPPLER_PUBLIC
 void 		      poppler_page_get_crop_box 	 (PopplerPage        *page,
 							  PopplerRectangle   *rect);
 POPPLER_PUBLIC
+gboolean                   poppler_page_get_bounding_box (PopplerPage           *page,
+                                                          PopplerRectangle      *rect);
+POPPLER_PUBLIC
 gboolean               poppler_page_get_text_layout      (PopplerPage        *page,
                                                           PopplerRectangle  **rectangles,
                                                           guint              *n_rectangles);

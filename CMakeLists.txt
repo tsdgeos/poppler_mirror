@@ -404,6 +404,7 @@ set(poppler_SRCS
   poppler/Movie.cc
   poppler/Rendition.cc
   poppler/CertificateInfo.cc
+  poppler/BBoxOutputDev.cc
 )
 set(poppler_LIBS ${FREETYPE_LIBRARIES})
 if(ENABLE_SPLASH)
@@ -614,6 +615,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/SecurityHandler.h
     poppler/StdinCachedFile.h
     poppler/StdinPDFDocBuilder.h
+    poppler/BBoxOutputDev.h
     poppler/UTF.h
     poppler/Sound.h
     ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h

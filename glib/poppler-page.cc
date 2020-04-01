@@ -27,6 +27,7 @@
 #include <UnicodeMap.h>
 #include <GfxState.h>
 #include <PageTransition.h>
+#include <BBoxOutputDev.h>
 #endif
 
 #include "poppler.h"
@@ -2185,6 +2186,53 @@ poppler_page_get_crop_box (PopplerPage *page, PopplerRectangle *rect)
   rect->x2 = cropBox->x2;
   rect->y1 = cropBox->y1;
   rect->y2 = cropBox->y2;
+}
+
+/*
+ * poppler_page_get_bounding_box:
+ * @page: A #PopplerPage
+ * @rect: (out) return the bounding box of the page
+ *
+ * Returns the bounding box of the page, a rectangle enclosing all text, vector
+ * graphics (lines, rectangles and curves) and raster images in the page.
+ * Includes invisible text but not (yet) annotations like highlights and form
+ * elements.
+ *
+ * Return value: %TRUE if the page contains graphics, %FALSE otherwise
+ *
+ * Since: 0.88
+ */
+gboolean
+poppler_page_get_bounding_box (PopplerPage *page,
+                               PopplerRectangle *rect) {
+  Gfx *gfx;
+  BBoxOutputDev *bb_out;
+  bool hasGraphics;
+
+  g_return_val_if_fail(POPPLER_IS_PAGE (page), false);
+  g_return_val_if_fail(rect != nullptr, false);
+
+  bb_out = new BBoxOutputDev(page->page->getCropBox());
+
+  gfx = page->page->createGfx(bb_out,
+                              72.0, 72.0, 0,
+                              false, /* useMediaBox */
+                              true, /* Crop */
+                              -1, -1, -1, -1,
+                              false, /* printing */
+                              nullptr, nullptr);
+  page->page->display(gfx);
+  hasGraphics = bb_out->getHasGraphics();
+  if (hasGraphics) {
+    rect->x1 = bb_out->getX1();
+    rect->y1 = bb_out->getY1();
+    rect->x2 = bb_out->getX2();
+    rect->y2 = bb_out->getY2();
+  }
+
+  delete gfx;
+  delete bb_out;
+  return hasGraphics;
 }
 
 /**
