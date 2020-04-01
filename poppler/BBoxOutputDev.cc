@@ -1,6 +1,12 @@
-/*
- * boundingbox output device
- */
+//========================================================================
+//
+// BBoxOutputDev.cc
+//
+// This file is licensed under the GPLv2 or later
+//
+// Copyright 2020 sgerwk <sgerwk@aol.com>
+//
+//========================================================================
 
 #include <cmath>
 #include <BBoxOutputDev.h>
