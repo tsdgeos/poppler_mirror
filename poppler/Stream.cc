@@ -23,7 +23,7 @@
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2010 Tomas Hoger <thoger@redhat.com>
 // Copyright (C) 2011, 2012, 2016 William Bader <williambader@hotmail.com>
-// Copyright (C) 2012, 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
+// Copyright (C) 2012, 2013, 2020 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2012 Oliver Sander <sander@mi.fu-berlin.de>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Even Rouault <even.rouault@mines-paris.org>
@@ -813,7 +813,7 @@ bool StreamPredictor::getNextLine() {
 
   // apply TIFF (component) predictor
   if (predictor == 2) {
-    if (nBits == 1) {
+    if (nBits == 1 && nComps == 1) {
       inBuf = predLine[pixBytes - 1];
       for (i = pixBytes; i < rowBytes; i += 8) {
 	// 1-bit add is just xor

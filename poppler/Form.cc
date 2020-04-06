@@ -23,7 +23,7 @@
 // Copyright 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright 2018 Chinmoy Ranjan Pradhan <chinmoyrp65@protonmail.com>
 // Copyright 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright 2018, 2019 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright 2018-2020 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2019 Tomoyuki Kubota <himajin100000@gmail.com>
 // Copyright 2019 João Netto <joaonetto901@gmail.com>
@@ -646,6 +646,7 @@ FormField::FormField(PDFDoc *docA, Object &&aobj, const Ref aref, FormField *par
   fullyQualifiedName = nullptr;
   quadding = quaddingLeftJustified;
   hasQuadding = false;
+  standAlone = false;
 
   //childs
   Object obj1 = dict->lookup("Kids");
@@ -2022,6 +2023,21 @@ FormPageWidgets::FormPageWidgets (Annots *annots, unsigned int page, Form *form)
         widgets[numWidgets++] = tmp;
       }
     }
+  }
+}
+
+void FormPageWidgets::addWidgets(const std::vector<FormField*>& addedWidgets, unsigned int page)
+{
+  if (addedWidgets.empty())
+    return;
+
+  size += addedWidgets.size();
+  widgets = (FormWidget**)greallocn(widgets, size, sizeof(FormWidget*));
+
+  for (auto frmField : addedWidgets) {
+    FormWidget *frmWidget = frmField->getWidget(0);
+    frmWidget->setID(FormWidget::encodeID(page, numWidgets));
+    widgets[numWidgets++] = frmWidget;
   }
 }
 

@@ -1,3 +1,18 @@
+Release 0.87.0:
+        core:
+         * Fix leak in broken files
+         * Internal code improvements
+
+        qt5:
+         * Add option to get form choice for export value
+         * ArthurOutputDev: Avoid division by zero in updateLineDash. Issue #695
+
+        glib:
+         * Internal code improvements
+
+         utils:
+         * pdftohtml: Fix memory leak in HtmlOutputDev::getLinkDest
+
 Release 0.86.1:
         core:
          * Fix regression in Browse Link handling

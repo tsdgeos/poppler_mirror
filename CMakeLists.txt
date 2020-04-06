@@ -36,8 +36,8 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "0")
-set(POPPLER_MINOR_VERSION "86")
-set(POPPLER_MICRO_VERSION "1")
+set(POPPLER_MINOR_VERSION "87")
+set(POPPLER_MICRO_VERSION "0")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION}.${POPPLER_MICRO_VERSION}")
 
 set (CMAKE_CXX_STANDARD 14)
@@ -404,6 +404,7 @@ set(poppler_SRCS
   poppler/Movie.cc
   poppler/Rendition.cc
   poppler/CertificateInfo.cc
+  poppler/BBoxOutputDev.cc
 )
 set(poppler_LIBS ${FREETYPE_LIBRARIES})
 if(ENABLE_SPLASH)
@@ -533,7 +534,7 @@ add_library(poppler STATIC ${poppler_SRCS})
 else()
 add_library(poppler ${poppler_SRCS})
 endif()
-set_target_properties(poppler PROPERTIES VERSION 97.0.0 SOVERSION 97)
+set_target_properties(poppler PROPERTIES VERSION 98.0.0 SOVERSION 98)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
     set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -614,6 +615,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/SecurityHandler.h
     poppler/StdinCachedFile.h
     poppler/StdinPDFDocBuilder.h
+    poppler/BBoxOutputDev.h
     poppler/UTF.h
     poppler/Sound.h
     ${CMAKE_CURRENT_BINARY_DIR}/poppler/poppler-config.h

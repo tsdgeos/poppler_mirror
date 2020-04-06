@@ -4,6 +4,7 @@
  * Copyright (C) 2017, Jason Alan Palmer <jalanpalmer@gmail.com>
  * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2019, Masamichi Hosoda <trueroad@trueroad.jp>
+ * Copyright (C) 2020, Jiri Jakes <freedesktop@jirijakes.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,7 +82,7 @@ static const ArgDesc the_args[] = {
     { "--show-destinations",   argFlag,  &show_destinations,   0,
       "show named destinations" },
     { "--show-text",           argString, &show_text,          sizeof(show_text),
-      "show text (physical|raw) extracted from all pages" },
+      "show text (physical|raw|none) extracted from all pages" },
     { "--show-text-list",      argFlag, &show_text_list,       0,
       "show text list (experimental)" },
     { "-h",                    argFlag,  &show_help,           0,
@@ -451,6 +452,8 @@ int main(int argc, char *argv[])
             show_text_layout = poppler::page::physical_layout;
         } else if (!memcmp(show_text, "raw", 4)) {
             show_text_layout = poppler::page::raw_order_layout;
+        } else if (!memcmp(show_text, "none", 5)) {
+            show_text_layout = poppler::page::non_raw_non_physical_layout;
         } else {
             error(std::string("unrecognized text mode: '") + show_text + "'");
         }

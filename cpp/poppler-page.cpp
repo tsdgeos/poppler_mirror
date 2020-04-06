@@ -6,6 +6,7 @@
  * Copyright (C) 2018, Adam Reichold <adam.reichold@t-online.de>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2018, Aleksey Nikolaev <nae202@gmail.com>
+ * Copyright (C) 2020, Jiri Jakes <freedesktop@jirijakes.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -262,6 +263,10 @@ ustring page::text(const rectf &r) const
     return text(r, physical_layout);
 }
 
+static void appendToGooString(void *stream, const char *text, int len) {
+  ((GooString *) stream)->append(text, len);
+}
+
 /**
  Returns the text in the page.
 
@@ -275,22 +280,17 @@ ustring page::text(const rectf &r) const
  */
 ustring page::text(const rectf &r, text_layout_enum layout_mode) const
 {
-    std::unique_ptr<GooString> s;
-    const bool use_raw_order = (layout_mode == raw_order_layout);
-    TextOutputDev td(nullptr, false, 0, use_raw_order, false);
-    d->doc->doc->displayPage(&td, d->index + 1, 72, 72, 0, false, true, false);
+    std::unique_ptr<GooString> out(new GooString());
+    const bool use_raw_order = (layout_mode == raw_order_layout); 
+    const bool use_physical_layout = (layout_mode == physical_layout);
+    TextOutputDev td(&appendToGooString, out.get(), use_physical_layout, 0, use_raw_order, false);
     if (r.is_empty()) {
-        PDFRectangle rect = *d->page->getCropBox();
-        const int rotate = d->page->getRotate();
-        if (rotate == 90 || rotate == 270) {
-            std::swap(rect.x1, rect.y1);
-            std::swap(rect.x2, rect.y2);
-        }
-        s.reset(td.getText(rect.x1, rect.y1, rect.x2, rect.y2));
+        d->doc->doc->displayPage(&td, d->index + 1, 72, 72, 0, false, true, false);
     } else {
-        s.reset(td.getText(r.left(), r.top(), r.right(), r.bottom()));
+        d->doc->doc->displayPageSlice(&td, d->index + 1, 72, 72, 0, false, true, false,
+				      r.left(), r.top(), r.width(), r.height());
     }
-    return ustring::from_utf8(s->c_str());
+    return ustring::from_utf8(out->c_str());
 }
 
 /*

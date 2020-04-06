@@ -33,6 +33,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Umang Malik <umang99m@gmail.com>
 // Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
+// Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -696,6 +697,7 @@ public:
   PDFDoc *getDoc() const { return doc; }
   bool getHasRef() const { return hasRef; }
   Ref getRef() const { return ref; }
+  Dict *getDict() const { return annotObj.getDict(); }
   AnnotSubtype getType() const { return type; }
   PDFRectangle *getRect() const { return rect.get(); }
   void getRect(double *x1, double *y1, double *x2, double *y2) const;
