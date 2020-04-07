@@ -72,9 +72,9 @@ void TestForms::testStandAloneWidgets()
         QCOMPARE( ff->isStandAlone() , true );
 
         // tooltip.pdf has only these 3 standalone widgets
-        QVERIFY( field->uiName() == QStringLiteral("This is a tooltip!") ||
+        QVERIFY( field->uiName() == QStringLiteral("This is a tooltip!") || //clazy:exclude=qstring-allocations
                  field->uiName() == QStringLiteral("Sulfuric acid") ||
-                 field->uiName() == QStringLiteral("little Gauß") );
+                 field->uiName() == QString::fromUtf8("little Gauß") );
     }
 }
 
