@@ -15,7 +15,7 @@
 //
 // Copyright (C) 2005 Kristian Høgsberg <krh@redhat.com>
 // Copyright (C) 2005 Jeff Muizelaar <jeff@infidigm.net>
-// Copyright (C) 2005-2013, 2016-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright (C) 2005-2013, 2016-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2006-2008 Pino Toscano <pino@kde.org>
 // Copyright (C) 2006 Nickolay V. Shmyrev <nshmyrev@yandex.ru>
 // Copyright (C) 2006 Scott Turner <scotty1024@mac.com>
@@ -378,7 +378,7 @@ void Page::loadStandaloneFields(Annots *annotations, Form *form) {
       continue; // this annot is referenced inside Form, skip it
 
     std::set<int> parents;
-    FormField *field = Form::createFieldFromDict (Object(annot->getDict()),
+    FormField *field = Form::createFieldFromDict (annot->getAnnotObj().copy(),
                                                   annot->getDoc(), r, nullptr, &parents);
 
     if (field && field->getType() == formButton && field->getNumWidgets() == 1) {
