@@ -48,6 +48,7 @@
 #include <QtCore/QFile>
 #include <QtCore/QByteArray>
 
+#include "poppler-form.h"
 #include "poppler-private.h"
 #include "poppler-page-private.h"
 #include "poppler-outline-private.h"
@@ -824,6 +825,21 @@ namespace Poppler {
             if (w) {
                 result << w->getID();
             }
+        }
+
+        return result;
+    }
+
+    QVector<FormFieldSignature*> Document::signatures() const
+    {
+        QVector<FormFieldSignature*> result;
+
+        const std::vector<::FormFieldSignature*> pSignatures = m_doc->doc->getSignatureFields();
+
+        for (::FormFieldSignature *pSignature : pSignatures) {
+            ::FormWidget *fw = pSignature->getWidget(0);
+            ::Page *p = m_doc->doc->getPage(fw->getWidgetAnnotation()->getPageNum());
+            result.append(new FormFieldSignature(m_doc, p, static_cast<FormWidgetSignature*>(fw)));
         }
 
         return result;

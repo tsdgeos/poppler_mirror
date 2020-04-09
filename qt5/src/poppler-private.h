@@ -256,7 +256,7 @@ namespace Poppler {
 		}
 
 		DocumentData *doc;
-		::Page *page;
+		::Page *page; // Note for some signatures it can be null since there's signatures that don't belong to a given page
 		::FormWidget *fm;
 		QRectF box;
 		static POPPLER_QT5_EXPORT ::FormWidget *getFormWidget( const FormField *f );

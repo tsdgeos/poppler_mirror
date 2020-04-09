@@ -66,6 +66,7 @@ namespace Poppler {
     class PageData;
 
     class FormField;
+    class FormFieldSignature;
 
     class TextBoxData;
 
@@ -1845,6 +1846,16 @@ QString subject = m_doc->info("Subject");
 	   \since 0.53
 	*/
 	QVector<int> formCalculateOrder() const;
+
+	/**
+	 Returns the signatures of this document.
+
+	 Prefer to use this over getting the signatures for all the pages of the document
+	 since there are documents with signatures that don't belong to a given page
+
+	 \since 0.88
+	*/
+	QVector<FormFieldSignature*> signatures() const;
 
 	/**
 	   Destructor.

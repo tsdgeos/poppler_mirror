@@ -105,29 +105,31 @@ FormFieldIcon::~FormFieldIcon()
 FormField::FormField(std::unique_ptr<FormFieldData> dd)
   : m_formData(std::move(dd))
 {
-  const int rotation = m_formData->page->getRotate();
-  // reading the coords
-  double left, top, right, bottom;
-  m_formData->fm->getRect(&left, &bottom, &right, &top);
-  // build a normalized transform matrix for this page at 100% scale
-  GfxState gfxState( 72.0, 72.0, m_formData->page->getCropBox(), rotation, true );
-  const double * gfxCTM = gfxState.getCTM();
-  double MTX[6];
-  double pageWidth = m_formData->page->getCropWidth();
-  double pageHeight = m_formData->page->getCropHeight();
-  // landscape and seascape page rotation: be sure to use the correct (== rotated) page size
-  if (((rotation / 90) % 2) == 1)
-    qSwap(pageWidth, pageHeight);
-  for ( int i = 0; i < 6; i+=2 )
-  {
-    MTX[i] = gfxCTM[i] / pageWidth;
-    MTX[i+1] = gfxCTM[i+1] / pageHeight;
+  if (m_formData->page) {
+    const int rotation = m_formData->page->getRotate();
+    // reading the coords
+    double left, top, right, bottom;
+    m_formData->fm->getRect(&left, &bottom, &right, &top);
+    // build a normalized transform matrix for this page at 100% scale
+    GfxState gfxState( 72.0, 72.0, m_formData->page->getCropBox(), rotation, true );
+    const double * gfxCTM = gfxState.getCTM();
+    double MTX[6];
+    double pageWidth = m_formData->page->getCropWidth();
+    double pageHeight = m_formData->page->getCropHeight();
+    // landscape and seascape page rotation: be sure to use the correct (== rotated) page size
+    if (((rotation / 90) % 2) == 1)
+      qSwap(pageWidth, pageHeight);
+    for ( int i = 0; i < 6; i+=2 )
+    {
+      MTX[i] = gfxCTM[i] / pageWidth;
+      MTX[i+1] = gfxCTM[i+1] / pageHeight;
+    }
+    QPointF topLeft;
+    XPDFReader::transform( MTX, qMin( left, right ), qMax( top, bottom ), topLeft );
+    QPointF bottomRight;
+    XPDFReader::transform( MTX, qMax( left, right ), qMin( top, bottom ), bottomRight );
+    m_formData->box = QRectF(topLeft, QSizeF(bottomRight.x() - topLeft.x(), bottomRight.y() - topLeft.y()));
   }
-  QPointF topLeft;
-  XPDFReader::transform( MTX, qMin( left, right ), qMax( top, bottom ), topLeft );
-  QPointF bottomRight;
-  XPDFReader::transform( MTX, qMax( left, right ), qMin( top, bottom ), bottomRight );
-  m_formData->box = QRectF(topLeft, QSizeF(bottomRight.x() - topLeft.x(), bottomRight.y() - topLeft.y()));
 }
 
 FormField::~FormField() = default;
