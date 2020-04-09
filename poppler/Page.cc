@@ -362,6 +362,7 @@ void Page::replaceXRef(XRef *xrefA) {
 /* Loads standalone fields into Page, should be called once per page only */
 void Page::loadStandaloneFields(Annots *annotations, Form *form) {
   const int numAnnots = annotations ? annotations->getNumAnnots() : 0;
+
   if (numAnnots < 1)
     return;
 

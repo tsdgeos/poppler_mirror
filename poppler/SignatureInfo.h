@@ -53,15 +53,15 @@ public:
   SignatureInfo& operator=(const SignatureInfo &) = delete;
 
   /* GETTERS */
-  SignatureValidationStatus getSignatureValStatus();
-  CertificateValidationStatus getCertificateValStatus();
-  const char *getSignerName();
-  const char *getSubjectDN();
+  SignatureValidationStatus getSignatureValStatus() const;
+  CertificateValidationStatus getCertificateValStatus() const;
+  const char *getSignerName() const;
+  const char *getSubjectDN() const;
   const char *getLocation() const;
   const char *getReason() const;
-  int getHashAlgorithm(); // Returns a NSS3 HASH_HashType or -1 if compiled without NSS3
-  time_t getSigningTime();
-  bool isSubfilterSupported() { return sig_subfilter_supported; }
+  int getHashAlgorithm() const; // Returns a NSS3 HASH_HashType or -1 if compiled without NSS3
+  time_t getSigningTime() const;
+  bool isSubfilterSupported() const { return sig_subfilter_supported; }
   const X509CertificateInfo *getCertificateInfo() const;
 
   /* SETTERS */

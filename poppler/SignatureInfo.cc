@@ -67,22 +67,22 @@ SignatureInfo::~SignatureInfo()
 
 /* GETTERS */
 
-SignatureValidationStatus SignatureInfo::getSignatureValStatus()
+SignatureValidationStatus SignatureInfo::getSignatureValStatus() const
 {
   return sig_status;
 }
 
-CertificateValidationStatus SignatureInfo::getCertificateValStatus()
+CertificateValidationStatus SignatureInfo::getCertificateValStatus() const
 {
   return cert_status;
 }
 
-const char *SignatureInfo::getSignerName()
+const char *SignatureInfo::getSignerName() const
 {
   return signer_name;
 }
 
-const char *SignatureInfo::getSubjectDN()
+const char *SignatureInfo::getSubjectDN() const
 {
   return subject_dn;
 }
@@ -97,12 +97,12 @@ const char *SignatureInfo::getReason() const
   return reason;
 }
 
-int SignatureInfo::getHashAlgorithm()
+int SignatureInfo::getHashAlgorithm() const
 {
   return hash_type;
 }
 
-time_t SignatureInfo::getSigningTime()
+time_t SignatureInfo::getSigningTime() const
 {
   return signing_time;
 }

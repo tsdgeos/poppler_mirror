@@ -597,25 +597,32 @@ void PDFDoc::extractPDFSubtype() {
   delete pdfSubtypeVersion;
 }
 
-std::vector<FormWidgetSignature*> PDFDoc::getSignatureWidgets()
+static void addSignatureFieldsToVector(FormField *ff, std::vector<FormFieldSignature*> &res)
 {
-  int num_pages = getNumPages();
-  FormPageWidgets *page_widgets = nullptr;
-  std::vector<FormWidgetSignature*> widget_vector;
-
-  for (int i = 1; i <= num_pages; i++) {
-    Page *p = getCatalog()->getPage(i);
-    if (p) {
-      page_widgets = p->getFormWidgets();
-      for (int j = 0; page_widgets != nullptr && j < page_widgets->getNumWidgets(); j++) {
-	if (page_widgets->getWidget(j)->getType() == formSignature) {
-	    widget_vector.push_back(static_cast<FormWidgetSignature*>(page_widgets->getWidget(j)));
-	}
-      }
-      delete page_widgets;
+  if (ff->getNumChildren() == 0) {
+    if (ff->getType() == formSignature) {
+      res.push_back(static_cast<FormFieldSignature*>(ff));
+    }
+  } else {
+    for (int i = 0; i < ff->getNumChildren(); ++i) {
+      FormField *children = ff->getChildren(i);
+      addSignatureFieldsToVector(children, res);
     }
   }
-  return widget_vector;
+}
+
+std::vector<FormFieldSignature*> PDFDoc::getSignatureFields()
+{
+//   const int num_pages = getNumPages();
+  std::vector<FormFieldSignature*> res;
+
+  const Form *f = catalog->getForm();
+  const int nRootFields = f->getNumFields();
+  for (int i = 0; i < nRootFields; ++i) {
+    FormField *ff = f->getRootField(i);
+    addSignatureFieldsToVector(ff, res);
+  }
+  return res;
 }
 
 void PDFDoc::displayPage(OutputDev *out, int page,

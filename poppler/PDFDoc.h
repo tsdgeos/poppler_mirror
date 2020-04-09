@@ -239,7 +239,7 @@ public:
   // Is the file encrypted?
   bool isEncrypted() { return xref->isEncrypted(); }
 
-  std::vector<FormWidgetSignature*> getSignatureWidgets();
+  std::vector<FormFieldSignature*> getSignatureFields();
 
   // Check various permissions.
   bool okToPrint(bool ignoreOwnerPW = false)
