@@ -55,23 +55,13 @@ class ArthurType3Font;
 
 class ArthurOutputDev: public OutputDev {
 public:
-  /**
-   * Describes how fonts are distorted (aka hinted) to fit the pixel grid.
-   * More hinting means sharper edges and less adherence to the true letter shapes.
-   */
-  enum FontHinting {
-    NoHinting = 0, ///< Font shapes are left unchanged
-    SlightHinting, ///< Font shapes are distorted vertically only
-    FullHinting ///< Font shapes are distorted horizontally and vertically
-  };
-
   // Constructor.
   ArthurOutputDev(QPainter *painter );
 
   // Destructor.
   ~ArthurOutputDev() override;
 
-  void setFontHinting(FontHinting hinting) { m_fontHinting = hinting; }
+  void setHintingPreference(QFont::HintingPreference hintingPreference) { m_hintingPreference = hintingPreference; }
 
   //----- get info about output device
 
@@ -195,7 +185,7 @@ private:
   // it here for later use in paintTransparencyGroup.
   QPicture* m_lastTransparencyGroupPicture;
 
-  FontHinting m_fontHinting;
+  QFont::HintingPreference m_hintingPreference;
 
   QPen m_currentPen;
   // The various stacks are used to implement the 'saveState' and 'restoreState' methods

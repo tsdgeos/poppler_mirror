@@ -150,7 +150,7 @@ const QPicture& ArthurType3Font::getGlyph(int gid) const
 
 ArthurOutputDev::ArthurOutputDev(QPainter *painter):
   m_lastTransparencyGroupPicture(nullptr),
-  m_fontHinting(NoHinting)
+  m_hintingPreference(QFont::PreferDefaultHinting)
 {
   m_painter.push(painter);
   m_currentBrush = QBrush(Qt::SolidPattern);
@@ -481,7 +481,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
         int fontDataLen;
         const char* fontData = gfxFont->readEmbFontFile(xref, &fontDataLen);
 
-        m_rawFont = new QRawFont(QByteArray(fontData, fontDataLen), fontSize);
+        m_rawFont = new QRawFont(QByteArray(fontData, fontDataLen), fontSize, m_hintingPreference);
         m_rawFontCache.insert(std::make_pair(fontID,std::unique_ptr<QRawFont>(m_rawFont)));
 
         // Free the font data, it was copied in the QByteArray constructor
@@ -490,7 +490,7 @@ void ArthurOutputDev::updateFont(GfxState *state)
       }
       case gfxFontLocExternal:{ // font is in an external font file
         QString fontFile(fontLoc->path->c_str());
-        m_rawFont = new QRawFont(fontFile, fontSize);
+        m_rawFont = new QRawFont(fontFile, fontSize, m_hintingPreference);
         m_rawFontCache.insert(std::make_pair(fontID,std::unique_ptr<QRawFont>(m_rawFont)));
         break;
       }

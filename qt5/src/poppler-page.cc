@@ -511,6 +511,19 @@ QImage Page::renderToImage(double xres, double yres, int x, int y, int w, int h,
   return renderToImage(xres, yres, x, y, w, h, rotate, partialUpdateCallback, shouldDoPartialUpdateCallback, nullptr, payload);
 }
 
+// Translate the text hinting settings from poppler-speak to Qt-speak
+static QFont::HintingPreference QFontHintingFromPopplerHinting(int renderHints)
+{
+  QFont::HintingPreference result = QFont::PreferNoHinting;
+
+  if (renderHints & Document::TextHinting)
+  {
+    result = (renderHints & Document::TextSlightHinting) ? QFont::PreferVerticalHinting : QFont::PreferFullHinting;
+  }
+
+  return result;
+}
+
 QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, int h, Rotation rotate, RenderToImagePartialUpdateFunc partialUpdateCallback, ShouldRenderToImagePartialQueryFunc shouldDoPartialUpdateCallback, ShouldAbortQueryFunc shouldAbortRenderCallback, const QVariant &payload) const
 {
   int rotation = (int)rotate * 90;
@@ -604,6 +617,9 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
 
       QPainter painter(&tmpimg);
       QImageDumpingArthurOutputDev arthur_output(&painter, &tmpimg);
+
+      arthur_output.setHintingPreference(QFontHintingFromPopplerHinting(m_page->parentDoc->m_hints));
+
       arthur_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
       renderToArthur(&arthur_output, &painter, m_page, xres, yres, xPos, yPos, w, h, rotate, DontSaveAndRestore);
       painter.end();
@@ -630,6 +646,9 @@ bool Page::renderToPainter(QPainter* painter, double xres, double yres, int x, i
     case Poppler::Document::ArthurBackend:
     {
         QImageDumpingArthurOutputDev arthur_output(painter, nullptr);
+
+        arthur_output.setHintingPreference(QFontHintingFromPopplerHinting(m_page->parentDoc->m_hints));
+
         return renderToArthur(&arthur_output, painter, m_page, xres, yres, x, y, w, h, rotate, flags);
     }
   }
