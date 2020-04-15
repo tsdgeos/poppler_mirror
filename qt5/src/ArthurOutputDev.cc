@@ -767,6 +767,7 @@ bool ArthurOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading,
 
   // Number of color space components
   auto nComps = shading->getColorSpace()->getNComps();
+  auto opacity = state->getFillOpacity();
 
   // Helper function to test two color objects for 'almost-equality'
   auto isSameGfxColor = [&nComps,&colorDelta](const GfxColor &colorA, const GfxColor &colorB)
@@ -807,7 +808,7 @@ bool ArthurOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading,
 
   GfxRGB rgb;
   shading->getColorSpace()->getRGB(&color0, &rgb);
-  QColor qColor(colToByte(rgb.r), colToByte(rgb.g), colToByte(rgb.b));
+  QColor qColor(colToByte(rgb.r), colToByte(rgb.g), colToByte(rgb.b), dblToByte(opacity));
   gradient.setColorAt(0,qColor);
 
   // Look for more relevant parameter values by bisection
@@ -847,7 +848,7 @@ bool ArthurOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading,
 
     // set the color
     shading->getColorSpace()->getRGB(&color1, &rgb);
-    qColor.setRgb(colToByte(rgb.r), colToByte(rgb.g), colToByte(rgb.b));
+    qColor.setRgb(colToByte(rgb.r), colToByte(rgb.g), colToByte(rgb.b), dblToByte(opacity));
     gradient.setColorAt((ta[j] - tMin)/(tMax - tMin), qColor);
 
     // Move to the next parameter region
