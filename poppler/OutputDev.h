@@ -251,6 +251,10 @@ public:
   // inside the clipping region if a ray from it to infinity will cross the clipping
   // path an odd number of times (disregarding the path orientation).
   virtual void eoClip(GfxState * /*state*/) {}
+
+  // Update the clipping path.  Unlike for the previous two methods, the clipping region
+  // is not the region surrounded by the path in 'state', but rather the path itself,
+  // rendered with the current pen settings.
   virtual void clipToStrokePath(GfxState * /*state*/) {}
 
   //----- text drawing
