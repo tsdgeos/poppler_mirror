@@ -882,6 +882,24 @@ void ArthurOutputDev::eoClip(GfxState *state)
   m_painter.top()->setClipPath(convertPath( state, state->getPath(), Qt::OddEvenFill ), Qt::IntersectClip );
 }
 
+void ArthurOutputDev::clipToStrokePath(GfxState *state)
+{
+  QPainterPath clipPath = convertPath( state, state->getPath(), Qt::WindingFill );
+
+  // Get the outline of 'clipPath' as a separate path
+  QPainterPathStroker stroker;
+  stroker.setWidth( state->getLineWidth() );
+  stroker.setCapStyle( m_currentPen.capStyle() );
+  stroker.setJoinStyle( m_currentPen.joinStyle() );
+  stroker.setMiterLimit( state->getMiterLimit() );
+  stroker.setDashPattern( m_currentPen.dashPattern() );
+  stroker.setDashOffset( m_currentPen.dashOffset() );
+  QPainterPath clipPathOutline = stroker.createStroke ( clipPath );
+
+  // The interior of the outline is the desired clipping region
+  m_painter.top()->setClipPath(clipPathOutline, Qt::IntersectClip );
+}
+
 void ArthurOutputDev::drawChar(GfxState *state, double x, double y,
 			       double dx, double dy,
 			       double originX, double originY,

@@ -47,16 +47,14 @@ void TestStrokeOpacity::checkStrokeOpacity()
 
     // The actual tests start here
 
-    // Splash and QPainter backends implement shadings slightly differently,
-    // hence we cannot expect to get precisely the same colors.
-    // Allow a tolerance up to '3' per channel.
-    int tolerance = 3;
+    // Allow a tolerance.
+    int tolerance;
     auto approximatelyEqual = [&tolerance](QRgb c0, const QColor& c1)
     {
-      return std::abs(qAlpha(c0) - c1.alpha() )  < tolerance
-          && std::abs(qRed(c0)   - c1.red() ) < tolerance
-          && std::abs(qGreen(c0) - c1.green() ) < tolerance
-          && std::abs(qBlue(c0)  - c1.blue() ) < tolerance;
+      return std::abs(qAlpha(c0) - c1.alpha() )  <= tolerance
+          && std::abs(qRed(c0)   - c1.red() ) <= tolerance
+          && std::abs(qGreen(c0) - c1.green() ) <= tolerance
+          && std::abs(qBlue(c0)  - c1.blue() ) <= tolerance;
     };
 
     // At the lower left of the test document is a square with an axial shading,
@@ -64,7 +62,19 @@ void TestStrokeOpacity::checkStrokeOpacity()
     // Check that with a sample pixel
     auto pixel = image.pixel(70,160);
 
+    // Splash and QPainter backends implement shadings slightly differently,
+    // hence we cannot expect to get precisely the same colors.
+    tolerance = 2;
     QVERIFY(approximatelyEqual(pixel, QColor(253,233,196,255)));
+
+    // At the upper left of the test document is a stroked square with an axial shading.
+    // This is implemented by filling a clip region defined by a stroke outline.
+    // Check whether the backend really only renders the stroke, not the region
+    // surrounded by the stroke.
+    auto pixelUpperLeftInterior = image.pixel(70,70);
+
+    tolerance = 0;
+    QVERIFY(approximatelyEqual(pixelUpperLeftInterior, Qt::white));
 }
 
 QTEST_GUILESS_MAIN(TestStrokeOpacity)

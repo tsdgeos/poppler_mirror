@@ -125,6 +125,7 @@ public:
   //----- path clipping
   void clip(GfxState *state) override;
   void eoClip(GfxState *state) override;
+  void clipToStrokePath(GfxState *state) override;
 
   //----- text drawing
   //   virtual void drawString(GfxState *state, GooString *s);
