@@ -23,7 +23,7 @@
 // Copyright (C) 2010 Christian Feuersänger <cfeuersaenger@googlemail.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 William Bader <williambader@hotmail.com>
-// Copyright (C) 2017, 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2017, 2018, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 //
