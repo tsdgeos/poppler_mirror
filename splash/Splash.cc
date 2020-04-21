@@ -21,7 +21,7 @@
 // Copyright (C) 2012 Matthias Kramm <kramm@quiss.org>
 // Copyright (C) 2018, 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
@@ -6356,7 +6356,8 @@ void Splash::dumpXPath(SplashXPath *path) {
 }
 
 SplashError Splash::shadedFill(SplashPath *path, bool hasBBox,
-                               SplashPattern *pattern) {
+                               SplashPattern *pattern,
+                               bool clipToStrokePath) {
   SplashPipe pipe;
   int xMinI, yMinI, xMaxI, yMaxI, x0, x1, y;
   SplashClipResult clipRes;
@@ -6397,7 +6398,8 @@ SplashError Splash::shadedFill(SplashPath *path, bool hasBBox,
       yMaxI = state->clip->getYMaxI();
     }
 
-    pipeInit(&pipe, 0, yMinI, pattern, nullptr, (unsigned char)splashRound(state->fillAlpha * 255), vectorAntialias && !hasBBox, false);
+    unsigned char alpha = splashRound((clipToStrokePath) ? state->strokeAlpha * 255 : state->fillAlpha * 255);
+    pipeInit(&pipe, 0, yMinI, pattern, nullptr, alpha, vectorAntialias && !hasBBox, false);
 
     // draw the spans
     if (vectorAntialias) {

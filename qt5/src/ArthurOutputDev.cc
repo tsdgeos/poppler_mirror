@@ -767,7 +767,10 @@ bool ArthurOutputDev::axialShadedFill(GfxState *state, GfxAxialShading *shading,
 
   // Number of color space components
   auto nComps = shading->getColorSpace()->getNComps();
-  auto opacity = state->getFillOpacity();
+  // If the clipping region is a stroke, then the current operation counts as a stroke
+  // rather than as a fill, and the opacity has to be set accordingly.
+  // See https://gitlab.freedesktop.org/poppler/poppler/-/issues/178
+  auto opacity = (state->getStrokePattern()) ? state->getStrokeOpacity() : state->getFillOpacity();
 
   // Helper function to test two color objects for 'almost-equality'
   auto isSameGfxColor = [&nComps,&colorDelta](const GfxColor &colorA, const GfxColor &colorB)

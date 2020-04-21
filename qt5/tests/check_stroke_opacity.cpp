@@ -75,6 +75,13 @@ void TestStrokeOpacity::checkStrokeOpacity()
 
     tolerance = 0;
     QVERIFY(approximatelyEqual(pixelUpperLeftInterior, Qt::white));
+
+    // Now check whether that stroke is semi-transparent.
+    // Bug https://gitlab.freedesktop.org/poppler/poppler/-/issues/178
+    auto pixelUpperLeftOnStroke = image.pixel(70,20);
+
+    tolerance = 2;
+    QVERIFY(approximatelyEqual(pixelUpperLeftOnStroke, QColor(253,233,196,255)));
 }
 
 QTEST_GUILESS_MAIN(TestStrokeOpacity)
