@@ -42,6 +42,7 @@
 // Copyright (C) 2018, 2019 Stefan Brüns <stefan.bruens@rwth-aachen.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -4609,7 +4610,9 @@ bool SplashOutputDev::univariateShadedFill(GfxState *state, SplashUnivariatePatt
   pattern->getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
   setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(),
 		   state->getOverprintMode(), nullptr);
-  retVal = (splash->shadedFill(&path, pattern->getShading()->getHasBBox(), pattern) == splashOk);
+  // If state->getStrokePattern() is set, then the current clipping region
+  // is a stroke path.
+  retVal = (splash->shadedFill(&path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern()!=nullptr)) == splashOk);
   state->clearPath();
   setVectorAntialias(vaa);
 
@@ -4670,7 +4673,9 @@ bool SplashOutputDev::functionShadedFill(GfxState *state, GfxFunctionShading *sh
   pattern->getShading()->getColorSpace()->createMapping(bitmap->getSeparationList(), SPOT_NCOMPS);
   setOverprintMask(pattern->getShading()->getColorSpace(), state->getFillOverprint(),
 		   state->getOverprintMode(), nullptr);
-  retVal = (splash->shadedFill(&path, pattern->getShading()->getHasBBox(), pattern) == splashOk);
+  // If state->getStrokePattern() is set, then the current clipping region
+  // is a stroke path.
+  retVal = (splash->shadedFill(&path, pattern->getShading()->getHasBBox(), pattern, (state->getStrokePattern()!=nullptr)) == splashOk);
   state->clearPath();
   setVectorAntialias(vaa);
 

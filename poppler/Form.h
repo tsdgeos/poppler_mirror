@@ -268,13 +268,13 @@ public:
   FormWidgetSignature(PDFDoc *docA, Object *dictObj, unsigned num, Ref ref, FormField *p);
   void updateWidgetAppearance() override;
 
-  FormSignatureType signatureType();
+  FormSignatureType signatureType() const;
   // Use -1 for now as validationTime
   SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime);
 
   // returns a list with the boundaries of the signed ranges
   // the elements of the list are of type Goffset
-  std::vector<Goffset> getSignedRangeBounds();
+  std::vector<Goffset> getSignedRangeBounds() const;
 
   // checks the length encoding of the signature and returns the hex encoded signature
   // if the check passed (and the checked file size as output parameter in checkedFileSize)
@@ -318,8 +318,10 @@ public:
   GooString *getFullyQualifiedName();
 
   FormWidget* findWidgetByRef (Ref aref);
-  int getNumWidgets() { return terminal ? numChildren : 0; }
-  FormWidget *getWidget(int i) { return terminal ? widgets[i] : nullptr; }
+  int getNumWidgets() const { return terminal ? numChildren : 0; }
+  FormWidget *getWidget(int i) const { return terminal ? widgets[i] : nullptr; }
+  int getNumChildren() const { return !terminal ? numChildren : 0; }
+  FormField *getChildren(int i) const { return children[i]; }
 
   // only implemented in FormFieldButton
   virtual void fillChildrenSiblingsID ();
@@ -528,16 +530,25 @@ protected:
 //------------------------------------------------------------------------
 
 class FormFieldSignature: public FormField {
-  friend class FormWidgetSignature;
 public:
   FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref ref, FormField *parent, std::set<int> *usedParents);
 
   // Use -1 for now as validationTime
   SignatureInfo *validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime);
 
+  // returns a list with the boundaries of the signed ranges
+  // the elements of the list are of type Goffset
+  std::vector<Goffset> getSignedRangeBounds() const;
+
+  // checks the length encoding of the signature and returns the hex encoded signature
+  // if the check passed (and the checked file size as output parameter in checkedFileSize)
+  // otherwise a nullptr is returned
+  GooString* getCheckedSignature(Goffset *checkedFileSize);
+
   ~FormFieldSignature() override;
   Object* getByteRange() { return &byte_range; }
   const GooString* getSignature() const { return signature; }
+  FormSignatureType getSignatureType() const { return signature_type; }
 
 private:
   void parseInfo();

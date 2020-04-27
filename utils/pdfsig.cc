@@ -6,7 +6,7 @@
 //
 // Copyright 2015 André Guerreiro <aguerreiro1985@gmail.com>
 // Copyright 2015 André Esser <bepandre@hotmail.com>
-// Copyright 2015, 2017-2019 Albert Astals Cid <aacid@kde.org>
+// Copyright 2015, 2017-2020 Albert Astals Cid <aacid@kde.org>
 // Copyright 2016 Markus Kilås <digital@markuspage.com>
 // Copyright 2017, 2019 Hans-Ulrich Jüttner <huj@froreich-bioscientia.de>
 // Copyright 2017, 2019 Adrian Johnson <ajohnson@redneon.com>
@@ -97,9 +97,9 @@ static char *getReadableTime(time_t unix_time)
   return time_str;
 }
 
-static bool dumpSignature(int sig_num, int sigCount, FormWidgetSignature *sig_widget, const char *filename)
+static bool dumpSignature(int sig_num, int sigCount, FormFieldSignature *s, const char *filename)
 {
-    const GooString *signature = sig_widget->getSignature();
+    const GooString *signature = s->getSignature();
     if (!signature) {
         printf("Cannot dump signature #%d\n", sig_num);
         return false;
@@ -149,19 +149,12 @@ static const ArgDesc argDesc[] = {
 
 int main(int argc, char *argv[])
 {
-  PDFDoc *doc = nullptr;
-  unsigned int sigCount;
-  GooString * fileName = nullptr;
-  SignatureInfo *sig_info = nullptr;
   char *time_str = nullptr;
-  std::vector<FormWidgetSignature*> sig_widgets;
   globalParams = std::make_unique<GlobalParams>();
 
   Win32Console win32Console(&argc, &argv);
-  int exitCode = 99;
-  bool ok;
 
-  ok = parseArgs(argDesc, &argc, argv);
+  const bool ok = parseArgs(argDesc, &argc, argv);
 
   if (!ok || argc != 2 || printVersion || printHelp) {
     fprintf(stderr, "pdfsig version %s\n", PACKAGE_VERSION);
@@ -171,47 +164,44 @@ int main(int argc, char *argv[])
       printUsage("pdfsig", "<PDF-file>", argDesc);
     }
     if (printVersion || printHelp)
-      exitCode = 0;
-    goto end;
+      return 0;
+    return 99;
   }
 
-  fileName = new GooString(argv[argc - 1]);
+  std::unique_ptr<GooString> fileName = std::make_unique<GooString>(argv[argc - 1]);
 
   SignatureHandler::setNSSDir(nssDir);
 
   // open PDF file
-  doc = PDFDocFactory().createPDFDoc(*fileName, nullptr, nullptr);
+  std::unique_ptr<PDFDoc> doc(PDFDocFactory().createPDFDoc(*fileName, nullptr, nullptr));
 
   if (!doc->isOk()) {
-    exitCode = 1;
-    goto end;
+    return 1;
   }
 
-  sig_widgets = doc->getSignatureWidgets();
-  sigCount = sig_widgets.size();
+  const std::vector<FormFieldSignature*> signatures = doc->getSignatureFields();
+  const unsigned int sigCount = signatures.size();
 
   if (sigCount >= 1) {
     if (dumpSignatures) {
-      exitCode = 0;
       printf("Dumping Signatures: %u\n", sigCount);
       for (unsigned int i = 0; i < sigCount; i++) {
-        const bool dumpingOk = dumpSignature(i, sigCount, sig_widgets.at(i), fileName->c_str());
+        const bool dumpingOk = dumpSignature(i, sigCount, signatures.at(i), fileName->c_str());
         if (!dumpingOk) {
-          exitCode = 3;
+	  return 3;
         }
       }
-      goto end;
+      return 0;
     } else {
       printf("Digital Signature Info of: %s\n", fileName->c_str());
     }
   } else {
     printf("File '%s' does not contain any signatures\n", fileName->c_str());
-    exitCode = 2;
-    goto end;
+    return 2;
   }
 
   for (unsigned int i = 0; i < sigCount; i++) {
-    sig_info = sig_widgets.at(i)->validateSignature(!dontVerifyCert, false, -1 /* now */);
+    const SignatureInfo *sig_info = signatures.at(i)->validateSignature(!dontVerifyCert, false, -1 /* now */);
     printf("Signature #%u:\n", i+1);
     printf("  - Signer Certificate Common Name: %s\n", sig_info->getSignerName());
     printf("  - Signer full Distinguished Name: %s\n", sig_info->getSubjectDN());
@@ -244,7 +234,7 @@ int main(int argc, char *argv[])
         printf("unknown\n");
     }
     printf("  - Signature Type: ");
-    switch (sig_widgets.at(i)->signatureType())
+    switch (signatures.at(i)->getSignatureType())
     {
       case adbe_pkcs7_sha1:
         printf("adbe.pkcs7.sha1\n");
@@ -258,13 +248,13 @@ int main(int argc, char *argv[])
       default:
         printf("unknown\n");
     }
-    std::vector<Goffset> ranges = sig_widgets.at(i)->getSignedRangeBounds();
+    std::vector<Goffset> ranges = signatures.at(i)->getSignedRangeBounds();
     if (ranges.size() == 4)
     {
       printf("  - Signed Ranges: [%lld - %lld], [%lld - %lld]\n",
              ranges[0], ranges[1], ranges[2], ranges[3]);
       Goffset checked_file_size;
-      GooString* signature = sig_widgets.at(i)->getCheckedSignature(&checked_file_size);
+      GooString* signature = signatures.at(i)->getCheckedSignature(&checked_file_size);
       if (signature && checked_file_size == ranges[3]) {
         printf("  - Total document signed\n");
       } else {
@@ -280,11 +270,5 @@ int main(int argc, char *argv[])
     printf("  - Certificate Validation: %s\n", getReadableCertState(sig_info->getCertificateValStatus()));
   }
 
-  exitCode = 0;
-
-end:
-  delete fileName;
-  delete doc;
-
-  return exitCode;
+  return 0;
 }

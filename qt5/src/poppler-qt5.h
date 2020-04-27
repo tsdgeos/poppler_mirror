@@ -1,7 +1,7 @@
 /* poppler-qt.h: qt interface to poppler
  * Copyright (C) 2005, Net Integration Technologies, Inc.
  * Copyright (C) 2005, 2007, Brad Hards <bradh@frogmouth.net>
- * Copyright (C) 2005-2015, 2017-2019, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2005-2015, 2017-2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2005, Stefan Kebekus <stefan.kebekus@math.uni-koeln.de>
  * Copyright (C) 2006-2011, Pino Toscano <pino@kde.org>
  * Copyright (C) 2009 Shawn Rutledge <shawn.t.rutledge@gmail.com>
@@ -66,6 +66,7 @@ namespace Poppler {
     class PageData;
 
     class FormField;
+    class FormFieldSignature;
 
     class TextBoxData;
 
@@ -1845,6 +1846,16 @@ QString subject = m_doc->info("Subject");
 	   \since 0.53
 	*/
 	QVector<int> formCalculateOrder() const;
+
+	/**
+	 Returns the signatures of this document.
+
+	 Prefer to use this over getting the signatures for all the pages of the document
+	 since there are documents with signatures that don't belong to a given page
+
+	 \since 0.88
+	*/
+	QVector<FormFieldSignature*> signatures() const;
 
 	/**
 	   Destructor.

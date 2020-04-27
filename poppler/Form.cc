@@ -479,143 +479,14 @@ SignatureInfo *FormWidgetSignature::validateSignature(bool doVerifyCert, bool fo
   return static_cast<FormFieldSignature*>(field)->validateSignature(doVerifyCert, forceRevalidation, validationTime);
 }
 
-std::vector<Goffset> FormWidgetSignature::getSignedRangeBounds()
+std::vector<Goffset> FormWidgetSignature::getSignedRangeBounds() const
 {
-  Object* byteRangeObj = static_cast<FormFieldSignature*>(field)->getByteRange();
-  std::vector<Goffset> range_vec;
-  if (byteRangeObj->isArray())
-  {
-    if (byteRangeObj->arrayGetLength() == 4)
-    {
-      for (int i = 0; i < 2; ++i)
-      {
-        Object offsetObj(byteRangeObj->arrayGet(2*i));
-        Object lenObj(byteRangeObj->arrayGet(2*i+1));
-        if (offsetObj.isIntOrInt64() && lenObj.isIntOrInt64())
-        {
-          Goffset offset = offsetObj.getIntOrInt64();
-          Goffset len = lenObj.getIntOrInt64();
-          range_vec.push_back(offset);
-          range_vec.push_back(offset+len);
-        }
-      }
-    }
-  }
-  return range_vec;
+  return static_cast<FormFieldSignature*>(field)->getSignedRangeBounds();
 }
 
 GooString* FormWidgetSignature::getCheckedSignature(Goffset *checkedFileSize)
 {
-  Goffset start = 0;
-  Goffset end = 0;
-  const std::vector<Goffset> ranges = getSignedRangeBounds();
-  if (ranges.size() == 4)
-  {
-    start = ranges[1];
-    end = ranges[2];
-  }
-  if (end >= start+6)
-  {
-    BaseStream* stream = doc->getBaseStream();
-    *checkedFileSize = stream->getLength();
-    Goffset len = end-start;
-    stream->setPos(end-1);
-    int c2 = stream->lookChar();
-    stream->setPos(start);
-    int c1 = stream->getChar();
-    // PDF signatures are first ASN1 DER, then hex encoded PKCS#7 structures,
-    // possibly padded with 0 characters and enclosed in '<' and '>'.
-    // The ASN1 DER encoding of a PKCS#7 structure must start with the tag 0x30
-    // for SEQUENCE. The next byte must be 0x80 for ASN1 DER indefinite length
-    // encoding or (0x80 + n) for ASN1 DER definite length encoding
-    // where n is the number of subsequent "length bytes" which big-endian
-    // encode the length of the content of the SEQUENCE following them.
-    if (len <= std::numeric_limits<int>::max() && *checkedFileSize > end && c1 == '<' && c2 == '>')
-    {
-      GooString gstr;
-      ++start;
-      --end;
-      len = end-start;
-      Goffset pos = 0;
-      do
-      {
-        c1 = stream->getChar();
-        if (c1 == EOF)
-          return nullptr;
-        gstr.append(static_cast<char>(c1));
-      } while (++pos < len);
-      if (gstr.getChar(0) == '3' && gstr.getChar(1) == '0')
-      {
-        if (gstr.getChar(2) == '8' && gstr.getChar(3) == '0')
-        {
-          // ASN1 DER indefinite length encoding:
-          // We only check that all characters up to the enclosing '>'
-          // are hex characters and that there are two hex encoded 0 bytes
-          // just before the enclosing '>' marking the end of the indefinite
-          // length encoding.
-          int paddingCount = 0;
-          while (gstr.getChar(len-1) == '0' && gstr.getChar(len-2) == '0')
-          {
-            ++paddingCount;
-            len -= 2;
-          }
-          if (paddingCount < 2 || len%2 == 1)
-            len = 0;
-        }
-        else if (gstr.getChar(2) == '8')
-        {
-          // ASN1 DER definite length encoding:
-          // We calculate the length of the following bytes from the length bytes and
-          // check that after the length bytes and the following calculated number of
-          // bytes all bytes up to the enclosing '>' character are hex encoded 0 bytes.
-          int lenBytes = gstr.getChar(3) - '0';
-          if (lenBytes > 0 && lenBytes <= 4)
-          {
-            int sigLen = 0;
-            for (int i = 0; i < 2*lenBytes; ++i)
-            {
-              sigLen <<= 4;
-              char c = gstr.getChar(i+4);
-              if (isdigit(c))
-                sigLen += c - '0';
-              else if (isxdigit(c) && c >= 'a')
-                sigLen += c - 'a' + 10;
-              else if (isxdigit(c) && c >= 'A')
-                sigLen += c - 'A' + 10;
-              else
-              {
-                len = 0;
-                break;
-              }
-            }
-            if (sigLen > 0 && 2*(sigLen+lenBytes) <= len-4)
-            {
-              for (Goffset i = 2*(sigLen+lenBytes)+4; i < len; ++i)
-              {
-                if (gstr.getChar(i) != '0')
-                {
-                  len = 0;
-                  break;
-                }
-              }
-            }
-            else
-              len = 0;
-          }
-        }
-        for ( const char c : gstr.toStr() )
-        {
-          if (!isxdigit(c))
-            len = 0;
-        }
-        if (len > 0)
-        {
-          return new GooString(&gstr, 0, len);
-        }
-      }
-    }
-  }
-  return nullptr;
+  return static_cast<FormFieldSignature*>(field)->getCheckedSignature(checkedFileSize);
 }
 
 void FormWidgetSignature::updateWidgetAppearance()
@@ -1729,9 +1600,9 @@ void FormFieldSignature::hashSignedDataBlock(SignatureHandler *handler, Goffset 
 #endif
 }
 
-FormSignatureType FormWidgetSignature::signatureType()
+FormSignatureType FormWidgetSignature::signatureType() const
 {
-  return static_cast<FormFieldSignature*>(field)->signature_type;
+  return static_cast<FormFieldSignature*>(field)->getSignatureType();
 }
 
 SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime)
@@ -1810,6 +1681,144 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
 
 #endif
   return signature_info;
+}
+
+std::vector<Goffset> FormFieldSignature::getSignedRangeBounds() const
+{
+  std::vector<Goffset> range_vec;
+  if (byte_range.isArray())
+  {
+    if (byte_range.arrayGetLength() == 4)
+    {
+      for (int i = 0; i < 2; ++i)
+      {
+        const Object offsetObj(byte_range.arrayGet(2*i));
+        const Object lenObj(byte_range.arrayGet(2*i+1));
+        if (offsetObj.isIntOrInt64() && lenObj.isIntOrInt64())
+        {
+          const Goffset offset = offsetObj.getIntOrInt64();
+          const Goffset len = lenObj.getIntOrInt64();
+          range_vec.push_back(offset);
+          range_vec.push_back(offset+len);
+        }
+      }
+    }
+  }
+  return range_vec;
+}
+
+GooString* FormFieldSignature::getCheckedSignature(Goffset *checkedFileSize)
+{
+  Goffset start = 0;
+  Goffset end = 0;
+  const std::vector<Goffset> ranges = getSignedRangeBounds();
+  if (ranges.size() == 4)
+  {
+    start = ranges[1];
+    end = ranges[2];
+  }
+  if (end >= start+6)
+  {
+    BaseStream* stream = doc->getBaseStream();
+    *checkedFileSize = stream->getLength();
+    Goffset len = end-start;
+    stream->setPos(end-1);
+    int c2 = stream->lookChar();
+    stream->setPos(start);
+    int c1 = stream->getChar();
+    // PDF signatures are first ASN1 DER, then hex encoded PKCS#7 structures,
+    // possibly padded with 0 characters and enclosed in '<' and '>'.
+    // The ASN1 DER encoding of a PKCS#7 structure must start with the tag 0x30
+    // for SEQUENCE. The next byte must be 0x80 for ASN1 DER indefinite length
+    // encoding or (0x80 + n) for ASN1 DER definite length encoding
+    // where n is the number of subsequent "length bytes" which big-endian
+    // encode the length of the content of the SEQUENCE following them.
+    if (len <= std::numeric_limits<int>::max() && *checkedFileSize > end && c1 == '<' && c2 == '>')
+    {
+      GooString gstr;
+      ++start;
+      --end;
+      len = end-start;
+      Goffset pos = 0;
+      do
+      {
+        c1 = stream->getChar();
+        if (c1 == EOF)
+          return nullptr;
+        gstr.append(static_cast<char>(c1));
+      } while (++pos < len);
+      if (gstr.getChar(0) == '3' && gstr.getChar(1) == '0')
+      {
+        if (gstr.getChar(2) == '8' && gstr.getChar(3) == '0')
+        {
+          // ASN1 DER indefinite length encoding:
+          // We only check that all characters up to the enclosing '>'
+          // are hex characters and that there are two hex encoded 0 bytes
+          // just before the enclosing '>' marking the end of the indefinite
+          // length encoding.
+          int paddingCount = 0;
+          while (gstr.getChar(len-1) == '0' && gstr.getChar(len-2) == '0')
+          {
+            ++paddingCount;
+            len -= 2;
+          }
+          if (paddingCount < 2 || len%2 == 1)
+            len = 0;
+        }
+        else if (gstr.getChar(2) == '8')
+        {
+          // ASN1 DER definite length encoding:
+          // We calculate the length of the following bytes from the length bytes and
+          // check that after the length bytes and the following calculated number of
+          // bytes all bytes up to the enclosing '>' character are hex encoded 0 bytes.
+          int lenBytes = gstr.getChar(3) - '0';
+          if (lenBytes > 0 && lenBytes <= 4)
+          {
+            int sigLen = 0;
+            for (int i = 0; i < 2*lenBytes; ++i)
+            {
+              sigLen <<= 4;
+              char c = gstr.getChar(i+4);
+              if (isdigit(c))
+                sigLen += c - '0';
+              else if (isxdigit(c) && c >= 'a')
+                sigLen += c - 'a' + 10;
+              else if (isxdigit(c) && c >= 'A')
+                sigLen += c - 'A' + 10;
+              else
+              {
+                len = 0;
+                break;
+              }
+            }
+            if (sigLen > 0 && 2*(sigLen+lenBytes) <= len-4)
+            {
+              for (Goffset i = 2*(sigLen+lenBytes)+4; i < len; ++i)
+              {
+                if (gstr.getChar(i) != '0')
+                {
+                  len = 0;
+                  break;
+                }
+              }
+            }
+            else
+              len = 0;
+          }
+        }
+        for ( const char c : gstr.toStr() )
+        {
+          if (!isxdigit(c))
+            len = 0;
+        }
+        if (len > 0)
+        {
+          return new GooString(&gstr, 0, len);
+        }
+      }
+    }
+  }
+  return nullptr;
 }
 
 void FormFieldSignature::print(int indent)

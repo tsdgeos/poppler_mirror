@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 
 				/* copy to destination */
 
-	surface = cairo_pdf_surface_create(outfilename, width, height);
+	surface = cairo_pdf_surface_create(outfilename, 1.0, 1.0);
 
 	g_print("infile: %s\n", infilename);
 	g_print("outfile: %s\n", outfilename);

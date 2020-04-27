@@ -20,7 +20,7 @@
 // Copyright (C) 2011 Andreas Hartmetz <ahartmetz@gmail.com>
 // Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Mihai Niculescu <q.quark@gmail.com>
-// Copyright (C) 2017, 2018 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2017, 2018, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -55,23 +55,13 @@ class ArthurType3Font;
 
 class ArthurOutputDev: public OutputDev {
 public:
-  /**
-   * Describes how fonts are distorted (aka hinted) to fit the pixel grid.
-   * More hinting means sharper edges and less adherence to the true letter shapes.
-   */
-  enum FontHinting {
-    NoHinting = 0, ///< Font shapes are left unchanged
-    SlightHinting, ///< Font shapes are distorted vertically only
-    FullHinting ///< Font shapes are distorted horizontally and vertically
-  };
-
   // Constructor.
   ArthurOutputDev(QPainter *painter );
 
   // Destructor.
   ~ArthurOutputDev() override;
 
-  void setFontHinting(FontHinting hinting) { m_fontHinting = hinting; }
+  void setHintingPreference(QFont::HintingPreference hintingPreference) { m_hintingPreference = hintingPreference; }
 
   //----- get info about output device
 
@@ -135,6 +125,7 @@ public:
   //----- path clipping
   void clip(GfxState *state) override;
   void eoClip(GfxState *state) override;
+  void clipToStrokePath(GfxState *state) override;
 
   //----- text drawing
   //   virtual void drawString(GfxState *state, GooString *s);
@@ -195,7 +186,7 @@ private:
   // it here for later use in paintTransparencyGroup.
   QPicture* m_lastTransparencyGroupPicture;
 
-  FontHinting m_fontHinting;
+  QFont::HintingPreference m_hintingPreference;
 
   QPen m_currentPen;
   // The various stacks are used to implement the 'saveState' and 'restoreState' methods
