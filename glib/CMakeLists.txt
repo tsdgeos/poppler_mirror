@@ -87,7 +87,7 @@ set(poppler_glib_generated_SRCS
   ${CMAKE_SOURCE_DIR}/poppler/CairoRescaleBox.cc
 )
 add_library(poppler-glib ${poppler_glib_SRCS} ${poppler_glib_generated_SRCS})
-set_target_properties(poppler-glib PROPERTIES VERSION 8.15.0 SOVERSION 8)
+set_target_properties(poppler-glib PROPERTIES VERSION 8.16.0 SOVERSION 8)
 set_target_properties(poppler-glib PROPERTIES C_VISIBILITY_PRESET hidden)
 set_target_properties(poppler-glib PROPERTIES CXX_VISIBILITY_PRESET hidden)
 set_target_properties(poppler-glib PROPERTIES VISIBILITY_INLINES_HIDDEN 1)
