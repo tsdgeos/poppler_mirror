@@ -597,8 +597,8 @@ void CairoOutputDev::updateFillColorStop(GfxState *state, double offset) {
 				    colToDbl(fill_color.g),
 				    colToDbl(fill_color.b),
                                     opacity);
-  LOG(printf ("fill color stop: %f (%d, %d, %d)\n",
-	      offset, fill_color.r, fill_color.g, fill_color.b));
+  LOG(printf ("fill color stop: %f (%d, %d, %d, %d)\n",
+	      offset, fill_color.r, fill_color.g, fill_color.b, dblToCol(opacity)));
 }
 
 void CairoOutputDev::updateBlendMode(GfxState *state) {
