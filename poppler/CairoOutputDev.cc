@@ -33,6 +33,7 @@
 // Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
+// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -585,11 +586,17 @@ void CairoOutputDev::updateFillColorStop(GfxState *state, double offset) {
 
   state->getFillRGB(&fill_color);
 
+  // If stroke pattern is set then the current fill is clipped
+  // to a stroke path.  In that case, the stroke opacity has to be used
+  // rather than the fill opacity.
+  // See https://gitlab.freedesktop.org/poppler/poppler/issues/178
+  auto opacity = (state->getStrokePattern()) ? state->getStrokeOpacity() : state->getFillOpacity();
+
   cairo_pattern_add_color_stop_rgba(fill_pattern, offset,
 				    colToDbl(fill_color.r),
 				    colToDbl(fill_color.g),
 				    colToDbl(fill_color.b),
-				    fill_opacity);
+                                    opacity);
   LOG(printf ("fill color stop: %f (%d, %d, %d)\n",
 	      offset, fill_color.r, fill_color.g, fill_color.b));
 }
