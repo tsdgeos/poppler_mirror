@@ -82,6 +82,17 @@ void TestStrokeOpacity::checkStrokeOpacity()
 
     tolerance = 2;
     QVERIFY(approximatelyEqual(pixelUpperLeftOnStroke, QColor(253,233,196,255)));
+
+    // At the upper right there is a semi-transparent stroked red square
+    // a) Make sure that the color is correct.
+    auto pixelUpperRightOnStroke = image.pixel(130,20);
+
+    tolerance = 0;
+    QVERIFY(approximatelyEqual(pixelUpperRightOnStroke, QColor(246,196,206,255)));
+
+    // b) Make sure that it is really stroked, not filled
+    auto pixelUpperRightInterior = image.pixel(130,50);
+    QVERIFY(approximatelyEqual(pixelUpperRightInterior, Qt::white));
 }
 
 QTEST_GUILESS_MAIN(TestStrokeOpacity)
