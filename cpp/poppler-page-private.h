@@ -29,6 +29,7 @@ namespace poppler
 
 class document_private;
 class page_transition;
+class font_info;
 
 class page_private
 {
@@ -46,6 +47,9 @@ public:
 
     static inline page_private* get(const poppler::page *p)
     { return const_cast<poppler::page *>(p)->d; }
+
+    std::vector<font_info> font_info_cache;
+    size_t init_font_info_cache();
 };
 
 }

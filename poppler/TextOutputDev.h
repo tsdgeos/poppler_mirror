@@ -91,6 +91,7 @@ public:
 
   bool matches(const GfxState *state) const;
   bool matches(const TextFontInfo *fontInfo) const;
+  bool matches(const Ref *ref) const;
 
   // Get the font ascent, or a default value if the font is not set
   double getAscent() const;

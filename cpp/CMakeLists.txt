@@ -38,6 +38,7 @@ install(FILES
   poppler-document.h
   poppler-embedded-file.h
   poppler-font.h
+  poppler-font-private.h
   poppler-global.h
   poppler-image.h
   poppler-page.h

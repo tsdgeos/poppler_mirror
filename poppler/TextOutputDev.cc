@@ -341,6 +341,10 @@ bool TextFontInfo::matches(const TextFontInfo *fontInfo) const {
   return gfxFont == fontInfo->gfxFont;
 }
 
+bool TextFontInfo::matches(const Ref *ref) const {
+  return (gfxFont->getID()->num == ref->num && gfxFont->getID()->gen == ref->gen);
+}
+
 double TextFontInfo::getAscent() const {
   return gfxFont ? gfxFont->getAscent() : 0.95;
 }

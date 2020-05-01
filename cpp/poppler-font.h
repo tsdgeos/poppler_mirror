@@ -67,6 +67,7 @@ private:
 
     font_info_private *d;
     friend class font_iterator;
+    friend class page;
 };
 
 
@@ -84,6 +85,8 @@ private:
 
     font_iterator_private *d;
     friend class document;
+    friend class page;
+    friend class page_private;
 };
 
 }

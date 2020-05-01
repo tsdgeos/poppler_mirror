@@ -65,6 +65,56 @@ public:
      */
     rectf     char_bbox(size_t i) const;
     bool      has_space_after() const;
+
+    /**
+      \since 0.8x
+     */
+
+    /**
+       Get a writing mode for the i-th glyph
+
+       This method returns an integer of the writing mode
+       for the i-th glyph in the text_box.
+
+       0 means the horizontal writing mode.
+       1 means the vertical writing mode.
+
+       \note Usually all glyphs in one text_box have the
+       same writing mode. Thus the default value of the
+       glyph index is 0.
+     */
+    int        get_wmode(int i = 0) const;
+
+    /**
+       Get a font size of this text_box instance.
+
+       This method return a double floating value of the
+       font size from the text_box instance.
+     */
+    double     get_font_size() const;
+
+    /**
+       Get a font name for the i-th glyph
+
+       This method returns a std::string object holding
+       the font name for the i-th glyph.
+
+       \note The randomization prefix of the embedded fonts
+       are not removed. The font names including these
+       prefixes are insuffucient to determine whether the
+       two fonts are same or different.
+
+       \note The clients should not assume that the
+       encoding of the font name is one of the ASCII,
+       Latin1 or UTF-8. Some legacy PDF producers used
+       in CJK market use GBK, Big5, Wansung or Shift-JIS.
+
+       \warning The returned std::string is owned by the
+       text_box instance, it should not be used in the
+       other objects or should not be destroyed directly.
+     */
+    std::string get_font_name(int i = 0) const;
+
 private:
     text_box(text_box_data *data);
 
