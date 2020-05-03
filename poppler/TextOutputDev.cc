@@ -342,7 +342,7 @@ bool TextFontInfo::matches(const TextFontInfo *fontInfo) const {
 }
 
 bool TextFontInfo::matches(const Ref *ref) const {
-  return (gfxFont->getID()->num == ref->num && gfxFont->getID()->gen == ref->gen);
+  return (*(gfxFont->getID()) == *ref);
 }
 
 double TextFontInfo::getAscent() const {
