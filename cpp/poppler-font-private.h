@@ -48,10 +48,8 @@ public:
             font_file = fi->getFile()->c_str();
         }
 
-        ref.num = fi->getRef().num;
-        ref.gen = fi->getRef().gen;
-        emb_ref.num = fi->getEmbRef().num;
-        emb_ref.gen = fi->getEmbRef().gen;
+        ref = fi->getRef();
+        emb_ref = fi->getEmbRef();
     }
 
     std::string font_name;
