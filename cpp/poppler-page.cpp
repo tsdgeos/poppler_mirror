@@ -352,7 +352,7 @@ bool text_box::has_space_after() const
     return m_data->has_space_after;
 }
 
-int text_box::get_wmode(int i) const
+text_box::writing_mode_enum text_box::get_wmode(int i) const
 {
     return m_data->wmodes[i];
 }
@@ -434,7 +434,18 @@ std::vector<text_box> page::text_list() const
             tb.m_data->glyph_to_cache_index.reserve(word->getLength());
             for (int j = 0; j < word->getLength(); j++) {
                 const TextFontInfo* cur_text_font_info = word->getFontInfo(j);
-                tb.m_data->wmodes.push_back(cur_text_font_info->getWMode()); 
+
+                // filter-out the invalid WMode value here.
+                switch (cur_text_font_info->getWMode()) {
+                case 0:
+                    tb.m_data->wmodes.push_back(text_box::horizontal_wmode);
+                    break;
+                case 1:
+                    tb.m_data->wmodes.push_back(text_box::vertical_wmode);
+                    break;
+                default:
+                    tb.m_data->wmodes.push_back(text_box::invalid_wmode);
+                };
 
                 tb.m_data->glyph_to_cache_index[j] = -1;
                 for (size_t k = 0; k < d->font_info_cache.size(); k++) {

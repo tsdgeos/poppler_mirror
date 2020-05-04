@@ -28,6 +28,7 @@
 
 #include "poppler-global.h"
 #include "poppler-rectangle.h"
+#include "poppler-page.h" // to use text_box::writing_mode_enum
 
 #include "Error.h"
 #include "CharTypes.h"
@@ -82,7 +83,7 @@ struct text_box_data
     std::vector<rectf> char_bboxes;
     bool has_space_after;
 
-    std::vector<int> wmodes; 
+    std::vector<text_box::writing_mode_enum> wmodes; 
     double font_size;
 
     /*

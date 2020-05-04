@@ -73,17 +73,19 @@ public:
     /**
        Get a writing mode for the i-th glyph
 
-       This method returns an integer of the writing mode
+       This method returns an enum of the writing mode
        for the i-th glyph in the text_box.
-
-       0 means the horizontal writing mode.
-       1 means the vertical writing mode.
 
        \note Usually all glyphs in one text_box have the
        same writing mode. Thus the default value of the
        glyph index is 0.
      */
-    int        get_wmode(int i = 0) const;
+    enum writing_mode_enum {
+        invalid_wmode = -1,
+        horizontal_wmode = 0,
+        vertical_wmode = 1
+    };
+    writing_mode_enum get_wmode(int i = 0) const;
 
     /**
        Get a font size of this text_box instance.
