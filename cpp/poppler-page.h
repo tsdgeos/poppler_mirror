@@ -110,10 +110,6 @@ public:
        encoding of the font name is one of the ASCII,
        Latin1 or UTF-8. Some legacy PDF producers used
        in CJK market use GBK, Big5, Wansung or Shift-JIS.
-
-       \warning The returned std::string is owned by the
-       text_box instance, it should not be used in the
-       other objects or should not be destroyed directly.
      */
     std::string get_font_name(int i = 0) const;
 
