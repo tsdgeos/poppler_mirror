@@ -48,6 +48,7 @@ page_private::page_private(document_private *_doc, int _index)
     , page(doc->doc->getCatalog()->getPage(_index + 1))
     , index(_index)
     , transition(nullptr)
+    , font_info_cache_initialized(false)
 {
 }
 
@@ -58,7 +59,7 @@ page_private::~page_private()
 
 size_t page_private::init_font_info_cache()
 {
-    if (font_info_cache.size() > 0)
+    if (font_info_cache_initialized)
 	return font_info_cache.size();
 
     poppler::font_iterator it(index, doc);
@@ -67,6 +68,7 @@ size_t page_private::init_font_info_cache()
 	font_info_cache = it.next();
     }
 
+    font_info_cache_initialized = true;
     return font_info_cache.size();
 }
 
