@@ -61,13 +61,11 @@ size_t page_private::init_font_info_cache()
     if (font_info_cache.size() > 0)
 	return font_info_cache.size();
 
-    poppler::font_iterator* font_iterator = new poppler::font_iterator(index, doc);
+    poppler::font_iterator it(index, doc);
 
-    if (font_iterator->has_next()) {
-	font_info_cache = font_iterator->next();
+    if (it.has_next()) {
+	font_info_cache = it.next();
     }
-
-    delete font_iterator;
 
     return font_info_cache.size();
 }
