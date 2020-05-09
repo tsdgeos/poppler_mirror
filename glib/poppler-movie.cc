@@ -44,6 +44,8 @@ struct _PopplerMovie
   guint64  start;
   guint64  duration;
   gushort  rotation_angle;
+  gint     width;
+  gint     height;
 };
 
 struct _PopplerMovieClass
@@ -137,6 +139,8 @@ _poppler_movie_new (const Movie *poppler_movie)
   }
 
   movie->rotation_angle = poppler_movie->getRotationAngle();
+
+  poppler_movie->getAspect(&movie->width, &movie->height);
 
   return movie;
 }
@@ -324,4 +328,25 @@ poppler_movie_get_duration (PopplerMovie *poppler_movie)
   g_return_val_if_fail (POPPLER_IS_MOVIE (poppler_movie), 0L);
 
   return poppler_movie->duration;
+}
+
+/**
+ * poppler_movie_get_aspect:
+ * @poppler_movie: a #PopplerMovie
+ * @width: width of the movie's bounding box
+ * @height: height of the movie's bounding box
+ *
+ * Returns the dimensions of the movie's bounding box (in pixels).
+ * The respective PDF movie dictionary entry is optional; if missing,
+ * -1x-1 will be returned. 
+ *
+ * Since: 0.89
+ */
+void
+poppler_movie_get_aspect (PopplerMovie *poppler_movie, gint *width, gint *height)
+{
+  g_return_if_fail (POPPLER_IS_MOVIE (poppler_movie));
+
+  *width  = poppler_movie->width;
+  *height = poppler_movie->height;
 }

@@ -170,7 +170,7 @@ Release 0.80.0:
         glib:
          * Make print scaling getter visible
          * Make Duplex/NumCopies/PrintPageRange preference available in API
-         * Implement Movie API
+         * Complement Movie API
 
         utils:
          * pdftotext: Add -nodiag flag to remove diagonal text on output
