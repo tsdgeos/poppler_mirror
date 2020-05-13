@@ -613,10 +613,12 @@ static void addSignatureFieldsToVector(FormField *ff, std::vector<FormFieldSigna
 
 std::vector<FormFieldSignature*> PDFDoc::getSignatureFields()
 {
-//   const int num_pages = getNumPages();
   std::vector<FormFieldSignature*> res;
 
   const Form *f = catalog->getForm();
+  if (!f)
+      return res;
+
   const int nRootFields = f->getNumFields();
   for (int i = 0; i < nRootFields; ++i) {
     FormField *ff = f->getRootField(i);
