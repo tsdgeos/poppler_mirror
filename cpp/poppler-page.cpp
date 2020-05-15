@@ -57,10 +57,10 @@ page_private::~page_private()
     delete transition;
 }
 
-size_t page_private::init_font_info_cache()
+void page_private::init_font_info_cache()
 {
     if (font_info_cache_initialized)
-	return font_info_cache.size();
+	return;
 
     poppler::font_iterator it(index, doc);
 
@@ -69,7 +69,7 @@ size_t page_private::init_font_info_cache()
     }
 
     font_info_cache_initialized = true;
-    return font_info_cache.size();
+    return;
 }
 
 /**

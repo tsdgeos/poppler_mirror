@@ -50,7 +50,7 @@ public:
 
     std::vector<font_info> font_info_cache;
     bool font_info_cache_initialized;
-    size_t init_font_info_cache();
+    void init_font_info_cache();
 };
 
 }
