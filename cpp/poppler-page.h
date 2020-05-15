@@ -67,10 +67,6 @@ public:
     bool      has_space_after() const;
 
     /**
-      \since 0.8x
-     */
-
-    /**
        Get a writing mode for the i-th glyph
 
        This method returns an enum of the writing mode
@@ -85,6 +81,10 @@ public:
         horizontal_wmode = 0,
         vertical_wmode = 1
     };
+
+    /**
+      \since 0.89
+     */
     writing_mode_enum get_wmode(int i = 0) const;
 
     /**
@@ -92,6 +92,10 @@ public:
 
        This method return a double floating value of the
        font size from the text_box instance.
+     */
+
+    /**
+      \since 0.89
      */
     double     get_font_size() const;
 
@@ -110,6 +114,10 @@ public:
        encoding of the font name is one of the ASCII,
        Latin1 or UTF-8. Some legacy PDF producers used
        in CJK market use GBK, Big5, Wansung or Shift-JIS.
+     */
+
+    /**
+      \since 0.89
      */
     std::string get_font_name(int i = 0) const;
 
