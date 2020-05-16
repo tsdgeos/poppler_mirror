@@ -538,8 +538,9 @@ private:
 class GfxICCBasedColorSpace: public GfxColorSpace {
 public:
 
-  GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA);
-  ~GfxICCBasedColorSpace() override;
+  GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA,
+			const Ref *iccProfileStreamA);
+  ~GfxICCBasedColorSpace();
   GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csICCBased; }
 
@@ -575,6 +576,7 @@ private:
   GfxColorSpace *alt;		// alternate color space
   double rangeMin[4];		// min values for each component
   double rangeMax[4];		// max values for each component
+  Ref iccProfileStream;		// the ICC profile
 #ifdef USE_CMS
   int getIntent() { return (transform != nullptr) ? transform->getIntent() : 0; }
   GfxColorTransform *transform;
