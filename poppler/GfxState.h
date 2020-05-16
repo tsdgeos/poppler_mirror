@@ -193,7 +193,8 @@ class GfxColorTransform {
 public:
   void doTransform(void *in, void *out, unsigned int size);
   // transformA should be a cmsHTRANSFORM
-  GfxColorTransform(void *transformA, int cmsIntent, unsigned int inputPixelType, unsigned int transformPixelType);
+  GfxColorTransform(void *sourceProfileA, void *transformA, int cmsIntent,
+                    unsigned int inputPixelType, unsigned int transformPixelType);
   ~GfxColorTransform();
   GfxColorTransform(const GfxColorTransform &) = delete;
   GfxColorTransform& operator=(const GfxColorTransform &) = delete;
@@ -202,13 +203,17 @@ public:
   int getTransformPixelType() const { return transformPixelType; }
   void ref();
   unsigned int unref();
+  void *getSourceProfile() { return sourceProfile; }
+  char *getPostScriptCSA();
 private:
   GfxColorTransform() {}
+  void *sourceProfile;
   void *transform;
   unsigned int refCount;
   int cmsIntent;
   unsigned int inputPixelType;
   unsigned int transformPixelType;
+  char *psCSA;
 };
 
 class GfxColorSpace {
@@ -569,6 +574,10 @@ public:
 
   // ICCBased-specific access.
   GfxColorSpace *getAlt() { return alt; }
+  Ref getRef() { return iccProfileStream; }
+#ifdef USE_CMS
+  char *getPostScriptCSA();
+#endif
 
 private:
 
@@ -1594,6 +1603,7 @@ public:
   void setDisplayProfile(void *localDisplayProfileA);
   void *getDisplayProfile() { return localDisplayProfile; }
   GfxColorTransform *getXYZ2DisplayTransform();
+  int getCmsRenderingIntent();
 #endif
 
   // Add to path.

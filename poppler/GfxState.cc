@@ -196,16 +196,22 @@ void GfxColorTransform::doTransform(void *in, void *out, unsigned int size) {
 }
 
 // transformA should be a cmsHTRANSFORM
-GfxColorTransform::GfxColorTransform(void *transformA, int cmsIntentA, unsigned int inputPixelTypeA, unsigned int transformPixelTypeA) {
+GfxColorTransform::GfxColorTransform(void *sourceProfileA, void *transformA, int cmsIntentA, unsigned int inputPixelTypeA, unsigned int transformPixelTypeA) {
+  sourceProfile = sourceProfileA;
   transform = transformA;
   refCount = 1;
   cmsIntent = cmsIntentA;
   inputPixelType = inputPixelTypeA;
   transformPixelType = transformPixelTypeA;
+  psCSA = NULL;
 }
 
 GfxColorTransform::~GfxColorTransform() {
+  if (sourceProfile)
+    cmsCloseProfile(sourceProfile);
   cmsDeleteTransform(transform);
+  if (psCSA)
+    gfree(psCSA);
 }
 
 void GfxColorTransform::ref() {
@@ -214,6 +220,31 @@ void GfxColorTransform::ref() {
 
 unsigned int GfxColorTransform::unref() {
   return --refCount;
+}
+
+char *GfxColorTransform::getPostScriptCSA()
+{
+  int size;
+
+  if (psCSA)
+    return psCSA;
+
+  if (sourceProfile == NULL) {
+    error(errSyntaxWarning, -1, "profile is NULL");
+    return NULL;
+  }
+
+  size = cmsGetPostScriptCSA(cmsGetProfileContextID(sourceProfile), sourceProfile, cmsIntent, 0, NULL, 0);
+  if (size == 0) {
+    error(errSyntaxWarning, -1, "PostScript CSA is NULL");
+    return NULL;
+  }
+
+  psCSA = (char*)gmalloc(size+1);
+  cmsGetPostScriptCSA(cmsGetProfileContextID(sourceProfile), sourceProfile, cmsIntent, 0, psCSA, size);
+  psCSA[size] = 0;
+
+  return psCSA;
 }
 
 static cmsHPROFILE RGBProfile = nullptr;
@@ -248,9 +279,8 @@ void GfxColorSpace::setDisplayProfile(void *displayProfileA) {
 	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == nullptr) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransform = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, displayPixelType);
+      XYZ2DisplayTransform = new GfxColorTransform(displayProfile, transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, displayPixelType);
     }
-    cmsCloseProfile(XYZProfile);
   }
 }
 
@@ -525,10 +555,10 @@ int GfxColorSpace::setupColorProfiles()
 	     CHANNELS_SH(nChannels) | BYTES_SH(1),
 	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == nullptr) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
+      cmsCloseProfile(XYZProfile);
     } else {
-      XYZ2DisplayTransform = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, displayPixelType);
+      XYZ2DisplayTransform = new GfxColorTransform(XYZProfile, transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, displayPixelType);
     }
-    cmsCloseProfile(XYZProfile);
   }
   return 0;
 }
@@ -1789,16 +1819,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
       int transformIntent = cs->getIntent();
       int cmsIntent = INTENT_RELATIVE_COLORIMETRIC;
       if (state != nullptr) {
-        const char *intent = state->getRenderingIntent();
-        if (intent != nullptr) {
-          if (strcmp(intent, "AbsoluteColorimetric") == 0) {
-            cmsIntent = INTENT_ABSOLUTE_COLORIMETRIC;
-          } else if (strcmp(intent, "Saturation") == 0) {
-            cmsIntent = INTENT_SATURATION;
-          } else if (strcmp(intent, "Perceptual") == 0) {
-            cmsIntent = INTENT_PERCEPTUAL;
-          }
-        }
+        cmsIntent = state->getCmsRenderingIntent();
       }
       if (transformIntent == cmsIntent) {
         return cs;
@@ -1883,16 +1904,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
 
     int cmsIntent = INTENT_RELATIVE_COLORIMETRIC;
     if (state != nullptr) {
-      const char *intent = state->getRenderingIntent();
-      if (intent != nullptr) {
-        if (strcmp(intent, "AbsoluteColorimetric") == 0) {
-          cmsIntent = INTENT_ABSOLUTE_COLORIMETRIC;
-        } else if (strcmp(intent, "Saturation") == 0) {
-          cmsIntent = INTENT_SATURATION;
-        } else if (strcmp(intent, "Perceptual") == 0) {
-          cmsIntent = INTENT_PERCEPTUAL;
-        }
-      }
+      cmsIntent = state->getCmsRenderingIntent();
     }
     if ((transform = cmsCreateTransform(hp,
 	   COLORSPACE_SH(cst) |CHANNELS_SH(nCompsA) | BYTES_SH(1),
@@ -1903,7 +1915,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
       error(errSyntaxWarning, -1, "Can't create transform");
       cs->transform = nullptr;
     } else {
-      cs->transform = new GfxColorTransform(transform, cmsIntent, cst, dcst);
+      cs->transform = new GfxColorTransform(hp, transform, cmsIntent, cst, dcst);
     }
     if (dcst == PT_RGB || dcst == PT_CMYK) {
        // create line transform only when the display is RGB type color space 
@@ -1913,10 +1925,12 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
 	error(errSyntaxWarning, -1, "Can't create transform");
 	cs->lineTransform = nullptr;
       } else {
-	cs->lineTransform = new GfxColorTransform(transform, cmsIntent, cst, dcst);
+	cs->lineTransform = new GfxColorTransform(NULL, transform, cmsIntent, cst, dcst);
       }
     }
-    cmsCloseProfile(hp);
+    if (cs->transform == nullptr) {
+      cmsCloseProfile(hp);
+    }
   }
   // put this colorSpace into cache
   if (out && iccProfileStreamA != Ref::INVALID()) {
@@ -2367,6 +2381,16 @@ void GfxICCBasedColorSpace::getDefaultRanges(double *decodeLow,
   }
 #endif
 }
+
+#ifdef USE_CMS
+char *GfxICCBasedColorSpace::getPostScriptCSA()
+{
+  if (transform)
+    return transform->getPostScriptCSA();
+  else
+    return NULL;
+}
+#endif
 
 //------------------------------------------------------------------------
 // GfxIndexedColorSpace
@@ -6597,37 +6621,46 @@ void GfxState::setDisplayProfile(cmsHPROFILE localDisplayProfileA) {
 	     CHANNELS_SH(nChannels) | BYTES_SH(1),
 	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == nullptr) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
+      cmsCloseProfile(XYZProfile);
     } else {
-      XYZ2DisplayTransformRelCol = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
+      XYZ2DisplayTransformRelCol = new GfxColorTransform(XYZProfile, transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
     }
+
+    XYZProfile = cmsCreateXYZProfile();
     if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
 	   localDisplayProfile,
 	   COLORSPACE_SH(localDisplayPixelType) |
 	     CHANNELS_SH(nChannels) | BYTES_SH(1),
 	  INTENT_ABSOLUTE_COLORIMETRIC,LCMS_FLAGS)) == nullptr) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
+      cmsCloseProfile(XYZProfile);
     } else {
-      XYZ2DisplayTransformAbsCol = new GfxColorTransform(transform, INTENT_ABSOLUTE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
+      XYZ2DisplayTransformAbsCol = new GfxColorTransform(XYZProfile, transform, INTENT_ABSOLUTE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
     }
+
+    XYZProfile = cmsCreateXYZProfile();
     if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
 	   localDisplayProfile,
 	   COLORSPACE_SH(localDisplayPixelType) |
 	     CHANNELS_SH(nChannels) | BYTES_SH(1),
 	  INTENT_SATURATION,LCMS_FLAGS)) == nullptr) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
+      cmsCloseProfile(XYZProfile);
     } else {
-      XYZ2DisplayTransformSat = new GfxColorTransform(transform, INTENT_SATURATION, PT_XYZ, localDisplayPixelType);
+      XYZ2DisplayTransformSat = new GfxColorTransform(XYZProfile, transform, INTENT_SATURATION, PT_XYZ, localDisplayPixelType);
     }
+
+    XYZProfile = cmsCreateXYZProfile();
     if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
 	   localDisplayProfile,
 	   COLORSPACE_SH(localDisplayPixelType) |
 	     CHANNELS_SH(nChannels) | BYTES_SH(1),
 	  INTENT_PERCEPTUAL,LCMS_FLAGS)) == nullptr) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
+      cmsCloseProfile(XYZProfile);
     } else {
-      XYZ2DisplayTransformPerc = new GfxColorTransform(transform, INTENT_PERCEPTUAL, PT_XYZ, localDisplayPixelType);
+      XYZ2DisplayTransformPerc = new GfxColorTransform(XYZProfile, transform, INTENT_PERCEPTUAL, PT_XYZ, localDisplayPixelType);
     }
-    cmsCloseProfile(XYZProfile);
   }
 }
 
@@ -6646,6 +6679,21 @@ GfxColorTransform *GfxState::getXYZ2DisplayTransform() {
     transform = XYZ2DisplayTransform;
   }
   return transform;
+}
+
+int GfxState::getCmsRenderingIntent() {
+  const char *intent = getRenderingIntent();
+  int cmsIntent = INTENT_RELATIVE_COLORIMETRIC;
+  if (intent) {
+    if (strcmp(intent, "AbsoluteColorimetric") == 0) {
+      cmsIntent = INTENT_ABSOLUTE_COLORIMETRIC;
+    } else if (strcmp(intent, "Saturation") == 0) {
+      cmsIntent = INTENT_SATURATION;
+    } else if (strcmp(intent, "Perceptual") == 0) {
+      cmsIntent = INTENT_PERCEPTUAL;
+    }
+  }
+  return cmsIntent;
 }
 
 #endif

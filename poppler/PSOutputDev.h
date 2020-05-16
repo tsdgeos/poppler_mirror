@@ -395,17 +395,17 @@ private:
 		    Stream *str, int width, int height, int len,
 		    const int *maskColors, Stream *maskStr,
 		    int maskWidth, int maskHeight, bool maskInvert);
-  void doImageL2(Object *ref, GfxImageColorMap *colorMap,
+  void doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colorMap,
 		 bool invert, bool inlineImg,
 		 Stream *str, int width, int height, int len,
 		 const int *maskColors, Stream *maskStr,
 		 int maskWidth, int maskHeight, bool maskInvert);
-  void doImageL3(Object *ref, GfxImageColorMap *colorMap,
+  void doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colorMap,
 		 bool invert, bool inlineImg,
 		 Stream *str, int width, int height, int len,
 		 const int *maskColors, Stream *maskStr,
 		 int maskWidth, int maskHeight, bool maskInvert);
-  void dumpColorSpaceL2(GfxColorSpace *colorSpace,
+  void dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace,
 			bool genXform, bool updateColors,
 			bool map01);
   bool tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str,
@@ -556,6 +556,8 @@ private:
   bool useBinary;		// use binary instead of hex
   bool enableLZW;		// enable LZW compression
   bool enableFlate;		// enable Flate compression
+
+  std::unordered_set<std::string> iccEmitted; // contains ICCBased CSAs that have been emitted
 
 #ifdef OPI_SUPPORT
   int opi13Nest;		// nesting level of OPI 1.3 objects
