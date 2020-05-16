@@ -66,6 +66,12 @@ public:
     rectf     char_bbox(size_t i) const;
     bool      has_space_after() const;
 
+
+    /**
+      \since 0.89
+     */
+    bool      has_font_info() const;
+
     /**
        Get a writing mode for the i-th glyph
 
@@ -185,6 +191,22 @@ public:
        \warning This method is not tested with Asian scripts
     */
     std::vector<text_box> text_list() const;
+
+    /*
+     * text_list_option_enum is a bitmask-style flags for text_list(),
+     * 0 means the default & simplest behaviour.
+     */
+    enum text_list_option_enum {
+        text_list_include_font = 1 // \since 0.89
+    };
+
+    /**
+       Extended version of text_list() taking an option flag.
+       The option flag should be the multiple of text_list_option_enum.
+
+       \since 0.89
+    */
+    std::vector<text_box> text_list(int opt_flag) const;
 
 private:
     page(document_private *doc, int index);

@@ -299,7 +299,7 @@ static void appendToGooString(void *stream, const char *text, int len) {
 ustring page::text(const rectf &r, text_layout_enum layout_mode) const
 {
     std::unique_ptr<GooString> out(new GooString());
-    const bool use_raw_order = (layout_mode == raw_order_layout); 
+    const bool use_raw_order = (layout_mode == raw_order_layout);
     const bool use_physical_layout = (layout_mode == physical_layout);
     TextOutputDev td(&appendToGooString, out.get(), use_physical_layout, 0, use_raw_order, false);
     if (r.is_empty()) {
@@ -310,6 +310,11 @@ ustring page::text(const rectf &r, text_layout_enum layout_mode) const
     }
     return ustring::from_utf8(out->c_str());
 }
+
+/*
+ * text_box_font_info object for text_box
+ */
+text_box_font_info_data::~text_box_font_info_data() = default;
 
 /*
  * text_box object for page::text_list()
@@ -352,30 +357,41 @@ bool text_box::has_space_after() const
     return m_data->has_space_after;
 }
 
+bool text_box::has_font_info() const
+{
+    return (m_data->text_box_font != nullptr);
+}
+
 text_box::writing_mode_enum text_box::get_wmode(int i) const
 {
-    return m_data->wmodes[i];
+    if (this->has_font_info())
+        return m_data->text_box_font->wmodes[i];
+    else
+        return text_box::invalid_wmode;
 }
 
 double text_box::get_font_size() const
 {
-    return m_data->font_size;
+    if (this->has_font_info())
+        return m_data->text_box_font->font_size;
+    else
+        return -1;
 }
 
 std::string text_box::get_font_name(int i) const
 {
-    int j = m_data->glyph_to_cache_index[i];
+    if (!this->has_font_info())
+        return std::string("*ignored*");
+
+    int j = m_data->text_box_font->glyph_to_cache_index[i];
     if (j < 0) {
         return std::string("");
     }
-    return m_data->font_info_cache[j].name();
+    return m_data->text_box_font->font_info_cache[j].name();
 }
 
-
-std::vector<text_box> page::text_list() const
+std::vector<text_box> page::text_list(int opt_flag) const
 {
-    d->init_font_info_cache();
-
     std::vector<text_box>  output_list;
 
     /* config values are same with Qt5 Page::TextList() */
@@ -419,11 +435,22 @@ std::vector<text_box> page::text_list() const
                 word->getRotation(),
                 {},
                 word->hasSpaceAfter() == true,
-                {},
-                word->getFontSize(),
-                d->font_info_cache,
-                {}
+                nullptr
             }};
+
+            std::unique_ptr<text_box_font_info_data> tb_font_info = nullptr;
+            if (opt_flag & page::text_list_include_font) {
+                d->init_font_info_cache();
+
+                std::unique_ptr<text_box_font_info_data> tb_font{new text_box_font_info_data{
+                    word->getFontSize(), // double font_size
+                    {},                  // std::vector<text_box::writing_mode> wmodes;
+                    d->font_info_cache,  // std::vector<font_info> font_info_cache;
+                    {}                   // std::vector<int> glyph_to_cache_index;
+                }};
+
+                tb_font_info = std::move(tb_font);
+            };
 
             tb.m_data->char_bboxes.reserve(word->getLength());
             for (int j = 0; j < word->getLength(); j ++) {
@@ -431,29 +458,32 @@ std::vector<text_box> page::text_list() const
                 tb.m_data->char_bboxes.emplace_back(xMin, yMin, xMax-xMin, yMax-yMin);
             }
 
-            tb.m_data->glyph_to_cache_index.reserve(word->getLength());
-            for (int j = 0; j < word->getLength(); j++) {
-                const TextFontInfo* cur_text_font_info = word->getFontInfo(j);
+            if (tb_font_info && d->font_info_cache_initialized) {
+                tb_font_info->glyph_to_cache_index.reserve(word->getLength());
+                for (int j = 0; j < word->getLength(); j++) {
+                    const TextFontInfo* cur_text_font_info = word->getFontInfo(j);
 
-                // filter-out the invalid WMode value here.
-                switch (cur_text_font_info->getWMode()) {
-                case 0:
-                    tb.m_data->wmodes.push_back(text_box::horizontal_wmode);
-                    break;
-                case 1:
-                    tb.m_data->wmodes.push_back(text_box::vertical_wmode);
-                    break;
-                default:
-                    tb.m_data->wmodes.push_back(text_box::invalid_wmode);
-                };
-
-                tb.m_data->glyph_to_cache_index[j] = -1;
-                for (size_t k = 0; k < d->font_info_cache.size(); k++) {
-                    if (cur_text_font_info->matches(&(d->font_info_cache[k].d->ref))) {
-                        tb.m_data->glyph_to_cache_index[j] = k;
+                    // filter-out the invalid WMode value here.
+                    switch (cur_text_font_info->getWMode()) {
+                    case 0:
+                        tb_font_info->wmodes.push_back(text_box::horizontal_wmode);
                         break;
+                    case 1:
+                        tb_font_info->wmodes.push_back(text_box::vertical_wmode);
+                        break;
+                    default:
+                        tb_font_info->wmodes.push_back(text_box::invalid_wmode);
+                    };
+
+                    tb_font_info->glyph_to_cache_index[j] = -1;
+                    for (size_t k = 0; k < tb_font_info->font_info_cache.size(); k++) {
+                        if (cur_text_font_info->matches(&(tb_font_info->font_info_cache[k].d->ref))) {
+                            tb_font_info->glyph_to_cache_index[j] = k;
+                            break;
+                        }
                     }
                 }
+                tb.m_data->text_box_font = std::move(tb_font_info);
             }
 
             output_list.push_back(std::move(tb));
@@ -461,4 +491,9 @@ std::vector<text_box> page::text_list() const
     }
 
     return output_list;
+}
+
+std::vector<text_box> page::text_list() const
+{
+    return text_list(0);
 }

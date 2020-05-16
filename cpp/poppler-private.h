@@ -73,6 +73,33 @@ void delete_all(const Collection &c)
 }
 
 class font_info;
+struct text_box_font_info_data
+{
+    ~text_box_font_info_data();
+
+    double font_size;
+    std::vector<text_box::writing_mode_enum> wmodes; 
+
+    /*
+     * a duplication of the font_info_cache created by the
+     * poppler::font_iterator and owned by the poppler::page
+     * object. Its lifetime might differ from that of text_box
+     * object (think about collecting all text_box objects
+     * from all pages), so we have to duplicate it into all
+     * text_box instances.
+     */
+    std::vector<font_info> font_info_cache;
+
+    /*
+     * a std::vector from the glyph index in the owner
+     * text_box to the font_info index in font_info_cache. 
+     * The "-1" means no corresponding fonts found in the
+     * cache.
+     */
+    std::vector<int> glyph_to_cache_index;
+};
+
+class font_info;
 struct text_box_data
 {
     ~text_box_data();
@@ -83,26 +110,7 @@ struct text_box_data
     std::vector<rectf> char_bboxes;
     bool has_space_after;
 
-    std::vector<text_box::writing_mode_enum> wmodes; 
-    double font_size;
-
-    /*
-     * a duplication of the font_info_cache created by the
-     * poppler::font_iterator and owned by the poppler::page
-     *  object. Its lifetime might differ from that of text_box
-     * object (think about collecting all text_box objects
-     * from all pages), so we have to duplicate it into all
-     * text_box instances.
-     */
-    std::vector<font_info> font_info_cache;
-
-    /*
-     * a std::vector from the glyph index in the current
-     * text_box to the font_info index in font_info_cache. 
-     * The "-1" means no corresponding fonts found in the
-     * cache.
-     */
-    std::vector<int> glyph_to_cache_index;
+    std::unique_ptr<text_box_font_info_data> text_box_font;
 };
 
 }

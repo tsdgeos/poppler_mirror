@@ -60,6 +60,7 @@ bool show_help = false;
 bool show_version = false;
 char show_text[32];
 bool show_text_list = false;
+bool show_text_list_with_font = false;
 poppler::page::text_layout_enum show_text_layout = poppler::page::physical_layout;
 
 static const ArgDesc the_args[] = {
@@ -85,6 +86,8 @@ static const ArgDesc the_args[] = {
       "show text (physical|raw|none) extracted from all pages" },
     { "--show-text-list",      argFlag, &show_text_list,       0,
       "show text list (experimental)" },
+    { "--show-text-list-with-font",  argFlag, &show_text_list_with_font, 0,
+      "show text list with font info (experimental)" },
     { "-h",                    argFlag,  &show_help,           0,
       "print usage information" },
     { "--help",                argFlag,  &show_help,           0,
@@ -417,14 +420,14 @@ static void print_page_text(poppler::page *p)
     std::cout << std::endl;
 }
 
-static void print_page_text_list(poppler::page *p)
+static void print_page_text_list(poppler::page *p, int opt_flag = 0)
 {
     if (!p) {
         std::cout << std::setw(out_width) << "Broken Page. Could not be parsed" << std::endl;
         std::cout << std::endl;
         return;
     }
-    auto text_list = p->text_list();
+    auto text_list = p->text_list(opt_flag);
 
     std::cout << "---" << std::endl;
     for (const poppler::text_box &text : text_list) {
@@ -435,9 +438,9 @@ static void print_page_text_list(poppler::page *p)
         std::string font_name = text.get_font_name();
         std::cout << "[" << ustr << "] @ ";
         std::cout << "( x=" << bbox.x() << " y=" << bbox.y() << " w=" << bbox.width() << " h=" << bbox.height() << " )";
-        std::cout << "( fontname=" << font_name << " fontsize=" << font_size << " wmode=" << wmode << " )";
+        if (text.has_font_info())
+            std::cout << "( fontname=" << font_name << " fontsize=" << font_size << " wmode=" << wmode << " )";
         std::cout << std::endl;
-
     }
     std::cout << "---" << std::endl;
 }
@@ -538,12 +541,15 @@ int main(int argc, char *argv[])
             print_page_text(p.get());
         }
     }
-    if (show_text_list) {
+    if (show_text_list || show_text_list_with_font) {
         const int pages = doc->pages();
         for (int i = 0; i < pages; ++i) {
             std::cout << "Page " << (i + 1) << "/" << pages << ":" << std::endl;
             std::unique_ptr<poppler::page> p(doc->create_page(i));
-            print_page_text_list(p.get());
+            if (show_text_list_with_font)
+                print_page_text_list(p.get(), poppler::page::text_list_include_font);
+            else
+                print_page_text_list(p.get(), 0);
         }
     }
 
