@@ -6808,7 +6808,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace,
     break;
 
   case csICCBased:
-#if USE_CMS
+#ifdef USE_CMS
     {
       GfxICCBasedColorSpace *iccBasedCS;
       iccBasedCS = (GfxICCBasedColorSpace *)colorSpace;

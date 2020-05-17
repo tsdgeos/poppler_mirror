@@ -203,7 +203,7 @@ GfxColorTransform::GfxColorTransform(void *sourceProfileA, void *transformA, int
   cmsIntent = cmsIntentA;
   inputPixelType = inputPixelTypeA;
   transformPixelType = transformPixelTypeA;
-  psCSA = NULL;
+  psCSA = nullptr;
 }
 
 GfxColorTransform::~GfxColorTransform() {
@@ -229,15 +229,15 @@ char *GfxColorTransform::getPostScriptCSA()
   if (psCSA)
     return psCSA;
 
-  if (sourceProfile == NULL) {
-    error(errSyntaxWarning, -1, "profile is NULL");
-    return NULL;
+  if (sourceProfile == nullptr) {
+    error(errSyntaxWarning, -1, "profile is nullptr");
+    return nullptr;
   }
 
-  size = cmsGetPostScriptCSA(cmsGetProfileContextID(sourceProfile), sourceProfile, cmsIntent, 0, NULL, 0);
+  size = cmsGetPostScriptCSA(cmsGetProfileContextID(sourceProfile), sourceProfile, cmsIntent, 0, nullptr, 0);
   if (size == 0) {
-    error(errSyntaxWarning, -1, "PostScript CSA is NULL");
-    return NULL;
+    error(errSyntaxWarning, -1, "PostScript CSA is nullptr");
+    return nullptr;
   }
 
   psCSA = (char*)gmalloc(size+1);
@@ -1809,9 +1809,9 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
     error(errSyntaxError, -1, "Bad ICCBased color space");
     return nullptr;
   }
-#ifdef USE_CMS
   const Object &obj1Ref = arr->getNF(1);
   const Ref iccProfileStreamA = obj1Ref.isRef() ? obj1Ref.getRef() : Ref::INVALID();
+#ifdef USE_CMS
   // check cache
   if (out && iccProfileStreamA != Ref::INVALID()) {
     if (auto *item = out->getIccColorSpaceCache()->lookup(iccProfileStreamA)) {
@@ -1925,7 +1925,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
 	error(errSyntaxWarning, -1, "Can't create transform");
 	cs->lineTransform = nullptr;
       } else {
-	cs->lineTransform = new GfxColorTransform(NULL, transform, cmsIntent, cst, dcst);
+	cs->lineTransform = new GfxColorTransform(nullptr, transform, cmsIntent, cst, dcst);
       }
     }
     if (cs->transform == nullptr) {
@@ -2388,7 +2388,7 @@ char *GfxICCBasedColorSpace::getPostScriptCSA()
   if (transform)
     return transform->getPostScriptCSA();
   else
-    return NULL;
+    return nullptr;
 }
 #endif
 

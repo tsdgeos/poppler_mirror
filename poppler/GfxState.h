@@ -545,7 +545,7 @@ public:
 
   GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA,
 			const Ref *iccProfileStreamA);
-  ~GfxICCBasedColorSpace();
+  ~GfxICCBasedColorSpace() override;
   GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csICCBased; }
 
