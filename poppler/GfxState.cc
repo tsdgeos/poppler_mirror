@@ -224,6 +224,15 @@ unsigned int GfxColorTransform::unref() {
 
 char *GfxColorTransform::getPostScriptCSA()
 {
+#if LCMS_VERSION>=2070
+  // The runtime version check of lcms2 is only available from release 2.7 upwards.
+  // The generation of the CSA code only works reliably for version 2.10 and upwards.
+  // Cf. the explanation in the corresponding lcms2 merge request [1], and the original mail thread [2].
+  // [1] https://github.com/mm2/Little-CMS/pull/214
+  // [2] https://sourceforge.net/p/lcms/mailman/message/33182987/
+  if (cmsGetEncodedCMMversion() < 2100)
+    return nullptr;
+
   int size;
 
   if (psCSA)
@@ -245,6 +254,9 @@ char *GfxColorTransform::getPostScriptCSA()
   psCSA[size] = 0;
 
   return psCSA;
+#else
+  return nullptr;
+#endif
 }
 
 static cmsHPROFILE RGBProfile = nullptr;
