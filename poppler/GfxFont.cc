@@ -429,7 +429,7 @@ GfxFontType GfxFont::getFontType(XRef *xref, Dict *fontDict, Ref *embID) {
 	t = isType0 ? fontCIDType2 : fontTrueType;
 	break;
       case fofiIdOpenTypeCFF8Bit:
-	t = expectedType; // hack: open type always == expected type? s. bug-poppler20605.pdf
+	t = isType0 ? fontCIDType0COT : fontType1COT;
 	break;
       case fofiIdOpenTypeCFFCID:
 	t = fontCIDType0COT;
@@ -1826,24 +1826,22 @@ GfxCIDFont::GfxCIDFont(XRef *xref, const char *tagA, Ref idA, GooString *nameA,
   }
 
   // CIDToGIDMap (for embedded TrueType fonts)
-  if (type == fontCIDType2 || type == fontCIDType2OT) {
-    obj1 = desFontDict->lookup("CIDToGIDMap");
-    if (obj1.isStream()) {
-      cidToGIDLen = 0;
-      int i = 64;
-      cidToGID = (int *)gmallocn(i, sizeof(int));
-      obj1.streamReset();
-      while ((c1 = obj1.streamGetChar()) != EOF &&
-	     (c2 = obj1.streamGetChar()) != EOF) {
-	if (cidToGIDLen == i) {
-	  i *= 2;
-	  cidToGID = (int *)greallocn(cidToGID, i, sizeof(int));
-	}
-	cidToGID[cidToGIDLen++] = (c1 << 8) + c2;
+  obj1 = desFontDict->lookup("CIDToGIDMap");
+  if (obj1.isStream()) {
+    cidToGIDLen = 0;
+    int i = 64;
+    cidToGID = (int *)gmallocn(i, sizeof(int));
+    obj1.streamReset();
+    while ((c1 = obj1.streamGetChar()) != EOF &&
+	    (c2 = obj1.streamGetChar()) != EOF) {
+      if (cidToGIDLen == i) {
+	i *= 2;
+	cidToGID = (int *)greallocn(cidToGID, i, sizeof(int));
       }
-    } else if (!obj1.isName("Identity") && !obj1.isNull()) {
-      error(errSyntaxError, -1, "Invalid CIDToGIDMap entry in CID font");
+      cidToGID[cidToGIDLen++] = (c1 << 8) + c2;
     }
+  } else if (!obj1.isName("Identity") && !obj1.isNull()) {
+    error(errSyntaxError, -1, "Invalid CIDToGIDMap entry in CID font");
   }
 
   //----- character metrics -----
