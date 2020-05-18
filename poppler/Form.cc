@@ -27,6 +27,7 @@
 // Copyright 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2019 Tomoyuki Kubota <himajin100000@gmail.com>
 // Copyright 2019 João Netto <joaonetto901@gmail.com>
+// Copyright 2020 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
 
@@ -851,6 +852,67 @@ void FormField::setReadOnly (bool value)
   updateChildrenAppearance();
 }
 
+void FormField::reset(const std::vector<std::string>& excludedFields)
+{
+  resetChildren(excludedFields);
+}
+
+void FormField::resetChildren(const std::vector<std::string>& excludedFields)
+{
+  if (!terminal) {
+    for (int i = 0; i < numChildren; i++)
+      children[i]->reset(excludedFields);
+  }
+}
+
+bool FormField::isAmongExcludedFields(const std::vector<std::string>& excludedFields)
+{
+  Ref fieldRef;
+
+  for (const std::string &field : excludedFields) {
+    if (field.compare(field.size() - 2, 2, " R") == 0) {
+      if (sscanf(field.c_str(), "%d %d R", &fieldRef.num, &fieldRef.gen) == 2 &&
+          fieldRef == getRef())
+        return true;
+    } else {
+      if (field == getFullyQualifiedName()->toStr())
+        return true;
+    }
+  }
+
+  return false;
+}
+
+FormField* FormField::findFieldByRef (Ref aref)
+{
+  if (terminal) {
+    if (this->getRef() == aref)
+      return this;
+  } else {
+    for (int i = 0; i < numChildren; i++) {
+      FormField* result = children[i]->findFieldByRef(aref);
+      if (result)
+        return result;
+    }
+  }
+  return nullptr;
+}
+
+FormField* FormField::findFieldByFullyQualifiedName (const std::string &name)
+{
+  if (terminal) {
+    if (getFullyQualifiedName()->cmp(name.c_str()) == 0)
+      return this;
+  } else {
+    for (int i = 0; i < numChildren; i++) {
+      FormField* result = children[i]->findFieldByFullyQualifiedName(name);
+      if (result)
+        return result;
+    }
+  }
+  return nullptr;
+}
+
 //------------------------------------------------------------------------
 // FormFieldButton
 //------------------------------------------------------------------------
@@ -863,6 +925,7 @@ FormFieldButton::FormFieldButton(PDFDoc *docA, Object &&dictObj, const Ref refA,
   siblings = nullptr;
   numSiblings = 0;
   appearanceState.setToNull();
+  defaultAppearanceState.setToNull();
 
   btype = formButtonCheck;
   Object obj1 = Form::fieldLookup(dict, "Ff");
@@ -889,6 +952,7 @@ FormFieldButton::FormFieldButton(PDFDoc *docA, Object &&dictObj, const Ref refA,
     // Even though V is inheritable we are interested in the value of this
     // field, if not present it's probably because it's a button in a set.
     appearanceState = dict->lookup("V");
+    defaultAppearanceState = Form::fieldLookup(dict, "DV");
   }
 }
 
@@ -1021,6 +1085,24 @@ FormFieldButton::~FormFieldButton()
     gfree(siblings);
 }
 
+void FormFieldButton::reset(const std::vector<std::string>& excludedFields)
+{
+  if (!isAmongExcludedFields(excludedFields)) {
+    if (getDefaultAppearanceState()) {
+      setState(getDefaultAppearanceState());
+    } else {
+      obj.getDict()->remove("V");
+
+      // Clear check button if it doesn't have default value.
+      // This behaviour is what Adobe Reader does, it is not written in specification.
+      if (btype == formButtonCheck)
+        setState("Off");
+    }
+  }
+
+  resetChildren(excludedFields);
+}
+
 //------------------------------------------------------------------------
 // FormFieldText
 //------------------------------------------------------------------------
@@ -1031,6 +1113,7 @@ FormFieldText::FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref refA, For
   Object obj1;
   content = nullptr;
   internalContent = nullptr;
+  defaultContent = nullptr;
   multiline = password = fileSelect = doNotSpellCheck = doNotScroll = comb = richText = false;
   maxLen = 0;
 
@@ -1058,16 +1141,35 @@ FormFieldText::FormFieldText(PDFDoc *docA, Object &&dictObj, const Ref refA, For
     maxLen = obj1.getInt();
   }
 
-  obj1 = Form::fieldLookup(dict, "V");
+  fillContent(fillDefaultValue);
+  fillContent(fillValue);
+}
+
+void FormFieldText::fillContent(FillValueType fillType)
+{
+  Dict* dict = obj.getDict();
+  Object obj1;
+
+  obj1 = Form::fieldLookup(dict, fillType == fillDefaultValue ? "DV" : "V");
   if (obj1.isString()) {
     if (obj1.getString()->hasUnicodeMarker()) {
       if (obj1.getString()->getLength() > 2)
-        content = obj1.getString()->copy();
+        {
+          if (fillType == fillDefaultValue)
+            defaultContent = obj1.getString()->copy();
+          else
+            content = obj1.getString()->copy();
+        }
     } else if (obj1.getString()->getLength() > 0) {
       //non-unicode string -- assume pdfDocEncoding and try to convert to UTF16BE
       int tmp_length;
       char* tmp_str = pdfDocEncodingToUTF16(obj1.getString()->toStr(), &tmp_length);
-      content = new GooString(tmp_str, tmp_length);
+
+      if (fillType == fillDefaultValue)
+        defaultContent = new GooString(tmp_str, tmp_length);
+      else
+        content = new GooString(tmp_str, tmp_length);
+
       delete [] tmp_str;
     }
   }
@@ -1113,6 +1215,18 @@ FormFieldText::~FormFieldText()
 {
   delete content;
   delete internalContent;
+  delete defaultContent;
+}
+
+void FormFieldText::reset(const std::vector<std::string>& excludedFields)
+{
+  if (!isAmongExcludedFields(excludedFields)) {
+    setContentCopy(defaultContent);
+    if (defaultContent == nullptr)
+      obj.getDict()->remove("V");
+  }
+
+  resetChildren(excludedFields);
 }
 
 double FormFieldText::getTextFontSize()
@@ -1214,6 +1328,7 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
 {
   numChoices = 0;
   choices = nullptr;
+  defaultChoices = nullptr;
   editedChoice = nullptr;
   topIdx = 0;
 
@@ -1290,7 +1405,25 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
     // Note: According to PDF specs, /V should *never* contain the exportVal.
     // However, if /Opt is an array of (exportVal,optionName) pairs, acroread
     // seems to expect the exportVal instead of the optionName and so we do too.
-    obj1 = Form::fieldLookup(dict, "V");
+    fillChoices(fillValue);
+  }
+
+  fillChoices(fillDefaultValue);
+}
+
+void FormFieldChoice::fillChoices(FillValueType fillType)
+{
+  const char *key = fillType == fillDefaultValue ? "DV" : "V";
+  Dict* dict = obj.getDict();
+  Object obj1;
+
+  obj1 = Form::fieldLookup(dict, key);
+  if (obj1.isString() || obj1.isArray()) {
+    if (fillType == fillDefaultValue) {
+      defaultChoices = new bool[numChoices];
+      memset(defaultChoices, 0, sizeof(bool) * numChoices);
+    }
+
     if (obj1.isString()) {
       bool optionFound = false;
 
@@ -1306,13 +1439,16 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
         }
 
         if (optionFound) {
-          choices[i].selected = true;
+          if (fillType == fillDefaultValue)
+            defaultChoices[i] = true;
+          else
+            choices[i].selected = true;
           break; // We've determined that this option is selected. No need to keep on scanning
         }
       }
 
       // Set custom value if /V doesn't refer to any predefined option and the field is user-editable
-      if (!optionFound && edit) {
+      if (fillType == fillValue && !optionFound && edit) {
         editedChoice = obj1.getString()->copy();
       }
     } else if (obj1.isArray()) {
@@ -1320,7 +1456,7 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
         for (int j = 0; j < obj1.arrayGetLength(); j++) {
           const Object obj2 = obj1.arrayGet(j);
           if (!obj2.isString()) {
-            error(errSyntaxError, -1, "FormWidgetChoice:: V array contains a non string object");
+            error(errSyntaxError, -1, "FormWidgetChoice:: {0:s} array contains a non string object", key);
             continue;
           }
 
@@ -1337,7 +1473,10 @@ FormFieldChoice::FormFieldChoice(PDFDoc *docA, Object &&aobj, const Ref refA, Fo
           }
 
           if (matches) {
-            choices[i].selected = true;
+            if (fillType == fillDefaultValue)
+              defaultChoices[i] = true;
+            else
+              choices[i].selected = true;
             break; // We've determined that this option is selected. No need to keep on scanning
           }
         }
@@ -1353,6 +1492,7 @@ FormFieldChoice::~FormFieldChoice()
     delete choices[i].optionName;
   }
   delete [] choices;
+  delete [] defaultChoices;
   delete editedChoice;
 }
 
@@ -1501,6 +1641,25 @@ const GooString *FormFieldChoice::getSelectedChoice() const {
   }
 
   return nullptr;
+}
+
+void FormFieldChoice::reset(const std::vector<std::string>& excludedFields)
+{
+  if (!isAmongExcludedFields(excludedFields)) {
+    delete editedChoice;
+    editedChoice = nullptr;
+
+    if (defaultChoices) {
+      for (int i = 0; i < numChoices; i++)
+        choices[i].selected = defaultChoices[i];
+    } else {
+      unselectAll();
+    }
+  }
+
+  resetChildren(excludedFields);
+
+  updateSelection();
 }
 
 //------------------------------------------------------------------------
@@ -1991,6 +2150,56 @@ FormWidget* Form::findWidgetByRef (Ref aref)
     if(result) return result;
   }
   return nullptr;
+}
+
+FormField* Form::findFieldByRef(Ref aref) const
+{
+  for (int i = 0; i < numFields; i++) {
+    FormField *result = rootFields[i]->findFieldByRef(aref);
+    if (result) return result;
+  }
+  return nullptr;
+}
+
+FormField* Form::findFieldByFullyQualifiedName(const std::string &name) const
+{
+  for (int i = 0; i < numFields; i++) {
+    FormField *result = rootFields[i]->findFieldByFullyQualifiedName(name);
+    if (result) return result;
+  }
+  return nullptr;
+}
+
+void Form::reset (const std::vector<std::string>& fields, bool excludeFields)
+{
+  FormField  *foundField;
+  const bool  resetAllFields = fields.empty();
+
+  if (resetAllFields) {
+    for (int i = 0; i < numFields; i++) {
+      rootFields[i]->reset(std::vector<std::string>());
+    }
+  } else {
+    if (!excludeFields) {
+      for (const std::string &field : fields) {
+        Ref fieldRef;
+
+        if (field.compare(field.size() - 2, 2, " R") == 0 &&
+            sscanf(field.c_str(), "%d %d R", &fieldRef.num, &fieldRef.gen) == 2) {
+          foundField = findFieldByRef(fieldRef);
+        } else {
+          foundField = findFieldByFullyQualifiedName(field);
+        }
+
+        if (foundField)
+          foundField->reset(std::vector<std::string>());
+      }
+    } else {
+      for (int i = 0; i < numFields; i++) {
+        rootFields[i]->reset(fields);
+      }
+    }
+  }
 }
 
 //------------------------------------------------------------------------

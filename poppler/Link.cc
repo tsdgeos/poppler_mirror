@@ -24,6 +24,7 @@
 // Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
 // Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020 Marek Kasik <mkasik@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -128,6 +129,10 @@ std::unique_ptr<LinkAction> LinkAction::parseAction(const Object *obj, const Goo
   // Hide action
   } else if (obj2.isName("Hide")) {
     action = std::make_unique<LinkHide>(obj);
+
+  // ResetForm action
+  } else if (obj2.isName("ResetForm")) {
+    action = std::make_unique<LinkResetForm>(obj);
 
   // unknown action
   } else if (obj2.isName()) {
@@ -831,6 +836,42 @@ LinkHide::LinkHide(const Object *hideObj) {
 }
 
 LinkHide::~LinkHide() = default;
+
+//------------------------------------------------------------------------
+// LinkResetForm
+//------------------------------------------------------------------------
+
+LinkResetForm::LinkResetForm(const Object *obj) {
+  Object obj1;
+
+  exclude = false;
+
+  obj1 = obj->dictLookup("Fields");
+  if (obj1.isArray()) {
+    fields.resize(obj1.arrayGetLength());
+    for (int i = 0; i < obj1.arrayGetLength(); ++i) {
+      const Object &obj2 = obj1.arrayGetNF(i);
+      if (obj2.isName())
+        fields[i] = std::string (obj2.getName ());
+      else if (obj2.isRef()) {
+        fields[i] = std::to_string(obj2.getRef().num);
+        fields[i].append(" ");
+        fields[i].append(std::to_string(obj2.getRef().gen));
+        fields[i].append(" R");
+      }
+    }
+  }
+
+  obj1 = obj->dictLookup("Flags");
+  if (obj1.isInt()) {
+    int flags = obj1.getInt();
+
+    if (flags & 0x1)
+      exclude = true;
+  }
+}
+
+LinkResetForm::~LinkResetForm() = default;
 
 //------------------------------------------------------------------------
 // LinkUnknown

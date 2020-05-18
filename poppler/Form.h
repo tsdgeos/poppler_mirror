@@ -21,6 +21,7 @@
 // Copyright 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright 2019 João Netto <joaonetto901@gmail.com>
 // Copyright 2020 Nelson Benítez León <nbenitezl@gmail.com>
+// Copyright 2020 Marek Kasik <mkasik@redhat.com>
 //
 //========================================================================
 
@@ -71,6 +72,11 @@ enum FormSignatureType {
   adbe_pkcs7_sha1,
   adbe_pkcs7_detached,
   ETSI_CAdES_detached
+};
+
+enum FillValueType {
+  fillValue,
+  fillDefaultValue
 };
 
 class Form;
@@ -330,11 +336,16 @@ public:
 
   void printTree(int indent = 0);
   virtual void print(int indent = 0);
+  virtual void reset(const std::vector<std::string>& excludedFields);
+  void resetChildren(const std::vector<std::string>& excludedFields);
+  FormField* findFieldByRef(Ref aref);
+  FormField* findFieldByFullyQualifiedName(const std::string &name);
 
  protected:
   void _createWidget (Object *obj, Ref aref);
   void createChildren(std::set<int> *usedParents);
   void updateChildrenAppearance();
+  bool isAmongExcludedFields(const std::vector<std::string>& excludedFields);
 
   FormFieldType type;           // field type
   Ref ref;
@@ -383,6 +394,7 @@ public:
   bool getState(const char *state) const;
 
   const char *getAppearanceState() const { return appearanceState.isName() ? appearanceState.getName() : nullptr; }
+  const char *getDefaultAppearanceState() const { return defaultAppearanceState.isName() ? defaultAppearanceState.getName() : nullptr; }
 
   void fillChildrenSiblingsID () override;
   
@@ -394,6 +406,7 @@ public:
   int getNumSiblings () const { return numSiblings; }
 
   void print(int indent) override;
+  void reset(const std::vector<std::string>& excludedFields) override;
 
   ~FormFieldButton() override;
 protected:
@@ -408,6 +421,7 @@ protected:
   int active_child; //only used for combo box
   bool noAllOff;
   Object appearanceState; // V
+  Object defaultAppearanceState; // DV
 };
 
 //------------------------------------------------------------------------
@@ -440,14 +454,17 @@ public:
   void setTextFontSize(int fontSize);
 
   void print(int indent) override;
+  void reset(const std::vector<std::string>& excludedFields) override;
 
   static int tokenizeDA(const GooString* daString, std::vector<GooString*>* daToks, const char* searchTok);
 
 protected:
   int parseDA(std::vector<GooString*>* daToks);
+  void fillContent(FillValueType fillType);
 
   GooString* content;
   GooString* internalContent;
+  GooString* defaultContent;
   bool multiline;
   bool password;
   bool fileSelect;
@@ -502,10 +519,12 @@ public:
   int getTopIndex() const { return topIdx; }
 
   void print(int indent) override;
+  void reset(const std::vector<std::string>& excludedFields) override;
 
 protected:
   void unselectAll();
   void updateSelection();
+  void fillChoices(FillValueType fillType);
 
   bool combo;
   bool edit;
@@ -521,6 +540,7 @@ protected:
 
   int numChoices;
   ChoiceOpt* choices;
+  bool* defaultChoices;
   GooString* editedChoice;
   int topIdx; // TI
 };
@@ -595,10 +615,14 @@ public:
   Object* getDefaultResourcesObj() { return &resDict; }
 
   FormWidget* findWidgetByRef (Ref aref);
+  FormField* findFieldByRef(Ref aref) const;
+  FormField* findFieldByFullyQualifiedName(const std::string &name) const;
 
   void postWidgetsLoad();
 
   const std::vector<Ref> &getCalculateOrder() const { return calculateOrder; }
+
+  void reset(const std::vector<std::string>& fields, bool excludeFields);
 
 private:
   FormField** rootFields;

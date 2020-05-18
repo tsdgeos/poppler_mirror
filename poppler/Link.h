@@ -22,6 +22,7 @@
 // Copyright (C) 2018 Intevation GmbH <intevation@intevation.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2020 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2020 Marek Kasik <mkasik@redhat.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -59,6 +60,7 @@ enum LinkActionKind {
   actionJavaScript,		// JavaScript action
   actionOCGState,               // Set-OCG-State action
   actionHide,			// Hide action
+  actionResetForm,		// ResetForm action
   actionUnknown			// anything else
 };
 
@@ -490,6 +492,32 @@ private:
   std::string targetName;
   bool show;
 };
+
+//------------------------------------------------------------------------
+// LinkResetForm
+//------------------------------------------------------------------------
+
+class LinkResetForm: public LinkAction {
+public:
+
+  // Build a LinkResetForm.
+  LinkResetForm(const Object *nameObj);
+
+  ~LinkResetForm() override;
+
+  bool isOk() const override { return true; }
+
+  LinkActionKind getKind() const override { return actionResetForm; }
+
+  const std::vector<std::string>& getFields() const { return fields; }
+  bool getExclude() const { return exclude; }
+
+private:
+
+  std::vector<std::string> fields;
+  bool exclude;
+};
+
 
 //------------------------------------------------------------------------
 // LinkUnknown
