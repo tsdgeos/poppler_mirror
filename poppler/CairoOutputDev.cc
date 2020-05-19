@@ -31,8 +31,9 @@
 // Copyright (C) 2015 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
-// Copyright (C) 2019 Marek Kasik <mkasik@redhat.com>
+// Copyright (C) 2019, 2020 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2020 Michal <sudolskym@gmail.com>
+// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -585,13 +586,19 @@ void CairoOutputDev::updateFillColorStop(GfxState *state, double offset) {
 
   state->getFillRGB(&fill_color);
 
+  // If stroke pattern is set then the current fill is clipped
+  // to a stroke path.  In that case, the stroke opacity has to be used
+  // rather than the fill opacity.
+  // See https://gitlab.freedesktop.org/poppler/poppler/issues/178
+  auto opacity = (state->getStrokePattern()) ? state->getStrokeOpacity() : state->getFillOpacity();
+
   cairo_pattern_add_color_stop_rgba(fill_pattern, offset,
 				    colToDbl(fill_color.r),
 				    colToDbl(fill_color.g),
 				    colToDbl(fill_color.b),
-				    fill_opacity);
-  LOG(printf ("fill color stop: %f (%d, %d, %d)\n",
-	      offset, fill_color.r, fill_color.g, fill_color.b));
+                                    opacity);
+  LOG(printf ("fill color stop: %f (%d, %d, %d, %d)\n",
+	      offset, fill_color.r, fill_color.g, fill_color.b, dblToCol(opacity)));
 }
 
 void CairoOutputDev::updateBlendMode(GfxState *state) {
@@ -965,6 +972,26 @@ bool CairoOutputDev::tilingPatternFill(GfxState *state, Gfx *gfxA, Catalog *cat,
   cairo = old_cairo;
   if (cairo_pattern_status (pattern))
     return false;
+
+  // Cairo can fail if the pattern translation is too large. Fix by making the
+  // translation smaller.
+  const double det = pmat[0] * pmat[3] - pmat[1] * pmat[2];
+
+  // Find the number of repetitions of pattern we need to shift by. Transform
+  // the translation component of pmat (pmat[4] and pmat[5]) into the pattern's
+  // coordinate system by multiplying by inverse of pmat, then divide by
+  // pattern size (xStep and yStep).
+  const double xoffset = round ((pmat[3] * pmat[4] - pmat[2] * pmat[5]) / (xStep * det));
+  const double yoffset = - round ((pmat[1] * pmat[4] - pmat[0] * pmat[5]) / (yStep * det));
+
+  if (!std::isfinite(xoffset) || !std::isfinite(yoffset)) {
+    error(errSyntaxWarning, -1, "CairoOutputDev: Singular matrix in tilingPatternFill");
+    return false;
+  }
+
+  // Shift pattern_matrix by multiples of the pattern size.
+  pattern_matrix.x0 -= xoffset * pattern_matrix.xx * xStep + yoffset * pattern_matrix.xy * yStep;
+  pattern_matrix.y0 -= xoffset * pattern_matrix.yx * xStep + yoffset * pattern_matrix.yy * yStep;
 
   state->getUserClipBBox(&xMin, &yMin, &xMax, &yMax);
   cairo_rectangle (cairo, xMin, yMin, xMax - xMin, yMax - yMin);

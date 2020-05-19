@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009, Pino Toscano <pino@kde.org>
+ * Copyright (C) 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,6 +68,7 @@ private:
 
     font_info_private *d;
     friend class font_iterator;
+    friend class page;
 };
 
 
@@ -84,6 +86,8 @@ private:
 
     font_iterator_private *d;
     friend class document;
+    friend class page;
+    friend class page_private;
 };
 
 }

@@ -73,6 +73,8 @@ POPPLER_PUBLIC
 guint64              poppler_movie_get_start (PopplerMovie *poppler_movie);
 POPPLER_PUBLIC
 guint64              poppler_movie_get_duration (PopplerMovie *poppler_movie);
+POPPLER_PUBLIC
+void                 poppler_movie_get_aspect (PopplerMovie *poppler_movie, gint *width, gint *height);
 
 G_END_DECLS
 

@@ -3,9 +3,9 @@
  * Copyright (C) 2013 Adrian Johnson <ajohnson@redneon.com>
  * Copyright (C) 2014, Hans-Peter Deifel <hpdeifel@gmx.de>
  * Copyright (C) 2016 Jakub Alba <jakubalba@gmail.com>
- * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+ * Copyright (C) 2018, 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018, 2020 Adam Reichold <adam.reichold@t-online.de>
- * Copyright (C) 2018 Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2020 Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,6 +28,7 @@
 
 #include "poppler-global.h"
 #include "poppler-rectangle.h"
+#include "poppler-page.h" // to use text_box::writing_mode_enum
 
 #include "Error.h"
 #include "CharTypes.h"
@@ -71,6 +72,34 @@ void delete_all(const Collection &c)
     delete_all(c.begin(), c.end());
 }
 
+class font_info;
+struct text_box_font_info_data
+{
+    ~text_box_font_info_data();
+
+    double font_size;
+    std::vector<text_box::writing_mode_enum> wmodes; 
+
+    /*
+     * a duplication of the font_info_cache created by the
+     * poppler::font_iterator and owned by the poppler::page
+     * object. Its lifetime might differ from that of text_box
+     * object (think about collecting all text_box objects
+     * from all pages), so we have to duplicate it into all
+     * text_box instances.
+     */
+    std::vector<font_info> font_info_cache;
+
+    /*
+     * a std::vector from the glyph index in the owner
+     * text_box to the font_info index in font_info_cache. 
+     * The "-1" means no corresponding fonts found in the
+     * cache.
+     */
+    std::vector<int> glyph_to_cache_index;
+};
+
+class font_info;
 struct text_box_data
 {
     ~text_box_data();
@@ -80,6 +109,8 @@ struct text_box_data
     int rotation;
     std::vector<rectf> char_bboxes;
     bool has_space_after;
+
+    std::unique_ptr<text_box_font_info_data> text_box_font;
 };
 
 }

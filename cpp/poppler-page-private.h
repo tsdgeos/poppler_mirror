@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009, Pino Toscano <pino@kde.org>
- * Copyright (C) 2018, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2018, 2020, Albert Astals Cid <aacid@kde.org>
+ * Copyright (C) 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +30,7 @@ namespace poppler
 
 class document_private;
 class page_transition;
+class font_info;
 
 class page_private
 {
@@ -46,6 +48,10 @@ public:
 
     static inline page_private* get(const poppler::page *p)
     { return const_cast<poppler::page *>(p)->d; }
+
+    std::vector<font_info> font_info_cache;
+    bool font_info_cache_initialized;
+    void init_font_info_cache();
 };
 
 }

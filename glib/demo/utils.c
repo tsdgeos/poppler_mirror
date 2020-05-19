@@ -563,6 +563,7 @@ pgd_movie_view_set_movie (GtkWidget    *movie_view,
 	GtkWidget  *table;
 	GtkWidget  *button;
         GEnumValue *enum_value;
+        gint        width, height;
 	gint        row = 0;
 
 	table = gtk_bin_get_child (GTK_BIN (movie_view));
@@ -597,6 +598,8 @@ pgd_movie_view_set_movie (GtkWidget    *movie_view,
         pgd_table_add_property (GTK_GRID (table), "<b>Start:</b>", g_strdup_printf("%g s", poppler_movie_get_start (movie)/1e9), &row);
         pgd_table_add_property (GTK_GRID (table), "<b>Duration:</b>", g_strdup_printf("%g s", poppler_movie_get_duration (movie)/1e9), &row);
 	pgd_table_add_property (GTK_GRID (table), "<b>Rotation Angle:</b>", g_strdup_printf("%u", poppler_movie_get_rotation_angle (movie)), &row);
+	poppler_movie_get_aspect (movie, &width, &height);
+        pgd_table_add_property (GTK_GRID (table), "<b>Aspect:</b>", g_strdup_printf("%dx%d", width, height), &row);
 
 	button = gtk_button_new_with_mnemonic ("_Play");
 	g_signal_connect (button, "clicked",

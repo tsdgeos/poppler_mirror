@@ -42,7 +42,7 @@
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2018 Denis Onishchenko <denis.onischenko@gmail.com>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
-// Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
 //
 // To see a description of the changes please see the Changelog file that
@@ -2061,11 +2061,11 @@ void Gfx::doTilingPatternFill(GfxTilingPattern *tPat,
 
   // construct a (device space) -> (pattern space) transform matrix
   det = m1[0] * m1[3] - m1[1] * m1[2];
-  if (fabs(det) < 0.000001) {
+  det = 1 / det;
+  if (!std::isfinite(det)) {
     error(errSyntaxError, getPos(), "Singular matrix in tiling pattern fill");
     return;
   }
-  det = 1 / det;
   imb[0] = m1[3] * det;
   imb[1] = -m1[1] * det;
   imb[2] = -m1[2] * det;

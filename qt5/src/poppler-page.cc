@@ -355,6 +355,10 @@ Link* PageData::convertLinkActionToLink(::LinkAction * a, DocumentData *parentDo
     }
     break;
 
+    case actionResetForm:
+      // Not handled in Qt5 front-end yet
+    break;
+
     case actionUnknown:
     break;
   }

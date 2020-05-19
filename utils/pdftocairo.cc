@@ -34,6 +34,7 @@
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Kris Jurka <jurka@ejurka.com>
+// Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -290,13 +291,13 @@ static int icc_data_size;
 static cmsHPROFILE profile;
 #endif
 
-struct AntiliasOption
+struct AntialiasOption
 {
   const char *name;
   cairo_antialias_t value;
 };
 
-static const AntiliasOption antialiasOptions[] =
+static const AntialiasOption antialiasOptions[] =
 {
   { "default",  CAIRO_ANTIALIAS_DEFAULT },
   { "none",     CAIRO_ANTIALIAS_NONE },
@@ -310,7 +311,7 @@ static const AntiliasOption antialiasOptions[] =
 
 static bool parseAntialiasOption()
 {
-  const AntiliasOption *option = antialiasOptions;
+  const AntialiasOption *option = antialiasOptions;
   while (option->name) {
     if (antialias.cmp(option->name) == 0) {
       antialiasEnum = option->value;

@@ -1863,12 +1863,10 @@ void SplashOutputDev::doUpdateFont(GfxState *state) {
   GooString *fileName;
   char *tmpBuf;
   int tmpBufLen;
-  int *codeToGID;
   const double *textMat;
   double m11, m12, m21, m22, fontSize;
   int faceIndex = 0;
   SplashCoord mat[4];
-  int n, i;
   bool recreateFont = false;
   bool doAdjustFontMatrix = false;
 
@@ -1976,20 +1974,22 @@ reload:
       break;
     case fontTrueType:
     case fontTrueTypeOT:
-	if (fileName)
-	 ff = FoFiTrueType::load(fileName->c_str());
-	else
+    {
+      if (fileName)
+	ff = FoFiTrueType::load(fileName->c_str());
+      else
 	ff = FoFiTrueType::make(tmpBuf, tmpBufLen);
+      int *codeToGID;
+      const int n = ff ? 256 : 0;
       if (ff) {
 	codeToGID = ((Gfx8BitFont *)gfxFont)->getCodeToGIDMap(ff);
-	n = 256;
 	delete ff;
 	// if we're substituting for a non-TrueType font, we need to mark
 	// all notdef codes as "do not draw" (rather than drawing TrueType
 	// notdef glyphs)
 	if (gfxFont->getType() != fontTrueType &&
 	    gfxFont->getType() != fontTrueTypeOT) {
-	  for (i = 0; i < 256; ++i) {
+	  for (int i = 0; i < 256; ++i) {
 	    if (codeToGID[i] == 0) {
 	      codeToGID[i] = -1;
 	    }
@@ -1997,7 +1997,6 @@ reload:
 	}
       } else {
 	codeToGID = nullptr;
-	n = 0;
       }
       if (!(fontFile = fontEngine->loadTrueTypeFont(
 			   id,
@@ -2010,6 +2009,7 @@ reload:
 	goto err2;
       }
       break;
+    }
     case fontCIDType0:
     case fontCIDType0C:
       if (!(fontFile = fontEngine->loadCIDFont(
@@ -2023,6 +2023,9 @@ reload:
       }
       break;
     case fontCIDType0COT:
+    {
+      int *codeToGID;
+      int n;
       if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
 	n = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
 	codeToGID = (int *)gmallocn(n, sizeof(int));
@@ -2039,14 +2042,17 @@ reload:
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->c_str()
 	                         : "(unnamed)");
+	gfree(codeToGID);
 	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
       }
       break;
+    }
     case fontCIDType2:
     case fontCIDType2OT:
-      codeToGID = nullptr;
-      n = 0;
+    {
+      int *codeToGID = nullptr;
+      int n = 0;
       if (((GfxCIDFont *)gfxFont)->getCIDToGID()) {
 	n = ((GfxCIDFont *)gfxFont)->getCIDToGIDLen();
 	if (n) {
@@ -2080,6 +2086,7 @@ reload:
 	goto err2;
       }
       break;
+    }
     default:
       // this shouldn't happen
       goto err2;

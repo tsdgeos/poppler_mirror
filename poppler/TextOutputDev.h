@@ -26,6 +26,7 @@
 // Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Dan Shea <dan.shea@logical-innovations.com>
+// Copyright (C) 2020 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -91,6 +92,7 @@ public:
 
   bool matches(const GfxState *state) const;
   bool matches(const TextFontInfo *fontInfo) const;
+  bool matches(const Ref *ref) const;
 
   // Get the font ascent, or a default value if the font is not set
   double getAscent() const;

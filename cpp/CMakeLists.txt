@@ -25,7 +25,7 @@ set(poppler_cpp_SRCS
 )
 
 add_library(poppler-cpp ${poppler_cpp_SRCS})
-set_target_properties(poppler-cpp PROPERTIES VERSION 0.7.0 SOVERSION 0)
+set_target_properties(poppler-cpp PROPERTIES VERSION 0.8.0 SOVERSION 0)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_CPP_SOVERSION poppler-cpp SOVERSION)
     set_target_properties(poppler-cpp PROPERTIES SUFFIX "-${POPPLER_CPP_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -38,6 +38,7 @@ install(FILES
   poppler-document.h
   poppler-embedded-file.h
   poppler-font.h
+  poppler-font-private.h
   poppler-global.h
   poppler-image.h
   poppler-page.h

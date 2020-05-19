@@ -1,10 +1,11 @@
 /*
  * Copyright (C) 2009-2010, Pino Toscano <pino@kde.org>
- * Copyright (C) 2018, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
+ * Copyright (C) 2018, 2020, Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
  * Copyright (C) 2018-2020, Albert Astals Cid <aacid@kde.org>
  * Copyright (C) 2018, Zsombor Hollay-Horvath <hollay.horvath@gmail.com>
  * Copyright (C) 2018, Aleksey Nikolaev <nae202@gmail.com>
  * Copyright (C) 2020, Jiri Jakes <freedesktop@jirijakes.eu>
+ * Copyright (C) 2020, Adam Reichold <adam.reichold@t-online.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,6 +66,68 @@ public:
      */
     rectf     char_bbox(size_t i) const;
     bool      has_space_after() const;
+
+
+    /**
+      \since 0.89
+     */
+    bool      has_font_info() const;
+
+    /**
+       Get a writing mode for the i-th glyph
+
+       This method returns an enum of the writing mode
+       for the i-th glyph in the text_box.
+
+       \note Usually all glyphs in one text_box have the
+       same writing mode. Thus the default value of the
+       glyph index is 0.
+     */
+    enum writing_mode_enum {
+        invalid_wmode = -1,
+        horizontal_wmode = 0,
+        vertical_wmode = 1
+    };
+
+    /**
+      \since 0.89
+     */
+    writing_mode_enum get_wmode(int i = 0) const;
+
+    /**
+       Get a font size of this text_box instance.
+
+       This method return a double floating value of the
+       font size from the text_box instance.
+     */
+
+    /**
+      \since 0.89
+     */
+    double     get_font_size() const;
+
+    /**
+       Get a font name for the i-th glyph
+
+       This method returns a std::string object holding
+       the font name for the i-th glyph.
+
+       \note The randomization prefix of the embedded fonts
+       are not removed. The font names including these
+       prefixes are insuffucient to determine whether the
+       two fonts are same or different.
+
+       \note The clients should not assume that the
+       encoding of the font name is one of the ASCII,
+       Latin1 or UTF-8. Some legacy PDF producers used
+       in CJK market use GBK, Big5, Wansung or Shift-JIS.
+     */
+
+    /**
+      \since 0.89
+     */
+    std::string get_font_name(int i = 0) const;
+
 private:
     text_box(text_box_data *data);
 
@@ -129,6 +192,22 @@ public:
        \warning This method is not tested with Asian scripts
     */
     std::vector<text_box> text_list() const;
+
+    /*
+     * text_list_option_enum is a bitmask-style flags for text_list(),
+     * 0 means the default & simplest behaviour.
+     */
+    enum text_list_option_enum {
+        text_list_include_font = 1 // \since 0.89
+    };
+
+    /**
+       Extended version of text_list() taking an option flag.
+       The option flag should be the multiple of text_list_option_enum.
+
+       \since 0.89
+    */
+    std::vector<text_box> text_list(int opt_flag) const;
 
 private:
     page(document_private *doc, int index);
