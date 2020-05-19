@@ -2042,6 +2042,7 @@ reload:
 	error(errSyntaxError, -1, "Couldn't create a font for '{0:s}'",
 	      gfxFont->getName() ? gfxFont->getName()->c_str()
 	                         : "(unnamed)");
+	gfree(codeToGID);
 	if (gfxFont->invalidateEmbeddedFont()) goto reload;
 	goto err2;
       }
