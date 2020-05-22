@@ -643,7 +643,6 @@ bool Page::loadThumb(unsigned char **data_out,
   Object obj1;
   Dict *dict;
   GfxColorSpace *colorSpace;
-  bool success = false;
   Stream *str;
   GfxImageColorMap *colorMap;
 
@@ -658,17 +657,17 @@ bool Page::loadThumb(unsigned char **data_out,
   str = fetched_thumb.getStream(); 
 		
   if (!dict->lookupInt("Width", "W", &width))
-    goto fail1;
+    return false;
   if (!dict->lookupInt("Height", "H", &height))
-    goto fail1;
+    return false;
   if (!dict->lookupInt("BitsPerComponent", "BPC", &bits))
-    goto fail1;
+    return false;
 		
   /* Check for invalid dimensions and integer overflow. */
   if (width <= 0 || height <= 0)
-    goto fail1;
+    return false;
   if (width > INT_MAX / 3 / height)
-    goto fail1;
+    return false;
   pixbufdatasize = width * height * 3;
 
   /* Get color space */
@@ -676,10 +675,14 @@ bool Page::loadThumb(unsigned char **data_out,
   if (obj1.isNull ()) {
     obj1 = dict->lookup ("CS");
   }
-  colorSpace = GfxColorSpace::parse(nullptr, &obj1, nullptr, nullptr);
+  // Just initialize some dummy GfxState for GfxColorSpace::parse.
+  // This will set a sRGB profile for ICC-based colorspaces.
+  auto pdfrectangle = std::make_shared<PDFRectangle>();
+  auto state = std::make_shared<GfxState>(72.0,72.0,pdfrectangle.get(), 0, false);
+  colorSpace = GfxColorSpace::parse(nullptr, &obj1, nullptr, state.get());
   if (!colorSpace) {
     fprintf (stderr, "Error: Cannot parse color space\n");
-    goto fail1;
+    return false;
   }
 
   obj1 = dict->lookup("Decode");
@@ -690,7 +693,7 @@ bool Page::loadThumb(unsigned char **data_out,
   if (!colorMap->isOk()) {
     fprintf (stderr, "Error: invalid colormap\n");
     delete colorMap;
-    goto fail1;
+    return false;
   }
 
   if (data_out) {
@@ -718,8 +721,6 @@ bool Page::loadThumb(unsigned char **data_out,
     delete imgstr;
   }
 
-  success = true;
-
   if (width_out)
     *width_out = width;
   if (height_out)
@@ -728,8 +729,8 @@ bool Page::loadThumb(unsigned char **data_out,
     *rowstride_out = width * 3;
 
   delete colorMap;
- fail1:
-  return success;
+
+  return true;
 }
 
 void Page::makeBox(double hDPI, double vDPI, int rotate,
