@@ -1137,7 +1137,6 @@ int main(int argc, char *argv[]) {
   } else {
     profile = make_GfxLCMSProfilePtr(cmsCreate_sRGBProfile());
   }
-  GfxColorSpace::setDisplayProfile(profile);
 #endif
 
   doc = PDFDocFactory().createPDFDoc(*fileName, ownerPW, userPW);
@@ -1212,6 +1211,9 @@ int main(int argc, char *argv[]) {
 
 
   cairoOut = new CairoOutputDev();
+#ifdef USE_CMS
+  cairoOut->setDisplayProfile(profile);
+#endif
   cairoOut->startDoc(doc);
   if (sz != 0)
     crop_w = crop_h = sz;

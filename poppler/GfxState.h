@@ -283,13 +283,6 @@ public:
   // Return the name of the <idx>th color space mode.
   static const char *getColorSpaceModeName(int idx);
 
-#ifdef USE_CMS
-  static int setupColorProfiles();
-  static void setDisplayProfile(const GfxLCMSProfilePtr& displayProfileA);
-  static void setDisplayProfileName(GooString *name);
-  static GfxLCMSProfilePtr getRGBProfile();
-  static GfxLCMSProfilePtr getDisplayProfile();
-#endif
 protected:
 
   unsigned int overprintMask;
@@ -1608,6 +1601,7 @@ public:
   GfxLCMSProfilePtr getDisplayProfile() { return localDisplayProfile; }
   std::shared_ptr<GfxColorTransform> getXYZ2DisplayTransform();
   int getCmsRenderingIntent();
+  static GfxLCMSProfilePtr sRGBProfile;
 #endif
 
   // Add to path.
@@ -1709,6 +1703,7 @@ private:
   std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformAbsCol;
   std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformSat;
   std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformPerc;
+  static GfxLCMSProfilePtr XYZProfile;
 #endif
 };
 

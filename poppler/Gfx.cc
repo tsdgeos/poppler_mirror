@@ -548,6 +548,7 @@ Gfx::Gfx(PDFDoc *docA, OutputDev *outA, int pageNum, Dict *resDict,
   // initialize
   out = outA;
   state = new GfxState(hDPI, vDPI, box, rotate, out->upsideDown());
+  out->initGfxState(state);
   stackHeight = 1;
   pushStateGuard();
   fontChanged = false;

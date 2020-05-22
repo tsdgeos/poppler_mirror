@@ -40,6 +40,7 @@
 #include "Object.h"
 #include "PopplerCache.h"
 #include "ProfileData.h"
+#include "GfxState.h"
 #include <memory>
 #include <unordered_map>
 #include <string>
@@ -47,21 +48,7 @@
 class Annot;
 class Dict;
 class GooString;
-class GfxState;
 class Gfx;
-struct GfxColor;
-class GfxColorSpace;
-#ifdef USE_CMS
-class GfxICCBasedColorSpace;
-#endif
-class GfxImageColorMap;
-class GfxFunctionShading;
-class GfxAxialShading;
-class GfxGouraudTriangleShading;
-class GfxPatchMeshShading;
-class GfxRadialShading;
-class GfxGouraudTriangleShading;
-class GfxPatchMeshShading;
 class Stream;
 class Links;
 class AnnotLink;
@@ -149,6 +136,13 @@ public:
 
   // Dump page contents to display.
   virtual void dump() {}
+
+  virtual void initGfxState (GfxState* state)
+  {
+#ifdef USE_CMS
+    state->setDisplayProfile(displayprofile);
+#endif
+  }
 
   //----- coordinate conversion
 
@@ -370,6 +364,8 @@ public:
 #endif
 
 #ifdef USE_CMS
+  void setDisplayProfile(const GfxLCMSProfilePtr& profile) { displayprofile = profile; }
+
   PopplerCache<Ref, GfxICCBasedColorSpace> *getIccColorSpaceCache() { return &iccColorSpaceCache; }
 #endif
 
@@ -380,6 +376,8 @@ private:
   std::unique_ptr<std::unordered_map<std::string, ProfileData>> profileHash;
 
 #ifdef USE_CMS
+  GfxLCMSProfilePtr displayprofile;
+
   PopplerCache<Ref, GfxICCBasedColorSpace> iccColorSpaceCache;
 #endif
 };
