@@ -213,7 +213,6 @@ public:
   int getInputPixelType() const { return inputPixelType; }
   int getTransformPixelType() const { return transformPixelType; }
   GfxLCMSProfilePtr getSourceProfile() { return sourceProfile; }
-  char *getPostScriptCSA();
 private:
   GfxColorTransform() {}
   GfxLCMSProfilePtr sourceProfile;
@@ -221,7 +220,6 @@ private:
   int cmsIntent;
   unsigned int inputPixelType;
   unsigned int transformPixelType;
-  char *psCSA;
 };
 
 class GfxColorSpace {
@@ -582,6 +580,7 @@ public:
   Ref getRef() { return iccProfileStream; }
 #ifdef USE_CMS
   char *getPostScriptCSA();
+  GfxLCMSProfilePtr getProfile() { return profile; }
 #endif
 
 private:
@@ -592,6 +591,8 @@ private:
   double rangeMax[4];		// max values for each component
   Ref iccProfileStream;		// the ICC profile
 #ifdef USE_CMS
+  GfxLCMSProfilePtr profile;
+  char* psCSA;
   int getIntent() { return (transform != nullptr) ? transform->getIntent() : 0; }
   std::shared_ptr<GfxColorTransform> transform;
   std::shared_ptr<GfxColorTransform> lineTransform; // color transform for line

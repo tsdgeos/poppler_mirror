@@ -216,51 +216,10 @@ GfxColorTransform::GfxColorTransform(const GfxLCMSProfilePtr& sourceProfileA, vo
   cmsIntent = cmsIntentA;
   inputPixelType = inputPixelTypeA;
   transformPixelType = transformPixelTypeA;
-  psCSA = nullptr;
 }
 
 GfxColorTransform::~GfxColorTransform() {
   cmsDeleteTransform(transform);
-  if (psCSA)
-    gfree(psCSA);
-}
-
-char *GfxColorTransform::getPostScriptCSA()
-{
-#if LCMS_VERSION>=2070
-  // The runtime version check of lcms2 is only available from release 2.7 upwards.
-  // The generation of the CSA code only works reliably for version 2.10 and upwards.
-  // Cf. the explanation in the corresponding lcms2 merge request [1], and the original mail thread [2].
-  // [1] https://github.com/mm2/Little-CMS/pull/214
-  // [2] https://sourceforge.net/p/lcms/mailman/message/33182987/
-  if (cmsGetEncodedCMMversion() < 2100)
-    return nullptr;
-
-  int size;
-
-  if (psCSA)
-    return psCSA;
-
-  if (!sourceProfile) {
-    error(errSyntaxWarning, -1, "profile is nullptr");
-    return nullptr;
-  }
-
-  void *rawprofile = sourceProfile.get();
-  size = cmsGetPostScriptCSA(cmsGetProfileContextID(rawprofile), rawprofile, cmsIntent, 0, nullptr, 0);
-  if (size == 0) {
-    error(errSyntaxWarning, -1, "PostScript CSA is nullptr");
-    return nullptr;
-  }
-
-  psCSA = (char*)gmalloc(size+1);
-  cmsGetPostScriptCSA(cmsGetProfileContextID(rawprofile), rawprofile, cmsIntent, 0, psCSA, size);
-  psCSA[size] = 0;
-
-  return psCSA;
-#else
-  return nullptr;
-#endif
 }
 
 static GfxLCMSProfilePtr RGBProfile = nullptr;
@@ -1758,11 +1717,16 @@ GfxICCBasedColorSpace::GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA,
 #ifdef USE_CMS
   transform = nullptr;
   lineTransform = nullptr;
+  psCSA = nullptr;
 #endif
 }
 
 GfxICCBasedColorSpace::~GfxICCBasedColorSpace() {
   delete alt;
+#ifdef USE_CMS
+  if (psCSA)
+    gfree(psCSA);
+#endif
 }
 
 GfxColorSpace *GfxICCBasedColorSpace::copy() const {
@@ -1870,6 +1834,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
 
   profBuf = iccStream->toUnsignedChars(&length, 65536, 65536);
   auto hp = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf,length));
+  cs->profile = hp;
   gfree(profBuf);
   if (!hp) {
     error(errSyntaxWarning, -1, "read ICCBased color space profile error");
@@ -2366,10 +2331,40 @@ void GfxICCBasedColorSpace::getDefaultRanges(double *decodeLow,
 #ifdef USE_CMS
 char *GfxICCBasedColorSpace::getPostScriptCSA()
 {
-  if (transform)
-    return transform->getPostScriptCSA();
-  else
+#if LCMS_VERSION>=2070
+  // The runtime version check of lcms2 is only available from release 2.7 upwards.
+  // The generation of the CSA code only works reliably for version 2.10 and upwards.
+  // Cf. the explanation in the corresponding lcms2 merge request [1], and the original mail thread [2].
+  // [1] https://github.com/mm2/Little-CMS/pull/214
+  // [2] https://sourceforge.net/p/lcms/mailman/message/33182987/
+  if (cmsGetEncodedCMMversion() < 2100)
     return nullptr;
+
+  int size;
+
+  if (psCSA)
+    return psCSA;
+
+  if (!profile) {
+    error(errSyntaxWarning, -1, "profile is nullptr");
+    return nullptr;
+  }
+
+  void *rawprofile = profile.get();
+  size = cmsGetPostScriptCSA(cmsGetProfileContextID(rawprofile), rawprofile, getIntent(), 0, nullptr, 0);
+  if (size == 0) {
+    error(errSyntaxWarning, -1, "PostScript CSA is nullptr");
+    return nullptr;
+  }
+
+  psCSA = (char*)gmalloc(size+1);
+  cmsGetPostScriptCSA(cmsGetProfileContextID(rawprofile), rawprofile, getIntent(), 0, psCSA, size);
+  psCSA[size] = 0;
+
+  return psCSA;
+#else
+  return nullptr;
+#endif
 }
 #endif
 
