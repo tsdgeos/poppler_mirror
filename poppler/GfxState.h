@@ -204,7 +204,7 @@ class GfxColorTransform {
 public:
   void doTransform(void *in, void *out, unsigned int size);
   // transformA should be a cmsHTRANSFORM
-  GfxColorTransform(const GfxLCMSProfilePtr& sourceProfileA, void *transformA, int cmsIntent,
+  GfxColorTransform(void *transformA, int cmsIntent,
                     unsigned int inputPixelType, unsigned int transformPixelType);
   ~GfxColorTransform();
   GfxColorTransform(const GfxColorTransform &) = delete;
@@ -212,10 +212,8 @@ public:
   int getIntent() const { return cmsIntent; }
   int getInputPixelType() const { return inputPixelType; }
   int getTransformPixelType() const { return transformPixelType; }
-  GfxLCMSProfilePtr getSourceProfile() { return sourceProfile; }
 private:
   GfxColorTransform() {}
-  GfxLCMSProfilePtr sourceProfile;
   void *transform;
   int cmsIntent;
   unsigned int inputPixelType;
