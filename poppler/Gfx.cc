@@ -654,8 +654,8 @@ void Gfx::initDisplayProfile() {
                 Stream *iccStream = profile.getStream();
                 int length = 0;
                 unsigned char *profBuf = iccStream->toUnsignedChars(&length, 65536, 65536);
-                cmsHPROFILE hp = cmsOpenProfileFromMem(profBuf,length);
-                if (hp == nullptr) {
+                auto hp = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf,length));
+                if (!hp) {
                   error(errSyntaxWarning, -1, "read ICCBased color space profile error");
                 } else {
                   state->setDisplayProfile(hp);

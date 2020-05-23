@@ -1190,7 +1190,10 @@ delete it;
 
 	  \param outputProfileA is a \c cmsHPROFILE of the LCMS library.
 
-	  \note This should be called before any rendering happens and only once during the lifetime of the current process.
+	  \note This should be called before any rendering happens.
+
+	  \note It is assumed that poppler takes over the owernship of the corresponding cmsHPROFILE. In particular,
+          it is no longer the caller's responsibility to close the profile after use.
 
 	   \since 0.12
 	*/
@@ -1210,6 +1213,9 @@ delete it;
 
 	  \return a \c cmsHPROFILE of the LCMS library.
 
+	  \note The returned profile stays a property of poppler and shall NOT be closed by the user. It's
+	  existence is guaranteed for as long as this instance of the Document class is not deleted.
+
 	   \since 0.12
 	*/
 	void* colorRgbProfile() const;
@@ -1217,6 +1223,9 @@ delete it;
 	  Return the current display profile.
 
 	  \return a \c cmsHPROFILE of the LCMS library.
+
+	  \note The returned profile stays a property of poppler and shall NOT be closed by the user. It's
+	  existence is guaranteed for as long as this instance of the Document class is not deleted.
 
 	   \since 0.12
 	*/
