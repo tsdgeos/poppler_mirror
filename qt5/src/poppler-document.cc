@@ -15,6 +15,7 @@
  * Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
  * Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
  * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
+ * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
