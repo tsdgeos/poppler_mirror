@@ -2234,7 +2234,7 @@ poppler_page_get_bounding_box (PopplerPage *page,
   g_return_val_if_fail(POPPLER_IS_PAGE (page), false);
   g_return_val_if_fail(rect != nullptr, false);
 
-  bb_out = new BBoxOutputDev(page->page->getCropBox());
+  bb_out = new BBoxOutputDev();
 
   gfx = page->page->createGfx(bb_out,
                               72.0, 72.0, 0,

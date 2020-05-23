@@ -15,19 +15,17 @@
 #define writingModeHorizontal 0
 #define writingModeVertical 1
 
-BBoxOutputDev::BBoxOutputDev(const PDFRectangle *cropA) :
-		BBoxOutputDev(cropA, true, true, true) {
+BBoxOutputDev::BBoxOutputDev() :
+		BBoxOutputDev(true, true, true) {
 }
 
-BBoxOutputDev::BBoxOutputDev(const PDFRectangle *cropA,
-		bool textA, bool vectorA, bool rasterA) :
-		BBoxOutputDev(cropA, textA, vectorA, rasterA, true) {
+BBoxOutputDev::BBoxOutputDev(bool textA, bool vectorA, bool rasterA) :
+		BBoxOutputDev(textA, vectorA, rasterA, true) {
 }
 
-BBoxOutputDev::BBoxOutputDev(const PDFRectangle *cropA,
-		bool textA, bool vectorA, bool rasterA, bool lwidthA) {
+BBoxOutputDev::BBoxOutputDev(bool textA, bool vectorA, bool rasterA,
+		bool lwidthA) {
 	hasGraphics = false;
-	crop = *cropA;
 	text = textA;
 	vector = vectorA;
 	raster = rasterA;
@@ -55,7 +53,6 @@ double BBoxOutputDev::getHasGraphics() const {
 }
 
 void BBoxOutputDev::endPage() {
-	bb.clipTo(&crop);
 }
 
 void BBoxOutputDev::stroke(GfxState *state) {
@@ -177,49 +174,31 @@ void BBoxOutputDev::drawChar(GfxState *state,
 	updatePoint(&bb, nx + x + dx, ny + y + dy, state);
 }
 
-void BBoxOutputDev::clip(GfxState *state) {
-	updateClip(state);
-}
-
-void BBoxOutputDev::eoClip(GfxState *state) {
-	updateClip(state);
-}
-
-void BBoxOutputDev::clipToStrokePath(GfxState *state) {
-	updateClip(state);
-}
-
-/* update the crop box with a new path */
-void BBoxOutputDev::updateClip(const GfxState *state) {
-	PDFRectangle box;
-	bool hg;
-	hg = hasGraphics;
-	hasGraphics = true;
-	updatePath(&box, state->getPath(), state);
-	hasGraphics = hg;
-	crop.clipTo(&box);
-}
-
 /* update the bounding box with a new point */
 void BBoxOutputDev::updatePoint(PDFRectangle *bbA,
 		double x, double y, const GfxState *state) {
 	Matrix o = {1, 0, 0, 1, 0, 0};
-	double tx, ty, fx, fy;
+	double tx, ty;
+	double xMin, yMin, xMax, yMax;
+
+	state->getClipBBox(&xMin, &yMin, &xMax, &yMax);
 
 	o.scale(1, -1);
 	o.translate(0, -state->getPageHeight());
 
 	state->transform(x, y, &tx, &ty);
-	o.transform(tx, ty, &fx, &fy);
+	tx = tx < xMin ? xMin : tx > xMax ? xMax : tx;
+	ty = ty < yMin ? yMin : ty > yMax ? yMax : ty;
+	o.transform(tx, ty, &x, &y);
 
-	if (! hasGraphics || bbA->x1 > fx)
-		bbA->x1 = fx;
-	if (! hasGraphics || bbA->y1 > fy)
-		bbA->y1 = fy;
-	if (! hasGraphics || bbA->x2 < fx)
-		bbA->x2 = fx;
-	if (! hasGraphics || bbA->y2 < fy)
-		bbA->y2 = fy;
+	if (! hasGraphics || bbA->x1 > x)
+		bbA->x1 = x;
+	if (! hasGraphics || bbA->y1 > y)
+		bbA->y1 = y;
+	if (! hasGraphics || bbA->x2 < x)
+		bbA->x2 = x;
+	if (! hasGraphics || bbA->y2 < y)
+		bbA->y2 = y;
 	hasGraphics = true;
 }
 
@@ -228,6 +207,7 @@ void BBoxOutputDev::updatePath(PDFRectangle *bbA,
 		const GfxPath *path, const GfxState *state) {
 	int i, j;
 	const GfxSubpath *subpath;
+	double x, y;
 	double w;
 	if (! vector)
 		return;
@@ -235,14 +215,10 @@ void BBoxOutputDev::updatePath(PDFRectangle *bbA,
 	for (i = 0; i < path->getNumSubpaths(); i++) {
 		subpath = path->getSubpath(i);
 		for (j = 0; j < subpath->getNumPoints(); j++) {
-			updatePoint(bbA,
-				subpath->getX(j) - w / 2,
-				subpath->getY(j) - w / 2,
-				state);
-			updatePoint(bbA,
-				subpath->getX(j) + w / 2,
-				subpath->getY(j) + w / 2,
-				state);
+			x = subpath->getX(j);
+			y = subpath->getY(j);
+			updatePoint(bbA, x - w / 2, y - w / 2, state);
+			updatePoint(bbA, x + w / 2, y + w / 2, state);
 		}
 	}
 }

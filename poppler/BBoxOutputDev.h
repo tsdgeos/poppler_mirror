@@ -18,11 +18,9 @@ public:
 	bool useDrawChar() override { return true; }
 	bool interpretType3Chars() override { return false; }
 
-	BBoxOutputDev(const PDFRectangle *cropA);
-	BBoxOutputDev(const PDFRectangle *cropA,
-		bool text, bool vector, bool raster);
-	BBoxOutputDev(const PDFRectangle *cropA,
-		bool text, bool vector, bool raster, bool lwidth);
+	BBoxOutputDev();
+	BBoxOutputDev(bool text, bool vector, bool raster);
+	BBoxOutputDev(bool text, bool vector, bool raster, bool lwidth);
 	void endPage() override;
 	void stroke(GfxState *state) override;
 	void fill(GfxState *state) override;
@@ -53,9 +51,6 @@ public:
 		int maskWidth, int maskHeight,
 		GfxImageColorMap *maskColorMap,
 		bool maskInterpolate) override;
-	void clip(GfxState *state) override;
-	void eoClip(GfxState *state) override;
-	void clipToStrokePath(GfxState *state) override;
 
 	double getX1() const;
 	double getY1() const;
@@ -65,7 +60,6 @@ public:
 
 private:
 	PDFRectangle bb;
-	PDFRectangle crop;
 	bool hasGraphics;
 
 	bool text;
@@ -78,6 +72,5 @@ private:
 	void updatePath(PDFRectangle *bbA,
 		const GfxPath *path, const GfxState *state);
 	void updateImage(PDFRectangle *bbA, const GfxState *state);
-	void updateClip(const GfxState *state);
 };
 
