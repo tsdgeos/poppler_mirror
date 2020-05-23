@@ -475,7 +475,7 @@ std::vector<text_box> page::text_list(int opt_flag) const
                         tb_font_info->wmodes.push_back(text_box::invalid_wmode);
                     };
 
-                    tb_font_info->glyph_to_cache_index[j] = -1;
+                    tb_font_info->glyph_to_cache_index.push_back(-1);
                     for (size_t k = 0; k < tb_font_info->font_info_cache.size(); k++) {
                         if (cur_text_font_info->matches(&(tb_font_info->font_info_cache[k].d->ref))) {
                             tb_font_info->glyph_to_cache_index[j] = k;
