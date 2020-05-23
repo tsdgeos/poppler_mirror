@@ -2227,23 +2227,22 @@ poppler_page_get_crop_box (PopplerPage *page, PopplerRectangle *rect)
 gboolean
 poppler_page_get_bounding_box (PopplerPage *page,
                                PopplerRectangle *rect) {
-  Gfx *gfx;
   BBoxOutputDev *bb_out;
   bool hasGraphics;
 
   g_return_val_if_fail(POPPLER_IS_PAGE (page), false);
   g_return_val_if_fail(rect != nullptr, false);
 
-  bb_out = new BBoxOutputDev(page->page->getCropBox());
+  bb_out = new BBoxOutputDev();
 
-  gfx = page->page->createGfx(bb_out,
+  page->page->displaySlice(bb_out,
                               72.0, 72.0, 0,
                               false, /* useMediaBox */
                               true, /* Crop */
                               -1, -1, -1, -1,
                               false, /* printing */
-                              nullptr, nullptr);
-  page->page->display(gfx);
+                              nullptr, nullptr,
+			      nullptr, nullptr);
   hasGraphics = bb_out->getHasGraphics();
   if (hasGraphics) {
     rect->x1 = bb_out->getX1();
@@ -2252,7 +2251,6 @@ poppler_page_get_bounding_box (PopplerPage *page,
     rect->y2 = bb_out->getY2();
   }
 
-  delete gfx;
   delete bb_out;
   return hasGraphics;
 }

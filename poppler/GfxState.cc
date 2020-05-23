@@ -27,13 +27,14 @@
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
 // Copyright (C) 2013 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2013 Fabio D'Urso <fabiodurso@hotmail.it>
-// Copyright (C) 2015 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2015, 2020 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2016 Marek Kasik <mkasik@redhat.com>
 // Copyright (C) 2017, 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Volker Krause <vkrause@kde.org>
 // Copyright (C) 2018, 2019 Adam Reichold <adam.reichold@t-online.de>
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
+// Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -191,66 +192,111 @@ static const std::map<unsigned int, unsigned int>::size_type CMSCACHE_LIMIT = 20
 #define COLOR_PROFILE_DIR "/ColorProfiles/"
 #define GLOBAL_COLOR_PROFILE_DIR POPPLER_DATADIR COLOR_PROFILE_DIR
 
+static void lcmsprofiledeleter(void* profile)
+{
+    cmsCloseProfile(profile);
+}
+
+GfxLCMSProfilePtr make_GfxLCMSProfilePtr(void* profile)
+{
+    if (profile == nullptr) {
+        return GfxLCMSProfilePtr();
+    }
+    return GfxLCMSProfilePtr(profile, lcmsprofiledeleter);
+}
+
 void GfxColorTransform::doTransform(void *in, void *out, unsigned int size) {
   cmsDoTransform(transform, in, out, size);
 }
 
 // transformA should be a cmsHTRANSFORM
-GfxColorTransform::GfxColorTransform(void *transformA, int cmsIntentA, unsigned int inputPixelTypeA, unsigned int transformPixelTypeA) {
+GfxColorTransform::GfxColorTransform(const GfxLCMSProfilePtr& sourceProfileA, void *transformA, int cmsIntentA, unsigned int inputPixelTypeA, unsigned int transformPixelTypeA) {
+  sourceProfile = sourceProfileA;
   transform = transformA;
-  refCount = 1;
   cmsIntent = cmsIntentA;
   inputPixelType = inputPixelTypeA;
   transformPixelType = transformPixelTypeA;
+  psCSA = nullptr;
 }
 
 GfxColorTransform::~GfxColorTransform() {
   cmsDeleteTransform(transform);
+  if (psCSA)
+    gfree(psCSA);
 }
 
-void GfxColorTransform::ref() {
-  refCount++;
+char *GfxColorTransform::getPostScriptCSA()
+{
+#if LCMS_VERSION>=2070
+  // The runtime version check of lcms2 is only available from release 2.7 upwards.
+  // The generation of the CSA code only works reliably for version 2.10 and upwards.
+  // Cf. the explanation in the corresponding lcms2 merge request [1], and the original mail thread [2].
+  // [1] https://github.com/mm2/Little-CMS/pull/214
+  // [2] https://sourceforge.net/p/lcms/mailman/message/33182987/
+  if (cmsGetEncodedCMMversion() < 2100)
+    return nullptr;
+
+  int size;
+
+  if (psCSA)
+    return psCSA;
+
+  if (!sourceProfile) {
+    error(errSyntaxWarning, -1, "profile is nullptr");
+    return nullptr;
+  }
+
+  void *rawprofile = sourceProfile.get();
+  size = cmsGetPostScriptCSA(cmsGetProfileContextID(rawprofile), rawprofile, cmsIntent, 0, nullptr, 0);
+  if (size == 0) {
+    error(errSyntaxWarning, -1, "PostScript CSA is nullptr");
+    return nullptr;
+  }
+
+  psCSA = (char*)gmalloc(size+1);
+  cmsGetPostScriptCSA(cmsGetProfileContextID(rawprofile), rawprofile, cmsIntent, 0, psCSA, size);
+  psCSA[size] = 0;
+
+  return psCSA;
+#else
+  return nullptr;
+#endif
 }
 
-unsigned int GfxColorTransform::unref() {
-  return --refCount;
-}
-
-static cmsHPROFILE RGBProfile = nullptr;
+static GfxLCMSProfilePtr RGBProfile = nullptr;
 static GooString *displayProfileName = nullptr; // display profile file Name
-static cmsHPROFILE displayProfile = nullptr; // display profile
+static GfxLCMSProfilePtr displayProfile = nullptr; // display profile
 static unsigned int displayPixelType = 0;
-static GfxColorTransform *XYZ2DisplayTransform = nullptr;
+static std::shared_ptr<GfxColorTransform> XYZ2DisplayTransform = nullptr;
 
 // convert color space signature to cmsColor type 
 static unsigned int getCMSColorSpaceType(cmsColorSpaceSignature cs);
 static unsigned int getCMSNChannels(cmsColorSpaceSignature cs);
-static cmsHPROFILE loadColorProfile(const char *fileName);
+static GfxLCMSProfilePtr loadColorProfile(const char *fileName);
 
-void GfxColorSpace::setDisplayProfile(void *displayProfileA) {
-  if (displayProfile != nullptr) {
+void GfxColorSpace::setDisplayProfile(const GfxLCMSProfilePtr& displayProfileA) {
+  if (displayProfile) {
     error(errInternal, -1, "The display color profile can only be set once before any rendering is done.");
     return;
   }
   displayProfile = displayProfileA;
-  if (displayProfile != nullptr) {
+  if (displayProfile) {
     cmsHTRANSFORM transform;
     unsigned int nChannels;
 
-    displayPixelType = getCMSColorSpaceType(cmsGetColorSpace(displayProfile));
-    nChannels = getCMSNChannels(cmsGetColorSpace(displayProfile));
+    displayPixelType = getCMSColorSpaceType(cmsGetColorSpace(displayProfile.get()));
+    nChannels = getCMSNChannels(cmsGetColorSpace(displayProfile.get()));
     // create transform from XYZ
-    cmsHPROFILE XYZProfile = cmsCreateXYZProfile();
-    if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
-	   displayProfile,
+    auto XYZProfile = make_GfxLCMSProfilePtr(cmsCreateXYZProfile());
+    if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL,
+	   displayProfile.get(),
 	   COLORSPACE_SH(displayPixelType) |
 	     CHANNELS_SH(nChannels) | BYTES_SH(1),
 	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == nullptr) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransform = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, displayPixelType);
+      XYZ2DisplayTransform = std::make_shared<GfxColorTransform>(displayProfile, transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, displayPixelType);
     }
-    cmsCloseProfile(XYZProfile);
   }
 }
 
@@ -263,11 +309,11 @@ void GfxColorSpace::setDisplayProfileName(GooString *name) {
   displayProfileName = name->copy();
 }
 
-cmsHPROFILE GfxColorSpace::getRGBProfile() {
+GfxLCMSProfilePtr GfxColorSpace::getRGBProfile() {
   return RGBProfile;
 }
 
-cmsHPROFILE GfxColorSpace::getDisplayProfile() {
+GfxLCMSProfilePtr GfxColorSpace::getDisplayProfile() {
   return displayProfile;
 }
 
@@ -455,7 +501,7 @@ const char *GfxColorSpace::getColorSpaceModeName(int idx) {
 }
 
 #ifdef USE_CMS
-cmsHPROFILE loadColorProfile(const char *fileName)
+GfxLCMSProfilePtr loadColorProfile(const char *fileName)
 {
   cmsHPROFILE hp = nullptr;
   FILE *fp;
@@ -467,7 +513,7 @@ cmsHPROFILE loadColorProfile(const char *fileName)
       fclose(fp);
       hp = cmsOpenProfileFromFile(fileName,"r");
     }
-    return hp;
+    return make_GfxLCMSProfilePtr(hp);
   }
   // try to load from global directory
   GooString *path = new GooString(GLOBAL_COLOR_PROFILE_DIR);
@@ -478,7 +524,7 @@ cmsHPROFILE loadColorProfile(const char *fileName)
     hp = cmsOpenProfileFromFile(path->c_str(),"r");
   }
   delete path;
-  return hp;
+  return make_GfxLCMSProfilePtr(hp);
 }
 
 static void CMSError(cmsContext /*contextId*/, cmsUInt32Number /*ecode*/, const char *text)
@@ -499,7 +545,7 @@ int GfxColorSpace::setupColorProfiles()
   // set error handlor
   cmsSetLogErrorHandler(CMSError);
 
-  if (displayProfile == nullptr) {
+  if (!displayProfile) {
     // load display profile if it was not already loaded.
     if (displayProfileName == nullptr) {
       displayProfile = loadColorProfile("display.icc");
@@ -509,26 +555,25 @@ int GfxColorSpace::setupColorProfiles()
   }
   // load RGB profile
   RGBProfile = loadColorProfile("RGB.icc");
-  if (RGBProfile == nullptr) {
+  if (!RGBProfile) {
     /* use built in sRGB profile */
-    RGBProfile = cmsCreate_sRGBProfile();
+    RGBProfile = make_GfxLCMSProfilePtr(cmsCreate_sRGBProfile());
   }
   // create transforms
-  if (displayProfile != nullptr) {
-    displayPixelType = getCMSColorSpaceType(cmsGetColorSpace(displayProfile));
-    nChannels = getCMSNChannels(cmsGetColorSpace(displayProfile));
+  if (displayProfile) {
+    displayPixelType = getCMSColorSpaceType(cmsGetColorSpace(displayProfile.get()));
+    nChannels = getCMSNChannels(cmsGetColorSpace(displayProfile.get()));
     // create transform from XYZ
-    cmsHPROFILE XYZProfile = cmsCreateXYZProfile();
-    if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
-	   displayProfile,
+    auto XYZProfile = make_GfxLCMSProfilePtr(cmsCreateXYZProfile());
+    if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL,
+	   displayProfile.get(),
 	   COLORSPACE_SH(displayPixelType) |
 	     CHANNELS_SH(nChannels) | BYTES_SH(1),
 	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == nullptr) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransform = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, displayPixelType);
+      XYZ2DisplayTransform = std::make_shared<GfxColorTransform>(XYZProfile, transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, displayPixelType);
     }
-    cmsCloseProfile(XYZProfile);
   }
   return 0;
 }
@@ -747,11 +792,6 @@ GfxCalGrayColorSpace::GfxCalGrayColorSpace() {
 }
 
 GfxCalGrayColorSpace::~GfxCalGrayColorSpace() {
-#ifdef USE_CMS
-  if (transform != nullptr) {
-    if (transform->unref() == 0) delete transform;
-  }
-#endif
 }
 
 GfxColorSpace *GfxCalGrayColorSpace::copy() const {
@@ -770,7 +810,6 @@ GfxColorSpace *GfxCalGrayColorSpace::copy() const {
   cs->kb = kb;
 #ifdef USE_CMS
   cs->transform = transform;
-  if (transform != nullptr) transform->ref();
 #endif
   return cs;
 }
@@ -819,7 +858,6 @@ GfxColorSpace *GfxCalGrayColorSpace::parse(Array *arr, GfxState *state) {
 		xyzrgb[2][2] * cs->whiteZ);
 #ifdef USE_CMS
   cs->transform = (state != nullptr) ? state->getXYZ2DisplayTransform() : XYZ2DisplayTransform;
-  if (cs->transform != nullptr) cs->transform->ref();
 #endif
   return cs;
 }
@@ -839,7 +877,7 @@ void GfxCalGrayColorSpace::getGray(const GfxColor *color, GfxGray *gray) const {
   GfxRGB rgb;
 
 #ifdef USE_CMS
-  if (transform != nullptr && transform->getTransformPixelType() == PT_GRAY) {
+  if (transform && transform->getTransformPixelType() == PT_GRAY) {
     unsigned char out[gfxColorMaxComps];
     double in[gfxColorMaxComps];
     double X, Y, Z;
@@ -865,7 +903,7 @@ void GfxCalGrayColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const {
 
   getXYZ(color,&X,&Y,&Z);
 #ifdef USE_CMS
-  if (transform != nullptr && transform->getTransformPixelType() == PT_RGB) {
+  if (transform && transform->getTransformPixelType() == PT_RGB) {
     unsigned char out[gfxColorMaxComps];
     double in[gfxColorMaxComps];
     
@@ -896,7 +934,7 @@ void GfxCalGrayColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const {
   GfxColorComp c, m, y, k;
 
 #ifdef USE_CMS
-  if (transform != nullptr && transform->getTransformPixelType() == PT_CMYK) {
+  if (transform && transform->getTransformPixelType() == PT_CMYK) {
     double in[gfxColorMaxComps];
     unsigned char out[gfxColorMaxComps];
     double X, Y, Z;
@@ -1102,11 +1140,6 @@ GfxCalRGBColorSpace::GfxCalRGBColorSpace() {
 }
 
 GfxCalRGBColorSpace::~GfxCalRGBColorSpace() {
-#ifdef USE_CMS
-  if (transform != nullptr) {
-    if (transform->unref() == 0) delete transform;
-  }
-#endif
 }
 
 GfxColorSpace *GfxCalRGBColorSpace::copy() const {
@@ -1131,7 +1164,6 @@ GfxColorSpace *GfxCalRGBColorSpace::copy() const {
   }
 #ifdef USE_CMS
   cs->transform = transform;
-  if (transform != nullptr) transform->ref();
 #endif
   return cs;
 }
@@ -1186,7 +1218,6 @@ GfxColorSpace *GfxCalRGBColorSpace::parse(Array *arr, GfxState *state) {
 
 #ifdef USE_CMS
   cs->transform = (state != nullptr) ? state->getXYZ2DisplayTransform() : XYZ2DisplayTransform;
-  if (cs->transform != nullptr) cs->transform->ref();
 #endif
   return cs;
 }
@@ -1456,11 +1487,6 @@ GfxLabColorSpace::GfxLabColorSpace() {
 }
 
 GfxLabColorSpace::~GfxLabColorSpace() {
-#ifdef USE_CMS
-  if (transform != nullptr) {
-    if (transform->unref() == 0) delete transform;
-  }
-#endif
 }
 
 GfxColorSpace *GfxLabColorSpace::copy() const {
@@ -1482,7 +1508,6 @@ GfxColorSpace *GfxLabColorSpace::copy() const {
   cs->kb = kb;
 #ifdef USE_CMS
   cs->transform = transform;
-  if (transform != nullptr) transform->ref();
 #endif
   return cs;
 }
@@ -1539,7 +1564,6 @@ GfxColorSpace *GfxLabColorSpace::parse(Array *arr, GfxState *state) {
 
 #ifdef USE_CMS
   cs->transform = (state != nullptr) ? state->getXYZ2DisplayTransform() : XYZ2DisplayTransform;
-  if (cs->transform != nullptr) cs->transform->ref();
 #endif
   return cs;
 }
@@ -1724,9 +1748,11 @@ void GfxLabColorSpace::getDefaultRanges(double *decodeLow, double *decodeRange,
 // GfxICCBasedColorSpace
 //------------------------------------------------------------------------
 
-GfxICCBasedColorSpace::GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA) {
+GfxICCBasedColorSpace::GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA,
+					     const Ref *iccProfileStreamA) {
   nComps = nCompsA;
   alt = altA;
+  iccProfileStream = *iccProfileStreamA;
   rangeMin[0] = rangeMin[1] = rangeMin[2] = rangeMin[3] = 0;
   rangeMax[0] = rangeMax[1] = rangeMax[2] = rangeMax[3] = 1;
 #ifdef USE_CMS
@@ -1737,30 +1763,20 @@ GfxICCBasedColorSpace::GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA) {
 
 GfxICCBasedColorSpace::~GfxICCBasedColorSpace() {
   delete alt;
-#ifdef USE_CMS
-  if (transform != nullptr) {
-    if (transform->unref() == 0) delete transform;
-  }
-  if (lineTransform != nullptr) {
-    if (lineTransform->unref() == 0) delete lineTransform;
-  }
-#endif
 }
 
 GfxColorSpace *GfxICCBasedColorSpace::copy() const {
   GfxICCBasedColorSpace *cs;
   int i;
 
-  cs = new GfxICCBasedColorSpace(nComps, alt->copy());
+  cs = new GfxICCBasedColorSpace(nComps, alt->copy(), &iccProfileStream);
   for (i = 0; i < 4; ++i) {
     cs->rangeMin[i] = rangeMin[i];
     cs->rangeMax[i] = rangeMax[i];
   }
 #ifdef USE_CMS
   cs->transform = transform;
-  if (transform != nullptr) transform->ref();
   cs->lineTransform = lineTransform;
-  if (lineTransform != nullptr) lineTransform->ref();
 #endif
   return cs;
 }
@@ -1777,9 +1793,9 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
     error(errSyntaxError, -1, "Bad ICCBased color space");
     return nullptr;
   }
-#ifdef USE_CMS
   const Object &obj1Ref = arr->getNF(1);
   const Ref iccProfileStreamA = obj1Ref.isRef() ? obj1Ref.getRef() : Ref::INVALID();
+#ifdef USE_CMS
   // check cache
   if (out && iccProfileStreamA != Ref::INVALID()) {
     if (auto *item = out->getIccColorSpaceCache()->lookup(iccProfileStreamA)) {
@@ -1787,16 +1803,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
       int transformIntent = cs->getIntent();
       int cmsIntent = INTENT_RELATIVE_COLORIMETRIC;
       if (state != nullptr) {
-        const char *intent = state->getRenderingIntent();
-        if (intent != nullptr) {
-          if (strcmp(intent, "AbsoluteColorimetric") == 0) {
-            cmsIntent = INTENT_ABSOLUTE_COLORIMETRIC;
-          } else if (strcmp(intent, "Saturation") == 0) {
-            cmsIntent = INTENT_SATURATION;
-          } else if (strcmp(intent, "Perceptual") == 0) {
-            cmsIntent = INTENT_PERCEPTUAL;
-          }
-        }
+        cmsIntent = state->getCmsRenderingIntent();
       }
       if (transformIntent == cmsIntent) {
         return cs;
@@ -1846,7 +1853,7 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
       delete altA;
       return nullptr;
   }
-  cs = new GfxICCBasedColorSpace(nCompsA, altA);
+  cs = new GfxICCBasedColorSpace(nCompsA, altA, &iccProfileStreamA);
   obj2 = dict->lookup("Range");
   if (obj2.isArray() && obj2.arrayGetLength() == 2 * nCompsA) {
     for (i = 0; i < nCompsA; ++i) {
@@ -1862,59 +1869,49 @@ GfxColorSpace *GfxICCBasedColorSpace::parse(Array *arr, OutputDev *out, GfxState
   int length = 0;
 
   profBuf = iccStream->toUnsignedChars(&length, 65536, 65536);
-  cmsHPROFILE hp = cmsOpenProfileFromMem(profBuf,length);
+  auto hp = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf,length));
   gfree(profBuf);
-  if (hp == nullptr) {
+  if (!hp) {
     error(errSyntaxWarning, -1, "read ICCBased color space profile error");
   } else {
-    cmsHPROFILE dhp = (state != nullptr && state->getDisplayProfile() != nullptr) ? state->getDisplayProfile() : displayProfile;
-    if (dhp == nullptr) {
-      if (unlikely(RGBProfile == nullptr)) {
+    auto dhp = (state != nullptr && state->getDisplayProfile() != nullptr) ? state->getDisplayProfile() : displayProfile;
+    if (!dhp) {
+      if (unlikely(!RGBProfile)) {
         GfxColorSpace::setupColorProfiles();
       }
       dhp = RGBProfile;
     }
-    unsigned int cst = getCMSColorSpaceType(cmsGetColorSpace(hp));
-    unsigned int dNChannels = getCMSNChannels(cmsGetColorSpace(dhp));
-    unsigned int dcst = getCMSColorSpaceType(cmsGetColorSpace(dhp));
+    unsigned int cst = getCMSColorSpaceType(cmsGetColorSpace(hp.get()));
+    unsigned int dNChannels = getCMSNChannels(cmsGetColorSpace(dhp.get()));
+    unsigned int dcst = getCMSColorSpaceType(cmsGetColorSpace(dhp.get()));
     cmsHTRANSFORM transform;
 
     int cmsIntent = INTENT_RELATIVE_COLORIMETRIC;
     if (state != nullptr) {
-      const char *intent = state->getRenderingIntent();
-      if (intent != nullptr) {
-        if (strcmp(intent, "AbsoluteColorimetric") == 0) {
-          cmsIntent = INTENT_ABSOLUTE_COLORIMETRIC;
-        } else if (strcmp(intent, "Saturation") == 0) {
-          cmsIntent = INTENT_SATURATION;
-        } else if (strcmp(intent, "Perceptual") == 0) {
-          cmsIntent = INTENT_PERCEPTUAL;
-        }
-      }
+      cmsIntent = state->getCmsRenderingIntent();
     }
-    if ((transform = cmsCreateTransform(hp,
+    if ((transform = cmsCreateTransform(hp.get(),
 	   COLORSPACE_SH(cst) |CHANNELS_SH(nCompsA) | BYTES_SH(1),
-	   dhp,
+	   dhp.get(),
 	   COLORSPACE_SH(dcst) |
 	     CHANNELS_SH(dNChannels) | BYTES_SH(1),
 	   cmsIntent, LCMS_FLAGS)) == nullptr) {
       error(errSyntaxWarning, -1, "Can't create transform");
       cs->transform = nullptr;
     } else {
-      cs->transform = new GfxColorTransform(transform, cmsIntent, cst, dcst);
+      cs->transform = std::make_shared<GfxColorTransform>(hp, transform, cmsIntent, cst, dcst);
     }
     if (dcst == PT_RGB || dcst == PT_CMYK) {
        // create line transform only when the display is RGB type color space 
-      if ((transform = cmsCreateTransform(hp,
-	    CHANNELS_SH(nCompsA) | BYTES_SH(1),dhp,
+      if ((transform = cmsCreateTransform(hp.get(),
+	    CHANNELS_SH(nCompsA) | BYTES_SH(1),dhp.get(),
 	    (dcst == PT_RGB) ? TYPE_RGB_8 : TYPE_CMYK_8, cmsIntent, LCMS_FLAGS)) == nullptr) {
 	error(errSyntaxWarning, -1, "Can't create transform");
 	cs->lineTransform = nullptr;
       } else {
-	cs->lineTransform = new GfxColorTransform(transform, cmsIntent, cst, dcst);
+	cs->lineTransform = std::make_shared<GfxColorTransform>(hp, transform, cmsIntent, cst, dcst);
       }
     }
-    cmsCloseProfile(hp);
   }
   // put this colorSpace into cache
   if (out && iccProfileStreamA != Ref::INVALID()) {
@@ -2365,6 +2362,16 @@ void GfxICCBasedColorSpace::getDefaultRanges(double *decodeLow,
   }
 #endif
 }
+
+#ifdef USE_CMS
+char *GfxICCBasedColorSpace::getPostScriptCSA()
+{
+  if (transform)
+    return transform->getPostScriptCSA();
+  else
+    return nullptr;
+}
+#endif
 
 //------------------------------------------------------------------------
 // GfxIndexedColorSpace
@@ -6466,7 +6473,6 @@ GfxState::GfxState(double hDPIA, double vDPIA, const PDFRectangle *pageBox,
   XYZ2DisplayTransformSat = nullptr;
   XYZ2DisplayTransformPerc = nullptr;
   localDisplayProfile = nullptr;
-  displayProfileRef = 0;
 #endif
 }
 
@@ -6498,141 +6504,163 @@ GfxState::~GfxState() {
   if (font) {
     font->decRefCnt();
   }
-#ifdef USE_CMS
-  if (XYZ2DisplayTransformRelCol) {
-    if (XYZ2DisplayTransformRelCol->unref() == 0)
-      delete XYZ2DisplayTransformRelCol;
-  }
-  if (XYZ2DisplayTransformAbsCol) {
-    if (XYZ2DisplayTransformAbsCol->unref() == 0)
-      delete XYZ2DisplayTransformAbsCol;
-  }
-  if (XYZ2DisplayTransformSat) {
-    if (XYZ2DisplayTransformSat->unref() == 0)
-      delete XYZ2DisplayTransformSat;
-  }
-  if (XYZ2DisplayTransformPerc) {
-    if (XYZ2DisplayTransformPerc->unref() == 0)
-      delete XYZ2DisplayTransformPerc;
-  }
-  if (--displayProfileRef == 0 && localDisplayProfile != nullptr) {
-    cmsCloseProfile(localDisplayProfile);
-  }
-#endif
 }
 
 // Used for copy();
 GfxState::GfxState(const GfxState *state, bool copyPath) {
   int i;
 
-  memcpy(this, state, sizeof(GfxState));
+  hDPI = state->hDPI;
+  vDPI = state->vDPI;
+  memcpy(ctm, state->ctm, sizeof(ctm));
+  px1 = state->px1;
+  py1 = state->py1;
+  px2 = state->px2;
+  py2 = state->py2;
+  pageWidth = state->pageWidth;
+  pageHeight = state->pageHeight;
+  rotate = state->rotate;
+
+  fillColorSpace = state->fillColorSpace;
   if (fillColorSpace) {
     fillColorSpace = state->fillColorSpace->copy();
   }
+  strokeColorSpace = state->strokeColorSpace;
   if (strokeColorSpace) {
     strokeColorSpace = state->strokeColorSpace->copy();
   }
+  fillColor = state->fillColor;
+  strokeColor = state->strokeColor;
+
+  fillPattern = state->fillPattern;
   if (fillPattern) {
     fillPattern = state->fillPattern->copy();
   }
+  strokePattern = state->strokePattern;
   if (strokePattern) {
     strokePattern = state->strokePattern->copy();
   }
+  blendMode = state->blendMode;
+  fillOpacity = state->fillOpacity;
+  strokeOpacity = state->strokeOpacity;
+  fillOverprint = state->fillOverprint;
+  strokeOverprint = state->strokeOverprint;
+  overprintMode = state->overprintMode;
   for (i = 0; i < 4; ++i) {
+    transfer[i] = state->transfer[i];
     if (transfer[i]) {
       transfer[i] = state->transfer[i]->copy();
     }
   }
+  lineWidth = state->lineWidth;
+  lineDashLength = state->lineDashLength;
+  lineDash = nullptr;
   if (lineDashLength > 0) {
     lineDash = (double *)gmallocn(lineDashLength, sizeof(double));
     memcpy(lineDash, state->lineDash, lineDashLength * sizeof(double));
   }
+  lineDashStart = state->lineDashStart;
+  flatness = state->flatness;
+  lineJoin = state->lineJoin;
+  lineCap = state->lineCap;
+  miterLimit = state->miterLimit;
+  strokeAdjust = state->strokeAdjust;
+  alphaIsShape = state->alphaIsShape;
+  textKnockout = state->textKnockout;
+
+  font = state->font;
   if (font)
     font->incRefCnt();
+  fontSize = state->fontSize;
+  memcpy(textMat, state->textMat, sizeof(textMat));
+  charSpace = state->charSpace;
+  wordSpace = state->wordSpace;
+  horizScaling = state->horizScaling;
+  leading = state->leading;
+  rise = state->rise;
+  render = state->render;
 
+  path = state->path;
   if (copyPath) {
     path = state->path->copy();
   }
+  curX = state->curX;
+  curY = state->curY;
+  lineX = state->lineX;
+  lineY = state->lineY;
+
+  clipXMin = state->clipXMin;
+  clipYMin = state->clipYMin;
+  clipXMax = state->clipXMax;
+  clipYMax = state->clipYMax;
+  memcpy(renderingIntent, state->renderingIntent, sizeof(renderingIntent));
+
   saved = nullptr;
 #ifdef USE_CMS
-  if (XYZ2DisplayTransformRelCol) {
-    XYZ2DisplayTransformRelCol->ref();
-  }
-  if (XYZ2DisplayTransformAbsCol) {
-    XYZ2DisplayTransformAbsCol->ref();
-  }
-  if (XYZ2DisplayTransformSat) {
-    XYZ2DisplayTransformSat->ref();
-  }
-  if (XYZ2DisplayTransformPerc) {
-    XYZ2DisplayTransformPerc->ref();
-  }
-  if (localDisplayProfile) {
-    displayProfileRef++;
-  }
+  localDisplayProfile = state->localDisplayProfile;
+  XYZ2DisplayTransformRelCol = state->XYZ2DisplayTransformRelCol;
+  XYZ2DisplayTransformAbsCol = state->XYZ2DisplayTransformAbsCol;
+  XYZ2DisplayTransformSat = state->XYZ2DisplayTransformSat;
+  XYZ2DisplayTransformPerc = state->XYZ2DisplayTransformPerc;
 #endif
 }
 
 #ifdef USE_CMS
-void GfxState::setDisplayProfile(cmsHPROFILE localDisplayProfileA) {
-  if (localDisplayProfile != nullptr) {
-    cmsCloseProfile(localDisplayProfile);
-  }
+void GfxState::setDisplayProfile(const GfxLCMSProfilePtr& localDisplayProfileA) {
   localDisplayProfile = localDisplayProfileA;
-  if (localDisplayProfileA != nullptr) {
+  if (localDisplayProfile) {
     cmsHTRANSFORM transform;
     unsigned int nChannels;
     unsigned int localDisplayPixelType;
 
-    localDisplayPixelType = getCMSColorSpaceType(cmsGetColorSpace(localDisplayProfile));
-    nChannels = getCMSNChannels(cmsGetColorSpace(localDisplayProfile));
-    displayProfileRef = 1;
+    localDisplayPixelType = getCMSColorSpaceType(cmsGetColorSpace(localDisplayProfile.get()));
+    nChannels = getCMSNChannels(cmsGetColorSpace(localDisplayProfile.get()));
     // create transform from XYZ
-    cmsHPROFILE XYZProfile = cmsCreateXYZProfile();
-    if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
-	   localDisplayProfile,
+    auto XYZProfile = make_GfxLCMSProfilePtr(cmsCreateXYZProfile());
+    if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL,
+	   localDisplayProfile.get(),
 	   COLORSPACE_SH(localDisplayPixelType) |
 	     CHANNELS_SH(nChannels) | BYTES_SH(1),
 	  INTENT_RELATIVE_COLORIMETRIC,LCMS_FLAGS)) == nullptr) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransformRelCol = new GfxColorTransform(transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
+      XYZ2DisplayTransformRelCol = std::make_shared<GfxColorTransform>(XYZProfile, transform, INTENT_RELATIVE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
     }
-    if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
-	   localDisplayProfile,
+
+    if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL,
+	   localDisplayProfile.get(),
 	   COLORSPACE_SH(localDisplayPixelType) |
 	     CHANNELS_SH(nChannels) | BYTES_SH(1),
 	  INTENT_ABSOLUTE_COLORIMETRIC,LCMS_FLAGS)) == nullptr) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransformAbsCol = new GfxColorTransform(transform, INTENT_ABSOLUTE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
+      XYZ2DisplayTransformAbsCol = std::make_shared<GfxColorTransform>(XYZProfile, transform, INTENT_ABSOLUTE_COLORIMETRIC, PT_XYZ, localDisplayPixelType);
     }
-    if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
-	   localDisplayProfile,
+
+    if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL,
+	   localDisplayProfile.get(),
 	   COLORSPACE_SH(localDisplayPixelType) |
 	     CHANNELS_SH(nChannels) | BYTES_SH(1),
 	  INTENT_SATURATION,LCMS_FLAGS)) == nullptr) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransformSat = new GfxColorTransform(transform, INTENT_SATURATION, PT_XYZ, localDisplayPixelType);
+      XYZ2DisplayTransformSat = std::make_shared<GfxColorTransform>(XYZProfile, transform, INTENT_SATURATION, PT_XYZ, localDisplayPixelType);
     }
-    if ((transform = cmsCreateTransform(XYZProfile, TYPE_XYZ_DBL,
-	   localDisplayProfile,
+
+    if ((transform = cmsCreateTransform(XYZProfile.get(), TYPE_XYZ_DBL,
+	   localDisplayProfile.get(),
 	   COLORSPACE_SH(localDisplayPixelType) |
 	     CHANNELS_SH(nChannels) | BYTES_SH(1),
 	  INTENT_PERCEPTUAL,LCMS_FLAGS)) == nullptr) {
       error(errSyntaxWarning, -1, "Can't create Lab transform");
     } else {
-      XYZ2DisplayTransformPerc = new GfxColorTransform(transform, INTENT_PERCEPTUAL, PT_XYZ, localDisplayPixelType);
+      XYZ2DisplayTransformPerc = std::make_shared<GfxColorTransform>(XYZProfile, transform, INTENT_PERCEPTUAL, PT_XYZ, localDisplayPixelType);
     }
-    cmsCloseProfile(XYZProfile);
   }
 }
 
-GfxColorTransform *GfxState::getXYZ2DisplayTransform() {
-  GfxColorTransform *transform;
-
-  transform = XYZ2DisplayTransformRelCol;
+std::shared_ptr<GfxColorTransform> GfxState::getXYZ2DisplayTransform() {
+  auto transform = XYZ2DisplayTransformRelCol;
   if (strcmp(renderingIntent, "AbsoluteColorimetric") == 0) {
     transform = XYZ2DisplayTransformAbsCol;
   } else if (strcmp(renderingIntent, "Saturation") == 0) {
@@ -6640,10 +6668,25 @@ GfxColorTransform *GfxState::getXYZ2DisplayTransform() {
   } else if (strcmp(renderingIntent, "Perceptual") == 0) {
     transform = XYZ2DisplayTransformPerc;
   }
-  if (transform == nullptr) {
+  if (!transform) {
     transform = XYZ2DisplayTransform;
   }
   return transform;
+}
+
+int GfxState::getCmsRenderingIntent() {
+  const char *intent = getRenderingIntent();
+  int cmsIntent = INTENT_RELATIVE_COLORIMETRIC;
+  if (intent) {
+    if (strcmp(intent, "AbsoluteColorimetric") == 0) {
+      cmsIntent = INTENT_ABSOLUTE_COLORIMETRIC;
+    } else if (strcmp(intent, "Saturation") == 0) {
+      cmsIntent = INTENT_SATURATION;
+    } else if (strcmp(intent, "Perceptual") == 0) {
+      cmsIntent = INTENT_PERCEPTUAL;
+    }
+  }
+  return cmsIntent;
 }
 
 #endif

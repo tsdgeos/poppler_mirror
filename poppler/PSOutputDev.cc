@@ -25,7 +25,7 @@
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2011, 2012, 2014-2017, 2019 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
-// Copyright (C) 2009-2011, 2013-2015, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2009-2011, 2013-2015, 2017, 2020 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012, 2014 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2012 Lu Wang <coolwanglu@gmail.com>
 // Copyright (C) 2014 Till Kamppeter <till.kamppeter@gmail.com>
@@ -36,6 +36,7 @@
 // Copyright (C) 2018 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
 // Copyright (C) 2019 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -3945,6 +3946,10 @@ void PSOutputDev::endPage() {
     (*overlayCbk)(this, overlayCbkData);
   }
 
+  for (const auto& item : iccEmitted) {
+      writePSFmt("userdict /{0:s} undef\n", item.c_str());
+  }
+  iccEmitted.clear();
 
   if (mode == psModeForm) {
     writePS("pdfEndPage\n");
@@ -3955,8 +3960,8 @@ void PSOutputDev::endPage() {
     if (!manualCtrl) {
       writePS("showpage\n");
     }
-      writePS("%%PageTrailer\n");
-      writePageTrailer();
+    writePS("%%PageTrailer\n");
+    writePageTrailer();
     }
 }
 
@@ -4022,7 +4027,7 @@ void PSOutputDev::updateFillColorSpace(GfxState *state) {
   case psLevel2:
   case psLevel3:
     if (state->getFillColorSpace()->getMode() != csPattern) {
-      dumpColorSpaceL2(state->getFillColorSpace(), true, false, false);
+      dumpColorSpaceL2(state, state->getFillColorSpace(), true, false, false);
       writePS(" cs\n");
     }
     break;
@@ -4043,7 +4048,7 @@ void PSOutputDev::updateStrokeColorSpace(GfxState *state) {
   case psLevel2:
   case psLevel3:
     if (state->getStrokeColorSpace()->getMode() != csPattern) {
-      dumpColorSpaceL2(state->getStrokeColorSpace(), true, false, false);
+      dumpColorSpaceL2(state, state->getStrokeColorSpace(), true, false, false);
       writePS(" CS\n");
     }
     break;
@@ -4940,7 +4945,7 @@ bool PSOutputDev::patchMeshShadedFill(GfxState *state,
   writePS("<<\n");
   writePS("  /ShadingType 7\n");
   writePS("  /ColorSpace ");
-  dumpColorSpaceL2(shading->getColorSpace(), false, false, false);
+  dumpColorSpaceL2(state, shading->getColorSpace(), false, false, false);
   writePS("\n");
   writePS("  /DataSource [\n");
 
@@ -5233,12 +5238,12 @@ void PSOutputDev::drawImageMask(GfxState *state, Object *ref, Stream *str,
     break;
     case psLevel2:
     case psLevel2Sep:
-      doImageL2(ref, nullptr, invert, inlineImg, str, width, height, len,
+      doImageL2(state, ref, nullptr, invert, inlineImg, str, width, height, len,
                 nullptr, nullptr, 0, 0, false);
     break;
     case psLevel3:
     case psLevel3Sep:
-      doImageL3(ref, nullptr, invert, inlineImg, str, width, height, len,
+      doImageL3(state, ref, nullptr, invert, inlineImg, str, width, height, len,
                 nullptr, nullptr, 0, 0, false);
     break;
   }
@@ -5277,12 +5282,12 @@ void PSOutputDev::drawImage(GfxState *state, Object *ref, Stream *str,
     break;
   case psLevel2:
   case psLevel2Sep:
-    doImageL2(ref, colorMap, false, inlineImg, str,
+    doImageL2(state, ref, colorMap, false, inlineImg, str,
 	      width, height, len, maskColors, nullptr, 0, 0, false);
     break;
   case psLevel3:
   case psLevel3Sep:
-    doImageL3(ref, colorMap, false, inlineImg, str,
+    doImageL3(state, ref, colorMap, false, inlineImg, str,
 	      width, height, len, maskColors, nullptr, 0, 0, false);
     break;
   }
@@ -5312,12 +5317,12 @@ void PSOutputDev::drawMaskedImage(GfxState *state, Object *ref, Stream *str,
     break;
   case psLevel2:
   case psLevel2Sep:
-    doImageL2(ref, colorMap, false, false, str, width, height, len,
+    doImageL2(state, ref, colorMap, false, false, str, width, height, len,
 	      nullptr, maskStr, maskWidth, maskHeight, maskInvert);
     break;
   case psLevel3:
   case psLevel3Sep:
-    doImageL3(ref, colorMap, false, false, str, width, height, len,
+    doImageL3(state, ref, colorMap, false, false, str, width, height, len,
 	      nullptr, maskStr, maskWidth, maskHeight, maskInvert);
     break;
   }
@@ -5769,7 +5774,7 @@ void PSOutputDev::maskToClippingPath(Stream *maskStr, int maskWidth, int maskHei
   maskStr->close();
 }
 
-void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
+void PSOutputDev::doImageL2(GfxState* state, Object *ref, GfxImageColorMap *colorMap,
 			    bool invert, bool inlineImg,
 			    Stream *str, int width, int height, int len,
 			    const int *maskColors, Stream *maskStr,
@@ -5961,7 +5966,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
     bool isCustomColor =
       (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep) &&
       colorMap->getColorSpace()->getMode() == csDeviceN;
-    dumpColorSpaceL2(colorMap->getColorSpace(), false, !isCustomColor, false);
+    dumpColorSpaceL2(state, colorMap->getColorSpace(), false, !isCustomColor, false);
     writePS(" setcolorspace\n");
   }
 
@@ -6249,7 +6254,7 @@ void PSOutputDev::doImageL2(Object *ref, GfxImageColorMap *colorMap,
 }
 
 //~ this doesn't currently support OPI
-void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
+void PSOutputDev::doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colorMap,
 			    bool invert, bool inlineImg,
 			    Stream *str, int width, int height, int len,
 			    const int *maskColors, Stream *maskStr,
@@ -6364,7 +6369,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
     bool isCustomColor =
       (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep) &&
       colorMap->getColorSpace()->getMode() == csDeviceN;
-    dumpColorSpaceL2(colorMap->getColorSpace(), false, !isCustomColor, false);
+    dumpColorSpaceL2(state, colorMap->getColorSpace(), false, !isCustomColor, false);
     writePS(" setcolorspace\n");
   }
 
@@ -6663,7 +6668,7 @@ void PSOutputDev::doImageL3(Object *ref, GfxImageColorMap *colorMap,
   }
 }
 
-void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
+void PSOutputDev::dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace,
 				   bool genXform, bool updateColors,
 				   bool map01) {
   GfxCalGrayColorSpace *calGrayCS;
@@ -6804,17 +6809,48 @@ void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
     break;
 
   case csICCBased:
+#ifdef USE_CMS
+    {
+      GfxICCBasedColorSpace *iccBasedCS;
+      iccBasedCS = (GfxICCBasedColorSpace *)colorSpace;
+      Ref ref = iccBasedCS->getRef();
+      int intent = state->getCmsRenderingIntent();
+      GooString *name = GooString::format("ICCBased-{0:d}-{1:d}-{2:d}", ref.num, ref.gen, intent);
+      const auto& it = iccEmitted.find(name->toStr());
+      if (it != iccEmitted.end()) {
+	writePSFmt("{0:t}", name);
+	if (genXform) {
+	  writePS(" {}");
+	}
+      } else {
+	char *csa = iccBasedCS->getPostScriptCSA();
+	if (csa) {
+	  writePSFmt("userdict /{0:t} {1:s} put\n", name, csa);
+	  iccEmitted.emplace(name->toStr());
+	  writePSFmt("{0:t}", name);
+	  if (genXform) {
+	    writePS(" {}");
+	  }
+	} else {
+	  dumpColorSpaceL2(state, ((GfxICCBasedColorSpace *)colorSpace)->getAlt(),
+			   genXform, updateColors, false);
+	}
+      }
+      delete name;
+    }
+#else
     // there is no transform function to the alternate color space, so
     // we can use it directly
-    dumpColorSpaceL2(((GfxICCBasedColorSpace *)colorSpace)->getAlt(),
+    dumpColorSpaceL2(state, ((GfxICCBasedColorSpace *)colorSpace)->getAlt(),
 		     genXform, updateColors, false);
+#endif
     break;
 
   case csIndexed:
     indexedCS = (GfxIndexedColorSpace *)colorSpace;
     baseCS = indexedCS->getBase();
     writePS("[/Indexed ");
-    dumpColorSpaceL2(baseCS, false, false, true);
+    dumpColorSpaceL2(state, baseCS, false, false, true);
     n = indexedCS->getIndexHigh();
     numComps = baseCS->getNComps();
     lookup = indexedCS->getLookup();
@@ -6889,7 +6925,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
     writePS("[/Separation ");
     writePSString(separationCS->getName()->toStr());
     writePS(" ");
-    dumpColorSpaceL2(separationCS->getAlt(), false, false, false);
+    dumpColorSpaceL2(state, separationCS->getAlt(), false, false, false);
     writePS("\n");
     cvtFunction(separationCS->getFunc());
     writePS("]");
@@ -6911,7 +6947,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
         writePS(" ");
       }
       writePS("]\n");
-      dumpColorSpaceL2(deviceNCS->getAlt(), false, updateColors, false);
+      dumpColorSpaceL2(state, deviceNCS->getAlt(), false, updateColors, false);
       writePS("\n");
       cvtFunction(deviceNCS->getTintTransformFunc(), map01 && deviceNCS->getAlt()->getMode() == csLab);
       writePS("]\n");
@@ -6920,7 +6956,7 @@ void PSOutputDev::dumpColorSpaceL2(GfxColorSpace *colorSpace,
       }
     } else {
       // DeviceN color spaces are a Level 3 PostScript feature.
-      dumpColorSpaceL2(deviceNCS->getAlt(), false, updateColors, map01);
+      dumpColorSpaceL2(state, deviceNCS->getAlt(), false, updateColors, map01);
       if (genXform) {
         writePS(" ");
         cvtFunction(deviceNCS->getTintTransformFunc());

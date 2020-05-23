@@ -22,9 +22,10 @@
 // Copyright (C) 2011 Andrea Canciani <ranma42@gmail.com>
 // Copyright (C) 2011-2014, 2016 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Lu Wang <coolwanglu@gmail.com>
-// Copyright (C) 2015, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2015, 2017, 2020 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2017, 2019 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
+// Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -41,6 +42,7 @@
 
 #include <cassert>
 #include <map>
+#include <memory>
 
 class Array;
 class Gfx;
@@ -188,27 +190,38 @@ enum GfxColorSpaceMode {
   csPattern
 };
 
+// This shall hold a cmsHPROFILE handle.
+// Only use the make_GfxLCMSProfilePtr function to construct this pointer,
+// to ensure that the resources are properly released after usage.
+typedef std::shared_ptr<void> GfxLCMSProfilePtr;
+
+#ifdef USE_CMS
+GfxLCMSProfilePtr make_GfxLCMSProfilePtr(void* profile);
+#endif
+
 // wrapper of cmsHTRANSFORM to copy
 class GfxColorTransform {
 public:
   void doTransform(void *in, void *out, unsigned int size);
   // transformA should be a cmsHTRANSFORM
-  GfxColorTransform(void *transformA, int cmsIntent, unsigned int inputPixelType, unsigned int transformPixelType);
+  GfxColorTransform(const GfxLCMSProfilePtr& sourceProfileA, void *transformA, int cmsIntent,
+                    unsigned int inputPixelType, unsigned int transformPixelType);
   ~GfxColorTransform();
   GfxColorTransform(const GfxColorTransform &) = delete;
   GfxColorTransform& operator=(const GfxColorTransform &) = delete;
   int getIntent() const { return cmsIntent; }
   int getInputPixelType() const { return inputPixelType; }
   int getTransformPixelType() const { return transformPixelType; }
-  void ref();
-  unsigned int unref();
+  GfxLCMSProfilePtr getSourceProfile() { return sourceProfile; }
+  char *getPostScriptCSA();
 private:
   GfxColorTransform() {}
+  GfxLCMSProfilePtr sourceProfile;
   void *transform;
-  unsigned int refCount;
   int cmsIntent;
   unsigned int inputPixelType;
   unsigned int transformPixelType;
+  char *psCSA;
 };
 
 class GfxColorSpace {
@@ -276,13 +289,10 @@ public:
 
 #ifdef USE_CMS
   static int setupColorProfiles();
-  // displayProfileA should be a cmsHPROFILE 
-  static void setDisplayProfile(void *displayProfileA);
+  static void setDisplayProfile(const GfxLCMSProfilePtr& displayProfileA);
   static void setDisplayProfileName(GooString *name);
-  // result will be a cmsHPROFILE 
-  static void *getRGBProfile();
-  // result will be a cmsHPROFILE 
-  static void *getDisplayProfile();
+  static GfxLCMSProfilePtr getRGBProfile();
+  static GfxLCMSProfilePtr getDisplayProfile();
 #endif
 protected:
 
@@ -364,7 +374,7 @@ private:
   double kr, kg, kb;		    // gamut mapping mulitpliers
   void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
 #ifdef USE_CMS
-  GfxColorTransform *transform;
+  std::shared_ptr<GfxColorTransform> transform;
 #endif
 };
 
@@ -446,7 +456,7 @@ private:
   double kr, kg, kb;		    // gamut mapping mulitpliers
   void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
 #ifdef USE_CMS
-  GfxColorTransform *transform;
+  std::shared_ptr<GfxColorTransform> transform;
 #endif
 };
 
@@ -527,7 +537,7 @@ private:
   double kr, kg, kb;		    // gamut mapping mulitpliers
   void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
 #ifdef USE_CMS
-  GfxColorTransform *transform;
+  std::shared_ptr<GfxColorTransform> transform;
 #endif
 };
 
@@ -538,7 +548,8 @@ private:
 class GfxICCBasedColorSpace: public GfxColorSpace {
 public:
 
-  GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA);
+  GfxICCBasedColorSpace(int nCompsA, GfxColorSpace *altA,
+			const Ref *iccProfileStreamA);
   ~GfxICCBasedColorSpace() override;
   GfxColorSpace *copy() const override;
   GfxColorSpaceMode getMode() const override { return csICCBased; }
@@ -568,6 +579,10 @@ public:
 
   // ICCBased-specific access.
   GfxColorSpace *getAlt() { return alt; }
+  Ref getRef() { return iccProfileStream; }
+#ifdef USE_CMS
+  char *getPostScriptCSA();
+#endif
 
 private:
 
@@ -575,10 +590,11 @@ private:
   GfxColorSpace *alt;		// alternate color space
   double rangeMin[4];		// min values for each component
   double rangeMax[4];		// max values for each component
+  Ref iccProfileStream;		// the ICC profile
 #ifdef USE_CMS
   int getIntent() { return (transform != nullptr) ? transform->getIntent() : 0; }
-  GfxColorTransform *transform;
-  GfxColorTransform *lineTransform; // color transform for line
+  std::shared_ptr<GfxColorTransform> transform;
+  std::shared_ptr<GfxColorTransform> lineTransform; // color transform for line
   mutable std::map<unsigned int, unsigned int> cmsCache;
 #endif
 };
@@ -1589,9 +1605,10 @@ public:
     { strncpy(renderingIntent, intent, 31); }
 
 #ifdef USE_CMS
-  void setDisplayProfile(void *localDisplayProfileA);
-  void *getDisplayProfile() { return localDisplayProfile; }
-  GfxColorTransform *getXYZ2DisplayTransform();
+  void setDisplayProfile(const GfxLCMSProfilePtr& localDisplayProfileA);
+  GfxLCMSProfilePtr getDisplayProfile() { return localDisplayProfile; }
+  std::shared_ptr<GfxColorTransform> getXYZ2DisplayTransform();
+  int getCmsRenderingIntent();
 #endif
 
   // Add to path.
@@ -1688,12 +1705,11 @@ private:
   GfxState(const GfxState *state, bool copyPath);
 
 #ifdef USE_CMS
-  void *localDisplayProfile;
-  int displayProfileRef;
-  GfxColorTransform *XYZ2DisplayTransformRelCol;
-  GfxColorTransform *XYZ2DisplayTransformAbsCol;
-  GfxColorTransform *XYZ2DisplayTransformSat;
-  GfxColorTransform *XYZ2DisplayTransformPerc;
+  GfxLCMSProfilePtr localDisplayProfile;
+  std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformRelCol;
+  std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformAbsCol;
+  std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformSat;
+  std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformPerc;
 #endif
 };
 

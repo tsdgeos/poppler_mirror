@@ -35,6 +35,7 @@
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Kris Jurka <jurka@ejurka.com>
 // Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+// Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -288,7 +289,7 @@ static cairo_antialias_t antialiasEnum = CAIRO_ANTIALIAS_DEFAULT;
 #ifdef USE_CMS
 static unsigned char *icc_data;
 static int icc_data_size;
-static cmsHPROFILE profile;
+static GfxLCMSProfilePtr profile;
 #endif
 
 struct AntialiasOption
@@ -413,7 +414,7 @@ static void writePageImage(GooString *filename)
       cmsUInt8Number profileID[17];
       profileID[16] = '\0';
 
-      cmsGetHeaderProfileID(profile,profileID);
+      cmsGetHeaderProfileID(profile.get(),profileID);
       static_cast<PNGWriter*>(writer)->setICCProfile(reinterpret_cast<char *>(profileID), icc_data, icc_data_size);
     } else {
       static_cast<PNGWriter*>(writer)->setSRGBProfile();
@@ -1128,13 +1129,13 @@ int main(int argc, char *argv[]) {
       exit(4);
     }
     fclose(file);
-    profile = cmsOpenProfileFromMem(icc_data, icc_data_size);
+    profile = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(icc_data, icc_data_size));
     if (!profile) {
       fprintf(stderr, "Error: lcms error opening profile\n");
       exit(4);
     }
   } else {
-    profile = cmsCreate_sRGBProfile();
+    profile = make_GfxLCMSProfilePtr(cmsCreate_sRGBProfile());
   }
   GfxColorSpace::setDisplayProfile(profile);
 #endif
@@ -1286,7 +1287,6 @@ int main(int argc, char *argv[]) {
     delete userPW;
 
 #ifdef USE_CMS
-  cmsCloseProfile(profile);
   if (icc_data)
     gfree(icc_data);
 #endif

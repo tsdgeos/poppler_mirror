@@ -22,7 +22,7 @@
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
 // Copyright (C) 2009, 2011, 2015-2017 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
-// Copyright (C) 2011, 2014, 2017 Adrian Johnson <ajohnson@redneon.com>
+// Copyright (C) 2011, 2014, 2017, 2020 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
 // Copyright (C) 2018 Klarälvdalens Datakonsult AB, a KDAB Group company, <info@kdab.com>. Work sponsored by the LiMux project of the city of Munich
 // Copyright (C) 2018 Adam Reichold <adam.reichold@t-online.de>
@@ -395,17 +395,17 @@ private:
 		    Stream *str, int width, int height, int len,
 		    const int *maskColors, Stream *maskStr,
 		    int maskWidth, int maskHeight, bool maskInvert);
-  void doImageL2(Object *ref, GfxImageColorMap *colorMap,
+  void doImageL2(GfxState *state, Object *ref, GfxImageColorMap *colorMap,
 		 bool invert, bool inlineImg,
 		 Stream *str, int width, int height, int len,
 		 const int *maskColors, Stream *maskStr,
 		 int maskWidth, int maskHeight, bool maskInvert);
-  void doImageL3(Object *ref, GfxImageColorMap *colorMap,
+  void doImageL3(GfxState *state, Object *ref, GfxImageColorMap *colorMap,
 		 bool invert, bool inlineImg,
 		 Stream *str, int width, int height, int len,
 		 const int *maskColors, Stream *maskStr,
 		 int maskWidth, int maskHeight, bool maskInvert);
-  void dumpColorSpaceL2(GfxColorSpace *colorSpace,
+  void dumpColorSpaceL2(GfxState *state, GfxColorSpace *colorSpace,
 			bool genXform, bool updateColors,
 			bool map01);
   bool tilingPatternFillL1(GfxState *state, Catalog *cat, Object *str,
@@ -556,6 +556,8 @@ private:
   bool useBinary;		// use binary instead of hex
   bool enableLZW;		// enable LZW compression
   bool enableFlate;		// enable Flate compression
+
+  std::unordered_set<std::string> iccEmitted; // contains ICCBased CSAs that have been emitted
 
 #ifdef OPI_SUPPORT
   int opi13Nest;		// nesting level of OPI 1.3 objects

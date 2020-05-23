@@ -44,6 +44,7 @@
 // Copyright (C) 2019 LE GARREC Vincent <legarrec.vincent@gmail.com>
 // Copyright (C) 2019, 2020 Oliver Sander <oliver.sander@tu-dresden.de>
 // Copyright (C) 2019 Volker Krause <vkrause@kde.org>
+// Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -654,8 +655,8 @@ void Gfx::initDisplayProfile() {
                 Stream *iccStream = profile.getStream();
                 int length = 0;
                 unsigned char *profBuf = iccStream->toUnsignedChars(&length, 65536, 65536);
-                cmsHPROFILE hp = cmsOpenProfileFromMem(profBuf,length);
-                if (hp == nullptr) {
+                auto hp = make_GfxLCMSProfilePtr(cmsOpenProfileFromMem(profBuf,length));
+                if (!hp) {
                   error(errSyntaxWarning, -1, "read ICCBased color space profile error");
                 } else {
                   state->setDisplayProfile(hp);
