@@ -379,7 +379,6 @@ private:
     double whiteX, whiteY, whiteZ; // white point
     double blackX, blackY, blackZ; // black point
     double gamma; // gamma value
-    double kr, kg, kb; // gamut mapping mulitpliers
     void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
 #ifdef USE_CMS
     std::shared_ptr<GfxColorTransform> transform;
@@ -460,7 +459,6 @@ private:
     double blackX, blackY, blackZ; // black point
     double gammaR, gammaG, gammaB; // gamma values
     double mat[9]; // ABC -> XYZ transform matrix
-    double kr, kg, kb; // gamut mapping mulitpliers
     void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
 #ifdef USE_CMS
     std::shared_ptr<GfxColorTransform> transform;
@@ -539,7 +537,6 @@ private:
     double whiteX, whiteY, whiteZ; // white point
     double blackX, blackY, blackZ; // black point
     double aMin, aMax, bMin, bMax; // range for the a and b components
-    double kr, kg, kb; // gamut mapping mulitpliers
     void getXYZ(const GfxColor *color, double *pX, double *pY, double *pZ) const;
 #ifdef USE_CMS
     std::shared_ptr<GfxColorTransform> transform;

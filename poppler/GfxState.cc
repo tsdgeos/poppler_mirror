@@ -635,9 +635,6 @@ GfxColorSpace *GfxCalGrayColorSpace::copy() const
     cs->blackY = blackY;
     cs->blackZ = blackZ;
     cs->gamma = gamma;
-    cs->kr = kr;
-    cs->kg = kg;
-    cs->kb = kb;
 #ifdef USE_CMS
     cs->transform = transform;
 #endif
@@ -647,6 +644,74 @@ GfxColorSpace *GfxCalGrayColorSpace::copy() const
 // This is the inverse of MatrixLMN in Example 4.10 from the PostScript
 // Language Reference, Third Edition.
 static const double xyzrgb[3][3] = { { 3.240449, -1.537136, -0.498531 }, { -0.969265, 1.876011, 0.041556 }, { 0.055643, -0.204026, 1.057229 } };
+
+// From the same reference as above, the inverse of the DecodeLMN function.
+// This is essentially the gamma function of the sRGB profile.
+static double srgb_gamma_function(double x)
+{
+    // 0.04045 is what lcms2 uses, but the PS Reference Example 4.10 specifies 0.03928???
+    // if (x <= 0.04045 / 12.92321) {
+    if (x <= 0.03928 / 12.92321) {
+        return x * 12.92321;
+    }
+    return 1.055 * pow(x, 1.0 / 2.4) - 0.055;
+}
+
+// D65 is the white point of the sRGB profile as it is specified above in the xyzrgb array
+static const double white_d65_X = 0.9505;
+static const double white_d65_Y = 1.0;
+static const double white_d65_Z = 1.0890;
+
+// D50 is the default white point as used in ICC profiles and in the lcms2 library
+static const double white_d50_X = 0.96422;
+static const double white_d50_Y = 1.0;
+static const double white_d50_Z = 0.82521;
+
+static void inline bradford_transform_to_d50(double &X, double &Y, double &Z, const double source_whiteX, const double source_whiteY, const double source_whiteZ)
+{
+    if (source_whiteX == white_d50_X && source_whiteY == white_d50_Y && source_whiteZ == white_d50_Z) {
+        // early exit if noop
+        return;
+    }
+    // at first apply Bradford matrix
+    double rho_in = 0.8951000 * X + 0.2664000 * Y - 0.1614000 * Z;
+    double gamma_in = -0.7502000 * X + 1.7135000 * Y + 0.0367000 * Z;
+    double beta_in = 0.0389000 * X - 0.0685000 * Y + 1.0296000 * Z;
+
+    // apply a diagonal matrix with the diagonal entries being the inverse bradford-transformed white point
+    rho_in /= 0.8951000 * source_whiteX + 0.2664000 * source_whiteY - 0.1614000 * source_whiteZ;
+    gamma_in /= -0.7502000 * source_whiteX + 1.7135000 * source_whiteY + 0.0367000 * source_whiteZ;
+    beta_in /= 0.0389000 * source_whiteX - 0.0685000 * source_whiteY + 1.0296000 * source_whiteZ;
+
+    // now revert the two steps above, but substituting the source white point by the device white point (D50)
+    // Since the white point is known a priori this has been combined into a single operation.
+    X = 0.98332566 * rho_in - 0.15005819 * gamma_in + 0.13095252 * beta_in;
+    Y = 0.43069901 * rho_in + 0.52894900 * gamma_in + 0.04035199 * beta_in;
+    Z = 0.00849698 * rho_in + 0.04086079 * gamma_in + 0.79284618 * beta_in;
+}
+
+static void inline bradford_transform_to_d65(double &X, double &Y, double &Z, const double source_whiteX, const double source_whiteY, const double source_whiteZ)
+{
+    if (source_whiteX == white_d65_X && source_whiteY == white_d65_Y && source_whiteZ == white_d65_Z) {
+        // early exit if noop
+        return;
+    }
+    // at first apply Bradford matrix
+    double rho_in = 0.8951000 * X + 0.2664000 * Y - 0.1614000 * Z;
+    double gamma_in = -0.7502000 * X + 1.7135000 * Y + 0.0367000 * Z;
+    double beta_in = 0.0389000 * X - 0.0685000 * Y + 1.0296000 * Z;
+
+    // apply a diagonal matrix with the diagonal entries being the inverse bradford-transformed white point
+    rho_in /= 0.8951000 * source_whiteX + 0.2664000 * source_whiteY - 0.1614000 * source_whiteZ;
+    gamma_in /= -0.7502000 * source_whiteX + 1.7135000 * source_whiteY + 0.0367000 * source_whiteZ;
+    beta_in /= 0.0389000 * source_whiteX - 0.0685000 * source_whiteY + 1.0296000 * source_whiteZ;
+
+    // now revert the two steps above, but substituting the source white point by the device white point (D65)
+    // Since the white point is known a priori this has been combined into a single operation.
+    X = 0.92918329 * rho_in - 0.15299782 * gamma_in + 0.17428453 * beta_in;
+    Y = 0.40698452 * rho_in + 0.53931108 * gamma_in + 0.05370440 * beta_in;
+    Z = -0.00802913 * rho_in + 0.04166125 * gamma_in + 1.05519788 * beta_in;
+}
 
 GfxColorSpace *GfxCalGrayColorSpace::parse(Array *arr, GfxState *state)
 {
@@ -674,9 +739,6 @@ GfxColorSpace *GfxCalGrayColorSpace::parse(Array *arr, GfxState *state)
 
     cs->gamma = obj1.dictLookup("Gamma").getNumWithDefaultValue(1);
 
-    cs->kr = 1 / (xyzrgb[0][0] * cs->whiteX + xyzrgb[0][1] * cs->whiteY + xyzrgb[0][2] * cs->whiteZ);
-    cs->kg = 1 / (xyzrgb[1][0] * cs->whiteX + xyzrgb[1][1] * cs->whiteY + xyzrgb[1][2] * cs->whiteZ);
-    cs->kb = 1 / (xyzrgb[2][0] * cs->whiteX + xyzrgb[2][1] * cs->whiteY + xyzrgb[2][2] * cs->whiteZ);
 #ifdef USE_CMS
     cs->transform = (state != nullptr) ? state->getXYZ2DisplayTransform() : nullptr;
 #endif
@@ -705,9 +767,10 @@ void GfxCalGrayColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
         double X, Y, Z;
 
         getXYZ(color, &X, &Y, &Z);
-        in[0] = clip01(X);
-        in[1] = clip01(Y);
-        in[2] = clip01(Z);
+        bradford_transform_to_d50(X, Y, Z, whiteX, whiteY, whiteZ);
+        in[0] = X;
+        in[1] = Y;
+        in[2] = Z;
         transform->doTransform(in, out, 1);
         *gray = byteToCol(out[0]);
         return;
@@ -728,9 +791,10 @@ void GfxCalGrayColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
         unsigned char out[gfxColorMaxComps];
         double in[gfxColorMaxComps];
 
-        in[0] = clip01(X);
-        in[1] = clip01(Y);
-        in[2] = clip01(Z);
+        bradford_transform_to_d50(X, Y, Z, whiteX, whiteY, whiteZ);
+        in[0] = X;
+        in[1] = Y;
+        in[2] = Z;
         transform->doTransform(in, out, 1);
         rgb->r = byteToCol(out[0]);
         rgb->g = byteToCol(out[1]);
@@ -738,16 +802,14 @@ void GfxCalGrayColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
         return;
     }
 #endif
-    X *= whiteX;
-    Y *= whiteY;
-    Z *= whiteZ;
+    bradford_transform_to_d65(X, Y, Z, whiteX, whiteY, whiteZ);
     // convert XYZ to RGB, including gamut mapping and gamma correction
     r = xyzrgb[0][0] * X + xyzrgb[0][1] * Y + xyzrgb[0][2] * Z;
     g = xyzrgb[1][0] * X + xyzrgb[1][1] * Y + xyzrgb[1][2] * Z;
     b = xyzrgb[2][0] * X + xyzrgb[2][1] * Y + xyzrgb[2][2] * Z;
-    rgb->r = dblToCol(sqrt(clip01(r * kr)));
-    rgb->g = dblToCol(sqrt(clip01(g * kg)));
-    rgb->b = dblToCol(sqrt(clip01(b * kb)));
+    rgb->r = dblToCol(srgb_gamma_function(clip01(r)));
+    rgb->g = dblToCol(srgb_gamma_function(clip01(g)));
+    rgb->b = dblToCol(srgb_gamma_function(clip01(b)));
 }
 
 void GfxCalGrayColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
@@ -762,10 +824,10 @@ void GfxCalGrayColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
         double X, Y, Z;
 
         getXYZ(color, &X, &Y, &Z);
-        in[0] = clip01(X);
-        in[1] = clip01(Y);
-        in[2] = clip01(Z);
-
+        bradford_transform_to_d50(X, Y, Z, whiteX, whiteY, whiteZ);
+        in[0] = X;
+        in[1] = Y;
+        in[2] = Z;
         transform->doTransform(in, out, 1);
         cmyk->c = byteToCol(out[0]);
         cmyk->m = byteToCol(out[1]);
@@ -991,9 +1053,6 @@ GfxColorSpace *GfxCalRGBColorSpace::copy() const
     cs->gammaR = gammaR;
     cs->gammaG = gammaG;
     cs->gammaB = gammaB;
-    cs->kr = kr;
-    cs->kg = kg;
-    cs->kb = kb;
     for (i = 0; i < 9; ++i) {
         cs->mat[i] = mat[i];
     }
@@ -1042,10 +1101,6 @@ GfxColorSpace *GfxCalRGBColorSpace::parse(Array *arr, GfxState *state)
         }
     }
 
-    cs->kr = 1 / (xyzrgb[0][0] * cs->whiteX + xyzrgb[0][1] * cs->whiteY + xyzrgb[0][2] * cs->whiteZ);
-    cs->kg = 1 / (xyzrgb[1][0] * cs->whiteX + xyzrgb[1][1] * cs->whiteY + xyzrgb[1][2] * cs->whiteZ);
-    cs->kb = 1 / (xyzrgb[2][0] * cs->whiteX + xyzrgb[2][1] * cs->whiteY + xyzrgb[2][2] * cs->whiteZ);
-
 #ifdef USE_CMS
     cs->transform = (state != nullptr) ? state->getXYZ2DisplayTransform() : nullptr;
 #endif
@@ -1076,9 +1131,10 @@ void GfxCalRGBColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
         double X, Y, Z;
 
         getXYZ(color, &X, &Y, &Z);
-        in[0] = clip01(X);
-        in[1] = clip01(Y);
-        in[2] = clip01(Z);
+        bradford_transform_to_d50(X, Y, Z, whiteX, whiteY, whiteZ);
+        in[0] = X;
+        in[1] = Y;
+        in[2] = Z;
         transform->doTransform(in, out, 1);
         *gray = byteToCol(out[0]);
         return;
@@ -1099,23 +1155,26 @@ void GfxCalRGBColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
         unsigned char out[gfxColorMaxComps];
         double in[gfxColorMaxComps];
 
-        in[0] = clip01(X / whiteX);
-        in[1] = clip01(Y / whiteY);
-        in[2] = clip01(Z / whiteZ);
+        bradford_transform_to_d50(X, Y, Z, whiteX, whiteY, whiteZ);
+        in[0] = X;
+        in[1] = Y;
+        in[2] = Z;
         transform->doTransform(in, out, 1);
         rgb->r = byteToCol(out[0]);
         rgb->g = byteToCol(out[1]);
         rgb->b = byteToCol(out[2]);
+
         return;
     }
 #endif
+    bradford_transform_to_d65(X, Y, Z, whiteX, whiteY, whiteZ);
     // convert XYZ to RGB, including gamut mapping and gamma correction
     r = xyzrgb[0][0] * X + xyzrgb[0][1] * Y + xyzrgb[0][2] * Z;
     g = xyzrgb[1][0] * X + xyzrgb[1][1] * Y + xyzrgb[1][2] * Z;
     b = xyzrgb[2][0] * X + xyzrgb[2][1] * Y + xyzrgb[2][2] * Z;
-    rgb->r = dblToCol(sqrt(clip01(r)));
-    rgb->g = dblToCol(sqrt(clip01(g)));
-    rgb->b = dblToCol(sqrt(clip01(b)));
+    rgb->r = dblToCol(srgb_gamma_function(clip01(r)));
+    rgb->g = dblToCol(srgb_gamma_function(clip01(g)));
+    rgb->b = dblToCol(srgb_gamma_function(clip01(b)));
 }
 
 void GfxCalRGBColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
@@ -1130,9 +1189,10 @@ void GfxCalRGBColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
         double X, Y, Z;
 
         getXYZ(color, &X, &Y, &Z);
-        in[0] = clip01(X);
-        in[1] = clip01(Y);
-        in[2] = clip01(Z);
+        bradford_transform_to_d50(X, Y, Z, whiteX, whiteY, whiteZ);
+        in[0] = X;
+        in[1] = Y;
+        in[2] = Z;
         transform->doTransform(in, out, 1);
         cmyk->c = byteToCol(out[0]);
         cmyk->m = byteToCol(out[1]);
@@ -1338,9 +1398,6 @@ GfxColorSpace *GfxLabColorSpace::copy() const
     cs->aMax = aMax;
     cs->bMin = bMin;
     cs->bMax = bMax;
-    cs->kr = kr;
-    cs->kg = kg;
-    cs->kb = kb;
 #ifdef USE_CMS
     cs->transform = transform;
 #endif
@@ -1388,17 +1445,6 @@ GfxColorSpace *GfxLabColorSpace::parse(Array *arr, GfxState *state)
         return nullptr;
     }
 
-    const auto krDenominator = (xyzrgb[0][0] * cs->whiteX + xyzrgb[0][1] * cs->whiteY + xyzrgb[0][2] * cs->whiteZ);
-    const auto kgDenominator = (xyzrgb[1][0] * cs->whiteX + xyzrgb[1][1] * cs->whiteY + xyzrgb[1][2] * cs->whiteZ);
-    const auto kbDenominator = (xyzrgb[2][0] * cs->whiteX + xyzrgb[2][1] * cs->whiteY + xyzrgb[2][2] * cs->whiteZ);
-    if (unlikely(krDenominator == 0 || kgDenominator == 0 || kbDenominator == 0)) {
-        delete cs;
-        return nullptr;
-    }
-    cs->kr = 1 / krDenominator;
-    cs->kg = 1 / kgDenominator;
-    cs->kb = 1 / kbDenominator;
-
 #ifdef USE_CMS
     cs->transform = (state != nullptr) ? state->getXYZ2DisplayTransform() : nullptr;
 #endif
@@ -1415,6 +1461,7 @@ void GfxLabColorSpace::getGray(const GfxColor *color, GfxGray *gray) const
         double in[gfxColorMaxComps];
 
         getXYZ(color, &in[0], &in[1], &in[2]);
+        bradford_transform_to_d50(in[0], in[1], in[2], whiteX, whiteY, whiteZ);
         transform->doTransform(in, out, 1);
         *gray = byteToCol(out[0]);
         return;
@@ -1467,9 +1514,10 @@ void GfxLabColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
         unsigned char out[gfxColorMaxComps];
         double in[gfxColorMaxComps];
 
-        in[0] = clip01(X);
-        in[1] = clip01(Y);
-        in[2] = clip01(Z);
+        bradford_transform_to_d50(X, Y, Z, whiteX, whiteY, whiteZ);
+        in[0] = X;
+        in[1] = Y;
+        in[2] = Z;
         transform->doTransform(in, out, 1);
         rgb->r = byteToCol(out[0]);
         rgb->g = byteToCol(out[1]);
@@ -1480,9 +1528,10 @@ void GfxLabColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
         double in[gfxColorMaxComps];
         double c, m, y, k, c1, m1, y1, k1, r, g, b;
 
-        in[0] = clip01(X);
-        in[1] = clip01(Y);
-        in[2] = clip01(Z);
+        bradford_transform_to_d50(X, Y, Z, whiteX, whiteY, whiteZ);
+        in[0] = X;
+        in[1] = Y;
+        in[2] = Z;
         transform->doTransform(in, out, 1);
         c = byteToDbl(out[0]);
         m = byteToDbl(out[1]);
@@ -1499,13 +1548,14 @@ void GfxLabColorSpace::getRGB(const GfxColor *color, GfxRGB *rgb) const
         return;
     }
 #endif
+    bradford_transform_to_d65(X, Y, Z, whiteX, whiteY, whiteZ);
     // convert XYZ to RGB, including gamut mapping and gamma correction
     const double r = xyzrgb[0][0] * X + xyzrgb[0][1] * Y + xyzrgb[0][2] * Z;
     const double g = xyzrgb[1][0] * X + xyzrgb[1][1] * Y + xyzrgb[1][2] * Z;
     const double b = xyzrgb[2][0] * X + xyzrgb[2][1] * Y + xyzrgb[2][2] * Z;
-    rgb->r = dblToCol(sqrt(clip01(r * kr)));
-    rgb->g = dblToCol(sqrt(clip01(g * kg)));
-    rgb->b = dblToCol(sqrt(clip01(b * kb)));
+    rgb->r = dblToCol(srgb_gamma_function(clip01(r)));
+    rgb->g = dblToCol(srgb_gamma_function(clip01(g)));
+    rgb->b = dblToCol(srgb_gamma_function(clip01(b)));
 }
 
 void GfxLabColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
@@ -1519,9 +1569,7 @@ void GfxLabColorSpace::getCMYK(const GfxColor *color, GfxCMYK *cmyk) const
         unsigned char out[gfxColorMaxComps];
 
         getXYZ(color, &in[0], &in[1], &in[2]);
-        in[0] *= whiteX;
-        in[1] *= whiteY;
-        in[2] *= whiteZ;
+        bradford_transform_to_d50(in[0], in[1], in[2], whiteX, whiteY, whiteZ);
         transform->doTransform(in, out, 1);
         cmyk->c = byteToCol(out[0]);
         cmyk->m = byteToCol(out[1]);
