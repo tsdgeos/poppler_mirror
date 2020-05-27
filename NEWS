@@ -1,3 +1,20 @@
+Release 0.89.0:
+        core:
+         * Add support for ResetForm action. Issue #225
+         * Fix crash in PDFDoc::getSignatureFields when there's no Forms at all
+         * Fix exporting to PS of some files with CID fonts
+         * Use ICC profiles in PS output (if new enough lcms is used)
+         * Allow almost-singular tiling pattern matrices. Issue #894
+         * Fix memory leak when failing to load some fonts
+         * CairoOutputDev: Use stroke opacity when clipping to a stroke path
+         * CairoOutputDev: Fix tiling patterns when pattern cell is too far. Issue #190
+
+        glib:
+         * Add poppler_movie_get_aspect
+
+        cpp:
+         * Add the font infos to the text_box object
+
 Release 0.88.0:
         core:
          * Support Widget Annotation Buttons not linked to any Form
