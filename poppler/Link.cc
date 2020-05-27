@@ -401,10 +401,10 @@ LinkDest::LinkDest(const Array *a) {
   // unknown link kind
   } else {
     error(errSyntaxWarning, -1, "Unknown annotation destination type");
+    return;
   }
 
   ok = true;
-  return;
 }
 
 LinkDest::LinkDest(const LinkDest *dest) {
