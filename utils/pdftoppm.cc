@@ -72,6 +72,10 @@
 #include <deque>
 #endif // UTILS_USE_PTHREADS
 
+#ifdef USE_CMS
+#include <lcms2.h>
+#endif
+
 static int firstPage = 1;
 static int lastPage = 0;
 static bool printOnlyOdd = false;
@@ -93,6 +97,10 @@ static bool hideAnnotations = false;
 static bool useCropBox = false;
 static bool mono = false;
 static bool gray = false;
+#ifdef USE_CMS
+static GooString displayprofilename;
+static GfxLCMSProfilePtr displayprofile;
+#endif
 static char sep[2] = "-";
 static bool forceNum = false;
 static bool png = false;
@@ -168,6 +176,10 @@ static const ArgDesc argDesc[] = {
    "generate a monochrome PBM file"},
   {"-gray",   argFlag,     &gray,          0,
    "generate a grayscale PGM file"},
+#ifdef USE_CMS
+  {"-displayprofile",   argGooString,     &displayprofilename,          0,
+   "ICC color profile to use as the display profile"},
+#endif
   {"-sep",   argString,      sep, sizeof(sep),
     "single character separator between name and page number, default - "},
   {"-forcenum",   argFlag,      &forceNum, 0,
@@ -388,6 +400,9 @@ static void processPageJobs() {
     splashOut->setFontAntialias(fontAntialias);
     splashOut->setVectorAntialias(vectorAntialias);
     splashOut->setEnableFreeType(enableFreeType);
+#ifdef USE_CMS
+    splashOut->setDisplayProfile(displayprofile);
+#endif
     splashOut->startDoc(pageJob.doc);
     
     savePageSlice(pageJob.doc, splashOut, pageJob.pg, x, y, w, h, pageJob.pg_w, pageJob.pg_h, pageJob.ppmFile);
@@ -415,6 +430,9 @@ int main(int argc, char *argv[]) {
   int exitCode;
   int pg, pg_num_len;
   double pg_w, pg_h;
+#ifdef USE_CMS
+  cmsColorSpaceSignature displayprofilecolorspace;
+#endif
 
   Win32Console win32Console(&argc, &argv);
   exitCode = 99;
@@ -557,6 +575,40 @@ int main(int argc, char *argv[]) {
     paperColor[1] = 255;
     paperColor[2] = 255;
   }
+
+#ifdef USE_CMS
+  if (!displayprofilename.toStr().empty()) {
+    displayprofile = make_GfxLCMSProfilePtr(cmsOpenProfileFromFile(displayprofilename.c_str(),"r"));
+    if (!displayprofile) {
+      fprintf(stderr, "Could not open the ICC profile \"%s\".\n", displayprofilename.c_str());
+      goto err1;
+    }
+    if(!cmsIsIntentSupported(displayprofile.get(), INTENT_RELATIVE_COLORIMETRIC, LCMS_USED_AS_OUTPUT) &&
+       !cmsIsIntentSupported(displayprofile.get(), INTENT_ABSOLUTE_COLORIMETRIC, LCMS_USED_AS_OUTPUT) &&
+       !cmsIsIntentSupported(displayprofile.get(), INTENT_SATURATION, LCMS_USED_AS_OUTPUT) &&
+       !cmsIsIntentSupported(displayprofile.get(), INTENT_PERCEPTUAL, LCMS_USED_AS_OUTPUT)) {
+      fprintf(stderr, "ICC profile \"%s\" is not an output profile.\n", displayprofilename.c_str());
+      goto err1;
+    }
+    displayprofilecolorspace = cmsGetColorSpace(displayprofile.get());
+    if (jpegcmyk || overprint) {
+      if (displayprofilecolorspace != cmsSigCmykData) {
+        fprintf(stderr, "Warning: Supplied ICC profile \"%s\" is not a CMYK profile.\n",
+                displayprofilename.c_str());
+      }
+    } else if (mono || gray) {
+      if (displayprofilecolorspace != cmsSigGrayData) {
+        fprintf(stderr, "Warning: Supplied ICC profile \"%s\" is not a monochrome profile.\n",
+                displayprofilename.c_str());
+      }
+    } else {
+      if (displayprofilecolorspace != cmsSigRgbData) {
+        fprintf(stderr, "Warning: Supplied ICC profile \"%s\" is not a RGB profile.\n",
+                displayprofilename.c_str());
+      }
+    }
+  }
+#endif
   
 #ifndef UTILS_USE_PTHREADS
 
@@ -571,6 +623,9 @@ int main(int argc, char *argv[]) {
   splashOut->setFontAntialias(fontAntialias);
   splashOut->setVectorAntialias(vectorAntialias);
   splashOut->setEnableFreeType(enableFreeType);
+#ifdef USE_CMS
+  splashOut->setDisplayProfile(displayprofile);
+#endif
   splashOut->startDoc(doc);
   
 #endif // UTILS_USE_PTHREADS
