@@ -1,6 +1,6 @@
 project(poppler)
 
-cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5.0 FATAL_ERROR)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
@@ -36,7 +36,7 @@ if (ECM_FOUND)
 endif()
 
 set(POPPLER_MAJOR_VERSION "0")
-set(POPPLER_MINOR_VERSION "88")
+set(POPPLER_MINOR_VERSION "89")
 set(POPPLER_MICRO_VERSION "0")
 set(POPPLER_VERSION "${POPPLER_MAJOR_VERSION}.${POPPLER_MINOR_VERSION}.${POPPLER_MICRO_VERSION}")
 
@@ -454,7 +454,7 @@ if(ENABLE_LIBCURL)
     poppler/CurlCachedFile.cc
     poppler/CurlPDFDocBuilder.cc
   )
-  set(poppler_LIBS ${poppler_LIBS} ${CURL_LIBRARIES})
+  set(poppler_LIBS ${poppler_LIBS} CURL::libcurl)
 endif()
 if (ENABLE_NSS3)
   set(poppler_SRCS ${poppler_SRCS}
@@ -534,7 +534,7 @@ add_library(poppler STATIC ${poppler_SRCS})
 else()
 add_library(poppler ${poppler_SRCS})
 endif()
-set_target_properties(poppler PROPERTIES VERSION 99.0.0 SOVERSION 99)
+set_target_properties(poppler PROPERTIES VERSION 100.0.0 SOVERSION 100)
 if(MINGW AND BUILD_SHARED_LIBS)
     get_target_property(POPPLER_SOVERSION poppler SOVERSION)
     set_target_properties(poppler PROPERTIES SUFFIX "-${POPPLER_SOVERSION}${CMAKE_SHARED_LIBRARY_SUFFIX}")
