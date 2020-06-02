@@ -454,7 +454,7 @@ if(ENABLE_LIBCURL)
     poppler/CurlCachedFile.cc
     poppler/CurlPDFDocBuilder.cc
   )
-  set(poppler_LIBS ${poppler_LIBS} ${CURL_LIBRARIES})
+  set(poppler_LIBS ${poppler_LIBS} CURL::libcurl)
 endif()
 if (ENABLE_NSS3)
   set(poppler_SRCS ${poppler_SRCS}
