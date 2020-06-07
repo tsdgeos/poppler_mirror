@@ -205,7 +205,9 @@ bypass all security restrictions.
 Specify the user password for the PDF file.
 .TP
 .B \-overprint
-Enable overprinting.
+Enable overprint emulation during rasterization. For \-processcolorformat being CMYK8 and the language level
+being higher than 2, this option is set to true by default. Note: This option requires \-processcolorformat to
+be CMYK8.
 .TP
 .B \-q
 Don't print any messages or errors.

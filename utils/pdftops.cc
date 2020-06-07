@@ -172,7 +172,7 @@ static const ArgDesc argDesc[] = { { "-f", argInt, &firstPage, 0, "first page to
                                    { "-duplex", argFlag, &duplex, 0, "enable duplex printing" },
                                    { "-opw", argString, ownerPassword, sizeof(ownerPassword), "owner password (for encrypted files)" },
                                    { "-upw", argString, userPassword, sizeof(userPassword), "user password (for encrypted files)" },
-                                   { "-overprint", argFlag, &overprint, 0, "enable overprint" },
+                                   { "-overprint", argFlag, &overprint, 0, "enable overprint emulation during rasterization" },
                                    { "-q", argFlag, &quiet, 0, "don't print any messages or errors" },
                                    { "-v", argFlag, &printVersion, 0, "print copyright and version info" },
                                    { "-h", argFlag, &printHelp, 0, "print usage information" },

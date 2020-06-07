@@ -3140,6 +3140,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     char hexBuf[32 * 2 + 2]; // 32 values X 2 chars/value + line ending + null
     unsigned char digit;
     bool isOptimizedGray;
+    bool overprint;
 #endif
 
     if (!postInitDone) {
@@ -3191,7 +3192,10 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
         numComps = 3;
         paperColor[0] = paperColor[1] = paperColor[2] = 0xff;
     }
-    splashOut = new SplashOutputDev(processColorFormat, 1, false, paperColor, false);
+    // If we would not rasterize this page, we would emit the overprint code anyway for language level 2 and upwards.
+    // As such it is safe to assume for a CMYK printer that it would respect the overprint operands.
+    overprint = globalParams->getOverprintPreview() || (processColorFormat == splashModeCMYK8 && level >= psLevel2);
+    splashOut = new SplashOutputDev(processColorFormat, 1, false, paperColor, false, splashThinLineDefault, overprint);
     splashOut->setFontAntialias(rasterAntialias);
     splashOut->setVectorAntialias(rasterAntialias);
 #    ifdef USE_CMS
