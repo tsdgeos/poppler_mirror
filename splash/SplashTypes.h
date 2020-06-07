@@ -71,6 +71,8 @@ enum SplashColorMode
                        // CMYKSSSSCMYKSSSS...
 };
 
+#define splashModeUndefined ((SplashColorMode)-1)
+
 enum SplashThinLineMode
 {
     splashThinLineDefault, // if SA on: draw solid if requested line width, transformed into

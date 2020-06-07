@@ -50,6 +50,10 @@
 #include <unordered_map>
 #include <string>
 
+#ifdef HAVE_SPLASH
+#    include "splash/Splash.h"
+#endif
+
 class PDFDoc;
 class XRef;
 class Function;
@@ -292,7 +296,13 @@ public:
     void setRasterAntialias(bool a) { rasterAntialias = a; }
     void setForceRasterize(PSForceRasterize f) { forceRasterize = f; }
     void setRasterResolution(double r) { rasterResolution = r; }
-    void setRasterMono(bool b) { rasterMono = b; }
+    void setRasterMono(bool b)
+    {
+#ifdef HAVE_SPLASH
+        processColorFormat = splashModeMono8;
+#endif
+    }
+
     void setUncompressPreloadedImages(bool b) { uncompressPreloadedImages = b; }
 
     bool getEmbedType1() const { return embedType1; }
@@ -326,6 +336,10 @@ public:
     void setUseBinary(bool b) { useBinary = b; }
     void setEnableLZW(bool b) { enableLZW = b; }
     void setEnableFlate(bool b) { enableFlate = b; }
+
+#ifdef HAVE_SPLASH
+    void setProcessColorFormat(SplashColorMode format) { processColorFormat = format; }
+#endif
 
 private:
     void init(PSOutputFunc outputFuncA, void *outputStreamA, PSFileType fileTypeA, char *psTitleA, PDFDoc *doc, const std::vector<int> &pages, PSOutMode modeA, int imgLLXA, int imgLLYA, int imgURXA, int imgURYA, bool manualCtrlA,
@@ -476,9 +490,6 @@ private:
     bool rasterAntialias; // antialias on rasterize
     bool uncompressPreloadedImages;
     double rasterResolution; // PostScript rasterization resolution (dpi)
-    bool rasterMono; // true to do PostScript rasterization
-                     //   in monochrome (gray); false to do it
-                     //   in color (RGB/CMYK)
     bool embedType1; // embed Type 1 fonts?
     bool embedTrueType; // embed TrueType fonts?
     bool embedCIDPostScript; // embed CID PostScript fonts?
@@ -496,6 +507,10 @@ private:
     bool useBinary; // use binary instead of hex
     bool enableLZW; // enable LZW compression
     bool enableFlate; // enable Flate compression
+
+#ifdef HAVE_SPLASH
+    SplashColorMode processColorFormat;
+#endif
 
     std::unordered_set<std::string> iccEmitted; // contains ICCBased CSAs that have been emitted
 

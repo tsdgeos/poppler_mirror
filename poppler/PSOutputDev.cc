@@ -87,6 +87,10 @@
 #include "PSOutputDev.h"
 #include "PDFDoc.h"
 
+#ifdef USE_CMS
+#    include <lcms2.h>
+#endif
+
 // the MSVC math.h doesn't define this
 #ifndef M_PI
 #    define M_PI 3.14159265358979323846
@@ -1212,7 +1216,6 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA, PSFileType
     useBinary = false;
     enableLZW = true;
     enableFlate = true;
-    rasterMono = false;
     rasterResolution = 300;
     uncompressPreloadedImages = false;
     psCenter = true;
@@ -1255,6 +1258,10 @@ void PSOutputDev::init(PSOutputFunc outputFuncA, void *outputStreamA, PSFileType
     rotate0 = -1;
     clipLLX0 = clipLLY0 = 0;
     clipURX0 = clipURY0 = -1;
+
+#ifdef HAVE_SPLASH
+    processColorFormat = splashModeUndefined;
+#endif
 
     // initialize sequential page number
     seqPage = 1;
@@ -1375,6 +1382,63 @@ void PSOutputDev::postInit()
     numSaves = 0;
     numTilingPatterns = 0;
     nextFunc = 0;
+
+#ifdef HAVE_SPLASH
+    // set some default process color format if none is set
+    if (processColorFormat == splashModeUndefined) {
+        if (level == psLevel1) {
+            processColorFormat = splashModeMono8;
+        } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || globalParams->getOverprintPreview()) {
+            processColorFormat = splashModeCMYK8;
+        }
+#    ifdef USE_CMS
+        else if (getDisplayProfile()) {
+            auto processcolorspace = cmsGetColorSpace(getDisplayProfile().get());
+            if (processcolorspace == cmsSigCmykData) {
+                processColorFormat = splashModeCMYK8;
+            } else if (processcolorspace == cmsSigGrayData) {
+                processColorFormat = splashModeMono8;
+            } else {
+                processColorFormat = splashModeRGB8;
+            }
+        }
+#    endif
+        else {
+            processColorFormat = splashModeRGB8;
+        }
+    }
+
+    // check for consistency between the processColorFormat the LanguageLevel and other settings
+    if (level == psLevel1 && processColorFormat != splashModeMono8) {
+        error(errConfig, -1,
+              "Conflicting settings between LanguageLevel=psLevel1 and processColorFormat."
+              " Resetting processColorFormat to MONO8.");
+        processColorFormat = splashModeMono8;
+    } else if ((level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || globalParams->getOverprintPreview()) && processColorFormat != splashModeCMYK8) {
+        error(errConfig, -1,
+              "Conflicting settings between LanguageLevel and/or overprint simulation, and processColorFormat."
+              " Resetting processColorFormat to CMYK8.");
+        processColorFormat = splashModeCMYK8;
+    }
+#    ifdef USE_CMS
+    if (getDisplayProfile()) {
+        auto processcolorspace = cmsGetColorSpace(getDisplayProfile().get());
+        if (processColorFormat == splashModeCMYK8) {
+            if (processcolorspace != cmsSigCmykData) {
+                error(errConfig, -1, "Mismatch between processColorFormat=CMYK8 and ICC profile color format.");
+            }
+        } else if (processColorFormat == splashModeMono8) {
+            if (processcolorspace != cmsSigGrayData) {
+                error(errConfig, -1, "Mismatch between processColorFormat=MONO8 and ICC profile color format.");
+            }
+        } else if (processColorFormat == splashModeRGB8) {
+            if (processcolorspace != cmsSigRgbData) {
+                error(errConfig, -1, "Mismatch between processColorFormat=RGB8 and ICC profile color format.");
+            }
+        }
+    }
+#    endif
+#endif
 
     // initialize embedded font resource comment list
     embFontList = new GooString();
@@ -3075,7 +3139,7 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     int numComps, initialNumComps;
     char hexBuf[32 * 2 + 2]; // 32 values X 2 chars/value + line ending + null
     unsigned char digit;
-    bool isGray;
+    bool isOptimizedGray;
 #endif
 
     if (!postInitDone) {
@@ -3112,21 +3176,27 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
     delete state;
 
     // set up the SplashOutputDev
-    if (rasterMono || level == psLevel1) {
+    if (processColorFormat == splashModeMono8) {
         numComps = 1;
         paperColor[0] = 0xff;
-        splashOut = new SplashOutputDev(splashModeMono8, 1, false, paperColor, false);
-    } else if (level == psLevel1Sep || level == psLevel2Sep || level == psLevel3Sep || globalParams->getOverprintPreview()) {
+    } else if (processColorFormat == splashModeCMYK8) {
         numComps = 4;
         paperColor[0] = paperColor[1] = paperColor[2] = paperColor[3] = 0;
-        splashOut = new SplashOutputDev(splashModeCMYK8, 1, false, paperColor, false);
-    } else {
+    } else if (processColorFormat == splashModeRGB8) {
         numComps = 3;
         paperColor[0] = paperColor[1] = paperColor[2] = 0xff;
-        splashOut = new SplashOutputDev(splashModeRGB8, 1, false, paperColor, false);
+    } else {
+        error(errUnimplemented, -1, "Unsupported processColorMode. Falling back to RGB8.");
+        processColorFormat = splashModeRGB8;
+        numComps = 3;
+        paperColor[0] = paperColor[1] = paperColor[2] = 0xff;
     }
+    splashOut = new SplashOutputDev(processColorFormat, 1, false, paperColor, false);
     splashOut->setFontAntialias(rasterAntialias);
     splashOut->setVectorAntialias(rasterAntialias);
+#    ifdef USE_CMS
+    splashOut->setDisplayProfile(getDisplayProfile());
+#    endif
     splashOut->startDoc(doc);
 
     // break the page into stripes
@@ -3211,11 +3281,11 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
             p = bitmap->getDataPtr();
             // Check for an all gray image
             if (getOptimizeColorSpace()) {
-                isGray = true;
+                isOptimizedGray = true;
                 for (y = 0; y < h; ++y) {
                     for (x = 0; x < w; ++x) {
                         if (p[4 * x] != p[4 * x + 1] || p[4 * x] != p[4 * x + 2]) {
-                            isGray = false;
+                            isOptimizedGray = false;
                             y = h;
                             break;
                         }
@@ -3223,13 +3293,13 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
                     p += bitmap->getRowSize();
                 }
             } else {
-                isGray = false;
+                isOptimizedGray = false;
             }
-            writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1{5:s}{6:s}\n", w, h, w, -h, h, isGray ? "" : "Sep", useBinary ? "Bin" : "");
+            writePSFmt("{0:d} {1:d} 8 [{2:d} 0 0 {3:d} 0 {4:d}] pdfIm1{5:s}{6:s}\n", w, h, w, -h, h, isOptimizedGray ? "" : "Sep", useBinary ? "Bin" : "");
             p = bitmap->getDataPtr() + (h - 1) * bitmap->getRowSize();
             i = 0;
             col[0] = col[1] = col[2] = col[3] = 0;
-            if (isGray) {
+            if (isOptimizedGray) {
                 int g;
                 if ((psProcessBlack & processColors) == 0) {
                     // Check if the image uses black
@@ -3369,36 +3439,36 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
             str0 = new MemStream((char *)p, 0, w * h * numComps, Object(objNull));
             // Check for a color image that uses only gray
             if (!getOptimizeColorSpace()) {
-                isGray = false;
+                isOptimizedGray = false;
             } else if (numComps == 4) {
                 int compCyan;
-                isGray = true;
+                isOptimizedGray = true;
                 while ((compCyan = str0->getChar()) != EOF) {
                     if (str0->getChar() != compCyan || str0->getChar() != compCyan) {
-                        isGray = false;
+                        isOptimizedGray = false;
                         break;
                     }
                     str0->getChar();
                 }
             } else if (numComps == 3) {
                 int compRed;
-                isGray = true;
+                isOptimizedGray = true;
                 while ((compRed = str0->getChar()) != EOF) {
                     if (str0->getChar() != compRed || str0->getChar() != compRed) {
-                        isGray = false;
+                        isOptimizedGray = false;
                         break;
                     }
                 }
             } else {
-                isGray = false;
+                isOptimizedGray = false;
             }
             str0->reset();
 #    ifdef ENABLE_ZLIB
             if (useFlate) {
-                if (isGray && numComps == 4) {
+                if (isOptimizedGray && numComps == 4) {
                     str = new FlateEncoder(new CMYKGrayEncoder(str0));
                     numComps = 1;
-                } else if (isGray && numComps == 3) {
+                } else if (isOptimizedGray && numComps == 3) {
                     str = new FlateEncoder(new RGBGrayEncoder(str0));
                     numComps = 1;
                 } else {
@@ -3407,20 +3477,20 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
             } else
 #    endif
                     if (useLZW) {
-                if (isGray && numComps == 4) {
+                if (isOptimizedGray && numComps == 4) {
                     str = new LZWEncoder(new CMYKGrayEncoder(str0));
                     numComps = 1;
-                } else if (isGray && numComps == 3) {
+                } else if (isOptimizedGray && numComps == 3) {
                     str = new LZWEncoder(new RGBGrayEncoder(str0));
                     numComps = 1;
                 } else {
                     str = new LZWEncoder(str0);
                 }
             } else {
-                if (isGray && numComps == 4) {
+                if (isOptimizedGray && numComps == 4) {
                     str = new RunLengthEncoder(new CMYKGrayEncoder(str0));
                     numComps = 1;
-                } else if (isGray && numComps == 3) {
+                } else if (isOptimizedGray && numComps == 3) {
                     str = new RunLengthEncoder(new RGBGrayEncoder(str0));
                     numComps = 1;
                 } else {
@@ -3440,7 +3510,13 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/, i
             writePSFmt("  /ImageMatrix [{0:d} 0 0 {1:d} 0 {2:d}]\n", w, -h, h);
             writePS("  /BitsPerComponent 8\n");
             if (numComps == 1) {
-                writePS("  /Decode [1 0]\n");
+                // the optimized gray variants are implemented as a subtractive color space,
+                // such that the range is flipped for them
+                if (isOptimizedGray) {
+                    writePS("  /Decode [1 0]\n");
+                } else {
+                    writePS("  /Decode [0 1]\n");
+                }
             } else if (numComps == 3) {
                 writePS("  /Decode [0 1 0 1 0 1]\n");
             } else {

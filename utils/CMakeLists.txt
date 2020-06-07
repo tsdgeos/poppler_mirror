@@ -114,6 +114,9 @@ set(pdftops_SOURCES ${common_srcs}
 )
 add_executable(pdftops ${pdftops_SOURCES})
 target_link_libraries(pdftops ${common_libs})
+if(LCMS2_FOUND)
+  target_link_libraries(pdftops ${LCMS2_LIBRARIES})
+endif()
 install(TARGETS pdftops DESTINATION bin)
 install(FILES pdftops.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 

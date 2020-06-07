@@ -323,6 +323,7 @@ public:
 
 #ifdef USE_CMS
     void setDisplayProfile(const GfxLCMSProfilePtr &profile) { displayprofile = profile; }
+    GfxLCMSProfilePtr getDisplayProfile() const { return displayprofile; }
 
     PopplerCache<Ref, GfxICCBasedColorSpace> *getIccColorSpaceCache() { return &iccColorSpaceCache; }
 #endif
