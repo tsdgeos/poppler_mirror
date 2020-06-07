@@ -454,7 +454,11 @@ if(ENABLE_LIBCURL)
     poppler/CurlCachedFile.cc
     poppler/CurlPDFDocBuilder.cc
   )
-  set(poppler_LIBS ${poppler_LIBS} CURL::libcurl)
+  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+    set(poppler_LIBS ${poppler_LIBS} ${CURL_LIBRARIES})
+  else()
+    set(poppler_LIBS ${poppler_LIBS} CURL::libcurl)
+  endif()
 endif()
 if (ENABLE_NSS3)
   set(poppler_SRCS ${poppler_SRCS}
