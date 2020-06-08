@@ -426,6 +426,11 @@ POPPLER_PUBLIC
 PopplerFormField  *poppler_document_get_form_field         (PopplerDocument  *document,
 							    gint              id);
 
+POPPLER_PUBLIC
+void               poppler_document_reset_form             (PopplerDocument  *document,
+                                                            GList            *fields,
+                                                            gboolean          exclude_fields);
+
 /* Interface for getting the Index of a poppler_document */
 #define POPPLER_TYPE_INDEX_ITER                 (poppler_index_iter_get_type ())
 POPPLER_PUBLIC

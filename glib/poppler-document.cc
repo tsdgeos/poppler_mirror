@@ -2002,6 +2002,44 @@ poppler_document_get_metadata (PopplerDocument *document)
   return retval;
 }
 
+/**
+ * poppler_document_reset_form:
+ * @document: A #PopplerDocument
+ * @fields: list of fields to reset
+ * @exclude_fields: whether to reset all fields except those in @fields
+ *
+ * Resets the form fields specified by fields if exclude_fields is FALSE.
+ * Resets all others if exclude_fields is TRUE.
+ * All form fields are reset regardless of the exclude_fields flag
+ * if fields is empty.
+ *
+ * Since: 0.90
+ **/
+void
+poppler_document_reset_form (PopplerDocument *document,
+                             GList           *fields,
+                             gboolean         exclude_fields)
+{
+  std::vector<std::string>  list;
+  Catalog                  *catalog;
+  GList                    *iter;
+  Form                     *form;
+
+  g_return_if_fail (POPPLER_IS_DOCUMENT (document));
+
+  catalog = document->doc->getCatalog ();
+  if (catalog && catalog->isOk ()) {
+    form = catalog->getForm ();
+
+    if (form) {
+      for (iter = fields; iter != nullptr; iter = iter->next)
+        list.emplace_back (std::string ((char *) iter->data));
+
+      form->reset (list, exclude_fields);
+    }
+  }
+}
+
 static void
 poppler_document_get_property (GObject    *object,
 			       guint       prop_id,

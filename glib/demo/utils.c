@@ -475,6 +475,9 @@ pgd_action_view_set_action (GtkWidget     *action_view,
                 gtk_widget_show (swindow);
         }
                 break;
+	case POPPLER_ACTION_RESET_FORM:
+		pgd_table_add_property (GTK_GRID (table), "<b>Type:</b>", "ResetForm", &row);
+		break;
 	default:
 		g_assert_not_reached ();
 	}
