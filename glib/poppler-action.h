@@ -343,7 +343,7 @@ char   *poppler_named_dest_from_bytestring (const guint8 *data,
                                             gsize         length);
 
 POPPLER_PUBLIC
-guint8 *poppler_named_dest_to_bytestring   (const char   *named_dest,
+guint8 *poppler_named_dest_to_bytestring   (const char   *name,
                                             gsize        *length);
 
 G_END_DECLS

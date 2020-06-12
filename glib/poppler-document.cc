@@ -918,9 +918,9 @@ _poppler_dest_destroy_value (gpointer value)
  * Creates named destinations balanced binary tree in @document
  *
  * The tree key is strings in the form returned by
- * poppler_named_dest_bytestring() which constains a destination name.
- * The tree value is the #PopplerDest* which contains a named destination.
- * The return value must be freed with #g_tree_destroy.
+ * poppler_named_dest_to_bytestring() which constains a destination name.
+ * The tree value is the #PopplerDest which contains a named destination.
+ * The return value must be freed with g_tree_destroy().
  *
  * Returns: (transfer full) (nullable): the #GTree, or %NULL
  * Since: 0.78
