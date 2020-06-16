@@ -9,7 +9,7 @@ before_script:
   - echo 'deb-src http://deb.debian.org/debian unstable main' >> /etc/apt/sources.list
   - apt-get update
   - apt-get build-dep --yes --no-install-recommends poppler
-  - apt-get install --yes --no-install-recommends ninja-build libcurl4-openssl-dev git ca-certificates locales libc++-dev libc++abi-dev clang libgtk-3-dev clang-tidy
+  - apt-get install --yes --no-install-recommends ninja-build libcurl4-openssl-dev git ca-certificates locales libc++-dev libc++abi-dev clang libgtk-3-dev clang-tidy wget p7zip-full
   - echo 'en_US.UTF-8 UTF-8' >> /etc/locale.gen
   - locale-gen
 
@@ -38,9 +38,13 @@ clang_format:
 build:
   stage: build
   script:
+    - wget http://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_600/qt.qt6.600.gcc_64/6.0.0-0-202006250811qtbase-Linux-RHEL_7_6-GCC-Linux-RHEL_7_6-X86_64.7z
+    - 7z x 6.0.0-0-202006250811qtbase-Linux-RHEL_7_6-GCC-Linux-RHEL_7_6-X86_64.7z
+    - wget http://download.qt.io/online/qtsdkrepository/linux_x64/desktop/qt6_600/qt.qt6.600.gcc_64/6.0.0-0-202006250811icu-linux-Rhel7.2-x64.7z
+    - 7z x 6.0.0-0-202006250811icu-linux-Rhel7.2-x64.7z
     - git clone --branch ${CI_COMMIT_REF_NAME} --depth 1 ${TEST_DATA_URL} test-data || git clone --depth 1 ${UPSTREAM_TEST_DATA_URL} test-data
     - mkdir -p build && cd build
-    - cmake -G Ninja -DTESTDATADIR=$PWD/../test-data ..
+    - cmake -G Ninja -DTESTDATADIR=$PWD/../test-data .. -DCMAKE_PREFIX_PATH=$PWD/../6.0.0/gcc_64/lib/cmake
     - ninja
     - ctest --output-on-failure
 
