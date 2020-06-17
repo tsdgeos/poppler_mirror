@@ -677,7 +677,7 @@ void NameTree::init(XRef *xrefA, Object *tree) {
   }
 }
 
-void NameTree::parse(Object *tree, std::set<int> &seen) {
+void NameTree::parse(const Object *tree, std::set<int> &seen) {
   if (!tree->isDict())
     return;
 
@@ -693,19 +693,27 @@ void NameTree::parse(Object *tree, std::set<int> &seen) {
   }
 
   // root or intermediate node
-  Object kids = tree->dictLookup("Kids");
+  Ref ref;
+  const Object kids = tree->getDict()->lookup("Kids", &ref);
+  if (ref != Ref::INVALID()) {
+    const int numObj = ref.num;
+    if (seen.find(numObj) != seen.end()) {
+      error(errSyntaxError, -1, "loop in NameTree (numObj: {0:d})", numObj);
+      return;
+    }
+    seen.insert(numObj);
+  }
   if (kids.isArray()) {
     for (int i = 0; i < kids.arrayGetLength(); ++i) {
-      const Object &kidRef = kids.arrayGetNF(i);
-      if (kidRef.isRef()) {
-	const int numObj = kidRef.getRef().num;
+      const Object kid = kids.getArray()->get(i, &ref);
+      if (ref != Ref::INVALID()) {
+	const int numObj = ref.num;
 	if (seen.find(numObj) != seen.end()) {
 	  error(errSyntaxError, -1, "loop in NameTree (numObj: {0:d})", numObj);
 	  continue;
 	}
 	seen.insert(numObj);
       }
-      Object kid = kids.arrayGet(i);
       if (kid.isDict())
 	parse(&kid, seen);
     }
