@@ -86,6 +86,7 @@
 #include "PDFDoc.h"
 #include "Hints.h"
 #include "UTF.h"
+#include "JSInfo.h"
 
 //------------------------------------------------------------------------
 
@@ -2151,4 +2152,10 @@ Page *PDFDoc::getPage(int page)
   }
 
   return catalog->getPage(page);
+}
+
+bool PDFDoc::hasJavascript() {
+  JSInfo jsInfo(this);
+  jsInfo.scanJS (getNumPages(), true);
+  return jsInfo.containsJS();
 }

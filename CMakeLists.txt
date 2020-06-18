@@ -365,6 +365,7 @@ set(poppler_SRCS
   poppler/Hints.cc
   poppler/JArithmeticDecoder.cc
   poppler/JBIG2Stream.cc
+  poppler/JSInfo.cc
   poppler/Lexer.cc
   poppler/Link.cc
   poppler/Linearization.cc
@@ -574,6 +575,7 @@ if(ENABLE_UNSTABLE_API_ABI_HEADERS)
     poppler/Hints.h
     poppler/JArithmeticDecoder.h
     poppler/JBIG2Stream.h
+    poppler/JSInfo.h
     poppler/Lexer.h
     poppler/Link.h
     poppler/Linearization.h

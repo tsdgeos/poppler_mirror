@@ -430,6 +430,9 @@ POPPLER_PUBLIC
 void               poppler_document_reset_form             (PopplerDocument  *document,
                                                             GList            *fields,
                                                             gboolean          exclude_fields);
+/* Javascript */
+POPPLER_PUBLIC
+gboolean           poppler_document_has_javascript         (PopplerDocument  *document);
 
 /* Interface for getting the Index of a poppler_document */
 #define POPPLER_TYPE_INDEX_ITER                 (poppler_index_iter_get_type ())

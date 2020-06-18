@@ -2040,6 +2040,22 @@ poppler_document_reset_form (PopplerDocument *document,
   }
 }
 
+/**
+ * poppler_document_has_javascript:
+ * @document: A #PopplerDocument
+ *
+ * Returns whether @document has any javascript in it.
+ *
+ * Since: 0.90
+ **/
+gboolean
+poppler_document_has_javascript (PopplerDocument *document)
+{
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), FALSE);
+
+  return document->doc->hasJavascript();
+}
+
 static void
 poppler_document_get_property (GObject    *object,
 			       guint       prop_id,

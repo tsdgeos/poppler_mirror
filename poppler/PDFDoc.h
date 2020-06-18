@@ -349,6 +349,8 @@ public:
                                      Goffset uxrefOffset, OutStream* outStr, XRef *xRef);
   static void writeXRefStreamTrailer (Object &&trailerDict, XRef *uxref, Ref *uxrefStreamRef,
                                       Goffset uxrefOffset, OutStream* outStr, XRef *xRef);
+  // scans the PDF and returns whether it contains any javascript
+  bool hasJavascript();
 
 private:
   // insert referenced objects in XRef

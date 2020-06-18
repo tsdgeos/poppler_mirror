@@ -87,6 +87,7 @@ void JSInfo::scanLinkAction(LinkAction *link, const char *action) {
 void JSInfo::scanJS(int nPages) {
   print = false;
   file = nullptr;
+  onlyFirstJS = false;
   scan(nPages);
 }
 
@@ -94,6 +95,14 @@ void JSInfo::scanJS(int nPages, FILE *fout, const UnicodeMap *uMap) {
   print = true;
   file = fout;
   uniMap = uMap;
+  onlyFirstJS = false;
+  scan(nPages);
+}
+
+void JSInfo::scanJS(int nPages, bool stopOnFirstJS) {
+  print = false;
+  file = nullptr;
+  onlyFirstJS = stopOnFirstJS;
   scan(nPages);
 }
 
@@ -108,6 +117,9 @@ void JSInfo::scan(int nPages) {
   int numNames = doc->getCatalog()->numJS();
   if (numNames > 0) {
     hasJS = true;
+    if (onlyFirstJS) {
+      return;
+    }
     if (print) {
       for (int i = 0; i < numNames; i++) {
 	fprintf(file, "Name Dictionary \"%s\":\n", doc->getCatalog()->getJSName(i)->c_str());
@@ -131,6 +143,9 @@ void JSInfo::scan(int nPages) {
   scanLinkAction(doc->getCatalog()->getAdditionalAction(Catalog::actionPrintDocumentFinish).get(),
                  "After Print Document");
 
+  if (onlyFirstJS && hasJS) {
+    return;
+  }
   // form field actions
   if (doc->getCatalog()->getFormType() == Catalog::AcroForm) {
     Form *form = doc->getCatalog()->getForm();
@@ -148,6 +163,9 @@ void JSInfo::scan(int nPages) {
                        "Validate Field");
 	scanLinkAction(widget->getAdditionalAction(Annot::actionCalculateField).get(),
                        "Calculate Field");
+        if (onlyFirstJS && hasJS) {
+          return;
+        }
       }
     }
   }
@@ -171,12 +189,18 @@ void JSInfo::scan(int nPages) {
     scanLinkAction(page->getAdditionalAction(Page::actionOpenPage).get(), "Page Open");
     scanLinkAction(page->getAdditionalAction(Page::actionClosePage).get(), "Page Close");
 
+    if (onlyFirstJS && hasJS) {
+          return;
+    }
     // annotation actions (links, screen, widget)
     annots = page->getAnnots();
     for (int i = 0; i < annots->getNumAnnots(); ++i) {
       if (annots->getAnnot(i)->getType() == Annot::typeLink) {
 	AnnotLink *annot = static_cast<AnnotLink *>(annots->getAnnot(i));
 	scanLinkAction(annot->getAction(), "Link Annotation Activated");
+	if (onlyFirstJS && hasJS) {
+	  return;
+	}
       } else if (annots->getAnnot(i)->getType() == Annot::typeScreen) {
 	AnnotScreen *annot = static_cast<AnnotScreen *>(annots->getAnnot(i));
 	scanLinkAction(annot->getAction(),
@@ -202,6 +226,9 @@ void JSInfo::scan(int nPages) {
 	scanLinkAction(annot->getAdditionalAction(Annot::actionPageInvisible).get(),
                        "Screen Annotation Page Invisible");
 
+	if (onlyFirstJS && hasJS) {
+	  return;
+	}
       } else if (annots->getAnnot(i)->getType() == Annot::typeWidget) {
 	AnnotWidget *annot = static_cast<AnnotWidget *>(annots->getAnnot(i));
 	scanLinkAction(annot->getAction(),
@@ -226,6 +253,9 @@ void JSInfo::scan(int nPages) {
                        "Widget Annotation Page Visible");
 	scanLinkAction(annot->getAdditionalAction(Annot::actionPageInvisible).get(),
                        "Widget Annotation Page Invisible");
+	if (onlyFirstJS && hasJS) {
+	  return;
+	}
       }
     }
   }

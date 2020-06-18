@@ -41,6 +41,9 @@ public:
   // scan and print JS in the PDF
   void scanJS(int nPages, FILE *fout, const UnicodeMap *uMap);
 
+  // scan but exit after finding first JS in the PDF
+  void scanJS(int nPages, bool stopOnFirstJS);
+
   // return true if PDF contains JavaScript
   bool containsJS();
 
@@ -52,6 +55,7 @@ private:
   bool print;
   FILE *file;
   const UnicodeMap *uniMap;
+  bool onlyFirstJS; /* stop scanning after finding first JS */
 
   void scan(int nPages);
   void scanLinkAction(LinkAction *link, const char *action);
