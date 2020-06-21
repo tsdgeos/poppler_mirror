@@ -87,6 +87,12 @@ enum PSOutCustomCodeLocation {
   psOutCustomPageSetup
 };
 
+enum PSForceRasterize {
+  psRasterizeWhenNeeded,	// default
+  psAlwaysRasterize,		// always rasterize, useful for testing
+  psNeverRasterize		// never rasterize, may produce incorrect output
+};
+
 typedef void (*PSOutputFunc)(void *stream, const char *data, int len);
 
 typedef GooString *(*PSOutCustomCodeCbk)(PSOutputDev *psOut,
@@ -106,7 +112,7 @@ public:
 	      bool duplexA = true,
 	      int imgLLXA = 0, int imgLLYA = 0,
 	      int imgURXA = 0, int imgURYA = 0,
-	      bool forceRasterizeA = false,
+	      PSForceRasterize forceRasterizeA = psRasterizeWhenNeeded,
 	      bool manualCtrlA = false,
 	      PSOutCustomCodeCbk customCodeCbkA = nullptr,
 	      void *customCodeCbkDataA = nullptr);
@@ -122,7 +128,7 @@ public:
 	      bool duplexA = true,
 	      int imgLLXA = 0, int imgLLYA = 0,
 	      int imgURXA = 0, int imgURYA = 0,
-	      bool forceRasterizeA = false,
+	      PSForceRasterize forceRasterizeA = psRasterizeWhenNeeded,
 	      bool manualCtrlA = false,
 	      PSOutCustomCodeCbk customCodeCbkA = nullptr,
 	      void *customCodeCbkDataA = nullptr);
@@ -315,6 +321,7 @@ public:
 
   void setPSCenter(bool center) { psCenter = center; }
   void setRasterAntialias(bool a) { rasterAntialias = a; }
+  void setForceRasterize(PSForceRasterize f) { forceRasterize = f; }
   void setRasterResolution(double r) { rasterResolution = r; }
   void setRasterMono(bool b) { rasterMono = b; }
   void setUncompressPreloadedImages(bool b) { uncompressPreloadedImages = b; }
@@ -530,7 +537,7 @@ private:
   bool t3FillColorOnly;	// operators should only use the fill color
   bool t3Cacheable;		// cleared if char is not cacheable
   bool t3NeedsRestore;		// set if a 'q' operator was issued
-  bool forceRasterize;		// forces the page to be rasterized into a image before printing
+  PSForceRasterize forceRasterize; // controls the rasterization of pages into images
   bool displayText;		// displayText
   bool psCenter;		// center pages on the paper
   bool rasterAntialias;	// antialias on rasterize

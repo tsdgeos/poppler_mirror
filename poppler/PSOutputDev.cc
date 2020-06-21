@@ -1088,7 +1088,7 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA,
 			 int paperWidthA, int paperHeightA,
                          bool noCropA, bool duplexA,
 			 int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
-			 bool forceRasterizeA,
+			 PSForceRasterize forceRasterizeA,
 			 bool manualCtrlA,
 			 PSOutCustomCodeCbk customCodeCbkA,
 			 void *customCodeCbkDataA) {
@@ -1158,7 +1158,7 @@ PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
 			 int paperWidthA, int paperHeightA,
                          bool noCropA, bool duplexA,
 			 int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
-			 bool forceRasterizeA,
+			 PSForceRasterize forceRasterizeA,
 			 bool manualCtrlA,
 			 PSOutCustomCodeCbk customCodeCbkA,
 			 void *customCodeCbkDataA) {
@@ -3228,8 +3228,10 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   if (!postInitDone) {
     postInit();
   }
-  if (forceRasterize) {
+  if (forceRasterize == psAlwaysRasterize) {
     rasterize = true;
+  } else if (forceRasterize == psNeverRasterize) {
+    rasterize = false;
   } else {
     scan = new PreScanOutputDev(doc);
     page->displaySlice(scan, 72, 72, rotateA, useMediaBox, crop,

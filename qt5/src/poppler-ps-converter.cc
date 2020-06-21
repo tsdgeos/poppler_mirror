@@ -235,7 +235,7 @@ bool PSConverter::convert()
 	                                     d->marginBottom,
 	                                     d->paperWidth - d->marginRight,
 	                                     d->paperHeight - d->marginTop,
-	                                     (d->opts & ForceRasterization));
+	                                     (d->opts & ForceRasterization) ? psAlwaysRasterize : psRasterizeWhenNeeded);
 	
 	if (d->opts & StrictMargins)
 	{

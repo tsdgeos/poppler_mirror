@@ -1144,8 +1144,11 @@ poppler_page_render_to_ps (PopplerPage   *page,
                                     ps_file->document->doc,
                                     nullptr, pages,
                                     psModePS, (int)ps_file->paper_width,
-                                    (int)ps_file->paper_height, ps_file->duplex,
-                                    false, 0, 0, 0, false, false);
+                                    (int)ps_file->paper_height,
+                                    false, ps_file->duplex,
+                                    0, 0, 0, 0,
+                                    psRasterizeWhenNeeded, false,
+                                    nullptr, nullptr);
   }
 
 

@@ -101,6 +101,7 @@ static bool fontPassthrough = false;
 static bool optimizeColorSpace = false;
 static bool passLevel1CustomColor = false;
 static char rasterAntialiasStr[16] = "";
+static char forceRasterizeStr[16] = "";
 static bool preload = false;
 static char paperSize[15] = "";
 static int paperWidth = -1;
@@ -160,6 +161,8 @@ static const ArgDesc argDesc[] = {
    "don't substitute missing fonts"},
   {"-aaRaster",   argString,   rasterAntialiasStr, sizeof(rasterAntialiasStr),
    "enable anti-aliasing on rasterization: yes, no"},
+  {"-rasterize",  argString,   forceRasterizeStr, sizeof(forceRasterizeStr),
+   "control rasterization: always, never, whenneeded"},
   {"-optimizecolorspace",  argFlag,        &optimizeColorSpace,0,
    "convert gray RGB images to gray color space"},
   {"-passlevel1customcolor", argFlag,      &passLevel1CustomColor, 0,
@@ -395,6 +398,20 @@ int main(int argc, char *argv[]) {
     if (!GlobalParams::parseYesNo2(rasterAntialiasStr, &rasterAntialias)) {
       fprintf(stderr, "Bad '-aaRaster' value on command line\n");
     }
+  }
+
+  if (forceRasterizeStr[0]) {
+    PSForceRasterize forceRasterize = psRasterizeWhenNeeded;
+    if (strcmp(forceRasterizeStr, "whenneeded") == 0) {
+      forceRasterize = psRasterizeWhenNeeded;
+    } else if (strcmp(forceRasterizeStr, "always") == 0) {
+      forceRasterize = psAlwaysRasterize;
+    } else if (strcmp(forceRasterizeStr, "never") == 0) {
+      forceRasterize = psNeverRasterize;
+    } else {
+      fprintf(stderr, "Bad '-rasterize' value on command line\n");
+    }
+    psOut->setForceRasterize(forceRasterize);
   }
 
   if (splashResolution > 0) {
