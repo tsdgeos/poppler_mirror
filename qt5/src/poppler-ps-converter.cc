@@ -6,6 +6,7 @@
  * Copyright (C) 2012 Fabio D'Urso <fabiodurso@hotmail.it>
  * Copyright (C) 2013 Thomas Freitag <Thomas.Freitag@alfa.de>
  * Copyright (C) 2014 Adrian Johnson <ajohnson@redneon.com>
+ * Copyright (C) 2020 William Bader <williambader@hotmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
