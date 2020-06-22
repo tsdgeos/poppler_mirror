@@ -1314,6 +1314,8 @@ delete it;
 	
 	   The caller gets the ownership of the returned object.
 
+	   This function can return nullptr if for some reason the page can't be properly parsed.
+
 	   \param index the page number index
 	*/
 	Page *page(int index) const;
