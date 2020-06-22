@@ -750,7 +750,8 @@ namespace Poppler {
 	enum SignatureType {
 	    AdbePkcs7sha1,
 	    AdbePkcs7detached,
-	    EtsiCAdESdetached
+	    EtsiCAdESdetached,
+	    UnknownSignatureType ///< \since 0.90
 	};
 
 	/**
