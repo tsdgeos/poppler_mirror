@@ -37,6 +37,7 @@ G_BEGIN_DECLS
  * @POPPLER_ACTION_RENDITION: play multimedia content. Since 0.14
  * @POPPLER_ACTION_OCG_STATE: state of layer. Since 0.14
  * @POPPLER_ACTION_JAVASCRIPT: Javascript. Since 0.18
+ * @POPPLER_ACTION_RESET_FORM: resets form. Since 0.90
  *
  * Action types
  */
@@ -52,7 +53,8 @@ typedef enum
 	POPPLER_ACTION_MOVIE,		/* movie action */
 	POPPLER_ACTION_RENDITION,       /* rendition action */
 	POPPLER_ACTION_OCG_STATE,       /* Set-OCG-State action */
-	POPPLER_ACTION_JAVASCRIPT	/* Javascript action */
+	POPPLER_ACTION_JAVASCRIPT,	/* Javascript action */
+	POPPLER_ACTION_RESET_FORM	/* ResetForm action */
 } PopplerActionType;
 
 /**
@@ -148,6 +150,7 @@ typedef struct _PopplerActionMovie      PopplerActionMovie;
 typedef struct _PopplerActionRendition  PopplerActionRendition;
 typedef struct _PopplerActionOCGState   PopplerActionOCGState;
 typedef struct _PopplerActionJavascript PopplerActionJavascript;
+typedef struct _PopplerActionResetForm  PopplerActionResetForm;
 
 /**
  * PopplerDest:
@@ -284,6 +287,15 @@ struct _PopplerActionJavascript
 	gchar		  *script;
 };
 
+struct _PopplerActionResetForm
+{
+	PopplerActionType  type;
+	gchar             *title;
+
+	GList             *fields;
+	gboolean           exclude;
+};
+
 /**
  * PopplerAction:
  *
@@ -302,6 +314,7 @@ union _PopplerAction
 	PopplerActionRendition rendition;
 	PopplerActionOCGState ocg_state;
 	PopplerActionJavascript javascript;
+	PopplerActionResetForm reset_form;
 };
 
 #define POPPLER_TYPE_ACTION             (poppler_action_get_type ())
@@ -330,7 +343,7 @@ char   *poppler_named_dest_from_bytestring (const guint8 *data,
                                             gsize         length);
 
 POPPLER_PUBLIC
-guint8 *poppler_named_dest_to_bytestring   (const char   *named_dest,
+guint8 *poppler_named_dest_to_bytestring   (const char   *name,
                                             gsize        *length);
 
 G_END_DECLS

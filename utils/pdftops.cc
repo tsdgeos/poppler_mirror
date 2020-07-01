@@ -19,7 +19,7 @@
 // Copyright (C) 2007-2008, 2010, 2015, 2017, 2018 Albert Astals Cid <aacid@kde.org>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Sanjoy Mahajan <sanjoy@mit.edu>
-// Copyright (C) 2009, 2011, 2012, 2014-2016 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2012, 2014-2016, 2020 William Bader <williambader@hotmail.com>
 // Copyright (C) 2010 Hib Eris <hib@hiberis.nl>
 // Copyright (C) 2012 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2013 Suzuki Toshiya <mpsuzuki@hiroshima-u.ac.jp>
@@ -101,6 +101,7 @@ static bool fontPassthrough = false;
 static bool optimizeColorSpace = false;
 static bool passLevel1CustomColor = false;
 static char rasterAntialiasStr[16] = "";
+static char forceRasterizeStr[16] = "";
 static bool preload = false;
 static char paperSize[15] = "";
 static int paperWidth = -1;
@@ -160,6 +161,8 @@ static const ArgDesc argDesc[] = {
    "don't substitute missing fonts"},
   {"-aaRaster",   argString,   rasterAntialiasStr, sizeof(rasterAntialiasStr),
    "enable anti-aliasing on rasterization: yes, no"},
+  {"-rasterize",  argString,   forceRasterizeStr, sizeof(forceRasterizeStr),
+   "control rasterization: always, never, whenneeded"},
   {"-optimizecolorspace",  argFlag,        &optimizeColorSpace,0,
    "convert gray RGB images to gray color space"},
   {"-passlevel1customcolor", argFlag,      &passLevel1CustomColor, 0,
@@ -395,6 +398,20 @@ int main(int argc, char *argv[]) {
     if (!GlobalParams::parseYesNo2(rasterAntialiasStr, &rasterAntialias)) {
       fprintf(stderr, "Bad '-aaRaster' value on command line\n");
     }
+  }
+
+  if (forceRasterizeStr[0]) {
+    PSForceRasterize forceRasterize = psRasterizeWhenNeeded;
+    if (strcmp(forceRasterizeStr, "whenneeded") == 0) {
+      forceRasterize = psRasterizeWhenNeeded;
+    } else if (strcmp(forceRasterizeStr, "always") == 0) {
+      forceRasterize = psAlwaysRasterize;
+    } else if (strcmp(forceRasterizeStr, "never") == 0) {
+      forceRasterize = psNeverRasterize;
+    } else {
+      fprintf(stderr, "Bad '-rasterize' value on command line\n");
+    }
+    psOut->setForceRasterize(forceRasterize);
   }
 
   if (splashResolution > 0) {

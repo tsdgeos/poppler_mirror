@@ -918,9 +918,9 @@ _poppler_dest_destroy_value (gpointer value)
  * Creates named destinations balanced binary tree in @document
  *
  * The tree key is strings in the form returned by
- * poppler_named_dest_bytestring() which constains a destination name.
- * The tree value is the #PopplerDest* which contains a named destination.
- * The return value must be freed with #g_tree_destroy.
+ * poppler_named_dest_to_bytestring() which constains a destination name.
+ * The tree value is the #PopplerDest which contains a named destination.
+ * The return value must be freed with g_tree_destroy().
  *
  * Returns: (transfer full) (nullable): the #GTree, or %NULL
  * Since: 0.78
@@ -2000,6 +2000,60 @@ poppler_document_get_metadata (PopplerDocument *document)
   }
 
   return retval;
+}
+
+/**
+ * poppler_document_reset_form:
+ * @document: A #PopplerDocument
+ * @fields: list of fields to reset
+ * @exclude_fields: whether to reset all fields except those in @fields
+ *
+ * Resets the form fields specified by fields if exclude_fields is FALSE.
+ * Resets all others if exclude_fields is TRUE.
+ * All form fields are reset regardless of the exclude_fields flag
+ * if fields is empty.
+ *
+ * Since: 0.90
+ **/
+void
+poppler_document_reset_form (PopplerDocument *document,
+                             GList           *fields,
+                             gboolean         exclude_fields)
+{
+  std::vector<std::string>  list;
+  Catalog                  *catalog;
+  GList                    *iter;
+  Form                     *form;
+
+  g_return_if_fail (POPPLER_IS_DOCUMENT (document));
+
+  catalog = document->doc->getCatalog ();
+  if (catalog && catalog->isOk ()) {
+    form = catalog->getForm ();
+
+    if (form) {
+      for (iter = fields; iter != nullptr; iter = iter->next)
+        list.emplace_back (std::string ((char *) iter->data));
+
+      form->reset (list, exclude_fields);
+    }
+  }
+}
+
+/**
+ * poppler_document_has_javascript:
+ * @document: A #PopplerDocument
+ *
+ * Returns whether @document has any javascript in it.
+ *
+ * Since: 0.90
+ **/
+gboolean
+poppler_document_has_javascript (PopplerDocument *document)
+{
+  g_return_val_if_fail (POPPLER_IS_DOCUMENT (document), FALSE);
+
+  return document->doc->hasJavascript();
 }
 
 static void

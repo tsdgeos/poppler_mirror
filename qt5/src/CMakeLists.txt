@@ -52,6 +52,9 @@ endif()
 if (ENABLE_NSS3)
     target_include_directories(poppler-qt5 SYSTEM PRIVATE ${NSS3_INCLUDE_DIRS})
 endif()
+if(USE_CMS)
+    target_link_libraries(poppler-qt5 poppler ${LCMS2_LIBRARIES})
+endif()
 install(TARGETS poppler-qt5 RUNTIME DESTINATION bin LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install(FILES

@@ -20,6 +20,8 @@
 #include <StructElement.h>
 #endif
 
+#define SUPPORTED_ROTATION(r) (r == 90 || r == 180 || r == 270)
+
 struct _PopplerDocument
 {
   /*< private >*/
@@ -116,6 +118,17 @@ GList         *_poppler_document_get_layer_rbgroup (PopplerDocument *document,
 PopplerPage   *_poppler_page_new   (PopplerDocument *document,
 				    Page            *page,
 				    int              index);
+void _unrotate_rect_for_annot_and_page (Page *page,
+					Annot *annot,
+					double *x1,
+					double *y1,
+					double *x2,
+					double *y2);
+AnnotQuadrilaterals *_page_new_quads_unrotated (Page                *page,
+						AnnotQuadrilaterals *quads);
+AnnotQuadrilaterals *new_quads_from_offset_cropbox (const PDFRectangle  *crop_box,
+						    AnnotQuadrilaterals *quads,
+						    gboolean             add);
 PopplerAction *_poppler_action_new (PopplerDocument *document,
 				    const LinkAction      *link,
 				    const gchar     *title);

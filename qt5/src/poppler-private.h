@@ -17,6 +17,7 @@
  * Copyright (C) 2019 João Netto <joaonetto901@gmail.com>
  * Copyright (C) 2019 Jan Grulich <jgrulich@redhat.com>
  * Copyright (C) 2019 Alexander Volkov <a.volkov@rusbitech.ru>
+ * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  * Inspired on code by
  * Copyright (C) 2004 by Albert Astals Cid <tsdgeos@terra.es>
  * Copyright (C) 2004 by Enrico Ros <eros.kde@email.it>
@@ -178,6 +179,10 @@ namespace Poppler {
 	QPointer<OptContentModel> m_optContentModel;
 	QColor paperColor;
 	int m_hints;
+#ifdef USE_CMS
+        GfxLCMSProfilePtr m_sRGBProfile;
+        GfxLCMSProfilePtr m_displayProfile;
+#endif
     };
 
     class FontInfoData

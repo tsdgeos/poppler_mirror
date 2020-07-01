@@ -110,9 +110,8 @@ void BBoxOutputDev::drawChar(GfxState *state,
 	GfxFont *font;
 	double leftent, rightent, ascent, descent;
 	const double *fm, *fb;
-	Matrix fmat;
-	double fontSize;
-	double fx, fy, nx, ny;
+	double fontSize, w, adjust;
+	double fx, fy;
 
 	if (! text)
 		return;
@@ -125,13 +124,6 @@ void BBoxOutputDev::drawChar(GfxState *state,
 		return;
 
 	fontSize = state->getFontSize();
-
-	if (font->getType() != fontType3)
-		fmat.init(1, 0, 0, 1, 0, 0);
-	else {
-		fm = font->getFontMatrix();
-		fmat.init(fm[0], fm[1], fm[2], fm[3], fm[4], fm[5]);
-	}
 
 	fb = font->getFontBBox();
 	if (font->getWMode() == writingModeHorizontal) {
@@ -152,26 +144,35 @@ void BBoxOutputDev::drawChar(GfxState *state,
 		ascent = 0;
 		descent = 0;
 	}
-	if (font->getType() == fontType3) {
-		ascent *= 1000;
-		descent *= 1000;
+
+	if (font->getType() != fontType3)
+		adjust = 1;
+	else {
+		// adjust font size for type3 fonts,
+		// similar to TextPage::updateFont()
+		w = ((Gfx8BitFont *) font)->getWidth(code);
+		adjust = w / 0.5;
+		fm = font->getFontMatrix();
+		if (fm[0] != 0)
+			adjust *= fabs(fm[3] / fm[0]);
 	}
 
-	fmat.transform(leftent, descent, &fx, &fy);
-	state->textTransformDelta(fx, fy, &nx, &ny);
-	updatePoint(&bb, nx + x, ny + y, state);
+	ascent *= adjust * fontSize;
+	descent *= adjust * fontSize;
+	leftent *= adjust * fontSize;
+	rightent *= adjust * fontSize;
 
-	fmat.transform(rightent, ascent, &fx, &fy);
-	state->textTransformDelta(fx, fy, &nx, &ny);
-	updatePoint(&bb, nx + x, ny + y, state);
+	state->textTransformDelta(leftent, descent, &fx, &fy);
+	updatePoint(&bb, fx + x, fy + y, state);
 
-	fmat.transform(leftent * fontSize, descent * fontSize, &fx, &fy);
-	state->textTransformDelta(fx, fy, &nx, &ny);
-	updatePoint(&bb, nx + x + dx, ny + y + dy, state);
+	state->textTransformDelta(rightent, ascent, &fx, &fy);
+	updatePoint(&bb, fx + x, fy + y, state);
 
-	fmat.transform(rightent * fontSize, ascent * fontSize, &fx, &fy);
-	state->textTransformDelta(fx, fy, &nx, &ny);
-	updatePoint(&bb, nx + x + dx, ny + y + dy, state);
+	state->textTransformDelta(leftent, descent, &fx, &fy);
+	updatePoint(&bb, fx + x + dx, fy + y + dy, state);
+
+	state->textTransformDelta(rightent, ascent, &fx, &fy);
+	updatePoint(&bb, fx + x + dx, fy + y + dy, state);
 }
 
 /* update the bounding box with a new point */

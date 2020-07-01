@@ -71,7 +71,8 @@ enum VariableTextQuadding {
 enum FormSignatureType {
   adbe_pkcs7_sha1,
   adbe_pkcs7_detached,
-  ETSI_CAdES_detached
+  ETSI_CAdES_detached,
+  unknown_signature_type
 };
 
 enum FillValueType {

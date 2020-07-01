@@ -150,7 +150,10 @@ PopplerPDFSubtype
 PopplerPSFile
 PopplerPageLayout
 PopplerPageMode
+PopplerPageRange
 PopplerPermissions
+PopplerPrintDuplex
+PopplerPrintScaling
 PopplerViewerPreferences
 poppler_document_create_dests_tree
 poppler_document_find_dest
@@ -184,12 +187,14 @@ poppler_document_get_producer
 poppler_document_get_subject
 poppler_document_get_title
 poppler_document_has_attachments
+poppler_document_has_javascript
 poppler_document_is_linearized
 poppler_document_new_from_bytes
 poppler_document_new_from_data
 poppler_document_new_from_file
 poppler_document_new_from_gfile
 poppler_document_new_from_stream
+poppler_document_reset_form
 poppler_document_save
 poppler_document_save_a_copy
 poppler_document_set_author
@@ -288,6 +293,7 @@ PopplerActionUri
 PopplerActionNamed
 PopplerActionMovie
 PopplerActionRendition
+PopplerActionResetForm
 PopplerActionOCGState
 PopplerActionJavascript
 PopplerActionType
@@ -773,6 +779,9 @@ poppler_get_version
 <SUBSECTION Standard>
 POPPLER_TYPE_BACKEND
 poppler_backend_get_type
+
+<SUBSECTION Private>
+POPPLER_PUBLIC
 </SECTION>
 
 <SECTION>

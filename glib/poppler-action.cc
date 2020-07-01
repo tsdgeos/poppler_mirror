@@ -143,6 +143,10 @@ poppler_action_free (PopplerAction *action)
 		if (action->javascript.script)
 			g_free (action->javascript.script);
 		break;
+	case POPPLER_ACTION_RESET_FORM:
+		if (action->reset_form.fields)
+			g_list_free_full (action->reset_form.fields, g_free);
+		break;
 	default:
 		break;
 	}
@@ -220,6 +224,16 @@ poppler_action_copy (PopplerAction *action)
 	case POPPLER_ACTION_JAVASCRIPT:
 		if (action->javascript.script)
 			new_action->javascript.script = g_strdup (action->javascript.script);
+		break;
+	case POPPLER_ACTION_RESET_FORM:
+		if (action->reset_form.fields) {
+			GList *iter;
+
+			new_action->reset_form.fields = nullptr;
+			for (iter = action->reset_form.fields; iter != nullptr; iter = iter->next)
+				new_action->reset_form.fields = g_list_append (new_action->reset_form.fields,
+				                                               g_strdup ((char *) iter->data));
+		}
 		break;
 	default:
 		break;
@@ -520,7 +534,23 @@ build_javascript (PopplerAction *action,
 	        const GooString script(link->getScript());
 		action->javascript.script = _poppler_goo_string_to_utf8 (&script);
         }
+}
 
+static void
+build_reset_form (PopplerAction *action,
+		  const LinkResetForm *link)
+{
+	const std::vector<std::string>& fields = link->getFields ();
+
+	if (action->reset_form.fields != nullptr)
+		g_list_free_full (action->reset_form.fields, g_free);
+
+	action->reset_form.fields = nullptr;
+	for (const auto & field : fields) {
+		action->reset_form.fields = g_list_append (action->reset_form.fields, g_strdup (field.c_str ()));
+	}
+
+	action->reset_form.exclude = link->getExclude ();
 }
 
 static void
@@ -660,6 +690,10 @@ _poppler_action_new (PopplerDocument *document,
 	case actionJavaScript:
 		action->type = POPPLER_ACTION_JAVASCRIPT;
 		build_javascript (action, static_cast<const LinkJavaScript*> (link));
+		break;
+	case actionResetForm:
+		action->type = POPPLER_ACTION_RESET_FORM;
+		build_reset_form (action, dynamic_cast<const LinkResetForm*> (link));
 		break;
 	case actionUnknown:
 	default:

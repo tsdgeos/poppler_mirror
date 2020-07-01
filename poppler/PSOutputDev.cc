@@ -23,7 +23,7 @@
 // Copyright (C) 2009-2013 Thomas Freitag <Thomas.Freitag@alfa.de>
 // Copyright (C) 2009 Till Kamppeter <till.kamppeter@gmail.com>
 // Copyright (C) 2009 Carlos Garcia Campos <carlosgc@gnome.org>
-// Copyright (C) 2009, 2011, 2012, 2014-2017, 2019 William Bader <williambader@hotmail.com>
+// Copyright (C) 2009, 2011, 2012, 2014-2017, 2019, 2020 William Bader <williambader@hotmail.com>
 // Copyright (C) 2009 Kovid Goyal <kovid@kovidgoyal.net>
 // Copyright (C) 2009-2011, 2013-2015, 2017, 2020 Adrian Johnson <ajohnson@redneon.com>
 // Copyright (C) 2012, 2014 Fabio D'Urso <fabiodurso@hotmail.it>
@@ -1088,7 +1088,7 @@ PSOutputDev::PSOutputDev(const char *fileName, PDFDoc *docA,
 			 int paperWidthA, int paperHeightA,
                          bool noCropA, bool duplexA,
 			 int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
-			 bool forceRasterizeA,
+			 PSForceRasterize forceRasterizeA,
 			 bool manualCtrlA,
 			 PSOutCustomCodeCbk customCodeCbkA,
 			 void *customCodeCbkDataA) {
@@ -1158,7 +1158,7 @@ PSOutputDev::PSOutputDev(PSOutputFunc outputFuncA, void *outputStreamA,
 			 int paperWidthA, int paperHeightA,
                          bool noCropA, bool duplexA,
 			 int imgLLXA, int imgLLYA, int imgURXA, int imgURYA,
-			 bool forceRasterizeA,
+			 PSForceRasterize forceRasterizeA,
 			 bool manualCtrlA,
 			 PSOutCustomCodeCbk customCodeCbkA,
 			 void *customCodeCbkDataA) {
@@ -3228,8 +3228,10 @@ bool PSOutputDev::checkPageSlice(Page *page, double /*hDPI*/, double /*vDPI*/,
   if (!postInitDone) {
     postInit();
   }
-  if (forceRasterize) {
+  if (forceRasterize == psAlwaysRasterize) {
     rasterize = true;
+  } else if (forceRasterize == psNeverRasterize) {
+    rasterize = false;
   } else {
     scan = new PreScanOutputDev(doc);
     page->displaySlice(scan, 72, 72, rotateA, useMediaBox, crop,

@@ -12,8 +12,8 @@
 /*
  * compare floating-point coordinates
  */
-int equal(double a, double b) {
-	return fabs(a - b) < 0.01;
+int equal(double a, double b, double precision) {
+	return fabs(a - b) < precision;
 }
 
 /*
@@ -28,6 +28,7 @@ int main(int argc, char *argv[]) {
 	PopplerRectangle bb, correct;
 	GError *err = NULL;
 	int argx;
+	double precision = 0.01;
 
 				/* open file */
 
@@ -43,6 +44,14 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
+				/* precision */
+
+	argx = 2;
+	if (! strcmp(argv[argx], "-p")) {
+		precision = atof(argv[argx + 1]);
+		argx += 2;
+	}
+
 				/* pages */
 
 	npages = poppler_document_get_n_pages(doc);
@@ -53,7 +62,6 @@ int main(int argc, char *argv[]) {
 
 				/* check the bounding box */
 
-	argx = 2;
 	for (n = 0; n < poppler_document_get_n_pages(doc); n++) {
 		g_print("    page: %d\n", n + 1);
 
@@ -76,10 +84,10 @@ int main(int argc, char *argv[]) {
 		correct.y2 = atof(argv[argx++]);
 		g_print("        correct:      %g,%g - %g,%g\n",
 			correct.x1, correct.y1, correct.x2, correct.y2);
-		if (! equal(bb.x1, correct.x1) ||
-		    ! equal(bb.x2, correct.x2) ||
-		    ! equal(bb.y1, correct.y1) ||
-		    ! equal(bb.x2, correct.x2)) {
+		if (! equal(bb.x1, correct.x1, precision) ||
+		    ! equal(bb.x2, correct.x2, precision) ||
+		    ! equal(bb.y1, correct.y1, precision) ||
+		    ! equal(bb.x2, correct.x2, precision)) {
 			g_print("bounding box differs from expected\n");
 			exit(EXIT_FAILURE);
 		}

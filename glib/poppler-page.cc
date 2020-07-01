@@ -33,7 +33,7 @@
 #include "poppler.h"
 #include "poppler-private.h"
 
-#define SUPPORTED_ROTATION(r) (r == 90 || r == 180 || r == 270)
+static void _page_unrotate_xy (Page *page, double *x, double *y);
 
 /**
  * SECTION:poppler-page
@@ -1144,8 +1144,11 @@ poppler_page_render_to_ps (PopplerPage   *page,
                                     ps_file->document->doc,
                                     nullptr, pages,
                                     psModePS, (int)ps_file->paper_width,
-                                    (int)ps_file->paper_height, ps_file->duplex,
-                                    false, 0, 0, 0, false, false);
+                                    (int)ps_file->paper_height,
+                                    false, ps_file->duplex,
+                                    0, 0, 0, 0,
+                                    psRasterizeWhenNeeded, false,
+                                    nullptr, nullptr);
   }
 
 
@@ -1529,7 +1532,7 @@ poppler_page_free_annot_mapping (GList *list)
 
 /* Adds or removes (according to @add parameter) the passed in @crop_box from the
  * passed in @quads and returns it as a new #AnnotQuadrilaterals object */
-static AnnotQuadrilaterals *
+AnnotQuadrilaterals *
 new_quads_from_offset_cropbox (const PDFRectangle* crop_box,
                                AnnotQuadrilaterals *quads,
                                gboolean add)
@@ -1555,6 +1558,119 @@ new_quads_from_offset_cropbox (const PDFRectangle* crop_box,
   return new AnnotQuadrilaterals (std::move(quads_array), len);
 }
 
+/* This function undoes the rotation of @page in the passed-in @x @y point.
+ * In other words, it moves the point to where it'll be located if @page
+ * was put to zero rotation (unrotated) */
+static void
+_page_unrotate_xy (Page   *page,
+                   double *x,
+                   double *y)
+{
+  double page_width, page_height, temp;
+  gint rotation = page->getRotate ();
+
+  if (rotation == 90 || rotation == 270) {
+    page_height = page->getCropWidth ();
+    page_width = page->getCropHeight ();
+  } else {
+    page_width = page->getCropWidth ();
+    page_height = page->getCropHeight ();
+  }
+
+  if (rotation == 90) {
+    temp = *x;
+    *x = page_height - *y;
+    *y = temp;
+  } else if (rotation == 180) {
+    *x = page_width - *x;
+    *y = page_height - *y;
+  } else if (rotation == 270) {
+    temp = *x;
+    *x = *y;
+    *y = page_width - temp;
+  }
+}
+
+AnnotQuadrilaterals *
+_page_new_quads_unrotated (Page                *page,
+                           AnnotQuadrilaterals *quads)
+{
+  double x1, y1, x2, y2, x3, y3, x4, y4;
+  int len = quads->getQuadrilateralsLength();
+  auto quads_array = std::make_unique<AnnotQuadrilaterals::AnnotQuadrilateral[]>(len);
+
+  for (int i = 0; i < len; i++) {
+     x1 = quads->getX1(i);
+     y1 = quads->getY1(i);
+     x2 = quads->getX2(i);
+     y2 = quads->getY2(i);
+     x3 = quads->getX3(i);
+     y3 = quads->getY3(i);
+     x4 = quads->getX4(i);
+     y4 = quads->getY4(i);
+
+     _page_unrotate_xy (page, &x1, &y1);
+     _page_unrotate_xy (page, &x2, &y2);
+     _page_unrotate_xy (page, &x3, &y3);
+     _page_unrotate_xy (page, &x4, &y4);
+
+     quads_array[i] = AnnotQuadrilaterals::AnnotQuadrilateral (
+                      x1, y1, x2, y2, x3, y3, x4, y4);
+  }
+
+  return new AnnotQuadrilaterals (std::move(quads_array), len);
+}
+
+/* @x1 @y1 @x2 @y2 are both 'in' and 'out' parameters, representing
+ * the diagonal of a rectangle which is the 'rect' area of @annot
+ * which is inside @page.
+ *
+ * If @page is unrotated (i.e. has zero rotation) this function does
+ * nothing, otherwise this function un-rotates the passed-in rect
+ * coords according to @page rotation so as the returned coords are
+ * those of the rect if page was put to zero rotation (unrotated).
+ * This is mandated by PDF spec when saving annotation coords (see
+ * 8.4.2 Annotation Flags) which also explains the special rotation
+ * that needs to be done when @annot has the flagNoRotate set to
+ * true, which this function follows. */
+void
+_unrotate_rect_for_annot_and_page (Page  *page,
+                                   Annot *annot,
+                                   double *x1,
+                                   double *y1,
+                                   double *x2,
+                                   double *y2)
+{
+  gboolean flag_no_rotate;
+
+  if (!SUPPORTED_ROTATION (page->getRotate ()))
+    return;
+  /* Normalize received rect diagonal to be from UpperLeft to BottomRight,
+   * as our algorithm follows that */
+  if (*y2 > *y1) {
+    double temp = *y1;
+    *y1 = *y2;
+    *y2 = temp;
+  }
+  if (G_UNLIKELY (*x1 > *x2)) {
+    double temp = *x1;
+    *x1 = *x2;
+    *x2 = temp;
+  }
+  flag_no_rotate = annot->getFlags () & Annot::flagNoRotate;
+  if (flag_no_rotate) {
+    /* For this case rotating just the upperleft point is enough */
+    double annot_height = *y1 - *y2;
+    double annot_width = *x2 - *x1;
+    _page_unrotate_xy (page, x1, y1);
+    *x2 = *x1 + annot_width;
+    *y2 = *y1 - annot_height;
+  } else {
+    _page_unrotate_xy (page, x1, y1);
+    _page_unrotate_xy (page, x2, y2);
+  }
+}
+
 /**
  * poppler_page_add_annot:
  * @page: a #PopplerPage
@@ -1569,6 +1685,7 @@ poppler_page_add_annot (PopplerPage  *page,
 			PopplerAnnot *annot)
 {
   double x1, y1, x2, y2;
+  gboolean page_is_rotated;
   const PDFRectangle *crop_box;
   const PDFRectangle *page_crop_box;
 
@@ -1578,6 +1695,14 @@ poppler_page_add_annot (PopplerPage  *page,
   /* Add the page's cropBox to the coordinates of rect field of annot */
   page_crop_box = page->page->getCropBox ();
   annot->annot->getRect(&x1, &y1, &x2, &y2);
+
+  page_is_rotated = SUPPORTED_ROTATION (page->page->getRotate ());
+  if (page_is_rotated) {
+    /* annot is inside a rotated page, as core poppler rect must be saved
+     * un-rotated, let's proceed to un-rotate rect before saving */
+    _unrotate_rect_for_annot_and_page (page->page, annot->annot, &x1, &y1, &x2, &y2);
+  }
+
   annot->annot->setRect(x1 + page_crop_box->x1,
                         y1 + page_crop_box->y1,
                         x2 + page_crop_box->x1,
@@ -1591,6 +1716,11 @@ poppler_page_add_annot (PopplerPage  *page,
       /* Handle hypothetical case of annot being added is already existing on a prior page, so
        * first remove cropbox of the prior page before adding cropbox of the new page later */
       quads = new_quads_from_offset_cropbox (crop_box, annot_markup->getQuadrilaterals(), FALSE);
+      annot_markup->setQuadrilaterals( quads );
+    }
+    if (page_is_rotated) {
+      /* Quadrilateral's coords need to be saved un-rotated (same as rect coords) */
+      quads = _page_new_quads_unrotated (page->page, annot_markup->getQuadrilaterals());
       annot_markup->setQuadrilaterals( quads );
     }
     /* Add to annot's quadrilaterals the offset for the cropbox of the new page */

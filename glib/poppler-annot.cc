@@ -23,6 +23,11 @@
 #include "poppler.h"
 #include "poppler-private.h"
 
+#define ZERO_CROPBOX(c) (!(c && (c->x1 > 0.01 || c->y1 > 0.01)))
+
+const PDFRectangle *_poppler_annot_get_cropbox_and_page (PopplerAnnot *poppler_annot,
+                                                         Page         **page_out);
+
 /**
  * SECTION:poppler-annot
  * @short_description: Annotations
@@ -264,29 +269,20 @@ _poppler_annot_text_markup_new (Annot *annot)
   return _poppler_create_annot (POPPLER_TYPE_ANNOT_TEXT_MARKUP, annot);
 }
 
-/* If @crop_box parameter is non null, it will add the crop_box offset
- * to the coordinates of the returned quads */
 static AnnotQuadrilaterals *
-create_annot_quads_from_poppler_quads (GArray             *quads,
-                                       const PDFRectangle *crop_box)
+create_annot_quads_from_poppler_quads (GArray *quads)
 {
-  PDFRectangle zerobox;
   g_assert (quads->len > 0);
-
-  if (!crop_box) {
-    zerobox = PDFRectangle();
-    crop_box = &zerobox;
-  }
 
   auto quads_array = std::make_unique<AnnotQuadrilaterals::AnnotQuadrilateral[]>(quads->len);
   for (guint i = 0; i < quads->len; i++) {
     PopplerQuadrilateral *quadrilateral = &g_array_index (quads, PopplerQuadrilateral, i);
 
     quads_array[i] = AnnotQuadrilaterals::AnnotQuadrilateral (
-      quadrilateral->p1.x + crop_box->x1, quadrilateral->p1.y + crop_box->y1,
-      quadrilateral->p2.x + crop_box->x1, quadrilateral->p2.y + crop_box->y1,
-      quadrilateral->p3.x + crop_box->x1, quadrilateral->p3.y + crop_box->y1,
-      quadrilateral->p4.x + crop_box->x1, quadrilateral->p4.y + crop_box->y1);
+      quadrilateral->p1.x, quadrilateral->p1.y,
+      quadrilateral->p2.x, quadrilateral->p2.y,
+      quadrilateral->p3.x, quadrilateral->p3.y,
+      quadrilateral->p4.x, quadrilateral->p4.y );
   }
 
   return new AnnotQuadrilaterals (std::move(quads_array), quads->len);
@@ -1027,9 +1023,11 @@ poppler_annot_get_page_index (PopplerAnnot *poppler_annot)
 }
 
 /* Returns cropbox rect for the page where the passed in @poppler_annot is in,
- * or NULL when could not retrieve the cropbox */
+ * or NULL when could not retrieve the cropbox. If @page_out is non-null then
+ * it will be set with the page that @poppler_annot is in. */
 const PDFRectangle *
-_poppler_annot_get_cropbox (PopplerAnnot *poppler_annot)
+_poppler_annot_get_cropbox_and_page (PopplerAnnot *poppler_annot,
+                                     Page         **page_out)
 {
   int page_index;
 
@@ -1041,11 +1039,22 @@ _poppler_annot_get_cropbox (PopplerAnnot *poppler_annot)
 
     page = poppler_annot->annot->getDoc()->getPage(page_index);
     if (page) {
+      if (page_out)
+        *page_out = page;
+
       return page->getCropBox ();
     }
   }
 
   return nullptr;
+}
+
+/* Returns cropbox rect for the page where the passed in @poppler_annot is in,
+ * or NULL when could not retrieve the cropbox */
+const PDFRectangle *
+_poppler_annot_get_cropbox (PopplerAnnot *poppler_annot)
+{
+  return _poppler_annot_get_cropbox_and_page (poppler_annot, nullptr);
 }
 
 /**
@@ -1065,11 +1074,12 @@ poppler_annot_get_rectangle (PopplerAnnot     *poppler_annot,
   PDFRectangle *annot_rect;
   const PDFRectangle *crop_box;
   PDFRectangle zerobox;
+  Page *page = nullptr;
 
   g_return_if_fail (POPPLER_IS_ANNOT (poppler_annot));
   g_return_if_fail (poppler_rect != nullptr);
 
-  crop_box = _poppler_annot_get_cropbox (poppler_annot);
+  crop_box = _poppler_annot_get_cropbox_and_page (poppler_annot, &page);
   if (!crop_box) {
     zerobox = PDFRectangle();
     crop_box = &zerobox;
@@ -1098,20 +1108,33 @@ poppler_annot_set_rectangle (PopplerAnnot     *poppler_annot,
 {
   const PDFRectangle *crop_box;
   PDFRectangle zerobox;
+  double x1, y1, x2, y2;
+  Page *page = nullptr;
 
   g_return_if_fail (POPPLER_IS_ANNOT (poppler_annot));
   g_return_if_fail (poppler_rect != nullptr);
 
-  crop_box = _poppler_annot_get_cropbox (poppler_annot);
+  crop_box = _poppler_annot_get_cropbox_and_page (poppler_annot, &page);
   if (!crop_box) {
     zerobox = PDFRectangle();
     crop_box = &zerobox;
   }
 
-  poppler_annot->annot->setRect (poppler_rect->x1 + crop_box->x1,
-                                 poppler_rect->y1 + crop_box->y1,
-                                 poppler_rect->x2 + crop_box->x1,
-                                 poppler_rect->y2 + crop_box->y1 );
+  x1 = poppler_rect->x1;
+  y1 = poppler_rect->y1;
+  x2 = poppler_rect->x2;
+  y2 = poppler_rect->y2;
+
+  if (page && SUPPORTED_ROTATION (page->getRotate ())) {
+    /* annot is inside a rotated page, as core poppler rect must be saved
+     * un-rotated, let's proceed to un-rotate rect before saving */
+    _unrotate_rect_for_annot_and_page (page, poppler_annot->annot, &x1, &y1, &x2, &y2);
+  }
+
+  poppler_annot->annot->setRect (x1 + crop_box->x1,
+                                 y1 + crop_box->y1,
+                                 x2 + crop_box->x1,
+                                 y2 + crop_box->y1 );
 }
 
 /* PopplerAnnotMarkup */
@@ -1673,15 +1696,30 @@ void
 poppler_annot_text_markup_set_quadrilaterals (PopplerAnnotTextMarkup *poppler_annot,
                                               GArray                 *quadrilaterals)
 {
+  AnnotQuadrilaterals *quads, *quads_temp;
   AnnotTextMarkup *annot;
   const PDFRectangle* crop_box;
+  Page *page = nullptr;
 
   g_return_if_fail (POPPLER_IS_ANNOT_TEXT_MARKUP (poppler_annot));
   g_return_if_fail (quadrilaterals != nullptr && quadrilaterals->len > 0);
 
   annot = static_cast<AnnotTextMarkup *>(POPPLER_ANNOT (poppler_annot)->annot);
-  crop_box = _poppler_annot_get_cropbox (POPPLER_ANNOT (poppler_annot));
-  AnnotQuadrilaterals *quads = create_annot_quads_from_poppler_quads (quadrilaterals, crop_box);
+  crop_box = _poppler_annot_get_cropbox_and_page (POPPLER_ANNOT (poppler_annot), &page);
+  quads = create_annot_quads_from_poppler_quads (quadrilaterals);
+
+  if (page && SUPPORTED_ROTATION (page->getRotate ())) {
+      quads_temp = _page_new_quads_unrotated (page, quads);
+      delete quads;
+      quads = quads_temp;
+  }
+
+  if (!ZERO_CROPBOX (crop_box)) {
+    quads_temp = quads;
+    quads = new_quads_from_offset_cropbox (crop_box, quads, TRUE);
+    delete quads_temp;
+  }
+
   annot->setQuadrilaterals (quads);
   delete quads;
 }

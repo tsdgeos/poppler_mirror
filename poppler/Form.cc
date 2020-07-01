@@ -1667,7 +1667,7 @@ void FormFieldChoice::reset(const std::vector<std::string>& excludedFields)
 //------------------------------------------------------------------------
 FormFieldSignature::FormFieldSignature(PDFDoc *docA, Object &&dict, const Ref refA, FormField *parentA, std::set<int> *usedParents)
   : FormField(docA, std::move(dict), refA, parentA, usedParents, formSignature),
-    signature_type(adbe_pkcs7_detached),
+    signature_type(unknown_signature_type),
     signature(nullptr), signature_info(nullptr)
 {
   signature = nullptr;
@@ -1767,11 +1767,6 @@ FormSignatureType FormWidgetSignature::signatureType() const
 SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool forceRevalidation, time_t validationTime)
 {
 #ifdef ENABLE_NSS3
-  if (!signature_info->isSubfilterSupported()) {
-    error(errUnimplemented, 0, "Unable to validate this type of signature");
-    return signature_info;
-  }
-
   if (signature_info->getSignatureValStatus() != SIGNATURE_NOT_VERIFIED && !forceRevalidation) {
     return signature_info;
   }
@@ -1819,11 +1814,17 @@ SignatureInfo *FormFieldSignature::validateSignature(bool doVerifyCert, bool for
     hashSignedDataBlock(&signature_handler, len);
   }
 
-  const SignatureValidationStatus sig_val_state = signature_handler.validateSignature();
-  signature_info->setSignatureValStatus(sig_val_state);
   signature_info->setSignerName(signature_handler.getSignerName());
   signature_info->setSubjectDN(signature_handler.getSignerSubjectDN());
   signature_info->setHashAlgorithm(signature_handler.getHashAlgorithm());
+
+  if (!signature_info->isSubfilterSupported()) {
+    error(errUnimplemented, 0, "Unable to validate this type of signature");
+    return signature_info;
+  }
+
+  const SignatureValidationStatus sig_val_state = signature_handler.validateSignature();
+  signature_info->setSignatureValStatus(sig_val_state);
 
   // verify if signature contains a 'signing time' attribute
   if (signature_handler.getSigningTime() != 0) {

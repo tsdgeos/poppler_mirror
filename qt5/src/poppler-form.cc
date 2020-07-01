@@ -953,6 +953,9 @@ FormFieldSignature::SignatureType FormFieldSignature::signatureType() const
     case ETSI_CAdES_detached:
       sigType = EtsiCAdESdetached;
       break;
+    case unknown_signature_type:
+      sigType = UnknownSignatureType;
+      break;
   }
   return sigType;
 }

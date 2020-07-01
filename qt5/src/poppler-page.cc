@@ -24,6 +24,7 @@
  * Copyright (C) 2018, Tobias Deiminger <haxtibal@posteo.de>
  * Copyright (C) 2018 Nelson Benítez León <nbenitezl@gmail.com>
  * Copyright (C) 2020 Oliver Sander <oliver.sander@tu-dresden.de>
+ * Copyright (C) 2020 Philipp Knechtges <philipp-dev@knechtges.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -592,6 +593,10 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
       splash_output.setFreeTypeHinting(m_page->parentDoc->m_hints & Document::TextHinting ? true : false,
                                         m_page->parentDoc->m_hints & Document::TextSlightHinting ? true : false);
 
+#ifdef USE_CMS
+      splash_output.setDisplayProfile(m_page->parentDoc->m_displayProfile);
+#endif
+
       splash_output.startDoc(m_page->parentDoc->doc);
 
       const bool hideAnnotations = m_page->parentDoc->m_hints & Document::HideAnnotations;
@@ -623,6 +628,10 @@ QImage Page::renderToImage(double xres, double yres, int xPos, int yPos, int w, 
       QImageDumpingArthurOutputDev arthur_output(&painter, &tmpimg);
 
       arthur_output.setHintingPreference(QFontHintingFromPopplerHinting(m_page->parentDoc->m_hints));
+
+#ifdef USE_CMS
+      arthur_output.setDisplayProfile(m_page->parentDoc->m_displayProfile);
+#endif
 
       arthur_output.setCallbacks(partialUpdateCallback, shouldDoPartialUpdateCallback, shouldAbortRenderCallback, payload);
       renderToArthur(&arthur_output, &painter, m_page, xres, yres, xPos, yPos, w, h, rotate, DontSaveAndRestore);

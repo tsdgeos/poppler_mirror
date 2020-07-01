@@ -204,7 +204,7 @@ class GfxColorTransform {
 public:
   void doTransform(void *in, void *out, unsigned int size);
   // transformA should be a cmsHTRANSFORM
-  GfxColorTransform(const GfxLCMSProfilePtr& sourceProfileA, void *transformA, int cmsIntent,
+  GfxColorTransform(void *transformA, int cmsIntent,
                     unsigned int inputPixelType, unsigned int transformPixelType);
   ~GfxColorTransform();
   GfxColorTransform(const GfxColorTransform &) = delete;
@@ -212,16 +212,12 @@ public:
   int getIntent() const { return cmsIntent; }
   int getInputPixelType() const { return inputPixelType; }
   int getTransformPixelType() const { return transformPixelType; }
-  GfxLCMSProfilePtr getSourceProfile() { return sourceProfile; }
-  char *getPostScriptCSA();
 private:
   GfxColorTransform() {}
-  GfxLCMSProfilePtr sourceProfile;
   void *transform;
   int cmsIntent;
   unsigned int inputPixelType;
   unsigned int transformPixelType;
-  char *psCSA;
 };
 
 class GfxColorSpace {
@@ -287,13 +283,6 @@ public:
   // Return the name of the <idx>th color space mode.
   static const char *getColorSpaceModeName(int idx);
 
-#ifdef USE_CMS
-  static int setupColorProfiles();
-  static void setDisplayProfile(const GfxLCMSProfilePtr& displayProfileA);
-  static void setDisplayProfileName(GooString *name);
-  static GfxLCMSProfilePtr getRGBProfile();
-  static GfxLCMSProfilePtr getDisplayProfile();
-#endif
 protected:
 
   unsigned int overprintMask;
@@ -582,6 +571,7 @@ public:
   Ref getRef() { return iccProfileStream; }
 #ifdef USE_CMS
   char *getPostScriptCSA();
+  GfxLCMSProfilePtr getProfile() { return profile; }
 #endif
 
 private:
@@ -592,6 +582,8 @@ private:
   double rangeMax[4];		// max values for each component
   Ref iccProfileStream;		// the ICC profile
 #ifdef USE_CMS
+  GfxLCMSProfilePtr profile;
+  char* psCSA;
   int getIntent() { return (transform != nullptr) ? transform->getIntent() : 0; }
   std::shared_ptr<GfxColorTransform> transform;
   std::shared_ptr<GfxColorTransform> lineTransform; // color transform for line
@@ -1609,6 +1601,7 @@ public:
   GfxLCMSProfilePtr getDisplayProfile() { return localDisplayProfile; }
   std::shared_ptr<GfxColorTransform> getXYZ2DisplayTransform();
   int getCmsRenderingIntent();
+  static GfxLCMSProfilePtr sRGBProfile;
 #endif
 
   // Add to path.
@@ -1710,6 +1703,7 @@ private:
   std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformAbsCol;
   std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformSat;
   std::shared_ptr<GfxColorTransform> XYZ2DisplayTransformPerc;
+  static GfxLCMSProfilePtr XYZProfile;
 #endif
 };
 

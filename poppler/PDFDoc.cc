@@ -43,6 +43,7 @@
 // Copyright (C) 2018 Evangelos Rigas <erigas@rnd2.org>
 // Copyright (C) 2018 Philipp Knechtges <philipp-dev@knechtges.com>
 // Copyright (C) 2019 Christian Persch <chpe@src.gnome.org>
+// Copyright (C) 2020 Nelson Benítez León <nbenitezl@gmail.com>
 //
 // To see a description of the changes please see the Changelog file that
 // came with your tarball or type make ChangeLog if you are building from git
@@ -86,6 +87,7 @@
 #include "PDFDoc.h"
 #include "Hints.h"
 #include "UTF.h"
+#include "JSInfo.h"
 
 //------------------------------------------------------------------------
 
@@ -2151,4 +2153,10 @@ Page *PDFDoc::getPage(int page)
   }
 
   return catalog->getPage(page);
+}
+
+bool PDFDoc::hasJavascript() {
+  JSInfo jsInfo(this);
+  jsInfo.scanJS (getNumPages(), true);
+  return jsInfo.containsJS();
 }

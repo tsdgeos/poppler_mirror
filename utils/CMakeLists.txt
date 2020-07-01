@@ -14,6 +14,9 @@ if (ENABLE_SPLASH)
   )
   add_executable(pdftoppm ${pdftoppm_SOURCES})
   target_link_libraries(pdftoppm ${common_libs})
+  if(LCMS2_FOUND)
+    target_link_libraries(pdftoppm ${LCMS2_LIBRARIES})
+  endif()
   install(TARGETS pdftoppm DESTINATION bin)
   install(FILES pdftoppm.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 endif ()
@@ -81,8 +84,6 @@ set(pdfimages_SOURCES ${common_srcs}
   pdfimages.cc
   ImageOutputDev.cc
   ImageOutputDev.h
-  JSInfo.cc
-  JSInfo.h
 )
 add_executable(pdfimages ${pdfimages_SOURCES})
 target_link_libraries(pdfimages ${common_libs})
@@ -92,8 +93,6 @@ install(FILES pdfimages.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 # pdfinfo
 set(pdfinfo_SOURCES ${common_srcs}
   pdfinfo.cc printencodings.cc
-  JSInfo.cc
-  JSInfo.h
 )
 add_executable(pdfinfo ${pdfinfo_SOURCES})
 target_link_libraries(pdfinfo ${common_libs})

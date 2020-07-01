@@ -27,6 +27,7 @@
     <xi:include href="xml/poppler-errors.xml"/>
     <xi:include href="xml/poppler-pdf-utility-functions.xml"/>
     <xi:include href="xml/poppler-features.xml"/>
+    <xi:include href="xml/poppler-text-span.xml"/>
   </chapter>
 
   <index id="api-index-full">
@@ -93,9 +94,25 @@
     <title>Index of new symbols in 0.78</title>
     <xi:include href="xml/api-index-0.78.xml"><xi:fallback /></xi:include>
   </index>
+  <index id="api-index-0-80">
+    <title>Index of new symbols in 0.80</title>
+    <xi:include href="xml/api-index-0.80.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-0-82">
+    <title>Index of new symbols in 0.82</title>
+    <xi:include href="xml/api-index-0.82.xml"><xi:fallback /></xi:include>
+  </index>
   <index id="api-index-0-88">
     <title>Index of new symbols in 0.88</title>
     <xi:include href="xml/api-index-0.88.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-0-89">
+    <title>Index of new symbols in 0.89</title>
+    <xi:include href="xml/api-index-0.89.xml"><xi:fallback /></xi:include>
+  </index>
+  <index id="api-index-0-90">
+    <title>Index of new symbols in 0.90</title>
+    <xi:include href="xml/api-index-0.90.xml"><xi:fallback /></xi:include>
   </index>
 
 

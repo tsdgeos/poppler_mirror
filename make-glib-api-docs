@@ -59,7 +59,7 @@ gtkdoc = PkgConfigGTKDoc(pkgconfig_file, {
     'doc_dir': os.path.join(args.src_dir, 'glib', 'reference'),
     'output_dir': os.path.join(args.build_dir, 'glib', 'reference'),
     'main_sgml_file': 'poppler-docs.sgml',
-    'source_dirs': [os.path.join(args.src_dir, 'glib')],
+    'source_dirs': [os.path.join(args.src_dir, 'glib'), os.path.join(args.build_dir, 'glib')],
     'cflags': '-I%s' % os.path.join(args.src_dir, 'glib'),
     'ignored_files': ['poppler-private.h', 'poppler-input-stream.h', 'poppler-cached-file-loader.h', 'demo']
 })
