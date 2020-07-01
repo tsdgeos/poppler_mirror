@@ -2211,6 +2211,7 @@ FormPageWidgets::FormPageWidgets (Annots *annots, unsigned int page, Form *form)
 {
   numWidgets = 0;
   widgets = nullptr;
+  size = 0;
 
   if (annots && annots->getNumAnnots() > 0 && form) {
     size = annots->getNumAnnots();
