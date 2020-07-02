@@ -1,3 +1,29 @@
+Release 0.90.0:
+        core:
+         * Color profile tweaks
+         * Small signature improvements
+         * BBoxOutputDev: Fix calculation when type3 fonts are involved
+         * Fix potential crash when reading Forms
+         * Fix infinite loop in broken file
+
+        glib:
+         * Fix adding annots in rotated pages
+         * Add ability to reset forms
+         * Several fixes to the documentation
+
+        qt5:
+         * Make it clear we require Qt 5.5
+         * demo: Fix crash on broken files
+         * Small documentation improvements
+
+        utils:
+         * pdftoppm: Add option to set display profile
+         * pdftops: Add a -rasterize option with values always, never, or whenneeded
+
+        build system:
+         * Require cmake 3.5
+         * More modern cmake way to link against curl
+
 Release 0.89.0:
         core:
          * Add support for ResetForm action. Issue #225
